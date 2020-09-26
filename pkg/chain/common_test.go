@@ -94,12 +94,9 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 		blocklen := readBuf
 		rbytes := make([]byte, blocklen)
 		// read block
-		_, err = dr.Read(rbytes)
-		if err != nil {
-			fmt.Println(err)
+		if _, err = dr.Read(rbytes); slog.Check(err) {
 		}
-		block, err = util.NewBlockFromBytes(rbytes)
-		if err != nil {
+		if block, err = util.NewBlockFromBytes(rbytes); slog.Check(err) {
 			return
 		}
 		blocks = append(blocks, block)
@@ -108,7 +105,7 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 }
 
 // chainSetup is used to create a new db and chain instance with the genesis block already inserted.  In addition to the new chain instance, it returns a teardown function the caller should invoke when done testing to clean up.
-func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func(), error) {
+func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func(), err error) {
 	if !isSupportedDbType(testDbType) {
 		return nil, nil, fmt.Errorf("unsupported db type %v", testDbType)
 	}
@@ -168,7 +165,7 @@ func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func()
 }
 
 // loadUtxoView returns a utxo view loaded from a file.
-func loadUtxoView(filename string) (*UtxoViewpoint, error) {
+func loadUtxoView(filename string) (*UtxoViewpoint, err error) {
 	// The utxostore file format is:
 	// <tx hash><output index><serialized utxo len><serialized utxo>
 	//

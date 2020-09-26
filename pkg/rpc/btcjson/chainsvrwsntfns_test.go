@@ -22,7 +22,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 	}{
 		{
 			name: "blockconnected",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("blockconnected", "123", 100000, 123456789)
 			},
 			staticNtfn: func() interface{} {
@@ -37,7 +37,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "blockdisconnected",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("blockdisconnected", "123", 100000, 123456789)
 			},
 			staticNtfn: func() interface{} {
@@ -52,7 +52,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "filteredblockconnected",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("filteredblockconnected", 100000, "header", []string{"tx0", "tx1"})
 			},
 			staticNtfn: func() interface{} {
@@ -67,7 +67,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "filteredblockdisconnected",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("filteredblockdisconnected", 100000, "header")
 			},
 			staticNtfn: func() interface{} {
@@ -81,7 +81,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "recvtx",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("recvtx", "001122", `{"height":100000,"hash":"123","index":0,"time":12345678}`)
 			},
 			staticNtfn: func() interface{} {
@@ -106,7 +106,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "redeemingtx",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("redeemingtx", "001122", `{"height":100000,"hash":"123","index":0,"time":12345678}`)
 			},
 			staticNtfn: func() interface{} {
@@ -131,7 +131,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "rescanfinished",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("rescanfinished", "123", 100000, 12345678)
 			},
 			staticNtfn: func() interface{} {
@@ -146,7 +146,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "rescanprogress",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("rescanprogress", "123", 100000, 12345678)
 			},
 			staticNtfn: func() interface{} {
@@ -161,7 +161,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "txaccepted",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("txaccepted", "123", 1.5)
 			},
 			staticNtfn: func() interface{} {
@@ -175,7 +175,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "txacceptedverbose",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("txacceptedverbose", `{"hex":"001122","txid":"123","version":1,"locktime":4294967295,"vin":null,"vout":null,"confirmations":0}`)
 			},
 			staticNtfn: func() interface{} {
@@ -205,7 +205,7 @@ func TestChainSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "relevanttxaccepted",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("relevanttxaccepted", "001122")
 			},
 			staticNtfn: func() interface{} {

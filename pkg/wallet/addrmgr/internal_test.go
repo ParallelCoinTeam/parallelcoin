@@ -34,14 +34,14 @@ type failingCryptoKey struct {
 // Encrypt intenionally returns a failure when invoked to test error paths.
 //
 // This is part of the EncryptorDecryptor interface implementation.
-func (c *failingCryptoKey) Encrypt(in []byte) ([]byte, error) {
+func (c *failingCryptoKey) Encrypt(in []byte) ([]byte, err error) {
 	return nil, errors.New("failed to encrypt")
 }
 
 // Decrypt intenionally returns a failure when invoked to test error paths.
 //
 // This is part of the EncryptorDecryptor interface implementation.
-func (c *failingCryptoKey) Decrypt(in []byte) ([]byte, error) {
+func (c *failingCryptoKey) Decrypt(in []byte) ([]byte, err error) {
 	return nil, errors.New("failed to decrypt")
 }
 

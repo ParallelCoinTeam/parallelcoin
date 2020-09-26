@@ -101,7 +101,7 @@ type (
 // NewTxRecord creates a new transaction record that may be inserted into the
 // store.  It uses memoization to save the transaction hash and the serialized
 // transaction.
-func NewTxRecord(serializedTx []byte, received time.Time) (*TxRecord, error) {
+func NewTxRecord(serializedTx []byte, received time.Time) (*TxRecord, err error) {
 	rec := &TxRecord{
 		Received:     received,
 		SerializedTx: serializedTx,
@@ -118,7 +118,7 @@ func NewTxRecord(serializedTx []byte, received time.Time) (*TxRecord, error) {
 
 // NewTxRecordFromMsgTx creates a new transaction record that may be inserted
 // into the store.
-func NewTxRecordFromMsgTx(msgTx *wire.MsgTx, received time.Time) (*TxRecord, error) {
+func NewTxRecordFromMsgTx(msgTx *wire.MsgTx, received time.Time) (*TxRecord, err error) {
 	buf := bytes.NewBuffer(make([]byte, 0, msgTx.SerializeSize()))
 	err := msgTx.Serialize(buf)
 	if err != nil {
@@ -138,14 +138,14 @@ func NewTxRecordFromMsgTx(msgTx *wire.MsgTx, received time.Time) (*TxRecord, err
 // DoUpgrades performs any necessary upgrades to the transaction history
 // contained in the wallet database, namespaced by the top level bucket key
 // namespaceKey.
-func DoUpgrades(db walletdb.DB, namespaceKey []byte) error {
+func DoUpgrades(db walletdb.DB, namespaceKey []byte) (err error) {
 	// No upgrades
 	return nil
 }
 
 func // Open opens the wallet transaction store from a walletdb namespace.
 // If the store does not exist, ErrNoExist is returned.
-Open(ns walletdb.ReadBucket, chainParams *netparams.Params) (*Store, error) {
+Open(ns walletdb.ReadBucket, chainParams *netparams.Params) (*Store, err error) {
 	// Open the store.
 	err := openStore(ns)
 	if err != nil {
@@ -160,14 +160,14 @@ func // Create creates a new persistent transaction store in the walletdb
 // namespace.
 // Creating the store when one already exists in this namespace will error with
 // ErrAlreadyExists.
-Create(ns walletdb.ReadWriteBucket) error {
+Create(ns walletdb.ReadWriteBucket) (err error) {
 	return createStore(ns)
 }
 
 func // updateMinedBalance updates the mined balance within the store,
 // if changed, after processing the given transaction record.
 (s *Store) updateMinedBalance(ns walletdb.ReadWriteBucket, rec *TxRecord,
-	block *BlockMeta) error {
+	block *BlockMeta) (err error) {
 	// Fetch the mined balance in case we need to update it.
 	minedBalance, err := fetchMinedBalance(ns)
 	if err != nil {
@@ -276,7 +276,7 @@ func // updateMinedBalance updates the mined balance within the store,
 
 func // deleteUnminedTx deletes an unmined transaction from the store.
 // NOTE: This should only be used once the transaction has been mined.
-(s *Store) deleteUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
+(s *Store) deleteUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) (err error) {
 	for i := range rec.MsgTx.TxOut {
 		k := canonicalOutPoint(&rec.Hash, uint32(i))
 		if err := deleteRawUnminedCredit(ns, k); err != nil {
@@ -289,7 +289,7 @@ func // deleteUnminedTx deletes an unmined transaction from the store.
 func // InsertTx records a transaction as belonging to a wallet's transaction
 // history.  If block is nil, the transaction is considered unspent, and the
 // transaction's index must be unset.
-(s *Store) InsertTx(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta) error {
+(s *Store) InsertTx(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta) (err error) {
 	if block == nil {
 		return s.insertMemPoolTx(ns, rec)
 	}
@@ -302,7 +302,7 @@ func // RemoveUnminedTx attempts to remove an unmined transaction from the
 // existing inputs. This function we remove the conflicting transaction
 // identified by the tx record, and also recursively remove all transactions
 // that depend on it.
-(s *Store) RemoveUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
+(s *Store) RemoveUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) (err error) {
 	// As we already have a tx record, we can directly call the
 	// RemoveConflict method. This will do the job of recursively removing
 	// this unmined transaction, and any transactions that depend on it.
@@ -315,7 +315,7 @@ func // insertMinedTx inserts a new transaction record for a mined
 // then it will take care of cleaning up the unconfirmed state.
 // All other unconfirmed double spend attempts will be removed as well.
 (s *Store) insertMinedTx(ns walletdb.ReadWriteBucket, rec *TxRecord,
-	block *BlockMeta) error {
+	block *BlockMeta) (err error) {
 	// If a transaction record for this hash and block already exists, we
 	// can exit early.
 	if _, v := existsTxRecord(ns, &rec.Hash, &block.Block); v != nil {
@@ -374,7 +374,7 @@ func // AddCredit marks a transaction record as containing a transaction output
 // TODO(jrick): This should not be necessary.  Instead, pass the indexes
 // that are known to contain credits when a transaction or merkleblock is
 // inserted into the store.
-(s *Store) AddCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32, change bool) error {
+(s *Store) AddCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32, change bool) (err error) {
 	if int(index) >= len(rec.MsgTx.TxOut) {
 		str := "transaction output does not exist"
 		return storeError(ErrInput, str, nil)
@@ -389,7 +389,7 @@ func // AddCredit marks a transaction record as containing a transaction output
 func // addCredit is an AddCredit helper that runs in an update transaction.
 // The bool return specifies whether the unspent output is newly added (
 // true) or a duplicate (false).
-(s *Store) addCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32, change bool) (bool, error) {
+(s *Store) addCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32, change bool) (bool, err error) {
 	if block == nil {
 		// If the outpoint that we should mark as credit already exists
 		// within the store, either as unconfirmed or confirmed, then we
@@ -443,10 +443,10 @@ func // addCredit is an AddCredit helper that runs in an update transaction.
 
 func // Rollback removes all blocks at height onwards,
 // moving any transactions within each block to the unconfirmed pool.
-(s *Store) Rollback(ns walletdb.ReadWriteBucket, height int32) error {
+(s *Store) Rollback(ns walletdb.ReadWriteBucket, height int32) (err error) {
 	return s.rollback(ns, height)
 }
-func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
+func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (err error) {
 	minedBalance, err := fetchMinedBalance(ns)
 	if err != nil {
 		slog.Error(err)
@@ -682,11 +682,11 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
 
 func // UnspentOutputs returns all unspent received transaction outputs.
 // The order is undefined.
-(s *Store) UnspentOutputs(ns walletdb.ReadBucket) ([]Credit, error) {
+(s *Store) UnspentOutputs(ns walletdb.ReadBucket) ([]Credit, err error) {
 	var unspent []Credit
 	var op wire.OutPoint
 	var block Block
-	err := ns.NestedReadBucket(bucketUnspent).ForEach(func(k, v []byte) error {
+	err := ns.NestedReadBucket(bucketUnspent).ForEach(func(k, v []byte) (err error) {
 		err := readCanonicalOutPoint(k, &op)
 		if err != nil {
 			slog.Error(err)
@@ -738,7 +738,7 @@ func // UnspentOutputs returns all unspent received transaction outputs.
 		str := "failed iterating unspent bucket"
 		return nil, storeError(ErrDatabase, str, err)
 	}
-	err = ns.NestedReadBucket(bucketUnminedCredits).ForEach(func(k, v []byte) error {
+	err = ns.NestedReadBucket(bucketUnminedCredits).ForEach(func(k, v []byte) (err error) {
 		if existsRawUnminedInput(ns, k) != nil {
 			// Output is spent by an unmined transaction.
 			// Skip to next unmined credit.
@@ -790,7 +790,7 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 //
 // Balance may return unexpected results if syncHeight is lower than the block
 // height of the most recent mined transaction in the store.
-(s *Store) Balance(ns walletdb.ReadBucket, minConf int32, syncHeight int32) (util.Amount, error) {
+(s *Store) Balance(ns walletdb.ReadBucket, minConf int32, syncHeight int32) (util.Amount, err error) {
 	bal, err := fetchMinedBalance(ns)
 	if err != nil {
 		slog.Error(err)
@@ -800,7 +800,7 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 	// transaction.
 	var op wire.OutPoint
 	var block Block
-	err = ns.NestedReadBucket(bucketUnspent).ForEach(func(k, v []byte) error {
+	err = ns.NestedReadBucket(bucketUnspent).ForEach(func(k, v []byte) (err error) {
 		err := readCanonicalOutPoint(k, &op)
 		if err != nil {
 			slog.Error(err)
@@ -886,7 +886,7 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 	// If unmined outputs are included, increment the balance for each
 	// output that is unspent.
 	if minConf == 0 {
-		err = ns.NestedReadBucket(bucketUnminedCredits).ForEach(func(k, v []byte) error {
+		err = ns.NestedReadBucket(bucketUnminedCredits).ForEach(func(k, v []byte) (err error) {
 			if existsRawUnminedInput(ns, k) != nil {
 				// Output is spent by an unmined transaction.
 				// Skip to next unmined credit.

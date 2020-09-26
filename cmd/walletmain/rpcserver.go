@@ -26,7 +26,7 @@ type listenFunc func(net string, laddr string) (net.Listener, error)
 // GenerateRPCKeyPair generates a new RPC TLS keypair and writes the cert and
 // possibly also the key in PEM format to the paths specified by the config.  If
 // successful, the new keypair is returned.
-func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
+func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err error) {
 	slog.Info("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
 	slog.Warn("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
@@ -160,7 +160,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 // openRPCKeyPair creates or loads the RPC TLS keypair specified by the
 // application config.  This function respects the pod.Config.OneTimeTLSKey
 // setting.
-func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
+func openRPCKeyPair(config *pod.Config) (tls.Certificate, err error) {
 	// Check for existence of the TLS key file.  If one time TLS keys are
 	// enabled but a key already exists, this function should error since
 	// it's possible that a persistent certificate was copied to a remote
@@ -185,7 +185,7 @@ func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 	}
 }
 func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netparams.Params,
-	walletLoader *wallet.Loader) (*legacy.Server, error) {
+	walletLoader *wallet.Loader) (*legacy.Server, err error) {
 	slog.Trace("startRPCServers")
 	var (
 		legacyServer *legacy.Server
@@ -208,7 +208,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 			NextProtos:         []string{"h2"}, // HTTP/2 over TLS
 			InsecureSkipVerify: *config.TLSSkipVerify,
 		}
-		walletListen = func(net string, laddr string) (net.Listener, error) {
+		walletListen = func(net string, laddr string) (net.Listener, err error) {
 			return tls.Listen(net, laddr, tlsConfig)
 		}
 	}

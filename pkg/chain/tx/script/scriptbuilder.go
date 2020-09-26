@@ -191,7 +191,7 @@ func (b *ScriptBuilder) Reset() *ScriptBuilder {
 }
 
 // Script returns the currently built script.  When any errors occurred while building the script, the script will be returned up the point of the first error along with the error.
-func (b *ScriptBuilder) Script() ([]byte, error) {
+func (b *ScriptBuilder) Script() (bb []byte, err error) {
 	return b.script, b.err
 }
 

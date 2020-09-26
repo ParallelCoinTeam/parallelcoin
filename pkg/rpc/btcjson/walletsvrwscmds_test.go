@@ -23,7 +23,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 	}{
 		{
 			name: "createencryptedwallet",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("createencryptedwallet", "pass")
 			},
 			staticCmd: func() interface{} {
@@ -34,7 +34,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "exportwatchingwallet",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("exportwatchingwallet")
 			},
 			staticCmd: func() interface{} {
@@ -48,7 +48,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "exportwatchingwallet optional1",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("exportwatchingwallet", "acct")
 			},
 			staticCmd: func() interface{} {
@@ -62,7 +62,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "exportwatchingwallet optional2",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("exportwatchingwallet", "acct", true)
 			},
 			staticCmd: func() interface{} {
@@ -77,7 +77,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "getunconfirmedbalance",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getunconfirmedbalance")
 			},
 			staticCmd: func() interface{} {
@@ -90,7 +90,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "getunconfirmedbalance optional1",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getunconfirmedbalance", "acct")
 			},
 			staticCmd: func() interface{} {
@@ -103,7 +103,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "listaddresstransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("listaddresstransactions", `["1Address"]`)
 			},
 			staticCmd: func() interface{} {
@@ -117,7 +117,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "listaddresstransactions optional1",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("listaddresstransactions", `["1Address"]`, "acct")
 			},
 			staticCmd: func() interface{} {
@@ -132,7 +132,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "listalltransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("listalltransactions")
 			},
 			staticCmd: func() interface{} {
@@ -145,7 +145,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "listalltransactions optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("listalltransactions", "acct")
 			},
 			staticCmd: func() interface{} {
@@ -158,7 +158,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "recoveraddresses",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("recoveraddresses", "acct", 10)
 			},
 			staticCmd: func() interface{} {
@@ -172,7 +172,7 @@ func TestWalletSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "walletislocked",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("walletislocked")
 			},
 			staticCmd: func() interface{} {

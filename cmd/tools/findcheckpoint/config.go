@@ -63,7 +63,7 @@ func netName(
 }
 
 // loadConfig initializes and parses the Config using command line options.
-func loadConfig() (*Config, []string, error) {
+func loadConfig() (*Config, []string, err error) {
 	// Default Config.
 	cfg := Config{
 		DataDir:       defaultDataDir,

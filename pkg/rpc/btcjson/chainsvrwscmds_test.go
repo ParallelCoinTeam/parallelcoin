@@ -23,7 +23,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 	}{
 		{
 			name: "authenticate",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("authenticate", "user", "pass")
 			},
 			staticCmd: func() interface{} {
@@ -34,7 +34,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "notifyblocks",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("notifyblocks")
 			},
 			staticCmd: func() interface{} {
@@ -45,7 +45,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "stopnotifyblocks",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("stopnotifyblocks")
 			},
 			staticCmd: func() interface{} {
@@ -56,7 +56,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "notifynewtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("notifynewtransactions")
 			},
 			staticCmd: func() interface{} {
@@ -69,7 +69,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "notifynewtransactions optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("notifynewtransactions", true)
 			},
 			staticCmd: func() interface{} {
@@ -82,7 +82,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "stopnotifynewtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("stopnotifynewtransactions")
 			},
 			staticCmd: func() interface{} {
@@ -93,7 +93,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "notifyreceived",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("notifyreceived", []string{"1Address"})
 			},
 			staticCmd: func() interface{} {
@@ -106,7 +106,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "stopnotifyreceived",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("stopnotifyreceived", []string{"1Address"})
 			},
 			staticCmd: func() interface{} {
@@ -119,7 +119,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "notifyspent",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("notifyspent", `[{"hash":"123","index":0}]`)
 			},
 			staticCmd: func() interface{} {
@@ -133,7 +133,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "stopnotifyspent",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("stopnotifyspent", `[{"hash":"123","index":0}]`)
 			},
 			staticCmd: func() interface{} {
@@ -147,7 +147,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "rescan",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("rescan", "123", `["1Address"]`, `[{"hash":"0000000000000000000000000000000000000000000000000000000000000123","index":0}]`)
 			},
 			staticCmd: func() interface{} {
@@ -168,7 +168,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "rescan optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("rescan", "123", `["1Address"]`, `[{"hash":"123","index":0}]`, "456")
 			},
 			staticCmd: func() interface{} {
@@ -186,7 +186,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "loadtxfilter",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("loadtxfilter", false, `["1Address"]`, `[{"hash":"0000000000000000000000000000000000000000000000000000000000000123","index":0}]`)
 			},
 			staticCmd: func() interface{} {
@@ -206,7 +206,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		},
 		{
 			name: "rescanblocks",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("rescanblocks", `["0000000000000000000000000000000000000000000000000000000000000123"]`)
 			},
 			staticCmd: func() interface{} {

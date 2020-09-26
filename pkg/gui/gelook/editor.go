@@ -14,7 +14,7 @@ import (
 	"gioui.org/unit"
 )
 
-type DuoUIeditor struct {
+type DuoUIEditor struct {
 	Font     text.Font
 	TextSize unit.Value
 	// Color is the text color.
@@ -30,8 +30,8 @@ type DuoUIeditor struct {
 	shaper text.Shaper
 }
 
-func (t *DuoUItheme) DuoUIeditor(hint, color, bg string, width int) DuoUIeditor {
-	return DuoUIeditor{
+func (t *DuoUITheme) DuoUIEditor(hint, color, bg string, width int) DuoUIEditor {
+	return DuoUIEditor{
 		TextSize:   t.TextSize,
 		Color:      HexARGB(color),
 		Background: HexARGB(bg),
@@ -42,7 +42,7 @@ func (t *DuoUItheme) DuoUIeditor(hint, color, bg string, width int) DuoUIeditor 
 	}
 }
 
-func (e DuoUIeditor) Layout(gtx *layout.Context, editor *gel.Editor) {
+func (e DuoUIEditor) Layout(gtx *layout.Context, editor *gel.Editor) {
 	gtx.Constraints.Width.Min = e.Width
 	var stack op.StackOp
 	stack.Push(gtx.Ops)

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
@@ -161,7 +160,7 @@ func updateChan(update <-chan *updateOptions) RescanOption {
 
 // rescan is a single-threaded function that uses headers from the database and
 // functional options as arguments.
-func (s *ChainService) rescan(options ...RescanOption) error {
+func (s *ChainService) rescan(options ...RescanOption) (err error) {
 	// First, we'll apply the set of default options, then serially apply
 	// all the options that've been passed in.
 	ro := defaultRescanOptions()
@@ -654,7 +653,7 @@ rescanLoop:
 // notifyBlock calls appropriate listeners based on the block filter.
 func (s *ChainService) notifyBlock(ro *rescanOptions,
 	curHeader wire.BlockHeader, curStamp waddrmgr.BlockStamp,
-	scanning bool) error {
+	scanning bool) (err error) {
 	// Find relevant transactions based on watch list. If scanning is
 	// false, we can safely assume this block has no relevant transactions.
 	var relevantTxs []*util.Tx
@@ -689,7 +688,7 @@ func (s *ChainService) notifyBlock(ro *rescanOptions,
 // extractBlockMatches fetches the target block from the network, and filters
 // out any relevant transactions found within the block.
 func (s *ChainService) extractBlockMatches(ro *rescanOptions,
-	curStamp *waddrmgr.BlockStamp) ([]*util.Tx, error) {
+	curStamp *waddrmgr.BlockStamp) ([]*util.Tx, err error) {
 	// We've matched. Now we actually get the block and cycle through the
 	// transactions to see which ones are relevant.
 	block, err := s.GetBlock(curStamp.Hash, ro.queryOptions...)
@@ -745,7 +744,7 @@ func (s *ChainService) extractBlockMatches(ro *rescanOptions,
 // obtained the target filter.
 func (s *ChainService) notifyBlockWithFilter(ro *rescanOptions,
 	curHeader *wire.BlockHeader, curStamp *waddrmgr.BlockStamp,
-	filter *gcs.Filter) error {
+	filter *gcs.Filter) (err error) {
 	// Based on what we find within the block or the filter, we'll be
 	// sending out a set of notifications with transactions that are
 	// relevant to the rescan.
@@ -784,7 +783,7 @@ func (s *ChainService) notifyBlockWithFilter(ro *rescanOptions,
 // filter to already be obtained, rather than fetching the filter from the
 // network.
 func (s *ChainService) matchBlockFilter(ro *rescanOptions, filter *gcs.Filter,
-	blockHash *chainhash.Hash) (bool, error) {
+	blockHash *chainhash.Hash) (bool, err error) {
 	// Now that we have the filter as well as the block hash of the block
 	// used to construct the filter, we'll check to see if the block
 	// matches any items in our watch list.
@@ -801,7 +800,7 @@ func (s *ChainService) matchBlockFilter(ro *rescanOptions, filter *gcs.Filter,
 // items. If this returns false, it means the block is certainly not interesting
 // to us.
 func (s *ChainService) blockFilterMatches(ro *rescanOptions,
-	blockHash *chainhash.Hash) (bool, error) {
+	blockHash *chainhash.Hash) (bool, err error) {
 	// TODO(roasbeef): need to ENSURE always get filter
 	key := builder.DeriveKey(blockHash)
 	bFilter, err := s.GetCFilter(*blockHash, wire.GCSFilterRegular)
@@ -842,7 +841,7 @@ func (s *ChainService) hasFilterHeadersByHeight(height uint32) bool {
 // updateFilter atomically updates the filter and rewinds to the specified
 // height if not 0.
 func (ro *rescanOptions) updateFilter(update *updateOptions,
-	curStamp *waddrmgr.BlockStamp, curHeader *wire.BlockHeader) (bool, error) {
+	curStamp *waddrmgr.BlockStamp, curHeader *wire.BlockHeader) (bool, err error) {
 	ro.watchAddrs = append(ro.watchAddrs, update.addrs...)
 	ro.watchInputs = append(ro.watchInputs, update.inputs...)
 	for _, addr := range update.addrs {
@@ -917,7 +916,7 @@ func (ro *rescanOptions) spendsWatchedInput(tx *util.Tx) bool {
 // paysWatchedAddr returns whether the transaction matches the filter by having
 // an output paying to a watched address. If that is the case, this also
 // updates the filter to watch the newly created output going forward.
-func (ro *rescanOptions) paysWatchedAddr(tx *util.Tx) (bool, error) {
+func (ro *rescanOptions) paysWatchedAddr(tx *util.Tx) (bool, err error) {
 	anyMatchingOutputs := false
 txOutLoop:
 	for outIdx, out := range tx.MsgTx().TxOut {
@@ -993,24 +992,24 @@ func (r *Rescan) WaitForShutdown() {
 
 // Start kicks off the rescan goroutine, which will begin to scan the chain
 // according to the specified rescan options.
-func (r *Rescan) Start() <-chan error {
-	errChan := make(chan error, 1)
-	if !atomic.CompareAndSwapUint32(&r.started, 0, 1) {
-		errChan <- fmt.Errorf("Rescan already started")
-		return errChan
-	}
-	r.wg.Add(1)
-	go func() {
-		defer r.wg.Done()
-		rescanArgs := append(r.options, updateChan(r.updateChan))
-		err := r.chain.rescan(rescanArgs...)
-		close(r.running)
-		r.errMtx.Lock()
-		r.err = err
-		r.errMtx.Unlock()
-		errChan <- err
-	}()
-	return errChan
+func (r *Rescan) Start() <-chan (err error) {
+errChan := make(chan error, 1)
+if !atomic.CompareAndSwapUint32(&r.started, 0, 1) {
+errChan <- fmt.Errorf("Rescan already started")
+return errChan
+}
+r.wg.Add(1)
+go func () {
+defer r.wg.Done()
+rescanArgs := append(r.options, updateChan(r.updateChan))
+err := r.chain.rescan(rescanArgs...)
+close(r.running)
+r.errMtx.Lock()
+r.err = err
+r.errMtx.Unlock()
+errChan <- err
+}()
+return errChan
 }
 
 // updateOptions are a set of functional parameters for Update.
@@ -1064,7 +1063,7 @@ DisableDisconnectedNtfns(disabled bool) UpdateOption {
 }
 
 func // Update sends an update to a long-running rescan/notification goroutine.
-(r *Rescan) Update(options ...UpdateOption) error {
+(r *Rescan) Update(options ...UpdateOption) (err error) {
 	ro := defaultRescanOptions()
 	for _, option := range r.options {
 		option(ro)
@@ -1126,7 +1125,7 @@ func // GetUtxo gets the appropriate TxOut or errors if it's spent. The option
 // is 0, first normal transaction is 1, etc.).
 //
 // TODO(roasbeef): WTB utxo-commitments
-(s *ChainService) GetUtxo(options ...RescanOption) (*SpendReport, error) {
+(s *ChainService) GetUtxo(options ...RescanOption) (*SpendReport, err error) {
 	// Before we start we'll fetch the set of default options, and apply
 	// any user specified options in a functional manner.
 	ro := defaultRescanOptions()

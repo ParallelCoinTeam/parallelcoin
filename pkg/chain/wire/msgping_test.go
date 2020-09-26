@@ -157,8 +157,8 @@ func TestPingWire(t *testing.T) {
 		}
 		// Decode the message from wire format.
 		var msg MsgPing
-		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
+		rBuf := bytes.NewReader(test.buf)
+		err = msg.BtcDecode(rBuf, test.pver, test.enc)
 		if err != nil {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue

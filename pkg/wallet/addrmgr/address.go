@@ -126,23 +126,24 @@ var _ ManagedPubKeyAddress = (*managedAddress)(nil)
 // The returned clear text private key will always be a copy that may be safely
 // used by the caller without worrying about it being zeroed during an address
 // lock.
-func (a *managedAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
+func (a *managedAddress) unlock(key EncryptorDecryptor) (privKeyCopy []byte, err error) {
 	// Protect concurrent access to clear text private key.
 	a.privKeyMutex.Lock()
 	defer a.privKeyMutex.Unlock()
 	if len(a.privKeyCT) == 0 {
-		privKey, err := key.Decrypt(a.privKeyEncrypted)
-		if err != nil {
-			slog.Error(err)
+		var privKey []byte
+		if privKey, err = key.Decrypt(a.privKeyEncrypted); slog.Check(err) {
 			str := fmt.Sprintf("failed to decrypt private key for "+
 				"%s", a.address)
-			return nil, managerError(ErrCrypto, str, err)
+			err = managerError(ErrCrypto, str, err)
+			slog.Debug(err)
+			return
 		}
 		a.privKeyCT = privKey
 	}
-	privKeyCopy := make([]byte, len(a.privKeyCT))
+	privKeyCopy = make([]byte, len(a.privKeyCT))
 	copy(privKeyCopy, a.privKeyCT)
-	return privKeyCopy, nil
+	return
 }
 
 // lock zeroes the associated clear text private key.
@@ -252,7 +253,7 @@ func (a *managedAddress) ExportPubKey() string {
 // manager is watching-only or locked, or the address does not have any keys.
 //
 // This is part of the ManagedPubKeyAddress interface implementation.
-func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
+func (a *managedAddress) PrivKey() (privKey *ec.PrivateKey, err error) {
 	// No private keys are available for a watching-only address manager.
 	if a.manager.rootManager.WatchOnly() {
 		return nil, managerError(ErrWatchingOnly, errWatchingOnly, nil)
@@ -261,17 +262,18 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 	defer a.manager.mtx.Unlock()
 	// Account manager must be unlocked to decrypt the private key.
 	if a.manager.rootManager.IsLocked() {
-		return nil, managerError(ErrLocked, errLocked, nil)
+		err = managerError(ErrLocked, errLocked, nil)
+		slog.Debug(err)
+		return
 	}
 	// Decrypt the key as needed.  Also, make sure it's a copy since the
 	// private key stored in memory can be cleared at any time.  Otherwise
 	// the returned private key could be invalidated from under the caller.
-	privKeyCopy, err := a.unlock(a.manager.rootManager.cryptoKeyPriv)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var privKeyCopy []byte
+	if privKeyCopy, err = a.unlock(a.manager.rootManager.cryptoKeyPriv); slog.Check(err) {
+		return
 	}
-	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), privKeyCopy)
+	privKey, _ = ec.PrivKeyFromBytes(ec.S256(), privKeyCopy)
 	zero.Bytes(privKeyCopy)
 	return privKey, nil
 }
@@ -280,11 +282,10 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 // Import Format (WIF).
 //
 // This is part of the ManagedPubKeyAddress interface implementation.
-func (a *managedAddress) ExportPrivKey() (*util.WIF, error) {
-	pk, err := a.PrivKey()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (a *managedAddress) ExportPrivKey() (wif *util.WIF, err error) {
+	var pk *ec.PrivateKey
+	if pk, err = a.PrivKey(); slog.Check(err) {
+		return
 	}
 	return util.NewWIF(pk, a.manager.rootManager.chainParams, a.compressed)
 }
@@ -313,7 +314,7 @@ func (a *managedAddress) DerivationInfo() (KeyScope, DerivationPath, bool) {
 // compressed.
 func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 	derivationPath DerivationPath, pubKey *ec.PublicKey, compressed bool,
-	addrType AddressType) (*managedAddress, error) {
+	addrType AddressType) (ma *managedAddress, err error) {
 	// Create a pay-to-pubkey-hash address from the public key.
 	var pubKeyHash []byte
 	if compressed {
@@ -322,7 +323,6 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
 	}
 	var address util.Address
-	var err error
 	switch addrType {
 	case NestedWitnessPubKey:
 		// For this address type we'l generate an address which is
@@ -330,16 +330,14 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 		// allows us to take advantage of segwit's scripting improvements,
 		// and malleability fixes.
 		// First, we'll generate a normal p2wkh address from the pubkey hash.
-		witAddr, err := util.NewAddressWitnessPubKeyHash(
-			pubKeyHash, m.rootManager.chainParams,
-		)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var witAddr *util.AddressWitnessPubKeyHash
+		if witAddr, err = util.NewAddressWitnessPubKeyHash(pubKeyHash, m.rootManager.chainParams); slog.Check(err) {
+			return
 		}
 		// Next we'll generate the witness program which can be used as a
 		// pkScript to pay to this generated address.
-		witnessProgram, err := txscript.PayToAddrScript(witAddr)
+		var witnessProgram []byte
+		witnessProgram, err = txscript.PayToAddrScript(witAddr)
 		if err != nil {
 			slog.Error(err)
 			return nil, err
@@ -348,31 +346,23 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 		// to a p2sh address. In order to spend, we first use the
 		// witnessProgram as the sigScript, then present the proper
 		// <sig, pubkey> pair as the witness.
-		address, err = util.NewAddressScriptHash(
-			witnessProgram, m.rootManager.chainParams,
-		)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if address, err = util.NewAddressScriptHash(witnessProgram, m.rootManager.chainParams); slog.Check(err) {
+			return
 		}
 	case PubKeyHash:
-		address, err = util.NewAddressPubKeyHash(
+		if address, err = util.NewAddressPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
-		)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		); slog.Check(err) {
+			return
 		}
 	case WitnessPubKey:
-		address, err = util.NewAddressWitnessPubKeyHash(
+		if address, err = util.NewAddressWitnessPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
-		)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		); slog.Check(err) {
+			return
 		}
 	}
-	return &managedAddress{
+	ma = &managedAddress{
 		manager:          m,
 		address:          address,
 		derivationPath:   derivationPath,
@@ -383,7 +373,8 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 		pubKey:           pubKey,
 		privKeyEncrypted: nil,
 		privKeyCT:        nil,
-	}, nil
+	}
+	return
 }
 
 // newManagedAddress returns a new managed address based on the passed account,
@@ -391,27 +382,26 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 // address will have access to the private and public keys.
 func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 	privKey *ec.PrivateKey, compressed bool,
-	addrType AddressType) (*managedAddress, error) {
+	addrType AddressType) (ma *managedAddress, err error) {
 	// Encrypt the private key.
 	//
 	// NOTE: The privKeyBytes here are set into the managed address which
 	// are cleared when locked, so they aren't cleared here.
 	privKeyBytes := privKey.Serialize()
-	privKeyEncrypted, err := s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes)
-	if err != nil {
-		slog.Error(err)
+	var privKeyEncrypted []byte
+	if privKeyEncrypted, err = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes); slog.Check(err) {
 		str := "failed to encrypt private key"
-		return nil, managerError(ErrCrypto, str, err)
+		err = managerError(ErrCrypto, str, err)
+		slog.Debug(err)
+		return
 	}
 	// Leverage the code to create a managed address without a private key
 	// and then add the private key to it.
 	ecPubKey := (*ec.PublicKey)(&privKey.PublicKey)
-	managedAddr, err := newManagedAddressWithoutPrivKey(
-		s, derivationPath, ecPubKey, compressed, addrType,
-	)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var managedAddr *managedAddress
+	if managedAddr, err =
+		newManagedAddressWithoutPrivKey(s, derivationPath, ecPubKey, compressed, addrType); slog.Check(err) {
+		return
 	}
 	managedAddr.privKeyEncrypted = privKeyEncrypted
 	managedAddr.privKeyCT = privKeyBytes
@@ -422,43 +412,37 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 // account and extended key.  The managed address will have access to the
 // private and public keys if the provided extended key is private, otherwise it
 // will only have access to the public key.
-func newManagedAddressFromExtKey(s *ScopedKeyManager,
-	derivationPath DerivationPath, key *hdkeychain.ExtendedKey,
-	addrType AddressType) (*managedAddress, error) {
+func newManagedAddressFromExtKey(
+	s *ScopedKeyManager,
+	derivationPath DerivationPath,
+	key *hdkeychain.ExtendedKey,
+	addrType AddressType,
+) (managedAddr *managedAddress, err error) {
 	// Create a new managed address based on the public or private key
 	// depending on whether the generated key is private.
-	var managedAddr *managedAddress
 	if key.IsPrivate() {
-		privKey, err := key.ECPrivKey()
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var privKey *ec.PrivateKey
+		if privKey, err = key.ECPrivKey(); slog.Check(err) {
+			return
 		}
 		// Ensure the temp private key big integer is cleared after
 		// use.
-		managedAddr, err = newManagedAddress(
-			s, derivationPath, privKey, true, addrType,
-		)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if managedAddr, err =
+			newManagedAddress(s, derivationPath, privKey, true, addrType); slog.Check(err) {
+			return
 		}
 	} else {
-		pubKey, err := key.ECPubKey()
-		if err != nil {
+		var pubKey *ec.PublicKey
+		if pubKey, err = key.ECPubKey(); slog.Check(err) {
 			slog.Error(err)
-			return nil, err
+			return
 		}
-		managedAddr, err = newManagedAddressWithoutPrivKey(
-			s, derivationPath, pubKey, true,
-			addrType,
-		)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if managedAddr, err =
+			newManagedAddressWithoutPrivKey(s, derivationPath, pubKey, true, addrType); slog.Check(err) {
+			return
 		}
 	}
-	return managedAddr, nil
+	return
 }
 
 // scriptAddress represents a pay-to-script-hash address.
@@ -479,21 +463,21 @@ var _ ManagedScriptAddress = (*scriptAddress)(nil)
 // invalid or the encrypted script is not available.  The returned clear text
 // script will always be a copy that may be safely used by the caller without
 // worrying about it being zeroed during an address lock.
-func (a *scriptAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
+func (a *scriptAddress) unlock(key EncryptorDecryptor) (scriptCopy []byte, err error) {
 	// Protect concurrent access to clear text script.
 	a.scriptMutex.Lock()
 	defer a.scriptMutex.Unlock()
 	if len(a.scriptCT) == 0 {
-		script, err := key.Decrypt(a.scriptEncrypted)
-		if err != nil {
-			slog.Error(err)
-			str := fmt.Sprintf("failed to decrypt script for %s",
-				a.address)
-			return nil, managerError(ErrCrypto, str, err)
+		var script []byte
+		if script, err = key.Decrypt(a.scriptEncrypted); slog.Check(err) {
+			str := fmt.Sprintf("failed to decrypt script for %s", a.address)
+			err = managerError(ErrCrypto, str, err)
+			slog.Debug(err)
+			return
 		}
 		a.scriptCT = script
 	}
-	scriptCopy := make([]byte, len(a.scriptCT))
+	scriptCopy = make([]byte, len(a.scriptCT))
 	copy(scriptCopy, a.scriptCT)
 	return scriptCopy, nil
 }
@@ -571,16 +555,20 @@ func (a *scriptAddress) Used(ns walletdb.ReadBucket) bool {
 // Script returns the script associated with the address.
 //
 // This implements the ScriptAddress interface.
-func (a *scriptAddress) Script() ([]byte, error) {
+func (a *scriptAddress) Script() (b []byte, err error) {
 	// No script is available for a watching-only address manager.
 	if a.manager.rootManager.WatchOnly() {
-		return nil, managerError(ErrWatchingOnly, errWatchingOnly, nil)
+		err = managerError(ErrWatchingOnly, errWatchingOnly, nil)
+		slog.Debug(err)
+		return
 	}
 	a.manager.mtx.Lock()
 	defer a.manager.mtx.Unlock()
 	// Account manager must be unlocked to decrypt the script.
 	if a.manager.rootManager.IsLocked() {
-		return nil, managerError(ErrLocked, errLocked, nil)
+		err = managerError(ErrLocked, errLocked, nil)
+		slog.Debug(err)
+		return
 	}
 	// Decrypt the script as needed.  Also, make sure it's a copy since the
 	// script stored in memory can be cleared at any time.  Otherwise,
@@ -590,18 +578,16 @@ func (a *scriptAddress) Script() ([]byte, error) {
 
 // newScriptAddress initializes and returns a new pay-to-script-hash address.
 func newScriptAddress(m *ScopedKeyManager, account uint32, scriptHash,
-	scriptEncrypted []byte) (*scriptAddress, error) {
-	address, err := util.NewAddressScriptHashFromHash(
-		scriptHash, m.rootManager.chainParams,
-	)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	scriptEncrypted []byte) (sa *scriptAddress, err error) {
+	var address *util.AddressScriptHash
+	if address, err = util.NewAddressScriptHashFromHash(scriptHash, m.rootManager.chainParams); slog.Check(err) {
+		return
 	}
-	return &scriptAddress{
+	sa = &scriptAddress{
 		manager:         m,
 		account:         account,
 		address:         address,
 		scriptEncrypted: scriptEncrypted,
-	}, nil
+	}
+	return
 }

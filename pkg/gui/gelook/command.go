@@ -17,7 +17,7 @@ type Command struct {
 	Time     time.Time
 }
 
-func (t *DuoUItheme) Command(name string) *Command {
+func (t *DuoUITheme) Command(name string) *Command {
 	return &Command{
 		ComID: name,
 	}
@@ -29,10 +29,10 @@ func (p Command) Layout(gtx *layout.Context, f func()) {
 			in := layout.UniformInset(unit.Dp(0))
 			in.Layout(gtx, func() {
 				cs := gtx.Constraints
-				DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ffacacac", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				DuoUIDrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ffacacac", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 					cs := gtx.Constraints
-					DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+					DuoUIDrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 					f()
 				})
 			})

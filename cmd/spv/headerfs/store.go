@@ -84,7 +84,7 @@ type headerStore struct {
 // target file path for the flat-file and a particular header type. The target
 // file will be created as necessary.
 func newHeaderStore(db walletdb.DB, filePath string,
-	hType HeaderType) (*headerStore, error) {
+	hType HeaderType) (*headerStore, err error) {
 	var flatFileName string
 	switch hType {
 	case Block:
@@ -136,7 +136,7 @@ var _ BlockHeaderStore = (*blockHeaderStore)(nil)
 // the initial start up of the blockHeaderStore, then the initial genesis
 // header will need to be inserted.
 func NewBlockHeaderStore(filePath string, db walletdb.DB,
-	netParams *netparams.Params) (BlockHeaderStore, error) {
+	netParams *netparams.Params) (BlockHeaderStore, err error) {
 	hStore, err := newHeaderStore(db, filePath, Block)
 	if err != nil {
 		slog.Error(err)
@@ -205,7 +205,7 @@ func NewBlockHeaderStore(filePath string, db walletdb.DB,
 // block height.
 //
 // NOTE: Part of the BlockHeaderStore interface.
-func (h *blockHeaderStore) FetchHeader(hash *chainhash.Hash) (*wire.BlockHeader, uint32, error) {
+func (h *blockHeaderStore) FetchHeader(hash *chainhash.Hash) (*wire.BlockHeader, uint32, err error) {
 	// Lock store for read.
 	h.mtx.RLock()
 	defer h.mtx.RUnlock()
@@ -230,7 +230,7 @@ func (h *blockHeaderStore) FetchHeader(hash *chainhash.Hash) (*wire.BlockHeader,
 //
 // NOTE: Part of the BlockHeaderStore interface.
 func (h *blockHeaderStore) FetchHeaderByHeight(height uint32) (*wire.
-BlockHeader, error) {
+BlockHeader, err error) {
 	// Lock store for read.
 	h.mtx.RLock()
 	defer h.mtx.RUnlock()
@@ -254,7 +254,7 @@ BlockHeader, error) {
 //
 // NOTE: Part of the BlockHeaderStore interface.
 func (h *blockHeaderStore) FetchHeaderAncestors(numHeaders uint32,
-	stopHash *chainhash.Hash) ([]wire.BlockHeader, uint32, error) {
+	stopHash *chainhash.Hash) ([]wire.BlockHeader, uint32, err error) {
 	// First, we'll find the final header in the range, this will be the
 	// ending height of our scan.
 	endHeight, err := h.heightFromHash(stopHash)
@@ -275,7 +275,7 @@ func (h *blockHeaderStore) FetchHeaderAncestors(numHeaders uint32,
 // hash.
 //
 // NOTE: Part of the BlockHeaderStore interface.
-func (h *blockHeaderStore) HeightFromHash(hash *chainhash.Hash) (uint32, error) {
+func (h *blockHeaderStore) HeightFromHash(hash *chainhash.Hash) (uint32, err error) {
 	return h.heightFromHash(hash)
 }
 
@@ -285,7 +285,7 @@ func (h *blockHeaderStore) HeightFromHash(hash *chainhash.Hash) (uint32, error) 
 // information about the new header tip after truncation is returned.
 //
 // NOTE: Part of the BlockHeaderStore interface.
-func (h *blockHeaderStore) RollbackLastBlock() (*waddrmgr.BlockStamp, error) {
+func (h *blockHeaderStore) RollbackLastBlock() (*waddrmgr.BlockStamp, err error) {
 	// Lock store for write.
 	h.mtx.Lock()
 	defer h.mtx.Unlock()
@@ -341,7 +341,7 @@ func (b *BlockHeader) toIndexEntry() headerEntry {
 // single atomic transaction.
 //
 // NOTE: Part of the BlockHeaderStore interface.
-func (h *blockHeaderStore) WriteHeaders(headers ...BlockHeader) error {
+func (h *blockHeaderStore) WriteHeaders(headers ...BlockHeader) (err error) {
 	// Lock store for write.
 	h.mtx.Lock()
 	defer h.mtx.Unlock()
@@ -380,7 +380,7 @@ func (h *blockHeaderStore) WriteHeaders(headers ...BlockHeader) error {
 //
 // TODO(roasbeef): make into single transaction.
 func (h *blockHeaderStore) blockLocatorFromHash(hash *chainhash.Hash) (
-	blockchain.BlockLocator, error) {
+	blockchain.BlockLocator, err error) {
 	var locator blockchain.BlockLocator
 	// Append the initial hash
 	locator = append(locator, hash)
@@ -417,7 +417,7 @@ func (h *blockHeaderStore) blockLocatorFromHash(hash *chainhash.Hash) (
 // of the current main chain from the PoV of the database and flat files.
 //
 // NOTE: Part of the BlockHeaderStore interface.
-func (h *blockHeaderStore) LatestBlockLocator() (blockchain.BlockLocator, error) {
+func (h *blockHeaderStore) LatestBlockLocator() (blockchain.BlockLocator, err error) {
 	// Lock store for read.
 	h.mtx.RLock()
 	defer h.mtx.RUnlock()
@@ -433,7 +433,7 @@ func (h *blockHeaderStore) LatestBlockLocator() (blockchain.BlockLocator, error)
 // BlockLocatorFromHash computes a block locator given a particular hash. The
 // standard Bitcoin algorithm to compute block locators are employed.
 func (h *blockHeaderStore) BlockLocatorFromHash(hash *chainhash.Hash) (
-	blockchain.BlockLocator, error) {
+	blockchain.BlockLocator, err error) {
 	// Lock store for read.
 	h.mtx.RLock()
 	defer h.mtx.RUnlock()
@@ -444,11 +444,11 @@ func (h *blockHeaderStore) BlockLocatorFromHash(hash *chainhash.Hash) (
 // to first, and makes sure they all connect to each other. Additionally, at
 // each block header, we also ensure that the index entry for that height and
 // hash also match up properly.
-func (h *blockHeaderStore) CheckConnectivity() error {
+func (h *blockHeaderStore) CheckConnectivity() (err error) {
 	// Lock store for read.
 	h.mtx.RLock()
 	defer h.mtx.RUnlock()
-	return walletdb.View(h.db, func(tx walletdb.ReadTx) error {
+	return walletdb.View(h.db, func(tx walletdb.ReadTx) (err error) {
 		// First, we'll fetch the root bucket, in order to use that to
 		// fetch the bucket that houses the header index.
 		rootBucket := tx.ReadBucket(indexBucket)
@@ -518,7 +518,7 @@ func (h *blockHeaderStore) CheckConnectivity() error {
 // blockHeaderStore.
 //
 // NOTE: Part of the BlockHeaderStore interface.
-func (h *blockHeaderStore) ChainTip() (*wire.BlockHeader, uint32, error) {
+func (h *blockHeaderStore) ChainTip() (*wire.BlockHeader, uint32, err error) {
 	// Lock store for read.
 	h.mtx.RLock()
 	defer h.mtx.RUnlock()
@@ -549,7 +549,7 @@ type FilterHeaderStore struct {
 // FilterHeaderStore, then the initial genesis filter header will need to be
 // inserted.
 func NewFilterHeaderStore(filePath string, db walletdb.DB,
-	filterType HeaderType, netParams *netparams.Params) (*FilterHeaderStore, error) {
+	filterType HeaderType, netParams *netparams.Params) (*FilterHeaderStore, err error) {
 	fStore, err := newHeaderStore(db, filePath, filterType)
 	if err != nil {
 		slog.Error(err)
@@ -637,7 +637,7 @@ func NewFilterHeaderStore(filePath string, db walletdb.DB,
 // FetchHeader returns the filter header that corresponds to the passed block
 // height.
 func (f *FilterHeaderStore) FetchHeader(hash *chainhash.Hash) (*chainhash.
-Hash, error) {
+Hash, err error) {
 	// Lock store for read.
 	f.mtx.RLock()
 	defer f.mtx.RUnlock()
@@ -651,7 +651,7 @@ Hash, error) {
 
 // FetchHeaderByHeight returns the filter header for a particular block height.
 func (f *FilterHeaderStore) FetchHeaderByHeight(height uint32) (*chainhash.
-Hash, error) {
+Hash, err error) {
 	// Lock store for read.
 	f.mtx.RLock()
 	defer f.mtx.RUnlock()
@@ -683,7 +683,7 @@ func (f *FilterHeader) toIndexEntry() headerEntry {
 // WriteHeaders writes a batch of filter headers to persistent storage. The
 // headers themselves are appended to the flat file, and then the index updated
 // to reflect the new entries.
-func (f *FilterHeaderStore) WriteHeaders(headers ...FilterHeader) error {
+func (f *FilterHeaderStore) WriteHeaders(headers ...FilterHeader) (err error) {
 	// Lock store for write.
 	f.mtx.Lock()
 	defer f.mtx.Unlock()
@@ -719,7 +719,7 @@ func (f *FilterHeaderStore) WriteHeaders(headers ...FilterHeader) error {
 
 // ChainTip returns the latest filter header and height known to the
 // FilterHeaderStore.
-func (f *FilterHeaderStore) ChainTip() (*chainhash.Hash, uint32, error) {
+func (f *FilterHeaderStore) ChainTip() (*chainhash.Hash, uint32, err error) {
 	// Lock store for read.
 	f.mtx.RLock()
 	defer f.mtx.RUnlock()
@@ -742,7 +742,7 @@ func (f *FilterHeaderStore) ChainTip() (*chainhash.Hash, uint32, error) {
 // chain. The information about the latest header tip after truncation is
 // returned.
 func (f *FilterHeaderStore) RollbackLastBlock(newTip *chainhash.Hash) (
-	*waddrmgr.BlockStamp, error) {
+	*waddrmgr.BlockStamp, err error) {
 	// Lock store for write.
 	f.mtx.Lock()
 	defer f.mtx.Unlock()

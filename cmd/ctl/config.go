@@ -42,13 +42,13 @@ func ListCommands() {
 		categoryWallet
 		numCategories
 	)
+	var err error
 	// Get a list of registered commands and categorize and filter them.
 	cmdMethods := btcjson.RegisteredCmdMethods()
 	categorized := make([][]string, numCategories)
 	for _, method := range cmdMethods {
-		flags, err := btcjson.MethodUsageFlags(method)
-		if err != nil {
-			slog.Error(err)
+		var flags btcjson.UsageFlag
+		if flags, err = btcjson.MethodUsageFlags(method); slog.Check(err) {
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue

@@ -36,7 +36,7 @@ func fatalf(
 	os.Exit(1)
 }
 func errContext(
-	err error, context string) error {
+	err error, context string) (err error) {
 	return fmt.Errorf("%s: %v", context, err)
 }
 
@@ -177,7 +177,7 @@ func makeInputSource(
 	if sourceErr == nil && totalInputValue == 0 {
 		sourceErr = noInputValue{}
 	}
-	return func(util.Amount) (util.Amount, []*wire.TxIn, []util.Amount, [][]byte, error) {
+	return func(util.Amount) (util.Amount, []*wire.TxIn, []util.Amount, [][]byte, err error) {
 		return totalInputValue, inputs, inputValues, nil, sourceErr
 	}
 }
@@ -187,7 +187,7 @@ func makeInputSource(
 // function.
 func makeDestinationScriptSource(
 	rpcClient *rpcclient.Client, accountName string) txauthor.ChangeSource {
-	return func() ([]byte, error) {
+	return func() ([]byte, err error) {
 		destinationAddress, err := rpcClient.GetNewAddress(accountName)
 		if err != nil {
 			slog.Error(err)
@@ -203,7 +203,7 @@ func main() {
 		fatalf("%v", err)
 	}
 }
-func sweep() error {
+func sweep() (err error) {
 	rpcPassword, err := promptSecret("Wallet RPC password")
 	if err != nil {
 		slog.Error(err)
@@ -319,7 +319,7 @@ func sweep() error {
 	}
 	return nil
 }
-func promptSecret(what string) (string, error) {
+func promptSecret(what string) (string, err error) {
 	fmt.Printf("%s: ", what)
 	fd := int(os.Stdin.Fd())
 	input, err := terminal.ReadPassword(fd)
@@ -337,7 +337,7 @@ func saneOutputValue(
 }
 
 func parseOutPoint(
-	input *btcjson.ListUnspentResult) (wire.OutPoint, error) {
+	input *btcjson.ListUnspentResult) (wire.OutPoint, err error) {
 	txHash, err := chainhash.NewHashFromStr(input.TxID)
 	if err != nil {
 		slog.Error(err)

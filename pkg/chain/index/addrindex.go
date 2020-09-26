@@ -433,7 +433,7 @@ func (idx *AddrIndex) NeedsInputs() bool {
 
 // Init is only provided to satisfy the Indexer interface as there is nothing to initialize for this index. This is part
 // of the Indexer interface.
-func (idx *AddrIndex) Init() error {
+func (idx *AddrIndex) Init() (err error) {
 	// Nothing to do.
 	return nil
 }
@@ -564,7 +564,7 @@ func (idx *AddrIndex) TxRegionsForAddress(dbTx database.Tx, addr util.Address, n
 		// Create closure to lookup the block hash given the ID using the database transaction.
 		addrIdxBucket := dbTx.Metadata().Bucket(addrIndexKey)
 		regions, skipped, err = dbFetchAddrIndexEntries(addrIdxBucket, addrKey, numToSkip, numRequested, reverse,
-			func(id []byte) (*chainhash.Hash, error) {
+			func(id []byte) (h *chainhash.Hash, err error) {
 				// Deserialize and populate the result.
 				return dbFetchBlockHashBySerializedID(dbTx, id)
 			})
@@ -673,6 +673,6 @@ func NewAddrIndex(db database.DB, chainParams *netparams.Params) *AddrIndex {
 }
 
 // DropAddrIndex drops the address index from the provided database if it exists.
-func DropAddrIndex(db database.DB, interrupt <-chan struct{}) error {
+func DropAddrIndex(db database.DB, interrupt <-chan struct{}) (err error) {
 	return dropIndex(db, addrIndexKey, addrIndexName, interrupt)
 }

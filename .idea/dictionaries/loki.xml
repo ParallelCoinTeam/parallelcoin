@@ -1,67 +1,325 @@
 <component name="ProjectDictionaryState">
   <dictionary name="loki">
     <words>
+      <w>abcd</w>
+      <w>abcdefghijklmnopqrstuvwxyz</w>
       <w>addcheckpoint</w>
+      <w>addednode</w>
+      <w>addnode</w>
       <w>addpeer</w>
       <w>addressbook</w>
+      <w>addrlocal</w>
+      <w>addrme</w>
       <w>addrs</w>
       <w>advertisment</w>
+      <w>aead</w>
+      <w>aewma</w>
       <w>algo</w>
+      <w>algoname</w>
       <w>algos</w>
+      <w>altstack</w>
+      <w>ancestorcount</w>
+      <w>ancestorfees</w>
+      <w>ancestorsize</w>
+      <w>arrayjson</w>
+      <w>atotto</w>
       <w>autoports</w>
+      <w>awpkh</w>
+      <w>awsh</w>
       <w>backfill</w>
       <w>banduration</w>
+      <w>banscore</w>
       <w>banthreshold</w>
+      <w>bariol</w>
+      <w>bcast</w>
+      <w>bech</w>
+      <w>bestblock</w>
+      <w>bestblockhash</w>
+      <w>bhwa</w>
+      <w>bignum</w>
+      <w>bitcoind's</w>
+      <w>bitcointalk</w>
+      <w>bitlength</w>
       <w>bitses</w>
+      <w>bitsize</w>
       <w>blockchain</w>
+      <w>blockconnected</w>
+      <w>blockdisconnected</w>
+      <w>blockhash</w>
+      <w>blockheader</w>
+      <w>blockheight</w>
+      <w>blocklocators</w>
       <w>blockmaxsize</w>
       <w>blockmaxweight</w>
       <w>blockminsize</w>
       <w>blockminweight</w>
       <w>blockprioritysize</w>
       <w>blocksonly</w>
+      <w>blockstamp</w>
+      <w>blocktime</w>
+      <w>boguscommand</w>
+      <w>bogusmethod</w>
+      <w>booland</w>
+      <w>boolor</w>
+      <w>btcnet</w>
+      <w>btcsuite</w>
+      <w>btcwallet</w>
+      <w>buildmetadata</w>
+      <w>byhashidx</w>
+      <w>byteses</w>
+      <w>bytesrecv</w>
+      <w>bytessent</w>
+      <w>bytestring</w>
       <w>cafile</w>
+      <w>carryless</w>
+      <w>castagnoli</w>
+      <w>cfcheckpt</w>
+      <w>cfheaders</w>
+      <w>cfilter</w>
+      <w>cfilters</w>
+      <w>cfindexparentbucket</w>
       <w>chainhash</w>
+      <w>chainwork</w>
+      <w>checkable</w>
+      <w>checklocktimeverify</w>
+      <w>checkmultisig</w>
+      <w>checkmultisigverify</w>
+      <w>checkpt</w>
+      <w>checksequenceverify</w>
       <w>checksig</w>
+      <w>checksigverify</w>
       <w>ciph</w>
+      <w>cleanstack</w>
       <w>clienttls</w>
+      <w>cmds</w>
+      <w>codeseparator</w>
+      <w>coinbaseaux</w>
       <w>coinbases</w>
+      <w>coinbasetxn</w>
+      <w>coinbasevalue</w>
+      <w>cointype</w>
+      <w>conns</w>
+      <w>conntime</w>
+      <w>coord</w>
       <w>cpuprofile</w>
+      <w>createmultisig</w>
+      <w>createnewaccount</w>
+      <w>createopenfail</w>
+      <w>createrawtransaction</w>
+      <w>csprng</w>
+      <w>currentblocksize</w>
+      <w>currentblocktx</w>
+      <w>currentblockweight</w>
+      <w>currentheight</w>
+      <w>currentpriority</w>
+      <w>curtime</w>
       <w>datadir</w>
       <w>datagram</w>
       <w>dbtype</w>
+      <w>dcrd</w>
+      <w>dcrjson</w>
+      <w>dcrrpcclient</w>
+      <w>deadbeef</w>
+      <w>deadbeefcafe</w>
+      <w>deadbeefcafeb</w>
+      <w>debuglevel</w>
+      <w>decadic</w>
+      <w>decoderawtransaction</w>
+      <w>decodescript</w>
+      <w>decred</w>
+      <w>decryptable</w>
+      <w>deprioritise</w>
+      <w>dersig</w>
+      <w>descendantcount</w>
+      <w>descendantfees</w>
+      <w>descendantsize</w>
+      <w>descs</w>
+      <w>disasm</w>
       <w>dropcfindex</w>
+      <w>dropnode</w>
+      <w>dumpwallet</w>
+      <w>electric's</w>
+      <w>encap</w>
+      <w>equalverify</w>
+      <w>errorf</w>
+      <w>erroring</w>
       <w>externalip</w>
+      <w>feefilter</w>
+      <w>ffff</w>
       <w>ffffffff</w>
+      <w>ffldb</w>
+      <w>filteradd</w>
+      <w>filterclear</w>
+      <w>filteredblockconnected</w>
+      <w>filteredblockdisconnected</w>
+      <w>filterload</w>
+      <w>finney's</w>
+      <w>fprate</w>
+      <w>fprates</w>
+      <w>fromaltstack</w>
+      <w>funcs</w>
+      <w>gbcir</w>
+      <w>gbhvr</w>
       <w>gbvr</w>
+      <w>gecc</w>
+      <w>genalgo</w>
+      <w>genprecomps</w>
+      <w>genproclimit</w>
+      <w>gensecp</w>
       <w>genthreads</w>
+      <w>getaddednodeinfo</w>
+      <w>getaddr</w>
+      <w>getbestblock</w>
+      <w>getbestblockhash</w>
+      <w>getblock</w>
+      <w>getblockchaininfo</w>
+      <w>getblockcount</w>
+      <w>getblockhash</w>
+      <w>getblockheader</w>
+      <w>getblockheight</w>
+      <w>getblocks</w>
+      <w>getblocktemplate</w>
+      <w>getcfcheckpt</w>
+      <w>getcfheaders</w>
+      <w>getcfilterheader</w>
+      <w>getcfilters</w>
+      <w>getchaintips</w>
+      <w>getconnectioncount</w>
+      <w>getcurrentnet</w>
+      <w>getdata</w>
+      <w>getgenerate</w>
+      <w>gethashespersec</w>
+      <w>getheaders</w>
+      <w>getinfo</w>
+      <w>getmempoolentry</w>
+      <w>getmempoolinfo</w>
+      <w>getmininginfo</w>
+      <w>getnettotals</w>
+      <w>getnetworkhashps</w>
+      <w>getnetworkinfo</w>
+      <w>getpeerinfo</w>
+      <w>getrawmempool</w>
+      <w>getrawtransaction</w>
+      <w>gettxout</w>
+      <w>gettxoutproof</w>
+      <w>gettxoutsetinfo</w>
+      <w>getutxos</w>
+      <w>getwork</w>
+      <w>gewma</w>
+      <w>gioui</w>
+      <w>gmem</w>
+      <w>gmer</w>
+      <w>goregular</w>
+      <w>grayi</w>
+      <w>grayii</w>
+      <w>grayiii</w>
+      <w>greaterthan</w>
+      <w>greaterthanorequal</w>
+      <w>grmvr</w>
+      <w>gtor</w>
+      <w>halflife</w>
+      <w>hankerson</w>
       <w>hardfork</w>
+      <w>hashbyhashidx</w>
       <w>hashcount</w>
+      <w>hasher</w>
+      <w>hashespersec</w>
       <w>hashrate</w>
+      <w>hashstop</w>
+      <w>hashtype</w>
+      <w>haveblock</w>
+      <w>hdrs</w>
+      <w>headerbyhashidx</w>
+      <w>idxf</w>
       <w>idxs</w>
+      <w>ifdup</w>
+      <w>iinput</w>
       <w>ilogger</w>
+      <w>ilsbeth</w>
+      <w>importaddress</w>
+      <w>importpubkey</w>
+      <w>importwallet</w>
+      <w>incrementalfee</w>
       <w>infof</w>
       <w>inputser</w>
+      <w>insufficientfee</w>
+      <w>interfacetest</w>
       <w>intn</w>
+      <w>ints</w>
+      <w>invalidateblock</w>
+      <w>invalidopcode</w>
+      <w>isvalid</w>
+      <w>jacobian</w>
+      <w>jsonrpc</w>
+      <w>jsonrpcdefault</w>
+      <w>jsonrpcusage</w>
+      <w>keypath</w>
+      <w>koblitz</w>
       <w>kopach</w>
       <w>kopachworker</w>
+      <w>lastrecv</w>
+      <w>lastseen</w>
+      <w>lastsend</w>
+      <w>lessthan</w>
+      <w>lessthanorequal</w>
+      <w>levelspec</w>
       <w>limitfreerelay</w>
       <w>limitpass</w>
       <w>limituser</w>
+      <w>listtransactions</w>
+      <w>liveness</w>
+      <w>loadtxfilter</w>
+      <w>localaddresses</w>
+      <w>localrelay</w>
+      <w>localservices</w>
+      <w>lockin</w>
       <w>locktime</w>
+      <w>locs</w>
+      <w>logi</w>
+      <w>longpoll</w>
+      <w>longpollid</w>
+      <w>longpolluri</w>
+      <w>lshift</w>
+      <w>lstrcpy</w>
       <w>mainnet</w>
+      <w>malleated</w>
       <w>marshaler</w>
       <w>maxorphantx</w>
       <w>maxpeers</w>
+      <w>maxtime</w>
+      <w>mcfh</w>
+      <w>mduo</w>
+      <w>mediantime</w>
       <w>mempool</w>
+      <w>menezes</w>
       <w>merkle</w>
+      <w>merkleblock</w>
+      <w>merkleroot</w>
       <w>merkles</w>
+      <w>midstate</w>
       <w>minerpass</w>
+      <w>minfee</w>
+      <w>minimaldata</w>
+      <w>minimalif</w>
       <w>miningaddrs</w>
       <w>minrelaytxfee</w>
+      <w>mintime</w>
+      <w>minuse</w>
       <w>misedited</w>
+      <w>modifiedfee</w>
+      <w>msgs</w>
+      <w>mult</w>
       <w>multicast</w>
       <w>multisig</w>
+      <w>multisignature</w>
+      <w>myclient</w>
+      <w>mygui</w>
+      <w>nates</w>
+      <w>netaddress</w>
+      <w>netparams</w>
+      <w>networkactive</w>
+      <w>networkhashps</w>
+      <w>nextblockhash</w>
       <w>noaddrindex</w>
       <w>nobanning</w>
       <w>nocfilters</w>
@@ -70,27 +328,96 @@
       <w>nodnsseed</w>
       <w>noinitialload</w>
       <w>nolisten</w>
+      <w>noncerange</w>
+      <w>nonces</w>
       <w>nopeerbloomfilters</w>
+      <w>nops</w>
       <w>norelaypriority</w>
       <w>norpc</w>
+      <w>notif</w>
+      <w>notifyblocks</w>
+      <w>notifynewtransactions</w>
+      <w>notifyreceived</w>
+      <w>notifyspent</w>
       <w>notxindex</w>
+      <w>nphi</w>
+      <w>nplo</w>
+      <w>npvmid</w>
+      <w>nrequired</w>
+      <w>ntfn</w>
+      <w>ntfns</w>
+      <w>nulldata</w>
+      <w>nulldummy</w>
+      <w>nullfail</w>
+      <w>numequal</w>
+      <w>numequalverify</w>
+      <w>numnotequal</w>
+      <w>offf</w>
       <w>onetimetlskey</w>
+      <w>onetry</w>
+      <w>onioncat</w>
       <w>onionpass</w>
       <w>onionproxy</w>
       <w>onionuser</w>
+      <w>oorschot</w>
+      <w>oscript</w>
       <w>othernodes</w>
+      <w>parallelcoin</w>
+      <w>pbcopy</w>
+      <w>pbpaste</w>
+      <w>pebibytes</w>
+      <w>pingtime</w>
+      <w>pingwait</w>
       <w>pipelog</w>
       <w>pkscript</w>
+      <w>polymod</w>
+      <w>pooledtx</w>
       <w>powlimit</w>
+      <w>preciousblock</w>
+      <w>previousblockhash</w>
+      <w>prio</w>
+      <w>priv</w>
+      <w>protocolversion</w>
+      <w>proxied</w>
       <w>proxyuser</w>
+      <w>pruneheight</w>
       <w>pubkey</w>
+      <w>pubkeyhash</w>
+      <w>pubkeys</w>
+      <w>pubkeytype</w>
+      <w>publickey</w>
+      <w>pushdata</w>
+      <w>pushonly</w>
+      <w>pver</w>
+      <w>pyelliptic</w>
+      <w>qhour</w>
+      <w>quentins</w>
+      <w>rawtx</w>
+      <w>readd</w>
+      <w>reallocations</w>
+      <w>reappend</w>
       <w>rebroadcaster</w>
+      <w>reconsiderblock</w>
+      <w>recvtx</w>
+      <w>redeemingtx</w>
       <w>regressiontest</w>
       <w>regtestnet</w>
       <w>rejectnonstd</w>
+      <w>relayfee</w>
       <w>relaynonstd</w>
+      <w>relaytxes</w>
+      <w>relevanttxaccepted</w>
+      <w>renameaccount</w>
+      <w>rescanblocks</w>
+      <w>rescanfinished</w>
+      <w>rescanprogress</w>
       <w>reserialize</w>
       <w>reserialized</w>
+      <w>retur</w>
+      <w>ripemd</w>
+      <w>rmka</w>
+      <w>roasbeef</w>
+      <w>rolen</w>
       <w>routeable</w>
       <w>rpc</w>
       <w>rpccert</w>
@@ -102,40 +429,147 @@
       <w>rpcmaxwebsockets</w>
       <w>rpcquirks</w>
       <w>rpctest</w>
+      <w>rshift</w>
       <w>satoshis</w>
+      <w>screenful</w>
+      <w>scripterror</w>
+      <w>scripthash</w>
+      <w>searchrawtransaction</w>
+      <w>searchrawtransactions</w>
+      <w>secg</w>
+      <w>secp</w>
+      <w>secretbox's</w>
+      <w>segnet</w>
       <w>segwit</w>
+      <w>selnotify</w>
+      <w>sendheaders</w>
+      <w>sendrawtransaction</w>
       <w>sendtoaddress</w>
+      <w>serializedtx</w>
       <w>serverpass</w>
       <w>servertls</w>
       <w>serveruser</w>
+      <w>sessionid</w>
+      <w>setgenerate</w>
       <w>sigcachemaxsize</w>
+      <w>sighash</w>
+      <w>signrawtransaction</w>
+      <w>sigoplimit</w>
+      <w>sigops</w>
+      <w>sigpushonly</w>
+      <w>sigs</w>
+      <w>sigscript</w>
+      <w>sikrit</w>
       <w>simnet</w>
+      <w>sizelimit</w>
       <w>softfork</w>
+      <w>softforks</w>
+      <w>somesig</w>
+      <w>spdx</w>
+      <w>squarings</w>
+      <w>ssoc</w>
+      <w>startingheight</w>
+      <w>startingpriority</w>
+      <w>stopnotifyblocks</w>
+      <w>stopnotifynewtransactions</w>
+      <w>stopnotifyreceived</w>
+      <w>stopnotifyspent</w>
+      <w>strconv</w>
+      <w>stribog</w>
+      <w>strictenc</w>
+      <w>stringified</w>
+      <w>stringized</w>
+      <w>strippedsize</w>
+      <w>strs</w>
       <w>stxo</w>
       <w>stxos</w>
+      <w>submitblock</w>
+      <w>submitold</w>
+      <w>subslices</w>
+      <w>subver</w>
+      <w>syncnode</w>
+      <w>testusage</w>
+      <w>testvalue</w>
+      <w>timemillis</w>
+      <w>timeoffset</w>
       <w>timesource</w>
       <w>tlsskipverify</w>
+      <w>toaltstack</w>
+      <w>toredo</w>
       <w>torisolation</w>
+      <w>totalbytesrecv</w>
+      <w>totalbytessent</w>
       <w>totaltx</w>
+      <w>tracability</w>
+      <w>tracef</w>
+      <w>treap</w>
       <w>trickleinterval</w>
+      <w>ttfs</w>
       <w>ttpb</w>
+      <w>tuxcanfly</w>
+      <w>txaccepted</w>
+      <w>txacceptedverbose</w>
+      <w>txes</w>
+      <w>txhash</w>
+      <w>txid</w>
+      <w>txin</w>
+      <w>txinwitness</w>
+      <w>txitxo</w>
       <w>txns</w>
+      <w>txnum</w>
       <w>txos</w>
       <w>txout</w>
       <w>txouts</w>
+      <w>txscript</w>
       <w>uacomment</w>
+      <w>uncomp</w>
+      <w>uncompressing</w>
+      <w>unfinalized</w>
       <w>unicast</w>
+      <w>unicodetext</w>
+      <w>unlicense</w>
       <w>unmarshalling</w>
+      <w>unmined</w>
+      <w>unparse</w>
+      <w>unparsing</w>
+      <w>unroutable</w>
+      <w>unrouteable</w>
+      <w>unserialized</w>
       <w>unspend</w>
       <w>unspendable</w>
       <w>unspentness</w>
+      <w>unsynced</w>
       <w>upnp</w>
       <w>utxo</w>
       <w>utxos</w>
       <w>utxoset</w>
       <w>utxosetv</w>
       <w>uxtos</w>
+      <w>validateaddress</w>
+      <w>vanstone</w>
+      <w>varint</w>
+      <w>vect</w>
+      <w>vects</w>
+      <w>verack</w>
+      <w>veracks</w>
+      <w>verbosetx</w>
+      <w>verif</w>
+      <w>verificationprogress</w>
+      <w>verifychain</w>
+      <w>verifymessage</w>
+      <w>verifytxoutproof</w>
+      <w>vernotif</w>
+      <w>versionresult</w>
+      <w>versionstring</w>
+      <w>vinprevout</w>
+      <w>vnphi</w>
+      <w>vnplo</w>
+      <w>vnpmid</w>
+      <w>vout</w>
+      <w>vsize</w>
       <w>walletconnect</w>
+      <w>walletdb</w>
+      <w>walletdbtest</w>
       <w>walletfile</w>
       <w>walletoff</w>
       <w>walletpass</w>
@@ -144,7 +578,15 @@
       <w>walletrpcmaxclients</w>
       <w>walletrpcmaxwebsockets</w>
       <w>walletserver</w>
+      <w>warnc</w>
+      <w>warnf</w>
       <w>websockets</w>
+      <w>weightlimit</w>
+      <w>whitebox</w>
+      <w>workid</w>
+      <w>wpkh</w>
+      <w>wtxid</w>
+      <w>xthin</w>
     </words>
   </dictionary>
 </component>

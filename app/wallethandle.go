@@ -29,9 +29,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		walletChan := make(chan *wallet.Wallet)
 		cx.WalletKill = make(chan struct{})
 		go func() {
-			err = walletmain.Main(cx)
-			if err != nil {
-				slog.Error("failed to start up wallet", err)
+			if err = walletmain.Main(cx); slog.Check(err) {
 			}
 		}()
 		cx.WalletServer = <-walletChan

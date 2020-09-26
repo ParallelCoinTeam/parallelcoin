@@ -236,9 +236,11 @@ func mergeUtxoView(viewA *blockchain.UtxoViewpoint, viewB *blockchain.UtxoViewpo
 // signature script of the coinbase transaction of a new block.  In particular,
 // it starts with the block height that is required by version 2 blocks and
 // adds the extra nonce as well as additional coinbase flags.
-func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, error) {
-	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
-		AddInt64(int64(extraNonce)).AddData([]byte(CoinbaseFlags)).
+func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) (s []byte, err error) {
+	return txscript.NewScriptBuilder().
+		AddInt64(int64(nextBlockHeight)).
+		AddInt64(int64(extraNonce)).
+		AddData([]byte(CoinbaseFlags)).
 		Script()
 }
 
@@ -248,13 +250,11 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 // anyone. See the comment for NewBlockTemplate for more information about why
 // the nil address handling is useful.
 func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte, nextBlockHeight int32,
-	addr util.Address, version int32) (*util.Tx, error) {
+	addr util.Address, version int32) (t *util.Tx, err error) {
 	// if this is the hard fork activation height coming up, we create the
 	// special disbursement coinbase
-	if nextBlockHeight == fork.List[1].ActivationHeight &&
-		params.Net == wire.MainNet ||
-		nextBlockHeight == fork.List[1].TestnetStart &&
-			params.Net == wire.TestNet3 {
+	if nextBlockHeight == fork.List[1].ActivationHeight && params.Net == wire.MainNet ||
+		nextBlockHeight == fork.List[1].TestnetStart && params.Net == wire.TestNet3 {
 		return createHardForkSubsidyTx(params, coinbaseScript, nextBlockHeight, addr, version)
 	}
 
@@ -263,19 +263,14 @@ func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte, nextBlock
 	// redeemable by anyone.
 	var pkScript []byte
 	if addr != nil {
-		var err error
-		pkScript, err = txscript.PayToAddrScript(addr)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if pkScript, err = txscript.PayToAddrScript(addr); slog.Check(err) {
+			return
 		}
 	} else {
 		var err error
 		scriptBuilder := txscript.NewScriptBuilder()
-		pkScript, err = scriptBuilder.AddOp(txscript.OP_TRUE).Script()
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if pkScript, err = scriptBuilder.AddOp(txscript.OP_TRUE).Script(); slog.Check(err) {
+			return
 		}
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -294,10 +289,10 @@ func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte, nextBlock
 	return util.NewTx(tx), nil
 }
 
-func // spendTransaction updates the passed view by marking the inputs to the passed
+// spendTransaction updates the passed view by marking the inputs to the passed
 // transaction as spent.  It also adds all outputs in the passed transaction
 // which are not provably unspendable as available unspent transaction outputs.
-spendTransaction(utxoView *blockchain.UtxoViewpoint, tx *util.Tx, height int32) error {
+func spendTransaction(utxoView *blockchain.UtxoViewpoint, tx *util.Tx, height int32) (err error) {
 	for _, txIn := range tx.MsgTx().TxIn {
 		entry := utxoView.LookupEntry(txIn.PreviousOutPoint)
 		if entry != nil {
@@ -305,7 +300,7 @@ spendTransaction(utxoView *blockchain.UtxoViewpoint, tx *util.Tx, height int32) 
 		}
 	}
 	utxoView.AddTxOuts(tx, height)
-	return nil
+	return
 }
 
 func // logSkippedDeps logs any dependencies which are also skipped as a result of
@@ -315,8 +310,7 @@ logSkippedDeps(tx *util.Tx, deps map[chainhash.Hash]*txPrioItem) {
 		return
 	}
 	for _, item := range deps {
-		slog.Tracef("skipping tx %s since it depends on %s", item.tx.Hash(),
-			tx.Hash())
+		slog.Tracef("skipping tx %s since it depends on %s", item.tx.Hash(), tx.Hash())
 	}
 }
 
@@ -328,33 +322,37 @@ MinimumMedianTime(chainState *blockchain.BestState) time.Time {
 	return chainState.MedianTime.Add(time.Second)
 }
 
-func // medianAdjustedTime returns the current time adjusted to ensure it is at
+// medianAdjustedTime returns the current time adjusted to ensure it is at
 // least one second after the median timestamp of the last several blocks per
 // the chain consensus rules.
-medianAdjustedTime(chainState *blockchain.BestState, timeSource blockchain.MedianTimeSource) time.Time {
+func medianAdjustedTime(chainState *blockchain.BestState, timeSource blockchain.MedianTimeSource) (newTimestamp time.Time) {
 	// The timestamp for the block must not be before the median timestamp of
 	// the last several blocks.  Thus, choose the maximum between the current
 	// time and one second after the past median time.  The current timestamp is
 	// truncated to a second boundary before comparison since a block timestamp
 	// does not supported a precision greater than one second.
-	newTimestamp := timeSource.AdjustedTime()
+	newTimestamp = timeSource.AdjustedTime()
 	minTimestamp := MinimumMedianTime(chainState)
 	if newTimestamp.Before(minTimestamp) {
 		newTimestamp = minTimestamp
 	}
-	return newTimestamp
+	return
 }
 
-func // NewBlkTmplGenerator returns a new block template generator for the given
+// NewBlkTmplGenerator returns a new block template generator for the given
 // policy using transactions from the provided transaction source. The
 // additional state-related fields are required in order to ensure the
 // templates are built on top of the current best chain and adhere to the
 // consensus rules.
-NewBlkTmplGenerator(policy *Policy, params *netparams.Params,
-	txSource TxSource, chain *blockchain.BlockChain,
+func NewBlkTmplGenerator(
+	policy *Policy,
+	params *netparams.Params,
+	txSource TxSource,
+	chain *blockchain.BlockChain,
 	timeSource blockchain.MedianTimeSource,
 	sigCache *txscript.SigCache,
-	hashCache *txscript.HashCache) *BlkTmplGenerator {
+	hashCache *txscript.HashCache,
+) *BlkTmplGenerator {
 	return &BlkTmplGenerator{
 		Policy:      policy,
 		ChainParams: params,
@@ -366,7 +364,7 @@ NewBlkTmplGenerator(policy *Policy, params *netparams.Params,
 	}
 }
 
-func // NewBlockTemplate returns a new block template that is ready to be solved
+// NewBlockTemplate returns a new block template that is ready to be solved
 // using the transactions from the passed transaction source pool and a
 // coinbase that either pays to the passed address if it is not nil, or a
 // coinbase that is redeemable by anyone if the passed address is nil.  The nil
@@ -421,8 +419,8 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 //  |  transactions (while block size   |   |
 //  |  <= policy.BlockMinSize)          |   |
 //   -----------------------------------  --
-(g *BlkTmplGenerator) NewBlockTemplate(workerNumber uint32, payToAddress util.
-Address, algo string) (*BlockTemplate, error) {
+func (g *BlkTmplGenerator) NewBlockTemplate(workerNumber uint32, payToAddress util.Address, algo string,
+) (bt *BlockTemplate, err error) {
 	// Trace("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
@@ -441,15 +439,13 @@ Address, algo string) (*BlockTemplate, error) {
 	// duplicate transaction (paying the same value to the same public key
 	// address would otherwise be an identical transaction for block version 1).
 	extraNonce := uint64(0)
-	coinbaseScript, err := standardCoinbaseScript(nextBlockHeight, extraNonce)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var coinbaseScript []byte
+	if coinbaseScript, err = standardCoinbaseScript(nextBlockHeight, extraNonce); slog.Check(err) {
+		return
 	}
-	coinbaseTx, err := createCoinbaseTx(g.ChainParams, coinbaseScript, nextBlockHeight, payToAddress, vers)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var coinbaseTx *util.Tx
+	if coinbaseTx, err = createCoinbaseTx(g.ChainParams, coinbaseScript, nextBlockHeight, payToAddress, vers); slog.Check(err) {
+		return
 	}
 	coinbaseSigOpCost := int64(blockchain.CountSigOps(coinbaseTx)) * blockchain.WitnessScaleFactor
 	// Get the current source transactions and create a priority queue to hold
@@ -506,8 +502,8 @@ mempoolLoop:
 		// intentionally does not fetch inputs from the mempool since a
 		// transaction which depends on other transactions in the mempool must
 		// come after those dependencies in the final generated block.
-		utxos, err := g.Chain.FetchUtxoView(tx)
-		if err != nil {
+		var utxos *blockchain.UtxoViewpoint
+		if utxos, err = g.Chain.FetchUtxoView(tx); slog.Check(err) {
 			slog.Warn(func() string {
 				return "unable to fetch utxo view for tx " + tx.Hash().String() + ": " + err.Error()
 			}())
@@ -584,10 +580,9 @@ mempoolLoop:
 	// then this means that we'll include any transactions with witness data in
 	// the mempool, and also add the witness commitment as an OP_RETURN output
 	// in the coinbase transaction.
-	segwitState, err := g.Chain.ThresholdState(config.DeploymentSegwit)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var segwitState blockchain.ThresholdState
+	if segwitState, err = g.Chain.ThresholdState(config.DeploymentSegwit); slog.Check(err) {
+		return
 	}
 	segwitActive := segwitState == blockchain.ThresholdActive
 	witnessIncluded := false
@@ -614,20 +609,17 @@ mempoolLoop:
 			// the block with a model coinbase tx with a witness commitment.
 			coinbaseCopy := util.NewTx(coinbaseTx.MsgTx().Copy())
 			coinbaseCopy.MsgTx().TxIn[0].Witness = [][]byte{
-				bytes.Repeat([]byte("a"),
-					blockchain.CoinbaseWitnessDataLen),
+				bytes.Repeat([]byte("a"), blockchain.CoinbaseWitnessDataLen),
 			}
 			coinbaseCopy.MsgTx().AddTxOut(&wire.TxOut{
-				PkScript: bytes.Repeat([]byte("a"),
-					blockchain.CoinbaseWitnessPkScriptLength),
+				PkScript: bytes.Repeat([]byte("a"), blockchain.CoinbaseWitnessPkScriptLength),
 			})
 			// In order to accurately account for the weight addition due to
 			// this
 			// coinbase transaction, we'll add the difference of the transaction
 			// before and after the addition of the commitment to the block
 			// weight.
-			weightDiff := blockchain.GetTransactionWeight(coinbaseCopy) -
-				blockchain.GetTransactionWeight(coinbaseTx)
+			weightDiff := blockchain.GetTransactionWeight(coinbaseCopy) - blockchain.GetTransactionWeight(coinbaseTx)
 			blockWeight += uint32(weightDiff)
 			witnessIncluded = true
 		}
@@ -638,19 +630,17 @@ mempoolLoop:
 		blockPlusTxWeight := blockWeight + txWeight
 		if blockPlusTxWeight < blockWeight ||
 			blockPlusTxWeight >= g.Policy.BlockMaxWeight {
-			slog.Tracef("skipping tx %s because it would exceed the max block"+
-				" weight", tx.Hash())
+			slog.Tracef("skipping tx %s because it would exceed the max block weight", tx.Hash())
 			logSkippedDeps(tx, deps)
 			continue
 		}
 		// Enforce maximum signature operation cost per block.  Also check for
 		// overflow.
-		sigOpCost, err := blockchain.GetSigOpCost(tx, false,
-			blockUtxos, true, segwitActive)
-		if err != nil {
+		var sigOpCost int
+		if sigOpCost, err = blockchain.GetSigOpCost(tx, false,
+			blockUtxos, true, segwitActive); slog.Check(err) {
 			slog.Trace(func() string {
-				return "skipping tx " + tx.Hash().String() +
-					"due to error in GetSigOpCost: " + err.Error()
+				return "skipping tx " + tx.Hash().String() + "due to error in GetSigOpCost: " + err.Error()
 			}())
 			logSkippedDeps(tx, deps)
 			continue
@@ -658,8 +648,7 @@ mempoolLoop:
 		if blockSigOpCost+int64(sigOpCost) < blockSigOpCost ||
 			blockSigOpCost+int64(sigOpCost) > blockchain.MaxBlockSigOpsCost {
 			slog.Trace(func() string {
-				return "skipping tx " + tx.Hash().String() +
-					" because it would exceed the maximum sigops per block"
+				return "skipping tx " + tx.Hash().String() + " because it would exceed the maximum sigops per block"
 			}())
 			logSkippedDeps(tx, deps)
 			continue
@@ -707,22 +696,17 @@ mempoolLoop:
 
 		// Ensure the transaction inputs pass all of the necessary preconditions
 		// before allowing it to be added to the block.
-		_, err = blockchain.CheckTransactionInputs(tx, nextBlockHeight,
-			blockUtxos, g.ChainParams)
-		if err != nil {
+		if _, err = blockchain.CheckTransactionInputs(tx, nextBlockHeight,
+			blockUtxos, g.ChainParams); slog.Check(err) {
 			slog.Tracef("skipping tx %s due to error in CheckTransactionInputs"+
 				": %v",
 				tx.Hash(), err)
 			logSkippedDeps(tx, deps)
 			continue
 		}
-		err = blockchain.ValidateTransactionScripts(g.Chain, tx, blockUtxos,
-			txscript.StandardVerifyFlags, g.SigCache,
-			g.HashCache)
-		if err != nil {
-			slog.Tracef("skipping tx %s due to error in"+
-				" ValidateTransactionScripts: %v",
-				tx.Hash(), err)
+		if err = blockchain.ValidateTransactionScripts(g.Chain, tx, blockUtxos, txscript.StandardVerifyFlags,
+			g.SigCache, g.HashCache); slog.Check(err) {
+			slog.Tracef("skipping tx %s due to error in ValidateTransactionScripts: %v", tx.Hash(), err)
 			logSkippedDeps(tx, deps)
 			continue
 		}
@@ -730,9 +714,7 @@ mempoolLoop:
 		// Spend the transaction inputs in the block utxo view and add an entry
 		// for it to ensure any transactions which reference this one have it
 		// available as an input and can ensure they aren't double spending.
-		err = spendTransaction(blockUtxos, tx, nextBlockHeight)
-		if err != nil {
-			slog.Error(err)
+		if err = spendTransaction(blockUtxos, tx, nextBlockHeight); slog.Check(err) {
 		}
 		// Add the transaction to the block, increment counters, and save the
 		// fees and signature operation counts to the block template.
@@ -743,9 +725,7 @@ mempoolLoop:
 		txFees = append(txFees, prioItem.fee)
 		txSigOpCosts = append(txSigOpCosts, int64(sigOpCost))
 		slog.Tracef("adding tx %s (priority %.2f, feePerKB %.2f)",
-			prioItem.tx.Hash(),
-			prioItem.priority,
-			prioItem.feePerKB)
+			prioItem.tx.Hash(), prioItem.priority, prioItem.feePerKB)
 		// Add transactions which depend on this one (and also do not have any
 		// other unsatisified dependencies) to the priority queue.
 		for _, item := range deps {
@@ -760,9 +740,8 @@ mempoolLoop:
 	// Now that the actual transactions have been selected, update the block
 	// weight for the real transaction count and coinbase value with the total
 	// fees accordingly.
-	blockWeight -= wire.MaxVarIntPayload -
-		(uint32(wire.VarIntSerializeSize(uint64(len(blockTxns)))) *
-			blockchain.WitnessScaleFactor)
+	blockWeight -= wire.MaxVarIntPayload - (uint32(wire.VarIntSerializeSize(uint64(len(blockTxns)))) *
+		blockchain.WitnessScaleFactor)
 	coinbaseTx.MsgTx().TxOut[0].Value += totalFees
 	txFees[0] = -totalFees
 	// If segwit is active and we included transactions with witness data, then
@@ -807,14 +786,11 @@ mempoolLoop:
 	// several blocks per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
 	// Trace("algo ", ts, " ", algo)
-	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(workerNumber, ts,
-		algo)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var reqDifficulty uint32
+	if reqDifficulty, err = g.Chain.CalcNextRequiredDifficulty(workerNumber, ts, algo); slog.Check(err) {
+		return
 	}
-	slog.Tracef("reqDifficulty %d %08x %064x", vers, reqDifficulty,
-		fork.CompactToBig(reqDifficulty))
+	slog.Tracef("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
 	var msgBlock wire.MsgBlock
@@ -826,8 +802,8 @@ mempoolLoop:
 		Bits:       reqDifficulty,
 	}
 	for _, tx := range blockTxns {
-		if err := msgBlock.AddTransaction(tx.MsgTx()); err != nil {
-			return nil, err
+		if err = msgBlock.AddTransaction(tx.MsgTx()); slog.Check(err) {
+			return
 		}
 	}
 	// Finally, perform a full check on the created block against the chain
@@ -835,10 +811,8 @@ mempoolLoop:
 	// with no issues.
 	block := util.NewBlock(&msgBlock)
 	block.SetHeight(nextBlockHeight)
-	err = g.Chain.CheckConnectBlockTemplate(workerNumber, block)
-	if err != nil {
-		slog.Debug("checkconnectblocktemplate err:", err)
-		return nil, err
+	if err = g.Chain.CheckConnectBlockTemplate(workerNumber, block); slog.Check(err) {
+		return
 	}
 	bh := msgBlock.Header.BlockHash()
 	slog.Trace(func() string {
@@ -857,41 +831,39 @@ mempoolLoop:
 			msgBlock.Transactions[0].TxOut[0].Value,
 		)
 	}())
-	// Traces(msgBlock)
-	return &BlockTemplate{
+	bt = &BlockTemplate{
+		// Traces(msgBlock)
 		Block:             &msgBlock,
 		Fees:              txFees,
 		SigOpCosts:        txSigOpCosts,
 		Height:            nextBlockHeight,
 		ValidPayAddress:   payToAddress != nil,
 		WitnessCommitment: witnessCommitment,
-	}, nil
+	}
+	return
 }
 
-func // UpdateBlockTime updates the timestamp in the header of the passed
+// UpdateBlockTime updates the timestamp in the header of the passed
 // block to the current time while taking into account the median time of the
 // last several blocks to ensure the new time is after that time per the
 // chain consensus rules.  Finally,
 // it will update the target difficulty if needed based on the new time for
 // the test networks since their target difficulty can change based upon time.
-(g *BlkTmplGenerator) UpdateBlockTime(workerNumber uint32, msgBlock *wire.
-MsgBlock) error {
+func (g *BlkTmplGenerator) UpdateBlockTime(workerNumber uint32, msgBlock *wire.MsgBlock) (err error) {
 	// The new timestamp is potentially adjusted to ensure it comes after the
 	// median time of the last several blocks per the chain consensus rules.
 	newTime := medianAdjustedTime(g.Chain.BestSnapshot(), g.TimeSource)
 	msgBlock.Header.Timestamp = newTime
 	// Recalculate the difficulty if running on a network that requires it.
 	if g.ChainParams.ReduceMinDifficulty {
-		difficulty, err := g.Chain.CalcNextRequiredDifficulty(
-			workerNumber, newTime,
-			fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height))
-		if err != nil {
-			slog.Error(err)
-			return err
+		var difficulty uint32
+		if difficulty, err = g.Chain.CalcNextRequiredDifficulty(workerNumber, newTime,
+			fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height)); slog.Check(err) {
+			return
 		}
 		msgBlock.Header.Bits = difficulty
 	}
-	return nil
+	return
 }
 
 // UpdateExtraNonce updates the extra nonce in the coinbase script of the
@@ -899,17 +871,15 @@ MsgBlock) error {
 // block height.  It also recalculates and updates the new merkle root that
 // results from changing the coinbase script.
 func (g *BlkTmplGenerator) UpdateExtraNonce(msgBlock *wire.MsgBlock,
-	blockHeight int32, extraNonce uint64) error {
-	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
-	if err != nil {
-		slog.Error(err)
-		return err
+	blockHeight int32, extraNonce uint64) (err error) {
+	var coinbaseScript []byte
+	if coinbaseScript, err = standardCoinbaseScript(blockHeight, extraNonce); slog.Check(err) {
+		return
 	}
 	if len(coinbaseScript) > blockchain.MaxCoinbaseScriptLen {
 		return fmt.Errorf(
 			"coinbase transaction script length of %d is out of range (min: %d, max: %d)",
-			len(coinbaseScript), blockchain.MinCoinbaseScriptLen,
-			blockchain.MaxCoinbaseScriptLen)
+			len(coinbaseScript), blockchain.MinCoinbaseScriptLen, blockchain.MaxCoinbaseScriptLen)
 	}
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript
 	// TODO(davec): A util.Block should use saved in the state to avoid
@@ -919,20 +889,20 @@ func (g *BlkTmplGenerator) UpdateExtraNonce(msgBlock *wire.MsgBlock,
 	block := util.NewBlock(msgBlock)
 	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
 	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]
-	return nil
+	return
 }
 
-func // BestSnapshot returns information about the current best chain block and
+// BestSnapshot returns information about the current best chain block and
 // related state as of the current point in time using the chain instance
 // associated with the block template generator.  The returned state must be
 // treated as immutable since it is shared by all callers. This function is
 // safe for concurrent access.
-(g *BlkTmplGenerator) BestSnapshot() *blockchain.BestState {
+func (g *BlkTmplGenerator) BestSnapshot() *blockchain.BestState {
 	return g.Chain.BestSnapshot()
 }
 
-func // GetTxSource returns the associated transaction source.
+// GetTxSource returns the associated transaction source.
 // This function is safe for concurrent access.
-(g *BlkTmplGenerator) GetTxSource() TxSource {
+func (g *BlkTmplGenerator) GetTxSource() TxSource {
 	return g.TxSource
 }

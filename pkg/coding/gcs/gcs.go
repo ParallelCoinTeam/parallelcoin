@@ -58,16 +58,17 @@ type Filter struct {
 }
 
 // BuildGCSFilter builds a new GCS filter with the collision probability of `1/(2**P)`, key `key`, and including every `[]byte` in `data` as a member of the set.
-func BuildGCSFilter(P uint8, M uint64, key [KeySize]byte, data [][]byte) (*Filter, error) {
+func BuildGCSFilter(P uint8, M uint64, key [KeySize]byte, data [][]byte) (f *Filter, err error) {
 	// Some initial parameter checks: make sure we have data from which to build the filter, and make sure our parameters will fit the hash function we're using.
 	if uint64(len(data)) >= (1 << 32) {
-		return nil, ErrNTooBig
+		err = ErrNTooBig
+		return
 	}
 	if P > 32 {
 		return nil, ErrPTooBig
 	}
 	// Create the filter object and insert metadata.
-	f := Filter{
+	f = &Filter{
 		n: uint32(len(data)),
 		p: P,
 	}
@@ -75,13 +76,15 @@ func BuildGCSFilter(P uint8, M uint64, key [KeySize]byte, data [][]byte) (*Filte
 	f.modulusNP = uint64(f.n) * M
 	// Shortcut if the filter is empty.
 	if f.n == 0 {
-		return &f, nil
+		return
 	}
 	// Build the filter.
 	values := make(uint64Slice, 0, len(data))
 	b := bstream.NewBStreamWriter(0)
-	// Insert the hash (fast-ranged over a space of N*P) of each data element into a slice and sort the slice. This can be greatly optimized with native 128-bit multiplication, but we're going to be fully portable for now.
-	// First, we cache the high and low bits of modulusNP for the multiplication of 2 64-bit integers into a 128-bit integer.
+	// Insert the hash (fast-ranged over a space of N*P) of each data element into a slice and sort the slice. This can
+	// be greatly optimized with native 128-bit multiplication, but we're going to be fully portable for now.
+	// First, we cache the high and low bits of modulusNP for the multiplication of 2 64-bit integers into a 128-bit
+	// integer.
 	nphi := f.modulusNP >> 32
 	nplo := uint64(uint32(f.modulusNP))
 	for _, d := range data {
@@ -105,22 +108,24 @@ func BuildGCSFilter(P uint8, M uint64, key [KeySize]byte, data [][]byte) (*Filte
 			value--
 		}
 		b.WriteBit(false)
-		// Write the remainder as a big-endian integer with enough bits to represent the appropriate collision probability.
+		// Write the remainder as a big-endian integer with enough bits to represent the appropriate collision
+		// probability.
 		b.WriteBits(remainder, int(f.p))
 	}
 	// Copy the bitstream into the filter object and return the object.
 	f.filterData = b.Bytes()
-	return &f, nil
+	return f, nil
 }
 
 // FromBytes deserializes a GCS filter from a known N, P, and serialized filter as returned by Hash().
-func FromBytes(N uint32, P uint8, M uint64, d []byte) (*Filter, error) {
+func FromBytes(N uint32, P uint8, M uint64, d []byte) (f *Filter, err error) {
 	// Basic sanity check.
 	if P > 32 {
-		return nil, ErrPTooBig
+		err = ErrPTooBig
+		return
 	}
 	// Create the filter object and insert metadata.
-	f := &Filter{
+	f = &Filter{
 		n: N,
 		p: P,
 	}
@@ -129,73 +134,65 @@ func FromBytes(N uint32, P uint8, M uint64, d []byte) (*Filter, error) {
 	// Copy the filter.
 	f.filterData = make([]byte, len(d))
 	copy(f.filterData, d)
-	return f, nil
+	return
 }
 
 // FromNBytes deserializes a GCS filter from a known P, and serialized N and filter as returned by NBytes().
-func FromNBytes(P uint8, M uint64, d []byte) (*Filter, error) {
+func FromNBytes(P uint8, M uint64, d []byte) (f *Filter, err error) {
 	buffer := bytes.NewBuffer(d)
-	N, err := wire.ReadVarInt(buffer, varIntProtoVer)
+	var N uint64
+	N, err = wire.ReadVarInt(buffer, varIntProtoVer)
 	if err != nil {
 		slog.Error(err)
 		return nil, err
 	}
 	if N >= (1 << 32) {
-		return nil, ErrNTooBig
+		err = ErrNTooBig
+		return
 	}
 	return FromBytes(uint32(N), P, M, buffer.Bytes())
 }
 
 // Hash returns the serialized format of the GCS filter, which does not include N or P (returned by separate methods) or the key used by SipHash.
-func (f *Filter) Bytes() ([]byte, error) {
-	filterData := make([]byte, len(f.filterData))
+func (f *Filter) Bytes() (filterData []byte, err error) {
+	filterData = make([]byte, len(f.filterData))
 	copy(filterData, f.filterData)
-	return filterData, nil
+	return
 }
 
 // NBytes returns the serialized format of the GCS filter with N, which does not include P (returned by a separate method) or the key used by SipHash.
-func (f *Filter) NBytes() ([]byte, error) {
+func (f *Filter) NBytes() (b []byte, err error) {
 	var buffer bytes.Buffer
 	buffer.Grow(wire.VarIntSerializeSize(uint64(f.n)) + len(f.filterData))
-	err := wire.WriteVarInt(&buffer, varIntProtoVer, uint64(f.n))
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = wire.WriteVarInt(&buffer, varIntProtoVer, uint64(f.n)); slog.Check(err) {
+		return
 	}
-	_, err = buffer.Write(f.filterData)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = buffer.Write(f.filterData); slog.Check(err) {
+		return
 	}
-	return buffer.Bytes(), nil
+	return buffer.Bytes(), err
 }
 
 // PBytes returns the serialized format of the GCS filter with P, which does not include N (returned by a separate method) or the key used by SipHash.
-func (f *Filter) PBytes() ([]byte, error) {
-	filterData := make([]byte, len(f.filterData)+1)
+func (f *Filter) PBytes() (filterData []byte, err error) {
+	filterData = make([]byte, len(f.filterData)+1)
 	filterData[0] = f.p
 	copy(filterData[1:], f.filterData)
-	return filterData, nil
+	return filterData, err
 }
 
 // NPBytes returns the serialized format of the GCS filter with N and P, which does not include the key used by SipHash.
-func (f *Filter) NPBytes() ([]byte, error) {
+func (f *Filter) NPBytes() (b []byte, err error) {
 	var buffer bytes.Buffer
 	buffer.Grow(wire.VarIntSerializeSize(uint64(f.n)) + 1 + len(f.filterData))
-	err := wire.WriteVarInt(&buffer, varIntProtoVer, uint64(f.n))
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = wire.WriteVarInt(&buffer, varIntProtoVer, uint64(f.n)); slog.Check(err) {
+		return
 	}
-	err = buffer.WriteByte(f.p)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = buffer.WriteByte(f.p); slog.Check(err) {
+		return
 	}
-	_, err = buffer.Write(f.filterData)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = buffer.Write(f.filterData); slog.Check(err) {
+		return
 	}
 	return buffer.Bytes(), nil
 }
@@ -211,12 +208,11 @@ func (f *Filter) N() uint32 {
 }
 
 // Match checks whether a []byte value is likely (within collision probability) to be a member of the set represented by the filter.
-func (f *Filter) Match(key [KeySize]byte, data []byte) (bool, error) {
+func (f *Filter) Match(key [KeySize]byte, data []byte) (tf bool, err error) {
 	// Create a filter bitstream.
-	filterData, err := f.Bytes()
-	if err != nil {
-		slog.Error(err)
-		return false, err
+	var filterData []byte
+	if filterData, err = f.Bytes(); slog.Check(err) {
+		return
 	}
 	b := bstream.NewBStreamReader(filterData)
 	// We take the high and low bits of modulusNP for the multiplication of 2 64-bit integers into a 128-bit integer.
@@ -229,7 +225,8 @@ func (f *Filter) Match(key [KeySize]byte, data []byte) (bool, error) {
 	var lastValue uint64
 	for lastValue < term {
 		// Read the difference between previous and new value from bitstream.
-		value, err := f.readFullUint64(b)
+		var value uint64
+		value, err = f.readFullUint64(b)
 		if err != nil {
 			slog.Error(err)
 			if err == io.EOF {
@@ -248,16 +245,16 @@ func (f *Filter) Match(key [KeySize]byte, data []byte) (bool, error) {
 }
 
 // MatchAny returns checks whether any []byte value is likely (within collision probability) to be a member of the set represented by the filter faster than calling Match() for each value individually.
-func (f *Filter) MatchAny(key [KeySize]byte, data [][]byte) (bool, error) {
+func (f *Filter) MatchAny(key [KeySize]byte, data [][]byte) (tf bool, err error) {
 	// Basic sanity check.
 	if len(data) == 0 {
-		return false, nil
+		tf = false
+		return
 	}
 	// Create a filter bitstream.
-	filterData, err := f.Bytes()
-	if err != nil {
-		slog.Error(err)
-		return false, err
+	var filterData []byte
+	if filterData, err = f.Bytes(); slog.Check(err) {
+		return
 	}
 	b := bstream.NewBStreamReader(filterData)
 	// Create an uncompressed filter of the search values.
@@ -290,45 +287,43 @@ func (f *Filter) MatchAny(key [KeySize]byte, data [][]byte) (bool, error) {
 			}
 		case lastValue2 > lastValue1:
 			// Advance filter we're searching or return false if we're at the end because nothing matched.
-			value, err := f.readFullUint64(b)
-			if err != nil {
-				// Error(err)
+			var value uint64
+			if value, err = f.readFullUint64(b); slog.Check(err) {
 				if err == io.EOF {
-					return false, nil
+					tf = false
+					return
 				}
-				return false, err
+				tf = false
+				return
 			}
 			lastValue1 += value
 		}
 	}
 	// If we've made it this far, an element matched between filters so we return true.
-	return true, nil
+	tf = true
+	return
 }
 
 // readFullUint64 reads a value represented by the sum of a unary multiple of the filter's P modulus (`2**P`) and a big-endian P-bit remainder.
-func (f *Filter) readFullUint64(b *bstream.BStream) (uint64, error) {
+func (f *Filter) readFullUint64(b *bstream.BStream) (v uint64, err error) {
 	var quotient uint64
 	// Count the 1s until we reach a 0.
-	c, err := b.ReadBit()
-	if err != nil {
-		slog.Error(err)
-		return 0, err
-	}
-	for c {
-		quotient++
-		c, err = b.ReadBit()
-		if err != nil {
-			slog.Trace(err)
-			return 0, err
+	if c, e := b.ReadBit(); slog.Check(e) {
+		return
+	} else {
+		for c {
+			quotient++
+			if c, err = b.ReadBit(); slog.Check(err) {
+				return
+			}
+		}
+		// Read P bits.
+		if remainder, e := b.ReadBits(int(f.p)); slog.Check(e) {
+			return
+			// Add the multiple and the remainder.
+		} else {
+			v = (quotient << f.p) + remainder
 		}
 	}
-	// Read P bits.
-	remainder, err := b.ReadBits(int(f.p))
-	if err != nil {
-		slog.Trace(err)
-		return 0, err
-	}
-	// Add the multiple and the remainder.
-	v := (quotient << f.p) + remainder
 	return v, nil
 }

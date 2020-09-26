@@ -133,11 +133,10 @@ func isWitnessProgram(pops []parsedOpcode) bool {
 
 // ExtractWitnessProgramInfo attempts to extract the witness program
 // version, as well as the witness program itself from the passed script.
-func ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
-	pops, err := parseScript(script)
-	if err != nil {
-		slog.Error(err)
-		return 0, nil, err
+func ExtractWitnessProgramInfo(script []byte) (witnessVersion int, witnessProgram []byte, err error) {
+	var pops []parsedOpcode
+	if pops, err = parseScript(script); slog.Check(err) {
+		return
 	}
 	// If at this point, the scripts doesn't resemble a witness program,
 	// then we'll exit early as there isn't a valid version or program to
@@ -146,9 +145,9 @@ func ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
 		return 0, nil, fmt.Errorf("script is not a witness program, " +
 			"unable to extract version or witness program")
 	}
-	witnessVersion := asSmallInt(pops[0].opcode)
-	witnessProgram := pops[1].data
-	return witnessVersion, witnessProgram, nil
+	witnessVersion = asSmallInt(pops[0].opcode)
+	witnessProgram = pops[1].data
+	return
 }
 
 func isPushOnly(pops []parsedOpcode) bool {
@@ -183,8 +182,8 @@ func IsPushOnlyScript(script []byte) bool {
 // of the template list for testing purposes.  When there are parse errors,
 // it returns the list of parsed opcodes up to the point of failure along
 // with the error.
-func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, error) {
-	retScript := make([]parsedOpcode, 0, len(script))
+func ParseScriptTemplate(script []byte, opcodes *[256]opcode) (retScript []parsedOpcode, err error) {
+	retScript = make([]parsedOpcode, 0, len(script))
 	for i := 0; i < len(script); {
 		instr := script[i]
 		op := &opcodes[instr]
@@ -202,8 +201,9 @@ func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, e
 				str := fmt.Sprintf("opcode %s requires %d "+
 					"bytes, but script only has %d remaining",
 					op.name, op.length, len(script[i:]))
-				return retScript, scriptError(ErrMalformedPush,
-					str)
+				err = scriptError(ErrMalformedPush, str)
+				slog.Check(err)
+				return
 			}
 			// Slice out the data.
 			pop.data = script[i+1 : i+op.length]
@@ -256,23 +256,22 @@ func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, e
 }
 
 // parseScript preparses the script in bytes into a list of parsedOpcodes while applying a number of sanity checks.
-func parseScript(script []byte) ([]parsedOpcode, error) {
+func parseScript(script []byte) (po []parsedOpcode, err error) {
 	return ParseScriptTemplate(script, &OpcodeArray)
 }
 
 // unparseScript reversed the action of parseScript and returns the
 // parsedOpcodes as a list of bytes
-func unparseScript(pops []parsedOpcode) ([]byte, error) {
-	script := make([]byte, 0, len(pops))
+func unparseScript(pops []parsedOpcode) (script []byte, err error) {
+	script = make([]byte, 0, len(pops))
+	var b []byte
 	for _, pop := range pops {
-		b, err := pop.bytes()
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if b, err = pop.bytes(); slog.Check(err) {
+			return
 		}
 		script = append(script, b...)
 	}
-	return script, nil
+	return
 }
 
 // DisasmString formats a disassembled script for one line printing.
@@ -281,21 +280,20 @@ func unparseScript(pops []parsedOpcode) ([]byte, error) {
 // the failure occurred along with the string '[error]' appended.
 // In addition, the reason the script failed to parse is returned if the
 // caller wants more information about the failure.
-func DisasmString(buf []byte) (string, error) {
-	var disbuf bytes.Buffer
-	opcodes, err := parseScript(buf)
+func DisasmString(buf []byte) (s string, err error) {
+	var disBuf bytes.Buffer
+	var opcodes []parsedOpcode
+	if opcodes, err = parseScript(buf); slog.Check(err) {
+		disBuf.WriteString("[error]")
+	}
 	for _, pop := range opcodes {
-		disbuf.WriteString(pop.print(true))
-		disbuf.WriteByte(' ')
+		disBuf.WriteString(pop.print(true))
+		disBuf.WriteByte(' ')
 	}
-	if disbuf.Len() > 0 {
-		disbuf.Truncate(disbuf.Len() - 1)
+	if disBuf.Len() > 0 {
+		disBuf.Truncate(disBuf.Len() - 1)
 	}
-	if err != nil {
-		slog.Error(err)
-		disbuf.WriteString("[error]")
-	}
-	return disbuf.String(), err
+	return disBuf.String(), err
 }
 
 // removeOpcode will remove any opcode matching ``opcode'' from the
@@ -414,11 +412,14 @@ func calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 // exact amount being spent in addition to the final transaction fee.
 // In the case the wallet if fed an invalid input amount,
 // the real sighash will differ causing the produced signature to be invalid.
-func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
+func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashType SigHashType, tx *wire.MsgTx,
+	idx int, amt int64) (b []byte, err error) {
 	// As a sanity check,
 	// ensure the passed input index for the transaction is valid.
 	if idx > len(tx.TxIn)-1 {
-		return nil, fmt.Errorf("idx %d but %d txins", idx, len(tx.TxIn))
+		err = fmt.Errorf("idx %d but %d txins", idx, len(tx.TxIn))
+		slog.Debug(err)
+		return
 	}
 	// We'll utilize this buffer throughout to incrementally calculate the
 	// signature hash for this transaction.
@@ -469,9 +470,7 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 		// with all code separators removed,
 		// serialized with a var int length prefix.
 		rawScript, _ := unparseScript(subScript)
-		err := wire.WriteVarBytes(&sigHash, 0, rawScript)
-		if err != nil {
-			slog.Error(err)
+		if err = wire.WriteVarBytes(&sigHash, 0, rawScript); slog.Check(err) {
 		}
 	}
 	// Next, add the input amount,
@@ -511,11 +510,12 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 
 // CalcWitnessSigHash computes the sighash digest for the specified
 // input of the target transaction observing the desired sig hash type.
-func CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
-	parsedScript, err := parseScript(script)
-	if err != nil {
-		slog.Error(err)
-		return nil, fmt.Errorf("cannot parse output script: %v", err)
+func CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx *wire.MsgTx, idx int, amt int64) (b []byte, err error) {
+	var parsedScript []parsedOpcode
+	if parsedScript, err = parseScript(script); slog.Check(err) {
+		if err = fmt.Errorf("cannot parse output script: %v", err); slog.Check(err) {
+		}
+		return
 	}
 	return calcWitnessSignatureHash(parsedScript, sigHashes, hType, tx, idx,
 		amt)
@@ -550,11 +550,10 @@ func shallowCopyTx(tx *wire.MsgTx) wire.MsgTx {
 // CalcSignatureHash will given a script and hash type for the current
 // script engine instance calculate the signature hash to be used for signing
 // and verification.
-func CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) ([]byte, error) {
-	parsedScript, err := parseScript(script)
-	if err != nil {
-		slog.Error(err)
-		return nil, fmt.Errorf("cannot parse output script: %v", err)
+func CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) (b []byte, err error) {
+	var parsedScript []parsedOpcode
+	if parsedScript, err = parseScript(script); slog.Check(fmt.Errorf("cannot parse output script: %v", err)) {
+		return
 	}
 	return calcSignatureHash(parsedScript, hashType, tx, idx), nil
 }

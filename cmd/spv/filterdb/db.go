@@ -65,15 +65,14 @@ var _ FilterDatabase = (*FilterStore)(nil)
 
 // New creates a new instance of the FilterStore given an already open
 // database, and the target chain parameters.
-func New(db walletdb.DB, params netparams.Params) (*FilterStore, error) {
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+func New(db walletdb.DB, params netparams.Params) (fs *FilterStore, err error) {
+	if err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		// As part of our initial setup, we'll try to create the top
 		// level filter bucket. If this already exists, then we can
 		// exit early.
-		filters, err := tx.CreateTopLevelBucket(filterBucket)
-		if err != nil {
-			slog.Error(err)
-			return err
+		var filters walletdb.ReadWriteBucket
+		if filters, err = tx.CreateTopLevelBucket(filterBucket); slog.Check(err) {
+			return
 		}
 		// If the main bucket doesn't already exist, then we'll need to
 		// create the sub-buckets, and also initialize them with the
@@ -81,34 +80,29 @@ func New(db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 		genesisBlock := params.GenesisBlock
 		genesisHash := params.GenesisHash
 		// First we'll create the bucket for the regular filters.
-		regFilters, err := filters.CreateBucketIfNotExists(regBucket)
-		if err != nil {
-			slog.Error(err)
-			return err
+		var regFilters walletdb.ReadWriteBucket
+		if regFilters, err = filters.CreateBucketIfNotExists(regBucket); slog.Check(err) {
+			return
 		}
 		// With the bucket created, we'll now construct the initial
 		// basic genesis filter and store it within the database.
-		basicFilter, err := builder.BuildBasicFilter(genesisBlock, nil)
-		if err != nil {
-			slog.Error(err)
-			return err
+		var basicFilter *gcs.Filter
+		if basicFilter, err = builder.BuildBasicFilter(genesisBlock, nil); slog.Check(err) {
+			return
 		}
 		return putFilter(regFilters, genesisHash, basicFilter)
-	})
-	if err != nil && err != walletdb.ErrBucketExists {
-		return nil, err
+	}); slog.Check(err) && err != walletdb.ErrBucketExists {
+		return
 	}
-	return &FilterStore{
-			db: db,
-		},
-		nil
+	fs = &FilterStore{db: db}
+	return
 }
 
 // putFilter stores a filter in the database according to the corresponding
 // block hash. The passed bucket is expected to be the proper bucket for the
 // passed filter type.
 func putFilter(bucket walletdb.ReadWriteBucket, hash *chainhash.Hash,
-	filter *gcs.Filter) error {
+	filter *gcs.Filter) (err error) {
 	if filter == nil {
 		return bucket.Put(hash[:], nil)
 	}
@@ -125,8 +119,8 @@ func putFilter(bucket walletdb.ReadWriteBucket, hash *chainhash.Hash,
 //
 // NOTE: This method is a part of the FilterDatabase interface.
 func (f *FilterStore) PutFilter(hash *chainhash.Hash,
-	filter *gcs.Filter, fType FilterType) error {
-	return walletdb.Update(f.db, func(tx walletdb.ReadWriteTx) error {
+	filter *gcs.Filter, fType FilterType) (err error) {
+	return walletdb.Update(f.db, func(tx walletdb.ReadWriteTx) (err error) {
 		filters := tx.ReadWriteBucket(filterBucket)
 		var targetBucket walletdb.ReadWriteBucket
 		switch fType {
@@ -152,9 +146,8 @@ func (f *FilterStore) PutFilter(hash *chainhash.Hash,
 //
 // NOTE: This method is a part of the FilterDatabase interface.
 func (f *FilterStore) FetchFilter(blockHash *chainhash.Hash,
-	filterType FilterType) (*gcs.Filter, error) {
-	var filter *gcs.Filter
-	err := walletdb.View(f.db, func(tx walletdb.ReadTx) error {
+	filterType FilterType) (filter *gcs.Filter, err error) {
+	if err = walletdb.View(f.db, func(tx walletdb.ReadTx) (err error) {
 		filters := tx.ReadBucket(filterBucket)
 		var targetBucket walletdb.ReadBucket
 		switch filterType {
@@ -179,10 +172,8 @@ func (f *FilterStore) FetchFilter(blockHash *chainhash.Hash,
 		}
 		filter = dbFilter
 		return nil
-	})
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	}); slog.Check(err) {
+		return
 	}
-	return filter, nil
+	return
 }

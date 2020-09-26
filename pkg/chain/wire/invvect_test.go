@@ -223,8 +223,8 @@ func TestInvVectWire(t *testing.T) {
 		}
 		// Decode the message from wire format.
 		var iv InvVect
-		rbuf := bytes.NewReader(test.buf)
-		err = readInvVect(rbuf, test.pver, &iv)
+		rBuf := bytes.NewReader(test.buf)
+		err = readInvVect(rBuf, test.pver, &iv)
 		if err != nil {
 			t.Errorf("readInvVect #%d error %v", i, err)
 			continue

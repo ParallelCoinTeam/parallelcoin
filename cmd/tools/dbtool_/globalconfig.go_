@@ -65,7 +65,7 @@ func netName(	chainParams *netparams.Params) string {
 }
 
 // setupGlobalConfig examine the global configuration options for any conditions which are invalid as well as performs any addition setup necessary after the initial parse.
-func setupGlobalConfig(	) error {
+func setupGlobalConfig(	) (err error) {
 	// Multiple networks can't be selected simultaneously. Count number of network flags passed; assign active network params while we're at it
 	numNets := 0
 	if cfg.TestNet3 {

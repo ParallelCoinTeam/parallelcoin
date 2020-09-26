@@ -12,7 +12,7 @@ import (
 )
 
 // dirEmpty returns whether or not the specified directory path is empty
-func dirEmpty(dirPath string) (bool, error) {
+func dirEmpty(dirPath string) (bool, err error) {
 	f, err := os.Open(dirPath)
 	if err != nil {
 		slog.Error(err)

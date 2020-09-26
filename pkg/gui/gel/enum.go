@@ -35,17 +35,17 @@ func (e *Enum) Value(gtx *layout.Context) string {
 }
 
 // Layout adds the event handler for key.
-func (rg *Enum) Layout(gtx *layout.Context, key string) {
-	if index(rg.values, key) == -1 {
-		rg.values = append(rg.values, key)
-		rg.clicks = append(rg.clicks, gesture.Click{})
-		rg.clicks[len(rg.clicks)-1].Add(gtx.Ops)
+func (e *Enum) Layout(gtx *layout.Context, key string) {
+	if index(e.values, key) == -1 {
+		e.values = append(e.values, key)
+		e.clicks = append(e.clicks, gesture.Click{})
+		e.clicks[len(e.clicks)-1].Add(gtx.Ops)
 	} else {
-		idx := index(rg.values, key)
-		rg.clicks[idx].Add(gtx.Ops)
+		idx := index(e.values, key)
+		e.clicks[idx].Add(gtx.Ops)
 	}
 }
 
-func (rg *Enum) SetValue(value string) {
-	rg.value = value
+func (e *Enum) SetValue(value string) {
+	e.value = value
 }

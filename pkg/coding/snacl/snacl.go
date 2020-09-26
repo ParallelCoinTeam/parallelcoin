@@ -40,12 +40,10 @@ const (
 type CryptoKey [KeySize]byte
 
 // Encrypt encrypts the passed data.
-func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
+func (ck *CryptoKey) Encrypt(in []byte) (b []byte, err error) {
 	var nonce [NonceSize]byte
-	_, err := io.ReadFull(prng, nonce[:])
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = io.ReadFull(prng, nonce[:]); slog.Check(err) {
+		return
 	}
 	blob := secretbox.Seal(nil, in, &nonce, (*[KeySize]byte)(ck))
 	return append(nonce[:], blob...), nil
@@ -53,18 +51,20 @@ func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
 
 // Decrypt decrypts the passed data.  The must be the output of the Encrypt
 // function.
-func (ck *CryptoKey) Decrypt(in []byte) ([]byte, error) {
+func (ck *CryptoKey) Decrypt(in []byte) (opened []byte, err error) {
 	if len(in) < NonceSize {
 		return nil, ErrMalformed
 	}
 	var nonce [NonceSize]byte
 	copy(nonce[:], in[:NonceSize])
 	blob := in[NonceSize:]
-	opened, ok := secretbox.Open(nil, blob, &nonce, (*[KeySize]byte)(ck))
-	if !ok {
-		return nil, ErrDecryptFailed
+	var ok bool
+	if opened, ok = secretbox.Open(nil, blob, &nonce, (*[KeySize]byte)(ck)); !ok {
+		err = ErrDecryptFailed
+		slog.Debug(err)
+		return
 	}
-	return opened, nil
+	return
 }
 
 // Zero clears the key by manually zeroing all memory.  This is for security
@@ -76,14 +76,11 @@ func (ck *CryptoKey) Zero() {
 }
 
 // GenerateCryptoKey generates a new cryptographically random key.
-func GenerateCryptoKey() (*CryptoKey, error) {
-	var key CryptoKey
-	_, err := io.ReadFull(prng, key[:])
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func GenerateCryptoKey() (key *CryptoKey, err error) {
+	key = new(CryptoKey)
+	if _, err = io.ReadFull(prng, key[:]); slog.Check(err) {
 	}
-	return &key, nil
+	return
 }
 
 // Parameters are not secret and can be stored in plain text.
@@ -103,7 +100,7 @@ type SecretKey struct {
 }
 
 // deriveKey fills out the Key field.
-func (sk *SecretKey) deriveKey(password *[]byte) error {
+func (sk *SecretKey) deriveKey(password *[]byte) (err error) {
 	key, err := scrypt.Key(*password, sk.Parameters.Salt[:],
 		sk.Parameters.N,
 		sk.Parameters.R,
@@ -149,7 +146,7 @@ func (sk *SecretKey) Marshal() []byte {
 
 // Unmarshal unmarshalls the parameters needed to derive the secret key from a
 // passphrase into sk.
-func (sk *SecretKey) Unmarshal(marshalled []byte) error {
+func (sk *SecretKey) Unmarshal(marshalled []byte) (err error) {
 	if sk.Key == nil {
 		sk.Key = (*CryptoKey)(&[KeySize]byte{})
 	}
@@ -183,7 +180,7 @@ func (sk *SecretKey) Zero() {
 // DeriveKey derives the underlying secret key and ensures it matches the
 // expected digest.  This should only be called after previously calling the
 // Zero function or on an initial Unmarshal.
-func (sk *SecretKey) DeriveKey(password *[]byte) error {
+func (sk *SecretKey) DeriveKey(password *[]byte) (err error) {
 	if err := sk.deriveKey(password); err != nil {
 		return err
 	}
@@ -196,36 +193,32 @@ func (sk *SecretKey) DeriveKey(password *[]byte) error {
 }
 
 // Encrypt encrypts in bytes and returns a JSON blob.
-func (sk *SecretKey) Encrypt(in []byte) ([]byte, error) {
+func (sk *SecretKey) Encrypt(in []byte) (b []byte, err error) {
 	return sk.Key.Encrypt(in)
 }
 
 // Decrypt takes in a JSON blob and returns it's decrypted form.
-func (sk *SecretKey) Decrypt(in []byte) ([]byte, error) {
+func (sk *SecretKey) Decrypt(in []byte) (b []byte, err error) {
 	return sk.Key.Decrypt(in)
 }
 
 // NewSecretKey returns a SecretKey structure based on the passed parameters.
-func NewSecretKey(password *[]byte, N, r, p int) (*SecretKey, error) {
-	sk := SecretKey{
+func NewSecretKey(password *[]byte, N, r, p int) (sk *SecretKey, err error) {
+	sk = &SecretKey{
 		Key: (*CryptoKey)(&[KeySize]byte{}),
 	}
 	// setup parameters
 	sk.Parameters.N = N
 	sk.Parameters.R = r
 	sk.Parameters.P = p
-	_, err := io.ReadFull(prng, sk.Parameters.Salt[:])
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = io.ReadFull(prng, sk.Parameters.Salt[:]); slog.Check(err) {
+		return
 	}
 	// derive key
-	err = sk.deriveKey(password)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = sk.deriveKey(password); slog.Check(err) {
+		return
 	}
 	// store digest
 	sk.Parameters.Digest = sha256.Sum256(sk.Key[:])
-	return &sk, nil
+	return sk, nil
 }

@@ -74,7 +74,7 @@ type (
 )
 
 func // Result is callback returning either a spend report or an error.
-(r *GetUtxoRequest) Result(cancel <-chan struct{}) (*SpendReport, error) {
+(r *GetUtxoRequest) Result(cancel <-chan struct{}) (*SpendReport, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	select {
@@ -136,7 +136,7 @@ func // Push is called by the heap.
 
 func // Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
 (s *UtxoScanner) Enqueue(input *InputWithScript,
-	birthHeight uint32) (*GetUtxoRequest, error) {
+	birthHeight uint32) (*GetUtxoRequest, err error) {
 	slog.Debugf(
 		"enqueuing request for %s with birth height %d %s",
 		input.OutPoint.String(), birthHeight,
@@ -163,7 +163,7 @@ func // Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
 }
 
 func // Start begins running scan batches.
-(s *UtxoScanner) Start() error {
+(s *UtxoScanner) Start() (err error) {
 	if !atomic.CompareAndSwapUint32(&s.started, 0, 1) {
 		return nil
 	}
@@ -173,7 +173,7 @@ func // Start begins running scan batches.
 }
 
 func // Stop any in-progress scan.
-(s *UtxoScanner) Stop() error {
+(s *UtxoScanner) Stop() (err error) {
 	if !atomic.CompareAndSwapUint32(&s.stopped, 0, 1) {
 		return nil
 	}
@@ -263,7 +263,7 @@ func // dequeueAtHeight returns all GetUtxoRequests that have starting height
 func // scanFromHeight runs a single batch,
 // pulling in any requests that get added above the batch's last processed
 // height. If there was an error, then return the outstanding requests.
-(s *UtxoScanner) scanFromHeight(initHeight uint32) error {
+(s *UtxoScanner) scanFromHeight(initHeight uint32) (err error) {
 	// Before beginning the scan, grab the best block stamp we know of,
 	// which will serve as an initial estimate for the end height of the
 	// scan.

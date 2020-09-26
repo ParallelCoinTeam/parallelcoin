@@ -106,7 +106,7 @@ func ExampleSignTxOutput() {
 	txOut = wire.NewTxOut(0, nil)
 	redeemTx.AddTxOut(txOut)
 	// Sign the redeeming transaction.
-	lookupKey := func(a util.Address) (*ec.PrivateKey, bool, error) {
+	lookupKey := func(a util.Address) (*ec.PrivateKey, bool, err error) {
 		// Ordinarily this function would involve looking up the private key for the provided address, but since the only thing being signed in this example uses the address associated with the private key from above, simply return it with the compressed flag set since the address is using the associated compressed public key.
 		// NOTE: If you want to prove the code is actually signing the transaction properly, uncomment the following line which intentionally returns an invalid key to sign with, which in turn will result in a failure during the script execution when verifying the signature.
 		// privKey.D.SetInt64(12345)

@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"github.com/stalker-loki/app/slog"
+	"io"
 	"io/ioutil"
 	"strings"
 )
@@ -17,7 +18,7 @@ import (
 // and be performed much faster than it is with hard-coding the final in-memory
 // data structure.  At the same time, it is quite fast to generate the in-memory
 // data structure at init time with this approach versus computing the table.
-func loadS256BytePoints() error {
+func loadS256BytePoints() (err error) {
 	// There will be no byte points to load when generating them.
 	bp := secp256k1BytePoints
 	if len(bp) == 0 {
@@ -26,16 +27,10 @@ func loadS256BytePoints() error {
 	// Decompress the pre-computed table used to accelerate scalar base
 	// multiplication.
 	decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(bp))
-	r, err := zlib.NewReader(decoder)
-	if err != nil {
-		slog.Error(err)
-		return err
-	}
-	serialized, err := ioutil.ReadAll(r)
-	if err != nil {
-		slog.Error(err)
-		return err
-	}
+	var r io.ReadCloser
+	if r, err = zlib.NewReader(decoder); slog.Check(err){return}
+ 	var serialized []byte
+	if serialized, err = ioutil.ReadAll(r); slog.Check(err){return}
 	// Deserialize the precomputed byte points and set the curve to them.
 	offset := 0
 	var bytePoints [32][256][3]fieldVal

@@ -59,7 +59,7 @@ func Example_basicUsage() {
 	// Use the Update function of the database to perform a managed
 	// read-write transaction.  The transaction will automatically be rolled
 	// back if the supplied inner function returns a non-nil error.
-	err = db.Update(func(tx database.Tx) error {
+	err = db.Update(func(tx database.Tx) (err error) {
 		// Store a key/value pair directly in the metadata bucket.
 		// Typically a nested bucket would be used for a given feature,
 		// but this example is using the metadata bucket directly for
@@ -118,7 +118,7 @@ func Example_basicUsage() {
 // 	// Use the Update function of the database to perform a managed
 // 	// read-write transaction and store a genesis block in the database as
 // 	// and example.
-// 	err = db.Update(func(tx database.Tx) error {
+// 	err = db.Update(func(tx database.Tx) (err error) {
 // 		genesisBlock := chaincfg.MainNetParams.GenesisBlock
 // 		return tx.StoreBlock(util.NewBlock(genesisBlock))
 // 	})
@@ -129,7 +129,7 @@ func Example_basicUsage() {
 // 	// Use the View function of the database to perform a managed read-only
 // 	// transaction and fetch the block stored above.
 // 	var loadedBlockBytes []byte
-// 	err = db.Update(func(tx database.Tx) error {
+// 	err = db.Update(func(tx database.Tx) (err error) {
 // 		genesisHash := chaincfg.MainNetParams.GenesisHash
 // 		blockBytes, err := tx.FetchBlock(genesisHash)
 // 		if err != nil {

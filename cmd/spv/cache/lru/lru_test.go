@@ -26,7 +26,7 @@ type sizeable struct {
 }
 
 // Size implements the CacheEntry interface on sizeable struct.
-func (s *sizeable) Size() (uint64, error) {
+func (s *sizeable) Size() (uint64, err error) {
 
 	return s.size, nil
 }

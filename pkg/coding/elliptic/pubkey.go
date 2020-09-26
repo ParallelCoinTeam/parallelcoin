@@ -21,7 +21,7 @@ func isOdd(a *big.Int) bool {
 
 // decompressPoint decompresses a point on the given curve given the X point and
 // the solution to use.
-func decompressPoint(curve *KoblitzCurve, x *big.Int, yBit bool) (*big.Int, error) {
+func decompressPoint(curve *KoblitzCurve, x *big.Int, yBit bool) (y *big.Int, err error) {
 	// TODO: This will probably only work for secp256k1 due to
 	// optimizations.
 	// Y = +-sqrt(x^3 + B)
@@ -33,7 +33,7 @@ func decompressPoint(curve *KoblitzCurve, x *big.Int, yBit bool) (*big.Int, erro
 	// This code used to do a full sqrt based on tonelli/shanks,
 	// but this was replaced by the algorithms referenced in
 	// https://bitcointalk.org/index.php?topic=162805.msg1712294#msg1712294
-	y := new(big.Int).Exp(x3, curve.QPlus1Div4(), curve.Params().P)
+	y = new(big.Int).Exp(x3, curve.QPlus1Div4(), curve.Params().P)
 	if yBit != isOdd(y) {
 		y.Sub(curve.Params().P, y)
 	}

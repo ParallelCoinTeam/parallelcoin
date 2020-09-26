@@ -11,7 +11,7 @@ import (
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
 
-func createTestIndex() (func(), *headerIndex, error) {
+func createTestIndex() (func(), *headerIndex, err error) {
 	tempDir, err := ioutil.TempDir("", "neutrino")
 	if err != nil {
 		return nil, nil, err

@@ -20,9 +20,9 @@ func (p *OutputSelectionPolicy) meetsRequiredConfs(txHeight, curHeight int32) bo
 
 // UnspentOutputs fetches all unspent outputs from the wallet that match rules
 // described in the passed policy.
-func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOutput, error) {
+func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOutput, err error) {
 	var outputResults []*TransactionOutput
-	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
+	err := walletdb.View(w.db, func(tx walletdb.ReadTx) (err error) {
 		addrmgrNs := tx.ReadBucket(waddrmgrNamespaceKey)
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		syncBlock := w.Manager.SyncedTo()

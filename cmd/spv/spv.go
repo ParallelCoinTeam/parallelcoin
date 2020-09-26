@@ -234,7 +234,7 @@ func (s *ChainService) BanPeer(sp *ServerPeer) {
 
 // BestBlock retrieves the most recent block's height and hash where we
 // have both the header and filter header ready.
-func (s *ChainService) BestBlock() (*waddrmgr.BlockStamp, error) {
+func (s *ChainService) BestBlock() (*waddrmgr.BlockStamp, err error) {
 	bestHeader, bestHeight, err := s.BlockHeaders.ChainTip()
 	if err != nil {
 		slog.Error(err)
@@ -270,7 +270,7 @@ func (s *ChainService) ChainParams() netparams.Params {
 }
 
 // GetBlockHash returns the block hash at the given height.
-func (s *ChainService) GetBlockHash(height int64) (*chainhash.Hash, error) {
+func (s *ChainService) GetBlockHash(height int64) (*chainhash.Hash, err error) {
 	header, err := s.BlockHeaders.FetchHeaderByHeight(uint32(height))
 	if err != nil {
 		slog.Error(err)
@@ -283,14 +283,14 @@ func (s *ChainService) GetBlockHash(height int64) (*chainhash.Hash, error) {
 // GetBlockHeader returns the block header for the given block hash, or an
 // error if the hash doesn't exist or is unknown.
 func (s *ChainService) GetBlockHeader(
-	blockHash *chainhash.Hash) (*wire.BlockHeader, error) {
+	blockHash *chainhash.Hash) (*wire.BlockHeader, err error) {
 	header, _, err := s.BlockHeaders.FetchHeader(blockHash)
 	return header, err
 }
 
 // GetBlockHeight gets the height of a block by its hash. An error is returned
 // if the given block hash is unknown.
-func (s *ChainService) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
+func (s *ChainService) GetBlockHeight(hash *chainhash.Hash) (int32, err error) {
 	_, height, err := s.BlockHeaders.FetchHeader(hash)
 	if err != nil {
 		slog.Error(err)
@@ -325,7 +325,7 @@ func (s *ChainService) PeerByAddr(addr string) *ServerPeer {
 
 // PublishTransaction sends the transaction to the consensus RPC server so it
 // can be propigated to other nodes and eventually mined.
-func (s *ChainService) PublishTransaction(tx *wire.MsgTx) error {
+func (s *ChainService) PublishTransaction(tx *wire.MsgTx) (err error) {
 	// TODO(roasbeef): pipe through querying interface
 	/*_, err := s.rpcClient.SendRawTransaction(tx, false)
 	return err*/
@@ -346,7 +346,7 @@ func (s *ChainService) Start() {
 
 // Stop gracefully shuts down the server by stopping and disconnecting all
 // peers and the main listener.
-func (s *ChainService) Stop() error {
+func (s *ChainService) Stop() (err error) {
 	// Make sure this only happens once.
 	if atomic.AddInt32(&s.shutdown, 1) != 1 {
 		return nil
@@ -373,7 +373,7 @@ func (s *ChainService) UpdatePeerHeights(latestBlkHash *chainhash.Hash, latestHe
 // and returns a net.Addr which maps to the original address with any host
 // names resolved to IP addresses and a default port added, if not specified,
 // from the ChainService's network parameters.
-func (s *ChainService) addrStringToNetAddr(addr string) (net.Addr, error) {
+func (s *ChainService) addrStringToNetAddr(addr string) (net.Addr, err error) {
 	host, strPort, err := net.SplitHostPort(addr)
 	if err != nil {
 		slog.Error(err)
@@ -665,7 +665,7 @@ cleanup:
 
 // rollBackToHeight rolls back all blocks until it hits the specified height.
 // It sends notifications along the way.
-func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, error) {
+func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, err error) {
 	header, headerHeight, err := s.BlockHeaders.ChainTip()
 	if err != nil {
 		slog.Error(err)
@@ -976,7 +976,7 @@ func (sp *ServerPeer) addKnownAddresses(addresses []*wire.NetAddress) {
 
 // newestBlock returns the current best block hash and height using the format
 // required by the configuration for the peer package.
-func (sp *ServerPeer) newestBlock() (*chainhash.Hash, int32, error) {
+func (sp *ServerPeer) newestBlock() (*chainhash.Hash, int32, err error) {
 	bestHeader, bestHeight, err := sp.server.BlockHeaders.ChainTip()
 	if err != nil {
 		slog.Error(err)
@@ -987,7 +987,7 @@ func (sp *ServerPeer) newestBlock() (*chainhash.Hash, int32, error) {
 }
 
 // pushSendHeadersMsg sends a sendheaders message to the connected peer.
-func (sp *ServerPeer) pushSendHeadersMsg() error {
+func (sp *ServerPeer) pushSendHeadersMsg() (err error) {
 	if sp.VersionKnown() {
 		if sp.ProtocolVersion() > wire.SendHeadersVersion {
 			sp.QueueMessage(wire.NewMsgSendHeaders(), nil)
@@ -1036,7 +1036,7 @@ func (ps *peerState) forAllPeers(closure func(sp *ServerPeer)) {
 // NewChainService returns a new chain service configured to connect to the
 // bitcoin network type specified by chainParams.  Use start to begin syncing
 // with peers.
-func NewChainService(cfg Config) (*ChainService, error) {
+func NewChainService(cfg Config) (*ChainService, err error) {
 	// First, we'll sort out the methods that we'll use to established
 	// outbound TCP connections, as well as perform any DNS queries.
 	//
@@ -1049,7 +1049,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 	if cfg.Dialer != nil {
 		dialer = cfg.Dialer
 	} else {
-		dialer = func(addr net.Addr) (net.Conn, error) {
+		dialer = func(addr net.Addr) (net.Conn, err error) {
 			return net.Dial(addr.Network(), addr.String())
 		}
 	}
@@ -1138,7 +1138,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 	// peers in order to prevent it from becoming a public test network.
 	var newAddressFunc func() (net.Addr, error)
 	if s.chainParams.Net != config.SimNetParams.Net {
-		newAddressFunc = func() (net.Addr, error) {
+		newAddressFunc = func() (net.Addr, err error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.addrManager.GetAddress()
 				if addr == nil {

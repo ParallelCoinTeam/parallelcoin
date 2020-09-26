@@ -110,7 +110,7 @@ func main() {
 	}
 }
 
-func genDir(dirName string) error {
+func genDir(dirName string) (err error) {
 	fqSVGDirName := filepath.FromSlash(dirName)
 	f, err := os.Open(fqSVGDirName)
 	if err != nil {
@@ -194,7 +194,7 @@ type Circle struct {
 	R  float32 `xml:"r,attr"`
 }
 
-func genFile(svgData []byte, baseName string, outSize float32) error {
+func genFile(svgData []byte, baseName string, outSize float32) (err error) {
 	var varName string
 	for _, s := range strings.Split(baseName, "_") {
 		varName += upperCase(s)
@@ -302,7 +302,7 @@ func genFile(svgData []byte, baseName string, outSize float32) error {
 	return nil
 }
 
-func parseColor(col string) (color.RGBA, error) {
+func parseColor(col string) (color.RGBA, err error) {
 	if col == "none" {
 		return color.RGBA{}, nil
 	}
@@ -327,7 +327,7 @@ func parseColor(col string) (color.RGBA, error) {
 	return color.RGBA{R: elems[0], G: elems[1], B: elems[2], A: 255}, nil
 }
 
-func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, outSize, size float32, offset f32.Vec2, circles []Circle) error {
+func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, outSize, size float32, offset f32.Vec2, circles []Circle) (err error) {
 	adj := uint8(0)
 	opacity := float32(1)
 	if p.Opacity != nil {
@@ -382,7 +382,7 @@ func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, outSize, size
 	return nil
 }
 
-func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size float32, offset f32.Vec2) error {
+func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size float32, offset f32.Vec2) (err error) {
 	if strings.HasSuffix(pathData, "z") {
 		pathData = pathData[:len(pathData)-1]
 	}

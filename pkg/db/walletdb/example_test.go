@@ -39,7 +39,7 @@ func ExampleCreate() {
 var exampleNum = 0
 
 // exampleLoadDB is used in the examples to elide the setup code.
-func exampleLoadDB() (walletdb.DB, func(), error) {
+func exampleLoadDB() (walletdb.DB, func(), err error) {
 	dbName := fmt.Sprintf("exampleload%d.db", exampleNum)
 	dbPath := filepath.Join(os.TempDir(), dbName)
 	db, err := walletdb.Create("bdb", dbPath)
@@ -116,7 +116,7 @@ func Example_basicUsage() {
 	// is what is typically passed to specific sub-packages so they have
 	// their own area to work in without worrying about conflicting keys.
 	bucketKey := []byte("walletsubpackage")
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		bucket := tx.ReadWriteBucket(bucketKey)
 		if bucket == nil {
 			_, err = tx.CreateTopLevelBucket(bucketKey)
@@ -133,7 +133,7 @@ func Example_basicUsage() {
 	// Use the Update function of the namespace to perform a managed
 	// read-write transaction.  The transaction will automatically be rolled
 	// back if the supplied inner function returns a non-nil error.
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		// All data is stored against the root bucket of the namespace,
 		// or nested buckets of the root bucket.  It's not really
 		// necessary to store it in a separate variable like this, but

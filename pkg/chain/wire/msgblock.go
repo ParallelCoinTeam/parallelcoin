@@ -36,7 +36,7 @@ type MsgBlock struct {
 }
 
 // AddTransaction adds a transaction to the message.
-func (msg *MsgBlock) AddTransaction(tx *MsgTx) error {
+func (msg *MsgBlock) AddTransaction(tx *MsgTx) (err error) {
 	msg.Transactions = append(msg.Transactions, tx)
 	return nil
 }
@@ -47,30 +47,26 @@ func (msg *MsgBlock) ClearTransactions() {
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation. See Deserialize for decoding blocks stored to disk, such as in a database, as opposed to decoding blocks from the wire.
-func (msg *MsgBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
-	err := readBlockHeader(r, pver, &msg.Header)
-	if err != nil {
-		slog.Error(err)
-		return err
+func (msg *MsgBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (err error) {
+	if err = readBlockHeader(r, pver, &msg.Header); slog.Check(err) {
+		return
 	}
-	txCount, err := ReadVarInt(r, pver)
-	if err != nil {
-		slog.Error(err)
-		return err
+	var txCount uint64
+	if txCount, err = ReadVarInt(r, pver); slog.Check(err) {
+		return
 	}
 	// Prevent more transactions than could possibly fit into a block. It would be possible to cause memory exhaustion and panics without a sane upper bound on this count.
 	if txCount > maxTxPerBlock {
-		str := fmt.Sprintf("too many transactions to fit into a block "+
-			"[count %d, max %d]", txCount, maxTxPerBlock)
-		return messageError("MsgBlock.BtcDecode", str)
+		err = messageError("MsgBlock.BtcDecode", fmt.Sprintf(
+			"too many transactions to fit into a block [count %d, max %d]", txCount, maxTxPerBlock))
+		slog.Debug(err)
+		return
 	}
 	msg.Transactions = make([]*MsgTx, 0, txCount)
 	for i := uint64(0); i < txCount; i++ {
 		tx := MsgTx{}
-		err := tx.BtcDecode(r, pver, enc)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = tx.BtcDecode(r, pver, enc); slog.Check(err) {
+			return
 		}
 		msg.Transactions = append(msg.Transactions, &tx)
 	}
@@ -78,29 +74,26 @@ func (msg *MsgBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) er
 }
 
 // Deserialize decodes a block from r into the receiver using a format that is suitable for long-term storage such as a database while respecting the Version field in the block.  This function differs from BtcDecode in that BtcDecode decodes from the bitcoin wire protocol as it was sent across the network.  The wire encoding can technically differ depending on the protocol version and doesn't even really need to match the format of a stored block at all.  As of the time this comment was written, the encoded block is the same in both instances, but there is a distinct difference and separating the two allows the API to be flexible enough to deal with changes.
-func (msg *MsgBlock) Deserialize(r io.Reader) error {
+func (msg *MsgBlock) Deserialize(r io.Reader) (err error) {
 	// At the current time, there is no difference between the wire encoding at protocol version 0 and the stable long-term storage format.  As a result, make use of BtcDecode. Passing an encoding type of WitnessEncoding to BtcEncode for the MessageEncoding parameter indicates that the transactions within the block are expected to be serialized according to the new serialization structure defined in BIP0141.
 	return msg.BtcDecode(r, 0, WitnessEncoding)
 }
 
 // DeserializeNoWitness decodes a block from r into the receiver similar to Deserialize, however DeserializeWitness strips all (if any) witness data from the transactions within the block before encoding them.
-func (msg *MsgBlock) DeserializeNoWitness(r io.Reader) error {
+func (msg *MsgBlock) DeserializeNoWitness(r io.Reader) (err error) {
 	return msg.BtcDecode(r, 0, BaseEncoding)
 }
 
 // DeserializeTxLoc decodes r in the same manner Deserialize does, but it takes a byte buffer instead of a generic reader and returns a slice containing the start and length of each transaction within the raw data that is being deserialized.
-func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) ([]TxLoc, error) {
+func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) (txLocs []TxLoc, err error) {
 	fullLen := r.Len()
 	// At the current time, there is no difference between the wire encoding at protocol version 0 and the stable long-term storage format.  As a result, make use of existing wire protocol functions.
-	err := readBlockHeader(r, 0, &msg.Header)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = readBlockHeader(r, 0, &msg.Header); slog.Check(err) {
+		return
 	}
-	txCount, err := ReadVarInt(r, 0)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var txCount uint64
+	if txCount, err = ReadVarInt(r, 0); slog.Check(err) {
+		return
 	}
 	// Prevent more transactions than could possibly fit into a block. It would be possible to cause memory exhaustion and panics without a sane upper bound on this count.
 	if txCount > maxTxPerBlock {
@@ -110,54 +103,46 @@ func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) ([]TxLoc, error) {
 	}
 	// Deserialize each transaction while keeping track of its location within the byte stream.
 	msg.Transactions = make([]*MsgTx, 0, txCount)
-	txLocs := make([]TxLoc, txCount)
+	txLocs = make([]TxLoc, txCount)
 	for i := uint64(0); i < txCount; i++ {
 		txLocs[i].TxStart = fullLen - r.Len()
 		tx := MsgTx{}
-		err := tx.Deserialize(r)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if err = tx.Deserialize(r); slog.Check(err) {
+			return
 		}
 		msg.Transactions = append(msg.Transactions, &tx)
 		txLocs[i].TxLen = (fullLen - r.Len()) - txLocs[i].TxStart
 	}
-	return txLocs, nil
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message
 // interface implementation. See Serialize for encoding blocks to be stored to disk, such as in a
 // database, as opposed to encoding blocks for the wire.
-func (msg *MsgBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
-	err := writeBlockHeader(w, pver, &msg.Header)
-	if err != nil {
-		slog.Error(err)
-		return err
+func (msg *MsgBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (err error) {
+	if err = writeBlockHeader(w, pver, &msg.Header); slog.Check(err) {
+		return
 	}
-	err = WriteVarInt(w, pver, uint64(len(msg.Transactions)))
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarInt(w, pver, uint64(len(msg.Transactions))); slog.Check(err) {
+		return
 	}
 	for _, tx := range msg.Transactions {
-		err = tx.BtcEncode(w, pver, enc)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = tx.BtcEncode(w, pver, enc); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // Serialize encodes the block to w using a format that suitable for long-term storage such as a database while respecting the Version field in the block. This function differs from BtcEncode in that BtcEncode encodes the block to the bitcoin wire protocol in order to be sent across the network.  The wire encoding can technically differ depending on the protocol version and doesn't even really need to match the format of a stored block at all.  As of the time this comment was written, the encoded block is the same in both instances, but there is a distinct difference and separating the two allows the API to be flexible enough to deal with changes.
-func (msg *MsgBlock) Serialize(w io.Writer) error {
+func (msg *MsgBlock) Serialize(w io.Writer) (err error) {
 	// At the current time, there is no difference between the wire encoding at protocol version 0 and the stable long-term storage format.  As a result, make use of BtcEncode.
 	// Passing WitnessEncoding as the encoding type here indicates that each of the transactions should be serialized using the witness serialization structure defined in BIP0141.
 	return msg.BtcEncode(w, 0, WitnessEncoding)
 }
 
 // SerializeNoWitness encodes a block to w using an identical format to Serialize, with all (if any) witness data stripped from all transactions. This method is provided in additon to the regular Serialize, in order to allow one to selectively encode transaction witness data to non-upgraded peers which are unaware of the new encoding.
-func (msg *MsgBlock) SerializeNoWitness(w io.Writer) error {
+func (msg *MsgBlock) SerializeNoWitness(w io.Writer) (err error) {
 	return msg.BtcEncode(w, 0, BaseEncoding)
 }
 
@@ -203,12 +188,12 @@ func (msg *MsgBlock) BlockHashWithAlgos(h int32) chainhash.Hash {
 }
 
 // TxHashes returns a slice of hashes of all of transactions in this block.
-func (msg *MsgBlock) TxHashes() ([]chainhash.Hash, error) {
-	hashList := make([]chainhash.Hash, 0, len(msg.Transactions))
+func (msg *MsgBlock) TxHashes() (hashList []chainhash.Hash, err error) {
+	hashList = make([]chainhash.Hash, 0, len(msg.Transactions))
 	for _, tx := range msg.Transactions {
 		hashList = append(hashList, tx.TxHash())
 	}
-	return hashList, nil
+	return
 }
 
 // NewMsgBlock returns a new bitcoin block message that conforms to the Message interface.  See MsgBlock for details.

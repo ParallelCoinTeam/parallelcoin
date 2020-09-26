@@ -86,7 +86,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 	return func() {
 		ctx := ui.ly.Context
 		th := ui.ly.Theme
-		footer := th.DuoUIcontainer(0, th.Colors["Dark"])
+		footer := th.DuoUIContainer(0, th.Colors["Dark"])
 		footer.FullWidth = true
 		footer.Layout(ctx, layout.N, func() {
 			layout.Flex{Spacing: layout.SpaceBetween}.Layout(ctx,
@@ -116,7 +116,7 @@ func (ui *DuoUI) DuoUIheader() func() {
 			iPadV = 6
 			iPadH = 6
 		}
-		th.DuoUIcontainer(0, th.Colors["Dark"]).Layout(ctx, layout.NW, func() {
+		th.DuoUIContainer(0, th.Colors["Dark"]).Layout(ctx, layout.NW, func() {
 			layout.Flex{
 				Axis:      layout.Horizontal,
 				Spacing:   layout.SpaceBetween,
@@ -163,7 +163,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 	cs := ui.ly.Context.Constraints
 	th := ui.ly.Theme
 	ctx := ui.ly.Context
-	gelook.DuoUIdrawRectangle(ctx, cs.Width.Max, cs.Height.Max,
+	gelook.DuoUIDrawRectangle(ctx, cs.Width.Max, cs.Height.Max,
 		th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	layout.Center.Layout(ctx, func() {
 		controllers := []func(){
@@ -176,7 +176,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				layout.UniformInset(unit.Dp(8)).Layout(ctx, func() {
-					e := th.DuoUIeditor("Enter Passphrase", "Dark", "Light", 32)
+					e := th.DuoUIEditor("Enter Passphrase", "Dark", "Light", 32)
 					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Regular
 					e.Layout(ctx, passEditor)
@@ -190,7 +190,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				layout.UniformInset(unit.Dp(8)).Layout(ctx, func() {
-					e := th.DuoUIeditor("Repeat Passphrase", "Dark", "Light", 32)
+					e := th.DuoUIEditor("Repeat Passphrase", "Dark", "Light", 32)
 					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Regular
 					e.Layout(ctx, confirmPassEditor)
@@ -203,7 +203,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				})
 			},
 			func() {
-				encryptionCheckBox := th.DuoUIcheckBox(
+				encryptionCheckBox := th.DuoUICheckBox(
 					"Do you want to add an additional layer of encryption"+
 						" for public data?", th.Colors["Dark"],
 					th.Colors["Dark"])
@@ -213,7 +213,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				// TODO: needs input box for seed
-				seedCheckBox := th.DuoUIcheckBox(
+				seedCheckBox := th.DuoUICheckBox(
 					"Do you have an existing wallet seed you want to use?",
 					th.Colors["Dark"], th.Colors["Dark"])
 				seedCheckBox.Font.Typeface = th.Fonts["Primary"]
@@ -221,7 +221,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				seedCheckBox.Layout(ctx, seed)
 			},
 			func() {
-				testnetCheckBox := th.DuoUIcheckBox(
+				testnetCheckBox := th.DuoUICheckBox(
 					"Use testnet?", th.Colors["Dark"], th.Colors["Dark"])
 				testnetCheckBox.Font.Typeface = th.Fonts["Primary"]
 				testnetCheckBox.Color = gelook.HexARGB(th.Colors["Dark"])
@@ -268,7 +268,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 func (ui *DuoUI) DuoUImainScreen() {
 	ctx := ui.ly.Context
 	th := ui.ly.Theme
-	th.DuoUIcontainer(0, th.Colors["Dark"]).Layout(ctx,
+	th.DuoUIContainer(0, th.Colors["Dark"]).Layout(ctx,
 		layout.Center, func() {
 			layout.Flex{Axis: layout.Vertical}.Layout(ctx,
 				layout.Rigid(ui.DuoUIheader()),
@@ -309,7 +309,7 @@ func (ui *DuoUI) DuoUImenu() func() {
 // splash screen
 func (ui *DuoUI) DuoUIsidebar() func() {
 	return func() {
-		ui.ly.Theme.DuoUIcontainer(0,
+		ui.ly.Theme.DuoUIContainer(0,
 			ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context,
 			layout.NW, func() {
 				layout.Flex{
@@ -324,9 +324,9 @@ func (ui *DuoUI) DuoUIsidebar() func() {
 func (ui *DuoUI) DuoUIsplashScreen() {
 	ctx := ui.ly.Context
 	th := ui.ly.Theme
-	th.DuoUIcontainer(0, th.Colors["Dark"]).
+	th.DuoUIContainer(0, th.Colors["Dark"]).
 		Layout(ctx, layout.Center, func() {
-			logo, _ := gelook.NewDuoUIicon(ico.ParallelCoin)
+			logo, _ := gelook.NewDuoUIIcon(ico.ParallelCoin)
 			layout.Flex{
 				Axis: layout.Vertical,
 			}.Layout(ctx,
@@ -407,12 +407,12 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 	// sys.Components["logger"].View()
 	// d.sys.Components["logger"].View
 	duo.Navigation = &model.DuoUInav{
-		Items: make(map[string]*gelook.DuoUIthemeNav),
+		Items: make(map[string]*gelook.DuoUIThemeNav),
 	}
 	// navigations["mainMenu"] = mainMenu()
 	// Icons
 	// rc.Settings.Daemon = rcd.GetCoreSettings()
-	duo.Theme = gelook.NewDuoUItheme()
+	duo.Theme = gelook.NewDuoUITheme()
 	// duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
 	duo.Pages = &model.DuoUIpages{
 		Controller: nil,
@@ -508,7 +508,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) (err error) {
 	}
 }
 
-func renderIcon(gtx *layout.Context, icon *gelook.DuoUIicon) func() {
+func renderIcon(gtx *layout.Context, icon *gelook.DuoUIIcon) func() {
 	return func() {
 		icon.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0x55, B: 0x30}
 		icon.Layout(gtx, unit.Dp(float32(48)))

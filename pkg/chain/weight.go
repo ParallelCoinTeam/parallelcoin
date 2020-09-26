@@ -45,13 +45,12 @@ func GetTransactionWeight(tx *util.Tx) int64 {
 }
 
 // GetSigOpCost returns the unified sig op cost for the passed transaction respecting current active soft-forks which modified sig op cost counting. The unified sig op cost for a transaction is computed as the sum of: the legacy sig op count scaled according to the WitnessScaleFactor, the sig op count for all p2sh inputs scaled by the WitnessScaleFactor, and finally the unscaled sig op count for any inputs spending witness programs.
-func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16, segWit bool) (int, error) {
-	numSigOps := CountSigOps(tx) * WitnessScaleFactor
+func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16, segWit bool) (numSigOps int, err error) {
+	numSigOps = CountSigOps(tx) * WitnessScaleFactor
 	if bip16 {
-		numP2SHSigOps, err := CountP2SHSigOps(tx, isCoinBaseTx, utxoView)
-		if err != nil {
-			slog.Error(err)
-			return 0, nil
+		var numP2SHSigOps int
+		if numP2SHSigOps, err = CountP2SHSigOps(tx, isCoinBaseTx, utxoView); slog.Check(err) {
+			return
 		}
 		numSigOps += numP2SHSigOps * WitnessScaleFactor
 	}
@@ -61,12 +60,11 @@ func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16
 			// Ensure the referenced output is available and hasn't already been spent.
 			utxo := utxoView.LookupEntry(txIn.PreviousOutPoint)
 			if utxo == nil || utxo.IsSpent() {
-				str := fmt.Sprintf("output %v referenced from "+
-					"transaction %s:%d either does not "+
-					"exist or has already been spent",
-					txIn.PreviousOutPoint, tx.Hash(),
-					txInIndex)
-				return 0, ruleError(ErrMissingTxOut, str)
+				str := fmt.Sprintf("output %v referenced from transaction %s:%d either does not "+
+					"exist or has already been spent", txIn.PreviousOutPoint, tx.Hash(), txInIndex)
+				err = ruleError(ErrMissingTxOut, str)
+				slog.Debug(err)
+				return
 			}
 			witness := txIn.Witness
 			sigScript := txIn.SignatureScript
@@ -74,5 +72,5 @@ func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16
 			numSigOps += txscript.GetWitnessSigOpCount(sigScript, pkScript, witness)
 		}
 	}
-	return numSigOps, nil
+	return
 }

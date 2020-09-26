@@ -332,150 +332,123 @@ type // wrongNumParams is an error type describing an unparseable JSON-RPC
 	// notification.
 	wrongNumParams int
 
-func // BTCJSONError satisfies the builtin error interface.
-(e wrongNumParams) Error() string {
+// BTCJSONError satisfies the builtin error interface.
+func (e wrongNumParams) Error() string {
 	return fmt.Sprintf("wrong number of parameters (%d)", e)
 }
 
-func // parseChainNtfnParams parses out the block hash and height from the
+// parseChainNtfnParams parses out the block hash and height from the
 // parameters of blockconnected and blockdisconnected notifications.
-parseChainNtfnParams(params []js.RawMessage) (*chainhash.Hash,
-	int32, time.Time, error) {
+func parseChainNtfnParams(params []js.RawMessage) (blockHash *chainhash.Hash, blockHeight int32, blockTime time.Time,
+	err error) {
 	if len(params) != 3 {
-		return nil, 0, time.Time{}, wrongNumParams(len(params))
+		err = wrongNumParams(len(params))
+		slog.Debug(err)
+		return
 	}
 	// Unmarshal first parameter as a string.
 	var blockHashStr string
-	err := js.Unmarshal(params[0], &blockHashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, time.Time{}, err
+	if err = js.Unmarshal(params[0], &blockHashStr); slog.Check(err) {
+		return
 	}
 	// Unmarshal second parameter as an integer.
-	var blockHeight int32
-	err = js.Unmarshal(params[1], &blockHeight)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, time.Time{}, err
+	if err = js.Unmarshal(params[1], &blockHeight); slog.Check(err) {
+		return
 	}
 	// Unmarshal third parameter as unix time.
 	var blockTimeUnix int64
-	err = js.Unmarshal(params[2], &blockTimeUnix)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, time.Time{}, err
+	if err = js.Unmarshal(params[2], &blockTimeUnix); slog.Check(err) {
+		return
 	}
 	// Create hash from block hash string.
-	blockHash, err := chainhash.NewHashFromStr(blockHashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, time.Time{}, err
+	if blockHash, err = chainhash.NewHashFromStr(blockHashStr); slog.Check(err) {
+		return
 	}
 	// Create time.Time from unix time.
-	blockTime := time.Unix(blockTimeUnix, 0)
-	return blockHash, blockHeight, blockTime, nil
+	blockTime = time.Unix(blockTimeUnix, 0)
+	return
 }
 
 // parseFilteredBlockConnectedParams parses out the parameters included in a
 // filteredblockconnected notification.
 // NOTE: This is a pod extension ported from github.
 // com/decred/dcrrpcclient and requires a websocket connection.
-func parseFilteredBlockConnectedParams(params []js.RawMessage) (int32,
-	*wire.BlockHeader, []*util.Tx, error) {
+func parseFilteredBlockConnectedParams(params []js.RawMessage) (blockHeight int32, blockHeader *wire.BlockHeader,
+	transactions []*util.Tx, err error) {
 	if len(params) < 3 {
 		return 0, nil, nil, wrongNumParams(len(params))
 	}
 	// Unmarshal first parameter as an integer.
-	var blockHeight int32
-	err := js.Unmarshal(params[0], &blockHeight)
-	if err != nil {
-		slog.Error(err)
-		return 0, nil, nil, err
+	if err = js.Unmarshal(params[0], &blockHeight); slog.Check(err) {
+		return
 	}
 	// Unmarshal second parameter as a slice of bytes.
-	blockHeaderBytes, err := parseHexParam(params[1])
-	if err != nil {
-		slog.Error(err)
-		return 0, nil, nil, err
+	var blockHeaderBytes []byte
+	if blockHeaderBytes, err = parseHexParam(params[1]); slog.Check(err) {
+		return
 	}
 	// Deserialize block header from slice of bytes.
-	var blockHeader wire.BlockHeader
-	err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
-	if err != nil {
-		slog.Error(err)
-		return 0, nil, nil, err
+	if err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes)); slog.Check(err) {
+		return
 	}
 	// Unmarshal third parameter as a slice of hex-encoded strings.
 	var hexTransactions []string
-	err = js.Unmarshal(params[2], &hexTransactions)
-	if err != nil {
-		slog.Error(err)
-		return 0, nil, nil, err
+	if err = js.Unmarshal(params[2], &hexTransactions); slog.Check(err) {
+		return
 	}
 	// Create slice of transactions from slice of strings by hex-decoding.
-	transactions := make([]*util.Tx, len(hexTransactions))
+	transactions = make([]*util.Tx, len(hexTransactions))
+	var transaction []byte
 	for i, hexTx := range hexTransactions {
-		transaction, err := hex.DecodeString(hexTx)
-		if err != nil {
-			slog.Error(err)
-			return 0, nil, nil, err
+		if transaction, err = hex.DecodeString(hexTx); slog.Check(err) {
+			return
 		}
-		transactions[i], err = util.NewTxFromBytes(transaction)
-		if err != nil {
-			slog.Error(err)
-			return 0, nil, nil, err
+		if transactions[i], err = util.NewTxFromBytes(transaction); slog.Check(err) {
+			return
 		}
 	}
-	return blockHeight, &blockHeader, transactions, nil
+	return
 }
 
-func // parseFilteredBlockDisconnectedParams parses out the parameters
+// parseFilteredBlockDisconnectedParams parses out the parameters
 // included in a filteredblockdisconnected notification.
 // : This is a pod extension ported from github.
 // com/decred/dcrrpcclient and requires a websocket connection.
-parseFilteredBlockDisconnectedParams(params []js.RawMessage) (int32,
-	*wire.BlockHeader, error) {
+func parseFilteredBlockDisconnectedParams(params []js.RawMessage) (blockHeight int32, blockHeader *wire.BlockHeader, err error) {
 	if len(params) < 2 {
 		return 0, nil, wrongNumParams(len(params))
 	}
 	// Unmarshal first parameter as an integer.
-	var blockHeight int32
-	err := js.Unmarshal(params[0], &blockHeight)
-	if err != nil {
-		slog.Error(err)
-		return 0, nil, err
+	if err = js.Unmarshal(params[0], &blockHeight); slog.Check(err) {
+		return
 	}
 	// Unmarshal second parameter as a slice of bytes.
-	blockHeaderBytes, err := parseHexParam(params[1])
-	if err != nil {
-		slog.Error(err)
-		return 0, nil, err
+	var blockHeaderBytes []byte
+	if blockHeaderBytes, err = parseHexParam(params[1]); slog.Check(err) {
+		return
 	}
 	// Deserialize block header from slice of bytes.
-	var blockHeader wire.BlockHeader
-	err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
-	if err != nil {
-		slog.Error(err)
-		return 0, nil, err
+	if err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes)); slog.Check(err) {
+		return
 	}
-	return blockHeight, &blockHeader, nil
+	return
 }
 
-func parseHexParam(param js.RawMessage) ([]byte, error) {
+func parseHexParam(param js.RawMessage) (b []byte, err error) {
 	var s string
-	err := js.Unmarshal(param, &s)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(param, &s); slog.Check(err) {
+		return
 	}
 	return hex.DecodeString(s)
 }
 
-func // parseRelevantTxAcceptedParams parses out the parameter included in a
+// parseRelevantTxAcceptedParams parses out the parameter included in a
 // relevanttxaccepted notification.
-parseRelevantTxAcceptedParams(params []js.RawMessage) (transaction []byte, err error) {
+func parseRelevantTxAcceptedParams(params []js.RawMessage) (transaction []byte, err error) {
 	if len(params) < 1 {
-		return nil, wrongNumParams(len(params))
+		err = wrongNumParams(len(params))
+		slog.Debug(err)
+		return
 	}
 	return parseHexParam(params[0])
 }
@@ -483,38 +456,31 @@ parseRelevantTxAcceptedParams(params []js.RawMessage) (transaction []byte, err e
 func // parseChainTxNtfnParams parses out the transaction and optional details
 // about the block it's mined in from the parameters of recvtx and
 // redeemingtx notifications.
-parseChainTxNtfnParams(params []js.RawMessage) (*util.Tx,
-	*btcjson.BlockDetails, error) {
+parseChainTxNtfnParams(params []js.RawMessage) (tx *util.Tx, block *btcjson.BlockDetails, err error) {
 	if len(params) == 0 || len(params) > 2 {
-		return nil, nil, wrongNumParams(len(params))
+		err = wrongNumParams(len(params))
+		slog.Debug(err)
+		return
 	}
 	// Unmarshal first parameter as a string.
 	var txHex string
-	err := js.Unmarshal(params[0], &txHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, nil, err
+	if err = js.Unmarshal(params[0], &txHex); slog.Check(err) {
+		return
 	}
 	// If present, unmarshal second optional parameter as the block details JSON object.
-	var block *btcjson.BlockDetails
 	if len(params) > 1 {
-		err = js.Unmarshal(params[1], &block)
-		if err != nil {
-			slog.Error(err)
-			return nil, nil, err
+		if err = js.Unmarshal(params[1], &block); slog.Check(err) {
+			return
 		}
 	}
 	// Hex decode and deserialize the transaction.
-	serializedTx, err := hex.DecodeString(txHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, nil, err
+	var serializedTx []byte
+	if serializedTx, err = hex.DecodeString(txHex); slog.Check(err) {
+		return
 	}
 	var msgTx wire.MsgTx
-	err = msgTx.Deserialize(bytes.NewReader(serializedTx))
-	if err != nil {
-		slog.Error(err)
-		return nil, nil, err
+	if err = msgTx.Deserialize(bytes.NewReader(serializedTx)); slog.Check(err) {
+		return
 	}
 	// TODO: Change recvtx and redeemingtx callback signatures to use nicer
 	//  types for details about the block (block hash as a chainhash.Hash,
@@ -522,190 +488,163 @@ parseChainTxNtfnParams(params []js.RawMessage) (*util.Tx,
 	return util.NewTx(&msgTx), block, nil
 }
 
-func // parseRescanProgressParams parses out the height of the last
+// parseRescanProgressParams parses out the height of the last
 // rescanned block from the parameters of rescanfinished and rescanprogress
 // notifications.
-parseRescanProgressParams(params []js.RawMessage) (*chainhash.Hash, int32, time.Time, error) {
+func parseRescanProgressParams(params []js.RawMessage) (hash *chainhash.Hash, height int32, t time.Time, err error) {
 	if len(params) != 3 {
 		return nil, 0, time.Time{}, wrongNumParams(len(params))
 	}
 	// Unmarshal first parameter as an string.
 	var hashStr string
-	err := js.Unmarshal(params[0], &hashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, time.Time{}, err
+	if err = js.Unmarshal(params[0], &hashStr); slog.Check(err) {
+		return
 	}
 	// Unmarshal second parameter as an integer.
-	var height int32
-	err = js.Unmarshal(params[1], &height)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, time.Time{}, err
+	if err = js.Unmarshal(params[1], &height); slog.Check(err) {
+		return
 	}
 	// Unmarshal third parameter as an integer.
 	var blkTime int64
-	err = js.Unmarshal(params[2], &blkTime)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, time.Time{}, err
+	if err = js.Unmarshal(params[2], &blkTime); slog.Check(err) {
+		return
 	}
 	// Decode string encoding of block hash.
-	hash, err := chainhash.NewHashFromStr(hashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, time.Time{}, err
+	if hash, err = chainhash.NewHashFromStr(hashStr); slog.Check(err) {
+		return
 	}
-	return hash, height, time.Unix(blkTime, 0), nil
+	t = time.Unix(blkTime, 0)
+	return
 }
 
-func // parseTxAcceptedNtfnParams parses out the transaction hash and total
+// parseTxAcceptedNtfnParams parses out the transaction hash and total
 // amount from the parameters of a txaccepted notification.
-parseTxAcceptedNtfnParams(params []js.RawMessage) (*chainhash.Hash,
-	util.Amount, error) {
+func parseTxAcceptedNtfnParams(params []js.RawMessage) (txHash *chainhash.Hash, amt util.Amount, err error) {
 	if len(params) != 2 {
-		return nil, 0, wrongNumParams(len(params))
+		err = wrongNumParams(len(params))
+		slog.Debug(err)
+		return
 	}
 	// Unmarshal first parameter as a string.
 	var txHashStr string
-	err := js.Unmarshal(params[0], &txHashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, err
+	if err = js.Unmarshal(params[0], &txHashStr); slog.Check(err) {
+		return
 	}
 	// Unmarshal second parameter as a floating point number.
 	var fAmt float64
-	err = js.Unmarshal(params[1], &fAmt)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, err
+	if err = js.Unmarshal(params[1], &fAmt); slog.Check(err) {
+		return
 	}
 	// Bounds check amount.
-	amt, err := util.NewAmount(fAmt)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, err
+	if amt, err = util.NewAmount(fAmt); slog.Check(err) {
+		return
 	}
 	// Decode string encoding of transaction sha.
-	txHash, err := chainhash.NewHashFromStr(txHashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, err
+	if txHash, err = chainhash.NewHashFromStr(txHashStr); slog.Check(err) {
+		return
 	}
-	return txHash, amt, nil
+	return
 }
 
-func // parseTxAcceptedVerboseNtfnParams parses out details about a raw
+// parseTxAcceptedVerboseNtfnParams parses out details about a raw
 // transaction from the parameters of a txacceptedverbose notification.
-parseTxAcceptedVerboseNtfnParams(params []js.RawMessage) (*btcjson.TxRawResult,
-	error) {
+func parseTxAcceptedVerboseNtfnParams(params []js.RawMessage) (rawTx *btcjson.TxRawResult, err error) {
 	if len(params) != 1 {
-		return nil, wrongNumParams(len(params))
+		err = wrongNumParams(len(params))
+		slog.Debug(err)
+		return
 	}
 	// Unmarshal first parameter as a raw transaction result object.
-	var rawTx btcjson.TxRawResult
-	err := js.Unmarshal(params[0], &rawTx)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(params[0], rawTx); slog.Check(err) {
+		return
 	}
 	// TODO: change txacceptedverbose notification callbacks to use nicer
 	//  types for all details about the transaction (i.e.
 	//  decoding hashes from their string encoding).
-	return &rawTx, nil
+	return
 }
 
-func // parsePodConnectedNtfnParams parses out the connection status of pod
+// parsePodConnectedNtfnParams parses out the connection status of pod
 // and btcwallet from the parameters of a podconnected notification.
-parsePodConnectedNtfnParams(params []js.RawMessage) (bool, error) {
+func parsePodConnectedNtfnParams(params []js.RawMessage) (connected bool, err error) {
 	if len(params) != 1 {
-		return false, wrongNumParams(len(params))
+		err = wrongNumParams(len(params))
+		slog.Debug(err)
+		return
 	}
 	// Unmarshal first parameter as a boolean.
-	var connected bool
-	err := js.Unmarshal(params[0], &connected)
-	if err != nil {
-		slog.Error(err)
-		return false, err
+	if err = js.Unmarshal(params[0], &connected); slog.Check(err) {
+		return
 	}
-	return connected, nil
+	return
 }
 
-func // parseAccountBalanceNtfnParams parses out the account name,
+// parseAccountBalanceNtfnParams parses out the account name,
 // total balance, and whether or not the balance is confirmed or unconfirmed
 // from the parameters of an accountbalance notification.
-parseAccountBalanceNtfnParams(params []js.RawMessage) (account string,
-	balance util.Amount, confirmed bool, err error) {
+func parseAccountBalanceNtfnParams(params []js.RawMessage) (
+	account string, bal util.Amount, confirmed bool, err error) {
 	if len(params) != 3 {
-		return "", 0, false, wrongNumParams(len(params))
+		err = wrongNumParams(len(params))
+		slog.Debug(err)
+		return
 	}
 	// Unmarshal first parameter as a string.
-	err = js.Unmarshal(params[0], &account)
-	if err != nil {
-		slog.Error(err)
-		return "", 0, false, err
+	if err = js.Unmarshal(params[0], &account); slog.Check(err) {
+		return
 	}
 	// Unmarshal second parameter as a floating point number.
 	var fBal float64
-	err = js.Unmarshal(params[1], &fBal)
-	if err != nil {
-		slog.Error(err)
-		return "", 0, false, err
+	if err = js.Unmarshal(params[1], &fBal); slog.Check(err) {
+		return
 	}
 	// Unmarshal third parameter as a boolean.
-	err = js.Unmarshal(params[2], &confirmed)
-	if err != nil {
-		slog.Error(err)
-		return "", 0, false, err
+	if err = js.Unmarshal(params[2], &confirmed); slog.Check(err) {
+		return
 	}
 	// Bounds check amount.
-	bal, err := util.NewAmount(fBal)
-	if err != nil {
-		slog.Error(err)
-		return "", 0, false, err
+	if bal, err = util.NewAmount(fBal); slog.Check(err) {
+		return
 	}
 	return account, bal, confirmed, nil
 }
 
 func // parseWalletLockStateNtfnParams parses out the account name and locked
 // state of an account from the parameters of a walletlockstate notification.
-parseWalletLockStateNtfnParams(params []js.RawMessage) (account string,
-	locked bool, err error) {
+parseWalletLockStateNtfnParams(params []js.RawMessage) (account string, locked bool, err error) {
 	if len(params) != 2 {
-		return "", false, wrongNumParams(len(params))
+		err = wrongNumParams(len(params))
+		slog.Debug(err)
+		return
 	}
 	// Unmarshal first parameter as a string.
-	err = js.Unmarshal(params[0], &account)
-	if err != nil {
-		slog.Error(err)
-		return "", false, err
+	if err = js.Unmarshal(params[0], &account); slog.Check(err) {
+		return
 	}
 	// Unmarshal second parameter as a boolean.
-	err = js.Unmarshal(params[1], &locked)
-	if err != nil {
-		slog.Error(err)
-		return "", false, err
+	if err = js.Unmarshal(params[1], &locked); slog.Check(err) {
+		return
 	}
-	return account, locked, nil
+	return
 }
 
-type // FutureNotifyBlocksResult is a future promise to deliver the result of
-	// a NotifyBlocksAsync RPC invocation (or an applicable error).
-	FutureNotifyBlocksResult chan *response
+// FutureNotifyBlocksResult is a future promise to deliver the result of
+// a NotifyBlocksAsync RPC invocation (or an applicable error).
+type FutureNotifyBlocksResult chan *response
 
-func // Receive waits for the response promised by the future and returns an
+// Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
-(r FutureNotifyBlocksResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureNotifyBlocksResult) Receive() (err error) {
+	_, err = receiveFuture(r)
+	return
 }
 
-func // NotifyBlocksAsync returns an instance of a type that can be used to
+// NotifyBlocksAsync returns an instance of a type that can be used to
 // get the result of the RPC at some future time by invoking the Receive
 // function on the returned instance.
 // See NotifyBlocks for the blocking version and more details.
 // NOTE: This is a pod extension and requires a websocket connection.
-(c *Client) NotifyBlocksAsync() FutureNotifyBlocksResult {
+func (c *Client) NotifyBlocksAsync() FutureNotifyBlocksResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -718,7 +657,7 @@ func // NotifyBlocksAsync returns an instance of a type that can be used to
 	return c.sendCmd(cmd)
 }
 
-func // NotifyBlocks registers the client to receive notifications when
+// NotifyBlocks registers the client to receive notifications when
 // blocks are connected and disconnected from the main chain.
 // The notifications are delivered to the notification handlers associated
 // with the client.  Calling this function has no effect if there are no
@@ -727,26 +666,26 @@ func // NotifyBlocks registers the client to receive notifications when
 // The notifications delivered as a result of this call will be via one of or
 // OnBlockDisconnected. NOTE: This is a pod extension and requires a
 // websocket connection.
-(c *Client) NotifyBlocks() error {
+func (c *Client) NotifyBlocks() (err error) {
 	return c.NotifyBlocksAsync().Receive()
 }
 
-type // FutureNotifySpentResult is a future promise to deliver the result of
-	// a NotifySpentAsync RPC invocation (or an applicable error).
-	// NOTE: Deprecated. Use FutureLoadTxFilterResult instead.
-	FutureNotifySpentResult chan *response
+// FutureNotifySpentResult is a future promise to deliver the result of
+// a NotifySpentAsync RPC invocation (or an applicable error).
+// NOTE: Deprecated. Use FutureLoadTxFilterResult instead.
+type FutureNotifySpentResult chan *response
 
 func // Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
-(r FutureNotifySpentResult) Receive() error {
-	_, err := receiveFuture(r)
+(r FutureNotifySpentResult) Receive() (err error) {
+	_, err = receiveFuture(r)
 	return err
 }
 
-func // notifySpentInternal is the same as notifySpentAsync except it accepts
+// notifySpentInternal is the same as notifySpentAsync except it accepts
 // the converted outpoints as a parameter so the client can more efficiently
 // recreate the previous notification state on reconnect.
-(c *Client) notifySpentInternal(outpoints []btcjson.OutPoint) FutureNotifySpentResult {
+func (c *Client) notifySpentInternal(outpoints []btcjson.OutPoint) FutureNotifySpentResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -759,22 +698,22 @@ func // notifySpentInternal is the same as notifySpentAsync except it accepts
 	return c.sendCmd(cmd)
 }
 
-func // newOutPointFromWire constructs the json representation of a transaction
+// newOutPointFromWire constructs the json representation of a transaction
 // outpoint from the wire type.
-newOutPointFromWire(op *wire.OutPoint) btcjson.OutPoint {
+func newOutPointFromWire(op *wire.OutPoint) btcjson.OutPoint {
 	return btcjson.OutPoint{
 		Hash:  op.Hash.String(),
 		Index: op.Index,
 	}
 }
 
-func // NotifySpentAsync returns an instance of a type that can be used to
+// NotifySpentAsync returns an instance of a type that can be used to
 // get the result of the RPC at some future time by invoking the Receive
 // function on the returned instance.
 // See NotifySpent for the blocking version and more details.
 // NOTE: This is a pod extension and requires a websocket connection.
 // NOTE: Deprecated. Use LoadTxFilterAsync instead.
-(c *Client) NotifySpentAsync(outpoints []*wire.OutPoint) FutureNotifySpentResult {
+func (c *Client) NotifySpentAsync(outpoints []*wire.OutPoint) FutureNotifySpentResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -791,7 +730,7 @@ func // NotifySpentAsync returns an instance of a type that can be used to
 	return c.sendCmd(cmd)
 }
 
-func // NotifySpent registers the client to receive notifications when the
+// NotifySpent registers the client to receive notifications when the
 // passed transaction outputs are spent.
 // The notifications are delivered to the notification handlers associated
 // with the client.  Calling this function has no effect if there are no
@@ -800,7 +739,7 @@ func // NotifySpent registers the client to receive notifications when the
 // The notifications delivered as a result of this call will be via
 // OnRedeemingTx. NOTE: This is a pod extension and requires a websocket
 // connection. NOTE: Deprecated. Use LoadTxFilter instead.
-(c *Client) NotifySpent(outpoints []*wire.OutPoint) error {
+func (c *Client) NotifySpent(outpoints []*wire.OutPoint) (err error) {
 	return c.NotifySpentAsync(outpoints).Receive()
 }
 
@@ -809,19 +748,19 @@ type // FutureNotifyNewTransactionsResult is a future promise to deliver the
 	// or an applicable error).
 	FutureNotifyNewTransactionsResult chan *response
 
-func // Receive waits for the response promised by the future and returns an
+// Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
-(r FutureNotifyNewTransactionsResult) Receive() error {
-	_, err := receiveFuture(r)
+func (r FutureNotifyNewTransactionsResult) Receive() (err error) {
+	_, err = receiveFuture(r)
 	return err
 }
 
-func // NotifyNewTransactionsAsync returns an instance of a type that can be
+// NotifyNewTransactionsAsync returns an instance of a type that can be
 // used to get the result of the RPC at some future time by invoking the
 // Receive function on the returned instance.
 // See NotifyNewTransactionsAsync for the blocking version and more details.
 // NOTE: This is a pod extension and requires a websocket connection.
-(c *Client) NotifyNewTransactionsAsync(verbose bool) FutureNotifyNewTransactionsResult {
+func (c *Client) NotifyNewTransactionsAsync(verbose bool) FutureNotifyNewTransactionsResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -834,7 +773,7 @@ func // NotifyNewTransactionsAsync returns an instance of a type that can be
 	return c.sendCmd(cmd)
 }
 
-func // NotifyNewTransactions registers the client to receive notifications
+// NotifyNewTransactions registers the client to receive notifications
 // every time a new transaction is accepted to the memory pool.
 // The notifications are delivered to the notification handlers associated
 // with the client.  Calling this function has no effect if there are no
@@ -844,26 +783,26 @@ func // NotifyNewTransactions registers the client to receive notifications
 // OnTxAccepted (when verbose is false) or OnTxAcceptedVerbose (
 // when verbose is true). NOTE: This is a pod extension and requires a
 // websocket connection.
-(c *Client) NotifyNewTransactions(verbose bool) error {
+func (c *Client) NotifyNewTransactions(verbose bool) (err error) {
 	return c.NotifyNewTransactionsAsync(verbose).Receive()
 }
 
-type // FutureNotifyReceivedResult is a future promise to deliver the result
-	// of a NotifyReceivedAsync RPC invocation (or an applicable error).
-	// NOTE: Deprecated. Use FutureLoadTxFilterResult instead.
-	FutureNotifyReceivedResult chan *response
+// FutureNotifyReceivedResult is a future promise to deliver the result
+// of a NotifyReceivedAsync RPC invocation (or an applicable error).
+// NOTE: Deprecated. Use FutureLoadTxFilterResult instead.
+type FutureNotifyReceivedResult chan *response
 
-func // Receive waits for the response promised by the future and returns an
+// Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
-(r FutureNotifyReceivedResult) Receive() error {
-	_, err := receiveFuture(r)
+func (r FutureNotifyReceivedResult) Receive() (err error) {
+	_, err = receiveFuture(r)
 	return err
 }
 
-func // notifyReceivedInternal is the same as notifyReceivedAsync except it
+// notifyReceivedInternal is the same as notifyReceivedAsync except it
 // accepts the converted addresses as a parameter so the client can more
 // efficiently recreate the previous notification state on reconnect.
-(c *Client) notifyReceivedInternal(addresses []string) FutureNotifyReceivedResult {
+func (c *Client) notifyReceivedInternal(addresses []string) FutureNotifyReceivedResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -877,13 +816,13 @@ func // notifyReceivedInternal is the same as notifyReceivedAsync except it
 	return c.sendCmd(cmd)
 }
 
-func // NotifyReceivedAsync returns an instance of a type that can be used to
+// NotifyReceivedAsync returns an instance of a type that can be used to
 // get the result of the RPC at some future time by invoking the Receive
 // function on the returned instance.
 // See NotifyReceived for the blocking version and more details.
 // NOTE: This is a pod extension and requires a websocket connection.
 // NOTE: Deprecated. Use LoadTxFilterAsync instead.
-(c *Client) NotifyReceivedAsync(addresses []util.Address) FutureNotifyReceivedResult {
+func (c *Client) NotifyReceivedAsync(addresses []util.Address) FutureNotifyReceivedResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -901,7 +840,7 @@ func // NotifyReceivedAsync returns an instance of a type that can be used to
 	return c.sendCmd(cmd)
 }
 
-func // NotifyReceived registers the client to receive notifications every
+// NotifyReceived registers the client to receive notifications every
 // time a new transaction which pays to one of the passed addresses is
 // accepted to memory pool or in a block connected to the block chain.
 // In addition, when one of these transactions is detected,
@@ -918,24 +857,24 @@ func // NotifyReceived registers the client to receive notifications every
 // automatically registered upon receipt of funds to the address).
 // NOTE: This is a pod extension and requires a websocket connection.
 // NOTE: Deprecated. Use LoadTxFilter instead.
-(c *Client) NotifyReceived(addresses []util.Address) error {
+func (c *Client) NotifyReceived(addresses []util.Address) (err error) {
 	return c.NotifyReceivedAsync(addresses).Receive()
 }
 
-type // FutureRescanResult is a future promise to deliver the result of a
-	// RescanAsync or RescanEndHeightAsync RPC invocation (
-	// or an applicable error). NOTE: Deprecated.
-	// Use FutureRescanBlocksResult instead.
-	FutureRescanResult chan *response
+// FutureRescanResult is a future promise to deliver the result of a
+// RescanAsync or RescanEndHeightAsync RPC invocation (
+// or an applicable error). NOTE: Deprecated.
+// Use FutureRescanBlocksResult instead.
+type FutureRescanResult chan *response
 
-func // Receive waits for the response promised by the future and returns an
+// Receive waits for the response promised by the future and returns an
 // error if the rescan was not successful.
-(r FutureRescanResult) Receive() error {
-	_, err := receiveFuture(r)
+func (r FutureRescanResult) Receive() (err error) {
+	_, err = receiveFuture(r)
 	return err
 }
 
-func // RescanAsync returns an instance of a type that can be used to get the
+// RescanAsync returns an instance of a type that can be used to get the
 // result of the RPC at some future time by invoking the Receive function on
 // the returned instance. See Rescan for the blocking version and more
 // details. NOTE: Rescan requests are not issued on client reconnect and must
@@ -945,7 +884,7 @@ func // RescanAsync returns an instance of a type that can be used to get the
 // reissue rescan requests on connect and reconnect.
 // NOTE: This is a pod extension and requires a websocket connection.
 // NOTE: Deprecated. Use RescanBlocksAsync instead.
-(c *Client) RescanAsync(startBlock *chainhash.Hash,
+func (c *Client) RescanAsync(startBlock *chainhash.Hash,
 	addresses []util.Address,
 	outpoints []*wire.OutPoint) FutureRescanResult {
 	// Not supported in HTTP POST mode.
@@ -975,7 +914,7 @@ func // RescanAsync returns an instance of a type that can be used to get the
 	return c.sendCmd(cmd)
 }
 
-func // Rescan rescans the block chain starting from the provided starting
+// Rescan rescans the block chain starting from the provided starting
 // block to the end of the longest chain for transactions that pay to the
 // passed addresses and transactions which spend the passed outpoints.
 // The notifications of found transactions are delivered to the notification
@@ -996,19 +935,19 @@ func // Rescan rescans the block chain starting from the provided starting
 // reissue rescan requests on connect and reconnect.
 // NOTE: This is a pod extension and requires a websocket connection.
 // NOTE: Deprecated. Use RescanBlocks instead.
-(c *Client) Rescan(startBlock *chainhash.Hash,
+func (c *Client) Rescan(startBlock *chainhash.Hash,
 	addresses []util.Address,
-	outpoints []*wire.OutPoint) error {
+	outpoints []*wire.OutPoint) (err error) {
 	return c.RescanAsync(startBlock, addresses, outpoints).Receive()
 }
 
-func // RescanEndBlockAsync returns an instance of a type that can be used to
+// RescanEndBlockAsync returns an instance of a type that can be used to
 // get the result of the RPC at some future time by invoking the Receive
 // function on the returned instance.
 // See RescanEndBlock for the blocking version and more details.
 // NOTE: This is a pod extension and requires a websocket connection.
 // NOTE: Deprecated. Use RescanBlocksAsync instead.
-(c *Client) RescanEndBlockAsync(startBlock *chainhash.Hash,
+func (c *Client) RescanEndBlockAsync(startBlock *chainhash.Hash,
 	addresses []util.Address, outpoints []*wire.OutPoint,
 	endBlock *chainhash.Hash) FutureRescanResult {
 	// Not supported in HTTP POST mode.
@@ -1042,7 +981,7 @@ func // RescanEndBlockAsync returns an instance of a type that can be used to
 	return c.sendCmd(cmd)
 }
 
-func // RescanEndHeight rescans the block chain starting from the provided
+// RescanEndHeight rescans the block chain starting from the provided
 // starting block up to the provided ending block for transactions that pay
 // to the passed addresses and transactions which spend the passed outpoints.
 // The notifications of found transactions are delivered to the notification
@@ -1057,36 +996,36 @@ func // RescanEndHeight rescans the block chain starting from the provided
 // See Rescan to also perform a rescan through current end of the longest
 // chain. NOTE: This is a pod extension and requires a websocket connection.
 // NOTE: Deprecated. Use RescanBlocks instead.
-(c *Client) RescanEndHeight(startBlock *chainhash.Hash,
+func (c *Client) RescanEndHeight(startBlock *chainhash.Hash,
 	addresses []util.Address, outpoints []*wire.OutPoint,
-	endBlock *chainhash.Hash) error {
+	endBlock *chainhash.Hash) (err error) {
 	return c.RescanEndBlockAsync(startBlock, addresses, outpoints,
 		endBlock).Receive()
 }
 
-type // FutureLoadTxFilterResult is a future promise to deliver the result of
-	// a LoadTxFilterAsync RPC invocation (or an applicable error).
-	// NOTE: This is a pod extension ported from github.com/decred/dcrrpcclient
-	// and requires a websocket connection.
-	FutureLoadTxFilterResult chan *response
+// FutureLoadTxFilterResult is a future promise to deliver the result of
+// a LoadTxFilterAsync RPC invocation (or an applicable error).
+// NOTE: This is a pod extension ported from github.com/decred/dcrrpcclient
+// and requires a websocket connection.
+type FutureLoadTxFilterResult chan *response
 
-func // Receive waits for the response promised by the future and returns an
+// Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
 // NOTE: This is a pod extension ported from github.com/decred/dcrrpcclient
 // and requires a websocket connection.
-(r FutureLoadTxFilterResult) Receive() error {
-	_, err := receiveFuture(r)
+func (r FutureLoadTxFilterResult) Receive() (err error) {
+	_, err = receiveFuture(r)
 	return err
 }
 
-func // LoadTxFilterAsync returns an instance of a type that can be used to
+// LoadTxFilterAsync returns an instance of a type that can be used to
 // get the result of the RPC at some future time by invoking the Receive
 // function on the returned instance.
 // See LoadTxFilter for the blocking version and more details.
 // NOTE: This is a pod extension ported from github.
 // com/decred/dcrrpcclient and requires a websocket connection.
-(c *Client) LoadTxFilterAsync(reload bool, addresses []util.Address,
-	outPoints []wire.OutPoint) FutureLoadTxFilterResult {
+func (c *Client) LoadTxFilterAsync(reload bool, addresses []util.Address, outPoints []wire.OutPoint,
+) FutureLoadTxFilterResult {
 	addrStrs := make([]string, len(addresses))
 	for i, a := range addresses {
 		addrStrs[i] = a.EncodeAddress()
@@ -1102,12 +1041,12 @@ func // LoadTxFilterAsync returns an instance of a type that can be used to
 	return c.sendCmd(cmd)
 }
 
-func // LoadTxFilter loads reloads or adds data to a websocket client's
+// LoadTxFilter loads reloads or adds data to a websocket client's
 // transaction filter.
 // The filter is consistently updated based on inspected transactions during
 // mempool acceptance, block acceptance, and for all rescanned blocks.
 // NOTE: This is a pod extension ported from github.
 // com/decred/dcrrpcclient and requires a websocket connection.
-(c *Client) LoadTxFilter(reload bool, addresses []util.Address, outPoints []wire.OutPoint) error {
+func (c *Client) LoadTxFilter(reload bool, addresses []util.Address, outPoints []wire.OutPoint) (err error) {
 	return c.LoadTxFilterAsync(reload, addresses, outPoints).Receive()
 }

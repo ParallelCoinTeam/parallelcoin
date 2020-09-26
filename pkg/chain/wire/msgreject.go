@@ -56,7 +56,7 @@ type MsgReject struct {
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation.
-func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (err error) {
 	if pver < RejectVersion {
 		str := fmt.Sprintf("reject message invalid for protocol "+
 			"version %d", pver)
@@ -94,39 +94,23 @@ func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) e
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface implementation.
-func (msg *MsgReject) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
+func (msg *MsgReject) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (err error) {
 	if pver < RejectVersion {
 		str := fmt.Sprintf("reject message invalid for protocol "+
 			"version %d", pver)
 		return messageError("MsgReject.BtcEncode", str)
 	}
 	// Command that was rejected.
-	err := WriteVarString(w, pver, msg.Cmd)
-	if err != nil {
-		slog.Error(err)
-		return err
-	}
+	if err = WriteVarString(w, pver, msg.Cmd); slog.Check(err) {return}
 	// Code indicating why the command was rejected.
-	err = writeElement(w, msg.Code)
-	if err != nil {
-		slog.Error(err)
-		return err
-	}
+	if err = writeElement(w, msg.Code); slog.Check(err) {return}
 	// Human readable string with specific details (over and above the reject code above) about why the command was rejected.
-	err = WriteVarString(w, pver, msg.Reason)
-	if err != nil {
-		slog.Error(err)
-		return err
-	}
+	if err = WriteVarString(w, pver, msg.Reason); slog.Check(err) {return}
 	// CmdBlock and CmdTx messages have an additional hash field that identifies the specific block or transaction.
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
-		err := writeElement(w, &msg.Hash)
-		if err != nil {
-			slog.Error(err)
-			return err
-		}
+		if err = writeElement(w, &msg.Hash); slog.Check(err) {return}
 	}
-	return nil
+	return
 }
 
 // Command returns the protocol command string for the message.  This is part of the Message interface implementation.
@@ -136,13 +120,13 @@ func (msg *MsgReject) Command() string {
 
 // MaxPayloadLength returns the maximum length the payload can be for the receiver.  This is part of the Message interface implementation.
 func (msg *MsgReject) MaxPayloadLength(pver uint32) uint32 {
-	plen := uint32(0)
+	pLen := uint32(0)
 	// The reject message did not exist before protocol version RejectVersion.
 	if pver >= RejectVersion {
 		// Unfortunately the bitcoin protocol does not enforce a sane limit on the length of the reason, so the max payload is the overall maximum message payload.
-		plen = MaxMessagePayload
+		pLen = MaxMessagePayload
 	}
-	return plen
+	return pLen
 }
 
 // NewMsgReject returns a new bitcoin reject message that conforms to the Message interface.  See MsgReject for details.

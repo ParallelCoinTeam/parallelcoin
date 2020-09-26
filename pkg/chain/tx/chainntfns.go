@@ -31,7 +31,7 @@ func (w *Wallet) handleChainNotifications() {
 		}
 	}
 	catchUpHashes := func(w *Wallet, client chain.Interface,
-		height int32) error {
+		height int32) (err error) {
 		// TODO(aakselrod): There's a race conditon here, which
 		// happens when a reorg occurs between the
 		// rescanProgress notification and the last GetBlockHash
@@ -44,7 +44,7 @@ func (w *Wallet) handleChainNotifications() {
 		// rescan.
 		slog.Infof("catching up block hashes to height %d, this might take a while, %s",
 			height)
-		err := walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
+		err := walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) (err error) {
 			ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 			startBlock := w.Manager.SyncedTo()
 			for i := startBlock.Height + 1; i <= height; i++ {
@@ -91,19 +91,19 @@ func (w *Wallet) handleChainNotifications() {
 			case chain.ClientConnected:
 				go sync(w)
 			case chain.BlockConnected:
-				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
+				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) (err error) {
 					err := w.connectBlock(tx, wtxmgr.BlockMeta(n))
 					slog.Debug("connect block error ", err)
 					return err
 				})
 				notificationName = "blockconnected"
 			case chain.BlockDisconnected:
-				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
+				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) (err error) {
 					return w.disconnectBlock(tx, wtxmgr.BlockMeta(n))
 				})
 				notificationName = "blockdisconnected"
 			case chain.RelevantTx:
-				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
+				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) (err error) {
 					return w.addRelevantTx(tx, n.TxRecord, n.Block)
 				})
 				notificationName = "recvtx/redeemingtx"
@@ -111,7 +111,7 @@ func (w *Wallet) handleChainNotifications() {
 				// Atomically update for the whole block.
 				if len(n.RelevantTxs) > 0 {
 					err = walletdb.Update(w.db, func(
-						tx walletdb.ReadWriteTx) error {
+						tx walletdb.ReadWriteTx) (err error) {
 						var err error
 						for _, rec := range n.RelevantTxs {
 							err = w.addRelevantTx(tx, rec,
@@ -168,7 +168,7 @@ func (w *Wallet) handleChainNotifications() {
 // connectBlock handles a chain server notification by marking a wallet
 // that's currently in-sync with the chain server as being synced up to
 // the passed block.
-func (w *Wallet) connectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) error {
+func (w *Wallet) connectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) (err error) {
 	addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 	bs := waddrmgr.BlockStamp{
 		Height:    b.Height,
@@ -190,7 +190,7 @@ func (w *Wallet) connectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) err
 // disconnectBlock handles a chain server reorganize by rolling back all
 // block history from the reorged block for a wallet in-sync with the chain
 // server.
-func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) error {
+func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) (err error) {
 	addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 	txmgrNs := dbtx.ReadWriteBucket(wtxmgrNamespaceKey)
 	if !w.ChainSynced() {
@@ -237,7 +237,7 @@ func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) 
 	w.NtfnServer.notifyDetachedBlock(&b.Hash)
 	return nil
 }
-func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, block *wtxmgr.BlockMeta) error {
+func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, block *wtxmgr.BlockMeta) (err error) {
 	addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 	txmgrNs := dbtx.ReadWriteBucket(wtxmgrNamespaceKey)
 	// At the moment all notified transactions are assumed to actually be

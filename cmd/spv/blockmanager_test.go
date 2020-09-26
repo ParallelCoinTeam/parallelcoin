@@ -326,7 +326,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // // the next interval
 // func generateHeaders(// 	genesisBlockHeader *wire.BlockHeader,
 // 	genesisFilterHeader *chainhash.Hash,
-// 	onCheckpoint func(*chainhash.Hash)) (*headers, error) {
+// 	onCheckpoint func(*chainhash.Hash)) (*headers, err error) {
 // 	var blockHeaders []headerfs.BlockHeader
 // 	blockHeaders = append(blockHeaders, headerfs.BlockHeader{
 // 		BlockHeader: genesisBlockHeader,
@@ -408,7 +408,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // // generateResponses generates the MsgCFHeaders messages from the given queries
 // // and headers.
 // func generateResponses(// 	msgs []wire.Message,
-// 	headers *headers) ([]*wire.MsgCFHeaders, error) {
+// 	headers *headers) ([]*wire.MsgCFHeaders, err error) {
 // 	// Craft a response for each message.
 // 	var responses []*wire.MsgCFHeaders
 // 	for _, msg := range msgs {
@@ -457,7 +457,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 
 // // setupBlockManager initialises a blockManager to be used in tests.
 // func setupBlockManager() (*blockManager, headerfs.BlockHeaderStore,
-// 	*headerfs.FilterHeaderStore, func(), error) {
+// 	*headerfs.FilterHeaderStore, func(), err error) {
 // 	// Set up the block and filter header stores.
 // 	tempDir, err := ioutil.TempDir("", "neutrino")
 // 	if err != nil {

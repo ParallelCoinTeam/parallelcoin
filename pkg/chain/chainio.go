@@ -117,21 +117,21 @@ dbPutVersion(dbTx database.Tx, key []byte, version uint32) (err error) {
 	return dbTx.Metadata().Put(key, serialized[:])
 }
 
-func // dbFetchOrCreateVersion uses an existing database transaction to
+// dbFetchOrCreateVersion uses an existing database transaction to
 // attempt to fetch the provided key from the metadata bucket as a version
 // and in the case it doesn't exist it adds the entry with the provided
 // default version and returns that.
 // This is useful during upgrades to automatically handle loading and adding
 // version keys as necessary.
-dbFetchOrCreateVersion(dbTx database.Tx, key []byte, defaultVersion uint32) (uint32, error) {
-	version := dbFetchVersion(dbTx, key)
+func dbFetchOrCreateVersion(dbTx database.Tx, key []byte, defaultVersion uint32) (version uint32, err error) {
+	version = dbFetchVersion(dbTx, key)
 	if version == 0 {
 		version = defaultVersion
-		if err := dbPutVersion(dbTx, key, version); slog.Check(err) {
-			return 0, err
+		if err = dbPutVersion(dbTx, key, version); slog.Check(err) {
+			return
 		}
 	}
-	return version, nil
+	return
 }
 
 // The transaction spend journal consists of an entry for each block
@@ -274,17 +274,20 @@ putSpentTxOut(target []byte, stxo *SpentTxOut) int {
 func // decodeSpentTxOut decodes the passed serialized stxo entry,
 // possibly followed by other data, into the passed stxo struct.
 // It returns the number of bytes read.
-decodeSpentTxOut(serialized []byte, stxo *SpentTxOut) (int, error) {
+decodeSpentTxOut(serialized []byte, stxo *SpentTxOut) (offset int, err error) {
 	// Ensure there are bytes to decode.
 	if len(serialized) == 0 {
-		return 0, errDeserialize("no serialized bytes")
+		err = errDeserialize("no serialized bytes")
+		slog.Debug(err)
+		return
 	}
 	// Deserialize the header code.
-	code, offset := deserializeVLQ(serialized)
+	var code uint64
+	code, offset = deserializeVLQ(serialized)
 	if offset >= len(serialized) {
-		return offset, errDeserialize(
-			"unexpected end of data after header code",
-		)
+		err = errDeserialize("unexpected end of data after header code")
+		slog.Debug(err)
+		return
 	}
 	// Decode the header code.
 	// Bit 0 indicates containing transaction is a coinbase.
@@ -317,12 +320,12 @@ decodeSpentTxOut(serialized []byte, stxo *SpentTxOut) (int, error) {
 	return offset, nil
 }
 
-func // deserializeSpendJournalEntry decodes the passed serialized byte slice
+// deserializeSpendJournalEntry decodes the passed serialized byte slice
 //  into a slice of spent txouts according to the format described in detail
 //  above.
 //  Since the serialization format is not self describing as noted in the
 //  format comments this function also requires the transactions that spend the txouts.
-deserializeSpendJournalEntry(serialized []byte, txns []*wire.MsgTx) ([]SpentTxOut, error) {
+func deserializeSpendJournalEntry(serialized []byte, txns []*wire.MsgTx) (stxos []SpentTxOut, err error) {
 	// Calculate the total number of stxos.
 	var numStxos int
 	for _, tx := range txns {
@@ -334,18 +337,18 @@ deserializeSpendJournalEntry(serialized []byte, txns []*wire.MsgTx) ([]SpentTxOu
 		// This should never happen unless there is database corruption or an
 		// empty entry erroneously made its way into the database.
 		if numStxos != 0 {
-			return nil, AssertError(fmt.Sprintf(
-				"mismatched spend journal serialization - no serialization for expected %d stxos",
-				numStxos,
+			err = AssertError(fmt.Sprintf("mismatched spend journal serialization "+
+				"- no serialization for expected %d stxos", numStxos,
 			))
+			return
 		}
-		return nil, nil
+		return
 	}
 	// Loop backwards through all transactions so everything is read in
 	// reverse order to match the serialization order.
 	stxoIdx := numStxos - 1
 	offset := 0
-	stxos := make([]SpentTxOut, numStxos)
+	stxos = make([]SpentTxOut, numStxos)
 	for txIdx := len(txns) - 1; txIdx > -1; txIdx-- {
 		tx := txns[txIdx]
 		// Loop backwards through all of the transaction inputs and read the
@@ -354,22 +357,22 @@ deserializeSpendJournalEntry(serialized []byte, txns []*wire.MsgTx) ([]SpentTxOu
 			txIn := tx.TxIn[txInIdx]
 			stxo := &stxos[stxoIdx]
 			stxoIdx--
-			n, err := decodeSpentTxOut(serialized[offset:], stxo)
+			var n int
+			n, err = decodeSpentTxOut(serialized[offset:], stxo)
 			offset += n
 			if slog.Check(err) {
-				return nil, errDeserialize(fmt.Sprintf(
-					"unable to decode stxo for %v: %v",
-					txIn.PreviousOutPoint, err,
-				))
+				err = errDeserialize(fmt.Sprintf("unable to decode stxo for %v: %v", txIn.PreviousOutPoint, err))
+				slog.Debug(err)
+				return
 			}
 		}
 	}
-	return stxos, nil
+	return
 }
 
-func // serializeSpendJournalEntry serializes all of the passed spent txouts
+// serializeSpendJournalEntry serializes all of the passed spent txouts
 // into a single byte slice according to the format described in detail above.
-serializeSpendJournalEntry(stxos []SpentTxOut) []byte {
+func serializeSpendJournalEntry(stxos []SpentTxOut) []byte {
 	if len(stxos) == 0 {
 		return nil
 	}
@@ -388,40 +391,42 @@ serializeSpendJournalEntry(stxos []SpentTxOut) []byte {
 	return serialized
 }
 
-func // dbFetchSpendJournalEntry fetches the spend journal entry for the passed
+// dbFetchSpendJournalEntry fetches the spend journal entry for the passed
 // block and deserializes it into a slice of spent txout entries.
 // NOTE: Legacy entries will not have the coinbase flag or height set unless
 // it was the final output spend in the containing transaction.
 // It is up to the caller to handle this properly by looking the information
 // up in the utxo set.
-dbFetchSpendJournalEntry(dbTx database.Tx, block *util.Block) ([]SpentTxOut, error) {
+func dbFetchSpendJournalEntry(dbTx database.Tx, block *util.Block) (stxos []SpentTxOut, err error) {
 	// Exclude the coinbase transaction since it can't spend anything.
 	spendBucket := dbTx.Metadata().Bucket(spendJournalBucketName)
 	serialized := spendBucket.Get(block.Hash()[:])
 	blockTxns := block.MsgBlock().Transactions[1:]
-	stxos, err := deserializeSpendJournalEntry(serialized, blockTxns)
+	stxos, err = deserializeSpendJournalEntry(serialized, blockTxns)
 	if slog.Check(err) {
 		// Ensure any deserialization errors are returned as database
 		// corruption errors.
 		if isDeserializeErr(err) {
-			return nil, database.DBError{
+			err = database.DBError{
 				ErrorCode: database.ErrCorruption,
 				Description: fmt.Sprintf(
 					"corrupt spend information for %v: %v",
 					block.Hash(), err,
 				),
 			}
+			slog.Debug(err)
+			return
 		}
-		return nil, err
+		return
 	}
-	return stxos, nil
+	return
 }
 
-func // dbPutSpendJournalEntry uses an existing database transaction to
+// dbPutSpendJournalEntry uses an existing database transaction to
 // update the spend journal entry for the given block hash using the provided
 // slice of spent txouts. The spent txouts slice must contain an entry for
 // every txout the transactions in the block spend in the order they are spent.
-dbPutSpendJournalEntry(dbTx database.Tx, blockHash *chainhash.Hash, stxos []SpentTxOut) (err error) {
+func dbPutSpendJournalEntry(dbTx database.Tx, blockHash *chainhash.Hash, stxos []SpentTxOut) (err error) {
 	spendBucket := dbTx.Metadata().Bucket(spendJournalBucketName)
 	serialized := serializeSpendJournalEntry(stxos)
 	return spendBucket.Put(blockHash[:], serialized)
@@ -536,49 +541,49 @@ func recycleOutpointKey(key *[]byte) {
 
 // utxoEntryHeaderCode returns the calculated header code to be used when
 // serializing the provided utxo entry.
-func utxoEntryHeaderCode(entry *UtxoEntry) (uint64, error) {
+func utxoEntryHeaderCode(entry *UtxoEntry) (headerCode uint64, err error) {
 	if entry.IsSpent() {
-		return 0, AssertError("attempt to serialize spent UXTO header")
+		err = AssertError("attempt to serialize spent UXTO header")
+		slog.Debug(err)
+		return
 	}
 	// As described in the serialization format comments,
 	// the header code encodes the height shifted over one bit and the
 	// coinbase flag in the lowest bit.
-	headerCode := uint64(entry.BlockHeight()) << 1
+	headerCode = uint64(entry.BlockHeight()) << 1
 	if entry.IsCoinBase() {
 		headerCode |= 0x01
 	}
-	return headerCode, nil
+	return
 }
 
 // serializeUtxoEntry returns the entry serialized to a format that is
 // suitable for long-term storage.  The format is described in detail above.
-func serializeUtxoEntry(entry *UtxoEntry) ([]byte, error) {
+func serializeUtxoEntry(entry *UtxoEntry) (serialized []byte, err error) {
 	// Spent outputs have no serialization.
 	if entry.IsSpent() {
-		return nil, nil
+		return
 	}
 	// Encode the header code.
 	var headerCode uint64
-	var err error
 	if headerCode, err = utxoEntryHeaderCode(entry); slog.Check(err) {
-		return nil, err
+		return
 	}
 	// Calculate the size needed to serialize the entry.
 	size := serializeSizeVLQ(headerCode) +
 		compressedTxOutSize(uint64(entry.Amount()), entry.PkScript())
 	// Serialize the header code followed by the compressed unspent
 	// transaction output.
-	serialized := make([]byte, size)
+	serialized = make([]byte, size)
 	offset := putVLQ(serialized, headerCode)
-	_ = putCompressedTxOut(serialized[offset:], uint64(entry.Amount()),
-		entry.PkScript())
-	return serialized, nil
+	_ = putCompressedTxOut(serialized[offset:], uint64(entry.Amount()), entry.PkScript())
+	return
 }
 
-func // deserializeUtxoEntry decodes a utxo entry from the passed serialized
+// deserializeUtxoEntry decodes a utxo entry from the passed serialized
 // byte slice into a new UtxoEntry using a format that is suitable for long
 // -term storage.  The format is described in detail above.
-deserializeUtxoEntry(serialized []byte) (*UtxoEntry, error) {
+func deserializeUtxoEntry(serialized []byte) (entry *UtxoEntry, err error) {
 	// Deserialize the header code.
 	code, offset := deserializeVLQ(serialized)
 	if offset >= len(serialized) {
@@ -590,13 +595,14 @@ deserializeUtxoEntry(serialized []byte) (*UtxoEntry, error) {
 	isCoinBase := code&0x01 != 0
 	blockHeight := int32(code >> 1)
 	// Decode the compressed unspent transaction output.
-	amount, pkScript, _, err := decodeCompressedTxOut(serialized[offset:])
-	if slog.Check(err) {
-		return nil, errDeserialize(fmt.Sprint(
-			"unable to decode utxo:", err,
-		))
+	var amount uint64
+	var pkScript []byte
+	if amount, pkScript, _, err = decodeCompressedTxOut(serialized[offset:]); slog.Check(err) {
+		err = errDeserialize(fmt.Sprint("unable to decode utxo:", err))
+		slog.Debug(err)
+		return
 	}
-	entry := &UtxoEntry{
+	entry = &UtxoEntry{
 		amount:      int64(amount),
 		pkScript:    pkScript,
 		blockHeight: blockHeight,
@@ -605,14 +611,14 @@ deserializeUtxoEntry(serialized []byte) (*UtxoEntry, error) {
 	if isCoinBase {
 		entry.packedFlags |= tfCoinBase
 	}
-	return entry, nil
+	return
 }
 
-func // dbFetchUtxoEntryByHash attempts to find and fetch a utxo for the given
+// dbFetchUtxoEntryByHash attempts to find and fetch a utxo for the given
 // hash. It uses a cursor and seek to try and do this as efficiently as
 // possible. When there are no entries for the provided hash,
 // nil will be returned for the both the entry and the error.
-dbFetchUtxoEntryByHash(dbTx database.Tx, hash *chainhash.Hash) (*UtxoEntry, error) {
+func dbFetchUtxoEntryByHash(dbTx database.Tx, hash *chainhash.Hash) (ue *UtxoEntry, err error) {
 	// Attempt to find an entry by seeking for the hash along with a zero
 	// index.  Due to the fact the keys are serialized as <hash><index>,
 	// where the index uses an MSB encoding,
@@ -622,24 +628,24 @@ dbFetchUtxoEntryByHash(dbTx database.Tx, hash *chainhash.Hash) (*UtxoEntry, erro
 	ok := cursor.Seek(*key)
 	recycleOutpointKey(key)
 	if !ok {
-		return nil, nil
+		return
 	}
 	// An entry was found,
 	// but it could just be an entry with the next highest hash after the
 	// requested one, so make sure the hashes actually match.
 	cursorKey := cursor.Key()
 	if len(cursorKey) < chainhash.HashSize {
-		return nil, nil
+		return
 	}
 	if !bytes.Equal(hash[:], cursorKey[:chainhash.HashSize]) {
-		return nil, nil
+		return
 	}
 	return deserializeUtxoEntry(cursor.Value())
 }
 
 // dbFetchUtxoEntry uses an existing database transaction to fetch the
 // specified transaction output from the utxo set. When there is no entry for the provided output, nil will be returned for both the entry and the error.
-func dbFetchUtxoEntry(dbTx database.Tx, outpoint wire.OutPoint) (*UtxoEntry, error) {
+func dbFetchUtxoEntry(dbTx database.Tx, outpoint wire.OutPoint) (entry *UtxoEntry, err error) {
 	// Fetch the unspent transaction output information for the passed
 	// transaction output.  Return now when there is no entry.
 	key := outpointKey(outpoint)
@@ -647,41 +653,39 @@ func dbFetchUtxoEntry(dbTx database.Tx, outpoint wire.OutPoint) (*UtxoEntry, err
 	serializedUtxo := utxoBucket.Get(*key)
 	recycleOutpointKey(key)
 	if serializedUtxo == nil {
-		return nil, nil
+		return
 	}
 	// A non-nil zero-length entry means there is an entry in the database
 	// for a spent transaction output which should never be the case.
 	if len(serializedUtxo) == 0 {
-		return nil, AssertError(fmt.Sprint(
-			"database contains entry for spent tx output ",
-			outpoint,
-		))
+		err = AssertError(fmt.Sprint("database contains entry for spent tx output ", outpoint))
+		slog.Debug(err)
+		return
 	}
 	// Deserialize the utxo entry and return it.
-	entry, err := deserializeUtxoEntry(serializedUtxo)
+	entry, err = deserializeUtxoEntry(serializedUtxo)
 	if slog.Check(err) {
 		// Ensure any deserialization errors are returned as database
 		// corruption errors.
 		if isDeserializeErr(err) {
-			return nil, database.DBError{
-				ErrorCode: database.ErrCorruption,
-				Description: fmt.Sprintf(
-					"corrupt utxo entry for %v: %v",
-					outpoint, err,
-				),
+			err = database.DBError{
+				ErrorCode:   database.ErrCorruption,
+				Description: fmt.Sprintf("corrupt utxo entry for %v: %v", outpoint, err),
 			}
+			slog.Debug(err)
+			return
 		}
-		return nil, err
+		return
 	}
-	return entry, nil
+	return
 }
 
-func // dbPutUtxoView uses an existing database transaction to update the
-// utxo set in the database based on the provided utxo view contents and
-// state.
+// dbPutUtxoView uses an existing database transaction to update the utxo set in the database based on the provided utxo
+// view contents and state.
+//
 // In particular, only the entries that have been marked as modified are
 // written to the database.
-dbPutUtxoView(dbTx database.Tx, view *UtxoViewpoint) (err error) {
+func dbPutUtxoView(dbTx database.Tx, view *UtxoViewpoint) (err error) {
 	utxoBucket := dbTx.Metadata().Bucket(utxoSetBucketName)
 	for outpoint, entry := range view.entries {
 		// No need to update the database if the entry was not modified.
@@ -691,28 +695,27 @@ dbPutUtxoView(dbTx database.Tx, view *UtxoViewpoint) (err error) {
 		// Remove the utxo entry if it is spent.
 		if entry.IsSpent() {
 			key := outpointKey(outpoint)
-			err := utxoBucket.Delete(*key)
+			err = utxoBucket.Delete(*key)
 			if recycleOutpointKey(key); slog.Check(err) {
-				return err
+				return
 			}
 			continue
 		}
 		// Serialize and store the utxo entry.
-		serialized, err := serializeUtxoEntry(entry)
-		if slog.Check(err) {
-			return err
+		var serialized []byte
+		if serialized, err = serializeUtxoEntry(entry); slog.Check(err) {
+			return
 		}
 		key := outpointKey(outpoint)
-		err = utxoBucket.Put(*key, serialized)
-		// NOTE: The key is intentionally not recycled here since the
-		// database interface contract prohibits modifications.
-		// It will be garbage collected normally when the database is done
 		// with it.
-		if slog.Check(err) {
-			return err
+		// It will be garbage collected normally when the database is done
+		// database interface contract prohibits modifications.
+		// NOTE: The key is intentionally not recycled here since the
+		if err = utxoBucket.Put(*key, serialized); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // The block index consists of two buckets with an entry for every block in
@@ -775,9 +778,9 @@ func dbFetchHeightByHash(dbTx database.Tx, hash *chainhash.Hash) (height int32, 
 	return int32(byteOrder.Uint32(serializedHeight)), nil
 }
 
-func // dbFetchHashByHeight uses an existing database transaction to retrieve
+// dbFetchHashByHeight uses an existing database transaction to retrieve
 // the hash for the provided height from the index.
-dbFetchHashByHeight(dbTx database.Tx, height int32) (*chainhash.Hash, error) {
+func dbFetchHashByHeight(dbTx database.Tx, height int32) (h *chainhash.Hash, err error) {
 	var serializedHeight [4]byte
 	byteOrder.PutUint32(serializedHeight[:], uint32(height))
 	meta := dbTx.Metadata()
@@ -789,9 +792,9 @@ dbFetchHashByHeight(dbTx database.Tx, height int32) (*chainhash.Hash, error) {
 		)
 		return nil, errNotInMainChain(str)
 	}
-	var hash chainhash.Hash
-	copy(hash[:], hashBytes)
-	return &hash, nil
+	h = &chainhash.Hash{}
+	copy(h[:], hashBytes)
+	return
 }
 
 // The best chain state consists of the best block hash and height,
@@ -836,19 +839,21 @@ func serializeBestChainState(state bestChainState) []byte {
 	return serializedData[:]
 }
 
-func // deserializeBestChainState deserializes the passed serialized best chain
+// deserializeBestChainState deserializes the passed serialized best chain
 // state.  This is data stored in the chain state bucket and is updated after
 // every block is connected or disconnected form the main chain. block.
-deserializeBestChainState(serializedData []byte) (bestChainState, error) {
+func deserializeBestChainState(serializedData []byte) (state *bestChainState, err error) {
+	state = &bestChainState{}
 	// Ensure the serialized data has enough bytes to properly deserialize
 	// the hash, height, total transactions, and work sum length.
 	if len(serializedData) < chainhash.HashSize+16 {
-		return bestChainState{}, database.DBError{
+		err = database.DBError{
 			ErrorCode:   database.ErrCorruption,
 			Description: "corrupt best chain state",
 		}
+		slog.Debug(err)
+		return
 	}
-	state := bestChainState{}
 	copy(state.hash[:], serializedData[0:chainhash.HashSize])
 	offset := uint32(chainhash.HashSize)
 	state.height = byteOrder.Uint32(serializedData[offset : offset+4])
@@ -859,14 +864,16 @@ deserializeBestChainState(serializedData []byte) (bestChainState, error) {
 	offset += 4
 	// Ensure the serialized data has enough bytes to deserialize the work sum.
 	if uint32(len(serializedData[offset:])) < workSumBytesLen {
-		return bestChainState{}, database.DBError{
+		err = database.DBError{
 			ErrorCode:   database.ErrCorruption,
 			Description: "corrupt best chain state",
 		}
+		slog.Debug(err)
+		return
 	}
 	workSumBytes := serializedData[offset : offset+workSumBytesLen]
 	state.workSum = new(big.Int).SetBytes(workSumBytes)
-	return state, nil
+	return
 }
 
 // dbPutBestState uses an existing database transaction to update the best
@@ -999,7 +1006,7 @@ func (b *BlockChain) initChainState() (err error) {
 		// database transaction.
 		serializedData := dbTx.Metadata().Get(chainStateKeyName)
 		slog.Tracef("serialized chain state: %0x", serializedData)
-		var state bestChainState
+		var state *bestChainState
 		if state, err = deserializeBestChainState(serializedData); slog.Check(err) {
 			return err
 		}
@@ -1155,7 +1162,7 @@ func dbFetchHeaderByHash(dbTx database.Tx, hash *chainhash.Hash) (header *wire.B
 /*// dbFetchHeaderByHeight uses an existing database transaction to retrieve
 the block header for the provided height.
 func dbFetchHeaderByHeight(dbTx database.Tx,
-height int32) (*wire.BlockHeader, error) {
+height int32) (*wire.BlockHeader, err error) {
 	hash, err := dbFetchHashByHeight(dbTx, height)
 	if err != nil {
 		return nil, err

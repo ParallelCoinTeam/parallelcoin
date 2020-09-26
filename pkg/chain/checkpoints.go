@@ -76,9 +76,9 @@ func // findPreviousCheckpoint finds the most recent checkpoint that is already
 // associated block node.  It returns nil if a checkpoint can't be found (
 // this should really only happen for blocks before the first checkpoint).
 // This function MUST be called with the chain lock held (for reads).
-(b *BlockChain) findPreviousCheckpoint() (*BlockNode, error) {
+(b *BlockChain) findPreviousCheckpoint() (cp *BlockNode, err error) {
 	if !b.HasCheckpoints() {
-		return nil, nil
+		return
 	}
 	// Perform the initial search to find and cache the latest known
 	// checkpoint if the best chain is not known yet or we haven't already
@@ -99,27 +99,31 @@ func // findPreviousCheckpoint finds the most recent checkpoint that is already
 			if i < numCheckpoints-1 {
 				b.nextCheckpoint = &checkpoints[i+1]
 			}
-			return b.checkpointNode, nil
+			cp = b.checkpointNode
+			return
 		}
 		// No known latest checkpoint.
 		// This will only happen on blocks before the first known checkpoint.
 		// So, set the next expected checkpoint to the first checkpoint and
 		// return the fact there is no latest known checkpoint block.
 		b.nextCheckpoint = &checkpoints[0]
-		return nil, nil
+		return
 	}
 	// At this point we've already searched for the latest known checkpoint,
 	// so when there is no next checkpoint,
 	// the current checkpoint lockin will always be the latest known
 	//  checkpoint.
 	if b.nextCheckpoint == nil {
-		return b.checkpointNode, nil
+		cp = b.checkpointNode
+		return
 	}
 	// When there is a next checkpoint and the height of the current best
 	// chain does not exceed it,
 	// the current checkpoint lockin is still the latest known checkpoint.
 	if b.BestChain.Tip().height < b.nextCheckpoint.Height {
-		return b.checkpointNode, nil
+		cp = b.checkpointNode
+		return
+
 	}
 	// We've reached or exceeded the next checkpoint height.
 	// Note that once a checkpoint lockin has been reached,
@@ -132,9 +136,10 @@ func // findPreviousCheckpoint finds the most recent checkpoint that is already
 	// before inserting it.
 	checkpointNode := b.Index.LookupNode(b.nextCheckpoint.Hash)
 	if checkpointNode == nil {
-		return nil, AssertError(fmt.Sprintf("findPreviousCheckpoint "+
-			"failed lookup of known good block node %s",
+		err = AssertError(fmt.Sprintf("findPreviousCheckpoint failed lookup of known good block node %s",
 			b.nextCheckpoint.Hash))
+		slog.Debug(err)
+		return
 	}
 	b.checkpointNode = checkpointNode
 	// Set the next expected checkpoint.
@@ -149,12 +154,13 @@ func // findPreviousCheckpoint finds the most recent checkpoint that is already
 	if checkpointIndex != -1 && checkpointIndex < numCheckpoints-1 {
 		b.nextCheckpoint = &checkpoints[checkpointIndex+1]
 	}
-	return b.checkpointNode, nil
+	cp = b.checkpointNode
+	return
 }
 
-func // isNonstandardTransaction determines whether a transaction contains any
+// isNonstandardTransaction determines whether a transaction contains any
 // scripts which are not one of the standard types.
-isNonstandardTransaction(tx *util.Tx) bool {
+func isNonstandardTransaction(tx *util.Tx) bool {
 	// Check all of the output public key scripts for non-standard scripts.
 	for _, txOut := range tx.MsgTx().TxOut {
 		scriptClass := txscript.GetScriptClass(txOut.PkScript)
@@ -165,7 +171,7 @@ isNonstandardTransaction(tx *util.Tx) bool {
 	return false
 }
 
-func // IsCheckpointCandidate returns whether or not the passed block is a good
+// IsCheckpointCandidate returns whether or not the passed block is a good
 // checkpoint candidate.
 // The factors used to determine a good checkpoint are:
 //  - The block must be in the main chain
@@ -179,27 +185,28 @@ func // IsCheckpointCandidate returns whether or not the passed block is a good
 // The intent is that candidates are reviewed by a developer to make the
 // final decision and then manually added to the list of checkpoints for a
 // network. This function is safe for concurrent access.
-(b *BlockChain) IsCheckpointCandidate(block *util.Block) (bool, error) {
+func (b *BlockChain) IsCheckpointCandidate(block *util.Block) (is bool, err error) {
 	b.chainLock.RLock()
 	defer b.chainLock.RUnlock()
 	// A checkpoint must be in the main chain.
 	node := b.Index.LookupNode(block.Hash())
 	if node == nil || !b.BestChain.Contains(node) {
-		return false, nil
+		return
 	}
 	// Ensure the height of the passed block and the entry for the block in
 	// the main chain match.  This should always be the case unless the
 	// caller provided an invalid block.
 	if node.height != block.Height() {
-		return false, fmt.Errorf("passed block height of %d does not "+
-			"match the main chain height of %d", block.Height(),
-			node.height)
+		err = fmt.Errorf("passed block height of %d does not match the main chain height of %d",
+			block.Height(), node.height)
+		slog.Debug(err)
+		return
 	}
 	// A checkpoint must be at least CheckpointConfirmations blocks before
 	// the end of the main chain.
 	mainChainHeight := b.BestChain.Tip().height
 	if node.height > (mainChainHeight - CheckpointConfirmations) {
-		return false, nil
+		return
 	}
 	// A checkpoint must be have at least one block after it.
 	// This should always succeed since the check above already made sure it
@@ -207,11 +214,11 @@ func // IsCheckpointCandidate returns whether or not the passed block is a good
 	// but be safe in case the constant changes.
 	nextNode := b.BestChain.Next(node)
 	if nextNode == nil {
-		return false, nil
+		return
 	}
 	// A checkpoint must be have at least one block before it.
 	if node.parent == nil {
-		return false, nil
+		return
 	}
 	// A checkpoint must have timestamps for the block and the blocks on
 	// either side of it in order (
@@ -220,14 +227,15 @@ func // IsCheckpointCandidate returns whether or not the passed block is a good
 	curTime := block.MsgBlock().Header.Timestamp
 	nextTime := time.Unix(nextNode.timestamp, 0)
 	if prevTime.After(curTime) || nextTime.Before(curTime) {
-		return false, nil
+		return
 	}
 	// A checkpoint must have transactions that only contain standard scripts.
 	for _, tx := range block.Transactions() {
 		if isNonstandardTransaction(tx) {
-			return false, nil
+			return
 		}
 	}
 	// All of the checks passed, so the block is a candidate.
-	return true, nil
+	is = true
+	return
 }

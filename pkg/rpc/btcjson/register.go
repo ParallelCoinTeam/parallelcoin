@@ -102,7 +102,7 @@ The type format is very strict since it needs to be able to automatically marsha
   - A field that has a 'jsonrpcdefault' struct tag must be an optional field (pointer)
 NOTE: This function only needs to be able to examine the structure of the passed struct, so it does not need to be an actual instance.  Therefore, it is recommended to simply pass a nil pointer cast to the appropriate type. For example, (*FooCmd)(nil).
 */
-func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
+func RegisterCmd(method string, cmd interface{}, flags UsageFlag) (err error) {
 	registerLock.Lock()
 	defer registerLock.Unlock()
 	if _, ok := methodToConcreteType[method]; ok {

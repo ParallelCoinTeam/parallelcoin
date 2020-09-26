@@ -40,7 +40,7 @@ func HandleAddNode(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.AddNodeCmd)
@@ -89,7 +89,7 @@ func HandleAskWallet(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	return nil, ErrRPCNoWallet
 }
 
@@ -98,7 +98,7 @@ func HandleCreateRawTransaction(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.CreateRawTransactionCmd)
@@ -216,7 +216,7 @@ func HandleDecodeRawTransaction(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.DecodeRawTransactionCmd)
@@ -268,7 +268,7 @@ func HandleDecodeScript(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.DecodeScriptCmd)
@@ -332,7 +332,7 @@ func HandleEstimateFee(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.EstimateFeeCmd)
@@ -369,7 +369,7 @@ func HandleGenerate(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	// Respond with an error if there are no addresses to pay the created blocks
 	// to.
 	if len(s.StateCfg.ActiveMiningAddrs) == 0 {
@@ -425,7 +425,7 @@ func HandleGetAddedNodeInfo(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetAddedNodeInfoCmd)
@@ -529,7 +529,7 @@ func HandleGetBestBlock(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	// All other "get block" commands give either the height, the hash, or both
 	// but require the block SHA.  This gets both for the best block.
 	best := s.Cfg.Chain.BestSnapshot()
@@ -545,7 +545,7 @@ func HandleGetBestBlockHash(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	best := s.Cfg.Chain.BestSnapshot()
 	return best.Hash.String(), nil
 }
@@ -555,7 +555,7 @@ func HandleGetBlock(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetBlockCmd)
@@ -579,7 +579,7 @@ func HandleGetBlock(
 		return nil, DecodeHexError(c.Hash)
 	}
 	var blkBytes []byte
-	err = s.Cfg.DB.View(func(dbTx database.Tx) error {
+	err = s.Cfg.DB.View(func(dbTx database.Tx) (err error) {
 		var err error
 		blkBytes, err = dbTx.FetchBlock(hash)
 		return err
@@ -680,7 +680,7 @@ func HandleGetBlockChainInfo(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	// Obtain a snapshot of the current best known blockchain state. We'll
 	// populate the response to this call primarily from this snapshot.
 	params := s.Cfg.ChainParams
@@ -785,7 +785,7 @@ func HandleGetBlockCount(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	best := s.Cfg.Chain.BestSnapshot()
 	return int64(best.Height), nil
 }
@@ -795,7 +795,7 @@ func HandleGetBlockHash(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetBlockHashCmd)
@@ -828,7 +828,7 @@ func HandleGetBlockHeader(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetBlockHeaderCmd)
@@ -920,7 +920,7 @@ func HandleGetBlockTemplate(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetBlockTemplateCmd)
@@ -968,7 +968,7 @@ func HandleGetBlockTemplateLongPoll(
 	s *Server,
 	longPollID string,
 	useCoinbaseValue bool, closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	state := s.GBTWorkState
 	state.Lock()
 	// The state unlock is intentionally not deferred here since it needs to be
@@ -1051,7 +1051,7 @@ func HandleGetBlockTemplateLongPoll(
 func HandleGetBlockTemplateProposal(
 	s *Server,
 	request *btcjson.TemplateRequest,
-) (interface{}, error) {
+) (interface{}, err error) {
 	hexData := request.Data
 	if hexData == "" {
 		return false, &btcjson.RPCError{
@@ -1116,7 +1116,7 @@ func HandleGetBlockTemplateRequest(
 	s *Server,
 	request *btcjson.TemplateRequest,
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	// Extract the relevant passed capabilities and restrict the result to
 	// either a coinbase value or a coinbase transaction object depending on the
 	// request.  Default to only providing a coinbase value.
@@ -1192,7 +1192,7 @@ func HandleGetCFilter(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	if s.Cfg.CfIndex == nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCNoCFIndex,
@@ -1241,7 +1241,7 @@ func HandleGetCFilterHeader(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	if s.Cfg.CfIndex == nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCNoCFIndex,
@@ -1297,14 +1297,14 @@ func HandleGetCFilterHeader(
 // HandleGetConnectionCount implements the getconnectioncount command.
 func HandleGetConnectionCount(
 	s *Server,
-	cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+	cmd interface{}, closeChan <-chan struct{}) (interface{}, err error) {
 	return s.Cfg.ConnMgr.ConnectedCount(), nil
 }
 
 // HandleGetCurrentNet implements the getcurrentnet command.
 func HandleGetCurrentNet(
 	s *Server,
-	cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+	cmd interface{}, closeChan <-chan struct{}) (interface{}, err error) {
 	return s.Cfg.ChainParams.Net, nil
 }
 
@@ -1315,7 +1315,7 @@ func HandleGetDifficulty(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetDifficultyCmd)
@@ -1383,7 +1383,7 @@ func HandleGetDifficulty(
 // HandleGetGenerate implements the getgenerate command.
 func HandleGetGenerate(
 	s *Server,
-	cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
+	cmd interface{}, closeChan <-chan struct{}) (interface{}, err error) { // cpuminer
 	generating := s.Cfg.CPUMiner != nil
 	if generating {
 		slog.Debug("miner is running internally")
@@ -1400,7 +1400,7 @@ var startTime = time.Now()
 // HandleGetHashesPerSec implements the gethashespersec command.
 func HandleGetHashesPerSec(
 	s *Server,
-	cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
+	cmd interface{}, closeChan <-chan struct{}) (interface{}, err error) { // cpuminer
 	// return int64(s.,
 	// Cfg.CPUMiner.HashesPerSecond()), nil
 	// TODO: finish this - needs generator for momentary rate (ewma)
@@ -1415,7 +1415,7 @@ func HandleGetHeaders(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetHeadersCmd)
@@ -1598,7 +1598,7 @@ func HandleGetMempoolInfo(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	mempoolTxns := s.Cfg.TxMemPool.TxDescs()
 	var numBytes int64
 	for _, txD := range mempoolTxns {
@@ -1742,7 +1742,7 @@ func HandleGetNetTotals(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	totalBytesRecv, totalBytesSent := s.Cfg.ConnMgr.NetTotals()
 	reply := &btcjson.GetNetTotalsResult{
 		TotalBytesRecv: totalBytesRecv,
@@ -1759,7 +1759,7 @@ func HandleGetNetworkHashPS(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetNetworkHashPSCmd)
@@ -1867,7 +1867,7 @@ func HandleGetPeerInfo(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	peers := s.Cfg.ConnMgr.ConnectedPeers()
 	syncPeerID := s.Cfg.SyncMgr.SyncPeerID()
 	infos := make([]*btcjson.GetPeerInfoResult, 0, len(peers))
@@ -1910,7 +1910,7 @@ func HandleGetRawMempool(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	c := cmd.(*btcjson.GetRawMempoolCmd)
 	mp := s.Cfg.TxMemPool
 	if c.Verbose != nil && *c.Verbose {
@@ -1931,7 +1931,7 @@ func HandleGetRawTransaction(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -1986,7 +1986,7 @@ func HandleGetRawTransaction(
 		}
 		// Load the raw transaction bytes from the database.
 		var txBytes []byte
-		err = s.Cfg.DB.View(func(dbTx database.Tx) error {
+		err = s.Cfg.DB.View(func(dbTx database.Tx) (err error) {
 			var err error
 			txBytes, err = dbTx.FetchBlockRegion(blockRegion)
 			return err
@@ -2065,7 +2065,7 @@ func HandleGetTxOut(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -2181,7 +2181,7 @@ func HandleGetTxOut(
 func HandleHelp(
 	s *Server,
 	cmd interface{}, closeChan <-chan struct{}) (
-	interface{}, error) {
+	interface{}, err error) {
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -2237,7 +2237,7 @@ func HandleHelp(
 func HandleNode(
 	s *Server,
 	cmd interface{}, closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -2343,7 +2343,7 @@ func HandleNode(
 func HandlePing(
 	s *Server,
 	cmd interface{}, closeChan <-chan struct{}) (
-	interface{}, error) {
+	interface{}, err error) {
 	// Ask server to ping \o_
 	nonce, err := wire.RandomUint64()
 	if err != nil {
@@ -2361,7 +2361,7 @@ func HandleSearchRawTransactions(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	// Respond with an error if the address index is not enabled.
 	addrIndex := s.Cfg.AddrIndex
 	if addrIndex == nil {
@@ -2442,7 +2442,7 @@ func HandleSearchRawTransactions(
 	// Fetch transactions from the database in the desired order if more are
 	// needed.
 	if len(addressTxns) < numRequested {
-		err = s.Cfg.DB.View(func(dbTx database.Tx) error {
+		err = s.Cfg.DB.View(func(dbTx database.Tx) (err error) {
 			regions, dbSkipped, err := addrIndex.TxRegionsForAddress(dbTx, addr,
 				uint32(numToSkip)-numSkipped, uint32(numRequested-len(addressTxns)),
 				reverse)
@@ -2603,7 +2603,7 @@ func HandleSendRawTransaction(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -2692,7 +2692,7 @@ func HandleSendRawTransaction(
 // HandleSetGenerate implements the setgenerate command.
 func HandleSetGenerate(
 	s *Server,
-	cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
+	cmd interface{}, closeChan <-chan struct{}) (interface{}, err error) { // cpuminer
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -2777,7 +2777,7 @@ func HandleSetGenerate(
 func HandleStop(
 	s *Server,
 	cmd interface{}, closeChan <-chan struct{}) (
-	interface{}, error) {
+	interface{}, err error) {
 	interrupt.Request()
 	return nil, nil
 }
@@ -2786,7 +2786,7 @@ func HandleStop(
 func HandleRestart(
 	s *Server,
 	cmd interface{}, closeChan <-chan struct{}) (
-	interface{}, error) {
+	interface{}, err error) {
 	// select {
 	// case s.RequestProcessShutdown <- struct{}{}:
 	// default:
@@ -2800,7 +2800,7 @@ func HandleSubmitBlock(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -2856,7 +2856,7 @@ func HandleUnimplemented(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	return nil, ErrRPCUnimplemented
 }
 
@@ -2864,7 +2864,7 @@ func HandleUnimplemented(
 func HandleUptime(
 	s *Server,
 	cmd interface{}, closeChan <-chan struct{}) (
-	interface{}, error) {
+	interface{}, err error) {
 	return time.Now().Unix() - s.Cfg.StartupTime, nil
 }
 
@@ -2873,7 +2873,7 @@ func HandleValidateAddress(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -2908,7 +2908,7 @@ func HandleVerifyChain(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -2940,7 +2940,7 @@ func HandleVerifyChain(
 // HandleResetChain deletes the existing chain database and restarts
 func HandleResetChain(
 	s *Server,
-	cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+	cmd interface{}, closeChan <-chan struct{}) (interface{}, err error) {
 	dbName := blockdb.NamePrefix + "_" + *s.Config.DbType
 	if *s.Config.DbType == "sqlite" {
 		dbName += ".db"
@@ -2960,7 +2960,7 @@ func HandleVerifyMessage(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	var msg string
 	var err error
 	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
@@ -3052,7 +3052,7 @@ func HandleVersion(
 	s *Server,
 	cmd interface{},
 	closeChan <-chan struct{},
-) (interface{}, error) {
+) (interface{}, err error) {
 	result := map[string]btcjson.VersionResult{
 		"podjsonrpcapi": {
 			VersionString: JSONRPCSemverString,

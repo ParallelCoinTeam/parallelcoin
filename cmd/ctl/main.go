@@ -27,14 +27,11 @@ func Main(args []string, cx *conte.Xt) {
 	usageFlags, err := btcjson.MethodUsageFlags(method)
 	if err != nil {
 		slog.Error(err)
-		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 		HelpPrint()
 		os.Exit(1)
 	}
 	if usageFlags&unusableFlags != 0 {
-		fmt.Fprintf(
-			os.Stderr,
-			"The '%s' command can only be used via websockets\n", method)
+		slog.Errorf("The '%s' command can only be used via websockets\n", method)
 		HelpPrint()
 		os.Exit(1)
 	}
@@ -51,12 +48,11 @@ func Main(args []string, cx *conte.Xt) {
 		if arg == "-" {
 			param, err := bio.ReadString('\n')
 			if err != nil && err != io.EOF {
-				fmt.Fprintf(os.Stderr,
-					"Failed to read data from stdin: %v\n", err)
+				slog.Errorf("Failed to read data from stdin: %v\n", err)
 				os.Exit(1)
 			}
 			if err == io.EOF && len(param) == 0 {
-				fmt.Fprintln(os.Stderr, "Not enough lines provided on stdin")
+				slog.Errorf("Not enough lines provided on stdin")
 				os.Exit(1)
 			}
 			param = strings.TrimRight(param, "\r\n")
@@ -67,38 +63,35 @@ func Main(args []string, cx *conte.Xt) {
 	}
 	// Attempt to create the appropriate command using the arguments provided
 	// by the user.
-	cmd, err := btcjson.NewCmd(method, params...)
-	if err != nil {
-		slog.Error(err)
+	var cmd interface{}
+	if cmd, err = btcjson.NewCmd(method, params...); slog.Check(err) {
 		// Show the error along with its error code when it's a json.
 		// BTCJSONError as it realistically will always be since the NewCmd function
 		// is only supposed to return errors of that type.
-		if jerr, ok := err.(btcjson.Error); ok {
-			fmt.Fprintf(os.Stderr, "%s command: %v (code: %s)\n",
-				method, err, jerr.ErrorCode)
+		var ok bool
+		var e btcjson.Error
+		if e, ok = err.(btcjson.Error); ok {
+			slog.Errorf("%s command: %v (code: %s)\n", method, err, e.ErrorCode)
 			CommandUsage(method)
 			os.Exit(1)
 		}
 		// The error is not a json.BTCJSONError and this really should not happen.
 		// Nevertheless fall back to just showing the error if it should
 		// happen due to a bug in the package.
-		fmt.Fprintf(os.Stderr, "%s command: %v\n", method, err)
+		slog.Errorf("%s command: %v\n", method, err)
 		CommandUsage(method)
 		os.Exit(1)
 	}
 	// Marshal the command into a JSON-RPC byte slice in preparation for sending
 	// it to the RPC server.
-	marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
-	if err != nil {
-		slog.Error(err)
-		fmt.Println(err)
+	var marshalledJSON []byte
+	if marshalledJSON, err = btcjson.MarshalCmd(1, cmd); slog.Check(err) {
 		os.Exit(1)
 	}
 	// Send the JSON-RPC request to the server using the user-specified
 	// connection configuration.
-	result, err := sendPostRequest(marshalledJSON, cx)
-	if err != nil {
-		slog.Error(err)
+	var result []byte
+	if result, err = sendPostRequest(marshalledJSON, cx); slog.Check(err) {
 		os.Exit(1)
 	}
 	// Choose how to display the result based on its type.
@@ -106,16 +99,15 @@ func Main(args []string, cx *conte.Xt) {
 	switch {
 	case strings.HasPrefix(strResult, "{") || strings.HasPrefix(strResult, "["):
 		var dst bytes.Buffer
-		if err := js.Indent(&dst, result, "", "  "); err != nil {
-			fmt.Printf("Failed to format result: %v", err)
+		if err = js.Indent(&dst, result, "", "  "); slog.Check(err) {
+			slog.Errorf("Failed to format result: %v", err)
 			os.Exit(1)
 		}
 		fmt.Println(dst.String())
 	case strings.HasPrefix(strResult, `"`):
 		var str string
 		if err := js.Unmarshal(result, &str); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to unmarshal result: %v",
-				err)
+			slog.Errorf("Failed to unmarshal result: %v", err)
 			os.Exit(1)
 		}
 		fmt.Println(str)

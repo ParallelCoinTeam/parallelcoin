@@ -211,7 +211,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 // It also additional logic such warning the user if there are multiple
 // databases which consume space on the file system and ensuring the
 // regression test database is clean when in regression test mode.
-func loadBlockDB(cx *conte.Xt) (database.DB, error) {
+func loadBlockDB(cx *conte.Xt) (database.DB, err error) {
 	// The memdb backend does not have a file path associated with it,
 	// so handle it uniquely.
 	// We also don't want to worry about the multiple database type

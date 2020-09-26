@@ -81,7 +81,7 @@ func addNaTest(ip string, port uint16, want string) {
 	test := naTest{na, want}
 	naTests = append(naTests, test)
 }
-func lookupFunc(host string) ([]net.IP, error) {
+func lookupFunc(host string) ([]net.IP, err error) {
 	return nil, errors.New("not implemented")
 }
 func TestStartStop(t *testing.T) {

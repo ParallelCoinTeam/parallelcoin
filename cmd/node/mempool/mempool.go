@@ -187,7 +187,7 @@ func // FetchTransaction returns the requested transaction from the transaction
 // pool. This only fetches from the main transaction pool and does not
 // include orphans.
 // This function is safe for concurrent access.
-(mp *TxPool) FetchTransaction(txHash *chainhash.Hash) (*util.Tx, error) {
+(mp *TxPool) FetchTransaction(txHash *chainhash.Hash) (*util.Tx, err error) {
 	// Protect concurrent access.
 	mp.mtx.RLock()
 	txDesc, exists := mp.pool[*txHash]
@@ -248,7 +248,7 @@ func // MaybeAcceptTransaction is the main workhorse for handling insertion
 // Use ProcessTransaction instead if new orphans should be added to the
 // orphan pool. This function is safe for concurrent access.
 (mp *TxPool) MaybeAcceptTransaction(b *blockchain.BlockChain,
-	tx *util.Tx, isNew, rateLimit bool) ([]*chainhash.Hash, *TxDesc, error) {
+	tx *util.Tx, isNew, rateLimit bool) ([]*chainhash.Hash, *TxDesc, err error) {
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	hashes, txD, err := mp.maybeAcceptTransaction(b, tx, isNew, rateLimit, true)
@@ -299,7 +299,7 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 // of the passed one being accepted.
 // This function is safe for concurrent access.
 (mp *TxPool) ProcessTransaction(b *blockchain.BlockChain, tx *util.Tx,
-	allowOrphan, rateLimit bool, tag Tag) ([]*TxDesc, error) {
+	allowOrphan, rateLimit bool, tag Tag) ([]*TxDesc, err error) {
 	slog.Trace("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
@@ -659,7 +659,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 // public MaybeAcceptTransaction.
 // See the comment for MaybeAcceptTransaction for more details.
 // This function MUST be called with the mempool lock held (for writes).
-(mp *TxPool) maybeAcceptTransaction(b *blockchain.BlockChain, tx *util.Tx, isNew, rateLimit, rejectDupOrphans bool) ([]*chainhash.Hash, *TxDesc, error) {
+(mp *TxPool) maybeAcceptTransaction(b *blockchain.BlockChain, tx *util.Tx, isNew, rateLimit, rejectDupOrphans bool) ([]*chainhash.Hash, *TxDesc, err error) {
 	txHash := tx.Hash()
 	// If a transaction has witness data, and segwit isn't active yet,
 	// If segwit isn't active yet,

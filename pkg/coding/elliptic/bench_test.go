@@ -19,7 +19,7 @@ func BenchmarkAddJacobian(b *testing.B) {
 	}
 }
 
-// BenchmarkAddJacobianNotZOne benchmarks the secp256k1 curve addJacobian function with Z values other than one so the optimizations associated with Z=1 aren't used.
+// BenchmarkAddJacobianNotZOne benchmarks the secp256k1 curve add Jacobian function with Z values other than one so the optimizations associated with Z=1 aren't used.
 func BenchmarkAddJacobianNotZOne(b *testing.B) {
 	b.StopTimer()
 	x1 := new(fieldVal).SetHex("d3e5183c393c20e4f464acf144ce9ae8266a82b67f553af33eb37e88e7fd2718")

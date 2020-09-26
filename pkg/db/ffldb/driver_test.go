@@ -28,7 +28,7 @@ func TestCreateOpenFail(t *testing.T) {
 	wantErr := fmt.Errorf("invalid arguments to %s.Open -- expected "+
 		"database path and block network", dbType)
 	_, err = database.Open(dbType, 1, 2, 3)
-	if err.Error() != wantErr.Error() {
+	if err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -37,7 +37,7 @@ func TestCreateOpenFail(t *testing.T) {
 	wantErr = fmt.Errorf("first argument to %s.Open is invalid -- "+
 		"expected database path string", dbType)
 	_, err = database.Open(dbType, 1, blockDataNet)
-	if err.Error() != wantErr.Error() {
+	if err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -46,7 +46,7 @@ func TestCreateOpenFail(t *testing.T) {
 	wantErr = fmt.Errorf("second argument to %s.Open is invalid -- "+
 		"expected block network", dbType)
 	_, err = database.Open(dbType, "noexist", "invalid")
-	if err.Error() != wantErr.Error() {
+	if err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -55,7 +55,7 @@ func TestCreateOpenFail(t *testing.T) {
 	wantErr = fmt.Errorf("invalid arguments to %s.Create -- expected "+
 		"database path and block network", dbType)
 	_, err = database.Create(dbType, 1, 2, 3)
-	if err.Error() != wantErr.Error() {
+	if err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -64,7 +64,7 @@ func TestCreateOpenFail(t *testing.T) {
 	wantErr = fmt.Errorf("first argument to %s.Create is invalid -- "+
 		"expected database path string", dbType)
 	_, err = database.Create(dbType, 1, blockDataNet)
-	if err.Error() != wantErr.Error() {
+	if err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -73,7 +73,7 @@ func TestCreateOpenFail(t *testing.T) {
 	wantErr = fmt.Errorf("second argument to %s.Create is invalid -- "+
 		"expected block network", dbType)
 	_, err = database.Create(dbType, "noexist", "invalid")
-	if err.Error() != wantErr.Error() {
+	if err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -89,14 +89,14 @@ func TestCreateOpenFail(t *testing.T) {
 	defer os.RemoveAll(dbPath)
 	db.Close()
 	wantErrCode = database.ErrDbNotOpen
-	err = db.View(func(tx database.Tx) error {
+	err = db.View(func(tx database.Tx) (err error) {
 		return nil
 	})
 	if !checkDbError(t, "View", err, wantErrCode) {
 		return
 	}
 	wantErrCode = database.ErrDbNotOpen
-	err = db.Update(func(tx database.Tx) error {
+	err = db.Update(func(tx database.Tx) (err error) {
 		return nil
 	})
 	if !checkDbError(t, "Update", err, wantErrCode) {
@@ -141,7 +141,7 @@ func TestPersistence(t *testing.T) {
 	}
 	genesisBlock := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 	genesisHash := chaincfg.MainNetParams.GenesisHash
-	err = db.Update(func(tx database.Tx) error {
+	err = db.Update(func(tx database.Tx) (err error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("Metadata: unexpected nil bucket")
@@ -177,7 +177,7 @@ func TestPersistence(t *testing.T) {
 	}
 	defer db.Close()
 	// Ensure the values previously stored in the 3rd namespace still exist and are correct.
-	err = db.View(func(tx database.Tx) error {
+	err = db.View(func(tx database.Tx) (err error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("Metadata: unexpected nil bucket")

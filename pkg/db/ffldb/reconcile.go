@@ -25,7 +25,7 @@ serializeWriteRow(curBlockFileNum, curFileOffset uint32) []byte {
 
 func // deserializeWriteRow deserializes the write cursor location stored in the
 // metadata.  Returns ErrCorruption if the checksum of the entry doesn't match.
-deserializeWriteRow(writeRow []byte) (uint32, uint32, error) {
+deserializeWriteRow(writeRow []byte) (uint32, uint32, err error) {
 	// Ensure the checksum matches.  The checksum is at the end.
 	gotChecksum := crc32.Checksum(writeRow[:8], castagnoli)
 	wantChecksumBytes := writeRow[8:12]
@@ -43,28 +43,26 @@ deserializeWriteRow(writeRow []byte) (uint32, uint32, error) {
 
 func // reconcileDB reconciles the metadata with the flat block files on
 // disk.  It will also initialize the underlying database if the create flag is set.
-reconcileDB(pdb *db, create bool) (database.DB, error) {
+reconcileDB(pdb *db, create bool) (dB database.DB, err error) {
 	// Perform initial internal bucket and value creation during database creation.
 	if create {
-		if err := initDB(pdb.cache.ldb); err != nil {
-			return nil, err
+		if err = initDB(pdb.cache.ldb); err != nil {
+			return
 		}
 	}
 	// Load the current write cursor position from the metadata.
 	var curFileNum, curOffset uint32
-	err := pdb.View(func(tx database.Tx) error {
+	if err = pdb.View(func(tx database.Tx) (err error) {
 		writeRow := tx.Metadata().Get(writeLocKeyName)
 		if writeRow == nil {
 			str := "write cursor does not exist"
 			return makeDbErr(database.ErrCorruption, str, nil)
 		}
-		var err error
-		curFileNum, curOffset, err = deserializeWriteRow(writeRow)
+		if curFileNum, curOffset, err = deserializeWriteRow(writeRow); slog.Check(err) {
+		}
 		return err
-	})
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	}); slog.Check(err) {
+		return
 	}
 	// When the write cursor position found by scanning the block files on disk is AFTER the position the metadata believes to be true, truncate the files on disk to match the metadata.  This can be a fairly common occurrence in unclean shutdown scenarios while the block files are in the middle of being written.  Since the metadata isn't updated until after the block data is written, this is effectively just a rollback to the known good point before the unclean shutdown.
 	wc := pdb.store.writeCursor

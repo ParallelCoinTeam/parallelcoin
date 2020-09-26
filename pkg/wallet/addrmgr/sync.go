@@ -43,7 +43,7 @@ func newSyncState(startBlock, syncedTo *BlockStamp) *syncState {
 // imported addresses will be used.  This effectively allows the manager to be
 // marked as unsynced back to the oldest known point any of the addresses have
 // appeared in the block chain.
-func (m *Manager) SetSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) error {
+func (m *Manager) SetSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) (err error) {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 	// Use the stored start blockstamp and reset recent hashes and height
@@ -52,14 +52,12 @@ func (m *Manager) SetSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) error
 		bs = &m.syncState.startBlock
 	}
 	// Update the database.
-	err := putSyncedTo(ns, bs)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = putSyncedTo(ns, bs); slog.Check(err) {
+		return
 	}
 	// Update memory now that the database is updated.
 	m.syncState.syncedTo = *bs
-	return nil
+	return
 }
 
 // SyncedTo returns details about the block height and hash that the address
@@ -75,8 +73,7 @@ func (m *Manager) SyncedTo() BlockStamp {
 // BlockHash returns the block hash at a particular block height. This
 // information is useful for comparing against the chain back-end to see if a
 // reorg is taking place and how far back it goes.
-func (m *Manager) BlockHash(ns walletdb.ReadBucket, height int32) (
-	*chainhash.Hash, error) {
+func (m *Manager) BlockHash(ns walletdb.ReadBucket, height int32) (h *chainhash.Hash, err error) {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 	return fetchBlockHash(ns, height)
@@ -93,7 +90,7 @@ func (m *Manager) Birthday() time.Time {
 // SetBirthday sets the birthday, or earliest time a key could have been used,
 // for the manager.
 func (m *Manager) SetBirthday(ns walletdb.ReadWriteBucket,
-	birthday time.Time) error {
+	birthday time.Time) (err error) {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 	m.birthday = birthday

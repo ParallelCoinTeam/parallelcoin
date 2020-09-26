@@ -21,7 +21,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 	}
 	defer os.RemoveAll(dbPath)
 	defer db.Close()
-	err = db.Update(func(tx database.Tx) error {
+	err = db.Update(func(tx database.Tx) (err error) {
 		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
 	})
@@ -30,7 +30,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
-	err = db.View(func(tx database.Tx) error {
+	err = db.View(func(tx database.Tx) (err error) {
 		blockHash := chaincfg.MainNetParams.GenesisHash
 		for i := 0; i < b.N; i++ {
 			_, err := tx.FetchBlockHeader(blockHash)
@@ -58,7 +58,7 @@ func BenchmarkBlock(b *testing.B) {
 	}
 	defer os.RemoveAll(dbPath)
 	defer db.Close()
-	err = db.Update(func(tx database.Tx) error {
+	err = db.Update(func(tx database.Tx) (err error) {
 		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
 	})
@@ -67,7 +67,7 @@ func BenchmarkBlock(b *testing.B) {
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
-	err = db.View(func(tx database.Tx) error {
+	err = db.View(func(tx database.Tx) (err error) {
 		blockHash := chaincfg.MainNetParams.GenesisHash
 		for i := 0; i < b.N; i++ {
 			_, err := tx.FetchBlock(blockHash)

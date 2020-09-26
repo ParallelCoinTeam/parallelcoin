@@ -26,7 +26,7 @@ const slash = string(os.PathSeparator)
 
 // CreateSimulationWallet is intended to be called from the rpcclient
 // and used to create a wallet for actors involved in simulations.
-func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
+func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) (err error) {
 	// Simulation wallet password is 'password'.
 	privPass := []byte("password")
 	// Public passphrase is the default.
@@ -55,7 +55,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 // CreateWallet prompts the user for information needed to generate a new
 // wallet and generates the wallet accordingly.
 // The new wallet will reside at the provided path.
-func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
+func CreateWallet(activenet *netparams.Params, config *pod.Config) (err error) {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
 	// When there is a legacy keystore, open it now to ensure any errors
@@ -181,7 +181,7 @@ func NetworkDir(dataDir string, chainParams *netparams.Params) string {
 
 // // checkCreateDir checks that the path exists and is a directory.
 // // If path does not exist, it is created.
-// func checkCreateDir(// 	path string) error {
+// func checkCreateDir(// 	path string) (err error) {
 // 	if fi, err := os.Stat(path); err != nil {
 // 		if os.IsNotExist(err) {
 // 			// Attempt data directory creation
@@ -202,7 +202,7 @@ func NetworkDir(dataDir string, chainParams *netparams.Params) string {
 // convertLegacyKeystore converts all of the addresses in the passed legacy
 // key store to the new waddrmgr.Manager format.
 // Both the legacy keystore and the new manager must be unlocked.
-func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) error {
+func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) (err error) {
 	netParams := legacyKeyStore.Net()
 	blockStamp := waddrmgr.BlockStamp{
 		Height: 0,

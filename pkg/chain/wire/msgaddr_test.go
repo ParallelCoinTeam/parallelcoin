@@ -2,6 +2,7 @@ package wire
 
 import (
 	"bytes"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"net"
 	"reflect"
@@ -164,9 +165,8 @@ func TestAddrWire(t *testing.T) {
 		}
 		// Decode the message from wire format.
 		var msg MsgAddr
-		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
-		if err != nil {
+		rBuf := bytes.NewReader(test.buf)
+		if err = msg.BtcDecode(rBuf, test.pver, test.enc); slog.Check(err) {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
 		}

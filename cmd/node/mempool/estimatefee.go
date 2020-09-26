@@ -123,7 +123,7 @@ var (
 
 func // EstimateFee estimates the fee per byte to have a tx confirmed a given
 // number of blocks from now.
-(ef *FeeEstimator) EstimateFee(numBlocks uint32) (DUOPerKilobyte, error) {
+(ef *FeeEstimator) EstimateFee(numBlocks uint32) (DUOPerKilobyte, err error) {
 	ef.mtx.Lock()
 	defer ef.mtx.Unlock()
 	// If the number of registered blocks is below the minimum, return an error.
@@ -571,7 +571,7 @@ NewSatoshiPerByte(fee util.Amount, size uint32) SatoshiPerByte {
 
 func // RestoreFeeEstimator takes a FeeEstimatorState that was previously
 // returned by Save and restores it to a FeeEstimator
-RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
+RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, err error) {
 	r := bytes.NewReader(data)
 	// Check version
 	var version uint32
@@ -668,7 +668,7 @@ RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 	}
 	return ef, nil
 }
-func deserializeObservedTransaction(r io.Reader) (*observedTransaction, error) {
+func deserializeObservedTransaction(r io.Reader) (*observedTransaction, err error) {
 	ot := observedTransaction{}
 	// The first 32 bytes should be a hash.
 	e := binary.Read(r, binary.BigEndian, &ot.hash)
@@ -692,7 +692,7 @@ func deserializeObservedTransaction(r io.Reader) (*observedTransaction, error) {
 	return &ot, nil
 }
 func deserializeRegisteredBlock(r io.Reader,
-	txs map[uint32]*observedTransaction) (*registeredBlock, error) {
+	txs map[uint32]*observedTransaction) (*registeredBlock, err error) {
 	var lenTransactions uint32
 	rb := &registeredBlock{}
 	e := binary.Read(r, binary.BigEndian, &rb.hash)

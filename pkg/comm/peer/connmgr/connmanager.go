@@ -489,10 +489,11 @@ func (cm *ConnManager) Stop() {
 
 // New returns a new connection manager. Use Start to start connecting to the
 // network.
-func New(cfg *Config) (*ConnManager, error) {
+func New(cfg *Config) (cm *ConnManager, err error) {
 	if cfg.Dial == nil {
 		slog.Error("Cfg.Dial is nil")
-		return nil, ErrDialNil
+		err = ErrDialNil
+		return
 	}
 	// Default to sane values
 	if cfg.RetryDuration <= 0 {
@@ -501,10 +502,10 @@ func New(cfg *Config) (*ConnManager, error) {
 	if cfg.TargetOutbound == 0 {
 		cfg.TargetOutbound = defaultTargetOutbound
 	}
-	cm := ConnManager{
+	cm = &ConnManager{
 		Cfg:      *cfg, // Copy so caller can't mutate
 		requests: make(chan interface{}),
 		quit:     make(chan struct{}),
 	}
-	return &cm, nil
+	return
 }

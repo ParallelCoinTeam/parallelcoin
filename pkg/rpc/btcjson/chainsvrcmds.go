@@ -180,24 +180,26 @@ type TemplateRequest struct {
 
 // convertTemplateRequestField potentially converts the provided value as
 // needed.
-func convertTemplateRequestField(fieldName string, iface interface{}) (interface{}, error) {
+func convertTemplateRequestField(fieldName string, iface interface{}) (i interface{}, err error) {
 	switch val := iface.(type) {
 	case nil:
-		return nil, nil
+		return
 	case bool:
-		return val, nil
+		i = val
+		return
 	case float64:
 		if val == float64(int64(val)) {
-			return int64(val), nil
+			i = int64(val)
+			return
 		}
 	}
-	str := fmt.Sprintf("the %s field must be unspecified, a boolean, or "+
-		"a 64-bit integer", fieldName)
-	return nil, makeError(ErrInvalidType, str)
+	err = makeError(ErrInvalidType, fmt.Sprintf(
+		"the %s field must be unspecified, a boolean, or a 64-bit integer", fieldName))
+	return
 }
 
 // UnmarshalJSON provides a custom Unmarshal method for TemplateRequest.  This is necessary because the SigOpLimit and SizeLimit fields can only be specific types.
-func (t *TemplateRequest) UnmarshalJSON(data []byte) error {
+func (t *TemplateRequest) UnmarshalJSON(data []byte) (err error) {
 	type templateRequest TemplateRequest
 	request := (*templateRequest)(t)
 	if err := json.Unmarshal(data, &request); err != nil {

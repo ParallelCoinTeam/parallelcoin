@@ -54,7 +54,7 @@ var (
 // CreateNewWallet creates a new wallet using the provided public and private passphrases.  The seed is optional.  If
 // non-nil, addresses are derived from this seed.  If nil, a secure random seed is generated.
 func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bday time.Time, noStart bool,
-	podConfig *pod.Config) (*Wallet, error) {
+	podConfig *pod.Config) (*Wallet, err error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	if ld.Loaded {
@@ -113,7 +113,7 @@ func (ld *Loader) LoadedWallet() (*Wallet, bool) {
 }
 
 // OpenExistingWallet opens the wallet from the loader's wallet database path and the public passphrase.  If the loader is being called by a context where standard input prompts may be used during wallet upgrades, setting canConsolePrompt will enables these prompts.
-func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool, podConfig *pod.Config) (*Wallet, error) {
+func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool, podConfig *pod.Config) (*Wallet, err error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	// INFO("opening existing wallet", ld.DDDirPath}
@@ -191,7 +191,7 @@ func (ld *Loader) RunAfterLoad(fn func(*Wallet)) {
 // This returns ErrNotLoaded if the wallet has not been loaded with
 // CreateNewWallet or LoadExistingWallet.  The Loader may be reused if this
 // function returns without error.
-func (ld *Loader) UnloadWallet() error {
+func (ld *Loader) UnloadWallet() (err error) {
 	slog.Trace("unloading wallet")
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
@@ -223,7 +223,7 @@ func (ld *Loader) UnloadWallet() error {
 
 // WalletExists returns whether a file exists at the loader's database path.
 // This may return an error for unexpected I/O failures.
-func (ld *Loader) WalletExists() (bool, error) {
+func (ld *Loader) WalletExists() (bool, err error) {
 	return fileExists(ld.DDDirPath)
 }
 
@@ -251,7 +251,7 @@ func NewLoader(chainParams *netparams.Params, dbDirPath string, recoveryWindow u
 	}
 	return l
 }
-func fileExists(filePath string) (bool, error) {
+func fileExists(filePath string) (bool, err error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
 		slog.Error(err)
@@ -262,6 +262,6 @@ func fileExists(filePath string) (bool, error) {
 	}
 	return true, nil
 }
-func noConsole() ([]byte, error) {
+func noConsole() ([]byte, err error) {
 	return nil, errNoConsole
 }

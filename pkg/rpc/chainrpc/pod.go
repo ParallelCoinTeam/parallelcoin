@@ -18,8 +18,8 @@ var DefaultConnectTimeout = time.Second * 30
 // For example .onion addresses will be dialed using the onion specific proxy
 // if one was specified, but will otherwise use the normal dial function (
 // which could itself use a proxy or not).
-var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
-	return func(addr net.Addr) (net.Conn, error) {
+var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, err error) {
+	return func(addr net.Addr) (net.Conn, err error) {
 		if strings.Contains(addr.String(), ".onion:") {
 			return stateCfg.Oniondial(addr.Network(), addr.String(),
 				DefaultConnectTimeout)
@@ -41,8 +41,8 @@ var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
 // resolver will be used. Any attempt to resolve a tor address (.
 // onion) will return an error since they are not intended to be resolved
 // outside of the tor proxy.
-var Lookup = func(stateCfg *state.Config) func(host string) ([]net.IP, error) {
-	return func(host string) ([]net.IP, error) {
+var Lookup = func(stateCfg *state.Config) func(host string) ([]net.IP, err error) {
+	return func(host string) ([]net.IP, err error) {
 		if strings.HasSuffix(host, ".onion") {
 			return nil, fmt.Errorf("attempt to resolve tor address %s", host)
 		}

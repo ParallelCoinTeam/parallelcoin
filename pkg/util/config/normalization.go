@@ -28,7 +28,7 @@ func NormalizeAddress(addr string, defaultPort string) (hostport string, err err
 
 // NormalizeAddresses returns a new slice with all the passed peer addresses
 // normalized with the given default port, and all duplicates removed.
-func NormalizeAddresses(addrs []string, defaultPort string) ([]string, error) {
+func NormalizeAddresses(addrs []string, defaultPort string) ([]string, err error) {
 	var (
 		normalized = make([]string, 0, len(addrs))
 		seenSet    = make(map[string]struct{})

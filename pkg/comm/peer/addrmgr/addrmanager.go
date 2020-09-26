@@ -325,8 +325,8 @@ func (a *AddrManager) savePeers() {
 		ska.TimeStamp = v.na.Timestamp.Unix()
 		ska.Src = NetAddressKey(v.srcAddr)
 		ska.Attempts = v.attempts
-		ska.LastAttempt = v.lastattempt.Unix()
-		ska.LastSuccess = v.lastsuccess.Unix()
+		ska.LastAttempt = v.lastAttempt.Unix()
+		ska.LastSuccess = v.lastSuccess.Unix()
 		// Tried and refs are implicit in the rest of the structure and will be worked out from context on unserialisation.
 		sam.Addresses[i] = ska
 		i++
@@ -390,48 +390,45 @@ func (a *AddrManager) loadPeers() {
 	//	)
 	// })
 }
-func (a *AddrManager) deserializePeers(filePath string) error {
-	_, err := os.Stat(filePath)
-	if os.IsNotExist(err) {
-		return nil
+func (a *AddrManager) deserializePeers(filePath string) (err error) {
+	if _, err = os.Stat(filePath); os.IsNotExist(err) {
+		return
 	}
-	r, err := os.Open(filePath)
-	if err != nil {
-		slog.Error(err)
-		return fmt.Errorf("%s error opening file: %v", filePath, err)
+	var r *os.File
+	if r, err = os.Open(filePath); slog.Check(err) {
+		err = fmt.Errorf("%s error opening file: %v", filePath, err)
+		slog.Debug(err)
+		return
 	}
 	defer r.Close()
 	var sam serializedAddrManager
 	dec := json.NewDecoder(r)
-	err = dec.Decode(&sam)
-	if err != nil {
-		slog.Error(err)
-		return fmt.Errorf("error reading %s: %v", filePath, err)
+	if err = dec.Decode(&sam); slog.Check(err) {
+		err = fmt.Errorf("error reading %s: %v", filePath, err)
+		slog.Debug(err)
+		return
 	}
 	if sam.Version != serialisationVersion {
-		return fmt.Errorf(
-			"unknown version %v in serialized addrmanager",
-			sam.Version,
-		)
+		err = fmt.Errorf("unknown version %v in serialized addrmanager", sam.Version)
+		slog.Debug(err)
+		return
 	}
 	copy(a.key[:], sam.Key[:])
 	for _, v := range sam.Addresses {
 		ka := new(KnownAddress)
-		ka.na, err = a.DeserializeNetAddress(v.Addr)
-		if err != nil {
-			slog.Error(err)
-			return fmt.Errorf("failed to deserialize netaddress "+
-				"%s: %v", v.Addr, err)
+		if ka.na, err = a.DeserializeNetAddress(v.Addr); slog.Check(err) {
+			if err = fmt.Errorf("failed to deserialize netaddress %s: %v", v.Addr, err); slog.Check(err) {
+			}
+			return
 		}
-		ka.srcAddr, err = a.DeserializeNetAddress(v.Src)
-		if err != nil {
-			slog.Error(err)
-			return fmt.Errorf("failed to deserialize netaddress "+
-				"%s: %v", v.Src, err)
+		if ka.srcAddr, err = a.DeserializeNetAddress(v.Src); slog.Check(err) {
+			if err = fmt.Errorf("failed to deserialize netaddress %s: %v", v.Src, err); slog.Check(err) {
+			}
+			return
 		}
 		ka.attempts = v.Attempts
-		ka.lastattempt = time.Unix(v.LastAttempt, 0)
-		ka.lastsuccess = time.Unix(v.LastSuccess, 0)
+		ka.lastAttempt = time.Unix(v.LastAttempt, 0)
+		ka.lastSuccess = time.Unix(v.LastSuccess, 0)
 		a.addrIndex[NetAddressKey(ka.na)] = ka
 	}
 	for i := range sam.NewBuckets {
@@ -465,28 +462,24 @@ func (a *AddrManager) deserializePeers(filePath string) error {
 	// Sanity checking.
 	for k, v := range a.addrIndex {
 		if v.refs == 0 && !v.tried {
-			return fmt.Errorf("address %s after serialisation "+
-				"with no references", k)
+			return fmt.Errorf("address %s after serialisation with no references", k)
 		}
 		if v.refs > 0 && v.tried {
-			return fmt.Errorf("address %s after serialisation "+
-				"which is both new and tried!", k)
+			return fmt.Errorf("address %s after serialisation which is both new and tried", k)
 		}
 	}
 	return nil
 }
 
 func // DeserializeNetAddress converts a given address string to a *wire.NetAddress
-(a *AddrManager) DeserializeNetAddress(addr string) (*wire.NetAddress, error) {
-	host, portStr, err := net.SplitHostPort(addr)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+(a *AddrManager) DeserializeNetAddress(addr string) (na *wire.NetAddress, err error) {
+	var host, portStr string
+	if host, portStr, err = net.SplitHostPort(addr); slog.Check(err) {
+		return
 	}
-	port, err := strconv.ParseUint(portStr, 10, 16)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var port uint64
+	if port, err = strconv.ParseUint(portStr, 10, 16); slog.Check(err) {
+		return
 	}
 	return a.HostToNetAddress(host, uint16(port), wire.SFNodeNetwork)
 }
@@ -507,7 +500,7 @@ func // Start begins the core address handler which manages a pool of known
 }
 
 func // Stop gracefully shuts down the address manager by stopping the main handler.
-(a *AddrManager) Stop() error {
+(a *AddrManager) Stop() (err error) {
 	if atomic.AddInt32(&a.shutdown, 1) != 1 {
 		slog.Warn("address manager is already in the process of shutting down")
 		return nil
@@ -540,7 +533,7 @@ func // AddAddress adds a new address to the address manager.  It enforces a max
 
 func // AddAddressByIP adds an address where we are given an ip:port and not a
 // wire.NetAddress.
-(a *AddrManager) AddAddressByIP(addrIP string) error {
+(a *AddrManager) AddAddressByIP(addrIP string) (err error) {
 	// Split IP and port
 	addr, portStr, err := net.SplitHostPort(addrIP)
 	if err != nil {
@@ -632,38 +625,37 @@ func // HostToNetAddress returns a netaddress given a host address.
 // If the address is a Tor .onion address this will be taken care of.
 // Else if the host is not an IP address it will be resolved (
 // via Tor if required).
-(a *AddrManager) HostToNetAddress(host string, port uint16, services wire.ServiceFlag) (*wire.NetAddress, error) {
+(a *AddrManager) HostToNetAddress(host string, port uint16, services wire.ServiceFlag) (na *wire.NetAddress, err error) {
 	// Tor address is 16 char base32 + ".onion"
 	var ip net.IP
 	if len(host) == 22 && host[16:] == ".onion" {
 		// go base32 encoding uses capitals (as does the rfc but Tor and bitcoind
 		// tend to user lowercase, so we switch case here.
-		data, err := base32.StdEncoding.DecodeString(
-			strings.ToUpper(host[:16]))
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var data []byte
+		if data, err = base32.StdEncoding.DecodeString(strings.ToUpper(host[:16])); slog.Check(err) {
+			return
 		}
 		prefix := []byte{0xfd, 0x87, 0xd8, 0x7e, 0xeb, 0x43}
 		ip = net.IP(append(prefix, data...))
 	} else if ip = net.ParseIP(host); ip == nil {
-		ips, err := a.lookupFunc(host)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var ips []net.IP
+		if ips, err = a.lookupFunc(host); slog.Check(err) {
+			return
 		}
 		if len(ips) == 0 {
-			return nil, fmt.Errorf("no addresses found for %s", host)
+			err = fmt.Errorf("no addresses found for %s", host)
+			return
 		}
 		ip = ips[0]
 	}
-	return wire.NewNetAddressIPPort(ip, port, services), nil
+	na = wire.NewNetAddressIPPort(ip, port, services)
+	return
 }
 
-func // ipString returns a string for the ip from the provided NetAddress.
+// ipString returns a string for the ip from the provided NetAddress.
 // If the ip is in the range used for Tor addresses then it will be
 // transformed into the relevant .onion address.
-ipString(na *wire.NetAddress) string {
+func ipString(na *wire.NetAddress) string {
 	if IsOnionCatTor(na) {
 		// We know now that na.IP is long enough.
 		s := base32.StdEncoding.EncodeToString(na.IP[6:])
@@ -672,18 +664,18 @@ ipString(na *wire.NetAddress) string {
 	return na.IP.String()
 }
 
-func // NetAddressKey returns a string key in the form of ip:port for IPv4
+// NetAddressKey returns a string key in the form of ip:port for IPv4
 // addresses or [ip]:port for IPv6 addresses.
-NetAddressKey(na *wire.NetAddress) string {
+func NetAddressKey(na *wire.NetAddress) string {
 	port := strconv.FormatUint(uint64(na.Port), 10)
 	return net.JoinHostPort(ipString(na), port)
 }
 
-func // GetAddress returns a single address that should be routable.  It picks a
+// GetAddress returns a single address that should be routable.  It picks a
 // random one from the possible addresses with preference given to ones that
 // have not been used recently and should not pick 'close' addresses
 // consecutively.
-(a *AddrManager) GetAddress() *KnownAddress {
+func (a *AddrManager) GetAddress() *KnownAddress {
 	// Protect concurrent access.
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
@@ -703,8 +695,7 @@ func // GetAddress returns a single address that should be routable.  It picks a
 			}
 			// Pick a random entry in the list
 			e := a.addrTried[bucket].Front()
-			for i :=
-				a.rand.Int63n(int64(a.addrTried[bucket].Len())); i > 0; i-- {
+			for i := a.rand.Int63n(int64(a.addrTried[bucket].Len())); i > 0; i-- {
 				e = e.Next()
 			}
 			ka := e.Value.(*KnownAddress)
@@ -737,8 +728,8 @@ func // GetAddress returns a single address that should be routable.  It picks a
 				}
 				nth--
 			}
-			randval := a.rand.Intn(large)
-			if float64(randval) < (factor * ka.chance() * float64(large)) {
+			randVal := a.rand.Intn(large)
+			if float64(randVal) < (factor * ka.chance() * float64(large)) {
 				slog.Trace(func() string {
 					return fmt.Sprintf("Selected %v from new bucket",
 						NetAddressKey(ka.na))
@@ -753,9 +744,9 @@ func (a *AddrManager) find(addr *wire.NetAddress) *KnownAddress {
 	return a.addrIndex[NetAddressKey(addr)]
 }
 
-func // Attempt increases the given address' attempt counter and updates the last
+// Attempt increases the given address' attempt counter and updates the last
 // attempt time.
-(a *AddrManager) Attempt(addr *wire.NetAddress) {
+func (a *AddrManager) Attempt(addr *wire.NetAddress) {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	// find address. Surely address will be in tried by now?
@@ -765,7 +756,7 @@ func // Attempt increases the given address' attempt counter and updates the las
 	}
 	// set last tried time to now
 	ka.attempts++
-	ka.lastattempt = time.Now()
+	ka.lastAttempt = time.Now()
 }
 
 // Connected Marks the given address as currently connected and working at the
@@ -801,8 +792,8 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	// ka.Timestamp is not updated here to avoid leaking information about
 	// currently connected peers.
 	now := time.Now()
-	ka.lastsuccess = now
-	ka.lastattempt = now
+	ka.lastSuccess = now
+	ka.lastAttempt = now
 	ka.attempts = 0
 	// move to tried set, optionally evicting other addresses if needed.
 	if ka.tried {
@@ -881,7 +872,7 @@ func // SetServices sets the services for the giiven address to the provided
 
 func // AddLocalAddress adds na to the list of known local addresses to
 // advertise with the given priority.
-(a *AddrManager) AddLocalAddress(na *wire.NetAddress, priority AddressPriority) error {
+(a *AddrManager) AddLocalAddress(na *wire.NetAddress, priority AddressPriority) (err error) {
 	if !IsRoutable(na) {
 		return fmt.Errorf("address %s is not routable", na.IP)
 	}

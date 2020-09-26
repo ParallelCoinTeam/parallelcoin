@@ -50,11 +50,11 @@ type rescanBatch struct {
 // SubmitRescan submits a RescanJob to the RescanManager.  A channel is
 // returned with the final error of the rescan.  The channel is buffered
 // and does not need to be read to prevent a deadlock.
-func (w *Wallet) SubmitRescan(job *RescanJob) <-chan error {
-	errChan := make(chan error, 1)
-	job.err = errChan
-	w.rescanAddJob <- job
-	return errChan
+func (w *Wallet) SubmitRescan(job *RescanJob) <-chan (err error) {
+errChan := make(chan error, 1)
+job.err = errChan
+w.rescanAddJob <- job
+return errChan
 }
 
 // batch creates the rescanBatch for a single rescan job.
@@ -231,14 +231,14 @@ out:
 // a wallet.  This is intended to be used to sync a wallet back up to the
 // current best block in the main chain, and is considered an initial sync
 // rescan.
-func (w *Wallet) Rescan(addrs []util.Address, unspent []tm.Credit) error {
+func (w *Wallet) Rescan(addrs []util.Address, unspent []tm.Credit) (err error) {
 	return w.rescanWithTarget(addrs, unspent, nil)
 }
 
 // rescanWithTarget performs a rescan starting at the optional startStamp. If
 // none is provided, the rescan will begin from the manager's sync tip.
 func (w *Wallet) rescanWithTarget(addrs []util.Address,
-	unspent []tm.Credit, startStamp *wm.BlockStamp) error {
+	unspent []tm.Credit, startStamp *wm.BlockStamp) (err error) {
 	outpoints := make(map[wire.OutPoint]util.Address, len(unspent))
 	for _, output := range unspent {
 		_, outputAddrs, _, err := txs.ExtractPkScriptAddrs(

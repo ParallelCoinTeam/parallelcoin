@@ -2,6 +2,7 @@ package worker
 
 import (
 	"github.com/stalker-loki/app/slog"
+	"io"
 	"os"
 	"os/exec"
 	"syscall"
@@ -28,19 +29,14 @@ func Spawn(args ...string) (w *Worker) {
 		slog.Error(err)
 		return
 	}
-	cmdIn, err := w.cmd.StdinPipe()
-	if err != nil {
-		slog.Error(err)
+	var cmdIn io.WriteCloser
+	if cmdIn, err = w.cmd.StdinPipe(); slog.Check(err) {
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, make(chan struct{}))
-	err = w.cmd.Start()
-	if err != nil {
-		slog.Error(err)
-		return nil
-	} else {
-		return
+	if err = w.cmd.Start(); slog.Check(err) {
 	}
+	return
 }
 
 func (w *Worker) Wait() (err error) {

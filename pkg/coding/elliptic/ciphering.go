@@ -58,11 +58,10 @@ func GenerateSharedSecret(privKey *PrivateKey, pubkey *PublicKey) []byte {
 //	}
 // The primary aim is to ensure byte compatibility with Pyelliptic.  Also, refer
 // to section 5.8.1 of ANSI X9.63 for rationale on this format.
-func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
-	ephemeral, err := NewPrivateKey(S256())
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func Encrypt(pubkey *PublicKey, in []byte) (out []byte, err error) {
+	var ephemeral *PrivateKey
+	if ephemeral, err = NewPrivateKey(S256()); slog.Check(err) {
+		return
 	}
 	ecdhKey := GenerateSharedSecret(ephemeral, pubkey)
 	derivedKey := sha512.Sum512(ecdhKey)
@@ -70,10 +69,10 @@ func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	keyM := derivedKey[32:]
 	paddedIn := addPKCSPadding(in)
 	// IV + Curve netparams/X/Y + padded plaintext/ciphertext + HMAC-256
-	out := make([]byte, aes.BlockSize+70+len(paddedIn)+sha256.Size)
+	out = make([]byte, aes.BlockSize+70+len(paddedIn)+sha256.Size)
 	iv := out[:aes.BlockSize]
-	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
-		return nil, err
+	if _, err = io.ReadFull(rand.Reader, iv); slog.Check(err) {
+		return
 	}
 	// start writing public key
 	pb := ephemeral.PubKey().SerializeUncompressed()
@@ -91,35 +90,36 @@ func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	copy(out[offset:offset+32], pb[33:])
 	offset += 32
 	// start encryption
-	block, err := aes.NewCipher(keyE)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var block cipher.Block
+	if block, err = aes.NewCipher(keyE); slog.Check(err) {
+		return
 	}
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(out[offset:len(out)-sha256.Size], paddedIn)
 	// start HMAC-SHA-256
 	hm := hmac.New(sha256.New, keyM)
-	_, err = hm.Write(out[:len(out)-sha256.Size]) // everything is hashed
-	if err != nil {
-		slog.Error(err)
+	// everything is hashed
+	if _, err = hm.Write(out[:len(out)-sha256.Size]); slog.Check(err) {
+		return
 	}
 	copy(out[len(out)-sha256.Size:], hm.Sum(nil)) // write checksum
-	return out, nil
+	return
 }
 
 // Decrypt decrypts data that was encrypted using the Encrypt function.
-func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
+func Decrypt(priv *PrivateKey, in []byte) (out []byte, err error) {
 	// IV + Curve netparams/X/Y + 1 block + HMAC-256
 	if len(in) < aes.BlockSize+70+aes.BlockSize+sha256.Size {
-		return nil, errInputTooShort
+		err = errInputTooShort
+		return
 	}
 	// read iv
 	iv := in[:aes.BlockSize]
 	offset := aes.BlockSize
 	// start reading pubkey
 	if !bytes.Equal(in[offset:offset+2], ciphCurveBytes[:]) {
-		return nil, errUnsupportedCurve
+		err = errUnsupportedCurve
+		return
 	}
 	offset += 2
 	if !bytes.Equal(in[offset:offset+2], ciphCoordLength[:]) {
@@ -129,7 +129,8 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	xBytes := in[offset : offset+32]
 	offset += 32
 	if !bytes.Equal(in[offset:offset+2], ciphCoordLength[:]) {
-		return nil, errInvalidYLength
+		err = errInvalidYLength
+		return
 	}
 	offset += 2
 	yBytes := in[offset : offset+32]
@@ -139,14 +140,14 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	copy(pb[1:33], xBytes)
 	copy(pb[33:], yBytes)
 	// check if (X, Y) lies on the curve and create a Pubkey if it does
-	pubkey, err := ParsePubKey(pb, S256())
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var pubkey *PublicKey
+	if pubkey, err = ParsePubKey(pb, S256()); slog.Check(err) {
+		return
 	}
 	// check for cipher text length
 	if (len(in)-aes.BlockSize-offset-sha256.Size)%aes.BlockSize != 0 {
-		return nil, errInvalidPadding // not padded to 16 bytes
+		err = errInvalidPadding // not padded to 16 bytes
+		return
 	}
 	// read hmac
 	messageMAC := in[len(in)-sha256.Size:]
@@ -157,19 +158,19 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	keyM := derivedKey[32:]
 	// verify mac
 	hm := hmac.New(sha256.New, keyM)
-	_, err = hm.Write(in[:len(in)-sha256.Size]) // everything is hashed
-	if err != nil {
-		slog.Error(err)
+	// everything is hashed
+	if _, err = hm.Write(in[:len(in)-sha256.Size]); slog.Check(err) {
+		return
 	}
 	expectedMAC := hm.Sum(nil)
 	if !hmac.Equal(messageMAC, expectedMAC) {
-		return nil, ErrInvalidMAC
+		err = ErrInvalidMAC
+		return
 	}
 	// start decryption
-	block, err := aes.NewCipher(keyE)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var block cipher.Block
+	if block, err = aes.NewCipher(keyE); slog.Check(err) {
+		return
 	}
 	mode := cipher.NewCBCDecrypter(block, iv)
 	// same length as ciphertext
@@ -187,11 +188,13 @@ func addPKCSPadding(src []byte) []byte {
 }
 
 // removePKCSPadding removes padding from data that was added with addPKCSPadding
-func removePKCSPadding(src []byte) ([]byte, error) {
+func removePKCSPadding(src []byte) (b []byte, err error) {
 	length := len(src)
 	padLength := int(src[length-1])
 	if padLength > aes.BlockSize || length < aes.BlockSize {
-		return nil, errInvalidPadding
+		err = errInvalidPadding
+		return
 	}
-	return src[:length-padLength], nil
+	b = src[:length-padLength]
+	return
 }

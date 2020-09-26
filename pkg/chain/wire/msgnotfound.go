@@ -12,7 +12,7 @@ type MsgNotFound struct {
 }
 
 // AddInvVect adds an inventory vector to the message.
-func (msg *MsgNotFound) AddInvVect(iv *InvVect) error {
+func (msg *MsgNotFound) AddInvVect(iv *InvVect) (err error) {
 	if len(msg.InvList)+1 > MaxInvPerMsg {
 		str := fmt.Sprintf("too many invvect in message [max %v]",
 			MaxInvPerMsg)
@@ -23,7 +23,7 @@ func (msg *MsgNotFound) AddInvVect(iv *InvVect) error {
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation.
-func (msg *MsgNotFound) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+func (msg *MsgNotFound) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (err error) {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
 		slog.Error(err)
@@ -53,26 +53,22 @@ func (msg *MsgNotFound) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding)
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface implementation.
-func (msg *MsgNotFound) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
+func (msg *MsgNotFound) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (err error) {
 	// Limit to max inventory vectors per message.
 	count := len(msg.InvList)
 	if count > MaxInvPerMsg {
 		str := fmt.Sprintf("too many invvect in message [%v]", count)
 		return messageError("MsgNotFound.BtcEncode", str)
 	}
-	err := WriteVarInt(w, pver, uint64(count))
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarInt(w, pver, uint64(count)); slog.Check(err) {
+		return
 	}
 	for _, iv := range msg.InvList {
-		err := writeInvVect(w, pver, iv)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = writeInvVect(w, pver, iv); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // Command returns the protocol command string for the message.  This is part of the Message interface implementation.

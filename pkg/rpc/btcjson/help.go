@@ -365,7 +365,7 @@ func isValidResultType(kind reflect.Kind) bool {
 //   "help--condition1": "command specified"
 //   "help--result0":    "List of commands"
 //   "help--result1":    "Help for specified command"
-func GenerateHelp(method string, descs map[string]string, resultTypes ...interface{}) (string, error) {
+func GenerateHelp(method string, descs map[string]string, resultTypes ...interface{}) (help string, err error) {
 	// Look up details about the provided method and error out if not registered.
 	registerLock.RLock()
 	rtp, ok := methodToConcreteType[method]
@@ -406,7 +406,7 @@ func GenerateHelp(method string, descs map[string]string, resultTypes ...interfa
 		return key
 	}
 	// Generate and return the help for the method.
-	help := methodHelp(xT, rtp, info.defaults, method, resultTypes)
+	help = methodHelp(xT, rtp, info.defaults, method, resultTypes)
 	if missingKey != "" {
 		return help, makeError(ErrMissingDescription, missingKey)
 	}

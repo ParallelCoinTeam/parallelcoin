@@ -271,7 +271,7 @@ func (msg *MsgTx) Copy() *MsgTx {
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation. See Deserialize for decoding transactions stored to disk, such as in a database, as opposed to decoding transactions from the wire.
-func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (err error) {
 	version, err := binarySerializer.Uint32(r, littleEndian)
 	if err != nil {
 		slog.Error(err)
@@ -457,68 +457,58 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error
 }
 
 // Deserialize decodes a transaction from r into the receiver using a format that is suitable for long-term storage such as a database while respecting the Version field in the transaction.  This function differs from BtcDecode in that BtcDecode decodes from the bitcoin wire protocol as it was sent across the network.  The wire encoding can technically differ depending on the protocol version and doesn't even really need to match the format of a stored transaction at all.  As of the time this comment was written, the encoded transaction is the same in both instances, but there is a distinct difference and separating the two allows the API to be flexible enough to deal with changes.
-func (msg *MsgTx) Deserialize(r io.Reader) error {
+func (msg *MsgTx) Deserialize(r io.Reader) (err error) {
 	// At the current time, there is no difference between the wire encoding at protocol version 0 and the stable long-term storage format.  As a result, make use of BtcDecode.
 	return msg.BtcDecode(r, 0, WitnessEncoding)
 }
 
 // DeserializeNoWitness decodes a transaction from r into the receiver, where the transaction encoding format within r MUST NOT utilize the new serialization format created to encode transaction bearing witness data within inputs.
-func (msg *MsgTx) DeserializeNoWitness(r io.Reader) error {
+func (msg *MsgTx) DeserializeNoWitness(r io.Reader) (err error) {
 	return msg.BtcDecode(r, 0, BaseEncoding)
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface implementation. See Serialize for encoding transactions to be stored to disk, such as in a database, as opposed to encoding transactions for the wire.
-func (msg *MsgTx) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
-	err := binarySerializer.PutUint32(w, littleEndian, uint32(msg.Version))
-	if err != nil {
-		slog.Error(err)
-		return err
+func (msg *MsgTx) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (err error) {
+	if err = binarySerializer.PutUint32(w, littleEndian, uint32(msg.Version)); slog.Check(err) {
+		return
 	}
 	// If the encoding version is set to WitnessEncoding, and the Flags field for the MsgTx aren't 0x00, then this indicates the transaction is to be encoded using the new witness inclusionary structure defined in BIP0144.
 	doWitness := enc == WitnessEncoding && msg.HasWitness()
 	if doWitness {
 		// After the txn's Version field, we include two additional bytes specific to the witness encoding. The first byte is an always 0x00 marker byte, which allows decoders to distinguish a serialized transaction with witnesses from a regular (legacy) one. The second byte is the Flag field, which at the moment is always 0x01, but may be extended in the future to accommodate auxiliary non-committed fields.
-		if _, err := w.Write(witessMarkerBytes); err != nil {
-			return err
+		if _, err = w.Write(witessMarkerBytes); slog.Check(err) {
+			return
 		}
 	}
 	count := uint64(len(msg.TxIn))
-	err = WriteVarInt(w, pver, count)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarInt(w, pver, count); slog.Check(err) {
+		return
 	}
 	for _, ti := range msg.TxIn {
-		err = writeTxIn(w, pver, msg.Version, ti)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = writeTxIn(w, pver, msg.Version, ti); slog.Check(err) {
+			return
 		}
 	}
 	count = uint64(len(msg.TxOut))
-	err = WriteVarInt(w, pver, count)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarInt(w, pver, count); slog.Check(err) {
+		return
 	}
 	for _, to := range msg.TxOut {
-		err = WriteTxOut(w, pver, msg.Version, to)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = WriteTxOut(w, pver, msg.Version, to); slog.Check(err) {
+			return
 		}
 	}
 	// If this transaction is a witness transaction, and the witness encoded is desired, then encode the witness for each of the inputs within the transaction.
 	if doWitness {
 		for _, ti := range msg.TxIn {
-			err = writeTxWitness(w, pver, msg.Version, ti.Witness)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if err = writeTxWitness(w, pver, msg.Version, ti.Witness); slog.Check(err) {
+				return
 			}
 		}
 	}
-	return binarySerializer.PutUint32(w, littleEndian, msg.LockTime)
+	if err = binarySerializer.PutUint32(w, littleEndian, msg.LockTime); slog.Check(err) {
+	}
+	return
 }
 
 // HasWitness returns false if none of the inputs within the transaction contain witness data, true false otherwise.
@@ -532,13 +522,13 @@ func (msg *MsgTx) HasWitness() bool {
 }
 
 // Serialize encodes the transaction to w using a format that suitable for long-term storage such as a database while respecting the Version field in the transaction.  This function differs from BtcEncode in that BtcEncode encodes the transaction to the bitcoin wire protocol in order to be sent across the network.  The wire encoding can technically differ depending on the protocol version and doesn't even really need to match the format of a stored transaction at all.  As of the time this comment was written, the encoded transaction is the same in both instances, but there is a distinct difference and separating the two allows the API to be flexible enough to deal with changes.
-func (msg *MsgTx) Serialize(w io.Writer) error {
+func (msg *MsgTx) Serialize(w io.Writer) (err error) {
 	// At the current time, there is no difference between the wire encoding at protocol version 0 and the stable long-term storage format.  As a result, make use of BtcEncode. Passing a encoding type of WitnessEncoding to BtcEncode for MsgTx indicates that the transaction's witnesses (if any) should be serialized according to the new serialization structure defined in BIP0144.
 	return msg.BtcEncode(w, 0, WitnessEncoding)
 }
 
 // SerializeNoWitness encodes the transaction to w in an identical manner to Serialize, however even if the source transaction has inputs with witness data, the old serialization format will still be used.
-func (msg *MsgTx) SerializeNoWitness(w io.Writer) error {
+func (msg *MsgTx) SerializeNoWitness(w io.Writer) (err error) {
 	return msg.BtcEncode(w, 0, BaseEncoding)
 }
 
@@ -624,32 +614,30 @@ func NewMsgTx(version int32) *MsgTx {
 }
 
 // readOutPoint reads the next sequence of bytes from r as an OutPoint.
-func readOutPoint(r io.Reader, pver uint32, version int32, op *OutPoint) error {
-	_, err := io.ReadFull(r, op.Hash[:])
-	if err != nil {
-		slog.Error(err)
-		return err
+func readOutPoint(r io.Reader, pver uint32, version int32, op *OutPoint) (err error) {
+	if _, err = io.ReadFull(r, op.Hash[:]); slog.Check(err) {
+		return
 	}
-	op.Index, err = binarySerializer.Uint32(r, littleEndian)
-	return err
+	if op.Index, err = binarySerializer.Uint32(r, littleEndian); slog.Check(err) {
+	}
+	return
 }
 
 // writeOutPoint encodes op to the bitcoin protocol encoding for an OutPoint to w.
-func writeOutPoint(w io.Writer, pver uint32, version int32, op *OutPoint) error {
-	_, err := w.Write(op.Hash[:])
-	if err != nil {
-		slog.Error(err)
-		return err
+func writeOutPoint(w io.Writer, pver uint32, version int32, op *OutPoint) (err error) {
+	if _, err = w.Write(op.Hash[:]); slog.Check(err) {
+		return
 	}
-	return binarySerializer.PutUint32(w, littleEndian, op.Index)
+	if err = binarySerializer.PutUint32(w, littleEndian, op.Index); slog.Check(err) {
+	}
+	return
 }
 
 // readScript reads a variable length byte array that represents a transaction script.  It is encoded as a varInt containing the length of the array followed by the bytes themselves.  An error is returned if the length is greater than the passed maxAllowed parameter which helps protect against memory exhaustion attacks and forced panics through malformed messages.  The fieldName parameter is only used for the error message so it provides more context in the error.
-func readScript(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) ([]byte, error) {
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func readScript(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) (b []byte, err error) {
+	var count uint64
+	if count, err = ReadVarInt(r, pver); slog.Check(err) {
+		return
 	}
 	// Prevent byte array larger than the max message size.  It would be possible to cause memory exhaustion and panics without a sane upper bound on this count.
 	if count > uint64(maxAllowed) {
@@ -657,82 +645,70 @@ func readScript(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) (
 			"[count %d, max %d]", fieldName, count, maxAllowed)
 		return nil, messageError("readScript", str)
 	}
-	b := scriptPool.Borrow(count)
-	_, err = io.ReadFull(r, b)
-	if err != nil {
-		slog.Error(err)
+	b = scriptPool.Borrow(count)
+	if _, err = io.ReadFull(r, b); slog.Check(err) {
 		scriptPool.Return(b)
-		return nil, err
+		return
 	}
-	return b, nil
+	return
 }
 
 // readTxIn reads the next sequence of bytes from r as a transaction input (TxIn).
-func readTxIn(r io.Reader, pver uint32, version int32, ti *TxIn) error {
-	err := readOutPoint(r, pver, version, &ti.PreviousOutPoint)
-	if err != nil {
-		slog.Error(err)
-		return err
+func readTxIn(r io.Reader, pver uint32, version int32, ti *TxIn) (err error) {
+	if err = readOutPoint(r, pver, version, &ti.PreviousOutPoint); slog.Check(err) {
+		return
 	}
-	ti.SignatureScript, err = readScript(r, pver, MaxMessagePayload,
-		"transaction input signature script")
-	if err != nil {
-		slog.Error(err)
-		return err
+	if ti.SignatureScript, err = readScript(r, pver, MaxMessagePayload,
+		"transaction input signature script"); slog.Check(err) {
+		return
 	}
-	return readElement(r, &ti.Sequence)
+	if err = readElement(r, &ti.Sequence); slog.Check(err) {
+	}
+	return
 }
 
 // writeTxIn encodes ti to the bitcoin protocol encoding for a transaction input (TxIn) to w.
-func writeTxIn(w io.Writer, pver uint32, version int32, ti *TxIn) error {
-	err := writeOutPoint(w, pver, version, &ti.PreviousOutPoint)
-	if err != nil {
-		slog.Error(err)
-		return err
+func writeTxIn(w io.Writer, pver uint32, version int32, ti *TxIn) (err error) {
+	if err = writeOutPoint(w, pver, version, &ti.PreviousOutPoint); slog.Check(err) {
+		return
 	}
-	err = WriteVarBytes(w, pver, ti.SignatureScript)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarBytes(w, pver, ti.SignatureScript); slog.Check(err) {
+		return
 	}
-	return binarySerializer.PutUint32(w, littleEndian, ti.Sequence)
+	if err = binarySerializer.PutUint32(w, littleEndian, ti.Sequence); slog.Check(err) {
+	}
+	return
 }
 
 // readTxOut reads the next sequence of bytes from r as a transaction output (TxOut).
-func readTxOut(r io.Reader, pver uint32, version int32, to *TxOut) error {
-	err := readElement(r, &to.Value)
-	if err != nil {
-		slog.Error(err)
-		return err
+func readTxOut(r io.Reader, pver uint32, version int32, to *TxOut) (err error) {
+	if err = readElement(r, &to.Value); slog.Check(err) {
+		return
 	}
-	to.PkScript, err = readScript(r, pver, MaxMessagePayload,
-		"transaction output public key script")
-	return err
+	if to.PkScript, err = readScript(r, pver, MaxMessagePayload, "transaction output public key script"); slog.Check(err) {
+	}
+	return
 }
 
 // WriteTxOut encodes to into the bitcoin protocol encoding for a transaction output (TxOut) to w. NOTE: This function is exported in order to allow txscript to compute the new sighashes for witness transactions (BIP0143).
-func WriteTxOut(w io.Writer, pver uint32, version int32, to *TxOut) error {
-	err := binarySerializer.PutUint64(w, littleEndian, uint64(to.Value))
-	if err != nil {
-		slog.Error(err)
-		return err
+func WriteTxOut(w io.Writer, pver uint32, version int32, to *TxOut) (err error) {
+	if err = binarySerializer.PutUint64(w, littleEndian, uint64(to.Value)); slog.Check(err) {
+		return
 	}
-	return WriteVarBytes(w, pver, to.PkScript)
+	if err = WriteVarBytes(w, pver, to.PkScript); slog.Check(err) {
+	}
+	return
 }
 
 // writeTxWitness encodes the bitcoin protocol encoding for a transaction input's witness into to w.
-func writeTxWitness(w io.Writer, pver uint32, version int32, wit [][]byte) error {
-	err := WriteVarInt(w, pver, uint64(len(wit)))
-	if err != nil {
-		slog.Error(err)
-		return err
+func writeTxWitness(w io.Writer, pver uint32, version int32, wit [][]byte) (err error) {
+	if err = WriteVarInt(w, pver, uint64(len(wit))); slog.Check(err) {
+		return
 	}
 	for _, item := range wit {
-		err = WriteVarBytes(w, pver, item)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = WriteVarBytes(w, pver, item); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }

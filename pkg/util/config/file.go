@@ -6,7 +6,7 @@ import (
 )
 
 // FileExists reports whether the named file or directory exists.
-func FileExists(filePath string) (bool, error) {
+func FileExists(filePath string) (bool, err error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
 		slog.Error(err)

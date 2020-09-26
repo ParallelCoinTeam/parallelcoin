@@ -4,6 +4,7 @@ package app
 
 import (
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/stalker-loki/app/slog"
 	"github.com/urfave/cli"
 
@@ -23,7 +24,8 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			rc.Boot.IsFirstRun = true
 		}
-		duo, err := duoui.DuOuI(rc)
+		var duo *model.DuoUI
+		duo, err = duoui.DuOuI(rc)
 		rc.DuoUIloggerController()
 		interrupt.AddHandler(func() {
 			slog.Debug("guiHandle interrupt")
@@ -40,10 +42,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// Start up GUI
 		slog.Debug("starting up GUI")
 		cx.WaitGroup.Add(1)
-		err = gui.WalletGUI(duo, rc)
-		if err != nil {
-			slog.Error(err)
-		}
+		if err = gui.WalletGUI(duo, rc); slog.Check(err) {}
 		cx.WaitGroup.Done()
 		slog.Debug("wallet GUI finished")
 		// wait for stop signal

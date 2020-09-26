@@ -71,7 +71,7 @@ func netName(	chainParams *netparams.Params) string {
 }
 
 // loadConfig initializes and parses the config using command line options.
-func loadConfig(	) (*config, []string, error) {
+func loadConfig(	) (*config, []string, err error) {
 
 	// Default config.
 	cfg := config{

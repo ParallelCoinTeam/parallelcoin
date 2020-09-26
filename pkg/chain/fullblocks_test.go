@@ -44,7 +44,7 @@ func isSupportedDbType(dbType string) bool {
 }
 
 // // chainSetup is used to create a new db and chain instance with the genesis block already inserted.  In addition to the new chain instance, it returns a teardown function the caller should invoke when done testing to clean up.
-// func chainSetup(	dbName string, netparams *netparams.Params) (*blockchain.BlockChain, func(), error) {
+// func chainSetup(	dbName string, netparams *netparams.Params) (*blockchain.BlockChain, func(), err error) {
 // 	if !isSupportedDbType(testDbType) {
 // 		return nil, nil, fmt.Errorf("unsupported db type %v", testDbType)
 // 	}

@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"errors"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -27,11 +28,13 @@ type WIF struct {
 }
 
 // NewWIF creates a new WIF structure to export an address and its private key as a string encoded in the Wallet Import Format.  The compress argument specifies whether the address intended to be imported or exported was created by serializing the public key compressed rather than uncompressed.
-func NewWIF(privKey *ec.PrivateKey, net *netparams.Params, compress bool) (*WIF, error) {
+func NewWIF(privKey *ec.PrivateKey, net *netparams.Params, compress bool) (wif *WIF, err error) {
 	if net == nil {
-		return nil, errors.New("no network")
+		err = errors.New("no network")
+	} else {
+		wif = &WIF{privKey, compress, net.PrivateKeyID}
 	}
-	return &WIF{privKey, compress, net.PrivateKeyID}, nil
+	return
 }
 
 // IsForNet returns whether or not the decoded WIF structure is associated with the passed bitcoin network.
@@ -47,7 +50,7 @@ func (w *WIF) IsForNet(net *netparams.Params) bool {
 //    compressed (33-byte) public key
 //  * 4 bytes of checksum, must equal the first four bytes of the double SHA256 of every byte before the checksum in this sequence
 // If the base58-decoded byte sequence does not match this, DecodeWIF will return a non-nil error.  ErrMalformedPrivateKey is returned when the WIF is of an impossible length or the expected compressed pubkey magic number does not equal the expected value of 0x01.  ErrChecksumMismatch is returned if the expected WIF checksum does not match the calculated checksum.
-func DecodeWIF(wif string) (*WIF, error) {
+func DecodeWIF(wif string) (w *WIF, err error) {
 	decoded := base58.Decode(wif)
 	decodedLen := len(decoded)
 	var compress bool
@@ -55,29 +58,36 @@ func DecodeWIF(wif string) (*WIF, error) {
 	switch decodedLen {
 	case 1 + ec.PrivKeyBytesLen + 1 + 4:
 		if decoded[33] != compressMagic {
-			return nil, ErrMalformedPrivateKey
+			err = ErrMalformedPrivateKey
+			slog.Debug(err)
+			return
 		}
 		compress = true
 	case 1 + ec.PrivKeyBytesLen + 4:
 		compress = false
 	default:
-		return nil, ErrMalformedPrivateKey
+		err = ErrMalformedPrivateKey
+		slog.Check(err)
+		return
 	}
 	// Checksum is first four bytes of double SHA256 of the identifier byte and privKey.  Verify this matches the final 4 bytes of the decoded private key.
-	var tosum []byte
+	var toSum []byte
 	if compress {
-		tosum = decoded[:1+ec.PrivKeyBytesLen+1]
+		toSum = decoded[:1+ec.PrivKeyBytesLen+1]
 	} else {
-		tosum = decoded[:1+ec.PrivKeyBytesLen]
+		toSum = decoded[:1+ec.PrivKeyBytesLen]
 	}
-	cksum := chainhash.DoubleHashB(tosum)[:4]
-	if !bytes.Equal(cksum, decoded[decodedLen-4:]) {
-		return nil, ErrChecksumMismatch
+	checkSum := chainhash.DoubleHashB(toSum)[:4]
+	if !bytes.Equal(checkSum, decoded[decodedLen-4:]) {
+		err = ErrChecksumMismatch
+		slog.Debug(err)
+		return
 	}
 	netID := decoded[0]
 	privKeyBytes := decoded[1 : 1+ec.PrivKeyBytesLen]
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), privKeyBytes)
-	return &WIF{privKey, compress, netID}, nil
+	w = &WIF{privKey, compress, netID}
+	return
 }
 
 // String creates the Wallet Import Format string encoding of a WIF structure. See DecodeWIF for a detailed breakdown of the format and requirements of a valid WIF string.
@@ -94,8 +104,8 @@ func (w *WIF) String() string {
 	if w.CompressPubKey {
 		a = append(a, compressMagic)
 	}
-	cksum := chainhash.DoubleHashB(a)[:4]
-	a = append(a, cksum...)
+	checkSum := chainhash.DoubleHashB(a)[:4]
+	a = append(a, checkSum...)
 	return base58.Encode(a)
 }
 

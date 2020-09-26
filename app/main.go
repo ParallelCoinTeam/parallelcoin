@@ -8,7 +8,7 @@
 package app
 
 import (
-	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"os"
 
 	"github.com/p9c/pod/app/conte"
@@ -26,9 +26,7 @@ const (
 func Main() int {
 	cx := conte.GetNewContext(appName, appLanguage, "main")
 	cx.App = GetApp(cx)
-	e := cx.App.Run(os.Args)
-	if e != nil {
-		fmt.Println("Pod ERROR:", e)
+	if e := cx.App.Run(os.Args); slog.Check(e) {
 		return 1
 	}
 	return 0

@@ -27,7 +27,7 @@ package component
 
 // func InputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
 //	return func() {
-//		e := th.DuoUIeditor(f.Field.Label)
+//		e := th.DuoUIEditor(f.Field.Label)
 //		e.Font.Typeface = th.Font.Primary
 //		e.Font.Style = text.Italic
 //		//e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
@@ -83,14 +83,14 @@ package component
 // }
 
 //	return func() {
-//		transactionsPanel := th.DuoUIpanel()
+//		transactionsPanel := th.DuoUIPanel()
 //		transactionsPanel.PanelObject = rc.History.Txs.Txs
 //		transactionsPanel.ScrollBar = th.ScrollBar()
 //		transactionsPanelElement.PanelObjectsNumber = len(rc.History.Txs.Txs)
 //		transactionsPanel.Layout(gtx, transactionsPanelElement, func(i int, in interface{}) {
 //			txs := in.([]model.DuoUItransactionExcerpt)
 //			t := txs[i]
-//			th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])()
+//			th.DuoUILine(gtx, 0, 0, 1, th.Colors["Hint"])()
 //			for t.Link.Clicked(gtx) {
 //				rc.ShowPage = fmt.Sprintf("TRANSACTION %s", t.TxID)
 //				rc.GetSingleTx(t.TxID)()

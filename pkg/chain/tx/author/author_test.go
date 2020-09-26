@@ -24,7 +24,7 @@ func makeInputSource(unspents []*wire.TxOut) InputSource {
 	currentTotal := util.Amount(0)
 	currentInputs := make([]*wire.TxIn, 0, len(unspents))
 	currentInputValues := make([]util.Amount, 0, len(unspents))
-	f := func(target util.Amount) (util.Amount, []*wire.TxIn, []util.Amount, [][]byte, error) {
+	f := func(target util.Amount) (util.Amount, []*wire.TxIn, []util.Amount, [][]byte, err error) {
 		for currentTotal < target && len(unspents) != 0 {
 			u := unspents[0]
 			unspents = unspents[1:]
@@ -161,7 +161,7 @@ func TestNewUnsignedTransaction(t *testing.T) {
 			InputCount:     1,
 		},
 	}
-	changeSource := func() ([]byte, error) {
+	changeSource := func() ([]byte, err error) {
 		// Only length matters for these tests.
 		return make([]byte, txsizes.P2WPKHPkScriptSize), nil
 	}

@@ -9,10 +9,9 @@ import (
 	"github.com/stalker-loki/app/slog"
 )
 
-func // Configure loads and sanitises the configuration from urfave/cli
-Configure(cx *conte.Xt, commandName string, initial bool) {
+// Configure loads and sanitises the configuration from urfave/cli
+func Configure(cx *conte.Xt, commandName string, initial bool) {
 	slog.Debug("running Configure", commandName)
-	slog.Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *chainrpc.Server)
 	// theoretically, the configuration should be accessed only when locked

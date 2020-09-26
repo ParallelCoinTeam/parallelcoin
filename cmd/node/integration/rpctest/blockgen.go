@@ -84,14 +84,14 @@ func solveBlock(header *wire.BlockHeader, targetDifficulty *big.Int) bool {
 // signature script of the coinbase transaction of a new block.
 // In particular, it starts with the block height that is required by version
 // 2 blocks.
-func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, error) {
+func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, err error) {
 	return script.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
 		AddInt64(int64(extraNonce)).Script()
 }
 
 // createCoinbaseTx returns a coinbase transaction paying an appropriate
 // subsidy based on the passed block height to the provided address.
-func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Address, mineTo []wire.TxOut, net *netparams.Params, version int32) (*util.Tx, error) {
+func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Address, mineTo []wire.TxOut, net *netparams.Params, version int32) (*util.Tx, err error) {
 	// Create the script to pay to the provided payment address.
 	pkScript, err := script.PayToAddrScript(addr)
 	if err != nil {
@@ -128,7 +128,7 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Ad
 // off of the genesis block for the specified chain.
 func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	blockVersion int32, blockTime time.Time, miningAddr util.Address,
-	mineTo []wire.TxOut, net *netparams.Params) (*util.Block, error) {
+	mineTo []wire.TxOut, net *netparams.Params) (*util.Block, err error) {
 	var (
 		prevHash      *chainhash.Hash
 		blockHeight   int32

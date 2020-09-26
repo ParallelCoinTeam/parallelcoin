@@ -13,11 +13,11 @@ type fixedWriter struct {
 
 // Write writes the contents of p to w.  When the contents of p would cause the writer to exceed the maximum allowed size of the fixed writer,  io.ErrShortWrite is returned and the writer is left unchanged. This satisfies the io.Writer interface.
 func (w *fixedWriter) Write(p []byte) (n int, err error) {
-	lenp := len(p)
-	if w.pos+lenp > cap(w.b) {
+	lenP := len(p)
+	if w.pos+lenP > cap(w.b) {
 		return 0, io.ErrShortWrite
 	}
-	n = lenp
+	n = lenP
 	w.pos += copy(w.b[w.pos:], p)
 	return
 }
@@ -38,12 +38,12 @@ func newFixedWriter(max int) io.Writer {
 type fixedReader struct {
 	buf   []byte
 	pos   int
-	iobuf *bytes.Buffer
+	ioBuf *bytes.Buffer
 }
 
 // Read reads the next len(p) bytes from the fixed reader.  When the number of bytes read would exceed the maximum number of allowed bytes to be read from the fixed writer, an error is returned. This satisfies the io.Reader interface.
 func (fr *fixedReader) Read(p []byte) (n int, err error) {
-	n, err = fr.iobuf.Read(p)
+	n, err = fr.ioBuf.Read(p)
 	fr.pos += n
 	return
 }
@@ -54,7 +54,7 @@ func newFixedReader(max int, buf []byte) io.Reader {
 	if buf != nil {
 		copy(b[:], buf)
 	}
-	iobuf := bytes.NewBuffer(b)
-	fr := fixedReader{b, 0, iobuf}
+	ioBuf := bytes.NewBuffer(b)
+	fr := fixedReader{b, 0, ioBuf}
 	return &fr
 }

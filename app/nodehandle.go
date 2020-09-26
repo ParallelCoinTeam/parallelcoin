@@ -21,7 +21,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		}
 		// runServiceCommand is only set to a real function on Windows.  It is used to parse and execute service
 		// commands specified via the -s flag.
-		runServiceCommand := func(string) error { return nil }
+		runServiceCommand := func(string) (err error) { return }
 		// Service options which are only added on Windows.
 		serviceOpts := serviceOptions{}
 		// Perform service command and exit if specified.  Invalid service commands show an appropriate error.
@@ -34,7 +34,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		}
 		shutdownChan := make(chan struct{})
 		go func() {
-			if err := node.Main(cx, shutdownChan); slog.Check(err) {
+			if err = node.Main(cx, shutdownChan); slog.Check(err) {
 			}
 		}()
 		slog.Debug("sending back node rpc server handler")

@@ -192,7 +192,7 @@ func (s *State) SettingsItem(fields pod.Group) func(il int) {
 
 func (s *State) SettingsBody() {
 	s.FlexH(gui.Rigid(func() {
-		s.Theme.DuoUIcontainer(4, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
+		s.Theme.DuoUIContainer(4, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
 			for _, fields := range s.Rc.Settings.Daemon.Schema.Groups {
 				if fmt.Sprint(fields.Legend) == s.Rc.Settings.Tabs.Current {
 					s.Lists["SettingsFields"].Layout(s.Gtx,
@@ -232,7 +232,7 @@ func (s *State) SettingsFieldLabel(f *Field) func() {
 	}
 }
 
-func (s *State) SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
+func (s *State) SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUITheme, f *Field) func() {
 	return func() {
 		s.Inset(4, func() {
 			layout.Flex{
@@ -345,7 +345,7 @@ func (s *State) InputField(f *Field) func() {
 			}
 		case "switch":
 			bg, fg := s.Theme.Colors["DocBg"], s.Theme.Colors["DocText"]
-			sw := s.Theme.DuoUIcheckBox("",
+			sw := s.Theme.DuoUICheckBox("",
 				//f.Field.Label,
 				s.Theme.Colors["Primary"],
 				s.Theme.Colors["Primary"])
@@ -398,12 +398,12 @@ func (s *State) Editor(editorController *gel.Editor, label string, handler func(
 	t, g := s.Theme, s.Gtx
 	bg, fg := t.Colors["DocBg"], t.Colors["DocText"]
 	return func() {
-		t.DuoUIcontainer(8, bg).Layout(g, layout.NW, func() {
+		t.DuoUIContainer(8, bg).Layout(g, layout.NW, func() {
 			width := g.Constraints.Width.Max / 2
 			if width > 320 {
 				width = 320
 			}
-			e := t.DuoUIeditor(label, fg, bg, width)
+			e := t.DuoUIEditor(label, fg, bg, width)
 			e.Font.Typeface = t.Fonts["Mono"]
 			e.TextSize = unit.Dp(16)
 			layout.UniformInset(unit.Dp(4)).Layout(g, func() {
@@ -427,12 +427,12 @@ func (s *State) PasswordEditor(editorController *gel.Editor, handler func(gel.Ed
 		fg = t.Colors["Transparent"]
 	}
 	return func() {
-		t.DuoUIcontainer(8, bg).Layout(g, layout.NW, func() {
+		t.DuoUIContainer(8, bg).Layout(g, layout.NW, func() {
 			width := g.Constraints.Width.Max / 2
 			if width > 320 {
 				width = 320
 			}
-			e := t.DuoUIeditor("", fg, bg, width)
+			e := t.DuoUIEditor("", fg, bg, width)
 			e.Font.Typeface = t.Fonts["Mono"]
 			e.TextSize = unit.Dp(16)
 			layout.UniformInset(unit.Dp(4)).Layout(g, func() {
@@ -453,13 +453,13 @@ func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, h
 	t, g := s.Theme, s.Gtx
 	bg, fg := t.Colors["DocBg"], t.Colors["DocText"]
 	return func() {
-		t.DuoUIcontainer(8, bg).Layout(g, layout.NW,
+		t.DuoUIContainer(8, bg).Layout(g, layout.NW,
 			func() {
 				width := g.Constraints.Width.Max / 2
 				if width > 320 {
 					width = 320
 				}
-				e := t.DuoUIeditor(label, fg, bg, width)
+				e := t.DuoUIEditor(label, fg, bg, width)
 				e.Font.Typeface = t.Fonts["Mono"]
 				layout.UniformInset(unit.Dp(4)).Layout(g, func() {
 					e.Layout(g, editorController)

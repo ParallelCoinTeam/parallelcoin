@@ -45,7 +45,7 @@ var _ iterator.Iterator = (*ldbCacheIter)(nil)
 // Error is only provided to satisfy the iterator interface as there are no
 // errors for this memory-only structure.
 // This is part of the leveldb iterator.Iterator interface implementation.
-func (iter *ldbCacheIter) Error() error {
+func (iter *ldbCacheIter) Error() (err error) {
 	return nil
 }
 
@@ -253,7 +253,7 @@ func (iter *dbCacheIterator) Release() {
 // Error is only provided to satisfy the iterator interface as there are no
 // errors for this memory-only structure.
 // This is part of the leveldb iterator.Iterator interface implementation.
-func (iter *dbCacheIterator) Error() error {
+func (iter *dbCacheIterator) Error() (err error) {
 	return nil
 }
 
@@ -361,7 +361,7 @@ type dbCache struct {
 // Snapshot returns a snapshot of the database cache and underlying database
 // at a particular point in time.
 // The snapshot must be released after use by calling Release.
-func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
+func (c *dbCache) Snapshot() (*dbCacheSnapshot, err error) {
 	dbSnapshot, err := c.ldb.GetSnapshot()
 	if err != nil {
 		slog.Error(err)
@@ -387,7 +387,7 @@ func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
 // function. Otherwise,
 // the transaction is committed when the user-supplied function returns a nil
 // error.
-func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) error {
+func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) (err error) {
 	// Start a leveldb transaction.
 	ldbTx, err := c.ldb.OpenTransaction()
 	if err != nil {
@@ -415,9 +415,9 @@ type TreapForEacher interface {
 
 // commitTreaps atomically commits all of the passed pending add/update
 // /remove updates to the underlying database.
-func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error {
+func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) (err error) {
 	// Perform all leveldb updates using an atomic transaction.
-	return c.updateDB(func(ldbTx *leveldb.Transaction) error {
+	return c.updateDB(func(ldbTx *leveldb.Transaction) (err error) {
 		var innerErr error
 		pendingKeys.ForEach(func(k, v []byte) bool {
 			if dbErr := ldbTx.Put(k, v, nil); dbErr != nil {
@@ -449,7 +449,7 @@ func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error 
 // This involes syncing the block store and replaying all transactions that
 // have been applied to the cache to the underlying database.
 // This function MUST be called with the database write lock held.
-func (c *dbCache) flush() error {
+func (c *dbCache) flush() (err error) {
 	slog.Trace("syncing database to disk")
 	c.lastFlush = time.Now()
 	// Sync the current write file associated with the block store.
@@ -518,7 +518,7 @@ func (c *dbCache) needsFlush(tx *transaction) bool {
 // but it will only be the state of the cache without the transaction
 // applied. This function MUST be called during a database write transaction
 // which in turn implies the database write lock will be held.
-func (c *dbCache) commitTx(tx *transaction) error {
+func (c *dbCache) commitTx(tx *transaction) (err error) {
 	// Flush the cache and write the current transaction directly to the
 	// database if a flush is needed.
 	if c.needsFlush(tx) {
@@ -571,7 +571,7 @@ func (c *dbCache) commitTx(tx *transaction) error {
 // Close cleanly shuts down the database cache by syncing all data and
 // closing the underlying leveldb database.
 // This function MUST be called with the database write lock held.
-func (c *dbCache) Close() error {
+func (c *dbCache) Close() (err error) {
 	// Flush any outstanding cached entries to disk.
 	if err := c.flush(); err != nil {
 		// Even if there is an error while flushing,

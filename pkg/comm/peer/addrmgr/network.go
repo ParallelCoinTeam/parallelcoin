@@ -25,7 +25,7 @@ var (
 	rfc3964Net = ipNet("2002::", 16, 128)
 	// rfc4193Net specifies the IPv6 unique local address block as defined by RFC4193 (FC00::/7).
 	rfc4193Net = ipNet("FC00::", 7, 128)
-	// rfc4380Net specifies the IPv6 teredo tunneling over UDP address block as defined by RFC4380 (2001::/32).
+	// rfc4380Net specifies the IPv6 toredo tunneling over UDP address block as defined by RFC4380 (2001::/32).
 	rfc4380Net = ipNet("2001::", 32, 128)
 	// rfc4843Net specifies the IPv6 ORCHID address block as defined by RFC4843 (2001:10::/28).
 	rfc4843Net = ipNet("2001:10::", 28, 128)
@@ -109,7 +109,7 @@ func IsRFC4193(na *wire.NetAddress) bool {
 	return rfc4193Net.Contains(na.IP)
 }
 
-// IsRFC4380 returns whether or not the passed address is part of the IPv6 teredo tunneling over UDP range as defined by RFC4380 (2001::/32).
+// IsRFC4380 returns whether or not the passed address is part of the IPv6 toredo tunneling over UDP range as defined by RFC4380 (2001::/32).
 func IsRFC4380(na *wire.NetAddress) bool {
 	return rfc4380Net.Contains(na.IP)
 }
@@ -188,7 +188,7 @@ func GroupKey(na *wire.NetAddress) string {
 		return ip.Mask(net.CIDRMask(16, 32)).String()
 	}
 	if IsRFC4380(na) {
-		// teredo tunnels have the last 4 bytes as the v4 address XOR 0xff.
+		// toredo tunnels have the last 4 bytes as the v4 address XOR 0xff.
 		ip := net.IP(make([]byte, 4))
 		for i, b := range na.IP[12:16] {
 			ip[i] = b ^ 0xff

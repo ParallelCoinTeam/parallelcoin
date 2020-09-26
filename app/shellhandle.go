@@ -39,9 +39,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		slog.Warn("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
-				err = node.Main(cx, shutdownChan)
-				if err != nil {
-					slog.Error("error starting node ", err)
+				if err = node.Main(cx, shutdownChan); slog.Check(err) {
 				}
 			}()
 			cx.RPCServer = <-cx.NodeChan
@@ -49,9 +47,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		slog.Warn("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
-				err = walletmain.Main(cx)
-				if err != nil {
-					fmt.Println("error running wallet:", err)
+				if err = walletmain.Main(cx); slog.Check(err) {
 				}
 			}()
 			cx.WalletServer = <-cx.WalletChan

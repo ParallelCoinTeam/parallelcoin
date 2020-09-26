@@ -56,7 +56,7 @@ type BitcoindConn struct {
 // disconnected.
 func NewBitcoindConn(chainParams *netparams.Params,
 	host, user, pass, zmqBlockHost, zmqTxHost string,
-	zmqPollInterval time.Duration) (*BitcoindConn, error) {
+	zmqPollInterval time.Duration) (*BitcoindConn, err error) {
 	clientCfg := &rpcclient.ConnConfig{
 		Host:                 host,
 		User:                 user,
@@ -88,7 +88,7 @@ func NewBitcoindConn(chainParams *netparams.Params,
 // It's possible for this function to fail due to a limited number of connection
 // attempts. This is done to prevent waiting forever on the connection to be
 // established in the case that the node is down.
-func (c *BitcoindConn) Start() error {
+func (c *BitcoindConn) Start() (err error) {
 	if !atomic.CompareAndSwapInt32(&c.started, 0, 1) {
 		return nil
 	}
@@ -297,7 +297,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 }
 
 // getCurrentNet returns the network on which the bitcoind node is running.
-func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, error) {
+func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, err error) {
 	hash, err := c.client.GetBlockHash(0)
 	if err != nil {
 		slog.Error(err)

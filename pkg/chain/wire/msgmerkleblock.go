@@ -20,7 +20,7 @@ type MsgMerkleBlock struct {
 }
 
 // AddTxHash adds a new transaction hash to the message.
-func (msg *MsgMerkleBlock) AddTxHash(hash *chainhash.Hash) error {
+func (msg *MsgMerkleBlock) AddTxHash(hash *chainhash.Hash) (err error) {
 	if len(msg.Hashes)+1 > maxTxPerBlock {
 		str := fmt.Sprintf("too many tx hashes for message [max %v]",
 			maxTxPerBlock)
@@ -31,27 +31,22 @@ func (msg *MsgMerkleBlock) AddTxHash(hash *chainhash.Hash) error {
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation.
-func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (err error) {
 	if pver < BIP0037Version {
 		str := fmt.Sprintf("merkleblock message invalid for protocol "+
 			"version %d", pver)
 		return messageError("MsgMerkleBlock.BtcDecode", str)
 	}
-	err := readBlockHeader(r, pver, &msg.Header)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = readBlockHeader(r, pver, &msg.Header); slog.Check(err) {
+		return
 	}
-	err = readElement(r, &msg.Transactions)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = readElement(r, &msg.Transactions); slog.Check(err) {
+		return
 	}
 	// Read num block locator hashes and limit to max.
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		slog.Error(err)
-		return err
+	var count uint64
+	if count, err = ReadVarInt(r, pver); slog.Check(err) {
+		return
 	}
 	if count > maxTxPerBlock {
 		str := fmt.Sprintf("too many transaction hashes for message "+
@@ -63,14 +58,10 @@ func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncodi
 	msg.Hashes = make([]*chainhash.Hash, 0, count)
 	for i := uint64(0); i < count; i++ {
 		hash := &hashes[i]
-		err := readElement(r, hash)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = readElement(r, hash); slog.Check(err) {
+			return
 		}
-		err = msg.AddTxHash(hash)
-		if err != nil {
-			slog.Error(err)
+		if err = msg.AddTxHash(hash); slog.Check(err) {
 		}
 	}
 	msg.Flags, err = ReadVarBytes(r, pver, maxFlagsPerMerkleBlock,
@@ -79,7 +70,7 @@ func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncodi
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface implementation.
-func (msg *MsgMerkleBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
+func (msg *MsgMerkleBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (err error) {
 	if pver < BIP0037Version {
 		str := fmt.Sprintf("merkleblock message invalid for protocol "+
 			"version %d", pver)
@@ -98,29 +89,22 @@ func (msg *MsgMerkleBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncodi
 			"max %v]", numFlagBytes, maxFlagsPerMerkleBlock)
 		return messageError("MsgMerkleBlock.BtcDecode", str)
 	}
-	err := writeBlockHeader(w, pver, &msg.Header)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = writeBlockHeader(w, pver, &msg.Header); slog.Check(err) {
+		return
 	}
-	err = writeElement(w, msg.Transactions)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = writeElement(w, msg.Transactions); slog.Check(err) {
+		return
 	}
-	err = WriteVarInt(w, pver, uint64(numHashes))
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarInt(w, pver, uint64(numHashes)); slog.Check(err) {
+		return
 	}
 	for _, hash := range msg.Hashes {
-		err = writeElement(w, hash)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = writeElement(w, hash); slog.Check(err) {
+			return
 		}
 	}
-	return WriteVarBytes(w, pver, msg.Flags)
+	err = WriteVarBytes(w, pver, msg.Flags)
+	return
 }
 
 // Command returns the protocol command string for the message.  This is part of the Message interface implementation.

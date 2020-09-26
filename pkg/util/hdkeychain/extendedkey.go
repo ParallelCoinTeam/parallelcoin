@@ -135,7 +135,7 @@ func (k *ExtendedKey) ParentFingerprint() uint32 {
 // chance (< 1 in 2^127) the specific child index does not derive to a usable child.  The ErrInvalidChild error will be
 // returned if this should occur, and the caller is expected to ignore the invalid child and simply increment to the
 // next index.
-func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
+func (k *ExtendedKey) Child(i uint32) (ek *ExtendedKey, err error) {
 	// Prevent derivation of children beyond the max allowed depth.
 	if k.depth == maxUint8 {
 		return nil, ErrDeriveBeyondMaxDepth
@@ -172,9 +172,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	// Take the HMAC-SHA512 of the current key's chain code and the derived data:
 	//   I = HMAC-SHA512(Key = chainCode, Data = data)
 	hmac512 := hmac.New(sha512.New, k.chainCode)
-	_, err := hmac512.Write(data)
-	if err != nil {
-		slog.Error(err)
+	if _, err = hmac512.Write(data); slog.Check(err) {
 	}
 	ilr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -237,16 +235,15 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 // As the name implies, an extended public key does not have access to the private key, so it is not capable of signing
 //transactions or deriving child extended private keys.  However, it is capable of deriving further child extended
 //public keys.
-func (k *ExtendedKey) Neuter() (*ExtendedKey, error) {
+func (k *ExtendedKey) Neuter() (ek *ExtendedKey, err error) {
 	// Already an extended public key.
 	if !k.isPrivate {
 		return k, nil
 	}
 	// Get the associated public extended key version bytes.
-	version, err := config.HDPrivateKeyToPublicKeyID(k.version)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var version []byte
+	if version, err = config.HDPrivateKeyToPublicKeyID(k.version); slog.Check(err) {
+		return
 	}
 	// Convert it to an extended public key.  The key for the new extended key will simply be the pubkey of the current
 	//extended private key.
@@ -256,23 +253,23 @@ func (k *ExtendedKey) Neuter() (*ExtendedKey, error) {
 }
 
 // ECPubKey converts the extended key to a ec public key and returns it.
-func (k *ExtendedKey) ECPubKey() (*ec.PublicKey, error) {
+func (k *ExtendedKey) ECPubKey() (pk *ec.PublicKey, err error) {
 	return ec.ParsePubKey(k.pubKeyBytes(), ec.S256())
 }
 
 // ECPrivKey converts the extended key to a ec private key and returns it. As you might imagine this is only possible
 //if the extended key is a private extended key (as determined by the IsPrivate function).  The ErrNotPrivExtKey error
 //will be returned if this function is called on a public extended key.
-func (k *ExtendedKey) ECPrivKey() (*ec.PrivateKey, error) {
+func (k *ExtendedKey) ECPrivKey() (privKey *ec.PrivateKey, err error) {
 	if !k.isPrivate {
 		return nil, ErrNotPrivExtKey
 	}
-	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), k.key)
+	privKey, _ = ec.PrivKeyFromBytes(ec.S256(), k.key)
 	return privKey, nil
 }
 
 // Address converts the extended key to a standard bitcoin pay-to-pubkey-hash address for the passed network.
-func (k *ExtendedKey) Address(net *netparams.Params) (*util.AddressPubKeyHash, error) {
+func (k *ExtendedKey) Address(net *netparams.Params) (pkh *util.AddressPubKeyHash, err error) {
 	pkHash := util.Hash160(k.pubKeyBytes())
 	return util.NewAddressPubKeyHash(pkHash, net)
 }
@@ -356,7 +353,7 @@ func (k *ExtendedKey) Zero() {
 // NOTE: There is an extremely small chance (< 1 in 2^127) the provided seed will derive to an unusable secret key.
 //The ErrUnusable error will be returned if this should occur, so the caller must check for it and generate a
 // new seed accordingly.
-func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
+func NewMaster(seed []byte, net *netparams.Params) (ek *ExtendedKey, err error) {
 	// Per [BIP32], the seed must be in range [MinSeedBytes, MaxSeedBytes].
 	if len(seed) < MinSeedBytes || len(seed) > MaxSeedBytes {
 		return nil, ErrInvalidSeedLen
@@ -364,9 +361,7 @@ func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
 	// First take the HMAC-SHA512 of the master key and the seed data:
 	//   I = HMAC-SHA512(Key = "Parallelcoin seed", Data = S)
 	hmac512 := hmac.New(sha512.New, masterKey)
-	_, err := hmac512.Write(seed)
-	if err != nil {
-		slog.Error(err)
+	if _, err = hmac512.Write(seed); slog.Check(err) {
 	}
 	lr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -385,7 +380,7 @@ func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
 }
 
 // NewKeyFromString returns a new extended key instance from a base58-encoded extended key.
-func NewKeyFromString(key string) (*ExtendedKey, error) {
+func NewKeyFromString(key string) (ek *ExtendedKey, err error) {
 	// The base58-decoded extended key must consist of a serialized payload plus an additional 4 bytes for the checksum.
 	decoded := base58.Decode(key)
 	if len(decoded) != serializedKeyLen+4 {
@@ -434,16 +429,14 @@ func NewKeyFromString(key string) (*ExtendedKey, error) {
 // GenerateSeed returns a cryptographically secure random seed that can be used as the input for the NewMaster function
 // to generate a new master node. The length is in bytes and it must be between 16 and 64 (128 to 512 bits). The
 // recommended length is 32 (256 bits) as defined by the RecommendedSeedLen constant.
-func GenerateSeed(length uint8) ([]byte, error) {
+func GenerateSeed(length uint8) (buf []byte, err error) {
 	// Per [BIP32], the seed must be in range [MinSeedBytes, MaxSeedBytes].
 	if length < MinSeedBytes || length > MaxSeedBytes {
 		return nil, ErrInvalidSeedLen
 	}
-	buf := make([]byte, length)
-	_, err := rand.Read(buf)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	buf = make([]byte, length)
+	if _, err = rand.Read(buf); slog.Check(err) {
+		return
 	}
-	return buf, nil
+	return
 }

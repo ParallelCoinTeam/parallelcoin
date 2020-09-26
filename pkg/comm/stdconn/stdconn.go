@@ -46,17 +46,17 @@ func (s StdConn) RemoteAddr() (addr net.Addr) {
 	return
 }
 
-func (s StdConn) SetDeadline(t time.Time) (err error) {
+func (s StdConn) SetDeadline(_ time.Time) (err error) {
 	// this is a no-op as it is not relevant to the type of connection
 	return
 }
 
-func (s StdConn) SetReadDeadline(t time.Time) (err error) {
+func (s StdConn) SetReadDeadline(_ time.Time) (err error) {
 	// this is a no-op as it is not relevant to the type of connection
 	return
 }
 
-func (s StdConn) SetWriteDeadline(t time.Time) (err error) {
+func (s StdConn) SetWriteDeadline(_ time.Time) (err error) {
 	// this is a no-op as it is not relevant to the type of connection
 	return
 }

@@ -307,7 +307,7 @@ func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 // //
 // // NOTE: copied from btcsuite/btcd/database/ffldb/interface_test.go
 // func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) (
-// 	[]*util.Block, error) {
+// 	[]*util.Block, err error) {
 // 	// Open the file that contains the blocks for reading.
 // 	fi, err := os.Open(dataFile)
 // 	if err != nil {

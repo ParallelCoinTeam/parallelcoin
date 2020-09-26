@@ -308,7 +308,7 @@ func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Poo
 		t.Fatalf("Failed to create wallet DB: %v", err)
 	}
 	var addrMgr *waddrmgr.Manager
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		addrmgrNs, err := tx.CreateTopLevelBucket(addrmgrNamespaceKey)
 		if err != nil {
 			return err
@@ -342,7 +342,7 @@ func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Poo
 }
 func TstCreateTxStore(t *testing.T, db walletdb.DB) *wtxmgr.Store {
 	var store *wtxmgr.Store
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		txmgrNs, err := tx.CreateTopLevelBucket(txmgrNamespaceKey)
 		if err != nil {
 			return err

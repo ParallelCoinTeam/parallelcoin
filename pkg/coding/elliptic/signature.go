@@ -71,29 +71,33 @@ func (sig *Signature) IsEqual(otherSig *Signature) bool {
 // 0x30 + <1-byte> + 0x02 + 0x01 + <byte> + 0x2 + 0x01 + <byte>
 const minSigLen = 8
 
-func parseSig(sigStr []byte, curve elliptic.Curve, der bool) (*Signature, error) {
+func parseSig(sigStr []byte, curve elliptic.Curve, der bool) (signature *Signature, err error) {
 	// Originally this code used encoding/asn1 in order to parse the signature, but a number of problems were found with this approach. Despite the fact that signatures are stored as DER, the difference between go's idea of a bignum (and that they have sign) doesn't agree with the openssl one (where they do not). The above is true as of Go 1.1. In the end it was simpler to rewrite the code to explicitly understand the format which is this:
 	// 0x30 <length of whole message> <0x02> <length of R> <R> 0x2
 	// <length of S> <S>.
-	signature := &Signature{}
+	signature = &Signature{}
 	if len(sigStr) < minSigLen {
-		return nil, errors.New("malformed signature: too short")
+		err = errors.New("malformed signature: too short")
+		slog.Debug(err)
+		return
 	}
 	// 0x30
 	index := 0
 	if sigStr[index] != 0x30 {
-		return nil, errors.New("malformed signature: no header magic")
+		err = errors.New("malformed signature: no header magic")
+		slog.Debug(err)
+		return
 	}
 	index++
 	// length of remaining message
-	siglen := sigStr[index]
+	sigLen := sigStr[index]
 	index++
-	// siglen should be less than the entire message and greater than the minimal message size.
-	if int(siglen+2) > len(sigStr) || int(siglen+2) < minSigLen {
+	// sigLen should be less than the entire message and greater than the minimal message size.
+	if int(sigLen+2) > len(sigStr) || int(sigLen+2) < minSigLen {
 		return nil, errors.New("malformed signature: bad length")
 	}
 	// trim the slice we're working on so we only look at what matters.
-	sigStr = sigStr[:siglen+2]
+	sigStr = sigStr[:sigLen+2]
 	// 0x02
 	if sigStr[index] != 0x02 {
 		return nil,
@@ -166,12 +170,12 @@ func parseSig(sigStr []byte, curve elliptic.Curve, der bool) (*Signature, error)
 
 // ParseSignature parses a signature in BER format for the curve type `curve' into a Signature type, performing some
 // basic sanity checks.  If parsing according to the more strict DER format is needed, use ParseDERSignature.
-func ParseSignature(sigStr []byte, curve elliptic.Curve) (*Signature, error) {
+func ParseSignature(sigStr []byte, curve elliptic.Curve) (signature *Signature, err error) {
 	return parseSig(sigStr, curve, false)
 }
 
 // ParseDERSignature parses a signature in DER format for the curve type `curve` into a Signature type.  If parsing according to the less strict BER format is needed, use ParseSignature.
-func ParseDERSignature(sigStr []byte, curve elliptic.Curve) (*Signature, error) {
+func ParseDERSignature(sigStr []byte, curve elliptic.Curve) (signature *Signature, err error) {
 	return parseSig(sigStr, curve, true)
 }
 
@@ -190,7 +194,7 @@ func canonicalizeInt(val *big.Int) []byte {
 }
 
 // canonicalPadding checks whether a big-endian encoded integer could possibly be misinterpreted as a negative number (even though OpenSSL treats all numbers as unsigned), or if there is any unnecessary leading zero padding.
-func canonicalPadding(b []byte) error {
+func canonicalPadding(b []byte) (err error) {
 	switch {
 	case b[0]&0x80 == 0x80:
 		return errNegativeValue
@@ -222,20 +226,20 @@ func hashToInt(hash []byte, c elliptic.Curve) *big.Int {
 // of j we do the R case, else the -R case in step 1.6. This counter is used in the bitcoin compressed signature format
 // and thus we match bitcoind's behaviour here.
 func recoverKeyFromSignature(curve *KoblitzCurve, sig *Signature, msg []byte,
-	iter int, doChecks bool) (*PublicKey, error) {
+	iter int, doChecks bool) (pk *PublicKey, err error) {
 	// 1.1 x = (n * i) + r
-	Rx := new(big.Int).Mul(curve.Params().N,
-		new(big.Int).SetInt64(int64(iter/2)))
+	Rx := new(big.Int).Mul(curve.Params().N, new(big.Int).SetInt64(int64(iter/2)))
 	Rx.Add(Rx, sig.R)
 	if Rx.Cmp(curve.Params().P) != -1 {
-		return nil, errors.New("calculated Rx is larger than curve P")
+		err = errors.New("calculated Rx is larger than curve P")
+		slog.Debug(err)
+		return
 	}
 	// convert 02<Rx> to point R. (step 1.2 and 1.3). If we are on an odd iteration then 1.6 will be done with -R, so we
 	// calculate the other term when uncompressing the point.
-	Ry, err := decompressPoint(curve, Rx, iter%2 == 1)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var Ry *big.Int
+	if Ry, err = decompressPoint(curve, Rx, iter%2 == 1); slog.Check(err) {
+		return
 	}
 	// 1.4 Check n*R is point at infinity
 	if doChecks {
@@ -248,43 +252,43 @@ func recoverKeyFromSignature(curve *KoblitzCurve, sig *Signature, msg []byte,
 	e := hashToInt(msg, curve)
 	// Step 1.6.1:
 	// We calculate the two terms sR and eG separately multiplied by the inverse of r (from the signature). We then add them to calculate  Q = r^-1(sR-eG)
-	invr := new(big.Int).ModInverse(sig.R, curve.Params().N)
+	inverse := new(big.Int).ModInverse(sig.R, curve.Params().N)
 	// first term.
-	invrS := new(big.Int).Mul(invr, sig.S)
-	invrS.Mod(invrS, curve.Params().N)
-	sRx, sRy := curve.ScalarMult(Rx, Ry, invrS.Bytes())
+	inverseS := new(big.Int).Mul(inverse, sig.S)
+	inverseS.Mod(inverseS, curve.Params().N)
+	sRx, sRy := curve.ScalarMult(Rx, Ry, inverseS.Bytes())
 	// second term.
 	e.Neg(e)
 	e.Mod(e, curve.Params().N)
-	e.Mul(e, invr)
+	e.Mul(e, inverse)
 	e.Mod(e, curve.Params().N)
 	minuseGx, minuseGy := curve.ScalarBaseMult(e.Bytes())
 	// TODO: this would be faster if we did a mult and add in one
 	//  step to prevent the jacobian conversion back and forth.
 	Qx, Qy := curve.Add(sRx, sRy, minuseGx, minuseGy)
-	return &PublicKey{
+	pk = &PublicKey{
 		Curve: curve,
 		X:     Qx,
 		Y:     Qy,
-	}, nil
+	}
+	return
 }
 
 // SignCompact produces a compact signature of the data in hash with the given private key on the given koblitz curve. The isCompressed  parameter should be used to detail if the given signature should reference a compressed public key or not. If successful the bytes of the compact signature will be returned in the format:
 // <(byte of 27+public key solution)+4 if compressed >< padded bytes for signature R><padded bytes for signature S>
-// where the R and S parameters are padded up to the bitlengh of the curve.
-func SignCompact(curve *KoblitzCurve, key *PrivateKey,
-	hash []byte, isCompressedKey bool) ([]byte, error) {
-	sig, err := key.Sign(hash)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+// where the R and S parameters are padded up to the bitlength of the curve.
+func SignCompact(curve *KoblitzCurve, key *PrivateKey, hash []byte, isCompressedKey bool) (result []byte, err error) {
+	var sig *Signature
+	if sig, err = key.Sign(hash); slog.Check(err) {
+		return
 	}
 	// bitcoind checks the bit length of R and S here. The ecdsa signature algorithm returns R and S mod N therefore
 	// they will be the bitsize of the curve, and thus correctly sized.
 	for i := 0; i < (curve.H+1)*2; i++ {
-		pk, err := recoverKeyFromSignature(curve, sig, hash, i, true)
+		var pk *PublicKey
+		pk, err = recoverKeyFromSignature(curve, sig, hash, i, true)
 		if err == nil && pk.X.Cmp(key.X) == 0 && pk.Y.Cmp(key.Y) == 0 {
-			result := make([]byte, 1, 2*curve.byteSize+1)
+			result = make([]byte, 1, 2*curve.byteSize+1)
 			result[0] = 27 + byte(i)
 			if isCompressedKey {
 				result[0] += 4
@@ -304,20 +308,23 @@ func SignCompact(curve *KoblitzCurve, key *PrivateKey,
 					make([]byte, curveLen-byteLen)...)
 			}
 			result = append(result, sig.S.Bytes()...)
-			return result, nil
+			return
 		}
 	}
-	return nil, errors.New("no valid solution for pubkey found")
+	err = errors.New("no valid solution for pubkey found")
+	slog.Debug(err)
+	return
 }
 
 // RecoverCompact verifies the compact signature "signature" of "hash" for the Koblitz curve in "curve". If the
 // signature matches then the recovered public key will be returned as well as a boolean if the original key was
 // compressed or not, else an error will be returned.
-func RecoverCompact(curve *KoblitzCurve, signature,
-	hash []byte) (*PublicKey, bool, error) {
+func RecoverCompact(curve *KoblitzCurve, signature, hash []byte) (pk *PublicKey, b bool, err error) {
 	bitLen := (curve.BitSize + 7) / 8
 	if len(signature) != 1+bitLen*2 {
-		return nil, false, errors.New("invalid compact signature size")
+		err = errors.New("invalid compact signature size")
+		slog.Check(err)
+		return
 	}
 	iteration := int((signature[0] - 27) & ^byte(4))
 	// format is <header byte><bitLen R><bitLen S>
@@ -326,16 +333,16 @@ func RecoverCompact(curve *KoblitzCurve, signature,
 		S: new(big.Int).SetBytes(signature[bitLen+1:]),
 	}
 	// The iteration used here was encoded
-	key, err := recoverKeyFromSignature(curve, sig, hash, iteration, false)
-	if err != nil {
-		slog.Error(err)
-		return nil, false, err
+	if pk, err = recoverKeyFromSignature(curve, sig, hash, iteration, false); slog.Check(err) {
+		return
 	}
-	return key, ((signature[0] - 27) & 4) == 4, nil
+	b = ((signature[0] - 27) & 4) == 4
+	slog.Debug(err)
+	return
 }
 
 // signRFC6979 generates a deterministic ECDSA signature according to RFC 6979 and BIP 62.
-func signRFC6979(privateKey *PrivateKey, hash []byte) (*Signature, error) {
+func signRFC6979(privateKey *PrivateKey, hash []byte) (sig *Signature, err error) {
 	privKey := privateKey.ToECDSA()
 	N := S256().N
 	halfOrder := S256().halfOrder
@@ -346,7 +353,9 @@ func signRFC6979(privateKey *PrivateKey, hash []byte) (*Signature, error) {
 		r.Sub(r, N)
 	}
 	if r.Sign() == 0 {
-		return nil, errors.New("calculated R is zero")
+		err = errors.New("calculated R is zero")
+		slog.Debug(err)
+		return
 	}
 	e := hashToInt(hash, privKey.Curve)
 	s := new(big.Int).Mul(privKey.D, r)
@@ -357,9 +366,13 @@ func signRFC6979(privateKey *PrivateKey, hash []byte) (*Signature, error) {
 		s.Sub(N, s)
 	}
 	if s.Sign() == 0 {
-		return nil, errors.New("calculated S is zero")
+		err = errors.New("calculated S is zero")
+		slog.Debug(err)
+		return
 	}
-	return &Signature{R: r, S: s}, nil
+	sig = &Signature{R: r, S: s}
+	slog.Debug(err)
+	return
 }
 
 // nonceRFC6979 generates an ECDSA nonce (`k`) deterministically according to RFC 6979. It takes a 32-byte hash as an input and returns 32-byte nonce to be used in ECDSA algorithm.

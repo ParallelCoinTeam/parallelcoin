@@ -68,7 +68,7 @@ var _ ServerConnManager = &ConnManager{}
 // Attempting to connect to an already existing peer will return an error.
 // This function is safe for concurrent access and is part of the
 // RPCServerConnManager interface implementation.
-func (cm *ConnManager) Connect(addr string, permanent bool) error {
+func (cm *ConnManager) Connect(addr string, permanent bool) (err error) {
 	replyChan := make(chan error)
 	cm.server.Query <- ConnectNodeMsg{
 		Addr:      addr,
@@ -82,7 +82,7 @@ func (cm *ConnManager) Connect(addr string, permanent bool) error {
 // of persistent peers.  Attempting to remove an id that does not exist will
 // return an error. This function is safe for concurrent access and is part
 // of the RPCServerConnManager interface implementation.
-func (cm *ConnManager) RemoveByID(id int32) error {
+func (cm *ConnManager) RemoveByID(id int32) (err error) {
 	replyChan := make(chan error)
 	cm.server.Query <- RemoveNodeMsg{
 		Cmp:   func(sp *NodePeer) bool { return sp.ID() == id },
@@ -96,7 +96,7 @@ func (cm *ConnManager) RemoveByID(id int32) error {
 // Attempting to remove an address that does not exist will return an error.
 // This function is safe for concurrent access and is part of the
 // RPCServerConnManager interface implementation.
-func (cm *ConnManager) RemoveByAddr(addr string) error {
+func (cm *ConnManager) RemoveByAddr(addr string) (err error) {
 	replyChan := make(chan error)
 	cm.server.Query <- RemoveNodeMsg{
 		Cmp:   func(sp *NodePeer) bool { return sp.Addr() == addr },
@@ -110,7 +110,7 @@ func (cm *ConnManager) RemoveByAddr(addr string) error {
 // Attempting to remove an id that does not exist will return an error.
 // This function is safe for concurrent access and is part of the
 // RPCServerConnManager interface implementation.
-func (cm *ConnManager) DisconnectByID(id int32) error {
+func (cm *ConnManager) DisconnectByID(id int32) (err error) {
 	replyChan := make(chan error)
 	cm.server.Query <- DisconnectNodeMsg{
 		Cmp:   func(sp *NodePeer) bool { return sp.ID() == id },
@@ -124,7 +124,7 @@ func (cm *ConnManager) DisconnectByID(id int32) error {
 // Attempting to remove an address that does not exist will return an error.
 // This function is safe for concurrent access and is part of the
 // RPCServerConnManager interface implementation.
-func (cm *ConnManager) DisconnectByAddr(addr string) error {
+func (cm *ConnManager) DisconnectByAddr(addr string) (err error) {
 	replyChan := make(chan error)
 	cm.server.Query <- DisconnectNodeMsg{
 		Cmp:   func(sp *NodePeer) bool { return sp.Addr() == addr },
@@ -221,7 +221,7 @@ func (b *SyncManager) IsCurrent() bool {
 // locally. This function is safe for concurrent access and is part of the
 // RPCServerSyncManager interface implementation.
 func (b *SyncManager) SubmitBlock(block *util.Block,
-	flags blockchain.BehaviorFlags) (bool, error) {
+	flags blockchain.BehaviorFlags) (bool, err error) {
 	return b.syncMgr.ProcessBlock(block, flags)
 }
 

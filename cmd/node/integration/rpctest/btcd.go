@@ -27,7 +27,7 @@ var (
 // The executable file is not cleaned up,
 // but since it lives at a static path in a temp directory,
 // it is not a big deal.
-func podExecutablePath() (string, error) {
+func podExecutablePath() (string, err error) {
 	compileMtx.Lock()
 	defer compileMtx.Unlock()
 	// If pod has already been compiled, just use that.

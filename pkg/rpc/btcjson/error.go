@@ -32,7 +32,7 @@ const (
 	ErrUnregisteredMethod
 	// ErrMissingDescription indicates a description required to generate help is missing.
 	ErrMissingDescription
-	// ErrNumParams inidcates the number of netparams supplied do not match the requirements of the associated command.
+	// ErrNumParams indicates the number of netparams supplied do not match the requirements of the associated command.
 	ErrNumParams
 	// numErrorCodes is the maximum error code number used in tests.
 	numErrorCodes
@@ -74,6 +74,6 @@ func (e Error) Error() string {
 }
 
 // makeError creates an BTCJSONError given a set of arguments.
-func makeError(c ErrorCode, desc string) Error {
+func makeError(c ErrorCode, desc string) (err error) {
 	return Error{ErrorCode: c, Description: desc}
 }

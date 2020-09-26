@@ -152,7 +152,7 @@ return err
 // but it is provided here since it can be useful for development.
 // Not the eventlog entry is intentionally not removed since it would
 // invalidate any existing event log messages.
-func removeService() error {
+func removeService() (err error) {
 	// Connect to the windows service manager.
 	serviceManager, err := mgr.Connect()
 	if err != nil {
@@ -172,7 +172,7 @@ return fmt.Errorf("service %s is not installed", svcName)
 }
 
 // startService attempts to start the pod service.
-func startService() error {
+func startService() (err error) {
 	// Connect to the windows service manager.
 	serviceManager, err := mgr.Connect()
 	if err != nil {
@@ -197,7 +197,7 @@ return fmt.Errorf("could not start service: %v", err)
 // controlService allows commands which change the status of the service.
 // It also waits for up to 10 seconds for the service to change to the passed
 // state.
-func controlService(c svc.Cmd, to svc.State) error {
+func controlService(c svc.Cmd, to svc.State) (err error) {
 	// Connect to the windows service manager.
 	serviceManager, err := mgr.Connect()
 	if err != nil {
@@ -237,7 +237,7 @@ return fmt.Errorf("could not retrieve service "+
 // performServiceCommand attempts to run one of the supported service
 // commands provided on the command line via the service command flag.
 // An appropriate error is returned if an invalid command is specified.
-func performServiceCommand(command string) error {
+func performServiceCommand(command string) (err error) {
 	var err error
 	switch command {
 	case "install":
@@ -259,7 +259,7 @@ func performServiceCommand(command string) error {
 // server.
 // A flag is returned to the caller so the application can determine whether
 // to exit (when running as a service) or launch in normal interactive mode.
-func serviceMain() (bool, error) {
+func serviceMain() (bool, err error) {
 	// Don't run as a service if we're running interactively
 	// (or that can't be determined due to an error).
 	isInteractive, err := svc.IsAnInteractiveSession()

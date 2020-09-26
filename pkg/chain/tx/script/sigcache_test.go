@@ -9,7 +9,7 @@ import (
 )
 
 // genRandomSig returns a random message, a signature of the message under the public key and the public key. This function is used to generate randomized test data.
-func genRandomSig() (*chainhash.Hash, *ec.Signature, *ec.PublicKey, error) {
+func genRandomSig() (*chainhash.Hash, *ec.Signature, *ec.PublicKey, err error) {
 	privKey, err := ec.NewPrivateKey(ec.S256())
 	if err != nil {
 		return nil, nil, nil, err

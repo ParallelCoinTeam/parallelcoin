@@ -33,20 +33,20 @@ func (c *MockChainClient) SetBlock(hash *chainhash.Hash, block *util.Block) {
 	c.getBlockResponse[*hash] = block
 }
 func (c *MockChainClient) GetBlockFromNetwork(blockHash chainhash.Hash,
-	options ...QueryOption) (*util.Block, error) {
+	options ...QueryOption) (*util.Block, err error) {
 	return c.getBlockResponse[blockHash], nil
 }
 func (c *MockChainClient) SetBlockHash(height int64, hash *chainhash.Hash) {
 	c.getBlockHashResponse[height] = hash
 }
-func (c *MockChainClient) GetBlockHash(height int64) (*chainhash.Hash, error) {
+func (c *MockChainClient) GetBlockHash(height int64) (*chainhash.Hash, err error) {
 	return c.getBlockHashResponse[height], nil
 }
 func (c *MockChainClient) SetBestSnapshot(hash *chainhash.Hash, height int32) {
 	c.getBestBlockHash = hash
 	c.getBestBlockHeight = height
 }
-func (c *MockChainClient) BestSnapshot() (*waddrmgr.BlockStamp, error) {
+func (c *MockChainClient) BestSnapshot() (*waddrmgr.BlockStamp, err error) {
 	return &waddrmgr.BlockStamp{
 			Hash:   *c.getBestBlockHash,
 			Height: c.getBestBlockHeight,
@@ -54,7 +54,7 @@ func (c *MockChainClient) BestSnapshot() (*waddrmgr.BlockStamp, error) {
 		nil
 }
 func (c *MockChainClient) blockFilterMatches(ro *rescanOptions,
-	blockHash *chainhash.Hash) (bool, error) {
+	blockHash *chainhash.Hash) (bool, err error) {
 	return true, nil
 }
 func makeTestInputWithScript() *InputWithScript {
@@ -344,7 +344,7 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	scanner := NewUtxoScanner(&UtxoScannerConfig{
 		GetBlock:     mockChainClient.GetBlockFromNetwork,
 		GetBlockHash: mockChainClient.GetBlockHash,
-		BestSnapshot: func() (*waddrmgr.BlockStamp, error) {
+		BestSnapshot: func() (*waddrmgr.BlockStamp, err error) {
 			<-waitForSnapshot
 			snapshotLock.Lock()
 			defer snapshotLock.Unlock()
@@ -408,7 +408,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	block := make(chan struct{})
 	scanner := NewUtxoScanner(&UtxoScannerConfig{
 		GetBlock: func(chainhash.Hash, ...QueryOption,
-		) (*util.Block, error) {
+		) (*util.Block, err error) {
 			<-block
 			return nil, fetchErr
 		},

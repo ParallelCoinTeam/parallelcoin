@@ -13,7 +13,7 @@ import (
 	"gioui.org/unit"
 )
 
-type DuoUIpage struct {
+type DuoUIPage struct {
 	Title   string
 	TxColor string
 	// Font          text.Font
@@ -39,8 +39,8 @@ type DuoUIpage struct {
 	// footer
 }
 
-func (t *DuoUItheme) DuoUIpage(p DuoUIpage) *DuoUIpage {
-	return &DuoUIpage{
+func (t *DuoUITheme) DuoUIPage(p DuoUIPage) *DuoUIPage {
+	return &DuoUIPage{
 		Title: p.Title,
 		// Font: text.Font{
 		// Size: t.TextSize.Scale(14.0 / 16.0),
@@ -62,13 +62,13 @@ func (t *DuoUItheme) DuoUIpage(p DuoUIpage) *DuoUIpage {
 	}
 }
 
-func (p DuoUIpage) Layout(gtx *layout.Context) {
+func (p DuoUIPage) Layout(gtx *layout.Context) {
 	layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(gtx,
 		layout.Rigid(pageElementLayout(gtx, layout.N, p.HeaderBgColor, p.HeaderPadding, p.Header)),
 		layout.Flexed(1, func() {
-			DuoUIfill(gtx, p.BorderColor)
+			DuoUIFill(gtx, p.BorderColor)
 			layout.UniformInset(unit.Dp(p.Border)).Layout(gtx, pageElementLayout(gtx, layout.N, p.BodyBgColor, p.BodyPadding, p.Body))
 		}),
 		layout.Rigid(pageElementLayout(gtx, layout.N, p.FooterBgColor, p.FooterPadding, p.Footer)),
@@ -77,8 +77,8 @@ func (p DuoUIpage) Layout(gtx *layout.Context) {
 
 func pageElementLayout(gtx *layout.Context, direction layout.Direction, background string, padding float32, elementContent func()) func() {
 	return func() {
-		hmin := gtx.Constraints.Width.Max
-		vmin := gtx.Constraints.Height.Min
+		hMin := gtx.Constraints.Width.Max
+		vMin := gtx.Constraints.Height.Min
 		layout.Stack{Alignment: layout.W}.Layout(gtx,
 			layout.Expanded(func() {
 				rr := float32(gtx.Px(unit.Dp(0)))
@@ -93,8 +93,8 @@ func pageElementLayout(gtx *layout.Context, direction layout.Direction, backgrou
 				pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 			}),
 			layout.Stacked(func() {
-				gtx.Constraints.Width.Min = hmin
-				gtx.Constraints.Height.Min = vmin
+				gtx.Constraints.Width.Min = hMin
+				gtx.Constraints.Height.Min = vMin
 				direction.Layout(gtx, func() {
 					layout.Flex{}.Layout(gtx,
 						layout.Flexed(1, func() {

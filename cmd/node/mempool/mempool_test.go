@@ -34,7 +34,7 @@ type fakeChain struct {
 // It also attempts to fetch the utxos for the outputs of the transaction
 // itself so the returned view can be examined for duplicate transactions.
 // This function is safe for concurrent access however the returned view is NOT.
-func (s *fakeChain) FetchUtxoView(tx *util.Tx) (*blockchain.UtxoViewpoint, error) {
+func (s *fakeChain) FetchUtxoView(tx *util.Tx) (*blockchain.UtxoViewpoint, err error) {
 	s.RLock()
 	defer s.RUnlock()
 	// All entries are cloned to ensure modifications to the returned view do
@@ -91,7 +91,7 @@ func (s *fakeChain) SetMedianTimePast(mtp time.Time) {
 // CalcSequenceLock returns the current sequence lock for the passed
 // transaction associated with the fake chain instance.
 func (s *fakeChain) CalcSequenceLock(tx *util.Tx,
-	view *blockchain.UtxoViewpoint) (*blockchain.SequenceLock, error) {
+	view *blockchain.UtxoViewpoint) (*blockchain.SequenceLock, err error) {
 	return &blockchain.SequenceLock{
 		Seconds:     -1,
 		BlockHeight: -1,
@@ -135,7 +135,7 @@ type poolHarness struct {
 // to the address associated with the harness.
 // It automatically uses a standard signature script that starts with the
 // block height that is required by version 2 blocks.
-func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, version int32) (*util.Tx, error) {
+func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, version int32) (*util.Tx, err error) {
 	// Create standard coinbase script.
 	extraNonce := int64(0)
 	coinbaseScript, err := script.NewScriptBuilder().
@@ -174,7 +174,7 @@ func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, ver
 // the total input amount.
 // All outputs will be to the payment script associated with the harness and
 // all inputs are assumed to do the same.
-func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32) (*util.Tx, error) {
+func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32) (*util.Tx, err error) {
 	// Calculate the total input amount and split it amongst the requested
 	// number of outputs.
 	var totalInput util.Amount
@@ -221,7 +221,7 @@ func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32
 // one spending the provided outpoint.
 // Each transaction spends the entire amount of the previous one and as such
 // does not include any fees.
-func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32) ([]*util.Tx, error) {
+func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32) ([]*util.Tx, err error) {
 	txChain := make([]*util.Tx, 0, numTxns)
 	prevOutPoint := firstOutput.outPoint
 	spendableAmount := firstOutput.amount
@@ -259,7 +259,7 @@ func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32)
 // suitable for testing.
 // Also the fake chain is populated with the returned spendable outputs so
 // the caller can easily create new valid transactions which build off of it.
-func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOutput, error) {
+func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOutput, err error) {
 	// Use a hard coded key pair for deterministic results.
 	keyBytes, err := hex.DecodeString("700868df1838811ffbdf918fb482c1f7e" +
 		"ad62db4b97bd7012c23e726485e577d")

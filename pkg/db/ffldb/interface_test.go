@@ -7,6 +7,7 @@ import (
 	"compress/bzip2"
 	"encoding/binary"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	config "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
@@ -34,7 +35,7 @@ var (
 )
 
 // loadBlocks loads the blocks contained in the testdata directory and returns a slice of them.
-func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, error) {
+func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, err error) {
 	// Open the file that contains the blocks for reading.
 	fi, err := os.Open(dataFile)
 	if err != nil {
@@ -50,7 +51,7 @@ func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util
 	dr := bzip2.NewReader(fi)
 	// Set the first block as the genesis block.
 	blocks := make([]*util.Block, 0, 256)
-	genesis := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+	genesis := util.NewBlock(config.MainNetParams.GenesisBlock)
 	blocks = append(blocks, genesis)
 	// Load the remaining blocks.
 	for height := 1; ; height++ {
@@ -382,7 +383,7 @@ func testBucketInterface(tc *testContext, bucket database.Bucket) bool {
 		}
 		// Ensure errors returned from the user-supplied ForEach function are returned.
 		forEachError := fmt.Errorf("example foreach error")
-		err := bucket.ForEach(func(k, v []byte) error {
+		err := bucket.ForEach(func(k, v []byte) (err error) {
 			return forEachError
 		})
 		if err != forEachError {
@@ -392,7 +393,7 @@ func testBucketInterface(tc *testContext, bucket database.Bucket) bool {
 		}
 		// Iterate all of the keys using ForEach while making sure the stored values are the expected values.
 		keysFound := make(map[string]struct{}, len(keyValues))
-		err = bucket.ForEach(func(k, v []byte) error {
+		err = bucket.ForEach(func(k, v []byte) (err error) {
 			wantV, found := lookupKey(k, expectedKeyValues)
 			if !found {
 				return fmt.Errorf("ForEach: key '%s' should "+
@@ -436,7 +437,7 @@ func testBucketInterface(tc *testContext, bucket database.Bucket) bool {
 			return false
 		}
 		// Ensure errors returned from the user-supplied ForEachBucket function are returned.
-		err = bucket.ForEachBucket(func(k []byte) error {
+		err = bucket.ForEachBucket(func(k []byte) (err error) {
 			return forEachError
 		})
 		if err != forEachError {
@@ -650,37 +651,40 @@ func testMetadataManualTxInterface(tc *testContext) bool {
 		return true
 	}
 	// deleteValues starts a read-write transaction and deletes the keys in the passed key/value pairs.
-	deleteValues := func(values []keyPair) bool {
-		tx, err := tc.db.Begin(true)
-		if err != nil {
+	deleteValues := func(values []keyPair) (result bool) {
+		var err error
+		var tx database.Tx
+		if tx, err = tc.db.Begin(true); slog.Check(err) {
+			return
 		}
 		defer rollbackOnPanic(tc.t, tx)
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			tc.t.Errorf("Metadata: unexpected nil bucket")
 			_ = tx.Rollback()
-			return false
+			return
 		}
 		bucket1 := metadataBucket.Bucket(bucket1Name)
 		if bucket1 == nil {
 			tc.t.Errorf("Bucket1: unexpected nil bucket")
-			return false
+			return
 		}
 		// Delete the keys and ensure they were deleted.
 		if !testDeleteValues(tc, bucket1, values) {
 			_ = tx.Rollback()
-			return false
+			return
 		}
 		if !testGetValues(tc, bucket1, rollbackValues(values)) {
 			_ = tx.Rollback()
-			return false
+			return
 		}
 		// Commit the changes and ensure it was successful.
-		if err := tx.Commit(); err != nil {
+		if err = tx.Commit(); slog.Check(err) {
 			tc.t.Errorf("Commit: unexpected error %v", err)
-			return false
+			return
 		}
-		return true
+		result = true
+		return
 	}
 	// keyValues holds the keys and values to use when putting values into a bucket.
 	var keyValues = []keyPair{
@@ -732,46 +736,46 @@ func testManagedTxPanics(tc *testContext) bool {
 		return false
 	}
 	// Ensure calling Commit on a managed read-only transaction panics.
-	paniced := testPanic(func() {
-		tc.db.View(func(tx database.Tx) error {
+	panicked := testPanic(func() {
+		tc.db.View(func(tx database.Tx) (err error) {
 			tx.Commit()
 			return nil
 		})
 	})
-	if !paniced {
+	if !panicked {
 		tc.t.Error("Commit called inside View did not panic")
 		return false
 	}
 	// Ensure calling Rollback on a managed read-only transaction panics.
-	paniced = testPanic(func() {
-		tc.db.View(func(tx database.Tx) error {
+	panicked = testPanic(func() {
+		tc.db.View(func(tx database.Tx) (err error) {
 			tx.Rollback()
 			return nil
 		})
 	})
-	if !paniced {
+	if !panicked {
 		tc.t.Error("Rollback called inside View did not panic")
 		return false
 	}
 	// Ensure calling Commit on a managed read-write transaction panics.
-	paniced = testPanic(func() {
-		tc.db.Update(func(tx database.Tx) error {
+	panicked = testPanic(func() {
+		tc.db.Update(func(tx database.Tx) (err error) {
 			tx.Commit()
 			return nil
 		})
 	})
-	if !paniced {
+	if !panicked {
 		tc.t.Error("Commit called inside Update did not panic")
 		return false
 	}
 	// Ensure calling Rollback on a managed read-write transaction panics.
-	paniced = testPanic(func() {
-		tc.db.Update(func(tx database.Tx) error {
+	panicked = testPanic(func() {
+		tc.db.Update(func(tx database.Tx) (err error) {
 			tx.Rollback()
 			return nil
 		})
 	})
-	if !paniced {
+	if !panicked {
 		tc.t.Error("Rollback called inside Update did not panic")
 		return false
 	}
@@ -786,9 +790,10 @@ func testMetadataTxInterface(tc *testContext) bool {
 		return false
 	}
 	bucket1Name := []byte("bucket1")
-	err := tc.db.Update(func(tx database.Tx) error {
-		_, err := tx.Metadata().CreateBucket(bucket1Name)
-		return err
+	err := tc.db.Update(func(tx database.Tx) (err error) {
+		if _, err = tx.Metadata().CreateBucket(bucket1Name); slog.Check(err) {
+		}
+		return
 	})
 	if err != nil {
 		tc.t.Errorf("Update: unexpected error creating bucket: %v", err)
@@ -805,7 +810,7 @@ func testMetadataTxInterface(tc *testContext) bool {
 		{[]byte("mtxkey4"), nil},
 	}
 	// Test the bucket interface via a managed read-only transaction.
-	err = tc.db.View(func(tx database.Tx) error {
+	err = tc.db.View(func(tx database.Tx) (err error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("Metadata: unexpected nil bucket")
@@ -828,7 +833,7 @@ func testMetadataTxInterface(tc *testContext) bool {
 	}
 	// Ensure errors returned from the user-supplied View function are returned.
 	viewError := fmt.Errorf("example view error")
-	err = tc.db.View(func(tx database.Tx) error {
+	err = tc.db.View(func(tx database.Tx) (err error) {
 		return viewError
 	})
 	if err != viewError {
@@ -838,7 +843,7 @@ func testMetadataTxInterface(tc *testContext) bool {
 	}
 	// Test the bucket interface via a managed read-write transaction. Also, put a series of values and force a rollback so the following can ensure the values were not stored.
 	forceRollbackError := fmt.Errorf("force rollback")
-	err = tc.db.Update(func(tx database.Tx) error {
+	err = tc.db.Update(func(tx database.Tx) (err error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("Metadata: unexpected nil bucket")
@@ -866,7 +871,7 @@ func testMetadataTxInterface(tc *testContext) bool {
 		return false
 	}
 	// Ensure the values that should not have been stored due to the forced rollback above were not actually stored.
-	err = tc.db.View(func(tx database.Tx) error {
+	err = tc.db.View(func(tx database.Tx) (err error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("Metadata: unexpected nil bucket")
@@ -883,7 +888,7 @@ func testMetadataTxInterface(tc *testContext) bool {
 		return false
 	}
 	// Store a series of values via a managed read-write transaction.
-	err = tc.db.Update(func(tx database.Tx) error {
+	err = tc.db.Update(func(tx database.Tx) (err error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("Metadata: unexpected nil bucket")
@@ -904,7 +909,7 @@ func testMetadataTxInterface(tc *testContext) bool {
 		return false
 	}
 	// Ensure the values stored above were committed as expected.
-	err = tc.db.View(func(tx database.Tx) error {
+	err = tc.db.View(func(tx database.Tx) (err error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("Metadata: unexpected nil bucket")
@@ -925,7 +930,7 @@ func testMetadataTxInterface(tc *testContext) bool {
 		return false
 	}
 	// Clean up the values stored above in a managed read-write transaction.
-	err = tc.db.Update(func(tx database.Tx) error {
+	err = tc.db.Update(func(tx database.Tx) (err error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("Metadata: unexpected nil bucket")
@@ -1283,7 +1288,7 @@ func testFetchBlockIO(tc *testContext, tx database.Tx) bool {
 // nolint
 func testBlockIOTxInterface(tc *testContext) bool {
 	// Ensure attempting to store a block with a read-only transaction fails with the expected error.
-	err := tc.db.View(func(tx database.Tx) error {
+	err := tc.db.View(func(tx database.Tx) (err error) {
 		wantErrCode := database.ErrTxNotWritable
 		for i, block := range tc.blocks {
 			testName := fmt.Sprintf("StoreBlock(%d) on ro tx", i)
@@ -1305,7 +1310,7 @@ func testBlockIOTxInterface(tc *testContext) bool {
 	// commit or rollback.  Then, force a rollback so the code below can
 	// ensure none of the data actually gets stored.
 	forceRollbackError := fmt.Errorf("force rollback")
-	err = tc.db.Update(func(tx database.Tx) error {
+	err = tc.db.Update(func(tx database.Tx) (err error) {
 		// Store all blocks in the same transaction.
 		for i, block := range tc.blocks {
 			err := tx.StoreBlock(block)
@@ -1340,7 +1345,7 @@ func testBlockIOTxInterface(tc *testContext) bool {
 		return false
 	}
 	// Ensure rollback was successful
-	err = tc.db.View(func(tx database.Tx) error {
+	err = tc.db.View(func(tx database.Tx) (err error) {
 		if !testFetchBlockIOMissing(tc, tx) {
 			return errSubTestFail
 		}
@@ -1353,7 +1358,7 @@ func testBlockIOTxInterface(tc *testContext) bool {
 		return false
 	}
 	// Populate the database with loaded blocks and ensure all of the data fetching APIs work properly.
-	err = tc.db.Update(func(tx database.Tx) error {
+	err = tc.db.Update(func(tx database.Tx) (err error) {
 		// Store a bunch of blocks in the same transaction.
 		for i, block := range tc.blocks {
 			err := tx.StoreBlock(block)
@@ -1386,7 +1391,7 @@ func testBlockIOTxInterface(tc *testContext) bool {
 		return false
 	}
 	// Ensure all data fetch tests work as expected using a managed read-only transaction after the data was successfully committed above.
-	err = tc.db.View(func(tx database.Tx) error {
+	err = tc.db.View(func(tx database.Tx) (err error) {
 		if !testFetchBlockIO(tc, tx) {
 			return errSubTestFail
 		}
@@ -1399,7 +1404,7 @@ func testBlockIOTxInterface(tc *testContext) bool {
 		return false
 	}
 	// Ensure all data fetch tests work as expected using a managed read-write transaction after the data was successfully committed above.
-	err = tc.db.Update(func(tx database.Tx) error {
+	err = tc.db.Update(func(tx database.Tx) (err error) {
 		if !testFetchBlockIO(tc, tx) {
 			return errSubTestFail
 		}
@@ -1685,9 +1690,10 @@ func testConcurrecy(tc *testContext) bool {
 	var sleepTime = time.Millisecond * 250
 	// Determine about how long it takes for a single block read.  When it's longer than the default minimum sleep time, adjust the sleep time to help prevent durations that are too short which would cause erroneous test failures on slower systems.
 	startTime := time.Now()
-	err := tc.db.View(func(tx database.Tx) error {
-		_, err := tx.FetchBlock(tc.blocks[0].Hash())
-		return err
+	err := tc.db.View(func(tx database.Tx) (err error) {
+		if _, err = tx.FetchBlock(tc.blocks[0].Hash()); slog.Check(err) {
+		}
+		return
 	})
 	if err != nil {
 		tc.t.Errorf("Unexpected error in view: %v", err)
@@ -1697,16 +1703,16 @@ func testConcurrecy(tc *testContext) bool {
 	if sleepTime < elapsed {
 		sleepTime = elapsed
 	}
-	tc.t.Logf("Time to load block 0: %v, using sleep time: %v", elapsed,
-		sleepTime)
+	tc.t.Logf("Time to load block 0: %v, using sleep time: %v", elapsed, sleepTime)
 	// reader takes a block number to load and channel to return the result of the operation on.  It is used below to launch multiple concurrent readers.
 	numReaders := len(tc.blocks)
 	resultChan := make(chan bool, numReaders)
 	reader := func(blockNum int) {
-		err := tc.db.View(func(tx database.Tx) error {
+		err := tc.db.View(func(tx database.Tx) (err error) {
 			time.Sleep(sleepTime)
-			_, err := tx.FetchBlock(tc.blocks[blockNum].Hash())
-			return err
+			if _, err = tx.FetchBlock(tc.blocks[blockNum].Hash()); slog.Check(err) {
+			}
+			return
 		})
 		if err != nil {
 			tc.t.Errorf("Unexpected error in concurrent view: %v",
@@ -1760,7 +1766,7 @@ func testConcurrecy(tc *testContext) bool {
 	started := make(chan struct{})
 	writeComplete := make(chan struct{})
 	reader = func(blockNum int) {
-		err := tc.db.View(func(tx database.Tx) error {
+		err := tc.db.View(func(tx database.Tx) (err error) {
 			started <- struct{}{}
 			// Wait for the writer to complete.
 			<-writeComplete
@@ -1786,7 +1792,7 @@ func testConcurrecy(tc *testContext) bool {
 		<-started
 	}
 	// All readers are started and waiting for completion of the writer. Set some data the readers are expecting to not find and signal the readers the write is done by closing the writeComplete channel.
-	err = tc.db.Update(func(tx database.Tx) error {
+	err = tc.db.Update(func(tx database.Tx) (err error) {
 		return tx.Metadata().Put(concurrentKey, concurrentVal)
 	})
 	if err != nil {
@@ -1803,7 +1809,7 @@ func testConcurrecy(tc *testContext) bool {
 	// Start a few writers and ensure the total time is at least the writeSleepTime * numWriters.  This ensures only one write transaction can be active at a time.
 	writeSleepTime := time.Millisecond * 250
 	writer := func() {
-		err := tc.db.Update(func(tx database.Tx) error {
+		err := tc.db.Update(func(tx database.Tx) (err error) {
 			time.Sleep(writeSleepTime)
 			return nil
 		})
@@ -1848,7 +1854,7 @@ func testConcurrentClose(tc *testContext) bool {
 	finishReaders := make(chan struct{})
 	resultChan := make(chan bool, numReaders+1)
 	reader := func() {
-		err := tc.db.View(func(tx database.Tx) error {
+		err := tc.db.View(func(tx database.Tx) (err error) {
 			atomic.AddInt32(&activeReaders, 1)
 			started <- struct{}{}
 			<-finishReaders

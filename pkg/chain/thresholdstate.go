@@ -86,7 +86,8 @@ func newThresholdCaches(numCaches uint32) []thresholdStateCache {
 }
 
 // thresholdState returns the current rule change threshold state for the block AFTER the given node and deployment ID.  The cache is used to ensure the threshold states for previous windows are only calculated once. This function MUST be called with the chain state lock held (for writes).
-func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdConditionChecker, cache *thresholdStateCache) (ThresholdState, error) {
+func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdConditionChecker, cache *thresholdStateCache,
+) (state ThresholdState, err error) {
 	// The threshold state for the window that contains the genesis block is defined by definition.
 	confirmationWindow := int32(checker.MinerConfirmationWindow())
 	if prevNode == nil || (prevNode.height+1) < confirmationWindow {
@@ -115,7 +116,7 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 		prevNode = prevNode.RelativeAncestor(confirmationWindow)
 	}
 	// Start with the threshold state for the most recent confirmation window that has a cached state.
-	state := ThresholdDefined
+	state = ThresholdDefined
 	if prevNode != nil {
 		var ok bool
 		state, ok = cache.Lookup(&prevNode.hash)
@@ -179,22 +180,24 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 }
 
 // ThresholdState returns the current rule change threshold state of the given deployment ID for the block AFTER the end of the current best chain. This function is safe for concurrent access.
-func (b *BlockChain) ThresholdState(deploymentID uint32) (ThresholdState, error) {
+func (b *BlockChain) ThresholdState(deploymentID uint32) (state ThresholdState, err error) {
 	b.chainLock.Lock()
-	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
+	state, err = b.deploymentState(b.BestChain.Tip(), deploymentID)
 	b.chainLock.Unlock()
 	return state, err
 }
 
 // IsDeploymentActive returns true if the target deploymentID is active, and false otherwise. This function is safe for concurrent access.
-func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
+func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (is bool, err error) {
 	b.chainLock.Lock()
-	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
+	var state ThresholdState
+	state, err = b.deploymentState(b.BestChain.Tip(), deploymentID)
 	b.chainLock.Unlock()
 	if slog.Check(err) {
-		return false, err
+		return
 	}
-	return state == ThresholdActive, nil
+	is = state == ThresholdActive
+	return
 }
 
 // deploymentState returns the current rule change threshold for a given
@@ -204,7 +207,7 @@ func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
 // prior to the block for which the deployment state is desired.  In other
 // words, the returned deployment state is for the block AFTER the passed node.
 // This function MUST be called with the chain state lock held (for writes).
-func (b *BlockChain) deploymentState(prevNode *BlockNode, deploymentID uint32) (ThresholdState, error) {
+func (b *BlockChain) deploymentState(prevNode *BlockNode, deploymentID uint32) (ts ThresholdState, err error) {
 	if deploymentID > uint32(len(b.params.Deployments)) {
 		return ThresholdFailed, DeploymentError(deploymentID)
 	}

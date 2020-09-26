@@ -234,7 +234,7 @@ func (s *State) BuildConfigPage() {
 					),
 					gui.Rigid(func() {
 						bg, fg := s.Theme.Colors["DocBg"], s.Theme.Colors["DocText"]
-						cb := s.Theme.DuoUIcheckBox("", fg, bg)
+						cb := s.Theme.DuoUICheckBox("", fg, bg)
 						cb.PillColor = bg
 						cb.CircleColor = fg
 						cb.PillColorChecked = bg

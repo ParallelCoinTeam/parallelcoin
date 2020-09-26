@@ -28,8 +28,8 @@ type mockFile struct {
 }
 
 // Close closes the mock file without releasing any data associated with it. This allows it to be "reopened" without
-// losing the data. This is part of the jebote implementation.
-func (f *mockFile) Close() error {
+// losing the data. This is part of the filer implementation.
+func (f *mockFile) Close() (err error) {
 	f.Lock()
 	defer f.Unlock()
 	if f.closed {
@@ -42,7 +42,7 @@ func (f *mockFile) Close() error {
 // ReadAt reads len(b) bytes from the mock file starting at byte offset off. It returns the number of bytes read and
 // the error, if any.  ReadAt always returns a non-nil error when n < len(b). At end of file, that error is io.EOF.
 // This is part of the filer implementation.
-func (f *mockFile) ReadAt(b []byte, off int64) (int, error) {
+func (f *mockFile) ReadAt(b []byte, off int64) (int, err error) {
 	f.RLock()
 	defer f.RUnlock()
 	if f.closed {
@@ -69,7 +69,7 @@ func (f *mockFile) ReadAt(b []byte, off int64) (int, error) {
 }
 
 // Truncate changes the size of the mock file. This is part of the filer implementation.
-func (f *mockFile) Truncate(size int64) error {
+func (f *mockFile) Truncate(size int64) (err error) {
 	f.Lock()
 	defer f.Unlock()
 	if f.closed {
@@ -88,7 +88,7 @@ func (f *mockFile) Truncate(size int64) error {
 
 // Write writes len(b) bytes to the mock file. It returns the number of bytes written and an error, if any.  Write
 // returns a non-nil error any time n != len(b). This is part of the filer implementation.
-func (f *mockFile) WriteAt(b []byte, off int64) (int, error) {
+func (f *mockFile) WriteAt(b []byte, off int64) (int, err error) {
 	f.Lock()
 	defer f.Unlock()
 	if f.closed {
@@ -121,7 +121,7 @@ func (f *mockFile) WriteAt(b []byte, off int64) (int, error) {
 // Sync doesn't do anything for mock files.  However, it will return an error if the mock file's forceSyncErr flag is
 // set.
 // This is part of the filer implementation.
-func (f *mockFile) Sync() error {
+func (f *mockFile) Sync() (err error) {
 	if f.forceSyncErr {
 		return errSyncFail
 	}

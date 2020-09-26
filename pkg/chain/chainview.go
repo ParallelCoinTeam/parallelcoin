@@ -96,7 +96,7 @@ func (c *chainView) setTip(node *BlockNode) {
 			c.nodes[i] = nil
 		}
 	}
-	for node != nil && c.nodes[node.height] != node {
+	for c.nodes[node.height] != node {
 		c.nodes[node.height] = node
 		node = node.parent
 	}
@@ -169,13 +169,15 @@ func (c *chainView) next(node *BlockNode) *BlockNode {
 	return c.nodeByHeight(node.height + 1)
 }
 
-// Next returns the successor to the provided node for the chain view.  It will return nil if there is no successfor or the provided node is not part of the view.
+// Next returns the successor to the provided node for the chain view.  It will return nil if there is no success for or
+// the provided node is not part of the view.
 // For example, assume a block chain with a side chain as depicted below:
 //   genesis -> 1 -> 2 -> 3 -> 4  -> 5 ->  6  -> 7  -> 8
 //                         \-> 4a -> 5a -> 6a
 // Further, assume the view is for the longer chain depicted above.  That is to say it consists of:
 //   genesis -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
-// Invoking this function with block node 5 would return block node 6 while invoking it with block node 5a would return nil since that node is not part of the view.
+// Invoking this function with block node 5 would return block node 6 while invoking it with block node 5a would return
+// nil since that node is not part of the view.
 // This function is safe for concurrent access.
 func (c *chainView) Next(node *BlockNode) *BlockNode {
 	c.mtx.Lock()
@@ -184,32 +186,43 @@ func (c *chainView) Next(node *BlockNode) *BlockNode {
 	return next
 }
 
-// findFork returns the final common block between the provided node and the the chain view.  It will return nil if there is no common block.  This only differs from the exported version in that it is up to the caller to ensure the lock is held. See the exported FindFork comments for more details. This function MUST be called with the view mutex locked (for reads).
+// findFork returns the final common block between the provided node and the the chain view.  It will return nil if
+// there is no common block.  This only differs from the exported version in that it is up to the caller to ensure the
+// lock is held. See the exported FindFork comments for more details.
+// This function MUST be called with the view mutex locked (for reads).
 func (c *chainView) findFork(node *BlockNode) *BlockNode {
 	// No fork point for node that doesn't exist.
 	if node == nil {
 		return nil
 	}
-	// When the height of the passed node is higher than the height of the tip of the current chain view, walk backwards through the nodes of the other chain until the heights match (or there or no more nodes in which case there is no common node between the two).
-	// NOTE: This isn't strictly necessary as the following section will find the node as well, however, it is more efficient to avoid the contains check since it is already known that the common node can't possibly be past the end of the current chain view.  It also allows this code to take advantage of any potential future optimizations to the Ancestor function such as using an O(log n) skip list.
+	// When the height of the passed node is higher than the height of the tip of the current chain view, walk backwards
+	// through the nodes of the other chain until the heights match (or there or no more nodes in which case there is no
+	// common node between the two).
+	// NOTE: This isn't strictly necessary as the following section will find the node as well, however, it is more
+	// efficient to avoid the contains check since it is already known that the common node can't possibly be past the
+	// end of the current chain view.  It also allows this code to take advantage of any potential future optimizations
+	// to the Ancestor function such as using an O(log n) skip list.
 	chainHeight := c.height()
 	if node.height > chainHeight {
 		node = node.Ancestor(chainHeight)
 	}
-	// Walk the other chain backwards as long as the current one does not contain the node or there are no more nodes in which case there is no common node between the two.
+	// Walk the other chain backwards as long as the current one does not contain the node or there are no more nodes in
+	// which case there is no common node between the two.
 	for node != nil && !c.contains(node) {
 		node = node.parent
 	}
 	return node
 }
 
-// FindFork returns the final common block between the provided node and the the chain view.  It will return nil if there is no common block.
+// FindFork returns the final common block between the provided node and the the chain view.  It will return nil if
+// there is no common block.
 // For example, assume a block chain with a side chain as depicted below:
 //   genesis -> 1 -> 2 -> ... -> 5 -> 6  -> 7  -> 8
 //                                \-> 6a -> 7a
 // Further, assume the view is for the longer chain depicted above.  That is to say it consists of:
 //   genesis -> 1 -> 2 -> ... -> 5 -> 6 -> 7 -> 8.
-// Invoking this function with block node 7a would return block node 5 while invoking it with block node 7 would return itself since it is already part of the branch formed by the view. This function is safe for concurrent access.
+// Invoking this function with block node 7a would return block node 5 while invoking it with block node 7 would return
+// itself since it is already part of the branch formed by the view. This function is safe for concurrent access.
 func (c *chainView) FindFork(node *BlockNode) *BlockNode {
 	c.mtx.Lock()
 	fork := c.findFork(node)
@@ -217,7 +230,10 @@ func (c *chainView) FindFork(node *BlockNode) *BlockNode {
 	return fork
 }
 
-// blockLocator returns a block locator for the passed block node.  The passed node can be nil in which case the block locator for the current tip associated with the view will be returned. This only differs from the exported version in that it is up to the caller to ensure the lock is held. See the exported BlockLocator function comments for more details. This function MUST be called with the view mutex locked (for reads).
+// blockLocator returns a block locator for the passed block node.  The passed node can be nil in which case the block
+// locator for the current tip associated with the view will be returned. This only differs from the exported version in
+// that it is up to the caller to ensure the lock is held. See the exported BlockLocator function comments for more
+// details. This function MUST be called with the view mutex locked (for reads).
 func (c *chainView) blockLocator(node *BlockNode) BlockLocator {
 	// Use the current tip if requested.
 	if node == nil {
@@ -226,12 +242,14 @@ func (c *chainView) blockLocator(node *BlockNode) BlockLocator {
 	if node == nil {
 		return nil
 	}
-	// Calculate the max number of entries that will ultimately be in the block locator.  See the description of the algorithm for how these numbers are derived.
+	// Calculate the max number of entries that will ultimately be in the block locator.  See the description of the
+	// algorithm for how these numbers are derived.
 	var maxEntries uint8
 	if node.height <= 12 {
 		maxEntries = uint8(node.height) + 1
 	} else {
-		// Requested hash itself + previous 10 entries + genesis block. Then floor(log2(height-10)) entries for the skip portion.
+		// Requested hash itself + previous 10 entries + genesis block. Then floor(log2(height-10)) entries for the skip
+		// portion.
 		adjustedHeight := uint32(node.height) - 10
 		maxEntries = 12 + fastLog2Floor(adjustedHeight)
 	}
@@ -243,12 +261,14 @@ func (c *chainView) blockLocator(node *BlockNode) BlockLocator {
 		if node.height == 0 {
 			break
 		}
-		// Calculate height of previous node to include ensuring thefinal node is the genesis block.
+		// Calculate height of previous node to include ensuring the final node is the genesis block.
 		height := node.height - step
 		if height < 0 {
 			height = 0
 		}
-		// When the node is in the current chain view, all of its ancestors must be too, so use a much faster O(1) lookup in that case.  Otherwise, fall back to walking backwards through the nodes of the other chain to the correct ancestor.
+		// When the node is in the current chain view, all of its ancestors must be too, so use a much faster O(1)
+		// lookup in that case.  Otherwise, fall back to walking backwards through the nodes of the other chain to the
+		// correct ancestor.
 		if c.contains(node) {
 			node = c.nodes[height]
 		} else {
@@ -262,7 +282,9 @@ func (c *chainView) blockLocator(node *BlockNode) BlockLocator {
 	return locator
 }
 
-// BlockLocator returns a block locator for the passed block node.  The passed node can be nil in which case the block locator for the current tip associated with the view will be returned. See the BlockLocator type for details on the algorithm used to create a block locator. This function is safe for concurrent access.
+// BlockLocator returns a block locator for the passed block node.  The passed node can be nil in which case the block
+// locator for the current tip associated with the view will be returned. See the BlockLocator type for details on the
+// algorithm used to create a block locator. This function is safe for concurrent access.
 func (c *chainView) BlockLocator(node *BlockNode) BlockLocator {
 	c.mtx.Lock()
 	locator := c.blockLocator(node)

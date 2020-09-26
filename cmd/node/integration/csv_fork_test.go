@@ -24,7 +24,7 @@ const (
 // makeTestOutput creates an on-chain output paying to a freshly generated
 // p2pkh output with the specified amount.
 func makeTestOutput(r *rpctest.Harness, t *testing.T,
-	amt util.Amount) (*ec.PrivateKey, *wire.OutPoint, []byte, error) {
+	amt util.Amount) (*ec.PrivateKey, *wire.OutPoint, []byte, err error) {
 	// Create a fresh key then send some coins to an address spendable by
 	// that key.
 	key, err := ec.NewPrivateKey(ec.S256())
@@ -241,7 +241,7 @@ func TestBIP0113Activation(t *testing.T) {
 // pkScript with the specified time-lock.
 func createCSVOutput(r *rpctest.Harness, t *testing.T,
 	numSatoshis util.Amount, timeLock int32,
-	isSeconds bool) ([]byte, *wire.OutPoint, *wire.MsgTx, error) {
+	isSeconds bool) ([]byte, *wire.OutPoint, *wire.MsgTx, err error) {
 	// Convert the time-lock to the proper sequence lock based according to
 	// if the lock is seconds or time based.
 	sequenceLock := blockchain.LockTimeToSequence(isSeconds,
@@ -292,7 +292,7 @@ func createCSVOutput(r *rpctest.Harness, t *testing.T,
 // pass P2SH evaluation.
 func spendCSVOutput(redeemScript []byte, csvUTXO *wire.OutPoint,
 	sequence uint32, targetOutput *wire.TxOut,
-	txVersion int32) (*wire.MsgTx, error) {
+	txVersion int32) (*wire.MsgTx, err error) {
 	tx := wire.NewMsgTx(txVersion)
 	tx.AddTxIn(&wire.TxIn{
 		PreviousOutPoint: *csvUTXO,

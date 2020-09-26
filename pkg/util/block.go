@@ -42,41 +42,38 @@ func (b *Block) MsgBlock() *wire.MsgBlock {
 }
 
 // Hash returns the serialized bytes for the Block.  This is equivalent to calling Serialize on the underlying wire.MsgBlock, however it caches the result so subsequent calls are more efficient.
-func (b *Block) Bytes() ([]byte, error) {
+func (b *Block) Bytes() (serializedBlock []byte, err error) {
 	// Return the cached serialized bytes if it has already been generated.
 	if len(b.serializedBlock) != 0 {
-		return b.serializedBlock, nil
+		serializedBlock = b.serializedBlock
+	} else {
+		// Serialize the MsgBlock.
+		w := bytes.NewBuffer(make([]byte, 0, b.msgBlock.SerializeSize()))
+		if err = b.msgBlock.Serialize(w); !slog.Check(err) {
+			// Cache the serialized bytes and return them.
+			serializedBlock = w.Bytes()
+			b.serializedBlock = serializedBlock
+		}
 	}
-	// Serialize the MsgBlock.
-	w := bytes.NewBuffer(make([]byte, 0, b.msgBlock.SerializeSize()))
-	err := b.msgBlock.Serialize(w)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
-	}
-	serializedBlock := w.Bytes()
-	// Cache the serialized bytes and return them.
-	b.serializedBlock = serializedBlock
-	return serializedBlock, nil
+	return
 }
 
 // BytesNoWitness returns the serialized bytes for the block with transactions encoded without any witness data.
-func (b *Block) BytesNoWitness() ([]byte, error) {
+func (b *Block) BytesNoWitness() (serializedBlock []byte, err error) {
 	// Return the cached serialized bytes if it has already been generated.
 	if len(b.serializedBlockNoWitness) != 0 {
-		return b.serializedBlockNoWitness, nil
+		serializedBlock = b.serializedBlockNoWitness
+	} else {
+		// Serialize the MsgBlock.
+		var w bytes.Buffer
+		if err = b.msgBlock.SerializeNoWitness(&w); slog.Check(err) {
+			return
+		}
+		serializedBlock = w.Bytes()
+		// Cache the serialized bytes and return them.
+		b.serializedBlockNoWitness = serializedBlock
 	}
-	// Serialize the MsgBlock.
-	var w bytes.Buffer
-	err := b.msgBlock.SerializeNoWitness(&w)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
-	}
-	serializedBlock := w.Bytes()
-	// Cache the serialized bytes and return them.
-	b.serializedBlockNoWitness = serializedBlock
-	return serializedBlock, nil
+	return
 }
 
 // Hash returns the block identifier hash for the Block.  This is equivalent to calling BlockHash on the underlying wire.MsgBlock, however it caches the result so subsequent calls are more efficient.
@@ -92,13 +89,14 @@ func (b *Block) Hash() *chainhash.Hash {
 }
 
 // Tx returns a wrapped transaction (util.Tx) for the transaction at the specified index in the Block.  The supplied index is 0 based.  That is to say, the first transaction in the block is txNum 0.  This is nearly equivalent to accessing the raw transaction (wire.MsgTx) from the underlying wire.MsgBlock, however the wrapped transaction has some helpful properties such as caching the hash so subsequent calls are more efficient.
-func (b *Block) Tx(txNum int) (*Tx, error) {
+func (b *Block) Tx(txNum int) (newTx *Tx, err error) {
 	// Ensure the requested transaction is in range.
 	numTx := uint64(len(b.msgBlock.Transactions))
 	if txNum < 0 || uint64(txNum) > numTx {
-		str := fmt.Sprintf("transaction index %d is out of range - max %d",
-			txNum, numTx-1)
-		return nil, OutOfRangeError(str)
+		str := fmt.Sprintf("transaction index %d is out of range - max %d", txNum, numTx-1)
+		err = OutOfRangeError(str)
+		slog.Debug(err)
+		return
 	}
 	// Generate slice to hold all of the wrapped transactions if needed.
 	if len(b.transactions) == 0 {
@@ -109,7 +107,7 @@ func (b *Block) Tx(txNum int) (*Tx, error) {
 		return b.transactions[txNum], nil
 	}
 	// Generate and cache the wrapped transaction and return it.
-	newTx := NewTx(b.msgBlock.Transactions[txNum])
+	newTx = NewTx(b.msgBlock.Transactions[txNum])
 	newTx.SetIndex(txNum)
 	b.transactions[txNum] = newTx
 	return newTx, nil
@@ -137,33 +135,32 @@ func (b *Block) Transactions() []*Tx {
 	return b.transactions
 }
 
-// TxHash returns the hash for the requested transaction number in the Block. The supplied index is 0 based.  That is to say, the first transaction in the block is txNum 0.  This is equivalent to calling TxHash on the underlying wire.MsgTx, however it caches the result so subsequent calls are more efficient.
-func (b *Block) TxHash(txNum int) (*chainhash.Hash, error) {
-	// Attempt to get a wrapped transaction for the specified index.  It will be created lazily if needed or simply return the cached version if it has already been generated.
-	tx, err := b.Tx(txNum)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+// TxHash returns the hash for the requested transaction number in the Block. The supplied index is 0 based.  That is to
+// say, the first transaction in the block is txNum 0.  This is equivalent to calling TxHash on the underlying
+// wire.MsgTx, however it caches the result so subsequent calls are more efficient.
+func (b *Block) TxHash(txNum int) (h *chainhash.Hash, err error) {
+	// Attempt to get a wrapped transaction for the specified index.  It will be created lazily if needed or simply
+	// return the cached version if it has already been generated.
+	var tx *Tx
+	if tx, err = b.Tx(txNum); slog.Check(err) {
+		return
 	}
 	// Defer to the wrapped transaction which will return the cached hash if it has already been generated.
-	return tx.Hash(), nil
+	h = tx.Hash()
+	return
 }
 
-// TxLoc returns the offsets and lengths of each transaction in a raw block. It is used to allow fast indexing into transactions within the raw byte stream.
-func (b *Block) TxLoc() ([]wire.TxLoc, error) {
-	rawMsg, err := b.Bytes()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+// TxLoc returns the offsets and lengths of each transaction in a raw block. It is used to allow fast indexing into
+// transactions within the raw byte stream.
+func (b *Block) TxLoc() (txLocs []wire.TxLoc, err error) {
+	var rawMsg []byte
+	if rawMsg, err = b.Bytes(); slog.Check(err) {
+		return
 	}
-	rbuf := bytes.NewBuffer(rawMsg)
-	var mblock wire.MsgBlock
-	txLocs, err := mblock.DeserializeTxLoc(rbuf)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var msgBlock wire.MsgBlock
+	if txLocs, err = msgBlock.DeserializeTxLoc(bytes.NewBuffer(rawMsg)); slog.Check(err) {
 	}
-	return txLocs, err
+	return
 }
 
 // Height returns the saved height of the block in the block chain.  This value will be BlockHeightUnknown if it hasn't already explicitly been set.
@@ -185,31 +182,24 @@ func NewBlock(msgBlock *wire.MsgBlock) *Block {
 }
 
 // NewBlockFromBytes returns a new instance of a bitcoin block given the serialized bytes.  See Block.
-func NewBlockFromBytes(serializedBlock []byte) (*Block, error) {
-	br := bytes.NewReader(serializedBlock)
-	b, err := NewBlockFromReader(br)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func NewBlockFromBytes(serializedBlock []byte) (b *Block, err error) {
+	if b, err = NewBlockFromReader(bytes.NewReader(serializedBlock)); !slog.Check(err) {
+		b.serializedBlock = serializedBlock
 	}
-	b.serializedBlock = serializedBlock
-	return b, nil
+	return
 }
 
 // NewBlockFromReader returns a new instance of a bitcoin block given a Reader to deserialize the block.  See Block.
-func NewBlockFromReader(r io.Reader) (*Block, error) {
+func NewBlockFromReader(r io.Reader) (b *Block, err error) {
 	// Deserialize the bytes into a MsgBlock.
 	var msgBlock wire.MsgBlock
-	err := msgBlock.Deserialize(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = msgBlock.Deserialize(r); !slog.Check(err) {
+		b = &Block{
+			msgBlock:    &msgBlock,
+			blockHeight: BlockHeightUnknown,
+		}
 	}
-	b := Block{
-		msgBlock:    &msgBlock,
-		blockHeight: BlockHeightUnknown,
-	}
-	return &b, nil
+	return
 }
 
 // NewBlockFromBlockAndBytes returns a new instance of a bitcoin block given an underlying wire.MsgBlock and the serialized bytes for it.  See Block.

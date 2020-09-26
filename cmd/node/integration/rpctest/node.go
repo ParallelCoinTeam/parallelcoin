@@ -36,7 +36,7 @@ type nodeConfig struct {
 }
 
 // newConfig returns a newConfig with all default values.
-func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, error) {
+func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, err error) {
 	podPath, err := podExecutablePath()
 	if err != nil {
 		slog.Error(err)
@@ -177,7 +177,7 @@ type node struct {
 // newNode creates a new node instance according to the passed config.
 // dataDir will be used to hold a file recording the pid of the launched
 // process, and as the base for the log and data directories for pod.
-func newNode(config *nodeConfig, dataDir string) (*node, error) {
+func newNode(config *nodeConfig, dataDir string) (*node, err error) {
 	return &node{
 		config:  config,
 		dataDir: dataDir,

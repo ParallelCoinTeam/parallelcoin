@@ -13,11 +13,11 @@ import (
 	"github.com/p9c/pod/pkg/gui/gel"
 )
 
-type DuoUIcounter struct {
+type DuoUICounter struct {
 	increase     DuoUIbutton
 	decrease     DuoUIbutton
 	reset        DuoUIbutton
-	input        DuoUIeditor
+	input        DuoUIEditor
 	pageFunction func()
 	Font         text.Font
 	TextSize     unit.Value
@@ -26,8 +26,8 @@ type DuoUIcounter struct {
 	shaper       text.Shaper
 }
 
-func (t *DuoUItheme) DuoUIcounter(pageFunction func()) DuoUIcounter {
-	return DuoUIcounter{
+func (t *DuoUITheme) DuoUICounter(pageFunction func()) DuoUICounter {
+	return DuoUICounter{
 		// ToDo Replace theme's buttons with counter exclusive buttons, set icons for increase/decrease
 		increase: t.DuoUIbutton(ButtonParams{
 			BgColor:      t.Colors["Light"],
@@ -47,8 +47,8 @@ func (t *DuoUItheme) DuoUIcounter(pageFunction func()) DuoUIcounter {
 			Width:        32,
 			Height:       32},
 		),
-		// reset:        t.DuoUIbutton(t.Font.Secondary, "RESET", t.Colors["Primary"], t.Colors["Light"], t.Colors["Light"], t.Colors["Primary"], "", "", 12, 0, 0, 48, 48, 0),
-		input:        t.DuoUIeditor("", "DocText", "DocBg", 5),
+		// reset:        t.DuoUIButton(t.Font.Secondary, "RESET", t.Colors["Primary"], t.Colors["Light"], t.Colors["Light"], t.Colors["Primary"], "", "", 12, 0, 0, 48, 48, 0),
+		input:        t.DuoUIEditor("", "DocText", "DocBg", 5),
 		pageFunction: pageFunction,
 		Font: text.Font{
 			Typeface: t.Fonts["Primary"],
@@ -60,10 +60,10 @@ func (t *DuoUItheme) DuoUIcounter(pageFunction func()) DuoUIcounter {
 	}
 }
 
-func (c DuoUIcounter) Layout(gtx *layout.Context, cc *gel.DuoUIcounter, label, value string) {
+func (c DuoUICounter) Layout(gtx *layout.Context, cc *gel.DuoUIcounter, label, value string) {
 	cc.CounterInput.SetText(value)
-	hmin := gtx.Constraints.Width.Min
-	vmin := gtx.Constraints.Height.Min
+	hMin := gtx.Constraints.Width.Min
+	vMin := gtx.Constraints.Height.Min
 	// txColor := c.TxColor
 	bgColor := c.BgColor
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
@@ -79,8 +79,8 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *gel.DuoUIcounter, label, v
 			fill(gtx, HexARGB(bgColor))
 		}),
 		layout.Stacked(func() {
-			gtx.Constraints.Width.Min = hmin
-			gtx.Constraints.Height.Min = vmin
+			gtx.Constraints.Width.Min = hMin
+			gtx.Constraints.Height.Min = vMin
 			layout.Center.Layout(gtx, func() {
 				layout.Flex{
 					Spacing:   layout.SpaceAround,

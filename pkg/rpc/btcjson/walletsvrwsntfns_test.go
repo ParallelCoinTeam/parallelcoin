@@ -22,7 +22,7 @@ func TestWalletSvrWsNtfns(t *testing.T) {
 	}{
 		{
 			name: "accountbalance",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("accountbalance", "acct", 1.25, true)
 			},
 			staticNtfn: func() interface{} {
@@ -37,7 +37,7 @@ func TestWalletSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "podconnected",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("podconnected", true)
 			},
 			staticNtfn: func() interface{} {
@@ -50,7 +50,7 @@ func TestWalletSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "walletlockstate",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("walletlockstate", true)
 			},
 			staticNtfn: func() interface{} {
@@ -63,7 +63,7 @@ func TestWalletSvrWsNtfns(t *testing.T) {
 		},
 		{
 			name: "newtx",
-			newNtfn: func() (interface{}, error) {
+			newNtfn: func() (interface{}, err error) {
 				return btcjson.NewCmd("newtx", "acct", `{"account":"acct","address":"1Address",`+
 					`"category":"send","amount":1.5,"bip125-replaceable":"unknown","fee":0.0001,"confirmations":1,"trusted":true,"txid":"456","walletconflicts":[],"time":12345678,"timereceived":12345876,"vout":789,"otheraccount":"otheracct"}`)
 			},

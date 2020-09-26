@@ -241,7 +241,7 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 // services.  This function uses the RPC options from the global config and
 // there is no recovery in case the server is not available or if there is an
 // authentication error.  Instead, all requests to the client will simply error.
-func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, error) {
+func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, err error) {
 	slog.Tracef(
 		"attempting RPC client connection to %v, TLS: %s",
 		*config.RPCConnect, fmt.Sprint(*config.TLS),

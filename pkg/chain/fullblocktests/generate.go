@@ -163,7 +163,7 @@ type testGenerator struct {
 }
 
 // makeTestGenerator returns a test generator instance initialized with the genesis block as the tip.
-func makeTestGenerator(params *netparams.Params) (testGenerator, error) {
+func makeTestGenerator(params *netparams.Params) (testGenerator, err error) {
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), []byte{0x01})
 	genesis := params.GenesisBlock
 	genesisHash := genesis.BlockHash()
@@ -207,7 +207,7 @@ func pushDataScript(items ...[]byte) []byte {
 }
 
 // standardCoinbaseScript returns a standard script suitable for use as the signature script of the coinbase transaction of a new block.  In particular, it starts with the block height that is required by version 2 blocks.
-func standardCoinbaseScript(blockHeight int32, extraNonce uint64) ([]byte, error) {
+func standardCoinbaseScript(blockHeight int32, extraNonce uint64) ([]byte, err error) {
 	return script.NewScriptBuilder().AddInt64(int64(blockHeight)).
 		AddInt64(int64(extraNonce)).Script()
 }

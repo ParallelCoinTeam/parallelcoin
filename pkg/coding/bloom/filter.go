@@ -225,11 +225,11 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 		return true
 	}
 	// At this point, the transaction and none of the data elements in the public key scripts of its outputs matched. Check if the filter matches any outpoints this transaction spends or any any data elements in the signature scripts of any of the inputs.
-	for _, txin := range tx.MsgTx().TxIn {
-		if bf.matchesOutPoint(&txin.PreviousOutPoint) {
+	for _, txIn := range tx.MsgTx().TxIn {
+		if bf.matchesOutPoint(&txIn.PreviousOutPoint) {
 			return true
 		}
-		pushedData, err := txscript.PushedData(txin.SignatureScript)
+		pushedData, err := txscript.PushedData(txIn.SignatureScript)
 		if err != nil {
 			slog.Error(err)
 			continue

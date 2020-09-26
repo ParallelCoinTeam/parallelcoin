@@ -39,7 +39,7 @@ type TxDetails struct {
 
 // minedTxDetails fetches the TxDetails for the mined transaction with hash
 // txHash and the passed tx record key and value.
-func (s *Store) minedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, recKey, recVal []byte) (*TxDetails, error) {
+func (s *Store) minedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, recKey, recVal []byte) (*TxDetails, err error) {
 	var details TxDetails
 	// Parse transaction record k/v, lookup the full block record for the
 	// block time, and read all matching credits, debits.
@@ -89,7 +89,7 @@ func (s *Store) minedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, r
 
 // unminedTxDetails fetches the TxDetails for the unmined transaction with the
 // hash txHash and the passed unmined record value.
-func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, v []byte) (*TxDetails, error) {
+func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, v []byte) (*TxDetails, err error) {
 	details := TxDetails{
 		Block: BlockMeta{Block: Block{Height: -1}},
 	}
@@ -157,7 +157,7 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 //
 // Not finding a transaction with this hash is not an error.  In this case,
 // a nil TxDetails is returned.
-func (s *Store) TxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash) (*TxDetails, error) {
+func (s *Store) TxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash) (*TxDetails, err error) {
 	// First, check whether there exists an unmined transaction with this
 	// hash.  Use it if found.
 	v := existsRawUnmined(ns, txHash[:])
@@ -180,7 +180,7 @@ func (s *Store) TxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash) (*TxDe
 // Not finding a transaction with this hash from this block is not an error.  In
 // this case, a nil TxDetails is returned.
 func (s *Store) UniqueTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
-	block *Block) (*TxDetails, error) {
+	block *Block) (*TxDetails, err error) {
 	if block == nil {
 		v := existsRawUnmined(ns, txHash[:])
 		if v == nil {
@@ -201,10 +201,10 @@ func (s *Store) UniqueTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 // (signaling breaking out of a RangeTransactions) iff f executes and returns
 // true.
 func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
-	f func([]TxDetails) (bool, error)) (bool, error) {
+	f func([]TxDetails) (bool, error)) (bool, err error) {
 	slog.Trace("rangeUnminedTransactions")
 	var details []TxDetails
-	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
+	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) (err error) {
 		// Debug("k", k, "v", v)
 		if len(k) < 32 {
 			str := fmt.Sprintf("%s: short key (expected %d "+
@@ -235,7 +235,7 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
 // returns true, or the transactions from block is processed.  Returns true iff
 // f executes and returns true.
 func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
-	f func([]TxDetails) (bool, error)) (bool, error) {
+	f func([]TxDetails) (bool, error)) (bool, err error) {
 	slog.Trace("rangeBlockTransactions", begin, end)
 	// Mempool height is considered a high bound.
 	if begin < 0 {
@@ -350,7 +350,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 // elements.  The slice may be reused for multiple blocks, so it is not safe to
 // use it after the loop iteration it was acquired.
 func (s *Store) RangeTransactions(ns walletdb.ReadBucket, begin, end int32,
-	f func([]TxDetails) (bool, error)) error {
+	f func([]TxDetails) (bool, error)) (err error) {
 	slog.Trace("RangeTransactions")
 	var addedUnmined, brk bool
 	var err error
@@ -372,7 +372,7 @@ func (s *Store) RangeTransactions(ns walletdb.ReadBucket, begin, end int32,
 
 // PreviousPkScripts returns a slice of previous output scripts for each credit
 // output this transaction record debits from.
-func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *Block) ([][]byte, error) {
+func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *Block) ([][]byte, err error) {
 	var pkScripts [][]byte
 	if block == nil {
 		for _, input := range rec.MsgTx.TxIn {

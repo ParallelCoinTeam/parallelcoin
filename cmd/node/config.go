@@ -168,7 +168,7 @@ var (
 )
 
 // NewCheckpointFromStr parses checkpoints in the '<height>:<hash>' format.
-func NewCheckpointFromStr(checkpoint string) (config.Checkpoint, error) {
+func NewCheckpointFromStr(checkpoint string) (config.Checkpoint, err error) {
 	parts := strings.Split(checkpoint, ":")
 	if len(parts) != 2 {
 		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
@@ -213,7 +213,7 @@ func NewCheckpointFromStr(checkpoint string) (config.Checkpoint, error) {
 
 // ParseCheckpoints checks the checkpoint strings for valid syntax (
 // '<height>:<hash>') and parses them to config.Checkpoint instances.
-func ParseCheckpoints(checkpointStrings []string) ([]config.Checkpoint, error) {
+func ParseCheckpoints(checkpointStrings []string) ([]config.Checkpoint, err error) {
 	if len(checkpointStrings) == 0 {
 		return nil, nil
 	}
@@ -260,7 +260,7 @@ func ValidLogLevel(logLevel string) bool {
 
 // // createDefaultConfig copies the file sample-pod.
 // conf to the given destination path, and populates it with some randomly generated RPC username and password.
-// func createDefaultConfigFile(destinationPath string) error {
+// func createDefaultConfigFile(destinationPath string) (err error) {
 // 	// Create the destination directory if it does not exists
 // 	err := os.MkdirAll(filepath.Dir(destinationPath), 0700)
 // 	if err != nil {
@@ -809,7 +809,7 @@ func loadConfig() (
 		StateCfg.Dial = proxy.DialTimeout
 		// Treat the proxy as tor and perform DNS resolution through it unless the --noonion flag is set or there is an onion-specific proxy configured.
 		if !cfg.NoOnion && cfg.OnionProxy == "" {
-			StateCfg.Lookup = func(host string) ([]net.IP, error) {
+			StateCfg.Lookup = func(host string) ([]net.IP, err error) {
 				return connmgr.TorLookupIP(host, cfg.Proxy)
 			}
 		}
@@ -831,7 +831,7 @@ func loadConfig() (
 				"overriding specified onionproxy user "+
 				"credentials ")
 		}
-		StateCfg.Oniondial = func(network, addr string, timeout time.Duration) (net.Conn, error) {
+		StateCfg.Oniondial = func(network, addr string, timeout time.Duration) (net.Conn, err error) {
 			proxy := &socks.Proxy{
 				Addr:         cfg.OnionProxy,
 				Username:     cfg.OnionProxyUser,
@@ -842,7 +842,7 @@ func loadConfig() (
 		}
 		// When configured in bridge mode (both --onion and --proxy are configured), it means that the proxy configured by --proxy is not a tor proxy, so override the DNS resolution to use the onion-specific proxy.
 		if cfg.Proxy != "" {
-			StateCfg.Lookup = func(host string) ([]net.IP, error) {
+			StateCfg.Lookup = func(host string) ([]net.IP, err error) {
 				return connmgr.TorLookupIP(host, cfg.OnionProxy)
 			}
 		}
@@ -851,7 +851,7 @@ func loadConfig() (
 	}
 	// Specifying --noonion means the onion address dial function results in an error.
 	if cfg.NoOnion {
-		StateCfg.Oniondial = func(a, b string, t time.Duration) (net.Conn, error) {
+		StateCfg.Oniondial = func(a, b string, t time.Duration) (net.Conn, err error) {
 			return nil, errors.New("tor has been disabled")
 		}
 	}

@@ -485,7 +485,7 @@ func (n *Node) Stop() (err error) {
 		}
 	}
 	// Save fee estimator state in the database.
-	if err = n.DB.Update(func(tx database.Tx) error {
+	if err = n.DB.Update(func(tx database.Tx) (err error) {
 		metadata := tx.Metadata()
 		err := metadata.Put(mempool.EstimateFeeDatabaseKey, n.FeeEstimator.Save())
 		if err != nil {
@@ -1003,10 +1003,10 @@ cleanup:
 // connected peer.  An error is returned if the block hash is not known.
 func (n *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 	doneChan chan<- struct{}, waitChan <-chan struct{},
-	encoding wire.MessageEncoding) error {
+	encoding wire.MessageEncoding) (err error) {
 	// Fetch the raw block bytes from the database.
 	var blockBytes []byte
-	err := sp.Server.DB.View(func(dbTx database.Tx) error {
+	err := sp.Server.DB.View(func(dbTx database.Tx) (err error) {
 		var err error
 		blockBytes, err = dbTx.FetchBlock(hash)
 		return err
@@ -1067,7 +1067,7 @@ func (n *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 // loaded.  An error is returned if the block hash is not known.
 func (n *Node) PushMerkleBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 	doneChan chan<- struct{}, waitChan <-chan struct{},
-	encoding wire.MessageEncoding) error {
+	encoding wire.MessageEncoding) (err error) {
 	// Do not send a response if the peer doesn't have a filter loaded.
 	if !sp.Filter.IsLoaded() {
 		if doneChan != nil {
@@ -1119,7 +1119,7 @@ func (n *Node) PushMerkleBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 // connected peer.  An error is returned if the transaction hash is not known.
 func (n *Node) PushTxMsg(sp *NodePeer, hash *chainhash.Hash,
 	doneChan chan<- struct{}, waitChan <-chan struct{},
-	encoding wire.MessageEncoding) error {
+	encoding wire.MessageEncoding) (err error) {
 	// Attempt to fetch the requested transaction from the pool.  A call could
 	// be made to check for existence first, but simply trying to fetch a
 	// missing transaction results in the same behavior.
@@ -2153,7 +2153,7 @@ func (np *NodePeer) EnforceNodeBloomFlag(cmd string) bool {
 
 // GetNewestBlock returns the current best block hash and height using the
 // format required by the configuration for the peer package.
-func (np *NodePeer) GetNewestBlock() (*chainhash.Hash, int32, error) {
+func (np *NodePeer) GetNewestBlock() (*chainhash.Hash, int32, err error) {
 	best := np.Server.Chain.BestSnapshot()
 	return &best.Hash, best.Height, nil
 }
@@ -2223,7 +2223,7 @@ func (a SimpleAddr) String() string {
 
 //	AddLocalAddress adds an address that this node is listening on to the
 // address manager so that it may be relayed to peers.
-func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.ServiceFlag) error {
+func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.ServiceFlag) (err error) {
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
 		slog.Error(err)
@@ -2276,7 +2276,7 @@ func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Se
 // a net.Addr which maps to the original address with any host names resolved
 // to IP addresses.  It also handles tor addresses properly by returning a
 // net.Addr that encapsulates the address.
-func AddrStringToNetAddr(config *pod.Config, stateCfg *state.Config, addr string) (net.Addr, error) {
+func AddrStringToNetAddr(config *pod.Config, stateCfg *state.Config, addr string) (net.Addr, err error) {
 	host, strPort, err := net.SplitHostPort(addr)
 	if err != nil {
 		slog.Error(err)
@@ -2375,7 +2375,7 @@ func GetHasServices(advertised, desired wire.ServiceFlag) bool {
 // addresses to the address manager. Returns the listeners and a upnp.NAT
 // interface, which is non-nil if UPnP is in use.
 func InitListeners(config *pod.Config, activeNet *netparams.Params,
-	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag) ([]net.Listener, upnp.NAT, error) {
+	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag) ([]net.Listener, upnp.NAT, err error) {
 	// Listen for TCP connections at the configured addresses
 	slog.Trace("listenAddrs ", listenAddrs)
 	netAddrs, err := ParseListeners(listenAddrs)
@@ -2565,7 +2565,7 @@ func // NewNode returns a new pod server configured to listen on addr for the
 // connections from peers.
 // TODO: simplify/modularise this
 NewNode(listenAddrs []string, db database.DB,
-	interruptChan <-chan struct{}, cx *Context) (*Node, error) {
+	interruptChan <-chan struct{}, cx *Context) (*Node, err error) {
 	slog.Trace("listenAddrs ", listenAddrs)
 	services := DefaultServices
 	if *cx.Config.NoPeerBloomFilters {
@@ -2683,7 +2683,7 @@ NewNode(listenAddrs []string, db database.DB,
 	s.Chain.DifficultyBits.Store(make(blockchain.TargetBits))
 	// Search for a FeeEstimator state in the database.
 	// If none can be found or if it cannot be loaded, create a new one.
-	e := db.Update(func(tx database.Tx) error {
+	e := db.Update(func(tx database.Tx) (err error) {
 		metadata := tx.Metadata()
 		feeEstimationData := metadata.Get(mempool.EstimateFeeDatabaseKey)
 		if feeEstimationData != nil {
@@ -2735,7 +2735,7 @@ NewNode(listenAddrs []string, db database.DB,
 			return s.Chain.BestSnapshot().MedianTime
 		},
 		CalcSequenceLock: func(tx *util.Tx, view *blockchain.UtxoViewpoint) (
-			*blockchain.SequenceLock, error) {
+			*blockchain.SequenceLock, err error) {
 			return s.Chain.CalcSequenceLock(tx, view, true)
 		},
 		IsDeploymentActive: s.Chain.IsDeploymentActive,
@@ -2796,7 +2796,7 @@ NewNode(listenAddrs []string, db database.DB,
 	// network.
 	var newAddressFunc func() (net.Addr, error)
 	if !((*cx.Config.Network)[0] == 's') && len(*cx.Config.ConnectPeers) == 0 {
-		newAddressFunc = func() (net.Addr, error) {
+		newAddressFunc = func() (net.Addr, err error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.AddrManager.GetAddress()
 				if addr == nil {
@@ -2936,7 +2936,7 @@ func NewServerPeer(s *Node, isPersistent bool) *NodePeer {
 // returns a slice of appropriate net.Addrs to listen on with TCP. It also
 // properly detects addresses which apply to "all interfaces" and adds the
 // address as both IPv4 and IPv6.
-func ParseListeners(addrs []string) ([]net.Addr, error) {
+func ParseListeners(addrs []string) ([]net.Addr, err error) {
 	netAddrs := make([]net.Addr, 0, len(addrs)*2)
 	for _, addr := range addrs {
 		host, _, err := net.SplitHostPort(addr)
@@ -2995,7 +2995,7 @@ func RandomUint16Number(max uint16) uint16 {
 // SetupRPCListeners returns a slice of listeners that are configured for use
 // with the RPC server depending on the configuration settings for listen
 // addresses and TLS.
-func SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
+func SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, err error) {
 	// Setup TLS if not disabled.
 	listenFunc := net.Listen
 	if *config.TLS {
@@ -3018,7 +3018,7 @@ func SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error
 			InsecureSkipVerify: *config.TLSSkipVerify,
 		}
 		// Change the standard net.Listen function to the tls one.
-		listenFunc = func(net string, laddr string) (net.Listener, error) {
+		listenFunc = func(net string, laddr string) (net.Listener, err error) {
 			return tls.Listen(net, laddr, &tlsConfig)
 		}
 	}

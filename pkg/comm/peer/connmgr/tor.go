@@ -40,30 +40,27 @@ var (
 )
 
 // TorLookupIP uses Tor to resolve DNS via the SOCKS extension they provide for resolution over the Tor network. Tor itself doesn't support ipv6 so this doesn't either.
-func TorLookupIP(host, proxy string) ([]net.IP, error) {
-	conn, err := net.Dial("tcp", proxy)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func TorLookupIP(host, proxy string) (addr []net.IP, err error) {
+	var conn net.Conn
+	if conn, err = net.Dial("tcp", proxy); slog.Check(err) {
+		return
 	}
 	defer conn.Close()
 	buf := []byte{'\x05', '\x01', '\x00'}
-	_, err = conn.Write(buf)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = conn.Write(buf); slog.Check(err) {
+		return
 	}
 	buf = make([]byte, 2)
-	_, err = conn.Read(buf)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = conn.Read(buf); slog.Check(err) {
+		return
 	}
 	if buf[0] != '\x05' {
-		return nil, ErrTorInvalidProxyResponse
+		err = ErrTorInvalidProxyResponse
+		return
 	}
 	if buf[1] != '\x00' {
-		return nil, ErrTorUnrecognizedAuthMethod
+		err = ErrTorUnrecognizedAuthMethod
+		return
 	}
 	buf = make([]byte, 7+len(host))
 	buf[0] = 5      // protocol version
@@ -73,43 +70,45 @@ func TorLookupIP(host, proxy string) ([]net.IP, error) {
 	buf[4] = byte(len(host))
 	copy(buf[5:], host)
 	buf[5+len(host)] = 0 // Port 0
-	_, err = conn.Write(buf)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = conn.Write(buf); slog.Check(err) {
+		return
 	}
 	buf = make([]byte, 4)
-	_, err = conn.Read(buf)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = conn.Read(buf); slog.Check(err) {
+		return
 	}
 	if buf[0] != 5 {
-		return nil, ErrTorInvalidProxyResponse
+		err = ErrTorInvalidProxyResponse
+		return
 	}
 	if buf[1] != 0 {
 		if int(buf[1]) >= len(torStatusErrors) {
-			return nil, ErrTorInvalidProxyResponse
-		} else if err := torStatusErrors[buf[1]]; err != nil {
-			return nil, err
+			err = ErrTorInvalidProxyResponse
+			slog.Debug(err)
+			return
+		} else if err = torStatusErrors[buf[1]]; slog.Check(err) {
+			return
 		}
-		return nil, ErrTorInvalidProxyResponse
+		err = ErrTorInvalidProxyResponse
+		slog.Debug(err)
+		return
 	}
 	if buf[3] != 1 {
-		err := torStatusErrors[torGeneralError]
-		return nil, err
+		err = torStatusErrors[torGeneralError]
+		slog.Debug(err)
+		return
 	}
 	buf = make([]byte, 4)
-	bytes, err := conn.Read(buf)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var bytes int
+	if bytes, err = conn.Read(buf); slog.Check(err) {
+		return
 	}
 	if bytes != 4 {
-		return nil, ErrTorInvalidAddressResponse
+		err = ErrTorInvalidAddressResponse
+		return
 	}
 	r := binary.BigEndian.Uint32(buf)
-	addr := make([]net.IP, 1)
+	addr = make([]net.IP, 1)
 	addr[0] = net.IPv4(byte(r>>24), byte(r>>16), byte(r>>8), byte(r))
-	return addr, nil
+	return
 }

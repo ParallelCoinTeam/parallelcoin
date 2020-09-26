@@ -71,7 +71,6 @@ type Xt struct {
 	OtherNodes atomic.Int32
 }
 
-
 func (cx *Xt) IsCurrent() (is bool) {
 	rn := cx.RealNode
 	cc := rn.ConnectedCount()

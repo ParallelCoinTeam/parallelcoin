@@ -230,7 +230,7 @@ func minUint32(a, b uint32) uint32 {
 // newNetAddress attempts to extract the IP address and port from the passed
 // net.Addr interface and create a bitcoin NetAddress structure using that
 // information.
-func newNetAddress(addr net.Addr, services wire.ServiceFlag) (*wire.NetAddress, error) {
+func newNetAddress(addr net.Addr, services wire.ServiceFlag) (*wire.NetAddress, err error) {
 	// addr will be a net.TCPAddr when not using a proxy.
 	if tcpAddr, ok := addr.(*net.TCPAddr); ok {
 		ip := tcpAddr.IP
@@ -686,7 +686,7 @@ func (p *Peer) IsWitnessEnabled() bool {
 // QueueMessage since it automatically limits the addresses to the maximum
 // number allowed by the message and randomizes the chosen addresses when
 // there are too many.  It returns the addresses that were actually sent and no message will be sent if there are no entries in the provided addresses slice. This function is safe for concurrent access.
-func (p *Peer) PushAddrMsg(addresses []*wire.NetAddress) ([]*wire.NetAddress, error) {
+func (p *Peer) PushAddrMsg(addresses []*wire.NetAddress) ([]*wire.NetAddress, err error) {
 	addressCount := len(addresses)
 	// Nothing to send.
 	if addressCount == 0 {
@@ -712,7 +712,7 @@ func (p *Peer) PushAddrMsg(addresses []*wire.NetAddress) ([]*wire.NetAddress, er
 // PushGetBlocksMsg sends a getblocks message for the provided block locator
 // and stop hash.  It will ignore back-to-back duplicate requests.
 // This function is safe for concurrent access.
-func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chainhash.Hash) error {
+func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chainhash.Hash) (err error) {
 	// Extract the begin hash from the block locator, if one was specified,
 	// to use for filtering duplicate getblocks requests.
 	var beginHash *chainhash.Hash
@@ -755,7 +755,7 @@ func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chain
 // PushGetHeadersMsg sends a getblocks message for the provided block locator
 // and stop hash.  It will ignore back-to-back duplicate requests.
 // This function is safe for concurrent access.
-func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chainhash.Hash) error {
+func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chainhash.Hash) (err error) {
 	// Extract the begin hash from the block locator, if one was specified,
 	// to use for filtering duplicate getheaders requests.
 	var beginHash *chainhash.Hash
@@ -862,7 +862,7 @@ func (p *Peer) handlePongMsg(msg *wire.MsgPong) {
 }
 
 // readMessage reads the next bitcoin message from the peer with logging.
-func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte, error) {
+func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte, err error) {
 	n, msg, buf, err := wire.ReadMessageWithEncodingN(p.conn,
 		p.ProtocolVersion(), p.cfg.ChainParams.Net, encoding)
 	atomic.AddUint64(&p.bytesReceived, uint64(n))
@@ -892,7 +892,7 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 }
 
 // writeMessage sends a bitcoin message to the peer with logging.
-func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) error {
+func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (err error) {
 	// Don't do anything if we're disconnecting.
 	if atomic.LoadInt32(&p.disconnect) != 0 {
 		return nil
@@ -1354,7 +1354,8 @@ func (p *Peer) queueHandler() {
 	// to the outHandler or not.
 	// We could use the presence of a head of the list for this but then we
 	// have rather racy concerns about whether it has gotten it at cleanup
-	// time - and thus who sends on the message's done channel.  To avoid such confusion we keep a different flag and pendingMsgs only contains messages that we have not yet passed to outHandler.
+	// time - and thus who sends on the message's done channel.  To avoid such confusion we keep a different flag and
+	// pendingMsgs only contains messages that we have not yet passed to outHandler.
 	waiting := false
 	// To avoid duplication below.
 	queuePacket := func(msg outMsg, list *list.List, waiting bool) bool {
@@ -1651,7 +1652,7 @@ func (p *Peer) Disconnect() {
 // readRemoteVersionMsg waits for the next message to arrive from the remote
 // peer.  If the next message is not a version message or the version is not
 // acceptable then return an error.
-func (p *Peer) readRemoteVersionMsg() error {
+func (p *Peer) readRemoteVersionMsg() (err error) {
 	if p.versionKnown {
 		slog.Debug("received version previously, dropping")
 		return nil
@@ -1741,7 +1742,7 @@ func (p *Peer) readRemoteVersionMsg() error {
 
 // localVersionMsg creates a version message that can be used to send to the
 // remote peer.
-func (p *Peer) localVersionMsg() (*wire.MsgVersion, error) {
+func (p *Peer) localVersionMsg() (*wire.MsgVersion, err error) {
 	var blockNum int32
 	if p.cfg.NewestBlock != nil {
 		var err error
@@ -1795,7 +1796,7 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, error) {
 }
 
 // writeLocalVersionMsg writes our version message to the remote peer.
-func (p *Peer) writeLocalVersionMsg() error {
+func (p *Peer) writeLocalVersionMsg() (err error) {
 	localVerMsg, err := p.localVersionMsg()
 	if err != nil {
 		slog.Error(err)
@@ -1807,7 +1808,7 @@ func (p *Peer) writeLocalVersionMsg() error {
 // negotiateInboundProtocol waits to receive a version message from the peer
 // then sends our version message.
 // If the events do not occur in that order then it returns an error.
-func (p *Peer) negotiateInboundProtocol() error {
+func (p *Peer) negotiateInboundProtocol() (err error) {
 	if err := p.readRemoteVersionMsg(); err != nil {
 		return err
 	}
@@ -1817,7 +1818,7 @@ func (p *Peer) negotiateInboundProtocol() error {
 // negotiateOutboundProtocol sends our version message then waits to receive
 // a version message from the peer.
 // If the events do not occur in that order then it returns an error.
-func (p *Peer) negotiateOutboundProtocol() error {
+func (p *Peer) negotiateOutboundProtocol() (err error) {
 	if err := p.writeLocalVersionMsg(); err != nil {
 		return err
 	}
@@ -1825,7 +1826,7 @@ func (p *Peer) negotiateOutboundProtocol() error {
 }
 
 // start begins processing input and output messages.
-func (p *Peer) start() error {
+func (p *Peer) start() (err error) {
 	slog.Trace("starting peer", p)
 	negotiateErr := make(chan error, 1)
 	go func() {
@@ -1944,7 +1945,7 @@ func NewInboundPeer(cfg *Config) *Peer {
 }
 
 // NewOutboundPeer returns a new outbound bitcoin peer.
-func NewOutboundPeer(cfg *Config, addr string) (*Peer, error) {
+func NewOutboundPeer(cfg *Config, addr string) (*Peer, err error) {
 	p := newPeerBase(cfg, false)
 	p.addr = addr
 	host, portStr, err := net.SplitHostPort(addr)

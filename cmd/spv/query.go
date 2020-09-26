@@ -640,7 +640,7 @@ checkResponses:
 func // getFilterFromCache returns a filter from ChainService's FilterCache
 // if it exists, returning nil and error if it doesn't.
 (s *ChainService) getFilterFromCache(blockHash *chainhash.Hash,
-	filterType filterdb.FilterType) (*gcs.Filter, error) {
+	filterType filterdb.FilterType) (*gcs.Filter, err error) {
 	cacheKey := filterCacheKey{blockHash: blockHash, filterType: filterType}
 	filterValue, err := s.FilterCache.Get(cacheKey)
 	if err != nil {
@@ -652,7 +652,7 @@ func // getFilterFromCache returns a filter from ChainService's FilterCache
 
 func // putFilterToCache inserts a given filter in ChainService's FilterCache.
 (s *ChainService) putFilterToCache(blockHash *chainhash.Hash,
-	filterType filterdb.FilterType, filter *gcs.Filter) error {
+	filterType filterdb.FilterType, filter *gcs.Filter) (err error) {
 	cacheKey := filterCacheKey{blockHash: blockHash, filterType: filterType}
 	return s.FilterCache.Put(cacheKey, &cache.CacheableFilter{Filter: filter})
 }
@@ -662,7 +662,7 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 // If extended is true, an extended filter will be queried for. Otherwise,
 // we'll fetch the regular filter.
 (s *ChainService) GetCFilter(blockHash chainhash.Hash,
-	filterType wire.FilterType, options ...QueryOption) (*gcs.Filter, error) {
+	filterType wire.FilterType, options ...QueryOption) (*gcs.Filter, err error) {
 	// The only supported filter atm is the regular filter, so we'll reject
 	// all other filters.
 	if filterType != wire.GCSFilterRegular {
@@ -813,7 +813,7 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 // time, until one answers. If the block is found in the cache, it will be
 // returned immediately.
 (s *ChainService) GetBlock(blockHash chainhash.Hash,
-	options ...QueryOption) (*util.Block, error) {
+	options ...QueryOption) (*util.Block, err error) {
 	// Fetch the corresponding block header from the database.
 	// If this isn't found then we don't have the header for this so we can't
 	// request it.
@@ -928,7 +928,7 @@ func // SendTransaction sends a transaction to all peers.
 // TODO: Better privacy by sending to only one random peer and watching
 // propagation, requires better peer selection support in query API.
 (s *ChainService) SendTransaction(tx *wire.MsgTx,
-	options ...QueryOption) error {
+	options ...QueryOption) (err error) {
 	var err error
 	// Starting with the set of default options, we'll apply any specified
 	// functional options to the query so that we can check what inv type

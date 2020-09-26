@@ -21,7 +21,7 @@ import (
 )
 
 func createTestBlockHeaderStore() (func(), walletdb.DB, string,
-	*blockHeaderStore, error) {
+	*blockHeaderStore, err error) {
 	tempDir, err := ioutil.TempDir("", "store_test")
 	if err != nil {
 		return nil, nil, "", nil, err
@@ -202,7 +202,7 @@ func TestBlockHeaderStoreRecovery(t *testing.T) {
 	}
 }
 func createTestFilterHeaderStore() (func(), walletdb.DB, string,
-	*FilterHeaderStore, error) {
+	*FilterHeaderStore, err error) {
 	tempDir, err := ioutil.TempDir("", "store_test")
 	if err != nil {
 		return nil, nil, "", nil, err
@@ -249,7 +249,7 @@ func TestFilterHeaderStoreOperations(t *testing.T) {
 	blockHeaders := createTestFilterHeaderChain(numHeaders)
 	// We simulate the expected behavior of the block headers being written
 	// to disk before the filter headers are.
-	if err := walletdb.Update(fhs.db, func(tx walletdb.ReadWriteTx) error {
+	if err := walletdb.Update(fhs.db, func(tx walletdb.ReadWriteTx) (err error) {
 		rootBucket := tx.ReadWriteBucket(indexBucket)
 		for _, header := range blockHeaders {
 			var heightBytes [4]byte
@@ -351,7 +351,7 @@ func TestFilterHeaderStoreRecovery(t *testing.T) {
 	blockHeaders := createTestFilterHeaderChain(10)
 	// We simulate the expected behavior of the block headers being written
 	// to disk before the filter headers are.
-	if err := walletdb.Update(fhs.db, func(tx walletdb.ReadWriteTx) error {
+	if err := walletdb.Update(fhs.db, func(tx walletdb.ReadWriteTx) (err error) {
 		rootBucket := tx.ReadWriteBucket(indexBucket)
 		for _, header := range blockHeaders {
 			var heightBytes [4]byte

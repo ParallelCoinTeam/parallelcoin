@@ -154,7 +154,7 @@ type (
 
 func // newBlockManager returns a new bitcoin block manager.  Use Start to begin
 // processing asynchronous block and inv updates.
-newBlockManager(s *ChainService) (*blockManager, error) {
+newBlockManager(s *ChainService) (*blockManager, err error) {
 	targetTimespan := int64(s.chainParams.TargetTimespan)
 	targetTimePerBlock := int64(s.chainParams.TargetTimePerBlock)
 	adjustmentFactor := s.chainParams.RetargetAdjustmentFactor
@@ -235,7 +235,7 @@ func // Start begins the core block handler which processes block and inv
 
 func // Stop gracefully shuts down the block manager by stopping all
 // asynchronous handlers and waiting for them to finish.
-(b *blockManager) Stop() error {
+(b *blockManager) Stop() (err error) {
 	if atomic.AddInt32(&b.shutdown, 1) != 1 {
 		slog.Warn("Block manager is already in the process of shutting down")
 		return nil
@@ -602,7 +602,7 @@ func // getUncheckpointedCFHeaders gets the next batch of cfheaders from the
 // network, if it can, and resolves any conflicts between them. It then writes
 // any verified headers to the store.
 (b *blockManager) getUncheckpointedCFHeaders(
-	store *headerfs.FilterHeaderStore, fType wire.FilterType) error {
+	store *headerfs.FilterHeaderStore, fType wire.FilterType) (err error) {
 	// Get the filter header store's chain tip.
 	_, filtHeight, err := store.ChainTip()
 	if err != nil {
@@ -947,7 +947,7 @@ func // writeCFHeadersMsg writes a cfheaders message to the specified store.
 // callers populate the prev filter header field in the next message range
 // before writing to disk.
 (b *blockManager) writeCFHeadersMsg(msg *wire.MsgCFHeaders,
-	store *headerfs.FilterHeaderStore) (*chainhash.Hash, error) {
+	store *headerfs.FilterHeaderStore) (*chainhash.Hash, err error) {
 	b.newFilterHeadersMtx.Lock()
 	defer b.newFilterHeadersMtx.Unlock()
 	// Check that the PrevFilterHeader is the same as the last stored so we
@@ -1075,7 +1075,7 @@ func // resolveConflict finds the correct checkpoint information,
 (b *blockManager) resolveConflict(
 	checkpoints map[string][]*chainhash.Hash,
 	store *headerfs.FilterHeaderStore, fType wire.FilterType) (
-	[]*chainhash.Hash, error) {
+	[]*chainhash.Hash, err error) {
 	heightDiff, err := checkCFCheckptSanity(checkpoints, store)
 	if err != nil {
 		slog.Error(err)
@@ -1237,7 +1237,7 @@ func // resolveCFHeaderMismatch will attempt to cross-reference each filter
 // filter in question. We'll return all the peers that returned what we
 // believe to in invalid filter.
 resolveCFHeaderMismatch(block *wire.MsgBlock, fType wire.FilterType,
-	filtersFromPeers map[string]*gcs.Filter) ([]string, error) {
+	filtersFromPeers map[string]*gcs.Filter) ([]string, err error) {
 	badPeers := make(map[string]struct{})
 	blockHash := block.BlockHash()
 	filterKey := builder.DeriveKey(&blockHash)
@@ -1442,7 +1442,7 @@ func // checkCFCheckptSanity checks whether all peers which have responded
 // existing store up to the tip of the store. If all of the peers match but
 // the store doesn't, the height at which the mismatch occurs is returned.
 checkCFCheckptSanity(cp map[string][]*chainhash.Hash,
-	headerStore *headerfs.FilterHeaderStore) (int, error) {
+	headerStore *headerfs.FilterHeaderStore) (int, err error) {
 	// Get the known best header to compare against checkpoints.
 	_, storeTip, err := headerStore.ChainTip()
 	if err != nil {
@@ -1772,7 +1772,7 @@ func // SynchronizeFilterHeaders allows the caller to execute a function closure
 // header state, thereby ensuring that the state would shift from underneath
 // them. Each execution of the closure will have the current filter header tip
 // passed in to ensue that the caller gets a consistent view.
-(b *blockManager) SynchronizeFilterHeaders(f func(uint32) error) error {
+(b *blockManager) SynchronizeFilterHeaders(f func(uint32) error) (err error) {
 	b.newFilterHeadersMtx.RLock()
 	defer b.newFilterHeadersMtx.RUnlock()
 	return f(b.filterHeaderTip)
@@ -2227,7 +2227,7 @@ func // handleHeadersMsg handles headers messages from all peers.
 
 func // checkHeaderSanity checks the PoW, and timestamp of a block header.
 (b *blockManager) checkHeaderSanity(blockHeader *wire.BlockHeader,
-	maxTimestamp time.Time, reorgAttempt bool, height int32) error {
+	maxTimestamp time.Time, reorgAttempt bool, height int32) (err error) {
 	diff, err := b.calcNextRequiredDifficulty(
 		blockHeader.Timestamp, reorgAttempt)
 	if err != nil {
@@ -2256,7 +2256,7 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 // block after the passed previous block node based on the difficulty
 // retarget rules.
 (b *blockManager) calcNextRequiredDifficulty(newBlockTime time.Time,
-	reorgAttempt bool) (uint32, error) {
+	reorgAttempt bool) (uint32, err error) {
 	hList := b.headerList
 	if reorgAttempt {
 		hList = b.reorgList
@@ -2353,7 +2353,7 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 
 func // findPrevTestNetDifficulty returns the difficulty of the previous block
 // which did not have the special testnet minimum difficulty rule applied.
-(b *blockManager) findPrevTestNetDifficulty(hList headerlist.Chain) (uint32, error) {
+(b *blockManager) findPrevTestNetDifficulty(hList headerlist.Chain) (uint32, err error) {
 	startNode := hList.Back()
 	// Genesis block.
 	if startNode == nil {

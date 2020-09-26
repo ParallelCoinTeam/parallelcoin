@@ -10,14 +10,14 @@ import (
 	"gioui.org/unit"
 )
 
-type DuoUIthemeNav struct {
+type DuoUIThemeNav struct {
 	Title string
 	// Color is the text color.
 	TxColor      color.RGBA
 	Font         text.Font
 	BgColor      color.RGBA
 	CornerRadius unit.Value
-	// Icon          *DuoUIicon
+	// Icon          *DuoUIIcon
 	IcoBackground color.RGBA
 	IcoColor      color.RGBA
 	IcoPadding    unit.Value
@@ -25,15 +25,15 @@ type DuoUIthemeNav struct {
 	Size          unit.Value
 	Padding       unit.Value
 	// NavButtons    map[string]*DuoUIbutton
-	// theme         DuoUItheme
+	// theme         DuoUITheme
 }
 
-// func (t *DuoUItheme) DuoUIthemeNav(Txt string, items *map[string]*DuoUIbutton) DuoUIthemeNav {
+// func (t *DuoUITheme) DuoUIThemeNav(Txt string, items *map[string]*DuoUIbutton) DuoUIThemeNav {
 //	//for it, item := range items {
 //	//	items[it] = t.DuoUIbutton(item.Text, item.Icon)
 //	//}
 //
-//	return DuoUIthemeNav{
+//	return DuoUIThemeNav{
 //		Title: Txt,
 //		Font: text.Font{
 //			Size: t.TextSize.Scale(14.0 / 16.0),
@@ -47,7 +47,7 @@ type DuoUIthemeNav struct {
 //	}
 // }
 
-func (n DuoUIthemeNav) Layout(gtx *layout.Context) {
+func (n DuoUIThemeNav) Layout(gtx *layout.Context) {
 	// navList := &layout.List{
 	//	Axis: layout.Vertical,
 	// }

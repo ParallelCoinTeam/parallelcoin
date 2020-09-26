@@ -59,7 +59,7 @@ func assertChainHeight(r *rpctest.Harness, t *testing.T, expectedHeight uint32) 
 
 // thresholdStateToStatus converts the passed threshold state to the
 // equivalent status string returned in the getblockchaininfo RPC.
-func thresholdStateToStatus(state blockchain.ThresholdState) (string, error) {
+func thresholdStateToStatus(state blockchain.ThresholdState) (string, err error) {
 	switch state {
 	case blockchain.ThresholdDefined:
 		return "defined", nil

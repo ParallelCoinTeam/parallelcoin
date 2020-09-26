@@ -12,7 +12,7 @@ func TestPutUsedAddrHash(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dummyHash := bytes.Repeat([]byte{0x09}, 10)
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		ns, _ := TstRWNamespaces(tx)
 		return putUsedAddrHash(ns, pool.ID, 0, 0, 0, dummyHash)
 	})
@@ -20,7 +20,7 @@ func TestPutUsedAddrHash(t *testing.T) {
 		t.Fatal(err)
 	}
 	var storedHash []byte
-	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
+	err = walletdb.View(db, func(tx walletdb.ReadTx) (err error) {
 		ns, _ := TstRNamespaces(tx)
 		storedHash = getUsedAddrHash(ns, pool.ID, 0, 0, 0)
 		return nil
@@ -35,7 +35,7 @@ func TestPutUsedAddrHash(t *testing.T) {
 func TestGetMaxUsedIdx(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		ns, _ := TstRWNamespaces(tx)
 		for i, idx := range []int{0, 7, 9, 3001, 41, 500, 6} {
 			dummyHash := bytes.Repeat([]byte{byte(i)}, 10)
@@ -50,7 +50,7 @@ func TestGetMaxUsedIdx(t *testing.T) {
 		t.Fatal(err)
 	}
 	var maxIdx Index
-	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
+	err = walletdb.View(db, func(tx walletdb.ReadTx) (err error) {
 		ns, _ := TstRNamespaces(tx)
 		var err error
 		maxIdx, err = getMaxUsedIdx(ns, pool.ID, 0, 0)
@@ -114,7 +114,7 @@ func TestPutAndGetWithdrawal(t *testing.T) {
 	serialized := bytes.Repeat([]byte{1}, 10)
 	poolID := []byte{0x00}
 	roundID := uint32(0)
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		ns, _ := TstRWNamespaces(tx)
 		return putWithdrawal(ns, poolID, roundID, serialized)
 	})
@@ -122,7 +122,7 @@ func TestPutAndGetWithdrawal(t *testing.T) {
 		t.Fatal(err)
 	}
 	var retrieved []byte
-	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
+	err = walletdb.View(db, func(tx walletdb.ReadTx) (err error) {
 		ns, _ := TstRNamespaces(tx)
 		retrieved = getWithdrawal(ns, poolID, roundID)
 		return nil

@@ -11,7 +11,7 @@ import (
 )
 
 // genTestTx creates a random transaction for uses within test cases.
-func genTestTx() (*wire.MsgTx, error) {
+func genTestTx() (*wire.MsgTx, err error) {
 	tx := wire.NewMsgTx(2)
 	tx.Version = rand.Int31()
 	numTxins := rand.Intn(11)

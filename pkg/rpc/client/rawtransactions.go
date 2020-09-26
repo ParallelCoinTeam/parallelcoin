@@ -40,29 +40,25 @@ func (s SigHashType) String() string {
 type FutureGetRawTransactionResult chan *response
 
 // Receive waits for the response promised by the future and returns a transaction given its hash.
-func (r FutureGetRawTransactionResult) Receive() (*util.Tx, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetRawTransactionResult) Receive() (t *util.Tx, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
 	var txHex string
-	err = js.Unmarshal(res, &txHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &txHex); slog.Check(err) {
+		return
 	}
 	// Decode the serialized transaction hex to raw bytes.
-	serializedTx, err := hex.DecodeString(txHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var serializedTx []byte
+	if serializedTx, err = hex.DecodeString(txHex); slog.Check(err) {
+		return
 	}
 	// Deserialize the transaction and return it.
 	var msgTx wire.MsgTx
-	if err := msgTx.Deserialize(bytes.NewReader(serializedTx)); err != nil {
-		return nil, err
+	if err = msgTx.Deserialize(bytes.NewReader(serializedTx)); slog.Check(err) {
+		return
 	}
 	return util.NewTx(&msgTx), nil
 }
@@ -78,7 +74,7 @@ func (c *Client) GetRawTransactionAsync(txHash *chainhash.Hash) FutureGetRawTran
 }
 
 // GetRawTransaction returns a transaction given its hash. See GetRawTransactionVerbose to obtain additional information about the transaction.
-func (c *Client) GetRawTransaction(txHash *chainhash.Hash) (*util.Tx, error) {
+func (c *Client) GetRawTransaction(txHash *chainhash.Hash) (t *util.Tx, err error) {
 	return c.GetRawTransactionAsync(txHash).Receive()
 }
 
@@ -86,20 +82,16 @@ func (c *Client) GetRawTransaction(txHash *chainhash.Hash) (*util.Tx, error) {
 type FutureGetRawTransactionVerboseResult chan *response
 
 // Receive waits for the response promised by the future and returns information about a transaction given its hash.
-func (r FutureGetRawTransactionVerboseResult) Receive() (*btcjson.TxRawResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetRawTransactionVerboseResult) Receive() (rawTxResult *btcjson.TxRawResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a gettrawtransaction result object.
-	var rawTxResult btcjson.TxRawResult
-	err = js.Unmarshal(res, &rawTxResult)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, rawTxResult); slog.Check(err) {
+		return
 	}
-	return &rawTxResult, nil
+	return
 }
 
 // GetRawTransactionVerboseAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetRawTransactionVerbose for the blocking version and more details.
@@ -113,7 +105,7 @@ func (c *Client) GetRawTransactionVerboseAsync(txHash *chainhash.Hash) FutureGet
 }
 
 // GetRawTransactionVerbose returns information about a transaction given its hash. See GetRawTransaction to obtain only the transaction already deserialized.
-func (c *Client) GetRawTransactionVerbose(txHash *chainhash.Hash) (*btcjson.TxRawResult, error) {
+func (c *Client) GetRawTransactionVerbose(txHash *chainhash.Hash) (tr *btcjson.TxRawResult, err error) {
 	return c.GetRawTransactionVerboseAsync(txHash).Receive()
 }
 
@@ -121,20 +113,15 @@ func (c *Client) GetRawTransactionVerbose(txHash *chainhash.Hash) (*btcjson.TxRa
 type FutureDecodeRawTransactionResult chan *response
 
 // Receive waits for the response promised by the future and returns information about a transaction given its serialized bytes.
-func (r FutureDecodeRawTransactionResult) Receive() (*btcjson.TxRawResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureDecodeRawTransactionResult) Receive() (rawTxResult *btcjson.TxRawResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a decoderawtransaction result object.
-	var rawTxResult btcjson.TxRawResult
-	err = js.Unmarshal(res, &rawTxResult)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, rawTxResult); slog.Check(err) {
 	}
-	return &rawTxResult, nil
+	return
 }
 
 // DecodeRawTransactionAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See DecodeRawTransaction for the blocking version and more details.
@@ -145,7 +132,7 @@ func (c *Client) DecodeRawTransactionAsync(serializedTx []byte) FutureDecodeRawT
 }
 
 // DecodeRawTransaction returns information about a transaction given its serialized bytes.
-func (c *Client) DecodeRawTransaction(serializedTx []byte) (*btcjson.TxRawResult, error) {
+func (c *Client) DecodeRawTransaction(serializedTx []byte) (tr *btcjson.TxRawResult, err error) {
 	return c.DecodeRawTransactionAsync(serializedTx).Receive()
 }
 
@@ -153,31 +140,27 @@ func (c *Client) DecodeRawTransaction(serializedTx []byte) (*btcjson.TxRawResult
 type FutureCreateRawTransactionResult chan *response
 
 // Receive waits for the response promised by the future and returns a new transaction spending the provided inputs and sending to the provided addresses.
-func (r FutureCreateRawTransactionResult) Receive() (*wire.MsgTx, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureCreateRawTransactionResult) Receive() (msgTx *wire.MsgTx, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
 	var txHex string
-	err = js.Unmarshal(res, &txHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &txHex); slog.Check(err) {
+		return
 	}
 	// Decode the serialized transaction hex to raw bytes.
-	serializedTx, err := hex.DecodeString(txHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var serializedTx []byte
+	if serializedTx, err = hex.DecodeString(txHex); slog.Check(err) {
+		return
 	}
 	// Deserialize the transaction and return it.
-	var msgTx wire.MsgTx
+	msgTx = &wire.MsgTx{}
 	if err := msgTx.Deserialize(bytes.NewReader(serializedTx)); err != nil {
 		return nil, err
 	}
-	return &msgTx, nil
+	return
 }
 
 // CreateRawTransactionAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See CreateRawTransaction for the blocking version and more details.
@@ -192,8 +175,8 @@ func (c *Client) CreateRawTransactionAsync(inputs []btcjson.TransactionInput,
 }
 
 // CreateRawTransaction returns a new transaction spending the provided inputs and sending to the provided addresses.
-func (c *Client) CreateRawTransaction(inputs []btcjson.TransactionInput,
-	amounts map[util.Address]util.Amount, lockTime *int64) (*wire.MsgTx, error) {
+func (c *Client) CreateRawTransaction(inputs []btcjson.TransactionInput, amounts map[util.Address]util.Amount,
+	lockTime *int64) (t *wire.MsgTx, err error) {
 	return c.CreateRawTransactionAsync(inputs, amounts, lockTime).Receive()
 }
 
@@ -201,18 +184,15 @@ func (c *Client) CreateRawTransaction(inputs []btcjson.TransactionInput,
 type FutureSendRawTransactionResult chan *response
 
 // Receive waits for the response promised by the future and returns the result of submitting the encoded transaction to the server which then relays it to the network.
-func (r FutureSendRawTransactionResult) Receive() (*chainhash.Hash, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureSendRawTransactionResult) Receive() (ch *chainhash.Hash, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
 	var txHashStr string
-	err = js.Unmarshal(res, &txHashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &txHashStr); slog.Check(err) {
+		return
 	}
 	return chainhash.NewHashFromStr(txHashStr)
 }
@@ -233,42 +213,44 @@ func (c *Client) SendRawTransactionAsync(tx *wire.MsgTx, allowHighFees bool) Fut
 }
 
 // SendRawTransaction submits the encoded transaction to the server which will then relay it to the network.
-func (c *Client) SendRawTransaction(tx *wire.MsgTx, allowHighFees bool) (*chainhash.Hash, error) {
+func (c *Client) SendRawTransaction(tx *wire.MsgTx, allowHighFees bool) (h *chainhash.Hash, err error) {
 	return c.SendRawTransactionAsync(tx, allowHighFees).Receive()
 }
 
-// FutureSignRawTransactionResult is a future promise to deliver the result of one of the SignRawTransactionAsync family of RPC invocations (or an applicable error).
+// FutureSignRawTransactionResult is a future promise to deliver the result of one of the SignRawTransactionAsync family
+// of RPC invocations (or an applicable error).
 type FutureSignRawTransactionResult chan *response
 
-// Receive waits for the response promised by the future and returns the signed transaction as well as whether or not all inputs are now signed.
-func (r FutureSignRawTransactionResult) Receive() (*wire.MsgTx, bool, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, false, err
+// Receive waits for the response promised by the future and returns the signed transaction as well as whether or not
+// all inputs are now signed.
+func (r FutureSignRawTransactionResult) Receive() (msgTx *wire.MsgTx, cpl bool, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal as a signrawtransaction result.
 	var signRawTxResult btcjson.SignRawTransactionResult
-	err = js.Unmarshal(res, &signRawTxResult)
-	if err != nil {
-		slog.Error(err)
-		return nil, false, err
+	if err = js.Unmarshal(res, &signRawTxResult); slog.Check(err) {
+		return
 	}
 	// Decode the serialized transaction hex to raw bytes.
 	serializedTx, err := hex.DecodeString(signRawTxResult.Hex)
 	if err != nil {
 		slog.Error(err)
-		return nil, false, err
+		return
 	}
 	// Deserialize the transaction and return it.
-	var msgTx wire.MsgTx
-	if err := msgTx.Deserialize(bytes.NewReader(serializedTx)); err != nil {
-		return nil, false, err
+	msgTx = &wire.MsgTx{}
+	if err = msgTx.Deserialize(bytes.NewReader(serializedTx)); slog.Check(err) {
+		return
 	}
-	return &msgTx, signRawTxResult.Complete, nil
+	cpl = signRawTxResult.Complete
+	return
 }
 
-// SignRawTransactionAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on returned instance. See SignRawTransaction for the blocking version and more details.
+// SignRawTransactionAsync returns an instance of a type that can be used to get the result of the RPC at some future
+// time by invoking the Receive function on returned instance. See SignRawTransaction for the blocking version and more
+// details.
 func (c *Client) SignRawTransactionAsync(tx *wire.MsgTx) FutureSignRawTransactionResult {
 	txHex := ""
 	if tx != nil {
@@ -283,12 +265,18 @@ func (c *Client) SignRawTransactionAsync(tx *wire.MsgTx) FutureSignRawTransactio
 	return c.sendCmd(cmd)
 }
 
-// SignRawTransaction signs inputs for the passed transaction and returns the signed transaction as well as whether or not all inputs are now signed. This function assumes the RPC server already knows the input transactions and private keys for the passed transaction which needs to be signed and uses the default signature hash type.  Use one of the SignRawTransaction# variants to specify that information if needed.
-func (c *Client) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
+// SignRawTransaction signs inputs for the passed transaction and returns the signed transaction as well as whether or
+// not all inputs are now signed. This function assumes the RPC server already knows the input transactions and private
+// keys for the passed transaction which needs to be signed and uses the default signature hash type.
+//
+// Use one of the SignRawTransaction# variants to specify that information if needed.
+func (c *Client) SignRawTransaction(tx *wire.MsgTx) (t *wire.MsgTx, is bool, err error) {
 	return c.SignRawTransactionAsync(tx).Receive()
 }
 
-// SignRawTransaction2Async returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive on the returned instance. See SignRawTransaction2 for the blocking version and more details.
+// SignRawTransaction2Async returns an instance of a type that can be used to get the result of the RPC at some future
+// time by invoking the Receive on the returned instance. See SignRawTransaction2 for the blocking version and more
+// details.
 func (c *Client) SignRawTransaction2Async(tx *wire.MsgTx, inputs []btcjson.RawTxInput) FutureSignRawTransactionResult {
 	txHex := ""
 	if tx != nil {
@@ -304,14 +292,13 @@ func (c *Client) SignRawTransaction2Async(tx *wire.MsgTx, inputs []btcjson.RawTx
 }
 
 // SignRawTransaction2 signs inputs for the passed transaction given the list information about the input transactions needed to perform the signing process. This only input transactions that need to be specified are ones the RPC server does not already know.  Already known input transactions will be merged with the specified transactions. See SignRawTransaction if the RPC server already knows the input transactions.
-func (c *Client) SignRawTransaction2(tx *wire.MsgTx, inputs []btcjson.RawTxInput) (*wire.MsgTx, bool, error) {
+func (c *Client) SignRawTransaction2(tx *wire.MsgTx, inputs []btcjson.RawTxInput) (msgTx *wire.MsgTx, is bool, err error) {
 	return c.SignRawTransaction2Async(tx, inputs).Receive()
 }
 
 // SignRawTransaction3Async returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See SignRawTransaction3 for the blocking version and more details.
-func (c *Client) SignRawTransaction3Async(tx *wire.MsgTx,
-	inputs []btcjson.RawTxInput,
-	privKeysWIF []string) FutureSignRawTransactionResult {
+func (c *Client) SignRawTransaction3Async(tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string,
+) FutureSignRawTransactionResult {
 	txHex := ""
 	if tx != nil {
 		// Serialize the transaction and convert to hex string.
@@ -326,16 +313,25 @@ func (c *Client) SignRawTransaction3Async(tx *wire.MsgTx,
 	return c.sendCmd(cmd)
 }
 
-// SignRawTransaction3 signs inputs for the passed transaction given the list of information about extra input transactions and a list of private keys needed to perform the signing process.  The private keys must be in wallet import format (WIF). This only input transactions that need to be specified are ones the RPC server does not already know.  Already known input transactions will be merged with the specified transactions.  This means the list of transaction inputs can be nil if the RPC server already knows them all. NOTE: Unlike the merging functionality of the input transactions, ONLY the specified private keys will be used, so even if the server already knows some of the private keys, they will NOT be used. See SignRawTransaction if the RPC server already knows the input transactions and private keys or SignRawTransaction2 if it already knows the private keys.
-func (c *Client) SignRawTransaction3(tx *wire.MsgTx,
-	inputs []btcjson.RawTxInput,
-	privKeysWIF []string) (*wire.MsgTx, bool, error) {
+// SignRawTransaction3 signs inputs for the passed transaction given the list of information about extra input
+// transactions and a list of private keys needed to perform the signing process.
+//
+// The private keys must be in wallet import format (WIF). This only input transactions that need to be specified are
+// ones the RPC server does not already know.  Already known input transactions will be merged with the specified
+// transactions.  This means the list of transaction inputs can be nil if the RPC server already knows them all.
+//
+// NOTE: Unlike the merging functionality of the input transactions, ONLY the specified private keys will be used, so
+// even if the server already knows some of the private keys, they will NOT be used.
+//
+// See SignRawTransaction if the RPC server already knows the input transactions and private keys or SignRawTransaction2
+// if it already knows the private keys.
+func (c *Client) SignRawTransaction3(tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string,
+) (msgTx *wire.MsgTx, is bool, err error) {
 	return c.SignRawTransaction3Async(tx, inputs, privKeysWIF).Receive()
 }
 
 // SignRawTransaction4Async returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See SignRawTransaction4 for the blocking version and more details.
-func (c *Client) SignRawTransaction4Async(tx *wire.MsgTx,
-	inputs []btcjson.RawTxInput, privKeysWIF []string,
+func (c *Client) SignRawTransaction4Async(tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string,
 	hashType SigHashType) FutureSignRawTransactionResult {
 	txHex := ""
 	if tx != nil {
@@ -352,49 +348,41 @@ func (c *Client) SignRawTransaction4Async(tx *wire.MsgTx,
 }
 
 // SignRawTransaction4 signs inputs for the passed transaction using the the specified signature hash type given the list of information about extra input transactions and a potential list of private keys needed to perform the signing process.  The private keys, if specified, must be in wallet import format (WIF). The only input transactions that need to be specified are ones the RPC server does not already know.  This means the list of transaction inputs can be nil if the RPC server already knows them all. NOTE: Unlike the merging functionality of the input transactions, ONLY the specified private keys will be used, so even if the server already knows some of the private keys, they will NOT be used.  The list of private keys can be nil in which case any private keys the RPC server knows will be used. This function should only used if a non-default signature hash type is desired.  Otherwise, see SignRawTransaction if the RPC server already knows the input transactions and private keys, SignRawTransaction2 if it already knows the private keys, or SignRawTransaction3 if it does not know both.
-func (c *Client) SignRawTransaction4(tx *wire.MsgTx,
-	inputs []btcjson.RawTxInput, privKeysWIF []string,
-	hashType SigHashType) (*wire.MsgTx, bool, error) {
-	return c.SignRawTransaction4Async(tx, inputs, privKeysWIF,
-		hashType).Receive()
+func (c *Client) SignRawTransaction4(tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string,
+	hashType SigHashType) (msgTx *wire.MsgTx, is bool, err error) {
+	return c.SignRawTransaction4Async(tx, inputs, privKeysWIF, hashType).Receive()
 }
 
 // FutureSearchRawTransactionsResult is a future promise to deliver the result of the SearchRawTransactionsAsync RPC invocation (or an applicable error).
 type FutureSearchRawTransactionsResult chan *response
 
 // Receive waits for the response promised by the future and returns the found raw transactions.
-func (r FutureSearchRawTransactionsResult) Receive() ([]*wire.MsgTx, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureSearchRawTransactionsResult) Receive() (msgTxns []*wire.MsgTx, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal as an array of strings.
 	var searchRawTxnsResult []string
-	err = js.Unmarshal(res, &searchRawTxnsResult)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &searchRawTxnsResult); slog.Check(err) {
+		return
 	}
 	// Decode and deserialize each transaction.
-	msgTxns := make([]*wire.MsgTx, 0, len(searchRawTxnsResult))
+	msgTxns = make([]*wire.MsgTx, 0, len(searchRawTxnsResult))
 	for _, hexTx := range searchRawTxnsResult {
 		// Decode the serialized transaction hex to raw bytes.
-		serializedTx, err := hex.DecodeString(hexTx)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var serializedTx []byte
+		if serializedTx, err = hex.DecodeString(hexTx); slog.Check(err) {
+			return
 		}
 		// Deserialize the transaction and add it to the result slice.
 		var msgTx wire.MsgTx
-		err = msgTx.Deserialize(bytes.NewReader(serializedTx))
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if err = msgTx.Deserialize(bytes.NewReader(serializedTx)); slog.Check(err) {
+			return
 		}
 		msgTxns = append(msgTxns, &msgTx)
 	}
-	return msgTxns, nil
+	return
 }
 
 // SearchRawTransactionsAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See SearchRawTransactions for the blocking version and more details.
@@ -407,7 +395,8 @@ func (c *Client) SearchRawTransactionsAsync(address util.Address, skip, count in
 }
 
 // SearchRawTransactions returns transactions that involve the passed address. NOTE: Chain servers do not typically provide this capability unless it has specifically been enabled. See SearchRawTransactionsVerbose to retrieve a list of data structures with information about the transactions instead of the transactions themselves.
-func (c *Client) SearchRawTransactions(address util.Address, skip, count int, reverse bool, filterAddrs []string) ([]*wire.MsgTx, error) {
+func (c *Client) SearchRawTransactions(address util.Address, skip, count int, reverse bool, filterAddrs []string,
+) (msgTx []*wire.MsgTx, err error) {
 	return c.SearchRawTransactionsAsync(address, skip, count, reverse, filterAddrs).Receive()
 }
 
@@ -415,61 +404,51 @@ func (c *Client) SearchRawTransactions(address util.Address, skip, count int, re
 type FutureSearchRawTransactionsVerboseResult chan *response
 
 // Receive waits for the response promised by the future and returns the found raw transactions.
-func (r FutureSearchRawTransactionsVerboseResult) Receive() ([]*btcjson.SearchRawTransactionsResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureSearchRawTransactionsVerboseResult) Receive() (result []*btcjson.SearchRawTransactionsResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal as an array of raw transaction results.
-	var result []*btcjson.SearchRawTransactionsResult
-	err = js.Unmarshal(res, &result)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &result); slog.Check(err) {
 	}
-	return result, nil
+	return
 }
 
 // SearchRawTransactionsVerboseAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See SearchRawTransactionsVerbose for the blocking version and more details.
-func (c *Client) SearchRawTransactionsVerboseAsync(address util.Address, skip,
-	count int, includePrevOut, reverse bool, filterAddrs *[]string) FutureSearchRawTransactionsVerboseResult {
+func (c *Client) SearchRawTransactionsVerboseAsync(address util.Address, skip, count int, includePrevOut, reverse bool,
+	filterAddrs *[]string) FutureSearchRawTransactionsVerboseResult {
 	addr := address.EncodeAddress()
 	verbose := btcjson.Int(1)
 	var prevOut *int
 	if includePrevOut {
 		prevOut = btcjson.Int(1)
 	}
-	cmd := btcjson.NewSearchRawTransactionsCmd(addr, verbose, &skip, &count,
-		prevOut, &reverse, filterAddrs)
+	cmd := btcjson.NewSearchRawTransactionsCmd(addr, verbose, &skip, &count, prevOut, &reverse, filterAddrs)
 	return c.sendCmd(cmd)
 }
 
 // SearchRawTransactionsVerbose returns a list of data structures that describe transactions which involve the passed address. NOTE: Chain servers do not typically provide this capability unless it has specifically been enabled. See SearchRawTransactions to retrieve a list of raw transactions instead.
-func (c *Client) SearchRawTransactionsVerbose(address util.Address, skip,
-	count int, includePrevOut, reverse bool, filterAddrs []string) ([]*btcjson.SearchRawTransactionsResult, error) {
-	return c.SearchRawTransactionsVerboseAsync(address, skip, count,
-		includePrevOut, reverse, &filterAddrs).Receive()
+func (c *Client) SearchRawTransactionsVerbose(address util.Address, skip, count int, includePrevOut, reverse bool,
+	filterAddrs []string) (result []*btcjson.SearchRawTransactionsResult, err error) {
+	return c.SearchRawTransactionsVerboseAsync(address, skip, count, includePrevOut, reverse, &filterAddrs).Receive()
 }
 
 // FutureDecodeScriptResult is a future promise to deliver the result of a DecodeScriptAsync RPC invocation (or an applicable error).
 type FutureDecodeScriptResult chan *response
 
 // Receive waits for the response promised by the future and returns information about a script given its serialized bytes.
-func (r FutureDecodeScriptResult) Receive() (*btcjson.DecodeScriptResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureDecodeScriptResult) Receive() (decodeScriptResult *btcjson.DecodeScriptResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a decodescript result object.
-	var decodeScriptResult btcjson.DecodeScriptResult
-	err = js.Unmarshal(res, &decodeScriptResult)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	decodeScriptResult = &btcjson.DecodeScriptResult{}
+	if err = js.Unmarshal(res, decodeScriptResult); slog.Check(err) {
+		return
 	}
-	return &decodeScriptResult, nil
+	return
 }
 
 // DecodeScriptAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See DecodeScript for the blocking version and more details.
@@ -480,6 +459,6 @@ func (c *Client) DecodeScriptAsync(serializedScript []byte) FutureDecodeScriptRe
 }
 
 // DecodeScript returns information about a script given its serialized bytes.
-func (c *Client) DecodeScript(serializedScript []byte) (*btcjson.DecodeScriptResult, error) {
+func (c *Client) DecodeScript(serializedScript []byte) (result *btcjson.DecodeScriptResult, err error) {
 	return c.DecodeScriptAsync(serializedScript).Receive()
 }

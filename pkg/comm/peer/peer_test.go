@@ -49,15 +49,15 @@ func (c conn) RemoteAddr() net.Addr {
 }
 
 // Close handles closing the connection.
-func (c conn) Close() error {
+func (c conn) Close() (err error) {
 	if c.Closer == nil {
 		return nil
 	}
 	return c.Closer.Close()
 }
-func (c conn) SetDeadline(t time.Time) error      { return nil }
-func (c conn) SetReadDeadline(t time.Time) error  { return nil }
-func (c conn) SetWriteDeadline(t time.Time) error { return nil }
+func (c conn) SetDeadline(t time.Time) error            { return nil }
+func (c conn) SetReadDeadline(t time.Time) error        { return nil }
+func (c conn) SetWriteDeadline(t time.Time) (err error) { return nil }
 
 // addr mocks a network address
 type addr struct {
@@ -251,7 +251,7 @@ func TestPeerConnection(t *testing.T) {
 	}{
 		{
 			"basic handshake",
-			func() (*peer.Peer, *peer.Peer, error) {
+			func() (*peer.Peer, *peer.Peer, err error) {
 				inConn, outConn := pipe(
 					&conn{rAddr: "10.0.0.1:11047"},
 					&conn{rAddr: "10.0.0.2:11047"},
@@ -275,7 +275,7 @@ func TestPeerConnection(t *testing.T) {
 		},
 		{
 			"socks proxy",
-			func() (*peer.Peer, *peer.Peer, error) {
+			func() (*peer.Peer, *peer.Peer, err error) {
 				inConn, outConn := pipe(
 					&conn{rAddr: "10.0.0.1:11047", proxy: true},
 					&conn{rAddr: "10.0.0.2:11047"},
@@ -569,7 +569,7 @@ func TestPeerListeners(t *testing.T) {
 // TestOutboundPeer tests that the outbound peer works as expected.
 func TestOutboundPeer(t *testing.T) {
 	peerCfg := &peer.Config{
-		NewestBlock: func() (*chainhash.Hash, int32, error) {
+		NewestBlock: func() (*chainhash.Hash, int32, err error) {
 			return nil, 0, errors.New("newest block not found")
 		},
 		UserAgentName:     "peer",
@@ -617,7 +617,7 @@ func TestOutboundPeer(t *testing.T) {
 	<-done
 	p.Disconnect()
 	// Test NewestBlock
-	var newestBlock = func() (*chainhash.Hash, int32, error) {
+	var newestBlock = func() (*chainhash.Hash, int32, err error) {
 		hashStr := "14a0810ac680a3eb3f82edc878cea25ec41d6b790744e5daeef"
 		hash, err := chainhash.NewHashFromStr(hashStr)
 		if err != nil {

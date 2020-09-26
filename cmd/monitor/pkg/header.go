@@ -52,7 +52,7 @@ func (s *State) Header() layout.FlexChild {
 				s.FlexV(gui.Flexed(1, func() {
 					s.Inset(8, func() {
 						layout.W.Layout(s.Gtx, func() {
-							t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
+							t := s.Theme.DuoUILabel(unit.Dp(float32(40)), "Monitor")
 							t.Color = s.Theme.Colors[fg]
 							t.Font.Typeface = s.Theme.Fonts["Secondary"]
 							t.Layout(s.Gtx)
@@ -66,7 +66,7 @@ func (s *State) Header() layout.FlexChild {
 				// cs := s.Gtx.Constraints
 				// s.Rectangle(cs.Width.Max, cs.Width.Max, "Primary")
 				layout.E.Layout(s.Gtx, func() {
-					t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
+					t := s.Theme.DuoUILabel(unit.Dp(float32(16)),
 						fmt.Sprintf("p2p %s rpc %s ctl %s %s %dx%d",
 							(*s.Ctx.Config.Listeners)[0],
 							(*s.Ctx.Config.RPCListeners)[0],

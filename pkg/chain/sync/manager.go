@@ -188,7 +188,7 @@ func (sm *SyncManager) Pause() chan<- struct{} {
 }
 
 // ProcessBlock makes use of ProcessBlock on an internal instance of a block chain.
-func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.BehaviorFlags) (bool, error) {
+func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.BehaviorFlags) (bool, err error) {
 	slog.Trace("processing block")
 	// Traces(block)
 	reply := make(chan processBlockResponse, 1)
@@ -255,7 +255,7 @@ func (sm *SyncManager) Start() {
 
 // Stop gracefully shuts down the sync manager by stopping all asynchronous
 // handlers and waiting for them to finish.
-func (sm *SyncManager) Stop() error {
+func (sm *SyncManager) Stop() (err error) {
 	if atomic.AddInt32(&sm.shutdown, 1) != 1 {
 		slog.Warn("sync manager is already in the process of shutting down")
 		return nil
@@ -1183,7 +1183,7 @@ func (sm *SyncManager) handleTxMsg(tmsg *txMsg) {
 // inventory can be when it is in different states such as blocks that are part
 // of the main chain, on a side chain, in the orphan pool, and transactions
 // that are in the memory pool (either the main pool or orphan pool).
-func (sm *SyncManager) haveInventory(invVect *wire.InvVect) (bool, error) {
+func (sm *SyncManager) haveInventory(invVect *wire.InvVect) (bool, err error) {
 	switch invVect.Type {
 	case wire.InvTypeWitnessBlock:
 		fallthrough
@@ -1397,7 +1397,7 @@ func (sm *SyncManager) startSync() {
 
 // New constructs a new SyncManager. Use Start to begin processing asynchronous
 // block, tx, and inv updates.
-func New(config *Config) (*SyncManager, error) {
+func New(config *Config) (*SyncManager, err error) {
 	sm := SyncManager{
 		peerNotifier:    config.PeerNotifier,
 		chain:           config.Chain,

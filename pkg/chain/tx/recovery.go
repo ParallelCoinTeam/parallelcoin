@@ -54,7 +54,7 @@ func NewRecoveryManager(recoveryWindow, batchSize uint32,
 // attempt.
 func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 	scopedMgrs map[waddrmgr.KeyScope]*waddrmgr.ScopedKeyManager,
-	credits []wtxmgr.Credit) error {
+	credits []wtxmgr.Credit) (err error) {
 	// First, for each scope that we are recovering, rederive all of the
 	// addresses up to the last found address known to each branch.
 	for keyScope, scopedMgr := range scopedMgrs {

@@ -81,23 +81,21 @@ func NewTx(msgTx *wire.MsgTx) *Tx {
 }
 
 // NewTxFromBytes returns a new instance of a bitcoin transaction given the serialized bytes.  See Tx.
-func NewTxFromBytes(serializedTx []byte) (*Tx, error) {
+func NewTxFromBytes(serializedTx []byte) (t *Tx, err error) {
 	br := bytes.NewReader(serializedTx)
 	return NewTxFromReader(br)
 }
 
 // NewTxFromReader returns a new instance of a bitcoin transaction given a Reader to deserialize the transaction.  See Tx.
-func NewTxFromReader(r io.Reader) (*Tx, error) {
+func NewTxFromReader(r io.Reader) (t *Tx, err error) {
 	// Deserialize the bytes into a MsgTx.
 	var msgTx wire.MsgTx
-	err := msgTx.Deserialize(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = msgTx.Deserialize(r); slog.Check(err) {
+		return
 	}
-	t := Tx{
+	t = &Tx{
 		msgTx:   &msgTx,
 		txIndex: TxIndexUnknown,
 	}
-	return &t, nil
+	return
 }

@@ -31,22 +31,22 @@ func newMockBlockHeaderStore() headerfs.BlockHeaderStore {
 	}
 }
 func (m *mockBlockHeaderStore) ChainTip() (*wire.BlockHeader,
-	uint32, error) {
+	uint32, err error) {
 	return nil, 0, nil
 }
 func (m *mockBlockHeaderStore) LatestBlockLocator() (
-	blockchain.BlockLocator, error) {
+	blockchain.BlockLocator, err error) {
 	return nil, nil
 }
 func (m *mockBlockHeaderStore) FetchHeaderByHeight(height uint32) (
-	*wire.BlockHeader, error) {
+	*wire.BlockHeader, err error) {
 	return nil, nil
 }
 func (m *mockBlockHeaderStore) FetchHeaderAncestors(uint32,
-	*chainhash.Hash) ([]wire.BlockHeader, uint32, error) {
+	*chainhash.Hash) ([]wire.BlockHeader, uint32, err error) {
 	return nil, 0, nil
 }
-func (m *mockBlockHeaderStore) HeightFromHash(*chainhash.Hash) (uint32, error) {
+func (m *mockBlockHeaderStore) HeightFromHash(*chainhash.Hash) (uint32, err error) {
 	return 0, nil
 }
 func (m *mockBlockHeaderStore) RollbackLastBlock() (*waddrmgr.BlockStamp,
@@ -54,13 +54,13 @@ func (m *mockBlockHeaderStore) RollbackLastBlock() (*waddrmgr.BlockStamp,
 	return nil, nil
 }
 func (m *mockBlockHeaderStore) FetchHeader(h *chainhash.Hash) (
-	*wire.BlockHeader, uint32, error) {
+	*wire.BlockHeader, uint32, err error) {
 	if header, ok := m.headers[*h]; ok {
 		return &header, 0, nil
 	}
 	return nil, 0, fmt.Errorf("not found")
 }
-func (m *mockBlockHeaderStore) WriteHeaders(headers ...headerfs.BlockHeader) error {
+func (m *mockBlockHeaderStore) WriteHeaders(headers ...headerfs.BlockHeader) (err error) {
 	for _, h := range headers {
 		m.headers[h.BlockHash()] = *h.BlockHeader
 	}

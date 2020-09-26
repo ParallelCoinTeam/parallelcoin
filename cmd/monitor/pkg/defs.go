@@ -82,7 +82,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		State: gui.State{
 			Gtx:   gtx,
 			Rc:    rc,
-			Theme: gelook.NewDuoUItheme(),
+			Theme: gelook.NewDuoUITheme(),
 		},
 		ModesButtons:        make(map[string]*gel.Button),
 		Config:              &Config{FilterNodes: make(map[string]*Node)},

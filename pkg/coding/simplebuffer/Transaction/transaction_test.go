@@ -16,7 +16,7 @@ func TestTransaction(t *testing.T) {
 // signature script of the coinbase transaction of a new block.  In particular,
 // it starts with the block height that is required by version 2 blocks and
 // adds the extra nonce as well as additional coinbase flags.
-func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, error) {
+func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, err error) {
 	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
 		AddInt64(int64(extraNonce)).AddData([]byte(mining.CoinbaseFlags)).
 		Script()

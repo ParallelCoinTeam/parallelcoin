@@ -13,7 +13,7 @@ import (
 	"gioui.org/unit"
 )
 
-type DuoUIcontainer struct {
+type DuoUIContainer struct {
 	// Color is the text color.
 	Color         string
 	Font          text.Font
@@ -36,8 +36,8 @@ type DuoUIcontainer struct {
 	hover         bool
 }
 
-func (t *DuoUItheme) DuoUIcontainer(padding int, background string) DuoUIcontainer {
-	return DuoUIcontainer{
+func (t *DuoUITheme) DuoUIContainer(padding int, background string) DuoUIContainer {
+	return DuoUIContainer{
 		Font: text.Font{
 			Typeface: t.Fonts["Primary"],
 		},
@@ -52,11 +52,11 @@ func (t *DuoUItheme) DuoUIcontainer(padding int, background string) DuoUIcontain
 	}
 }
 
-func (d DuoUIcontainer) Layout(gtx *layout.Context, direction layout.Direction, itemContent func()) {
-	hmin := gtx.Constraints.Width.Min
-	vmin := gtx.Constraints.Height.Min
+func (d DuoUIContainer) Layout(gtx *layout.Context, direction layout.Direction, itemContent func()) {
+	hMin := gtx.Constraints.Width.Min
+	vMin := gtx.Constraints.Height.Min
 	if d.FullWidth {
-		hmin = gtx.Constraints.Width.Max
+		hMin = gtx.Constraints.Width.Max
 	}
 	layout.Stack{Alignment: layout.W}.Layout(gtx,
 		layout.Expanded(func() {
@@ -72,8 +72,8 @@ func (d DuoUIcontainer) Layout(gtx *layout.Context, direction layout.Direction, 
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 		}),
 		layout.Stacked(func() {
-			gtx.Constraints.Width.Min = hmin
-			gtx.Constraints.Height.Min = vmin
+			gtx.Constraints.Width.Min = hMin
+			gtx.Constraints.Height.Min = vMin
 			direction.Layout(gtx, func() {
 				layout.Inset{
 					Top:    unit.Dp(float32(d.PaddingTop)),

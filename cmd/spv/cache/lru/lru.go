@@ -49,7 +49,7 @@ func NewCache(capacity uint64) *Cache {
 
 // evict will evict as many elements as necessary to make enough space for a new
 // element with size needed to be inserted.
-func (c *Cache) evict(needed uint64) error {
+func (c *Cache) evict(needed uint64) (err error) {
 	if needed > c.capacity {
 		return fmt.Errorf("can't evict %v elements in size, since"+
 			"capacity is %v", needed, c.capacity)
@@ -86,7 +86,7 @@ func (c *Cache) evict(needed uint64) error {
 
 // Put inserts a given (key,value) pair into the cache, if the key already
 // exists, it will replace value and update it to be most recent item in cache.
-func (c *Cache) Put(key interface{}, value cache.Value) error {
+func (c *Cache) Put(key interface{}, value cache.Value) (err error) {
 	vs, err := value.Size()
 	if err != nil {
 		slog.Error(err)
@@ -125,19 +125,20 @@ func (c *Cache) Put(key interface{}, value cache.Value) error {
 
 // Get will return value for a given key, making the element the most recently
 // accessed item in the process. Will return nil if the key isn't found.
-func (c *Cache) Get(key interface{}) (cache.Value, error) {
+func (c *Cache) Get(key interface{}) (cv cache.Value, err error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
-	el, ok := c.cache[key]
-	if !ok {
+	if el, ok := c.cache[key]; !ok {
 		// Element not found in the cache.
-		return nil, cache.ErrElementNotFound
+		err = cache.ErrElementNotFound
+		// When the cache needs to evict a element to make space for another
+		// one, it starts eviction from the back, so by moving this element to
+		// the front, it's eviction is delayed because it's recently accessed.
+	} else {
+		c.ll.MoveToFront(el)
+		cv = el.Value.(*entry).value
 	}
-	// When the cache needs to evict a element to make space for another
-	// one, it starts eviction from the back, so by moving this element to
-	// the front, it's eviction is delayed because it's recently accessed.
-	c.ll.MoveToFront(el)
-	return el.Value.(*entry).value, nil
+	return
 }
 
 // Len returns number of elements in the cache.

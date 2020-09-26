@@ -41,6 +41,6 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
-		return nil
+		return
 	}
 }

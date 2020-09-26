@@ -64,7 +64,7 @@ func BigToLEUint256(n *big.Int) [Uint256Size]byte {
 }
 
 // HandleGetWork handles the getwork call
-func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, err error) {
 	c := cmd.(*btcjson.GetWorkCmd)
 	if len(s.StateCfg.ActiveMiningAddrs) == 0 {
 		return nil, &btcjson.RPCError{
@@ -252,7 +252,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 //	HandleGetWorkSubmission is a helper for handleGetWork which deals with the
 // calling submitting work to be verified and processed. This function MUST be
 // called with the RPC workstate locked.
-func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
+func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, err error) {
 	// Ensure the provided data is sane.
 	if len(hexData)%2 != 0 {
 		hexData = "0" + hexData

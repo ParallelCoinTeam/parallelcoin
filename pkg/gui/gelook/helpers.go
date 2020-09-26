@@ -12,7 +12,7 @@ import (
 	"gioui.org/unit"
 )
 
-func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadius [4]float32, padding [4]float32) {
+func DuoUIDrawRectangle(gtx *layout.Context, w, h int, color string, borderRadius [4]float32, padding [4]float32) {
 	in := layout.Inset{
 		Top:    unit.Dp(padding[0]),
 		Right:  unit.Dp(padding[1]),
@@ -28,7 +28,7 @@ func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadiu
 		}
 		paint.ColorOp{Color: HexARGB(color)}.Add(gtx.Ops)
 		clip.Rect{Rect: square,
-			NE: borderRadius[0], NW: borderRadius[1], SE: borderRadius[2], SW: borderRadius[3]}.Op(gtx.Ops).Add(gtx.Ops) // HLdraw
+			NE: borderRadius[0], NW: borderRadius[1], SE: borderRadius[2], SW: borderRadius[3]}.Op(gtx.Ops).Add(gtx.Ops)
 		paint.PaintOp{Rect: square}.Add(gtx.Ops)
 		gtx.Dimensions = layout.Dimensions{Size: image.Point{X: w, Y: h}}
 	})
@@ -39,7 +39,7 @@ func HexARGB(s string) (c color.RGBA) {
 	return
 }
 
-func DuoUIfill(gtx *layout.Context, col string) {
+func DuoUIFill(gtx *layout.Context, col string) {
 	cs := gtx.Constraints
 	d := image.Point{X: cs.Width.Min, Y: cs.Height.Min}
 	dr := f32.Rectangle{
@@ -50,7 +50,7 @@ func DuoUIfill(gtx *layout.Context, col string) {
 	gtx.Dimensions = layout.Dimensions{Size: d}
 }
 
-func (t *DuoUItheme) DuoUIline(gtx *layout.Context, verticalPadding, horizontalPadding float32, size int, color string) func() {
+func (t *DuoUITheme) DuoUILine(gtx *layout.Context, verticalPadding, horizontalPadding float32, size int, color string) func() {
 	return func() {
 		layout.Inset{
 			Top:    unit.Dp(verticalPadding),
@@ -58,7 +58,7 @@ func (t *DuoUItheme) DuoUIline(gtx *layout.Context, verticalPadding, horizontalP
 			Bottom: unit.Dp(verticalPadding),
 			Left:   unit.Dp(horizontalPadding),
 		}.Layout(gtx, func() {
-			DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, size, color, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			DuoUIDrawRectangle(gtx, gtx.Constraints.Width.Max, size, color, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		})
 	}
 }

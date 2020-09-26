@@ -28,7 +28,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// parameters returns the expected error.
 	wantErr = fmt.Errorf("invalid arguments to %s.Open -- expected "+
 		"database path", dbType)
-	if _, err := walletdb.Open(dbType, 1, 2, 3); err.Error() != wantErr.Error() {
+	if _, err := walletdb.Open(dbType, 1, 2, 3); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -37,7 +37,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// the first parameter returns the expected error.
 	wantErr = fmt.Errorf("first argument to %s.Open is invalid -- "+
 		"expected database path string", dbType)
-	if _, err := walletdb.Open(dbType, 1); err.Error() != wantErr.Error() {
+	if _, err := walletdb.Open(dbType, 1); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -46,7 +46,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// parameters returns the expected error.
 	wantErr = fmt.Errorf("invalid arguments to %s.Create -- expected "+
 		"database path", dbType)
-	if _, err := walletdb.Create(dbType, 1, 2, 3); err.Error() != wantErr.Error() {
+	if _, err := walletdb.Create(dbType, 1, 2, 3); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -55,7 +55,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// the first parameter returns the expected error.
 	wantErr = fmt.Errorf("first argument to %s.Create is invalid -- "+
 		"expected database path string", dbType)
-	if _, err := walletdb.Create(dbType, 1); err.Error() != wantErr.Error() {
+	if _, err := walletdb.Create(dbType, 1); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -98,7 +98,7 @@ func TestPersistence(t *testing.T) {
 		"ns1key3": "foo3",
 	}
 	ns1Key := []byte("ns1")
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		ns1, err := tx.CreateTopLevelBucket(ns1Key)
 		if err != nil {
 			return err
@@ -124,7 +124,7 @@ func TestPersistence(t *testing.T) {
 	defer db.Close()
 	// Ensure the values previously stored in the 3rd namespace still exist
 	// and are correct.
-	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
+	err = walletdb.View(db, func(tx walletdb.ReadTx) (err error) {
 		ns1 := tx.ReadBucket(ns1Key)
 		if ns1 == nil {
 			return fmt.Errorf("ReadTx.ReadBucket: unexpected nil root bucket")

@@ -10,10 +10,13 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// createHardForkSubsidyTx creates the transaction that must be on the hard fork activation block in place of a standard coinbase transaction. The main difference is the value set on this coinbase and that it pays out to multiple addresses, several being to the developers and to a 3 of 4 multisig to the development team for marketing and ongoing development costs
+// createHardForkSubsidyTx creates the transaction that must be on the hard fork activation block in place of a standard
+// coinbase transaction. The main difference is the value set on this coinbase and that it pays out to multiple
+// addresses, several being to the developers and to a 3 of 4 multisig to the development team for marketing and ongoing
+// development costs
 // multisig tx: NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OP_CHECKMULTISIG
-// nolint
-func createHardForkSubsidyTx(params *netparams.Params, coinbaseScript []byte, nextBlockHeight int32, addr util.Address, version int32) (*util.Tx, error) {
+func createHardForkSubsidyTx(params *netparams.Params, coinbaseScript []byte, nextBlockHeight int32, addr util.Address,
+	version int32) (t *util.Tx, err error) {
 	payees := hardfork.Payees
 	if params.Net == wire.TestNet3 {
 		payees = hardfork.TestnetPayees
@@ -35,15 +38,15 @@ func createHardForkSubsidyTx(params *netparams.Params, coinbaseScript []byte, ne
 	}
 	// Add Core multisig payment
 	builder := txscript.NewScriptBuilder()
-	keylist := hardfork.CorePubkeyBytes
+	keyList := hardfork.CorePubkeyBytes
 	if params.Net == wire.TestNet3 {
-		keylist = hardfork.TestnetCorePubkeyBytes
+		keyList = hardfork.TestnetCorePubkeyBytes
 	}
 	builder.AddOp(txscript.OP_3).
-		AddData(keylist[0]).
-		AddData(keylist[1]).
-		AddData(keylist[2]).
-		AddData(keylist[3]).
+		AddData(keyList[0]).
+		AddData(keyList[1]).
+		AddData(keyList[2]).
+		AddData(keyList[3]).
 		AddOp(txscript.OP_4).
 		AddOp(txscript.OP_CHECKMULTISIG)
 	script, _ := builder.Script()
@@ -61,5 +64,6 @@ func createHardForkSubsidyTx(params *netparams.Params, coinbaseScript []byte, ne
 		Value:    blockchain.CalcBlockSubsidy(nextBlockHeight+1, params, version),
 		PkScript: script,
 	})
-	return util.NewTx(tx), nil
+	t = util.NewTx(tx)
+	return
 }

@@ -20,7 +20,7 @@ var (
 )
 
 // Execute is the main entry point for the command.  It's invoked by the parser.
-func (cmd *headersCmd) Execute(args []string) error {
+func (cmd *headersCmd) Execute(args []string) (err error) {
 	// Setup the global config options and ensure they are valid.
 	if err := setupGlobalConfig(); err != nil {
 		return err
@@ -35,17 +35,17 @@ return err
 	// NOTE: This code will only work for ffldb.  Ideally the package using the database would keep a metadata index of its own.
 	blockIdxName := []byte("ffldb-blockidx")
 	if !headersCfg.Bulk {
-		err = db.View(func(tx database.Tx) error {
+		err = db.View(func(tx database.Tx) (err error) {
 			totalHdrs := 0
 			blockIdxBucket := tx.Metadata().Bucket(blockIdxName)
-			blockIdxBucket.ForEach(func(k, v []byte) error {
+			blockIdxBucket.ForEach(func(k, v []byte) (err error) {
 				totalHdrs++
 				return nil
 			})
 			L.Infof("Loading headers for %d blocks...", totalHdrs)
 			numLoaded := 0
 			startTime := time.Now()
-			blockIdxBucket.ForEach(func(k, v []byte) error {
+			blockIdxBucket.ForEach(func(k, v []byte) (err error) {
 				var hash chainhash.Hash
 				copy(hash[:], k)
 				_, err := tx.FetchBlockHeader(&hash)
@@ -63,10 +63,10 @@ return err
 		return err
 	}
 	// Bulk load headers.
-	err = db.View(func(tx database.Tx) error {
+	err = db.View(func(tx database.Tx) (err error) {
 		blockIdxBucket := tx.Metadata().Bucket(blockIdxName)
 		hashes := make([]chainhash.Hash, 0, 500000)
-		blockIdxBucket.ForEach(func(k, v []byte) error {
+		blockIdxBucket.ForEach(func(k, v []byte) (err error) {
 			var hash chainhash.Hash
 			copy(hash[:], k)
 			hashes = append(hashes, hash)

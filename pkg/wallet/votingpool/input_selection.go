@@ -86,7 +86,7 @@ func (c byAddress) Less(i, j int) bool {
 // their address.
 func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmgr.Store, txmgrNs walletdb.ReadBucket, startAddress WithdrawalAddress,
 	lastSeriesID uint32, dustThreshold util.Amount, chainHeight int32,
-	minConf int) ([]Credit, error) {
+	minConf int) ([]Credit, err error) {
 	if p.Series(lastSeriesID) == nil {
 		str := fmt.Sprintf("lastSeriesID (%d) does not exist", lastSeriesID)
 		return nil, newError(ErrSeriesNotExists, str, nil)
@@ -136,7 +136,7 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 // rules: http://opentransactions.org/wiki/index.php/Input_Selection_Algorithm_(voting_pools)
 // It returns nil if the new address' seriesID is >= stopSeriesID.
 func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branch Branch, index Index, stopSeriesID uint32) (
-	*WithdrawalAddress, error) {
+	*WithdrawalAddress, err error) {
 	series := p.Series(seriesID)
 	if series == nil {
 		return nil, newError(ErrSeriesNotExists, fmt.Sprintf("unknown seriesID: %d", seriesID), nil)
@@ -176,7 +176,7 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 // highestUsedSeriesIndex returns the highest index among all of this Pool's
 // used addresses for the given seriesID. It returns 0 if there are no used
 // addresses with the given seriesID.
-func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (Index, error) {
+func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (Index, err error) {
 	maxIdx := Index(0)
 	series := p.Series(seriesID)
 	if series == nil {
@@ -200,7 +200,7 @@ func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (
 // representation of an encoded address to the unspent outputs associated with
 // that address.
 func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *netparams.Params) (
-	map[string][]wtxmgr.Credit, error) {
+	map[string][]wtxmgr.Credit, err error) {
 	addrMap := make(map[string][]wtxmgr.Credit)
 	for _, c := range credits {
 		_, addrs, _, err := txscript.ExtractPkScriptAddrs(c.PkScript, chainParams)

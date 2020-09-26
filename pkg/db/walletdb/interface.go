@@ -163,7 +163,7 @@ type DB interface {
 // transaction passed as a parameter.  After f exits, the transaction is rolled
 // back.  If f errors, its error is returned, not a rollback error (if any
 // occur).
-func View(db DB, f func(tx ReadTx) error) error {
+func View(db DB, f func(tx ReadTx) error) (err error) {
 	tx, err := db.BeginReadTx()
 	if err != nil {
 		slog.Error(err)
@@ -187,7 +187,7 @@ func View(db DB, f func(tx ReadTx) error) error {
 // transaction is rolled back.  If the rollback fails, the original error
 // returned by f is still returned.  If the commit fails, the commit error is
 // returned.
-func Update(db DB, f func(tx ReadWriteTx) error) error {
+func Update(db DB, f func(tx ReadWriteTx) error) (err error) {
 	tx, err := db.BeginReadWriteTx()
 	if err != nil {
 		slog.Error(err)
@@ -226,7 +226,7 @@ var drivers = make(map[string]*Driver)
 // RegisterDriver adds a backend database driver to available interfaces.
 // ErrDbTypeRegistered will be retruned if the database type for the driver has
 // already been registered.
-func RegisterDriver(driver Driver) error {
+func RegisterDriver(driver Driver) (err error) {
 	if _, exists := drivers[driver.DbType]; exists {
 		return ErrDbTypeRegistered
 	}
@@ -249,10 +249,12 @@ func SupportedDrivers() []string {
 // database driver for further details.
 //
 // ErrDbUnknownType will be returned if the the database type is not registered.
-func Create(dbType string, args ...interface{}) (DB, error) {
+func Create(dbType string, args ...interface{}) (d DB, err error) {
 	drv, exists := drivers[dbType]
 	if !exists {
-		return nil, ErrDbUnknownType
+		err = ErrDbUnknownType
+		slog.Debug(err)
+		return
 	}
 	return drv.Create(args...)
 }
@@ -262,10 +264,12 @@ func Create(dbType string, args ...interface{}) (DB, error) {
 // driver for further details.
 //
 // ErrDbUnknownType will be returned if the the database type is not registered.
-func Open(dbType string, args ...interface{}) (DB, error) {
+func Open(dbType string, args ...interface{}) (d DB, err error) {
 	drv, exists := drivers[dbType]
 	if !exists {
-		return nil, ErrDbUnknownType
+		err = ErrDbUnknownType
+		slog.Debug(err)
+		return
 	}
 	return drv.Open(args...)
 }

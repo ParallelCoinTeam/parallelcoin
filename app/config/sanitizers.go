@@ -253,7 +253,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 }
 
 // GetFreePort asks the kernel for free open ports that are ready to use.
-func GetFreePort() (int, error) {
+func GetFreePort() (int, err error) {
 	var port int
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
@@ -763,7 +763,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 		// configured.
 		if *cfg.Onion &&
 			*cfg.OnionProxy == "" {
-			stateConfig.Lookup = func(host string) ([]net.IP, error) {
+			stateConfig.Lookup = func(host string) ([]net.IP, err error) {
 				return connmgr.TorLookupIP(host, *cfg.Proxy)
 			}
 		}
@@ -793,7 +793,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	}
 	slog.Trace("setting onion dialer")
 	stateConfig.Oniondial =
-		func(network, addr string, timeout time.Duration) (net.Conn, error) {
+		func(network, addr string, timeout time.Duration) (net.Conn, err error) {
 			proxy := &socks.Proxy{
 				Addr:         *cfg.OnionProxy,
 				Username:     *cfg.OnionProxyUser,
@@ -809,7 +809,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// proxy.
 	slog.Trace("setting proxy lookup")
 	if *cfg.Proxy != "" {
-		stateConfig.Lookup = func(host string) ([]net.IP, error) {
+		stateConfig.Lookup = func(host string) ([]net.IP, err error) {
 			return connmgr.TorLookupIP(host, *cfg.OnionProxy)
 		}
 	} else {
@@ -818,7 +818,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// Specifying --noonion means the onion address dial function results in
 	// an error.
 	if !*cfg.Onion {
-		stateConfig.Oniondial = func(a, b string, t time.Duration) (net.Conn, error) {
+		stateConfig.Oniondial = func(a, b string, t time.Duration) (net.Conn, err error) {
 			return nil, errors.New("tor has been disabled")
 		}
 	}

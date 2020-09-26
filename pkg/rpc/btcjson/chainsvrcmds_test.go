@@ -14,7 +14,7 @@ import (
 // TestChainSvrCmds tests all of the chain server commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
 func TestChainSvrCmds(t *testing.T) {
 	t.Parallel()
-	testID := int(1)
+	testID := 1
 	tests := []struct {
 		name         string
 		newCmd       func() (interface{}, error)
@@ -24,7 +24,7 @@ func TestChainSvrCmds(t *testing.T) {
 	}{
 		{
 			name: "addnode",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("addnode", "127.0.0.1", btcjson.ANRemove)
 			},
 			staticCmd: func() interface{} {
@@ -35,7 +35,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "createrawtransaction",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("createrawtransaction", `[{"txid":"123","vout":1}]`,
 					`{"456":0.0123}`)
 			},
@@ -54,7 +54,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "createrawtransaction optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("createrawtransaction", `[{"txid":"123","vout":1}]`,
 					`{"456":0.0123}`, int64(12312333333))
 			},
@@ -74,7 +74,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "decoderawtransaction",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("decoderawtransaction", "123")
 			},
 			staticCmd: func() interface{} {
@@ -85,7 +85,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "decodescript",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("decodescript", "00")
 			},
 			staticCmd: func() interface{} {
@@ -96,7 +96,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getaddednodeinfo",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getaddednodeinfo", true)
 			},
 			staticCmd: func() interface{} {
@@ -107,7 +107,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getaddednodeinfo optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getaddednodeinfo", true, "127.0.0.1")
 			},
 			staticCmd: func() interface{} {
@@ -121,7 +121,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getbestblockhash",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getbestblockhash")
 			},
 			staticCmd: func() interface{} {
@@ -132,7 +132,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblock",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblock", "123")
 			},
 			staticCmd: func() interface{} {
@@ -147,7 +147,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblock required optional1",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				// Intentionally use a source param that is more pointers than the destination to exercise that path.
 				verbosePtr := btcjson.Bool(true)
 				return btcjson.NewCmd("getblock", "123", &verbosePtr)
@@ -164,7 +164,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblock required optional2",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblock", "123", true, true)
 			},
 			staticCmd: func() interface{} {
@@ -179,7 +179,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblockchaininfo",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblockchaininfo")
 			},
 			staticCmd: func() interface{} {
@@ -190,7 +190,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblockcount",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblockcount")
 			},
 			staticCmd: func() interface{} {
@@ -201,7 +201,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblockhash",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblockhash", 123)
 			},
 			staticCmd: func() interface{} {
@@ -212,7 +212,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblockheader",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblockheader", "123")
 			},
 			staticCmd: func() interface{} {
@@ -226,7 +226,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblocktemplate",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblocktemplate")
 			},
 			staticCmd: func() interface{} {
@@ -237,7 +237,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblocktemplate optional - template request",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblocktemplate", `{"mode":"template","capabilities":["longpoll","coinbasetxn"]}`)
 			},
 			staticCmd: func() interface{} {
@@ -257,7 +257,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblocktemplate optional - template request with tweaks",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblocktemplate", `{"mode":"template","capabilities":["longpoll","coinbasetxn"],"sigoplimit":500,"sizelimit":100000000,"maxversion":2}`)
 			},
 			staticCmd: func() interface{} {
@@ -283,7 +283,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getblocktemplate optional - template request with tweaks 2",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getblocktemplate", `{"mode":"template","capabilities":["longpoll","coinbasetxn"],"sigoplimit":true,"sizelimit":100000000,"maxversion":2}`)
 			},
 			staticCmd: func() interface{} {
@@ -309,7 +309,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getcfilter",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getcfilter", "123",
 					wire.GCSFilterRegular)
 			},
@@ -325,7 +325,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getcfilterheader",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getcfilterheader", "123",
 					wire.GCSFilterRegular)
 			},
@@ -341,7 +341,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getchaintips",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getchaintips")
 			},
 			staticCmd: func() interface{} {
@@ -352,7 +352,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getconnectioncount",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getconnectioncount")
 			},
 			staticCmd: func() interface{} {
@@ -363,7 +363,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getdifficulty",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getdifficulty", "123")
 			},
 			staticCmd: func() interface{} {
@@ -374,7 +374,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getgenerate",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getgenerate")
 			},
 			staticCmd: func() interface{} {
@@ -385,7 +385,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "gethashespersec",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("gethashespersec")
 			},
 			staticCmd: func() interface{} {
@@ -396,7 +396,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getinfo",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getinfo")
 			},
 			staticCmd: func() interface{} {
@@ -407,7 +407,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getmempoolentry",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getmempoolentry", "txhash")
 			},
 			staticCmd: func() interface{} {
@@ -420,7 +420,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getmempoolinfo",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getmempoolinfo")
 			},
 			staticCmd: func() interface{} {
@@ -431,7 +431,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getmininginfo",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getmininginfo")
 			},
 			staticCmd: func() interface{} {
@@ -442,7 +442,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getnetworkinfo",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getnetworkinfo")
 			},
 			staticCmd: func() interface{} {
@@ -453,7 +453,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getnettotals",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getnettotals")
 			},
 			staticCmd: func() interface{} {
@@ -464,7 +464,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getnetworkhashps",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getnetworkhashps")
 			},
 			staticCmd: func() interface{} {
@@ -478,7 +478,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getnetworkhashps optional1",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getnetworkhashps", 200)
 			},
 			staticCmd: func() interface{} {
@@ -492,7 +492,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getnetworkhashps optional2",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getnetworkhashps", 200, 123)
 			},
 			staticCmd: func() interface{} {
@@ -506,7 +506,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getpeerinfo",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getpeerinfo")
 			},
 			staticCmd: func() interface{} {
@@ -517,7 +517,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getrawmempool",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getrawmempool")
 			},
 			staticCmd: func() interface{} {
@@ -530,7 +530,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getrawmempool optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getrawmempool", false)
 			},
 			staticCmd: func() interface{} {
@@ -543,7 +543,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getrawtransaction",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getrawtransaction", "123")
 			},
 			staticCmd: func() interface{} {
@@ -557,7 +557,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getrawtransaction optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getrawtransaction", "123", 1)
 			},
 			staticCmd: func() interface{} {
@@ -571,7 +571,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "gettxout",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("gettxout", "123", 1)
 			},
 			staticCmd: func() interface{} {
@@ -586,7 +586,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "gettxout optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("gettxout", "123", 1, true)
 			},
 			staticCmd: func() interface{} {
@@ -601,7 +601,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "gettxoutproof",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("gettxoutproof", []string{"123", "456"})
 			},
 			staticCmd: func() interface{} {
@@ -614,7 +614,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "gettxoutproof optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("gettxoutproof", []string{"123", "456"},
 					btcjson.String("000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf"))
 			},
@@ -631,7 +631,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "gettxoutsetinfo",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("gettxoutsetinfo")
 			},
 			staticCmd: func() interface{} {
@@ -642,7 +642,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getwork",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getwork")
 			},
 			staticCmd: func() interface{} {
@@ -655,7 +655,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "getwork optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getwork", "00112233")
 			},
 			staticCmd: func() interface{} {
@@ -668,7 +668,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "help",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("help")
 			},
 			staticCmd: func() interface{} {
@@ -681,7 +681,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "help optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("help", "getblock")
 			},
 			staticCmd: func() interface{} {
@@ -694,7 +694,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "invalidateblock",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("invalidateblock", "123")
 			},
 			staticCmd: func() interface{} {
@@ -707,7 +707,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "ping",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("ping")
 			},
 			staticCmd: func() interface{} {
@@ -718,7 +718,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "preciousblock",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("preciousblock", "0123")
 			},
 			staticCmd: func() interface{} {
@@ -731,7 +731,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "reconsiderblock",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("reconsiderblock", "123")
 			},
 			staticCmd: func() interface{} {
@@ -744,7 +744,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "searchrawtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("searchrawtransactions", "1Address")
 			},
 			staticCmd: func() interface{} {
@@ -763,7 +763,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "searchrawtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("searchrawtransactions", "1Address", 0)
 			},
 			staticCmd: func() interface{} {
@@ -783,7 +783,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "searchrawtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("searchrawtransactions", "1Address", 0, 5)
 			},
 			staticCmd: func() interface{} {
@@ -803,7 +803,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "searchrawtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("searchrawtransactions", "1Address", 0, 5, 10)
 			},
 			staticCmd: func() interface{} {
@@ -823,7 +823,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "searchrawtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("searchrawtransactions", "1Address", 0, 5, 10, 1)
 			},
 			staticCmd: func() interface{} {
@@ -843,7 +843,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "searchrawtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("searchrawtransactions", "1Address", 0, 5, 10, 1, true)
 			},
 			staticCmd: func() interface{} {
@@ -863,7 +863,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "searchrawtransactions",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("searchrawtransactions", "1Address", 0, 5, 10, 1, true, []string{"1Address"})
 			},
 			staticCmd: func() interface{} {
@@ -883,7 +883,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "sendrawtransaction",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("sendrawtransaction", "1122")
 			},
 			staticCmd: func() interface{} {
@@ -897,7 +897,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "sendrawtransaction optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("sendrawtransaction", "1122", false)
 			},
 			staticCmd: func() interface{} {
@@ -911,7 +911,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "setgenerate",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("setgenerate", true)
 			},
 			staticCmd: func() interface{} {
@@ -925,7 +925,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "setgenerate optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("setgenerate", true, 6)
 			},
 			staticCmd: func() interface{} {
@@ -939,7 +939,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "stop",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("stop")
 			},
 			staticCmd: func() interface{} {
@@ -950,7 +950,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "restart",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("restart")
 			},
 			staticCmd: func() interface{} {
@@ -961,7 +961,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "submitblock",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("submitblock", "112233")
 			},
 			staticCmd: func() interface{} {
@@ -975,7 +975,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "submitblock optional",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("submitblock", "112233", `{"workid":"12345"}`)
 			},
 			staticCmd: func() interface{} {
@@ -994,7 +994,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "uptime",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("uptime")
 			},
 			staticCmd: func() interface{} {
@@ -1005,7 +1005,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "validateaddress",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("validateaddress", "1Address")
 			},
 			staticCmd: func() interface{} {
@@ -1018,7 +1018,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "verifychain",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("verifychain")
 			},
 			staticCmd: func() interface{} {
@@ -1032,7 +1032,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "verifychain optional1",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("verifychain", 2)
 			},
 			staticCmd: func() interface{} {
@@ -1046,7 +1046,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "verifychain optional2",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("verifychain", 2, 500)
 			},
 			staticCmd: func() interface{} {
@@ -1060,7 +1060,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "verifymessage",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("verifymessage", "1Address", "301234", "test")
 			},
 			staticCmd: func() interface{} {
@@ -1075,7 +1075,7 @@ func TestChainSvrCmds(t *testing.T) {
 		},
 		{
 			name: "verifytxoutproof",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("verifytxoutproof", "test")
 			},
 			staticCmd: func() interface{} {

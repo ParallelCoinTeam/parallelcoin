@@ -179,12 +179,12 @@ func // HaveBlock returns whether or not the chain instance has the block
 // This includes checking the various places a block can be like part of the
 // main chain, on a side chain, or in the orphan pool.
 // This function is safe for concurrent access.
-(b *BlockChain) HaveBlock(hash *chainhash.Hash) (bool, error) {
-	if exists, err := b.blockExists(hash); slog.Check(err) {
-		return false, err
-	} else {
-		return exists || b.IsKnownOrphan(hash), nil
+(b *BlockChain) HaveBlock(hash *chainhash.Hash) (have bool, err error) {
+	var exists bool
+	if exists, err = b.blockExists(hash); !slog.Check(err) {
+		have = exists || b.IsKnownOrphan(hash)
 	}
+	return
 }
 
 // IsKnownOrphan returns whether the passed hash is currently a
@@ -332,7 +332,7 @@ func // CalcSequenceLock computes a relative lock-time SequenceLock for the
 // within a transaction have reached sufficient maturity allowing the
 // candidate transaction to be included in a block.
 // This function is safe for concurrent access.
-(b *BlockChain) CalcSequenceLock(tx *util.Tx, utxoView *UtxoViewpoint, mempool bool) (*SequenceLock, error) {
+(b *BlockChain) CalcSequenceLock(tx *util.Tx, utxoView *UtxoViewpoint, mempool bool) (sl *SequenceLock, err error) {
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	return b.calcSequenceLock(b.BestChain.Tip(), tx, utxoView, mempool)
@@ -341,13 +341,14 @@ func // CalcSequenceLock computes a relative lock-time SequenceLock for the
 func // calcSequenceLock computes the relative lock-times for the passed
 // transaction. See the exported version CalcSequenceLock for further details.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) calcSequenceLock(node *BlockNode, tx *util.Tx, utxoView *UtxoViewpoint, mempool bool) (*SequenceLock, error) {
+(b *BlockChain) calcSequenceLock(node *BlockNode, tx *util.Tx, utxoView *UtxoViewpoint, mempool bool,
+) (sequenceLock *SequenceLock, err error) {
 	// A value of -1 for each relative lock type represents a relative time
 	// lock value that will allow a transaction to be included in a block at
 	// any given height or time.
 	// This value is returned as the relative lock time in the case that BIP
 	// 68 is disabled, or has not yet been activated.
-	sequenceLock := &SequenceLock{Seconds: -1, BlockHeight: -1}
+	sequenceLock = &SequenceLock{Seconds: -1, BlockHeight: -1}
 	// The sequence locks semantics are always active for transactions within
 	// the mempool.
 	csvSoftforkActive := mempool
@@ -1164,9 +1165,9 @@ func (b *BlockChain) BlockLocatorFromHash(hash *chainhash.Hash) BlockLocator {
 
 // LatestBlockLocator returns a block locator for the latest known tip
 // of the main (best) chain. This function is safe for concurrent access.
-func (b *BlockChain) LatestBlockLocator() (BlockLocator, error) {
+func (b *BlockChain) LatestBlockLocator() (locator BlockLocator, err error) {
 	b.chainLock.RLock()
-	locator := b.BestChain.BlockLocator(nil)
+	locator = b.BestChain.BlockLocator(nil)
 	b.chainLock.RUnlock()
 	return locator, nil
 }

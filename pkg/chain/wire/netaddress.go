@@ -65,26 +65,21 @@ func NewNetAddress(addr *net.TCPAddr, services ServiceFlag) *NetAddress {
 }
 
 // readNetAddress reads an encoded NetAddress from r depending on the protocol version and whether or not the timestamp is included per ts.  Some messages like version do not include the timestamp.
-func readNetAddress(r io.Reader, pver uint32, na *NetAddress, ts bool) error {
+func readNetAddress(r io.Reader, pver uint32, na *NetAddress, ts bool) (err error) {
 	var ip [16]byte
 	// NOTE: The bitcoin protocol uses a uint32 for the timestamp so it will stop working somewhere around 2106.  Also timestamp wasn't added until protocol version >= NetAddressTimeVersion
 	if ts && pver >= NetAddressTimeVersion {
-		err := readElement(r, (*uint32Time)(&na.Timestamp))
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = readElement(r, (*uint32Time)(&na.Timestamp)); slog.Check(err) {
+			return
 		}
 	}
-	err := readElements(r, &na.Services, &ip)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = readElements(r, &na.Services, &ip); slog.Check(err) {
+		return
 	}
 	// Sigh.  Bitcoin protocol mixes little and big endian.
-	port, err := binarySerializer.Uint16(r, bigEndian)
-	if err != nil {
-		slog.Error(err)
-		return err
+	var port uint16
+	if port, err = binarySerializer.Uint16(r, bigEndian); slog.Check(err) {
+		return
 	}
 	*na = NetAddress{
 		Timestamp: na.Timestamp,
@@ -92,17 +87,15 @@ func readNetAddress(r io.Reader, pver uint32, na *NetAddress, ts bool) error {
 		IP:        net.IP(ip[:]),
 		Port:      port,
 	}
-	return nil
+	return
 }
 
 // writeNetAddress serializes a NetAddress to w depending on the protocol version and whether or not the timestamp is included per ts.  Some messages like version do not include the timestamp.
-func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) error {
+func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) (err error) {
 	// NOTE: The bitcoin protocol uses a uint32 for the timestamp so it will stop working somewhere around 2106.  Also timestamp wasn't added until until protocol version >= NetAddressTimeVersion.
 	if ts && pver >= NetAddressTimeVersion {
-		err := writeElement(w, uint32(na.Timestamp.Unix()))
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = writeElement(w, uint32(na.Timestamp.Unix())); slog.Check(err) {
+			return
 		}
 	}
 	// Ensure to always write 16 bytes even if the ip is nil.
@@ -110,11 +103,11 @@ func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) error {
 	if na.IP != nil {
 		copy(ip[:], na.IP.To16())
 	}
-	err := writeElements(w, na.Services, ip)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = writeElements(w, na.Services, ip); slog.Check(err) {
+		return
 	}
 	// Sigh.  Bitcoin protocol mixes little and big endian.
-	return binary.Write(w, bigEndian, na.Port)
+	if err = binary.Write(w, bigEndian, na.Port); slog.Check(err) {
+	}
+	return
 }

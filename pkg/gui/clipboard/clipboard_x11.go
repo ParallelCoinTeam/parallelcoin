@@ -3,8 +3,7 @@
 package clipboard
 
 import (
-	"fmt"
-	"os"
+	"github.com/stalker-loki/app/slog"
 	"time"
 
 	"github.com/BurntSushi/xgb"
@@ -59,11 +58,11 @@ func Set(text string) {
 	clipboardText = text
 	ssoc := xproto.SetSelectionOwnerChecked(X, win, clipboardAtom, xproto.TimeCurrentTime)
 	if err := ssoc.Check(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error setting clipboard: %v", err)
+		slog.Error("Error setting clipboard: %v", err)
 	}
 	ssoc = xproto.SetSelectionOwnerChecked(X, win, primaryAtom, xproto.TimeCurrentTime)
 	if err := ssoc.Check(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error setting primary selection: %v", err)
+		slog.Error("Error setting primary selection: %v", err)
 	}
 }
 
@@ -79,7 +78,7 @@ func getSelection(selAtom xproto.Atom) string {
 	csc := xproto.ConvertSelectionChecked(X, win, selAtom, textAtom, selAtom, xproto.TimeCurrentTime)
 	err := csc.Check()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		slog.Debug(err)
 		return ""
 	}
 
@@ -91,16 +90,16 @@ func getSelection(selAtom xproto.Atom) string {
 		gpc := xproto.GetProperty(X, true, win, selAtom, textAtom, 0, 5*1024*1024)
 		gpr, err := gpc.Reply()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			slog.Debug(err)
 			return ""
 		}
 		if gpr.BytesAfter != 0 {
-			fmt.Fprintln(os.Stderr, "Clipboard too large")
+			slog.Debug("Clipboard too large")
 			return ""
 		}
 		return string(gpr.Value[:gpr.ValueLen])
 	case <-time.After(1 * time.Second):
-		fmt.Fprintln(os.Stderr, "Clipboard retrieval failed, timeout")
+		slog.Debug("Clipboard retrieval failed, timeout")
 		return ""
 	}
 }
@@ -116,7 +115,7 @@ func eventLoop() {
 		case xproto.SelectionRequestEvent:
 			if debugClipboardRequests {
 				tgtname := lookupAtom(e.Target)
-				fmt.Fprintln(os.Stderr, "SelectionRequest", e, textAtom, tgtname, "isPrimary:", e.Selection ==
+				slog.Debug("SelectionRequest", e, textAtom, tgtname, "isPrimary:", e.Selection ==
 					primaryAtom, "isClipboard:", e.Selection == clipboardAtom)
 			}
 			t := clipboardText
@@ -124,7 +123,7 @@ func eventLoop() {
 			switch e.Target {
 			case textAtom:
 				if debugClipboardRequests {
-					fmt.Fprintln(os.Stderr, "Sending as text")
+					slog.Debug("Sending as text")
 				}
 				cpc := xproto.ChangePropertyChecked(X, xproto.PropModeReplace, e.Requestor, e.Property, textAtom,
 					8, uint32(len(t)), []byte(t))
@@ -132,12 +131,12 @@ func eventLoop() {
 				if err == nil {
 					sendSelectionNotify(e)
 				} else {
-					fmt.Fprintln(os.Stderr, err)
+					slog.Debug(err)
 				}
 
 			case targetsAtom:
 				if debugClipboardRequests {
-					fmt.Fprintln(os.Stderr, "Sending targets")
+					slog.Debug("Sending targets")
 				}
 				buf := make([]byte, len(targetAtoms)*4)
 				for i, atom := range targetAtoms {
@@ -149,12 +148,12 @@ func eventLoop() {
 				if err == nil {
 					sendSelectionNotify(e)
 				} else {
-					fmt.Fprintln(os.Stderr, err)
+					slog.Debug(err)
 				}
 
 			default:
 				if debugClipboardRequests {
-					fmt.Fprintln(os.Stderr, "Skipping")
+					slog.Debug("Skipping")
 				}
 				e.Property = 0
 				sendSelectionNotify(e)
@@ -192,7 +191,7 @@ func sendSelectionNotify(e xproto.SelectionRequestEvent) {
 	sec := xproto.SendEventChecked(X, false, e.Requestor, 0, string(sn.Bytes()))
 	err := sec.Check()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		slog.Debug(err)
 	}
 }
 

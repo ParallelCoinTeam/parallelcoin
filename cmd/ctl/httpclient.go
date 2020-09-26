@@ -20,31 +20,27 @@ import (
 
 // newHTTPClient returns a new HTTP client that is configured according to the
 // proxy and TLS settings in the associated connection configuration.
-func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
+func newHTTPClient(cfg *pod.Config) (cl *http.Client, err error) {
 	// Configure proxy if needed.
-	var dial func(network, addr string) (net.Conn, error)
+	var dial func(network, addr string) (htConn net.Conn, err error)
 	if *cfg.Proxy != "" {
 		proxy := &socks.Proxy{
 			Addr:     *cfg.Proxy,
 			Username: *cfg.ProxyUser,
 			Password: *cfg.ProxyPass,
 		}
-		dial = func(network, addr string) (net.Conn, error) {
-			c, err := proxy.Dial(network, addr)
-			if err != nil {
-				slog.Error(err)
-				return nil, err
+		dial = func(network, addr string) (htConn net.Conn, err error) {
+			if htConn, err = proxy.Dial(network, addr); slog.Check(err) {
 			}
-			return c, nil
+			return
 		}
 	}
 	// Configure TLS if needed.
 	var tlsConfig *tls.Config
 	if *cfg.TLS && *cfg.RPCCert != "" {
-		pem, err := ioutil.ReadFile(*cfg.RPCCert)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var pem []byte
+		if pem, err = ioutil.ReadFile(*cfg.RPCCert); slog.Check(err) {
+			return
 		}
 		pool := x509.NewCertPool()
 		pool.AppendCertsFromPEM(pem)
@@ -56,20 +52,21 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 	}
 	// Create and return the new HTTP client potentially configured with a
 	// proxy and TLS.
-	client := http.Client{
+	cl = &http.Client{
 		Transport: &http.Transport{
+			// TODO: upgrade this to use DialContext
 			Dial:            dial,
 			TLSClientConfig: tlsConfig,
 		},
 	}
-	return &client, nil
+	return
 }
 
 // sendPostRequest sends the marshalled JSON-RPC command using HTTP-POST mode
 // to the server described in the passed config struct.  It also attempts to
 // unmarshal the response as a JSON-RPC response and returns either the result
 // field or the error field depending on whether or not there is an error.
-func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
+func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) (rawMsg js.RawMessage, err error) {
 	// Generate a request to the configured RPC server.
 	protocol := "http"
 	if *cx.Config.TLS {
@@ -82,10 +79,9 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	}
 	url := protocol + "://" + serverAddr
 	bodyReader := bytes.NewReader(marshalledJSON)
-	httpRequest, err := http.NewRequest("POST", url, bodyReader)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var httpRequest *http.Request
+	if httpRequest, err = http.NewRequest("POST", url, bodyReader); slog.Check(err) {
+		return
 	}
 	httpRequest.Close = true
 	httpRequest.Header.Set("Content-Type", "application/json")
@@ -93,24 +89,19 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	httpRequest.SetBasicAuth(*cx.Config.Username, *cx.Config.Password)
 	// Create the new HTTP client that is configured according to the user
 	// - specified options and submit the request.
-	httpClient, err := newHTTPClient(cx.Config)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var httpClient *http.Client
+	if httpClient, err = newHTTPClient(cx.Config); slog.Check(err) {
+		return
 	}
-	httpResponse, err := httpClient.Do(httpRequest)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var httpResponse *http.Response
+	if httpResponse, err = httpClient.Do(httpRequest); slog.Check(err) {
+		return
 	}
 	// Read the raw bytes and close the response.
-	respBytes, err := ioutil.ReadAll(httpResponse.Body)
-	httpResponse.Body.Close()
-	if err != nil {
-		slog.Error(err)
-		err = fmt.Errorf("error reading json reply: %v", err)
-		slog.Error(err)
-		return nil, err
+	var respBytes []byte
+	respBytes, err = ioutil.ReadAll(httpResponse.Body)
+	if err = httpResponse.Body.Close(); slog.Check(err) {
+		return
 	}
 	// Handle unsuccessful HTTP responses
 	if httpResponse.StatusCode < 200 || httpResponse.StatusCode >= 300 {
@@ -119,18 +110,21 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 		// but it's better than showing nothing in case the target server has
 		// a poor implementation.
 		if len(respBytes) == 0 {
-			return nil, fmt.Errorf("%d %s", httpResponse.StatusCode,
+			err = fmt.Errorf("%d %s", httpResponse.StatusCode,
 				http.StatusText(httpResponse.StatusCode))
+			slog.Debug(err)
+			return
 		}
-		return nil, fmt.Errorf("%s", respBytes)
+		err = fmt.Errorf("%s", respBytes)
+		slog.Debug(err)
+		return
 	}
 	// Unmarshal the response.
 	var resp btcjson.Response
-	if err := js.Unmarshal(respBytes, &resp); err != nil {
-		return nil, err
+	if err = js.Unmarshal(respBytes, &resp); slog.Check(err) {
+		return
 	}
-	if resp.Error != nil {
-		return nil, resp.Error
-	}
-	return resp.Result, nil
+	err = resp.Error
+	rawMsg = resp.Result
+	return
 }

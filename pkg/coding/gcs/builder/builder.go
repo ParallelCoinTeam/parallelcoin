@@ -30,19 +30,16 @@ type GCSBuilder struct {
 }
 
 // RandomKey is a utility function that returns a cryptographically random [gcs.KeySize]byte usable as a key for a GCS filter.
-func RandomKey() ([gcs.KeySize]byte, error) {
-	var key [gcs.KeySize]byte
+func RandomKey() (key [gcs.KeySize]byte, err error) {
 	// Read a byte slice from rand.Reader.
 	randKey := make([]byte, gcs.KeySize)
-	_, err := rand.Read(randKey)
-	// This shouldn't happen unless the user is on a system that doesn't have a system CSPRNG. OK to panic in this case.
-	if err != nil {
-		slog.Error(err)
-		return key, err
+	if _, err = rand.Read(randKey); slog.Check(err) {
+		// This shouldn't happen unless the user is on a system that doesn't have a system CSPRNG. OK to panic in this case.
+		return
 	}
 	// Copy the byte slice to a [gcs.KeySize]byte array and return it.
 	copy(key[:], randKey[:])
-	return key, nil
+	return
 }
 
 // DeriveKey is a utility function that derives a key from a chainhash.Hash by truncating the bytes of the hash to the
@@ -54,12 +51,13 @@ func DeriveKey(keyHash *chainhash.Hash) [gcs.KeySize]byte {
 }
 
 // Key retrieves the key with which the builder will build a filter. This is useful if the builder is created with a random initial key.
-func (b *GCSBuilder) Key() ([gcs.KeySize]byte, error) {
+func (b *GCSBuilder) Key() (k [gcs.KeySize]byte, err error) {
 	// Do nothing if the builder's errored out.
-	if b.err != nil {
+	if slog.Check(b.err) {
 		return [gcs.KeySize]byte{}, b.err
 	}
-	return b.key, nil
+	k = b.key
+	return
 }
 
 // SetKey sets the key with which the builder will build a filter to the passed [gcs.KeySize]byte.
@@ -165,17 +163,21 @@ func (b *GCSBuilder) AddWitness(witness wire.TxWitness) *GCSBuilder {
 }
 
 // Build returns a function which builds a GCS filter with the given parameters and data.
-func (b *GCSBuilder) Build() (*gcs.Filter, error) {
+func (b *GCSBuilder) Build() (f *gcs.Filter, err error) {
 	// Do nothing if the builder's already errored out.
-	if b.err != nil {
+	if slog.Check(b.err) {
 		return nil, b.err
 	}
 	// We'll ensure that all the parameters we need to actually build the filter properly are set.
 	if b.p == 0 {
-		return nil, fmt.Errorf("p value is not set, cannot build")
+		err = fmt.Errorf("p value is not set, cannot build")
+		slog.Check(err)
+		return
 	}
 	if b.m == 0 {
-		return nil, fmt.Errorf("m value is not set, cannot build")
+		err = fmt.Errorf("m value is not set, cannot build")
+		slog.Check(err)
+		return
 	}
 	dataSlice := make([][]byte, 0, len(b.data))
 	for item := range b.data {
@@ -238,14 +240,12 @@ func WithRandomKey() *GCSBuilder {
 }
 
 // BuildBasicFilter builds a basic GCS filter from a block. A basic GCS filter will contain all the previous output scripts spent by inputs within a block, as well as the data pushes within all the outputs created within a block.
-func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filter, error) {
+func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (f *gcs.Filter, err error) {
 	blockHash := block.BlockHash()
 	b := WithKeyHash(&blockHash)
 	// If the filter had an issue with the specified key, then we force it to bubble up here by calling the Key() function.
-	_, err := b.Key()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if _, err = b.Key(); slog.Check(err) {
+		return
 	}
 	// In order to build a basic filter, we'll range over the entire block, adding each whole script itself.
 	for _, tx := range block.Transactions {
@@ -274,26 +274,27 @@ func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filte
 }
 
 // GetFilterHash returns the double-SHA256 of the filter.
-func GetFilterHash(filter *gcs.Filter) (chainhash.Hash, error) {
-	filterData, err := filter.NBytes()
-	if err != nil {
-		slog.Error(err)
-		return chainhash.Hash{}, err
+func GetFilterHash(filter *gcs.Filter) (h chainhash.Hash, err error) {
+	var filterData []byte
+	if filterData, err = filter.NBytes(); slog.Check(err) {
+		return
 	}
-	return chainhash.DoubleHashH(filterData), nil
+	h = chainhash.DoubleHashH(filterData)
+	return
 }
 
 // MakeHeaderForFilter makes a filter chain header for a filter, given the filter and the previous filter chain header.
-func MakeHeaderForFilter(filter *gcs.Filter, prevHeader chainhash.Hash) (chainhash.Hash, error) {
+func MakeHeaderForFilter(filter *gcs.Filter, prevHeader chainhash.Hash) (h chainhash.Hash, err error) {
 	filterTip := make([]byte, 2*chainhash.HashSize)
-	filterHash, err := GetFilterHash(filter)
-	if err != nil {
-		slog.Error(err)
-		return chainhash.Hash{}, err
+	var filterHash chainhash.Hash
+	filterHash, err = GetFilterHash(filter)
+	if slog.Check(err) {
+		return
 	}
 	// In the buffer we created above we'll compute hash || prevHash as an intermediate value.
 	copy(filterTip, filterHash[:])
 	copy(filterTip[chainhash.HashSize:], prevHeader[:])
 	// The final filter hash is the double-sha256 of the hash computed above.
-	return chainhash.DoubleHashH(filterTip), nil
+	h = chainhash.DoubleHashH(filterTip)
+	return
 }

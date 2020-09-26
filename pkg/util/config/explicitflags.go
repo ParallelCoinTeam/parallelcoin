@@ -22,12 +22,12 @@ func NewExplicitString(defaultValue string) *ExplicitString {
 func (e *ExplicitString) ExplicitlySet() bool { return e.explicitlySet }
 
 // MarshalFlag implements the flags.Marshaler interface.
-func (e *ExplicitString) MarshalFlag() (string, error) {
+func (e *ExplicitString) MarshalFlag() (string, err error) {
 	return e.Value, nil
 }
 
 // UnmarshalFlag implements the flags.Unmarshaler interface.
-func (e *ExplicitString) UnmarshalFlag(value string) error {
+func (e *ExplicitString) UnmarshalFlag(value string) (err error) {
 	e.Value = value
 	e.explicitlySet = true
 	return nil

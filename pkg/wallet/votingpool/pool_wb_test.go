@@ -450,7 +450,7 @@ func TestValidateAndDecryptKeysErrors(t *testing.T) {
 		TstCheckError(t, fmt.Sprintf("Test #%d", i), err, test.err)
 	}
 }
-func encryptKeys(keys []string, mgr *waddrmgr.Manager, keyType waddrmgr.CryptoKeyType) ([][]byte, error) {
+func encryptKeys(keys []string, mgr *waddrmgr.Manager, keyType waddrmgr.CryptoKeyType) ([][]byte, err error) {
 	encryptedKeys := make([][]byte, len(keys))
 	var err error
 	for i, key := range keys {

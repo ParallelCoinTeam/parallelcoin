@@ -31,11 +31,10 @@ func PrivKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey,
 
 // NewPrivateKey is a wrapper for ecdsa.GenerateKey that returns a PrivateKey
 // instead of the normal ecdsa.PrivateKey.
-func NewPrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
-	key, err := ecdsa.GenerateKey(curve, rand.Reader)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func NewPrivateKey(curve elliptic.Curve) (pk *PrivateKey, err error) {
+	var key *ecdsa.PrivateKey
+	if key, err = ecdsa.GenerateKey(curve, rand.Reader); slog.Check(err) {
+		return
 	}
 	return (*PrivateKey)(key), nil
 }
@@ -54,7 +53,7 @@ func (p *PrivateKey) ToECDSA() *ecdsa.PrivateKey {
 // of hashing a larger message) using the private key. Produced signature
 // is deterministic (same message and same key yield the same signature) and canonical
 // in accordance with RFC6979 and BIP0062.
-func (p *PrivateKey) Sign(hash []byte) (*Signature, error) {
+func (p *PrivateKey) Sign(hash []byte) (sig *Signature, err error) {
 	return signRFC6979(p, hash)
 }
 

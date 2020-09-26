@@ -86,7 +86,7 @@ type Harness struct {
 // a default configuration will be used.
 // NOTE: This function is safe for concurrent access.
 func New(activeNet *netparams.Params, handlers *client.NotificationHandlers,
-	extraArgs []string) (*Harness, error) {
+	extraArgs []string) (*Harness, err error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
 	// Add a flag for the appropriate network type based on the provided chain netparams.
@@ -287,7 +287,7 @@ func (h *Harness) connectRPCClient() (err error) {
 // NewAddress returns a fresh address spendable by the Harness' internal
 // wallet.
 // This function is safe for concurrent access.
-func (h *Harness) NewAddress() (util.Address, error) {
+func (h *Harness) NewAddress() (util.Address, err error) {
 	return h.wallet.NewAddress()
 }
 
@@ -301,7 +301,7 @@ func (h *Harness) ConfirmedBalance() util.Amount {
 // the harness' available mature coinbase outputs creating new outputs
 // according to targetOutputs.
 // This function is safe for concurrent access.
-func (h *Harness) SendOutputs(targetOutputs []*wire.TxOut, feeRate util.Amount) (*chainhash.Hash, error) {
+func (h *Harness) SendOutputs(targetOutputs []*wire.TxOut, feeRate util.Amount) (*chainhash.Hash, err error) {
 	return h.wallet.SendOutputs(targetOutputs, feeRate)
 }
 
@@ -311,7 +311,7 @@ func (h *Harness) SendOutputs(targetOutputs []*wire.TxOut, feeRate util.Amount) 
 // The passed fee rate should be expressed in sat/b.
 // This function is safe for concurrent access.
 func (h *Harness) SendOutputsWithoutChange(targetOutputs []*wire.TxOut,
-	feeRate util.Amount) (*chainhash.Hash, error) {
+	feeRate util.Amount) (*chainhash.Hash, err error) {
 	return h.wallet.SendOutputsWithoutChange(targetOutputs, feeRate)
 }
 
@@ -329,7 +329,7 @@ func (h *Harness) SendOutputsWithoutChange(targetOutputs []*wire.TxOut,
 // outputs.
 // This function is safe for concurrent access.
 func (h *Harness) CreateTransaction(targetOutputs []*wire.TxOut,
-	feeRate util.Amount, change bool) (*wire.MsgTx, error) {
+	feeRate util.Amount, change bool) (*wire.MsgTx, err error) {
 	return h.wallet.CreateTransaction(targetOutputs, feeRate, change)
 }
 
@@ -366,7 +366,7 @@ func (h *Harness) P2PAddress() string {
 // parameter if one doesn't wish to set a custom time.
 // This function is safe for concurrent access.
 func (h *Harness) GenerateAndSubmitBlock(txns []*util.Tx, blockVersion uint32,
-	blockTime time.Time) (*util.Block, error) {
+	blockTime time.Time) (*util.Block, err error) {
 	return h.GenerateAndSubmitBlockWithCustomCoinbaseOutputs(txns,
 		blockVersion, blockTime, []wire.TxOut{})
 }
@@ -388,7 +388,7 @@ func (h *Harness) GenerateAndSubmitBlock(txns []*util.Tx, blockVersion uint32,
 // This function is safe for concurrent access.
 func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	txns []*util.Tx, blockVersion uint32, blockTime time.Time,
-	mineTo []wire.TxOut) (*util.Block, error) {
+	mineTo []wire.TxOut) (*util.Block, err error) {
 	h.Lock()
 	defer h.Unlock()
 	if blockVersion == ^uint32(0) {
@@ -439,7 +439,7 @@ func generateListeningAddresses() (string, string) {
 }
 
 // baseDir is the directory path of the temp directory for all rpctest files.
-func baseDir() (string, error) {
+func baseDir() (string, err error) {
 	dirPath := filepath.Join(os.TempDir(), "pod", "rpctest")
 	err := os.MkdirAll(dirPath, 0755)
 	return dirPath, err

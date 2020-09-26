@@ -27,7 +27,7 @@ func getCopyCommand() *exec.Cmd {
 	return exec.Command(copyCmdArgs)
 }
 
-func readAll() (string, error) {
+func readAll() (string, err error) {
 	pasteCmd := getPasteCommand()
 	out, err := pasteCmd.Output()
 	if err != nil {
@@ -36,7 +36,7 @@ func readAll() (string, error) {
 	return string(out), nil
 }
 
-func writeAll(text string) error {
+func writeAll(text string) (err error) {
 	copyCmd := getCopyCommand()
 	in, err := copyCmd.StdinPipe()
 	if err != nil {

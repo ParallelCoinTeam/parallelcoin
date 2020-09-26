@@ -10,12 +10,12 @@ import (
 	"github.com/p9c/pod/pkg/gui/gel"
 )
 
-type DuoUIcheckBox struct {
+type DuoUICheckBox struct {
 	checkable
 }
 
-func (t *DuoUItheme) DuoUIcheckBox(label, color, iconColor string) DuoUIcheckBox {
-	return DuoUIcheckBox{
+func (t *DuoUITheme) DuoUICheckBox(label, color, iconColor string) DuoUICheckBox {
+	return DuoUICheckBox{
 		checkable{
 			Font: text.Font{
 				Typeface: t.Fonts["Primary"],
@@ -32,12 +32,12 @@ func (t *DuoUItheme) DuoUIcheckBox(label, color, iconColor string) DuoUIcheckBox
 	}
 }
 
-func (c DuoUIcheckBox) Layout(gtx *layout.Context, checkBox *gel.CheckBox) {
+func (c DuoUICheckBox) Layout(gtx *layout.Context, checkBox *gel.CheckBox) {
 	c.layout(gtx, checkBox.Checked(gtx))
 	checkBox.Layout(gtx)
 }
 
-func (c DuoUIcheckBox) DrawLayout(gtx *layout.Context, checkBox *gel.CheckBox) {
+func (c DuoUICheckBox) DrawLayout(gtx *layout.Context, checkBox *gel.CheckBox) {
 	c.drawLayout(gtx, checkBox.Checked(gtx))
 	checkBox.Layout(gtx)
 }

@@ -2,7 +2,7 @@ package blockchain
 
 import (
 	"github.com/p9c/pod/pkg/chain/fork"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	script "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -21,8 +21,8 @@ func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (
 	// first decode transaction and collect all addresses in the transaction outputs
 	txo := tx.MsgTx().TxOut
 	for i := range txo {
-		script := txo[i].PkScript
-		_, a, _, _ := txscript.ExtractPkScriptAddrs(script, b.params)
+		scr := txo[i].PkScript
+		_, a, _, _ := script.ExtractPkScriptAddrs(scr, b.params)
 		addrs = append(addrs, a...)
 	}
 	// next get the addresses from the input transactions outpoints
@@ -34,8 +34,8 @@ func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (
 			for j := range txs {
 				txitxo := txs[j].TxOut
 				for k := range txitxo {
-					script := txitxo[k].PkScript
-					_, a, _, _ := txscript.ExtractPkScriptAddrs(script, b.params)
+					scr := txitxo[k].PkScript
+					_, a, _, _ := script.ExtractPkScriptAddrs(scr, b.params)
 					addrs = append(addrs, a...)
 				}
 			}

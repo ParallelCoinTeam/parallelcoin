@@ -92,7 +92,7 @@ type DuOScomponent struct {
 type DuoUI struct {
 	Window     *app.Window
 	Context    *layout.Context
-	Theme      *gelook.DuoUItheme
+	Theme      *gelook.DuoUITheme
 	Pages      *DuoUIpages
 	Navigation *DuoUInav
 	// Configuration *DuoUIconfiguration
@@ -101,9 +101,9 @@ type DuoUI struct {
 }
 
 type DuoUIpages struct {
-	CurrentPage *gelook.DuoUIpage
+	CurrentPage *gelook.DuoUIPage
 	Controller  map[string]*gel.DuoUIpage
-	Theme       map[string]*gelook.DuoUIpage
+	Theme       map[string]*gelook.DuoUIPage
 }
 
 type DuoUIlog struct {
@@ -119,7 +119,7 @@ type DuoUIlog struct {
 //	SecondaryTextColor color.RGBA
 //	PrimaryBgColor     color.RGBA
 //	SecondaryBgColor   color.RGBA
-//	Navigations        map[string]*view.DuoUIthemeNav
+//	Navigations        map[string]*view.DuoUIThemeNav
 // }
 
 type DuoUIconfTabs struct {
@@ -165,7 +165,7 @@ type DuoUItoast struct {
 }
 
 type DuoUInav struct {
-	Items             map[string]*gelook.DuoUIthemeNav
+	Items             map[string]*gelook.DuoUIThemeNav
 	Width             int
 	Height            int
 	TextSize          int

@@ -353,8 +353,8 @@ func TestTxWire(t *testing.T) {
 		}
 		// Decode the message from wire format.
 		var msg MsgTx
-		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
+		rBuf := bytes.NewReader(test.buf)
+		err = msg.BtcDecode(rBuf, test.pver, test.enc)
 		if err != nil {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
@@ -485,11 +485,11 @@ func TestTxSerialize(t *testing.T) {
 		}
 		// Deserialize the transaction.
 		var tx MsgTx
-		rbuf := bytes.NewReader(test.buf)
+		rBuf := bytes.NewReader(test.buf)
 		if test.witness {
-			err = tx.Deserialize(rbuf)
+			err = tx.Deserialize(rBuf)
 		} else {
-			err = tx.DeserializeNoWitness(rbuf)
+			err = tx.DeserializeNoWitness(rBuf)
 		}
 		if err != nil {
 			t.Errorf("Deserialize #%d error %v", i, err)
@@ -629,7 +629,7 @@ func TestTxOverflowErrors(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Previous output hash
-				0xff, 0xff, 0xff, 0xff, // Prevous output index
+				0xff, 0xff, 0xff, 0xff, // Previous output index
 				0x00,                   // Varint for length of signature script
 				0xff, 0xff, 0xff, 0xff, // Sequence
 				0x01,                                           // Varint for number of output transactions
@@ -670,9 +670,9 @@ func TestTxSerializeSizeStripped(t *testing.T) {
 		in   *MsgTx // Tx to encode
 		size int    // Expected serialized size
 	}{
-		// No inputs or outpus.
+		// No inputs or output.
 		{noTx, 10},
-		// Transcaction with an input and an output.
+		// Transaction with an input and an output.
 		{multiTx, 210},
 		// Transaction with an input which includes witness data, and one output. Note that this uses SerializeSizeStripped which excludes the additional bytes due to witness data encoding.
 		{multiWitnessTx, 82},
@@ -768,7 +768,7 @@ var multiTxEncoded = []byte{
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Previous output hash
-	0xff, 0xff, 0xff, 0xff, // Prevous output index
+	0xff, 0xff, 0xff, 0xff, // Previous output index
 	0x07,                                     // Varint for length of signature script
 	0x04, 0x31, 0xdc, 0x00, 0x1b, 0x01, 0x62, // Signature script
 	0xff, 0xff, 0xff, 0xff, // Sequence

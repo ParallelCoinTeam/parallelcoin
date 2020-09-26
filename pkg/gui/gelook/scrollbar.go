@@ -20,17 +20,17 @@ type ScrollBar struct {
 	slider       *ScrollBarSlider
 	up           IconButton
 	down         IconButton
-	container    DuoUIcontainer
+	container    DuoUIContainer
 }
 
 type ScrollBarSlider struct {
-	container DuoUIcontainer
-	Icon      DuoUIicon
+	container DuoUIContainer
+	Icon      DuoUIIcon
 }
 
-func (t *DuoUItheme) ScrollBar(leftMargin int) *ScrollBar {
+func (t *DuoUITheme) ScrollBar(leftMargin int) *ScrollBar {
 	slider := &ScrollBarSlider{
-		container: t.DuoUIcontainer(0, t.Colors["Primary"]),
+		container: t.DuoUIContainer(0, t.Colors["Primary"]),
 		Icon:      *t.Icons["Grab"],
 	}
 	slider.container.CornerRadius = 8
@@ -40,13 +40,13 @@ func (t *DuoUItheme) ScrollBar(leftMargin int) *ScrollBar {
 		slider:       slider,
 		up:           t.IconButton(t.Icons["Up"]),
 		down:         t.IconButton(t.Icons["Down"]),
-		container:    t.DuoUIcontainer(0, t.Colors["Light"]),
+		container:    t.DuoUIContainer(0, t.Colors["Light"]),
 	}
 	scrollbar.container.PaddingLeft = leftMargin
 	return scrollbar
 }
 
-func (p *DuoUIpanel) ScrollBarLayout(gtx *layout.Context, panel *gel.Panel) {
+func (p *DuoUIPanel) ScrollBarLayout(gtx *layout.Context, panel *gel.Panel) {
 	p.ScrollBar.container.Layout(gtx, layout.Center, func() {
 
 		layout.Flex{
@@ -83,7 +83,7 @@ func (p *DuoUIpanel) ScrollBarLayout(gtx *layout.Context, panel *gel.Panel) {
 	})
 }
 
-func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
+func (p *DuoUIPanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 	layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(gtx,

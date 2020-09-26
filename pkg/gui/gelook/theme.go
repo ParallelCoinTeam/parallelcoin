@@ -10,12 +10,12 @@ import (
 	"github.com/p9c/pod/pkg/gui/fonts"
 )
 
-type DuoUItheme struct {
+type DuoUITheme struct {
 	Shaper        text.Shaper
 	TextSize      unit.Value
 	Colors        map[string]string
 	Fonts         map[string]text.Typeface
-	Icons         map[string]*DuoUIicon
+	Icons         map[string]*DuoUIIcon
 	scrollBarSize int
 }
 
@@ -23,18 +23,18 @@ func init() {
 	fonts.Register()
 }
 
-func NewDuoUItheme() *DuoUItheme {
-	t := &DuoUItheme{
+func NewDuoUITheme() *DuoUITheme {
+	t := &DuoUITheme{
 		Shaper: font.Default(),
 	}
 	t.Colors = NewDuoUIcolors()
-	t.Fonts = NewDuoUIfonts()
+	t.Fonts = NewDuoUIFonts()
 	t.TextSize = unit.Sp(16)
-	t.Icons = NewDuoUIicons()
+	t.Icons = NewDuoUIIcons()
 	return t
 }
 
-func NewDuoUIfonts() (f map[string]text.Typeface) {
+func NewDuoUIFonts() (f map[string]text.Typeface) {
 	f = make(map[string]text.Typeface)
 	f["Primary"] = "bariol"
 	f["Secondary"] = "plan9"
@@ -42,7 +42,7 @@ func NewDuoUIfonts() (f map[string]text.Typeface) {
 	return f
 }
 
-func (t *DuoUItheme) ChangeLightDark() {
+func (t *DuoUITheme) ChangeLightDark() {
 	light := t.Colors["Light"]
 	dark := t.Colors["Dark"]
 	lightGray := t.Colors["LightGrayIII"]

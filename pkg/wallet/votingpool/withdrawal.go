@@ -134,7 +134,7 @@ func (s outputStatus) String() string {
 	}
 	return strings[s]
 }
-func (tx *changeAwareTx) addSelfToStore(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket) error {
+func (tx *changeAwareTx) addSelfToStore(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket) (err error) {
 	rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx, time.Now())
 	if err != nil {
 		Error(err)
@@ -406,7 +406,7 @@ func (tx *withdrawalTx) addChange(pkScript []byte) bool {
 //
 // The tx needs to have two or more outputs. The case with only one output must
 // be handled separately (by the split output procedure).
-func (tx *withdrawalTx) rollBackLastOutput() ([]Credit, *withdrawalTxOut, error) {
+func (tx *withdrawalTx) rollBackLastOutput() ([]Credit, *withdrawalTxOut, err error) {
 	// Check precondition: At least two outputs are required in the transaction.
 	if len(tx.outputs) < 2 {
 		str := fmt.Sprintf("at least two outputs expected; got %d", len(tx.outputs))
@@ -456,7 +456,7 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 	addrmgrNs walletdb.ReadBucket, roundID uint32, requests []OutputRequest,
 	startAddress WithdrawalAddress, lastSeriesID uint32, changeStart ChangeAddress,
 	txStore *wtxmgr.Store, txmgrNs walletdb.ReadBucket, chainHeight int32, dustThreshold util.Amount) (
-	*WithdrawalStatus, error) {
+	*WithdrawalStatus, err error) {
 	status, err := getWithdrawalStatus(p, ns, addrmgrNs, roundID, requests, startAddress, lastSeriesID,
 		changeStart, dustThreshold)
 	if err != nil {
@@ -524,7 +524,7 @@ func (w *withdrawal) pushInput(input Credit) {
 // If this returns it means we have added an output and the necessary inputs to fulfil that
 // output plus the required fees. It also means the tx won't reach the size limit even
 // after we add a change output and sign all inputs.
-func (w *withdrawal) fulfillNextRequest() error {
+func (w *withdrawal) fulfillNextRequest() (err error) {
 	request := w.popRequest()
 	output := w.status.outputs[request.outBailmentID()]
 	// We start with an output status of success and let the methods that deal
@@ -555,7 +555,7 @@ func (w *withdrawal) fulfillNextRequest() error {
 
 // handleOversizeTx handles the case when a transaction has become too
 // big by either rolling back an output or splitting it.
-func (w *withdrawal) handleOversizeTx() error {
+func (w *withdrawal) handleOversizeTx() (err error) {
 	if len(w.current.outputs) > 1 {
 		Debug("rolling back last output because tx got too big")
 		inputs, output, err := w.current.rollBackLastOutput()
@@ -582,7 +582,7 @@ func (w *withdrawal) handleOversizeTx() error {
 // finalizeCurrentTx finalizes the transaction in w.current, moves it to the
 // list of finalized transactions and replaces w.current with a new empty
 // transaction.
-func (w *withdrawal) finalizeCurrentTx() error {
+func (w *withdrawal) finalizeCurrentTx() (err error) {
 	Debug("finalizing current transaction")
 	tx := w.current
 	if len(tx.outputs) == 0 {
@@ -653,7 +653,7 @@ func (w *withdrawal) maybeDropRequests() {
 		w.status.outputs[request.outBailmentID()].status = statusPartial
 	}
 }
-func (w *withdrawal) fulfillRequests() error {
+func (w *withdrawal) fulfillRequests() (err error) {
 	w.maybeDropRequests()
 	if len(w.pendingRequests) == 0 {
 		return nil
@@ -695,7 +695,7 @@ func (w *withdrawal) fulfillRequests() error {
 	}
 	return nil
 }
-func (w *withdrawal) splitLastOutput() error {
+func (w *withdrawal) splitLastOutput() (err error) {
 	if len(w.current.outputs) == 0 {
 		return newError(ErrPreconditionNotMet,
 			"splitLastOutput requires current tx to have at least 1 output", nil)
@@ -785,7 +785,7 @@ func (wi *withdrawalInfo) match(requests []OutputRequest, startAddress Withdrawa
 // address manager unlocked.
 func getWithdrawalStatus(p *Pool, ns, addrmgrNs walletdb.ReadBucket, roundID uint32, requests []OutputRequest,
 	startAddress WithdrawalAddress, lastSeriesID uint32, changeStart ChangeAddress,
-	dustThreshold util.Amount) (*WithdrawalStatus, error) {
+	dustThreshold util.Amount) (*WithdrawalStatus, err error) {
 	serialized := getWithdrawal(ns, p.ID, roundID)
 	if bytes.Equal(serialized, []byte{}) {
 		return nil, nil
@@ -804,7 +804,7 @@ func getWithdrawalStatus(p *Pool, ns, addrmgrNs walletdb.ReadBucket, roundID uin
 // getRawSigs iterates over the inputs of each transaction given, constructing the
 // raw signatures for them using the private keys available to us.
 // It returns a map of ntxids to signature lists.
-func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
+func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, err error) {
 	sigs := make(map[Ntxid]TxSigs)
 	for _, tx := range transactions {
 		txSigs := make(TxSigs, len(tx.inputs))
@@ -871,7 +871,7 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 // manager) the redeem script for each of them and constructing the signature
 // script using that and the given raw signatures.
 // This function must be called with the manager unlocked.
-func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, store *wtxmgr.Store, txmgrNs walletdb.ReadBucket) error {
+func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, store *wtxmgr.Store, txmgrNs walletdb.ReadBucket) (err error) {
 	// We use time.Now() here as we're not going to store the new TxRecord
 	// anywhere -- we just need it to pass to store.PreviousPkScripts().
 	rec, err := wtxmgr.NewTxRecordFromMsgTx(msgtx, time.Now())
@@ -894,7 +894,7 @@ func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs wal
 
 // getRedeemScript returns the redeem script for the given P2SH address. It must
 // be called with the manager unlocked.
-func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr *util.AddressScriptHash) ([]byte, error) {
+func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr *util.AddressScriptHash) ([]byte, err error) {
 	address, err := mgr.Address(addrmgrNs, addr)
 	if err != nil {
 		Error(err)
@@ -910,7 +910,7 @@ func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr 
 // The order of the signatures must match that of the public keys in the multi-sig
 // script as OP_CHECKMULTISIG expects that.
 // This function must be called with the manager unlocked.
-func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, idx int, pkScript []byte, sigs []RawSig) error {
+func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, idx int, pkScript []byte, sigs []RawSig) (err error) {
 	class, addresses, _, err := txscript.ExtractPkScriptAddrs(pkScript, mgr.ChainParams())
 	if err != nil {
 		Error(err)
@@ -959,7 +959,7 @@ func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *
 
 // validateSigScripts executes the signature script of the tx input with the
 // given index, returning an error if it fails.
-func validateSigScript(msgtx *wire.MsgTx, idx int, pkScript []byte) error {
+func validateSigScript(msgtx *wire.MsgTx, idx int, pkScript []byte) (err error) {
 	vm, err := txscript.NewEngine(pkScript, msgtx, idx,
 		txscript.StandardVerifyFlags, nil, nil, 0)
 	if err != nil {
@@ -1001,7 +1001,7 @@ func calculateTxSize(tx *withdrawalTx) int {
 	}
 	return msgtx.SerializeSize()
 }
-func nextChangeAddress(a ChangeAddress) (ChangeAddress, error) {
+func nextChangeAddress(a ChangeAddress) (ChangeAddress, err error) {
 	index := a.index
 	seriesID := a.seriesID
 	if index == math.MaxUint32 {
@@ -1013,7 +1013,7 @@ func nextChangeAddress(a ChangeAddress) (ChangeAddress, error) {
 	addr, err := a.pool.ChangeAddress(seriesID, index)
 	return *addr, err
 }
-func storeTransactions(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket, transactions []*changeAwareTx) error {
+func storeTransactions(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket, transactions []*changeAwareTx) (err error) {
 	for _, tx := range transactions {
 		if err := tx.addSelfToStore(store, txmgrNs); err != nil {
 			return err

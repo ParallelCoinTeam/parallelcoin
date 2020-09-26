@@ -18,7 +18,7 @@ var (
 )
 
 // loadBlockDB opens the block database and returns a handle to it.
-func loadBlockDB() (database.DB, error) {
+func loadBlockDB() (database.DB, err error) {
 	// The database name is based on the database type.
 	dbName := blockDbNamePrefix + "_" + cfg.DbType
 	dbPath := filepath.Join(cfg.DataDir, dbName)
@@ -37,7 +37,7 @@ func loadBlockDB() (database.DB, error) {
 // that is already hard coded into btcchain since there is no point in
 // finding candidates before already existing checkpoints.
 func findCandidates(
-	chain *blockchain.BlockChain, latestHash *chainhash.Hash) ([]*chaincfg.Checkpoint, error) {
+	chain *blockchain.BlockChain, latestHash *chainhash.Hash) ([]*chaincfg.Checkpoint, err error) {
 	// Start with the latest block of the main chain.
 	block, err := chain.BlockByHash(latestHash)
 	if err != nil {

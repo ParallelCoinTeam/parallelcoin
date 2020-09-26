@@ -11,8 +11,8 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
+func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) (err error) {
+	return func(c *cli.Context) (err error) {
 		// cfg := w.PodConfig
 		var (
 			err error
@@ -36,7 +36,7 @@ func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) error {
 		// }
 		// defer db.Close()
 		slog.Debug("dropping wtxmgr namespace")
-		err = walletdb.Update(w.Database(), func(tx walletdb.ReadWriteTx) error {
+		err = walletdb.Update(w.Database(), func(tx walletdb.ReadWriteTx) (err error) {
 			slog.Debug("deleting top level bucket")
 			if err := tx.DeleteTopLevelBucket(wtxmgrNamespace); slog.Check(err) {
 			}

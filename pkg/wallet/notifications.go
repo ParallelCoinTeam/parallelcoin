@@ -599,7 +599,7 @@ func relevantAccounts(w *Wallet, m map[uint32]util.Amount, txs []TransactionSumm
 		}
 	}
 }
-func totalBalances(dbtx walletdb.ReadTx, w *Wallet, m map[uint32]util.Amount) error {
+func totalBalances(dbtx walletdb.ReadTx, w *Wallet, m map[uint32]util.Amount) (err error) {
 	addrmgrNs := dbtx.ReadBucket(waddrmgrNamespaceKey)
 	unspent, err := w.TxStore.UnspentOutputs(dbtx.ReadBucket(wtxmgrNamespaceKey))
 	if err != nil {

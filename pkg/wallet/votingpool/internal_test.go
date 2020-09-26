@@ -12,14 +12,14 @@ var TstLastErr = lastErr
 // const TstEligibleInputMinConfirmations = eligibleInputMinConfirmations
 
 // TstPutSeries transparently wraps the voting pool putSeries method.
-func (p *Pool) TstPutSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs uint32, inRawPubKeys []string) error {
+func (p *Pool) TstPutSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs uint32, inRawPubKeys []string) (err error) {
 	return p.putSeries(ns, version, seriesID, reqSigs, inRawPubKeys)
 }
 
 var TstBranchOrder = branchOrder
 
 // TstExistsSeries checks whether a series is stored in the database.
-func (p *Pool) TstExistsSeries(dbtx walletdb.ReadTx, seriesID uint32) (bool, error) {
+func (p *Pool) TstExistsSeries(dbtx walletdb.ReadTx, seriesID uint32) (bool, err error) {
 	ns, _ := TstRNamespaces(dbtx)
 	poolBucket := ns.NestedReadBucket(p.ID)
 	if poolBucket == nil {
@@ -63,7 +63,7 @@ func (p *Pool) TstEmptySeriesLookup() {
 }
 
 // TstDecryptExtendedKey expose the decryptExtendedKey method.
-func (p *Pool) TstDecryptExtendedKey(keyType waddrmgr.CryptoKeyType, encrypted []byte) (*hdkeychain.ExtendedKey, error) {
+func (p *Pool) TstDecryptExtendedKey(keyType waddrmgr.CryptoKeyType, encrypted []byte) (*hdkeychain.ExtendedKey, err error) {
 	return p.decryptExtendedKey(keyType, encrypted)
 }
 

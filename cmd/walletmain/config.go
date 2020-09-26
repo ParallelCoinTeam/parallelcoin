@@ -123,7 +123,7 @@ homeDir = "."
 // For this it tries to read the config file for the RPC server (either pod or
 // sac), and extract the RPC user and password from it.
 func createDefaultConfigFile(destinationPath, serverConfigPath,
-	serverDataDir, walletDataDir string) error {
+	serverDataDir, walletDataDir string) (err error) {
 // fmt.Println("server config path", serverConfigPath)
 	// Read the RPC server config
 	serverConfigFile, err := os.Open(serverConfigPath)
@@ -188,7 +188,7 @@ Currently there is no adequate tool for this, but will be soon.")
 	dest.WriteString(output)
 	return nil
 }
-func copy(src, dst string) (int64, error) {
+func copy(src, dst string) (int64, err error) {
 // fmt.Println(src, dst)
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
@@ -225,7 +225,7 @@ subsystems = append(subsystems, subsysID)
 // parseAndSetDebugLevels attempts to parse the specified debug level and set
 // the levels accordingly.  An appropriate error is returned if anything is
 // invalid.
-func parseAndSetDebugLevels(debugLevel string) error {
+func parseAndSetDebugLevels(debugLevel string) (err error) {
 // When the specified string doesn't have any delimters, treat it as
 	// the log level for all subsystems.
 	if !strings.Contains(debugLevel, ",") && !strings.Contains(debugLevel, "=") {
@@ -276,7 +276,7 @@ str := "The specified debug level [%v] is invalid"
 // The above results in btcwallet functioning properly without any config
 // settings while still allowing the user to override settings with config files
 // and command line options.  Command line options always take precedence.
-func loadConfig(	cfg *Config) (*Config, []string, error) {
+func loadConfig(	cfg *Config) (*Config, []string, err error) {
 cfg = Config{
 				ConfigFile:             DefaultConfigFile,
 				AppDataDir:             DefaultAppDataDir,

@@ -3,6 +3,7 @@
 package gelook
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"image"
 	"image/color"
 	"image/draw"
@@ -14,7 +15,7 @@ import (
 	"golang.org/x/exp/shiny/iconvg"
 )
 
-type DuoUIicon struct {
+type DuoUIIcon struct {
 	Color color.RGBA
 	src   []byte
 	size  unit.Value
@@ -24,16 +25,16 @@ type DuoUIicon struct {
 	imgColor color.RGBA
 }
 
-// NewDuoUIicon returns a new DuoUIicon from DuoUIiconVG data.
-func NewDuoUIicon(data []byte) (*DuoUIicon, error) {
+// NewDuoUIIcon returns a new DuoUIIcon from DuoUIIconVG data.
+func NewDuoUIIcon(data []byte) (*DuoUIIcon, err error) {
 	_, err := iconvg.DecodeMetadata(data)
 	if err != nil {
 		return nil, err
 	}
-	return &DuoUIicon{src: data, Color: rgb(0x000000)}, nil
+	return &DuoUIIcon{src: data, Color: rgb(0x000000)}, nil
 }
 
-func (ic *DuoUIicon) Layout(gtx *layout.Context, sz unit.Value) {
+func (ic *DuoUIIcon) Layout(gtx *layout.Context, sz unit.Value) {
 	ico := ic.image(gtx.Px(sz))
 	ico.Add(gtx.Ops)
 	paint.PaintOp{
@@ -43,7 +44,7 @@ func (ic *DuoUIicon) Layout(gtx *layout.Context, sz unit.Value) {
 	}.Add(gtx.Ops)
 }
 
-func (ic *DuoUIicon) image(sz int) paint.ImageOp {
+func (ic *DuoUIIcon) image(sz int) paint.ImageOp {
 	if sz == ic.imgSize && ic.Color == ic.imgColor {
 		return ic.op
 	}
@@ -54,9 +55,8 @@ func (ic *DuoUIicon) image(sz int) paint.ImageOp {
 	var ico iconvg.Rasterizer
 	ico.SetDstImage(img, img.Bounds(), draw.Src)
 	m.Palette[0] = ic.Color
-	iconvg.Decode(&ico, ic.src, &iconvg.DecodeOptions{
-		Palette: &m.Palette,
-	})
+	if err := iconvg.Decode(&ico, ic.src, &iconvg.DecodeOptions{Palette: &m.Palette}); slog.Check(err) {
+	}
 	ic.op = paint.NewImageOp(img)
 	ic.imgSize = sz
 	ic.imgColor = ic.Color

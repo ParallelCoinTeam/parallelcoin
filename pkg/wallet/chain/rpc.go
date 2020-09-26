@@ -41,7 +41,7 @@ type RPCClient struct {
 // operate on the same bitcoin network as described by the passed chain
 // parameters, the connection will be disconnected.
 func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
-	certs []byte, disableTLS bool, reconnectAttempts int) (*RPCClient, error) {
+	certs []byte, disableTLS bool, reconnectAttempts int) (*RPCClient, err error) {
 	slog.Warn("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
@@ -94,7 +94,7 @@ func (c *RPCClient) BackEnd() string {
 // sent by the server.  After a limited number of connection attempts, this
 // function gives up, and therefore will not block forever waiting for the
 // connection to be established to a server that may not exist.
-func (c *RPCClient) Start() error {
+func (c *RPCClient) Start() (err error) {
 	// Debug(c.connConfig)
 	err := c.Connect(c.reconnectAttempts)
 	if err != nil {
@@ -141,7 +141,7 @@ func (c *RPCClient) Stop() {
 // This is useful when using BIP 158 filters as they include the prev pkScript
 // rather than the full outpoint.
 func (c *RPCClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
-	outPoints map[wire.OutPoint]util.Address) error {
+	outPoints map[wire.OutPoint]util.Address) (err error) {
 	flatOutpoints := make([]*wire.OutPoint, 0, len(outPoints))
 	for ops := range outPoints {
 		flatOutpoints = append(flatOutpoints, &ops)
@@ -166,7 +166,7 @@ func (c *RPCClient) Notifications() <-chan interface{} {
 
 // BlockStamp returns the latest block notified by the client, or an error
 // if the client has been shut down.
-func (c *RPCClient) BlockStamp() (*wm.BlockStamp, error) {
+func (c *RPCClient) BlockStamp() (*wm.BlockStamp, err error) {
 	select {
 	case bs := <-c.currentBlock:
 		return bs, nil
@@ -183,7 +183,7 @@ func (c *RPCClient) BlockStamp() (*wm.BlockStamp, error) {
 // block containing a matching address. If no matches are found in the range of
 // blocks requested, the returned response will be nil.
 func (c *RPCClient) FilterBlocks(
-	req *FilterBlocksRequest) (*FilterBlocksResponse, error) {
+	req *FilterBlocksRequest) (*FilterBlocksResponse, err error) {
 	blockFilterer := NewBlockFilterer(c.chainParams, req)
 	// Construct the watchlist using the addresses and outpoints contained
 	// in the filter blocks request.
@@ -259,7 +259,7 @@ func (c *RPCClient) FilterBlocks(
 // parseBlock parses a btcws definition of the block a tx is mined it to the
 // Block structure of the tm package, and the block index.  This is done
 // here since rpcclient doesn't parse this nicely for us.
-func parseBlock(block *btcjson.BlockDetails) (*tm.BlockMeta, error) {
+func parseBlock(block *btcjson.BlockDetails) (*tm.BlockMeta, err error) {
 	if block == nil {
 		return nil, nil
 	}
@@ -420,7 +420,7 @@ out:
 }
 
 // POSTClient creates the equivalent HTTP POST rpcclient.Client.
-func (c *RPCClient) POSTClient() (*rpcclient.Client, error) {
+func (c *RPCClient) POSTClient() (*rpcclient.Client, err error) {
 	configCopy := *c.connConfig
 	configCopy.HTTPPostMode = true
 	return rpcclient.New(&configCopy, nil)

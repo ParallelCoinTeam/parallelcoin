@@ -3,6 +3,7 @@ package txscript
 import (
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"testing"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
@@ -20,12 +21,12 @@ type addressToKey struct {
 func mkGetKey(keys map[string]addressToKey) KeyDB {
 	if keys == nil {
 		return KeyClosure(func(addr util.Address) (*ec.PrivateKey,
-			bool, error) {
+			bool, err error) {
 			return nil, false, errors.New("nope")
 		})
 	}
 	return KeyClosure(func(addr util.Address) (*ec.PrivateKey,
-		bool, error) {
+		bool, err error) {
 		a2k, ok := keys[addr.EncodeAddress()]
 		if !ok {
 			return nil, false, errors.New("nope")
@@ -35,11 +36,11 @@ func mkGetKey(keys map[string]addressToKey) KeyDB {
 }
 func mkGetScript(scripts map[string][]byte) ScriptDB {
 	if scripts == nil {
-		return ScriptClosure(func(addr util.Address) ([]byte, error) {
+		return ScriptClosure(func(addr util.Address) ([]byte, err error) {
 			return nil, errors.New("nope")
 		})
 	}
-	return ScriptClosure(func(addr util.Address) ([]byte, error) {
+	return ScriptClosure(func(addr util.Address) ([]byte, err error) {
 		script, ok := scripts[addr.EncodeAddress()]
 		if !ok {
 			return nil, errors.New("nope")
@@ -47,7 +48,7 @@ func mkGetScript(scripts map[string][]byte) ScriptDB {
 		return script, nil
 	})
 }
-func checkScripts(msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScript, pkScript []byte) error {
+func checkScripts(msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScript, pkScript []byte) (err error) {
 	tx.TxIn[idx].SignatureScript = sigScript
 	vm, err := NewEngine(pkScript, tx, idx,
 		ScriptBip16|ScriptVerifyDERSignatures, nil, nil, inputAmt)
@@ -62,16 +63,18 @@ func checkScripts(msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScript
 	}
 	return nil
 }
+
 func signAndCheck(msg string, tx *wire.MsgTx, idx int, inputAmt int64, pkScript []byte,
 	hashType SigHashType, kdb KeyDB, sdb ScriptDB,
-	previousScript []byte) error {
-	sigScript, err := SignTxOutput(&netparams.TestNet3Params, tx, idx,
-		pkScript, hashType, kdb, sdb, nil)
-	if err != nil {
+	previousScript []byte) (err error) {
+	var sigScript []byte
+	if sigScript, err = SignTxOutput(&netparams.TestNet3Params, tx, idx,
+		pkScript, hashType, kdb, sdb, nil); slog.Check(err) {
 		return fmt.Errorf("failed to sign output %s: %v", msg, err)
 	}
 	return checkScripts(msg, tx, idx, inputAmt, sigScript, pkScript)
 }
+
 func TestSignTxOutput(t *testing.T) {
 	t.Parallel()
 	// make key

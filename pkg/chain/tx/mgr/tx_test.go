@@ -43,7 +43,7 @@ var (
 	}
 )
 
-func testDB() (walletdb.DB, func(), error) {
+func testDB() (walletdb.DB, func(), err error) {
 	tmpDir, err := ioutil.TempDir("", "wtxmgr_test")
 	if err != nil {
 		return nil, func() {
@@ -57,7 +57,7 @@ func testDB() (walletdb.DB, func(), error) {
 
 var namespaceKey = []byte("txstore")
 
-func testStore() (*Store, walletdb.DB, func(), error) {
+func testStore() (*Store, walletdb.DB, func(), err error) {
 	tmpDir, err := ioutil.TempDir("", "wtxmgr_test")
 	if err != nil {
 		return nil, nil, func() {
@@ -73,7 +73,7 @@ func testStore() (*Store, walletdb.DB, func(), error) {
 		os.RemoveAll(tmpDir)
 	}
 	var s *Store
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		ns, err := tx.CreateTopLevelBucket(namespaceKey)
 		if err != nil {
 			return err
@@ -128,7 +128,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 	}{
 		{
 			name: "new store",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				return s, nil
 			},
 			bal:      0,
@@ -138,7 +138,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "txout insert",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstRecvSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -164,7 +164,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "insert duplicate unconfirmed",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstRecvSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -190,7 +190,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "confirmed txout insert",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstRecvSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -214,7 +214,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "insert duplicate confirmed",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstRecvSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -238,7 +238,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "rollback confirmed credit",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				err := s.Rollback(ns, TstRecvTxBlockDetails.Height)
 				return s, err
 			},
@@ -256,7 +256,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "insert confirmed double spend",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstDoubleSpendSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -280,7 +280,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "insert unconfirmed debit",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstSpendingSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -297,7 +297,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "insert unconfirmed debit again",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstDoubleSpendSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -314,7 +314,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "insert change (index 0)",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstSpendingSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -340,7 +340,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "insert output back to this own wallet (index 1)",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstSpendingSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -370,7 +370,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "confirm signed tx",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstSpendingSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -394,7 +394,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "rollback after spending tx",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				err := s.Rollback(ns, TstSignedTxBlockDetails.Height+1)
 				return s, err
 			},
@@ -414,7 +414,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "rollback spending tx block",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				err := s.Rollback(ns, TstSignedTxBlockDetails.Height)
 				return s, err
 			},
@@ -436,7 +436,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "rollback double spend tx block",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				err := s.Rollback(ns, TstRecvTxBlockDetails.Height)
 				return s, err
 			},
@@ -453,7 +453,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 		},
 		{
 			name: "insert original recv txout",
-			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, error) {
+			f: func(s *Store, ns walletdb.ReadWriteBucket) (*Store, err error) {
 				rec, err := NewTxRecord(TstRecvSerializedTx, time.Now())
 				if err != nil {
 					return nil, err
@@ -479,7 +479,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 	}
 	defer teardown()
 	for _, test := range tests {
-		err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+		err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 			ns := tx.ReadWriteBucket(namespaceKey)
 			tmpStore, err := test.f(s, ns)
 			if err != nil {

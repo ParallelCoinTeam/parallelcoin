@@ -62,7 +62,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 // modifying an object held by the caller.
 (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 	onDisconnect chan<- wire.BlockHeader,
-	quit <-chan struct{}) (*blockSubscription, error) {
+	quit <-chan struct{}) (*blockSubscription, err error) {
 	subscription := blockSubscription{
 		onConnectBasic: onConnectBasic,
 		onDisconnect:   onDisconnect,
@@ -73,7 +73,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 	// At this point, we'll now check to see if we need to deliver any
 	// backlog notifications as its possible that while the caller is
 	// requesting right after a new set of blocks has been connected.
-	err := s.blockManager.SynchronizeFilterHeaders(func(filterHeaderTip uint32) error {
+	err := s.blockManager.SynchronizeFilterHeaders(func(filterHeaderTip uint32) (err error) {
 		s.mtxSubscribers.Lock()
 		defer s.mtxSubscribers.Unlock()
 		s.blockSubscribers[&subscription] = struct{}{}

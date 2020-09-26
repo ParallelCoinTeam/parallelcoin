@@ -8,7 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/coding/gcs"
 )
 
-func genRandFilterElements(numElements uint) ([][]byte, error) {
+func genRandFilterElements(numElements uint) ([][]byte, err error) {
 	testContents := make([][]byte, numElements)
 	for i := range contents {
 		randElem := make([]byte, 32)

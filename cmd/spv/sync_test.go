@@ -180,7 +180,7 @@ type secSource struct {
 	params  *netparams.Params
 }
 
-func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, error) {
+func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, err error) {
 	pubKeyHash := util.Hash160(privKey.PubKey().SerializeCompressed())
 	addr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, s.params)
 	if err != nil {
@@ -214,7 +214,7 @@ func (s *secSource) GetKey(addr util.Address) (*ec.PrivateKey, bool,
 }
 
 // GetScript is required by the txscript.ScriptDB interface
-func (s *secSource) GetScript(addr util.Address) ([]byte, error) {
+func (s *secSource) GetScript(addr util.Address) ([]byte, err error) {
 	script, ok := s.scripts[addr.String()]
 	if !ok {
 		return nil, fmt.Errorf("No script for address %s", addr)
@@ -496,7 +496,7 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 		// Fee rate is satoshis per kilobyte
 		1024000,
 		inSrc(*tx1),
-		func() ([]byte, error) {
+		func() ([]byte, err error) {
 			return script3, nil
 		},
 	)
@@ -536,7 +536,7 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 		// Fee rate is satoshis per kilobyte
 		1024000,
 		inSrc(*tx2),
-		func() ([]byte, error) {
+		func() ([]byte, err error) {
 			return script3, nil
 		},
 	)
@@ -621,7 +621,7 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 	}
 }
 
-func fetchPrevInputScripts(block *wire.MsgBlock, client *rpctest.Harness) ([][]byte, error) {
+func fetchPrevInputScripts(block *wire.MsgBlock, client *rpctest.Harness) ([][]byte, err error) {
 	var inputScripts [][]byte
 	for i, tx := range block.Transactions {
 		if i == 0 {
@@ -1082,7 +1082,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // csd does a connect-sync-disconnect between nodes in order to support
 // reorg testing. It brings up and tears down a temporary node, otherwise the
 // nodes try to reconnect to each other which results in unintended reorgs.
-func csd(harnesses []*rpctest.Harness) error {
+func csd(harnesses []*rpctest.Harness) (err error) {
 	hTemp, err := rpctest.New(&netparams.SimNetParams, nil, nil)
 	if err != nil {
 		return err
@@ -1115,7 +1115,7 @@ func checkErrChan(t *testing.T, errChan <-chan error) {
 
 // waitForSync waits for the ChainService to sync to the current chain state.
 func waitForSync(t *testing.T, svc *spv.ChainService,
-	correctSyncNode *rpctest.Harness) error {
+	correctSyncNode *rpctest.Harness) (err error) {
 	knownBestHash, knownBestHeight, err :=
 		correctSyncNode.Node.GetBestBlock()
 	if err != nil {
@@ -1376,7 +1376,7 @@ func startRescan(t *testing.T, svc *spv.ChainService, addr util.Address,
 
 // checkRescanStatus returns the number of relevant transactions we currently
 // know about and the currently known height.
-func checkRescanStatus() (int, int32, error) {
+func checkRescanStatus() (int, int32, err error) {
 	var txCount [2]int
 	rescanMtx.RLock()
 	defer rescanMtx.RUnlock()

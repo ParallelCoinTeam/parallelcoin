@@ -9,15 +9,15 @@ import (
 	"gioui.org/widget"
 )
 
-type DuoUIradioButton struct {
+type DuoUIRadioButton struct {
 	checkable
 	Key string
 }
 
 // RadioButton returns a RadioButton with a label. The key specifies
 // the value for the Enum.
-func (t *DuoUItheme) DuoUIradioButton(key, label string) DuoUIradioButton {
-	return DuoUIradioButton{
+func (t *DuoUITheme) DuoUIRadioButton(key, label string) DuoUIradioButton {
+	return DuoUIRadioButton{
 		checkable: checkable{
 			Label: label,
 
@@ -35,7 +35,7 @@ func (t *DuoUItheme) DuoUIradioButton(key, label string) DuoUIradioButton {
 	}
 }
 
-func (r DuoUIradioButton) Layout(gtx *layout.Context, enum *widget.Enum) {
+func (r DuoUIRadioButton) Layout(gtx *layout.Context, enum *widget.Enum) {
 	r.layout(gtx, enum.Value(gtx) == r.Key)
 	enum.Layout(gtx, r.Key)
 }

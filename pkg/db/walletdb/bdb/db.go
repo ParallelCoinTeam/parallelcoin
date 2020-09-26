@@ -11,36 +11,36 @@ import (
 )
 
 // convertErr converts some bolt errors to the equivalent walletdb error.
-func convertErr(err error) error {
-	switch err {
+func convertErr(er error) (err error) {
+	switch er {
 	// Database open/create errors.
 	case bolt.ErrDatabaseNotOpen:
-		return walletdb.ErrDbNotOpen
+		err = walletdb.ErrDbNotOpen
 	case bolt.ErrInvalid:
-		return walletdb.ErrInvalid
+		err = walletdb.ErrInvalid
 	// Transaction errors.
 	case bolt.ErrTxNotWritable:
-		return walletdb.ErrTxNotWritable
+		err = walletdb.ErrTxNotWritable
 	case bolt.ErrTxClosed:
-		return walletdb.ErrTxClosed
+		err = walletdb.ErrTxClosed
 	// Value/bucket errors.
 	case bolt.ErrBucketNotFound:
-		return walletdb.ErrBucketNotFound
+		err = walletdb.ErrBucketNotFound
 	case bolt.ErrBucketExists:
-		return walletdb.ErrBucketExists
+		err = walletdb.ErrBucketExists
 	case bolt.ErrBucketNameRequired:
-		return walletdb.ErrBucketNameRequired
+		err = walletdb.ErrBucketNameRequired
 	case bolt.ErrKeyRequired:
-		return walletdb.ErrKeyRequired
+		err = walletdb.ErrKeyRequired
 	case bolt.ErrKeyTooLarge:
-		return walletdb.ErrKeyTooLarge
+		err = walletdb.ErrKeyTooLarge
 	case bolt.ErrValueTooLarge:
-		return walletdb.ErrValueTooLarge
+		err = walletdb.ErrValueTooLarge
 	case bolt.ErrIncompatibleValue:
-		return walletdb.ErrIncompatibleValue
+		err = walletdb.ErrIncompatibleValue
 	}
 	// Return the original error if none of the above applies.
-	return err
+	return
 }
 
 // transaction represents a database transaction.  It can either by read-only or
@@ -60,7 +60,7 @@ func (tx *transaction) ReadWriteBucket(key []byte) walletdb.ReadWriteBucket {
 	}
 	return (*bucket)(boltBucket)
 }
-func (tx *transaction) CreateTopLevelBucket(key []byte) (walletdb.ReadWriteBucket, error) {
+func (tx *transaction) CreateTopLevelBucket(key []byte) (walletdb.ReadWriteBucket, err error) {
 	boltBucket, err := tx.boltTx.CreateBucket(key)
 	if err != nil {
 		slog.Error(err)
@@ -68,20 +68,18 @@ func (tx *transaction) CreateTopLevelBucket(key []byte) (walletdb.ReadWriteBucke
 	}
 	return (*bucket)(boltBucket), nil
 }
-func (tx *transaction) DeleteTopLevelBucket(key []byte) error {
-	err := tx.boltTx.DeleteBucket(key)
-	if err != nil {
-		slog.Error(err)
-		return convertErr(err)
+func (tx *transaction) DeleteTopLevelBucket(key []byte) (err error) {
+	if err = tx.boltTx.DeleteBucket(key); slog.Check(err) {
+		err = convertErr(err)
 	}
-	return nil
+	return
 }
 
 // Commit commits all changes that have been made through the root bucket and
 // all of its sub-buckets to persistent storage.
 //
 // This function is part of the walletdb.Tx interface implementation.
-func (tx *transaction) Commit() error {
+func (tx *transaction) Commit() (err error) {
 	return convertErr(tx.boltTx.Commit())
 }
 
@@ -89,7 +87,7 @@ func (tx *transaction) Commit() error {
 // its sub-buckets.
 //
 // This function is part of the walletdb.Tx interface implementation.
-func (tx *transaction) Rollback() error {
+func (tx *transaction) Rollback() (err error) {
 	return convertErr(tx.boltTx.Rollback())
 }
 
@@ -122,7 +120,7 @@ func (b *bucket) NestedReadBucket(key []byte) walletdb.ReadBucket {
 // invalid.
 //
 // This function is part of the walletdb.Bucket interface implementation.
-func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, error) {
+func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, err error) {
 	boltBucket, err := (*bolt.Bucket)(b).CreateBucket(key)
 	if err != nil {
 		slog.Error(err)
@@ -136,7 +134,7 @@ func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, error) {
 // key is empty or ErrIncompatibleValue if the key value is otherwise invalid.
 //
 // This function is part of the walletdb.Bucket interface implementation.
-func (b *bucket) CreateBucketIfNotExists(key []byte) (walletdb.ReadWriteBucket, error) {
+func (b *bucket) CreateBucketIfNotExists(key []byte) (walletdb.ReadWriteBucket, err error) {
 	boltBucket, err := (*bolt.Bucket)(b).CreateBucketIfNotExists(key)
 	if err != nil {
 		slog.Error(err)
@@ -150,7 +148,7 @@ func (b *bucket) CreateBucketIfNotExists(key []byte) (walletdb.ReadWriteBucket, 
 // ErrBucketNotFound if the specified bucket does not exist.
 //
 // This function is part of the walletdb.Bucket interface implementation.
-func (b *bucket) DeleteNestedBucket(key []byte) error {
+func (b *bucket) DeleteNestedBucket(key []byte) (err error) {
 	return convertErr((*bolt.Bucket)(b).DeleteBucket(key))
 }
 
@@ -163,7 +161,7 @@ func (b *bucket) DeleteNestedBucket(key []byte) error {
 // likely result in an access violation.
 //
 // This function is part of the walletdb.Bucket interface implementation.
-func (b *bucket) ForEach(fn func(k, v []byte) error) error {
+func (b *bucket) ForEach(fn func(k, v []byte) error) (err error) {
 	return convertErr((*bolt.Bucket)(b).ForEach(fn))
 }
 
@@ -172,7 +170,7 @@ func (b *bucket) ForEach(fn func(k, v []byte) error) error {
 // ErrTxNotWritable if attempted against a read-only transaction.
 //
 // This function is part of the walletdb.Bucket interface implementation.
-func (b *bucket) Put(key, value []byte) error {
+func (b *bucket) Put(key, value []byte) (err error) {
 	return convertErr((*bolt.Bucket)(b).Put(key, value))
 }
 
@@ -193,7 +191,7 @@ func (b *bucket) Get(key []byte) []byte {
 // against a read-only transaction.
 //
 // This function is part of the walletdb.Bucket interface implementation.
-func (b *bucket) Delete(key []byte) error {
+func (b *bucket) Delete(key []byte) (err error) {
 	return convertErr((*bolt.Bucket)(b).Delete(key))
 }
 func (b *bucket) ReadCursor() walletdb.ReadCursor {
@@ -223,7 +221,7 @@ type cursor bolt.Cursor
 // nested bucket.
 //
 // This function is part of the walletdb.Cursor interface implementation.
-func (c *cursor) Delete() error {
+func (c *cursor) Delete() (err error) {
 	return convertErr((*bolt.Cursor)(c).Delete())
 }
 
@@ -271,7 +269,7 @@ type db bolt.DB
 // Enforce db implements the walletdb.Db interface.
 var _ walletdb.DB = (*db)(nil)
 
-func (db *db) beginTx(writable bool) (*transaction, error) {
+func (db *db) beginTx(writable bool) (*transaction, err error) {
 	boltTx, err := (*bolt.DB)(db).Begin(writable)
 	if err != nil {
 		slog.Error(err)
@@ -279,10 +277,10 @@ func (db *db) beginTx(writable bool) (*transaction, error) {
 	}
 	return &transaction{boltTx: boltTx}, nil
 }
-func (db *db) BeginReadTx() (walletdb.ReadTx, error) {
+func (db *db) BeginReadTx() (walletdb.ReadTx, err error) {
 	return db.beginTx(false)
 }
-func (db *db) BeginReadWriteTx() (walletdb.ReadWriteTx, error) {
+func (db *db) BeginReadWriteTx() (walletdb.ReadWriteTx, err error) {
 	return db.beginTx(true)
 }
 
@@ -290,8 +288,8 @@ func (db *db) BeginReadWriteTx() (walletdb.ReadWriteTx, error) {
 // start a read-only transaction to perform all operations.
 //
 // This function is part of the walletdb.Db interface implementation.
-func (db *db) Copy(w io.Writer) error {
-	return convertErr((*bolt.DB)(db).View(func(tx *bolt.Tx) error {
+func (db *db) Copy(w io.Writer) (err error) {
+	return convertErr((*bolt.DB)(db).View(func(tx *bolt.Tx) (err error) {
 		return tx.Copy(w)
 	}))
 }
@@ -299,7 +297,7 @@ func (db *db) Copy(w io.Writer) error {
 // Close cleanly shuts down the database and syncs all data.
 //
 // This function is part of the walletdb.Db interface implementation.
-func (db *db) Close() error {
+func (db *db) Close() (err error) {
 	return convertErr((*bolt.DB)(db).Close())
 }
 
@@ -315,7 +313,7 @@ func fileExists(name string) bool {
 
 // openDB opens the database at the provided path.  walletdb.ErrDbDoesNotExist
 // is returned if the database doesn't exist and the create flag is not set.
-func openDB(dbPath string, create bool) (walletdb.DB, error) {
+func openDB(dbPath string, create bool) (walletdb.DB, err error) {
 	if !create && !fileExists(dbPath) {
 		return nil, walletdb.ErrDbDoesNotExist
 	}

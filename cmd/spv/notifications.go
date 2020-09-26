@@ -199,7 +199,7 @@ func (s *ChainService) Peers() []*ServerPeer {
 // DisconnectNodeByAddr disconnects a peer by target address. Both outbound and
 // inbound nodes will be searched for the target node. An error message will
 // be returned if the peer was not found.
-func (s *ChainService) DisconnectNodeByAddr(addr string) error {
+func (s *ChainService) DisconnectNodeByAddr(addr string) (err error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- disconnectNodeMsg{
@@ -215,7 +215,7 @@ func (s *ChainService) DisconnectNodeByAddr(addr string) error {
 // DisconnectNodeByID disconnects a peer by target node id. Both outbound and
 // inbound nodes will be searched for the target node. An error message will be
 // returned if the peer was not found.
-func (s *ChainService) DisconnectNodeByID(id int32) error {
+func (s *ChainService) DisconnectNodeByID(id int32) (err error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- disconnectNodeMsg{
@@ -230,7 +230,7 @@ func (s *ChainService) DisconnectNodeByID(id int32) error {
 
 // RemoveNodeByAddr removes a peer from the list of persistent peers if
 // present. An error will be returned if the peer was not found.
-func (s *ChainService) RemoveNodeByAddr(addr string) error {
+func (s *ChainService) RemoveNodeByAddr(addr string) (err error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- removeNodeMsg{
@@ -245,7 +245,7 @@ func (s *ChainService) RemoveNodeByAddr(addr string) error {
 
 // RemoveNodeByID removes a peer by node ID from the list of persistent peers
 // if present. An error will be returned if the peer was not found.
-func (s *ChainService) RemoveNodeByID(id int32) error {
+func (s *ChainService) RemoveNodeByID(id int32) (err error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- removeNodeMsg{
@@ -261,7 +261,7 @@ func (s *ChainService) RemoveNodeByID(id int32) error {
 // ConnectNode adds `addr' as a new outbound peer. If permanent is true then the
 // peer will be persistent and reconnect if the connection is lost.
 // It is an error to call this with an already existing peer.
-func (s *ChainService) ConnectNode(addr string, permanent bool) error {
+func (s *ChainService) ConnectNode(addr string, permanent bool) (err error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- connectNodeMsg{

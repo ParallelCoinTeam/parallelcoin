@@ -16,7 +16,7 @@ import (
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
 
-func createTestDatabase() (func(), FilterDatabase, error) {
+func createTestDatabase() (func(), FilterDatabase, err error) {
 
 	tempDir, err := ioutil.TempDir("", "neutrino")
 
@@ -71,7 +71,7 @@ func TestGenesisFilterCreation(t *testing.T) {
 	}
 
 }
-func genRandFilter(numElements uint32) (*gcs.Filter, error) {
+func genRandFilter(numElements uint32) (*gcs.Filter, err error) {
 
 	elements := make([][]byte, numElements)
 

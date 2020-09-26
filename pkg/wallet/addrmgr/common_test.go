@@ -266,7 +266,7 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("createDbNamespace: unexpected error: %v", err)
 	}
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
 		ns, err := tx.CreateTopLevelBucket(waddrmgrNamespaceKey)
 		if err != nil {
 			return err

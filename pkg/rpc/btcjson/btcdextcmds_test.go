@@ -23,7 +23,7 @@ func TestPodExtCmds(t *testing.T) {
 	}{
 		{
 			name: "debuglevel",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("debuglevel", "trace")
 			},
 			staticCmd: func() interface{} {
@@ -36,7 +36,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "node",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("node", btcjson.NRemove, "1.1.1.1")
 			},
 			staticCmd: func() interface{} {
@@ -50,7 +50,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "node",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("node", btcjson.NDisconnect, "1.1.1.1")
 			},
 			staticCmd: func() interface{} {
@@ -64,7 +64,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "node",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("node", btcjson.NConnect, "1.1.1.1", "perm")
 			},
 			staticCmd: func() interface{} {
@@ -79,7 +79,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "node",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("node", btcjson.NConnect, "1.1.1.1", "temp")
 			},
 			staticCmd: func() interface{} {
@@ -94,7 +94,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "generate",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("generate", 1)
 			},
 			staticCmd: func() interface{} {
@@ -107,7 +107,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "getbestblock",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getbestblock")
 			},
 			staticCmd: func() interface{} {
@@ -118,7 +118,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "getcurrentnet",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getcurrentnet")
 			},
 			staticCmd: func() interface{} {
@@ -129,7 +129,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "getheaders",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getheaders", []string{}, "")
 			},
 			staticCmd: func() interface{} {
@@ -146,7 +146,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "getheaders - with arguments",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("getheaders", []string{"000000000000000001f1739002418e2f9a84c47a4fd2a0eb7a787a6b7dc12f16", "0000000000000000026f4b7f56eef057b32167eb5ad9ff62006f1807b7336d10"}, "000000000000000000ba33b33e1fad70b69e234fc24414dd47113bff38f523f7")
 			},
 			staticCmd: func() interface{} {
@@ -169,7 +169,7 @@ func TestPodExtCmds(t *testing.T) {
 		},
 		{
 			name: "version",
-			newCmd: func() (interface{}, error) {
+			newCmd: func() (interface{}, err error) {
 				return btcjson.NewCmd("version")
 			},
 			staticCmd: func() interface{} {

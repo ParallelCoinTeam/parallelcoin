@@ -43,7 +43,7 @@ func NewWebsocketClient(c *websocket.Conn, authenticated bool, remoteAddr string
 		quit:          make(chan struct{}),
 	}
 }
-func (c *WebsocketClient) Send(b []byte) error {
+func (c *WebsocketClient) Send(b []byte) (err error) {
 	select {
 	case c.responses <- b:
 		return nil
@@ -274,7 +274,7 @@ var ErrNoAuth = errors.New("no auth")
 // authentication was provided but incorrect.
 //
 // This check is time-constant.
-func (s *Server) CheckAuthHeader(r *http.Request) error {
+func (s *Server) CheckAuthHeader(r *http.Request) (err error) {
 	authHdr := r.Header["Authorization"]
 	if len(authHdr) == 0 {
 		return ErrNoAuth

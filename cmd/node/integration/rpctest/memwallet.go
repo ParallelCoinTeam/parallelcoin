@@ -98,7 +98,7 @@ type memWallet struct {
 
 // newMemWallet creates and returns a fully initialized instance of the
 // memWallet given a particular blockchain's parameters.
-func newMemWallet(net *netparams.Params, harnessID uint32) (*memWallet, error) {
+func newMemWallet(net *netparams.Params, harnessID uint32) (*memWallet, err error) {
 	// The wallet's final HD seed is: hdSeed || harnessID.
 	// This method ensures that each harness instance uses a deterministic
 	// root seed based on its harness ID.
@@ -313,7 +313,7 @@ func (m *memWallet) unwindBlock(update *chainUpdate) {
 // newAddress returns a new address from the wallet's hd key chain.
 // It also loads the address into the RPC client's transaction filter to
 // ensure any transactions that involve it are delivered via the notifications.
-func (m *memWallet) newAddress() (util.Address, error) {
+func (m *memWallet) newAddress() (util.Address, err error) {
 	index := m.hdIndex
 	childKey, err := m.hdRoot.Child(index)
 	if err != nil {
@@ -342,7 +342,7 @@ func (m *memWallet) newAddress() (util.Address, error) {
 
 // NewAddress returns a fresh address spendable by the wallet.
 // This function is safe for concurrent access.
-func (m *memWallet) NewAddress() (util.Address, error) {
+func (m *memWallet) NewAddress() (util.Address, err error) {
 	m.Lock()
 	defer m.Unlock()
 	return m.newAddress()

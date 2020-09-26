@@ -22,8 +22,8 @@ type checkable struct {
 	IconColor          color.RGBA
 	Size               unit.Value
 	shaper             text.Shaper
-	checkedStateIcon   *DuoUIicon
-	uncheckedStateIcon *DuoUIicon
+	checkedStateIcon   *DuoUIIcon
+	uncheckedStateIcon *DuoUIIcon
 	PillColor          string
 	PillColorChecked   string
 	CircleColor        string
@@ -32,15 +32,15 @@ type checkable struct {
 
 func (c *checkable) layout(gtx *layout.Context, checked bool) {
 
-	var icon *DuoUIicon
+	var icon *DuoUIIcon
 	if checked {
 		icon = c.checkedStateIcon
 	} else {
 		icon = c.uncheckedStateIcon
 	}
 
-	hmin := gtx.Constraints.Width.Min
-	vmin := gtx.Constraints.Height.Min
+	hMin := gtx.Constraints.Width.Min
+	vMin := gtx.Constraints.Height.Min
 	layout.Flex{Alignment: layout.Middle}.Layout(gtx,
 		layout.Rigid(func() {
 			layout.Center.Layout(gtx, func() {
@@ -56,8 +56,8 @@ func (c *checkable) layout(gtx *layout.Context, checked bool) {
 		}),
 
 		layout.Rigid(func() {
-			gtx.Constraints.Width.Min = hmin
-			gtx.Constraints.Height.Min = vmin
+			gtx.Constraints.Width.Min = hMin
+			gtx.Constraints.Height.Min = vMin
 			layout.W.Layout(gtx, func() {
 				layout.UniformInset(unit.Dp(2)).Layout(gtx, func() {
 					paint.ColorOp{Color: c.Color}.Add(gtx.Ops)
@@ -78,8 +78,8 @@ func (c *checkable) drawLayout(gtx *layout.Context, checked bool) {
 		pillColor = c.PillColorChecked
 		circleColor = c.CircleColorChecked
 	}
-	hmin := gtx.Constraints.Width.Min
-	vmin := gtx.Constraints.Height.Min
+	hMin := gtx.Constraints.Width.Min
+	vMin := gtx.Constraints.Height.Min
 	layout.Flex{Alignment: layout.Middle}.Layout(gtx,
 		layout.Rigid(func() {
 			layout.Center.Layout(gtx, func() {
@@ -87,12 +87,12 @@ func (c *checkable) drawLayout(gtx *layout.Context, checked bool) {
 					layout.Center.Layout(gtx, func() {
 						gtx.Constraints.Width.Min = 64
 						gtx.Constraints.Height.Min = 32
-						//DuoUIdrawRectangle(gtx, 64, 32, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+						//DuoUIDrawRectangle(gtx, 64, 32, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 						layout.Center.Layout(gtx, func() {
-							DuoUIdrawRectangle(gtx, 48, 16, pillColor, [4]float32{8, 8, 8, 8}, [4]float32{0, 0, 0, 0})
+							DuoUIDrawRectangle(gtx, 48, 16, pillColor, [4]float32{8, 8, 8, 8}, [4]float32{0, 0, 0, 0})
 						})
 						state.Layout(gtx, func() {
-							DuoUIdrawRectangle(gtx, 24, 24, circleColor, [4]float32{12, 12, 12, 12}, [4]float32{0, 0, 0, 0})
+							DuoUIDrawRectangle(gtx, 24, 24, circleColor, [4]float32{12, 12, 12, 12}, [4]float32{0, 0, 0, 0})
 						})
 						pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 					})
@@ -104,8 +104,8 @@ func (c *checkable) drawLayout(gtx *layout.Context, checked bool) {
 		}),
 
 		layout.Rigid(func() {
-			gtx.Constraints.Width.Min = hmin
-			gtx.Constraints.Height.Min = vmin
+			gtx.Constraints.Width.Min = hMin
+			gtx.Constraints.Height.Min = vMin
 			layout.E.Layout(gtx, func() {
 				layout.UniformInset(unit.Dp(2)).Layout(gtx, func() {
 					paint.ColorOp{Color: c.Color}.Add(gtx.Ops)

@@ -13,7 +13,7 @@ type State struct {
 	Gtx   *layout.Context
 	W     *app.Window
 	Rc    *rcd.RcVar
-	Theme *gelook.DuoUItheme
+	Theme *gelook.DuoUITheme
 }
 
 func (s *State) FlexV(children ...layout.FlexChild) {
@@ -58,7 +58,7 @@ func (s *State) Rectangle(width, height int, color string, radius ...float32) {
 	if len(radius) > 0 {
 		r = radius[0]
 	}
-	gelook.DuoUIdrawRectangle(s.Gtx,
+	gelook.DuoUIDrawRectangle(s.Gtx,
 		width, height, col,
 		[4]float32{r, r, r, r},
 		[4]float32{0, 0, 0, 0},
@@ -132,7 +132,7 @@ func (s *State) Label(txt, fg, bg string) {
 	cs := s.Gtx.Constraints
 	s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 	s.Inset(10, func() {
-		t := s.Theme.DuoUIlabel(unit.Dp(float32(36)), txt)
+		t := s.Theme.DuoUILabel(unit.Dp(float32(36)), txt)
 		t.Color = s.Theme.Colors[fg]
 		t.Font.Typeface = s.Theme.Fonts["Secondary"]
 		// t.TextSize = unit.Dp(32)
@@ -142,7 +142,7 @@ func (s *State) Label(txt, fg, bg string) {
 
 func (s *State) Text(txt, fg, bg, face, tag string) func() {
 	return func() {
-		var desc gelook.DuoUIlabel
+		var desc gelook.DuoUILabel
 		switch tag {
 		case "h1":
 			desc = s.Theme.H1(txt)

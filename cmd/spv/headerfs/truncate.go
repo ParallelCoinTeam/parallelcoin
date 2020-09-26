@@ -13,7 +13,7 @@ import (
 //
 // TODO(roasbeef): define this and the two methods above on a headerFile
 // struct?
-func (h *headerStore) singleTruncate() error {
+func (h *headerStore) singleTruncate() (err error) {
 
 	// In order to truncate the file, we'll need to grab the absolute size
 

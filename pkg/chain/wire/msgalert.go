@@ -109,35 +109,28 @@ type Alert struct {
 }
 
 // Serialize encodes the alert to w using the alert protocol encoding format.
-func (alert *Alert) Serialize(w io.Writer, pver uint32) error {
-	err := writeElements(w, alert.Version, alert.RelayUntil,
-		alert.Expiration, alert.ID, alert.Cancel)
-	if err != nil {
-		slog.Error(err)
-		return err
+func (alert *Alert) Serialize(w io.Writer, pver uint32) (err error) {
+	if err = writeElements(w, alert.Version, alert.RelayUntil, alert.Expiration, alert.ID,
+		alert.Cancel); slog.Check(err) {
+		return
 	}
 	count := len(alert.SetCancel)
 	if count > maxCountSetCancel {
-		str := fmt.Sprintf("too many cancel alert IDs for alert "+
-			"[count %v, max %v]", count, maxCountSetCancel)
-		return messageError("Alert.Serialize", str)
+		err = messageError("Alert.Serialize", fmt.Sprintf(
+			"too many cancel alert IDs for alert [count %v, max %v]", count, maxCountSetCancel))
+		slog.Debug(err)
+		return
 	}
-	err = WriteVarInt(w, pver, uint64(count))
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarInt(w, pver, uint64(count)); slog.Check(err) {
+		return
 	}
 	for i := 0; i < count; i++ {
-		err = writeElement(w, alert.SetCancel[i])
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = writeElement(w, alert.SetCancel[i]); slog.Check(err) {
+			return
 		}
 	}
-	err = writeElements(w, alert.MinVer, alert.MaxVer)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = writeElements(w, alert.MinVer, alert.MaxVer); slog.Check(err) {
+		return
 	}
 	count = len(alert.SetSubVer)
 	if count > maxCountSetSubVer {
@@ -145,102 +138,77 @@ func (alert *Alert) Serialize(w io.Writer, pver uint32) error {
 			"[count %v, max %v]", count, maxCountSetSubVer)
 		return messageError("Alert.Serialize", str)
 	}
-	err = WriteVarInt(w, pver, uint64(count))
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarInt(w, pver, uint64(count)); slog.Check(err) {
+		return
 	}
 	for i := 0; i < count; i++ {
-		err = WriteVarString(w, pver, alert.SetSubVer[i])
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = WriteVarString(w, pver, alert.SetSubVer[i]); slog.Check(err) {
+			return
 		}
 	}
-	err = writeElement(w, alert.Priority)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = writeElement(w, alert.Priority); slog.Check(err) {
+		return
 	}
-	err = WriteVarString(w, pver, alert.Comment)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarString(w, pver, alert.Comment); slog.Check(err) {
+		return
 	}
-	err = WriteVarString(w, pver, alert.StatusBar)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarString(w, pver, alert.StatusBar); slog.Check(err) {
+		return
 	}
 	return WriteVarString(w, pver, alert.Reserved)
 }
 
 // Deserialize decodes from r into the receiver using the alert protocol encoding format.
-func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
-	err := readElements(r, &alert.Version, &alert.RelayUntil,
-		&alert.Expiration, &alert.ID, &alert.Cancel)
-	if err != nil {
-		slog.Error(err)
-		return err
+func (alert *Alert) Deserialize(r io.Reader, pver uint32) (err error) {
+	if err = readElements(r, &alert.Version, &alert.RelayUntil, &alert.Expiration, &alert.ID,
+		&alert.Cancel); slog.Check(err) {
+		return
 	}
 	// SetCancel: first read a VarInt that contains count - the number of Cancel IDs, then
 	// iterate count times and read them
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		slog.Error(err)
-		return err
+	var count uint64
+	if count, err = ReadVarInt(r, pver); slog.Check(err) {
+		return
 	}
 	if count > maxCountSetCancel {
-		str := fmt.Sprintf("too many cancel alert IDs for alert "+
-			"[count %v, max %v]", count, maxCountSetCancel)
-		return messageError("Alert.Deserialize", str)
+		err = messageError("Alert.Deserialize", fmt.Sprintf(
+			"too many cancel alert IDs for alert [count %v, max %v]", count, maxCountSetCancel))
+		slog.Debug(err)
+		return
 	}
 	alert.SetCancel = make([]int32, count)
 	for i := 0; i < int(count); i++ {
-		err := readElement(r, &alert.SetCancel[i])
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = readElement(r, &alert.SetCancel[i]); slog.Check(err) {
+			return
 		}
 	}
-	err = readElements(r, &alert.MinVer, &alert.MaxVer)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = readElements(r, &alert.MinVer, &alert.MaxVer); slog.Check(err) {
+		return
 	}
 	// SetSubVer: similar to SetCancel but read count number of sub-version strings
-	count, err = ReadVarInt(r, pver)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if count, err = ReadVarInt(r, pver); slog.Check(err) {
+		return
 	}
 	if count > maxCountSetSubVer {
-		str := fmt.Sprintf("too many sub versions for alert "+
-			"[count %v, max %v]", count, maxCountSetSubVer)
-		return messageError("Alert.Deserialize", str)
+		err = messageError("Alert.Deserialize", fmt.Sprintf(
+			"too many sub versions for alert [count %v, max %v]", count, maxCountSetSubVer))
+		slog.Debug(err)
+		return
 	}
 	alert.SetSubVer = make([]string, count)
 	for i := 0; i < int(count); i++ {
-		alert.SetSubVer[i], err = ReadVarString(r, pver)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if alert.SetSubVer[i], err = ReadVarString(r, pver); slog.Check(err) {
+			return
 		}
 	}
-	err = readElement(r, &alert.Priority)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = readElement(r, &alert.Priority); slog.Check(err) {
+		return
 	}
-	alert.Comment, err = ReadVarString(r, pver)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if alert.Comment, err = ReadVarString(r, pver); slog.Check(err) {
+		return
 	}
-	alert.StatusBar, err = ReadVarString(r, pver)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if alert.StatusBar, err = ReadVarString(r, pver); slog.Check(err) {
+		return
 	}
 	alert.Reserved, err = ReadVarString(r, pver)
 	return err
@@ -269,15 +237,13 @@ func NewAlert(version int32, relayUntil int64, expiration int64,
 }
 
 // NewAlertFromPayload returns an Alert with values deserialized from the serialized payload.
-func NewAlertFromPayload(serializedPayload []byte, pver uint32) (*Alert, error) {
-	var alert Alert
+func NewAlertFromPayload(serializedPayload []byte, pver uint32) (alert *Alert, err error) {
+	alert = new(Alert)
 	r := bytes.NewReader(serializedPayload)
-	err := alert.Deserialize(r, pver)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = alert.Deserialize(r, pver); slog.Check(err) {
+		return
 	}
-	return &alert, nil
+	return
 }
 
 // MsgAlert  implements the Message interface and defines a bitcoin alert message. This is a signed message that provides notifications that the client should display if the signature matches the key.  bitcoind/bitcoin-qt only checks against a signature from the core developers.
@@ -291,34 +257,24 @@ type MsgAlert struct {
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation.
-func (msg *MsgAlert) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
-	var err error
-	msg.SerializedPayload, err = ReadVarBytes(r, pver, MaxMessagePayload,
-		"alert serialized payload")
-	if err != nil {
-		slog.Error(err)
-		return err
+func (msg *MsgAlert) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (err error) {
+	if msg.SerializedPayload, err = ReadVarBytes(r, pver, MaxMessagePayload, "alert serialized payload"); slog.Check(err) {
+		return
 	}
-	msg.Payload, err = NewAlertFromPayload(msg.SerializedPayload, pver)
-	if err != nil {
-		slog.Error(err)
+	if msg.Payload, err = NewAlertFromPayload(msg.SerializedPayload, pver); slog.Check(err) {
 		msg.Payload = nil
 	}
-	msg.Signature, err = ReadVarBytes(r, pver, MaxMessagePayload,
-		"alert signature")
-	return err
+	msg.Signature, err = ReadVarBytes(r, pver, MaxMessagePayload, "alert signature")
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface implementation.
-func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
-	var err error
+func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (err error) {
 	var serializedPayload []byte
 	if msg.Payload != nil {
 		// try to Serialize Payload if possible
 		r := new(bytes.Buffer)
-		err = msg.Payload.Serialize(r, pver)
-		if err != nil {
-			slog.Error(err)
+		if err = msg.Payload.Serialize(r, pver); slog.Check(err) {
 			// Serialize failed - ignore & fallback to SerializedPayload
 			serializedPayload = msg.SerializedPayload
 		} else {
@@ -327,16 +283,15 @@ func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) er
 	} else {
 		serializedPayload = msg.SerializedPayload
 	}
-	slen := uint64(len(serializedPayload))
-	if slen == 0 {
+	sLen := uint64(len(serializedPayload))
+	if sLen == 0 {
 		return messageError("MsgAlert.BtcEncode", "empty serialized payload")
 	}
-	err = WriteVarBytes(w, pver, serializedPayload)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = WriteVarBytes(w, pver, serializedPayload); slog.Check(err) {
+		return
 	}
-	return WriteVarBytes(w, pver, msg.Signature)
+	err = WriteVarBytes(w, pver, msg.Signature)
+	return
 }
 
 // Command returns the protocol command string for the message.  This is part of the Message interface implementation.

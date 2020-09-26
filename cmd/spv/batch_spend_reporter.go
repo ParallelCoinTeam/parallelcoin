@@ -35,7 +35,7 @@ type batchSpendReporter struct {
 // experience a critical rescan error. The error is threaded through to allow
 // the syntax:
 //     return reporter.FailRemaining(err)
-func (b *batchSpendReporter) FailRemaining(err error) error {
+func (b *batchSpendReporter) FailRemaining(err error) (err error) {
 	for outpoint, requests := range b.requests {
 		b.notifyRequests(&outpoint, requests, nil, err)
 	}

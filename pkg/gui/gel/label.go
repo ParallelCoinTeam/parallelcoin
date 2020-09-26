@@ -69,14 +69,14 @@ func (l *lineIterator) Next() (int, int, []text.Glyph, f32.Point, bool) {
 			start += utf8.RuneLen(g.Rune)
 		}
 		end := start
-		endx := off.X
+		endX := off.X
 		for i, g := range layOut {
-			if (endx + line.Bounds.Min.X).Floor() > l.Clip.Max.X {
+			if (endX + line.Bounds.Min.X).Floor() > l.Clip.Max.X {
 				layOut = layOut[:i]
 				break
 			}
 			end += utf8.RuneLen(g.Rune)
-			endx += g.Advance
+			endX += g.Advance
 		}
 		offf := f32.Point{X: float32(off.X) / 64, Y: float32(off.Y) / 64}
 		return start, end, layOut, offf, true
@@ -91,7 +91,7 @@ func (l Label) Layout(gtx *layout.Context, s text.Shaper, font text.Font, size u
 	if max := l.MaxLines; max > 0 && len(lines) > max {
 		lines = lines[:max]
 	}
-	dims := linesDimens(lines)
+	dims := linesDimensions(lines)
 	dims.Size = cs.Constrain(dims.Size)
 	clip := textPadding(lines)
 	clip.Max = clip.Max.Add(dims.Size)
@@ -106,13 +106,13 @@ func (l Label) Layout(gtx *layout.Context, s text.Shaper, font text.Font, size u
 		if !ok {
 			break
 		}
-		lclip := toRectF(clip).Sub(off)
+		lClip := toRectF(clip).Sub(off)
 		var stack op.StackOp
 		stack.Push(gtx.Ops)
 		op.TransformOp{}.Offset(off).Add(gtx.Ops)
 		str := txt[start:end]
 		s.ShapeString(font, textSize, str, layOut).Add(gtx.Ops)
-		paint.PaintOp{Rect: lclip}.Add(gtx.Ops)
+		paint.PaintOp{Rect: lClip}.Add(gtx.Ops)
 		stack.Pop()
 	}
 	gtx.Dimensions = dims
@@ -146,7 +146,7 @@ func textPadding(lines []text.Line) (padding image.Rectangle) {
 	return
 }
 
-func linesDimens(lines []text.Line) layout.Dimensions {
+func linesDimensions(lines []text.Line) layout.Dimensions {
 	var width fixed.Int26_6
 	var h int
 	var baseline int

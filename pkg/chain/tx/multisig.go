@@ -16,7 +16,7 @@ import (
 // otherwise an error is returned for a missing pubkey.
 //
 // This function only works with pubkeys and P2PKH addresses derived from them.
-func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte, error) {
+func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte, err error) {
 	pubKeys := make([]*util.AddressPubKey, len(addrs))
 	var dbtx walletdb.ReadTx
 	var addrmgrNs walletdb.ReadBucket
@@ -68,9 +68,9 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 }
 
 // ImportP2SHRedeemScript adds a P2SH redeem script to the wallet.
-func (w *Wallet) ImportP2SHRedeemScript(script []byte) (*util.AddressScriptHash, error) {
+func (w *Wallet) ImportP2SHRedeemScript(script []byte) (*util.AddressScriptHash, err error) {
 	var p2shAddr *util.AddressScriptHash
-	err := walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
+	err := walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) (err error) {
 		addrmgrNs := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 		// TODO(oga) blockstamp current block?
 		bs := &waddrmgr.BlockStamp{

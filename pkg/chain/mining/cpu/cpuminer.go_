@@ -115,7 +115,7 @@ var (
 // generating a new block template.  When a block is solved, it is submitted.
 // The function returns a list of the hashes of generated blocks.
 func (m *CPUMiner) GenerateNBlocks(workerNumber uint32, n uint32,
-	algo string) ([]*chainhash.Hash, error) {
+	algo string) ([]*chainhash.Hash, err error) {
 	m.Lock()
 	L.Warnf("generating %s blocks...", m.cfg.Algo)
 	// Respond with an error if server is already mining.

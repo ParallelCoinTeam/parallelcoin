@@ -154,7 +154,7 @@ func // addRequest associates the passed jsonRequest with its id.
 // If the client has already begun shutting down,
 // ErrClientShutdown is returned and the request is not added.
 // This function is safe for concurrent access.
-(c *Client) addRequest(jReq *jsonRequest) error {
+(c *Client) addRequest(jReq *jsonRequest) (err error) {
 	c.requestLock.Lock()
 	defer c.requestLock.Unlock()
 	// A non-blocking read of the shutdown channel with the request lock held avoids adding the request to the client's internal data structures if the client is in the process of shutting down (and has not yet grabbed the request lock), or has finished shutdown already (responding to each outstanding request with ErrClientShutdown).
@@ -437,7 +437,7 @@ func // sendMessage sends the passed JSON to the connected server using the
 func // reregisterNtfns creates and sends commands needed to re-establish the
 // current notification state associated with the client.
 // It should only be called on on reconnect by the resendRequests function.
-(c *Client) reregisterNtfns() error {
+(c *Client) reregisterNtfns() (err error) {
 	// Nothing to do if the caller is not interested in notifications.
 	if c.ntfnHandlers == nil {
 		return nil
@@ -703,22 +703,22 @@ newFutureError(err error) chan *response {
 	return responseChan
 }
 
-func // receiveFuture receives from the passed futureResult channel to extract a
+// receiveFuture receives from the passed futureResult channel to extract a
 // reply or any errors.  The examined errors include an error in the
 // futureResult and the error in the reply from the server.  This will block
 // until the result is available on the passed channel.
-receiveFuture(f chan *response) ([]byte, error) {
+func receiveFuture(f chan *response) (b []byte, err error) {
 	// Wait for a response on the returned channel.
 	r := <-f
 	return r.result, r.err
 }
 
-func // sendPost sends the passed request to the server by issuing an HTTP POST
+// sendPost sends the passed request to the server by issuing an HTTP POST
 // request using the provided response channel for the reply.  Typically a new
 // connection is opened and closed for each command when using this method,
 // however, the underlying HTTP client might coalesce multiple commands
 // depending on several factors including the remote server configuration.
-(c *Client) sendPost(jReq *jsonRequest) {
+func (c *Client) sendPost(jReq *jsonRequest) {
 	// Generate a request to the configured RPC server.
 	protocol := "http"
 	if c.config.TLS {
@@ -806,7 +806,7 @@ func // sendCmd sends the passed command to the associated server and returns a
 func // sendCmdAndWait sends the passed command to the associated server,
 // waits for the reply, and returns the result from it.
 // It will return the error field in the reply if there is one.
-(c *Client) sendCmdAndWait(cmd interface{}) (interface{}, error) {
+(c *Client) sendCmdAndWait(cmd interface{}) (i interface{}, err error) {
 	// Marshal the command to JSON-RPC, send it to the connected server, and
 	// wait for a response on the returned channel.
 	return receiveFuture(c.sendCmd(cmd))
@@ -995,16 +995,15 @@ type // ConnConfig describes the connection configuration parameters for the cli
 		EnableBCInfoHacks bool
 	}
 
-func // newHTTPClient returns a new http client that is configured according
+// newHTTPClient returns a new http client that is configured according
 // to the proxy and TLS settings in the associated connection configuration.
-newHTTPClient(config *ConnConfig) (*http.Client, error) {
+func newHTTPClient(config *ConnConfig) (client *http.Client, err error) {
 	// Set proxy function if there is a proxy configured.
 	var proxyFunc func(*http.Request) (*url.URL, error)
 	if config.Proxy != "" {
-		proxyURL, err := url.Parse(config.Proxy)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var proxyURL *url.URL
+		if proxyURL, err = url.Parse(config.Proxy); slog.Check(err) {
+			return
 		}
 		proxyFunc = http.ProxyURL(proxyURL)
 	}
@@ -1014,23 +1013,21 @@ newHTTPClient(config *ConnConfig) (*http.Client, error) {
 		if len(config.Certificates) > 0 {
 			pool := x509.NewCertPool()
 			pool.AppendCertsFromPEM(config.Certificates)
-			tlsConfig = &tls.Config{
-				RootCAs: pool,
-			}
+			tlsConfig = &tls.Config{RootCAs: pool}
 		}
 	}
-	client := http.Client{
+	client = &http.Client{
 		Transport: &http.Transport{
 			Proxy:           proxyFunc,
 			TLSClientConfig: tlsConfig,
 		},
 	}
-	return &client, nil
+	return
 }
 
-func // dial opens a websocket connection using the passed connection
+// dial opens a websocket connection using the passed connection
 // configuration details.
-dial(config *ConnConfig) (*websocket.Conn, error) {
+func dial(config *ConnConfig) (wsConn *websocket.Conn, err error) {
 	// Setup TLS if not disabled.
 	var tlsConfig *tls.Config
 	var scheme = "ws"
@@ -1065,35 +1062,36 @@ dial(config *ConnConfig) (*websocket.Conn, error) {
 	requestHeader.Add("Authorization", auth)
 	// Dial the connection.
 	address := fmt.Sprintf("%s://%s/%s", scheme, config.Host, config.Endpoint)
-	wsConn, resp, err := dialer.Dial(address, requestHeader)
-	if err != nil {
-		slog.Error(err)
+	var resp *http.Response
+	if wsConn, resp, err = dialer.Dial(address, requestHeader); slog.Check(err) {
 		if err != websocket.ErrBadHandshake || resp == nil {
-			return nil, err
+			return
 		}
 		// Detect HTTP authentication error status codes.
 		if resp.StatusCode == http.StatusUnauthorized ||
 			resp.StatusCode == http.StatusForbidden {
-			return nil, ErrInvalidAuth
+			err = ErrInvalidAuth
+			return
 		}
 		// The connection was authenticated and the status response was ok, but
 		// the websocket handshake still failed, so the endpoint is invalid in
 		// some way.
 		if resp.StatusCode == http.StatusOK {
-			return nil, ErrInvalidEndpoint
+			err = ErrInvalidEndpoint
+			return
 		}
 		// Return the status text from the server if none of the special cases
 		// above apply.
-		return nil, errors.New(resp.Status)
+		err = errors.New(resp.Status)
 	}
-	return wsConn, nil
+	return
 }
 
-func // New creates a new RPC client based on the provided connection
+// New creates a new RPC client based on the provided connection
 // configuration details.  The notification handlers parameter may be nil if
 // you are not interested in receiving notifications and will be ignored if the
 // configuration is set to run in HTTP POST mode.
-New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error) {
+func New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (client *Client, err error) {
 	// Either open a websocket connection or create an HTTP client depending on
 	// the HTTP POST mode.  Also, set the notification handlers to nil when
 	// running in HTTP POST mode.
@@ -1104,24 +1102,18 @@ New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error) {
 	if config.HTTPPostMode {
 		ntfnHandlers = nil
 		start = true
-		var err error
-		httpClient, err = newHTTPClient(config)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if httpClient, err = newHTTPClient(config); slog.Check(err) {
+			return
 		}
 	} else {
 		if !config.DisableConnectOnNew {
-			var err error
-			wsConn, err = dial(config)
-			if err != nil {
-				slog.Error(err)
-				return nil, err
+			if wsConn, err = dial(config); slog.Check(err) {
+				return
 			}
 			start = true
 		}
 	}
-	client := &Client{
+	client = &Client{
 		config:          config,
 		wsConn:          wsConn,
 		httpClient:      httpClient,
@@ -1144,10 +1136,10 @@ New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error) {
 			go client.wsReconnectHandler()
 		}
 	}
-	return client, nil
+	return
 }
 
-func // Connect establishes the initial websocket connection.  This is necessary
+// Connect establishes the initial websocket connection.  This is necessary
 // when a client was created after setting the DisableConnectOnNew field of the
 // Config struct. Up to tries number of connections (each after an increasing
 // backoff) will be tried if the connection can not be established.  The
@@ -1155,7 +1147,7 @@ func // Connect establishes the initial websocket connection.  This is necessary
 // This method will error if the client is not configured for websockets, if
 // the connection has already been established, or if none of the connection
 // attempts were successful.
-(c *Client) Connect(tries int) error {
+func (c *Client) Connect(tries int) (err error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	if c.config.HTTPPostMode {
@@ -1166,13 +1158,10 @@ func // Connect establishes the initial websocket connection.  This is necessary
 	}
 	// Begin connection attempts.
 	// Increase the backoff after each failed attempt, up to a maximum of one minute.
-	var err error
 	var backoff time.Duration
 	for i := 0; tries == 0 || i < tries; i++ {
 		var wsConn *websocket.Conn
-		wsConn, err = dial(c.config)
-		if err != nil {
-			slog.Error(err)
+		if wsConn, err = dial(c.config); slog.Check(err) {
 			backoff = connectionRetryInterval * time.Duration(i+1)
 			if backoff > time.Minute {
 				backoff = time.Minute
@@ -1190,9 +1179,9 @@ func // Connect establishes the initial websocket connection.  This is necessary
 			c.wg.Add(1)
 			go c.wsReconnectHandler()
 		}
-		return nil
+		return
 	}
 
 	// All connection attempts failed, so return the last error.
-	return err
+	return
 }

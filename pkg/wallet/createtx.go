@@ -35,7 +35,7 @@ func makeInputSource(eligible []wtxmgr.Credit) txauthor.InputSource {
 	currentScripts := make([][]byte, 0, len(eligible))
 	currentInputValues := make([]util.Amount, 0, len(eligible))
 	return func(target util.Amount) (util.Amount, []*wire.TxIn,
-		[]util.Amount, [][]byte, error) {
+		[]util.Amount, [][]byte, err error) {
 		for currentTotal < target && len(eligible) != 0 {
 			nextCredit := &eligible[0]
 			eligible = eligible[1:]
@@ -56,7 +56,7 @@ type secretSource struct {
 	addrmgrNs walletdb.ReadBucket
 }
 
-func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
+func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, err error) {
 	ma, err := s.Address(s.addrmgrNs, addr)
 	if err != nil {
 		slog.Error(err)
@@ -75,7 +75,7 @@ func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 	}
 	return privKey, ma.Compressed(), nil
 }
-func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
+func (s secretSource) GetScript(addr util.Address) ([]byte, err error) {
 	ma, err := s.Address(s.addrmgrNs, addr)
 	if err != nil {
 		slog.Error(err)
@@ -102,7 +102,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		slog.Error(err)
 		return nil, err
 	}
-	err = walletdb.Update(w.db, func(dbtx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(w.db, func(dbtx walletdb.ReadWriteTx) (err error) {
 		addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 		// Get current block's height and hash.
 		bs, err := chainClient.BlockStamp()
@@ -116,7 +116,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 			return err
 		}
 		inputSource := makeInputSource(eligible)
-		changeSource := func() ([]byte, error) {
+		changeSource := func() ([]byte, err error) {
 			// Derive the change output script.  As a hack to allow
 			// spending from the imported account, change addresses
 			// are created from account 0.
@@ -166,7 +166,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 	}
 	return tx, nil
 }
-func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minconf int32, bs *waddrmgr.BlockStamp) ([]wtxmgr.Credit, error) {
+func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minconf int32, bs *waddrmgr.BlockStamp) ([]wtxmgr.Credit, err error) {
 	addrmgrNs := dbtx.ReadBucket(waddrmgrNamespaceKey)
 	txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
 	unspent, err := w.TxStore.UnspentOutputs(txmgrNs)
@@ -220,7 +220,7 @@ func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minco
 // validateMsgTx verifies transaction input scripts for tx.  All previous output
 // scripts from outputs redeemed by the transaction, in the same order they are
 // spent, must be passed in the prevScripts slice.
-func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amount) error {
+func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amount) (err error) {
 	hashCache := txscript.NewTxSigHashes(tx)
 	for i, prevScript := range prevScripts {
 		vm, err := txscript.NewEngine(prevScript, tx, i,

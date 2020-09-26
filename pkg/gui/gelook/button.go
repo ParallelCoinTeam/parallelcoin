@@ -42,13 +42,13 @@ type ButtonLayout struct {
 type IconButton struct {
 	Background color.RGBA
 	Color      color.RGBA
-	Icon       *DuoUIicon
+	Icon       *DuoUIIcon
 	Size       unit.Value
 	Padding    unit.Value
 	Inset      layout.Inset
 }
 
-func (t *DuoUItheme) Button(txt string) Button {
+func (t *DuoUITheme) Button(txt string) Button {
 	return Button{
 		Text:         txt,
 		Color:        HexARGB(t.Colors["ButtonText"]),
@@ -63,7 +63,7 @@ func (t *DuoUItheme) Button(txt string) Button {
 	}
 }
 
-func (t *DuoUItheme) ButtonLayout() ButtonLayout {
+func (t *DuoUITheme) ButtonLayout() ButtonLayout {
 	return ButtonLayout{
 		Background:   HexARGB(t.Colors["ButtonBg"]),
 		Color:        HexARGB(t.Colors["ButtonText"]),
@@ -72,7 +72,7 @@ func (t *DuoUItheme) ButtonLayout() ButtonLayout {
 	}
 }
 
-func (t *DuoUItheme) IconButton(icon *DuoUIicon) IconButton {
+func (t *DuoUITheme) IconButton(icon *DuoUIIcon) IconButton {
 	return IconButton{
 		Background: HexARGB(t.Colors["Primary"]),
 		Color:      HexARGB(t.Colors["InvText"]),
@@ -176,7 +176,7 @@ type DuoUIbutton struct {
 	Width         int
 	Height        int
 	CornerRadius  unit.Value
-	Icon          *DuoUIicon
+	Icon          *DuoUIIcon
 	IconSize      int
 	IconColor     color.RGBA
 	PaddingTop    unit.Value
@@ -198,7 +198,7 @@ type ButtonParams struct {
 	PaddingTop, PaddingRight, PaddingBottom, PaddingLeft int
 }
 
-func (t *DuoUItheme) DuoUIbutton(p ButtonParams) DuoUIbutton {
+func (t *DuoUITheme) DuoUIbutton(p ButtonParams) DuoUIbutton {
 	return DuoUIbutton{
 		Text: p.Txt,
 		Font: text.Font{

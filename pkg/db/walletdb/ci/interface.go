@@ -117,7 +117,7 @@ func testReadWriteBucketInterface(
 	// Iterate all of the keys using ForEach while making sure the
 	// stored values are the expected values.
 	keysFound := make(map[string]struct{}, len(keyValues))
-	err := bucket.ForEach(func(k, v []byte) error {
+	err := bucket.ForEach(func(k, v []byte) (err error) {
 		ks := string(k)
 		wantV, ok := keyValues[ks]
 		if !ok {
@@ -403,20 +403,20 @@ func testManualTxInterface(
 func testNamespaceAndTxInterfaces(
 	tc *testContext, namespaceKey string) bool {
 	namespaceKeyBytes := []byte(namespaceKey)
-	err := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
-		_, err := tx.CreateTopLevelBucket(namespaceKeyBytes)
-		return err
-	})
-	if err != nil {
+	var err error
+	if err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (err error) {
+		if _, err = tx.CreateTopLevelBucket(namespaceKeyBytes); slog.Check(err) {
+		}
+		return
+	}); slog.Check(err) {
 		tc.t.Errorf("CreateTopLevelBucket: unexpected error: %v", err)
 		return false
 	}
 	defer func() {
 		// Remove the namespace now that the tests are done for it.
-		err := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+		if err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (err error) {
 			return tx.DeleteTopLevelBucket(namespaceKeyBytes)
-		})
-		if err != nil {
+		}); slog.Check(err) {
 			tc.t.Errorf("DeleteTopLevelBucket: unexpected error: %v", err)
 			return
 		}
@@ -432,7 +432,7 @@ func testNamespaceAndTxInterfaces(
 		"mtxkey3": "foo3",
 	}
 	// Test the bucket interface via a managed read-only transaction.
-	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) error {
+	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) (err error) {
 		rootBucket := tx.ReadBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadBucket: unexpected nil root bucket")
@@ -449,7 +449,7 @@ func testNamespaceAndTxInterfaces(
 	// Also, put a series of values and force a rollback so the following
 	// code can ensure the values were not stored.
 	forceRollbackError := fmt.Errorf("force rollback")
-	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (err error) {
 		rootBucket := tx.ReadWriteBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadWriteBucket: unexpected nil root bucket")
@@ -474,7 +474,7 @@ func testNamespaceAndTxInterfaces(
 	}
 	// Ensure the values that should have not been stored due to the forced
 	// rollback above were not actually stored.
-	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) error {
+	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) (err error) {
 		rootBucket := tx.ReadBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadBucket: unexpected nil root bucket")
@@ -491,7 +491,7 @@ func testNamespaceAndTxInterfaces(
 		return false
 	}
 	// Store a series of values via a managed read-write transaction.
-	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (err error) {
 		rootBucket := tx.ReadWriteBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadWriteBucket: unexpected nil root bucket")
@@ -508,7 +508,7 @@ func testNamespaceAndTxInterfaces(
 		return false
 	}
 	// Ensure the values stored above were committed as expected.
-	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) error {
+	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) (err error) {
 		rootBucket := tx.ReadBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadBucket: unexpected nil root bucket")
@@ -526,7 +526,7 @@ func testNamespaceAndTxInterfaces(
 		return false
 	}
 	// Clean up the values stored above in a managed read-write transaction.
-	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (err error) {
 		rootBucket := tx.ReadWriteBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadWriteBucket: unexpected nil root bucket")
@@ -551,7 +551,7 @@ func testNamespaceAndTxInterfaces(
 func testAdditionalErrors(
 	tc *testContext) bool {
 	ns3Key := []byte("ns3")
-	err := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+	err := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (err error) {
 		// Create a new namespace
 		rootBucket, err := tx.CreateTopLevelBucket(ns3Key)
 		if err != nil {
@@ -574,9 +574,8 @@ func testAdditionalErrors(
 		// Ensure Put returns the expected error when no key is
 		// specified.
 		wantErr = walletdb.ErrKeyRequired
-		if err := rootBucket.Put(nil, nil); err != wantErr {
-			return fmt.Errorf("Put: unexpected error - got %v, "+
-				"want %v", err, wantErr)
+		if err = rootBucket.Put(nil, nil); err != wantErr {
+			return fmt.Errorf("put: unexpected error - got %v, want %v", err, wantErr)
 		}
 		return nil
 	})

@@ -119,7 +119,7 @@ func addressBookContent(c *component.State) func() {
 	return func() {
 		addressBookPanelElement.PanelObject = c.Rc.AddressBook.Addresses
 		addressBookPanelElement.PanelObjectsNumber = len(c.Rc.AddressBook.Addresses)
-		addressBookPanel := c.Thm.DuoUIpanel()
+		addressBookPanel := c.Thm.DuoUIPanel()
 		addressBookPanel.ScrollBar = c.Thm.ScrollBar(16)
 		addressBookPanel.Layout(c.Gtx, addressBookPanelElement, func(i int, in interface{}) {
 			//if in != nil {
@@ -159,7 +159,7 @@ func addressBookContent(c *component.State) func() {
 						),
 					)
 				}),
-				layout.Rigid(c.Thm.DuoUIline(c.Gtx, 1, 0,
+				layout.Rigid(c.Thm.DuoUILine(c.Gtx, 1, 0,
 					1, c.Thm.Colors["Gray"])),
 			)
 			//}
@@ -182,12 +182,12 @@ func addressBookHeader(c *component.State, pageFunc func()) func() {
 				} else {
 					// c.Rc.GetAddressBook()()
 				}
-				c.Thm.DuoUIcheckBox("SHOW MINING ADDRESSES",
+				c.Thm.DuoUICheckBox("SHOW MINING ADDRESSES",
 					c.Thm.Colors["Light"], c.Thm.Colors["Light"]).
 					Layout(c.Gtx, showMiningAddresses)
 			}),
 			layout.Rigid(func() {
-				// c.Thm.DuoUIcounter(c.Rc.GetBlocksExcerpts()).Layout(c.Gtx,
+				// c.Thm.DuoUICounter(c.Rc.GetBlocksExcerpts()).Layout(c.Gtx,
 				//c.Rc.Explorer.Page, "PAGE", fmt.Sprint(c.Rc.Explorer.Page.Value))
 			}),
 			// layout.Rigid(component.Button(c.Gtx, th, buttonNewAddress,
@@ -214,8 +214,8 @@ func addressBookHeader(c *component.State, pageFunc func()) func() {
 	}
 }
 
-func blockPage(c *component.State, block string) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func blockPage(c *component.State, block string) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "BLOCK",
 		TxColor:       "",
 		Command:       c.Rc.GetSingleBlock(block),
@@ -231,7 +231,7 @@ func blockPage(c *component.State, block string) *gelook.DuoUIpage {
 		FooterBgColor: "",
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
 func blockRow(c *component.State, block *model.DuoUIblock) {
@@ -296,7 +296,7 @@ func blockRow(c *component.State, block *model.DuoUIblock) {
 						})
 					}),
 					layout.Rigid(func() {
-						gelook.DuoUIcontainer{}.Layout(c.Gtx, layout.Center, func() {
+						gelook.DuoUIContainer{}.Layout(c.Gtx, layout.Center, func() {
 							l := c.Thm.Body2(fmt.Sprint(block.TxNum))
 							l.Font.Typeface = c.Thm.Fonts["Mono"]
 							l.Color = c.Thm.Colors["Dark"]
@@ -315,7 +315,7 @@ func blockRow(c *component.State, block *model.DuoUIblock) {
 				)
 			}),
 			layout.Rigid(func() {
-				c.Thm.DuoUIline(c.Gtx, 0, 0, 1,
+				c.Thm.DuoUILine(c.Gtx, 0, 0, 1,
 					c.Thm.Colors["Gray"])()
 			}),
 		)
@@ -324,7 +324,7 @@ func blockRow(c *component.State, block *model.DuoUIblock) {
 
 func blockRowCellLabels(c *component.State) {
 	cs := c.Gtx.Constraints
-	labels := c.Thm.DuoUIcontainer(0, c.Thm.Colors["Gray"])
+	labels := c.Thm.DuoUIContainer(0, c.Thm.Colors["Gray"])
 	labels.FullWidth = true
 	labels.Layout(c.Gtx, layout.W, func() {
 		// component.HorizontalLine(c.Gtx, 1, c.Thm.Colors["Dark"])()
@@ -389,7 +389,7 @@ func bodyExplorer(c *component.State) func() {
 				blockRowCellLabels(c)
 			}),
 			layout.Flexed(1, func() {
-				explorerPanel := c.Thm.DuoUIpanel()
+				explorerPanel := c.Thm.DuoUIPanel()
 				explorerPanel.PanelObject = c.Rc.Explorer.Blocks
 				explorerPanel.ScrollBar = c.Thm.ScrollBar(16)
 				explorerPanelElement.PanelObjectsNumber =
@@ -409,8 +409,8 @@ func bodyExplorer(c *component.State) func() {
 	}
 }
 
-func Console(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func Console(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "CONSOLE",
 		Command:       func() {},
 		Border:        4,
@@ -423,13 +423,13 @@ func Console(c *component.State) *gelook.DuoUIpage {
 		Footer:        func() {},
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
 func consoleBody(c *component.State) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(c.Gtx, func() {
-			c.Thm.DuoUIcontainer(0, "ff000000").
+			c.Thm.DuoUIContainer(0, "ff000000").
 				Layout(c.Gtx, layout.N, func() {
 					layout.Flex{}.Layout(c.Gtx,
 						layout.Flexed(1, func() {
@@ -485,8 +485,8 @@ func consoleBody(c *component.State) func() {
 	}
 }
 
-func DuoUIaddressBook(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func DuoUIaddressBook(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "ADDRESSBOOK",
 		Command:       c.Rc.GetAddressBook(),
 		Border:        4,
@@ -499,11 +499,11 @@ func DuoUIaddressBook(c *component.State) *gelook.DuoUIpage {
 		Footer:        func() {},
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
-func DuoUIexplorer(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func DuoUIexplorer(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "EXPLORER",
 		TxColor:       "",
 		Command:       c.Rc.GetBlocksExcerpts(),
@@ -519,7 +519,7 @@ func DuoUIexplorer(c *component.State) *gelook.DuoUIpage {
 		FooterBgColor: "",
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
 func DuoUIminer(c *component.State) func() {
@@ -562,12 +562,12 @@ func explorerHeader(c *component.State) func() {
 			Alignment: layout.Middle,
 		}.Layout(c.Gtx,
 			layout.Rigid(func() {
-				c.Thm.DuoUIcounter(c.Rc.GetBlocksExcerpts()).Layout(c.Gtx,
+				c.Thm.DuoUICounter(c.Rc.GetBlocksExcerpts()).Layout(c.Gtx,
 					c.Rc.Explorer.Page, "PAGE",
 					fmt.Sprint(c.Rc.Explorer.Page.Value))
 			}),
 			layout.Rigid(func() {
-				c.Thm.DuoUIcounter(c.Rc.GetBlocksExcerpts()).Layout(c.Gtx,
+				c.Thm.DuoUICounter(c.Rc.GetBlocksExcerpts()).Layout(c.Gtx,
 					c.Rc.Explorer.PerPage, "PER PAGE",
 					fmt.Sprint(c.Rc.Explorer.PerPage.Value))
 			}),
@@ -575,8 +575,8 @@ func explorerHeader(c *component.State) func() {
 	}
 }
 
-func History(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func History(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "HISTORY",
 		Command:       c.Rc.GetDuoUItransactions(),
 		Border:        4,
@@ -589,7 +589,7 @@ func History(c *component.State) *gelook.DuoUIpage {
 		Footer:        func() {},
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
 func historyBody(c *component.State) func() {
@@ -599,14 +599,14 @@ func historyBody(c *component.State) func() {
 				Axis: layout.Vertical,
 			}.Layout(c.Gtx,
 				layout.Rigid(func() {
-					txsPanel := c.Thm.DuoUIpanel()
+					txsPanel := c.Thm.DuoUIPanel()
 					txsPanel.PanelObject = c.Rc.History.Txs.Txs
 					txsPanel.ScrollBar = c.Thm.ScrollBar(16)
 					txsPanelElement.PanelObjectsNumber = len(c.Rc.History.Txs.Txs)
 					txsPanel.Layout(c.Gtx, txsPanelElement, func(i int, in interface{}) {
 						txs := in.([]model.DuoUItransactionExcerpt)
 						t := txs[i]
-						c.Thm.DuoUIline(c.Gtx, 0, 0, 1, c.Thm.Colors["Hint"])()
+						c.Thm.DuoUILine(c.Gtx, 0, 0, 1, c.Thm.Colors["Hint"])()
 						for t.Link.Clicked(c.Gtx) {
 							c.Rc.ShowPage = fmt.Sprintf("TRANSACTION %s", t.TxID)
 							c.Rc.GetSingleTx(t.TxID)()
@@ -639,12 +639,12 @@ func historyHeader(c *component.State) func() {
 		}.Layout(c.Gtx,
 			layout.Rigid(c.TransactionsFilter()),
 			layout.Rigid(func() {
-				c.Thm.DuoUIcounter(c.Rc.GetDuoUItransactions()).
+				c.Thm.DuoUICounter(c.Rc.GetDuoUItransactions()).
 					Layout(c.Gtx, c.Rc.History.PerPage, "TxNum per page: ",
 						fmt.Sprint(c.Rc.History.PerPage.Value))
 			}),
 			layout.Rigid(func() {
-				c.Thm.DuoUIcounter(c.Rc.GetDuoUItransactions()).
+				c.Thm.DuoUICounter(c.Rc.GetDuoUItransactions()).
 					Layout(c.Gtx, c.Rc.History.Page, "TxNum page: ",
 						fmt.Sprint(c.Rc.History.Page.Value))
 			}),
@@ -652,16 +652,16 @@ func historyHeader(c *component.State) func() {
 	}
 }
 
-func LoadPages(c *component.State) (p map[string]*gelook.DuoUIpage) {
-	p = make(map[string]*gelook.DuoUIpage)
+func LoadPages(c *component.State) (p map[string]*gelook.DuoUIPage) {
+	p = make(map[string]*gelook.DuoUIPage)
 	p["OVERVIEW"] = Overview(c)
 	p["SEND"] = Send(c)
-	// p["RECEIVE"] = c.Thm.DuoUIpage("RECEIVE", 10, func() {},
+	// p["RECEIVE"] = c.Thm.DuoUIPage("RECEIVE", 10, func() {},
 	// func() {}, func() { c.Thm.H5("receive :").Layout(c.Gtx) }, func() {})
 	p["ADDRESSBOOK"] = DuoUIaddressBook(c)
 	p["SETTINGS"] = Settings(c)
 	p["NETWORK"] = Network(c)
-	// p["BLOCK"] = c.Thm.DuoUIpage("BLOCK", 0, func() {},
+	// p["BLOCK"] = c.Thm.DuoUIPage("BLOCK", 0, func() {},
 	// func() {}, func() { c.Thm.H5("block :").Layout(c.Gtx) }, func() {})
 	p["HISTORY"] = History(c)
 	p["EXPLORER"] = DuoUIexplorer(c)
@@ -671,8 +671,8 @@ func LoadPages(c *component.State) (p map[string]*gelook.DuoUIpage) {
 	return
 }
 
-func Logger(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func Logger(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "LOG",
 		Command:       func() {},
 		Border:        4,
@@ -684,11 +684,11 @@ func Logger(c *component.State) *gelook.DuoUIpage {
 		Footer:        func() {},
 		FooterBgColor: "",
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
-func Miner(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func Miner(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "MINER",
 		TxColor:       "",
 		Command:       func() {},
@@ -704,11 +704,11 @@ func Miner(c *component.State) *gelook.DuoUIpage {
 		FooterBgColor: "",
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
-func Network(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func Network(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "NETWORK",
 		TxColor:       "",
 		Command:       c.Rc.GetPeerInfo(),
@@ -724,7 +724,7 @@ func Network(c *component.State) *gelook.DuoUIpage {
 		FooterBgColor: "",
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
 func networkBody(c *component.State) func() {
@@ -745,12 +745,12 @@ func networkHeader(c *component.State) func() {
 		}.Layout(c.Gtx,
 			// layout.Rigid(component.TransactionsFilter(c)),
 			layout.Rigid(func() {
-				c.Thm.DuoUIcounter(c.Rc.GetPeerInfo()).Layout(c.Gtx,
+				c.Thm.DuoUICounter(c.Rc.GetPeerInfo()).Layout(c.Gtx,
 					c.Rc.Network.PerPage, "Peers per page: ",
 					fmt.Sprint(c.Rc.Network.PerPage.Value))
 			}),
 			layout.Rigid(func() {
-				c.Thm.DuoUIcounter(c.Rc.GetPeerInfo()).Layout(c.Gtx,
+				c.Thm.DuoUICounter(c.Rc.GetPeerInfo()).Layout(c.Gtx,
 					c.Rc.Network.Page, "Peers page: ",
 					fmt.Sprint(c.Rc.Network.Page.Value))
 			}),
@@ -758,8 +758,8 @@ func networkHeader(c *component.State) func() {
 	}
 }
 
-func Overview(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func Overview(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "OVERVIEW",
 		Border:        0,
 		Command:       func() {},
@@ -773,7 +773,7 @@ func Overview(c *component.State) *gelook.DuoUIpage {
 		FooterBgColor: "",
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
 func overviewBody(c *component.State) func() {
@@ -790,8 +790,8 @@ func overviewBody(c *component.State) func() {
 	}
 }
 
-func Send(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func Send(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "SEND",
 		TxColor:       "",
 		Command:       func() {},
@@ -807,13 +807,13 @@ func Send(c *component.State) *gelook.DuoUIpage {
 		FooterBgColor: "",
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }
 
 func getSendBodyWidgets(c *component.State) []func() {
 	return []func(){
 		func() {
-			c.Thm.DuoUIcontainer(1,
+			c.Thm.DuoUIContainer(1,
 				c.Thm.Colors["Gray"]).Layout(c.Gtx, layout.Center, func() {
 				layout.Flex{}.Layout(c.Gtx,
 					layout.Flexed(1,
@@ -835,7 +835,7 @@ func getSendBodyWidgets(c *component.State) []func() {
 			})
 		},
 		func() {
-			c.Thm.DuoUIcontainer(1, c.Thm.Colors["Gray"]).Layout(c.Gtx,
+			c.Thm.DuoUIContainer(1, c.Thm.Colors["Gray"]).Layout(c.Gtx,
 				layout.Center, func() {
 					layout.Flex{}.Layout(c.Gtx,
 						layout.Flexed(1, c.Editor(
@@ -913,8 +913,8 @@ func sendBody(c *component.State) func() {
 	}
 }
 
-func Settings(c *component.State) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func Settings(c *component.State) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "SETTINGS",
 		TxColor:       "",
 		Command:       func() {},
@@ -930,9 +930,9 @@ func Settings(c *component.State) *gelook.DuoUIpage {
 		FooterBgColor: "",
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 
-	// return c.Thm.DuoUIpage("SETTINGS", 0, func() {},
+	// return c.Thm.DuoUIPage("SETTINGS", 0, func() {},
 	//component.ContentHeader(c.Gtx, th, SettingsHeader(c)), SettingsBody(c),
 	//func() {
 	// var msg string
@@ -949,11 +949,11 @@ func Settings(c *component.State) *gelook.DuoUIpage {
 
 func SettingsBody(c *component.State) func() {
 	return func() {
-		c.Thm.DuoUIcontainer(16,
+		c.Thm.DuoUIContainer(16,
 			c.Thm.Colors["Light"]).Layout(c.Gtx, layout.N, func() {
 			for _, fields := range c.Rc.Settings.Daemon.Schema.Groups {
 				if fmt.Sprint(fields.Legend) == c.Rc.Settings.Tabs.Current {
-					settingsPanel := c.Thm.DuoUIpanel()
+					settingsPanel := c.Thm.DuoUIPanel()
 					settingsPanel.PanelObject = fields.Fields
 					settingsPanel.ScrollBar = c.Thm.ScrollBar(16)
 					settingsPanelElement.PanelObjectsNumber = len(fields.Fields)
@@ -970,7 +970,7 @@ func SettingsBody(c *component.State) func() {
 								Axis: layout.Vertical,
 							}.Layout(c.Gtx,
 								layout.Rigid(SettingsItemRow(c, &tl)),
-								layout.Rigid(c.Thm.DuoUIline(c.Gtx,
+								layout.Rigid(c.Thm.DuoUILine(c.Gtx,
 									4, 0, 1, c.Thm.Colors["LightGray"])))
 						},
 					)
@@ -1011,7 +1011,7 @@ func SettingsItemRow(c *component.State, f *component.Field) func() {
 			Alignment: layout.Middle,
 		}.Layout(c.Gtx,
 			// layout.Rigid(func() {
-			//	gelook.DuoUIdrawRectangle(c.Gtx, 30, 3, c.Thm.Colors["Light"],
+			//	gelook.DuoUIDrawRectangle(c.Gtx, 30, 3, c.Thm.Colors["Light"],
 			//	[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			// }),
 			layout.Flexed(0.62, func() {
@@ -1260,8 +1260,8 @@ func singleTxBody(c *component.State,
 		})
 	}
 }
-func txPage(c *component.State, tx string) *gelook.DuoUIpage {
-	page := gelook.DuoUIpage{
+func txPage(c *component.State, tx string) *gelook.DuoUIPage {
+	page := gelook.DuoUIPage{
 		Title:         "BLOCK",
 		TxColor:       "",
 		Command:       c.Rc.GetSingleTx(tx),
@@ -1277,5 +1277,5 @@ func txPage(c *component.State, tx string) *gelook.DuoUIpage {
 		FooterBgColor: "",
 		FooterPadding: 0,
 	}
-	return c.Thm.DuoUIpage(page)
+	return c.Thm.DuoUIPage(page)
 }

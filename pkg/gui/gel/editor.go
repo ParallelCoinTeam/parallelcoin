@@ -446,7 +446,7 @@ func (e *Editor) moveCoord(c unit.Converter, pos image.Point) {
 func (e *Editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	e.rr.Reset()
 	lines, _ := s.Layout(e.font, e.textSize, e.maxWidth, &e.rr)
-	dims := linesDimens(lines)
+	dims := linesDimensions(lines)
 	for i := 0; i < len(lines)-1; i++ {
 		// To avoid layout flickering while editing, assume a soft newline takes
 		// up all available space.

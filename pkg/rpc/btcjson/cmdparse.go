@@ -31,7 +31,7 @@ func makeParams(rt reflect.Type, rv reflect.Value) []interface{} {
 // MarshalCmd marshals the passed command to a JSON-RPC request byte slice that is suitable for
 // transmission to an RPC server.  The provided command type must be a registered type.  All
 // commands provided by this package are registered by default.
-func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
+func MarshalCmd(id interface{}, cmd interface{}) (b []byte, err error) {
 	// Look up the cmd type and error out if not registered.
 	rt := reflect.TypeOf(cmd)
 	registerLock.RLock()
@@ -39,7 +39,8 @@ func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
 	registerLock.RUnlock()
 	if !ok {
 		str := fmt.Sprintf("%q is not registered", method)
-		return nil, makeError(ErrUnregisteredMethod, str)
+		err = makeError(ErrUnregisteredMethod, str)
+		return
 	}
 	// The provided command must not be nil.
 	rv := reflect.ValueOf(cmd)
@@ -50,10 +51,9 @@ func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
 	// Create a slice of interface values in the order of the struct fields while respecting pointer fields as optional netparams and only adding them if they are non-nil.
 	params := makeParams(rt.Elem(), rv.Elem())
 	// Generate and marshal the final JSON-RPC request.
-	rawCmd, err := NewRequest(id, method, params)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var rawCmd *Request
+	if rawCmd, err = NewRequest(id, method, params); slog.Check(err) {
+		return
 	}
 	return json.Marshal(rawCmd)
 }
@@ -87,7 +87,7 @@ func MarshalRequest(id interface{}, cmd interface{}) (rawCmd *Request, err error
 }
 
 // checkNumParams ensures the supplied number of netparams is at least the minimum required number for the command and less than the maximum allowed.
-func checkNumParams(numParams int, info *MethodInfo) error {
+func checkNumParams(numParams int, info *MethodInfo) (err error) {
 	if numParams < info.NumReqParams || numParams > info.MaxParams {
 		if info.NumReqParams == info.MaxParams {
 			str := fmt.Sprintf("wrong number of netparams (expected "+
@@ -115,41 +115,44 @@ func populateDefaults(numParams int, info *MethodInfo, rv reflect.Value) {
 }
 
 // UnmarshalCmd unmarshals a JSON-RPC request into a suitable concrete command so long as the method type contained within the marshalled request is registered.
-func UnmarshalCmd(r *Request) (interface{}, error) {
+func UnmarshalCmd(r *Request) (ifc interface{}, err error) {
 	registerLock.RLock()
 	rtp, ok := methodToConcreteType[r.Method]
 	info := methodToInfo[r.Method]
 	registerLock.RUnlock()
 	if !ok {
 		str := fmt.Sprintf("%q is not registered", r.Method)
-		return nil, makeError(ErrUnregisteredMethod, str)
+		err = makeError(ErrUnregisteredMethod, str)
+		return
 	}
 	rt := rtp.Elem()
 	rvp := reflect.New(rt)
 	rv := rvp.Elem()
 	// Ensure the number of parameters are correct.
 	numParams := len(r.Params)
-	if err := checkNumParams(numParams, &info); err != nil {
-		return nil, err
+	if err = checkNumParams(numParams, &info); err != nil {
+		return
 	}
 	// Loop through each of the struct fields and unmarshal the associated parameter into them.
 	for i := 0; i < numParams; i++ {
 		rvf := rv.Field(i)
 		// Unmarshal the parameter into the struct field.
 		concreteVal := rvf.Addr().Interface()
-		if err := json.Unmarshal(r.Params[i], &concreteVal); err != nil {
+		if err = json.Unmarshal(r.Params[i], &concreteVal); slog.Check(err) {
 			// The most common error is the wrong type, so explicitly detect that error and make it nicer.
 			fieldName := strings.ToLower(rt.Field(i).Name)
-			if jerr, ok := err.(*json.UnmarshalTypeError); ok {
+			if jErr, ok := err.(*json.UnmarshalTypeError); ok {
 				str := fmt.Sprintf("parameter #%d '%s' must "+
 					"be type %v (got %v)", i+1, fieldName,
-					jerr.Type, jerr.Value)
-				return nil, makeError(ErrInvalidType, str)
+					jErr.Type, jErr.Value)
+				err = makeError(ErrInvalidType, str)
+				return
 			}
 			// Fallback to showing the underlying error.
-			str := fmt.Sprintf("parameter #%d '%s' failed to "+
-				"unmarshal: %v", i+1, fieldName, err)
-			return nil, makeError(ErrInvalidType, str)
+			str := fmt.Sprintf("parameter #%d '%s' failed to unmarshal: %v", i+1, fieldName, err)
+			err = makeError(ErrInvalidType, str)
+			slog.Debug(err)
+			return
 		}
 	}
 	// When there are less supplied parameters than the total number of netparams, any remaining struct fields must be optional.  Thus, populate them with their associated default value as needed.
@@ -218,7 +221,7 @@ func baseType(arg reflect.Type) (reflect.Type, int) {
 // unmarshaling of strings into arrays, slices, structs, and maps via
 // json.Unmarshal.
 func assignField(paramNum int, fieldName string, dest reflect.Value,
-	src reflect.Value) error {
+	src reflect.Value) (err error) {
 	// Just error now when the types have no chance of being compatible.
 	destBaseType, destIndirects := baseType(dest.Type())
 	srcBaseType, srcIndirects := baseType(src.Type())
@@ -455,7 +458,7 @@ func assignField(paramNum int, fieldName string, dest reflect.Value,
 //   - Conversion from string to any size float for everything strconv.ParseFloat recognizes
 //   - Conversion from string to arrays, slices, structs, and maps by treating the string as marshalled JSON and
 //   calling json.Unmarshal into the destination field
-func NewCmd(method string, args ...interface{}) (interface{}, error) {
+func NewCmd(method string, args ...interface{}) (ifc interface{}, err error) {
 	// Look up details about the provided method.  Any methods that aren't registered are an error.
 	registerLock.RLock()
 	rtp, ok := methodToConcreteType[method]
@@ -463,14 +466,14 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 	registerLock.RUnlock()
 	if !ok {
 		str := fmt.Sprintf("%q is not registered", method)
-		err := makeError(ErrUnregisteredMethod, str)
-		slog.Check(err)
-		return nil, err
+		err = makeError(ErrUnregisteredMethod, str)
+		slog.Debug(err)
+		return
 	}
 	// Ensure the number of parameters are correct.
 	numParams := len(args)
-	if err := checkNumParams(numParams, &info); err != nil {
-		return nil, err
+	if err = checkNumParams(numParams, &info); slog.Check(err) {
+		return
 	}
 	// Create the appropriate command type for the method.  Since all types are enforced to be a pointer to a struct at
 	// registration time, it's safe to indirect to the struct now.
@@ -482,17 +485,14 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 		// Attempt to assign each of the arguments to the according struct field.
 		rvf := rv.Field(i)
 		fieldName := strings.ToLower(rt.Field(i).Name)
-		err := assignField(i+1, fieldName, rvf, reflect.ValueOf(args[i]))
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if err = assignField(i+1, fieldName, rvf, reflect.ValueOf(args[i])); slog.Check(err) {
+			return
 		}
 	}
 	return rvp.Interface(), nil
 }
 
 func MethodToInfo(method string) *MethodInfo {
-	slog.Trace(method)
 	slog.Traces(methodToInfo[method])
 	if v, ok := methodToInfo[method]; ok {
 		return &v

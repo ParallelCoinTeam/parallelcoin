@@ -136,7 +136,7 @@ func decodeCompressedScriptSize(serialized []byte) int {
 }
 
 // decodeCompressedTxOut decodes the passed compressed txout, possibly followed by other data, into its uncompressed amount and script and returns them along with the number of bytes they occupied prior to decompression.
-func decodeCompressedTxOut(serialized []byte) (uint64, []byte, int, error) {
+func decodeCompressedTxOut(serialized []byte) (amount uint64, script []byte, tot int, err error) {
 	// Deserialize the compressed amount and ensure there are bytes remaining for the compressed script.
 	compressedAmount, bytesRead := deserializeVLQ(serialized)
 	if bytesRead >= len(serialized) {
@@ -150,8 +150,8 @@ func decodeCompressedTxOut(serialized []byte) (uint64, []byte, int, error) {
 			"data after script size")
 	}
 	// Decompress and return the amount and script.
-	amount := decompressTxOutAmount(compressedAmount)
-	script := decompressScript(serialized[bytesRead : bytesRead+scriptSize])
+	amount = decompressTxOutAmount(compressedAmount)
+	script = decompressScript(serialized[bytesRead : bytesRead+scriptSize])
 	return amount, script, bytesRead + scriptSize, nil
 }
 
@@ -252,9 +252,7 @@ func decompressTxOutAmount(amount uint64) uint64 {
 }
 
 // deserializeVLQ deserializes the provided variable-length quantity according to the format described above.  It also returns the number of bytes deserialized.
-func deserializeVLQ(serialized []byte) (uint64, int) {
-	var n uint64
-	var size int
+func deserializeVLQ(serialized []byte) (n uint64, size int) {
 	for _, val := range serialized {
 		size++
 		n = (n << 7) | uint64(val&0x7f)
@@ -266,7 +264,11 @@ func deserializeVLQ(serialized []byte) (uint64, int) {
 	return n, size
 }
 
-// isPubKey returns whether or not the passed public key script is a standard pay-to-pubkey script that pays to a valid compressed or uncompressed public key along with the serialized pubkey it is paying to if it is. NOTE: This function ensures the public key is actually valid since the compression algorithm requires valid pubkeys.  It does not support hybrid pubkeys.  This means that even if the script has the correct form for a pay-to-pubkey script, this function will only return true when it is paying to a valid compressed or uncompressed pubkey.
+// isPubKey returns whether or not the passed public key script is a standard pay-to-pubkey script that pays to a valid
+// compressed or uncompressed public key along with the serialized pubkey it is paying to if it is. NOTE: This function
+// ensures the public key is actually valid since the compression algorithm requires valid pubkeys.  It does not support
+// hybrid pubkeys.  This means that even if the script has the correct form for a pay-to-pubkey script, this function
+// will only return true when it is paying to a valid compressed or uncompressed pubkey.
 func isPubKey(script []byte) (bool, []byte) {
 	// Pay-to-compressed-pubkey script.
 	if len(script) == 35 && script[0] == txscript.OP_DATA_33 &&

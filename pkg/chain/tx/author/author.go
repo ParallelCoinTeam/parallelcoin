@@ -92,18 +92,23 @@ func (insufficientFundsError) Error() string {
 //
 // BUGS: Fee estimation may be off when redeeming non-compressed P2PKH outputs.
 func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
-	fetchInputs InputSource, fetchChange ChangeSource) (*AuthoredTx, error) {
+	fetchInputs InputSource, fetchChange ChangeSource) (atx *AuthoredTx, err error) {
 	targetAmount := h.SumOutputValues(outputs)
 	estimatedSize := txsizes.EstimateVirtualSize(0, 1, 0, outputs, true)
 	targetFee := txrules.FeeForSerializeSize(relayFeePerKb, estimatedSize)
+	var (
+		inputAmount util.Amount
+		inputs      []*wire.TxIn
+		inputValues []util.Amount
+		scripts     [][]byte
+	)
 	for {
-		inputAmount, inputs, inputValues, scripts, err := fetchInputs(targetAmount + targetFee)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if inputAmount, inputs, inputValues, scripts, err = fetchInputs(targetAmount + targetFee); slog.Check(err) {
+			return
 		}
 		if inputAmount < targetAmount+targetFee {
-			return nil, insufficientFundsError{}
+			err = insufficientFundsError{}
+			return
 		}
 		// We count the types of inputs, which we'll use to estimate
 		// the vsize of the transaction.
@@ -120,8 +125,7 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 				p2pkh++
 			}
 		}
-		maxSignedSize := txsizes.EstimateVirtualSize(p2pkh, p2wpkh,
-			nested, outputs, true)
+		maxSignedSize := txsizes.EstimateVirtualSize(p2pkh, p2wpkh, nested, outputs, true)
 		maxRequiredFee := txrules.FeeForSerializeSize(relayFeePerKb, maxSignedSize)
 		remainingAmount := inputAmount - targetAmount
 		if remainingAmount < maxRequiredFee {
@@ -152,13 +156,14 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 			unsignedTransaction.TxOut = append(outputs[:l:l], change)
 			changeIndex = l
 		}
-		return &AuthoredTx{
+		atx = &AuthoredTx{
 			Tx:              unsignedTransaction,
 			PrevScripts:     scripts,
 			PrevInputValues: inputValues,
 			TotalInput:      inputAmount,
 			ChangeIndex:     changeIndex,
-		}, nil
+		}
+		return
 	}
 }
 
@@ -183,7 +188,7 @@ func (tx *AuthoredTx) RandomizeChangePosition() {
 // inputs.  Private keys and redeem scripts are looked up using a SecretsSource
 // based on the previous output script.
 func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []util.Amount,
-	secrets SecretsSource) error {
+	secrets SecretsSource) (err error) {
 	inputs := tx.TxIn
 	hashCache := txscript.NewTxSigHashes(tx)
 	chainParams := secrets.ChainParams()
@@ -236,7 +241,7 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 // the input value in the sighash.
 func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
 	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
-	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) error {
+	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) (err error) {
 	// First obtain the key pair associated with this p2wkh address.
 	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
 		chainParams)
@@ -290,7 +295,7 @@ func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
 // digest algorithm defined in BIP0143 includes the input value in the sighash.
 func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
 	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
-	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) error {
+	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) (err error) {
 	// First we need to obtain the key pair related to this p2sh output.
 	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
 		chainParams)
@@ -347,6 +352,6 @@ func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
 // AddAllInputScripts modifies an authored transaction by adding inputs scripts
 // for each input of an authored transaction.  Private keys and redeem scripts
 // are looked up using a SecretsSource based on the previous output script.
-func (tx *AuthoredTx) AddAllInputScripts(secrets SecretsSource) error {
+func (tx *AuthoredTx) AddAllInputScripts(secrets SecretsSource) (err error) {
 	return AddAllInputScripts(tx.Tx, tx.PrevScripts, tx.PrevInputValues, secrets)
 }

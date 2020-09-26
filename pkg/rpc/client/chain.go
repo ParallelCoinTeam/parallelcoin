@@ -15,18 +15,15 @@ import (
 type FutureGetBestBlockHashResult chan *response
 
 // Receive waits for the response promised by the future and returns the hash of the best block in the longest block chain.
-func (r FutureGetBestBlockHashResult) Receive() (*chainhash.Hash, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetBestBlockHashResult) Receive() (ch *chainhash.Hash, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
 	var txHashStr string
-	err = js.Unmarshal(res, &txHashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &txHashStr); slog.Check(err) {
+		return
 	}
 	return chainhash.NewHashFromStr(txHashStr)
 }
@@ -38,7 +35,7 @@ func (c *Client) GetBestBlockHashAsync() FutureGetBestBlockHashResult {
 }
 
 // GetBestBlockHash returns the hash of the best block in the longest block chain.
-func (c *Client) GetBestBlockHash() (*chainhash.Hash, error) {
+func (c *Client) GetBestBlockHash() (ch *chainhash.Hash, err error) {
 	return c.GetBestBlockHashAsync().Receive()
 }
 
@@ -46,33 +43,27 @@ func (c *Client) GetBestBlockHash() (*chainhash.Hash, error) {
 type FutureGetBlockResult chan *response
 
 // Receive waits for the response promised by the future and returns the raw block requested from the server given its hash.
-func (r FutureGetBlockResult) Receive() (*wire.MsgBlock, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetBlockResult) Receive() (mb *wire.MsgBlock, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
 	var blockHex string
-	err = js.Unmarshal(res, &blockHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &blockHex); slog.Check(err) {
+		return
 	}
 	// Decode the serialized block hex to raw bytes.
-	serializedBlock, err := hex.DecodeString(blockHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var serializedBlock []byte
+	if serializedBlock, err = hex.DecodeString(blockHex); slog.Check(err) {
+		return
 	}
 	// Deserialize the block and return it.
-	var msgBlock wire.MsgBlock
-	err = msgBlock.Deserialize(bytes.NewReader(serializedBlock))
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	mb = &wire.MsgBlock{}
+	if err = mb.Deserialize(bytes.NewReader(serializedBlock)); slog.Check(err) {
+		return
 	}
-	return &msgBlock, nil
+	return
 }
 
 // GetBlockAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetBlock for the blocking version and more details.
@@ -86,7 +77,7 @@ func (c *Client) GetBlockAsync(blockHash *chainhash.Hash) FutureGetBlockResult {
 }
 
 // GetBlock returns a raw block from the server given its hash. GetBlockVerbose to retrieve a data structure with information about the block instead.
-func (c *Client) GetBlock(blockHash *chainhash.Hash) (*wire.MsgBlock, error) {
+func (c *Client) GetBlock(blockHash *chainhash.Hash) (mb *wire.MsgBlock, err error) {
 	return c.GetBlockAsync(blockHash).Receive()
 }
 
@@ -94,20 +85,17 @@ func (c *Client) GetBlock(blockHash *chainhash.Hash) (*wire.MsgBlock, error) {
 type FutureGetBlockVerboseResult chan *response
 
 // Receive waits for the response promised by the future and returns the data structure from the server with information about the requested block.
-func (r FutureGetBlockVerboseResult) Receive() (*btcjson.GetBlockVerboseResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetBlockVerboseResult) Receive() (blockResult *btcjson.GetBlockVerboseResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal the raw result into a BlockResult.
-	var blockResult btcjson.GetBlockVerboseResult
-	err = js.Unmarshal(res, &blockResult)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	blockResult = &btcjson.GetBlockVerboseResult{}
+	if err = js.Unmarshal(res, blockResult); slog.Check(err) {
+		return
 	}
-	return &blockResult, nil
+	return
 }
 
 // GetBlockVerboseAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetBlockVerbose for the blocking version and more details.
@@ -121,7 +109,7 @@ func (c *Client) GetBlockVerboseAsync(blockHash *chainhash.Hash) FutureGetBlockV
 }
 
 // GetBlockVerbose returns a data structure from the server with information about a block given its hash. See GetBlockVerboseTx to retrieve transaction data structures as well. See GetBlock to retrieve a raw block instead.
-func (c *Client) GetBlockVerbose(blockHash *chainhash.Hash) (*btcjson.GetBlockVerboseResult, error) {
+func (c *Client) GetBlockVerbose(blockHash *chainhash.Hash) (gbvr *btcjson.GetBlockVerboseResult, err error) {
 	return c.GetBlockVerboseAsync(blockHash).Receive()
 }
 
@@ -136,7 +124,7 @@ func (c *Client) GetBlockVerboseTxAsync(blockHash *chainhash.Hash) FutureGetBloc
 }
 
 // GetBlockVerboseTx returns a data structure from the server with information about a block and its transactions given its hash. See GetBlockVerbose if only transaction hashes are preferred. See GetBlock to retrieve a raw block instead.
-func (c *Client) GetBlockVerboseTx(blockHash *chainhash.Hash) (*btcjson.GetBlockVerboseResult, error) {
+func (c *Client) GetBlockVerboseTx(blockHash *chainhash.Hash) (gbvr *btcjson.GetBlockVerboseResult, err error) {
 	return c.GetBlockVerboseTxAsync(blockHash).Receive()
 }
 
@@ -144,20 +132,16 @@ func (c *Client) GetBlockVerboseTx(blockHash *chainhash.Hash) (*btcjson.GetBlock
 type FutureGetBlockCountResult chan *response
 
 // Receive waits for the response promised by the future and returns the number of blocks in the longest block chain.
-func (r FutureGetBlockCountResult) Receive() (int64, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return 0, err
+func (r FutureGetBlockCountResult) Receive() (count int64, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal the result as an int64.
-	var count int64
-	err = js.Unmarshal(res, &count)
-	if err != nil {
-		slog.Error(err)
-		return 0, err
+	if err = js.Unmarshal(res, &count); slog.Check(err) {
+		return
 	}
-	return count, nil
+	return
 }
 
 // GetBlockCountAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetBlockCount for the blocking version and more details.
@@ -167,7 +151,7 @@ func (c *Client) GetBlockCountAsync() FutureGetBlockCountResult {
 }
 
 // GetBlockCount returns the number of blocks in the longest block chain.
-func (c *Client) GetBlockCount() (int64, error) {
+func (c *Client) GetBlockCount() (i int64, err error) {
 	return c.GetBlockCountAsync().Receive()
 }
 
@@ -175,20 +159,16 @@ func (c *Client) GetBlockCount() (int64, error) {
 type FutureGetDifficultyResult chan *response
 
 // Receive waits for the response promised by the future and returns the proof-of-work difficulty as a multiple of the minimum difficulty.
-func (r FutureGetDifficultyResult) Receive() (float64, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return 0, err
+func (r FutureGetDifficultyResult) Receive() (difficulty float64, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal the result as a float64.
-	var difficulty float64
-	err = js.Unmarshal(res, &difficulty)
-	if err != nil {
-		slog.Error(err)
-		return 0, err
+	if err = js.Unmarshal(res, &difficulty); slog.Check(err) {
+		return
 	}
-	return difficulty, nil
+	return
 }
 
 // GetDifficultyAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetDifficulty for the blocking version and more details.
@@ -198,7 +178,7 @@ func (c *Client) GetDifficultyAsync(algo string) FutureGetDifficultyResult {
 }
 
 // GetDifficulty returns the proof-of-work difficulty as a multiple of the minimum difficulty.
-func (c *Client) GetDifficulty(algo string) (float64, error) {
+func (c *Client) GetDifficulty(algo string) (f float64, err error) {
 	return c.GetDifficultyAsync(algo).Receive()
 }
 
@@ -206,17 +186,16 @@ func (c *Client) GetDifficulty(algo string) (float64, error) {
 type FutureGetBlockChainInfoResult chan *response
 
 // Receive waits for the response promised by the future and returns chain info result provided by the server.
-func (r FutureGetBlockChainInfoResult) Receive() (*btcjson.GetBlockChainInfoResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetBlockChainInfoResult) Receive() (chainInfo *btcjson.GetBlockChainInfoResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
-	var chainInfo btcjson.GetBlockChainInfoResult
-	if err := js.Unmarshal(res, &chainInfo); err != nil {
-		return nil, err
+	chainInfo = &btcjson.GetBlockChainInfoResult{}
+	if err = js.Unmarshal(res, chainInfo); slog.Check(err) {
+		return
 	}
-	return &chainInfo, nil
+	return
 }
 
 // GetBlockChainInfoAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. GetBlockChainInfo for the blocking version and more details.
@@ -226,7 +205,7 @@ func (c *Client) GetBlockChainInfoAsync() FutureGetBlockChainInfoResult {
 }
 
 // GetBlockChainInfo returns information related to the processing state of various chain-specific details such as the current difficulty from the tip of the main chain.
-func (c *Client) GetBlockChainInfo() (*btcjson.GetBlockChainInfoResult, error) {
+func (c *Client) GetBlockChainInfo() (gbcir *btcjson.GetBlockChainInfoResult, err error) {
 	return c.GetBlockChainInfoAsync().Receive()
 }
 
@@ -234,18 +213,15 @@ func (c *Client) GetBlockChainInfo() (*btcjson.GetBlockChainInfoResult, error) {
 type FutureGetBlockHashResult chan *response
 
 // Receive waits for the response promised by the future and returns the hash of the block in the best block chain at the given height.
-func (r FutureGetBlockHashResult) Receive() (*chainhash.Hash, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetBlockHashResult) Receive() (h *chainhash.Hash, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal the result as a string-encoded sha.
 	var txHashStr string
-	err = js.Unmarshal(res, &txHashStr)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &txHashStr); slog.Check(err) {
+		return
 	}
 	return chainhash.NewHashFromStr(txHashStr)
 }
@@ -257,7 +233,7 @@ func (c *Client) GetBlockHashAsync(blockHeight int64) FutureGetBlockHashResult {
 }
 
 // GetBlockHash returns the hash of the block in the best block chain at the given height.
-func (c *Client) GetBlockHash(blockHeight int64) (*chainhash.Hash, error) {
+func (c *Client) GetBlockHash(blockHeight int64) (h *chainhash.Hash, err error) {
 	return c.GetBlockHashAsync(blockHeight).Receive()
 }
 
@@ -265,32 +241,26 @@ func (c *Client) GetBlockHash(blockHeight int64) (*chainhash.Hash, error) {
 type FutureGetBlockHeaderResult chan *response
 
 // Receive waits for the response promised by the future and returns the blockheader requested from the server given its hash.
-func (r FutureGetBlockHeaderResult) Receive() (*wire.BlockHeader, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetBlockHeaderResult) Receive() (bh *wire.BlockHeader, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
 	var bhHex string
-	err = js.Unmarshal(res, &bhHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &bhHex); slog.Check(err) {
+		return
 	}
-	serializedBH, err := hex.DecodeString(bhHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var serializedBH []byte
+	if serializedBH, err = hex.DecodeString(bhHex); slog.Check(err) {
+		return
 	}
 	// Deserialize the blockheader and return it.
-	var bh wire.BlockHeader
-	err = bh.Deserialize(bytes.NewReader(serializedBH))
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	bh = &wire.BlockHeader{}
+	if err = bh.Deserialize(bytes.NewReader(serializedBH)); slog.Check(err) {
+		return
 	}
-	return &bh, err
+	return
 }
 
 // GetBlockHeaderAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetBlockHeader for the blocking version and more details.
@@ -304,7 +274,7 @@ func (c *Client) GetBlockHeaderAsync(blockHash *chainhash.Hash) FutureGetBlockHe
 }
 
 // GetBlockHeader returns the blockheader from the server given its hash. See GetBlockHeaderVerbose to retrieve a data structure with information about the block instead.
-func (c *Client) GetBlockHeader(blockHash *chainhash.Hash) (*wire.BlockHeader, error) {
+func (c *Client) GetBlockHeader(blockHash *chainhash.Hash) (bh *wire.BlockHeader, err error) {
 	return c.GetBlockHeaderAsync(blockHash).Receive()
 }
 
@@ -312,20 +282,17 @@ func (c *Client) GetBlockHeader(blockHash *chainhash.Hash) (*wire.BlockHeader, e
 type FutureGetBlockHeaderVerboseResult chan *response
 
 // Receive waits for the response promised by the future and returns the data structure of the blockheader requested from the server given its hash.
-func (r FutureGetBlockHeaderVerboseResult) Receive() (*btcjson.GetBlockHeaderVerboseResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetBlockHeaderVerboseResult) Receive() (bh *btcjson.GetBlockHeaderVerboseResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
-	var bh btcjson.GetBlockHeaderVerboseResult
-	err = js.Unmarshal(res, &bh)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	bh = &btcjson.GetBlockHeaderVerboseResult{}
+	if err = js.Unmarshal(res, &bh); slog.Check(err) {
+		return
 	}
-	return &bh, nil
+	return bh, nil
 }
 
 // GetBlockHeaderVerboseAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetBlockHeader for the blocking version and more details.
@@ -339,7 +306,7 @@ func (c *Client) GetBlockHeaderVerboseAsync(blockHash *chainhash.Hash) FutureGet
 }
 
 // GetBlockHeaderVerbose returns a data structure with information about the blockheader from the server given its hash. See GetBlockHeader to retrieve a blockheader instead.
-func (c *Client) GetBlockHeaderVerbose(blockHash *chainhash.Hash) (*btcjson.GetBlockHeaderVerboseResult, error) {
+func (c *Client) GetBlockHeaderVerbose(blockHash *chainhash.Hash) (gbhvr *btcjson.GetBlockHeaderVerboseResult, err error) {
 	return c.GetBlockHeaderVerboseAsync(blockHash).Receive()
 }
 
@@ -347,20 +314,17 @@ func (c *Client) GetBlockHeaderVerbose(blockHash *chainhash.Hash) (*btcjson.GetB
 type FutureGetMempoolEntryResult chan *response
 
 // Receive waits for the response promised by the future and returns a data structure with information about the transaction in the memory pool given its hash.
-func (r FutureGetMempoolEntryResult) Receive() (*btcjson.GetMempoolEntryResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetMempoolEntryResult) Receive() (mempoolEntryResult *btcjson.GetMempoolEntryResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal the result as an array of strings.
-	var mempoolEntryResult btcjson.GetMempoolEntryResult
-	err = js.Unmarshal(res, &mempoolEntryResult)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	mempoolEntryResult = &btcjson.GetMempoolEntryResult{}
+	if err = js.Unmarshal(res, &mempoolEntryResult); slog.Check(err) {
+		return
 	}
-	return &mempoolEntryResult, nil
+	return
 }
 
 // GetMempoolEntryAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetMempoolEntry for the blocking version and more details.
@@ -370,7 +334,7 @@ func (c *Client) GetMempoolEntryAsync(txHash string) FutureGetMempoolEntryResult
 }
 
 // GetMempoolEntry returns a data structure with information about the transaction in the memory pool given its hash.
-func (c *Client) GetMempoolEntry(txHash string) (*btcjson.GetMempoolEntryResult, error) {
+func (c *Client) GetMempoolEntry(txHash string) (gmer *btcjson.GetMempoolEntryResult, err error) {
 	return c.GetMempoolEntryAsync(txHash).Receive()
 }
 
@@ -378,30 +342,26 @@ func (c *Client) GetMempoolEntry(txHash string) (*btcjson.GetMempoolEntryResult,
 type FutureGetRawMempoolResult chan *response
 
 // Receive waits for the response promised by the future and returns the hashes of all transactions in the memory pool.
-func (r FutureGetRawMempoolResult) Receive() ([]*chainhash.Hash, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetRawMempoolResult) Receive() (h []*chainhash.Hash, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal the result as an array of strings.
 	var txHashStrs []string
-	err = js.Unmarshal(res, &txHashStrs)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &txHashStrs); slog.Check(err) {
+		return
 	}
 	// Create a slice of ShaHash arrays from the string slice.
 	txHashes := make([]*chainhash.Hash, 0, len(txHashStrs))
+	var txHash *chainhash.Hash
 	for _, hashStr := range txHashStrs {
-		txHash, err := chainhash.NewHashFromStr(hashStr)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if txHash, err = chainhash.NewHashFromStr(hashStr); slog.Check(err) {
+			return
 		}
 		txHashes = append(txHashes, txHash)
 	}
-	return txHashes, nil
+	return
 }
 
 // GetRawMempoolAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetRawMempool for the blocking version and more details.
@@ -411,7 +371,7 @@ func (c *Client) GetRawMempoolAsync() FutureGetRawMempoolResult {
 }
 
 // GetRawMempool returns the hashes of all transactions in the memory pool. See GetRawMempoolVerbose to retrieve data structures with information about the transactions instead.
-func (c *Client) GetRawMempool() ([]*chainhash.Hash, error) {
+func (c *Client) GetRawMempool() (h []*chainhash.Hash, err error) {
 	return c.GetRawMempoolAsync().Receive()
 }
 
@@ -419,20 +379,16 @@ func (c *Client) GetRawMempool() ([]*chainhash.Hash, error) {
 type FutureGetRawMempoolVerboseResult chan *response
 
 // Receive waits for the response promised by the future and returns a map of transaction hashes to an associated data structure with information about the transaction for all transactions in the memory pool.
-func (r FutureGetRawMempoolVerboseResult) Receive() (map[string]btcjson.GetRawMempoolVerboseResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetRawMempoolVerboseResult) Receive() (mempoolItems map[string]btcjson.GetRawMempoolVerboseResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal the result as a map of strings (tx SHAs) to their detailed results.
-	var mempoolItems map[string]btcjson.GetRawMempoolVerboseResult
-	err = js.Unmarshal(res, &mempoolItems)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &mempoolItems); slog.Check(err) {
+		return
 	}
-	return mempoolItems, nil
+	return
 }
 
 // GetRawMempoolVerboseAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetRawMempoolVerbose for the blocking version and more details.
@@ -442,7 +398,7 @@ func (c *Client) GetRawMempoolVerboseAsync() FutureGetRawMempoolVerboseResult {
 }
 
 // GetRawMempoolVerbose returns a map of transaction hashes to an associated data structure with information about the transaction for all transactions in the memory pool. See GetRawMempool to retrieve only the transaction hashes instead.
-func (c *Client) GetRawMempoolVerbose() (map[string]btcjson.GetRawMempoolVerboseResult, error) {
+func (c *Client) GetRawMempoolVerbose() (grmvr map[string]btcjson.GetRawMempoolVerboseResult, err error) {
 	return c.GetRawMempoolVerboseAsync().Receive()
 }
 
@@ -450,20 +406,16 @@ func (c *Client) GetRawMempoolVerbose() (map[string]btcjson.GetRawMempoolVerbose
 type FutureEstimateFeeResult chan *response
 
 // Receive waits for the response promised by the future and returns the info provided by the server.
-func (r FutureEstimateFeeResult) Receive() (float64, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return -1, err
+func (r FutureEstimateFeeResult) Receive() (fee float64, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a getinfo result object.
-	var fee float64
-	err = js.Unmarshal(res, &fee)
-	if err != nil {
-		slog.Error(err)
-		return -1, err
+	if err = js.Unmarshal(res, &fee); slog.Check(err) {
+		return
 	}
-	return fee, nil
+	return
 }
 
 // EstimateFeeAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See EstimateFee for the blocking version and more details.
@@ -473,7 +425,7 @@ func (c *Client) EstimateFeeAsync(numBlocks int64) FutureEstimateFeeResult {
 }
 
 // EstimateFee provides an estimated fee  in bitcoins per kilobyte.
-func (c *Client) EstimateFee(numBlocks int64) (float64, error) {
+func (c *Client) EstimateFee(numBlocks int64) (u float64, err error) {
 	return c.EstimateFeeAsync(numBlocks).Receive()
 }
 
@@ -481,20 +433,16 @@ func (c *Client) EstimateFee(numBlocks int64) (float64, error) {
 type FutureVerifyChainResult chan *response
 
 // Receive waits for the response promised by the future and returns whether or not the chain verified based on the check level and number of blocks to verify specified in the original call.
-func (r FutureVerifyChainResult) Receive() (bool, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return false, err
+func (r FutureVerifyChainResult) Receive() (verified bool, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal the result as a boolean.
-	var verified bool
-	err = js.Unmarshal(res, &verified)
-	if err != nil {
-		slog.Error(err)
-		return false, err
+	if err = js.Unmarshal(res, &verified); slog.Check(err) {
+		return
 	}
-	return verified, nil
+	return
 }
 
 // VerifyChainAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See VerifyChain for the blocking version and more details.
@@ -504,7 +452,7 @@ func (c *Client) VerifyChainAsync() FutureVerifyChainResult {
 }
 
 // VerifyChain requests the server to verify the block chain database using the default check level and number of blocks to verify. See VerifyChainLevel and VerifyChainBlocks to override the defaults.
-func (c *Client) VerifyChain() (bool, error) {
+func (c *Client) VerifyChain() (b bool, err error) {
 	return c.VerifyChainAsync().Receive()
 }
 
@@ -515,7 +463,7 @@ func (c *Client) VerifyChainLevelAsync(checkLevel int32) FutureVerifyChainResult
 }
 
 // VerifyChainLevel requests the server to verify the block chain database using the passed check level and default number of blocks to verify. The check level controls how thorough the verification is with higher numbers increasing the amount of checks done as consequently how long the verification takes. See VerifyChain to use the default check level and VerifyChainBlocks to override the number of blocks to verify.
-func (c *Client) VerifyChainLevel(checkLevel int32) (bool, error) {
+func (c *Client) VerifyChainLevel(checkLevel int32) (b bool, err error) {
 	return c.VerifyChainLevelAsync(checkLevel).Receive()
 }
 
@@ -526,7 +474,7 @@ func (c *Client) VerifyChainBlocksAsync(checkLevel, numBlocks int32) FutureVerif
 }
 
 // VerifyChainBlocks requests the server to verify the block chain database using the passed check level and number of blocks to verify. The check level controls how thorough the verification is with higher numbers increasing the amount of checks done as consequently how long the verification takes. The number of blocks refers to the number of blocks from the end of the current longest chain. See VerifyChain and VerifyChainLevel to use defaults.
-func (c *Client) VerifyChainBlocks(checkLevel, numBlocks int32) (bool, error) {
+func (c *Client) VerifyChainBlocks(checkLevel, numBlocks int32) (b bool, err error) {
 	return c.VerifyChainBlocksAsync(checkLevel, numBlocks).Receive()
 }
 
@@ -534,24 +482,20 @@ func (c *Client) VerifyChainBlocks(checkLevel, numBlocks int32) (bool, error) {
 type FutureGetTxOutResult chan *response
 
 // Receive waits for the response promised by the future and returns a transaction given its hash.
-func (r FutureGetTxOutResult) Receive() (*btcjson.GetTxOutResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetTxOutResult) Receive() (txOutInfo *btcjson.GetTxOutResult, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// take care of the special case where the output has been spent already it should return the string "null"
 	if string(res) == "null" {
-		return nil, nil
+		return
 	}
 	// Unmarshal result as an gettxout result object.
-	var txOutInfo *btcjson.GetTxOutResult
-	err = js.Unmarshal(res, &txOutInfo)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &txOutInfo); slog.Check(err) {
+		return
 	}
-	return txOutInfo, nil
+	return
 }
 
 // GetTxOutAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetTxOut for the blocking version and more details.
@@ -565,7 +509,7 @@ func (c *Client) GetTxOutAsync(txHash *chainhash.Hash, index uint32, mempool boo
 }
 
 // GetTxOut returns the transaction output info if it's unspent and nil, otherwise.
-func (c *Client) GetTxOut(txHash *chainhash.Hash, index uint32, mempool bool) (*btcjson.GetTxOutResult, error) {
+func (c *Client) GetTxOut(txHash *chainhash.Hash, index uint32, mempool bool) (gtor *btcjson.GetTxOutResult, err error) {
 	return c.GetTxOutAsync(txHash, index, mempool).Receive()
 }
 
@@ -575,17 +519,13 @@ type FutureRescanBlocksResult chan *response
 
 // Receive waits for the response promised by the future and returns the discovered rescanblocks data. NOTE: This is a
 // btcsuite extension ported from github.com/decred/dcrrpcclient.
-func (r FutureRescanBlocksResult) Receive() ([]btcjson.RescannedBlock, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureRescanBlocksResult) Receive() (rescanBlocksResult []btcjson.RescannedBlock, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
-	var rescanBlocksResult []btcjson.RescannedBlock
-	err = js.Unmarshal(res, &rescanBlocksResult)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &rescanBlocksResult); slog.Check(err) {
+		return
 	}
 	return rescanBlocksResult, nil
 }
@@ -601,7 +541,7 @@ func (c *Client) RescanBlocksAsync(blockHashes []chainhash.Hash) FutureRescanBlo
 }
 
 // RescanBlocks rescans the blocks identified by blockHashes, in order, using the client's loaded transaction filter.  The blocks do not need to be on the main chain, but they do need to be adjacent to each other. NOTE: This is a btcsuite extension ported from github.com/decred/dcrrpcclient.
-func (c *Client) RescanBlocks(blockHashes []chainhash.Hash) ([]btcjson.RescannedBlock, error) {
+func (c *Client) RescanBlocks(blockHashes []chainhash.Hash) (rb []btcjson.RescannedBlock, err error) {
 	return c.RescanBlocksAsync(blockHashes).Receive()
 }
 
@@ -609,8 +549,8 @@ func (c *Client) RescanBlocks(blockHashes []chainhash.Hash) ([]btcjson.Rescanned
 type FutureInvalidateBlockResult chan *response
 
 // Receive waits for the response promised by the future and returns the raw block requested from the server given its hash.
-func (r FutureInvalidateBlockResult) Receive() error {
-	_, err := receiveFuture(r)
+func (r FutureInvalidateBlockResult) Receive() (err error) {
+	_, err = receiveFuture(r)
 	return err
 }
 
@@ -625,7 +565,7 @@ func (c *Client) InvalidateBlockAsync(blockHash *chainhash.Hash) FutureInvalidat
 }
 
 // InvalidateBlock invalidates a specific block.
-func (c *Client) InvalidateBlock(blockHash *chainhash.Hash) error {
+func (c *Client) InvalidateBlock(blockHash *chainhash.Hash) (err error) {
 	return c.InvalidateBlockAsync(blockHash).Receive()
 }
 
@@ -633,29 +573,24 @@ func (c *Client) InvalidateBlock(blockHash *chainhash.Hash) error {
 type FutureGetCFilterResult chan *response
 
 // Receive waits for the response promised by the future and returns the raw filter requested from the server given its block hash.
-func (r FutureGetCFilterResult) Receive() (*wire.MsgCFilter, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetCFilterResult) Receive() (msgCFilter *wire.MsgCFilter, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
 	var filterHex string
-	err = js.Unmarshal(res, &filterHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &filterHex); slog.Check(err) {
+		return
 	}
 	// Decode the serialized cf hex to raw bytes.
-	serializedFilter, err := hex.DecodeString(filterHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var serializedFilter []byte
+	if res, err = hex.DecodeString(filterHex); slog.Check(err) {
+		return
 	}
 	// Assign the filter bytes to the correct field of the wire message. We aren't going to set the block hash or extended flag, since we don't actually get that back in the RPC response.
-	var msgCFilter wire.MsgCFilter
-	msgCFilter.Data = serializedFilter
-	return &msgCFilter, nil
+	msgCFilter = &wire.MsgCFilter{Data: serializedFilter}
+	return
 }
 
 // GetCFilterAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetCFilter for the blocking version and more details.
@@ -671,7 +606,7 @@ func (c *Client) GetCFilterAsync(blockHash *chainhash.Hash,
 
 // GetCFilter returns a raw filter from the server given its block hash.
 func (c *Client) GetCFilter(blockHash *chainhash.Hash,
-	filterType wire.FilterType) (*wire.MsgCFilter, error) {
+	filterType wire.FilterType) (mcf *wire.MsgCFilter, err error) {
 	return c.GetCFilterAsync(blockHash, filterType).Receive()
 }
 
@@ -679,18 +614,15 @@ func (c *Client) GetCFilter(blockHash *chainhash.Hash,
 type FutureGetCFilterHeaderResult chan *response
 
 // Receive waits for the response promised by the future and returns the raw filter header requested from the server given its block hash.
-func (r FutureGetCFilterHeaderResult) Receive() (*wire.MsgCFHeaders, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (r FutureGetCFilterHeaderResult) Receive() (msgCFHeaders *wire.MsgCFHeaders, err error) {
+	var res []byte
+	if res, err = receiveFuture(r); slog.Check(err) {
+		return
 	}
 	// Unmarshal result as a string.
 	var headerHex string
-	err = js.Unmarshal(res, &headerHex)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = js.Unmarshal(res, &headerHex); slog.Check(err) {
+		return
 	}
 	// Assign the decoded header into a hash
 	headerHash, err := chainhash.NewHashFromStr(headerHex)
@@ -699,8 +631,8 @@ func (r FutureGetCFilterHeaderResult) Receive() (*wire.MsgCFHeaders, error) {
 		return nil, err
 	}
 	// Assign the hash to a headers message and return it.
-	msgCFHeaders := wire.MsgCFHeaders{PrevFilterHeader: *headerHash}
-	return &msgCFHeaders, nil
+	msgCFHeaders = &wire.MsgCFHeaders{PrevFilterHeader: *headerHash}
+	return
 }
 
 // GetCFilterHeaderAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetCFilterHeader for the blocking version and more details.
@@ -716,6 +648,6 @@ func (c *Client) GetCFilterHeaderAsync(blockHash *chainhash.Hash,
 
 // GetCFilterHeader returns a raw filter header from the server given its block hash.
 func (c *Client) GetCFilterHeader(blockHash *chainhash.Hash,
-	filterType wire.FilterType) (*wire.MsgCFHeaders, error) {
+	filterType wire.FilterType) (mcfh *wire.MsgCFHeaders, err error) {
 	return c.GetCFilterHeaderAsync(blockHash, filterType).Receive()
 }

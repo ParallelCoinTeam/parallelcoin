@@ -41,7 +41,7 @@ const (
 	_MOVEFILE_REPLACE_EXISTING = 1
 )
 
-func moveFileEx(from *uint16, to *uint16, flags uint32) error {
+func moveFileEx(from *uint16, to *uint16, flags uint32) (err error) {
 	r1, _, e1 := syscall.Syscall(procMoveFileExW.Addr(), 3,
 		uintptr(unsafe.Pointer(from)), uintptr(unsafe.Pointer(to)),
 		uintptr(flags))
@@ -57,7 +57,7 @@ func moveFileEx(from *uint16, to *uint16, flags uint32) error {
 
 // Atomic provides an atomic file rename.  newpath is replaced if it
 // already exists.
-func Atomic(oldpath, newpath string) error {
+func Atomic(oldpath, newpath string) (err error) {
 	from, err := syscall.UTF16PtrFromString(oldpath)
 	if err != nil {
 		Error(err)

@@ -47,11 +47,11 @@ type // blockChainContext represents a particular block's placement in the block
 		mainChain bool
 	}
 
-func // migrateBlockIndex migrates all block entries from the v1 block index
+// migrateBlockIndex migrates all block entries from the v1 block index
 // bucket to the v2 bucket. The v1 bucket stores all block entries keyed by
 // block hash, whereas the v2 bucket stores the exact same values,
 // but keyed instead by block height + hash.
-migrateBlockIndex(db database.DB) (err error) {
+func migrateBlockIndex(db database.DB) (err error) {
 	// Hardcoded bucket names so updates to the global values do not affect
 	// old upgrades.
 	v1BucketName := []byte("ffldb-blockidx")
@@ -70,7 +70,7 @@ migrateBlockIndex(db database.DB) (err error) {
 		}
 		// Get tip of the main chain.
 		serializedData := dbTx.Metadata().Get(chainStateKeyName)
-		var state bestChainState
+		var state *bestChainState
 		if state, err = deserializeBestChainState(serializedData); slog.Check(err) {
 			return
 		}
@@ -97,6 +97,7 @@ migrateBlockIndex(db database.DB) (err error) {
 			chainContext := blocksMap[h]
 			if chainContext.height == -1 {
 				err = fmt.Errorf("unable to calculate chain height for stored block %s", h)
+				slog.Debug(err)
 				return
 			}
 			// Mark blocks as valid if they are part of the main chain.

@@ -11,7 +11,7 @@ import (
 	"gioui.org/unit"
 )
 
-type DuoUIlabel struct {
+type DuoUILabel struct {
 	// Face defines the text style.
 	Font text.Font
 	// Color is the text color.
@@ -26,44 +26,44 @@ type DuoUIlabel struct {
 	shaper text.Shaper
 }
 
-func (t *DuoUItheme) H1(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize.Scale(96.0/16.0), txt)
+func (t *DuoUITheme) H1(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize.Scale(96.0/16.0), txt)
 }
 
-func (t *DuoUItheme) H2(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize.Scale(60.0/16.0), txt)
+func (t *DuoUITheme) H2(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize.Scale(60.0/16.0), txt)
 }
 
-func (t *DuoUItheme) H3(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize.Scale(48.0/16.0), txt)
+func (t *DuoUITheme) H3(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize.Scale(48.0/16.0), txt)
 }
 
-func (t *DuoUItheme) H4(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize.Scale(34.0/16.0), txt)
+func (t *DuoUITheme) H4(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize.Scale(34.0/16.0), txt)
 }
 
-func (t *DuoUItheme) H5(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize.Scale(24.0/16.0), txt)
+func (t *DuoUITheme) H5(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize.Scale(24.0/16.0), txt)
 }
 
-func (t *DuoUItheme) H6(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize.Scale(20.0/16.0), txt)
+func (t *DuoUITheme) H6(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize.Scale(20.0/16.0), txt)
 }
 
-func (t *DuoUItheme) Body1(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize, txt)
+func (t *DuoUITheme) Body1(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize, txt)
 }
 
-func (t *DuoUItheme) Body2(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize.Scale(14.0/16.0), txt)
+func (t *DuoUITheme) Body2(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize.Scale(14.0/16.0), txt)
 }
 
-func (t *DuoUItheme) Caption(txt string) DuoUIlabel {
-	return t.DuoUIlabel(t.TextSize.Scale(12.0/16.0), txt)
+func (t *DuoUITheme) Caption(txt string) DuoUILabel {
+	return t.DuoUILabel(t.TextSize.Scale(12.0/16.0), txt)
 }
 
-func (t *DuoUItheme) DuoUIlabel(size unit.Value, txt string) DuoUIlabel {
-	return DuoUIlabel{
+func (t *DuoUITheme) DuoUILabel(size unit.Value, txt string) DuoUILabel {
+	return DuoUILabel{
 		Text:     txt,
 		Color:    "Dark",
 		TextSize: size,
@@ -71,7 +71,7 @@ func (t *DuoUItheme) DuoUIlabel(size unit.Value, txt string) DuoUIlabel {
 	}
 }
 
-func (l DuoUIlabel) Layout(gtx *layout.Context) {
+func (l DuoUILabel) Layout(gtx *layout.Context) {
 	paint.ColorOp{Color: HexARGB(l.Color)}.Add(gtx.Ops)
 	tl := gel.Label{Alignment: l.Alignment, MaxLines: l.MaxLines}
 	tl.Layout(gtx, l.shaper, l.Font, l.TextSize, l.Text)

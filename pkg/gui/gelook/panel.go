@@ -5,18 +5,18 @@ import (
 	"github.com/p9c/pod/pkg/gui/gel"
 )
 
-type DuoUIpanel struct {
+type DuoUIPanel struct {
 	PanelObject interface{}
 	ScrollBar   *ScrollBar
-	container   DuoUIcontainer
+	container   DuoUIContainer
 }
 
-func (t *DuoUItheme) DuoUIpanel() DuoUIpanel {
-	return DuoUIpanel{
-		container: t.DuoUIcontainer(0, t.Colors["Light"]),
+func (t *DuoUITheme) DuoUIPanel() DuoUIPanel {
+	return DuoUIPanel{
+		container: t.DuoUIContainer(0, t.Colors["Light"]),
 	}
 }
-func (p *DuoUIpanel) panelLayout(gtx *layout.Context, panel *gel.Panel, row func(i int, in interface{})) func() {
+func (p *DuoUIPanel) panelLayout(gtx *layout.Context, panel *gel.Panel, row func(i int, in interface{})) func() {
 	return func() {
 		visibleObjectsNumber := 0
 		panel.PanelContentLayout.Layout(gtx, panel.PanelObjectsNumber, func(i int) {
@@ -27,7 +27,7 @@ func (p *DuoUIpanel) panelLayout(gtx *layout.Context, panel *gel.Panel, row func
 	}
 }
 
-func (p *DuoUIpanel) Layout(gtx *layout.Context, panel *gel.Panel, row func(i int, in interface{})) {
+func (p *DuoUIPanel) Layout(gtx *layout.Context, panel *gel.Panel, row func(i int, in interface{})) {
 	p.container.Layout(gtx, layout.NW, func() {
 		layout.Flex{
 			Axis:    layout.Horizontal,

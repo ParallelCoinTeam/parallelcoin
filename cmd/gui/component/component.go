@@ -32,7 +32,7 @@ import (
 type (
 	Context struct {
 		Gtx *layout.Context
-		Thm *gelook.DuoUItheme
+		Thm *gelook.DuoUITheme
 	}
 	State struct {
 		Context
@@ -41,7 +41,7 @@ type (
 	DuoUIcomponent struct {
 		Name    string
 		Version string
-		Theme   *gelook.DuoUItheme
+		Theme   *gelook.DuoUITheme
 		M       interface{}
 		V       func()
 		C       func()
@@ -108,7 +108,7 @@ var (
 	}
 )
 
-func NewContext(gtx *layout.Context, th *gelook.DuoUItheme) (cx *Context) {
+func NewContext(gtx *layout.Context, th *gelook.DuoUITheme) (cx *Context) {
 	return &Context{
 		Gtx: gtx,
 		Thm: th,
@@ -116,7 +116,7 @@ func NewContext(gtx *layout.Context, th *gelook.DuoUItheme) (cx *Context) {
 }
 
 func NewState(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) (cx *State) {
+	th *gelook.DuoUITheme) (cx *State) {
 	return &State{
 		Context: *NewContext(gtx, th),
 		Rc:      rc,
@@ -128,7 +128,7 @@ func NewState(rc *rcd.RcVar, gtx *layout.Context,
 func (s *State) DuoUIdialog() {
 	t, g := s.Thm, s.Gtx
 	// cs := g.Constraints
-	t.DuoUIcontainer(0, "ee000000").
+	t.DuoUIContainer(0, "ee000000").
 		Layout(g, layout.Center, func() {
 			cs := g.Constraints
 			layout.Stack{
@@ -174,7 +174,7 @@ func (s *State) DuoUIdialog() {
 											Left:   unit.Dp(4),
 											Right:  unit.Dp(4)}.
 											Layout(g, func() {
-												cur := t.DuoUIlabel(unit.Dp(
+												cur := t.DuoUILabel(unit.Dp(
 													14), s.Rc.Dialog.Text)
 												cur.Font.Typeface = t.
 													Fonts["Primary"]
@@ -325,7 +325,7 @@ func (s *State) DuoUIinputField(f *Field) func() {
 			default:
 			}
 		case "switch":
-			sw := t.DuoUIcheckBox(
+			sw := t.DuoUICheckBox(
 				f.Field.Label, t.Colors["Primary"], t.Colors["Primary"])
 			sw.PillColor = t.Colors["LightGray"]
 			sw.PillColorChecked = t.Colors["PrimaryDim"]
@@ -375,13 +375,13 @@ func (s *State) DuoUIlatestTransactions() func() {
 	return func() {
 		width := g.Constraints.Width.Max
 		//cs := g.Constraints
-		t.DuoUIcontainer(0, t.Colors["DarkGray"]).
+		t.DuoUIContainer(0, t.Colors["DarkGray"]).
 			Layout(g, layout.NW, func() {
 				layout.Flex{
 					Axis: layout.Vertical,
 				}.Layout(g,
 					layout.Rigid(func() {
-						t.DuoUIcontainer(8, t.Colors["Primary"]).
+						t.DuoUIContainer(8, t.Colors["Primary"]).
 							Layout(g, layout.N,
 								func() {
 									g.Constraints.Width.Min = width
@@ -399,7 +399,7 @@ func (s *State) DuoUIlatestTransactions() func() {
 									Axis: layout.Vertical,
 								}.Layout(g,
 									layout.Rigid(func() {
-										latestTxsBookPanel := t.DuoUIpanel()
+										latestTxsBookPanel := t.DuoUIPanel()
 										latestTxsBookPanel.PanelObject =
 											s.Rc.Status.Wallet.LastTxs.Txs
 										latestTxsBookPanel.ScrollBar =
@@ -410,7 +410,7 @@ func (s *State) DuoUIlatestTransactions() func() {
 											latestTxsPanelElement, func(i int, in interface{}) {
 												txs := in.([]model.DuoUItransactionExcerpt)
 												tx := txs[i]
-												t.DuoUIcontainer(16,
+												t.DuoUIContainer(16,
 													t.Colors["Dark"]).
 													Layout(g, layout.NW,
 														func() {
@@ -444,7 +444,7 @@ func (s *State) DuoUIlatestTransactions() func() {
 																}),
 																layout.Rigid(s.
 																	Thm.
-																	DuoUIline(g,
+																	DuoUILine(g,
 																		0, 0, 1,
 																		t.
 																			Colors["Hint"]),
@@ -467,7 +467,7 @@ func (s *State) DuoUIlogger() func() {
 		layout.UniformInset(unit.Dp(10)).Layout(g, func() {
 			// const n = 1e6
 			cs := g.Constraints
-			gelook.DuoUIdrawRectangle(g,
+			gelook.DuoUIDrawRectangle(g,
 				cs.Width.Max, cs.Height.Max, t.Colors["Dark"],
 				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			lm, ok := s.Rc.Log.LogMessages.Load().([]log.Entry)
@@ -508,29 +508,29 @@ func (s *State) DuoUIstatus() func() {
 	wall := s.Rc.Status.Wallet
 	nod := s.Rc.Status.Node
 	return func() {
-		t.DuoUIcontainer(8, t.Colors["Light"]).Layout(g, layout.NW,
+		t.DuoUIContainer(8, t.Colors["Light"]).Layout(g, layout.NW,
 			func() {
 				bigStatus := []func(){
 					s.listItem(22, 6, "EditorMonetizationOn",
 						"BALANCE :", wall.Balance.Load()+" "+s.Rc.Settings.
 							Abbrevation),
-					t.DuoUIline(g,
+					t.DuoUILine(g,
 						8, 0, 1, t.Colors["LightGray"]),
 					s.listItem(22, 6, "MapsLayersClear", "UNCONFIRMED :",
 						wall.Unconfirmed.Load()+" "+s.Rc.Settings.Abbrevation),
-					t.DuoUIline(g,
+					t.DuoUILine(g,
 						8, 0, 1, t.Colors["LightGray"]),
 					s.listItem(22, 6, "CommunicationImportExport",
 						"TRANSACTIONS :", fmt.Sprint(wall.TxsNumber.Load())),
-					t.DuoUIline(g,
+					t.DuoUILine(g,
 						8, 0, 1, t.Colors["LightGray"]),
 					s.listItem(16, 4, "DeviceWidgets",
 						"Block Count :", fmt.Sprint(nod.BlockCount.Load())),
-					t.DuoUIline(g,
+					t.DuoUILine(g,
 						4, 0, 1, t.Colors["LightGray"]),
 					s.listItem(16, 4, "ImageTimer",
 						"Difficulty :", fmt.Sprint(nod.Difficulty.Load())),
-					t.DuoUIline(g,
+					t.DuoUILine(g,
 						4, 0, 1, t.Colors["LightGray"]),
 					s.listItem(16, 4, "NotificationVPNLock",
 						"Connections :", fmt.Sprint(nod.ConnectionCount.Load())),
@@ -558,7 +558,7 @@ func (s *State) FooterLeftMenu(allPages *model.DuoUIpages) func() {
 	}
 }
 
-func (s *State) footerMenuButton(page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {
+func (s *State) footerMenuButton(page *gelook.DuoUIPage, text, icon string, footerButton *gel.Button) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(s.Gtx, func() {
 			var footerMenuItem gelook.DuoUIbutton
@@ -700,7 +700,7 @@ func (s *State) headerMenuButton(text, icon string, headerButton *gel.Button) fu
 	}
 }
 
-func (s *State) iconButton(page *gelook.DuoUIpage) func() {
+func (s *State) iconButton(page *gelook.DuoUIPage) func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
 		var logMenuItem gelook.DuoUIbutton
@@ -731,7 +731,7 @@ func (s *State) MainNavigation(allPages *model.DuoUIpages, nav *model.DuoUInav) 
 	return func() {
 		navButtons := s.navButtons(allPages, nav)
 		g.Constraints.Width.Max = nav.Width
-		t.DuoUIcontainer(0, t.Colors["Dark"]).Layout(g, layout.NW,
+		t.DuoUIContainer(0, t.Colors["Dark"]).Layout(g, layout.NW,
 			func() {
 				mainNav.Layout(g, len(navButtons), func(i int) {
 					layout.UniformInset(unit.Dp(0)).Layout(g, navButtons[i])
@@ -745,25 +745,25 @@ func (s *State) navButtons(allPages *model.DuoUIpages, nav *model.DuoUInav) []fu
 	return []func(){
 		s.navMenuButton(allPages.Theme["OVERVIEW"], nav,
 			"OVERVIEW", "overviewIcon", navButtonOverview),
-		t.DuoUIline(g, 0, 0, 1,
+		t.DuoUILine(g, 0, 0, 1,
 			t.Colors["LightGrayIII"]),
 		s.navMenuButton(allPages.Theme["SEND"], nav, "SEND", "sendIcon",
 			navButtonSend),
 		// navMenuLine(g, th),
 		// navMenuButton(rc, g, t, allPages.Theme["RECEIVE"], "RECEIVE",
 		//"receiveIcon", navButtonReceive),
-		t.DuoUIline(g, 0, 0, 1,
+		t.DuoUILine(g, 0, 0, 1,
 			t.Colors["LightGrayIII"]),
 		s.navMenuButton(allPages.Theme["ADDRESSBOOK"], nav,
 			"ADDRESSBOOK", "addressBookIcon", navButtonAddressBook),
-		t.DuoUIline(g, 0, 0, 1,
+		t.DuoUILine(g, 0, 0, 1,
 			t.Colors["LightGrayIII"]),
 		s.navMenuButton(allPages.Theme["HISTORY"], nav,
 			"HISTORY", "historyIcon", navButtonHistory),
 	}
 }
 
-func (s *State) navMenuButton(page *gelook.DuoUIpage, nav *model.DuoUInav, title, icon string, navButton *gel.Button) func() {
+func (s *State) navMenuButton(page *gelook.DuoUIPage, nav *model.DuoUInav, title, icon string, navButton *gel.Button) func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
@@ -796,7 +796,7 @@ func (s *State) navMenuButton(page *gelook.DuoUIpage, nav *model.DuoUInav, title
 	}
 }
 
-func (s *State) pageNavButton(page *gelook.DuoUIpage, b *gel.Button, label, hash string) {
+func (s *State) pageNavButton(page *gelook.DuoUIPage, b *gel.Button, label, hash string) {
 	t, g := s.Thm, s.Gtx
 	layout.UniformInset(unit.Dp(4)).Layout(g, func() {
 		var blockButton gelook.DuoUIbutton
@@ -820,7 +820,7 @@ func (s *State) pageNavButton(page *gelook.DuoUIpage, b *gel.Button, label, hash
 	})
 }
 
-func (s *State) PageNavButtons(previousBlockHash, nextBlockHash string, prevPage, nextPage *gelook.DuoUIpage) func() {
+func (s *State) PageNavButtons(previousBlockHash, nextBlockHash string, prevPage, nextPage *gelook.DuoUIPage) func() {
 	g := s.Gtx
 	return func() {
 		layout.Flex{}.Layout(g,
@@ -847,7 +847,7 @@ func (s *State) PeersList() func() {
 	return func() {
 		s.Rc.Network.PeersList.Layout(g, len(s.Rc.Network.Peers), func(i int) {
 			np := s.Rc.Network.Peers[i]
-			t.DuoUIline(g, 0, 0, 1,
+			t.DuoUILine(g, 0, 0, 1,
 				t.Colors["Hint"])()
 			layout.Flex{
 				Spacing: layout.SpaceBetween,
@@ -971,7 +971,7 @@ func (s *State) TransactionsFilter() func() {
 func (s *Context) Button(buttonController *gel.Button, font text.Typeface, textSize, padT, padR, padB, padL int, color, bgColor, label string, handler func()) func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
-		t.DuoUIcontainer(0, t.Colors[""])
+		t.DuoUIContainer(0, t.Colors[""])
 		button := t.DuoUIbutton(gelook.ButtonParams{
 			TxtFont:       font,
 			Txt:           label,
@@ -996,7 +996,7 @@ func (s *Context) ConsoleInput(editorController *gel.Editor, label string, handl
 	t, g := s.Thm, s.Gtx
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
-			e := t.DuoUIeditor(label, "Dark", "Light", 120)
+			e := t.DuoUIEditor(label, "Dark", "Light", 120)
 			e.Font.Typeface = t.Fonts["Primary"]
 			e.Color = gelook.HexARGB(t.Colors["Light"])
 			e.Font.Style = text.Italic
@@ -1033,7 +1033,7 @@ func (s *Context) contentField(text, color, bgColor string, font text.Typeface, 
 				g.Constraints.Height.Min = vmin
 				layout.Center.Layout(g, func() {
 					layout.UniformInset(unit.Dp(padding)).Layout(g, func() {
-						l := t.DuoUIlabel(unit.Dp(textSize), text)
+						l := t.DuoUILabel(unit.Dp(textSize), text)
 						l.Font.Typeface = font
 						l.Color = color
 						l.Layout(g)
@@ -1098,10 +1098,10 @@ func (s *Context) dialogButton(f func(), txt, bgColor, icon, iconColor string,
 func (s *Context) Editor(editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
-		t.DuoUIcontainer(8, "ffffffff").
+		t.DuoUIContainer(8, "ffffffff").
 			Layout(g, layout.NW, func() {
 				width := g.Constraints.Width.Max
-				e := t.DuoUIeditor(label, t.Colors["Black"],
+				e := t.DuoUIEditor(label, t.Colors["Black"],
 					t.Colors["White"], width)
 				e.Font.Typeface = t.Fonts["Mono"]
 				e.TextSize = unit.Dp(12)
@@ -1121,7 +1121,7 @@ func (s *Context) Editor(editorController *gel.Editor, label string, handler fun
 func (s *Context) Label(font text.Typeface, size float32, color, label string) func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
-		l := t.DuoUIlabel(unit.Dp(size), label)
+		l := t.DuoUILabel(unit.Dp(size), label)
 		l.Font.Typeface = font
 		l.Color = color
 		l.Layout(g)
@@ -1153,7 +1153,7 @@ func (s *Context) listItem(size, top int, iconName, name, value string) func() {
 						})
 					}),
 					layout.Rigid(func() {
-						txt := t.DuoUIlabel(unit.Dp(float32(size)), name)
+						txt := t.DuoUILabel(unit.Dp(float32(size)), name)
 						txt.Font.Typeface = t.Fonts["Primary"]
 						txt.Color = t.Colors["Primary"]
 						txt.Layout(g)
@@ -1299,9 +1299,9 @@ func (s *Context) SettingsFieldLabel(f *Field) func() {
 func (s *Context) StringsArrayEditor(editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
-		t.DuoUIcontainer(8, t.Colors["White"]).Layout(g, layout.NW,
+		t.DuoUIContainer(8, t.Colors["White"]).Layout(g, layout.NW,
 			func() {
-				e := t.DuoUIeditor(label, t.Colors["Black"],
+				e := t.DuoUIEditor(label, t.Colors["Black"],
 					t.Colors["White"], 16)
 				e.Font.Typeface = t.Fonts["Mono"]
 				layout.UniformInset(unit.Dp(4)).Layout(g, func() {
@@ -1369,7 +1369,7 @@ func (s *Context) TxsDetails(i int, te *model.DuoUItransactionExcerpt) func() {
 func (s *Context) txsFilterItem(id string, c *gel.CheckBox) func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
-		t.DuoUIcheckBox(id, t.Colors["Light"],
+		t.DuoUICheckBox(id, t.Colors["Light"],
 			t.Colors["Light"]).Layout(g, c)
 	}
 }
@@ -1454,7 +1454,7 @@ func QrDialog(rc *rcd.RcVar, gtx *layout.Context, address string) func() {
 	}
 }
 
-func SetPage(rc *rcd.RcVar, page *gelook.DuoUIpage) {
+func SetPage(rc *rcd.RcVar, page *gelook.DuoUIPage) {
 	page.Command()
 	rc.CurrentPage = page
 }

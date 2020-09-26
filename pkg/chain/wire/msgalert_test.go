@@ -2,6 +2,7 @@ package wire
 
 import (
 	"bytes"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"reflect"
 	"testing"
@@ -144,8 +145,8 @@ func TestMsgAlertWire(t *testing.T) {
 		}
 		// Decode the message from wire format.
 		var msg MsgAlert
-		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
+		rBuf := bytes.NewReader(test.buf)
+		err = msg.BtcDecode(rBuf, test.pver, test.enc)
 		if err != nil {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
@@ -265,9 +266,9 @@ func TestAlert(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	serializedpayload := w.Bytes()
-	newAlert, err := NewAlertFromPayload(serializedpayload, pver)
-	if err != nil {
+	serializedPayload := w.Bytes()
+	var newAlert *Alert
+	if newAlert, err = NewAlertFromPayload(serializedPayload, pver); slog.Check(err) {
 		t.Error(err.Error())
 	}
 	if alert.Version != newAlert.Version {
