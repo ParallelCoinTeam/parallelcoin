@@ -4,12 +4,13 @@ import (
 	"compress/bzip2"
 	"encoding/binary"
 	"fmt"
-	"github.com/p9c/pkg/app/slog"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/p9c/pkg/app/slog"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -105,13 +106,12 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 }
 
 // chainSetup is used to create a new db and chain instance with the genesis block already inserted.  In addition to the new chain instance, it returns a teardown function the caller should invoke when done testing to clean up.
-func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func(), err error) {
+func chainSetup(dbName string, netparams *netparams.Params) (chain *BlockChain, teardown func(), err error) {
 	if !isSupportedDbType(testDbType) {
 		return nil, nil, fmt.Errorf("unsupported db type %v", testDbType)
 	}
 	// Handle memory database specially since it doesn't need the disk specific handling.
 	var db database.DB
-	var teardown func()
 	if testDbType == "memdb" {
 		ndb, err := database.Create(testDbType)
 		if err != nil {
@@ -149,27 +149,28 @@ func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func()
 	// Copy the chain netparams to ensure any modifications the tests do to the chain parameters do not affect the global instance.
 	paramsCopy := *netparams
 	// Create the main chain instance.
-	chain, err := New(&Config{
+	if chain, err = New(&Config{
 		DB:          db,
 		ChainParams: &paramsCopy,
 		Checkpoints: nil,
 		TimeSource:  NewMedianTime(),
 		SigCache:    txscript.NewSigCache(1000),
-	})
-	if err != nil {
+	}); slog.Check(err) {
 		teardown()
-		err := fmt.Errorf("failed to create chain instance: %v", err)
-		return nil, nil, err
+		err = fmt.Errorf("failed to create chain instance: %v", err)
+		slog.Debug(err)
+		return
 	}
 	return chain, teardown, nil
 }
 
 // loadUtxoView returns a utxo view loaded from a file.
-func loadUtxoView(filename string) (*UtxoViewpoint, err error) {
+func loadUtxoView(filename string) (view *UtxoViewpoint, err error) {
 	// The utxostore file format is:
 	// <tx hash><output index><serialized utxo len><serialized utxo>
 	//
-	// The output index and serialized utxo len are little endian uint32s and the serialized utxo uses the format described in chainio.go.
+	// The output index and serialized utxo len are little endian uint32s and the serialized utxo uses the format
+	// described in chainio.go.
 	filename = filepath.Join("testdata", filename)
 	fi, err := os.Open(filename)
 	if err != nil {
@@ -183,7 +184,7 @@ func loadUtxoView(filename string) (*UtxoViewpoint, err error) {
 		r = fi
 	}
 	defer fi.Close()
-	view := NewUtxoViewpoint()
+	view = NewUtxoViewpoint()
 	for {
 		// Hash of the utxo entry.
 		var hash chainhash.Hash
@@ -228,7 +229,9 @@ func (b *BlockChain) TstSetCoinbaseMaturity(maturity uint16) {
 	b.params.CoinbaseMaturity = maturity
 }
 
-// newFakeChain returns a chain that is usable for syntetic tests.  It is important to note that this chain has no database associated with it, so it is not usable with all functions and the tests must take care when making use of it.
+// newFakeChain returns a chain that is usable for syntetic tests. It is important to note that this chain has no
+// database associated with it, so it is not usable with all functions and the tests must take care when making use of
+// it.
 func newFakeChain(params *netparams.Params) *BlockChain {
 	// Create a genesis block node and block index index populated with it for use when creating the fake chain below.
 	node := NewBlockNode(&params.GenesisBlock.Header, nil)
@@ -262,12 +265,15 @@ func newFakeNode(parent *BlockNode, blockVersion int32, bits uint32, timestamp t
 	return NewBlockNode(header, parent)
 }
 
-// convertUtxoStore reads a utxostore from the legacy format and writes it back out using the latest format.  It is only useful for converting utxostore data used in the tests, which has already been done.  However, the code is left available for future reference.
+// convertUtxoStore reads a utxostore from the legacy format and writes it back out using the latest format. It is only
+// useful for converting utxostore data used in the tests, which has already been done. However, the code is left
+// available for future reference.
 func convertUtxoStore(r io.Reader, w io.Writer) (err error) {
 	// The old utxostore file format was:
 	// <tx hash><serialized utxo len><serialized utxo>
 	//
-	// The serialized utxo len was a little endian uint32 and the serialized utxo uses the format described in upgrade.go.
+	// The serialized utxo len was a little endian uint32 and the serialized utxo uses the format described in
+	// upgrade.go.
 	littleEndian := binary.LittleEndian
 	for {
 		// Hash of the utxo entry.

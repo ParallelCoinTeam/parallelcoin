@@ -13,6 +13,7 @@ src/build-dir
 src/parallelcoind
 src/openssl-1.0.1u/**
 pod
+pod.exe
 test**
 vendor/**
 node_modules/**
