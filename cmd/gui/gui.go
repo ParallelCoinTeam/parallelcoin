@@ -9,7 +9,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"os"
 )
 

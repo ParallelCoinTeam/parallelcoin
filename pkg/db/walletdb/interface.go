@@ -3,7 +3,7 @@ package walletdb
 // This interface was inspired heavily by the excellent boltdb project at
 // https://github.com/boltdb/bolt by Ben B. Johnson.
 import (
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"io"
 )
 

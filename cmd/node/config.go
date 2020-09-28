@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	"github.com/p9c/pod/app/appdata"
 	blockchain "github.com/p9c/pod/pkg/chain"

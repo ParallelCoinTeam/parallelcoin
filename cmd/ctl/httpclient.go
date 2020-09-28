@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	js "encoding/json"
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"io/ioutil"
 	"net"
 	"net/http"

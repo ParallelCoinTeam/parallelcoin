@@ -3,7 +3,7 @@ package coinset
 import (
 	"container/list"
 	"errors"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"sort"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

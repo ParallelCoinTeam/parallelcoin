@@ -2,7 +2,7 @@ package rpctest
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"io/ioutil"
 	"os"
 	"os/exec"

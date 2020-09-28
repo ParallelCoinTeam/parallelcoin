@@ -4,7 +4,7 @@ package headerfs
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 )
 
 // singleTruncate truncates a single header from the end of the header file.

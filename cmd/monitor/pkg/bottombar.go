@@ -7,7 +7,7 @@ package pkg
 import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 )
 
 func (s *State) BottomBar() layout.FlexChild {

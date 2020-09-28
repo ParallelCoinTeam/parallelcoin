@@ -2,7 +2,7 @@ package blockchain
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"

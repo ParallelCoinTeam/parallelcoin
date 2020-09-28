@@ -3,7 +3,7 @@ package gel
 import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 )
 
 type item struct {

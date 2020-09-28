@@ -3,7 +3,7 @@ package wallet
 import (
 	"errors"
 
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/db/walletdb"

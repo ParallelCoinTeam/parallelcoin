@@ -4,7 +4,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/db/walletdb"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 )
 
 // insertMemPoolTx inserts the unmined transaction record.  It also marks

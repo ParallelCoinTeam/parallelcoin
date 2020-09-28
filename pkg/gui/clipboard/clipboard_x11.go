@@ -3,7 +3,7 @@
 package clipboard
 
 import (
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"time"
 
 	"github.com/BurntSushi/xgb"

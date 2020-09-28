@@ -18,7 +18,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/gui/gelook/ico"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"image"
 	"image/color"
 	"sync"

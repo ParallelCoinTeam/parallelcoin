@@ -30,7 +30,7 @@ import (
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/wallet"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 	"golang.org/x/text/unicode/norm"

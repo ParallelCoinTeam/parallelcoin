@@ -6,7 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/binary"
 	"errors"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"io"
 	"runtime/debug"
 

@@ -1,7 +1,7 @@
 package wallet
 
 import (
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txs "github.com/p9c/pod/pkg/chain/tx/script"

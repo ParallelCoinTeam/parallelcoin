@@ -3,7 +3,7 @@ package rpcclient
 import (
 	js "encoding/json"
 	"errors"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )

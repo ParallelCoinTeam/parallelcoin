@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	js "encoding/json"
 	"errors"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"io"
 	"io/ioutil"
 	"net"

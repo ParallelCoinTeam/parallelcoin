@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/p9c/pod/pkg/comm/stdconn/example/hello/hello"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 )
 
 func main() {

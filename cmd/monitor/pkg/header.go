@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gelook"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"os"
 	"os/exec"
 	"path/filepath"

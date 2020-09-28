@@ -3,7 +3,7 @@ package txauthor
 import (
 	"crypto/rand"
 	"encoding/binary"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	mrand "math/rand"
 	"sync"
 )

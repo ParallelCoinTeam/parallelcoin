@@ -8,7 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/util/lang"
 	"github.com/p9c/pod/pkg/wallet"
 	"github.com/p9c/pod/pkg/wallet/chain"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 	"sync"

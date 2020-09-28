@@ -2,7 +2,7 @@ package spv
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	blockchain "github.com/p9c/pod/pkg/chain"

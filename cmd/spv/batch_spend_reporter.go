@@ -3,7 +3,7 @@ package spv
 import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 )
 
 // batchSpendReporter orchestrates the delivery of spend reports to

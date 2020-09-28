@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"container/ring"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"time"
 
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"

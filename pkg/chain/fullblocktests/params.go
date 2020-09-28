@@ -3,7 +3,7 @@ package fullblocktests
 import (
 	"encoding/hex"
 	"github.com/p9c/pod/pkg/chain/config"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"math/big"
 	"time"
 

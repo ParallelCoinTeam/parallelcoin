@@ -7,7 +7,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"math/rand"
 	"net"
 	"os"

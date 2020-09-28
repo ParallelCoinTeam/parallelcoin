@@ -8,7 +8,7 @@ import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"os/exec"
 	"strings"
 )

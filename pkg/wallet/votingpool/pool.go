@@ -2,7 +2,7 @@ package votingpool
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"sort"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"

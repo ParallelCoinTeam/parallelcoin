@@ -2,7 +2,7 @@ package wallettx
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"sort"
 
 	txauthor "github.com/p9c/pod/pkg/chain/tx/author"

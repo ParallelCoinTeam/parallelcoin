@@ -2,7 +2,7 @@ package wtxmgr
 
 import (
 	"bytes"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"time"
 
 	blockchain "github.com/p9c/pod/pkg/chain"

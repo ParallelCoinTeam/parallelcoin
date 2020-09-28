@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	// This enables pprof
 	_ "net/http/pprof"

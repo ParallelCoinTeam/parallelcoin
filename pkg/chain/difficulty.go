@@ -2,7 +2,7 @@ package blockchain
 
 import (
 	"encoding/hex"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"math/big"
 	"strings"
 	"time"

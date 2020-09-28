@@ -2,7 +2,7 @@ package bloom
 
 import (
 	"encoding/binary"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"math"
 	"sync"
 

@@ -3,7 +3,7 @@ package ec_test
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	ec "github.com/p9c/pod/pkg/coding/elliptic"

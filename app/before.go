@@ -3,14 +3,18 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/serve"
 	"io/ioutil"
 	pseudo "math/rand"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/serve"
+
+	"github.com/p9c/pkg/app/slog"
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
@@ -18,8 +22,6 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/stalker-loki/app/slog"
-	"github.com/urfave/cli"
 )
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) (err error) {

@@ -2,7 +2,7 @@ package ctl
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"path/filepath"
 
 	"github.com/p9c/pod/app/appdata"

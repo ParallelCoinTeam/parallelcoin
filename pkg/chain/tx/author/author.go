@@ -3,7 +3,7 @@ package txauthor
 
 import (
 	"errors"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	txrules "github.com/p9c/pod/pkg/chain/tx/rules"

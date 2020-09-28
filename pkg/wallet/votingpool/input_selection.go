@@ -3,7 +3,7 @@ package votingpool
 import (
 	"bytes"
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"sort"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"

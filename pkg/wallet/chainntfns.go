@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"

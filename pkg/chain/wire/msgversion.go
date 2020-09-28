@@ -3,7 +3,7 @@ package wire
 import (
 	"bytes"
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"io"
 	"strings"
 	"time"

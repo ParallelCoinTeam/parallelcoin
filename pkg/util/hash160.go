@@ -2,7 +2,7 @@ package util
 
 import (
 	"crypto/sha256"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"hash"
 
 	"golang.org/x/crypto/ripemd160"

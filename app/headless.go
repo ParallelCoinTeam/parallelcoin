@@ -3,7 +3,7 @@
 package app
 
 import (
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"os"
 
 	"github.com/urfave/cli"

@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/cmd/monitor/pkg"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
 	"os/exec"

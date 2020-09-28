@@ -3,7 +3,7 @@ package netsync
 import (
 	"container/list"
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"net"
 	"sync"
 	"sync/atomic"

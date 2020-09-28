@@ -3,7 +3,7 @@ package Transaction
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	"github.com/p9c/pod/pkg/chain/wire"
 )

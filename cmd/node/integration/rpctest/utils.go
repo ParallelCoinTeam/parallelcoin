@@ -2,7 +2,7 @@ package rpctest
 
 import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"reflect"
 	"time"
 

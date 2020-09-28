@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	js "encoding/json"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"

@@ -4,7 +4,7 @@ import (
 	"compress/zlib"
 	"encoding/base64"
 	"encoding/binary"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"io"
 	"io/ioutil"
 	"strings"

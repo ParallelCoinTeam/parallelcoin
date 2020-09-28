@@ -4,7 +4,7 @@
 
 package pkg
 
-import "github.com/stalker-loki/app/slog"
+import "github.com/p9c/pkg/app/slog"
 
 func (s *State) FlipTheme() {
 	slog.Debug("dark theme:", s.Config.DarkTheme)

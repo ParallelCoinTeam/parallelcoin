@@ -1,7 +1,7 @@
 package kopach_worker
 
 import (
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"net/rpc"
 	"os"
 

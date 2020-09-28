@@ -3,14 +3,16 @@ package logi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
 
 const (
@@ -168,8 +170,8 @@ var L = NewLogger()
 
 // AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() (ch chan Entry) {
-	L.LogChan = append(L.LogChan, make(chan Entry))
-	//L.Write = false
+	l.LogChan = append(L.LogChan, make(chan Entry))
+	// L.Write = false
 	return L.LogChan[len(L.LogChan)-1]
 }
 
@@ -257,7 +259,7 @@ func (l *Logger) SetLevel(level string, color bool, split string) {
 }
 
 func (l *Logger) LocToPkg(pkg string) (out string) {
-	//fmt.Println("pkg",pkg)
+	// fmt.Println("pkg",pkg)
 	sep := string(os.PathSeparator)
 	if runtime.GOOS == "windows" {
 		sep = "/"
@@ -266,17 +268,17 @@ func (l *Logger) LocToPkg(pkg string) (out string) {
 	if len(split) < 2 {
 		return pkg
 	}
-	//fmt.Println("split",split, l.Split)
+	// fmt.Println("split",split, l.Split)
 	pkg = split[1]
 	split = strings.Split(pkg, sep)
 	return strings.Join(split[:len(split)-1], string(os.PathSeparator))
 }
 
 func (l *Logger) Register(pkg string) string {
-	//split := strings.Split(pkg, l.Split)
-	//pkg = split[1]
-	//split = strings.Split(pkg, string(os.PathSeparator))
-	//pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
+	// split := strings.Split(pkg, l.Split)
+	// pkg = split[1]
+	// split = strings.Split(pkg, string(os.PathSeparator))
+	// pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
 	// if runtime.GOOS == "windows" {
 	// 	pkg = strings.Replace(pkg, "/", string(os.PathSeparator), -1)
 	// }
@@ -506,7 +508,7 @@ func Composite(text, level string, color bool, split string) string {
 			dots = " "
 		}
 		since = fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Millisecond*time.Millisecond)
-		//since = fmt.Sprint(time.Now())[:19]
+		// since = fmt.Sprint(time.Now())[:19]
 	case terminalWidth >= 200:
 		since = fmt.Sprint(time.Now())[:39]
 	default:

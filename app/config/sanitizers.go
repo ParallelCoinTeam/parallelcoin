@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/kopach/control/pause"

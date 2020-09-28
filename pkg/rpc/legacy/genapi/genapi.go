@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"os"
 	"sort"
 	"text/template"

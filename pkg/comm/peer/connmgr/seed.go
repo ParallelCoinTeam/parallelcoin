@@ -2,7 +2,7 @@ package connmgr
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	mrand "math/rand"
 	"net"
 	"strconv"

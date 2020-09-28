@@ -3,7 +3,7 @@ package waddrmgr
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 	"sync"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"

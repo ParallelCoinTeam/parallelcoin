@@ -3,7 +3,7 @@ package gcm
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pkg/app/slog"
 
 	"golang.org/x/crypto/argon2"
 )
