@@ -23,27 +23,28 @@ serializeWriteRow(curBlockFileNum, curFileOffset uint32) []byte {
 	return serializedRow[:]
 }
 
-func // deserializeWriteRow deserializes the write cursor location stored in the
+// deserializeWriteRow deserializes the write cursor location stored in the
 // metadata.  Returns ErrCorruption if the checksum of the entry doesn't match.
-deserializeWriteRow(writeRow []byte) (uint32, uint32, err error) {
+func deserializeWriteRow(writeRow []byte) (fileNum uint32, fileOffset uint32, err error) {
 	// Ensure the checksum matches.  The checksum is at the end.
 	gotChecksum := crc32.Checksum(writeRow[:8], castagnoli)
 	wantChecksumBytes := writeRow[8:12]
 	wantChecksum := byteOrder.Uint32(wantChecksumBytes)
 	if gotChecksum != wantChecksum {
-		str := fmt.Sprintf("metadata for write cursor does not match "+
-			"the expected checksum - got %d, want %d", gotChecksum,
-			wantChecksum)
-		return 0, 0, makeDbErr(database.ErrCorruption, str, nil)
+		str := fmt.Sprintf("metadata for write cursor does not match the expected checksum - got %d, want %d",
+			gotChecksum, wantChecksum)
+		err = makeDbErr(database.ErrCorruption, str, nil)
+		slog.Debug(err)
+		return
 	}
-	fileNum := byteOrder.Uint32(writeRow[0:4])
-	fileOffset := byteOrder.Uint32(writeRow[4:8])
-	return fileNum, fileOffset, nil
+	fileNum = byteOrder.Uint32(writeRow[0:4])
+	fileOffset = byteOrder.Uint32(writeRow[4:8])
+	return
 }
 
-func // reconcileDB reconciles the metadata with the flat block files on
+// reconcileDB reconciles the metadata with the flat block files on
 // disk.  It will also initialize the underlying database if the create flag is set.
-reconcileDB(pdb *db, create bool) (dB database.DB, err error) {
+func reconcileDB(pdb *db, create bool) (dB database.DB, err error) {
 	// Perform initial internal bucket and value creation during database creation.
 	if create {
 		if err = initDB(pdb.cache.ldb); err != nil {

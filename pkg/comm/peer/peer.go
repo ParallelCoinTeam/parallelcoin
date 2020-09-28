@@ -230,13 +230,13 @@ func minUint32(a, b uint32) uint32 {
 // newNetAddress attempts to extract the IP address and port from the passed
 // net.Addr interface and create a bitcoin NetAddress structure using that
 // information.
-func newNetAddress(addr net.Addr, services wire.ServiceFlag) (*wire.NetAddress, err error) {
+func newNetAddress(addr net.Addr, services wire.ServiceFlag) (na *wire.NetAddress, err error) {
 	// addr will be a net.TCPAddr when not using a proxy.
 	if tcpAddr, ok := addr.(*net.TCPAddr); ok {
 		ip := tcpAddr.IP
 		port := uint16(tcpAddr.Port)
-		na := wire.NewNetAddressIPPort(ip, port, services)
-		return na, nil
+		na = wire.NewNetAddressIPPort(ip, port, services)
+		return
 	}
 	// addr will be a socks.ProxiedAddr when using a proxy.
 	if proxiedAddr, ok := addr.(*socks.ProxiedAddr); ok {
@@ -245,26 +245,24 @@ func newNetAddress(addr net.Addr, services wire.ServiceFlag) (*wire.NetAddress, 
 			ip = net.ParseIP("0.0.0.0")
 		}
 		port := uint16(proxiedAddr.Port)
-		na := wire.NewNetAddressIPPort(ip, port, services)
-		return na, nil
+		na = wire.NewNetAddressIPPort(ip, port, services)
+		return
 	}
 	// For the most part, addr should be one of the two above cases,
 	// but to be safe,
 	// fall back to trying to parse the information from the address string
 	// as a last resort.
-	host, portStr, err := net.SplitHostPort(addr.String())
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var host, portStr string
+	if host, portStr, err = net.SplitHostPort(addr.String()); slog.Check(err) {
+		return
 	}
 	ip := net.ParseIP(host)
-	port, err := strconv.ParseUint(portStr, 10, 16)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var port uint64
+	if port, err = strconv.ParseUint(portStr, 10, 16); slog.Check(err) {
+		return
 	}
-	na := wire.NewNetAddressIPPort(ip, uint16(port), services)
-	return na, nil
+	na = wire.NewNetAddressIPPort(ip, uint16(port), services)
+	return
 }
 
 // outMsg is used to house a message to be sent along with a channel to
@@ -686,11 +684,11 @@ func (p *Peer) IsWitnessEnabled() bool {
 // QueueMessage since it automatically limits the addresses to the maximum
 // number allowed by the message and randomizes the chosen addresses when
 // there are too many.  It returns the addresses that were actually sent and no message will be sent if there are no entries in the provided addresses slice. This function is safe for concurrent access.
-func (p *Peer) PushAddrMsg(addresses []*wire.NetAddress) ([]*wire.NetAddress, err error) {
+func (p *Peer) PushAddrMsg(addresses []*wire.NetAddress) (ad []*wire.NetAddress, err error) {
 	addressCount := len(addresses)
 	// Nothing to send.
 	if addressCount == 0 {
-		return nil, nil
+		return
 	}
 	msg := wire.NewMsgAddr()
 	msg.AddrList = make([]*wire.NetAddress, addressCount)
@@ -706,7 +704,8 @@ func (p *Peer) PushAddrMsg(addresses []*wire.NetAddress) ([]*wire.NetAddress, er
 		msg.AddrList = msg.AddrList[:wire.MaxAddrPerMsg]
 	}
 	p.QueueMessage(msg, nil)
-	return msg.AddrList, nil
+	ad = msg.AddrList
+	return
 }
 
 // PushGetBlocksMsg sends a getblocks message for the provided block locator
@@ -731,15 +730,13 @@ func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chain
 			beginHash,
 			stopHash,
 		)
-		return nil
+		return
 	}
 	// Construct the getblocks request and queue it to be sent.
 	msg := wire.NewMsgGetBlocks(stopHash)
 	for _, hash := range locator {
-		err := msg.AddBlockLocatorHash(hash)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = msg.AddBlockLocatorHash(hash); slog.Check(err) {
+			return
 		}
 	}
 	p.QueueMessage(msg, nil)
@@ -749,7 +746,7 @@ func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chain
 	p.prevGetBlocksBegin = beginHash
 	p.prevGetBlocksStop = stopHash
 	p.prevGetBlocksMtx.Unlock()
-	return nil
+	return
 }
 
 // PushGetHeadersMsg sends a getblocks message for the provided block locator
@@ -772,16 +769,14 @@ func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chai
 		slog.Trace(
 			"Filtering duplicate [getheaders] with begin hash", beginHash,
 		)
-		return nil
+		return
 	}
 	// Construct the getheaders request and queue it to be sent.
 	msg := wire.NewMsgGetHeaders()
 	msg.HashStop = *stopHash
 	for _, hash := range locator {
-		err := msg.AddBlockLocatorHash(hash)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = msg.AddBlockLocatorHash(hash); slog.Check(err) {
+			return
 		}
 	}
 	p.QueueMessage(msg, nil)
@@ -791,7 +786,7 @@ func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chai
 	p.prevGetHdrsBegin = beginHash
 	p.prevGetHdrsStop = stopHash
 	p.prevGetHdrsMtx.Unlock()
-	return nil
+	return
 }
 
 // PushRejectMsg sends a reject message for the provided command,
@@ -808,10 +803,8 @@ func (p *Peer) PushRejectMsg(command string, code wire.RejectCode, reason string
 	msg := wire.NewMsgReject(command, code, reason)
 	if command == wire.CmdTx || command == wire.CmdBlock {
 		if hash == nil {
-			slog.Warn(
-				"Sending a reject message for command type", command,
-				"which should have specified a hash but does not",
-			)
+			slog.Warn("Sending a reject message for command type", command,
+				"which should have specified a hash but does not")
 			hash = &zeroHash
 		}
 		msg.Hash = *hash
@@ -862,16 +855,15 @@ func (p *Peer) handlePongMsg(msg *wire.MsgPong) {
 }
 
 // readMessage reads the next bitcoin message from the peer with logging.
-func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte, err error) {
-	n, msg, buf, err := wire.ReadMessageWithEncodingN(p.conn,
-		p.ProtocolVersion(), p.cfg.ChainParams.Net, encoding)
+func (p *Peer) readMessage(encoding wire.MessageEncoding) (msg wire.Message, buf []byte, err error) {
+	var n int
+	n, msg, buf, err = wire.ReadMessageWithEncodingN(p.conn, p.ProtocolVersion(), p.cfg.ChainParams.Net, encoding)
 	atomic.AddUint64(&p.bytesReceived, uint64(n))
 	if p.cfg.Listeners.OnRead != nil {
 		p.cfg.Listeners.OnRead(p, n, msg, err)
 	}
-	if err != nil {
-		slog.Trace(err)
-		return nil, nil, err
+	if slog.Check(err) {
+		return
 	}
 	// Use closures to log expensive operations so they are only run when the
 	// logging level requires it.
@@ -888,14 +880,14 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 		o += spew.Sdump(msg)
 		return o + spew.Sdump(buf)
 	}())
-	return msg, buf, nil
+	return
 }
 
 // writeMessage sends a bitcoin message to the peer with logging.
 func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (err error) {
 	// Don't do anything if we're disconnecting.
 	if atomic.LoadInt32(&p.disconnect) != 0 {
-		return nil
+		return
 	}
 	// Use closures to log expensive operations so they are only run when the
 	// logging level requires it.
@@ -909,46 +901,42 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (err err
 			summary, p)
 		o += spew.Sdump(msg)
 		var buf bytes.Buffer
-		_, err := wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(),
-			p.cfg.ChainParams.Net, enc)
-		if err != nil {
-			slog.Error(err)
-			return err.Error()
+		if _, err = wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(),
+			p.cfg.ChainParams.Net, enc); slog.Check(err) {
+			return ""
 		}
 		return o + spew.Sdump(buf.Bytes())
 	}())
 	// Write the message to the peer.
-	n, err := wire.WriteMessageWithEncodingN(p.conn, msg,
-		p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
+	n, err := wire.WriteMessageWithEncodingN(p.conn, msg, p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
 	atomic.AddUint64(&p.bytesSent, uint64(n))
 	if p.cfg.Listeners.OnWrite != nil {
 		p.cfg.Listeners.OnWrite(p, n, msg, err)
 	}
-	return err
+	return
 }
 
 // isAllowedReadError returns whether or not the passed error is allowed
 // without disconnecting the peer.  In particular,
 // regression tests need to be allowed to send malformed messages without the
 // peer being disconnected.
-func (p *Peer) isAllowedReadError(err error) bool {
+func (p *Peer) isAllowedReadError(err error) (b bool) {
 	// Only allow read errors in regression test mode.
 	if p.cfg.ChainParams.Net != wire.TestNet {
-		return false
+		return
 	}
 	// Don't allow the error if it's not specifically a malformed message error.
 	if _, ok := err.(*wire.MessageError); !ok {
-		return false
+		return
 	}
 	// Don't allow the error if it's not coming from localhost or the
 	// hostname can't be determined for some reason.
-	host, _, err := net.SplitHostPort(p.addr)
-	if err != nil {
-		slog.Error(err)
-		return false
+	var host string
+	if host, _, err = net.SplitHostPort(p.addr); slog.Check(err) {
+		return
 	}
 	if host != "127.0.0.1" && host != "localhost" {
-		return false
+		return
 	}
 	// Allowed if all checks passed.
 	return true
@@ -957,18 +945,18 @@ func (p *Peer) isAllowedReadError(err error) bool {
 // shouldHandleReadError returns whether or not the passed error,
 // which is expected to have come from reading from the remote peer in the
 // inHandler, should be logged and responded to with a reject message.
-func (p *Peer) shouldHandleReadError(err error) bool {
+func (p *Peer) shouldHandleReadError(err error) (b bool) {
 	// No logging or reject message when the peer is being forcibly
 	// disconnected.
 	if atomic.LoadInt32(&p.disconnect) != 0 {
-		return false
+		return
 	}
 	// No logging or reject message when the remote peer has been disconnected.
 	if err == io.EOF {
-		return false
+		return
 	}
 	if opErr, ok := err.(*net.OpError); ok && !opErr.Temporary() {
-		return false
+		return
 	}
 	return true
 }
@@ -1061,9 +1049,7 @@ out:
 			case sccHandlerStart:
 				// Warn on unbalanced callback signalling.
 				if handlerActive {
-					slog.Warn(
-						"Received handler start control command while a handler is already active",
-					)
+					slog.Warn("Received handler start control command while a handler is already active")
 					continue
 				}
 				handlerActive = true
@@ -1071,9 +1057,7 @@ out:
 			case sccHandlerDone:
 				// Warn on unbalanced callback signalling.
 				if !handlerActive {
-					slog.Warn(
-						"Received handler done control command when a handler is not already active",
-					)
+					slog.Warn("Received handler done control command when a handler is not already active")
 					continue
 				}
 				// Extend active deadlines by the time it took to execute the
@@ -1082,9 +1066,7 @@ out:
 				deadlineOffset += duration
 				handlerActive = false
 			default:
-				slog.Warn(
-					"Unsupported message command", msg.command,
-				)
+				slog.Warn("Unsupported message command", msg.command)
 			}
 		case <-stallTicker.C:
 			// Calculate the offset to apply to the deadline based on how
@@ -1100,10 +1082,8 @@ out:
 				if now.Before(deadline.Add(offset)) {
 					continue
 				}
-				slog.Debugf(
-					"Peer %s appears to be stalled or misbehaving, %s timeout -- disconnecting",
-					p,
-					command)
+				slog.Debugf("Peer %s appears to be stalled or misbehaving, %s timeout -- disconnecting",
+					p, command)
 				p.Disconnect()
 				break
 			}
@@ -1742,14 +1722,11 @@ func (p *Peer) readRemoteVersionMsg() (err error) {
 
 // localVersionMsg creates a version message that can be used to send to the
 // remote peer.
-func (p *Peer) localVersionMsg() (*wire.MsgVersion, err error) {
+func (p *Peer) localVersionMsg() (msg *wire.MsgVersion, err error) {
 	var blockNum int32
 	if p.cfg.NewestBlock != nil {
-		var err error
-		_, blockNum, err = p.cfg.NewestBlock()
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if _, blockNum, err = p.cfg.NewestBlock(); slog.Check(err) {
+			return
 		}
 	}
 	theirNA := p.na
@@ -1757,11 +1734,10 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, err error) {
 	// we return an unrouteable address as their address.
 	// This is to prevent leaking the tor proxy address.
 	if p.cfg.Proxy != "" {
-		proxyAddress, _, err := net.SplitHostPort(p.cfg.Proxy)
+		var proxyAddress string
 		// invalid proxy means poorly configured, be on the safe side.
-		if err != nil || p.na.IP.String() == proxyAddress {
-			theirNA = wire.NewNetAddressIPPort([]byte{0, 0, 0, 0}, 0,
-				theirNA.Services)
+		if proxyAddress, _, err = net.SplitHostPort(p.cfg.Proxy); slog.Check(err) || p.na.IP.String() == proxyAddress {
+			theirNA = wire.NewNetAddressIPPort([]byte{0, 0, 0, 0}, 0, theirNA.Services)
 		}
 	}
 	// Create a wire.NetAddress with only the services set to use as the
@@ -1774,17 +1750,14 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, err error) {
 	ourNA := &wire.NetAddress{
 		Services: p.cfg.Services,
 	}
-	// Generate a unique Nonce for this peer so self connections can be
-	// detected.  This is accomplished by adding it to a size-limited map of
-	// recently seen nonces.
+	// Generate a unique Nonce for this peer so self connections can be detected.  This is accomplished by adding it to
+	// a size-limited map of recently seen nonces.
 	nonce := uint64(rand.Int63())
 	SentNonces.Add(nonce)
 	// Version message.
-	msg := wire.NewMsgVersion(ourNA, theirNA, nonce, blockNum)
-	err := msg.AddUserAgent(p.cfg.UserAgentName, p.cfg.UserAgentVersion,
-		p.cfg.UserAgentComments...)
-	if err != nil {
-		slog.Error(err)
+	msg = wire.NewMsgVersion(ourNA, theirNA, nonce, blockNum)
+	if err = msg.AddUserAgent(p.cfg.UserAgentName, p.cfg.UserAgentVersion, p.cfg.UserAgentComments...); slog.Check(err) {
+		return
 	}
 	// Advertise local services.
 	msg.Services = p.cfg.Services
@@ -1792,15 +1765,14 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, err error) {
 	msg.ProtocolVersion = int32(p.cfg.ProtocolVersion)
 	// Advertise if inv messages for transactions are desired.
 	msg.DisableRelayTx = p.cfg.DisableRelayTx
-	return msg, nil
+	return
 }
 
 // writeLocalVersionMsg writes our version message to the remote peer.
 func (p *Peer) writeLocalVersionMsg() (err error) {
-	localVerMsg, err := p.localVersionMsg()
-	if err != nil {
-		slog.Error(err)
-		return err
+	var localVerMsg *wire.MsgVersion
+	if localVerMsg, err = p.localVersionMsg(); slog.Check(err) {
+		return
 	}
 	return p.writeMessage(localVerMsg, wire.LatestEncoding)
 }
@@ -1809,8 +1781,8 @@ func (p *Peer) writeLocalVersionMsg() (err error) {
 // then sends our version message.
 // If the events do not occur in that order then it returns an error.
 func (p *Peer) negotiateInboundProtocol() (err error) {
-	if err := p.readRemoteVersionMsg(); err != nil {
-		return err
+	if err = p.readRemoteVersionMsg(); slog.Check(err) {
+		return
 	}
 	return p.writeLocalVersionMsg()
 }
@@ -1819,8 +1791,8 @@ func (p *Peer) negotiateInboundProtocol() (err error) {
 // a version message from the peer.
 // If the events do not occur in that order then it returns an error.
 func (p *Peer) negotiateOutboundProtocol() (err error) {
-	if err := p.writeLocalVersionMsg(); err != nil {
-		return err
+	if err = p.writeLocalVersionMsg(); slog.Check(err) {
+		return
 	}
 	return p.readRemoteVersionMsg()
 }
@@ -1838,7 +1810,7 @@ func (p *Peer) start() (err error) {
 	}()
 	// Negotiate the protocol within the specified negotiateTimeout.
 	select {
-	case err := <-negotiateErr:
+	case err = <-negotiateErr:
 		if err != nil {
 			slog.Error(err)
 			p.Disconnect()
@@ -1858,7 +1830,7 @@ func (p *Peer) start() (err error) {
 	go p.pingHandler()
 	// Send our verack message now that the IO processing machinery has started.
 	p.QueueMessage(wire.NewMsgVerAck(), nil)
-	return nil
+	return
 }
 
 // AssociateConnection associates the given conn to the peer.
@@ -1875,9 +1847,9 @@ func (p *Peer) AssociateConnection(conn net.Conn) {
 		// Set up a NetAddress for the peer to be used with AddrManager.
 		// We only do this inbound because outbound set this up at connection
 		// time and no point recomputing.
-		na, err := newNetAddress(p.conn.RemoteAddr(), p.services)
-		if err != nil {
-			slog.Error(err)
+		var na *wire.NetAddress
+		var err error
+		if na, err = newNetAddress(p.conn.RemoteAddr(), p.services); slog.Check(err) {
 			slog.Error("cannot create remote net address:", err)
 			p.Disconnect()
 			return
@@ -1945,30 +1917,27 @@ func NewInboundPeer(cfg *Config) *Peer {
 }
 
 // NewOutboundPeer returns a new outbound bitcoin peer.
-func NewOutboundPeer(cfg *Config, addr string) (*Peer, err error) {
-	p := newPeerBase(cfg, false)
+func NewOutboundPeer(cfg *Config, addr string) (p *Peer, err error) {
+	p = newPeerBase(cfg, false)
 	p.addr = addr
-	host, portStr, err := net.SplitHostPort(addr)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var host, portStr string
+	if host, portStr, err = net.SplitHostPort(addr); slog.Check(err) {
+		return
 	}
-	port, err := strconv.ParseUint(portStr, 10, 16)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var port uint64
+	if port, err = strconv.ParseUint(portStr, 10, 16); slog.Check(err) {
+		return
 	}
 	if cfg.HostToNetAddress != nil {
-		na, err := cfg.HostToNetAddress(host, uint16(port), 0)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var na *wire.NetAddress
+		if na, err = cfg.HostToNetAddress(host, uint16(port), 0); slog.Check(err) {
+			return
 		}
 		p.na = na
 	} else {
 		p.na = wire.NewNetAddressIPPort(net.ParseIP(host), uint16(port), 0)
 	}
-	return p, nil
+	return
 }
 
 func init() {

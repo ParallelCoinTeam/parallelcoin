@@ -10,11 +10,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/stalker-loki/app/slog"
 	"io"
 	"math"
 	"sync"
 	"time"
+
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/btcsuite/websocket"
 	"golang.org/x/crypto/ripemd160"
@@ -1582,20 +1583,20 @@ func DeserializeOutpoints(serializedOuts []btcjson.OutPoint) ([]*wire.OutPoint,
 	return outpoints, nil
 }
 
-// HandleLoadTxFilter implements the loadtxfilter command extension for
-// websocket connections. NOTE: This extension is ported from
-// github.com/decred/dcrd
-func HandleLoadTxFilter(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+// HandleLoadTxFilter implements the loadtxfilter command extension for websocket connections. NOTE: This extension is
+// ported from github.com/decred/dcrd
+func HandleLoadTxFilter(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	cmd := icmd.(*btcjson.LoadTxFilterCmd)
 	outPoints := make([]wire.OutPoint, len(cmd.OutPoints))
 	for i := range cmd.OutPoints {
-		hash, err := chainhash.NewHashFromStr(cmd.OutPoints[i].Hash)
-		if err != nil {
-			slog.Error(err)
-			return nil, &btcjson.RPCError{
+		var hash *chainhash.Hash
+		if hash, err = chainhash.NewHashFromStr(cmd.OutPoints[i].Hash); slog.Check(err) {
+			err = &btcjson.RPCError{
 				Code:    btcjson.ErrRPCInvalidParameter,
 				Message: err.Error(),
 			}
+			slog.Debug(err)
+			return
 		}
 		outPoints[i] = wire.OutPoint{
 			Hash:  *hash,
@@ -1605,8 +1606,7 @@ func HandleLoadTxFilter(wsc *WSClient, icmd interface{}) (interface{}, err error
 	params := wsc.Server.Cfg.ChainParams
 	wsc.Lock()
 	if cmd.Reload || wsc.FilterData == nil {
-		wsc.FilterData = NewWSClientFilter(cmd.Addresses, outPoints,
-			params)
+		wsc.FilterData = NewWSClientFilter(cmd.Addresses, outPoints, params)
 		wsc.Unlock()
 	} else {
 		wsc.Unlock()
@@ -1622,82 +1622,76 @@ func HandleLoadTxFilter(wsc *WSClient, icmd interface{}) (interface{}, err error
 	return nil, nil
 }
 
-// HandleNotifyBlocks implements the notifyblocks command extension for
-// websocket connections.
-func HandleNotifyBlocks(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+// HandleNotifyBlocks implements the notifyblocks command extension for websocket connections.
+func HandleNotifyBlocks(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	wsc.Server.NtfnMgr.RegisterBlockUpdates(wsc)
-	return nil, nil
+	return
 }
 
 // handleNotifyNewTransactions implements the notifynewtransactions command
 // extension for websocket connections.
-func HandleNotifyNewTransactions(wsc *WSClient,
-	icmd interface{}) (interface{}, err error) {
-	cmd, ok := icmd.(*btcjson.NotifyNewTransactionsCmd)
-	if !ok {
-		return nil, btcjson.ErrRPCInternal
+func HandleNotifyNewTransactions(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
+	if cmd, ok := icmd.(*btcjson.NotifyNewTransactionsCmd); !ok {
+		err = btcjson.ErrRPCInternal
+		slog.Debug(err)
+		return
+	} else {
+		wsc.VerboseTxUpdates = cmd.Verbose != nil && *cmd.Verbose
+		wsc.Server.NtfnMgr.RegisterNewMempoolTxsUpdates(wsc)
 	}
-	wsc.VerboseTxUpdates = cmd.Verbose != nil && *cmd.Verbose
-	wsc.Server.NtfnMgr.RegisterNewMempoolTxsUpdates(wsc)
-	return nil, nil
+	return
 }
 
-// HandleNotifyReceived implements the notifyreceived command extension for
-// websocket connections.
-func HandleNotifyReceived(wsc *WSClient, icmd interface{}) (interface{},
-	error) {
+// HandleNotifyReceived implements the notifyreceived command extension for websocket connections.
+func HandleNotifyReceived(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	cmd, ok := icmd.(*btcjson.NotifyReceivedCmd)
 	if !ok {
 		return nil, btcjson.ErrRPCInternal
 	}
-	// Decode addresses to validate input, but the strings slice is used
-	// directly if these are all ok.
-	err := CheckAddressValidity(cmd.Addresses, wsc.Server.Cfg.ChainParams)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	// Decode addresses to validate input, but the strings slice is used directly if these are all ok.
+	if err = CheckAddressValidity(cmd.Addresses, wsc.Server.Cfg.ChainParams); slog.Check(err) {
+		return
 	}
 	wsc.Server.NtfnMgr.RegisterTxOutAddressRequests(wsc, cmd.Addresses)
-	return nil, nil
+	return
 }
 
-// HandleNotifySpent implements the notifyspent command extension for websocket
-// connections.
-func HandleNotifySpent(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+// HandleNotifySpent implements the notifyspent command extension for websocket connections.
+func HandleNotifySpent(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	cmd, ok := icmd.(*btcjson.NotifySpentCmd)
 	if !ok {
-		return nil, btcjson.ErrRPCInternal
+		err = btcjson.ErrRPCInternal
+		slog.Debug(err)
+		return
 	}
-	outpoints, err := DeserializeOutpoints(cmd.OutPoints)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var outpoints []*wire.OutPoint
+	if outpoints, err = DeserializeOutpoints(cmd.OutPoints); slog.Check(err) {
+		return
 	}
 	wsc.Server.NtfnMgr.RegisterSpentRequests(wsc, outpoints)
-	return nil, nil
+	return
 }
 
-// HandleRescan implements the rescan command extension for websocket
-// connections.
-// NOTE: This does not smartly handle reorgs, and fixing requires database
-// changes (for safe, concurrent access to full block ranges, and support for
-// other chains than the best chain).  It will, however, detect whether a reorg
-// removed a block that was previously processed, and result in the handler
-// erroring.  Clients must handle this by finding a block still in the chain
-// (perhaps from a rescanprogress notification) to resume their rescan.
+// HandleRescan implements the rescan command extension for websocket connections.
+//
+// NOTE: This does not smartly handle reorgs, and fixing requires database changes (for safe, concurrent access to full
+// block ranges, and support for other chains than the best chain). It will, however, detect whether a reorg removed a
+// block that was previously processed, and result in the handler erroring. Clients must handle this by finding a block
+// still in the chain (perhaps from a rescanprogress notification) to resume their rescan.
 // TODO: simplify, modularise this
-func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+func HandleRescan(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	cmd, ok := icmd.(*btcjson.RescanCmd)
 	if !ok {
 		return nil, btcjson.ErrRPCInternal
 	}
 	outpoints := make([]*wire.OutPoint, 0, len(cmd.OutPoints))
+	var blockHash *chainhash.Hash
 	for i := range cmd.OutPoints {
 		cmdOutpoint := &cmd.OutPoints[i]
-		blockHash, err := chainhash.NewHashFromStr(cmdOutpoint.Hash)
-		if err != nil {
-			slog.Error(err)
-			return nil, DecodeHexError(cmdOutpoint.Hash)
+		if blockHash, err = chainhash.NewHashFromStr(cmdOutpoint.Hash); slog.Check(err) {
+			err = DecodeHexError(cmdOutpoint.Hash)
+			slog.Debug(err)
+			return
 		}
 		outpoint := wire.NewOutPoint(blockHash, cmdOutpoint.Index)
 		outpoints = append(outpoints, outpoint)
@@ -1721,15 +1715,15 @@ func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, err error) {
 	var uncompressedPubkey [65]byte
 	params := wsc.Server.Cfg.ChainParams
 	for _, addrStr := range cmd.Addresses {
-		addr, err := util.DecodeAddress(addrStr, params)
-		if err != nil {
-			slog.Error(err)
-			jsonErr := btcjson.RPCError{
+		var addr util.Address
+		if addr, err = util.DecodeAddress(addrStr, params); slog.Check(err) {
+			err = btcjson.RPCError{
 				Code: btcjson.ErrRPCInvalidAddressOrKey,
 				Message: "Rescan address " + addrStr + ": " +
 					err.Error(),
 			}
-			return nil, &jsonErr
+			slog.Debug(err)
+			return
 		}
 		switch a := addr.(type) {
 		case *util.AddressPubKeyHash:
@@ -1746,11 +1740,12 @@ func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, err error) {
 				copy(uncompressedPubkey[:], pubkeyBytes)
 				lookups.UncompressedPubKeys[uncompressedPubkey] = struct{}{}
 			default:
-				jsonErr := btcjson.RPCError{
+				err = btcjson.RPCError{
 					Code:    btcjson.ErrRPCInvalidAddressOrKey,
 					Message: "Pubkey " + addrStr + " is of unknown length",
 				}
-				return nil, &jsonErr
+				slog.Debug(err)
+				return
 			}
 		default:
 			// A new address type must have been added.  Use encoded payment
@@ -1762,57 +1757,59 @@ func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, err error) {
 		lookups.Unspent[*outpoint] = struct{}{}
 	}
 	chain := wsc.Server.Cfg.Chain
-	minBlockHash, err := chainhash.NewHashFromStr(cmd.BeginBlock)
-	if err != nil {
-		slog.Error(err)
-		return nil, DecodeHexError(cmd.BeginBlock)
+	var minBlockHash *chainhash.Hash
+	if minBlockHash, err = chainhash.NewHashFromStr(cmd.BeginBlock); slog.Check(err) {
+		err = DecodeHexError(cmd.BeginBlock)
+		slog.Debug(err)
+		return
 	}
-	minBlock, err := chain.BlockHeightByHash(minBlockHash)
-	if err != nil {
-		slog.Error(err)
-		return nil, &btcjson.RPCError{
+	var minBlock int32
+	if minBlock, err = chain.BlockHeightByHash(minBlockHash); slog.Check(err) {
+		err = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCBlockNotFound,
 			Message: "ScriptError getting block: " + err.Error(),
 		}
+		slog.Debug(err)
+		return
 	}
 	maxBlock := int32(math.MaxInt32)
 	if cmd.EndBlock != nil {
-		maxBlockHash, err := chainhash.NewHashFromStr(*cmd.EndBlock)
-		if err != nil {
-			slog.Error(err)
-			return nil, DecodeHexError(*cmd.EndBlock)
+		var maxBlockHash *chainhash.Hash
+		if maxBlockHash, err = chainhash.NewHashFromStr(*cmd.EndBlock); slog.Check(err) {
+			err = DecodeHexError(*cmd.EndBlock)
+			slog.Debug(err)
+			return
 		}
-		maxBlock, err = chain.BlockHeightByHash(maxBlockHash)
-		if err != nil {
-			slog.Error(err)
-			return nil, &btcjson.RPCError{
+		if maxBlock, err = chain.BlockHeightByHash(maxBlockHash); slog.Check(err) {
+			err = &btcjson.RPCError{
 				Code:    btcjson.ErrRPCBlockNotFound,
 				Message: "ScriptError getting block: " + err.Error(),
 			}
+			slog.Debug(err)
+			return
 		}
 	}
-	// lastBlock and lastBlockHash track the previously-rescanned block. They
-	// equal nil when no previous blocks have been rescanned.
+	// lastBlock and lastBlockHash track the previously-rescanned block. They equal nil when no previous blocks have
+	// been rescanned.
 	var lastBlock *util.Block
 	var lastBlockHash *chainhash.Hash
-	// A ticker is created to wait at least 10 seconds before notifying the
-	// websocket client of the current progress completed by the rescan.
+	// A ticker is created to wait at least 10 seconds before notifying the websocket client of the current progress
+	// completed by the rescan.
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
-	// Instead of fetching all block shas at once, fetch in smaller chunks to
-	// ensure large rescans consume a limited amount of memory.
+	// Instead of fetching all block sha sums at once, fetch in smaller chunks to ensure large rescans consume a limited
+	// amount of memory.
 fetchRange:
 	for minBlock < maxBlock {
-		// Limit the max number of hashes to fetch at once to the maximum number
-		// of items allowed in a single inventory. This value could be higher
-		// since it's not creating inventory messages, but this mirrors the
-		// limiting logic used in the peer-to-peer protocol.
+		// Limit the max number of hashes to fetch at once to the maximum number of items allowed in a single inventory.
+		// This value could be higher since it's not creating inventory messages, but this mirrors the limiting logic
+		// used in the peer-to-peer protocol.
 		maxLoopBlock := maxBlock
 		if maxLoopBlock-minBlock > wire.MaxInvPerMsg {
 			maxLoopBlock = minBlock + wire.MaxInvPerMsg
 		}
-		hashList, err := chain.HeightRange(minBlock, maxLoopBlock)
-		if err != nil {
+		var hashList []chainhash.Hash
+		if hashList, err = chain.HeightRange(minBlock, maxLoopBlock); slog.Check(err) {
 			slog.Error("error looking up block range:", err)
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCDatabase,
@@ -1820,20 +1817,17 @@ fetchRange:
 			}
 		}
 		if len(hashList) == 0 {
-			// The rescan is finished if no blocks hashes for this range were
-			// successfully fetched and a stop block was provided.
+			// The rescan is finished if no blocks hashes for this range were successfully fetched and a stop block was
+			// provided.
 			if maxBlock != math.MaxInt32 {
 				break
 			}
-			// If the rescan is through the current block, set up the client to
-			// continue to receive notifications regarding all rescanned addresses
-			// and the current set of unspent outputs.
-			// This is done safely by temporarily grabbing exclusive access of the
-			// block manager.  If no more blocks have been attached between this
-			// pause and the fetch above, then it is safe to register the
-			// websocket client for continuous notifications if necessary.
-			// Otherwise, continue the fetch loop again to rescan the new blocks
-			// (or error due to an irrecoverable reorganize).
+			// If the rescan is through the current block, set up the client to continue to receive notifications
+			// regarding all rescanned addresses and the current set of unspent outputs. This is done safely by
+			// temporarily grabbing exclusive access of the block manager. If no more blocks have been attached between
+			// this pause and the fetch above, then it is safe to register the websocket client for continuous
+			// notifications if necessary. Otherwise, continue the fetch loop again to rescan the new blocks (or error
+			// due to an irrecoverable reorganize).
 			pauseGuard := wsc.Server.Cfg.SyncMgr.Pause()
 			best := wsc.Server.Cfg.Chain.BestSnapshot()
 			curHash := &best.Hash
@@ -1860,11 +1854,10 @@ fetchRange:
 			}
 			break
 		}
+		var blk *util.Block
 	loopHashList:
 		for i := range hashList {
-			blk, err := chain.BlockByHash(&hashList[i])
-			if err != nil {
-				slog.Error(err)
+			if blk, err = chain.BlockByHash(&hashList[i]); slog.Check(err) {
 				// Only handle reorgs if a block could not be found for the hash.
 				if dbErr, ok := err.(database.DBError); !ok ||
 					dbErr.ErrorCode != database.ErrBlockNotFound {
@@ -1875,24 +1868,18 @@ fetchRange:
 							err.Error(),
 					}
 				}
-				// If an absolute max block was specified, don't attempt to handle
-				// the reorg.
+				// If an absolute max block was specified, don't attempt to handle the reorg.
 				if maxBlock != math.MaxInt32 {
 					slog.Error("stopping rescan for reorged block", cmd.EndBlock)
 					return nil, &ErrRescanReorg
 				}
-				// If the lookup for the previously valid block hash failed, there
-				// may have been a reorg. Fetch a new range of block hashes and
-				// verify that the previously processed block (if there was any)
-				// still exists in the database.  If it doesn't, we error.
-				// A goto is used to branch executation back to before the range
-				// was evaluated, as it must be reevaluated for the new hashList.
+				// If the lookup for the previously valid block hash failed, there may have been a reorg. Fetch a new
+				// range of block hashes and verify that the previously processed block (if there was any) still exists
+				// in the database. If it doesn't, we error. A goto is used to branch executation back to before the
+				// range was evaluated, as it must be reevaluated for the new hashList.
 				minBlock += int32(i)
-				hashList, err = RecoverFromReorg(chain,
-					minBlock, maxBlock, lastBlockHash)
-				if err != nil {
-					slog.Error(err)
-					return nil, err
+				if hashList, err = RecoverFromReorg(chain, minBlock, maxBlock, lastBlockHash); slog.Check(err) {
+					return
 				}
 				if len(hashList) == 0 {
 					break fetchRange
@@ -1900,96 +1887,87 @@ fetchRange:
 				goto loopHashList
 			}
 			if i == 0 && lastBlockHash != nil {
-				// Ensure the new hashList is on the same fork as the last block
-				// from the old hashList.
+				// Ensure the new hashList is on the same fork as the last block from the old hashList.
 				jsonErr := DescendantBlock(lastBlockHash, blk)
 				if jsonErr != nil {
 					return nil, jsonErr
 				}
 			}
-			// A select statement is used to stop rescans if the client requesting
-			// the rescan has disconnected.
+			// A select statement is used to stop rescans if the client requesting the rescan has disconnected.
 			select {
 			case <-wsc.Quit:
-				slog.Debugf("stopped rescan at height %v for disconnected"+
-					" client",
-					blk.Height())
-				return nil, nil
+				slog.Debugf("stopped rescan at height %v for disconnected client", blk.Height())
+				return
 			default:
 				RescanBlock(wsc, &lookups, blk)
 				lastBlock = blk
 				lastBlockHash = blk.Hash()
 			}
-			// Periodically notify the client of the progress completed.  Continue
-			// with next block if no progress notification is needed yet.
+			// Periodically notify the client of the progress completed. Continue with next block if no progress
+			// notification is needed yet.
 			select {
 			case <-ticker.C: // fallthrough
 			default:
 				continue
 			}
-			n := btcjson.NewRescanProgressNtfn(hashList[i].String(),
-				blk.Height(), blk.MsgBlock().Header.Timestamp.Unix())
-			mn, err := btcjson.MarshalCmd(nil, n)
-			if err != nil {
-				slog.Errorf("failed to marshal rescan progress notification: %v",
-					err)
+			n := btcjson.NewRescanProgressNtfn(hashList[i].String(), blk.Height(), blk.MsgBlock().Header.Timestamp.Unix())
+			var mn []byte
+			if mn, err = btcjson.MarshalCmd(nil, n); slog.Check(err) {
+				slog.Errorf("failed to marshal rescan progress notification: %v", err)
 				continue
 			}
 			if err = wsc.QueueNotification(mn); err == ErrClientQuit {
 				// Finished if the client disconnected.
-				slog.Debugf(
-					"stopped rescan at height %v for disconnected client",
-					blk.Height())
-				return nil, nil
+				slog.Debugf("stopped rescan at height %v for disconnected client", blk.Height())
+				return
 			}
 		}
 		minBlock += int32(len(hashList))
 	}
-	// Notify websocket client of the finished rescan.  Due to how pod
-	// asynchronously queues notifications to not block calling code, there is
-	// no guarantee that any of the notifications created during rescan (such as
-	// rescanprogress, recvtx and redeemingtx) will be received before the
-	// rescan RPC returns.  Therefore, another method is needed to safely inform
-	// clients that all rescan notifications have been sent.
-	n := btcjson.NewRescanFinishedNtfn(lastBlockHash.String(),
-		lastBlock.Height(),
+	// Notify websocket client of the finished rescan. Due to how pod asynchronously queues notifications to not block
+	// calling code, there is no guarantee that any of the notifications created during rescan (such as rescanprogress,
+	// recvtx and redeemingtx) will be received before the rescan RPC returns. Therefore, another method is needed to
+	// safely inform clients that all rescan notifications have been sent.
+	n := btcjson.NewRescanFinishedNtfn(lastBlockHash.String(), lastBlock.Height(),
 		lastBlock.MsgBlock().Header.Timestamp.Unix())
-	if mn, err := btcjson.MarshalCmd(nil, n); err != nil {
-		slog.Errorf(
-			"failed to marshal rescan finished notification: %v", err)
+	var mn []byte
+	if mn, err = btcjson.MarshalCmd(nil, n); slog.Check(err) {
+		slog.Errorf("failed to marshal rescan finished notification: %v", err)
 	} else {
-		// The rescan is finished, so we don't care whether the client has
-		// disconnected at this point, so discard error.
+		// The rescan is finished, so we don't care whether the client has disconnected at this point, so discard error.
 		_ = wsc.QueueNotification(mn)
 	}
 	slog.Info("finished rescan")
-	return nil, nil
+	return
 }
 
 // HandleRescanBlocks implements the rescanblocks command extension for
 // websocket connections. NOTE: This extension is ported from
 // github.com/decred/dcrd
-func HandleRescanBlocks(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+func HandleRescanBlocks(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	cmd, ok := icmd.(*btcjson.RescanBlocksCmd)
 	if !ok {
-		return nil, btcjson.ErrRPCInternal
+		err = btcjson.ErrRPCInternal
+		slog.Debug(err)
+		return
 	}
 	// Load client's transaction filter.  Must exist in order to continue.
 	wsc.Lock()
 	filter := wsc.FilterData
 	wsc.Unlock()
 	if filter == nil {
-		return nil, &btcjson.RPCError{
+		err = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCMisc,
 			Message: "Transaction filter must be loaded before rescanning",
 		}
+		slog.Debug(err)
+		return
 	}
 	blockHashes := make([]*chainhash.Hash, len(cmd.BlockHashes))
 	for i := range cmd.BlockHashes {
-		hash, err := chainhash.NewHashFromStr(cmd.BlockHashes[i])
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var hash *chainhash.Hash
+		if hash, err = chainhash.NewHashFromStr(cmd.BlockHashes[i]); slog.Check(err) {
+			return
 		}
 		blockHashes[i] = hash
 	}
@@ -2000,21 +1978,24 @@ func HandleRescanBlocks(wsc *WSClient, icmd interface{}) (interface{}, err error
 	params := wsc.Server.Cfg.ChainParams
 	var lastBlockHash *chainhash.Hash
 	for i := range blockHashes {
-		block, err := bc.BlockByHash(blockHashes[i])
-		if err != nil {
-			slog.Error(err)
-			return nil, &btcjson.RPCError{
+		var block *util.Block
+		if block, err = bc.BlockByHash(blockHashes[i]); slog.Check(err) {
+			err = &btcjson.RPCError{
 				Code:    btcjson.ErrRPCBlockNotFound,
 				Message: "Failed to fetch block: " + err.Error(),
 			}
+			slog.Debug(err)
+			return
 		}
 		if lastBlockHash != nil && block.MsgBlock().Header.
 			PrevBlock != *lastBlockHash {
-			return nil, &btcjson.RPCError{
+			err = &btcjson.RPCError{
 				Code: btcjson.ErrRPCInvalidParameter,
 				Message: fmt.Sprintf("Block %v is not a child of %v",
 					blockHashes[i], lastBlockHash),
 			}
+			slog.Debug(err)
+			return
 		}
 		lastBlockHash = blockHashes[i]
 		transactions := RescanBlockFilter(filter, block, params)
@@ -2028,90 +2009,78 @@ func HandleRescanBlocks(wsc *WSClient, icmd interface{}) (interface{}, err error
 	return &discoveredData, nil
 }
 
-// HandleSession implements the session command extension for websocket
-// connections.
-func HandleSession(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+// HandleSession implements the session command extension for websocket connections.
+func HandleSession(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	return &btcjson.SessionResult{SessionID: wsc.SessionID}, nil
 }
 
-// HandleStopNotifyBlocks implements the stopnotifyblocks command extension for
-// websocket connections.
-func HandleStopNotifyBlocks(wsc *WSClient, icmd interface{}) (interface{},
-	error) {
+// HandleStopNotifyBlocks implements the stopnotifyblocks command extension for websocket connections.
+func HandleStopNotifyBlocks(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	wsc.Server.NtfnMgr.UnregisterBlockUpdates(wsc)
-	return nil, nil
+	return
 }
 
-// handleStopNotifyNewTransations implements the stopnotifynewtransactions
-// command extension for websocket connections.
-func HandleStopNotifyNewTransactions(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+// handleStopNotifyNewTransations implements the stopnotifynewtransactions command extension for websocket connections.
+func HandleStopNotifyNewTransactions(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	wsc.Server.NtfnMgr.UnregisterNewMempoolTxsUpdates(wsc)
-	return nil, nil
+	return
 }
 
-// HandleStopNotifyReceived implements the stopnotifyreceived command extension
-// for websocket connections.
-func HandleStopNotifyReceived(wsc *WSClient, icmd interface{}) (interface{},
-	error) {
+// HandleStopNotifyReceived implements the stopnotifyreceived command extension for websocket connections.
+func HandleStopNotifyReceived(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	cmd, ok := icmd.(*btcjson.StopNotifyReceivedCmd)
 	if !ok {
 		return nil, btcjson.ErrRPCInternal
 	}
-	// Decode addresses to validate input, but the strings slice is used
-	// directly if these are all ok.
-	err := CheckAddressValidity(cmd.Addresses, wsc.Server.Cfg.ChainParams)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	// Decode addresses to validate input, but the strings slice is used directly if these are all ok.
+	if err = CheckAddressValidity(cmd.Addresses, wsc.Server.Cfg.ChainParams); slog.Check(err) {
+		return
 	}
 	for _, addr := range cmd.Addresses {
 		wsc.Server.NtfnMgr.UnregisterTxOutAddressRequest(wsc, addr)
 	}
-	return nil, nil
+	return
 }
 
-// HandleStopNotifySpent implements the stopnotifyspent command extension for
-// websocket connections.
-func HandleStopNotifySpent(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+// HandleStopNotifySpent implements the stopnotifyspent command extension for websocket connections.
+func HandleStopNotifySpent(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	cmd, ok := icmd.(*btcjson.StopNotifySpentCmd)
 	if !ok {
 		return nil, btcjson.ErrRPCInternal
 	}
-	outpoints, err := DeserializeOutpoints(cmd.OutPoints)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var outpoints []*wire.OutPoint
+	if outpoints, err = DeserializeOutpoints(cmd.OutPoints); slog.Check(err) {
+		return
 	}
 	for _, outpoint := range outpoints {
 		wsc.Server.NtfnMgr.UnregisterSpentRequest(wsc, outpoint)
 	}
-	return nil, nil
+	return
 }
 
 // HandleWebsocketHelp implements the help command for websocket connections.
-func HandleWebsocketHelp(wsc *WSClient, icmd interface{}) (interface{}, err error) {
+func HandleWebsocketHelp(wsc *WSClient, icmd interface{}) (ifc interface{}, err error) {
 	cmd, ok := icmd.(*btcjson.HelpCmd)
 	if !ok {
 		return nil, btcjson.ErrRPCInternal
 	}
-	// Provide a usage overview of all commands when no specific command was
-	// specified.
+	// Provide a usage overview of all commands when no specific command was specified.
 	var command string
 	if cmd.Command != nil {
 		command = *cmd.Command
 	}
 	if command == "" {
-		usage, err := wsc.Server.HelpCacher.RPCUsage(true)
-		if err != nil {
-			slog.Error(err)
+		var usage string
+		if usage, err = wsc.Server.HelpCacher.RPCUsage(true); slog.Check(err) {
 			context := "Failed to generate RPC usage"
-			return nil, InternalRPCError(err.Error(), context)
+			err = InternalRPCError(err.Error(), context)
+			slog.Debug(err)
+			return
 		}
 		return usage, nil
 	}
-	// Check that the command asked for is supported and implemented. Search the
-	// list of websocket handlers as well as the main list of handlers since
-	// help should only be provided for those cases.
+	// Check that the command asked for is supported and implemented. Search the list of websocket handlers as well as
+	// the main list of handlers since help should only be provided for those cases.
 	valid := true
 	if _, ok := RPCHandlers[command]; !ok {
 		if _, ok := WSHandlers[command]; !ok {
@@ -2119,17 +2088,20 @@ func HandleWebsocketHelp(wsc *WSClient, icmd interface{}) (interface{}, err erro
 		}
 	}
 	if !valid {
-		return nil, &btcjson.RPCError{
+		err = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidParameter,
 			Message: "Unknown command: " + command,
 		}
+		slog.Debug(err)
+		return
 	}
 	// Get the help for the command.
-	help, err := wsc.Server.HelpCacher.RPCMethodHelp(command)
-	if err != nil {
-		slog.Error(err)
+	var help string
+	if help, err = wsc.Server.HelpCacher.RPCMethodHelp(command); slog.Check(err) {
 		context := "Failed to generate help"
-		return nil, InternalRPCError(err.Error(), context)
+		err = InternalRPCError(err.Error(), context)
+		slog.Debug(err)
+		return
 	}
 	return help, nil
 }
@@ -2142,21 +2114,18 @@ func MakeSemaphore(n int) Semaphore {
 	return make(chan struct{}, n)
 }
 
-// NewRedeemingTxNotification returns a new marshalled redeemingtx notification
-// with the passed parameters.
+// NewRedeemingTxNotification returns a new marshalled redeemingtx notification with the passed parameters.
 func NewRedeemingTxNotification(txHex string, index int,
-	block *util.Block) ([]byte, err error) {
+	block *util.Block) (b []byte, err error) {
 	// Create and marshal the notification.
 	ntfn := btcjson.NewRedeemingTxNtfn(txHex, BlockDetails(block, index))
 	return btcjson.MarshalCmd(nil, ntfn)
 }
 
-// NewWSClientFilter creates a new, empty wsClientFilter struct to be used for
-// a websocket client. NOTE: This extension was ported from github.com/decred/
-// dcrd
-func NewWSClientFilter(addresses []string, unspentOutPoints []wire.OutPoint,
-	params *netparams.Params) *WSClientFilter {
-	filter := &WSClientFilter{
+// NewWSClientFilter creates a new, empty wsClientFilter struct to be used for a websocket client. NOTE: This extension
+// was ported from github.com/decred/ dcrd
+func NewWSClientFilter(addresses []string, unspentOutPoints []wire.OutPoint, params *netparams.Params) (filter *WSClientFilter) {
+	filter = &WSClientFilter{
 		PubKeyHashes:        map[[ripemd160.Size]byte]struct{}{},
 		ScriptHashes:        map[[ripemd160.Size]byte]struct{}{},
 		CompressedPubKeys:   map[[33]byte]struct{}{},
@@ -2171,23 +2140,20 @@ func NewWSClientFilter(addresses []string, unspentOutPoints []wire.OutPoint,
 	for i := range unspentOutPoints {
 		filter.AddUnspentOutPoint(&unspentOutPoints[i])
 	}
-	return filter
+	return
 }
 
-// NewWebsocketClient returns a new websocket client given the notification
-// manager, websocket connection, remote address, and whether or not the client
-// has already been authenticated (via HTTP Basic access authentication).  The
-// returned client is ready to start.  Once started, the client will process
-// incoming and outgoing messages in separate goroutines complete with queuing
-// and asynchrous handling for long-running operations.
+// NewWebsocketClient returns a new websocket client given the notification manager, websocket connection, remote
+// address, and whether or not the client has already been authenticated (via HTTP Basic access authentication). The
+// returned client is ready to start. Once started, the client will process incoming and outgoing messages in separate
+// goroutines complete with queuing and asynchrous handling for long-running operations.
 func NewWebsocketClient(server *Server, conn *websocket.Conn,
-	remoteAddr string, authenticated bool, isAdmin bool) (*WSClient, err error) {
-	sessionID, err := wire.RandomUint64()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	remoteAddr string, authenticated bool, isAdmin bool) (client *WSClient, err error) {
+	var sessionID uint64
+	if sessionID, err = wire.RandomUint64(); slog.Check(err) {
+		return
 	}
-	client := &WSClient{
+	client = &WSClient{
 		Conn:              conn,
 		Addr:              remoteAddr,
 		Authenticated:     authenticated,
@@ -2201,11 +2167,11 @@ func NewWebsocketClient(server *Server, conn *websocket.Conn,
 		SendChan:          make(chan WSResponse, WebsocketSendBufferSize),
 		Quit:              make(chan struct{}),
 	}
-	return client, nil
+	return
 }
 
-// NewWSNotificationManager returns a new notification manager ready for use.
-// See wsNotificationManager for more details.
+// NewWSNotificationManager returns a new notification manager ready for use. See wsNotificationManager for more
+// details.
 func NewWSNotificationManager(server *Server) *WSNtfnMgr {
 	return &WSNtfnMgr{
 		Server:            server,
@@ -2216,10 +2182,9 @@ func NewWSNotificationManager(server *Server) *WSNtfnMgr {
 	}
 }
 
-// QueueHandler manages a queue of empty interfaces, reading from in and
-// sending the oldest unsent to out.  This handler stops when either of the in
-// or quit channels are closed, and closes out before returning, without
-// waiting to send any variables still remaining in the queue.
+// QueueHandler manages a queue of empty interfaces, reading from in and sending the oldest unsent to out. This handler
+// stops when either of the in or quit channels are closed, and closes out before returning, without waiting to send any
+// variables still remaining in the queue.
 func QueueHandler(in <-chan interface{}, out chan<- interface{},
 	quit <-chan struct{}) {
 	var q []interface{}
@@ -2234,8 +2199,8 @@ out:
 				// Sender closed input channel.
 				break out
 			}
-			// Either send to out immediately if skipQueue is non-nil (queue is
-			// empty) and reader is ready, or append to the queue and send later.
+			// Either send to out immediately if skipQueue is non-nil (queue is empty) and reader is ready, or append to
+			// the queue and send later.
 			select {
 			case skipQueue <- n:
 			default:
@@ -2261,49 +2226,46 @@ out:
 	close(out)
 }
 
-// RecoverFromReorg attempts to recover from a detected reorganize during a
-// rescan.  It fetches a new range of block shas from the database and verifies
-// that the new range of blocks is on the same fork as a previous range of
-// blocks.  If this condition does not hold true, the JSON-RPC error for an
-// unrecoverable reorganize is returned.
+// RecoverFromReorg attempts to recover from a detected reorganize during a rescan. It fetches a new range of block sha
+// sums from the database and verifies that the new range of blocks is on the same fork as a previous range of blocks.
+// If this condition does not hold true, the JSON-RPC error for an unrecoverable reorganize is returned.
 func RecoverFromReorg(chain *blockchain.BlockChain, minBlock, maxBlock int32,
-	lastBlock *chainhash.Hash) ([]chainhash.Hash, err error) {
-	hashList, err := chain.HeightRange(minBlock, maxBlock)
-	if err != nil {
-		slog.Error("error looking up block range:", err)
-		return nil, &btcjson.RPCError{
+	lastBlock *chainhash.Hash) (hashList []chainhash.Hash, err error) {
+	if hashList, err = chain.HeightRange(minBlock, maxBlock); slog.Check(err) {
+		err = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDatabase,
 			Message: "Database error: " + err.Error(),
 		}
+		slog.Check(err)
+		return
 	}
 	if lastBlock == nil || len(hashList) == 0 {
-		return hashList, nil
+		return
 	}
-	blk, err := chain.BlockByHash(&hashList[0])
-	if err != nil {
+	var blk *util.Block
+	if blk, err = chain.BlockByHash(&hashList[0]); slog.Check(err) {
 		slog.Error("error looking up possibly reorged block:", err)
-		return nil, &btcjson.RPCError{
+		err = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDatabase,
 			Message: "Database error: " + err.Error(),
 		}
+		slog.Debug(err)
+		return
 	}
-	jsonErr := DescendantBlock(lastBlock, blk)
-	if jsonErr != nil {
-		return nil, jsonErr
+	if err = DescendantBlock(lastBlock, blk); slog.Check(err) {
+		return
 	}
-	return hashList, nil
+	return
 }
 
-// RescanBlock rescans all transactions in a single block.  This is a helper
-// function for handleRescan.
+// RescanBlock rescans all transactions in a single block. This is a helper function for handleRescan.
 func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 	for _, tx := range blk.Transactions() {
-		// Hexadecimal representation of this tx.  Only created if needed,
-		// and reused for later notifications if already made.
+		// Hexadecimal representation of this tx. Only created if needed, and reused for later notifications if already
+		// made.
 		var txHex string
-		// All inputs and outputs must be iterated through to correctly modify
-		// the unspent map, however, just a single notification for any matching
-		// transaction inputs or outputs should be created and sent.
+		// All inputs and outputs must be iterated through to correctly modify the unspent map, however, just a single
+		// notification for any matching transaction inputs or outputs should be created and sent.
 		spentNotified := false
 		recvNotified := false
 		for _, txin := range tx.MsgTx().TxIn {
@@ -2315,11 +2277,10 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 				if txHex == "" {
 					txHex = TxHexString(tx.MsgTx())
 				}
-				marshalledJSON, err := NewRedeemingTxNotification(txHex,
-					tx.Index(), blk)
-				if err != nil {
-					slog.Error("failed to marshal redeemingtx notification:",
-						err)
+				var marshalledJSON []byte
+				var err error
+				if marshalledJSON, err = NewRedeemingTxNotification(txHex, tx.Index(), blk); slog.Check(err) {
+					slog.Error("failed to marshal redeemingtx notification:", err)
 					continue
 				}
 				err = wsc.QueueNotification(marshalledJSON)
@@ -2359,13 +2320,10 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 							found = true
 						}
 					default:
-						slog.Warnf(
-							"skipping rescanned pubkey of unknown serialized"+
-								" length", len(sa))
+						slog.Warnf("skipping rescanned pubkey of unknown serialized length", len(sa))
 						continue
 					}
-					// If the transaction output pays to the pubkey of a
-					// rescanned P2PKH address, include it as well.
+					// If the transaction output pays to the pubkey of a rescanned P2PKH address, include it as well.
 					if !found {
 						pkh := a.AddressPubKeyHash()
 						if _, ok := lookups.PubKeyHashes[*pkh.Hash160()]; !ok {
@@ -2373,8 +2331,7 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 						}
 					}
 				default:
-					// A new address type must have been added.
-					// Encode as a payment address string and check the
+					// A new address type must have been added. Encode as a payment address string and check the
 					// fallback map.
 					addrStr := addr.EncodeAddress()
 					_, ok := lookups.Fallbacks[addrStr]
@@ -2411,17 +2368,15 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 	}
 }
 
-// RescanBlockFilter rescans a block for any relevant transactions for the
-// passed lookup keys. Any discovered transactions are returned hex encoded as
-// a string slice. NOTE: This extension is ported from github.com/decred/dcrd
+// RescanBlockFilter rescans a block for any relevant transactions for the passed lookup keys. Any discovered
+// transactions are returned hex encoded as a string slice. NOTE: This extension is ported from github.com/decred/dcrd
 func RescanBlockFilter(filter *WSClientFilter, block *util.Block,
 	params *netparams.Params) []string {
 	var transactions []string
 	filter.mu.Lock()
 	for _, tx := range block.Transactions() {
 		msgTx := tx.MsgTx()
-		// Keep track of whether the transaction has already been added to
-		// the result.  It shouldn't be added twice.
+		// Keep track of whether the transaction has already been added to the result. It shouldn't be added twice.
 		added := false
 		// Scan inputs if not a coinbase transaction.
 		if !blockchain.IsCoinBaseTx(msgTx) {
@@ -2430,17 +2385,14 @@ func RescanBlockFilter(filter *WSClientFilter, block *util.Block,
 					continue
 				}
 				if !added {
-					transactions = append(
-						transactions,
-						TxHexString(msgTx))
+					transactions = append(transactions, TxHexString(msgTx))
 					added = true
 				}
 			}
 		}
 		// Scan outputs.
 		for i, output := range msgTx.TxOut {
-			_, addrs, _, err := txscript.ExtractPkScriptAddrs(
-				output.PkScript, params)
+			_, addrs, _, err := txscript.ExtractPkScriptAddrs(output.PkScript, params)
 			if err != nil {
 				slog.Error(err)
 				continue
@@ -2455,9 +2407,7 @@ func RescanBlockFilter(filter *WSClientFilter, block *util.Block,
 				}
 				filter.AddUnspentOutPoint(&op)
 				if !added {
-					transactions = append(
-						transactions,
-						TxHexString(msgTx))
+					transactions = append(transactions, TxHexString(msgTx))
 					added = true
 				}
 			}
@@ -2471,9 +2421,6 @@ func RescanBlockFilter(filter *WSClientFilter, block *util.Block,
 func TxHexString(tx *wire.MsgTx) string {
 	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
 	// Ignore Serialize's error, as writing to a bytes.buffer cannot fail.
-	err := tx.Serialize(buf)
-	if err != nil {
-		slog.Error(err)
-	}
+	_ = tx.Serialize(buf)
 	return hex.EncodeToString(buf.Bytes())
 }

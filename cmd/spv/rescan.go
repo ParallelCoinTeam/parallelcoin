@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
@@ -40,25 +41,25 @@ type // rescanOptions holds the set of functional parameters for Rescan.
 		quit         <-chan struct{}
 	}
 
-type // RescanOption is a functional option argument to any of the rescan and
-	// notification subscription methods. These are always processed in order, with
-	// later options overriding earlier ones.
-	RescanOption func(ro *rescanOptions)
+// RescanOption is a functional option argument to any of the rescan and
+// notification subscription methods. These are always processed in order, with
+// later options overriding earlier ones.
+type RescanOption func(ro *rescanOptions)
 
 func defaultRescanOptions() *rescanOptions {
 	return &rescanOptions{}
 }
 
-func // QueryOptions pass onto the underlying queries.
-QueryOptions(options ...QueryOption) RescanOption {
+// QueryOptions pass onto the underlying queries.
+func QueryOptions(options ...QueryOption) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.queryOptions = options
 	}
 }
 
-func // NotificationHandlers specifies notification handlers for the rescan.
+// NotificationHandlers specifies notification handlers for the rescan.
 // These will always run in the same goroutine as the caller.
-NotificationHandlers(ntfn client.NotificationHandlers) RescanOption {
+func NotificationHandlers(ntfn client.NotificationHandlers) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.ntfn = ntfn
 	}
@@ -172,15 +173,14 @@ func (s *ChainService) rescan(options ...RescanOption) (err error) {
 		option(ro)
 	}
 	ro.chain = s
-	// If we have something to watch, create a watch list. The watch list
-	// can be composed of a set of scripts, outpoints, and txids.
+	// If we have something to watch, create a watch list. The watch list can be composed of a set of scripts,
+	// outpoints, and txids.
+	var scr []byte
 	for _, addr := range ro.watchAddrs {
-		script, err := script.PayToAddrScript(addr)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if scr, err = script.PayToAddrScript(addr); slog.Check(err) {
+			return
 		}
-		ro.watchList = append(ro.watchList, script)
+		ro.watchList = append(ro.watchList, scr)
 	}
 	for _, input := range ro.watchInputs {
 		ro.watchList = append(ro.watchList, input.PkScript)
@@ -220,8 +220,7 @@ func (s *ChainService) rescan(options ...RescanOption) (err error) {
 	// If we don't have a quit channel, and the end height is still
 	// unspecified, then we'll exit out here.
 	if ro.quit == nil && ro.endBlock.Height == 0 {
-		return fmt.Errorf("Rescan request must specify a quit channel" +
-			" or valid end block")
+		return fmt.Errorf("rescan request must specify a quit channel or valid end block")
 	}
 	// Track our position in the chain.
 	var (
@@ -322,10 +321,7 @@ filterHeaderWaitLoop:
 			return err
 		}
 	}
-	slog.Debugf(
-		"starting rescan from known block %d (%s) %s",
-		curStamp.Height, curStamp.Hash,
-	)
+	slog.Debugf("starting rescan from known block %d (%s) %s", curStamp.Height, curStamp.Hash)
 	// Compare the start time to the start block. If the start time is
 	// later, cycle through blocks until we find a block timestamp later
 	// than the start time, and begin filter download at that block. Since
@@ -338,7 +334,6 @@ filterHeaderWaitLoop:
 	blockDisconnected := make(chan wire.BlockHeader)
 	var (
 		subscription *blockSubscription
-		err          error
 	)
 	// blockRetryInterval is the interval in which we'll continually re-try
 	// to fetch the latest filter from our peers.
@@ -687,18 +682,17 @@ func (s *ChainService) notifyBlock(ro *rescanOptions,
 
 // extractBlockMatches fetches the target block from the network, and filters
 // out any relevant transactions found within the block.
-func (s *ChainService) extractBlockMatches(ro *rescanOptions,
-	curStamp *waddrmgr.BlockStamp) ([]*util.Tx, err error) {
+func (s *ChainService) extractBlockMatches(ro *rescanOptions, curStamp *waddrmgr.BlockStamp) (relevantTxs []*util.Tx, err error) {
 	// We've matched. Now we actually get the block and cycle through the
 	// transactions to see which ones are relevant.
-	block, err := s.GetBlock(curStamp.Hash, ro.queryOptions...)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var block *util.Block
+	if block, err = s.GetBlock(curStamp.Hash, ro.queryOptions...); slog.Check(err) {
+		return
 	}
 	if block == nil {
-		return nil, fmt.Errorf("Couldn't get block %d (%s) from "+
-			"network", curStamp.Height, curStamp.Hash)
+		err = fmt.Errorf("couldn't get block %d (%s) from network", curStamp.Height, curStamp.Hash)
+		slog.Debug(err)
+		return
 	}
 	blockHeader := block.MsgBlock().Header
 	blockDetails := btcjson.BlockDetails{
@@ -706,7 +700,7 @@ func (s *ChainService) extractBlockMatches(ro *rescanOptions,
 		Hash:   block.Hash().String(),
 		Time:   blockHeader.Timestamp.Unix(),
 	}
-	relevantTxs := make([]*util.Tx, 0, len(block.Transactions()))
+	relevantTxs = make([]*util.Tx, 0, len(block.Transactions()))
 	for txIdx, tx := range block.Transactions() {
 		txDetails := blockDetails
 		txDetails.Index = txIdx
@@ -717,14 +711,11 @@ func (s *ChainService) extractBlockMatches(ro *rescanOptions,
 				ro.ntfn.OnRedeemingTx(tx, &txDetails)
 			}
 		}
-		// Even though the transaction may already be known as relevant
-		// and there might not be a notification callback, we need to
-		// call paysWatchedAddr anyway as it updates the rescan
-		// options.
-		pays, err := ro.paysWatchedAddr(tx)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		// Even though the transaction may already be known as relevant and there might not be a notification callback,
+		// we need to call paysWatchedAddr anyway as it updates the rescan options.
+		var pays bool
+		if pays, err = ro.paysWatchedAddr(tx); slog.Check(err) {
+			return
 		}
 		if pays {
 			relevant = true
@@ -777,30 +768,23 @@ func (s *ChainService) notifyBlockWithFilter(ro *rescanOptions,
 	return nil
 }
 
-// matchBlockFilter returns whether the block filter matches the watched items.
-// If this returns false, it means the block is certainly not interesting to
-// us. This method differs from blockFilterMatches in that it expects the
-// filter to already be obtained, rather than fetching the filter from the
-// network.
+// matchBlockFilter returns whether the block filter matches the watched items. If this returns false, it means the
+// block is certainly not interesting to us. This method differs from blockFilterMatches in that it expects the
+// filter to already be obtained, rather than fetching the filter from the network.
 func (s *ChainService) matchBlockFilter(ro *rescanOptions, filter *gcs.Filter,
-	blockHash *chainhash.Hash) (bool, err error) {
-	// Now that we have the filter as well as the block hash of the block
-	// used to construct the filter, we'll check to see if the block
-	// matches any items in our watch list.
+	blockHash *chainhash.Hash) (matched bool, err error) {
+	// Now that we have the filter as well as the block hash of the block used to construct the filter, we'll check to
+	// see if the block matches any items in our watch list.
 	key := builder.DeriveKey(blockHash)
-	matched, err := filter.MatchAny(key, ro.watchList)
-	if err != nil {
-		slog.Error(err)
-		return false, err
+	if matched, err = filter.MatchAny(key, ro.watchList); slog.Check(err) {
+		return
 	}
-	return matched, nil
+	return
 }
 
-// blockFilterMatches returns whether the block filter matches the watched
-// items. If this returns false, it means the block is certainly not interesting
-// to us.
-func (s *ChainService) blockFilterMatches(ro *rescanOptions,
-	blockHash *chainhash.Hash) (bool, err error) {
+// blockFilterMatches returns whether the block filter matches the watched items. If this returns false, it means the
+// block is certainly not interesting to us.
+func (s *ChainService) blockFilterMatches(ro *rescanOptions, blockHash *chainhash.Hash) (matched bool, err error) {
 	// TODO(roasbeef): need to ENSURE always get filter
 	key := builder.DeriveKey(blockHash)
 	bFilter, err := s.GetCFilter(*blockHash, wire.GCSFilterRegular)
@@ -808,18 +792,18 @@ func (s *ChainService) blockFilterMatches(ro *rescanOptions,
 		slog.Error(err)
 		if err == headerfs.ErrHashNotFound {
 			// Block has been reorged out from under us.
-			return false, nil
+			return
 		}
-		return false, err
+		return
 	}
 	// If we found the basic filter, and the filter isn't
 	// "nil", then we'll check the items in the watch list
 	// against it.
 	if bFilter != nil && bFilter.N() != 0 {
 		// We see if any relevant transactions match.
-		matched, err := bFilter.MatchAny(key, ro.watchList)
-		if matched || err != nil {
-			return matched, err
+		matched, err = bFilter.MatchAny(key, ro.watchList)
+		if matched || slog.Check(err) {
+			return
 		}
 	}
 	// We don't need the extended filter, since all of the things a rescan
@@ -840,17 +824,16 @@ func (s *ChainService) hasFilterHeadersByHeight(height uint32) bool {
 
 // updateFilter atomically updates the filter and rewinds to the specified
 // height if not 0.
-func (ro *rescanOptions) updateFilter(update *updateOptions,
-	curStamp *waddrmgr.BlockStamp, curHeader *wire.BlockHeader) (bool, err error) {
+func (ro *rescanOptions) updateFilter(update *updateOptions, curStamp *waddrmgr.BlockStamp,
+	curHeader *wire.BlockHeader) (rewound bool, err error) {
 	ro.watchAddrs = append(ro.watchAddrs, update.addrs...)
 	ro.watchInputs = append(ro.watchInputs, update.inputs...)
+	var scr []byte
 	for _, addr := range update.addrs {
-		script, err := script.PayToAddrScript(addr)
-		if err != nil {
-			slog.Error(err)
-			return false, err
+		if scr, err = script.PayToAddrScript(addr); slog.Check(err) {
+			return
 		}
-		ro.watchList = append(ro.watchList, script)
+		ro.watchList = append(ro.watchList, scr)
 	}
 	for _, input := range update.inputs {
 		ro.watchList = append(ro.watchList, input.PkScript)
@@ -863,10 +846,8 @@ func (ro *rescanOptions) updateFilter(update *updateOptions,
 		return false, nil
 	}
 	var (
-		header  *wire.BlockHeader
-		height  uint32
-		rewound bool
-		err     error
+		header *wire.BlockHeader
+		height uint32
 	)
 	// If we need to rewind, then we'll walk backwards in the chain until
 	// we arrive at the block _just_ before the rewind.
@@ -913,33 +894,25 @@ func (ro *rescanOptions) spendsWatchedInput(tx *util.Tx) bool {
 	return false
 }
 
-// paysWatchedAddr returns whether the transaction matches the filter by having
-// an output paying to a watched address. If that is the case, this also
-// updates the filter to watch the newly created output going forward.
-func (ro *rescanOptions) paysWatchedAddr(tx *util.Tx) (bool, err error) {
-	anyMatchingOutputs := false
+// paysWatchedAddr returns whether the transaction matches the filter by having an output paying to a watched address.
+// If that is the case, this also updates the filter to watch the newly created output going forward.
+func (ro *rescanOptions) paysWatchedAddr(tx *util.Tx) (anyMatchingOutputs bool, err error) {
 txOutLoop:
 	for outIdx, out := range tx.MsgTx().TxOut {
 		pkScript := out.PkScript
 		for _, addr := range ro.watchAddrs {
-			// We'll convert the address into its matching pkScript
-			// to in order to check for a match.
-			addrScript, err := script.PayToAddrScript(addr)
-			if err != nil {
-				slog.Error(err)
-				return false, err
+			// We'll convert the address into its matching pkScript to in order to check for a match.
+			var addrScript []byte
+			if addrScript, err = script.PayToAddrScript(addr); slog.Check(err) {
+				return
 			}
-			// If the script doesn't match, we'll move onto the
-			// next one.
+			// If the script doesn't match, we'll move onto the next one.
 			if !bytes.Equal(pkScript, addrScript) {
 				continue
 			}
-			// At this state, we have a matching output so we'll
-			// mark this transaction as matching.
+			// At this state, we have a matching output so we'll mark this transaction as matching.
 			anyMatchingOutputs = true
-			// Update the filter by also watching this created
-			// outpoint for the event in the future that it's
-			// spent.
+			// Update the filter by also watching this created outpoint for the event in the future that it's spent.
 			hash := tx.Hash()
 			outPoint := wire.OutPoint{
 				Hash:  *hash,
@@ -953,7 +926,7 @@ txOutLoop:
 			continue txOutLoop
 		}
 	}
-	return anyMatchingOutputs, nil
+	return
 }
 
 // Rescan is an object that represents a long-running rescan/notification
@@ -992,24 +965,24 @@ func (r *Rescan) WaitForShutdown() {
 
 // Start kicks off the rescan goroutine, which will begin to scan the chain
 // according to the specified rescan options.
-func (r *Rescan) Start() <-chan (err error) {
-errChan := make(chan error, 1)
-if !atomic.CompareAndSwapUint32(&r.started, 0, 1) {
-errChan <- fmt.Errorf("Rescan already started")
-return errChan
-}
-r.wg.Add(1)
-go func () {
-defer r.wg.Done()
-rescanArgs := append(r.options, updateChan(r.updateChan))
-err := r.chain.rescan(rescanArgs...)
-close(r.running)
-r.errMtx.Lock()
-r.err = err
-r.errMtx.Unlock()
-errChan <- err
-}()
-return errChan
+func (r *Rescan) Start() <-chan error {
+	errChan := make(chan error, 1)
+	if !atomic.CompareAndSwapUint32(&r.started, 0, 1) {
+		errChan <- fmt.Errorf("rescan already started")
+		return errChan
+	}
+	r.wg.Add(1)
+	go func() {
+		defer r.wg.Done()
+		rescanArgs := append(r.options, updateChan(r.updateChan))
+		err := r.chain.rescan(rescanArgs...)
+		close(r.running)
+		r.errMtx.Lock()
+		r.err = err
+		r.errMtx.Unlock()
+		errChan <- err
+	}()
+	return errChan
 }
 
 // updateOptions are a set of functional parameters for Update.
@@ -1125,7 +1098,7 @@ func // GetUtxo gets the appropriate TxOut or errors if it's spent. The option
 // is 0, first normal transaction is 1, etc.).
 //
 // TODO(roasbeef): WTB utxo-commitments
-(s *ChainService) GetUtxo(options ...RescanOption) (*SpendReport, err error) {
+(s *ChainService) GetUtxo(options ...RescanOption) (report *SpendReport, err error) {
 	// Before we start we'll fetch the set of default options, and apply
 	// any user specified options in a functional manner.
 	ro := defaultRescanOptions()
@@ -1139,37 +1112,29 @@ func // GetUtxo gets the appropriate TxOut or errors if it's spent. The option
 	// As this is meant to fetch UTXO's, the options MUST specify exactly
 	// one outpoint.
 	if len(ro.watchInputs) != 1 {
-		return nil, fmt.Errorf("must pass exactly one OutPoint")
+		err = fmt.Errorf("must pass exactly one OutPoint")
+		slog.Debug(err)
+		return
 	}
-	req, err := s.utxoScanner.Enqueue(
-		&ro.watchInputs[0], uint32(ro.startBlock.Height),
-	)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var req *GetUtxoRequest
+	if req, err = s.utxoScanner.Enqueue(&ro.watchInputs[0], uint32(ro.startBlock.Height)); slog.Check(err) {
+		return
 	}
 	// Wait for the result to be delivered by the rescan or until a shutdown
 	// is signaled.
-	report, err := req.Result(ro.quit)
-	if err != nil {
-		slog.Error(err)
-		slog.Debugf(
-			"error finding spends for %s: %v %s",
-			ro.watchInputs[0].OutPoint.String(),
-			err,
+	if report, err = req.Result(ro.quit); slog.Check(err) {
+		slog.Debugf("error finding spends for %s: %v %s", ro.watchInputs[0].OutPoint.String(), err,
 		)
-		return nil, err
+		return
 	}
-	return report, nil
+	return
 }
 
-func // getReorgTip gets a block header from the chain service's cache.
-// This is only
-// required until the block subscription API is factored out into its own
-// package.
+// getReorgTip gets a block header from the chain service's cache.
+// This is only required until the block subscription API is factored out into its own package.
 //
 // TODO(aakselrod): Get rid of this as described above.
-(s *ChainService) getReorgTip(hash chainhash.Hash) *wire.BlockHeader {
+func (s *ChainService) getReorgTip(hash chainhash.Hash) *wire.BlockHeader {
 	s.mtxReorgHeader.RLock()
 	defer s.mtxReorgHeader.RUnlock()
 	return s.reorgedBlockHeaders[hash]

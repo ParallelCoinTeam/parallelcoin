@@ -194,9 +194,8 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	}
 	// interrupt.AddHandler(gracefulShutdown)
 
-	// Wait until the interrupt signal is received from an OS signal or
-	// shutdown is requested through one of the subsystems such as the
-	// RPC server.
+	// Wait until the interrupt signal is received from an OS signal or shutdown is requested through one of the
+	// subsystems such as the RPC server.
 	select {
 	case <-cx.NodeKill:
 		gracefulShutdown()
@@ -206,60 +205,47 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	return nil
 }
 
-// loadBlockDB loads (or creates when needed) the block database taking into
-// account the selected database backend and returns a handle to it.
-// It also additional logic such warning the user if there are multiple
-// databases which consume space on the file system and ensuring the
-// regression test database is clean when in regression test mode.
-func loadBlockDB(cx *conte.Xt) (database.DB, err error) {
-	// The memdb backend does not have a file path associated with it,
-	// so handle it uniquely.
-	// We also don't want to worry about the multiple database type
-	// warnings when running with the memory database.
+// loadBlockDB loads (or creates when needed) the block database taking into account the selected database backend and
+// returns a handle to it. It also additional logic such warning the user if there are multiple databases which consume
+// space on the file system and ensuring the regression test database is clean when in regression test mode.
+func loadBlockDB(cx *conte.Xt) (db database.DB, err error) {
+	// The memdb backend does not have a file path associated with it, so handle it uniquely. We also don't want to
+	// worry about the multiple database type warnings when running with the memory database.
 	if *cx.Config.DbType == "memdb" {
 		slog.Info("creating block database in memory")
-		db, err := database.Create(*cx.Config.DbType)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if db, err = database.Create(*cx.Config.DbType); slog.Check(err) {
+			return
 		}
-		return db, nil
+		return
 	}
 	warnMultipleDBs(cx)
 	// The database name is based on the database type.
 	dbPath := path.BlockDb(cx, *cx.Config.DbType, blockdb.NamePrefix)
-	// The regression test is special in that it needs a clean database
-	// for each run, so remove it now if it already exists.
-	e := removeRegressionDB(cx, dbPath)
-	if e != nil {
-		slog.Debug("failed to remove regression db:", e)
+	// The regression test is special in that it needs a clean database for each run, so remove it now if it already
+	// exists.
+	if err = removeRegressionDB(cx, dbPath); slog.Check(err) {
+		slog.Debug("failed to remove regression db:", err)
 	}
 	slog.Infof("loading block database from '%s'", dbPath)
-	db, err := database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
-	if err != nil {
-		slog.Trace(err) // return the error if it's not because the database doesn't exist
+	if db, err = database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net); slog.Check(err) {
 		if dbErr, ok := err.(database.DBError); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
 			return nil, err
 		}
 		// create the db if it does not exist
-		err = os.MkdirAll(*cx.Config.DataDir, 0700)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if err = os.MkdirAll(*cx.Config.DataDir, 0700); slog.Check(err) {
+			return
 		}
-		db, err = database.Create(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if db, err = database.Create(*cx.Config.DbType, dbPath, cx.ActiveNet.Net); slog.Check(err) {
+			return
 		}
 	}
 	slog.Trace("block database loaded")
-	return db, nil
+	return
 }
 
-// removeRegressionDB removes the existing regression test database if
-// running in regression test mode and it already exists.
+// removeRegressionDB removes the existing regression test database if running in regression test mode and it already
+// exists.
 func removeRegressionDB(cx *conte.Xt, dbPath string) (err error) {
 	// don't do anything if not in regression test mode
 	if !((*cx.Config.Network)[0] == 'r') {
@@ -270,25 +256,23 @@ func removeRegressionDB(cx *conte.Xt, dbPath string) (err error) {
 	if fi, err = os.Stat(dbPath); !slog.Check(err) {
 		slog.Infof("removing regression test database from '%s' %s", dbPath)
 		if fi.IsDir() {
-			if err = os.RemoveAll(dbPath); err != nil {
-				return err
+			if err = os.RemoveAll(dbPath); slog.Check(err) {
+				return
 			}
 		} else {
-			if err = os.Remove(dbPath); err != nil {
-				return err
+			if err = os.Remove(dbPath); slog.Check(err) {
+				return
 			}
 		}
 	}
 	return
 }
 
-// warnMultipleDBs shows a warning if multiple block database types are
-// detected. This is not a situation most users want.
-// It is handy for development however to support multiple side-by-side databases.
+// warnMultipleDBs shows a warning if multiple block database types are detected. This is not a situation most users
+// want. It is handy for development however to support multiple side-by-side databases.
 func warnMultipleDBs(cx *conte.Xt) {
-	// This is intentionally not using the known db types which depend on the
-	// database types compiled into the binary since we want to detect legacy
-	// db types as well.
+	// This is intentionally not using the known db types which depend on the database types compiled into the binary
+	// since we want to detect legacy db types as well.
 	dbTypes := []string{"ffldb", "leveldb", "sqlite"}
 	duplicateDbPaths := make([]string, 0, len(dbTypes)-1)
 	for _, dbType := range dbTypes {

@@ -372,10 +372,9 @@ func (idx *TxIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 // disconnected from the main chain.
 // This indexer removes the hash-to-transaction mapping for every transaction
 // in the block. This is part of the Indexer interface.
-func (idx *TxIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
-	stxos []blockchain.SpentTxOut) (err error) {
+func (idx *TxIndex) DisconnectBlock(dbTx database.Tx, block *util.Block, stxos []blockchain.SpentTxOut) (err error) {
 	// Remove all of the transactions in the block from the index.
-	if err := dbRemoveTxIndexEntries(dbTx, block); slog.Check(err) {
+	if err = dbRemoveTxIndexEntries(dbTx, block); slog.Check(err) {
 		return
 	}
 	// Remove the block ID index entry for the block being disconnected and

@@ -12,33 +12,33 @@ const (
 )
 
 // parseArgs parses the arguments from the walletdb Open/Create methods.
-func parseArgs(funcName string, args ...interface{}) (string, err error) {
+func parseArgs(funcName string, args ...interface{}) (dbPath string, err error) {
 	if len(args) != 1 {
-		return "", fmt.Errorf("invalid arguments to %s.%s -- "+
-			"expected database path", dbType, funcName)
+		err = fmt.Errorf("invalid arguments to %s.%s -- expected database path", dbType, funcName)
+		slog.Debug(err)
+		return
 	}
-	dbPath, ok := args[0].(string)
-	if !ok {
-		return "", fmt.Errorf("first argument to %s.%s is invalid -- "+
-			"expected database path string", dbType, funcName)
+	var ok bool
+	if dbPath, ok = args[0].(string); !ok {
+		err = fmt.Errorf("first argument to %s.%s is invalid -- expected database path string", dbType, funcName)
+		slog.Debug(err)
 	}
-	return dbPath, nil
+	return
 }
 
 // openDBDriver is the callback provided during driver registration that opens
 // an existing database for use.
-func openDBDriver(args ...interface{}) (walletdb.DB, err error) {
-	dbPath, err := parseArgs("Open", args...)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func openDBDriver(args ...interface{}) (d walletdb.DB, err error) {
+	var dbPath string
+	if dbPath, err = parseArgs("Open", args...); slog.Check(err) {
+		return
 	}
 	return openDB(dbPath, false)
 }
 
 // createDBDriver is the callback provided during driver registration that
 // creates, initializes, and opens a database for use.
-func createDBDriver(args ...interface{}) (walletdb.DB, err error) {
+func createDBDriver(args ...interface{}) (d walletdb.DB, err error) {
 	dbPath, err := parseArgs("Create", args...)
 	if err != nil {
 		slog.Error(err)

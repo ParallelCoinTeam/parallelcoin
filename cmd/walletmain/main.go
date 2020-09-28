@@ -2,11 +2,12 @@ package walletmain
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
 	"io/ioutil"
 	// This enables pprof
 	// _ "net/http/pprof"
 	"sync"
+
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
@@ -237,21 +238,15 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 	}
 }
 
-// startChainRPC opens a RPC client connection to a pod server for blockchain
-// services.  This function uses the RPC options from the global config and
-// there is no recovery in case the server is not available or if there is an
-// authentication error.  Instead, all requests to the client will simply error.
-func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, err error) {
-	slog.Tracef(
-		"attempting RPC client connection to %v, TLS: %s",
-		*config.RPCConnect, fmt.Sprint(*config.TLS),
-	)
-	rpcC, err := chain.NewRPCClient(activeNet, *config.RPCConnect,
-		*config.Username, *config.Password, certs, !*config.TLS, 0)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+// startChainRPC opens a RPC client connection to a pod server for blockchain services. This function uses the RPC
+// options from the global config and there is no recovery in case the server is not available or if there is an
+// authentication error. Instead, all requests to the client will simply error.
+func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (rpcC *chain.RPCClient, err error) {
+	slog.Tracef("attempting RPC client connection to %v, TLS: %s", *config.RPCConnect, fmt.Sprint(*config.TLS))
+	if rpcC, err = chain.NewRPCClient(activeNet, *config.RPCConnect, *config.Username, *config.Password, certs, !*config.TLS, 0); slog.Check(err) {
+		return
 	}
 	err = rpcC.Start()
+	slog.Debug(err)
 	return rpcC, err
 }

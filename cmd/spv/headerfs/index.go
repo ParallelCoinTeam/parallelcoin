@@ -65,22 +65,18 @@ type headerIndex struct {
 
 // newHeaderIndex creates a new headerIndex given an already open database, and
 // a particular header type.
-func newHeaderIndex(db walletdb.DB, indexType HeaderType) (*headerIndex, err error) {
+func newHeaderIndex(db walletdb.DB, indexType HeaderType) (hi *headerIndex, err error) {
 	// As an initially step, we'll attempt to create all the buckets
 	// necessary for functioning of the index. If these buckets has already
 	// been created, then we can exit early.
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
-		_, err := tx.CreateTopLevelBucket(indexBucket)
-		return err
-	})
-	if err != nil && err != walletdb.ErrBucketExists {
-		return nil, err
+	if err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (err error) {
+		_, err = tx.CreateTopLevelBucket(indexBucket)
+		return
+	}); slog.Check(err) && err != walletdb.ErrBucketExists {
+		return
 	}
-	return &headerIndex{
-			db:        db,
-			indexType: indexType,
-		},
-		nil
+	hi = &headerIndex{db: db, indexType: indexType}
+	return
 }
 
 // headerEntry is an internal type that's used to quickly map a (height, hash)
@@ -170,9 +166,8 @@ func (h *headerIndex) addHeaders(batch headerBatch) (err error) {
 // heightFromHash returns the height of the entry that matches the specified
 // height. With this height, the caller is then able to seek to the appropriate
 // spot in the flat files in order to extract the true header.
-func (h *headerIndex) heightFromHash(hash *chainhash.Hash) (uint32, err error) {
-	var height uint32
-	err := walletdb.View(h.db, func(tx walletdb.ReadTx) (err error) {
+func (h *headerIndex) heightFromHash(hash *chainhash.Hash) (height uint32, err error) {
+	if err = walletdb.View(h.db, func(tx walletdb.ReadTx) (err error) {
 		rootBucket := tx.ReadBucket(indexBucket)
 		heightBytes := rootBucket.Get(hash[:])
 		if heightBytes == nil {
@@ -181,22 +176,16 @@ func (h *headerIndex) heightFromHash(hash *chainhash.Hash) (uint32, err error) {
 			return ErrHashNotFound
 		}
 		height = binary.BigEndian.Uint32(heightBytes)
-		return nil
-	})
-	if err != nil {
-		slog.Error(err)
-		return 0, err
+		return
+	}); slog.Check(err) {
+		return
 	}
-	return height, nil
+	return
 }
 
 // chainTip returns the best hash and height that the index knows of.
-func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, err error) {
-	var (
-		tipHeight uint32
-		tipHash   *chainhash.Hash
-	)
-	err := walletdb.View(h.db, func(tx walletdb.ReadTx) (err error) {
+func (h *headerIndex) chainTip() (tipHash *chainhash.Hash, tipHeight uint32, err error) {
+	if err = walletdb.View(h.db, func(tx walletdb.ReadTx) (err error) {
 		rootBucket := tx.ReadBucket(indexBucket)
 		var tipKey []byte
 		// Based on the specified index type of this instance of the
@@ -228,12 +217,10 @@ func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, err error) {
 		tipHash = h
 		tipHeight = binary.BigEndian.Uint32(tipHeightBytes)
 		return nil
-	})
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, err
+	}); slog.Check(err) {
+		return
 	}
-	return tipHash, tipHeight, nil
+	return
 }
 
 // truncateIndex truncates the index for a particular header type by a single
@@ -260,8 +247,8 @@ func (h *headerIndex) truncateIndex(newTip *chainhash.Hash, delete bool) (err er
 		// being rolled back.
 		if delete {
 			prevTipHash := rootBucket.Get(tipKey)
-			if err := rootBucket.Delete(prevTipHash); err != nil {
-				return err
+			if err = rootBucket.Delete(prevTipHash); slog.Check(err) {
+				return
 			}
 		}
 		// With the now stale entry deleted, we'll update the chain tip

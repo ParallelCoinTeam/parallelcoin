@@ -2,6 +2,7 @@ package spv
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -30,39 +31,41 @@ func newMockBlockHeaderStore() headerfs.BlockHeaderStore {
 		headers: make(map[chainhash.Hash]wire.BlockHeader),
 	}
 }
-func (m *mockBlockHeaderStore) ChainTip() (*wire.BlockHeader,
-	uint32, err error) {
+func (m *mockBlockHeaderStore) ChainTip() (b *wire.BlockHeader, u uint32, err error) {
 	return nil, 0, nil
 }
-func (m *mockBlockHeaderStore) LatestBlockLocator() (
-	blockchain.BlockLocator, err error) {
+func (m *mockBlockHeaderStore) LatestBlockLocator() (loc blockchain.BlockLocator, err error) {
 	return nil, nil
 }
-func (m *mockBlockHeaderStore) FetchHeaderByHeight(height uint32) (
-	*wire.BlockHeader, err error) {
+func (m *mockBlockHeaderStore) FetchHeaderByHeight(height uint32) (b *wire.BlockHeader, err error) {
 	return nil, nil
 }
-func (m *mockBlockHeaderStore) FetchHeaderAncestors(uint32,
-	*chainhash.Hash) ([]wire.BlockHeader, uint32, err error) {
+func (m *mockBlockHeaderStore) FetchHeaderAncestors(uint32, *chainhash.Hash) (b []wire.BlockHeader, u uint32, err error) {
 	return nil, 0, nil
 }
-func (m *mockBlockHeaderStore) HeightFromHash(*chainhash.Hash) (uint32, err error) {
+func (m *mockBlockHeaderStore) HeightFromHash(*chainhash.Hash) (u uint32, err error) {
 	return 0, nil
 }
-func (m *mockBlockHeaderStore) RollbackLastBlock() (*waddrmgr.BlockStamp,
-	error) {
+func (m *mockBlockHeaderStore) RollbackLastBlock() (bs *waddrmgr.BlockStamp, err error) {
 	return nil, nil
 }
-func (m *mockBlockHeaderStore) FetchHeader(h *chainhash.Hash) (
-	*wire.BlockHeader, uint32, err error) {
-	if header, ok := m.headers[*h]; ok {
-		return &header, 0, nil
+func (m *mockBlockHeaderStore) FetchHeader(h *chainhash.Hash) (header *wire.BlockHeader, u uint32, err error) {
+	var (
+		ok  bool
+		hdr wire.BlockHeader
+	)
+
+	if hdr, ok = m.headers[*h]; ok {
+		header = &hdr
+		return
 	}
-	return nil, 0, fmt.Errorf("not found")
+	err = fmt.Errorf("not found")
+	slog.Debug(err)
+	return
 }
 func (m *mockBlockHeaderStore) WriteHeaders(headers ...headerfs.BlockHeader) (err error) {
 	for _, h := range headers {
 		m.headers[h.BlockHash()] = *h.BlockHeader
 	}
-	return nil
+	return
 }

@@ -28,6 +28,7 @@ package rename
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.import (
 import (
+	"github.com/stalker-loki/app/slog"
 	"syscall"
 	"unsafe"
 )
@@ -59,14 +60,12 @@ func moveFileEx(from *uint16, to *uint16, flags uint32) (err error) {
 // already exists.
 func Atomic(oldpath, newpath string) (err error) {
 	from, err := syscall.UTF16PtrFromString(oldpath)
-	if err != nil {
-		Error(err)
-		return err
+	if slog.Check(err) {
+		return
 	}
 	to, err := syscall.UTF16PtrFromString(newpath)
-	if err != nil {
-		Error(err)
-		return err
+	if slog.Check(err) {
+		return
 	}
 	return moveFileEx(from, to, _MOVEFILE_REPLACE_EXISTING)
 }

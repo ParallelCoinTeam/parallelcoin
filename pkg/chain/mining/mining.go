@@ -267,7 +267,6 @@ func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte, nextBlock
 			return
 		}
 	} else {
-		var err error
 		scriptBuilder := txscript.NewScriptBuilder()
 		if pkScript, err = scriptBuilder.AddOp(txscript.OP_TRUE).Script(); slog.Check(err) {
 			return

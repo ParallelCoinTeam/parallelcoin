@@ -121,9 +121,9 @@ var (
 	EstimateFeeDatabaseKey = []byte("estimatefee")
 )
 
-func // EstimateFee estimates the fee per byte to have a tx confirmed a given
+// EstimateFee estimates the fee per byte to have a tx confirmed a given
 // number of blocks from now.
-(ef *FeeEstimator) EstimateFee(numBlocks uint32) (DUOPerKilobyte, err error) {
+func (ef *FeeEstimator) EstimateFee(numBlocks uint32) (n DUOPerKilobyte, err error) {
 	ef.mtx.Lock()
 	defer ef.mtx.Unlock()
 	// If the number of registered blocks is below the minimum, return an error.
@@ -571,20 +571,19 @@ NewSatoshiPerByte(fee util.Amount, size uint32) SatoshiPerByte {
 
 func // RestoreFeeEstimator takes a FeeEstimatorState that was previously
 // returned by Save and restores it to a FeeEstimator
-RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, err error) {
+RestoreFeeEstimator(data FeeEstimatorState) (ef *FeeEstimator, err error) {
 	r := bytes.NewReader(data)
 	// Check version
 	var version uint32
-	err := binary.Read(r, binary.BigEndian, &version)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = binary.Read(r, binary.BigEndian, &version); slog.Check(err) {
+		return
 	}
 	if version != estimateFeeSaveVersion {
-		return nil, fmt.Errorf("incorrect version: expected %d found %d",
-			estimateFeeSaveVersion, version)
+		err = fmt.Errorf("incorrect version: expected %d found %d", estimateFeeSaveVersion, version)
+		slog.Debug(err)
+		return
 	}
-	ef := &FeeEstimator{
+	ef = &FeeEstimator{
 		observed: make(map[chainhash.Hash]*observedTransaction),
 	}
 	// Read basic parameters.
@@ -668,33 +667,32 @@ RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, err error) {
 	}
 	return ef, nil
 }
-func deserializeObservedTransaction(r io.Reader) (*observedTransaction, err error) {
-	ot := observedTransaction{}
+func deserializeObservedTransaction(r io.Reader) (ot *observedTransaction, err error) {
+	ot = &observedTransaction{}
 	// The first 32 bytes should be a hash.
-	e := binary.Read(r, binary.BigEndian, &ot.hash)
+	e := binary.Read(r, binary.BigEndian, ot.hash)
 	if e != nil {
 		slog.Trace("failed to read", e)
 	}
 	// The next 8 are SatoshiPerByte
-	e = binary.Read(r, binary.BigEndian, &ot.feeRate)
+	e = binary.Read(r, binary.BigEndian, ot.feeRate)
 	if e != nil {
 		slog.Trace("failed to read", e)
 	}
 	// And next there are two uint32's.
-	e = binary.Read(r, binary.BigEndian, &ot.observed)
+	e = binary.Read(r, binary.BigEndian, ot.observed)
 	if e != nil {
 		slog.Trace("failed to read", e)
 	}
-	e = binary.Read(r, binary.BigEndian, &ot.mined)
+	e = binary.Read(r, binary.BigEndian, ot.mined)
 	if e != nil {
 		slog.Trace("failed to read", e)
 	}
-	return &ot, nil
+	return
 }
-func deserializeRegisteredBlock(r io.Reader,
-	txs map[uint32]*observedTransaction) (*registeredBlock, err error) {
+func deserializeRegisteredBlock(r io.Reader, txs map[uint32]*observedTransaction) (rb *registeredBlock, err error) {
 	var lenTransactions uint32
-	rb := &registeredBlock{}
+	rb = &registeredBlock{}
 	e := binary.Read(r, binary.BigEndian, &rb.hash)
 	if e != nil {
 		slog.Trace("failed to read", e)
@@ -712,5 +710,5 @@ func deserializeRegisteredBlock(r io.Reader,
 		}
 		rb.transactions[i] = txs[index]
 	}
-	return rb, nil
+	return
 }

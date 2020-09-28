@@ -60,13 +60,15 @@ func (tx *transaction) ReadWriteBucket(key []byte) walletdb.ReadWriteBucket {
 	}
 	return (*bucket)(boltBucket)
 }
-func (tx *transaction) CreateTopLevelBucket(key []byte) (walletdb.ReadWriteBucket, err error) {
-	boltBucket, err := tx.boltTx.CreateBucket(key)
-	if err != nil {
-		slog.Error(err)
-		return nil, convertErr(err)
+func (tx *transaction) CreateTopLevelBucket(key []byte) (bkt walletdb.ReadWriteBucket, err error) {
+	var boltBucket *bolt.Bucket
+	if boltBucket, err = tx.boltTx.CreateBucket(key); slog.Check(err) {
+		err = convertErr(err)
+		slog.Debug(err)
+		return
 	}
-	return (*bucket)(boltBucket), nil
+	bkt = (*bucket)(boltBucket)
+	return
 }
 func (tx *transaction) DeleteTopLevelBucket(key []byte) (err error) {
 	if err = tx.boltTx.DeleteBucket(key); slog.Check(err) {
@@ -120,13 +122,15 @@ func (b *bucket) NestedReadBucket(key []byte) walletdb.ReadBucket {
 // invalid.
 //
 // This function is part of the walletdb.Bucket interface implementation.
-func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, err error) {
-	boltBucket, err := (*bolt.Bucket)(b).CreateBucket(key)
-	if err != nil {
-		slog.Error(err)
-		return nil, convertErr(err)
+func (b *bucket) CreateBucket(key []byte) (bkt walletdb.ReadWriteBucket, err error) {
+	var boltBucket *bolt.Bucket
+	if boltBucket, err = (*bolt.Bucket)(b).CreateBucket(key); slog.Check(err) {
+		err = convertErr(err)
+		slog.Debug(err)
+		return
 	}
-	return (*bucket)(boltBucket), nil
+	bkt = (*bucket)(boltBucket)
+	return
 }
 
 // CreateBucketIfNotExists creates and returns a new nested bucket with the
@@ -134,13 +138,15 @@ func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, err error) 
 // key is empty or ErrIncompatibleValue if the key value is otherwise invalid.
 //
 // This function is part of the walletdb.Bucket interface implementation.
-func (b *bucket) CreateBucketIfNotExists(key []byte) (walletdb.ReadWriteBucket, err error) {
-	boltBucket, err := (*bolt.Bucket)(b).CreateBucketIfNotExists(key)
-	if err != nil {
-		slog.Error(err)
-		return nil, convertErr(err)
+func (b *bucket) CreateBucketIfNotExists(key []byte) (bkt walletdb.ReadWriteBucket, err error) {
+	var boltBucket *bolt.Bucket
+	if boltBucket, err = (*bolt.Bucket)(b).CreateBucketIfNotExists(key); slog.Check(err) {
+		err = convertErr(err)
+		slog.Debug(err)
+		return
 	}
-	return (*bucket)(boltBucket), nil
+	bkt = (*bucket)(boltBucket)
+	return
 }
 
 // DeleteNestedBucket removes a nested bucket with the given key.  Returns
@@ -269,7 +275,7 @@ type db bolt.DB
 // Enforce db implements the walletdb.Db interface.
 var _ walletdb.DB = (*db)(nil)
 
-func (db *db) beginTx(writable bool) (*transaction, err error) {
+func (db *db) beginTx(writable bool) (t *transaction, err error) {
 	boltTx, err := (*bolt.DB)(db).Begin(writable)
 	if err != nil {
 		slog.Error(err)
@@ -277,10 +283,10 @@ func (db *db) beginTx(writable bool) (*transaction, err error) {
 	}
 	return &transaction{boltTx: boltTx}, nil
 }
-func (db *db) BeginReadTx() (walletdb.ReadTx, err error) {
+func (db *db) BeginReadTx() (t walletdb.ReadTx, err error) {
 	return db.beginTx(false)
 }
-func (db *db) BeginReadWriteTx() (walletdb.ReadWriteTx, err error) {
+func (db *db) BeginReadWriteTx() (t walletdb.ReadWriteTx, err error) {
 	return db.beginTx(true)
 }
 
@@ -313,10 +319,11 @@ func fileExists(name string) bool {
 
 // openDB opens the database at the provided path.  walletdb.ErrDbDoesNotExist
 // is returned if the database doesn't exist and the create flag is not set.
-func openDB(dbPath string, create bool) (walletdb.DB, err error) {
+func openDB(dbPath string, create bool) (t walletdb.DB, err error) {
 	if !create && !fileExists(dbPath) {
 		return nil, walletdb.ErrDbDoesNotExist
 	}
-	boltDB, err := bolt.Open(dbPath, 0600, nil)
+	var boltDB *bolt.DB
+	boltDB, err = bolt.Open(dbPath, 0600, nil)
 	return (*db)(boltDB), convertErr(err)
 }

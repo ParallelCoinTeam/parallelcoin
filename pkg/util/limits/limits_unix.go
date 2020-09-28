@@ -16,34 +16,28 @@ const (
 // SetLimits raises some process limits to values which allow pod and associated utilities to run.
 func SetLimits() (err error) {
 	var rLimit syscall.Rlimit
-	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit); slog.Check(err) {
+		return
 	}
 	if rLimit.Cur > fileLimitWant {
-		return nil
+		return
 	}
 	if rLimit.Max < fileLimitMin {
-		err = fmt.Errorf("need at least %v file descriptors",
-			fileLimitMin)
-		return err
+		err = fmt.Errorf("need at least %v file descriptors", fileLimitMin)
+		slog.Debug(err)
+		return
 	}
 	if rLimit.Max < fileLimitWant {
 		rLimit.Cur = rLimit.Max
 	} else {
 		rLimit.Cur = fileLimitWant
 	}
-	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-	if err != nil {
-		slog.Error(err)
+	if err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit); slog.Check(err) {
 		// try min value
 		rLimit.Cur = fileLimitMin
-		err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }

@@ -361,24 +361,25 @@ type dbCache struct {
 // Snapshot returns a snapshot of the database cache and underlying database
 // at a particular point in time.
 // The snapshot must be released after use by calling Release.
-func (c *dbCache) Snapshot() (*dbCacheSnapshot, err error) {
-	dbSnapshot, err := c.ldb.GetSnapshot()
-	if err != nil {
-		slog.Error(err)
+func (c *dbCache) Snapshot() (cacheSnapshot *dbCacheSnapshot, err error) {
+	var dbSnapshot *leveldb.Snapshot
+	if dbSnapshot, err = c.ldb.GetSnapshot(); slog.Check(err) {
 		str := "failed to open transaction"
-		return nil, convertErr(str, err)
+		err = convertErr(str, err)
+		slog.Debug(err)
+		return
 	}
 	// Since the cached keys to be added and removed use an immutable treap,
 	// a snapshot is simply obtaining the root of the tree under the lock
 	// which is used to atomically swap the root.
 	c.cacheLock.RLock()
-	cacheSnapshot := &dbCacheSnapshot{
+	cacheSnapshot = &dbCacheSnapshot{
 		dbSnapshot:    dbSnapshot,
 		pendingKeys:   c.cachedKeys,
 		pendingRemove: c.cachedRemove,
 	}
 	c.cacheLock.RUnlock()
-	return cacheSnapshot, nil
+	return
 }
 
 // updateDB invokes the passed function in the context of a managed leveldb

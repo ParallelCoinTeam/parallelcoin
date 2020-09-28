@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/stalker-loki/app/slog"
 	"io/ioutil"
 	"net"
 	"os"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
@@ -212,12 +213,12 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	}
 	// all of these can be autodiscovered/set but to do that and know what
 	// they are we have to reserve them
-	//listeners := []*cli.StringSlice{
+	// listeners := []*cli.StringSlice{
 	//	cfg.WalletRPCListeners,
 	//	cfg.Listeners,
 	//	cfg.RPCListeners,
-	//}
-	//for i := range listeners {
+	// }
+	// for i := range listeners {
 	//	if h, p, err := net.SplitHostPort((*listeners[i])[0]); p == "0" {
 	//		if err != nil {
 	//			Error(err)
@@ -230,10 +231,10 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	//				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 	//		}
 	//	}
-	//}
-	//(*cfg.WalletRPCListeners)[0] = (*listeners[0])[0]
-	//(*cfg.Listeners)[0] = (*listeners[1])[0]
-	//(*cfg.RPCListeners)[0] = (*listeners[2])[0]
+	// }
+	// (*cfg.WalletRPCListeners)[0] = (*listeners[0])[0]
+	// (*cfg.Listeners)[0] = (*listeners[1])[0]
+	// (*cfg.RPCListeners)[0] = (*listeners[2])[0]
 	// if lan mode is set, remove the peers.json so no unwanted nodes are connected to
 	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
 		peersFile := filepath.Join(filepath.Join(
@@ -253,8 +254,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 }
 
 // GetFreePort asks the kernel for free open ports that are ready to use.
-func GetFreePort() (int, err error) {
-	var port int
+func GetFreePort() (port int, err error) {
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
 		return 0, err
@@ -460,7 +460,7 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 					err = fmt.Errorf(str, funcName, addr)
 					slog.Error(err)
 					fmt.Fprintln(os.Stderr, err)
-					//os.Exit(1)
+					// os.Exit(1)
 				}
 				var bits int
 				if ip.To4() == nil {
@@ -486,7 +486,7 @@ func validatePeerLists(cfg *pod.Config) {
 			"%s: the --addpeer and --connect options can not be mixed",
 			funcName)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 }
 func configListener(cfg *pod.Config, params *netparams.Params) {
@@ -513,7 +513,7 @@ func validateUsers(cfg *pod.Config) {
 		str := "%s: --username and --limituser must not specify the same username"
 		err := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 	// Check to make sure limited and admin users don't have the same password
 	slog.Trace("checking limited and admin passwords are not the same")
@@ -522,7 +522,7 @@ func validateUsers(cfg *pod.Config) {
 		str := "%s: --password and --limitpass must not specify the same password"
 		err := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 }
 
@@ -542,7 +542,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
 			slog.Error(err)
-			//os.Exit(1)
+			// os.Exit(1)
 		}
 		*cfg.RPCListeners = make([]string, 0, len(addrs))
 		slog.Debug("setting listeners")
@@ -557,7 +557,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 			" less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.RPCMaxConcurrentReqs)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 	slog.Trace("checking rpc listener addresses")
 	nrms := normalize.Addresses
@@ -581,7 +581,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: invalid minrelaytxfee: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 	// Limit the max block size to a sane value.
 	slog.Trace("checking max block size")
@@ -591,7 +591,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		err := fmt.Errorf(str, funcName, node.BlockMaxSizeMin,
 			node.BlockMaxSizeMax, *cfg.BlockMaxSize)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 	// Limit the max block weight to a sane value.
 	slog.Trace("checking max block weight")
@@ -601,7 +601,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		err := fmt.Errorf(str, funcName, node.BlockMaxWeightMin,
 			node.BlockMaxWeightMax, *cfg.BlockMaxWeight)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 	// Limit the max orphan count to a sane vlue.
 	slog.Trace("checking max orphan limit")
@@ -609,7 +609,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 	// Limit the block priority and minimum block sizes to max block size.
 	slog.Trace("validating block priority and minimum size/weight")
@@ -643,7 +643,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 				"appear in user agent comments: '/', ':', '(', ')'",
 				funcName)
 			fmt.Fprintln(os.Stderr, err)
-			//os.Exit(1)
+			// os.Exit(1)
 		}
 	}
 	// Check the checkpoints for syntax errors.
@@ -655,7 +655,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: Error parsing checkpoints: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 }
 func validateOnions(cfg *pod.Config) {
@@ -665,7 +665,7 @@ func validateOnions(cfg *pod.Config) {
 	if *cfg.Onion && *cfg.OnionProxy != "" {
 		slog.Error("onion enabled but no onionproxy has been configured")
 		slog.Fatal("halting to avoid exposing IP address")
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if *cfg.TorIsolation &&
@@ -674,7 +674,7 @@ func validateOnions(cfg *pod.Config) {
 		str := "%s: Tor stream isolation requires either proxy or onionproxy to be set"
 		err := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
-		//os.Exit(1)
+		// os.Exit(1)
 	}
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
@@ -737,7 +737,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			str := "%s: Proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.Proxy, err)
 			fmt.Fprintln(os.Stderr, err)
-			//os.Exit(1)
+			// os.Exit(1)
 		}
 		// Tor isolation flag means proxy credentials will be overridden unless
 		// there is also an onion proxy configured in which case that one will be
@@ -763,7 +763,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 		// configured.
 		if *cfg.Onion &&
 			*cfg.OnionProxy == "" {
-			stateConfig.Lookup = func(host string) ([]net.IP, err error) {
+			stateConfig.Lookup = func(host string) (i []net.IP, err error) {
 				return connmgr.TorLookupIP(host, *cfg.Proxy)
 			}
 		}
@@ -782,7 +782,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			str := "%s: Onion proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.OnionProxy, err)
 			fmt.Fprintln(os.Stderr, err)
-			//os.Exit(1)
+			// os.Exit(1)
 		}
 		// Tor isolation flag means onion proxy credentials will be overridden.
 		if *cfg.TorIsolation &&
@@ -793,7 +793,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	}
 	slog.Trace("setting onion dialer")
 	stateConfig.Oniondial =
-		func(network, addr string, timeout time.Duration) (net.Conn, err error) {
+		func(network, addr string, timeout time.Duration) (conn net.Conn, err error) {
 			proxy := &socks.Proxy{
 				Addr:         *cfg.OnionProxy,
 				Username:     *cfg.OnionProxyUser,
@@ -809,7 +809,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// proxy.
 	slog.Trace("setting proxy lookup")
 	if *cfg.Proxy != "" {
-		stateConfig.Lookup = func(host string) ([]net.IP, err error) {
+		stateConfig.Lookup = func(host string) (ips []net.IP, err error) {
 			return connmgr.TorLookupIP(host, *cfg.OnionProxy)
 		}
 	} else {
@@ -818,7 +818,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// Specifying --noonion means the onion address dial function results in
 	// an error.
 	if !*cfg.Onion {
-		stateConfig.Oniondial = func(a, b string, t time.Duration) (net.Conn, err error) {
+		stateConfig.Oniondial = func(a, b string, t time.Duration) (conn net.Conn, err error) {
 			return nil, errors.New("tor has been disabled")
 		}
 	}

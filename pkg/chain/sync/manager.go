@@ -188,13 +188,10 @@ func (sm *SyncManager) Pause() chan<- struct{} {
 }
 
 // ProcessBlock makes use of ProcessBlock on an internal instance of a block chain.
-func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.BehaviorFlags) (bool, err error) {
+func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.BehaviorFlags) (isOrphan bool, err error) {
 	slog.Trace("processing block")
-	// Traces(block)
 	reply := make(chan processBlockResponse, 1)
-	// Trace("sending to msgChan")
 	sm.msgChan <- processBlockMsg{block: block, flags: flags, reply: reply}
-	// Trace("waiting on reply")
 	response := <-reply
 	return response.isOrphan, response.err
 }
@@ -547,14 +544,14 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 		return
 	}
 	// Meta-data about the new block this peer is reporting. We use this below
-	// to update this peer's lastest block height and the heights of other peers
+	// to update this peer's latest block height and the heights of other peers
 	// based on their last announced block hash. This allows us to dynamically
 	// update the block heights of peers, avoiding stale heights when looking
 	// for a new sync peer. Upon acceptance of a block or recognition of an
 	// orphan, we also use this information to update the block heights over
 	// other peers who's invs may have been ignored if we are actively syncing
 	// while the chain is not yet current or who may have lost the lock
-	// announcment race. Request the parents for the orphan block from the peer
+	// announcement race. Request the parents for the orphan block from the peer
 	// that sent it.
 	if isOrphan {
 		// We've just received an orphan block from a peer. In order to update
@@ -699,31 +696,21 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 		// Transactions which depend on a confirmed transaction are NOT removed
 		// recursively because they are still valid.
 		for _, tx := range block.Transactions()[1:] {
-			// log<-cl.Debugf{"removing tx %d", i}
 			sm.txMemPool.RemoveTransaction(tx, false)
-			// log<-cl.Debug{emoved transaction}
 			sm.txMemPool.RemoveDoubleSpends(tx)
-			// log<-cl.Debug{emoved double spends}
 			sm.txMemPool.RemoveOrphan(tx)
-			// log<-cl.Debug{emoved orphan}
 			sm.peerNotifier.TransactionConfirmed(tx)
-			// log<-cl.Debug{otified transaction confirmed}
 			acceptedTxs := sm.txMemPool.ProcessOrphans(sm.chain, tx)
-			// log<-cl.Debug{rocessed orphans}
 			sm.peerNotifier.AnnounceNewTransactions(acceptedTxs)
-			// log<-cl.Debug{nnounced new transactions}
 		}
 		// Register block with the fee estimator, if it exists.
 		if sm.feeEstimator != nil {
-			// log<-cl.Debug{egistering block with fee estimator}
 			err := sm.feeEstimator.RegisterBlock(block)
-			// If an error is somehow generated then the fee estimator has entered
-			// an invalid state. Since it doesn't know how to recover, create a
-			// new one.
+			// If an error is somehow generated then the fee estimator has entered an invalid state. Since it doesn't
+			// know how to recover, create a new one.
 			if err != nil {
 				slog.Error(err)
-				sm.feeEstimator = mempool.NewFeeEstimator(
-					mempool.DefaultEstimateFeeMaxRollback,
+				sm.feeEstimator = mempool.NewFeeEstimator(mempool.DefaultEstimateFeeMaxRollback,
 					mempool.DefaultEstimateFeeMinRegisteredBlocks)
 			}
 		}
@@ -796,15 +783,15 @@ func (sm *SyncManager) handleDonePeerMsg(peer *peerpkg.Peer) {
 
 // handleHeadersMsg handles block header messages from all peers.  Headers are
 // requested when performing a headers-first sync.
-func (sm *SyncManager) handleHeadersMsg(hmsg *headersMsg) {
-	peer := hmsg.peer
+func (sm *SyncManager) handleHeadersMsg(headerMsg *headersMsg) {
+	peer := headerMsg.peer
 	_, exists := sm.peerStates[peer]
 	if !exists {
 		slog.Trace("received headers message from unknown peer", peer)
 		return
 	}
 	// The remote peer is misbehaving if we didn't request headers.
-	msg := hmsg.headers
+	msg := headerMsg.headers
 	numHeaders := len(msg.Headers)
 	if !sm.headersFirstMode {
 		slog.Tracef(
@@ -976,10 +963,8 @@ func (sm *SyncManager) handleInvMsg(imsg *invMsg) {
 					continue
 				}
 			}
-			// Ignore invs block invs from non-witness enabled peers, as after
-			// segwit activation we only want to download from peers that can
-			// provide us full witness data for blocks. PARALLELCOIN HAS NO
-			// WITNESS STUFF
+			// Ignore invs block invs from non-witness enabled peers, as after segwit activation we only want to
+			// download from peers that can provide us full witness data for blocks. PARALLELCOIN HAS NO WITNESS STUFF
 			// if !peer.IsWitnessEnabled() && iv.Type == wire.InvTypeBlock {
 			// 	continue
 			// }
@@ -1183,7 +1168,7 @@ func (sm *SyncManager) handleTxMsg(tmsg *txMsg) {
 // inventory can be when it is in different states such as blocks that are part
 // of the main chain, on a side chain, in the orphan pool, and transactions
 // that are in the memory pool (either the main pool or orphan pool).
-func (sm *SyncManager) haveInventory(invVect *wire.InvVect) (bool, err error) {
+func (sm *SyncManager) haveInventory(invVect *wire.InvVect) (have bool, err error) {
 	switch invVect.Type {
 	case wire.InvTypeWitnessBlock:
 		fallthrough
@@ -1397,8 +1382,8 @@ func (sm *SyncManager) startSync() {
 
 // New constructs a new SyncManager. Use Start to begin processing asynchronous
 // block, tx, and inv updates.
-func New(config *Config) (*SyncManager, err error) {
-	sm := SyncManager{
+func New(config *Config) (sm *SyncManager, err error) {
+	sm = &SyncManager{
 		peerNotifier:    config.PeerNotifier,
 		chain:           config.Chain,
 		txMemPool:       config.TxMemPool,
@@ -1424,5 +1409,5 @@ func New(config *Config) (*SyncManager, err error) {
 		slog.Info("checkpoints are disabled")
 	}
 	sm.chain.Subscribe(sm.handleBlockchainNotification)
-	return &sm, nil
+	return sm, nil
 }

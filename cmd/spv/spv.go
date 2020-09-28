@@ -234,34 +234,28 @@ func (s *ChainService) BanPeer(sp *ServerPeer) {
 
 // BestBlock retrieves the most recent block's height and hash where we
 // have both the header and filter header ready.
-func (s *ChainService) BestBlock() (*waddrmgr.BlockStamp, err error) {
-	bestHeader, bestHeight, err := s.BlockHeaders.ChainTip()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (s *ChainService) BestBlock() (bs *waddrmgr.BlockStamp, err error) {
+	var (
+		bestHeader *wire.BlockHeader
+		bestHeight uint32
+	)
+	if bestHeader, bestHeight, err = s.BlockHeaders.ChainTip(); slog.Check(err) {
+		return
 	}
-	_, filterHeight, err := s.RegFilterHeaders.ChainTip()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var filterHeight uint32
+	if _, filterHeight, err = s.RegFilterHeaders.ChainTip(); slog.Check(err) {
+		return
 	}
-	// Filter headers might lag behind block headers, so we can can fetch a
-	// previous block header if the filter headers are not caught up.
+	// Filter headers might lag behind block headers, so we can can fetch a previous block header if the filter headers
+	// are not caught up.
 	if filterHeight < bestHeight {
 		bestHeight = filterHeight
-		bestHeader, err = s.BlockHeaders.FetchHeaderByHeight(
-			bestHeight,
-		)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if bestHeader, err = s.BlockHeaders.FetchHeaderByHeight(bestHeight); slog.Check(err) {
+			return
 		}
 	}
-	return &waddrmgr.BlockStamp{
-			Height: int32(bestHeight),
-			Hash:   bestHeader.BlockHash(),
-		},
-		nil
+	bs = &waddrmgr.BlockStamp{Height: int32(bestHeight), Hash: bestHeader.BlockHash()}
+	return
 }
 
 // ChainParams returns a copy of the ChainService's netparams.Params.
@@ -270,31 +264,28 @@ func (s *ChainService) ChainParams() netparams.Params {
 }
 
 // GetBlockHash returns the block hash at the given height.
-func (s *ChainService) GetBlockHash(height int64) (*chainhash.Hash, err error) {
-	header, err := s.BlockHeaders.FetchHeaderByHeight(uint32(height))
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (s *ChainService) GetBlockHash(height int64) (hash *chainhash.Hash, err error) {
+	var header *wire.BlockHeader
+	if header, err = s.BlockHeaders.FetchHeaderByHeight(uint32(height)); slog.Check(err) {
+		return
 	}
-	hash := header.BlockHash()
-	return &hash, err
+	h := header.BlockHash()
+	return &h, err
 }
 
 // GetBlockHeader returns the block header for the given block hash, or an
 // error if the hash doesn't exist or is unknown.
-func (s *ChainService) GetBlockHeader(
-	blockHash *chainhash.Hash) (*wire.BlockHeader, err error) {
-	header, _, err := s.BlockHeaders.FetchHeader(blockHash)
+func (s *ChainService) GetBlockHeader(blockHash *chainhash.Hash) (header *wire.BlockHeader, err error) {
+	header, _, err = s.BlockHeaders.FetchHeader(blockHash)
 	return header, err
 }
 
 // GetBlockHeight gets the height of a block by its hash. An error is returned
 // if the given block hash is unknown.
-func (s *ChainService) GetBlockHeight(hash *chainhash.Hash) (int32, err error) {
-	_, height, err := s.BlockHeaders.FetchHeader(hash)
-	if err != nil {
-		slog.Error(err)
-		return 0, err
+func (s *ChainService) GetBlockHeight(hash *chainhash.Hash) (h int32, err error) {
+	var height uint32
+	if _, height, err = s.BlockHeaders.FetchHeader(hash); slog.Check(err) {
+		return
 	}
 	return int32(height), nil
 }
@@ -373,10 +364,9 @@ func (s *ChainService) UpdatePeerHeights(latestBlkHash *chainhash.Hash, latestHe
 // and returns a net.Addr which maps to the original address with any host
 // names resolved to IP addresses and a default port added, if not specified,
 // from the ChainService's network parameters.
-func (s *ChainService) addrStringToNetAddr(addr string) (net.Addr, err error) {
-	host, strPort, err := net.SplitHostPort(addr)
-	if err != nil {
-		slog.Error(err)
+func (s *ChainService) addrStringToNetAddr(addr string) (na net.Addr, err error) {
+	var host, strPort string
+	if host, strPort, err = net.SplitHostPort(addr); slog.Check(err) {
 		switch err.(type) {
 		case *net.AddrError:
 			host = addr
@@ -386,28 +376,24 @@ func (s *ChainService) addrStringToNetAddr(addr string) (net.Addr, err error) {
 		}
 	}
 	// Attempt to look up an IP address associated with the parsed host.
-	ips, err := s.nameResolver(host)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var ips []net.IP
+	if ips, err = s.nameResolver(host); slog.Check(err) {
+		return
 	}
 	if len(ips) == 0 {
-		return nil, fmt.Errorf("no addresses found for %s", host)
+		err = fmt.Errorf("no addresses found for %s", host)
+		slog.Debug(err)
+		return
 	}
-	port, err := strconv.Atoi(strPort)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var port int
+	if port, err = strconv.Atoi(strPort); slog.Check(err) {
+		return
 	}
-	return &net.TCPAddr{
-			IP:   ips[0],
-			Port: port,
-		},
-		nil
+	na = &net.TCPAddr{IP: ips[0], Port: port}
+	return
 }
 
-// handleAddPeerMsg deals with adding new peers.  It is invoked from the
-// peerHandler goroutine.
+// handleAddPeerMsg deals with adding new peers.  It is invoked from the peerHandler goroutine.
 func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 	if sp == nil {
 		return false
@@ -665,53 +651,46 @@ cleanup:
 
 // rollBackToHeight rolls back all blocks until it hits the specified height.
 // It sends notifications along the way.
-func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, err error) {
-	header, headerHeight, err := s.BlockHeaders.ChainTip()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (s *ChainService) rollBackToHeight(height uint32) (bs *waddrmgr.BlockStamp, err error) {
+	var (
+		header       *wire.BlockHeader
+		headerHeight uint32
+	)
+	if header, headerHeight, err = s.BlockHeaders.ChainTip(); slog.Check(err) {
+		return
 	}
-	bs := &waddrmgr.BlockStamp{
+	bs = &waddrmgr.BlockStamp{
 		Height: int32(headerHeight),
 		Hash:   header.BlockHash(),
 	}
-	_, regHeight, err := s.RegFilterHeaders.ChainTip()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var regHeight uint32
+	if _, regHeight, err = s.RegFilterHeaders.ChainTip(); slog.Check(err) {
+		return
 	}
 	for uint32(bs.Height) > height {
-		header, _, err := s.BlockHeaders.FetchHeader(&bs.Hash)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if header, _, err = s.BlockHeaders.FetchHeader(&bs.Hash); slog.Check(err) {
+			return
 		}
 		newTip := &header.PrevBlock
 		// Only roll back filter headers if they've caught up this far.
 		if uint32(bs.Height) <= regHeight {
-			newFilterTip, err := s.RegFilterHeaders.RollbackLastBlock(newTip)
-			if err != nil {
-				slog.Error(err)
-				return nil, err
+			var newFilterTip *waddrmgr.BlockStamp
+			if newFilterTip, err = s.RegFilterHeaders.RollbackLastBlock(newTip); slog.Check(err) {
+				return
 			}
 			regHeight = uint32(newFilterTip.Height)
 		}
-		bs, err = s.BlockHeaders.RollbackLastBlock()
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if bs, err = s.BlockHeaders.RollbackLastBlock(); slog.Check(err) {
+			return
 		}
-		// Notifications are asynchronous, so we include the previous
-		// header in the disconnected notification in case we're rolling
-		// back farther and the notification subscriber needs it but
-		// can't read it before it's deleted from the store.
+		// Notifications are asynchronous, so we include the previous header in the disconnected notification in case
+		// we're rolling back farther and the notification subscriber needs it but can't read it before it's deleted
+		// from the store.
 		//
-		// TODO(aakselrod): Get rid of this when subscriptions are
-		// factored out into their own package.
-		lastHeader, _, err := s.BlockHeaders.FetchHeader(newTip)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		// TODO(aakselrod): Get rid of this when subscriptions are factored out into their own package.
+		var lastHeader *wire.BlockHeader
+		if lastHeader, _, err = s.BlockHeaders.FetchHeader(newTip); slog.Check(err) {
+			return
 		}
 		s.mtxReorgHeader.Lock()
 		s.reorgedBlockHeaders[header.PrevBlock] = lastHeader
@@ -976,14 +955,19 @@ func (sp *ServerPeer) addKnownAddresses(addresses []*wire.NetAddress) {
 
 // newestBlock returns the current best block hash and height using the format
 // required by the configuration for the peer package.
-func (sp *ServerPeer) newestBlock() (*chainhash.Hash, int32, err error) {
-	bestHeader, bestHeight, err := sp.server.BlockHeaders.ChainTip()
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, err
+func (sp *ServerPeer) newestBlock() (bestHash *chainhash.Hash, bestHeight int32, err error) {
+	var (
+		bestHeader *wire.BlockHeader
+		bhgt       uint32
+	)
+
+	if bestHeader, bhgt, err = sp.server.BlockHeaders.ChainTip(); slog.Check(err) {
+		return
 	}
-	bestHash := bestHeader.BlockHash()
-	return &bestHash, int32(bestHeight), nil
+	bestHeight = int32(bhgt)
+	bh := bestHeader.BlockHash()
+	bestHash = &bh
+	return
 }
 
 // pushSendHeadersMsg sends a sendheaders message to the connected peer.
@@ -1036,12 +1020,11 @@ func (ps *peerState) forAllPeers(closure func(sp *ServerPeer)) {
 // NewChainService returns a new chain service configured to connect to the
 // bitcoin network type specified by chainParams.  Use start to begin syncing
 // with peers.
-func NewChainService(cfg Config) (*ChainService, err error) {
-	// First, we'll sort out the methods that we'll use to established
-	// outbound TCP connections, as well as perform any DNS queries.
+func NewChainService(cfg Config) (s *ChainService, err error) {
+	// First, we'll sort out the methods that we'll use to established outbound TCP connections, as well as perform any
+	// DNS queries.
 	//
-	// If the dialler was specified, then we'll use that in place of the
-	// default net.Dial function.
+	// If the dialler was specified, then we'll use that in place of the default net.Dial function.
 	var (
 		nameResolver func(string) ([]net.IP, error)
 		dialer       func(net.Addr) (net.Conn, error)
@@ -1049,23 +1032,20 @@ func NewChainService(cfg Config) (*ChainService, err error) {
 	if cfg.Dialer != nil {
 		dialer = cfg.Dialer
 	} else {
-		dialer = func(addr net.Addr) (net.Conn, err error) {
+		dialer = func(addr net.Addr) (c net.Conn, err error) {
 			return net.Dial(addr.Network(), addr.String())
 		}
 	}
-	// Similarly, if the user specified as function to use for name
-	// resolution, then we'll use that everywhere as well.
+	// Similarly, if the user specified as function to use for name resolution, then we'll use that everywhere as well.
 	if cfg.NameResolver != nil {
 		nameResolver = cfg.NameResolver
 	} else {
 		nameResolver = net.LookupIP
 	}
-	// When creating the addr manager, we'll check to see if the user has
-	// provided their own resolution function. If so, then we'll use that
-	// instead as this may be proxying requests over an anonymizing
-	// network.
+	// When creating the addr manager, we'll check to see if the user has provided their own resolution function. If so,
+	// then we'll use that instead as this may be proxying requests over an anonymizing network.
 	amgr := addrmgr.New(cfg.DataDir, nameResolver)
-	s := ChainService{
+	s = &ChainService{
 		chainParams:         cfg.ChainParams,
 		addrManager:         amgr,
 		newPeers:            make(chan *ServerPeer, MaxPeers),
@@ -1083,23 +1063,19 @@ func NewChainService(cfg Config) (*ChainService, err error) {
 		nameResolver:        nameResolver,
 		dialer:              dialer,
 	}
-	// We set the queryPeers method to point to queryChainServicePeers,
-	// passing a reference to the newly created ChainService.
+	// We set the queryPeers method to point to queryChainServicePeers, passing a reference to the newly created
+	// ChainService.
 	s.queryPeers = func(msg wire.Message, f func(*ServerPeer,
 		wire.Message, chan<- struct{}), qo ...QueryOption) {
-		queryChainServicePeers(&s, msg, f, qo...)
+		queryChainServicePeers(s, msg, f, qo...)
 	}
 	// We do the same for queryBatch.
-	s.queryBatch = func(msgs []wire.Message, f func(*ServerPeer,
-		wire.Message, wire.Message) bool, q <-chan struct{},
+	s.queryBatch = func(msgs []wire.Message, f func(*ServerPeer, wire.Message, wire.Message) bool, q <-chan struct{},
 		qo ...QueryOption) {
-		queryChainServiceBatch(&s, msgs, f, q, qo...)
+		queryChainServiceBatch(s, msgs, f, q, qo...)
 	}
-	var err error
-	s.FilterDB, err = filterdb.New(cfg.Database, cfg.ChainParams)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if s.FilterDB, err = filterdb.New(cfg.Database, cfg.ChainParams); slog.Check(err) {
+		return
 	}
 	filterCacheSize := DefaultFilterCacheSize
 	if cfg.FilterCacheSize != 0 {
@@ -1111,24 +1087,17 @@ func NewChainService(cfg Config) (*ChainService, err error) {
 		blockCacheSize = cfg.BlockCacheSize
 	}
 	s.BlockCache = lru.NewCache(blockCacheSize)
-	s.BlockHeaders, err = headerfs.NewBlockHeaderStore(
-		cfg.DataDir, cfg.Database, &cfg.ChainParams,
-	)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if s.BlockHeaders, err = headerfs.NewBlockHeaderStore(cfg.DataDir, cfg.Database, &cfg.ChainParams); slog.Check(err) {
+		return
 	}
-	s.RegFilterHeaders, err = headerfs.NewFilterHeaderStore(
+	if s.RegFilterHeaders, err = headerfs.NewFilterHeaderStore(
 		cfg.DataDir, cfg.Database, headerfs.RegularFilter, &cfg.ChainParams,
-	)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	); slog.Check(err) {
+		return
 	}
-	bm, err := newBlockManager(&s)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var bm *blockManager
+	if bm, err = newBlockManager(s); slog.Check(err) {
+		return
 	}
 	s.blockManager = bm
 	// Only setup a function to return new addresses to connect to when not
@@ -1138,36 +1107,33 @@ func NewChainService(cfg Config) (*ChainService, err error) {
 	// peers in order to prevent it from becoming a public test network.
 	var newAddressFunc func() (net.Addr, error)
 	if s.chainParams.Net != config.SimNetParams.Net {
-		newAddressFunc = func() (net.Addr, err error) {
+		newAddressFunc = func() (na net.Addr, err error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.addrManager.GetAddress()
 				if addr == nil {
 					break
 				}
-				// Address will not be invalid, local or unroutable
-				// because addrmanager rejects those on addition.
-				// Just check that we don't already have an address
-				// in the same group so that we are not connecting
-				// to the same network segment at the expense of
-				// others.
+				// Address will not be invalid, local or non routable because addrmanager rejects those on addition.
+				// Just check that we don't already have an address in the same group so that we are not connecting
+				// to the same network segment at the expense of others.
 				key := addrmgr.GroupKey(addr.NetAddress())
 				if s.OutboundGroupCount(key) != 0 {
 					continue
 				}
-				// only allow recent nodes (10mins) after we failed 30
-				// times
+				// only allow recent nodes (10mins) after we failed 30 times
 				if tries < 30 && time.Since(addr.LastAttempt()) < 10*time.Minute {
 					continue
 				}
-				// allow nondefault ports after 50 failed tries.
-				if tries < 50 && fmt.Sprintf("%d", addr.NetAddress().Port) !=
-					s.chainParams.DefaultPort {
+				// allow non default ports after 50 failed tries.
+				if tries < 50 && fmt.Sprintf("%d", addr.NetAddress().Port) != s.chainParams.DefaultPort {
 					continue
 				}
 				addrString := addrmgr.NetAddressKey(addr.NetAddress())
 				return s.addrStringToNetAddr(addrString)
 			}
-			return nil, errors.New("no valid connect address")
+			err = errors.New("no valid connect address")
+			slog.Debug(err)
+			return
 		}
 	}
 	cmgrCfg := &connmgr.Config{
@@ -1183,10 +1149,9 @@ func NewChainService(cfg Config) (*ChainService, err error) {
 	if MaxPeers < TargetOutbound {
 		TargetOutbound = MaxPeers
 	}
-	cmgr, err := connmgr.New(cmgrCfg)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var cmgr *connmgr.ConnManager
+	if cmgr, err = connmgr.New(cmgrCfg); slog.Check(err) {
+		return
 	}
 	s.connManager = cmgr
 	// Start up persistent peers.
@@ -1195,15 +1160,11 @@ func NewChainService(cfg Config) (*ChainService, err error) {
 		permanentPeers = cfg.AddPeers
 	}
 	for _, addr := range permanentPeers {
-		tcpAddr, err := s.addrStringToNetAddr(addr)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var tcpAddr net.Addr
+		if tcpAddr, err = s.addrStringToNetAddr(addr); slog.Check(err) {
+			return
 		}
-		go s.connManager.Connect(&connmgr.ConnReq{
-			Addr:      tcpAddr,
-			Permanent: true,
-		})
+		go s.connManager.Connect(&connmgr.ConnReq{Addr: tcpAddr, Permanent: true})
 	}
 	s.utxoScanner = NewUtxoScanner(&UtxoScannerConfig{
 		BestSnapshot:       s.BestBlock,
@@ -1211,7 +1172,7 @@ func NewChainService(cfg Config) (*ChainService, err error) {
 		BlockFilterMatches: s.blockFilterMatches,
 		GetBlock:           s.GetBlock,
 	})
-	return &s, nil
+	return
 }
 
 // disconnectPeer attempts to drop the connection of a tageted peer in the

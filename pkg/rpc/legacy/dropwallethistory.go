@@ -15,7 +15,6 @@ func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		// cfg := w.PodConfig
 		var (
-			err error
 			// Namespace keys.
 			syncBucketName    = []byte("sync")
 			waddrmgrNamespace = []byte("waddrmgr")

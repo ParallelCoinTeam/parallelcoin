@@ -1,13 +1,14 @@
 package wallet
 
 import (
+	"github.com/stalker-loki/app/slog"
+
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txs "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
-	"github.com/stalker-loki/app/slog"
 )
 
 // RescanProgressMsg reports the current progress made by a rescan for a
@@ -50,11 +51,11 @@ type rescanBatch struct {
 // SubmitRescan submits a RescanJob to the RescanManager.  A channel is
 // returned with the final error of the rescan.  The channel is buffered
 // and does not need to be read to prevent a deadlock.
-func (w *Wallet) SubmitRescan(job *RescanJob) <-chan (err error) {
-errChan := make(chan error, 1)
-job.err = errChan
-w.rescanAddJob <- job
-return errChan
+func (w *Wallet) SubmitRescan(job *RescanJob) <-chan error {
+	errChan := make(chan error, 1)
+	job.err = errChan
+	w.rescanAddJob <- job
+	return errChan
 }
 
 // batch creates the rescanBatch for a single rescan job.
@@ -206,7 +207,7 @@ out:
 		case batch := <-w.rescanBatch:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
-			//noun := log.PickNoun(numAddrs, "address", "addresses")
+			// noun := log.PickNoun(numAddrs, "address", "addresses")
 			noun := "address(es)"
 			slog.Infof(
 				"started rescan from block %v (height %d) for %d %s",

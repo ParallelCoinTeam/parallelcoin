@@ -2,10 +2,11 @@ package node
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/app/appdata"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -168,28 +169,22 @@ var (
 )
 
 // NewCheckpointFromStr parses checkpoints in the '<height>:<hash>' format.
-func NewCheckpointFromStr(checkpoint string) (config.Checkpoint, err error) {
+func NewCheckpointFromStr(checkpoint string) (cp config.Checkpoint, err error) {
 	parts := strings.Split(checkpoint, ":")
 	if len(parts) != 2 {
-		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
-			"checkpoint %q -- use the syntax <height>:<hash>",
+		return config.Checkpoint{}, fmt.Errorf("unable to parse checkpoint %q -- use the syntax <height>:<hash>",
 			checkpoint)
 	}
-	height, err := strconv.ParseInt(parts[0], 10, 32)
-	if err != nil {
-		slog.Error(err)
-		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
-			"checkpoint %q due to malformed height", checkpoint)
+	var height int64
+	if height, err = strconv.ParseInt(parts[0], 10, 32); slog.Check(err) {
+		return config.Checkpoint{}, fmt.Errorf("unable to parse checkpoint %q due to malformed height", checkpoint)
 	}
 	if len(parts[1]) == 0 {
-		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
-			"checkpoint %q due to missing hash", checkpoint)
+		return config.Checkpoint{}, fmt.Errorf("unable to parse checkpoint %q due to missing hash", checkpoint)
 	}
-	hash, err := chainhash.NewHashFromStr(parts[1])
-	if err != nil {
-		slog.Error(err)
-		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
-			"checkpoint %q due to malformed hash", checkpoint)
+	var hash *chainhash.Hash
+	if hash, err = chainhash.NewHashFromStr(parts[1]); slog.Check(err) {
+		return config.Checkpoint{}, fmt.Errorf("unable to parse checkpoint %q due to malformed hash", checkpoint)
 	}
 	return config.Checkpoint{
 			Height: int32(height),
@@ -211,18 +206,17 @@ func NewCheckpointFromStr(checkpoint string) (config.Checkpoint, err error) {
 // 	return parser
 // }
 
-// ParseCheckpoints checks the checkpoint strings for valid syntax (
-// '<height>:<hash>') and parses them to config.Checkpoint instances.
-func ParseCheckpoints(checkpointStrings []string) ([]config.Checkpoint, err error) {
+// ParseCheckpoints checks the checkpoint strings for valid syntax ('<height>:<hash>') and parses them to
+// config.Checkpoint instances.
+func ParseCheckpoints(checkpointStrings []string) (cp []config.Checkpoint, err error) {
 	if len(checkpointStrings) == 0 {
 		return nil, nil
 	}
 	checkpoints := make([]config.Checkpoint, len(checkpointStrings))
+	var checkpoint config.Checkpoint
 	for i, cpString := range checkpointStrings {
-		checkpoint, err := NewCheckpointFromStr(cpString)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if checkpoint, err = NewCheckpointFromStr(cpString); slog.Check(err) {
+			return
 		}
 		checkpoints[i] = checkpoint
 	}

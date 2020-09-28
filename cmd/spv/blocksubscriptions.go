@@ -60,10 +60,9 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 // best tip.
 // TODO(aakselrod): move this to its own package and refactor so that we're not
 // modifying an object held by the caller.
-(s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
-	onDisconnect chan<- wire.BlockHeader,
-	quit <-chan struct{}) (*blockSubscription, err error) {
-	subscription := blockSubscription{
+(s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic, onDisconnect chan<- wire.BlockHeader,
+	quit <-chan struct{}) (subscription *blockSubscription, err error) {
+	subscription = &blockSubscription{
 		onConnectBasic: onConnectBasic,
 		onDisconnect:   onDisconnect,
 		quit:           quit,
@@ -73,10 +72,10 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 	// At this point, we'll now check to see if we need to deliver any
 	// backlog notifications as its possible that while the caller is
 	// requesting right after a new set of blocks has been connected.
-	err := s.blockManager.SynchronizeFilterHeaders(func(filterHeaderTip uint32) (err error) {
+	if err = s.blockManager.SynchronizeFilterHeaders(func(filterHeaderTip uint32) (err error) {
 		s.mtxSubscribers.Lock()
 		defer s.mtxSubscribers.Unlock()
-		s.blockSubscribers[&subscription] = struct{}{}
+		s.blockSubscribers[subscription] = struct{}{}
 		go subscription.subscriptionHandler()
 		// If the best height matches the filter header tip, then we're
 		// done and don't need to proceed any further.
@@ -104,18 +103,16 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 					currentHeight, err,
 				)
 			}
-			sendMsgToSubscriber(&subscription, &blockMessage{
+			sendMsgToSubscriber(subscription, &blockMessage{
 				msgType: connectBasic,
 				header:  blockHeader,
 			})
 		}
-		return nil
-	})
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+		return
+	}); slog.Check(err) {
+		return
 	}
-	return &subscription, nil
+	return
 }
 
 func // unsubscribeBlockMsgs handles removing block subscriptions from the

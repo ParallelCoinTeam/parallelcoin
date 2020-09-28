@@ -1,6 +1,6 @@
 // Package monitor is a log viewer and filter and configuration interface
 //
-// +build !headless !windows
+// +build !headless,!windows
 
 package pkg
 

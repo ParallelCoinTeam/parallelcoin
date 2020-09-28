@@ -1,10 +1,13 @@
 package wallet
 
 import (
+	"github.com/stalker-loki/app/slog"
+
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/db/walletdb"
-	"github.com/stalker-loki/app/slog"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // OutputSelectionPolicy describes the rules for selecting an output from the
@@ -20,45 +23,36 @@ func (p *OutputSelectionPolicy) meetsRequiredConfs(txHeight, curHeight int32) bo
 
 // UnspentOutputs fetches all unspent outputs from the wallet that match rules
 // described in the passed policy.
-func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOutput, err error) {
-	var outputResults []*TransactionOutput
-	err := walletdb.View(w.db, func(tx walletdb.ReadTx) (err error) {
+func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) (outputResults []*TransactionOutput, err error) {
+	if err = walletdb.View(w.db, func(tx walletdb.ReadTx) (err error) {
 		addrmgrNs := tx.ReadBucket(waddrmgrNamespaceKey)
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		syncBlock := w.Manager.SyncedTo()
-		// TODO: actually stream outputs from the db instead of fetching
-		// all of them at once.
-		outputs, err := w.TxStore.UnspentOutputs(txmgrNs)
-		if err != nil {
-			slog.Error(err)
-			return err
+		// TODO: actually stream outputs from the db instead of fetching  all of them at once.
+		var outputs []wtxmgr.Credit
+		if outputs, err = w.TxStore.UnspentOutputs(txmgrNs); slog.Check(err) {
+			return
 		}
+		var addrs []util.Address
 		for _, output := range outputs {
-			// Ignore outputs that haven't reached the required
-			// number of confirmations.
+			// Ignore outputs that haven't reached the required number of confirmations.
 			if !policy.meetsRequiredConfs(output.Height, syncBlock.Height) {
 				continue
 			}
 			// Ignore outputs that are not controlled by the account.
-			_, addrs, _, err := txscript.ExtractPkScriptAddrs(output.PkScript,
-				w.chainParams)
-			if err != nil || len(addrs) == 0 {
-				// Cannot determine which account this belongs
-				// to without a valid address.  TODO: Fix this
-				// by saving outputs per account, or accounts
-				// per output.
+			if _, addrs, _, err = txscript.ExtractPkScriptAddrs(output.PkScript, w.chainParams); slog.Check(err) || len(addrs) == 0 {
+				// Cannot determine which account this belongs to without a valid address.
+				// TODO: Fix this by saving outputs per account, or accounts per output.
 				continue
 			}
-			_, outputAcct, err := w.Manager.AddrAccount(addrmgrNs, addrs[0])
-			if err != nil {
-				slog.Error(err)
-				return err
+			var outputAcct uint32
+			if _, outputAcct, err = w.Manager.AddrAccount(addrmgrNs, addrs[0]); slog.Check(err) {
+				return
 			}
 			if outputAcct != policy.Account {
 				continue
 			}
-			// Stakebase isn't exposed by wtxmgr so those will be
-			// OutputKindNormal for now.
+			// Stakebase isn't exposed by wtxmgr so those will be OutputKindNormal for now.
 			outputSource := OutputKindNormal
 			if output.FromCoinBase {
 				outputSource = OutputKindCoinbase
@@ -75,7 +69,8 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 			}
 			outputResults = append(outputResults, result)
 		}
-		return nil
-	})
-	return outputResults, err
+		return
+	}); slog.Check(err) {
+	}
+	return
 }

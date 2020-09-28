@@ -1189,7 +1189,7 @@ func (s *Server) Stop() (err error) {
 // true if successful) and the second bool return value specifies whether the
 // user can change the state of the server (true) or whether the user is limited
 // (false). The second is always false if the first is.
-func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, err error) {
+func (s *Server) CheckAuth(r *http.Request, require bool) (success bool, can bool, err error) {
 	authhdr := r.Header["Authorization"]
 	if len(authhdr) == 0 {
 		if require {
@@ -1458,8 +1458,7 @@ func (s *Server) LimitConnections(w http.ResponseWriter, remoteAddr string) bool
 // JSON-RPC command and runs the appropriate handler to reply to the command.
 // Any commands which are not recognized or not implemented will return an
 // error suitable for use in replies.
-func (s *Server) StandardCmdResult(cmd *ParsedRPCCmd,
-	closeChan <-chan struct{}) (interface{}, err error) {
+func (s *Server) StandardCmdResult(cmd *ParsedRPCCmd, closeChan <-chan struct{}) (ifc interface{}, err error) {
 	handler, ok := RPCHandlers[cmd.Method]
 	if ok {
 		goto handled
@@ -1484,23 +1483,19 @@ handled:
 // headers to write, a status code, and a writer.
 func (s *Server) WriteHTTPResponseHeaders(req *http.Request,
 	headers http.Header, code int, w io.Writer) (err error) {
-	_, err := io.WriteString(w, s.HTTPStatusLine(req, code))
-	if err != nil {
-		slog.Error(err)
-		return err
+	if _, err = io.WriteString(w, s.HTTPStatusLine(req, code)); slog.Check(err) {
+		return
 	}
-	err = headers.Write(w)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = headers.Write(w); slog.Check(err) {
+		return
 	}
-	_, err = io.WriteString(w, "\r\n")
+	if _, err = io.WriteString(w, "\r\n"); slog.Check(err) {
+	}
 	return err
 }
 
-// BuilderScript is a convenience function which is used for hard-coded scripts
-// built with the script builder. Any errors are converted to a panic since it
-// is only, and must only, be used with hard-coded, and therefore, known good,
+// BuilderScript is a convenience function which is used for hard-coded scripts built with the script builder. Any
+// errors are converted to a panic since it is only, and must only, be used with hard-coded, and therefore, known good,
 // scripts.
 func BuilderScript(builder *txscript.ScriptBuilder) []byte {
 	script, err := builder.Script()
@@ -1616,7 +1611,7 @@ func ChainErrToGBTErrString(err error) string {
 // CreateMarshalledReply returns a new marshalled JSON-RPC response given the
 // passed parameters.  It will automatically convert errors that are not of the
 // type *json.RPCError to the appropriate type as needed.
-func CreateMarshalledReply(id, result interface{}, replyErr error) ([]byte, err error) {
+func CreateMarshalledReply(id, result interface{}, replyErr error) (b []byte, err error) {
 	var jsonErr *btcjson.RPCError
 	if replyErr != nil {
 		if jErr, ok := replyErr.(*btcjson.RPCError); ok {
@@ -1632,13 +1627,13 @@ func CreateMarshalledReply(id, result interface{}, replyErr error) ([]byte, err 
 // to a raw transaction JSON object.
 func CreateTxRawResult(chainParams *netparams.Params, mtx *wire.MsgTx,
 	txHash string, blkHeader *wire.BlockHeader, blkHash string, blkHeight int32,
-	chainHeight int32) (*btcjson.TxRawResult, err error) {
+	chainHeight int32) (txReply *btcjson.TxRawResult, err error) {
 	mtxHex, err := MessageToHex(mtx)
 	if err != nil {
 		slog.Error(err)
 		return nil, err
 	}
-	txReply := &btcjson.TxRawResult{
+	txReply = &btcjson.TxRawResult{
 		Hex:      mtxHex,
 		Txid:     txHash,
 		Hash:     mtx.WitnessHash().String(),
@@ -1694,7 +1689,7 @@ func CreateVinList(mtx *wire.MsgTx) []btcjson.Vin {
 // passed transaction.
 func CreateVinListPrevOut(s *Server, mtx *wire.MsgTx,
 	chainParams *netparams.Params, vinExtra bool,
-	filterAddrMap map[string]struct{}) ([]btcjson.VinPrevOut, err error) {
+	filterAddrMap map[string]struct{}) (vinList []btcjson.VinPrevOut, err error) {
 	// Coinbase transactions only have a single txin by definition.
 	if blockchain.IsCoinBaseTx(mtx) {
 		// Only include the transaction if the filter map is empty because a
@@ -1704,13 +1699,13 @@ func CreateVinListPrevOut(s *Server, mtx *wire.MsgTx,
 			return nil, nil
 		}
 		txIn := mtx.TxIn[0]
-		vinList := make([]btcjson.VinPrevOut, 1)
+		vinList = make([]btcjson.VinPrevOut, 1)
 		vinList[0].Coinbase = hex.EncodeToString(txIn.SignatureScript)
 		vinList[0].Sequence = txIn.Sequence
-		return vinList, nil
+		return
 	}
 	// Use a dynamically sized list to accommodate the address filter.
-	vinList := make([]btcjson.VinPrevOut, 0, len(mtx.TxIn))
+	vinList = make([]btcjson.VinPrevOut, 0, len(mtx.TxIn))
 	// Lookup all of the referenced transaction outputs needed to populate the
 	// previous output information if requested.
 	var originOutputs map[wire.OutPoint]wire.TxOut
@@ -1725,7 +1720,7 @@ func CreateVinListPrevOut(s *Server, mtx *wire.MsgTx,
 	for _, txIn := range mtx.TxIn {
 		// The disassembled string will contain [error] inline if the script
 		// doesn't fully parse, so ignore the error here.
-		disbuf, _ := txscript.DisasmString(txIn.SignatureScript)
+		disBuf, _ := txscript.DisasmString(txIn.SignatureScript)
 		// Create the basic input entry without the additional optional previous
 		// output details which will be added later if requested and available.
 		prevOut := &txIn.PreviousOutPoint
@@ -1734,7 +1729,7 @@ func CreateVinListPrevOut(s *Server, mtx *wire.MsgTx,
 			Vout:     prevOut.Index,
 			Sequence: txIn.Sequence,
 			ScriptSig: &btcjson.ScriptSig{
-				Asm: disbuf,
+				Asm: disBuf,
 				Hex: hex.EncodeToString(txIn.SignatureScript),
 			},
 		}
@@ -1840,17 +1835,17 @@ func CreateVoutList(mtx *wire.MsgTx, chainParams *netparams.Params,
 // clients that are using long polling for block templates.  The ID consists of
 // the previous block hash for the associated template and the time the
 // associated template was generated.
-func DecodeTemplateID(templateID string) (*chainhash.Hash, int64, err error) {
+func DecodeTemplateID(templateID string) (prevHash *chainhash.Hash, lastGenerated int64, err error) {
 	fields := strings.Split(templateID, "-")
 	if len(fields) != 2 {
 		return nil, 0, errors.New("invalid longpollid format")
 	}
-	prevHash, err := chainhash.NewHashFromStr(fields[0])
+	prevHash, err = chainhash.NewHashFromStr(fields[0])
 	if err != nil {
 		slog.Error(err)
 		return nil, 0, errors.New("invalid longpollid format")
 	}
-	lastGenerated, err := strconv.ParseInt(fields[1], 10, 64)
+	lastGenerated, err = strconv.ParseInt(fields[1], 10, 64)
 	if err != nil {
 		slog.Error(err)
 		return nil, 0, errors.New("invalid longpollid format")
@@ -1867,9 +1862,9 @@ func EncodeTemplateID(prevHash *chainhash.Hash, lastGenerated time.Time) string 
 // FetchInputTxos fetches the outpoints from all transactions referenced by the
 // inputs to the passed transaction by checking the transaction mempool first
 // then the transaction index for those already mined into blocks.
-func FetchInputTxos(s *Server, tx *wire.MsgTx) (map[wire.OutPoint]wire.TxOut, err error) {
+func FetchInputTxos(s *Server, tx *wire.MsgTx) (originOutputs map[wire.OutPoint]wire.TxOut, err error) {
 	mp := s.Cfg.TxMemPool
-	originOutputs := make(map[wire.OutPoint]wire.TxOut)
+	originOutputs = make(map[wire.OutPoint]wire.TxOut)
 	for txInIndex, txIn := range tx.TxIn {
 		// Attempt to fetch and use the referenced transaction from the memory pool.
 		origin := &txIn.PreviousOutPoint
@@ -1898,9 +1893,8 @@ func FetchInputTxos(s *Server, tx *wire.MsgTx) (map[wire.OutPoint]wire.TxOut, er
 		// Load the raw transaction bytes from the database.
 		var txBytes []byte
 		err = s.Cfg.DB.View(func(dbTx database.Tx) (err error) {
-			var err error
 			txBytes, err = dbTx.FetchBlockRegion(blockRegion)
-			return err
+			return
 		})
 		if err != nil {
 			slog.Error(err)
@@ -2030,7 +2024,7 @@ func JSONAuthFail(w http.ResponseWriter) {
 
 // MessageToHex serializes a message to the wire protocol encoding using the
 // latest protocol version and returns a hex-encoded string of the result.
-func MessageToHex(msg wire.Message) (string, err error) {
+func MessageToHex(msg wire.Message) (s string, err error) {
 	var buf bytes.Buffer
 	if err := msg.BtcEncode(&buf, MaxProtocolVersion,
 		wire.WitnessEncoding); err != nil {
@@ -2052,9 +2046,8 @@ func NewGbtWorkState(timeSource blockchain.MedianTimeSource,
 }
 
 // NewRPCServer returns a new instance of the RPCServer struct.
-func NewRPCServer(config *ServerConfig, statecfg *state.Config,
-	podcfg *pod.Config) (*Server, err error) {
-	rpc := Server{
+func NewRPCServer(config *ServerConfig, statecfg *state.Config, podcfg *pod.Config) (rpc *Server, err error) {
+	rpc = &Server{
 		Cfg:                    *config,
 		Config:                 podcfg,
 		StateCfg:               statecfg,
@@ -2074,9 +2067,9 @@ func NewRPCServer(config *ServerConfig, statecfg *state.Config,
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(login))
 		rpc.LimitAuthSHA = sha256.Sum256([]byte(auth))
 	}
-	rpc.NtfnMgr = NewWSNotificationManager(&rpc)
+	rpc.NtfnMgr = NewWSNotificationManager(rpc)
 	rpc.Cfg.Chain.Subscribe(rpc.HandleBlockchainNotification)
-	return &rpc, nil
+	return
 }
 
 // ParseCmd parses a JSON-RPC request object into known concrete command.  The
@@ -2138,7 +2131,7 @@ func NoTxInfoError(txHash *chainhash.Hash) *btcjson.RPCError {
 
 // SoftForkStatus converts a ThresholdState state into a human readable string
 // corresponding to the particular state.
-func SoftForkStatus(state blockchain.ThresholdState) (string, err error) {
+func SoftForkStatus(state blockchain.ThresholdState) (s string, err error) {
 	switch state {
 	case blockchain.ThresholdDefined:
 		return "defined", nil

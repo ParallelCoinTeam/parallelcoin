@@ -11,29 +11,25 @@ type UnstableAPI struct {
 	w *Wallet
 }
 
-// ExposeUnstableAPI exposes additional unstable public APIs for a Wallet.  These APIs
-// may be changed or removed at any time.  Currently this type exists to ease
-// the transaction (particularly for the legacy JSON-RPC server) from using
-// exported manager packages to a unified wallet package that exposes all
-// functionality by itself.  New code should not be written using this API.
+// ExposeUnstableAPI exposes additional unstable public APIs for a Wallet. These APIs may be changed or removed at any
+// time. Currently this type exists to ease the transaction (particularly for the legacy JSON-RPC server) from using
+// exported manager packages to a unified wallet package that exposes all functionality by itself. New code should not
+// be written using this API.
 func ExposeUnstableAPI(w *Wallet) UnstableAPI {
 	return UnstableAPI{w}
 }
 
 // TxDetails calls wtxmgr.Store.TxDetails under a single database view transaction.
-func (u UnstableAPI) TxDetails(txHash *chainhash.Hash) (*wtxmgr.TxDetails, err error) {
-	var details *wtxmgr.TxDetails
-	err := walletdb.View(u.w.db, func(dbtx walletdb.ReadTx) (err error) {
+func (u UnstableAPI) TxDetails(txHash *chainhash.Hash) (details *wtxmgr.TxDetails, err error) {
+	err = walletdb.View(u.w.db, func(dbtx walletdb.ReadTx) (err error) {
 		txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
-		var err error
 		details, err = u.w.TxStore.TxDetails(txmgrNs, txHash)
-		return err
+		return
 	})
-	return details, err
+	return
 }
 
-// RangeTransactions calls wtxmgr.Store.RangeTransactions under a single
-// database view transaction.
+// RangeTransactions calls wtxmgr.Store.RangeTransactions under a single database view transaction.
 func (u UnstableAPI) RangeTransactions(begin, end int32, f func([]wtxmgr.TxDetails) (bool, error)) (err error) {
 	return walletdb.View(u.w.db, func(dbtx walletdb.ReadTx) (err error) {
 		txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)

@@ -1,6 +1,6 @@
 module github.com/p9c/pod
 
-go 1.14
+go 1.13
 
 require (
 	gioui.org v0.0.0-20200311164516-7024a0e6914d

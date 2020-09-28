@@ -2,10 +2,11 @@ package chainrpc
 
 import (
 	"errors"
-	"github.com/stalker-loki/app/slog"
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -776,31 +777,32 @@ type HelpCacher struct {
 }
 
 // RPCMethodHelp returns an RPC help string for the provided method. This function is safe for concurrent access.
-func (c *HelpCacher) RPCMethodHelp(method string) (string, err error) {
+func (c *HelpCacher) RPCMethodHelp(method string) (help string, err error) {
 	c.Lock()
 	defer c.Unlock()
 	// Return the cached method help if it exists.
-	if help, exists := c.methodHelp[method]; exists {
-		return help, nil
+	var exists bool
+	if help, exists = c.methodHelp[method]; exists {
+		return
 	}
 	// Look up the result types for the method.
-	resultTypes, ok := ResultTypes[method]
-	if !ok {
-		return "", errors.New("no result types specified for method " +
-			method)
+	var resultTypes []interface{}
+	var ok bool
+	if resultTypes, ok = ResultTypes[method]; !ok {
+		err = errors.New("no result types specified for method " + method)
+		slog.Debug(err)
+		return
 	}
 	// Generate, cache, and return the help.
-	help, err := btcjson.GenerateHelp(method, HelpDescsEnUS, resultTypes...)
-	if err != nil {
-		slog.Error(err)
-		return "", err
+	if help, err = btcjson.GenerateHelp(method, HelpDescsEnUS, resultTypes...); slog.Check(err) {
+		return
 	}
 	c.methodHelp[method] = help
-	return help, nil
+	return
 }
 
 // RPCUsage returns one-line usage for all support RPC commands. This function is safe for concurrent access.
-func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, err error) {
+func (c *HelpCacher) RPCUsage(includeWebsockets bool) (u string, err error) {
 	c.Lock()
 	defer c.Unlock()
 	// Return the cached usage if it is available.
@@ -809,21 +811,18 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, err error) {
 	}
 	// Generate a list of one-line usage for every command.
 	usageTexts := make([]string, 0, len(RPCHandlers))
+	var usage string
 	for k := range RPCHandlers {
-		usage, err := btcjson.MethodUsageText(k)
-		if err != nil {
-			slog.Error(err)
-			return "", err
+		if usage, err = btcjson.MethodUsageText(k); slog.Check(err) {
+			return
 		}
 		usageTexts = append(usageTexts, usage)
 	}
 	// Include websockets commands if requested.
 	if includeWebsockets {
 		for k := range WSHandlers {
-			usage, err := btcjson.MethodUsageText(k)
-			if err != nil {
-				slog.Error(err)
-				return "", err
+			if usage, err = btcjson.MethodUsageText(k); slog.Check(err) {
+				return
 			}
 			usageTexts = append(usageTexts, usage)
 		}
@@ -833,9 +832,8 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, err error) {
 	return c.usage, nil
 }
 
-// NewHelpCacher returns a new instance of a help cacher which provides help
-// and usage for the RPC server commands and caches the results for future
-// calls.
+// NewHelpCacher returns a new instance of a help cacher which provides help and usage for the RPC server commands and
+// caches the results for future calls.
 func NewHelpCacher() *HelpCacher {
 	return &HelpCacher{
 		methodHelp: make(map[string]string),

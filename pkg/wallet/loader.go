@@ -2,11 +2,12 @@ package wallet
 
 import (
 	"errors"
-	"github.com/stalker-loki/app/slog"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/db/walletdb"
@@ -54,44 +55,37 @@ var (
 // CreateNewWallet creates a new wallet using the provided public and private passphrases.  The seed is optional.  If
 // non-nil, addresses are derived from this seed.  If nil, a secure random seed is generated.
 func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bday time.Time, noStart bool,
-	podConfig *pod.Config) (*Wallet, err error) {
+	podConfig *pod.Config) (w *Wallet, err error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	if ld.Loaded {
 		return nil, ErrLoaded
 	}
-	// dbPath := filepath.Join(ld.DDDirPath, WalletDbName)
-	exists, err := fileExists(ld.DDDirPath)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var exists bool
+	if exists, err = fileExists(ld.DDDirPath); slog.Check(err) {
+		return
 	}
 	if exists {
-		return nil, errors.New("Wallet ERROR: " + ld.DDDirPath + " already exists")
+		err = errors.New("Wallet ERROR: " + ld.DDDirPath + " already exists")
+		slog.Debug(err)
+		return
 	}
 	// Create the wallet database backed by bolt db.
 	p := filepath.Dir(ld.DDDirPath)
-	err = os.MkdirAll(p, 0700)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = os.MkdirAll(p, 0700); slog.Check(err) {
+		return
 	}
-	db, err := walletdb.Create("bdb", ld.DDDirPath)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var db walletdb.DB
+	if db, err = walletdb.Create("bdb", ld.DDDirPath); slog.Check(err) {
+		return
 	}
 	// Initialize the newly created database for the wallet before opening.
-	err = Create(db, pubPassphrase, privPassphrase, seed, ld.ChainParams, bday)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = Create(db, pubPassphrase, privPassphrase, seed, ld.ChainParams, bday); slog.Check(err) {
+		return
 	}
 	// Open the newly-created wallet.
-	w, err := Open(db, pubPassphrase, nil, ld.ChainParams, ld.RecoveryWindow, podConfig)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if w, err = Open(db, pubPassphrase, nil, ld.ChainParams, ld.RecoveryWindow, podConfig); slog.Check(err) {
+		return
 	}
 	if !noStart {
 		w.Start()
@@ -99,12 +93,11 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 	} else {
 		w.db.Close()
 	}
-	return w, nil
+	return
 }
 
-// LoadedWallet returns the loaded wallet, if any, and a bool for whether the
-// wallet has been loaded or not.  If true, the wallet pointer should be safe to
-// dereference.
+// LoadedWallet returns the loaded wallet, if any, and a bool for whether the wallet has been loaded or not. If true,
+// the wallet pointer should be safe to dereference.
 func (ld *Loader) LoadedWallet() (*Wallet, bool) {
 	ld.Mutex.Lock()
 	w := ld.Wallet
@@ -113,7 +106,7 @@ func (ld *Loader) LoadedWallet() (*Wallet, bool) {
 }
 
 // OpenExistingWallet opens the wallet from the loader's wallet database path and the public passphrase.  If the loader is being called by a context where standard input prompts may be used during wallet upgrades, setting canConsolePrompt will enables these prompts.
-func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool, podConfig *pod.Config) (*Wallet, err error) {
+func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool, podConfig *pod.Config) (w *Wallet, err error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	// INFO("opening existing wallet", ld.DDDirPath}
@@ -122,19 +115,18 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 		return nil, ErrLoaded
 	}
 	// Ensure that the network directory exists.
-	if err := checkCreateDir(filepath.Dir(ld.DDDirPath)); err != nil {
+	if err = checkCreateDir(filepath.Dir(ld.DDDirPath)); slog.Check(err) {
 		slog.Error("cannot create directory", ld.DDDirPath)
-		return nil, err
+		return
 	}
 	slog.Info("directory exists")
 	// Open the database using the boltdb backend.
 	dbPath := ld.DDDirPath
 	slog.Info("opening database", dbPath)
-	db, err := walletdb.Open("bdb", dbPath)
-	if err != nil {
-		slog.Error(err)
+	var db walletdb.DB
+	if db, err = walletdb.Open("bdb", dbPath); slog.Check(err) {
 		slog.Error("failed to open database '", ld.DDDirPath, "':", err)
-		return nil, err
+		return
 	}
 	slog.Info("opened wallet database")
 	var cbs *waddrmgr.OpenCallbacks
@@ -150,18 +142,14 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 		}
 	}
 	slog.Trace("opening wallet")
-	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig)
-	if err != nil {
-		slog.Error(err)
+	if w, err = Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig); slog.Check(err) {
 		slog.Info("failed to open wallet", err)
-		// If opening the wallet fails (e.g. because of wrong
-		// passphrase), we must close the backing database to
-		// allow future calls to walletdb.Open().
-		e := db.Close()
-		if e != nil {
-			slog.Warn("error closing database:", e)
+		// If opening the wallet fails (e.g. because of wrong passphrase), we must close the backing database to allow
+		// future calls to walletdb.Open().
+		if err = db.Close(); slog.Check(err) {
+			slog.Warn("error closing database:", err)
 		}
-		return nil, err
+		return
 	}
 	ld.Wallet = w
 	slog.Trace("starting wallet", w != nil)
@@ -208,11 +196,9 @@ func (ld *Loader) UnloadWallet() (err error) {
 		return ErrNotLoaded
 	}
 	slog.Trace("wallet stopped")
-	err := ld.DB.Close()
-	if err != nil {
-		slog.Error(err)
+	if err = ld.DB.Close(); slog.Check(err) {
 		slog.Debug("error closing database", err)
-		return err
+		return
 	}
 	slog.Trace("database closed")
 	time.Sleep(time.Second / 4)
@@ -221,14 +207,14 @@ func (ld *Loader) UnloadWallet() (err error) {
 	return nil
 }
 
-// WalletExists returns whether a file exists at the loader's database path.
-// This may return an error for unexpected I/O failures.
-func (ld *Loader) WalletExists() (bool, err error) {
+// WalletExists returns whether a file exists at the loader's database path. This may return an error for unexpected I/O
+// failures.
+func (ld *Loader) WalletExists() (exists bool, err error) {
 	return fileExists(ld.DDDirPath)
 }
 
-// onLoaded executes each added callback and prevents loader from loading any
-// additional wallets.  Requires mutex to be locked.
+// onLoaded executes each added callback and prevents loader from loading any additional wallets. Requires mutex to be
+// locked.
 func (ld *Loader) onLoaded(db walletdb.DB) {
 	slog.Trace("wallet loader callbacks running ", ld.Wallet != nil)
 	for _, fn := range ld.Callbacks {
@@ -240,9 +226,8 @@ func (ld *Loader) onLoaded(db walletdb.DB) {
 	ld.Callbacks = nil // not needed anymore
 }
 
-// NewLoader constructs a Loader with an optional recovery window. If the
-// recovery window is non-zero, the wallet will attempt to recovery addresses
-// starting from the last SyncedTo height.
+// NewLoader constructs a Loader with an optional recovery window. If the recovery window is non-zero, the wallet will
+// attempt to recovery addresses starting from the last SyncedTo height.
 func NewLoader(chainParams *netparams.Params, dbDirPath string, recoveryWindow uint32) *Loader {
 	l := &Loader{
 		ChainParams:    chainParams,
@@ -251,10 +236,8 @@ func NewLoader(chainParams *netparams.Params, dbDirPath string, recoveryWindow u
 	}
 	return l
 }
-func fileExists(filePath string) (bool, err error) {
-	_, err := os.Stat(filePath)
-	if err != nil {
-		slog.Error(err)
+func fileExists(filePath string) (exists bool, err error) {
+	if _, err = os.Stat(filePath); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
@@ -262,6 +245,6 @@ func fileExists(filePath string) (bool, err error) {
 	}
 	return true, nil
 }
-func noConsole() ([]byte, err error) {
+func noConsole() (b []byte, err error) {
 	return nil, errNoConsole
 }

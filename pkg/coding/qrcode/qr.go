@@ -194,7 +194,7 @@ type Qrcode struct {
 	penalty        []int   // calculated mask penalty (0-7)
 }
 
-func Encode(data string, version int, level ECLevel) (image.Image, err error) {
+func Encode(data string, version int, level ECLevel) (img image.Image, err error) {
 
 	qr := new(Qrcode)
 	qr.data = data
@@ -209,7 +209,7 @@ func Encode(data string, version int, level ECLevel) (image.Image, err error) {
 // Module count on a side
 func (qr *Qrcode) len() int { return qr.Version*4 + (7+1)*2 + 1 }
 
-func (qr *Qrcode) Encode() (image.Image, err error) {
+func (qr *Qrcode) Encode() (img image.Image, err error) {
 
 	// check version
 	if qr.Version < 0 || 40 < qr.Version {

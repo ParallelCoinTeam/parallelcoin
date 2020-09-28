@@ -64,7 +64,7 @@ func BigToLEUint256(n *big.Int) [Uint256Size]byte {
 }
 
 // HandleGetWork handles the getwork call
-func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, err error) {
+func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (ifc interface{}, err error) {
 	c := cmd.(*btcjson.GetWorkCmd)
 	if len(s.StateCfg.ActiveMiningAddrs) == 0 {
 		return nil, &btcjson.RPCError{
@@ -194,15 +194,14 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 	// as part of the data below.
 	data := make([]byte, 0, GetworkDataLen)
 	buf := bytes.NewBuffer(data)
-	err := msgBlock.Header.Serialize(buf)
-	if err != nil {
-		slog.Error(err)
+	if err = msgBlock.Header.Serialize(buf); slog.Check(err) {
 		errStr := fmt.Sprintf("Failed to serialize data: %v", err)
 		slog.Warn(errStr)
-		return nil, &btcjson.RPCError{
+		err = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInternal.Code,
 			Message: errStr,
 		}
+		return
 	}
 	// Calculate the midstate for the block header.  The midstate here is the
 	// internal state of the sha256 algorithm for the first chunk of the block
@@ -252,7 +251,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 //	HandleGetWorkSubmission is a helper for handleGetWork which deals with the
 // calling submitting work to be verified and processed. This function MUST be
 // called with the RPC workstate locked.
-func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, err error) {
+func HandleGetWorkSubmission(s *Server, hexData string) (ifc interface{}, err error) {
 	// Ensure the provided data is sane.
 	if len(hexData)%2 != 0 {
 		hexData = "0" + hexData

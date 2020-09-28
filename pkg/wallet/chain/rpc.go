@@ -2,9 +2,10 @@ package chain
 
 import (
 	"errors"
-	"github.com/stalker-loki/app/slog"
 	"sync"
 	"time"
+
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -18,8 +19,8 @@ import (
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
-// RPCClient represents a persistent client connection to a bitcoin RPC server
-// for information regarding the current best block chain.
+// RPCClient represents a persistent client connection to a bitcoin RPC server for information regarding the current
+// best block chain.
 type RPCClient struct {
 	*rpcclient.Client
 	connConfig          *rpcclient.ConnConfig // Work around unexported field
@@ -34,19 +35,17 @@ type RPCClient struct {
 	quitMtx             sync.Mutex
 }
 
-// NewRPCClient creates a client connection to the server described by the
-// connect string.  If disableTLS is false, the remote RPC certificate must be
-// provided in the certs slice.  The connection is not established immediately,
-// but must be done using the Start method.  If the remote server does not
-// operate on the same bitcoin network as described by the passed chain
-// parameters, the connection will be disconnected.
+// NewRPCClient creates a client connection to the server described by the connect string. If disableTLS is false, the
+// remote RPC certificate must be provided in the certs slice. The connection is not established immediately, but must
+// be done using the Start method. If the remote server does not operate on the same bitcoin network as described by the
+// passed chain parameters, the connection will be disconnected.
 func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
-	certs []byte, disableTLS bool, reconnectAttempts int) (*RPCClient, err error) {
+	certs []byte, disableTLS bool, reconnectAttempts int) (client *RPCClient, err error) {
 	slog.Warn("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
 	}
-	client := &RPCClient{
+	client = &RPCClient{
 		connConfig: &rpcclient.ConnConfig{
 			Host:                 connect,
 			Endpoint:             "ws",
@@ -74,14 +73,13 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
 		OnRescanProgress:    client.onRescanProgress,
 	}
 	// Warn("*actually* creating rpc client")
-	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var rpcClient *rpcclient.Client
+	if rpcClient, err = rpcclient.New(client.connConfig, ntfnCallbacks); slog.Check(err) {
+		return
 	}
 	// defer Warn("*succeeded* in making rpc client")
 	client.Client = rpcClient
-	return client, nil
+	return
 }
 
 // BackEnd returns the name of the driver.
@@ -89,39 +87,35 @@ func (c *RPCClient) BackEnd() string {
 	return "pod"
 }
 
-// Start attempts to establish a client connection with the remote server.
-// If successful, handler goroutines are started to process notifications
-// sent by the server.  After a limited number of connection attempts, this
-// function gives up, and therefore will not block forever waiting for the
-// connection to be established to a server that may not exist.
+// Start attempts to establish a client connection with the remote server. If successful, handler goroutines are started
+// to process notifications sent by the server. After a limited number of connection attempts, this function gives up,
+// and therefore will not block forever waiting for the connection to be established to a server that may not exist.
 func (c *RPCClient) Start() (err error) {
 	// Debug(c.connConfig)
-	err := c.Connect(c.reconnectAttempts)
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = c.Connect(c.reconnectAttempts); slog.Check(err) {
+		return
 	}
 	// Verify that the server is running on the expected network.
-	net, err := c.GetCurrentNet()
-	if err != nil {
-		slog.Error(err)
+	var net wire.BitcoinNet
+	if net, err = c.GetCurrentNet(); slog.Check(err) {
 		c.Disconnect()
-		return err
+		return
 	}
 	if net != c.chainParams.Net {
 		c.Disconnect()
-		return errors.New("mismatched networks")
+		err = errors.New("mismatched networks")
+		slog.Debug(err)
+		return
 	}
 	c.quitMtx.Lock()
 	c.started = true
 	c.quitMtx.Unlock()
 	c.wg.Add(1)
 	go c.handler()
-	return nil
+	return
 }
 
-// Stop disconnects the client and signals the shutdown of all goroutines
-// started by Start.
+// Stop disconnects the client and signals the shutdown of all goroutines started by Start.
 func (c *RPCClient) Stop() {
 	c.quitMtx.Lock()
 	select {
@@ -136,10 +130,9 @@ func (c *RPCClient) Stop() {
 	c.quitMtx.Unlock()
 }
 
-// Rescan wraps the normal Rescan command with an additional parameter that
-// allows us to map an outpoint to the address in the chain that it pays to.
-// This is useful when using BIP 158 filters as they include the prev pkScript
-// rather than the full outpoint.
+// Rescan wraps the normal Rescan command with an additional parameter that allows us to map an outpoint to the address
+// in the chain that it pays to. This is useful when using BIP 158 filters as they include the prev pkScript rather than
+// the full outpoint.
 func (c *RPCClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	outPoints map[wire.OutPoint]util.Address) (err error) {
 	flatOutpoints := make([]*wire.OutPoint, 0, len(outPoints))
@@ -149,100 +142,82 @@ func (c *RPCClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	return c.Client.Rescan(startHash, addrs, flatOutpoints)
 }
 
-// WaitForShutdown blocks until both the client has finished disconnecting
-// and all handlers have exited.
+// WaitForShutdown blocks until both the client has finished disconnecting and all handlers have exited.
 func (c *RPCClient) WaitForShutdown() {
 	c.Client.WaitForShutdown()
 	c.wg.Wait()
 }
 
-// Notifications returns a channel of parsed notifications sent by the remote
-// bitcoin RPC server.  This channel must be continually read or the process
-// may abort for running out memory, as unread notifications are queued for
-// later reads.
+// Notifications returns a channel of parsed notifications sent by the remote bitcoin RPC server. This channel must be
+// continually read or the process may abort for running out memory, as unread notifications are queued for later reads.
 func (c *RPCClient) Notifications() <-chan interface{} {
 	return c.dequeueNotification
 }
 
-// BlockStamp returns the latest block notified by the client, or an error
-// if the client has been shut down.
-func (c *RPCClient) BlockStamp() (*wm.BlockStamp, err error) {
+// BlockStamp returns the latest block notified by the client, or an error if the client has been shut down.
+func (c *RPCClient) BlockStamp() (bs *wm.BlockStamp, err error) {
 	select {
-	case bs := <-c.currentBlock:
-		return bs, nil
+	case bs = <-c.currentBlock:
+		return
 	case <-c.quit:
-		return nil, errors.New("disconnected")
+		err = errors.New("disconnected")
+		slog.Debug(err)
+		return
 	}
 }
 
-// FilterBlocks scans the blocks contained in the FilterBlocksRequest for any
-// addresses of interest. For each requested block, the corresponding compact
-// filter will first be checked for matches, skipping those that do not report
-// anything. If the filter returns a positive match, the full block will be
-// fetched and filtered. This method returns a FilterBlocksResponse for the first
-// block containing a matching address. If no matches are found in the range of
+// FilterBlocks scans the blocks contained in the FilterBlocksRequest for any addresses of interest. For each requested
+// block, the corresponding compact filter will first be checked for matches, skipping those that do not report
+// anything. If the filter returns a positive match, the full block will be fetched and filtered. This method returns a
+// FilterBlocksResponse for the first block containing a matching address. If no matches are found in the range of
 // blocks requested, the returned response will be nil.
 func (c *RPCClient) FilterBlocks(
-	req *FilterBlocksRequest) (*FilterBlocksResponse, err error) {
+	req *FilterBlocksRequest) (response *FilterBlocksResponse, err error) {
 	blockFilterer := NewBlockFilterer(c.chainParams, req)
-	// Construct the watchlist using the addresses and outpoints contained
-	// in the filter blocks request.
-	watchList, err := buildFilterBlocksWatchList(req)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	// Construct the watchlist using the addresses and outpoints contained in the filter blocks request.
+	var watchList [][]byte
+	if watchList, err = buildFilterBlocksWatchList(req); slog.Check(err) {
+		return
 	}
-	// Iterate over the requested blocks, fetching the compact filter for
-	// each one, and matching it against the watchlist generated above. If
-	// the filter returns a positive match, the full block is then requested
-	// and scanned for addresses using the block filterer.
+	// Iterate over the requested blocks, fetching the compact filter for each one, and matching it against the
+	// watchlist generated above. If the filter returns a positive match, the full block is then requested and scanned
+	// for addresses using the block filterer.
 	for i, blk := range req.Blocks {
-		rawFilter, err := c.GetCFilter(&blk.Hash, wire.GCSFilterRegular)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var rawFilter *wire.MsgCFilter
+		if rawFilter, err = c.GetCFilter(&blk.Hash, wire.GCSFilterRegular); slog.Check(err) {
+			return
 		}
 		// Ensure the filter is large enough to be deserialized.
 		if len(rawFilter.Data) < 4 {
 			continue
 		}
-		filter, err := gcs.FromNBytes(
-			builder.DefaultP, builder.DefaultM, rawFilter.Data,
-		)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var filter *gcs.Filter
+		if filter, err = gcs.FromNBytes(builder.DefaultP, builder.DefaultM, rawFilter.Data); slog.Check(err) {
+			return
 		}
 		// Skip any empty filters.
 		if filter.N() == 0 {
 			continue
 		}
 		key := builder.DeriveKey(&blk.Hash)
-		matched, err := filter.MatchAny(key, watchList)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var matched bool
+		if matched, err = filter.MatchAny(key, watchList); slog.Check(err) {
+			return
 		} else if !matched {
 			continue
 		}
-		slog.Tracef(
-			"fetching block height=%d hash=%v",
-			blk.Height, blk.Hash,
-		)
-		rawBlock, err := c.GetBlock(&blk.Hash)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		slog.Tracef("fetching block height=%d hash=%v", blk.Height, blk.Hash)
+		var rawBlock *wire.MsgBlock
+		if rawBlock, err = c.GetBlock(&blk.Hash); slog.Check(err) {
+			return
 		}
 		if !blockFilterer.FilterBlock(rawBlock) {
 			continue
 		}
-		// If any external or internal addresses were detected in this
-		// block, we return them to the caller so that the rescan
-		// windows can widened with subsequent addresses. The
-		// `BatchIndex` is returned so that the caller can compute the
-		// *next* block from which to begin again.
-		resp := &FilterBlocksResponse{
+		// If any external or internal addresses were detected in this block, we return them to the caller so that the
+		// rescan windows can widened with subsequent addresses. The `BatchIndex` is returned so that the caller can
+		// compute the *next* block from which to begin again.
+		response = &FilterBlocksResponse{
 			BatchIndex:         uint32(i),
 			BlockMeta:          blk,
 			FoundExternalAddrs: blockFilterer.FoundExternal,
@@ -250,39 +225,39 @@ func (c *RPCClient) FilterBlocks(
 			FoundOutPoints:     blockFilterer.FoundOutPoints,
 			RelevantTxns:       blockFilterer.RelevantTxns,
 		}
-		return resp, nil
+		return
 	}
 	// No addresses were found for this range.
-	return nil, nil
+	return
 }
 
-// parseBlock parses a btcws definition of the block a tx is mined it to the
-// Block structure of the tm package, and the block index.  This is done
-// here since rpcclient doesn't parse this nicely for us.
-func parseBlock(block *btcjson.BlockDetails) (*tm.BlockMeta, err error) {
+// parseBlock parses a btcws definition of the block a tx is mined it to the Block structure of the tm package, and the
+// block index. This is done here since rpcclient doesn't parse this nicely for us.
+func parseBlock(block *btcjson.BlockDetails) (blk *tm.BlockMeta, err error) {
 	if block == nil {
 		return nil, nil
 	}
-	blkHash, err := chainhash.NewHashFromStr(block.Hash)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var blkHash *chainhash.Hash
+	if blkHash, err = chainhash.NewHashFromStr(block.Hash); slog.Check(err) {
+		return
 	}
-	blk := &tm.BlockMeta{
+	blk = &tm.BlockMeta{
 		Block: tm.Block{
 			Height: block.Height,
 			Hash:   *blkHash,
 		},
 		Time: time.Unix(block.Time, 0),
 	}
-	return blk, nil
+	return
 }
+
 func (c *RPCClient) onClientConnect() {
 	select {
 	case c.enqueueNotification <- ClientConnected{}:
 	case <-c.quit:
 	}
 }
+
 func (c *RPCClient) onBlockConnected(hash *chainhash.Hash, height int32, time time.Time) {
 	select {
 	case c.enqueueNotification <- BlockConnected{
@@ -295,6 +270,7 @@ func (c *RPCClient) onBlockConnected(hash *chainhash.Hash, height int32, time ti
 	case <-c.quit:
 	}
 }
+
 func (c *RPCClient) onBlockDisconnected(hash *chainhash.Hash, height int32, time time.Time) {
 	select {
 	case c.enqueueNotification <- BlockDisconnected{
@@ -307,22 +283,18 @@ func (c *RPCClient) onBlockDisconnected(hash *chainhash.Hash, height int32, time
 	case <-c.quit:
 	}
 }
+
 func (c *RPCClient) onRecvTx(tx *util.Tx, block *btcjson.BlockDetails) {
-	blk, err := parseBlock(block)
-	if err != nil {
-		slog.Error(err)
+	var blk *tm.BlockMeta
+	var err error
+	if blk, err = parseBlock(block); slog.Check(err) {
 		// Log and drop improper notification.
-		slog.Error(
-			"recvtx notification bad block:", err,
-		)
+		slog.Error("recvtx notification bad block:", err)
 		return
 	}
-	rec, err := tm.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now())
-	if err != nil {
-		slog.Error(err)
-		slog.Error(
-			"cannot create transaction record for relevant tx:", err,
-		)
+	var rec *tm.TxRecord
+	if rec, err = tm.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now()); slog.Check(err) {
+		slog.Error("cannot create transaction record for relevant tx:", err)
 		return
 	}
 	select {
@@ -350,23 +322,20 @@ func (c *RPCClient) onRescanFinished(hash *chainhash.Hash, height int32, blkTime
 // handler maintains a queue of notifications and the current state (best
 // block) of the chain.
 func (c *RPCClient) handler() {
-	hash, height, err := c.GetBestBlock()
-	if err != nil {
-		slog.Error(err)
-		slog.Error(
-			"failed to receive best block from chain server:", err,
-		)
+	var hash *chainhash.Hash
+	var height int32
+	var err error
+	if hash, height, err = c.GetBestBlock(); slog.Check(err) {
+		slog.Error("failed to receive best block from chain server:", err)
 		c.Stop()
 		c.wg.Done()
 		return
 	}
 	bs := &wm.BlockStamp{Hash: *hash, Height: height}
 	// TODO: Rather than leaving this as an unbounded queue for all types of
-	// notifications, try dropping ones where a later enqueued notification
-	// can fully invalidate one waiting to be processed.  For example,
-	// blockconnected notifications for greater block heights can remove the
-	// need to process earlier blockconnected notifications still waiting
-	// here.
+	//  notifications, try dropping ones where a later enqueued notification can fully invalidate one waiting to be
+	//  processed. For example, blockconnected notifications for greater block heights can remove the need to process
+	//  earlier blockconnected notifications still waiting here.
 	var notifications []interface{}
 	enqueue := c.enqueueNotification
 	var dequeue chan interface{}
@@ -376,8 +345,7 @@ out:
 		select {
 		case n, ok := <-enqueue:
 			if !ok {
-				// If no notifications are queued for handling,
-				// the queue is finished.
+				// If no notifications are queued for handling, the queue is finished.
 				if len(notifications) == 0 {
 					break out
 				}
@@ -402,8 +370,7 @@ out:
 			if len(notifications) != 0 {
 				next = notifications[0]
 			} else {
-				// If no more notifications can be enqueued, the
-				// queue is finished.
+				// If no more notifications can be enqueued, the queue is finished.
 				if enqueue == nil {
 					break out
 				}
@@ -420,7 +387,7 @@ out:
 }
 
 // POSTClient creates the equivalent HTTP POST rpcclient.Client.
-func (c *RPCClient) POSTClient() (*rpcclient.Client, err error) {
+func (c *RPCClient) POSTClient() (client *rpcclient.Client, err error) {
 	configCopy := *c.connConfig
 	configCopy.HTTPPostMode = true
 	return rpcclient.New(&configCopy, nil)

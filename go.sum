@@ -133,8 +133,6 @@ github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 h1:xHQewZjohU
 github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1/go.mod h1:7NL9UAYQnRM5iKHUCld3tf02fKb5Dft+41+VckASUy0=
 github.com/src-d/gcfg v1.4.0 h1:xXbNR5AlLSA315x2UO+fTSSAXCDf+Ar38/6oyGbDKQ4=
 github.com/src-d/gcfg v1.4.0/go.mod h1:p/UMsR43ujA89BJY9duynAwIpvqEujIH/jFlfL7jWoI=
-github.com/stalker-loki/app v0.0.5 h1:PUPQpWGHPCEMwigLJDCCpeRvp81Jos3HNN3pYLRC9WI=
-github.com/stalker-loki/app v0.0.5/go.mod h1:Vnxb8XWxS7iJdHhRVj5ItSTVd9C/SQjyHJtis6IKRMw=
 github.com/stalker-loki/app v0.0.6 h1:seTwm/iJO9ZRIWIqsQQklTmWYOTZxBCXJR5yBEFI+LE=
 github.com/stalker-loki/app v0.0.6/go.mod h1:Vnxb8XWxS7iJdHhRVj5ItSTVd9C/SQjyHJtis6IKRMw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

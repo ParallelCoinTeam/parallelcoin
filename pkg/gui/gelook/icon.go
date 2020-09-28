@@ -26,10 +26,9 @@ type DuoUIIcon struct {
 }
 
 // NewDuoUIIcon returns a new DuoUIIcon from DuoUIIconVG data.
-func NewDuoUIIcon(data []byte) (*DuoUIIcon, err error) {
-	_, err := iconvg.DecodeMetadata(data)
-	if err != nil {
-		return nil, err
+func NewDuoUIIcon(data []byte) (ic *DuoUIIcon, err error) {
+	if _, err = iconvg.DecodeMetadata(data); slog.Check(err) {
+		return
 	}
 	return &DuoUIIcon{src: data, Color: rgb(0x000000)}, nil
 }

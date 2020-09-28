@@ -36,7 +36,7 @@ func dbPutIndexerTip(dbTx database.Tx, idxKey []byte, hash *chainhash.Hash, heig
 
 // dbFetchIndexerTip uses an existing database transaction to retrieve the
 // hash and height of the current tip for the provided index.
-func dbFetchIndexerTip(dbTx database.Tx, idxKey []byte) (*chainhash.Hash, int32, err error) {
+func dbFetchIndexerTip(dbTx database.Tx, idxKey []byte) (hash *chainhash.Hash, height int32, err error) {
 	indexesBucket := dbTx.Metadata().Bucket(indexTipsBucketName)
 	serialized := indexesBucket.Get(idxKey)
 	if len(serialized) < chainhash.HashSize+4 {
@@ -46,35 +46,34 @@ func dbFetchIndexerTip(dbTx database.Tx, idxKey []byte) (*chainhash.Hash, int32,
 				"index %q tip", string(idxKey)),
 		}
 	}
-	var hash chainhash.Hash
+	var h chainhash.Hash
 	copy(hash[:], serialized[:chainhash.HashSize])
-	height := int32(byteOrder.Uint32(serialized[chainhash.HashSize:]))
-	return &hash, height, nil
+	height = int32(byteOrder.Uint32(serialized[chainhash.HashSize:]))
+	hash = &h
+	return
 }
 
 // dbIndexConnectBlock adds all of the index entries associated with the
 // given block using the provided indexer and updates the tip of the indexer
 // accordingly.  An error will be returned if the current tip for the indexer
 // is not the previous block for the passed block.
-func dbIndexConnectBlock(dbTx database.Tx, indexer Indexer, block *util.Block,
-	stxo []blockchain.SpentTxOut) (err error) {
+func dbIndexConnectBlock(dbTx database.Tx, indexer Indexer, block *util.Block, stxo []blockchain.SpentTxOut) (err error) {
 	// Assert that the block being connected properly connects to the current
 	// tip of the index.
 	idxKey := indexer.Key()
-	curTipHash, _, err := dbFetchIndexerTip(dbTx, idxKey)
-	if err != nil {
-		slog.Error(err)
-		return err
+	var curTipHash *chainhash.Hash
+	if curTipHash, _, err = dbFetchIndexerTip(dbTx, idxKey); slog.Check(err) {
+		return
 	}
 	if !curTipHash.IsEqual(&block.MsgBlock().Header.PrevBlock) {
-		return AssertError(fmt.Sprintf("dbIndexConnectBlock must be "+
-			"called with a block that extends the current index "+
-			"tip (%s, tip %s, block %s)", indexer.Name(),
-			curTipHash, block.Hash()))
+		err = AssertError(fmt.Sprintf("dbIndexConnectBlock must be called with a block that extends the current "+
+			"index tip (%s, tip %s, block %s)", indexer.Name(), curTipHash, block.Hash()))
+		slog.Debug(err)
+		return
 	}
 	// Notify the indexer with the connected block so it can index it.
-	if err := indexer.ConnectBlock(dbTx, block, stxo); err != nil {
-		return err
+	if err = indexer.ConnectBlock(dbTx, block, stxo); slog.Check(err) {
+		return
 	}
 	// Update the current index tip.
 	return dbPutIndexerTip(dbTx, idxKey, block.Hash(), block.Height())
@@ -137,12 +136,12 @@ func indexDropKey(idxKey []byte) []byte {
 // entries.
 func (m *Manager) maybeFinishDrops(interrupt <-chan struct{}) (err error) {
 	indexNeedsDrop := make([]bool, len(m.enabledIndexes))
-	err := m.db.View(func(dbTx database.Tx) (err error) {
+	if err = m.db.View(func(dbTx database.Tx) (err error) {
 		// None of the indexes needs to be dropped if the index tips bucket
 		// hasn't been created yet.
 		indexesBucket := dbTx.Metadata().Bucket(indexTipsBucketName)
 		if indexesBucket == nil {
-			return nil
+			return
 		}
 		// Mark the indexer as requiring a drop if one is already in progress.
 		for i, indexer := range m.enabledIndexes {
@@ -151,11 +150,9 @@ func (m *Manager) maybeFinishDrops(interrupt <-chan struct{}) (err error) {
 				indexNeedsDrop[i] = true
 			}
 		}
-		return nil
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+		return
+	}); slog.Check(err) {
+		return
 	}
 	if interruptRequested(interrupt) {
 		return errInterruptRequested
@@ -169,13 +166,11 @@ func (m *Manager) maybeFinishDrops(interrupt <-chan struct{}) (err error) {
 		slog.Info(func() string {
 			return fmt.Sprintf("Resuming %s drop", indexer.Name())
 		}())
-		err := dropIndex(m.db, indexer.Key(), indexer.Name(), interrupt)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = dropIndex(m.db, indexer.Key(), indexer.Name(), interrupt); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // maybeCreateIndexes determines if each of the enabled indexes have already
@@ -191,58 +186,52 @@ func (m *Manager) maybeCreateIndexes(dbTx database.Tx) (err error) {
 		// The tip for the index does not exist,
 		// so create it and invoke the create callback for the index so it
 		// can perform any one-time initialization it requires.
-		if err := indexer.Create(dbTx); err != nil {
-			return err
+		if err = indexer.Create(dbTx); slog.Check(err) {
+			return
 		}
 		// Set the tip for the index to values which represent an
 		// uninitialized index.
-		err := dbPutIndexerTip(dbTx, idxKey, &chainhash.Hash{}, -1)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = dbPutIndexerTip(dbTx, idxKey, &chainhash.Hash{}, -1); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // Init initializes the enabled indexes.
-// This is called during chain initialization and primarily consists of
-// catching up all indexes to the current best chain tip.
-// This is necessary since each index can be disabled and re-enabled at any
-// time and attempting to catch-up indexes at the same time new blocks are
-// being downloaded would lead to an overall longer time to catch up due to
-// the I/O contention. This is part of the blockchain.IndexManager interface.
+// This is called during chain initialization and primarily consists of catching up all indexes to the current best
+// chain tip. This is necessary since each index can be disabled and re-enabled at any time and attempting to catch-up
+// indexes at the same time new blocks are being downloaded would lead to an overall longer time to catch up due to
+// the I/O contention.
+//
+// This is part of the blockchain.IndexManager interface.
 func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) (err error) {
 	// Nothing to do when no indexes are enabled.
 	if len(m.enabledIndexes) == 0 {
-		return nil
+		return
 	}
 	if interruptRequested(interrupt) {
 		return errInterruptRequested
 	}
 	// Finish and drops that were previously interrupted.
-	if err := m.maybeFinishDrops(interrupt); err != nil {
-		return err
+	if err = m.maybeFinishDrops(interrupt); slog.Check(err) {
+		return
 	}
 	// Create the initial state for the indexes as needed.
-	err := m.db.Update(func(dbTx database.Tx) (err error) {
+	if err = m.db.Update(func(dbTx database.Tx) (err error) {
 		// Create the bucket for the current tips as needed.
 		meta := dbTx.Metadata()
-		_, err := meta.CreateBucketIfNotExists(indexTipsBucketName)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if _, err = meta.CreateBucketIfNotExists(indexTipsBucketName); slog.Check(err) {
+			return
 		}
 		return m.maybeCreateIndexes(dbTx)
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+	}); slog.Check(err) {
+		return
 	}
 	// Initialize each of the enabled indexes.
 	for _, indexer := range m.enabledIndexes {
-		if err := indexer.Init(); err != nil {
-			return err
+		if err = indexer.Init(); slog.Check(err) {
+			return
 		}
 	}
 	// Rollback indexes to the main chain if their tip is an orphaned fork.
@@ -255,14 +244,12 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	for i := len(m.enabledIndexes); i > 0; i-- {
 		indexer := m.enabledIndexes[i-1]
 		// Fetch the current tip for the index.
-		err := m.db.View(func(dbTx database.Tx) (err error) {
+		if err = m.db.View(func(dbTx database.Tx) (err error) {
 			idxKey := indexer.Key()
 			hash, height, err = dbFetchIndexerTip(dbTx, idxKey)
 			return err
-		})
-		if err != nil {
-			slog.Error(err)
-			return err
+		}); slog.Check(err) {
+			return
 		}
 		// Nothing to do if the index does not have any entries yet.
 		if height == -1 {
@@ -278,51 +265,39 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			// the main chain and thus the chain.
 			// BlockByHash function would error.
 			var block *util.Block
-			err := m.db.View(func(dbTx database.Tx) (err error) {
-				blockBytes, err := dbTx.FetchBlock(hash)
-				if err != nil {
-					slog.Error(err)
-					return err
+			if err = m.db.View(func(dbTx database.Tx) (err error) {
+				var blockBytes []byte
+				if blockBytes, err = dbTx.FetchBlock(hash); slog.Check(err) {
+					return
 				}
-				block, err = util.NewBlockFromBytes(blockBytes)
-				if err != nil {
-					slog.Error(err)
-					return err
+				if block, err = util.NewBlockFromBytes(blockBytes); slog.Check(err) {
+					return
 				}
 				block.SetHeight(height)
-				return err
-			})
-			if err != nil {
-				slog.Error(err)
-				return err
+				return
+			}); slog.Check(err) {
+				return
 			}
 			// We'll also grab the set of outputs spent by this block so we
 			// can remove them from the index.
-			spentTxos, err := chain.FetchSpendJournal(block)
-			if err != nil {
-				slog.Error(err)
-				return err
+			var spentTxos []blockchain.SpentTxOut
+			if spentTxos, err = chain.FetchSpendJournal(block); slog.Check(err) {
+				return
 			}
 			// With the block and stxo set for that block retrieved,
 			// we can now update the index itself.
-			err = m.db.Update(func(dbTx database.Tx) (err error) {
+			if err = m.db.Update(func(dbTx database.Tx) (err error) {
 				// Remove all of the index entries associated with the block
 				// and update the indexer tip.
-				err = dbIndexDisconnectBlock(
-					dbTx, indexer, block, spentTxos,
-				)
-				if err != nil {
-					slog.Error(err)
-					return err
+				if err = dbIndexDisconnectBlock(dbTx, indexer, block, spentTxos); slog.Check(err) {
+					return
 				}
 				// Update the tip to the previous block.
 				hash = &block.MsgBlock().Header.PrevBlock
 				height--
-				return nil
-			})
-			if err != nil {
-				slog.Error(err)
-				return err
+				return
+			}); slog.Check(err) {
+				return
 			}
 			if interruptRequested(interrupt) {
 				return errInterruptRequested
@@ -345,53 +320,40 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	bestHeight := chain.BestSnapshot().Height
 	lowestHeight := bestHeight
 	indexerHeights := make([]int32, len(m.enabledIndexes))
-	err = m.db.View(func(dbTx database.Tx) (err error) {
+	if err = m.db.View(func(dbTx database.Tx) (err error) {
 		for i, indexer := range m.enabledIndexes {
 			idxKey := indexer.Key()
-			_, height, err := dbFetchIndexerTip(dbTx, idxKey)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if _, height, err = dbFetchIndexerTip(dbTx, idxKey); slog.Check(err) {
+				return
 			}
 			slog.Tracef(
-				"current %s tip (height %d, hash %v)",
-				indexer.Name(),
-				height,
-				hash,
+				"current %s tip (height %d, hash %v)", indexer.Name(), height, hash,
 			)
 			indexerHeights[i] = height
 			if height < lowestHeight {
 				lowestHeight = height
 			}
 		}
-		return nil
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+		return
+	}); slog.Check(err) {
+		return
 	}
 	// Nothing to index if all of the indexes are caught up.
 	if lowestHeight == bestHeight {
-		return nil
+		return
 	}
 	// Create a progress logger for the indexing process below.
-	progressLogger := newBlockProgressLogger("Indexed",
-		log.L)
+	progressLogger := newBlockProgressLogger("Indexed", log.L)
 	// At this point,
 	// one or more indexes are behind the current best chain tip and need to
 	// be caught up,
 	// so log the details and loop through each block that needs to be indexed.
-	slog.Infof(
-		"catching up indexes from height %d to %d",
-		lowestHeight,
-		bestHeight,
-	)
+	slog.Infof("catching up indexes from height %d to %d", lowestHeight, bestHeight)
 	for height := lowestHeight + 1; height <= bestHeight; height++ {
 		// Load the block for the height since it is required to index it.
-		block, err := chain.BlockByHeight(height)
-		if err != nil {
-			slog.Error(err)
-			return err
+		var block *util.Block
+		if block, err = chain.BlockByHeight(height); slog.Check(err) {
+			return
 		}
 		if interruptRequested(interrupt) {
 			return errInterruptRequested
@@ -407,20 +369,16 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			// haven't been loaded yet,
 			// they need to be retrieved from the spend journal.
 			if spentTxos == nil && indexNeedsInputs(indexer) {
-				spentTxos, err = chain.FetchSpendJournal(block)
-				if err != nil {
-					slog.Error(err)
-					return err
+				if spentTxos, err = chain.FetchSpendJournal(block); slog.Check(err) {
+					return
 				}
 			}
-			err := m.db.Update(func(dbTx database.Tx) (err error) {
+			if err = m.db.Update(func(dbTx database.Tx) (err error) {
 				return dbIndexConnectBlock(
 					dbTx, indexer, block, spentTxos,
 				)
-			})
-			if err != nil {
-				slog.Error(err)
-				return err
+			}); slog.Check(err) {
+				return
 			}
 			indexerHeights[i] = height
 		}
@@ -431,7 +389,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 		}
 	}
 	slog.Info("indexes caught up to height", bestHeight)
-	return nil
+	return
 }
 
 // indexNeedsInputs returns whether or not the index needs access to the
@@ -476,18 +434,15 @@ func indexNeedsInputs(index Indexer) bool {
 // It keeps track of the state of each index it is managing,
 // performs some sanity checks, and invokes each indexer.
 // This is part of the blockchain.IndexManager interface.
-func (m *Manager) ConnectBlock(dbTx database.Tx, block *util.Block,
-	stxos []blockchain.SpentTxOut) (err error) {
+func (m *Manager) ConnectBlock(dbTx database.Tx, block *util.Block, stxos []blockchain.SpentTxOut) (err error) {
 	// Call each of the currently active optional indexes with the block
 	// being connected so they can update accordingly.
 	for _, index := range m.enabledIndexes {
-		err := dbIndexConnectBlock(dbTx, index, block, stxos)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = dbIndexConnectBlock(dbTx, index, block, stxos); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // DisconnectBlock must be invoked when a block is being disconnected from
@@ -501,13 +456,11 @@ func (m *Manager) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	// Call each of the currently active optional indexes with the block
 	// being disconnected so they can update accordingly.
 	for _, index := range m.enabledIndexes {
-		err := dbIndexDisconnectBlock(dbTx, index, block, stxo)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = dbIndexDisconnectBlock(dbTx, index, block, stxo); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // NewManager returns a new index manager with the provided indexes enabled.
@@ -515,10 +468,7 @@ func (m *Manager) DisconnectBlock(dbTx database.Tx, block *util.Block,
 // IndexManager interface and thus cleanly plugs into the normal blockchain
 // processing path.
 func NewManager(db database.DB, enabledIndexes []Indexer) *Manager {
-	return &Manager{
-		db:             db,
-		enabledIndexes: enabledIndexes,
-	}
+	return &Manager{db: db, enabledIndexes: enabledIndexes}
 }
 
 // dropIndex drops the passed index from the database.
@@ -530,32 +480,28 @@ func NewManager(db database.DB, enabledIndexes []Indexer) *Manager {
 func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan struct{}) (err error) {
 	// Nothing to do if the index doesn't already exist.
 	var needsDelete bool
-	err := db.View(func(dbTx database.Tx) (err error) {
+	if err = db.View(func(dbTx database.Tx) (err error) {
 		indexesBucket := dbTx.Metadata().Bucket(indexTipsBucketName)
 		if indexesBucket != nil && indexesBucket.Get(idxKey) != nil {
 			needsDelete = true
 		}
-		return nil
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+		return
+	}); slog.Check(err) {
+		return
 	}
 	if !needsDelete {
 		slog.Warnf("not dropping %s because it does not exist", idxName)
-		return nil
+		return
 	}
 	// Mark that the index is in the process of being dropped so that it can
 	// be resumed on the next start if interrupted before the process is
 	// complete.
 	slog.Infof("dropping all %s entries.  This might take a while...", idxName)
-	err = db.Update(func(dbTx database.Tx) (err error) {
+	if err = db.Update(func(dbTx database.Tx) (err error) {
 		indexesBucket := dbTx.Metadata().Bucket(indexTipsBucketName)
 		return indexesBucket.Put(indexDropKey(idxKey), idxKey)
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+	}); slog.Check(err) {
+		return
 	}
 	// Since the indexes can be so large,
 	// attempting to simply delete the bucket in a single database
@@ -589,12 +535,10 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 		})
 	}
 	// Call subBucketClosure with top-level bucket.
-	err = db.View(func(dbTx database.Tx) (err error) {
+	if err = db.View(func(dbTx database.Tx) (err error) {
 		return subBucketClosure(dbTx, idxKey, nil)
-	})
-	if err != nil {
-		slog.Error(err)
-		return nil
+	}); slog.Check(err) {
+		return
 	}
 	// Iterate through each sub-bucket in reverse, deepest-first,
 	// deleting all keys inside them and then dropping the buckets themselves.
@@ -603,7 +547,7 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 		// Delete maxDeletions key/value pairs at a time.
 		for numDeleted := maxDeletions; numDeleted == maxDeletions; {
 			numDeleted = 0
-			err := db.Update(func(dbTx database.Tx) (err error) {
+			if err = db.Update(func(dbTx database.Tx) (err error) {
 				subBucket := dbTx.Metadata()
 				for _, subBucketName := range bucketName {
 					subBucket = subBucket.Bucket(subBucketName)
@@ -611,16 +555,14 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 				cursor := subBucket.Cursor()
 				for ok := cursor.First(); ok; ok = cursor.Next() &&
 					numDeleted < maxDeletions {
-					if err := cursor.Delete(); err != nil {
-						return err
+					if err = cursor.Delete(); slog.Check(err) {
+						return
 					}
 					numDeleted++
 				}
-				return nil
-			})
-			if err != nil {
-				slog.Error(err)
-				return err
+				return
+			}); slog.Check(err) {
+				return
 			}
 			if numDeleted > 0 {
 				totalDeleted += uint64(numDeleted)
@@ -632,37 +574,34 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 			return errInterruptRequested
 		}
 		// Drop the bucket itself.
-		err = db.Update(func(dbTx database.Tx) (err error) {
+		if err = db.Update(func(dbTx database.Tx) (err error) {
 			bucket := dbTx.Metadata()
 			for j := 0; j < len(bucketName)-1; j++ {
 				bucket = bucket.Bucket(bucketName[j])
 			}
 			return bucket.DeleteBucket(bucketName[len(bucketName)-1])
-		})
-		if err != nil {
-			slog.Error(err)
+		}); slog.Check(err) {
+			return
 		}
 	}
 	// Call extra index specific deinitialization for the transaction index.
 	if idxName == txIndexName {
-		if err := dropBlockIDIndex(db); err != nil {
-			return err
+		if err = dropBlockIDIndex(db); slog.Check(err) {
+			return
 		}
 	}
 	// Remove the index tip, index bucket,
 	// and in-progress drop flag now that all index entries have been removed.
-	err = db.Update(func(dbTx database.Tx) (err error) {
+	if err = db.Update(func(dbTx database.Tx) (err error) {
 		meta := dbTx.Metadata()
 		indexesBucket := meta.Bucket(indexTipsBucketName)
-		if err := indexesBucket.Delete(idxKey); err != nil {
-			return err
+		if err = indexesBucket.Delete(idxKey); slog.Check(err) {
+			return
 		}
 		return indexesBucket.Delete(indexDropKey(idxKey))
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+	}); slog.Check(err) {
+		return
 	}
 	slog.Info("dropped", idxName)
-	return nil
+	return
 }

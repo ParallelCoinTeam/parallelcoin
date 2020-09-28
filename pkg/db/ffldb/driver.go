@@ -13,41 +13,42 @@ const (
 )
 
 // parseArgs parses the arguments from the database Open/Create methods.
-func parseArgs(funcName string, args ...interface{}) (string, wire.BitcoinNet, err error) {
+func parseArgs(funcName string, args ...interface{}) (dbPath string, network wire.BitcoinNet, err error) {
 	if len(args) != 2 {
-		return "", 0, fmt.Errorf("invalid arguments to %s.%s -- "+
-			"expected database path and block network", dbType,
-			funcName)
+		err = fmt.Errorf("invalid arguments to %s.%s -- expected database path and block network", dbType, funcName)
+		slog.Debug(err)
+		return
 	}
-	dbPath, ok := args[0].(string)
-	if !ok {
-		return "", 0, fmt.Errorf("first argument to %s.%s is invalid -- "+
-			"expected database path string", dbType, funcName)
+	var ok bool
+	if dbPath, ok = args[0].(string); !ok {
+		err = fmt.Errorf("first argument to %s.%s is invalid -- expected database path string", dbType, funcName)
+		slog.Debug(err)
+		return
 	}
-	network, ok := args[1].(wire.BitcoinNet)
-	if !ok {
-		return "", 0, fmt.Errorf("second argument to %s.%s is invalid -- "+
-			"expected block network", dbType, funcName)
+	if network, ok = args[1].(wire.BitcoinNet); !ok {
+		err = fmt.Errorf("second argument to %s.%s is invalid -- expected block network", dbType, funcName)
+		slog.Debug(err)
+		return
 	}
-	return dbPath, network, nil
+	return
 }
 
 // openDBDriver is the callback provided during driver registration that opens an existing database for use.
-func openDBDriver(args ...interface{}) (database.DB, err error) {
-	dbPath, network, err := parseArgs("Open", args...)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func openDBDriver(args ...interface{}) (d database.DB, err error) {
+	var dbPath string
+	var network wire.BitcoinNet
+	if dbPath, network, err = parseArgs("Open", args...); slog.Check(err) {
+		return
 	}
 	return openDB(dbPath, network, false)
 }
 
 // createDBDriver is the callback provided during driver registration that creates, initializes, and opens a database for use.
-func createDBDriver(args ...interface{}) (database.DB, err error) {
-	dbPath, network, err := parseArgs("Create", args...)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func createDBDriver(args ...interface{}) (d database.DB, err error) {
+	var dbPath string
+	var network wire.BitcoinNet
+	if dbPath, network, err = parseArgs("Create", args...); slog.Check(err) {
+		return
 	}
 	return openDB(dbPath, network, true)
 }

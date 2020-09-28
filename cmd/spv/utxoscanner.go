@@ -73,28 +73,29 @@ type (
 	}
 )
 
-func // Result is callback returning either a spend report or an error.
-(r *GetUtxoRequest) Result(cancel <-chan struct{}) (*SpendReport, err error) {
+// Result is callback returning either a spend report or an error.
+func (r *GetUtxoRequest) Result(cancel <-chan struct{}) (report *SpendReport, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	select {
 	case result := <-r.resultChan:
-		// Cache the first result returned, in case we have multiple
-		// readers calling Result.
+		// Cache the first result returned, in case we have multiple readers calling Result.
 		if r.result == nil {
 			r.result = result
 		}
-		return r.result.report, r.result.err
+		report = r.result.report
+		err = r.result.err
 	case <-cancel:
-		return nil, ErrGetUtxoCancelled
+		err = ErrGetUtxoCancelled
 	case <-r.quit:
-		return nil, ErrShuttingDown
+		err = ErrShuttingDown
 	}
+	return
 }
 
-func // deliver tries to deliver the report or error to any subscribers. If
+// deliver tries to deliver the report or error to any subscribers. If
 // resultChan cannot accept a new update, this method will not block.
-(r *GetUtxoRequest) deliver(report *SpendReport, err error) {
+func (r *GetUtxoRequest) deliver(report *SpendReport, err error) {
 	select {
 	case r.resultChan <- &getUtxoResult{report, err}:
 	default:
@@ -105,20 +106,19 @@ func // deliver tries to deliver the report or error to any subscribers. If
 	}
 }
 
-func // IsEmpty returns true if the queue has no elements.
-(pq *GetUtxoRequestPQ) IsEmpty() bool {
+// IsEmpty returns true if the queue has no elements.
+func (pq *GetUtxoRequestPQ) IsEmpty() bool {
 	return pq.Len() == 0
 }
 
-func // Peek returns the least height element in the queue without removing it.
-(pq *GetUtxoRequestPQ) Peek() *GetUtxoRequest {
+// Peek returns the least height element in the queue without removing it.
+func (pq *GetUtxoRequestPQ) Peek() *GetUtxoRequest {
 	return (*pq)[0]
 }
 
-func // Pop is called by the heap.
-// Interface implementation to remove an element from the end of the backing
-// store. The heap library will then maintain the heap invariant.
-(pq *GetUtxoRequestPQ) Pop() interface{} {
+// Pop is called by the heap. Interface implementation to remove an element from the end of the backing store. The heap
+// library will then maintain the heap invariant.
+func (pq *GetUtxoRequestPQ) Pop() interface{} {
 	old := *pq
 	n := len(old)
 	item := old[n-1]
@@ -126,22 +126,17 @@ func // Pop is called by the heap.
 	return item
 }
 
-func // Push is called by the heap.
-// Interface implementation to add an element to the end of the backing
-// store. The heap library will then maintain the heap invariant.
-(pq *GetUtxoRequestPQ) Push(x interface{}) {
+// Push is called by the heap.  Interface implementation to add an element to the end of the backing store. The heap
+// library will then maintain the heap invariant.
+func (pq *GetUtxoRequestPQ) Push(x interface{}) {
 	item := x.(*GetUtxoRequest)
 	*pq = append(*pq, item)
 }
 
-func // Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
-(s *UtxoScanner) Enqueue(input *InputWithScript,
-	birthHeight uint32) (*GetUtxoRequest, err error) {
-	slog.Debugf(
-		"enqueuing request for %s with birth height %d %s",
-		input.OutPoint.String(), birthHeight,
-	)
-	req := &GetUtxoRequest{
+// Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
+func (s *UtxoScanner) Enqueue(input *InputWithScript, birthHeight uint32) (req *GetUtxoRequest, err error) {
+	slog.Debugf("enqueuing request for %s with birth height %d %s", input.OutPoint.String(), birthHeight)
+	req = &GetUtxoRequest{
 		Input:       input,
 		BirthHeight: birthHeight,
 		resultChan:  make(chan *getUtxoResult, 1),
@@ -151,15 +146,14 @@ func // Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
 	select {
 	case <-s.quit:
 		s.cv.L.Unlock()
-		return nil, ErrShuttingDown
+		err = ErrShuttingDown
 	default:
+		// Insert the request into the queue and signal any threads that might be waiting for new elements.
+		heap.Push(&s.pq, req)
+		s.cv.L.Unlock()
+		s.cv.Signal()
 	}
-	// Insert the request into the queue and signal any threads that might be
-	// waiting for new elements.
-	heap.Push(&s.pq, req)
-	s.cv.L.Unlock()
-	s.cv.Signal()
-	return req, nil
+	return
 }
 
 func // Start begins running scan batches.
@@ -241,9 +235,9 @@ func // batchManager is responsible for scheduling batches of UTXOs to scan. Any
 	}
 }
 
-func // dequeueAtHeight returns all GetUtxoRequests that have starting height
+// dequeueAtHeight returns all GetUtxoRequests that have starting height
 // of the given height.
-(s *UtxoScanner) dequeueAtHeight(height uint32) []*GetUtxoRequest {
+func (s *UtxoScanner) dequeueAtHeight(height uint32) []*GetUtxoRequest {
 	s.cv.L.Lock()
 	defer s.cv.L.Unlock()
 	// Take any requests that are too old to go in this batch and keep them for

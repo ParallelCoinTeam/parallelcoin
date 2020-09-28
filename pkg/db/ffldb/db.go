@@ -557,26 +557,32 @@ func // CreateBucket creates and returns a new nested bucket with the given key.
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Bucket interface implementation.
-(b *bucket) CreateBucket(key []byte) (database.Bucket, err error) {
+(b *bucket) CreateBucket(key []byte) (bkt database.Bucket, err error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return nil, err
+	if err = b.tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	// Ensure the transaction is writable.
 	if !b.tx.writable {
 		str := "create bucket requires a writable database transaction"
-		return nil, makeDbErr(database.ErrTxNotWritable, str, nil)
+		err = makeDbErr(database.ErrTxNotWritable, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Ensure a key was provided.
 	if len(key) == 0 {
 		str := "create bucket requires a key"
-		return nil, makeDbErr(database.ErrBucketNameRequired, str, nil)
+		err = makeDbErr(database.ErrBucketNameRequired, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Ensure bucket does not already exist.
 	bidxKey := bucketIndexKey(b.id, key)
 	if b.tx.hasKey(bidxKey) {
 		str := "bucket already exists"
-		return nil, makeDbErr(database.ErrBucketExists, str, nil)
+		err = makeDbErr(database.ErrBucketExists, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Find the appropriate next bucket ID to use for the new bucket.
 	// In the case of the special internal block index, keep the fixed ID.
@@ -610,38 +616,42 @@ func // CreateBucket creates and returns a new nested bucket with the given key.
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Bucket interface implementation.
-func (b *bucket) CreateBucketIfNotExists(key []byte) (database.Bucket, err error) {
+func (b *bucket) CreateBucketIfNotExists(key []byte) (bkt database.Bucket, err error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return nil, err
+	if err = b.tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	// Ensure the transaction is writable.
 	if !b.tx.writable {
 		str := "create bucket requires a writable database transaction"
-		return nil, makeDbErr(database.ErrTxNotWritable, str, nil)
+		err = makeDbErr(database.ErrTxNotWritable, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Return existing bucket if it already exists, otherwise create it.
-	if bucket := b.Bucket(key); bucket != nil {
-		return bucket, nil
+	if bkt = b.Bucket(key); bkt != nil {
+		return
 	}
 	return b.CreateBucket(key)
 }
 
-func // DeleteBucket removes a nested bucket with the given key.
+// DeleteBucket removes a nested bucket with the given key.
 // Returns the following errors as required by the interface contract:
 //   - ErrBucketNotFound if the specified bucket does not exist
 //   - ErrTxNotWritable if attempted against a read-only transaction
 //   - ErrTxClosed if the transaction has already been closed
 // This function is part of the database.Bucket interface implementation.
-(b *bucket) DeleteBucket(key []byte) (err error) {
+func (b *bucket) DeleteBucket(key []byte) (err error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return err
+	if err = b.tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	// Ensure the transaction is writable.
 	if !b.tx.writable {
 		str := "delete bucket requires a writable database transaction"
-		return makeDbErr(database.ErrTxNotWritable, str, nil)
+		err = makeDbErr(database.ErrTxNotWritable, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Attempt to fetch the ID for the child bucket.
 	// The bucket does not exist if the bucket index entry does not exist.
@@ -650,7 +660,9 @@ func // DeleteBucket removes a nested bucket with the given key.
 	childID := b.tx.fetchKey(bidxKey)
 	if childID == nil {
 		str := fmt.Sprintf("bucket %q does not exist", key)
-		return makeDbErr(database.ErrBucketNotFound, str, nil)
+		err = makeDbErr(database.ErrBucketNotFound, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Remove all nested buckets and their keys.
 	childIDs := [][]byte{childID}
@@ -678,7 +690,7 @@ func // DeleteBucket removes a nested bucket with the given key.
 	// Remove the nested bucket from the bucket index.  Any buckets nested
 	// under it were already removed above.
 	b.tx.deleteKey(bidxKey, true)
-	return nil
+	return
 }
 
 func // Cursor returns a new cursor,
@@ -1004,12 +1016,11 @@ func // nextBucketID returns the next bucket ID to use for creating a new
 // bucket.
 // NOTE: This function must only be called on a writable transaction.
 // Since it is an internal helper function, it does not check.
-(tx *transaction) nextBucketID() ([4]byte, err error) {
+(tx *transaction) nextBucketID() (nextBucketID [4]byte, err error) {
 	// Load the currently highest used bucket ID.
 	curIDBytes := tx.fetchKey(curBucketIDKeyName)
 	curBucketNum := binary.BigEndian.Uint32(curIDBytes)
 	// Increment and update the current bucket ID and return it.
-	var nextBucketID [4]byte
 	binary.BigEndian.PutUint32(nextBucketID[:], curBucketNum+1)
 	if err := tx.putKey(curBucketIDKeyName, nextBucketID[:]); err != nil {
 		return [4]byte{}, err
@@ -1017,9 +1028,9 @@ func // nextBucketID returns the next bucket ID to use for creating a new
 	return nextBucketID, nil
 }
 
-func // Metadata returns the top-most bucket for all metadata storage.
+// Metadata returns the top-most bucket for all metadata storage.
 // This function is part of the database.Tx interface implementation.
-(tx *transaction) Metadata() database.Bucket {
+func (tx *transaction) Metadata() database.Bucket {
 	return tx.metaBucket
 }
 
@@ -1082,48 +1093,50 @@ func // StoreBlock stores the provided block into the database.
 	return nil
 }
 
-func // HasBlock returns whether or not a block with the given hash exists in
+// HasBlock returns whether or not a block with the given hash exists in
 // the database.
 // // Returns the following errors as required by the interface contract:
 //   - ErrTxClosed if the transaction has already been closed
 // This function is part of the database.Tx interface implementation.
-(tx *transaction) HasBlock(hash *chainhash.Hash) (bool, err error) {
+func (tx *transaction) HasBlock(hash *chainhash.Hash) (b bool, err error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return false, err
+	if err = tx.checkClosed(); slog.Check(err) {
+		return
 	}
-	return tx.hasBlock(hash), nil
+	b = tx.hasBlock(hash)
+	return
 }
 
-func // HasBlocks returns whether or not the blocks with the provided hashes
+// HasBlocks returns whether or not the blocks with the provided hashes
 // exist in the database.
 // Returns the following errors as required by the interface contract:
 //   - ErrTxClosed if the transaction has already been closed
 // This function is part of the database.Tx interface implementation.
-(tx *transaction) HasBlocks(hashes []chainhash.Hash) ([]bool, err error) {
+func (tx *transaction) HasBlocks(hashes []chainhash.Hash) (results []bool, err error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if err = tx.checkClosed(); slog.Check(err) {
+		return
 	}
-	results := make([]bool, len(hashes))
+	results = make([]bool, len(hashes))
 	for i := range hashes {
 		results[i] = tx.hasBlock(&hashes[i])
 	}
-	return results, nil
+	return
 }
 
-func // fetchBlockRow fetches the metadata stored in the block index for the
+// fetchBlockRow fetches the metadata stored in the block index for the
 // provided hash.  It will return ErrBlockNotFound if there is no entry.
-(tx *transaction) fetchBlockRow(hash *chainhash.Hash) ([]byte, err error) {
-	blockRow := tx.blockIdxBucket.Get(hash[:])
-	if blockRow == nil {
+func (tx *transaction) fetchBlockRow(hash *chainhash.Hash) (blockRow []byte, err error) {
+	if blockRow = tx.blockIdxBucket.Get(hash[:]); blockRow == nil {
 		str := fmt.Sprintf("block %s does not exist", hash)
-		return nil, makeDbErr(database.ErrBlockNotFound, str, nil)
+		err = makeDbErr(database.ErrBlockNotFound, str, nil)
+		slog.Debug(err)
+		return
 	}
-	return blockRow, nil
+	return
 }
 
-func // FetchBlockHeader returns the raw serialized bytes for the block
+// FetchBlockHeader returns the raw serialized bytes for the block
 // header identified by the given hash.
 // The raw bytes are in the format returned by Serialize on a wire.BlockHeader.
 // Returns the following errors as required by the interface contract:
@@ -1136,7 +1149,7 @@ func // FetchBlockHeader returns the raw serialized bytes for the block
 // This constraint prevents additional data copies and allows support for
 // memory-mapped database implementations.
 // This function is part of the database.Tx interface implementation.
-(tx *transaction) FetchBlockHeader(hash *chainhash.Hash) ([]byte, err error) {
+func (tx *transaction) FetchBlockHeader(hash *chainhash.Hash) (b []byte, err error) {
 	return tx.FetchBlockRegion(&database.BlockRegion{
 		Hash:   hash,
 		Offset: 0,
@@ -1144,7 +1157,7 @@ func // FetchBlockHeader returns the raw serialized bytes for the block
 	})
 }
 
-func // FetchBlockHeaders returns the raw serialized bytes for the block
+// FetchBlockHeaders returns the raw serialized bytes for the block
 // headers identified by the given hashes.
 // The raw bytes are in the format returned by Serialize on a wire.BlockHeader.
 // Returns the following errors as required by the interface contract:
@@ -1157,7 +1170,7 @@ func // FetchBlockHeaders returns the raw serialized bytes for the block
 // This constraint prevents additional data copies and allows support for
 // memory-mapped database implementations.
 // This function is part of the database.Tx interface implementation.
-(tx *transaction) FetchBlockHeaders(hashes []chainhash.Hash) ([][]byte, err error) {
+func (tx *transaction) FetchBlockHeaders(hashes []chainhash.Hash) (b [][]byte, err error) {
 	regions := make([]database.BlockRegion, len(hashes))
 	for i := range hashes {
 		regions[i].Hash = &hashes[i]
@@ -1167,7 +1180,7 @@ func // FetchBlockHeaders returns the raw serialized bytes for the block
 	return tx.FetchBlockRegions(regions)
 }
 
-func // FetchBlock returns the raw serialized bytes for the block identified
+// FetchBlock returns the raw serialized bytes for the block identified
 // by the given hash.  The raw bytes are in the format returned by Serialize
 // on a wire.MsgBlock.
 // Returns the following errors as required by the interface contract:
@@ -1182,35 +1195,33 @@ func // FetchBlock returns the raw serialized bytes for the block identified
 // This constraint prevents additional data copies and allows support for
 // memory-mapped database implementations.
 // This function is part of the database.Tx interface implementation.
-(tx *transaction) FetchBlock(hash *chainhash.Hash) ([]byte, err error) {
+func (tx *transaction) FetchBlock(hash *chainhash.Hash) (blockBytes []byte, err error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if err = tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	// When the block is pending to be written on commit return the bytes
 	// from there.
 	if idx, exists := tx.pendingBlocks[*hash]; exists {
-		return tx.pendingBlockData[idx].bytes, nil
+		blockBytes = tx.pendingBlockData[idx].bytes
+		return
 	}
 	// Lookup the location of the block in the files from the block index.
-	blockRow, err := tx.fetchBlockRow(hash)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var blockRow []byte
+	if blockRow, err = tx.fetchBlockRow(hash); slog.Check(err) {
+		return
 	}
 	location := deserializeBlockLoc(blockRow)
 	// Read the block from the appropriate location.
 	// The function also performs a checksum over the data to detect data
 	// corruption.
-	blockBytes, err := tx.db.store.readBlock(hash, location)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if blockBytes, err = tx.db.store.readBlock(hash, location); slog.Check(err) {
+		return
 	}
-	return blockBytes, nil
+	return
 }
 
-func // FetchBlocks returns the raw serialized bytes for the blocks
+// FetchBlocks returns the raw serialized bytes for the blocks
 // identified by the given hashes.
 // The raw bytes are in the format returned by Serialize on a wire.MsgBlock.
 // Returns the following errors as required by the interface contract:
@@ -1224,50 +1235,50 @@ func // FetchBlocks returns the raw serialized bytes for the blocks
 // This constraint prevents additional data copies and allows support for
 // memory-mapped database implementations.
 // This function is part of the database.Tx interface implementation.
-(tx *transaction) FetchBlocks(hashes []chainhash.Hash) ([][]byte, err error) {
+func (tx *transaction) FetchBlocks(hashes []chainhash.Hash) (blocks [][]byte, err error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if err = tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	// NOTE: This could check for the existence of all blocks before loading any of them which would be faster in the failure case, however callers will not typically be calling this function with invalid values, so optimize for the common case. Load the blocks.
-	blocks := make([][]byte, len(hashes))
+	blocks = make([][]byte, len(hashes))
 	for i := range hashes {
-		var err error
-		blocks[i], err = tx.FetchBlock(&hashes[i])
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if blocks[i], err = tx.FetchBlock(&hashes[i]); slog.Check(err) {
+			return
 		}
 	}
-	return blocks, nil
+	return
 }
 
-func // fetchPendingRegion attempts to fetch the provided region from any block
+// fetchPendingRegion attempts to fetch the provided region from any block
 // which are pending to be written on commit.
 // It will return nil for the byte slice when the region references a block
 // which is not pending.  When the region does reference a pending block,
 // it is bounds checked and returns ErrBlockRegionInvalid if invalid.
-(tx *transaction) fetchPendingRegion(region *database.BlockRegion) ([]byte, err error) {
+func (tx *transaction) fetchPendingRegion(region *database.BlockRegion) (bb []byte, err error) {
 	// Nothing to do if the block is not pending to be written on commit.
-	idx, exists := tx.pendingBlocks[*region.Hash]
-	if !exists {
-		return nil, nil
+	var idx int
+	var exists bool
+	if idx, exists = tx.pendingBlocks[*region.Hash]; !exists {
+		return
 	}
 	// Ensure the region is within the bounds of the block.
 	blockBytes := tx.pendingBlockData[idx].bytes
 	blockLen := uint32(len(blockBytes))
 	endOffset := region.Offset + region.Len
 	if endOffset < region.Offset || endOffset > blockLen {
-		str := fmt.Sprintf("block %s region offset %d, length %d "+
-			"exceeds block length of %d", region.Hash,
-			region.Offset, region.Len, blockLen)
-		return nil, makeDbErr(database.ErrBlockRegionInvalid, str, nil)
+		str := fmt.Sprintf("block %s region offset %d, length %d exceeds block length of %d",
+			region.Hash, region.Offset, region.Len, blockLen)
+		err = makeDbErr(database.ErrBlockRegionInvalid, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Return the bytes from the pending block.
-	return blockBytes[region.Offset:endOffset:endOffset], nil
+	bb = blockBytes[region.Offset:endOffset:endOffset]
+	return
 }
 
-func // FetchBlockRegion returns the raw serialized bytes for the given block
+// FetchBlockRegion returns the raw serialized bytes for the given block
 // region.
 // For example, it is possible to directly extract Bitcoin transactions and/or scripts from a block with this function.  Depending on the backend implementation, this can provide significant savings by avoiding the need to load entire blocks.
 // The raw bytes are in the format returned by Serialize on a wire.MsgBlock and the Offset field in the provided BlockRegion is zero-based and relative to the start of the block (byte 0).
@@ -1279,48 +1290,43 @@ func // FetchBlockRegion returns the raw serialized bytes for the given block
 //   - ErrCorruption if the database has somehow become corrupted
 // In addition, returns ErrDriverSpecific if any failures occur when reading the block files.
 // NOTE: The data returned by this function is only valid during a database transaction.  Attempting to access it after a transaction has ended results in undefined behavior.  This constraint prevents additional data copies and allows support for memory-mapped database implementations. This function is part of the database.Tx interface implementation.
-(tx *transaction) FetchBlockRegion(region *database.BlockRegion) ([]byte, err error) {
+func (tx *transaction) FetchBlockRegion(region *database.BlockRegion) (regionBytes []byte, err error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if err = tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	// When the block is pending to be written on commit return the bytes from there.
 	if tx.pendingBlocks != nil {
-		regionBytes, err := tx.fetchPendingRegion(region)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if regionBytes, err = tx.fetchPendingRegion(region); slog.Check(err) {
+			return
 		}
 		if regionBytes != nil {
-			return regionBytes, nil
+			return
 		}
 	}
 	// Lookup the location of the block in the files from the block index.
-	blockRow, err := tx.fetchBlockRow(region.Hash)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var blockRow []byte
+	if blockRow, err = tx.fetchBlockRow(region.Hash); slog.Check(err) {
+		return
 	}
 	location := deserializeBlockLoc(blockRow)
 	// Ensure the region is within the bounds of the block.
 	endOffset := region.Offset + region.Len
 	if endOffset < region.Offset || endOffset > location.blockLen {
-		str := fmt.Sprintf("block %s region offset %d, length %d "+
-			"exceeds block length of %d", region.Hash,
-			region.Offset, region.Len, location.blockLen)
-		return nil, makeDbErr(database.ErrBlockRegionInvalid, str, nil)
+		str := fmt.Sprintf("block %s region offset %d, length %d exceeds block length of %d",
+			region.Hash, region.Offset, region.Len, location.blockLen)
+		err = makeDbErr(database.ErrBlockRegionInvalid, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Read the region from the appropriate disk block file.
-	regionBytes, err := tx.db.store.readBlockRegion(location, region.Offset,
-		region.Len)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if regionBytes, err = tx.db.store.readBlockRegion(location, region.Offset, region.Len); slog.Check(err) {
+		return
 	}
-	return regionBytes, nil
+	return
 }
 
-func // FetchBlockRegions returns the raw serialized bytes for the given
+// FetchBlockRegions returns the raw serialized bytes for the given
 // block regions.
 // For example, it is possible to directly extract Bitcoin transactions and/or scripts from various blocks with this function.  Depending on the backend implementation, this can provide significant savings by avoiding the need to load entire blocks.
 // The raw bytes are in the format returned by Serialize on a wire.MsgBlock and the Offset fields in the provided BlockRegions are zero-based and relative to the start of the block (byte 0).
@@ -1332,10 +1338,10 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 //   - ErrCorruption if the database has somehow become corrupted
 // In addition, returns ErrDriverSpecific if any failures occur when reading the block files.
 // NOTE: The data returned by this function is only valid during a database transaction.  Attempting to access it after a transaction has ended results in undefined behavior.  This constraint prevents additional data copies and allows support for memory-mapped database implementations. This function is part of the database.Tx interface implementation.
-(tx *transaction) FetchBlockRegions(regions []database.BlockRegion) ([][]byte, err error) {
+func (tx *transaction) FetchBlockRegions(regions []database.BlockRegion) (blockRegions [][]byte, err error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if err = tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	// NOTE: This could check for the existence of all blocks before
 	// deserializing the locations and building up the fetch list which would
@@ -1353,16 +1359,15 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 	// The fetchList is intentionally allocated with a cap because some of
 	// the regions might be fetched from the pending blocks and hence there
 	// is no need to fetch those from disk.
-	blockRegions := make([][]byte, len(regions))
+	blockRegions = make([][]byte, len(regions))
 	fetchList := make([]bulkFetchData, 0, len(regions))
+	var regionBytes []byte
 	for i := range regions {
 		region := &regions[i]
 		// When the block is pending to be written on commit grab the bytes from there.
 		if tx.pendingBlocks != nil {
-			regionBytes, err := tx.fetchPendingRegion(region)
-			if err != nil {
-				slog.Error(err)
-				return nil, err
+			if regionBytes, err = tx.fetchPendingRegion(region); slog.Check(err) {
+				return
 			}
 			if regionBytes != nil {
 				blockRegions[i] = regionBytes
@@ -1371,19 +1376,19 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 		}
 		// Lookup the location of the block in the files from the block
 		// index.
-		blockRow, err := tx.fetchBlockRow(region.Hash)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var blockRow []byte
+		if blockRow, err = tx.fetchBlockRow(region.Hash); slog.Check(err) {
+			return
 		}
 		location := deserializeBlockLoc(blockRow)
 		// Ensure the region is within the bounds of the block.
 		endOffset := region.Offset + region.Len
 		if endOffset < region.Offset || endOffset > location.blockLen {
-			str := fmt.Sprintf("block %s region offset %d, length "+
-				"%d exceeds block length of %d", region.Hash,
-				region.Offset, region.Len, location.blockLen)
-			return nil, makeDbErr(database.ErrBlockRegionInvalid, str, nil)
+			str := fmt.Sprintf("block %s region offset %d, length %d exceeds block length of %d",
+				region.Hash, region.Offset, region.Len, location.blockLen)
+			err = makeDbErr(database.ErrBlockRegionInvalid, str, nil)
+			slog.Debug(err)
+			return
 		}
 		fetchList = append(fetchList, bulkFetchData{&location, i})
 	}
@@ -1394,21 +1399,18 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 		ri := fetchData.replyIndex
 		region := &regions[ri]
 		location := fetchData.blockLocation
-		regionBytes, err := tx.db.store.readBlockRegion(*location,
-			region.Offset, region.Len)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		if regionBytes, err = tx.db.store.readBlockRegion(*location, region.Offset, region.Len); slog.Check(err) {
+			return
 		}
 		blockRegions[ri] = regionBytes
 	}
-	return blockRegions, nil
+	return
 }
 
-func // close marks the transaction closed then releases any pending data,
+// close marks the transaction closed then releases any pending data,
 // the underlying snapshot, the transaction read lock,
 // and the write lock when the transaction is writable.
-(tx *transaction) close() {
+func (tx *transaction) close() {
 	tx.closed = true
 	// Clear pending blocks that would have been written on commit.
 	tx.pendingBlocks = nil
@@ -1429,13 +1431,13 @@ func // close marks the transaction closed then releases any pending data,
 	}
 }
 
-func // writePendingAndCommit writes pending block data to the flat block
+// writePendingAndCommit writes pending block data to the flat block
 // files, updates the metadata with their locations as well as the new
 // current write location,
 // and commits the metadata to the memory database cache.
 // It also properly handles rollback in the case of failures.
 // This function MUST only be called when there is pending data to be written.
-(tx *transaction) writePendingAndCommit() (err error) {
+func (tx *transaction) writePendingAndCommit() (err error) {
 	// Save the current block store write position for potential rollback.
 	// These variables are only updated here in this function and there can
 	// only be one write transaction active at a time,
@@ -1452,29 +1454,26 @@ func // writePendingAndCommit writes pending block data to the flat block
 		tx.db.store.handleRollback(oldBlkFileNum, oldBlkOffset)
 	}
 	// Loop through all of the pending blocks to store and write them.
+	var location blockLocation
 	for _, blockData := range tx.pendingBlockData {
 		// Tracef("storing block %s", blockData.hash)
-		location, err := tx.db.store.writeBlock(blockData.bytes)
-		if err != nil {
-			slog.Error(err)
+		if location, err = tx.db.store.writeBlock(blockData.bytes); slog.Check(err) {
 			rollback()
-			return err
+			return
 		}
 		// Add a record in the block index for the block.
 		// The record includes the location information needed to locate the
 		// block on the filesystem as well as the block header since they are
 		// so commonly needed.
 		blockRow := serializeBlockLoc(location)
-		err = tx.blockIdxBucket.Put(blockData.hash[:], blockRow)
-		if err != nil {
-			slog.Error(err)
+		if err = tx.blockIdxBucket.Put(blockData.hash[:], blockRow); slog.Check(err) {
 			rollback()
 			return err
 		}
 	}
 	// Update the metadata for the current write file and offset.
 	writeRow := serializeWriteRow(wc.curFileNum, wc.curOffset)
-	if err := tx.metaBucket.Put(writeLocKeyName, writeRow); err != nil {
+	if err = tx.metaBucket.Put(writeLocKeyName, writeRow); slog.Check(err) {
 		rollback()
 		return convertErr("failed to store write cursor", err)
 	}
@@ -1484,7 +1483,7 @@ func // writePendingAndCommit writes pending block data to the flat block
 	return tx.db.cache.commitTx(tx)
 }
 
-func // Commit commits all changes that have been made to the root metadata
+// Commit commits all changes that have been made to the root metadata
 // bucket and all of its sub-buckets to the database cache which is
 // periodically synced to persistent storage.  In addition,
 // it commits all new blocks directly to persistent storage bypassing the db
@@ -1492,15 +1491,15 @@ func // Commit commits all changes that have been made to the root metadata
 // cache available for the metadata updates and is safe since blocks are
 // immutable.
 // This function is part of the database.Tx interface implementation.
-(tx *transaction) Commit() (err error) {
+func (tx *transaction) Commit() (err error) {
 	// Prevent commits on managed transactions.
 	if tx.managed {
 		tx.close()
 		panic("managed transaction commit not allowed")
 	}
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return err
+	if err = tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	// Regardless of whether the commit succeeds, the transaction is closed on return.
 	defer tx.close()
@@ -1513,21 +1512,21 @@ func // Commit commits all changes that have been made to the root metadata
 	return tx.writePendingAndCommit()
 }
 
-func // Rollback undoes all changes that have been made to the root bucket
+// Rollback undoes all changes that have been made to the root bucket
 // and all of its sub-buckets. This function is part of the database.
 // Tx interface implementation.
-(tx *transaction) Rollback() (err error) {
+func (tx *transaction) Rollback() (err error) {
 	// Prevent rollbacks on managed transactions.
 	if tx.managed {
 		tx.close()
 		panic("managed transaction rollback not allowed")
 	}
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return err
+	if err = tx.checkClosed(); slog.Check(err) {
+		return
 	}
 	tx.close()
-	return nil
+	return
 }
 
 // db represents a collection of namespaces which are persisted and implements the database.DB interface.  All database access is performed through transactions which are obtained through the specific Namespace.
@@ -1554,7 +1553,7 @@ func // begin is the implementation function for the Begin database method.
 // This function is only separate because it returns the internal transaction
 // which is used by the managed transaction code while the database method
 // returns the interface.
-(db *db) begin(writable bool) (*transaction, err error) {
+(db *db) begin(writable bool) (tx *transaction, err error) {
 	// Whenever a new writable transaction is started,
 	// grab the write lock to ensure only a single write transaction can be
 	// active at the same time.
@@ -1574,23 +1573,23 @@ func // begin is the implementation function for the Begin database method.
 		if writable {
 			db.writeLock.Unlock()
 		}
-		return nil, makeDbErr(database.ErrDbNotOpen, errDbNotOpenStr,
-			nil)
+		err = makeDbErr(database.ErrDbNotOpen, errDbNotOpenStr, nil)
+		slog.Debug(err)
+		return
 	}
 	// Grab a snapshot of the database cache (
 	// which in turn also handles the underlying database).
-	snapshot, err := db.cache.Snapshot()
-	if err != nil {
-		slog.Error(err)
+	var snapshot *dbCacheSnapshot
+	if snapshot, err = db.cache.Snapshot(); slog.Check(err) {
 		db.closeLock.RUnlock()
 		if writable {
 			db.writeLock.Unlock()
 		}
-		return nil, err
+		return
 	}
 	// The metadata and block index buckets are internal-only buckets,
 	// so they have defined IDs.
-	tx := &transaction{
+	tx = &transaction{
 		writable:      writable,
 		db:            db,
 		snapshot:      snapshot,
@@ -1599,10 +1598,10 @@ func // begin is the implementation function for the Begin database method.
 	}
 	tx.metaBucket = &bucket{tx: tx, id: metadataBucketID}
 	tx.blockIdxBucket = &bucket{tx: tx, id: blockIdxBucketID}
-	return tx, nil
+	return
 }
 
-func // Begin starts a transaction which is either read-only or read-write
+// Begin starts a transaction which is either read-only or read-write
 // depending on the specified flag.
 // Multiple read-only transactions can be started simultaneously while only a
 // single read-write transaction can be started at a time.
@@ -1612,11 +1611,11 @@ func // Begin starts a transaction which is either read-only or read-write
 // when it is no longer needed.
 // Failure to do so will result in unclaimed memory.
 // This function is part of the database.DB interface implementation.
-(db *db) Begin(writable bool) (database.Tx, err error) {
+func (db *db) Begin(writable bool) (tx database.Tx, err error) {
 	return db.begin(writable)
 }
 
-func // rollbackOnPanic rolls the passed transaction back if the code in the
+// rollbackOnPanic rolls the passed transaction back if the code in the
 // calling function panics.  This is needed since the mutex on a transaction
 // must be released and a panic in called code would prevent that from
 // happening.
@@ -1627,7 +1626,7 @@ func // rollbackOnPanic rolls the passed transaction back if the code in the
 // transaction is rolled back on panic if it desires that functionality as
 // well or the database will fail to close since the read-lock will never be
 // released.
-rollbackOnPanic(tx *transaction) {
+func rollbackOnPanic(tx *transaction) {
 	if err := recover(); err != nil {
 		tx.managed = false
 		_ = tx.Rollback()
@@ -1635,16 +1634,15 @@ rollbackOnPanic(tx *transaction) {
 	}
 }
 
-func // View invokes the passed function in the context of a managed read
+// View invokes the passed function in the context of a managed read
 // -only transaction with the root bucket for the namespace.
 // Any errors returned from the user-supplied function are returned from this
 // function. This function is part of the database.DB interface implementation.
-(db *db) View(fn func(database.Tx) error) (err error) {
+func (db *db) View(fn func(database.Tx) error) (err error) {
 	// Start a read-only transaction.
-	tx, err := db.begin(false)
-	if err != nil {
-		slog.Error(err)
-		return err
+	var tx *transaction
+	if tx, err = db.begin(false); slog.Check(err) {
+		return
 	}
 	// Since the user-provided function might panic,
 	// ensure the transaction releases all mutexes and resources.
@@ -1655,29 +1653,27 @@ func // View invokes the passed function in the context of a managed read
 	tx.managed = true
 	err = fn(tx)
 	tx.managed = false
-	if err != nil {
-		slog.Error(err)
+	if slog.Check(err) {
 		// The error is ignored here because nothing was written yet and
 		// regardless of a rollback failure, the tx is closed now anyways.
 		_ = tx.Rollback()
-		return err
+		return
 	}
 	return tx.Rollback()
 }
 
-func // Update invokes the passed function in the context of a managed read
+// Update invokes the passed function in the context of a managed read
 // -write transaction with the root bucket for the namespace.
 // Any errors returned from the user-supplied function will cause the
 // transaction to be rolled back and are returned from this function.
 // Otherwise, the transaction is committed when the user-supplied function
 // returns a nil error. This function is part of the database.
 // DB interface implementation.
-(db *db) Update(fn func(database.Tx) error) (err error) {
+func (db *db) Update(fn func(database.Tx) error) (err error) {
 	// Start a read-write transaction.
-	tx, err := db.begin(true)
-	if err != nil {
-		slog.Error(err)
-		return err
+	var tx *transaction
+	if tx, err = db.begin(true); slog.Check(err) {
+		return
 	}
 	// Since the user-provided function might panic,
 	// ensure the transaction releases all mutexes and resources.
@@ -1688,21 +1684,20 @@ func // Update invokes the passed function in the context of a managed read
 	tx.managed = true
 	err = fn(tx)
 	tx.managed = false
-	if err != nil {
-		slog.Error(err)
+	if slog.Check(err) {
 		// The error is ignored here because nothing was written yet and
 		// regardless of a rollback failure, the tx is closed now anyways.
 		_ = tx.Rollback()
-		return err
+		return
 	}
 	return tx.Commit()
 }
 
-func // Close cleanly shuts down the database and syncs all data.
+// Close cleanly shuts down the database and syncs all data.
 // It will block until all database transactions have been finalized (
 // rolled back or committed). This function is part of the database.
 // DB interface implementation.
-(db *db) Close() (err error) {
+func (db *db) Close() (err error) {
 	// Since all transactions have a read lock on this mutex,
 	// this will cause Close to wait for all readers to complete.
 	db.closeLock.Lock()
@@ -1720,7 +1715,7 @@ func // Close cleanly shuts down the database and syncs all data.
 	// since the database will be marked closed even if this fails given
 	// there is no good way for the caller to recover from a failure here
 	// anyways.
-	closeErr := db.cache.Close()
+	err = db.cache.Close()
 	// Close any open flat files that house the blocks.
 	wc := db.store.writeCursor
 	if wc.curFile.file != nil {
@@ -1733,11 +1728,11 @@ func // Close cleanly shuts down the database and syncs all data.
 	db.store.openBlockFiles = nil
 	db.store.openBlocksLRU.Init()
 	db.store.fileNumToLRUElem = nil
-	return closeErr
+	return
 }
 
-func // fileExists reports whether the named file or directory exists.
-fileExists(name string) bool {
+// fileExists reports whether the named file or directory exists.
+func fileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
 			return false
@@ -1746,9 +1741,9 @@ fileExists(name string) bool {
 	return true
 }
 
-func // initDB creates the initial buckets and values used by the package.
+// initDB creates the initial buckets and values used by the package.
 // This is mainly in a separate function for testing purposes.
-initDB(ldb *leveldb.DB) (err error) {
+func initDB(ldb *leveldb.DB) (err error) {
 	// The starting block file write cursor location is file num 0, offset 0.
 	batch := new(leveldb.Batch)
 	batch.Put(bucketizedKey(metadataBucketID, writeLocKeyName),
@@ -1759,24 +1754,25 @@ initDB(ldb *leveldb.DB) (err error) {
 		blockIdxBucketID[:])
 	batch.Put(curBucketIDKeyName, blockIdxBucketID[:])
 	// Write everything as a single batch.
-	if err := ldb.Write(batch, nil); err != nil {
-		str := fmt.Sprintf("failed to initialize metadata database: %v",
-			err)
+	if err = ldb.Write(batch, nil); slog.Check(err) {
+		str := fmt.Sprintf("failed to initialize metadata database: %v", err)
 		return convertErr(str, err)
 	}
-	return nil
+	return
 }
 
-func // openDB opens the database at the provided path
+// openDB opens the database at the provided path
 // ErrDbDoesNotExist is returned if the database doesn't exist and the create
 // flag is not set.
-openDB(dbPath string, network wire.BitcoinNet, create bool) (database.DB, err error) {
+func openDB(dbPath string, network wire.BitcoinNet, create bool) (d database.DB, err error) {
 	// DBError if the database doesn't exist and the create flag is not set.
 	metadataDbPath := filepath.Join(dbPath, metadataDbName)
 	dbExists := fileExists(metadataDbPath)
 	if !create && !dbExists {
 		str := fmt.Sprintf("database %q does not exist", metadataDbPath)
-		return nil, makeDbErr(database.ErrDbDoesNotExist, str, nil)
+		err = makeDbErr(database.ErrDbDoesNotExist, str, nil)
+		slog.Debug(err)
+		return
 	}
 	// Ensure the full path to the database exists.
 	if !dbExists {
@@ -1791,10 +1787,11 @@ openDB(dbPath string, network wire.BitcoinNet, create bool) (database.DB, err er
 		Compression:  opt.NoCompression,
 		Filter:       filter.NewBloomFilter(10),
 	}
-	ldb, err := leveldb.OpenFile(metadataDbPath, &opts)
-	if err != nil {
-		slog.Error(err)
-		return nil, convertErr(err.Error(), err)
+	var ldb *leveldb.DB
+	if ldb, err = leveldb.OpenFile(metadataDbPath, &opts); slog.Check(err) {
+		err = convertErr(err.Error(), err)
+		slog.Debug(err)
+		return
 	}
 	// Create the block store which includes scanning the existing flat block
 	// files to find what the current write cursor position is according to

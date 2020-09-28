@@ -507,7 +507,7 @@ func (r *RcVar) GetAddressBook() func() {
 			endHeight = syncBlock.Height - int32(minConf) + 1
 		}
 		if err = wallet.ExposeUnstableAPI(r.cx.WalletServer).RangeTransactions(
-			0, endHeight, func(details []wtxmgr.TxDetails) (bool, err error) {
+			0, endHeight, func(details []wtxmgr.TxDetails) (b bool, err error) {
 				for _, tx := range details {
 					for _, cred := range tx.Credits {
 						pkScript := tx.MsgTx.TxOut[cred.Index].PkScript

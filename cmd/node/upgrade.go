@@ -1,10 +1,11 @@
 package node
 
 import (
-	"github.com/stalker-loki/app/slog"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
@@ -12,20 +13,17 @@ import (
 )
 
 // dirEmpty returns whether or not the specified directory path is empty
-func dirEmpty(dirPath string) (bool, err error) {
-	f, err := os.Open(dirPath)
-	if err != nil {
-		slog.Error(err)
-		return false, err
+func dirEmpty(dirPath string) (b bool, err error) {
+	var f *os.File
+	if f, err = os.Open(dirPath); slog.Check(err) {
+		return
 	}
 	defer f.Close()
-	// Read the names of a max of one entry from the directory.
-	// When the directory is empty, an io.EOF error will be returned,
-	// so allow it.
-	names, err := f.Readdirnames(1)
-	if err != nil && err != io.EOF {
-		slog.Error(err)
-		return false, err
+	// Read the names of a max of one entry from the directory. When the directory is empty, an io.EOF error will be
+	// returned, so allow it.
+	var names []string
+	if names, err = f.Readdirnames(1); slog.Check(err) && err != io.EOF {
+		return
 	}
 	return len(names) == 0, nil
 }
@@ -38,10 +36,8 @@ func doUpgrades(cx *conte.Xt) (err error) {
 	return upgradeDataPaths()
 }
 
-// oldPodHomeDir returns the OS specific home directory pod used prior to
-// version 0.3.3.
-// This has since been replaced with util.AppDataDir but this function is still
-// provided for the automatic upgrade path.
+// oldPodHomeDir returns the OS specific home directory pod used prior to version 0.3.3. This has since been replaced
+// with util.AppDataDir but this function is still provided for the automatic upgrade path.
 func oldPodHomeDir() string {
 	// Search for Windows APPDATA first.  This won't exist on POSIX OSes
 	appData := os.Getenv("APPDATA")
@@ -57,22 +53,19 @@ func oldPodHomeDir() string {
 	return "."
 }
 
-// upgradeDBPathNet moves the database for a specific network from its
-// location prior to pod version 0.2.0 and uses heuristics to ascertain the old
-// database type to rename to the new format.
+// upgradeDBPathNet moves the database for a specific network from its location prior to pod version 0.2.0 and uses
+// heuristics to ascertain the old database type to rename to the new format.
 func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) (err error) {
-	// Prior to version 0.2.0,
-	// the database was named the same thing for both sqlite and leveldb.
-	// Use heuristics to figure out the type of the database and move it to
-	// the new path and name introduced with version 0.2.0 accordingly.
+	// Prior to version 0.2.0, the database was named the same thing for both sqlite and leveldb. Use heuristics to
+	// figure out the type of the database and move it to the new path and name introduced with version 0.2.0
+	// accordingly.
 	var fi os.FileInfo
 	if fi, err = os.Stat(oldDbPath); slog.Check(err) {
 		oldDbType := "sqlite"
 		if fi.IsDir() {
 			oldDbType = "leveldb"
 		}
-		// The new database name is based on the database type and resides in
-		// a directory named after the network type.
+		// The new database name is based on the database type and resides in a directory named after the network type.
 		newDbRoot := filepath.Join(filepath.Dir(*cx.Config.DataDir), netName)
 		newDbName := blockdb.NamePrefix + "_" + oldDbType
 		if oldDbType == "sqlite" {
@@ -93,14 +86,12 @@ func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) (err error) {
 	return
 }
 
-// upgradeDBPaths moves the databases from their locations prior to pod
-// version 0.2.0 to their new locations
+// upgradeDBPaths moves the databases from their locations prior to pod version 0.2.0 to their new locations
 //
 func upgradeDBPaths(cx *conte.Xt) (err error) {
-	// Prior to version 0.2.0 the databases were in the "db" directory and
-	// their names were suffixed by "testnet" and "regtest" for their
-	// respective networks.  Check for the old database and update it
-	// to the new path introduced with version 0.2.0 accordingly.
+	// Prior to version 0.2.0 the databases were in the "db" directory and their names were suffixed by "testnet" and
+	// "regtest" for their respective networks. Check for the old database and update it to the new path introduced with
+	// version 0.2.0 accordingly.
 	oldDbRoot := filepath.Join(oldPodHomeDir(), "db")
 	if err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet"); slog.Check(err) {
 	}
@@ -113,8 +104,7 @@ func upgradeDBPaths(cx *conte.Xt) (err error) {
 	return os.RemoveAll(oldDbRoot)
 }
 
-// upgradeDataPaths moves the application data from its location prior to pod
-// version 0.3.3 to its new location.
+// upgradeDataPaths moves the application data from its location prior to pod version 0.3.3 to its new location.
 func upgradeDataPaths() (err error) {
 	// No need to migrate if the old and new home paths are the same.
 	oldHomePath := oldPodHomeDir()
@@ -125,8 +115,7 @@ func upgradeDataPaths() (err error) {
 	// Only migrate if the old path exists and the new one doesn't
 	if apputil.FileExists(oldHomePath) && !apputil.FileExists(newHomePath) {
 		// Create the new path
-		slog.Infof("migrating application home path from '%s' to '%s'",
-			oldHomePath, newHomePath)
+		slog.Infof("migrating application home path from '%s' to '%s'", oldHomePath, newHomePath)
 		if err = os.MkdirAll(newHomePath, 0700); slog.Check(err) {
 			return
 		}

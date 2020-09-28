@@ -171,6 +171,30 @@ In the above you see the addr variable is created before the loop as it is share
 is sequential and non-concurrent. In this way the variable is not incurring allocation overhead when it is being
 written to before reading.
 
+A very commonly found pattern in functions calling functions returning errors is to perform a function, assign 
+variables and check for the error. To make this easier to do, in Goland using Live Templates you can set a `chek`
+live template with the following text:
+
+```
+;slog.Check(err){return}$END$
+```
+
+then for a function that would otherwise be a `:=` variable creation and then an `if err !=nil {}` block, it can be
+collapsed nicely down to one by putting an `if` in front, remove the `:` from the `:=`, do the `chek` live template
+and any variable that needs to be created, the context menu allows adding the variable automatically with a zero
+value, ie as a `var` declaration.
+
+Since this is a very common pattern found in a lot of code this saves a lot of time and lets you focus on the logic
+while keeping the scope members clear and unambiguous. The brief information on the function signature and
+compact error handling code makes it a lot clearer what is going on and when memory is being used, and returns are 
+generally naked preceded by assignments to the fields. The reason for this is from 3 return values and greater the
+usual case is only one of the values or maybe two are important for a particular condition, the other will already
+be zero, such as success with no error, the error was not set, so it will not be returned.
+
+Some may think it is more explicit to list all the return values every time but honestly with a number of
+functions that make 10 calls that all must succeed the naked return with error set in an if statement is significantly 
+more readable.
+
 #### Log the error at the site
 
 Furthermore, the slog logging library prints the code locations of log
@@ -188,3 +212,6 @@ to the actual executing code.
 
 By printing the error *in* that code, this time is saved, meaning faster 
 feedback cycles in attempts to fix the bug. 
+
+The suggestion above with live templates is an easy way to get logging everywhere with minimal boilerplate and
+pretty and brief invocations. 

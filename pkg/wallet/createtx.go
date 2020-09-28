@@ -4,8 +4,9 @@ package wallet
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
 	"sort"
+
+	"github.com/stalker-loki/app/slog"
 
 	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
@@ -15,6 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 // byAmount defines the methods needed to satisify sort.Interface to
@@ -34,8 +36,7 @@ func makeInputSource(eligible []wtxmgr.Credit) txauthor.InputSource {
 	currentInputs := make([]*wire.TxIn, 0, len(eligible))
 	currentScripts := make([][]byte, 0, len(eligible))
 	currentInputValues := make([]util.Amount, 0, len(eligible))
-	return func(target util.Amount) (util.Amount, []*wire.TxIn,
-		[]util.Amount, [][]byte, err error) {
+	return func(target util.Amount) (util.Amount, []*wire.TxIn, []util.Amount, [][]byte, error) {
 		for currentTotal < target && len(eligible) != 0 {
 			nextCredit := &eligible[0]
 			eligible = eligible[1:]
@@ -49,60 +50,54 @@ func makeInputSource(eligible []wtxmgr.Credit) txauthor.InputSource {
 	}
 }
 
-// secretSource is an implementation of txauthor.SecretSource for the wallet's
-// address manager.
+// secretSource is an implementation of txauthor.SecretSource for the wallet's address manager.
 type secretSource struct {
 	*waddrmgr.Manager
 	addrmgrNs walletdb.ReadBucket
 }
 
-func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, err error) {
-	ma, err := s.Address(s.addrmgrNs, addr)
-	if err != nil {
-		slog.Error(err)
-		return nil, false, err
+func (s secretSource) GetKey(addr util.Address) (privKey *ec.PrivateKey, compressed bool, err error) {
+	var ma waddrmgr.ManagedAddress
+	if ma, err = s.Address(s.addrmgrNs, addr); slog.Check(err) {
+		return
 	}
 	mpka, ok := ma.(waddrmgr.ManagedPubKeyAddress)
 	if !ok {
-		e := fmt.Errorf("managed address type for %v is `%T` but "+
-			"want waddrmgr.ManagedPubKeyAddress", addr, ma)
-		return nil, false, e
+		err = fmt.Errorf("managed address type for %v is `%T` but want waddrmgr.ManagedPubKeyAddress", addr, ma)
+		slog.Debug(err)
+		return
 	}
-	privKey, err := mpka.PrivKey()
-	if err != nil {
-		slog.Error(err)
-		return nil, false, err
+	if privKey, err = mpka.PrivKey(); slog.Check(err) {
+		return
 	}
 	return privKey, ma.Compressed(), nil
 }
-func (s secretSource) GetScript(addr util.Address) ([]byte, err error) {
-	ma, err := s.Address(s.addrmgrNs, addr)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+
+func (s secretSource) GetScript(addr util.Address) (script []byte, err error) {
+	var ma waddrmgr.ManagedAddress
+	if ma, err = s.Address(s.addrmgrNs, addr); slog.Check(err) {
+		return
 	}
 	msa, ok := ma.(waddrmgr.ManagedScriptAddress)
 	if !ok {
-		e := fmt.Errorf("managed address type for %v is `%T` but "+
-			"want waddrmgr.ManagedScriptAddress", addr, ma)
-		return nil, e
+		err = fmt.Errorf("managed address type for %v is `%T` but want waddrmgr.ManagedScriptAddress", addr, ma)
+		slog.Debug(err)
+		return
 	}
 	return msa.Script()
 }
 
-// txToOutputs creates a signed transaction which includes each output from
-// outputs.  Previous outputs to redeem are chosen from the passed account's
-// UTXO set and minconf policy. An additional output may be added to return
-// change to the wallet.  An appropriate fee is included based on the wallet's
-// current relay fee.  The wallet must be unlocked to create the transaction.
-func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
-	minconf int32, feeSatPerKb util.Amount) (tx *txauthor.AuthoredTx, err error) {
-	chainClient, err := w.requireChainClient()
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+// txToOutputs creates a signed transaction which includes each output from outputs. Previous outputs to redeem are
+// chosen from the passed account's UTXO set and minconf policy. An additional output may be added to return change to
+// the wallet. An appropriate fee is included based on the wallet's current relay fee. The wallet must be unlocked to
+// create the transaction.
+func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32, minconf int32, feeSatPerKb util.Amount,
+) (tx *txauthor.AuthoredTx, err error) {
+	var chainClient chain.Interface
+	if chainClient, err = w.requireChainClient(); slog.Check(err) {
+		return
 	}
-	err = walletdb.Update(w.db, func(dbtx walletdb.ReadWriteTx) (err error) {
+	if err = walletdb.Update(w.db, func(dbtx walletdb.ReadWriteTx) (err error) {
 		addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 		// Get current block's height and hash.
 		bs, err := chainClient.BlockStamp()
@@ -116,75 +111,60 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 			return err
 		}
 		inputSource := makeInputSource(eligible)
-		changeSource := func() ([]byte, err error) {
-			// Derive the change output script.  As a hack to allow
-			// spending from the imported account, change addresses
+		changeSource := func() (b []byte, err error) {
+			// Derive the change output script. As a hack to allow spending from the imported account, change addresses
 			// are created from account 0.
 			var changeAddr util.Address
-			var err error
 			if account == waddrmgr.ImportedAddrAccount {
 				changeAddr, err = w.newChangeAddress(addrmgrNs, 0)
 			} else {
 				changeAddr, err = w.newChangeAddress(addrmgrNs, account)
 			}
-			if err != nil {
-				slog.Error(err)
-				return nil, err
+			if slog.Check(err) {
+				return
 			}
 			return txscript.PayToAddrScript(changeAddr)
 		}
-		tx, err = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb,
-			inputSource, changeSource)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if tx, err = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb, inputSource, changeSource); slog.Check(err) {
+			return
 		}
-		// Randomize change position, if change exists, before signing.
-		// This doesn't affect the serialize size, so the change amount
-		// will still be valid.
+		// Randomize change position, if change exists, before signing. This doesn't affect the serialize size, so the
+		// change amount will still be valid.
 		if tx.ChangeIndex >= 0 {
 			tx.RandomizeChangePosition()
 		}
 		return tx.AddAllInputScripts(secretSource{w.Manager, addrmgrNs})
-	})
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	}); slog.Check(err) {
+		return
 	}
-	err = validateMsgTx(tx.Tx, tx.PrevScripts, tx.PrevInputValues)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	if err = validateMsgTx(tx.Tx, tx.PrevScripts, tx.PrevInputValues); slog.Check(err) {
+		return
 	}
 	if tx.ChangeIndex >= 0 && account == waddrmgr.ImportedAddrAccount {
 		changeAmount := util.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
 		slog.Warnf(
-			"spend from imported account produced change: "+
-				"moving %v from imported account into default account.",
+			"spend from imported account produced change: moving %v from imported account into default account.",
 			changeAmount,
 		)
 	}
-	return tx, nil
+	return
 }
-func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minconf int32, bs *waddrmgr.BlockStamp) ([]wtxmgr.Credit, err error) {
+func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minconf int32, bs *waddrmgr.BlockStamp) (eligible []wtxmgr.Credit, err error) {
 	addrmgrNs := dbtx.ReadBucket(waddrmgrNamespaceKey)
 	txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
-	unspent, err := w.TxStore.UnspentOutputs(txmgrNs)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var unspent []wtxmgr.Credit
+	if unspent, err = w.TxStore.UnspentOutputs(txmgrNs); slog.Check(err) {
+		return
 	}
-	// TODO: Eventually all of these filters (except perhaps output locking)
-	// should be handled by the call to UnspentOutputs (or similar).
-	// Because one of these filters requires matching the output script to
-	// the desired account, this change depends on making wtxmgr a waddrmgr
-	// dependency and requesting unspent outputs for a single account.
-	eligible := make([]wtxmgr.Credit, 0, len(unspent))
+	// TODO: Eventually all of these filters (except perhaps output locking) should be handled by the call to
+	//  UnspentOutputs (or similar). Because one of these filters requires matching the output script to the desired
+	//  account, this change depends on making wtxmgr a waddrmgr dependency and requesting unspent outputs for a single
+	//  account.
+	eligible = make([]wtxmgr.Credit, 0, len(unspent))
 	for i := range unspent {
 		output := &unspent[i]
-		// Only include this output if it meets the required number of
-		// confirmations.  Coinbase transactions must have have reached
-		// maturity before their outputs may be spent.
+		// Only include this output if it meets the required number of confirmations. Coinbase transactions must have
+		// have reached maturity before their outputs may be spent.
 		if !confirmed(minconf, output.Height, bs.Height) {
 			continue
 		}
@@ -201,20 +181,19 @@ func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minco
 		// Only include the output if it is associated with the passed
 		// account.
 		//
-		// TODO: Handle multisig outputs by determining if enough of the
-		// addresses are controlled.
-		_, addrs, _, err := txscript.ExtractPkScriptAddrs(
-			output.PkScript, w.chainParams)
-		if err != nil || len(addrs) != 1 {
+		// TODO: Handle multisig outputs by determining if enough of the addresses are controlled.
+		var addrs []util.Address
+		if _, addrs, _, err = txscript.ExtractPkScriptAddrs(output.PkScript, w.chainParams); slog.Check(err) ||
+			len(addrs) != 1 {
 			continue
 		}
-		_, addrAcct, err := w.Manager.AddrAccount(addrmgrNs, addrs[0])
-		if err != nil || addrAcct != account {
+		var addrAcct uint32
+		if _, addrAcct, err = w.Manager.AddrAccount(addrmgrNs, addrs[0]); slog.Check(err) || addrAcct != account {
 			continue
 		}
 		eligible = append(eligible, *output)
 	}
-	return eligible, nil
+	return
 }
 
 // validateMsgTx verifies transaction input scripts for tx.  All previous output
@@ -222,18 +201,19 @@ func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minco
 // spent, must be passed in the prevScripts slice.
 func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amount) (err error) {
 	hashCache := txscript.NewTxSigHashes(tx)
+	var vm *txscript.Engine
 	for i, prevScript := range prevScripts {
-		vm, err := txscript.NewEngine(prevScript, tx, i,
-			txscript.StandardVerifyFlags, nil, hashCache, int64(inputValues[i]))
-		if err != nil {
-			slog.Error(err)
-			return fmt.Errorf("cannot create script engine: %s", err)
+		if vm, err = txscript.NewEngine(prevScript, tx, i,
+			txscript.StandardVerifyFlags, nil, hashCache, int64(inputValues[i])); slog.Check(err) {
+			err = fmt.Errorf("cannot create script engine: %s", err)
+			slog.Debug(err)
+			return
 		}
-		err = vm.Execute()
-		if err != nil {
-			slog.Error(err)
-			return fmt.Errorf("cannot validate transaction: %s", err)
+		if err = vm.Execute(); slog.Check(err) {
+			err = fmt.Errorf("cannot validate transaction: %s", err)
+			slog.Debug(err)
+			return
 		}
 	}
-	return nil
+	return
 }

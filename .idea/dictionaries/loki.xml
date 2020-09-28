@@ -5,9 +5,11 @@
       <w>abcdefghijklmnopqrstuvwxyz</w>
       <w>addcheckpoint</w>
       <w>addednode</w>
+      <w>addmultisigaddress</w>
       <w>addnode</w>
       <w>addpeer</w>
       <w>addressbook</w>
+      <w>addrindex</w>
       <w>addrlocal</w>
       <w>addrme</w>
       <w>addrs</w>
@@ -70,6 +72,7 @@
       <w>bytesrecv</w>
       <w>bytessent</w>
       <w>bytestring</w>
+      <w>cacher</w>
       <w>cafile</w>
       <w>carryless</w>
       <w>castagnoli</w>
@@ -134,9 +137,11 @@
       <w>descendantfees</w>
       <w>descendantsize</w>
       <w>descs</w>
+      <w>desynced</w>
       <w>disasm</w>
       <w>dropcfindex</w>
       <w>dropnode</w>
+      <w>dumpprivkey</w>
       <w>dumpwallet</w>
       <w>electric's</w>
       <w>encap</w>
@@ -200,6 +205,7 @@
       <w>getpeerinfo</w>
       <w>getrawmempool</w>
       <w>getrawtransaction</w>
+      <w>gettransaction</w>
       <w>gettxout</w>
       <w>gettxoutproof</w>
       <w>gettxoutsetinfo</w>
@@ -248,6 +254,7 @@
       <w>ints</w>
       <w>invalidateblock</w>
       <w>invalidopcode</w>
+      <w>invs</w>
       <w>isvalid</w>
       <w>jacobian</w>
       <w>jsonrpc</w>
@@ -266,6 +273,9 @@
       <w>limitfreerelay</w>
       <w>limitpass</w>
       <w>limituser</w>
+      <w>listaddresstransactions</w>
+      <w>listlockunspent</w>
+      <w>listsinceblock</w>
       <w>listtransactions</w>
       <w>liveness</w>
       <w>loadtxfilter</w>
@@ -274,6 +284,7 @@
       <w>localservices</w>
       <w>lockin</w>
       <w>locktime</w>
+      <w>lockunspent</w>
       <w>locs</w>
       <w>logi</w>
       <w>longpoll</w>
@@ -317,6 +328,7 @@
       <w>nates</w>
       <w>netaddress</w>
       <w>netparams</w>
+      <w>netsync</w>
       <w>networkactive</w>
       <w>networkhashps</w>
       <w>nextblockhash</w>
@@ -363,6 +375,7 @@
       <w>oscript</w>
       <w>othernodes</w>
       <w>parallelcoin</w>
+      <w>passthrough</w>
       <w>pbcopy</w>
       <w>pbpaste</w>
       <w>pebibytes</w>
@@ -381,6 +394,7 @@
       <w>proxied</w>
       <w>proxyuser</w>
       <w>pruneheight</w>
+      <w>ptrs</w>
       <w>pubkey</w>
       <w>pubkeyhash</w>
       <w>pubkeys</w>
@@ -407,12 +421,14 @@
       <w>relaynonstd</w>
       <w>relaytxes</w>
       <w>relevanttxaccepted</w>
+      <w>relocks</w>
       <w>renameaccount</w>
       <w>rescanblocks</w>
       <w>rescanfinished</w>
       <w>rescanprogress</w>
       <w>reserialize</w>
       <w>reserialized</w>
+      <w>reserializing</w>
       <w>retur</w>
       <w>ripemd</w>
       <w>rmka</w>
@@ -421,6 +437,7 @@
       <w>routeable</w>
       <w>rpc</w>
       <w>rpccert</w>
+      <w>rpcclient</w>
       <w>rpcconnect</w>
       <w>rpckey</w>
       <w>rpclisten</w>
@@ -428,6 +445,7 @@
       <w>rpcmaxconcurrentreqs</w>
       <w>rpcmaxwebsockets</w>
       <w>rpcquirks</w>
+      <w>rpcserver</w>
       <w>rpctest</w>
       <w>rshift</w>
       <w>satoshis</w>
@@ -442,9 +460,12 @@
       <w>segnet</w>
       <w>segwit</w>
       <w>selnotify</w>
+      <w>sendfrom</w>
       <w>sendheaders</w>
+      <w>sendmany</w>
       <w>sendrawtransaction</w>
       <w>sendtoaddress</w>
+      <w>serialize's</w>
       <w>serializedtx</w>
       <w>serverpass</w>
       <w>servertls</w>
@@ -468,6 +489,7 @@
       <w>spdx</w>
       <w>squarings</w>
       <w>ssoc</w>
+      <w>stakebase</w>
       <w>startingheight</w>
       <w>startingpriority</w>
       <w>stopnotifyblocks</w>
@@ -509,10 +531,12 @@
       <w>tuxcanfly</w>
       <w>txaccepted</w>
       <w>txacceptedverbose</w>
+      <w>txauthor</w>
       <w>txes</w>
       <w>txhash</w>
       <w>txid</w>
       <w>txin</w>
+      <w>txindex</w>
       <w>txinwitness</w>
       <w>txitxo</w>
       <w>txns</w>
@@ -524,6 +548,8 @@
       <w>uacomment</w>
       <w>uncomp</w>
       <w>uncompressing</w>
+      <w>unconfirming</w>
+      <w>unconfirms</w>
       <w>unfinalized</w>
       <w>unicast</w>
       <w>unicodetext</w>
@@ -586,6 +612,7 @@
       <w>workid</w>
       <w>wpkh</w>
       <w>wtxid</w>
+      <w>wtxmgr</w>
       <w>xthin</w>
     </words>
   </dictionary>

@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"errors"
+
 	"github.com/stalker-loki/app/slog"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -16,50 +17,39 @@ import (
 // otherwise an error is returned for a missing pubkey.
 //
 // This function only works with pubkeys and P2PKH addresses derived from them.
-func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte, err error) {
+func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) (scr []byte, err error) {
 	pubKeys := make([]*util.AddressPubKey, len(addrs))
 	var dbtx walletdb.ReadTx
 	var addrmgrNs walletdb.ReadBucket
 	defer func() {
 		if dbtx != nil {
-			err := dbtx.Rollback()
-			if err != nil {
-				slog.Error(err)
+			if err = dbtx.Rollback(); slog.Check(err) {
 			}
 		}
 	}()
-	// The address list will made up either of addresses (pubkey hash), for
-	// which we need to look up the keys in wallet, straight pubkeys, or a
-	// mixture of the two.
+	// The address list will made up either of addresses (pubkey hash), for which we need to look up the keys in wallet,
+	// straight pubkeys, or a mixture of the two.
 	for i, addr := range addrs {
 		switch addr := addr.(type) {
 		default:
-			return nil, errors.New("cannot make multisig script for " +
-				"a non-secp256k1 public key or P2PKH address")
+			return nil, errors.New("cannot make multisig script for a non-secp256k1 public key or P2PKH address")
 		case *util.AddressPubKey:
 			pubKeys[i] = addr
 		case *util.AddressPubKeyHash:
 			if dbtx == nil {
-				var err error
-				dbtx, err = w.db.BeginReadTx()
-				if err != nil {
-					slog.Error(err)
-					return nil, err
+				if dbtx, err = w.db.BeginReadTx(); slog.Check(err) {
+					return
 				}
 				addrmgrNs = dbtx.ReadBucket(waddrmgrNamespaceKey)
 			}
-			addrInfo, err := w.Manager.Address(addrmgrNs, addr)
-			if err != nil {
-				slog.Error(err)
-				return nil, err
+			var addrInfo waddrmgr.ManagedAddress
+			if addrInfo, err = w.Manager.Address(addrmgrNs, addr); slog.Check(err) {
+				return
 			}
-			serializedPubKey := addrInfo.(waddrmgr.ManagedPubKeyAddress).
-				PubKey().SerializeCompressed()
-			pubKeyAddr, err := util.NewAddressPubKey(
-				serializedPubKey, w.chainParams)
-			if err != nil {
-				slog.Error(err)
-				return nil, err
+			serializedPubKey := addrInfo.(waddrmgr.ManagedPubKeyAddress).PubKey().SerializeCompressed()
+			var pubKeyAddr *util.AddressPubKey
+			if pubKeyAddr, err = util.NewAddressPubKey(serializedPubKey, w.chainParams); slog.Check(err) {
+				return
 			}
 			pubKeys[i] = pubKeyAddr
 		}
@@ -68,41 +58,33 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 }
 
 // ImportP2SHRedeemScript adds a P2SH redeem script to the wallet.
-func (w *Wallet) ImportP2SHRedeemScript(script []byte) (*util.AddressScriptHash, err error) {
-	var p2shAddr *util.AddressScriptHash
-	err := walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) (err error) {
+func (w *Wallet) ImportP2SHRedeemScript(script []byte) (p2shAddr *util.AddressScriptHash, err error) {
+	if err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) (err error) {
 		addrmgrNs := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 		// TODO(oga) blockstamp current block?
 		bs := &waddrmgr.BlockStamp{
 			Hash:   *w.ChainParams().GenesisHash,
 			Height: 0,
 		}
-		// As this is a regular P2SH script, we'll import this into the
-		// BIP0044 scope.
-		bip44Mgr, err := w.Manager.FetchScopedKeyManager(
-			waddrmgr.KeyScopeBIP0084,
-		)
-		if err != nil {
-			slog.Error(err)
-			return err
+		// As this is a regular P2SH script, we'll import this into the BIP0044 scope.
+		var bip44Mgr *waddrmgr.ScopedKeyManager
+		if bip44Mgr, err = w.Manager.FetchScopedKeyManager(waddrmgr.KeyScopeBIP0084); slog.Check(err) {
+			return
 		}
-		addrInfo, err := bip44Mgr.ImportScript(addrmgrNs, script, bs)
-		if err != nil {
-			slog.Error(err)
-			// Don't care if it's already there, but still have to
-			// set the p2shAddr since the address manager didn't
+		var addrInfo waddrmgr.ManagedScriptAddress
+		if addrInfo, err = bip44Mgr.ImportScript(addrmgrNs, script, bs); slog.Check(err) {
+			// Don't care if it's already there, but still have to set the p2shAddr since the address manager didn't
 			// return anything useful.
 			if waddrmgr.IsError(err, waddrmgr.ErrDuplicateAddress) {
-				// This function will never error as it always
-				// hashes the script to the correct length.
-				p2shAddr, _ = util.NewAddressScriptHash(script,
-					w.chainParams)
-				return nil
+				// This function will never error as it always hashes the script to the correct length.
+				p2shAddr, _ = util.NewAddressScriptHash(script, w.chainParams)
+				return
 			}
-			return err
+			return
 		}
 		p2shAddr = addrInfo.Address().(*util.AddressScriptHash)
-		return nil
-	})
-	return p2shAddr, err
+		return
+	}); slog.Check(err) {
+	}
+	return
 }

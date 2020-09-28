@@ -37,11 +37,11 @@ var (
 	QueryEncoding = wire.WitnessEncoding
 )
 
-type // queryOptions are a set of options that can be modified per-query,
+// queryOptions are a set of options that can be modified per-query,
 	// unlike global options.
 	//
 	// TODO: Make more query options that override global options.
-	queryOptions struct {
+type 	queryOptions struct {
 		// timeout lets the query know how long to wait for a peer to answer
 		// the query before moving onto the next peer.
 		timeout time.Duration
@@ -66,23 +66,23 @@ type // queryOptions are a set of options that can be modified per-query,
 		persistToDisk bool
 	}
 
-type // filterCacheKey represents the key used for FilterCache of the
+// filterCacheKey represents the key used for FilterCache of the
 	// ChainService.
-	filterCacheKey struct {
+type 	filterCacheKey struct {
 		blockHash  *chainhash.Hash
 		filterType filterdb.FilterType
 	}
 
-type // QueryOption is a functional option argument to any of the network query
+// QueryOption is a functional option argument to any of the network query
 	// methods, such as GetBlock and GetCFilter (when that resorts to a network
 	// query). These are always processed in order,
 	// with later options overriding
 	// earlier ones.
-	QueryOption func(*queryOptions)
+type 	QueryOption func(*queryOptions)
 
-func // defaultQueryOptions returns a queryOptions set to package-level
+// defaultQueryOptions returns a queryOptions set to package-level
 // defaults.
-defaultQueryOptions() *queryOptions {
+func defaultQueryOptions() *queryOptions {
 	return &queryOptions{
 		timeout:            QueryTimeout,
 		numRetries:         uint8(QueryNumRetries),
@@ -91,57 +91,57 @@ defaultQueryOptions() *queryOptions {
 	}
 }
 
-func // applyQueryOptions updates a queryOptions set with functional options.
-(qo *queryOptions) applyQueryOptions(options ...QueryOption) {
+// applyQueryOptions updates a queryOptions set with functional options.
+func (qo *queryOptions) applyQueryOptions(options ...QueryOption) {
 	for _, option := range options {
 		option(qo)
 	}
 }
 
-func // Timeout is a query option that lets the query know how long to wait
+// Timeout is a query option that lets the query know how long to wait
 // for each peer we ask the query to answer it before moving on.
-Timeout(timeout time.Duration) QueryOption {
+func Timeout(timeout time.Duration) QueryOption {
 	return func(qo *queryOptions) {
 		qo.timeout = timeout
 	}
 }
 
-func // NumRetries is a query option that lets the query know the maximum
+// NumRetries is a query option that lets the query know the maximum
 // number of times each peer should be queried. The default is one.
-NumRetries(numRetries uint8) QueryOption {
+func NumRetries(numRetries uint8) QueryOption {
 	return func(qo *queryOptions) {
 		qo.numRetries = numRetries
 	}
 }
 
-func // PeerConnectTimeout is a query option that lets the query know how
+// PeerConnectTimeout is a query option that lets the query know how
 // long to wait for the underlying chain service to connect to a peer before
 // giving up on a query in case we don't have any peers.
-PeerConnectTimeout(timeout time.Duration) QueryOption {
+func PeerConnectTimeout(timeout time.Duration) QueryOption {
 	return func(qo *queryOptions) {
 		qo.peerConnectTimeout = timeout
 	}
 }
 
-func // Encoding is a query option that allows the caller to set a message
+// Encoding is a query option that allows the caller to set a message
 // encoding for the query messages.
-Encoding(encoding wire.MessageEncoding) QueryOption {
+func Encoding(encoding wire.MessageEncoding) QueryOption {
 	return func(qo *queryOptions) {
 		qo.encoding = encoding
 	}
 }
 
-func // DoneChan allows the caller to pass a channel that will get closed when the
+// DoneChan allows the caller to pass a channel that will get closed when the
 // query is finished.
-DoneChan(doneChan chan<- struct{}) QueryOption {
+func DoneChan(doneChan chan<- struct{}) QueryOption {
 	return func(qo *queryOptions) {
 		qo.doneChan = doneChan
 	}
 }
 
-func // PersistToDisk allows the caller to tell that the filter should be kept
+// PersistToDisk allows the caller to tell that the filter should be kept
 // on disk once it's found.
-PersistToDisk() QueryOption {
+func PersistToDisk() QueryOption {
 	return func(qo *queryOptions) {
 		qo.persistToDisk = true
 	}
@@ -637,48 +637,45 @@ checkResponses:
 	}
 }
 
-func // getFilterFromCache returns a filter from ChainService's FilterCache
-// if it exists, returning nil and error if it doesn't.
-(s *ChainService) getFilterFromCache(blockHash *chainhash.Hash,
-	filterType filterdb.FilterType) (*gcs.Filter, err error) {
+// getFilterFromCache returns a filter from ChainService's FilterCache if it exists, returning nil and error if it doesn't.
+func (s *ChainService) getFilterFromCache(blockHash *chainhash.Hash,
+	filterType filterdb.FilterType) (f *gcs.Filter, err error) {
 	cacheKey := filterCacheKey{blockHash: blockHash, filterType: filterType}
-	filterValue, err := s.FilterCache.Get(cacheKey)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var filterValue cache.Value
+	if filterValue, err = s.FilterCache.Get(cacheKey); slog.Check(err) {
+		return
 	}
 	return filterValue.(*cache.CacheableFilter).Filter, nil
 }
 
-func // putFilterToCache inserts a given filter in ChainService's FilterCache.
-(s *ChainService) putFilterToCache(blockHash *chainhash.Hash,
-	filterType filterdb.FilterType, filter *gcs.Filter) (err error) {
+// putFilterToCache inserts a given filter in ChainService's FilterCache.
+func (s *ChainService) putFilterToCache(blockHash *chainhash.Hash, filterType filterdb.FilterType,
+	filter *gcs.Filter) (err error) {
 	cacheKey := filterCacheKey{blockHash: blockHash, filterType: filterType}
 	return s.FilterCache.Put(cacheKey, &cache.CacheableFilter{Filter: filter})
 }
 
-func // GetCFilter gets a cfilter from the database. Failing that,
+// GetCFilter gets a cfilter from the database. Failing that,
 // it requests the cfilter from the network and writes it to the database.
 // If extended is true, an extended filter will be queried for. Otherwise,
 // we'll fetch the regular filter.
-(s *ChainService) GetCFilter(blockHash chainhash.Hash,
-	filterType wire.FilterType, options ...QueryOption) (*gcs.Filter, err error) {
-	// The only supported filter atm is the regular filter, so we'll reject
-	// all other filters.
+func (s *ChainService) GetCFilter(blockHash chainhash.Hash,
+	filterType wire.FilterType, options ...QueryOption) (f *gcs.Filter, err error) {
+	// The only supported filter atm is the regular filter, so we'll reject all other filters.
 	if filterType != wire.GCSFilterRegular {
-		return nil, fmt.Errorf("unknown filter type: %v", filterType)
+		err = fmt.Errorf("unknown filter type: %v", filterType)
+		slog.Debug(err)
+		return
 	}
-	// Only get one CFilter at a time to avoid redundancy from mutliple
-	// rescans running at once.
+	// Only get one CFilter at a time to avoid redundancy from multiple rescans running at once.
 	s.mtxCFilter.Lock()
 	defer s.mtxCFilter.Unlock()
-	// Based on if extended is true or not, we'll set up our set of
-	// querying, and db-write functions.
+	// Based on if extended is true or not, we'll set up our set of querying, and db-write functions.
 	getHeader := s.RegFilterHeaders.FetchHeader
 	dbFilterType := filterdb.RegularFilter
-	// First check the cache to see if we already have this filter. If
-	// so, then we can return it an exit early.
-	filter, err := s.getFilterFromCache(&blockHash, dbFilterType)
+	// First check the cache to see if we already have this filter. If so, then we can return it an exit early.
+	var filter *gcs.Filter
+	filter, err = s.getFilterFromCache(&blockHash, dbFilterType)
 	if err == nil && filter != nil {
 		return filter, nil
 	}
@@ -693,88 +690,69 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 	if err != nil && err != filterdb.ErrFilterNotFound {
 		return nil, err
 	}
-	// We didn't get the filter from the DB, so we'll set it to nil and try
-	// to get it from the network.
+	// We didn't get the filter from the DB, so we'll set it to nil and try to get it from the network.
 	filter = nil
-	// In order to verify the authenticity of the filter, we'll fetch the
-	// target block header so we can retrieve the hash of the prior block,
-	// which is required to fetch the filter header for that block.
-	block, height, err := s.BlockHeaders.FetchHeader(&blockHash)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	// In order to verify the authenticity of the filter, we'll fetch the target block header so we can retrieve the
+	// hash of the prior block, which is required to fetch the filter header for that block.
+	var (
+		block  *wire.BlockHeader
+		height uint32
+	)
+	if block, height, err = s.BlockHeaders.FetchHeader(&blockHash); slog.Check(err) {
+		return
 	}
 	if block.BlockHash() != blockHash {
 		str := "couldn't get header for block %s from database"
-		slog.Debug(str, blockHash)
-		return nil, fmt.Errorf(str, blockHash)
+		err = fmt.Errorf(str, blockHash)
+		slog.Debug(err)
+		return
 	}
-	slog.Debugf(
-		"fetching filter for height=%v, hash=%v %s",
-		height, blockHash,
-	)
-	// In addition to fetching the block header, we'll fetch the filter
-	// headers (for this particular filter type) from the database. These
-	// are required in order to verify the authenticity of the filter.
-	curHeader, err := getHeader(&blockHash)
-	if err != nil {
-		slog.Error(err)
-		return nil, fmt.Errorf("Couldn't get cfheader for block %s "+
-			"from database", blockHash)
+	slog.Debugf("fetching filter for height=%v, hash=%v %s", height, blockHash)
+	// In addition to fetching the block header, we'll fetch the filter headers (for this particular filter type) from
+	// the database. These are required in order to verify the authenticity of the filter.
+	var curHeader *chainhash.Hash
+	if curHeader, err = getHeader(&blockHash); slog.Check(err) {
+		err = fmt.Errorf("couldn't get cfheader for block %s from database", blockHash)
+		slog.Debug(err)
+		return
 	}
-	prevHeader, err := getHeader(&block.PrevBlock)
-	if err != nil {
-		slog.Error(err)
-		return nil, fmt.Errorf("Couldn't get cfheader for block %s "+
-			"from database", blockHash)
+	var prevHeader *chainhash.Hash
+	if prevHeader, err = getHeader(&block.PrevBlock); slog.Check(err) {
+		err = fmt.Errorf("couldn't get cfheader for block %s from database", blockHash)
+		slog.Debug(err)
+		return
 	}
-	// With all the necessary items retrieved, we'll launch our concurrent
-	// query to the set of connected peers.
+	// With all the necessary items retrieved, we'll launch our concurrent query to the set of connected peers.
 	s.queryPeers(
 		// Send a wire.MsgGetCFilters
 		wire.NewMsgGetCFilters(filterType, height, &blockHash),
-		// Check responses and if we get one that matches, end the
-		// query early.
+		// Check responses and if we get one that matches, end the query early.
 		func(sp *ServerPeer, resp wire.Message, quit chan<- struct{}) {
 			switch response := resp.(type) {
 			// We're only interested in "cfilter" messages.
 			case *wire.MsgCFilter:
-				// Only keep this going if we haven't already
-				// found a filter, or we risk closing an
-				// already closed channel.
+				// Only keep this going if we haven't already found a filter, or we risk closing an already closed
+				// channel.
 				if filter != nil {
 					return
 				}
-				// If the response doesn't match our request.
-				// Ignore this message.
-				if blockHash != response.BlockHash ||
-					filterType != response.FilterType {
+				// If the response doesn't match our request. Ignore this message.
+				if blockHash != response.BlockHash || filterType != response.FilterType {
 					return
 				}
-				gotFilter, err := gcs.FromNBytes(
-					builder.DefaultP, builder.DefaultM,
-					response.Data,
-				)
-				if err != nil {
-					slog.Error(err)
-					// Malformed filter data. We can ignore
-					// this message.
+				var gotFilter *gcs.Filter
+				if gotFilter, err = gcs.FromNBytes(builder.DefaultP, builder.DefaultM, response.Data); slog.Check(err) {
+					// Malformed filter data. We can ignore this message.
 					return
 				}
-				// Now that we have a proper filter, ensure
-				// that re-calculating the filter header hash
-				// for the header _after_ the filter in the
-				// chain checks out. If not, we can ignore this
-				// response.
-				if gotHeader, err := builder.MakeHeaderForFilter(gotFilter,
-					*prevHeader); err != nil ||
-					gotHeader != *curHeader {
+				// Now that we have a proper filter, ensure that re-calculating the filter header hash for the header
+				// _after_ the filter in the chain checks out. If not, we can ignore this response.
+				var gotHeader chainhash.Hash
+				if gotHeader, err = builder.MakeHeaderForFilter(gotFilter, *prevHeader); slog.Check(err) || gotHeader != *curHeader {
 					return
 				}
-				// At this point, the filter matches what we
-				// know about it and we declare it sane. We can
-				// kill the query and pass the response back to
-				// the caller.
+				// At this point, the filter matches what we know about it and we declare it sane. We can kill the query
+				// and pass the response back to the caller.
 				filter = gotFilter
 				close(quit)
 			default:
@@ -809,22 +787,23 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 	return filter, nil
 }
 
-func // GetBlock gets a block by requesting it from the network, one peer at a
-// time, until one answers. If the block is found in the cache, it will be
-// returned immediately.
-(s *ChainService) GetBlock(blockHash chainhash.Hash,
-	options ...QueryOption) (*util.Block, err error) {
-	// Fetch the corresponding block header from the database.
-	// If this isn't found then we don't have the header for this so we can't
-	// request it.
-	blockHeader, height, err := s.BlockHeaders.FetchHeader(&blockHash)
-	if err != nil || blockHeader.BlockHash() != blockHash {
-		return nil, fmt.Errorf("Couldn't get header for block %s "+
-			"from database", blockHash)
+// GetBlock gets a block by requesting it from the network, one peer at a time, until one answers. If the block is found
+// in the cache, it will be returned immediately.
+func (s *ChainService) GetBlock(blockHash chainhash.Hash, options ...QueryOption) (foundBlock *util.Block, err error) {
+	// Fetch the corresponding block header from the database. If this isn't found then we don't have the header for
+	// this so we can't request it.
+	var (
+		blockHeader *wire.BlockHeader
+		height      uint32
+	)
+	if blockHeader, height, err = s.BlockHeaders.FetchHeader(&blockHash); slog.Check(err) || blockHeader.BlockHash() !=
+		blockHash {
+		err = fmt.Errorf("couldn't get header for block %s from database", blockHash)
+		slog.Debug(err)
+		return
 	}
-	// Starting with the set of default options, we'll apply any specified
-	// functional options to the query so that we can check what inv type
-	// to use.
+	// Starting with the set of default options, we'll apply any specified functional options to the query so that we
+	// can check what inv type to use.
 	qo := defaultQueryOptions()
 	qo.applyQueryOptions(options...)
 	invType := wire.InvTypeWitnessBlock
@@ -834,7 +813,8 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 	// Create an inv vector for getting this block.
 	inv := wire.NewInvVect(invType, &blockHash)
 	// If the block is already in the cache, we can return it immediately.
-	blockValue, err := s.BlockCache.Get(*inv)
+	var blockValue cache.Value
+	blockValue, err = s.BlockCache.Get(*inv)
 	if err == nil && blockValue != nil {
 		return blockValue.(*cache.CacheableBlock).Block, err
 	}
@@ -847,23 +827,17 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 	if err != nil {
 		slog.Error(err)
 	}
-	// The block is only updated from the checkResponse function argument,
-	// which is always called single-threadedly. We don't check the block
-	// until after the query is finished, so we can just write to it
-	// naively.
-	var foundBlock *util.Block
+	// The block is only updated from the checkResponse function argument, which is always called single-threadedly. We
+	// don't check the block until after the query is finished, so we can just write to it naively.
 	s.queryPeers(
 		// Send a wire.GetDataMsg
 		getData,
-		// Check responses and if we get one that matches, end the
-		// query early.
+		// Check responses and if we get one that matches, end the query early.
 		func(sp *ServerPeer, resp wire.Message, quit chan<- struct{}) {
 			switch response := resp.(type) {
 			// We're only interested in "block" messages.
 			case *wire.MsgBlock:
-				// Only keep this going if we haven't already
-				// found a block, or we risk closing an already
-				// closed channel.
+				// Only keep this going if we haven't already found a block, or we risk closing an already closed channel.
 				if foundBlock != nil {
 					return
 				}
@@ -872,36 +846,27 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 					return
 				}
 				block := util.NewBlock(response)
-				// Only set height if util hasn't
-				// automagically put one in.
+				// Only set height if util hasn't automagically put one in.
 				if block.Height() == util.BlockHeightUnknown {
 					block.SetHeight(int32(height))
 				}
-				// If this claims our block but doesn't pass
-				// the sanity check, the peer is trying to
-				// bamboozle us. Disconnect it.
-				if err := blockchain.CheckBlockSanity(
-					block,
-					// We don't need to check PoW because by the time we get
-					// here, it's been checked during header synchronization
+				// If this claims our block but doesn't pass the sanity check, the peer is trying to bamboozle us.
+				// Disconnect it.
+				if err := blockchain.CheckBlockSanity(block,
+					// We don't need to check PoW because by the time we get here, it's been checked during header
+					// synchronization
 					s.chainParams.PowLimit,
 					s.timeSource,
 					false,
 					block.Height(),
-				); err != nil {
-					slog.Warnf(
-						"Invalid block for %s received from %s -- disconnecting peer",
-						blockHash, sp.Addr(),
-					)
+				); slog.Check(err) {
+					slog.Warnf("Invalid block for %s received from %s -- disconnecting peer", blockHash, sp.Addr())
 					sp.Disconnect()
 					return
 				}
-				// TODO(roasbeef): modify CheckBlockSanity to
-				// also check witness commitment
-				// At this point, the block matches what we
-				// know about it and we declare it sane. We can
-				// kill the query and pass the response back to
-				// the caller.
+				// TODO(roasbeef): modify CheckBlockSanity to also check witness commitment
+				// At this point, the block matches what we know about it and we declare it sane. We can kill the query
+				// and pass the response back to the caller.
 				foundBlock = block
 				close(quit)
 			default:
@@ -910,16 +875,15 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 		options...,
 	)
 	if foundBlock == nil {
-		return nil, fmt.Errorf("Couldn't retrieve block %s from "+
-			"network", blockHash)
+		err = fmt.Errorf("Couldn't retrieve block %s from network", blockHash)
+		slog.Debug(err)
+		return
 	}
 	// Add block to the cache before returning it.
-	err = s.BlockCache.Put(*inv, &cache.CacheableBlock{Block: foundBlock})
-	if err != nil {
-		slog.Error(err)
+	if err = s.BlockCache.Put(*inv, &cache.CacheableBlock{Block: foundBlock}); slog.Check(err) {
 		slog.Error("couldn't write block to cache:", err)
 	}
-	return foundBlock, nil
+	return
 }
 
 func // SendTransaction sends a transaction to all peers.
@@ -927,13 +891,9 @@ func // SendTransaction sends a transaction to all peers.
 //
 // TODO: Better privacy by sending to only one random peer and watching
 // propagation, requires better peer selection support in query API.
-(s *ChainService) SendTransaction(tx *wire.MsgTx,
-	options ...QueryOption) (err error) {
-	var err error
-	// Starting with the set of default options, we'll apply any specified
-	// functional options to the query so that we can check what inv type
-	// to use. Broadcast the inv to all peers, responding to any getdata
-	// messages for the transaction.
+(s *ChainService) SendTransaction(tx *wire.MsgTx, options ...QueryOption) (err error) {
+	// Starting with the set of default options, we'll apply any specified functional options to the query so that we
+	// can check what inv type to use. Broadcast the inv to all peers, responding to any getdata messages for the transaction.
 	qo := defaultQueryOptions()
 	qo.applyQueryOptions(options...)
 	invType := wire.InvTypeWitnessTx
@@ -943,30 +903,23 @@ func // SendTransaction sends a transaction to all peers.
 	// Create an inv.
 	txHash := tx.TxHash()
 	inv := wire.NewMsgInv()
-	err = inv.AddInvVect(wire.NewInvVect(invType, &txHash))
-	if err != nil {
-		slog.Error(err)
+	if err = inv.AddInvVect(wire.NewInvVect(invType, &txHash)); slog.Check(err) {
 	}
 	// Send the peer query and listen for getdata.
-	s.queryAllPeers(
-		inv,
+	s.queryAllPeers(inv,
 		func(sp *ServerPeer, resp wire.Message, quit chan<- struct{},
 			peerQuit chan<- struct{}) {
 			switch response := resp.(type) {
 			case *wire.MsgGetData:
 				for _, vec := range response.InvList {
 					if vec.Hash == txHash {
-						sp.QueueMessageWithEncoding(
-							tx, nil, qo.encoding)
+						sp.QueueMessageWithEncoding(tx, nil, qo.encoding)
 					}
 				}
 			case *wire.MsgReject:
 				if response.Hash == txHash {
-					err = fmt.Errorf("Transaction %s "+
-						"rejected by %s: %s",
-						tx.TxHash(), sp.Addr(),
-						response.Reason)
-					slog.Error(err)
+					err = fmt.Errorf("transaction %s rejected by %s: %s", tx.TxHash(), sp.Addr(), response.Reason)
+					slog.Debug(err)
 					close(quit)
 				}
 			}

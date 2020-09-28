@@ -4,6 +4,7 @@ package headerfs
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"os"
 )
 
@@ -19,9 +20,8 @@ func (h *headerStore) singleTruncate() (err error) {
 	// of the file as it stands currently.
 	fileInfo, err := h.file.Stat()
 
-	if err != nil {
-		Error(err)
-		return err
+	if slog.Check(err) {
+		return
 	}
 
 	fileSize := fileInfo.Size()
@@ -48,12 +48,12 @@ func (h *headerStore) singleTruncate() (err error) {
 	// and reopen it.
 	fileName := h.file.Name()
 
-	if err = h.file.Close(); err != nil {
-		return err
+	if err = h.file.Close(); slog.Check(err) {
+		return
 	}
 
-	if err = os.Truncate(fileName, newSize); err != nil {
-		return err
+	if err = os.Truncate(fileName, newSize); slog.Check(err) {
+		return
 	}
 
 	fileFlags := os.O_RDWR | os.O_APPEND | os.O_CREATE
