@@ -1,6 +1,6 @@
 module github.com/p9c/pod
 
-go 1.13
+go 1.14
 
 require (
 	gioui.org v0.0.0-20200311164516-7024a0e6914d
@@ -24,7 +24,7 @@ require (
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/p9c/goterm v0.0.3
-	github.com/p9c/pkg v0.0.3
+	github.com/p9c/pkg v0.0.6
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
 	github.com/urfave/cli v1.22.4
@@ -36,5 +36,4 @@ require (
 	golang.org/x/text v0.3.2
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	lukechampine.com/blake3 v1.0.0
-
 )

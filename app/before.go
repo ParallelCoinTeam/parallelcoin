@@ -47,7 +47,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// we are going to assume the config is not manually misedited
 		if apputil.FileExists(*cx.Config.ConfigFile) {
 			var b []byte
-			if b, err = ioutil.ReadFile(*cx.Config.ConfigFile); slog.Check(err) {
+			if b, err = ioutil.ReadFile(*cx.Config.ConfigFile); !slog.Check(err) {
 				cx.Config, cx.ConfigMap = pod.EmptyConfig()
 				if err = json.Unmarshal(b, cx.Config); slog.Check(err) {
 					os.Exit(1)
@@ -68,7 +68,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (err error) {
 			// if runtime.GOOS == "windows" {
 			// 	color = false
 			// }
-			slog.SetLevel(logi.LevelsMap[*cx.Config.LogLevel])
+			slog.SetLevel(logi.Level(logi.LevelsMap[*cx.Config.LogLevel]))
 		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")

@@ -1,6 +1,5 @@
-// Copyright 2013 @atotto. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright 2013 @atotto. All rights reserved. Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 package clipboard
 
@@ -32,7 +31,7 @@ var (
 	lstrcpy      = kernel32.NewProc("lstrcpyW")
 )
 
-func readAll() (string, err error) {
+func readAll() (text string, err error) {
 	r, _, err := openClipboard.Call(0)
 	if r == 0 {
 		return "", err
@@ -49,7 +48,7 @@ func readAll() (string, err error) {
 		return "", err
 	}
 
-	text := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(l))[:])
+	text = syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(l))[:])
 
 	r, _, err = globalUnlock.Call(h)
 	if r == 0 {
