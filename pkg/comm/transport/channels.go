@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net"
 	"runtime"
-	"runtime/debug"
 	"strings"
 	"time"
 
@@ -139,7 +138,7 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 	if addr, err = net.ResolveUDPAddr("udp4", address); Check(err) {
 		return
 	} else if conn, err = net.DialUDP("udp4", nil, addr); Check(err) {
-		debug.PrintStack()
+		// debug.PrintStack()
 		return
 	}
 	Debug("started new sender on", conn.LocalAddr(), "->", conn.RemoteAddr())

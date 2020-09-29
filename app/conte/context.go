@@ -117,11 +117,8 @@ func (cx *Xt) IsCurrent() (is bool) {
 	is = rn.Chain.IsCurrent() &&
 		rn.SyncManager.IsCurrent() &&
 		connected &&
-		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load()
-	Trace("is current:", is, "-", rn.Chain.IsCurrent(),
-		rn.SyncManager.IsCurrent(), !*cx.Config.Solo,
-		"connected", rn.HighestKnown.Load(),
-		rn.Chain.BestChain.Height(),
-	)
+		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load() || *cx.Config.Solo
+	Trace("is current:", is, "-", rn.Chain.IsCurrent(), rn.SyncManager.IsCurrent(), !*cx.Config.Solo, "connected",
+		rn.HighestKnown.Load(), rn.Chain.BestChain.Height())
 	return is
 }

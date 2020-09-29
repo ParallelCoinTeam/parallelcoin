@@ -24,8 +24,7 @@ var _d _dtype
 // Xt as in conte.Xt stores all the common state data used in pod
 type Xt struct {
 	sync.Mutex
-	// App is the heart of the application system,
-	// this creates and initialises it.
+	// App is the heart of the application system, this creates and initialises it.
 	App *cli.App
 	// Config is the pod all-in-one server config
 	Config *pod.Config

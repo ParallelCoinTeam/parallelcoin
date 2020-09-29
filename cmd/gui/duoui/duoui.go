@@ -445,7 +445,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				for {
 					select {
 					case <-updateTrigger:
-						Trace("repaint forced")
+						// Trace("repaint forced")
 						ui.ly.Window.Invalidate()
 					case <-ui.rc.Quit:
 						break quitTrigger

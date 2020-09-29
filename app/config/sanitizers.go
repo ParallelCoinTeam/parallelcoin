@@ -294,9 +294,8 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	if isNew {
 		// Now is the best time to make the certs
 		//
-		// // GenerateRPCKeyPair generates a new RPC TLS keypair and writes the cert and
-		// // possibly also the key in PEM format to the paths specified by the cfg.  If
-		// // successful, the new keypair is returned.
+		// // GenerateRPCKeyPair generates a new RPC TLS keypair and writes the cert and // possibly also the key in PEM
+		// format to the paths specified by the cfg. If // successful, the new keypair is returned.
 		Info("generating TLS certificates")
 		// Create directories for cert and key files if they do not yet exist.
 		Warn("rpc tls ", *cfg.RPCCert, " ", *cfg.RPCKey)
@@ -496,8 +495,8 @@ func configListener(cfg *pod.Config, params *netparams.Params) {
 		len(*cfg.Listeners) == 0 {
 		*cfg.DisableListen = true
 	}
-	// Add the default listener if none were specified. The default listener is
-	// all addresses on the listen port for the network we are to connect to.
+	// Add the default listener if none were specified. The default listener is all addresses on the listen port for the
+	// network we are to connect to.
 	Trace("checking if listener was set")
 	if len(*cfg.Listeners) == 0 {
 		*cfg.Listeners = []string{":" + params.DefaultPort}
@@ -561,9 +560,13 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 	Trace("checking rpc listener addresses")
 	nrms := normalize.Addresses
 	// Add default port to all rpc listener addresses if needed and remove duplicate addresses.
+	//
 	// *cfg.RPCListeners = nrms(*cfg.RPCListeners, cx.ActiveNet.RPCClientPort)
+	//
 	// Add default port to all listener addresses if needed and remove duplicate addresses.
+	//
 	// *cfg.Listeners = nrms(*cfg.Listeners, cx.ActiveNet.DefaultPort)
+	//
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
 	*cfg.AddPeers = nrms(*cfg.AddPeers, params.DefaultPort)
 	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers, params.DefaultPort)
