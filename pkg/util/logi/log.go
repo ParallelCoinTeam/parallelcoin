@@ -250,7 +250,8 @@ func (l *Logger) SetLevel(level string, color bool, split string) {
 	l.Level = sanitizeLoglevel(level)
 	sep := string(os.PathSeparator)
 	if runtime.GOOS == "windows" {
-		sep = "/"
+		sep = "\\"
+		color = false
 	}
 	l.Split = split + sep
 	l.Color = color
@@ -260,7 +261,7 @@ func (l *Logger) LocToPkg(pkg string) (out string) {
 	//fmt.Println("pkg",pkg)
 	sep := string(os.PathSeparator)
 	if runtime.GOOS == "windows" {
-		sep = "/"
+		sep = "\\"
 	}
 	split := strings.Split(pkg, l.Split)
 	if len(split) < 2 {
@@ -333,8 +334,9 @@ func (l *Logger) GetLoc(loc string, line int) (out string) {
 	split := strings.Split(loc, l.Split)
 	if len(split) < 2 {
 		out = loc
+	} else {
+		out = split[1]
 	}
-	out = split[1]
 	return out + fmt.Sprint(":", line)
 }
 
