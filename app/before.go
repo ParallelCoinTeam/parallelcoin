@@ -6,12 +6,13 @@ import (
 	"io/ioutil"
 	pseudo "math/rand"
 	"os"
-	"runtime"
 	"time"
 
+	"github.com/p9c/pkg/app/slog/serve"
+
+	"github.com/p9c/pkg/app/slog/logi"
+
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/serve"
 
 	"github.com/p9c/pkg/app/slog"
 	"github.com/urfave/cli"
@@ -63,11 +64,11 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if c.IsSet("loglevel") {
 			slog.Trace("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
-			color := true
-			if runtime.GOOS == "windows" {
-				color = false
-			}
-			logi.L.SetLevel(*cx.Config.LogLevel, color, "pod")
+			// color := true
+			// if runtime.GOOS == "windows" {
+			// 	color = false
+			// }
+			slog.SetLevel(logi.LevelsMap[*cx.Config.LogLevel])
 		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")

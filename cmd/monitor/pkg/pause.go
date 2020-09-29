@@ -5,9 +5,10 @@
 package pkg
 
 import (
-	"github.com/p9c/pkg/app/slog"
 	"os/exec"
 	"syscall"
+
+	"github.com/p9c/pkg/app/slog"
 )
 
 func pause(s *State, c *exec.Cmd) {

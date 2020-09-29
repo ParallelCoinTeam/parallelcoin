@@ -6,16 +6,18 @@ package pkg
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/pkg/app/slog"
+
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pkg/app/slog"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type Field struct {
@@ -64,7 +66,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 	switch {
 	case s.Config.SettingsZoomed:
 		weight = 1
-	//case s.WindowWidth < 1024 && s.WindowHeight > 1024:
+	// case s.WindowWidth < 1024 && s.WindowHeight > 1024:
 	// weight = 0.333
 	case s.WindowHeight <= 960 && s.WindowWidth <= 960:
 		weight = 1
@@ -95,7 +97,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 							ic = "minimize"
 						}
 						b := s.Buttons["SettingsZoom"]
-						//s.IconButton(ic, "DocText", "DocBg", b)
+						// s.IconButton(ic, "DocText", "DocBg", b)
 						s.ButtonArea(func() {
 							s.Inset(8, func() {
 								s.Icon(ic, "DocText", "DocBg", 32)
@@ -114,7 +116,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 							s.Icon("foldIn", "DocText", "DocBg", 32)
 						})
 					}, b)
-					//s.IconButton("foldIn", "DocText", "DocBg", b)
+					// s.IconButton("foldIn", "DocText", "DocBg", b)
 					for b.Clicked(s.Gtx) {
 						slog.Debug("settings panel close button clicked")
 						s.Config.SettingsOpen = false
@@ -169,7 +171,7 @@ func (s *State) SettingsTabs(size int) {
 }
 func (s *State) SettingsItem(fields pod.Group) func(il int) {
 	return func(il int) {
-		//il = len(fields.Fields) - 1 - il
+		// il = len(fields.Fields) - 1 - il
 		tl := &Field{
 			Field: &fields.Fields[il],
 		}
@@ -205,7 +207,7 @@ func (s *State) SettingsBody() {
 
 func (s *State) SettingsItemLabel(f *Field) func() {
 	return func() {
-		//s.Gtx.Constraints.Width.Max = 32 * 10
+		// s.Gtx.Constraints.Width.Max = 32 * 10
 		s.Gtx.Constraints.Width.Min = 32 * 10
 		s.Inset(8, func() {
 			s.FlexV(gui.Rigid(s.SettingsFieldLabel(f)))
@@ -326,7 +328,7 @@ func (s *State) InputField(f *Field) func() {
 					}
 				})()
 			case "time":
-				//Debug("rendering duration")
+				// Debug("rendering duration")
 				s.Editor(
 					(rdw[f.Field.Model]).(*gel.Editor),
 					(rdw[f.Field.Model]).(*gel.Editor).Text(),
@@ -346,7 +348,7 @@ func (s *State) InputField(f *Field) func() {
 		case "switch":
 			bg, fg := s.Theme.Colors["DocBg"], s.Theme.Colors["DocText"]
 			sw := s.Theme.DuoUICheckBox("",
-				//f.Field.Label,
+				// f.Field.Label,
 				s.Theme.Colors["Primary"],
 				s.Theme.Colors["Primary"])
 			sw.PillColor = bg
@@ -387,7 +389,7 @@ func (s *State) InputField(f *Field) func() {
 		//	}))
 		default:
 			// duo.Theme.CheckBox("Checkbox").Layout(g,
-			//(duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
+			// (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
 		}
 	}
 }
@@ -412,7 +414,7 @@ func (s *State) Editor(editorController *gel.Editor, label string, handler func(
 			for _, e := range editorController.Events(g) {
 				switch e.(type) {
 				case gel.EditorEvent:
-					//case gel.ChangeEvent:
+					// case gel.ChangeEvent:
 					handler(e)
 				}
 			}
@@ -440,7 +442,7 @@ func (s *State) PasswordEditor(editorController *gel.Editor, handler func(gel.Ed
 			})
 			for _, e := range editorController.Events(g) {
 				switch e.(type) {
-				//case gel.ChangeEvent:
+				// case gel.ChangeEvent:
 				case gel.EditorEvent:
 					handler(e)
 				}

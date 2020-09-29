@@ -25,8 +25,8 @@ const (
 	statusValid
 	// statusValidateFailed indicates that the block has failed validation.
 	statusValidateFailed
-	// statusInvalidAncestor indicates that one of the block's ancestors has
-	// has failed validation, thus the block is also invalid.
+	// statusInvalidAncestor indicates that one of the block's ancestors has has failed validation, thus the block is
+	// also invalid.
 	statusInvalidAncestor
 	// statusNone indicates that the block has no validation state flags set.
 	//
@@ -34,39 +34,31 @@ const (
 	statusNone blockStatus = 0
 )
 
-// HaveData returns whether the full block data is stored in the database.
-// This will return false for a block node where only the header is
-// downloaded or kept.
+// HaveData returns whether the full block data is stored in the database. This will return false for a block node where
+// only the header is downloaded or kept.
 func (status blockStatus) HaveData() bool {
 	return status&statusDataStored != 0
 }
 
-// KnownValid returns whether the block is known to be valid.
-// This will return false for a valid block that has not been fully validated
-// yet.
+// KnownValid returns whether the block is known to be valid. This will return false for a valid block that has not been
+// fully validated yet.
 func (status blockStatus) KnownValid() bool {
 	return status&statusValid != 0
 }
 
-// KnownInvalid returns whether the block is known to be invalid.
-// This may be because the block itself failed validation or any of its
-// ancestors is invalid. This will return false for invalid blocks that have
-// not been proven invalid yet.
+// KnownInvalid returns whether the block is known to be invalid. This may be because the block itself failed validation
+// or any of its ancestors is invalid. This will return false for invalid blocks that have not been proven invalid yet.
 func (status blockStatus) KnownInvalid() bool {
 	return status&(statusValidateFailed|statusInvalidAncestor) != 0
 }
 
-// BlockNode represents a block within the block chain and is primarily used
-// to aid in selecting the best chain to be the main chain.
-// The main chain is stored into the block database.
+// BlockNode represents a block within the block chain and is primarily used to aid in selecting the best chain to be
+// the main chain. The main chain is stored into the block database.
 type BlockNode struct {
-	// NOTE: Additions, deletions,
-	// or modifications to the order of the definitions in this struct should
-	// not be changed without considering how it affects alignment on 64-bit
-	// platforms. The current order is specifically crafted to result in
-	// minimal padding. There will be hundreds of thousands of these in
-	// memory, so a few extra bytes of padding adds up.
-	// parent is the parent block for this node.
+	// NOTE: Additions, deletions, or modifications to the order of the definitions in this struct should not be changed
+	// without considering how it affects alignment on 64-bit platforms. The current order is specifically crafted to
+	// result in minimal padding. There will be hundreds of thousands of these in memory, so a few extra bytes of
+	// padding adds up. parent is the parent block for this node.
 	parent *BlockNode
 	// hash is the double sha 256 of the block.
 	hash chainhash.Hash
@@ -75,30 +67,25 @@ type BlockNode struct {
 	workSum *big.Int
 	// height is the position in the block chain.
 	height int32
-	// Some fields from block headers to aid in best chain selection and
-	// reconstructing headers from memory.
-	// These must be treated as immutable and are intentionally ordered to
-	// avoid padding on 64-bit platforms.
+	// Some fields from block headers to aid in best chain selection and reconstructing headers from memory. These must
+	// be treated as immutable and are intentionally ordered to avoid padding on 64-bit platforms.
 	version    int32
 	bits       uint32
 	nonce      uint32
 	timestamp  int64
 	merkleRoot chainhash.Hash
-	// status is a bitfield representing the validation state of the block.
-	// The status field, unlike the other fields,
-	// may be written to and so should only be accessed using the concurrent
-	// -safe NodeStatus method on blockIndex once the node has been added to
-	// the global index.
+	// status is a bitfield representing the validation state of the block. The status field, unlike the other fields,
+	// may be written to and so should only be accessed using the concurrent -safe NodeStatus method on blockIndex once
+	// the node has been added to the global index.
 	status blockStatus
 	// Diffs is the computed difficulty targets for a block to be connected
 	// to this one
 	Diffs atomic.Value
 }
 
-// initBlockNode initializes a block node from the given header and parent
-// node, calculating the height and workSum from the respective fields on the
-// parent. This function is NOT safe for concurrent access.
-// It must only be called when initially creating a node.
+// initBlockNode initializes a block node from the given header and parent node, calculating the height and workSum from
+// the respective fields on the parent. This function is NOT safe for concurrent access. It must only be called when
+// initially creating a node.
 func initBlockNode(node *BlockNode, blockHeader *wire.BlockHeader, parent *BlockNode) {
 	*node = BlockNode{
 		hash:       blockHeader.BlockHash(),

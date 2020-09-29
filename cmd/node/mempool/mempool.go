@@ -2,18 +2,17 @@ package mempool
 
 import (
 	"container/list"
-	"errors"
 	"fmt"
-	"github.com/p9c/pkg/app/slog"
 	"math"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/p9c/pkg/app/slog"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	config "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/hardfork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	"github.com/p9c/pod/pkg/chain/mining"
@@ -681,11 +680,11 @@ func (mp *TxPool) maybeAcceptTransaction(b *blockchain.BlockChain, tx *util.Tx, 
 			return
 		}
 	}
-	if blockchain.ContainsBlacklisted(b, tx, hardfork.Blacklist) {
-		err = errors.New("transaction contains blacklisted address")
-		slog.Debug(err)
-		return
-	}
+	// if blockchain.ContainsBlacklisted(b, tx, hardfork.Blacklist) {
+	// 	err = errors.New("transaction contains blacklisted address")
+	// 	slog.Debug(err)
+	// 	return
+	// }
 	// Don't accept the transaction if it already exists in the pool. This applies to orphan transactions as well when
 	// the reject duplicate orphans flag is set.  This check is intended to be a quick check to weed out duplicates.
 	if mp.isTransactionInPool(txHash) || (rejectDupOrphans && mp.isOrphanInPool(txHash)) {

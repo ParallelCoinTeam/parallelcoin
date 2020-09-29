@@ -6,7 +6,12 @@ package pkg
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"path/filepath"
+
 	"gioui.org/layout"
+	"github.com/p9c/pkg/app/slog"
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -16,9 +21,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pkg/app/slog"
-	"io/ioutil"
-	"path/filepath"
 )
 
 const ConfigFileName = "monitor.json"

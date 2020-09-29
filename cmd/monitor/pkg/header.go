@@ -6,14 +6,16 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/gui/gelook"
-	"github.com/p9c/pkg/app/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"syscall"
 	"time"
+
+	"github.com/p9c/pkg/app/slog"
+
+	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/gui/gelook"
 
 	"gioui.org/layout"
 	"gioui.org/unit"

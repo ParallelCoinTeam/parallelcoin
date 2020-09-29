@@ -5,12 +5,14 @@
 package pkg
 
 import (
-	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pkg/app/slog"
 	"os/exec"
 	"strings"
+
+	"gioui.org/layout"
+	"github.com/p9c/pkg/app/slog"
+
+	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/util/logi"
 )
 
 // LogViewer renders the log view

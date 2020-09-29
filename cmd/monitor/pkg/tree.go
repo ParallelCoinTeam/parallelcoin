@@ -5,15 +5,17 @@
 package pkg
 
 import (
+	"os"
+	"sort"
+	"strings"
+
 	"gioui.org/layout"
+	"github.com/p9c/pkg/app/slog"
+
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 	"github.com/p9c/pod/pkg/util/logi/consume"
-	"github.com/p9c/pkg/app/slog"
-	"os"
-	"sort"
-	"strings"
 )
 
 type Node struct {

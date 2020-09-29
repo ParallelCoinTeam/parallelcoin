@@ -1,12 +1,13 @@
 package serve
 
 import (
+	"go.uber.org/atomic"
+
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
-	"go.uber.org/atomic"
 )
 
 func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool)) {

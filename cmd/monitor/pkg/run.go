@@ -5,17 +5,19 @@
 package pkg
 
 import (
-	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/consume"
-	"github.com/p9c/pkg/app/slog"
-	"go.uber.org/atomic"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"gioui.org/layout"
+	"github.com/p9c/pkg/app/slog"
+	"go.uber.org/atomic"
+
+	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 )
 
 func (s *State) RunControls() layout.FlexChild {

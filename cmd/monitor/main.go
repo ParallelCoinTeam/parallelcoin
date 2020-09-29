@@ -5,21 +5,23 @@
 package monitor
 
 import (
+	"os"
+	"os/exec"
+	"strings"
+	"time"
+
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/pkg/app/slog"
+	"gopkg.in/src-d/go-git.v4"
+
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/cmd/monitor/pkg"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pkg/app/slog"
-	"gopkg.in/src-d/go-git.v4"
-	"os"
-	"os/exec"
-	"strings"
-	"time"
 )
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
@@ -60,8 +62,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 		}
 	}
 	mon.W = app.NewWindow(
-		app.Size(unit.Dp(float32(mon.Config.Width)),
-			unit.Dp(float32(mon.Config.Height))),
+		app.Size(unit.Dp(float32(mon.Config.Width)), unit.Dp(float32(mon.Config.Height))),
 		app.Title("ParallelCoin Pod Monitor ["+*cx.Config.DataDir+"]"),
 	)
 	mon.Gtx = layout.NewContext(mon.W.Queue())

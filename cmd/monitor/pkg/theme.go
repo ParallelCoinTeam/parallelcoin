@@ -9,7 +9,7 @@ import "github.com/p9c/pkg/app/slog"
 func (s *State) FlipTheme() {
 	slog.Debug("dark theme:", s.Config.DarkTheme)
 	s.Config.DarkTheme = !s.Config.DarkTheme
-	//Debug(s.Config.DarkTheme)
+	// Debug(s.Config.DarkTheme)
 	s.SetTheme(s.Config.DarkTheme)
 	s.SaveConfig()
 }
