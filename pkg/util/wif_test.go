@@ -3,9 +3,9 @@ package util_test
 import (
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
-	. "github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	. "github.com/p9c/pod/pkg/util"
 )
 
 func TestEncodeDecodeWIF(t *testing.T) {

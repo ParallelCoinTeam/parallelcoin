@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // TestChainSvrCmds tests all of the chain server commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.

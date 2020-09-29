@@ -1,11 +1,11 @@
 package app
 
 import (
-	"github.com/stalker-loki/pod/app/config"
+	"github.com/p9c/pod/app/config"
 	"github.com/urfave/cli"
 
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/cmd/node"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/cmd/node"
 )
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {

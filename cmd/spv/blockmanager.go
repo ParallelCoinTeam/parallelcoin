@@ -10,17 +10,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/stalker-loki/pod/cmd/spv/headerfs"
-	"github.com/stalker-loki/pod/cmd/spv/headerlist"
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
-	"github.com/stalker-loki/pod/pkg/chain/fork"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/coding/gcs"
-	"github.com/stalker-loki/pod/pkg/coding/gcs/builder"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/cmd/spv/headerfs"
+	"github.com/p9c/pod/cmd/spv/headerlist"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (

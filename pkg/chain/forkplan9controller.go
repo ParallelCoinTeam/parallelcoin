@@ -3,7 +3,7 @@ package blockchain
 import (
 	"sort"
 
-	"github.com/stalker-loki/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/chain/fork"
 )
 
 type Algo struct {

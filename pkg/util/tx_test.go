@@ -8,8 +8,8 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // TestTx tests the API for Tx.

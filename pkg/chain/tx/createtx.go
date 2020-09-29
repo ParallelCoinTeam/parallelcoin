@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"sort"
 
-	txauthor "github.com/stalker-loki/pod/pkg/chain/tx/author"
-	wtxmgr "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	"github.com/stalker-loki/pod/pkg/util"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/util"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // byAmount defines the methods needed to satisify sort.Interface to

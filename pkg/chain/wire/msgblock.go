@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // defaultTransactionAlloc is the default size used for the backing array for transactions.  The transaction array will dynamically grow as needed, but this figure is intended to provide enough space for the number of transactions in the vast majority of blocks without needing to grow the backing array multiple times.

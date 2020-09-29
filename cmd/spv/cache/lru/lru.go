@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/stalker-loki/pod/cmd/spv/cache"
+	"github.com/p9c/pod/cmd/spv/cache"
 )
 
 // elementMap is an alias for a map from a generic interface to a list.Element.

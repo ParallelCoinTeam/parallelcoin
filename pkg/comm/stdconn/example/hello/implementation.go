@@ -5,7 +5,7 @@ import (
 	"net/rpc"
 	"os"
 
-	"github.com/stalker-loki/pod/pkg/comm/stdconn"
+	"github.com/p9c/pod/pkg/comm/stdconn"
 )
 
 type Hello struct {

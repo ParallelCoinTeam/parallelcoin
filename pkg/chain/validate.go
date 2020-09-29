@@ -8,14 +8,14 @@ import (
 	"math/big"
 	"time"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/chain/fork"
-	"github.com/stalker-loki/pod/pkg/chain/hardfork"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/chain/hardfork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (

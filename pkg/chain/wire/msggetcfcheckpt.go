@@ -3,7 +3,7 @@ package wire
 import (
 	"io"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MsgGetCFCheckpt is a request for filter headers at evenly spaced intervals throughout the blockchain history. It allows to set the FilterType field to get headers in the chain of basic (0x00) or extended (0x01) headers.

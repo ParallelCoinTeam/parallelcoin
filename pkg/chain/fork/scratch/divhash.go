@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/big"
 
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 func main() {

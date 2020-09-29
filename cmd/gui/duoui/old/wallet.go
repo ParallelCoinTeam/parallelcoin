@@ -5,9 +5,9 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/stalker-loki/pod/pkg/gui/gel"
-	"github.com/stalker-loki/pod/pkg/gui/gelook"
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 var (

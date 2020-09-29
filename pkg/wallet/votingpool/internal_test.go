@@ -1,10 +1,10 @@
 package votingpool
 
 import (
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	"github.com/stalker-loki/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 var TstLastErr = lastErr

@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // mustParseShortForm parses the passed short form script and returns the resulting bytes.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.

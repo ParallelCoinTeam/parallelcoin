@@ -6,7 +6,7 @@ import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
-	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 	"image"
 	"image/color"
 

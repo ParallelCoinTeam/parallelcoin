@@ -1,7 +1,7 @@
 package component
 
 import (
-	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 type DuoUIcomponent struct {

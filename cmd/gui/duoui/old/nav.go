@@ -3,7 +3,7 @@ package duoui
 import (
 	"gioui.org/layout"
 
-	"github.com/stalker-loki/pod/cmd/gui/component"
+	"github.com/p9c/pod/cmd/gui/component"
 )
 
 func (ui *DuoUI) DuoUImenu() func() {

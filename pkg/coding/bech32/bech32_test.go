@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/coding/bech32"
+	"github.com/p9c/pod/pkg/coding/bech32"
 )
 
 func TestBech32(t *testing.T) {

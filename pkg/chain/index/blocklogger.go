@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/util"
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util"
+	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 // blockProgressLogger provides periodic logging for other services in order to show users progress of certain "actions" involving some or all current blocks. Ex: syncing to best chain, indexing all blocks, etc.

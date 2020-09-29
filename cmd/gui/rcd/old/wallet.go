@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
-	"github.com/stalker-loki/pod/pkg/rpc/legacy"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/legacy"
 )
 
 func (r *RcVar) GetDuoUIbalance() {

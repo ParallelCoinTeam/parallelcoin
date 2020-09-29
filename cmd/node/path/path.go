@@ -3,7 +3,7 @@ package path
 import (
 	"path/filepath"
 
-	"github.com/stalker-loki/pod/app/conte"
+	"github.com/p9c/pod/app/conte"
 )
 
 // BlockDb returns the path to the block database given a database type.

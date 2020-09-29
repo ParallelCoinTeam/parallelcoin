@@ -1,7 +1,7 @@
 # indexers
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://godoc.org/github.com/stalker-loki/pod/blockchain/indexers?status.png)](http://godoc.org/github.com/stalker-loki/pod/blockchain/indexers)
+[![GoDoc](https://godoc.org/github.com/p9c/pod/blockchain/indexers?status.png)](http://godoc.org/github.com/p9c/pod/blockchain/indexers)
 
 Package indexers implements optional block chain indexes.
 
@@ -18,7 +18,7 @@ These indexes are typically used to enhance the amount of information available 
 ## Installation
 
 ```bash
-$ go get -u github.com/stalker-loki/pod/blockchain/indexers
+$ go get -u github.com/p9c/pod/blockchain/indexers
 ```
 
 ## License

@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/wire"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // RawTxInWitnessSignature returns the serialized ECDSA signature for the input idx of the given transaction, with the

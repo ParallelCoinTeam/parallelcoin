@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/coding/fec"
-	"github.com/stalker-loki/pod/pkg/coding/gcm"
+	"github.com/p9c/pod/pkg/coding/fec"
+	"github.com/p9c/pod/pkg/coding/gcm"
 )
 
 const (

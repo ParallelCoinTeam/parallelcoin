@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/stalker-loki/pod/app/conte"
+	"github.com/p9c/pod/app/conte"
 )
 
 const (

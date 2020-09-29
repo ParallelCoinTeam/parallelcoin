@@ -3,9 +3,9 @@ package blockchain
 import (
 	"fmt"
 
-	"github.com/stalker-loki/pod/pkg/chain/hardfork"
-	database "github.com/stalker-loki/pod/pkg/db"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chain/hardfork"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func // maybeAcceptBlock potentially accepts a block into the block chain

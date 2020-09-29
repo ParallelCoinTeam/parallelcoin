@@ -1,8 +1,8 @@
 # ![Logo](https://raw.githubusercontent.com/stalker-loki/pod/master/pkg/gui/logo/logo.svg) Parallelcoin Pod 
 
 [![github](https://img.shields.io/badge/github-page-blue.svg)](https://stalker-loki.github.io/pod)
-[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/stalker-loki/pod) 
-[![Go Report Card](https://goreportcard.com/badge/github.com/stalker-loki/pod)](https://goreportcard.com/report/github.com/stalker-loki/pod)
+[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/p9c/pod)](https://goreportcard.com/report/github.com/p9c/pod)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=alert_status)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=bugs)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=ncloc)](https://sonarcloud.io/dashboard?id=p9c_pod)

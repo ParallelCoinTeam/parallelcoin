@@ -4,10 +4,10 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 
-	"github.com/stalker-loki/pod/cmd/gui/model"
-	"github.com/stalker-loki/pod/cmd/gui/rcd"
-	"github.com/stalker-loki/pod/pkg/gui/gel"
-	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/p9c/pod/cmd/gui/model"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 var buttonHeader = new(gel.Button)

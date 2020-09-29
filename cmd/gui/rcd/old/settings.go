@@ -3,15 +3,15 @@ package old
 import (
 	js "encoding/json"
 	"fmt"
-	config2 "github.com/stalker-loki/pod/app/config"
+	config2 "github.com/p9c/pod/app/config"
 	"github.com/urfave/cli"
 	"time"
 
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/app/save"
-	"github.com/stalker-loki/pod/cmd/gui/model"
-	"github.com/stalker-loki/pod/pkg/gui/gel"
-	"github.com/stalker-loki/pod/pkg/pod"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/cmd/gui/model"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/pod"
 )
 
 func (r *RcVar) SaveDaemonCfg() {

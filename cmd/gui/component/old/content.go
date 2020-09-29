@@ -9,10 +9,10 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/stalker-loki/pod/cmd/gui/rcd"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/gui/gel"
-	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 var (

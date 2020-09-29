@@ -7,11 +7,11 @@ import (
 	"gioui.org/layout"
 	"go.uber.org/atomic"
 
-	"github.com/stalker-loki/pod/pkg/gui/gel"
-	"github.com/stalker-loki/pod/pkg/gui/gelook"
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
+	log "github.com/p9c/pod/pkg/util/logi"
 
-	"github.com/stalker-loki/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/pod"
 )
 
 type DuOScomponent struct {

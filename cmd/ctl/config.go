@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/stalker-loki/pod/app/appdata"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // unusableFlags are the command usage flags which this utility are not able to

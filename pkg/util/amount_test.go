@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	. "github.com/stalker-loki/pod/pkg/util"
+	. "github.com/p9c/pod/pkg/util"
 )
 
 func TestAmountCreation(t *testing.T) {

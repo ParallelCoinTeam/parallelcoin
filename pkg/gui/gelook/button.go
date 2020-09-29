@@ -7,7 +7,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi"
 
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
@@ -17,7 +17,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 )
 
 type Button struct {

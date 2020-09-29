@@ -6,12 +6,12 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/cmd/kopach/worker"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/chain/fork"
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/cmd/kopach/worker"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {

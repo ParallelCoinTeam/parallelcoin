@@ -6,17 +6,17 @@ import (
 	"sync"
 	"time"
 
-	sac "github.com/stalker-loki/pod/cmd/spv"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	wtxmgr "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/coding/gcs"
-	"github.com/stalker-loki/pod/pkg/coding/gcs/builder"
-	rpcclient "github.com/stalker-loki/pod/pkg/rpc/client"
-	"github.com/stalker-loki/pod/pkg/util"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	sac "github.com/p9c/pod/cmd/spv"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // NeutrinoClient is an implementation of the btcwalet chain.Interface interface.

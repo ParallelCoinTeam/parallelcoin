@@ -1,6 +1,6 @@
 package main
 
-import "github.com/stalker-loki/pod/clog"
+import "github.com/p9c/pod/clog"
 
 var (
 	lf = &clog.Ftl.Chan

@@ -1,7 +1,7 @@
 # chaincfg
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/stalker-loki/pod/chaincfg)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/chaincfg)
 
 Package chaincfg defines chain configuration parameters for the three standard Parallelcoin networks and provides the ability for callers to define their own custom networks.
 
@@ -14,13 +14,13 @@ package main
 import (
 "flag"
 "fmt"
-"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+"github.com/p9c/pod/pkg/chain/config/netparams"
 "log"
 
 
 
 
-"github.com/stalker-loki/pod/pkg/chain/config"
+"github.com/p9c/pod/pkg/chain/config"
 "git.parallelcoin.io/util"
 )
 var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
@@ -46,7 +46,7 @@ func main(	) {
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/stalker-loki/pod/chaincfg
+$ go get -u github.com/p9c/pod/chaincfg
 ```
 
 ## License

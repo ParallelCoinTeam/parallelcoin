@@ -10,9 +10,9 @@ import (
 
 	"github.com/btcsuite/golangcrypto/ripemd160"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func TestAddresses(t *testing.T) {

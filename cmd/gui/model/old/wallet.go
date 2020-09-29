@@ -3,7 +3,7 @@ package model
 import (
 	"gioui.org/op/paint"
 
-	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 )
 
 type DuoUIbalance struct {

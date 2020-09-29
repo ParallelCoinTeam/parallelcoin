@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // TestSequenceLocksActive tests the SequenceLockActive function to ensure it

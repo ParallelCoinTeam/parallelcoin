@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stalker-loki/pod/app/appdata"
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/p9c/pod/app/appdata"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/urfave/cli"
 )

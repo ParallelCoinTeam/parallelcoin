@@ -3,9 +3,9 @@ package old
 import (
 	"time"
 
-	"github.com/stalker-loki/pod/cmd/gui/model"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
-	"github.com/stalker-loki/pod/pkg/rpc/chainrpc"
+	"github.com/p9c/pod/cmd/gui/model"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 )
 
 // System Ststus

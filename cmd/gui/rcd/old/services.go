@@ -2,12 +2,12 @@ package old
 
 import (
 	"fmt"
-	"github.com/stalker-loki/pod/pkg/rpc/legacy"
+	"github.com/p9c/pod/pkg/rpc/legacy"
 	"os"
 
-	"github.com/stalker-loki/pod/cmd/node"
-	"github.com/stalker-loki/pod/cmd/walletmain"
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func (r *RcVar) StartServices() (err error) {

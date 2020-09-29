@@ -7,8 +7,8 @@ import (
 	"runtime/debug"
 	"testing"
 
-	"github.com/stalker-loki/pod/cmd/node/integration/rpctest"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/cmd/node/integration/rpctest"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 )
 
 func testGetBestBlock(r *rpctest.Harness, t *testing.T) {

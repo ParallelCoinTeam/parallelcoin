@@ -3,13 +3,13 @@ package chainrpc
 import (
 	"sync/atomic"
 
-	"github.com/stalker-loki/pod/cmd/node/mempool"
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	netsync "github.com/stalker-loki/pod/pkg/chain/sync"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/comm/peer"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/cmd/node/mempool"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	netsync "github.com/p9c/pod/pkg/chain/sync"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Peer provides a peer for use with the RPC server and implements the

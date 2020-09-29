@@ -4,7 +4,7 @@
 package ffldb
 
 import (
-	database "github.com/stalker-loki/pod/pkg/db"
+	database "github.com/p9c/pod/pkg/db"
 )
 
 // TstRunWithMaxBlockFileSize runs the passed function with the maximum allowed file size for the database set to the provided value.  The value will be set back to the original value upon completion.

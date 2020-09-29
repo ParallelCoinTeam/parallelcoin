@@ -1,13 +1,13 @@
 package netsync
 
 import (
-	"github.com/stalker-loki/pod/cmd/node/mempool"
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/comm/peer"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/cmd/node/mempool"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // PeerNotifier exposes methods to notify peers of status changes to transactions, blocks, etc. Currently server (in the main package) implements this interface.

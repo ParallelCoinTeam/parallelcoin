@@ -7,11 +7,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	_ "github.com/stalker-loki/pod/pkg/db/walletdb/bdb"
-	"github.com/stalker-loki/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
-	vp "github.com/stalker-loki/pod/pkg/wallet/votingpool"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	vp "github.com/p9c/pod/pkg/wallet/votingpool"
 )
 
 func TestLoadPoolAndDepositScript(t *testing.T) {

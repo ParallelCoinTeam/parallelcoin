@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/atomic"
 
-	"github.com/stalker-loki/pod/pkg/data/ring"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/data/ring"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // System Ststus

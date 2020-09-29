@@ -5,16 +5,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	tm "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/coding/gcs"
-	"github.com/stalker-loki/pod/pkg/coding/gcs/builder"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/stalker-loki/pod/pkg/rpc/client"
-	"github.com/stalker-loki/pod/pkg/util"
-	wm "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
+	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // RPCClient represents a persistent client connection to a bitcoin RPC server

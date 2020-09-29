@@ -10,11 +10,11 @@ import (
 
 	"github.com/tstranex/gozmq"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	rpcclient "github.com/stalker-loki/pod/pkg/rpc/client"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 // BitcoindConn represents a persistent client connection to a bitcoind node

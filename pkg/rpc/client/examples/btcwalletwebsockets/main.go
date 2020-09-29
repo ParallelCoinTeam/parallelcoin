@@ -8,9 +8,9 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"github.com/stalker-loki/pod/app/appdata"
-	rpcclient "github.com/stalker-loki/pod/pkg/rpc/client"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/app/appdata"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func main() {

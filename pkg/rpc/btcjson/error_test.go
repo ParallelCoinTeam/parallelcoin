@@ -3,7 +3,7 @@ package btcjson_test
 import (
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.

@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
-	database "github.com/stalker-loki/pod/pkg/db"
-	"github.com/stalker-loki/pod/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // BenchmarkBlockHeader benchmarks how long it takes to load the mainnet genesis block header.

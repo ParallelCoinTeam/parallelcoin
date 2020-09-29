@@ -3,7 +3,7 @@ package connmgr
 import (
 	"runtime"
 
-	"github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi"
 )
 
 var pkg string

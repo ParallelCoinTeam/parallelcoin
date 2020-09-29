@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stalker-loki/pod/cmd/node/state"
+	"github.com/p9c/pod/cmd/node/state"
 )
 
 // DefaultConnectTimeout is a reasonable 30 seconds

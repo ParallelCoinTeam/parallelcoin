@@ -9,9 +9,9 @@ import (
 	"gioui.org/unit"
 	"github.com/nfnt/resize"
 
-	"github.com/stalker-loki/pod/cmd/gui/model"
-	"github.com/stalker-loki/pod/cmd/gui/rcd"
-	"github.com/stalker-loki/pod/pkg/coding/qrcode"
+	"github.com/p9c/pod/cmd/gui/model"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/coding/qrcode"
 )
 
 // func DuoUIqrCode(pubAddr string) {

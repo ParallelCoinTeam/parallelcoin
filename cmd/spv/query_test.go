@@ -6,12 +6,12 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/stalker-loki/pod/cmd/spv/cache"
-	"github.com/stalker-loki/pod/cmd/spv/cache/lru"
-	"github.com/stalker-loki/pod/cmd/spv/filterdb"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/coding/gcs"
-	"github.com/stalker-loki/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/cmd/spv/cache"
+	"github.com/p9c/pod/cmd/spv/cache/lru"
+	"github.com/p9c/pod/cmd/spv/filterdb"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/coding/gcs/builder"
 )
 
 var (

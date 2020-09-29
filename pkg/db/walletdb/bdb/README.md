@@ -33,16 +33,16 @@ if err != nil {
 
 ## Documentation
 
-[![GoDoc](https://godoc.org/github.com/stalker-loki/pod/walletmain/walletdb/bdb?status.png)]
-(http://godoc.org/github.com/stalker-loki/pod/walletmain/walletdb/bdb)
+[![GoDoc](https://godoc.org/github.com/p9c/pod/walletmain/walletdb/bdb?status.png)]
+(http://godoc.org/github.com/p9c/pod/walletmain/walletdb/bdb)
 
 Full `go doc` style documentation for the project can be viewed online without
 installing this package by using the GoDoc site here:
-http://godoc.org/github.com/stalker-loki/pod/walletmain/walletdb/bdb
+http://godoc.org/github.com/p9c/pod/walletmain/walletdb/bdb
 
 You can also view the documentation locally once the package is installed with
 the `godoc` tool by running `godoc -http=":6060"` and pointing your browser to
-http://localhost:6060/pkg/github.com/stalker-loki/pod/walletmain/walletdb/bdb
+http://localhost:6060/pkg/github.com/p9c/pod/walletmain/walletdb/bdb
 
 ## License
 

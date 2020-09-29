@@ -6,11 +6,11 @@ import (
 	"encoding/gob"
 	"fmt"
 
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/coding/snacl"
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	"github.com/stalker-loki/pod/pkg/util"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/snacl"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // These constants define the serialized length for a given encrypted extended

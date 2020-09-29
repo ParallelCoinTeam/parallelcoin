@@ -7,8 +7,8 @@ import (
 
 	"github.com/VividCortex/ewma"
 
-	"github.com/stalker-loki/pod/pkg/chain/fork"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last *BlockNode,

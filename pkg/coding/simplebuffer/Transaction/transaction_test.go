@@ -3,8 +3,8 @@ package Transaction
 import (
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/chain/mining"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/mining"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 )
 
 func TestTransaction(t *testing.T) {

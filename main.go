@@ -5,10 +5,10 @@
 package main
 
 import (
-	_ "github.com/stalker-loki/pod/pkg"
+	_ "github.com/p9c/pod/pkg"
 	_ "net/http/pprof"
 
-	"github.com/stalker-loki/pod/cmd"
+	"github.com/p9c/pod/cmd"
 )
 
 func main() {

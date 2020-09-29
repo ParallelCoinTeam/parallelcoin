@@ -4,13 +4,13 @@ package txauthor
 import (
 	"errors"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	txrules "github.com/stalker-loki/pod/pkg/chain/tx/rules"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	txsizes "github.com/stalker-loki/pod/pkg/chain/tx/sizes"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
-	h "github.com/stalker-loki/pod/pkg/util/helpers"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	txsizes "github.com/p9c/pod/pkg/chain/tx/sizes"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	h "github.com/p9c/pod/pkg/util/helpers"
 )
 
 type (

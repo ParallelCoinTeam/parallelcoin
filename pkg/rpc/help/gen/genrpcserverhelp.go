@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
-	rpchelp "github.com/stalker-loki/pod/pkg/rpc/help"
-	// rpchelp "github.com/stalker-loki/pod/pkg/rpc/help"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	rpchelp "github.com/p9c/pod/pkg/rpc/help"
+	// rpchelp "github.com/p9c/pod/pkg/rpc/help"
 )
 
 var outputFile = func() *os.File {

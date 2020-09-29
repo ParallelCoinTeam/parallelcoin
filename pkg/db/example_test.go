@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	database "github.com/stalker-loki/pod/pkg/db"
-	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 // This example demonstrates creating a new database.
@@ -16,8 +16,8 @@ func ExampleCreate() {
 	// This example assumes the ffldb driver is imported.
 	//
 	// import (
-	// 	"github.com/stalker-loki/pod/pkg/db"
-	// 	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
+	// 	"github.com/p9c/pod/pkg/db"
+	// 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	// )
 	// Create a database and schedule it to be closed and removed on exit.
 	// Typically you wouldn't want to remove the database right away like
@@ -40,8 +40,8 @@ func Example_basicUsage() {
 	// This example assumes the ffldb driver is imported.
 	//
 	// import (
-	// 	"github.com/stalker-loki/pod/pkg/db"
-	// 	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
+	// 	"github.com/p9c/pod/pkg/db"
+	// 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	// )
 	// Create a database and schedule it to be closed and removed on exit.
 	// Typically you wouldn't want to remove the database right away like
@@ -99,8 +99,8 @@ func Example_basicUsage() {
 // 	// This example assumes the ffldb driver is imported.
 // 	//
 // 	// import (
-// 	// 	"github.com/stalker-loki/pod/pkg/db"
-// 	// 	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
+// 	// 	"github.com/p9c/pod/pkg/db"
+// 	// 	_ "github.com/p9c/pod/pkg/db/ffldb"
 // 	// )
 // 	// Create a database and schedule it to be closed and removed on exit.
 // 	// Typically you wouldn't want to remove the database right away like

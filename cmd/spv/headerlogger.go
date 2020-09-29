@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 // headerProgressLogger provides periodic logging for other services in order

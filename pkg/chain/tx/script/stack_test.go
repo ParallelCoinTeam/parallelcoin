@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 // tstCheckScriptError ensures the type of the two passed errors are of the same type (either both nil or both of type ScriptError) and their error codes match when not nil.

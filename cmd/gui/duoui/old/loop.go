@@ -3,13 +3,13 @@ package duoui
 import (
 	"errors"
 
-	"github.com/stalker-loki/pod/cmd/gui/component"
+	"github.com/p9c/pod/cmd/gui/component"
 
 	"gioui.org/io/system"
 
-	"github.com/stalker-loki/pod/cmd/gui/model"
-	"github.com/stalker-loki/pod/cmd/gui/rcd"
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/cmd/gui/model"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/stalker-loki/pod/pkg/chain/config"
+	. "github.com/p9c/pod/pkg/chain/config"
 )
 
 // Define some of the required parameters for a user-registered network.  This is necessary to test the registration of and lookup of encoding magics from the network.

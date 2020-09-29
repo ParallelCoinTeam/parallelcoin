@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	database "github.com/stalker-loki/pod/pkg/db"
-	"github.com/stalker-loki/pod/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (

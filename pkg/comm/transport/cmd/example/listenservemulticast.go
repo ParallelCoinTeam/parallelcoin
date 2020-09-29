@@ -5,9 +5,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/comm/transport"
-	log "github.com/stalker-loki/pod/pkg/util/logi"
-	"github.com/stalker-loki/pod/pkg/util/loop"
+	"github.com/p9c/pod/pkg/comm/transport"
+	log "github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/loop"
 )
 
 const (

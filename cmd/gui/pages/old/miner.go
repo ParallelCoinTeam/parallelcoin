@@ -4,8 +4,8 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 
-	"github.com/stalker-loki/pod/cmd/gui/rcd"
-	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 func Miner(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {

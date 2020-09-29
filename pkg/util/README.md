@@ -1,7 +1,7 @@
 # btcutil
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/stalker-loki/pod/btcutil)
+[![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/btcutil)
 
 Package btcutil provides bitcoin-specific convenience functions and types.
 
@@ -12,7 +12,7 @@ This package was developed for pod, an alternative full-node implementation of b
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/stalker-loki/pod/btcutil
+$ go get -u github.com/p9c/pod/btcutil
 ```
 
 ## License

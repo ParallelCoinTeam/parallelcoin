@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"testing"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 )
 
 // genRandomSig returns a random message, a signature of the message under the public key and the public key. This function is used to generate randomized test data.

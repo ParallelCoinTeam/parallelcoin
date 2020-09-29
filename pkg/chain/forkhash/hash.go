@@ -13,9 +13,9 @@ import (
 	"golang.org/x/crypto/sha3"
 	"lukechampine.com/blake3"
 
-	"github.com/stalker-loki/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/chain/fork"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // HashReps allows the number of multiplication/division cycles to be

@@ -18,8 +18,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // AddrManager provides a concurrency safe address manager for caching

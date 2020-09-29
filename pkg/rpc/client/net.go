@@ -3,7 +3,7 @@ package rpcclient
 import (
 	js "encoding/json"
 
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // AddNodeCommand enumerates the available commands that the AddNode function accepts.

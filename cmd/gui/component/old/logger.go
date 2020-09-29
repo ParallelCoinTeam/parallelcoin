@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stalker-loki/pod/cmd/gui/rcd"
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
 
-	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 var logOutputList = &layout.List{

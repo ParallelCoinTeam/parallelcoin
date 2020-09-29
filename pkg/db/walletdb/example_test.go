@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	_ "github.com/stalker-loki/pod/pkg/db/walletdb/bdb"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
 
 // This example demonstrates creating a new database.
@@ -15,8 +15,8 @@ func ExampleCreate() {
 	// This example assumes the bdb (bolt db) driver is imported.
 	//
 	// import (
-	// 	"github.com/stalker-loki/pod/pkg/wallet/db"
-	// 	_ "github.com/stalker-loki/pod/pkg/wallet/db/bdb"
+	// 	"github.com/p9c/pod/pkg/wallet/db"
+	// 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 	// )
 	// Create a database and schedule it to be closed and removed on exit.
 	// Typically you wouldn't want to remove the database right away like
@@ -96,8 +96,8 @@ func Example_basicUsage() {
 	// This example assumes the bdb (bolt db) driver is imported.
 	//
 	// import (
-	// 	"github.com/stalker-loki/pod/pkg/wallet/db"
-	// 	_ "github.com/stalker-loki/pod/pkg/wallet/db/bdb"
+	// 	"github.com/p9c/pod/pkg/wallet/db"
+	// 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 	// )
 	// Create a database and schedule it to be closed and removed on exit.
 	// Typically you wouldn't want to remove the database right away like

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // RejectCode represents a numeric value by which a remote peer indicates why a message was rejected.
