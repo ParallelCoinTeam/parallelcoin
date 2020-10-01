@@ -917,22 +917,25 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) error {
 		}
 		return o + spew.Sdump(buf.Bytes())
 	})
-	Debugc(func() string {
-		// Debug summary of message.
-		summary := messageSummary(msg)
-		if len(summary) > 0 {
-			summary = " (" + summary + ")"
-		}
-		o := fmt.Sprintf("Sending %v%s to %s\n", msg.Command(), summary, p)
-		// o += spew.Sdump(msg)
-		// var buf bytes.Buffer
-		// _, err := wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
-		// if err != nil {
-		// 	Error(err)
-		// 	return err.Error()
-		// }
-		return o // + spew.Sdump(buf.Bytes())
-	})
+	cmd := msg.Command()
+	if cmd != "ping" && cmd != "pong" {
+		Debugc(func() string {
+			// Debug summary of message.
+			summary := messageSummary(msg)
+			if len(summary) > 0 {
+				summary = " (" + summary + ")"
+			}
+			o := fmt.Sprintf("Sending %v%s to %s", msg.Command(), summary, p)
+			// o += spew.Sdump(msg)
+			// var buf bytes.Buffer
+			// _, err := wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
+			// if err != nil {
+			// 	Error(err)
+			// 	return err.Error()
+			// }
+			return o // + spew.Sdump(buf.Bytes())
+		})
+	}
 	// Write the message to the peer.
 	n, err := wire.WriteMessageWithEncodingN(p.conn, msg,
 		p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
