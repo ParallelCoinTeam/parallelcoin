@@ -50,3 +50,5 @@ npm.lock
 pod_mon*
 go_build*
 pod.exe
+
+pkg/comm/transport/cmd/example/example.exe
