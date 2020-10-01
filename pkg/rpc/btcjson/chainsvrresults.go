@@ -57,7 +57,8 @@ type GetBlockChainInfoResult struct {
 	Bip9SoftForks        map[string]*Bip9SoftForkDescription `json:"bip9_softforks"`
 }
 
-// GetBlockHeaderVerboseResult models the data from the getblockheader command when the verbose flag is set.  When the verbose flag is not set, getblockheader returns a hex-encoded string.
+// GetBlockHeaderVerboseResult models the data from the getblockheader command when the verbose flag is set. When the
+// verbose flag is not set, getblockheader returns a hex-encoded string.
 type GetBlockHeaderVerboseResult struct {
 	Hash          string  `json:"hash"`
 	Confirmations int64   `json:"confirmations"`
@@ -75,7 +76,9 @@ type GetBlockHeaderVerboseResult struct {
 
 // GetBlockTemplateResult models the data returned from the getblocktemplate command.
 type GetBlockTemplateResult struct {
-	// Base fields from BIP 0022.  CoinbaseAux is optional.  One of CoinbaseTxn or CoinbaseValue must be specified, but not both.
+	// Base fields from BIP 0022.  CoinbaseAux is optional.
+	//
+	// One of CoinbaseTxn or CoinbaseValue must be specified, but not both.
 	Bits          string                     `json:"bits"`
 	CurTime       int64                      `json:"curtime"`
 	Height        int64                      `json:"height"`
@@ -123,7 +126,8 @@ type GetBlockTemplateResultTx struct {
 	Weight  int64   `json:"weight"`
 }
 
-// GetBlockVerboseResult models the data from the getblock command when the verbose flag is set.  When the verbose flag is not set, getblock returns a hex-encoded string.
+// GetBlockVerboseResult models the data from the getblock command when the verbose flag is set. When the verbose flag
+// is not set, getblock returns a hex-encoded string.
 type GetBlockVerboseResult struct {
 	Hash          string        `json:"hash"`
 	Confirmations int64         `json:"confirmations"`
@@ -268,10 +272,11 @@ type GetPeerInfoResult struct {
 	SyncNode       bool    `json:"syncnode"`
 }
 
-// GetRawMempoolVerboseResult models the data returned from the getrawmempool command when the verbose flag is set.  When the verbose flag is not set, getrawmempool returns an array of transaction hashes.
+// GetRawMempoolVerboseResult models the data returned from the getrawmempool command when the verbose flag is set. When
+// the verbose flag is not set, getrawmempool returns an array of transaction hashes.
 type GetRawMempoolVerboseResult struct {
 	Size             int32    `json:"size"`
-	Vsize            int32    `json:"vsize"`
+	VSize            int32    `json:"vsize"`
 	Fee              float64  `json:"fee"`
 	Time             int64    `json:"time"`
 	Height           int64    `json:"height"`
@@ -357,7 +362,8 @@ type (
 		Addresses []string `json:"addresses,omitempty"`
 		Value     float64  `json:"value"`
 	}
-	// ScriptPubKeyResult models the scriptPubKey data of a tx script. It is defined separately since it is used by multiple commands.
+	// ScriptPubKeyResult models the scriptPubKey data of a tx script. It is defined separately since it is used by
+	// multiple commands.
 	ScriptPubKeyResult struct {
 		Asm       string   `json:"asm"`
 		Hex       string   `json:"hex,omitempty"`
@@ -365,7 +371,8 @@ type (
 		Type      string   `json:"type"`
 		Addresses []string `json:"addresses,omitempty"`
 	}
-	// ScriptSig models a signature script.  It is defined separately since it only applies to non-coinbase.  Therefore the field in the Vin structure needs to be a pointer.
+	// ScriptSig models a signature script. It is defined separately since it only applies to non-coinbase. Therefore
+	// the field in the Vin structure needs to be a pointer.
 	ScriptSig struct {
 		Asm string `json:"asm"`
 		Hex string `json:"hex"`
@@ -373,14 +380,14 @@ type (
 	// SearchRawTransactionsResult models the data from the searchrawtransaction command.
 	SearchRawTransactionsResult struct {
 		Hex           string       `json:"hex,omitempty"`
-		Txid          string       `json:"txid"`
+		TxID          string       `json:"txid"`
 		Hash          string       `json:"hash"`
 		Size          string       `json:"size"`
 		Vsize         string       `json:"vsize"`
 		Version       int32        `json:"version"`
 		LockTime      uint32       `json:"locktime"`
 		Vin           []VinPrevOut `json:"vin"`
-		Vout          []Vout       `json:"vout"`
+		VOut          []Vout       `json:"vout"`
 		BlockHash     string       `json:"blockhash,omitempty"`
 		Confirmations uint64       `json:"confirmations,omitempty"`
 		Time          int64        `json:"time,omitempty"`
@@ -423,7 +430,8 @@ type (
 		IsValid bool   `json:"isvalid"`
 		Address string `json:"address,omitempty"`
 	}
-	// Vin models parts of the tx data.  It is defined separately since getrawtransaction, decoderawtransaction, and searchrawtransaction use the same structure.
+	// Vin models parts of the tx data. It is defined separately since getrawtransaction, decoderawtransaction, and
+	// searchrawtransaction use the same structure.
 	Vin struct {
 		Coinbase  string     `json:"coinbase"`
 		Txid      string     `json:"txid"`
@@ -442,7 +450,8 @@ type (
 		PrevOut   *PrevOut   `json:"prevOut"`
 		Sequence  uint32     `json:"sequence"`
 	}
-	// Vout models parts of the tx data.  It is defined separately since both getrawtransaction and decoderawtransaction use the same structure.
+	// Vout models parts of the tx data. It is defined separately since both getrawtransaction and decoderawtransaction
+	// use the same structure.
 	Vout struct {
 		Value        float64            `json:"value"`
 		N            uint32             `json:"n"`
@@ -451,23 +460,17 @@ type (
 )
 
 // HasWitness returns a bool to show if a Vin has any witness data associated with it or not.
-func (
-v *Vin,
-) HasWitness() bool {
+func (v *Vin) HasWitness() bool {
 	return len(v.Witness) > 0
 }
 
 // IsCoinBase returns a bool to show if a Vin is a Coinbase one or not.
-func (
-v *Vin,
-) IsCoinBase() bool {
+func (v *Vin) IsCoinBase() bool {
 	return len(v.Coinbase) > 0
 }
 
 // MarshalJSON provides a custom Marshal method for Vin.
-func (
-v *Vin,
-) MarshalJSON() ([]byte, error) {
+func (v *Vin) MarshalJSON() ([]byte, error) {
 	if v.IsCoinBase() {
 		coinbaseStruct := struct {
 			Coinbase string   `json:"coinbase"`
@@ -511,23 +514,17 @@ v *Vin,
 }
 
 // HasWitness returns a bool to show if a Vin has any witness data associated with it or not.
-func (
-v *VinPrevOut,
-) HasWitness() bool {
+func (v *VinPrevOut) HasWitness() bool {
 	return len(v.Witness) > 0
 }
 
 // IsCoinBase returns a bool to show if a Vin is a Coinbase one or not.
-func (
-v *VinPrevOut,
-) IsCoinBase() bool {
+func (v *VinPrevOut) IsCoinBase() bool {
 	return len(v.Coinbase) > 0
 }
 
 // MarshalJSON provides a custom Marshal method for VinPrevOut.
-func (
-v *VinPrevOut,
-) MarshalJSON() ([]byte, error) {
+func (v *VinPrevOut) MarshalJSON() ([]byte, error) {
 	if v.IsCoinBase() {
 		coinbaseStruct := struct {
 			Coinbase string `json:"coinbase"`

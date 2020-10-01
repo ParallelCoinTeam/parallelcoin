@@ -6,8 +6,7 @@ import (
 	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
-// OutputSelectionPolicy describes the rules for selecting an output from the
-// wallet.
+// OutputSelectionPolicy describes the rules for selecting an output from the wallet.
 type OutputSelectionPolicy struct {
 	Account               uint32
 	RequiredConfirmations int32
@@ -17,8 +16,7 @@ func (p *OutputSelectionPolicy) meetsRequiredConfs(txHeight, curHeight int32) bo
 	return confirmed(p.RequiredConfirmations, txHeight, curHeight)
 }
 
-// UnspentOutputs fetches all unspent outputs from the wallet that match rules
-// described in the passed policy.
+// UnspentOutputs fetches all unspent outputs from the wallet that match rules described in the passed policy.
 func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOutput, error) {
 	var outputResults []*TransactionOutput
 	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
@@ -33,8 +31,7 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 			return err
 		}
 		for _, output := range outputs {
-			// Ignore outputs that haven't reached the required
-			// number of confirmations.
+			// Ignore outputs that haven't reached the required number of confirmations.
 			if !policy.meetsRequiredConfs(output.Height, syncBlock.Height) {
 				continue
 			}
@@ -42,10 +39,8 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 			_, addrs, _, err := txscript.ExtractPkScriptAddrs(output.PkScript,
 				w.chainParams)
 			if err != nil || len(addrs) == 0 {
-				// Cannot determine which account this belongs
-				// to without a valid address.  TODO: Fix this
-				// by saving outputs per account, or accounts
-				// per output.
+				// Cannot determine which account this belongs to without a valid address.
+				// TODO: Fix this by saving outputs per account, or accounts per output.
 				continue
 			}
 			_, outputAcct, err := w.Manager.AddrAccount(addrmgrNs, addrs[0])
@@ -56,8 +51,7 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 			if outputAcct != policy.Account {
 				continue
 			}
-			// Stakebase isn't exposed by wtxmgr so those will be
-			// OutputKindNormal for now.
+			// Stakebase isn't exposed by wtxmgr so those will be OutputKindNormal for now.
 			outputSource := OutputKindNormal
 			if output.FromCoinBase {
 				outputSource = OutputKindCoinbase

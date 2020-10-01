@@ -13,21 +13,17 @@ var (
 	bytea64 = new([64]byte)
 )
 
-// xor is the "slow" byte zeroing implementation which this package
-// originally replaced.  If this function benchmarks faster than the
-// functions exported by this package in a future Go version (perhaps
-// by calling runtime.memclr), replace the "optimized" versions with
-// this.
+// xor is the "slow" byte zeroing implementation which this package originally replaced. If this function benchmarks
+// faster than the functions exported by this package in a future Go version (perhaps by calling runtime.memclr),
+// replace the "optimized" versions with this.
 func xor(b []byte) {
 	for i := range b {
 		b[i] ^= b[i]
 	}
 }
 
-// zrange is an alternative zero implementation that, while currently
-// slower than the functions provided by this package, may be faster
-// in a future Go release.  Switch to this or the xor implementation
-// if they ever become faster.
+// zrange is an alternative zero implementation that, while currently slower than the functions provided by this
+// package, may be faster in a future Go release. Switch to this or the xor implementation if they ever become faster.
 func zrange(b []byte) {
 	for i := range b {
 		b[i] = 0

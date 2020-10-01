@@ -12,7 +12,8 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
-// genesisCoinbaseTx is the coinbase transaction for the genesis blocks for the main network, regression test network, and test network (version 3).
+// genesisCoinbaseTx is the coinbase transaction for the genesis blocks for the main network, regression test network,
+// and test network (version 3).
 var genesisCoinbaseTx = MsgTx{
 	Version: 1,
 	TxIn: []*TxIn{
@@ -346,7 +347,8 @@ func BenchmarkWriteBlockHeader(b *testing.B) {
 	}
 }
 
-// BenchmarkDecodeGetHeaders performs a benchmark on how long it takes to decode a getheaders message with the maximum number of block locator hashes.
+// BenchmarkDecodeGetHeaders performs a benchmark on how long it takes to decode a getheaders message with the maximum
+// number of block locator hashes.
 func BenchmarkDecodeGetHeaders(b *testing.B) {
 	// Create a message with the maximum number of block locators.
 	pver := ProtocolVersion
@@ -373,7 +375,8 @@ func BenchmarkDecodeGetHeaders(b *testing.B) {
 	}
 }
 
-// BenchmarkDecodeHeaders performs a benchmark on how long it takes to decode a headers message with the maximum number of headers.
+// BenchmarkDecodeHeaders performs a benchmark on how long it takes to decode a headers message with the maximum number
+// of headers.
 func BenchmarkDecodeHeaders(b *testing.B) {
 	// Create a message with the maximum number of headers.
 	pver := ProtocolVersion
@@ -400,7 +403,8 @@ func BenchmarkDecodeHeaders(b *testing.B) {
 	}
 }
 
-// BenchmarkDecodeGetBlocks performs a benchmark on how long it takes to decode a getblocks message with the maximum number of block locator hashes.
+// BenchmarkDecodeGetBlocks performs a benchmark on how long it takes to decode a getblocks message with the maximum
+// number of block locator hashes.
 func BenchmarkDecodeGetBlocks(b *testing.B) {
 	// Create a message with the maximum number of block locators.
 	pver := ProtocolVersion
@@ -427,7 +431,8 @@ func BenchmarkDecodeGetBlocks(b *testing.B) {
 	}
 }
 
-// BenchmarkDecodeAddr performs a benchmark on how long it takes to decode an addr message with the maximum number of addresses.
+// BenchmarkDecodeAddr performs a benchmark on how long it takes to decode an addr message with the maximum number of
+// addresses.
 func BenchmarkDecodeAddr(b *testing.B) {
 	// Create a message with the maximum number of addresses.
 	pver := ProtocolVersion
@@ -451,7 +456,8 @@ func BenchmarkDecodeAddr(b *testing.B) {
 	}
 }
 
-// BenchmarkDecodeInv performs a benchmark on how long it takes to decode an inv message with the maximum number of entries.
+// BenchmarkDecodeInv performs a benchmark on how long it takes to decode an inv message with the maximum number of
+// entries.
 func BenchmarkDecodeInv(b *testing.B) {
 	// Create a message with the maximum number of entries.
 	pver := ProtocolVersion
@@ -478,7 +484,8 @@ func BenchmarkDecodeInv(b *testing.B) {
 	}
 }
 
-// BenchmarkDecodeNotFound performs a benchmark on how long it takes to decode a notfound message with the maximum number of entries.
+// BenchmarkDecodeNotFound performs a benchmark on how long it takes to decode a notfound message with the maximum
+// number of entries.
 func BenchmarkDecodeNotFound(b *testing.B) {
 	// Create a message with the maximum number of entries.
 	pver := ProtocolVersion
@@ -505,7 +512,8 @@ func BenchmarkDecodeNotFound(b *testing.B) {
 	}
 }
 
-// BenchmarkDecodeMerkleBlock performs a benchmark on how long it takes to decode a reasonably sized merkleblock message.
+// BenchmarkDecodeMerkleBlock performs a benchmark on how long it takes to decode a reasonably sized merkleblock
+// message.
 func BenchmarkDecodeMerkleBlock(b *testing.B) {
 	// Create a message with random data.
 	pver := ProtocolVersion

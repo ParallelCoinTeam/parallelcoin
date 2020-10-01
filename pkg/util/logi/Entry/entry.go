@@ -27,8 +27,7 @@ func Get(ent *logi.Entry) Container {
 	}.CreateContainer(EntryMagic)}
 }
 
-// LoadContainer takes a message byte slice payload and loads it into a container
-// ready to be decoded
+// LoadContainer takes a message byte slice payload and loads it into a container ready to be decoded
 func LoadContainer(b []byte) (out *Container) {
 	out = &Container{simplebuffer.Container{Data: b}}
 	return
@@ -59,11 +58,11 @@ func (c *Container) String() (s string) {
 	return
 }
 
-// Struct deserializes the data all in one go by calling the field deserializing
-// functions into a structure containing the fields.
-// The height is given in this report as it is part of the job message
-// and makes it faster for clients to look up the algorithm name according to the
-// block height, which can change between hard fork versions
+// Struct deserializes the data all in one go by calling the field deserializing functions into a structure containing
+// the fields.
+//
+// The height is given in this report as it is part of the job message and makes it faster for clients to look up the
+// algorithm name according to the block height, which can change between hard fork versions
 func (c *Container) Struct() (out *logi.Entry) {
 	out = &logi.Entry{
 		Time:         c.GetTime(),

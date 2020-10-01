@@ -21,7 +21,7 @@ func Spawn(args ...string) (w *Worker) {
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
 	}
-	//w.cmd.Stderr = os.Stderr
+	// w.cmd.Stderr = os.Stderr
 	cmdOut, err := w.cmd.StdoutPipe()
 	if err != nil {
 		Error(err)
@@ -65,9 +65,10 @@ func (w *Worker) Kill() (err error) {
 }
 
 // Stop signals the worker to shut down cleanly.
+//
 // Note that the worker must have handlers for os.Signal messages.
-// It is possible and neater to put a quit method in the IPC API and use the
-// quit channel built into the StdConn
+//
+// It is possible and neater to put a quit method in the IPC API and use the quit channel built into the StdConn
 func (w *Worker) Stop() (err error) {
 	return w.cmd.Process.Signal(os.Interrupt)
 }

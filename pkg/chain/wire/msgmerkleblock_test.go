@@ -94,7 +94,8 @@ func TestMerkleBlock(t *testing.T) {
 	}
 }
 
-// TestMerkleBlockCrossProtocol tests the MsgMerkleBlock API when encoding with the latest protocol version and decoding with BIP0031Version.
+// TestMerkleBlockCrossProtocol tests the MsgMerkleBlock API when encoding with the latest protocol version and decoding
+// with BIP0031Version.
 func TestMerkleBlockCrossProtocol(t *testing.T) {
 	// Block 1 header.
 	prevHash := &blockOne.Header.PrevBlock
@@ -119,7 +120,8 @@ func TestMerkleBlockCrossProtocol(t *testing.T) {
 	}
 }
 
-// TestMerkleBlockWire tests the MsgMerkleBlock wire encode and decode for various numbers of transaction hashes and protocol versions.
+// TestMerkleBlockWire tests the MsgMerkleBlock wire encode and decode for various numbers of transaction hashes and
+// protocol versions.
 func TestMerkleBlockWire(t *testing.T) {
 	tests := []struct {
 		in   *MsgMerkleBlock // Message to encode
@@ -169,9 +171,11 @@ func TestMerkleBlockWire(t *testing.T) {
 	}
 }
 
-// TestMerkleBlockWireErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths work correctly.
+// TestMerkleBlockWireErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths
+// work correctly.
 func TestMerkleBlockWireErrors(t *testing.T) {
-	// Use protocol version 70001 specifically here instead of the latest because the test data is using bytes encoded with that protocol version.
+	// Use protocol version 70001 specifically here instead of the latest because the test data is using bytes encoded
+	// with that protocol version.
 	pver := uint32(70001)
 	pverNoMerkleBlock := BIP0037Version - 1
 	wireErr := &MessageError{}
@@ -283,9 +287,12 @@ func TestMerkleBlockWireErrors(t *testing.T) {
 	}
 }
 
-// TestMerkleBlockOverflowErrors performs tests to ensure encoding and decoding merkle blocks that are intentionally crafted to use large values for the number of hashes and flags are handled properly.  This could otherwise potentially be used as an attack vector.
+// TestMerkleBlockOverflowErrors performs tests to ensure encoding and decoding merkle blocks that are intentionally
+// crafted to use large values for the number of hashes and flags are handled properly. This could otherwise potentially
+// be used as an attack vector.
 func TestMerkleBlockOverflowErrors(t *testing.T) {
-	// Use protocol version 70001 specifically here instead of the latest protocol version because the test data is using bytes encoded with that version.
+	// Use protocol version 70001 specifically here instead of the latest protocol version because the test data is
+	// using bytes encoded with that version.
 	pver := uint32(70001)
 	// Create bytes for a merkle block that claims to have more than the max allowed tx hashes.
 	var buf bytes.Buffer
@@ -364,7 +371,8 @@ var merkleBlockOne = MsgMerkleBlock{
 	Flags: []byte{0x80},
 }
 
-// merkleBlockOneBytes is the serialized bytes for a merkle block created from block one of the block chain where the first transaction matches.
+// merkleBlockOneBytes is the serialized bytes for a merkle block created from block one of the block chain where the
+// first transaction matches.
 var merkleBlockOneBytes = []byte{
 	0x01, 0x00, 0x00, 0x00, // Version 1
 	0x6f, 0xe2, 0x8c, 0x0a, 0xb6, 0xf1, 0xb3, 0x72,

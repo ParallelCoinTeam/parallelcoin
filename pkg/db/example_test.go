@@ -19,14 +19,14 @@ func ExampleCreate() {
 	// 	"github.com/p9c/pod/pkg/db"
 	// 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	// )
-	// Create a database and schedule it to be closed and removed on exit.
-	// Typically you wouldn't want to remove the database right away like
-	// this, nor put it in the temp directory, but it's done here to ensure
-	// the example cleans up after itself.
+	//
+	// Create a database and schedule it to be closed and removed on exit. Typically you wouldn't want to remove the
+	// database right away like this, nor put it in the temp directory, but it's done here to ensure the example cleans
+	// up after itself.
 	dbPath := filepath.Join(os.TempDir(), "examplecreate")
 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 	if err != nil {
-		Error(err)
+		database.Error(err)
 		return
 	}
 	defer os.RemoveAll(dbPath)
@@ -34,8 +34,8 @@ func ExampleCreate() {
 	// Output:
 }
 
-// This example demonstrates creating a new database and using a managed
-// read-write transaction to store and retrieve metadata.
+// This example demonstrates creating a new database and using a managed read-write transaction to store and retrieve
+// metadata.
 func Example_basicUsage() {
 	// This example assumes the ffldb driver is imported.
 	//
@@ -43,26 +43,23 @@ func Example_basicUsage() {
 	// 	"github.com/p9c/pod/pkg/db"
 	// 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	// )
-	// Create a database and schedule it to be closed and removed on exit.
-	// Typically you wouldn't want to remove the database right away like
-	// this, nor put it in the temp directory, but it's done here to ensure
-	// the example cleans up after itself.
+	//
+	// Create a database and schedule it to be closed and removed on exit. Typically you wouldn't want to remove the
+	// database right away like this, nor put it in the temp directory, but it's done here to ensure the example cleans
+	// up after itself.
 	dbPath := filepath.Join(os.TempDir(), "exampleusage")
 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 	if err != nil {
-		Error(err)
+		database.Error(err)
 		return
 	}
 	defer os.RemoveAll(dbPath)
 	defer db.Close()
-	// Use the Update function of the database to perform a managed
-	// read-write transaction.  The transaction will automatically be rolled
-	// back if the supplied inner function returns a non-nil error.
+	// Use the Update function of the database to perform a managed read-write transaction. The transaction will
+	// automatically be rolled back if the supplied inner function returns a non-nil error.
 	err = db.Update(func(tx database.Tx) error {
-		// Store a key/value pair directly in the metadata bucket.
-		// Typically a nested bucket would be used for a given feature,
-		// but this example is using the metadata bucket directly for
-		// simplicity.
+		// Store a key/value pair directly in the metadata bucket. Typically a nested bucket would be used for a given
+		// feature, but this example is using the metadata bucket directly for simplicity.
 		key := []byte("mykey")
 		value := []byte("myvalue")
 		if err := tx.Metadata().Put(key, value); err != nil {
@@ -78,15 +75,14 @@ func Example_basicUsage() {
 		if err != nil {
 			return err
 		}
-		// The key from above that was set in the metadata bucket does
-		// not exist in this new nested bucket.
+		// The key from above that was set in the metadata bucket does not exist in this new nested bucket.
 		if nestedBucket.Get(key) != nil {
 			return fmt.Errorf("key '%s' is not expected nil", key)
 		}
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		database.Error(err)
 		return
 	}
 	// Output:

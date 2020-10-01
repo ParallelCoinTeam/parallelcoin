@@ -98,9 +98,8 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			for {
 				select {
 				case <-ticker.C:
-					// if the last message sent was 3 seconds ago the server is
-					// almost certainly disconnected or crashed so clear
-					// FirstSender
+					// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
+					// so clear FirstSender
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {

@@ -122,7 +122,8 @@ func TestImmutableSequential(t *testing.T) {
 	}
 }
 
-// TestImmutableReverseSequential ensures that putting keys into an immutable treap in reverse sequential order works as expected.
+// TestImmutableReverseSequential ensures that putting keys into an immutable treap in reverse sequential order works as
+// expected.
 func TestImmutableReverseSequential(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of sequential keys while checking several of the treap functions work as expected.
@@ -205,7 +206,7 @@ func TestImmutableReverseSequential(t *testing.T) {
 	}
 }
 
-// TestImmutableUnordered ensures that putting keys into an immutable treap in no paritcular order works as expected.
+// TestImmutableUnordered ensures that putting keys into an immutable treap in no particular order works as expected.
 func TestImmutableUnordered(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of out-of-order keys while checking several of the treap functions work as expected.
@@ -226,8 +227,7 @@ func TestImmutableUnordered(t *testing.T) {
 		if !testTreap.Has(key) {
 			t.Fatalf("Has #%d: key %q is not in treap", i, key)
 		}
-		// Get the key from the treap and ensure it is the expected
-		// value.
+		// Get the key from the treap and ensure it is the expected value.
 		if gotVal := testTreap.Get(key); !bytes.Equal(gotVal, key) {
 			t.Fatalf("Get #%d: unexpected value - got %x, want %x",
 				i, gotVal, key)
@@ -254,8 +254,7 @@ func TestImmutableUnordered(t *testing.T) {
 		if testTreap.Has(key) {
 			t.Fatalf("Has #%d: key %q is in treap", i, key)
 		}
-		// Get the key that no longer exists from the treap and ensure
-		// it is nil.
+		// Get the key that no longer exists from the treap and ensure it is nil.
 		if gotVal := testTreap.Get(key); gotVal != nil {
 			t.Fatalf("Get #%d: unexpected value - got %x, want nil",
 				i, gotVal)
@@ -301,7 +300,8 @@ func TestImmutableDuplicatePut(t *testing.T) {
 	}
 }
 
-// TestImmutableNilValue ensures that putting a nil value into an immutable treap results in a key being added with an empty byte slice.
+// TestImmutableNilValue ensures that putting a nil value into an immutable treap results in a key being added with an
+// empty byte slice.
 func TestImmutableNilValue(t *testing.T) {
 	t.Parallel()
 	key := serializeUint32(0)
@@ -321,7 +321,8 @@ func TestImmutableNilValue(t *testing.T) {
 	}
 }
 
-// TestImmutableForEachStopIterator ensures that returning false from the ForEach callback on an immutable treap stops iteration early.
+// TestImmutableForEachStopIterator ensures that returning false from the ForEach callback on an immutable treap stops
+// iteration early.
 func TestImmutableForEachStopIterator(t *testing.T) {
 	t.Parallel()
 	// Insert a few keys.
@@ -343,7 +344,8 @@ func TestImmutableForEachStopIterator(t *testing.T) {
 	}
 }
 
-// TestImmutableSnapshot ensures that immutable treaps are actually immutable by keeping a reference to the previous treap, performing a mutation, and then ensuring the referenced treap does not have the mutation applied.
+// TestImmutableSnapshot ensures that immutable treaps are actually immutable by keeping a reference to the previous
+// treap, performing a mutation, and then ensuring the referenced treap does not have the mutation applied.
 func TestImmutableSnapshot(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of sequential keys while checking several of the treap functions work as expected.

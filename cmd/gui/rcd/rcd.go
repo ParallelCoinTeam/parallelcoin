@@ -4,9 +4,19 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"os"
+	"sort"
+	"strings"
+	"time"
+	"unicode"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	scribble "github.com/nanobox-io/golang-scribble"
+	"github.com/urfave/cli"
+	"go.uber.org/atomic"
+	"golang.org/x/text/unicode/norm"
+
 	config2 "github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
@@ -29,14 +39,6 @@ import (
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/wallet"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	"github.com/urfave/cli"
-	"go.uber.org/atomic"
-	"golang.org/x/text/unicode/norm"
-	"os"
-	"sort"
-	"strings"
-	"time"
-	"unicode"
 )
 
 const (
@@ -773,7 +775,7 @@ func (r *RcVar) GetDuoUIhashesPerSecList() {
 	// hps.Do(func(p interface{}) {
 	//	r.Status.Kopach.Hps = append(r.Status.Kopach.Hps, p.(float64))
 	//
-	//fmt.Println(r.Status.Kopach.Hashrate)
+	// fmt.Println(r.Status.Kopach.Hashrate)
 	// })
 
 }
@@ -1034,10 +1036,10 @@ func (r *RcVar) GetTx(txid string) btcjson.GetTransactionResult {
 		Verbose: &verbose,
 	}
 
-	//lt, err := r.cx.RPCServer .(startTx, r.History.PerPage.Value)
-	//if err != nil {
+	// lt, err := r.cx.RPCServer .(startTx, r.History.PerPage.Value)
+	// if err != nil {
 	//	Info(err)
-	//}
+	// }
 
 	if tx, err := chainrpc.HandleGetRawTransaction(r.cx.RPCServer, &tcmd,
 		nil); !Check(err) {

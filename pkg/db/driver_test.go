@@ -9,8 +9,10 @@ import (
 )
 
 var (
-// // ignoreDbTypes are types which should be ignored when running tests that iterate all supported DB types.  This allows some tests to add  bogus drivers for testing purposes while still allowing other tests to easily iterate all supported drivers.
-// ignoreDbTypes = map[string]bool{"createopenfail": true}
+	// ignoreDbTypes are types which should be ignored when running tests that iterate all supported DB types. This allows
+	// some tests to add bogus drivers for testing purposes while still allowing other tests to easily iterate all
+	// supported drivers.
+	ignoreDbTypes = map[string]bool{"createopenfail": true}
 )
 
 // checkDbError ensures the passed error is a database.DBError with an error code that matches the passed  error code.
@@ -38,13 +40,14 @@ func TestAddDuplicateDriver(t *testing.T) {
 		return
 	}
 	dbType := supportedDrivers[0]
-	// bogusCreateDB is a function which acts as a bogus create and open driver function and intentionally returns a failure that can be detected if the interface allows a duplicate driver to overwrite an
-	// existing one.
+	// bogusCreateDB is a function which acts as a bogus create and open driver function and intentionally returns a
+	// failure that can be detected if the interface allows a duplicate driver to overwrite an existing one.
 	bogusCreateDB := func(args ...interface{}) (database.DB, error) {
 		return nil, fmt.Errorf("duplicate driver allowed for database "+
 			"type [%v]", dbType)
 	}
-	// Create a driver that tries to replace an existing one.  Set its create and open functions to a function that causes a test failure if they are invoked.
+	// Create a driver that tries to replace an existing one. Set its create and open functions to a function that
+	// causes a test failure if they are invoked.
 	driver := database.Driver{
 		DbType: dbType,
 		Create: bogusCreateDB,
@@ -59,14 +62,16 @@ func TestAddDuplicateDriver(t *testing.T) {
 
 // TestCreateOpenFail ensures that errors which occur while opening or closing a database are handled properly.
 func TestCreateOpenFail(t *testing.T) {
-	// bogusCreateDB is a function which acts as a bogus create and open driver function that intentionally returns a failure which can be detected.
+	// bogusCreateDB is a function which acts as a bogus create and open driver function that intentionally returns a
+	// failure which can be detected.
 	dbType := "createopenfail"
 	openError := fmt.Errorf("failed to create or open database for "+
 		"database type [%v]", dbType)
 	bogusCreateDB := func(args ...interface{}) (database.DB, error) {
 		return nil, openError
 	}
-	// Create and add driver that intentionally fails when created or opened to ensure errors on database open and create are handled properly.
+	// Create and add driver that intentionally fails when created or opened to ensure errors on database open and
+	// create are handled properly.
 	driver := database.Driver{
 		DbType: dbType,
 		Create: bogusCreateDB,

@@ -1,9 +1,10 @@
 package app
 
 import (
-	"github.com/p9c/pod/app/config"
 	"os"
 	"os/exec"
+
+	"github.com/p9c/pod/app/config"
 
 	"github.com/urfave/cli"
 

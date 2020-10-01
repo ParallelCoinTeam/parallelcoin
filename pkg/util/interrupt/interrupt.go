@@ -26,8 +26,8 @@ var (
 	HandlersDone = make(chan struct{})
 )
 
-// Receiver listens for interrupt signals, registers interrupt callbacks, and
-// responds to custom shutdown signals as required
+// Receiver listens for interrupt signals, registers interrupt callbacks, and responds to custom shutdown signals as
+// required
 func Listener() {
 	var interruptCallbacks []func()
 	invokeCallbacks := func() {
@@ -77,8 +77,8 @@ func Listener() {
 
 // AddHandler adds a handler to call when a SIGINT (Ctrl+C) is received.
 func AddHandler(handler func()) {
-	// Create the channel and start the main interrupt handler which invokes all
-	// other callbacks and exits if not already done.
+	// Create the channel and start the main interrupt handler which invokes all other callbacks and exits if not
+	// already done.
 	if Chan == nil {
 		Chan = make(chan os.Signal, 1)
 		signal.Notify(Chan, Signals...)
@@ -87,7 +87,7 @@ func AddHandler(handler func()) {
 	AddHandlerChan <- handler
 }
 
-// Request programatically requests a shutdown
+// Request programmatically requests a shutdown
 func Request() {
 	Debug("interrupt requested")
 	ShutdownRequestChan <- struct{}{}

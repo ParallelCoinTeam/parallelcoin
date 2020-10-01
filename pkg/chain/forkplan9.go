@@ -189,11 +189,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	return
 }
 
-// CalcNextRequiredDifficultyPlan9 calculates the required difficulty for the
-// block after the passed previous block node based on the difficulty retarget
-// rules. This function differs from the exported  CalcNextRequiredDifficulty
-// in that the exported version uses the current best chain as the previous
-// block node while this function accepts any block node.
+// CalcNextRequiredDifficultyPlan9 calculates the required difficulty for the block after the passed previous block node
+// based on the difficulty retarget rules. This function differs from the exported CalcNextRequiredDifficulty in that
+// the exported version uses the current best chain as the previous block node while this function accepts any block
+// node.
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, algoName string, l bool,
 ) (newTargetBits uint32, adjustment float64, err error) {
 

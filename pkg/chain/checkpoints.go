@@ -10,51 +10,48 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// CheckpointConfirmations is the number of blocks before the end of the
-// current best block chain that a good checkpoint candidate must be.
-// TODO: review this and add it to the fork spec
+// CheckpointConfirmations is the number of blocks before the end of the current best block chain that a good checkpoint
+// candidate must be. TODO: review this and add it to the fork spec
 const CheckpointConfirmations = 2016
 
-func // newHashFromStr converts the passed big-endian hex string into a
-// chainhash.Hash.
-// It only differs from the one available in chainhash in that it
-// ignores the error since it will only (and must only) be called with
-// hard-coded, and therefore known good, hashes.
-newHashFromStr(hexStr string) *chainhash.Hash {
+// newHashFromStr converts the passed big-endian hex string into a chainhash.Hash.
+//
+// It only differs from the one available in chainhash in that it ignores the error since it will only (and must only)
+// be called with hard-coded, and therefore known good, hashes.
+func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, _ := chainhash.NewHashFromStr(hexStr)
 	return hash
 }
 
-func // Checkpoints returns a slice of checkpoints (
-// regardless of whether they are already known).
-// When there are no checkpoints for the chain,
-// it will return nil. This function is safe for concurrent access.
-(b *BlockChain) Checkpoints() []chaincfg.Checkpoint {
+// Checkpoints returns a slice of checkpoints ( regardless of whether they are already known). When there are no
+// checkpoints for the chain, it will return nil.
+//
+// This function is safe for concurrent access.
+func (b *BlockChain) Checkpoints() []chaincfg.Checkpoint {
 	return b.checkpoints
 }
 
-func // HasCheckpoints returns whether this BlockChain has checkpoints defined.
+// HasCheckpoints returns whether this BlockChain has checkpoints defined.
+//
 // This function is safe for concurrent access.
-(b *BlockChain) HasCheckpoints() bool {
+func (b *BlockChain) HasCheckpoints() bool {
 	return len(b.checkpoints) > 0
 }
 
-func // LatestCheckpoint returns the most recent checkpoint
-// (regardless of whether it is already known).
-// When there are no defined checkpoints for the active chain instance,
-// it will return nil. This function is safe for concurrent access.
-(b *BlockChain) LatestCheckpoint() *chaincfg.Checkpoint {
+// LatestCheckpoint returns the most recent checkpoint (regardless of whether it is already known). When there are no
+// defined checkpoints for the active chain instance, it will return nil.
+//
+// This function is safe for concurrent access.
+func (b *BlockChain) LatestCheckpoint() *chaincfg.Checkpoint {
 	if !b.HasCheckpoints() {
 		return nil
 	}
 	return &b.checkpoints[len(b.checkpoints)-1]
 }
 
-func // verifyCheckpoint returns whether the passed block height and hash
-// combination match the checkpoint data.
-// It also returns true if there is no checkpoint data for the passed block
-// height.
-(b *BlockChain) verifyCheckpoint(height int32, hash *chainhash.Hash) bool {
+// verifyCheckpoint returns whether the passed block height and hash combination match the checkpoint data. It also
+// returns true if there is no checkpoint data for the passed block height.
+func (b *BlockChain) verifyCheckpoint(height int32, hash *chainhash.Hash) bool {
 	if !b.HasCheckpoints() {
 		return true
 	}
@@ -71,65 +68,59 @@ func // verifyCheckpoint returns whether the passed block height and hash
 	return true
 }
 
-func // findPreviousCheckpoint finds the most recent checkpoint that is already
-// available in the downloaded portion of the block chain and returns the
-// associated block node.  It returns nil if a checkpoint can't be found (
-// this should really only happen for blocks before the first checkpoint).
+// findPreviousCheckpoint finds the most recent checkpoint that is already available in the downloaded portion of the
+// block chain and returns the associated block node. It returns nil if a checkpoint can't be found ( this should really
+// only happen for blocks before the first checkpoint).
+//
 // This function MUST be called with the chain lock held (for reads).
-(b *BlockChain) findPreviousCheckpoint() (*BlockNode, error) {
+func (b *BlockChain) findPreviousCheckpoint() (*BlockNode, error) {
 	if !b.HasCheckpoints() {
 		return nil, nil
 	}
-	// Perform the initial search to find and cache the latest known
-	// checkpoint if the best chain is not known yet or we haven't already
-	// previously searched.
+	// Perform the initial search to find and cache the latest known checkpoint if the best chain is not known yet or we
+	// haven't already previously searched.
 	checkpoints := b.checkpoints
 	numCheckpoints := len(checkpoints)
 	if b.checkpointNode == nil && b.nextCheckpoint == nil {
-		// Loop backwards through the available checkpoints to find one that
-		// is already available.
+		// Loop backwards through the available checkpoints to find one that is already available.
 		for i := numCheckpoints - 1; i >= 0; i-- {
 			node := b.Index.LookupNode(checkpoints[i].Hash)
 			if node == nil || !b.BestChain.Contains(node) {
 				continue
 			}
-			// Checkpoint found.  Cache it for future lookups and set the
-			// next expected checkpoint accordingly.
+			// Checkpoint found. Cache it for future lookups and set the next expected checkpoint accordingly.
 			b.checkpointNode = node
 			if i < numCheckpoints-1 {
 				b.nextCheckpoint = &checkpoints[i+1]
 			}
 			return b.checkpointNode, nil
 		}
-		// No known latest checkpoint.
-		// This will only happen on blocks before the first known checkpoint.
-		// So, set the next expected checkpoint to the first checkpoint and
-		// return the fact there is no latest known checkpoint block.
+		// No known latest checkpoint. This will only happen on blocks before the first known checkpoint. So, set the
+		// next expected checkpoint to the first checkpoint and return the fact there is no latest known checkpoint
+		// block.
 		b.nextCheckpoint = &checkpoints[0]
 		return nil, nil
 	}
-	// At this point we've already searched for the latest known checkpoint,
-	// so when there is no next checkpoint,
-	// the current checkpoint lockin will always be the latest known
+	// At this point we've already searched for the latest known checkpoint, so when there is no next checkpoint, the
+	// current checkpoint lockin will always be the latest known
 	//  checkpoint.
 	if b.nextCheckpoint == nil {
 		return b.checkpointNode, nil
 	}
-	// When there is a next checkpoint and the height of the current best
-	// chain does not exceed it,
-	// the current checkpoint lockin is still the latest known checkpoint.
+	// When there is a next checkpoint and the height of the current best chain does not exceed it, the current
+	// checkpoint lockin is still the latest known checkpoint.
 	if b.BestChain.Tip().height < b.nextCheckpoint.Height {
 		return b.checkpointNode, nil
 	}
 	// We've reached or exceeded the next checkpoint height.
-	// Note that once a checkpoint lockin has been reached,
-	// forks are prevented from any blocks before the checkpoint,
-	// so we don't have to worry about the checkpoint going away out from
-	// under us due to a chain reorganize.
+	//
+	// Note that once a checkpoint lockin has been reached, forks are prevented from any blocks before the checkpoint,
+	// so we don't have to worry about the checkpoint going away out from under us due to a chain reorganize.
+	//
 	// Cache the latest known checkpoint for future lookups.
-	// Note that if this lookup fails something is very wrong since the chain
-	// has already passed the checkpoint which was verified as accurate
-	// before inserting it.
+	//
+	// Note that if this lookup fails something is very wrong since the chain has already passed the checkpoint which
+	// was verified as accurate before inserting it.
 	checkpointNode := b.Index.LookupNode(b.nextCheckpoint.Hash)
 	if checkpointNode == nil {
 		return nil, AssertError(fmt.Sprintf("findPreviousCheckpoint "+
@@ -152,9 +143,9 @@ func // findPreviousCheckpoint finds the most recent checkpoint that is already
 	return b.checkpointNode, nil
 }
 
-func // isNonstandardTransaction determines whether a transaction contains any
-// scripts which are not one of the standard types.
-isNonstandardTransaction(tx *util.Tx) bool {
+// isNonstandardTransaction determines whether a transaction contains any scripts which are not one of the standard
+// types.
+func isNonstandardTransaction(tx *util.Tx) bool {
 	// Check all of the output public key scripts for non-standard scripts.
 	for _, txOut := range tx.MsgTx().TxOut {
 		scriptClass := txscript.GetScriptClass(txOut.PkScript)
@@ -165,21 +156,22 @@ isNonstandardTransaction(tx *util.Tx) bool {
 	return false
 }
 
-func // IsCheckpointCandidate returns whether or not the passed block is a good
-// checkpoint candidate.
+// IsCheckpointCandidate returns whether or not the passed block is a good checkpoint candidate.
+//
 // The factors used to determine a good checkpoint are:
+//
 //  - The block must be in the main chain
-//  - The block must be at least 'CheckpointConfirmations' blocks prior to the
-//    current end of the main chain
-//  - The timestamps for the blocks before and after the checkpoint must have
-//    timestamps which are also before and after the checkpoint, respectively
-//    (due to the median time allowance this is not always the case)
-//  - The block must not contain any strange transaction such as those with
-//    nonstandard scripts
-// The intent is that candidates are reviewed by a developer to make the
-// final decision and then manually added to the list of checkpoints for a
-// network. This function is safe for concurrent access.
-(b *BlockChain) IsCheckpointCandidate(block *util.Block) (bool, error) {
+//
+//  - The block must be at least 'CheckpointConfirmations' blocks prior to the current end of the main chain
+//
+//  - The timestamps for the blocks before and after the checkpoint must have timestamps which are also before and after
+//  the checkpoint, respectively (due to the median time allowance this is not always the case)
+//
+//  - The block must not contain any strange transaction such as those with nonstandard scripts
+//
+// The intent is that candidates are reviewed by a developer to make the final decision and then manually added to the
+// list of checkpoints for a network. This function is safe for concurrent access.
+func (b *BlockChain) IsCheckpointCandidate(block *util.Block) (bool, error) {
 	b.chainLock.RLock()
 	defer b.chainLock.RUnlock()
 	// A checkpoint must be in the main chain.
@@ -187,24 +179,20 @@ func // IsCheckpointCandidate returns whether or not the passed block is a good
 	if node == nil || !b.BestChain.Contains(node) {
 		return false, nil
 	}
-	// Ensure the height of the passed block and the entry for the block in
-	// the main chain match.  This should always be the case unless the
-	// caller provided an invalid block.
+	// Ensure the height of the passed block and the entry for the block in the main chain match. This should always be
+	// the case unless the caller provided an invalid block.
 	if node.height != block.Height() {
 		return false, fmt.Errorf("passed block height of %d does not "+
 			"match the main chain height of %d", block.Height(),
 			node.height)
 	}
-	// A checkpoint must be at least CheckpointConfirmations blocks before
-	// the end of the main chain.
+	// A checkpoint must be at least CheckpointConfirmations blocks before the end of the main chain.
 	mainChainHeight := b.BestChain.Tip().height
 	if node.height > (mainChainHeight - CheckpointConfirmations) {
 		return false, nil
 	}
-	// A checkpoint must be have at least one block after it.
-	// This should always succeed since the check above already made sure it
-	// is CheckpointConfirmations back,
-	// but be safe in case the constant changes.
+	// A checkpoint must be have at least one block after it. This should always succeed since the check above already
+	// made sure it is CheckpointConfirmations back, but be safe in case the constant changes.
 	nextNode := b.BestChain.Next(node)
 	if nextNode == nil {
 		return false, nil
@@ -213,9 +201,8 @@ func // IsCheckpointCandidate returns whether or not the passed block is a good
 	if node.parent == nil {
 		return false, nil
 	}
-	// A checkpoint must have timestamps for the block and the blocks on
-	// either side of it in order (
-	// due to the median time allowance this is not always the case).
+	// A checkpoint must have timestamps for the block and the blocks on either side of it in order (due to the median
+	// time allowance this is not always the case).
 	prevTime := time.Unix(node.parent.timestamp, 0)
 	curTime := block.MsgBlock().Header.Timestamp
 	nextTime := time.Unix(nextNode.timestamp, 0)

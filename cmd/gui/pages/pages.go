@@ -3,14 +3,16 @@ package pages
 import (
 	"encoding/json"
 	"fmt"
-	"gioui.org/op"
-	"gioui.org/text"
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"runtime/debug"
 	"strconv"
 	"time"
+
+	"gioui.org/op"
+	"gioui.org/text"
+
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -121,8 +123,8 @@ func addressBookContent(c *component.State) func() {
 		addressBookPanel := c.Thm.DuoUIpanel()
 		addressBookPanel.ScrollBar = c.Thm.ScrollBar(16)
 		addressBookPanel.Layout(c.Gtx, addressBookPanelElement, func(i int, in interface{}) {
-			//if in != nil {
-			//addresses := in.([]model.DuoUIaddress)
+			// if in != nil {
+			// addresses := in.([]model.DuoUIaddress)
 			t := c.Rc.AddressBook.Addresses[i]
 			layout.Flex{Axis: layout.Vertical}.Layout(c.Gtx,
 				layout.Rigid(func() {
@@ -161,7 +163,7 @@ func addressBookContent(c *component.State) func() {
 				layout.Rigid(c.Thm.DuoUIline(c.Gtx, 1, 0,
 					1, c.Thm.Colors["Gray"])),
 			)
-			//}
+			// }
 		})
 		// }).Layout(c.Gtx, addressBookPanel)
 	}
@@ -187,11 +189,11 @@ func addressBookHeader(c *component.State, pageFunc func()) func() {
 			}),
 			layout.Rigid(func() {
 				// c.Thm.DuoUIcounter(c.Rc.GetBlocksExcerpts()).Layout(c.Gtx,
-				//c.Rc.Explorer.Page, "PAGE", fmt.Sprint(c.Rc.Explorer.Page.Value))
+				// c.Rc.Explorer.Page, "PAGE", fmt.Sprint(c.Rc.Explorer.Page.Value))
 			}),
 			// layout.Rigid(component.Button(c.Gtx, th, buttonNewAddress,
-			//c.Thm.Fonts["Secondary"], 12, c.Thm.Colors["ButtonText"], c.Thm.Colors["Dark"],
-			//"NEW ADDRESS", component.QrDialog(rc, c.Gtx, c.Rc.CreateNewAddress("")))))
+			// c.Thm.Fonts["Secondary"], 12, c.Thm.Colors["ButtonText"], c.Thm.Colors["Dark"],
+			// "NEW ADDRESS", component.QrDialog(rc, c.Gtx, c.Rc.CreateNewAddress("")))))
 			layout.Rigid(c.MonoButton(
 				buttonNewAddress, 12,
 				"Primary", "Light", "Secondary",
@@ -397,10 +399,10 @@ func bodyExplorer(c *component.State) func() {
 					func(i int, in interface{}) {
 						blocks := in.([]model.DuoUIblock)
 						b := blocks[i]
-						//blocksList.Layout(c.Gtx, len(c.Rc.Explorer.Blocks), func(i int) {
+						// blocksList.Layout(c.Gtx, len(c.Rc.Explorer.Blocks), func(i int) {
 						//	b := c.Rc.Explorer.Blocks[i]
 						blockRow(c, &b)
-						//})
+						// })
 					},
 				)
 			}),
@@ -908,7 +910,7 @@ func sendBody(c *component.State) func() {
 					layout.UniformInset(unit.Dp(8)).Layout(c.Gtx, widgets[i])
 				})
 			}))
-		//Info("passPhrase:" + sendStruct.passPhrase)
+		// Info("passPhrase:" + sendStruct.passPhrase)
 	}
 }
 
@@ -932,8 +934,8 @@ func Settings(c *component.State) *gelook.DuoUIpage {
 	return c.Thm.DuoUIpage(page)
 
 	// return c.Thm.DuoUIpage("SETTINGS", 0, func() {},
-	//component.ContentHeader(c.Gtx, th, SettingsHeader(c)), SettingsBody(c),
-	//func() {
+	// component.ContentHeader(c.Gtx, th, SettingsHeader(c)), SettingsBody(c),
+	// func() {
 	// var msg string
 	// if c.Rc.Settings.Daemon.Config["DisableBanning"].(*bool) != true{
 	//	msg = "ima"
@@ -959,8 +961,8 @@ func SettingsBody(c *component.State) func() {
 					settingsPanel.Layout(c.Gtx, settingsPanelElement,
 						func(i int, in interface{}) {
 							settings := in.(pod.Fields)
-							//t := settings[i]
-							//fieldsList.Layout(c.Gtx, len(fields.Fields), func(il int) {
+							// t := settings[i]
+							// fieldsList.Layout(c.Gtx, len(fields.Fields), func(il int) {
 							i = settingsPanelElement.PanelObjectsNumber - 1 - i
 							tl := component.Field{
 								Field: &settings[i],
@@ -1182,25 +1184,25 @@ func singleTxBody(c *component.State,
 	tx btcjson.GetTransactionResult) func() {
 	return func() {
 
-		//duo := layout.Horizontal
-		//if c.Gtx.Constraints.Width.Max < 1280 {
+		// duo := layout.Horizontal
+		// if c.Gtx.Constraints.Width.Max < 1280 {
 		//	duo = layout.Vertical
-		//}
-		//trio := layout.Horizontal
-		//if c.Gtx.Constraints.Width.Max < 780 {
+		// }
+		// trio := layout.Horizontal
+		// if c.Gtx.Constraints.Width.Max < 780 {
 		//	trio = layout.Vertical
-		//}
+		// }
 
-		//blockJSON, _ := json.MarshalIndent(block, "", "  ")
-		//blockText := string(blockJSON)
+		// blockJSON, _ := json.MarshalIndent(block, "", "  ")
+		// blockText := string(blockJSON)
 		widgets := []func(){
 
 			func() {
 				c.Thm.H6(tx.TxID).Layout(c.Gtx)
 			},
-			//component.UnoField(c.Gtx, component.ContentLabeledField(c.Gtx, th,
-			//layout.Vertical, 4, 12, 14, "Hash", "Dark", "LightGrayII", "Dark", "LightGrayI", fmt.Sprint(block.Hash))),
-			//component.DuoFields(c.Gtx, duo,
+			// component.UnoField(c.Gtx, component.ContentLabeledField(c.Gtx, th,
+			// layout.Vertical, 4, 12, 14, "Hash", "Dark", "LightGrayII", "Dark", "LightGrayI", fmt.Sprint(block.Hash))),
+			// component.DuoFields(c.Gtx, duo,
 			//	component.TrioFields(c.Gtx, th, trio, 12, 16,
 			//		"Height", fmt.Sprint(block.Height), "Dark", "LightGrayII",
 			//		"Dark", "LightGrayI",
@@ -1217,16 +1219,16 @@ func singleTxBody(c *component.State,
 			//		"Nonce", fmt.Sprint(block.Nonce), "LightGrayII", "Dark",
 			//		"Dark", "LightGrayI",
 			//	),
-			//),
-			//component.DuoFields(c.Gtx, duo,
+			// ),
+			// component.DuoFields(c.Gtx, duo,
 			//	component.ContentLabeledField(c.Gtx, th, layout.Vertical,
 			//	4, 12, 12, "MerkleRoot", "Dark", "LightGrayII", "Dark",
 			//	"LightGrayI", block.MerkleRoot),
 			//	component.ContentLabeledField(c.Gtx, th, layout.Vertical,
 			//	4, 12, 12, "PowHash", "Dark", "LightGrayII", "Dark",
 			//	"LightGrayI", fmt.Sprint(block.PowHash)),
-			//),
-			//component.DuoFields(c.Gtx, duo,
+			// ),
+			// component.DuoFields(c.Gtx, duo,
 			//	component.TrioFields(c.Gtx, th, trio, 12, 16,
 			//		"Size", fmt.Sprint(block.Size), "Dark", "LightGrayII",
 			//		"Dark", "LightGrayI",
@@ -1243,16 +1245,16 @@ func singleTxBody(c *component.State,
 			//		"Version", fmt.Sprint(block.Version), "LightGrayII",
 			//		"Dark", "Dark", "LightGrayI",
 			//	),
-			//),
-			//component.UnoField(c.Gtx, component.ContentLabeledField(c.Gtx, th,
-			//layout.Vertical, 4, 12, 12, "Tx", "Dark", "LightGrayII", "Dark",
-			//"LightGrayI", fmt.Sprint(block.Tx))),
-			//component.UnoField(c.Gtx, component.ContentLabeledField(c.Gtx, th,
-			//layout.Vertical, 4, 12, 12, "RawTx", "Dark", "LightGrayII",
-			//"Dark", "LightGrayI", fmt.Sprint(blockText))),
-			//component.PageNavButtons(c, block.PreviousHash,
-			//block.NextHash, blockPage(c, block.PreviousHash),
-			//blockPage(c, block.NextHash)),
+			// ),
+			// component.UnoField(c.Gtx, component.ContentLabeledField(c.Gtx, th,
+			// layout.Vertical, 4, 12, 12, "Tx", "Dark", "LightGrayII", "Dark",
+			// "LightGrayI", fmt.Sprint(block.Tx))),
+			// component.UnoField(c.Gtx, component.ContentLabeledField(c.Gtx, th,
+			// layout.Vertical, 4, 12, 12, "RawTx", "Dark", "LightGrayII",
+			// "Dark", "LightGrayI", fmt.Sprint(blockText))),
+			// component.PageNavButtons(c, block.PreviousHash,
+			// block.NextHash, blockPage(c, block.PreviousHash),
+			// blockPage(c, block.NextHash)),
 		}
 		layautList.Layout(c.Gtx, len(widgets), func(i int) {
 			layout.UniformInset(unit.Dp(0)).Layout(c.Gtx, widgets[i])

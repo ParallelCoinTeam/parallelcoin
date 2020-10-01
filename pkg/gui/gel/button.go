@@ -15,8 +15,7 @@ type Button struct {
 	click gesture.Click
 	// clicks tracks the number of unreported clicks.
 	clicks int
-	// prevClicks tracks the number of unreported clicks
-	// that belong to the previous frame.
+	// prevClicks tracks the number of unreported clicks that belong to the previous frame.
 	prevClicks int
 	history    []Click
 }

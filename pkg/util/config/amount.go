@@ -7,8 +7,8 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// AmountFlag embeds a util.Amount and implements the flags.Marshaler and
-// Unmarshaler interfaces so it can be used as a config struct field.
+// AmountFlag embeds a util.Amount and implements the flags.Marshaler and Unmarshaler interfaces so it can be used as a
+// config struct field.
 type AmountFlag struct {
 	util.Amount
 }

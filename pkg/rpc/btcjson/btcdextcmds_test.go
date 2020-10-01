@@ -10,7 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestPodExtCmds tests all of the pod extended commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
+// TestPodExtCmds tests all of the pod extended commands marshal and unmarshal into valid results include handling of
+// optional fields being omitted in the marshalled command, while optional fields with defaults have the default
+// assigned on unmarshalled commands.
 func TestPodExtCmds(t *testing.T) {
 	t.Parallel()
 	testID := int(1)
@@ -147,7 +149,10 @@ func TestPodExtCmds(t *testing.T) {
 		{
 			name: "getheaders - with arguments",
 			newCmd: func() (interface{}, error) {
-				return btcjson.NewCmd("getheaders", []string{"000000000000000001f1739002418e2f9a84c47a4fd2a0eb7a787a6b7dc12f16", "0000000000000000026f4b7f56eef057b32167eb5ad9ff62006f1807b7336d10"}, "000000000000000000ba33b33e1fad70b69e234fc24414dd47113bff38f523f7")
+				return btcjson.NewCmd("getheaders", []string{
+					"000000000000000001f1739002418e2f9a84c47a4fd2a0eb7a787a6b7dc12f16",
+					"0000000000000000026f4b7f56eef057b32167eb5ad9ff62006f1807b7336d10",
+				}, "000000000000000000ba33b33e1fad70b69e234fc24414dd47113bff38f523f7")
 			},
 			staticCmd: func() interface{} {
 				return btcjson.NewGetHeadersCmd(
@@ -158,7 +163,8 @@ func TestPodExtCmds(t *testing.T) {
 					"000000000000000000ba33b33e1fad70b69e234fc24414dd47113bff38f523f7",
 				)
 			},
-			marshalled: `{"jsonrpc":"1.0","method":"getheaders","netparams":[["000000000000000001f1739002418e2f9a84c47a4fd2a0eb7a787a6b7dc12f16","0000000000000000026f4b7f56eef057b32167eb5ad9ff62006f1807b7336d10"],"000000000000000000ba33b33e1fad70b69e234fc24414dd47113bff38f523f7"],"id":1}`,
+			marshalled: `{"jsonrpc":"1.0","method":"getheaders",
+				"netparams":[["000000000000000001f1739002418e2f9a84c47a4fd2a0eb7a787a6b7dc12f16","0000000000000000026f4b7f56eef057b32167eb5ad9ff62006f1807b7336d10"],"000000000000000000ba33b33e1fad70b69e234fc24414dd47113bff38f523f7"],"id":1}`,
 			unmarshalled: &btcjson.GetHeadersCmd{
 				BlockLocators: []string{
 					"000000000000000001f1739002418e2f9a84c47a4fd2a0eb7a787a6b7dc12f16",

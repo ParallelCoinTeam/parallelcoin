@@ -16,8 +16,7 @@ import (
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
-// TestOutputSplittingNotEnoughInputs checks that an output will get split if we
-// don't have enough inputs to fulfil it.
+// TestOutputSplittingNotEnoughInputs checks that an output will get split if we don't have enough inputs to fulfil it.
 func TestOutputSplittingNotEnoughInputs(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -35,18 +34,16 @@ func TestOutputSplittingNotEnoughInputs(t *testing.T) {
 	output1Amount := util.Amount(2)
 	output2Amount := util.Amount(3)
 	requests := []OutputRequest{
-		// These output requests will have the same server ID, so we know
-		// they'll be fulfilled in the order they're defined here, which is
-		// important for this test.
+		// These output requests will have the same server ID, so we know they'll be fulfilled in the order they're
+		// defined here, which is important for this test.
 		TstNewOutputRequest(t, 1, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", output1Amount, net),
 		TstNewOutputRequest(t, 2, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", output2Amount, net),
 	}
 	seriesID, eligible := TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{7})
 	w := newWithdrawal(0, requests, eligible, *TstNewChangeAddress(t, pool, seriesID, 0))
 	w.txOptions = func(tx *withdrawalTx) {
-		// Trigger an output split because of lack of inputs by forcing a high fee.
-		// If we just started with not enough inputs for the requested outputs,
-		// fulfillRequests() would drop outputs until we had enough.
+		// Trigger an output split because of lack of inputs by forcing a high fee. If we just started with not enough
+		// inputs for the requested outputs, fulfillRequests() would drop outputs until we had enough.
 		tx.calculateFee = TstConstantFee(3)
 	}
 	if err := w.fulfillRequests(); err != nil {
@@ -64,8 +61,7 @@ func TestOutputSplittingNotEnoughInputs(t *testing.T) {
 		t.Fatalf("Wrong amount for first tx output; got %v, want %v",
 			tx.outputs[0].amount, output1Amount)
 	}
-	// The last output should have had its amount updated to whatever we had
-	// left after satisfying all previous outputs.
+	// The last output should have had its amount updated to whatever we had left after satisfying all previous outputs.
 	newAmount := tx.inputTotal() - output1Amount - tx.calculateFee()
 	checkLastOutputWasSplit(t, w, tx, output2Amount, newAmount)
 }
@@ -149,8 +145,7 @@ func TestSplitLastOutputNoOutputs(t *testing.T) {
 	TstCheckError(t, "", err, ErrPreconditionNotMet)
 }
 
-// Check that all outputs requested in a withdrawal match the outputs of the generated
-// transaction(s).
+// Check that all outputs requested in a withdrawal match the outputs of the generated transaction(s).
 func TestWithdrawalTxOutputs(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -180,8 +175,7 @@ func TestWithdrawalTxOutputs(t *testing.T) {
 		t.Fatalf("Unexpected number of transactions; got %d, want 1", len(w.transactions))
 	}
 	tx := w.transactions[0]
-	// The created tx should include both eligible credits, so we expect it to have
-	// an input amount of 2e6+4e6 satoshis.
+	// The created tx should include both eligible credits, so we expect it to have an input amount of 2e6+4e6 satoshis.
 	inputAmount := eligible[0].Amount + eligible[1].Amount
 	change := inputAmount - (outputs[0].Amount + outputs[1].Amount + tx.calculateFee())
 	expectedOutputs := append(
@@ -190,8 +184,8 @@ func TestWithdrawalTxOutputs(t *testing.T) {
 	checkMsgTxOutputs(t, msgtx, expectedOutputs)
 }
 
-// Check that withdrawal.status correctly states that no outputs were fulfilled when we
-// don't have enough eligible credits for any of them.
+// Check that withdrawal.status correctly states that no outputs were fulfilled when we don't have enough eligible
+// credits for any of them.
 func TestFulfillRequestsNoSatisfiableOutputs(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -227,8 +221,7 @@ func TestFulfillRequestsNoSatisfiableOutputs(t *testing.T) {
 	}
 }
 
-// Check that some requested outputs are not fulfilled when we don't have credits for all
-// of them.
+// Check that some requested outputs are not fulfilled when we don't have credits for all of them.
 func TestFulfillRequestsNotEnoughCreditsForAllRequests(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -258,11 +251,10 @@ func TestFulfillRequestsNotEnoughCreditsForAllRequests(t *testing.T) {
 		t.Fatal(err)
 	}
 	tx := w.transactions[0]
-	// The created tx should spend both eligible credits, so we expect it to have
-	// an input amount of 2e6+4e6 satoshis.
+	// The created tx should spend both eligible credits, so we expect it to have an input amount of 2e6+4e6 satoshis.
 	inputAmount := eligible[0].Amount + eligible[1].Amount
-	// We expect it to include outputs for requests 1 and 2, plus a change output, but
-	// output request #3 should not be there because we don't have enough credits.
+	// We expect it to include outputs for requests 1 and 2, plus a change output, but output request #3 should not be
+	// there because we don't have enough credits.
 	change := inputAmount - (out1.Amount + out2.Amount + tx.calculateFee())
 	expectedOutputs := []OutputRequest{out1, out2}
 	sort.Sort(byOutBailmentID(expectedOutputs))
@@ -270,8 +262,7 @@ func TestFulfillRequestsNotEnoughCreditsForAllRequests(t *testing.T) {
 		expectedOutputs, TstNewOutputRequest(t, 4, changeStart.addr.String(), change, net))
 	msgtx := tx.toMsgTx()
 	checkMsgTxOutputs(t, msgtx, expectedOutputs)
-	// withdrawal.status should state that outputs 1 and 2 were successfully fulfilled,
-	// and that output 3 was not.
+	// withdrawal.status should state that outputs 1 and 2 were successfully fulfilled, and that output 3 was not.
 	expectedStatuses := map[OutBailmentID]outputStatus{
 		out1.outBailmentID(): statusSuccess,
 		out2.outBailmentID(): statusSuccess,
@@ -284,8 +275,8 @@ func TestFulfillRequestsNotEnoughCreditsForAllRequests(t *testing.T) {
 	}
 }
 
-// TestRollbackLastOutput tests the case where we rollback one output
-// and one input, such that sum(in) >= sum(out) + fee.
+// TestRollbackLastOutput tests the case where we rollback one output and one input, such that sum(in) >= sum(out) +
+// fee.
 func TestRollbackLastOutput(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -307,8 +298,7 @@ func TestRollbackLastOutput(t *testing.T) {
 	if err != nil {
 		t.Fatal("Unexpected error:", err)
 	}
-	// The above rollBackLastOutput() call should have removed the last output
-	// and the last input.
+	// The above rollBackLastOutput() call should have removed the last output and the last input.
 	lastOutput := initialOutputs[len(initialOutputs)-1]
 	if removedOutput != lastOutput {
 		t.Fatalf("Wrong rolled back output; got %s want %s", removedOutput, lastOutput)
@@ -320,8 +310,7 @@ func TestRollbackLastOutput(t *testing.T) {
 	if !reflect.DeepEqual(removedInputs[0], lastInput) {
 		t.Fatalf("Wrong rolled back input; got %v want %v", removedInputs[0], lastInput)
 	}
-	// Now check that the inputs and outputs left in the tx match what we
-	// expect.
+	// Now check that the inputs and outputs left in the tx match what we expect.
 	checkTxOutputs(t, tx, initialOutputs[:len(initialOutputs)-1])
 	checkTxInputs(t, tx, initialInputs[:len(initialInputs)-1])
 }
@@ -338,8 +327,8 @@ func TestRollbackLastOutputMultipleInputsRolledBack(t *testing.T) {
 			t.Log(err)
 		}
 	}()
-	// This tx will need the 3 last inputs to fulfill the second output, so they
-	// should all be rolled back and returned in the reverse order they were added.
+	// This tx will need the 3 last inputs to fulfill the second output, so they should all be rolled back and returned
+	// in the reverse order they were added.
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{1, 2, 3, 4}, []int64{1, 8})
 	initialInputs := tx.inputs
 	initialOutputs := tx.outputs
@@ -356,14 +345,13 @@ func TestRollbackLastOutputMultipleInputsRolledBack(t *testing.T) {
 			t.Fatalf("Unexpected input amount; got %v, want %v", removedInputs[i].Amount, amount)
 		}
 	}
-	// Now check that the inputs and outputs left in the tx match what we
-	// expect.
+	// Now check that the inputs and outputs left in the tx match what we expect.
 	checkTxOutputs(t, tx, initialOutputs[:len(initialOutputs)-1])
 	checkTxInputs(t, tx, initialInputs[:len(initialInputs)-len(removedInputs)])
 }
 
-// TestRollbackLastOutputNoInputsRolledBack tests the case where we roll back
-// one output but don't need to roll back any inputs.
+// TestRollbackLastOutputNoInputsRolledBack tests the case where we roll back one output but don't need to roll back any
+// inputs.
 func TestRollbackLastOutputNoInputsRolledBack(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -385,8 +373,7 @@ func TestRollbackLastOutputNoInputsRolledBack(t *testing.T) {
 	if err != nil {
 		t.Fatal("Unexpected error:", err)
 	}
-	// The above rollBackLastOutput() call should have removed the
-	// last output but no inputs.
+	// The above rollBackLastOutput() call should have removed the last output but no inputs.
 	lastOutput := initialOutputs[len(initialOutputs)-1]
 	if removedOutput != lastOutput {
 		t.Fatalf("Wrong output; got %s want %s", removedOutput, lastOutput)
@@ -394,14 +381,12 @@ func TestRollbackLastOutputNoInputsRolledBack(t *testing.T) {
 	if len(removedInputs) != 0 {
 		t.Fatalf("Expected no removed inputs, but got %d inputs", len(removedInputs))
 	}
-	// Now check that the inputs and outputs left in the tx match what we
-	// expect.
+	// Now check that the inputs and outputs left in the tx match what we expect.
 	checkTxOutputs(t, tx, initialOutputs[:len(initialOutputs)-1])
 	checkTxInputs(t, tx, initialInputs)
 }
 
-// TestRollBackLastOutputInsufficientOutputs checks that
-// rollBackLastOutput returns an error if there are less than two
+// TestRollBackLastOutputInsufficientOutputs checks that rollBackLastOutput returns an error if there are less than two
 // outputs in the transaction.
 func TestRollBackLastOutputInsufficientOutputs(t *testing.T) {
 	tx := newWithdrawalTx(defaultTxOptions)
@@ -414,8 +399,8 @@ func TestRollBackLastOutputInsufficientOutputs(t *testing.T) {
 	TstCheckError(t, "", err, ErrPreconditionNotMet)
 }
 
-// TestRollbackLastOutputWhenNewOutputAdded checks that we roll back the last
-// output if a tx becomes too big right after we add a new output to it.
+// TestRollbackLastOutputWhenNewOutputAdded checks that we roll back the last output if a tx becomes too big right after
+// we add a new output to it.
 func TestRollbackLastOutputWhenNewOutputAdded(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -455,8 +440,7 @@ func TestRollbackLastOutputWhenNewOutputAdded(t *testing.T) {
 	if len(w.transactions) != 2 {
 		t.Fatalf("Wrong number of finalized transactions; got %d, want 2", len(w.transactions))
 	}
-	// First tx should have one output with 1 and one change output with 4
-	// satoshis.
+	// First tx should have one output with 1 and one change output with 4 satoshis.
 	firstTx := w.transactions[0]
 	req1 := requests[0]
 	checkTxOutputs(t, firstTx,
@@ -470,8 +454,8 @@ func TestRollbackLastOutputWhenNewOutputAdded(t *testing.T) {
 	checkTxChangeAmount(t, secondTx, util.Amount(3))
 }
 
-// TestRollbackLastOutputWhenNewInputAdded checks that we roll back the last
-// output if a tx becomes too big right after we add a new input to it.
+// TestRollbackLastOutputWhenNewInputAdded checks that we roll back the last output if a tx becomes too big right after
+// we add a new input to it.
 func TestRollbackLastOutputWhenNewInputAdded(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -488,8 +472,8 @@ func TestRollbackLastOutputWhenNewInputAdded(t *testing.T) {
 	net := pool.Manager().ChainParams()
 	series, eligible := TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{6, 5, 4, 3, 2, 1})
 	requests := []OutputRequest{
-		// This is manually ordered by outBailmentIDHash, which is the order in
-		// which they're going to be fulfilled by w.fulfillRequests().
+		// This is manually ordered by outBailmentIDHash, which is the order in which they're going to be fulfilled by
+		// w.fulfillRequests().
 		TstNewOutputRequest(t, 1, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", 1, net),
 		TstNewOutputRequest(t, 3, "3Qt1EaKRD9g9FeL2DGkLLswhK1AKmmXFSe", 6, net),
 		TstNewOutputRequest(t, 2, "3PbExiaztsSYgh6zeMswC49hLUwhTQ86XG", 3, net),
@@ -506,8 +490,7 @@ func TestRollbackLastOutputWhenNewInputAdded(t *testing.T) {
 			return txMaxSize - 1
 		}
 	}
-	// The rollback should be triggered right after the 4th input is added in
-	// order to fulfill the second request.
+	// The rollback should be triggered right after the 4th input is added in order to fulfill the second request.
 	if err := w.fulfillRequests(); err != nil {
 		t.Fatal("Unexpected error:", err)
 	}
@@ -515,17 +498,16 @@ func TestRollbackLastOutputWhenNewInputAdded(t *testing.T) {
 	if len(w.transactions) != 2 {
 		t.Fatalf("Wrong number of finalized transactions; got %d, want 2", len(w.transactions))
 	}
-	// First tx should have one output with amount of 1, the first input from
-	// the stack of eligible inputs (last slice item), and no change output.
+	// First tx should have one output with amount of 1, the first input from the stack of eligible inputs (last slice
+	// item), and no change output.
 	firstTx := w.transactions[0]
 	req1 := requests[0]
 	checkTxOutputs(t, firstTx,
 		[]*withdrawalTxOut{{request: req1, amount: req1.Amount}})
 	checkTxInputs(t, firstTx, eligible[5:6])
-	// Second tx should have outputs for the two last requests (in the same
-	// order they were passed to newWithdrawal), and the 3 inputs needed to
-	// fulfill that (in reverse order as they were passed to newWithdrawal, as
-	// that's how fulfillRequests() consumes them) and no change output.
+	// Second tx should have outputs for the two last requests (in the same order they were passed to newWithdrawal),
+	// and the 3 inputs needed to fulfill that (in reverse order as they were passed to newWithdrawal, as that's how
+	// fulfillRequests() consumes them) and no change output.
 	secondTx := w.transactions[1]
 	wantOutputs := []*withdrawalTxOut{
 		{request: requests[1], amount: requests[1].Amount},
@@ -549,8 +531,7 @@ func TestWithdrawalTxRemoveOutput(t *testing.T) {
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{}, []int64{1, 2})
 	outputs := tx.outputs
-	// Make sure we have created the transaction with the expected
-	// outputs.
+	// Make sure we have created the transaction with the expected outputs.
 	checkTxOutputs(t, tx, outputs)
 	remainingOutput := tx.outputs[0]
 	wantRemovedOutput := tx.outputs[1]
@@ -626,9 +607,8 @@ func TestWithdrawalTxAddChange(t *testing.T) {
 	}
 }
 
-// TestWithdrawalTxAddChangeNoChange checks that withdrawalTx.addChange() does not
-// add a change output when there's no satoshis left after paying all
-// outputs+fees.
+// TestWithdrawalTxAddChangeNoChange checks that withdrawalTx.addChange() does not add a change output when there's no
+// satoshis left after paying all outputs+fees.
 func TestWithdrawalTxAddChangeNoChange(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
@@ -780,9 +760,8 @@ func TestWithdrawalInfoMatch(t *testing.T) {
 	}()
 	roundID := uint32(0)
 	wi := createAndFulfillWithdrawalRequests(t, dbtx, pool, roundID)
-	// Use freshly created values for requests, startAddress and changeStart
-	// to simulate what would happen if we had recreated them from the
-	// serialized data in the DB.
+	// Use freshly created values for requests, startAddress and changeStart to simulate what would happen if we had
+	// recreated them from the serialized data in the DB.
 	requestsCopy := make([]OutputRequest, len(wi.requests))
 	copy(requestsCopy, wi.requests)
 	startAddr := TstNewWithdrawalAddress(t, dbtx, pool, wi.startAddress.seriesID, wi.startAddress.branch,
@@ -870,8 +849,8 @@ func TestGetWithdrawalStatus(t *testing.T) {
 		t.Fatal(err)
 	}
 	TstCheckWithdrawalStatusMatches(t, wi.status, *status)
-	// Here we should get a nil WithdrawalStatus because the parameters are not
-	// identical to those of the stored WithdrawalStatus with this roundID.
+	// Here we should get a nil WithdrawalStatus because the parameters are not identical to those of the stored
+	// WithdrawalStatus with this roundID.
 	dustThreshold := wi.dustThreshold + 1
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		status, err = getWithdrawalStatus(pool, ns, addrmgrNs, roundID, wi.requests, wi.startAddress,
@@ -974,8 +953,7 @@ func TestSignMultiSigUTXORedeemScriptNotFound(t *testing.T) {
 	_, addrmgrNs := TstRWNamespaces(dbtx)
 	mgr := pool.Manager()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{4e6}, []int64{})
-	// This is a P2SH address for which the addr manager doesn't have the redeem
-	// script.
+	// This is a P2SH address for which the addr manager doesn't have the redeem script.
 	addr, _ := util.DecodeAddress("3Hb4xcebcKg4DiETJfwjh8sF4uDw9rqtVC", mgr.ChainParams())
 	if _, err := mgr.Address(addrmgrNs, addr); err == nil {
 		t.Fatalf("Address %s found in manager when it shouldn't", addr)
@@ -1066,9 +1044,8 @@ func TestGetRawSigs(t *testing.T) {
 		t.Fatalf("Unexpected number of sig lists; got %d, want %d", len(txSigs), len(tx.inputs))
 	}
 	checkNonEmptySigsForPrivKeys(t, txSigs, tx.inputs[0].addr.series().privateKeys)
-	// Since we have all the necessary signatures (m-of-n), we construct the
-	// sigsnature scripts and execute them to make sure the raw signatures are
-	// valid.
+	// Since we have all the necessary signatures (m-of-n), we construct the signature scripts and execute them to make
+	// sure the raw signatures are valid.
 	signTxAndValidate(t, pool.Manager(), addrmgrNs, msgtx, txSigs, tx.inputs)
 }
 func TestGetRawSigsOnlyOnePrivKeyAvailable(t *testing.T) {
@@ -1114,8 +1091,7 @@ func TestGetRawSigsUnparseableRedeemScript(t *testing.T) {
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{5e6, 4e6}, []int64{})
-	// Change the redeem script for one of our tx inputs, to force an error in
-	// getRawSigs().
+	// Change the redeem script for one of our tx inputs, to force an error in getRawSigs().
 	tx.inputs[0].addr.script = []byte{0x01}
 	_, err = getRawSigs([]*withdrawalTx{tx})
 	TstCheckError(t, "", err, ErrRawSigning)
@@ -1134,15 +1110,13 @@ func TestGetRawSigsInvalidAddrBranch(t *testing.T) {
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{5e6, 4e6}, []int64{})
-	// Change the branch of our input's address to an invalid value, to force
-	// an error in getRawSigs().
+	// Change the branch of our input's address to an invalid value, to force an error in getRawSigs().
 	tx.inputs[0].addr.branch = Branch(999)
 	_, err = getRawSigs([]*withdrawalTx{tx})
 	TstCheckError(t, "", err, ErrInvalidBranch)
 }
 
-// TestOutBailmentIDSort tests that we can correctly sort a slice
-// of output requests by the hash of the outbailmentID.
+// TestOutBailmentIDSort tests that we can correctly sort a slice of output requests by the hash of the outbailmentID.
 func TestOutBailmentIDSort(t *testing.T) {
 	or00 := OutputRequest{cachedHash: []byte{0, 0}}
 	or01 := OutputRequest{cachedHash: []byte{0, 1}}
@@ -1202,10 +1176,8 @@ func TestTxSizeCalculation(t *testing.T) {
 	_, addrmgrNs := TstRWNamespaces(dbtx)
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{1, 5}, []int64{2})
 	size := tx.calculateSize()
-	// Now add a change output, get a msgtx, sign it and get its SerializedSize
-	// to compare with the value above. We need to replace the calculateFee
-	// method so that the tx.addChange() call below always adds a change
-	// output.
+	// Now add a change output, get a msgtx, sign it and get its SerializedSize to compare with the value above. We need
+	// to replace the calculateFee method so that the tx.addChange() call below always adds a change output.
 	tx.calculateFee = TstConstantFee(1)
 	seriesID := tx.inputs[0].addr.SeriesID()
 	tx.addChange(TstNewChangeAddress(t, pool, seriesID, 0).addr.ScriptAddress())
@@ -1215,19 +1187,15 @@ func TestTxSizeCalculation(t *testing.T) {
 		t.Fatal(err)
 	}
 	signTxAndValidate(t, pool.Manager(), addrmgrNs, msgtx, sigs[tx.ntxid()], tx.inputs)
-	// ECDSA signatures have variable length (71-73 bytes) but in
-	// calculateSize() we use a dummy signature for the worst-case scenario (73
-	// bytes) so the estimate here can be up to 2 bytes bigger for every
-	// signature in every input's SigScript.
+	// ECDSA signatures have variable length (71-73 bytes) but in calculateSize() we use a dummy signature for the
+	// worst-case scenario (73 bytes) so the estimate here can be up to 2 bytes bigger for every signature in every
+	// input's SigScript.
 	maxDiff := 2 * len(msgtx.TxIn) * int(tx.inputs[0].addr.series().reqSigs)
-	// To make things worse, there's a possibility that the length of the
-	// actual SignatureScript is at the upper boundary of one of the uint*
-	// types, and when that happens our dummy SignatureScript is likely to have
-	// a length that cannot be represented in the same uint* type as that of the
-	// actual one, so we need to account for that here too. As per
-	// wire.VarIntSerializeSize(), the biggest difference would be of 4
-	// bytes, when the actual SigScript size fits in a uint32 but the dummy one
-	// needs a uint64.
+	// To make things worse, there's a possibility that the length of the actual SignatureScript is at the upper
+	// boundary of one of the uint* types, and when that happens our dummy SignatureScript is likely to have a length
+	// that cannot be represented in the same uint* type as that of the actual one, so we need to account for that here
+	// too. As per wire.VarIntSerializeSize(), the biggest difference would be of 4 bytes, when the actual SigScript
+	// size fits in a uint32 but the dummy one needs a uint64.
 	maxDiff += 4 * len(msgtx.TxIn)
 	if size-msgtx.SerializeSize() > maxDiff {
 		t.Fatalf("Size difference bigger than maximum expected: %d - %d > %d",
@@ -1238,8 +1206,7 @@ func TestTxSizeCalculation(t *testing.T) {
 }
 func TestTxFeeEstimationForSmallTx(t *testing.T) {
 	tx := newWithdrawalTx(defaultTxOptions)
-	// A tx that is smaller than 1000 bytes in size should have a fee of 10000
-	// satoshis.
+	// A tx that is smaller than 1000 bytes in size should have a fee of 10000 satoshis.
 	tx.calculateSize = func() int { return 999 }
 	fee := tx.calculateFee()
 	wantFee := util.Amount(1e3)
@@ -1249,8 +1216,7 @@ func TestTxFeeEstimationForSmallTx(t *testing.T) {
 }
 func TestTxFeeEstimationForLargeTx(t *testing.T) {
 	tx := newWithdrawalTx(defaultTxOptions)
-	// A tx that is larger than 1000 bytes in size should have a fee of 1e3
-	// satoshis plus 1e3 for every 1000 bytes.
+	// A tx that is larger than 1000 bytes in size should have a fee of 1e3 satoshis plus 1e3 for every 1000 bytes.
 	tx.calculateSize = func() int { return 3000 }
 	fee := tx.calculateFee()
 	wantFee := util.Amount(4e3)
@@ -1345,9 +1311,8 @@ func TestStoreTransactionsWithChangeOutput(t *testing.T) {
 	}
 }
 
-// createWithdrawalTxWithStoreCredits creates a new Credit in the given store
-// for each entry in inputAmounts, and uses them to construct a withdrawalTx
-// with one output for every entry in outputAmounts.
+// createWithdrawalTxWithStoreCredits creates a new Credit in the given store for each entry in inputAmounts, and uses
+// them to construct a withdrawalTx with one output for every entry in outputAmounts.
 func createWithdrawalTxWithStoreCredits(t *testing.T, dbtx walletdb.ReadWriteTx, store *wtxmgr.Store, pool *Pool,
 	inputAmounts []int64, outputAmounts []int64) *withdrawalTx {
 	masters := []*hdkeychain.ExtendedKey{
@@ -1370,9 +1335,8 @@ func createWithdrawalTxWithStoreCredits(t *testing.T, dbtx walletdb.ReadWriteTx,
 	return tx
 }
 
-// checkNonEmptySigsForPrivKeys checks that every signature list in txSigs has
-// one non-empty signature for every non-nil private key in the given list. This
-// is to make sure every signature list matches the specification at
+// checkNonEmptySigsForPrivKeys checks that every signature list in txSigs has one non-empty signature for every non-nil
+// private key in the given list. This is to make sure every signature list matches the specification at
 // http://opentransactions.org/wiki/index.php/Siglist.
 func checkNonEmptySigsForPrivKeys(t *testing.T, txSigs TxSigs, privKeys []*hdkeychain.ExtendedKey) {
 	for _, txInSigs := range txSigs {
@@ -1392,8 +1356,7 @@ func checkNonEmptySigsForPrivKeys(t *testing.T, txSigs TxSigs, privKeys []*hdkey
 	}
 }
 
-// checkTxOutputs uses reflect.DeepEqual() to ensure that the tx outputs match
-// the given slice of withdrawalTxOuts.
+// checkTxOutputs uses reflect.DeepEqual() to ensure that the tx outputs match the given slice of withdrawalTxOuts.
 func checkTxOutputs(t *testing.T, tx *withdrawalTx, outputs []*withdrawalTxOut) {
 	nOutputs := len(outputs)
 	if len(tx.outputs) != nOutputs {
@@ -1406,9 +1369,8 @@ func checkTxOutputs(t *testing.T, tx *withdrawalTx, outputs []*withdrawalTxOut) 
 	}
 }
 
-// checkMsgTxOutputs checks that the pkScript and amount of every output in the
-// given msgtx match the pkScript and amount of every item in the slice of
-// OutputRequests.
+// checkMsgTxOutputs checks that the pkScript and amount of every output in the given msgtx match the pkScript and
+// amount of every item in the slice of OutputRequests.
 func checkMsgTxOutputs(t *testing.T, msgtx *wire.MsgTx, requests []OutputRequest) {
 	nRequests := len(requests)
 	if len(msgtx.TxOut) != nRequests {
@@ -1441,9 +1403,8 @@ func checkTxInputs(t *testing.T, tx *withdrawalTx, inputs []Credit) {
 	}
 }
 
-// signTxAndValidate will construct the signature script for each input of the given
-// transaction (using the given raw signatures and the pkScripts from credits) and execute
-// those scripts to validate them.
+// signTxAndValidate will construct the signature script for each input of the given transaction (using the given raw
+// signatures and the pkScripts from credits) and execute those scripts to validate them.
 func signTxAndValidate(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, txSigs TxSigs,
 	credits []Credit) {
 	for i := range tx.TxIn {
@@ -1507,10 +1468,9 @@ func checkTxChangeAmount(t *testing.T, tx *withdrawalTx, amount util.Amount) {
 	}
 }
 
-// checkLastOutputWasSplit ensures that the amount of the last output in the
-// given tx matches newAmount and that the splitRequest amount is equal to
-// origAmount - newAmount. It also checks that splitRequest is identical (except
-// for its amount) to the request of the last output in the tx.
+// checkLastOutputWasSplit ensures that the amount of the last output in the given tx matches newAmount and that the
+// splitRequest amount is equal to origAmount - newAmount. It also checks that splitRequest is identical (except for its
+// amount) to the request of the last output in the tx.
 func checkLastOutputWasSplit(t *testing.T, w *withdrawal, tx *withdrawalTx,
 	origAmount, newAmount util.Amount) {
 	splitRequest := w.pendingRequests[0]
@@ -1523,8 +1483,7 @@ func checkLastOutputWasSplit(t *testing.T, w *withdrawal, tx *withdrawalTx,
 		t.Fatalf("Wrong amount in split output; got %v, want %v", splitRequest.Amount,
 			wantSplitAmount)
 	}
-	// Check that the split request is identical (except for its amount) to the
-	// original one.
+	// Check that the split request is identical (except for its amount) to the original one.
 	origRequest := lastOutput.request
 	if !bytes.Equal(origRequest.PkScript, splitRequest.PkScript) {
 		t.Fatalf("Wrong pkScript in split request; got %x, want %x", splitRequest.PkScript,

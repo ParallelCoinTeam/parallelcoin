@@ -28,11 +28,11 @@ type Slider struct {
 	Cursor       int
 	Height       int
 	CursorHeight int
-	//Icon         DuoUIicon
+	// Icon         DuoUIicon
 }
 
 type ScrollBarButton struct {
-	//button      DuoUIbutton
+	// button      DuoUIbutton
 	Height      int
 	insetTop    float32
 	insetRight  float32
@@ -43,12 +43,12 @@ type ScrollBarButton struct {
 }
 
 func (s *Slider) Layout(gtx *layout.Context) {
-	//fmt.Println("He::", gtx.Constraints.Height.Max)
-	//fmt.Println("wi::", gtx.Constraints.Width.Max)
+	// fmt.Println("He::", gtx.Constraints.Height.Max)
+	// fmt.Println("wi::", gtx.Constraints.Width.Max)
 
 	for _, e := range gtx.Events(s) {
 		if e, ok := e.(pointer.Event); ok {
-			//s.Body.Position = e.Position.Y - float32(s.CursorHeight/2)
+			// s.Body.Position = e.Position.Y - float32(s.CursorHeight/2)
 			if e.Position.Y > 0 {
 				s.Position = int(e.Position.Y) - (s.CursorHeight / 2)
 			}

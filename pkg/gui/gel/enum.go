@@ -20,8 +20,7 @@ func index(vs []string, t string) int {
 	return -1
 }
 
-// Value processes events and returns the last selected value, or
-// the empty string.
+// Value processes events and returns the last selected value, or the empty string.
 func (e *Enum) Value(gtx *layout.Context) string {
 	for i := range e.clicks {
 		for _, ev := range e.clicks[i].Events(gtx) {

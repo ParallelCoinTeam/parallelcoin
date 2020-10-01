@@ -1,4 +1,5 @@
 // Copyright (c) 2015-2016 The btcsuite developers
+
 package main
 
 import (
@@ -6,8 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/crypto/ssh/terminal"
@@ -124,19 +123,17 @@ func init() {
 	}
 }
 
-// noInputValue describes an error returned by the input source when no inputs
-// were selected because each previous output value was zero.  Callers of
-// txauthor.NewUnsignedTransaction need not report these errors to the user.
+// noInputValue describes an error returned by the input source when no inputs were selected because each previous
+// output value was zero. Callers of txauthor.NewUnsignedTransaction need not report these errors to the user.
 type noInputValue struct {
 }
 
 func (noInputValue) Error() string { return "no input value" }
 
-// makeInputSource creates an InputSource that creates inputs for every unspent
-// output with non-zero output values.  The target amount is ignored since every
-// output is consumed.  The InputSource does not return any previous output
-// scripts as they are not needed for creating the unsinged transaction and are
-// looked up again by the wallet during the call to signrawtransaction.
+// makeInputSource creates an InputSource that creates inputs for every unspent output with non-zero output values. The
+// target amount is ignored since every output is consumed. The InputSource does not return any previous output scripts
+// as they are not needed for creating the unsinged transaction and are looked up again by the wallet during the call to
+// signrawtransaction.
 func makeInputSource(
 	outputs []btcjson.ListUnspentResult) txauthor.InputSource {
 	var (
@@ -183,9 +180,8 @@ func makeInputSource(
 	}
 }
 
-// makeDestinationScriptSource creates a ChangeSource which is used to receive
-// all correlated previous input value.  A non-change address is created by this
-// function.
+// makeDestinationScriptSource creates a ChangeSource which is used to receive all correlated previous input value. A
+// non-change address is created by this function.
 func makeDestinationScriptSource(
 	rpcClient *rpcclient.Client, accountName string) txauthor.ChangeSource {
 	return func() ([]byte, error) {
@@ -229,10 +225,8 @@ func sweep() error {
 		return errContext(err, "failed to create RPC client")
 	}
 	defer rpcClient.Shutdown()
-	// Fetch all unspent outputs, ignore those not from the source
-	// account, and group by their destination address.  Each grouping of
-	// outputs will be used as inputs for a single transaction sending to a
-	// new destination account address.
+	// Fetch all unspent outputs, ignore those not from the source account, and group by their destination address. Each
+	// grouping of outputs will be used as inputs for a single transaction sending to a new destination account address.
 	unspentOutputs, err := rpcClient.ListUnspent()
 	if err != nil {
 		Error(err)
@@ -321,7 +315,7 @@ func sweep() error {
 	return nil
 }
 func promptSecret(what string) (string, error) {
-	log.Printf("%s: ", what)
+	fmt.Printf("%s: ", what)
 	fd := int(os.Stdin.Fd())
 	input, err := terminal.ReadPassword(fd)
 	fmt.Println()

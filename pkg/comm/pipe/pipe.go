@@ -1,10 +1,11 @@
 package pipe
 
 import (
-	"github.com/p9c/pod/pkg/comm/stdconn"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"io"
 	"os"
+
+	"github.com/p9c/pod/pkg/comm/stdconn"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 )
 
 func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *worker.Worker {

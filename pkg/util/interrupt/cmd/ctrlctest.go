@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

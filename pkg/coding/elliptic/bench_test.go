@@ -2,7 +2,8 @@ package ec
 
 import "testing"
 
-// BenchmarkAddJacobian benchmarks the secp256k1 curve addJacobian function with Z values of 1 so that the associated optimizations are used.
+// BenchmarkAddJacobian benchmarks the secp256k1 curve addJacobian function with Z values of 1 so that the associated
+// optimizations are used.
 func BenchmarkAddJacobian(b *testing.B) {
 	b.StopTimer()
 	x1 := new(fieldVal).SetHex("34f9460f0e4f08393d192b3c5133a6ba099aa0ad9fd54ebccfacdfa239ff49c6")
@@ -19,7 +20,8 @@ func BenchmarkAddJacobian(b *testing.B) {
 	}
 }
 
-// BenchmarkAddJacobianNotZOne benchmarks the secp256k1 curve addJacobian function with Z values other than one so the optimizations associated with Z=1 aren't used.
+// BenchmarkAddJacobianNotZOne benchmarks the secp256k1 curve addJacobian function with Z values other than one so the
+// optimizations associated with Z=1 aren't used.
 func BenchmarkAddJacobianNotZOne(b *testing.B) {
 	b.StopTimer()
 	x1 := new(fieldVal).SetHex("d3e5183c393c20e4f464acf144ce9ae8266a82b67f553af33eb37e88e7fd2718")
@@ -98,7 +100,8 @@ func BenchmarkSigVerify(b *testing.B) {
 	}
 }
 
-// BenchmarkFieldNormalize benchmarks how long it takes the internal field to perform normalization (which includes modular reduction).
+// BenchmarkFieldNormalize benchmarks how long it takes the internal field to perform normalization (which includes
+// modular reduction).
 func BenchmarkFieldNormalize(b *testing.B) {
 	// The normalize function is constant time so default value is fine.
 	f := new(fieldVal)

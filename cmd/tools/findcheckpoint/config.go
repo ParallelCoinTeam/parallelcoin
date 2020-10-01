@@ -28,7 +28,8 @@ var (
 	activeNetParams = &netparams.MainNetParams
 )
 
-// config defines the configuration options for findcheckpoint. See loadConfig for details on the configuration load process.
+// config defines the configuration options for findcheckpoint. See loadConfig for details on the configuration load
+// process.
 type config struct {
 	DataDir        string `short:"b" long:"datadir" description:"Location of the pod data directory"`
 	DbType         string `long:"dbtype" description:"Database backend to use for the Block Chain"`
@@ -50,7 +51,11 @@ func validDbType(
 	return false
 }
 
-// netName returns the name used when referring to a bitcoin network.  At the time of writing, pod currently places blocks for testnet version 3 in the data and log directory "testnet", which does not match the Name field of the chaincfg parameters.  This function can be used to override this directory name as "testnet" when the passed active network matches wire.TestNet3. A proper upgrade to move the data and log directories for this network to "testnet3" is planned for the future, at which point this function can be removed and the network parameter's name used instead.
+// netName returns the name used when referring to a bitcoin network. At the time of writing, pod currently places
+// blocks for testnet version 3 in the data and log directory "testnet", which does not match the Name field of the
+// chaincfg parameters. This function can be used to override this directory name as "testnet" when the passed active
+// network matches wire.TestNet3. A proper upgrade to move the data and log directories for this network to "testnet3"
+// is planned for the future, at which point this function can be removed and the network parameter's name used instead.
 func netName(
 	chainParams *netparams.Params) string {
 	switch chainParams.Net {
@@ -112,7 +117,10 @@ func loadConfig() (*config, []string, error) {
 		parser.WriteHelp(os.Stderr)
 		return nil, nil, err
 	}
-	// Append the network type to the data directory so it is "namespaced" per network.  In addition to the block database, there are other pieces of data that are saved to disk such as address manager state. All data is specific to a network, so namespacing the data directory means each individual piece of serialized data does not have to worry about changing names per network and such.
+	// Append the network type to the data directory so it is "namespaced" per network. In addition to the block
+	// database, there are other pieces of data that are saved to disk such as address manager state. All data is
+	// specific to a network, so namespacing the data directory means each individual piece of serialized data does not
+	// have to worry about changing names per network and such.
 	cfg.DataDir = filepath.Join(cfg.DataDir, netName(activeNetParams))
 	// Validate the number of candidates.
 	if cfg.NumCandidates < minCandidates || cfg.NumCandidates > maxCandidates {

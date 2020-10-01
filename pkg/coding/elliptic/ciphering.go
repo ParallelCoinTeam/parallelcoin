@@ -13,15 +13,13 @@ import (
 )
 
 var (
-	// ErrInvalidMAC occurs when Message Authentication Check (MAC) fails
-	// during decryption. This happens because of either invalid private key or
-	// corrupt ciphertext.
+	// ErrInvalidMAC occurs when Message Authentication Check (MAC) fails during decryption. This happens because of
+	// either invalid private key or corrupt ciphertext.
 	ErrInvalidMAC = errors.New("invalid mac hash")
-	// errInputTooShort occurs when the input ciphertext to the Decrypt
-	// function is less than 134 bytes long.
+	// errInputTooShort occurs when the input ciphertext to the Decrypt function is less than 134 bytes long.
 	errInputTooShort = errors.New("ciphertext too short")
-	// errUnsupportedCurve occurs when the first two bytes of the encrypted
-	// text aren't 0x02CA (= 712 = secp256k1, from OpenSSL).
+	// errUnsupportedCurve occurs when the first two bytes of the encrypted text aren't 0x02CA (= 712 = secp256k1, from
+	// OpenSSL).
 	errUnsupportedCurve = errors.New("unsupported curve")
 	errInvalidXLength   = errors.New("invalid X length, must be 32")
 	errInvalidYLength   = errors.New("invalid Y length, must be 32")
@@ -32,18 +30,17 @@ var (
 	ciphCoordLength = [2]byte{0x00, 0x20}
 )
 
-// GenerateSharedSecret generates a shared secret based on a private key and a
-// public key using Diffie-Hellman key exchange (ECDH) (RFC 4753).
-// RFC5903 Section 9 states we should only return x.
+// GenerateSharedSecret generates a shared secret based on a private key and a public key using Diffie-Hellman key
+// exchange (ECDH) (RFC 4753). RFC5903 Section 9 states we should only return x.
 func GenerateSharedSecret(privkey *PrivateKey, pubkey *PublicKey) []byte {
 	x, _ := pubkey.Curve.ScalarMult(pubkey.X, pubkey.Y, privkey.D.Bytes())
 	return x.Bytes()
 }
 
-// Encrypt encrypts data for the target public key using AES-256-CBC. It also
-// generates a private key (the pubkey of which is also in the output). The only
-// supported curve is secp256k1. The `structure' that it encodes everything into
+// Encrypt encrypts data for the target public key using AES-256-CBC. It also generates a private key (the pubkey of
+// which is also in the output). The only supported curve is secp256k1. The `structure' that it encodes everything into
 // is:
+//
 //	struct {
 //		// Initialization Vector used for AES-256-CBC
 //		IV [16]byte
@@ -55,8 +52,9 @@ func GenerateSharedSecret(privkey *PrivateKey, pubkey *PublicKey) []byte {
 //		// HMAC-SHA-256 Message Authentication Code
 //		HMAC [32]byte
 //	}
-// The primary aim is to ensure byte compatibility with Pyelliptic.  Also, refer
-// to section 5.8.1 of ANSI X9.63 for rationale on this format.
+//
+// The primary aim is to ensure byte compatibility with Pyelliptic. Also, refer to section 5.8.1 of ANSI X9.63 for
+// rationale on this format.
 func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	ephemeral, err := NewPrivateKey(S256())
 	if err != nil {

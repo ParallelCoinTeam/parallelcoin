@@ -6,8 +6,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// KnownAddress tracks information about a known network address that is used
-// to determine how viable an address is.
+// KnownAddress tracks information about a known network address that is used to determine how viable an address is.
 type KnownAddress struct {
 	na          *wire.NetAddress
 	srcAddr     *wire.NetAddress
@@ -28,7 +27,8 @@ func (ka *KnownAddress) LastAttempt() time.Time {
 	return ka.lastattempt
 }
 
-// chance returns the selection probability for a known address.  The priority depends upon how recently the address has been seen, how recently it was last attempted and how often attempts to connect to it have failed.
+// chance returns the selection probability for a known address. The priority depends upon how recently the address has
+// been seen, how recently it was last attempted and how often attempts to connect to it have failed.
 func (ka *KnownAddress) chance() float64 {
 	now := time.Now()
 	lastAttempt := now.Sub(ka.lastattempt)
@@ -47,11 +47,17 @@ func (ka *KnownAddress) chance() float64 {
 	return c
 }
 
-// isBad returns true if the address in question has not been tried in the last minute and meets one of the following criteria:
+// isBad returns true if the address in question has not been tried in the last minute and meets one of the following
+// criteria:
+//
 // 1) It claims to be from the future
+//
 // 2) It hasn't been seen in over a month
+//
 // 3) It has failed at least three times and never succeeded
+//
 // 4) It has failed ten times in the last week
+//
 // All addresses that meet these criteria are assumed to be worthless and not worth keeping hold of.
 func (ka *KnownAddress) isBad() bool {
 	if ka.lastattempt.After(time.Now().Add(-1 * time.Minute)) {

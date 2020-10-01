@@ -7,7 +7,8 @@ import (
 	"sync"
 )
 
-// mruNonceMap provides a concurrency safe map that is limited to a maximum number of items with eviction for the oldest entry when the limit is exceeded.
+// mruNonceMap provides a concurrency safe map that is limited to a maximum number of items with eviction for the oldest
+// entry when the limit is exceeded.
 type mruNonceMap struct {
 	mtx       sync.Mutex
 	nonceMap  map[uint64]*list.Element // nearly O(1) lookups
@@ -33,7 +34,9 @@ func (m *mruNonceMap) String() string {
 	return fmt.Sprintf("<%d>%s", m.limit, buf.String())
 }
 
-// Exists returns whether or not the passed Nonce is in the map. This function is safe for concurrent access.
+// Exists returns whether or not the passed Nonce is in the map.
+//
+// This function is safe for concurrent access.
 func (m *mruNonceMap) Exists(nonce uint64) bool {
 	m.mtx.Lock()
 	_, exists := m.nonceMap[nonce]
@@ -41,7 +44,10 @@ func (m *mruNonceMap) Exists(nonce uint64) bool {
 	return exists
 }
 
-// Add adds the passed Nonce to the map and handles eviction of the oldest item if adding the new item would exceed the max limit.  Adding an existing item makes it the most recently used item. This function is safe for concurrent access.
+// Add adds the passed Nonce to the map and handles eviction of the oldest item if adding the new item would exceed the
+// max limit. Adding an existing item makes it the most recently used item.
+//
+// This function is safe for concurrent access.
 func (m *mruNonceMap) Add(nonce uint64) {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
@@ -54,7 +60,8 @@ func (m *mruNonceMap) Add(nonce uint64) {
 		m.nonceList.MoveToFront(node)
 		return
 	}
-	// Evict the least recently used entry (back of the list) if the the new entry would exceed the size limit for the map.  Also reuse the list node so a new one doesn't have to be allocated.
+	// Evict the least recently used entry (back of the list) if the the new entry would exceed the size limit for the
+	// map. Also reuse the list node so a new one doesn't have to be allocated.
 	if uint(len(m.nonceMap))+1 > m.limit {
 		node := m.nonceList.Back()
 		lru := node.Value.(uint64)
@@ -71,7 +78,9 @@ func (m *mruNonceMap) Add(nonce uint64) {
 	m.nonceMap[nonce] = node
 }
 
-// Delete deletes the passed Nonce from the map (if it exists). This function is safe for concurrent access.
+// Delete deletes the passed Nonce from the map (if it exists).
+//
+// This function is safe for concurrent access.
 func (m *mruNonceMap) Delete(nonce uint64) {
 	m.mtx.Lock()
 	if node, exists := m.nonceMap[nonce]; exists {
@@ -81,7 +90,8 @@ func (m *mruNonceMap) Delete(nonce uint64) {
 	m.mtx.Unlock()
 }
 
-// newMruNonceMap returns a new Nonce map that is limited to the number of entries specified by limit.  When the number of entries exceeds the limit, the oldest (least recently used) entry will be removed to make room for the new entry.
+// newMruNonceMap returns a new Nonce map that is limited to the number of entries specified by limit. When the number
+// of entries exceeds the limit, the oldest (least recently used) entry will be removed to make room for the new entry.
 func newMruNonceMap(limit uint) *mruNonceMap {
 	m := mruNonceMap{
 		nonceMap:  make(map[uint64]*list.Element),

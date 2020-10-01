@@ -1,11 +1,13 @@
 package gui
 
 import (
+	"os"
+
 	"gioui.org/app"
+
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"os"
 )
 
 func WalletGUI(duo *model.DuoUI, rc *rcd.RcVar) (err error) {
@@ -15,8 +17,8 @@ func WalletGUI(duo *model.DuoUI, rc *rcd.RcVar) (err error) {
 		}
 		if err := duoui.DuoUImainLoop(duo, rc); Check(err) {
 			Fatal("shutting down")
-			//close(rc.Quit)
-			//time.Sleep(time.Second * 2)
+			// close(rc.Quit)
+			// time.Sleep(time.Second * 2)
 			os.Exit(1)
 		}
 	}()

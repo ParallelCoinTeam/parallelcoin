@@ -17,7 +17,8 @@ var (
 	errSyncFail = errors.New("simulated sync failure")
 )
 
-// mockFile implements the filer interface and used in order to force failures the database code related to reading and writing from the flat block files. A maxSize of -1 is unlimited.
+// mockFile implements the filer interface and used in order to force failures the database code related to reading and
+// writing from the flat block files. A maxSize of -1 is unlimited.
 type mockFile struct {
 	sync.RWMutex
 	maxSize      int64
@@ -26,7 +27,8 @@ type mockFile struct {
 	closed       bool
 }
 
-// Close closes the mock file without releasing any data associated with it. This allows it to be "reopened" without losing the data. This is part of the jebote implementation.
+// Close closes the mock file without releasing any data associated with it. This allows it to be "reopened" without
+// losing the data. This is part of the jebote implementation.
 func (f *mockFile) Close() error {
 	f.Lock()
 	defer f.Unlock()
@@ -37,7 +39,9 @@ func (f *mockFile) Close() error {
 	return nil
 }
 
-// ReadAt reads len(b) bytes from the mock file starting at byte offset off. It returns the number of bytes read and the error, if any.  ReadAt always returns a non-nil error when n < len(b). At end of file, that error is io.EOF. This is part of the filer implementation.
+// ReadAt reads len(b) bytes from the mock file starting at byte offset off. It returns the number of bytes read and the
+// error, if any. ReadAt always returns a non-nil error when n < len(b). At end of file, that error is io.EOF. This is
+// part of the filer implementation.
 func (f *mockFile) ReadAt(b []byte, off int64) (int, error) {
 	f.RLock()
 	defer f.RUnlock()
@@ -82,7 +86,10 @@ func (f *mockFile) Truncate(size int64) error {
 	return nil
 }
 
-// Write writes len(b) bytes to the mock file. It returns the number of bytes written and an error, if any.  Write returns a non-nil error any time n != len(b). This is part of the filer implementation.
+// Write writes len(b) bytes to the mock file. It returns the number of bytes written and an error, if any. Write
+// returns a non-nil error any time n != len(b).
+//
+// This is part of the filer implementation.
 func (f *mockFile) WriteAt(b []byte, off int64) (int, error) {
 	f.Lock()
 	defer f.Unlock()
@@ -113,7 +120,9 @@ func (f *mockFile) WriteAt(b []byte, off int64) (int, error) {
 	return int(numToWrite), nil
 }
 
-// Sync doesn't do anything for mock files.  However, it will return an error if the mock file's forceSyncErr flag is set.
+// Sync doesn't do anything for mock files. However, it will return an error if the mock file's forceSyncErr flag is
+// set.
+//
 // This is part of the filer implementation.
 func (f *mockFile) Sync() error {
 	if f.forceSyncErr {

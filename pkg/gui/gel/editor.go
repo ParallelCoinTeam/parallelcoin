@@ -25,12 +25,10 @@ import (
 // Editor implements an editable and scrollable text area.
 type Editor struct {
 	Alignment text.Alignment
-	// SingleLine force the text to stay on a single line.
-	// SingleLine also sets the scrolling direction to
-	// horizontal.
+	// SingleLine force the text to stay on a single line. SingleLine also sets the scrolling direction to horizontal.
 	SingleLine bool
-	// Submit enabled translation of carriage return keys to SubmitEvents.
-	// If not enabled, carriage returns are inserted as newlines in the text.
+	// Submit enabled translation of carriage return keys to SubmitEvents. If not enabled, carriage returns are inserted
+	// as newlines in the text.
 	Submit bool
 
 	eventKey     int
@@ -50,8 +48,7 @@ type Editor struct {
 	caretOn      bool
 	caretScroll  bool
 
-	// carXOff is the offset to the current caret
-	// position when moving between lines.
+	// carXOff is the offset to the current caret position when moving between lines.
 	carXOff fixed.Int26_6
 
 	scroller  gesture.Scroll
@@ -72,8 +69,7 @@ type EditorEvent interface {
 // A ChangeEvent is generated for every user change to the text.
 type ChangeEvent struct{}
 
-// A SubmitEvent is generated when Submit is set
-// and a carriage return key is pressed.
+// A SubmitEvent is generated when Submit is set and a carriage return key is pressed.
 type SubmitEvent struct {
 	Text string
 }
@@ -503,8 +499,8 @@ func (e *Editor) invalidate() {
 	e.valid = false
 }
 
-// Delete runes from the caret position. The sign of runes specifies the
-// direction to delete: positive is forward, negative is backward.
+// Delete runes from the caret position. The sign of runes specifies the direction to delete: positive is forward,
+// negative is backward.
 func (e *Editor) Delete(runes int) {
 	e.rr.deleteRunes(runes)
 	e.carXOff = 0
@@ -604,8 +600,7 @@ func (e *Editor) moveToLine(carX fixed.Int26_6, carLine2 int) fixed.Int26_6 {
 	return carX - carX2
 }
 
-// Move the caret: positive distance moves forward, negative distance moves
-// backward.
+// Move the caret: positive distance moves forward, negative distance moves backward.
 func (e *Editor) Move(distance int) {
 	e.rr.move(distance)
 	e.carXOff = 0

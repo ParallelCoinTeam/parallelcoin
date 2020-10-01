@@ -1,18 +1,20 @@
 package model
 
 import (
+	"sync"
+	"time"
+
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
+	"go.uber.org/atomic"
+
 	"github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	log "github.com/p9c/pod/pkg/util/logi"
-	"go.uber.org/atomic"
-	"sync"
-	"time"
 )
 
 type DuoUIconsoleHistory struct {

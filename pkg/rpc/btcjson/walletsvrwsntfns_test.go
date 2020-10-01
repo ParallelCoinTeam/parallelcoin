@@ -10,7 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestWalletSvrWsNtfns tests all of the chain server websocket-specific notifications marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
+// TestWalletSvrWsNtfns tests all of the chain server websocket-specific notifications marshal and unmarshal into valid
+// results include handling of optional fields being omitted in the marshalled command, while optional fields with
+// defaults have the default assigned on unmarshalled commands.
 func TestWalletSvrWsNtfns(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -64,7 +66,8 @@ func TestWalletSvrWsNtfns(t *testing.T) {
 		{
 			name: "newtx",
 			newNtfn: func() (interface{}, error) {
-				return btcjson.NewCmd("newtx", "acct", `{"account":"acct","address":"1Address","category":"send","amount":1.5,"bip125-replaceable":"unknown","fee":0.0001,"confirmations":1,"trusted":true,"txid":"456","walletconflicts":[],"time":12345678,"timereceived":12345876,"vout":789,"otheraccount":"otheracct"}`)
+				return btcjson.NewCmd("newtx",
+					"acct", `{"account":"acct","address":"1Address","category":"send","amount":1.5,"bip125-replaceable":"unknown","fee":0.0001,"confirmations":1,"trusted":true,"txid":"456","walletconflicts":[],"time":12345678,"timereceived":12345876,"vout":789,"otheraccount":"otheracct"}`)
 			},
 			staticNtfn: func() interface{} {
 				result := btcjson.ListTransactionsResult{
@@ -130,7 +133,8 @@ func TestWalletSvrWsNtfns(t *testing.T) {
 			t.Errorf("Test #%d (%s) unexpected NewCmd error: %v ",
 				i, test.name, err)
 		}
-		// Marshal the notification as created by the generic new notification creation function. The ID is nil for notifications.
+		// Marshal the notification as created by the generic new notification creation function. The ID is nil for
+		// notifications.
 		marshalled, err = btcjson.MarshalCmd(nil, cmd)
 		if err != nil {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,

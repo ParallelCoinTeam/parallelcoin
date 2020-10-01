@@ -31,8 +31,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		Debug("IsFirstRun? ", rc.Boot.IsFirstRun)
 		// signal the GUI that the back end is ready
 		Debug("sending ready signal")
-		// we can do this without blocking because the channel has 1 buffer this
-		// way it falls immediately the GUI starts
+		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
 		if !rc.Boot.IsFirstRun {
 			go rc.StartServices()
 		}

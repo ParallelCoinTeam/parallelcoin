@@ -17,8 +17,7 @@ func Stack() (out *stack) {
 
 // functions to chain widgets to stack (first is lowest last highest)
 
-// Stacked appends a widget to the stack, the stack's dimensions will be
-// computed from the largest widget in the stack
+// Stacked appends a widget to the stack, the stack's dimensions will be computed from the largest widget in the stack
 func (s *stack) Stacked(w layout.Widget) (out *stack) {
 	s.children = append(s.children, layout.Stacked(w))
 	return s

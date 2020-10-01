@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	log "github.com/p9c/pod/pkg/util/logi"
 )
 
-// tstCheckScriptError ensures the type of the two passed errors are of the same type (either both nil or both of type ScriptError) and their error codes match when not nil.
+// tstCheckScriptError ensures the type of the two passed errors are of the same type (either both nil or both of type
+// ScriptError) and their error codes match when not nil.
 func tstCheckScriptError(gotErr, wantErr error) error {
-	// Ensure the error code is of the expected type and the error code matches the value specified in the test instance.
+	// Ensure the error code is of the expected type and the error code matches the value specified in the test
+	// instance.
 	if reflect.TypeOf(gotErr) != reflect.TypeOf(wantErr) {
 		return fmt.Errorf("wrong error - got %T (%[1]v), want %T",
 			gotErr, wantErr)
@@ -25,7 +25,8 @@ func tstCheckScriptError(gotErr, wantErr error) error {
 	if !ok {
 		return fmt.Errorf("unexpected test error type %T", wantErr)
 	}
-	// Ensure the error codes match.  It's safe to use a raw type assert here since the code above already proved they are the same type and the want error is a script error.
+	// Ensure the error codes match. It's safe to use a raw type assert here since the code above already proved they
+	// are the same type and the want error is a script error.
 	gotErrorCode := gotErr.(ScriptError).ErrorCode
 	if gotErrorCode != werr.ErrorCode {
 		return fmt.Errorf("mismatched error code - got %v (%v), want %v",
@@ -228,7 +229,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != 1 {
-					log.Printf("%v != %v\n", v, 1)
+					fmt.Printf("%v != %v\n", v, 1)
 					return errors.New("1 != 1 on popInt")
 				}
 				return nil
@@ -261,7 +262,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -1 {
-					log.Printf("%v != %v\n", v, -1)
+					fmt.Printf("%v != %v\n", v, -1)
 					return errors.New("-1 != -1 on popInt")
 				}
 				return nil
@@ -279,7 +280,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -513 {
-					log.Printf("%v != %v\n", v, -513)
+					fmt.Printf("%v != %v\n", v, -513)
 					return errors.New("1 != 1 on popInt")
 				}
 				return nil
@@ -297,7 +298,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -1 {
-					log.Printf("%v != %v\n", v, -1)
+					fmt.Printf("%v != %v\n", v, -1)
 					return errors.New("-1 != -1 on popInt")
 				}
 				return nil

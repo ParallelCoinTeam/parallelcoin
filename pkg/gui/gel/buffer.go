@@ -22,8 +22,7 @@ type editBuffer struct {
 	gapstart, gapend int
 	text             []byte
 
-	// changed tracks whether the buffer content
-	// has changed since the last call to Changed.
+	// changed tracks whether the buffer content has changed since the last call to Changed.
 	changed bool
 }
 
@@ -51,8 +50,7 @@ func (e *editBuffer) deleteRunes(runes int) {
 	e.dump()
 }
 
-// moveGap moves the gap to the caret position. After returning,
-// the gap is guaranteed to be at least space bytes long.
+// moveGap moves the gap to the caret position. After returning, the gap is guaranteed to be at least space bytes long.
 func (e *editBuffer) moveGap(space int) {
 	if e.gapLen() < space {
 		if space < minSpace {
@@ -148,7 +146,8 @@ func (e *editBuffer) prepend(s string) {
 
 func (e *editBuffer) dump() {
 	if bufferDebug {
-		fmt.Printf("len(e.text) %d e.len() %d e.gapstart %d e.gapend %d e.caret %d txt:\n'%+x'<-%d->'%+x'\n", len(e.text), e.len(), e.gapstart, e.gapend, e.caret, e.text[:e.gapstart], e.gapLen(), e.text[e.gapend:])
+		fmt.Printf("len(e.text) %d e.len() %d e.gapstart %d e.gapend %d e.caret %d txt:\n'%+x'<-%d->'%+x'\n",
+			len(e.text), e.len(), e.gapstart, e.gapend, e.caret, e.text[:e.gapstart], e.gapLen(), e.text[e.gapend:])
 	}
 }
 

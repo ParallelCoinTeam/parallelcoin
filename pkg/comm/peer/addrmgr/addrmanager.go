@@ -22,8 +22,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// AddrManager provides a concurrency safe address manager for caching
-// potential peers on the bitcoin network.
+// AddrManager provides a concurrency safe address manager for caching potential peers on the bitcoin network.
 type AddrManager struct {
 	mtx            sync.Mutex
 	PeersFile      string
@@ -63,8 +62,7 @@ type localAddress struct {
 	score AddressPriority
 }
 
-// AddressPriority type is used to describe the hierarchy of local address
-// routeable methods.
+// AddressPriority type is used to describe the hierarchy of local address routeable methods.
 type AddressPriority int
 
 const (
@@ -80,60 +78,48 @@ const (
 	ManualPrio
 )
 const (
-	// needAddressThreshold is the number of addresses under which the address
-	// manager will claim to need more addresses.
+	// needAddressThreshold is the number of addresses under which the address manager will claim to need more
+	// addresses.
 	needAddressThreshold = 1000
 	// dumpAddressInterval is the interval used to dump the address cache to
 	// disk for future use.
 	dumpAddressInterval = time.Minute * 5
-	// triedBucketSize is the maximum number of addresses in each tried address
-	// bucket.
+	// triedBucketSize is the maximum number of addresses in each tried address bucket.
 	triedBucketSize = 256
 	// triedBucketCount is the number of buckets we split tried addresses over.
 	triedBucketCount = 64
-	// newBucketSize is the maximum number of addresses in each new address
-	// bucket.
+	// newBucketSize is the maximum number of addresses in each new address bucket.
 	newBucketSize = 64
 	// newBucketCount is the number of buckets that we spread new addresses	over.
 	newBucketCount = 1024
-	// triedBucketsPerGroup is the number of tried buckets over which an address
-	// group will be spread.
+	// triedBucketsPerGroup is the number of tried buckets over which an address group will be spread.
 	triedBucketsPerGroup = 8
-	// newBucketsPerGroup is the number of new buckets over which an source
-	// address group will be spread.
+	// newBucketsPerGroup is the number of new buckets over which an source address group will be spread.
 	newBucketsPerGroup = 64
-	// newBucketsPerAddress is the number of buckets a frequently seen new
-	// address may end up in.
+	// newBucketsPerAddress is the number of buckets a frequently seen new address may end up in.
 	newBucketsPerAddress = 8
-	// numMissingDays is the number of days before which we assume an address
-	// has vanished if we have not seen it announced  in that long.
+	// numMissingDays is the number of days before which we assume an address has vanished if we have not seen it
+	// announced in that long.
 	numMissingDays = 30
-	// numRetries is the number of tried without a single success before we
-	// assume an address is bad.
+	// numRetries is the number of tried without a single success before we assume an address is bad.
 	numRetries = 3
-	// maxFailures is the maximum number of failures we will accept without a
-	// success before considering an address bad.
+	// maxFailures is the maximum number of failures we will accept without a success before considering an address bad.
 	maxFailures = 10
-	// minBadDays is the number of days since the last success before we will
-	// consider evicting an address.
+	// minBadDays is the number of days since the last success before we will consider evicting an address.
 	minBadDays = 7
-	// getAddrMax is the most addresses that we will send in response to a
-	// getAddr (in practise the most addresses we will return from a call to
-	// AddressCache()).
+	// getAddrMax is the most addresses that we will send in response to a getAddr (in practise the most addresses we
+	// will return from a call to AddressCache()).
 	getAddrMax = 2500
-	// getAddrPercent is the percentage of total addresses known that we will
-	// share with a call to AddressCache.
+	// getAddrPercent is the percentage of total addresses known that we will share with a call to AddressCache.
 	getAddrPercent = 23
 	// serialisationVersion is the current version of the on-disk format.
 	serialisationVersion = 1
 )
 
-func // updateAddress is a helper function to either update an address
-// already known to the address manager,
-// or to add the address if not already known.
-(a *AddrManager) updateAddress(netAddr, srcAddr *wire.NetAddress) {
-	// Filter out non-routable addresses. Note that non-routable also includes
-	// invalid and local addresses.
+// updateAddress is a helper function to either update an address already known to the address manager, or to add the
+// address if not already known.
+func (a *AddrManager) updateAddress(netAddr, srcAddr *wire.NetAddress) {
+	// Filter out non-routable addresses. Note that non-routable also includes invalid and local addresses.
 	if !IsRoutable(netAddr) {
 		return
 	}
@@ -141,10 +127,10 @@ func // updateAddress is a helper function to either update an address
 	ka := a.find(netAddr)
 	if ka != nil {
 		// TODO: only update addresses periodically.
-		// Update the last seen time and services. note that to prevent causing
-		// excess garbage on getaddr messages the netaddresses in addrmanager are
-		// *immutable*, if we need to change them then we replace the pointer
-		// with a new copy so that we don't have to copy every na for getaddr.
+		//
+		// Update the last seen time and services. note that to prevent causing excess garbage on getaddr messages the
+		// netaddresses in addrmanager are *immutable*, if we need to change them then we replace the pointer with a new
+		// copy so that we don't have to copy every na for getaddr.
 		if netAddr.Timestamp.After(ka.na.Timestamp) ||
 			(ka.na.Services&netAddr.Services) !=
 				netAddr.Services {
@@ -167,9 +153,8 @@ func // updateAddress is a helper function to either update an address
 			return
 		}
 	} else {
-		// Make a copy of the net address to avoid races since it is updated
-		// elsewhere in the addrmanager code and would otherwise change the
-		// actual netaddress on the peer.
+		// Make a copy of the net address to avoid races since it is updated elsewhere in the addrmanager code and would
+		// otherwise change the actual netaddress on the peer.
 		netAddrCopy := *netAddr
 		ka = &KnownAddress{na: &netAddrCopy, srcAddr: srcAddr}
 		a.addrIndex[addr] = ka
@@ -192,14 +177,12 @@ func // updateAddress is a helper function to either update an address
 		a.nTried+a.nNew)
 }
 
-func // expireNew makes space in the new buckets by expiring the really bad entries.
-// If no bad entries are available we look at a few and remove the oldest.
-(a *AddrManager) expireNew(bucket int) {
-	// First see if there are any entries that are so bad we can just throw them
-	// away. otherwise we throw away the oldest entry in the cache. Bitcoind
-	// here chooses four random and just throws the oldest of those away, but we
-	// keep track of oldest in the initial traversal and use that information
-	// instead.
+// expireNew makes space in the new buckets by expiring the really bad entries. If no bad entries are available we look
+// at a few and remove the oldest.
+func (a *AddrManager) expireNew(bucket int) {
+	// First see if there are any entries that are so bad we can just throw them away. otherwise we throw away the
+	// oldest entry in the cache. Bitcoind here chooses four random and just throws the oldest of those away, but we
+	// keep track of oldest in the initial traversal and use that information instead.
 	var oldest *KnownAddress
 	for k, v := range a.addrNew[bucket] {
 		if v.isBad() {
@@ -230,11 +213,10 @@ func // expireNew makes space in the new buckets by expiring the really bad entr
 	}
 }
 
-func // pickTried selects an address from the tried bucket to be evicted.
-// We just choose the eldest.
-// Bitcoind selects 4 random entries and throws away the
-// older of them.
-(a *AddrManager) pickTried(bucket int) *list.Element {
+// pickTried selects an address from the tried bucket to be evicted. We just choose the eldest.
+//
+// Bitcoind selects 4 random entries and throws away the older of them.
+func (a *AddrManager) pickTried(bucket int) *list.Element {
 	var oldest *KnownAddress
 	var oldestElem *list.Element
 	for e := a.addrTried[bucket].Front(); e != nil; e = e.Next() {
@@ -286,9 +268,10 @@ func (a *AddrManager) getTriedBucket(netAddr *wire.NetAddress) int {
 	return int(binary.LittleEndian.Uint64(hash2) % triedBucketCount)
 }
 
-func // addressHandler is the main handler for the address manager.
+// addressHandler is the main handler for the address manager.
+//
 // It must be run as a goroutine.
-(a *AddrManager) addressHandler() {
+func (a *AddrManager) addressHandler() {
 	Trace("starting address handler")
 	dumpAddressTicker := time.NewTicker(dumpAddressInterval)
 	defer dumpAddressTicker.Stop()
@@ -307,8 +290,7 @@ out:
 	Trace("address handler done")
 }
 
-// savePeers saves all the known addresses to a file so they can be read back
-// in at next run.
+// savePeers saves all the known addresses to a file so they can be read back in at next run.
 func (a *AddrManager) savePeers() {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
@@ -326,7 +308,8 @@ func (a *AddrManager) savePeers() {
 		ska.Attempts = v.attempts
 		ska.LastAttempt = v.lastattempt.Unix()
 		ska.LastSuccess = v.lastsuccess.Unix()
-		// Tried and refs are implicit in the rest of the structure and will be worked out from context on unserialisation.
+		// Tried and refs are implicit in the rest of the structure and will be worked out from context on
+		// deserialisation.
 		sam.Addresses[i] = ska
 		i++
 	}
@@ -349,7 +332,6 @@ func (a *AddrManager) savePeers() {
 	}
 	w, err := os.Create(a.PeersFile)
 	if err != nil {
-		Error(err)
 		Errorf("error opening file %s: %v", a.PeersFile, err)
 		return
 	}
@@ -361,8 +343,8 @@ func (a *AddrManager) savePeers() {
 	}
 }
 
-// loadPeers loads the known address from the saved file.  If empty, missing,
-// or malformed file, just don't load anything and start fresh
+// loadPeers loads the known address from the saved file. If empty, missing, or malformed file, just don't load anything
+// and start fresh
 func (a *AddrManager) loadPeers() {
 	Trace("loading peers")
 
@@ -370,14 +352,11 @@ func (a *AddrManager) loadPeers() {
 	defer a.mtx.Unlock()
 	err := a.deserializePeers(a.PeersFile)
 	if err != nil {
-		Error(err)
 		Errorf("failed to parse file %s: %v", a.PeersFile, err)
 		// if it is invalid we nuke the old one unconditionally.
 		err = os.Remove(a.PeersFile)
 		if err != nil {
-			Error(err)
-			Warnf("failed to remove corrupt peers file %s: %v", a.PeersFile,
-				err)
+			Warnf("failed to remove corrupt peers file %s: %v", a.PeersFile, err)
 		}
 		a.reset()
 		return
@@ -464,19 +443,17 @@ func (a *AddrManager) deserializePeers(filePath string) error {
 	// Sanity checking.
 	for k, v := range a.addrIndex {
 		if v.refs == 0 && !v.tried {
-			return fmt.Errorf("address %s after serialisation "+
-				"with no references", k)
+			return fmt.Errorf("address %s after serialisationwith no references", k)
 		}
 		if v.refs > 0 && v.tried {
-			return fmt.Errorf("address %s after serialisation "+
-				"which is both new and tried!", k)
+			return fmt.Errorf("address %s after serialisation which is both new and tried", k)
 		}
 	}
 	return nil
 }
 
-func // DeserializeNetAddress converts a given address string to a *wire.NetAddress
-(a *AddrManager) DeserializeNetAddress(addr string) (*wire.NetAddress, error) {
+// DeserializeNetAddress converts a given address string to a *wire.NetAddress
+func (a *AddrManager) DeserializeNetAddress(addr string) (*wire.NetAddress, error) {
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
 		Error(err)
@@ -490,9 +467,9 @@ func // DeserializeNetAddress converts a given address string to a *wire.NetAddr
 	return a.HostToNetAddress(host, uint16(port), wire.SFNodeNetwork)
 }
 
-func // Start begins the core address handler which manages a pool of known
+// Start begins the core address handler which manages a pool of known
 // addresses, timeouts, and interval based writes.
-(a *AddrManager) Start() {
+func (a *AddrManager) Start() {
 	// Already started?
 	if atomic.AddInt32(&a.started, 1) != 1 {
 		return
@@ -505,8 +482,8 @@ func // Start begins the core address handler which manages a pool of known
 	go a.addressHandler()
 }
 
-func // Stop gracefully shuts down the address manager by stopping the main handler.
-(a *AddrManager) Stop() error {
+// Stop gracefully shuts down the address manager by stopping the main handler.
+func (a *AddrManager) Stop() error {
 	if atomic.AddInt32(&a.shutdown, 1) != 1 {
 		Warn("address manager is already in the process of shutting down")
 		return nil
@@ -517,10 +494,12 @@ func // Stop gracefully shuts down the address manager by stopping the main hand
 	return nil
 }
 
-func // AddAddresses adds new addresses to the address manager.
-// It enforces a max number of addresses and silently ignores duplicate
-// addresses.  It is safe for concurrent access.
-(a *AddrManager) AddAddresses(addrs []*wire.NetAddress, srcAddr *wire.NetAddress) {
+// AddAddresses adds new addresses to the address manager.
+//
+// It enforces a max number of addresses and silently ignores duplicate addresses.
+//
+// It is safe for concurrent access.
+func (a *AddrManager) AddAddresses(addrs []*wire.NetAddress, srcAddr *wire.NetAddress) {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	for _, na := range addrs {
@@ -528,18 +507,19 @@ func // AddAddresses adds new addresses to the address manager.
 	}
 }
 
-func // AddAddress adds a new address to the address manager.  It enforces a max
-// number of addresses and silently ignores duplicate addresses.  It is safe
-// for concurrent access.
-(a *AddrManager) AddAddress(addr, srcAddr *wire.NetAddress) {
+// AddAddress adds a new address to the address manager.
+//
+// It enforces a max number of addresses and silently ignores duplicate addresses.
+//
+// It is safe for concurrent access.
+func (a *AddrManager) AddAddress(addr, srcAddr *wire.NetAddress) {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	a.updateAddress(addr, srcAddr)
 }
 
-func // AddAddressByIP adds an address where we are given an ip:port and not a
-// wire.NetAddress.
-(a *AddrManager) AddAddressByIP(addrIP string) error {
+// AddAddressByIP adds an address where we are given an ip:port and not a wire.NetAddress.
+func (a *AddrManager) AddAddressByIP(addrIP string) error {
 	// Split IP and port
 	addr, portStr, err := net.SplitHostPort(addrIP)
 	if err != nil {
@@ -561,29 +541,28 @@ func // AddAddressByIP adds an address where we are given an ip:port and not a
 	return nil
 }
 
-func // NumAddresses returns the number of addresses known to the address manager.
-(a *AddrManager) numAddresses() int {
+// NumAddresses returns the number of addresses known to the address manager.
+func (a *AddrManager) numAddresses() int {
 	return a.nTried + a.nNew
 }
 
-func // NumAddresses returns the number of addresses known to the address manager.
-(a *AddrManager) NumAddresses() int {
+// NumAddresses returns the number of addresses known to the address manager.
+func (a *AddrManager) NumAddresses() int {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	return a.numAddresses()
 }
 
-func // NeedMoreAddresses returns whether or not the address manager needs more
-// addresses.
-(a *AddrManager) NeedMoreAddresses() bool {
+// NeedMoreAddresses returns whether or not the address manager needs more addresses.
+func (a *AddrManager) NeedMoreAddresses() bool {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	return a.numAddresses() < needAddressThreshold
 }
 
-func // AddressCache returns the current address cache.  It must be treated as
-// read-only (but since it is a copy now, this is not as dangerous).
-(a *AddrManager) AddressCache() []*wire.NetAddress {
+// AddressCache returns the current address cache. It must be treated as read-only (but since it is a copy now, this is
+// not as dangerous).
+func (a *AddrManager) AddressCache() []*wire.NetAddress {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	addrIndexLen := len(a.addrIndex)
@@ -599,8 +578,7 @@ func // AddressCache returns the current address cache.  It must be treated as
 	if numAddresses > getAddrMax {
 		numAddresses = getAddrMax
 	}
-	// Fisher-Yates shuffle the array. We only need to do the first
-	// `numAddresses' since we are throwing the rest.
+	// Fisher-Yates shuffle the array. We only need to do the first `numAddresses' since we are throwing the rest.
 	for i := 0; i < numAddresses; i++ {
 		// pick a number between current index and the end
 		j := rand.Intn(addrIndexLen-i) + i
@@ -610,9 +588,8 @@ func // AddressCache returns the current address cache.  It must be treated as
 	return allAddr[0:numAddresses]
 }
 
-func // reset resets the address manager by reinitialising the random source and
-// allocating fresh empty bucket storage.
-(a *AddrManager) reset() {
+// reset resets the address manager by reinitialising the random source and allocating fresh empty bucket storage.
+func (a *AddrManager) reset() {
 	a.addrIndex = make(map[string]*KnownAddress)
 	// fill key with bytes from a good random source.
 	_, err := io.ReadFull(crand.Reader, a.key[:])
@@ -627,16 +604,17 @@ func // reset resets the address manager by reinitialising the random source and
 	}
 }
 
-func // HostToNetAddress returns a netaddress given a host address.
+// HostToNetAddress returns a netaddress given a host address.
+//
 // If the address is a Tor .onion address this will be taken care of.
-// Else if the host is not an IP address it will be resolved (
-// via Tor if required).
-(a *AddrManager) HostToNetAddress(host string, port uint16, services wire.ServiceFlag) (*wire.NetAddress, error) {
+//
+// Else if the host is not an IP address it will be resolved ( via Tor if required).
+func (a *AddrManager) HostToNetAddress(host string, port uint16, services wire.ServiceFlag) (*wire.NetAddress, error) {
 	// Tor address is 16 char base32 + ".onion"
 	var ip net.IP
 	if len(host) == 22 && host[16:] == ".onion" {
-		// go base32 encoding uses capitals (as does the rfc but Tor and bitcoind
-		// tend to user lowercase, so we switch case here.
+		// go base32 encoding uses capitals (as does the rfc but Tor and bitcoind tend to user lowercase, so we switch
+		// case here.
 		data, err := base32.StdEncoding.DecodeString(
 			strings.ToUpper(host[:16]))
 		if err != nil {
@@ -659,10 +637,9 @@ func // HostToNetAddress returns a netaddress given a host address.
 	return wire.NewNetAddressIPPort(ip, port, services), nil
 }
 
-func // ipString returns a string for the ip from the provided NetAddress.
-// If the ip is in the range used for Tor addresses then it will be
-// transformed into the relevant .onion address.
-ipString(na *wire.NetAddress) string {
+// ipString returns a string for the ip from the provided NetAddress. If the ip is in the range used for Tor addresses
+// then it will be transformed into the relevant .onion address.
+func ipString(na *wire.NetAddress) string {
 	if IsOnionCatTor(na) {
 		// We know now that na.IP is long enough.
 		s := base32.StdEncoding.EncodeToString(na.IP[6:])
@@ -671,18 +648,15 @@ ipString(na *wire.NetAddress) string {
 	return na.IP.String()
 }
 
-func // NetAddressKey returns a string key in the form of ip:port for IPv4
-// addresses or [ip]:port for IPv6 addresses.
-NetAddressKey(na *wire.NetAddress) string {
+// NetAddressKey returns a string key in the form of ip:port for IPv4 addresses or [ip]:port for IPv6 addresses.
+func NetAddressKey(na *wire.NetAddress) string {
 	port := strconv.FormatUint(uint64(na.Port), 10)
 	return net.JoinHostPort(ipString(na), port)
 }
 
-func // GetAddress returns a single address that should be routable.  It picks a
-// random one from the possible addresses with preference given to ones that
-// have not been used recently and should not pick 'close' addresses
-// consecutively.
-(a *AddrManager) GetAddress() *KnownAddress {
+// GetAddress returns a single address that should be routable. It picks a random one from the possible addresses with
+// preference given to ones that have not been used recently and should not pick 'close' addresses consecutively.
+func (a *AddrManager) GetAddress() *KnownAddress {
 	// Protect concurrent access.
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
@@ -752,9 +726,8 @@ func (a *AddrManager) find(addr *wire.NetAddress) *KnownAddress {
 	return a.addrIndex[NetAddressKey(addr)]
 }
 
-func // Attempt increases the given address' attempt counter and updates the last
-// attempt time.
-(a *AddrManager) Attempt(addr *wire.NetAddress) {
+// Attempt increases the given address' attempt counter and updates the last attempt time.
+func (a *AddrManager) Attempt(addr *wire.NetAddress) {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	// find address. Surely address will be in tried by now?
@@ -767,9 +740,8 @@ func // Attempt increases the given address' attempt counter and updates the las
 	ka.lastattempt = time.Now()
 }
 
-// Connected Marks the given address as currently connected and working at the
-// current time.  The address must already be known to AddrManager else it will
-// be ignored.
+// Connected Marks the given address as currently connected and working at the current time. The address must already be
+// known to AddrManager else it will be ignored.
 func (a *AddrManager) Connected(addr *wire.NetAddress) {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
@@ -787,9 +759,8 @@ func (a *AddrManager) Connected(addr *wire.NetAddress) {
 	}
 }
 
-// Good marks the given address as good.  To be called after a successful
-// connection and version exchange.  If the address is unknown to the address
-// manager it will be ignored.
+// Good marks the given address as good. To be called after a successful connection and version exchange. If the address
+// is unknown to the address manager it will be ignored.
 func (a *AddrManager) Good(addr *wire.NetAddress) {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
@@ -797,8 +768,7 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	if ka == nil {
 		return
 	}
-	// ka.Timestamp is not updated here to avoid leaking information about
-	// currently connected peers.
+	// ka.Timestamp is not updated here to avoid leaking information about currently connected peers.
 	now := time.Now()
 	ka.lastsuccess = now
 	ka.lastattempt = now
@@ -807,8 +777,8 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	if ka.tried {
 		return
 	}
-	// ok, need to move it to tried. remove from all new buckets. record one of
-	// the buckets in question and call it the `first'
+	// ok, need to move it to tried. remove from all new buckets. record one of the buckets in question and call it the
+	// `first'
 	addrKey := NetAddressKey(addr)
 	oldBucket := -1
 	for i := range a.addrNew {
@@ -839,8 +809,7 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	rmka := entry.Value.(*KnownAddress)
 	// First bucket it would have been put in.
 	newBucket := a.getNewBucket(rmka.na, rmka.srcAddr)
-	// If no room in the original bucket, we put it in a bucket we just freed up
-	// a space in.
+	// If no room in the original bucket, we put it in a bucket we just freed up a space in.
 	if len(a.addrNew[newBucket]) >= newBucketSize {
 		newBucket = oldBucket
 	}
@@ -849,9 +818,8 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	entry.Value = ka
 	rmka.tried = false
 	rmka.refs++
-	// We don't touch a.nTried here since the number of tried stays the same but
-	// we decemented new above, raise it again since we're putting something
-	// back.
+	// We don't touch a.nTried here since the number of tried stays the same but we decemented new above, raise it again
+	// since we're putting something back.
 	a.nNew++
 	rmkey := NetAddressKey(rmka.na)
 	Tracef("replacing %s with %s in tried", rmkey, addrKey)
@@ -860,9 +828,8 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	a.addrNew[newBucket][rmkey] = rmka
 }
 
-func // SetServices sets the services for the giiven address to the provided
-// value.
-(a *AddrManager) SetServices(addr *wire.NetAddress, services wire.ServiceFlag) {
+// SetServices sets the services for the giiven address to the provided value.
+func (a *AddrManager) SetServices(addr *wire.NetAddress, services wire.ServiceFlag) {
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	ka := a.find(addr)
@@ -878,9 +845,8 @@ func // SetServices sets the services for the giiven address to the provided
 	}
 }
 
-func // AddLocalAddress adds na to the list of known local addresses to
-// advertise with the given priority.
-(a *AddrManager) AddLocalAddress(na *wire.NetAddress, priority AddressPriority) error {
+// AddLocalAddress adds na to the list of known local addresses to advertise with the given priority.
+func (a *AddrManager) AddLocalAddress(na *wire.NetAddress, priority AddressPriority) error {
 	if !IsRoutable(na) {
 		return fmt.Errorf("address %s is not routable", na.IP)
 	}
@@ -901,9 +867,8 @@ func // AddLocalAddress adds na to the list of known local addresses to
 	return nil
 }
 
-func // getReachabilityFrom returns the relative reachability of the provided
-// local address to the provided remote address.
-getReachabilityFrom(localAddr, remoteAddr *wire.NetAddress) int {
+// getReachabilityFrom returns the relative reachability of the provided local address to the provided remote address.
+func getReachabilityFrom(localAddr, remoteAddr *wire.NetAddress) int {
 	const (
 		Unreachable = 0
 		Default     = iota
@@ -965,9 +930,8 @@ getReachabilityFrom(localAddr, remoteAddr *wire.NetAddress) int {
 	return Ipv6Strong
 }
 
-func // GetBestLocalAddress returns the most appropriate local address to use
-// for the given remote address.
-(a *AddrManager) GetBestLocalAddress(remoteAddr *wire.NetAddress) *wire.NetAddress {
+// GetBestLocalAddress returns the most appropriate local address to use for the given remote address.
+func (a *AddrManager) GetBestLocalAddress(remoteAddr *wire.NetAddress) *wire.NetAddress {
 	a.lamtx.Lock()
 	defer a.lamtx.Unlock()
 	bestreach := 0
@@ -1001,9 +965,8 @@ func // GetBestLocalAddress returns the most appropriate local address to use
 	return bestAddress
 }
 
-func // New returns a new bitcoin address manager. Use Start to begin processing
-// asynchronous address updates.
-New(dataDir string, lookupFunc func(string) ([]net.IP, error)) *AddrManager {
+// New returns a new bitcoin address manager. Use Start to begin processing asynchronous address updates.
+func New(dataDir string, lookupFunc func(string) ([]net.IP, error)) *AddrManager {
 	am := AddrManager{
 		PeersFile:      filepath.Join(dataDir, "peers.json"),
 		lookupFunc:     lookupFunc,

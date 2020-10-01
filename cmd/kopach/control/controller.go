@@ -274,9 +274,8 @@ var handlersMulticast = transport.Handlers{
 				if _, ok := c.otherNodes[o]; !ok {
 					Debug("ctrl", j.GetControllerListenerPort(), "P2P",
 						j.GetP2PListenersPort(), "rpc", j.GetRPCListenersPort())
-					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
-					// recommended).
-					// go func() {
+					// because nodes can be set to change their port each launch this always reconnects (for lan,
+					// autoports is recommended).
 					Info("connecting to lan peer with same PSK", o, otherIPs)
 					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
 					}
@@ -413,9 +412,8 @@ out:
 				c.UpdateAndSendTemplate()
 				break
 			}
-			// The current block is stale if the memory pool has been updated
-			// since the block template was generated and it has been at least
-			// one minute.
+			// The current block is stale if the memory pool has been updated since the block template was generated and
+			// it has been at least one minute.
 			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
 				LastUpdated() && time.Now().After(time.Unix(0,
 				c.lastGenerated.Load().(int64)+int64(time.Minute))) {

@@ -19,11 +19,11 @@ import (
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
-// NeutrinoClient is an implementation of the btcwalet chain.Interface interface.
+// NeutrinoClient is an implementation of the btcwallet chain.Interface interface.
 type NeutrinoClient struct {
 	CS          *sac.ChainService
 	chainParams *netparams.Params
-	// We currently support one rescan/notifiction goroutine per client
+	// We currently support one rescan/notification goroutine per client
 	rescan              *sac.Rescan
 	enqueueNotification chan interface{}
 	dequeueNotification chan interface{}
@@ -41,8 +41,7 @@ type NeutrinoClient struct {
 	clientMtx           sync.Mutex
 }
 
-// NewNeutrinoClient creates a new NeutrinoClient struct with a backing
-// ChainService.
+// NewNeutrinoClient creates a new NeutrinoClient struct with a backing ChainService.
 func NewNeutrinoClient(chainParams *netparams.Params,
 	chainService *sac.ChainService) *NeutrinoClient {
 	return &NeutrinoClient{
@@ -108,10 +107,9 @@ func (s *NeutrinoClient) GetBlock(hash *chainhash.Hash) (*wire.MsgBlock, error) 
 	return block.MsgBlock(), nil
 }
 
-// GetBlockHeight gets the height of a block by its hash. It serves as a
-// replacement for the use of GetBlockVerboseTxAsync for the wallet package
-// since we can't actually return a FutureGetBlockVerboseResult because the
-// underlying type is private to rpcclient.
+// GetBlockHeight gets the height of a block by its hash. It serves as a replacement for the use of
+// GetBlockVerboseTxAsync for the wallet package since we can't actually return a FutureGetBlockVerboseResult because
+// the underlying type is private to rpcclient.
 func (s *NeutrinoClient) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
 	return s.CS.GetBlockHeight(hash)
 }
@@ -126,8 +124,7 @@ func (s *NeutrinoClient) GetBestBlock() (*chainhash.Hash, int32, error) {
 	return &chainTip.Hash, chainTip.Height, nil
 }
 
-// BlockStamp returns the latest block notified by the client, or an error
-// if the client has been shut down.
+// BlockStamp returns the latest block notified by the client, or an error if the client has been shut down.
 func (s *NeutrinoClient) BlockStamp() (*waddrmgr.BlockStamp, error) {
 	select {
 	case bs := <-s.currentBlock:
@@ -137,15 +134,14 @@ func (s *NeutrinoClient) BlockStamp() (*waddrmgr.BlockStamp, error) {
 	}
 }
 
-// GetBlockHash returns the block hash for the given height, or an error if the
-// client has been shut down or the hash at the block height doesn't exist or
-// is unknown.
+// GetBlockHash returns the block hash for the given height, or an error if the client has been shut down or the hash at
+// the block height doesn't exist or is unknown.
 func (s *NeutrinoClient) GetBlockHash(height int64) (*chainhash.Hash, error) {
 	return s.CS.GetBlockHash(height)
 }
 
-// GetBlockHeader returns the block header for the given block hash, or an error
-// if the client has been shut down or the hash doesn't exist or is unknown.
+// GetBlockHeader returns the block header for the given block hash, or an error if the client has been shut down or the
+// hash doesn't exist or is unknown.
 func (s *NeutrinoClient) GetBlockHeader(
 	blockHash *chainhash.Hash) (*wire.BlockHeader, error) {
 	return s.CS.GetBlockHeader(blockHash)
@@ -163,27 +159,23 @@ func (s *NeutrinoClient) SendRawTransaction(tx *wire.MsgTx, allowHighFees bool) 
 	return &hash, nil
 }
 
-// FilterBlocks scans the blocks contained in the FilterBlocksRequest for any
-// addresses of interest. For each requested block, the corresponding compact
-// filter will first be checked for matches, skipping those that do not report
-// anything. If the filter returns a postive match, the full block will be
-// fetched and filtered. This method returns a FilterBlocksReponse for the first
-// block containing a matching address. If no matches are found in the range of
+// FilterBlocks scans the blocks contained in the FilterBlocksRequest for any addresses of interest. For each requested
+// block, the corresponding compact filter will first be checked for matches, skipping those that do not report
+// anything. If the filter returns a positive match, the full block will be fetched and filtered. This method returns a
+// FilterBlocksResponse for the first block containing a matching address. If no matches are found in the range of
 // blocks requested, the returned response will be nil.
 func (s *NeutrinoClient) FilterBlocks(
 	req *FilterBlocksRequest) (*FilterBlocksResponse, error) {
 	blockFilterer := NewBlockFilterer(s.chainParams, req)
-	// Construct the watchlist using the addresses and outpoints contained
-	// in the filter blocks request.
+	// Construct the watchlist using the addresses and outpoints contained in the filter blocks request.
 	watchList, err := buildFilterBlocksWatchList(req)
 	if err != nil {
 		Error(err)
 		return nil, err
 	}
-	// Iterate over the requested blocks, fetching the compact filter for
-	// each one, and matching it against the watchlist generated above. If
-	// the filter returns a positive match, the full block is then requested
-	// and scanned for addresses using the block filterer.
+	// Iterate over the requested blocks, fetching the compact filter for each one, and matching it against the
+	// watchlist generated above. If the filter returns a positive match, the full block is then requested and scanned
+	// for addresses using the block filterer.
 	for i, blk := range req.Blocks {
 		filter, err := s.pollCFilter(&blk.Hash)
 		if err != nil {
@@ -216,11 +208,9 @@ func (s *NeutrinoClient) FilterBlocks(
 		if !blockFilterer.FilterBlock(rawBlock) {
 			continue
 		}
-		// If any external or internal addresses were detected in this
-		// block, we return them to the caller so that the rescan
-		// windows can widened with subsequent addresses. The
-		// `BatchIndex` is returned so that the caller can compute the
-		// *next* block from which to begin again.
+		// If any external or internal addresses were detected in this block, we return them to the caller so that the
+		// rescan windows can widened with subsequent addresses. The `BatchIndex` is returned so that the caller can
+		// compute the *next* block from which to begin again.
 		resp := &FilterBlocksResponse{
 			BatchIndex:         uint32(i),
 			BlockMeta:          blk,
@@ -235,14 +225,11 @@ func (s *NeutrinoClient) FilterBlocks(
 	return nil, nil
 }
 
-// buildFilterBlocksWatchList constructs a watchlist used for matching against a
-// cfilter from a FilterBlocksRequest. The watchlist will be populated with all
-// external addresses, internal addresses, and outpoints contained in the
-// request.
+// buildFilterBlocksWatchList constructs a watchlist used for matching against a cfilter from a FilterBlocksRequest. The
+// watchlist will be populated with all external addresses, internal addresses, and outpoints contained in the request.
 func buildFilterBlocksWatchList(req *FilterBlocksRequest) ([][]byte, error) {
-	// Construct a watch list containing the script addresses of all
-	// internal and external addresses that were requested, in addition to
-	// the set of outpoints currently being watched.
+	// Construct a watch list containing the script addresses of all internal and external addresses that were
+	// requested, in addition to the set of outpoints currently being watched.
 	watchListSize := len(req.ExternalAddrs) +
 		len(req.InternalAddrs) +
 		len(req.WatchedOutPoints)
@@ -274,9 +261,8 @@ func buildFilterBlocksWatchList(req *FilterBlocksRequest) ([][]byte, error) {
 	return watchList, nil
 }
 
-// pollCFilter attempts to fetch a CFilter from the neutrino client. This is
-// used to get around the fact that the filter headers may lag behind the
-// highest known block header.
+// pollCFilter attempts to fetch a CFilter from the neutrino client. This is used to get around the fact that the filter
+// headers may lag behind the highest known block header.
 func (s *NeutrinoClient) pollCFilter(hash *chainhash.Hash) (*gcs.Filter, error) {
 	var (
 		filter *gcs.Filter
@@ -333,9 +319,8 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 		return fmt.Errorf("Can't get block header for hash %v: %s",
 			bestBlock.Hash, err)
 	}
-	// If the wallet is already fully caught up, or the rescan has started
-	// with state that indicates a "fresh" wallet, we'll send a
-	// notification indicating the rescan has "finished".
+	// If the wallet is already fully caught up, or the rescan has started with state that indicates a "fresh" wallet,
+	// we'll send a notification indicating the rescan has "finished".
 	if header.BlockHash() == *startHash {
 		s.finished = true
 		select {
@@ -381,8 +366,7 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 // NotifyBlocks replicates the RPC client's NotifyBlocks command.
 func (s *NeutrinoClient) NotifyBlocks() error {
 	s.clientMtx.Lock()
-	// If we're scanning, we're already notifying on blocks. Otherwise,
-	// start a rescan without watching any addresses.
+	// If we're scanning, we're already notifying on blocks. Otherwise, start a rescan without watching any addresses.
 	if !s.scanning {
 		s.clientMtx.Unlock()
 		return s.NotifyReceived([]util.Address{})
@@ -394,8 +378,7 @@ func (s *NeutrinoClient) NotifyBlocks() error {
 // NotifyReceived replicates the RPC client's NotifyReceived command.
 func (s *NeutrinoClient) NotifyReceived(addrs []util.Address) error {
 	s.clientMtx.Lock()
-	// If we have a rescan running, we just need to add the appropriate
-	// addresses to the watch list.
+	// If we have a rescan running, we just need to add the appropriate addresses to the watch list.
 	if s.scanning {
 		s.clientMtx.Unlock()
 		return s.rescan.Update(sac.AddAddrs(addrs...))
@@ -427,20 +410,17 @@ func (s *NeutrinoClient) Notifications() <-chan interface{} {
 	return s.dequeueNotification
 }
 
-// SetStartTime is a non-interface method to set the birthday of the wallet
-// using this object. Since only a single rescan at a time is currently
-// supported, only one birthday needs to be set. This does not fully restart a
-// running rescan, so should not be used to update a rescan while it is running.
-// TODO: When factoring out to multiple rescans per Neutrino client, add a
-// birthday per client.
+// SetStartTime is a non-interface method to set the birthday of the wallet using this object. Since only a single
+// rescan at a time is currently supported, only one birthday needs to be set. This does not fully restart a running
+// rescan, so should not be used to update a rescan while it is running. TODO: When factoring out to multiple rescans
+// per Neutrino client, add a birthday per client.
 func (s *NeutrinoClient) SetStartTime(startTime time.Time) {
 	s.clientMtx.Lock()
 	defer s.clientMtx.Unlock()
 	s.startTime = startTime
 }
 
-// onFilteredBlockConnected sends appropriate notifications to the notification
-// channel.
+// onFilteredBlockConnected sends appropriate notifications to the notification channel.
 func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 	header *wire.BlockHeader, relevantTxs []*util.Tx) {
 	ntfn := FilteredBlockConnected{
@@ -486,8 +466,7 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 			s.clientMtx.Unlock()
 			return
 		}
-		// Only send the RescanFinished notification once the
-		// underlying chain service sees itself as current.
+		// Only send the RescanFinished notification once the underlying chain service sees itself as current.
 		current := s.CS.IsCurrent() && s.lastProgressSent
 		if current {
 			s.finished = true
@@ -509,8 +488,7 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 	}
 }
 
-// onBlockDisconnected sends appropriate notifications to the notification
-// channel.
+// onBlockDisconnected sends appropriate notifications to the notification channel.
 func (s *NeutrinoClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
 	t time.Time) {
 	select {
@@ -540,9 +518,8 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 		case <-s.rescanQuit:
 		}
 	}
-	// Only send BlockConnected notification if we're processing blocks
-	// before the birthday. Otherwise, we can just update using
-	// RescanProgress notifications.
+	// Only send BlockConnected notification if we're processing blocks before the birthday. Otherwise, we can just
+	// update using RescanProgress notifications.
 	if time.Before(s.startTime) {
 		// Send a RescanProgress notification every 10K blocks.
 		if height%10000 == 0 {
@@ -554,9 +531,8 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 			}
 		}
 	} else {
-		// Send a RescanProgress notification if we're just going over
-		// the boundary between pre-birthday and post-birthday blocks,
-		// and note that we've sent it.
+		// Send a RescanProgress notification if we're just going over the boundary between pre-birthday and
+		// post-birthday blocks, and note that we've sent it.
 		s.clientMtx.Lock()
 		if !s.lastProgressSent {
 			shouldSend := s.isRescan && !s.finished
@@ -582,9 +558,8 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 	}
 }
 
-// notificationHandler queues and dequeues notifications. There are currently
-// no bounds on the queue, so the dequeue channel should be read continually to
-// avoid running out of memory.
+// notificationHandler queues and dequeues notifications. There are currently no bounds on the queue, so the dequeue
+// channel should be read continually to avoid running out of memory.
 func (s *NeutrinoClient) notificationHandler() {
 	hash, height, err := s.GetBestBlock()
 	if err != nil {
@@ -595,12 +570,10 @@ func (s *NeutrinoClient) notificationHandler() {
 		return
 	}
 	bs := &waddrmgr.BlockStamp{Hash: *hash, Height: height}
-	// TODO: Rather than leaving this as an unbounded queue for all types of
-	// notifications, try dropping ones where a later enqueued notification
-	// can fully invalidate one waiting to be processed.  For example,
-	// blockconnected notifications for greater block heights can remove the
-	// need to process earlier blockconnected notifications still waiting
-	// here.
+	// TODO: Rather than leaving this as an unbounded queue for all types of notifications, try dropping ones where a
+	//  later enqueued notification can fully invalidate one waiting to be processed. For example, blockconnected
+	//  notifications for greater block heights can remove the need to process earlier blockconnected notifications still
+	//  waiting here.
 	var notifications []interface{}
 	enqueue := s.enqueueNotification
 	var dequeue chan interface{}
@@ -613,8 +586,7 @@ out:
 		select {
 		case n, ok := <-enqueue:
 			if !ok {
-				// If no notifications are queued for handling,
-				// the queue is finished.
+				// If no notifications are queued for handling, the queue is finished.
 				if len(notifications) == 0 {
 					break out
 				}
@@ -639,8 +611,7 @@ out:
 			if len(notifications) != 0 {
 				next = notifications[0]
 			} else {
-				// If no more notifications can be enqueued, the
-				// queue is finished.
+				// If no more notifications can be enqueued, the queue is finished.
 				if enqueue == nil {
 					break out
 				}

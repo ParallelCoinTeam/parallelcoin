@@ -7,7 +7,8 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestHelpReflectInternals ensures the various help functions which deal with reflect types work as expected for various Go types.
+// TestHelpReflectInternals ensures the various help functions which deal with reflect types work as expected for
+// various Go types.
 func TestHelpReflectInternals(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -150,7 +151,6 @@ func TestHelpReflectInternals(t *testing.T) {
 		},
 		{
 			name: "struct indent level 1",
-			// nolint
 			reflectType: reflect.TypeOf(struct{ field int }{}),
 			indentLevel: 1,
 			key:         "json-type-object",
@@ -166,7 +166,6 @@ func TestHelpReflectInternals(t *testing.T) {
 		{
 			name: "array of struct indent level 0",
 			reflectType: func() reflect.Type {
-				// nolint
 				type s struct{ field int }
 				return reflect.TypeOf([]s{})
 			}(),
@@ -185,7 +184,6 @@ func TestHelpReflectInternals(t *testing.T) {
 			name: "array of struct indent level 1",
 			reflectType: func() reflect.Type {
 				type s struct {
-					// nolint
 					field int
 				}
 				return reflect.TypeOf([]s{})
@@ -295,7 +293,6 @@ func TestResultStructHelp(t *testing.T) {
 		{
 			name: "struct with primitive field",
 			reflectType: func() reflect.Type {
-				// nolint
 				type s struct{ field int }
 				return reflect.TypeOf(s{})
 			}(),
@@ -318,7 +315,6 @@ func TestResultStructHelp(t *testing.T) {
 		{
 			name: "struct with array of primitive field",
 			reflectType: func() reflect.Type {
-				// nolint
 				type s struct{ field []int }
 				return reflect.TypeOf(s{})
 			}(),
@@ -330,11 +326,9 @@ func TestResultStructHelp(t *testing.T) {
 			name: "struct with sub-struct field",
 			reflectType: func() reflect.Type {
 				type s2 struct {
-					// nolint
 					subField int
 				}
 				type s struct {
-					// nolint
 					field s2
 				}
 				return reflect.TypeOf(s{})
@@ -350,11 +344,9 @@ func TestResultStructHelp(t *testing.T) {
 			name: "struct with sub-struct field pointer",
 			reflectType: func() reflect.Type {
 				type s2 struct {
-					// nolint
 					subField int
 				}
 				type s struct {
-					// nolint
 					field *s2
 				}
 				return reflect.TypeOf(s{})
@@ -370,11 +362,9 @@ func TestResultStructHelp(t *testing.T) {
 			name: "struct with array of structs field",
 			reflectType: func() reflect.Type {
 				type s2 struct {
-					// nolint
 					subField int
 				}
 				type s struct {
-					// nolint
 					field []s2
 				}
 				return reflect.TypeOf(s{})

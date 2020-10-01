@@ -25,6 +25,7 @@ func (b *addrIndexBucket) Clone() *addrIndexBucket {
 }
 
 // Get returns the value associated with the key from the mock address index bucket.
+//
 // This is part of the internalBucket interface.
 func (b *addrIndexBucket) Get(key []byte) []byte {
 	var levelKey [levelKeySize]byte
@@ -33,6 +34,7 @@ func (b *addrIndexBucket) Get(key []byte) []byte {
 }
 
 // Put stores the provided key/value pair to the mock address index bucket.
+//
 // This is part of the internalBucket interface.
 func (b *addrIndexBucket) Put(key []byte, value []byte) error {
 	var levelKey [levelKeySize]byte
@@ -42,6 +44,7 @@ func (b *addrIndexBucket) Put(key []byte, value []byte) error {
 }
 
 // Delete removes the provided key from the mock address index bucket.
+//
 // This is part of the internalBucket interface.
 func (b *addrIndexBucket) Delete(key []byte) error {
 	var levelKey [levelKeySize]byte
@@ -50,7 +53,8 @@ func (b *addrIndexBucket) Delete(key []byte) error {
 	return nil
 }
 
-// printLevels returns a string with a visual representation of the provided address key taking into account the max size of each level.  It is useful when creating and debugging test cases.
+// printLevels returns a string with a visual representation of the provided address key taking into account the max
+// size of each level. It is useful when creating and debugging test cases.
 func (b *addrIndexBucket) printLevels(addrKey [addrKeySize]byte) string {
 	highestLevel := uint8(0)
 	for k := range b.levels {
@@ -82,7 +86,8 @@ func (b *addrIndexBucket) printLevels(addrKey [addrKeySize]byte) string {
 	return levelBuf.String()
 }
 
-// sanityCheck ensures that all data stored in the bucket for the given address adheres to the level-based rules described by the address index documentation.
+// sanityCheck ensures that all data stored in the bucket for the given address adheres to the level-based rules
+// described by the address index documentation.
 func (b *addrIndexBucket) sanityCheck(addrKey [addrKeySize]byte, expectedTotal int) error {
 	// Find the highest level for the key.
 	highestLevel := uint8(0)
@@ -95,11 +100,13 @@ func (b *addrIndexBucket) sanityCheck(addrKey [addrKeySize]byte, expectedTotal i
 			highestLevel = level
 		}
 	}
-	// Ensure the expected total number of entries are present and that all levels adhere to the rules described in the address index documentation.
+	// Ensure the expected total number of entries are present and that all levels adhere to the rules described in the
+	// address index documentation.
 	var totalEntries int
 	maxEntries := level0MaxEntries
 	for level := uint8(0); level <= highestLevel; level++ {
-		// Level 0 can'have more entries than the max allowed if the levels after it have data and it can't be empty.  All other levels must either be half full or full.
+		// Level 0 can'have more entries than the max allowed if the levels after it have data and it can't be empty.
+		// All other levels must either be half full or full.
 		data := b.levels[keyForLevel(addrKey, level)]
 		numEntries := len(data) / txEntrySize
 		totalEntries += numEntries
@@ -139,7 +146,8 @@ func (b *addrIndexBucket) sanityCheck(addrKey [addrKeySize]byte, expectedTotal i
 	return nil
 }
 
-// TestAddrIndexLevels ensures that adding and deleting entries to the address index creates multiple levels as described by the address index documentation.
+// TestAddrIndexLevels ensures that adding and deleting entries to the address index creates multiple levels as
+// described by the address index documentation.
 func TestAddrIndexLevels(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -205,7 +213,9 @@ nextTest:
 		if test.printLevels {
 			t.Log(populatedBucket.printLevels(test.key))
 		}
-		// Delete entries from the populated bucket until all entries have been deleted.  The bucket is reset to the fully populated bucket on each iteration so every combination is tested.  Notice the upper limit purposes exceeds the number of entries to ensure attempting to delete more entries than there are works correctly.
+		// Delete entries from the populated bucket until all entries have been deleted. The bucket is reset to the
+		// fully populated bucket on each iteration so every combination is tested. Notice the upper limit purposes
+		// exceeds the number of entries to ensure attempting to delete more entries than there are works correctly.
 		for numDelete := 0; numDelete <= test.numInsert+1; numDelete++ {
 			// Clone populated bucket to run each delete against.
 			bucket := populatedBucket.Clone()

@@ -109,7 +109,7 @@ func p2pkSignatureScript(tx *wire.MsgTx, idx int, subScript []byte, hashType Sig
 }
 
 // signMultiSig signs as many of the outputs in the provided multisig script as possible. It returns the generated
-// script and a boolean if the script fulfils the contract (i.e. nrequired signatures are provided).  Since it is
+// script and a boolean if the script fulfils the contract (i.e. nrequired signatures are provided). Since it is
 // arguably legal to not be able to sign any of the outputs, no error is returned.
 func signMultiSig(tx *wire.MsgTx, idx int, subScript []byte, hashType SigHashType,
 	addresses []util.Address, nRequired int, kdb KeyDB) ([]byte, bool) {

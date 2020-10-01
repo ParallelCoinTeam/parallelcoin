@@ -15,24 +15,20 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// solveBlock attempts to find a nonce which makes the passed block header
-// hash to a value less than the target difficulty.
-// When a successful solution is found true is returned and the nonce field
-// of the passed header is updated with the solution.
-// False is returned if no solution exists.
+// solveBlock attempts to find a nonce which makes the passed block header hash to a value less than the target
+// difficulty. When a successful solution is found true is returned and the nonce field of the passed header is updated
+// with the solution. False is returned if no solution exists.
 func solveBlock(header *wire.BlockHeader, targetDifficulty *big.Int) bool {
 	// sbResult is used by the solver goroutines to send results.
 	type sbResult struct {
 		found bool
 		nonce uint32
 	}
-	// solver accepts a block header and a nonce range to test.
-	// It is intended to be run as a goroutine.
+	// solver accepts a block header and a nonce range to test. It is intended to be run as a goroutine.
 	quit := make(chan bool)
 	results := make(chan sbResult)
 	solver := func(hdr wire.BlockHeader, startNonce, stopNonce uint32) {
-		// We need to modify the nonce field of the header,
-		// so make sure we work with a copy of the original header.
+		// We need to modify the nonce field of the header, so make sure we work with a copy of the original header.
 		for i := startNonce; i >= startNonce && i <= stopNonce; i++ {
 			select {
 			case <-quit:
@@ -79,17 +75,15 @@ func solveBlock(header *wire.BlockHeader, targetDifficulty *big.Int) bool {
 	return false
 }
 
-// standardCoinbaseScript returns a standard script suitable for use as the
-// signature script of the coinbase transaction of a new block.
-// In particular, it starts with the block height that is required by version
-// 2 blocks.
+// standardCoinbaseScript returns a standard script suitable for use as the signature script of the coinbase transaction
+// of a new block. In particular, it starts with the block height that is required by version 2 blocks.
 func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, error) {
 	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
 		AddInt64(int64(extraNonce)).Script()
 }
 
-// createCoinbaseTx returns a coinbase transaction paying an appropriate
-// subsidy based on the passed block height to the provided address.
+// createCoinbaseTx returns a coinbase transaction paying an appropriate subsidy based on the passed block height to the
+// provided address.
 func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Address, mineTo []wire.TxOut, net *netparams.Params, version int32) (*util.Tx, error) {
 	// Create the script to pay to the provided payment address.
 	pkScript, err := txscript.PayToAddrScript(addr)
@@ -99,8 +93,7 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Ad
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
 	tx.AddTxIn(&wire.TxIn{
-		// Coinbase transactions have no inputs,
-		// so previous outpoint is zero hash and max index.
+		// Coinbase transactions have no inputs, so previous outpoint is zero hash and max index.
 		PreviousOutPoint: *wire.NewOutPoint(&chainhash.Hash{},
 			wire.MaxPrevOutIndex),
 		SignatureScript: coinbaseScript,
@@ -119,12 +112,10 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Ad
 	return util.NewTx(tx), nil
 }
 
-// CreateBlock creates a new block building from the previous block with a
-// specified blockversion and timestamp. If the timestamp passed is zero (
-// not initialized),
-// then the timestamp of the previous block will be used plus 1 second is
-// used. Passing nil for the previous block results in a block that builds
-// off of the genesis block for the specified chain.
+// CreateBlock creates a new block building from the previous block with a specified blockversion and timestamp. If the
+// timestamp passed is zero ( not initialized), then the timestamp of the previous block will be used plus 1 second is
+// used. Passing nil for the previous block results in a block that builds off of the genesis block for the specified
+// chain.
 func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	blockVersion int32, blockTime time.Time, miningAddr util.Address,
 	mineTo []wire.TxOut, net *netparams.Params) (*util.Block, error) {
@@ -133,8 +124,8 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 		blockHeight   int32
 		prevBlockTime time.Time
 	)
-	// If the previous block isn't specified, then we'll construct a block that
-	// builds off of the genesis block for the chain.
+	// If the previous block isn't specified, then we'll construct a block that builds off of the genesis block for the
+	// chain.
 	if prevBlock == nil {
 		prevHash = net.GenesisHash
 		blockHeight = 1
@@ -144,10 +135,8 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 		blockHeight = prevBlock.Height() + 1
 		prevBlockTime = prevBlock.MsgBlock().Header.Timestamp
 	}
-	// If a target block time was specified,
-	// then use that as the header's timestamp. Otherwise,
-	// add one second to the previous block unless it's the genesis block in
-	// which case use the current time.
+	// If a target block time was specified, then use that as the header's timestamp. Otherwise, add one second to the
+	// previous block unless it's the genesis block in which case use the current time.
 	var ts time.Time
 	switch {
 	case !blockTime.IsZero():

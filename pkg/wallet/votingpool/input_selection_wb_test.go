@@ -98,8 +98,7 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 	TstEnsureUsedAddr(t, dbtx, pool, 1, Branch(1), 1)
 	// Start with the address for branch==0, index==1.
 	addr := TstNewWithdrawalAddress(t, dbtx, pool, 1, 0, 1)
-	// The first call to nextAddr() should give us the address for branch==1
-	// and index==1.
+	// The first call to nextAddr() should give us the address for branch==1 and index==1.
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
@@ -107,8 +106,7 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 		t.Fatalf("Failed to get next address: %v", err)
 	}
 	checkWithdrawalAddressMatches(t, addr, 1, Branch(1), 1)
-	// The next call should give us the address for branch==0, index==2 since
-	// there are no used addresses for branch==2.
+	// The next call should give us the address for branch==0, index==2 since there are no used addresses for branch==2.
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
@@ -116,8 +114,7 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 		t.Fatalf("Failed to get next address: %v", err)
 	}
 	checkWithdrawalAddressMatches(t, addr, 1, Branch(0), 2)
-	// Since the last addr for branch==1 was the one with index==1, a subsequent
-	// call will return nil.
+	// Since the last addr for branch==1 was the one with index==1, a subsequent call will return nil.
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
@@ -149,14 +146,13 @@ func TestNextAddr(t *testing.T) {
 	TstCreateSeries(t, dbtx, pool, series)
 	stopSeriesID := uint32(3)
 	lastIdx := Index(10)
-	// Populate used addresses DB with entries for seriesID==1, branch==0..3,
-	// idx==0..10.
+	// Populate used addresses DB with entries for seriesID==1, branch==0..3, idx==0..10.
 	for _, i := range []int{0, 1, 2, 3} {
 		TstEnsureUsedAddr(t, dbtx, pool, 1, Branch(i), lastIdx)
 	}
 	addr := TstNewWithdrawalAddress(t, dbtx, pool, 1, 0, lastIdx-1)
-	// nextAddr() first increments just the branch, which ranges from 0 to 3
-	// here (because our series has 3 public keys).
+	// nextAddr() first increments just the branch, which ranges from 0 to 3 here (because our series has 3 public
+	// keys).
 	for _, i := range []int{1, 2, 3} {
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
@@ -166,9 +162,8 @@ func TestNextAddr(t *testing.T) {
 		}
 		checkWithdrawalAddressMatches(t, addr, 1, Branch(i), lastIdx-1)
 	}
-	// The last nextAddr() above gave us the addr with branch=3,
-	// idx=lastIdx-1, so the next 4 calls should give us the addresses with
-	// branch=[0-3] and idx=lastIdx.
+	// The last nextAddr() above gave us the addr with branch=3, idx=lastIdx-1, so the next 4 calls should give us the
+	// addresses with branch=[0-3] and idx=lastIdx.
 	for _, i := range []int{0, 1, 2, 3} {
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
@@ -178,13 +173,12 @@ func TestNextAddr(t *testing.T) {
 		}
 		checkWithdrawalAddressMatches(t, addr, 1, Branch(i), lastIdx)
 	}
-	// Populate used addresses DB with entries for seriesID==2, branch==0..3,
-	// idx==0..10.
+	// Populate used addresses DB with entries for seriesID==2, branch==0..3, idx==0..10.
 	for _, i := range []int{0, 1, 2, 3} {
 		TstEnsureUsedAddr(t, dbtx, pool, 2, Branch(i), lastIdx)
 	}
-	// Now we've gone through all the available branch/idx combinations, so
-	// we should move to the next series and start again with branch=0, idx=0.
+	// Now we've gone through all the available branch/idx combinations, so we should move to the next series and start
+	// again with branch=0, idx=0.
 	for _, i := range []int{0, 1, 2, 3} {
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
@@ -194,8 +188,7 @@ func TestNextAddr(t *testing.T) {
 		}
 		checkWithdrawalAddressMatches(t, addr, 2, Branch(i), 0)
 	}
-	// Finally check that nextAddr() returns nil when we've reached the last
-	// available address before stopSeriesID.
+	// Finally check that nextAddr() returns nil when we've reached the last available address before stopSeriesID.
 	addr = TstNewWithdrawalAddress(t, dbtx, pool, 2, 3, lastIdx)
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
@@ -254,9 +247,8 @@ func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	// Check that a credit with not enough confirmations is rejected.
 	_, credits = TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{int64(dustThreshold)})
 	c = credits[0]
-	// The calculation of if it has been confirmed does this: chainheigt - bh +
-	// 1 >= target, which is quite weird, but the reason why I need to put 902
-	// is *that* makes 1000 - 902 +1 = 99 >= 100 false
+	// The calculation of if it has been confirmed does this: chainheigt - bh + 1 >= target, which is quite weird, but
+	// the reason why I need to put 902 is *that* makes 1000 - 902 +1 = 99 >= 100 false
 	c.BlockMeta.Height = int32(902)
 	if pool.isCreditEligible(c, eligibleInputMinConfirmations, chainHeight, dustThreshold) {
 		t.Errorf("Input is eligible and it should not be.")
@@ -312,17 +304,16 @@ func TestCreditSortingByAddress(t *testing.T) {
 	}
 }
 
-// newDummyCredit creates a new credit with the given hash and outpointIdx,
-// locked to the votingpool address identified by the given
-// series/index/branch.
+// newDummyCredit creates a new credit with the given hash and outpointIdx, locked to the votingpool address identified
+// by the given series/index/branch.
 func newDummyCredit(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series uint32, index Index, branch Branch,
 	txHash []byte, outpointIdx uint32) Credit {
 	var hash chainhash.Hash
 	if err := hash.SetBytes(txHash); err != nil {
 		t.Fatal(err)
 	}
-	// Ensure the address defined by the given series/branch/index is present on
-	// the set of used addresses as that's a requirement of WithdrawalAddress.
+	// Ensure the address defined by the given series/branch/index is present on the set of used addresses as that's a
+	// requirement of WithdrawalAddress.
 	TstEnsureUsedAddr(t, dbtx, pool, series, branch, index)
 	addr := TstNewWithdrawalAddress(t, dbtx, pool, series, branch, index)
 	c := wtxmgr.Credit{

@@ -5,7 +5,8 @@ import (
 	"testing"
 )
 
-// TestMruNonceMap ensures the mruNonceMap behaves as expected including limiting, eviction of least-recently used entries, specific entry removal, and existence tests.
+// TestMruNonceMap ensures the mruNonceMap behaves as expected including limiting, eviction of least-recently used
+// entries, specific entry removal, and existence tests.
 func TestMruNonceMap(t *testing.T) {
 	// Create a bunch of fake nonces to use in testing the mru Nonce code.
 	numNonces := 10
@@ -26,7 +27,8 @@ func TestMruNonceMap(t *testing.T) {
 	}
 testLoop:
 	for i, test := range tests {
-		// Create a new mru Nonce map limited by the specified test limit and add all of the test nonces.  This will cause evicition since there are more test nonces than the limits.
+		// Create a new mru Nonce map limited by the specified test limit and add all of the test nonces. This will
+		// cause evicition since there are more test nonces than the limits.
 		mruNonceMap := newMruNonceMap(uint(test.limit))
 		for j := 0; j < numNonces; j++ {
 			mruNonceMap.Add(nonces[j])
@@ -47,8 +49,9 @@ testLoop:
 				continue testLoop
 			}
 		}
-		// Readd the entry that should currently be the least-recently used entry so it becomes the most-recently used entry, then force an eviction by adding an entry that doesn't exist and ensure the evicted entry is the new least-recently used entry.
-		// This check needs at least 2 entries.
+		// Readd the entry that should currently be the least-recently used entry so it becomes the most-recently used
+		// entry, then force an eviction by adding an entry that doesn't exist and ensure the evicted entry is the new
+		// least-recently used entry. This check needs at least 2 entries.
 		if test.limit > 1 {
 			origLruIndex := numNonces - test.limit
 			mruNonceMap.Add(nonces[origLruIndex])
@@ -67,7 +70,8 @@ testLoop:
 				continue testLoop
 			}
 		}
-		// Delete all of the entries in the list, including those that don't exist in the map, and ensure they no longer exist.
+		// Delete all of the entries in the list, including those that don't exist in the map, and ensure they no longer
+		// exist.
 		for j := 0; j < numNonces; j++ {
 			mruNonceMap.Delete(nonces[j])
 			if mruNonceMap.Exists(nonces[j]) {
@@ -88,7 +92,8 @@ func TestMruNonceMapStringer(t *testing.T) {
 	mruNonceMap := newMruNonceMap(uint(2))
 	mruNonceMap.Add(nonce1)
 	mruNonceMap.Add(nonce2)
-	// Ensure the stringer gives the expected result.  Since map iteration is not ordered, either entry could be first, so account for both cases.
+	// Ensure the stringer gives the expected result. Since map iteration is not ordered, either entry could be first,
+	// so account for both cases.
 	wantStr1 := fmt.Sprintf("<%d>[%d, %d]", 2, nonce1, nonce2)
 	wantStr2 := fmt.Sprintf("<%d>[%d, %d]", 2, nonce2, nonce1)
 	gotStr := mruNonceMap.String()

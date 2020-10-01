@@ -2,6 +2,12 @@ package component
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"strconv"
+	"strings"
+	"time"
+
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -11,6 +17,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/nfnt/resize"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -21,11 +28,6 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
-	"image"
-	"image/color"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type (
@@ -306,7 +308,7 @@ func (s *State) DuoUIinputField(f *Field) func() {
 					},
 				)()
 			case "time":
-				//Debug("rendering duration")
+				// Debug("rendering duration")
 				s.Editor(
 					(rdw[f.Field.Model]).(*gel.Editor),
 					(rdw[f.Field.Model]).(*gel.Editor).Text(),
@@ -364,7 +366,7 @@ func (s *State) DuoUIinputField(f *Field) func() {
 			//	}))
 		default:
 			// duo.Theme.CheckBox("Checkbox").Layout(g,
-			//(duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
+			// (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
 		}
 	}
 }
@@ -373,7 +375,7 @@ func (s *State) DuoUIlatestTransactions() func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
 		width := g.Constraints.Width.Max
-		//cs := g.Constraints
+		// cs := g.Constraints
 		t.DuoUIcontainer(0, t.Colors["DarkGray"]).
 			Layout(g, layout.NW, func() {
 				layout.Flex{
@@ -544,7 +546,7 @@ func (s *State) FooterLeftMenu(allPages *model.DuoUIpages) func() {
 		cornerButtons := []func(){
 			s.QuitButton(),
 			// s.footerMenuButton(allPages.Theme["EXPLORER"],
-			//"BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
+			// "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
 			s.footerMenuButton(allPages.Theme["LOG"], "LOG", "traceIcon",
 				buttonLog),
 		}
@@ -604,7 +606,7 @@ func (s *State) FooterRightMenu(allPages *model.DuoUIpages) func() {
 			// "", "networkIcon", buttonNetwork),
 			// s.footerMenuButton(allPages.Theme["NETWORK"],
 			// "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount),
-			//"", buttonNetwork),
+			// "", buttonNetwork),
 			// s.footerMenuButton(allPages.Theme["EXPLORER"],
 			// "", "DeviceWidgets", buttonBlocks),
 			s.footerMenuButton(allPages.Theme["NETWORK"],
@@ -747,7 +749,7 @@ func (s *State) navButtons(allPages *model.DuoUIpages, nav *model.DuoUInav) []fu
 			navButtonSend),
 		// navMenuLine(g, th),
 		// navMenuButton(rc, g, t, allPages.Theme["RECEIVE"], "RECEIVE",
-		//"receiveIcon", navButtonReceive),
+		// "receiveIcon", navButtonReceive),
 		t.DuoUIline(g, 0, 0, 1,
 			t.Colors["LightGrayIII"]),
 		s.navMenuButton(allPages.Theme["ADDRESSBOOK"], nav,
@@ -1215,7 +1217,7 @@ func (s *Context) MonoButton(buttonController *gel.Button, textSize int, color, 
 	t, g := s.Thm, s.Gtx
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
-			//var button gelook.Button
+			// var button gelook.Button
 			button := t.Button(label)
 			switch {
 			case font != "":
@@ -1248,9 +1250,9 @@ func (s *Context) peerDetails(i int, pi *btcjson.GetPeerInfoResult) func() {
 			layout.Rigid(s.Label(prim, 12, c, pi.Services)),
 			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.RelayTxes))),
 			// layout.Rigid(s.Label(prim, 12, c
-			//fmt.Sprint(t.LastSend))),
+			// fmt.Sprint(t.LastSend))),
 			// layout.Rigid(s.Label(prim, 12, c
-			//fmt.Sprint(t.LastRecv))),
+			// fmt.Sprint(t.LastRecv))),
 			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.BytesSent))),
 			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.BytesRecv))),
 			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.ConnTime))),

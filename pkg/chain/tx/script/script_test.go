@@ -3816,7 +3816,8 @@ func TestGetPreciseSigOps(t *testing.T) {
 			scriptSig: mustParseShortForm("DATA_2 PUSHDATA1 0x02"),
 		},
 	}
-	// The signature in the p2sh script is nonsensical for the tests since this script will never be executed.  What matters is that it matches the right pattern.
+	// The signature in the p2sh script is nonsensical for the tests since this script will never be executed. What
+	// matters is that it matches the right pattern.
 	pkScript := mustParseShortForm("HASH160 DATA_20 0x433ec2ac1ffa1b7b7d0" +
 		"27f564529c57197f9ae88 EQUAL")
 	for _, test := range tests {
@@ -3883,7 +3884,8 @@ func TestGetWitnessSigOpCount(t *testing.T) {
 					"3ca481d4d4eeae1b7970f51c78231207e52ae"),
 			},
 		},
-		// A p2wsh witness program. However, the witness script fails to parse after the valid portion of the script. As a result, the valid portion of the script should still be counted.
+		// A p2wsh witness program. However, the witness script fails to parse after the valid portion of the script. As
+		// a result, the valid portion of the script should still be counted.
 		{
 			name:      "witness script doesn't parse",
 			numSigOps: 1,
@@ -3956,7 +3958,8 @@ func TestRemoveOpcodes(t *testing.T) {
 			err:    scriptError(ErrMalformedPush, ""),
 		},
 	}
-	// tstRemoveOpcode is a convenience function to parse the provided raw script, remove the passed opcode, then unparse the result back into a raw script.
+	// tstRemoveOpcode is a convenience function to parse the provided raw script, remove the passed opcode, then
+	// unparse the result back into a raw script.
 	tstRemoveOpcode := func(script []byte, opcode byte) ([]byte, error) {
 		pops, err := parseScript(script)
 		if err != nil {
@@ -4100,7 +4103,8 @@ func TestRemoveOpcodeByData(t *testing.T) {
 			err:    scriptError(ErrMalformedPush, ""),
 		},
 	}
-	// tstRemoveOpcodeByData is a convenience function to parse the provided raw script, remove the passed data, then unparse the result back into a raw script.
+	// tstRemoveOpcodeByData is a convenience function to parse the provided raw script, remove the passed data, then
+	// unparse the result back into a raw script.
 	tstRemoveOpcodeByData := func(script []byte, data []byte) ([]byte, error) {
 		pops, err := parseScript(script)
 		if err != nil {
@@ -4122,7 +4126,8 @@ func TestRemoveOpcodeByData(t *testing.T) {
 	}
 }
 
-// TestIsPayToScriptHash ensures the IsPayToScriptHash function returns the expected results for all the scripts in scriptClassTests.
+// TestIsPayToScriptHash ensures the IsPayToScriptHash function returns the expected results for all the scripts in
+// scriptClassTests.
 func TestIsPayToScriptHash(t *testing.T) {
 	t.Parallel()
 	for _, test := range scriptClassTests {
@@ -4136,7 +4141,8 @@ func TestIsPayToScriptHash(t *testing.T) {
 	}
 }
 
-// TestIsPayToWitnessScriptHash ensures the IsPayToWitnessScriptHash function returns the expected results for all the scripts in scriptClassTests.
+// TestIsPayToWitnessScriptHash ensures the IsPayToWitnessScriptHash function returns the expected results for all the
+// scripts in scriptClassTests.
 func TestIsPayToWitnessScriptHash(t *testing.T) {
 	t.Parallel()
 	for _, test := range scriptClassTests {
@@ -4150,7 +4156,8 @@ func TestIsPayToWitnessScriptHash(t *testing.T) {
 	}
 }
 
-// TestIsPayToWitnessPubKeyHash ensures the IsPayToWitnessPubKeyHash function returns the expected results for all the scripts in scriptClassTests.
+// TestIsPayToWitnessPubKeyHash ensures the IsPayToWitnessPubKeyHash function returns the expected results for all the
+// scripts in scriptClassTests.
 func TestIsPayToWitnessPubKeyHash(t *testing.T) {
 	t.Parallel()
 	for _, test := range scriptClassTests {
@@ -4164,7 +4171,8 @@ func TestIsPayToWitnessPubKeyHash(t *testing.T) {
 	}
 }
 
-// TestHasCanonicalPushes ensures the canonicalPush function properly determines what is considered a canonical push for the purposes of removeOpcodeByData.
+// TestHasCanonicalPushes ensures the canonicalPush function properly determines what is considered a canonical push for
+// the purposes of removeOpcodeByData.
 func TestHasCanonicalPushes(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

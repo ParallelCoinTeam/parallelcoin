@@ -1,20 +1,18 @@
-// Copyright 2016 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright 2016 The Go Authors. All rights reserved. Use of this source code is governed by a BSD-style license that
+// can be found in the LICENSE file.
 
 // +build ignore
 
 package main
 
-// This program generates the subdirectories of Go packages that contain []byte
-// versions of the TrueType font files under ./ttfs.
+// This program generates the subdirectories of Go packages that contain []byte versions of the TrueType font files
+// under ./ttfs.
 //
-// Currently, "go run gen.go" needs to be run manually. This isn't done by the
-// usual "go generate" mechanism as there isn't any other Go code in this
-// directory (excluding sub-directories) to attach a "go:generate" line to.
+// Currently, "go run gen.go" needs to be run manually. This isn't done by the usual "go generate" mechanism as there
+// isn't any other Go code in this directory (excluding sub-directories) to attach a "go:generate" line to.
 //
-// In any case, code generation should only need to happen when the underlying
-// TTF files change, which isn't expected to happen frequently.
+// In any case, code generation should only need to happen when the underlying TTF files change, which isn't expected to
+// happen frequently.
 
 import (
 	"bytes"

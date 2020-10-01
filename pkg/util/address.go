@@ -16,14 +16,16 @@ import (
 	ec "github.com/p9c/pod/pkg/coding/elliptic"
 )
 
-// UnsupportedWitnessVerError describes an error where a segwit address being decoded has an unsupported witness version.
+// UnsupportedWitnessVerError describes an error where a segwit address being decoded has an unsupported witness
+// version.
 type UnsupportedWitnessVerError byte
 
 func (e UnsupportedWitnessVerError) Error() string {
 	return "unsupported witness version: " + string(e)
 }
 
-// UnsupportedWitnessProgLenError describes an error where a segwit address being decoded has an unsupported witness program length.
+// UnsupportedWitnessProgLenError describes an error where a segwit address being decoded has an unsupported witness
+// program length.
 type UnsupportedWitnessProgLenError int
 
 func (e UnsupportedWitnessProgLenError) Error() string {
@@ -33,13 +35,20 @@ func (e UnsupportedWitnessProgLenError) Error() string {
 var (
 	// ErrChecksumMismatch describes an error where decoding failed due to a bad checksum.
 	ErrChecksumMismatch = errors.New("checksum mismatch")
-	// ErrUnknownAddressType describes an error where an address can not decoded as a specific address type due to the string encoding begining with an identifier byte unknown to any standard or registered (via chaincfg.Register) network.
+	// ErrUnknownAddressType describes an error where an address can not decoded as a specific address type due to the
+	// string encoding beginning with an identifier byte unknown to any standard or registered (via chaincfg.Register)
+	// network.
 	ErrUnknownAddressType = errors.New("unknown address type")
-	// ErrAddressCollision describes an error where an address can not be uniquely determined as either a pay-to-pubkey-hash or pay-to-script-hash address since the leading identifier is used for describing both address kinds, but for different networks.  Rather than assuming or defaulting to one or the other, this error is returned and the caller must decide how to decode the address.
+	// ErrAddressCollision describes an error where an address can not be uniquely determined as either a
+	// pay-to-pubkey-hash or pay-to-script-hash address since the leading identifier is used for describing both address
+	// kinds, but for different networks. Rather than assuming or defaulting to one or the other, this error is returned
+	// and the caller must decide how to decode the address.
 	ErrAddressCollision = errors.New("address collision")
 )
 
-// encodeAddress returns a human-readable payment address given a ripemd160 hash and netID which encodes the bitcoin network and address type.  It is used in both pay-to-pubkey-hash (P2PKH) and pay-to-script-hash (P2SH) address encoding.
+// encodeAddress returns a human-readable payment address given a ripemd160 hash and netID which encodes the bitcoin
+// network and address type. It is used in both pay-to-pubkey-hash (P2PKH) and pay-to-script-hash (P2SH) address
+// encoding.
 func encodeAddress(hash160 []byte, netID byte) string {
 	// Format is 1 byte for a network and address class (i.e. P2PKH vs P2SH), 20 bytes for a RIPEMD160 hash, and 4 bytes of checksum.
 	return base58.CheckEncode(hash160[:ripemd160.Size], netID)
@@ -74,7 +83,9 @@ func encodeSegWitAddress(hrp string, witnessVersion byte, witnessProgram []byte)
 	return bech, nil
 }
 
-// Address is an interface type for any type of destination a transaction output may spend to.  This includes pay-to-pubkey (P2PK), pay-to-pubkey-hash (P2PKH), and pay-to-script-hash (P2SH).  Address is designed to be generic enough that other kinds of addresses may be added in the future without changing the decoding and encoding API.
+// Address is an interface type for any type of destination a transaction output may spend to. This includes
+// pay-to-pubkey (P2PK), pay-to-pubkey-hash (P2PKH), and pay-to-script-hash (P2SH). Address is designed to be generic
+// enough that other kinds of addresses may be added in the future without changing the decoding and encoding API.
 type Address interface {
 	// String returns the string encoding of the transaction output
 	// destination.
@@ -97,9 +108,14 @@ type Address interface {
 	IsForNet(*netparams.Params) bool
 }
 
-// DecodeAddress decodes the string encoding of an address and returns the Address if addr is a valid encoding for a known address type. The bitcoin network the address is associated with is extracted if possible. When the address does not encode the network, such as in the case of a raw public key, the address will be associated with the passed defaultNet.
+// DecodeAddress decodes the string encoding of an address and returns the Address if addr is a valid encoding for a
+// known address type. The bitcoin network the address is associated with is extracted if possible. When the address
+// does not encode the network, such as in the case of a raw public key, the address will be associated with the passed
+// defaultNet.
 func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
-	// Bech32 encoded segwit addresses start with a human-readable part (hrp) followed by '1'. For Bitcoin mainnet the hrp is "bc", and for testnet it is "tb". If the address string has a prefix that matches one of the prefixes for the known networks, we try to decode it as a segwit address.
+	// Bech32 encoded segwit addresses start with a human-readable part (hrp) followed by '1'. For Bitcoin mainnet the
+	// hrp is "bc", and for testnet it is "tb". If the address string has a prefix that matches one of the prefixes for
+	// the known networks, we try to decode it as a segwit address.
 	oneIndex := strings.LastIndexByte(addr, '1')
 	if oneIndex > 1 {
 		prefix := addr[:oneIndex+1]
@@ -125,7 +141,8 @@ func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
 			}
 		}
 	}
-	// Serialized public keys are either 65 bytes (130 hex chars) if uncompressed/hybrid or 33 bytes (66 hex chars) if compressed.
+	// Serialized public keys are either 65 bytes (130 hex chars) if uncompressed/hybrid or 33 bytes (66 hex chars) if
+	// compressed.
 	if len(addr) == 130 || len(addr) == 66 {
 		serializedPubKey, err := hex.DecodeString(addr)
 		if err != nil {
@@ -162,7 +179,8 @@ func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
 	}
 }
 
-// decodeSegWitAddress parses a bech32 encoded segwit address string and returns the witness version and witness program byte representation.
+// decodeSegWitAddress parses a bech32 encoded segwit address string and returns the witness version and witness program
+// byte representation.
 func decodeSegWitAddress(address string) (byte, []byte, error) {
 	// Decode the bech32 encoded address.
 	_, data, err := bech32.Decode(address)
@@ -179,7 +197,8 @@ func decodeSegWitAddress(address string) (byte, []byte, error) {
 	if version > 16 {
 		return 0, nil, fmt.Errorf("invalid witness version: %v", version)
 	}
-	// The remaining characters of the address returned are grouped into words of 5 bits. In order to restore the original witness program bytes, we'll need to regroup into 8 bit words.
+	// The remaining characters of the address returned are grouped into words of 5 bits. In order to restore the
+	// original witness program bytes, we'll need to regroup into 8 bit words.
 	regrouped, err := bech32.ConvertBits(data[1:], 5, 8, false)
 	if err != nil {
 		Error(err)
@@ -208,7 +227,9 @@ func NewAddressPubKeyHash(pkHash []byte, net *netparams.Params) (*AddressPubKeyH
 	return newAddressPubKeyHash(pkHash, net.PubKeyHashAddrID)
 }
 
-// newAddressPubKeyHash is the internal API to create a pubkey hash address with a known leading identifier byte for a network, rather than looking it up through its parameters.  This is useful when creating a new address structure from a string encoding where the identifer byte is already known.
+// newAddressPubKeyHash is the internal API to create a pubkey hash address with a known leading identifier byte for a
+// network, rather than looking it up through its parameters. This is useful when creating a new address structure from
+// a string encoding where the identifier byte is already known.
 func newAddressPubKeyHash(pkHash []byte, netID byte) (*AddressPubKeyHash, error) {
 	// Check for a valid pubkey hash length.
 	if len(pkHash) != ripemd160.Size {
@@ -224,7 +245,8 @@ func (a *AddressPubKeyHash) EncodeAddress() string {
 	return encodeAddress(a.hash[:], a.netID)
 }
 
-// ScriptAddress returns the bytes to be included in a txout script to pay to a pubkey hash.  Part of the Address interface.
+// ScriptAddress returns the bytes to be included in a txout script to pay to a pubkey hash. Part of the Address
+// interface.
 func (a *AddressPubKeyHash) ScriptAddress() []byte {
 	return a.hash[:]
 }
@@ -234,12 +256,14 @@ func (a *AddressPubKeyHash) IsForNet(net *netparams.Params) bool {
 	return a.netID == net.PubKeyHashAddrID
 }
 
-// String returns a human-readable string for the pay-to-pubkey-hash address. This is equivalent to calling EncodeAddress, but is provided so the type can be used as a fmt.Stringer.
+// String returns a human-readable string for the pay-to-pubkey-hash address. This is equivalent to calling
+// EncodeAddress, but is provided so the type can be used as a fmt.Stringer.
 func (a *AddressPubKeyHash) String() string {
 	return a.EncodeAddress()
 }
 
-// Hash160 returns the underlying array of the pubkey hash.  This can be useful when an array is more appropiate than a slice (for example, when used as map keys).
+// Hash160 returns the underlying array of the pubkey hash. This can be useful when an array is more appropriate than a
+// slice (for example, when used as map keys).
 func (a *AddressPubKeyHash) Hash160() *[ripemd160.Size]byte {
 	return &a.hash
 }
@@ -261,7 +285,9 @@ func NewAddressScriptHashFromHash(scriptHash []byte, net *netparams.Params) (*Ad
 	return newAddressScriptHashFromHash(scriptHash, net.ScriptHashAddrID)
 }
 
-// newAddressScriptHashFromHash is the internal API to create a script hash address with a known leading identifier byte for a network, rather than looking it up through its parameters.  This is useful when creating a new address structure from a string encoding where the identifer byte is already known.
+// newAddressScriptHashFromHash is the internal API to create a script hash address with a known leading identifier byte
+// for a network, rather than looking it up through its parameters. This is useful when creating a new address structure
+// from a string encoding where the identifer byte is already known.
 func newAddressScriptHashFromHash(scriptHash []byte, netID byte) (*AddressScriptHash, error) {
 	// Check for a valid script hash length.
 	if len(scriptHash) != ripemd160.Size {
@@ -277,7 +303,8 @@ func (a *AddressScriptHash) EncodeAddress() string {
 	return encodeAddress(a.hash[:], a.netID)
 }
 
-// ScriptAddress returns the bytes to be included in a txout script to pay to a script hash.  Part of the Address interface.
+// ScriptAddress returns the bytes to be included in a txout script to pay to a script hash. Part of the Address
+// interface.
 func (a *AddressScriptHash) ScriptAddress() []byte {
 	return a.hash[:]
 }
@@ -287,12 +314,14 @@ func (a *AddressScriptHash) IsForNet(net *netparams.Params) bool {
 	return a.netID == net.ScriptHashAddrID
 }
 
-// String returns a human-readable string for the pay-to-script-hash address. This is equivalent to calling EncodeAddress, but is provided so the type can be used as a fmt.Stringer.
+// String returns a human-readable string for the pay-to-script-hash address. This is equivalent to calling
+// EncodeAddress, but is provided so the type can be used as a fmt.Stringer.
 func (a *AddressScriptHash) String() string {
 	return a.EncodeAddress()
 }
 
-// Hash160 returns the underlying array of the script hash.  This can be useful when an array is more appropiate than a slice (for example, when used as map keys).
+// Hash160 returns the underlying array of the script hash. This can be useful when an array is more appropriate than a
+// slice (for example, when used as map keys).
 func (a *AddressScriptHash) Hash160() *[ripemd160.Size]byte {
 	return &a.hash
 }
@@ -316,14 +345,17 @@ type AddressPubKey struct {
 	pubKeyHashID byte
 }
 
-// NewAddressPubKey returns a new AddressPubKey which represents a pay-to-pubkey address.  The serializedPubKey parameter must be a valid pubkey and can be uncompressed, compressed, or hybrid.
+// NewAddressPubKey returns a new AddressPubKey which represents a pay-to-pubkey address. The serializedPubKey parameter
+// must be a valid pubkey and can be uncompressed, compressed, or hybrid.
 func NewAddressPubKey(serializedPubKey []byte, net *netparams.Params) (*AddressPubKey, error) {
 	pubKey, err := ec.ParsePubKey(serializedPubKey, ec.S256())
 	if err != nil {
 		Error(err)
 		return nil, err
 	}
-	// Set the format of the pubkey.  This probably should be returned from ec, but do it here to avoid API churn.  We already know the pubkey is valid since it parsed above, so it's safe to simply examine the leading byte to get the format.
+	// Set the format of the pubkey. This probably should be returned from ec, but do it here to avoid API churn. We
+	// already know the pubkey is valid since it parsed above, so it's safe to simply examine the leading byte to get
+	// the format.
 	pkFormat := PKFUncompressed
 	switch serializedPubKey[0] {
 	case 0x02, 0x03:

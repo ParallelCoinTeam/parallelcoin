@@ -41,12 +41,10 @@ type Config struct {
 	BanThreshold *int             `long:"banthreshold" description:"Maximum allowed ban score before disconnecting and banning misbehaving peers."`
 	// RPC server options
 	//
-	// The legacy server is still enabled by default (and eventually will be
-	// replaced with the experimental server) so prepare for that change by
-	// renaming the struct fields (but not the configuration options).
+	// The legacy server is still enabled by default (and eventually will be replaced with the experimental server) so
+	// prepare for that change by renaming the struct fields (but not the configuration options).
 	//
-	// Usernames can also be used for the consensus RPC client, so they
-	// aren't considered legacy.
+	// Usernames can also be used for the consensus RPC client, so they aren't considered legacy.
 	RPCCert                *string          `long:"rpccert" description:"File containing the certificate file"`
 	RPCKey                 *string          `long:"rpckey" description:"File containing the certificate key"`
 	OneTimeTLSKey          *bool            `long:"onetimetlskey" description:"Generate a new TLS certpair at startup, but only write the certificate to disk"`
@@ -58,8 +56,7 @@ type Config struct {
 	Password               *string          `short:"P" long:"password" default-mask:"-" description:"Password for legacy RPC and pod authentication (if podpassword is unset)"`
 	// EXPERIMENTAL RPC server options
 	//
-	// These options will change (and require changes to config files, etc.)
-	// when the new gRPC server is enabled.
+	// These options will change (and require changes to config files, etc.) when the new gRPC server is enabled.
 	ExperimentalRPCListeners *cli.StringSlice `long:"experimentalrpclisten" description:"Listen for RPC connections on this interface/port"`
 	// Deprecated options
 	DataDir *string `short:"b" long:"datadir" default-mask:"-" description:"DEPRECATED -- use appdata instead"`

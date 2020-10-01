@@ -10,7 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestChainSvrWsCmds tests all of the chain server websocket-specific commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
+// TestChainSvrWsCmds tests all of the chain server websocket-specific commands marshal and unmarshal into valid results
+// include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have
+// the default assigned on unmarshalled commands.
 func TestChainSvrWsCmds(t *testing.T) {
 	t.Parallel()
 	testID := int(1)

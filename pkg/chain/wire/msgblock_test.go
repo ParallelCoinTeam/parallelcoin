@@ -96,7 +96,8 @@ func TestBlockHash(t *testing.T) {
 	}
 }
 
-// TestBlockWire tests the MsgBlock wire encode and decode for various numbers of transaction inputs and outputs and protocol versions.
+// TestBlockWire tests the MsgBlock wire encode and decode for various numbers of transaction inputs and outputs and
+// protocol versions.
 func TestBlockWire(t *testing.T) {
 	tests := []struct {
 		in     *MsgBlock       // Message to encode
@@ -183,9 +184,11 @@ func TestBlockWire(t *testing.T) {
 	}
 }
 
-// TestBlockWireErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths work correctly.
+// TestBlockWireErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths work
+// correctly.
 func TestBlockWireErrors(t *testing.T) {
-	// Use protocol version 60002 specifically here instead of the latest because the test data is using bytes encoded with that protocol version.
+	// Use protocol version 60002 specifically here instead of the latest because the test data is using bytes encoded
+	// with that protocol version.
 	pver := uint32(60002)
 	tests := []struct {
 		in       *MsgBlock       // Value to encode
@@ -298,7 +301,8 @@ func TestBlockSerialize(t *testing.T) {
 	}
 }
 
-// TestBlockSerializeErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths work correctly.
+// TestBlockSerializeErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths
+// work correctly.
 func TestBlockSerializeErrors(t *testing.T) {
 	tests := []struct {
 		in       *MsgBlock // Value to encode
@@ -354,9 +358,12 @@ func TestBlockSerializeErrors(t *testing.T) {
 	}
 }
 
-// TestBlockOverflowErrors  performs tests to ensure deserializing blocks, which are intentionally crafted to use large values for the number of transactions are handled properly.  This could otherwise potentially be used as an attack vector.
+// TestBlockOverflowErrors performs tests to ensure deserializing blocks, which are intentionally crafted to use large
+// values for the number of transactions are handled properly. This could otherwise potentially be used as an attack
+// vector.
 func TestBlockOverflowErrors(t *testing.T) {
-	// Use protocol version 70001 specifically here instead of the latest protocol version because the test data is using bytes encoded with that version.
+	// Use protocol version 70001 specifically here instead of the latest protocol version because the test data is
+	// using bytes encoded with that version.
 	pver := uint32(70001)
 	tests := []struct {
 		buf  []byte          // Wire encoding

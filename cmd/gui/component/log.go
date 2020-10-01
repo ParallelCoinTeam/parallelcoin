@@ -1,8 +1,9 @@
 package component
 
 import (
-	"github.com/p9c/pod/pkg/util/logi"
 	"runtime"
+
+	"github.com/p9c/pod/pkg/util/logi"
 )
 
 var pkg string

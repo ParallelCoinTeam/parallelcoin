@@ -1,11 +1,13 @@
 package fui
 
 import (
+	"image/color"
+
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/pkg/gui/fonts"
-	"image/color"
 )
 
 func init() {

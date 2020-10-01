@@ -21,7 +21,6 @@ var HelpPrint = func() {
 // Main is the entry point for the pod.Ctl component
 func Main(args []string, cx *conte.Xt) {
 	// Ensure the specified method identifies a valid registered command and is one of the usable types.
-	//
 	method := args[0]
 	usageFlags, err := btcjson.MethodUsageFlags(method)
 	if err != nil {
@@ -37,13 +36,10 @@ func Main(args []string, cx *conte.Xt) {
 		HelpPrint()
 		os.Exit(1)
 	}
-	// Convert remaining command line args to a slice of interface values to
-	// be passed along as parameters to new command creation function.
-	// Since some commands, such as submitblock,
-	// can involve data which is too large for the Operating System to allow
-	// as a normal command line parameter,
-	// support using '-' as an argument to allow the argument to be read from
-	// a stdin pipe.
+	// Convert remaining command line args to a slice of interface values to be passed along as parameters to new
+	// command creation function. Since some commands, such as submitblock, can involve data which is too large for the
+	// Operating System to allow as a normal command line parameter, support using '-' as an argument to allow the
+	// argument to be read from a stdin pipe.
 	bio := bufio.NewReader(os.Stdin)
 	params := make([]interface{}, 0, len(args[1:]))
 	for _, arg := range args[1:] {
@@ -64,37 +60,32 @@ func Main(args []string, cx *conte.Xt) {
 		}
 		params = append(params, arg)
 	}
-	// Attempt to create the appropriate command using the arguments provided
-	// by the user.
+	// Attempt to create the appropriate command using the arguments provided by the user.
 	cmd, err := btcjson.NewCmd(method, params...)
 	if err != nil {
 		Error(err)
-		// Show the error along with its error code when it's a json.
-		// BTCJSONError as it realistically will always be since the NewCmd function
-		// is only supposed to return errors of that type.
+		// Show the error along with its error code when it's a json. BTCJSONError as it realistically will always be
+		// since the NewCmd function is only supposed to return errors of that type.
 		if jerr, ok := err.(btcjson.BTCJSONError); ok {
 			fmt.Fprintf(os.Stderr, "%s command: %v (code: %s)\n",
 				method, err, jerr.ErrorCode)
 			CommandUsage(method)
 			os.Exit(1)
 		}
-		// The error is not a json.BTCJSONError and this really should not happen.
-		// Nevertheless fall back to just showing the error if it should
-		// happen due to a bug in the package.
+		// The error is not a json.BTCJSONError and this really should not happen. Nevertheless fall back to just
+		// showing the error if it should happen due to a bug in the package.
 		fmt.Fprintf(os.Stderr, "%s command: %v\n", method, err)
 		CommandUsage(method)
 		os.Exit(1)
 	}
-	// Marshal the command into a JSON-RPC byte slice in preparation for sending
-	// it to the RPC server.
+	// Marshal the command into a JSON-RPC byte slice in preparation for sending it to the RPC server.
 	marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
 	if err != nil {
 		Error(err)
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	// Send the JSON-RPC request to the server using the user-specified
-	// connection configuration.
+	// Send the JSON-RPC request to the server using the user-specified connection configuration.
 	result, err := sendPostRequest(marshalledJSON, cx)
 	if err != nil {
 		Error(err)
@@ -128,8 +119,7 @@ func CommandUsage(method string) {
 	usage, err := btcjson.MethodUsageText(method)
 	if err != nil {
 		Error(err)
-		// This should never happen since the method was already checked
-		// before calling this function, but be safe.
+		// This should never happen since the method was already checked before calling this function, but be safe.
 		fmt.Println("Failed to obtain command usage:", err)
 		return
 	}

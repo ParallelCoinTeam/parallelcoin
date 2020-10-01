@@ -3,12 +3,17 @@ package duoui
 import (
 	"errors"
 	"fmt"
+	"image"
+	"image/color"
+	"sync"
+
 	"gioui.org/app"
 	"gioui.org/io/pointer"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/pages"
@@ -18,9 +23,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/gui/gelook/ico"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"image"
-	"image/color"
-	"sync"
 )
 
 type DuoUI struct {
@@ -461,10 +463,10 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				interrupt.Request()
 			}
 			// This case is for handling when some external application is
-			//controlling the GUI and to gracefully handle the back-end
-			//servers being shut down by the interrupt library receiving an
-			//interrupt signal  Probably nothing needs to be run between
-			//starting it and shutting down
+			// controlling the GUI and to gracefully handle the back-end
+			// servers being shut down by the interrupt library receiving an
+			// interrupt signal  Probably nothing needs to be run between
+			// starting it and shutting down
 			<-interrupt.HandlersDone
 			Debug("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
@@ -482,7 +484,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				Debug("destroy event received")
 				interrupt.Request()
 				// Here do cleanup like are you sure (
-				//optional) modal or shutting down indefinite spinner
+				// optional) modal or shutting down indefinite spinner
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
@@ -502,7 +504,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					}
 					e.Frame(ctx.Ops)
 				}
-				//ui.ly.Window.Invalidate()
+				// ui.ly.Window.Invalidate()
 			}
 		}
 	}

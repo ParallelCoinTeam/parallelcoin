@@ -5,8 +5,7 @@ import (
 	"os"
 )
 
-// checkCreateDir checks that the path exists and is a directory.
-// If path does not exist, it is created.
+// checkCreateDir checks that the path exists and is a directory. If path does not exist, it is created.
 func checkCreateDir(path string) error {
 	if fi, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {

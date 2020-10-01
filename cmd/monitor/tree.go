@@ -1,14 +1,16 @@
 package monitor
 
 import (
+	"os"
+	"sort"
+	"strings"
+
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 	"github.com/p9c/pod/pkg/util/logi/consume"
-	"os"
-	"sort"
-	"strings"
 )
 
 type Node struct {
@@ -71,9 +73,7 @@ func (s *State) GetTree(paths []string) (root *Node) {
 		var n *Node
 		switch {
 		case splitLen > prevLen:
-			// attach child
-			// because of the loop above that fills in childless nodes this
-			// works
+			// attach child because of the loop above that fills in childless nodes this works
 			n = &Node{
 				Name:               name,
 				FullName:           v,

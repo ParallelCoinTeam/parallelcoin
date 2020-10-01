@@ -6,7 +6,8 @@ import (
 	"testing"
 )
 
-// TestMutableIterator ensures that the general behavior of mutable treap iterators is as expected including tests for first, last, ordered and reverse ordered iteration, limiting the range, seeking, and initially unpositioned.
+// TestMutableIterator ensures that the general behavior of mutable treap iterators is as expected including tests for
+// first, last, ordered and reverse ordered iteration, limiting the range, seeking, and initially unpositioned.
 func TestMutableIterator(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -242,8 +243,7 @@ testLoop:
 	}
 }
 
-// TestMutableEmptyIterator ensures that the various functions behave as
-// expected when a mutable treap is empty.
+// TestMutableEmptyIterator ensures that the various functions behave as expected when a mutable treap is empty.
 func TestMutableEmptyIterator(t *testing.T) {
 	t.Parallel()
 	// Create iterator against empty treap.
@@ -274,8 +274,7 @@ func TestMutableEmptyIterator(t *testing.T) {
 	if gotVal := iter.Value(); gotVal != nil {
 		t.Fatalf("Value: should be nil - got %q", gotVal)
 	}
-	// Ensure Next and Prev report exhausted after forcing a reseek on an
-	// empty iterator.
+	// Ensure Next and Prev report exhausted after forcing a reseek on an empty iterator.
 	iter.ForceReseek()
 	if iter.Next() {
 		t.Fatal("Next: iterator should be exhausted")
@@ -286,12 +285,12 @@ func TestMutableEmptyIterator(t *testing.T) {
 	}
 }
 
-// TestIteratorUpdates ensures that issuing a call to ForceReseek on an iterator
-// that had the underlying mutable treap updated works as expected.
+// TestIteratorUpdates ensures that issuing a call to ForceReseek on an iterator that had the underlying mutable treap
+// updated works as expected.
 func TestIteratorUpdates(t *testing.T) {
 	t.Parallel()
-	// Create a new treap with various values inserted in no particular
-	// order.  The resulting keys are the set (2, 4, 7, 11, 18, 25).
+	// Create a new treap with various values inserted in no particular order. The resulting keys are the set (2, 4, 7,
+	// 11, 18, 25).
 	testTreap := NewMutable()
 	testTreap.Put(serializeUint32(7), nil)
 	testTreap.Put(serializeUint32(2), nil)
@@ -299,16 +298,14 @@ func TestIteratorUpdates(t *testing.T) {
 	testTreap.Put(serializeUint32(11), nil)
 	testTreap.Put(serializeUint32(25), nil)
 	testTreap.Put(serializeUint32(4), nil)
-	// Create an iterator against the treap with a range that excludes the
-	// lowest and highest entries.  The limited set is then (4, 7, 11, 18)
+	// Create an iterator against the treap with a range that excludes the lowest and highest entries. The limited set
+	// is then (4, 7, 11, 18)
 	iter := testTreap.Iterator(serializeUint32(3), serializeUint32(25))
-	// Delete a key from the middle of the range and notify the iterator to
-	// force a reseek.
+	// Delete a key from the middle of the range and notify the iterator to force a reseek.
 	testTreap.Delete(serializeUint32(11))
 	iter.ForceReseek()
-	// Ensure that calling Next on the iterator after the forced reseek
-	// gives the expected key.  The limited set of keys at this point is
-	// (4, 7, 18) and the iterator has not yet been positioned.
+	// Ensure that calling Next on the iterator after the forced reseek gives the expected key. The limited set of keys
+	// at this point is (4, 7, 18) and the iterator has not yet been positioned.
 	if !iter.Next() {
 		t.Fatal("ForceReseek.Next: unexpected exhausted iterator")
 	}
@@ -318,13 +315,11 @@ func TestIteratorUpdates(t *testing.T) {
 		t.Fatalf("ForceReseek.Key: unexpected key - got %x, want %x",
 			gotKey, wantKey)
 	}
-	// Delete the key the iterator is currently position at and notify the
-	// iterator to force a reseek.
+	// Delete the key the iterator is currently position at and notify the iterator to force a reseek.
 	testTreap.Delete(serializeUint32(4))
 	iter.ForceReseek()
-	// Ensure that calling Next on the iterator after the forced reseek
-	// gives the expected key.  The limited set of keys at this point is
-	// (7, 18) and the iterator is positioned at a deleted entry before 7.
+	// Ensure that calling Next on the iterator after the forced reseek gives the expected key. The limited set of keys
+	// at this point is (7, 18) and the iterator is positioned at a deleted entry before 7.
 	if !iter.Next() {
 		t.Fatal("ForceReseek.Next: unexpected exhausted iterator")
 	}
@@ -334,13 +329,11 @@ func TestIteratorUpdates(t *testing.T) {
 		t.Fatalf("ForceReseek.Key: unexpected key - got %x, want %x",
 			gotKey, wantKey)
 	}
-	// Add a key before the current key the iterator is position at and
-	// notify the iterator to force a reseek.
+	// Add a key before the current key the iterator is position at and notify the iterator to force a reseek.
 	testTreap.Put(serializeUint32(4), nil)
 	iter.ForceReseek()
-	// Ensure that calling Prev on the iterator after the forced reseek
-	// gives the expected key.  The limited set of keys at this point is
-	// (4, 7, 18) and the iterator is positioned at 7.
+	// Ensure that calling Prev on the iterator after the forced reseek gives the expected key. The limited set of keys
+	// at this point is (4, 7, 18) and the iterator is positioned at 7.
 	if !iter.Prev() {
 		t.Fatal("ForceReseek.Prev: unexpected exhausted iterator")
 	}
@@ -350,13 +343,11 @@ func TestIteratorUpdates(t *testing.T) {
 		t.Fatalf("ForceReseek.Key: unexpected key - got %x, want %x",
 			gotKey, wantKey)
 	}
-	// Delete the next key the iterator would ordinarily move to then notify
-	// the iterator to force a reseek.
+	// Delete the next key the iterator would ordinarily move to then notify the iterator to force a reseek.
 	testTreap.Delete(serializeUint32(7))
 	iter.ForceReseek()
-	// Ensure that calling Next on the iterator after the forced reseek
-	// gives the expected key.  The limited set of keys at this point is
-	// (4, 18) and the iterator is positioned at 4.
+	// Ensure that calling Next on the iterator after the forced reseek gives the expected key. The limited set of keys
+	// at this point is (4, 18) and the iterator is positioned at 4.
 	if !iter.Next() {
 		t.Fatal("ForceReseek.Next: unexpected exhausted iterator")
 	}
@@ -368,9 +359,8 @@ func TestIteratorUpdates(t *testing.T) {
 	}
 }
 
-// TestImmutableIterator ensures that the general behavior of immutable treap
-// iterators is as expected including tests for first, last, ordered and reverse
-// ordered iteration, limiting the range, seeking, and initially unpositioned.
+// TestImmutableIterator ensures that the general behavior of immutable treap iterators is as expected including tests
+// for first, last, ordered and reverse ordered iteration, limiting the range, seeking, and initially unpositioned.
 func TestImmutableIterator(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -606,8 +596,7 @@ testLoop:
 	}
 }
 
-// TestImmutableEmptyIterator ensures that the various functions behave as
-// expected when an immutable treap is empty.
+// TestImmutableEmptyIterator ensures that the various functions behave as expected when an immutable treap is empty.
 func TestImmutableEmptyIterator(t *testing.T) {
 	t.Parallel()
 	// Create iterator against empty treap.
@@ -638,8 +627,8 @@ func TestImmutableEmptyIterator(t *testing.T) {
 	if gotVal := iter.Value(); gotVal != nil {
 		t.Fatalf("Value: should be nil - got %q", gotVal)
 	}
-	// Ensure calling ForceReseek on an immutable treap iterator does not
-	// cause any issues since it only applies to mutable treap iterators.
+	// Ensure calling ForceReseek on an immutable treap iterator does not cause any issues since it only applies to
+	// mutable treap iterators.
 	iter.ForceReseek()
 	if iter.Next() {
 		t.Fatal("Next: iterator should be exhausted")

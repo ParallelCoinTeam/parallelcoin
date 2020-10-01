@@ -20,8 +20,8 @@ func DecryptMessage(creator string, ciph cipher.AEAD, data []byte) (msg []byte, 
 	return
 }
 
-// EncryptMessage encrypts a message, if the nonce is given it uses that otherwise it generates a new one.
-// If there is no cipher this just returns a message with the given magic prepended.
+// EncryptMessage encrypts a message, if the nonce is given it uses that otherwise it generates a new one. If there is
+// no cipher this just returns a message with the given magic prepended.
 func EncryptMessage(creator string, ciph cipher.AEAD, magic []byte, nonce, data []byte) (msg []byte, err error) {
 	if ciph != nil {
 		if nonce == nil {

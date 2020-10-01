@@ -9,10 +9,12 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// testNoncePrng provides a deterministic prng for the nonce in generated fake nodes.  The ensures that the node have unique hashes.
+// testNoncePrng provides a deterministic prng for the nonce in generated fake nodes. The ensures that the node have
+// unique hashes.
 var testNoncePrng = rand.New(rand.NewSource(0))
 
-// chainedNodes returns the specified number of nodes constructed such that each subsequent node points to the previous one to create a chain.  The first node will point to the passed parent which can be nil if desired.
+// chainedNodes returns the specified number of nodes constructed such that each subsequent node points to the previous
+// one to create a chain. The first node will point to the passed parent which can be nil if desired.
 func chainedNodes(parent *BlockNode, numNodes int) []*BlockNode {
 	nodes := make([]*BlockNode, numNodes)
 	tip := parent
@@ -38,7 +40,8 @@ func tstTip(nodes []*BlockNode) *BlockNode {
 	return nodes[len(nodes)-1]
 }
 
-// locatorHashes is a convenience function that returns the hashes for all of the passed indexes of the provided nodes.  It is used to construct expected block locators in the tests.
+// locatorHashes is a convenience function that returns the hashes for all of the passed indexes of the provided nodes.
+// It is used to construct expected block locators in the tests.
 func locatorHashes(nodes []*BlockNode, indexes ...int) BlockLocator {
 	hashes := make(BlockLocator, 0, len(indexes))
 	for _, idx := range indexes {
@@ -47,7 +50,8 @@ func locatorHashes(nodes []*BlockNode, indexes ...int) BlockLocator {
 	return hashes
 }
 
-// zipLocators is a convenience function that returns a single block locator given a variable number of them and is used in the tests.
+// zipLocators is a convenience function that returns a single block locator given a variable number of them and is used
+// in the tests.
 func zipLocators(locators ...BlockLocator) BlockLocator {
 	var hashes BlockLocator
 	for _, locator := range locators {
@@ -56,9 +60,11 @@ func zipLocators(locators ...BlockLocator) BlockLocator {
 	return hashes
 }
 
-// TestChainView ensures all of the exported functionality of chain views works as intended with the exception of some special cases which are handled in other tests.
+// TestChainView ensures all of the exported functionality of chain views works as intended with the exception of some
+// special cases which are handled in other tests.
 func TestChainView(t *testing.T) {
 	// Construct a synthetic block index consisting of the following structure.
+	//
 	// 0 -> 1 -> 2  -> 3  -> 4
 	//       \-> 2a -> 3a -> 4a  -> 5a -> 6a -> 7a -> ... -> 26a
 	//             \-> 3a'-> 4a' -> 5a'
@@ -270,7 +276,8 @@ testLoop:
 	}
 }
 
-// TestChainViewForkCorners ensures that finding the fork between two chains works in some corner cases such as when the two chains have completely unrelated histories.
+// TestChainViewForkCorners ensures that finding the fork between two chains works in some corner cases such as when the
+// two chains have completely unrelated histories.
 func TestChainViewForkCorners(t *testing.T) {
 	// Construct two unrelated single branch synthetic block indexes.
 	branchNodes := chainedNodes(nil, 5)
@@ -300,6 +307,7 @@ func TestChainViewForkCorners(t *testing.T) {
 // TestChainViewSetTip ensures changing the tip works as intended including capacity changes.
 func TestChainViewSetTip(t *testing.T) {
 	// Construct a synthetic block index consisting of the following structure.
+	//
 	// 0 -> 1 -> 2  -> 3  -> 4
 	//       \-> 2a -> 3a -> 4a  -> 5a -> 6a -> 7a -> ... -> 26a
 	branch0Nodes := chainedNodes(nil, 5)
@@ -326,14 +334,16 @@ func TestChainViewSetTip(t *testing.T) {
 			contains: [][]*BlockNode{branch0Nodes, nil},
 		},
 		{
-			// Create a view with a shorter chain and set the tip to a longer chain followed by setting it back to the shorter chain.
+			// Create a view with a shorter chain and set the tip to a longer chain followed by setting it back to the
+			// shorter chain.
 			name:     "small-large-small",
 			view:     newChainView(tip(branch0Nodes)),
 			tips:     []*BlockNode{tip(branch1Nodes), tip(branch0Nodes)},
 			contains: [][]*BlockNode{branch1Nodes, branch0Nodes},
 		},
 		{
-			// Create a view with a longer chain and set the tip to a smaller chain followed by setting it back to the longer chain.
+			// Create a view with a longer chain and set the tip to a smaller chain followed by setting it back to the
+			// longer chain.
 			name:     "large-small-large",
 			view:     newChainView(tip(branch1Nodes)),
 			tips:     []*BlockNode{tip(branch0Nodes), tip(branch1Nodes)},

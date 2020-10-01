@@ -3,17 +3,18 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/util/logi"
 	"time"
+
+	"github.com/p9c/pod/pkg/util/logi"
 )
 
 func main() {
-	L.SetLevel("trace", true, "logi")
+	logi.L.SetLevel("trace", true, "logi")
 	for {
 		Trace("testing")
 		logi.L.Debug("testing")
-		fmt.Println("'", logi.L.Check(errors.New("this is a test")), "'")
-		logi.L.Check(nil)
+		fmt.Println("'", logi.L.Check("", errors.New("this is a test")))
+		logi.L.Check("", nil)
 		logi.L.Info("testing")
 		logi.L.Warn("testing")
 		logi.L.Error("testing")

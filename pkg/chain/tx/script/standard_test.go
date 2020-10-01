@@ -11,7 +11,9 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// mustParseShortForm parses the passed short form script and returns the resulting bytes.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
+// mustParseShortForm parses the passed short form script and returns the resulting bytes. It panics if an error occurs.
+// This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source
+// code.
 func mustParseShortForm(script string) []byte {
 	s, err := parseShortForm(script)
 	if err != nil {
@@ -21,7 +23,9 @@ func mustParseShortForm(script string) []byte {
 	return s
 }
 
-// newAddressPubKey returns a new util.AddressPubKey from the provided serialized public key.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
+// newAddressPubKey returns a new util.AddressPubKey from the provided serialized public key. It panics if an error
+// occurs. This is only used in the tests as a helper since the only way it can fail is if there is an error in the test
+// source code.
 func newAddressPubKey(serializedPubKey []byte) util.Address {
 	addr, err := util.NewAddressPubKey(serializedPubKey,
 		&netparams.MainNetParams)
@@ -31,7 +35,8 @@ func newAddressPubKey(serializedPubKey []byte) util.Address {
 	return addr
 }
 
-// newAddressPubKeyHash returns a new util.AddressPubKeyHash from the provided hash.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
+// newAddressPubKeyHash returns a new util.AddressPubKeyHash from the provided hash. It panics if an error occurs. This
+// is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
 func newAddressPubKeyHash(pkHash []byte) util.Address {
 	addr, err := util.NewAddressPubKeyHash(pkHash, &netparams.MainNetParams)
 	if err != nil {
@@ -40,7 +45,8 @@ func newAddressPubKeyHash(pkHash []byte) util.Address {
 	return addr
 }
 
-// newAddressScriptHash returns a new util.AddressScriptHash from the provided hash.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
+// newAddressScriptHash returns a new util.AddressScriptHash from the provided hash. It panics if an error occurs. This
+// is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
 func newAddressScriptHash(scriptHash []byte) util.Address {
 	addr, err := util.NewAddressScriptHashFromHash(scriptHash,
 		&netparams.MainNetParams)
@@ -50,7 +56,8 @@ func newAddressScriptHash(scriptHash []byte) util.Address {
 	return addr
 }
 
-// TestExtractPkScriptAddrs ensures that extracting the type, addresses, and number of required signatures from PkScripts works as intended.
+// TestExtractPkScriptAddrs ensures that extracting the type, addresses, and number of required signatures from
+// PkScripts works as intended.
 func TestExtractPkScriptAddrs(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -518,7 +525,8 @@ func TestCalcScriptInfo(t *testing.T) {
 	}
 }
 
-// bogusAddress implements the util.Address interface so the tests can ensure unsupported address types are handled properly.
+// bogusAddress implements the util.Address interface so the tests can ensure unsupported address types are handled
+// properly.
 type bogusAddress struct{}
 
 // EncodeAddress simply returns an empty string.  It exists to satisfy the util.Address interface.
@@ -541,7 +549,8 @@ func (b *bogusAddress) String() string {
 	return ""
 }
 
-// TestPayToAddrScript ensures the PayToAddrScript function generates the correct scripts for the various types of addresses.
+// TestPayToAddrScript ensures the PayToAddrScript function generates the correct scripts for the various types of
+// addresses.
 func TestPayToAddrScript(t *testing.T) {
 	t.Parallel()
 	// 1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX
@@ -791,7 +800,9 @@ func TestCalcMultiSigStats(t *testing.T) {
 	}
 }
 
-// scriptClassTests houses several test scripts used to ensure various class determination is working as expected.  It's defined as a test global versus inside a function scope since this spans both the standard tests and the consensus tests (pay-to-script-hash is part of consensus).
+// scriptClassTests houses several test scripts used to ensure various class determination is working as expected. It's
+// defined as a test global versus inside a function scope since this spans both the standard tests and the consensus
+// tests (pay-to-script-hash is part of consensus).
 var scriptClassTests = []struct {
 	name   string
 	script string
@@ -811,7 +822,8 @@ var scriptClassTests = []struct {
 			"c271ad504b EQUALVERIFY CHECKSIG",
 		class: PubKeyHashTy,
 	},
-	// part of tx 6d36bc17e947ce00bb6f12f8e7a56a1585c5a36188ffa2b05e10b4743273a74b parts have been elided. (bitcoin core's checks for multisig type doesn't have codesep either).
+	// part of tx 6d36bc17e947ce00bb6f12f8e7a56a1585c5a36188ffa2b05e10b4743273a74b parts have been elided. (bitcoin
+	// core's checks for multisig type doesn't have codesep either).
 	{
 		name: "multisig",
 		script: "1 DATA_33 0x0232abdc893e7f0631364d7fd01cb33d24da4" +

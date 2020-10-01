@@ -18,9 +18,11 @@ const (
 	cfIndexName = "committed filter index"
 )
 
-// Committed filters come in one flavor currently: basic. They are generated and dropped in pairs, and both are indexed by a block's hash.  Besides holding different content, they also live in different buckets.
+// Committed filters come in one flavor currently: basic. They are generated and dropped in pairs, and both are indexed
+// by a block's hash. Besides holding different content, they also live in different buckets.
 var (
-	// cfIndexParentBucketKey is the name of the parent bucket used to house the index. The rest of the buckets live below this bucket.
+	// cfIndexParentBucketKey is the name of the parent bucket used to house the index. The rest of the buckets live
+	// below this bucket.
 	cfIndexParentBucketKey = []byte("cfindexparentbucket")
 	// cfIndexKeys is an array of db bucket names used to house indexes of block hashes to cfilters.
 	cfIndexKeys = [][]byte{
@@ -39,7 +41,8 @@ var (
 	zeroHash chainhash.Hash
 )
 
-// dbFetchFilterIdxEntry retrieves a data blob from the filter index database. An entry's absence is not considered an error.
+// dbFetchFilterIdxEntry retrieves a data blob from the filter index database. An entry's absence is not considered an
+// error.
 func dbFetchFilterIdxEntry(dbTx database.Tx, key []byte, h *chainhash.Hash) ([]byte, error) {
 	idx := dbTx.Metadata().Bucket(cfIndexParentBucketKey).Bucket(key)
 	return idx.Get(h[:]), nil
@@ -69,7 +72,8 @@ var _ Indexer = (*CFIndex)(nil)
 // Ensure the CfIndex type implements the NeedsInputser interface.
 var _ NeedsInputser = (*CFIndex)(nil)
 
-// NeedsInputs signals that the index requires the referenced inputs in order to properly create the index. This implements the NeedsInputser interface.
+// NeedsInputs signals that the index requires the referenced inputs in order to properly create the index. This
+// implements the NeedsInputser interface.
 func (idx *CFIndex) NeedsInputs() bool {
 	return true
 }
@@ -89,7 +93,8 @@ func (idx *CFIndex) Name() string {
 	return cfIndexName
 }
 
-// Create is invoked when the indexer manager determines the index needs to be created for the first time. It creates buckets for the two hash-based cf indexes (regular only currently).
+// Create is invoked when the indexer manager determines the index needs to be created for the first time. It creates
+// buckets for the two hash-based cf indexes (regular only currently).
 func (idx *CFIndex) Create(dbTx database.Tx) error {
 	meta := dbTx.Metadata()
 	cfIndexParentBucket, err := meta.CreateBucket(cfIndexParentBucketKey)
@@ -180,7 +185,8 @@ func storeFilter(dbTx database.Tx, block *util.Block, f *gcs.Filter,
 	return dbStoreFilterIdxEntry(dbTx, hkey, h, fh[:])
 }
 
-// ConnectBlock is invoked by the index manager when a new block has been connected to the main chain. This indexer adds a hash-to-cf mapping for every passed block. This is part of the Indexer interface.
+// ConnectBlock is invoked by the index manager when a new block has been connected to the main chain. This indexer adds
+// a hash-to-cf mapping for every passed block. This is part of the Indexer interface.
 func (idx *CFIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 	stxos []blockchain.SpentTxOut) error {
 	prevScripts := make([][]byte, len(stxos))
@@ -195,7 +201,8 @@ func (idx *CFIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 	return storeFilter(dbTx, block, f, wire.GCSFilterRegular)
 }
 
-// DisconnectBlock is invoked by the index manager when a block has been disconnected from the main chain.  This indexer removes the hash-to-cf mapping for every passed block. This is part of the Indexer interface.
+// DisconnectBlock is invoked by the index manager when a block has been disconnected from the main chain. This indexer
+// removes the hash-to-cf mapping for every passed block. This is part of the Indexer interface.
 func (idx *CFIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	_ []blockchain.SpentTxOut) error {
 	for _, key := range cfIndexKeys {
@@ -222,7 +229,8 @@ func (idx *CFIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	return nil
 }
 
-// entryByBlockHash fetches a filter index entry of a particular type (eg. filter, filter header, etc) for a filter type and block hash.
+// entryByBlockHash fetches a filter index entry of a particular type (eg. filter, filter header, etc) for a filter type
+// and block hash.
 func (idx *CFIndex) entryByBlockHash(filterTypeKeys [][]byte,
 	filterType wire.FilterType, h *chainhash.Hash) ([]byte, error) {
 	if uint8(filterType) > maxFilterType {
@@ -238,7 +246,8 @@ func (idx *CFIndex) entryByBlockHash(filterTypeKeys [][]byte,
 	return entry, err
 }
 
-// entriesByBlockHashes batch fetches a filter index entry of a particular type (eg. filter, filter header, etc) for a filter type and slice of block hashes.
+// entriesByBlockHashes batch fetches a filter index entry of a particular type (eg. filter, filter header, etc) for a
+// filter type and slice of block hashes.
 func (idx *CFIndex) entriesByBlockHashes(filterTypeKeys [][]byte,
 	filterType wire.FilterType, blockHashes []*chainhash.Hash) ([][]byte, error) {
 	if uint8(filterType) > maxFilterType {
@@ -266,7 +275,8 @@ func (idx *CFIndex) FilterByBlockHash(h *chainhash.Hash,
 	return idx.entryByBlockHash(cfIndexKeys, filterType, h)
 }
 
-// FiltersByBlockHashes returns the serialized contents of a block's basic or committed filter for a set of blocks by hash.
+// FiltersByBlockHashes returns the serialized contents of a block's basic or committed filter for a set of blocks by
+// hash.
 func (idx *CFIndex) FiltersByBlockHashes(blockHashes []*chainhash.Hash,
 	filterType wire.FilterType) ([][]byte, error) {
 	return idx.entriesByBlockHashes(cfIndexKeys, filterType, blockHashes)
@@ -278,7 +288,8 @@ func (idx *CFIndex) FilterHeaderByBlockHash(h *chainhash.Hash,
 	return idx.entryByBlockHash(cfHeaderKeys, filterType, h)
 }
 
-// FilterHeadersByBlockHashes returns the serialized contents of a block's basic committed filter header for a set of blocks by hash.
+// FilterHeadersByBlockHashes returns the serialized contents of a block's basic committed filter header for a set of
+// blocks by hash.
 func (idx *CFIndex) FilterHeadersByBlockHashes(blockHashes []*chainhash.Hash,
 	filterType wire.FilterType) ([][]byte, error) {
 	return idx.entriesByBlockHashes(cfHeaderKeys, filterType, blockHashes)
@@ -290,14 +301,17 @@ func (idx *CFIndex) FilterHashByBlockHash(h *chainhash.Hash,
 	return idx.entryByBlockHash(cfHashKeys, filterType, h)
 }
 
-// FilterHashesByBlockHashes returns the serialized contents of a block's basic committed filter hash for a set of blocks by hash.
+// FilterHashesByBlockHashes returns the serialized contents of a block's basic committed filter hash for a set of
+// blocks by hash.
 func (idx *CFIndex) FilterHashesByBlockHashes(blockHashes []*chainhash.Hash,
 	filterType wire.FilterType) ([][]byte, error) {
 	return idx.entriesByBlockHashes(cfHashKeys, filterType, blockHashes)
 }
 
-// NewCfIndex returns a new instance of an indexer that is used to create a mapping of the hashes of all blocks in the blockchain to their respective committed filters.
-// It implements the Indexer interface which plugs into the IndexManager that in turn is used by the blockchain package. This allows the index to be seamlessly maintained along with the chain.
+// NewCfIndex returns a new instance of an indexer that is used to create a mapping of the hashes of all blocks in the
+// blockchain to their respective committed filters. It implements the Indexer interface which plugs into the
+// IndexManager that in turn is used by the blockchain package. This allows the index to be seamlessly maintained along
+// with the chain.
 func NewCfIndex(db database.DB, chainParams *netparams.Params) *CFIndex {
 	return &CFIndex{db: db, chainParams: chainParams}
 }

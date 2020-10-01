@@ -158,7 +158,8 @@ func TestMsgAlertWire(t *testing.T) {
 	}
 }
 
-// TestMsgAlertWireErrors performs negative tests against wire encode and decode of MsgAlert to confirm error paths work correctly.
+// TestMsgAlertWireErrors performs negative tests against wire encode and decode of MsgAlert to confirm error paths work
+// correctly.
 func TestMsgAlertWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	encoding := BaseEncoding
@@ -336,7 +337,8 @@ func TestAlert(t *testing.T) {
 	}
 }
 
-// TestAlertErrors performs negative tests against payload serialization, deserialization of Alert to confirm error paths work correctly.
+// TestAlertErrors performs negative tests against payload serialization, deserialization of Alert to confirm error
+// paths work correctly.
 func TestAlertErrors(t *testing.T) {
 	pver := ProtocolVersion
 	baseAlert := NewAlert(

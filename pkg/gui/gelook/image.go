@@ -17,8 +17,7 @@ import (
 type DuoUIimage struct {
 	// Src is the image to display.
 	Src paint.ImageOp
-	// Scale is the ratio of image pixels to
-	// dps.
+	// Scale is the ratio of image pixels to dps.
 	Scale float32
 }
 

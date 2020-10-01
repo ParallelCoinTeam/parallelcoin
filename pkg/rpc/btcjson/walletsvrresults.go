@@ -101,7 +101,8 @@ type (
 		Confirmations int64   `json:"confirmations"`
 		Spendable     bool    `json:"spendable"`
 	}
-	// SignRawTransactionError models the data that contains script verification errors from the signrawtransaction request.
+	// SignRawTransactionError models the data that contains script verification errors from the signrawtransaction
+	// request.
 	SignRawTransactionError struct {
 		TxID      string `json:"txid"`
 		Vout      uint32 `json:"vout"`

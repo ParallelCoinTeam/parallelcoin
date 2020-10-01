@@ -7,7 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestCmdMethod tests the CmdMethod function to ensure it retunrs the expected methods and errors.
+// TestCmdMethod tests the CmdMethod function to ensure it returns the expected methods and errors.
 func TestCmdMethod(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

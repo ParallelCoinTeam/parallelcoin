@@ -62,7 +62,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
 
 	//  groups = []string{"config", "node", "debug", "rpc", "wallet", "proxy", "policy", "mining", "tls"}
-	//var groups []string
+	// var groups []string
 	rawFields := make(map[string]Fields)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)

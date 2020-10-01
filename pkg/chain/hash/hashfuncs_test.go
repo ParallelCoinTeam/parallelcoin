@@ -7,7 +7,6 @@ import (
 
 // TestHashFuncs ensures the hash functions which perform hash(b) work as expected.
 func TestHashFuncs(t *testing.T) {
-
 	tests := []struct {
 		out string
 		in  string
@@ -44,29 +43,19 @@ func TestHashFuncs(t *testing.T) {
 		{"395585ce30617b62c80b93e8208ce866d4edc811a177fdb4b82d3911d8696423", "The fugacity of a constituent in a mixture of gases at a given temperature is proportional to its mole fraction.  Lewis-Randall Rule"},
 		{"4f9b189a13d030838269dce846b16a1ce9ce81fe63e65de2f636863336a98fe6", "How can you write a big system without C++?  -Paul Glick"},
 	}
-
 	// Ensure the hash function which returns a byte slice returns the expected result.
-
 	for _, test := range tests {
-
 		h := fmt.Sprintf("%x", HashB([]byte(test.in)))
-
 		if h != test.out {
-
 			t.Errorf("HashB(%q) = %s, want %s", test.in, h, test.out)
 			continue
 		}
 	}
-
 	// Ensure the hash function which returns a Hash returns the expected result.
-
 	for _, test := range tests {
-
 		hash := HashH([]byte(test.in))
 		h := fmt.Sprintf("%x", hash[:])
-
 		if h != test.out {
-
 			t.Errorf("HashH(%q) = %s, want %s", test.in, h, test.out)
 			continue
 		}
@@ -75,7 +64,6 @@ func TestHashFuncs(t *testing.T) {
 
 // TestDoubleHashFuncs ensures the hash functions which perform hash(hash(b)) work as expected.
 func TestDoubleHashFuncs(t *testing.T) {
-
 	tests := []struct {
 		out string
 		in  string
@@ -112,30 +100,20 @@ func TestDoubleHashFuncs(t *testing.T) {
 		{"6bcbf25469e9544c5b5806b24220554fedb6695ba9b1510a76837414f7adb113", "The fugacity of a constituent in a mixture of gases at a given temperature is proportional to its mole fraction.  Lewis-Randall Rule"},
 		{"1041988b06835481f0845be2a54f4628e1da26145b2de7ad1be3bb643cef9d4f", "How can you write a big system without C++?  -Paul Glick"},
 	}
-
 	// Ensure the hash function which returns a byte slice returns the expected result.
-
 	for _, test := range tests {
-
 		h := fmt.Sprintf("%x", DoubleHashB([]byte(test.in)))
-
 		if h != test.out {
-
 			t.Errorf("DoubleHashB(%q) = %s, want %s", test.in, h,
 				test.out)
 			continue
 		}
 	}
-
 	// Ensure the hash function which returns a Hash returns the expected result.
-
 	for _, test := range tests {
-
 		hash := DoubleHashH([]byte(test.in))
 		h := fmt.Sprintf("%x", hash[:])
-
 		if h != test.out {
-
 			t.Errorf("DoubleHashH(%q) = %s, want %s", test.in, h,
 				test.out)
 			continue

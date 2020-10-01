@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/gui"
 )
 

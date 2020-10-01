@@ -18,8 +18,7 @@ import (
 func makeHeader(btcnet BitcoinNet, command string,
 	payloadLen uint32, checksum uint32) []byte {
 	// The length of a bitcoin message header is 24 bytes.
-	// 4 byte magic number of the bitcoin network + 12 byte command + 4 byte
-	// payload length + 4 byte checksum.
+	// 4 byte magic number of the bitcoin network + 12 byte command + 4 byte payload length + 4 byte checksum.
 	buf := make([]byte, 24)
 	binary.LittleEndian.PutUint32(buf, uint32(btcnet))
 	copy(buf[4:], []byte(command))
@@ -31,8 +30,7 @@ func makeHeader(btcnet BitcoinNet, command string,
 // TestMessage tests the Read/WriteMessage and Read/WriteMessageN API.
 func TestMessage(t *testing.T) {
 	pver := ProtocolVersion
-	// Create the various types of messages to test.
-	// MsgVersion.
+	// Create the various types of messages to test. MsgVersion.
 	addrYou := &net.TCPAddr{IP: net.ParseIP("192.168.0.1"), Port: 11047}
 	you := NewNetAddress(addrYou, SFNodeNetwork)
 	you.Timestamp = time.Time{} // Version message has zero value timestamp.
@@ -136,8 +134,7 @@ func TestMessage(t *testing.T) {
 				"got %d, want %d", i, nr, test.bytes)
 		}
 	}
-	// Do the same thing for Read/WriteMessage, but ignore the bytes since
-	// they don't return them.
+	// Do the same thing for Read/WriteMessage, but ignore the bytes since they don't return them.
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
 		// Encode to wire format.
@@ -163,8 +160,8 @@ func TestMessage(t *testing.T) {
 	}
 }
 
-// TestReadMessageWireErrors performs negative tests against wire decoding into
-// concrete messages to confirm error paths work correctly.
+// TestReadMessageWireErrors performs negative tests against wire decoding into concrete messages to confirm error paths
+// work correctly.
 func TestReadMessageWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	btcnet := MainNet
@@ -184,8 +181,7 @@ func TestReadMessageWireErrors(t *testing.T) {
 	}
 	// Wire encoded bytes for main and testnet3 networks magic identifiers.
 	testNet3Bytes := makeHeader(TestNet3, "", 0, 0)
-	// Wire encoded bytes for a message that exceeds max overall message
-	// length.
+	// Wire encoded bytes for a message that exceeds max overall message length.
 	mpl := uint32(MaxMessagePayload)
 	exceedMaxPayloadBytes := makeHeader(btcnet, "getaddr", mpl+1, 0)
 	// Wire encoded bytes for a command which is invalid utf-8.
@@ -193,24 +189,19 @@ func TestReadMessageWireErrors(t *testing.T) {
 	badCommandBytes[4] = 0x81
 	// Wire encoded bytes for a command which is valid, but not supported.
 	unsupportedCommandBytes := makeHeader(btcnet, "bogus", 0, 0)
-	// Wire encoded bytes for a message which exceeds the max payload for
-	// a specific message type.
+	// Wire encoded bytes for a message which exceeds the max payload for a specific message type.
 	exceedTypePayloadBytes := makeHeader(btcnet, "getaddr", 1, 0)
-	// Wire encoded bytes for a message which does not deliver the full
-	// payload according to the header length.
+	// Wire encoded bytes for a message which does not deliver the full payload according to the header length.
 	shortPayloadBytes := makeHeader(btcnet, "version", 115, 0)
 	// Wire encoded bytes for a message with a bad checksum.
 	badChecksumBytes := makeHeader(btcnet, "version", 2, 0xbeef)
 	badChecksumBytes = append(badChecksumBytes, []byte{0x0, 0x0}...)
-	// Wire encoded bytes for a message which has a valid header, but is
-	// the wrong format.  An addr starts with a varint of the number of
-	// contained in the message.  Claim there is two, but don't provide
-	// them.  At the same time, forge the header fields so the message is
-	// otherwise accurate.
+	// Wire encoded bytes for a message which has a valid header, but is the wrong format. An addr starts with a varint
+	// of the number of contained in the message. Claim there is two, but don't provide them. At the same time, forge
+	// the header fields so the message is otherwise accurate.
 	badMessageBytes := makeHeader(btcnet, "addr", 1, 0xeaadc31c)
 	badMessageBytes = append(badMessageBytes, 0x2)
-	// Wire encoded bytes for a message which the header claims has 15k
-	// bytes of data to discard.
+	// Wire encoded bytes for a message which the header claims has 15k bytes of data to discard.
 	discardBytes := makeHeader(btcnet, "bogus", 15*1024, 0)
 	tests := []struct {
 		buf     []byte     // Wire encoding
@@ -327,8 +318,7 @@ func TestReadMessageWireErrors(t *testing.T) {
 			t.Errorf("ReadMessage #%d unexpected num bytes read - "+
 				"got %d, want %d", i, nr, test.bytes)
 		}
-		// For errors which are not of type MessageError, check them for
-		// equality.
+		// For errors which are not of type MessageError, check them for equality.
 		if _, ok := err.(*MessageError); !ok {
 			if err != test.readErr {
 				t.Errorf("ReadMessage #%d wrong error got: %v <%T>, "+
@@ -340,8 +330,8 @@ func TestReadMessageWireErrors(t *testing.T) {
 	}
 }
 
-// TestWriteMessageWireErrors performs negative tests against wire encoding from
-// concrete messages to confirm error paths work correctly.
+// TestWriteMessageWireErrors performs negative tests against wire encoding from concrete messages to confirm error
+// paths work correctly.
 func TestWriteMessageWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	btcnet := MainNet
@@ -356,8 +346,7 @@ func TestWriteMessageWireErrors(t *testing.T) {
 	// Fake message that has payload which exceeds max allowed per message.
 	exceedPayload := make([]byte, 1)
 	exceedPayloadErrMsg := &fakeMessage{payload: exceedPayload, forceLenErr: true}
-	// Fake message that is used to force errors in the header and payload
-	// writes.
+	// Fake message that is used to force errors in the header and payload writes.
 	bogusPayload := []byte{0x01, 0x02, 0x03, 0x04}
 	bogusMsg := &fakeMessage{command: "bogus", payload: bogusPayload}
 	tests := []struct {
@@ -396,8 +385,7 @@ func TestWriteMessageWireErrors(t *testing.T) {
 			t.Errorf("WriteMessage #%d unexpected num bytes "+
 				"written - got %d, want %d", i, nw, test.bytes)
 		}
-		// For errors which are not of type MessageError, check them for
-		// equality.
+		// For errors which are not of type MessageError, check them for equality.
 		if _, ok := err.(*MessageError); !ok {
 			if err != test.err {
 				t.Errorf("ReadMessage #%d wrong error got: %v <%T>, "+

@@ -91,7 +91,9 @@ func TestVersion(t *testing.T) {
 		t.Errorf("NewMsgVersion: wrong command - got %v want %v",
 			cmd, wantCmd)
 	}
-	// Ensure max payload is expected value. Protocol version 4 bytes + services 8 bytes + timestamp 8 bytes + remote and local net addresses + nonce 8 bytes + length of user agent (varInt) + max allowed user agent length + last block 4 bytes + relay transactions flag 1 byte.
+	// Ensure max payload is expected value. Protocol version 4 bytes + services 8 bytes + timestamp 8 bytes + remote
+	// and local net addresses + nonce 8 bytes + length of user agent (varInt) + max allowed user agent length + last
+	// block 4 bytes + relay transactions flag 1 byte.
 	wantPayload := uint32(358)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {

@@ -16,7 +16,8 @@ import (
 	"github.com/p9c/pod/pkg/comm/peer"
 )
 
-// conn mocks a network connection by implementing the net.Conn interface.  It is used to test peer connection without actually opening a network connection.
+// conn mocks a network connection by implementing the net.Conn interface. It is used to test peer connection without
+// actually opening a network connection.
 type conn struct {
 	io.Reader
 	io.Writer
@@ -67,7 +68,8 @@ type addr struct {
 func (m addr) Network() string { return m.net }
 func (m addr) String() string  { return m.address }
 
-// pipe turns two mock connections into a full-duplex connection similar to net.Pipe to allow pipe's with (fake) addresses.
+// pipe turns two mock connections into a full-duplex connection similar to net.Pipe to allow pipe's with (fake)
+// addresses.
 func pipe(c1, c2 *conn) (*conn, *conn) {
 	r1, w1 := io.Pipe()
 	r2, w2 := io.Pipe()
@@ -784,7 +786,8 @@ func TestOutboundPeer(t *testing.T) {
 // 	}
 // }
 
-// TestDuplicateVersionMsg ensures that receiving a version message after one has already been received results in the peer being disconnected.
+// TestDuplicateVersionMsg ensures that receiving a version message after one has already been received results in the
+// peer being disconnected.
 func TestDuplicateVersionMsg(t *testing.T) {
 	// Create a pair of peers that are connected to each other using a fake connection.
 	verack := make(chan struct{})

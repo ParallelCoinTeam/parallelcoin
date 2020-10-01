@@ -79,8 +79,7 @@ func TestFindSpends(t *testing.T) {
 			BirthHeight: height,
 		},
 	}
-	// Test that finding spends with an empty outpoints index returns no
-	// spends.
+	// Test that finding spends with an empty outpoints index returns no spends.
 	r := newBatchSpendReporter()
 	spends := r.notifySpends(&Block100000, height)
 	if len(spends) != 0 {
@@ -97,9 +96,8 @@ func TestFindSpends(t *testing.T) {
 	}
 }
 
-// TestFindInitialTransactions tests that findInitialTransactions properly
-// returns the transaction corresponding to an output if it is found in the
-// given block.
+// TestFindInitialTransactions tests that findInitialTransactions properly returns the transaction corresponding to an
+// output if it is found in the given block.
 func TestFindInitialTransactions(t *testing.T) {
 	hash, _ := chainhash.NewHashFromStr(
 		"e9a66845e05d5abc0ad04ec80f774a7e585c6e8db975962d069a522137b80c1d")
@@ -160,11 +158,9 @@ func TestFindInitialTransactions(t *testing.T) {
 	}
 }
 
-// TestDequeueAtHeight asserts the correct behavior of various orderings of
-// enqueuing requests and dequeueing that could arise. Predominately, this
-// ensures that dequeueing heights lower than what has already been dequeued
-// will not return requests, as they should be moved internally to the nextBatch
-// slice.
+// TestDequeueAtHeight asserts the correct behavior of various orderings of enqueuing requests and dequeueing that could
+// arise. Predominately, this ensures that dequeueing heights lower than what has already been dequeued will not return
+// requests, as they should be moved internally to the nextBatch slice.
 func TestDequeueAtHeight(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	scanner := NewUtxoScanner(&UtxoScannerConfig{
@@ -182,8 +178,7 @@ func TestDequeueAtHeight(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	// Dequeue the heights in the same order, this should return both
-	// requests without failure.
+	// Dequeue the heights in the same order, this should return both requests without failure.
 	reqs := scanner.dequeueAtHeight(100000)
 	if len(reqs) != 1 {
 		t.Fatalf("Unexpected number of requests returned -- "+
@@ -222,8 +217,7 @@ func TestDequeueAtHeight(t *testing.T) {
 		t.Fatalf("Unexpected request returned -- "+
 			"want %v, got %v", reqs[0], req100001)
 	}
-	// Try to request requests at height 100000, which should not return a
-	// request since we've already passed it.
+	// Try to request requests at height 100000, which should not return a request since we've already passed it.
 	reqs = scanner.dequeueAtHeight(100000)
 	if len(reqs) != 0 {
 		t.Fatalf("Unexpected number of requests returned -- "+
@@ -238,8 +232,7 @@ func TestDequeueAtHeight(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	// Dequeue the heights in the correct order, this should return both
-	// requests without failure.
+	// Dequeue the heights in the correct order, this should return both requests without failure.
 	reqs = scanner.dequeueAtHeight(100000)
 	if len(reqs) != 1 {
 		t.Fatalf("Unexpected number of requests returned -- "+
@@ -277,8 +270,7 @@ func TestDequeueAtHeight(t *testing.T) {
 		t.Fatalf("Unexpected request returned -- "+
 			"want %v, got %v", reqs[0], req100001)
 	}
-	// Try to request requests at height 100000, which should not return a
-	// request since we've already passed it.
+	// Try to request requests at height 100000, which should not return a request since we've already passed it.
 	reqs = scanner.dequeueAtHeight(100000)
 	if len(reqs) != 0 {
 		t.Fatalf("Unexpected number of requests returned -- "+
@@ -286,8 +278,8 @@ func TestDequeueAtHeight(t *testing.T) {
 	}
 }
 
-// TestUtxoScannerScanBasic tests that enqueueing a spend request at the height
-// of the spend returns a correct spend report.
+// TestUtxoScannerScanBasic tests that enqueueing a spend request at the height of the spend returns a correct spend
+// report.
 func TestUtxoScannerScanBasic(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block100000Hash := Block100000.BlockHash()
@@ -326,10 +318,9 @@ func TestUtxoScannerScanBasic(t *testing.T) {
 	}
 }
 
-// TestUtxoScannerScanAddBlocks tests that adding new blocks to neutrino's view
-// of the best snapshot properly dispatches spend reports. Internally, this
-// tests that the rescan detects a difference in the original best height and
-// the best height after a rescan, and then continues scans up to the new tip.
+// TestUtxoScannerScanAddBlocks tests that adding new blocks to neutrino's view of the best snapshot properly dispatches
+// spend reports. Internally, this tests that the rescan detects a difference in the original best height and the best
+// height after a rescan, and then continues scans up to the new tip.
 func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block99999Hash := Block99999.BlockHash()
@@ -368,18 +359,15 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	// The utxoscanner should currently be waiting for the block stamp at
-	// height 99999. Signaling will cause the initial scan to finish and
-	// block while querying again for the updated chain tip.
+	// The utxoscanner should currently be waiting for the block stamp at height 99999. Signaling will cause the initial
+	// scan to finish and block while querying again for the updated chain tip.
 	waitForSnapshot <- struct{}{}
-	// Now, add the successor block at height 100000 and update the best
-	// snapshot..
+	// Now, add the successor block at height 100000 and update the best snapshot..
 	snapshotLock.Lock()
 	mockChainClient.SetBestSnapshot(&block100000Hash, 100000)
 	snapshotLock.Unlock()
-	// The rescan should now be waiting for stamp 100000, signal to allow
-	// the rescan to detect the added block and perform another pass.
-	// Signal one more for the final query scan makes before exiting.
+	// The rescan should now be waiting for stamp 100000, signal to allow the rescan to detect the added block and
+	// perform another pass. Signal one more for the final query scan makes before exiting.
 	waitForSnapshot <- struct{}{}
 	waitForSnapshot <- struct{}{}
 	spendReport, scanErr = req.Result(nil)
@@ -392,9 +380,8 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	}
 }
 
-// TestUtxoScannerCancelRequest tests the ability to cancel pending GetUtxo
-// requests, as well as the scanners ability to exit and cancel request when
-// stopped during a batch scan.
+// TestUtxoScannerCancelRequest tests the ability to cancel pending GetUtxo requests, as well as the scanners ability to
+// exit and cancel request when stopped during a batch scan.
 func TestUtxoScannerCancelRequest(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block100000Hash := Block100000.BlockHash()
@@ -402,9 +389,8 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	mockChainClient.SetBlock(&block100000Hash, util.NewBlock(&Block100000))
 	mockChainClient.SetBestSnapshot(&block100000Hash, 100000)
 	fetchErr := errors.New("cannot fetch block")
-	// Create a mock function that will block when the utxoscanner tries to
-	// retrieve a block from the network. It will return fetchErr when it
-	// finally returns.
+	// Create a mock function that will block when the utxoscanner tries to retrieve a block from the network. It will
+	// return fetchErr when it finally returns.
 	block := make(chan struct{})
 	scanner := NewUtxoScanner(&UtxoScannerConfig{
 		GetBlock: func(chainhash.Hash, ...QueryOption,
@@ -433,16 +419,14 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	// Spawn our first task with a cancel chan, which we'll test to make
-	// sure it can break away early.
+	// Spawn our first task with a cancel chan, which we'll test to make sure it can break away early.
 	cancel100000 := make(chan struct{})
 	err100000 := make(chan error, 1)
 	go func() {
 		_, err := req100000.Result(cancel100000)
 		err100000 <- err
 	}()
-	// Spawn our second task without a cancel chan, we'll be testing it's
-	// ability to break if the scanner is stopped.
+	// Spawn our second task without a cancel chan, we'll be testing it's ability to break if the scanner is stopped.
 	err100001 := make(chan error, 1)
 	go func() {
 		_, err := req100001.Result(nil)
@@ -459,28 +443,24 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 		t.Fatalf("getutxo should not have been cancelled yet")
 	case <-time.After(50 * time.Millisecond):
 	}
-	// Cancel the first request, which should cause it to return
-	// ErrGetUtxoCancelled.
+	// Cancel the first request, which should cause it to return ErrGetUtxoCancelled.
 	close(cancel100000)
 	select {
 	case err := <-err100000:
 		if err != ErrGetUtxoCancelled {
-			t.Fatalf("unexpected error returned "+
-				"from Result, want: %v, got %v",
-				ErrGetUtxoCancelled, err)
+			t.Fatalf("unexpected error returned from Result, want: %v, got %v", ErrGetUtxoCancelled, err)
 		}
 	case <-time.After(50 * time.Millisecond):
 		t.Fatalf("getutxo should have been cancelled")
 	}
-	// The second task shouldn't have been started yet, and should deliver a
-	// message since it wasn't tied to the same cancel chan.
+	// The second task shouldn't have been started yet, and should deliver a message since it wasn't tied to the same
+	// cancel chan.
 	select {
 	case <-err100001:
 		t.Fatalf("getutxo should not have been cancelled yet")
 	case <-time.After(50 * time.Millisecond):
 	}
-	// Spawn a goroutine to stop the scanner, we add a wait group to make
-	// sure it cleans up at the end of the test.
+	// Spawn a goroutine to stop the scanner, we add a wait group to make sure it cleans up at the end of the test.
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -490,8 +470,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 			t.Log(err)
 		}
 	}()
-	// The second request should be cancelled as soon as the utxoscanner
-	// begins shut down, returning ErrShuttingDown.
+	// The second request should be cancelled as soon as the utxoscanner begins shut down, returning ErrShuttingDown.
 	select {
 	case err := <-err100001:
 		if err != ErrShuttingDown {
@@ -502,8 +481,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	case <-time.After(50 * time.Millisecond):
 		t.Fatalf("getutxo should have been cancelled")
 	}
-	// Ensure that GetBlock gets unblocked so the batchManager can properly
-	// exit.
+	// Ensure that GetBlock gets unblocked so the batchManager can properly exit.
 	select {
 	case block <- struct{}{}:
 	default:
@@ -512,8 +490,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	wg.Wait()
 }
 
-// Block99999 defines block 99,999 of the main chain. It is used to test a
-// rescan consisting of multiple blocks.
+// Block99999 defines block 99,999 of the main chain. It is used to test a rescan consisting of multiple blocks.
 var Block99999 = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version: 1,
@@ -573,9 +550,8 @@ var Block99999 = wire.MsgBlock{
 	},
 }
 
-// The following is taken from the btcsuite/util project.
-// Block100000 defines block 100,000 of the block chain.  It is used to test
-// Block operations.
+// The following is taken from the btcsuite/util project. Block100000 defines block 100,000 of the block chain. It is
+// used to test Block operations.
 var Block100000 = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version: 1,

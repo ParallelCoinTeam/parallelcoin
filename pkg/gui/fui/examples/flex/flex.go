@@ -3,6 +3,7 @@ package main
 import (
 	"gioui.org/app"
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/gui/fui"
 )
 

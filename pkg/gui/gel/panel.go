@@ -6,7 +6,7 @@ import (
 
 type Panel struct {
 	VisibleObjectsNumber int
-	//totalOffset       int
+	// totalOffset       int
 	PanelContentLayout *layout.List
 	PanelObject        interface{}
 	PanelObjectsNumber int

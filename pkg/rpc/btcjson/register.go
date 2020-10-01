@@ -26,11 +26,15 @@ type MethodInfo struct {
 const (
 	// UFWalletOnly indicates that the command can only be used with an RPC server that supports wallet commands.
 	UFWalletOnly UsageFlag = 1 << iota
-	// UFWebsocketOnly indicates that the command can only be used when communicating with an RPC server over websockets.  This typically applies to notifications and notification registration functions since neiher makes since when using a single-shot HTTP-POST request.
+	// UFWebsocketOnly indicates that the command can only be used when communicating with an RPC server over
+	// websockets. This typically applies to notifications and notification registration functions since neiher makes
+	// since when using a single-shot HTTP-POST request.
 	UFWebsocketOnly
-	// UFNotification indicates that the command is actually a notification. This means when it is marshalled, the ID must be nil.
+	// UFNotification indicates that the command is actually a notification. This means when it is marshalled, the ID
+	// must be nil.
 	UFNotification
-	// highestUsageFlagBit is the maximum usage flag bit and is used in the stringer and tests to ensure all of the above constants have been tested.
+	// highestUsageFlagBit is the maximum usage flag bit and is used in the stringer and tests to ensure all of the
+	// above constants have been tested.
 	highestUsageFlagBit
 )
 
@@ -71,7 +75,8 @@ func (fl UsageFlag) String() string {
 	return s
 }
 
-// MustRegisterCmd performs the same function as RegisterCmd except it panics if there is an error.  This should only be called from package init functions.
+// MustRegisterCmd performs the same function as RegisterCmd except it panics if there is an error. This should only be
+// called from package init functions.
 func MustRegisterCmd(method string, cmd interface{}, flags UsageFlag) {
 	if err := RegisterCmd(method, cmd, flags); err != nil {
 		panic(fmt.Sprintf("failed to register type %q: %v\n", method,
@@ -83,19 +88,39 @@ func MustRegisterCmd(method string, cmd interface{}, flags UsageFlag) {
 var RegisteredCommands = make(map[string]interface{})
 
 /*
-RegisterCmd registers a new command that will automatically marshal to and from JSON-RPC with full type checking and positional parameter support.  It also accepts usage flags which identify the circumstances under which the command can be used.
-This package automatically registers all of the exported commands by default using this function, however it is also exported so callers can easily register custom types.
-The type format is very strict since it needs to be able to automatically marshal to and from JSON-RPC 1.0.  The following enumerates the requirements:
+RegisterCmd registers a new command that will automatically marshal to and from JSON-RPC with full type checking and
+positional parameter support. It also accepts usage flags which identify the circumstances under which the command can
+be used.
+
+This package automatically registers all of the exported commands by default using this function, however it is also
+exported so callers can easily register custom types.
+
+The type format is very strict since it needs to be able to automatically marshal to and from JSON-RPC 1.0. The
+following enumerates the requirements:
+
   - The provided command must be a single pointer to a struct
+
   - All fields must be exported
-  - The order of the positional parameters in the marshalled JSON will be in the same order as declared in the struct definition
+
+  - The order of the positional parameters in the marshalled JSON will be in the same order as declared in the struct
+  definition
+
   - Struct embedding is not supported
+
   - Struct fields may NOT be channels, functions, complex, or interface
+
   - A field in the provided struct with a pointer is treated as optional
+
   - Multiple indirections (i.e **int) are not supported
-  - Once the first optional field (pointer) is encountered, the remaining fields must also be optional fields (pointers) as required by positional netparams
+
+  - Once the first optional field (pointer) is encountered, the remaining fields must also be optional fields (pointers)
+  as required by positional netparams
+
   - A field that has a 'jsonrpcdefault' struct tag must be an optional field (pointer)
-NOTE: This function only needs to be able to examine the structure of the passed struct, so it does not need to be an actual instance.  Therefore, it is recommended to simply pass a nil pointer cast to the appropriate type. For example, (*FooCmd)(nil).
+
+NOTE: This function only needs to be able to examine the structure of the passed struct, so it does not need to be an
+actual instance. Therefore, it is recommended to simply pass a nil pointer cast to the appropriate type. For example,
+(*FooCmd)(nil).
 */
 func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 	registerLock.Lock()
@@ -164,8 +189,8 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 				return makeError(ErrNonOptionalField, str)
 			}
 		}
-		// Ensure the default value can be unsmarshalled into the type and that
-		// defaults are only specified for optional fields.
+		// Ensure the default value can be unmarshalled into the type and that defaults are only specified for optional
+		// fields.
 		if tag := rtf.Tag.Get("jsonrpcdefault"); tag != "" {
 			if !isOptional {
 				str := fmt.Sprintf("required fields must not "+
@@ -220,7 +245,8 @@ func baseKindString(rt reflect.Type) string {
 	return fmt.Sprintf("%s%s", strings.Repeat("*", numIndirects), rt.Kind())
 }
 
-// isAcceptableKind returns whether or not the passed field type is a supported type.  It is called after the first pointer indirection, so further pointers are not supported.
+// isAcceptableKind returns whether or not the passed field type is a supported type. It is called after the first
+// pointer indirection, so further pointers are not supported.
 func isAcceptableKind(kind reflect.Kind) bool {
 	switch kind {
 	case reflect.Chan:

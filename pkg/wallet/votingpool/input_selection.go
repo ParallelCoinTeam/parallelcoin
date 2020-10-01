@@ -14,8 +14,7 @@ import (
 
 const eligibleInputMinConfirmations = 100
 
-// Credit is an abstraction over wtxmgr.Credit used in the construction of
-// voting pool withdrawal transactions.
+// Credit is an abstraction over wtxmgr.Credit used in the construction of voting pool withdrawal transactions.
 type Credit struct {
 	wtxmgr.Credit
 	addr WithdrawalAddress
@@ -31,8 +30,7 @@ func (c *Credit) String() string {
 	return fmt.Sprintf("credit of %v locked to %v", c.Amount, c.addr)
 }
 
-// byAddress defines the methods needed to satisify sort.Interface to sort a
-// slice of credits by their address.
+// byAddress defines the methods needed to satisfy sort.Interface to sort a slice of credits by their address.
 type byAddress []Credit
 
 func (c byAddress) Len() int { return len(c) }
@@ -40,10 +38,9 @@ func (c byAddress) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 
-// Less returns true if the element at positions i is smaller than the
-// element at position j. The 'smaller-than' relation is defined to be
-// the lexicographic ordering defined on the tuple (SeriesID, Index,
-// Branch, TxSha, OutputIndex).
+// Less returns true if the element at positions i is smaller than the element at position j. The 'smaller-than'
+// relation is defined to be the lexicographic ordering defined on the tuple (SeriesID, Index, Branch, TxSha,
+// OutputIndex).
 func (c byAddress) Less(i, j int) bool {
 	iAddr := c[i].addr
 	jAddr := c[j].addr
@@ -75,14 +72,12 @@ func (c byAddress) Less(i, j int) bool {
 	if txidComparison > 0 {
 		return false
 	}
-	// The seriesID, index, branch, and hash are equal, so compare output
-	// index.
+	// The seriesID, index, branch, and hash are equal, so compare output index.
 	return c[i].OutPoint.Index < c[j].OutPoint.Index
 }
 
-// getEligibleInputs returns eligible inputs with addresses between startAddress
-// and the last used address of lastSeriesID. They're reverse ordered based on
-// their address.
+// getEligibleInputs returns eligible inputs with addresses between startAddress and the last used address of
+// lastSeriesID. They're reverse ordered based on their address.
 func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmgr.Store, txmgrNs walletdb.ReadBucket, startAddress WithdrawalAddress,
 	lastSeriesID uint32, dustThreshold util.Amount, chainHeight int32,
 	minConf int) ([]Credit, error) {
@@ -104,8 +99,7 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 	address := startAddress
 	for {
 		Debugc(func() string {
-			return "looking for eligible inputs at address" +
-				address.addrIdentifier()
+			return "looking for eligible inputs at address" + address.addrIdentifier()
 		})
 		if candidates, ok := addrMap[address.addr.EncodeAddress()]; ok {
 			var eligibles []Credit
@@ -131,9 +125,9 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 	return inputs, nil
 }
 
-// nextAddr returns the next WithdrawalAddress according to the input selection
-// rules: http://opentransactions.org/wiki/index.php/Input_Selection_Algorithm_(voting_pools)
-// It returns nil if the new address' seriesID is >= stopSeriesID.
+// nextAddr returns the next WithdrawalAddress according to the input selection rules:
+// http://opentransactions.org/wiki/index.php/Input_Selection_Algorithm_(voting_pools) It returns nil if the new
+// address' seriesID is >= stopSeriesID.
 func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branch Branch, index Index, stopSeriesID uint32) (
 	*WithdrawalAddress, error) {
 	series := p.Series(seriesID)
@@ -161,10 +155,9 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 		return nil, nil
 	}
 	addr, err := p.WithdrawalAddress(ns, addrmgrNs, seriesID, branch, index)
-	if err != nil && err.(Error).ErrorCode == ErrWithdrawFromUnusedAddr {
-		// The used indices will vary between branches so sometimes we'll try to
-		// get a WithdrawalAddress that hasn't been used before, and in such
-		// cases we just need to move on to the next one.
+	if err != nil && err.(VPError).ErrorCode == ErrWithdrawFromUnusedAddr {
+		// The used indices will vary between branches so sometimes we'll try to get a WithdrawalAddress that hasn't
+		// been used before, and in such cases we just need to move on to the next one.
 		Debugf("nextAddr(): skipping addr (series #%d, branch #%d, index #%d) "+
 			"as it hasn't been used before %s", seriesID, branch, index)
 		return nextAddr(p, ns, addrmgrNs, seriesID, branch, index, stopSeriesID)
@@ -172,9 +165,8 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 	return addr, err
 }
 
-// highestUsedSeriesIndex returns the highest index among all of this Pool's
-// used addresses for the given seriesID. It returns 0 if there are no used
-// addresses with the given seriesID.
+// highestUsedSeriesIndex returns the highest index among all of this Pool's used addresses for the given seriesID. It
+// returns 0 if there are no used addresses with the given seriesID.
 func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (Index, error) {
 	maxIdx := Index(0)
 	series := p.Series(seriesID)
@@ -195,9 +187,8 @@ func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (
 	return maxIdx, nil
 }
 
-// groupCreditsByAddr converts a slice of credits to a map from the string
-// representation of an encoded address to the unspent outputs associated with
-// that address.
+// groupCreditsByAddr converts a slice of credits to a map from the string representation of an encoded address to the
+// unspent outputs associated with that address.
 func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *netparams.Params) (
 	map[string][]wtxmgr.Credit, error) {
 	addrMap := make(map[string][]wtxmgr.Credit)
@@ -207,9 +198,8 @@ func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *netparams.Params) 
 			Error(err)
 			return nil, newError(ErrInputSelection, "failed to obtain input address", err)
 		}
-		// As our credits are all P2SH we should never have more than one
-		// address per credit, so let's error out if that assumption is
-		// violated.
+		// As our credits are all P2SH we should never have more than one address per credit, so let's error out if that
+		// assumption is violated.
 		if len(addrs) != 1 {
 			return nil, newError(ErrInputSelection, "input doesn't have exactly one address", nil)
 		}
@@ -223,9 +213,8 @@ func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *netparams.Params) 
 	return addrMap, nil
 }
 
-// isCreditEligible tests a given credit for eligibilty with respect
-// to number of confirmations, the dust threshold and that it is not
-// the charter output.
+// isCreditEligible tests a given credit for eligibility with respect to number of confirmations, the dust threshold and
+// that it is not the charter output.
 func (p *Pool) isCreditEligible(c Credit, minConf int, chainHeight int32,
 	dustThreshold util.Amount) bool {
 	if c.Amount < dustThreshold {
@@ -240,15 +229,16 @@ func (p *Pool) isCreditEligible(c Credit, minConf int, chainHeight int32,
 	return true
 }
 
-// isCharterOutput - TODO: In order to determine this, we need the txid
-// and the output index of the current charter output, which we don't have yet.
+// isCharterOutput -
+//
+// TODO: In order to determine this, we need the txid and the output index of the current charter output, which we don't
+//  have yet.
 func (p *Pool) isCharterOutput(c Credit) bool {
 	return false
 }
 
-// confirms returns the number of confirmations for a transaction in a block at
-// height txHeight (or -1 for an unconfirmed tx) given the chain height
-// curHeight.
+// confirms returns the number of confirmations for a transaction in a block at height txHeight (or -1 for an
+// unconfirmed tx) given the chain height curHeight.
 func confirms(txHeight, curHeight int32) int32 {
 	switch {
 	case txHeight == -1, txHeight > curHeight:

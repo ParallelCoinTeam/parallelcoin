@@ -575,8 +575,8 @@ func TestReplaceExistingSeries(t *testing.T) {
 	}
 }
 
-// validateReplaceSeries validate the created series stored in the system
-// corresponds to the series we replaced the original with.
+// validateReplaceSeries validate the created series stored in the system corresponds to the series we replaced the
+// original with.
 func validateReplaceSeries(t *testing.T, pool *vp.Pool, testID int, replacedWith seriesRaw) {
 	seriesID := replacedWith.id
 	series := pool.Series(seriesID)
@@ -878,10 +878,9 @@ func TestBranchOrderZero(t *testing.T) {
 func TestBranchOrderNonZero(t *testing.T) {
 	maxBranch := 5
 	maxTail := 4
-	// Test branch reordering for branch no. > 0. We test all branch values
-	// within [1, 5] in a slice of up to 9 (maxBranch-1 + branch-pivot +
-	// maxTail) keys. Hopefully that covers all combinations and edge-cases.
-	// We test the case where branch no. is 0 elsewhere.
+	// Test branch reordering for branch no. > 0. We test all branch values within [1, 5] in a slice of up to 9
+	// (maxBranch-1 + branch-pivot + maxTail) keys. Hopefully that covers all combinations and edge-cases. We test the
+	// case where branch no. is 0 elsewhere.
 	for branch := 1; branch <= maxBranch; branch++ {
 		for j := 0; j <= maxTail; j++ {
 			first := createTestPubKeys(t, branch-1, 0)
@@ -948,8 +947,7 @@ func createTestPubKeys(t *testing.T, number, offset int) []*hdkeychain.ExtendedK
 	return keys
 }
 func TestReverse(t *testing.T) {
-	// Test the utility function that reverses a list of public keys.
-	// 11 is arbitrary.
+	// Test the utility function that reverses a list of public keys. 11 is arbitrary.
 	for numKeys := 0; numKeys < 11; numKeys++ {
 		keys := createTestPubKeys(t, numKeys, 0)
 		revRevKeys := reverse(reverse(keys))
@@ -984,9 +982,8 @@ func TestEmpowerSeriesNeuterFailed(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create series: %v", err)
 	}
-	// A private key with bad version (0xffffffff) will trigger an
-	// error in (k *ExtendedKey).Neuter and the associated error path
-	// in EmpowerSeries.
+	// A private key with bad version (0xffffffff) will trigger an error in (k *ExtendedKey).Neuter and the associated
+	// error path in EmpowerSeries.
 	badKey := "wM5uZBNTYmaYGiK8VaGi7zPGbZGLuQgDiR2Zk4nGfbRFLXwHGcMUdVdazRpNHFSR7X7WLmzzbAq8dA1ViN6eWKgKqPye1rJTDQTvBiXvZ7E3nmdx"
 	err = pool.EmpowerSeries(ns, seriesID, badKey)
 	vp.TstCheckError(t, "", err, vp.ErrKeyNeuter)
@@ -1050,8 +1047,7 @@ func TestPoolWithdrawalAddress(t *testing.T) {
 	vp.TstCreateSeries(t, dbtx, pool, []vp.TstSeriesDef{{ReqSigs: 2, PubKeys: pubKeys, SeriesID: 1}})
 	addr := vp.TstNewWithdrawalAddress(t, dbtx, pool, 1, 0, 0)
 	checkPoolAddress(t, addr, 1, 0, 0)
-	// When the requested address is not present in the set of used addresses
-	// for that Pool, we should get an error.
+	// When the requested address is not present in the set of used addresses for that Pool, we should get an error.
 	_, err = pool.WithdrawalAddress(ns, addrmgrNs, 1, 2, 3)
 	vp.TstCheckError(t, "", err, vp.ErrWithdrawFromUnusedAddr)
 }

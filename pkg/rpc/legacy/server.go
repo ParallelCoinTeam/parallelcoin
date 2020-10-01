@@ -77,24 +77,21 @@ func JSONAuthFail(w http.ResponseWriter) {
 	http.Error(w, "401 Unauthorized.", http.StatusUnauthorized)
 }
 
-// NewServer creates a new server for serving legacy RPC client connections,
-// both HTTP POST and websocket.
+// NewServer creates a new server for serving legacy RPC client connections, both HTTP POST and websocket.
 func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Listener) *Server {
 	serveMux := http.NewServeMux()
 	const rpcAuthTimeoutSeconds = 10
 	server := &Server{
 		HTTPServer: http.Server{
 			Handler: serveMux,
-			// Timeout connections which don't complete the initial
-			// handshake within the allowed timeframe.
+			// Timeout connections which don't complete the initial handshake within the allowed timeframe.
 			ReadTimeout: time.Second * rpcAuthTimeoutSeconds,
 		},
 		WalletLoader:        walletLoader,
 		MaxPostClients:      opts.MaxPOSTClients,
 		MaxWebsocketClients: opts.MaxWebsocketClients,
 		Listeners:           listeners,
-		// A hash of the HTTP basic auth string is used for a constant
-		// time comparison.
+		// A hash of the HTTP basic auth string is used for a constant time comparison.
 		AuthSHA: sha256.Sum256(HTTPBasicAuth(opts.Username, opts.Password)),
 		Upgrader: websocket.Upgrader{
 			// Allow all origins.
@@ -126,8 +123,8 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 			case ErrNoAuth:
 				// nothing
 			default:
-				// If auth was supplied but incorrect, rather than simply
-				// being missing, immediately terminate the connection.
+				// If auth was supplied but incorrect, rather than simply being missing, immediately terminate the
+				// connection.
 				Warn("disconnecting improperly authorized websocket client")
 				JSONAuthFail(w)
 				return
@@ -150,8 +147,7 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 	return server
 }
 
-// HTTPBasicAuth returns the UTF-8 bytes of the HTTP Basic authentication
-// string:
+// HTTPBasicAuth returns the UTF-8 bytes of the HTTP Basic authentication string:
 //
 //   "Basic " + base64(username + ":" + password)
 func HTTPBasicAuth(username, password string) []byte {
@@ -168,8 +164,8 @@ func HTTPBasicAuth(username, password string) []byte {
 	return output
 }
 
-// Serve serves HTTP POST and websocket RPC for the legacy JSON-RPC RPC server.
-// This function does not block on lis.Accept.
+// Serve serves HTTP POST and websocket RPC for the legacy JSON-RPC RPC server. This function does not block on
+// lis.Accept.
 func (s *Server) Serve(lis net.Listener) {
 	s.WG.Add(1)
 	go func() {
@@ -180,15 +176,16 @@ func (s *Server) Serve(lis net.Listener) {
 	}()
 }
 
-// RegisterWallet associates the legacy RPC server with the wallet.  This
-// function must be called before any wallet RPCs can be called by clients.
+// RegisterWallet associates the legacy RPC server with the wallet. This function must be called before any wallet RPCs
+// can be called by clients.
 func (s *Server) RegisterWallet(w *wallet.Wallet) {
 	s.HandlerMutex.Lock()
 	s.Wallet = w
 	s.HandlerMutex.Unlock()
 }
 
-// Stop gracefully shuts down the rpc server by stopping and disconnecting all clients, disconnecting the chain server connection, and closing the wallet's account files.  This blocks until shutdown completes.
+// Stop gracefully shuts down the rpc server by stopping and disconnecting all clients, disconnecting the chain server
+// connection, and closing the wallet's account files. This blocks until shutdown completes.
 func (s *Server) Stop() {
 	s.QuitMutex.Lock()
 	select {
@@ -221,8 +218,7 @@ func (s *Server) Stop() {
 	// Signal the remaining goroutines to stop.
 	close(s.Quit)
 	s.QuitMutex.Unlock()
-	// First wait for the wllt and chain server to stop, if they
-	// were ever set.
+	// First wait for the wallet and chain server to stop, if they were ever set.
 	if wllt != nil {
 		wllt.WaitForShutdown()
 	}
@@ -233,23 +229,20 @@ func (s *Server) Stop() {
 	s.WG.Wait()
 }
 
-// SetChainServer sets the chain server client component needed to run a fully
-// functional bitcoin wallet RPC server.  This can be called to enable RPC
-// passthrough even before a loaded wallet is set, but the wallet's RPC client
-// is preferred.
+// SetChainServer sets the chain server client component needed to run a fully functional bitcoin wallet RPC server.
+// This can be called to enable RPC passthrough even before a loaded wallet is set, but the wallet's RPC client is
+// preferred.
 func (s *Server) SetChainServer(chainClient chain.Interface) {
 	s.HandlerMutex.Lock()
 	s.ChainClient = chainClient
 	s.HandlerMutex.Unlock()
 }
 
-// HandlerClosure creates a closure function for handling requests of the given
-// method.  This may be a request that is handled directly by btcwallet, or
-// a chain server request that is handled by passing the request down to pod.
+// HandlerClosure creates a closure function for handling requests of the given method. This may be a request that is
+// handled directly by btcwallet, or a chain server request that is handled by passing the request down to pod.
 //
-// NOTE: These handlers do not handle special cases, such as the authenticate
-// method.  Each of these must be checked beforehand (the method is already
-// known) and handled accordingly.
+// NOTE: These handlers do not handle special cases, such as the authenticate method. Each of these must be checked
+// beforehand (the method is already known) and handled accordingly.
 func (s *Server) HandlerClosure(request *btcjson.Request) LazyHandler {
 	s.HandlerMutex.Lock()
 	// With the lock held, make copies of these pointers for the closure.
@@ -263,14 +256,12 @@ func (s *Server) HandlerClosure(request *btcjson.Request) LazyHandler {
 	return LazyApplyHandler(request, wllt, chainClient)
 }
 
-// ErrNoAuth represents an error where authentication could not succeed
-// due to a missing Authorization HTTP header.
+// ErrNoAuth represents an error where authentication could not succeed due to a missing Authorization HTTP header.
 var ErrNoAuth = errors.New("no auth")
 
-// CheckAuthHeader checks the HTTP Basic authentication supplied by a client
-// in the HTTP request r.  It errors with ErrNoAuth if the request does not
-// contain the Authorization header, or another non-nil error if the
-// authentication was provided but incorrect.
+// CheckAuthHeader checks the HTTP Basic authentication supplied by a client in the HTTP request r. It errors with
+// ErrNoAuth if the request does not contain the Authorization header, or another non-nil error if the authentication
+// was provided but incorrect.
 //
 // This check is time-constant.
 func (s *Server) CheckAuthHeader(r *http.Request) error {
@@ -286,14 +277,14 @@ func (s *Server) CheckAuthHeader(r *http.Request) error {
 	return nil
 }
 
-// ThrottledFn wraps an http.HandlerFunc with throttling of concurrent active
-// clients by responding with an HTTP 429 when the threshold is crossed.
+// ThrottledFn wraps an http.HandlerFunc with throttling of concurrent active clients by responding with an HTTP 429
+// when the threshold is crossed.
 func ThrottledFn(threshold int64, f http.HandlerFunc) http.Handler {
 	return Throttled(threshold, f)
 }
 
-// Throttled wraps an http.Handler with throttling of concurrent active
-// clients by responding with an HTTP 429 when the threshold is crossed.
+// Throttled wraps an http.Handler with throttling of concurrent active clients by responding with an HTTP 429 when the
+// threshold is crossed.
 func Throttled(threshold int64, h http.Handler) http.Handler {
 	var active int64
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -326,10 +317,9 @@ func Throttled(threshold int64, h http.Handler) http.Handler {
 // 		r.Method, r.Params)
 // }
 
-// IDPointer returns a pointer to the passed ID, or nil if the interface is nil.
-// Interface pointers are usually a red flag of doing something incorrectly,
-// but this is only implemented here to work around an oddity with json,
-// which uses empty interface pointers for response IDs.
+// IDPointer returns a pointer to the passed ID, or nil if the interface is nil. Interface pointers are usually a red
+// flag of doing something incorrectly, but this is only implemented here to work around an oddity with json, which uses
+// empty interface pointers for response IDs.
 func IDPointer(id interface{}) (p *interface{}) {
 	if id != nil {
 		p = &id
@@ -337,9 +327,8 @@ func IDPointer(id interface{}) (p *interface{}) {
 	return
 }
 
-// InvalidAuth checks whether a websocket request is a valid (parsable)
-// authenticate request and checks the supplied username and passphrase
-// against the server auth.
+// InvalidAuth checks whether a websocket request is a valid (parsable) authenticate request and checks the supplied
+// username and passphrase against the server auth.
 func (s *Server) InvalidAuth(req *btcjson.Request) bool {
 	cmd, err := btcjson.UnmarshalCmd(req)
 	if err != nil {
@@ -374,11 +363,9 @@ func (s *Server) WebsocketClientRead(wsc *WebsocketClient) {
 	}
 }
 func (s *Server) WebsocketClientRespond(wsc *WebsocketClient) {
-	// A for-select with a read of the quit channel is used instead of a
-	// for-range to provide clean shutdown.  This is necessary due to
-	// WebsocketClientRead (which sends to the allRequests chan) not closing
-	// allRequests during shutdown if the remote websocket client is still
-	// connected.
+	// A for-select with a read of the quit channel is used instead of a for-range to provide clean shutdown. This is
+	// necessary due to WebsocketClientRead (which sends to the allRequests chan) not closing allRequests during
+	// shutdown if the remote websocket client is still connected.
 out:
 	for {
 		select {
@@ -398,9 +385,8 @@ out:
 				resp := MakeResponse(req.ID, nil,
 					btcjson.ErrRPCInvalidRequest)
 				mResp, err := js.Marshal(resp)
-				// We expect the marshal to succeed.  If it
-				// doesn't, it indicates some non-marshalable
-				// type in the response.
+				// We expect the marshal to succeed. If it doesn't, it indicates some non-marshalable type in the
+				// response.
 				if err != nil {
 					Error(err)
 					panic(err)
@@ -532,8 +518,7 @@ out:
 	s.WG.Done()
 }
 
-// WebsocketClientRPC starts the goroutines to serve JSON-RPC requests over a
-// websocket connection for a single client.
+// WebsocketClientRPC starts the goroutines to serve JSON-RPC requests over a websocket connection for a single client.
 func (s *Server) WebsocketClientRPC(wsc *WebsocketClient) {
 	Infof(
 		"new websocket client %v %s", wsc.remoteAddr,
@@ -545,10 +530,9 @@ func (s *Server) WebsocketClientRPC(wsc *WebsocketClient) {
 			"cannot remove read deadline:", err,
 		)
 	}
-	// WebsocketClientRead is intentionally not run with the waitgroup
-	// so it is ignored during shutdown.  This is to prevent a hang during
-	// shutdown where the goroutine is blocked on a read of the
-	// websocket connection if the client is still connected.
+	// WebsocketClientRead is intentionally not run with the waitgroup so it is ignored during shutdown. This is to
+	// prevent a hang during shutdown where the goroutine is blocked on a read of the websocket connection if the client
+	// is still connected.
 	go s.WebsocketClientRead(wsc)
 	s.WG.Add(2)
 	go s.WebsocketClientRespond(wsc)
@@ -556,8 +540,8 @@ func (s *Server) WebsocketClientRPC(wsc *WebsocketClient) {
 	<-wsc.quit
 }
 
-// MaxRequestSize specifies the maximum number of bytes in the request body
-// that may be read from a client.  This is currently limited to 4MB.
+// MaxRequestSize specifies the maximum number of bytes in the request body that may be read from a client. This is
+// currently limited to 4MB.
 const MaxRequestSize = 1024 * 1024 * 4
 
 // POSTClientRPC processes and replies to a JSON-RPC client request.
@@ -571,10 +555,9 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 			http.StatusRequestEntityTooLarge)
 		return
 	}
-	// First check whether wallet has a handler for this request's method.
-	// If unfound, the request is sent to the chain server for further
-	// processing.  While checking the methods, disallow authenticate
-	// requests, as they are invalid for HTTP POST clients.
+	// First check whether wallet has a handler for this request's method. If unfound, the request is sent to the chain
+	// server for further processing. While checking the methods, disallow authenticate requests, as they are invalid
+	// for HTTP POST clients.
 	var req btcjson.Request
 	err = js.Unmarshal(rpcRequest, &req)
 	if err != nil {
@@ -597,8 +580,8 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	// Create the response and error from the request.  Two special cases
-	// are handled for the authenticate and stop request methods.
+	// Create the response and error from the request. Two special cases are handled for the authenticate and stop
+	// request methods.
 	var res interface{}
 	var jsonErr *btcjson.RPCError
 	var stop bool
@@ -642,8 +625,7 @@ func (s *Server) RequestProcessShutdown() {
 	}
 }
 
-// RequestProcessShutdownChan returns a channel that is sent to when an authorized
-// client requests remote shutdown.
+// RequestProcessShutdownChan returns a channel that is sent to when an authorized client requests remote shutdown.
 func (s *Server) RequestProcessShutdownChan() <-chan struct{} {
 	return s.RequestShutdownChan
 }

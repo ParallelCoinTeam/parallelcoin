@@ -2,7 +2,11 @@ package monitor
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"path/filepath"
+
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -12,8 +16,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/util/logi"
-	"io/ioutil"
-	"path/filepath"
 )
 
 const ConfigFileName = "monitor.json"
@@ -98,13 +100,35 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		s.ModesButtons[modes[i]] = new(gel.Button)
 	}
 	buttons := []string{
-		"Close", "Restart", "Logo", "RunMenu", "StopMenu", "PauseMenu",
-		"RestartMenu", "KillMenu", "RunModeFold", "SettingsFold",
-		"SettingsClose", "SettingsZoom", "BuildFold",
-		"BuildClose", "BuildZoom", "BuildTitleClose", "Filter",
-		"FilterHeader", "FilterAll", "FilterHide", "FilterShow",
-		"FilterNone", "FilterClear", "FilterSend", "RunningInRepo",
-		"RunFromProfile", "UseBuiltinGo", "InstallNewGo"}
+		"Close",
+		"Restart",
+		"Logo",
+		"RunMenu",
+		"StopMenu",
+		"PauseMenu",
+		"RestartMenu",
+		"KillMenu",
+		"RunModeFold",
+		"SettingsFold",
+		"SettingsClose",
+		"SettingsZoom",
+		"BuildFold",
+		"BuildClose",
+		"BuildZoom",
+		"BuildTitleClose",
+		"Filter",
+		"FilterHeader",
+		"FilterAll",
+		"FilterHide",
+		"FilterShow",
+		"FilterNone",
+		"FilterClear",
+		"FilterSend",
+		"RunningInRepo",
+		"RunFromProfile",
+		"UseBuiltinGo",
+		"InstallNewGo",
+	}
 	for i := range buttons {
 		s.Buttons[buttons[i]] = new(gel.Button)
 	}

@@ -96,8 +96,8 @@ func (c *Channel) Close() (err error) {
 	return
 }
 
-// GetShards returns a buffer iterator to feed to Channel.SendMany containing
-// fec encoded shards built from the provided buffer
+// GetShards returns a buffer iterator to feed to Channel.SendMany containing fec encoded shards built from the provided
+// buffer
 func GetShards(data []byte) (shards [][]byte) {
 	var err error
 	if shards, err = fec.Encode(data); Check(err) {
@@ -147,8 +147,8 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 	return
 }
 
-// Listen binds to the UDP Address and port given and writes packets received
-// from that Address to a buffer which is passed to a handler
+// Listen binds to the UDP Address and port given and writes packets received from that Address to a buffer which is
+// passed to a handler
 func Listen(address string, channel *Channel, maxDatagramSize int, handlers Handlers,
 	quit chan struct{}) (conn *net.UDPConn, err error) {
 	var addr *net.UDPAddr
@@ -167,9 +167,8 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 	return
 }
 
-// NewBroadcastChannel returns a broadcaster and listener with a given handler on a multicast
-// address and specified port. The handlers define the messages that will be processed and
-// any other messages are ignored
+// NewBroadcastChannel returns a broadcaster and listener with a given handler on a multicast address and specified
+// port. The handlers define the messages that will be processed and any other messages are ignored
 func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
 	quit chan struct{}) (channel *Channel, err error) {
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
@@ -200,8 +199,8 @@ func NewBroadcaster(port int, maxDatagramSize int) (conn *net.UDPConn, err error
 	return
 }
 
-// ListenBroadcast binds to the UDP Address and port given and writes packets received
-// from that Address to a buffer which is passed to a handler
+// ListenBroadcast binds to the UDP Address and port given and writes packets received from that Address to a buffer
+// which is passed to a handler
 func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers Handlers,
 	quit chan struct{}) (conn *net.UDPConn, err error) {
 	address := net.JoinHostPort(UDPMulticastAddress, fmt.Sprint(port))
@@ -239,9 +238,8 @@ func handleNetworkError(address string, err error) (result int) {
 	return
 }
 
-// Handle listens for messages, decodes them, aggregates them, recovers the data from the
-// reed solomon fec shards received and invokes the handler provided matching the magic
-// on the complete received messages
+// Handle listens for messages, decodes them, aggregates them, recovers the data from the reed solomon fec shards
+// received and invokes the handler provided matching the magic on the complete received messages
 func Handle(address string, channel *Channel,
 	handlers Handlers, maxDatagramSize int, quit chan struct{}) {
 	buffer := make([]byte, maxDatagramSize)
@@ -272,8 +270,7 @@ out:
 		// Filter messages by magic, if there is no match in the map the packet is ignored
 		magic := string(buffer[:4])
 		if handler, ok := handlers[magic]; ok {
-			// if caller needs to know the liveness status of the
-			// controller it is working on, the code below
+			// if caller needs to know the liveness status of the controller it is working on, the code below
 			if channel.lastSent != nil && channel.firstSender != nil {
 				*channel.lastSent = time.Now()
 			}
@@ -322,9 +319,9 @@ out:
 					for i := range channel.buffers {
 						if i != nonce || (channel.buffers[i].Decoded &&
 							len(channel.buffers[i].Buffers) > 8) {
-							// superseded messages can be deleted from the
-							// buffers, we don't add more data for the already
-							// decoded.
+							// superseded messages can be deleted from the buffers, we don't add more data for the
+							// already decoded.
+							// todo: this will be changed to track stats for the puncture rate and redundancy scaling
 							delete(channel.buffers, i)
 						}
 					}

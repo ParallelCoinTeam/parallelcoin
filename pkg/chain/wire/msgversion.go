@@ -14,10 +14,10 @@ const MaxUserAgentLen = 256
 // DefaultUserAgent for wire in the stack
 const DefaultUserAgent = "/btcwire:0.5.0/"
 
-// MsgVersion implements the Message interface and represents a bitcoin version message.  It is used for a peer to
-// advertise itself as soon as an outbound connection is made.  The remote peer then uses this information along with
-// its own to negotiate.  The remote peer must then respond with a version message of its own containing the negotiated
-// values followed by a verack message (MsgVerAck).  This exchange must take place before any further communication is
+// MsgVersion implements the Message interface and represents a bitcoin version message. It is used for a peer to
+// advertise itself as soon as an outbound connection is made. The remote peer then uses this information along with its
+// own to negotiate. The remote peer must then respond with a version message of its own containing the negotiated
+// values followed by a verack message (MsgVerAck). This exchange must take place before any further communication is
 // allowed to proceed.
 type MsgVersion struct {
 	// Version of the protocol the node is using.
@@ -32,7 +32,7 @@ type MsgVersion struct {
 	AddrMe NetAddress
 	// Unique value associated with message that is used to detect self connections.
 	Nonce uint64
-	// The user agent that generated messsage.  This is a encoded as a varString on the wire.  This has a max length of
+	// The user agent that generated message. This is a encoded as a varString on the wire. This has a max length of
 	// MaxUserAgentLen.
 	UserAgent string
 	// Last block seen by the generator of the version message.
@@ -52,8 +52,8 @@ func (msg *MsgVersion) AddService(service ServiceFlag) {
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. The version message is special in that the
-// protocol version hasn't been negotiated yet.  As a result, the pver field is ignored and any fields which are added
-// in new versions are optional.  This also mean that r must be a *bytes.Buffer so the number of remaining bytes can be
+// protocol version hasn't been negotiated yet. As a result, the pver field is ignored and any fields which are added in
+// new versions are optional. This also mean that r must be a *bytes.Buffer so the number of remaining bytes can be
 // ascertained. This is part of the Message interface implementation.
 func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	buf, ok := r.(*bytes.Buffer)

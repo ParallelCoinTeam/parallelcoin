@@ -10,7 +10,6 @@ import (
 )
 
 // HelpDescsEnUS defines the English descriptions used for the help strings.
-// nolint
 var HelpDescsEnUS = map[string]string{
 	// DebugLevelCmd help.
 	"debuglevel--synopsis": "Dynamically changes the debug logging level.\n" +
@@ -86,7 +85,7 @@ var HelpDescsEnUS = map[string]string{
 	"scriptpubkeyresult-reqSigs":   "The number of required signatures",
 	"scriptpubkeyresult-type":      "The type of the script (e.g. 'pubkeyhash')",
 	"scriptpubkeyresult-addresses": "The bitcoin addresses associated with this script",
-	// Vout help.
+	// VOut help.
 	"vout-value":        "The amount in DUO",
 	"vout-n":            "The index of this transaction output",
 	"vout-scriptPubKey": "The public key script used to pay coins as a JSON object",
@@ -700,7 +699,6 @@ var HelpDescsEnUS = map[string]string{
 // ResultTypes specifies the result types that each RPC command can return.
 // This information is used to generate the help.  Each result type must be a
 // pointer to the type (or nil to indicate no return value).
-// nolint
 var ResultTypes = map[string][]interface{}{
 	"addnode":               nil,
 	"createrawtransaction":  {(*string)(nil)},
@@ -766,8 +764,8 @@ var ResultTypes = map[string][]interface{}{
 	"rescanblocks":              {(*[]btcjson.RescannedBlock)(nil)},
 }
 
-// HelpCacher provides a concurrent safe type that provides help and usage for
-// the RPC server commands and caches the results for future calls.
+// HelpCacher provides a concurrent safe type that provides help and usage for the RPC server commands and caches the
+// results for future calls.
 type HelpCacher struct {
 	sync.Mutex
 	usage      string
@@ -832,9 +830,8 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 	return c.usage, nil
 }
 
-// NewHelpCacher returns a new instance of a help cacher which provides help
-// and usage for the RPC server commands and caches the results for future
-// calls.
+// NewHelpCacher returns a new instance of a help cacher which provides help and usage for the RPC server commands and
+// caches the results for future calls.
 func NewHelpCacher() *HelpCacher {
 	return &HelpCacher{
 		methodHelp: make(map[string]string),

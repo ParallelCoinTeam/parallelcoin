@@ -1,13 +1,14 @@
 package fui
 
 import (
+	"math"
+	"time"
+
 	"gioui.org/app"
 	"gioui.org/io/event"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"math"
-	"time"
 )
 
 type scaledConfig struct {

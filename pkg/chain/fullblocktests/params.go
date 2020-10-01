@@ -5,12 +5,15 @@ import (
 	"math/big"
 	"time"
 
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// newHashFromStr converts the passed big-endian hex string into a wire.Hash.  It only differs from the one available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore known good, hashes.
+// newHashFromStr converts the passed big-endian hex string into a wire.Hash. It only differs from the one available in
+// chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore
+// known good, hashes.
 func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
 	if err != nil {
@@ -76,7 +79,7 @@ var (
 //
 // NOTE: The test generator intentionally does not use the existing definitions in the chaincfg package since the intent is to be able to generate known good tests which exercise that code.  Using the chaincfg parameters would allow them to change out from under the tests potentially invalidating them.
 var regressionNetParams = &netparams.Params{
-	Params: &netparams.Params{
+	Params: &chaincfg.Params{
 		Name:        "regtest",
 		Net:         wire.TestNet,
 		DefaultPort: "18444",

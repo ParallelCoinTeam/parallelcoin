@@ -21,7 +21,8 @@ func TestInv(t *testing.T) {
 		t.Errorf("NewMsgInv: wrong command - got %v want %v",
 			cmd, wantCmd)
 	}
-	// Ensure max payload is expected value for latest protocol version. Num inventory vectors (varInt) + max allowed inventory vectors.
+	// Ensure max payload is expected value for latest protocol version. Num inventory vectors (varInt) + max allowed
+	// inventory vectors.
 	wantPayload := uint32(1800009)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
@@ -219,7 +220,8 @@ func TestInvWire(t *testing.T) {
 	}
 }
 
-// TestInvWireErrors performs negative tests against wire encode and decode of MsgInv to confirm error paths work correctly.
+// TestInvWireErrors performs negative tests against wire encode and decode of MsgInv to confirm error paths work
+// correctly.
 func TestInvWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	wireErr := &MessageError{}

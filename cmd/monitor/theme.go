@@ -3,7 +3,7 @@ package monitor
 func (s *State) FlipTheme() {
 	Debug("dark theme:", s.Config.DarkTheme)
 	s.Config.DarkTheme = !s.Config.DarkTheme
-	//Debug(s.Config.DarkTheme)
+	// Debug(s.Config.DarkTheme)
 	s.SetTheme(s.Config.DarkTheme)
 	s.SaveConfig()
 }

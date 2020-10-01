@@ -46,7 +46,8 @@ type CreateRawTransactionCmd struct {
 	LockTime *int64
 }
 
-// NewCreateRawTransactionCmd returns a new instance which can be used to issue a createrawtransaction JSON-RPC command. Amounts are in DUO.
+// NewCreateRawTransactionCmd returns a new instance which can be used to issue a createrawtransaction JSON-RPC command.
+// Amounts are in DUO.
 func NewCreateRawTransactionCmd(inputs []TransactionInput, amounts map[string]float64,
 	lockTime *int64) *CreateRawTransactionCmd {
 	return &CreateRawTransactionCmd{
@@ -86,7 +87,9 @@ type GetAddedNodeInfoCmd struct {
 	Node *string
 }
 
-// NewGetAddedNodeInfoCmd returns a new instance which can be used to issue a getaddednodeinfo JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetAddedNodeInfoCmd returns a new instance which can be used to issue a getaddednodeinfo JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewGetAddedNodeInfoCmd(dns bool, node *string) *GetAddedNodeInfoCmd {
 	return &GetAddedNodeInfoCmd{
 		DNS:  dns,
@@ -109,7 +112,8 @@ type GetBlockCmd struct {
 	VerboseTx *bool `jsonrpcdefault:"false"`
 }
 
-// NewGetBlockCmd returns a new instance which can be used to issue a getblock JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetBlockCmd returns a new instance which can be used to issue a getblock JSON-RPC command. The parameters which
+// are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewGetBlockCmd(hash string, verbose, verboseTx *bool) *GetBlockCmd {
 	return &GetBlockCmd{
 		Hash:      hash,
@@ -160,7 +164,8 @@ func NewGetBlockHeaderCmd(hash string, verbose *bool) *GetBlockHeaderCmd {
 	}
 }
 
-// TemplateRequest is a request object as defined in BIP22 (https://en.bitcoin.it/wiki/BIP_0022), it is optionally provided as an pointer argument to GetBlockTemplateCmd.
+// TemplateRequest is a request object as defined in BIP22 (https://en.bitcoin.it/wiki/BIP_0022), it is optionally
+// provided as an pointer argument to GetBlockTemplateCmd.
 type TemplateRequest struct {
 	Mode         string   `json:"mode,omitempty"`
 	Capabilities []string `json:"capabilities,omitempty"`
@@ -177,8 +182,7 @@ type TemplateRequest struct {
 	WorkID string `json:"workid,omitempty"`
 }
 
-// convertTemplateRequestField potentially converts the provided value as
-// needed.
+// convertTemplateRequestField potentially converts the provided value as needed.
 func convertTemplateRequestField(fieldName string, iface interface{}) (interface{}, error) {
 	switch val := iface.(type) {
 	case nil:
@@ -195,7 +199,8 @@ func convertTemplateRequestField(fieldName string, iface interface{}) (interface
 	return nil, makeError(ErrInvalidType, str)
 }
 
-// UnmarshalJSON provides a custom Unmarshal method for TemplateRequest.  This is necessary because the SigOpLimit and SizeLimit fields can only be specific types.
+// UnmarshalJSON provides a custom Unmarshal method for TemplateRequest. This is necessary because the SigOpLimit and
+// SizeLimit fields can only be specific types.
 func (t *TemplateRequest) UnmarshalJSON(data []byte) error {
 	type templateRequest TemplateRequest
 	request := (*templateRequest)(t)
@@ -224,7 +229,9 @@ type GetBlockTemplateCmd struct {
 	Request *TemplateRequest
 }
 
-// NewGetBlockTemplateCmd returns a new instance which can be used to issue a getblocktemplate JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetBlockTemplateCmd returns a new instance which can be used to issue a getblocktemplate JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewGetBlockTemplateCmd(request *TemplateRequest) *GetBlockTemplateCmd {
 	return &GetBlockTemplateCmd{
 		Request: request,
@@ -540,7 +547,9 @@ type SendRawTransactionCmd struct {
 	AllowHighFees *bool `jsonrpcdefault:"false"`
 }
 
-// NewSendRawTransactionCmd returns a new instance which can be used to issue a sendrawtransaction JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewSendRawTransactionCmd returns a new instance which can be used to issue a sendrawtransaction JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewSendRawTransactionCmd(hexTx string, allowHighFees *bool) *SendRawTransactionCmd {
 	return &SendRawTransactionCmd{
 		HexTx:         hexTx,
@@ -554,7 +563,8 @@ type SetGenerateCmd struct {
 	GenProcLimit *int `jsonrpcdefault:"-1"`
 }
 
-// NewSetGenerateCmd returns a new instance which can be used to issue a setgenerate JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewSetGenerateCmd returns a new instance which can be used to issue a setgenerate JSON-RPC command. The parameters
+// which are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewSetGenerateCmd(generate bool, genProcLimit *int) *SetGenerateCmd {
 	return &SetGenerateCmd{
 		Generate:     generate,
@@ -598,7 +608,8 @@ type SubmitBlockCmd struct {
 	Options  *SubmitBlockOptions
 }
 
-// NewSubmitBlockCmd returns a new instance which can be used to issue a submitblock JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewSubmitBlockCmd returns a new instance which can be used to issue a submitblock JSON-RPC command. The parameters
+// which are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewSubmitBlockCmd(hexBlock string, options *SubmitBlockOptions) *SubmitBlockCmd {
 	return &SubmitBlockCmd{
 		HexBlock: hexBlock,

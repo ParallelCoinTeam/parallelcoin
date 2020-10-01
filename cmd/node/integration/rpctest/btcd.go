@@ -10,22 +10,17 @@ import (
 )
 
 var (
-	// compileMtx guards access to the executable path so that the project is
-	// only compiled once.
+	// compileMtx guards access to the executable path so that the project is only compiled once.
 	compileMtx sync.Mutex
-	// executablePath is the path to the compiled executable.
-	// This is the empty string until pod is compiled. This should not be accessed directly;
-	// instead use the function podExecutablePath().
+	// executablePath is the path to the compiled executable. This is the empty string until pod is compiled. This
+	// should not be accessed directly; instead use the function podExecutablePath().
 	executablePath string
 )
 
-// podExecutablePath returns a path to the pod executable to be used by
-// rpctests. To ensure the code tests against the most up-to-date version of
-// pod, this method compiles pod the first time it is called. After that,
-// the generated binary is used for subsequent test harnesses.
-// The executable file is not cleaned up,
-// but since it lives at a static path in a temp directory,
-// it is not a big deal.
+// podExecutablePath returns a path to the pod executable to be used by rpctests. To ensure the code tests against the
+// most up-to-date version of pod, this method compiles pod the first time it is called. After that, the generated
+// binary is used for subsequent test harnesses. The executable file is not cleaned up, but since it lives at a static
+// path in a temp directory, it is not a big deal.
 func podExecutablePath() (string, error) {
 	compileMtx.Lock()
 	defer compileMtx.Unlock()
@@ -38,8 +33,7 @@ func podExecutablePath() (string, error) {
 		Error(err)
 		return "", err
 	}
-	// Determine import path of this package.
-	// Not necessarily pod if this is a forked repo.
+	// Determine import path of this package. Not necessarily pod if this is a forked repo.
 	_, rpctestDir, _, ok := runtime.Caller(1)
 	if !ok {
 		return "", fmt.Errorf("Cannot get path to pod source code")

@@ -15,12 +15,12 @@ import (
 
 type HandleFunc map[string]func(ctx interface{}) func(b []byte) (err error)
 
-// Connection is the state and working memory references for a simple
-// reliable UDP lan transport, encrypted by a GCM AES cipher,
-// with the simple protocol of sending out 9 packets containing encrypted FEC
-// shards containing a slice of bytes.
-// This protocol probably won't work well outside of a multicast lan in
-// adverse conditions but it is designed for local network control systems
+// Connection is the state and working memory references for a simple reliable UDP lan transport, encrypted by a GCM AES
+// cipher, with the simple protocol of sending out 9 packets containing encrypted FEC shards containing a slice of
+// bytes.
+//
+// This protocol probably won't work well outside of a multicast lan in adverse conditions but it is designed for local
+// network control systems todo: it is if the updated fec segmenting code is put in
 type Connection struct {
 	maxDatagramSize int
 	buffers         map[string]*MsgBuffer
@@ -199,8 +199,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 			}
 			magic := string(buf[:4])
 			if _, ok := handlers[magic]; ok {
-				// if caller needs to know the liveness status of the
-				// controller it is working on, the code below
+				// if caller needs to know the liveness status of the controller it is working on, the code below
 				if lastSent != nil && firstSender != nil {
 					*lastSent = time.Now()
 				}

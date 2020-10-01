@@ -104,7 +104,8 @@ func TestFeeFilterWire(t *testing.T) {
 	}
 }
 
-// TestFeeFilterWireErrors performs negative tests against wire encode and decode of MsgFeeFilter to confirm error paths work correctly.
+// TestFeeFilterWireErrors performs negative tests against wire encode and decode of MsgFeeFilter to confirm error paths
+// work correctly.
 func TestFeeFilterWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoFeeFilter := FeeFilterVersion - 1

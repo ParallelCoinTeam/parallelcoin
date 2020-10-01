@@ -7,7 +7,8 @@ const (
 	PodConnectedNtfnMethod = "podconnected"
 	// WalletLockStateNtfnMethod is the method used to notify the lock state of a wallet has changed.
 	WalletLockStateNtfnMethod = "walletlockstate"
-	// NewTxNtfnMethod is the method used to notify that a wallet server has added a new transaction to the transaction store.
+	// NewTxNtfnMethod is the method used to notify that a wallet server has added a new transaction to the transaction
+	// store.
 	NewTxNtfnMethod = "newtx"
 )
 

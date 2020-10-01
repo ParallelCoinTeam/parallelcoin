@@ -60,7 +60,8 @@ func TestAddr(t *testing.T) {
 		t.Errorf("AddAddresses: expected error on too many addresses " +
 			"not received")
 	}
-	// Ensure max payload is expected value for protocol versions before timestamp was added to NetAddress. Num addresses (varInt) + max allowed addresses.
+	// Ensure max payload is expected value for protocol versions before timestamp was added to NetAddress. Num
+	// addresses (varInt) + max allowed addresses.
 	pver = NetAddressTimeVersion - 1
 	wantPayload = uint32(26009)
 	maxPayload = msg.MaxPayloadLength(pver)
@@ -69,7 +70,8 @@ func TestAddr(t *testing.T) {
 			"protocol version %d - got %v, want %v", pver,
 			maxPayload, wantPayload)
 	}
-	// Ensure max payload is expected value for protocol versions before multiple addresses were allowed. Num addresses (varInt) + a single net addresses.
+	// Ensure max payload is expected value for protocol versions before multiple addresses were allowed. Num addresses
+	// (varInt) + a single net addresses.
 	pver = MultipleAddressVersion - 1
 	wantPayload = uint32(35)
 	maxPayload = msg.MaxPayloadLength(pver)
@@ -243,7 +245,8 @@ func TestAddrWireErrors(t *testing.T) {
 		{baseAddr, baseAddrEncoded, pver, BaseEncoding, 1, io.ErrShortWrite, io.EOF},
 		// Force error with greater than max inventory vectors.
 		{maxAddr, maxAddrEncoded, pver, BaseEncoding, 3, wireErr, wireErr},
-		// Force error with greater than max inventory vectors for protocol versions before multiple addresses were allowed.
+		// Force error with greater than max inventory vectors for protocol versions before multiple addresses were
+		// allowed.
 		{maxAddr, maxAddrEncoded, pverMA - 1, BaseEncoding, 3, wireErr, wireErr},
 	}
 	t.Logf("Running %d tests", len(tests))

@@ -7,8 +7,13 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
-	nH int32) (allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv float64) {
+func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode, nH int32) (
+	allTimeAv float64,
+	allTimeDiv float64,
+	qhourDiv float64,
+	hourDiv float64,
+	dayDiv float64,
+) {
 	const minAvSamples = 2
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv = 1.0, 1.0, 1.0, 1.0, 1.0
 	ttpb := float64(fork.List[1].TargetTimePerBlock)
@@ -151,8 +156,13 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 	return
 }
 
-func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *BlockNode,
-	startHeight int32, algoVer int32, ttpb float64) (algDiv float64) {
+func (b *BlockChain) GetP9AlgoDiv(
+	allTimeDiv float64,
+	last *BlockNode,
+	startHeight int32,
+	algoVer int32,
+	ttpb float64,
+) (algDiv float64) {
 	const minAvSamples = 9
 	// collect timestamps of same algo of equal number as avinterval
 	algDiv = allTimeDiv
@@ -188,8 +198,13 @@ func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *BlockNode,
 	return
 }
 
-func (b *BlockChain) GetP9Since(lastNode *BlockNode, algoVer int32) (since,
-	ttpb, timeSinceAlgo float64, startHeight int32, last *BlockNode) {
+func (b *BlockChain) GetP9Since(lastNode *BlockNode, algoVer int32) (
+	since float64,
+	ttpb float64,
+	timeSinceAlgo float64,
+	startHeight int32,
+	last *BlockNode,
+) {
 	last = lastNode
 	// find the most recent block of the same algo
 	ln := last
@@ -205,9 +220,8 @@ func (b *BlockChain) GetP9Since(lastNode *BlockNode, algoVer int32) (since,
 	since = float64(lastNode.timestamp - last.timestamp)
 	ttpb = float64(fork.List[1].TargetTimePerBlock)
 	tspb := ttpb * float64(len(fork.List[1].Algos))
-	// ratio of seconds since to target seconds per block times the
-	// all time divergence ensures the change scales with the divergence
-	// from the target, and favours algos that are later
+	// ratio of seconds since to target seconds per block times the all time divergence ensures the change scales with
+	// the divergence from the target, and favours algos that are later
 	timeSinceAlgo = capP9Adjustment((since / tspb) / 5)
 
 	return

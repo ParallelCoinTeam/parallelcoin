@@ -6,8 +6,8 @@ type direction struct {
 	layout.Direction
 }
 
-// Direction creates a directional layout that sets its contents to align
-// according to the configured direction (8 cardinal directions and centered)
+// Direction creates a directional layout that sets its contents to align according to the configured direction (8
+// cardinal directions and centered)
 func Direction() (out *direction) {
 	out = &direction{}
 	return

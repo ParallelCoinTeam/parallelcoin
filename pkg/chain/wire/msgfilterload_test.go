@@ -41,7 +41,8 @@ func TestFilterLoadLatest(t *testing.T) {
 	}
 }
 
-// TestFilterLoadCrossProtocol tests the MsgFilterLoad API when encoding with the latest protocol version and decoding with BIP0031Version.
+// TestFilterLoadCrossProtocol tests the MsgFilterLoad API when encoding with the latest protocol version and decoding
+// with BIP0031Version.
 func TestFilterLoadCrossProtocol(t *testing.T) {
 	data := []byte{0x01, 0x02}
 	msg := NewMsgFilterLoad(data, 10, 0, 0)
@@ -108,7 +109,8 @@ func TestFilterLoadMaxHashFuncsSize(t *testing.T) {
 	}
 }
 
-// TestFilterLoadWireErrors performs negative tests against wire encode and decode of MsgFilterLoad to confirm error paths work correctly.
+// TestFilterLoadWireErrors performs negative tests against wire encode and decode of MsgFilterLoad to confirm error
+// paths work correctly.
 func TestFilterLoadWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoFilterLoad := BIP0037Version - 1

@@ -93,15 +93,13 @@ func TestMarshalResponse(t *testing.T) {
 // TestMiscErrors tests a few error conditions not covered elsewhere.
 func TestMiscErrors(t *testing.T) {
 	t.Parallel()
-	// Force an error in NewRequest by giving it a parameter type that is
-	// not supported.
+	// Force an error in NewRequest by giving it a parameter type that is not supported.
 	_, err := btcjson.NewRequest(nil, "test", []interface{}{make(chan int)})
 	if err == nil {
 		t.Error("NewRequest: did not receive error")
 		return
 	}
-	// Force an error in MarshalResponse by giving it an id type that is not
-	// supported.
+	// Force an error in MarshalResponse by giving it an id type that is not supported.
 	wantErr := btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType}
 	_, err = btcjson.MarshalResponse(make(chan int), nil, nil)
 	if jerr, ok := err.(btcjson.BTCJSONError); !ok || jerr.ErrorCode != wantErr.ErrorCode {

@@ -23,7 +23,8 @@ func BenchmarkDeriveHardened(b *testing.B) {
 	}
 }
 
-// BenchmarkDeriveNormal benchmarks how long it takes to derive a normal (non-hardened) child from a master private extended key.
+// BenchmarkDeriveNormal benchmarks how long it takes to derive a normal (non-hardened) child from a master private
+// extended key.
 func BenchmarkDeriveNormal(b *testing.B) {
 	b.StopTimer()
 	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)

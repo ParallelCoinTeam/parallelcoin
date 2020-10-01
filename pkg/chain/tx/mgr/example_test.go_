@@ -37,8 +37,8 @@ func init() {
 
 var exampleBlock100 = makeBlockMeta(100)
 
-// This example demonstrates reporting the Store balance given an unmined and
-// mined transaction given 0, 1, and 6 block confirmations.
+// This example demonstrates reporting the Store balance given an unmined and mined transaction given 0, 1, and 6 block
+// confirmations.
 func ExampleStore_Balance() {
 	s, db, teardown, err := testStore()
 	defer teardown()

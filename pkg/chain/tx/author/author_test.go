@@ -118,9 +118,8 @@ func TestNewUnsignedTransaction(t *testing.T) {
 			ChangeAmount: 1393,
 			InputCount:   1,
 		},
-		// Test two unspent outputs available but only one needed
-		// (tested fee only includes one input rather than using a
-		// serialize size for each).
+		// Test two unspent outputs available but only one needed (tested fee only includes one input rather than using
+		// a serialize size for each).
 		9: {
 			UnspentOutputs: p2pkhOutputs(1e8, 1e8),
 			Outputs: p2pkhOutputs(1e8 - 546 - txrules.FeeForSerializeSize(1e3,
@@ -129,11 +128,10 @@ func TestNewUnsignedTransaction(t *testing.T) {
 			ChangeAmount: 546,
 			InputCount:   1,
 		},
-		// Test that second output is not included to make the change
-		// output not dust and be included in the transaction.
+		// Test that second output is not included to make the change output not dust and be included in the
+		// transaction.
 		//
-		// It's debatable whether or not this is a good idea, but it's
-		// how the function was written, so test it anyways.
+		// It's debatable whether or not this is a good idea, but it's how the function was written, so test it anyways.
 		10: {
 			UnspentOutputs: p2pkhOutputs(1e8, 1e8),
 			Outputs: p2pkhOutputs(1e8 - 545 - txrules.FeeForSerializeSize(1e3,
@@ -151,8 +149,7 @@ func TestNewUnsignedTransaction(t *testing.T) {
 				txsizes.EstimateVirtualSize(2, 0, 0, p2pkhOutputs(1e8), true)),
 			InputCount: 2,
 		},
-		// Test that zero change outputs are not included
-		// (ChangeAmount=0 means don't include any change output).
+		// Test that zero change outputs are not included (ChangeAmount=0 means don't include any change output).
 		12: {
 			UnspentOutputs: p2pkhOutputs(1e8),
 			Outputs:        p2pkhOutputs(1e8),

@@ -7,8 +7,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// GetCipher returns a GCM cipher given a password string. Note that this cipher
-// must be renewed every 4gb of encrypted data
+// GetCipher returns a GCM cipher given a password string. Note that this cipher must be renewed every 4gb of encrypted
+// data
 func GetCipher(password string) (gcm cipher.AEAD, err error) {
 	bytes := []byte(password)
 	var c cipher.Block

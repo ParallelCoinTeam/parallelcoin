@@ -35,7 +35,9 @@ type NotifyNewTransactionsCmd struct {
 	Verbose *bool `jsonrpcdefault:"false"`
 }
 
-// NewNotifyNewTransactionsCmd returns a new instance which can be used to issue a notifynewtransactions JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewNotifyNewTransactionsCmd returns a new instance which can be used to issue a notifynewtransactions JSON-RPC
+// command. The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use
+// the default value.
 func NewNotifyNewTransactionsCmd(verbose *bool) *NotifyNewTransactionsCmd {
 	return &NotifyNewTransactionsCmd{
 		Verbose: verbose,
@@ -53,7 +55,9 @@ func NewSessionCmd() *SessionCmd {
 // StopNotifyNewTransactionsCmd defines the stopnotifynewtransactions JSON-RPC command.
 type StopNotifyNewTransactionsCmd struct{}
 
-// NewStopNotifyNewTransactionsCmd returns a new instance which can be used to issue a stopnotifynewtransactions JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewStopNotifyNewTransactionsCmd returns a new instance which can be used to issue a stopnotifynewtransactions
+// JSON-RPC command. The parameters which are pointers indicate they are optional. Passing nil for optional parameters
+// will use the default value.
 func NewStopNotifyNewTransactionsCmd() *StopNotifyNewTransactionsCmd {
 	return &StopNotifyNewTransactionsCmd{}
 }
@@ -63,7 +67,9 @@ type NotifyReceivedCmd struct {
 	Addresses []string
 }
 
-// NewNotifyReceivedCmd returns a new instance which can be used to issue a notifyreceived JSON-RPC command. NOTE: Deprecated. Use NewLoadTxFilterCmd instead.
+// NewNotifyReceivedCmd returns a new instance which can be used to issue a notifyreceived JSON-RPC command.
+//
+// NOTE: Deprecated. Use NewLoadTxFilterCmd instead.
 func NewNotifyReceivedCmd(addresses []string) *NotifyReceivedCmd {
 	return &NotifyReceivedCmd{
 		Addresses: addresses,
@@ -76,14 +82,18 @@ type OutPoint struct {
 	Index uint32 `json:"index"`
 }
 
-// LoadTxFilterCmd defines the loadtxfilter request parameters to load or reload a transaction filter. NOTE: This is a pod extension ported from github.com/decred/dcrd/dcrjson and requires a websocket connection.
+// LoadTxFilterCmd defines the loadtxfilter request parameters to load or reload a transaction filter.
+//
+// NOTE: This is a pod extension ported from github.com/decred/dcrd/dcrjson and requires a websocket connection.
 type LoadTxFilterCmd struct {
 	Reload    bool
 	Addresses []string
 	OutPoints []OutPoint
 }
 
-// NewLoadTxFilterCmd returns a new instance which can be used to issue a loadtxfilter JSON-RPC command. NOTE: This is a pod extension ported from github.com/decred/dcrd/dcrjson and requires a websocket connection.
+// NewLoadTxFilterCmd returns a new instance which can be used to issue a loadtxfilter JSON-RPC command.
+//
+// NOTE: This is a pod extension ported from github.com/decred/dcrd/dcrjson and requires a websocket connection.
 func NewLoadTxFilterCmd(reload bool, addresses []string, outPoints []OutPoint) *LoadTxFilterCmd {
 	return &LoadTxFilterCmd{
 		Reload:    reload,
@@ -92,36 +102,48 @@ func NewLoadTxFilterCmd(reload bool, addresses []string, outPoints []OutPoint) *
 	}
 }
 
-// NotifySpentCmd defines the notifyspent JSON-RPC command. NOTE: Deprecated. Use LoadTxFilterCmd instead.
+// NotifySpentCmd defines the notifyspent JSON-RPC command.
+//
+// NOTE: Deprecated. Use LoadTxFilterCmd instead.
 type NotifySpentCmd struct {
 	OutPoints []OutPoint
 }
 
-// NewNotifySpentCmd returns a new instance which can be used to issue a notifyspent JSON-RPC command. NOTE: Deprecated. Use NewLoadTxFilterCmd instead.
+// NewNotifySpentCmd returns a new instance which can be used to issue a notifyspent JSON-RPC command.
+//
+// NOTE: Deprecated. Use NewLoadTxFilterCmd instead.
 func NewNotifySpentCmd(outPoints []OutPoint) *NotifySpentCmd {
 	return &NotifySpentCmd{
 		OutPoints: outPoints,
 	}
 }
 
-// StopNotifyReceivedCmd defines the stopnotifyreceived JSON-RPC command. NOTE: Deprecated. Use LoadTxFilterCmd instead.
+// StopNotifyReceivedCmd defines the stopnotifyreceived JSON-RPC command.
+//
+// NOTE: Deprecated. Use LoadTxFilterCmd instead.
 type StopNotifyReceivedCmd struct {
 	Addresses []string
 }
 
-// NewStopNotifyReceivedCmd returns a new instance which can be used to issue a stopnotifyreceived JSON-RPC command. NOTE: Deprecated. Use NewLoadTxFilterCmd instead.
+// NewStopNotifyReceivedCmd returns a new instance which can be used to issue a stopnotifyreceived JSON-RPC command.
+//
+// NOTE: Deprecated. Use NewLoadTxFilterCmd instead.
 func NewStopNotifyReceivedCmd(addresses []string) *StopNotifyReceivedCmd {
 	return &StopNotifyReceivedCmd{
 		Addresses: addresses,
 	}
 }
 
-// StopNotifySpentCmd defines the stopnotifyspent JSON-RPC command. NOTE: Deprecated. Use LoadTxFilterCmd instead.
+// StopNotifySpentCmd defines the stopnotifyspent JSON-RPC command.
+//
+// NOTE: Deprecated. Use LoadTxFilterCmd instead.
 type StopNotifySpentCmd struct {
 	OutPoints []OutPoint
 }
 
-// NewStopNotifySpentCmd returns a new instance which can be used to issue a stopnotifyspent JSON-RPC command. NOTE: Deprecated. Use NewLoadTxFilterCmd instead.
+// NewStopNotifySpentCmd returns a new instance which can be used to issue a stopnotifyspent JSON-RPC command.
+//
+// NOTE: Deprecated. Use NewLoadTxFilterCmd instead.
 func NewStopNotifySpentCmd(outPoints []OutPoint) *StopNotifySpentCmd {
 	return &StopNotifySpentCmd{
 		OutPoints: outPoints,
@@ -136,7 +158,10 @@ type RescanCmd struct {
 	EndBlock   *string
 }
 
-// NewRescanCmd returns a new instance which can be used to issue a rescan JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value. NOTE: Deprecated. Use NewRescanBlocksCmd instead.
+// NewRescanCmd returns a new instance which can be used to issue a rescan JSON-RPC command. The parameters which are
+// pointers indicate they are optional. Passing nil for optional parameters will use the default value.
+//
+// NOTE: Deprecated. Use NewRescanBlocksCmd instead.
 func NewRescanCmd(beginBlock string, addresses []string, outPoints []OutPoint, endBlock *string) *RescanCmd {
 	return &RescanCmd{
 		BeginBlock: beginBlock,
@@ -146,13 +171,17 @@ func NewRescanCmd(beginBlock string, addresses []string, outPoints []OutPoint, e
 	}
 }
 
-// RescanBlocksCmd defines the rescan JSON-RPC command. NOTE: This is a pod extension ported from github.com/decred/dcrd/dcrjson and requires a websocket connection.
+// RescanBlocksCmd defines the rescan JSON-RPC command.
+//
+// NOTE: This is a pod extension ported from github.com/decred/dcrd/dcrjson and requires a websocket connection.
 type RescanBlocksCmd struct {
 	// Block hashes as a string array.
 	BlockHashes []string
 }
 
-// NewRescanBlocksCmd returns a new instance which can be used to issue a rescan JSON-RPC command. NOTE: This is a pod extension ported from github.com/decred/dcrd/dcrjson and requires a websocket connection.
+// NewRescanBlocksCmd returns a new instance which can be used to issue a rescan JSON-RPC command.
+//
+// NOTE: This is a pod extension ported from github.com/decred/dcrd/dcrjson and requires a websocket connection.
 func NewRescanBlocksCmd(blockHashes []string) *RescanBlocksCmd {
 	return &RescanBlocksCmd{BlockHashes: blockHashes}
 }

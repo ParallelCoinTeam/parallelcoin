@@ -37,8 +37,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to create test db: %v", err)
 	}
-	// First, we'll create a a series of random headers that we'll use to
-	// write into the database.
+	// First, we'll create a a series of random headers that we'll use to write into the database.
 	const numHeaders = 100
 	headerEntries := make(headerBatch, numHeaders)
 	headerIndex := make(map[uint32]headerEntry)
@@ -51,13 +50,11 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 		headerEntries[i] = header
 		headerIndex[i] = header
 	}
-	// With the headers constructed, we'll write them to disk in a single
-	// batch.
+	// With the headers constructed, we'll write them to disk in a single batch.
 	if err := hIndex.addHeaders(headerEntries); err != nil {
 		t.Fatalf("unable to add headers: %v", err)
 	}
-	// Next, verify that the database tip matches the _final_ header
-	// inserted.
+	// Next, verify that the database tip matches the _final_ header inserted.
 	dbTip, dbHeight, err := hIndex.chainTip()
 	if err != nil {
 		t.Fatalf("unable to obtain chain tip: %v", err)
@@ -71,8 +68,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 		t.Fatalf("tip doesn't match: expected %x, got %x",
 			lastEntry.hash[:], dbTip[:])
 	}
-	// For each header written, check that we're able to retrieve the entry
-	// both by hash and height.
+	// For each header written, check that we're able to retrieve the entry both by hash and height.
 	for i, headerEntry := range headerEntries {
 		height, err := hIndex.heightFromHash(&headerEntry.hash)
 		if err != nil {
@@ -83,14 +79,12 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 				headerEntry.height, height)
 		}
 	}
-	// Next if we truncate the index by one, then we should end up at the
-	// second to last entry for the tip.
+	// Next if we truncate the index by one, then we should end up at the second to last entry for the tip.
 	newTip := headerIndex[numHeaders-2]
 	if err := hIndex.truncateIndex(&newTip.hash, true); err != nil {
 		t.Fatalf("unable to truncate index: %v", err)
 	}
-	// This time the database tip should be the _second_ to last entry
-	// inserted.
+	// This time the database tip should be the _second_ to last entry inserted.
 	dbTip, dbHeight, err = hIndex.chainTip()
 	if err != nil {
 		t.Fatalf("unable to obtain chain tip: %v", err)

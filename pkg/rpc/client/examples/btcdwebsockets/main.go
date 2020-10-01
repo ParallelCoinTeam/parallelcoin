@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -13,7 +14,9 @@ import (
 )
 
 func main() {
-	// Only override the handlers for notifications you care about. Also note most of these handlers will only be called if you register for notifications.  See the documentation of the rpcclient NotificationHandlers type for more details about each handler.
+	// Only override the handlers for notifications you care about. Also note most of these handlers will only be called
+	// if you register for notifications. See the documentation of the rpcclient NotificationHandlers type for more
+	// details about each handler.
 	ntfnHandlers := rpcclient.NotificationHandlers{
 		OnFilteredBlockConnected: func(height int32, header *wire.BlockHeader, txns []*util.Tx) {
 			log.Printf("Block connected: %v (%d) %v",
@@ -52,7 +55,8 @@ func main() {
 		Fatal(err)
 	}
 	log.Printf("Block count: %d", blockCount)
-	// For this example gracefully shutdown the client after 10 seconds. Ordinarily when to shutdown the client is highly application specific.
+	// For this example gracefully shutdown the client after 10 seconds. Ordinarily when to shutdown the client is
+	// highly application specific.
 	fmt.Println("Client shutdown in 10 seconds...")
 	time.AfterFunc(time.Second*10, func() {
 		fmt.Println("Client shutting down...")

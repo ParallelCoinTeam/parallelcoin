@@ -5,12 +5,11 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"os"
 	"runtime"
 	"strconv"
 	"time"
-
-	log "github.com/p9c/pod/pkg/util/logi"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
@@ -87,7 +86,7 @@ func main() {
 			Error("For some reason did not get 65 random bytes")
 			os.Exit(1)
 		}
-		log.Printf("\nGenerated random public key:\n0x%x\n", pubkey)
+		fmt.Printf("\nGenerated random public key:\n0x%x\n", pubkey)
 	} else {
 		if len(args[1]) != 130 {
 			Error("Invalid public key length. Should be 130 hex digits,")
@@ -155,7 +154,7 @@ func main() {
 	byteswap(tx.merkleHash)
 	txScriptSig := hex.EncodeToString(tx.scriptSig)
 	pubScriptSig := hex.EncodeToString(tx.pubkeyScript)
-	log.Printf("\nCoinbase:\n0x%s\n\nPubKeyScript:\n0x%s\n\nMerkle Hash:\n0x%s\n\nByteswapped:\n0x%s\n", txScriptSig, pubScriptSig, merkleHash, merkleHashSwapped)
+	fmt.Printf("\nCoinbase:\n0x%s\n\nPubKeyScript:\n0x%s\n\nMerkle Hash:\n0x%s\n\nByteswapped:\n0x%s\n", txScriptSig, pubScriptSig, merkleHash, merkleHashSwapped)
 	unixtime := uint32(time.Now().Unix())
 	var blockversion uint32 = 4
 	blockHeader := joinBytes(uint32tobytes(blockversion), make([]byte, 32), tx.merkleHash,
@@ -199,8 +198,8 @@ func findNonce(b []byte, bytes, bits uint32, start time.Time) []byte {
 		blockhash2 := sha256.Sum256(blockhash1[:])
 		if undertarget(blockhash2[bytes:], bits) {
 			byteswap(blockhash2[:])
-			log.Printf("Block found!\n\nHash:\n0x%x\n\nNonce:\n%d\n\nUnix time:\n%d\n", blockhash2, startNonce, unixtime)
-			log.Printf("\nBlock header encoded in hex:\n0x%x\n", blockHeader)
+			fmt.Printf("Block found!\n\nHash:\n0x%x\n\nNonce:\n%d\n\nUnix time:\n%d\n", blockhash2, startNonce, unixtime)
+			fmt.Printf("\nBlock header encoded in hex:\n0x%x\n", blockHeader)
 			fmt.Println("\nTime for nonce search:", time.Since(start))
 			os.Exit(1)
 		}

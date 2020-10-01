@@ -13,8 +13,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// nodeConfig contains all the args and data required to launch a pod process
-// and connect the rpc client to it.
+// nodeConfig contains all the args and data required to launch a pod process and connect the rpc client to it.
 type nodeConfig struct {
 	rpcUser      string
 	rpcPass      string
@@ -59,9 +58,8 @@ func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, e
 	return a, nil
 }
 
-// setDefaults sets the default values of the config.
-// It also creates the temporary data,
-// and log directories which must be cleaned up with a call to cleanup().
+// setDefaults sets the default values of the config. It also creates the temporary data, and log directories which must
+// be cleaned up with a call to cleanup().
 func (n *nodeConfig) setDefaults() error {
 	datadir, err := ioutil.TempDir("", n.prefix+"-data")
 	if err != nil {
@@ -84,8 +82,7 @@ func (n *nodeConfig) setDefaults() error {
 	return nil
 }
 
-// arguments returns an array of arguments that be used to launch the pod
-// process.
+// arguments returns an array of arguments that be used to launch the pod process.
 func (n *nodeConfig) arguments() []string {
 	args := []string{}
 	if n.rpcUser != "" {
@@ -137,8 +134,8 @@ func (n *nodeConfig) command() *exec.Cmd {
 	return exec.Command(n.exe, n.arguments()...)
 }
 
-// rpcConnConfig returns the rpc connection config that can be used to
-// connect to the pod process that is launched via Start().
+// rpcConnConfig returns the rpc connection config that can be used to connect to the pod process that is launched via
+// Start().
 func (n *nodeConfig) rpcConnConfig() rpc.ConnConfig {
 	return rpc.ConnConfig{
 		Host:                 n.rpcListen,
@@ -178,9 +175,8 @@ type node struct {
 	dataDir string
 }
 
-// newNode creates a new node instance according to the passed config.
-// dataDir will be used to hold a file recording the pid of the launched
-// process, and as the base for the log and data directories for pod.
+// newNode creates a new node instance according to the passed config. dataDir will be used to hold a file recording the
+// pid of the launched process, and as the base for the log and data directories for pod.
 func newNode(config *nodeConfig, dataDir string) (*node, error) {
 	return &node{
 		config:  config,
@@ -189,12 +185,9 @@ func newNode(config *nodeConfig, dataDir string) (*node, error) {
 	}, nil
 }
 
-// start creates a new pod process and writes its pid in a file reserved for
-// recording the pid of the launched process.
-// This file can be used to terminate the process in case of a hang or panic.
-// In the case of a failing test case, or panic,
-// it is important that the process be stopped via stop( ) otherwise it will
-// persist unless explicitly killed.
+// start creates a new pod process and writes its pid in a file reserved for recording the pid of the launched process.
+// This file can be used to terminate the process in case of a hang or panic. In the case of a failing test case, or
+// panic, it is important that the process be stopped via stop( ) otherwise it will persist unless explicitly killed.
 func (n *node) start() error {
 	if err := n.cmd.Start(); err != nil {
 		return err
@@ -215,9 +208,8 @@ func (n *node) start() error {
 	return nil
 }
 
-// stop interrupts the running pod process process,
-// and waits until it exits properly.
-// On windows, interrupt is not supported so a kill signal is used instead
+// stop interrupts the running pod process process, and waits until it exits properly. On windows, interrupt is not
+// supported so a kill signal is used instead
 func (n *node) stop() error {
 	if n.cmd == nil || n.cmd.Process == nil {
 		// return if not properly initialized or error starting the process
@@ -235,8 +227,7 @@ func (n *node) stop() error {
 	return n.cmd.Process.Signal(os.Interrupt)
 }
 
-// cleanup cleanups process and args files.
-// The file housing the pid of the created process will be deleted as well as
+// cleanup cleanups process and args files. The file housing the pid of the created process will be deleted as well as
 // any directories created by the process.
 func (n *node) cleanup() error {
 	if n.pidFile != "" {
@@ -247,8 +238,7 @@ func (n *node) cleanup() error {
 	return n.config.cleanup()
 }
 
-// shutdown terminates the running pod process and cleans up all file
-// /directories created by node.
+// shutdown terminates the running pod process and cleans up all file/directories created by node.
 func (n *node) shutdown() error {
 	if err := n.stop(); err != nil {
 		return err

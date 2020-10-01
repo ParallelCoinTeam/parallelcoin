@@ -89,8 +89,8 @@ func TstRWNamespaces(tx walletdb.ReadWriteTx) (votingpoolNs, addrmgrNs walletdb.
 // 	return tx.ReadWriteBucket(txmgrNamespaceKey)
 // }
 
-// TstEnsureUsedAddr ensures the addresses defined by the given series/branch and
-// index==0..idx are present in the set of used addresses for the given Pool.
+// TstEnsureUsedAddr ensures the addresses defined by the given series/branch and index==0..idx are present in the set
+// of used addresses for the given Pool.
 func TstEnsureUsedAddr(t *testing.T, dbtx walletdb.ReadWriteTx, p *Pool, seriesID uint32, branch Branch, idx Index) []byte {
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
 	addr, err := p.getUsedAddr(ns, addrmgrNs, seriesID, branch, idx)
@@ -135,9 +135,8 @@ type TstSeriesDef struct {
 	Inactive bool
 }
 
-// TstCreateSeries creates a new Series for every definition in the given slice
-// of TstSeriesDef. If the definition includes any private keys, the Series is
-// empowered with them.
+// TstCreateSeries creates a new Series for every definition in the given slice of TstSeriesDef. If the definition
+// includes any private keys, the Series is empowered with them.
 func TstCreateSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, definitions []TstSeriesDef) {
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
 	for _, def := range definitions {
@@ -172,9 +171,8 @@ func TstCreateMasterKey(t *testing.T, seed []byte) *hdkeychain.ExtendedKey {
 // 	return keys
 // }
 
-// TstCreateSeriesDef creates a TstSeriesDef with a unique SeriesID, the given
-// reqSigs and the raw public/private keys extracted from the list of private
-// keys. The new series will be empowered with all private keys.
+// TstCreateSeriesDef creates a TstSeriesDef with a unique SeriesID, the given reqSigs and the raw public/private keys
+// extracted from the list of private keys. The new series will be empowered with all private keys.
 func TstCreateSeriesDef(t *testing.T, pool *Pool, reqSigs uint32, keys []*hdkeychain.ExtendedKey) TstSeriesDef {
 	pubKeys := make([]string, len(keys))
 	privKeys := make([]string, len(keys))
@@ -193,10 +191,9 @@ func TstCreatePoolAndTxStore(t *testing.T) (tearDown func(), db walletdb.DB, poo
 	return teardown, db, pool, store
 }
 
-// TstCreateCreditsOnNewSeries creates a new Series (with a unique ID) and a
-// slice of credits locked to the series' address with branch==1 and index==0.
-// The new Series will use a 2-of-3 configuration and will be empowered with
-// all of its private keys.
+// TstCreateCreditsOnNewSeries creates a new Series (with a unique ID) and a slice of credits locked to the series'
+// address with branch==1 and index==0. The new Series will use a 2-of-3 configuration and will be empowered with all of
+// its private keys.
 func TstCreateCreditsOnNewSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, amounts []int64) (uint32, []Credit) {
 	masters := []*hdkeychain.ExtendedKey{
 		TstCreateMasterKey(t, bytes.Repeat(uint32ToBytes(getUniqueID()), 4)),
@@ -208,8 +205,8 @@ func TstCreateCreditsOnNewSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *
 	return def.SeriesID, TstCreateSeriesCredits(t, dbtx, pool, def.SeriesID, amounts)
 }
 
-// TstCreateSeriesCredits creates a new credit for every item in the amounts
-// slice, locked to the given series' address with branch==1 and index==0.
+// TstCreateSeriesCredits creates a new credit for every item in the amounts slice, locked to the given series' address
+// with branch==1 and index==0.
 func TstCreateSeriesCredits(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, seriesID uint32, amounts []int64) []Credit {
 	addr := TstNewWithdrawalAddress(t, dbtx, pool, seriesID, Branch(1), Index(0))
 	pkScript, err := txscript.PayToAddrScript(addr.addr)
@@ -236,9 +233,8 @@ func TstCreateSeriesCredits(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool,
 	return credits
 }
 
-// TstCreateSeriesCreditsOnStore inserts a new credit in the given store for
-// every item in the amounts slice. These credits are locked to the votingpool
-// address composed of the given seriesID, branch==1 and index==0.
+// TstCreateSeriesCreditsOnStore inserts a new credit in the given store for every item in the amounts slice. These
+// credits are locked to the votingpool address composed of the given seriesID, branch==1 and index==0.
 func TstCreateSeriesCreditsOnStore(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, seriesID uint32, amounts []int64,
 	store *wtxmgr.Store) []Credit {
 	branch := Branch(1)
@@ -251,8 +247,7 @@ func TstCreateSeriesCreditsOnStore(t *testing.T, dbtx walletdb.ReadWriteTx, pool
 	return eligible
 }
 
-// TstCreateCreditsOnStore inserts a new credit in the given store for
-// every item in the amounts slice.
+// TstCreateCreditsOnStore inserts a new credit in the given store for every item in the amounts slice.
 func TstCreateCreditsOnStore(t *testing.T, dbtx walletdb.ReadWriteTx, s *wtxmgr.Store, pkScript []byte, amounts []int64) []wtxmgr.Credit {
 	msgTx := createMsgTx(pkScript, amounts)
 	meta := &wtxmgr.BlockMeta{
@@ -290,13 +285,11 @@ var (
 	txmgrNamespaceKey      = []byte("testtxstore")
 )
 
-// TstCreatePool creates a Pool on a fresh walletdb and returns it. It also
-// returns a teardown function that closes the Manager and removes the directory
-// used to store the database.
+// TstCreatePool creates a Pool on a fresh walletdb and returns it. It also returns a teardown function that closes the
+// Manager and removes the directory used to store the database.
 func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Pool) {
-	// This should be moved somewhere else eventually as not all of our tests
-	// call this function, but right now the only option would be to have the
-	// t.Parallel() call in each of our tests.
+	// This should be moved somewhere else eventually as not all of our tests call this function, but right now the only
+	// option would be to have the t.Parallel() call in each of our tests.
 	t.Parallel()
 	// Create a new wallet DB and addr manager.
 	dir, err := ioutil.TempDir("", "pool_test")

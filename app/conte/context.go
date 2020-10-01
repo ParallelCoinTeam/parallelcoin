@@ -28,8 +28,7 @@ type Xt struct {
 	sync.Mutex
 	WaitGroup sync.WaitGroup
 	KillAll   chan struct{}
-	// App is the heart of the application system,
-	// this creates and initialises it.
+	// App is the heart of the application system, this creates and initialises it.
 	App *cli.App
 	// AppContext is the urfave/cli app context
 	AppContext *cli.Context

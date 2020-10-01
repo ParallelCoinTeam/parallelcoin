@@ -7,8 +7,7 @@ import (
 type Serializer interface {
 	// Encode returns the wire/storage form of the data
 	Encode() []byte
-	// Decode stores the decoded data from the head of the slice and returns
-	// the remainder
+	// Decode stores the decoded data from the head of the slice and returns the remainder
 	Decode(b []byte) []byte
 }
 
@@ -18,8 +17,7 @@ type Container struct {
 	Data []byte
 }
 
-// CreateContainer takes an array of serializer interface objects and renders
-// the data into bytes
+// CreateContainer takes an array of serializer interface objects and renders the data into bytes
 func (srs Serializers) CreateContainer(magic []byte) (out *Container) {
 	if len(magic) != 4 {
 		Error("magic must be 4 bytes")
@@ -61,8 +59,7 @@ func (c *Container) Count() uint16 {
 	size := binary.BigEndian.Uint32(c.Data[4:8])
 	// Debug("size", size)
 	if len(c.Data) >= int(size) {
-		// we won't touch it if it's not at least as big so we don't get
-		// bounds errors
+		// we won't touch it if it's not at least as big so we don't get bounds errors
 		return binary.BigEndian.Uint16(c.Data[8:10])
 	}
 	return 0
@@ -72,13 +69,12 @@ func (c *Container) GetMagic() (out []byte) {
 	return c.Data[:4]
 }
 
-// Get returns the bytes that can be imported into an interface assuming the
-// types are correct - field ordering is hard coded by the creation and
-// identified by the magic. This is all read only and subslices so it should
-// generate very little garbage or copy operations except as required for the
-// output (we aren't going to go unsafe here,
-// it isn't really necessary since already this library enables avoiding the
-// decoding of values not being used from a message (or not used yet)
+// Get returns the bytes that can be imported into an interface assuming the types are correct - field ordering is hard
+// coded by the creation and identified by the magic.
+//
+// This is all read only and subslices so it should generate very little garbage or copy operations except as required
+// for the output (we aren't going to go unsafe here, it isn't really necessary since already this library enables
+// avoiding the decoding of values not being used from a message (or not used yet)
 func (c *Container) Get(idx uint16) (out []byte) {
 	length := c.Count()
 	size := len(c.Data)

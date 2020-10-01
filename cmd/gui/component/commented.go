@@ -1,6 +1,6 @@
 package component
 
-//func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+// func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 
 // func ContentHeader(gtx *layout.Context, th *gelook.DuoUItheme, b func()) func() {
 //	return func() {
@@ -43,12 +43,12 @@ package component
 //	}
 // }
 
-//func navMenuLine(gtx *layout.Context, th *gelook.DuoUItheme) func() {
+// func navMenuLine(gtx *layout.Context, th *gelook.DuoUItheme) func() {
 //	return func() {
 //		gelook.DuoUIdrawRectangle(gtx, int(navItemWidth), 1,
 //		th.Colors["LightGrayIII"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 //	}
-//}
+// }
 
 //
 // var typeRegistry = make(map[string]reflect.Type)
@@ -108,4 +108,4 @@ package component
 //			})
 //		})
 //	}
-//}
+// }

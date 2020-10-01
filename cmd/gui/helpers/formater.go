@@ -20,15 +20,12 @@ type formatter struct {
 
 type formatError string
 
-// Format lays out widgets according to a format string, similar to
-// how fmt.Printf interpolates a string.
+// Format lays out widgets according to a format string, similar to how fmt.Printf interpolates a string.
 //
-// The format string is an epxression where layouts are similar to
-// function calls, and the underscore denotes a widget from the
-// arguments. The ith _ invokes the ith widget from the arguments.
+// The format string is an epxression where layouts are similar to function calls, and the underscore denotes a widget
+// from the arguments. The ith _ invokes the ith widget from the arguments.
 //
-// If the layout format is invalid, Format panics with an error where
-// a cross, ✗, marks the error position.
+// If the layout format is invalid, Format panics with an error where a cross, ✗, marks the error position.
 //
 // For example,
 //
@@ -40,34 +37,25 @@ type formatError string
 //
 // Available layouts:
 //
-// inset(insets, widget) applies inset to widget. Insets are either:
-// one value for uniform insets; two values for top/bottom and
-// right/left insets; three values for top, bottom and right/left
-// insets; or four values for top, right, bottom, left insets.
+// inset(insets, widget) applies inset to widget. Insets are either: one value for uniform insets; two values for
+// top/bottom and right/left insets; three values for top, bottom and right/left insets; or four values for top, right,
+// bottom, left insets.
 //
-// direction(widget) aligns a widget. Direction is one of north, northeast,
-// east, southeast, south, southwest, west, northwest, center.
+// direction(widget) aligns a widget. Direction is one of north, northeast, east, southeast, south, southwest, west,
+// northwest, center.
 //
-// hmax/vmax/max(widget) forces the horizontal, vertical or both
-// constraints to their maximum before laying out widget.
+// hmax/vmax/max(widget) forces the horizontal, vertical or both constraints to their maximum before laying out widget.
 //
-// hmin/vmin/min(widget) forces the horizontal, vertical or both
-// constraints to their minimum before laying out widget.
+// hmin/vmin/min(widget) forces the horizontal, vertical or both constraints to their minimum before laying out widget.
 //
-// hcap/vcap(size, widget) caps the maximum horizontal or vertical
-// constraints to size.
+// hcap/vcap(size, widget) caps the maximum horizontal or vertical constraints to size.
 //
-// hflex/vflex(alignment, children...) lays out children with a
-// horizontal or vertical layout.Flex. Each rigid child must be on the form
-// r(widget), and each flex child on the form f(<weight>, widget).
-// If alignment is specified, it must be one of: start, middle, end,
-// baseline. The default alignment is start.
+// hflex/vflex(alignment, children...) lays out children with a horizontal or vertical layout.Flex. Each rigid child
+// must be on the form r(widget), and each flex child on the form f(<weight>, widget). If alignment is specified, it
+// must be one of: start, middle, end, baseline. The default alignment is start.
 //
-// stack(alignment, children) lays out children with a layout.Stack. Each
-// Rigid child must be on the form r(widget), and each expand child
-// on the form e(widget).
-// If alignment is specified it must be one of the directions listed
-// above.
+// stack(alignment, children) lays out children with a layout.Stack. Each Rigid child must be on the form r(widget), and
+// each expand child on the form e(widget). If alignment is specified it must be one of the directions listed above.
 func RGB(c uint32) color.RGBA {
 	return argb((0xff << 24) | c)
 }

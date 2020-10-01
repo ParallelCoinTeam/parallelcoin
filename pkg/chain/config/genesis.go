@@ -8,7 +8,8 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// genesisCoinbaseTx is the coinbase transaction for the genesis blocks for the main network, regression test network, and test network (version 3).
+// genesisCoinbaseTx is the coinbase transaction for the genesis blocks for the main network, regression test network,
+// and test network (version 3).
 var genesisCoinbaseTx = wire.MsgTx{
 	Version: 2,
 	TxIn: []*wire.TxIn{
@@ -73,7 +74,8 @@ var genesisMerkleRoot = chainhash.Hash([chainhash.HashSize]byte{
 	0x51, 0x3a, 0x8e, 0x65, 0xe4, 0xea, 0x43, 0xc8,
 })
 
-// genesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for the main network.
+// genesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for the main
+// network.
 var genesisBlock = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version:    2,
@@ -94,10 +96,12 @@ var regTestGenesisHash = chainhash.Hash([chainhash.HashSize]byte{
 	0x83, 0xa1, 0x0e, 0x22, 0x9e, 0xb7, 0xe9, 0x69,
 })
 
-// regTestGenesisMerkleRoot is the hash of the first transaction in the genesis block for the regression test network.  It is the same as the merkle root for the main network.
+// regTestGenesisMerkleRoot is the hash of the first transaction in the genesis block for the regression test network.
+// It is the same as the merkle root for the main network.
 var regTestGenesisMerkleRoot = genesisMerkleRoot
 
-// regTestGenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for the regression test network.
+// regTestGenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for
+// the regression test network.
 var regTestGenesisBlock = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version:    2,
@@ -110,13 +114,12 @@ var regTestGenesisBlock = wire.MsgBlock{
 	Transactions: []*wire.MsgTx{&genesisCoinbaseTx},
 }
 
-// testNet3GenesisMerkleRoot is the hash of the first transaction in the genesis
-// block for the test network (version 3).  It is the same as the merkle root
-// for the main network.
+// testNet3GenesisMerkleRoot is the hash of the first transaction in the genesis block for the test network (version 3).
+// It is the same as the merkle root for the main network.
 var testNet3GenesisMerkleRoot = genesisMerkleRoot
 
-// testNet3GenesisBlock defines the genesis block of the block chain which
-// serves as the public transaction ledger for the test network (version 3).
+// testNet3GenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for
+// the test network (version 3).
 var testNet3GenesisBlock = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version:    2,
@@ -139,8 +142,7 @@ var testNet3GenesisBlock = wire.MsgBlock{
 // })
 var testNet3GenesisHash = testNet3GenesisBlock.Header.BlockHash()
 
-// simNetGenesisHash is the hash of the first block in the block chain for the
-// simulation test network.
+// simNetGenesisHash is the hash of the first block in the block chain for the simulation test network.
 var simNetGenesisHash = chainhash.Hash([chainhash.HashSize]byte{
 	0xdf, 0x0c, 0xb3, 0x5f, 0x69, 0x72, 0x75, 0xe1,
 	0x8f, 0x66, 0xa2, 0x7d, 0xc8, 0xbb, 0x12, 0xfa,
@@ -148,10 +150,12 @@ var simNetGenesisHash = chainhash.Hash([chainhash.HashSize]byte{
 	0x5e, 0xa3, 0xba, 0xec, 0x41, 0x0e, 0x00, 0x00,
 })
 
-// simNetGenesisMerkleRoot is the hash of the first transaction in the genesis block for the simulation test network.  It is the same as the merkle root for the main network.
+// simNetGenesisMerkleRoot is the hash of the first transaction in the genesis block for the simulation test network. It
+// is the same as the merkle root for the main network.
 var simNetGenesisMerkleRoot = genesisMerkleRoot
 
-// simNetGenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for the simulation test network.
+// simNetGenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for the
+// simulation test network.
 var simNetGenesisBlock = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version:    2,

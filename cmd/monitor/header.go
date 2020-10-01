@@ -2,13 +2,14 @@ package monitor
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/gui/gelook"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"syscall"
 	"time"
+
+	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/gui/gelook"
 
 	"gioui.org/layout"
 	"gioui.org/unit"

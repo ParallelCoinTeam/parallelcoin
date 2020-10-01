@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -14,7 +15,9 @@ import (
 )
 
 func main() {
-	// Only override the handlers for notifications you care about. Also note most of the handlers will only be called if you register for notifications.  See the documentation of the rpcclient NotificationHandlers type for more details about each handler.
+	// Only override the handlers for notifications you care about. Also note most of the handlers will only be called
+	// if you register for notifications. See the documentation of the rpcclient NotificationHandlers type for more
+	// details about each handler.
 	ntfnHandlers := rpcclient.NotificationHandlers{
 		OnAccountBalance: func(account string, balance util.Amount, confirmed bool) {
 			log.Printf("New balance for account %s: %v", account,
@@ -47,7 +50,8 @@ func main() {
 	if len(unspent) > 0 {
 		log.Printf("First utxo:\n%v", spew.Sdump(unspent[0]))
 	}
-	// For this example gracefully shutdown the client after 10 seconds. Ordinarily when to shutdown the client is highly application specific.
+	// For this example gracefully shutdown the client after 10 seconds. Ordinarily when to shutdown the client is
+	// highly application specific.
 	fmt.Println("Client shutdown in 10 seconds...")
 	time.AfterFunc(time.Second*10, func() {
 		fmt.Println("Client shutting down...")

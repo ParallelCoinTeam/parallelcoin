@@ -15,13 +15,12 @@ func init() {
 	// Log.SetLevel("debug")
 }
 
-// TstCheckError ensures the passed error is a votingpool.DBError with an error
-// code that matches the passed error code.
+// TstCheckError ensures the passed error is a votingpool.DBError with an error code that matches the passed error code.
 func TstCheckError(t *testing.T, testName string, gotErr error, wantErrCode ErrorCode) {
-	vpErr, ok := gotErr.(Error)
+	vpErr, ok := gotErr.(VPError)
 	if !ok {
 		t.Errorf("%s: unexpected error type - got %T (%s), want %T",
-			testName, gotErr, gotErr, Error{})
+			testName, gotErr, gotErr, VPError{})
 	}
 	if vpErr.ErrorCode != wantErrCode {
 		t.Errorf("%s: unexpected error code - got %s (%s), want %s",
@@ -29,8 +28,7 @@ func TstCheckError(t *testing.T, testName string, gotErr error, wantErrCode Erro
 	}
 }
 
-// TstRunWithManagerUnlocked calls the given callback with the manager unlocked,
-// and locks it again before returning.
+// TstRunWithManagerUnlocked calls the given callback with the manager unlocked, and locks it again before returning.
 func TstRunWithManagerUnlocked(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, callback func()) {
 	if err := mgr.Unlock(addrmgrNs, privPassphrase); err != nil {
 		t.Fatal(err)
@@ -44,8 +42,8 @@ func TstRunWithManagerUnlocked(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs wa
 	callback()
 }
 
-// TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual
-// and calls t.Fatal() if they're not identical.
+// TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual and calls t.Fatal() if they're not
+// identical.
 func TstCheckWithdrawalStatusMatches(t *testing.T, s1, s2 WithdrawalStatus) {
 	if s1.Fees() != s2.Fees() {
 		t.Fatalf("Wrong amount of network fees; want %d, got %d", s1.Fees(), s2.Fees())
@@ -65,10 +63,9 @@ func TstCheckWithdrawalStatusMatches(t *testing.T, s1, s2 WithdrawalStatus) {
 	if !reflect.DeepEqual(s1.transactions, s2.transactions) {
 		t.Fatalf("Wrong transactions; got %v, want %v", s1.transactions, s2.transactions)
 	}
-	// The above checks could be replaced by this one, but when they fail the
-	// failure msg wouldn't give us much clue as to what is not equal, so we do
-	// the individual checks above and use this one as a catch-all check in case
-	// we forget to check any of the individual fields.
+	// The above checks could be replaced by this one, but when they fail the failure msg wouldn't give us much clue as
+	// to what is not equal, so we do the individual checks above and use this one as a catch-all check in case we
+	// forget to check any of the individual fields.
 	if !reflect.DeepEqual(s1, s2) {
 		t.Fatalf("Wrong WithdrawalStatus; got %v, want %v", s1, s2)
 	}

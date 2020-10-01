@@ -4,9 +4,8 @@ import (
 	"testing"
 )
 
-// TestHelp ensures the help is reasonably accurate by checking that every
-// command specified also has result types defined and the one-line usage and
-// help text can be generated for them.
+// TestHelp ensures the help is reasonably accurate by checking that every command specified also has result types
+// defined and the one-line usage and help text can be generated for them.
 func TestHelp(t *testing.T) {
 	// Ensure there are result types specified for every handler.
 	for k := range RPCHandlers {

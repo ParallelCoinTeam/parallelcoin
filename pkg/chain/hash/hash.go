@@ -14,7 +14,8 @@ const MaxHashStringSize = HashSize * 2
 // ErrHashStrSize describes an error that indicates the caller specified a hash string that has too many characters.
 var ErrHashStrSize = fmt.Errorf("max hash string length is %v bytes", MaxHashStringSize)
 
-// Hash is used in several of the bitcoin messages and common structures.  It typically represents the double sha256 of data.
+// Hash is used in several of the bitcoin messages and common structures. It typically represents the double sha256 of
+// data.
 type Hash [HashSize]byte
 
 // String returns the Hash as the hexadecimal string of the byte-reversed hash.
@@ -25,14 +26,16 @@ func (hash Hash) String() string {
 	return hex.EncodeToString(hash[:])
 }
 
-// CloneBytes returns a copy of the bytes which represent the hash as a byte slice. NOTE: It is generally cheaper to just slice the hash directly thereby reusing the same bytes rather than calling this method.
+// CloneBytes returns a copy of the bytes which represent the hash as a byte slice. NOTE: It is generally cheaper to
+// just slice the hash directly thereby reusing the same bytes rather than calling this method.
 func (hash *Hash) CloneBytes() []byte {
 	newHash := make([]byte, HashSize)
 	copy(newHash, hash[:])
 	return newHash
 }
 
-// SetBytes sets the bytes which represent the hash.  An error is returned if the number of bytes passed in is not HashSize.
+// SetBytes sets the bytes which represent the hash. An error is returned if the number of bytes passed in is not
+// HashSize.
 func (hash *Hash) SetBytes(newHash []byte) error {
 	nhlen := len(newHash)
 	if nhlen != HashSize {
@@ -54,7 +57,7 @@ func (hash *Hash) IsEqual(target *Hash) bool {
 	return *hash == *target
 }
 
-// NewHash returns a new Hash from a byte slice.  An error is returned if the number of bytes passed in is not HashSize.
+// NewHash returns a new Hash from a byte slice. An error is returned if the number of bytes passed in is not HashSize.
 func NewHash(newHash []byte) (*Hash, error) {
 	var sh Hash
 	err := sh.SetBytes(newHash)
@@ -65,7 +68,8 @@ func NewHash(newHash []byte) (*Hash, error) {
 	return &sh, err
 }
 
-// NewHashFromStr creates a Hash from a hash string.  The string should be the hexadecimal string of a byte-reversed hash, but any missing characters result in zero padding at the end of the Hash.
+// NewHashFromStr creates a Hash from a hash string. The string should be the hexadecimal string of a byte-reversed
+// hash, but any missing characters result in zero padding at the end of the Hash.
 func NewHashFromStr(hash string) (*Hash, error) {
 	ret := new(Hash)
 	err := Decode(ret, hash)
@@ -98,7 +102,8 @@ func Decode(dst *Hash, src string) error {
 		Error(err)
 		return err
 	}
-	// Reverse copy from the temporary hash to destination.  Because the temporary was zeroed, the written result will be correctly padded.
+	// Reverse copy from the temporary hash to destination. Because the temporary was zeroed, the written result will be
+	// correctly padded.
 	for i, b := range reversedHash[:HashSize/2] {
 		dst[i], dst[HashSize-1-i] = reversedHash[HashSize-1-i], b
 	}

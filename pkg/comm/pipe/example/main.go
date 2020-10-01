@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/comm/pipe"
 	"time"
+
+	"github.com/p9c/pod/pkg/comm/pipe"
 )
 
 func main() {

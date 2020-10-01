@@ -1,20 +1,22 @@
 package monitor
 
 import (
+	"os"
+	"os/exec"
+	"strings"
+	"time"
+
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"gopkg.in/src-d/go-git.v4"
+
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
-	"gopkg.in/src-d/go-git.v4"
-	"os"
-	"os/exec"
-	"strings"
-	"time"
 )
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {

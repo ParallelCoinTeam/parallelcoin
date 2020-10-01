@@ -19,7 +19,8 @@ func TestHeaders(t *testing.T) {
 		t.Errorf("NewMsgHeaders: wrong command - got %v want %v",
 			cmd, wantCmd)
 	}
-	// Ensure max payload is expected value for latest protocol version. Num headers (varInt) + max allowed headers (header length + 1 byte for the number of transactions which is always 0).
+	// Ensure max payload is expected value for latest protocol version. Num headers (varInt) + max allowed headers
+	// (header length + 1 byte for the number of transactions which is always 0).
 	wantPayload := uint32(162009)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
@@ -202,7 +203,8 @@ func TestHeadersWire(t *testing.T) {
 	}
 }
 
-// TestHeadersWireErrors performs negative tests against wire encode and decode of MsgHeaders to confirm error paths work correctly.
+// TestHeadersWireErrors performs negative tests against wire encode and decode of MsgHeaders to confirm error paths
+// work correctly.
 func TestHeadersWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	wireErr := &MessageError{}

@@ -22,8 +22,7 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 				//Debug(b)
 				e := Entry.LoadContainer(b).Struct()
 				if filter(e.Package) {
-					// if the worker filter is out of sync this stops it
-					// printing
+					// if the worker filter is out of sync this stops it printing
 					return
 				}
 				// Debugs(e)

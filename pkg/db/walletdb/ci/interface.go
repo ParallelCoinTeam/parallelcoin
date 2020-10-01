@@ -11,8 +11,7 @@ import (
 // errSubTestFail is used to signal that a sub test returned false.
 var errSubTestFail = fmt.Errorf("sub test failure")
 
-// testContext is used to store context information about a running test which
-// is passed into helper functions.
+// testContext is used to store context information about a running test which is passed into helper functions.
 type testContext struct {
 	t           Tester
 	db          walletdb.DB
@@ -20,8 +19,8 @@ type testContext struct {
 	isWritable  bool
 }
 
-// rollbackValues returns a copy of the provided map with all values set to an
-// empty string.  This is used to test that values are properly rolled back.
+// rollbackValues returns a copy of the provided map with all values set to an empty string. This is used to test that
+// values are properly rolled back.
 func rollbackValues(
 	values map[string]string) map[string]string {
 	retMap := make(map[string]string, len(values))
@@ -31,9 +30,8 @@ func rollbackValues(
 	return retMap
 }
 
-// testGetValues checks that all of the provided key/value pairs can be
-// retrieved from the database and the retrieved values match the provided
-// values.
+// testGetValues checks that all of the provided key/value pairs can be retrieved from the database and the retrieved
+// values match the provided values.
 func testGetValues(
 	tc *testContext, bucket walletdb.ReadBucket, values map[string]string) bool {
 	for k, v := range values {
@@ -51,8 +49,7 @@ func testGetValues(
 	return true
 }
 
-// testPutValues stores all of the provided key/value pairs in the provided
-// bucket while checking for errors.
+// testPutValues stores all of the provided key/value pairs in the provided bucket while checking for errors.
 func testPutValues(
 	tc *testContext, bucket walletdb.ReadWriteBucket, values map[string]string) bool {
 	for k, v := range values {
@@ -68,8 +65,7 @@ func testPutValues(
 	return true
 }
 
-// testDeleteValues removes all of the provided key/value pairs from the
-// provided bucket.
+// testDeleteValues removes all of the provided key/value pairs from the provided bucket.
 func testDeleteValues(
 	tc *testContext, bucket walletdb.ReadWriteBucket, values map[string]string) bool {
 	for k := range values {
@@ -81,8 +77,8 @@ func testDeleteValues(
 	return true
 }
 
-// testNestedReadWriteBucket reruns the testBucketInterface against a nested bucket along
-// with a counter to only test a couple of level deep.
+// testNestedReadWriteBucket reruns the testBucketInterface against a nested bucket along with a counter to only test a
+// couple of level deep.
 func testNestedReadWriteBucket(
 	tc *testContext, testBucket walletdb.ReadWriteBucket) bool {
 	// Don't go more than 2 nested level deep.
@@ -96,12 +92,10 @@ func testNestedReadWriteBucket(
 	return testReadWriteBucketInterface(tc, testBucket)
 }
 
-// testReadWriteBucketInterface ensures the bucket interface is working properly by
-// exercising all of its functions.
+// testReadWriteBucketInterface ensures the bucket interface is working properly by exercising all of its functions.
 func testReadWriteBucketInterface(
 	tc *testContext, bucket walletdb.ReadWriteBucket) bool {
-	// keyValues holds the keys and values to use when putting
-	// values into the bucket.
+	// keyValues holds the keys and values to use when putting values into the bucket.
 	var keyValues = map[string]string{
 		"bucketkey1": "foo1",
 		"bucketkey2": "foo2",
@@ -113,8 +107,7 @@ func testReadWriteBucketInterface(
 	if !testGetValues(tc, bucket, keyValues) {
 		return false
 	}
-	// Iterate all of the keys using ForEach while making sure the
-	// stored values are the expected values.
+	// Iterate all of the keys using ForEach while making sure the stored values are the expected values.
 	keysFound := make(map[string]struct{}, len(keyValues))
 	err := bucket.ForEach(func(k, v []byte) error {
 		ks := string(k)
@@ -160,8 +153,7 @@ func testReadWriteBucketInterface(
 	if !testNestedReadWriteBucket(tc, testBucket) {
 		return false
 	}
-	// Ensure creating a bucket that already exists fails with the
-	// expected error.
+	// Ensure creating a bucket that already exists fails with the expected error.
 	wantErr := walletdb.ErrBucketExists
 	if _, err := bucket.CreateBucket(testBucketName); err != wantErr {
 		tc.t.Errorf("CreateBucket: unexpected error - got %v, "+
@@ -193,16 +185,14 @@ func testReadWriteBucketInterface(
 			testBucketName)
 		return false
 	}
-	// Ensure deleting a bucket that doesn't exist returns the
-	// expected error.
+	// Ensure deleting a bucket that doesn't exist returns the expected error.
 	wantErr = walletdb.ErrBucketNotFound
 	if err := bucket.DeleteNestedBucket(testBucketName); err != wantErr {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error - got %v, "+
 			"want %v", err, wantErr)
 		return false
 	}
-	// Ensure CreateBucketIfNotExists creates a new bucket when
-	// it doesn't already exist.
+	// Ensure CreateBucketIfNotExists creates a new bucket when it doesn't already exist.
 	testBucket, err = bucket.CreateBucketIfNotExists(testBucketName)
 	if err != nil {
 		tc.t.Errorf("CreateBucketIfNotExists: unexpected "+
@@ -212,8 +202,7 @@ func testReadWriteBucketInterface(
 	if !testNestedReadWriteBucket(tc, testBucket) {
 		return false
 	}
-	// Delete the test bucket to avoid leaving it around for future
-	// calls.
+	// Delete the test bucket to avoid leaving it around for future calls.
 	if err := bucket.DeleteNestedBucket(testBucketName); err != nil {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error: %v", err)
 		return false
@@ -232,14 +221,11 @@ func testManualTxInterface(
 	db := tc.db
 	// populateValues tests that populating values works as expected.
 	//
-	// When the writable flag is false, a read-only tranasction is created,
-	// standard bucket tests for read-only transactions are performed, and
-	// the Commit function is checked to ensure it fails as expected.
+	// When the writable flag is false, a read-only tranasction is created, standard bucket tests for read-only
+	// transactions are performed, and the Commit function is checked to ensure it fails as expected.
 	//
-	// Otherwise, a read-write transaction is created, the values are
-	// written, standard bucket tests for read-write transactions are
-	// performed, and then the transaction is either commited or rolled
-	// back depending on the flag.
+	// Otherwise, a read-write transaction is created, the values are written, standard bucket tests for read-write
+	// transactions are performed, and then the transaction is either commited or rolled back depending on the flag.
 	populateValues := func(writable, rollback bool, putValues map[string]string) bool {
 		var dbtx walletdb.ReadTx
 		var rootBucket walletdb.ReadBucket
@@ -300,9 +286,8 @@ func testManualTxInterface(
 		}
 		return true
 	}
-	// checkValues starts a read-only transaction and checks that all of
-	// the key/value pairs specified in the expectedValues parameter match
-	// what's in the database.
+	// checkValues starts a read-only transaction and checks that all of the key/value pairs specified in the
+	// expectedValues parameter match what's in the database.
 	checkValues := func(expectedValues map[string]string) bool {
 		// Begin another read-only transaction to ensure...
 		dbtx, err := db.BeginReadTx()
@@ -327,8 +312,7 @@ func testManualTxInterface(
 		}
 		return true
 	}
-	// deleteValues starts a read-write transaction and deletes the keys
-	// in the passed key/value pairs.
+	// deleteValues starts a read-write transaction and deletes the keys in the passed key/value pairs.
 	deleteValues := func(values map[string]string) bool {
 		dbtx, err := db.BeginReadWriteTx()
 		if err != nil {
@@ -358,31 +342,29 @@ func testManualTxInterface(
 		}
 		return true
 	}
-	// keyValues holds the keys and values to use when putting values
-	// into a bucket.
+	// keyValues holds the keys and values to use when putting values into a bucket.
 	var keyValues = map[string]string{
 		"umtxkey1": "foo1",
 		"umtxkey2": "foo2",
 		"umtxkey3": "foo3",
 	}
-	// Ensure that attempting populating the values using a read-only
-	// transaction fails as expected.
+	// Ensure that attempting populating the values using a read-only transaction fails as expected.
 	if !populateValues(false, true, keyValues) {
 		return false
 	}
 	if !checkValues(rollbackValues(keyValues)) {
 		return false
 	}
-	// Ensure that attempting populating the values using a read-write
-	// transaction and then rolling it back yields the expected values.
+	// Ensure that attempting populating the values using a read-write transaction and then rolling it back yields the
+	// expected values.
 	if !populateValues(true, true, keyValues) {
 		return false
 	}
 	if !checkValues(rollbackValues(keyValues)) {
 		return false
 	}
-	// Ensure that attempting populating the values using a read-write
-	// transaction and then committing it stores the expected values.
+	// Ensure that attempting populating the values using a read-write transaction and then committing it stores the
+	// expected values.
 	if !populateValues(true, false, keyValues) {
 		return false
 	}
@@ -396,9 +378,8 @@ func testManualTxInterface(
 	return true
 }
 
-// testNamespaceAndTxInterfaces creates a namespace using the provided key and
-// tests all facets of it interface as well as  transaction and bucket
-// interfaces under it.
+// testNamespaceAndTxInterfaces creates a namespace using the provided key and tests all facets of it interface as well
+// as transaction and bucket interfaces under it.
 func testNamespaceAndTxInterfaces(
 	tc *testContext, namespaceKey string) bool {
 	namespaceKeyBytes := []byte(namespaceKey)
@@ -423,8 +404,7 @@ func testNamespaceAndTxInterfaces(
 	if !testManualTxInterface(tc, namespaceKeyBytes) {
 		return false
 	}
-	// keyValues holds the keys and values to use when putting values
-	// into a bucket.
+	// keyValues holds the keys and values to use when putting values into a bucket.
 	var keyValues = map[string]string{
 		"mtxkey1": "foo1",
 		"mtxkey2": "foo2",
@@ -444,9 +424,8 @@ func testNamespaceAndTxInterfaces(
 		}
 		return false
 	}
-	// Test the bucket interface via a managed read-write transaction.
-	// Also, put a series of values and force a rollback so the following
-	// code can ensure the values were not stored.
+	// Test the bucket interface via a managed read-write transaction. Also, put a series of values and force a rollback
+	// so the following code can ensure the values were not stored.
 	forceRollbackError := fmt.Errorf("force rollback")
 	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
 		rootBucket := tx.ReadWriteBucket(namespaceKeyBytes)
@@ -471,8 +450,7 @@ func testNamespaceAndTxInterfaces(
 			"%v, want %v", err, forceRollbackError)
 		return false
 	}
-	// Ensure the values that should have not been stored due to the forced
-	// rollback above were not actually stored.
+	// Ensure the values that should have not been stored due to the forced rollback above were not actually stored.
 	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) error {
 		rootBucket := tx.ReadBucket(namespaceKeyBytes)
 		if rootBucket == nil {
@@ -545,8 +523,8 @@ func testNamespaceAndTxInterfaces(
 	return true
 }
 
-// testAdditionalErrors performs some tests for error cases not covered
-// elsewhere in the tests and therefore improves negative test coverage.
+// testAdditionalErrors performs some tests for error cases not covered elsewhere in the tests and therefore improves
+// negative test coverage.
 func testAdditionalErrors(
 	tc *testContext) bool {
 	ns3Key := []byte("ns3")
@@ -556,26 +534,22 @@ func testAdditionalErrors(
 		if err != nil {
 			return fmt.Errorf("CreateTopLevelBucket: unexpected error: %v", err)
 		}
-		// Ensure CreateBucket returns the expected error when no bucket
-		// key is specified.
+		// Ensure CreateBucket returns the expected error when no bucket key is specified.
 		wantErr := walletdb.ErrBucketNameRequired
 		if _, err := rootBucket.CreateBucket(nil); err != wantErr {
 			return fmt.Errorf("CreateBucket: unexpected error - "+
 				"got %v, want %v", err, wantErr)
 		}
-		// Ensure DeleteNestedBucket returns the expected error when no bucket
-		// key is specified.
+		// Ensure DeleteNestedBucket returns the expected error when no bucket key is specified.
 		wantErr = walletdb.ErrIncompatibleValue
 		if err := rootBucket.DeleteNestedBucket(nil); err != wantErr {
 			return fmt.Errorf("DeleteNestedBucket: unexpected error - "+
 				"got %v, want %v", err, wantErr)
 		}
-		// Ensure Put returns the expected error when no key is
-		// specified.
+		// Ensure Put returns the expected error when no key is specified.
 		wantErr = walletdb.ErrKeyRequired
 		if err := rootBucket.Put(nil, nil); err != wantErr {
-			return fmt.Errorf("Put: unexpected error - got %v, "+
-				"want %v", err, wantErr)
+			return fmt.Errorf("put: unexpected error - got %v, want %v", err, wantErr)
 		}
 		return nil
 	})
@@ -585,8 +559,7 @@ func testAdditionalErrors(
 		}
 		return false
 	}
-	// Ensure that attempting to rollback or commit a transaction that is
-	// already closed returns the expected error.
+	// Ensure that attempting to rollback or commit a transaction that is already closed returns the expected error.
 	tx, err := tc.db.BeginReadWriteTx()
 	if err != nil {
 		tc.t.Errorf("Begin: unexpected error: %v", err)
@@ -620,8 +593,7 @@ func TestInterface(
 	}
 	defer os.Remove(dbPath)
 	defer db.Close()
-	// Run all of the interface tests against the database.
-	// Create a test context to pass around.
+	// Run all of the interface tests against the database. Create a test context to pass around.
 	context := testContext{t: t, db: db}
 	// Create a namespace and test the interface for it.
 	if !testNamespaceAndTxInterfaces(&context, "ns1") {

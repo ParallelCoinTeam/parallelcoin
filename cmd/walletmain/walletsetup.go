@@ -23,8 +23,8 @@ import (
 
 const slash = string(os.PathSeparator)
 
-// CreateSimulationWallet is intended to be called from the rpcclient
-// and used to create a wallet for actors involved in simulations.
+// CreateSimulationWallet is intended to be called from the rpcclient and used to create a wallet for actors involved in
+// simulations.
 func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	// Simulation wallet password is 'password'.
 	privPass := []byte("password")
@@ -51,22 +51,19 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	return nil
 }
 
-// CreateWallet prompts the user for information needed to generate a new
-// wallet and generates the wallet accordingly.
+// CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.
 // The new wallet will reside at the provided path.
 func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
-	// When there is a legacy keystore, open it now to ensure any errors
-	// don't end up exiting the process after the user has spent time
-	// entering a bunch of information.
+	// When there is a legacy keystore, open it now to ensure any errors don't end up exiting the process after the user
+	// has spent time entering a bunch of information.
 	netDir := NetworkDir(*config.DataDir, activenet)
 	keystorePath := filepath.Join(netDir, keystore.Filename)
 	var legacyKeyStore *keystore.Store
 	_, err := os.Stat(keystorePath)
 	if err != nil && !os.IsNotExist(err) {
-		// A stat error not due to a non-existant file should be
-		// returned to the caller.
+		// A stat error not due to a non-existant file should be returned to the caller.
 		return err
 	} else if err == nil {
 		// Keystore file exists.
@@ -76,9 +73,8 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 			return err
 		}
 	}
-	// Start by prompting for the private passphrase.  When there is an existing
-	// keystore, the user will be promped for that passphrase, otherwise they
-	// will be prompted for a new one.
+	// Start by prompting for the private passphrase. When there is an existing keystore, the user will be promped for
+	// that passphrase, otherwise they will be prompted for a new one.
 	reader := bufio.NewReader(os.Stdin)
 	privPass, err := prompt.PrivatePass(reader, legacyKeyStore)
 	if err != nil {
@@ -87,16 +83,16 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 		time.Sleep(time.Second * 3)
 		return err
 	}
-	// When there exists a legacy keystore, unlock it now and set up a callback
-	// to import all keystore keys into the new walletdb wallet
+	// When there exists a legacy keystore, unlock it now and set up a callback to import all keystore keys into the new
+	// walletdb wallet
 	if legacyKeyStore != nil {
 		err = legacyKeyStore.Unlock(privPass)
 		if err != nil {
 			Error(err)
 			return err
 		}
-		// Import the addresses in the legacy keystore to the new wallet if any
-		// exist, locking each wallet again when finished.
+		// Import the addresses in the legacy keystore to the new wallet if any exist, locking each wallet again when
+		// finished.
 		loader.RunAfterLoad(func(w *wallet.Wallet) {
 			defer func() {
 				err := legacyKeyStore.Lock()
@@ -130,9 +126,8 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 			}
 		})
 	}
-	// Ascertain the public passphrase.  This will either be a value specified
-	// by the user or the default hard-coded public passphrase if the user does
-	// not want the additional public data encryption.
+	// Ascertain the public passphrase. This will either be a value specified by the user or the default hard-coded
+	// public passphrase if the user does not want the additional public data encryption.
 	pubPass, err := prompt.PublicPass(reader, privPass, []byte(""),
 		[]byte(*config.WalletPass))
 	if err != nil {
@@ -141,9 +136,8 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 		time.Sleep(time.Second * 5)
 		return err
 	}
-	// Ascertain the wallet generation seed.  This will either be an
-	// automatically generated value the user has already confirmed or a
-	// value the user has entered which has already been validated.
+	// Ascertain the wallet generation seed. This will either be an automatically generated value the user has already
+	// confirmed or a value the user has entered which has already been validated.
 	seed, err := prompt.Seed(reader)
 	if err != nil {
 		Error(err)
@@ -167,11 +161,9 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 // NetworkDir returns the directory name of a network directory to hold wallet files.
 func NetworkDir(dataDir string, chainParams *netparams.Params) string {
 	netname := chainParams.Name
-	// For now, we must always name the testnet data directory as "testnet" and not
-	// "testnet3" or any other version, as the chaincfg testnet3 paramaters will
-	// likely be switched to being named "testnet3" in the future.  This is done to
-	// future proof that change, and an upgrade plan to move the testnet3 data
-	// directory can be worked out later.
+	// For now, we must always name the testnet data directory as "testnet" and not "testnet3" or any other version, as
+	// the chaincfg testnet3 paramaters will likely be switched to being named "testnet3" in the future. This is done to
+	// future proof that change, and an upgrade plan to move the testnet3 data directory can be worked out later.
 	if chainParams.Net == wire.TestNet3 {
 		netname = "testnet"
 	}
@@ -198,9 +190,8 @@ func NetworkDir(dataDir string, chainParams *netparams.Params) string {
 // 	return nil
 // }
 
-// convertLegacyKeystore converts all of the addresses in the passed legacy
-// key store to the new waddrmgr.Manager format.
-// Both the legacy keystore and the new manager must be unlocked.
+// convertLegacyKeystore converts all of the addresses in the passed legacy key store to the new waddrmgr.Manager
+// format. Both the legacy keystore and the new manager must be unlocked.
 func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) error {
 	netParams := legacyKeyStore.Net()
 	blockStamp := waddrmgr.BlockStamp{
