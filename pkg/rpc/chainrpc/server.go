@@ -1649,8 +1649,7 @@ func (np *NodePeer) OnGetCFilters(_ *peer.Peer,
 
 // handleGetData is invoked when a peer receives a getdata bitcoin message and is used to deliver block and transaction
 // information.
-func (np *NodePeer) OnGetData(_ *peer.Peer,
-	msg *wire.MsgGetData) {
+func (np *NodePeer) OnGetData(_ *peer.Peer,	msg *wire.MsgGetData) {
 	numAdded := 0
 	notFound := wire.NewMsgNotFound()
 	length := len(msg.InvList)
@@ -1661,7 +1660,9 @@ func (np *NodePeer) OnGetData(_ *peer.Peer,
 	//
 	// Sustained bursts of small requests are not penalized as that would potentially ban peers performing IBD. This
 	// incremental score decays each minute to half of its value.
-	np.AddBanScore(0, uint32(length)*99/wire.MaxInvPerMsg, "getdata")
+	if np.AddBanScore(0, uint32(length)*99/wire.MaxInvPerMsg, "getdata") {
+		return
+	}
 	// We wait on this wait channel periodically to prevent queuing far more data than we can send in a reasonable time,
 	// wasting memory.
 	//
@@ -1962,14 +1963,14 @@ func (np *NodePeer) OnWrite(_ *peer.Peer, bytesWritten int,
 // AddBanScore increases the persistent and decaying ban score fields by the values passed as parameters. If the
 // resulting score exceeds half of the ban threshold, a warning is logged including the reason provided. Further, if the
 // score is above the ban threshold, the peer will be banned and disconnected.
-func (np *NodePeer) AddBanScore(persistent, transient uint32, reason string) {
+func (np *NodePeer) AddBanScore(persistent, transient uint32, reason string) bool {
 	// No warning is logged and no score is calculated if banning is disabled.
 	if *np.Server.Config.DisableBanning {
-		return
+		return false
 	}
 	if np.IsWhitelisted {
 		Debugf("misbehaving whitelisted peer %s: %s %s", np, reason)
-		return
+		return false
 	}
 	warnThreshold := *np.Server.Config.BanThreshold >> 1
 	if transient == 0 && persistent == 0 {
@@ -1979,7 +1980,7 @@ func (np *NodePeer) AddBanScore(persistent, transient uint32, reason string) {
 		if int(score) > warnThreshold {
 			Warnf("misbehaving peer %s: %s -- ban score is %d, it was not increased this time", np, reason, score)
 		}
-		return
+		return false
 	}
 	score := np.BanScore.Increase(persistent, transient)
 	if int(score) > warnThreshold {
@@ -1988,8 +1989,10 @@ func (np *NodePeer) AddBanScore(persistent, transient uint32, reason string) {
 			Warnf("misbehaving peer %s -- banning and disconnecting", np)
 			np.Server.BanPeer(np)
 			np.Disconnect()
+			return true
 		}
 	}
+	return false
 }
 
 // AddKnownAddresses adds the given addresses to the set of known addresses to the peer to prevent sending duplicate
