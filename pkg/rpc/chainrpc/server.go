@@ -1977,15 +1977,13 @@ func (np *NodePeer) AddBanScore(persistent, transient uint32, reason string) {
 		// threshold.
 		score := np.BanScore.Int()
 		if int(score) > warnThreshold {
-			Warnf("misbehaving peer %s: %s -- ban score is %d, "+
-				"it was not increased this time", np, reason, score)
+			Warnf("misbehaving peer %s: %s -- ban score is %d, it was not increased this time", np, reason, score)
 		}
 		return
 	}
 	score := np.BanScore.Increase(persistent, transient)
 	if int(score) > warnThreshold {
-		Warnf("misbehaving peer %s: %s -- ban score increased to %d",
-			np, reason, score)
+		Warnf("misbehaving peer %s: %s -- ban score increased to %d", np, reason, score)
 		if int(score) > *np.Server.Config.BanThreshold {
 			Warnf("misbehaving peer %s -- banning and disconnecting", np)
 			np.Server.BanPeer(np)

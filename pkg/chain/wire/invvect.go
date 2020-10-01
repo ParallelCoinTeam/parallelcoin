@@ -9,7 +9,7 @@ import (
 
 const (
 	// MaxInvPerMsg is the maximum number of inventory vectors that can be in a single bitcoin inv message.
-	MaxInvPerMsg = 5000
+	MaxInvPerMsg = 1000
 	// Maximum payload size for an inventory vector.
 	maxInvVectPayload = 4 + chainhash.HashSize
 	// InvWitnessFlag denotes that the inventory vector type is requesting, or sending a version which includes witness
