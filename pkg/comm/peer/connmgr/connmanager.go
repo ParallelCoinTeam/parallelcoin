@@ -356,11 +356,11 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 		Tracef("%s attempting to connect to '%s'",
 			cm.Cfg.Listeners[0].Addr(), c.Addr)
 	}
-	Traces(cm.Cfg.Dial)
+	// Traces(cm.Cfg.Dial)
 	conn, err := cm.Cfg.Dial(c.Addr)
-	Error(err, c.Addr)
+	// Error(err, c.Addr)
 	if err != nil {
-		Error(err)
+		Trace(err)
 		select {
 		case cm.requests <- handleFailed{c, err}:
 		case <-cm.quit:

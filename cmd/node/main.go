@@ -33,6 +33,7 @@ var winServiceMain func() (bool, error)
 // the server once it is setup so it can gracefully stop it when requested from the service control manager.
 //
 //  - shutdownchan can be used to wait for the node to shut down
+//
 //  - killswitch can be closed to shut the node down
 func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	Trace("starting up node main")

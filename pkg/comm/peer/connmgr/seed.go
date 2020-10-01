@@ -37,7 +37,7 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 			randSource := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 			seedpeers, err := lookupFn(host)
 			if err != nil {
-				Error("DNS routeable failed on seed %s: %v", host, err)
+				Errorf("DNS routeable failed on seed %s: %v", host, err)
 				return
 			}
 			numPeers := len(seedpeers)

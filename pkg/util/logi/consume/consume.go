@@ -19,36 +19,35 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 			magic := string(b[:4])
 			switch magic {
 			case "entr":
-				//Debug(b)
+				// Debug(b)
 				e := Entry.LoadContainer(b).Struct()
 				if filter(e.Package) {
 					// if the worker filter is out of sync this stops it printing
 					return
 				}
 				// Debugs(e)
-				color := logi.ColorYellow
-				//Debug(e.Level)
+				// color := logi.ColorYellow
+				// Debug(e.Level)
 				switch e.Level {
 				case logi.Fatal:
-					color = logi.ColorRed
+					// color = logi.ColorRed
 				case logi.Error:
-					color = logi.ColorOrange
+					// color = logi.ColorOrange
 				case logi.Warn:
-					color = logi.ColorYellow
+					// color = logi.ColorYellow
 				case logi.Info:
-					color = logi.ColorGreen
+					// color = logi.ColorGreen
 				case logi.Check:
-					color = logi.ColorCyan
+					// color = logi.ColorCyan
 				case logi.Debug:
-					color = logi.ColorBlue
+					// color = logi.ColorBlue
 				case logi.Trace:
-					color = logi.ColorViolet
+					// color = logi.ColorViolet
 				default:
 					Debug("got an empty log entry")
 					return
 				}
-				Debugf("%s%s %s%s", color, e.Text,
-					logi.ColorOff, e.CodeLocation)
+				// Debugf("%s%s %s%s", color, e.Text, logi.ColorOff, e.CodeLocation)
 				if err := handler(e); Check(err) {
 				}
 			}
