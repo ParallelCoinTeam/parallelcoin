@@ -4,6 +4,9 @@
 // loopback. It is up to the consuming library to discard messages it sends. This is only necessary because the
 // net standard library disables loopback by default though on windows this takes effect whereas on unix platforms
 // it does not.
+//
+// This code was derived from the information found here:
+// https://stackoverflow.com/questions/43109552/how-to-set-ip-multicast-loop-on-multicast-udpconn-in-golang
 
 package multicast
 
@@ -13,11 +16,9 @@ import (
 	"golang.org/x/net/ipv4"
 )
 
-func GetMulticastConn(port int) (conn *net.UDPConn, err error) {
+func Conn(port int) (conn *net.UDPConn, err error) {
 	var ipv4Addr = &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1), Port: port}
-	conn, err = net.ListenUDP("udp4", ipv4Addr)
-	if err != nil {
-		Errorf("ListenUDP error %v\n", err)
+	if conn, err = net.ListenUDP("udp4", ipv4Addr); Check(err) {
 		return
 	}
 
@@ -26,7 +27,9 @@ func GetMulticastConn(port int) (conn *net.UDPConn, err error) {
 	var iface net.Interface
 	if ifaces, err = net.Interfaces(); Check(err) {
 	}
-	// This grabs the first physical interface with multicast that is up
+	// This grabs the first physical interface with multicast that is up. Note that this should filter out
+	// VPN connections which would normally be selected first but don't actually have a multicast connection
+	// to the local area network.
 	for i := range ifaces {
 		if ifaces[i].Flags&net.FlagMulticast != 0 &&
 			ifaces[i].Flags&net.FlagUp != 0 &&

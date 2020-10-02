@@ -211,7 +211,7 @@ func ListenBroadcast(
 	handlers Handlers,
 	quit chan struct{},
 ) (conn *net.UDPConn, err error) {
-	if conn, err = multicast.GetMulticastConn(port); Check(err) {
+	if conn, err = multicast.Conn(port); Check(err) {
 		return
 	}
 	address := conn.LocalAddr().String()
