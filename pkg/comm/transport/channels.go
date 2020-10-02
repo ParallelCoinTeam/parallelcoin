@@ -12,15 +12,19 @@ import (
 
 	"github.com/p9c/pod/pkg/coding/fec"
 	"github.com/p9c/pod/pkg/coding/gcm"
+	"github.com/p9c/pod/pkg/comm/multicast"
 )
 
 const (
 	UDPMulticastAddress     = "224.0.0.1"
-	success             int = iota // this is implicit zero of an int but starts the iota
+	success int = iota // this is implicit zero of an int but starts the iota
 	closed
 	other
 	DefaultPort = 11049
 )
+
+var DefaultIP = net.IPv4(224, 0, 0, 1)
+var MulticastAddress = &net.UDPAddr{IP: DefaultIP, Port: DefaultPort}
 
 type (
 	MsgBuffer struct {
@@ -47,7 +51,7 @@ type (
 	}
 )
 
-// SetDestination changes the address the outbound connection of a channel directs to
+// SetDestination changes the address the outbound connection of a multicast directs to
 func (c *Channel) SetDestination(dst string) (err error) {
 	Debug("sending to", dst)
 	if c.Sender, err = NewSender(dst, c.MaxDatagramSize); Check(err) {
@@ -55,7 +59,7 @@ func (c *Channel) SetDestination(dst string) (err error) {
 	return
 }
 
-// Send fires off some data through the configured channel's outbound.
+// Send fires off some data through the configured multicast's outbound.
 func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, err error) {
 	if len(data) == 0 {
 		err = errors.New("not sending empty packet")
@@ -80,14 +84,13 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		Trace(c.Creator, "sent packets", string(magic),
-			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
+		Trace(c.Creator, "sent packets", string(magic),			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
 			c.Sender.RemoteAddr())
 	}
 	return
 }
 
-// Close the channel
+// Close the multicast
 func (c *Channel) Close() (err error) {
 	// if err = c.Sender.Close(); Check(err) {
 	// }
@@ -128,7 +131,7 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 	if err != nil {
 		Error(err)
 	}
-	Warn("starting unicast channel:", channel.Creator, sender, receiver, magics)
+	Warn("starting unicast multicast:", channel.Creator, sender, receiver, magics)
 	return
 }
 
@@ -201,19 +204,17 @@ func NewBroadcaster(port int, maxDatagramSize int) (conn *net.UDPConn, err error
 
 // ListenBroadcast binds to the UDP Address and port given and writes packets received from that Address to a buffer
 // which is passed to a handler
-func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers Handlers,
-	quit chan struct{}) (conn *net.UDPConn, err error) {
-	address := net.JoinHostPort(UDPMulticastAddress, fmt.Sprint(port))
-	var addr *net.UDPAddr
-	// Parse the string Address
-	if addr, err = net.ResolveUDPAddr("udp4", address); Check(err) {
+func ListenBroadcast(
+	port int,
+	channel *Channel,
+	maxDatagramSize int,
+	handlers Handlers,
+	quit chan struct{},
+) (conn *net.UDPConn, err error) {
+	if conn, err = multicast.GetMulticastConn(port); Check(err) {
 		return
-		// Open up a connection
-	} else if conn, err = net.ListenMulticastUDP("udp4", nil, addr); Check(err) {
-		return
-	} else if conn == nil {
-		return nil, errors.New("unable to start connection ")
 	}
+	address := conn.LocalAddr().String()
 	var magics []string
 	for i := range handlers {
 		magics = append(magics, i)

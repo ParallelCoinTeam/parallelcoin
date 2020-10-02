@@ -41,7 +41,7 @@ require (
 	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6
 	golang.org/x/exp v0.0.0-20200228211341-fcea875c7e85
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
-	golang.org/x/net v0.0.0-20200301022130-244492dfa37a // indirect
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d // indirect
 	golang.org/x/text v0.3.2
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
