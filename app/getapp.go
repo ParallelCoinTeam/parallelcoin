@@ -626,7 +626,12 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.Bool(
 				"delaystart",
 				"pauses for 3 seconds before starting, for internal use with restart function",
-				cx.Config.WalletOff,
+				nil,
+			),
+			apputil.Bool(
+				"kopachgui",
+				"enables the GUI for the kopach miner",
+				 cx.Config.KopachGUI,
 			),
 		},
 	}

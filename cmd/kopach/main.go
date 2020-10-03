@@ -45,6 +45,9 @@ type Worker struct {
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		Debug("miner controller starting")
+		if *cx.Config.KopachGUI {
+			Info("opening miner controller GUI")
+		}
 		ctx, cancel := context.WithCancel(context.Background())
 		w := &Worker{
 			ctx:           ctx,
