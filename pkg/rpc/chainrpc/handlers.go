@@ -11,11 +11,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/p9c/pod/app/apputil"
 	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/p9c/pod/app/save"
@@ -2603,16 +2603,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	if *s.Config.Generate && *s.Config.GenThreads != 0 {
 		Debug("starting miner")
 		args := []string{os.Args[0], "-D", *s.Config.DataDir, "kopach"}
-		if runtime.GOOS == "windows" {
-			args = append(
-				[]string{
-					"cmd.exe",
-					"/C",
-					// "start",
-				},
-				args...
-			)
-		}
+		args = apputil.PrependForWindows(args)
 		s.Cfg.CPUMiner = exec.Command(args[0], args[1:]...)
 		s.Cfg.CPUMiner.Stdin = os.Stdin
 		s.Cfg.CPUMiner.Stdout = os.Stdout

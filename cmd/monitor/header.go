@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gelook"
 
@@ -105,9 +106,7 @@ func (s *State) RestartRunButton(fg, bg string) layout.FlexChild {
 				go func() {
 					exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
 					command := []string{GoBin, "build", "-v", "-o", exePath}
-					if runtime.GOOS == "windows" {
-						command = append([]string{"cmd.exe", "/C", "start"}, command...)
-					}
+					command = apputil.PrependForWindows(command)
 					c = exec.Command(command[0], command[1:]...)
 					c.Stderr = os.Stderr
 					c.Stdout = os.Stdout
@@ -115,11 +114,7 @@ func (s *State) RestartRunButton(fg, bg string) layout.FlexChild {
 					if err = c.Run(); !Check(err) {
 						if runtime.GOOS == "windows" {
 							command = append([]string{exePath}, os.Args[1:]...)
-							command = append([]string{
-								"cmd.exe",
-								"/C",
-								// "start",
-							}, command...)
+							command = apputil.PrependForWindows(command)
 							exec.Command(command[0], command[1:]...)
 						} else {
 							if err = syscall.Exec(exePath, os.Args, os.Environ()); Check(err) {

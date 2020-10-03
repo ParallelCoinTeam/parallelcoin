@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
 
 	"github.com/urfave/cli"
@@ -20,6 +21,7 @@ var initHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		var command []string
 		command = append(command, os.Args[0])
 		command = append(command, args...)
+		command = apputil.PrependForWindows(command)
 		firstWallet := exec.Command(command[0], command[1:]...)
 		firstWallet.Stdin = os.Stdin
 		firstWallet.Stdout = os.Stdout

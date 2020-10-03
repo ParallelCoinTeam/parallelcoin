@@ -204,8 +204,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				encryptionCheckBox := th.DuoUIcheckBox(
-					"Do you want to add an additional layer of encryption"+
-						" for public data?", th.Colors["Dark"],
+					"Do you want to add an additional layer of encryption for public data?", th.Colors["Dark"],
 					th.Colors["Dark"])
 				encryptionCheckBox.Font.Typeface = th.Fonts["Primary"]
 				encryptionCheckBox.Color = gelook.HexARGB(th.Colors["Dark"])

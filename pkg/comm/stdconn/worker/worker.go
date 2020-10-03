@@ -4,9 +4,9 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"runtime"
 	"syscall"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/comm/stdconn"
 )
 
@@ -19,9 +19,10 @@ type Worker struct {
 // Spawn starts up an arbitrary executable file with given arguments and
 // attaches a connection to its stdin/stdout
 func Spawn(args ...string) (w *Worker, err error) {
-	if runtime.GOOS == "windows" {
-		args = append([]string{"cmd.exe", "/C", "start"}, args...)
-	}
+	// if runtime.GOOS == "windows" {
+	// 	args = append([]string{"cmd.exe", "/C", "start"}, args...)
+	// }
+	args = apputil.PrependForWindows(args)
 	w = &Worker{
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,

@@ -12,6 +12,7 @@ import (
 	"gioui.org/unit"
 	"gopkg.in/src-d/go-git.v4"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui"
@@ -53,9 +54,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	if GoBin, err = gobin.Get(); !Check(err) {
 		var command []string
 		command = append([]string{GoBin, "version"})
-		// if runtime.GOOS == "windows" {
-		// 	command = append([]string{"cmd.exe", "/C", "start"}, command...)
-		// }
+		command = apputil.PrependForWindows(command)
 		cmd := exec.Command(command[0], command[1:]...)
 		var out []byte
 		out, err = cmd.CombinedOutput()

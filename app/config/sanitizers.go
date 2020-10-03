@@ -62,11 +62,10 @@ func initDataDir(cfg *pod.Config) {
 
 func initWalletFile(cx *conte.Xt) {
 	if cx.Config.WalletFile == nil || *cx.Config.WalletFile == "" {
-		*cx.
-			Config.
-			WalletFile = *cx.Config.DataDir + string(os.PathSeparator) + cx.ActiveNet.Name + string(os.PathSeparator) + wallet.WalletDbName
+		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
+			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.WalletDbName
 	}
-	Trace("walletfile set to", *cx.Config.WalletFile)
+	Trace("wallet file set to", *cx.Config.WalletFile, *cx.Config.Network)
 }
 
 func initConfigFile(cfg *pod.Config) {
@@ -97,6 +96,7 @@ func initParams(cx *conte.Xt) {
 		Trace("on testnet")
 		cx.ActiveNet = &netparams.TestNet3Params
 		fork.IsTestnet = true
+		Debug(cx.ActiveNet.Name)
 	case "regtestnet", "regressiontest", "r":
 		Trace("on regression testnet")
 		cx.ActiveNet = &netparams.RegressionTestParams

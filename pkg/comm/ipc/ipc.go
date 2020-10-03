@@ -7,10 +7,11 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"runtime"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/minio/highwayhash"
+
+	"github.com/p9c/pod/app/apputil"
 )
 
 var quitMessage = ^uint32(0)
@@ -55,9 +56,10 @@ func NewWorker() (w *Worker, err error) {
 
 // A controller runs a child process and attaches to its stdin/out
 func NewController(args []string) (c *Controller, err error) {
-	if runtime.GOOS == "windows" {
-		args = append([]string{"cmd.exe", "/C", "start"}, args...)
-	}
+	// if runtime.GOOS == "windows" {
+	// 	args = append([]string{"cmd.exe", "/C", "start"}, args...)
+	// }
+	args = apputil.PrependForWindows(args)
 	c = &Controller{
 		Cmd: exec.Command(args[0], args[1:]...),
 	}

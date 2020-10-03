@@ -1650,7 +1650,9 @@ func (p *Peer) readRemoteVersionMsg() error {
 	// Read their version message.
 	remoteMsg, _, err := p.readMessage(wire.LatestEncoding)
 	if err != nil {
-		Error(err)
+		if err != io.EOF {
+			Error(err)
+		}
 		return err
 	}
 	// Notify and disconnect clients if the first message is not a version message.
@@ -1818,7 +1820,9 @@ func (p *Peer) start() error {
 	select {
 	case err := <-negotiateErr:
 		if err != nil {
-			Error(err)
+			if err != io.EOF {
+				Error(err)
+			}
 			p.Disconnect()
 			return err
 		}

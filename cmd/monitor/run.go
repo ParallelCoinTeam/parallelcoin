@@ -10,6 +10,7 @@ import (
 	"gioui.org/layout"
 	"go.uber.org/atomic"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
@@ -108,7 +109,7 @@ func (s *State) Build() (exePath string, err error) {
 	command := []string{GoBin, "build", "-v", "-o", exePath}
 	if runtime.GOOS == "windows" {
 		command = append(command, `-ldflags="-H windowsgui"`)
-		command = append([]string{"cmd.exe", "/C", "start"}, command...)
+		command = apputil.PrependForWindows(command)
 	}
 	c = exec.Command(command[0], command[1:]...)
 	c.Stdout = os.Stdout

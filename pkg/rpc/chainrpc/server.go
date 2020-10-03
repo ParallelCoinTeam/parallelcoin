@@ -21,6 +21,7 @@ import (
 
 	uberatomic "go.uber.org/atomic"
 
+	"github.com/p9c/pod/app/apputil"
 	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/p9c/pod/cmd/node/mempool"
@@ -429,9 +430,7 @@ func (n *Node) Start() {
 	if *n.Config.Generate {
 		Debug("starting cpu miner") // cpuminer
 		args := []string{os.Args[0], "-D", *n.Config.DataDir, "kopach"}
-		if runtime.GOOS == "windows" {
-			args = append([]string{"cmd.exe", "/C", "start"}, args...)
-		}
+		args = apputil.PrependForWindows(args)
 		n.CPUMiner = exec.Command(args[0], args[1:]...)
 		n.CPUMiner.Stdin = os.Stdin
 		n.CPUMiner.Stdout = os.Stdout

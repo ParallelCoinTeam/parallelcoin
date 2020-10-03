@@ -161,7 +161,9 @@ func readMessageHeader(r io.Reader) (int, *messageHeader, error) {
 	var headerBytes [MessageHeaderSize]byte
 	n, err := io.ReadFull(r, headerBytes[:])
 	if err != nil {
-		Trace(err)
+		if err != io.EOF {
+			Trace(err)
+		}
 		return n, nil, err
 	}
 	hr := bytes.NewReader(headerBytes[:])
@@ -290,7 +292,9 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 	n, hdr, err := readMessageHeader(r)
 	totalBytes += n
 	if err != nil {
-		Trace(err)
+		if err != io.EOF {
+			Error(err)
+		}
 		return totalBytes, nil, nil, err
 	}
 	// Enforce maximum message payload.

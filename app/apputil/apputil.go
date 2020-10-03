@@ -3,6 +3,7 @@ package apputil
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 // EnsureDir checks a file could be written to a path, creates the directories as needed
@@ -29,4 +30,18 @@ func MinUint32(a, b uint32) uint32 {
 		return a
 	}
 	return b
+}
+
+func PrependForWindows(args []string) []string {
+	if runtime.GOOS == "windows" {
+		args = append(
+			[]string{
+				"cmd.exe",
+				"/C",
+				// "start",
+			},
+			args...,
+		)
+	}
+	return args
 }

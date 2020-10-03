@@ -2,11 +2,11 @@ package monitor
 
 import (
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"gioui.org/layout"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/logi"
 )
@@ -111,9 +111,7 @@ func (s *State) LogViewer() layout.FlexChild {
 								c = strings.Replace(c, "$2", v2, 1)
 								Debug("running command", c)
 								args := strings.Split(c, " ")
-								if runtime.GOOS == "windows" {
-									args = append([]string{"cmd.exe", "/C", "start"}, args...)
-								}
+								args = apputil.PrependForWindows(args)
 								cmd := exec.Command(args[0], args[1:]...)
 								_ = cmd.Run()
 								// s.Config.ClickCommand
