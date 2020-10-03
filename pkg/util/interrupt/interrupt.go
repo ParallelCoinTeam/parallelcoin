@@ -2,7 +2,9 @@ package interrupt
 
 import (
 	"os"
+	"os/exec"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -24,6 +26,7 @@ var (
 	// HandlersDone is closed after all interrupt handlers run the first time
 	// an interrupt is signaled.
 	HandlersDone = make(chan struct{})
+	DataDir      string
 )
 
 // Receiver listens for interrupt signals, registers interrupt callbacks, and responds to custom shutdown signals as
@@ -39,20 +42,31 @@ func Listener() {
 		}
 		close(HandlersDone)
 		Debug("interrupt handlers finished")
-		if Restart {
-			Debug("restarting")
-			file, err := osext.Executable()
-			if err != nil {
-				Error(err)
-				return
-			}
-			err = syscall.Exec(file, os.Args, os.Environ())
-			if err != nil {
-				Fatal(err)
-			}
-			// return
+		Debug("restarting")
+
+		file, err := osext.Executable()
+		if err != nil {
+			Error(err)
+			return
 		}
-		time.Sleep(time.Second)
+		if Restart {
+			if runtime.GOOS != "windows" {
+				err = syscall.Exec(file, os.Args, os.Environ())
+				if err != nil {
+					Fatal(err)
+				}
+			} else {
+				s := []string{"cmd.exe", "/C", "start"}
+				s = append(s, os.Args[0])
+				s = append(s, "--delaystart")
+				s = append(s, os.Args[1:]...)
+				cmd := exec.Command(s[0], s[1:]...)
+				if err = cmd.Run(); Check(err) {
+				}
+
+			}
+		}
+		time.Sleep(time.Second * 3)
 		os.Exit(1)
 	}
 	for {

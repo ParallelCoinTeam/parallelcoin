@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/serve"
 
@@ -31,6 +32,12 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
 			cx.DataDir = c.String("datadir")
+		}
+		// propagate datadir path to interrupt for restart handling
+		interrupt.DataDir = cx.DataDir
+		// if there is a delaystart requested, pause for 3 seconds
+		if c.IsSet("delaystart") {
+			time.Sleep(time.Second * 3)
 		}
 		if c.IsSet("pipelog") {
 			Warn("pipe logger enabled")

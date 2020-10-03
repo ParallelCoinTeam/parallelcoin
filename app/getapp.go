@@ -623,6 +623,12 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"Starts GUI with wallet turned off",
 				cx.Config.WalletOff,
 			),
+			apputil.Bool(
+				"delaystart",
+				"pauses for 3 seconds before starting, for internal use with restart function",
+				cx.Config.WalletOff,
+			),
+
 		},
 	}
 }

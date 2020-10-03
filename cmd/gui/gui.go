@@ -2,6 +2,7 @@ package gui
 
 import (
 	"os"
+	"time"
 
 	"gioui.org/app"
 
@@ -18,7 +19,7 @@ func WalletGUI(duo *model.DuoUI, rc *rcd.RcVar) (err error) {
 		if err := duoui.DuoUImainLoop(duo, rc); Check(err) {
 			Fatal("shutting down")
 			// close(rc.Quit)
-			// time.Sleep(time.Second * 2)
+			time.Sleep(time.Second * 2)
 			os.Exit(1)
 		}
 	}()

@@ -52,3 +52,5 @@ go_build*
 pod.exe
 
 pkg/comm/transport/cmd/example/example.exe
+
+app/launcher/launcher.exe
