@@ -4,7 +4,6 @@ import (
 	"math/big"
 )
 
-//go:generate go run genalphabet.go
 var bigRadix = big.NewInt(58)
 var bigZero = big.NewInt(0)
 

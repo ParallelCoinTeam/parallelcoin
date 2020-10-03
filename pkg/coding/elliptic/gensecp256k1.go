@@ -1,16 +1,19 @@
-// +build gensecp256k1
+////+build gensecp256k1
+
+//go:generate go run precomp/genprecomps.go precomp/log.go
 
 package ec
 
 // References:
 //   [GECC]: Guide to Elliptic Curve Cryptography (Hankerson, Menezes, Vanstone)
+
 import (
 	"encoding/binary"
 	"math/big"
 )
 
 // secp256k1BytePoints are dummy points used so the code which generates the real values can compile.
-var secp256k1BytePoints = ""
+// var secp256k1BytePoints = ""
 
 // getDoublingPoints returns all the possible G^(2^i) for i in 0..n-1 where n is the curve's bit size (256 in the case
 // of secp256k1) the coordinates are recorded as Jacobian coordinates.

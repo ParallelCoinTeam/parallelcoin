@@ -1213,8 +1213,7 @@ func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet, chainClient ...
 // requestUsages contains single line usages for every supported request, separated by newlines. It is set during init.
 // These usages are used for all locales.
 //
-//go:generate go run ../../internal/rpchelp/genrpcserverhelp.go legacyrpc
-//go:generate gofmt -w rpcserverhelp.go
+
 var HelpDescs map[string]string
 var HelpDescsMutex sync.Mutex // Help may execute concurrently, so synchronize access.
 
