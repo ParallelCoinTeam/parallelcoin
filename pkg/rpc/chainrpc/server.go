@@ -428,18 +428,25 @@ func (n *Node) Start() {
 	// Start the CPU miner if generation is enabled.
 	if *n.Config.Generate {
 		Debug("starting cpu miner") // cpuminer
-		n.CPUMiner = exec.Command(os.Args[0], "-D", *n.Config.DataDir,
-			"kopach")
+		args := []string{os.Args[0], "-D", *n.Config.DataDir, "kopach"}
+		if runtime.GOOS == "windows" {
+			args = append([]string{"cmd.exe", "/C", "start"}, args...)
+		}
+		n.CPUMiner = exec.Command(args[0], args[1:]...)
 		n.CPUMiner.Stdin = os.Stdin
 		n.CPUMiner.Stdout = os.Stdout
 		n.CPUMiner.Stderr = os.Stderr
-		n.CPUMiner.Start()
-		// n.CPUMiner.Start()
+		var err error
+		if err = n.CPUMiner.Start(); Check(err) {
+		}
 		interrupt.AddHandler(func() {
 			// Stop the CPU miner if needed
+			var err error
 			Debug("stopping the cpu miner") // cpuminer
-			n.CPUMiner.Process.Kill()
-			n.CPUMiner.Wait()
+			if err = n.CPUMiner.Process.Kill(); Check(err) {
+			}
+			if err = n.CPUMiner.Wait(); Check(err) {
+			}
 			Debug("miner has stopped")
 		})
 	}
@@ -1649,7 +1656,7 @@ func (np *NodePeer) OnGetCFilters(_ *peer.Peer,
 
 // handleGetData is invoked when a peer receives a getdata bitcoin message and is used to deliver block and transaction
 // information.
-func (np *NodePeer) OnGetData(_ *peer.Peer,	msg *wire.MsgGetData) {
+func (np *NodePeer) OnGetData(_ *peer.Peer, msg *wire.MsgGetData) {
 	numAdded := 0
 	notFound := wire.NewMsgNotFound()
 	length := len(msg.InvList)

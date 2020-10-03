@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	"github.com/p9c/pod/pkg/util/gobin"
 )
 
 var (
@@ -49,7 +51,11 @@ func podExecutablePath() (string, error) {
 	if runtime.GOOS == "windows" {
 		outputPath += ".exe"
 	}
-	cmd := exec.Command("go", "build", "-o", outputPath, podPkg.ImportPath)
+	var gb string
+	if gb, err = gobin.Get(); Check(err){
+		return "", err
+	}
+	cmd := exec.Command(gb, "build", "-o", outputPath, podPkg.ImportPath)
 	err = cmd.Run()
 	if err != nil {
 		Error(err)

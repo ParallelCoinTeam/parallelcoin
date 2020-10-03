@@ -628,7 +628,6 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"pauses for 3 seconds before starting, for internal use with restart function",
 				cx.Config.WalletOff,
 			),
-
 		},
 	}
 }

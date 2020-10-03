@@ -169,15 +169,14 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 	layout.Center.Layout(ctx, func() {
 		controllers := []func(){
 			func() {
-				bal := th.H5("Enter the private passphrase for your new" +
-					" wallet:")
+				bal := th.H5("Enter the private passphrase for your new wallet:")
 				bal.Font.Typeface = th.Fonts["Primary"]
 				bal.Color = th.Colors["Dark"]
 				bal.Layout(ctx)
 			},
 			func() {
 				layout.UniformInset(unit.Dp(8)).Layout(ctx, func() {
-					e := th.DuoUIeditor("Enter Passphrase", "Dark", "Light", 32)
+					e := th.DuoUIeditor("Enter Passphrase", "Dark", "Light", 256)
 					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Regular
 					e.Layout(ctx, passEditor)
@@ -191,7 +190,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				layout.UniformInset(unit.Dp(8)).Layout(ctx, func() {
-					e := th.DuoUIeditor("Repeat Passphrase", "Dark", "Light", 32)
+					e := th.DuoUIeditor("Repeat Passphrase", "Dark", "Light", 256)
 					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Regular
 					e.Layout(ctx, confirmPassEditor)
@@ -252,9 +251,9 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 							ui.rc.UseTestnet()
 						}
 						ui.rc.CreateWallet(passPhrase, "", "", "")
-						if testnet.Checked(ctx) {
-							interrupt.RequestRestart()
-						}
+						// if testnet.Checked(ctx) {
+						interrupt.RequestRestart()
+						// }
 					}
 				}
 				createWalletbuttonComp.Layout(ctx, buttonCreateWallet)

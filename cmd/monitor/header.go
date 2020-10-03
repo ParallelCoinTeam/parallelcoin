@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -103,14 +104,26 @@ func (s *State) RestartRunButton(fg, bg string) layout.FlexChild {
 				s.RunCommandChan <- "kill"
 				go func() {
 					exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
-					c = exec.Command("go", "build", "-v",
-						"-o", exePath)
+					command := []string{GoBin, "build", "-v", "-o", exePath}
+					if runtime.GOOS == "windows" {
+						command = append([]string{"cmd.exe", "/C", "start"}, command...)
+					}
+					c = exec.Command(command[0], command[1:]...)
 					c.Stderr = os.Stderr
 					c.Stdout = os.Stdout
 					time.Sleep(time.Second)
 					if err = c.Run(); !Check(err) {
-						if err = syscall.Exec(exePath, os.Args,
-							os.Environ()); Check(err) {
+						if runtime.GOOS == "windows" {
+							command = append([]string{exePath}, os.Args[1:]...)
+							command = append([]string{
+								"cmd.exe",
+								"/C",
+								// "start",
+							}, command...)
+							exec.Command(command[0], command[1:]...)
+						} else {
+							if err = syscall.Exec(exePath, os.Args, os.Environ()); Check(err) {
+							}
 						}
 						close(s.Ctx.KillAll)
 						// time.Sleep(time.Second/2)

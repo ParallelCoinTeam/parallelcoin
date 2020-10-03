@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/minio/highwayhash"
@@ -54,22 +55,24 @@ func NewWorker() (w *Worker, err error) {
 
 // A controller runs a child process and attaches to its stdin/out
 func NewController(args []string) (c *Controller, err error) {
+	if runtime.GOOS == "windows" {
+		args = append([]string{"cmd.exe", "/C", "start"}, args...)
+	}
 	c = &Controller{
 		Cmd: exec.Command(args[0], args[1:]...),
 	}
-	w, err := c.StdinPipe()
-	if err != nil {
+	var w io.WriteCloser
+	if w, err = c.StdinPipe(); Check(err) {
 		panic(err)
 	}
 	// child process can print to parent's stderr for debugging
 	c.Cmd.Stderr = os.Stderr
 	c.Stderr = os.Stderr
-	r, err := c.StdoutPipe()
-	if err != nil {
+	var r io.ReadCloser
+	if r, err = c.StdoutPipe(); Check(err) {
 		panic(err)
 	}
-	c.Conn, err = NewConn("controller", r, w)
-	if err != nil {
+	if c.Conn, err = NewConn("controller", r, w); Check(err) {
 		return
 	}
 	return

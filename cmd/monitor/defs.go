@@ -177,7 +177,9 @@ type Config struct {
 	BuildOpen      bool
 	BuildZoomed    bool
 	DarkTheme      bool
+	// RunInRepo records whether the current working directory is the root of the Pod repository
 	RunInRepo      bool
+	// UseBuiltinGo records whether the current environment has a Go toolchain configured, as it does for a developer
 	UseBuiltinGo   bool
 	Running        bool
 	Pausing        bool

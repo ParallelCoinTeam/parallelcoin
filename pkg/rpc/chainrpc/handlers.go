@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -1003,7 +1004,7 @@ func HandleGetBlockTemplateProposal(
 	hexData := request.Data
 	if hexData == "" {
 		return false, &btcjson.RPCError{
-			Code: btcjson.ErrRPCType,
+			Code:    btcjson.ErrRPCType,
 			Message: fmt.Sprintf("Data must contain the hex-encoded serialized block that is being proposed"),
 		}
 	}
@@ -2601,12 +2602,23 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	save.Pod(s.Config)
 	if *s.Config.Generate && *s.Config.GenThreads != 0 {
 		Debug("starting miner")
-		s.Cfg.CPUMiner = exec.Command(os.Args[0], "-D", *s.Config.DataDir,
-			"kopach")
+		args := []string{os.Args[0], "-D", *s.Config.DataDir, "kopach"}
+		if runtime.GOOS == "windows" {
+			args = append(
+				[]string{
+					"cmd.exe",
+					"/C",
+					// "start",
+				},
+				args...
+			)
+		}
+		s.Cfg.CPUMiner = exec.Command(args[0], args[1:]...)
 		s.Cfg.CPUMiner.Stdin = os.Stdin
 		s.Cfg.CPUMiner.Stdout = os.Stdout
 		s.Cfg.CPUMiner.Stderr = os.Stderr
-		s.Cfg.CPUMiner.Start()
+		if err = s.Cfg.CPUMiner.Start(); Check(err) {
+		}
 	} else {
 		s.Cfg.CPUMiner = nil
 	}

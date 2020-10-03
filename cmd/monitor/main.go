@@ -15,9 +15,12 @@ import (
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/util/gobin"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 )
+
+var GoBin string
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	mon := NewMonitor(cx, nil, rc)
@@ -47,13 +50,21 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			mon.Config.RunInRepo = true
 		}
 	}
-	cmd := exec.Command("go", "version")
-	var out []byte
-	out, err = cmd.CombinedOutput()
-	if !strings.HasPrefix("go version", string(out)) {
-		mon.HasGo = true
-		if isNew {
-			mon.Config.UseBuiltinGo = true
+	if GoBin, err = gobin.Get(); !Check(err) {
+		var command []string
+		command = append([]string{GoBin, "version"})
+		// if runtime.GOOS == "windows" {
+		// 	command = append([]string{"cmd.exe", "/C", "start"}, command...)
+		// }
+		cmd := exec.Command(command[0], command[1:]...)
+		var out []byte
+		out, err = cmd.CombinedOutput()
+		Debug(cmd, out)
+		if strings.HasPrefix("go version", string(out)) {
+			mon.HasGo = true
+			if isNew {
+				mon.Config.UseBuiltinGo = true
+			}
 		}
 	}
 	mon.W = app.NewWindow(

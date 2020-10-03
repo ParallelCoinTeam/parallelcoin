@@ -1,8 +1,10 @@
 package worker
 
 import (
+	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"syscall"
 
 	"github.com/p9c/pod/pkg/comm/stdconn"
@@ -16,30 +18,27 @@ type Worker struct {
 
 // Spawn starts up an arbitrary executable file with given arguments and
 // attaches a connection to its stdin/stdout
-func Spawn(args ...string) (w *Worker) {
+func Spawn(args ...string) (w *Worker, err error) {
+	if runtime.GOOS == "windows" {
+		args = append([]string{"cmd.exe", "/C", "start"}, args...)
+	}
 	w = &Worker{
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
 	}
 	// w.cmd.Stderr = os.Stderr
-	cmdOut, err := w.cmd.StdoutPipe()
-	if err != nil {
-		Error(err)
+	var cmdOut io.ReadCloser
+	if cmdOut, err = w.cmd.StdoutPipe(); Check(err) {
 		return
 	}
-	cmdIn, err := w.cmd.StdinPipe()
-	if err != nil {
-		Error(err)
+	var cmdIn io.WriteCloser
+	if cmdIn, err = w.cmd.StdinPipe(); Check(err) {
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, make(chan struct{}))
-	err = w.cmd.Start()
-	if err != nil {
-		Error(err)
-		return nil
-	} else {
-		return
+	if err = w.cmd.Start(); Check(err) {
 	}
+	return
 }
 
 func (w *Worker) Wait() (err error) {

@@ -104,17 +104,19 @@ func (s *State) RunControls() layout.FlexChild {
 
 func (s *State) Build() (exePath string, err error) {
 	var c *exec.Cmd
-	gt := "goterm"
-	if runtime.GOOS == "windows" {
-		gt = ""
-	}
 	exePath = filepath.Join(*s.Ctx.Config.DataDir, "pod_mon")
-	c = exec.Command("go", "build", "-v",
-		"-tags", gt, "-o", exePath)
+	command := []string{GoBin, "build", "-v", "-o", exePath}
+	if runtime.GOOS == "windows" {
+		command = append(command, `-ldflags="-H windowsgui"`)
+		command = append([]string{"cmd.exe", "/C", "start"}, command...)
+	}
+	c = exec.Command(command[0], command[1:]...)
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
-	if err = c.Run(); !Check(err) {
+	var output []byte
+	if output, err = c.CombinedOutput(); !Check(err) {
 	}
+	Debug(string(output))
 	return
 }
 
