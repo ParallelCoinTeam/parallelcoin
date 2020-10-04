@@ -476,7 +476,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					" and other node peers",
 				":0",
 				cx.Config.Controller),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"autoports",
 				"uses random automatic ports for p2p, rpc and controller",
 				cx.Config.AutoPorts),
@@ -544,15 +544,13 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"blocksonly",
 				"Do not accept transactions from remote peers.",
 				cx.Config.BlocksOnly),
-			apputil.Bool(
-				"notxindex",
-				"Disable the transaction index which makes all transactions"+
-					" available via the getrawtransaction RPC",
+			apputil.BoolTrue(
+				"txindex",
+				"Disable the transaction index which makes all transactions available via the getrawtransaction RPC",
 				cx.Config.TxIndex),
-			apputil.Bool(
-				"noaddrindex",
-				"Disable address-based transaction index which"+
-					" makes the searchrawtransactions RPC available",
+			apputil.BoolTrue(
+				"addrindex",
+				"Disable address-based transaction index which makes the searchrawtransactions RPC available",
 				cx.Config.AddrIndex,
 			),
 			apputil.Bool(
@@ -610,17 +608,13 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				8,
 				cx.Config.WalletRPCMaxWebsockets,
 			),
-			// apputil.StringSlice(
-			// 	"experimentalrpclisten",
-			// 	"Listen for RPC connections on this interface/port",
-			// 	cx.Config.ExperimentalRPCListeners),
 			apputil.Bool(
 				"nodeoff",
-				"Starts GUI with node turned off",
+				"Starts with node turned off",
 				cx.Config.NodeOff),
 			apputil.Bool(
 				"walletoff",
-				"Starts GUI with wallet turned off",
+				"Starts with wallet turned off",
 				cx.Config.WalletOff,
 			),
 			apputil.Bool(

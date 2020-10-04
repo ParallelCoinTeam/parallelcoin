@@ -38,7 +38,21 @@ func PrependForWindows(args []string) []string {
 			[]string{
 				"cmd.exe",
 				"/C",
-				// "start",
+			},
+			args...,
+		)
+	}
+	return args
+}
+
+
+func PrependForWindowsWithStart(args []string) []string {
+	if runtime.GOOS == "windows" {
+		args = append(
+			[]string{
+				"cmd.exe",
+				"/C",
+				"start",
 			},
 			args...,
 		)

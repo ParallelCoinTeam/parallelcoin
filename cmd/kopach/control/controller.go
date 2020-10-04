@@ -64,9 +64,11 @@ type Controller struct {
 }
 
 func Run(cx *conte.Xt) (quit chan struct{}) {
+	mining := true
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
-		Warn("no mining addresses, not starting controller")
-		return
+		// Warn("no mining addresses, not starting controller")
+		// return
+		mining = false
 	}
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		Warn("not running controller without RPC enabled")
@@ -122,15 +124,17 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		}
 	})
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
-	err = ctrl.sendNewBlockTemplate()
-	if err != nil {
-		Error(err)
-	} else {
-		ctrl.active.Store(true)
+	if mining {
+		err = ctrl.sendNewBlockTemplate()
+		if err != nil {
+			Error(err)
+		} else {
+			ctrl.active.Store(true)
+		}
+		cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
+		go rebroadcaster(ctrl)
+		go submitter(ctrl)
 	}
-	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
-	go rebroadcaster(ctrl)
-	go submitter(ctrl)
 	go advertiser(ctrl)
 	ticker := time.NewTicker(time.Second * 3)
 	cont := true
@@ -144,7 +148,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 					ctrl.active.Store(true)
 				}
 			}
-			Trace("network hashrate", ctrl.HashReport())
+			Debug("network hashrate", ctrl.HashReport())
 		case <-ctrl.quit:
 			cont = false
 			ctrl.active.Store(false)
@@ -259,7 +263,7 @@ var handlersMulticast = transport.Handlers{
 		b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			Debug("not active")
+			// Debug("not active")
 			return
 		}
 		j := p2padvt.LoadContainer(b)
@@ -461,7 +465,7 @@ out:
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
 		if !c.active.Load() {
-			Debug("not active")
+			// Debug("not active")
 			return
 		}
 		if !c.Ready.Load() {

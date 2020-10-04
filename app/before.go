@@ -27,7 +27,7 @@ import (
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		Debug("running beforeFunc")
-		Debug(appName, pod.Tag, pod.GitCommit, pod.BuildTime)
+		Debug(Name, pod.Tag, pod.GitCommit, pod.BuildTime)
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {

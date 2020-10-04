@@ -42,14 +42,13 @@ func Listener() {
 		}
 		close(HandlersDone)
 		Debug("interrupt handlers finished")
-		Debug("restarting")
-
 		file, err := osext.Executable()
 		if err != nil {
 			Error(err)
 			return
 		}
 		if Restart {
+			Debug("restarting")
 			if runtime.GOOS != "windows" {
 				err = syscall.Exec(file, os.Args, os.Environ())
 				if err != nil {
