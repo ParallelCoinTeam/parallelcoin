@@ -29,7 +29,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Version:     "v0.0.1",
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
-		Action:      guiHandle(cx),
+		Action:      nodeHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
 			Trace("subcommand completed")
@@ -43,8 +43,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
 				}, apputil.SubCommands(), nil, "v"),
-			apputil.NewCommand("monitor", "run monitor GUI",
-				monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
+			// apputil.NewCommand("monitor", "run monitor GUI",
+			// 	monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
 			apputil.NewCommand("ctl",
 				"send RPC commands to a node or wallet and print the result",
 				ctlHandle(cx), apputil.SubCommands(
@@ -144,8 +144,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				), nil, "w"),
 			apputil.NewCommand("shell", "start combined wallet/node shell",
 				shellHandle(cx), apputil.SubCommands(), nil, "s"),
-			apputil.NewCommand("gui", "start GUI", guiHandle(cx),
-				apputil.SubCommands(), nil),
+			// apputil.NewCommand("gui", "start GUI", guiHandle(cx),
+			// 	apputil.SubCommands(), nil),
 			apputil.NewCommand("kopach", "standalone miner for clusters",
 				KopachHandle(cx), apputil.SubCommands(), nil, "k"),
 			apputil.NewCommand(
