@@ -96,7 +96,6 @@ func initParams(cx *conte.Xt) {
 		Trace("on testnet")
 		cx.ActiveNet = &netparams.TestNet3Params
 		fork.IsTestnet = true
-		Debug(cx.ActiveNet.Name)
 	case "regtestnet", "regressiontest", "r":
 		Trace("on regression testnet")
 		cx.ActiveNet = &netparams.RegressionTestParams

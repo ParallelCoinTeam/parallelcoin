@@ -428,7 +428,7 @@ func (n *Node) Start() {
 	}
 	// Start the CPU miner if generation is enabled.
 	if *n.Config.Generate {
-		Debug("starting cpu miner") // cpuminer
+		Debug("starting miner") // cpuminer
 		args := []string{os.Args[0], "-D", *n.Config.DataDir, "kopach"}
 		args = apputil.PrependForWindows(args)
 		n.CPUMiner = exec.Command(args[0], args[1:]...)
@@ -441,7 +441,7 @@ func (n *Node) Start() {
 		interrupt.AddHandler(func() {
 			// Stop the CPU miner if needed
 			var err error
-			Debug("stopping the cpu miner") // cpuminer
+			Debug("stopping the miner")
 			if err = n.CPUMiner.Process.Kill(); Check(err) {
 			}
 			if err = n.CPUMiner.Wait(); Check(err) {

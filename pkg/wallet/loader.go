@@ -51,8 +51,8 @@ var (
 // non-nil, addresses are derived from this seed. If nil, a secure random seed is generated.
 func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bday time.Time, noStart bool,
 	podConfig *pod.Config) (*Wallet, error) {
-	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
+	defer ld.Mutex.Unlock()
 	if ld.Loaded {
 		return nil, ErrLoaded
 	}

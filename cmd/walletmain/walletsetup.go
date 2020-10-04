@@ -56,6 +56,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
+	Debug("CreateWallet", loader.ChainParams.Name)
 	// When there is a legacy keystore, open it now to ensure any errors don't end up exiting the process after the user
 	// has spent time entering a bunch of information.
 	netDir := NetworkDir(*config.DataDir, activenet)
@@ -128,8 +129,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	}
 	// Ascertain the public passphrase. This will either be a value specified by the user or the default hard-coded
 	// public passphrase if the user does not want the additional public data encryption.
-	pubPass, err := prompt.PublicPass(reader, privPass, []byte(""),
-		[]byte(*config.WalletPass))
+	pubPass, err := prompt.PublicPass(reader, privPass, []byte(""), []byte(*config.WalletPass))
 	if err != nil {
 		Error(err)
 		Debug(err)
@@ -140,7 +140,6 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	// confirmed or a value the user has entered which has already been validated.
 	seed, err := prompt.Seed(reader)
 	if err != nil {
-		Error(err)
 		Debug(err)
 		time.Sleep(time.Second * 5)
 		return err
@@ -148,7 +147,6 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	Debug("Creating the wallet")
 	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false, config)
 	if err != nil {
-		Error(err)
 		Debug(err)
 		time.Sleep(time.Second * 5)
 		return err

@@ -148,7 +148,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 					ctrl.active.Store(true)
 				}
 			}
-			Debug("network hashrate", ctrl.HashReport())
+			Debugf("cluster hashrate %.2f", ctrl.HashReport())
 		case <-ctrl.quit:
 			cont = false
 			ctrl.active.Store(false)
