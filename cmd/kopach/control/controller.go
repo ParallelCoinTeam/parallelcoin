@@ -136,7 +136,8 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		go submitter(ctrl)
 	}
 	go advertiser(ctrl)
-	ticker := time.NewTicker(time.Second * 3)
+	factor := 10
+	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	cont := true
 	for cont {
 		select {
@@ -148,7 +149,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 					ctrl.active.Store(true)
 				}
 			}
-			Debugf("cluster hashrate %.2f", ctrl.HashReport())
+			Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
 		case <-ctrl.quit:
 			cont = false
 			ctrl.active.Store(false)

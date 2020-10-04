@@ -332,6 +332,12 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 	if atomic.LoadInt32(&cm.stop) != 0 {
 		return
 	}
+	for i := range cm.Cfg.Listeners {
+		if cm.Cfg.Listeners[i].Addr().String() == c.Addr.String() {
+			Debug("not making outbound connection to our own listener address")
+			return
+		}
+	}
 	if atomic.LoadUint64(&c.id) == 0 {
 		atomic.StoreUint64(&c.id, atomic.AddUint64(&cm.connReqCount, 1))
 		// Submit a request of a pending connection attempt to the connection manager. By registering the id before the
