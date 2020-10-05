@@ -5,7 +5,8 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/layout"
-	"gioui.org/widget"
+
+	w "github.com/p9c/pod/pkg/gui/widget"
 
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
@@ -13,7 +14,7 @@ import (
 )
 
 var (
-	button = new(widget.Clickable)
+	button = w.NewClickable()
 )
 
 func Run(quit chan struct{}) {
@@ -55,7 +56,7 @@ func testLabels(th *p9.Theme, gtx layout.Context) {
 					th.Caption("this is a Caption").Fn,
 				).Fn,
 			).Rigid(
-				th.Button(button, func(button *widget.Clickable) {
+				th.Button(button, func(button *w.Clickable) {
 					Info("clicked button")
 				}, "plan9", "Click me!").Fn,
 			).Fn,
