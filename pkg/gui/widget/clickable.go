@@ -12,8 +12,8 @@ import (
 	"gioui.org/op"
 )
 
-type events struct {
-	click, cancel, press chan struct{}
+type ClickEvents struct {
+	click, cancel, press func()
 }
 
 // Clickable represents a clickable area.
@@ -25,7 +25,7 @@ type Clickable struct {
 	// clicks bounded.
 	prevClicks int
 	history    []Press
-	events     events
+	events     ClickEvents
 }
 
 func NewClickable() (c *Clickable) {
@@ -34,13 +34,28 @@ func NewClickable() (c *Clickable) {
 		clicks:     nil,
 		prevClicks: 0,
 		history:    nil,
-		events: events{
-			click:  make(chan struct{}),
-			cancel: make(chan struct{}),
-			press:  make(chan struct{}),
+		events: ClickEvents{
+			click:  func() {},
+			cancel: func() {},
+			press:  func() {},
 		},
 	}
 	return
+}
+
+func (c *Clickable) SetClick(fn func()) *Clickable {
+	c.events.click = fn
+	return c
+}
+
+func (c *Clickable) SetCancel(fn func()) *Clickable {
+	c.events.cancel = fn
+	return c
+}
+
+func (c *Clickable) SetPress(fn func()) *Clickable {
+	c.events.press = fn
+	return c
 }
 
 // Click represents a click.
@@ -107,8 +122,18 @@ func (b *Clickable) Fn(gtx layout.Context) layout.Dimensions {
 	return layout.Dimensions{Size: gtx.Constraints.Min}
 }
 
-// update the button state by processing events.
+// update the button state by processing ClickEvents.
 func (b *Clickable) update(gtx layout.Context) {
+	// if this is used by old code these functions have to be empty as they are called, not nil (which will panic)
+	if b.events.click == nil {
+		b.events.click = func(){}
+	}
+	if b.events.cancel == nil {
+		b.events.cancel = func(){}
+	}
+	if b.events.press == nil {
+		b.events.press = func(){}
+	}
 	// Flush clicks from before the last update.
 	n := copy(b.clicks, b.clicks[b.prevClicks:])
 	b.clicks = b.clicks[:n]
@@ -125,7 +150,7 @@ func (b *Clickable) update(gtx layout.Context) {
 			if l := len(b.history); l > 0 {
 				b.history[l-1].End = gtx.Now
 			}
-			// send the click signal on the channel
+			b.events.click()
 		case gesture.TypeCancel:
 			for i := range b.history {
 				b.history[i].Cancelled = true
@@ -133,11 +158,13 @@ func (b *Clickable) update(gtx layout.Context) {
 					b.history[i].End = gtx.Now
 				}
 			}
+			b.events.cancel()
 		case gesture.TypePress:
 			b.history = append(b.history, Press{
 				Position: e.Position,
 				Start:    gtx.Now,
 			})
+			b.events.press()
 		}
 	}
 }
