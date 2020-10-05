@@ -30,7 +30,7 @@ func Run() {
 }
 
 func testLabels(th *p9.Theme, gtx layout.Context) {
-	f.Flex().Flexed(1,
+	th.Flex().Flexed(1,
 		th.Inset(10,
 			f.Flex().Vertical().Rigid(
 				th.H1("this is a H1").Fn,

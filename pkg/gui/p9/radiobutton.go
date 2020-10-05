@@ -12,8 +12,7 @@ type RadioButtonStyle struct {
 	Group *widget.Enum
 }
 
-// RadioButton returns a RadioButton with a label. The key specifies
-// the value for the Enum.
+// RadioButton returns a RadioButton with a label. The key specifies the value for the Enum.
 func (th *Theme) RadioButton(group *widget.Enum, key, label string) RadioButtonStyle {
 	return RadioButtonStyle{
 		Group: group,
@@ -32,7 +31,7 @@ func (th *Theme) RadioButton(group *widget.Enum, key, label string) RadioButtonS
 	}
 }
 
-// Layout updates enum and displays the radio button.
+// Fn updates enum and displays the radio button.
 func (r RadioButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
 	dims := r.layout(gtx, r.Group.Value == r.Key)
 	gtx.Constraints.Min = dims.Size

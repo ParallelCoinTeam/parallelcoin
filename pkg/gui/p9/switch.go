@@ -33,7 +33,7 @@ func (th *Theme) Switch(swtch *widget.Bool) SwitchStyle {
 	return sw
 }
 
-// Layout updates the checkBox and displays it.
+// Fn updates the checkBox and displays it.
 func (s SwitchStyle) Fn(gtx layout.Context) layout.Dimensions {
 	trackWidth := gtx.Px(unit.Dp(36))
 	trackHeight := gtx.Px(unit.Dp(16))
@@ -92,8 +92,7 @@ func (s SwitchStyle) Fn(gtx layout.Context) layout.Dimensions {
 		op.Offset(f32.Point{X: float32(off)}).Add(gtx.Ops)
 	}
 
-	// Draw thumb shadow, a translucent disc slightly larger than the
-	// thumb itself.
+	// Draw thumb shadow, a translucent disc slightly larger than the thumb itself.
 	shadowStack := op.Push(gtx.Ops)
 	shadowSize := float32(2)
 	// Center shadow horizontally and slightly adjust its Y.
