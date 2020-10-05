@@ -13,8 +13,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget/material"
 
-	"gioui.org/font/gofont"
-
+	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -37,7 +36,7 @@ func Run(quit chan struct{}) {
 }
 
 func loop(w *app.Window, quit chan struct{}) error {
-	th := material.NewTheme(gofont.Collection())
+	th := material.NewTheme(p9fonts.Collection())
 	var ops op.Ops
 	for {
 		e := <-w.Events()
@@ -48,11 +47,13 @@ func loop(w *app.Window, quit chan struct{}) error {
 			close(quit)
 		case system.FrameEvent:
 			gtx := layout.NewContext(&ops, e)
-			l := material.H1(th, "Hello, Gio")
+			h := material.Body1(th, "Kopach Miner")
 			maroon := color.RGBA{127, 0, 0, 255}
-			l.Color = maroon
-			l.Alignment = text.Middle
-			l.Layout(gtx)
+			h.Color = maroon
+			h.Alignment = text.Middle
+			h.Font = text.Font{Typeface: "bariol", Weight: text.Bold}
+			h.TextSize = unit.Dp(20)
+			h.Layout(gtx)
 			e.Frame(gtx.Ops)
 		}
 		select {

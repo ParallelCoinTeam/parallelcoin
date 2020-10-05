@@ -1,23 +1,19 @@
 package p9fonts
 
 import (
-"fmt"
-"sync"
+	"fmt"
+	"sync"
 
-"gioui.org/font/opentype"
-"gioui.org/text"
-"golang.org/x/image/font/gofont/gobold"
-"golang.org/x/image/font/gofont/gobolditalic"
-"golang.org/x/image/font/gofont/goitalic"
-"golang.org/x/image/font/gofont/gomedium"
-"golang.org/x/image/font/gofont/gomediumitalic"
-"golang.org/x/image/font/gofont/gomono"
-"golang.org/x/image/font/gofont/gomonobold"
-"golang.org/x/image/font/gofont/gomonobolditalic"
-"golang.org/x/image/font/gofont/gomonoitalic"
-"golang.org/x/image/font/gofont/goregular"
-"golang.org/x/image/font/gofont/gosmallcaps"
-"golang.org/x/image/font/gofont/gosmallcapsitalic"
+	"gioui.org/font/opentype"
+	"gioui.org/text"
+
+	"github.com/p9c/pod/pkg/gui/fonts/bariolbold"
+	"github.com/p9c/pod/pkg/gui/fonts/bariolbolditalic"
+	"github.com/p9c/pod/pkg/gui/fonts/bariollight"
+	"github.com/p9c/pod/pkg/gui/fonts/bariollightitalic"
+	"github.com/p9c/pod/pkg/gui/fonts/bariolregular"
+	"github.com/p9c/pod/pkg/gui/fonts/bariolregularitalic"
+	"github.com/p9c/pod/pkg/gui/fonts/plan9"
 )
 
 var (
@@ -27,19 +23,18 @@ var (
 
 func Collection() []text.FontFace {
 	once.Do(func() {
-		register(text.Font{}, goregular.TTF)
-		register(text.Font{Style: text.Italic}, goitalic.TTF)
-		register(text.Font{Weight: text.Bold}, gobold.TTF)
-		register(text.Font{Style: text.Italic, Weight: text.Bold}, gobolditalic.TTF)
-		register(text.Font{Weight: text.Medium}, gomedium.TTF)
-		register(text.Font{Weight: text.Medium, Style: text.Italic}, gomediumitalic.TTF)
-		register(text.Font{Variant: "Mono"}, gomono.TTF)
-		register(text.Font{Variant: "Mono", Weight: text.Bold}, gomonobold.TTF)
-		register(text.Font{Variant: "Mono", Weight: text.Bold, Style: text.Italic}, gomonobolditalic.TTF)
-		register(text.Font{Variant: "Mono", Style: text.Italic}, gomonoitalic.TTF)
-		register(text.Font{Variant: "Mono", Style: text.Italic}, gomonoitalic.TTF)
-		register(text.Font{Variant: "Smallcaps"}, gosmallcaps.TTF)
-		register(text.Font{Variant: "Smallcaps", Style: text.Italic}, gosmallcapsitalic.TTF)
+		register(text.Font{Typeface: "bariol"}, bariolregular.TTF)
+		register(text.Font{Typeface: "plan9"}, plan9.TTF)
+		register(text.Font{Typeface: "bariol", Style: text.Italic}, bariolregularitalic.TTF)
+		register(text.Font{Typeface: "bariol", Weight: text.Bold}, bariolbold.TTF)
+		register(text.Font{Typeface: "bariol", Style: text.Italic, Weight: text.Bold}, bariolbolditalic.TTF)
+		register(text.Font{Typeface: "bariol", Weight: text.Medium}, bariollight.TTF)
+		register(text.Font{Typeface: "bariol", Weight: text.Medium, Style: text.Italic}, bariollightitalic.TTF)
+		// register(text.Font{Typeface: "go"}, gomono.TTF)
+		// register(text.Font{Typeface: "go", Weight: text.Bold}, gomonobold.TTF)
+		// register(text.Font{Typeface: "go", Weight: text.Bold, Style: text.Italic}, gomonobolditalic.TTF)
+		// register(text.Font{Typeface: "go", Style: text.Italic}, gomonoitalic.TTF)
+		// register(text.Font{Typeface: "go", Style: text.Italic}, gomonoitalic.TTF)
 		// Ensure that any outside appends will not reuse the backing store.
 		n := len(collection)
 		collection = collection[:n:n]
