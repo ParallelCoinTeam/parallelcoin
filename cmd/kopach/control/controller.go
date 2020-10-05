@@ -144,7 +144,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		case <-ticker.C:
 			if !ctrl.Ready.Load() {
 				if cx.IsCurrent() {
-					Info("ready to mine!")
+					Info("ready to send out jobs!")
 					ctrl.Ready.Store(true)
 					ctrl.active.Store(true)
 				}
@@ -163,7 +163,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 
 func (c *Controller) HashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
-	av := ewma.NewMovingAverage(15)
+	av := ewma.NewMovingAverage()
 	var i int
 	var prev uint64
 	if err := c.hashSampleBuf.ForEach(func(v uint64) error {

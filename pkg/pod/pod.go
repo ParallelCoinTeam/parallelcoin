@@ -212,7 +212,7 @@ type Config struct {
 	WalletServer           *string          `group:"wallet" label:"Wallet Server" description:"node address to connect wallet server to" type:"input" inputType:"text" json:"WalletServer" hook:"restart"`
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"stringSlice" inputType:"text" json:"Whitelists" hook:"restart"`
 	LAN                    *bool            `group:"debug" label:"LAN" description:"run without any connection to nodes on the internet (does not apply on mainnet)" type:"switch" json:"LAN" hook:"restart"`
-	KopachGUI              *bool            `group:"mining" label:"Kopach GUI" description:"enables GUI for miner" type:"switch" json:"KopachGUI" hook:"restart"`
+	KopachGUI              *bool            `group:"mining" label:"Kopach GUI" description:"enables GUI for miner" type:"switch" json:"kopachgui" hook:"restart"`
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {

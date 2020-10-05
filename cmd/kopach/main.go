@@ -16,6 +16,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
+	"github.com/p9c/pod/cmd/kopach/gui"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
@@ -42,11 +43,12 @@ type Worker struct {
 	LastHash      *chainhash.Hash
 }
 
-func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
+func Handle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		Debug("miner controller starting")
 		if *cx.Config.KopachGUI {
 			Info("opening miner controller GUI")
+			gui.Run(cx.KillAll)
 		}
 		ctx, cancel := context.WithCancel(context.Background())
 		w := &Worker{
@@ -77,7 +79,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		interrupt.AddHandler(func() {
 			w.active.Store(false)
-			Debug("KopachHandle interrupt")
+			Debug("Handle interrupt")
 			for i := range w.workers {
 				if err = wks[i].Kill(); !Check(err) {
 				}
@@ -105,8 +107,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
-						Debug("previous current controller has stopped"+
-							" broadcasting", since, w.FirstSender.Load())
+						Debug("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be listened to
 						w.FirstSender.Store("")
 						// pause the workers

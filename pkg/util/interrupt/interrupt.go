@@ -6,7 +6,6 @@ import (
 	"os/signal"
 	"runtime"
 	"syscall"
-	"time"
 
 	"github.com/kardianos/osext"
 )
@@ -65,7 +64,7 @@ func Listener() {
 
 			}
 		}
-		time.Sleep(time.Second * 3)
+		// time.Sleep(time.Second * 3)
 		os.Exit(1)
 	}
 	for {
