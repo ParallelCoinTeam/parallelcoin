@@ -35,6 +35,7 @@ require (
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.uber.org/atomic v1.5.1
 	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6
+	golang.org/x/exp v0.0.0-20191002040644-a1355ae1e2c3
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	golang.org/x/mod v0.1.1-0.20191107180719-034126e5016b // indirect
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a

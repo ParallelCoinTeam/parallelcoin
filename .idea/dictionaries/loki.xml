@@ -24,6 +24,7 @@
       <w>bailment</w>
       <w>bals</w>
       <w>banscore</w>
+      <w>bariol</w>
       <w>bech</w>
       <w>bestblock</w>
       <w>bitcent</w>
@@ -39,6 +40,7 @@
       <w>blockstamp</w>
       <w>blocktime</w>
       <w>bogusmethod</w>
+      <w>bolditalic</w>
       <w>btcjson</w>
       <w>btcsuite</w>
       <w>btcwallet</w>
@@ -196,6 +198,7 @@
       <w>lastrecv</w>
       <w>lastsend</w>
       <w>legacyrpc</w>
+      <w>lightitalic</w>
       <w>listaccounts</w>
       <w>listaddressgroupings</w>
       <w>listaddresstransactions</w>

@@ -6,6 +6,10 @@ import (
 
 	"gioui.org/font/opentype"
 	"gioui.org/text"
+	"golang.org/x/image/font/gofont/gomono"
+	"golang.org/x/image/font/gofont/gomonobold"
+	"golang.org/x/image/font/gofont/gomonobolditalic"
+	"golang.org/x/image/font/gofont/gomonoitalic"
 
 	"github.com/p9c/pod/pkg/gui/fonts/bariolbold"
 	"github.com/p9c/pod/pkg/gui/fonts/bariolbolditalic"
@@ -19,22 +23,34 @@ import (
 var (
 	once       sync.Once
 	collection []text.FontFace
+	Fonts      = map[string]text.Font{
+		"plan9":              {Typeface: "plan9"},
+		"bariol regular":     {Typeface: "bariol regular"},
+		"bariol italic":      {Typeface: "bariol italic", Style: text.Italic},
+		"bariol bold":        {Typeface: "bariol bold", Weight: text.Bold},
+		"bariol bolditalic":  {Typeface: "bariol bolditalic", Style: text.Italic, Weight: text.Bold},
+		"bariol light":       {Typeface: "bariol light", Weight: text.Medium},
+		"bariol lightitalic": {Typeface: "bariol lightitalic", Weight: text.Medium, Style: text.Italic},
+		"go regular":         {Typeface: "go regular"},
+		"go bold":            {Typeface: "go bold", Weight: text.Bold},
+		"go bolditalic":      {Typeface: "go bolditalic", Weight: text.Bold, Style: text.Italic},
+		"go italic":          {Typeface: "go italic", Style: text.Italic},
+	}
 )
 
 func Collection() []text.FontFace {
 	once.Do(func() {
-		register(text.Font{Typeface: "bariol"}, bariolregular.TTF)
-		register(text.Font{Typeface: "plan9"}, plan9.TTF)
-		register(text.Font{Typeface: "bariol", Style: text.Italic}, bariolregularitalic.TTF)
-		register(text.Font{Typeface: "bariol", Weight: text.Bold}, bariolbold.TTF)
-		register(text.Font{Typeface: "bariol", Style: text.Italic, Weight: text.Bold}, bariolbolditalic.TTF)
-		register(text.Font{Typeface: "bariol", Weight: text.Medium}, bariollight.TTF)
-		register(text.Font{Typeface: "bariol", Weight: text.Medium, Style: text.Italic}, bariollightitalic.TTF)
-		// register(text.Font{Typeface: "go"}, gomono.TTF)
-		// register(text.Font{Typeface: "go", Weight: text.Bold}, gomonobold.TTF)
-		// register(text.Font{Typeface: "go", Weight: text.Bold, Style: text.Italic}, gomonobolditalic.TTF)
-		// register(text.Font{Typeface: "go", Style: text.Italic}, gomonoitalic.TTF)
-		// register(text.Font{Typeface: "go", Style: text.Italic}, gomonoitalic.TTF)
+		register(Fonts["plan9"], plan9.TTF)
+		register(Fonts["bariol regular"], bariolregular.TTF)
+		register(Fonts["bariol italic"], bariolregularitalic.TTF)
+		register(Fonts["bariol bold"], bariolbold.TTF)
+		register(Fonts["bariol bold italic"], bariolbolditalic.TTF)
+		register(Fonts["bariol light"], bariollight.TTF)
+		register(Fonts["bariol light italic"], bariollightitalic.TTF)
+		register(Fonts["go regular"], gomono.TTF)
+		register(Fonts["go bold"], gomonobold.TTF)
+		register(Fonts["go bolditalic"], gomonobolditalic.TTF)
+		register(Fonts["go italic"], gomonoitalic.TTF)
 		// Ensure that any outside appends will not reuse the backing store.
 		n := len(collection)
 		collection = collection[:n:n]
@@ -47,6 +63,6 @@ func register(fnt text.Font, ttf []byte) {
 	if err != nil {
 		panic(fmt.Errorf("failed to parse font: %v", err))
 	}
-	fnt.Typeface = "Go"
+	// fnt.Typeface = "Go"
 	collection = append(collection, text.FontFace{Font: fnt, Face: face})
 }
