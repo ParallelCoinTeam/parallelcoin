@@ -127,7 +127,7 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *gel.DuoUIcounter, label, v
 										// paint.ColorOp{Color: HexARGB(c.TxColor)}.Add(gtx.Ops)
 										// gel.Label{
 										//	Alignment: text.Middle,
-										// }.Layout(gtx, c.shaper, c.Font, unit.Dp(12), value)
+										// }.Fn(gtx, c.shaper, c.Font, unit.Dp(12), value)
 									}))
 							})
 						})
@@ -137,7 +137,7 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *gel.DuoUIcounter, label, v
 					//	//	cc.Reset()
 					//	//	c.pageFunction()
 					//	//}
-					//	//c.reset.Layout(gtx, cc.CounterReset)
+					//	//c.reset.Fn(gtx, cc.CounterReset)
 					// }),
 					layout.Rigid(func() {
 						for cc.CounterIncrease.Clicked(gtx) {

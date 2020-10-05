@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
-package plan9
+package p9
 
 import (
 	"image"
@@ -20,14 +18,14 @@ type ProgressBarStyle struct {
 	Progress int
 }
 
-func ProgressBar(th *Theme, progress int) ProgressBarStyle {
+func (th *Theme) ProgressBar(progress int) ProgressBarStyle {
 	return ProgressBarStyle{
 		Progress: progress,
 		Color:    th.Color.Primary,
 	}
 }
 
-func (p ProgressBarStyle) Layout(gtx layout.Context) layout.Dimensions {
+func (p ProgressBarStyle) Fn(gtx layout.Context) layout.Dimensions {
 	shader := func(width float32, color color.RGBA) layout.Dimensions {
 		maxHeight := unit.Dp(4)
 		rr := float32(gtx.Px(unit.Dp(2)))

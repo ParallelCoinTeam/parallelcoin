@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
-package plan9
+package p9
 
 import (
 	"image"
@@ -26,7 +24,7 @@ type SwitchStyle struct {
 	Switch *widget.Bool
 }
 
-func Switch(th *Theme, swtch *widget.Bool) SwitchStyle {
+func (th *Theme) Switch(swtch *widget.Bool) SwitchStyle {
 	sw := SwitchStyle{
 		Switch: swtch,
 	}
@@ -36,7 +34,7 @@ func Switch(th *Theme, swtch *widget.Bool) SwitchStyle {
 }
 
 // Layout updates the checkBox and displays it.
-func (s SwitchStyle) Layout(gtx layout.Context) layout.Dimensions {
+func (s SwitchStyle) Fn(gtx layout.Context) layout.Dimensions {
 	trackWidth := gtx.Px(unit.Dp(36))
 	trackHeight := gtx.Px(unit.Dp(16))
 	thumbSize := gtx.Px(unit.Dp(20))

@@ -1,4 +1,4 @@
-package fui
+package f
 
 //
 // func init() {

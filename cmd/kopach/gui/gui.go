@@ -7,9 +7,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/widget"
 
+	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	"github.com/p9c/pod/pkg/gui/fui"
-	"github.com/p9c/pod/pkg/gui/plan9"
+	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 var (
@@ -18,8 +18,8 @@ var (
 
 func Run() {
 	go func() {
-		th := plan9.NewTheme(p9fonts.Collection())
-		f := fui.Window().Size(640, 480)
+		th := p9.NewTheme(p9fonts.Collection())
+		f := f.Window().Size(640, 480)
 		f.Run(func(ctx *layout.Context) {
 			testLabels(th, *ctx)
 		}, func() {
@@ -29,18 +29,34 @@ func Run() {
 	app.Main()
 }
 
-func testLabels(th *plan9.Theme, gtx layout.Context) {
-	x := fui.Flex().Vertical().
-		Rigid(plan9.H1(th, "this is a H1").Layout).
-		Rigid(plan9.H2(th, "this is a H2").Layout).
-		Rigid(plan9.H3(th, "this is a H3").Layout).
-		Rigid(plan9.H4(th, "this is a H4").Layout).
-		Rigid(plan9.H5(th, "this is a H5").Layout).
-		Rigid(plan9.H6(th, "this is a H6").Layout).
-		Rigid(plan9.Body1(th, "this is a Body1").Layout).
-		Rigid(fui.Inset(10, plan9.Body2(th, "this is a Body2").Layout).Layout).
-		Rigid(fui.Inset(10, plan9.Caption(th, "this is a Caption").Layout).Layout).
-		Rigid(plan9.Button(th, button, "plan9", "Click me!").Layout).
-		Layout
-	fui.Flex().Flexed(1, fui.Inset(10, x).Layout).Layout(gtx)
+func testLabels(th *p9.Theme, gtx layout.Context) {
+	f.Flex().Flexed(1,
+		th.Inset(10,
+			f.Flex().Vertical().Rigid(
+				th.H1("this is a H1").Fn,
+			).Rigid(
+				th.H2("this is a H2").Fn,
+			).Rigid(
+				th.H3("this is a H3").Fn,
+			).Rigid(
+				th.H4("this is a H4").Fn,
+			).Rigid(
+				th.H5("this is a H5").Fn,
+			).Rigid(
+				th.H6("this is a H6").Fn,
+			).Rigid(
+				th.Body1("this is a Body1").Fn,
+			).Rigid(
+				th.Inset(10,
+					th.Body2("this is a Body2").Fn,
+				).Fn,
+			).Rigid(
+				th.Inset(10,
+					th.Caption("this is a Caption").Fn,
+				).Fn,
+			).Rigid(
+				th.Button(button, "plan9", "Click me!").Fn,
+			).Fn,
+		).Fn,
+	).Fn(gtx)
 }

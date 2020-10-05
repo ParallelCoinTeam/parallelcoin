@@ -1,4 +1,4 @@
-package plan9
+package p9
 
 import (
 	"runtime"

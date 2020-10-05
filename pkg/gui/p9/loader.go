@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
-package plan9
+package p9
 
 import (
 	"image"
@@ -20,13 +18,13 @@ type LoaderStyle struct {
 	Color color.RGBA
 }
 
-func Loader(th *Theme) LoaderStyle {
+func (th *Theme) Loader() LoaderStyle {
 	return LoaderStyle{
 		Color: th.Color.Primary,
 	}
 }
 
-func (l LoaderStyle) Layout(gtx layout.Context) layout.Dimensions {
+func (l LoaderStyle) Fn(gtx layout.Context) layout.Dimensions {
 	diam := gtx.Constraints.Min.X
 	if minY := gtx.Constraints.Min.Y; minY > diam {
 		diam = minY

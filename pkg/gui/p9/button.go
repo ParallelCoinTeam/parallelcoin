@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
-package plan9
+package p9
 
 import (
 	"image"
@@ -50,7 +48,7 @@ type IconButtonStyle struct {
 	Button *widget.Clickable
 }
 
-func Button(th *Theme, button *widget.Clickable, font, txt string) ButtonStyle {
+func (th *Theme) Button(button *widget.Clickable, font, txt string) ButtonStyle {
 	var f text.Font
 	for i := range th.Collection {
 		// Debug(th.Collection[i].Font)
@@ -114,7 +112,7 @@ func Clickable(gtx layout.Context, button *widget.Clickable, w layout.Widget) la
 	)
 }
 
-func (b ButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
+func (b ButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
 	return ButtonLayoutStyle{
 		Background:   b.Background,
 		CornerRadius: b.CornerRadius,

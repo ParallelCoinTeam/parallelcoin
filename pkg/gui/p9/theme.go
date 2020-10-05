@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
-package plan9
+package p9
 
 import (
 	"image/color"

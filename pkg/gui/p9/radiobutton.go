@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
-package plan9
+package p9
 
 import (
 	"gioui.org/layout"
@@ -16,7 +14,7 @@ type RadioButtonStyle struct {
 
 // RadioButton returns a RadioButton with a label. The key specifies
 // the value for the Enum.
-func RadioButton(th *Theme, group *widget.Enum, key, label string) RadioButtonStyle {
+func (th *Theme) RadioButton(group *widget.Enum, key, label string) RadioButtonStyle {
 	return RadioButtonStyle{
 		Group: group,
 		checkable: checkable{
@@ -35,7 +33,7 @@ func RadioButton(th *Theme, group *widget.Enum, key, label string) RadioButtonSt
 }
 
 // Layout updates enum and displays the radio button.
-func (r RadioButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
+func (r RadioButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
 	dims := r.layout(gtx, r.Group.Value == r.Key)
 	gtx.Constraints.Min = dims.Size
 	r.Group.Layout(gtx, r.Key)

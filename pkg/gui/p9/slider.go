@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
-package plan9
+package p9
 
 import (
 	"image"
@@ -18,7 +16,7 @@ import (
 )
 
 // Slider is for selecting a value in a range.
-func Slider(th *Theme, float *widget.Float, min, max float32) SliderStyle {
+func (th *Theme) Slider(float *widget.Float, min, max float32) SliderStyle {
 	return SliderStyle{
 		Min:   min,
 		Max:   max,
@@ -33,7 +31,7 @@ type SliderStyle struct {
 	Float    *widget.Float
 }
 
-func (s SliderStyle) Layout(gtx layout.Context) layout.Dimensions {
+func (s SliderStyle) Fn(gtx layout.Context) layout.Dimensions {
 	thumbRadiusInt := gtx.Px(unit.Dp(6))
 	trackWidth := float32(gtx.Px(unit.Dp(2)))
 	thumbRadius := float32(thumbRadiusInt)

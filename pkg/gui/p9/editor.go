@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
-package plan9
+package p9
 
 import (
 	"image/color"
@@ -40,7 +38,7 @@ func Editor(th *Theme, editor *widget.Editor, hint string) EditorStyle {
 	}
 }
 
-func (e EditorStyle) Layout(gtx layout.Context) layout.Dimensions {
+func (e EditorStyle) Fn(gtx layout.Context) layout.Dimensions {
 	defer op.Push(gtx.Ops).Pop()
 	macro := op.Record(gtx.Ops)
 	paint.ColorOp{Color: e.HintColor}.Add(gtx.Ops)
