@@ -20,9 +20,8 @@ type ClickEvents struct {
 type Clickable struct {
 	click  gesture.Click
 	clicks []Click
-	// prevClicks is the index into clicks that marks the clicks
-	// from the most recent Fn call. prevClicks is used to keep
-	// clicks bounded.
+	// prevClicks is the index into clicks that marks the clicks from the most recent Fn call. prevClicks is used to
+	// keep clicks bounded.
 	prevClicks int
 	history    []Press
 	Events     ClickEvents
@@ -44,17 +43,27 @@ func NewClickable() (c *Clickable) {
 }
 
 func (c *Clickable) SetClick(fn func()) *Clickable {
+	if c.Events.Click == nil {
+		c.Events.Click = func(){}
+	}
 	c.Events.Click = fn
 	return c
 }
 
 func (c *Clickable) SetCancel(fn func()) *Clickable {
+	if c.Events.Cancel == nil {
+		c.Events.Cancel = func(){}
+	}
 	c.Events.Cancel = fn
 	return c
 }
 
 func (c *Clickable) SetPress(fn func()) *Clickable {
-	c.Events.Press = fn
+	if c.Events.Press == nil {
+		c.Events.Press = func(){}
+	}
+		c.Events.Press = fn
+
 	return c
 }
 
@@ -70,15 +79,14 @@ type Press struct {
 	Position f32.Point
 	// Start is when the Press began.
 	Start time.Time
-	// End is when the Press was ended by a release or Cancel.
-	// A zero End means it hasn't ended yet.
+	// End is when the Press was ended by a release or Cancel. A zero End means it hasn't ended yet.
 	End time.Time
 	// Cancelled is true for cancelled presses.
 	Cancelled bool
 }
 
-// Clicked reports whether there are pending clicks as would be
-// reported by Clicks. If so, Clicked removes the earliest Click.
+// Clicked reports whether there are pending clicks as would be reported by Clicks. If so, Clicked removes the earliest
+// Click.
 func (b *Clickable) Clicked() bool {
 	if len(b.clicks) == 0 {
 		return false
@@ -99,8 +107,8 @@ func (b *Clickable) Clicks() []Click {
 	return clicks
 }
 
-// History is the past pointer presses useful for drawing markers.
-// History is retained for a short duration (about a second).
+// History is the past pointer presses useful for drawing markers. History is retained for a short duration (about a
+// second).
 func (b *Clickable) History() []Press {
 	return b.history
 }
