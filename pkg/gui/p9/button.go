@@ -167,7 +167,10 @@ func drawInk(gtx layout.Context, c widget.Press) {
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(size), Y: float32(size)}}}.Add(gtx.Ops)
 }
 
-func (th *Theme) Button(button *w.Clickable, font, txt string) ButtonStyle {
+func (th *Theme) Button(button *w.Clickable, events w.ClickEvents, font, txt string) ButtonStyle {
+	button.SetPress(events.Press)
+	button.SetClick(events.Click)
+	button.SetCancel(events.Cancel)
 	var f text.Font
 	for i := range th.Collection {
 		// Debug(th.Collection[i].Font)
@@ -175,17 +178,6 @@ func (th *Theme) Button(button *w.Clickable, font, txt string) ButtonStyle {
 			f = th.Collection[i].Font
 		}
 	}
-	// run handler
-	go func(button *w.Clickable) {
-		// handler(button)
-		for {
-			select {
-			case <-th.quit:
-				// so the handler stops it listens to a quit channel
-				return
-			}
-		}
-	}(button)
 	return ButtonStyle{
 		Text:  txt,
 		Font:  f,

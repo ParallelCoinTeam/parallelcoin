@@ -13,7 +13,7 @@ import (
 )
 
 type ClickEvents struct {
-	click, cancel, press func()
+	Click, Cancel, Press func()
 }
 
 // Clickable represents a clickable area.
@@ -25,7 +25,7 @@ type Clickable struct {
 	// clicks bounded.
 	prevClicks int
 	history    []Press
-	events     ClickEvents
+	Events     ClickEvents
 }
 
 func NewClickable() (c *Clickable) {
@@ -34,43 +34,43 @@ func NewClickable() (c *Clickable) {
 		clicks:     nil,
 		prevClicks: 0,
 		history:    nil,
-		events: ClickEvents{
-			click:  func() {},
-			cancel: func() {},
-			press:  func() {},
+		Events: ClickEvents{
+			Click:  func() {},
+			Cancel: func() {},
+			Press:  func() {},
 		},
 	}
 	return
 }
 
 func (c *Clickable) SetClick(fn func()) *Clickable {
-	c.events.click = fn
+	c.Events.Click = fn
 	return c
 }
 
 func (c *Clickable) SetCancel(fn func()) *Clickable {
-	c.events.cancel = fn
+	c.Events.Cancel = fn
 	return c
 }
 
 func (c *Clickable) SetPress(fn func()) *Clickable {
-	c.events.press = fn
+	c.Events.Press = fn
 	return c
 }
 
-// Click represents a click.
+// Click represents a Click.
 type Click struct {
 	Modifiers key.Modifiers
 	NumClicks int
 }
 
-// Press represents a past pointer press.
+// Press represents a past pointer Press.
 type Press struct {
-	// Position of the press.
+	// Position of the Press.
 	Position f32.Point
-	// Start is when the press began.
+	// Start is when the Press began.
 	Start time.Time
-	// End is when the press was ended by a release or cancel.
+	// End is when the Press was ended by a release or Cancel.
 	// A zero End means it hasn't ended yet.
 	End time.Time
 	// Cancelled is true for cancelled presses.
@@ -78,7 +78,7 @@ type Press struct {
 }
 
 // Clicked reports whether there are pending clicks as would be
-// reported by Clicks. If so, Clicked removes the earliest click.
+// reported by Clicks. If so, Clicked removes the earliest Click.
 func (b *Clickable) Clicked() bool {
 	if len(b.clicks) == 0 {
 		return false
@@ -125,14 +125,14 @@ func (b *Clickable) Fn(gtx layout.Context) layout.Dimensions {
 // update the button state by processing ClickEvents.
 func (b *Clickable) update(gtx layout.Context) {
 	// if this is used by old code these functions have to be empty as they are called, not nil (which will panic)
-	if b.events.click == nil {
-		b.events.click = func(){}
+	if b.Events.Click == nil {
+		b.Events.Click = func(){}
 	}
-	if b.events.cancel == nil {
-		b.events.cancel = func(){}
+	if b.Events.Cancel == nil {
+		b.Events.Cancel = func(){}
 	}
-	if b.events.press == nil {
-		b.events.press = func(){}
+	if b.Events.Press == nil {
+		b.Events.Press = func(){}
 	}
 	// Flush clicks from before the last update.
 	n := copy(b.clicks, b.clicks[b.prevClicks:])
@@ -150,7 +150,7 @@ func (b *Clickable) update(gtx layout.Context) {
 			if l := len(b.history); l > 0 {
 				b.history[l-1].End = gtx.Now
 			}
-			b.events.click()
+			b.Events.Click()
 		case gesture.TypeCancel:
 			for i := range b.history {
 				b.history[i].Cancelled = true
@@ -158,13 +158,13 @@ func (b *Clickable) update(gtx layout.Context) {
 					b.history[i].End = gtx.Now
 				}
 			}
-			b.events.cancel()
+			b.Events.Cancel()
 		case gesture.TypePress:
 			b.history = append(b.history, Press{
 				Position: e.Position,
 				Start:    gtx.Now,
 			})
-			b.events.press()
+			b.Events.Press()
 		}
 	}
 }

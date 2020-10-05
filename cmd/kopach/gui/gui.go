@@ -14,13 +14,7 @@ import (
 )
 
 var (
-	button = w.NewClickable().SetClick(func(){
-		Info("click event")
-	}).SetCancel(func(){
-		Info("cancel event")
-	}).SetPress(func(){
-		Info("press event")
-	})
+	button = w.NewClickable()
 )
 
 func Run(quit chan struct{}) {
@@ -62,7 +56,17 @@ func testLabels(th *p9.Theme, gtx layout.Context) {
 					th.Caption("this is a Caption").Fn,
 				).Fn,
 			).Rigid(
-				th.Button(button, "plan9", "Click me!").Fn,
+				th.Button(button, w.ClickEvents{
+					Click: func() {
+						Info("click event")
+					},
+					Cancel: func() {
+						Info("cancel event")
+					},
+					Press: func() {
+						Info("press event")
+					},
+				}, "plan9", "Click me!").Fn,
 			).Fn,
 		).Fn,
 	).Fn(gtx)
