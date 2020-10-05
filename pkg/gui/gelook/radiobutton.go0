@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: Unlicense OR MIT
+
+package components
+
+import (
+	"gioui.org/layout"
+	"gioui.org/text"
+	"gioui.org/unit"
+	"gioui.org/widget"
+)
+
+type DuoUIradioButton struct {
+	checkable
+	Key string
+}
+
+// RadioButton returns a RadioButton with a label. The key specifies
+// the value for the Enum.
+func (t *DuoUItheme) DuoUIradioButton(key, label string) DuoUIradioButton {
+	return DuoUIradioButton{
+		checkable: checkable{
+			Label: label,
+
+			Color:     t.Color.Text,
+			IconColor: t.Color.Primary,
+			Font: text.Font{
+				Size: t.TextSize.Scale(14.0 / 16.0),
+			},
+			Size:               unit.Dp(26),
+			shaper:             t.Shaper,
+			checkedStateIcon:   t.Icons["RadioUnchecked"],
+			uncheckedStateIcon: t.Icons["RadioChecked"],
+		},
+		Key: key,
+	}
+}
+
+func (r DuoUIradioButton) Layout(gtx *layout.Context, enum *widget.Enum) {
+	r.layout(gtx, enum.Value(gtx) == r.Key)
+	enum.Layout(gtx, r.Key)
+}

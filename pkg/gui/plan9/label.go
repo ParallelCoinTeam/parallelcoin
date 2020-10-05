@@ -27,7 +27,6 @@ type LabelStyle struct {
 	shaper text.Shaper
 }
 
-
 func H1(th *Theme, txt string) (l LabelStyle) {
 	l = Label(th, th.TextSize.Scale(96.0/16.0), "plan9", txt)
 	return
@@ -76,7 +75,7 @@ func Caption(th *Theme, txt string) (l LabelStyle) {
 func Label(th *Theme, size unit.Value, font, txt string) (l LabelStyle) {
 	var f text.Font
 	for i := range th.Collection {
-		Debug(th.Collection[i].Font)
+		// Debug(th.Collection[i].Font)
 		if th.Collection[i].Font.Typeface == text.Typeface(font) {
 			f = th.Collection[i].Font
 		}

@@ -50,16 +50,24 @@ type IconButtonStyle struct {
 	Button *widget.Clickable
 }
 
-func Button(th *Theme, button *widget.Clickable, txt string) ButtonStyle {
+func Button(th *Theme, button *widget.Clickable, font, txt string) ButtonStyle {
+	var f text.Font
+	for i := range th.Collection {
+		// Debug(th.Collection[i].Font)
+		if th.Collection[i].Font.Typeface == text.Typeface(font) {
+			f = th.Collection[i].Font
+		}
+	}
 	return ButtonStyle{
 		Text:         txt,
+		Font:         f,
 		Color:        rgb(0xffffff),
-		CornerRadius: unit.Dp(4),
+		// CornerRadius: unit.Dp(4),
 		Background:   th.Color.Primary,
-		TextSize:     th.TextSize.Scale(14.0 / 16.0),
+		TextSize:     th.TextSize,
 		Inset: layout.Inset{
 			Top: unit.Dp(10), Bottom: unit.Dp(10),
-			Left: unit.Dp(12), Right: unit.Dp(12),
+			Left: unit.Dp(10), Right: unit.Dp(12),
 		},
 		Button: button,
 		shaper: th.Shaper,

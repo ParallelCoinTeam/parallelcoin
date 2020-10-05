@@ -48,7 +48,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		Debug("miner controller starting")
 		if *cx.Config.KopachGUI {
 			Info("opening miner controller GUI")
-			gui.Run(cx.KillAll)
+			gui.Run()
 		}
 		ctx, cancel := context.WithCancel(context.Background())
 		w := &Worker{
