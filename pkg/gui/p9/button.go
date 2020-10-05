@@ -48,7 +48,7 @@ type IconButtonStyle struct {
 	Button *widget.Clickable
 }
 
-func (th *Theme) Button(button *widget.Clickable, font, txt string) ButtonStyle {
+func (th *Theme) Button(button *widget.Clickable, handler func(button *widget.Clickable), font, txt string) ButtonStyle {
 	var f text.Font
 	for i := range th.Collection {
 		// Debug(th.Collection[i].Font)
@@ -56,13 +56,17 @@ func (th *Theme) Button(button *widget.Clickable, font, txt string) ButtonStyle 
 			f = th.Collection[i].Font
 		}
 	}
+	// run handler
+	go func(button *widget.Clickable) {
+		button.Clicked()
+	}(button)
 	return ButtonStyle{
-		Text:         txt,
-		Font:         f,
-		Color:        rgb(0xffffff),
+		Text:  txt,
+		Font:  f,
+		Color: rgb(0xffffff),
 		// CornerRadius: unit.Dp(4),
-		Background:   th.Color.Primary,
-		TextSize:     th.TextSize,
+		Background: th.Color.Primary,
+		TextSize:   th.TextSize,
 		Inset: layout.Inset{
 			Top: unit.Dp(10), Bottom: unit.Dp(10),
 			Left: unit.Dp(10), Right: unit.Dp(12),

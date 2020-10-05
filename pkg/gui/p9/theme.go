@@ -13,27 +13,23 @@ import (
 )
 
 type Theme struct {
+	quit       chan struct{}
 	Collection []text.FontFace
-	Shaper text.Shaper
-	Color  struct {
-		Primary color.RGBA
-		Text    color.RGBA
-		Hint    color.RGBA
-		InvText color.RGBA
+	Shaper     text.Shaper
+	Color      struct {
+		Primary, Text, Hint, InvText color.RGBA
 	}
 	TextSize unit.Value
 	Icon     struct {
-		CheckBoxChecked   *widget.Icon
-		CheckBoxUnchecked *widget.Icon
-		RadioChecked      *widget.Icon
-		RadioUnchecked    *widget.Icon
+		CheckBoxChecked, CheckBoxUnchecked, RadioChecked, RadioUnchecked *widget.Icon
 	}
 }
 
-func NewTheme(fontCollection []text.FontFace) *Theme {
+func NewTheme(fontCollection []text.FontFace, quit chan struct{}) *Theme {
 	t := &Theme{
+		quit:       quit,
 		Collection: fontCollection,
-		Shaper: text.NewCache(fontCollection),
+		Shaper:     text.NewCache(fontCollection),
 	}
 	t.Color.Primary = rgb(0x3f51b5)
 	t.Color.Text = rgb(0x000000)

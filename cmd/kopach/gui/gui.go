@@ -16,9 +16,9 @@ var (
 	button = new(widget.Clickable)
 )
 
-func Run() {
+func Run(quit chan struct{}) {
 	go func() {
-		th := p9.NewTheme(p9fonts.Collection())
+		th := p9.NewTheme(p9fonts.Collection(), quit)
 		f := f.Window().Size(640, 480)
 		f.Run(func(ctx *layout.Context) {
 			testLabels(th, *ctx)
@@ -32,7 +32,7 @@ func Run() {
 func testLabels(th *p9.Theme, gtx layout.Context) {
 	th.Flex().Flexed(1,
 		th.Inset(10,
-			f.Flex().Vertical().Rigid(
+			th.Flex().Vertical().Rigid(
 				th.H1("this is a H1").Fn,
 			).Rigid(
 				th.H2("this is a H2").Fn,
@@ -55,7 +55,9 @@ func testLabels(th *p9.Theme, gtx layout.Context) {
 					th.Caption("this is a Caption").Fn,
 				).Fn,
 			).Rigid(
-				th.Button(button, "plan9", "Click me!").Fn,
+				th.Button(button, func(button *widget.Clickable) {
+					Info("clicked button")
+				}, "plan9", "Click me!").Fn,
 			).Fn,
 		).Fn,
 	).Fn(gtx)
