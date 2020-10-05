@@ -1,4 +1,4 @@
-package fui
+package f
 
 import (
 	"gioui.org/layout"
@@ -19,8 +19,8 @@ func Inset(pad int, w layout.Widget) (out *inset) {
 	return
 }
 
-// Layout the given widget with the configured context and padding
-func (in *inset) Layout(gtx layout.Context) layout.Dimensions {
+// Fn the given widget with the configured context and padding
+func (in *inset) Fn(gtx layout.Context) layout.Dimensions {
 	return in.in.Layout(gtx, in.w)
 }
 

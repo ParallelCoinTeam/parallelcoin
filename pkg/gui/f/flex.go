@@ -1,4 +1,4 @@
-package fui
+package f
 
 import "gioui.org/layout"
 
@@ -98,8 +98,8 @@ func (f *flex) Flexed(wgt float32, w layout.Widget) (out *flex) {
 	return f
 }
 
-// Layout runs the ops in the context using the FlexChildren inside it
-func (f *flex) Layout(c layout.Context) layout.Dimensions {
+// Fn runs the ops in the context using the FlexChildren inside it
+func (f *flex) Fn(c layout.Context) layout.Dimensions {
 	return f.flex.Layout(c, f.children...)
 }
 

@@ -4,11 +4,11 @@ import (
 	"gioui.org/app"
 	"gioui.org/layout"
 
-	"github.com/p9c/pod/pkg/gui/fui"
+	"github.com/p9c/pod/pkg/gui/f"
 )
 
 func main() {
-	if err := fui.Window().Title("Parallelcoin").Size(640, 480).
+	if err := f.Window().Title("Parallelcoin").Size(640, 480).
 		Run(func(*layout.Context) {
 			Info("frame")
 		}, func() {
