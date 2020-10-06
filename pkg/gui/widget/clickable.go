@@ -44,7 +44,7 @@ func NewClickable() (c *Clickable) {
 
 func (c *Clickable) SetClick(fn func()) *Clickable {
 	if c.Events.Click == nil {
-		c.Events.Click = func(){}
+		c.Events.Click = func() {}
 	}
 	c.Events.Click = fn
 	return c
@@ -52,7 +52,7 @@ func (c *Clickable) SetClick(fn func()) *Clickable {
 
 func (c *Clickable) SetCancel(fn func()) *Clickable {
 	if c.Events.Cancel == nil {
-		c.Events.Cancel = func(){}
+		c.Events.Cancel = func() {}
 	}
 	c.Events.Cancel = fn
 	return c
@@ -60,9 +60,9 @@ func (c *Clickable) SetCancel(fn func()) *Clickable {
 
 func (c *Clickable) SetPress(fn func()) *Clickable {
 	if c.Events.Press == nil {
-		c.Events.Press = func(){}
+		c.Events.Press = func() {}
 	}
-		c.Events.Press = fn
+	c.Events.Press = fn
 
 	return c
 }
@@ -87,92 +87,91 @@ type Press struct {
 
 // Clicked reports whether there are pending clicks as would be reported by Clicks. If so, Clicked removes the earliest
 // Click.
-func (b *Clickable) Clicked() bool {
-	if len(b.clicks) == 0 {
+func (c *Clickable) Clicked() bool {
+	if len(c.clicks) == 0 {
 		return false
 	}
-	n := copy(b.clicks, b.clicks[1:])
-	b.clicks = b.clicks[:n]
-	if b.prevClicks > 0 {
-		b.prevClicks--
+	n := copy(c.clicks, c.clicks[1:])
+	c.clicks = c.clicks[:n]
+	if c.prevClicks > 0 {
+		c.prevClicks--
 	}
 	return true
 }
 
 // Clicks returns and clear the clicks since the last call to Clicks.
-func (b *Clickable) Clicks() []Click {
-	clicks := b.clicks
-	b.clicks = nil
-	b.prevClicks = 0
+func (c *Clickable) Clicks() []Click {
+	clicks := c.clicks
+	c.clicks = nil
+	c.prevClicks = 0
 	return clicks
 }
 
 // History is the past pointer presses useful for drawing markers. History is retained for a short duration (about a
 // second).
-func (b *Clickable) History() []Press {
-	return b.history
+func (c *Clickable) History() []Press {
+	return c.history
 }
 
-func (b *Clickable) Fn(gtx layout.Context) layout.Dimensions {
-	b.update(gtx)
+func (c *Clickable) Fn(gtx layout.Context) layout.Dimensions {
+	c.update(gtx)
 	stack := op.Push(gtx.Ops)
 	pointer.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
-	b.click.Add(gtx.Ops)
+	c.click.Add(gtx.Ops)
 	stack.Pop()
-	for len(b.history) > 0 {
-		c := b.history[0]
-		if c.End.IsZero() || gtx.Now.Sub(c.End) < 1*time.Second {
+	for len(c.history) > 0 {
+		cc := c.history[0]
+		if cc.End.IsZero() || gtx.Now.Sub(cc.End) < 1*time.Second {
 			break
 		}
-		n := copy(b.history, b.history[1:])
-		b.history = b.history[:n]
+		n := copy(c.history, c.history[1:])
+		c.history = c.history[:n]
 	}
 	return layout.Dimensions{Size: gtx.Constraints.Min}
 }
 
 // update the button state by processing ClickEvents.
-func (b *Clickable) update(gtx layout.Context) {
+func (c *Clickable) update(gtx layout.Context) {
 	// if this is used by old code these functions have to be empty as they are called, not nil (which will panic)
-	if b.Events.Click == nil {
-		b.Events.Click = func(){}
+	if c.Events.Click == nil {
+		c.Events.Click = func() {}
 	}
-	if b.Events.Cancel == nil {
-		b.Events.Cancel = func(){}
+	if c.Events.Cancel == nil {
+		c.Events.Cancel = func() {}
 	}
-	if b.Events.Press == nil {
-		b.Events.Press = func(){}
+	if c.Events.Press == nil {
+		c.Events.Press = func() {}
 	}
 	// Flush clicks from before the last update.
-	n := copy(b.clicks, b.clicks[b.prevClicks:])
-	b.clicks = b.clicks[:n]
-	b.prevClicks = n
-
-	for _, e := range b.click.Events(gtx) {
+	n := copy(c.clicks, c.clicks[c.prevClicks:])
+	c.clicks = c.clicks[:n]
+	c.prevClicks = n
+	for _, e := range c.click.Events(gtx) {
 		switch e.Type {
 		case gesture.TypeClick:
 			click := Click{
 				Modifiers: e.Modifiers,
 				NumClicks: e.NumClicks,
 			}
-			b.clicks = append(b.clicks, click)
-			if l := len(b.history); l > 0 {
-				b.history[l-1].End = gtx.Now
+			c.clicks = append(c.clicks, click)
+			if l := len(c.history); l > 0 {
+				c.history[l-1].End = gtx.Now
 			}
-			b.Events.Click()
+			c.Events.Click()
 		case gesture.TypeCancel:
-			for i := range b.history {
-				b.history[i].Cancelled = true
-				if b.history[i].End.IsZero() {
-					b.history[i].End = gtx.Now
+			for i := range c.history {
+				c.history[i].Cancelled = true
+				if c.history[i].End.IsZero() {
+					c.history[i].End = gtx.Now
 				}
 			}
-			b.Events.Cancel()
+			c.Events.Cancel()
 		case gesture.TypePress:
-			b.history = append(b.history, Press{
+			c.history = append(c.history, Press{
 				Position: e.Position,
 				Start:    gtx.Now,
 			})
-			b.Events.Press()
+			c.Events.Press()
 		}
 	}
 }

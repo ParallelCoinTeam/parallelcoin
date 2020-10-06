@@ -167,7 +167,7 @@ func drawInk(gtx layout.Context, c widget.Press) {
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(size), Y: float32(size)}}}.Add(gtx.Ops)
 }
 
-func (th *Theme) Button(button *w.Clickable, events w.ClickEvents, font, txt string) ButtonStyle {
+func (th *Theme) Button(button *w.Clickable, font, txt string, events w.ClickEvents) ButtonStyle {
 	button.SetPress(events.Press)
 	button.SetClick(events.Click)
 	button.SetCancel(events.Cancel)
