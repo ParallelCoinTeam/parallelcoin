@@ -1,12 +1,11 @@
 package p9
 
 import (
-	"image"
 	"image/color"
 	"math"
+	"strings"
 
 	"gioui.org/f32"
-	"gioui.org/io/pointer"
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -15,80 +14,126 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 
-	w "github.com/p9c/pod/pkg/gui/widget"
-
 	"github.com/p9c/pod/pkg/gui/f32color"
+	w "github.com/p9c/pod/pkg/gui/widget"
 )
 
 type _button struct {
-	Text string
+	th   *Theme
+	text string
 	// Color is the text color.
-	Color        color.RGBA
-	Font         text.Font
-	TextSize     unit.Value
-	Background   color.RGBA
-	CornerRadius unit.Value
-	Inset        l.Inset
-	Button       *w.Clickable
+	color        color.RGBA
+	font         text.Font
+	textSize     unit.Value
+	background   color.RGBA
+	cornerRadius unit.Value
+	inset        *l.Inset
+	button       *w.Clickable
 	shaper       text.Shaper
 }
 
-type _buttonLayout struct {
-	Background   color.RGBA
-	CornerRadius unit.Value
-	Button       *w.Clickable
+func (b *_button) Text(text string) *_button {
+	b.text = text
+	return b
 }
 
-type _iconButton struct {
-	Background color.RGBA
-	// Color is the icon color.
-	Color color.RGBA
-	Icon  *widget.Icon
-	// Size is the icon size.
-	Size   unit.Value
-	Inset  l.Inset
-	Button *w.Clickable
+func (b *_button) Inset(pad float32) *_button {
+	b.inset = &l.Inset{
+		Top:    unit.Sp(pad),
+		Right:  unit.Sp(pad),
+		Bottom: unit.Sp(pad),
+		Left:   unit.Sp(pad),
+	}
+	return b
 }
 
-// Clickable lays out a rectangular clickable widget without further decoration.
-func Clickable(gtx l.Context, button *w.Clickable, w l.Widget) l.Dimensions {
-	return l.Stack{}.Layout(gtx,
-		l.Expanded(button.Fn),
-		l.Expanded(func(gtx l.Context) l.Dimensions {
-			clip.RRect{
-				Rect: f32.Rectangle{Max: f32.Point{
-					X: float32(gtx.Constraints.Min.X),
-					Y: float32(gtx.Constraints.Min.Y),
-				}},
-			}.Add(gtx.Ops)
-			for _, c := range button.History() {
-				drawInk(gtx, widget.Press(c))
-			}
-			return l.Dimensions{Size: gtx.Constraints.Min}
-		}),
-		l.Stacked(w),
-	)
+func (b *_button) CornerRadius(cornerRadius float32) *_button {
+	b.cornerRadius = unit.Sp(cornerRadius)
+	return b
 }
 
-func drawInk(gtx l.Context, c widget.Press) {
+func (b *_button) Background(background string) *_button {
+	b.background = b.th.Colors.Get(background)
+	return b
+}
+
+func (b *_button) TextScale(scale float32) *_button {
+	b.textSize = b.th.textSize.Scale(scale)
+	return b
+}
+
+func (b *_button) Font(font string) *_button {
+	var f text.Font
+	for i := range b.th.collection {
+		// Debug(th.Collection[i].Font)
+		if b.th.collection[i].Font.Typeface == text.Typeface(font) {
+			f = b.th.collection[i].Font
+		}
+	}
+	b.font = f
+	return b
+}
+
+func (b *_button) Color(color string) *_button {
+	b.color = b.th.Colors.Get(color)
+	return b
+}
+
+func (th *Theme) Button(btn *w.Clickable) *_button {
+	return &_button{
+		th:   th,
+		text: strings.ToUpper("text unset"),
+		// default sets
+		font:  th.collection[0].Font,
+		color: th.Colors.Get("ButtonText"),
+		// CornerRadius: unit.Dp(4),
+		background: th.Colors.Get("Primary"),
+		textSize:   th.textSize,
+		inset: &l.Inset{
+			Top: unit.Sp(8), Bottom: unit.Sp(8),
+			Left: unit.Sp(8), Right: unit.Sp(8),
+		},
+		button: btn,
+		shaper: th.shaper,
+	}
+}
+
+func (b *_button) Fn(gtx l.Context) l.Dimensions {
+	bl := &_buttonLayout{
+		background:   b.background,
+		cornerRadius: b.cornerRadius,
+		button:       b.button,
+	}
+	fn := func(gtx l.Context) l.Dimensions {
+		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
+			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
+			return widget.Label{Alignment: text.Middle}.
+				Layout(gtx, b.shaper, b.font, b.textSize, b.text)
+		})
+	}
+	bl.Widget(fn)
+	return bl.Fn(gtx)
+}
+
+func drawInk(c l.Context, p widget.Press) {
 	// duration is the number of seconds for the completed animation: expand while fading in, then out.
 	const (
 		expandDuration = float32(0.5)
 		fadeDuration   = float32(0.9)
 	)
-	now := gtx.Now
-	t := float32(now.Sub(c.Start).Seconds())
-	end := c.End
+	now := c.Now
+	t := float32(now.Sub(p.Start).Seconds())
+	end := p.End
 	if end.IsZero() {
 		// If the press hasn't ended, don't fade-out.
 		end = now
 	}
-	endt := float32(end.Sub(c.Start).Seconds())
+	endt := float32(end.Sub(p.Start).Seconds())
 	// Compute the fade-in/out position in [0;1].
 	var alphat float32
 	{
 		var haste float32
-		if c.Cancelled {
+		if p.Cancelled {
 			// If the press was cancelled before the inkwell was fully faded in, fast forward the animation to match the
 			// fade-out.
 			if h := 0.5 - endt/fadeDuration; h > 0 {
@@ -113,21 +158,18 @@ func drawInk(gtx l.Context, c widget.Press) {
 	}
 	// Compute the expand position in [0;1].
 	sizet := t
-	if c.Cancelled {
+	if p.Cancelled {
 		// Freeze expansion of cancelled presses.
 		sizet = endt
 	}
 	sizet /= expandDuration
-
 	// Animate only ended presses, and presses that are fading in.
-	if !c.End.IsZero() || sizet <= 1.0 {
-		op.InvalidateOp{}.Add(gtx.Ops)
+	if !p.End.IsZero() || sizet <= 1.0 {
+		op.InvalidateOp{}.Add(c.Ops)
 	}
-
 	if sizet > 1.0 {
 		sizet = 1.0
 	}
-
 	if alphat > .5 {
 		// Start fadeout after half the animation.
 		alphat = 1.0 - alphat
@@ -137,8 +179,8 @@ func drawInk(gtx l.Context, c widget.Press) {
 	// Beziér ease-in curve.
 	alphaBezier := t2 * t2 * (3.0 - 2.0*t2)
 	sizeBezier := sizet * sizet * (3.0 - 2.0*sizet)
-	size := float32(gtx.Constraints.Min.X)
-	if h := float32(gtx.Constraints.Min.Y); h > size {
+	size := float32(c.Constraints.Min.X)
+	if h := float32(c.Constraints.Min.Y); h > size {
 		size = h
 	}
 	// Cover the entire constraints min rectangle.
@@ -148,149 +190,21 @@ func drawInk(gtx l.Context, c widget.Press) {
 	alpha := 0.7 * alphaBezier
 	const col = 0.8
 	ba, bc := byte(alpha*0xff), byte(col*0xff)
-	defer op.Push(gtx.Ops).Pop()
+	defer op.Push(c.Ops).Pop()
 	rgba := f32color.MulAlpha(color.RGBA{A: 0xff, R: bc, G: bc, B: bc}, ba)
 	ink := paint.ColorOp{Color: rgba}
-	ink.Add(gtx.Ops)
+	ink.Add(c.Ops)
 	rr := size * .5
-	op.Offset(c.Position.Add(f32.Point{
+	op.Offset(p.Position.Add(f32.Point{
 		X: -rr,
 		Y: -rr,
-	})).Add(gtx.Ops)
+	})).Add(c.Ops)
 	clip.RRect{
 		Rect: f32.Rectangle{Max: f32.Point{
-			X: float32(size),
-			Y: float32(size),
+			X: size,
+			Y: size,
 		}},
 		NE: rr, NW: rr, SE: rr, SW: rr,
-	}.Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(size), Y: float32(size)}}}.Add(gtx.Ops)
-}
-
-func (th *Theme) Button(btn *w.Clickable, font, txt string, events w.ClickEvents) _button {
-	btn.SetPress(events.Press)
-	btn.SetClick(events.Click)
-	btn.SetCancel(events.Cancel)
-	var f text.Font
-	for i := range th.Collection {
-		// Debug(th.Collection[i].Font)
-		if th.Collection[i].Font.Typeface == text.Typeface(font) {
-			f = th.Collection[i].Font
-		}
-	}
-	return _button{
-		Text:  txt,
-		Font:  f,
-		Color: rgb(0xffffff),
-		// CornerRadius: unit.Dp(4),
-		Background: th.Colors.Get("Primary"),
-		TextSize:   th.TextSize,
-		Inset: l.Inset{
-			Top: unit.Dp(10), Bottom: unit.Dp(10),
-			Left: unit.Dp(10), Right: unit.Dp(12),
-		},
-		Button: btn,
-		shaper: th.Shaper,
-	}
-}
-
-func (b _button) Fn(gtx l.Context) l.Dimensions {
-	return _buttonLayout{
-		Background:   b.Background,
-		CornerRadius: b.CornerRadius,
-		Button:       b.Button,
-	}.Fn(gtx, func(gtx l.Context) l.Dimensions {
-		return b.Inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
-			paint.ColorOp{Color: b.Color}.Add(gtx.Ops)
-			return widget.Label{Alignment: text.Middle}.Layout(gtx, b.shaper, b.Font, b.TextSize, b.Text)
-		})
-	})
-}
-
-func ButtonLayout(th *Theme, button *w.Clickable) _buttonLayout {
-	return _buttonLayout{
-		Button:       button,
-		Background:   th.Colors.Get("ButtonBg"),
-		CornerRadius: unit.Dp(4),
-	}
-}
-
-func (b _buttonLayout) Fn(gtx l.Context, w l.Widget) l.Dimensions {
-	min := gtx.Constraints.Min
-	return l.Stack{Alignment: l.Center}.Layout(gtx,
-		l.Expanded(func(gtx l.Context) l.Dimensions {
-			rr := float32(gtx.Px(b.CornerRadius))
-			clip.RRect{
-				Rect: f32.Rectangle{Max: f32.Point{
-					X: float32(gtx.Constraints.Min.X),
-					Y: float32(gtx.Constraints.Min.Y),
-				}},
-				NE: rr, NW: rr, SE: rr, SW: rr,
-			}.Add(gtx.Ops)
-			background := b.Background
-			if gtx.Queue == nil {
-				background = f32color.MulAlpha(b.Background, 150)
-			}
-			dims := fill(gtx, background)
-			for _, c := range b.Button.History() {
-				drawInk(gtx, widget.Press(c))
-			}
-			return dims
-		}),
-		l.Stacked(func(gtx l.Context) l.Dimensions {
-			gtx.Constraints.Min = min
-			return l.Center.Layout(gtx, w)
-		}),
-		l.Expanded(b.Button.Fn),
-	)
-}
-
-func IconButton(th *Theme, button *w.Clickable, icon *widget.Icon) _iconButton {
-	return _iconButton{
-		Background: th.Colors.Get("Primary"),
-		Color:      th.Colors.Get("InvText"),
-		Icon:       icon,
-		Size:       unit.Dp(24),
-		Inset:      l.UniformInset(unit.Dp(12)),
-		Button:     button,
-	}
-}
-
-func (b _iconButton) Fn(gtx l.Context) l.Dimensions {
-	return l.Stack{Alignment: l.Center}.Layout(gtx,
-		l.Expanded(func(gtx l.Context) l.Dimensions {
-			sizex, sizey := gtx.Constraints.Min.X, gtx.Constraints.Min.Y
-			sizexf, sizeyf := float32(sizex), float32(sizey)
-			rr := (sizexf + sizeyf) * .25
-			clip.RRect{
-				Rect: f32.Rectangle{Max: f32.Point{X: sizexf, Y: sizeyf}},
-				NE:   rr, NW: rr, SE: rr, SW: rr,
-			}.Add(gtx.Ops)
-			background := b.Background
-			if gtx.Queue == nil {
-				background = f32color.MulAlpha(b.Background, 150)
-			}
-			dims := fill(gtx, background)
-			for _, c := range b.Button.History() {
-				drawInk(gtx, widget.Press(c))
-			}
-			return dims
-		}),
-		l.Stacked(func(gtx l.Context) l.Dimensions {
-			return b.Inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
-				size := gtx.Px(b.Size)
-				if b.Icon != nil {
-					b.Icon.Color = b.Color
-					b.Icon.Layout(gtx, unit.Px(float32(size)))
-				}
-				return l.Dimensions{
-					Size: image.Point{X: size, Y: size},
-				}
-			})
-		}),
-		l.Expanded(func(gtx l.Context) l.Dimensions {
-			pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
-			return b.Button.Fn(gtx)
-		}),
-	)
+	}.Add(c.Ops)
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: size, Y: size}}}.Add(c.Ops)
 }

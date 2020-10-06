@@ -28,7 +28,7 @@ package p9
 // 	}
 // }
 //
-// func (im DuoUIimage) Layout(gtx *layout.Context) {
+// func (im DuoUIimage) Fn(gtx *layout.Context) {
 // 	size := im.Src.Size()
 // 	wf, hf := float32(size.X), float32(size.Y)
 // 	w, h := gtx.Px(unit.Dp(wf*im.Scale)), gtx.Px(unit.Dp(hf*im.Scale))

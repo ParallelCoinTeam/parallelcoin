@@ -14,58 +14,58 @@ import (
 )
 
 type _editor struct {
-	Font     text.Font
-	TextSize unit.Value
+	font     text.Font
+	textSize unit.Value
 	// Color is the text color.
-	Color color.RGBA
+	color color.RGBA
 	// Hint contains the text displayed when the editor is empty.
-	Hint string
+	hint string
 	// HintColor is the color of hint text.
-	HintColor color.RGBA
-	Editor    *widget.Editor
+	hintColor color.RGBA
+	editor    *widget.Editor
 
 	shaper text.Shaper
 }
 
-func (th *Theme) Editor(editor *widget.Editor, hint string) _editor {
-	return _editor{
-		Editor:    editor,
-		TextSize:  th.TextSize,
-		Color:     th.Colors.Get("Text"),
-		shaper:    th.Shaper,
-		Hint:      hint,
-		HintColor: th.Colors.Get("Hint"),
+func (th *Theme) Editor(editor *widget.Editor, hint string) *_editor {
+	return &_editor{
+		editor:    editor,
+		textSize:  th.textSize,
+		color:     th.Colors.Get("Text"),
+		shaper:    th.shaper,
+		hint:      hint,
+		hintColor: th.Colors.Get("Hint"),
 	}
 }
 
-func (e _editor) Fn(gtx l.Context) l.Dimensions {
-	defer op.Push(gtx.Ops).Pop()
-	macro := op.Record(gtx.Ops)
-	paint.ColorOp{Color: e.HintColor}.Add(gtx.Ops)
-	tl := widget.Label{Alignment: e.Editor.Alignment}
-	dims := tl.Layout(gtx, e.shaper, e.Font, e.TextSize, e.Hint)
+func (e *_editor) Fn(c l.Context) l.Dimensions {
+	defer op.Push(c.Ops).Pop()
+	macro := op.Record(c.Ops)
+	paint.ColorOp{Color: e.hintColor}.Add(c.Ops)
+	tl := widget.Label{Alignment: e.editor.Alignment}
+	dims := tl.Layout(c, e.shaper, e.font, e.textSize, e.hint)
 	call := macro.Stop()
-	if w := dims.Size.X; gtx.Constraints.Min.X < w {
-		gtx.Constraints.Min.X = w
+	if w := dims.Size.X; c.Constraints.Min.X < w {
+		c.Constraints.Min.X = w
 	}
-	if h := dims.Size.Y; gtx.Constraints.Min.Y < h {
-		gtx.Constraints.Min.Y = h
+	if h := dims.Size.Y; c.Constraints.Min.Y < h {
+		c.Constraints.Min.Y = h
 	}
-	dims = e.Editor.Layout(gtx, e.shaper, e.Font, e.TextSize)
-	disabled := gtx.Queue == nil
-	if e.Editor.Len() > 0 {
-		textColor := e.Color
+	dims = e.editor.Layout(c, e.shaper, e.font, e.textSize)
+	disabled := c.Queue == nil
+	if e.editor.Len() > 0 {
+		textColor := e.color
 		if disabled {
 			textColor = f32color.MulAlpha(textColor, 150)
 		}
-		paint.ColorOp{Color: textColor}.Add(gtx.Ops)
-		e.Editor.PaintText(gtx)
+		paint.ColorOp{Color: textColor}.Add(c.Ops)
+		e.editor.PaintText(c)
 	} else {
-		call.Add(gtx.Ops)
+		call.Add(c.Ops)
 	}
 	if !disabled {
-		paint.ColorOp{Color: e.Color}.Add(gtx.Ops)
-		e.Editor.PaintCaret(gtx)
+		paint.ColorOp{Color: e.color}.Add(c.Ops)
+		e.editor.PaintCaret(c)
 	}
 	return dims
 }

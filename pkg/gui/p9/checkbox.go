@@ -10,29 +10,29 @@ import (
 
 type _checkbox struct {
 	_checkable
-	CheckBox *widget.Bool
+	checkBox *widget.Bool
 }
 
-func CheckBox(th *Theme, checkBox *widget.Bool, color color.RGBA, label string) _checkbox {
-	return _checkbox{
-		CheckBox: checkBox,
+func (th *Theme) CheckBox(checkBox *widget.Bool, color color.RGBA, label string) *_checkbox {
+	return &_checkbox{
+		checkBox: checkBox,
 		_checkable: _checkable{
-			Label:              label,
-			Color:              color,
-			IconColor:          th.Colors.Get("Primary"),
-			TextSize:           th.TextSize.Scale(14.0 / 16.0),
-			Size:               unit.Dp(26),
-			shaper:             th.Shaper,
-			checkedStateIcon:   th.Icons["Checked"],
-			uncheckedStateIcon: th.Icons["Unchecked"],
+			label:              label,
+			color:              color,
+			iconColor:          th.Colors.Get("Primary"),
+			textSize:           th.textSize.Scale(14.0 / 16.0),
+			size:               unit.Dp(26),
+			shaper:             th.shaper,
+			checkedStateIcon:   th.icons["Checked"],
+			uncheckedStateIcon: th.icons["Unchecked"],
 		},
 	}
 }
 
 // Layout updates the checkBox and displays it.
-func (c _checkbox) Layout(gtx l.Context) l.Dimensions {
-	dims := c.layout(gtx, c.CheckBox.Value)
+func (c *_checkbox) Layout(gtx l.Context) l.Dimensions {
+	dims := c.fn(gtx, c.checkBox.Value)
 	gtx.Constraints.Min = dims.Size
-	c.CheckBox.Layout(gtx)
+	c.checkBox.Layout(gtx)
 	return dims
 }

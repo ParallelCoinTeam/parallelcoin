@@ -102,7 +102,7 @@ func NewColors() (c Colors) {
 	c["Check"] = c["orange"]
 	c["Hint"] = c["light-gray"]
 	c["InvText"] = c["light"]
-	c["ButtonText"] = c["light"]
+	c["ButtonText"] = c["White"]
 	c["ButtonBg"] = c["blue-lite-blue"]
 	c["PanelText"] = c["light"]
 	c["PanelBg"] = c["dark"]

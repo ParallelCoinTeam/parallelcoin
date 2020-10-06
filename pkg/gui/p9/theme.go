@@ -7,12 +7,12 @@ import (
 
 type Theme struct {
 	quit          chan struct{}
-	Shaper        text.Shaper
-	Collection    []text.FontFace
-	TextSize      unit.Value
+	shaper        text.Shaper
+	collection    []text.FontFace
+	textSize      unit.Value
 	Colors        Colors
-	Fonts         map[string]text.Typeface
-	Icons         map[string]*_icon
+	fonts         map[string]text.Typeface
+	icons         map[string]*_icon
 	scrollBarSize int
 }
 
@@ -27,13 +27,13 @@ func NewFonts() (f map[string]text.Typeface) {
 func NewTheme(fontCollection []text.FontFace, quit chan struct{}) (th *Theme) {
 	th = &Theme{
 		quit:          quit,
-		Shaper:        text.NewCache(fontCollection),
-		Collection:    fontCollection,
-		TextSize:      unit.Sp(16),
+		shaper:        text.NewCache(fontCollection),
+		collection:    fontCollection,
+		textSize:      unit.Sp(16),
 		Colors:        NewColors(),
-		Fonts:         NewFonts(),
+		fonts:         NewFonts(),
 		scrollBarSize: 0,
 	}
-	th.Icons = th.NewIcons()
+	th.icons = th.NewIcons()
 	return
 }

@@ -30,12 +30,7 @@ func (s *_stack) Expanded(w l.Widget) (out *_stack) {
 	return s
 }
 
-// Layout runs the ops queue configured in the stack
-func (s *_stack) Layout(c *l.Context) {
-	s.Stack.Layout(*c, s.children...)
-}
-
-// Prep the ops queue configured in the stack
-func (s *_stack) Prep(c *l.Context) func() {
-	return func() { s.Layout(c) }
+// Fn runs the ops queue configured in the stack
+func (s *_stack) Fn(c l.Context) l.Dimensions {
+	return s.Stack.Layout(c, s.children...)
 }

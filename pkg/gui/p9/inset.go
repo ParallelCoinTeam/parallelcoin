@@ -11,15 +11,19 @@ type _inset struct {
 }
 
 // Inset creates a padded empty space around a widget
-func (th *Theme) Inset(pad int, w l.Widget) (out *_inset) {
+func (th *Theme) Inset(pad float32) (out *_inset) {
 	out = &_inset{
-		in: l.UniformInset(unit.Dp(float32(pad))),
-		w:  w,
+		in: l.UniformInset(unit.Sp(pad)),
 	}
 	return
 }
 
+func (in *_inset) Widget(w l.Widget) *_inset {
+	in.w = w
+	return in
+}
+
 // Fn the given widget with the configured context and padding
-func (in *_inset) Fn(gtx l.Context) l.Dimensions {
-	return in.in.Layout(gtx, in.w)
+func (in *_inset) Fn(c l.Context) l.Dimensions {
+	return in.in.Layout(c, in.w)
 }

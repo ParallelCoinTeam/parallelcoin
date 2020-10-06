@@ -4,7 +4,7 @@ import (
 	"image/color"
 
 	"gioui.org/f32"
-	l "gioui.org/layout"
+	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/text"
 )
@@ -15,8 +15,7 @@ type (
 	Icons      map[string]*_icon
 	Collection []text.FontFace
 )
-
-func fill(gtx l.Context, col color.RGBA) l.Dimensions {
+func Fill(gtx layout.Context, col color.RGBA) layout.Dimensions {
 	cs := gtx.Constraints
 	d := cs.Min
 	dr := f32.Rectangle{
@@ -24,5 +23,5 @@ func fill(gtx l.Context, col color.RGBA) l.Dimensions {
 	}
 	paint.ColorOp{Color: col}.Add(gtx.Ops)
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
-	return l.Dimensions{Size: d}
+	return layout.Dimensions{Size: d}
 }

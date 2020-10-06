@@ -69,7 +69,7 @@ func (d *_direction) Center() (out *_direction) {
 	return d
 }
 
-// Layout the given widget given the context and direction
+// Fn the given widget given the context and direction
 func (d *_direction) Fn(c *l.Context, w l.Widget) {
 	d.Direction.Layout(*c, w)
 }

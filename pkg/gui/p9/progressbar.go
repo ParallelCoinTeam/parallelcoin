@@ -14,18 +14,29 @@ import (
 )
 
 type _progressBar struct {
-	Color    color.RGBA
-	Progress int
+	color    color.RGBA
+	progress int
 }
 
-func (th *Theme) ProgressBar(progress int) _progressBar {
-	return _progressBar{
-		Progress: progress,
-		Color:    th.Colors.Get("Primary"),
+func (th *Theme) ProgressBar() *_progressBar {
+	return &_progressBar{
+		progress: 0,
+		color:    th.Colors.Get("Primary"),
 	}
 }
 
-func (p _progressBar) Fn(gtx l.Context) l.Dimensions {
+// SetProgress sets the progress of the _progressBar
+func (p *_progressBar) SetProgress(progress int) *_progressBar {
+	p.progress = progress
+	return p
+}
+
+func (p *_progressBar) SetColor(c color.RGBA) *_progressBar {
+	p.color = c
+	return p
+}
+
+func (p *_progressBar) Fn(gtx l.Context) l.Dimensions {
 	shader := func(width float32, color color.RGBA) l.Dimensions {
 		maxHeight := unit.Dp(4)
 		rr := float32(gtx.Px(unit.Dp(2)))
@@ -46,7 +57,7 @@ func (p _progressBar) Fn(gtx l.Context) l.Dimensions {
 		return l.Dimensions{Size: d}
 	}
 
-	progress := p.Progress
+	progress := p.progress
 	if progress > 100 {
 		progress = 100
 	} else if progress < 0 {
@@ -58,13 +69,13 @@ func (p _progressBar) Fn(gtx l.Context) l.Dimensions {
 	return l.Stack{Alignment: l.W}.Layout(gtx,
 		l.Stacked(func(gtx l.Context) l.Dimensions {
 			// Use a transparent equivalent of progress color.
-			bgCol := f32color.MulAlpha(p.Color, 150)
+			bgCol := f32color.MulAlpha(p.color, 150)
 
 			return shader(progressBarWidth, bgCol)
 		}),
 		l.Stacked(func(gtx l.Context) l.Dimensions {
 			fillWidth := (progressBarWidth / 100) * float32(progress)
-			fillColor := p.Color
+			fillColor := p.color
 			if gtx.Queue == nil {
 				fillColor = f32color.MulAlpha(fillColor, 200)
 			}

@@ -18,13 +18,13 @@ type _loader struct {
 	Color color.RGBA
 }
 
-func (th *Theme) Loader() _loader {
-	return _loader{
+func (th *Theme) Loader() *_loader {
+	return &_loader{
 		Color: th.Colors.Get("Primary"),
 	}
 }
 
-func (lo _loader) Fn(gtx l.Context) l.Dimensions {
+func (lo *_loader) Fn(gtx l.Context) l.Dimensions {
 	diam := gtx.Constraints.Min.X
 	if minY := gtx.Constraints.Min.Y; minY > diam {
 		diam = minY

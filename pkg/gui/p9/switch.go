@@ -16,7 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type SwitchStyle struct {
+type _switch struct {
 	Color struct {
 		Enabled  color.RGBA
 		Disabled color.RGBA
@@ -24,8 +24,8 @@ type SwitchStyle struct {
 	Switch *widget.Bool
 }
 
-func (th *Theme) Switch(swtch *widget.Bool) SwitchStyle {
-	sw := SwitchStyle{
+func (th *Theme) Switch(swtch *widget.Bool) *_switch {
+	sw := &_switch{
 		Switch: swtch,
 	}
 	sw.Color.Enabled = th.Colors.Get("Primary")
@@ -34,7 +34,7 @@ func (th *Theme) Switch(swtch *widget.Bool) SwitchStyle {
 }
 
 // Fn updates the checkBox and displays it.
-func (s SwitchStyle) Fn(gtx l.Context) l.Dimensions {
+func (s *_switch) Fn(gtx l.Context) l.Dimensions {
 	trackWidth := gtx.Px(unit.Dp(36))
 	trackHeight := gtx.Px(unit.Dp(16))
 	thumbSize := gtx.Px(unit.Dp(20))

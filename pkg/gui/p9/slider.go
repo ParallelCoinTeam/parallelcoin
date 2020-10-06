@@ -15,9 +15,15 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
+type _slider struct {
+	Min, Max float32
+	Color    color.RGBA
+	Float    *widget.Float
+}
+
 // Slider is for selecting a value in a range.
-func (th *Theme) Slider(float *widget.Float, min, max float32) SliderStyle {
-	return SliderStyle{
+func (th *Theme) Slider(float *widget.Float, min, max float32) *_slider {
+	return &_slider{
 		Min:   min,
 		Max:   max,
 		Color: th.Colors.Get("Primary"),
@@ -25,13 +31,7 @@ func (th *Theme) Slider(float *widget.Float, min, max float32) SliderStyle {
 	}
 }
 
-type SliderStyle struct {
-	Min, Max float32
-	Color    color.RGBA
-	Float    *widget.Float
-}
-
-func (s SliderStyle) Fn(c l.Context) l.Dimensions {
+func (s *_slider) Fn(c l.Context) l.Dimensions {
 	thumbRadiusInt := c.Px(unit.Dp(6))
 	trackWidth := float32(c.Px(unit.Dp(2)))
 	thumbRadius := float32(thumbRadiusInt)

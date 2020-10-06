@@ -15,7 +15,7 @@ import (
 )
 
 type _icon struct {
-	Color color.RGBA
+	color color.RGBA
 	src   []byte
 	size  unit.Value
 	// Cached values.
@@ -30,7 +30,7 @@ func (th *Theme) Icon(data []byte) (*_icon, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &_icon{src: data, Color: rgb(0x000000)}, nil
+	return &_icon{src: data, color: rgb(0x000000)}, nil
 }
 
 func (ic *_icon) Fn(gtx *l.Context, sz unit.Value) {
@@ -48,7 +48,7 @@ func toPointF(p image.Point) f32.Point {
 }
 
 func (ic *_icon) image(sz int) paint.ImageOp {
-	if sz == ic.imgSize && ic.Color == ic.imgColor {
+	if sz == ic.imgSize && ic.color == ic.imgColor {
 		return ic.op
 	}
 	m, _ := iconvg.DecodeMetadata(ic.src)
@@ -57,12 +57,12 @@ func (ic *_icon) image(sz int) paint.ImageOp {
 		Y: int(float32(sz) * dy / dx)}})
 	var ico iconvg.Rasterizer
 	ico.SetDstImage(img, img.Bounds(), draw.Src)
-	m.Palette[0] = ic.Color
+	m.Palette[0] = ic.color
 	iconvg.Decode(&ico, ic.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
 	})
 	ic.op = paint.NewImageOp(img)
 	ic.imgSize = sz
-	ic.imgColor = ic.Color
+	ic.imgColor = ic.color
 	return ic.op
 }
