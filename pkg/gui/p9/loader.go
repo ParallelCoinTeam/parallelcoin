@@ -7,24 +7,24 @@ import (
 	"time"
 
 	"gioui.org/f32"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 )
 
-type LoaderStyle struct {
+type _loader struct {
 	Color color.RGBA
 }
 
-func (th *Theme) Loader() LoaderStyle {
-	return LoaderStyle{
+func (th *Theme) Loader() _loader {
+	return _loader{
 		Color: th.Colors.Get("Primary"),
 	}
 }
 
-func (l LoaderStyle) Fn(gtx layout.Context) layout.Dimensions {
+func (lo _loader) Fn(gtx l.Context) l.Dimensions {
 	diam := gtx.Constraints.Min.X
 	if minY := gtx.Constraints.Min.Y; minY > diam {
 		diam = minY
@@ -43,14 +43,14 @@ func (l LoaderStyle) Fn(gtx layout.Context) layout.Dimensions {
 
 	clipLoader(gtx.Ops, startAngle, endAngle, radius)
 	paint.ColorOp{
-		Color: l.Color,
+		Color: lo.Color,
 	}.Add(gtx.Ops)
 	op.Offset(f32.Pt(-float32(radius), -float32(radius))).Add(gtx.Ops)
 	paint.PaintOp{
-		Rect: f32.Rectangle{Max: layout.FPt(sz)},
+		Rect: f32.Rectangle{Max: l.FPt(sz)},
 	}.Add(gtx.Ops)
 	op.InvalidateOp{}.Add(gtx.Ops)
-	return layout.Dimensions{
+	return l.Dimensions{
 		Size: sz,
 	}
 }
@@ -71,8 +71,8 @@ func clipLoader(ops *op.Ops, startAngle, endAngle, radius float64) {
 	p.Arc(center, center, delta)
 	// Arc cap.
 	pen = p.Pos()
-	cap := pen.Mul(1 - thickness)
-	p.Line(cap.Sub(pen))
+	capacity := pen.Mul(1 - thickness)
+	p.Line(capacity.Sub(pen))
 	// Inner arc.
 	center = f32.Pt(0, 0).Sub(p.Pos())
 	p.Arc(center, center, -delta)

@@ -1,22 +1,22 @@
 package p9
 
 import (
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
 )
 
-type RadioButtonStyle struct {
-	checkable
+type _radioButton struct {
+	_checkable
 	Key   string
 	Group *widget.Enum
 }
 
 // RadioButton returns a RadioButton with a label. The key specifies the value for the Enum.
-func (th *Theme) RadioButton(group *widget.Enum, key, label string) RadioButtonStyle {
-	return RadioButtonStyle{
+func (th *Theme) RadioButton(group *widget.Enum, key, label string) _radioButton {
+	return _radioButton{
 		Group: group,
-		checkable: checkable{
+		_checkable: _checkable{
 			Label: label,
 
 			Color:              th.Colors.Get("Text"),
@@ -31,8 +31,8 @@ func (th *Theme) RadioButton(group *widget.Enum, key, label string) RadioButtonS
 	}
 }
 
-// Fn updates enum and displays the radio button.
-func (r RadioButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
+// Fn updates enum and displays the radio _button.
+func (r _radioButton) Fn(gtx l.Context) l.Dimensions {
 	dims := r.layout(gtx, r.Group.Value == r.Key)
 	gtx.Constraints.Min = dims.Size
 	r.Group.Layout(gtx, r.Key)

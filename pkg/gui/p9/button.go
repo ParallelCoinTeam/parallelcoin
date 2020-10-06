@@ -7,7 +7,7 @@ import (
 
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
@@ -20,7 +20,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type ButtonStyle struct {
+type _button struct {
 	Text string
 	// Color is the text color.
 	Color        color.RGBA
@@ -28,33 +28,33 @@ type ButtonStyle struct {
 	TextSize     unit.Value
 	Background   color.RGBA
 	CornerRadius unit.Value
-	Inset        layout.Inset
+	Inset        l.Inset
 	Button       *w.Clickable
 	shaper       text.Shaper
 }
 
-type ButtonLayoutStyle struct {
+type _buttonLayout struct {
 	Background   color.RGBA
 	CornerRadius unit.Value
 	Button       *w.Clickable
 }
 
-type IconButtonStyle struct {
+type _iconButton struct {
 	Background color.RGBA
 	// Color is the icon color.
 	Color color.RGBA
 	Icon  *widget.Icon
 	// Size is the icon size.
 	Size   unit.Value
-	Inset  layout.Inset
+	Inset  l.Inset
 	Button *w.Clickable
 }
 
 // Clickable lays out a rectangular clickable widget without further decoration.
-func Clickable(gtx layout.Context, button *w.Clickable, w layout.Widget) layout.Dimensions {
-	return layout.Stack{}.Layout(gtx,
-		layout.Expanded(button.Fn),
-		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+func Clickable(gtx l.Context, button *w.Clickable, w l.Widget) l.Dimensions {
+	return l.Stack{}.Layout(gtx,
+		l.Expanded(button.Fn),
+		l.Expanded(func(gtx l.Context) l.Dimensions {
 			clip.RRect{
 				Rect: f32.Rectangle{Max: f32.Point{
 					X: float32(gtx.Constraints.Min.X),
@@ -64,13 +64,13 @@ func Clickable(gtx layout.Context, button *w.Clickable, w layout.Widget) layout.
 			for _, c := range button.History() {
 				drawInk(gtx, widget.Press(c))
 			}
-			return layout.Dimensions{Size: gtx.Constraints.Min}
+			return l.Dimensions{Size: gtx.Constraints.Min}
 		}),
-		layout.Stacked(w),
+		l.Stacked(w),
 	)
 }
 
-func drawInk(gtx layout.Context, c widget.Press) {
+func drawInk(gtx l.Context, c widget.Press) {
 	// duration is the number of seconds for the completed animation: expand while fading in, then out.
 	const (
 		expandDuration = float32(0.5)
@@ -167,10 +167,10 @@ func drawInk(gtx layout.Context, c widget.Press) {
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(size), Y: float32(size)}}}.Add(gtx.Ops)
 }
 
-func (th *Theme) Button(button *w.Clickable, font, txt string, events w.ClickEvents) ButtonStyle {
-	button.SetPress(events.Press)
-	button.SetClick(events.Click)
-	button.SetCancel(events.Cancel)
+func (th *Theme) Button(btn *w.Clickable, font, txt string, events w.ClickEvents) _button {
+	btn.SetPress(events.Press)
+	btn.SetClick(events.Click)
+	btn.SetCancel(events.Cancel)
 	var f text.Font
 	for i := range th.Collection {
 		// Debug(th.Collection[i].Font)
@@ -178,47 +178,47 @@ func (th *Theme) Button(button *w.Clickable, font, txt string, events w.ClickEve
 			f = th.Collection[i].Font
 		}
 	}
-	return ButtonStyle{
+	return _button{
 		Text:  txt,
 		Font:  f,
 		Color: rgb(0xffffff),
 		// CornerRadius: unit.Dp(4),
 		Background: th.Colors.Get("Primary"),
 		TextSize:   th.TextSize,
-		Inset: layout.Inset{
+		Inset: l.Inset{
 			Top: unit.Dp(10), Bottom: unit.Dp(10),
 			Left: unit.Dp(10), Right: unit.Dp(12),
 		},
-		Button: button,
+		Button: btn,
 		shaper: th.Shaper,
 	}
 }
 
-func (b ButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
-	return ButtonLayoutStyle{
+func (b _button) Fn(gtx l.Context) l.Dimensions {
+	return _buttonLayout{
 		Background:   b.Background,
 		CornerRadius: b.CornerRadius,
 		Button:       b.Button,
-	}.Fn(gtx, func(gtx layout.Context) layout.Dimensions {
-		return b.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	}.Fn(gtx, func(gtx l.Context) l.Dimensions {
+		return b.Inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
 			paint.ColorOp{Color: b.Color}.Add(gtx.Ops)
 			return widget.Label{Alignment: text.Middle}.Layout(gtx, b.shaper, b.Font, b.TextSize, b.Text)
 		})
 	})
 }
 
-func ButtonLayout(th *Theme, button *w.Clickable) ButtonLayoutStyle {
-	return ButtonLayoutStyle{
+func ButtonLayout(th *Theme, button *w.Clickable) _buttonLayout {
+	return _buttonLayout{
 		Button:       button,
 		Background:   th.Colors.Get("ButtonBg"),
 		CornerRadius: unit.Dp(4),
 	}
 }
 
-func (b ButtonLayoutStyle) Fn(gtx layout.Context, w layout.Widget) layout.Dimensions {
+func (b _buttonLayout) Fn(gtx l.Context, w l.Widget) l.Dimensions {
 	min := gtx.Constraints.Min
-	return layout.Stack{Alignment: layout.Center}.Layout(gtx,
-		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+	return l.Stack{Alignment: l.Center}.Layout(gtx,
+		l.Expanded(func(gtx l.Context) l.Dimensions {
 			rr := float32(gtx.Px(b.CornerRadius))
 			clip.RRect{
 				Rect: f32.Rectangle{Max: f32.Point{
@@ -237,28 +237,28 @@ func (b ButtonLayoutStyle) Fn(gtx layout.Context, w layout.Widget) layout.Dimens
 			}
 			return dims
 		}),
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+		l.Stacked(func(gtx l.Context) l.Dimensions {
 			gtx.Constraints.Min = min
-			return layout.Center.Layout(gtx, w)
+			return l.Center.Layout(gtx, w)
 		}),
-		layout.Expanded(b.Button.Fn),
+		l.Expanded(b.Button.Fn),
 	)
 }
 
-func IconButton(th *Theme, button *w.Clickable, icon *widget.Icon) IconButtonStyle {
-	return IconButtonStyle{
+func IconButton(th *Theme, button *w.Clickable, icon *widget.Icon) _iconButton {
+	return _iconButton{
 		Background: th.Colors.Get("Primary"),
 		Color:      th.Colors.Get("InvText"),
 		Icon:       icon,
 		Size:       unit.Dp(24),
-		Inset:      layout.UniformInset(unit.Dp(12)),
+		Inset:      l.UniformInset(unit.Dp(12)),
 		Button:     button,
 	}
 }
 
-func (b IconButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
-	return layout.Stack{Alignment: layout.Center}.Layout(gtx,
-		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+func (b _iconButton) Fn(gtx l.Context) l.Dimensions {
+	return l.Stack{Alignment: l.Center}.Layout(gtx,
+		l.Expanded(func(gtx l.Context) l.Dimensions {
 			sizex, sizey := gtx.Constraints.Min.X, gtx.Constraints.Min.Y
 			sizexf, sizeyf := float32(sizex), float32(sizey)
 			rr := (sizexf + sizeyf) * .25
@@ -276,19 +276,19 @@ func (b IconButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
 			}
 			return dims
 		}),
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-			return b.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		l.Stacked(func(gtx l.Context) l.Dimensions {
+			return b.Inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
 				size := gtx.Px(b.Size)
 				if b.Icon != nil {
 					b.Icon.Color = b.Color
 					b.Icon.Layout(gtx, unit.Px(float32(size)))
 				}
-				return layout.Dimensions{
+				return l.Dimensions{
 					Size: image.Point{X: size, Y: size},
 				}
 			})
 		}),
-		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+		l.Expanded(func(gtx l.Context) l.Dimensions {
 			pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
 			return b.Button.Fn(gtx)
 		}),

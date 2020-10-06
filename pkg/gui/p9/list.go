@@ -1,34 +1,34 @@
 package p9
 
-import "gioui.org/layout"
+import lo "gioui.org/layout"
 
-type list struct {
-	*layout.List
+type _list struct {
+	*lo.List
 }
 
-// List returns a new scrollable list widget
-func (th *Theme) List() (out *list) {
-	out = &list{
-		List: &layout.List{},
+// List returns a new scrollable _list widget
+func (th *Theme) List() (out *_list) {
+	out = &_list{
+		List: &lo.List{},
 	}
 	return
 }
 
 // Vertical sets the axis to vertical (default implicit is horizontal)
-func (l *list) Vertical() (out *list) {
-	l.List.Axis = layout.Vertical
+func (l *_list) Vertical() (out *_list) {
+	l.List.Axis = lo.Vertical
 	return l
 }
 
-// ScrollToEnd sets the list to add new items to the end and push older ones
-// up/left and initial render has scroll to the end (or bottom) of the list
-func (l *list) ScrollToEnd() (out *list) {
+// ScrollToEnd sets the _list to add new items to the end and push older ones
+// up/left and initial render has scroll to the end (or bottom) of the _list
+func (l *_list) ScrollToEnd() (out *_list) {
 	l.List.ScrollToEnd = true
 	return l
 }
 
 // Fn runs the layout in the configured context. The ListElement function
 // returns the widget at the given index
-func (l *list) Fn(c *layout.Context, length int, w layout.ListElement) {
+func (l *_list) Fn(c *lo.Context, length int, w lo.ListElement) {
 	l.List.Layout(*c, length, w)
 }

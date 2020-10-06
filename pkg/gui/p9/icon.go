@@ -8,13 +8,13 @@ import (
 	"image/draw"
 
 	"gioui.org/f32"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"golang.org/x/exp/shiny/iconvg"
 )
 
-type Icon struct {
+type _icon struct {
 	Color color.RGBA
 	src   []byte
 	size  unit.Value
@@ -24,16 +24,16 @@ type Icon struct {
 	imgColor color.RGBA
 }
 
-// NewIcon returns a new Icon from iconVG data.
-func NewIcon(data []byte) (*Icon, error) {
+// Icon returns a new _icon from iconVG data.
+func (th *Theme) Icon(data []byte) (*_icon, error) {
 	_, err := iconvg.DecodeMetadata(data)
 	if err != nil {
 		return nil, err
 	}
-	return &Icon{src: data, Color: rgb(0x000000)}, nil
+	return &_icon{src: data, Color: rgb(0x000000)}, nil
 }
 
-func (ic *Icon) Layout(gtx *layout.Context, sz unit.Value) {
+func (ic *_icon) Fn(gtx *l.Context, sz unit.Value) {
 	ico := ic.image(gtx.Px(sz))
 	ico.Add(gtx.Ops)
 	paint.PaintOp{
@@ -47,7 +47,7 @@ func toPointF(p image.Point) f32.Point {
 	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
 }
 
-func (ic *Icon) image(sz int) paint.ImageOp {
+func (ic *_icon) image(sz int) paint.ImageOp {
 	if sz == ic.imgSize && ic.Color == ic.imgColor {
 		return ic.op
 	}

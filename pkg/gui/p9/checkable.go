@@ -5,7 +5,7 @@ import (
 	"image/color"
 
 	"gioui.org/io/pointer"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type checkable struct {
+type _checkable struct {
 	Label              string
 	Color              color.RGBA
 	Font               text.Font
@@ -22,12 +22,12 @@ type checkable struct {
 	IconColor          color.RGBA
 	Size               unit.Value
 	shaper             text.Shaper
-	checkedStateIcon   *Icon
-	uncheckedStateIcon *Icon
+	checkedStateIcon   *_icon
+	uncheckedStateIcon *_icon
 }
 
-func (c *checkable) layout(gtx layout.Context, checked bool) layout.Dimensions {
-	var icon *Icon
+func (c *_checkable) layout(gtx l.Context, checked bool) l.Dimensions {
+	var icon *_icon
 	if checked {
 		icon = c.checkedStateIcon
 	} else {
@@ -35,27 +35,27 @@ func (c *checkable) layout(gtx layout.Context, checked bool) layout.Dimensions {
 	}
 
 	min := gtx.Constraints.Min
-	dims := layout.Flex{Alignment: layout.Middle}.Layout(gtx,
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return layout.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	dims := l.Flex{Alignment: l.Middle}.Layout(gtx,
+		l.Rigid(func(gtx l.Context) l.Dimensions {
+			return l.Center.Layout(gtx, func(gtx l.Context) l.Dimensions {
+				return l.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx l.Context) l.Dimensions {
 					size := gtx.Px(c.Size)
 					icon.Color = c.IconColor
 					if gtx.Queue == nil {
 						icon.Color = f32color.MulAlpha(icon.Color, 150)
 					}
-					icon.Layout(&gtx, unit.Px(float32(size)))
-					return layout.Dimensions{
+					icon.Fn(&gtx, unit.Px(float32(size)))
+					return l.Dimensions{
 						Size: image.Point{X: size, Y: size},
 					}
 				})
 			})
 		}),
 
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+		l.Rigid(func(gtx l.Context) l.Dimensions {
 			gtx.Constraints.Min = min
-			return layout.W.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return layout.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return l.W.Layout(gtx, func(gtx l.Context) l.Dimensions {
+				return l.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx l.Context) l.Dimensions {
 					paint.ColorOp{Color: c.Color}.Add(gtx.Ops)
 					return widget.Label{}.Layout(gtx, c.shaper, c.Font, c.TextSize, c.Label)
 				})

@@ -1,80 +1,75 @@
 package p9
 
-import "gioui.org/layout"
+import l "gioui.org/layout"
 
-type direction struct {
-	layout.Direction
+type _direction struct {
+	l.Direction
 }
 
 // Direction creates a directional layout that sets its contents to align according to the configured direction (8
 // cardinal directions and centered)
-func (th *Theme) Direction() (out *direction) {
-	out = &direction{}
+func (th *Theme) Direction() (out *_direction) {
+	out = &_direction{}
 	return
 }
 
 // direction setters
 
 // NW sets the relevant direction for the Direction layout
-func (d *direction) NW() (out *direction) {
-	d.Direction = layout.NW
+func (d *_direction) NW() (out *_direction) {
+	d.Direction = l.NW
 	return d
 }
 
 // N sets the relevant direction for the Direction layout
-func (d *direction) N() (out *direction) {
-	d.Direction = layout.N
+func (d *_direction) N() (out *_direction) {
+	d.Direction = l.N
 	return d
 }
 
 // NE sets the relevant direction for the Direction layout
-func (d *direction) NE() (out *direction) {
-	d.Direction = layout.NE
+func (d *_direction) NE() (out *_direction) {
+	d.Direction = l.NE
 	return d
 }
 
 // E sets the relevant direction for the Direction layout
-func (d *direction) E() (out *direction) {
-	d.Direction = layout.E
+func (d *_direction) E() (out *_direction) {
+	d.Direction = l.E
 	return d
 }
 
 // SE sets the relevant direction for the Direction layout
-func (d *direction) SE() (out *direction) {
-	d.Direction = layout.SE
+func (d *_direction) SE() (out *_direction) {
+	d.Direction = l.SE
 	return d
 }
 
 // S sets the relevant direction for the Direction layout
-func (d *direction) S() (out *direction) {
-	d.Direction = layout.S
+func (d *_direction) S() (out *_direction) {
+	d.Direction = l.S
 	return d
 }
 
 // SW sets the relevant direction for the Direction layout
-func (d *direction) SW() (out *direction) {
-	d.Direction = layout.SW
+func (d *_direction) SW() (out *_direction) {
+	d.Direction = l.SW
 	return d
 }
 
 // W sets the relevant direction for the Direction layout
-func (d *direction) W() (out *direction) {
-	d.Direction = layout.W
+func (d *_direction) W() (out *_direction) {
+	d.Direction = l.W
 	return d
 }
 
 // Center sets the relevant direction for the Direction layout
-func (d *direction) Center() (out *direction) {
-	d.Direction = layout.Center
+func (d *_direction) Center() (out *_direction) {
+	d.Direction = l.Center
 	return d
 }
 
 // Layout the given widget given the context and direction
-func (d *direction) Layout(c *layout.Context, w layout.Widget) {
+func (d *_direction) Fn(c *l.Context, w l.Widget) {
 	d.Direction.Layout(*c, w)
-}
-
-// Prep the given widget given the context and direction
-func (d *direction) Prep(c *layout.Context, w layout.Widget) func() {
-	return func() { d.Direction.Layout(*c, w) }
 }

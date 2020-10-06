@@ -1,109 +1,104 @@
 package p9
 
-import "gioui.org/layout"
+import l "gioui.org/layout"
 
-type flex struct {
-	flex     layout.Flex
-	ctx      *layout.Context
-	children []layout.FlexChild
+type _flex struct {
+	flex     l.Flex
+	ctx      *l.Context
+	children []l.FlexChild
 }
 
 // Flex creates a new flex layout
-func (th *Theme) Flex() (out *flex) {
-	out = &flex{}
+func (th *Theme) Flex() (out *_flex) {
+	out = &_flex{}
 	return
 }
 
 // Alignment setters
 
 // AlignStart sets alignment for layout from Start
-func (f *flex) AlignStart() (out *flex) {
-	f.flex.Alignment = layout.Start
+func (f *_flex) AlignStart() (out *_flex) {
+	f.flex.Alignment = l.Start
 	return f
 }
 
 // AlignEnd sets alignment for layout from End
-func (f *flex) AlignEnd() (out *flex) {
-	f.flex.Alignment = layout.End
+func (f *_flex) AlignEnd() (out *_flex) {
+	f.flex.Alignment = l.End
 	return f
 }
 
 // AlignMiddle sets alignment for layout from Middle
-func (f *flex) AlignMiddle() (out *flex) {
-	f.flex.Alignment = layout.Middle
+func (f *_flex) AlignMiddle() (out *_flex) {
+	f.flex.Alignment = l.Middle
 	return f
 }
 
 // AlignBaseline sets alignment for layout from Baseline
-func (f *flex) AlignBaseline() (out *flex) {
-	f.flex.Alignment = layout.Baseline
+func (f *_flex) AlignBaseline() (out *_flex) {
+	f.flex.Alignment = l.Baseline
 	return f
 }
 
 // Axis setters
 
 // Vertical sets axis to vertical, otherwise it is horizontal
-func (f *flex) Vertical() (out *flex) {
-	f.flex.Axis = layout.Vertical
+func (f *_flex) Vertical() (out *_flex) {
+	f.flex.Axis = l.Vertical
 	return f
 }
 
 // Spacing setters
 
 // SpaceStart sets the corresponding flex spacing parameter
-func (f *flex) SpaceStart() (out *flex) {
-	f.flex.Spacing = layout.SpaceStart
+func (f *_flex) SpaceStart() (out *_flex) {
+	f.flex.Spacing = l.SpaceStart
 	return f
 }
 
 // SpaceEnd sets the corresponding flex spacing parameter
-func (f *flex) SpaceEnd() (out *flex) {
-	f.flex.Spacing = layout.SpaceEnd
+func (f *_flex) SpaceEnd() (out *_flex) {
+	f.flex.Spacing = l.SpaceEnd
 	return f
 }
 
 // SpaceSides sets the corresponding flex spacing parameter
-func (f *flex) SpaceSides() (out *flex) {
-	f.flex.Spacing = layout.SpaceSides
+func (f *_flex) SpaceSides() (out *_flex) {
+	f.flex.Spacing = l.SpaceSides
 	return f
 }
 
 // SpaceAround sets the corresponding flex spacing parameter
-func (f *flex) SpaceAround() (out *flex) {
-	f.flex.Spacing = layout.SpaceAround
+func (f *_flex) SpaceAround() (out *_flex) {
+	f.flex.Spacing = l.SpaceAround
 	return f
 }
 
 // SpaceBetween sets the corresponding flex spacing parameter
-func (f *flex) SpaceBetween() (out *flex) {
-	f.flex.Spacing = layout.SpaceBetween
+func (f *_flex) SpaceBetween() (out *_flex) {
+	f.flex.Spacing = l.SpaceBetween
 	return f
 }
 
 // SpaceEvenly sets the corresponding flex spacing parameter
-func (f *flex) SpaceEvenly() (out *flex) {
-	f.flex.Spacing = layout.SpaceEvenly
+func (f *_flex) SpaceEvenly() (out *_flex) {
+	f.flex.Spacing = l.SpaceEvenly
 	return f
 }
 
 // Rigid inserts a rigid widget into the flex
-func (f *flex) Rigid(w layout.Widget) (out *flex) {
-	f.children = append(f.children, layout.Rigid(w))
+func (f *_flex) Rigid(w l.Widget) (out *_flex) {
+	f.children = append(f.children, l.Rigid(w))
 	return f
 }
 
 // Flexed inserts a flexed widget into the flex
-func (f *flex) Flexed(wgt float32, w layout.Widget) (out *flex) {
-	f.children = append(f.children, layout.Flexed(wgt, w))
+func (f *_flex) Flexed(wgt float32, w l.Widget) (out *_flex) {
+	f.children = append(f.children, l.Flexed(wgt, w))
 	return f
 }
 
 // Fn runs the ops in the context using the FlexChildren inside it
-func (f *flex) Fn(c layout.Context) layout.Dimensions {
+func (f *_flex) Fn(c l.Context) l.Dimensions {
 	return f.flex.Layout(c, f.children...)
-}
-
-// Prep a layout but return it instead of running it (return a layout.Widget)
-func (f *flex) Prep(c layout.Context) func() {
-	return func() { f.flex.Layout(c, f.children...) }
 }

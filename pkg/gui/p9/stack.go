@@ -1,16 +1,16 @@
 package p9
 
-import "gioui.org/layout"
+import l "gioui.org/layout"
 
-type stack struct {
-	*layout.Stack
-	children []layout.StackChild
+type _stack struct {
+	*l.Stack
+	children []l.StackChild
 }
 
 // Stack starts a chain of widgets to compose into a stack
-func (th *Theme) Stack() (out *stack) {
-	out = &stack{
-		Stack: &layout.Stack{},
+func (th *Theme) Stack() (out *_stack) {
+	out = &_stack{
+		Stack: &l.Stack{},
 	}
 	return
 }
@@ -19,23 +19,23 @@ func (th *Theme) Stack() (out *stack) {
 
 // Stacked appends a widget to the stack, the stack's dimensions will be
 // computed from the largest widget in the stack
-func (s *stack) Stacked(w layout.Widget) (out *stack) {
-	s.children = append(s.children, layout.Stacked(w))
+func (s *_stack) Stacked(w l.Widget) (out *_stack) {
+	s.children = append(s.children, l.Stacked(w))
 	return s
 }
 
 // Expanded lays out a widget with the same max constraints as the stack
-func (s *stack) Expanded(w layout.Widget) (out *stack) {
-	s.children = append(s.children, layout.Expanded(w))
+func (s *_stack) Expanded(w l.Widget) (out *_stack) {
+	s.children = append(s.children, l.Expanded(w))
 	return s
 }
 
 // Layout runs the ops queue configured in the stack
-func (s *stack) Layout(c *layout.Context) {
+func (s *_stack) Layout(c *l.Context) {
 	s.Stack.Layout(*c, s.children...)
 }
 
 // Prep the ops queue configured in the stack
-func (s *stack) Prep(c *layout.Context) func() {
+func (s *_stack) Prep(c *l.Context) func() {
 	return func() { s.Layout(c) }
 }

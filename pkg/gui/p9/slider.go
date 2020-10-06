@@ -5,7 +5,7 @@ import (
 	"image/color"
 
 	"gioui.org/f32"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
@@ -31,14 +31,14 @@ type SliderStyle struct {
 	Float    *widget.Float
 }
 
-func (s SliderStyle) Fn(gtx layout.Context) layout.Dimensions {
-	thumbRadiusInt := gtx.Px(unit.Dp(6))
-	trackWidth := float32(gtx.Px(unit.Dp(2)))
+func (s SliderStyle) Fn(c l.Context) l.Dimensions {
+	thumbRadiusInt := c.Px(unit.Dp(6))
+	trackWidth := float32(c.Px(unit.Dp(2)))
 	thumbRadius := float32(thumbRadiusInt)
 	halfWidthInt := 2 * thumbRadiusInt
 	halfWidth := float32(halfWidthInt)
 
-	size := gtx.Constraints.Min
+	size := c.Constraints.Min
 	// Keep a minimum length so that the track is always visible.
 	minLength := halfWidthInt + 3*thumbRadiusInt + halfWidthInt
 	if size.X < minLength {
@@ -46,20 +46,20 @@ func (s SliderStyle) Fn(gtx layout.Context) layout.Dimensions {
 	}
 	size.Y = 2 * halfWidthInt
 
-	st := op.Push(gtx.Ops)
-	op.Offset(f32.Pt(halfWidth, 0)).Add(gtx.Ops)
-	gtx.Constraints.Min = image.Pt(size.X-2*halfWidthInt, size.Y)
-	s.Float.Layout(gtx, halfWidthInt, s.Min, s.Max)
+	st := op.Push(c.Ops)
+	op.Offset(f32.Pt(halfWidth, 0)).Add(c.Ops)
+	c.Constraints.Min = image.Pt(size.X-2*halfWidthInt, size.Y)
+	s.Float.Layout(c, halfWidthInt, s.Min, s.Max)
 	thumbPos := halfWidth + s.Float.Pos()
 	st.Pop()
 
 	color := s.Color
-	if gtx.Queue == nil {
+	if c.Queue == nil {
 		color = f32color.MulAlpha(color, 150)
 	}
 
 	// Draw track before thumb.
-	st = op.Push(gtx.Ops)
+	st = op.Push(c.Ops)
 	track := f32.Rectangle{
 		Min: f32.Point{
 			X: halfWidth,
@@ -70,22 +70,22 @@ func (s SliderStyle) Fn(gtx layout.Context) layout.Dimensions {
 			Y: halfWidth + trackWidth/2,
 		},
 	}
-	clip.RRect{Rect: track}.Add(gtx.Ops)
-	paint.ColorOp{Color: color}.Add(gtx.Ops)
-	paint.PaintOp{Rect: track}.Add(gtx.Ops)
+	clip.RRect{Rect: track}.Add(c.Ops)
+	paint.ColorOp{Color: color}.Add(c.Ops)
+	paint.PaintOp{Rect: track}.Add(c.Ops)
 	st.Pop()
 
 	// Draw track after thumb.
-	st = op.Push(gtx.Ops)
+	st = op.Push(c.Ops)
 	track.Min.X = thumbPos
 	track.Max.X = float32(size.X) - halfWidth
-	clip.RRect{Rect: track}.Add(gtx.Ops)
-	paint.ColorOp{Color: f32color.MulAlpha(color, 96)}.Add(gtx.Ops)
-	paint.PaintOp{Rect: track}.Add(gtx.Ops)
+	clip.RRect{Rect: track}.Add(c.Ops)
+	paint.ColorOp{Color: f32color.MulAlpha(color, 96)}.Add(c.Ops)
+	paint.PaintOp{Rect: track}.Add(c.Ops)
 	st.Pop()
 
 	// Draw thumb.
-	st = op.Push(gtx.Ops)
+	st = op.Push(c.Ops)
 	thumb := f32.Rectangle{
 		Min: f32.Point{
 			X: thumbPos - thumbRadius,
@@ -100,10 +100,10 @@ func (s SliderStyle) Fn(gtx layout.Context) layout.Dimensions {
 	clip.RRect{
 		Rect: thumb,
 		NE:   rr, NW: rr, SE: rr, SW: rr,
-	}.Add(gtx.Ops)
-	paint.ColorOp{Color: color}.Add(gtx.Ops)
-	paint.PaintOp{Rect: thumb}.Add(gtx.Ops)
+	}.Add(c.Ops)
+	paint.ColorOp{Color: color}.Add(c.Ops)
+	paint.PaintOp{Rect: thumb}.Add(c.Ops)
 	st.Pop()
 
-	return layout.Dimensions{Size: size}
+	return l.Dimensions{Size: size}
 }

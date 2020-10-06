@@ -3,20 +3,20 @@ package p9
 import (
 	"image/color"
 
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
 )
 
-type CheckBoxStyle struct {
-	checkable
+type _checkbox struct {
+	_checkable
 	CheckBox *widget.Bool
 }
 
-func CheckBox(th *Theme, checkBox *widget.Bool, color color.RGBA, label string) CheckBoxStyle {
-	return CheckBoxStyle{
+func CheckBox(th *Theme, checkBox *widget.Bool, color color.RGBA, label string) _checkbox {
+	return _checkbox{
 		CheckBox: checkBox,
-		checkable: checkable{
+		_checkable: _checkable{
 			Label:              label,
 			Color:              color,
 			IconColor:          th.Colors.Get("Primary"),
@@ -30,7 +30,7 @@ func CheckBox(th *Theme, checkBox *widget.Bool, color color.RGBA, label string) 
 }
 
 // Layout updates the checkBox and displays it.
-func (c CheckBoxStyle) Layout(gtx layout.Context) layout.Dimensions {
+func (c _checkbox) Layout(gtx l.Context) l.Dimensions {
 	dims := c.layout(gtx, c.CheckBox.Value)
 	gtx.Constraints.Min = dims.Size
 	c.CheckBox.Layout(gtx)

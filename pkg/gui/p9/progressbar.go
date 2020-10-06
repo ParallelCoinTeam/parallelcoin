@@ -5,7 +5,7 @@ import (
 	"image/color"
 
 	"gioui.org/f32"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
@@ -13,20 +13,20 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type ProgressBarStyle struct {
+type _progressBar struct {
 	Color    color.RGBA
 	Progress int
 }
 
-func (th *Theme) ProgressBar(progress int) ProgressBarStyle {
-	return ProgressBarStyle{
+func (th *Theme) ProgressBar(progress int) _progressBar {
+	return _progressBar{
 		Progress: progress,
 		Color:    th.Colors.Get("Primary"),
 	}
 }
 
-func (p ProgressBarStyle) Fn(gtx layout.Context) layout.Dimensions {
-	shader := func(width float32, color color.RGBA) layout.Dimensions {
+func (p _progressBar) Fn(gtx l.Context) l.Dimensions {
+	shader := func(width float32, color color.RGBA) l.Dimensions {
 		maxHeight := unit.Dp(4)
 		rr := float32(gtx.Px(unit.Dp(2)))
 
@@ -43,7 +43,7 @@ func (p ProgressBarStyle) Fn(gtx layout.Context) layout.Dimensions {
 		paint.ColorOp{Color: color}.Add(gtx.Ops)
 		paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 
-		return layout.Dimensions{Size: d}
+		return l.Dimensions{Size: d}
 	}
 
 	progress := p.Progress
@@ -55,14 +55,14 @@ func (p ProgressBarStyle) Fn(gtx layout.Context) layout.Dimensions {
 
 	progressBarWidth := float32(gtx.Constraints.Max.X)
 
-	return layout.Stack{Alignment: layout.W}.Layout(gtx,
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+	return l.Stack{Alignment: l.W}.Layout(gtx,
+		l.Stacked(func(gtx l.Context) l.Dimensions {
 			// Use a transparent equivalent of progress color.
 			bgCol := f32color.MulAlpha(p.Color, 150)
 
 			return shader(progressBarWidth, bgCol)
 		}),
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+		l.Stacked(func(gtx l.Context) l.Dimensions {
 			fillWidth := (progressBarWidth / 100) * float32(progress)
 			fillColor := p.Color
 			if gtx.Queue == nil {

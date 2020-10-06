@@ -6,7 +6,7 @@ import (
 
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
@@ -34,7 +34,7 @@ func (th *Theme) Switch(swtch *widget.Bool) SwitchStyle {
 }
 
 // Fn updates the checkBox and displays it.
-func (s SwitchStyle) Fn(gtx layout.Context) layout.Dimensions {
+func (s SwitchStyle) Fn(gtx l.Context) l.Dimensions {
 	trackWidth := gtx.Px(unit.Dp(36))
 	trackHeight := gtx.Px(unit.Dp(16))
 	thumbSize := gtx.Px(unit.Dp(20))
@@ -76,7 +76,7 @@ func (s SwitchStyle) Fn(gtx layout.Context) layout.Dimensions {
 	gtx.Constraints.Min = image.Pt(inkSize, inkSize)
 	clip.RRect{
 		Rect: f32.Rectangle{
-			Max: layout.FPt(gtx.Constraints.Min),
+			Max: l.FPt(gtx.Constraints.Min),
 		},
 		NE: rr, NW: rr, SE: rr, SW: rr,
 	}.Add(gtx.Ops)
@@ -119,7 +119,7 @@ func (s SwitchStyle) Fn(gtx layout.Context) layout.Dimensions {
 	stack.Pop()
 
 	dims := image.Point{X: trackWidth, Y: thumbSize}
-	return layout.Dimensions{Size: dims}
+	return l.Dimensions{Size: dims}
 }
 
 func drawDisc(ops *op.Ops, sz float32, col color.RGBA) {

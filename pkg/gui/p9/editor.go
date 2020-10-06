@@ -3,7 +3,7 @@ package p9
 import (
 	"image/color"
 
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/text"
@@ -13,7 +13,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type EditorStyle struct {
+type _editor struct {
 	Font     text.Font
 	TextSize unit.Value
 	// Color is the text color.
@@ -27,8 +27,8 @@ type EditorStyle struct {
 	shaper text.Shaper
 }
 
-func Editor(th *Theme, editor *widget.Editor, hint string) EditorStyle {
-	return EditorStyle{
+func (th *Theme) Editor(editor *widget.Editor, hint string) _editor {
+	return _editor{
 		Editor:    editor,
 		TextSize:  th.TextSize,
 		Color:     th.Colors.Get("Text"),
@@ -38,7 +38,7 @@ func Editor(th *Theme, editor *widget.Editor, hint string) EditorStyle {
 	}
 }
 
-func (e EditorStyle) Fn(gtx layout.Context) layout.Dimensions {
+func (e _editor) Fn(gtx l.Context) l.Dimensions {
 	defer op.Push(gtx.Ops).Pop()
 	macro := op.Record(gtx.Ops)
 	paint.ColorOp{Color: e.HintColor}.Add(gtx.Ops)
