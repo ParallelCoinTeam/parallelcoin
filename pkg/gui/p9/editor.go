@@ -31,10 +31,10 @@ func Editor(th *Theme, editor *widget.Editor, hint string) EditorStyle {
 	return EditorStyle{
 		Editor:    editor,
 		TextSize:  th.TextSize,
-		Color:     th.Color.Text,
+		Color:     th.Colors.Get("Text"),
 		shaper:    th.Shaper,
 		Hint:      hint,
-		HintColor: th.Color.Hint,
+		HintColor: th.Colors.Get("Hint"),
 	}
 }
 

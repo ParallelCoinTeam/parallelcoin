@@ -1,63 +1,85 @@
+// SPDX-License-Identifier: Unlicense OR MIT
+
 package p9
 
 import (
 	"image/color"
 
 	"gioui.org/f32"
+
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget"
-	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
 type Theme struct {
-	quit       chan struct{}
-	Collection []text.FontFace
-	Shaper     text.Shaper
-	Color      struct {
-		Primary, Text, Hint, InvText color.RGBA
-	}
-	TextSize unit.Value
-	Icon     struct {
-		CheckBoxChecked, CheckBoxUnchecked, RadioChecked, RadioUnchecked *widget.Icon
-	}
+	quit          chan struct{}
+	Shaper        text.Shaper
+	Collection    []text.FontFace
+	TextSize      unit.Value
+	Colors        Colors
+	Fonts         map[string]text.Typeface
+	Icons         map[string]*Icon
+	scrollBarSize int
 }
+//
+// func NewTheme() *Theme {
+// 	t := &Theme{
+// 		Shaper: font.Default(),
+// 	}
+// 	t.Colors = NewDuoUIcolors()
+// 	// t.Fonts = NewDuoUIfonts()
+// 	t.TextSize = unit.Sp(16)
+// 	t.Icons = NewIcons()
+// 	return t
+// }
+
+func NewFonts() (f map[string]text.Typeface) {
+	f = make(map[string]text.Typeface)
+	f["Primary"] = "bariol"
+	f["Secondary"] = "plan9"
+	f["Mono"] = "go"
+	return f
+}
+
+func (th *Theme) ChangeLightDark() {
+	light := th.Colors["Light"]
+	dark := th.Colors["Dark"]
+	lightGray := th.Colors["LightGrayIII"]
+	darkGray := th.Colors["DarkGrayII"]
+	th.Colors["Light"] = dark
+	th.Colors["Dark"] = light
+	th.Colors["LightGrayIII"] = darkGray
+	th.Colors["DarkGrayII"] = lightGray
+}
+
+//
+// type Theme struct {
+// 	quit       chan struct{}
+// 	Collection []text.FontFace
+// 	Shaper     text.Shaper
+// 	Color      struct {
+// 		Primary, Text, Hint, InvText color.RGBA
+// 	}
+// 	TextSize unit.Value
+// 	Icon     struct {
+// 		CheckBoxChecked, CheckBoxUnchecked, RadioChecked, RadioUnchecked *widget.Icon
+// 	}
+// }
 
 func NewTheme(fontCollection []text.FontFace, quit chan struct{}) *Theme {
 	t := &Theme{
-		quit:       quit,
-		Collection: fontCollection,
-		Shaper:     text.NewCache(fontCollection),
+		quit:          quit,
+		Shaper:        text.NewCache(fontCollection),
+		Collection:    fontCollection,
+		TextSize:      unit.Sp(16),
+		Colors:        NewColors(),
+		Fonts:         NewFonts(),
+		Icons:         NewIcons(),
+		scrollBarSize: 0,
 	}
-	t.Color.Primary = rgb(0x3f51b5)
-	t.Color.Text = rgb(0x000000)
-	t.Color.Hint = rgb(0xbbbbbb)
-	t.Color.InvText = rgb(0xffffff)
-	t.TextSize = unit.Sp(16)
-
-	t.Icon.CheckBoxChecked = mustIcon(widget.NewIcon(icons.ToggleCheckBox))
-	t.Icon.CheckBoxUnchecked = mustIcon(widget.NewIcon(icons.ToggleCheckBoxOutlineBlank))
-	t.Icon.RadioChecked = mustIcon(widget.NewIcon(icons.ToggleRadioButtonChecked))
-	t.Icon.RadioUnchecked = mustIcon(widget.NewIcon(icons.ToggleRadioButtonUnchecked))
-
 	return t
-}
-
-func mustIcon(ic *widget.Icon, err error) *widget.Icon {
-	if err != nil {
-		panic(err)
-	}
-	return ic
-}
-
-func rgb(c uint32) color.RGBA {
-	return argb(0xff000000 | c)
-}
-
-func argb(c uint32) color.RGBA {
-	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
 }
 
 func fill(gtx layout.Context, col color.RGBA) layout.Dimensions {

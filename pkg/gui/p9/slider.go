@@ -20,7 +20,7 @@ func (th *Theme) Slider(float *widget.Float, min, max float32) SliderStyle {
 	return SliderStyle{
 		Min:   min,
 		Max:   max,
-		Color: th.Color.Primary,
+		Color: th.Colors.Get("Primary"),
 		Float: float,
 	}
 }

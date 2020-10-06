@@ -73,7 +73,6 @@ func (th *Theme) Caption(txt string) (l LabelStyle) {
 func (th *Theme) Label(size unit.Value, font, txt string) (l LabelStyle) {
 	var f text.Font
 	for i := range th.Collection {
-		// Debug(th.Collection[i].Font)
 		if th.Collection[i].Font.Typeface == text.Typeface(font) {
 			f = th.Collection[i].Font
 		}
@@ -81,7 +80,7 @@ func (th *Theme) Label(size unit.Value, font, txt string) (l LabelStyle) {
 	return LabelStyle{
 		Text:     txt,
 		Font:     f,
-		Color:    th.Color.Text,
+		Color:    th.Colors.Get("DocText"),
 		TextSize: size,
 		shaper:   th.Shaper,
 	}

@@ -28,7 +28,7 @@ func (th *Theme) Switch(swtch *widget.Bool) SwitchStyle {
 	sw := SwitchStyle{
 		Switch: swtch,
 	}
-	sw.Color.Enabled = th.Color.Primary
+	sw.Color.Enabled = th.Colors.Get("Primary")
 	sw.Color.Disabled = rgb(0xffffff)
 	return sw
 }

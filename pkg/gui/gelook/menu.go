@@ -56,19 +56,19 @@ func (n DuoUIthemeNav) Layout(gtx *layout.Context) {
 	//
 	// for a, b := range n.NavButtons {
 	//	navButtons[b.Order] = func() {
-	//		n.theme.H3(a).Fn(gtx)
+	//		n.theme.H3(a).Layout(gtx)
 	//	}
 	// }
 	// //for a, _ := range n.NavButtons {
 	// //	navButtons = append(navButtons, func() {
-	// //		n.theme.H3(a).Fn(gtx)
+	// //		n.theme.H3(a).Layout(gtx)
 	// //	})
 	// //}
 	// //	navButtons := func() {
-	// //		n.theme.H3("button").Fn(gtx)
+	// //		n.theme.H3("button").Layout(gtx)
 	// //	}
 	//
-	// navList.Fn(gtx, 2, func(i int) {
-	//	layout.UniformInset(unit.Dp(16)).Fn(gtx, navButtons[i])
+	// navList.Layout(gtx, 2, func(i int) {
+	//	layout.UniformInset(unit.Dp(16)).Layout(gtx, navButtons[i])
 	// })
 }

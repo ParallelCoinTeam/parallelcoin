@@ -1,6 +1,8 @@
 package p9
 
 import (
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -11,18 +13,18 @@ type CheckBoxStyle struct {
 	CheckBox *widget.Bool
 }
 
-func CheckBox(th *Theme, checkBox *widget.Bool, label string) CheckBoxStyle {
+func CheckBox(th *Theme, checkBox *widget.Bool, color color.RGBA, label string) CheckBoxStyle {
 	return CheckBoxStyle{
 		CheckBox: checkBox,
 		checkable: checkable{
 			Label:              label,
-			Color:              th.Color.Text,
-			IconColor:          th.Color.Primary,
+			Color:              color,
+			IconColor:          th.Colors.Get("Primary"),
 			TextSize:           th.TextSize.Scale(14.0 / 16.0),
 			Size:               unit.Dp(26),
 			shaper:             th.Shaper,
-			checkedStateIcon:   th.Icon.CheckBoxChecked,
-			uncheckedStateIcon: th.Icon.CheckBoxUnchecked,
+			checkedStateIcon:   th.Icons["Checked"],
+			uncheckedStateIcon: th.Icons["Unchecked"],
 		},
 	}
 }

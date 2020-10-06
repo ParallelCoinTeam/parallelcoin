@@ -19,13 +19,13 @@ func (th *Theme) RadioButton(group *widget.Enum, key, label string) RadioButtonS
 		checkable: checkable{
 			Label: label,
 
-			Color:              th.Color.Text,
-			IconColor:          th.Color.Primary,
+			Color:              th.Colors.Get("Text"),
+			IconColor:          th.Colors.Get("Primary"),
 			TextSize:           th.TextSize.Scale(14.0 / 16.0),
 			Size:               unit.Dp(26),
 			shaper:             th.Shaper,
-			checkedStateIcon:   th.Icon.RadioChecked,
-			uncheckedStateIcon: th.Icon.RadioUnchecked,
+			checkedStateIcon:   th.Icons["Checked"],
+			uncheckedStateIcon: th.Icons["Unchecked"],
 		},
 		Key: key,
 	}

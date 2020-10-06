@@ -20,7 +20,7 @@ type LoaderStyle struct {
 
 func (th *Theme) Loader() LoaderStyle {
 	return LoaderStyle{
-		Color: th.Color.Primary,
+		Color: th.Colors.Get("Primary"),
 	}
 }
 
@@ -58,12 +58,12 @@ func (l LoaderStyle) Fn(gtx layout.Context) layout.Dimensions {
 func clipLoader(ops *op.Ops, startAngle, endAngle, radius float64) {
 	const thickness = .25
 	var (
-		outer = float32(radius)
-		delta = float32(endAngle - startAngle)
+		outer  = float32(radius)
+		delta  = float32(endAngle - startAngle)
 		vy, vx = math.Sincos(startAngle)
 		pen    = f32.Pt(float32(vx), float32(vy)).Mul(outer)
 		center = f32.Pt(0, 0).Sub(pen)
-		p clip.Path
+		p      clip.Path
 	)
 	p.Begin(ops)
 	p.Move(pen)

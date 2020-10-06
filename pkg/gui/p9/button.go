@@ -183,7 +183,7 @@ func (th *Theme) Button(button *w.Clickable, font, txt string, events w.ClickEve
 		Font:  f,
 		Color: rgb(0xffffff),
 		// CornerRadius: unit.Dp(4),
-		Background: th.Color.Primary,
+		Background: th.Colors.Get("Primary"),
 		TextSize:   th.TextSize,
 		Inset: layout.Inset{
 			Top: unit.Dp(10), Bottom: unit.Dp(10),
@@ -210,7 +210,7 @@ func (b ButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
 func ButtonLayout(th *Theme, button *w.Clickable) ButtonLayoutStyle {
 	return ButtonLayoutStyle{
 		Button:       button,
-		Background:   th.Color.Primary,
+		Background:   th.Colors.Get("ButtonBg"),
 		CornerRadius: unit.Dp(4),
 	}
 }
@@ -247,8 +247,8 @@ func (b ButtonLayoutStyle) Fn(gtx layout.Context, w layout.Widget) layout.Dimens
 
 func IconButton(th *Theme, button *w.Clickable, icon *widget.Icon) IconButtonStyle {
 	return IconButtonStyle{
-		Background: th.Color.Primary,
-		Color:      th.Color.InvText,
+		Background: th.Colors.Get("Primary"),
+		Color:      th.Colors.Get("InvText"),
 		Icon:       icon,
 		Size:       unit.Dp(24),
 		Inset:      layout.UniformInset(unit.Dp(12)),

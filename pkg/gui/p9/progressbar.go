@@ -21,7 +21,7 @@ type ProgressBarStyle struct {
 func (th *Theme) ProgressBar(progress int) ProgressBarStyle {
 	return ProgressBarStyle{
 		Progress: progress,
-		Color:    th.Color.Primary,
+		Color:    th.Colors.Get("Primary"),
 	}
 }
 
