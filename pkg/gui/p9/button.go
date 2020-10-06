@@ -32,6 +32,25 @@ type _button struct {
 	shaper       text.Shaper
 }
 
+func (th *Theme) Button(btn *w.Clickable) *_button {
+	return &_button{
+		th:   th,
+		text: strings.ToUpper("text unset"),
+		// default sets
+		font:  th.collection[0].Font,
+		color: th.Colors.Get("ButtonText"),
+		// CornerRadius: unit.Dp(4),
+		background: th.Colors.Get("Primary"),
+		textSize:   th.textSize,
+		inset: &l.Inset{
+			Top: unit.Sp(8), Bottom: unit.Sp(8),
+			Left: unit.Sp(8), Right: unit.Sp(8),
+		},
+		button: btn,
+		shaper: th.shaper,
+	}
+}
+
 func (b *_button) Text(text string) *_button {
 	b.text = text
 	return b
@@ -77,25 +96,6 @@ func (b *_button) Font(font string) *_button {
 func (b *_button) Color(color string) *_button {
 	b.color = b.th.Colors.Get(color)
 	return b
-}
-
-func (th *Theme) Button(btn *w.Clickable) *_button {
-	return &_button{
-		th:   th,
-		text: strings.ToUpper("text unset"),
-		// default sets
-		font:  th.collection[0].Font,
-		color: th.Colors.Get("ButtonText"),
-		// CornerRadius: unit.Dp(4),
-		background: th.Colors.Get("Primary"),
-		textSize:   th.textSize,
-		inset: &l.Inset{
-			Top: unit.Sp(8), Bottom: unit.Sp(8),
-			Left: unit.Sp(8), Right: unit.Sp(8),
-		},
-		button: btn,
-		shaper: th.shaper,
-	}
 }
 
 func (b *_button) Fn(gtx l.Context) l.Dimensions {
