@@ -375,7 +375,7 @@ func TestTxWireErrors(t *testing.T) {
 	// with that protocol version.
 	pver := uint32(60002)
 	tests := []struct {
-		in       *MsgTx          // Value to encode
+		in       *MsgTx          // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format
@@ -528,7 +528,7 @@ func TestTxSerialize(t *testing.T) {
 // correctly.
 func TestTxSerializeErrors(t *testing.T) {
 	tests := []struct {
-		in       *MsgTx // Value to encode
+		in       *MsgTx // value to encode
 		buf      []byte // Serialized data
 		max      int    // Max size of fixed buffer to induce errors
 		writeErr error  // Expected write error

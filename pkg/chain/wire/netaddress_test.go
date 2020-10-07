@@ -182,7 +182,7 @@ func TestNetAddress(t *testing.T) {
 // 		Port:      11047,
 // 	}
 // 	tests := []struct {
-// 		in       *NetAddress // Value to encode
+// 		in       *NetAddress // value to encode
 // 		buf      []byte      // Wire encoding
 // 		pver     uint32      // Protocol version for wire encoding
 // 		ts       bool        // Include timestamp flag

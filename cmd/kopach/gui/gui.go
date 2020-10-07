@@ -15,9 +15,15 @@ import (
 )
 
 var (
-	button0 = w.NewClickable()
-	button1 = w.NewClickable()
-	button2 = w.NewClickable()
+	button0     = w.NewClickable()
+	button1     = w.NewClickable()
+	button2     = w.NewClickable()
+	bool1       bool
+	boolbutton1 = w.NewBool(&bool1, func(b, cs bool) {
+		if cs {
+			Debug("change state to", b)
+		}
+	})
 )
 
 func Run(quit chan struct{}) {
@@ -38,11 +44,13 @@ func testLabels(th *p9.Theme, gtx layout.Context) {
 		th.Flex().Vertical().Flexed(0.5,
 			th.Flex().Rigid(
 				th.Flex().Flexed(0.5,
-					th.Fill("Light").Widget(
+					th.Fill("PanelBg").Widget(
 						blocks(th),
 					).Fn,
 				).Flexed(0.5,
-					buttons(th),
+					th.Fill("DocBg").Widget(
+						buttons(th),
+					).Fn,
 				).Fn,
 			).Fn,
 		).Fn,
@@ -55,8 +63,7 @@ func buttons(th *p9.Theme) layout.Widget {
 			th.Button(
 				button0.SetClick(func() {
 					Info("clicked first button")
-				}),
-			).
+				})).
 				Background("Secondary").
 				Color("Dark").
 				Font("bariol bold").
@@ -76,13 +83,21 @@ func buttons(th *p9.Theme) layout.Widget {
 		).Fn,
 	).Rigid(
 		th.Inset(4).Widget(
-			th.Button(button1.SetClick(func() {
-				Info("clicked second button")
-			})).
+			th.Button(
+				button1.SetClick(func() {
+					Info("clicked second button")
+				})).
 				TextScale(0.5).
 				Text("button").
 				Inset(4).
 				Fn,
+		).Fn,
+	).Rigid(
+		th.CheckBox(
+			boolbutton1,
+			"Primary",
+			"DocText",
+			"checkbox",
 		).Fn,
 	).Fn
 }
@@ -91,40 +106,53 @@ func blocks(th *p9.Theme) layout.Widget {
 	return th.Flex().Vertical().Rigid(
 		th.Inset(4).Widget(
 			th.Flex().Rigid(
-				th.H1("this is a H1").Fn,
+				th.H1("this is a H1").Color("PanelText").Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
 		th.Inset(4).Widget(
-			th.H2("this is a H2").Font("bariol regular").Fn,
+			th.H2("this is a H2").
+				Font("bariol regular").
+				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
 		th.Inset(4).Widget(
-			th.H3("this is a H3").Alignment(text.End).Fn,
+			th.H3("this is a H3").
+				Alignment(text.End).
+				Color("PanelText").Fn,
+		).Fn,
+	).Rigid(
+		th.Fill("DocBg").Widget(
+			th.Inset(4).Widget(
+				th.H4("this is a H4").
+					Alignment(text.Middle).
+					Color("DocText").Fn,
+			).Fn,
+		).Fn,
+	).Rigid(
+		// th.Fill("PanelBg").Widget(
+		th.Inset(4).Widget(
+			th.H5("this is a H5").
+				Color("PanelText").
+				Fn,
+		).Fn,
+		// ).Fn,
+	).Rigid(
+		th.Inset(4).Widget(
+			th.H6("this is a H6").
+				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
 		th.Inset(4).Widget(
-			th.H4("this is a H4").Alignment(text.Middle).Fn,
+			th.Body1("this is a Body1").Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
 		th.Inset(4).Widget(
-			th.H5("this is a H5").Fn,
+			th.Body2("this is a Body2").Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
 		th.Inset(4).Widget(
-			th.H6("this is a H6").Fn,
-		).Fn,
-	).Rigid(
-		th.Inset(4).Widget(
-			th.Body1("this is a Body1").Fn,
-		).Fn,
-	).Rigid(
-		th.Inset(4).Widget(
-			th.Body2("this is a Body2").Fn,
-		).Fn,
-	).Rigid(
-		th.Inset(4).Widget(
-			th.Caption("this is a Caption").Fn,
+			th.Caption("this is a Caption").Color("PanelText").Fn,
 		).Fn,
 	).Fn
 }

@@ -180,7 +180,7 @@ func TestMerkleBlockWireErrors(t *testing.T) {
 	pverNoMerkleBlock := BIP0037Version - 1
 	wireErr := &MessageError{}
 	tests := []struct {
-		in       *MsgMerkleBlock // Value to encode
+		in       *MsgMerkleBlock // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

@@ -178,7 +178,7 @@ func TestPingWire(t *testing.T) {
 func TestPingWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
-		in       *MsgPing        // Value to encode
+		in       *MsgPing        // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

@@ -148,7 +148,7 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 		// 		chainService *neutrino.ChainService
 		// 		spvdb        walletdb.DB
 		// 	)
-		// 	netDir := networkDir(cx.PodConfig.AppDataDir.Value, ActiveNet.Params)
+		// 	netDir := networkDir(cx.PodConfig.AppDataDir.value, ActiveNet.Params)
 		// 	spvdb, err = walletdb.Create("bdb",
 		// 		filepath.Join(netDir, "neutrino.db"))
 		// 	defer spvdb.Close()

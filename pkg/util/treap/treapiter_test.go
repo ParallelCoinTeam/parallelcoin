@@ -105,7 +105,7 @@ testLoop:
 		}
 		gotVal := iter.Value()
 		if !bytes.Equal(gotVal, test.expectedFirst) {
-			t.Errorf("First.Value #%d: unexpected value - got %x, "+
+			t.Errorf("First.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedFirst)
 			continue
 		}
@@ -125,7 +125,7 @@ testLoop:
 			// Ensure value is as expected.
 			gotVal := iter.Value()
 			if !bytes.Equal(gotVal, expectedKey) {
-				t.Errorf("iter.Value #%d (%d): unexpected "+
+				t.Errorf("iter.value #%d (%d): unexpected "+
 					"value - got %x, want %x", i, curNum,
 					gotVal, expectedKey)
 				continue testLoop
@@ -150,7 +150,7 @@ testLoop:
 		}
 		gotVal = iter.Value()
 		if !bytes.Equal(gotVal, test.expectedLast) {
-			t.Errorf("Last.Value #%d: unexpected value - got %x, "+
+			t.Errorf("Last.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedLast)
 			continue
 		}
@@ -171,7 +171,7 @@ testLoop:
 			// Ensure value is as expected.
 			gotVal := iter.Value()
 			if !bytes.Equal(gotVal, expectedKey) {
-				t.Errorf("iter.Value #%d (%d): unexpected "+
+				t.Errorf("iter.value #%d (%d): unexpected "+
 					"value - got %x, want %x", i, curNum,
 					gotVal, expectedKey)
 				continue testLoop
@@ -196,7 +196,7 @@ testLoop:
 		}
 		gotVal = iter.Value()
 		if !bytes.Equal(gotVal, test.expectedSeek) {
-			t.Errorf("Seek.Value #%d: unexpected value - got %x, "+
+			t.Errorf("Seek.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedSeek)
 			continue
 		}
@@ -216,7 +216,7 @@ testLoop:
 		}
 		gotVal = iter.Value()
 		if !bytes.Equal(gotVal, test.expectedFirst) {
-			t.Errorf("Next.Value #%d: unexpected value - got %x, "+
+			t.Errorf("Next.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedFirst)
 			continue
 		}
@@ -236,7 +236,7 @@ testLoop:
 		}
 		gotVal = iter.Value()
 		if !bytes.Equal(gotVal, test.expectedLast) {
-			t.Errorf("Next.Value #%d: unexpected value - got %x, "+
+			t.Errorf("Next.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedLast)
 			continue
 		}
@@ -267,12 +267,12 @@ func TestMutableEmptyIterator(t *testing.T) {
 	if iter.Prev() {
 		t.Fatal("Prev: iterator should be exhausted")
 	}
-	// Ensure Key and Value on empty iterator are nil.
+	// Ensure Key and value on empty iterator are nil.
 	if gotKey := iter.Key(); gotKey != nil {
 		t.Fatalf("Key: should be nil - got %q", gotKey)
 	}
 	if gotVal := iter.Value(); gotVal != nil {
-		t.Fatalf("Value: should be nil - got %q", gotVal)
+		t.Fatalf("value: should be nil - got %q", gotVal)
 	}
 	// Ensure Next and Prev report exhausted after forcing a reseek on an empty iterator.
 	iter.ForceReseek()
@@ -458,7 +458,7 @@ testLoop:
 		}
 		gotVal := iter.Value()
 		if !bytes.Equal(gotVal, test.expectedFirst) {
-			t.Errorf("First.Value #%d: unexpected value - got %x, "+
+			t.Errorf("First.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedFirst)
 			continue
 		}
@@ -478,7 +478,7 @@ testLoop:
 			// Ensure value is as expected.
 			gotVal := iter.Value()
 			if !bytes.Equal(gotVal, expectedKey) {
-				t.Errorf("iter.Value #%d (%d): unexpected "+
+				t.Errorf("iter.value #%d (%d): unexpected "+
 					"value - got %x, want %x", i, curNum,
 					gotVal, expectedKey)
 				continue testLoop
@@ -503,7 +503,7 @@ testLoop:
 		}
 		gotVal = iter.Value()
 		if !bytes.Equal(gotVal, test.expectedLast) {
-			t.Errorf("Last.Value #%d: unexpected value - got %x, "+
+			t.Errorf("Last.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedLast)
 			continue
 		}
@@ -524,7 +524,7 @@ testLoop:
 			// Ensure value is as expected.
 			gotVal := iter.Value()
 			if !bytes.Equal(gotVal, expectedKey) {
-				t.Errorf("iter.Value #%d (%d): unexpected "+
+				t.Errorf("iter.value #%d (%d): unexpected "+
 					"value - got %x, want %x", i, curNum,
 					gotVal, expectedKey)
 				continue testLoop
@@ -549,7 +549,7 @@ testLoop:
 		}
 		gotVal = iter.Value()
 		if !bytes.Equal(gotVal, test.expectedSeek) {
-			t.Errorf("Seek.Value #%d: unexpected value - got %x, "+
+			t.Errorf("Seek.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedSeek)
 			continue
 		}
@@ -569,7 +569,7 @@ testLoop:
 		}
 		gotVal = iter.Value()
 		if !bytes.Equal(gotVal, test.expectedFirst) {
-			t.Errorf("Next.Value #%d: unexpected value - got %x, "+
+			t.Errorf("Next.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedFirst)
 			continue
 		}
@@ -589,7 +589,7 @@ testLoop:
 		}
 		gotVal = iter.Value()
 		if !bytes.Equal(gotVal, test.expectedLast) {
-			t.Errorf("Next.Value #%d: unexpected value - got %x, "+
+			t.Errorf("Next.value #%d: unexpected value - got %x, "+
 				"want %x", i, gotVal, test.expectedLast)
 			continue
 		}
@@ -620,12 +620,12 @@ func TestImmutableEmptyIterator(t *testing.T) {
 	if iter.Prev() {
 		t.Fatal("Prev: iterator should be exhausted")
 	}
-	// Ensure Key and Value on empty iterator are nil.
+	// Ensure Key and value on empty iterator are nil.
 	if gotKey := iter.Key(); gotKey != nil {
 		t.Fatalf("Key: should be nil - got %q", gotKey)
 	}
 	if gotVal := iter.Value(); gotVal != nil {
-		t.Fatalf("Value: should be nil - got %q", gotVal)
+		t.Fatalf("value: should be nil - got %q", gotVal)
 	}
 	// Ensure calling ForceReseek on an immutable treap iterator does not cause any issues since it only applies to
 	// mutable treap iterators.

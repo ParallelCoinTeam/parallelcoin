@@ -40,7 +40,7 @@ const (
 	// maxTxInPerMessage is the maximum number of transactions inputs that a transaction which fits into a message could
 	// possibly have.
 	maxTxInPerMessage = (MaxMessagePayload / minTxInPayload) + 1
-	// MinTxOutPayload is the minimum payload size for a transaction output. Value 8 bytes + Varint for PkScript length
+	// MinTxOutPayload is the minimum payload size for a transaction output. value 8 bytes + Varint for PkScript length
 	// 1 byte.
 	MinTxOutPayload = 9
 	// maxTxOutPerMessage is the maximum number of transactions outputs that a transaction which fits into a message
@@ -199,7 +199,7 @@ type TxOut struct {
 
 // SerializeSize returns the number of bytes it would take to serialize the the transaction output.
 func (t *TxOut) SerializeSize() int {
-	// Value 8 bytes + serialized varint size for the length of PkScript + PkScript bytes.
+	// value 8 bytes + serialized varint size for the length of PkScript + PkScript bytes.
 	return 8 + VarIntSerializeSize(uint64(len(t.PkScript))) + len(t.PkScript)
 }
 
@@ -702,7 +702,7 @@ func (msg *MsgTx) PkScriptLocs() []int {
 	pkScriptLocs := make([]int, numTxOut)
 	for i, txOut := range msg.TxOut {
 		// The offset of the script in the transaction output is:
-		// Value 8 bytes + serialized varint size for the length of PkScript.
+		// value 8 bytes + serialized varint size for the length of PkScript.
 		n += 8 + VarIntSerializeSize(uint64(len(txOut.PkScript)))
 		pkScriptLocs[i] = n
 		n += len(txOut.PkScript)

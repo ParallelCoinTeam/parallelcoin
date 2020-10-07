@@ -980,7 +980,7 @@ func opcodeElse(op *parsedOpcode, vm *Engine) error {
 	case OpCondFalse:
 		vm.condStack[conditionalIdx] = OpCondTrue
 	case OpCondSkip:
-		// Value doesn't change in skip since it indicates this opcode is nested in a non-executed branch.
+		// value doesn't change in skip since it indicates this opcode is nested in a non-executed branch.
 	}
 	return nil
 }
@@ -1273,7 +1273,7 @@ func opcodeDepth(op *parsedOpcode, vm *Engine) error {
 // opcodeDrop removes the top item from the data stack.
 //
 // Stack transformation: [... x1 x2 x3] -> [... x1 x2]
-func  opcodeDrop(op *parsedOpcode, vm *Engine) error {
+func opcodeDrop(op *parsedOpcode, vm *Engine) error {
 	return vm.dstack.DropN(1)
 }
 

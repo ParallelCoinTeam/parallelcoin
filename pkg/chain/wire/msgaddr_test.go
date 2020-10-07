@@ -230,7 +230,7 @@ func TestAddrWireErrors(t *testing.T) {
 		0xfd, 0x03, 0xe9, // Varint for number of addresses (1001)
 	}
 	tests := []struct {
-		in       *MsgAddr        // Value to encode
+		in       *MsgAddr        // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

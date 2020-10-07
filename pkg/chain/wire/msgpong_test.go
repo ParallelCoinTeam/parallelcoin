@@ -191,7 +191,7 @@ func TestPongWireErrors(t *testing.T) {
 		0xf3, 0xe0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
 	}
 	tests := []struct {
-		in       *MsgPong        // Value to encode
+		in       *MsgPong        // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

@@ -22,7 +22,7 @@ type entry struct {
 // storing filters, blocks, etc.
 type Cache struct {
 	// capacity represents how much this cache can hold. It could be number
-	// of elements or a number of bytes, decided by the cache.Value's Size.
+	// of elements or a number of bytes, decided by the cache.value's Size.
 	capacity uint64
 	// size represents the size of all the elements currenty in the cache.
 	size uint64

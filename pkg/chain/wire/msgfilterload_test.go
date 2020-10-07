@@ -123,7 +123,7 @@ func TestFilterLoadWireErrors(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00, // Tweak
 		0x00) // Flags
 	tests := []struct {
-		in       *MsgFilterLoad  // Value to encode
+		in       *MsgFilterLoad  // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

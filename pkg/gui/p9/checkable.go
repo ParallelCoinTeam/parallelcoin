@@ -15,22 +15,68 @@ import (
 )
 
 type _checkable struct {
+	th                 *Theme
 	label              string
 	color              color.RGBA
 	font               text.Font
 	textSize           unit.Value
 	iconColor          color.RGBA
 	size               unit.Value
-	shaper             text.Shaper
 	checkedStateIcon   *_icon
 	uncheckedStateIcon *_icon
+	shaper             text.Shaper
 }
 
 func (th *Theme) Checkable() *_checkable {
 	return &_checkable{}
 }
 
-func (c *_checkable) fn(gtx l.Context, checked bool) l.Dimensions {
+func (c *_checkable) Label(txt string) *_checkable {
+	c.label = txt
+	return c
+}
+
+func (c *_checkable) Color(color string) *_checkable {
+	c.color = c.th.Colors.Get(color)
+	return c
+}
+
+func (c *_checkable) Font(font string) *_checkable {
+	for i := range c.th.collection {
+		if c.th.collection[i].Font.Typeface == text.Typeface(font) {
+			c.font = c.th.collection[i].Font
+			break
+		}
+	}
+	return c
+}
+
+func (c *_checkable) TextScale(scale float32) *_checkable {
+	c.textSize = c.th.textSize.Scale(scale)
+	return c
+}
+
+func (c *_checkable) IconColor(color string) *_checkable {
+	c.iconColor = c.th.Colors.Get(color)
+	return c
+}
+
+func (c *_checkable) Size(size float32) *_checkable {
+	c.size = unit.Sp(size)
+	return c
+}
+
+func (c *_checkable) CheckedStateIcon(ic *_icon) *_checkable {
+	c.checkedStateIcon = ic
+	return c
+}
+
+func (c *_checkable) UncheckedStateIcon(ic *_icon) *_checkable {
+	c.uncheckedStateIcon = ic
+	return c
+}
+
+func (c *_checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	var icon *_icon
 	if checked {
 		icon = c.checkedStateIcon

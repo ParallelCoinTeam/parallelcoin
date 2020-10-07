@@ -50,7 +50,7 @@ func (r *fakeRandReader) Read(p []byte) (int, error) {
 // func TestElementWire(t *testing.T) {
 // 	type writeElementReflect int32
 // 	tests := []struct {
-// 		in  interface{} // Value to encode
+// 		in  interface{} // value to encode
 // 		buf []byte      // Wire encoding
 // 	}{
 // 		{int32(1), []byte{0x01, 0x00, 0x00, 0x00}},
@@ -167,7 +167,7 @@ func (r *fakeRandReader) Read(p []byte) (int, error) {
 // TestElementWireErrors performs negative tests against wire encode and decode of various element types to confirm error paths work correctly.
 func TestElementWireErrors(t *testing.T) {
 	tests := []struct {
-		in       interface{} // Value to encode
+		in       interface{} // value to encode
 		max      int         // Max size of fixed buffer to induce errors
 		writeErr error       // Expected write error
 		readErr  error       // Expected read error
@@ -233,7 +233,7 @@ func TestElementWireErrors(t *testing.T) {
 func TestVarIntWire(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
-		in   uint64 // Value to encode
+		in   uint64 // value to encode
 		out  uint64 // Expected decoded value
 		buf  []byte // Wire encoding
 		pver uint32 // Protocol version for wire encoding
@@ -298,7 +298,7 @@ func TestVarIntWire(t *testing.T) {
 func TestVarIntWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
-		in       uint64 // Value to encode
+		in       uint64 // value to encode
 		buf      []byte // Wire encoding
 		pver     uint32 // Protocol version for wire encoding
 		max      int    // Max size of fixed buffer to induce errors
@@ -340,7 +340,7 @@ func TestVarIntNonCanonical(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
 		name string // Test name for easier identification
-		in   []byte // Value to decode
+		in   []byte // value to decode
 		pver uint32 // Protocol version for wire encoding
 	}{
 		{
@@ -391,7 +391,7 @@ func TestVarIntNonCanonical(t *testing.T) {
 // TestVarIntWire tests the serialize size for variable length integers.
 func TestVarIntSerializeSize(t *testing.T) {
 	tests := []struct {
-		val  uint64 // Value to get the serialized size for
+		val  uint64 // value to get the serialized size for
 		size int    // Expected serialized size
 	}{
 		// Single byte
@@ -477,7 +477,7 @@ func TestVarStringWireErrors(t *testing.T) {
 	// str256 is a string that takes a 2-byte varint to encode.
 	str256 := strings.Repeat("test", 64)
 	tests := []struct {
-		in       string // Value to encode
+		in       string // value to encode
 		buf      []byte // Wire encoding
 		pver     uint32 // Protocol version for wire encoding
 		max      int    // Max size of fixed buffer to induce errors

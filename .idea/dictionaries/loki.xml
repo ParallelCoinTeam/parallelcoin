@@ -52,6 +52,7 @@
       <w>cfilters</w>
       <w>chaincfg</w>
       <w>chainhash</w>
+      <w>checkable</w>
       <w>checkpt</w>
       <w>ciph</w>
       <w>cmds</w>

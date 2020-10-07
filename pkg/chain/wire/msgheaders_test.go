@@ -275,7 +275,7 @@ func TestHeadersWireErrors(t *testing.T) {
 		0x01, // TxnCount (should be 0 for headers message, but 1 to force error)
 	}
 	tests := []struct {
-		in       *MsgHeaders     // Value to encode
+		in       *MsgHeaders     // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

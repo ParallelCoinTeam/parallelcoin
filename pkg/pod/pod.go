@@ -90,7 +90,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 			Datatype:    field.Type.String(),
 			Model:       field.Tag.Get("json"),
 			Hooks:       field.Tag.Get("hooks"),
-			// Value:       cfgMap[field.Tag.Get("model")],
+			// value:       cfgMap[field.Tag.Get("model")],
 		}
 		if f.Group != "" {
 			rawFields[f.Group] = append(rawFields[f.Group], f)

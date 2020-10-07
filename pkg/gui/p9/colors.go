@@ -13,7 +13,11 @@ func HexARGB(s string) (c color.RGBA) {
 }
 
 func (c Colors) Get(color string) color.RGBA {
-	return HexARGB(c[color])
+	if col, ok := c[color]; ok {
+		return HexARGB(col)
+	}
+	// return red if the color is not found to alert the programmer
+	return HexARGB(c["red"])
 }
 
 func NewColors() (c Colors) {

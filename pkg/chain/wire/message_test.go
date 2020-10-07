@@ -67,7 +67,7 @@ func TestMessage(t *testing.T) {
 	msgCFHeaders := NewMsgCFHeaders()
 	msgCFCheckpt := NewMsgCFCheckpt(GCSFilterRegular, &chainhash.Hash{}, 0)
 	tests := []struct {
-		in     Message    // Value to encode
+		in     Message    // value to encode
 		out    Message    // Expected decoded value
 		pver   uint32     // Protocol version for wire encoding
 		btcnet BitcoinNet // Network to use for wire encoding

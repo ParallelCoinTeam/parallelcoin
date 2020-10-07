@@ -699,9 +699,9 @@ func (b *bucket) DeleteBucket(key []byte) error {
 // Cursor returns a new cursor, allowing for iteration over the bucket's key/value pairs and nested buckets in forward
 // or backward order.
 //
-// You must seek to a position using the First, Last, or Seek functions before calling the Next, Prev, Key, or Value
+// You must seek to a position using the First, Last, or Seek functions before calling the Next, Prev, Key, or value
 // functions. Failure to do so will result in the same return values as an exhausted cursor, which is false for the Prev
-// and Next functions and nil for Key and Value functions. This function is part of the database.
+// and Next functions and nil for Key and value functions. This function is part of the database.
 //
 // Bucket interface implementation.
 func (b *bucket) Cursor() database.Cursor {

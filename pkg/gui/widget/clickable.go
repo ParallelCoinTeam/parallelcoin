@@ -8,7 +8,7 @@ import (
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/op"
 )
 
@@ -34,9 +34,15 @@ func NewClickable() (c *Clickable) {
 		prevClicks: 0,
 		history:    nil,
 		Events: ClickEvents{
-			Click:  func() {},
-			Cancel: func() {},
-			Press:  func() {},
+			Click: func() {
+				Debug("click event")
+			},
+			Cancel: func() {
+				Debug("cancel event")
+			},
+			Press: func() {
+				Debug("press event")
+			},
 		},
 	}
 	return
@@ -113,7 +119,7 @@ func (c *Clickable) History() []Press {
 	return c.history
 }
 
-func (c *Clickable) Fn(gtx layout.Context) layout.Dimensions {
+func (c *Clickable) Fn(gtx l.Context) l.Dimensions {
 	c.update(gtx)
 	stack := op.Push(gtx.Ops)
 	pointer.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
@@ -127,20 +133,26 @@ func (c *Clickable) Fn(gtx layout.Context) layout.Dimensions {
 		n := copy(c.history, c.history[1:])
 		c.history = c.history[:n]
 	}
-	return layout.Dimensions{Size: gtx.Constraints.Min}
+	return l.Dimensions{Size: gtx.Constraints.Min}
 }
 
-// update the button state by processing ClickEvents.
-func (c *Clickable) update(gtx layout.Context) {
+// update the button changeState by processing ClickEvents.
+func (c *Clickable) update(gtx l.Context) {
 	// if this is used by old code these functions have to be empty as they are called, not nil (which will panic)
 	if c.Events.Click == nil {
-		c.Events.Click = func() {}
+		c.Events.Click = func() {
+			Debug("click event")
+		}
 	}
 	if c.Events.Cancel == nil {
-		c.Events.Cancel = func() {}
+		c.Events.Cancel = func() {
+			Debug("cancel event")
+		}
 	}
 	if c.Events.Press == nil {
-		c.Events.Press = func() {}
+		c.Events.Press = func() {
+			Debug("press event")
+		}
 	}
 	// Flush clicks from before the last update.
 	n := copy(c.clicks, c.clicks[c.prevClicks:])

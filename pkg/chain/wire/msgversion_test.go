@@ -247,7 +247,7 @@ func TestVersion(t *testing.T) {
 // 	copy(exceedUAVerEncoded[83:], []byte(newUA))
 // 	copy(exceedUAVerEncoded[83+len(newUA):], baseVersionEncoded[97:100])
 // 	tests := []struct {
-// 		in       *MsgVersion     // Value to encode
+// 		in       *MsgVersion     // value to encode
 // 		buf      []byte          // Wire encoding
 // 		pver     uint32          // Protocol version for wire encoding
 // 		enc      MessageEncoding // Message encoding format

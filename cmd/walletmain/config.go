@@ -311,13 +311,13 @@ fmt.Println(appName, "version", version())
 		// Load additional config from file.
 		var configFileError error
 		parser := flags.NewParser(&cfg, flags.Default)
-		configFilePath := preCfg.ConfigFile.Value
+		configFilePath := preCfg.ConfigFile.value
 		if preCfg.ConfigFile.ExplicitlySet() {
 configFilePath = cleanAndExpandPath(configFilePath)
 			} else {
-appDataDir := preCfg.AppDataDir.Value
+appDataDir := preCfg.AppDataDir.value
 					if !preCfg.AppDataDir.ExplicitlySet() && preCfg.DataDir.ExplicitlySet() {
-appDataDir = cleanAndExpandPath(preCfg.DataDir.Value)
+appDataDir = cleanAndExpandPath(preCfg.DataDir.value)
 						}
 						if appDataDir != DefaultAppDataDir {
 configFilePath = filepath.Join(appDataDir, DefaultConfigFilename)
@@ -346,31 +346,31 @@ parser.WriteHelp(os.Stderr)
 fmt.Fprintln(os.Stderr, "datadir option has been replaced by "+
 					"appdata -- please update your config")
 				if !cfg.AppDataDir.ExplicitlySet() {
-cfg.AppDataDir.Value = cfg.DataDir.Value
+cfg.AppDataDir.value = cfg.DataDir.value
 					}
 				}
 				// If an alternate data directory was specified, and paths with defaults
 				// relative to the data dir are unchanged, modify each path to be
 				// relative to the new data dir.
 				if cfg.AppDataDir.ExplicitlySet() {
-cfg.AppDataDir.Value = cleanAndExpandPath(cfg.AppDataDir.Value)
+cfg.AppDataDir.value = cleanAndExpandPath(cfg.AppDataDir.value)
 						if !cfg.RPCKey.ExplicitlySet() {
-cfg.RPCKey.Value = filepath.Join(cfg.AppDataDir.Value, "rpc.key")
+cfg.RPCKey.value = filepath.Join(cfg.AppDataDir.value, "rpc.key")
 							}
 							if !cfg.RPCCert.ExplicitlySet() {
-cfg.RPCCert.Value = filepath.Join(cfg.AppDataDir.Value, "rpc.cert")
+cfg.RPCCert.value = filepath.Join(cfg.AppDataDir.value, "rpc.cert")
 								}
 							}
-							if _, err := os.Stat(cfg.DataDir.Value); os.IsNotExist(err) {
+							if _, err := os.Stat(cfg.DataDir.value); os.IsNotExist(err) {
 // Create the destination directory if it does not exists
-									err = os.MkdirAll(cfg.DataDir.Value, 0700)
+									err = os.MkdirAll(cfg.DataDir.value, 0700)
 									if err != nil {
 fmt.Println("ERROR", err)
 											return nil, nil, err
 										}
 									}
 									var generatedRPCPass, generatedRPCUser string
-		if _, err := os.Stat(cfg.ConfigFile.Value); os.IsNotExist(err) {
+		if _, err := os.Stat(cfg.ConfigFile.value); os.IsNotExist(err) {
 // If we can find a pod.conf in the standard location, copy
 				// copy the rpcuser and rpcpassword and TLS setting
 				c := cleanAndExpandPath("~/.pod/pod.conf")
@@ -380,13 +380,13 @@ fmt.Println("ERROR", err)
 			// fmt.Println(os.IsNotExist(err))
 			if _, err := os.Stat(c); err == nil {
 fmt.Println("Creating config from pod config")
-					createDefaultConfigFile(cfg.ConfigFile.Value, c, cleanAndExpandPath("~/.pod"),
-						cfg.AppDataDir.Value)
+					createDefaultConfigFile(cfg.ConfigFile.value, c, cleanAndExpandPath("~/.pod"),
+						cfg.AppDataDir.value)
 				} else {
 var bb bytes.Buffer
 						bb.Write(sampleModConf)
-				fmt.Println("Writing config file:", cfg.ConfigFile.Value)
-				dest, err := os.OpenFile(cfg.ConfigFile.Value,
+				fmt.Println("Writing config file:", cfg.ConfigFile.value)
+				dest, err := os.OpenFile(cfg.ConfigFile.value,
 						os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 					if err != nil {
 fmt.Println("ERROR", err)
@@ -547,7 +547,7 @@ fmt.Fprintln(os.Stderr, err)
 // err = fmt.Errorf("The wallet does not exist.  Run with the " +
 				// "--create option to initialize and create it...")
 				// Ensure the data directory for the network exists.
-				fmt.Println("Existing wallet not found in", cfg.ConfigFile.Value)
+				fmt.Println("Existing wallet not found in", cfg.ConfigFile.value)
 				if err := checkCreateDir(netDir); err != nil {
 fmt.Fprintln(os.Stderr, err)
 						return nil, nil, err
@@ -604,10 +604,10 @@ fmt.Fprintf(os.Stderr,
 					// } else {
 // If CAFile is unset, choose either the copy or local pod cert.
 						if !cfg.CAFile.ExplicitlySet() {
-cfg.CAFile.Value = filepath.Join(cfg.AppDataDir.Value, DefaultCAFilename)
+cfg.CAFile.value = filepath.Join(cfg.AppDataDir.value, DefaultCAFilename)
 				// If the CA copy does not exist, check if we're connecting to
 				// a local pod and switch to its RPC cert if it exists.
-				certExists, err := cfgutil.FileExists(cfg.CAFile.Value)
+				certExists, err := cfgutil.FileExists(cfg.CAFile.value)
 				if err != nil {
 fmt.Fprintln(os.Stderr, err)
 						return nil, nil, err
@@ -621,7 +621,7 @@ fmt.Fprintln(os.Stderr, err)
 										return nil, nil, err
 					}
 					if podCertExists {
-cfg.CAFile.Value = DefaultCAFile
+cfg.CAFile.value = DefaultCAFile
 						}
 						// }
 					}
@@ -704,9 +704,9 @@ str := "%s: RPC listen interface '%s' is " +
 			}
 		}
 		// Expand environment variable and leading ~ for filepaths.
-		cfg.CAFile.Value = cleanAndExpandPath(cfg.CAFile.Value)
-		cfg.RPCCert.Value = cleanAndExpandPath(cfg.RPCCert.Value)
-		cfg.RPCKey.Value = cleanAndExpandPath(cfg.RPCKey.Value)
+		cfg.CAFile.value = cleanAndExpandPath(cfg.CAFile.value)
+		cfg.RPCCert.value = cleanAndExpandPath(cfg.RPCCert.value)
+		cfg.RPCKey.value = cleanAndExpandPath(cfg.RPCKey.value)
 		// If the pod username or password are unset, use the same auth as for
 		// the client.  The two settings were previously shared for pod and
 		// client auth, so this avoids breaking backwards compatibility while

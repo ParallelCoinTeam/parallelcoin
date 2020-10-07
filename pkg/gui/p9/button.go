@@ -19,17 +19,78 @@ import (
 )
 
 type _button struct {
-	th   *Theme
-	text string
-	// Color is the text color.
-	color        color.RGBA
-	font         text.Font
-	textSize     unit.Value
+	th           *Theme
 	background   color.RGBA
+	color        color.RGBA
 	cornerRadius unit.Value
+	font         text.Font
 	inset        *l.Inset
+	text         string
+	textSize     unit.Value
 	button       *w.Clickable
 	shaper       text.Shaper
+}
+
+func (b *_button) Background(background string) *_button {
+	b.background = b.th.Colors.Get(background)
+	return b
+}
+
+func (b *_button) Color(color string) *_button {
+	b.color = b.th.Colors.Get(color)
+	return b
+}
+
+func (b *_button) CornerRadius(cornerRadius float32) *_button {
+	b.cornerRadius = unit.Sp(cornerRadius)
+	return b
+}
+
+func (b *_button) Fn(gtx l.Context) l.Dimensions {
+	bl := &_buttonLayout{
+		background:   b.background,
+		cornerRadius: b.cornerRadius,
+		button:       b.button,
+	}
+	fn := func(gtx l.Context) l.Dimensions {
+		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
+			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
+			return widget.Label{Alignment: text.Middle}.
+				Layout(gtx, b.shaper, b.font, b.textSize, b.text)
+		})
+	}
+	bl.Widget(fn)
+	return bl.Fn(gtx)
+}
+
+func (b *_button) Font(font string) *_button {
+	for i := range b.th.collection {
+		if b.th.collection[i].Font.Typeface == text.Typeface(font) {
+			b.font = b.th.collection[i].Font
+			return b
+		}
+	}
+	return b
+}
+
+func (b *_button) Inset(pad float32) *_button {
+	b.inset = &l.Inset{
+		Top:    unit.Sp(pad),
+		Right:  unit.Sp(pad),
+		Bottom: unit.Sp(pad),
+		Left:   unit.Sp(pad),
+	}
+	return b
+}
+
+func (b *_button) Text(text string) *_button {
+	b.text = text
+	return b
+}
+
+func (b *_button) TextScale(scale float32) *_button {
+	b.textSize = b.th.textSize.Scale(scale)
+	return b
 }
 
 func (th *Theme) Button(btn *w.Clickable) *_button {
@@ -49,70 +110,6 @@ func (th *Theme) Button(btn *w.Clickable) *_button {
 		button: btn,
 		shaper: th.shaper,
 	}
-}
-
-func (b *_button) Text(text string) *_button {
-	b.text = text
-	return b
-}
-
-func (b *_button) Inset(pad float32) *_button {
-	b.inset = &l.Inset{
-		Top:    unit.Sp(pad),
-		Right:  unit.Sp(pad),
-		Bottom: unit.Sp(pad),
-		Left:   unit.Sp(pad),
-	}
-	return b
-}
-
-func (b *_button) CornerRadius(cornerRadius float32) *_button {
-	b.cornerRadius = unit.Sp(cornerRadius)
-	return b
-}
-
-func (b *_button) Background(background string) *_button {
-	b.background = b.th.Colors.Get(background)
-	return b
-}
-
-func (b *_button) TextScale(scale float32) *_button {
-	b.textSize = b.th.textSize.Scale(scale)
-	return b
-}
-
-func (b *_button) Font(font string) *_button {
-	var f text.Font
-	for i := range b.th.collection {
-		// Debug(th.Collection[i].Font)
-		if b.th.collection[i].Font.Typeface == text.Typeface(font) {
-			f = b.th.collection[i].Font
-		}
-	}
-	b.font = f
-	return b
-}
-
-func (b *_button) Color(color string) *_button {
-	b.color = b.th.Colors.Get(color)
-	return b
-}
-
-func (b *_button) Fn(gtx l.Context) l.Dimensions {
-	bl := &_buttonLayout{
-		background:   b.background,
-		cornerRadius: b.cornerRadius,
-		button:       b.button,
-	}
-	fn := func(gtx l.Context) l.Dimensions {
-		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
-			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-			return widget.Label{Alignment: text.Middle}.
-				Layout(gtx, b.shaper, b.font, b.textSize, b.text)
-		})
-	}
-	bl.Widget(fn)
-	return bl.Fn(gtx)
 }
 
 func drawInk(c l.Context, p widget.Press) {

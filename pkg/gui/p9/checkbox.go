@@ -1,38 +1,39 @@
 package p9
 
 import (
-	"image/color"
-
 	l "gioui.org/layout"
-	"gioui.org/unit"
-	"gioui.org/widget"
+
+	w "github.com/p9c/pod/pkg/gui/widget"
 )
 
 type _checkbox struct {
-	_checkable
-	checkBox *widget.Bool
+	*_checkable
+	checkBox *w.Bool
 }
 
-func (th *Theme) CheckBox(checkBox *widget.Bool, color color.RGBA, label string) *_checkbox {
+func (th *Theme) CheckBox(checkBox *w.Bool, color, textColor string, label string) *_checkbox {
+	chk := &_checkable{
+		th:                 th,
+		label:              label,
+		color:              th.Colors.Get(textColor),
+		iconColor:          th.Colors.Get(color),
+		textSize:           th.textSize.Scale(14.0 / 16.0),
+		size:               th.textSize.Scale(14.0 / 16.0 * 2),
+		shaper:             th.shaper,
+		checkedStateIcon:   th.icons["Checked"],
+		uncheckedStateIcon: th.icons["Unchecked"],
+	}
+	chk = chk.Font("bariol regular").Color(textColor)
 	return &_checkbox{
-		checkBox: checkBox,
-		_checkable: _checkable{
-			label:              label,
-			color:              color,
-			iconColor:          th.Colors.Get("Primary"),
-			textSize:           th.textSize.Scale(14.0 / 16.0),
-			size:               unit.Dp(26),
-			shaper:             th.shaper,
-			checkedStateIcon:   th.icons["Checked"],
-			uncheckedStateIcon: th.icons["Unchecked"],
-		},
+		checkBox:   checkBox,
+		_checkable: chk,
 	}
 }
 
-// Layout updates the checkBox and displays it.
-func (c *_checkbox) Layout(gtx l.Context) l.Dimensions {
-	dims := c.fn(gtx, c.checkBox.Value)
+// Fn updates the checkBox and displays it.
+func (c *_checkbox) Fn(gtx l.Context) l.Dimensions {
+	dims := c._checkable.Fn(gtx, *c.checkBox.GetValue())
 	gtx.Constraints.Min = dims.Size
-	c.checkBox.Layout(gtx)
+	c.checkBox.Fn(gtx)
 	return dims
 }

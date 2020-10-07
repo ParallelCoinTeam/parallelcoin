@@ -15,7 +15,7 @@ package f
 // }
 // type Theme struct {
 // 	Shaper   text.Shaper
-// 	TextSize unit.Value
+// 	TextSize unit.value
 // 	Current  Active
 // 	Colors   map[string]map[string]color.RGBA
 // 	Icons    map[string]map[string]Icon

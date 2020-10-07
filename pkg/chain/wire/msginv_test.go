@@ -259,7 +259,7 @@ func TestInvWireErrors(t *testing.T) {
 		0xfd, 0x51, 0xc3, // Varint for number of inv vectors (50001)
 	}
 	tests := []struct {
-		in       *MsgInv         // Value to encode
+		in       *MsgInv         // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

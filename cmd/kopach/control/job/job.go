@@ -107,7 +107,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		txx := util.NewTx(txc.Copy())
 		// Traces(txs)
 		(*cbs)[i] = txx
-		// Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
+		// Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, txr...), false)
 		// Traces(mTree[len(mTree)-1].CloneBytes())

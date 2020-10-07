@@ -294,7 +294,7 @@ func TestRejectWireErrors(t *testing.T) {
 		0x68, 0xd6, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00, // mainNetGenesisHash
 	}
 	tests := []struct {
-		in       *MsgReject      // Value to encode
+		in       *MsgReject      // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

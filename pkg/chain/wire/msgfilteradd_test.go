@@ -99,7 +99,7 @@ func TestFilterAddWireErrors(t *testing.T) {
 	baseFilterAdd := NewMsgFilterAdd(baseData)
 	baseFilterAddEncoded := append([]byte{0x04}, baseData...)
 	tests := []struct {
-		in       *MsgFilterAdd   // Value to encode
+		in       *MsgFilterAdd   // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

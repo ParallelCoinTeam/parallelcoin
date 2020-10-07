@@ -307,7 +307,7 @@ func TestGetHeadersWireErrors(t *testing.T) {
 		0xfd, 0xf5, 0x01, // Varint for number of block loc hashes (501)
 	}
 	tests := []struct {
-		in       *MsgGetHeaders  // Value to encode
+		in       *MsgGetHeaders  // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

@@ -121,7 +121,7 @@ func TestFilterClearWireErrors(t *testing.T) {
 	baseFilterClear := NewMsgFilterClear()
 	baseFilterClearEncoded := []byte{}
 	tests := []struct {
-		in       *MsgFilterClear // Value to encode
+		in       *MsgFilterClear // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

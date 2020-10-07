@@ -22,7 +22,7 @@ func convertErr(err error) error {
 		return walletdb.ErrTxNotWritable
 	case bolt.ErrTxClosed:
 		return walletdb.ErrTxClosed
-	// Value/bucket errors.
+	// value/bucket errors.
 	case bolt.ErrBucketNotFound:
 		return walletdb.ErrBucketNotFound
 	case bolt.ErrBucketExists:

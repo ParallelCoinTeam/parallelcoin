@@ -111,7 +111,7 @@ func (th *Theme) H6(txt string) (l *_label) {
 }
 
 func (th *Theme) Body1(txt string) (l *_label) {
-	l = th.Label().Font("bariol regular").Text(txt)
+	l = th.Label().TextScale(1).Font("bariol regular").Text(txt)
 	return
 }
 

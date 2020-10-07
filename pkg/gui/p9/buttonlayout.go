@@ -14,6 +14,7 @@ import (
 )
 
 type _buttonLayout struct {
+	th           *Theme
 	background   color.RGBA
 	cornerRadius unit.Value
 	button       *w.Clickable
@@ -22,10 +23,21 @@ type _buttonLayout struct {
 
 func (th *Theme) ButtonLayout(button *w.Clickable) *_buttonLayout {
 	return &_buttonLayout{
+		th:           th,
 		button:       button,
 		background:   th.Colors.Get("ButtonBg"),
 		cornerRadius: unit.Sp(4),
 	}
+}
+
+func (b *_buttonLayout) Background(color string) *_buttonLayout {
+	b.background = b.th.Colors.Get(color)
+	return b
+}
+
+func (b *_buttonLayout) CornerRadius(radius float32) *_buttonLayout {
+	b.cornerRadius = unit.Sp(radius)
+	return b
 }
 
 func (b *_buttonLayout) Widget(w l.Widget) *_buttonLayout {
