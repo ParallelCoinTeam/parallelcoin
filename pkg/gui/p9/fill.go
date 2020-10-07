@@ -26,7 +26,7 @@ func (f *_filler) Widget(w l.Widget) *_filler {
 }
 
 func (f *_filler) Fn(gtx l.Context) l.Dimensions {
-	return f.th.Stack().Stacked(f.w).Expanded(
+	return f.th.Stack().Stacked(f.w).Stacked(
 		func(c l.Context) l.Dimensions {
 			dims := f.w(gtx)
 			cs := gtx.Constraints

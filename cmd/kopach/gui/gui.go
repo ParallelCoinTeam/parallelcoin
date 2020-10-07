@@ -19,11 +19,7 @@ var (
 	button1     = w.NewClickable()
 	button2     = w.NewClickable()
 	bool1       bool
-	boolbutton1 = w.NewBool(&bool1, func(b, cs bool) {
-		if cs {
-			Debug("change state to", b)
-		}
-	})
+	boolbutton1 = w.NewBool(&bool1)
 )
 
 func Run(quit chan struct{}) {
@@ -64,6 +60,7 @@ func buttons(th *p9.Theme) layout.Widget {
 				button0.SetClick(func() {
 					Info("clicked first button")
 				})).
+				CornerRadius(2).
 				Background("Secondary").
 				Color("Dark").
 				Font("bariol bold").
@@ -73,31 +70,34 @@ func buttons(th *p9.Theme) layout.Widget {
 				Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(4).Widget(
-			th.Button(
-				button2.SetClick(func() {
-					Info("clicked third button")
-				})).
-				Text("default style button").
+		th.Flex().Rigid(
+			th.Inset(4).Widget(
+				th.Button(
+					button2.SetClick(func() {
+						Info("clicked third button")
+					})).
+					Text("default style button").
+					Fn,
+			).Fn,
+		).Rigid(
+			th.Inset(4).Widget(
+				th.Button(
+					button1.SetClick(func() {
+						Info("clicked second button")
+					})).
+					TextScale(0.5).
+					Text("button").
+					Inset(4).
+					Fn,
+			).Fn,
+		).Rigid(
+			th.CheckBox(boolbutton1.SetHook(func(b bool) {
+				Debug("change state to", b)
+			})).
+				IconColor("Primary").
+				TextColor("DocText").
+				Label("checkbox").
 				Fn,
-		).Fn,
-	).Rigid(
-		th.Inset(4).Widget(
-			th.Button(
-				button1.SetClick(func() {
-					Info("clicked second button")
-				})).
-				TextScale(0.5).
-				Text("button").
-				Inset(4).
-				Fn,
-		).Fn,
-	).Rigid(
-		th.CheckBox(
-			boolbutton1,
-			"Primary",
-			"DocText",
-			"checkbox",
 		).Fn,
 	).Fn
 }

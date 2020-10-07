@@ -4,11 +4,13 @@ import (
 	"gioui.org/layout"
 )
 
+type changeStateHook func(b bool)
+
 type Bool struct {
 	value       *bool
 	clk         *Clickable
 	changed     bool
-	changeState func(b, cs bool)
+	changeState changeStateHook
 }
 
 func (b *Bool) GetValue() *bool {
@@ -19,13 +21,18 @@ func (b *Bool) Value(value *bool) {
 	b.value = value
 }
 
-func NewBool(value *bool, changeState func(b, cs bool)) *Bool {
+func NewBool(value *bool) *Bool {
 	return &Bool{
 		value:       value,
 		clk:         NewClickable(),
 		changed:     false,
-		changeState: changeState,
+		changeState: func(b bool){},
 	}
+}
+
+func (b *Bool) SetHook(fn changeStateHook) *Bool {
+	b.changeState = fn
+	return b
 }
 
 // Changed reports whether value has changed since the last call to Changed.
@@ -43,14 +50,10 @@ func (b *Bool) History() []Press {
 // Fn renders the events of the boolean widget
 func (b *Bool) Fn(gtx layout.Context) layout.Dimensions {
 	dims := b.clk.Fn(gtx)
-	old := *b.value
 	for b.clk.Clicked() {
 		*b.value = !*b.value
 		b.changed = true
-	}
-	// send the signal on the channel of the eventual changeState if it changed
-	if b.changed {
-		b.changeState(*b.value, old != *b.value)
+		b.changeState(*b.value)
 	}
 	return dims
 }

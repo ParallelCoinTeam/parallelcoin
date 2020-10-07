@@ -100,7 +100,7 @@ func (th *Theme) Button(btn *w.Clickable) *_button {
 		// default sets
 		font:  th.collection[0].Font,
 		color: th.Colors.Get("ButtonText"),
-		// CornerRadius: unit.Dp(4),
+		cornerRadius: unit.Sp(2),
 		background: th.Colors.Get("Primary"),
 		textSize:   th.textSize,
 		inset: &l.Inset{
