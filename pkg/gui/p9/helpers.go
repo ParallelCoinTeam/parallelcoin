@@ -12,7 +12,7 @@ import (
 type (
 	// Defining these as types gives flexibility later to create methods that modify them
 	Fonts      map[string]text.Typeface
-	Icons      map[string]*_icon
+	Icons      map[string]*Ico
 	Collection []text.FontFace
 )
 func Fill(gtx layout.Context, col color.RGBA) layout.Dimensions {

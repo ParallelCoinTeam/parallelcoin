@@ -12,7 +12,7 @@ type Theme struct {
 	textSize      unit.Value
 	Colors        Colors
 	fonts         map[string]text.Typeface
-	icons         map[string]*_icon
+	icons         map[string]*Ico
 	scrollBarSize int
 }
 
@@ -34,6 +34,6 @@ func NewTheme(fontCollection []text.FontFace, quit chan struct{}) (th *Theme) {
 		fonts:         NewFonts(),
 		scrollBarSize: 0,
 	}
-	th.icons = th.NewIcons()
+	// th.icons = th.NewIcons()
 	return
 }

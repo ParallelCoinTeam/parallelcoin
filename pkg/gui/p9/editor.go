@@ -14,6 +14,7 @@ import (
 )
 
 type _editor struct {
+	th       *Theme
 	font     text.Font
 	textSize unit.Value
 	// Color is the text color.
@@ -23,19 +24,45 @@ type _editor struct {
 	// HintColor is the color of hint text.
 	hintColor color.RGBA
 	editor    *widget.Editor
-
-	shaper text.Shaper
+	shaper    text.Shaper
 }
 
-func (th *Theme) Editor(editor *widget.Editor, hint string) *_editor {
+func (th *Theme) Editor(editor *widget.Editor) *_editor {
 	return &_editor{
+		th:        th,
 		editor:    editor,
 		textSize:  th.textSize,
 		color:     th.Colors.Get("Text"),
 		shaper:    th.shaper,
-		hint:      hint,
+		hint:      "hint",
 		hintColor: th.Colors.Get("Hint"),
 	}
+}
+
+func (e *_editor) Font(font string) *_editor {
+	for i := range e.th.collection {
+		if e.th.collection[i].Font.Typeface == text.Typeface(font) {
+			e.font = e.th.collection[i].Font
+			break
+		}
+	}
+	return e
+}
+func (e *_editor) TextScale(scale float32) *_editor {
+	e.textSize = e.th.textSize.Scale(scale)
+	return e
+}
+func (e *_editor) Color(color string) *_editor {
+	e.color = e.th.Colors.Get(color)
+	return e
+}
+func (e *_editor) Hint(hint string) *_editor {
+	e.hint = hint
+	return e
+}
+func (e *_editor) HintColor(color string) *_editor {
+	e.hintColor = e.th.Colors.Get(color)
+	return e
 }
 
 func (e *_editor) Fn(c l.Context) l.Dimensions {

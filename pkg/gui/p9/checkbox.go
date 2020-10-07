@@ -2,6 +2,7 @@ package p9
 
 import (
 	l "gioui.org/layout"
+	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	w "github.com/p9c/pod/pkg/gui/widget"
 )
@@ -27,10 +28,10 @@ func (th *Theme) CheckBox(checkBox *w.Bool) *_checkbox {
 		textSize:           th.textSize.Scale(14.0 / 16.0),
 		size:               th.textSize.Scale(14.0 / 16.0 * 2),
 		shaper:             th.shaper,
-		checkedStateIcon:   th.icons["Checked"],
-		uncheckedStateIcon: th.icons["Unchecked"],
+		checkedStateIcon:   th.Icon().Src(icons.ToggleCheckBox),
+		uncheckedStateIcon: th.Icon().Src(icons.ToggleCheckBoxOutlineBlank),
 	}
-	chk = chk.Font("bariol regular").Color(textColor)
+	chk.Font("bariol regular").Color(textColor)
 	return &_checkbox{
 		color:      color,
 		textColor:  textColor,
@@ -50,8 +51,18 @@ func (c *_checkbox) TextColor(color string) *_checkbox {
 	return c
 }
 
+func (c *_checkbox) TextScale(scale float32) *_checkbox {
+	c.textSize = c.th.textSize.Scale(scale)
+	return c
+}
+
 func (c *_checkbox) Label(label string) *_checkbox {
 	c._checkable.label = label
+	return c
+}
+
+func (c *_checkbox) Scale(scale float32) *_checkbox {
+	c.size = c.th.textSize.Scale(scale)
 	return c
 }
 

@@ -2,7 +2,6 @@ package p9
 
 import (
 	l "gioui.org/layout"
-	"gioui.org/unit"
 )
 
 type _inset struct {
@@ -13,7 +12,7 @@ type _inset struct {
 // Inset creates a padded empty space around a widget
 func (th *Theme) Inset(pad float32) (out *_inset) {
 	out = &_inset{
-		in: l.UniformInset(unit.Sp(pad)),
+		in: l.UniformInset(th.textSize.Scale(pad)),
 	}
 	return
 }

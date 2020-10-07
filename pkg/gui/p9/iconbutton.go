@@ -16,30 +16,56 @@ import (
 )
 
 type _iconButton struct {
+	th         *Theme
 	background color.RGBA
 	// Color is the icon color.
 	color color.RGBA
-	icon  *widget.Icon
+	icon  *Ico
 	// Size is the icon size.
 	size   unit.Value
-	inset  l.Inset
+	inset  *_inset
 	button *w.Clickable
 }
 
-func (th *Theme) IconButton(button *w.Clickable, icon *widget.Icon) *_iconButton {
+func (th *Theme) IconButton(button *w.Clickable) *_iconButton {
 	return &_iconButton{
+		th:         th,
 		background: th.Colors.Get("Primary"),
-		color:      th.Colors.Get("InvText"),
-		icon:       icon,
-		size:       unit.Sp(24),
-		inset:      l.UniformInset(unit.Sp(12)),
+		color:      th.Colors.Get("DocBg"),
+		size:       th.textSize,
+		inset:      th.Inset(0.5),
 		button:     button,
 	}
 }
 
+func (b *_iconButton) Background(color string) *_iconButton {
+	b.background = b.th.Colors.Get(color)
+	return b
+}
+
+func (b *_iconButton) Color(color string) *_iconButton {
+	b.color = b.th.Colors.Get(color)
+	return b
+}
+
+func (b *_iconButton) Icon(ico *Ico) *_iconButton {
+	b.icon = ico
+	return b
+}
+
+func (b *_iconButton) Scale(scale float32) *_iconButton {
+	b.size = b.th.textSize.Scale(scale)
+	return b
+}
+
+func (b *_iconButton) Inset(inset *_inset) *_iconButton {
+	b.inset = inset
+	return b
+}
+
 func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
-	return l.Stack{Alignment: l.Center}.Layout(gtx,
-		l.Expanded(func(gtx l.Context) l.Dimensions {
+	return b.th.Inset(0.5).Widget(b.th.Stack().Expanded(
+		func(gtx l.Context) l.Dimensions {
 			sizex, sizey := gtx.Constraints.Min.X, gtx.Constraints.Min.Y
 			sizexf, sizeyf := float32(sizex), float32(sizey)
 			rr := (sizexf + sizeyf) * .25
@@ -56,22 +82,12 @@ func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
 				drawInk(gtx, widget.Press(c))
 			}
 			return dims
-		}),
-		l.Stacked(func(gtx l.Context) l.Dimensions {
-			return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
-				size := gtx.Px(b.size)
-				if b.icon != nil {
-					b.icon.Color = b.color
-					b.icon.Layout(gtx, unit.Px(float32(size)))
-				}
-				return l.Dimensions{
-					Size: image.Point{X: size, Y: size},
-				}
-			})
-		}),
-		l.Expanded(func(gtx l.Context) l.Dimensions {
-			pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
-			return b.button.Fn(gtx)
-		}),
-	)
+		},
+	).Stacked(
+		b.inset.Widget(b.icon.Fn).Fn,
+	).Expanded(func(gtx l.Context) l.Dimensions {
+		pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
+		return b.button.Fn(gtx)
+	}).Fn,
+	).Fn(gtx)
 }
