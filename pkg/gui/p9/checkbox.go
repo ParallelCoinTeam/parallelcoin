@@ -55,7 +55,7 @@ func (c *_checkbox) Label(label string) *_checkbox {
 	return c
 }
 
-func (c *_checkbox) Action(fn func(b, cs bool)) *_checkbox {
+func (c *_checkbox) Action(fn func(b bool)) *_checkbox {
 	c.checkBox.SetHook(fn)
 	return c
 }

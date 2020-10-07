@@ -130,13 +130,13 @@ func blocks(th *p9.Theme) layout.Widget {
 			).Fn,
 		).Fn,
 	).Rigid(
-		// th.Fill("PanelBg").Widget(
-		th.Inset(4).Widget(
-			th.H5("this is a H5").
-				Color("PanelText").
-				Fn,
+		th.Fill("PanelBg").Widget(
+			th.Inset(4).Widget(
+				th.H5("this is a H5").
+					Color("PanelText").
+					Fn,
+			).Fn,
 		).Fn,
-		// ).Fn,
 	).Rigid(
 		th.Inset(4).Widget(
 			th.H6("this is a H6").
