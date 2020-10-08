@@ -11,19 +11,11 @@ type Theme struct {
 	collection    []text.FontFace
 	textSize      unit.Value
 	Colors        Colors
-	fonts         map[string]text.Typeface
 	icons         map[string]*Ico
 	scrollBarSize int
 }
 
-func NewFonts() (f map[string]text.Typeface) {
-	f = make(map[string]text.Typeface)
-	f["Primary"] = "bariol"
-	f["Secondary"] = "plan9"
-	f["Mono"] = "go"
-	return f
-}
-
+// NewTheme creates a new theme to use for rendering a user interface
 func NewTheme(fontCollection []text.FontFace, quit chan struct{}) (th *Theme) {
 	th = &Theme{
 		quit:          quit,
@@ -31,9 +23,7 @@ func NewTheme(fontCollection []text.FontFace, quit chan struct{}) (th *Theme) {
 		collection:    fontCollection,
 		textSize:      unit.Sp(16),
 		Colors:        NewColors(),
-		fonts:         NewFonts(),
 		scrollBarSize: 0,
 	}
-	// th.icons = th.NewIcons()
 	return
 }

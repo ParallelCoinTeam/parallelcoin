@@ -29,6 +29,7 @@ type _checkable struct {
 	checked            bool
 }
 
+// Checkable creates a checkbox type widget
 func (th *Theme) Checkable() *_checkable {
 	font := "bariol regular"
 	var f text.Font
@@ -52,16 +53,19 @@ func (th *Theme) Checkable() *_checkable {
 	}
 }
 
+// Label sets the label on the checkbox
 func (c *_checkable) Label(txt string) *_checkable {
 	c.label = txt
 	return c
 }
 
+// Color sets the color of the checkbox label
 func (c *_checkable) Color(color string) *_checkable {
 	c.color = c.th.Colors.Get(color)
 	return c
 }
 
+// Font sets the font used on the label
 func (c *_checkable) Font(font string) *_checkable {
 	for i := range c.th.collection {
 		if c.th.collection[i].Font.Typeface == text.Typeface(font) {
@@ -72,31 +76,37 @@ func (c *_checkable) Font(font string) *_checkable {
 	return c
 }
 
+// TextScale sets the size of the font relative to the base text size
 func (c *_checkable) TextScale(scale float32) *_checkable {
 	c.textSize = c.th.textSize.Scale(scale)
 	return c
 }
 
+// IconColor sets the color of the icon
 func (c *_checkable) IconColor(color string) *_checkable {
 	c.iconColor = c.th.Colors.Get(color)
 	return c
 }
 
+// Scale sets the size of the checkbox icon relative to the base font size
 func (c *_checkable) Scale(size float32) *_checkable {
 	c.size = c.th.textSize.Scale(size)
 	return c
 }
 
+// CheckedStateIcon loads the icon for the checked state
 func (c *_checkable) CheckedStateIcon(ic *Ico) *_checkable {
 	c.checkedStateIcon = ic
 	return c
 }
 
+// UncheckedStateIcon loads the icon for the unchecked state
 func (c *_checkable) UncheckedStateIcon(ic *Ico) *_checkable {
 	c.uncheckedStateIcon = ic
 	return c
 }
 
+// Fn renders the checkbox widget
 func (c *_checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	var icon *Ico
 	if checked {
@@ -104,33 +114,28 @@ func (c *_checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	} else {
 		icon = c.uncheckedStateIcon.Scale(2)
 	}
-	min := gtx.Constraints.Min
-	dims := l.Flex{Alignment: l.Middle}.Layout(gtx,
-		l.Rigid(func(gtx l.Context) l.Dimensions {
-			return l.Center.Layout(gtx, func(gtx l.Context) l.Dimensions {
-				return l.UniformInset(c.th.textSize.Scale(0.25)).Layout(gtx, func(gtx l.Context) l.Dimensions {
-					size := gtx.Px(c.size)
-					icon.color = c.iconColor
-					if gtx.Queue == nil {
-						icon.color = f32color.MulAlpha(icon.color, 150)
-					}
-					icon.Fn(gtx)
-					return l.Dimensions{
-						Size: image.Point{X: size, Y: size},
-					}
-				})
-			})
-		}),
-		l.Rigid(func(gtx l.Context) l.Dimensions {
-			gtx.Constraints.Min = min
-			return l.W.Layout(gtx, func(gtx l.Context) l.Dimensions {
-				return l.UniformInset(c.th.textSize.Scale(0.25)).Layout(gtx, func(gtx l.Context) l.Dimensions {
-					paint.ColorOp{Color: c.color}.Add(gtx.Ops)
-					return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
-				})
-			})
-		}),
-	)
+	dims := c.th.Flex().Rigid(
+		func(gtx l.Context) l.Dimensions {
+			size := gtx.Px(c.size)
+			icon.color = c.iconColor
+			if gtx.Queue == nil {
+				icon.color = f32color.MulAlpha(icon.color, 150)
+			}
+			icon.Fn(gtx)
+			return l.Dimensions{
+				Size: image.Point{X: size, Y: size},
+			}
+		},
+	).Rigid(
+		c.th.Inset(0.25).Widget(func(ctx l.Context) l.Dimensions { return l.Dimensions{} }).Fn,
+	).Rigid(
+		c.th.Inset(0.5).Widget(
+			func(gtx l.Context) l.Dimensions {
+				paint.ColorOp{Color: c.color}.Add(gtx.Ops)
+				return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
+			},
+		).Fn,
+	).Fn(gtx)
 	pointer.Rect(image.Rectangle{Max: dims.Size}).Add(gtx.Ops)
 	return dims
 }

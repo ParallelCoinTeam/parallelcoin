@@ -27,6 +27,7 @@ type _iconButton struct {
 	button *w.Clickable
 }
 
+// IconButton creates an icon with a circular background and an icon placed in the centre
 func (th *Theme) IconButton(button *w.Clickable) *_iconButton {
 	return &_iconButton{
 		th:         th,
@@ -38,33 +39,39 @@ func (th *Theme) IconButton(button *w.Clickable) *_iconButton {
 	}
 }
 
+// Background sets the color of the circular background
 func (b *_iconButton) Background(color string) *_iconButton {
 	b.background = b.th.Colors.Get(color)
 	return b
 }
 
+// Color sets the color of the icon
 func (b *_iconButton) Color(color string) *_iconButton {
 	b.color = b.th.Colors.Get(color)
 	return b
 }
 
+// Icon sets the icon to display
 func (b *_iconButton) Icon(ico *Ico) *_iconButton {
 	b.icon = ico
 	return b
 }
 
+// Scale changes the size of the icon as a ratio of the base font size
 func (b *_iconButton) Scale(scale float32) *_iconButton {
 	b.size = b.th.textSize.Scale(scale)
 	return b
 }
 
-func (b *_iconButton) Inset(inset *_inset) *_iconButton {
-	b.inset = inset
+// Inset sets the size of inset that goes in between the button background and the icon
+func (b *_iconButton) Inset(inset float32) *_iconButton {
+	b.inset = b.th.Inset(inset).Widget(b.button.Fn)
 	return b
 }
 
+// Fn renders the icon button
 func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
-	return b.th.Inset(0.5).Widget(b.th.Stack().Expanded(
+	return b.th.Stack().Expanded(
 		func(gtx l.Context) l.Dimensions {
 			sizex, sizey := gtx.Constraints.Min.X, gtx.Constraints.Min.Y
 			sizexf, sizeyf := float32(sizex), float32(sizey)
@@ -88,6 +95,5 @@ func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
 	).Expanded(func(gtx l.Context) l.Dimensions {
 		pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
 		return b.button.Fn(gtx)
-	}).Fn,
-	).Fn(gtx)
+	}).Fn(gtx)
 }

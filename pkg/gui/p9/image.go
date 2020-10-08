@@ -1,6 +1,8 @@
+// TODO: we need this working
 // SPDX-License-Identifier: Unlicense OR MIT
 
 package p9
+
 //
 // import (
 // 	"image"
@@ -17,21 +19,21 @@ package p9
 // type DuoUIimage struct {
 // 	// Src is the image to display.
 // 	Src paint.ImageOp
-// 	// Scale is the ratio of image pixels to dps.
-// 	Scale float32
+// 	// IconScale is the ratio of image pixels to dps.
+// 	IconScale float32
 // }
 //
 // func (t *DuoUItheme) Image(img paint.ImageOp) DuoUIimage {
 // 	return DuoUIimage{
 // 		Src:   img,
-// 		Scale: 160 / 72, // About 72 DPI.
+// 		IconScale: 160 / 72, // About 72 DPI.
 // 	}
 // }
 //
 // func (im DuoUIimage) Fn(gtx *layout.Context) {
 // 	size := im.Src.Size()
 // 	wf, hf := float32(size.X), float32(size.Y)
-// 	w, h := gtx.Px(unit.Dp(wf*im.Scale)), gtx.Px(unit.Dp(hf*im.Scale))
+// 	w, h := gtx.Px(unit.Dp(wf*im.IconScale)), gtx.Px(unit.Dp(hf*im.IconScale))
 // 	cs := gtx.Constraints
 // 	d := image.Point{X: cs.Width.Constrain(w), Y: cs.Height.Constrain(h)}
 // 	var s op.StackOp

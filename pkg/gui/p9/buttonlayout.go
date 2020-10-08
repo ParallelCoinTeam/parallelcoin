@@ -26,7 +26,7 @@ func (th *Theme) ButtonLayout(button *w.Clickable) *_buttonLayout {
 		th:           th,
 		button:       button,
 		background:   th.Colors.Get("ButtonBg"),
-		cornerRadius: unit.Sp(4),
+		cornerRadius: th.textSize.Scale(0.125),
 	}
 }
 
@@ -36,7 +36,7 @@ func (b *_buttonLayout) Background(color string) *_buttonLayout {
 }
 
 func (b *_buttonLayout) CornerRadius(radius float32) *_buttonLayout {
-	b.cornerRadius = unit.Sp(radius)
+	b.cornerRadius = b.th.textSize.Scale(radius)
 	return b
 }
 

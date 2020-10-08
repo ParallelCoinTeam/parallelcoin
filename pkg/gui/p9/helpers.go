@@ -15,6 +15,8 @@ type (
 	Icons      map[string]*Ico
 	Collection []text.FontFace
 )
+
+// Fill is a general fill function that covers the background of the current context space
 func Fill(gtx layout.Context, col color.RGBA) layout.Dimensions {
 	cs := gtx.Constraints
 	d := cs.Min
@@ -23,5 +25,6 @@ func Fill(gtx layout.Context, col color.RGBA) layout.Dimensions {
 	}
 	paint.ColorOp{Color: col}.Add(gtx.Ops)
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	gtx.Constraints.Constrain(d)
 	return layout.Dimensions{Size: d}
 }

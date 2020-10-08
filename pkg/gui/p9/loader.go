@@ -18,12 +18,14 @@ type _loader struct {
 	Color color.RGBA
 }
 
+// Loader creates an indefinite loading animation icon
 func (th *Theme) Loader() *_loader {
 	return &_loader{
 		Color: th.Colors.Get("Primary"),
 	}
 }
 
+// Fn renders the loader
 func (lo *_loader) Fn(gtx l.Context) l.Dimensions {
 	diam := gtx.Constraints.Min.X
 	if minY := gtx.Constraints.Min.Y; minY > diam {

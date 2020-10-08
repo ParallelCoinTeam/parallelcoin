@@ -24,6 +24,7 @@ type _switch struct {
 	Switch *widget.Bool
 }
 
+// Switch creates a boolean switch widget (basically a checkbox but looks like a switch)
 func (th *Theme) Switch(swtch *widget.Bool) *_switch {
 	sw := &_switch{
 		Switch: swtch,

@@ -26,43 +26,7 @@ type _label struct {
 	shaper text.Shaper
 }
 
-func (l *_label) Text(text string) *_label {
-	l.text = text
-	return l
-}
-
-func (l *_label) TextScale(scale float32) *_label {
-	l.textSize = l.th.textSize.Scale(scale)
-	return l
-}
-
-func (l *_label) MaxLines(maxLines int) *_label {
-	l.maxLines = maxLines
-	return l
-}
-
-func (l *_label) Alignment(alignment text.Alignment) *_label {
-	l.alignment = alignment
-	return l
-}
-
-func (l *_label) Color(color string) *_label {
-	l.color = l.th.Colors.Get(color)
-	return l
-}
-
-func (l *_label) Font(font string) *_label {
-	var f text.Font
-	for i := range l.th.collection {
-		// Debug(th.Collection[i].Font)
-		if l.th.collection[i].Font.Typeface == text.Typeface(font) {
-			f = l.th.collection[i].Font
-		}
-	}
-	l.font = f
-	return l
-}
-
+// Label creates a label that prints a block of text
 func (th *Theme) Label() (l *_label) {
 	var f text.Font
 	for i := range th.collection {
@@ -78,6 +42,49 @@ func (th *Theme) Label() (l *_label) {
 		textSize: unit.Sp(1),
 		shaper:   th.shaper,
 	}
+}
+
+// Text sets the text to render in the label
+func (l *_label) Text(text string) *_label {
+	l.text = text
+	return l
+}
+
+// TextScale sets the size of the text relative to the base font size
+func (l *_label) TextScale(scale float32) *_label {
+	l.textSize = l.th.textSize.Scale(scale)
+	return l
+}
+
+// MaxLines sets the maximum number of lines to render
+func (l *_label) MaxLines(maxLines int) *_label {
+	l.maxLines = maxLines
+	return l
+}
+
+// Alignment sets the text alignment, left, right or centered
+func (l *_label) Alignment(alignment text.Alignment) *_label {
+	l.alignment = alignment
+	return l
+}
+
+// Color sets the color of the label font
+func (l *_label) Color(color string) *_label {
+	l.color = l.th.Colors.Get(color)
+	return l
+}
+
+// Font sets the font out of the available font collection
+func (l *_label) Font(font string) *_label {
+	var f text.Font
+	for i := range l.th.collection {
+		// Debug(th.Collection[i].Font)
+		if l.th.collection[i].Font.Typeface == text.Typeface(font) {
+			f = l.th.collection[i].Font
+		}
+	}
+	l.font = f
+	return l
 }
 
 func (th *Theme) H1(txt string) (l *_label) {
@@ -125,6 +132,7 @@ func (th *Theme) Caption(txt string) (l *_label) {
 	return
 }
 
+// Fn renders the label as specified
 func (l *_label) Fn(gtx l.Context) l.Dimensions {
 	paint.ColorOp{Color: l.color}.Add(gtx.Ops)
 	tl := widget.Label{Alignment: l.alignment, MaxLines: l.maxLines}

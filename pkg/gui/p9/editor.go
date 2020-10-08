@@ -27,6 +27,7 @@ type _editor struct {
 	shaper    text.Shaper
 }
 
+// Editor creates a simple text input widget
 func (th *Theme) Editor(editor *widget.Editor) *_editor {
 	return &_editor{
 		th:        th,
@@ -39,6 +40,7 @@ func (th *Theme) Editor(editor *widget.Editor) *_editor {
 	}
 }
 
+// Font sets the font for the text input widget
 func (e *_editor) Font(font string) *_editor {
 	for i := range e.th.collection {
 		if e.th.collection[i].Font.Typeface == text.Typeface(font) {
@@ -48,23 +50,32 @@ func (e *_editor) Font(font string) *_editor {
 	}
 	return e
 }
+
+// TextScale sets the size of the text relative to the base font size
 func (e *_editor) TextScale(scale float32) *_editor {
 	e.textSize = e.th.textSize.Scale(scale)
 	return e
 }
+
+// Color sets the color to render the text
 func (e *_editor) Color(color string) *_editor {
 	e.color = e.th.Colors.Get(color)
 	return e
 }
+
+// Hint sets the text to show when the box is empty
 func (e *_editor) Hint(hint string) *_editor {
 	e.hint = hint
 	return e
 }
+
+// HintColor sets the color of the hint text
 func (e *_editor) HintColor(color string) *_editor {
 	e.hintColor = e.th.Colors.Get(color)
 	return e
 }
 
+// Fn renders the text input widget
 func (e *_editor) Fn(c l.Context) l.Dimensions {
 	defer op.Push(c.Ops).Pop()
 	macro := op.Record(c.Ops)

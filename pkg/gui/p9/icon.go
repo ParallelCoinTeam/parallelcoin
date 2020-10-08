@@ -35,6 +35,7 @@ func (i *Ico) Color(color string) *Ico {
 	return i
 }
 
+// Src sets the icon source to draw from
 func (i *Ico) Src(data []byte) *Ico {
 	_, err := iconvg.DecodeMetadata(data)
 	if Check(err) {
@@ -44,11 +45,13 @@ func (i *Ico) Src(data []byte) *Ico {
 	return i
 }
 
+// Scale changes the size relative to the base font size
 func (i *Ico) Scale(scale float32) *Ico {
 	i.size = i.th.textSize.Scale(scale)
 	return i
 }
 
+// Fn renders the icon
 func (i *Ico) Fn(gtx l.Context) l.Dimensions {
 	ico := i.image(gtx.Px(i.size))
 	ico.Add(gtx.Ops)

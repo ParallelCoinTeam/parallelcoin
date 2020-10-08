@@ -31,6 +31,7 @@ func (th *Theme) Slider(float *widget.Float, min, max float32) *_slider {
 	}
 }
 
+// Fn renders the slider
 func (s *_slider) Fn(c l.Context) l.Dimensions {
 	thumbRadiusInt := c.Px(unit.Dp(6))
 	trackWidth := float32(c.Px(unit.Dp(2)))

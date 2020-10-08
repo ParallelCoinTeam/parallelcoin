@@ -5,13 +5,16 @@ import (
 	"image/color"
 )
 
+// Colors is a map of names to hex strings specifying colors
 type Colors map[string]string
 
+// HexARGB converts a 32 bit hex string into a color specification
 func HexARGB(s string) (c color.RGBA) {
 	_, _ = fmt.Sscanf(s, "%02x%02x%02x%02x", &c.A, &c.R, &c.G, &c.B)
 	return
 }
 
+// Get returns the named color from the map
 func (c Colors) Get(color string) color.RGBA {
 	if col, ok := c[color]; ok {
 		return HexARGB(col)
@@ -20,6 +23,7 @@ func (c Colors) Get(color string) color.RGBA {
 	return HexARGB(c["red"])
 }
 
+// NewColors creates the base palette for the theme
 func NewColors() (c Colors) {
 	c = map[string]string{
 		"black":                 "ff000000",
