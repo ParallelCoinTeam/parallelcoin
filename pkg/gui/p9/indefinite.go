@@ -15,14 +15,21 @@ import (
 )
 
 type _loader struct {
-	Color color.RGBA
+	th    *Theme
+	color color.RGBA
 }
 
-// Loader creates an indefinite loading animation icon
-func (th *Theme) Loader() *_loader {
+// Indefinite creates an indefinite loading animation icon
+func (th *Theme) Indefinite() *_loader {
 	return &_loader{
-		Color: th.Colors.Get("Primary"),
+		th:    th,
+		color: th.Colors.Get("Primary"),
 	}
+}
+
+func (lo *_loader) Color(color string) *_loader {
+	lo.color = lo.th.Colors.Get(color)
+	return lo
 }
 
 // Fn renders the loader
@@ -45,7 +52,7 @@ func (lo *_loader) Fn(gtx l.Context) l.Dimensions {
 
 	clipLoader(gtx.Ops, startAngle, endAngle, radius)
 	paint.ColorOp{
-		Color: lo.Color,
+		Color: lo.color,
 	}.Add(gtx.Ops)
 	op.Offset(f32.Pt(-float32(radius), -float32(radius))).Add(gtx.Ops)
 	paint.PaintOp{

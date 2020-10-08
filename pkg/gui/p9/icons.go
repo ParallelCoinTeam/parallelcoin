@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
-	"github.com/p9c/pod/pkg/gui/ico"
+	ico "github.com/p9c/pod/pkg/gui/ico/svg"
 )
 
 func (th *Theme) NewIcons() (i map[string]*Ico) {

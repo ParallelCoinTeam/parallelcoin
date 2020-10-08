@@ -6,12 +6,13 @@ import (
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/text"
-	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/pkg/gui/ico/svg"
+
+	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	w "github.com/p9c/pod/pkg/gui/widget"
 
 	"github.com/p9c/pod/pkg/gui/f"
-	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
@@ -22,11 +23,17 @@ var (
 	bool1       bool
 	boolbutton1 = w.NewBool(&bool1)
 	iconbutton  = w.NewClickable()
+	quit        = make(chan struct{})
+	th          *p9.Theme
+	//
+	progressbar *p9.ProgressBar
+	progress    int
 )
 
 func Run(quit chan struct{}) {
+	th = p9.NewTheme(p9fonts.Collection(), quit)
+	progressbar = th.ProgressBar().SetProgress(0)
 	go func() {
-		th := p9.NewTheme(p9fonts.Collection(), quit)
 		fw := f.Window().Size(640, 480)
 		fw.Run(func(ctx *layout.Context) {
 			testLabels(th, *ctx)
@@ -55,6 +62,10 @@ func testLabels(th *p9.Theme, gtx layout.Context) {
 			).Fn,
 		).Fn,
 	).Fn(gtx)
+	progress++
+	if progress == 100 {
+		progress = 0
+	}
 }
 
 func blocks(th *p9.Theme) layout.Widget {
@@ -139,7 +150,7 @@ func buttons(th *p9.Theme) layout.Widget {
 					button2.SetClick(func() {
 						Info("clicked default style button")
 					})).
-					Text("default style button").
+					Text("default style").
 					Fn,
 			).Fn,
 		).Rigid(
@@ -148,10 +159,11 @@ func buttons(th *p9.Theme) layout.Widget {
 					func() {
 						Debug("clicked icon button")
 					})).
+					Scale(50).
 					Icon(
 						th.Icon().
 							Color("Light").
-							Src(icons.ActionAndroid)).
+							Src(icons.ParallelCoin)).
 					Fn,
 			).Fn,
 		).Rigid(
@@ -165,8 +177,18 @@ func buttons(th *p9.Theme) layout.Widget {
 					Text("checkbox").
 					Fn,
 			).Fn,
+		).Fn,
+	).Rigid(
+		th.Flex().Rigid(
+			th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
 		).Rigid(
-			th.Flex().Fn,
+			th.Flex().Rigid(
+				th.Indefinite().Color("Primary").Fn,
+			).Fn,
+		).Rigid(
+			th.Flex().Rigid(
+				th.ProgressBar().Color("Primary").SetProgress(progress).Fn,
+			).Fn,
 		).Fn,
 	).Fn
 }
