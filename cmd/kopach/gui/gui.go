@@ -8,6 +8,7 @@ import (
 	"gioui.org/text"
 
 	"github.com/p9c/pod/pkg/gui/ico/svg"
+	mico "golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	w "github.com/p9c/pod/pkg/gui/widget"
@@ -23,6 +24,7 @@ var (
 	bool1       bool
 	boolbutton1 = w.NewBool(&bool1)
 	iconbutton  = w.NewClickable()
+	iconbutton1  = w.NewClickable()
 	quit        = make(chan struct{})
 	th          *p9.Theme
 	//
@@ -38,6 +40,7 @@ func Run(quit chan struct{}) {
 		fw.Run(func(ctx *layout.Context) {
 			testLabels(th, *ctx)
 		}, func() {
+			close(quit)
 			os.Exit(0)
 		})
 	}()
@@ -155,15 +158,39 @@ func buttons(th *p9.Theme) layout.Widget {
 			).Fn,
 		).Rigid(
 			th.Inset(0.25).Widget(
+				th.Flex().Rigid(
+					th.Indefinite().Color("Primary").Fn,
+				).Fn,
+			).Fn,
+		).Rigid(
+			th.Inset(0.25).Widget(
+				th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
+			).Fn,
+		).Rigid(
+			th.Inset(0.25).Widget(
 				th.IconButton(iconbutton.SetClick(
 					func() {
-						Debug("clicked icon button")
+						Debug("clicked parallelcoin button")
 					})).
 					Scale(50).
 					Icon(
 						th.Icon().
 							Color("Light").
 							Src(icons.ParallelCoin)).
+					Fn,
+			).Fn,
+		).Rigid(
+			th.Inset(0.25).Widget(
+				th.IconButton(iconbutton1.SetClick(
+					func() {
+						Debug("clicked android button")
+					})).
+					Scale(50).
+					Background("Secondary").
+					Icon(
+						th.Icon().
+							Color("Light").
+							Src(mico.ActionAndroid)).
 					Fn,
 			).Fn,
 		).Rigid(
@@ -180,14 +207,18 @@ func buttons(th *p9.Theme) layout.Widget {
 		).Fn,
 	).Rigid(
 		th.Flex().Rigid(
-			th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
-		).Rigid(
-			th.Flex().Rigid(
-				th.Indefinite().Color("Primary").Fn,
+			th.Inset(0.25).Widget(
+				th.Flex().Rigid(
+					th.ProgressBar().Color("Primary").SetProgress(progress).Fn,
+				).Fn,
 			).Fn,
-		).Rigid(
-			th.Flex().Rigid(
-				th.ProgressBar().Color("Primary").SetProgress(progress).Fn,
+		).Fn,
+	).Rigid(
+		th.Flex().Rigid(
+			th.Inset(0.25).Widget(
+				th.Flex().Rigid(
+					th.ProgressBar().Color("Primary").SetProgress(100-progress).Fn,
+				).Fn,
 			).Fn,
 		).Fn,
 	).Fn

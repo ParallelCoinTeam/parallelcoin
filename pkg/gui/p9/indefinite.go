@@ -17,6 +17,7 @@ import (
 type _loader struct {
 	th    *Theme
 	color color.RGBA
+	scale unit.Value
 }
 
 // Indefinite creates an indefinite loading animation icon
@@ -25,6 +26,11 @@ func (th *Theme) Indefinite() *_loader {
 		th:    th,
 		color: th.Colors.Get("Primary"),
 	}
+}
+
+func (lo *_loader) Scale(scale float32) *_loader {
+	lo.scale = lo.th.textSize.Scale(scale)
+	return lo
 }
 
 func (lo *_loader) Color(color string) *_loader {
@@ -39,7 +45,7 @@ func (lo *_loader) Fn(gtx l.Context) l.Dimensions {
 		diam = minY
 	}
 	if diam == 0 {
-		diam = gtx.Px(unit.Dp(24))
+		diam = gtx.Px(lo.th.textSize.Scale( 2))
 	}
 	sz := gtx.Constraints.Constrain(image.Pt(diam, diam))
 	radius := float64(sz.X) * .5

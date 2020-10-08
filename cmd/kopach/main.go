@@ -46,10 +46,6 @@ type Worker struct {
 func Handle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		Debug("miner controller starting")
-		if *cx.Config.KopachGUI {
-			Info("opening miner controller GUI")
-			gui.Run(cx.KillAll)
-		}
 		ctx, cancel := context.WithCancel(context.Background())
 		w := &Worker{
 			ctx:           ctx,
@@ -125,6 +121,10 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
+		if *cx.Config.KopachGUI {
+			Info("opening miner controller GUI")
+			gui.Run(cx.KillAll)
+		}
 		<-cx.KillAll
 		Info("kopach shutting down")
 		return

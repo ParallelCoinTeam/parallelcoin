@@ -79,7 +79,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		return
 	}
 	ctrl := &Controller{
-		quit:                   make(chan struct{}),
+		quit:                   cx.KillAll,
 		cx:                     cx,
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
@@ -151,6 +151,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 			}
 			Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
 		case <-ctrl.quit:
+			Debug("quitting on close quit channel")
 			cont = false
 			ctrl.active.Store(false)
 		case <-interrupt.HandlersDone:

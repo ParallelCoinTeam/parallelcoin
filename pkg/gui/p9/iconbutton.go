@@ -34,7 +34,7 @@ func (th *Theme) IconButton(button *w.Clickable) *_iconButton {
 		background: th.Colors.Get("Primary"),
 		color:      th.Colors.Get("DocBg"),
 		size:       th.textSize,
-		inset:      th.Inset(0.5),
+		inset:      th.Inset(0.33),
 		button:     button,
 	}
 }
@@ -91,7 +91,7 @@ func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
 			return dims
 		},
 	).Stacked(
-		b.inset.Widget(b.icon.Fn).Fn,
+		b.inset.Widget(b.icon.Scale(1.33).Fn).Fn,
 	).Expanded(func(gtx l.Context) l.Dimensions {
 		pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
 		return b.button.Fn(gtx)

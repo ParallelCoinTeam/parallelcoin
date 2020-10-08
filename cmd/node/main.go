@@ -161,7 +161,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
-	_ = control.Run(cx)
+	stopController := control.Run(cx)
 	cx.Controller.Store(true)
 	gracefulShutdown := func() {
 		Info("gracefully shutting down the server...")
@@ -171,9 +171,9 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		if e != nil {
 			Warn("failed to stop server", e)
 		}
-		// if cx.Controller.Load() {
-		// 	close(stopController)
-		// }
+		if cx.Controller.Load() {
+			close(stopController)
+		}
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
