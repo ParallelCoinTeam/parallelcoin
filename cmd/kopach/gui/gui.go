@@ -239,7 +239,7 @@ func buttons(th *p9.Theme) layout.Widget {
 				Fn,
 		).Fn,
 	).Rigid(
-		th.Flex().Vertical().Rigid(
+		th.Flex().Rigid(
 			th.RadioButton(radio, "r1", "first").Fn,
 		).Rigid(
 			th.RadioButton(radio, "r2", "second").Fn,

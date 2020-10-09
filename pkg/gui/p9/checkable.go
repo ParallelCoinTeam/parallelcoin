@@ -110,32 +110,36 @@ func (c *_checkable) UncheckedStateIcon(ic *Ico) *_checkable {
 func (c *_checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	var icon *Ico
 	if checked {
-		icon = c.checkedStateIcon.Scale(2)
+		icon = c.checkedStateIcon.Scale(1.5)
 	} else {
-		icon = c.uncheckedStateIcon.Scale(2)
+		icon = c.uncheckedStateIcon.Scale(1.5)
 	}
-	dims := c.th.Flex().Rigid(
-		func(gtx l.Context) l.Dimensions {
-			size := gtx.Px(c.size)
-			icon.color = c.iconColor
-			if gtx.Queue == nil {
-				icon.color = f32color.MulAlpha(icon.color, 150)
-			}
-			icon.Fn(gtx)
-			return l.Dimensions{
-				Size: image.Point{X: size, Y: size},
-			}
-		},
-	).Rigid(
-		c.th.Inset(0.25).Widget(func(ctx l.Context) l.Dimensions { return l.Dimensions{} }).Fn,
-	).Rigid(
-		c.th.Inset(0.5).Widget(
-			func(gtx l.Context) l.Dimensions {
-				paint.ColorOp{Color: c.color}.Add(gtx.Ops)
-				return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
-			},
-		).Fn,
-	).Fn(gtx)
+	dims :=
+		c.th.Flex().Rigid(
+			c.th.Inset(0.25).Widget(
+				func(gtx l.Context) l.Dimensions {
+					size := gtx.Px(c.size)
+					icon.color = c.iconColor
+					if gtx.Queue == nil {
+						icon.color = f32color.MulAlpha(icon.color, 150)
+					}
+					icon.Fn(gtx)
+					return l.Dimensions{
+						Size: image.Point{X: size, Y: size},
+					}
+				}).Fn,
+		// ).Rigid(
+		// 	c.th.Inset(0.125).Widget(func(ctx l.Context) l.Dimensions {
+		// 		return l.Dimensions{}
+		// 	}).Fn,
+		).Rigid(
+			c.th.Inset(0.25).Widget(
+				func(gtx l.Context) l.Dimensions {
+					paint.ColorOp{Color: c.color}.Add(gtx.Ops)
+					return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
+				},
+			).Fn,
+		).Fn(gtx)
 	pointer.Rect(image.Rectangle{Max: dims.Size}).Add(gtx.Ops)
 	return dims
 }
