@@ -28,3 +28,12 @@ func Fill(gtx layout.Context, col color.RGBA) layout.Dimensions {
 	gtx.Constraints.Constrain(d)
 	return layout.Dimensions{Size: d}
 }
+
+func (th *Theme) GetFont(font string) *text.Font {
+	for i := range th.collection {
+		if th.collection[i].Font.Typeface == text.Typeface(font) {
+			return &th.collection[i].Font
+		}
+	}
+	return nil
+}

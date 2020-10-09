@@ -110,9 +110,9 @@ func (c *_checkable) UncheckedStateIcon(ic *Ico) *_checkable {
 func (c *_checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	var icon *Ico
 	if checked {
-		icon = c.checkedStateIcon.Scale(2)
+		icon = c.checkedStateIcon.Scale(3)
 	} else {
-		icon = c.uncheckedStateIcon.Scale(2)
+		icon = c.uncheckedStateIcon.Scale(3)
 	}
 	dims := c.th.Flex().Rigid(
 		func(gtx l.Context) l.Dimensions {

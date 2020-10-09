@@ -5,6 +5,7 @@ import (
 )
 
 type _inset struct {
+	th *Theme
 	in l.Inset
 	w  l.Widget
 }
@@ -12,7 +13,11 @@ type _inset struct {
 // Inset creates a padded empty space around a widget
 func (th *Theme) Inset(pad float32) (out *_inset) {
 	out = &_inset{
-		in: l.UniformInset(th.textSize.Scale(pad)),
+		th: th,
+		in: l.UniformInset(
+			th.
+				textSize.
+				Scale(pad)),
 	}
 	return
 }

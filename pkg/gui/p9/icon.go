@@ -31,7 +31,14 @@ func (th *Theme) Icon() *Ico {
 
 // Color sets the color of the icon image. It must be called before creating the image
 func (i *Ico) Color(color string) *Ico {
-	i.color = i.th.Colors.Get(color)
+	i.color = i.
+		th.
+		Colors.Get(color)
+	return i
+}
+
+func (i *Ico) RGBA(rgba color.RGBA) *Ico {
+	i.color = rgba
 	return i
 }
 
@@ -48,6 +55,11 @@ func (i *Ico) Src(data []byte) *Ico {
 // Scale changes the size relative to the base font size
 func (i *Ico) Scale(scale float32) *Ico {
 	i.size = i.th.textSize.Scale(scale)
+	return i
+}
+
+func (i *Ico) Size(size unit.Value) *Ico {
+	i.size = size
 	return i
 }
 

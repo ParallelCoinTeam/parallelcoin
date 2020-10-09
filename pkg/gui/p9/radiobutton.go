@@ -1,38 +1,37 @@
+// SPDX-License-Identifier: Unlicense OR MIT
+
 package p9
 
 import (
-	l "gioui.org/layout"
+	"gioui.org/layout"
 	"gioui.org/widget"
+	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-type _radioButton struct {
+type RadioButtonStyle struct {
 	_checkable
-	key   string
-	group *widget.Enum
+	th    *Theme
+	Key   string
+	Group *widget.Enum
 }
 
 // RadioButton returns a RadioButton with a label. The key specifies the value for the Enum.
-func (th *Theme) RadioButton(group *widget.Enum, key, label string) *_radioButton {
-	return &_radioButton{
-		group: group,
-		_checkable: _checkable{
-			label:              label,
-			color:              th.Colors.Get("Text"),
-			iconColor:          th.Colors.Get("Primary"),
-			textSize:           th.textSize, // .Scale(14.0 / 16.0),
-			size:               th.textSize.Scale(2),
-			shaper:             th.shaper,
-			checkedStateIcon:   th.icons["Checked"],
-			uncheckedStateIcon: th.icons["Unchecked"],
-		},
-		key: key,
+func (th *Theme) RadioButton(group *widget.Enum, key, label string) RadioButtonStyle {
+	return RadioButtonStyle{
+		Group: group,
+		th: th,
+		_checkable: *th.Checkable().
+			CheckedStateIcon(th.Icon().Src(icons.ToggleRadioButtonChecked)).
+			UncheckedStateIcon(th.Icon().Src(icons.ToggleRadioButtonUnchecked)).
+			Label(label),
+		Key: key,
 	}
 }
 
-// Fn updates enum and displays the radio _button.
-func (r *_radioButton) Fn(gtx l.Context) l.Dimensions {
-	dims := r._checkable.Fn(gtx, r.group.Value == r.key)
+// Fn updates enum and displays the radio button.
+func (r RadioButtonStyle) Fn(gtx layout.Context) layout.Dimensions {
+	dims := r._checkable.Fn(gtx, r.Group.Value == r.Key)
 	gtx.Constraints.Min = dims.Size
-	r.group.Layout(gtx, r.key)
+	r.Group.Layout(gtx, r.Key)
 	return dims
 }

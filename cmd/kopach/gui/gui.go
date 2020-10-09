@@ -1,11 +1,13 @@
 package gui
 
 import (
+	"fmt"
 	"os"
 
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/text"
+	"gioui.org/widget"
 
 	mico "golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -28,9 +30,10 @@ var (
 	iconbutton1 = w.NewClickable()
 	quit        = make(chan struct{})
 	th          *p9.Theme
-	//
 	progressbar *p9.ProgressBar
 	progress    int
+	slider      = &widget.Float{}
+	radio       = new(widget.Enum)
 )
 
 func Run(quit chan struct{}) {
@@ -215,12 +218,33 @@ func buttons(th *p9.Theme) layout.Widget {
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.Flex().Rigid(
+		// th.Flex().Rigid(
 			th.Inset(0.25).Widget(
 				th.Flex().Rigid(
 					th.ProgressBar().Color("Primary").SetProgress(100 - progress).Fn,
 				).Fn,
 			).Fn,
+		// ).Fn,
+	).Rigid(
+		th.Inset(0.25).Widget(
+			th.Flex().
+				Flexed(1,
+					th.Slider(slider, 0, 1).Fn,
+				).
+				Rigid(
+					th.Body1(fmt.Sprintf("%3v", int(slider.Value*100))).
+						Font("go regular").Color("DocText").
+						Fn,
+				).
+				Fn,
+		).Fn,
+	).Rigid(
+		th.Flex().Vertical().Rigid(
+			th.RadioButton(radio, "r1", "first").Fn,
+		).Rigid(
+			th.RadioButton(radio, "r2", "second").Fn,
+		).Rigid(
+			th.RadioButton(radio, "r3", "third").Fn,
 		).Fn,
 	).Fn
 }
