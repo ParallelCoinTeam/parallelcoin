@@ -7,21 +7,19 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/unit"
-	"gioui.org/widget"
 
 	"github.com/p9c/pod/pkg/gui/f32color"
-	w "github.com/p9c/pod/pkg/gui/widget"
 )
 
 type _buttonLayout struct {
 	th           *Theme
 	background   color.RGBA
 	cornerRadius unit.Value
-	button       *w.Clickable
+	button       *_clickable
 	w            l.Widget
 }
 
-func (th *Theme) ButtonLayout(button *w.Clickable) *_buttonLayout {
+func (th *Theme) ButtonLayout(button *_clickable) *_buttonLayout {
 	return &_buttonLayout{
 		th:           th,
 		button:       button,
@@ -63,7 +61,7 @@ func (b *_buttonLayout) Fn(gtx l.Context) l.Dimensions {
 			}
 			dims := Fill(gtx, background)
 			for _, c := range b.button.History() {
-				drawInk(gtx, widget.Press(c))
+				drawInk(gtx, c)
 			}
 			return dims
 		}),

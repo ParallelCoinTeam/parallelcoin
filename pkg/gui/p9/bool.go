@@ -1,4 +1,4 @@
-package widget
+package p9
 
 import (
 	"gioui.org/layout"
@@ -6,23 +6,23 @@ import (
 
 type changeStateHook func(b bool)
 
-type Bool struct {
+type _bool struct {
 	value       *bool
-	clk         *Clickable
+	clk         *_clickable
 	changed     bool
 	changeState changeStateHook
 }
 
-func (b *Bool) GetValue() *bool {
-	return b.value
+func (b *_bool) GetValue() bool {
+	return *b.value
 }
 
-func (b *Bool) Value(value *bool) {
+func (b *_bool) Value(value *bool) {
 	b.value = value
 }
 
-func NewBool(value *bool) *Bool {
-	return &Bool{
+func NewBool(value *bool) *_bool {
+	return &_bool{
 		value:       value,
 		clk:         NewClickable(),
 		changed:     false,
@@ -30,25 +30,25 @@ func NewBool(value *bool) *Bool {
 	}
 }
 
-func (b *Bool) SetHook(fn changeStateHook) *Bool {
+func (b *_bool) SetHook(fn changeStateHook) *_bool {
 	b.changeState = fn
 	return b
 }
 
 // Changed reports whether value has changed since the last call to Changed.
-func (b *Bool) Changed() bool {
+func (b *_bool) Changed() bool {
 	changed := b.changed
 	b.changed = false
 	return changed
 }
 
 // History returns the history of presses in the buffer
-func (b *Bool) History() []Press {
+func (b *_bool) History() []press {
 	return b.clk.History()
 }
 
 // Fn renders the events of the boolean widget
-func (b *Bool) Fn(gtx layout.Context) layout.Dimensions {
+func (b *_bool) Fn(gtx layout.Context) layout.Dimensions {
 	dims := b.clk.Fn(gtx)
 	for b.clk.Clicked() {
 		*b.value = !*b.value

@@ -11,116 +11,134 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"gioui.org/widget"
 
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
 type _switch struct {
-	Color struct {
-		Enabled  color.RGBA
-		Disabled color.RGBA
+	th    *Theme
+	color struct {
+		enabled  color.RGBA
+		disabled color.RGBA
 	}
-	Switch *widget.Bool
+	swtch *_bool
 }
 
 // Switch creates a boolean switch widget (basically a checkbox but looks like a switch)
-func (th *Theme) Switch(swtch *widget.Bool) *_switch {
+func (th *Theme) Switch(swtch *_bool) *_switch {
 	sw := &_switch{
-		Switch: swtch,
+		th:    th,
+		swtch: swtch,
 	}
-	sw.Color.Enabled = th.Colors.Get("Primary")
-	sw.Color.Disabled = rgb(0xffffff)
+	sw.color.enabled = th.Colors.Get("Primary")
+	sw.color.disabled = rgb(0xffffff)
 	return sw
 }
 
-// Fn updates the checkBox and displays it.
+func (s *_switch) EnabledColor(color string) *_switch {
+	s.color.enabled = s.th.Colors.Get(color)
+	return s
+}
+
+func (s *_switch) DisabledColor() *_switch {
+	s.color.disabled = s.th.Colors.Get("Primary")
+	return s
+}
+
+func (s *_switch) Switch(boo *_bool) *_switch {
+	s.swtch = boo
+	return s
+}
+
+// Fn updates the switch and displays it.
 func (s *_switch) Fn(gtx l.Context) l.Dimensions {
-	trackWidth := gtx.Px(unit.Dp(36))
-	trackHeight := gtx.Px(unit.Dp(16))
-	thumbSize := gtx.Px(unit.Dp(20))
-	trackOff := float32(thumbSize-trackHeight) * .5
+	return s.th.Inset(0.25).Widget(func(gtx l.Context) l.Dimensions {
+		trackWidth := gtx.Px(s.th.textSize.Scale(2.75))
+		trackHeight := gtx.Px(s.th.textSize.Scale(1))
+		thumbSize := gtx.Px(s.th.textSize.Scale(1.5))
+		trackOff := float32(thumbSize-trackHeight) * .5
 
-	// Draw track.
-	stack := op.Push(gtx.Ops)
-	trackCorner := float32(trackHeight) / 2
-	trackRect := f32.Rectangle{Max: f32.Point{
-		X: float32(trackWidth),
-		Y: float32(trackHeight),
-	}}
-	col := s.Color.Disabled
-	if s.Switch.Value {
-		col = s.Color.Enabled
-	}
-	if gtx.Queue == nil {
-		col = f32color.MulAlpha(col, 150)
-	}
-	trackColor := f32color.MulAlpha(col, 150)
-	op.Offset(f32.Point{Y: trackOff}).Add(gtx.Ops)
-	clip.RRect{
-		Rect: trackRect,
-		NE:   trackCorner, NW: trackCorner, SE: trackCorner, SW: trackCorner,
-	}.Add(gtx.Ops)
-	paint.ColorOp{Color: trackColor}.Add(gtx.Ops)
-	paint.PaintOp{Rect: trackRect}.Add(gtx.Ops)
-	stack.Pop()
+		// Draw track.
+		stack := op.Push(gtx.Ops)
+		trackCorner := float32(trackHeight) / 2
+		trackRect := f32.Rectangle{Max: f32.Point{
+			X: float32(trackWidth),
+			Y: float32(trackHeight),
+		}}
+		col := s.color.disabled
+		if s.swtch.GetValue() {
+			col = s.color.enabled
+		}
+		if gtx.Queue == nil {
+			col = f32color.MulAlpha(col, 150)
+		}
+		trackColor := f32color.MulAlpha(col, 150)
+		op.Offset(f32.Point{Y: trackOff}).Add(gtx.Ops)
+		clip.RRect{
+			Rect: trackRect,
+			NE:   trackCorner, NW: trackCorner, SE: trackCorner, SW: trackCorner,
+		}.Add(gtx.Ops)
+		paint.ColorOp{Color: trackColor}.Add(gtx.Ops)
+		paint.PaintOp{Rect: trackRect}.Add(gtx.Ops)
+		stack.Pop()
+		// TODO: change this to animating the thumb slide with color fades
+		// Draw thumb ink.
+		stack = op.Push(gtx.Ops)
+		inkSize := gtx.Px(unit.Dp(44))
+		rr := float32(inkSize) * .5
+		inkOff := f32.Point{
+			X: float32(trackWidth)*.5 - rr,
+			Y: -rr + float32(trackHeight)*.5 + trackOff,
+		}
+		op.Offset(inkOff).Add(gtx.Ops)
+		gtx.Constraints.Min = image.Pt(inkSize, inkSize)
+		clip.RRect{
+			Rect: f32.Rectangle{
+				Max: l.FPt(gtx.Constraints.Min),
+			},
+			NE: rr, NW: rr, SE: rr, SW: rr,
+		}.Add(gtx.Ops)
+		for _, p := range s.swtch.History() {
+			drawInk(gtx, p)
+		}
+		stack.Pop()
 
-	// Draw thumb ink.
-	stack = op.Push(gtx.Ops)
-	inkSize := gtx.Px(unit.Dp(44))
-	rr := float32(inkSize) * .5
-	inkOff := f32.Point{
-		X: float32(trackWidth)*.5 - rr,
-		Y: -rr + float32(trackHeight)*.5 + trackOff,
-	}
-	op.Offset(inkOff).Add(gtx.Ops)
-	gtx.Constraints.Min = image.Pt(inkSize, inkSize)
-	clip.RRect{
-		Rect: f32.Rectangle{
-			Max: l.FPt(gtx.Constraints.Min),
-		},
-		NE: rr, NW: rr, SE: rr, SW: rr,
-	}.Add(gtx.Ops)
-	for _, p := range s.Switch.History() {
-		drawInk(gtx, p)
-	}
-	stack.Pop()
+		// Compute thumb offset and color.
+		stack = op.Push(gtx.Ops)
+		if s.swtch.GetValue() {
+			off := trackWidth - thumbSize
+			op.Offset(f32.Point{X: float32(off)}).Add(gtx.Ops)
+		}
 
-	// Compute thumb offset and color.
-	stack = op.Push(gtx.Ops)
-	if s.Switch.Value {
-		off := trackWidth - thumbSize
-		op.Offset(f32.Point{X: float32(off)}).Add(gtx.Ops)
-	}
+		// Draw thumb shadow, a translucent disc slightly larger than the thumb itself.
+		shadowStack := op.Push(gtx.Ops)
+		shadowSize := float32(2)
+		// Center shadow horizontally and slightly adjust its Y.
+		op.Offset(f32.Point{X: -shadowSize / 2, Y: -.5}).Add(gtx.Ops)
+		drawDisc(gtx.Ops, float32(thumbSize)+shadowSize, argb(0x55000000))
+		shadowStack.Pop()
 
-	// Draw thumb shadow, a translucent disc slightly larger than the thumb itself.
-	shadowStack := op.Push(gtx.Ops)
-	shadowSize := float32(2)
-	// Center shadow horizontally and slightly adjust its Y.
-	op.Offset(f32.Point{X: -shadowSize / 2, Y: -.75}).Add(gtx.Ops)
-	drawDisc(gtx.Ops, float32(thumbSize)+shadowSize, argb(0x55000000))
-	shadowStack.Pop()
+		// Draw thumb.
+		drawDisc(gtx.Ops, float32(thumbSize), col)
+		stack.Pop()
 
-	// Draw thumb.
-	drawDisc(gtx.Ops, float32(thumbSize), col)
-	stack.Pop()
+		// Set up click area.
+		stack = op.Push(gtx.Ops)
+		clickSize := gtx.Px(unit.Dp(40))
+		clickOff := f32.Point{
+			X: (float32(trackWidth) - float32(clickSize)) * .5,
+			Y: (float32(trackHeight)-float32(clickSize))*.5 + trackOff,
+		}
+		op.Offset(clickOff).Add(gtx.Ops)
+		sz := image.Pt(clickSize, clickSize)
+		pointer.Ellipse(image.Rectangle{Max: sz}).Add(gtx.Ops)
+		gtx.Constraints.Min = sz
+		s.swtch.Fn(gtx)
+		stack.Pop()
 
-	// Set up click area.
-	stack = op.Push(gtx.Ops)
-	clickSize := gtx.Px(unit.Dp(40))
-	clickOff := f32.Point{
-		X: (float32(trackWidth) - float32(clickSize)) * .5,
-		Y: (float32(trackHeight)-float32(clickSize))*.5 + trackOff,
-	}
-	op.Offset(clickOff).Add(gtx.Ops)
-	sz := image.Pt(clickSize, clickSize)
-	pointer.Ellipse(image.Rectangle{Max: sz}).Add(gtx.Ops)
-	gtx.Constraints.Min = sz
-	s.Switch.Layout(gtx)
-	stack.Pop()
-
-	dims := image.Point{X: trackWidth, Y: thumbSize}
-	return l.Dimensions{Size: dims}
+		dims := image.Point{X: trackWidth, Y: thumbSize}
+		return l.Dimensions{Size: dims}
+	}).Fn(gtx)
 }
 
 func drawDisc(ops *op.Ops, sz float32, col color.RGBA) {

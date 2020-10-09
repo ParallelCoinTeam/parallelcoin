@@ -7,7 +7,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget"
 )
 
 type _label struct {
@@ -26,7 +25,7 @@ type _label struct {
 	shaper text.Shaper
 }
 
-// Label creates a label that prints a block of text
+// _text creates a label that prints a block of text
 func (th *Theme) Label() (l *_label) {
 	var f text.Font
 	for i := range th.collection {
@@ -135,6 +134,6 @@ func (th *Theme) Caption(txt string) (l *_label) {
 // Fn renders the label as specified
 func (l *_label) Fn(gtx l.Context) l.Dimensions {
 	paint.ColorOp{Color: l.color}.Add(gtx.Ops)
-	tl := widget.Label{Alignment: l.alignment, MaxLines: l.maxLines}
+	tl := _text{alignment: l.alignment, maxLines: l.maxLines}
 	return tl.Layout(gtx, l.shaper, l.font, l.textSize, l.text)
 }

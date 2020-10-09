@@ -11,7 +11,7 @@ type Theme struct {
 	collection    []text.FontFace
 	textSize      unit.Value
 	Colors        Colors
-	icons         map[string]*Ico
+	icons         map[string]*_icon
 	scrollBarSize int
 }
 

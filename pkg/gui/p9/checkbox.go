@@ -2,18 +2,16 @@ package p9
 
 import (
 	l "gioui.org/layout"
-
-	w "github.com/p9c/pod/pkg/gui/widget"
 )
 
 type _checkbox struct {
 	*_checkable
-	checkBox                *w.Bool
+	checkBox                *_bool
 	color, textColor, label string
 	action                  func(b, cs bool)
 }
 
-func (th *Theme) CheckBox(checkBox *w.Bool) *_checkbox {
+func (th *Theme) CheckBox(checkBox *_bool) *_checkbox {
 	var (
 		color     = "DocText"
 		textColor = "Primary"
@@ -63,7 +61,7 @@ func (c *_checkbox) Action(fn func(b bool)) *_checkbox {
 
 // Fn renders the checkbox
 func (c *_checkbox) Fn(gtx l.Context) l.Dimensions {
-	dims := c._checkable.Fn(gtx, *c.checkBox.GetValue())
+	dims := c._checkable.Fn(gtx, c.checkBox.GetValue())
 	gtx.Constraints.Min = dims.Size
 	c.checkBox.Fn(gtx)
 	return dims

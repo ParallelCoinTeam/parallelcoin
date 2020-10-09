@@ -14,32 +14,32 @@ import (
 	"gioui.org/unit"
 )
 
-type _loader struct {
+type _indefinite struct {
 	th    *Theme
 	color color.RGBA
 	scale unit.Value
 }
 
 // Indefinite creates an indefinite loading animation icon
-func (th *Theme) Indefinite() *_loader {
-	return &_loader{
+func (th *Theme) Indefinite() *_indefinite {
+	return &_indefinite{
 		th:    th,
 		color: th.Colors.Get("Primary"),
 	}
 }
 
-func (lo *_loader) Scale(scale float32) *_loader {
+func (lo *_indefinite) Scale(scale float32) *_indefinite {
 	lo.scale = lo.th.textSize.Scale(scale)
 	return lo
 }
 
-func (lo *_loader) Color(color string) *_loader {
+func (lo *_indefinite) Color(color string) *_indefinite {
 	lo.color = lo.th.Colors.Get(color)
 	return lo
 }
 
 // Fn renders the loader
-func (lo *_loader) Fn(gtx l.Context) l.Dimensions {
+func (lo *_indefinite) Fn(gtx l.Context) l.Dimensions {
 	diam := gtx.Constraints.Min.X
 	if minY := gtx.Constraints.Min.Y; minY > diam {
 		diam = minY

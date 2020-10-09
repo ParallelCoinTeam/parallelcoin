@@ -12,10 +12,8 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget"
 
 	"github.com/p9c/pod/pkg/gui/f32color"
-	w "github.com/p9c/pod/pkg/gui/widget"
 )
 
 type _button struct {
@@ -27,12 +25,12 @@ type _button struct {
 	inset        *l.Inset
 	text         string
 	textSize     unit.Value
-	button       *w.Clickable
+	button       *_clickable
 	shaper       text.Shaper
 }
 
 // Button is a regular material text button where all the dimensions, colors, corners and font can be changed
-func (th *Theme) Button(btn *w.Clickable) *_button {
+func (th *Theme) Button(btn *_clickable) *_button {
 	return &_button{
 		th:   th,
 		text: strings.ToUpper("text unset"),
@@ -115,7 +113,7 @@ func (b *_button) Fn(gtx l.Context) l.Dimensions {
 	fn := func(gtx l.Context) l.Dimensions {
 		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
 			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-			return widget.Label{Alignment: text.Middle}.
+			return _text{alignment: text.Middle}.
 				Layout(gtx, b.shaper, b.font, b.textSize, b.text)
 		})
 	}
@@ -123,7 +121,7 @@ func (b *_button) Fn(gtx l.Context) l.Dimensions {
 	return bl.Fn(gtx)
 }
 
-func drawInk(c l.Context, p widget.Press) {
+func drawInk(c l.Context, p press) {
 	// duration is the number of seconds for the completed animation: expand while fading in, then out.
 	const (
 		expandDuration = float32(0.5)

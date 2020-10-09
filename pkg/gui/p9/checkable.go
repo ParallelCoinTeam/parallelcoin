@@ -23,8 +23,8 @@ type _checkable struct {
 	textSize           unit.Value
 	iconColor          color.RGBA
 	size               unit.Value
-	checkedStateIcon   *Ico
-	uncheckedStateIcon *Ico
+	checkedStateIcon   *_icon
+	uncheckedStateIcon *_icon
 	shaper             text.Shaper
 	checked            bool
 }
@@ -53,7 +53,7 @@ func (th *Theme) Checkable() *_checkable {
 	}
 }
 
-// Label sets the label on the checkbox
+// _text sets the label on the checkbox
 func (c *_checkable) Label(txt string) *_checkable {
 	c.label = txt
 	return c
@@ -95,20 +95,20 @@ func (c *_checkable) Scale(size float32) *_checkable {
 }
 
 // CheckedStateIcon loads the icon for the checked state
-func (c *_checkable) CheckedStateIcon(ic *Ico) *_checkable {
+func (c *_checkable) CheckedStateIcon(ic *_icon) *_checkable {
 	c.checkedStateIcon = ic
 	return c
 }
 
 // UncheckedStateIcon loads the icon for the unchecked state
-func (c *_checkable) UncheckedStateIcon(ic *Ico) *_checkable {
+func (c *_checkable) UncheckedStateIcon(ic *_icon) *_checkable {
 	c.uncheckedStateIcon = ic
 	return c
 }
 
 // Fn renders the checkbox widget
 func (c *_checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
-	var icon *Ico
+	var icon *_icon
 	if checked {
 		icon = c.checkedStateIcon.Scale(1.5)
 	} else {

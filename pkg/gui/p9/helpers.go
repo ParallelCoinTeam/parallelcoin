@@ -1,6 +1,7 @@
 package p9
 
 import (
+	"image"
 	"image/color"
 
 	"gioui.org/f32"
@@ -12,7 +13,7 @@ import (
 type (
 	// Defining these as types gives flexibility later to create methods that modify them
 	Fonts      map[string]text.Typeface
-	Icons      map[string]*Ico
+	Icons      map[string]*_icon
 	Collection []text.FontFace
 )
 
@@ -36,4 +37,16 @@ func (th *Theme) GetFont(font string) *text.Font {
 		}
 	}
 	return nil
+}
+
+func rgb(c uint32) color.RGBA {
+	return argb(0xff000000 | c)
+}
+
+func argb(c uint32) color.RGBA {
+	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
+}
+
+func toPointF(p image.Point) f32.Point {
+	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
 }

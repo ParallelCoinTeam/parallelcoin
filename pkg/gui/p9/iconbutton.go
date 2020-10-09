@@ -9,10 +9,8 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/unit"
-	"gioui.org/widget"
 
 	"github.com/p9c/pod/pkg/gui/f32color"
-	w "github.com/p9c/pod/pkg/gui/widget"
 )
 
 type _iconButton struct {
@@ -20,15 +18,15 @@ type _iconButton struct {
 	background color.RGBA
 	// Color is the icon color.
 	color color.RGBA
-	icon  *Ico
+	icon  *_icon
 	// Size is the icon size.
 	size   unit.Value
 	inset  *_inset
-	button *w.Clickable
+	button *_clickable
 }
 
 // IconButton creates an icon with a circular background and an icon placed in the centre
-func (th *Theme) IconButton(button *w.Clickable) *_iconButton {
+func (th *Theme) IconButton(button *_clickable) *_iconButton {
 	return &_iconButton{
 		th:         th,
 		background: th.Colors.Get("Primary"),
@@ -52,7 +50,7 @@ func (b *_iconButton) Color(color string) *_iconButton {
 }
 
 // Icon sets the icon to display
-func (b *_iconButton) Icon(ico *Ico) *_iconButton {
+func (b *_iconButton) Icon(ico *_icon) *_iconButton {
 	b.icon = ico
 	return b
 }
@@ -86,7 +84,7 @@ func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
 			}
 			dims := Fill(gtx, background)
 			for _, c := range b.button.History() {
-				drawInk(gtx, widget.Press(c))
+				drawInk(gtx, c)
 			}
 			return dims
 		},

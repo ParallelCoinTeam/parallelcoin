@@ -1,4 +1,4 @@
-package widget
+package p9
 
 import (
 	"image"
@@ -12,28 +12,28 @@ import (
 	"gioui.org/op"
 )
 
-type ClickEvents struct {
+type clickEvents struct {
 	Click, Cancel, Press func()
 }
 
-// Clickable represents a clickable area.
-type Clickable struct {
+// _clickable represents a clickable area.
+type _clickable struct {
 	click  gesture.Click
-	clicks []Click
+	clicks []click
 	// prevClicks is the index into clicks that marks the clicks from the most recent Fn call. prevClicks is used to
 	// keep clicks bounded.
 	prevClicks int
-	history    []Press
-	Events     ClickEvents
+	history    []press
+	Events     clickEvents
 }
 
-func NewClickable() (c *Clickable) {
-	c = &Clickable{
+func NewClickable() (c *_clickable) {
+	c = &_clickable{
 		click:      gesture.Click{},
 		clicks:     nil,
 		prevClicks: 0,
 		history:    nil,
-		Events: ClickEvents{
+		Events: clickEvents{
 			Click: func() {
 				// Debug("click event")
 			},
@@ -48,7 +48,7 @@ func NewClickable() (c *Clickable) {
 	return
 }
 
-func (c *Clickable) SetClick(fn func()) *Clickable {
+func (c *_clickable) SetClick(fn func()) *_clickable {
 	if c.Events.Click == nil {
 		c.Events.Click = func() {}
 	}
@@ -56,7 +56,7 @@ func (c *Clickable) SetClick(fn func()) *Clickable {
 	return c
 }
 
-func (c *Clickable) SetCancel(fn func()) *Clickable {
+func (c *_clickable) SetCancel(fn func()) *_clickable {
 	if c.Events.Cancel == nil {
 		c.Events.Cancel = func() {}
 	}
@@ -64,7 +64,7 @@ func (c *Clickable) SetCancel(fn func()) *Clickable {
 	return c
 }
 
-func (c *Clickable) SetPress(fn func()) *Clickable {
+func (c *_clickable) SetPress(fn func()) *_clickable {
 	if c.Events.Press == nil {
 		c.Events.Press = func() {}
 	}
@@ -73,27 +73,27 @@ func (c *Clickable) SetPress(fn func()) *Clickable {
 	return c
 }
 
-// Click represents a Click.
-type Click struct {
+// click represents a click.
+type click struct {
 	Modifiers key.Modifiers
 	NumClicks int
 }
 
-// Press represents a past pointer Press.
-type Press struct {
-	// Position of the Press.
+// press represents a past pointer press.
+type press struct {
+	// Position of the press.
 	Position f32.Point
-	// Start is when the Press began.
+	// Start is when the press began.
 	Start time.Time
-	// End is when the Press was ended by a release or Cancel. A zero End means it hasn't ended yet.
+	// End is when the press was ended by a release or Cancel. A zero End means it hasn't ended yet.
 	End time.Time
 	// Cancelled is true for cancelled presses.
 	Cancelled bool
 }
 
 // Clicked reports whether there are pending clicks as would be reported by Clicks. If so, Clicked removes the earliest
-// Click.
-func (c *Clickable) Clicked() bool {
+// click.
+func (c *_clickable) Clicked() bool {
 	if len(c.clicks) == 0 {
 		return false
 	}
@@ -106,7 +106,7 @@ func (c *Clickable) Clicked() bool {
 }
 
 // Clicks returns and clear the clicks since the last call to Clicks.
-func (c *Clickable) Clicks() []Click {
+func (c *_clickable) Clicks() []click {
 	clicks := c.clicks
 	c.clicks = nil
 	c.prevClicks = 0
@@ -115,11 +115,11 @@ func (c *Clickable) Clicks() []Click {
 
 // History is the past pointer presses useful for drawing markers. History is retained for a short duration (about a
 // second).
-func (c *Clickable) History() []Press {
+func (c *_clickable) History() []press {
 	return c.history
 }
 
-func (c *Clickable) Fn(gtx l.Context) l.Dimensions {
+func (c *_clickable) Fn(gtx l.Context) l.Dimensions {
 	c.update(gtx)
 	stack := op.Push(gtx.Ops)
 	pointer.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
@@ -136,8 +136,8 @@ func (c *Clickable) Fn(gtx l.Context) l.Dimensions {
 	return l.Dimensions{Size: gtx.Constraints.Min}
 }
 
-// update the button changeState by processing ClickEvents.
-func (c *Clickable) update(gtx l.Context) {
+// update the button changeState by processing clickEvents.
+func (c *_clickable) update(gtx l.Context) {
 	// if this is used by old code these functions have to be empty as they are called, not nil (which will panic)
 	if c.Events.Click == nil {
 		c.Events.Click = func() {
@@ -161,7 +161,7 @@ func (c *Clickable) update(gtx l.Context) {
 	for _, e := range c.click.Events(gtx) {
 		switch e.Type {
 		case gesture.TypeClick:
-			click := Click{
+			click := click{
 				Modifiers: e.Modifiers,
 				NumClicks: e.NumClicks,
 			}
@@ -179,7 +179,7 @@ func (c *Clickable) update(gtx l.Context) {
 			}
 			c.Events.Cancel()
 		case gesture.TypePress:
-			c.history = append(c.history, Press{
+			c.history = append(c.history, press{
 				Position: e.Position,
 				Start:    gtx.Now,
 			})

@@ -14,7 +14,7 @@ func (th *Theme) Flex() (out *_flex) {
 	return
 }
 
-// Alignment setters
+// alignment setters
 
 // AlignStart sets alignment for layout from Start
 func (f *_flex) AlignStart() (out *_flex) {

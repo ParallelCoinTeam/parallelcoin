@@ -10,25 +10,46 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"gioui.org/widget"
 
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
 type _slider struct {
-	Min, Max float32
-	Color    color.RGBA
-	Float    *widget.Float
+	th       *Theme
+	min, max float32
+	color    color.RGBA
+	float    *_float
 }
 
 // Slider is for selecting a value in a range.
-func (th *Theme) Slider(float *widget.Float, min, max float32) *_slider {
+func (th *Theme) Slider(float *_float, min, max float32) *_slider {
 	return &_slider{
-		Min:   min,
-		Max:   max,
-		Color: th.Colors.Get("Primary"),
-		Float: float,
+		th:    th,
+		min:   min,
+		max:   max,
+		color: th.Colors.Get("Primary"),
+		float: float,
 	}
+}
+
+func (s *_slider) Min(min float32) *_slider {
+	s.min = min
+	return s
+}
+
+func (s *_slider) Max(max float32) *_slider {
+	s.max = max
+	return s
+}
+
+func (s *_slider) Color(color string) *_slider {
+	s.color = s.th.Colors.Get(color)
+	return s
+}
+
+func (s *_slider) Float(f *_float) *_slider {
+	s.float = f
+	return s
 }
 
 // Fn renders the slider
@@ -50,11 +71,11 @@ func (s *_slider) Fn(c l.Context) l.Dimensions {
 	st := op.Push(c.Ops)
 	op.Offset(f32.Pt(halfWidth, 0)).Add(c.Ops)
 	c.Constraints.Min = image.Pt(size.X-2*halfWidthInt, size.Y)
-	s.Float.Layout(c, halfWidthInt, s.Min, s.Max)
-	thumbPos := halfWidth + s.Float.Pos()
+	s.float.Layout(c, halfWidthInt, s.min, s.max)
+	thumbPos := halfWidth + s.float.Pos()
 	st.Pop()
 
-	color := s.Color
+	color := s.color
 	if c.Queue == nil {
 		color = f32color.MulAlpha(color, 150)
 	}

@@ -7,38 +7,33 @@ import (
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/text"
-	"gioui.org/widget"
-
 	mico "golang.org/x/exp/shiny/materialdesign/icons"
 
-	"github.com/p9c/pod/pkg/gui/ico/svg"
-
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	w "github.com/p9c/pod/pkg/gui/widget"
+	"github.com/p9c/pod/pkg/gui/ico/svg"
 
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 var (
-	button0     = w.NewClickable()
-	button1     = w.NewClickable()
-	button2     = w.NewClickable()
-	bool1       bool
-	boolbutton1 = w.NewBool(&bool1)
-	iconbutton  = w.NewClickable()
-	iconbutton1 = w.NewClickable()
-	quit        = make(chan struct{})
-	th          *p9.Theme
-	progressbar *p9.ProgressBar
-	progress    int
-	slider      = &widget.Float{}
-	radio       = new(widget.Enum)
+	button0      = p9.NewClickable()
+	button1      = p9.NewClickable()
+	button2      = p9.NewClickable()
+	bool1, bool2 bool
+	boolButton1  = p9.NewBool(&bool1)
+	boolButton2  = p9.NewBool(&bool2)
+	iconbutton   = p9.NewClickable()
+	iconbutton1  = p9.NewClickable()
+	quit         = make(chan struct{})
+	th           = p9.NewTheme(p9fonts.Collection(), quit)
+	progress     int
+	slider       = th.Float()
+	radio        = th.Enum()
+	lineEditor   = th.Editor().SingleLine(true).Submit(true)
 )
 
 func Run(quit chan struct{}) {
-	th = p9.NewTheme(p9fonts.Collection(), quit)
-	progressbar = th.ProgressBar().SetProgress(0)
 	go func() {
 		fw := f.Window().Size(640, 480)
 		fw.Run(func(ctx *layout.Context) {
@@ -140,13 +135,13 @@ func buttons(th *p9.Theme) layout.Widget {
 					button0.SetClick(func() {
 						Info("clicked customised button")
 					})).
-					CornerRadius(1).
+					CornerRadius(3).
 					Background("Secondary").
 					Color("Dark").
 					Font("bariol bold").
 					TextScale(2).
 					Text("customised button").
-					Inset(1).
+					Inset(1.5).
 					Fn,
 			).Fn,
 		).Fn,
@@ -168,15 +163,10 @@ func buttons(th *p9.Theme) layout.Widget {
 			).Fn,
 		).Rigid(
 			th.Inset(0.25).Widget(
-				th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
-			).Fn,
-		).Rigid(
-			th.Inset(0.25).Widget(
 				th.IconButton(iconbutton.SetClick(
 					func() {
 						Debug("clicked parallelcoin button")
 					})).
-					Scale(50).
 					Icon(
 						th.Icon().
 							Color("Light").
@@ -197,54 +187,45 @@ func buttons(th *p9.Theme) layout.Widget {
 							Src(mico.ActionAndroid)).
 					Fn,
 			).Fn,
-		).Rigid(
-			th.Inset(0.25).Widget(
-				th.CheckBox(boolbutton1.SetHook(func(b bool) {
-					Debug("change state to", b)
-				})).
-					IconColor("Primary").
-					TextColor("DocText").
-					// IconScale(0.1).
-					Text("checkbox").
+		).Fn,
+	).Rigid(
+		th.ProgressBar().Color("Primary").SetProgress(progress).Fn,
+	).Rigid(
+		th.ProgressBar().Color("Primary").SetProgress(100 - progress).Fn,
+	).Rigid(
+		th.Flex().
+			Flexed(1,
+				th.Slider(slider, 0, 1).Fn,
+			).
+			Rigid(
+				th.Body1(fmt.Sprintf("%3v", int(slider.Value()*100))).
+					Font("go regular").Color("DocText").
 					Fn,
 			).Fn,
-		).Fn,
 	).Rigid(
 		th.Flex().Rigid(
-			th.Inset(0.25).Widget(
-				th.Flex().Rigid(
-					th.ProgressBar().Color("Primary").SetProgress(progress).Fn,
-				).Fn,
-			).Fn,
-		).Fn,
-	).Rigid(
-		// th.Flex().Rigid(
-			th.Inset(0.25).Widget(
-				th.Flex().Rigid(
-					th.ProgressBar().Color("Primary").SetProgress(100 - progress).Fn,
-				).Fn,
-			).Fn,
-		// ).Fn,
-	).Rigid(
-		th.Inset(0.25).Widget(
-			th.Flex().
-				Flexed(1,
-					th.Slider(slider, 0, 1).Fn,
-				).
-				Rigid(
-					th.Body1(fmt.Sprintf("%3v", int(slider.Value*100))).
-						Font("go regular").Color("DocText").
-						Fn,
-				).
-				Fn,
-		).Fn,
-	).Rigid(
-		th.Flex().Rigid(
+			th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
+		).Rigid(
 			th.RadioButton(radio, "r1", "first").Fn,
 		).Rigid(
 			th.RadioButton(radio, "r2", "second").Fn,
 		).Rigid(
 			th.RadioButton(radio, "r3", "third").Fn,
+		).Rigid(
+			th.Switch(boolButton2).Fn,
+		).Rigid(
+			th.CheckBox(boolButton1.SetHook(func(b bool) {
+				Debug("change state to", b)
+			})).
+				IconColor("Primary").
+				TextColor("DocText").
+				// IconScale(0.1).
+				Text("checkbox").
+				Fn,
+		).Fn,
+	).Rigid(
+		th.Inset(0.5).Widget(
+			th.Input(lineEditor).Fn,
 		).Fn,
 	).Fn
 }
