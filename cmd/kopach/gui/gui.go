@@ -7,8 +7,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 
-	"github.com/p9c/pod/pkg/gui/ico/svg"
 	mico "golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/p9c/pod/pkg/gui/ico/svg"
 
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	w "github.com/p9c/pod/pkg/gui/widget"
@@ -24,7 +25,7 @@ var (
 	bool1       bool
 	boolbutton1 = w.NewBool(&bool1)
 	iconbutton  = w.NewClickable()
-	iconbutton1  = w.NewClickable()
+	iconbutton1 = w.NewClickable()
 	quit        = make(chan struct{})
 	th          *p9.Theme
 	//
@@ -217,7 +218,7 @@ func buttons(th *p9.Theme) layout.Widget {
 		th.Flex().Rigid(
 			th.Inset(0.25).Widget(
 				th.Flex().Rigid(
-					th.ProgressBar().Color("Primary").SetProgress(100-progress).Fn,
+					th.ProgressBar().Color("Primary").SetProgress(100 - progress).Fn,
 				).Fn,
 			).Fn,
 		).Fn,
