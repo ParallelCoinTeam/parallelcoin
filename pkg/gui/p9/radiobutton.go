@@ -7,13 +7,6 @@ import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-type _radioButton struct {
-	_checkable
-	th    *Theme
-	key   string
-	group *_enum
-}
-
 // RadioButton returns a RadioButton with a label. The key specifies the value for the _enum.
 func (th *Theme) RadioButton(group *_enum, key, label string) *_radioButton {
 	return &_radioButton{
@@ -27,11 +20,20 @@ func (th *Theme) RadioButton(group *_enum, key, label string) *_radioButton {
 	}
 }
 
+type _radioButton struct {
+	_checkable
+	th    *Theme
+	key   string
+	group *_enum
+}
+
+// Key sets the key initially active on the radiobutton
 func (r *_radioButton) Key(key string) *_radioButton {
 	r.key = key
 	return r
 }
 
+// Group sets the enum group of the radio button
 func (r *_radioButton) Group(group *_enum) *_radioButton {
 	r.group = group
 	return r
@@ -39,8 +41,8 @@ func (r *_radioButton) Group(group *_enum) *_radioButton {
 
 // Fn updates enum and displays the radio button.
 func (r _radioButton) Fn(gtx layout.Context) layout.Dimensions {
-	dims := r._checkable.Fn(gtx, r.group.Value == r.key)
+	dims := r._checkable.Fn(gtx, r.group.Value() == r.key)
 	gtx.Constraints.Min = dims.Size
-	r.group.Layout(gtx, r.key)
+	r.group.Fn(gtx, r.key)
 	return dims
 }

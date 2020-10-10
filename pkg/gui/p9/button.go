@@ -117,7 +117,7 @@ func (b *_button) Fn(gtx l.Context) l.Dimensions {
 				Layout(gtx, b.shaper, b.font, b.textSize, b.text)
 		})
 	}
-	bl.Widget(fn)
+	bl.Embed(fn)
 	return bl.Fn(gtx)
 }
 

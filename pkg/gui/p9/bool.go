@@ -4,38 +4,44 @@ import (
 	"gioui.org/layout"
 )
 
-type changeStateHook func(b bool)
+type BoolHook func(b bool)
 
 type _bool struct {
-	value       *bool
+	th          *Theme
+	value       bool
 	clk         *_clickable
 	changed     bool
-	changeState changeStateHook
+	changeState BoolHook
 }
 
+// GetValue gets the boolean value stored in the widget
 func (b *_bool) GetValue() bool {
-	return *b.value
+	return b.value
 }
 
-func (b *_bool) Value(value *bool) {
+// Value sets the value of the boolean stored in the widget
+func (b *_bool) Value(value bool) {
 	b.value = value
 }
 
-func NewBool(value *bool) *_bool {
+// Bool creates a new boolean widget
+func (th *Theme) Bool(value bool) *_bool {
 	return &_bool{
+		th:          th,
 		value:       value,
-		clk:         NewClickable(),
+		clk:         Clickable(),
 		changed:     false,
-		changeState: func(b bool){},
+		changeState: func(b bool) {},
 	}
 }
 
-func (b *_bool) SetHook(fn changeStateHook) *_bool {
+// SetHook sets the callback function to run when the state changes
+func (b *_bool) SetHook(fn BoolHook) *_bool {
 	b.changeState = fn
 	return b
 }
 
-// Changed reports whether value has changed since the last call to Changed.
+// Changed reports whether value has changed since the last call to Changed
 func (b *_bool) Changed() bool {
 	changed := b.changed
 	b.changed = false
@@ -51,9 +57,9 @@ func (b *_bool) History() []press {
 func (b *_bool) Fn(gtx layout.Context) layout.Dimensions {
 	dims := b.clk.Fn(gtx)
 	for b.clk.Clicked() {
-		*b.value = !*b.value
+		b.value = !b.value
 		b.changed = true
-		b.changeState(*b.value)
+		b.changeState(b.value)
 	}
 	return dims
 }

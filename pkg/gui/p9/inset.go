@@ -22,8 +22,8 @@ func (th *Theme) Inset(pad float32) (out *_inset) {
 	return
 }
 
-// Widget sets the widget that will be inside the inset
-func (in *_inset) Widget(w l.Widget) *_inset {
+// Embed sets the widget that will be inside the inset
+func (in *_inset) Embed(w l.Widget) *_inset {
 	in.w = w
 	return in
 }

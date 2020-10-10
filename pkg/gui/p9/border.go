@@ -17,28 +17,44 @@ type _border struct {
 	color        color.RGBA
 	cornerRadius unit.Value
 	width        unit.Value
+	w            layout.Widget
 }
 
+// Border creates a border with configurable color, width and corner radius.
 func (th *Theme) Border() *_border {
-	b := &_border{th: th}
+	b := &_border{
+		th: th,
+	}
+	b.CornerRadius(0.25).Color("Primary").Width(0.125)
 	return b
 }
 
-func (b *_border) Color(color color.RGBA) *_border {
-	b.color = color
+// Color sets the color to render the border in
+func (b *_border) Color(color string) *_border {
+	b.color = b.th.Colors.Get(color)
 	return b
 }
+
+// CornerRadius sets the radius of the curve on the corners
 func (b *_border) CornerRadius(rad float32) *_border {
 	b.cornerRadius = b.th.textSize.Scale(rad)
 	return b
 }
+
+// Width sets the width of the border line
 func (b *_border) Width(width float32) *_border {
 	b.width = b.th.textSize.Scale(width)
 	return b
 }
 
-func (b *_border) Layout(gtx layout.Context, w layout.Widget) layout.Dimensions {
-	dims := w(gtx)
+func (b *_border) Embed(w layout.Widget) *_border {
+	b.w = w
+	return b
+}
+
+// Fn renders the border
+func (b *_border) Fn(gtx layout.Context) layout.Dimensions {
+	dims := b.w(gtx)
 	sz := dims.Size
 	rr := float32(gtx.Px(b.cornerRadius))
 	st := op.Push(gtx.Ops)

@@ -17,20 +17,21 @@ import (
 )
 
 var (
-	button0      = p9.NewClickable()
-	button1      = p9.NewClickable()
-	button2      = p9.NewClickable()
-	bool1, bool2 bool
-	boolButton1  = p9.NewBool(&bool1)
-	boolButton2  = p9.NewBool(&bool2)
-	iconbutton   = p9.NewClickable()
-	iconbutton1  = p9.NewClickable()
-	quit         = make(chan struct{})
 	th           = p9.NewTheme(p9fonts.Collection(), quit)
+	button0      = p9.Clickable()
+	button1      = p9.Clickable()
+	button2      = p9.Clickable()
+	bool1, bool2 bool
+	boolButton1  = th.Bool(bool1)
+	boolButton2  = th.Bool(bool2)
+	iconbutton   = p9.Clickable()
+	iconbutton1  = p9.Clickable()
+	quit         = make(chan struct{})
 	progress     int
 	slider       = th.Float()
 	radio        = th.Enum()
 	lineEditor   = th.Editor().SingleLine(true).Submit(true)
+	areaEditor   = th.Editor().SingleLine(false).Submit(false)
 )
 
 func Run(quit chan struct{}) {
@@ -50,14 +51,14 @@ func testLabels(th *p9.Theme, gtx layout.Context) {
 	th.Flex().Flexed(1,
 		th.Flex().Rigid(
 			th.Flex().Flexed(0.5,
-				th.Fill("PanelBg").Widget(
-					th.Inset(0.25).Widget(
+				th.Fill("PanelBg").Embed(
+					th.Inset(0.25).Embed(
 						blocks(th),
 					).Fn,
 				).Fn,
 			).Flexed(0.5,
-				th.Fill("DocBg").Widget(
-					th.Inset(0.25).Widget(
+				th.Fill("DocBg").Embed(
+					th.Inset(0.25).Embed(
 						buttons(th),
 					).Fn,
 				).Fn,
@@ -72,7 +73,7 @@ func testLabels(th *p9.Theme, gtx layout.Context) {
 
 func blocks(th *p9.Theme) layout.Widget {
 	return th.Flex().Vertical().Rigid(
-		th.Inset(0.25).Widget(
+		th.Inset(0.25).Embed(
 			th.Flex().Rigid(
 				th.H1("this is a H1").
 					Color("PanelText").
@@ -80,48 +81,48 @@ func blocks(th *p9.Theme) layout.Widget {
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Widget(
+		th.Inset(0.25).Embed(
 			th.H2("this is a H2").
 				Font("bariol regular").
 				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Widget(
+		th.Inset(0.25).Embed(
 			th.H3("this is a H3").
 				Alignment(text.End).
 				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Fill("DocBg").Widget(
-			th.Inset(0.25).Widget(
+		th.Fill("DocBg").Embed(
+			th.Inset(0.25).Embed(
 				th.H4("this is a H4").
 					Alignment(text.Middle).
 					Color("DocText").Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.Fill("PanelBg").Widget(
-			th.Inset(0.25).Widget(
+		th.Fill("PanelBg").Embed(
+			th.Inset(0.25).Embed(
 				th.H5("this is a H5").
 					Color("PanelText").
 					Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Widget(
+		th.Inset(0.25).Embed(
 			th.H6("this is a H6").
 				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Widget(
+		th.Inset(0.25).Embed(
 			th.Body1("this is a Body1").Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Widget(
+		th.Inset(0.25).Embed(
 			th.Body2("this is a Body2").Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Widget(
+		th.Inset(0.25).Embed(
 			th.Caption("this is a Caption").Color("PanelText").Fn,
 		).Fn,
 	).Fn
@@ -129,7 +130,7 @@ func blocks(th *p9.Theme) layout.Widget {
 
 func buttons(th *p9.Theme) layout.Widget {
 	return th.Flex().Vertical().Rigid(
-		th.Inset(0.25).Widget(
+		th.Inset(0.25).Embed(
 			th.Flex().Rigid(
 				th.Button(
 					button0.SetClick(func() {
@@ -147,7 +148,7 @@ func buttons(th *p9.Theme) layout.Widget {
 		).Fn,
 	).Rigid(
 		th.Flex().Rigid(
-			th.Inset(0.25).Widget(
+			th.Inset(0.25).Embed(
 				th.Button(
 					button2.SetClick(func() {
 						Info("clicked default style button")
@@ -156,13 +157,13 @@ func buttons(th *p9.Theme) layout.Widget {
 					Fn,
 			).Fn,
 		).Rigid(
-			th.Inset(0.25).Widget(
+			th.Inset(0.25).Embed(
 				th.Flex().Rigid(
 					th.Indefinite().Color("Primary").Fn,
 				).Fn,
 			).Fn,
 		).Rigid(
-			th.Inset(0.25).Widget(
+			th.Inset(0.25).Embed(
 				th.IconButton(iconbutton.SetClick(
 					func() {
 						Debug("clicked parallelcoin button")
@@ -174,7 +175,7 @@ func buttons(th *p9.Theme) layout.Widget {
 					Fn,
 			).Fn,
 		).Rigid(
-			th.Inset(0.25).Widget(
+			th.Inset(0.25).Embed(
 				th.IconButton(iconbutton1.SetClick(
 					func() {
 						Debug("clicked android button")
@@ -191,7 +192,7 @@ func buttons(th *p9.Theme) layout.Widget {
 	).Rigid(
 		th.ProgressBar().Color("Primary").SetProgress(progress).Fn,
 	).Rigid(
-		th.ProgressBar().Color("Primary").SetProgress(100 - progress).Fn,
+		th.ProgressBar().Color("Primary").SetProgress(100-progress).Fn,
 	).Rigid(
 		th.Flex().
 			Flexed(1,
@@ -224,8 +225,20 @@ func buttons(th *p9.Theme) layout.Widget {
 				Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.5).Widget(
-			th.Input(lineEditor).Fn,
+		th.Inset(0.25).Embed(
+			th.Border().Embed(
+				th.Inset(0.25).Embed(
+					th.Input(lineEditor).Fn,
+				).Fn,
+			).Fn,
+		).Fn,
+	).Flexed(1,
+		th.Inset(0.25).Embed(
+			th.Border().Embed(
+				th.Inset(0.25).Embed(
+					th.Input(areaEditor).Fn,
+				).Fn,
+			).Fn,
 		).Fn,
 	).Fn
 }

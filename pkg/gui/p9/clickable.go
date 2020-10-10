@@ -27,7 +27,7 @@ type _clickable struct {
 	Events     clickEvents
 }
 
-func NewClickable() (c *_clickable) {
+func Clickable() (c *_clickable) {
 	c = &_clickable{
 		click:      gesture.Click{},
 		clicks:     nil,

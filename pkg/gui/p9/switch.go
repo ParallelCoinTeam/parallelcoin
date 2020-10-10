@@ -52,7 +52,7 @@ func (s *_switch) Switch(boo *_bool) *_switch {
 
 // Fn updates the switch and displays it.
 func (s *_switch) Fn(gtx l.Context) l.Dimensions {
-	return s.th.Inset(0.25).Widget(func(gtx l.Context) l.Dimensions {
+	return s.th.Inset(0.25).Embed(func(gtx l.Context) l.Dimensions {
 		trackWidth := gtx.Px(s.th.textSize.Scale(2.75))
 		trackHeight := gtx.Px(s.th.textSize.Scale(1))
 		thumbSize := gtx.Px(s.th.textSize.Scale(1.5))

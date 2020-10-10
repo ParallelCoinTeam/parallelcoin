@@ -19,7 +19,7 @@ func (th *Theme) Fill(col string) *_filler {
 	return &_filler{th: th, col: col}
 }
 
-func (f *_filler) Widget(w l.Widget) *_filler {
+func (f *_filler) Embed(w l.Widget) *_filler {
 	f.w = w
 	return f
 }

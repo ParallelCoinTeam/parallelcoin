@@ -19,6 +19,7 @@ type _buttonLayout struct {
 	w            l.Widget
 }
 
+// ButtonLayout creates a button with a background and another widget over top
 func (th *Theme) ButtonLayout(button *_clickable) *_buttonLayout {
 	return &_buttonLayout{
 		th:           th,
@@ -28,21 +29,25 @@ func (th *Theme) ButtonLayout(button *_clickable) *_buttonLayout {
 	}
 }
 
+// Background sets the background color of the button
 func (b *_buttonLayout) Background(color string) *_buttonLayout {
 	b.background = b.th.Colors.Get(color)
 	return b
 }
 
+// CornerRadius sets the radius of the corners of the button
 func (b *_buttonLayout) CornerRadius(radius float32) *_buttonLayout {
 	b.cornerRadius = b.th.textSize.Scale(radius)
 	return b
 }
 
-func (b *_buttonLayout) Widget(w l.Widget) *_buttonLayout {
+// Embed a widget in the button
+func (b *_buttonLayout) Embed(w l.Widget) *_buttonLayout {
 	b.w = w
 	return b
 }
 
+// Fn is the function that draws the button and its child widget
 func (b *_buttonLayout) Fn(gtx l.Context) l.Dimensions {
 	min := gtx.Constraints.Min
 	return l.Stack{Alignment: l.Center}.Layout(gtx,

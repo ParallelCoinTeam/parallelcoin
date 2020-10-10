@@ -89,14 +89,17 @@ func (e *_editor) Alignment(alignment text.Alignment) *_editor {
 	e.alignment = alignment
 	return e
 }
+
 func (e *_editor) SingleLine(singleLine bool) *_editor {
 	e.singleLine = singleLine
 	return e
 }
+
 func (e *_editor) Submit(submit bool) *_editor {
 	e.submit = submit
 	return e
 }
+
 func (e *_editor) Mask(mask rune) *_editor {
 	e.mask = mask
 	return e
@@ -576,10 +579,9 @@ func (e *_editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	}
 	dims := linesDimens(lines)
 	for i := 0; i < len(lines)-1; i++ {
-		// To avoid layout flickering while editing, assume a soft newline takes
-		// up all available space.
-		if layout := lines[i].Layout; len(layout) > 0 {
-			r := layout[len(layout)-1].Rune
+		// To avoid layout flickering while editing, assume a soft newline takes up all available space.
+		if lay := lines[i].Layout; len(lay) > 0 {
+			r := lay[len(lay)-1].Rune
 			if r != '\n' {
 				dims.Size.X = e.maxWidth
 				break

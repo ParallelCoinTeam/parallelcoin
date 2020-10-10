@@ -10,16 +10,23 @@ import (
 )
 
 type _enum struct {
-	Value string
-
+	value string
 	changed bool
-
 	clicks []gesture.Click
 	values []string
 }
 
 func (th *Theme) Enum() *_enum {
 	return &_enum{}
+}
+
+func (e *_enum) Value() string {
+	return e.value
+}
+
+func (e *_enum) SetValue(value string) *_enum {
+	e.value = value
+	return e
 }
 
 func index(vs []string, t string) int {
@@ -31,16 +38,15 @@ func index(vs []string, t string) int {
 	return -1
 }
 
-// Changed reports whether Value has changed by user interactino since the last
-// call to Changed.
+// Changed reports whether Value has changed by user interaction since the last call to Changed.
 func (e *_enum) Changed() bool {
 	changed := e.changed
 	e.changed = false
 	return changed
 }
 
-// Layout adds the event handler for key.
-func (e *_enum) Layout(gtx layout.Context, key string) layout.Dimensions {
+// Fn adds the event handler for key.
+func (e *_enum) Fn(gtx layout.Context, key string) layout.Dimensions {
 	defer op.Push(gtx.Ops).Pop()
 	pointer.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
 
@@ -54,8 +60,8 @@ func (e *_enum) Layout(gtx layout.Context, key string) layout.Dimensions {
 		for _, ev := range clk.Events(gtx) {
 			switch ev.Type {
 			case gesture.TypeClick:
-				if new := e.values[idx]; new != e.Value {
-					e.Value = new
+				if new := e.values[idx]; new != e.value {
+					e.value = new
 					e.changed = true
 				}
 			}
