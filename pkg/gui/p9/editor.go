@@ -78,10 +78,17 @@ type _editor struct {
 	events []EditorEvent
 	// prevEvents is the number of events from the previous frame.
 	prevEvents int
+	submitHook func(string)
+	changeHook func(string)
+	focusHook  func(bool)
 }
 
 func (th *Theme) Editor() *_editor {
-	e := &_editor{}
+	e := &_editor{
+		submitHook: func(string) {},
+		changeHook: func(string) {},
+		focusHook:  func(bool) {},
+	}
 	return e
 }
 
@@ -102,6 +109,21 @@ func (e *_editor) Submit(submit bool) *_editor {
 
 func (e *_editor) Mask(mask rune) *_editor {
 	e.mask = mask
+	return e
+}
+
+func (e *_editor) SetSubmit(submitFn func(txt string)) *_editor {
+	e.submitHook = submitFn
+	return e
+}
+
+func (e *_editor) SetChange(changeFn func(txt string)) *_editor {
+	e.changeHook = changeFn
+	return e
+}
+
+func (e *_editor) SetFocus(focusFn func(is bool)) *_editor {
+	e.focusHook = focusFn
 	return e
 }
 
@@ -253,6 +275,7 @@ func (e *_editor) processKey(gtx layout.Context) {
 		switch ke := ke.(type) {
 		case key.FocusEvent:
 			e.focused = ke.Focus
+			e.focusHook(ke.Focus)
 		case key.Event:
 			if !e.focused {
 				break
@@ -262,6 +285,7 @@ func (e *_editor) processKey(gtx layout.Context) {
 					e.events = append(e.events, SubmitEvent{
 						Text: e.Text(),
 					})
+					e.submitHook(e.Text())
 					return
 				}
 			}
@@ -276,6 +300,7 @@ func (e *_editor) processKey(gtx layout.Context) {
 		}
 		if e.rr.Changed() {
 			e.events = append(e.events, ChangeEvent{})
+			e.changeHook(e.Text())
 		}
 	}
 }
@@ -849,9 +874,11 @@ func (e *_editor) moveWord(distance int) {
 	}
 }
 
-// deleteWord the next word(s) in the specified direction.
-// Unlike moveWord, deleteWord treats whitespace as a word itself.
+// deleteWord the next word(s) in the specified direction. Unlike moveWord, deleteWord treats whitespace as a word
+// itself.
+//
 // Positive is forward, negative is backward.
+//
 // Absolute values greater than one will delete that many words.
 func (e *_editor) deleteWord(distance int) {
 	e.makeValid()

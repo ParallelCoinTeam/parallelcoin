@@ -19,6 +19,7 @@ func (th *Theme) CheckBox(checkBox *_bool) *_checkbox {
 		label:      label,
 		checkBox:   checkBox,
 		_checkable: chk,
+		action:     func(b bool) {},
 	}
 }
 
@@ -26,7 +27,7 @@ type _checkbox struct {
 	*_checkable
 	checkBox                *_bool
 	color, textColor, label string
-	action                  func(b, cs bool)
+	action                  func(b bool)
 }
 
 // IconColor sets the color of the icon in the checkbox
@@ -61,7 +62,7 @@ func (c *_checkbox) IconScale(scale float32) *_checkbox {
 
 // SetOnChange sets the callback when a state change event occurs
 func (c *_checkbox) SetOnChange(fn func(b bool)) *_checkbox {
-	c.checkBox.SetOnChange(fn)
+	c.action = fn
 	return c
 }
 

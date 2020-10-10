@@ -34,42 +34,26 @@ func Clickable() (c *_clickable) {
 		prevClicks: 0,
 		history:    nil,
 		Events: clickEvents{
-			Click: func() {
-				// Debug("click event")
-			},
-			Cancel: func() {
-				// Debug("cancel event")
-			},
-			Press: func() {
-				// Debug("press event")
-			},
+			Click:  func() {},
+			Cancel: func() {},
+			Press:  func() {},
 		},
 	}
 	return
 }
 
 func (c *_clickable) SetClick(fn func()) *_clickable {
-	if c.Events.Click == nil {
-		c.Events.Click = func() {}
-	}
 	c.Events.Click = fn
 	return c
 }
 
 func (c *_clickable) SetCancel(fn func()) *_clickable {
-	if c.Events.Cancel == nil {
-		c.Events.Cancel = func() {}
-	}
 	c.Events.Cancel = fn
 	return c
 }
 
 func (c *_clickable) SetPress(fn func()) *_clickable {
-	if c.Events.Press == nil {
-		c.Events.Press = func() {}
-	}
 	c.Events.Press = fn
-
 	return c
 }
 
@@ -138,22 +122,6 @@ func (c *_clickable) Fn(gtx l.Context) l.Dimensions {
 
 // update the button changeState by processing clickEvents.
 func (c *_clickable) update(gtx l.Context) {
-	// if this is used by old code these functions have to be empty as they are called, not nil (which will panic)
-	if c.Events.Click == nil {
-		c.Events.Click = func() {
-			Debug("click event")
-		}
-	}
-	if c.Events.Cancel == nil {
-		c.Events.Cancel = func() {
-			Debug("cancel event")
-		}
-	}
-	if c.Events.Press == nil {
-		c.Events.Press = func() {
-			Debug("press event")
-		}
-	}
 	// Flush clicks from before the last update.
 	n := copy(c.clicks, c.clicks[c.prevClicks:])
 	c.clicks = c.clicks[:n]

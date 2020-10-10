@@ -10,15 +10,15 @@ import (
 )
 
 type _enum struct {
-	value string
+	value   string
 	changed bool
-	clicks []gesture.Click
-	values []string
-	hook func(value string)
+	clicks  []gesture.Click
+	values  []string
+	hook    func(value string)
 }
 
 func (th *Theme) Enum() *_enum {
-	return &_enum{}
+	return &_enum{hook: func(string) {}}
 }
 
 func (e *_enum) Value() string {
@@ -30,8 +30,8 @@ func (e *_enum) SetValue(value string) *_enum {
 	return e
 }
 
-func (e *_enum) SetOnChange(func(value string)) *_enum {
-
+func (e *_enum) SetOnChange(hook func(value string)) *_enum {
+	e.hook = hook
 	return e
 }
 
@@ -69,6 +69,7 @@ func (e *_enum) Fn(gtx layout.Context, key string) layout.Dimensions {
 				if new := e.values[idx]; new != e.value {
 					e.value = new
 					e.changed = true
+					e.hook(e.value)
 				}
 			}
 		}

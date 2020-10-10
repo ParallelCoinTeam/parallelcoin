@@ -71,7 +71,7 @@ func (s *_slider) Fn(c l.Context) l.Dimensions {
 	st := op.Push(c.Ops)
 	op.Offset(f32.Pt(halfWidth, 0)).Add(c.Ops)
 	c.Constraints.Min = image.Pt(size.X-2*halfWidthInt, size.Y)
-	s.float.Layout(c, halfWidthInt, s.min, s.max)
+	s.float.Fn(c, halfWidthInt, s.min, s.max)
 	thumbPos := halfWidth + s.float.Pos()
 	st.Pop()
 

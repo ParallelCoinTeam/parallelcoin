@@ -147,12 +147,9 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			Debug("ignoring other controller job")
+			Trace("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
-		}
-		if firstSender == "" {
-			Warn("new sender", addr)
 		}
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())

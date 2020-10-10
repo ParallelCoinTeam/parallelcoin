@@ -13,16 +13,16 @@ import (
 
 // _float is for selecting a value in a range.
 type _float struct {
-	value float32
-
-	drag    gesture.Drag
-	pos     float32 // position normalized to [0, 1]
-	length  float32
-	changed bool
+	value      float32
+	drag       gesture.Drag
+	pos        float32 // position normalized to [0, 1]
+	length     float32
+	changed    bool
+	changeHook func(float32)
 }
 
 func (th *Theme) Float() *_float {
-	return &_float{}
+	return &_float{changeHook: func(float32) {}}
 }
 
 func (f *_float) SetValue(value float32) *_float {
@@ -33,18 +33,21 @@ func (f *_float) Value() float32 {
 	return f.value
 }
 
-// Layout processes events.
-func (f *_float) Layout(gtx layout.Context, pointerMargin int, min, max float32) layout.Dimensions {
+func (f *_float) SetHook(fn func(fl float32)) *_float {
+	f.changeHook = fn
+	return f
+}
+
+// Fn processes events.
+func (f *_float) Fn(gtx layout.Context, pointerMargin int, min, max float32) layout.Dimensions {
 	size := gtx.Constraints.Min
 	f.length = float32(size.X)
-
 	var de *pointer.Event
 	for _, e := range f.drag.Events(gtx.Metric, gtx, gesture.Horizontal) {
 		if e.Type == pointer.Press || e.Type == pointer.Drag {
 			de = &e
 		}
 	}
-
 	value := f.value
 	if de != nil {
 		f.pos = de.Position.X / f.length
@@ -83,6 +86,7 @@ func (f *_float) setValue(value, min, max float32) {
 	if f.value != value {
 		f.value = value
 		f.changed = true
+		f.changeHook(value)
 	}
 }
 
@@ -91,8 +95,7 @@ func (f *_float) Pos() float32 {
 	return f.pos * f.length
 }
 
-// Changed reports whether the value has changed since
-// the last call to Changed.
+// Changed reports whether the value has changed since the last call to Changed.
 func (f *_float) Changed() bool {
 	changed := f.changed
 	f.changed = false
