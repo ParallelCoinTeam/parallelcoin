@@ -103,6 +103,21 @@ func (b *_button) TextScale(scale float32) *_button {
 	return b
 }
 
+func (b *_button) SetClick(fn func()) *_button {
+	b.button.SetClick(fn)
+	return b
+}
+
+func (b *_button) SetCancel(fn func()) *_button {
+	b.button.SetCancel(fn)
+	return b
+}
+
+func (b *_button) SetPress(fn func()) *_button {
+	b.button.SetPress(fn)
+	return b
+}
+
 // Fn renders the button
 func (b *_button) Fn(gtx l.Context) l.Dimensions {
 	bl := &_buttonLayout{

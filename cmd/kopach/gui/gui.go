@@ -215,7 +215,7 @@ func buttons(th *p9.Theme) layout.Widget {
 		).Rigid(
 			th.Switch(boolButton2).Fn,
 		).Rigid(
-			th.CheckBox(boolButton1.SetHook(func(b bool) {
+			th.CheckBox(boolButton1.SetOnChange(func(b bool) {
 				Debug("change state to", b)
 			})).
 				IconColor("Primary").

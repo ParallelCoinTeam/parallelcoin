@@ -128,10 +128,6 @@ func (c *_checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 						Size: image.Point{X: size, Y: size},
 					}
 				}).Fn,
-		// ).Rigid(
-		// 	c.th.Inset(0.125).Embed(func(ctx l.Context) l.Dimensions {
-		// 		return l.Dimensions{}
-		// 	}).Fn,
 		).Rigid(
 			c.th.Inset(0.25).Embed(
 				func(gtx l.Context) l.Dimensions {

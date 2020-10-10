@@ -59,9 +59,9 @@ func (c *_checkbox) IconScale(scale float32) *_checkbox {
 	return c
 }
 
-// Action sets the callback when a state change event occurs
-func (c *_checkbox) Action(fn func(b bool)) *_checkbox {
-	c.checkBox.SetHook(fn)
+// SetOnChange sets the callback when a state change event occurs
+func (c *_checkbox) SetOnChange(fn func(b bool)) *_checkbox {
+	c.checkBox.SetOnChange(fn)
 	return c
 }
 

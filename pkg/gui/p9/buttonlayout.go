@@ -47,6 +47,21 @@ func (b *_buttonLayout) Embed(w l.Widget) *_buttonLayout {
 	return b
 }
 
+func (b *_buttonLayout) SetClick(fn func()) *_buttonLayout {
+	b.button.SetClick(fn)
+	return b
+}
+
+func (b *_buttonLayout) SetCancel(fn func()) *_buttonLayout {
+	b.button.SetCancel(fn)
+	return b
+}
+
+func (b *_buttonLayout) SetPress(fn func()) *_buttonLayout {
+	b.button.SetPress(fn)
+	return b
+}
+
 // Fn is the function that draws the button and its child widget
 func (b *_buttonLayout) Fn(gtx l.Context) l.Dimensions {
 	min := gtx.Constraints.Min

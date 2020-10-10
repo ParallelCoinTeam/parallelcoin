@@ -35,8 +35,8 @@ func (th *Theme) Bool(value bool) *_bool {
 	}
 }
 
-// SetHook sets the callback function to run when the state changes
-func (b *_bool) SetHook(fn BoolHook) *_bool {
+// SetOnChange sets the callback function to run when the state changes
+func (b *_bool) SetOnChange(fn BoolHook) *_bool {
 	b.changeState = fn
 	return b
 }

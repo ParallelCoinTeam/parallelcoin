@@ -14,6 +14,7 @@ type _enum struct {
 	changed bool
 	clicks []gesture.Click
 	values []string
+	hook func(value string)
 }
 
 func (th *Theme) Enum() *_enum {
@@ -26,6 +27,11 @@ func (e *_enum) Value() string {
 
 func (e *_enum) SetValue(value string) *_enum {
 	e.value = value
+	return e
+}
+
+func (e *_enum) SetOnChange(func(value string)) *_enum {
+
 	return e
 }
 

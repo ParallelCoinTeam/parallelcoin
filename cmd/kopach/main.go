@@ -123,7 +123,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		Debug("listening on", control.UDP4MulticastAddress)
 		if *cx.Config.KopachGUI {
 			Info("opening miner controller GUI")
-			gui.Run(cx.KillAll)
+			go gui.Run(cx.KillAll)
 		}
 		<-cx.KillAll
 		Info("kopach shutting down")
