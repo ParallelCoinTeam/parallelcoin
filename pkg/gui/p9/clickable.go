@@ -27,16 +27,22 @@ type Clickable struct {
 	Events     clickEvents
 }
 
-func NewClickable() (c *Clickable) {
+func (th *Theme) Clickable() (c *Clickable) {
 	c = &Clickable{
 		click:      gesture.Click{},
 		clicks:     nil,
 		prevClicks: 0,
 		history:    nil,
 		Events: clickEvents{
-			Click:  func() {},
-			Cancel: func() {},
-			Press:  func() {},
+			Click:  func() {
+				// Debug("click event")
+			},
+			Cancel: func() {
+				// Debug("cancel event")
+			},
+			Press:  func() {
+				// Debug("press event")
+			},
 		},
 	}
 	return

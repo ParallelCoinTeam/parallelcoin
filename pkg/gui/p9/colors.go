@@ -15,12 +15,11 @@ func HexARGB(s string) (c color.RGBA) {
 }
 
 // Get returns the named color from the map
-func (c Colors) Get(color string) color.RGBA {
-	if col, ok := c[color]; ok {
+func (c Colors) Get(co string) color.RGBA {
+	if col, ok := c[co]; ok {
 		return HexARGB(col)
 	}
-	// return red if the color is not found to alert the programmer
-	return HexARGB(c["red"])
+	return color.RGBA{}
 }
 
 // NewColors creates the base palette for the theme

@@ -29,7 +29,7 @@ func (th *Theme) Bool(value bool) *Bool {
 	return &Bool{
 		th:          th,
 		value:       value,
-		clk:         NewClickable(),
+		clk:         th.Clickable(),
 		changed:     false,
 		changeState: func(b bool) {},
 	}

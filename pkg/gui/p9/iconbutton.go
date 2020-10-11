@@ -34,6 +34,7 @@ func (th *Theme) IconButton(button *Clickable) *_iconButton {
 		size:       th.TextSize,
 		inset:      th.Inset(0.33),
 		button:     button,
+		icon:       th.Icon(),
 	}
 }
 
@@ -50,14 +51,16 @@ func (b *_iconButton) Color(color string) *_iconButton {
 }
 
 // Icon sets the icon to display
-func (b *_iconButton) Icon(ico *_icon) *_iconButton {
-	b.icon = ico
+func (b *_iconButton) Icon(data []byte) *_iconButton {
+	b.icon.color = b.color
+	b.icon.Size(b.size)
+	b.icon.Src(data)
 	return b
 }
 
 // Scale changes the size of the icon as a ratio of the base font size
 func (b *_iconButton) Scale(scale float32) *_iconButton {
-	b.size = b.th.TextSize.Scale(scale)
+	b.size = b.th.TextSize.Scale(scale*0.72)
 	return b
 }
 
@@ -104,7 +107,7 @@ func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
 			return dims
 		},
 	).Stacked(
-		b.inset.Embed(b.icon.Scale(1.33).Fn).Fn,
+		b.inset.Embed(b.icon.Fn).Fn,
 	).Expanded(func(gtx l.Context) l.Dimensions {
 		pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
 		return b.button.Fn(gtx)

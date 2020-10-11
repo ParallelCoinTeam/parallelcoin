@@ -86,48 +86,64 @@ func (l *_label) Font(font string) *_label {
 	return l
 }
 
+type ScaleType map[string]float32
+
+var (
+	Scales = ScaleType{
+		"H1":      96.0 / 16.0,
+		"H2":      60.0 / 16.0,
+		"H3":      48.0 / 16.0,
+		"H4":      34.0 / 16.0,
+		"H5":      24.0 / 16.0,
+		"H6":      20.0 / 16.0,
+		"Body1":   1,
+		"Body2":   14.0 / 16.0,
+		"Caption": 12.0 / 16.0,
+	}
+)
+
 func (th *Theme) H1(txt string) (l *_label) {
-	l = th.Label().TextScale(96.0 / 16.0).Font("plan9").Text(txt)
+	l = th.Label().TextScale(Scales["H1"]).Font("plan9").Text(txt)
 	return
 }
 
 func (th *Theme) H2(txt string) (l *_label) {
-	l = th.Label().TextScale(60.0 / 16.0).Font("plan9").Text(txt)
+	l = th.Label().TextScale(Scales["H2"]).Font("plan9").Text(txt)
 	return
 }
 
 func (th *Theme) H3(txt string) (l *_label) {
-	l = th.Label().TextScale(48.0 / 16.0).Font("plan9").Text(txt)
+	l = th.Label().TextScale(Scales["H3"]).Font("plan9").Text(txt)
 	return
 }
 
 func (th *Theme) H4(txt string) (l *_label) {
-	l = th.Label().TextScale(34.0 / 16.0).Font("plan9").Text(txt)
+	l = th.Label().TextScale(Scales["H4"]).Font("plan9").Text(txt)
 	return
 }
 
 func (th *Theme) H5(txt string) (l *_label) {
-	l = th.Label().TextScale(24.0 / 16.0).Font("plan9").Text(txt)
+	l = th.Label().TextScale(Scales["H5"]).Font("plan9").Text(txt)
 	return
 }
 
 func (th *Theme) H6(txt string) (l *_label) {
-	l = th.Label().TextScale(20.0 / 16.0).Font("plan9").Text(txt)
+	l = th.Label().TextScale(Scales["H6"]).Font("plan9").Text(txt)
 	return
 }
 
 func (th *Theme) Body1(txt string) (l *_label) {
-	l = th.Label().TextScale(1).Font("bariol regular").Text(txt)
+	l = th.Label().TextScale(Scales["Body1"]).Font("bariol regular").Text(txt)
 	return
 }
 
 func (th *Theme) Body2(txt string) (l *_label) {
-	l = th.Label().TextScale(14.0 / 16.0).Font("bariol regular").Text(txt)
+	l = th.Label().TextScale(Scales["Body2"]).Font("bariol regular").Text(txt)
 	return
 }
 
 func (th *Theme) Caption(txt string) (l *_label) {
-	l = th.Label().TextScale(12.0 / 16.0).Font("bariol regular").Text(txt)
+	l = th.Label().TextScale(Scales["Caption"]).Font("bariol regular").Text(txt)
 	return
 }
 

@@ -32,13 +32,13 @@ func main() {
 	th := p9.NewTheme(p9fonts.Collection(), quit)
 	minerModel := MinerModel{
 		th:          th,
-		button0:     p9.NewClickable(),
-		button1:     p9.NewClickable(),
-		button2:     p9.NewClickable(),
+		button0:     th.Clickable(),
+		button1:     th.Clickable(),
+		button2:     th.Clickable(),
 		boolButton1: th.Bool(false),
 		boolButton2: th.Bool(false),
-		iconbutton:  p9.NewClickable(),
-		iconbutton1: p9.NewClickable(),
+		iconbutton:  th.Clickable(),
+		iconbutton1: th.Clickable(),
 		quit:        make(chan struct{}),
 		progress:    0,
 		slider:      th.Float(),
@@ -53,9 +53,7 @@ func main() {
 			Size(800, 600).
 			Title("example").
 			Open().
-			Run(func(ctx *layout.Context) {
-				minerModel.testLabels(*ctx)
-			}, func() {
+			Run(minerModel.testLabels, func() {
 				close(quit)
 				os.Exit(0)
 			}); Check(err) {
@@ -188,10 +186,7 @@ func (m *MinerModel) buttons() layout.Widget {
 					func() {
 						Debug("clicked parallelcoin button")
 					})).
-					Icon(
-						th.Icon().
-							Color("Light").
-							Src(icons.ParallelCoin)).
+					Icon(icons.ParallelCoin).
 					Fn,
 			).Fn,
 		).Rigid(
@@ -200,12 +195,9 @@ func (m *MinerModel) buttons() layout.Widget {
 					func() {
 						Debug("clicked android button")
 					})).
-					Scale(50).
+					Scale(1).
 					Background("Secondary").
-					Icon(
-						th.Icon().
-							Color("Light").
-							Src(mico.ActionAndroid)).
+					Icon(mico.ActionAndroid).
 					Fn,
 			).Fn,
 		).Fn,
