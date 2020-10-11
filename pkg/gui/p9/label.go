@@ -135,5 +135,5 @@ func (th *Theme) Caption(txt string) (l *_label) {
 func (l *_label) Fn(gtx l.Context) l.Dimensions {
 	paint.ColorOp{Color: l.color}.Add(gtx.Ops)
 	tl := _text{alignment: l.alignment, maxLines: l.maxLines}
-	return tl.Fn(gtx, l.shaper, l.font, l.textSize, l.text)
+	return tl.Layout(gtx, l.shaper, l.font, l.textSize, l.text)
 }

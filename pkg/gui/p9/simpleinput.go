@@ -82,7 +82,7 @@ func (e *_textInput) Fn(c l.Context) l.Dimensions {
 	macro := op.Record(c.Ops)
 	paint.ColorOp{Color: e.hintColor}.Add(c.Ops)
 	tl := _text{alignment: e.editor.alignment}
-	dims := tl.Fn(c, e.shaper, e.font, e.textSize, e.hint)
+	dims := tl.Layout(c, e.shaper, e.font, e.textSize, e.hint)
 	call := macro.Stop()
 	if w := dims.Size.X; c.Constraints.Min.X < w {
 		c.Constraints.Min.X = w

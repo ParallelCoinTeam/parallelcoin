@@ -422,12 +422,12 @@ func (e *_editor) layout(gtx layout.Context) layout.Dimensions {
 	}
 	clip := textPadding(e.lines)
 	clip.Max = clip.Max.Add(e.viewSize)
-	it := _lineIterator{
-		lines:     e.lines,
-		clip:      clip,
-		alignment: e.alignment,
-		width:     e.viewSize.X,
-		offset:    off,
+	it := lineIterator{
+		Lines:     e.lines,
+		Clip:      clip,
+		Alignment: e.alignment,
+		Width:     e.viewSize.X,
+		Offset:    off,
 	}
 	e.shapes = e.shapes[:0]
 	for {
