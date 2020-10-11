@@ -1,14 +1,13 @@
 package gui
 
 import (
-	"os"
-
 	"gioui.org/app"
 	"gioui.org/layout"
 
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 type MinerModel struct {
@@ -25,19 +24,20 @@ func Run(quit chan struct{}) {
 			Size(640, 480).
 			Title("parallelcoin kopach miner control gui").
 			Open().
-			Run(func(ctx *layout.Context) {
-				minerModel.Widget(*ctx)
-			}, func() {
-				close(quit)
-				os.Exit(0)
-			}); Check(err) {
+			Run(
+				minerModel.Widget,
+				func() {
+					Debug("quitting miner")
+					close(quit)
+					interrupt.Request()
+				}); Check(err) {
 		}
 	}()
 	app.Main()
 }
 
-func (m *MinerModel) Widget(gtx layout.Context) {
-	m.Fill("DocBg").Embed(
+func (m *MinerModel) Widget(gtx layout.Context) layout.Dimensions {
+	return m.Fill("DocBg").Embed(
 		m.Flex().Vertical().Rigid(
 			m.Label().Text("this is a test").Fn,
 		).Fn,

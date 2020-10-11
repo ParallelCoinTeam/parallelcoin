@@ -77,7 +77,7 @@ func (w *window) Open() (out *window) {
 	return w
 }
 
-func (w *window) Run(frame func(ctx *layout.Context), destroy func()) (err error) {
+func (w *window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy func()) (err error) {
 	// w.set()
 	var ops op.Ops
 	for {
@@ -88,7 +88,7 @@ func (w *window) Run(frame func(ctx *layout.Context), destroy func()) (err error
 			return e.Err
 		case system.FrameEvent:
 			ctx := layout.NewContext(&ops, e)
-			frame(&ctx)
+			frame(ctx)
 			e.Frame(ctx.Ops)
 		}
 	}

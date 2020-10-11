@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+
 // loadS256BytePoints decompresses and deserializes the pre-computed byte points used to accelerate scalar base
 // multiplication for the secp256k1 curve.
 //
