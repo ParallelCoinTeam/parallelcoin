@@ -788,7 +788,7 @@ func deleteRawUnspent(ns walletdb.ReadWriteBucket, k []byte) error {
 //   [0:32]  Transaction hash (32 bytes)
 //   [32:36] Block height (4 bytes)
 //   [36:68] Block hash (32 bytes)
-//   [68:72] SimpleInput index (4 bytes)
+//   [68:72] Input index (4 bytes)
 //
 // The first 68 bytes match the key for the transaction record and may be used as a prefix filter to iterate through all
 // debits in order.

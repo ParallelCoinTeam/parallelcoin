@@ -103,16 +103,19 @@ func (b *_button) TextScale(scale float32) *_button {
 	return b
 }
 
+// SetClick sets the click hook
 func (b *_button) SetClick(fn func()) *_button {
 	b.button.SetClick(fn)
 	return b
 }
 
+// SetCancel sets the cancel hook
 func (b *_button) SetCancel(fn func()) *_button {
 	b.button.SetCancel(fn)
 	return b
 }
 
+// SetPress sets the press hook
 func (b *_button) SetPress(fn func()) *_button {
 	b.button.SetPress(fn)
 	return b

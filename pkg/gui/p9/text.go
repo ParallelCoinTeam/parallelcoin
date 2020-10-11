@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
 package p9
 
 import (
@@ -65,13 +63,13 @@ func (l *_lineIterator) Width(width int) *_lineIterator {
 }
 
 func (l *_lineIterator) Offset(offset image.Point) *_lineIterator {
-
+	l.offset = offset
 	return l
 }
 
 const inf = 1e6
 
-func (l *_lineIterator) Next() (start, end int, glyph []text.Glyph, offf f32.Point, is bool) {
+func (l *_lineIterator) Next() (start, end int, glyph []text.Glyph, offF f32.Point, is bool) {
 	for len(l.lines) > 0 {
 		line := l.lines[0]
 		l.lines = l.lines[1:]
@@ -85,33 +83,33 @@ func (l *_lineIterator) Next() (start, end int, glyph []text.Glyph, offf f32.Poi
 		if (off.Y + line.Bounds.Min.Y).Floor() > l.clip.Max.Y {
 			break
 		}
-		layout := line.Layout
+		lineLayout := line.Layout
 		start = l.txtOff
 		l.txtOff += line.Len
 		if (off.Y + line.Bounds.Max.Y).Ceil() < l.clip.Min.Y {
 			continue
 		}
-		for len(layout) > 0 {
-			g := layout[0]
+		for len(lineLayout) > 0 {
+			g := lineLayout[0]
 			adv := g.Advance
 			if (off.X + adv + line.Bounds.Max.X - line.Width).Ceil() >= l.clip.Min.X {
 				break
 			}
 			off.X += adv
-			layout = layout[1:]
+			lineLayout = lineLayout[1:]
 			start += utf8.RuneLen(g.Rune)
 		}
 		end = start
-		endx := off.X
-		for i, g := range layout {
-			if (endx + line.Bounds.Min.X).Floor() > l.clip.Max.X {
-				layout = layout[:i]
+		endX := off.X
+		for i, g := range lineLayout {
+			if (endX + line.Bounds.Min.X).Floor() > l.clip.Max.X {
+				lineLayout = lineLayout[:i]
 				break
 			}
 			end += utf8.RuneLen(g.Rune)
-			endx += g.Advance
+			endX += g.Advance
 		}
-		offf = f32.Point{X: float32(off.X) / 64, Y: float32(off.Y) / 64}
+		offF = f32.Point{X: float32(off.X) / 64, Y: float32(off.Y) / 64}
 		is = true
 		return
 	}
@@ -125,7 +123,7 @@ func (l _text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.V
 	if max := l.maxLines; max > 0 && len(lines) > max {
 		lines = lines[:max]
 	}
-	dims := linesDimens(lines)
+	dims := linesDimensions(lines)
 	dims.Size = cs.Constrain(dims.Size)
 	clip := textPadding(lines)
 	clip.Max = clip.Max.Add(dims.Size)
@@ -140,12 +138,12 @@ func (l _text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.V
 		if !ok {
 			break
 		}
-		lclip := layout.FRect(clip).Sub(off)
+		lClip := layout.FRect(clip).Sub(off)
 		stack := op.Push(gtx.Ops)
 		op.Offset(off).Add(gtx.Ops)
 		str := txt[start:end]
 		s.ShapeString(font, textSize, str, l).Add(gtx.Ops)
-		paint.PaintOp{Rect: lclip}.Add(gtx.Ops)
+		paint.PaintOp{Rect: lClip}.Add(gtx.Ops)
 		stack.Pop()
 	}
 	return dims
@@ -172,7 +170,7 @@ func textPadding(lines []text.Line) (padding image.Rectangle) {
 	return
 }
 
-func linesDimens(lines []text.Line) layout.Dimensions {
+func linesDimensions(lines []text.Line) layout.Dimensions {
 	var width fixed.Int26_6
 	var h int
 	var baseline int

@@ -602,7 +602,7 @@ func (e *_editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	} else {
 		lines, _ = nullLayout(r)
 	}
-	dims := linesDimens(lines)
+	dims := linesDimensions(lines)
 	for i := 0; i < len(lines)-1; i++ {
 		// To avoid layout flickering while editing, assume a soft newline takes up all available space.
 		if lay := lines[i].Layout; len(lay) > 0 {

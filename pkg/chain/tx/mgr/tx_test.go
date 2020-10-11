@@ -99,7 +99,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 	t.Parallel()
 	// Create a double spend of the received blockchain transaction.
 	dupRecvTx, _ := util.NewTxFromBytes(TstRecvSerializedTx)
-	// SetBool txout amount to 1 DUO. Transaction store doesn't validate txs, so this is fine for testing a double spend
+	// Switch txout amount to 1 DUO. Transaction store doesn't validate txs, so this is fine for testing a double spend
 	// removal.
 	TstDupRecvAmount := int64(1e8)
 	newDupMsgTx := dupRecvTx.MsgTx()

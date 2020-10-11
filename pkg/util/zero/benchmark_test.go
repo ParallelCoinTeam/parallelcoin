@@ -23,7 +23,7 @@ func xor(b []byte) {
 }
 
 // zrange is an alternative zero implementation that, while currently slower than the functions provided by this
-// package, may be faster in a future Go release. SetBool to this or the xor implementation if they ever become faster.
+// package, may be faster in a future Go release. Switch to this or the xor implementation if they ever become faster.
 func zrange(b []byte) {
 	for i := range b {
 		b[i] = 0
