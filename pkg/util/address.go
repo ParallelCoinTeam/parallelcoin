@@ -151,7 +151,7 @@ func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
 		}
 		return NewAddressPubKey(serializedPubKey, defaultNet)
 	}
-	// Switch on decoded length to determine the type.
+	// SetBool on decoded length to determine the type.
 	decoded, netID, err := base58.CheckDecode(addr)
 	if err != nil {
 		Error(err)

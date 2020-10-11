@@ -145,10 +145,10 @@ func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	//   Output to hash (34 bytes):
 	//     8 value, 1 script len, 25 script [1 OP_DUP, 1 OP_HASH_160,
 	//     1 OP_DATA_20, 20 hash, 1 OP_EQUALVERIFY, 1 OP_CHECKSIG]
-	//   Input with compressed pubkey (148 bytes):
+	//   SimpleInput with compressed pubkey (148 bytes):
 	//     36 prev outpoint, 1 script len, 107 script [1 OP_DATA_72, 72 sig,
 	//     1 OP_DATA_33, 33 compressed pubkey], 4 sequence
-	//   Input with uncompressed pubkey (180 bytes):
+	//   SimpleInput with uncompressed pubkey (180 bytes):
 	//     36 prev outpoint, 1 script len, 139 script [1 OP_DATA_72, 72 sig,
 	//     1 OP_DATA_65, 65 compressed pubkey], 4 sequence
 	//
@@ -160,7 +160,7 @@ func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	//   Output to uncompressed pubkey (76 bytes):
 	//     8 value, 1 script len, 67 script [1 OP_DATA_65, 65 pubkey,
 	//     1 OP_CHECKSIG]
-	//   Input (114 bytes):
+	//   SimpleInput (114 bytes):
 	//     36 prev outpoint, 1 script len, 73 script [1 OP_DATA_72,
 	//     72 sig], 4 sequence
 	//
@@ -169,7 +169,7 @@ func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	//   Output to witness key hash (31 bytes);
 	//     8 value, 1 script len, 22 script [1 OP_0, 1 OP_DATA_20,
 	//     20 bytes hash160]
-	//   Input (67 bytes as the 107 witness stack is discounted):
+	//   SimpleInput (67 bytes as the 107 witness stack is discounted):
 	//     36 prev outpoint, 1 script len, 0 script (not sigScript), 107
 	//     witness stack bytes [1 element length, 33 compressed pubkey,
 	//     element length 72 sig], 4 sequence

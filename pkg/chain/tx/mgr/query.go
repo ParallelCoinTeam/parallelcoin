@@ -358,7 +358,7 @@ func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *
 	if block == nil {
 		for _, input := range rec.MsgTx.TxIn {
 			prevOut := &input.PreviousOutPoint
-			// Input may spend a previous unmined output, a mined output (which would still be marked unspent), or
+			// input may spend a previous unmined output, a mined output (which would still be marked unspent), or
 			// neither.
 			v := existsRawUnmined(ns, prevOut.Hash[:])
 			if v != nil {

@@ -75,37 +75,26 @@ func blocks(th *p9.Theme) layout.Widget {
 	return th.Flex().Vertical().Rigid(
 		th.Inset(0.25).Embed(
 			th.Flex().Rigid(
-				th.H1("this is a H1").
-					Color("PanelText").
-					Fn,
+				th.H1("this is a H1").Color("PanelText").Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
 		th.Inset(0.25).Embed(
-			th.H2("this is a H2").
-				Font("bariol regular").
-				Color("PanelText").Fn,
+			th.H2("this is a H2").Font("bariol regular").Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
 		th.Inset(0.25).Embed(
-			th.H3("this is a H3").
-				Alignment(text.End).
-				Color("PanelText").Fn,
+			th.H3("this is a H3").Alignment(text.End).Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
 		th.Fill("DocBg").Embed(
 			th.Inset(0.25).Embed(
-				th.H4("this is a H4").
-					Alignment(text.Middle).
-					Color("DocText").Fn,
-			).Fn,
+				th.H4("this is a H4").Alignment(text.Middle).Color("DocText").Fn).Fn,
 		).Fn,
 	).Rigid(
 		th.Fill("PanelBg").Embed(
 			th.Inset(0.25).Embed(
-				th.H5("this is a H5").
-					Color("PanelText").
-					Fn,
+				th.H5("this is a H5").Color("PanelText").Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
@@ -132,10 +121,7 @@ func buttons(th *p9.Theme) layout.Widget {
 	return th.Flex().Vertical().Rigid(
 		th.Inset(0.25).Embed(
 			th.Flex().Rigid(
-				th.Button(
-					button0.SetClick(func() {
-						Info("clicked customised button")
-					})).
+				th.Button(button0).
 					CornerRadius(3).
 					Background("Secondary").
 					Color("Dark").
@@ -143,17 +129,20 @@ func buttons(th *p9.Theme) layout.Widget {
 					TextScale(2).
 					Text("customised button").
 					Inset(1.5).
+					SetClick(func() {
+						Info("clicked customised button")
+					}).
 					Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
 		th.Flex().Rigid(
 			th.Inset(0.25).Embed(
-				th.Button(
-					button2.SetClick(func() {
-						Info("clicked default style button")
-					})).
+				th.Button(button2).
 					Text("default style").
+					SetClick(func() {
+						Info("clicked default style button")
+					}).
 					Fn,
 			).Fn,
 		).Rigid(
@@ -192,7 +181,7 @@ func buttons(th *p9.Theme) layout.Widget {
 	).Rigid(
 		th.ProgressBar().Color("Primary").SetProgress(progress).Fn,
 	).Rigid(
-		th.ProgressBar().Color("Primary").SetProgress(100-progress).Fn,
+		th.ProgressBar().Color("Primary").SetProgress(int(slider.Value())*100).Fn,
 	).Rigid(
 		th.Flex().
 			Flexed(1,
