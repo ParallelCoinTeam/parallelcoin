@@ -444,6 +444,8 @@ func (n *Node) Start() {
 			Debug("stopping the miner")
 			if err = n.CPUMiner.Process.Kill(); Check(err) {
 			}
+			if err = n.CPUMiner.Process.Signal(os.Interrupt); Check(err) {
+			}
 			if err = n.CPUMiner.Wait(); Check(err) {
 			}
 			Debug("miner has stopped")

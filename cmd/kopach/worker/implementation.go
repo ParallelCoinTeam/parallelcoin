@@ -32,6 +32,7 @@ const RoundsPerAlgo = 69
 
 type Worker struct {
 	mx            sync.Mutex
+	id            string
 	pipeConn      *stdconn.StdConn
 	dispatchConn  *transport.Channel
 	dispatchReady atomic.Bool
@@ -115,10 +116,11 @@ func (w *Worker) hashReport() {
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
 // allow a worker to be configured to run on a bare metal system with a different launcher main
-func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker {
+func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit chan struct{}) *Worker {
 	Debug("creating new worker")
 	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
+		id:            id,
 		pipeConn:      conn,
 		Quit:          quit,
 		roller:        NewCounter(RoundsPerAlgo),
@@ -262,10 +264,10 @@ out:
 
 // New initialises the state for a worker, loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
-func New(quit chan struct{}) (w *Worker, conn net.Conn) {
+func New(id string, quit chan struct{}) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
 	sc := stdconn.New(os.Stdin, os.Stdout, quit)
-	return NewWithConnAndSemaphore(&sc, quit), &sc
+	return NewWithConnAndSemaphore(id, &sc, quit), &sc
 }
 
 // NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the

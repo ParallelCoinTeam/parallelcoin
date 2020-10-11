@@ -23,16 +23,16 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 		// correct for mainnet anyway, it is only the other way around that there could be problems with testnet
 		// probably never as high as this and hard fork activates early for testing as pre-hardfork doesn't need testing
 		// or CPU mining.
-		if len(os.Args) > 2 {
-			if os.Args[2] == netparams.TestNet3Params.Name {
+		if len(os.Args) > 3 {
+			if os.Args[3] == netparams.TestNet3Params.Name {
 				fork.IsTestnet = true
 			}
 		}
-		if len(os.Args) > 3 {
-			log.L.SetLevel(os.Args[3], true, "pod")
+		if len(os.Args) > 4 {
+			log.L.SetLevel(os.Args[4], true, "pod")
 		}
 		Debug("miner worker starting")
-		w, conn := worker.New(cx.KillAll)
+		w, conn := worker.New(os.Args[2], cx.KillAll)
 		interrupt.AddHandler(func() {
 			Debug("KopachWorkerHandle interrupt")
 			if err := conn.Close(); Check(err) {

@@ -89,7 +89,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
-		hashSampleBuf:          rav.NewBufferUint64(1000),
+		hashSampleBuf:          rav.NewBufferUint64(100),
 	}
 	quit = ctrl.quit
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())

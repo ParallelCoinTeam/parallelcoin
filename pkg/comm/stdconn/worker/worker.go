@@ -36,6 +36,7 @@ func Spawn(args ...string) (w *Worker, err error) {
 	if cmdIn, err = w.cmd.StdinPipe(); Check(err) {
 		return
 	}
+	w.cmd.Stderr = os.Stderr
 	w.StdConn = stdconn.New(cmdOut, cmdIn, make(chan struct{}))
 	if err = w.cmd.Start(); Check(err) {
 	}
