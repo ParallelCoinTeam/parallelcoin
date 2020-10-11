@@ -35,18 +35,15 @@ func (th *Theme) Switch(swtch *_bool) *_switch {
 	return sw
 }
 
+// EnabledColor sets the color to draw for the enabled state
 func (s *_switch) EnabledColor(color string) *_switch {
 	s.color.enabled = s.th.Colors.Get(color)
 	return s
 }
 
+// DisabledColor sets the color to draw for the disabled state
 func (s *_switch) DisabledColor() *_switch {
 	s.color.disabled = s.th.Colors.Get("Primary")
-	return s
-}
-
-func (s *_switch) Switch(boo *_bool) *_switch {
-	s.swtch = boo
 	return s
 }
 

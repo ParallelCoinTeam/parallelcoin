@@ -28,11 +28,13 @@ func (th *Theme) Indefinite() *_indefinite {
 	}
 }
 
+// Scale sets the size of the spinner
 func (lo *_indefinite) Scale(scale float32) *_indefinite {
 	lo.scale = lo.th.textSize.Scale(scale)
 	return lo
 }
 
+// Color sets the color of the spinner
 func (lo *_indefinite) Color(color string) *_indefinite {
 	lo.color = lo.th.Colors.Get(color)
 	return lo

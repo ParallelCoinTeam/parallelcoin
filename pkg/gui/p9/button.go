@@ -129,7 +129,7 @@ func (b *_button) Fn(gtx l.Context) l.Dimensions {
 		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
 			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
 			return _text{alignment: text.Middle}.
-				Layout(gtx, b.shaper, b.font, b.textSize, b.text)
+				Fn(gtx, b.shaper, b.font, b.textSize, b.text)
 		})
 	}
 	bl.Embed(fn)

@@ -67,6 +67,21 @@ func (b *_iconButton) Inset(inset float32) *_iconButton {
 	return b
 }
 
+func (b *_iconButton) SetClick(fn func()) *_iconButton {
+	b.button.SetClick(fn)
+	return b
+}
+
+func (b *_iconButton) SetPress(fn func()) *_iconButton {
+	b.button.SetPress(fn)
+	return b
+}
+
+func (b *_iconButton) SetCancel(fn func()) *_iconButton {
+	b.button.SetCancel(fn)
+	return b
+}
+
 // Fn renders the icon button
 func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
 	return b.th.Stack().Expanded(

@@ -228,7 +228,7 @@ func buttons(th *p9.Theme) layout.Widget {
 		th.Inset(0.25).Embed(
 			th.Border().Embed(
 				th.Inset(0.25).Embed(
-					th.Input(lineEditor).Fn,
+					th.SimpleInput(lineEditor).Fn,
 				).Fn,
 			).Fn,
 		).Fn,
@@ -236,7 +236,7 @@ func buttons(th *p9.Theme) layout.Widget {
 		th.Inset(0.25).Embed(
 			th.Border().Embed(
 				th.Inset(0.25).Embed(
-					th.Input(areaEditor).Fn,
+					th.SimpleInput(areaEditor).Fn,
 				).Fn,
 			).Fn,
 		).Fn,
