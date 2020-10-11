@@ -11,8 +11,8 @@ import (
 	"gioui.org/op"
 )
 
-// _float is for selecting a value in a range.
-type _float struct {
+// Float is for selecting a value in a range.
+type Float struct {
 	value      float32
 	drag       gesture.Drag
 	pos        float32 // position normalized to [0, 1]
@@ -21,25 +21,25 @@ type _float struct {
 	changeHook func(float32)
 }
 
-func (th *Theme) Float() *_float {
-	return &_float{changeHook: func(float32) {}}
+func (th *Theme) Float() *Float {
+	return &Float{changeHook: func(float32) {}}
 }
 
-func (f *_float) SetValue(value float32) *_float {
+func (f *Float) SetValue(value float32) *Float {
 	f.value = value
 	return f
 }
-func (f *_float) Value() float32 {
+func (f *Float) Value() float32 {
 	return f.value
 }
 
-func (f *_float) SetHook(fn func(fl float32)) *_float {
+func (f *Float) SetHook(fn func(fl float32)) *Float {
 	f.changeHook = fn
 	return f
 }
 
 // Fn processes events.
-func (f *_float) Fn(gtx layout.Context, pointerMargin int, min, max float32) layout.Dimensions {
+func (f *Float) Fn(gtx layout.Context, pointerMargin int, min, max float32) layout.Dimensions {
 	size := gtx.Constraints.Min
 	f.length = float32(size.X)
 	var de *pointer.Event
@@ -74,7 +74,7 @@ func (f *_float) Fn(gtx layout.Context, pointerMargin int, min, max float32) lay
 	return layout.Dimensions{Size: size}
 }
 
-func (f *_float) setValue(value, min, max float32) {
+func (f *Float) setValue(value, min, max float32) {
 	if min > max {
 		min, max = max, min
 	}
@@ -91,12 +91,12 @@ func (f *_float) setValue(value, min, max float32) {
 }
 
 // Pos reports the selected position.
-func (f *_float) Pos() float32 {
+func (f *Float) Pos() float32 {
 	return f.pos * f.length
 }
 
 // Changed reports whether the value has changed since the last call to Changed.
-func (f *_float) Changed() bool {
+func (f *Float) Changed() bool {
 	changed := f.changed
 	f.changed = false
 	return changed

@@ -14,50 +14,47 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type _slider struct {
+type Slider struct {
 	th       *Theme
 	min, max float32
 	color    color.RGBA
-	float    *_float
+	float    *Float
 }
 
 // Slider is for selecting a value in a range.
-func (th *Theme) Slider(float *_float, min, max float32) *_slider {
-	return &_slider{
+func (th *Theme) Slider() *Slider {
+	return &Slider{
 		th:    th,
-		min:   min,
-		max:   max,
 		color: th.Colors.Get("Primary"),
-		float: float,
 	}
 }
 
 // Min sets the value at the left hand side
-func (s *_slider) Min(min float32) *_slider {
+func (s *Slider) Min(min float32) *Slider {
 	s.min = min
 	return s
 }
 
 // Max sets the value at the right hand side
-func (s *_slider) Max(max float32) *_slider {
+func (s *Slider) Max(max float32) *Slider {
 	s.max = max
 	return s
 }
 
 // Color sets the color to draw the slider in
-func (s *_slider) Color(color string) *_slider {
+func (s *Slider) Color(color string) *Slider {
 	s.color = s.th.Colors.Get(color)
 	return s
 }
 
 // Float sets the initial value
-func (s *_slider) Float(f *_float) *_slider {
+func (s *Slider) Float(f *Float) *Slider {
 	s.float = f
 	return s
 }
 
 // Fn renders the slider
-func (s *_slider) Fn(c l.Context) l.Dimensions {
+func (s *Slider) Fn(c l.Context) l.Dimensions {
 	thumbRadiusInt := c.Px(unit.Dp(6))
 	trackWidth := float32(c.Px(unit.Dp(2)))
 	thumbRadius := float32(thumbRadiusInt)

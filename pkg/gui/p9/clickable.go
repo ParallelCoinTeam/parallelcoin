@@ -16,8 +16,8 @@ type clickEvents struct {
 	Click, Cancel, Press func()
 }
 
-// _clickable represents a clickable area.
-type _clickable struct {
+// Clickable represents a clickable area.
+type Clickable struct {
 	click  gesture.Click
 	clicks []click
 	// prevClicks is the index into clicks that marks the clicks from the most recent Fn call. prevClicks is used to
@@ -27,8 +27,8 @@ type _clickable struct {
 	Events     clickEvents
 }
 
-func Clickable() (c *_clickable) {
-	c = &_clickable{
+func NewClickable() (c *Clickable) {
+	c = &Clickable{
 		click:      gesture.Click{},
 		clicks:     nil,
 		prevClicks: 0,
@@ -42,17 +42,17 @@ func Clickable() (c *_clickable) {
 	return
 }
 
-func (c *_clickable) SetClick(fn func()) *_clickable {
+func (c *Clickable) SetClick(fn func()) *Clickable {
 	c.Events.Click = fn
 	return c
 }
 
-func (c *_clickable) SetCancel(fn func()) *_clickable {
+func (c *Clickable) SetCancel(fn func()) *Clickable {
 	c.Events.Cancel = fn
 	return c
 }
 
-func (c *_clickable) SetPress(fn func()) *_clickable {
+func (c *Clickable) SetPress(fn func()) *Clickable {
 	c.Events.Press = fn
 	return c
 }
@@ -77,7 +77,7 @@ type press struct {
 
 // Clicked reports whether there are pending clicks as would be reported by Clicks. If so, Clicked removes the earliest
 // click.
-func (c *_clickable) Clicked() bool {
+func (c *Clickable) Clicked() bool {
 	if len(c.clicks) == 0 {
 		return false
 	}
@@ -90,7 +90,7 @@ func (c *_clickable) Clicked() bool {
 }
 
 // Clicks returns and clear the clicks since the last call to Clicks.
-func (c *_clickable) Clicks() []click {
+func (c *Clickable) Clicks() []click {
 	clicks := c.clicks
 	c.clicks = nil
 	c.prevClicks = 0
@@ -99,11 +99,11 @@ func (c *_clickable) Clicks() []click {
 
 // History is the past pointer presses useful for drawing markers. History is retained for a short duration (about a
 // second).
-func (c *_clickable) History() []press {
+func (c *Clickable) History() []press {
 	return c.history
 }
 
-func (c *_clickable) Fn(gtx l.Context) l.Dimensions {
+func (c *Clickable) Fn(gtx l.Context) l.Dimensions {
 	c.update(gtx)
 	stack := op.Push(gtx.Ops)
 	pointer.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
@@ -121,7 +121,7 @@ func (c *_clickable) Fn(gtx l.Context) l.Dimensions {
 }
 
 // update the button changeState by processing clickEvents.
-func (c *_clickable) update(gtx l.Context) {
+func (c *Clickable) update(gtx l.Context) {
 	// Flush clicks from before the last update.
 	n := copy(c.clicks, c.clicks[c.prevClicks:])
 	c.clicks = c.clicks[:n]

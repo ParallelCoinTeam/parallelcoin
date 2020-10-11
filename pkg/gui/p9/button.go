@@ -25,12 +25,12 @@ type _button struct {
 	inset        *l.Inset
 	text         string
 	textSize     unit.Value
-	button       *_clickable
+	button       *Clickable
 	shaper       text.Shaper
 }
 
 // Button is a regular material text button where all the dimensions, colors, corners and font can be changed
-func (th *Theme) Button(btn *_clickable) *_button {
+func (th *Theme) Button(btn *Clickable) *_button {
 	return &_button{
 		th:   th,
 		text: strings.ToUpper("text unset"),
@@ -128,8 +128,9 @@ func (b *_button) Fn(gtx l.Context) l.Dimensions {
 	fn := func(gtx l.Context) l.Dimensions {
 		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
 			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-			return _text{alignment: text.Middle}.
-				Layout(gtx, b.shaper, b.font, b.textSize, b.text)
+			return b.th.Text().
+				Alignment(text.Middle).
+				Fn(gtx, b.shaper, b.font, b.textSize, b.text)
 		})
 	}
 	bl.Embed(fn)

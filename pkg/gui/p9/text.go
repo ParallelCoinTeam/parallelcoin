@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
 package p9
 
 import (
@@ -27,6 +25,18 @@ type _text struct {
 
 func (th *Theme) Text() *_text {
 	return &_text{}
+}
+
+// Alignment sets the alignment for the text
+func (t *_text) Alignment(alignment text.Alignment) *_text {
+	t.alignment = alignment
+	return t
+}
+
+// MaxLines sets the alignment for the text
+func (t *_text) MaxLines(maxLines int) *_text {
+	t.maxLines = maxLines
+	return t
 }
 
 type lineIterator struct {
@@ -88,21 +98,21 @@ func (l *lineIterator) Next() (int, int, []text.Glyph, f32.Point, bool) {
 	return 0, 0, nil, f32.Point{}, false
 }
 
-func (l _text) Layout(gtx layout.Context, s text.Shaper, font text.Font, size unit.Value, txt string) layout.Dimensions {
+func (t *_text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.Value, txt string) layout.Dimensions {
 	cs := gtx.Constraints
 	textSize := fixed.I(gtx.Px(size))
 	lines := s.LayoutString(font, textSize, cs.Max.X, txt)
-	if max := l.maxLines; max > 0 && len(lines) > max {
+	if max := t.maxLines; max > 0 && len(lines) > max {
 		lines = lines[:max]
 	}
-	dims := linesDimens(lines)
+	dims := linesDimensions(lines)
 	dims.Size = cs.Constrain(dims.Size)
 	clip := textPadding(lines)
 	clip.Max = clip.Max.Add(dims.Size)
 	it := lineIterator{
 		Lines:     lines,
 		Clip:      clip,
-		Alignment: l.alignment,
+		Alignment: t.alignment,
 		Width:     dims.Size.X,
 	}
 	for {
@@ -142,7 +152,7 @@ func textPadding(lines []text.Line) (padding image.Rectangle) {
 	return
 }
 
-func linesDimens(lines []text.Line) layout.Dimensions {
+func linesDimensions(lines []text.Line) layout.Dimensions {
 	var width fixed.Int26_6
 	var h int
 	var baseline int

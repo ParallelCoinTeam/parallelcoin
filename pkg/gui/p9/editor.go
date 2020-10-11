@@ -26,8 +26,8 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-// _editor implements an editable and scrollable text area.
-type _editor struct {
+// Editor implements an editable and scrollable text area.
+type Editor struct {
 	alignment text.Alignment
 	// singleLine force the text to stay on a single line. singleLine also sets the scrolling direction to horizontal.
 	singleLine bool
@@ -83,8 +83,8 @@ type _editor struct {
 	focusHook  func(bool)
 }
 
-func (th *Theme) Editor() *_editor {
-	e := &_editor{
+func (th *Theme) Editor() *Editor {
+	e := &Editor{
 		submitHook: func(string) {},
 		changeHook: func(string) {},
 		focusHook:  func(bool) {},
@@ -92,37 +92,37 @@ func (th *Theme) Editor() *_editor {
 	return e
 }
 
-func (e *_editor) Alignment(alignment text.Alignment) *_editor {
+func (e *Editor) Alignment(alignment text.Alignment) *Editor {
 	e.alignment = alignment
 	return e
 }
 
-func (e *_editor) SingleLine(singleLine bool) *_editor {
+func (e *Editor) SingleLine(singleLine bool) *Editor {
 	e.singleLine = singleLine
 	return e
 }
 
-func (e *_editor) Submit(submit bool) *_editor {
+func (e *Editor) Submit(submit bool) *Editor {
 	e.submit = submit
 	return e
 }
 
-func (e *_editor) Mask(mask rune) *_editor {
+func (e *Editor) Mask(mask rune) *Editor {
 	e.mask = mask
 	return e
 }
 
-func (e *_editor) SetSubmit(submitFn func(txt string)) *_editor {
+func (e *Editor) SetSubmit(submitFn func(txt string)) *Editor {
 	e.submitHook = submitFn
 	return e
 }
 
-func (e *_editor) SetChange(changeFn func(txt string)) *_editor {
+func (e *Editor) SetChange(changeFn func(txt string)) *Editor {
 	e.changeHook = changeFn
 	return e
 }
 
-func (e *_editor) SetFocus(focusFn func(is bool)) *_editor {
+func (e *Editor) SetFocus(focusFn func(is bool)) *Editor {
 	e.focusHook = focusFn
 	return e
 }
@@ -192,14 +192,14 @@ const (
 )
 
 // Events returns available editor events.
-func (e *_editor) Events() []EditorEvent {
+func (e *Editor) Events() []EditorEvent {
 	events := e.events
 	e.events = nil
 	e.prevEvents = 0
 	return events
 }
 
-func (e *_editor) processEvents(gtx layout.Context) {
+func (e *Editor) processEvents(gtx layout.Context) {
 	// Flush events from before the previous Fn.
 	n := copy(e.events, e.events[e.prevEvents:])
 	e.events = e.events[:n]
@@ -213,7 +213,7 @@ func (e *_editor) processEvents(gtx layout.Context) {
 	e.processKey(gtx)
 }
 
-func (e *_editor) makeValid() {
+func (e *Editor) makeValid() {
 	if e.valid {
 		return
 	}
@@ -226,7 +226,7 @@ func (e *_editor) makeValid() {
 	e.valid = true
 }
 
-func (e *_editor) processPointer(gtx layout.Context) {
+func (e *Editor) processPointer(gtx layout.Context) {
 	sbounds := e.scrollBounds()
 	var smin, smax int
 	var axis gesture.Axis
@@ -266,7 +266,7 @@ func (e *_editor) processPointer(gtx layout.Context) {
 	}
 }
 
-func (e *_editor) processKey(gtx layout.Context) {
+func (e *Editor) processKey(gtx layout.Context) {
 	if e.rr.Changed() {
 		e.events = append(e.events, ChangeEvent{})
 	}
@@ -305,11 +305,11 @@ func (e *_editor) processKey(gtx layout.Context) {
 	}
 }
 
-func (e *_editor) moveLines(distance int) {
+func (e *Editor) moveLines(distance int) {
 	e.moveToLine(e.caret.x+e.caret.xoff, e.caret.line+distance)
 }
 
-func (e *_editor) command(k key.Event) bool {
+func (e *Editor) command(k key.Event) bool {
 	modSkip := key.ModCtrl
 	if runtime.GOOS == "darwin" {
 		modSkip = key.ModAlt
@@ -360,17 +360,17 @@ func (e *_editor) command(k key.Event) bool {
 }
 
 // Focus requests the input focus for the _editor.
-func (e *_editor) Focus() {
+func (e *Editor) Focus() {
 	e.requestFocus = true
 }
 
 // Focused returns whether the editor is focused or not.
-func (e *_editor) Focused() bool {
+func (e *Editor) Focused() bool {
 	return e.focused
 }
 
 // Layout lays out the editor.
-func (e *_editor) Layout(gtx layout.Context, sh text.Shaper, font text.Font, size unit.Value) layout.Dimensions {
+func (e *Editor) Layout(gtx layout.Context, sh text.Shaper, font text.Font, size unit.Value) layout.Dimensions {
 	textSize := fixed.I(gtx.Px(size))
 	if e.font != font || e.textSize != textSize {
 		e.invalidate()
@@ -407,7 +407,7 @@ func (e *_editor) Layout(gtx layout.Context, sh text.Shaper, font text.Font, siz
 	return e.layout(gtx)
 }
 
-func (e *_editor) layout(gtx layout.Context) layout.Dimensions {
+func (e *Editor) layout(gtx layout.Context) layout.Dimensions {
 	// Adjust scrolling for new viewport and layout.
 	e.scrollRel(0, 0)
 
@@ -467,7 +467,7 @@ func (e *_editor) layout(gtx layout.Context) layout.Dimensions {
 	return layout.Dimensions{Size: e.viewSize, Baseline: e.dims.Baseline}
 }
 
-func (e *_editor) PaintText(gtx layout.Context) {
+func (e *Editor) PaintText(gtx layout.Context) {
 	clip := textPadding(e.lines)
 	clip.Max = clip.Max.Add(e.viewSize)
 	for _, shape := range e.shapes {
@@ -479,7 +479,7 @@ func (e *_editor) PaintText(gtx layout.Context) {
 	}
 }
 
-func (e *_editor) PaintCaret(gtx layout.Context) {
+func (e *Editor) PaintCaret(gtx layout.Context) {
 	if !e.caret.on {
 		return
 	}
@@ -516,23 +516,23 @@ func (e *_editor) PaintCaret(gtx layout.Context) {
 }
 
 // Len is the length of the editor contents.
-func (e *_editor) Len() int {
+func (e *Editor) Len() int {
 	return e.rr.len()
 }
 
 // Text returns the contents of the editor.
-func (e *_editor) Text() string {
+func (e *Editor) Text() string {
 	return e.rr.String()
 }
 
 // SetText replaces the contents of the editor.
-func (e *_editor) SetText(s string) {
+func (e *Editor) SetText(s string) {
 	e.rr = editBuffer{}
 	e.caret.xoff = 0
 	e.prepend(s)
 }
 
-func (e *_editor) scrollBounds() image.Rectangle {
+func (e *Editor) scrollBounds() image.Rectangle {
 	var b image.Rectangle
 	if e.singleLine {
 		if len(e.lines) > 0 {
@@ -548,11 +548,11 @@ func (e *_editor) scrollBounds() image.Rectangle {
 	return b
 }
 
-func (e *_editor) scrollRel(dx, dy int) {
+func (e *Editor) scrollRel(dx, dy int) {
 	e.scrollAbs(e.scrollOff.X+dx, e.scrollOff.Y+dy)
 }
 
-func (e *_editor) scrollAbs(x, y int) {
+func (e *Editor) scrollAbs(x, y int) {
 	e.scrollOff.X = x
 	e.scrollOff.Y = y
 	b := e.scrollBounds()
@@ -570,7 +570,7 @@ func (e *_editor) scrollAbs(x, y int) {
 	}
 }
 
-func (e *_editor) moveCoord(pos image.Point) {
+func (e *Editor) moveCoord(pos image.Point) {
 	var (
 		prevDesc fixed.Int26_6
 		carLine  int
@@ -589,7 +589,7 @@ func (e *_editor) moveCoord(pos image.Point) {
 	e.caret.xoff = 0
 }
 
-func (e *_editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
+func (e *Editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	e.rr.Reset()
 	var r io.Reader = &e.rr
 	if e.mask != 0 {
@@ -602,7 +602,7 @@ func (e *_editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	} else {
 		lines, _ = nullLayout(r)
 	}
-	dims := linesDimens(lines)
+	dims := linesDimensions(lines)
 	for i := 0; i < len(lines)-1; i++ {
 		// To avoid layout flickering while editing, assume a soft newline takes up all available space.
 		if lay := lines[i].Layout; len(lay) > 0 {
@@ -617,19 +617,19 @@ func (e *_editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 }
 
 // CaretPos returns the line & column numbers of the caret.
-func (e *_editor) CaretPos() (line, col int) {
+func (e *Editor) CaretPos() (line, col int) {
 	e.makeValid()
 	return e.caret.line, e.caret.col
 }
 
 // CaretCoords returns the coordinates of the caret, relative to the
 // editor itself.
-func (e *_editor) CaretCoords() f32.Point {
+func (e *Editor) CaretCoords() f32.Point {
 	e.makeValid()
 	return f32.Pt(float32(e.caret.x)/64, float32(e.caret.y))
 }
 
-func (e *_editor) layoutCaret() (line, col int, x fixed.Int26_6, y int) {
+func (e *Editor) layoutCaret() (line, col int, x fixed.Int26_6, y int) {
 	var idx int
 	var prevDesc fixed.Int26_6
 loop:
@@ -657,26 +657,26 @@ loop:
 	return
 }
 
-func (e *_editor) invalidate() {
+func (e *Editor) invalidate() {
 	e.valid = false
 }
 
 // Delete runes from the caret position. The sign of runes specifies the
 // direction to delete: positive is forward, negative is backward.
-func (e *_editor) Delete(runes int) {
+func (e *Editor) Delete(runes int) {
 	e.rr.deleteRunes(runes)
 	e.caret.xoff = 0
 	e.invalidate()
 }
 
 // Insert inserts text at the caret, moving the caret forward.
-func (e *_editor) Insert(s string) {
+func (e *Editor) Insert(s string) {
 	e.append(s)
 	e.caret.scroll = true
 	e.invalidate()
 }
 
-func (e *_editor) append(s string) {
+func (e *Editor) append(s string) {
 	if e.singleLine {
 		s = strings.ReplaceAll(s, "\n", "")
 	}
@@ -684,13 +684,13 @@ func (e *_editor) append(s string) {
 	e.rr.caret += len(s)
 }
 
-func (e *_editor) prepend(s string) {
+func (e *Editor) prepend(s string) {
 	e.rr.prepend(s)
 	e.caret.xoff = 0
 	e.invalidate()
 }
 
-func (e *_editor) movePages(pages int) {
+func (e *Editor) movePages(pages int) {
 	e.makeValid()
 	y := e.caret.y + pages*e.viewSize.Y
 	var (
@@ -714,7 +714,7 @@ func (e *_editor) movePages(pages int) {
 	e.moveToLine(e.caret.x+e.caret.xoff, carLine2)
 }
 
-func (e *_editor) moveToLine(x fixed.Int26_6, line int) {
+func (e *Editor) moveToLine(x fixed.Int26_6, line int) {
 	e.makeValid()
 	if line < 0 {
 		line = 0
@@ -773,7 +773,7 @@ func (e *_editor) moveToLine(x fixed.Int26_6, line int) {
 
 // Move the caret: positive distance moves forward, negative distance moves
 // backward.
-func (e *_editor) Move(distance int) {
+func (e *Editor) Move(distance int) {
 	e.makeValid()
 	for ; distance < 0 && e.rr.caret > 0; distance++ {
 		if e.caret.col == 0 {
@@ -807,7 +807,7 @@ func (e *_editor) Move(distance int) {
 	e.caret.xoff = 0
 }
 
-func (e *_editor) moveStart() {
+func (e *Editor) moveStart() {
 	e.makeValid()
 	layout := e.lines[e.caret.line].Layout
 	for i := e.caret.col - 1; i >= 0; i-- {
@@ -819,7 +819,7 @@ func (e *_editor) moveStart() {
 	e.caret.xoff = -e.caret.x
 }
 
-func (e *_editor) moveEnd() {
+func (e *Editor) moveEnd() {
 	e.makeValid()
 	l := e.lines[e.caret.line]
 	// Only move past the end of the last line
@@ -842,7 +842,7 @@ func (e *_editor) moveEnd() {
 // moveWord moves the caret to the next word in the specified direction.
 // Positive is forward, negative is backward.
 // Absolute values greater than one will skip that many words.
-func (e *_editor) moveWord(distance int) {
+func (e *Editor) moveWord(distance int) {
 	e.makeValid()
 	// split the distance information into constituent parts to be
 	// used independently.
@@ -880,7 +880,7 @@ func (e *_editor) moveWord(distance int) {
 // Positive is forward, negative is backward.
 //
 // Absolute values greater than one will delete that many words.
-func (e *_editor) deleteWord(distance int) {
+func (e *Editor) deleteWord(distance int) {
 	e.makeValid()
 	// split the distance information into constituent parts to be
 	// used independently.
@@ -923,7 +923,7 @@ func (e *_editor) deleteWord(distance int) {
 	e.Delete(runes * direction)
 }
 
-func (e *_editor) scrollToCaret() {
+func (e *Editor) scrollToCaret() {
 	e.makeValid()
 	l := e.lines[e.caret.line]
 	if e.singleLine {
@@ -948,7 +948,7 @@ func (e *_editor) scrollToCaret() {
 }
 
 // NumLines returns the number of lines in the editor.
-func (e *_editor) NumLines() int {
+func (e *Editor) NumLines() int {
 	e.makeValid()
 	return len(e.lines)
 }

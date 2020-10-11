@@ -16,29 +16,41 @@ import (
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
-var (
-	th           = p9.NewTheme(p9fonts.Collection(), quit)
-	button0      = p9.Clickable()
-	button1      = p9.Clickable()
-	button2      = p9.Clickable()
-	bool1, bool2 bool
-	boolButton1  = th.Bool(bool1)
-	boolButton2  = th.Bool(bool2)
-	iconbutton   = p9.Clickable()
-	iconbutton1  = p9.Clickable()
-	quit         = make(chan struct{})
-	progress     int
-	slider       = th.Float()
-	radio        = th.Enum()
-	lineEditor   = th.Editor().SingleLine(true).Submit(true)
-	areaEditor   = th.Editor().SingleLine(false).Submit(false)
-)
+type MinerModel struct {
+	th                                                 *p9.Theme
+	button0, button1, button2, iconbutton, iconbutton1 *p9.Clickable
+	boolButton1, boolButton2                           *p9.Bool
+	quit                                               chan struct{}
+	progress                                           int
+	slider                                             *p9.Float
+	lineEditor, areaEditor                             *p9.Editor
+	radio                                              *p9.Enum
+}
 
 func Run(quit chan struct{}) {
+	th := p9.NewTheme(p9fonts.Collection(), quit)
+	minerModel := MinerModel{
+		th:          th,
+		button0:     p9.NewClickable(),
+		button1:     p9.NewClickable(),
+		button2:     p9.NewClickable(),
+		boolButton1: th.Bool(false),
+		boolButton2: th.Bool(false),
+		iconbutton:  p9.NewClickable(),
+		iconbutton1: p9.NewClickable(),
+		quit:        make(chan struct{}),
+		progress:    0,
+		slider:      th.Float(),
+		lineEditor:  th.Editor().SingleLine(true).Submit(true),
+		areaEditor:  th.Editor().SingleLine(false).Submit(false),
+		radio: th.Enum().SetOnChange(func(value string) {
+			Debug("changed radio button to", value)
+		}),
+	}
 	go func() {
 		fw := f.Window().Size(640, 480)
 		fw.Run(func(ctx *layout.Context) {
-			testLabels(th, *ctx)
+			minerModel.testLabels(*ctx)
 		}, func() {
 			close(quit)
 			os.Exit(0)
@@ -47,31 +59,33 @@ func Run(quit chan struct{}) {
 	app.Main()
 }
 
-func testLabels(th *p9.Theme, gtx layout.Context) {
+func (m *MinerModel) testLabels(gtx layout.Context) {
+	th := m.th
 	th.Flex().Flexed(1,
 		th.Flex().Rigid(
 			th.Flex().Flexed(0.5,
 				th.Fill("PanelBg").Embed(
 					th.Inset(0.25).Embed(
-						blocks(th),
+						m.blocks(),
 					).Fn,
 				).Fn,
 			).Flexed(0.5,
 				th.Fill("DocBg").Embed(
 					th.Inset(0.25).Embed(
-						buttons(th),
+						m.buttons(),
 					).Fn,
 				).Fn,
 			).Fn,
 		).Fn,
 	).Fn(gtx)
-	progress++
-	if progress == 100 {
-		progress = 0
+	m.progress++
+	if m.progress == 100 {
+		m.progress = 0
 	}
 }
 
-func blocks(th *p9.Theme) layout.Widget {
+func (m *MinerModel) blocks() layout.Widget {
+	th := m.th
 	return th.Flex().Vertical().Rigid(
 		th.Inset(0.25).Embed(
 			th.Flex().Rigid(
@@ -128,12 +142,13 @@ func blocks(th *p9.Theme) layout.Widget {
 	).Fn
 }
 
-func buttons(th *p9.Theme) layout.Widget {
+func (m *MinerModel) buttons() layout.Widget {
+	th := m.th
 	return th.Flex().Vertical().Rigid(
 		th.Inset(0.25).Embed(
 			th.Flex().Rigid(
 				th.Button(
-					button0.SetClick(func() {
+					m.button0.SetClick(func() {
 						Info("clicked customised button")
 					})).
 					CornerRadius(3).
@@ -150,7 +165,7 @@ func buttons(th *p9.Theme) layout.Widget {
 		th.Flex().Rigid(
 			th.Inset(0.25).Embed(
 				th.Button(
-					button2.SetClick(func() {
+					m.button2.SetClick(func() {
 						Info("clicked default style button")
 					})).
 					Text("default style").
@@ -164,7 +179,7 @@ func buttons(th *p9.Theme) layout.Widget {
 			).Fn,
 		).Rigid(
 			th.Inset(0.25).Embed(
-				th.IconButton(iconbutton.SetClick(
+				th.IconButton(m.iconbutton.SetClick(
 					func() {
 						Debug("clicked parallelcoin button")
 					})).
@@ -176,7 +191,7 @@ func buttons(th *p9.Theme) layout.Widget {
 			).Fn,
 		).Rigid(
 			th.Inset(0.25).Embed(
-				th.IconButton(iconbutton1.SetClick(
+				th.IconButton(m.iconbutton1.SetClick(
 					func() {
 						Debug("clicked android button")
 					})).
@@ -190,16 +205,21 @@ func buttons(th *p9.Theme) layout.Widget {
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.ProgressBar().Color("Primary").SetProgress(progress).Fn,
+		th.ProgressBar().Color("Primary").SetProgress(int(m.progress)).Fn,
 	).Rigid(
-		th.ProgressBar().Color("Primary").SetProgress(100-progress).Fn,
+		th.ProgressBar().Color("Primary").SetProgress(int(m.slider.Value())).Fn,
 	).Rigid(
 		th.Flex().
 			Flexed(1,
-				th.Slider(slider, 0, 1).Fn,
+				th.Slider().
+					Float(m.slider.SetHook(func(fl float32) {
+						Debug("float now at value", fl)
+					})).
+					Min(0).Max(100).
+					Fn,
 			).
 			Rigid(
-				th.Body1(fmt.Sprintf("%3v", int(slider.Value()*100))).
+				th.Body1(fmt.Sprintf("%3v", int(m.slider.Value()))).
 					Font("go regular").Color("DocText").
 					Fn,
 			).Fn,
@@ -207,15 +227,17 @@ func buttons(th *p9.Theme) layout.Widget {
 		th.Flex().Rigid(
 			th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
 		).Rigid(
-			th.RadioButton(radio, "r1", "first").Fn,
+			th.RadioButton(m.radio, "first", "first").Fn,
 		).Rigid(
-			th.RadioButton(radio, "r2", "second").Fn,
+			th.RadioButton(m.radio, "second", "second").Fn,
 		).Rigid(
-			th.RadioButton(radio, "r3", "third").Fn,
+			th.RadioButton(m.radio, "third", "third").Fn,
 		).Rigid(
-			th.Switch(boolButton2).Fn,
+			th.Switch(m.boolButton2.SetOnChange(func(b bool) {
+				Debug("switch state set to", b)
+			})).Fn,
 		).Rigid(
-			th.CheckBox(boolButton1.SetOnChange(func(b bool) {
+			th.CheckBox(m.boolButton1.SetOnChange(func(b bool) {
 				Debug("change state to", b)
 			})).
 				IconColor("Primary").
@@ -228,7 +250,16 @@ func buttons(th *p9.Theme) layout.Widget {
 		th.Inset(0.25).Embed(
 			th.Border().Embed(
 				th.Inset(0.25).Embed(
-					th.SimpleInput(lineEditor).Fn,
+					th.SimpleInput(m.lineEditor.
+						SetChange(func(txt string) {
+							Debug("lineEditor changed to:\n" + txt)
+						}).
+						SetFocus(func(is bool) {
+							Debug("lineEditor is focused", is)
+						}).
+						SetSubmit(func(txt string) {
+							Debug("lineEditor submitted with text:\n" + txt)
+						})).Fn,
 				).Fn,
 			).Fn,
 		).Fn,
@@ -236,7 +267,16 @@ func buttons(th *p9.Theme) layout.Widget {
 		th.Inset(0.25).Embed(
 			th.Border().Embed(
 				th.Inset(0.25).Embed(
-					th.SimpleInput(areaEditor).Fn,
+					th.SimpleInput(m.areaEditor.
+						SetChange(func(txt string) {
+							Debug("areaEditor changed to:\n" + txt)
+						}).
+						SetFocus(func(is bool) {
+							Debug("areaEditor is focused", is)
+						}).
+						SetSubmit(func(txt string) {
+							Debug("areaEditor submitted with text:\n" + txt)
+						})).Fn,
 				).Fn,
 			).Fn,
 		).Fn,

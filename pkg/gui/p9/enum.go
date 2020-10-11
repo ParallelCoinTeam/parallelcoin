@@ -9,7 +9,7 @@ import (
 	"gioui.org/op"
 )
 
-type _enum struct {
+type Enum struct {
 	value   string
 	changed bool
 	clicks  []gesture.Click
@@ -17,20 +17,20 @@ type _enum struct {
 	hook    func(value string)
 }
 
-func (th *Theme) Enum() *_enum {
-	return &_enum{hook: func(string) {}}
+func (th *Theme) Enum() *Enum {
+	return &Enum{hook: func(string) {}}
 }
 
-func (e *_enum) Value() string {
+func (e *Enum) Value() string {
 	return e.value
 }
 
-func (e *_enum) SetValue(value string) *_enum {
+func (e *Enum) SetValue(value string) *Enum {
 	e.value = value
 	return e
 }
 
-func (e *_enum) SetOnChange(hook func(value string)) *_enum {
+func (e *Enum) SetOnChange(hook func(value string)) *Enum {
 	e.hook = hook
 	return e
 }
@@ -45,14 +45,14 @@ func index(vs []string, t string) int {
 }
 
 // Changed reports whether Value has changed by user interaction since the last call to Changed.
-func (e *_enum) Changed() bool {
+func (e *Enum) Changed() bool {
 	changed := e.changed
 	e.changed = false
 	return changed
 }
 
 // Fn adds the event handler for key.
-func (e *_enum) Fn(gtx layout.Context, key string) layout.Dimensions {
+func (e *Enum) Fn(gtx layout.Context, key string) layout.Dimensions {
 	defer op.Push(gtx.Ops).Pop()
 	pointer.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
 

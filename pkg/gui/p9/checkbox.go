@@ -5,7 +5,7 @@ import (
 )
 
 // CheckBox creates a checkbox with a text label
-func (th *Theme) CheckBox(checkBox *_bool) *_checkbox {
+func (th *Theme) CheckBox(checkBox *Bool) *_checkbox {
 	var (
 		color     = "DocText"
 		textColor = "Primary"
@@ -25,7 +25,7 @@ func (th *Theme) CheckBox(checkBox *_bool) *_checkbox {
 
 type _checkbox struct {
 	*_checkable
-	checkBox                *_bool
+	checkBox                *Bool
 	color, textColor, label string
 	action                  func(b bool)
 }

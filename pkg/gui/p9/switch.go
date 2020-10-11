@@ -21,11 +21,11 @@ type _switch struct {
 		enabled  color.RGBA
 		disabled color.RGBA
 	}
-	swtch *_bool
+	swtch *Bool
 }
 
 // Switch creates a boolean switch widget (basically a checkbox but looks like a switch)
-func (th *Theme) Switch(swtch *_bool) *_switch {
+func (th *Theme) Switch(swtch *Bool) *_switch {
 	sw := &_switch{
 		th:    th,
 		swtch: swtch,
@@ -44,6 +44,11 @@ func (s *_switch) EnabledColor(color string) *_switch {
 // DisabledColor sets the color to draw for the disabled state
 func (s *_switch) DisabledColor() *_switch {
 	s.color.disabled = s.th.Colors.Get("Primary")
+	return s
+}
+
+func (s *_switch) SetHook(fn func(b bool)) *_switch {
+	s.swtch.SetOnChange(fn)
 	return s
 }
 

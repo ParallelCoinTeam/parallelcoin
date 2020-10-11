@@ -15,12 +15,12 @@ type _buttonLayout struct {
 	th           *Theme
 	background   color.RGBA
 	cornerRadius unit.Value
-	button       *_clickable
+	button       *Clickable
 	w            l.Widget
 }
 
 // ButtonLayout creates a button with a background and another widget over top
-func (th *Theme) ButtonLayout(button *_clickable) *_buttonLayout {
+func (th *Theme) ButtonLayout(button *Clickable) *_buttonLayout {
 	return &_buttonLayout{
 		th:           th,
 		button:       button,

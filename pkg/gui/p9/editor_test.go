@@ -22,7 +22,7 @@ import (
 )
 
 func TestEditor(t *testing.T) {
-	e := new(_editor)
+	e := new(Editor)
 	gtx := layout.Context{
 		Ops:         new(op.Ops),
 		Constraints: layout.Exact(image.Pt(100, 100)),
@@ -71,7 +71,7 @@ func TestEditor(t *testing.T) {
 }
 
 func TestEditorDimensions(t *testing.T) {
-	e := new(_editor)
+	e := new(Editor)
 	tq := &testQueue{
 		events: []event.Event{
 			key.EditEvent{Text: "A"},
@@ -101,7 +101,7 @@ func (q *testQueue) Events(_ event.Tag) []event.Event {
 
 // assertCaret asserts that the editor caret is at a particular line
 // and column, and that the byte position matches as well.
-func assertCaret(t *testing.T, e *_editor, line, col, bytes int) {
+func assertCaret(t *testing.T, e *Editor, line, col, bytes int) {
 	t.Helper()
 	gotLine, gotCol := e.CaretPos()
 	if gotLine != line || gotCol != col {
@@ -136,7 +136,7 @@ func TestEditorCaretConsistency(t *testing.T) {
 	fontSize := unit.Px(10)
 	font := text.Font{}
 	for _, a := range []text.Alignment{text.Start, text.Middle, text.End} {
-		e := &_editor{
+		e := &Editor{
 			alignment: a,
 		}
 		e.Layout(gtx, cache, font, fontSize)
@@ -215,8 +215,8 @@ func TestEditorMoveWord(t *testing.T) {
 		{"hello    world", 8, -1, 0},
 		{"hello brave new world", 0, 3, 15},
 	}
-	setup := func(t string) *_editor {
-		e := new(_editor)
+	setup := func(t string) *Editor {
+		e := new(Editor)
 		gtx := layout.Context{
 			Ops:         new(op.Ops),
 			Constraints: layout.Exact(image.Pt(100, 100)),
@@ -263,8 +263,8 @@ func TestEditorDeleteWord(t *testing.T) {
 		{"hello    world", 8, -1, 5, "hello world"},
 		{"hello brave new world", 0, 3, 0, " new world"},
 	}
-	setup := func(t string) *_editor {
-		e := new(_editor)
+	setup := func(t string) *Editor {
+		e := new(Editor)
 		gtx := layout.Context{
 			Ops:         new(op.Ops),
 			Constraints: layout.Exact(image.Pt(100, 100)),
@@ -290,7 +290,7 @@ func TestEditorDeleteWord(t *testing.T) {
 }
 
 func TestEditorNoLayout(t *testing.T) {
-	var e _editor
+	var e Editor
 	e.SetText("hi!\n")
 	e.Move(1)
 }

@@ -22,11 +22,11 @@ type _iconButton struct {
 	// Size is the icon size.
 	size   unit.Value
 	inset  *_inset
-	button *_clickable
+	button *Clickable
 }
 
 // IconButton creates an icon with a circular background and an icon placed in the centre
-func (th *Theme) IconButton(button *_clickable) *_iconButton {
+func (th *Theme) IconButton(button *Clickable) *_iconButton {
 	return &_iconButton{
 		th:         th,
 		background: th.Colors.Get("Primary"),
