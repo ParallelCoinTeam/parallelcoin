@@ -49,22 +49,22 @@ func (m *MinerModel) Widget(gtx layout.Context) {
 		m.Fill("PanelBg").Embed(
 			// m.Inset(0.25).Embed(
 			m.Flex().Rigid(
-				// m.Inset(0.25).Embed(
+				m.Inset(0.25).Embed(
 				m.IconButton(m.logoButton.SetClick(
 					func() {
 						Info("clicked logo button")
 						m.FlipTheme()
 					})).
-					Color("PanelText").
-					Background("").
-					Scale(p9.Scales["H2"]).
+					Color("PanelBg").
+					Background("PanelText").
+					Scale(p9.Scales["H4"]).
 					Icon(icons.ParallelCoin).
 					Fn,
-				// ).Fn,
+				).Fn,
 			).Rigid(
 				m.Inset(0.5).Embed(
 					// m.Fill("Primary").Embed(
-					m.H4("kopach miner control").
+					m.H5("kopach miner control").
 						Color("PanelText").
 						Fn,
 					// ).Fn,
