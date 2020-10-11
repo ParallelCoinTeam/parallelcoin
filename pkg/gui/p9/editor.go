@@ -422,12 +422,12 @@ func (e *_editor) layout(gtx layout.Context) layout.Dimensions {
 	}
 	clip := textPadding(e.lines)
 	clip.Max = clip.Max.Add(e.viewSize)
-	it := _lineIterator{
-		lines:     e.lines,
-		clip:      clip,
-		alignment: e.alignment,
-		width:     e.viewSize.X,
-		offset:    off,
+	it := lineIterator{
+		Lines:     e.lines,
+		Clip:      clip,
+		Alignment: e.alignment,
+		Width:     e.viewSize.X,
+		Offset:    off,
 	}
 	e.shapes = e.shapes[:0]
 	for {
@@ -602,7 +602,7 @@ func (e *_editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	} else {
 		lines, _ = nullLayout(r)
 	}
-	dims := linesDimensions(lines)
+	dims := linesDimens(lines)
 	for i := 0; i < len(lines)-1; i++ {
 		// To avoid layout flickering while editing, assume a soft newline takes up all available space.
 		if lay := lines[i].Layout; len(lay) > 0 {

@@ -103,19 +103,16 @@ func (b *_button) TextScale(scale float32) *_button {
 	return b
 }
 
-// SetClick sets the click hook
 func (b *_button) SetClick(fn func()) *_button {
 	b.button.SetClick(fn)
 	return b
 }
 
-// SetCancel sets the cancel hook
 func (b *_button) SetCancel(fn func()) *_button {
 	b.button.SetCancel(fn)
 	return b
 }
 
-// SetPress sets the press hook
 func (b *_button) SetPress(fn func()) *_button {
 	b.button.SetPress(fn)
 	return b
@@ -132,7 +129,7 @@ func (b *_button) Fn(gtx l.Context) l.Dimensions {
 		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
 			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
 			return _text{alignment: text.Middle}.
-				Fn(gtx, b.shaper, b.font, b.textSize, b.text)
+				Layout(gtx, b.shaper, b.font, b.textSize, b.text)
 		})
 	}
 	bl.Embed(fn)

@@ -42,19 +42,16 @@ func Clickable() (c *_clickable) {
 	return
 }
 
-// SetClick sets the click hook
 func (c *_clickable) SetClick(fn func()) *_clickable {
 	c.Events.Click = fn
 	return c
 }
 
-// SetCancel sets the cancel hook
 func (c *_clickable) SetCancel(fn func()) *_clickable {
 	c.Events.Cancel = fn
 	return c
 }
 
-// SetPress sets the press hook
 func (c *_clickable) SetPress(fn func()) *_clickable {
 	c.Events.Press = fn
 	return c
