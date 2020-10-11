@@ -29,66 +29,96 @@ func (th *Theme) Text() *_text {
 	return &_text{}
 }
 
-type lineIterator struct {
-	Lines     []text.Line
-	Clip      image.Rectangle
-	Alignment text.Alignment
-	Width     int
-	Offset    image.Point
+type _lineIterator struct {
+	lines     []text.Line
+	clip      image.Rectangle
+	alignment text.Alignment
+	width     int
+	offset    image.Point
 
 	y, prevDesc fixed.Int26_6
 	txtOff      int
 }
 
+func (th *Theme) LineIterator() *_lineIterator {
+	return &_lineIterator{}
+}
+
+func (l *_lineIterator) Lines(lines []text.Line) *_lineIterator {
+	l.lines = lines
+	return l
+}
+
+func (l *_lineIterator) Clip(clip image.Rectangle) *_lineIterator {
+	l.clip = clip
+	return l
+}
+
+func (l *_lineIterator) Alignment(alignment text.Alignment) *_lineIterator {
+	l.alignment = alignment
+	return l
+}
+
+func (l *_lineIterator) Width(width int) *_lineIterator {
+	l.width = width
+	return l
+}
+
+func (l *_lineIterator) Offset(offset image.Point) *_lineIterator {
+
+	return l
+}
+
 const inf = 1e6
 
-func (l *lineIterator) Next() (int, int, []text.Glyph, f32.Point, bool) {
-	for len(l.Lines) > 0 {
-		line := l.Lines[0]
-		l.Lines = l.Lines[1:]
-		x := align(l.Alignment, line.Width, l.Width) + fixed.I(l.Offset.X)
+func (l *_lineIterator) Next() (start, end int, glyph []text.Glyph, offf f32.Point, is bool) {
+	for len(l.lines) > 0 {
+		line := l.lines[0]
+		l.lines = l.lines[1:]
+		x := align(l.alignment, line.Width, l.width) + fixed.I(l.offset.X)
 		l.y += l.prevDesc + line.Ascent
 		l.prevDesc = line.Descent
 		// Align baseline and line start to the pixel grid.
 		off := fixed.Point26_6{X: fixed.I(x.Floor()), Y: fixed.I(l.y.Ceil())}
 		l.y = off.Y
-		off.Y += fixed.I(l.Offset.Y)
-		if (off.Y + line.Bounds.Min.Y).Floor() > l.Clip.Max.Y {
+		off.Y += fixed.I(l.offset.Y)
+		if (off.Y + line.Bounds.Min.Y).Floor() > l.clip.Max.Y {
 			break
 		}
 		layout := line.Layout
-		start := l.txtOff
+		start = l.txtOff
 		l.txtOff += line.Len
-		if (off.Y + line.Bounds.Max.Y).Ceil() < l.Clip.Min.Y {
+		if (off.Y + line.Bounds.Max.Y).Ceil() < l.clip.Min.Y {
 			continue
 		}
 		for len(layout) > 0 {
 			g := layout[0]
 			adv := g.Advance
-			if (off.X + adv + line.Bounds.Max.X - line.Width).Ceil() >= l.Clip.Min.X {
+			if (off.X + adv + line.Bounds.Max.X - line.Width).Ceil() >= l.clip.Min.X {
 				break
 			}
 			off.X += adv
 			layout = layout[1:]
 			start += utf8.RuneLen(g.Rune)
 		}
-		end := start
+		end = start
 		endx := off.X
 		for i, g := range layout {
-			if (endx + line.Bounds.Min.X).Floor() > l.Clip.Max.X {
+			if (endx + line.Bounds.Min.X).Floor() > l.clip.Max.X {
 				layout = layout[:i]
 				break
 			}
 			end += utf8.RuneLen(g.Rune)
 			endx += g.Advance
 		}
-		offf := f32.Point{X: float32(off.X) / 64, Y: float32(off.Y) / 64}
-		return start, end, layout, offf, true
+		offf = f32.Point{X: float32(off.X) / 64, Y: float32(off.Y) / 64}
+		is = true
+		return
 	}
-	return 0, 0, nil, f32.Point{}, false
+	return
 }
 
-func (l _text) Layout(gtx layout.Context, s text.Shaper, font text.Font, size unit.Value, txt string) layout.Dimensions {
+func (l _text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.Value, txt string) layout.Dimensions {
 	cs := gtx.Constraints
 	textSize := fixed.I(gtx.Px(size))
 	lines := s.LayoutString(font, textSize, cs.Max.X, txt)
@@ -99,11 +129,11 @@ func (l _text) Layout(gtx layout.Context, s text.Shaper, font text.Font, size un
 	dims.Size = cs.Constrain(dims.Size)
 	clip := textPadding(lines)
 	clip.Max = clip.Max.Add(dims.Size)
-	it := lineIterator{
-		Lines:     lines,
-		Clip:      clip,
-		Alignment: l.alignment,
-		Width:     dims.Size.X,
+	it := _lineIterator{
+		lines:     lines,
+		clip:      clip,
+		alignment: l.alignment,
+		width:     dims.Size.X,
 	}
 	for {
 		start, end, l, off, ok := it.Next()

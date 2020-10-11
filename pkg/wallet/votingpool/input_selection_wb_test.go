@@ -219,7 +219,7 @@ func TestEligibleInputsAreEligible(t *testing.T) {
 	// Make sure credit is old enough to pass the minConf check.
 	c.BlockMeta.Height = int32(eligibleInputMinConfirmations)
 	if !pool.isCreditEligible(c, eligibleInputMinConfirmations, chainHeight, dustThreshold) {
-		t.Errorf("Input is not eligible and it should be.")
+		t.Errorf("SimpleInput is not eligible and it should be.")
 	}
 }
 func TestNonEligibleInputsAreNotEligible(t *testing.T) {
@@ -242,7 +242,7 @@ func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	c.BlockMeta.Height = int32(eligibleInputMinConfirmations)
 	// Check that credit below dustThreshold is rejected.
 	if pool.isCreditEligible(c, eligibleInputMinConfirmations, chainHeight, dustThreshold) {
-		t.Errorf("Input is eligible and it should not be.")
+		t.Errorf("SimpleInput is eligible and it should not be.")
 	}
 	// Check that a credit with not enough confirmations is rejected.
 	_, credits = TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{int64(dustThreshold)})
@@ -251,7 +251,7 @@ func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	// the reason why I need to put 902 is *that* makes 1000 - 902 +1 = 99 >= 100 false
 	c.BlockMeta.Height = int32(902)
 	if pool.isCreditEligible(c, eligibleInputMinConfirmations, chainHeight, dustThreshold) {
-		t.Errorf("Input is eligible and it should not be.")
+		t.Errorf("SimpleInput is eligible and it should not be.")
 	}
 }
 func TestCreditSortingByAddress(t *testing.T) {

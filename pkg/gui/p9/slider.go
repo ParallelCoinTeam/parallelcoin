@@ -32,21 +32,25 @@ func (th *Theme) Slider(float *_float, min, max float32) *_slider {
 	}
 }
 
+// Min sets the value at the left hand side
 func (s *_slider) Min(min float32) *_slider {
 	s.min = min
 	return s
 }
 
+// Max sets the value at the right hand side
 func (s *_slider) Max(max float32) *_slider {
 	s.max = max
 	return s
 }
 
+// Color sets the color to draw the slider in
 func (s *_slider) Color(color string) *_slider {
 	s.color = s.th.Colors.Get(color)
 	return s
 }
 
+// Float sets the initial value
 func (s *_slider) Float(f *_float) *_slider {
 	s.float = f
 	return s

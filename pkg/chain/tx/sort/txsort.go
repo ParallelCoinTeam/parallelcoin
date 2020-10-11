@@ -55,10 +55,10 @@ func (s sortableOutputSlice) Swap(i, j int) {
 }
 func (s sortableInputSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
-// Input comparison function.
+// SimpleInput comparison function.
 // First sort based on input hash (reversed / rpc-style), then index.
 func (s sortableInputSlice) Less(i, j int) bool {
-	// Input hashes are the same, so compare the index.
+	// SimpleInput hashes are the same, so compare the index.
 	ihash := s[i].PreviousOutPoint.Hash
 	jhash := s[j].PreviousOutPoint.Hash
 	if ihash == jhash {
