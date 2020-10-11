@@ -37,14 +37,14 @@ func (th *Theme) Button(btn *Clickable) *_button {
 		// default sets
 		font:         th.collection[0].Font,
 		color:        th.Colors.Get("ButtonText"),
-		cornerRadius: th.textSize.Scale(0.125),
+		cornerRadius: th.TextSize.Scale(0.125),
 		background:   th.Colors.Get("Primary"),
-		textSize:     th.textSize,
+		textSize:     th.TextSize,
 		inset: &l.Inset{
-			Top:    th.textSize.Scale(0.5),
-			Bottom: th.textSize.Scale(0.5),
-			Left:   th.textSize.Scale(0.5),
-			Right:  th.textSize.Scale(0.5),
+			Top:    th.TextSize.Scale(0.5),
+			Bottom: th.TextSize.Scale(0.5),
+			Left:   th.TextSize.Scale(0.5),
+			Right:  th.TextSize.Scale(0.5),
 		},
 		button: btn,
 		shaper: th.shaper,
@@ -65,7 +65,7 @@ func (b *_button) Color(color string) *_button {
 
 // CornerRadius sets the corner radius (all measurements are scaled from the base text size)
 func (b *_button) CornerRadius(cornerRadius float32) *_button {
-	b.cornerRadius = b.th.textSize.Scale(cornerRadius)
+	b.cornerRadius = b.th.TextSize.Scale(cornerRadius)
 	return b
 }
 
@@ -83,10 +83,10 @@ func (b *_button) Font(font string) *_button {
 // Inset sets the inset between the button border and the text
 func (b *_button) Inset(scale float32) *_button {
 	b.inset = &l.Inset{
-		Top:    b.th.textSize.Scale(scale),
-		Right:  b.th.textSize.Scale(scale),
-		Bottom: b.th.textSize.Scale(scale),
-		Left:   b.th.textSize.Scale(scale),
+		Top:    b.th.TextSize.Scale(scale),
+		Right:  b.th.TextSize.Scale(scale),
+		Bottom: b.th.TextSize.Scale(scale),
+		Left:   b.th.TextSize.Scale(scale),
 	}
 	return b
 }
@@ -99,7 +99,7 @@ func (b *_button) Text(text string) *_button {
 
 // TextScale sets the dimensions of the text as a fraction of the base text size
 func (b *_button) TextScale(scale float32) *_button {
-	b.textSize = b.th.textSize.Scale(scale)
+	b.textSize = b.th.TextSize.Scale(scale)
 	return b
 }
 

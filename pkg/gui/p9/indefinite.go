@@ -30,7 +30,7 @@ func (th *Theme) Indefinite() *_indefinite {
 
 // Scale sets the size of the spinner
 func (lo *_indefinite) Scale(scale float32) *_indefinite {
-	lo.scale = lo.th.textSize.Scale(scale)
+	lo.scale = lo.th.TextSize.Scale(scale)
 	return lo
 }
 
@@ -47,7 +47,7 @@ func (lo *_indefinite) Fn(gtx l.Context) l.Dimensions {
 		diam = minY
 	}
 	if diam == 0 {
-		diam = gtx.Px(lo.th.textSize.Scale( 2))
+		diam = gtx.Px(lo.th.TextSize.Scale( 2))
 	}
 	sz := gtx.Constraints.Constrain(image.Pt(diam, diam))
 	radius := float64(sz.X) * .5

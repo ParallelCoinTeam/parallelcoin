@@ -44,7 +44,7 @@ func (c *_checkbox) TextColor(color string) *_checkbox {
 
 // TextScale sets the scale relative to the base font size for the text label
 func (c *_checkbox) TextScale(scale float32) *_checkbox {
-	c.textSize = c.th.textSize.Scale(scale)
+	c.textSize = c.th.TextSize.Scale(scale)
 	return c
 }
 
@@ -56,7 +56,7 @@ func (c *_checkbox) Text(label string) *_checkbox {
 
 // IconScale sets the scaling of the check icon
 func (c *_checkbox) IconScale(scale float32) *_checkbox {
-	c.size = c.th.textSize.Scale(scale)
+	c.size = c.th.TextSize.Scale(scale)
 	return c
 }
 

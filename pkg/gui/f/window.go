@@ -38,13 +38,11 @@ type window struct {
 func Window() (out *window) {
 	var ops op.Ops
 	var e system.FrameEvent
-	var opts []app.Option
 	out = &window{
 		Ctx:   layout.NewContext(&ops, e),
-		w:     app.NewWindow(opts...),
-		opts:  opts,
 		scale: &scaledConfig{1},
 	}
+	// out.set()
 	return
 }
 
@@ -67,37 +65,17 @@ func (w *window) Scale(s float32) *window {
 	return w
 }
 
-// Set the window options and initialise the app.window
-func (w *window) set() (out *window) {
+// Open sets the window options and initialise the app.window
+func (w *window) Open() (out *window) {
+	if w.scale == nil {
+		w.Scale(1)
+	}
 	if w.opts != nil {
 		w.w = app.NewWindow(w.opts...)
 		w.opts = nil
 	}
-	if w.scale == nil {
-		w.Scale(1)
-	}
 	return w
 }
-
-// These override app.window methods to ensure the options are set first
-//
-// // Queue returns the window's event queue
-// func (w *window) Queue() (out *app.Queue) {
-// 	w.set()
-// 	return w.w.Queue()
-// }
-//
-// // Events returns the channel for events registered with the window
-// func (w *window) Events() (out <-chan event.Event) {
-// 	w.set()
-// 	return w.w.Events()
-// }
-//
-// // Context for the window
-// func (w *window) Context() (out *layout.Context) {
-// 	w.set()
-// 	return layout.NewContext(w.w.Queue())
-// }
 
 func (w *window) Run(frame func(ctx *layout.Context), destroy func()) (err error) {
 	// w.set()

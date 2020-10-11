@@ -44,9 +44,9 @@ func (th *Theme) Checkable() *_checkable {
 		label:              "checkable",
 		color:              th.Colors.Get("DocText"),
 		font:               f,
-		textSize:           th.textSize.Scale(14.0 / 16.0),
+		textSize:           th.TextSize.Scale(14.0 / 16.0),
 		iconColor:          th.Colors.Get("Primary"),
-		size:               th.textSize.Scale(1),
+		size:               th.TextSize.Scale(1),
 		checkedStateIcon:   th.Icon().Src(icons.ToggleCheckBox).Color("Primary"),
 		uncheckedStateIcon: th.Icon().Src(icons.ToggleCheckBoxOutlineBlank).Color("Primary"),
 		shaper:             th.shaper,
@@ -78,7 +78,7 @@ func (c *_checkable) Font(font string) *_checkable {
 
 // TextScale sets the size of the font relative to the base text size
 func (c *_checkable) TextScale(scale float32) *_checkable {
-	c.textSize = c.th.textSize.Scale(scale)
+	c.textSize = c.th.TextSize.Scale(scale)
 	return c
 }
 
@@ -90,7 +90,7 @@ func (c *_checkable) IconColor(color string) *_checkable {
 
 // Scale sets the size of the checkbox icon relative to the base font size
 func (c *_checkable) Scale(size float32) *_checkable {
-	c.size = c.th.textSize.Scale(size)
+	c.size = c.th.TextSize.Scale(size)
 	return c
 }
 

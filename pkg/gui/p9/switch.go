@@ -55,9 +55,9 @@ func (s *_switch) SetHook(fn func(b bool)) *_switch {
 // Fn updates the switch and displays it.
 func (s *_switch) Fn(gtx l.Context) l.Dimensions {
 	return s.th.Inset(0.25).Embed(func(gtx l.Context) l.Dimensions {
-		trackWidth := gtx.Px(s.th.textSize.Scale(2.75))
-		trackHeight := gtx.Px(s.th.textSize.Scale(1))
-		thumbSize := gtx.Px(s.th.textSize.Scale(1.5))
+		trackWidth := gtx.Px(s.th.TextSize.Scale(2.75))
+		trackHeight := gtx.Px(s.th.TextSize.Scale(1))
+		thumbSize := gtx.Px(s.th.TextSize.Scale(1.5))
 		trackOff := float32(thumbSize-trackHeight) * .5
 
 		// Draw track.

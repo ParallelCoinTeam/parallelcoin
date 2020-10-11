@@ -31,7 +31,7 @@ func (th *Theme) SimpleInput(editor *Editor) *_textInput {
 	e := &_textInput{
 		th:        th,
 		editor:    editor,
-		textSize:  th.textSize,
+		textSize:  th.TextSize,
 		color:     th.Colors.Get("DocText"),
 		shaper:    th.shaper,
 		hint:      "hint",
@@ -54,7 +54,7 @@ func (e *_textInput) Font(font string) *_textInput {
 
 // TextScale sets the size of the text relative to the base font size
 func (e *_textInput) TextScale(scale float32) *_textInput {
-	e.textSize = e.th.textSize.Scale(scale)
+	e.textSize = e.th.TextSize.Scale(scale)
 	return e
 }
 

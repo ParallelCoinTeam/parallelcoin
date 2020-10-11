@@ -9,7 +9,7 @@ type Theme struct {
 	quit          chan struct{}
 	shaper        text.Shaper
 	collection    []text.FontFace
-	textSize      unit.Value
+	TextSize      unit.Value
 	Colors        Colors
 	icons         map[string]*_icon
 	scrollBarSize int
@@ -21,7 +21,7 @@ func NewTheme(fontCollection []text.FontFace, quit chan struct{}) (th *Theme) {
 		quit:          quit,
 		shaper:        text.NewCache(fontCollection),
 		collection:    fontCollection,
-		textSize:      unit.Sp(16),
+		TextSize:      unit.Sp(16),
 		Colors:        NewColors(),
 		scrollBarSize: 0,
 	}

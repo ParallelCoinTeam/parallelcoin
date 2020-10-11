@@ -200,7 +200,7 @@ func (e *Editor) Events() []EditorEvent {
 }
 
 func (e *Editor) processEvents(gtx layout.Context) {
-	// Flush events from before the previous Fn.
+	// Flush events from before the previous Open.
 	n := copy(e.events, e.events[e.prevEvents:])
 	e.events = e.events[:n]
 	e.prevEvents = n

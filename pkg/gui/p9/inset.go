@@ -16,7 +16,7 @@ func (th *Theme) Inset(pad float32) (out *_inset) {
 		th: th,
 		in: l.UniformInset(
 			th.
-				textSize.
+				TextSize.
 				Scale(pad)),
 	}
 	return

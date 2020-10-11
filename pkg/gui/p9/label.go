@@ -51,7 +51,7 @@ func (l *_label) Text(text string) *_label {
 
 // TextScale sets the size of the text relative to the base font size
 func (l *_label) TextScale(scale float32) *_label {
-	l.textSize = l.th.textSize.Scale(scale)
+	l.textSize = l.th.TextSize.Scale(scale)
 	return l
 }
 

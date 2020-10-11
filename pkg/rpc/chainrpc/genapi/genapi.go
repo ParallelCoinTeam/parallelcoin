@@ -379,7 +379,7 @@ type (
 // ` + RPCMapName + `BeforeInit are created first and are added to the main list 
 // when the init runs.
 //
-// - Fn is the handler function
+// - Open is the handler function
 // 
 // - Call is a channel carrying a struct containing parameters and error that is 
 // listened to in RunAPI to dispatch the calls
@@ -391,7 +391,7 @@ type (
 // check, result and wait functions for asynchronous and synchronous calls to RPC functions
 var ` + RPCMapName + `BeforeInit = map[string]CommandHandler{
 {{range .}}	"{{.Method}}":{ 
-		Fn: Handle{{.Handler}}, Call: make(chan API, 32), 
+		Open: Handle{{.Handler}}, Call: make(chan API, 32), 
 		Result: func() API { return API{Ch: make(chan {{.Handler}}Res)} }}, 
 {{end}}
 }
@@ -458,7 +458,7 @@ func RunAPI(server *Server, quit chan struct{}) {
 			select { {{range .}}
 			case msg := <-nrh["{{.Method}}"].Call:
 				if res, err = nrh["{{.Method}}"].
-					Fn(server, msg.Params.({{.Cmd}}), nil); Check(err) {
+					Open(server, msg.Params.({{.Cmd}}), nil); Check(err) {
 				}
 				if r, ok := res.({{.ResType}}); ok { 
 					msg.Ch.(chan {{.Handler}}Res) <- {{.Handler}}Res{&r, err} } {{end}}

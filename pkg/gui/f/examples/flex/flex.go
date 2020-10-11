@@ -16,7 +16,7 @@ func main() {
 	// 		fui.Embed().Fill(0, 255, 0, 255).Prep(c),
 	// 	).Flexed(0.25,
 	// 		fui.Embed().Fill(0, 0, 255, 255).Prep(c),
-	// 	).Fn(c)
+	// 	).Open(c)
 	// }, func() {
 	// })
 	// app.Main()

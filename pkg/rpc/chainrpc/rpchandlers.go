@@ -150,7 +150,7 @@ type (
 // RPCHandlersBeforeInit are created first and are added to the main list 
 // when the init runs.
 //
-// - Fn is the handler function
+// - Open is the handler function
 // 
 // - Call is a channel carrying a struct containing parameters and error that is 
 // listened to in RunAPI to dispatch the calls

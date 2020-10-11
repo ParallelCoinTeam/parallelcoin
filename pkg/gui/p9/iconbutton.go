@@ -31,7 +31,7 @@ func (th *Theme) IconButton(button *Clickable) *_iconButton {
 		th:         th,
 		background: th.Colors.Get("Primary"),
 		color:      th.Colors.Get("DocBg"),
-		size:       th.textSize,
+		size:       th.TextSize,
 		inset:      th.Inset(0.33),
 		button:     button,
 	}
@@ -57,7 +57,7 @@ func (b *_iconButton) Icon(ico *_icon) *_iconButton {
 
 // Scale changes the size of the icon as a ratio of the base font size
 func (b *_iconButton) Scale(scale float32) *_iconButton {
-	b.size = b.th.textSize.Scale(scale)
+	b.size = b.th.TextSize.Scale(scale)
 	return b
 }
 

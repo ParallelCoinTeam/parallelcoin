@@ -37,13 +37,13 @@ func (b *_border) Color(color string) *_border {
 
 // CornerRadius sets the radius of the curve on the corners
 func (b *_border) CornerRadius(rad float32) *_border {
-	b.cornerRadius = b.th.textSize.Scale(rad)
+	b.cornerRadius = b.th.TextSize.Scale(rad)
 	return b
 }
 
 // Width sets the width of the border line
 func (b *_border) Width(width float32) *_border {
-	b.width = b.th.textSize.Scale(width)
+	b.width = b.th.TextSize.Scale(width)
 	return b
 }
 
