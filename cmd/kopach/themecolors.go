@@ -1,7 +1,9 @@
-package gui
+package kopach
+
+import "github.com/p9c/pod/cmd/kopach/gui"
 
 func (s *MinerModel) FlipTheme() {
-	Debug("dark theme:", s.DarkTheme)
+	gui.Debug("dark theme:", s.DarkTheme)
 	s.DarkTheme = !s.DarkTheme
 	// Debug(s.Config.DarkTheme)
 	s.SetTheme(s.DarkTheme)

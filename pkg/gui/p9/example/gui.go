@@ -34,14 +34,18 @@ func main() {
 		th:          th,
 		button0:     th.Clickable(),
 		button1:     th.Clickable(),
-		button2:     th.Clickable(),
+		button2:     th.Clickable().SetClick(func() {
+			Info("clicked default style button")
+		}),
 		boolButton1: th.Bool(false),
 		boolButton2: th.Bool(false),
 		iconbutton:  th.Clickable(),
 		iconbutton1: th.Clickable(),
 		quit:        make(chan struct{}),
 		progress:    0,
-		slider:      th.Float(),
+		slider:      th.Float().SetHook(func(fl float32) {
+			Debug("float now at value", fl)
+		}),
 		lineEditor:  th.Editor().SingleLine(true).Submit(true),
 		areaEditor:  th.Editor().SingleLine(false).Submit(false),
 		radio: th.Enum().SetOnChange(func(value string) {
@@ -168,9 +172,7 @@ func (m *MinerModel) buttons() layout.Widget {
 		th.Flex().Rigid(
 			th.Inset(0.25).Embed(
 				th.Button(
-					m.button2.SetClick(func() {
-						Info("clicked default style button")
-					})).
+					m.button2).
 					Text("default style").
 					Fn,
 			).Fn,
@@ -209,9 +211,7 @@ func (m *MinerModel) buttons() layout.Widget {
 		th.Flex().
 			Flexed(1,
 				th.Slider().
-					Float(m.slider.SetHook(func(fl float32) {
-						Debug("float now at value", fl)
-					})).
+					Float(m.slider).
 					Min(0).Max(100).
 					Fn,
 			).

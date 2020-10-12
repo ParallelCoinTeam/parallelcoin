@@ -37,6 +37,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			Debug("KopachWorkerHandle interrupt")
 			if err := conn.Close(); Check(err) {
 			}
+			close(w.Quit)
 		})
 		err := rpc.Register(w)
 		if err != nil {

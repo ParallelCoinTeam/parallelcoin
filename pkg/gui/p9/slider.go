@@ -55,13 +55,13 @@ func (s *Slider) Float(f *Float) *Slider {
 
 // Fn renders the slider
 func (s *Slider) Fn(c l.Context) l.Dimensions {
-	thumbRadiusInt := c.Px(unit.Dp(6))
-	trackWidth := float32(c.Px(unit.Dp(2)))
+	thumbRadiusInt := c.Px(unit.Sp(6))
+	trackWidth := float32(c.Px(unit.Sp(2)))
 	thumbRadius := float32(thumbRadiusInt)
 	halfWidthInt := 2 * thumbRadiusInt
 	halfWidth := float32(halfWidthInt)
 
-	size := c.Constraints.Min
+	size := c.Constraints.Max
 	// Keep a minimum length so that the track is always visible.
 	minLength := halfWidthInt + 3*thumbRadiusInt + halfWidthInt
 	if size.X < minLength {

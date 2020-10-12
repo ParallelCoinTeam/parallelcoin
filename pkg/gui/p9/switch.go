@@ -31,7 +31,7 @@ func (th *Theme) Switch(swtch *Bool) *_switch {
 		swtch: swtch,
 	}
 	sw.color.enabled = th.Colors.Get("Primary")
-	sw.color.disabled = rgb(0xffffff)
+	sw.color.disabled = th.Colors.Get("PanelBg")
 	return sw
 }
 
@@ -55,9 +55,9 @@ func (s *_switch) SetHook(fn func(b bool)) *_switch {
 // Fn updates the switch and displays it.
 func (s *_switch) Fn(gtx l.Context) l.Dimensions {
 	return s.th.Inset(0.25).Embed(func(gtx l.Context) l.Dimensions {
-		trackWidth := gtx.Px(s.th.TextSize.Scale(2.75))
-		trackHeight := gtx.Px(s.th.TextSize.Scale(1))
-		thumbSize := gtx.Px(s.th.TextSize.Scale(1.5))
+		trackWidth := gtx.Px(s.th.TextSize.Scale(2.5))
+		trackHeight := gtx.Px(s.th.TextSize.Scale(0.75))
+		thumbSize := gtx.Px(s.th.TextSize.Scale(1.25))
 		trackOff := float32(thumbSize-trackHeight) * .5
 
 		// Draw track.
@@ -84,26 +84,26 @@ func (s *_switch) Fn(gtx l.Context) l.Dimensions {
 		paint.PaintOp{Rect: trackRect}.Add(gtx.Ops)
 		stack.Pop()
 		// TODO: change this to animating the thumb slide with color fades
-		// Draw thumb ink.
-		stack = op.Push(gtx.Ops)
-		inkSize := gtx.Px(unit.Dp(44))
-		rr := float32(inkSize) * .5
-		inkOff := f32.Point{
-			X: float32(trackWidth)*.5 - rr,
-			Y: -rr + float32(trackHeight)*.5 + trackOff,
-		}
-		op.Offset(inkOff).Add(gtx.Ops)
-		gtx.Constraints.Min = image.Pt(inkSize, inkSize)
-		clip.RRect{
-			Rect: f32.Rectangle{
-				Max: l.FPt(gtx.Constraints.Min),
-			},
-			NE: rr, NW: rr, SE: rr, SW: rr,
-		}.Add(gtx.Ops)
-		for _, p := range s.swtch.History() {
-			drawInk(gtx, p)
-		}
-		stack.Pop()
+		// // Draw thumb ink.
+		// stack = op.Push(gtx.Ops)
+		// inkSize := gtx.Px(unit.Dp(44))
+		// rr := float32(inkSize) * .5
+		// inkOff := f32.Point{
+		// 	X: float32(trackWidth)*.5 - rr,
+		// 	Y: -rr + float32(trackHeight)*.5 + trackOff,
+		// }
+		// op.Offset(inkOff).Add(gtx.Ops)
+		// gtx.Constraints.Min = image.Pt(inkSize, inkSize)
+		// clip.RRect{
+		// 	Rect: f32.Rectangle{
+		// 		Max: l.FPt(gtx.Constraints.Min),
+		// 	},
+		// 	NE: rr, NW: rr, SE: rr, SW: rr,
+		// }.Add(gtx.Ops)
+		// // for _, p := range s.swtch.History() {
+		// // 	drawInk(gtx, p)
+		// // }
+		// stack.Pop()
 
 		// Compute thumb offset and color.
 		stack = op.Push(gtx.Ops)

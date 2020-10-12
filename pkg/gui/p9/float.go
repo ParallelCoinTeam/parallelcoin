@@ -47,6 +47,9 @@ func (f *Float) Fn(gtx layout.Context, pointerMargin int, min, max float32) layo
 		if e.Type == pointer.Press || e.Type == pointer.Drag {
 			de = &e
 		}
+		if e.Type == pointer.Release {
+			f.changeHook(f.value)
+		}
 	}
 	value := f.value
 	if de != nil {
@@ -86,7 +89,6 @@ func (f *Float) setValue(value, min, max float32) {
 	if f.value != value {
 		f.value = value
 		f.changed = true
-		f.changeHook(value)
 	}
 }
 
