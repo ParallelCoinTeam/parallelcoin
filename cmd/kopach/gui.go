@@ -22,20 +22,31 @@ var maxThreads = float32(runtime.NumCPU())
 
 type MinerModel struct {
 	*p9.Theme
-	Cx         *conte.Xt
-	worker     *Worker
-	DarkTheme  bool
-	logoButton *p9.Clickable
-	mineToggle *p9.Bool
-	cores      *p9.Float
-	nCores     int
-	solData    []SolutionData
-	solButtons []*p9.Clickable
+	Cx            *conte.Xt
+	worker        *Worker
+	DarkTheme     bool
+	logoButton    *p9.Clickable
+	mineToggle    *p9.Bool
+	cores         *p9.Float
+	nCores        int
+	solButtons    []*p9.Clickable
+	lists         map[string]*layout.List
+	solutionCount int
 }
 
 func Run(w *Worker, cx *conte.Xt) {
 	th := p9.NewTheme(p9fonts.Collection(), w.quit)
 	Debug(*cx.Config.Generate, *cx.Config.GenThreads)
+	solButtons := make([]*p9.Clickable, 201)
+	for i := range solButtons {
+		solButtons[i] = th.Clickable()
+	}
+	lists := map[string]*layout.List{
+		"found": {
+			Axis:      layout.Vertical,
+			Alignment: layout.Start,
+		},
+	}
 	minerModel := MinerModel{
 		worker:    w,
 		Theme:     th,
@@ -45,7 +56,8 @@ func Run(w *Worker, cx *conte.Xt) {
 		}),
 		mineToggle: th.Bool(*cx.Config.Generate),
 		cores:      th.Float().SetValue(float32(*cx.Config.GenThreads)),
-		solButtons: make([]*p9.Clickable, 201),
+		solButtons: solButtons,
+		lists:      lists,
 	}
 	for i := 0; i < 201; i++ {
 		minerModel.solButtons[i] = th.Clickable()
@@ -69,6 +81,7 @@ func Run(w *Worker, cx *conte.Xt) {
 }
 
 func (m *MinerModel) Widget(gtx layout.Context) {
+	counter := 0
 	m.Flex().Vertical().Rigid(
 		m.Fill("PanelBg").Embed(
 			m.Flex().Rigid(
@@ -95,7 +108,7 @@ func (m *MinerModel) Widget(gtx layout.Context) {
 	).Flexed(1,
 		m.Fill("DocBg").Embed(
 			m.Inset(0.5).Embed(
-				m.Flex().Vertical().Flexed(1,
+				m.Flex().Vertical().Rigid(
 					// m.Inset(0.5).Embed(
 					m.Flex().Vertical().Rigid(
 						m.H5("miner settings").Fn,
@@ -138,7 +151,6 @@ func (m *MinerModel) Widget(gtx layout.Context) {
 										}
 										m.nCores = iFl
 										m.cores.SetValue(float32(iFl))
-										// TODO: then restart the threads
 										m.worker.SetThreads <- m.nCores
 									})).
 									Min(0).Max(maxThreads).
@@ -164,36 +176,40 @@ func (m *MinerModel) Widget(gtx layout.Context) {
 						).Rigid(
 							m.H5("found blocks").Fn,
 						).Flexed(1,
-							m.List().Vertical().
-								Length(len(m.worker.solutions)).
-								ListElement(func(gtx layout.Context, index int) layout.Dimensions {
-									if m.worker.solutionsUpdated.Load() {
-										// regenerate m.solData
-										m.solData = make([]SolutionData, len(m.worker.solutions))
-										for i := range m.worker.solutions {
-											m.solData[i] = m.worker.solutions[i]
-										}
-										m.worker.solutionsUpdated.Store(false)
-									}
-									// display from m.solData
-									return m.Flex().Rigid(
-										m.Button(
-											m.solButtons[index].SetClick(func() {
-												Debug("clicked for block", m.solData[index].height)
-											})).Text(fmt.Sprint(m.solData[index].height)).Fn,
-									).Flexed(1,
-										m.Inset(0.5).Embed(
-											m.Flex().Vertical().Rigid(
-												m.Body1(fmt.Sprint(m.solData[index].block.BlockHash())).
-													Font("go regular").
-													TextScale(0.75).Fn,
-											).Rigid(
-												m.Body1(fmt.Sprint(m.solData[index].time.Format(time.RFC3339))).Fn,
-											).Fn,
-										).Fn,
-									).Fn(gtx)
-								}).
-								Fn,
+							m.Fill("PanelBg").Embed(
+								m.Inset(0.25).Embed(
+									m.Flex().Flexed(1,
+										func(gtx layout.Context) layout.Dimensions {
+											cs := gtx.Constraints
+											cs.Min = cs.Max
+											return m.lists["found"].
+												Layout(gtx, m.worker.solutionCount,
+													func(c layout.Context, i int) layout.Dimensions {
+														counter++
+														return m.Flex().Rigid(
+															m.Inset(0.25).Embed(
+																m.Button(
+																	m.solButtons[i].SetClick(func() {
+																		Debug("clicked for block", m.worker.solutions[i].height)
+																	})).Text(fmt.Sprint(m.worker.solutions[i].height)).Fn,
+															).Fn,
+														).Flexed(1,
+															m.Inset(0.25).Embed(
+																m.Flex().Vertical().Rigid(
+																	m.Body1(fmt.Sprint(m.worker.solutions[i].block.BlockHash())).
+																		Font("go regular").
+																		TextScale(0.75).Fn,
+																).Rigid(
+																	m.Body1(fmt.Sprint(
+																		m.worker.solutions[i].time.Format(time.RFC3339))).Fn,
+																).Fn,
+															).Fn,
+														).Fn(c)
+													})
+										},
+									).Fn,
+								).Fn,
+							).Fn,
 						).Fn,
 					).Fn,
 				).Fn,

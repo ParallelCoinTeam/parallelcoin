@@ -54,7 +54,7 @@ type Worker struct {
 	StartChan, StopChan chan struct{}
 	SetThreads          chan int
 	solutions           []SolutionData
-	solutionsUpdated    atomic.Bool
+	solutionCount       int
 }
 
 func (w *Worker) Start(cx *conte.Xt) {
@@ -263,12 +263,13 @@ var handlers = transport.Handlers{
 			Warn("we found a solution")
 			// prepend to list of solutions for GUI display if enabled
 			if *w.cx.Config.KopachGUI {
+				Debug("length solutions", len(w.solutions))
 				w.solutions = append([]SolutionData{{time: time.Now(), height: int(w.height), block: j.GetMsgBlock()},
 				}, w.solutions...)
 				if len(w.solutions) > 200 {
 					w.solutions = w.solutions[:200]
 				}
-				w.solutionsUpdated.Store(true)
+				w.solutionCount = len(w.solutions)
 			}
 		}
 		w.FirstSender.Store("")

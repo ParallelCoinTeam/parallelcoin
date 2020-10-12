@@ -90,6 +90,7 @@ func (w *window) Run(frame func(ctx layout.Context), destroy func()) (err error)
 			ctx := layout.NewContext(&ops, e)
 			frame(ctx)
 			e.Frame(ctx.Ops)
+			w.w.Invalidate()
 		}
 	}
 }
