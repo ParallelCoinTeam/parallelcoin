@@ -363,6 +363,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("kopachgui") {
 			*cx.Config.KopachGUI = c.Bool("kopachgui")
 		}
+		if c.IsSet("darktheme") {
+			*cx.Config.DarkTheme = c.Bool("darktheme")
+		}
 		if c.IsSet("save") {
 			Info("saving configuration")
 			cx.StateCfg.Save = true

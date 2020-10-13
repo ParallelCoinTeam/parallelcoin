@@ -55,9 +55,10 @@ func (w *Worker) Run() {
 		},
 	}
 	minerModel := &MinerModel{
+		Cx:        w.cx,
 		worker:    w,
 		Theme:     th,
-		DarkTheme: false,
+		DarkTheme: *w.cx.Config.DarkTheme,
 		logoButton: th.Clickable().SetClick(func() {
 			Debug("clicked logo button")
 		}),
@@ -82,14 +83,14 @@ func (w *Worker) Run() {
 			minerModel.pass.Mask('*')
 			minerModel.passInput.Color("Primary")
 			// minerModel.worker.Update <- struct{}{}
-			Debug("hidden")
+			// Debug("hidden")
 		} else {
 			minerModel.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
 			// minerModel.worker.Update <- struct{}{}
 			minerModel.pass.Mask(0)
 			minerModel.passInput.Color("DocText")
 			// minerModel.worker.Update <- struct{}{}
-			Debug("showing")
+			// Debug("showing")
 		}
 		// w.Update <- struct{}{}
 	}
@@ -99,7 +100,6 @@ func (w *Worker) Run() {
 			showClickableFn()
 		}
 		showClickableFn()
-		// minerModel.pass.Focus()
 		go func() {
 			*w.cx.Config.MinerPass = txt
 			save.Pod(w.cx.Config)

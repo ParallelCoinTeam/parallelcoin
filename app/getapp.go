@@ -627,6 +627,11 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"enables the GUI for the kopach miner",
 				 cx.Config.KopachGUI,
 			),
+			apputil.Bool(
+				"darktheme",
+				"sets the dark theme on the gui interface",
+				cx.Config.KopachGUI,
+			),
 		},
 	}
 }

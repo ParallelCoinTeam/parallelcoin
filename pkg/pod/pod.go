@@ -213,6 +213,7 @@ type Config struct {
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"stringSlice" inputType:"text" json:"Whitelists" hook:"restart"`
 	LAN                    *bool            `group:"debug" label:"LAN" description:"run without any connection to nodes on the internet (does not apply on mainnet)" type:"switch" json:"LAN" hook:"restart"`
 	KopachGUI              *bool            `group:"mining" label:"Kopach GUI" description:"enables GUI for miner" type:"switch" json:"kopachgui" hook:"restart"`
+	DarkTheme              *bool            `group:"" label:"Dark Theme" description:"sets dark theme for GUI" type:"switch" json:"darktheme" hook:"restart"`
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
@@ -235,6 +236,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		ConnectPeers:           newStringSlice(),
 		Controller:             newstring(),
 		CPUProfile:             newstring(),
+		DarkTheme:              newbool(),
 		DataDir:                &datadir,
 		DbType:                 newstring(),
 		DisableBanning:         newbool(),
@@ -327,6 +329,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"ConnectPeers":           c.ConnectPeers,
 		"Controller":             c.Controller,
 		"CPUProfile":             c.CPUProfile,
+		"DarkTheme":              c.DarkTheme,
 		"DataDir":                c.DataDir,
 		"DbType":                 c.DbType,
 		"DisableBanning":         c.DisableBanning,

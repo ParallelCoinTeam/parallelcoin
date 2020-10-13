@@ -78,7 +78,6 @@ func (w *window) Open() (out *window) {
 }
 
 func (w *window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy func()) (err error) {
-	// Window.set()
 	var ops op.Ops
 	for {
 		e := <-w.Window.Events()

@@ -26,6 +26,7 @@ require (
 	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
 	github.com/minio/highwayhash v1.0.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/p9c/pod/cmd/kopach/gui v0.0.0-20201004044046-dbaecc24fd19
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
 	github.com/stretchr/testify v1.4.0 // indirect
@@ -35,7 +36,7 @@ require (
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.uber.org/atomic v1.5.1
 	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6
-	golang.org/x/exp v0.0.0-20191002040644-a1355ae1e2c3
+	golang.org/x/exp v0.0.0-20200228211341-fcea875c7e85
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	golang.org/x/mod v0.1.1-0.20191107180719-034126e5016b // indirect
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
