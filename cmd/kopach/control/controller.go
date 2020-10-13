@@ -216,8 +216,7 @@ var handlersMulticast = transport.Handlers{
 		for i := range txs {
 			msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 		}
-		// set old blocks to pause and send pause directly as block is
-		// probably a solution
+		// set old blocks to pause and send pause directly as block is probably a solution
 		err = c.multiConn.SendMany(pause.PauseMagic, c.pauseShards)
 		if err != nil {
 			Error(err)
@@ -227,8 +226,7 @@ var handlersMulticast = transport.Handlers{
 		isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(block,
 			blockchain.BFNone)
 		if err != nil {
-			// Anything other than a rule violation is an unexpected error, so log
-			// that error as an internal error.
+			// Anything other than a rule violation is an unexpected error, so log that error as an internal error.
 			if _, ok := err.(blockchain.RuleError); !ok {
 				Warnf(
 					"Unexpected error while processing block submitted"+

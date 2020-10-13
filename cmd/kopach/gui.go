@@ -8,9 +8,9 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/layout"
+	"gioui.org/text"
 
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/kopach/gui"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
@@ -52,7 +52,7 @@ func Run(w *Worker, cx *conte.Xt) {
 		Theme:     th,
 		DarkTheme: false,
 		logoButton: th.Clickable().SetClick(func() {
-			gui.Debug("clicked logo button")
+			Debug("clicked logo button")
 		}),
 		mineToggle: th.Bool(*cx.Config.Generate),
 		cores:      th.Float().SetValue(float32(*cx.Config.GenThreads)),
@@ -63,18 +63,27 @@ func Run(w *Worker, cx *conte.Xt) {
 		minerModel.solButtons[i] = th.Clickable()
 	}
 	minerModel.SetTheme(minerModel.DarkTheme)
+	win := f.Window()
 	go func() {
-		if err := f.Window().
+		if err := win.
 			Size(640, 480).
-			Title("parallelcoin kopach miner control gui").
+			Title("kopach").
 			Open().
 			Run(
 				minerModel.Widget,
 				func() {
-					gui.Debug("quitting miner")
+					Debug("quitting miner")
 					close(w.quit)
 					interrupt.Request()
-				}); gui.Check(err) {
+				}); Check(err) {
+		}
+	}()
+	go func() {
+		for {
+			select {
+			case <-minerModel.worker.Update:
+				win.Window.Invalidate()
+			}
 		}
 	}()
 	app.Main()
@@ -88,7 +97,7 @@ func (m *MinerModel) Widget(gtx layout.Context) {
 				m.Inset(0.25).Embed(
 					m.IconButton(m.logoButton.SetClick(
 						func() {
-							gui.Info("clicked logo button")
+							Info("clicked logo button")
 							m.FlipTheme()
 						})).
 						Color("PanelBg").
@@ -121,10 +130,10 @@ func (m *MinerModel) Widget(gtx layout.Context) {
 							m.Switch(m.mineToggle.SetOnChange(
 								func(b bool) {
 									if b {
-										gui.Debug("start mining")
+										Debug("start mining")
 										m.worker.StartChan <- struct{}{}
 									} else {
-										gui.Debug("stop mining")
+										Debug("stop mining")
 										m.worker.StopChan <- struct{}{}
 									}
 								})).
@@ -196,12 +205,22 @@ func (m *MinerModel) Widget(gtx layout.Context) {
 														).Flexed(1,
 															m.Inset(0.25).Embed(
 																m.Flex().Vertical().Rigid(
-																	m.Body1(fmt.Sprint(m.worker.solutions[i].block.BlockHash())).
-																		Font("go regular").
-																		TextScale(0.75).Fn,
+																	m.Flex().Rigid(
+																		// m.Inset(0.25).Embed(
+																		m.Body1(m.worker.solutions[i].algo).Font("bariol bold").Fn,
+																		// ).Fn,
+																	).Flexed(1,
+																		// m.Inset(0.25).Embed(
+																		m.Body1(fmt.Sprint(
+																			m.worker.solutions[i].time.Format(time.RFC3339))).
+																			Alignment(text.End).Fn,
+																	).Fn,
+																	// ).Fn,
 																).Rigid(
-																	m.Body1(fmt.Sprint(
-																		m.worker.solutions[i].time.Format(time.RFC3339))).Fn,
+																	m.Body1(m.worker.solutions[i].hash).
+																		Font("go regular").
+																		TextScale(0.75).
+																		Alignment(text.End).Fn,
 																).Fn,
 															).Fn,
 														).Fn(c)

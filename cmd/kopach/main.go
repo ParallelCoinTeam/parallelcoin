@@ -15,13 +15,15 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/kopach/client"
 	"github.com/p9c/pod/cmd/kopach/control"
+	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
+	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
+	rav "github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -33,7 +35,8 @@ type HashCount struct {
 type SolutionData struct {
 	time   time.Time
 	height int
-	block  *wire.MsgBlock
+	algo   string
+	hash   string
 }
 
 type Worker struct {
@@ -55,6 +58,10 @@ type Worker struct {
 	SetThreads          chan int
 	solutions           []SolutionData
 	solutionCount       int
+	Update              chan struct{}
+	hashCount           atomic.Uint64
+	hashSampleBuf       *rav.BufferUint64
+	lastNonce           int32
 }
 
 func (w *Worker) Start(cx *conte.Xt) {
@@ -115,6 +122,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			StopChan:      make(chan struct{}),
 			SetThreads:    make(chan int),
 			solutions:     make([]SolutionData, 0, 201),
+			Update:        make(chan struct{}),
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
@@ -201,7 +209,55 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 
 // these are the handlers for specific message types.
 var handlers = transport.Handlers{
-	string(job.Magic): func(ctx interface{}, src net.Addr, dst string,
+	string(hashrate.HashrateMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+		c := ctx.(*Worker)
+		if !c.active.Load() {
+			Debug("not active")
+			return
+		}
+		hp := hashrate.LoadContainer(b)
+		// count := hp.GetCount()
+		// nonce := hp.GetNonce()
+		lPort := hp.GetP2PListener()
+		ips := hp.GetIPs()
+		Debugs(ips)
+		Debug(lPort)
+
+	//
+	// 	if c.lastNonce == nonce {
+	// 		return
+	// 	}
+	// 	ip := hp.GetIPs()
+	// 	p2pPort := fmt.Sprint(hp.GetP2PListenersPort())
+	// 	myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
+	// 	ifs := routeable.GetInterface()
+	// 	var found bool
+	// 	var addrs []net.Addr
+	// out:
+	// 	for i := range ifs {
+	// 		// check the routeable interfaces to see if the sender is us
+	// 		if addrs, err = ifs[i].Addrs(); Check(err) {
+	// 		}
+	// 		for j := range ip {
+	// 			ii := ip[j].String()
+	// 			for k := range addrs {
+	// 				if ii == addrs[k].String() {
+	// 					found = true
+	// 					break out
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	if found {
+	// 		if p2pPort == myPort {
+	// 			// if the p2p port address
+	// 		}
+	// 	}
+	// 	c.lastNonce = nonce
+	// 	// add to total hash counts
+	// 	c.hashCount.Store(c.hashCount.Load() + uint64(count))
+		return
+	}, string(job.Magic): func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		w := ctx.(*Worker)
 		if !w.active.Load() {
@@ -264,12 +320,20 @@ var handlers = transport.Handlers{
 			// prepend to list of solutions for GUI display if enabled
 			if *w.cx.Config.KopachGUI {
 				Debug("length solutions", len(w.solutions))
-				w.solutions = append([]SolutionData{{time: time.Now(), height: int(w.height), block: j.GetMsgBlock()},
+				blok := j.GetMsgBlock()
+				w.solutions = append([]SolutionData{{
+					time:   time.Now(),
+					height: int(w.height),
+					algo: fmt.Sprint(
+						fork.GetAlgoName(blok.Header.Version, w.height)),
+					hash: blok.Header.BlockHashWithAlgos(w.height).String(),
+				},
 				}, w.solutions...)
 				if len(w.solutions) > 200 {
 					w.solutions = w.solutions[:200]
 				}
 				w.solutionCount = len(w.solutions)
+				w.Update <- struct{}{}
 			}
 		}
 		w.FirstSender.Store("")
