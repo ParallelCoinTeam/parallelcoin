@@ -125,3 +125,45 @@ func NewColors() (c Colors) {
 	c["Fatal"] = "ff880000"
 	return c
 }
+
+func (c Colors) SetTheme(dark bool) {
+	if !dark {
+		c["DocText"] =
+			c["dark"]
+		c["DocBg"] =
+			c["white"]
+
+		c["PanelText"] =
+			c["dark"]
+		c["PanelBg"] =
+			c["light"]
+
+		c["PanelTextDim"] = c["dark-grayii"]
+		c["PanelBgDim"] = c["dark-grayi"]
+		c["DocTextDim"] = c["light-grayi"]
+		c["DocBgDim"] = c["dark-grayi"]
+		c["Warning"] = c["light-orange"]
+		c["Success"] = c["dark-green"]
+		c["Check"] = c["orange"]
+		c["DocBgHilite"] = c["dark-white"]
+	} else {
+		c["DocText"] =
+			c["light"]
+		c["DocBg"] =
+		 	c["dark"]
+
+		c["PanelText"] =
+			c["light"]
+		c["PanelBg"] =
+			c["black"]
+
+		c["PanelTextDim"] = c["light-grayii"]
+		c["PanelBgDim"] = c["light-gray"]
+		c["DocTextDim"] = c["light-gray"]
+		c["DocBgDim"] = c["light-grayii"]
+		c["Warning"] = c["yellow"]
+		c["Success"] = c["green"]
+		c["Check"] = c["orange"]
+		c["DocBgHilite"] = c["light-black"]
+	}
+}

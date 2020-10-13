@@ -61,6 +61,7 @@ type Worker struct {
 	LastHash            *chainhash.Hash
 	StartChan, StopChan chan struct{}
 	SetThreads          chan int
+	PassChan            chan string
 	solutions           []SolutionData
 	solutionCount       int
 	Update              chan struct{}
@@ -184,6 +185,11 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					*cx.Config.Generate = false
 					save.Pod(cx.Config)
 					w.Stop()
+				case s := <-w.PassChan:
+					*cx.Config.MinerPass = s
+					save.Pod(cx.Config)
+					w.Stop()
+					w.Start()
 				case n := <-w.SetThreads:
 					*cx.Config.GenThreads = n
 					save.Pod(cx.Config)

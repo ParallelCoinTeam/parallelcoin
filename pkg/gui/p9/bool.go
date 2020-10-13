@@ -14,16 +14,6 @@ type Bool struct {
 	changeState BoolHook
 }
 
-// GetValue gets the boolean value stored in the widget
-func (b *Bool) GetValue() bool {
-	return b.value
-}
-
-// Value sets the value of the boolean stored in the widget
-func (b *Bool) Value(value bool) {
-	b.value = value
-}
-
 // Bool creates a new boolean widget
 func (th *Theme) Bool(value bool) *Bool {
 	return &Bool{
@@ -33,6 +23,16 @@ func (th *Theme) Bool(value bool) *Bool {
 		changed:     false,
 		changeState: func(b bool) {},
 	}
+}
+
+// GetValue gets the boolean value stored in the widget
+func (b *Bool) GetValue() bool {
+	return b.value
+}
+
+// Value sets the value of the boolean stored in the widget
+func (b *Bool) Value(value bool) {
+	b.value = value
 }
 
 // SetOnChange sets the callback function to run when the state changes

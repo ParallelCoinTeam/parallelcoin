@@ -9,8 +9,10 @@ import (
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/text"
+	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
@@ -22,16 +24,21 @@ var maxThreads = float32(runtime.NumCPU())
 
 type MinerModel struct {
 	*p9.Theme
-	Cx            *conte.Xt
-	worker        *Worker
-	DarkTheme     bool
-	logoButton    *p9.Clickable
-	mineToggle    *p9.Bool
-	cores         *p9.Float
-	nCores        int
-	solButtons    []*p9.Clickable
-	lists         map[string]*layout.List
-	solutionCount int
+	Cx              *conte.Xt
+	worker          *Worker
+	DarkTheme       bool
+	logoButton      *p9.Clickable
+	mineToggle      *p9.Bool
+	cores           *p9.Float
+	nCores          int
+	solButtons      []*p9.Clickable
+	lists           map[string]*layout.List
+	pass            *p9.Editor
+	unhideButton    *p9.IconButton
+	unhideClickable *p9.Clickable
+	hide            bool
+	passInput       *p9.TextInput
+	solutionCount   int
 }
 
 func (w *Worker) Run() {
@@ -47,23 +54,77 @@ func (w *Worker) Run() {
 			Alignment: layout.Start,
 		},
 	}
-	minerModel := MinerModel{
+	minerModel := &MinerModel{
 		worker:    w,
 		Theme:     th,
 		DarkTheme: false,
 		logoButton: th.Clickable().SetClick(func() {
 			Debug("clicked logo button")
 		}),
-		mineToggle: th.Bool(*w.cx.Config.Generate),
-		cores:      th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
-		solButtons: solButtons,
-		lists:      lists,
+		mineToggle:      th.Bool(*w.cx.Config.Generate),
+		cores:           th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
+		solButtons:      solButtons,
+		lists:           lists,
+		unhideClickable: th.Clickable(),
 	}
+	minerModel.SetTheme(minerModel.DarkTheme)
+	minerModel.pass = th.Editor().SingleLine(true).Submit(true)
+	minerModel.passInput = th.SimpleInput(minerModel.pass).Color("DocText")
+	minerModel.unhideButton = th.IconButton(minerModel.unhideClickable).
+		Background("").
+		Color("Primary").
+		Icon(icons2.ActionVisibility)
+	showClickableFn := func() {
+		minerModel.hide = !minerModel.hide
+		if !minerModel.hide {
+			minerModel.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+			// minerModel.worker.Update <- struct{}{}
+			minerModel.pass.Mask('*')
+			minerModel.passInput.Color("Primary")
+			// minerModel.worker.Update <- struct{}{}
+			Debug("hidden")
+		} else {
+			minerModel.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
+			// minerModel.worker.Update <- struct{}{}
+			minerModel.pass.Mask(0)
+			minerModel.passInput.Color("DocText")
+			// minerModel.worker.Update <- struct{}{}
+			Debug("showing")
+		}
+		// w.Update <- struct{}{}
+	}
+	minerModel.unhideClickable.SetClick(showClickableFn)
+	minerModel.pass.SetText(*w.cx.Config.MinerPass).Mask('*').SetSubmit(func(txt string) {
+		if !minerModel.hide {
+			showClickableFn()
+		}
+		showClickableFn()
+		// minerModel.pass.Focus()
+		go func() {
+			*w.cx.Config.MinerPass = txt
+			save.Pod(w.cx.Config)
+			w.Stop()
+			w.Start()
+		}()
+	}).SetChange(func(txt string) {
+		if minerModel.hide {
+			showClickableFn()
+		}
+		showClickableFn()
+	})
 	for i := 0; i < 201; i++ {
 		minerModel.solButtons[i] = th.Clickable()
 	}
-	minerModel.SetTheme(minerModel.DarkTheme)
+	minerModel.logoButton.SetClick(
+		func() {
+			minerModel.FlipTheme()
+			Info("clicked logo button")
+			showClickableFn()
+			showClickableFn()
+		})
 	win := f.Window()
+	minerModel.hide = !minerModel.hide
+	showClickableFn()
 	go func() {
 		if err := win.
 			Size(640, 480).
@@ -92,16 +153,12 @@ func (w *Worker) Run() {
 func (m *MinerModel) Widget(gtx layout.Context) layout.Dimensions {
 	counter := 0
 	return m.Flex().Vertical().Rigid(
-		m.Fill("PanelBg").Embed(
+		m.Fill("Primary").Embed(
 			m.Flex().Rigid(
 				m.Inset(0.25).Embed(
-					m.IconButton(m.logoButton.SetClick(
-						func() {
-							Info("clicked logo button")
-							m.FlipTheme()
-						})).
-						Color("PanelBg").
-						Background("PanelText").
+					m.IconButton(m.logoButton).
+						Color("Light").
+						Background("Dark").
 						Scale(p9.Scales["H4"]).
 						Icon(icons.ParallelCoin).
 						Fn,
@@ -109,12 +166,12 @@ func (m *MinerModel) Widget(gtx layout.Context) layout.Dimensions {
 			).Rigid(
 				m.Inset(0.5).Embed(
 					m.H5("kopach miner control").
-						Color("PanelText").
+						Color("Light").
 						Fn,
 				).Fn,
 			).Flexed(1,
 				m.Inset(0.5).Embed(
-					m.Body1(fmt.Sprintf("%d hash/s", int(m.worker.hashrate))).Alignment(text.End).Fn,
+					m.Body1(fmt.Sprintf("%d hash/s", int(m.worker.hashrate))).Color("Light").Alignment(text.End).Fn,
 				).Fn,
 			).Fn,
 		).Fn,
@@ -151,29 +208,45 @@ func (m *MinerModel) Widget(gtx layout.Context) layout.Dimensions {
 								m.Body1("number of mining threads"+
 									fmt.Sprintf("%3v", int(m.cores.Value()+0.5))).
 									Fn,
-							).Rigid(
-								m.Caption("0").
-									Color("Primary").
-									Fn,
 							).Flexed(0.5,
-								m.Slider().
-									Float(m.cores.SetHook(func(fl float32) {
-										iFl := int(fl + 0.5)
-										if m.nCores != iFl {
-											Debug("cores value changed", iFl)
-										}
-										m.nCores = iFl
-										m.cores.SetValue(float32(iFl))
-										m.worker.SetThreads <- m.nCores
-									})).
-									Min(0).Max(maxThreads).
-									Fn,
-							).Rigid(
-								m.Caption(fmt.Sprint(int(maxThreads))).
-									Color("Primary").
-									Fn,
+								m.Flex().Rigid(
+									m.Body1("0").
+										Color("Primary").
+										Fn,
+								).Flexed(1,
+									m.Slider().
+										Float(m.cores.SetHook(func(fl float32) {
+											iFl := int(fl + 0.5)
+											if m.nCores != iFl {
+												Debug("cores value changed", iFl)
+											}
+											m.nCores = iFl
+											m.cores.SetValue(float32(iFl))
+											m.worker.SetThreads <- m.nCores
+										})).
+										Min(0).Max(maxThreads).
+										Fn,
+								).Rigid(
+									m.Body1(fmt.Sprint(int(maxThreads))).
+										Color("Primary").
+										Fn,
+								).Fn,
 							).Fn,
 							// ).Fn,
+						).Fn,
+					).Rigid(
+						m.Flex().Flexed(0.5,
+							m.Body1("cluster preshared key").
+								Color("DocText").
+								Fn,
+						).Flexed(0.5,
+							m.Border().Embed(
+								m.Flex().Flexed(1,
+									m.Inset(0.25).Embed(m.passInput.Fn).Fn,
+								).Rigid(
+									m.unhideButton.Fn,
+								).Fn,
+							).Fn,
 						).Fn,
 					).Rigid(
 						m.Flex().Vertical().Rigid(

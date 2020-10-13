@@ -66,9 +66,13 @@ func main() {
 	app.Main()
 }
 
-func (m *MinerModel) testLabels(gtx layout.Context) {
+func (m *MinerModel) testLabels(gtx layout.Context) layout.Dimensions {
+	m.progress++
+	if m.progress == 100 {
+		m.progress = 0
+	}
 	th := m.th
-	th.Flex().Flexed(1,
+	return th.Flex().Flexed(1,
 		th.Flex().Rigid(
 			th.Flex().Flexed(0.5,
 				th.Fill("PanelBg").Embed(
@@ -85,10 +89,6 @@ func (m *MinerModel) testLabels(gtx layout.Context) {
 			).Fn,
 		).Fn,
 	).Fn(gtx)
-	m.progress++
-	if m.progress == 100 {
-		m.progress = 0
-	}
 }
 
 func (m *MinerModel) blocks() layout.Widget {

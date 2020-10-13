@@ -526,10 +526,11 @@ func (e *Editor) Text() string {
 }
 
 // SetText replaces the contents of the editor.
-func (e *Editor) SetText(s string) {
+func (e *Editor) SetText(s string) *Editor {
 	e.rr = EditBuffer{}
 	e.caret.xoff = 0
 	e.prepend(s)
+	return e
 }
 
 func (e *Editor) scrollBounds() image.Rectangle {
