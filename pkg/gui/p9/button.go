@@ -16,7 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type _button struct {
+type Button struct {
 	th           *Theme
 	background   color.RGBA
 	color        color.RGBA
@@ -30,8 +30,8 @@ type _button struct {
 }
 
 // Button is a regular material text button where all the dimensions, colors, corners and font can be changed
-func (th *Theme) Button(btn *Clickable) *_button {
-	return &_button{
+func (th *Theme) Button(btn *Clickable) *Button {
+	return &Button{
 		th:   th,
 		text: strings.ToUpper("text unset"),
 		// default sets
@@ -52,25 +52,25 @@ func (th *Theme) Button(btn *Clickable) *_button {
 }
 
 // Background sets the background color
-func (b *_button) Background(background string) *_button {
+func (b *Button) Background(background string) *Button {
 	b.background = b.th.Colors.Get(background)
 	return b
 }
 
 // Color sets the text color
-func (b *_button) Color(color string) *_button {
+func (b *Button) Color(color string) *Button {
 	b.color = b.th.Colors.Get(color)
 	return b
 }
 
 // CornerRadius sets the corner radius (all measurements are scaled from the base text size)
-func (b *_button) CornerRadius(cornerRadius float32) *_button {
+func (b *Button) CornerRadius(cornerRadius float32) *Button {
 	b.cornerRadius = b.th.TextSize.Scale(cornerRadius)
 	return b
 }
 
 // Font sets the font style
-func (b *_button) Font(font string) *_button {
+func (b *Button) Font(font string) *Button {
 	for i := range b.th.collection {
 		if b.th.collection[i].Font.Typeface == text.Typeface(font) {
 			b.font = b.th.collection[i].Font
@@ -81,7 +81,7 @@ func (b *_button) Font(font string) *_button {
 }
 
 // Inset sets the inset between the button border and the text
-func (b *_button) Inset(scale float32) *_button {
+func (b *Button) Inset(scale float32) *Button {
 	b.inset = &l.Inset{
 		Top:    b.th.TextSize.Scale(scale),
 		Right:  b.th.TextSize.Scale(scale),
@@ -92,35 +92,35 @@ func (b *_button) Inset(scale float32) *_button {
 }
 
 // Text sets the text on the button
-func (b *_button) Text(text string) *_button {
+func (b *Button) Text(text string) *Button {
 	b.text = text
 	return b
 }
 
 // TextScale sets the dimensions of the text as a fraction of the base text size
-func (b *_button) TextScale(scale float32) *_button {
+func (b *Button) TextScale(scale float32) *Button {
 	b.textSize = b.th.TextSize.Scale(scale)
 	return b
 }
 
-func (b *_button) SetClick(fn func()) *_button {
+func (b *Button) SetClick(fn func()) *Button {
 	b.button.SetClick(fn)
 	return b
 }
 
-func (b *_button) SetCancel(fn func()) *_button {
+func (b *Button) SetCancel(fn func()) *Button {
 	b.button.SetCancel(fn)
 	return b
 }
 
-func (b *_button) SetPress(fn func()) *_button {
+func (b *Button) SetPress(fn func()) *Button {
 	b.button.SetPress(fn)
 	return b
 }
 
 // Fn renders the button
-func (b *_button) Fn(gtx l.Context) l.Dimensions {
-	bl := &_buttonLayout{
+func (b *Button) Fn(gtx l.Context) l.Dimensions {
+	bl := &ButtonLayout{
 		background:   b.background,
 		cornerRadius: b.cornerRadius,
 		button:       b.button,

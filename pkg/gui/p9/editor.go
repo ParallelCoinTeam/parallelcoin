@@ -44,7 +44,7 @@ type Editor struct {
 	textSize     fixed.Int26_6
 	blinkStart   time.Time
 	focused      bool
-	rr           editBuffer
+	rr           EditBuffer
 	maskReader   maskReader
 	lastMask     rune
 	maxWidth     int
@@ -527,7 +527,7 @@ func (e *Editor) Text() string {
 
 // SetText replaces the contents of the editor.
 func (e *Editor) SetText(s string) {
-	e.rr = editBuffer{}
+	e.rr = EditBuffer{}
 	e.caret.xoff = 0
 	e.prepend(s)
 }

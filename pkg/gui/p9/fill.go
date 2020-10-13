@@ -8,23 +8,23 @@ import (
 	"gioui.org/op/paint"
 )
 
-type _filler struct {
+type Filler struct {
 	th  *Theme
 	col string
 	w   l.Widget
 }
 
 // Fill fills underneath a widget you can put over top of it
-func (th *Theme) Fill(col string) *_filler {
-	return &_filler{th: th, col: col}
+func (th *Theme) Fill(col string) *Filler {
+	return &Filler{th: th, col: col}
 }
 
-func (f *_filler) Embed(w l.Widget) *_filler {
+func (f *Filler) Embed(w l.Widget) *Filler {
 	f.w = w
 	return f
 }
 
-func (f *_filler) Fn(gtx l.Context) l.Dimensions {
+func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 	return f.th.Stack().Stacked(f.w).Expanded(
 		func(c l.Context) l.Dimensions {
 			dims := f.w(gtx)

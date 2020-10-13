@@ -2,14 +2,18 @@ package kopach
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 	"net"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
+
+	"github.com/p9c/pod/pkg/data/ring"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
@@ -40,6 +44,7 @@ type SolutionData struct {
 }
 
 type Worker struct {
+	id                  string
 	cx                  *conte.Xt
 	height              int32
 	active              atomic.Bool
@@ -61,10 +66,11 @@ type Worker struct {
 	Update              chan struct{}
 	hashCount           atomic.Uint64
 	hashSampleBuf       *rav.BufferUint64
+	hashrate            float64
 	lastNonce           int32
 }
 
-func (w *Worker) Start(cx *conte.Xt) {
+func (w *Worker) Start() {
 	// if !*cx.Config.Generate {
 	// 	Debug("called start but not running generate")
 	// 	return
@@ -72,15 +78,15 @@ func (w *Worker) Start(cx *conte.Xt) {
 	Debug("starting up kopach workers")
 	w.workers = []*worker.Worker{}
 	w.clients = []*client.Client{}
-	for i := 0; i < *cx.Config.GenThreads; i++ {
+	for i := 0; i < *w.cx.Config.GenThreads; i++ {
 		Debug("starting worker", i)
-		cmd, _ := worker.Spawn(os.Args[0], "worker", fmt.Sprint("worker", i), cx.ActiveNet.Name, *cx.Config.LogLevel)
+		cmd, _ := worker.Spawn(os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, *w.cx.Config.LogLevel)
 		w.workers = append(w.workers, cmd)
 		w.clients = append(w.clients, client.New(cmd.StdConn))
 	}
 	for i := range w.clients {
 		Debug("sending pass to worker", i)
-		err := w.clients[i].SendPass(*cx.Config.MinerPass)
+		err := w.clients[i].SendPass(*w.cx.Config.MinerPass)
 		if err != nil {
 			Error(err)
 		}
@@ -113,7 +119,11 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		Debug("miner controller starting")
 		ctx, cancel := context.WithCancel(context.Background())
+		randomBytes := make([]byte, 4)
+		if _, err = rand.Read(randomBytes); Check(err) {
+		}
 		w := &Worker{
+			id:            fmt.Sprintf("%x", randomBytes),
 			cx:            cx,
 			ctx:           ctx,
 			quit:          cx.KillAll,
@@ -123,6 +133,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			SetThreads:    make(chan int),
 			solutions:     make([]SolutionData, 0, 201),
 			Update:        make(chan struct{}),
+			hashSampleBuf: ring.NewBufferUint64(1000),
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
@@ -137,7 +148,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		// start up the workers
 		if *cx.Config.Generate {
-			w.Start(cx)
+			w.Start()
 		}
 		// controller watcher thread
 		go func() {
@@ -164,10 +175,11 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 							}
 						}
 					}
+					w.hashrate = w.HashReport()
 				case <-w.StartChan:
 					*cx.Config.Generate = true
 					save.Pod(cx.Config)
-					w.Start(cx)
+					w.Start()
 				case <-w.StopChan:
 					*cx.Config.Generate = false
 					save.Pod(cx.Config)
@@ -184,7 +196,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 							n = int(maxThreads)
 						}
 						w.Stop()
-						w.Start(cx)
+						w.Start()
 					}
 				case <-cx.KillAll:
 					Debug("stopping from killall")
@@ -199,7 +211,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		Debug("listening on", control.UDP4MulticastAddress)
 		if *cx.Config.KopachGUI {
 			Info("opening miner controller GUI")
-			go Run(w, cx)
+			go w.Run()
 		}
 		<-w.quit
 		Info("kopach shutting down")
@@ -216,48 +228,16 @@ var handlers = transport.Handlers{
 			return
 		}
 		hp := hashrate.LoadContainer(b)
-		// count := hp.GetCount()
-		// nonce := hp.GetNonce()
-		lPort := hp.GetP2PListener()
-		ips := hp.GetIPs()
-		Debugs(ips)
-		Debug(lPort)
-
-	//
-	// 	if c.lastNonce == nonce {
-	// 		return
-	// 	}
-	// 	ip := hp.GetIPs()
-	// 	p2pPort := fmt.Sprint(hp.GetP2PListenersPort())
-	// 	myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
-	// 	ifs := routeable.GetInterface()
-	// 	var found bool
-	// 	var addrs []net.Addr
-	// out:
-	// 	for i := range ifs {
-	// 		// check the routeable interfaces to see if the sender is us
-	// 		if addrs, err = ifs[i].Addrs(); Check(err) {
-	// 		}
-	// 		for j := range ip {
-	// 			ii := ip[j].String()
-	// 			for k := range addrs {
-	// 				if ii == addrs[k].String() {
-	// 					found = true
-	// 					break out
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// 	if found {
-	// 		if p2pPort == myPort {
-	// 			// if the p2p port address
-	// 		}
-	// 	}
-	// 	c.lastNonce = nonce
-	// 	// add to total hash counts
-	// 	c.hashCount.Store(c.hashCount.Load() + uint64(count))
+		id := hp.GetID()
+		// if this is not one of our workers reports ignore it
+		if id != c.id {
+			return
+		}
+		count := hp.GetCount()
+		c.hashCount.Store(c.hashCount.Load() + uint64(count))
 		return
-	}, string(job.Magic): func(ctx interface{}, src net.Addr, dst string,
+	},
+	string(job.Magic): func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		w := ctx.(*Worker)
 		if !w.active.Load() {
@@ -316,10 +296,10 @@ var handlers = transport.Handlers{
 		j := sol.LoadSolContainer(b)
 		senderPort := j.GetSenderPort()
 		if fmt.Sprint(senderPort) == port {
-			Warn("we found a solution")
+			// Warn("we found a solution")
 			// prepend to list of solutions for GUI display if enabled
 			if *w.cx.Config.KopachGUI {
-				Debug("length solutions", len(w.solutions))
+				// Debug("length solutions", len(w.solutions))
 				blok := j.GetMsgBlock()
 				w.solutions = append([]SolutionData{{
 					time:   time.Now(),
@@ -339,4 +319,24 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store("")
 		return
 	},
+}
+
+func (w *Worker) HashReport() float64 {
+	w.hashSampleBuf.Add(w.hashCount.Load())
+	av := ewma.NewMovingAverage()
+	var i int
+	var prev uint64
+	if err := w.hashSampleBuf.ForEach(func(v uint64) error {
+		if i < 1 {
+			prev = v
+		} else {
+			interval := v - prev
+			av.Add(float64(interval))
+			prev = v
+		}
+		i++
+		return nil
+	}); Check(err) {
+	}
+	return av.Value()
 }

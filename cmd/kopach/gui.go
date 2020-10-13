@@ -34,9 +34,9 @@ type MinerModel struct {
 	solutionCount int
 }
 
-func Run(w *Worker, cx *conte.Xt) {
+func (w *Worker) Run() {
 	th := p9.NewTheme(p9fonts.Collection(), w.quit)
-	Debug(*cx.Config.Generate, *cx.Config.GenThreads)
+	// Debug(*w.cx.Config.Generate, *w.cx.Config.GenThreads)
 	solButtons := make([]*p9.Clickable, 201)
 	for i := range solButtons {
 		solButtons[i] = th.Clickable()
@@ -54,8 +54,8 @@ func Run(w *Worker, cx *conte.Xt) {
 		logoButton: th.Clickable().SetClick(func() {
 			Debug("clicked logo button")
 		}),
-		mineToggle: th.Bool(*cx.Config.Generate),
-		cores:      th.Float().SetValue(float32(*cx.Config.GenThreads)),
+		mineToggle: th.Bool(*w.cx.Config.Generate),
+		cores:      th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
 		solButtons: solButtons,
 		lists:      lists,
 	}
@@ -89,9 +89,9 @@ func Run(w *Worker, cx *conte.Xt) {
 	app.Main()
 }
 
-func (m *MinerModel) Widget(gtx layout.Context) {
+func (m *MinerModel) Widget(gtx layout.Context) layout.Dimensions {
 	counter := 0
-	m.Flex().Vertical().Rigid(
+	return m.Flex().Vertical().Rigid(
 		m.Fill("PanelBg").Embed(
 			m.Flex().Rigid(
 				m.Inset(0.25).Embed(
@@ -111,6 +111,10 @@ func (m *MinerModel) Widget(gtx layout.Context) {
 					m.H5("kopach miner control").
 						Color("PanelText").
 						Fn,
+				).Fn,
+			).Flexed(1,
+				m.Inset(0.5).Embed(
+					m.Body1(fmt.Sprintf("%d hash/s", int(m.worker.hashrate))).Alignment(text.End).Fn,
 				).Fn,
 			).Fn,
 		).Fn,

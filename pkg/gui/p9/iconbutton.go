@@ -13,21 +13,21 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type _iconButton struct {
+type IconButton struct {
 	th         *Theme
 	background color.RGBA
 	// Color is the icon color.
 	color color.RGBA
-	icon  *_icon
+	icon  *Icon
 	// Size is the icon size.
 	size   unit.Value
-	inset  *_inset
+	inset  *Inset
 	button *Clickable
 }
 
 // IconButton creates an icon with a circular background and an icon placed in the centre
-func (th *Theme) IconButton(button *Clickable) *_iconButton {
-	return &_iconButton{
+func (th *Theme) IconButton(button *Clickable) *IconButton {
+	return &IconButton{
 		th:         th,
 		background: th.Colors.Get("Primary"),
 		color:      th.Colors.Get("DocBg"),
@@ -39,19 +39,19 @@ func (th *Theme) IconButton(button *Clickable) *_iconButton {
 }
 
 // Background sets the color of the circular background
-func (b *_iconButton) Background(color string) *_iconButton {
+func (b *IconButton) Background(color string) *IconButton {
 	b.background = b.th.Colors.Get(color)
 	return b
 }
 
 // Color sets the color of the icon
-func (b *_iconButton) Color(color string) *_iconButton {
+func (b *IconButton) Color(color string) *IconButton {
 	b.color = b.th.Colors.Get(color)
 	return b
 }
 
 // Icon sets the icon to display
-func (b *_iconButton) Icon(data []byte) *_iconButton {
+func (b *IconButton) Icon(data []byte) *IconButton {
 	b.icon.color = b.color
 	b.icon.Size(b.size)
 	b.icon.Src(data)
@@ -59,34 +59,34 @@ func (b *_iconButton) Icon(data []byte) *_iconButton {
 }
 
 // Scale changes the size of the icon as a ratio of the base font size
-func (b *_iconButton) Scale(scale float32) *_iconButton {
+func (b *IconButton) Scale(scale float32) *IconButton {
 	b.size = b.th.TextSize.Scale(scale*0.72)
 	return b
 }
 
 // Inset sets the size of inset that goes in between the button background and the icon
-func (b *_iconButton) Inset(inset float32) *_iconButton {
+func (b *IconButton) Inset(inset float32) *IconButton {
 	b.inset = b.th.Inset(inset).Embed(b.button.Fn)
 	return b
 }
 
-func (b *_iconButton) SetClick(fn func()) *_iconButton {
+func (b *IconButton) SetClick(fn func()) *IconButton {
 	b.button.SetClick(fn)
 	return b
 }
 
-func (b *_iconButton) SetPress(fn func()) *_iconButton {
+func (b *IconButton) SetPress(fn func()) *IconButton {
 	b.button.SetPress(fn)
 	return b
 }
 
-func (b *_iconButton) SetCancel(fn func()) *_iconButton {
+func (b *IconButton) SetCancel(fn func()) *IconButton {
 	b.button.SetCancel(fn)
 	return b
 }
 
 // Fn renders the icon button
-func (b *_iconButton) Fn(gtx l.Context) l.Dimensions {
+func (b *IconButton) Fn(gtx l.Context) l.Dimensions {
 	return b.th.Stack().Expanded(
 		func(gtx l.Context) l.Dimensions {
 			sizex, sizey := gtx.Constraints.Min.X, gtx.Constraints.Min.Y

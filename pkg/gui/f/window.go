@@ -28,10 +28,10 @@ func (s *scaledConfig) Px(v unit.Value) int {
 }
 
 type window struct {
-	Ctx   layout.Context
-	w     *app.Window
-	opts  []app.Option
-	scale *scaledConfig
+	Ctx    layout.Context
+	Window *app.Window
+	opts   []app.Option
+	scale  *scaledConfig
 }
 
 // Window creates a new window
@@ -71,17 +71,17 @@ func (w *window) Open() (out *window) {
 		w.Scale(1)
 	}
 	if w.opts != nil {
-		w.w = app.NewWindow(w.opts...)
+		w.Window = app.NewWindow(w.opts...)
 		w.opts = nil
 	}
 	return w
 }
 
-func (w *window) Run(frame func(ctx layout.Context), destroy func()) (err error) {
-	// w.set()
+func (w *window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy func()) (err error) {
+	// Window.set()
 	var ops op.Ops
 	for {
-		e := <-w.w.Events()
+		e := <-w.Window.Events()
 		switch e := e.(type) {
 		case system.DestroyEvent:
 			destroy()
@@ -90,7 +90,7 @@ func (w *window) Run(frame func(ctx layout.Context), destroy func()) (err error)
 			ctx := layout.NewContext(&ops, e)
 			frame(ctx)
 			e.Frame(ctx.Ops)
-			w.w.Invalidate()
+			w.Window.Invalidate()
 		}
 	}
 }

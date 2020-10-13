@@ -131,8 +131,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit chan struct{
 	w.msgBlock.Store(msgBlock)
 	w.block.Store(util.NewBlock(&msgBlock))
 	w.dispatchReady.Store(false)
-	// with this we can report cumulative hash counts as well as using it to distribute algorithms evenly tn :=
-	// time.Now()
+	// with this we can report cumulative hash counts as well as using it to distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C.Load())
 	interrupt.AddHandler(func() {
 		Debug("worker quitting")
@@ -150,7 +149,7 @@ func worker(w *Worker) {
 out:
 	for {
 		// Pause state
-		Debug("worker pausing")
+		Trace("worker pausing")
 	pausing:
 		for {
 			select {
@@ -170,7 +169,7 @@ out:
 			}
 		}
 		// Run state
-		Debug("worker running")
+		Trace("worker running")
 	running:
 		for {
 			select {
@@ -231,7 +230,7 @@ out:
 						// send out broadcast containing worker nonce and algorithm and count of blocks
 						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
 						nextAlgo = w.roller.C.Load() + 1
-						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH)
+						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH, w.id)
 						err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
 							transport.GetShards(hashReport.Data))
 						if err != nil {

@@ -15,6 +15,11 @@ func (th *Theme) Stack() (out *_stack) {
 	return
 }
 
+func (s *_stack) Alignment(alignment l.Direction) *_stack {
+	s.Stack.Alignment = alignment
+	return s
+}
+
 // functions to chain widgets to stack (first is lowest last highest)
 
 // Stacked appends a widget to the stack, the stack's dimensions will be

@@ -15,7 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type _checkable struct {
+type Checkable struct {
 	th                 *Theme
 	label              string
 	color              color.RGBA
@@ -23,14 +23,14 @@ type _checkable struct {
 	textSize           unit.Value
 	iconColor          color.RGBA
 	size               unit.Value
-	checkedStateIcon   *_icon
-	uncheckedStateIcon *_icon
+	checkedStateIcon   *Icon
+	uncheckedStateIcon *Icon
 	shaper             text.Shaper
 	checked            bool
 }
 
 // Checkable creates a checkbox type widget
-func (th *Theme) Checkable() *_checkable {
+func (th *Theme) Checkable() *Checkable {
 	font := "bariol regular"
 	var f text.Font
 	for i := range th.collection {
@@ -39,7 +39,7 @@ func (th *Theme) Checkable() *_checkable {
 			break
 		}
 	}
-	return &_checkable{
+	return &Checkable{
 		th:                 th,
 		label:              "checkable",
 		color:              th.Colors.Get("DocText"),
@@ -53,20 +53,20 @@ func (th *Theme) Checkable() *_checkable {
 	}
 }
 
-// _text sets the label on the checkbox
-func (c *_checkable) Label(txt string) *_checkable {
+// Text sets the label on the checkbox
+func (c *Checkable) Label(txt string) *Checkable {
 	c.label = txt
 	return c
 }
 
 // Color sets the color of the checkbox label
-func (c *_checkable) Color(color string) *_checkable {
+func (c *Checkable) Color(color string) *Checkable {
 	c.color = c.th.Colors.Get(color)
 	return c
 }
 
 // Font sets the font used on the label
-func (c *_checkable) Font(font string) *_checkable {
+func (c *Checkable) Font(font string) *Checkable {
 	for i := range c.th.collection {
 		if c.th.collection[i].Font.Typeface == text.Typeface(font) {
 			c.font = c.th.collection[i].Font
@@ -77,38 +77,38 @@ func (c *_checkable) Font(font string) *_checkable {
 }
 
 // TextScale sets the size of the font relative to the base text size
-func (c *_checkable) TextScale(scale float32) *_checkable {
+func (c *Checkable) TextScale(scale float32) *Checkable {
 	c.textSize = c.th.TextSize.Scale(scale)
 	return c
 }
 
 // IconColor sets the color of the icon
-func (c *_checkable) IconColor(color string) *_checkable {
+func (c *Checkable) IconColor(color string) *Checkable {
 	c.iconColor = c.th.Colors.Get(color)
 	return c
 }
 
 // Scale sets the size of the checkbox icon relative to the base font size
-func (c *_checkable) Scale(size float32) *_checkable {
+func (c *Checkable) Scale(size float32) *Checkable {
 	c.size = c.th.TextSize.Scale(size)
 	return c
 }
 
 // CheckedStateIcon loads the icon for the checked state
-func (c *_checkable) CheckedStateIcon(ic *_icon) *_checkable {
+func (c *Checkable) CheckedStateIcon(ic *Icon) *Checkable {
 	c.checkedStateIcon = ic
 	return c
 }
 
 // UncheckedStateIcon loads the icon for the unchecked state
-func (c *_checkable) UncheckedStateIcon(ic *_icon) *_checkable {
+func (c *Checkable) UncheckedStateIcon(ic *Icon) *Checkable {
 	c.uncheckedStateIcon = ic
 	return c
 }
 
 // Fn renders the checkbox widget
-func (c *_checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
-	var icon *_icon
+func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
+	var icon *Icon
 	if checked {
 		icon = c.checkedStateIcon.Scale(1.5)
 	} else {

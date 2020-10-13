@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type _textInput struct {
+type TextInput struct {
 	th       *Theme
 	font     text.Font
 	textSize unit.Value
@@ -27,8 +27,8 @@ type _textInput struct {
 }
 
 // SimpleInput creates a simple text input widget
-func (th *Theme) SimpleInput(editor *Editor) *_textInput {
-	e := &_textInput{
+func (th *Theme) SimpleInput(editor *Editor) *TextInput {
+	e := &TextInput{
 		th:        th,
 		editor:    editor,
 		textSize:  th.TextSize,
@@ -42,7 +42,7 @@ func (th *Theme) SimpleInput(editor *Editor) *_textInput {
 }
 
 // Font sets the font for the text input widget
-func (e *_textInput) Font(font string) *_textInput {
+func (e *TextInput) Font(font string) *TextInput {
 	for i := range e.th.collection {
 		if e.th.collection[i].Font.Typeface == text.Typeface(font) {
 			e.font = e.th.collection[i].Font
@@ -53,35 +53,35 @@ func (e *_textInput) Font(font string) *_textInput {
 }
 
 // TextScale sets the size of the text relative to the base font size
-func (e *_textInput) TextScale(scale float32) *_textInput {
+func (e *TextInput) TextScale(scale float32) *TextInput {
 	e.textSize = e.th.TextSize.Scale(scale)
 	return e
 }
 
 // Color sets the color to render the text
-func (e *_textInput) Color(color string) *_textInput {
+func (e *TextInput) Color(color string) *TextInput {
 	e.color = e.th.Colors.Get(color)
 	return e
 }
 
 // Hint sets the text to show when the box is empty
-func (e *_textInput) Hint(hint string) *_textInput {
+func (e *TextInput) Hint(hint string) *TextInput {
 	e.hint = hint
 	return e
 }
 
 // HintColor sets the color of the hint text
-func (e *_textInput) HintColor(color string) *_textInput {
+func (e *TextInput) HintColor(color string) *TextInput {
 	e.hintColor = e.th.Colors.Get(color)
 	return e
 }
 
 // Fn renders the text input widget
-func (e *_textInput) Fn(c l.Context) l.Dimensions {
+func (e *TextInput) Fn(c l.Context) l.Dimensions {
 	defer op.Push(c.Ops).Pop()
 	macro := op.Record(c.Ops)
 	paint.ColorOp{Color: e.hintColor}.Add(c.Ops)
-	tl := _text{alignment: e.editor.alignment}
+	tl := Text{alignment: e.editor.alignment}
 	dims := tl.Fn(c, e.shaper, e.font, e.textSize, e.hint)
 	call := macro.Stop()
 	if w := dims.Size.X; c.Constraints.Min.X < w {

@@ -9,7 +9,7 @@ import (
 	"gioui.org/unit"
 )
 
-type _label struct {
+type Label struct {
 	th *Theme
 	// Face defines the text style.
 	font text.Font
@@ -25,15 +25,15 @@ type _label struct {
 	shaper text.Shaper
 }
 
-// _text creates a label that prints a block of text
-func (th *Theme) Label() (l *_label) {
+// Text creates a label that prints a block of text
+func (th *Theme) Label() (l *Label) {
 	var f text.Font
 	for i := range th.collection {
 		if th.collection[i].Font.Typeface == "plan9" {
 			f = th.collection[i].Font
 		}
 	}
-	return &_label{
+	return &Label{
 		th:       th,
 		text:     "",
 		font:     f,
@@ -44,37 +44,37 @@ func (th *Theme) Label() (l *_label) {
 }
 
 // Text sets the text to render in the label
-func (l *_label) Text(text string) *_label {
+func (l *Label) Text(text string) *Label {
 	l.text = text
 	return l
 }
 
 // TextScale sets the size of the text relative to the base font size
-func (l *_label) TextScale(scale float32) *_label {
+func (l *Label) TextScale(scale float32) *Label {
 	l.textSize = l.th.TextSize.Scale(scale)
 	return l
 }
 
 // MaxLines sets the maximum number of lines to render
-func (l *_label) MaxLines(maxLines int) *_label {
+func (l *Label) MaxLines(maxLines int) *Label {
 	l.maxLines = maxLines
 	return l
 }
 
 // Alignment sets the text alignment, left, right or centered
-func (l *_label) Alignment(alignment text.Alignment) *_label {
+func (l *Label) Alignment(alignment text.Alignment) *Label {
 	l.alignment = alignment
 	return l
 }
 
 // Color sets the color of the label font
-func (l *_label) Color(color string) *_label {
+func (l *Label) Color(color string) *Label {
 	l.color = l.th.Colors.Get(color)
 	return l
 }
 
 // Font sets the font out of the available font collection
-func (l *_label) Font(font string) *_label {
+func (l *Label) Font(font string) *Label {
 	var f text.Font
 	for i := range l.th.collection {
 		// Debug(th.Collection[i].Font)
@@ -102,54 +102,54 @@ var (
 	}
 )
 
-func (th *Theme) H1(txt string) (l *_label) {
+func (th *Theme) H1(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["H1"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H2(txt string) (l *_label) {
+func (th *Theme) H2(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["H2"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H3(txt string) (l *_label) {
+func (th *Theme) H3(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["H3"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H4(txt string) (l *_label) {
+func (th *Theme) H4(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["H4"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H5(txt string) (l *_label) {
+func (th *Theme) H5(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["H5"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H6(txt string) (l *_label) {
+func (th *Theme) H6(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["H6"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) Body1(txt string) (l *_label) {
+func (th *Theme) Body1(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["Body1"]).Font("bariol regular").Text(txt)
 	return
 }
 
-func (th *Theme) Body2(txt string) (l *_label) {
+func (th *Theme) Body2(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["Body2"]).Font("bariol regular").Text(txt)
 	return
 }
 
-func (th *Theme) Caption(txt string) (l *_label) {
+func (th *Theme) Caption(txt string) (l *Label) {
 	l = th.Label().TextScale(Scales["Caption"]).Font("bariol regular").Text(txt)
 	return
 }
 
 // Fn renders the label as specified
-func (l *_label) Fn(gtx l.Context) l.Dimensions {
+func (l *Label) Fn(gtx l.Context) l.Dimensions {
 	paint.ColorOp{Color: l.color}.Add(gtx.Ops)
-	tl := _text{alignment: l.alignment, maxLines: l.maxLines}
+	tl := Text{alignment: l.alignment, maxLines: l.maxLines}
 	return tl.Fn(gtx, l.shaper, l.font, l.textSize, l.text)
 }

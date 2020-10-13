@@ -15,26 +15,26 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-// _text is a widget for laying out and drawing text.
-type _text struct {
+// Text is a widget for laying out and drawing text.
+type Text struct {
 	// alignment specify the text alignment.
 	alignment text.Alignment
 	// maxLines limits the number of lines. Zero means no limit.
 	maxLines int
 }
 
-func (th *Theme) Text() *_text {
-	return &_text{}
+func (th *Theme) Text() *Text {
+	return &Text{}
 }
 
 // Alignment sets the alignment for the text
-func (t *_text) Alignment(alignment text.Alignment) *_text {
+func (t *Text) Alignment(alignment text.Alignment) *Text {
 	t.alignment = alignment
 	return t
 }
 
 // MaxLines sets the alignment for the text
-func (t *_text) MaxLines(maxLines int) *_text {
+func (t *Text) MaxLines(maxLines int) *Text {
 	t.maxLines = maxLines
 	return t
 }
@@ -98,7 +98,7 @@ func (l *lineIterator) Next() (int, int, []text.Glyph, f32.Point, bool) {
 	return 0, 0, nil, f32.Point{}, false
 }
 
-func (t *_text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.Value, txt string) layout.Dimensions {
+func (t *Text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.Value, txt string) layout.Dimensions {
 	cs := gtx.Constraints
 	textSize := fixed.I(gtx.Px(size))
 	lines := s.LayoutString(font, textSize, cs.Max.X, txt)

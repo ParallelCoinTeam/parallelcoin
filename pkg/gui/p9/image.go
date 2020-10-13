@@ -13,30 +13,30 @@ import (
 	"gioui.org/unit"
 )
 
-// _image is a widget that displays an image.
-type _image struct {
+// Image is a widget that displays an image.
+type Image struct {
 	// src is the image to display.
 	src paint.ImageOp
-	// scale is the ratio of image pixels to dps. If scale is zero _image falls back to a scale that match a standard 72
+	// scale is the ratio of image pixels to dps. If scale is zero Image falls back to a scale that match a standard 72
 	// DPI.
 	scale float32
 }
 
-func (th *Theme) Image() *_image {
-	return &_image{}
+func (th *Theme) Image() *Image {
+	return &Image{}
 }
 
-func (i *_image) Src(img paint.ImageOp) *_image {
+func (i *Image) Src(img paint.ImageOp) *Image {
 	i.src = img
 	return i
 }
 
-func (i *_image) Scale(scale float32) *_image {
+func (i *Image) Scale(scale float32) *Image {
 	i.scale = scale
 	return i
 }
 
-func (im *_image) Fn(gtx layout.Context) layout.Dimensions {
+func (im *Image) Fn(gtx layout.Context) layout.Dimensions {
 	scale := im.scale
 	if scale == 0 {
 		scale = 160.0 / 72.0

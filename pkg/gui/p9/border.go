@@ -11,8 +11,8 @@ import (
 	"gioui.org/unit"
 )
 
-// _border lays out a widget and draws a border inside it.
-type _border struct {
+// Border lays out a widget and draws a border inside it.
+type Border struct {
 	th           *Theme
 	color        color.RGBA
 	cornerRadius unit.Value
@@ -21,8 +21,8 @@ type _border struct {
 }
 
 // Border creates a border with configurable color, width and corner radius.
-func (th *Theme) Border() *_border {
-	b := &_border{
+func (th *Theme) Border() *Border {
+	b := &Border{
 		th: th,
 	}
 	b.CornerRadius(0.25).Color("Primary").Width(0.125)
@@ -30,30 +30,30 @@ func (th *Theme) Border() *_border {
 }
 
 // Color sets the color to render the border in
-func (b *_border) Color(color string) *_border {
+func (b *Border) Color(color string) *Border {
 	b.color = b.th.Colors.Get(color)
 	return b
 }
 
 // CornerRadius sets the radius of the curve on the corners
-func (b *_border) CornerRadius(rad float32) *_border {
+func (b *Border) CornerRadius(rad float32) *Border {
 	b.cornerRadius = b.th.TextSize.Scale(rad)
 	return b
 }
 
 // Width sets the width of the border line
-func (b *_border) Width(width float32) *_border {
+func (b *Border) Width(width float32) *Border {
 	b.width = b.th.TextSize.Scale(width)
 	return b
 }
 
-func (b *_border) Embed(w layout.Widget) *_border {
+func (b *Border) Embed(w layout.Widget) *Border {
 	b.w = w
 	return b
 }
 
 // Fn renders the border
-func (b *_border) Fn(gtx layout.Context) layout.Dimensions {
+func (b *Border) Fn(gtx layout.Context) layout.Dimensions {
 	dims := b.w(gtx)
 	sz := dims.Size
 	rr := float32(gtx.Px(b.cornerRadius))

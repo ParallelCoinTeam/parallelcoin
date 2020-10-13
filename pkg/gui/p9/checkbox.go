@@ -5,7 +5,7 @@ import (
 )
 
 // CheckBox creates a checkbox with a text label
-func (th *Theme) CheckBox(checkBox *Bool) *_checkbox {
+func (th *Theme) CheckBox(checkBox *Bool) *Checkbox {
 	var (
 		color     = "DocText"
 		textColor = "Primary"
@@ -13,62 +13,62 @@ func (th *Theme) CheckBox(checkBox *Bool) *_checkbox {
 	)
 	chk := th.Checkable()
 	chk.Font("bariol regular").Color(textColor)
-	return &_checkbox{
-		color:      color,
-		textColor:  textColor,
-		label:      label,
-		checkBox:   checkBox,
-		_checkable: chk,
-		action:     func(b bool) {},
+	return &Checkbox{
+		color:     color,
+		textColor: textColor,
+		label:     label,
+		checkBox:  checkBox,
+		Checkable: chk,
+		action:    func(b bool) {},
 	}
 }
 
-type _checkbox struct {
-	*_checkable
+type Checkbox struct {
+	*Checkable
 	checkBox                *Bool
 	color, textColor, label string
 	action                  func(b bool)
 }
 
 // IconColor sets the color of the icon in the checkbox
-func (c *_checkbox) IconColor(color string) *_checkbox {
-	c._checkable.iconColor = c.th.Colors.Get(color)
+func (c *Checkbox) IconColor(color string) *Checkbox {
+	c.Checkable.iconColor = c.th.Colors.Get(color)
 	return c
 }
 
 // TextColor sets the color of the text label
-func (c *_checkbox) TextColor(color string) *_checkbox {
-	c._checkable.color = c.th.Colors.Get(color)
+func (c *Checkbox) TextColor(color string) *Checkbox {
+	c.Checkable.color = c.th.Colors.Get(color)
 	return c
 }
 
 // TextScale sets the scale relative to the base font size for the text label
-func (c *_checkbox) TextScale(scale float32) *_checkbox {
+func (c *Checkbox) TextScale(scale float32) *Checkbox {
 	c.textSize = c.th.TextSize.Scale(scale)
 	return c
 }
 
 // Text sets the text to be rendered on the checkbox
-func (c *_checkbox) Text(label string) *_checkbox {
-	c._checkable.label = label
+func (c *Checkbox) Text(label string) *Checkbox {
+	c.Checkable.label = label
 	return c
 }
 
 // IconScale sets the scaling of the check icon
-func (c *_checkbox) IconScale(scale float32) *_checkbox {
+func (c *Checkbox) IconScale(scale float32) *Checkbox {
 	c.size = c.th.TextSize.Scale(scale)
 	return c
 }
 
 // SetOnChange sets the callback when a state change event occurs
-func (c *_checkbox) SetOnChange(fn func(b bool)) *_checkbox {
+func (c *Checkbox) SetOnChange(fn func(b bool)) *Checkbox {
 	c.action = fn
 	return c
 }
 
 // Fn renders the checkbox
-func (c *_checkbox) Fn(gtx l.Context) l.Dimensions {
-	dims := c._checkable.Fn(gtx, c.checkBox.GetValue())
+func (c *Checkbox) Fn(gtx l.Context) l.Dimensions {
+	dims := c.Checkable.Fn(gtx, c.checkBox.GetValue())
 	gtx.Constraints.Min = dims.Size
 	c.checkBox.Fn(gtx)
 	return dims

@@ -14,6 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/coding/simplebuffer"
 	"github.com/p9c/pod/pkg/coding/simplebuffer/IPs"
 	"github.com/p9c/pod/pkg/coding/simplebuffer/Int32"
+	"github.com/p9c/pod/pkg/coding/simplebuffer/String"
 	"github.com/p9c/pod/pkg/coding/simplebuffer/Time"
 )
 
@@ -30,9 +31,10 @@ type Hashrate struct {
 	Version int32
 	Height  int32
 	Nonce   int32
+	ID      string
 }
 
-func Get(count int32, version int32, height int32) Container {
+func Get(count int32, version int32, height int32, id string) Container {
 	nonce := make([]byte, 4)
 	if _, err := io.ReadFull(rand.Reader, nonce); Check(err) {
 	}
@@ -43,6 +45,7 @@ func Get(count int32, version int32, height int32) Container {
 		Int32.New().Put(version),
 		Int32.New().Put(height),
 		Int32.New().Put(int32(binary.BigEndian.Uint32(nonce))),
+		String.New().Put(id),
 	}.CreateContainer(HashrateMagic)}
 }
 
@@ -77,6 +80,10 @@ func (j *Container) GetNonce() int32 {
 	return Int32.New().DecodeOne(j.Get(5)).Get()
 }
 
+func (j *Container) GetID() string {
+	return String.New().DecodeOne(j.Get(6)).Get()
+}
+
 func (j *Container) String() (s string) {
 	s += fmt.Sprint("\ntype '"+string(HashrateMagic)+"' elements:", j.Count())
 	s += "\n"
@@ -98,6 +105,14 @@ func (j *Container) String() (s string) {
 	s += "4 Version: "
 	s += fmt.Sprint(version)
 	s += "\n"
+	nonce := j.GetNonce()
+	s += "5 Nonce: "
+	s += fmt.Sprint(nonce)
+	s += "\n"
+	ID := j.GetID()
+	s += "6 ID: "
+	s += fmt.Sprint(ID)
+	s += "\n"
 	return
 }
 
@@ -112,6 +127,7 @@ func (j *Container) Struct() (out Hashrate) {
 		Version: j.GetVersion(),
 		Height:  j.GetHeight(),
 		Nonce:   j.GetNonce(),
+		ID:      j.GetID(),
 	}
 	return
 }

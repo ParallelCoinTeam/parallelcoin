@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"syscall"
 
 	"github.com/p9c/pod/app/apputil"
@@ -48,6 +49,9 @@ func (w *Worker) Wait() (err error) {
 }
 
 func (w *Worker) Interrupt() (err error) {
+	if runtime.GOOS == "windows" {
+		return
+	}
 	if err = w.cmd.Process.Signal(syscall.SIGINT); !Check(err) {
 		Debug("interrupted")
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type _buttonLayout struct {
+type ButtonLayout struct {
 	th           *Theme
 	background   color.RGBA
 	cornerRadius unit.Value
@@ -20,8 +20,8 @@ type _buttonLayout struct {
 }
 
 // ButtonLayout creates a button with a background and another widget over top
-func (th *Theme) ButtonLayout(button *Clickable) *_buttonLayout {
-	return &_buttonLayout{
+func (th *Theme) ButtonLayout(button *Clickable) *ButtonLayout {
+	return &ButtonLayout{
 		th:           th,
 		button:       button,
 		background:   th.Colors.Get("ButtonBg"),
@@ -30,65 +30,67 @@ func (th *Theme) ButtonLayout(button *Clickable) *_buttonLayout {
 }
 
 // Background sets the background color of the button
-func (b *_buttonLayout) Background(color string) *_buttonLayout {
+func (b *ButtonLayout) Background(color string) *ButtonLayout {
 	b.background = b.th.Colors.Get(color)
 	return b
 }
 
 // CornerRadius sets the radius of the corners of the button
-func (b *_buttonLayout) CornerRadius(radius float32) *_buttonLayout {
+func (b *ButtonLayout) CornerRadius(radius float32) *ButtonLayout {
 	b.cornerRadius = b.th.TextSize.Scale(radius)
 	return b
 }
 
 // Embed a widget in the button
-func (b *_buttonLayout) Embed(w l.Widget) *_buttonLayout {
+func (b *ButtonLayout) Embed(w l.Widget) *ButtonLayout {
 	b.w = w
 	return b
 }
 
-func (b *_buttonLayout) SetClick(fn func()) *_buttonLayout {
+func (b *ButtonLayout) SetClick(fn func()) *ButtonLayout {
 	b.button.SetClick(fn)
 	return b
 }
 
-func (b *_buttonLayout) SetCancel(fn func()) *_buttonLayout {
+func (b *ButtonLayout) SetCancel(fn func()) *ButtonLayout {
 	b.button.SetCancel(fn)
 	return b
 }
 
-func (b *_buttonLayout) SetPress(fn func()) *_buttonLayout {
+func (b *ButtonLayout) SetPress(fn func()) *ButtonLayout {
 	b.button.SetPress(fn)
 	return b
 }
 
 // Fn is the function that draws the button and its child widget
-func (b *_buttonLayout) Fn(gtx l.Context) l.Dimensions {
+func (b *ButtonLayout) Fn(gtx l.Context) l.Dimensions {
 	min := gtx.Constraints.Min
-	return l.Stack{Alignment: l.Center}.Layout(gtx,
-		l.Expanded(func(gtx l.Context) l.Dimensions {
-			rr := float32(gtx.Px(b.cornerRadius))
-			clip.RRect{
-				Rect: f32.Rectangle{Max: f32.Point{
-					X: float32(gtx.Constraints.Min.X),
-					Y: float32(gtx.Constraints.Min.Y),
-				}},
-				NE: rr, NW: rr, SE: rr, SW: rr,
-			}.Add(gtx.Ops)
-			background := b.background
-			if gtx.Queue == nil {
-				background = f32color.MulAlpha(b.background, 150)
-			}
-			dims := Fill(gtx, background)
-			for _, c := range b.button.History() {
-				drawInk(gtx, c)
-			}
-			return dims
-		}),
-		l.Stacked(func(gtx l.Context) l.Dimensions {
-			gtx.Constraints.Min = min
-			return l.Center.Layout(gtx, b.w)
-		}),
-		l.Expanded(b.button.Fn),
-	)
+	return b.th.Stack().Alignment(l.Center).
+		Expanded(
+			func(gtx l.Context) l.Dimensions {
+				rr := float32(gtx.Px(b.cornerRadius))
+				clip.RRect{
+					Rect: f32.Rectangle{Max: f32.Point{
+						X: float32(gtx.Constraints.Min.X),
+						Y: float32(gtx.Constraints.Min.Y),
+					}},
+					NE: rr, NW: rr, SE: rr, SW: rr,
+				}.Add(gtx.Ops)
+				background := b.background
+				if gtx.Queue == nil {
+					background = f32color.MulAlpha(b.background, 150)
+				}
+				dims := Fill(gtx, background)
+				for _, c := range b.button.History() {
+					drawInk(gtx, c)
+				}
+				return dims
+			}).
+		Stacked(
+			func(gtx l.Context) l.Dimensions {
+				gtx.Constraints.Min = min
+				return l.Center.Layout(gtx, b.w)
+			}).
+		Expanded(b.button.Fn).
+		Fn(gtx)
 }

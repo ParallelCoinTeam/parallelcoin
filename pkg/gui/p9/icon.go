@@ -12,7 +12,7 @@ import (
 	"golang.org/x/exp/shiny/iconvg"
 )
 
-type _icon struct {
+type Icon struct {
 	th    *Theme
 	color color.RGBA
 	src   []byte
@@ -24,24 +24,24 @@ type _icon struct {
 	imgColor color.RGBA
 }
 
-// Icon returns a new _icon from iconVG data.
-func (th *Theme) Icon() *_icon {
-	return &_icon{th: th, size: th.TextSize, color: rgb(0xff000000)}
+// Icon returns a new Icon from iconVG data.
+func (th *Theme) Icon() *Icon {
+	return &Icon{th: th, size: th.TextSize, color: rgb(0xff000000)}
 }
 
 // Color sets the color of the icon image. It must be called before creating the image
-func (i *_icon) Color(color string) *_icon {
+func (i *Icon) Color(color string) *Icon {
 	i.color = i.th.Colors.Get(color)
 	return i
 }
 
-func (i *_icon) RGBA(rgba color.RGBA) *_icon {
+func (i *Icon) RGBA(rgba color.RGBA) *Icon {
 	i.color = rgba
 	return i
 }
 
 // Src sets the icon source to draw from
-func (i *_icon) Src(data []byte) *_icon {
+func (i *Icon) Src(data []byte) *Icon {
 	_, err := iconvg.DecodeMetadata(data)
 	if Check(err) {
 		return nil
@@ -51,18 +51,18 @@ func (i *_icon) Src(data []byte) *_icon {
 }
 
 // Scale changes the size relative to the base font size
-func (i *_icon) Scale(scale float32) *_icon {
+func (i *Icon) Scale(scale float32) *Icon {
 	i.size = i.th.TextSize.Scale(scale * 1)
 	return i
 }
 
-func (i *_icon) Size(size unit.Value) *_icon {
+func (i *Icon) Size(size unit.Value) *Icon {
 	i.size = size
 	return i
 }
 
 // Fn renders the icon
-func (i *_icon) Fn(gtx l.Context) l.Dimensions {
+func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 	ico := i.image(gtx.Px(i.size))
 	ico.Add(gtx.Ops)
 	paint.PaintOp{
@@ -73,7 +73,7 @@ func (i *_icon) Fn(gtx l.Context) l.Dimensions {
 	return l.Dimensions{Size: ico.Size()}
 }
 
-func (i *_icon) image(sz int) paint.ImageOp {
+func (i *Icon) image(sz int) paint.ImageOp {
 	if sz == i.imgSize && i.color == i.imgColor {
 		return i.op
 	}

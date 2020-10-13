@@ -13,15 +13,15 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type _progressBar struct {
+type ProgressBar struct {
 	th       *Theme
 	color    color.RGBA
 	progress int
 }
 
-// _progressBar renders a horizontal bar with an indication of completion of a process
-func (th *Theme) ProgressBar() *_progressBar {
-	return &_progressBar{
+// ProgressBar renders a horizontal bar with an indication of completion of a process
+func (th *Theme) ProgressBar() *ProgressBar {
+	return &ProgressBar{
 		th:       th,
 		progress: 0,
 		color:    th.Colors.Get("Primary"),
@@ -29,19 +29,19 @@ func (th *Theme) ProgressBar() *_progressBar {
 }
 
 // SetProgress sets the progress of the progress bar
-func (p *_progressBar) SetProgress(progress int) *_progressBar {
+func (p *ProgressBar) SetProgress(progress int) *ProgressBar {
 	p.progress = progress
 	return p
 }
 
 // Color sets the color to render the bar in
-func (p *_progressBar) Color(c string) *_progressBar {
+func (p *ProgressBar) Color(c string) *ProgressBar {
 	p.color = p.th.Colors.Get(c)
 	return p
 }
 
 // Fn renders the progress bar as it is currently configured
-func (p *_progressBar) Fn(gtx l.Context) l.Dimensions {
+func (p *ProgressBar) Fn(gtx l.Context) l.Dimensions {
 	shader := func(width float32, color color.RGBA) l.Dimensions {
 		maxHeight := unit.Dp(4)
 		rr := float32(gtx.Px(unit.Dp(2)))

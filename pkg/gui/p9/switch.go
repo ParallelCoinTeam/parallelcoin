@@ -15,7 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
-type _switch struct {
+type Switch struct {
 	th    *Theme
 	color struct {
 		enabled  color.RGBA
@@ -25,8 +25,8 @@ type _switch struct {
 }
 
 // Switch creates a boolean switch widget (basically a checkbox but looks like a switch)
-func (th *Theme) Switch(swtch *Bool) *_switch {
-	sw := &_switch{
+func (th *Theme) Switch(swtch *Bool) *Switch {
+	sw := &Switch{
 		th:    th,
 		swtch: swtch,
 	}
@@ -36,24 +36,24 @@ func (th *Theme) Switch(swtch *Bool) *_switch {
 }
 
 // EnabledColor sets the color to draw for the enabled state
-func (s *_switch) EnabledColor(color string) *_switch {
+func (s *Switch) EnabledColor(color string) *Switch {
 	s.color.enabled = s.th.Colors.Get(color)
 	return s
 }
 
 // DisabledColor sets the color to draw for the disabled state
-func (s *_switch) DisabledColor() *_switch {
+func (s *Switch) DisabledColor() *Switch {
 	s.color.disabled = s.th.Colors.Get("Primary")
 	return s
 }
 
-func (s *_switch) SetHook(fn func(b bool)) *_switch {
+func (s *Switch) SetHook(fn func(b bool)) *Switch {
 	s.swtch.SetOnChange(fn)
 	return s
 }
 
 // Fn updates the switch and displays it.
-func (s *_switch) Fn(gtx l.Context) l.Dimensions {
+func (s *Switch) Fn(gtx l.Context) l.Dimensions {
 	return s.th.Inset(0.25).Embed(func(gtx l.Context) l.Dimensions {
 		trackWidth := gtx.Px(s.th.TextSize.Scale(2.5))
 		trackHeight := gtx.Px(s.th.TextSize.Scale(0.75))
