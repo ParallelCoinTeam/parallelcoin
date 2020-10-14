@@ -84,6 +84,7 @@ func NewColors() (c Colors) {
 		"white":                 "ffffffff",
 		"dark-white":            "ffdddddd",
 		"yellow":                "ffcfcf30",
+		"scrim":                 "88000000",
 	}
 
 	c["Black"] = c["black"]
@@ -150,7 +151,7 @@ func (c Colors) SetTheme(dark bool) {
 		c["DocText"] =
 			c["light"]
 		c["DocBg"] =
-		 	c["dark"]
+			c["dark"]
 
 		c["PanelText"] =
 			c["light"]

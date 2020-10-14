@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"gioui.org/app"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/text"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -24,34 +24,36 @@ var maxThreads = float32(runtime.NumCPU())
 
 type MinerModel struct {
 	*p9.Theme
-	Cx              *conte.Xt
-	worker          *Worker
-	DarkTheme       bool
-	logoButton      *p9.Clickable
-	mineToggle      *p9.Bool
-	cores           *p9.Float
-	nCores          int
-	solButtons      []*p9.Clickable
-	lists           map[string]*layout.List
-	pass            *p9.Editor
-	unhideButton    *p9.IconButton
-	unhideClickable *p9.Clickable
-	hide            bool
-	passInput       *p9.TextInput
-	solutionCount   int
+	Cx                     *conte.Xt
+	worker                 *Worker
+	DarkTheme              bool
+	logoButton             *p9.Clickable
+	mineToggle             *p9.Bool
+	cores                  *p9.Float
+	nCores                 int
+	solButtons             []*p9.Clickable
+	lists                  map[string]*l.List
+	pass                   *p9.Editor
+	unhideButton           *p9.IconButton
+	unhideClickable        *p9.Clickable
+	hide                   bool
+	passInput              *p9.TextInput
+	solutionCount          int
+	modalWidget            l.Widget
+	modalOn                bool
+	modalScrim, modalClose *p9.Clickable
 }
 
 func (w *Worker) Run() {
 	th := p9.NewTheme(p9fonts.Collection(), w.quit)
-	// Debug(*w.cx.Config.Generate, *w.cx.Config.GenThreads)
 	solButtons := make([]*p9.Clickable, 201)
 	for i := range solButtons {
 		solButtons[i] = th.Clickable()
 	}
-	lists := map[string]*layout.List{
+	lists := map[string]*l.List{
 		"found": {
-			Axis:      layout.Vertical,
-			Alignment: layout.Start,
+			Axis:      l.Vertical,
+			Alignment: l.Start,
 		},
 	}
 	minerModel := &MinerModel{
@@ -67,9 +69,11 @@ func (w *Worker) Run() {
 		solButtons:      solButtons,
 		lists:           lists,
 		unhideClickable: th.Clickable(),
+		modalScrim:      th.Clickable(),
+		modalClose:      th.Clickable(),
 	}
 	minerModel.SetTheme(minerModel.DarkTheme)
-	minerModel.pass = th.Editor().SingleLine(true).Submit(true)
+	minerModel.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
 	minerModel.passInput = th.SimpleInput(minerModel.pass).Color("DocText")
 	minerModel.unhideButton = th.IconButton(minerModel.unhideClickable).
 		Background("").
@@ -79,23 +83,16 @@ func (w *Worker) Run() {
 		minerModel.hide = !minerModel.hide
 		if !minerModel.hide {
 			minerModel.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
-			// minerModel.worker.Update <- struct{}{}
-			minerModel.pass.Mask('*')
+			minerModel.pass.Mask('•')
 			minerModel.passInput.Color("Primary")
-			// minerModel.worker.Update <- struct{}{}
-			// Debug("hidden")
 		} else {
 			minerModel.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
-			// minerModel.worker.Update <- struct{}{}
 			minerModel.pass.Mask(0)
 			minerModel.passInput.Color("DocText")
-			// minerModel.worker.Update <- struct{}{}
-			// Debug("showing")
 		}
-		// w.Update <- struct{}{}
 	}
 	minerModel.unhideClickable.SetClick(showClickableFn)
-	minerModel.pass.SetText(*w.cx.Config.MinerPass).Mask('*').SetSubmit(func(txt string) {
+	minerModel.pass.SetText(*w.cx.Config.MinerPass).Mask('•').SetSubmit(func(txt string) {
 		if !minerModel.hide {
 			showClickableFn()
 		}
@@ -107,10 +104,7 @@ func (w *Worker) Run() {
 			w.Start()
 		}()
 	}).SetChange(func(txt string) {
-		if minerModel.hide {
-			showClickableFn()
-		}
-		showClickableFn()
+		// send keystrokes to the NSA
 	})
 	for i := 0; i < 201; i++ {
 		minerModel.solButtons[i] = th.Clickable()
@@ -150,166 +144,431 @@ func (w *Worker) Run() {
 	app.Main()
 }
 
-func (m *MinerModel) Widget(gtx layout.Context) layout.Dimensions {
-	counter := 0
-	return m.Flex().Vertical().Rigid(
-		m.Fill("Primary").Embed(
-			m.Flex().Rigid(
-				m.Inset(0.25).Embed(
-					m.IconButton(m.logoButton).
-						Color("Light").
-						Background("Dark").
-						Scale(p9.Scales["H4"]).
-						Icon(icons.ParallelCoin).
-						Fn,
+func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
+	return m.Stack().Stacked(
+		m.Flex().Flexed(1,
+			m.Flex().Vertical().
+				Rigid(m.Header).
+				Flexed(1,
+					m.Fill("DocBg").Embed(
+						m.Inset(0.5).Embed(
+							m.Flex().Vertical().
+								Rigid(m.H5("miner settings").Fn).
+								Rigid(m.RunControl).
+								Rigid(m.SetThreads).
+								Rigid(m.PreSharedKey).
+								Rigid(m.VSpacer).
+								Rigid(m.H5("found blocks").Fn).
+								Flexed(1,
+									m.Fill("PanelBg").Embed(m.FoundBlocks).Fn,
+								).Fn,
+						).Fn,
+					).Fn,
 				).Fn,
-			).Rigid(
-				m.Inset(0.5).Embed(
-					m.H5("kopach miner control").
-						Color("Light").
+		).Fn,
+	).
+		Stacked(func(gtx l.Context) l.Dimensions {
+			if m.modalOn {
+				// return m.modalWidget(gtx)
+				return m.Fill("scrim").Embed(
+					m.Flex().
+						Vertical().
+						// AlignMiddle().
+						// SpaceSides().
+						// AlignBaseline().
+						Flexed(0.1,
+							m.Flex().
+								// Vertical().
+								// SpaceStart().
+								Rigid(
+									func(gtx l.Context) l.Dimensions {
+										return l.Dimensions{
+											Size: image.Point{
+												X: gtx.Constraints.Max.X,
+												Y: gtx.Constraints.Max.Y,
+											},
+											Baseline: 0,
+										}
+									}).Fn,
+						).AlignMiddle().
+						Rigid(m.modalWidget).
+						Flexed(0.1,
+							m.Flex().
+								// Vertical().
+								// SpaceStart().
+								Rigid(
+									func(gtx l.Context) l.Dimensions {
+										return l.Dimensions{
+											Size: image.Point{
+												X: gtx.Constraints.Max.X,
+												Y: gtx.Constraints.Max.Y,
+											},
+											Baseline: 0,
+										}
+									}).Fn,
+						).Fn,
+				).Fn(gtx)
+			} else {
+				return l.Dimensions{}
+			}
+		}).
+		// Expanded(func(gtx l.Context) l.Dimensions {
+		// 	if m.modalOn {
+		// 		return (gtx)
+		// 	} else {
+		// 		return l.Dimensions{}
+		// 	}
+		// }).
+		Fn(gtx)
+}
+
+func (m *MinerModel) FillSpace(gtx l.Context) l.Dimensions {
+	return l.Dimensions{
+		Size: image.Point{
+			X: gtx.Constraints.Min.X,
+			Y: gtx.Constraints.Min.Y,
+		},
+		Baseline: 0,
+	}
+}
+
+func (m *MinerModel) VSpacer(gtx l.Context) l.Dimensions {
+	return l.Dimensions{
+		Size: image.Point{
+			X: int(m.TextSize.Scale(2).V),
+			Y: int(m.TextSize.Scale(2).V),
+		},
+		Baseline: 0,
+	}
+}
+
+func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
+	return m.Fill("Primary").Embed(
+		m.Flex().Rigid(
+			m.Inset(0.25).Embed(
+				m.IconButton(m.logoButton).
+					Color("Light").
+					Background("Dark").
+					Scale(p9.Scales["H4"]).
+					Icon(icons.ParallelCoin).
+					Fn,
+			).Fn,
+		).Rigid(
+			m.Inset(0.5).Embed(
+				m.H5("kopach miner control").
+					Color("DocBg").
+					Fn,
+			).Fn,
+		).Flexed(1,
+			m.Inset(0.5).Embed(
+				m.Body1(fmt.Sprintf("%d hash/s", int(m.worker.hashrate))).
+					Color("DocBg").
+					// Alignment(text.End).
+					Fn,
+			).Fn,
+		).Fn,
+	).Fn(gtx)
+}
+
+func (m *MinerModel) RunControl(gtx l.Context) l.Dimensions {
+	return m.Inset(0.25).Embed(
+		m.Flex().Flexed(0.5,
+			m.Body1("enable mining").
+				Color("DocText").
+				Fn,
+		).Flexed(0.5,
+			m.Switch(m.mineToggle.SetOnChange(
+				func(b bool) {
+					if b {
+						Debug("start mining")
+						m.worker.StartChan <- struct{}{}
+					} else {
+						Debug("stop mining")
+						m.worker.StopChan <- struct{}{}
+					}
+				})).
+				Fn,
+		).Fn,
+	).Fn(gtx)
+}
+
+func (m *MinerModel) SetThreads(gtx l.Context) l.Dimensions {
+	return m.Flex().Rigid(
+		m.Inset(0.25).Embed(
+			m.Flex().Flexed(0.5,
+				m.Body1("number of mining threads"+
+					fmt.Sprintf("%3v", int(m.cores.Value()+0.5))).
+					Fn,
+			).Flexed(0.5,
+				m.Flex().Rigid(
+					m.Body1("0").
+						Color("Primary").
 						Fn,
-				).Fn,
-			).Flexed(1,
-				m.Inset(0.5).Embed(
-					m.Body1(fmt.Sprintf("%d hash/s", int(m.worker.hashrate))).Color("Light").Alignment(text.End).Fn,
+				).Flexed(1,
+					m.Slider().
+						Float(m.cores.SetHook(func(fl float32) {
+							iFl := int(fl + 0.5)
+							if m.nCores != iFl {
+								Debug("cores value changed", iFl)
+							}
+							m.nCores = iFl
+							m.cores.SetValue(float32(iFl))
+							m.worker.SetThreads <- m.nCores
+						})).
+						Min(0).Max(maxThreads).
+						Fn,
+				).Rigid(
+					m.Body1(fmt.Sprint(int(maxThreads))).
+						Color("Primary").
+						Fn,
 				).Fn,
 			).Fn,
 		).Fn,
-	).Flexed(1,
-		m.Fill("DocBg").Embed(
-			m.Inset(0.5).Embed(
-				m.Flex().Vertical().Rigid(
-					// m.Inset(0.5).Embed(
-					m.Flex().Vertical().Rigid(
-						m.H5("miner settings").Fn,
-					).Rigid(
-						m.Flex().Flexed(0.5,
-							m.Body1("enable mining").
-								Color("DocText").
-								Fn,
-						).Flexed(0.5,
-							m.Switch(m.mineToggle.SetOnChange(
-								func(b bool) {
-									if b {
-										Debug("start mining")
-										m.worker.StartChan <- struct{}{}
-									} else {
-										Debug("stop mining")
-										m.worker.StopChan <- struct{}{}
-									}
-								})).
-								Fn,
-						).Fn,
-						// ).Fn,
-					).Rigid(
-						m.Flex().Rigid(
-							// m.Inset(0.5).Embed(
-							m.Flex().Flexed(0.5,
-								m.Body1("number of mining threads"+
-									fmt.Sprintf("%3v", int(m.cores.Value()+0.5))).
-									Fn,
-							).Flexed(0.5,
-								m.Flex().Rigid(
-									m.Body1("0").
-										Color("Primary").
-										Fn,
-								).Flexed(1,
-									m.Slider().
-										Float(m.cores.SetHook(func(fl float32) {
-											iFl := int(fl + 0.5)
-											if m.nCores != iFl {
-												Debug("cores value changed", iFl)
-											}
-											m.nCores = iFl
-											m.cores.SetValue(float32(iFl))
-											m.worker.SetThreads <- m.nCores
-										})).
-										Min(0).Max(maxThreads).
-										Fn,
-								).Rigid(
-									m.Body1(fmt.Sprint(int(maxThreads))).
-										Color("Primary").
-										Fn,
+	).Fn(gtx)
+}
+
+func (m *MinerModel) PreSharedKey(gtx l.Context) l.Dimensions {
+	return m.Inset(0.25).Embed(
+		m.Flex().Flexed(0.5,
+			m.Body1("cluster preshared key").
+				Color("DocText").
+				Fn,
+		).Flexed(0.5,
+			m.Border().Embed(
+				m.Flex().Flexed(1,
+					m.Inset(0.25).Embed(m.passInput.Fn).Fn,
+				).Rigid(
+					m.unhideButton.Fn,
+				).Fn,
+			).Fn,
+		).Fn,
+	).Fn(gtx)
+}
+
+func (m *MinerModel) BlockInfoModalCloser(gtx l.Context) l.Dimensions {
+	return m.Button(m.modalScrim.SetClick(func() {
+		m.modalOn = false
+	})).Background("Primary").Text("close").Fn(gtx)
+}
+
+func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
+	return m.Inset(0.25).Embed(
+		m.Flex().Flexed(1, func(gtx l.Context) l.Dimensions {
+			return m.lists["found"].Layout(gtx, m.worker.solutionCount, func(c l.Context, i int) l.Dimensions {
+				return m.Flex().Rigid(
+					m.Button(m.solButtons[i].SetClick(func() {
+						Debug("clicked for block", m.worker.solutions[i].height)
+						m.modalWidget = m.Fill("DocBg").Embed(
+							m.Flex().Vertical().Rigid(
+								m.Inset(0.5).Embed(
+									m.H6("Block Information").Alignment(text.Middle).Color("DocText").Fn,
 								).Fn,
-							).Fn,
-							// ).Fn,
-						).Fn,
-					).Rigid(
-						m.Flex().Flexed(0.5,
-							m.Body1("cluster preshared key").
-								Color("DocText").
-								Fn,
-						).Flexed(0.5,
-							m.Border().Embed(
-								m.Flex().Flexed(1,
-									m.Inset(0.25).Embed(m.passInput.Fn).Fn,
-								).Rigid(
-									m.unhideButton.Fn,
-								).Fn,
-							).Fn,
-						).Fn,
-					).Rigid(
-						m.Flex().Vertical().Rigid(
-							func(ctx layout.Context) layout.Dimensions {
-								return layout.Dimensions{
-									Size: image.Point{
-										X: int(m.TextSize.Scale(2).V),
-										Y: int(m.TextSize.Scale(2).V),
-									},
-									Baseline: 0,
-								}
-							},
-						).Rigid(
-							m.H5("found blocks").Fn,
-						).Flexed(1,
-							m.Fill("PanelBg").Embed(
-								m.Inset(0.25).Embed(
-									m.Flex().Flexed(1,
-										func(gtx layout.Context) layout.Dimensions {
-											cs := gtx.Constraints
-											cs.Min = cs.Max
-											return m.lists["found"].
-												Layout(gtx, m.worker.solutionCount,
-													func(c layout.Context, i int) layout.Dimensions {
-														counter++
-														return m.Flex().Rigid(
-															m.Inset(0.25).Embed(
-																m.Button(
-																	m.solButtons[i].SetClick(func() {
-																		Debug("clicked for block", m.worker.solutions[i].height)
-																	})).Text(fmt.Sprint(m.worker.solutions[i].height)).Fn,
-															).Fn,
-														).Flexed(1,
-															m.Inset(0.25).Embed(
-																m.Flex().Vertical().Rigid(
-																	m.Flex().Rigid(
-																		// m.Inset(0.25).Embed(
-																		m.Body1(m.worker.solutions[i].algo).Font("bariol bold").Fn,
-																		// ).Fn,
-																	).Flexed(1,
-																		// m.Inset(0.25).Embed(
-																		m.Body1(fmt.Sprint(
-																			m.worker.solutions[i].time.Format(time.RFC3339))).
-																			Alignment(text.End).Fn,
-																	).Fn,
-																	// ).Fn,
-																).Rigid(
-																	m.Body1(m.worker.solutions[i].hash).
-																		Font("go regular").
-																		TextScale(0.75).
-																		Alignment(text.End).Fn,
-																).Fn,
-															).Fn,
-														).Fn(c)
-													})
-										},
+							).Rigid(
+								m.Inset(0.5).Embed(
+									m.Flex().Rigid(
+										m.Flex().Vertical().
+											Rigid(
+												m.H6("Height").Font("bariol bold").Fn,
+											).
+											Rigid(
+												m.H6("Hash").Font("bariol bold").Fn,
+											).
+											Rigid(
+												m.H6("Algorithm").Font("bariol bold").Fn,
+											).
+											Rigid(
+												m.H6("Index Hash").Font("bariol bold").Fn,
+											).
+											Rigid(
+												m.H6("Prev Block").Font("bariol bold").Fn,
+											).
+											Rigid(
+												m.H6("Merkle Root").Font("bariol bold").Fn,
+											).
+											Rigid(
+												m.H6("Timestamp").Font("bariol bold").Fn,
+											).
+											Rigid(
+												m.H6("Bits").Font("bariol bold").Fn,
+											).
+											Rigid(
+												m.H6("Nonce").Font("bariol bold").Fn,
+											).
+											Fn,
+
+									).Rigid(
+										m.Flex().Vertical().
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Body1(fmt.Sprintf("%d", m.worker.solutions[i].height)).
+															// Alignment(text.End).
+															Fn,
+														// ).Fn,
+													).
+													Fn,
+											).
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Caption(fmt.Sprintf("%s", m.worker.solutions[i].hash)).
+															Font("go regular").
+															// Alignment(text.End).
+															// TextScale(1).
+															Fn,
+														// ).Fn,
+													).Fn,
+											).
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Body1(m.worker.solutions[i].algo).
+															// Alignment(text.End).
+															Fn,
+														// ).Fn,
+													).
+													Fn,
+											).
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Caption(fmt.Sprintf("%s", m.worker.solutions[i].indexHash)).
+															Font("go regular").
+															// Alignment(text.End).
+															// TextScale(1).
+															Fn,
+														// ).Fn,
+													).
+													Fn,
+											).
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Caption(fmt.Sprintf("%s", m.worker.solutions[i].prevBlock)).
+															Font("go regular").
+															// Alignment(text.End).
+															// TextScale(1).
+															Fn,
+														// ).Fn,
+													).Fn,
+											).
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Caption(fmt.Sprintf("%s", m.worker.solutions[i].merkleRoot)).
+															Font("go regular").
+															// TextScale(1).
+															// Alignment(text.End).
+															Fn,
+														// ).Fn,
+													).Fn,
+											).
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Body1(m.worker.solutions[i].timestamp.Format(time.RFC3339)).
+															// Alignment(text.End).
+															Fn,
+														// ).Fn,
+													).Fn,
+											).
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Body1(fmt.Sprintf("%x", m.worker.solutions[i].bits)).
+															// Alignment(text.End).
+															Fn,
+														// ).Fn,
+													).Fn,
+											).
+											Rigid(
+												m.Flex().
+													AlignBaseline().
+													Rigid(
+														m.H6(" ").Font("bariol bold").Fn,
+													).
+													Rigid(
+														// m.Inset(0.5).Embed(
+														m.Body1(fmt.Sprintf("%d", m.worker.solutions[i].nonce)).
+															// Alignment(text.End).
+															Fn,
+														// ).Fn,
+													).Fn,
+											).Fn,
 									).Fn,
+
+								).Fn,
+							).Rigid(
+								m.Inset(0.5).Embed(
+									m.BlockInfoModalCloser,
+								).Fn,
+							).Fn,
+						).Fn
+						m.modalOn = true
+					})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
+				).Flexed(1,
+					m.Inset(0.25).Embed(
+						m.Flex().Vertical().Rigid(
+							m.Flex().Rigid(
+								m.Body1(m.worker.solutions[i].algo).Font("plan9").Fn,
+							).Flexed(1,
+								m.Flex().Vertical().Rigid(
+									m.Body1(m.worker.solutions[i].hash).
+										Font("go regular").
+										TextScale(0.75).
+										// Alignment(text.End).
+										Fn,
+								).Rigid(
+									m.Caption(fmt.Sprint(
+										m.worker.solutions[i].time.Format(time.RFC3339))).
+										// Alignment(text.End)
+										Fn,
 								).Fn,
 							).Fn,
 						).Fn,
 					).Fn,
-				).Fn,
-			).Fn,
-		).Fn,
+				).Fn(c)
+			})
+		}).Fn,
 	).Fn(gtx)
 }

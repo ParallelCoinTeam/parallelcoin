@@ -43,8 +43,6 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
 				}, apputil.SubCommands(), nil, "v"),
-			// apputil.NewCommand("monitor", "run monitor GUI",
-			// 	monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
 			apputil.NewCommand("ctl",
 				"send RPC commands to a node or wallet and print the result",
 				ctlHandle(cx), apputil.SubCommands(
@@ -105,6 +103,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					apputil.NewCommand("resetchain",
 						"reset the chain",
 						func(c *cli.Context) (err error) {
+							config.Configure(cx, c.Command.Name, true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"

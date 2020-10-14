@@ -4,6 +4,7 @@ import l "gioui.org/layout"
 
 type Direction struct {
 	l.Direction
+	w l.Widget
 }
 
 // Direction creates a directional layout that sets its contents to align according to the configured direction (8
@@ -69,7 +70,12 @@ func (d *Direction) Center() (out *Direction) {
 	return d
 }
 
+func (d *Direction) Embed(w l.Widget) *Direction {
+	d.w = w
+	return d
+}
+
 // Fn the given widget given the context and direction
-func (d *Direction) Fn(c *l.Context, w l.Widget) {
-	d.Direction.Layout(*c, w)
+func (d *Direction) Fn(c l.Context) l.Dimensions {
+	return d.Direction.Layout(c, d.w)
 }

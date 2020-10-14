@@ -15,4 +15,5 @@ kopachgui:
 
 node:
 	go install -v
-	pod -D test0 -n testnet -l debug -g=false -G 0 --lan --solo --kopachgui node
+	pod -D test0 node resetchain
+	pod -D test0 -n testnet -l debug --lan --solo --kopachgui node

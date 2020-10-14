@@ -57,7 +57,7 @@ func (s *Switch) Fn(gtx l.Context) l.Dimensions {
 	return s.th.Inset(0.25).Embed(func(gtx l.Context) l.Dimensions {
 		trackWidth := gtx.Px(s.th.TextSize.Scale(2.5))
 		trackHeight := gtx.Px(s.th.TextSize.Scale(0.75))
-		thumbSize := gtx.Px(s.th.TextSize.Scale(1.25))
+		thumbSize := gtx.Px(s.th.TextSize.Scale(1.125))
 		trackOff := float32(thumbSize-trackHeight) * .5
 
 		// Draw track.

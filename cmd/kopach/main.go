@@ -41,6 +41,13 @@ type SolutionData struct {
 	height int
 	algo   string
 	hash   string
+	indexHash string
+	version int32
+	prevBlock string
+	merkleRoot string
+	timestamp time.Time
+	bits uint32
+	nonce uint32
 }
 
 type Worker struct {
@@ -312,7 +319,14 @@ var handlers = transport.Handlers{
 					height: int(w.height),
 					algo: fmt.Sprint(
 						fork.GetAlgoName(blok.Header.Version, w.height)),
-					hash: blok.Header.BlockHashWithAlgos(w.height).String(),
+					hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
+					indexHash:  blok.Header.BlockHash().String(),
+					version:    blok.Header.Version,
+					prevBlock:  blok.Header.PrevBlock.String(),
+					merkleRoot: blok.Header.MerkleRoot.String(),
+					timestamp:  blok.Header.Timestamp,
+					bits:       blok.Header.Bits,
+					nonce:      blok.Header.Nonce,
 				},
 				}, w.solutions...)
 				if len(w.solutions) > 200 {
