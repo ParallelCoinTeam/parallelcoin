@@ -50,8 +50,6 @@ type lineIterator struct {
 	txtOff      int
 }
 
-const inf = 1e6
-
 func (l *lineIterator) Next() (int, int, []text.Glyph, f32.Point, bool) {
 	for len(l.Lines) > 0 {
 		line := l.Lines[0]

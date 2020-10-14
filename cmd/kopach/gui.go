@@ -32,7 +32,7 @@ type MinerModel struct {
 	cores                  *p9.Float
 	nCores                 int
 	solButtons             []*p9.Clickable
-	lists                  map[string]*l.List
+	lists                  map[string]*p9.List
 	pass                   *p9.Editor
 	unhideButton           *p9.IconButton
 	unhideClickable        *p9.Clickable
@@ -50,11 +50,8 @@ func (w *Worker) Run() {
 	for i := range solButtons {
 		solButtons[i] = th.Clickable()
 	}
-	lists := map[string]*l.List{
-		"found": {
-			Axis:      l.Vertical,
-			Alignment: l.Start,
-		},
+	lists := map[string]*p9.List{
+		"found": th.List().Vertical().Start(),
 	}
 	minerModel := &MinerModel{
 		Cx:        w.cx,
@@ -353,225 +350,214 @@ func (m *MinerModel) BlockInfoModalCloser(gtx l.Context) l.Dimensions {
 
 var currentBlock SolutionData
 
+func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
+	return m.Fill("DocBg").Embed(
+		m.Flex().Vertical().AlignMiddle().Rigid(
+			m.Inset(0.5).Embed(
+				m.H5("Block Information").Alignment(text.Middle).Color("DocText").Fn,
+			).Fn,
+		).Rigid(
+			m.Inset(0.5).Embed(
+				m.Flex().Rigid(
+					m.Flex().Vertical().
+						Rigid(
+							m.H6("Height").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("PoW Hash").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("Algorithm").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("Version").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("Index Hash").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("Prev Block").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("Merkle Root").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("Timestamp").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("Bits").Font("bariol bold").Fn,
+						).
+						Rigid(
+							m.H6("Nonce").Font("bariol bold").Fn,
+						).
+						Fn,
+
+				).Rigid(
+					m.Flex().Vertical().
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Body1(fmt.Sprintf("%d", currentBlock.height)).
+										Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Caption(fmt.Sprintf("%s", currentBlock.hash)).
+										Font("go regular").
+										Fn,
+								).Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Body1(currentBlock.algo).
+										Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Body1(fmt.Sprintf("%d",currentBlock.version)).
+										Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Caption(fmt.Sprintf("%s", currentBlock.indexHash)).
+										Font("go regular").
+										Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Caption(fmt.Sprintf("%s", currentBlock.prevBlock)).
+										Font("go regular").
+										Fn,
+								).Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Caption(fmt.Sprintf("%s", currentBlock.merkleRoot)).
+										Font("go regular").
+										Fn,
+								).Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Body1(currentBlock.timestamp.Format(time.RFC3339)).
+										Fn,
+								).Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Body1(fmt.Sprintf("%x", currentBlock.bits)).
+										Fn,
+								).Fn,
+						).
+						Rigid(
+							m.Flex().
+								AlignBaseline().
+								Rigid(
+									m.H6(" ").Font("bariol bold").Fn,
+								).
+								Rigid(
+									m.Body1(fmt.Sprintf("%d", currentBlock.nonce)).
+										Fn,
+								).Fn,
+						).Fn,
+				).Fn,
+
+			).Fn,
+		).Rigid(
+			m.Inset(0.5).Embed(
+				m.BlockInfoModalCloser,
+			).Fn,
+		).Fn,
+	).Fn(gtx)
+}
+
 func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 	return m.Inset(0.25).Embed(
 		m.Flex().Flexed(1, func(gtx l.Context) l.Dimensions {
-			return m.lists["found"].Layout(gtx, m.worker.solutionCount, func(c l.Context, i int) l.Dimensions {
-				return m.Flex().Rigid(
-					m.Button(m.solButtons[i].SetClick(func() {
-						currentBlock = m.worker.solutions[i]
-						Debug("clicked for block", currentBlock.height)
-						m.modalWidget = m.Fill("DocBg").Embed(
-							m.Flex().Vertical().AlignMiddle().Rigid(
-								m.Inset(0.5).Embed(
-									m.H6("Block Information").Alignment(text.Middle).Color("DocText").Fn,
-								).Fn,
-							).Rigid(
-								m.Inset(0.5).Embed(
-									m.Flex().Rigid(
-										m.Flex().Vertical().
-											Rigid(
-												m.H6("Height").Font("bariol bold").Fn,
-											).
-											Rigid(
-												m.H6("PoW Hash").Font("bariol bold").Fn,
-											).
-											Rigid(
-												m.H6("Algorithm").Font("bariol bold").Fn,
-											).
-											Rigid(
-												m.H6("Index Hash").Font("bariol bold").Fn,
-											).
-											Rigid(
-												m.H6("Prev Block").Font("bariol bold").Fn,
-											).
-											Rigid(
-												m.H6("Merkle Root").Font("bariol bold").Fn,
-											).
-											Rigid(
-												m.H6("Timestamp").Font("bariol bold").Fn,
-											).
-											Rigid(
-												m.H6("Bits").Font("bariol bold").Fn,
-											).
-											Rigid(
-												m.H6("Nonce").Font("bariol bold").Fn,
-											).
+			return m.lists["found"].Length(m.worker.solutionCount).ListElement(
+				func(gtx l.Context, i int) l.Dimensions {
+					return m.Flex().Rigid(
+						m.Button(m.solButtons[i].SetClick(func() {
+							currentBlock = m.worker.solutions[i]
+							Debug("clicked for block", currentBlock.height)
+							m.modalWidget = m.BlockDetails
+							m.modalOn = true
+						})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
+					).Flexed(1,
+						m.Inset(0.25).Embed(
+							m.Flex().Vertical().Rigid(
+								m.Flex().Rigid(
+									m.Body1(m.worker.solutions[i].algo).Font("plan9").Fn,
+								).Flexed(1,
+									m.Flex().Vertical().Rigid(
+										m.Body1(m.worker.solutions[i].hash).
+											Font("go regular").
+											TextScale(0.75).
+											Alignment(text.End).
 											Fn,
-
 									).Rigid(
-										m.Flex().Vertical().
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Body1(fmt.Sprintf("%d", currentBlock.height)).
-															// Alignment(text.End).
-															Fn,
-														// ).Fn,
-													).
-													Fn,
-											).
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Caption(fmt.Sprintf("%s", currentBlock.hash)).
-															Font("go regular").
-															// Alignment(text.End).
-															// TextScale(1).
-															Fn,
-														// ).Fn,
-													).Fn,
-											).
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Body1(m.worker.solutions[i].algo).
-															// Alignment(text.End).
-															Fn,
-														// ).Fn,
-													).
-													Fn,
-											).
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Caption(fmt.Sprintf("%s", currentBlock.indexHash)).
-															Font("go regular").
-															// Alignment(text.End).
-															// TextScale(1).
-															Fn,
-														// ).Fn,
-													).
-													Fn,
-											).
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Caption(fmt.Sprintf("%s", currentBlock.prevBlock)).
-															Font("go regular").
-															// Alignment(text.End).
-															// TextScale(1).
-															Fn,
-														// ).Fn,
-													).Fn,
-											).
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Caption(fmt.Sprintf("%s", currentBlock.merkleRoot)).
-															Font("go regular").
-															// TextScale(1).
-															// Alignment(text.End).
-															Fn,
-														// ).Fn,
-													).Fn,
-											).
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Body1(m.worker.solutions[i].timestamp.Format(time.RFC3339)).
-															// Alignment(text.End).
-															Fn,
-														// ).Fn,
-													).Fn,
-											).
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Body1(fmt.Sprintf("%x", currentBlock.bits)).
-															// Alignment(text.End).
-															Fn,
-														// ).Fn,
-													).Fn,
-											).
-											Rigid(
-												m.Flex().
-													AlignBaseline().
-													Rigid(
-														m.H6(" ").Font("bariol bold").Fn,
-													).
-													Rigid(
-														// m.Inset(0.5).Embed(
-														m.Body1(fmt.Sprintf("%d", currentBlock.nonce)).
-															// Alignment(text.End).
-															Fn,
-														// ).Fn,
-													).Fn,
-											).Fn,
+										m.Caption(fmt.Sprint(
+											m.worker.solutions[i].time.Format(time.RFC3339))).
+											Alignment(text.End).
+											Fn,
 									).Fn,
-
-								).Fn,
-							).Rigid(
-								m.Inset(0.5).Embed(
-									m.BlockInfoModalCloser,
-								).Fn,
-							).Fn,
-						).Fn
-						m.modalOn = true
-					})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
-				).Flexed(1,
-					m.Inset(0.25).Embed(
-						m.Flex().Vertical().Rigid(
-							m.Flex().Rigid(
-								m.Body1(m.worker.solutions[i].algo).Font("plan9").Fn,
-							).Flexed(1,
-								m.Flex().Vertical().Rigid(
-									m.Body1(m.worker.solutions[i].hash).
-										Font("go regular").
-										TextScale(0.75).
-										Alignment(text.End).
-										Fn,
-								).Rigid(
-									m.Caption(fmt.Sprint(
-										m.worker.solutions[i].time.Format(time.RFC3339))).
-										Alignment(text.End).
-										Fn,
 								).Fn,
 							).Fn,
 						).Fn,
-					).Fn,
-				).Fn(c)
-			})
+					).Fn(gtx)
+				}).Fn(gtx)
 		}).Fn,
 	).Fn(gtx)
 }
