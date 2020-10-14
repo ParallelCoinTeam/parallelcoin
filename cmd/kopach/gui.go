@@ -255,7 +255,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 			).Fn,
 		).Rigid(
 			m.Inset(0.5).Embed(
-				m.H5("kopach miner control").
+				m.H5("kopach").
 					Color("DocBg").
 					Fn,
 			).Fn,
@@ -263,7 +263,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 			m.Inset(0.5).Embed(
 				m.Body1(fmt.Sprintf("%d hash/s", int(m.worker.hashrate))).
 					Color("DocBg").
-					// Alignment(text.End).
+					Alignment(text.End).
 					Fn,
 			).Fn,
 		).Fn,
@@ -351,15 +351,18 @@ func (m *MinerModel) BlockInfoModalCloser(gtx l.Context) l.Dimensions {
 	})).Background("Primary").Text("close").Fn(gtx)
 }
 
+var currentBlock SolutionData
+
 func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 	return m.Inset(0.25).Embed(
 		m.Flex().Flexed(1, func(gtx l.Context) l.Dimensions {
 			return m.lists["found"].Layout(gtx, m.worker.solutionCount, func(c l.Context, i int) l.Dimensions {
 				return m.Flex().Rigid(
 					m.Button(m.solButtons[i].SetClick(func() {
-						Debug("clicked for block", m.worker.solutions[i].height)
+						currentBlock = m.worker.solutions[i]
+						Debug("clicked for block", currentBlock.height)
 						m.modalWidget = m.Fill("DocBg").Embed(
-							m.Flex().Vertical().Rigid(
+							m.Flex().Vertical().AlignMiddle().Rigid(
 								m.Inset(0.5).Embed(
 									m.H6("Block Information").Alignment(text.Middle).Color("DocText").Fn,
 								).Fn,
@@ -371,7 +374,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 												m.H6("Height").Font("bariol bold").Fn,
 											).
 											Rigid(
-												m.H6("Hash").Font("bariol bold").Fn,
+												m.H6("PoW Hash").Font("bariol bold").Fn,
 											).
 											Rigid(
 												m.H6("Algorithm").Font("bariol bold").Fn,
@@ -406,7 +409,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 													).
 													Rigid(
 														// m.Inset(0.5).Embed(
-														m.Body1(fmt.Sprintf("%d", m.worker.solutions[i].height)).
+														m.Body1(fmt.Sprintf("%d", currentBlock.height)).
 															// Alignment(text.End).
 															Fn,
 														// ).Fn,
@@ -421,7 +424,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 													).
 													Rigid(
 														// m.Inset(0.5).Embed(
-														m.Caption(fmt.Sprintf("%s", m.worker.solutions[i].hash)).
+														m.Caption(fmt.Sprintf("%s", currentBlock.hash)).
 															Font("go regular").
 															// Alignment(text.End).
 															// TextScale(1).
@@ -452,7 +455,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 													).
 													Rigid(
 														// m.Inset(0.5).Embed(
-														m.Caption(fmt.Sprintf("%s", m.worker.solutions[i].indexHash)).
+														m.Caption(fmt.Sprintf("%s", currentBlock.indexHash)).
 															Font("go regular").
 															// Alignment(text.End).
 															// TextScale(1).
@@ -469,7 +472,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 													).
 													Rigid(
 														// m.Inset(0.5).Embed(
-														m.Caption(fmt.Sprintf("%s", m.worker.solutions[i].prevBlock)).
+														m.Caption(fmt.Sprintf("%s", currentBlock.prevBlock)).
 															Font("go regular").
 															// Alignment(text.End).
 															// TextScale(1).
@@ -485,7 +488,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 													).
 													Rigid(
 														// m.Inset(0.5).Embed(
-														m.Caption(fmt.Sprintf("%s", m.worker.solutions[i].merkleRoot)).
+														m.Caption(fmt.Sprintf("%s", currentBlock.merkleRoot)).
 															Font("go regular").
 															// TextScale(1).
 															// Alignment(text.End).
@@ -515,7 +518,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 													).
 													Rigid(
 														// m.Inset(0.5).Embed(
-														m.Body1(fmt.Sprintf("%x", m.worker.solutions[i].bits)).
+														m.Body1(fmt.Sprintf("%x", currentBlock.bits)).
 															// Alignment(text.End).
 															Fn,
 														// ).Fn,
@@ -529,7 +532,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 													).
 													Rigid(
 														// m.Inset(0.5).Embed(
-														m.Body1(fmt.Sprintf("%d", m.worker.solutions[i].nonce)).
+														m.Body1(fmt.Sprintf("%d", currentBlock.nonce)).
 															// Alignment(text.End).
 															Fn,
 														// ).Fn,
@@ -556,12 +559,12 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 									m.Body1(m.worker.solutions[i].hash).
 										Font("go regular").
 										TextScale(0.75).
-										// Alignment(text.End).
+										Alignment(text.End).
 										Fn,
 								).Rigid(
 									m.Caption(fmt.Sprint(
 										m.worker.solutions[i].time.Format(time.RFC3339))).
-										// Alignment(text.End)
+										Alignment(text.End).
 										Fn,
 								).Fn,
 							).Fn,
