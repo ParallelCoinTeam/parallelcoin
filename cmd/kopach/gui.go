@@ -437,7 +437,7 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 									m.H6(" ").Font("bariol bold").Fn,
 								).
 								Rigid(
-									m.Body1(fmt.Sprintf("%d",currentBlock.version)).
+									m.Body1(fmt.Sprintf("%d", currentBlock.version)).
 										Fn,
 								).
 								Fn,

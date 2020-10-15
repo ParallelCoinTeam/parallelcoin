@@ -37,17 +37,17 @@ type HashCount struct {
 }
 
 type SolutionData struct {
-	time   time.Time
-	height int
-	algo   string
-	hash   string
-	indexHash string
-	version int32
-	prevBlock string
+	time       time.Time
+	height     int
+	algo       string
+	hash       string
+	indexHash  string
+	version    int32
+	prevBlock  string
 	merkleRoot string
-	timestamp time.Time
-	bits uint32
-	nonce uint32
+	timestamp  time.Time
+	bits       uint32
+	nonce      uint32
 }
 
 type Worker struct {
@@ -143,6 +143,11 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			Update:        make(chan struct{}),
 			hashSampleBuf: ring.NewBufferUint64(1000),
 		}
+		Warn("kopachgui", *cx.Config.KopachGUI)
+		if *cx.Config.KopachGUI {
+			Info("opening miner controller GUI")
+			go w.Run()
+		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
 		Debug("opening broadcast channel listener")
@@ -222,10 +227,6 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
-		if *cx.Config.KopachGUI {
-			Info("opening miner controller GUI")
-			go w.Run()
-		}
 		<-w.quit
 		Info("kopach shutting down")
 		return
@@ -314,7 +315,7 @@ var handlers = transport.Handlers{
 			if *w.cx.Config.KopachGUI {
 				// Debug("length solutions", len(w.solutions))
 				blok := j.GetMsgBlock()
-				w.solutions = append([]SolutionData{{
+				w.solutions = append(w.solutions, []SolutionData{{
 					time:   time.Now(),
 					height: int(w.height),
 					algo: fmt.Sprint(
@@ -328,7 +329,7 @@ var handlers = transport.Handlers{
 					bits:       blok.Header.Bits,
 					nonce:      blok.Header.Nonce,
 				},
-				}, w.solutions...)
+				}...)
 				if len(w.solutions) > 200 {
 					w.solutions = w.solutions[:200]
 				}

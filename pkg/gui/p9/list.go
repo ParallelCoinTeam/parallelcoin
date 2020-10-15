@@ -5,6 +5,7 @@ import (
 
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
+	"gioui.org/io/system"
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -13,6 +14,7 @@ import (
 // List displays a subsection of a potentially infinitely large underlying list. List accepts user input to scroll the
 // subsection.
 type List struct {
+	th   *Theme
 	axis l.Axis
 	// ScrollToEnd instructs the list to stay scrolled to the far end position once reached. A List with ScrollToEnd ==
 	// true and Position.BeforeEnd == false draws its content with the last item at the bottom of the list area.
@@ -26,22 +28,23 @@ type List struct {
 
 	// Position is updated during Layout. To save the list scroll position, just save Position after Layout finishes. To
 	// scroll the list programmatically, update Position (e.g. restore it from a saved value) before calling Layout.
-	position Position
-
-	len int
+	position         Position
+	nextUp, nextDown Position
+	len              int
 
 	// maxSize is the total size of visible children.
 	maxSize  int
 	children []scrollChild
 	dir      iterationDir
 
-	length int
-	w      ListElement
+	length           int
+	w                ListElement
+	pageUp, pageDown *Clickable
 }
 
 // List returns a new scrollable List widget
 func (th *Theme) List() (out *List) {
-	out = &List{}
+	out = &List{th: th, pageUp: th.Clickable(), pageDown: th.Clickable()}
 	return
 }
 
@@ -88,10 +91,252 @@ func (li *List) ListElement(w ListElement) *List {
 	return li
 }
 
+type DimensionList []l.Dimensions
+
+func (d DimensionList) GetTotal(axis l.Axis) (total int) {
+	for i := range d {
+		if axis == l.Horizontal {
+			total += d[i].Baseline*2 + d[i].Size.X
+		} else {
+			total += d[i].Baseline*2 + d[i].Size.Y
+		}
+	}
+	return
+}
+
+func (d DimensionList) PositionToCoordinate(position Position, axis l.Axis) (coordinate int) {
+	for i := 0; i <= position.First; i++ {
+		if axis == l.Horizontal {
+			coordinate += d[i].Baseline*2 + d[i].Size.X
+		} else {
+			coordinate += d[i].Baseline*2 + d[i].Size.Y
+		}
+	}
+	return coordinate + position.Offset
+}
+
+func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (position Position) {
+	cursor := 0
+	for i := range d {
+		if axis == l.Horizontal {
+			cursor += d[i].Baseline*2 + d[i].Size.X
+		} else {
+			cursor += d[i].Baseline*2 + d[i].Size.Y
+		}
+		if cursor > coordinate {
+			if i == 0 {
+				position.Offset = coordinate - cursor
+				position.BeforeEnd = true
+				break
+			}
+			// back up
+			if axis == l.Horizontal {
+				cursor -= d[i].Baseline*2 + d[i].Size.X
+			} else {
+				cursor -= d[i].Baseline*2 + d[i].Size.Y
+			}
+			position.First = i-1
+			position.Offset = coordinate - cursor
+			position.BeforeEnd = true
+			if i == len(d)-1 {
+				if position.Offset == 0 {
+					position.BeforeEnd = false
+				}
+			}
+			break
+		}
+	}
+	return
+}
+
 // Fn runs the layout in the configured context. The ListElement function returns the widget at the given index
 func (li *List) Fn(gtx l.Context) l.Dimensions {
-	// Debug("position", li.Position, "")
-	return li.Layout(gtx, li.length, li.w)
+	// Debug("position", li.position, )
+	// get the size of the scrollbar
+	scrollWidth := int(li.th.TextSize.V)
+	// render the widgets onto a second context to get their dimensions
+	var ops op.Ops
+	gtx1 := l.NewContext(&ops, system.FrameEvent{})
+	// set constraints for same width infinite length
+	if li.axis == l.Horizontal {
+		gtx1.Constraints.Max.Y = gtx.Constraints.Max.Y - scrollWidth
+		gtx1.Constraints.Max.X = Inf
+	} else {
+		gtx1.Constraints.Max.Y = Inf
+		gtx1.Constraints.Max.X = gtx.Constraints.Max.X - scrollWidth
+	}
+	// generate the dimensions for all the list elements
+	var dims DimensionList
+	var total, inView int
+	var before int
+	if li.axis == l.Horizontal {
+		inView = gtx.Constraints.Max.X
+	} else {
+		inView = gtx.Constraints.Max.Y
+	}
+	for i := 0; i < li.length; i++ {
+		d := li.w(gtx1, i)
+		dims = append(dims, d)
+		// Debug(d)
+		// depending on the axis gather the totals that create the total length
+		if li.axis == l.Horizontal {
+			el := d.Size.X + d.Baseline*2
+			total += el
+			if i < li.position.First {
+				before += el
+			}
+		} else {
+			el := d.Size.Y + d.Baseline*2
+			total += el
+			if i < li.position.First {
+				before += el
+			}
+		}
+	}
+	before += li.position.Offset
+	// compute the new positions for page up and page down
+
+	proportion := float32(inView) / float32(total)
+	if proportion > 1 {
+		proportion = 1
+	}
+	var last, first float32
+	first = float32(before) / float32(total)
+	last = 1 - first - proportion
+	// Debug("in view", inView, "proportion", proportion, "before", before, "total", total, "first", first, "last", last)
+	// now lay it all out and draw the list and scrollbar
+	var container l.Widget
+	if li.axis == l.Horizontal {
+		container = li.th.Flex().Flexed(1,
+			li.th.Flex().Vertical().
+				Rigid(
+					func(l.Context) l.Dimensions {
+						gtx.Constraints.Min.Y = gtx.Constraints.Max.Y - scrollWidth
+						gtx.Constraints.Max.Y = gtx.Constraints.Min.Y
+						return li.Layout(gtx, li.length, li.w)
+					},
+				).
+				Rigid(
+					li.th.Flex().Vertical().
+						Flexed(first,
+							li.th.Fill("DocBg").Embed(
+								func(gtx l.Context) l.Dimensions {
+									x := gtx.Constraints.Max.X
+									return l.Dimensions{
+										Size: image.Point{
+											Y: scrollWidth,
+											X: x,
+										},
+									}
+								},
+							).Fn,
+						).
+						Flexed(proportion,
+							li.th.Fill("Primary").Embed(
+								func(gtx l.Context) l.Dimensions {
+									return l.Dimensions{
+										Size: image.Point{
+											Y: scrollWidth,
+											X: gtx.Constraints.Max.X,
+										},
+									}
+								},
+							).Fn,
+						).
+						Flexed(last,
+							li.th.Fill("DocBg").Embed(
+								func(gtx l.Context) l.Dimensions {
+									x := gtx.Constraints.Max.X
+									return l.Dimensions{
+										Size: image.Point{
+											Y: scrollWidth,
+											X: x,
+										},
+									}
+								},
+							).Fn,
+						).
+						Fn,
+				).Fn,
+		).Fn
+	} else {
+		container = li.th.Flex().Vertical().Flexed(1,
+			li.th.Flex().
+				Rigid(
+					func(l.Context) l.Dimensions {
+						gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth
+						gtx.Constraints.Max.X = gtx.Constraints.Min.X
+						return li.Layout(gtx, li.length, li.w)
+					},
+				).
+				Rigid(
+					li.th.Flex().Vertical().
+						Flexed(first,
+							li.th.ButtonLayout(li.pageUp.SetClick(func() {
+								Debug("clicked page up", li.position)
+								current := dims.PositionToCoordinate(li.position, li.axis)
+								upPos := current - inView
+								if upPos < 0 {
+									upPos = 0
+								}
+								// jump new position next page up
+								li.position = dims.CoordinateToPosition(upPos, li.axis)
+								Debug("clicked page up", li.position)
+							})).Embed(
+								li.th.Fill("DocBg").Embed(
+									func(gtx l.Context) l.Dimensions {
+										y := gtx.Constraints.Max.Y
+										return l.Dimensions{
+											Size: image.Point{
+												X: scrollWidth,
+												Y: y,
+											},
+										}
+									},
+								).Fn,
+							).Fn,
+						).
+						Flexed(proportion,
+							li.th.Fill("Primary").Embed(
+								func(gtx l.Context) l.Dimensions {
+									return l.Dimensions{
+										Size: image.Point{
+											X: scrollWidth,
+											Y: gtx.Constraints.Max.Y,
+										},
+									}
+								},
+							).Fn,
+						).
+						Flexed(last,
+							li.th.ButtonLayout(li.pageDown.SetClick(func() {
+								Debug("clicked page down", li.position)
+								current := dims.PositionToCoordinate(li.position, li.axis)
+								downPos := current + inView
+								// if downPos > total-inView {
+								// 	downPos = total - inView
+								// }
+								li.position = dims.CoordinateToPosition(downPos, li.axis)
+								Debug("clicked page down", li.position)
+							})).Embed(
+								li.th.Fill("DocBg").Embed(
+									func(gtx l.Context) l.Dimensions {
+										y := gtx.Constraints.Max.Y
+										return l.Dimensions{
+											Size: image.Point{
+												X: scrollWidth,
+												Y: y,
+											},
+										}
+									},
+								).Fn,
+							).Fn,
+						).
+						Fn,
+				).Fn,
+		).Fn
+	}
+	return container(gtx)
 }
 
 type scrollChild struct {
@@ -144,7 +389,7 @@ func (li *List) init(gtx l.Context, len int) {
 func (li *List) Layout(gtx l.Context, len int, w ListElement) l.Dimensions {
 	li.init(gtx, len)
 	crossMin, crossMax := axisCrossConstraint(li.axis, gtx.Constraints)
-	gtx.Constraints = axisConstraints(li.axis, 0, inf, crossMin, crossMax)
+	gtx.Constraints = axisConstraints(li.axis, 0, Inf, crossMin, crossMax)
 	macro := op.Record(gtx.Ops)
 	for li.next(); li.more(); li.next() {
 		child := op.Record(gtx.Ops)
@@ -294,8 +539,8 @@ func (li *List) layout(macro op.MacroOp) l.Dimensions {
 			min = 0
 		}
 		r := image.Rectangle{
-			Min: axisPoint(li.axis, min, -inf),
-			Max: axisPoint(li.axis, max, inf),
+			Min: axisPoint(li.axis, min, -Inf),
+			Max: axisPoint(li.axis, max, Inf),
 		}
 		stack := op.Push(ops)
 		clip.Rect(r).Add(ops)

@@ -32,7 +32,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Action:      nodeHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			Trace("subcommand completed")
+			Trace("subcommand completed", os.Args)
 			if interrupt.Restart {
 			}
 			return nil
@@ -629,7 +629,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.Bool(
 				"darktheme",
 				"sets the dark theme on the gui interface",
-				cx.Config.KopachGUI,
+				cx.Config.DarkTheme,
 			),
 		},
 	}

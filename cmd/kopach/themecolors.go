@@ -10,6 +10,6 @@ func (m *MinerModel) FlipTheme() {
 
 func (m *MinerModel) SetTheme(dark bool) {
 	m.Theme.Colors.SetTheme(dark)
-	*m.Cx.Config.DarkTheme = m.DarkTheme
+	*m.Cx.Config.DarkTheme = dark
 	save.Pod(m.Cx.Config)
 }

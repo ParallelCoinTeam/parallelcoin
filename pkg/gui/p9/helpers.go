@@ -17,7 +17,7 @@ type (
 	Collection []text.FontFace
 )
 
-const inf = 1e6
+const Inf = 1e6
 
 // Fill is a general fill function that covers the background of the current context space
 func Fill(gtx l.Context, col color.RGBA) l.Dimensions {
