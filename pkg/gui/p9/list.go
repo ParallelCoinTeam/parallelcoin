@@ -135,7 +135,7 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 			} else {
 				cursor -= d[i].Baseline*2 + d[i].Size.Y
 			}
-			position.First = i-1
+			position.First = i - 1
 			position.Offset = coordinate - cursor
 			position.BeforeEnd = true
 			if i == len(d)-1 {
@@ -273,7 +273,6 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 					li.th.Flex().Vertical().
 						Flexed(first,
 							li.th.ButtonLayout(li.pageUp.SetClick(func() {
-								Debug("clicked page up", li.position)
 								current := dims.PositionToCoordinate(li.position, li.axis)
 								upPos := current - inView
 								if upPos < 0 {
@@ -281,7 +280,6 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 								}
 								// jump new position next page up
 								li.position = dims.CoordinateToPosition(upPos, li.axis)
-								Debug("clicked page up", li.position)
 							})).Embed(
 								li.th.Fill("DocBg").Embed(
 									func(gtx l.Context) l.Dimensions {
@@ -310,14 +308,14 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 						).
 						Flexed(last,
 							li.th.ButtonLayout(li.pageDown.SetClick(func() {
-								Debug("clicked page down", li.position)
 								current := dims.PositionToCoordinate(li.position, li.axis)
-								downPos := current + inView
-								// if downPos > total-inView {
-								// 	downPos = total - inView
-								// }
+								var downPos int
+								if current+inView > total {
+									downPos = total - inView
+								} else {
+									downPos = current + inView
+								}
 								li.position = dims.CoordinateToPosition(downPos, li.axis)
-								Debug("clicked page down", li.position)
 							})).Embed(
 								li.th.Fill("DocBg").Embed(
 									func(gtx l.Context) l.Dimensions {
