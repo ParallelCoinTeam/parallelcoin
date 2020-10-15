@@ -29,7 +29,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Version:     "v0.0.1",
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
-		Action:      nodeHandle(cx),
+		Action:      guiHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
 			Trace("subcommand completed")
@@ -43,8 +43,10 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
 				}, apputil.SubCommands(), nil, "v"),
-			// apputil.NewCommand("monitor", "run monitor GUI",
-			// 	monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
+			//apputil.NewCommand("gui", "run GUI",
+			//	guiHandle(cx), apputil.SubCommands(), nil, "gui"),
+			apputil.NewCommand("gui", "start GUI", guiHandle(cx),
+				apputil.SubCommands(), nil),
 			apputil.NewCommand("ctl",
 				"send RPC commands to a node or wallet and print the result",
 				ctlHandle(cx), apputil.SubCommands(
@@ -150,16 +152,16 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				KopachHandle(cx), apputil.SubCommands(), nil, "k"),
 			apputil.NewCommand(
 				"worker",
-				"single thread parallelcoin miner controlled with binary IPC interface on stdin/stdout; " +
-					"internal use, must have network name string as second arg after worker and nothing before;" +
+				"single thread parallelcoin miner controlled with binary IPC interface on stdin/stdout; "+
+					"internal use, must have network name string as second arg after worker and nothing before;"+
 					" communicates via net/rpc encoding/gob as default over stdio",
 				kopach_worker.KopachWorkerHandle(cx),
 				apputil.SubCommands(),
 				nil,
 			),
 			apputil.NewCommand("init",
-				"steps through creation of new wallet and initialization for a network with these specified " +
-				"in the main",
+				"steps through creation of new wallet and initialization for a network with these specified "+
+					"in the main",
 				initHandle(cx),
 				apputil.SubCommands(),
 				nil,
@@ -625,7 +627,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.Bool(
 				"kopachgui",
 				"enables the GUI for the kopach miner",
-				 cx.Config.KopachGUI,
+				cx.Config.KopachGUI,
 			),
 		},
 	}

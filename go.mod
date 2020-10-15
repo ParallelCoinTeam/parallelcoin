@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	gioui.org v0.0.0-20200929170715-d2e06d938930
-	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
+	github.com/BurntSushi/xgb v0.0.0-20200324125942-20f126ea2843
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
 	github.com/bitbandi/go-x11 v0.0.0-20171024232457-5fddbc9b2b09
@@ -17,27 +17,36 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
-	github.com/golang/protobuf v1.3.3 // indirect
+	github.com/gioapp/gel v0.0.0-20201002070804-a38b199dc376
+	github.com/gioapp/wallet v0.0.0-20201008233149-b3acb888305c
 	github.com/hpcloud/tail v1.0.0 // indirect
+	github.com/ipfs/go-bitswap v0.2.20 // indirect
+	github.com/ipfs/go-blockservice v0.1.3 // indirect
+	github.com/ipfs/go-ds-badger v0.2.6 // indirect
+	github.com/ipfs/go-ipfs-blockstore v1.0.1 // indirect
+	github.com/ipfs/go-ipfs-chunker v0.0.5 // indirect
+	github.com/ipfs/go-ipfs-config v0.10.0 // indirect
+	github.com/ipfs/go-ipfs-provider v0.4.3 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
 	github.com/kr/text v0.2.0 // indirect
+	github.com/libp2p/go-libp2p-connmgr v0.2.4 // indirect
+	github.com/libp2p/go-libp2p-core v0.7.0 // indirect
+	github.com/libp2p/go-libp2p-kad-dht v0.10.0 // indirect
 	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
-	github.com/minio/highwayhash v1.0.0
+	github.com/minio/highwayhash v1.0.1
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
-	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
-	github.com/urfave/cli v1.22.2
+	github.com/urfave/cli v1.22.4
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
 	go.etcd.io/bbolt v1.3.3 // indirect
-	go.uber.org/atomic v1.5.1
-	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6
-	golang.org/x/exp v0.0.0-20191002040644-a1355ae1e2c3
+	go.uber.org/atomic v1.6.0
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+	golang.org/x/exp v0.0.0-20200924195034-c827fd4f18b9
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
-	golang.org/x/mod v0.1.1-0.20191107180719-034126e5016b // indirect
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d // indirect
 	golang.org/x/text v0.3.2 // indirect
