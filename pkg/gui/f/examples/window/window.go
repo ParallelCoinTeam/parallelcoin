@@ -9,8 +9,9 @@ import (
 
 func main() {
 	if err := f.Window().Title("Parallelcoin").Size(640, 480).
-		Run(func(*layout.Context) {
+		Run(func(layout.Context) layout.Dimensions {
 			Info("frame")
+			return layout.Dimensions{}
 		}, func() {
 			Info("destroy")
 		}); Check(err) {
