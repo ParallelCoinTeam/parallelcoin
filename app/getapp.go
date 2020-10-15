@@ -29,7 +29,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Version:     "v0.0.1",
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
-		Action:      guiHandle(cx),
+		Action:      nodeHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
 			Trace("subcommand completed")

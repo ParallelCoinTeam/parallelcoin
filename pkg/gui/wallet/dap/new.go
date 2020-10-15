@@ -27,9 +27,9 @@ type dap struct {
 }
 
 func NewDap(title string) dap {
-	if cfg.Initial {
-		fmt.Println("running initial setup")
-	}
+	//if cfg.Initial {
+	//	fmt.Println("running initial setup")
+	//}
 	d := mod.Dap{
 		Ctx:  context.Background(),
 		Apps: make(map[string]mod.Sap),
