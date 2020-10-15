@@ -230,7 +230,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 								// jump new position next page up
 								li.position = dims.CoordinateToPosition(upPos, li.axis)
 							})).Embed(
-								// li.th.Fill("PanelBg").Embed(
+								li.th.Fill("PanelBg").Embed(
 								func(gtx l.Context) l.Dimensions {
 									x := gtx.Constraints.Max.X
 									return l.Dimensions{
@@ -240,8 +240,8 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 										},
 									}
 								},
-								// ).Fn,
-							).Fn,
+								).Fn,
+							).Background("PanelBg").CornerRadius(0).Fn,
 						).
 						Flexed(proportion,
 							li.th.Fill("DocBg").Embed(
@@ -266,7 +266,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 								}
 								li.position = dims.CoordinateToPosition(downPos, li.axis)
 							})).Embed(
-								// li.th.Fill("PanelBg").Embed(
+								li.th.Fill("PanelBg").Embed(
 								func(gtx l.Context) l.Dimensions {
 									x := gtx.Constraints.Max.X
 									return l.Dimensions{
@@ -276,8 +276,8 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 										},
 									}
 								},
-								// ).Fn,
-							).Fn,
+								).Fn,
+							).Background("PanelBg").CornerRadius(0).Fn,
 						).Fn,
 				).Fn,
 		).Fn

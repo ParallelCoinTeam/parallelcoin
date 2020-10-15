@@ -36,6 +36,7 @@ type MinerModel struct {
 	pass                   *p9.Editor
 	unhideButton           *p9.IconButton
 	unhideClickable        *p9.Clickable
+	threadsMax, threadsMin *p9.Clickable
 	hide                   bool
 	passInput              *p9.TextInput
 	solutionCount          int
@@ -68,6 +69,8 @@ func (w *Worker) Run() {
 		unhideClickable: th.Clickable(),
 		modalScrim:      th.Clickable(),
 		modalClose:      th.Clickable(),
+		threadsMax:      th.Clickable(),
+		threadsMin:      th.Clickable(),
 	}
 	minerModel.SetTheme(minerModel.DarkTheme)
 	minerModel.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
@@ -298,25 +301,43 @@ func (m *MinerModel) SetThreads(gtx l.Context) l.Dimensions {
 					Fn,
 			).Flexed(0.5,
 				m.Flex().Rigid(
-					m.Body1("0").
+					m.Button(
+						m.threadsMin.SetClick(func() {
+							m.cores.SetValue(0)
+							m.worker.SetThreads <- 0
+						})).
+						Inset(0.25).
 						Color("Primary").
+						Background("Transparent").
+						Font("bariol regular").
+						Text("0").
 						Fn,
 				).Flexed(1,
-					m.Slider().
-						Float(m.cores.SetHook(func(fl float32) {
-							iFl := int(fl + 0.5)
-							if m.nCores != iFl {
-								Debug("cores value changed", iFl)
-							}
-							m.nCores = iFl
-							m.cores.SetValue(float32(iFl))
-							m.worker.SetThreads <- m.nCores
-						})).
-						Min(0).Max(maxThreads).
-						Fn,
+					m.Inset(0.25).Embed(
+						m.Slider().
+							Float(m.cores.SetHook(func(fl float32) {
+								iFl := int(fl + 0.5)
+								if m.nCores != iFl {
+									Debug("cores value changed", iFl)
+								}
+								m.nCores = iFl
+								m.cores.SetValue(float32(iFl))
+								m.worker.SetThreads <- m.nCores
+							})).
+							Min(0).Max(maxThreads).
+							Fn,
+					).Fn,
 				).Rigid(
-					m.Body1(fmt.Sprint(int(maxThreads))).
+					m.Button(
+						m.threadsMax.SetClick(func() {
+							m.cores.SetValue(maxThreads)
+							m.worker.SetThreads <- int(maxThreads)
+						})).
+						Inset(0.25).
 						Color("Primary").
+						Background("Transparent").
+						Font("bariol regular").
+						Text(fmt.Sprint(int(maxThreads))).
 						Fn,
 				).Fn,
 			).Fn,
@@ -526,7 +547,7 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 	return m.Inset(0.25).Embed(
 		m.Flex().Flexed(1, func(gtx l.Context) l.Dimensions {
-			return m.lists["found"].Length(m.worker.solutionCount).ListElement(
+			return m.lists["found"].End().ScrollToEnd().Length(m.worker.solutionCount).ListElement(
 				func(gtx l.Context, i int) l.Dimensions {
 					return m.Flex().Rigid(
 						m.Button(m.solButtons[i].SetClick(func() {
