@@ -1,0 +1,11 @@
+{
+  "KEYVALUEJSON":[{
+    "dir" : "trans",
+    "filename" : "welcome.json",
+    "name" : "Assigned to IPFS Translation Team Join Team",
+    "slug" : "welcome-json",
+    "structure": "LANG-NAME",
+    "priority" : "0",
+    "categories" : ["IPFS"]
+  }]
+}
