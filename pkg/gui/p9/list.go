@@ -125,6 +125,7 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 		}
 		if cursor > coordinate {
 			if i == 0 {
+				position.First = 0
 				position.Offset = coordinate - cursor
 				position.BeforeEnd = true
 				break
@@ -153,7 +154,7 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 func (li *List) Fn(gtx l.Context) l.Dimensions {
 	// Debug("position", li.position, )
 	// get the size of the scrollbar
-	scrollWidth := int(li.th.TextSize.V)
+	scrollWidth := int(li.th.TextSize.V * 1.5)
 	// render the widgets onto a second context to get their dimensions
 	var ops op.Ops
 	gtx1 := l.NewContext(&ops, system.FrameEvent{})
@@ -198,6 +199,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 
 	proportion := float32(inView) / float32(total)
 	if proportion > 1 {
+		scrollWidth = 0
 		proportion = 1
 	}
 	var last, first float32
@@ -219,59 +221,6 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 				Rigid(
 					li.th.Flex().Vertical().
 						Flexed(first,
-							li.th.Fill("DocBg").Embed(
-								func(gtx l.Context) l.Dimensions {
-									x := gtx.Constraints.Max.X
-									return l.Dimensions{
-										Size: image.Point{
-											Y: scrollWidth,
-											X: x,
-										},
-									}
-								},
-							).Fn,
-						).
-						Flexed(proportion,
-							li.th.Fill("Primary").Embed(
-								func(gtx l.Context) l.Dimensions {
-									return l.Dimensions{
-										Size: image.Point{
-											Y: scrollWidth,
-											X: gtx.Constraints.Max.X,
-										},
-									}
-								},
-							).Fn,
-						).
-						Flexed(last,
-							li.th.Fill("DocBg").Embed(
-								func(gtx l.Context) l.Dimensions {
-									x := gtx.Constraints.Max.X
-									return l.Dimensions{
-										Size: image.Point{
-											Y: scrollWidth,
-											X: x,
-										},
-									}
-								},
-							).Fn,
-						).
-						Fn,
-				).Fn,
-		).Fn
-	} else {
-		container = li.th.Flex().Vertical().Flexed(1,
-			li.th.Flex().
-				Rigid(
-					func(l.Context) l.Dimensions {
-						gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth
-						gtx.Constraints.Max.X = gtx.Constraints.Min.X
-						return li.Layout(gtx, li.length, li.w)
-					},
-				).
-				Rigid(
-					li.th.Flex().Vertical().
-						Flexed(first,
 							li.th.ButtonLayout(li.pageUp.SetClick(func() {
 								current := dims.PositionToCoordinate(li.position, li.axis)
 								upPos := current - inView
@@ -281,26 +230,26 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 								// jump new position next page up
 								li.position = dims.CoordinateToPosition(upPos, li.axis)
 							})).Embed(
-								li.th.Fill("DocBg").Embed(
-									func(gtx l.Context) l.Dimensions {
-										y := gtx.Constraints.Max.Y
-										return l.Dimensions{
-											Size: image.Point{
-												X: scrollWidth,
-												Y: y,
-											},
-										}
-									},
-								).Fn,
+								// li.th.Fill("PanelBg").Embed(
+								func(gtx l.Context) l.Dimensions {
+									x := gtx.Constraints.Max.X
+									return l.Dimensions{
+										Size: image.Point{
+											Y: scrollWidth,
+											X: x,
+										},
+									}
+								},
+								// ).Fn,
 							).Fn,
 						).
 						Flexed(proportion,
-							li.th.Fill("Primary").Embed(
+							li.th.Fill("DocBg").Embed(
 								func(gtx l.Context) l.Dimensions {
 									return l.Dimensions{
 										Size: image.Point{
-											X: scrollWidth,
-											Y: gtx.Constraints.Max.Y,
+											Y: scrollWidth,
+											X: gtx.Constraints.Max.X,
 										},
 									}
 								},
@@ -317,9 +266,46 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 								}
 								li.position = dims.CoordinateToPosition(downPos, li.axis)
 							})).Embed(
-								li.th.Fill("DocBg").Embed(
+								// li.th.Fill("PanelBg").Embed(
+								func(gtx l.Context) l.Dimensions {
+									x := gtx.Constraints.Max.X
+									return l.Dimensions{
+										Size: image.Point{
+											Y: scrollWidth,
+											X: x,
+										},
+									}
+								},
+								// ).Fn,
+							).Fn,
+						).Fn,
+				).Fn,
+		).Fn
+	} else {
+		container = li.th.Flex().Vertical().Flexed(1,
+			li.th.Flex().
+				Rigid(
+					func(l.Context) l.Dimensions {
+						gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth
+						gtx.Constraints.Max.X = gtx.Constraints.Min.X
+						return li.Layout(gtx, li.length, li.w)
+					},
+				).
+				Rigid(
+					li.th.Flex().Vertical().
+						Flexed(first,
+							li.th.Fill("PanelBg").Embed(
+								li.th.ButtonLayout(li.pageUp.SetClick(func() {
+									current := dims.PositionToCoordinate(li.position, li.axis)
+									upPos := current - inView
+									if upPos < 0 {
+										upPos = 0
+									}
+									// jump new position next page up
+									li.position = dims.CoordinateToPosition(upPos, li.axis)
+								})).Embed(
 									func(gtx l.Context) l.Dimensions {
-										y := gtx.Constraints.Max.Y
+										y := gtx.Constraints.Min.Y
 										return l.Dimensions{
 											Size: image.Point{
 												X: scrollWidth,
@@ -327,7 +313,43 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 											},
 										}
 									},
-								).Fn,
+								).Background("PanelBg").CornerRadius(0).Fn,
+							).Fn,
+						).
+						Flexed(proportion,
+							li.th.Fill("DocBg").Embed(
+								func(gtx l.Context) l.Dimensions {
+									return l.Dimensions{
+										Size: image.Point{
+											X: scrollWidth,
+											Y: gtx.Constraints.Max.Y,
+										},
+									}
+								},
+							).Fn,
+						).
+						Flexed(last,
+							li.th.Fill("PanelBg").Embed(
+								li.th.ButtonLayout(li.pageDown.SetClick(func() {
+									current := dims.PositionToCoordinate(li.position, li.axis)
+									var downPos int
+									if current+inView >= total {
+										downPos = total - inView
+									} else {
+										downPos = current + inView
+									}
+									li.position = dims.CoordinateToPosition(downPos, li.axis)
+								})).Embed(
+									func(gtx l.Context) l.Dimensions {
+										y := gtx.Constraints.Min.Y
+										return l.Dimensions{
+											Size: image.Point{
+												X: scrollWidth,
+												Y: y,
+											},
+										}
+									},
+								).Background("PanelBg").CornerRadius(0).Fn,
 							).Fn,
 						).
 						Fn,

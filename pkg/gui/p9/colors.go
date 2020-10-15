@@ -84,7 +84,7 @@ func NewColors() (c Colors) {
 		"white":                 "ffffffff",
 		"dark-white":            "ffdddddd",
 		"yellow":                "ffcfcf30",
-		"scrim":                 "88000000",
+		"halfdim":               "88000000",
 	}
 
 	c["Black"] = c["black"]
@@ -124,21 +124,16 @@ func NewColors() (c Colors) {
 	c["DocBgDim"] = c["light-grayii"]
 	c["Transparent"] = c["00000000"]
 	c["Fatal"] = "ff880000"
+	c["scrim"] = c["halfdim"]
 	return c
 }
 
 func (c Colors) SetTheme(dark bool) {
 	if !dark {
-		c["DocText"] =
-			c["dark"]
-		c["DocBg"] =
-			c["white"]
-
-		c["PanelText"] =
-			c["dark"]
-		c["PanelBg"] =
-			c["light"]
-
+		c["DocText"] = c["dark"]
+		c["DocBg"] = c["white"]
+		c["PanelText"] = c["dark"]
+		c["PanelBg"] = c["light"]
 		c["PanelTextDim"] = c["dark-grayii"]
 		c["PanelBgDim"] = c["dark-grayi"]
 		c["DocTextDim"] = c["light-grayi"]
@@ -147,17 +142,12 @@ func (c Colors) SetTheme(dark bool) {
 		c["Success"] = c["dark-green"]
 		c["Check"] = c["orange"]
 		c["DocBgHilite"] = c["dark-white"]
+		c["scrim"] = c["halfdim"]
 	} else {
-		c["DocText"] =
-			c["light"]
-		c["DocBg"] =
-			c["dark"]
-
-		c["PanelText"] =
-			c["light"]
-		c["PanelBg"] =
-			c["black"]
-
+		c["DocText"] = c["light"]
+		c["DocBg"] = c["dark"]
+		c["PanelText"] = c["light"]
+		c["PanelBg"] = c["black"]
 		c["PanelTextDim"] = c["light-grayii"]
 		c["PanelBgDim"] = c["light-gray"]
 		c["DocTextDim"] = c["light-gray"]
@@ -166,5 +156,6 @@ func (c Colors) SetTheme(dark bool) {
 		c["Success"] = c["green"]
 		c["Check"] = c["orange"]
 		c["DocBgHilite"] = c["light-black"]
+		c["scrim"] = c["halfdim"]
 	}
 }
