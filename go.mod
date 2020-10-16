@@ -16,28 +16,39 @@ require (
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
-	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gioapp/gel v0.0.0-20201002070804-a38b199dc376
-	github.com/gioapp/wallet v0.0.0-20201008233149-b3acb888305c
-	github.com/hpcloud/tail v1.0.0 // indirect
-	github.com/ipfs/go-bitswap v0.2.20 // indirect
-	github.com/ipfs/go-blockservice v0.1.3 // indirect
-	github.com/ipfs/go-ds-badger v0.2.6 // indirect
-	github.com/ipfs/go-ipfs-blockstore v1.0.1 // indirect
-	github.com/ipfs/go-ipfs-chunker v0.0.5 // indirect
-	github.com/ipfs/go-ipfs-config v0.10.0 // indirect
-	github.com/ipfs/go-ipfs-provider v0.4.3 // indirect
+	github.com/ipfs/go-bitswap v0.2.20
+	github.com/ipfs/go-blockservice v0.1.3
+	github.com/ipfs/go-cid v0.0.7
+	github.com/ipfs/go-datastore v0.4.5
+	github.com/ipfs/go-ds-badger v0.2.6
+	github.com/ipfs/go-ipfs-blockstore v1.0.1
+	github.com/ipfs/go-ipfs-chunker v0.0.5
+	github.com/ipfs/go-ipfs-config v0.10.0
+	github.com/ipfs/go-ipfs-exchange-offline v0.0.1
+	github.com/ipfs/go-ipfs-provider v0.4.3
+	github.com/ipfs/go-ipld-cbor v0.0.4
+	github.com/ipfs/go-ipld-format v0.2.0
+	github.com/ipfs/go-ipns v0.0.2
+	github.com/ipfs/go-log/v2 v2.1.1
+	github.com/ipfs/go-merkledag v0.3.2
+	github.com/ipfs/go-unixfs v0.2.4
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
 	github.com/kr/text v0.2.0 // indirect
-	github.com/libp2p/go-libp2p-connmgr v0.2.4 // indirect
-	github.com/libp2p/go-libp2p-core v0.7.0 // indirect
-	github.com/libp2p/go-libp2p-kad-dht v0.10.0 // indirect
+	github.com/libp2p/go-libp2p v0.11.0
+	github.com/libp2p/go-libp2p-connmgr v0.2.4
+	github.com/libp2p/go-libp2p-core v0.7.0
+	github.com/libp2p/go-libp2p-kad-dht v0.10.0
+	github.com/libp2p/go-libp2p-record v0.1.3
+	github.com/libp2p/go-libp2p-secio v0.2.2
+	github.com/libp2p/go-libp2p-tls v0.1.3
 	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
 	github.com/minio/highwayhash v1.0.1
+	github.com/multiformats/go-multiaddr v0.3.1
+	github.com/multiformats/go-multihash v0.0.14
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
-	github.com/p9c/pod/cmd/kopach/gui v0.0.0-20201004044046-dbaecc24fd19
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
@@ -50,12 +61,7 @@ require (
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d // indirect
-	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20200207183749-b753a1ba74fa // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	gopkg.in/fsnotify.v1 v1.4.7 // indirect
-	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
-	gopkg.in/yaml.v2 v2.2.4 // indirect
 	lukechampine.com/blake3 v1.0.0
 
 )

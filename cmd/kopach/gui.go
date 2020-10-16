@@ -545,19 +545,20 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 }
 
 func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
-	return m.Inset(0.25).Embed(
+	return m.Inset(0).Embed(
 		m.Flex().Flexed(1, func(gtx l.Context) l.Dimensions {
 			return m.lists["found"].End().ScrollToEnd().Length(m.worker.solutionCount).ListElement(
 				func(gtx l.Context, i int) l.Dimensions {
-					return m.Fill("Primary").Embed(
-						m.Flex().Rigid(
-							m.Button(m.solButtons[i].SetClick(func() {
-								currentBlock = m.worker.solutions[i]
-								Debug("clicked for block", currentBlock.height)
-								m.modalWidget = m.BlockDetails
-								m.modalOn = true
-							})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
-						).Flexed(1,
+					return m.Fill("PrimaryDim").Embed(
+						m.Flex().
+							Rigid(
+								m.Button(m.solButtons[i].SetClick(func() {
+									currentBlock = m.worker.solutions[i]
+									Debug("clicked for block", currentBlock.height)
+									m.modalWidget = m.BlockDetails
+									m.modalOn = true
+								})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
+							).Flexed(1,
 							m.Inset(0.25).Embed(
 								m.Flex().Vertical().Rigid(
 									m.Flex().Rigid(

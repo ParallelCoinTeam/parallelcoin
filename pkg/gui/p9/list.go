@@ -2,6 +2,8 @@ package p9
 
 import (
 	"image"
+	"runtime"
+	"time"
 
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
@@ -148,15 +150,29 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	scrollWidth := int(li.th.TextSize.V * 1.5)
 	// render the widgets onto a second context to get their dimensions
 	var ops op.Ops
-	gtx1 := l.NewContext(&ops, system.FrameEvent{})
+	ip := image.Point{}
+	if li.axis == l.Horizontal {
+		ip.Y = gtx.Constraints.Max.Y - scrollWidth
+		ip.X = Inf
+	} else {
+		ip.Y = Inf
+		ip.X = gtx.Constraints.Max.X - scrollWidth
+	}
+
+	gtx1 := l.NewContext(&ops, system.FrameEvent{
+		Now:    time.Now(),
+		Metric: gtx.Metric,
+		Size:   ip,
+	})
 	// set constraints for same width infinite length
 	if li.axis == l.Horizontal {
-		gtx1.Constraints.Max.Y = gtx.Constraints.Max.Y - scrollWidth
-		gtx1.Constraints.Max.X = Inf
+		gtx1.Constraints.Max.Y =ip.Y
+		gtx1.Constraints.Max.X = ip.X
 	} else {
-		gtx1.Constraints.Max.Y = Inf
-		gtx1.Constraints.Max.X = gtx.Constraints.Max.X - scrollWidth
+		gtx1.Constraints.Max.Y = ip.Y
+		gtx1.Constraints.Max.X = ip.X
 	}
+	// gtx1.Constraints.Min = gtx1.Constraints.Max
 	// generate the dimensions for all the list elements
 	var dims DimensionList
 	// gather the dimensions of the list elements
@@ -171,9 +187,12 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	_, view = axisMainConstraint(li.axis, gtx.Constraints)
 	var total int
 	for i := range dims {
-		total += (dims[i].Baseline-1)*2 + axisMain(li.axis, dims[i].Size)+1
+		total += (dims[i].Baseline)*2 + axisMain(li.axis, dims[i].Size)
 	}
-	Debug("view", view, "total", total)
+	// Debug("view", view, "total", total)
+	Debug("view", view)
+	Debug(runtime.Caller(1))
+	Debugs(dims)
 	// compute the new positions for page up and page down
 	var top, middle, bottom int
 	// if total >= view {
