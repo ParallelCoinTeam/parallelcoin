@@ -109,7 +109,7 @@ func (d DimensionList) PositionToCoordinate(position Position, axis l.Axis) (coo
 	for i := 0; i <= position.First; i++ {
 		coordinate += axisMain(axis, d[i].Size)
 	}
-	return coordinate - position.Offset
+	return coordinate + position.Offset
 }
 
 func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (position Position) {
@@ -124,7 +124,7 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 				break
 			}
 			cursor -= axisMain(axis, d[i].Size)
-			position.First = i
+			position.First = i-1
 			position.Offset = coordinate - cursor
 			position.BeforeEnd = true
 			if i == len(d)-1 {
