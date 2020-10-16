@@ -5,8 +5,9 @@
 package main
 
 import (
-	_ "github.com/p9c/pod/pkg"
 	_ "net/http/pprof"
+
+	_ "github.com/p9c/pod/pkg"
 
 	"github.com/p9c/pod/cmd"
 )

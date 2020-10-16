@@ -38,7 +38,8 @@ func TestGetBlocks(t *testing.T) {
 		t.Errorf("NewMsgGetBlocks: wrong command - got %v want %v",
 			cmd, wantCmd)
 	}
-	// Ensure max payload is expected value for latest protocol version. Protocol version 4 bytes + num hashes (varInt) + max block locator hashes + hash stop.
+	// Ensure max payload is expected value for latest protocol version. Protocol version 4 bytes + num hashes (varInt)
+	// + max block locator hashes + hash stop.
 	wantPayload := uint32(16045)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
@@ -67,7 +68,8 @@ func TestGetBlocks(t *testing.T) {
 	}
 }
 
-// TestGetBlocksWire tests the MsgGetBlocks wire encode and decode for various numbers of block locator hashes and protocol versions.
+// TestGetBlocksWire tests the MsgGetBlocks wire encode and decode for various numbers of block locator hashes and
+// protocol versions.
 func TestGetBlocksWire(t *testing.T) {
 	// Set protocol inside getblocks message.
 	pver := uint32(60002)
@@ -245,9 +247,11 @@ func TestGetBlocksWire(t *testing.T) {
 	}
 }
 
-// TestGetBlocksWireErrors performs negative tests against wire encode and decode of MsgGetBlocks to confirm error paths work correctly.
+// TestGetBlocksWireErrors performs negative tests against wire encode and decode of MsgGetBlocks to confirm error paths
+// work correctly.
 func TestGetBlocksWireErrors(t *testing.T) {
-	// Set protocol inside getheaders message.  Use protocol version 60002 specifically here instead of the latest because the test data is using bytes encoded with that protocol version.
+	// Set protocol inside getheaders message. Use protocol version 60002 specifically here instead of the latest
+	// because the test data is using bytes encoded with that protocol version.
 	pver := uint32(60002)
 	wireErr := &MessageError{}
 	// Block 99499 hash.
@@ -311,7 +315,7 @@ func TestGetBlocksWireErrors(t *testing.T) {
 		0xfd, 0xf5, 0x01, // Varint for number of block loc hashes (501)
 	}
 	tests := []struct {
-		in       *MsgGetBlocks   // Value to encode
+		in       *MsgGetBlocks   // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

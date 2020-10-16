@@ -44,11 +44,13 @@ func (r *fakeRandReader) Read(p []byte) (int, error) {
 	return n, r.err
 }
 
-// // TestElementWire tests wire encode and decode for various element types.  This is mainly to test the "fast" paths in readElement and writeElement which use type assertions to avoid reflection when possible.
-// func TestElementWire(// 	t *testing.T) {
+// // TestElementWire tests wire encode and decode for various element types. This is mainly to test the "fast" paths in
+// readElement and writeElement which use type assertions to avoid reflection when possible.
+//
+// func TestElementWire(t *testing.T) {
 // 	type writeElementReflect int32
 // 	tests := []struct {
-// 		in  interface{} // Value to encode
+// 		in  interface{} // value to encode
 // 		buf []byte      // Wire encoding
 // 	}{
 // 		{int32(1), []byte{0x01, 0x00, 0x00, 0x00}},
@@ -165,7 +167,7 @@ func (r *fakeRandReader) Read(p []byte) (int, error) {
 // TestElementWireErrors performs negative tests against wire encode and decode of various element types to confirm error paths work correctly.
 func TestElementWireErrors(t *testing.T) {
 	tests := []struct {
-		in       interface{} // Value to encode
+		in       interface{} // value to encode
 		max      int         // Max size of fixed buffer to induce errors
 		writeErr error       // Expected write error
 		readErr  error       // Expected read error
@@ -231,7 +233,7 @@ func TestElementWireErrors(t *testing.T) {
 func TestVarIntWire(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
-		in   uint64 // Value to encode
+		in   uint64 // value to encode
 		out  uint64 // Expected decoded value
 		buf  []byte // Wire encoding
 		pver uint32 // Protocol version for wire encoding
@@ -291,11 +293,12 @@ func TestVarIntWire(t *testing.T) {
 	}
 }
 
-// TestVarIntWireErrors performs negative tests against wire encode and decode of variable length integers to confirm error paths work correctly.
+// TestVarIntWireErrors performs negative tests against wire encode and decode of variable length integers to confirm
+// error paths work correctly.
 func TestVarIntWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
-		in       uint64 // Value to encode
+		in       uint64 // value to encode
 		buf      []byte // Wire encoding
 		pver     uint32 // Protocol version for wire encoding
 		max      int    // Max size of fixed buffer to induce errors
@@ -337,7 +340,7 @@ func TestVarIntNonCanonical(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
 		name string // Test name for easier identification
-		in   []byte // Value to decode
+		in   []byte // value to decode
 		pver uint32 // Protocol version for wire encoding
 	}{
 		{
@@ -388,7 +391,7 @@ func TestVarIntNonCanonical(t *testing.T) {
 // TestVarIntWire tests the serialize size for variable length integers.
 func TestVarIntSerializeSize(t *testing.T) {
 	tests := []struct {
-		val  uint64 // Value to get the serialized size for
+		val  uint64 // value to get the serialized size for
 		size int    // Expected serialized size
 	}{
 		// Single byte
@@ -467,21 +470,21 @@ func TestVarStringWire(t *testing.T) {
 	}
 }
 
-// TestVarStringWireErrors performs negative tests against wire encode and decode of variable length strings to confirm error paths work correctly.
+// TestVarStringWireErrors performs negative tests against wire encode and decode of variable length strings to confirm
+// error paths work correctly.
 func TestVarStringWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	// str256 is a string that takes a 2-byte varint to encode.
 	str256 := strings.Repeat("test", 64)
 	tests := []struct {
-		in       string // Value to encode
+		in       string // value to encode
 		buf      []byte // Wire encoding
 		pver     uint32 // Protocol version for wire encoding
 		max      int    // Max size of fixed buffer to induce errors
 		writeErr error  // Expected write error
 		readErr  error  // Expected read error
 	}{
-		// Latest protocol version with intentional read/write errors.
-		// Force errors on empty string.
+		// Latest protocol version with intentional read/write errors. Force errors on empty string.
 		{"", []byte{0x00}, pver, 0, io.ErrShortWrite, io.EOF},
 		// Force error on single byte varint + string.
 		{"Test", []byte{0x04}, pver, 2, io.ErrShortWrite, io.ErrUnexpectedEOF},
@@ -509,7 +512,9 @@ func TestVarStringWireErrors(t *testing.T) {
 	}
 }
 
-// TestVarStringOverflowErrors performs tests to ensure deserializing variable length strings intentionally crafted to use large values for the string length are handled properly.  This could otherwise potentially be used as an attack vector.
+// TestVarStringOverflowErrors performs tests to ensure deserializing variable length strings intentionally crafted to
+// use large values for the string length are handled properly. This could otherwise potentially be used as an attack
+// vector.
 func TestVarStringOverflowErrors(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
@@ -583,7 +588,8 @@ func TestVarBytesWire(t *testing.T) {
 	}
 }
 
-// TestVarBytesWireErrors performs negative tests against wire encode and decode of variable length byte arrays to confirm error paths work correctly.
+// TestVarBytesWireErrors performs negative tests against wire encode and decode of variable length byte arrays to
+// confirm error paths work correctly.
 func TestVarBytesWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	// bytes256 is a byte array that takes a 2-byte varint to encode.
@@ -626,7 +632,9 @@ func TestVarBytesWireErrors(t *testing.T) {
 	}
 }
 
-// TestVarBytesOverflowErrors performs tests to ensure deserializing variable length byte arrays intentionally crafted to use large values for the array length are handled properly.  This could otherwise potentially be used as an attack vector.
+// TestVarBytesOverflowErrors performs tests to ensure deserializing variable length byte arrays intentionally crafted
+// to use large values for the array length are handled properly. This could otherwise potentially be used as an attack
+// vector.
 func TestVarBytesOverflowErrors(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
@@ -653,7 +661,10 @@ func TestVarBytesOverflowErrors(t *testing.T) {
 	}
 }
 
-// TestRandomUint64 exercises the randomness of the random number generator on the system by ensuring the probability of the generated numbers.  If the RNG is evenly distributed as a proper cryptographic RNG should be, there really should only be 1 number < 2^56 in 2^8 tries for a 64-bit number.  However, use a higher number of 5 to really ensure the test doesn't fail unless the RNG is just horrendous.
+// TestRandomUint64 exercises the randomness of the random number generator on the system by ensuring the probability of
+// the generated numbers. If the RNG is evenly distributed as a proper cryptographic RNG should be, there really should
+// only be 1 number < 2^56 in 2^8 tries for a 64-bit number. However, use a higher number of 5 to really ensure the test
+// doesn't fail unless the RNG is just horrendous.
 func TestRandomUint64(t *testing.T) {
 	tries := 1 << 8              // 2^8
 	watermark := uint64(1 << 56) // 2^56

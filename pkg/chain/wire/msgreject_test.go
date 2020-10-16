@@ -106,7 +106,8 @@ func TestRejectLatest(t *testing.T) {
 	}
 }
 
-// TestRejectBeforeAdded tests the MsgReject API against a protocol version before the version which introduced it (RejectVersion).
+// TestRejectBeforeAdded tests the MsgReject API against a protocol version before the version which introduced it
+// (RejectVersion).
 func TestRejectBeforeAdded(t *testing.T) {
 	// Use the protocol version just prior to RejectVersion.
 	pver := RejectVersion - 1
@@ -138,7 +139,8 @@ func TestRejectBeforeAdded(t *testing.T) {
 		t.Errorf("decode of MsgReject succeeded when it shouldn't "+
 			"have %v", spew.Sdump(buf.Bytes()))
 	}
-	// Since this protocol version doesn't support reject, make sure various fields didn't get encoded and decoded back out.
+	// Since this protocol version doesn't support reject, make sure various fields didn't get encoded and decoded back
+	// out.
 	if msg.Cmd == readMsg.Cmd {
 		t.Errorf("Should not get same reject command for protocol "+
 			"version %d", pver)
@@ -157,7 +159,8 @@ func TestRejectBeforeAdded(t *testing.T) {
 	}
 }
 
-// TestRejectCrossProtocol tests the MsgReject API when encoding with the latest protocol version and decoded with a version before the version which introduced it (RejectVersion).
+// TestRejectCrossProtocol tests the MsgReject API when encoding with the latest protocol version and decoded with a
+// version before the version which introduced it (RejectVersion).
 func TestRejectCrossProtocol(t *testing.T) {
 	// Create reject message data.
 	rejCommand := (&MsgBlock{}).Command()
@@ -179,7 +182,8 @@ func TestRejectCrossProtocol(t *testing.T) {
 		t.Errorf("encode of MsgReject succeeded when it shouldn't "+
 			"have %v", msg)
 	}
-	// Since one of the protocol versions doesn't support the reject message, make sure the various fields didn't get encoded and decoded back out.
+	// Since one of the protocol versions doesn't support the reject message, make sure the various fields didn't get
+	// encoded and decoded back out.
 	if msg.Cmd == readMsg.Cmd {
 		t.Errorf("Should not get same reject command for cross protocol")
 	}
@@ -271,7 +275,8 @@ func TestRejectWire(t *testing.T) {
 	}
 }
 
-// TestRejectWireErrors performs negative tests against wire encode and decode of MsgReject to confirm error paths work correctly.
+// TestRejectWireErrors performs negative tests against wire encode and decode of MsgReject to confirm error paths work
+// correctly.
 func TestRejectWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoReject := RejectVersion - 1
@@ -289,7 +294,7 @@ func TestRejectWireErrors(t *testing.T) {
 		0x68, 0xd6, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00, // mainNetGenesisHash
 	}
 	tests := []struct {
-		in       *MsgReject      // Value to encode
+		in       *MsgReject      // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

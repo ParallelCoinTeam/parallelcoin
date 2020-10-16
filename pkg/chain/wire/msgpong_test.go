@@ -93,7 +93,8 @@ func TestPongBIP0031(t *testing.T) {
 	}
 }
 
-// TestPongCrossProtocol tests the MsgPong API when encoding with the latest protocol version and decoding with BIP0031Version.
+// TestPongCrossProtocol tests the MsgPong API when encoding with the latest protocol version and decoding with
+// BIP0031Version.
 func TestPongCrossProtocol(t *testing.T) {
 	nonce, err := RandomUint64()
 	if err != nil {
@@ -116,7 +117,8 @@ func TestPongCrossProtocol(t *testing.T) {
 		t.Errorf("encode of MsgPong succeeded when it shouldn't have %v",
 			msg)
 	}
-	// Since one of the protocol versions doesn't support the pong message, make sure the nonce didn't get encoded and decoded back out.
+	// Since one of the protocol versions doesn't support the pong message, make sure the nonce didn't get encoded and
+	// decoded back out.
 	if msg.Nonce == readmsg.Nonce {
 		t.Error("Should not get same nonce for cross protocol")
 	}
@@ -178,7 +180,8 @@ func TestPongWire(t *testing.T) {
 	}
 }
 
-// TestPongWireErrors performs negative tests against wire encode and decode of MsgPong to confirm error paths work correctly.
+// TestPongWireErrors performs negative tests against wire encode and decode of MsgPong to confirm error paths work
+// correctly.
 func TestPongWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoPong := BIP0031Version
@@ -188,7 +191,7 @@ func TestPongWireErrors(t *testing.T) {
 		0xf3, 0xe0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
 	}
 	tests := []struct {
-		in       *MsgPong        // Value to encode
+		in       *MsgPong        // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

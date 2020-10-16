@@ -7,9 +7,8 @@ import (
 	"sync"
 )
 
-// cprng is a cryptographically random-seeded math/rand prng.  It is seeded
-// during package init.  Any initialization errors result in panics.  It is safe
-// for concurrent access.
+// cprng is a cryptographically random-seeded math/rand prng. It is seeded during package init. Any initialization
+// errors result in panics. It is safe for concurrent access.
 var cprng = cprngType{}
 
 type cprngType struct {

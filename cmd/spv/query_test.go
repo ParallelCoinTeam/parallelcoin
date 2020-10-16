@@ -15,21 +15,20 @@ import (
 )
 
 var (
-	// nolint
 	bigOne = big.NewInt(1)
-	// blockDataFile is the path to a file containing the first 256 blocks
-	// of the block chain.
+	// blockDataFile is the path to a file containing the first 256 blocks of the block chain.
+	//
 	// blockDataFile = filepath.Join("testdata", "blocks1-256.bz2")
 	// blockDataNet is the expected network in the test block data.
 	// blockDataNet = wire.MainNet
-	// maxPowLimit is used as the max block target to ensure all PoWs are
-	// valid.
+	//
+	// maxPowLimit is used as the max block target to ensure all PoWs are valid.
+	//
 	// maxPowLimit = new(big.Int).Sub(new(big.Int).Lsh(bigOne, 255), bigOne)
 )
 
-// TestBigFilterEvictsEverything creates a cache big enough to hold a large
-// filter and inserts many smaller filters into. Then it inserts the big filter
-// and verifies that it's the only one remaining.
+// TestBigFilterEvictsEverything creates a cache big enough to hold a large filter and inserts many smaller filters
+// into. Then it inserts the big filter and verifies that it's the only one remaining.
 func TestBigFilterEvictsEverything(t *testing.T) {
 	// Create different sized filters.
 	b1, f1, _ := genRandFilter(1, t)
@@ -198,8 +197,8 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 	fetchAndAssertPeersQueried(*b.Hash())
 // }
 
-// TestCacheBigEnoughHoldsAllFilter creates a cache big enough to hold all
-// filters, then gets them in random order and makes sure they are always there.
+// TestCacheBigEnoughHoldsAllFilter creates a cache big enough to hold all filters, then gets them in random order and
+// makes sure they are always there.
 func TestCacheBigEnoughHoldsAllFilter(t *testing.T) {
 	// Create different sized filters.
 	b1, f1, s1 := genRandFilter(1, t)
@@ -245,12 +244,10 @@ func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	t.Fatal(message)
 }
 
-// getRandFilter generates a random GCS filter that contains numElements. It
-// will then convert that filter into CacheableFilter to compute it's size for
-// convenience. It will return the filter along with it's size and randomly
-// generated block hash. testing.T is passed in as a convenience to deal with
-// errors in this method and making the test code more straigthforward. Method
-// originally taken from filterdb/db_test.go.
+// getRandFilter generates a random GCS filter that contains numElements. It will then convert that filter into
+// CacheableFilter to compute it's size for convenience. It will return the filter along with it's size and randomly
+// generated block hash. testing.T is passed in as a convenience to deal with errors in this method and making the test
+// code more straigthforward. Method originally taken from filterdb/db_test.go.
 func genRandFilter(numElements uint32, t *testing.T) (
 	*chainhash.Hash, *gcs.Filter, uint64) {
 	elements := make([][]byte, numElements)
@@ -291,8 +288,8 @@ func genRandomBlockHash() *chainhash.Hash {
 	return &hash
 }
 
-// getFilter is a convenience method which will extract a value from the cache
-// and handle errors, it makes the test code easier to follow.
+// getFilter is a convenience method which will extract a value from the cache and handle errors, it makes the test code
+// easier to follow.
 func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 	val, err := cs.getFilterFromCache(b, filterdb.RegularFilter)
 	if err != nil {

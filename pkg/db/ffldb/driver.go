@@ -41,7 +41,8 @@ func openDBDriver(args ...interface{}) (database.DB, error) {
 	return openDB(dbPath, network, false)
 }
 
-// createDBDriver is the callback provided during driver registration that creates, initializes, and opens a database for use.
+// createDBDriver is the callback provided during driver registration that creates, initializes, and opens a database
+// for use.
 func createDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Create", args...)
 	if err != nil {

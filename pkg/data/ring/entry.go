@@ -2,8 +2,9 @@ package ring
 
 import (
 	"context"
+
 	"github.com/marusama/semaphore"
-	"github.com/p9c/pod/pkg/gui/gel"
+
 	"github.com/p9c/pod/pkg/util/logi"
 )
 
@@ -13,8 +14,8 @@ type Entry struct {
 	Cursor  int
 	Full    bool
 	Clicked int
-	Buttons []gel.Button
-	Hiders  []gel.Button
+	// Buttons []gel.Button
+	// Hiders  []gel.Button
 }
 
 func NewEntry(size int) *Entry {
@@ -23,8 +24,8 @@ func NewEntry(size int) *Entry {
 		Buf:     make([]*logi.Entry, size),
 		Cursor:  0,
 		Clicked: -1,
-		Buttons: make([]gel.Button, size),
-		Hiders:  make([]gel.Button, size),
+		// Buttons: make([]gel.Button, size),
+		// Hiders:  make([]gel.Button, size),
 	}
 }
 
@@ -72,47 +73,48 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 	return
 }
 
-// GetButton returns the gel.Button of the entry
-func (b *Entry) GetButton(i int) (out *gel.Button) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
-		defer b.Sem.Release(1)
-		bl := len(b.Buf)
-		cursor := i
-		if i < bl {
-			if b.Full {
-				cursor = i + b.Cursor
-				if cursor >= bl {
-					cursor -= bl
-				}
-			}
-			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
-			//	cursor)
-			out = &b.Buttons[cursor]
-		}
-	}
-	return
-}
-
-// GetHider returns the gel.Button of the entry
-func (b *Entry) GetHider(i int) (out *gel.Button) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
-		defer b.Sem.Release(1)
-		bl := len(b.Buf)
-		cursor := i
-		if i < bl {
-			if b.Full {
-				cursor = i + b.Cursor
-				if cursor >= bl {
-					cursor -= bl
-				}
-			}
-			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
-			//	cursor)
-			out = &b.Hiders[cursor]
-		}
-	}
-	return
-}
+//
+// // GetButton returns the gel.Button of the entry
+// func (b *Entry) GetButton(i int) (out *gel.Button) {
+// 	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+// 		defer b.Sem.Release(1)
+// 		bl := len(b.Buf)
+// 		cursor := i
+// 		if i < bl {
+// 			if b.Full {
+// 				cursor = i + b.Cursor
+// 				if cursor >= bl {
+// 					cursor -= bl
+// 				}
+// 			}
+// 			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+// 			//	cursor)
+// 			out = &b.Buttons[cursor]
+// 		}
+// 	}
+// 	return
+// }
+//
+// // GetHider returns the gel.Button of the entry
+// func (b *Entry) GetHider(i int) (out *gel.Button) {
+// 	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+// 		defer b.Sem.Release(1)
+// 		bl := len(b.Buf)
+// 		cursor := i
+// 		if i < bl {
+// 			if b.Full {
+// 				cursor = i + b.Cursor
+// 				if cursor >= bl {
+// 					cursor -= bl
+// 				}
+// 			}
+// 			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+// 			//	cursor)
+// 			out = &b.Hiders[cursor]
+// 		}
+// 	}
+// 	return
+// }
 
 func (b *Entry) Add(value *logi.Entry) {
 	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {

@@ -7,7 +7,6 @@ import (
 )
 
 // headers wraps the different headers and filters used throughout the tests.
-// nolint
 type headers struct {
 	blockHeaders []headerfs.BlockHeader
 	cfHeaders    []headerfs.FilterHeader
@@ -16,7 +15,6 @@ type headers struct {
 }
 
 // maxHeight is the height we will generate filter headers up to.
-// nolint
 const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 
 // // TestBlockManagerInitialInterval tests that the block manager is able to

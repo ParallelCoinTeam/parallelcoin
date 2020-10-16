@@ -141,7 +141,7 @@ var (
 		{
 			Number:             1,
 			Name:               "Plan 9 from Crypto Space",
-			ActivationHeight:   250000,
+			ActivationHeight:   2500000,
 			Algos:              P9Algos,
 			AlgoVers:           P9AlgoVers,
 			TargetTimePerBlock: 36,
@@ -184,8 +184,7 @@ var (
 	MainPowLimitBits = BigToCompact(&MainPowLimit)
 )
 
-// GetAlgoID returns the 'algo_id' which in pre-hardfork is not the same as the
-// block version number, but is afterwards
+// GetAlgoID returns the 'algo_id' which in pre-hardfork is not the same as the block version number, but is afterwards
 func GetAlgoID(algoname string, height int32) uint32 {
 	if GetCurrent(height) > 1 {
 		return P9Algos[algoname].AlgoID
@@ -212,9 +211,8 @@ func GetRandomVersion(height int32) int32 {
 	return int32(rand.Intn(len(List[GetCurrent(height)].Algos)) + 5)
 }
 
-// GetAlgoVer returns the version number for a given algorithm (by string name)
-// at a given height. If "random" is given, a random number is taken from the
-// system secure random source (for randomised cpu mining)
+// GetAlgoVer returns the version number for a given algorithm (by string name) at a given height. If "random" is given,
+// a random number is taken from the system secure random source (for randomised cpu mining)
 func GetAlgoVer(name string, height int32) (version int32) {
 	hf := GetCurrent(height)
 	n := AlgoSlices[hf][0].Name
@@ -226,8 +224,7 @@ func GetAlgoVer(name string, height int32) (version int32) {
 	return
 }
 
-// GetAveragingInterval returns the active block interval target based on
-// hard fork status
+// GetAveragingInterval returns the active block interval target based on hard fork status
 func GetAveragingInterval(height int32) (r int32) {
 	r = List[GetCurrent(height)].AveragingInterval
 	return
@@ -269,8 +266,7 @@ func GetMinDiff(algoname string, height int32) (md *big.Int) {
 	return CompactToBig(minbits)
 }
 
-// GetTargetTimePerBlock returns the active block interval target based on
-// hard fork status
+// GetTargetTimePerBlock returns the active block interval target based on hard fork status
 func GetTargetTimePerBlock(height int32) (r int64) {
 	r = int64(List[GetCurrent(height)].TargetTimePerBlock)
 	return

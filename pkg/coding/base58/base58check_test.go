@@ -21,7 +21,8 @@ var checkEncodingStringTests = []struct {
 	{20, "abc", "4QiVtDjUdeq"},
 	{20, "1234598760", "ZmNb8uQn5zvnUohNCEPP"},
 	{20, "abcdefghijklmnopqrstuvwxyz", "K2RYDcKfupxwXdWhSAxQPCeiULntKm63UXyx5MvEH2"},
-	{20, "00000000000000000000000000000000000000000000000000000000000000", "bi1EWXwJay2udZVxLJozuTb8Meg4W9c6xnmJaRDjg6pri5MBAxb9XwrpQXbtnqEoRV5U2pixnFfwyXC8tRAVC8XxnjK"},
+	{20, "00000000000000000000000000000000000000000000000000000000000000",
+		"bi1EWXwJay2udZVxLJozuTb8Meg4W9c6xnmJaRDjg6pri5MBAxb9XwrpQXbtnqEoRV5U2pixnFfwyXC8tRAVC8XxnjK"},
 }
 
 func TestBase58Check(t *testing.T) {

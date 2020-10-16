@@ -27,7 +27,8 @@ func TestGetHeaders(t *testing.T) {
 		t.Errorf("NewMsgGetHeaders: wrong command - got %v want %v",
 			cmd, wantCmd)
 	}
-	// Ensure max payload is expected value for latest protocol version. Protocol version 4 bytes + num hashes (varInt) + max block locator hashes + hash stop.
+	// Ensure max payload is expected value for latest protocol version. Protocol version 4 bytes + num hashes (varInt)
+	// + max block locator hashes + hash stop.
 	wantPayload := uint32(16045)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
@@ -56,9 +57,11 @@ func TestGetHeaders(t *testing.T) {
 	}
 }
 
-// TestGetHeadersWire tests the MsgGetHeaders wire encode and decode for various numbers of block locator hashes and protocol versions.
+// TestGetHeadersWire tests the MsgGetHeaders wire encode and decode for various numbers of block locator hashes and
+// protocol versions.
 func TestGetHeadersWire(t *testing.T) {
-	// Set protocol inside getheaders message.  Use protocol version 60002 specifically here instead of the latest because the test data is using bytes encoded with that protocol version.
+	// Set protocol inside getheaders message. Use protocol version 60002 specifically here instead of the latest
+	// because the test data is using bytes encoded with that protocol version.
 	pver := uint32(60002)
 	// Block 99499 hash.
 	hashStr := "2710f40c87ec93d010a6fd95f42c59a2cbacc60b18cf6b7957535"
@@ -235,10 +238,11 @@ func TestGetHeadersWire(t *testing.T) {
 	}
 }
 
-// TestGetHeadersWireErrors performs negative tests against wire encode and decode of MsgGetHeaders to confirm error paths work correctly.
+// TestGetHeadersWireErrors performs negative tests against wire encode and decode of MsgGetHeaders to confirm error
+// paths work correctly.
 func TestGetHeadersWireErrors(t *testing.T) {
-	// Set protocol inside getheaders message.  Use protocol version 60002 specifically here instead of the latest because the test data is
-	// using bytes encoded with that protocol version.
+	// Set protocol inside getheaders message. Use protocol version 60002 specifically here instead of the latest
+	// because the test data is using bytes encoded with that protocol version.
 	pver := uint32(60002)
 	wireErr := &MessageError{}
 	// Block 99499 hash.
@@ -303,7 +307,7 @@ func TestGetHeadersWireErrors(t *testing.T) {
 		0xfd, 0xf5, 0x01, // Varint for number of block loc hashes (501)
 	}
 	tests := []struct {
-		in       *MsgGetHeaders  // Value to encode
+		in       *MsgGetHeaders  // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

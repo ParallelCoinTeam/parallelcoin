@@ -28,7 +28,8 @@ func fromBool(v bool) []byte {
 	return nil
 }
 
-// stack represents a stack of immutable objects to be used with bitcoin scripts.  Objects may be shared, therefore in usage if a value is to be changed it *must* be deep-copied first to avoid changing other values on the stack.
+// stack represents a stack of immutable objects to be used with bitcoin scripts. Objects may be shared, therefore in
+// usage if a value is to be changed it *must* be deep-copied first to avoid changing other values on the stack.
 type stack struct {
 	stk               [][]byte
 	stkMutex          sync.Mutex
@@ -52,7 +53,8 @@ func (s *stack) PushByteArray(so []byte) {
 	}
 }
 
-// PushInt converts the provided scriptNum to a suitable byte array then pushes it onto the top of the stack. Stack transformation: [... x1 x2] -> [... x1 x2 int]
+// PushInt converts the provided scriptNum to a suitable byte array then pushes it onto the top of the stack. Stack
+// transformation: [... x1 x2] -> [... x1 x2 int]
 func (s *stack) PushInt(val scriptNum) {
 	s.PushByteArray(val.Bytes())
 }
@@ -63,12 +65,16 @@ func (s *stack) PushBool(val bool) {
 	s.PushByteArray(fromBool(val))
 }
 
-// PopByteArray pops the value off the top of the stack and returns it. Stack transformation: [... x1 x2 x3] -> [... x1 x2]
+// PopByteArray pops the value off the top of the stack and returns it.
+//
+// Stack transformation: [... x1 x2 x3] -> [... x1 x2]
 func (s *stack) PopByteArray() ([]byte, error) {
 	return s.nipN(0)
 }
 
-// PopInt pops the value off the top of the stack, converts it into a script num, and returns it.  The act of converting to a script num enforces the consensus rules imposed on data interpreted as numbers.
+// PopInt pops the value off the top of the stack, converts it into a script num, and returns it. The act of converting
+// to a script num enforces the consensus rules imposed on data interpreted as numbers.
+//
 // Stack transformation: [... x1 x2 x3] -> [... x1 x2]
 func (s *stack) PopInt() (scriptNum, error) {
 	so, err := s.PopByteArray()
@@ -80,6 +86,7 @@ func (s *stack) PopInt() (scriptNum, error) {
 }
 
 // PopBool pops the value off the top of the stack, converts it into a bool, and returns it.
+//
 // Stack transformation: [... x1 x2 x3] -> [... x1 x2]
 func (s *stack) PopBool() (bool, error) {
 	so, err := s.PopByteArray()
@@ -101,7 +108,8 @@ func (s *stack) PeekByteArray(idx int32) ([]byte, error) {
 	return s.stk[sz-idx-1], nil
 }
 
-// PeekInt returns the Nth item on the stack as a script num without removing it.  The act of converting to a script num enforces the consensus rules imposed on data interpreted as numbers.
+// PeekInt returns the Nth item on the stack as a script num without removing it. The act of converting to a script num
+// enforces the consensus rules imposed on data interpreted as numbers.
 func (s *stack) PeekInt(idx int32) (scriptNum, error) {
 	so, err := s.PeekByteArray(idx)
 	if err != nil {
@@ -122,6 +130,7 @@ func (s *stack) PeekBool(idx int32) (bool, error) {
 }
 
 // nipN is an internal function that removes the nth item on the stack and returns it.
+//
 // Stack transformation:
 // nipN(0): [... x1 x2 x3] -> [... x1 x2]
 // nipN(1): [... x1 x2 x3] -> [... x1 x3]
@@ -153,7 +162,9 @@ func (s *stack) nipN(idx int32) ([]byte, error) {
 }
 
 // NipN removes the Nth object on the stack
+//
 // Stack transformation:
+//
 // NipN(0): [... x1 x2 x3] -> [... x1 x2]
 // NipN(1): [... x1 x2 x3] -> [... x1 x3]
 // NipN(2): [... x1 x2 x3] -> [... x2 x3]
@@ -163,6 +174,7 @@ func (s *stack) NipN(idx int32) error {
 }
 
 // Tuck copies the item at the top of the stack and inserts it before the 2nd to top item.
+//
 // Stack transformation: [... x1 x2] -> [... x2 x1 x2]
 func (s *stack) Tuck() error {
 	so2, err := s.PopByteArray()
@@ -182,7 +194,9 @@ func (s *stack) Tuck() error {
 }
 
 // DropN removes the top N items from the stack.
+//
 // Stack transformation:
+//
 // DropN(1): [... x1 x2] -> [... x1]
 // DropN(2): [... x1 x2] -> [...]
 func (s *stack) DropN(n int32) error {
@@ -201,7 +215,9 @@ func (s *stack) DropN(n int32) error {
 }
 
 // DupN duplicates the top N items on the stack.
+//
 // Stack transformation:
+//
 // DupN(1): [... x1 x2] -> [... x1 x2 x2]
 // DupN(2): [... x1 x2] -> [... x1 x2 x1 x2]
 func (s *stack) DupN(n int32) error {
@@ -209,7 +225,8 @@ func (s *stack) DupN(n int32) error {
 		str := fmt.Sprintf("attempt to dup %d stack items", n)
 		return scriptError(ErrInvalidStackOperation, str)
 	}
-	// Iteratively duplicate the value n-1 down the stack n times. This leaves an in-order duplicate of the top n items on the stack.
+	// Iteratively duplicate the value n-1 down the stack n times. This leaves an in-order duplicate of the top n items
+	// on the stack.
 	for i := n; i > 0; i-- {
 		so, err := s.PeekByteArray(n - 1)
 		if err != nil {
@@ -222,7 +239,9 @@ func (s *stack) DupN(n int32) error {
 }
 
 // RotN rotates the top 3N items on the stack to the left N times.
+//
 // Stack transformation:
+//
 // RotN(1): [... x1 x2 x3] -> [... x2 x3 x1]
 // RotN(2): [... x1 x2 x3 x4 x5 x6] -> [... x3 x4 x5 x6 x1 x2]
 func (s *stack) RotN(n int32) error {
@@ -244,7 +263,9 @@ func (s *stack) RotN(n int32) error {
 }
 
 // SwapN swaps the top N items on the stack with those below them.
+//
 // Stack transformation:
+//
 // SwapN(1): [... x1 x2] -> [... x2 x1]
 // SwapN(2): [... x1 x2 x3 x4] -> [... x3 x4 x1 x2]
 func (s *stack) SwapN(n int32) error {
@@ -266,7 +287,9 @@ func (s *stack) SwapN(n int32) error {
 }
 
 // OverN copies N items N items back to the top of the stack.
+//
 // Stack transformation:
+//
 // OverN(1): [... x1 x2 x3] -> [... x1 x2 x3 x2]
 // OverN(2): [... x1 x2 x3 x4] -> [... x1 x2 x3 x4 x1 x2]
 func (s *stack) OverN(n int32) error {
@@ -289,7 +312,9 @@ func (s *stack) OverN(n int32) error {
 }
 
 // PickN copies the item N items back in the stack to the top.
+//
 // Stack transformation:
+//
 // PickN(0): [x1 x2 x3] -> [x1 x2 x3 x3]
 // PickN(1): [x1 x2 x3] -> [x1 x2 x3 x2]
 // PickN(2): [x1 x2 x3] -> [x1 x2 x3 x1]
@@ -304,7 +329,9 @@ func (s *stack) PickN(n int32) error {
 }
 
 // RollN moves the item N items back in the stack to the top.
+//
 // Stack transformation:
+//
 // RollN(0): [x1 x2 x3] -> [x1 x2 x3]
 // RollN(1): [x1 x2 x3] -> [x1 x3 x2]
 // RollN(2): [x1 x2 x3] -> [x2 x3 x1]

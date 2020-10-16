@@ -145,7 +145,6 @@ const (
 	// DefaultAlgo      = "random"
 )
 
-// nolint
 var (
 	// // DefaultConfigFile is
 	// DefaultConfigFile = filepath.Join(DefaultHomeDir, DefaultConfigFilename)
@@ -210,8 +209,8 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 // 	return parser
 // }
 
-// ParseCheckpoints checks the checkpoint strings for valid syntax (
-// '<height>:<hash>') and parses them to chaincfg.Checkpoint instances.
+// ParseCheckpoints checks the checkpoint strings for valid syntax ( '<height>:<hash>') and parses them to
+// chaincfg.Checkpoint instances.
 func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error) {
 	if len(checkpointStrings) == 0 {
 		return nil, nil

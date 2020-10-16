@@ -78,7 +78,8 @@ func TestPingBIP0031(t *testing.T) {
 	}
 }
 
-// TestPingCrossProtocol tests the MsgPing API when encoding with the latest protocol version and decoding with BIP0031Version.
+// TestPingCrossProtocol tests the MsgPing API when encoding with the latest protocol version and decoding with
+// BIP0031Version.
 func TestPingCrossProtocol(t *testing.T) {
 	nonce, err := RandomUint64()
 	if err != nil {
@@ -101,7 +102,8 @@ func TestPingCrossProtocol(t *testing.T) {
 	if err != nil {
 		t.Errorf("decode of MsgPing failed [%v] err <%v>", buf, err)
 	}
-	// Since one of the protocol versions doesn't support the nonce, make sure it didn't get encoded and decoded back out.
+	// Since one of the protocol versions doesn't support the nonce, make sure it didn't get encoded and decoded back
+	// out.
 	if msg.Nonce == readmsg.Nonce {
 		t.Error("Should not get same nonce for cross protocol")
 	}
@@ -171,11 +173,12 @@ func TestPingWire(t *testing.T) {
 	}
 }
 
-// TestPingWireErrors performs negative tests against wire encode and decode of MsgPing to confirm error paths work correctly.
+// TestPingWireErrors performs negative tests against wire encode and decode of MsgPing to confirm error paths work
+// correctly.
 func TestPingWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	tests := []struct {
-		in       *MsgPing        // Value to encode
+		in       *MsgPing        // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

@@ -25,18 +25,15 @@ import (
 // var StateCfg = new(state.Config)
 // var cfg *pod.Config
 
-// winServiceMain is only invoked on Windows.
-// It detects when pod is running as a service and reacts accordingly.
-// nolint
+// winServiceMain is only invoked on Windows. It detects when pod is running as a service and reacts accordingly.
 var winServiceMain func() (bool, error)
 
-// Main is the real main function for pod.
-// It is necessary to work around the fact that deferred functions do not run
-// when os.Exit() is called.
-// The optional serverChan parameter is mainly used by the service code to be
-// notified with the server once it is setup so it can gracefully stop it
-// when requested from the service control manager.
+// Main is the real main function for pod. It is necessary to work around the fact that deferred functions do not run
+// when os.Exit() is called. The optional serverChan parameter is mainly used by the service code to be notified with
+// the server once it is setup so it can gracefully stop it when requested from the service control manager.
+//
 //  - shutdownchan can be used to wait for the node to shut down
+//
 //  - killswitch can be closed to shut the node down
 func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	Trace("starting up node main")
@@ -110,9 +107,8 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	if interrupt.Requested() {
 		return nil
 	}
-	// drop indexes and exit if requested.
-	// NOTE: The order is important here because dropping the
-	// tx index also drops the address index since it relies on it
+	// drop indexes and exit if requested. NOTE: The order is important here because dropping the tx index also drops
+	// the address index since it relies on it
 	if cx.StateCfg.DropAddrIndex {
 		Warn("dropping address index")
 		if err = indexers.DropAddrIndex(db,
@@ -175,7 +171,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		if e != nil {
 			Warn("failed to stop server", e)
 		}
-		if stopController != nil {
+		if cx.Controller.Load() {
 			close(stopController)
 		}
 		server.WaitForShutdown()
@@ -193,9 +189,8 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	}
 	// interrupt.AddHandler(gracefulShutdown)
 
-	// Wait until the interrupt signal is received from an OS signal or
-	// shutdown is requested through one of the subsystems such as the
-	// RPC server.
+	// Wait until the interrupt signal is received from an OS signal or shutdown is requested through one of the
+	// subsystems such as the RPC server.
 	select {
 	case <-cx.NodeKill:
 		gracefulShutdown()
@@ -205,16 +200,12 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	return nil
 }
 
-// loadBlockDB loads (or creates when needed) the block database taking into
-// account the selected database backend and returns a handle to it.
-// It also additional logic such warning the user if there are multiple
-// databases which consume space on the file system and ensuring the
-// regression test database is clean when in regression test mode.
+// loadBlockDB loads (or creates when needed) the block database taking into account the selected database backend and
+// returns a handle to it. It also additional logic such warning the user if there are multiple databases which consume
+// space on the file system and ensuring the regression test database is clean when in regression test mode.
 func loadBlockDB(cx *conte.Xt) (database.DB, error) {
-	// The memdb backend does not have a file path associated with it,
-	// so handle it uniquely.
-	// We also don't want to worry about the multiple database type
-	// warnings when running with the memory database.
+	// The memdb backend does not have a file path associated with it, so handle it uniquely. We also don't want to
+	// worry about the multiple database type warnings when running with the memory database.
 	if *cx.Config.DbType == "memdb" {
 		Info("creating block database in memory")
 		db, err := database.Create(*cx.Config.DbType)
@@ -227,8 +218,8 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 	warnMultipleDBs(cx)
 	// The database name is based on the database type.
 	dbPath := path.BlockDb(cx, *cx.Config.DbType, blockdb.NamePrefix)
-	// The regression test is special in that it needs a clean database
-	// for each run, so remove it now if it already exists.
+	// The regression test is special in that it needs a clean database for each run, so remove it now if it already
+	// exists.
 	e := removeRegressionDB(cx, dbPath)
 	if e != nil {
 		Debug("failed to remove regression db:", e)
@@ -257,8 +248,8 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 	return db, nil
 }
 
-// removeRegressionDB removes the existing regression test database if
-// running in regression test mode and it already exists.
+// removeRegressionDB removes the existing regression test database if running in regression test mode and it already
+// exists.
 func removeRegressionDB(cx *conte.Xt, dbPath string) error {
 	// don't do anything if not in regression test mode
 	if !((*cx.Config.Network)[0] == 'r') {
@@ -281,13 +272,11 @@ func removeRegressionDB(cx *conte.Xt, dbPath string) error {
 	return nil
 }
 
-// warnMultipleDBs shows a warning if multiple block database types are
-// detected. This is not a situation most users want.
-// It is handy for development however to support multiple side-by-side databases.
+// warnMultipleDBs shows a warning if multiple block database types are detected. This is not a situation most users
+// want. It is handy for development however to support multiple side-by-side databases.
 func warnMultipleDBs(cx *conte.Xt) {
-	// This is intentionally not using the known db types which depend on the
-	// database types compiled into the binary since we want to detect legacy
-	// db types as well.
+	// This is intentionally not using the known db types which depend on the database types compiled into the binary
+	// since we want to detect legacy db types as well.
 	dbTypes := []string{"ffldb", "leveldb", "sqlite"}
 	duplicateDbPaths := make([]string, 0, len(dbTypes)-1)
 	for _, dbType := range dbTypes {

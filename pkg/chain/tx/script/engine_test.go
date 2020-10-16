@@ -66,7 +66,8 @@ func TestBadPC(t *testing.T) {
 	}
 }
 
-// TestCheckErrorCondition tests the execute early test in CheckErrorCondition() since most code paths are tested elsewhere.
+// TestCheckErrorCondition tests the execute early test in CheckErrorCondition() since most code paths are tested
+// elsewhere.
 func TestCheckErrorCondition(t *testing.T) {
 	t.Parallel()
 	// tx with almost empty scripts.
@@ -128,7 +129,8 @@ func TestCheckErrorCondition(t *testing.T) {
 	}
 }
 
-// TestInvalidFlagCombinations ensures the script engine returns the expected error when disallowed flag combinations are specified.
+// TestInvalidFlagCombinations ensures the script engine returns the expected error when disallowed flag combinations
+// are specified.
 func TestInvalidFlagCombinations(t *testing.T) {
 	t.Parallel()
 	tests := []ScriptFlags{

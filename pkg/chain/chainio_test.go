@@ -116,7 +116,8 @@ func TestStxoSerialization(t *testing.T) {
 	}
 }
 
-// TestStxoDecodeErrors performs negative tests against decoding spent transaction outputs to ensure error paths work as expected.
+// TestStxoDecodeErrors performs negative tests against decoding spent transaction outputs to ensure error paths work as
+// expected.
 func TestStxoDecodeErrors(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -315,7 +316,8 @@ func TestSpendJournalSerialization(t *testing.T) {
 	}
 }
 
-// TestSpendJournalErrors performs negative tests against deserializing spend journal entries to ensure error paths work as expected.
+// TestSpendJournalErrors performs negative tests against deserializing spend journal entries to ensure error paths work
+// as expected.
 func TestSpendJournalErrors(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -491,7 +493,8 @@ func TestUtxoSerialization(t *testing.T) {
 	}
 }
 
-// TestUtxoEntryHeaderCodeErrors performs negative tests against unspent transaction output header codes to ensure error paths work as expected.
+// TestUtxoEntryHeaderCodeErrors performs negative tests against unspent transaction output header codes to ensure error
+// paths work as expected.
 func TestUtxoEntryHeaderCodeErrors(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -523,7 +526,8 @@ func TestUtxoEntryHeaderCodeErrors(t *testing.T) {
 	}
 }
 
-// TestUtxoEntryDeserializeErrors performs negative tests against deserializing unspent transaction outputs to ensure error paths work as expected.
+// TestUtxoEntryDeserializeErrors performs negative tests against deserializing unspent transaction outputs to ensure
+// error paths work as expected.
 func TestUtxoEntryDeserializeErrors(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -622,7 +626,8 @@ func TestUtxoEntryDeserializeErrors(t *testing.T) {
 // 	}
 // }
 
-// TestBestChainStateDeserializeErrors performs negative tests against deserializing the chain state to ensure error paths work as expected.
+// TestBestChainStateDeserializeErrors performs negative tests against deserializing the chain state to ensure error
+// paths work as expected.
 func TestBestChainStateDeserializeErrors(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

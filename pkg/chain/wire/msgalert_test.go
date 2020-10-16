@@ -158,7 +158,8 @@ func TestMsgAlertWire(t *testing.T) {
 	}
 }
 
-// TestMsgAlertWireErrors performs negative tests against wire encode and decode of MsgAlert to confirm error paths work correctly.
+// TestMsgAlertWireErrors performs negative tests against wire encode and decode of MsgAlert to confirm error paths work
+// correctly.
 func TestMsgAlertWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	encoding := BaseEncoding
@@ -171,7 +172,7 @@ func TestMsgAlertWireErrors(t *testing.T) {
 		0x73, 0x6f, 0x6d, 0x65, 0x73, 0x69, 0x67, // "somesig"
 	}
 	tests := []struct {
-		in       *MsgAlert       // Value to encode
+		in       *MsgAlert       // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format
@@ -336,7 +337,8 @@ func TestAlert(t *testing.T) {
 	}
 }
 
-// TestAlertErrors performs negative tests against payload serialization, deserialization of Alert to confirm error paths work correctly.
+// TestAlertErrors performs negative tests against payload serialization, deserialization of Alert to confirm error
+// paths work correctly.
 func TestAlertErrors(t *testing.T) {
 	pver := ProtocolVersion
 	baseAlert := NewAlert(
@@ -352,7 +354,7 @@ func TestAlertErrors(t *testing.T) {
 		0x55, 0x52, 0x47, 0x45, 0x4e, 0x54, 0x00, // |URGENT.|
 	}
 	tests := []struct {
-		in       *Alert // Value to encode
+		in       *Alert // value to encode
 		buf      []byte // Wire encoding
 		pver     uint32 // Protocol version for wire encoding
 		max      int    // Max size of fixed buffer to induce errors

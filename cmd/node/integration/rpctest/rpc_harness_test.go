@@ -1,7 +1,7 @@
 package rpctest
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -144,7 +144,8 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	if len(pooledHashes) != 0 {
 		t.Fatal("main test harness mempool not empty")
 	}
-	// Create a local test harness with only the genesis block.  The nodes will be synced below so the same transaction can be sent to both nodes without it being an orphan.
+	// Create a local test harness with only the genesis block. The nodes will be synced below so the same transaction
+	// can be sent to both nodes without it being an orphan.
 	harness, err := New(&netparams.SimNetParams, nil, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -216,7 +217,9 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	if _, err := harness.Node.SendRawTransaction(testTx, true); err != nil {
 		t.Fatalf("send transaction failed: %v", err)
 	}
-	// Select once again with a special timeout case after 1 minute. The goroutine above should now be blocked on sending into the unbuffered channel. The send should immediately succeed. In order to avoid the test hanging indefinitely, a 1 minute timeout is in place.
+	// Select once again with a special timeout case after 1 minute. The goroutine above should now be blocked on
+	// sending into the unbuffered channel. The send should immediately succeed. In order to avoid the test hanging
+	// indefinitely, a 1 minute timeout is in place.
 	select {
 	case <-poolsSynced:
 	case <-time.After(time.Minute):
@@ -251,7 +254,9 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	if err := ConnectNode(harness, r); err != nil {
 		t.Fatalf("unable to connect harnesses: %v", err)
 	}
-	// Select once again with a special timeout case after 1 minute. The goroutine above should now be blocked on sending into the unbuffered channel. The send should immediately succeed. In order to avoid the test hanging indefinitely, a 1 minute timeout is in place.
+	// Select once again with a special timeout case after 1 minute. The goroutine above should now be blocked on
+	// sending into the unbuffered channel. The send should immediately succeed. In order to avoid the test hanging
+	// indefinitely, a 1 minute timeout is in place.
 	select {
 	case <-blocksSynced:
 	case <-time.After(time.Minute):
@@ -294,7 +299,8 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 		t.Fatalf("block version is not default: expected %v, got %v",
 			BlockVersion, blockVersion)
 	}
-	// Next generate a block with a "non-standard" block version along with time stamp a minute after the previous block's timestamp.
+	// Next generate a block with a "non-standard" block version along with time stamp a minute after the previous
+	// block's timestamp.
 	timestamp := block.MsgBlock().Header.Timestamp.Add(time.Minute)
 	targetBlockVersion := uint32(1337)
 	block, err = r.GenerateAndSubmitBlock(nil, targetBlockVersion, timestamp)
@@ -354,7 +360,8 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(r *Harness,
 		t.Fatalf("block version is not default: expected %v, got %v",
 			BlockVersion, blockVersion)
 	}
-	// Next generate a block with a "non-standard" block version along with time stamp a minute after the previous block's timestamp.
+	// Next generate a block with a "non-standard" block version along with time stamp a minute after the previous
+	// block's timestamp.
 	timestamp := block.MsgBlock().Header.Timestamp.Add(time.Minute)
 	targetBlockVersion := uint32(1337)
 	block, err = r.GenerateAndSubmitBlockWithCustomCoinbaseOutputs(nil,
@@ -402,7 +409,8 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 	if err := JoinNodes(nodeSlice, Blocks); err != nil {
 		t.Fatalf("unable to join node on blocks: %v", err)
 	}
-	// The original wallet should now have a balance of 0 DUO as its entire chain should have been decimated in favor of the main harness' chain.
+	// The original wallet should now have a balance of 0 DUO as its entire chain should have been decimated in favor of
+	// the main harness' chain.
 	expectedBalance = util.Amount(0)
 	walletBalance = harness.ConfirmedBalance()
 	if expectedBalance != walletBalance {
@@ -434,7 +442,8 @@ func testMemWalletLockedOutputs(r *Harness, t *testing.T) {
 		t.Fatalf("spent outputs not locked: previous balance %v, "+
 			"current balance %v", startingBalance, currentBalance)
 	}
-	// Now unlocked all the spent inputs within the unbroadcast signed transaction. The current balance should now be exactly that of the starting balance.
+	// Now unlocked all the spent inputs within the unbroadcast signed transaction. The current balance should now be
+	// exactly that of the starting balance.
 	r.UnlockOutputs(tx.TxIn)
 	currentBalance = r.ConfirmedBalance()
 	if currentBalance != startingBalance {
@@ -468,10 +477,13 @@ func TestMain(m *testing.M) {
 		fmt.Println("unable to create main harness: ", err)
 		os.Exit(1)
 	}
-	// Initialize the main mining node with a chain of length 125, providing 25 mature coinbases to allow spending from for testing purposes.
+	// Initialize the main mining node with a chain of length 125, providing 25 mature coinbases to allow spending from
+	// for testing purposes.
 	if err = mainHarness.SetUp(true, numMatureOutputs); err != nil {
 		fmt.Println("unable to setup test chain: ", err)
-		// Even though the harness was not fully setup, it still needs to be torn down to ensure all resources such as temp directories are cleaned up.  The error is intentionally ignored since this is already an error path and nothing else could be done about it anyways.
+		// Even though the harness was not fully setup, it still needs to be torn down to ensure all resources such as
+		// temp directories are cleaned up. The error is intentionally ignored since this is already an error path and
+		// nothing else could be done about it anyways.
 		_ = mainHarness.TearDown()
 		os.Exit(1)
 	}

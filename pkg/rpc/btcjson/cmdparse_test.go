@@ -167,7 +167,7 @@ func TestAssignField(t *testing.T) {
 				test.name, err)
 			continue
 		}
-		// Inidirect through to the base types to ensure their values are the same.
+		// Indirect through to the base types to ensure their values are the same.
 		for dst.Kind() == reflect.Ptr {
 			dst = dst.Elem()
 		}

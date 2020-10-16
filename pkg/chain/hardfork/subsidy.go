@@ -17,13 +17,11 @@ var (
 	// The following prepares hard fork disbursement payout transactions
 	tn = &netparams.TestNet3Params
 	mn = &netparams.MainNetParams
-	// Payees are the list of payments to be made on the hard fork activation on
-	// mainnet
+	// Payees are the list of payments to be made on the hard fork activation on mainnet
 	Payees = []Payee{
 		{Addr("ag7s5bmcA8XoP1CcS1QPjiD4C5hhMWATik", mn), Amt(4400)},
 	}
-	// TestnetPayees are the list of payments to be made on the hard fork
-	// activation in the testnet
+	// TestnetPayees are the list of payments to be made on the hard fork activation in the testnet
 	//
 	// these are made using the following seed for testnet
 	// f4d2c4c542bb52512ed9e6bbfa2d000e576a0c8b4ebd1acafd7efa37247366bc
@@ -39,8 +37,7 @@ var (
 		{Addr("8MUnJMYi5Fo7Bm5Pmpr7JjdL3ZDJ7wqmXJ", tn), Amt(5000)},
 		{Addr("8d2RLbCBE8CiF4DetVuRfFFLEJJaXYjhdH", tn), Amt(30000)},
 	}
-	// CorePubkeyBytes is the address and public keys for the core dev
-	// disbursement
+	// CorePubkeyBytes is the address and public keys for the core dev disbursement
 	CorePubkeyBytes = [][]byte{
 		// nWo
 		Key("021a00c7e054279124e2d3eb8b64a58f1fda515464cd8df3c0823d2ff2931ebf37"),
@@ -51,8 +48,7 @@ var (
 	}
 	// CoreAmount is the amount paid into the dev pool
 	CoreAmount = Amt(30000)
-	// TestnetCorePubkeyBytes are the addresses for the 3 of 4 multisig payment
-	// for dev costs
+	// TestnetCorePubkeyBytes are the addresses for the 3 of 4 multisig payment for dev costs
 	//
 	// these are made using the following seed for testnet
 	// f4d2c4c542bb52512ed9e6bbfa2d000e576a0c8b4ebd1acafd7efa37247366bc

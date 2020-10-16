@@ -10,7 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestBtcWalletExtCmds tests all of the btcwallet extended commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
+// TestBtcWalletExtCmds tests all of the btcwallet extended commands marshal and unmarshal into valid results include
+// handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the
+// default assigned on unmarshalled commands.
 func TestBtcWalletExtCmds(t *testing.T) {
 	t.Parallel()
 	testID := int(1)
@@ -134,8 +136,7 @@ func TestBtcWalletExtCmds(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		// Marshal the command as created by the new static command
-		// creation function.
+		// Marshal the command as created by the new static command creation function.
 		marshalled, err := btcjson.MarshalCmd(testID, test.staticCmd())
 		if err != nil {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,

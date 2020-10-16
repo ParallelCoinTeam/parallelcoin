@@ -4,11 +4,9 @@ import (
 	"container/list"
 )
 
-// ConcurrentQueue is a concurrent-safe FIFO queue with unbounded capacity.
-// Clients interact with the queue by pushing items into the in channel and
-// popping items from the out channel. There is a goroutine that manages moving
-// items from the in channel to the out channel in the correct order that must
-// be started by calling Start().
+// ConcurrentQueue is a concurrent-safe FIFO queue with unbounded capacity. Clients interact with the queue by pushing
+// items into the in channel and popping items from the out channel. There is a goroutine that manages moving items from
+// the in channel to the out channel in the correct order that must be started by calling Start().
 type ConcurrentQueue struct {
 	chanIn   chan interface{}
 	chanOut  chan interface{}
@@ -16,9 +14,8 @@ type ConcurrentQueue struct {
 	overflow *list.List
 }
 
-// NewConcurrentQueue constructs a ConcurrentQueue. The bufferSize parameter is
-// the capacity of the output channel. When the size of the queue is below this
-// threshold, pushes do not incur the overhead of the less efficient overflow
+// NewConcurrentQueue constructs a ConcurrentQueue. The bufferSize parameter is the capacity of the output channel. When
+// the size of the queue is below this threshold, pushes do not incur the overhead of the less efficient overflow
 // structure.
 func NewConcurrentQueue(bufferSize int) *ConcurrentQueue {
 	return &ConcurrentQueue{
@@ -39,19 +36,16 @@ func (cq *ConcurrentQueue) ChanOut() <-chan interface{} {
 	return cq.chanOut
 }
 
-// Start begins a goroutine that manages moving items from the in channel to
-// the out channel. The queue tries to move items directly to the out channel
-// minimize overhead, but if the out channel is full it pushes items to an
-// overflow queue. This must be called before using the queue.
+// Start begins a goroutine that manages moving items from the in channel to the out channel. The queue tries to move
+// items directly to the out channel minimize overhead, but if the out channel is full it pushes items to an overflow
+// queue. This must be called before using the queue.
 func (cq *ConcurrentQueue) Start() {
 	go func() {
 		for {
 			nextElement := cq.overflow.Front()
 			if nextElement == nil {
-				// The overflow queue is empty, so incoming
-				// items can be pushed directly to the output
-				// channel. However, if output channel is full,
-				// we'll push to the overflow list instead.
+				// The overflow queue is empty, so incoming items can be pushed directly to the output channel. However,
+				// if output channel is full, we'll push to the overflow list instead.
 				select {
 				case item := <-cq.chanIn:
 					select {
@@ -65,9 +59,7 @@ func (cq *ConcurrentQueue) Start() {
 					return
 				}
 			} else {
-				// The overflow queue is not empty, so any new
-				// items get pushed to the back to preserve
-				// order.
+				// The overflow queue is not empty, so any new items get pushed to the back to preserve order.
 				select {
 				case item := <-cq.chanIn:
 					cq.overflow.PushBack(item)
@@ -81,8 +73,7 @@ func (cq *ConcurrentQueue) Start() {
 	}()
 }
 
-// Stop ends the goroutine that moves items from the in channel to the out
-// channel.
+// Stop ends the goroutine that moves items from the in channel to the out channel.
 func (cq *ConcurrentQueue) Stop() {
 	close(cq.quit)
 }

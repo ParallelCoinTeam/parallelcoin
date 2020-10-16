@@ -16,7 +16,8 @@ var (
 	P = uint8(19)
 	// Modulus value for the tests.
 	M uint64 = 784931
-	// Filters are conserved between tests but we must define with an interface which functions we're testing because the gcsFilter type isn't exported
+	// Filters are conserved between tests but we must define with an interface which functions we're testing because
+	// the gcsFilter type isn't exported
 	filter, filter2, filter3 /*, filter4, filter5*/ *gcs.Filter
 	// We need to use the same key for building and querying the filters
 	key [gcs.KeySize]byte
@@ -62,7 +63,8 @@ var (
 	}
 )
 
-// TestGCSFilterBuild builds a test filter with a randomized key. For Bitcoin use, deterministic filter generation is desired. Therefore, a key that's derived deterministically would be required.
+// TestGCSFilterBuild builds a test filter with a randomized key. For Bitcoin use, deterministic filter generation is
+// desired. Therefore, a key that's derived deterministically would be required.
 func TestGCSFilterBuild(t *testing.T) {
 	for i := 0; i < gcs.KeySize; i += 4 {
 		binary.BigEndian.PutUint32(key[i:], rand.Uint32())
@@ -140,7 +142,8 @@ func TestGCSFilterMetadata(t *testing.T) {
 	}
 }
 
-// TestGCSFilterMatch checks that both the built and copied filters match correctly, logging any false positives without failing on them.
+// TestGCSFilterMatch checks that both the built and copied filters match correctly, logging any false positives without
+// failing on them.
 func TestGCSFilterMatch(t *testing.T) {
 	match, err := filter.Match(key, []byte("Nate"))
 	if err != nil {
@@ -200,7 +203,8 @@ func TestGCSFilterMatch(t *testing.T) {
 	}
 }
 
-// TestGCSFilterMatchAny checks that both the built and copied filters match a list correctly, logging any false positives without failing on them.
+// TestGCSFilterMatchAny checks that both the built and copied filters match a list correctly, logging any false
+// positives without failing on them.
 func TestGCSFilterMatchAny(t *testing.T) {
 	match, err := filter.MatchAny(key, contents2)
 	if err != nil {

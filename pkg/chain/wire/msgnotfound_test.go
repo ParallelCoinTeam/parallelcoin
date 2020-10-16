@@ -21,7 +21,8 @@ func TestNotFound(t *testing.T) {
 		t.Errorf("NewMsgNotFound: wrong command - got %v want %v",
 			cmd, wantCmd)
 	}
-	// Ensure max payload is expected value for latest protocol version. Num inventory vectors (varInt) + max allowed inventory vectors.
+	// Ensure max payload is expected value for latest protocol version. Num inventory vectors (varInt) + max allowed
+	// inventory vectors.
 	wantPayload := uint32(1800009)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
@@ -50,7 +51,8 @@ func TestNotFound(t *testing.T) {
 	}
 }
 
-// TestNotFoundWire tests the MsgNotFound wire encode and decode for various numbers of inventory vectors and protocol versions.
+// TestNotFoundWire tests the MsgNotFound wire encode and decode for various numbers of inventory vectors and protocol
+// versions.
 func TestNotFoundWire(t *testing.T) {
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
@@ -212,7 +214,8 @@ func TestNotFoundWire(t *testing.T) {
 	}
 }
 
-// TestNotFoundWireErrors performs negative tests against wire encode and decode of MsgNotFound to confirm error paths work correctly.
+// TestNotFoundWireErrors performs negative tests against wire encode and decode of MsgNotFound to confirm error paths
+// work correctly.
 func TestNotFoundWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	wireErr := &MessageError{}
@@ -250,7 +253,7 @@ func TestNotFoundWireErrors(t *testing.T) {
 		0xfd, 0x51, 0xc3, // Varint for number of inv vectors (50001)
 	}
 	tests := []struct {
-		in       *MsgNotFound    // Value to encode
+		in       *MsgNotFound    // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

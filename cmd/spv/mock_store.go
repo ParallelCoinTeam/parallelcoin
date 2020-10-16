@@ -10,21 +10,16 @@ import (
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
-// mockBlockHeaderStore is an implementation of the BlockHeaderStore backed by
-// a simple map.
+// mockBlockHeaderStore is an implementation of the BlockHeaderStore backed by a simple map.
 type mockBlockHeaderStore struct {
 	headers map[chainhash.Hash]wire.BlockHeader
 }
 
-// A compile-time check to ensure the mockBlockHeaderStore adheres to the
-// BlockHeaderStore interface.
+// A compile-time check to ensure the mockBlockHeaderStore adheres to the BlockHeaderStore interface.
 var _ headerfs.BlockHeaderStore = (*mockBlockHeaderStore)(nil)
 
-// NewMockBlockHeaderStore returns a version of the BlockHeaderStore that's
-// backed by an in-memory map. This instance is meant to be used by callers
-// outside the package to unit test components that require a BlockHeaderStore
-// interface.
-// nolint
+// NewMockBlockHeaderStore returns a version of the BlockHeaderStore that's backed by an in-memory map. This instance is
+// meant to be used by callers outside the package to unit test components that require a BlockHeaderStore interface.
 func newMockBlockHeaderStore() headerfs.BlockHeaderStore {
 	return &mockBlockHeaderStore{
 		headers: make(map[chainhash.Hash]wire.BlockHeader),

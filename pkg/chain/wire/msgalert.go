@@ -7,6 +7,7 @@ import (
 )
 
 // MsgAlert contains a payload and a signature:
+//
 //        ===============================================
 //        |   Field         |   Data Type   |   Size    |
 //        ===============================================
@@ -14,10 +15,13 @@ import (
 //        -----------------------------------------------
 //        |   signature     |   []uchar     |   ?       |
 //        -----------------------------------------------
+//
 // Here payload is an Alert serialized into a byte array to ensure that
 // versions using incompatible alert formats can still relay
 // alerts among one another.
+//
 // An Alert is the payload deserialized as follows:
+//
 //        ===============================================
 //        |   Field         |   Data Type   |   Size    |
 //        ===============================================
@@ -49,18 +53,22 @@ import (
 //        -----------------------------------------------
 //        |   Total  (Fixed)                |   45      |
 //        -----------------------------------------------
+//
 // NOTE:
+//
 //      * string is a VarString i.e VarInt length followed by the string itself
 //      * set<string> is a VarInt followed by as many number of strings
 //      * set<int32> is a VarInt followed by as many number of ints
 //      * fixedAlertSize = 40 + 5*min(VarInt)  = 40 + 5*1 = 45
+//
 // Now we can define bounds on Alert size, SetCancel and SetSubVer Fixed size of the alert payload
 const fixedAlertSize = 45
 
 // maxSignatureSize is the max size of an ECDSA signature. NOTE: Since this size is fixed and < 255, the size of VarInt required = 1.
 const maxSignatureSize = 72
 
-// maxAlertSize is the maximum size an alert. MessagePayload = VarInt(Alert) + Alert + VarInt(Signature) + Signature MaxMessagePayload = maxAlertSize + max(VarInt) + maxSignatureSize + 1
+// maxAlertSize is the maximum size an alert. MessagePayload = VarInt(Alert) + Alert + VarInt(Signature) + Signature
+// MaxMessagePayload = maxAlertSize + max(VarInt) + maxSignatureSize + 1
 const maxAlertSize = MaxMessagePayload - maxSignatureSize - MaxVarIntPayload - 1
 
 // maxCountSetCancel is the maximum number of cancel IDs that could possibly fit into a maximum size alert.
@@ -95,7 +103,8 @@ type Alert struct {
 	MinVer int32
 	// This alert only applies to versions less than or equal to this version. Other versions should still relay it.
 	MaxVer int32
-	// If this set contains any elements, then only nodes that have their subVer contained in this set are affected by the alert. Other versions should still relay it.
+	// If this set contains any elements, then only nodes that have their subVer contained in this set are affected by
+	// the alert. Other versions should still relay it.
 	SetSubVer []string
 	// Relative priority compared to other alerts
 	Priority int32
@@ -182,8 +191,8 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
 		Error(err)
 		return err
 	}
-	// SetCancel: first read a VarInt that contains count - the number of Cancel IDs, then
-	// iterate count times and read them
+	// SetCancel: first read a VarInt that contains count - the number of Cancel IDs, then iterate count times and read
+	// them
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
 		Error(err)
@@ -279,9 +288,12 @@ func NewAlertFromPayload(serializedPayload []byte, pver uint32) (*Alert, error) 
 	return &alert, nil
 }
 
-// MsgAlert  implements the Message interface and defines a bitcoin alert message. This is a signed message that provides notifications that the client should display if the signature matches the key.  bitcoind/bitcoin-qt only checks against a signature from the core developers.
+// MsgAlert implements the Message interface and defines a bitcoin alert message. This is a signed message that provides
+// notifications that the client should display if the signature matches the key. bitcoind/bitcoin-qt only checks
+// against a signature from the core developers.
 type MsgAlert struct {
-	// SerializedPayload is the alert payload serialized as a string so that the version can change but the Alert can still be passed on by older clients.
+	// SerializedPayload is the alert payload serialized as a string so that the version can change but the Alert can
+	// still be passed on by older clients.
 	SerializedPayload []byte
 	// Signature is the ECDSA signature of the message.
 	Signature []byte
@@ -308,7 +320,8 @@ func (msg *MsgAlert) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) er
 	return err
 }
 
-// BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface implementation.
+// BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
+// implementation.
 func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
 	var err error
 	var serializedpayload []byte
@@ -343,13 +356,14 @@ func (msg *MsgAlert) Command() string {
 	return CmdAlert
 }
 
-// MaxPayloadLength returns the maximum length the payload can be for the receiver.  This is part of the Message interface implementation.
+// MaxPayloadLength returns the maximum length the payload can be for the receiver. This is part of the Message
+// interface implementation.
 func (msg *MsgAlert) MaxPayloadLength(pver uint32) uint32 {
 	// Since this can vary depending on the message, make it the max size allowed.
 	return MaxMessagePayload
 }
 
-// NewMsgAlert returns a new bitcoin alert message that conforms to the Message interface.  See MsgAlert for details.
+// NewMsgAlert returns a new bitcoin alert message that conforms to the Message interface. See MsgAlert for details.
 func NewMsgAlert(serializedPayload []byte, signature []byte) *MsgAlert {
 	return &MsgAlert{
 		SerializedPayload: serializedPayload,

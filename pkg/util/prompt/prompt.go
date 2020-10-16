@@ -14,8 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/util/legacy/keystore"
 )
 
-// ProvideSeed is used to prompt for the wallet seed which maybe required during
-// upgrades.
+// ProvideSeed is used to prompt for the wallet seed which maybe required during upgrades.
 func ProvideSeed() ([]byte, error) {
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -39,8 +38,7 @@ func ProvideSeed() ([]byte, error) {
 	}
 }
 
-// ProvidePrivPassphrase is used to prompt for the private passphrase which
-// maybe required during upgrades.
+// ProvidePrivPassphrase is used to prompt for the private passphrase which maybe required during upgrades.
 func ProvidePrivPassphrase() ([]byte, error) {
 	prompt := "enter the private passphrase for your wallet: "
 	for {
@@ -59,9 +57,8 @@ func ProvidePrivPassphrase() ([]byte, error) {
 	}
 }
 
-// promptList prompts the user with the given prefix, list of valid responses,
-// and default list entry to use.  The function will repeat the prompt to the
-// user until they enter a valid response.
+// promptList prompts the user with the given prefix, list of valid responses, and default list entry to use. The
+// function will repeat the prompt to the user until they enter a valid response.
 func promptList(reader *bufio.Reader, prefix string, validResponses []string, defaultEntry string) (string, error) {
 	// Setup the prompt according to the parameters.
 	validStrings := strings.Join(validResponses, "/")
@@ -92,9 +89,8 @@ func promptList(reader *bufio.Reader, prefix string, validResponses []string, de
 	}
 }
 
-// promptListBool prompts the user for a boolean (yes/no) with the given prefix.
-// The function will repeat the prompt to the user until they enter a valid
-// reponse.
+// promptListBool prompts the user for a boolean (yes/no) with the given prefix. The function will repeat the prompt to
+// the user until they enter a valid reponse.
 func promptListBool(reader *bufio.Reader, prefix string, defaultEntry string) (bool, error) {
 	// Setup the valid responses.
 	valid := []string{"n", "no", "y", "yes"}
@@ -106,9 +102,8 @@ func promptListBool(reader *bufio.Reader, prefix string, defaultEntry string) (b
 	return response == "yes" || response == "y", nil
 }
 
-// promptPass prompts the user for a passphrase with the given prefix.  The
-// function will ask the user to confirm the passphrase and will repeat the
-// prompts until they enter a matching response.
+// promptPass prompts the user for a passphrase with the given prefix. The function will ask the user to confirm the
+// passphrase and will repeat the prompts until they enter a matching response.
 func promptPass(reader *bufio.Reader, prefix string, confirm bool) ([]byte, error) {
 	// Prompt the user until they enter a passphrase.
 	prompt := fmt.Sprintf("%s: ", prefix)
@@ -143,22 +138,19 @@ func promptPass(reader *bufio.Reader, prefix string, confirm bool) ([]byte, erro
 	}
 }
 
-// PrivatePass prompts the user for a private passphrase with varying behavior
-// depending on whether the passed legacy keystore exists.  When it does, the
-// user is prompted for the existing passphrase which is then used to unlock it.
-// On the other hand, when the legacy keystore is nil, the user is prompted for
-// a new private passphrase.  All prompts are repeated until the user enters a
-// valid response.
+// PrivatePass prompts the user for a private passphrase with varying behavior depending on whether the passed legacy
+// keystore exists. When it does, the user is prompted for the existing passphrase which is then used to unlock it.
+//
+// On the other hand, when the legacy keystore is nil, the user is prompted for a new private passphrase. All prompts
+// are repeated until the user enters a valid response.
 func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, error) {
-	// When there is not an existing legacy wallet, simply prompt the user
-	// for a new private passphase and return it.
+	// When there is not an existing legacy wallet, simply prompt the user for a new private passphase and return it.
 	if legacyKeyStore == nil {
 		return promptPass(reader,
 			"Creating new wallet\n\nEnter the private passphrase for your new wallet", true)
 	}
-	// At this point, there is an existing legacy wallet, so prompt the user
-	// for the existing private passphrase and ensure it properly unlocks
-	// the legacy wallet so all of the addresses can later be imported.
+	// At this point, there is an existing legacy wallet, so prompt the user for the existing private passphrase and
+	// ensure it properly unlocks the legacy wallet so all of the addresses can later be imported.
 	Warn("You have an existing legacy wallet.  " +
 		"All addresses from your existing legacy wallet will be imported into" +
 		" the new wallet format.")
@@ -180,13 +172,13 @@ func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, 
 	}
 }
 
-// PublicPass prompts the user whether they want to add an additional layer of
-// encryption to the wallet.  When the user answers yes and there is already a
-// public passphrase provided via the passed config, it prompts them whether or
-// not to use that configured passphrase.  It will also detect when the same
-// passphrase is used for the private and public passphrase and prompt the user
-// if they are sure they want to use the same passphrase for both.  Finally, all
-// prompts are repeated until the user enters a valid response.
+// PublicPass prompts the user whether they want to add an additional layer of encryption to the wallet. When the user
+// answers yes and there is already a public passphrase provided via the passed config, it prompts them whether or not
+// to use that configured passphrase.
+//
+// It will also detect when the same passphrase is used for the private and public passphrase and prompt the user if
+// they are sure they want to use the same passphrase for both. Finally, all prompts are repeated until the user enters
+// a valid response.
 func PublicPass(reader *bufio.Reader, privPass []byte,
 	defaultPubPassphrase, configPubPassphrase []byte) ([]byte, error) {
 	pubPass := defaultPubPassphrase
@@ -239,11 +231,14 @@ func PublicPass(reader *bufio.Reader, privPass []byte,
 	return pubPass, nil
 }
 
-// Seed prompts the user whether they want to use an existing wallet generation
-// seed.  When the user answers no, a seed will be generated and displayed to
-// the user along with prompting them for confirmation.  When the user answers
-// yes, a the user is prompted for it.  All prompts are repeated until the user
-// enters a valid response.
+// Seed prompts the user whether they want to use an existing wallet generation seed.
+//
+// When the user answers no, a seed will be generated and displayed to the user along with prompting them for
+// confirmation.
+//
+// When the user answers yes, a the user is prompted for it.
+//
+// All prompts are repeated until the user enters a valid response.
 func Seed(reader *bufio.Reader) ([]byte, error) {
 	// Ascertain the wallet generation seed.
 	useUserSeed, err := promptListBool(reader, "Do you have an "+

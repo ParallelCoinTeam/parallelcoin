@@ -2,9 +2,11 @@ package app
 
 import (
 	"fmt"
-	"github.com/p9c/pod/app/config"
-	"github.com/urfave/cli"
 	"os"
+
+	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/app/config"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
@@ -15,9 +17,12 @@ import (
 func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
-		dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
-			Params.Name + slash + wallet.WalletDbName
-		if !apputil.FileExists(dbFilename) {
+		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
+			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.WalletDbName
+		// dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
+		// 	Params.Name + slash + wallet.WalletDbName
+		if !apputil.FileExists(*cx.Config.WalletFile) {
+			// Debug(cx.ActiveNet.Name, *cx.Config.WalletFile)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				Error("failed to create wallet", err)
 				return err

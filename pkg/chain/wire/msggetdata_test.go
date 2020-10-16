@@ -21,7 +21,8 @@ func TestGetData(t *testing.T) {
 		t.Errorf("NewMsgGetData: wrong command - got %v want %v",
 			cmd, wantCmd)
 	}
-	// Ensure max payload is expected value for latest protocol version. Num inventory vectors (varInt) + max allowed inventory vectors.
+	// Ensure max payload is expected value for latest protocol version. Num inventory vectors (varInt) + max allowed
+	// inventory vectors.
 	wantPayload := uint32(1800009)
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
@@ -57,7 +58,8 @@ func TestGetData(t *testing.T) {
 	}
 }
 
-// TestGetDataWire tests the MsgGetData wire encode and decode for various numbers of inventory vectors and protocol versions.
+// TestGetDataWire tests the MsgGetData wire encode and decode for various numbers of inventory vectors and protocol
+// versions.
 func TestGetDataWire(t *testing.T) {
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
@@ -219,7 +221,8 @@ func TestGetDataWire(t *testing.T) {
 	}
 }
 
-// TestGetDataWireErrors performs negative tests against wire encode and decode of MsgGetData to confirm error paths work correctly.
+// TestGetDataWireErrors performs negative tests against wire encode and decode of MsgGetData to confirm error paths
+// work correctly.
 func TestGetDataWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	wireErr := &MessageError{}
@@ -258,7 +261,7 @@ func TestGetDataWireErrors(t *testing.T) {
 		0xfd, 0x51, 0xc3, // Varint for number of inv vectors (50001)
 	}
 	tests := []struct {
-		in       *MsgGetData     // Value to encode
+		in       *MsgGetData     // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

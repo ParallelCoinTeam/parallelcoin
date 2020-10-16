@@ -564,7 +564,6 @@ func TestSignTxOutput(t *testing.T) {
 					"%s: %v", msg, err)
 				break
 			}
-			// nolint
 			sigScript, err := SignTxOutput(&netparams.TestNet3Params,
 				tx, i, scriptPkScript, hashType,
 				mkGetKey(map[string]addressToKey{
@@ -687,7 +686,6 @@ func TestSignTxOutput(t *testing.T) {
 					"%s: %v", msg, err)
 				break
 			}
-			// nolint
 			sigScript, err := SignTxOutput(&netparams.TestNet3Params,
 				tx, i, scriptPkScript, hashType,
 				mkGetKey(map[string]addressToKey{
@@ -809,7 +807,6 @@ func TestSignTxOutput(t *testing.T) {
 					"%s: %v", msg, err)
 				break
 			}
-			// nolint
 			sigScript, err := SignTxOutput(&netparams.TestNet3Params,
 				tx, i, scriptPkScript, hashType,
 				mkGetKey(map[string]addressToKey{
@@ -930,7 +927,6 @@ func TestSignTxOutput(t *testing.T) {
 					"%s: %v", msg, err)
 				break
 			}
-			// nolint
 			sigScript, err := SignTxOutput(&netparams.TestNet3Params,
 				tx, i, scriptPkScript, hashType,
 				mkGetKey(map[string]addressToKey{

@@ -14,8 +14,7 @@ import (
 
 // Naming
 //
-// The following variables are commonly used in this file and given
-// reserved names:
+// The following variables are commonly used in this file and given reserved names:
 //
 //   ns: The namespace bucket for this package
 //   b:  The primary bucket being operated on
@@ -25,11 +24,10 @@ import (
 //   ck: The current cursor key
 //   cv: The current cursor value
 //
-// Functions use the naming scheme `Op[Raw]Type[Field]`, which performs the
-// operation `Op` on the type `Type`, optionally dealing with raw keys and
-// values if `Raw` is used.  Fetch and extract operations may only need to read
-// some portion of a key or value, in which case `Field` describes the component
-// being returned.  The following operations are used:
+// Functions use the naming scheme `Op[Raw]Type[Field]`, which performs the operation `Op` on the type `Type`,
+// optionally dealing with raw keys and values if `Raw` is used. Fetch and extract operations may only need to read some
+// portion of a key or value, in which case `Field` describes the component being returned. The following operations are
+// used:
 //
 //   key:     return a db key for some data
 //   value:   return a db value for some data
@@ -40,23 +38,19 @@ import (
 //   delete:  remove a k/v pair
 //   extract: perform an unchecked slice to extract a key or value
 //
-// Other operations which are specific to the types being operated on
-// should be explained in a comment.
-// Big endian is the preferred byte order, due to cursor scans over integer
-// keys iterating in order.
+// Other operations which are specific to the types being operated on should be explained in a comment. Big endian is
+// the preferred byte order, due to cursor scans over integer keys iterating in order.
 var byteOrder = binary.BigEndian
 
-// Database versions.  Versions start at 1 and increment for each database
-// change.
+// Database versions. Versions start at 1 and increment for each database change.
 const (
 	// LatestVersion is the most recent store version.
 	LatestVersion = 1
 )
 
 var (
-	// This package makes assumptions that the width of a chainhash.Hash is always
-	// 32 bytes.  If this is ever changed (unlikely for bitcoin, possible for alts),
-	// offsets have to be rewritten.  Use a compile-time assertion that this
+	// This package makes assumptions that the width of a chainhash.Hash is always 32 bytes. If this is ever changed
+	// (unlikely for bitcoin, possible for alts), offsets have to be rewritten. Use a compile-time assertion that this
 	// assumption holds true.
 	_ [32]byte = chainhash.Hash{}
 	// Bucket names
@@ -74,11 +68,9 @@ var (
 	rootMinedBalance = []byte("bal")
 )
 
-// The root bucket's mined balance k/v pair records the total balance for all
-// unspent credits from mined transactions.  This includes immature outputs, and
-// outputs spent by mempool transactions, which must be considered when
-// returning the actual balance for a given number of block confirmations.  The
-// value is the amount serialized as a uint64.
+// The root bucket's mined balance k/v pair records the total balance for all unspent credits from mined transactions.
+// This includes immature outputs, and outputs spent by mempool transactions, which must be considered when returning
+// the actual balance for a given number of block confirmations. The value is the amount serialized as a uint64.
 func fetchMinedBalance(ns walletdb.ReadBucket) (util.Amount, error) {
 	v := ns.Get(rootMinedBalance)
 	if len(v) != 8 {
@@ -100,9 +92,8 @@ func putMinedBalance(ns walletdb.ReadWriteBucket, amt util.Amount) error {
 	return nil
 }
 
-// Several data structures are given canonical serialization formats as either
-// keys or values.  These common formats allow keys and values to be reused
-// across different buckets.
+// Several data structures are given canonical serialization formats as either keys or values. These common formats
+// allow keys and values to be reused across different buckets.
 //
 // The canonical outpoint serialization format is:
 //
@@ -126,8 +117,8 @@ func readCanonicalOutPoint(k []byte, op *wire.OutPoint) error {
 	return nil
 }
 
-// Details regarding blocks are saved as k/v pairs in the blocks bucket.
-// blockRecords are keyed by their height.  The value is serialized as such:
+// Details regarding blocks are saved as k/v pairs in the blocks bucket. blockRecords are keyed by their height. The
+// value is serialized as such:
 //
 //   [0:32]  Hash (32 bytes)
 //   [32:40] Unix time (8 bytes)
@@ -148,8 +139,8 @@ func valueBlockRecord(block *BlockMeta, txHash *chainhash.Hash) []byte {
 	return v
 }
 
-// appendRawBlockRecord returns a new block record value with a transaction
-// hash appended to the end and an incremented number of transactions.
+// appendRawBlockRecord returns a new block record value with a transaction hash appended to the end and an incremented
+// number of transactions.
 func appendRawBlockRecord(v []byte, txHash *chainhash.Hash) ([]byte, error) {
 	if len(v) < 44 {
 		str := fmt.Sprintf("%s: short read (expected %d bytes, read %d)",
@@ -229,7 +220,7 @@ type blockIterator struct {
 	err  error
 }
 
-// func makeBlockIterator(// 	ns walletdb.ReadWriteBucket, height int32) blockIterator {
+// func makeBlockIterator(ns walletdb.ReadWriteBucket, height int32) blockIterator {
 // 	seek := make([]byte, 4)
 // 	byteOrder.PutUint32(seek, uint32(height))
 // 	c := ns.NestedReadWriteBucket(bucketBlocks).ReadWriteCursor()
@@ -242,8 +233,8 @@ func makeReadBlockIterator(ns walletdb.ReadBucket, height int32) blockIterator {
 	return blockIterator{c: readCursor{c}, seek: seek}
 }
 
-// Works just like makeBlockIterator but will initially position the cursor at
-// the last k/v pair.  Use this with blockIterator.prev.
+// Works just like makeBlockIterator but will initially position the cursor at the last k/v pair. Use this with
+// blockIterator.prev.
 func makeReverseBlockIterator(ns walletdb.ReadWriteBucket) blockIterator {
 	seek := make([]byte, 4)
 	byteOrder.PutUint32(seek, ^uint32(0))
@@ -284,15 +275,12 @@ func (it *blockIterator) prev() bool {
 	}
 	if it.ck == nil {
 		it.ck, it.cv = it.c.Seek(it.seek)
-		// Seek positions the cursor at the next k/v pair if one with
-		// this prefix was not found.  If this happened (the prefixes
-		// won't match in this case) move the cursor backward.
+		// Seek positions the cursor at the next k/v pair if one with this prefix was not found. If this happened (the
+		// prefixes won't match in this case) move the cursor backward.
 		//
-		// This technically does not correct for multiple keys with
-		// matching prefixes by moving the cursor to the last matching
-		// key, but this doesn't need to be considered when dealing with
-		// block records since the key (and seek prefix) is just the
-		// block height.
+		// This technically does not correct for multiple keys with matching prefixes by moving the cursor to the last
+		// matching key, but this doesn't need to be considered when dealing with block records since the key (and seek
+		// prefix) is just the block height.
 		if !bytes.HasPrefix(it.ck, it.seek) {
 			it.ck, it.cv = it.c.Prev()
 		}
@@ -337,9 +325,8 @@ func deleteBlockRecord(ns walletdb.ReadWriteBucket, height int32) error {
 //   [32:36] Block height (4 bytes)
 //   [36:68] Block hash (32 bytes)
 //
-// The leading transaction hash allows to prefix filter for all records with
-// a matching hash.  The block height and hash records a particular incidence
-// of the transaction in the blockchain.
+// The leading transaction hash allows to prefix filter for all records with a matching hash. The block height and hash
+// records a particular incidence of the transaction in the blockchain.
 //
 // The record value is serialized as such:
 //
@@ -423,6 +410,7 @@ func readRawTxRecordBlock(k []byte, block *Block) error {
 	copy(block.Hash[:], k[36:68])
 	return nil
 }
+
 func fetchTxRecord(ns walletdb.ReadBucket, txHash *chainhash.Hash, block *Block) (*TxRecord, error) {
 	k := keyTxRecord(txHash, block)
 	v := ns.NestedReadBucket(bucketTxRecords).Get(k)
@@ -431,8 +419,8 @@ func fetchTxRecord(ns walletdb.ReadBucket, txHash *chainhash.Hash, block *Block)
 	return rec, err
 }
 
-// TODO: This reads more than necessary.  Pass the pkscript location instead to
-// avoid the wire.MsgTx deserialization.
+// TODO: This reads more than necessary. Pass the pkscript location instead to
+//  avoid the wire.MsgTx deserialization.
 func fetchRawTxRecordPkScript(k, v []byte, index uint32) ([]byte, error) {
 	var rec TxRecord
 	copy(rec.Hash[:], k) // Silly but need an array
@@ -452,17 +440,18 @@ func existsTxRecord(ns walletdb.ReadBucket, txHash *chainhash.Hash, block *Block
 	v = ns.NestedReadBucket(bucketTxRecords).Get(k)
 	return
 }
+
 func existsRawTxRecord(ns walletdb.ReadBucket, k []byte) (v []byte) {
 	return ns.NestedReadBucket(bucketTxRecords).Get(k)
 }
+
 func deleteTxRecord(ns walletdb.ReadWriteBucket, txHash *chainhash.Hash, block *Block) error {
 	k := keyTxRecord(txHash, block)
 	return ns.NestedReadWriteBucket(bucketTxRecords).Delete(k)
 }
 
-// latestTxRecord searches for the newest recorded mined transaction record with
-// a matching hash.  In case of a hash collision, the record from the newest
-// block is returned.  Returns (nil, nil) if no matching transactions are found.
+// latestTxRecord searches for the newest recorded mined transaction record with a matching hash. In case of a hash
+// collision, the record from the newest block is returned. Returns (nil, nil) if no matching transactions are found.
 func latestTxRecord(ns walletdb.ReadBucket, txHash *chainhash.Hash) (k, v []byte) {
 	prefix := txHash[:]
 	c := ns.NestedReadBucket(bucketTxRecords).ReadCursor()
@@ -482,8 +471,8 @@ func latestTxRecord(ns walletdb.ReadBucket, txHash *chainhash.Hash) (k, v []byte
 //   [36:68] Block hash (32 bytes)
 //   [68:72] Output index (4 bytes)
 //
-// The first 68 bytes match the key for the transaction record and may be used
-// as a prefix filter to iterate through all credits in order.
+// The first 68 bytes match the key for the transaction record and may be used as a prefix filter to iterate through all
+// credits in order.
 //
 // The credit value is serialized as such:
 //
@@ -508,9 +497,8 @@ func keyCredit(txHash *chainhash.Hash, index uint32, block *Block) []byte {
 	return k
 }
 
-// valueUnspentCredit creates a new credit value for an unspent credit.  All
-// credits are created unspent, and are only marked spent later, so there is no
-// value function to create either spent or unspent credits.
+// valueUnspentCredit creates a new credit value for an unspent credit. All credits are created unspent, and are only
+// marked spent later, so there is no value function to create either spent or unspent credits.
 func valueUnspentCredit(cred *credit) []byte {
 	v := make([]byte, 9)
 	byteOrder.PutUint64(v, uint64(cred.amount))
@@ -529,9 +517,8 @@ func putRawCredit(ns walletdb.ReadWriteBucket, k, v []byte) error {
 	return nil
 }
 
-// putUnspentCredit puts a credit record for an unspent credit.  It may only be
-// used when the credit is already know to be unspent, or spent by an
-// unconfirmed transaction.
+// putUnspentCredit puts a credit record for an unspent credit. It may only be used when the credit is already know to
+// be unspent, or spent by an unconfirmed transaction.
 func putUnspentCredit(ns walletdb.ReadWriteBucket, cred *credit) error {
 	k := keyCredit(&cred.outPoint.Hash, cred.outPoint.Index, &cred.block)
 	v := valueUnspentCredit(cred)
@@ -554,8 +541,7 @@ func fetchRawCreditAmount(v []byte) (util.Amount, error) {
 	return util.Amount(byteOrder.Uint64(v)), nil
 }
 
-// fetchRawCreditAmountSpent returns the amount of the credit and whether the
-// credit is spent.
+// fetchRawCreditAmountSpent returns the amount of the credit and whether the credit is spent.
 func fetchRawCreditAmountSpent(v []byte) (util.Amount, bool, error) {
 	if len(v) < 9 {
 		str := fmt.Sprintf("%s: short read (expected %d bytes, read %d)",
@@ -565,8 +551,7 @@ func fetchRawCreditAmountSpent(v []byte) (util.Amount, bool, error) {
 	return util.Amount(byteOrder.Uint64(v)), v[8]&(1<<0) != 0, nil
 }
 
-// fetchRawCreditAmountChange returns the amount of the credit and whether the
-// credit is marked as change.
+// fetchRawCreditAmountChange returns the amount of the credit and whether the credit is marked as change.
 func fetchRawCreditAmountChange(v []byte) (util.Amount, bool, error) {
 	if len(v) < 9 {
 		str := fmt.Sprintf("%s: short read (expected %d bytes, read %d)",
@@ -576,8 +561,8 @@ func fetchRawCreditAmountChange(v []byte) (util.Amount, bool, error) {
 	return util.Amount(byteOrder.Uint64(v)), v[8]&(1<<1) != 0, nil
 }
 
-// fetchRawCreditUnspentValue returns the unspent value for a raw credit key.
-// This may be used to mark a credit as unspent.
+// fetchRawCreditUnspentValue returns the unspent value for a raw credit key. This may be used to mark a credit as
+// unspent.
 func fetchRawCreditUnspentValue(k []byte) ([]byte, error) {
 	if len(k) < 72 {
 		str := fmt.Sprintf("%s: short key (expected %d bytes, read %d)",
@@ -587,9 +572,8 @@ func fetchRawCreditUnspentValue(k []byte) ([]byte, error) {
 	return k[32:68], nil
 }
 
-// spendRawCredit marks the credit with a given key as mined at some particular
-// block as spent by the input at some transaction incidence.  The debited
-// amount is returned.
+// spendRawCredit marks the credit with a given key as mined at some particular block as spent by the input at some
+// transaction incidence. The debited amount is returned.
 func spendCredit(ns walletdb.ReadWriteBucket, k []byte, spender *indexedIncidence) (util.Amount, error) {
 	v := ns.NestedReadBucket(bucketCredits).Get(k)
 	newv := make([]byte, 81)
@@ -603,9 +587,8 @@ func spendCredit(ns walletdb.ReadWriteBucket, k []byte, spender *indexedIncidenc
 	return util.Amount(byteOrder.Uint64(v[0:8])), putRawCredit(ns, k, v)
 }
 
-// unspendRawCredit rewrites the credit for the given key as unspent.  The
-// output amount of the credit is returned.  It returns without error if no
-// credit exists for the key.
+// unspendRawCredit rewrites the credit for the given key as unspent. The output amount of the credit is returned. It
+// returns without error if no credit exists for the key.
 func unspendRawCredit(ns walletdb.ReadWriteBucket, k []byte) (util.Amount, error) {
 	b := ns.NestedReadWriteBucket(bucketCredits)
 	v := b.Get(k)
@@ -623,14 +606,17 @@ func unspendRawCredit(ns walletdb.ReadWriteBucket, k []byte) (util.Amount, error
 	}
 	return util.Amount(byteOrder.Uint64(v[0:8])), nil
 }
+
 func existsCredit(ns walletdb.ReadBucket, txHash *chainhash.Hash, index uint32, block *Block) (k, v []byte) {
 	k = keyCredit(txHash, index, block)
 	v = ns.NestedReadBucket(bucketCredits).Get(k)
 	return
 }
+
 func existsRawCredit(ns walletdb.ReadBucket, k []byte) []byte {
 	return ns.NestedReadBucket(bucketCredits).Get(k)
 }
+
 func deleteRawCredit(ns walletdb.ReadWriteBucket, k []byte) error {
 	err := ns.NestedReadWriteBucket(bucketCredits).Delete(k)
 	if err != nil {
@@ -641,8 +627,7 @@ func deleteRawCredit(ns walletdb.ReadWriteBucket, k []byte) error {
 	return nil
 }
 
-// creditIterator allows for in-order iteration of all credit records for a
-// mined transaction.
+// creditIterator allows for in-order iteration of all credit records for a mined transaction.
 //
 // Example usage:
 //
@@ -656,8 +641,7 @@ func deleteRawCredit(ns walletdb.ReadWriteBucket, k []byte) error {
 //           // Handle error
 //   }
 //
-// The elem's Spent field is not set to true if the credit is spent by an
-// unmined transaction.  To check for this case:
+// The elem's Spent field is not set to true if the credit is spent by an unmined transaction. To check for this case:
 //
 //   k := canonicalOutPoint(&txHash, it.elem.Index)
 //   it.elem.Spent = existsRawUnminedInput(ns, k) != nil
@@ -717,9 +701,8 @@ func (it *creditIterator) next() bool {
 	return true
 }
 
-// The unspent index records all outpoints for mined credits which are not spent
-// by any other mined transaction records (but may be spent by a mempool
-// transaction).
+// The unspent index records all outpoints for mined credits which are not spent by any other mined transaction records
+// (but may be spent by a mempool transaction).
 //
 // Keys are use the canonical outpoint serialization:
 //
@@ -766,17 +749,16 @@ func readUnspentBlock(v []byte, block *Block) error {
 	return nil
 }
 
-// existsUnspent returns the key for the unspent output and the corresponding
-// key for the credits bucket.  If there is no unspent output recorded, the
-// credit key is nil.
+// existsUnspent returns the key for the unspent output and the corresponding key for the credits bucket. If there is no
+// unspent output recorded, the credit key is nil.
 func existsUnspent(ns walletdb.ReadBucket, outPoint *wire.OutPoint) (k, credKey []byte) {
 	k = canonicalOutPoint(&outPoint.Hash, outPoint.Index)
 	credKey = existsRawUnspent(ns, k)
 	return k, credKey
 }
 
-// existsRawUnspent returns the credit key if there exists an output recorded
-// for the raw unspent key.  It returns nil if the k/v pair does not exist.
+// existsRawUnspent returns the credit key if there exists an output recorded for the raw unspent key. It returns nil if
+// the k/v pair does not exist.
 func existsRawUnspent(ns walletdb.ReadBucket, k []byte) (credKey []byte) {
 	if len(k) < 36 {
 		return nil
@@ -808,8 +790,8 @@ func deleteRawUnspent(ns walletdb.ReadWriteBucket, k []byte) error {
 //   [36:68] Block hash (32 bytes)
 //   [68:72] Input index (4 bytes)
 //
-// The first 68 bytes match the key for the transaction record and may be used
-// as a prefix filter to iterate through all debits in order.
+// The first 68 bytes match the key for the transaction record and may be used as a prefix filter to iterate through all
+// debits in order.
 //
 // The debit value is serialized as such:
 //
@@ -827,6 +809,7 @@ func keyDebit(txHash *chainhash.Hash, index uint32, block *Block) []byte {
 	byteOrder.PutUint32(k[68:72], index)
 	return k
 }
+
 func putDebit(ns walletdb.ReadWriteBucket, txHash *chainhash.Hash, index uint32, amount util.Amount, block *Block, credKey []byte) error {
 	k := keyDebit(txHash, index, block)
 	v := make([]byte, 80)
@@ -841,13 +824,13 @@ func putDebit(ns walletdb.ReadWriteBucket, txHash *chainhash.Hash, index uint32,
 	}
 	return nil
 }
+
 func extractRawDebitCreditKey(v []byte) []byte {
 	return v[8:80]
 }
 
-// existsDebit checks for the existance of a debit.  If found, the debit and
-// previous credit keys are returned.  If the debit does not exist, both keys
-// are nil.
+// existsDebit checks for the existance of a debit. If found, the debit and previous credit keys are returned. If the
+// debit does not exist, both keys are nil.
 func existsDebit(ns walletdb.ReadBucket, txHash *chainhash.Hash, index uint32, block *Block) (k, credKey []byte, err error) {
 	k = keyDebit(txHash, index, block)
 	v := ns.NestedReadBucket(bucketDebits).Get(k)
@@ -861,6 +844,7 @@ func existsDebit(ns walletdb.ReadBucket, txHash *chainhash.Hash, index uint32, b
 	}
 	return k, v[8:80], nil
 }
+
 func deleteRawDebit(ns walletdb.ReadWriteBucket, k []byte) error {
 	err := ns.NestedReadWriteBucket(bucketDebits).Delete(k)
 	if err != nil {
@@ -871,8 +855,7 @@ func deleteRawDebit(ns walletdb.ReadWriteBucket, k []byte) error {
 	return nil
 }
 
-// debitIterator allows for in-order iteration of all debit records for a
-// mined transaction.
+// debitIterator allows for in-order iteration of all debit records for a mined transaction.
 //
 // Example usage:
 //
@@ -902,6 +885,7 @@ func makeReadDebitIterator(ns walletdb.ReadBucket, prefix []byte) debitIterator 
 	c := ns.NestedReadBucket(bucketDebits).ReadCursor()
 	return debitIterator{c: readCursor{c}, prefix: prefix}
 }
+
 func (it *debitIterator) readElem() error {
 	if len(it.ck) < 72 {
 		str := fmt.Sprintf("%s: short key (expected %d bytes, read %d)",
@@ -917,6 +901,7 @@ func (it *debitIterator) readElem() error {
 	it.elem.Amount = util.Amount(byteOrder.Uint64(it.cv))
 	return nil
 }
+
 func (it *debitIterator) next() bool {
 	if it.c == nil {
 		return false
@@ -939,8 +924,8 @@ func (it *debitIterator) next() bool {
 	return true
 }
 
-// All unmined transactions are saved in the unmined bucket keyed by the
-// transaction hash.  The value matches that of mined transaction records:
+// All unmined transactions are saved in the unmined bucket keyed by the transaction hash. The value matches that of
+// mined transaction records:
 //
 //   [0:8]   Received time (8 bytes)
 //   [8:]    Serialized transaction (varies)
@@ -953,6 +938,7 @@ func putRawUnmined(ns walletdb.ReadWriteBucket, k, v []byte) error {
 	}
 	return nil
 }
+
 func readRawUnminedHash(k []byte, txHash *chainhash.Hash) error {
 	if len(k) < 32 {
 		str := "short unmined key"
@@ -961,9 +947,11 @@ func readRawUnminedHash(k []byte, txHash *chainhash.Hash) error {
 	copy(txHash[:], k)
 	return nil
 }
+
 func existsRawUnmined(ns walletdb.ReadBucket, k []byte) (v []byte) {
 	return ns.NestedReadBucket(bucketUnmined).Get(k)
 }
+
 func deleteRawUnmined(ns walletdb.ReadWriteBucket, k []byte) error {
 	err := ns.NestedReadWriteBucket(bucketUnmined).Delete(k)
 	if err != nil {
@@ -979,9 +967,8 @@ func deleteRawUnmined(ns walletdb.ReadWriteBucket, k []byte) error {
 //  [0:32]   Transaction hash (32 bytes)
 //  [32:36]  Output index (4 bytes)
 //
-// The value matches the format used by mined credits, but the spent flag is
-// never set and the optional debit record is never included.  The simplified
-// format is thus:
+// The value matches the format used by mined credits, but the spent flag is never set and the optional debit record is
+// never included. The simplified format is thus:
 //
 //   [0:8]   Amount (8 bytes)
 //   [8]     Flags (1 byte)
@@ -1039,8 +1026,7 @@ func deleteRawUnminedCredit(ns walletdb.ReadWriteBucket, k []byte) error {
 	return nil
 }
 
-// unminedCreditIterator allows for cursor iteration over all credits, in order,
-// from a single unmined transaction.
+// unminedCreditIterator allows for cursor iteration over all credits, in order, from a single unmined transaction.
 //
 //  Example usage:
 //
@@ -1053,9 +1039,8 @@ func deleteRawUnminedCredit(ns walletdb.ReadWriteBucket, k []byte) error {
 //           // Handle error
 //   }
 //
-// The spentness of the credit is not looked up for performance reasons (because
-// for unspent credits, it requires another lookup in another bucket).  If this
-// is needed, it may be checked like this:
+// The spentness of the credit is not looked up for performance reasons (because for unspent credits, it requires
+// another lookup in another bucket). If this is needed, it may be checked like this:
 //
 //   spent := existsRawUnminedInput(ns, it.ck) != nil
 type unminedCreditIterator struct {
@@ -1066,6 +1051,7 @@ type unminedCreditIterator struct {
 	elem   CreditRecord
 	err    error
 }
+
 type readCursor struct {
 	walletdb.ReadCursor
 }
@@ -1074,14 +1060,17 @@ func (r readCursor) Delete() error {
 	str := "failed to delete current cursor item from read-only cursor"
 	return storeError(ErrDatabase, str, walletdb.ErrTxNotWritable)
 }
+
 func makeUnminedCreditIterator(ns walletdb.ReadWriteBucket, txHash *chainhash.Hash) unminedCreditIterator {
 	c := ns.NestedReadWriteBucket(bucketUnminedCredits).ReadWriteCursor()
 	return unminedCreditIterator{c: c, prefix: txHash[:]}
 }
+
 func makeReadUnminedCreditIterator(ns walletdb.ReadBucket, txHash *chainhash.Hash) unminedCreditIterator {
 	c := ns.NestedReadBucket(bucketUnminedCredits).ReadCursor()
 	return unminedCreditIterator{c: readCursor{c}, prefix: txHash[:]}
 }
+
 func (it *unminedCreditIterator) readElem() error {
 	index, err := fetchRawUnminedCreditIndex(it.ck)
 	if err != nil {
@@ -1099,6 +1088,7 @@ func (it *unminedCreditIterator) readElem() error {
 	// Spent intentionally not set
 	return nil
 }
+
 func (it *unminedCreditIterator) next() bool {
 	if it.c == nil {
 		return false
@@ -1135,9 +1125,8 @@ func (it *unminedCreditIterator) next() bool {
 // 	it.c.Seek(canonicalOutPoint(txHash, index))
 // }
 
-// Outpoints spent by unmined transactions are saved in the unmined inputs
-// bucket.  This bucket maps between each previous output spent, for both mined
-// and unmined transactions, to the hash of the unmined transaction.
+// Outpoints spent by unmined transactions are saved in the unmined inputs bucket. This bucket maps between each
+// previous output spent, for both mined and unmined transactions, to the hash of the unmined transaction.
 //
 // The key is serialized as such:
 //
@@ -1147,9 +1136,9 @@ func (it *unminedCreditIterator) next() bool {
 // The value is serialized as such:
 //
 //   [0:32]   Transaction hash (32 bytes)
-// putRawUnminedInput maintains a list of unmined transaction hashes that have
-// spent an outpoint. Each entry in the bucket is keyed by the outpoint being
-// spent.
+
+// putRawUnminedInput maintains a list of unmined transaction hashes that have spent an outpoint. Each entry in the
+// bucket is keyed by the outpoint being spent.
 func putRawUnminedInput(ns walletdb.ReadWriteBucket, k, v []byte) error {
 	spendTxHashes := ns.NestedReadBucket(bucketUnminedInputs).Get(k)
 	spendTxHashes = append(spendTxHashes, v...)
@@ -1161,12 +1150,12 @@ func putRawUnminedInput(ns walletdb.ReadWriteBucket, k, v []byte) error {
 	}
 	return nil
 }
+
 func existsRawUnminedInput(ns walletdb.ReadBucket, k []byte) (v []byte) {
 	return ns.NestedReadBucket(bucketUnminedInputs).Get(k)
 }
 
-// fetchUnminedInputSpendTxHashes fetches the list of unmined transactions that
-// spend the serialized outpoint.
+// fetchUnminedInputSpendTxHashes fetches the list of unmined transactions that spend the serialized outpoint.
 func fetchUnminedInputSpendTxHashes(ns walletdb.ReadBucket, k []byte) []chainhash.Hash {
 	rawSpendTxHashes := ns.NestedReadBucket(bucketUnminedInputs).Get(k)
 	if rawSpendTxHashes == nil {
@@ -1182,6 +1171,7 @@ func fetchUnminedInputSpendTxHashes(ns walletdb.ReadBucket, k []byte) []chainhas
 	}
 	return spendTxHashes
 }
+
 func deleteRawUnminedInput(ns walletdb.ReadWriteBucket, k []byte) error {
 	err := ns.NestedReadWriteBucket(bucketUnminedInputs).Delete(k)
 	if err != nil {
@@ -1211,9 +1201,8 @@ func openStore(ns walletdb.ReadBucket) error {
 			"understood version %d", version, LatestVersion)
 		return storeError(ErrUnknownVersion, str, nil)
 	}
-	// Upgrade the tx store as needed, one version at a time, until
-	// LatestVersion is reached.  Versions are not skipped when performing
-	// database upgrades, and each upgrade is done in its own transaction.
+	// Upgrade the tx store as needed, one version at a time, until LatestVersion is reached. Versions are not skipped
+	// when performing database upgrades, and each upgrade is done in its own transaction.
 	//
 	// No upgrades yet.
 	// if version < LatestVersion {
@@ -1227,8 +1216,8 @@ func openStore(ns walletdb.ReadBucket) error {
 	return nil
 }
 
-// createStore creates the tx store (with the latest db version) in the passed
-// namespace.  If a store already exists, ErrAlreadyExists is returned.
+// createStore creates the tx store (with the latest db version) in the passed namespace. If a store already exists,
+// ErrAlreadyExists is returned.
 func createStore(ns walletdb.ReadWriteBucket) error {
 	// Ensure that nothing currently exists in the namespace bucket.
 	ck, cv := ns.ReadCursor().First()

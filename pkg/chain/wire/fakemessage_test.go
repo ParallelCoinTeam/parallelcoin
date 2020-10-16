@@ -15,7 +15,8 @@ func (msg *fakeMessage) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding)
 	return nil
 }
 
-// BtcEncode writes the payload field of the fake message or forces an error if the forceEncodeErr flag of the fake message is set.  It also satisfies the wire.Message interface.
+// BtcEncode writes the payload field of the fake message or forces an error if the forceEncodeErr flag of the fake
+// message is set. It also satisfies the wire.Message interface.
 func (msg *fakeMessage) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
 	if msg.forceEncodeErr {
 		err := &MessageError{
@@ -33,7 +34,8 @@ func (msg *fakeMessage) Command() string {
 	return msg.command
 }
 
-// MaxPayloadLength returns the length of the payload field of fake message or a smaller value if the forceLenErr flag of the fake message is set.  It satisfies the Message interface.
+// MaxPayloadLength returns the length of the payload field of fake message or a smaller value if the forceLenErr flag
+// of the fake message is set. It satisfies the Message interface.
 func (msg *fakeMessage) MaxPayloadLength(pver uint32) uint32 {
 	lenp := uint32(len(msg.payload))
 	if msg.forceLenErr {

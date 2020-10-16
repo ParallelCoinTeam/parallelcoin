@@ -14,7 +14,7 @@ type Params struct {
 	WalletRPCServerPort string
 }
 
-// MainNetParams contains parameters specific running btcwallet and pod on the main network (wire.MainNet).
+// MainNetParams contains parameters specific running pod on the main network (wire.MainNet).
 var MainNetParams = Params{
 	Params:              &chaincfg.MainNetParams,
 	RPCClientPort:       "11048",
@@ -28,7 +28,7 @@ var SimNetParams = Params{
 	WalletRPCServerPort: "41046",
 }
 
-// TestNet3Params contains parameters specific running btcwallet and pod on the test network (version 3) (wire.TestNet3).
+// TestNet3Params contains parameters specific running pod on the test network (version 3) (wire.TestNet3).
 var TestNet3Params = Params{
 	Params:              &chaincfg.TestNet3Params,
 	RPCClientPort:       "21048",

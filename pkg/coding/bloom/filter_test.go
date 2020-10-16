@@ -37,7 +37,8 @@ func TestFilterLoad(t *testing.T) {
 	}
 }
 
-// TestFilterInsert ensures inserting data into the filter causes that data to be matched and the resulting serialized MsgFilterLoad is the expected value.
+// TestFilterInsert ensures inserting data into the filter causes that data to be matched and the resulting serialized
+// MsgFilterLoad is the expected value.
 func TestFilterInsert(t *testing.T) {
 	var tests = []struct {
 		hex    string
@@ -83,7 +84,8 @@ func TestFilterInsert(t *testing.T) {
 	}
 }
 
-// TestFilterFPRange checks that new filters made with out of range false positive targets result in either max or min false positive rates.
+// TestFilterFPRange checks that new filters made with out of range false positive targets result in either max or min
+// false positive rates.
 func TestFilterFPRange(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -140,7 +142,8 @@ func TestFilterFPRange(t *testing.T) {
 	}
 }
 
-// TestFilterInsert ensures inserting data into the filter with a tweak causes that data to be matched and the resulting serialized MsgFilterLoad is the expected value.
+// TestFilterInsert ensures inserting data into the filter with a tweak causes that data to be matched and the resulting
+// serialized MsgFilterLoad is the expected value.
 func TestFilterInsertWithTweak(t *testing.T) {
 	var tests = []struct {
 		hex    string

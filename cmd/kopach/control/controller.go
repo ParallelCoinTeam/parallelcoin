@@ -64,9 +64,11 @@ type Controller struct {
 }
 
 func Run(cx *conte.Xt) (quit chan struct{}) {
+	mining := true
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
-		Warn("no mining addresses, not starting controller")
-		return
+		// Warn("no mining addresses, not starting controller")
+		// return
+		mining = false
 	}
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		Warn("not running controller without RPC enabled")
@@ -77,7 +79,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		return
 	}
 	ctrl := &Controller{
-		quit:                   make(chan struct{}),
+		quit:                   cx.KillAll,
 		cx:                     cx,
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
@@ -87,7 +89,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
-		hashSampleBuf:          rav.NewBufferUint64(1000),
+		hashSampleBuf:          rav.NewBufferUint64(100),
 	}
 	quit = ctrl.quit
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
@@ -122,30 +124,34 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		}
 	})
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
-	err = ctrl.sendNewBlockTemplate()
-	if err != nil {
-		Error(err)
-	} else {
-		ctrl.active.Store(true)
+	if mining {
+		err = ctrl.sendNewBlockTemplate()
+		if err != nil {
+			Error(err)
+		} else {
+			ctrl.active.Store(true)
+		}
+		cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
+		go rebroadcaster(ctrl)
+		go submitter(ctrl)
 	}
-	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
-	go rebroadcaster(ctrl)
-	go submitter(ctrl)
 	go advertiser(ctrl)
-	ticker := time.NewTicker(time.Second * 3)
+	factor := 10
+	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	cont := true
 	for cont {
 		select {
 		case <-ticker.C:
 			if !ctrl.Ready.Load() {
 				if cx.IsCurrent() {
-					Info("ready to mine!")
+					Info("ready to send out jobs!")
 					ctrl.Ready.Store(true)
 					ctrl.active.Store(true)
 				}
 			}
-			Trace("network hashrate", ctrl.HashReport())
+			Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
 		case <-ctrl.quit:
+			Debug("quitting on close quit channel")
 			cont = false
 			ctrl.active.Store(false)
 		case <-interrupt.HandlersDone:
@@ -158,7 +164,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 
 func (c *Controller) HashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
-	av := ewma.NewMovingAverage(15)
+	av := ewma.NewMovingAverage()
 	var i int
 	var prev uint64
 	if err := c.hashSampleBuf.ForEach(func(v uint64) error {
@@ -210,8 +216,7 @@ var handlersMulticast = transport.Handlers{
 		for i := range txs {
 			msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 		}
-		// set old blocks to pause and send pause directly as block is
-		// probably a solution
+		// set old blocks to pause and send pause directly as block is probably a solution
 		err = c.multiConn.SendMany(pause.PauseMagic, c.pauseShards)
 		if err != nil {
 			Error(err)
@@ -221,8 +226,7 @@ var handlersMulticast = transport.Handlers{
 		isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(block,
 			blockchain.BFNone)
 		if err != nil {
-			// Anything other than a rule violation is an unexpected error, so log
-			// that error as an internal error.
+			// Anything other than a rule violation is an unexpected error, so log that error as an internal error.
 			if _, ok := err.(blockchain.RuleError); !ok {
 				Warnf(
 					"Unexpected error while processing block submitted"+
@@ -259,7 +263,7 @@ var handlersMulticast = transport.Handlers{
 		b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			Debug("not active")
+			// Debug("not active")
 			return
 		}
 		j := p2padvt.LoadContainer(b)
@@ -274,9 +278,8 @@ var handlersMulticast = transport.Handlers{
 				if _, ok := c.otherNodes[o]; !ok {
 					Debug("ctrl", j.GetControllerListenerPort(), "P2P",
 						j.GetP2PListenersPort(), "rpc", j.GetRPCListenersPort())
-					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
-					// recommended).
-					// go func() {
+					// because nodes can be set to change their port each launch this always reconnects (for lan,
+					// autoports is recommended).
 					Info("connecting to lan peer with same PSK", o, otherIPs)
 					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
 					}
@@ -413,9 +416,8 @@ out:
 				c.UpdateAndSendTemplate()
 				break
 			}
-			// The current block is stale if the memory pool has been updated
-			// since the block template was generated and it has been at least
-			// one minute.
+			// The current block is stale if the memory pool has been updated since the block template was generated and
+			// it has been at least one minute.
 			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
 				LastUpdated() && time.Now().After(time.Unix(0,
 				c.lastGenerated.Load().(int64)+int64(time.Minute))) {
@@ -463,7 +465,7 @@ out:
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
 		if !c.active.Load() {
-			Debug("not active")
+			// Debug("not active")
 			return
 		}
 		if !c.Ready.Load() {

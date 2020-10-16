@@ -4,8 +4,7 @@ import (
 	"net"
 )
 
-// GetInterface returns the address and interface of multicast capable
-// interfaces
+// GetInterface returns the address and interface of multicast capable interfaces
 func GetInterface() (lanInterface []*net.Interface) {
 	var err error
 	var interfaces []net.Interface

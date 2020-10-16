@@ -18,9 +18,8 @@ func dirEmpty(dirPath string) (bool, error) {
 		return false, err
 	}
 	defer f.Close()
-	// Read the names of a max of one entry from the directory.
-	// When the directory is empty, an io.EOF error will be returned,
-	// so allow it.
+	// Read the names of a max of one entry from the directory. When the directory is empty, an io.EOF error will be
+	// returned, so allow it.
 	names, err := f.Readdirnames(1)
 	if err != nil && err != io.EOF {
 		Error(err)
@@ -39,12 +38,10 @@ func doUpgrades(cx *conte.Xt) error {
 	return upgradeDataPaths()
 }
 
-// oldPodHomeDir returns the OS specific home directory pod used prior to
-// version 0.3.3.
-// This has since been replaced with util.AppDataDir but this function is still
-// provided for the automatic upgrade path.
+// oldPodHomeDir returns the OS specific home directory pod used prior to version 0.3.3. This has since been replaced
+// with util.AppDataDir but this function is still provided for the automatic upgrade path.
 func oldPodHomeDir() string {
-	// Search for Windows APPDATA first.  This won't exist on POSIX OSes
+	// Search for Windows APPDATA first. This won't exist on POSIX OSes
 	appData := os.Getenv("APPDATA")
 	if appData != "" {
 		return filepath.Join(appData, "pod")
@@ -58,22 +55,19 @@ func oldPodHomeDir() string {
 	return "."
 }
 
-// upgradeDBPathNet moves the database for a specific network from its
-// location prior to pod version 0.2.0 and uses heuristics to ascertain the old
-// database type to rename to the new format.
+// upgradeDBPathNet moves the database for a specific network from its location prior to pod version 0.2.0 and uses
+// heuristics to ascertain the old database type to rename to the new format.
 func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) error {
-	// Prior to version 0.2.0,
-	// the database was named the same thing for both sqlite and leveldb.
-	// Use heuristics to figure out the type of the database and move it to
-	// the new path and name introduced with version 0.2.0 accordingly.
+	// Prior to version 0.2.0, the database was named the same thing for both sqlite and leveldb. Use heuristics to
+	// figure out the type of the database and move it to the new path and name introduced with version 0.2.0
+	// accordingly.
 	fi, err := os.Stat(oldDbPath)
 	if err == nil {
 		oldDbType := "sqlite"
 		if fi.IsDir() {
 			oldDbType = "leveldb"
 		}
-		// The new database name is based on the database type and resides in
-		// a directory named after the network type.
+		// The new database name is based on the database type and resides in a directory named after the network type.
 		newDbRoot := filepath.Join(filepath.Dir(*cx.Config.DataDir), netName)
 		newDbName := blockdb.NamePrefix + "_" + oldDbType
 		if oldDbType == "sqlite" {
@@ -98,14 +92,11 @@ func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) error {
 	return nil
 }
 
-// upgradeDBPaths moves the databases from their locations prior to pod
-// version 0.2.0 to their new locations
-//
+// upgradeDBPaths moves the databases from their locations prior to pod version 0.2.0 to their new locations
 func upgradeDBPaths(cx *conte.Xt) error {
-	// Prior to version 0.2.0 the databases were in the "db" directory and
-	// their names were suffixed by "testnet" and "regtest" for their
-	// respective networks.  Check for the old database and update it
-	// to the new path introduced with version 0.2.0 accordingly.
+	// Prior to version 0.2.0 the databases were in the "db" directory and their names were suffixed by "testnet" and
+	// "regtest" for their respective networks. Check for the old database and update it to the new path introduced with
+	// version 0.2.0 accordingly.
 	oldDbRoot := filepath.Join(oldPodHomeDir(), "db")
 	err := upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet")
 	if err != nil {
@@ -125,12 +116,10 @@ func upgradeDBPaths(cx *conte.Xt) error {
 		Debug(err)
 	}
 	// Remove the old db directory
-	//
 	return os.RemoveAll(oldDbRoot)
 }
 
-// upgradeDataPaths moves the application data from its location prior to pod
-// version 0.3.3 to its new location.
+// upgradeDataPaths moves the application data from its location prior to pod version 0.3.3 to its new location.
 func upgradeDataPaths() error {
 	// No need to migrate if the old and new home paths are the same.
 	oldHomePath := oldPodHomeDir()

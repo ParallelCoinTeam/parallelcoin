@@ -7,7 +7,10 @@ import (
 	"testing"
 )
 
-// // fromHex converts the passed hex string into a byte slice and will panic if there is an error.  This is only provided for the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called for initialization purposes.
+// fromHex converts the passed hex string into a byte slice and will panic if there is an error. This is only provided
+// for the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called for
+// initialization purposes.
+//
 // func fromHex(// 	s string) []byte {
 // 	r, err := hex.DecodeString(s)
 // 	if err != nil {
@@ -42,8 +45,7 @@ testLoop:
 			node := newTreapNode(key[:], key[:], 0)
 			nodes = append(nodes, node)
 		}
-		// Push all of the nodes onto the parent stack while testing
-		// various stack properties.
+		// Push all of the nodes onto the parent stack while testing various stack properties.
 		stack := &parentStack{}
 		for j, node := range nodes {
 			stack.Push(node)
@@ -81,15 +83,13 @@ testLoop:
 				stack.Len())
 			continue testLoop
 		}
-		// Ensure attempting to retrieve a node at an index beyond the
-		// stack's length returns nil.
+		// Ensure attempting to retrieve a node at an index beyond the stack's length returns nil.
 		if node := stack.At(2); node != nil {
 			t.Errorf("At #%d: did not give back nil - got %v", i,
 				node)
 			continue testLoop
 		}
-		// Ensure attempting to pop a node from an empty stack returns
-		// nil.
+		// Ensure attempting to pop a node from an empty stack returns nil.
 		if node := stack.Pop(); node != nil {
 			t.Errorf("Pop #%d: did not give back nil - got %v", i,
 				node)

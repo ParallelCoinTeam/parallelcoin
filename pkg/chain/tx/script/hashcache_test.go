@@ -42,7 +42,9 @@ func genTestTx() (*wire.MsgTx, error) {
 	return tx, nil
 }
 
-// TestHashCacheAddContainsHashes tests that after items have been added to the hash cache, the ContainsHashes method returns true for all the items inserted.  Conversely, ContainsHashes should return false for any items _not_ in the hash cache.
+// TestHashCacheAddContainsHashes tests that after items have been added to the hash cache, the ContainsHashes method
+// returns true for all the items inserted. Conversely, ContainsHashes should return false for any items _not_ in the
+// hash cache.
 func TestHashCacheAddContainsHashes(t *testing.T) {
 	t.Parallel()
 	rand.Seed(time.Now().Unix())
@@ -61,7 +63,8 @@ func TestHashCacheAddContainsHashes(t *testing.T) {
 	for _, tx := range txns {
 		cache.AddSigHashes(tx)
 	}
-	// Next, we'll ensure that each of the transactions inserted into the cache are properly located by the ContainsHashes method.
+	// Next, we'll ensure that each of the transactions inserted into the cache are properly located by the
+	// ContainsHashes method.
 	for _, tx := range txns {
 		txid := tx.TxHash()
 		if ok := cache.ContainsHashes(&txid); !ok {
@@ -73,7 +76,8 @@ func TestHashCacheAddContainsHashes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to generate tx: %v", err)
 	}
-	// Finally, we'll assert that a transaction that wasn't added to the cache won't be reported as being present by the ContainsHashes method.
+	// Finally, we'll assert that a transaction that wasn't added to the cache won't be reported as being present by the
+	// ContainsHashes method.
 	randTxid := randTx.TxHash()
 	if ok := cache.ContainsHashes(&randTxid); ok {
 		t.Fatalf("txid %v wasn't inserted into cache but was found",
@@ -81,7 +85,8 @@ func TestHashCacheAddContainsHashes(t *testing.T) {
 	}
 }
 
-// TestHashCacheAddGet tests that the sighashes for a particular transaction are properly retrieved by the GetSigHashes function.
+// TestHashCacheAddGet tests that the sighashes for a particular transaction are properly retrieved by the GetSigHashes
+// function.
 func TestHashCacheAddGet(t *testing.T) {
 	t.Parallel()
 	rand.Seed(time.Now().Unix())

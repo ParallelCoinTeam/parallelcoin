@@ -6,8 +6,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// ContainsBlacklisted returns true if one of the given addresses
-// is found in the transaction
+// ContainsBlacklisted returns true if one of the given addresses is found in the transaction
 func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (hasBlacklisted bool) {
 	// in tests this function is not relevant
 	if b == nil {
@@ -45,8 +44,7 @@ func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (
 	return Intersects(addrs, blacklist)
 }
 
-// Intersects returns whether one slice of byte slices contains a match in
-// another
+// Intersects returns whether one slice of byte slices contains a match in another
 func Intersects(a, b []util.Address) bool {
 	for x := range a {
 		for y := range b {

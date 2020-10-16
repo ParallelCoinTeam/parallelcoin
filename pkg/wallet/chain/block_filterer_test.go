@@ -262,42 +262,35 @@ var Block100000 = wire.MsgBlock{
 	},
 }
 
-// TestBlockFiltererOneInOneOut tests the correctness of the BlockFilterer in
-// finding outpoints that spend from a "watched outpoint", even if they do not
-// send to an address controlled by the wallet.
+// TestBlockFiltererOneInOneOut tests the correctness of the BlockFilterer in finding outpoints that spend from a
+// "watched outpoint", even if they do not send to an address controlled by the wallet.
 func TestBlockFiltererOneInOneOut(t *testing.T) {
-	// Watch for spend from prev in in first and last tx, both of which are
-	// single input/single output.
+	// Watch for spend from prev in in first and last tx, both of which are single input/single output.
 	firstTx := Block100000.Transactions[1]
 	lastTx := Block100000.Transactions[3]
-	// Add each of their single previous outpoints to the set of watched
-	// outpoints to filter for.
+	// Add each of their single previous outpoints to the set of watched outpoints to filter for.
 	watchedOutPoints := make(map[wire.OutPoint]util.Address)
 	watchedOutPoints[firstTx.TxIn[0].PreviousOutPoint] = &util.AddressWitnessPubKeyHash{}
 	watchedOutPoints[lastTx.TxIn[0].PreviousOutPoint] = &util.AddressWitnessPubKeyHash{}
-	// Construct a filter request, watching only for the outpoints above,
-	// and construct a block filterer.
+	// Construct a filter request, watching only for the outpoints above, and construct a block filterer.
 	req := &chain.FilterBlocksRequest{
 		WatchedOutPoints: watchedOutPoints,
 	}
 	blockFilterer := chain.NewBlockFilterer(&netparams.SimNetParams, req)
-	// Filter block 100000, which should find matches for the watched
-	// outpoints.
+	// Filter block 100000, which should find matches for the watched outpoints.
 	match := blockFilterer.FilterBlock(&Block100000)
 	if !match {
 		t.Fatalf("failed to find matches when filtering for " +
 			"1-in-1-out txns")
 	}
-	// We should find exactly two relevant transactions added to the block
-	// filterer, then we check that both the first and last txns are found
-	// in that list.
+	// We should find exactly two relevant transactions added to the block filterer, then we check that both the first
+	// and last txns are found in that list.
 	assertNumRelevantTxns(t, blockFilterer, 2)
 	assertRelevantTxnsContains(t, blockFilterer, firstTx)
 	assertRelevantTxnsContains(t, blockFilterer, lastTx)
 }
 
-// assertNumRelevantTxns checks that the set of relevant txns found in a block
-// filterer is of a specific size.
+// assertNumRelevantTxns checks that the set of relevant txns found in a block filterer is of a specific size.
 func assertNumRelevantTxns(t *testing.T, bf *chain.BlockFilterer, size int) {
 	count := len(bf.RelevantTxns)
 	if count != size {
@@ -306,8 +299,7 @@ func assertNumRelevantTxns(t *testing.T, bf *chain.BlockFilterer, size int) {
 	}
 }
 
-// assertRelevantTxnsContains checks that the wantTx is found in the block
-// filterers set of relevant txns.
+// assertRelevantTxnsContains checks that the wantTx is found in the block filterers set of relevant txns.
 func assertRelevantTxnsContains(t *testing.T, bf *chain.BlockFilterer, wantTx *wire.MsgTx) {
 	for _, relevantTx := range bf.RelevantTxns {
 		if reflect.DeepEqual(relevantTx, wantTx) {

@@ -104,7 +104,8 @@ func TestFeeFilterWire(t *testing.T) {
 	}
 }
 
-// TestFeeFilterWireErrors performs negative tests against wire encode and decode of MsgFeeFilter to confirm error paths work correctly.
+// TestFeeFilterWireErrors performs negative tests against wire encode and decode of MsgFeeFilter to confirm error paths
+// work correctly.
 func TestFeeFilterWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoFeeFilter := FeeFilterVersion - 1
@@ -114,7 +115,7 @@ func TestFeeFilterWireErrors(t *testing.T) {
 		0xf3, 0xe0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
 	}
 	tests := []struct {
-		in       *MsgFeeFilter // Value to encode
+		in       *MsgFeeFilter // value to encode
 		buf      []byte        // Wire encoding
 		pver     uint32        // Protocol version for wire encoding
 		max      int           // Max size of fixed buffer to induce errors

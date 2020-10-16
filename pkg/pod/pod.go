@@ -14,6 +14,12 @@ import (
 
 const AppName = "pod"
 
+var (
+	GitCommit string
+	BuildTime string
+	Tag       string
+)
+
 type Schema struct {
 	Groups Groups `json:"groups"`
 }
@@ -62,7 +68,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
 
 	//  groups = []string{"config", "node", "debug", "rpc", "wallet", "proxy", "policy", "mining", "tls"}
-	//var groups []string
+	// var groups []string
 	rawFields := make(map[string]Fields)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
@@ -84,7 +90,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 			Datatype:    field.Type.String(),
 			Model:       field.Tag.Get("json"),
 			Hooks:       field.Tag.Get("hooks"),
-			// Value:       cfgMap[field.Tag.Get("model")],
+			// value:       cfgMap[field.Tag.Get("model")],
 		}
 		if f.Group != "" {
 			rawFields[f.Group] = append(rawFields[f.Group], f)
@@ -206,6 +212,8 @@ type Config struct {
 	WalletServer           *string          `group:"wallet" label:"Wallet Server" description:"node address to connect wallet server to" type:"input" inputType:"text" json:"WalletServer" hook:"restart"`
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"stringSlice" inputType:"text" json:"Whitelists" hook:"restart"`
 	LAN                    *bool            `group:"debug" label:"LAN" description:"run without any connection to nodes on the internet (does not apply on mainnet)" type:"switch" json:"LAN" hook:"restart"`
+	KopachGUI              *bool            `group:"mining" label:"Kopach GUI" description:"enables GUI for miner" type:"switch" json:"kopachgui" hook:"restart"`
+	DarkTheme              *bool            `group:"" label:"Dark Theme" description:"sets dark theme for GUI" type:"switch" json:"darktheme" hook:"restart"`
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
@@ -228,6 +236,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		ConnectPeers:           newStringSlice(),
 		Controller:             newstring(),
 		CPUProfile:             newstring(),
+		DarkTheme:              newbool(),
 		DataDir:                &datadir,
 		DbType:                 newstring(),
 		DisableBanning:         newbool(),
@@ -239,6 +248,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		FreeTxRelayLimit:       newfloat64(),
 		Generate:               newbool(),
 		GenThreads:             newint(),
+		KopachGUI:              newbool(),
 		LAN:                    newbool(),
 		Language:               newstring(),
 		LimitPass:              newstring(),
@@ -319,6 +329,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"ConnectPeers":           c.ConnectPeers,
 		"Controller":             c.Controller,
 		"CPUProfile":             c.CPUProfile,
+		"DarkTheme":              c.DarkTheme,
 		"DataDir":                c.DataDir,
 		"DbType":                 c.DbType,
 		"DisableBanning":         c.DisableBanning,
@@ -330,6 +341,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"FreeTxRelayLimit":       c.FreeTxRelayLimit,
 		"Generate":               c.Generate,
 		"GenThreads":             c.GenThreads,
+		"KopachGUI":              c.KopachGUI,
 		"LAN":                    c.LAN,
 		"Language":               c.Language,
 		"LimitPass":              c.LimitPass,

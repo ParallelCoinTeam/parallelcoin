@@ -22,9 +22,8 @@ import (
 
 type listenFunc func(net string, laddr string) (net.Listener, error)
 
-// GenerateRPCKeyPair generates a new RPC TLS keypair and writes the cert and
-// possibly also the key in PEM format to the paths specified by the config.  If
-// successful, the new keypair is returned.
+// GenerateRPCKeyPair generates a new RPC TLS keypair and writes the cert and possibly also the key in PEM format to the
+// paths specified by the config. If successful, the new keypair is returned.
 func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
 	Info("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
@@ -90,9 +89,8 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	return keyPair, nil
 }
 
-// makeListeners splits the normalized listen addresses into IPv4 and IPv6
-// addresses and creates new net.Listeners for each with the passed listen func.
-// Invalid addresses are logged and skipped.
+// makeListeners splits the normalized listen addresses into IPv4 and IPv6 addresses and creates new net.Listeners for
+// each with the passed listen func. Invalid addresses are logged and skipped.
 func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.Listener {
 	ipv4Addrs := make([]string, 0, len(normalizedListenAddrs)*2)
 	ipv6Addrs := make([]string, 0, len(normalizedListenAddrs)*2)
@@ -111,11 +109,9 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 			ipv6Addrs = append(ipv6Addrs, addr)
 			continue
 		}
-		// Remove the IPv6 zone from the host, if present.  The zone
-		// prevents ParseIP from correctly parsing the IP address.
-		// ResolveIPAddr is intentionally not used here due to the
-		// possibility of leaking a DNS query over Tor if the host is a
-		// hostname and not an IP address.
+		// Remove the IPv6 zone from the host, if present. The zone prevents ParseIP from correctly parsing the IP
+		// address. ResolveIPAddr is intentionally not used here due to the possibility of leaking a DNS query over Tor
+		// if the host is a hostname and not an IP address.
 		zoneIndex := strings.Index(host, "%")
 		if zoneIndex != -1 {
 			host = host[:zoneIndex]
@@ -156,18 +152,14 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	return listeners
 }
 
-// openRPCKeyPair creates or loads the RPC TLS keypair specified by the
-// application config.  This function respects the pod.Config.OneTimeTLSKey
-// setting.
+// openRPCKeyPair creates or loads the RPC TLS keypair specified by the application config. This function respects the
+// pod.Config.OneTimeTLSKey setting.
 func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
-	// Check for existence of the TLS key file.  If one time TLS keys are
-	// enabled but a key already exists, this function should error since
-	// it's possible that a persistent certificate was copied to a remote
-	// machine.  Otherwise, generate a new keypair when the key is missing.
-	// When generating new persistent keys, overwriting an existing cert is
-	// acceptable if the previous execution used a one time TLS key.
-	// Otherwise, both the cert and key should be read from disk.  If the
-	// cert is missing, the read error will occur in LoadX509KeyPair.
+	// Check for existence of the TLS key file. If one time TLS keys are enabled but a key already exists, this function
+	// should error since it's possible that a persistent certificate was copied to a remote machine. Otherwise,
+	// generate a new keypair when the key is missing. When generating new persistent keys, overwriting an existing cert
+	// is acceptable if the previous execution used a one time TLS key. Otherwise, both the cert and key should be read
+	// from disk. If the cert is missing, the read error will occur in LoadX509KeyPair.
 	_, e := os.Stat(*config.RPCKey)
 	keyExists := !os.IsNotExist(e)
 	switch {
@@ -234,9 +226,8 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 	return legacyServer, nil
 }
 
-// startWalletRPCServices associates each of the (optionally-nil) RPC servers
-// with a wallet to enable remote wallet access.  For the legacy JSON-RPC server it
-// enables methods that require a loaded wallet.
+// startWalletRPCServices associates each of the (optionally-nil) RPC servers with a wallet to enable remote wallet
+// access. For the legacy JSON-RPC server it enables methods that require a loaded wallet.
 func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *legacy.Server) {
 	if legacyServer != nil {
 		Warn("starting legacy wallet rpc server")

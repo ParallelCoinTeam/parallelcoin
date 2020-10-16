@@ -2,9 +2,10 @@ package interrupt
 
 import (
 	"os"
+	"os/exec"
 	"os/signal"
+	"runtime"
 	"syscall"
-	"time"
 
 	"github.com/kardianos/osext"
 )
@@ -24,10 +25,11 @@ var (
 	// HandlersDone is closed after all interrupt handlers run the first time
 	// an interrupt is signaled.
 	HandlersDone = make(chan struct{})
+	DataDir      string
 )
 
-// Receiver listens for interrupt signals, registers interrupt callbacks, and
-// responds to custom shutdown signals as required
+// Receiver listens for interrupt signals, registers interrupt callbacks, and responds to custom shutdown signals as
+// required
 func Listener() {
 	var interruptCallbacks []func()
 	invokeCallbacks := func() {
@@ -39,20 +41,30 @@ func Listener() {
 		}
 		close(HandlersDone)
 		Debug("interrupt handlers finished")
+		file, err := osext.Executable()
+		if err != nil {
+			Error(err)
+			return
+		}
 		if Restart {
 			Debug("restarting")
-			file, err := osext.Executable()
-			if err != nil {
-				Error(err)
-				return
+			if runtime.GOOS != "windows" {
+				err = syscall.Exec(file, os.Args, os.Environ())
+				if err != nil {
+					Fatal(err)
+				}
+			} else {
+				s := []string{"cmd.exe", "/C", "start"}
+				s = append(s, os.Args[0])
+				s = append(s, "--delaystart")
+				s = append(s, os.Args[1:]...)
+				cmd := exec.Command(s[0], s[1:]...)
+				if err = cmd.Run(); Check(err) {
+				}
+
 			}
-			err = syscall.Exec(file, os.Args, os.Environ())
-			if err != nil {
-				Fatal(err)
-			}
-			// return
 		}
-		time.Sleep(time.Second)
+		// time.Sleep(time.Second * 3)
 		os.Exit(1)
 	}
 	for {
@@ -77,8 +89,8 @@ func Listener() {
 
 // AddHandler adds a handler to call when a SIGINT (Ctrl+C) is received.
 func AddHandler(handler func()) {
-	// Create the channel and start the main interrupt handler which invokes all
-	// other callbacks and exits if not already done.
+	// Create the channel and start the main interrupt handler which invokes all other callbacks and exits if not
+	// already done.
 	if Chan == nil {
 		Chan = make(chan os.Signal, 1)
 		signal.Notify(Chan, Signals...)
@@ -87,7 +99,7 @@ func AddHandler(handler func()) {
 	AddHandlerChan <- handler
 }
 
-// Request programatically requests a shutdown
+// Request programmatically requests a shutdown
 func Request() {
 	Debug("interrupt requested")
 	ShutdownRequestChan <- struct{}{}

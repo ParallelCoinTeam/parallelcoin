@@ -86,27 +86,26 @@ func TestPoolGetUsedAddr(t *testing.T) {
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
 	TstCreateSeries(t, dbtx, pool, []TstSeriesDef{{ReqSigs: 2, PubKeys: TstPubKeys[0:3], SeriesID: 1}})
-	// Addr with series=1, branch=0, index=10 has never been used, so it should
-	// return nil.
+	// Addr with series=1, branch=0, index=10 has never been used, so it should return nil.
 	addr, err := pool.getUsedAddr(ns, addrmgrNs, 1, 0, 10)
 	if err != nil {
-		t.Fatalf("Error when looking up used addr: %v", err)
+		t.Fatalf("VPError when looking up used addr: %v", err)
 	}
 	if addr != nil {
 		t.Fatalf("Unused address found in used addresses DB: %v", addr)
 	}
-	// Now we add that addr to the used addresses DB and check that the value
-	// returned by getUsedAddr() is what we expect.
+	// Now we add that addr to the used addresses DB and check that the value returned by getUsedAddr() is what we
+	// expect.
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		err = pool.addUsedAddr(ns, addrmgrNs, 1, 0, 10)
 	})
 	if err != nil {
-		t.Fatalf("Error when storing addr in used addresses DB: %v", err)
+		t.Fatalf("VPError when storing addr in used addresses DB: %v", err)
 	}
 	var script []byte
 	addr, err = pool.getUsedAddr(ns, addrmgrNs, 1, 0, 10)
 	if err != nil {
-		t.Fatalf("Error when looking up used addr: %v", err)
+		t.Fatalf("VPError when looking up used addr: %v", err)
 	}
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		script, err = addr.Script()
@@ -167,14 +166,14 @@ func TestSerializationErrors(t *testing.T) {
 	for testNum, test := range tests {
 		encryptedPubs, err := encryptKeys(test.pubKeys, pool.Manager(), waddrmgr.CKTPublic)
 		if err != nil {
-			t.Fatalf("Test #%d - Error encrypting pubkeys: %v", testNum, err)
+			t.Fatalf("Test #%d - VPError encrypting pubkeys: %v", testNum, err)
 		}
 		var encryptedPrivs [][]byte
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			encryptedPrivs, err = encryptKeys(test.privKeys, pool.Manager(), waddrmgr.CKTPrivate)
 		})
 		if err != nil {
-			t.Fatalf("Test #%d - Error encrypting privkeys: %v", testNum, err)
+			t.Fatalf("Test #%d - VPError encrypting privkeys: %v", testNum, err)
 		}
 		row := &dbSeriesRow{
 			version:           test.version,
@@ -239,13 +238,13 @@ func TestSerialization(t *testing.T) {
 	for testNum, test := range tests {
 		encryptedPubs, err := encryptKeys(test.pubKeys, pool.Manager(), waddrmgr.CKTPublic)
 		if err != nil {
-			t.Fatalf("Test #%d - Error encrypting pubkeys: %v", testNum, err)
+			t.Fatalf("Test #%d - VPError encrypting pubkeys: %v", testNum, err)
 		}
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			encryptedPrivs, err = encryptKeys(test.privKeys, pool.Manager(), waddrmgr.CKTPrivate)
 		})
 		if err != nil {
-			t.Fatalf("Test #%d - Error encrypting privkeys: %v", testNum, err)
+			t.Fatalf("Test #%d - VPError encrypting privkeys: %v", testNum, err)
 		}
 		row := &dbSeriesRow{
 			version:           test.version,
@@ -256,7 +255,7 @@ func TestSerialization(t *testing.T) {
 		}
 		serialized, err := serializeSeriesRow(row)
 		if err != nil {
-			t.Fatalf("Test #%d - Error in serialization %v", testNum, err)
+			t.Fatalf("Test #%d - VPError in serialization %v", testNum, err)
 		}
 		row, err = deserializeSeriesRow(serialized)
 		if err != nil {
@@ -365,7 +364,7 @@ func TestValidateAndDecryptKeys(t *testing.T) {
 		pubKeys, privKeys, err = validateAndDecryptKeys(rawPubKeys, rawPrivKeys, pool)
 	})
 	if err != nil {
-		t.Fatalf("Error when validating/decrypting keys: %v", err)
+		t.Fatalf("VPError when validating/decrypting keys: %v", err)
 	}
 	if len(pubKeys) != 2 {
 		t.Fatalf("Unexpected number of decrypted public keys: got %d, want 2", len(pubKeys))

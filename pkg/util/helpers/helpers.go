@@ -1,5 +1,5 @@
-// Package helpers provides convenience functions to simplify wallet code.  This
-// package is intended for internal wallet use only.
+// Package helpers provides convenience functions to simplify wallet code. This package is intended for internal wallet
+// use only.
 package helpers
 
 import (

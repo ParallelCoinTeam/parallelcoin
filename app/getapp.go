@@ -2,6 +2,12 @@ package app
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"time"
+
+	"github.com/urfave/cli"
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/app/conte"
@@ -14,10 +20,6 @@ import (
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/urfave/cli"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 // GetApp defines the pod app
@@ -27,10 +29,10 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Version:     "v0.0.1",
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
-		Action:      guiHandle(cx),
+		Action:      nodeHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			Trace("subcommand completed")
+			Trace("subcommand completed", os.Args)
 			if interrupt.Restart {
 			}
 			return nil
@@ -41,8 +43,10 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
 				}, apputil.SubCommands(), nil, "v"),
-			apputil.NewCommand("monitor", "run monitor GUI",
-				monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
+			//apputil.NewCommand("gui", "run GUI",
+			//	guiHandle(cx), apputil.SubCommands(), nil, "gui"),
+			apputil.NewCommand("gui", "start GUI", guiHandle(cx),
+				apputil.SubCommands(), nil),
 			apputil.NewCommand("ctl",
 				"send RPC commands to a node or wallet and print the result",
 				ctlHandle(cx), apputil.SubCommands(
@@ -103,6 +107,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					apputil.NewCommand("resetchain",
 						"reset the chain",
 						func(c *cli.Context) (err error) {
+							config.Configure(cx, c.Command.Name, true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"
@@ -120,10 +125,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				), nil, "n"),
 			apputil.NewCommand("wallet", "start parallelcoin wallet server",
 				WalletHandle(cx), apputil.SubCommands(
-					apputil.NewCommand("drophistory",
-						"drop the transaction history in the wallet ("+
-							"for development and testing as well as clearing up"+
-							" transaction mess)",
+					apputil.NewCommand("drophistory", "drop the transaction history in the wallet (for "+
+						"development and testing as well as clearing up transaction mess)",
 						func(c *cli.Context) (err error) {
 							config.Configure(cx, c.Command.Name, true)
 							Info("dropping wallet history")
@@ -140,27 +143,26 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							Debug("walletChan sent")
 							err = legacy.DropWalletHistory(cx.WalletServer)(c)
 							return
-						},
-						apputil.SubCommands(),
-						nil,
-					),
+						}, apputil.SubCommands(), nil),
 				), nil, "w"),
 			apputil.NewCommand("shell", "start combined wallet/node shell",
 				shellHandle(cx), apputil.SubCommands(), nil, "s"),
-			apputil.NewCommand("gui", "start GUI", guiHandle(cx),
-				apputil.SubCommands(), nil),
+			// apputil.NewCommand("gui", "start GUI", guiHandle(cx),
+			// 	apputil.SubCommands(), nil),
 			apputil.NewCommand("kopach", "standalone miner for clusters",
 				KopachHandle(cx), apputil.SubCommands(), nil, "k"),
-			apputil.NewCommand("worker",
-				"single thread parallelcoin miner controlled with binary IPC"+
-					" interface on stdin/stdout; internal use, "+
-					"must have network name string as second arg after worker and"+
-					"nothing before; communicates via net/rpc encoding/gob as"+
-					" default over stdio", kopach_worker.KopachWorkerHandle(cx),
-				apputil.SubCommands(), nil),
+			apputil.NewCommand(
+				"worker",
+				"single thread parallelcoin miner controlled with binary IPC interface on stdin/stdout; "+
+					"internal use, must have network name string as second arg after worker and nothing before;"+
+					" communicates via net/rpc encoding/gob as default over stdio",
+				kopach_worker.KopachWorkerHandle(cx),
+				apputil.SubCommands(),
+				nil,
+			),
 			apputil.NewCommand("init",
-				"steps through creation of new wallet and initialization for"+
-					" a network with these specified in the main",
+				"steps through creation of new wallet and initialization for a network with these specified "+
+					"in the main",
 				initHandle(cx),
 				apputil.SubCommands(),
 				nil,
@@ -175,8 +177,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				Destination: cx.Config.DataDir,
 			},
 			cli.BoolFlag{
-				Name:        "pipelog, P",
-				Usage:       "enables pipe logger (" +
+				Name: "pipelog, P",
+				Usage: "enables pipe logger (" +
 					"setting only activates on use of cli flag or environment" +
 					" variable as it alters stdin/out behaviour)",
 				EnvVar:      "POD_PIPELOG",
@@ -477,7 +479,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					" and other node peers",
 				":0",
 				cx.Config.Controller),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"autoports",
 				"uses random automatic ports for p2p, rpc and controller",
 				cx.Config.AutoPorts),
@@ -545,15 +547,13 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"blocksonly",
 				"Do not accept transactions from remote peers.",
 				cx.Config.BlocksOnly),
-			apputil.Bool(
-				"notxindex",
-				"Disable the transaction index which makes all transactions"+
-					" available via the getrawtransaction RPC",
+			apputil.BoolTrue(
+				"txindex",
+				"Disable the transaction index which makes all transactions available via the getrawtransaction RPC",
 				cx.Config.TxIndex),
-			apputil.Bool(
-				"noaddrindex",
-				"Disable address-based transaction index which"+
-					" makes the searchrawtransactions RPC available",
+			apputil.BoolTrue(
+				"addrindex",
+				"Disable address-based transaction index which makes the searchrawtransactions RPC available",
 				cx.Config.AddrIndex,
 			),
 			apputil.Bool(
@@ -611,18 +611,29 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				8,
 				cx.Config.WalletRPCMaxWebsockets,
 			),
-			// apputil.StringSlice(
-			// 	"experimentalrpclisten",
-			// 	"Listen for RPC connections on this interface/port",
-			// 	cx.Config.ExperimentalRPCListeners),
 			apputil.Bool(
 				"nodeoff",
-				"Starts GUI with node turned off",
+				"Starts with node turned off",
 				cx.Config.NodeOff),
 			apputil.Bool(
 				"walletoff",
-				"Starts GUI with wallet turned off",
+				"Starts with wallet turned off",
 				cx.Config.WalletOff,
+			),
+			apputil.Bool(
+				"delaystart",
+				"pauses for 3 seconds before starting, for internal use with restart function",
+				nil,
+			),
+			apputil.Bool(
+				"kopachgui",
+				"enables the GUI for the kopach miner",
+				cx.Config.KopachGUI,
+			),
+			apputil.Bool(
+				"darktheme",
+				"sets the dark theme on the gui interface",
+				cx.Config.DarkTheme,
 			),
 		},
 	}

@@ -3,14 +3,16 @@ package logi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
 
 const (
@@ -56,21 +58,6 @@ var (
 		Trace: 7,
 	}
 	StartupTime    = time.Now()
-	BackgroundGrey = "\u001b[48;5;240m"
-	ColorBlue      = "\u001b[38;5;33m"
-	ColorBold      = "\u001b[1m"
-	ColorBrown     = "\u001b[38;5;130m"
-	ColorCyan      = "\u001b[36m"
-	ColorFaint     = "\u001b[2m"
-	ColorGreen     = "\u001b[38;5;40m"
-	ColorItalic    = "\u001b[3m"
-	ColorOff       = "\u001b[0m"
-	ColorOrange    = "\u001b[38;5;208m"
-	ColorPurple    = "\u001b[38;5;99m"
-	ColorRed       = "\u001b[38;5;196m"
-	ColorUnderline = "\u001b[4m"
-	ColorViolet    = "\u001b[38;5;201m"
-	ColorYellow    = "\u001b[38;5;226m"
 )
 
 type LogWriter struct {
@@ -169,7 +156,7 @@ var L = NewLogger()
 // AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() (ch chan Entry) {
 	L.LogChan = append(L.LogChan, make(chan Entry))
-	//L.Write = false
+	// L.Write = false
 	return L.LogChan[len(L.LogChan)-1]
 }
 
@@ -212,8 +199,8 @@ func NewLogger() (l *Logger) {
 	return
 }
 
-func (wr *LogWriter) SetLogWriter(w io.Writer) {
-	wr.Writer = w
+func (w *LogWriter) SetLogWriter(wr io.Writer) {
+	w.Writer = wr
 }
 
 // SetLogPaths sets a file path to write logs
@@ -250,33 +237,34 @@ func (l *Logger) SetLevel(level string, color bool, split string) {
 	l.Level = sanitizeLoglevel(level)
 	sep := string(os.PathSeparator)
 	if runtime.GOOS == "windows" {
-		sep = "/"
+		sep = "\\"
+		color = false
 	}
 	l.Split = split + sep
 	l.Color = color
 }
 
 func (l *Logger) LocToPkg(pkg string) (out string) {
-	//fmt.Println("pkg",pkg)
+	// fmt.Println("pkg",pkg)
 	sep := string(os.PathSeparator)
 	if runtime.GOOS == "windows" {
-		sep = "/"
+		sep = "\\"
 	}
 	split := strings.Split(pkg, l.Split)
 	if len(split) < 2 {
 		return pkg
 	}
-	//fmt.Println("split",split, l.Split)
+	// fmt.Println("split",split, l.Split)
 	pkg = split[1]
 	split = strings.Split(pkg, sep)
 	return strings.Join(split[:len(split)-1], string(os.PathSeparator))
 }
 
 func (l *Logger) Register(pkg string) string {
-	//split := strings.Split(pkg, l.Split)
-	//pkg = split[1]
-	//split = strings.Split(pkg, string(os.PathSeparator))
-	//pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
+	// split := strings.Split(pkg, l.Split)
+	// pkg = split[1]
+	// split = strings.Split(pkg, string(os.PathSeparator))
+	// pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
 	// if runtime.GOOS == "windows" {
 	// 	pkg = strings.Replace(pkg, "/", string(os.PathSeparator), -1)
 	// }
@@ -327,14 +315,13 @@ func (l *Logger) LevelIsActive(level string) (out bool) {
 	return
 }
 
-var TermWidth = func() int { return 80 }
-
 func (l *Logger) GetLoc(loc string, line int) (out string) {
 	split := strings.Split(loc, l.Split)
 	if len(split) < 2 {
 		out = loc
+	} else {
+		out = split[1]
 	}
-	out = split[1]
 	return out + fmt.Sprint(":", line)
 }
 
@@ -346,7 +333,7 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 			return
 		}
 		if l.Writer.write || (*l.Packages)[pkg] {
-			l.Writer.Println(Composite(text, level, l.Color, l.Split))
+			l.Writer.Println(Composite(text, level))
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
@@ -370,7 +357,7 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 		t := fn()
 		text := trimReturn(t)
 		if l.Writer.write {
-			l.Writer.Println(Composite(text, level, l.Color, l.Split))
+			l.Writer.Println(Composite(text, level))
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
@@ -393,7 +380,7 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 		}
 		text := trimReturn(fmt.Sprintln(a...))
 		if l.Writer.write {
-			l.Writer.Println(Composite(text, l.Level, l.Color, l.Split))
+			l.Writer.Println(Composite(text, l.Level))
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
@@ -419,7 +406,7 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 		}
 		text := err.Error()
 		if l.Writer.write {
-			l.Writer.Println(Composite(text, "CHK", l.Color, l.Split))
+			l.Writer.Println(Composite(text, "CHK"))
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
@@ -442,7 +429,7 @@ func (l *Logger) spewFunc(level string) SpewFunc {
 			return
 		}
 		text := trimReturn(spew.Sdump(a))
-		o := "" + Composite("spew:", level, l.Color, l.Split)
+		o := "" + Composite("spew:", level)
 		o += "\n" + text + "\n"
 		if l.Writer.write {
 			l.Writer.Print(o)
@@ -461,185 +448,14 @@ func (l *Logger) spewFunc(level string) SpewFunc {
 	return f
 }
 
-func Composite(text, level string, color bool, split string) string {
-	dots := "."
-	terminalWidth := TermWidth()
-	if TermWidth() <= 120 {
-		terminalWidth = 120
-	}
+func Composite(text, level string) (final string) {
 	skip := 3
 	if level == Check {
 		skip = 4
 	}
-	_, loc, iline, _ := runtime.Caller(skip)
-	line := fmt.Sprint(iline)
-	files := strings.Split(loc, split)
-	var file, since string
-	file = loc
-	if len(files) > 1 {
-		file = files[1]
-	}
-	switch {
-	case terminalWidth <= 60:
-		since = ""
-		file = ""
-		line = ""
-		dots = " "
-	case terminalWidth <= 80:
-		dots = " "
-		if len(file) > 30 {
-			file = ""
-			line = ""
-		}
-		since = fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Second*time.Second)
-	case terminalWidth < 120:
-		if len(file) > 40 {
-			file = ""
-			line = ""
-			dots = " "
-		}
-		since = fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Millisecond*time.Millisecond)
-	case terminalWidth < 160:
-		if len(file) > 60 {
-			file = ""
-			line = ""
-			dots = " "
-		}
-		since = fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Millisecond*time.Millisecond)
-		//since = fmt.Sprint(time.Now())[:19]
-	case terminalWidth >= 200:
-		since = fmt.Sprint(time.Now())[:39]
-	default:
-		since = fmt.Sprint(time.Now())[:19]
-	}
-	levelLen := 4 // len(level) + 1
-	sinceLen := len(since) + 1
-	textLen := len(text) + 1
-	fileLen := len(file) + 1
-	lineLen := len(line) + 1
-	if file != "" {
-		file += ":"
-	}
-	if color {
-		switch Tags[level] {
-		case "FTL":
-			level = ColorBold + ColorRed + Tags[level] + ColorOff
-			since = ColorRed + since + ColorOff
-			file = ColorItalic + ColorBlue + file
-			line = line + ColorOff
-		case "ERR":
-			level = ColorBold + ColorOrange + Tags[level] + ColorOff
-			since = ColorOrange + since + ColorOff
-			file = ColorItalic + ColorBlue + file
-			line = line + ColorOff
-		case "WRN":
-			level = ColorBold + ColorYellow + Tags[level] + ColorOff
-			since = ColorYellow + since + ColorOff
-			file = ColorItalic + ColorBlue + file
-			line = line + ColorOff
-		case "INF":
-			level = ColorBold + ColorGreen + Tags[level] + ColorOff
-			since = ColorGreen + since + ColorOff
-			file = ColorItalic + ColorBlue + file
-			line = line + ColorOff
-		case "CHK":
-			level = ColorBold + ColorCyan + Tags[level] + ColorOff
-			since = since
-			file = ColorItalic + ColorBlue + file
-			line = line + ColorOff
-		case "DBG":
-			level = ColorBold + ColorBlue + Tags[level] + ColorOff
-			since = ColorBlue + since + ColorOff
-			file = ColorItalic + ColorBlue + file
-			line = line + ColorOff
-		case "TRC":
-			level = ColorBold + ColorViolet + Tags[level] + ColorOff
-			since = ColorViolet + since + ColorOff
-			file = ColorItalic + ColorBlue + file
-			line = line + ColorOff
-		}
-	} else {
-		level = Tags[level]
-	}
-	final := ""
-	if levelLen+sinceLen+textLen+fileLen+lineLen > terminalWidth {
-		lines := strings.Split(text, "\n")
-		// log text is multiline
-		line1len := terminalWidth - levelLen - sinceLen - fileLen - lineLen
-		restLen := terminalWidth - levelLen - sinceLen
-		if len(lines) > 1 {
-			final = fmt.Sprintf("%s %s %s %s%s", level, since,
-				strings.Repeat(".",
-					terminalWidth-levelLen-sinceLen-fileLen-lineLen-4),
-				file, line)
-			final += text[:len(text)-1]
-		} else {
-			// log text is a long line
-			spaced := strings.Split(text, " ")
-			var rest bool
-			curLineLen := 0
-			final += fmt.Sprintf("%s %s ", level, since)
-			var i int
-			for i = range spaced {
-				if i > 0 {
-					curLineLen += len(spaced[i-1]) + 1
-					if !rest {
-						if curLineLen >= line1len {
-							rest = true
-							spacers := terminalWidth - levelLen - sinceLen -
-								fileLen - lineLen - curLineLen + len(spaced[i-1]) + 1
-							if spacers < 1 {
-								spacers = 1
-							}
-							final += strings.Repeat(dots, spacers)
-							final += fmt.Sprintf(" %s%s\n",
-								file, line)
-							final += strings.Repeat(" ", levelLen+sinceLen)
-							final += spaced[i-1] + " "
-							curLineLen = len(spaced[i-1]) + 1
-						} else {
-							final += spaced[i-1] + " "
-						}
-					} else {
-						if curLineLen >= restLen-1 {
-							final += "\n" + strings.Repeat(" ",
-								levelLen+sinceLen)
-							final += spaced[i-1] + dots
-							curLineLen = len(spaced[i-1]) + 1
-						} else {
-							final += spaced[i-1] + " "
-						}
-					}
-				}
-			}
-			curLineLen += len(spaced[i])
-			if !rest {
-				if curLineLen >= line1len {
-					final += fmt.Sprintf("%s %s%s\n",
-						strings.Repeat(dots,
-							len(spaced[i])+line1len-curLineLen),
-						file, line)
-					final += strings.Repeat(" ", levelLen+sinceLen)
-					final += spaced[i] // + "\n"
-				} else {
-					final += fmt.Sprintf("%s %s %s%s\n",
-						spaced[i],
-						strings.Repeat(dots,
-							terminalWidth-curLineLen-fileLen-lineLen),
-						file, line)
-				}
-			} else {
-				if curLineLen >= restLen {
-					final += "\n" + strings.Repeat(" ", levelLen+sinceLen)
-				}
-				final += spaced[i]
-			}
-		}
-	} else {
-		final = fmt.Sprintf("%s %s %s %s %s%s", level, since, text,
-			strings.Repeat(dots,
-				terminalWidth-levelLen-sinceLen-textLen-fileLen-lineLen),
-			file, line)
-	}
+	_, loc, iLine, _ := runtime.Caller(skip)
+	line := fmt.Sprint(iLine)
+	since := fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Second*time.Second)
+	final = Tags[level] + " " + since + " " + text + " " + loc + ":" + line
 	return final
 }

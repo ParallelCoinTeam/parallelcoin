@@ -174,13 +174,11 @@ func TestAddLocalAddress(t *testing.T) {
 	for x, test := range tests {
 		result := amgr.AddLocalAddress(&test.address, test.priority)
 		if result == nil && !test.valid {
-			t.Errorf("TestAddLocalAddress test #%d failed: %s should have "+
-				"been accepted", x, test.address.IP)
+			t.Errorf("TestAddLocalAddress test #%d failed: %s should have been accepted", x, test.address.IP)
 			continue
 		}
 		if result != nil && test.valid {
-			t.Errorf("TestAddLocalAddress test #%d failed: %s should not have "+
-				"been accepted", x, test.address.IP)
+			t.Errorf("TestAddLocalAddress test #%d failed: %s should not have been accepted", x, test.address.IP)
 			continue
 		}
 	}

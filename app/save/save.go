@@ -2,9 +2,10 @@ package save
 
 import (
 	"encoding/json"
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 
 	"github.com/urfave/cli"
 
@@ -21,8 +22,7 @@ func Pod(c *pod.Config) (success bool) {
 		copy(uac, *c.UserAgentComments)
 		*c.UserAgentComments = uac[1:]
 	}
-	// don't save pipe log setting as we want it to only be active from a
-	// flag or environment variable
+	// don't save pipe log setting as we want it to only be active from a flag or environment variable
 	pipeLogOn := *c.PipeLog
 	*c.PipeLog = false
 	if yp, e := json.MarshalIndent(c, "", "  "); e == nil {

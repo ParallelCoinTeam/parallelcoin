@@ -5,13 +5,10 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// RuleError identifies a rule violation.
-// It is used to indicate that processing of a transaction failed due to one
-// of the many validation rules.
-// The caller can use type assertions to determine if a failure was
-// specifically due to a rule violation and use the Err field to access the
-// underlying error, which will be either a TxRuleError or a blockchain.
-// RuleError.
+// RuleError identifies a rule violation. It is used to indicate that processing of a transaction failed due to one of
+// the many validation rules. The caller can use type assertions to determine if a failure was specifically due to a
+// rule violation and use the Err field to access the underlying error, which will be either a TxRuleError or a
+// blockchain. RuleError.
 type RuleError struct {
 	Err error
 }
@@ -24,12 +21,9 @@ func (e RuleError) Error() string {
 	return e.Err.Error()
 }
 
-// TxRuleError identifies a rule violation.
-// It is used to indicate that processing of a transaction failed due to one
-// of the many validation rules.
-// The caller can use type assertions to determine if a failure was
-// specifically due to a rule violation and access the ErrorCode field to
-// ascertain the specific reason for the rule violation.
+// TxRuleError identifies a rule violation. It is used to indicate that processing of a transaction failed due to one of
+// the many validation rules. The caller can use type assertions to determine if a failure was specifically due to a
+// rule violation and access the ErrorCode field to ascertain the specific reason for the rule violation.
 type TxRuleError struct {
 	RejectCode  wire.RejectCode // The code to send with reject messages
 	Description string          // Human readable description of the issue
@@ -40,24 +34,22 @@ func (e TxRuleError) Error() string {
 	return e.Description
 }
 
-// txRuleError creates an underlying TxRuleError with the given a set of
-// arguments and returns a RuleError that encapsulates it.
+// txRuleError creates an underlying TxRuleError with the given a set of arguments and returns a RuleError that
+// encapsulates it.
 func txRuleError(c wire.RejectCode, desc string) RuleError {
 	return RuleError{
 		Err: TxRuleError{RejectCode: c, Description: desc},
 	}
 }
 
-// chainRuleError returns a RuleError that encapsulates the given blockchain.
-// RuleError.
+// chainRuleError returns a RuleError that encapsulates the given blockchain. RuleError.
 func chainRuleError(chainErr blockchain.RuleError) RuleError {
 	return RuleError{
 		Err: chainErr,
 	}
 }
 
-// extractRejectCode attempts to return a relevant reject code for a given
-// error by examining the error for known types.
+// extractRejectCode attempts to return a relevant reject code for a given error by examining the error for known types.
 // It will return true if a code was successfully extracted.
 func extractRejectCode(err error) (wire.RejectCode, bool) {
 	// Pull the underlying error out of a RuleError.
@@ -97,8 +89,8 @@ func extractRejectCode(err error) (wire.RejectCode, bool) {
 	return wire.RejectInvalid, false
 }
 
-// ErrToRejectErr examines the underlying type of the error and returns a
-// reject code and string appropriate to be sent in a wire.MsgReject message.
+// ErrToRejectErr examines the underlying type of the error and returns a reject code and string appropriate to be sent
+// in a wire.MsgReject message.
 func ErrToRejectErr(err error) (wire.RejectCode, string) {
 	// Return the reject code along with the error text if it can be
 	// extracted from the error.
@@ -106,16 +98,13 @@ func ErrToRejectErr(err error) (wire.RejectCode, string) {
 	if found {
 		return rejectCode, err.Error()
 	}
-	// Return a generic rejected string if there is no error.
-	// This really should not happen unless the code elsewhere is not setting
-	// an error as it should be but it's best to be safe and simply return a
-	// generic string rather than allowing the following code that
-	// dereferences the err to panic.
+	// Return a generic rejected string if there is no error. This really should not happen unless the code elsewhere is
+	// not setting an error as it should be but it's best to be safe and simply return a generic string rather than
+	// allowing the following code that dereferences the err to panic.
 	if err == nil {
 		return wire.RejectInvalid, "rejected"
 	}
-	// When the underlying error is not one of the above cases,
-	// just return wire.RejectInvalid with a generic rejected string plus the
-	// error text.
+	// When the underlying error is not one of the above cases, just return wire.RejectInvalid with a generic rejected
+	// string plus the error text.
 	return wire.RejectInvalid, "rejected: " + err.Error()
 }

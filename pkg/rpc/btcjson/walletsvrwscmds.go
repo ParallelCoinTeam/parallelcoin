@@ -5,7 +5,8 @@ type CreateEncryptedWalletCmd struct {
 	Passphrase string
 }
 
-// NewCreateEncryptedWalletCmd returns a new instance which can be used to issue a createencryptedwallet JSON-RPC command.
+// NewCreateEncryptedWalletCmd returns a new instance which can be used to issue a createencryptedwallet JSON-RPC
+// command.
 func NewCreateEncryptedWalletCmd(passphrase string) *CreateEncryptedWalletCmd {
 	return &CreateEncryptedWalletCmd{
 		Passphrase: passphrase,
@@ -18,7 +19,9 @@ type ExportWatchingWalletCmd struct {
 	Download *bool `jsonrpcdefault:"false"`
 }
 
-// NewExportWatchingWalletCmd returns a new instance which can be used to issue a exportwatchingwallet JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewExportWatchingWalletCmd returns a new instance which can be used to issue a exportwatchingwallet JSON-RPC command.
+// The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the
+// default value.
 func NewExportWatchingWalletCmd(account *string, download *bool) *ExportWatchingWalletCmd {
 	return &ExportWatchingWalletCmd{
 		Account:  account,
@@ -31,7 +34,9 @@ type GetUnconfirmedBalanceCmd struct {
 	Account *string
 }
 
-// NewGetUnconfirmedBalanceCmd returns a new instance which can be used to issue a getunconfirmedbalance JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetUnconfirmedBalanceCmd returns a new instance which can be used to issue a getunconfirmedbalance JSON-RPC
+// command. The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use
+// the default value.
 func NewGetUnconfirmedBalanceCmd(account *string) *GetUnconfirmedBalanceCmd {
 	return &GetUnconfirmedBalanceCmd{
 		Account: account,
@@ -44,7 +49,9 @@ type ListAddressTransactionsCmd struct {
 	Account   *string
 }
 
-// NewListAddressTransactionsCmd returns a new instance which can be used to issue a listaddresstransactions JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewListAddressTransactionsCmd returns a new instance which can be used to issue a listaddresstransactions JSON-RPC
+// command. The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use
+// the default value.
 func NewListAddressTransactionsCmd(addresses []string, account *string) *ListAddressTransactionsCmd {
 	return &ListAddressTransactionsCmd{
 		Addresses: addresses,
@@ -57,7 +64,9 @@ type ListAllTransactionsCmd struct {
 	Account *string
 }
 
-// NewListAllTransactionsCmd returns a new instance which can be used to issue a listalltransactions JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewListAllTransactionsCmd returns a new instance which can be used to issue a listalltransactions JSON-RPC command.
+// The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the
+// default value.
 func NewListAllTransactionsCmd(account *string) *ListAllTransactionsCmd {
 	return &ListAllTransactionsCmd{
 		Account: account,

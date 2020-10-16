@@ -7,7 +7,8 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// TestNet3Params defines the network parameters for the test Bitcoin network (version 3).  Not to be confused with the regression test network, this network is sometimes simply called "testnet".
+// TestNet3Params defines the network parameters for the test Bitcoin network (version 3). Not to be confused with the
+// regression test network, this network is sometimes simply called "testnet".
 var TestNet3Params = Params{
 	Name:        "testnet",
 	Net:         wire.TestNet3,

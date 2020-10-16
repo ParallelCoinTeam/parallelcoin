@@ -39,11 +39,9 @@ type (
 	}
 )
 
-// TODO: General - abstract out more of blockmanager into queries. It'll make
-// this way more maintainable and usable.
+// TODO: General - abstract out more of blockmanager into queries. It'll make this way more maintainable and usable.
 
-// handleQuery is the central handler for all queries and commands from other
-// goroutines related to peer state.
+// handleQuery is the central handler for all queries and commands from other goroutines related to peer state.
 func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 	switch msg := querymsg.(type) {
 	case getConnCountMsg:
@@ -140,12 +138,12 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 		msg.reply <- errors.New("peer not found")
 	case forAllPeersMsg:
 		// TODO: Remove this when it's unnecessary due to wider use of
-		// queryPeers.
+		//  queryPeers.
+		//
 		// Run the closure on all peers in the passed state.
 		state.forAllPeers(msg.closure)
-		// Even though this is a query, there's no reply channel as the
-		// forAllPeers method doesn't return anything. An error might be
-		// useful in the future.
+		// Even though this is a query, there's no reply channel as the forAllPeers method doesn't return anything. An
+		// error might be useful in the future.
 	}
 }
 
@@ -160,8 +158,7 @@ func (s *ChainService) ConnectedCount() int32 {
 	}
 }
 
-// OutboundGroupCount returns the number of peers connected to the given
-// outbound group key.
+// OutboundGroupCount returns the number of peers connected to the given outbound group key.
 func (s *ChainService) OutboundGroupCount(key string) int {
 	replyChan := make(chan int)
 	select {
@@ -172,8 +169,7 @@ func (s *ChainService) OutboundGroupCount(key string) int {
 	}
 }
 
-// AddedNodeInfo returns an array of btcjson.GetAddedNodeInfoResult structures
-// describing the persistent (added) nodes.
+// AddedNodeInfo returns an array of btcjson.GetAddedNodeInfoResult structures describing the persistent (added) nodes.
 func (s *ChainService) AddedNodeInfo() []*ServerPeer {
 	replyChan := make(chan []*ServerPeer)
 	select {
@@ -195,9 +191,8 @@ func (s *ChainService) Peers() []*ServerPeer {
 	}
 }
 
-// DisconnectNodeByAddr disconnects a peer by target address. Both outbound and
-// inbound nodes will be searched for the target node. An error message will
-// be returned if the peer was not found.
+// DisconnectNodeByAddr disconnects a peer by target address. Both outbound and inbound nodes will be searched for the
+// target node. An error message will be returned if the peer was not found.
 func (s *ChainService) DisconnectNodeByAddr(addr string) error {
 	replyChan := make(chan error)
 	select {
@@ -211,9 +206,8 @@ func (s *ChainService) DisconnectNodeByAddr(addr string) error {
 	}
 }
 
-// DisconnectNodeByID disconnects a peer by target node id. Both outbound and
-// inbound nodes will be searched for the target node. An error message will be
-// returned if the peer was not found.
+// DisconnectNodeByID disconnects a peer by target node id. Both outbound and inbound nodes will be searched for the
+// target node. An error message will be returned if the peer was not found.
 func (s *ChainService) DisconnectNodeByID(id int32) error {
 	replyChan := make(chan error)
 	select {
@@ -227,8 +221,8 @@ func (s *ChainService) DisconnectNodeByID(id int32) error {
 	}
 }
 
-// RemoveNodeByAddr removes a peer from the list of persistent peers if
-// present. An error will be returned if the peer was not found.
+// RemoveNodeByAddr removes a peer from the list of persistent peers if present. An error will be returned if the peer
+// was not found.
 func (s *ChainService) RemoveNodeByAddr(addr string) error {
 	replyChan := make(chan error)
 	select {
@@ -242,8 +236,8 @@ func (s *ChainService) RemoveNodeByAddr(addr string) error {
 	}
 }
 
-// RemoveNodeByID removes a peer by node ID from the list of persistent peers
-// if present. An error will be returned if the peer was not found.
+// RemoveNodeByID removes a peer by node ID from the list of persistent peers if present. An error will be returned if
+// the peer was not found.
 func (s *ChainService) RemoveNodeByID(id int32) error {
 	replyChan := make(chan error)
 	select {
@@ -257,9 +251,8 @@ func (s *ChainService) RemoveNodeByID(id int32) error {
 	}
 }
 
-// ConnectNode adds `addr' as a new outbound peer. If permanent is true then the
-// peer will be persistent and reconnect if the connection is lost.
-// It is an error to call this with an already existing peer.
+// ConnectNode adds `addr' as a new outbound peer. If permanent is true then the peer will be persistent and reconnect
+// if the connection is lost. It is an error to call this with an already existing peer.
 func (s *ChainService) ConnectNode(addr string, permanent bool) error {
 	replyChan := make(chan error)
 	select {
@@ -274,10 +267,9 @@ func (s *ChainService) ConnectNode(addr string, permanent bool) error {
 	}
 }
 
-// ForAllPeers runs a closure over all peers (outbound and persistent) to which
-// the ChainService is connected. Nothing is returned because the peerState's
-// ForAllPeers method doesn't return anything as the closure passed to it
-// doesn't return anything.
+// ForAllPeers runs a closure over all peers (outbound and persistent) to which the ChainService is connected. Nothing
+// is returned because the peerState's ForAllPeers method doesn't return anything as the closure passed to it doesn't
+// return anything.
 func (s *ChainService) ForAllPeers(closure func(sp *ServerPeer)) {
 	select {
 	case s.query <- forAllPeersMsg{closure: closure}:

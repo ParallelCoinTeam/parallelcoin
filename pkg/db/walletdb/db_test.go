@@ -9,16 +9,15 @@ import (
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
 
-// var (
-// 	// ignoreDbTypes are types which should be ignored when running tests
-// 	// that iterate all supported DB types.  This allows some tests to add
-// 	// bogus drivers for testing purposes while still allowing other tests
-// 	// to easily iterate all supported drivers.
-// 	ignoreDbTypes = map[string]bool{"createopenfail": true}
-// )
+var (
+	// ignoreDbTypes are types which should be ignored when running tests
+	// that iterate all supported DB types.  This allows some tests to add
+	// bogus drivers for testing purposes while still allowing other tests
+	// to easily iterate all supported drivers.
+	ignoreDbTypes = map[string]bool{"createopenfail": true}
+)
 
-// TestAddDuplicateDriver ensures that adding a duplicate driver does not
-// overwrite an existing one.
+// TestAddDuplicateDriver ensures that adding a duplicate driver does not overwrite an existing one.
 func TestAddDuplicateDriver(t *testing.T) {
 	supportedDrivers := walletdb.SupportedDrivers()
 	if len(supportedDrivers) == 0 {
@@ -26,17 +25,14 @@ func TestAddDuplicateDriver(t *testing.T) {
 		return
 	}
 	dbType := supportedDrivers[0]
-	// bogusCreateDB is a function which acts as a bogus create and open
-	// driver function and intentionally returns a failure that can be
-	// detected if the interface allows a duplicate driver to overwrite an
-	// existing one.
+	// bogusCreateDB is a function which acts as a bogus create and open driver function and intentionally returns a
+	// failure that can be detected if the interface allows a duplicate driver to overwrite an existing one.
 	bogusCreateDB := func(args ...interface{}) (walletdb.DB, error) {
 		return nil, fmt.Errorf("duplicate driver allowed for database "+
 			"type [%v]", dbType)
 	}
-	// Create a driver that tries to replace an existing one.  Set its
-	// create and open functions to a function that causes a test failure if
-	// they are invoked.
+	// Create a driver that tries to replace an existing one. Set its create and open functions to a function that
+	// causes a test failure if they are invoked.
 	driver := walletdb.Driver{
 		DbType: dbType,
 		Create: bogusCreateDB,
@@ -57,20 +53,18 @@ func TestAddDuplicateDriver(t *testing.T) {
 	_ = os.Remove(dbPath)
 }
 
-// TestCreateOpenFail ensures that errors which occur while opening or closing
-// a database are handled properly.
+// TestCreateOpenFail ensures that errors which occur while opening or closing a database are handled properly.
 func TestCreateOpenFail(t *testing.T) {
-	// bogusCreateDB is a function which acts as a bogus create and open
-	// driver function that intentionally returns a failure which can be
-	// detected.
+	// bogusCreateDB is a function which acts as a bogus create and open driver function that intentionally returns a
+	// failure which can be detected.
 	dbType := "createopenfail"
 	openError := fmt.Errorf("failed to create or open database for "+
 		"database type [%v]", dbType)
 	bogusCreateDB := func(args ...interface{}) (walletdb.DB, error) {
 		return nil, openError
 	}
-	// Create and add driver that intentionally fails when created or opened
-	// to ensure errors on database open and create are handled properly.
+	// Create and add driver that intentionally fails when created or opened to ensure errors on database open and
+	// create are handled properly.
 	driver := walletdb.Driver{
 		DbType: dbType,
 		Create: bogusCreateDB,
@@ -78,10 +72,9 @@ func TestCreateOpenFail(t *testing.T) {
 	}
 	err := walletdb.RegisterDriver(driver)
 	if err != nil {
-		Error(err)
+		walletdb.Error(err)
 	}
-	// Ensure creating a database with the new type fails with the expected
-	// error.
+	// Ensure creating a database with the new type fails with the expected error.
 	_, err = walletdb.Create(dbType)
 	if err != openError {
 		t.Errorf("expected error not received - got: %v, want %v", err,
@@ -98,11 +91,9 @@ func TestCreateOpenFail(t *testing.T) {
 	}
 }
 
-// TestCreateOpenUnsupported ensures that attempting to create or open an
-// unsupported database type is handled properly.
+// TestCreateOpenUnsupported ensures that attempting to create or open an unsupported database type is handled properly.
 func TestCreateOpenUnsupported(t *testing.T) {
-	// Ensure creating a database with an unsupported type fails with the
-	// expected error.
+	// Ensure creating a database with an unsupported type fails with the expected error.
 	dbType := "unsupported"
 	_, err := walletdb.Create(dbType)
 	if err != walletdb.ErrDbUnknownType {
@@ -110,8 +101,7 @@ func TestCreateOpenUnsupported(t *testing.T) {
 			walletdb.ErrDbUnknownType)
 		return
 	}
-	// Ensure opening a database with the an unsupported type fails with the
-	// expected error.
+	// Ensure opening a database with the an unsupported type fails with the expected error.
 	_, err = walletdb.Open(dbType)
 	if err != walletdb.ErrDbUnknownType {
 		t.Errorf("expected error not received - got: %v, want %v", err,

@@ -12,8 +12,8 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// TestSequenceLocksActive tests the SequenceLockActive function to ensure it
-// works as expected in all possible combinations/scenarios.
+// TestSequenceLocksActive tests the SequenceLockActive function to ensure it works as expected in all possible
+// combinations/scenarios.
 func TestSequenceLocksActive(t *testing.T) {
 	seqLock := func(h int32, s int64) *SequenceLock {
 		return &SequenceLock{
@@ -137,8 +137,7 @@ func TestCheckBlockSanity(t *testing.T) {
 	if err != nil {
 		t.Errorf("CheckBlockSanity: %v", err)
 	}
-	// Ensure a block that has a timestamp with a precision higher than one
-	// second fails.
+	// Ensure a block that has a timestamp with a precision higher than one second fails.
 	timestamp := block.MsgBlock().Header.Timestamp
 	block.MsgBlock().Header.Timestamp = timestamp.Add(time.Nanosecond)
 	err = CheckBlockSanity(block, powLimit, timeSource, false, 1)
@@ -147,9 +146,8 @@ func TestCheckBlockSanity(t *testing.T) {
 	}
 }
 
-// TestCheckSerializedHeight tests the checkSerializedHeight function with
-// various serialized heights and also does negative tests to ensure errors
-// and handled properly.
+// TestCheckSerializedHeight tests the checkSerializedHeight function with various serialized heights and also does
+// negative tests to ensure errors and handled properly.
 func TestCheckSerializedHeight(t *testing.T) {
 	// Create an empty coinbase template to be used in the tests below.
 	coinbaseOutpoint := wire.NewOutPoint(&chainhash.Hash{}, math.MaxUint32)
@@ -207,8 +205,7 @@ func TestCheckSerializedHeight(t *testing.T) {
 	}
 }
 
-// Block100000 defines block 100,000 of the block chain.  It is used to
-// test Block operations.
+// Block100000 defines block 100,000 of the block chain. It is used to test Block operations.
 var Block100000 = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version: 1,

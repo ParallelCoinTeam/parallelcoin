@@ -8,8 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 )
 
-// TestIPTypes ensures the various functions which determine the type of an IP
-// address based on RFCs work as intended.
+// TestIPTypes ensures the various functions which determine the type of an IP address based on RFCs work as intended.
 func TestIPTypes(t *testing.T) {
 	type ipTest struct {
 		in       wire.NetAddress

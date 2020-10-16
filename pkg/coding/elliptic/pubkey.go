@@ -18,8 +18,7 @@ func isOdd(a *big.Int) bool {
 	return a.Bit(0) == 1
 }
 
-// decompressPoint decompresses a point on the given curve given the X point and
-// the solution to use.
+// decompressPoint decompresses a point on the given curve given the X point and the solution to use.
 func decompressPoint(curve *KoblitzCurve, x *big.Int, ybit bool) (*big.Int, error) {
 	// TODO: This will probably only work for secp256k1 due to
 	// optimizations.
@@ -29,8 +28,8 @@ func decompressPoint(curve *KoblitzCurve, x *big.Int, ybit bool) (*big.Int, erro
 	x3.Add(x3, curve.Params().B)
 	x3.Mod(x3, curve.Params().P)
 	// Now calculate sqrt mod p of x^3 + B
-	// This code used to do a full sqrt based on tonelli/shanks,
-	// but this was replaced by the algorithms referenced in
+	//
+	// This code used to do a full sqrt based on tonelli/shanks, but this was replaced by the algorithms referenced in
 	// https://bitcointalk.org/index.php?topic=162805.msg1712294#msg1712294
 	y := new(big.Int).Exp(x3, curve.QPlus1Div4(), curve.Params().P)
 	if ybit != isOdd(y) {
@@ -55,18 +54,17 @@ const (
 	pubkeyHybrid       byte = 0x6 // y_bit + x coord + y coord
 )
 
-// IsCompressedPubKey returns true the the passed serialized public key has
-// been encoded in compressed format, and false otherwise.
+// IsCompressedPubKey returns true the the passed serialized public key has been encoded in compressed format, and false
+// otherwise.
 func IsCompressedPubKey(pubKey []byte) bool {
-	// The public key is only compressed if it is the correct length and
-	// the format (first byte) is one of the compressed pubkey values.
+	// The public key is only compressed if it is the correct length and the format (first byte) is one of the
+	// compressed pubkey values.
 	return len(pubKey) == PubKeyBytesLenCompressed &&
 		(pubKey[0]&^byte(0x1) == pubkeyCompressed)
 }
 
-// ParsePubKey parses a public key for a koblitz curve from a bytestring into a
-// ecdsa.Publickey, verifying that it is valid. It supports compressed,
-// uncompressed and hybrid signature formats.
+// ParsePubKey parses a public key for a koblitz curve from a bytestring into a ecdsa.Publickey, verifying that it is
+// valid. It supports compressed, uncompressed and hybrid signature formats.
 func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err error) {
 	pubkey := PublicKey{}
 	pubkey.Curve = curve
@@ -90,8 +88,10 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 		}
 	case PubKeyBytesLenCompressed:
 		// format is 0x2 | solution, <X coordinate>
+		//
 		// solution determines which solution of the curve we use.
-		// / y^2 = x^3 + Curve.B
+		//
+		//   y^2 = x^3 + Curve.B
 		if format != pubkeyCompressed {
 			return nil, fmt.Errorf("invalid magic in compressed "+
 				"pubkey string: %d", pubKeyStr[0])
@@ -118,8 +118,8 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 	return &pubkey, nil
 }
 
-// PublicKey is an ecdsa.PublicKey with additional functions to
-// serialize in uncompressed, compressed, and hybrid formats.
+// PublicKey is an ecdsa.PublicKey with additional functions to serialize in uncompressed, compressed, and hybrid
+// formats.
 type PublicKey ecdsa.PublicKey
 
 // ToECDSA returns the public key as a *ecdsa.PublicKey.
@@ -127,8 +127,7 @@ func (p *PublicKey) ToECDSA() *ecdsa.PublicKey {
 	return (*ecdsa.PublicKey)(p)
 }
 
-// SerializeUncompressed serializes a public key in a 65-byte uncompressed
-// format.
+// SerializeUncompressed serializes a public key in a 65-byte uncompressed format.
 func (p *PublicKey) SerializeUncompressed() []byte {
 	b := make([]byte, 0, PubKeyBytesLenUncompressed)
 	b = append(b, pubkeyUncompressed)
@@ -159,17 +158,15 @@ func (p *PublicKey) SerializeHybrid() []byte {
 	return paddedAppend(32, b, p.Y.Bytes())
 }
 
-// IsEqual compares this PublicKey instance to the one passed, returning true if
-// both PublicKeys are equivalent. A PublicKey is equivalent to another, if they
-// both have the same X and Y coordinate.
+// IsEqual compares this PublicKey instance to the one passed, returning true if both PublicKeys are equivalent. A
+// PublicKey is equivalent to another, if they both have the same X and Y coordinate.
 func (p *PublicKey) IsEqual(otherPubKey *PublicKey) bool {
 	return p.X.Cmp(otherPubKey.X) == 0 &&
 		p.Y.Cmp(otherPubKey.Y) == 0
 }
 
-// paddedAppend appends the src byte slice to dst, returning the new slice.
-// If the length of the source is smaller than the passed size, leading zero
-// bytes are appended to the dst slice before appending src.
+// paddedAppend appends the src byte slice to dst, returning the new slice. If the length of the source is smaller than
+// the passed size, leading zero bytes are appended to the dst slice before appending src.
 func paddedAppend(size uint, dst, src []byte) []byte {
 	for i := 0; i < int(size)-len(src); i++ {
 		dst = append(dst, 0)

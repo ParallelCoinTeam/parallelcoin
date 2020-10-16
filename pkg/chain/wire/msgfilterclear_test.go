@@ -28,7 +28,8 @@ func TestFilterClearLatest(t *testing.T) {
 	}
 }
 
-// TestFilterClearCrossProtocol tests the MsgFilterClear API when encoding with the latest protocol version and decoding with BIP0031Version.
+// TestFilterClearCrossProtocol tests the MsgFilterClear API when encoding with the latest protocol version and decoding
+// with BIP0031Version.
 func TestFilterClearCrossProtocol(t *testing.T) {
 	msg := NewMsgFilterClear()
 	// Encode with latest protocol version.
@@ -112,14 +113,15 @@ func TestFilterClearWire(t *testing.T) {
 	}
 }
 
-// TestFilterClearWireErrors performs negative tests against wire encode and decode of MsgFilterClear to confirm error paths work correctly.
+// TestFilterClearWireErrors performs negative tests against wire encode and decode of MsgFilterClear to confirm error
+// paths work correctly.
 func TestFilterClearWireErrors(t *testing.T) {
 	pverNoFilterClear := BIP0037Version - 1
 	wireErr := &MessageError{}
 	baseFilterClear := NewMsgFilterClear()
 	baseFilterClearEncoded := []byte{}
 	tests := []struct {
-		in       *MsgFilterClear // Value to encode
+		in       *MsgFilterClear // value to encode
 		buf      []byte          // Wire encoding
 		pver     uint32          // Protocol version for wire encoding
 		enc      MessageEncoding // Message encoding format

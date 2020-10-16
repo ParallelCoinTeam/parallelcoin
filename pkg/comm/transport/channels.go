@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"net"
 	"runtime"
-	"runtime/debug"
 	"strings"
 	"time"
 
 	"github.com/p9c/pod/pkg/coding/fec"
 	"github.com/p9c/pod/pkg/coding/gcm"
+	"github.com/p9c/pod/pkg/comm/multicast"
 )
 
 const (
@@ -22,6 +22,9 @@ const (
 	other
 	DefaultPort = 11049
 )
+
+var DefaultIP = net.IPv4(224, 0, 0, 1)
+var MulticastAddress = &net.UDPAddr{IP: DefaultIP, Port: DefaultPort}
 
 type (
 	MsgBuffer struct {
@@ -48,7 +51,7 @@ type (
 	}
 )
 
-// SetDestination changes the address the outbound connection of a channel directs to
+// SetDestination changes the address the outbound connection of a multicast directs to
 func (c *Channel) SetDestination(dst string) (err error) {
 	Debug("sending to", dst)
 	if c.Sender, err = NewSender(dst, c.MaxDatagramSize); Check(err) {
@@ -56,7 +59,7 @@ func (c *Channel) SetDestination(dst string) (err error) {
 	return
 }
 
-// Send fires off some data through the configured channel's outbound.
+// Send fires off some data through the configured multicast's outbound.
 func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, err error) {
 	if len(data) == 0 {
 		err = errors.New("not sending empty packet")
@@ -81,14 +84,12 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		Trace(c.Creator, "sent packets", string(magic),
-			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
-			c.Sender.RemoteAddr())
+		Trace(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
 	}
 	return
 }
 
-// Close the channel
+// Close the multicast
 func (c *Channel) Close() (err error) {
 	// if err = c.Sender.Close(); Check(err) {
 	// }
@@ -97,8 +98,8 @@ func (c *Channel) Close() (err error) {
 	return
 }
 
-// GetShards returns a buffer iterator to feed to Channel.SendMany containing
-// fec encoded shards built from the provided buffer
+// GetShards returns a buffer iterator to feed to Channel.SendMany containing fec encoded shards built from the provided
+// buffer
 func GetShards(data []byte) (shards [][]byte) {
 	var err error
 	if shards, err = fec.Encode(data); Check(err) {
@@ -129,7 +130,7 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 	if err != nil {
 		Error(err)
 	}
-	Warn("starting unicast channel:", channel.Creator, sender, receiver, magics)
+	Warn("starting unicast multicast:", channel.Creator, sender, receiver, magics)
 	return
 }
 
@@ -139,7 +140,7 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 	if addr, err = net.ResolveUDPAddr("udp4", address); Check(err) {
 		return
 	} else if conn, err = net.DialUDP("udp4", nil, addr); Check(err) {
-		debug.PrintStack()
+		// debug.PrintStack()
 		return
 	}
 	Debug("started new sender on", conn.LocalAddr(), "->", conn.RemoteAddr())
@@ -148,8 +149,8 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 	return
 }
 
-// Listen binds to the UDP Address and port given and writes packets received
-// from that Address to a buffer which is passed to a handler
+// Listen binds to the UDP Address and port given and writes packets received from that Address to a buffer which is
+// passed to a handler
 func Listen(address string, channel *Channel, maxDatagramSize int, handlers Handlers,
 	quit chan struct{}) (conn *net.UDPConn, err error) {
 	var addr *net.UDPAddr
@@ -168,9 +169,8 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 	return
 }
 
-// NewBroadcastChannel returns a broadcaster and listener with a given handler on a multicast
-// address and specified port. The handlers define the messages that will be processed and
-// any other messages are ignored
+// NewBroadcastChannel returns a broadcaster and listener with a given handler on a multicast address and specified
+// port. The handlers define the messages that will be processed and any other messages are ignored
 func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
 	quit chan struct{}) (channel *Channel, err error) {
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
@@ -201,21 +201,19 @@ func NewBroadcaster(port int, maxDatagramSize int) (conn *net.UDPConn, err error
 	return
 }
 
-// ListenBroadcast binds to the UDP Address and port given and writes packets received
-// from that Address to a buffer which is passed to a handler
-func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers Handlers,
-	quit chan struct{}) (conn *net.UDPConn, err error) {
-	address := net.JoinHostPort(UDPMulticastAddress, fmt.Sprint(port))
-	var addr *net.UDPAddr
-	// Parse the string Address
-	if addr, err = net.ResolveUDPAddr("udp4", address); Check(err) {
+// ListenBroadcast binds to the UDP Address and port given and writes packets received from that Address to a buffer
+// which is passed to a handler
+func ListenBroadcast(
+	port int,
+	channel *Channel,
+	maxDatagramSize int,
+	handlers Handlers,
+	quit chan struct{},
+) (conn *net.UDPConn, err error) {
+	if conn, err = multicast.Conn(port); Check(err) {
 		return
-		// Open up a connection
-	} else if conn, err = net.ListenMulticastUDP("udp4", nil, addr); Check(err) {
-		return
-	} else if conn == nil {
-		return nil, errors.New("unable to start connection ")
 	}
+	address := conn.LocalAddr().String()
 	var magics []string
 	for i := range handlers {
 		magics = append(magics, i)
@@ -240,9 +238,8 @@ func handleNetworkError(address string, err error) (result int) {
 	return
 }
 
-// Handle listens for messages, decodes them, aggregates them, recovers the data from the
-// reed solomon fec shards received and invokes the handler provided matching the magic
-// on the complete received messages
+// Handle listens for messages, decodes them, aggregates them, recovers the data from the reed solomon fec shards
+// received and invokes the handler provided matching the magic on the complete received messages
 func Handle(address string, channel *Channel,
 	handlers Handlers, maxDatagramSize int, quit chan struct{}) {
 	buffer := make([]byte, maxDatagramSize)
@@ -273,8 +270,7 @@ out:
 		// Filter messages by magic, if there is no match in the map the packet is ignored
 		magic := string(buffer[:4])
 		if handler, ok := handlers[magic]; ok {
-			// if caller needs to know the liveness status of the
-			// controller it is working on, the code below
+			// if caller needs to know the liveness status of the controller it is working on, the code below
 			if channel.lastSent != nil && channel.firstSender != nil {
 				*channel.lastSent = time.Now()
 			}
@@ -307,8 +303,7 @@ out:
 						}
 						bn.Decoded = true
 						// DEBUG(numBytes, src, err)
-						Tracef("received packet with magic %s from %s",
-							magic, src.String())
+						// Tracef("received packet with magic %s from %s", magic, src.String())
 						if err = handler(channel.context, src, address, cipherText); Check(err) {
 							continue
 						}
@@ -323,9 +318,9 @@ out:
 					for i := range channel.buffers {
 						if i != nonce || (channel.buffers[i].Decoded &&
 							len(channel.buffers[i].Buffers) > 8) {
-							// superseded messages can be deleted from the
-							// buffers, we don't add more data for the already
-							// decoded.
+							// superseded messages can be deleted from the buffers, we don't add more data for the
+							// already decoded.
+							// todo: this will be changed to track stats for the puncture rate and redundancy scaling
 							delete(channel.buffers, i)
 						}
 					}

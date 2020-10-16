@@ -3,7 +3,6 @@ package ipc
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"hash"
 	"io"
 	"os"
@@ -11,6 +10,8 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/minio/highwayhash"
+
+	"github.com/p9c/pod/app/apputil"
 )
 
 var quitMessage = ^uint32(0)
@@ -54,57 +55,60 @@ func NewWorker() (w *Worker, err error) {
 }
 
 // A controller runs a child process and attaches to its stdin/out
-// append(os.Args[:len(os.Args)-1], "worker")
 func NewController(args []string) (c *Controller, err error) {
+	// if runtime.GOOS == "windows" {
+	// 	args = append([]string{"cmd.exe", "/C", "start"}, args...)
+	// }
+	args = apputil.PrependForWindows(args)
 	c = &Controller{
 		Cmd: exec.Command(args[0], args[1:]...),
 	}
-	w, err := c.StdinPipe()
-	if err != nil {
+	var w io.WriteCloser
+	if w, err = c.StdinPipe(); Check(err) {
 		panic(err)
 	}
 	// child process can print to parent's stderr for debugging
 	c.Cmd.Stderr = os.Stderr
 	c.Stderr = os.Stderr
-	r, err := c.StdoutPipe()
-	if err != nil {
+	var r io.ReadCloser
+	if r, err = c.StdoutPipe(); Check(err) {
 		panic(err)
 	}
-	c.Conn, err = NewConn("controller", r, w)
-	if err != nil {
+	if c.Conn, err = NewConn("controller", r, w); Check(err) {
 		return
 	}
 	return
 }
 
-// Write sends a message over the IPC pipe containing 32 bit length,
-// 64 bit highway hash and the payload
+// Write sends a message over the IPC pipe containing 32 bit length, 64 bit highway hash and the payload
 func (c *Conn) Write(p []byte) (n int, err error) {
-	c.printlnE("write", spew.Sdump(p))
+	Error("write", spew.Sdump(p))
 	pLen := len(p)
 	n, err = c.Hash.Write(p)
 	if err != nil {
 		return
 	}
 	sum := c.Hash.Sum(nil)
-	c.printlnE("write", spew.Sdump(sum))
+	Error("write", spew.Sdump(sum))
 	c.Hash.Reset()
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, uint32(pLen))
 	out := append(append(b, sum...), p...)
-	c.printlnE("write", spew.Sdump(out))
+	Error("write", spew.Sdump(out))
 	return c.Writer.Write(out)
 }
 
 // Read scans the input for a new message.
+//
 // First 4 bytes are the payload size in uint32 littleendian,
-// second 8 bytes are a highwayhash64 hash of the payload and
-// in the return the decoded length from the header of the incoming bytes
-// which matches the hash, expected message length, or errors are returned.
-// the input byte slice must be truncated to the given n or it isn't
-// guaranteed to be correct data
+//
+// Second 8 bytes are a highwayhash64 hash of the payload
+//
+// In the return the decoded length from the header of the incoming bytes which matches the hash, expected message
+// length, or errors are returned. the input byte slice must be truncated to the given n or it isn't guaranteed to be
+// correct data
 func (c *Conn) Read(p []byte) (n int, err error) {
-	c.printlnE("read buffer length", len(p))
+	Error("read buffer length", len(p))
 	r := c.Reader.Read
 	u64 := binary.LittleEndian.Uint64
 	u32 := binary.LittleEndian.Uint32
@@ -112,9 +116,9 @@ func (c *Conn) Read(p []byte) (n int, err error) {
 	if err != nil || n != 4 {
 		Error(err)
 	}
-	c.printlnE("read", p[:4])
+	Error("read", p[:4])
 	bLen := u32(p[:4])
-	c.printlnE("read", bLen)
+	Error("read", bLen)
 	if bLen == quitMessage {
 		return 0, errors.New("quit")
 	}
@@ -123,9 +127,9 @@ func (c *Conn) Read(p []byte) (n int, err error) {
 	if err != nil || n != 8 {
 		return
 	}
-	c.printlnE("read", p[:8])
+	Error("read", p[:8])
 	hash64 := u64(mHash)
-	c.printlnE("read", hash64)
+	Error("read", hash64)
 	n, err = r(p[:bLen])
 	if err != nil {
 		return
@@ -154,29 +158,4 @@ func (c *Conn) Close() (err error) {
 	}
 	// hang up
 	return
-}
-
-func (c *Conn) printE(a ...interface{}) {
-	out := append([]interface{}{c.Name + ":"}, a...)
-	_, _ = fmt.Fprint(os.Stderr, out...)
-}
-
-func (c *Conn) printlnE(a ...interface{}) {
-	out := append([]interface{}{c.Name + ":"}, a...)
-	_, _ = fmt.Fprintln(os.Stderr, out...)
-	// _, _ = fmt.Fprint(os.Stderr, "\r")
-}
-
-func (c *Conn) printfE(format string, a ...interface{}) {
-	out := append([]interface{}{c.Name + ":"}, a...)
-	_, _ = fmt.Fprintf(os.Stderr, c.Name+": "+format, out...)
-}
-
-func (c *Conn) printErr(err error, fn func()) {
-	if err != nil {
-		c.printlnE(c.Name+":", err)
-		if fn != nil {
-			fn()
-		}
-	}
 }

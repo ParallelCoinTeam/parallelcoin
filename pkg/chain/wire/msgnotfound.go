@@ -5,7 +5,10 @@ import (
 	"io"
 )
 
-// MsgNotFound defines a bitcoin notfound message which is sent in response to a getdata message if any of the requested data in not available on the peer. Each message is limited to a maximum number of inventory vectors, which is currently 50,000. Use the AddInvVect function to build up the list of inventory vectors when sending a notfound message to another peer.
+// MsgNotFound defines a bitcoin notfound message which is sent in response to a getdata message if any of the requested
+// data in not available on the peer. Each message is limited to a maximum number of inventory vectors, which is
+// currently 50,000. Use the AddInvVect function to build up the list of inventory vectors when sending a notfound
+// message to another peer.
 type MsgNotFound struct {
 	InvList []*InvVect
 }
@@ -21,7 +24,8 @@ func (msg *MsgNotFound) AddInvVect(iv *InvVect) error {
 	return nil
 }
 
-// BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation.
+// BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
+// implementation.
 func (msg *MsgNotFound) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
@@ -51,7 +55,8 @@ func (msg *MsgNotFound) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding)
 	return nil
 }
 
-// BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface implementation.
+// BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
+// implementation.
 func (msg *MsgNotFound) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
 	// Limit to max inventory vectors per message.
 	count := len(msg.InvList)
@@ -74,18 +79,21 @@ func (msg *MsgNotFound) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding)
 	return nil
 }
 
-// Command returns the protocol command string for the message.  This is part of the Message interface implementation.
+// Command returns the protocol command string for the message. This is part of the Message interface implementation.
 func (msg *MsgNotFound) Command() string {
 	return CmdNotFound
 }
 
-// MaxPayloadLength returns the maximum length the payload can be for the receiver.  This is part of the Message interface implementation.
+// MaxPayloadLength returns the maximum length the payload can be for the receiver. This is part of the Message
+// interface implementation.
 func (msg *MsgNotFound) MaxPayloadLength(pver uint32) uint32 {
-	// Max var int 9 bytes + max InvVects at 36 bytes each. Num inventory vectors (varInt) + max allowed inventory vectors.
+	// Max var int 9 bytes + max InvVects at 36 bytes each. Num inventory vectors (varInt) + max allowed inventory
+	// vectors.
 	return MaxVarIntPayload + (MaxInvPerMsg * maxInvVectPayload)
 }
 
-// NewMsgNotFound returns a new bitcoin notfound message that conforms to the Message interface.  See MsgNotFound for details.
+// NewMsgNotFound returns a new bitcoin notfound message that conforms to the Message interface. See MsgNotFound for
+// details.
 func NewMsgNotFound() *MsgNotFound {
 	return &MsgNotFound{
 		InvList: make([]*InvVect, 0, defaultInvListAlloc),

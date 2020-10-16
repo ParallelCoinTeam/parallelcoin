@@ -3,14 +3,16 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/serve"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/serve"
 
 	"github.com/urfave/cli"
 
@@ -25,11 +27,18 @@ import (
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		Debug("running beforeFunc")
+		Debug(Name, pod.Tag, pod.GitCommit, pod.BuildTime)
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
 			cx.DataDir = c.String("datadir")
+		}
+		// propagate datadir path to interrupt for restart handling
+		interrupt.DataDir = cx.DataDir
+		// if there is a delaystart requested, pause for 3 seconds
+		if c.IsSet("delaystart") {
+			time.Sleep(time.Second * 3)
 		}
 		if c.IsSet("pipelog") {
 			Warn("pipe logger enabled")
@@ -350,6 +359,12 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("walletoff") {
 			*cx.Config.WalletOff = c.Bool("walletoff")
+		}
+		if c.IsSet("kopachgui") {
+			*cx.Config.KopachGUI = c.Bool("kopachgui")
+		}
+		if c.IsSet("darktheme") {
+			*cx.Config.DarkTheme = c.Bool("darktheme")
 		}
 		if c.IsSet("save") {
 			Info("saving configuration")

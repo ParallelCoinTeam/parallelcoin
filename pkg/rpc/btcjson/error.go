@@ -20,19 +20,21 @@ const (
 	ErrEmbeddedType
 	// ErrUnexportedField indiciates the provided command struct contains an unexported field which is not supported.
 	ErrUnexportedField
-	// ErrUnsupportedFieldType indicates the type of a field in the provided command struct is not one of the supported types.
+	// ErrUnsupportedFieldType indicates the type of a field in the provided command struct is not one of the supported
+	// types.
 	ErrUnsupportedFieldType
 	// ErrNonOptionalField indicates a non-optional field was specified after an optional field.
 	ErrNonOptionalField
 	// ErrNonOptionalDefault indicates a 'jsonrpcdefault' struct tag was specified for a non-optional field.
 	ErrNonOptionalDefault
-	// ErrMismatchedDefault indicates a 'jsonrpcdefault' struct tag contains a value that doesn't match the type of the field.
+	// ErrMismatchedDefault indicates a 'jsonrpcdefault' struct tag contains a value that doesn't match the type of the
+	// field.
 	ErrMismatchedDefault
 	// ErrUnregisteredMethod indicates a method was specified that has not been registered.
 	ErrUnregisteredMethod
 	// ErrMissingDescription indicates a description required to generate help is missing.
 	ErrMissingDescription
-	// ErrNumParams inidcates the number of netparams supplied do not match the requirements of the associated command.
+	// ErrNumParams indicates the number of netparams supplied do not match the requirements of the associated command.
 	ErrNumParams
 	// numErrorCodes is the maximum error code number used in tests.
 	numErrorCodes
@@ -62,7 +64,10 @@ func (e ErrorCode) String() string {
 	return fmt.Sprintf("Unknown ErrorCode (%d)", int(e))
 }
 
-// BTCJSONError identifies a general error.  This differs from an RPCError in that this error typically is used more by the consumers of the package as opposed to RPCErrors which are intended to be returned to the client across the wire via a JSON-RPC Response.  The caller can use type assertions to determine the specific error and access the ErrorCode field.
+// BTCJSONError identifies a general error. This differs from an RPCError in that this error typically is used more by
+// the consumers of the package as opposed to RPCErrors which are intended to be returned to the client across the wire
+// via a JSON-RPC Response. The caller can use type assertions to determine the specific error and access the ErrorCode
+// field.
 type BTCJSONError struct {
 	ErrorCode   ErrorCode // Describes the kind of error
 	Description string    // Human readable description of the issue

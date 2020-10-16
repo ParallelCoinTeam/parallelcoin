@@ -17,10 +17,8 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// fakeChain is used by the pool harness to provide generated test utxos and
-// a current faked chain height to the pool callbacks.  This, in turn,
-// allows transactions to appear as though they are spending completely valid
-// utxos.
+// fakeChain is used by the pool harness to provide generated test utxos and a current faked chain height to the pool
+// callbacks. This, in turn, allows transactions to appear as though they are spending completely valid utxos.
 type fakeChain struct {
 	sync.RWMutex
 	utxos          *blockchain.UtxoViewpoint
@@ -28,17 +26,14 @@ type fakeChain struct {
 	medianTimePast time.Time
 }
 
-// FetchUtxoView loads utxo details about the inputs referenced by the passed
-// transaction from the point of view of the fake chain.
-// It also attempts to fetch the utxos for the outputs of the transaction
-// itself so the returned view can be examined for duplicate transactions.
-// This function is safe for concurrent access however the returned view is NOT.
+// FetchUtxoView loads utxo details about the inputs referenced by the passed transaction from the point of view of the
+// fake chain. It also attempts to fetch the utxos for the outputs of the transaction itself so the returned view can be
+// examined for duplicate transactions. This function is safe for concurrent access however the returned view is NOT.
 func (s *fakeChain) FetchUtxoView(tx *util.Tx) (*blockchain.UtxoViewpoint, error) {
 	s.RLock()
 	defer s.RUnlock()
-	// All entries are cloned to ensure modifications to the returned view do
-	// not affect the fake chain's view.
-	// Add an entry for the tx itself to the new view.
+	// All entries are cloned to ensure modifications to the returned view do not affect the fake chain's view. Add an
+	// entry for the tx itself to the new view.
 	viewpoint := blockchain.NewUtxoViewpoint()
 	prevOut := wire.OutPoint{Hash: *tx.Hash()}
 	for txOutIdx := range tx.MsgTx().TxOut {
@@ -54,8 +49,7 @@ func (s *fakeChain) FetchUtxoView(tx *util.Tx) (*blockchain.UtxoViewpoint, error
 	return viewpoint, nil
 }
 
-// BestHeight returns the current height associated with the fake chain
-// instance.
+// BestHeight returns the current height associated with the fake chain instance.
 func (s *fakeChain) BestHeight() int32 {
 	s.RLock()
 	height := s.currentHeight
@@ -70,8 +64,7 @@ func (s *fakeChain) SetHeight(height int32) {
 	s.Unlock()
 }
 
-// MedianTimePast returns the current median time past associated with the
-// fake chain instance.
+// MedianTimePast returns the current median time past associated with the fake chain instance.
 func (s *fakeChain) MedianTimePast() time.Time {
 	s.RLock()
 	mtp := s.medianTimePast
@@ -79,16 +72,15 @@ func (s *fakeChain) MedianTimePast() time.Time {
 	return mtp
 }
 
-// SetMedianTimePast sets the current median time past associated with the
-// fake chain instance.
+// SetMedianTimePast sets the current median time past associated with the fake chain instance.
 func (s *fakeChain) SetMedianTimePast(mtp time.Time) {
 	s.Lock()
 	s.medianTimePast = mtp
 	s.Unlock()
 }
 
-// CalcSequenceLock returns the current sequence lock for the passed
-// transaction associated with the fake chain instance.
+// CalcSequenceLock returns the current sequence lock for the passed transaction associated with the fake chain
+// instance.
 func (s *fakeChain) CalcSequenceLock(tx *util.Tx,
 	view *blockchain.UtxoViewpoint) (*blockchain.SequenceLock, error) {
 	return &blockchain.SequenceLock{
@@ -97,16 +89,14 @@ func (s *fakeChain) CalcSequenceLock(tx *util.Tx,
 	}, nil
 }
 
-// spendableOutput is a convenience type that houses a particular utxo and
-// the amount associated with it.
+// spendableOutput is a convenience type that houses a particular utxo and the amount associated with it.
 type spendableOutput struct {
 	outPoint wire.OutPoint
 	amount   util.Amount
 }
 
-// txOutToSpendableOut returns a spendable output given a transaction and
-// index of the output to use.
-// This is useful as a convenience when creating test transactions.
+// txOutToSpendableOut returns a spendable output given a transaction and index of the output to use. This is useful as
+// a convenience when creating test transactions.
 func txOutToSpendableOut(tx *util.Tx, outputNum uint32) spendableOutput {
 	return spendableOutput{
 		outPoint: wire.OutPoint{Hash: *tx.Hash(), Index: outputNum},
@@ -114,13 +104,11 @@ func txOutToSpendableOut(tx *util.Tx, outputNum uint32) spendableOutput {
 	}
 }
 
-// poolHarness provides a harness that includes functionality for creating
-// and signing transactions as well as a fake chain that provides utxos for
-// use in generating valid transactions.
+// poolHarness provides a harness that includes functionality for creating and signing transactions as well as a fake
+// chain that provides utxos for use in generating valid transactions.
 type poolHarness struct {
-	// signKey is the signing key used for creating transactions throughout
-	// the tests. payAddr is the p2sh address for the signing key and is used
-	// for the payment address throughout the tests.
+	// signKey is the signing key used for creating transactions throughout the tests. payAddr is the p2sh address for
+	// the signing key and is used for the payment address throughout the tests.
 	signKey     *ec.PrivateKey
 	payAddr     util.Address
 	payScript   []byte
@@ -129,11 +117,9 @@ type poolHarness struct {
 	txPool      *TxPool
 }
 
-// CreateCoinbaseTx returns a coinbase transaction with the requested number
-// of outputs paying an appropriate subsidy based on the passed block height
-// to the address associated with the harness.
-// It automatically uses a standard signature script that starts with the
-// block height that is required by version 2 blocks.
+// CreateCoinbaseTx returns a coinbase transaction with the requested number of outputs paying an appropriate subsidy
+// based on the passed block height to the address associated with the harness. It automatically uses a standard
+// signature script that starts with the block height that is required by version 2 blocks.
 func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, version int32) (*util.Tx, error) {
 	// Create standard coinbase script.
 	extraNonce := int64(0)
@@ -168,14 +154,11 @@ func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, ver
 	return util.NewTx(tx), nil
 }
 
-// CreateSignedTx creates a new signed transaction that consumes the provided
-// inputs and generates the provided number of outputs by evenly splitting
-// the total input amount.
-// All outputs will be to the payment script associated with the harness and
-// all inputs are assumed to do the same.
+// CreateSignedTx creates a new signed transaction that consumes the provided inputs and generates the provided number
+// of outputs by evenly splitting the total input amount. All outputs will be to the payment script associated with the
+// harness and all inputs are assumed to do the same.
 func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32) (*util.Tx, error) {
-	// Calculate the total input amount and split it amongst the requested
-	// number of outputs.
+	// Calculate the total input amount and split it amongst the requested number of outputs.
 	var totalInput util.Amount
 	for _, input := range inputs {
 		totalInput += input.amount
@@ -191,8 +174,7 @@ func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32
 		})
 	}
 	for i := uint32(0); i < numOutputs; i++ {
-		// Ensure the final output accounts for any remainder that might be
-		// left from splitting the input amount.
+		// Ensure the final output accounts for any remainder that might be left from splitting the input amount.
 		amount := amountPerOutput
 		if i == numOutputs-1 {
 			amount = amountPerOutput + remainder
@@ -215,19 +197,16 @@ func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32
 	return util.NewTx(tx), nil
 }
 
-// CreateTxChain creates a chain of zero-fee transactions (each subsequent
-// transaction spends the entire amount from the previous one) with the first
-// one spending the provided outpoint.
-// Each transaction spends the entire amount of the previous one and as such
-// does not include any fees.
+// CreateTxChain creates a chain of zero-fee transactions (each subsequent transaction spends the entire amount from the
+// previous one) with the first one spending the provided outpoint. Each transaction spends the entire amount of the
+// previous one and as such does not include any fees.
 func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32) ([]*util.Tx, error) {
 	txChain := make([]*util.Tx, 0, numTxns)
 	prevOutPoint := firstOutput.outPoint
 	spendableAmount := firstOutput.amount
 	for i := uint32(0); i < numTxns; i++ {
-		// Create the transaction using the previous transaction output and
-		// paying the full amount to the payment address associated with the
-		// harness.
+		// Create the transaction using the previous transaction output and paying the full amount to the payment
+		// address associated with the harness.
 		tx := wire.NewMsgTx(wire.TxVersion)
 		tx.AddTxIn(&wire.TxIn{
 			PreviousOutPoint: prevOutPoint,
@@ -253,11 +232,9 @@ func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32)
 	return txChain, nil
 }
 
-// newPoolHarness returns a new instance of a pool harness initialized with a
-// fake chain and a TxPool bound to it that is configured with a policy
-// suitable for testing.
-// Also the fake chain is populated with the returned spendable outputs so
-// the caller can easily create new valid transactions which build off of it.
+// newPoolHarness returns a new instance of a pool harness initialized with a fake chain and a TxPool bound to it that
+// is configured with a policy suitable for testing. Also the fake chain is populated with the returned spendable
+// outputs so the caller can easily create new valid transactions which build off of it.
 func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOutput, error) {
 	// Use a hard coded key pair for deterministic results.
 	keyBytes, err := hex.DecodeString("700868df1838811ffbdf918fb482c1f7e" +
@@ -267,8 +244,7 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 		return nil, nil, err
 	}
 	signKey, signPub := ec.PrivKeyFromBytes(ec.S256(), keyBytes)
-	// Generate associated pay-to-script-hash address and resulting payment
-	// script.
+	// Generate associated pay-to-script-hash address and resulting payment script.
 	pubKeyBytes := signPub.SerializeCompressed()
 	payPubKeyAddr, err := util.NewAddressPubKey(pubKeyBytes, chainParams)
 	if err != nil {
@@ -308,11 +284,9 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 			AddrIndex:        nil,
 		}),
 	}
-	// Create a single coinbase transaction and add it to the harness chain's
-	// utxo set and set the harness chain height such that the coinbase will
-	// mature in the next block.
-	// This ensures the txpool accepts transactions which spend immature
-	// coinbases that will become mature in the next block.
+	// Create a single coinbase transaction and add it to the harness chain's utxo set and set the harness chain height
+	// such that the coinbase will mature in the next block. This ensures the txpool accepts transactions which spend
+	// immature coinbases that will become mature in the next block.
 	numOutputs := uint32(1)
 	outputs := make([]spendableOutput, 0, numOutputs)
 	curHeight := harness.chain.BestHeight()
@@ -336,7 +310,9 @@ type testContext struct {
 	harness *poolHarness
 }
 
-// testPoolMembership tests the transaction pool associated with the provided test context to determine if the passed transaction matches the provided orphan pool and transaction pool status.  It also further determines if it should be reported as available by the HaveTransaction function based upon the two flags and tests that condition as well.
+// testPoolMembership tests the transaction pool associated with the provided test context to determine if the passed
+// transaction matches the provided orphan pool and transaction pool status. It also further determines if it should be
+// reported as available by the HaveTransaction function based upon the two flags and tests that condition as well.
 func testPoolMembership(tc *testContext, tx *util.Tx, inOrphanPool, inTxPool bool) {
 	txHash := tx.Hash()
 	gotOrphanPool := tc.harness.txPool.IsOrphanInPool(txHash)
@@ -360,7 +336,10 @@ func testPoolMembership(tc *testContext, tx *util.Tx, inOrphanPool, inTxPool boo
 	}
 }
 
-// TestSimpleOrphanChain ensures that a simple chain of orphans is handled properly.  In particular, it generates a chain of single input, single output transactions and inserts them while skipping the first linking transaction so they are all orphans.  Finally, it adds the linking transaction and ensures the entire orphan chain is moved to the transaction pool.
+// TestSimpleOrphanChain ensures that a simple chain of orphans is handled properly. In particular, it generates a chain
+// of single input, single output transactions and inserts them while skipping the first linking transaction so they are
+// all orphans. Finally, it adds the linking transaction and ensures the entire orphan chain is moved to the transaction
+// pool.
 func TestSimpleOrphanChain(t *testing.T) {
 	t.Parallel()
 	harness, spendableOuts, err := newPoolHarness(&netparams.MainNetParams)
@@ -391,7 +370,9 @@ func TestSimpleOrphanChain(t *testing.T) {
 		// Ensure the transaction is in the orphan pool, is not in the transaction pool, and is reported as available.
 		testPoolMembership(tc, tx, true, false)
 	}
-	// Add the transaction which completes the orphan chain and ensure they all get accepted.  Notice the accept orphans flag is also false here to ensure it has no bearing on whether or not already existing orphans in the pool are linked.
+	// Add the transaction which completes the orphan chain and ensure they all get accepted. Notice the accept orphans
+	// flag is also false here to ensure it has no bearing on whether or not already existing orphans in the pool are
+	// linked.
 	acceptedTxns, err := harness.txPool.ProcessTransaction(nil, chainedTxns[0],
 		false, false, 0)
 	if err != nil {
@@ -404,12 +385,14 @@ func TestSimpleOrphanChain(t *testing.T) {
 			len(acceptedTxns), len(chainedTxns))
 	}
 	for _, txD := range acceptedTxns {
-		// Ensure the transaction is no longer in the orphan pool, is now in the transaction pool, and is reported as available.
+		// Ensure the transaction is no longer in the orphan pool, is now in the transaction pool, and is reported as
+		// available.
 		testPoolMembership(tc, txD.Tx, false, true)
 	}
 }
 
-// TestOrphanReject ensures that orphans are properly rejected when the allow orphans flag is not set on ProcessTransaction.
+// TestOrphanReject ensures that orphans are properly rejected when the allow orphans flag is not set on
+// ProcessTransaction.
 func TestOrphanReject(t *testing.T) {
 	t.Parallel()
 	harness, outputs, err := newPoolHarness(&netparams.MainNetParams)
@@ -464,7 +447,8 @@ func TestOrphanEviction(t *testing.T) {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
 	tc := &testContext{t, harness}
-	// Create a chain of transactions rooted with the first spendable output provided by the harness that is long enough to be able to force several orphan evictions.
+	// Create a chain of transactions rooted with the first spendable output provided by the harness that is long enough
+	// to be able to force several orphan evictions.
 	maxOrphans := uint32(harness.txPool.cfg.Policy.MaxOrphanTxs)
 	chainedTxns, err := harness.CreateTxChain(outputs[0], maxOrphans+5)
 	if err != nil {
@@ -505,7 +489,8 @@ func TestOrphanEviction(t *testing.T) {
 	}
 }
 
-// TestBasicOrphanRemoval ensure that orphan removal works as expected when an orphan that doesn't exist is removed  both when there is another orphan that redeems it and when there is not.
+// TestBasicOrphanRemoval ensure that orphan removal works as expected when an orphan that doesn't exist is removed both
+// when there is another orphan that redeems it and when there is not.
 func TestBasicOrphanRemoval(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 4
@@ -537,7 +522,8 @@ func TestBasicOrphanRemoval(t *testing.T) {
 		// Ensure the transaction is in the orphan pool, not in the transaction pool, and reported as available.
 		testPoolMembership(tc, tx, true, false)
 	}
-	// Attempt to remove an orphan that has no redeemers and is not present, and ensure the state of all other orphans are unaffected.
+	// Attempt to remove an orphan that has no redeemers and is not present, and ensure the state of all other orphans
+	// are unaffected.
 	nonChainedOrphanTx, err := harness.CreateSignedTx([]spendableOutput{{
 		amount:   util.Amount(5000000000),
 		outPoint: wire.OutPoint{Hash: chainhash.Hash{}, Index: 0},
@@ -550,7 +536,8 @@ func TestBasicOrphanRemoval(t *testing.T) {
 	for _, tx := range chainedTxns[1 : maxOrphans+1] {
 		testPoolMembership(tc, tx, true, false)
 	}
-	// Attempt to remove an orphan that has a existing redeemer but itself is not present and ensure the state of all other orphans (including the one that redeems it) are unaffected.
+	// Attempt to remove an orphan that has a existing redeemer but itself is not present and ensure the state of all
+	// other orphans (including the one that redeems it) are unaffected.
 	harness.txPool.RemoveOrphan(chainedTxns[0])
 	testPoolMembership(tc, chainedTxns[0], false, false)
 	for _, tx := range chainedTxns[1 : maxOrphans+1] {
@@ -563,7 +550,8 @@ func TestBasicOrphanRemoval(t *testing.T) {
 	}
 }
 
-// TestOrphanChainRemoval ensure that orphan chains (orphans that spend outputs from other orphans) are removed as expected.
+// TestOrphanChainRemoval ensure that orphan chains (orphans that spend outputs from other orphans) are removed as
+// expected.
 func TestOrphanChainRemoval(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 10
@@ -595,7 +583,8 @@ func TestOrphanChainRemoval(t *testing.T) {
 		// Ensure the transaction is in the orphan pool, not in the transaction pool, and reported as available.
 		testPoolMembership(tc, tx, true, false)
 	}
-	// Remove the first orphan that starts the orphan chain without the remove redeemer flag set and ensure that only the first orphan was removed.
+	// Remove the first orphan that starts the orphan chain without the remove redeemer flag set and ensure that only
+	// the first orphan was removed.
 	harness.txPool.mtx.Lock()
 	harness.txPool.removeOrphan(chainedTxns[1], false)
 	harness.txPool.mtx.Unlock()
@@ -603,7 +592,8 @@ func TestOrphanChainRemoval(t *testing.T) {
 	for _, tx := range chainedTxns[2 : maxOrphans+1] {
 		testPoolMembership(tc, tx, true, false)
 	}
-	// Remove the first remaining orphan that starts the orphan chain with the remove redeemer flag set and ensure they are all removed.
+	// Remove the first remaining orphan that starts the orphan chain with the remove redeemer flag set and ensure they
+	// are all removed.
 	harness.txPool.mtx.Lock()
 	harness.txPool.removeOrphan(chainedTxns[2], true)
 	harness.txPool.mtx.Unlock()
@@ -612,7 +602,8 @@ func TestOrphanChainRemoval(t *testing.T) {
 	}
 }
 
-// TestMultiInputOrphanDoubleSpend ensures that orphans that spend from an output that is spend by another transaction entering the pool are removed.
+// TestMultiInputOrphanDoubleSpend ensures that orphans that spend from an output that is spend by another transaction
+// entering the pool are removed.
 func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 4
@@ -641,7 +632,10 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 		}
 		testPoolMembership(tc, tx, true, false)
 	}
-	// Ensure a transaction that contains a double spend of the same output as the second orphan that was just added as well as a valid spend from that last orphan in the chain generated above (and is not in the orphan pool) is accepted to the orphan pool.  This must be allowed since it would otherwise be possible for a malicious actor to disrupt tx chains.
+	// Ensure a transaction that contains a double spend of the same output as the second orphan that was just added as
+	// well as a valid spend from that last orphan in the chain generated above (and is not in the orphan pool) is
+	// accepted to the orphan pool. This must be allowed since it would otherwise be possible for a malicious actor to
+	// disrupt tx chains.
 	doubleSpendTx, err := harness.CreateSignedTx([]spendableOutput{
 		txOutToSpendableOut(chainedTxns[1], 0),
 		txOutToSpendableOut(chainedTxns[maxOrphans], 0),
@@ -660,8 +654,10 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 			"from what should be an orphan", len(acceptedTxns))
 	}
 	testPoolMembership(tc, doubleSpendTx, true, false)
-	// Add the transaction which completes the orphan chain and ensure the chain gets accepted.  Notice the accept orphans flag is also false here to ensure it has no bearing on whether or not already existing orphans in the pool are linked.
-	// This will cause the shared output to become a concrete spend which will in turn must cause the double spending orphan to be removed.
+	// Add the transaction which completes the orphan chain and ensure the chain gets accepted. Notice the accept
+	// orphans flag is also false here to ensure it has no bearing on whether or not already existing orphans in the
+	// pool are linked. This will cause the shared output to become a concrete spend which will in turn must cause the
+	// double spending orphan to be removed.
 	acceptedTxns, err = harness.txPool.ProcessTransaction(nil, chainedTxns[0],
 		false, false, 0)
 	if err != nil {
@@ -673,7 +669,8 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 			len(acceptedTxns), maxOrphans)
 	}
 	for _, txD := range acceptedTxns {
-		// Ensure the transaction is no longer in the orphan pool, is in the transaction pool, and is reported as available.
+		// Ensure the transaction is no longer in the orphan pool, is in the transaction pool, and is reported as
+		// available.
 		testPoolMembership(tc, txD.Tx, false, true)
 	}
 	// Ensure the double spending orphan is no longer in the orphan pool and was not moved to the transaction pool.

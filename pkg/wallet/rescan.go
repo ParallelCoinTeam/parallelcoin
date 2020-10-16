@@ -10,25 +10,22 @@ import (
 	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
-// RescanProgressMsg reports the current progress made by a rescan for a
-// set of wallet addresses.
+// RescanProgressMsg reports the current progress made by a rescan for a set of wallet addresses.
 type RescanProgressMsg struct {
 	Addresses    []util.Address
 	Notification *chain.RescanProgress
 }
 
-// RescanFinishedMsg reports the addresses that were rescanned when a
-// rescanfinished message was received rescanning a batch of addresses.
+// RescanFinishedMsg reports the addresses that were rescanned when a rescanfinished message was received rescanning a
+// batch of addresses.
 type RescanFinishedMsg struct {
 	Addresses    []util.Address
 	Notification *chain.RescanFinished
 }
 
-// RescanJob is a job to be processed by the RescanManager.  The job includes
-// a set of wallet addresses, a starting height to begin the rescan, and
-// outpoints spendable by the addresses thought to be unspent.  After the
-// rescan completes, the error result of the rescan RPC is sent on the Err
-// channel.
+// RescanJob is a job to be processed by the RescanManager. The job includes a set of wallet addresses, a starting
+// height to begin the rescan, and outpoints spendable by the addresses thought to be unspent. After the rescan
+// completes, the error result of the rescan RPC is sent on the Err channel.
 type RescanJob struct {
 	InitialSync bool
 	Addrs       []util.Address
@@ -37,8 +34,7 @@ type RescanJob struct {
 	err         chan error
 }
 
-// rescanBatch is a collection of one or more RescanJobs that were merged
-// together before a rescan is performed.
+// rescanBatch is a collection of one or more RescanJobs that were merged together before a rescan is performed.
 type rescanBatch struct {
 	initialSync bool
 	addrs       []util.Address
@@ -47,9 +43,8 @@ type rescanBatch struct {
 	errChans    []chan error
 }
 
-// SubmitRescan submits a RescanJob to the RescanManager.  A channel is
-// returned with the final error of the rescan.  The channel is buffered
-// and does not need to be read to prevent a deadlock.
+// SubmitRescan submits a RescanJob to the RescanManager. A channel is returned with the final error of the rescan. The
+// channel is buffered and does not need to be read to prevent a deadlock.
 func (w *Wallet) SubmitRescan(job *RescanJob) <-chan error {
 	errChan := make(chan error, 1)
 	job.err = errChan
@@ -68,9 +63,8 @@ func (job *RescanJob) batch() *rescanBatch {
 	}
 }
 
-// merge merges the work from k into j, setting the starting height to
-// the minimum of the two jobs.  This method does not check for
-// duplicate addresses or outpoints.
+// merge merges the work from k into j, setting the starting height to the minimum of the two jobs. This method does not
+// check for duplicate addresses or outpoints.
 func (b *rescanBatch) merge(job *RescanJob) {
 	if job.InitialSync {
 		b.initialSync = true
@@ -85,18 +79,16 @@ func (b *rescanBatch) merge(job *RescanJob) {
 	b.errChans = append(b.errChans, job.err)
 }
 
-// done iterates through all error channels, duplicating sending the error
-// to inform callers that the rescan finished (or could not complete due
-// to an error).
+// done iterates through all error channels, duplicating sending the error to inform callers that the rescan finished
+// (or could not complete due to an error).
 func (b *rescanBatch) done(err error) {
 	for _, c := range b.errChans {
 		c <- err
 	}
 }
 
-// rescanBatchHandler handles incoming rescan request, serializing rescan
-// submissions, and possibly batching many waiting requests together so they
-// can be handled by a single rescan after the current one completes.
+// rescanBatchHandler handles incoming rescan request, serializing rescan submissions, and possibly batching many
+// waiting requests together so they can be handled by a single rescan after the current one completes.
 func (w *Wallet) rescanBatchHandler() {
 	var curBatch, nextBatch *rescanBatch
 	quit := w.quitChan()
@@ -105,13 +97,11 @@ out:
 		select {
 		case job := <-w.rescanAddJob:
 			if curBatch == nil {
-				// Set current batch as this job and send
-				// request.
+				// Set current batch as this job and send request.
 				curBatch = job.batch()
 				w.rescanBatch <- curBatch
 			} else {
-				// Create next batch if it doesn't exist, or
-				// merge the job.
+				// Create next batch if it doesn't exist, or merge the job.
 				if nextBatch == nil {
 					nextBatch = job.batch()
 				} else {
@@ -188,9 +178,8 @@ out:
 	w.wg.Done()
 }
 
-// rescanRPCHandler reads batch jobs sent by rescanBatchHandler and sends the
-// RPC requests to perform a rescan.  New jobs are not read until a rescan
-// finishes.
+// rescanRPCHandler reads batch jobs sent by rescanBatchHandler and sends the RPC requests to perform a rescan. New jobs
+// are not read until a rescan finishes.
 func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
@@ -226,16 +215,14 @@ out:
 	w.wg.Done()
 }
 
-// Rescan begins a rescan for all active addresses and unspent outputs of
-// a wallet.  This is intended to be used to sync a wallet back up to the
-// current best block in the main chain, and is considered an initial sync
-// rescan.
+// Rescan begins a rescan for all active addresses and unspent outputs of a wallet. This is intended to be used to sync
+// a wallet back up to the current best block in the main chain, and is considered an initial sync rescan.
 func (w *Wallet) Rescan(addrs []util.Address, unspent []tm.Credit) error {
 	return w.rescanWithTarget(addrs, unspent, nil)
 }
 
-// rescanWithTarget performs a rescan starting at the optional startStamp. If
-// none is provided, the rescan will begin from the manager's sync tip.
+// rescanWithTarget performs a rescan starting at the optional startStamp. If none is provided, the rescan will begin
+// from the manager's sync tip.
 func (w *Wallet) rescanWithTarget(addrs []util.Address,
 	unspent []tm.Credit, startStamp *wm.BlockStamp) error {
 	outpoints := make(map[wire.OutPoint]util.Address, len(unspent))
@@ -249,8 +236,7 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 		}
 		outpoints[output.OutPoint] = outputAddrs[0]
 	}
-	// If a start block stamp was provided, we will use that as the initial
-	// starting point for the rescan.
+	// If a start block stamp was provided, we will use that as the initial starting point for the rescan.
 	if startStamp == nil {
 		startStamp = &wm.BlockStamp{}
 		*startStamp = w.Manager.SyncedTo()

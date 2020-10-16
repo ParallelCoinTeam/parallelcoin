@@ -10,7 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestWalletSvrCmds tests all of the wallet server commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
+// TestWalletSvrCmds tests all of the wallet server commands marshal and unmarshal into valid results include handling
+// of optional fields being omitted in the marshalled command, while optional fields with defaults have the default
+// assigned on unmarshalled commands.
 func TestWalletSvrCmds(t *testing.T) {
 	t.Parallel()
 	testID := int(1)

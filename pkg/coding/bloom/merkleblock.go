@@ -16,7 +16,8 @@ type merkleBlock struct {
 	bits        []byte
 }
 
-// calcTreeWidth calculates and returns the the number of nodes (width) or a merkle tree at the given depth-first height.
+// calcTreeWidth calculates and returns the the number of nodes (width) or a merkle tree at the given depth-first
+// height.
 func (m *merkleBlock) calcTreeWidth(height uint32) uint32 {
 	return (m.numTx + (1 << height) - 1) >> height
 }
@@ -36,7 +37,8 @@ func (m *merkleBlock) calcHash(height, pos uint32) *chainhash.Hash {
 	return blockchain.HashMerkleBranches(left, right)
 }
 
-// traverseAndBuild builds a partial merkle tree using a recursive depth-first approach.  As it calculates the hashes, it also saves whether or not each node is a parent node and a list of final hashes to be included in the merkle block.
+// traverseAndBuild builds a partial merkle tree using a recursive depth-first approach. As it calculates the hashes, it
+// also saves whether or not each node is a parent node and a list of final hashes to be included in the merkle block.
 func (m *merkleBlock) traverseAndBuild(height, pos uint32) {
 	// Determine whether this node is a parent of a matched node.
 	var isParent byte
@@ -44,12 +46,14 @@ func (m *merkleBlock) traverseAndBuild(height, pos uint32) {
 		isParent |= m.matchedBits[i]
 	}
 	m.bits = append(m.bits, isParent)
-	// When the node is a leaf node or not a parent of a matched node, append the hash to the list that will be part of the final merkle block.
+	// When the node is a leaf node or not a parent of a matched node, append the hash to the list that will be part of
+	// the final merkle block.
 	if height == 0 || isParent == 0x00 {
 		m.finalHashes = append(m.finalHashes, m.calcHash(height, pos))
 		return
 	}
-	// At this point, the node is an internal node and it is the parent of of an included leaf node. Descend into the left child and process its sub-tree.
+	// At this point, the node is an internal node and it is the parent of of an included leaf node. Descend into the
+	// left child and process its sub-tree.
 	m.traverseAndBuild(height-1, pos*2)
 	// Descend into the right child and process its sub-tree if there is one.
 	if pos*2+1 < m.calcTreeWidth(height-1) {
@@ -57,7 +61,8 @@ func (m *merkleBlock) traverseAndBuild(height, pos uint32) {
 	}
 }
 
-// NewMerkleBlock returns a new *wire.MsgMerkleBlock and an array of the matched transaction index numbers based on the passed block and filter.
+// NewMerkleBlock returns a new *wire.MsgMerkleBlock and an array of the matched transaction index numbers based on the
+// passed block and filter.
 func NewMerkleBlock(block *util.Block, filter *Filter) (*wire.MsgMerkleBlock, []uint32) {
 	numTx := uint32(len(block.Transactions()))
 	mBlock := merkleBlock{

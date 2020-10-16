@@ -11,8 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// estimateFeeTester interacts with the FeeEstimator to keep track of its
-// expected state.
+// estimateFeeTester interacts with the FeeEstimator to keep track of its expected state.
 type estimateFeeTester struct {
 	ef      *FeeEstimator
 	t       *testing.T
@@ -21,8 +20,7 @@ type estimateFeeTester struct {
 	last    *lastBlock
 }
 
-// lastBlock is a linked list of the block hashes which have been processed
-// by the test FeeEstimator.
+// lastBlock is a linked list of the block hashes which have been processed by the test FeeEstimator.
 type lastBlock struct {
 	hash *chainhash.Hash
 	prev *lastBlock
@@ -199,8 +197,7 @@ func TestEstimateFee(t *testing.T) {
 				" tx in mempool; got %f", expected, estimated)
 		}
 	}
-	// Change minRegisteredBlocks to make sure that works.
-	// Error return value expected.
+	// Change minRegisteredBlocks to make sure that works. Error return value expected.
 	ef.minRegisteredBlocks = 1
 	expected = DUOPerKilobyte(-1.0)
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
@@ -231,9 +228,8 @@ func TestEstimateFee(t *testing.T) {
 				" block; got %f", expected, estimated)
 		}
 	}
-	// Record an empty block and then a block with the new tx.
-	// This test was made because of a bug that only appeared when there were
-	// no transactions in the first bin.
+	// Record an empty block and then a block with the new tx. This test was made because of a bug that only appeared
+	// when there were no transactions in the first bin.
 	eft.newBlock([]*wire.MsgTx{})
 	eft.newBlock([]*wire.MsgTx{tx.Tx.MsgTx()})
 	expected = expectedFeePerKilobyte(tx)
@@ -257,8 +253,7 @@ func TestEstimateFee(t *testing.T) {
 	}
 	// Mine the first tx.
 	eft.newBlock([]*wire.MsgTx{txA.Tx.MsgTx()})
-	// Now the estimated amount should depend on the value of the argument to
-	// estimate fee.
+	// Now the estimated amount should depend on the value of the argument to estimate fee.
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if i > 2 {
@@ -299,8 +294,7 @@ func TestEstimateFee(t *testing.T) {
 	}
 	// Mine txC.
 	eft.newBlock([]*wire.MsgTx{txC.Tx.MsgTx()})
-	// This should have no effect on the outcome because too many blocks have
-	// been mined for txC to be recorded.
+	// This should have no effect on the outcome because too many blocks have been mined for txC to be recorded.
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		switch {
@@ -319,8 +313,7 @@ func TestEstimateFee(t *testing.T) {
 	}
 }
 
-// TestEstimateFeeRollback tests the rollback function,
-// which undoes the effect of a adding a new block.
+// TestEstimateFeeRollback tests the rollback function, which undoes the effect of a adding a new block.
 func TestEstimateFeeRollback(t *testing.T) {
 	txPerRound := uint32(7)
 	txPerBlock := uint32(5)
@@ -341,8 +334,7 @@ func TestEstimateFeeRollback(t *testing.T) {
 		// Now go back.
 		for step := 0; step < stepsBack; step++ {
 			eft.rollback()
-			// After rolling back we should have the same estimated fees as
-			// before.
+			// After rolling back we should have the same estimated fees as before.
 			expected := estimateHistory[len(estimateHistory)-step-2]
 			estimates := eft.estimates()
 			// Ensure that these are both the same.
@@ -365,8 +357,7 @@ func expectedFeePerKilobyte(t *TxDesc) DUOPerKilobyte {
 	return SatoshiPerByte(fee / size).ToBtcPerKb()
 }
 
-// newTestFeeEstimator creates a feeEstimator with some different parameters
-// for testing purposes.
+// newTestFeeEstimator creates a feeEstimator with some different parameters for testing purposes.
 func newTestFeeEstimator(binSize, maxReplacements, maxRollback uint32) *FeeEstimator {
 	return &FeeEstimator{
 		maxRollback:         maxRollback,

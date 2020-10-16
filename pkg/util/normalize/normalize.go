@@ -16,8 +16,8 @@ func Address(addr, defaultPort string) string {
 	return addr
 }
 
-// Addresses returns a new slice with all the passed peer addresses normalized with the given default port,
-// and all duplicates removed.
+// Addresses returns a new slice with all the passed peer addresses normalized with the given default port, and all
+// duplicates removed.
 func Addresses(addrs []string, defaultPort string) []string {
 	for i := range addrs {
 		addrs[i] = Address(addrs[i], defaultPort)

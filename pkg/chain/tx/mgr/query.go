@@ -8,9 +8,8 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// CreditRecord contains metadata regarding a transaction credit for a known
-// transaction.  Further details may be looked up by indexing a wire.MsgTx.TxOut
-// with the Index field.
+// CreditRecord contains metadata regarding a transaction credit for a known transaction. Further details may be looked
+// up by indexing a wire.MsgTx.TxOut with the Index field.
 type CreditRecord struct {
 	Amount util.Amount
 	Index  uint32
@@ -18,17 +17,15 @@ type CreditRecord struct {
 	Change bool
 }
 
-// DebitRecord contains metadata regarding a transaction debit for a known
-// transaction.  Further details may be looked up by indexing a wire.MsgTx.TxIn
-// with the Index field.
+// DebitRecord contains metadata regarding a transaction debit for a known transaction. Further details may be looked up
+// by indexing a wire.MsgTx.TxIn with the Index field.
 type DebitRecord struct {
 	Amount util.Amount
 	Index  uint32
 }
 
-// TxDetails is intended to provide callers with access to rich details
-// regarding a relevant transaction and which inputs and outputs are credit or
-// debits.
+// TxDetails is intended to provide callers with access to rich details regarding a relevant transaction and which
+// inputs and outputs are credit or debits.
 type TxDetails struct {
 	TxRecord
 	Block   BlockMeta
@@ -36,12 +33,12 @@ type TxDetails struct {
 	Debits  []DebitRecord
 }
 
-// minedTxDetails fetches the TxDetails for the mined transaction with hash
-// txHash and the passed tx record key and value.
+// minedTxDetails fetches the TxDetails for the mined transaction with hash txHash and the passed tx record key and
+// value.
 func (s *Store) minedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, recKey, recVal []byte) (*TxDetails, error) {
 	var details TxDetails
-	// Parse transaction record k/v, lookup the full block record for the
-	// block time, and read all matching credits, debits.
+	// Parse transaction record k/v, lookup the full block record for the block time, and read all matching credits,
+	// debits.
 	err := readRawTxRecord(txHash, recVal, &details.TxRecord)
 	if err != nil {
 		Error(err)
@@ -63,8 +60,8 @@ func (s *Store) minedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, r
 			str := "saved credit index exceeds number of outputs"
 			return nil, storeError(ErrData, str, nil)
 		}
-		// The credit iterator does not record whether this credit was
-		// spent by an unmined transaction, so check that here.
+		// The credit iterator does not record whether this credit was spent by an unmined transaction, so check that
+		// here.
 		if !credIter.elem.Spent {
 			k := canonicalOutPoint(txHash, credIter.elem.Index)
 			spent := existsRawUnminedInput(ns, k) != nil
@@ -86,8 +83,8 @@ func (s *Store) minedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, r
 	return &details, debIter.err
 }
 
-// unminedTxDetails fetches the TxDetails for the unmined transaction with the
-// hash txHash and the passed unmined record value.
+// unminedTxDetails fetches the TxDetails for the unmined transaction with the hash txHash and the passed unmined record
+// value.
 func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, v []byte) (*TxDetails, error) {
 	details := TxDetails{
 		Block: BlockMeta{Block: Block{Height: -1}},
@@ -110,12 +107,10 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 	if it.err != nil {
 		return nil, it.err
 	}
-	// Debit records are not saved for unmined transactions.  Instead, they
-	// must be looked up for each transaction input manually.  There are two
-	// kinds of previous credits that may be debited by an unmined
-	// transaction: mined unspent outputs (which remain marked unspent even
-	// when spent by an unmined transaction), and credits from other unmined
-	// transactions.  Both situations must be considered.
+	// Debit records are not saved for unmined transactions. Instead, they must be looked up for each transaction input
+	// manually. There are two kinds of previous credits that may be debited by an unmined transaction: mined unspent
+	// outputs (which remain marked unspent even when spent by an unmined transaction), and credits from other unmined
+	// transactions. Both situations must be considered.
 	for i, output := range details.MsgTx.TxIn {
 		opKey := canonicalOutPoint(&output.PreviousOutPoint.Hash,
 			output.PreviousOutPoint.Index)
@@ -150,21 +145,18 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 	return &details, nil
 }
 
-// TxDetails looks up all recorded details regarding a transaction with some
-// hash.  In case of a hash collision, the most recent transaction with a
-// matching hash is returned.
+// TxDetails looks up all recorded details regarding a transaction with some hash. In case of a hash collision, the most
+// recent transaction with a matching hash is returned.
 //
-// Not finding a transaction with this hash is not an error.  In this case,
-// a nil TxDetails is returned.
+// Not finding a transaction with this hash is not an error. In this case, a nil TxDetails is returned.
 func (s *Store) TxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash) (*TxDetails, error) {
-	// First, check whether there exists an unmined transaction with this
-	// hash.  Use it if found.
+	// First, check whether there exists an unmined transaction with this hash. Use it if found.
 	v := existsRawUnmined(ns, txHash[:])
 	if v != nil {
 		return s.unminedTxDetails(ns, txHash, v)
 	}
-	// Otherwise, if there exists a mined transaction with this matching
-	// hash, skip over to the newest and begin fetching all details.
+	// Otherwise, if there exists a mined transaction with this matching hash, skip over to the newest and begin
+	// fetching all details.
 	k, v := latestTxRecord(ns, txHash)
 	if v == nil {
 		// not found
@@ -173,11 +165,10 @@ func (s *Store) TxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash) (*TxDe
 	return s.minedTxDetails(ns, txHash, k, v)
 }
 
-// UniqueTxDetails looks up all recorded details for a transaction recorded
-// mined in some particular block, or an unmined transaction if block is nil.
+// UniqueTxDetails looks up all recorded details for a transaction recorded mined in some particular block, or an
+// unmined transaction if block is nil.
 //
-// Not finding a transaction with this hash from this block is not an error.  In
-// this case, a nil TxDetails is returned.
+// Not finding a transaction with this hash from this block is not an error. In this case, a nil TxDetails is returned.
 func (s *Store) UniqueTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 	block *Block) (*TxDetails, error) {
 	if block == nil {
@@ -194,11 +185,9 @@ func (s *Store) UniqueTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 	return s.minedTxDetails(ns, txHash, k, v)
 }
 
-// rangeUnminedTransactions executes the function f with TxDetails for every
-// unmined transaction.  f is not executed if no unmined transactions exist.
-// DBError returns from f (if any) are propigated to the caller.  Returns true
-// (signaling breaking out of a RangeTransactions) iff f executes and returns
-// true.
+// rangeUnminedTransactions executes the function f with TxDetails for every unmined transaction. f is not executed if
+// no unmined transactions exist. DBError returns from f (if any) are propigated to the caller. Returns true (signaling
+// breaking out of a RangeTransactions) iff f executes and returns true.
 func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
 	f func([]TxDetails) (bool, error)) (bool, error) {
 	Trace("rangeUnminedTransactions")
@@ -217,9 +206,8 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
 			Error(err)
 			return err
 		}
-		// Because the key was created while foreach-ing over the
-		// bucket, it should be impossible for unminedTxDetails to ever
-		// successfully return a nil details struct.
+		// Because the key was created while foreach-ing over the bucket, it should be impossible for unminedTxDetails
+		// to ever successfully return a nil details struct.
 		details = append(details, *detail)
 		return nil
 	})
@@ -229,10 +217,9 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
 	return false, err
 }
 
-// rangeBlockTransactions executes the function f with TxDetails for every block
-// between heights begin and end (reverse order when end > begin) until f
-// returns true, or the transactions from block is processed.  Returns true iff
-// f executes and returns true.
+// rangeBlockTransactions executes the function f with TxDetails for every block between heights begin and end (reverse
+// order when end > begin) until f returns true, or the transactions from block is processed. Returns true iff f
+// executes and returns true.
 func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error)) (bool, error) {
 	Trace("rangeBlockTransactions", begin, end)
@@ -299,9 +286,8 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 					str := "saved credit index exceeds number of outputs"
 					return false, storeError(ErrData, str, nil)
 				}
-				// The credit iterator does not record whether
-				// this credit was spent by an unmined
-				// transaction, so check that here.
+				// The credit iterator does not record whether this credit was spent by an unmined transaction, so check
+				// that here.
 				if !credIter.elem.Spent {
 					k := canonicalOutPoint(&txHash, credIter.elem.Index)
 					spent := existsRawUnminedInput(ns, k) != nil
@@ -335,19 +321,15 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	return false, blockIter.err
 }
 
-// RangeTransactions runs the function f on all transaction details between
-// blocks on the best chain over the height range [begin,end].  The special
-// height -1 may be used to also include unmined transactions.  If the end
-// height comes before the begin height, blocks are iterated in reverse order
-// and unmined transactions (if any) are processed first.
+// RangeTransactions runs the function f on all transaction details between blocks on the best chain over the height
+// range [begin,end]. The special height -1 may be used to also include unmined transactions. If the end height comes
+// before the begin height, blocks are iterated in reverse order and unmined transactions (if any) are processed first.
 //
-// The function f may return an error which, if non-nil, is propagated to the
-// caller.  Additionally, a boolean return value allows exiting the function
-// early without reading any additional transactions early when true.
+// The function f may return an error which, if non-nil, is propagated to the caller. Additionally, a boolean return
+// value allows exiting the function early without reading any additional transactions early when true.
 //
-// All calls to f are guaranteed to be passed a slice with more than zero
-// elements.  The slice may be reused for multiple blocks, so it is not safe to
-// use it after the loop iteration it was acquired.
+// All calls to f are guaranteed to be passed a slice with more than zero elements. The slice may be reused for multiple
+// blocks, so it is not safe to use it after the loop iteration it was acquired.
 func (s *Store) RangeTransactions(ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error)) error {
 	Trace("RangeTransactions")
@@ -369,21 +351,18 @@ func (s *Store) RangeTransactions(ns walletdb.ReadBucket, begin, end int32,
 	return err
 }
 
-// PreviousPkScripts returns a slice of previous output scripts for each credit
-// output this transaction record debits from.
+// PreviousPkScripts returns a slice of previous output scripts for each credit output this transaction record debits
+// from.
 func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *Block) ([][]byte, error) {
 	var pkScripts [][]byte
 	if block == nil {
 		for _, input := range rec.MsgTx.TxIn {
 			prevOut := &input.PreviousOutPoint
-			// Input may spend a previous unmined output, a
-			// mined output (which would still be marked
-			// unspent), or neither.
+			// Input may spend a previous unmined output, a mined output (which would still be marked unspent), or
+			// neither.
 			v := existsRawUnmined(ns, prevOut.Hash[:])
 			if v != nil {
-				// Ensure a credit exists for this
-				// unmined transaction before including
-				// the output script.
+				// Ensure a credit exists for this unmined transaction before including the output script.
 				k := canonicalOutPoint(&prevOut.Hash, prevOut.Index)
 				if existsRawUnminedCredit(ns, k) == nil {
 					continue

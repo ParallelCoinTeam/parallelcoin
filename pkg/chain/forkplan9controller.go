@@ -27,9 +27,8 @@ func (al AlgoList) Swap(i, j int) {
 
 type TargetBits map[int32]uint32
 
-// CalcNextRequiredDifficultyPlan9Controller returns all of the algorithm
-// difficulty targets for sending out with the other pieces required to
-// construct a block, as these numbers are generated from block timestamps
+// CalcNextRequiredDifficultyPlan9Controller returns all of the algorithm difficulty targets for sending out with the
+// other pieces required to construct a block, as these numbers are generated from block timestamps
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 	lastNode *BlockNode) (newTargetBits TargetBits, err error) {
 	nH := lastNode.height + 1

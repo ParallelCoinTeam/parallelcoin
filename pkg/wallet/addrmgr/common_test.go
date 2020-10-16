@@ -16,35 +16,26 @@ import (
 
 var (
 	// seed is the master seed used throughout the tests.
-	// nolint
 	seed = []byte{
 		0x2a, 0x64, 0xdf, 0x08, 0x5e, 0xef, 0xed, 0xd8, 0xbf,
 		0xdb, 0xb3, 0x31, 0x76, 0xb5, 0xba, 0x2e, 0x62, 0xe8,
 		0xbe, 0x8b, 0x56, 0xc8, 0x83, 0x77, 0x95, 0x59, 0x8b,
 		0xb6, 0xc4, 0x40, 0xc0, 0x64,
 	}
-	// nolint
-	pubPassphrase = []byte("_DJr{fL4H0O}*-0\n:V1izc)(6BomK")
-	// nolint
-	privPassphrase = []byte("81lUHXnOMZ@?XXd7O9xyDIWIbXX-lj")
-	// nolint
-	pubPassphrase2 = []byte("-0NV4P~VSJBWbunw}%<Z]fuGpbN[ZI")
-	// nolint
+	pubPassphrase   = []byte("_DJr{fL4H0O}*-0\n:V1izc)(6BomK")
+	privPassphrase  = []byte("81lUHXnOMZ@?XXd7O9xyDIWIbXX-lj")
+	pubPassphrase2  = []byte("-0NV4P~VSJBWbunw}%<Z]fuGpbN[ZI")
 	privPassphrase2 = []byte("~{<]08%6!-?2s<$(8$8:f(5[4/!/{Y")
 	// fastScrypt are parameters used throughout the tests to speed up the
 	// scrypt operations.
-	// nolint
 	fastScrypt = &waddrmgr.ScryptOptions{
 		N: 16,
 		R: 8,
 		P: 1,
 	}
 	// waddrmgrNamespaceKey is the namespace key for the waddrmgr package.
-	// nolint
 	waddrmgrNamespaceKey = []byte("waddrmgrNamespace")
-	// expectedAddrs is the list of all expected addresses generated from the
-	// seed.
-	// nolint
+	// expectedAddrs is the list of all expected addresses generated from the seed.
 	expectedAddrs = []expectedAddr{
 		{
 			address:     "14wtcepMNiEazuN7YosWY8bwD9tcCtxXRB",
@@ -197,18 +188,13 @@ var (
 			},
 		},
 	}
-	// expectedExternalAddrs is the list of expected external addresses
-	// generated from the seed
-	// nolint
+	// expectedExternalAddrs is the list of expected external addresses generated from the seed
 	expectedExternalAddrs = expectedAddrs[:5]
-	// expectedInternalAddrs is the list of expected internal addresses
-	// generated from the seed
-	// nolint
+	// expectedInternalAddrs is the list of expected internal addresses generated from the seed
 	expectedInternalAddrs = expectedAddrs[5:]
 )
 
-// checkManagerError ensures the passed error is a ManagerError with an error
-// code that matches the passed  error code.
+// checkManagerError ensures the passed error is a ManagerError with an error code that matches the passed error code.
 func checkManagerError(t *testing.T, testName string, gotErr error, wantErrCode waddrmgr.ErrorCode) bool {
 	merr, ok := gotErr.(waddrmgr.ManagerError)
 	if !ok {
@@ -224,9 +210,8 @@ func checkManagerError(t *testing.T, testName string, gotErr error, wantErrCode 
 	return true
 }
 
-// hexToBytes is a wrapper around hex.DecodeString that panics if there is an
-// error.  It MUST only be used with hard coded values in the tests.
-// nolint
+// hexToBytes is a wrapper around hex.DecodeString that panics if there is an error. It MUST only be used with hard
+// coded values in the tests.
 func hexToBytes(origHex string) []byte {
 	buf, err := hex.DecodeString(origHex)
 	if err != nil {
@@ -252,8 +237,8 @@ func emptyDB(t *testing.T) (tearDownFunc func(), db walletdb.DB) {
 	return
 }
 
-// setupManager creates a new address manager and returns a teardown function
-// that should be invoked to ensure it is closed and removed upon completion.
+// setupManager creates a new address manager and returns a teardown function that should be invoked to ensure it is
+// closed and removed upon completion.
 func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddrmgr.Manager) {
 	// Create a new manager in a temp directory.
 	dirName, err := ioutil.TempDir("", "mgrtest")

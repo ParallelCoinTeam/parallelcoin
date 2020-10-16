@@ -12,14 +12,19 @@ import (
 // (https://github.com/bitcoin/bips/blob/master/bip-0069.mediawiki)
 
 // InPlaceSort modifies the passed transaction inputs and outputs to be sorted based on BIP 69.
-// WARNING: This function must NOT be called with published transactions since it will mutate the transaction if it's not already sorted.  This can cause issues if you mutate a tx in a block, for example, which would invalidate the block.  It could also cause cached hashes, such as in a util.Tx to become invalidated.
-// The function should only be used if the caller is creating the transaction or is otherwise 100% positive mutating will not cause adverse affects due to other dependencies.
+//
+// WARNING: This function must NOT be called with published transactions since it will mutate the transaction if it's
+// not already sorted. This can cause issues if you mutate a tx in a block, for example, which would invalidate the
+// block. It could also cause cached hashes, such as in a util.Tx to become invalidated. The function should only be
+// used if the caller is creating the transaction or is otherwise 100% positive mutating will not cause adverse affects
+// due to other dependencies.
 func InPlaceSort(tx *wire.MsgTx) {
 	sort.Sort(sortableInputSlice(tx.TxIn))
 	sort.Sort(sortableOutputSlice(tx.TxOut))
 }
 
-// Sort returns a new transaction with the inputs and outputs sorted based on BIP 69.  The passed transaction is not modified and the new transaction might have a different hash if any sorting was done.
+// Sort returns a new transaction with the inputs and outputs sorted based on BIP 69. The passed transaction is not
+// modified and the new transaction might have a different hash if any sorting was done.
 func Sort(tx *wire.MsgTx) *wire.MsgTx {
 	txCopy := tx.Copy()
 	sort.Sort(sortableInputSlice(txCopy.TxIn))
@@ -41,7 +46,8 @@ func IsSorted(tx *wire.MsgTx) bool {
 type sortableInputSlice []*wire.TxIn
 type sortableOutputSlice []*wire.TxOut
 
-// For SortableInputSlice and SortableOutputSlice, three functions are needed to make it sortable with sort.Sort() -- Len, Less, and Swap Len and Swap are trivial.  Less is BIP 69 specific.
+// For SortableInputSlice and SortableOutputSlice, three functions are needed to make it sortable with sort.Sort() --
+// Len, Less, and Swap Len and Swap are trivial. Less is BIP 69 specific.
 func (s sortableInputSlice) Len() int  { return len(s) }
 func (s sortableOutputSlice) Len() int { return len(s) }
 func (s sortableOutputSlice) Swap(i, j int) {

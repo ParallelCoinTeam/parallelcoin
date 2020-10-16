@@ -3,6 +3,7 @@ package apputil
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 // EnsureDir checks a file could be written to a path, creates the directories as needed
@@ -22,10 +23,39 @@ func FileExists(filePath string) bool {
 	return err == nil
 }
 
-// MinUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast to floats.
+// MinUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast
+// to floats.
 func MinUint32(a, b uint32) uint32 {
 	if a < b {
 		return a
 	}
 	return b
+}
+
+func PrependForWindows(args []string) []string {
+	if runtime.GOOS == "windows" {
+		args = append(
+			[]string{
+				"cmd.exe",
+				"/C",
+			},
+			args...,
+		)
+	}
+	return args
+}
+
+
+func PrependForWindowsWithStart(args []string) []string {
+	if runtime.GOOS == "windows" {
+		args = append(
+			[]string{
+				"cmd.exe",
+				"/C",
+				"start",
+			},
+			args...,
+		)
+	}
+	return args
 }

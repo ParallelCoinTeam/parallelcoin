@@ -10,7 +10,7 @@ import (
 )
 
 // AppDataDir returns an operating system specific directory to be used for storing application data for an application.
-// See Dir for more details.  This unexported version takes an operating system argument primarily to enable the testing
+// See Dir for more details. This unexported version takes an operating system argument primarily to enable the testing
 // package to properly test the function by forcing an operating system that is not the currently one.
 func AppDataDir(goos, appName string, roaming bool) string {
 	if appName == "" || appName == "." {
@@ -64,13 +64,17 @@ func AppDataDir(goos, appName string, roaming bool) string {
 
 // Dir returns an operating system specific directory to be used for storing application data for an application. The
 // appName parameter is the name of the application the data directory is being requested for.  This function will
-// prepend a period to the appName for POSIX style operating systems since that is standard practice.  An empty appName
-// or one with a single dot is treated as requesting the current directory so only "." will be returned.  Further, the
-// first character of appName will be made lowercase for POSIX style operating systems and uppercase for Mac and Windows
-// since that is standard practice.
+// prepend a period to the appName for POSIX style operating systems since that is standard practice.
+//
+// An empty appName or one with a single dot is treated as requesting the current directory so only "." will be
+// returned. Further, the first character of appName will be made lowercase for POSIX style operating systems and
+// uppercase for Mac and Windows since that is standard practice.
+//
 // The roaming parameter only applies to Windows where it specifies the roaming application data profile (%APPDATA%)
 // should be used instead of the local one (%LOCALAPPDATA%) that is used by default. Example results:
+//
 //  dir := Dir("myapp", false)
+//
 //   POSIX (Linux/BSD): ~/.myapp
 //   Mac OS: $HOME/Library/Application Support/Myapp
 //   Windows: %LOCALAPPDATA%\Myapp

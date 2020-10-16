@@ -8,8 +8,8 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func // Configure loads and sanitises the configuration from urfave/cli
-Configure(cx *conte.Xt, commandName string, initial bool) {
+// Configure loads and sanitises the configuration from urfave/cli
+func Configure(cx *conte.Xt, commandName string, initial bool) {
 	Debug("running Configure", commandName)
 	Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)

@@ -18,7 +18,8 @@ type signatureTest struct {
 	isValid bool
 }
 
-// decodeHex decodes the passed hex string and returns the resulting bytes.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
+// decodeHex decodes the passed hex string and returns the resulting bytes. It panics if an error occurs. This is only
+// used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
 func decodeHex(hexStr string) []byte {
 	b, err := hex.DecodeString(hexStr)
 	if err != nil {
@@ -179,7 +180,9 @@ var signatureTests = []signatureTest{
 			0x08, 0x22, 0x21, 0xa8, 0x76, 0x8d, 0x1d, 0x09, 0x01,
 		},
 		der: true,
-		// This test is now passing (used to be failing) because there are signatures in the blockchain that have trailing zero bytes before the hashtype. So ParseSignature was fixed to permit buffers with trailing nonsense after the actual signature.
+		// This test is now passing (used to be failing) because there are signatures in the blockchain that have
+		// trailing zero bytes before the hashtype. So ParseSignature was fixed to permit buffers with trailing nonsense
+		// after the actual signature.
 		isValid: true,
 	},
 	{
@@ -288,7 +291,11 @@ var signatureTests = []signatureTest{
 		der:     true,
 		isValid: false,
 	},
-	// Standard checks (in BER format, without checking for 'canonical' DER signatures) don't test for negative numbers here because there isn't a way that is the same between openssl and go that will mark a number as negative. The Go ASN.1 parser marks numbers as negative when openssl does not (it doesn't handle negative numbers that I can tell at all. When not parsing DER signatures, which is done by by bitcoind when accepting transactions into its mempool, we otherwise only check for the coordinates being zero.
+	// Standard checks (in BER format, without checking for 'canonical' DER signatures) don't test for negative numbers
+	// here because there isn't a way that is the same between openssl and go that will mark a number as negative. The
+	// Go ASN.1 parser marks numbers as negative when openssl does not (it doesn't handle negative numbers that I can
+	// tell at all. When not parsing DER signatures, which is done by by bitcoind when accepting transactions into its
+	// mempool, we otherwise only check for the coordinates being zero.
 	{
 		name: "X == 0",
 		sig: []byte{0x30, 0x25, 0x02, 0x01, 0x00, 0x02, 0x20, 0x18,
@@ -499,7 +506,8 @@ func TestSignCompact(t *testing.T) {
 	}
 }
 
-// recoveryTests assert basic tests for public key recovery from signatures. The cases are borrowed from github.com/fjl/btcec-issue.
+// recoveryTests assert basic tests for public key recovery from signatures. The cases are borrowed from
+// github.com/fjl/btcec-issue.
 var recoveryTests = []struct {
 	msg string
 	sig string

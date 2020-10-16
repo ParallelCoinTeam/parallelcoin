@@ -11,7 +11,9 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestChainSvrCmds tests all of the chain server commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
+// TestChainSvrCmds tests all of the chain server commands marshal and unmarshal into valid results include handling of
+// optional fields being omitted in the marshalled command, while optional fields with defaults have the default
+// assigned on unmarshalled commands.
 func TestChainSvrCmds(t *testing.T) {
 	t.Parallel()
 	testID := int(1)

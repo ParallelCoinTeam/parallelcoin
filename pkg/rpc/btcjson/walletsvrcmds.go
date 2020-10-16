@@ -7,7 +7,9 @@ type AddMultisigAddressCmd struct {
 	Account   *string
 }
 
-// NewAddMultisigAddressCmd returns a new instance which can be used to issue a addmultisigaddress JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewAddMultisigAddressCmd returns a new instance which can be used to issue a addmultisigaddress JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewAddMultisigAddressCmd(nRequired int, keys []string, account *string) *AddMultisigAddressCmd {
 	return &AddMultisigAddressCmd{
 		NRequired: nRequired,
@@ -127,7 +129,8 @@ type GetAddressesByAccountCmd struct {
 	Account string
 }
 
-// NewGetAddressesByAccountCmd returns a new instance which can be used to issue a getaddressesbyaccount JSON-RPC command.
+// NewGetAddressesByAccountCmd returns a new instance which can be used to issue a getaddressesbyaccount JSON-RPC
+// command.
 func NewGetAddressesByAccountCmd(account string) *GetAddressesByAccountCmd {
 	return &GetAddressesByAccountCmd{
 		Account: account,
@@ -140,7 +143,8 @@ type GetBalanceCmd struct {
 	MinConf *int `jsonrpcdefault:"1"`
 }
 
-// NewGetBalanceCmd returns a new instance which can be used to issue a getbalance JSON-RPC command. The parameters that are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
+// NewGetBalanceCmd returns a new instance which can be used to issue a getbalance JSON-RPC command. The parameters that
+// are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewGetBalanceCmd(account *string, minConf *int) *GetBalanceCmd {
 	return &GetBalanceCmd{
 		Account: account,
@@ -153,7 +157,9 @@ type GetNewAddressCmd struct {
 	Account *string
 }
 
-// NewGetNewAddressCmd returns a new instance which can be used to issue a getnewaddress JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetNewAddressCmd returns a new instance which can be used to issue a getnewaddress JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewGetNewAddressCmd(account *string) *GetNewAddressCmd {
 	return &GetNewAddressCmd{
 		Account: account,
@@ -165,7 +171,9 @@ type GetRawChangeAddressCmd struct {
 	Account *string
 }
 
-// NewGetRawChangeAddressCmd returns a new instance which can be used to issue a getrawchangeaddress JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetRawChangeAddressCmd returns a new instance which can be used to issue a getrawchangeaddress JSON-RPC command.
+// The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the
+// default value.
 func NewGetRawChangeAddressCmd(account *string) *GetRawChangeAddressCmd {
 	return &GetRawChangeAddressCmd{
 		Account: account,
@@ -178,7 +186,9 @@ type GetReceivedByAccountCmd struct {
 	MinConf *int `jsonrpcdefault:"1"`
 }
 
-// NewGetReceivedByAccountCmd returns a new instance which can be used to issue a getreceivedbyaccount JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetReceivedByAccountCmd returns a new instance which can be used to issue a getreceivedbyaccount JSON-RPC command.
+// The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the
+// default value.
 func NewGetReceivedByAccountCmd(account string, minConf *int) *GetReceivedByAccountCmd {
 	return &GetReceivedByAccountCmd{
 		Account: account,
@@ -192,7 +202,9 @@ type GetReceivedByAddressCmd struct {
 	MinConf *int `jsonrpcdefault:"1"`
 }
 
-// NewGetReceivedByAddressCmd returns a new instance which can be used to issue a getreceivedbyaddress JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetReceivedByAddressCmd returns a new instance which can be used to issue a getreceivedbyaddress JSON-RPC command.
+// The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the
+// default value.
 func NewGetReceivedByAddressCmd(address string, minConf *int) *GetReceivedByAddressCmd {
 	return &GetReceivedByAddressCmd{
 		Address: address,
@@ -206,7 +218,9 @@ type GetTransactionCmd struct {
 	IncludeWatchOnly *bool `jsonrpcdefault:"false"`
 }
 
-// NewGetTransactionCmd returns a new instance which can be used to issue a gettransaction JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewGetTransactionCmd returns a new instance which can be used to issue a gettransaction JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewGetTransactionCmd(txHash string, includeWatchOnly *bool) *GetTransactionCmd {
 	return &GetTransactionCmd{
 		Txid:             txHash,
@@ -229,7 +243,9 @@ type ImportPrivKeyCmd struct {
 	Rescan  *bool `jsonrpcdefault:"true"`
 }
 
-// NewImportPrivKeyCmd returns a new instance which can be used to issue a importprivkey JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewImportPrivKeyCmd returns a new instance which can be used to issue a importprivkey JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewImportPrivKeyCmd(privKey string, label *string, rescan *bool) *ImportPrivKeyCmd {
 	return &ImportPrivKeyCmd{
 		PrivKey: privKey,
@@ -243,7 +259,9 @@ type KeyPoolRefillCmd struct {
 	NewSize *uint `jsonrpcdefault:"100"`
 }
 
-// NewKeyPoolRefillCmd returns a new instance which can be used to issue a keypoolrefill JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewKeyPoolRefillCmd returns a new instance which can be used to issue a keypoolrefill JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewKeyPoolRefillCmd(newSize *uint) *KeyPoolRefillCmd {
 	return &KeyPoolRefillCmd{
 		NewSize: newSize,
@@ -255,7 +273,8 @@ type ListAccountsCmd struct {
 	MinConf *int `jsonrpcdefault:"1"`
 }
 
-// NewListAccountsCmd returns a new instance which can be used to issue a listaccounts JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewListAccountsCmd returns a new instance which can be used to issue a listaccounts JSON-RPC command. The parameters
+// which are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewListAccountsCmd(minConf *int) *ListAccountsCmd {
 	return &ListAccountsCmd{
 		MinConf: minConf,
@@ -265,7 +284,8 @@ func NewListAccountsCmd(minConf *int) *ListAccountsCmd {
 // ListAddressGroupingsCmd defines the listaddressgroupings JSON-RPC command.
 type ListAddressGroupingsCmd struct{}
 
-// NewListAddressGroupingsCmd returns a new instance which can be used to issue a listaddressgroupoings JSON-RPC command.
+// NewListAddressGroupingsCmd returns a new instance which can be used to issue a listaddressgroupings JSON-RPC
+// command.
 func NewListAddressGroupingsCmd() *ListAddressGroupingsCmd {
 	return &ListAddressGroupingsCmd{}
 }
@@ -285,7 +305,9 @@ type ListReceivedByAccountCmd struct {
 	IncludeWatchOnly *bool `jsonrpcdefault:"false"`
 }
 
-// NewListReceivedByAccountCmd returns a new instance which can be used to issue a listreceivedbyaccount JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewListReceivedByAccountCmd returns a new instance which can be used to issue a listreceivedbyaccount JSON-RPC
+// command. The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use
+// the default value.
 func NewListReceivedByAccountCmd(minConf *int, includeEmpty, includeWatchOnly *bool) *ListReceivedByAccountCmd {
 	return &ListReceivedByAccountCmd{
 		MinConf:          minConf,
@@ -301,7 +323,9 @@ type ListReceivedByAddressCmd struct {
 	IncludeWatchOnly *bool `jsonrpcdefault:"false"`
 }
 
-// NewListReceivedByAddressCmd returns a new instance which can be used to issue a listreceivedbyaddress JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewListReceivedByAddressCmd returns a new instance which can be used to issue a listreceivedbyaddress JSON-RPC
+// command. The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use
+// the default value.
 func NewListReceivedByAddressCmd(minConf *int, includeEmpty, includeWatchOnly *bool) *ListReceivedByAddressCmd {
 	return &ListReceivedByAddressCmd{
 		MinConf:          minConf,
@@ -317,7 +341,9 @@ type ListSinceBlockCmd struct {
 	IncludeWatchOnly    *bool `jsonrpcdefault:"false"`
 }
 
-// NewListSinceBlockCmd returns a new instance which can be used to issue a listsinceblock JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewListSinceBlockCmd returns a new instance which can be used to issue a listsinceblock JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewListSinceBlockCmd(blockHash *string, targetConfirms *int, includeWatchOnly *bool) *ListSinceBlockCmd {
 	return &ListSinceBlockCmd{
 		BlockHash:           blockHash,
@@ -334,7 +360,9 @@ type ListTransactionsCmd struct {
 	IncludeWatchOnly *bool `jsonrpcdefault:"false"`
 }
 
-// NewListTransactionsCmd returns a new instance which can be used to issue a listtransactions JSON-RPC command. parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewListTransactionsCmd returns a new instance which can be used to issue a listtransactions JSON-RPC command.
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewListTransactionsCmd(account *string, count, from *int, includeWatchOnly *bool) *ListTransactionsCmd {
 	return &ListTransactionsCmd{
 		Account:          account,
@@ -351,7 +379,8 @@ type ListUnspentCmd struct {
 	Addresses *[]string
 }
 
-// NewListUnspentCmd returns a new instance which can be used to issue a listunspent JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewListUnspentCmd returns a new instance which can be used to issue a listunspent JSON-RPC command. The parameters
+// which are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewListUnspentCmd(minConf, maxConf *int, addresses *[]string) *ListUnspentCmd {
 	return &ListUnspentCmd{
 		MinConf:   minConf,
@@ -383,7 +412,8 @@ type MoveCmd struct {
 	Comment     *string
 }
 
-// NewMoveCmd returns a new instance which can be used to issue a move JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil// for optional parameters will use the default value.
+// NewMoveCmd returns a new instance which can be used to issue a move JSON-RPC command. The parameters which are
+// pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewMoveCmd(fromAccount, toAccount string, amount float64, minConf *int, comment *string) *MoveCmd {
 	return &MoveCmd{
 		FromAccount: fromAccount,
@@ -404,7 +434,8 @@ type SendFromCmd struct {
 	CommentTo   *string
 }
 
-// NewSendFromCmd returns a new instance which can be used to issue a sendfrom JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewSendFromCmd returns a new instance which can be used to issue a sendfrom JSON-RPC command. The parameters which
+// are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewSendFromCmd(fromAccount, toAddress string, amount float64, minConf *int, comment, commentTo *string) *SendFromCmd {
 	return &SendFromCmd{
 		FromAccount: fromAccount,
@@ -424,7 +455,8 @@ type SendManyCmd struct {
 	Comment     *string
 }
 
-// NewSendManyCmd returns a new instance which can be used to issue a sendmany JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewSendManyCmd returns a new instance which can be used to issue a sendmany JSON-RPC command. The parameters which
+// are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
 func NewSendManyCmd(fromAccount string, amounts map[string]float64, minConf *int, comment *string) *SendManyCmd {
 	return &SendManyCmd{
 		FromAccount: fromAccount,
@@ -442,7 +474,9 @@ type SendToAddressCmd struct {
 	CommentTo *string
 }
 
-// NewSendToAddressCmd returns a new instance which can be used to issue a sendtoaddress JSON-RPC command. The parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default value.
+// NewSendToAddressCmd returns a new instance which can be used to issue a sendtoaddress JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewSendToAddressCmd(address string, amount float64, comment, commentTo *string) *SendToAddressCmd {
 	return &SendToAddressCmd{
 		Address:   address,
@@ -508,7 +542,9 @@ type SignRawTransactionCmd struct {
 	Flags    *string `jsonrpcdefault:"\"ALL\""`
 }
 
-// NewSignRawTransactionCmd returns a new instance which can be used to issue a signrawtransaction JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewSignRawTransactionCmd returns a new instance which can be used to issue a signrawtransaction JSON-RPC command. The
+// parameters which are pointers indicate they are optional. Passing nil for optional parameters will use the default
+// value.
 func NewSignRawTransactionCmd(hexEncodedTx string, inputs *[]RawTxInput, privKeys *[]string, flags *string) *SignRawTransactionCmd {
 	return &SignRawTransactionCmd{
 		RawTx:    hexEncodedTx,
@@ -546,7 +582,8 @@ type WalletPassphraseChangeCmd struct {
 	NewPassphrase string
 }
 
-// NewWalletPassphraseChangeCmd returns a new instance which can be used to issue a walletpassphrasechange JSON-RPC command.
+// NewWalletPassphraseChangeCmd returns a new instance which can be used to issue a walletpassphrasechange JSON-RPC
+// command.
 func NewWalletPassphraseChangeCmd(oldPassphrase, newPassphrase string) *WalletPassphraseChangeCmd {
 	return &WalletPassphraseChangeCmd{
 		OldPassphrase: oldPassphrase,

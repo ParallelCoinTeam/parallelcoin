@@ -253,7 +253,8 @@ func TestBlockErrors(t *testing.T) {
 		t.Errorf("Tx: wrong error - got: %v <%T>, "+
 			"want: <%T>", err, err, util.OutOfRangeError(""))
 	}
-	// Ensure TxLoc returns expected error with short byte buffer. This makes use of the test package only function, SetBlockBytes, to inject a short byte buffer.
+	// Ensure TxLoc returns expected error with short byte buffer. This makes use of the test package only function,
+	// SetBlockBytes, to inject a short byte buffer.
 	b.SetBlockBytes(shortBytes)
 	_, err = b.TxLoc()
 	if err != io.EOF {

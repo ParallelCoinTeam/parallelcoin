@@ -12,14 +12,12 @@ import (
 )
 
 const (
-	// These constants are used by the DNS seed code to pick a random last
-	// seen time.
+	// These constants are used by the DNS seed code to pick a random last seen time.
 	secondsIn3Days int32 = 24 * 60 * 60 * 3
 	secondsIn4Days int32 = 24 * 60 * 60 * 4
 )
 
-// OnSeed is the signature of the callback function which is invoked when DNS
-// seeding is succesful
+// OnSeed is the signature of the callback function which is invoked when DNS seeding is succesful
 type OnSeed func(addrs []*wire.NetAddress)
 
 // LookupFunc is the signature of the DNS lookup function.
@@ -39,7 +37,7 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 			randSource := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 			seedpeers, err := lookupFn(host)
 			if err != nil {
-				Error("DNS routeable failed on seed %s: %v", host, err)
+				Errorf("DNS routeable failed on seed %s: %v", host, err)
 				return
 			}
 			numPeers := len(seedpeers)

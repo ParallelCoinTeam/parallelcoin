@@ -6,7 +6,9 @@ import (
 	"testing"
 )
 
-// hexToBytes converts the passed hex string into bytes and will panic if there is an error.  This is only provided for the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called with hard-coded values.
+// hexToBytes converts the passed hex string into bytes and will panic if there is an error. This is only provided for
+// the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called with
+// hard-coded values.
 func hexToBytes(s string) []byte {
 	b, err := hex.DecodeString(s)
 	if err != nil {
@@ -47,7 +49,8 @@ func TestScriptNumBytes(t *testing.T) {
 		{-8388608, hexToBytes("00008080")},
 		{2147483647, hexToBytes("ffffff7f")},
 		{-2147483647, hexToBytes("ffffffff")},
-		// Values that are out of range for data that is interpreted as numbers, but are allowed as the result of numeric operations.
+		// Values that are out of range for data that is interpreted as numbers, but are allowed as the result of
+		// numeric operations.
 		{2147483648, hexToBytes("0000008000")},
 		{-2147483648, hexToBytes("0000008080")},
 		{2415919104, hexToBytes("0000009000")},
@@ -89,7 +92,8 @@ func TestMakeScriptNum(t *testing.T) {
 	}{
 		// Minimal encoding must reject negative 0.
 		{hexToBytes("80"), 0, defaultScriptNumLen, true, errMinimalData},
-		// Minimally encoded valid values with minimal encoding flag. Should not error and return expected integral number.
+		// Minimally encoded valid values with minimal encoding flag. Should not error and return expected integral
+		// number.
 		{nil, 0, defaultScriptNumLen, true, nil},
 		{hexToBytes("01"), 1, defaultScriptNumLen, true, nil},
 		{hexToBytes("81"), -1, defaultScriptNumLen, true, nil},
@@ -123,7 +127,8 @@ func TestMakeScriptNum(t *testing.T) {
 		{hexToBytes("ffffffffffffffffff"), 1, 9, true, nil},
 		{hexToBytes("ffffffffffffffffff7f"), -1, 10, true, nil},
 		{hexToBytes("ffffffffffffffffffff"), 1, 10, true, nil},
-		// Minimally encoded values that are out of range for data that is interpreted as script numbers with the minimal encoding flag set.  Should error and return 0.
+		// Minimally encoded values that are out of range for data that is interpreted as script numbers with the
+		// minimal encoding flag set.  Should error and return 0.
 		{hexToBytes("0000008000"), 0, defaultScriptNumLen, true, errNumTooBig},
 		{hexToBytes("0000008080"), 0, defaultScriptNumLen, true, errNumTooBig},
 		{hexToBytes("0000009000"), 0, defaultScriptNumLen, true, errNumTooBig},
@@ -151,7 +156,8 @@ func TestMakeScriptNum(t *testing.T) {
 		{hexToBytes("00000800"), 0, defaultScriptNumLen, true, errMinimalData}, // 524288
 		{hexToBytes("00007000"), 0, defaultScriptNumLen, true, errMinimalData}, // 7340032
 		{hexToBytes("0009000100"), 0, 5, true, errMinimalData},                 // 16779520
-		// Non-minimally encoded, but otherwise valid values without minimal encoding flag.  Should not error and return expected integral number.
+		// Non-minimally encoded, but otherwise valid values without minimal encoding flag.  Should not error and return
+		// expected integral number.
 		{hexToBytes("00"), 0, defaultScriptNumLen, false, nil},
 		{hexToBytes("0100"), 1, defaultScriptNumLen, false, nil},
 		{hexToBytes("7f00"), 127, defaultScriptNumLen, false, nil},
@@ -166,7 +172,8 @@ func TestMakeScriptNum(t *testing.T) {
 		{hexToBytes("0009000100"), 16779520, 5, false, nil},
 	}
 	for _, test := range tests {
-		// Ensure the error code is of the expected type and the error code matches the value specified in the test instance.
+		// Ensure the error code is of the expected type and the error code matches the value specified in the test
+		// instance.
 		gotNum, err := makeScriptNum(test.serialized, test.minimalEncoding,
 			test.numLen)
 		if e := tstCheckScriptError(err, test.err); e != nil {

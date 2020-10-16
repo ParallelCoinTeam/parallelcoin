@@ -33,7 +33,7 @@ func (s *sizeable) Size() (uint64, error) {
 	return s.size, nil
 }
 
-// getSizeableValue is a helper method used for converting the cache.Value
+// getSizeableValue is a helper method used for converting the cache.value
 // interface to sizeable struct and extracting the value from it.
 func getSizeableValue(generic cache.Value, _ error) int {
 	return generic.(*sizeable).value
@@ -314,7 +314,6 @@ func TestConcurrencySimple(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
-		// nolint
 		go func(i int) {
 
 			defer wg.Done()
@@ -329,7 +328,6 @@ func TestConcurrencySimple(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
-		// nolint
 		go func(i int) {
 
 			defer wg.Done()
@@ -357,7 +355,6 @@ func TestConcurrencySmallCache(t *testing.T) {
 
 	for i := 0; i < 20; i++ {
 		wg.Add(1)
-		// nolint
 		go func(i int) {
 
 			defer wg.Done()
@@ -372,7 +369,6 @@ func TestConcurrencySmallCache(t *testing.T) {
 
 	for i := 0; i < 20; i++ {
 		wg.Add(1)
-		// nolint
 		go func(i int) {
 
 			defer wg.Done()
@@ -400,7 +396,6 @@ func TestConcurrencyBigCache(t *testing.T) {
 
 	for i := 0; i < 50; i++ {
 		wg.Add(1)
-		// nolint
 		go func(i int) {
 
 			defer wg.Done()
@@ -415,7 +410,6 @@ func TestConcurrencyBigCache(t *testing.T) {
 
 	for i := 0; i < 50; i++ {
 		wg.Add(1)
-		// nolint
 		go func(i int) {
 
 			defer wg.Done()

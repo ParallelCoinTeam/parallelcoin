@@ -10,7 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// TestChainSvrWsNtfns tests all of the chain server websocket-specific notifications marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
+// TestChainSvrWsNtfns tests all of the chain server websocket-specific notifications marshal and unmarshal into valid
+// results include handling of optional fields being omitted in the marshalled command, while optional fields with
+// defaults have the default assigned on unmarshalled commands.
 func TestChainSvrWsNtfns(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -238,7 +240,8 @@ func TestChainSvrWsNtfns(t *testing.T) {
 			t.Errorf("Test #%d (%s) unexpected NewCmd error: %v ",
 				i, test.name, err)
 		}
-		// Marshal the notification as created by the generic new notification creation function. The ID is nil for notifications.
+		// Marshal the notification as created by the generic new notification creation function. The ID is nil for
+		// notifications.
 		marshalled, err = btcjson.MarshalCmd(nil, cmd)
 		if err != nil {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,

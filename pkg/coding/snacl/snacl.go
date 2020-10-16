@@ -34,8 +34,7 @@ const (
 	DefaultP  = 1
 )
 
-// CryptoKey represents a secret key which can be used to encrypt and decrypt
-// data.
+// CryptoKey represents a secret key which can be used to encrypt and decrypt data.
 type CryptoKey [KeySize]byte
 
 // Encrypt encrypts the passed data.
@@ -50,8 +49,7 @@ func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
 	return append(nonce[:], blob...), nil
 }
 
-// Decrypt decrypts the passed data.  The must be the output of the Encrypt
-// function.
+// Decrypt decrypts the passed data. The must be the output of the Encrypt function.
 func (ck *CryptoKey) Decrypt(in []byte) ([]byte, error) {
 	if len(in) < NonceSize {
 		return nil, ErrMalformed
@@ -66,10 +64,9 @@ func (ck *CryptoKey) Decrypt(in []byte) ([]byte, error) {
 	return opened, nil
 }
 
-// Zero clears the key by manually zeroing all memory.  This is for security
-// conscience application which wish to zero the memory after they've used it
-// rather than waiting until it's reclaimed by the garbage collector.  The
-// key is no longer usable after this call.
+// Zero clears the key by manually zeroing all memory. This is for security conscience application which wish to zero
+// the memory after they've used it rather than waiting until it's reclaimed by the garbage collector. The key is no
+// longer usable after this call.
 func (ck *CryptoKey) Zero() {
 	zero.Bytea32((*[KeySize]byte)(ck))
 }
@@ -94,8 +91,8 @@ type Parameters struct {
 	P      int
 }
 
-// SecretKey houses a crypto key and the parameters needed to derive it from a
-// passphrase.  It should only be used in memory.
+// SecretKey houses a crypto key and the parameters needed to derive it from a passphrase. It should only be used in
+// memory.
 type SecretKey struct {
 	Key        *CryptoKey
 	Parameters Parameters
@@ -114,21 +111,22 @@ func (sk *SecretKey) deriveKey(password *[]byte) error {
 	}
 	copy(sk.Key[:], key)
 	zero.Bytes(key)
-	// I'm not a fan of forced garbage collections, but scrypt allocates a
-	// ton of memory and calling it back to back without a GC cycle in
-	// between means you end up needing twice the amount of memory.  For
-	// example, if your scrypt parameters are such that you require 1GB and
-	// you call it twice in a row, without this you end up allocating 2GB
-	// since the first GB probably hasn't been released yet.
+	// I'm not a fan of forced garbage collections, but scrypt allocates a ton of memory and calling it back to back
+	// without a GC cycle in between means you end up needing twice the amount of memory.
+	//
+	// For example, if your scrypt parameters are such that you require 1GB and you call it twice in a row, without this
+	// you end up allocating 2GB since the first GB probably hasn't been released yet.
 	debug.FreeOSMemory()
 	return nil
 }
 
-// Marshal returns the Parameters field marshalled into a format suitable for
-// storage.  This result of this can be stored in clear text.
+// Marshal returns the Parameters field marshalled into a format suitable for storage.
+//
+// This result of this can be stored in clear text.
 func (sk *SecretKey) Marshal() []byte {
 	params := &sk.Parameters
 	// The marshalled format for the the netparams is as follows:
+	//
 	//   <salt><digest><N><R><P>
 	//
 	// KeySize + sha256.Size + N (8 bytes) + R (8 bytes) + P (8 bytes)
@@ -146,13 +144,13 @@ func (sk *SecretKey) Marshal() []byte {
 	return marshalled
 }
 
-// Unmarshal unmarshalls the parameters needed to derive the secret key from a
-// passphrase into sk.
+// Unmarshal unmarshalls the parameters needed to derive the secret key from a passphrase into sk.
 func (sk *SecretKey) Unmarshal(marshalled []byte) error {
 	if sk.Key == nil {
 		sk.Key = (*CryptoKey)(&[KeySize]byte{})
 	}
 	// The marshalled format for the the netparams is as follows:
+	//
 	//   <salt><digest><N><R><P>
 	//
 	// KeySize + sha256.Size + N (8 bytes) + R (8 bytes) + P (8 bytes)
@@ -173,15 +171,15 @@ func (sk *SecretKey) Unmarshal(marshalled []byte) error {
 }
 
 // Zero zeroes the underlying secret key while leaving the parameters intact.
-// This effectively makes the key unusable until it is derived again via the
-// DeriveKey function.
+//
+// This effectively makes the key unusable until it is derived again via the DeriveKey function.
 func (sk *SecretKey) Zero() {
 	sk.Key.Zero()
 }
 
-// DeriveKey derives the underlying secret key and ensures it matches the
-// expected digest.  This should only be called after previously calling the
-// Zero function or on an initial Unmarshal.
+// DeriveKey derives the underlying secret key and ensures it matches the expected digest.
+//
+// This should only be called after previously calling the Zero function or on an initial Unmarshal.
 func (sk *SecretKey) DeriveKey(password *[]byte) error {
 	if err := sk.deriveKey(password); err != nil {
 		return err

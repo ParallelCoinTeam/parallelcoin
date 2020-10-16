@@ -2,8 +2,9 @@ package app
 
 import (
 	"fmt"
-	"github.com/p9c/pod/app/config"
 	"os"
+
+	"github.com/p9c/pod/app/config"
 
 	"github.com/urfave/cli"
 

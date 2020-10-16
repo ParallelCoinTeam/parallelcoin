@@ -3,15 +3,16 @@ package worker
 import (
 	"crypto/cipher"
 	"errors"
-	"github.com/p9c/pod/cmd/kopach/control/hashrate"
-	"github.com/p9c/pod/cmd/kopach/control/sol"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
 	"math/rand"
 	"net"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/p9c/pod/cmd/kopach/control/hashrate"
+	"github.com/p9c/pod/cmd/kopach/control/sol"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/fork"
 
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
@@ -31,6 +32,7 @@ const RoundsPerAlgo = 69
 
 type Worker struct {
 	mx            sync.Mutex
+	id            string
 	pipeConn      *stdconn.StdConn
 	dispatchConn  *transport.Channel
 	dispatchReady atomic.Bool
@@ -58,8 +60,8 @@ type Counter struct {
 	RoundsPerAlgo atomic.Int32
 }
 
-// NewCounter returns an initialized algorithm rolling counter that ensures
-// each miner does equal amounts of every algorithm
+// NewCounter returns an initialized algorithm rolling counter that ensures each miner does equal amounts of every
+// algorithm
 func NewCounter(roundsPerAlgo int32) (c *Counter) {
 	// these will be populated when work arrives
 	var algos []int32
@@ -75,8 +77,7 @@ func NewCounter(roundsPerAlgo int32) (c *Counter) {
 
 // GetAlgoVer returns the next algo version based on the current configuration
 func (c *Counter) GetAlgoVer() (ver int32) {
-	// the formula below rolls through versions with blocks roundsPerAlgo
-	// long for each algorithm by its index
+	// the formula below rolls through versions with blocks roundsPerAlgo long for each algorithm by its index
 	algs := c.Algos.Load().([]int32)
 	// Debug(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
@@ -113,13 +114,13 @@ func (w *Worker) hashReport() {
 	Tracef("average hashrate %.2f", av.Value())
 }
 
-// NewWithConnAndSemaphore is exposed to enable use an actual network
-// connection while retaining the same RPC API to allow a worker to be
-// configured to run on a bare metal system with a different launcher main
-func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker {
+// NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
+// allow a worker to be configured to run on a bare metal system with a different launcher main
+func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit chan struct{}) *Worker {
 	Debug("creating new worker")
 	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
+		id:            id,
 		pipeConn:      conn,
 		Quit:          quit,
 		roller:        NewCounter(RoundsPerAlgo),
@@ -130,9 +131,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 	w.msgBlock.Store(msgBlock)
 	w.block.Store(util.NewBlock(&msgBlock))
 	w.dispatchReady.Store(false)
-	// with this we can report cumulative hash counts as well as using it to
-	// distribute algorithms evenly
-	// tn := time.Now()
+	// with this we can report cumulative hash counts as well as using it to distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C.Load())
 	interrupt.AddHandler(func() {
 		Debug("worker quitting")
@@ -150,7 +149,7 @@ func worker(w *Worker) {
 out:
 	for {
 		// Pause state
-		Debug("worker pausing")
+		Trace("worker pausing")
 	pausing:
 		for {
 			select {
@@ -170,7 +169,7 @@ out:
 			}
 		}
 		// Run state
-		Debug("worker running")
+		Trace("worker running")
 	running:
 		for {
 			select {
@@ -231,7 +230,7 @@ out:
 						// send out broadcast containing worker nonce and algorithm and count of blocks
 						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
 						nextAlgo = w.roller.C.Load() + 1
-						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH)
+						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH, w.id)
 						err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
 							transport.GetShards(hashReport.Data))
 						if err != nil {
@@ -262,18 +261,16 @@ out:
 	Debug("worker finished")
 }
 
-// New initialises the state for a worker, loading the work
-// function handler that runs a round of processing between
+// New initialises the state for a worker, loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
-func New(quit chan struct{}) (w *Worker, conn net.Conn) {
+func New(id string, quit chan struct{}) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
 	sc := stdconn.New(os.Stdin, os.Stdout, quit)
-	return NewWithConnAndSemaphore(&sc, quit), &sc
+	return NewWithConnAndSemaphore(id, &sc, quit), &sc
 }
 
-// NewJob is a delivery of a new job for the worker, this
-// makes the miner start mining from pause or pause,
-// prepare the work and restart
+// NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
+// work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	Trace("starting new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
@@ -338,8 +335,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	return
 }
 
-// Pause signals the worker to stop working,
-// releases its semaphore and the worker is then idle
+// Pause signals the worker to stop working, releases its semaphore and the worker is then idle
 func (w *Worker) Pause(_ int, reply *bool) (err error) {
 	Trace("pausing from IPC")
 	w.running.Store(false)
@@ -354,11 +350,12 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 	w.stopChan <- struct{}{}
 	defer close(w.Quit)
 	*reply = true
+	os.Exit(0)
 	return
 }
 
-// SendPass gives the encryption key configured in the kopach controller (
-// pod) configuration to allow workers to dispatch their solutions
+// SendPass gives the encryption key configured in the kopach controller ( pod) configuration to allow workers to
+// dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	Debug("receiving dispatch password", pass)
 	rand.Seed(time.Now().UnixNano())

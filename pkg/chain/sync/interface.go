@@ -10,7 +10,8 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// PeerNotifier exposes methods to notify peers of status changes to transactions, blocks, etc. Currently server (in the main package) implements this interface.
+// PeerNotifier exposes methods to notify peers of status changes to transactions, blocks, etc. Currently server (in the
+// main package) implements this interface.
 type PeerNotifier interface {
 	AnnounceNewTransactions(newTxs []*mempool.TxDesc)
 	UpdatePeerHeights(latestBlkHash *chainhash.Hash, latestHeight int32, updateSource *peer.Peer)

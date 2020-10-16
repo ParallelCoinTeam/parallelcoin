@@ -25,7 +25,8 @@ const (
 	ErrRPCWalletWrongEncState       RPCErrorCode = -15
 	ErrRPCWalletEncryptionFailed    RPCErrorCode = -16
 	ErrRPCWalletAlreadyUnlocked     RPCErrorCode = -17
-	// Specific Errors related to commands.  These are the ones a user of the RPC server are most likely to see.  Generally, the codes should match one of the more general errors above.
+	// Specific Errors related to commands. These are the ones a user of the RPC server are most likely to see.
+	// Generally, the codes should match one of the more general errors above.
 	ErrRPCBlockNotFound     RPCErrorCode = -5
 	ErrRPCBlockCount        RPCErrorCode = -5
 	ErrRPCBestBlockHash     RPCErrorCode = -5

@@ -11,15 +11,20 @@ type ThresholdState byte
 
 // These constants are used to identify specific threshold states.
 const (
-	// ThresholdDefined is the first state for each deployment and is the state for the genesis block has by definition for all deployments.
+	// ThresholdDefined is the first state for each deployment and is the state for the genesis block has by definition
+	// for all deployments.
 	ThresholdDefined ThresholdState = iota
 	// ThresholdStarted is the state for a deployment once its start time has been reached.
 	ThresholdStarted
-	// ThresholdLockedIn is the state for a deployment during the retarget period which is after the ThresholdStarted state period and the number of blocks that have voted for the deployment equal or exceed the required number of votes for the deployment.
+	// ThresholdLockedIn is the state for a deployment during the retarget period which is after the ThresholdStarted
+	// state period and the number of blocks that have voted for the deployment equal or exceed the required number of
+	// votes for the deployment.
 	ThresholdLockedIn
-	// ThresholdActive is the state for a deployment for all blocks after a retarget period in which the deployment was in the ThresholdLockedIn state.
+	// ThresholdActive is the state for a deployment for all blocks after a retarget period in which the deployment was
+	// in the ThresholdLockedIn state.
 	ThresholdActive
-	// ThresholdFailed is the state for a deployment once its expiration time has been reached and it did not reach the ThresholdLockedIn state.
+	// ThresholdFailed is the state for a deployment once its expiration time has been reached and it did not reach the
+	// ThresholdLockedIn state.
 	ThresholdFailed
 	// numThresholdsStates is the maximum number of threshold states used in tests.
 	numThresholdsStates
@@ -42,18 +47,22 @@ func (t ThresholdState) String() string {
 	return fmt.Sprintf("Unknown ThresholdState (%d)", int(t))
 }
 
-// thresholdConditionChecker provides a generic interface that is invoked to determine when a consensus rule change threshold should be changed.
+// thresholdConditionChecker provides a generic interface that is invoked to determine when a consensus rule change
+// threshold should be changed.
 type thresholdConditionChecker interface {
-	// BeginTime returns the unix timestamp for the median block time after which voting on a rule change starts (at the next window).
+	// BeginTime returns the unix timestamp for the median block time after which voting on a rule change starts (at the
+	// next window).
 	BeginTime() uint64
-	// EndTime returns the unix timestamp for the median block time after which an attempted rule change fails if it has not already been
-	// locked in or activated.
+	// EndTime returns the unix timestamp for the median block time after which an attempted rule change fails if it has
+	// not already been locked in or activated.
 	EndTime() uint64
-	// RuleChangeActivationThreshold is the number of blocks for which the condition must be true in order to lock in a rule change.
+	// RuleChangeActivationThreshold is the number of blocks for which the condition must be true in order to lock in a
+	// rule change.
 	RuleChangeActivationThreshold() uint32
 	// MinerConfirmationWindow is the number of blocks in each threshold state retarget window.
 	MinerConfirmationWindow() uint32
-	// Condition returns whether or not the rule change activation condition has been met.  This typically involves checking whether or not the bit associated with the condition is set, but can be more complex as needed.
+	// Condition returns whether or not the rule change activation condition has been met. This typically involves
+	// checking whether or not the bit associated with the condition is set, but can be more complex as needed.
 	Condition(*BlockNode) (bool, error)
 }
 
@@ -62,7 +71,8 @@ type thresholdStateCache struct {
 	entries map[chainhash.Hash]ThresholdState
 }
 
-// Lookup returns the threshold state associated with the given hash along with a boolean that indicates whether or not it is valid.
+// Lookup returns the threshold state associated with the given hash along with a boolean that indicates whether or not
+// it is valid.
 func (c *thresholdStateCache) Lookup(hash *chainhash.Hash) (ThresholdState, bool) {
 	state, ok := c.entries[*hash]
 	return state, ok
@@ -84,14 +94,17 @@ func newThresholdCaches(numCaches uint32) []thresholdStateCache {
 	return caches
 }
 
-// thresholdState returns the current rule change threshold state for the block AFTER the given node and deployment ID.  The cache is used to ensure the threshold states for previous windows are only calculated once. This function MUST be called with the chain state lock held (for writes).
+// thresholdState returns the current rule change threshold state for the block AFTER the given node and deployment ID.
+// The cache is used to ensure the threshold states for previous windows are only calculated once. This function MUST be
+// called with the chain state lock held (for writes).
 func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdConditionChecker, cache *thresholdStateCache) (ThresholdState, error) {
 	// The threshold state for the window that contains the genesis block is defined by definition.
 	confirmationWindow := int32(checker.MinerConfirmationWindow())
 	if prevNode == nil || (prevNode.height+1) < confirmationWindow {
 		return ThresholdDefined, nil
 	}
-	// Get the ancestor that is the last block of the previous confirmation window in order to get its threshold state.  This can be done because the state is the same for all blocks within a given window.
+	// Get the ancestor that is the last block of the previous confirmation window in order to get its threshold state.
+	// This can be done because the state is the same for all blocks within a given window.
 	prevNode = prevNode.Ancestor(prevNode.height -
 		(prevNode.height+1)%confirmationWindow)
 	// Iterate backwards through each of the previous confirmation windows to find the most recently cached threshold state.
@@ -122,7 +135,8 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 			return ThresholdFailed, AssertError(fmt.Sprintf("thresholdState: cache lookup failed for %v", prevNode.hash))
 		}
 	}
-	// Since each threshold state depends on the state of the previous window, iterate starting from the oldest unknown window.
+	// Since each threshold state depends on the state of the previous window, iterate starting from the oldest unknown
+	// window.
 	for neededNum := len(neededStates) - 1; neededNum >= 0; neededNum-- {
 		prevNode := neededStates[neededNum]
 		switch state {
@@ -134,7 +148,8 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 				state = ThresholdFailed
 				break
 			}
-			// The state for the rule moves to the started state once its start time has been reached (and it hasn't already expired per the above).
+			// The state for the rule moves to the started state once its start time has been reached (and it hasn't
+			// already expired per the above).
 			if medianTimeUnix >= checker.BeginTime() {
 				state = ThresholdStarted
 			}
@@ -145,7 +160,8 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 				state = ThresholdFailed
 				break
 			}
-			// At this point, the rule change is still being voted on by the miners, so iterate backwards through the confirmation window to count all of the votes in it.
+			// At this point, the rule change is still being voted on by the miners, so iterate backwards through the
+			// confirmation window to count all of the votes in it.
 			var count uint32
 			countNode := prevNode
 			for i := int32(0); i < confirmationWindow; i++ {
@@ -160,7 +176,8 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 				// Get the previous block node.
 				countNode = countNode.parent
 			}
-			// The state is locked in if the number of blocks in the period that voted for the rule change meets the activation threshold.
+			// The state is locked in if the number of blocks in the period that voted for the rule change meets the
+			// activation threshold.
 			if count >= checker.RuleChangeActivationThreshold() {
 				state = ThresholdLockedIn
 			}
@@ -177,7 +194,10 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 	return state, nil
 }
 
-// ThresholdState returns the current rule change threshold state of the given deployment ID for the block AFTER the end of the current best chain. This function is safe for concurrent access.
+// ThresholdState returns the current rule change threshold state of the given deployment ID for the block AFTER the end
+// of the current best chain.
+//
+// This function is safe for concurrent access.
 func (b *BlockChain) ThresholdState(deploymentID uint32) (ThresholdState, error) {
 	b.chainLock.Lock()
 	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
@@ -185,7 +205,9 @@ func (b *BlockChain) ThresholdState(deploymentID uint32) (ThresholdState, error)
 	return state, err
 }
 
-// IsDeploymentActive returns true if the target deploymentID is active, and false otherwise. This function is safe for concurrent access.
+// IsDeploymentActive returns true if the target deploymentID is active, and false otherwise.
+//
+// This function is safe for concurrent access.
 func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
 	b.chainLock.Lock()
 	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
@@ -197,12 +219,11 @@ func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
 	return state == ThresholdActive, nil
 }
 
-// deploymentState returns the current rule change threshold for a given
-// deploymentID. The threshold is evaluated from the point of view of the block
-// node passed in as the first argument to this method. It is important to note
-// that, as the variable name indicates, this function expects the block node
-// prior to the block for which the deployment state is desired.  In other
-// words, the returned deployment state is for the block AFTER the passed node.
+// deploymentState returns the current rule change threshold for a given deploymentID. The threshold is evaluated from
+// the point of view of the block node passed in as the first argument to this method. It is important to note that, as
+// the variable name indicates, this function expects the block node prior to the block for which the deployment state
+// is desired. In other words, the returned deployment state is for the block AFTER the passed node.
+//
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) deploymentState(prevNode *BlockNode, deploymentID uint32) (ThresholdState, error) {
 	if deploymentID > uint32(len(b.params.Deployments)) {
@@ -214,9 +235,12 @@ func (b *BlockChain) deploymentState(prevNode *BlockNode, deploymentID uint32) (
 	return b.thresholdState(prevNode, checker, cache)
 }
 
-// initThresholdCaches initializes the threshold state caches for each warning bit and defined deployment and provides warnings if the chain is current per the warnUnknownVersions and warnUnknownRuleActivations functions.
+// initThresholdCaches initializes the threshold state caches for each warning bit and defined deployment and provides
+// warnings if the chain is current per the warnUnknownVersions and warnUnknownRuleActivations functions.
 func (b *BlockChain) initThresholdCaches() error {
-	// Initialize the warning and deployment caches by calculating the threshold state for each of them.  This will ensure the caches are populated and any states that needed to be recalculated due to definition changes is done now.
+	// Initialize the warning and deployment caches by calculating the threshold state for each of them. This will
+	// ensure the caches are populated and any states that needed to be recalculated due to definition changes is done
+	// now.
 	prevNode := b.BestChain.Tip().parent
 	for bit := uint32(0); bit < vbNumBits; bit++ {
 		checker := bitConditionChecker{bit: bit, chain: b}
@@ -244,7 +268,8 @@ func (b *BlockChain) initThresholdCaches() error {
 		// if err := b.warnUnknownVersions(bestNode); err != nil {
 		// 	return err
 		// }
-		// Warn if any unknown new rules are either about to activate orhave already been activated.
+		//
+		// Warn if any unknown new rules are either about to activate or have already been activated.
 		if err := b.warnUnknownRuleActivations(bestNode); err != nil {
 			return err
 		}

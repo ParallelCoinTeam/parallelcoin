@@ -11,18 +11,14 @@ import (
 )
 
 var (
-	// indexBucket is the main top-level bucket for the header index.
-	// Nothing is stored in this bucket other than the sub-buckets which
-	// contains the indexes for the various header types.
+	// indexBucket is the main top-level bucket for the header index. Nothing is stored in this bucket other than the
+	// sub-buckets which contains the indexes for the various header types.
 	indexBucket = []byte("header-index")
-	// bitcoinTip is the key which tracks the "tip" of the block header
-	// chain. The value of this key will be the current block hash of the
-	// best known chain that we're synced to.
+	// bitcoinTip is the key which tracks the "tip" of the block header chain. The value of this key will be the current
+	// block hash of the best known chain that we're synced to.
 	bitcoinTip = []byte("bitcoin")
-	// regFilterTip is the key which tracks the "tip" of the regular
-	// compact filter header chain. The value of this key will be the
-	// current block hash of the best known chain that the headers for
-	// regular filter are synced to.
+	// regFilterTip is the key which tracks the "tip" of the regular compact filter header chain. The value of this key
+	// will be the current block hash of the best known chain that the headers for regular filter are synced to.
 	regFilterTip = []byte("regular")
 	// // extFilterTip is the key which tracks the "tip" of the extended
 	// // compact filter header chain. The value of this key will be the
@@ -31,43 +27,34 @@ var (
 	// extFilterTip = []byte("ext")
 )
 var (
-	// ErrHeightNotFound is returned when a specified height isn't found in
-	// a target index.
+	// ErrHeightNotFound is returned when a specified height isn't found in a target index.
 	ErrHeightNotFound = fmt.Errorf("target height not found in index")
-	// ErrHashNotFound is returned when a specified block hash isn't found
-	// in a target index.
+	// ErrHashNotFound is returned when a specified block hash isn't found in a target index.
 	ErrHashNotFound = fmt.Errorf("target hash not found in index")
 )
 
-// HeaderType is an enum-like type which defines the various header types that
-// are stored within the index.
+// HeaderType is an enum-like type which defines the various header types that are stored within the index.
 type HeaderType uint8
 
 const (
-	// Block is the header type that represents regular Bitcoin block
-	// headers.
+	// Block is the header type that represents regular Bitcoin block headers.
 	Block HeaderType = iota
-	// RegularFilter is a header type that represents the basic filter
-	// header type for the filter header chain.
+	// RegularFilter is a header type that represents the basic filter header type for the filter header chain.
 	RegularFilter
 )
 
-// headerIndex is an index stored within the database that allows for random
-// access into the on-disk header file. This, in conjunction with a flat file
-// of headers consists of header database. The keys have been specifically
-// crafted in order to ensure maximum write performance during IBD, and also to
-// provide the necessary indexing properties required.
+// headerIndex is an index stored within the database that allows for random access into the on-disk header file. This,
+// in conjunction with a flat file of headers consists of header database. The keys have been specifically crafted in
+// order to ensure maximum write performance during IBD, and also to provide the necessary indexing properties required.
 type headerIndex struct {
 	db        walletdb.DB
 	indexType HeaderType
 }
 
-// newHeaderIndex creates a new headerIndex given an already open database, and
-// a particular header type.
+// newHeaderIndex creates a new headerIndex given an already open database, and a particular header type.
 func newHeaderIndex(db walletdb.DB, indexType HeaderType) (*headerIndex, error) {
-	// As an initially step, we'll attempt to create all the buckets
-	// necessary for functioning of the index. If these buckets has already
-	// been created, then we can exit early.
+	// As an initially step, we'll attempt to create all the buckets necessary for functioning of the index. If these
+	// buckets has already been created, then we can exit early.
 	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 		_, err := tx.CreateTopLevelBucket(indexBucket)
 		return err
@@ -82,8 +69,8 @@ func newHeaderIndex(db walletdb.DB, indexType HeaderType) (*headerIndex, error) 
 		nil
 }
 
-// headerEntry is an internal type that's used to quickly map a (height, hash)
-// pair into the proper key that'll be stored within the database.
+// headerEntry is an internal type that's used to quickly map a (height, hash) pair into the proper key that'll be
+// stored within the database.
 type headerEntry struct {
 	hash   chainhash.Hash
 	height uint32
@@ -91,8 +78,8 @@ type headerEntry struct {
 
 // headerBatch is a batch of header entries to be written to disk.
 //
-// NOTE: The entries within a batch SHOULD be properly sorted by hash in
-// order to ensure the batch is written in a sequential write.
+// NOTE: The entries within a batch SHOULD be properly sorted by hash in order to ensure the batch is written in a
+// sequential write.
 type headerBatch []headerEntry
 
 // Len returns the number of routes in the collection.
@@ -102,9 +89,8 @@ func (h headerBatch) Len() int {
 	return len(h)
 }
 
-// Less reports where the entry with index i should sort before the entry with
-// index j. As we want to ensure the items are written in sequential order,
-// items with the "first" hash.
+// Less reports where the entry with index i should sort before the entry with index j. As we want to ensure the items
+// are written in sequential order, items with the "first" hash.
 //
 // NOTE: This is part of the sort.Interface implementation.
 func (h headerBatch) Less(i, j int) bool {
@@ -124,17 +110,15 @@ func (h *headerIndex) addHeaders(batch headerBatch) error {
 	if len(batch) == 0 {
 		return nil
 	}
-	// In order to ensure optimal write performance, we'll ensure that the
-	// items are sorted by their hash before insertion into the database.
+	// In order to ensure optimal write performance, we'll ensure that the items are sorted by their hash before
+	// insertion into the database.
 	sort.Sort(batch)
 	return walletdb.Update(h.db, func(tx walletdb.ReadWriteTx) error {
 		rootBucket := tx.ReadWriteBucket(indexBucket)
 		var tipKey []byte
-		// Based on the specified index type of this instance of the
-		// index, we'll grab the key that tracks the tip of the chain
-		// so we can update the index once all the header entries have
-		// been updated.
-		// TODO(roasbeef): only need block tip?
+		// Based on the specified index type of this instance of the index, we'll grab the key that tracks the tip of
+		// the chain so we can update the index once all the header entries have been updated. TODO(roasbeef): only need
+		// block tip?
 		switch h.indexType {
 		case Block:
 			tipKey = bitcoinTip
@@ -155,8 +139,7 @@ func (h *headerIndex) addHeaders(batch headerBatch) error {
 				Error(err)
 				return err
 			}
-			// TODO(roasbeef): need to remedy if side-chain
-			// tracking added
+			// TODO(roasbeef): need to remedy if side-chain tracking added
 			if header.height >= chainTipHeight {
 				chainTipHash = header.hash
 				chainTipHeight = header.height
@@ -166,17 +149,15 @@ func (h *headerIndex) addHeaders(batch headerBatch) error {
 	})
 }
 
-// heightFromHash returns the height of the entry that matches the specified
-// height. With this height, the caller is then able to seek to the appropriate
-// spot in the flat files in order to extract the true header.
+// heightFromHash returns the height of the entry that matches the specified height. With this height, the caller is
+// then able to seek to the appropriate spot in the flat files in order to extract the true header.
 func (h *headerIndex) heightFromHash(hash *chainhash.Hash) (uint32, error) {
 	var height uint32
 	err := walletdb.View(h.db, func(tx walletdb.ReadTx) error {
 		rootBucket := tx.ReadBucket(indexBucket)
 		heightBytes := rootBucket.Get(hash[:])
 		if heightBytes == nil {
-			// If the hash wasn't found, then we don't know of this
-			// hash within the index.
+			// If the hash wasn't found, then we don't know of this hash within the index.
 			return ErrHashNotFound
 		}
 		height = binary.BigEndian.Uint32(heightBytes)
@@ -198,9 +179,8 @@ func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, error) {
 	err := walletdb.View(h.db, func(tx walletdb.ReadTx) error {
 		rootBucket := tx.ReadBucket(indexBucket)
 		var tipKey []byte
-		// Based on the specified index type of this instance of the
-		// index, we'll grab the particular key that tracks the chain
-		// tip.
+		// Based on the specified index type of this instance of the index, we'll grab the particular key that tracks
+		// the chain tip.
 		switch h.indexType {
 		case Block:
 			tipKey = bitcoinTip
@@ -209,16 +189,14 @@ func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, error) {
 		default:
 			return fmt.Errorf("unknown chain tip index type: %v", h.indexType)
 		}
-		// Now that we have the particular tip key for this header
-		// type, we'll fetch the hash for this tip, then using that
-		// we'll fetch the height that corresponds to that hash.
+		// Now that we have the particular tip key for this header type, we'll fetch the hash for this tip, then using
+		// that we'll fetch the height that corresponds to that hash.
 		tipHashBytes := rootBucket.Get(tipKey)
 		tipHeightBytes := rootBucket.Get(tipHashBytes)
 		if len(tipHeightBytes) != 4 {
 			return ErrHeightNotFound
 		}
-		// With the height fetched, we can now populate our return
-		// parameters.
+		// With the height fetched, we can now populate our return parameters.
 		h, err := chainhash.NewHash(tipHashBytes)
 		if err != nil {
 			Error(err)
@@ -235,10 +213,9 @@ func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, error) {
 	return tipHash, tipHeight, nil
 }
 
-// truncateIndex truncates the index for a particluar header type by a single
-// header entry. The passed newTip pointer should point to the hash of the new
-// chain tip. Optionally, if the entry is to be deleted as well, then the
-// delete flag should be set to true.
+// truncateIndex truncates the index for a particluar header type by a single header entry. The passed newTip pointer
+// should point to the hash of the new chain tip. Optionally, if the entry is to be deleted as well, then the delete
+// flag should be set to true.
 func (h *headerIndex) truncateIndex(newTip *chainhash.Hash, delete bool) error {
 	return walletdb.Update(h.db, func(tx walletdb.ReadWriteTx) error {
 		rootBucket := tx.ReadWriteBucket(indexBucket)
@@ -254,17 +231,15 @@ func (h *headerIndex) truncateIndex(newTip *chainhash.Hash, delete bool) error {
 		default:
 			return fmt.Errorf("unknown index type: %v", h.indexType)
 		}
-		// If the delete flag is set, then we'll also delete this entry
-		// from the database as the primary index (block headers) is
-		// being rolled back.
+		// If the delete flag is set, then we'll also delete this entry from the database as the primary index (block
+		// headers) is being rolled back.
 		if delete {
 			prevTipHash := rootBucket.Get(tipKey)
 			if err := rootBucket.Delete(prevTipHash); err != nil {
 				return err
 			}
 		}
-		// With the now stale entry deleted, we'll update the chain tip
-		// to point to the new hash.
+		// With the now stale entry deleted, we'll update the chain tip to point to the new hash.
 		return rootBucket.Put(tipKey, newTip[:])
 	})
 }

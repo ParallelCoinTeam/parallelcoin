@@ -1,21 +1,22 @@
-// +build gensecp256k1
+////+build gensecp256k1
+
+//go:generate go run precomp/genprecomps.go precomp/log.go
 
 package ec
 
 // References:
 //   [GECC]: Guide to Elliptic Curve Cryptography (Hankerson, Menezes, Vanstone)
+
 import (
 	"encoding/binary"
 	"math/big"
 )
 
-// secp256k1BytePoints are dummy points used so the code which generates the
-// real values can compile.
-var secp256k1BytePoints = ""
+// secp256k1BytePoints are dummy points used so the code which generates the real values can compile.
+// var secp256k1BytePoints = ""
 
-// getDoublingPoints returns all the possible G^(2^i) for i in
-// 0..n-1 where n is the curve's bit size (256 in the case of secp256k1)
-// the coordinates are recorded as Jacobian coordinates.
+// getDoublingPoints returns all the possible G^(2^i) for i in 0..n-1 where n is the curve's bit size (256 in the case
+// of secp256k1) the coordinates are recorded as Jacobian coordinates.
 
 func (curve *KoblitzCurve) getDoublingPoints() [][3]fieldVal {
 
@@ -34,9 +35,8 @@ func (curve *KoblitzCurve) getDoublingPoints() [][3]fieldVal {
 	return doublingPoints
 }
 
-// SerializedBytePoints returns a serialized byte slice which contains all of
-// the possible points per 8-bit window.  This is used to when generating
-// secp256k1.go.
+// SerializedBytePoints returns a serialized byte slice which contains all of the possible points per 8-bit window. This
+// is used to when generating secp256k1.go.
 func (curve *KoblitzCurve) SerializedBytePoints() []byte {
 
 	doublingPoints := curve.getDoublingPoints()
@@ -87,9 +87,8 @@ func (curve *KoblitzCurve) SerializedBytePoints() []byte {
 	return serialized
 }
 
-// sqrt returns the square root of the provided big integer using Newton's
-// method.  It's only compiled and used during generation of pre-computed
-// values, so speed is not a huge concern.
+// sqrt returns the square root of the provided big integer using Newton's method. It's only compiled and used during
+// generation of pre-computed values, so speed is not a huge concern.
 func sqrt(
 	n *big.Int) *big.Int {
 
@@ -115,21 +114,17 @@ func sqrt(
 	return guess
 }
 
-// EndomorphismVectors runs the first 3 steps of algorithm 3.74 from [GECC] to
-// generate the linearly independent vectors needed to generate a balanced
-// length-two representation of a multiplier such that k = k1 + k2λ (mod N) and
-// returns them.  Since the values will always be the same given the fact that N
-// and λ are fixed, the final results can be accelerated by storing the
-// precomputed values with the curve.
+// EndomorphismVectors runs the first 3 steps of algorithm 3.74 from [GECC] to generate the linearly independent vectors
+// needed to generate a balanced length-two representation of a multiplier such that k = k1 + k2λ (mod N) and returns
+// them.
+//
+// Since the values will always be the same given the fact that N and λ are fixed, the final results can be accelerated
+// by storing the precomputed values with the curve.
 
 func (curve *KoblitzCurve) EndomorphismVectors() (a1, b1, a2, b2 *big.Int) {
-
 	bigMinus1 := big.NewInt(-1)
-
-	// This section uses an extended Euclidean algorithm to generate a
-
-	// sequence of equations:
-
+	// This section uses an extended Euclidean algorithm to generate a sequence of equations:
+	//
 	//  s[i] * N + t[i] * λ = r[i]
 	nSqrt := sqrt(curve.N)
 	u, v := new(big.Int).Set(curve.N), new(big.Int).Set(curve.lambda)
@@ -162,30 +157,22 @@ func (curve *KoblitzCurve) EndomorphismVectors() (a1, b1, a2, b2 *big.Int) {
 		x1.Set(s)
 		y2.Set(y1)
 		y1.Set(t)
-		// As soon as the remainder is less than the sqrt of n, the
-		// values of a1 and b1 are known.
-
+		// As soon as the remainder is less than the sqrt of n, the values of a1 and b1 are known.
 		if !found && r.Cmp(nSqrt) < 0 {
-
-			// When this condition executes ri and ti represent the
-			// r[i] and t[i] values such that i is the greatest
-			// index for which r >= sqrt(n).  Meanwhile, the current
-			// r and t values are r[i+1] and t[i+1], respectively.
+			// When this condition executes ri and ti represent the r[i] and t[i] values such that i is the greatest
+			// index for which r >= sqrt(n). Meanwhile, the current r and t values are r[i+1] and t[i+1], respectively.
 			// a1 = r[i+1], b1 = -t[i+1]
 			a1.Set(r)
 			b1.Mul(t, bigMinus1)
 			found = true
 			oneMore = true
-			// Skip to the next iteration so ri and ti are not
-			// modified.
+			// Skip to the next iteration so ri and ti are not modified.
 			continue
 
 		} else if oneMore {
 
-			// When this condition executes ri and ti still
-			// represent the r[i] and t[i] values while the current
-			// r and t are r[i+2] and t[i+2], respectively.
-			// sum1 = r[i]^2 + t[i]^2
+			// When this condition executes ri and ti still represent the r[i] and t[i] values while the current r and t
+			// are r[i+2] and t[i+2], respectively. sum1 = r[i]^2 + t[i]^2
 			rSquared := new(big.Int).Mul(ri, ri)
 			tSquared := new(big.Int).Mul(ti, ti)
 			sum1 := new(big.Int).Add(rSquared, tSquared)

@@ -20,9 +20,8 @@ var (
 	}()
 )
 
-// padData appends a 2 byte length prefix, and pads to a multiple of rsTotal.
-// Max message size is limited to 1<<32 but in our use will never get near
-// this size through higher level protocols breaking packets into sessions
+// padData appends a 2 byte length prefix, and pads to a multiple of rsTotal. Max message size is limited to 1<<32 but
+// in our use will never get near this size through higher level protocols breaking packets into sessions
 func padData(data []byte) (out []byte) {
 	dataLen := len(data)
 	prefixBytes := make([]byte, 4)
@@ -39,10 +38,8 @@ func padData(data []byte) (out []byte) {
 	return
 }
 
-// Encode turns a byte slice into a set of shards with first byte containing
-// the shard number. Previously this code included a CRC32 but this is
-// unnecessary since the shards will be sent wrapped in HMAC protected
-// encryption
+// Encode turns a byte slice into a set of shards with first byte containing the shard number. Previously this code
+// included a CRC32 but this is unnecessary since the shards will be sent wrapped in HMAC protected encryption
 func Encode(data []byte) (chunks [][]byte, err error) {
 	// First we must pad the data
 	data = padData(data)
@@ -58,8 +55,8 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 	for i := range shares {
 		// Append the chunk number to the front of the chunk
 		chunk := append([]byte{byte(shares[i].Number)}, shares[i].Data...)
-		// Checksum includes chunk number byte so we know if its checksum is
-		// incorrect so could the chunk number be
+		// Checksum includes chunk number byte so we know if its checksum is incorrect so could the chunk number be
+		//
 		// checksum := crc32.Checksum(chunk, crc32.MakeTable(crc32.Castagnoli))
 		// checkBytes := make([]byte, 4)
 		// binary.LittleEndian.PutUint32(checkBytes, checksum)

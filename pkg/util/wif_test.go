@@ -48,8 +48,7 @@ func TestEncodeDecodeWIF(t *testing.T) {
 				test.encoded, s)
 			continue
 		}
-		// Test that decoding the expected string results in the original WIF
-		// structure.
+		// Test that decoding the expected string results in the original WIF structure.
 		w, err := DecodeWIF(test.encoded)
 		if err != nil {
 			t.Error(err)

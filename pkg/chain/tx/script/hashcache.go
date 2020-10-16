@@ -7,7 +7,9 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// TxSigHashes houses the partial set of sighashes introduced within BIP0143. This partial set of sighashes may be re-used within each input across a transaction when validating all inputs. As a result, validation complexity for SigHashAll can be reduced by a polynomial factor.
+// TxSigHashes houses the partial set of sighashes introduced within BIP0143. This partial set of sighashes may be
+// re-used within each input across a transaction when validating all inputs. As a result, validation complexity for
+// SigHashAll can be reduced by a polynomial factor.
 type TxSigHashes struct {
 	HashPrevOuts chainhash.Hash
 	HashSequence chainhash.Hash
@@ -23,18 +25,17 @@ func NewTxSigHashes(tx *wire.MsgTx) *TxSigHashes {
 	}
 }
 
-// HashCache houses a set of partial sighashes keyed by txid. The set of
-// partial sighashes are those introduced within BIP0143 by the new more
-// efficient sighash digest calculation algorithm. Using this threadsafe shared
-// cache, multiple goroutines can safely re-use the pre-computed partial
-// sighashes speeding up validation time amongst all inputs found within a
-// block.
+// HashCache houses a set of partial sighashes keyed by txid. The set of partial sighashes are those introduced within
+// BIP0143 by the new more efficient sighash digest calculation algorithm. Using this threadsafe shared cache, multiple
+// goroutines can safely re-use the pre-computed partial sighashes speeding up validation time amongst all inputs found
+// within a block.
 type HashCache struct {
 	sigHashes map[chainhash.Hash]*TxSigHashes
 	sync.RWMutex
 }
 
-// NewHashCache returns a new instance of the HashCache given a maximum number of entries which may exist within it at anytime.
+// NewHashCache returns a new instance of the HashCache given a maximum number of entries which may exist within it at
+// anytime.
 func NewHashCache(maxSize uint) *HashCache {
 	return &HashCache{
 		sigHashes: make(map[chainhash.Hash]*TxSigHashes, maxSize),
@@ -48,7 +49,8 @@ func (h *HashCache) AddSigHashes(tx *wire.MsgTx) {
 	h.Unlock()
 }
 
-// ContainsHashes returns true if the partial sighashes for the passed transaction currently exist within the HashCache, and false otherwise.
+// ContainsHashes returns true if the partial sighashes for the passed transaction currently exist within the HashCache,
+// and false otherwise.
 func (h *HashCache) ContainsHashes(txid *chainhash.Hash) bool {
 	h.RLock()
 	_, found := h.sigHashes[*txid]
@@ -56,7 +58,9 @@ func (h *HashCache) ContainsHashes(txid *chainhash.Hash) bool {
 	return found
 }
 
-// GetSigHashes possibly returns the previously cached partial sighashes for the passed transaction. This function also returns an additional boolean value indicating if the sighashes for the passed transaction were found to be present within the HashCache.
+// GetSigHashes possibly returns the previously cached partial sighashes for the passed transaction. This function also
+// returns an additional boolean value indicating if the sighashes for the passed transaction were found to be present
+// within the HashCache.
 func (h *HashCache) GetSigHashes(txid *chainhash.Hash) (*TxSigHashes, bool) {
 	h.RLock()
 	item, found := h.sigHashes[*txid]

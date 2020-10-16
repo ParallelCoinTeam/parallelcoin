@@ -9,7 +9,8 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// mruInventoryMap provides a concurrency safe map that is limited to a maximum number of items with eviction for the oldest entry when the limit is exceeded.
+// mruInventoryMap provides a concurrency safe map that is limited to a maximum number of items with eviction for the
+// oldest entry when the limit is exceeded.
 type mruInventoryMap struct {
 	invMtx  sync.Mutex
 	invMap  map[wire.InvVect]*list.Element // nearly O(1) lookups
@@ -17,7 +18,9 @@ type mruInventoryMap struct {
 	limit   uint
 }
 
-// String returns the map as a human-readable string. This function is safe for concurrent access.
+// String returns the map as a human-readable string.
+//
+// This function is safe for concurrent access.
 func (m *mruInventoryMap) String() string {
 	m.invMtx.Lock()
 	defer m.invMtx.Unlock()
@@ -35,7 +38,9 @@ func (m *mruInventoryMap) String() string {
 	return fmt.Sprintf("<%d>%s", m.limit, buf.String())
 }
 
-// Exists returns whether or not the passed inventory item is in the map. This function is safe for concurrent access.
+// Exists returns whether or not the passed inventory item is in the map.
+//
+// This function is safe for concurrent access.
 func (m *mruInventoryMap) Exists(iv *wire.InvVect) bool {
 	m.invMtx.Lock()
 	_, exists := m.invMap[*iv]
@@ -43,7 +48,10 @@ func (m *mruInventoryMap) Exists(iv *wire.InvVect) bool {
 	return exists
 }
 
-// Add adds the passed inventory to the map and handles eviction of the oldest item if adding the new item would exceed the max limit.  Adding an existing item makes it the most recently used item. This function is safe for concurrent access.
+// Add adds the passed inventory to the map and handles eviction of the oldest item if adding the new item would exceed
+// the max limit. Adding an existing item makes it the most recently used item.
+//
+// This function is safe for concurrent access.
 func (m *mruInventoryMap) Add(iv *wire.InvVect) {
 	m.invMtx.Lock()
 	defer m.invMtx.Unlock()
@@ -56,7 +64,8 @@ func (m *mruInventoryMap) Add(iv *wire.InvVect) {
 		m.invList.MoveToFront(node)
 		return
 	}
-	// Evict the least recently used entry (back of the list) if the the new entry would exceed the size limit for the map.  Also reuse the list node so a new one doesn't have to be allocated.
+	// Evict the least recently used entry (back of the list) if the the new entry would exceed the size limit for the
+	// map. Also reuse the list node so a new one doesn't have to be allocated.
 	if uint(len(m.invMap))+1 > m.limit {
 		node := m.invList.Back()
 		lru := node.Value.(*wire.InvVect)
@@ -73,7 +82,9 @@ func (m *mruInventoryMap) Add(iv *wire.InvVect) {
 	m.invMap[*iv] = node
 }
 
-// Delete deletes the passed inventory item from the map (if it exists). This function is safe for concurrent access.
+// Delete deletes the passed inventory item from the map (if it exists).
+//
+// This function is safe for concurrent access.
 func (m *mruInventoryMap) Delete(iv *wire.InvVect) {
 	m.invMtx.Lock()
 	if node, exists := m.invMap[*iv]; exists {
@@ -83,7 +94,9 @@ func (m *mruInventoryMap) Delete(iv *wire.InvVect) {
 	m.invMtx.Unlock()
 }
 
-// newMruInventoryMap returns a new inventory map that is limited to the number of entries specified by limit.  When the number of entries exceeds the limit, the oldest (least recently used) entry will be removed to make room for the new entry.
+// newMruInventoryMap returns a new inventory map that is limited to the number of entries specified by limit. When the
+// number of entries exceeds the limit, the oldest (least recently used) entry will be removed to make room for the new
+// entry.
 func newMruInventoryMap(limit uint) *mruInventoryMap {
 	m := mruInventoryMap{
 		invMap:  make(map[wire.InvVect]*list.Element),

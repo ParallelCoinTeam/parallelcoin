@@ -10,10 +10,15 @@ import (
 // isJacobianOnS256Curve returns boolean if the point (x,y,z) is on the secp256k1 curve.
 func isJacobianOnS256Curve(x, y, z *fieldVal) bool {
 	// Elliptic curve equation for secp256k1 is: y^2 = x^3 + 7
+	//
 	// In Jacobian coordinates, Y = y/z^3 and X = x/z^2
+	//
 	// Thus:
+	//
 	// (y/z^3)^2 = (x/z^2)^3 + 7
+	//
 	// y^2/z^6 = x^3/z^6 + 7
+	//
 	// y^2 = x^3 + 7*z^6
 	var y2, z2, x3, result fieldVal
 	y2.SquareVal(y).Normalize()
@@ -599,7 +604,10 @@ func TestScalarMult(t *testing.T) {
 }
 func TestScalarMultRand(t *testing.T) {
 	// Strategy for this test:
-	// Get a random exponent from the generator point at first This creates a new point which is used in the next iteration Use another random exponent on the new point. We use BaseMult to verify by multiplying the previous exponent and the new random exponent together (mod N)
+	//
+	// Get a random exponent from the generator point at first This creates a new point which is used in the next
+	// iteration Use another random exponent on the new point. We use BaseMult to verify by multiplying the previous
+	// exponent and the new random exponent together (mod N)
 	s256 := S256()
 	x, y := s256.Gx, s256.Gy
 	exponent := big.NewInt(1)

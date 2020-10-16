@@ -5,8 +5,7 @@ import (
 	"testing"
 )
 
-// TestSetInt ensures that setting a field value to various native integers
-// works as expected.
+// TestSetInt ensures that setting a field value to various native integers works as expected.
 func TestSetInt(t *testing.T) {
 	tests := []struct {
 		in  uint
@@ -144,8 +143,7 @@ func TestStringer(t *testing.T) {
 	}
 }
 
-// TestNormalize ensures that normalizing the internal field words works as
-// expected.
+// TestNormalize ensures that normalizing the internal field words works as expected.
 func TestNormalize(t *testing.T) {
 	tests := []struct {
 		raw        [10]uint32 // Intentionally denormalized value
@@ -220,14 +218,12 @@ func TestNormalize(t *testing.T) {
 			[10]uint32{0xfffffc2f, 0xffffff80, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0x3fffc0},
 			[10]uint32{0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x000000},
 		},
-		// Prime larger than P where both first and second words are larger
-		// than P's first and second words
+		// Prime larger than P where both first and second words are larger than P's first and second words
 		{
 			[10]uint32{0xfffffc30, 0xffffff86, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0x3fffc0},
 			[10]uint32{0x00000001, 0x00000006, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x000000},
 		},
-		// Prime larger than P where only the second word is larger
-		// than P's second words.
+		// Prime larger than P where only the second word is larger than P's second words.
 		{
 			[10]uint32{0xfffffc2a, 0xffffff87, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0x3fffc0},
 			[10]uint32{0x03fffffb, 0x00000006, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x000000},
@@ -237,61 +233,53 @@ func TestNormalize(t *testing.T) {
 			[10]uint32{0xffffffff, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0xffffffc0, 0x3fffc0},
 			[10]uint32{0x000003d0, 0x00000040, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x000000},
 		},
-		// Prime with field representation such that the initial
-		// reduction does not result in a carry to bit 256.
+		// Prime with field representation such that the initial reduction does not result in a carry to bit 256.
 		//
 		// 2^256 - 4294968273 (secp256k1 prime)
 		{
 			[10]uint32{0x03fffc2f, 0x03ffffbf, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x003fffff},
 			[10]uint32{0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
 		},
-		// Prime larger than P that reduces to a value which is still
-		// larger than P when it has a magnitude of 1 due to its first
-		// word and does not result in a carry to bit 256.
+		// Prime larger than P that reduces to a value which is still larger than P when it has a magnitude of 1 due to
+		// its first word and does not result in a carry to bit 256.
 		//
 		// 2^256 - 4294968272 (secp256k1 prime + 1)
 		{
 			[10]uint32{0x03fffc30, 0x03ffffbf, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x003fffff},
 			[10]uint32{0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
 		},
-		// Prime larger than P that reduces to a value which is still
-		// larger than P when it has a magnitude of 1 due to its second
-		// word and does not result in a carry to bit 256.
+		// Prime larger than P that reduces to a value which is still larger than P when it has a magnitude of 1 due to
+		// its second word and does not result in a carry to bit 256.
 		//
 		// 2^256 - 4227859409 (secp256k1 prime + 0x4000000)
 		{
 			[10]uint32{0x03fffc2f, 0x03ffffc0, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x003fffff},
 			[10]uint32{0x00000000, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
 		},
-		// Prime larger than P that reduces to a value which is still
-		// larger than P when it has a magnitude of 1 due to a carry to
-		// bit 256, but would not be without the carry.  These values
-		// come from the fact that P is 2^256 - 4294968273 and 977 is
-		// the low order word in the internal field representation.
+		// Prime larger than P that reduces to a value which is still larger than P when it has a magnitude of 1 due to
+		// a carry to bit 256, but would not be without the carry. These values come from the fact that P is 2^256 -
+		// 4294968273 and 977 is the low order word in the internal field representation.
 		//
 		// 2^256 * 5 - ((4294968273 - (977+1)) * 4)
 		{
 			[10]uint32{0x03ffffff, 0x03fffeff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x0013fffff},
 			[10]uint32{0x00001314, 0x00000040, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x000000000},
 		},
-		// Prime larger than P that reduces to a value which is still
-		// larger than P when it has a magnitude of 1 due to both a
-		// carry to bit 256 and the first word.
+		// Prime larger than P that reduces to a value which is still larger than P when it has a magnitude of 1 due to
+		// both a carry to bit 256 and the first word.
 		{
 			[10]uint32{0x03fffc30, 0x03ffffbf, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x07ffffff, 0x003fffff},
 			[10]uint32{0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000001},
 		},
-		// Prime larger than P that reduces to a value which is still
-		// larger than P when it has a magnitude of 1 due to both a
-		// carry to bit 256 and the second word.
+		// Prime larger than P that reduces to a value which is still larger than P when it has a magnitude of 1 due to
+		// both a carry to bit 256 and the second word.
 		//
 		{
 			[10]uint32{0x03fffc2f, 0x03ffffc0, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x3ffffff, 0x07ffffff, 0x003fffff},
 			[10]uint32{0x00000000, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x0000000, 0x00000000, 0x00000001},
 		},
-		// Prime larger than P that reduces to a value which is still
-		// larger than P when it has a magnitude of 1 due to a carry to
-		// bit 256 and the first and second words.
+		// Prime larger than P that reduces to a value which is still larger than P when it has a magnitude of 1 due to
+		// a carry to bit 256 and the first and second words.
 		//
 		{
 			[10]uint32{0x03fffc30, 0x03ffffc0, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x07ffffff, 0x003fffff},
@@ -339,8 +327,7 @@ func TestIsOdd(t *testing.T) {
 	}
 }
 
-// TestEquals ensures that checking two field values for equality via Equals
-// works as expected.
+// TestEquals ensures that checking two field values for equality via Equals works as expected.
 func TestEquals(t *testing.T) {
 	tests := []struct {
 		in1      string // hex encoded value
@@ -419,8 +406,7 @@ func TestNegate(t *testing.T) {
 	}
 }
 
-// TestAddInt ensures that adding an integer to field values via AddInt works as
-// expected.
+// TestAddInt ensures that adding an integer to field values via AddInt works as expected.
 func TestAddInt(t *testing.T) {
 	tests := []struct {
 		in1      string // hex encoded value
@@ -469,8 +455,7 @@ func TestAddInt(t *testing.T) {
 	}
 }
 
-// TestAdd ensures that adding two field values together via Add works as
-// expected.
+// TestAdd ensures that adding two field values together via Add works as expected.
 func TestAdd(t *testing.T) {
 	tests := []struct {
 		in1      string // first hex encoded value
@@ -520,8 +505,7 @@ func TestAdd(t *testing.T) {
 	}
 }
 
-// TestAdd2 ensures that adding two field values together via Add2 works as
-// expected.
+// TestAdd2 ensures that adding two field values together via Add2 works as expected.
 func TestAdd2(t *testing.T) {
 	tests := []struct {
 		in1      string // first hex encoded value
@@ -573,8 +557,7 @@ func TestAdd2(t *testing.T) {
 	}
 }
 
-// TestMulInt ensures that adding an integer to field values via MulInt works as
-// expected.
+// TestMulInt ensures that adding an integer to field values via MulInt works as expected.
 func TestMulInt(t *testing.T) {
 	tests := []struct {
 		in1      string // hex encoded value
@@ -599,9 +582,8 @@ func TestMulInt(t *testing.T) {
 			8,
 			"fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc27",
 		},
-		// Random samples for first value.  The second value is limited
-		// to 8 since that is the maximum int used in the elliptic curve
-		// calculations.
+		// Random samples for first value. The second value is limited to 8 since that is the maximum int used in the
+		// elliptic curve calculations.
 		{
 			"b75674dc9180d306c692163ac5e089f7cef166af99645c0c23568ab6d967288a",
 			6,
@@ -748,8 +730,7 @@ func TestSquare(t *testing.T) {
 	}
 }
 
-// TestInverse ensures that finding the multiplicative inverse via Inverse works
-// as expected.
+// TestInverse ensures that finding the multiplicative inverse via Inverse works as expected.
 func TestInverse(t *testing.T) {
 	tests := []struct {
 		in       string // hex encoded value

@@ -25,7 +25,10 @@ type Coins interface {
 	Coins() []Coin
 }
 
-// CoinSet is a utility struct for the modifications of a set of Coins that implements the Coins interface.  To create a CoinSet, you must call NewCoinSet with nil for an empty set or a slice of coins as the initial contents. It is important to note that the all the Coins being added or removed from a CoinSet must have a constant ValueAge() during the use of the CoinSet, otherwise the cached values will be incorrect.
+// CoinSet is a utility struct for the modifications of a set of Coins that implements the Coins interface. To create a
+// CoinSet, you must call NewCoinSet with nil for an empty set or a slice of coins as the initial contents. It is
+// important to note that the all the Coins being added or removed from a CoinSet must have a constant ValueAge() during
+// the use of the CoinSet, otherwise the cached values will be incorrect.
 type CoinSet struct {
 	coinList      *list.List
 	totalValue    util.Amount
@@ -35,7 +38,8 @@ type CoinSet struct {
 // Ensure that CoinSet is a Coins
 var _ Coins = NewCoinSet(nil)
 
-// NewCoinSet creates a CoinSet containing the coins provided. To create an empty CoinSet, you may pass null as the coins input parameter.
+// NewCoinSet creates a CoinSet containing the coins provided. To create an empty CoinSet, you may pass null as the
+// coins input parameter.
 func NewCoinSet(coins []Coin) *CoinSet {
 	newCoinSet := &CoinSet{
 		coinList:      list.New(),
@@ -97,7 +101,8 @@ func (cs *CoinSet) ShiftCoin() Coin {
 	return cs.removeElement(front)
 }
 
-// removeElement updates the cached value amounts in the CoinSet, removes the element from the list, then returns the Coin that was removed to the caller.
+// removeElement updates the cached value amounts in the CoinSet, removes the element from the list, then returns the
+// Coin that was removed to the caller.
 func (cs *CoinSet) removeElement(e *list.Element) Coin {
 	c := e.Value.(Coin)
 	cs.coinList.Remove(e)
@@ -106,7 +111,8 @@ func (cs *CoinSet) removeElement(e *list.Element) Coin {
 	return c
 }
 
-// NewMsgTxWithInputCoins takes the coins in the CoinSet and makes them the inputs to a new wire.MsgTx which is returned.
+// NewMsgTxWithInputCoins takes the coins in the CoinSet and makes them the inputs to a new wire.MsgTx which is
+// returned.
 func NewMsgTxWithInputCoins(txVersion int32, inputCoins Coins) *wire.MsgTx {
 	msgTx := wire.NewMsgTx(txVersion)
 	coins := inputCoins.Coins()
@@ -125,22 +131,28 @@ func NewMsgTxWithInputCoins(txVersion int32, inputCoins Coins) *wire.MsgTx {
 }
 
 var (
-	// ErrCoinsNoSelectionAvailable is returned when a CoinSelector believes there is no possible combination of coins which can meet the requirements provided to the selector.
+	// ErrCoinsNoSelectionAvailable is returned when a CoinSelector believes there is no possible combination of coins
+	// which can meet the requirements provided to the selector.
 	ErrCoinsNoSelectionAvailable = errors.New("no coin selection possible")
 )
 
-// satisfiesTargetValue checks that the totalValue is either exactly the targetValue or is greater than the targetValue by at least the minChange amount.
+// satisfiesTargetValue checks that the totalValue is either exactly the targetValue or is greater than the targetValue
+// by at least the minChange amount.
 func satisfiesTargetValue(targetValue, minChange, totalValue util.Amount) bool {
 	return totalValue == targetValue || totalValue >= targetValue+minChange
 }
 
-// CoinSelector is an interface that wraps the CoinSelect method. CoinSelect will attempt to select a subset of the coins which has at least the targetValue amount.  CoinSelect is not guaranteed to return a selection of coins even if the total value of coins given is greater than the target value.
-// The exact choice of coins in the subset will be implementation specific. It is important to note that the Coins being used as inputs need to have a constant ValueAge() during the execution of CoinSelect.
+// CoinSelector is an interface that wraps the CoinSelect method. CoinSelect will attempt to select a subset of the
+// coins which has at least the targetValue amount. CoinSelect is not guaranteed to return a selection of coins even if
+// the total value of coins given is greater than the target value. The exact choice of coins in the subset will be
+// implementation specific. It is important to note that the Coins being used as inputs need to have a constant
+// ValueAge() during the execution of CoinSelect.
 type CoinSelector interface {
 	CoinSelect(targetValue util.Amount, coins []Coin) (Coins, error)
 }
 
-// MinIndexCoinSelector is a CoinSelector that attempts to construct a selection of coins whose total value is at least targetValue and prefers any number of lower indexes (as in the ordered array) over higher ones.
+// MinIndexCoinSelector is a CoinSelector that attempts to construct a selection of coins whose total value is at least
+// targetValue and prefers any number of lower indexes (as in the ordered array) over higher ones.
 type MinIndexCoinSelector struct {
 	MaxInputs       int
 	MinChangeAmount util.Amount
@@ -158,7 +170,8 @@ func (s MinIndexCoinSelector) CoinSelect(targetValue util.Amount, coins []Coin) 
 	return nil, ErrCoinsNoSelectionAvailable
 }
 
-// MinNumberCoinSelector is a CoinSelector that attempts to construct a selection of coins whose total value is at least targetValue that uses as few of the inputs as possible.
+// MinNumberCoinSelector is a CoinSelector that attempts to construct a selection of coins whose total value is at least
+// targetValue that uses as few of the inputs as possible.
 type MinNumberCoinSelector struct {
 	MaxInputs       int
 	MinChangeAmount util.Amount
@@ -172,7 +185,9 @@ func (s MinNumberCoinSelector) CoinSelect(targetValue util.Amount, coins []Coin)
 	return MinIndexCoinSelector(s).CoinSelect(targetValue, sortedCoins)
 }
 
-// MaxValueAgeCoinSelector is a CoinSelector that attempts to construct a selection of coins whose total value is at least targetValue that has as much input value-age as possible. This would be useful in the case where you want to maximize likelihood of the inclusion of your transaction in the next mined block.
+// MaxValueAgeCoinSelector is a CoinSelector that attempts to construct a selection of coins whose total value is at
+// least targetValue that has as much input value-age as possible. This would be useful in the case where you want to
+// maximize likelihood of the inclusion of your transaction in the next mined block.
 type MaxValueAgeCoinSelector struct {
 	MaxInputs       int
 	MinChangeAmount util.Amount
@@ -186,7 +201,11 @@ func (s MaxValueAgeCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 	return MinIndexCoinSelector(s).CoinSelect(targetValue, sortedCoins)
 }
 
-// MinPriorityCoinSelector is a CoinSelector that attempts to construct a selection of coins whose total value is at least targetValue and whose average value-age per input is greater than MinAvgValueAgePerInput. If there is change, it must exceed MinChangeAmount to be a valid selection. When possible, MinPriorityCoinSelector will attempt to reduce the average input priority over the threshold, but no guarantees will be made as to minimality of the selection.  The selection below is almost certainly suboptimal.
+// MinPriorityCoinSelector is a CoinSelector that attempts to construct a selection of coins whose total value is at
+// least targetValue and whose average value-age per input is greater than MinAvgValueAgePerInput. If there is change,
+// it must exceed MinChangeAmount to be a valid selection. When possible, MinPriorityCoinSelector will attempt to reduce
+// the average input priority over the threshold, but no guarantees will be made as to minimality of the selection. The
+// selection below is almost certainly suboptimal.
 type MinPriorityCoinSelector struct {
 	MaxInputs              int
 	MinChangeAmount        util.Amount
@@ -278,7 +297,8 @@ func (a byAmount) Len() int           { return len(a) }
 func (a byAmount) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a byAmount) Less(i, j int) bool { return a[i].Value() < a[j].Value() }
 
-// SimpleCoin defines a concrete instance of Coin that is backed by a util.Tx, a specific outpoint index, and the number of confirmations that transaction has had.
+// SimpleCoin defines a concrete instance of Coin that is backed by a util.Tx, a specific outpoint index, and the number
+// of confirmations that transaction has had.
 type SimpleCoin struct {
 	Tx         *util.Tx
 	TxIndex    uint32
@@ -308,7 +328,8 @@ func (c *SimpleCoin) Value() util.Amount {
 	return util.Amount(c.txOut().Value)
 }
 
-// PkScript returns the outpoint script of the Coin. This can be used to determine what type of script the Coin uses and extract standard addresses if possible using txscript.ExtractPkScriptAddrs for example.
+// PkScript returns the outpoint script of the Coin. This can be used to determine what type of script the Coin uses and
+// extract standard addresses if possible using txscript.ExtractPkScriptAddrs for example.
 func (c *SimpleCoin) PkScript() []byte {
 	return c.txOut().PkScript
 }
@@ -318,7 +339,8 @@ func (c *SimpleCoin) NumConfs() int64 {
 	return c.TxNumConfs
 }
 
-// ValueAge returns the product of the value and the number of confirmations. This is used as an input to calculate the priority of the transaction.
+// ValueAge returns the product of the value and the number of confirmations. This is used as an input to calculate the
+// priority of the transaction.
 func (c *SimpleCoin) ValueAge() int64 {
 	return c.TxNumConfs * int64(c.Value())
 }

@@ -9,7 +9,8 @@ import (
 	. "github.com/p9c/pod/pkg/chain/config"
 )
 
-// Define some of the required parameters for a user-registered network.  This is necessary to test the registration of and lookup of encoding magics from the network.
+// Define some of the required parameters for a user-registered network. This is necessary to test the registration of
+// and lookup of encoding magics from the network.
 var mockNetParams = Params{
 	Name:             "mocknet",
 	Net:              1<<32 - 1,

@@ -8,12 +8,10 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-// unusableFlags are the command usage flags which this utility are not able to
-// use.  In particular it doesn't support websockets and consequently
-// notifications.
+// unusableFlags are the command usage flags which this utility are not able to use. In particular it doesn't support
+// websockets and consequently notifications.
 const unusableFlags = btcjson.UFWebsocketOnly | btcjson.UFNotification
 
-// nolint
 var (
 	// DefaultConfigFile is
 	DefaultConfigFile = filepath.Join(PodCtlHomeDir, "conf.json")
@@ -33,8 +31,7 @@ var (
 	SPVHomeDir = appdata.Dir("pod/spv", false)
 )
 
-// ListCommands categorizes and lists all of the usable commands along with
-// their one-line usage.
+// ListCommands categorizes and lists all of the usable commands along with their one-line usage.
 func ListCommands() {
 	const (
 		categoryChain uint8 = iota
@@ -48,8 +45,7 @@ func ListCommands() {
 		flags, err := btcjson.MethodUsageFlags(method)
 		if err != nil {
 			Error(err)
-			// This should never happen since the method was just returned
-			// from the package, but be safe.
+			// This should never happen since the method was just returned from the package, but be safe.
 			continue
 		}
 		// Skip the commands that aren't usable from this utility.
@@ -59,8 +55,7 @@ func ListCommands() {
 		usage, err := btcjson.MethodUsageText(method)
 		if err != nil {
 			Error(err)
-			// This should never happen since the method was just returned
-			// from the package, but be safe.
+			// This should never happen since the method was just returned from the package, but be safe.
 			continue
 		}
 		// Categorize the command based on the usage flags.
