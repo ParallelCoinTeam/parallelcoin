@@ -32,7 +32,7 @@ type List struct {
 	// nextUp, nextDown Position
 	len int
 
-	drag gesture.Drag
+	drag  gesture.Drag
 	color string
 
 	// maxSize is the total size of visible children.
@@ -47,7 +47,7 @@ type List struct {
 
 // List returns a new scrollable List widget
 func (th *Theme) List() (out *List) {
-	out = &List{th: th, pageUp: th.Clickable(), pageDown: th.Clickable(),color: "DocBg"}
+	out = &List{th: th, pageUp: th.Clickable(), pageDown: th.Clickable(), color: "DocBg"}
 	return
 }
 
@@ -96,24 +96,17 @@ func (li *List) ListElement(w ListElement) *List {
 
 type DimensionList []l.Dimensions
 
-func (d DimensionList) GetTotal(axis l.Axis) (total int) {
+func (d DimensionList) GetTotal(gtx l.Context, axis l.Axis) (total int) {
 	for i := range d {
-		if axis == l.Horizontal {
-			total += d[i].Baseline*2 + d[i].Size.X
-		} else {
-			total += d[i].Baseline*2 + d[i].Size.Y
-		}
+		total += axisMain(axis, d[i].Size)
 	}
-	return
+	_ = gtx.Metric
+	return total
 }
 
 func (d DimensionList) PositionToCoordinate(position Position, axis l.Axis) (coordinate int) {
-	for i := 0; i <= position.First; i++ {
-		if axis == l.Horizontal {
-			coordinate += d[i].Baseline*2 + d[i].Size.X
-		} else {
-			coordinate += d[i].Baseline*2 + d[i].Size.Y
-		}
+	for i := 0; i < position.First; i++ {
+		coordinate += axisMain(axis, d[i].Size)
 	}
 	return coordinate + position.Offset
 }
@@ -121,11 +114,7 @@ func (d DimensionList) PositionToCoordinate(position Position, axis l.Axis) (coo
 func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (position Position) {
 	cursor := 0
 	for i := range d {
-		if axis == l.Horizontal {
-			cursor += d[i].Baseline*2 + d[i].Size.X
-		} else {
-			cursor += d[i].Baseline*2 + d[i].Size.Y
-		}
+		cursor += axisMain(axis, d[i].Size)
 		if cursor > coordinate {
 			if i == 0 {
 				position.First = 0
@@ -133,13 +122,8 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 				position.BeforeEnd = true
 				break
 			}
-			// back up
-			if axis == l.Horizontal {
-				cursor -= d[i].Baseline*2 + d[i].Size.X
-			} else {
-				cursor -= d[i].Baseline*2 + d[i].Size.Y
-			}
-			position.First = i - 1
+			cursor -= axisMain(axis, d[i].Size)
+			position.First = i
 			position.Offset = coordinate - cursor
 			position.BeforeEnd = true
 			if i == len(d)-1 {
@@ -156,6 +140,10 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 // Fn runs the layout in the configured context. The ListElement function returns the widget at the given index
 func (li *List) Fn(gtx l.Context) l.Dimensions {
 	// Debug("position", li.position, )
+	if li.length == 0 {
+		// if there is no children just return a big empty box
+		return l.Dimensions{Size: gtx.Constraints.Max}
+	}
 	// get the size of the scrollbar
 	scrollWidth := int(li.th.TextSize.V * 1.5)
 	// render the widgets onto a second context to get their dimensions
@@ -171,44 +159,28 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	}
 	// generate the dimensions for all the list elements
 	var dims DimensionList
-	var total, inView int
-	var before int
-	if li.axis == l.Horizontal {
-		inView = gtx.Constraints.Max.X
-	} else {
-		inView = gtx.Constraints.Max.Y
-	}
+	// gather the dimensions of the list elements
 	for i := 0; i < li.length; i++ {
+		child := op.Record(gtx.Ops)
 		d := li.w(gtx1, i)
+		_ = child.Stop()
 		dims = append(dims, d)
-		// Debug(d)
-		// depending on the axis gather the totals that create the total length
-		if li.axis == l.Horizontal {
-			el := d.Size.X + d.Baseline*2
-			total += el
-			if i < li.position.First {
-				before += el
-			}
-		} else {
-			el := d.Size.Y + d.Baseline*2
-			total += el
-			if i < li.position.First {
-				before += el
-			}
-		}
 	}
-	before += li.position.Offset
+	// Debugs(dims)
+	var view int
+	_, view = axisMainConstraint(li.axis, gtx.Constraints)
+	var total int
+	for i := range dims {
+		total += (dims[i].Baseline-1)*2 + axisMain(li.axis, dims[i].Size)+1
+	}
+	Debug("view", view, "total", total)
 	// compute the new positions for page up and page down
-
-	proportion := float32(inView) / float32(total)
-	if proportion > 1 {
-		scrollWidth = 0
-		proportion = 1
-	}
-	var last, first float32
-	first = float32(before) / float32(total)
-	last = 1 - first - proportion
-	// Debug("in view", inView, "proportion", proportion, "before", before, "total", total, "first", first, "last", last)
+	var top, middle, bottom int
+	// if total >= view {
+	//
+	// } else {
+	// 	scrollWidth = 0
+	// }
 	// now lay it all out and draw the list and scrollbar
 	var container l.Widget
 	if li.axis == l.Horizontal {
@@ -223,10 +195,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 				).
 				Rigid(
 					li.th.Flex().Vertical().
-						Flexed(first,
+						Rigid(
 							li.th.ButtonLayout(li.pageUp.SetClick(func() {
 								current := dims.PositionToCoordinate(li.position, li.axis)
-								upPos := current - inView
+								upPos := current - view
 								if upPos < 0 {
 									upPos = 0
 								}
@@ -235,7 +207,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 							})).Embed(
 								li.th.Fill("PanelBg").Embed(
 									func(gtx l.Context) l.Dimensions {
-										x := gtx.Constraints.Max.X
+										x := top
 										return l.Dimensions{
 											Size: image.Point{
 												Y: scrollWidth,
@@ -246,61 +218,61 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 								).Fn,
 							).Background("PanelBg").CornerRadius(0).Fn,
 						).
-						Flexed(proportion,
-						func(gtx l.Context) l.Dimensions {
-							var de *pointer.Event
-							for _, ev := range li.drag.Events(gtx.Metric, gtx, gesture.Vertical) {
-								if ev.Type == pointer.Press ||
-									ev.Type == pointer.Release ||
-									ev.Type == pointer.Drag {
-									de = &ev
-									// Debugs(de)
-								}
-							}
-							if de != nil {
-								// respond to the event
-								if de.Type == pointer.Press || de.Type == pointer.Drag {
-									li.color = "Primary"
-								}
-								if de.Type == pointer.Release {
-									li.color = "DocBg"
-								}
-								if de.Type == pointer.Drag {
-									current := dims.PositionToCoordinate(li.position, li.axis)
-									dx := int(de.Position.X) + current
-									li.position = dims.CoordinateToPosition(dx, li.axis)
-								}
-							}
-							defer op.Push(gtx.Ops).Pop()
-							x := gtx.Constraints.Max.X
-							size := image.Point{X: x, Y: scrollWidth}
-							// Debug(size)
-							rect := image.Rectangle{Max: size}
-							pointer.Rect(rect).Add(gtx.Ops)
-							li.drag.Add(gtx.Ops)
-							return li.th.Fill(li.color).Embed(
-								func(gtx l.Context) l.Dimensions {
-									return l.Dimensions{
-										Size: size,
+						Rigid(
+							func(gtx l.Context) l.Dimensions {
+								var de *pointer.Event
+								for _, ev := range li.drag.Events(gtx.Metric, gtx, gesture.Vertical) {
+									if ev.Type == pointer.Press ||
+										ev.Type == pointer.Release ||
+										ev.Type == pointer.Drag {
+										de = &ev
+										// Debugs(de)
 									}
-								},
-							).Fn(gtx)
-						},
+								}
+								if de != nil {
+									// respond to the event
+									if de.Type == pointer.Press || de.Type == pointer.Drag {
+										li.color = "Primary"
+									}
+									if de.Type == pointer.Release {
+										li.color = "DocBg"
+									}
+									if de.Type == pointer.Drag {
+										current := dims.PositionToCoordinate(li.position, li.axis)
+										dx := int(de.Position.X) + current
+										li.position = dims.CoordinateToPosition(dx, li.axis)
+									}
+								}
+								defer op.Push(gtx.Ops).Pop()
+								x := middle
+								size := image.Point{X: x, Y: scrollWidth}
+								// Debug(size)
+								rect := image.Rectangle{Max: size}
+								pointer.Rect(rect).Add(gtx.Ops)
+								li.drag.Add(gtx.Ops)
+								return li.th.Fill(li.color).Embed(
+									func(gtx l.Context) l.Dimensions {
+										return l.Dimensions{
+											Size: size,
+										}
+									},
+								).Fn(gtx)
+							},
 						).
-						Flexed(last,
+						Rigid(
 							li.th.ButtonLayout(li.pageDown.SetClick(func() {
 								current := dims.PositionToCoordinate(li.position, li.axis)
 								var downPos int
-								if current+inView > total {
-									downPos = total - inView
+								if current+view > total {
+									downPos = total - view
 								} else {
-									downPos = current + inView
+									downPos = current + view
 								}
 								li.position = dims.CoordinateToPosition(downPos, li.axis)
 							})).Embed(
 								li.th.Fill("PanelBg").Embed(
 									func(gtx l.Context) l.Dimensions {
-										x := gtx.Constraints.Max.X
+										x := bottom
 										return l.Dimensions{
 											Size: image.Point{
 												Y: scrollWidth,
@@ -326,11 +298,11 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 					).
 					Rigid(
 						li.th.Flex().Vertical().
-							Flexed(first,
+							Rigid(
 								li.th.Fill("PanelBg").Embed(
 									li.th.ButtonLayout(li.pageUp.SetClick(func() {
 										current := dims.PositionToCoordinate(li.position, li.axis)
-										upPos := current - inView
+										upPos := current - view
 										if upPos < 0 {
 											upPos = 0
 										}
@@ -338,7 +310,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 										li.position = dims.CoordinateToPosition(upPos, li.axis)
 									})).Embed(
 										func(gtx l.Context) l.Dimensions {
-											y := gtx.Constraints.Max.Y
+											y := top
 											j := image.Point{X: scrollWidth, Y: y}
 											return l.Dimensions{
 												Size: j,
@@ -347,7 +319,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 									).Background("PanelBg").CornerRadius(0).Fn,
 								).Fn,
 							).
-							Flexed(proportion,
+							Rigid(
 								func(gtx l.Context) l.Dimensions {
 									var de *pointer.Event
 									for _, ev := range li.drag.Events(gtx.Metric, gtx, gesture.Vertical) {
@@ -373,7 +345,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 										}
 									}
 									defer op.Push(gtx.Ops).Pop()
-									y := gtx.Constraints.Max.Y
+									y := middle
 									size := image.Point{X: scrollWidth, Y: y}
 									// Debug(size)
 									rect := image.Rectangle{Max: size}
@@ -388,20 +360,20 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 									).Fn(gtx)
 								},
 							).
-							Flexed(last,
+							Rigid(
 								li.th.Fill("PanelBg").Embed(
 									li.th.ButtonLayout(li.pageDown.SetClick(func() {
 										current := dims.PositionToCoordinate(li.position, li.axis)
 										var downPos int
-										if current+inView >= total {
-											downPos = total - inView
+										if current+view >= total {
+											downPos = total - view
 										} else {
-											downPos = current + inView
+											downPos = current + view
 										}
 										li.position = dims.CoordinateToPosition(downPos, li.axis)
 									})).Embed(
 										func(gtx l.Context) l.Dimensions {
-											y := gtx.Constraints.Min.Y
+											y := bottom
 											return l.Dimensions{
 												Size: image.Point{
 													X: scrollWidth,
