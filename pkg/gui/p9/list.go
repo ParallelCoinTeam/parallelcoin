@@ -203,6 +203,12 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	top = before * view / total
 	middle = view * view / total
 	bottom = (total - before - view) * view / total
+	if total < view {
+		// li.color = "PanelBg"
+		top, middle, bottom = 0, view, 0
+	} else {
+		// li.color = "DocBg"
+	}
 	// Debugf("view %4v top %4v middle %4v bottom %4v", view, top, middle, bottom)
 	// now lay it all out and draw the list and scrollbar
 	var container l.Widget
