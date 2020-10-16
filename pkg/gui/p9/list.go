@@ -2,7 +2,6 @@ package p9
 
 import (
 	"image"
-	"runtime"
 	"time"
 
 	"gioui.org/gesture"
@@ -158,7 +157,6 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		ip.Y = Inf
 		ip.X = gtx.Constraints.Max.X - scrollWidth
 	}
-
 	gtx1 := l.NewContext(&ops, system.FrameEvent{
 		Now:    time.Now(),
 		Metric: gtx.Metric,
@@ -166,12 +164,14 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	})
 	// set constraints for same width infinite length
 	if li.axis == l.Horizontal {
-		gtx1.Constraints.Max.Y =ip.Y
+		gtx1.Constraints.Max.Y = ip.Y
 		gtx1.Constraints.Max.X = ip.X
 	} else {
 		gtx1.Constraints.Max.Y = ip.Y
 		gtx1.Constraints.Max.X = ip.X
 	}
+	gtx1.Constraints.Min.Y = gtx.Constraints.Min.Y
+	gtx1.Constraints.Min.X = gtx.Constraints.Min.X
 	// gtx1.Constraints.Min = gtx1.Constraints.Max
 	// generate the dimensions for all the list elements
 	var dims DimensionList
@@ -185,14 +185,20 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	// Debugs(dims)
 	var view int
 	_, view = axisMainConstraint(li.axis, gtx.Constraints)
-	var total int
+	var total, before int
 	for i := range dims {
-		total += (dims[i].Baseline)*2 + axisMain(li.axis, dims[i].Size)
+		inc := axisMain(li.axis, dims[i].Size)
+		total += inc
+		if i < li.position.First {
+			before += inc
+		}
 	}
-	// Debug("view", view, "total", total)
-	Debug("view", view)
-	Debug(runtime.Caller(1))
-	Debugs(dims)
+	before += li.position.Offset
+	Debug("view", view, "total", total, "before", before)
+	// Debug(runtime.Caller(3))
+	// Debugs(dims)
+	// Debug("view", view)
+	// Debug("\n")
 	// compute the new positions for page up and page down
 	var top, middle, bottom int
 	// if total >= view {
