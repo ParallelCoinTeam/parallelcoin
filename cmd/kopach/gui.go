@@ -11,6 +11,7 @@ import (
 	"gioui.org/text"
 
 	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
@@ -27,16 +28,15 @@ type MinerModel struct {
 	DarkTheme              bool
 	logoButton             *p9.Clickable
 	mineToggle             *p9.Bool
-	cores                  *p9.Float
 	nCores                 int
 	solButtons             []*p9.Clickable
 	lists                  map[string]*p9.List
-	threadsMax, threadsMin *p9.Clickable
 	solutionCount          int
 	modalWidget            l.Widget
 	modalOn                bool
 	modalScrim, modalClose *p9.Clickable
 	password               *p9.Password
+	threadSlider           *p9.IntSlider
 }
 
 func (w *Worker) Run() {
@@ -57,16 +57,17 @@ func (w *Worker) Run() {
 			Debug("clicked logo button")
 		}),
 		mineToggle: th.Bool(*w.cx.Config.Generate),
-		cores:      th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
 		solButtons: solButtons,
 		lists:      lists,
 		modalScrim: th.Clickable(),
 		modalClose: th.Clickable(),
-		threadsMax: th.Clickable(),
-		threadsMin: th.Clickable(),
 		password: th.Password(w.cx.Config.MinerPass, func(pass string) {
 			Debug("changed password")
 			*w.cx.Config.MinerPass = pass
+			save.Pod(w.cx.Config)
+		}),
+		threadSlider: th.IntSlider().Min(0).Max(maxThreads).Value(*w.cx.Config.GenThreads).Hook(func(v int){
+			w.SetThreads <- v
 		}),
 	}
 	minerModel.SetTheme(minerModel.DarkTheme)
@@ -81,7 +82,7 @@ func (w *Worker) Run() {
 	win := f.Window()
 	go func() {
 		if err := win.
-			Size(640, 320).
+			Size(640, 480).
 			Title("kopach").
 			Open().
 			Run(
@@ -243,52 +244,16 @@ func (m *MinerModel) RunControl(gtx l.Context) l.Dimensions {
 func (m *MinerModel) SetThreads(gtx l.Context) l.Dimensions {
 	return m.Flex().Rigid(
 		m.Inset(0.25).Embed(
-			m.Flex().Flexed(0.5,
-				m.Body1("number of mining threads"+
-					fmt.Sprintf("%3v", int(m.cores.Value()+0.5))).
-					Fn,
-			).Flexed(0.5,
-				m.Flex().Rigid(
-					m.Button(
-						m.threadsMin.SetClick(func() {
-							m.cores.SetValue(0)
-							m.worker.SetThreads <- 0
-						})).
-						Inset(0.25).
-						Color("Primary").
-						Background("Transparent").
-						Font("bariol regular").
-						Text("0").
+			m.Flex().
+				Flexed(0.5,
+					m.Body1("number of mining threads"+
+						fmt.Sprintf("%3v", int(m.threadSlider.GetValue()))).
 						Fn,
-				).Flexed(1,
-					m.Inset(0.25).Embed(
-						m.Slider().
-							Float(m.cores.SetHook(func(fl float32) {
-								iFl := int(fl + 0.5)
-								if m.nCores != iFl {
-									Debug("cores value changed", iFl)
-								}
-								m.nCores = iFl
-								m.cores.SetValue(float32(iFl))
-								m.worker.SetThreads <- m.nCores
-							})).
-							Min(0).Max(maxThreads).
-							Fn,
-					).Fn,
-				).Rigid(
-					m.Button(
-						m.threadsMax.SetClick(func() {
-							m.cores.SetValue(maxThreads)
-							m.worker.SetThreads <- int(maxThreads)
-						})).
-						Inset(0.25).
-						Color("Primary").
-						Background("Transparent").
-						Font("bariol regular").
-						Text(fmt.Sprint(int(maxThreads))).
-						Fn,
-				).Fn,
-			).Fn,
+				).
+				Flexed(0.5,
+					m.threadSlider.Fn,
+				).
+				Fn,
 		).Fn,
 	).Fn(gtx)
 }
