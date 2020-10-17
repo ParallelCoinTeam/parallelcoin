@@ -1,11 +1,11 @@
 package dap
 
 import (
-	"context"
 	"fmt"
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/wallet/appdata"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
@@ -26,12 +26,12 @@ type dap struct {
 	boot mod.Dap
 }
 
-func NewDap(title string) dap {
+func NewDap(cx *conte.Xt, title string) dap {
 	//if cfg.Initial {
 	//	fmt.Println("running initial setup")
 	//}
 	d := mod.Dap{
-		Ctx:  context.Background(),
+		Rc:   RcInit(cx),
 		Apps: make(map[string]mod.Sap),
 	}
 
@@ -74,4 +74,44 @@ func checkError(err error) {
 	if err != nil {
 		fmt.Println("Fatal error ", err.Error())
 	}
+}
+
+func RcInit(cx *conte.Xt) (r *mod.RcVar) {
+	b := mod.Boot{
+		IsBoot:     true,
+		IsFirstRun: false,
+		IsBootMenu: false,
+		IsBootLogo: false,
+		IsLoading:  false,
+	}
+	// d := models.DuoUIdialog{
+	//	Show:   true,
+	//	Ok:     func() { r.Dialog.Show = false },
+	//	Cancel: func() { r.Dialog.Show = false },
+	//	Title:  "Dialog!",
+	//	Text:   "Dialog text",
+	// }
+	//l := new(model.DuoUIlog)
+
+	r = &mod.RcVar{
+		Cx: cx,
+		//db:          new(DuoUIdb),
+		Boot: &b,
+		//AddressBook: new(model.DuoUIaddressBook),
+		//Status: &model.DuoUIstatus{
+		//	Node: &model.NodeStatus{},
+		//	Wallet: &model.WalletStatus{
+		//		WalletVersion: make(map[string]btcjson.VersionResult),
+		//		LastTxs:       &model.DuoUItransactionsExcerpts{},
+		//	},
+		//	Kopach: &model.KopachStatus{},
+		//},
+		//Dialog:   &model.DuoUIdialog{},
+		//Settings: settings(cx),
+		//Log:      l,
+		Quit:  make(chan struct{}),
+		Ready: make(chan struct{}),
+	}
+	//r.db.DuoUIdbInit(r.cx.DataDir)
+	return
 }

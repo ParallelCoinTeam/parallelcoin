@@ -4,6 +4,7 @@ package app
 
 import (
 	"gioui.org/app"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/config"
@@ -20,24 +21,24 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
 		Warn("starting GUI")
-		//rc := rcd.RcInit(cx)
+		d := dap.NewDap(cx, "Duo App Plan9")
 		Debug("wallet file", *cx.Config.WalletFile)
 		if !apputil.FileExists(*cx.Config.WalletFile) {
-			//rc.Boot.IsFirstRun = true
+			d.BOOT().Rc.Boot.IsFirstRun = true
 		}
 		//duo, err := duoui.DuOuI(rc)
 		//rc.DuoUIloggerController()
-		//interrupt.AddHandler(func() {
-		//	Debug("guiHandle interrupt")
-		//	close(rc.Quit)
-		//})
+		interrupt.AddHandler(func() {
+			Debug("guiHandle interrupt")
+			close(d.BOOT().Rc.Quit)
+		})
 		//Debug("IsFirstRun? ", rc.Boot.IsFirstRun)
 		// signal the GUI that the back end is ready
 		Debug("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
-		//if !rc.Boot.IsFirstRun {
-		//	go rc.StartServices()
-		//}
+		if !d.BOOT().Rc.Boot.IsFirstRun {
+			//go d.BOOT().Rc.StartServices()
+		}
 		// Start up GUI
 		Debug("starting up GUI")
 		cx.WaitGroup.Add(1)
@@ -45,7 +46,6 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		//if err != nil {
 		//	Error(err)
 		//}
-		d := dap.NewDap("Duo App Plan9")
 		d.NewSap(gwallet.NewGioWallet(d.BOOT()))
 		go d.DAP()
 		app.Main()
@@ -53,16 +53,16 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		cx.WaitGroup.Done()
 		Debug("wallet GUI finished")
 		// wait for stop signal
-		//<-rc.Quit
+		<-d.BOOT().Rc.Quit
 		cx.WaitGroup.Wait()
 		Debug("shutting down node")
-		// if !cx.Node.Load() {
-		// 	close(cx.WalletKill)
-		// }
+		if !cx.Node.Load() {
+			close(cx.WalletKill)
+		}
 		Debug("shutting down wallet")
-		// if !cx.Wallet.Load() {
-		// 	close(cx.NodeKill)
-		// }
+		if !cx.Wallet.Load() {
+			close(cx.NodeKill)
+		}
 		return
 	}
 }

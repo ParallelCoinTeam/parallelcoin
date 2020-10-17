@@ -8,6 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"log"
 	"os"
 	"time"
@@ -15,27 +16,96 @@ import (
 
 func (d *dap) DAP() {
 	defer os.Exit(0)
-	if err := d.DAppP(); err != nil {
+	if err := d.loop(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (d *dap) DAppP() error {
+func (d *dap) loop() error {
 	for {
 		select {
+		//case <-d.boot.Rc.Ready:
+		//	updateTrigger := make(chan struct{}, 1)
+		//	go func() {
+		//	quitTrigger:
+		//		for {
+		//			select {
+		//			case <-updateTrigger:
+		//				//log.L.Trace("repaint forced")
+		//				//ui.ly.Window.Invalidate()
+		//			case <-d.boot.Rc.Quit:
+		//				break quitTrigger
+		//			}
+		//		}
+		//	}()
+		//	d.boot.Rc.ListenInit(updateTrigger)
+		//	d.boot.Rc.IsReady = true
+		//case <-d.boot.Rc.Quit:
+		//	//log.L.Debug("quit signal received")
+		//	if !interrupt.Requested() {
+		//		interrupt.Request()
+		//	}
+		//	// This case is for handling when some external application is controlling the GUI and to gracefully
+		//	// handle the back-end servers being shut down by the interrupt library receiving an interrupt signal
+		//	// Probably nothing needs to be run between starting it and shutting down
+		//	<-interrupt.HandlersDone
+		//	//log.L.Debug("closing GUI from interrupt/quit signal")
+		//	return errors.New("shutdown triggered from back end")
+		//	//TODO events of gui
+		//case e := <-d.boot.Rc.Commands.Events:
+		//	switch e := e.(type) {
+		//	case mod.CommandEvent:
+		//		d.boot.Rc.Commands.History = append(d.boot.Rc.Commands.History, e.Command)
+		//		d.boot.UI.Window.Invalidate()
+		//	}
 		case e := <-d.boot.UI.Window.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
+				//log.L.Debug("destroy event received")
+				interrupt.Request()
+				// Here do cleanup like are you sure (optional) modal or shutting down indefinite spinner
+				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
+				//d.boot.UI.G.Reset(e.Config, e.Size)
+				//d.boot.UI.G.Reset()
+				//if d.boot.Rc.Boot.IsBoot {
+				//	if d.boot.Rc.Boot.IsFirstRun {
+				//		ui.DuoUIloaderCreateWallet()
+				//} else {
+				//	ui.DuoUIsplashScreen()
+				//}
+				//e.Frame(d.boot.UI.G.Ops)
+				//} else {
+				//ui.DuoUImainScreen()
 				gtx := layout.NewContext(&d.boot.UI.Ops, e)
 				d.BeforeMain(&gtx)
-				lyt.Format(gtx, "max(inset(0dp0dp0dp0dp,_))", d.Main())
-
+				d.Main(&gtx)
+				//lyt.Format(gtx, "max(inset(0dp0dp0dp0dp,_))", d.Main())
 				d.AfterMain(&gtx)
 				e.Frame(gtx.Ops)
+				//if d.boot.Rc.Dialog.Show {
+				//	component.DuoUIdialog(ui.rc, ui.ly.Context, ui.ly.Theme)
+				//	ui.DuoUItoastSys()
+				//}
+				e.Frame(d.boot.UI.G.Ops)
+				//}
 			}
-			d.boot.UI.Window.Invalidate()
+
+			//////////////
+			//case e := <-d.boot.UI.Window.Events():
+			//	switch e := e.(type) {
+			//	case system.DestroyEvent:
+			//		return e.Err
+			//	case system.FrameEvent:
+			//		gtx := layout.NewContext(&d.boot.UI.Ops, e)
+			//		d.BeforeMain(&gtx)
+			//		lyt.Format(gtx, "max(inset(0dp0dp0dp0dp,_))", d.Main())
+			//
+			//		d.AfterMain(&gtx)
+			//		e.Frame(gtx.Ops)
+			//	}
+			//	d.boot.UI.Window.Invalidate()
 		}
 	}
 }
@@ -87,8 +157,8 @@ func ticker(f func()) {
 	}()
 }
 
-func (d *dap) Main() W {
-	return func(gtx C) D {
+func (d *dap) Main(gtx *C) D {
+	return lyt.Format(*gtx, "max(inset(0dp0dp0dp0dp,_))", func(gtx C) D {
 		return lyt.Format(gtx, d.boot.UI.R.Mod["Container"].(string),
 			box.BoxBase(d.boot.UI.Theme.Colors["NavBg"], d.boot.UI.N.Nav(d.boot.UI.Theme, gtx)),
 			func(gtx C) D {
@@ -97,5 +167,5 @@ func (d *dap) Main() W {
 					d.boot.UI.F,
 				)
 			})
-	}
+	})
 }
