@@ -134,9 +134,15 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	dims := GetDimensionList(gtx1, li.length, li.w)
 	_, view := axisMainConstraint(li.axis, gtx.Constraints)
 	total, before := dims.GetSizes(li.position, li.axis)
-	top := before * view / total
-	middle := view * view / total
-	bottom := (total - before - view) * view / total
+	top := before * (view - li.scrollWidth) / total
+	middle := view * (view - li.scrollWidth) / total
+	bottom := (total - before - view) * (view - li.scrollWidth) / total
+	if view < li.scrollWidth {
+		middle = view
+		top, bottom = 0, 0
+	} else {
+		middle += li.scrollWidth
+	}
 	if total < view {
 		// if the contents fit the view, don't show the scrollbar
 		top, middle, bottom = 0, 0, 0
