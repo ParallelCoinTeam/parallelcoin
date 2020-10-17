@@ -9,10 +9,8 @@ import (
 	"gioui.org/app"
 	l "gioui.org/layout"
 	"gioui.org/text"
-	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
@@ -33,16 +31,12 @@ type MinerModel struct {
 	nCores                 int
 	solButtons             []*p9.Clickable
 	lists                  map[string]*p9.List
-	pass                   *p9.Editor
-	unhideButton           *p9.IconButton
-	unhideClickable        *p9.Clickable
 	threadsMax, threadsMin *p9.Clickable
-	hide                   bool
-	passInput              *p9.TextInput
 	solutionCount          int
 	modalWidget            l.Widget
 	modalOn                bool
 	modalScrim, modalClose *p9.Clickable
+	password               *p9.Password
 }
 
 func (w *Worker) Run() {
@@ -62,50 +56,20 @@ func (w *Worker) Run() {
 		logoButton: th.Clickable().SetClick(func() {
 			Debug("clicked logo button")
 		}),
-		mineToggle:      th.Bool(*w.cx.Config.Generate),
-		cores:           th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
-		solButtons:      solButtons,
-		lists:           lists,
-		unhideClickable: th.Clickable(),
-		modalScrim:      th.Clickable(),
-		modalClose:      th.Clickable(),
-		threadsMax:      th.Clickable(),
-		threadsMin:      th.Clickable(),
+		mineToggle: th.Bool(*w.cx.Config.Generate),
+		cores:      th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
+		solButtons: solButtons,
+		lists:      lists,
+		modalScrim: th.Clickable(),
+		modalClose: th.Clickable(),
+		threadsMax: th.Clickable(),
+		threadsMin: th.Clickable(),
+		password: th.Password(w.cx.Config.MinerPass, func(pass string) {
+			Debug("changed password")
+			*w.cx.Config.MinerPass = pass
+		}),
 	}
 	minerModel.SetTheme(minerModel.DarkTheme)
-	minerModel.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
-	minerModel.passInput = th.SimpleInput(minerModel.pass).Color("DocText")
-	minerModel.unhideButton = th.IconButton(minerModel.unhideClickable).
-		Background("").
-		Color("Primary").
-		Icon(icons2.ActionVisibility)
-	showClickableFn := func() {
-		minerModel.hide = !minerModel.hide
-		if !minerModel.hide {
-			minerModel.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
-			minerModel.pass.Mask('•')
-			minerModel.passInput.Color("Primary")
-		} else {
-			minerModel.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
-			minerModel.pass.Mask(0)
-			minerModel.passInput.Color("DocText")
-		}
-	}
-	minerModel.unhideClickable.SetClick(showClickableFn)
-	minerModel.pass.SetText(*w.cx.Config.MinerPass).Mask('•').SetSubmit(func(txt string) {
-		if !minerModel.hide {
-			showClickableFn()
-		}
-		showClickableFn()
-		go func() {
-			*w.cx.Config.MinerPass = txt
-			save.Pod(w.cx.Config)
-			w.Stop()
-			w.Start()
-		}()
-	}).SetChange(func(txt string) {
-		// send keystrokes to the NSA
-	})
 	for i := 0; i < 201; i++ {
 		minerModel.solButtons[i] = th.Clickable()
 	}
@@ -113,12 +77,8 @@ func (w *Worker) Run() {
 		func() {
 			minerModel.FlipTheme()
 			Info("clicked logo button")
-			showClickableFn()
-			showClickableFn()
 		})
 	win := f.Window()
-	minerModel.hide = !minerModel.hide
-	showClickableFn()
 	go func() {
 		if err := win.
 			Size(640, 320).
@@ -171,17 +131,11 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 	).
 		Stacked(func(gtx l.Context) l.Dimensions {
 			if m.modalOn {
-				// return m.modalWidget(gtx)
 				return m.Fill("scrim").Embed(
 					m.Flex().
 						Vertical().
-						// AlignMiddle().
-						// SpaceSides().
-						// AlignBaseline().
 						Flexed(0.1,
 							m.Flex().
-								// Vertical().
-								// SpaceStart().
 								Rigid(
 									func(gtx l.Context) l.Dimensions {
 										return l.Dimensions{
@@ -196,8 +150,6 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 						Rigid(m.modalWidget).
 						Flexed(0.1,
 							m.Flex().
-								// Vertical().
-								// SpaceStart().
 								Rigid(
 									func(gtx l.Context) l.Dimensions {
 										return l.Dimensions{
@@ -207,20 +159,14 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 											},
 											Baseline: 0,
 										}
-									}).Fn,
+									},
+								).Fn,
 						).Fn,
 				).Fn(gtx)
 			} else {
 				return l.Dimensions{}
 			}
 		}).
-		// Expanded(func(gtx l.Context) l.Dimensions {
-		// 	if m.modalOn {
-		// 		return (gtx)
-		// 	} else {
-		// 		return l.Dimensions{}
-		// 	}
-		// }).
 		Fn(gtx)
 }
 
@@ -354,13 +300,7 @@ func (m *MinerModel) PreSharedKey(gtx l.Context) l.Dimensions {
 				Color("DocText").
 				Fn,
 		).Flexed(0.5,
-			m.Border().Embed(
-				m.Flex().Flexed(1,
-					m.Inset(0.25).Embed(m.passInput.Fn).Fn,
-				).Rigid(
-					m.unhideButton.Fn,
-				).Fn,
-			).Fn,
+			m.password.Fn,
 		).Fn,
 	).Fn(gtx)
 }
