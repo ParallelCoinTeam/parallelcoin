@@ -6,7 +6,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/page"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 func NewGioWallet(d *mod.Dap) mod.Sap {
@@ -15,22 +14,22 @@ func NewGioWallet(d *mod.Dap) mod.Sap {
 	}
 
 	// Connect to local bitcoin core RPC server using HTTP POST mode.
-	connCfg := &rpcclient.ConnConfig{
-		Host:         "localhost:18444",
-		User:         "bitnode",
-		Pass:         "44444",
-		HTTPPostMode: true,  // Bitcoin core only supports HTTP POST mode
-		TLS:          false, // Bitcoin core does not provide TLS by default
-	}
-	// Notice the notification parameter is nil since notifications are not supported in HTTP POST mode.
-	client, err := rpcclient.New(connCfg, nil)
-	if err != nil {
-
-	}
-
-	g.rpc = client
-
-	defer g.rpc.Shutdown()
+	//connCfg := &rpcclient.ConnConfig{
+	//	Host:         "localhost:18444",
+	//	User:         "bitnode",
+	//	Pass:         "44444",
+	//	HTTPPostMode: true,  // Bitcoin core only supports HTTP POST mode
+	//	TLS:          false, // Bitcoin core does not provide TLS by default
+	//}
+	//// Notice the notification parameter is nil since notifications are not supported in HTTP POST mode.
+	//client, err := rpcclient.New(connCfg, nil)
+	//if err != nil {
+	//
+	//}
+	//
+	//g.rpc = client
+	//
+	//defer g.rpc.Shutdown()
 
 	//g.UI.pages = g.getPages()
 	//g.menuItems = g.getMenuItems()

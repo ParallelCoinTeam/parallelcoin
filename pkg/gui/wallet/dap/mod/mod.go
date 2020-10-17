@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Unlicense OR MIT
-// SPDX-License-Identifier: Unlicense OR MIT
 
 package mod
 
 import (
-	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
+	"github.com/p9c/pod/pkg/gui/wallet/dap/win"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )
@@ -37,8 +36,9 @@ type Settings struct {
 
 type UserInterface struct {
 	Device string
-	Window *app.Window
-	Theme  *theme.Theme
+	W      *win.Windows
+
+	Theme *theme.Theme
 	//Ekran   func(gtx C) D
 	FontSize float32
 	R        *res.Responsive

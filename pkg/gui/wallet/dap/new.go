@@ -6,9 +6,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/gui/wallet/appdata"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
+	"github.com/p9c/pod/pkg/gui/wallet/dap/win"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )
@@ -39,12 +39,16 @@ func NewDap(cx *conte.Xt, title string) dap {
 		Theme: theme.NewTheme(),
 		//mob:   make(chan bool),
 	}
-
-	d.UI.Window = app.NewWindow(
-		app.Size(unit.Dp(1024), unit.Dp(800)),
-		app.Title(title),
-	)
-
+	w := map[string]*win.Window{
+		"main": &win.Window{
+			W: app.NewWindow(
+				app.Size(unit.Dp(1024), unit.Dp(800)),
+				app.Title(title),
+			)},
+	}
+	d.UI.W = &win.Windows{
+		W: w,
+	}
 	n := &nav.Navigation{
 		Name:         "Navigacion",
 		Bg:           d.UI.Theme.Colors["NavBg"],
@@ -53,11 +57,12 @@ func NewDap(cx *conte.Xt, title string) dap {
 	d.UI.N = n
 
 	s := &mod.Settings{
-		Dir: appdata.Dir("dap", false),
+		//Dir: appdata.Dir("dap", false),
 	}
 	d.S = s
 
 	d.UI.R = res.Resposnsivity(0, 0)
+	Debug("New DAP", d)
 
 	return dap{boot: d}
 }

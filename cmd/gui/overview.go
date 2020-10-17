@@ -1,11 +1,9 @@
 package gwallet
 
 import (
-	"fmt"
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/gioapp/gel/helper"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
@@ -32,30 +30,30 @@ func (g *GioWallet) GetOverview() {
 }
 
 func (g *GioWallet) GetBalances() {
-	b, err := g.rpc.GetBalance("")
-	checkError(err)
-	fmt.Println("Ssss", b)
-	balances = Balances{
-		available: fmt.Sprint(b),
-		pending:   fmt.Sprint(b),
-		immature:  fmt.Sprint(b),
-		total:     fmt.Sprint(b),
-	}
+	//b, err := g.rpc.GetBalance("")
+	//checkError(err)
+	//fmt.Println("Ssss", b)
+	//balances = Balances{
+	//	available: fmt.Sprint(b),
+	//	pending:   fmt.Sprint(b),
+	//	immature:  fmt.Sprint(b),
+	//	total:     fmt.Sprint(b),
+	//}
 }
 
 func (g *GioWallet) GetLatestTransactions() {
-	txs, err := g.rpc.ListTransactionsCount("", 5)
-	checkError(err)
-	for _, tx := range txs {
-		t := Tx{
-			Id:      fmt.Sprint(tx.TxID),
-			Time:    fmt.Sprint(tx.Time),
-			Address: fmt.Sprint(tx.Address),
-			Amount:  fmt.Sprint(tx.Amount),
-			Btn:     new(widget.Clickable),
-		}
-		latestTransactions = append(latestTransactions, t)
-	}
+	//txs, err := g.rpc.ListTransactionsCount("", 5)
+	//checkError(err)
+	//for _, tx := range txs {
+	//	t := Tx{
+	//		Id:      fmt.Sprint(tx.TxID),
+	//		Time:    fmt.Sprint(tx.Time),
+	//		Address: fmt.Sprint(tx.Address),
+	//		Amount:  fmt.Sprint(tx.Amount),
+	//		Btn:     new(widget.Clickable),
+	//	}
+	//	latestTransactions = append(latestTransactions, t)
+	//}
 
 }
 

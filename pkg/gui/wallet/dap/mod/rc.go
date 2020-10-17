@@ -11,7 +11,7 @@ type RcVar struct {
 	Events        chan Event
 	UpdateTrigger chan struct{}
 	//Status         *model.DuoUIstatus
-	//Dialog         *model.DuoUIdialog
+	Dialog *Dialog
 	//Log            *model.DuoUIlog
 	//ConsoleHistory *model.DuoUIconsoleHistory
 

@@ -66,6 +66,7 @@ func NewColors() (c map[string]string) {
 		"yellow":                "ffcfcf30",
 	}
 
+	c["Bg"] = c["dark"]
 	c["Black"] = c["black"]
 	c["ButtonBg"] = c["light-grayiii"]
 	c["ContentBg"] = c["light-grayiii"]
