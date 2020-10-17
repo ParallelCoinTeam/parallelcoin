@@ -44,6 +44,9 @@ func (th *Theme) Password(password *string, handle func(pass string)) *Password 
 			p.passInput.Color("DocText")
 		}
 	}
+	p.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+	p.pass.Mask('•')
+	p.passInput.Color("Primary")
 	p.unhideClickable.SetClick(showClickableFn)
 	p.pass.SetText(*password).Mask('•').SetSubmit(func(txt string) {
 		if !p.hide {
