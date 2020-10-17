@@ -55,7 +55,7 @@ func (w *window) Title(title string) (out *window) {
 // Size sets the dimensions of the window
 func (w *window) Size(width, height int) (out *window) {
 	w.opts = append(w.opts,
-		app.Size(unit.Dp(float32(width)), unit.Dp(float32(height))))
+		app.Size(unit.Sp(float32(width)), unit.Sp(float32(height))))
 	return w
 }
 
