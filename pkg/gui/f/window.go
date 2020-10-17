@@ -89,7 +89,6 @@ func (w *window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy f
 			ctx := layout.NewContext(&ops, e)
 			frame(ctx)
 			e.Frame(ctx.Ops)
-			w.Window.Invalidate()
 		}
 	}
 }

@@ -455,7 +455,7 @@ func Composite(text, level string) (final string) {
 	}
 	_, loc, iLine, _ := runtime.Caller(skip)
 	line := fmt.Sprint(iLine)
-	since := fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Millisecond*time.Millisecond)
+	since := fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Second*time.Second)
 	final = Tags[level] + " " + since + " " + text + " " + loc + ":" + line
 	return final
 }
