@@ -2,7 +2,35 @@ package p9
 
 import (
 	l "gioui.org/layout"
+	"gioui.org/unit"
 )
+
+// App defines an application with a header, sidebar/menu, right side button bar, changeable body page widget and
+// pop-over layers
+type App struct {
+	*Theme
+	activePage         string
+	bodyBackground     string
+	bodyColor          string
+	buttonBar          []l.Widget
+	hideSideBar        bool
+	hideTitleBar       bool
+	layers             []l.Widget
+	pages              map[string]l.Widget
+	root               *Stack
+	sideBar            []l.Widget
+	sideBarSize        unit.Value
+	title              string
+	titleBarBackground string
+	titleBarColor      string
+	titleFont          string
+	menuClickable      *Clickable
+	menuButton         *IconButton
+	menuIcon           []byte
+	menuColor          string
+	menuBackground     string
+	responsive         *Responsive
+}
 
 func (th *Theme) App() *App {
 	mc := th.Clickable()
@@ -18,6 +46,7 @@ func (th *Theme) App() *App {
 		pages:              make(map[string]l.Widget),
 		root:               th.Stack(),
 		sideBar:            nil,
+		sideBarSize:        th.TextSize.Scale(10),
 		title:              "plan 9 from crypto space",
 		titleBarBackground: "Primary",
 		titleBarColor:      "DocBg",
@@ -27,27 +56,37 @@ func (th *Theme) App() *App {
 	}
 }
 
-type App struct {
-	*Theme
-	activePage         string
-	bodyBackground     string
-	bodyColor          string
-	buttonBar          []l.Widget
-	hideSideBar        bool
-	hideTitleBar       bool
-	layers             []l.Widget
-	pages              map[string]l.Widget
-	root               *Stack
-	sideBar            []l.Widget
-	title              string
-	titleBarBackground string
-	titleBarColor      string
-	titleFont          string
-	menuClickable      *Clickable
-	menuButton         *IconButton
-	menuIcon           []byte
-	menuColor          string
-	menuBackground     string
+// Fn renders the app widget
+func (a *App) Fn(gtx l.Context) l.Dimensions {
+	// barHeight := int(a.Theme.TextSize.Scale(3).V)
+	return a.Flex().
+		Rigid(
+			a.Flex().Rigid(
+				EmptySpace(int(a.sideBarSize.V), gtx.Constraints.Max.Y),
+			).Fn,
+		).
+		Rigid(
+			a.Flex().Vertical().
+				Rigid(
+					a.Flex().Flexed(1,
+						a.Fill(a.titleBarBackground).Embed(
+							a.Inset(0.5).Embed(
+								a.H5(a.title).Fn,
+							).Fn,
+						).Fn,
+					).Fn,
+				).
+				Flexed(1,
+					a.Fill(a.bodyBackground).Embed(
+						a.Flex().Flexed(1,
+							a.Inset(0.5).Embed(
+								a.Body1("body area").Fn,
+							).Fn,
+						).Fn,
+					).Fn,
+				).Fn,
+		).
+		Fn(gtx)
 }
 
 func (a *App) ActivePage(activePage string) {

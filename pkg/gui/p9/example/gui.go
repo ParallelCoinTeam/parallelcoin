@@ -53,7 +53,7 @@ func main() {
 		}),
 	}
 	go func() {
-		if err := f.Window().
+		if err := f.NewWindow().
 			Size(800, 600).
 			Title("example").
 			Open().

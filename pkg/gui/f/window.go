@@ -27,18 +27,18 @@ func (s *scaledConfig) Px(v unit.Value) int {
 	return int(math.Round(float64(scale * v.V)))
 }
 
-type window struct {
+type Window struct {
 	Ctx    layout.Context
 	Window *app.Window
 	opts   []app.Option
 	scale  *scaledConfig
 }
 
-// Window creates a new window
-func Window() (out *window) {
+// NewWindow creates a new window
+func NewWindow() (out *Window) {
 	var ops op.Ops
 	var e system.FrameEvent
-	out = &window{
+	out = &Window{
 		Ctx:   layout.NewContext(&ops, e),
 		scale: &scaledConfig{1},
 	}
@@ -47,26 +47,26 @@ func Window() (out *window) {
 }
 
 // Title sets the title of the window
-func (w *window) Title(title string) (out *window) {
+func (w *Window) Title(title string) (out *Window) {
 	w.opts = append(w.opts, app.Title(title))
 	return w
 }
 
 // Size sets the dimensions of the window
-func (w *window) Size(width, height int) (out *window) {
+func (w *Window) Size(width, height int) (out *Window) {
 	w.opts = append(w.opts,
 		app.Size(unit.Sp(float32(width)), unit.Sp(float32(height))))
 	return w
 }
 
 // Scale sets the scale factor for rendering
-func (w *window) Scale(s float32) *window {
+func (w *Window) Scale(s float32) *Window {
 	w.scale = &scaledConfig{s}
 	return w
 }
 
 // Open sets the window options and initialise the app.window
-func (w *window) Open() (out *window) {
+func (w *Window) Open() (out *Window) {
 	if w.scale == nil {
 		w.Scale(1)
 	}
@@ -77,7 +77,7 @@ func (w *window) Open() (out *window) {
 	return w
 }
 
-func (w *window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy func()) (err error) {
+func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy func()) (err error) {
 	var ops op.Ops
 	for {
 		e := <-w.Window.Events()

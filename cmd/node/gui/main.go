@@ -2,7 +2,6 @@ package gui
 
 import (
 	"gioui.org/app"
-	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
@@ -25,23 +24,24 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 type NodeGUI struct {
 	cx         *conte.Xt
 	c          *cli.Context
+	w          *f.Window
 	th         *p9.Theme
+	appWidget  *p9.App
 	invalidate chan struct{}
 	quit       chan struct{}
 }
 
 func (ng *NodeGUI) Run() (err error) {
 	ng.th = p9.NewTheme(p9fonts.Collection(), ng.quit)
-	win := f.Window()
+	ng.appWidget = ng.GetAppWidget()
+	ng.w = f.NewWindow()
 	go func() {
-		if err := win.
+		if err := ng.w.
 			Size(640, 480).
 			Title("parallelcoin node control panel").
 			Open().
 			Run(
-				func(gtx l.Context) l.Dimensions {
-					return l.Dimensions{}
-				},
+				ng.appWidget.Fn,
 				func() {
 					Debug("quitting node gui")
 					interrupt.Request()
@@ -53,7 +53,7 @@ func (ng *NodeGUI) Run() (err error) {
 		for {
 			select {
 			case <-ng.invalidate:
-				win.Window.Invalidate()
+				ng.w.Window.Invalidate()
 			case <-ng.quit:
 				break out
 			}

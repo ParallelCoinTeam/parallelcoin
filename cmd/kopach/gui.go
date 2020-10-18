@@ -79,7 +79,7 @@ func (w *Worker) Run() {
 			minerModel.FlipTheme()
 			Info("clicked logo button")
 		})
-	win := f.Window()
+	win := f.NewWindow()
 	go func() {
 		if err := win.
 			Size(640, 480).
