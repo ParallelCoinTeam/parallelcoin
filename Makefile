@@ -18,6 +18,6 @@ kopach:
 	pod -D test0 -n testnet node resetchain
 	pod -D test0 -n testnet -l debug -g -G 1 --lan --solo --kopachgui node
 
-node:
+nodegui:
 	go install -v
 	pod -D test0 -n testnet -l debug nodegui
