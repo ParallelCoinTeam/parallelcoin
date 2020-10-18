@@ -127,10 +127,10 @@ func (a *App) PagesGet() map[string]l.Widget {
 	return a.pages
 }
 
-func (a *App) Root(root l.Stack) {
+func (a *App) Root(root *Stack) {
 	a.root = root
 }
-func (a *App) RootGet() l.Stack {
+func (a *App) RootGet() *Stack {
 	return a.root
 }
 
