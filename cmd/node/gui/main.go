@@ -12,24 +12,28 @@ import (
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
+	var size int
 	ng := &NodeGUI{
 		cx:         cx,
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
+		size:       &size,
 	}
 	return ng.Run()
 }
 
 type NodeGUI struct {
-	cx         *conte.Xt
-	c          *cli.Context
-	w          *f.Window
-	th         *p9.Theme
-	appWidget  *p9.App
-	sidebarButtons []*p9.Clickable
-	invalidate chan struct{}
-	quit       chan struct{}
+	cx   *conte.Xt
+	c    *cli.Context
+	w    *f.Window
+	th   *p9.Theme
+	size *int
+	*p9.App
+	sidebarButtons   []*p9.Clickable
+	buttonBarButtons []*p9.Clickable
+	invalidate       chan struct{}
+	quit             chan struct{}
 }
 
 func (ng *NodeGUI) Run() (err error) {
@@ -39,15 +43,19 @@ func (ng *NodeGUI) Run() (err error) {
 	for i := range ng.sidebarButtons {
 		ng.sidebarButtons[i] = ng.th.Clickable()
 	}
-	ng.appWidget = ng.GetAppWidget()
+	ng.buttonBarButtons = make([]*p9.Clickable, 3)
+	for i := range ng.buttonBarButtons {
+		ng.buttonBarButtons[i] = ng.th.Clickable()
+	}
 	ng.w = f.NewWindow()
+	ng.App = ng.GetAppWidget()
 	go func() {
 		if err := ng.w.
 			Size(640, 480).
 			Title("parallelcoin node control panel").
 			Open().
 			Run(
-				ng.appWidget.Fn,
+				ng.Fn(),
 				func() {
 					Debug("quitting node gui")
 					interrupt.Request()

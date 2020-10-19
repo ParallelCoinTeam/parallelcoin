@@ -33,8 +33,8 @@ type Responsive struct {
 	size int
 }
 
-func (th *Theme) Responsive(size int) *Responsive {
-	return &Responsive{size: size}
+func (th *Theme) Responsive(size int, widgets Widgets) *Responsive {
+	return &Responsive{size: size, Widgets: widgets}
 }
 
 func (r *Responsive) Embed(widgets Widgets) *Responsive {

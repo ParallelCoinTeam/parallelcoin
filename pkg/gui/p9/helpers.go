@@ -133,7 +133,7 @@ func EmptyMaxWidth() func(gtx l.Context) l.Dimensions {
 }
 func EmptyMaxHeight() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		return l.Dimensions{Size: image.Point{Y: gtx.Constraints.Max.Y}}
+		return l.Dimensions{Size: image.Point{X: gtx.Constraints.Min.X, Y: gtx.Constraints.Max.Y}}
 	}
 }
 
