@@ -117,7 +117,10 @@ func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
 	for i := range a.buttonBar {
 		out.Rigid(a.buttonBar[i])
 	}
-	return out.Fn(gtx)
+	dims := out.Fn(gtx)
+	gtx.Constraints.Min = dims.Size
+	gtx.Constraints.Max = dims.Size
+	return dims
 }
 
 func (a *App) MainFrame() func(gtx l.Context) l.Dimensions {
@@ -156,6 +159,11 @@ func (a *App) MainFrame() func(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) MenuButton(gtx l.Context) l.Dimensions {
+	bg := a.titleBarBackground
+	color := a.menuColor
+	if a.MenuOpen {
+		color = "DocText"
+	}
 	return a.Flex().Rigid(
 		a.Inset(0.25,
 			a.ButtonLayout(a.menuClickable).
@@ -164,12 +172,12 @@ func (a *App) MenuButton(gtx l.Context) l.Dimensions {
 					a.Inset(0.25,
 						a.Icon().
 							Scale(Scales["H5"]).
-							Color(a.menuColor).
+							Color(color).
 							Src(icons.NavigationMenu).
 							Fn,
 					).Fn,
 				).
-				Background(a.titleBarBackground).
+				Background(bg).
 				SetClick(
 					func() {
 						a.MenuOpen = !a.MenuOpen
@@ -187,31 +195,52 @@ func (a *App) MenuButtonAction(gtx l.Context) l.Dimensions {
 func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 	return a.Flex().
 		Rigid(
-			a.Inset(0.125,
-				a.Inset(0.125,
-					a.IconButton(
-						a.logoClickable.SetClick(
-							func() {
-								Debug("clicked logo")
-								a.Dark = !a.Dark
-								a.Theme.Colors.SetTheme(a.Dark)
-							}),
-					).
-						Icon(
-							a.Icon().
-								Scale(Scales["H5"]).
-								Color("Light").
-								Src(a.logo)).
-						Background("Dark").Color("Light").
-						Inset(0.25).
-						Fn,
-				).Fn,
+			a.Responsive(*a.Size, Widgets{
+				{
+					Widget: EmptySpace(0, 0),
+				},
+				{Size: 800,
+					Widget: a.Inset(0.125,
+						a.Inset(0.125,
+							a.IconButton(
+								a.logoClickable.SetClick(
+									func() {
+										Debug("clicked logo")
+										a.Dark = !a.Dark
+										a.Theme.Colors.SetTheme(a.Dark)
+									}),
+							).
+								Icon(
+									a.Icon().
+										Scale(Scales["H5"]).
+										Color("Light").
+										Src(a.logo)).
+								Background("Dark").Color("Light").
+								Inset(0.25).
+								Fn,
+						).Fn,
+					).Fn,
+				},
+			},
 			).Fn,
 		).
 		Rigid(
-			a.Inset(0.5,
-				a.H5(a.title).Color("Light").Fn,
-			).Fn,
+			a.Responsive(*a.Size, Widgets{
+				{Size: 800,
+					Widget:
+					a.Inset(0.5,
+						a.H5(a.title).Color("Light").Fn,
+					).Fn,
+				},
+				{
+					Widget:
+					a.ButtonLayout(a.logoClickable).Embed(
+						a.Inset(0.5,
+							a.H5(a.title).Color("Light").Fn,
+						).Fn,
+					).Background("Transparent").Fn,
+				},
+			}).Fn,
 		).Fn(gtx)
 }
 

@@ -34,6 +34,37 @@ func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.D
 	}
 }
 
+func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
+	return ng.ButtonLayout(ng.sidebarButtons[index]).Embed(
+		func(gtx l.Context) l.Dimensions {
+			background := "Transparent"
+			color := "DocText"
+			if ng.ActivePageGet() == page {
+				background = "DocText"
+				color = "DocBg"
+			}
+			return ng.Fill(background,
+				ng.Flex().Flexed(1,
+					ng.th.Inset(0.5,
+						ng.th.H6(title).
+							Color(color).
+							Fn,
+					).Fn,
+				).Fn,
+			).Fn(gtx)
+		},
+	).
+		Background("Transparent").
+		SetClick(
+			func() {
+				if ng.MenuOpen {
+					ng.MenuOpen = false
+				}
+				ng.ActivePage(page)
+			}).
+		Fn
+}
+
 func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 	a = ng.th.App(*ng.size)
 	ng.App = a
@@ -60,253 +91,36 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 		"help": ng.Page("help", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
+		"log": ng.Page("log", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
 	})
 	a.SideBar([]l.Widget{
-		a.
-			ButtonLayout(
-				ng.
-					sidebarButtons[0]).
-			Embed(
-				func(gtx l.Context) l.Dimensions {
-					background := "Transparent"
-					color := "DocText"
-					if ng.ActivePageGet() == "main" {
-						background = "DocText"
-						color = "DocBg"
-					}
-					return ng.Fill(background,
-						ng.Flex().Flexed(1,
-							ng.th.Inset(0.5,
-								ng.th.H6("first").
-									Color(color).
-									Fn,
-							).Fn,
-						).Fn,
-					).Fn(gtx)
-				},
-			).
-			Background("Transparent").
-			SetClick(
-				func() {
-					if ng.MenuOpen {
-						ng.MenuOpen = false
-					}
-					a.ActivePage("main")
-				}).
-			Fn,
-		ng.th.ButtonLayout(ng.sidebarButtons[1]).
-			Embed(
-				func(gtx l.Context) l.Dimensions {
-					background := "Transparent"
-					color := "DocText"
-					if ng.ActivePageGet() == "second" {
-						background = "DocText"
-						color = "DocBg"
-					}
-					return ng.th.Fill(background,
-						ng.th.Flex().Flexed(1,
-							ng.th.Inset(0.5,
-								ng.th.H6("second").
-									Color(color).
-									Fn,
-							).Fn,
-						).Fn,
-					).Fn(gtx)
-				},
-			).
-			Background("Transparent").
-			SetClick(
-				func() {
-					if ng.MenuOpen {
-						ng.MenuOpen = false
-					}
-					ng.ActivePage("second")
-				}).
-			Fn,
-		ng.th.ButtonLayout(ng.sidebarButtons[2]).
-			Embed(
-				func(gtx l.Context) l.Dimensions {
-					background := "Transparent"
-					color := "DocText"
-					if ng.ActivePageGet() == "third" {
-						background = "DocText"
-						color = "DocBg"
-					}
-					return ng.th.Fill(background,
-						ng.th.Flex().Flexed(1,
-							ng.th.Inset(0.5,
-								ng.th.H6("third").
-									Color(color).
-									Fn,
-							).Fn,
-						).Fn,
-					).Fn(gtx)
-				},
-			).
-			Background("Transparent").
-			SetClick(
-				func() {
-					if ng.MenuOpen {
-						ng.MenuOpen = false
-					}
-					a.ActivePage("third")
-				}).
-			Fn,
-		ng.th.ButtonLayout(ng.sidebarButtons[3]).
-			Embed(
-				func(gtx l.Context) l.Dimensions {
-					background := "Transparent"
-					color := "DocText"
-					if a.ActivePageGet() == "fourth" {
-						background = "DocText"
-						color = "DocBg"
-					}
-					return ng.th.Fill(background,
-						ng.th.Flex().Flexed(1,
-							ng.th.Inset(0.5,
-								ng.th.H6("fourth").
-									Color(color).
-									Fn,
-							).Fn,
-						).Fn,
-					).Fn(gtx)
-				},
-			).
-			Background("Transparent").
-			SetClick(
-				func() {
-					if a.MenuOpen {
-						a.MenuOpen = false
-					}
-					a.ActivePage("fourth")
-				}).
-			Fn,
-		ng.th.ButtonLayout(ng.sidebarButtons[4]).
-			Embed(
-				func(gtx l.Context) l.Dimensions {
-					background := "Transparent"
-					color := "DocText"
-					if a.ActivePageGet() == "fifth" {
-						background = "DocText"
-						color = "DocBg"
-					}
-					return ng.th.Fill(background,
-						ng.th.Flex().Flexed(1,
-							ng.th.Inset(0.5,
-								ng.th.H6("fifth").
-									Color(color).
-									Fn,
-							).Fn,
-						).Fn,
-					).Fn(gtx)
-				},
-			).
-			Background("Transparent").
-			SetClick(
-				func() {
-					if a.MenuOpen {
-						a.MenuOpen = false
-					}
-					a.ActivePage("fifth")
-				}).
-			Fn,
-		ng.th.ButtonLayout(ng.sidebarButtons[5]).
-			Embed(
-				func(gtx l.Context) l.Dimensions {
-					background := "Transparent"
-					color := "DocText"
-					return ng.th.Fill(background,
-						ng.th.Flex().Flexed(1,
-							ng.th.Inset(0.5,
-								ng.th.H6("invalid").
-									Color(color).
-									Fn,
-							).Fn,
-						).Fn,
-					).Fn(gtx)
-				},
-			).
-			Background("Transparent").
-			SetClick(
-				func() {
-					if a.MenuOpen {
-						a.MenuOpen = false
-					}
-					a.ActivePage("invalid")
-				}).
-			Fn,
+		ng.SideBarButton("first", "main", 0),
+		ng.SideBarButton("second", "second", 1),
+		ng.SideBarButton("third", "third", 2),
+		ng.SideBarButton("fourth", "fourth", 3),
+		ng.SideBarButton("fifth", "fifth", 4),
+		ng.SideBarButton("settings", "settings", 5),
+		ng.SideBarButton("help", "help", 6),
+		ng.SideBarButton("log", "log", 7),
+		ng.SideBarButton("invalid", "invalid", 8),
 	})
 	a.ButtonBar([]l.Widget{
-		func(gtx l.Context) l.Dimensions {
-			background := a.TitleBarBackgroundGet()
-			color := a.MenuColorGet()
-			if a.ActivePageGet() == "help" {
-				// background, color = color,background
-				color = "DocText"
-			}
-			return a.Flex().Rigid(
-				a.Inset(0.25,
-					a.ButtonLayout(ng.buttonBarButtons[1]).
-						CornerRadius(0).
-						Embed(
-							a.Inset(0.25,
-								a.Icon().
-									Scale(p9.Scales["H5"]).
-									Color(color).
-									Src(icons.ActionHelp).
-									Fn,
-							).Fn,
-						).
-						Background(background).
-						SetClick(
-							func() {
-								a.ActivePage("help")
-							}).
-						Fn,
-				).Fn,
-			).Fn(gtx)
-		},
-		ng.PageTopBarButton("settings", icons.ActionSettings),
-		// func(gtx l.Context) l.Dimensions {
-		// 	background := a.TitleBarBackgroundGet()
-		// 	color := a.MenuColorGet()
-		// 	if a.ActivePageGet() == "settings" {
-		// 		// background, color = color,background
-		// 		color = "DocText"
-		// 	}
-		// 	return a.Flex().Rigid(
-		// 		a.Inset(0.25,
-		// 			a.ButtonLayout(ng.buttonBarButtons[0]).
-		// 				CornerRadius(0).
-		// 				Embed(
-		// 					a.Inset(0.25,
-		// 						a.Icon().
-		// 							Scale(p9.Scales["H5"]).
-		// 							Color(color).
-		// 							Src(icons.ActionSettings).
-		// 							Fn,
-		// 					).Fn,
-		// 				).
-		// 				Background(background).
-		// 				SetClick(
-		// 					func() {
-		// 						a.ActivePage("settings")
-		// 					}).
-		// 				Fn,
-		// 		).Fn,
-		// 	).Fn(gtx)
-		// },
+		ng.PageTopBarButton("help", 0, icons.ActionHelp),
+		ng.PageTopBarButton("log", 1, icons.ActionList),
+		ng.PageTopBarButton("settings", 2, icons.ActionSettings),
 	})
 	return
 }
 
-func (ng *NodeGUI) PageTopBarButton(name string, ico []byte) func(gtx l.Context) l.Dimensions {
+func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := ng.TitleBarBackgroundGet()
 		color := ng.MenuColorGet()
 		if ng.ActivePageGet() == name {
 			// background, color = color,background
-			color = "DocText"
+			color = "Dark"
 		}
 		ic := ng.Icon().
 			Scale(p9.Scales["H5"]).
@@ -315,7 +129,7 @@ func (ng *NodeGUI) PageTopBarButton(name string, ico []byte) func(gtx l.Context)
 			Fn
 		return ng.Flex().Rigid(
 			ng.Inset(0.25,
-				ng.ButtonLayout(ng.buttonBarButtons[0]).
+				ng.ButtonLayout(ng.buttonBarButtons[index]).
 					CornerRadius(0).
 					Embed(
 						ng.Inset(0.25, ic).Fn,
@@ -323,6 +137,9 @@ func (ng *NodeGUI) PageTopBarButton(name string, ico []byte) func(gtx l.Context)
 					Background(background).
 					SetClick(
 						func() {
+							if ng.MenuOpen {
+								ng.MenuOpen = false
+							}
 							ng.ActivePage(name)
 						}).
 					Fn,
