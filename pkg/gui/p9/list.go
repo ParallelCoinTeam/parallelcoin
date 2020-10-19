@@ -212,7 +212,7 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 			}
 			li.position = dims.CoordinateToPosition(newPos, li.axis)
 		})).Embed(
-			li.th.Fill("PanelBg").Embed(
+			li.th.Fill("PanelBg",
 				EmptySpace(x, y),
 			).Fn,
 		).Background("PanelBg").CornerRadius(0).Fn(gtx)
@@ -245,9 +245,9 @@ func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensio
 				current := dims.PositionToCoordinate(li.position, li.axis)
 				var d int
 				if li.axis == l.Horizontal {
-					d = int(de.Position.X) + current
+					d = int(de.Position.X)*2 + current
 				} else {
-					d = int(de.Position.Y) + current
+					d = int(de.Position.Y)*2 + current
 				}
 				li.position = dims.CoordinateToPosition(d, li.axis)
 			}
@@ -258,7 +258,7 @@ func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensio
 		li.drag.Add(gtx.Ops)
 		pointer.Rect(image.Rectangle{Max: image.Point{X: x, Y: y}}).Add(gtx.Ops)
 		li.sideScroll.Add(gtx.Ops)
-		return li.th.Fill(li.currentColor).Embed(
+		return li.th.Fill(li.currentColor,
 			EmptySpace(x, y),
 		).Fn(gtx)
 	}

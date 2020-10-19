@@ -19,7 +19,7 @@ func (th *Theme) Password(password *string, handle func(pass string)) *Password 
 	pass := th.Editor().Mask('•').SingleLine(true).Submit(true)
 	passInput := th.SimpleInput(pass).Color("DocText")
 	p := &Password{
-		Theme:              th,
+		Theme:           th,
 		unhideButton:    nil,
 		unhideClickable: th.Clickable(),
 		pass:            pass,
@@ -30,21 +30,37 @@ func (th *Theme) Password(password *string, handle func(pass string)) *Password 
 	}
 	p.unhideButton = th.IconButton(p.unhideClickable).
 		Background("").
-		Color("Primary").
-		Icon(icons2.ActionVisibility)
+		Icon(th.Icon().Color("Primary").Src(icons2.ActionVisibility))
 	showClickableFn := func() {
 		p.hide = !p.hide
 		if !p.hide {
-			p.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+			p.unhideButton.
+				// Color("Primary").
+				Icon(
+					th.Icon().
+						Color("Primary").
+						Src(icons2.ActionVisibility))
 			p.pass.Mask('•')
 			p.passInput.Color("Primary")
 		} else {
-			p.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
+			p.unhideButton.
+				// Color("DocText").
+				Icon(
+					th.Icon().
+						Color("DocText").
+						Src(icons2.ActionVisibilityOff),
+				)
 			p.pass.Mask(0)
 			p.passInput.Color("DocText")
 		}
 	}
-	p.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+	p.unhideButton.
+		// Color("Primary").
+		Icon(
+			th.Icon().
+				Color("Primary").
+				Src(icons2.ActionVisibility),
+		)
 	p.pass.Mask('•')
 	p.passInput.Color("Primary")
 	p.unhideClickable.SetClick(showClickableFn)
@@ -66,7 +82,7 @@ func (th *Theme) Password(password *string, handle func(pass string)) *Password 
 func (p *Password) Fn(gtx l.Context) l.Dimensions {
 	return p.Border().Embed(
 		p.Flex().Flexed(1,
-			p.Inset(0.25).Embed(p.passInput.Fn).Fn,
+			p.Inset(0.25, p.passInput.Fn).Fn,
 		).Rigid(
 			p.unhideButton.Fn,
 		).Fn,

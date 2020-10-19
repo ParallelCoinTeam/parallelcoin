@@ -1,8 +1,14 @@
 package p9
 
 import (
+	"fmt"
+
 	l "gioui.org/layout"
+	"gioui.org/text"
 	"gioui.org/unit"
+	"golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/p9c/pod/pkg/gui/wallet/ico"
 )
 
 // App defines an application with a header, sidebar/menu, right side button bar, changeable body page widget and
@@ -20,6 +26,10 @@ type App struct {
 	root               *Stack
 	sideBar            []l.Widget
 	sideBarSize        unit.Value
+	sideBarColor       string
+	sideBarBackground  string
+	logo               []byte
+	logoClickable      *Clickable
 	title              string
 	titleBarBackground string
 	titleBarColor      string
@@ -29,6 +39,7 @@ type App struct {
 	menuIcon           []byte
 	menuColor          string
 	menuBackground     string
+	MenuOpen           bool
 	responsive         *Responsive
 }
 
@@ -36,9 +47,9 @@ func (th *Theme) App() *App {
 	mc := th.Clickable()
 	return &App{
 		Theme:              th,
-		activePage:         "",
-		bodyBackground:     "DocBg",
-		bodyColor:          "DocText",
+		activePage:         "main",
+		bodyBackground:     "PanelBg",
+		bodyColor:          "PanelText",
 		buttonBar:          nil,
 		hideSideBar:        false,
 		hideTitleBar:       false,
@@ -46,163 +57,321 @@ func (th *Theme) App() *App {
 		pages:              make(map[string]l.Widget),
 		root:               th.Stack(),
 		sideBar:            nil,
-		sideBarSize:        th.TextSize.Scale(10),
-		title:              "plan 9 from crypto space",
+		sideBarSize:        th.TextSize.Scale(20),
+		sideBarColor:       "DocText",
+		sideBarBackground:  "DocBg",
+		logo:               ico.ParallelCoin,
+		logoClickable:      th.Clickable(),
+		title:              "parallelcoin",
 		titleBarBackground: "Primary",
 		titleBarColor:      "DocBg",
 		titleFont:          "plan9",
+		menuIcon:           icons.NavigationMenu,
 		menuClickable:      mc,
 		menuButton:         th.IconButton(mc),
+		menuColor:          "DocBg",
+		MenuOpen:           false,
 	}
 }
 
 // Fn renders the app widget
 func (a *App) Fn(gtx l.Context) l.Dimensions {
-	// barHeight := int(a.Theme.TextSize.Scale(3).V)
-	return a.Flex().
-		Rigid(
-			a.Flex().Rigid(
-				EmptySpace(int(a.sideBarSize.V), gtx.Constraints.Max.Y),
+	displaySize := gtx.Constraints.Max.X
+	return a.Flex().Rigid(
+		a.VFlex().Rigid(
+			a.Flex().Flexed(1,
+				a.Fill(a.titleBarBackground,
+					a.Flex().
+						Rigid(
+							a.Responsive(displaySize).Embed(
+								Widgets{{
+									Widget: func(gtx l.Context) l.Dimensions {
+										return a.Flex().Rigid(
+											a.Inset(0.25,
+												a.ButtonLayout(a.menuClickable).
+													CornerRadius(0).
+													Embed(
+														a.Inset(0.25,
+															a.Icon().
+																Scale(Scales["H5"]).
+																Color(a.menuColor).
+																Src(icons.NavigationMenu).
+																Fn,
+														).Fn,
+													).
+													Background(a.titleBarBackground).
+													SetClick(
+														func() {
+															a.MenuOpen = !a.MenuOpen
+														}).
+													Fn,
+											).Fn,
+										).Fn(gtx)
+									},
+								}, {
+									Size: 800,
+									Widget: func(gtx l.Context) l.Dimensions {
+										a.MenuOpen = false
+										return l.Dimensions{}
+									},
+								}}).
+								Fn,
+						).
+						Rigid(
+							a.Inset(0.125,
+								a.Flex().
+									Rigid(
+										a.Inset(0.125,
+											a.IconButton(
+												a.logoClickable.SetClick(
+													func() {
+														Debug("clicked logo")
+														a.Dark = !a.Dark
+														a.Theme.Colors.SetTheme(a.Dark)
+													}),
+											).
+												Icon(
+													a.Icon().
+														Scale(Scales["H5"]).
+														Color("Light").
+														Src(a.logo)).
+												Background("Dark").Color("Light").
+												Inset(0.25).
+												Fn,
+										).Fn,
+									).
+									Rigid(
+										a.Inset(0.25,
+											a.H5(a.title).Color("Light").Fn,
+										).Fn,
+									).Fn,
+							).Fn,
+						).
+						Flexed(1,
+							EmptyMinWidth(),
+						).
+						Rigid(
+							a.Caption(fmt.Sprintf("%dx%d", gtx.Constraints.Max.X,
+								gtx.Constraints.Max.Y)).Fn,
+						).Fn,
+				).Fn,
 			).Fn,
 		).
-		Rigid(
-			a.Flex().Vertical().
-				Rigid(
-					a.Flex().Flexed(1,
-						a.Fill(a.titleBarBackground).Embed(
-							a.Inset(0.5).Embed(
-								a.H5(a.title).Fn,
+			Flexed(1,
+				a.Flex().
+					Rigid(
+						a.Flex().
+							Rigid(
+								a.Fill(a.sideBarBackground,
+									a.Responsive(displaySize).Embed(Widgets{
+										{
+											Widget: func(gtx l.Context) l.Dimensions {
+												return If(a.MenuOpen,
+													a.Fill(a.sideBarBackground,
+														a.renderSideBar(),
+													).Fn,
+													EmptySpace(0, 0),
+												)(gtx)
+											},
+										},
+										{Size: 800,
+											Widget: a.Fill(a.sideBarBackground,
+												a.renderSideBar(),
+											).Fn,
+										},
+									},
+									).Fn,
+								).Fn,
 							).Fn,
+					).
+					Flexed(1,
+						a.Fill(a.bodyBackground,
+							func(gtx l.Context) l.Dimensions {
+								if page, ok := a.pages[a.activePage]; !ok {
+									return a.Inset(0.5,
+										a.VFlex().SpaceEvenly().
+											Rigid(
+												a.H1("404").
+													Alignment(text.Middle).
+													Fn,
+											).
+											Rigid(
+												a.Body1("page not found").
+													Alignment(text.Middle).
+													Fn,
+											).
+											Fn,
+									).Fn(gtx)
+								} else {
+									return page(gtx)
+								}
+							},
 						).Fn,
 					).Fn,
-				).
-				Flexed(1,
-					a.Fill(a.bodyBackground).Embed(
-						a.Flex().Flexed(1,
-							a.Inset(0.5).Embed(
-								a.Body1("body area").Fn,
-							).Fn,
-						).Fn,
-					).Fn,
-				).Fn,
-		).
-		Fn(gtx)
+			).Fn,
+	).Fn(gtx)
 }
 
-func (a *App) ActivePage(activePage string) {
+func (a *App) renderSideBar() l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		gtx.Constraints.Max.X = 200 // a.scrollBarSize
+		// gtx.Constraints.Min.X = a.scrollBarSize
+		out := a.VFlex()
+		for i := range a.sideBar {
+			out.Rigid(a.sideBar[i])
+		}
+		// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
+		return out.Fn(gtx)
+	}
+}
+
+func (a *App) ActivePage(activePage string) *App {
 	a.activePage = activePage
+	return a
 }
 func (a *App) ActivePageGet() string {
 	return a.activePage
 }
 
-func (a *App) BodyBackground(bodyBackground string) {
+func (a *App) BodyBackground(bodyBackground string) *App {
 	a.bodyBackground = bodyBackground
+	return a
 }
 func (a *App) BodyBackgroundGet() string {
 	return a.bodyBackground
 }
 
-func (a *App) BodyColor(bodyColor string) {
+func (a *App) BodyColor(bodyColor string) *App {
 	a.bodyColor = bodyColor
+	return a
 }
 func (a *App) BodyColorGet() string {
 	return a.bodyColor
 }
 
-func (a *App) ButtonBar(bar []l.Widget) {
+func (a *App) ButtonBar(bar []l.Widget) *App {
 	a.buttonBar = bar
+	return a
 }
 func (a *App) ButtonBarGet() (bar []l.Widget) {
 	return a.buttonBar
 }
 
-func (a *App) HideSideBar(hideSideBar bool) {
+func (a *App) HideSideBar(hideSideBar bool) *App {
 	a.hideSideBar = hideSideBar
+	return a
 }
 func (a *App) HideSideBarGet() bool {
 	return a.hideSideBar
 }
 
-func (a *App) HideTitleBar(hideTitleBar bool) {
+func (a *App) HideTitleBar(hideTitleBar bool) *App {
 	a.hideTitleBar = hideTitleBar
+	return a
 }
 func (a *App) HideTitleBarGet() bool {
 	return a.hideTitleBar
 }
 
-func (a *App) Layers(widgets []l.Widget) {
+func (a *App) Layers(widgets []l.Widget) *App {
 	a.layers = widgets
+	return a
 }
 func (a *App) LayersGet() []l.Widget {
 	return a.layers
 }
 
-func (a *App) MenuBackground(menuBackground string) {
+func (a *App) MenuBackground(menuBackground string) *App {
 	a.menuBackground = menuBackground
+	return a
 }
 func (a *App) MenuBackgroundGet() string {
 	return a.menuBackground
 }
 
-func (a *App) MenuColor(menuColor string) {
+func (a *App) MenuColor(menuColor string) *App {
 	a.menuColor = menuColor
+	return a
 }
 func (a *App) MenuColorGet() string {
 	return a.menuColor
 }
 
-func (a *App) MenuIcon(menuIcon []byte) {
+func (a *App) MenuIcon(menuIcon []byte) *App {
 	a.menuIcon = menuIcon
+	return a
 }
 func (a *App) MenuIconGet() []byte {
 	return a.menuIcon
 }
 
-func (a *App) Pages(widgets map[string]l.Widget) {
+func (a *App) Pages(widgets map[string]l.Widget) *App {
 	a.pages = widgets
+	return a
 }
 func (a *App) PagesGet() map[string]l.Widget {
 	return a.pages
 }
 
-func (a *App) Root(root *Stack) {
+func (a *App) Root(root *Stack) *App {
 	a.root = root
+	return a
 }
 func (a *App) RootGet() *Stack {
 	return a.root
 }
 
-func (a *App) SideBar(widgets []l.Widget) {
+func (a *App) SideBar(widgets []l.Widget) *App {
 	a.sideBar = widgets
+	return a
 }
 func (a *App) SideBarGet() []l.Widget {
 	return a.sideBar
 }
 
-func (a *App) Title(title string) {
+func (a *App) SideBarBackground(sideBarBackground string) *App {
+	a.sideBarBackground = sideBarBackground
+	return a
+}
+func (a *App) SideBarBackgroundGet() string {
+	return a.sideBarBackground
+}
+
+func (a *App) SideBarColor(sideBarColor string) *App {
+	a.sideBarColor = sideBarColor
+	return a
+}
+func (a *App) SideBarColorGet() string {
+	return a.sideBarColor
+}
+
+func (a *App) Title(title string) *App {
 	a.title = title
+	return a
 }
 func (a *App) TitleGet() string {
 	return a.title
 }
 
-func (a *App) TitleBarBackground(TitleBarBackground string) {
+func (a *App) TitleBarBackground(TitleBarBackground string) *App {
 	a.bodyBackground = TitleBarBackground
+	return a
 }
 func (a *App) TitleBarBackgroundGet() string {
 	return a.titleBarBackground
 }
 
-func (a *App) TitleBarColor(titleBarColor string) {
+func (a *App) TitleBarColor(titleBarColor string) *App {
 	a.titleBarColor = titleBarColor
+	return a
 }
 func (a *App) TitleBarColorGet() string {
 	return a.titleBarColor
 }
 
-func (a *App) TitleFont(font string) {
+func (a *App) TitleFont(font string) *App {
 	a.titleFont = font
+	return a
 }
 func (a *App) TitleFontGet() string {
 	return a.titleFont

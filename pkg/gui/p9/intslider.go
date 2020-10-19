@@ -64,7 +64,7 @@ func (i *IntSlider) Fn(gtx l.Context) l.Dimensions {
 			Text("0").
 			Fn,
 	).Flexed(1,
-		i.Inset(0.25).Embed(
+		i.Inset(0.25,
 			i.Slider().
 				Float(i.floater.SetHook(func(fl float32) {
 					iFl := int(fl + 0.5)

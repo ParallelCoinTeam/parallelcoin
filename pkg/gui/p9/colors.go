@@ -101,8 +101,11 @@ func NewColors() (c Colors) {
 	c["DarkGrayII"] = c["dark-gray"]
 	c["DarkGrayIII"] = c["dark"]
 	c["Primary"] = c["green-blue"]
+	c["PrimaryLight"] = c["green-blue"]
 	c["PrimaryDim"] = c["dark-green-blue"]
-	c["Secondary"] = c["dark-purple"]
+	c["Secondary"] = c["purple"]
+	c["SecondaryLight"] = c["purple"]
+	c["SecondaryDim"] = c["dark-purple"]
 	c["Success"] = c["green"]
 	c["Danger"] = c["red"]
 	c["Warning"] = c["yellow"]
@@ -130,6 +133,8 @@ func NewColors() (c Colors) {
 
 func (c Colors) SetTheme(dark bool) {
 	if !dark {
+		c["Primary"] = c["PrimaryLight"]
+		c["Secondary"] = c["SecondaryLight"]
 		c["DocText"] = c["dark"]
 		c["DocBg"] = c["white"]
 		c["PanelText"] = c["dark"]
@@ -144,6 +149,8 @@ func (c Colors) SetTheme(dark bool) {
 		c["DocBgHilite"] = c["dark-white"]
 		c["scrim"] = c["halfdim"]
 	} else {
+		c["Primary"] = c["PrimaryDim"]
+		c["Secondary"] = c["SecondaryDim"]
 		c["DocText"] = c["light"]
 		c["DocBg"] = c["dark"]
 		c["PanelText"] = c["light"]

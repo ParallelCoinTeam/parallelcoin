@@ -116,7 +116,7 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	}
 	dims :=
 		c.th.Flex().Rigid(
-			c.th.Inset(0.25).Embed(
+			c.th.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
 					size := gtx.Px(c.size)
 					icon.color = c.iconColor
@@ -129,7 +129,7 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 					}
 				}).Fn,
 		).Rigid(
-			c.th.Inset(0.25).Embed(
+			c.th.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
 					paint.ColorOp{Color: c.color}.Add(gtx.Ops)
 					return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)

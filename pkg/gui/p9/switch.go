@@ -54,7 +54,7 @@ func (s *Switch) SetHook(fn func(b bool)) *Switch {
 
 // Fn updates the switch and displays it.
 func (s *Switch) Fn(gtx l.Context) l.Dimensions {
-	return s.th.Inset(0.25).Embed(func(gtx l.Context) l.Dimensions {
+	return s.th.Inset(0.25, func(gtx l.Context) l.Dimensions {
 		trackWidth := gtx.Px(s.th.TextSize.Scale(2.5))
 		trackHeight := gtx.Px(s.th.TextSize.Scale(0.75))
 		thumbSize := gtx.Px(s.th.TextSize.Scale(1.125))

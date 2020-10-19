@@ -15,8 +15,8 @@ type Filler struct {
 }
 
 // Fill fills underneath a widget you can put over top of it
-func (th *Theme) Fill(col string) *Filler {
-	return &Filler{th: th, col: col}
+func (th *Theme) Fill(col string, w l.Widget) *Filler {
+	return &Filler{th: th, col: col, w: w}
 }
 
 func (f *Filler) Embed(w l.Widget) *Filler {

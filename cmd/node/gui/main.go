@@ -27,12 +27,18 @@ type NodeGUI struct {
 	w          *f.Window
 	th         *p9.Theme
 	appWidget  *p9.App
+	sidebarButtons []*p9.Clickable
 	invalidate chan struct{}
 	quit       chan struct{}
 }
 
 func (ng *NodeGUI) Run() (err error) {
 	ng.th = p9.NewTheme(p9fonts.Collection(), ng.quit)
+	ng.th.Colors.SetTheme(ng.th.Dark)
+	ng.sidebarButtons = make([]*p9.Clickable, 6)
+	for i := range ng.sidebarButtons {
+		ng.sidebarButtons[i] = ng.th.Clickable()
+	}
 	ng.appWidget = ng.GetAppWidget()
 	ng.w = f.NewWindow()
 	go func() {
