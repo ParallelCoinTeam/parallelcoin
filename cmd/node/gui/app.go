@@ -7,11 +7,63 @@ import (
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
+func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
+	a = ng.th.App(*ng.size)
+	ng.App = a
+	ng.size = a.Size
+	a.Pages(map[string]l.Widget{
+		"main": ng.Page("first", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
+		"second": ng.Page("second", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
+		"third": ng.Page("third", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
+		"fourth": ng.Page("fourth", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
+		"fifth": ng.Page("fifth", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
+		"settings": ng.Page("settings", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
+		"help": ng.Page("help", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
+		"log": ng.Page("log", p9.Widgets{
+			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		}),
+	})
+	a.SideBar([]l.Widget{
+		ng.SideBarButton("first", "main", 0),
+		ng.SideBarButton("second", "second", 1),
+		ng.SideBarButton("third", "third", 2),
+		ng.SideBarButton("fourth", "fourth", 3),
+		ng.SideBarButton("fifth", "fifth", 4),
+		ng.SideBarButton("settings", "settings", 5),
+		ng.SideBarButton("help", "help", 6),
+		ng.SideBarButton("log", "log", 7),
+		ng.SideBarButton("invalid", "invalid", 8),
+	})
+	a.ButtonBar([]l.Widget{
+		ng.PageTopBarButton("help", 0, icons.ActionHelp),
+		ng.PageTopBarButton("log", 1, icons.ActionList),
+		ng.PageTopBarButton("settings", 2, icons.ActionSettings),
+	})
+	a.StatusBar([]l.Widget{
+		ng.StatusBarButton("help", 0, icons.ActionHelp),
+		ng.StatusBarButton("log", 1, icons.ActionList),
+		ng.StatusBarButton("settings", 2, icons.ActionSettings),
+	})
+	return
+}
+
 func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
 	a := ng.th
 	return func(gtx l.Context) l.Dimensions {
-		// width := gtx.Constraints.Max.X
-		// height := gtx.Constraints.Max.Y
 		return a.VFlex().
 			SpaceEvenly().
 			Rigid(
@@ -65,61 +117,11 @@ func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Conte
 		Fn
 }
 
-func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
-	a = ng.th.App(*ng.size)
-	ng.App = a
-	ng.size = a.Size
-	a.Pages(map[string]l.Widget{
-		"main": ng.Page("first", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"second": ng.Page("second", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"third": ng.Page("third", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"fourth": ng.Page("fourth", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"fifth": ng.Page("fifth", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"settings": ng.Page("settings", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"help": ng.Page("help", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"log": ng.Page("log", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-	})
-	a.SideBar([]l.Widget{
-		ng.SideBarButton("first", "main", 0),
-		ng.SideBarButton("second", "second", 1),
-		ng.SideBarButton("third", "third", 2),
-		ng.SideBarButton("fourth", "fourth", 3),
-		ng.SideBarButton("fifth", "fifth", 4),
-		ng.SideBarButton("settings", "settings", 5),
-		ng.SideBarButton("help", "help", 6),
-		ng.SideBarButton("log", "log", 7),
-		ng.SideBarButton("invalid", "invalid", 8),
-	})
-	a.ButtonBar([]l.Widget{
-		ng.PageTopBarButton("help", 0, icons.ActionHelp),
-		ng.PageTopBarButton("log", 1, icons.ActionList),
-		ng.PageTopBarButton("settings", 2, icons.ActionSettings),
-	})
-	return
-}
-
 func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := ng.TitleBarBackgroundGet()
 		color := ng.MenuColorGet()
 		if ng.ActivePageGet() == name {
-			// background, color = color,background
 			color = "Dark"
 		}
 		ic := ng.Icon().
@@ -128,11 +130,43 @@ func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx
 			Src(ico).
 			Fn
 		return ng.Flex().Rigid(
-			ng.Inset(0.25,
-				ng.ButtonLayout(ng.buttonBarButtons[index]).
+			// ng.Inset(0.25,
+			ng.ButtonLayout(ng.buttonBarButtons[index]).
+				CornerRadius(0).
+				Embed(
+					ng.Inset(0.375,
+					ic,
+					).Fn,
+				).
+				Background(background).
+				SetClick(
+					func() {
+						if ng.MenuOpen {
+							ng.MenuOpen = false
+						}
+						ng.ActivePage(name)
+					}).
+				Fn,
+			// ).Fn,
+		).Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) StatusBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+	return func(gtx l.Context) l.Dimensions {
+		background := ng.StatusBarBackgroundGet()
+		color := ng.StatusBarColorGet()
+		ic := ng.Icon().
+			Scale(p9.Scales["H5"]).
+			Color(color).
+			Src(ico).
+			Fn
+		return ng.Flex().
+			Rigid(
+				ng.ButtonLayout(ng.statusBarButtons[index]).
 					CornerRadius(0).
 					Embed(
-						ng.Inset(0.25, ic).Fn,
+						ic,
 					).
 					Background(background).
 					SetClick(
@@ -143,7 +177,6 @@ func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx
 							ng.ActivePage(name)
 						}).
 					Fn,
-			).Fn,
-		).Fn(gtx)
+			).Fn(gtx)
 	}
 }

@@ -32,6 +32,7 @@ type NodeGUI struct {
 	*p9.App
 	sidebarButtons   []*p9.Clickable
 	buttonBarButtons []*p9.Clickable
+	statusBarButtons []*p9.Clickable
 	invalidate       chan struct{}
 	quit             chan struct{}
 }
@@ -46,6 +47,10 @@ func (ng *NodeGUI) Run() (err error) {
 	ng.buttonBarButtons = make([]*p9.Clickable, 3)
 	for i := range ng.buttonBarButtons {
 		ng.buttonBarButtons[i] = ng.th.Clickable()
+	}
+	ng.statusBarButtons = make([]*p9.Clickable, 3)
+	for i := range ng.statusBarButtons {
+		ng.statusBarButtons[i] = ng.th.Clickable()
 	}
 	ng.w = f.NewWindow()
 	ng.App = ng.GetAppWidget()
