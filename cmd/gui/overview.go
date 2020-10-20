@@ -1,13 +1,12 @@
-package gwallet
+package gui
 
 import (
-	"fmt"
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/gioapp/gel/helper"
+	"github.com/p9c/pod/cmd/gui/mod"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
@@ -16,50 +15,50 @@ import (
 )
 
 var (
-	balances               Balances
-	latestTransactions     []Tx
+	balances               mod.Balances
+	latestTransactions     []mod.Tx
 	recentTransactionsList = &layout.List{
 		Axis: layout.Vertical,
 	}
 )
 
-func (g *GioWallet) GetOverview() {
+func (g *GuiAppModel) GetOverview() {
 	//checkError(err)
-	g.Status = Status{
-		bal: &balances,
-	}
+	//g.Status = Status{
+	//	bal: &balances,
+	//}
 	return
 }
 
-func (g *GioWallet) GetBalances() {
-	b, err := g.rpc.GetBalance("")
-	checkError(err)
-	fmt.Println("Ssss", b)
-	balances = Balances{
-		available: fmt.Sprint(b),
-		pending:   fmt.Sprint(b),
-		immature:  fmt.Sprint(b),
-		total:     fmt.Sprint(b),
-	}
+func (g *GuiAppModel) GetBalances() {
+	//b, err := g.rpc.GetBalance("")
+	//checkError(err)
+	//fmt.Println("Ssss", b)
+	//balances = Balances{
+	//	available: fmt.Sprint(b),
+	//	pending:   fmt.Sprint(b),
+	//	immature:  fmt.Sprint(b),
+	//	total:     fmt.Sprint(b),
+	//}
 }
 
-func (g *GioWallet) GetLatestTransactions() {
-	txs, err := g.rpc.ListTransactionsCount("", 5)
-	checkError(err)
-	for _, tx := range txs {
-		t := Tx{
-			Id:      fmt.Sprint(tx.TxID),
-			Time:    fmt.Sprint(tx.Time),
-			Address: fmt.Sprint(tx.Address),
-			Amount:  fmt.Sprint(tx.Amount),
-			Btn:     new(widget.Clickable),
-		}
-		latestTransactions = append(latestTransactions, t)
-	}
+func (g *GuiAppModel) GetLatestTransactions() {
+	//txs, err := g.rpc.ListTransactionsCount("", 5)
+	//checkError(err)
+	//for _, tx := range txs {
+	//	t := Tx{
+	//		Id:      fmt.Sprint(tx.TxID),
+	//		Time:    fmt.Sprint(tx.Time),
+	//		Address: fmt.Sprint(tx.Address),
+	//		Amount:  fmt.Sprint(tx.Amount),
+	//		Btn:     new(widget.Clickable),
+	//	}
+	//	latestTransactions = append(latestTransactions, t)
+	//}
 
 }
 
-func (g *GioWallet) overviewHeader() func(gtx C) D {
+func (g *GuiAppModel) overviewHeader() func(gtx C) D {
 	return func(gtx C) D {
 		return D{}
 	}
@@ -88,22 +87,22 @@ func overviewRow(th *theme.Theme, label string, content func(gtx C) D) func(gtx 
 	}
 }
 
-func (g *GioWallet) overviewBody() func(gtx C) D {
+func (g *GuiAppModel) overviewBody() func(gtx C) D {
 	return box.BoxBase(g.ui.Theme.Colors["PanelBg"], func(gtx C) D {
 		return lyt.Format(gtx, g.ui.R.Mod["TwoEqual"].(string),
-			balancesView(g.ui.Theme, g.Status),
+			balancesView(g.ui.Theme, mod.Status{}),
 			recentTxView(g.ui.Theme, g.ui.N))
 	})
 }
 
-func balancesView(th *theme.Theme, s Status) func(gtx C) D {
+func balancesView(th *theme.Theme, s mod.Status) func(gtx C) D {
 	return panelView(th, "Balances", func(gtx C) D {
 		return lyt.Format(gtx, "vflex(r(_),r(_),r(_),r(_),r(_))",
-			overviewRow(th, "Available", row(th, s.bal.available)),
-			overviewRow(th, "Pending", row(th, s.bal.pending)),
-			overviewRow(th, "Immature", row(th, s.bal.immature)),
+			overviewRow(th, "Available", row(th, "s.bal.available")),
+			overviewRow(th, "Pending", row(th, "s.bal.pending")),
+			overviewRow(th, "Immature", row(th, "s.bal.immature")),
 			helper.DuoUIline(false, 1, 0, 1, th.Colors["Border"]),
-			overviewRow(th, "Total", row(th, s.bal.total)),
+			overviewRow(th, "Total", row(th, "s.bal.total")),
 		)
 	})
 }

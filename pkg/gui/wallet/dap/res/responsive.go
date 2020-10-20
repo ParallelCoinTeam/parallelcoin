@@ -23,7 +23,7 @@ func Resposnsivity(x, y int) *Responsive {
 	//case w > 1440:z
 	//	g.UI.Res.Mode = "desktopS"
 	case w > 1024:
-		fmt.Println("Screen 1024")
+		//fmt.Println("Screen 1024")
 		return Desktop()
 
 		//r.Mod["Screen"] = "max(inset(0dp90dp50dp10dp,_))"

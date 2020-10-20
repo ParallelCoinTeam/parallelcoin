@@ -1,4 +1,4 @@
-package gwallet
+package gui
 
 import (
 	"fmt"
@@ -52,7 +52,7 @@ type SendAddress struct {
 	AllAvailableBtn   *widget.Clickable
 }
 
-func (g *GioWallet) GetSend() {
+func (g *GuiAppModel) GetSend() {
 
 }
 
@@ -103,7 +103,7 @@ func ClearAllAddresses() func() {
 	}
 }
 
-func (g *GioWallet) sendHeader() func(gtx C) D {
+func (g *GuiAppModel) sendHeader() func(gtx C) D {
 	return box.BoxPanel(g.ui.Theme, func(gtx C) D {
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		helper.Fill(gtx, helper.HexARGB(g.ui.Theme.Colors["PanelBg"]))
@@ -117,7 +117,7 @@ func (g *GioWallet) sendHeader() func(gtx C) D {
 	})
 }
 
-func (g *GioWallet) sendFooter() func(gtx C) D {
+func (g *GuiAppModel) sendFooter() func(gtx C) D {
 	return func(gtx C) D {
 		return lyt.Format(gtx, "vflex(middle,r(inset(5dp0dp5dp0dp,_)),r(inset(5dp0dp5dp0dp,_))))",
 			sendFooterTop(g.ui.Theme),
@@ -171,7 +171,7 @@ func sendFooterTop(th *theme.Theme) func(gtx C) D {
 		)
 	})
 }
-func (g *GioWallet) sendBody() func(gtx C) D {
+func (g *GuiAppModel) sendBody() func(gtx C) D {
 	return box.BoxPanel(g.ui.Theme, func(gtx C) D {
 		return lyt.Format(gtx, "max(hflex(middle,f(1,_)))",
 			func(gtx C) D {

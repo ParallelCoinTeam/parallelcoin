@@ -3,28 +3,32 @@ package mod
 import (
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/widget"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/win"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )
 
-//Duo App Platform
-type Dap struct {
-	Rc         *RcVar
-	BeforeMain map[int]func()
-	Main       func()
-	AfterMain  map[int]func()
-	//Ctx        context.Context
-	//Tik        map[int]func()
-	UI   *UserInterface
-	S    *Settings
-	Apps map[string]Sap
+type Status struct {
+	bal *Balances
+	txs []Tx
 }
 
-type Sap struct {
-	Title string
-	App   interface{}
+type Balances struct {
+	available string
+	pending   string
+	immature  string
+	total     string
+}
+type Tx struct {
+	Id            string
+	Time          string
+	Type          string
+	Address       string
+	Amount        string
+	Verifications int
+	Btn           *widget.Clickable
 }
 
 type Settings struct {

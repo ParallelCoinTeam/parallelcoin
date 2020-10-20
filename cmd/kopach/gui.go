@@ -295,7 +295,6 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 						Rigid(m.H6("Bits").Font("bariol bold").Fn).
 						Rigid(m.H6("Nonce").Font("bariol bold").Fn).
 						Fn,
-
 				).Rigid(
 					m.VFlex().
 						Rigid(
@@ -368,7 +367,6 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 								Rigid(m.Body1(fmt.Sprintf("%d", currentBlock.nonce)).Fn).Fn,
 						).Fn,
 				).Fn,
-
 			).Fn,
 		).Rigid(
 			m.Inset(0.5,

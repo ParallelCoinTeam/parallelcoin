@@ -1,17 +1,12 @@
 package mod
 
-import (
-	"github.com/p9c/pod/app/conte"
-)
-
 type RcVar struct {
-	Cx *conte.Xt
 	//db            *DuoUIdb
-	Boot          *Boot
-	Events        chan Event
-	UpdateTrigger chan struct{}
+	Boot *Boot
+	//Events        chan Event
+	//UpdateTrigger chan struct{}
 	//Status         *model.DuoUIstatus
-	//Dialog         *model.DuoUIdialog
+	Dialog *Dialog
 	//Log            *model.DuoUIlog
 	//ConsoleHistory *model.DuoUIconsoleHistory
 
@@ -24,9 +19,9 @@ type RcVar struct {
 	Uptime int
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
-	Quit    chan struct{}
-	Ready   chan struct{}
-	IsReady bool
+	//Quit    chan struct{}
+	//Ready   chan struct{}
+	//IsReady bool
 }
 
 type Boot struct {

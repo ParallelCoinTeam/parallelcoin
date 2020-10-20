@@ -1,4 +1,4 @@
-package gwallet
+package gui
 
 //
 //var (
