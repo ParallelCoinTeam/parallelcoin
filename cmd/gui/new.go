@@ -1,41 +1,122 @@
-package gwallet
+package gui
 
 import (
 	"fmt"
+	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
+	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/page"
+	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
+	"github.com/p9c/pod/pkg/gui/wallet/theme"
+	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-func NewGioWallet(d *mod.Dap) mod.Sap {
-	g := &GioWallet{
-		ui: d.UI,
+func (w *Worker) NewGuiApp() *GuiAppModel {
+
+	//ww := map[string]*win.Window{
+	//	"main": &win.Window{
+	//		W: app.NewWindow(
+	//			app.Size(unit.Dp(1024), unit.Dp(800)),
+	//			app.Title("ParallelCoin"),
+	//		)},
+	//}
+
+	n := &nav.Navigation{
+		Name: "Navigacion",
+		//Bg:           d.UI.Theme.Colors["NavBg"],
+		ItemIconSize: unit.Px(24),
 	}
 
-	// Connect to local bitcoin core RPC server using HTTP POST mode.
-	//connCfg := &rpcclient.ConnConfig{
-	//	Host:         "localhost:18444",
-	//	User:         "bitnode",
-	//	Pass:         "44444",
-	//	HTTPPostMode: true,  // Bitcoin core only supports HTTP POST mode
-	//	TLS:          false, // Bitcoin core does not provide TLS by default
+	//s := &mod.Settings{
+	//	Dir: appdata.Dir("dap", false),
 	//}
-	//// Notice the notification parameter is nil since notifications are not supported in HTTP POST mode.
-	//client, err := rpcclient.New(connCfg, nil)
-	//if err != nil {
-	//
-	//}
-	//
-	//g.rpc = client
-	//
-	//defer g.rpc.Shutdown()
+	//d.S = s
 
-	//g.UI.pages = g.getPages()
-	//g.menuItems = g.getMenuItems()
+	//Debug("New DAP", d)
 
-	g.Status.bal = &Balances{}
-	g.GetOverview()
+	th := p9.NewTheme(p9fonts.Collection(), w.quit)
+	solButtons := make([]*p9.Clickable, 201)
+	for i := range solButtons {
+		solButtons[i] = th.Clickable()
+	}
+	lists := map[string]*p9.List{
+		"latestTransactions": th.List().Vertical().Start(),
+	}
+	g := &GuiAppModel{
+		Cx:        w.cx,
+		worker:    w,
+		Theme:     th,
+		DarkTheme: *w.cx.Config.DarkTheme,
+		logoButton: th.Clickable().SetClick(func() {
+			Debug("clicked logo button")
+		}),
+		mineToggle:      th.Bool(*w.cx.Config.Generate),
+		cores:           th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
+		solButtons:      solButtons,
+		lists:           lists,
+		unhideClickable: th.Clickable(),
+		modalScrim:      th.Clickable(),
+		modalClose:      th.Clickable(),
+		threadsMax:      th.Clickable(),
+		threadsMin:      th.Clickable(),
+		ui: &mod.UserInterface{
+			Theme: theme.NewTheme(),
+			N:     n,
+			R:     res.Resposnsivity(0, 0),
+			//W: &win.Windows{
+			//	W: ww,
+			//},
+		},
+	}
+	g.SetTheme(g.DarkTheme)
+	g.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
+	g.passInput = th.SimpleInput(g.pass).Color("DocText")
+	g.unhideButton = th.IconButton(g.unhideClickable).
+		Background("").
+		Color("Primary").
+		Icon(icons2.ActionVisibility)
+	showClickableFn := func() {
+		g.hide = !g.hide
+		if !g.hide {
+			g.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+			g.pass.Mask('•')
+			g.passInput.Color("Primary")
+		} else {
+			g.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
+			g.pass.Mask(0)
+			g.passInput.Color("DocText")
+		}
+	}
+	g.unhideClickable.SetClick(showClickableFn)
+	g.pass.SetText(*w.cx.Config.MinerPass).Mask('•').SetSubmit(func(txt string) {
+		if !g.hide {
+			showClickableFn()
+		}
+		showClickableFn()
+		go func() {
+			*w.cx.Config.MinerPass = txt
+			save.Pod(w.cx.Config)
+			w.Stop()
+			w.Start()
+		}()
+	}).SetChange(func(txt string) {
+		// send keystrokes to the NSA
+	})
+	for i := 0; i < 201; i++ {
+		g.solButtons[i] = th.Clickable()
+	}
+	g.logoButton.SetClick(
+		func() {
+			g.FlipTheme()
+			Info("clicked logo button")
+			showClickableFn()
+			showClickableFn()
+		})
+
 	g.ui.N.MenuItems = append(g.getMenuItems(g.ui))
 	g.ui.N.CurrentPage = page.Page{
 		Title:  "Overview",
@@ -43,19 +124,9 @@ func NewGioWallet(d *mod.Dap) mod.Sap {
 		Body:   g.overviewBody(),
 		Footer: noReturn,
 	}
-	d.UI.F = g.footer()
+	g.ui.F = g.footer()
 
-	CreateSendAddressItem()()
-
-	balances = dummyBalances
-	latestTransactions = dummyLatestTxs
-
-	transactions = dummyTxs
-
-	return mod.Sap{
-		Title: "ParallelCoin",
-		App:   g,
-	}
+	return g
 }
 
 func checkError(err error) {
@@ -64,7 +135,7 @@ func checkError(err error) {
 	}
 }
 
-func (g *GioWallet) getMenuItem(hide bool, title string, header, body, footer func(gtx C) D) nav.Item {
+func (g *GuiAppModel) getMenuItem(hide bool, title string, header, body, footer func(gtx C) D) nav.Item {
 	return nav.Item{
 		Title: title,
 		Icon:  g.ui.Theme.Icons[title],
@@ -79,7 +150,7 @@ func (g *GioWallet) getMenuItem(hide bool, title string, header, body, footer fu
 	}
 }
 
-func (g *GioWallet) getMenuItems(ui *mod.UserInterface) []nav.Item {
+func (g *GuiAppModel) getMenuItems(ui *mod.UserInterface) []nav.Item {
 	return []nav.Item{
 		g.getMenuItem(false, "Overview", g.overviewHeader(), g.overviewBody(), noReturn),
 		g.getMenuItem(false, "Send", g.sendHeader(), g.sendBody(), g.sendFooter()),

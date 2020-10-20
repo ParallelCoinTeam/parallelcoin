@@ -1,4 +1,4 @@
-package gwallet
+package gui
 
 import (
 	"fmt"
@@ -41,11 +41,11 @@ var (
 	}
 )
 
-func (g *GioWallet) GetReceive() {
+func (g *GuiAppModel) GetReceive() {
 
 }
 
-func (g *GioWallet) receiveHeader() func(gtx C) D {
+func (g *GuiAppModel) receiveHeader() func(gtx C) D {
 	return box.BoxPanel(g.ui.Theme, func(gtx C) D {
 		return lyt.Format(gtx, "vflex(start,r(inset(0dp0dp0dp0dp,_)),r(inset(0dp0dp4dp0dp,_)),r(inset(0dp0dp4dp0dp,_)),r(inset(0dp0dp4dp0dp,_)),r(inset(0dp0dp0dp0dp,_))))",
 			labeledRow(g.ui.Theme, "",
@@ -149,7 +149,7 @@ func (g *GioWallet) receiveHeader() func(gtx C) D {
 	})
 }
 
-func (g *GioWallet) receiveBody() func(gtx C) D {
+func (g *GuiAppModel) receiveBody() func(gtx C) D {
 	return box.BoxPanel(g.ui.Theme, func(gtx C) D {
 		return lyt.Format(gtx, "max(vflex(start,r(inset(0dp0dp0dp0dp,_)),r(inset(0dp0dp0dp0dp,_)))))",
 			func(gtx C) D {

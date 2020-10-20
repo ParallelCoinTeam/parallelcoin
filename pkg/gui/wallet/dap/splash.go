@@ -12,9 +12,9 @@ import (
 
 func (d *dap) SplashScreen(gtx C) D {
 	return box.BoxPanel(d.boot.UI.Theme, func(gtx C) D {
-		if d.boot.Rc.IsReady {
+		//if d.boot.Rc.IsReady {
 
-		}
+		//}
 		return lyt.Format(gtx,
 			"max(vflex(middle,r(inset(0dp0dp0dp0dp,_)),r(inset(0dp0dp0dp0dp,_)),f(1,inset(0dp0dp0dp0dp,_))))",
 			logo(d.boot.UI.Theme),

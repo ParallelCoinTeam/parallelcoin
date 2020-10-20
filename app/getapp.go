@@ -631,6 +631,11 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.KopachGUI,
 			),
 			apputil.Bool(
+				"gui",
+				"enables the GUI",
+				cx.Config.GUI,
+			),
+			apputil.Bool(
 				"darktheme",
 				"sets the dark theme on the gui interface",
 				cx.Config.DarkTheme,

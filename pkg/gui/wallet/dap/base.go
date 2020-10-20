@@ -3,7 +3,6 @@
 package dap
 
 import (
-	"errors"
 	"fmt"
 	"gioui.org/app"
 	"gioui.org/io/system"
@@ -24,6 +23,9 @@ import (
 //		log.Fatal(err)
 //	}
 //}
+func (d *dap) MainScreen() W {
+	return d.Main
+}
 
 func (d *dap) DAP() {
 	_ = d.loop()
@@ -49,34 +51,34 @@ func (d *dap) loop() error {
 
 	for {
 		select {
-		case <-d.boot.Rc.Ready:
-			updateTrigger := make(chan struct{}, 1)
-			go func() {
-			quitTrigger:
-				for {
-					select {
-					case <-updateTrigger:
-						//log.L.Trace("repaint forced")
-						d.boot.UI.W.W["main"].W.Invalidate()
-					case <-d.boot.Rc.Quit:
-						break quitTrigger
-					}
-				}
-			}()
-			d.boot.Rc.ListenInit(updateTrigger)
-			d.boot.Rc.IsReady = true
-		case <-d.boot.Rc.Quit:
-			//log.L.Debug("quit signal received")
-			if !interrupt.Requested() {
-				interrupt.Request()
-			}
-			// This case is for handling when some external application is controlling the GUI and to gracefully
-			// handle the back-end servers being shut down by the interrupt library receiving an interrupt signal
-			// Probably nothing needs to be run between starting it and shutting down
-			<-interrupt.HandlersDone
-			//log.L.Debug("closing GUI from interrupt/quit signal")
-			return errors.New("shutdown triggered from back end")
-		//TODO events of gui
+		//case <-d.boot.Rc.Ready:
+		//	updateTrigger := make(chan struct{}, 1)
+		//	go func() {
+		//	quitTrigger:
+		//		for {
+		//			select {
+		//			case <-updateTrigger:
+		//				//log.L.Trace("repaint forced")
+		//				d.boot.UI.W.W["main"].W.Invalidate()
+		//			case <-d.boot.Rc.Quit:
+		//				break quitTrigger
+		//			}
+		//		}
+		//	}()
+		//	d.boot.Rc.ListenInit(updateTrigger)
+		//	d.boot.Rc.IsReady = true
+		//case <-d.boot.Rc.Quit:
+		//	//log.L.Debug("quit signal received")
+		//	if !interrupt.Requested() {
+		//		interrupt.Request()
+		//	}
+		//	// This case is for handling when some external application is controlling the GUI and to gracefully
+		//	// handle the back-end servers being shut down by the interrupt library receiving an interrupt signal
+		//	// Probably nothing needs to be run between starting it and shutting down
+		//	<-interrupt.HandlersDone
+		//	//log.L.Debug("closing GUI from interrupt/quit signal")
+		//	return errors.New("shutdown triggered from back end")
+		////TODO events of gui
 		//case e := <-d.boot.Rc.Commands.Events:
 		//	switch e := e.(type) {
 		//	case mod.CommandEvent:

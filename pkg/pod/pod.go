@@ -213,6 +213,7 @@ type Config struct {
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"stringSlice" inputType:"text" json:"Whitelists" hook:"restart"`
 	LAN                    *bool            `group:"debug" label:"LAN" description:"run without any connection to nodes on the internet (does not apply on mainnet)" type:"switch" json:"LAN" hook:"restart"`
 	KopachGUI              *bool            `group:"mining" label:"Kopach GUI" description:"enables GUI for miner" type:"switch" json:"kopachgui" hook:"restart"`
+	GUI                    *bool            `group:"mining" label:"GUI" description:"enables GUI" type:"switch" json:"gui" hook:"restart"`
 	DarkTheme              *bool            `group:"" label:"Dark Theme" description:"sets dark theme for GUI" type:"switch" json:"darktheme" hook:"restart"`
 }
 
@@ -249,6 +250,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		Generate:               newbool(),
 		GenThreads:             newint(),
 		KopachGUI:              newbool(),
+		GUI:                    newbool(),
 		LAN:                    newbool(),
 		Language:               newstring(),
 		LimitPass:              newstring(),
@@ -342,6 +344,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"Generate":               c.Generate,
 		"GenThreads":             c.GenThreads,
 		"KopachGUI":              c.KopachGUI,
+		"GUI":                    c.GUI,
 		"LAN":                    c.LAN,
 		"Language":               c.Language,
 		"LimitPass":              c.LimitPass,

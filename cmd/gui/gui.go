@@ -1,7 +1,9 @@
-package kopach
+package gui
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
+	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 	"image"
 	"runtime"
 	"time"
@@ -9,10 +11,7 @@ import (
 	"gioui.org/app"
 	l "gioui.org/layout"
 	"gioui.org/text"
-	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
-
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
@@ -22,7 +21,7 @@ import (
 
 var maxThreads = float32(runtime.NumCPU())
 
-type MinerModel struct {
+type GuiAppModel struct {
 	*p9.Theme
 	Cx                     *conte.Xt
 	worker                 *Worker
@@ -43,6 +42,7 @@ type MinerModel struct {
 	modalWidget            l.Widget
 	modalOn                bool
 	modalScrim, modalClose *p9.Clickable
+	ui                     *mod.UserInterface
 }
 
 func (w *Worker) Run() {
@@ -51,83 +51,96 @@ func (w *Worker) Run() {
 	for i := range solButtons {
 		solButtons[i] = th.Clickable()
 	}
-	lists := map[string]*p9.List{
-		"found": th.List().Vertical().Start(),
-	}
-	minerModel := &MinerModel{
-		Cx:        w.cx,
-		worker:    w,
-		Theme:     th,
-		DarkTheme: *w.cx.Config.DarkTheme,
-		logoButton: th.Clickable().SetClick(func() {
-			Debug("clicked logo button")
-		}),
-		mineToggle:      th.Bool(*w.cx.Config.Generate),
-		cores:           th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
-		solButtons:      solButtons,
-		lists:           lists,
-		unhideClickable: th.Clickable(),
-		modalScrim:      th.Clickable(),
-		modalClose:      th.Clickable(),
-		threadsMax:      th.Clickable(),
-		threadsMin:      th.Clickable(),
-	}
-	minerModel.SetTheme(minerModel.DarkTheme)
-	minerModel.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
-	minerModel.passInput = th.SimpleInput(minerModel.pass).Color("DocText")
-	minerModel.unhideButton = th.IconButton(minerModel.unhideClickable).
-		Background("").
-		Color("Primary").
-		Icon(icons2.ActionVisibility)
+	guiAppModel := w.NewGuiApp()
+	//lists := map[string]*p9.List{
+	//	"found": th.List().Vertical().Start(),
+	//}
+	//guiAppModel := &GuiAppModel{
+	//	Cx:        w.cx,
+	//	worker:    w,
+	//	Theme:     th,
+	//	DarkTheme: *w.cx.Config.DarkTheme,
+	//	logoButton: th.Clickable().SetClick(func() {
+	//		Debug("clicked logo button")
+	//	}),
+	//	mineToggle:      th.Bool(*w.cx.Config.Generate),
+	//	cores:           th.Float().SetValue(float32(*w.cx.Config.GenThreads)),
+	//	solButtons:      solButtons,
+	//	lists:           lists,
+	//	unhideClickable: th.Clickable(),
+	//	modalScrim:      th.Clickable(),
+	//	modalClose:      th.Clickable(),
+	//	threadsMax:      th.Clickable(),
+	//	threadsMin:      th.Clickable(),
+	//}
+	//guiAppModel.SetTheme(guiAppModel.DarkTheme)
+	//guiAppModel.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
+	//guiAppModel.passInput = th.SimpleInput(guiAppModel.pass).Color("DocText")
+	//guiAppModel.unhideButton = th.IconButton(guiAppModel.unhideClickable).
+	//	Background("").
+	//	Color("Primary").
+	//	Icon(icons2.ActionVisibility)
+	//showClickableFn := func() {
+	//	guiAppModel.hide = !guiAppModel.hide
+	//	if !guiAppModel.hide {
+	//		guiAppModel.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+	//		guiAppModel.pass.Mask('•')
+	//		guiAppModel.passInput.Color("Primary")
+	//	} else {
+	//		guiAppModel.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
+	//		guiAppModel.pass.Mask(0)
+	//		guiAppModel.passInput.Color("DocText")
+	//	}
+	//}
+	//guiAppModel.unhideClickable.SetClick(showClickableFn)
+	//guiAppModel.pass.SetText(*w.cx.Config.MinerPass).Mask('•').SetSubmit(func(txt string) {
+	//	if !guiAppModel.hide {
+	//		showClickableFn()
+	//	}
+	//	showClickableFn()
+	//	go func() {
+	//		*w.cx.Config.MinerPass = txt
+	//		save.Pod(w.cx.Config)
+	//		w.Stop()
+	//		w.Start()
+	//	}()
+	//}).SetChange(func(txt string) {
+	//	send keystrokes to the NSA
+	//})
+	//for i := 0; i < 201; i++ {
+	//	guiAppModel.solButtons[i] = th.Clickable()
+	//}
+	//guiAppModel.logoButton.SetClick(
+	//	func() {
+	//		guiAppModel.FlipTheme()
+	//		Info("clicked logo button")
+	//		showClickableFn()
+	//		showClickableFn()
+	//	})
 	showClickableFn := func() {
-		minerModel.hide = !minerModel.hide
-		if !minerModel.hide {
-			minerModel.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
-			minerModel.pass.Mask('•')
-			minerModel.passInput.Color("Primary")
+		guiAppModel.hide = !guiAppModel.hide
+		if !guiAppModel.hide {
+			guiAppModel.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+			guiAppModel.pass.Mask('•')
+			guiAppModel.passInput.Color("Primary")
 		} else {
-			minerModel.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
-			minerModel.pass.Mask(0)
-			minerModel.passInput.Color("DocText")
+			guiAppModel.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
+			guiAppModel.pass.Mask(0)
+			guiAppModel.passInput.Color("DocText")
 		}
 	}
-	minerModel.unhideClickable.SetClick(showClickableFn)
-	minerModel.pass.SetText(*w.cx.Config.MinerPass).Mask('•').SetSubmit(func(txt string) {
-		if !minerModel.hide {
-			showClickableFn()
-		}
-		showClickableFn()
-		go func() {
-			*w.cx.Config.MinerPass = txt
-			save.Pod(w.cx.Config)
-			w.Stop()
-			w.Start()
-		}()
-	}).SetChange(func(txt string) {
-		// send keystrokes to the NSA
-	})
-	for i := 0; i < 201; i++ {
-		minerModel.solButtons[i] = th.Clickable()
-	}
-	minerModel.logoButton.SetClick(
-		func() {
-			minerModel.FlipTheme()
-			Info("clicked logo button")
-			showClickableFn()
-			showClickableFn()
-		})
 	win := f.Window()
-	minerModel.hide = !minerModel.hide
+	guiAppModel.hide = !guiAppModel.hide
 	showClickableFn()
 	go func() {
 		if err := win.
 			Size(640, 480).
-			Title("kopach").
+			Title("ParallelCoin").
 			Open().
 			Run(
-				minerModel.Widget,
+				guiAppModel.Screen,
 				func() {
-					Debug("quitting miner")
+					Debug("quitting wallet")
 					close(w.quit)
 					interrupt.Request()
 				}); Check(err) {
@@ -136,7 +149,7 @@ func (w *Worker) Run() {
 	go func() {
 		for {
 			select {
-			case <-minerModel.worker.Update:
+			case <-guiAppModel.worker.Update:
 				win.Window.Invalidate()
 			}
 		}
@@ -144,7 +157,12 @@ func (w *Worker) Run() {
 	app.Main()
 }
 
-func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
+func (g *GuiAppModel) Screen(gtx C) D {
+	g.BeforeMain(gtx)
+	return g.Main(gtx)
+}
+
+func (m *GuiAppModel) Widget(gtx C) D {
 	return m.Stack().Stacked(
 		m.Flex().Flexed(1,
 			m.Flex().Vertical().
@@ -167,7 +185,7 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 				).Fn,
 		).Fn,
 	).
-		Stacked(func(gtx l.Context) l.Dimensions {
+		Stacked(func(gtx C) D {
 			if m.modalOn {
 				// return m.modalWidget(gtx)
 				return m.Fill("scrim").Embed(
@@ -181,8 +199,8 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 								// Vertical().
 								// SpaceStart().
 								Rigid(
-									func(gtx l.Context) l.Dimensions {
-										return l.Dimensions{
+									func(gtx C) D {
+										return D{
 											Size: image.Point{
 												X: gtx.Constraints.Max.X,
 												Y: gtx.Constraints.Max.Y,
@@ -197,8 +215,8 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 								// Vertical().
 								// SpaceStart().
 								Rigid(
-									func(gtx l.Context) l.Dimensions {
-										return l.Dimensions{
+									func(gtx C) D {
+										return D{
 											Size: image.Point{
 												X: gtx.Constraints.Max.X,
 												Y: gtx.Constraints.Max.Y,
@@ -209,21 +227,21 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 						).Fn,
 				).Fn(gtx)
 			} else {
-				return l.Dimensions{}
+				return D{}
 			}
 		}).
-		// Expanded(func(gtx l.Context) l.Dimensions {
+		// Expanded(func(gtx C) D {
 		// 	if m.modalOn {
 		// 		return (gtx)
 		// 	} else {
-		// 		return l.Dimensions{}
+		// 		return D{}
 		// 	}
 		// }).
 		Fn(gtx)
 }
 
-func (m *MinerModel) FillSpace(gtx l.Context) l.Dimensions {
-	return l.Dimensions{
+func (m *GuiAppModel) FillSpace(gtx C) D {
+	return D{
 		Size: image.Point{
 			X: gtx.Constraints.Min.X,
 			Y: gtx.Constraints.Min.Y,
@@ -232,8 +250,8 @@ func (m *MinerModel) FillSpace(gtx l.Context) l.Dimensions {
 	}
 }
 
-func (m *MinerModel) VSpacer(gtx l.Context) l.Dimensions {
-	return l.Dimensions{
+func (m *GuiAppModel) VSpacer(gtx C) D {
+	return D{
 		Size: image.Point{
 			X: int(m.TextSize.Scale(2).V),
 			Y: int(m.TextSize.Scale(2).V),
@@ -242,7 +260,7 @@ func (m *MinerModel) VSpacer(gtx l.Context) l.Dimensions {
 	}
 }
 
-func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
+func (m *GuiAppModel) Header(gtx C) D {
 	return m.Fill("Primary").Embed(
 		m.Flex().Rigid(
 			m.Inset(0.25).Embed(
@@ -270,7 +288,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 	).Fn(gtx)
 }
 
-func (m *MinerModel) RunControl(gtx l.Context) l.Dimensions {
+func (m *GuiAppModel) RunControl(gtx C) D {
 	return m.Inset(0.25).Embed(
 		m.Flex().Flexed(0.5,
 			m.Body1("enable mining").
@@ -292,7 +310,7 @@ func (m *MinerModel) RunControl(gtx l.Context) l.Dimensions {
 	).Fn(gtx)
 }
 
-func (m *MinerModel) SetThreads(gtx l.Context) l.Dimensions {
+func (m *GuiAppModel) SetThreads(gtx C) D {
 	return m.Flex().Rigid(
 		m.Inset(0.25).Embed(
 			m.Flex().Flexed(0.5,
@@ -345,7 +363,7 @@ func (m *MinerModel) SetThreads(gtx l.Context) l.Dimensions {
 	).Fn(gtx)
 }
 
-func (m *MinerModel) PreSharedKey(gtx l.Context) l.Dimensions {
+func (m *GuiAppModel) PreSharedKey(gtx C) D {
 	return m.Inset(0.25).Embed(
 		m.Flex().Flexed(0.5,
 			m.Body1("cluster preshared key").
@@ -363,7 +381,7 @@ func (m *MinerModel) PreSharedKey(gtx l.Context) l.Dimensions {
 	).Fn(gtx)
 }
 
-func (m *MinerModel) BlockInfoModalCloser(gtx l.Context) l.Dimensions {
+func (m *GuiAppModel) BlockInfoModalCloser(gtx C) D {
 	return m.Button(m.modalScrim.SetClick(func() {
 		m.modalOn = false
 	})).Background("Primary").Text("close").Fn(gtx)
@@ -371,7 +389,7 @@ func (m *MinerModel) BlockInfoModalCloser(gtx l.Context) l.Dimensions {
 
 var currentBlock SolutionData
 
-func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
+func (m *GuiAppModel) BlockDetails(gtx C) D {
 	return m.Fill("DocBg").Embed(
 		m.Flex().Vertical().AlignMiddle().Rigid(
 			m.Inset(0.5).Embed(
@@ -412,7 +430,6 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 							m.H6("Nonce").Font("bariol bold").Fn,
 						).
 						Fn,
-
 				).Rigid(
 					m.Flex().Vertical().
 						Rigid(
@@ -534,7 +551,6 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 								).Fn,
 						).Fn,
 				).Fn,
-
 			).Fn,
 		).Rigid(
 			m.Inset(0.5).Embed(
@@ -544,11 +560,11 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 	).Fn(gtx)
 }
 
-func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
+func (m *GuiAppModel) FoundBlocks(gtx C) D {
 	return m.Inset(0.25).Embed(
-		m.Flex().Flexed(1, func(gtx l.Context) l.Dimensions {
+		m.Flex().Flexed(1, func(gtx C) D {
 			return m.lists["found"].End().ScrollToEnd().Length(m.worker.solutionCount).ListElement(
-				func(gtx l.Context, i int) l.Dimensions {
+				func(gtx C, i int) D {
 					return m.Flex().Rigid(
 						m.Button(m.solButtons[i].SetClick(func() {
 							currentBlock = m.worker.solutions[i]
@@ -582,4 +598,3 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 		}).Fn,
 	).Fn(gtx)
 }
-QmcgJ1tojM9v6Ynqyafh6SLUKCZC71yXwkyjLaMFmCe3ix

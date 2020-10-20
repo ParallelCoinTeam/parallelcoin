@@ -5,7 +5,6 @@ import (
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/win"
@@ -26,12 +25,12 @@ type dap struct {
 	boot mod.Dap
 }
 
-func NewDap(cx *conte.Xt, title string) dap {
+func NewDap(title string, rc interface{}) dap {
 	//if cfg.Initial {
 	//	fmt.Println("running initial setup")
 	//}
 	d := mod.Dap{
-		Rc:   RcInit(cx),
+		Rc:   RcInit(rc),
 		Apps: make(map[string]mod.Sap),
 	}
 
@@ -81,7 +80,7 @@ func checkError(err error) {
 	}
 }
 
-func RcInit(cx *conte.Xt) (r *mod.RcVar) {
+func RcInit(w interface{}) (r *mod.RcVar) {
 	b := mod.Boot{
 		IsBoot:     true,
 		IsFirstRun: false,
@@ -99,7 +98,7 @@ func RcInit(cx *conte.Xt) (r *mod.RcVar) {
 	//l := new(model.DuoUIlog)
 
 	r = &mod.RcVar{
-		Cx: cx,
+		Worker: w,
 		//db:          new(DuoUIdb),
 		Boot: &b,
 		//AddressBook: new(model.DuoUIaddressBook),
@@ -114,8 +113,8 @@ func RcInit(cx *conte.Xt) (r *mod.RcVar) {
 		//Dialog:   &model.DuoUIdialog{},
 		//Settings: settings(cx),
 		//Log:      l,
-		Quit:  make(chan struct{}),
-		Ready: make(chan struct{}),
+		//Quit:  make(chan struct{}),
+		//Ready: make(chan struct{}),
 	}
 	//r.db.DuoUIdbInit(r.cx.DataDir)
 	return
