@@ -2,9 +2,11 @@ package gui
 
 import (
 	l "gioui.org/layout"
+	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
@@ -12,19 +14,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 	ng.App = a
 	ng.size = a.Size
 	a.Pages(map[string]l.Widget{
-		"main": ng.Page("first", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"second": ng.Page("second", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"third": ng.Page("third", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"fourth": ng.Page("fourth", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"fifth": ng.Page("fifth", p9.Widgets{
+		"main": ng.Page("overview", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
 		"settings": ng.Page("settings", p9.Widgets{
@@ -36,22 +26,38 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 		"log": ng.Page("log", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
+		"quit": ng.Page("quit", p9.Widgets{
+			p9.WidgetSize{Widget:
+			a.VFlex().
+				SpaceEvenly().
+				// AlignMiddle().
+				Rigid(
+					a.H4("are you sure?").Color(ng.BodyColorGet()).Alignment(text.Middle).Fn,
+				).
+				Rigid(
+					a.Flex().
+						SpaceEvenly().
+						Rigid(
+							a.Button(ng.quitClickable.SetClick(func() {
+								interrupt.Request()
+							})).TextScale(2).Text("yes").Fn,
+						).Fn,
+				).
+				Fn},
+		}),
 	})
 	a.SideBar([]l.Widget{
-		ng.SideBarButton("first", "main", 0),
-		ng.SideBarButton("second", "second", 1),
-		ng.SideBarButton("third", "third", 2),
-		ng.SideBarButton("fourth", "fourth", 3),
-		ng.SideBarButton("fifth", "fifth", 4),
+		ng.SideBarButton("overview", "main", 0),
 		ng.SideBarButton("settings", "settings", 5),
 		ng.SideBarButton("help", "help", 6),
 		ng.SideBarButton("log", "log", 7),
-		ng.SideBarButton("invalid", "invalid", 8),
+		ng.SideBarButton("quit", "quit", 8),
 	})
 	a.ButtonBar([]l.Widget{
 		ng.PageTopBarButton("help", 0, icons.ActionHelp),
 		ng.PageTopBarButton("log", 1, icons.ActionList),
 		ng.PageTopBarButton("settings", 2, icons.ActionSettings),
+		ng.PageTopBarButton("quit", 3, icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
 		ng.StatusBarButton("help", 0, icons.ActionHelp),
@@ -64,25 +70,27 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
 	a := ng.th
 	return func(gtx l.Context) l.Dimensions {
-		return a.VFlex().
-			SpaceEvenly().
-			Rigid(
-				a.Responsive(*ng.Size, p9.Widgets{
-					p9.WidgetSize{
-						Widget: a.Inset(0.25, a.H5(title).Color(ng.BodyColorGet()).Fn).Fn,
-					},
-					p9.WidgetSize{
-						Size:   800,
-						Widget: a.Inset(0.25, a.Caption(title).Color(ng.BodyColorGet()).Fn).Fn,
-					},
-				}).Fn,
-			).
-			Flexed(1,
-				a.Inset(0.25,
-					a.Responsive(*ng.Size, widget).Fn,
+		return a.Fill(ng.BodyBackgroundGet(),
+			a.VFlex().
+				SpaceEvenly().
+				Rigid(
+					a.Responsive(*ng.Size, p9.Widgets{
+						p9.WidgetSize{
+							Widget: a.Inset(0.25, a.H5(title).Color(ng.BodyColorGet()).Fn).Fn,
+						},
+						p9.WidgetSize{
+							Size:   800,
+							Widget: p9.EmptySpace(0, 0),
+							// a.Inset(0.25, a.Caption(title).Color(ng.BodyColorGet()).Fn).Fn,
+						},
+					}).Fn,
+				).
+				Flexed(1,
+					a.Inset(0.25,
+						a.Responsive(*ng.Size, widget).Fn,
+					).Fn,
 				).Fn,
-			).
-			Fn(gtx)
+		).Fn(gtx)
 	}
 }
 
@@ -92,8 +100,8 @@ func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Conte
 			background := "Transparent"
 			color := "DocText"
 			if ng.ActivePageGet() == page {
-				background = "DocText"
-				color = "DocBg"
+				background = "PanelBg"
+				color = "PanelText"
 			}
 			return ng.Fill(background,
 				ng.Flex().Flexed(1,
@@ -122,7 +130,8 @@ func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx
 		background := ng.TitleBarBackgroundGet()
 		color := ng.MenuColorGet()
 		if ng.ActivePageGet() == name {
-			color = "Dark"
+			color = "PanelText"
+			background = "PanelBg"
 		}
 		ic := ng.Icon().
 			Scale(p9.Scales["H5"]).
@@ -135,7 +144,7 @@ func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx
 				CornerRadius(0).
 				Embed(
 					ng.Inset(0.375,
-					ic,
+						ic,
 					).Fn,
 				).
 				Background(background).

@@ -63,8 +63,10 @@ func (th *Theme) App(size int) *App {
 		sideBarSize:         th.TextSize.Scale(20),
 		sideBarColor:        "DocText",
 		sideBarBackground:   "DocBg",
-		statusBarColor:      "DocBg",
-		statusBarBackground: "DocText",
+		statusBarColor:
+			"DocBg",
+		statusBarBackground:
+			"DocText",
 		logo:                ico.ParallelCoin,
 		logoClickable:       th.Clickable(),
 		title:               "parallelcoin",

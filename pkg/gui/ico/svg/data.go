@@ -316,4 +316,4 @@ var Unconfirmed = []byte{
 	0xdd, 0x8d, 0x25, 0xa2, 0xe1,
 }
 
-// In total, 30198 SVG bytes in 25 files converted to 3660 IconVG bytes.
+// In total, 30324 SVG bytes in 25 files converted to 3660 IconVG bytes.
