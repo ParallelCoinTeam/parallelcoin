@@ -75,13 +75,12 @@ func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.D
 				SpaceEvenly().
 				Rigid(
 					a.Responsive(*ng.Size, p9.Widgets{
-						p9.WidgetSize{
+						{
 							Widget: a.Inset(0.25, a.H5(title).Color(ng.BodyColorGet()).Fn).Fn,
 						},
-						p9.WidgetSize{
+						{
 							Size:   800,
 							Widget: p9.EmptySpace(0, 0),
-							// a.Inset(0.25, a.Caption(title).Color(ng.BodyColorGet()).Fn).Fn,
 						},
 					}).Fn,
 				).
