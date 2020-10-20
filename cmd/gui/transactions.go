@@ -2,13 +2,15 @@ package gui
 
 import (
 	"fmt"
+	"time"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
-	"time"
 )
 
 func (g *GuiAppModel) GetTransactions() {
@@ -31,8 +33,8 @@ func (g *GuiAppModel) transactionsHeader() func(gtx C) D {
 
 func (g *GuiAppModel) sssssStransactionsBody() func(gtx C) D {
 	return box.BoxPanel(g.ui.Theme, noReturn)
-	//return box.BoxPanel(g.ui.Theme, func(gtx C) D {
-	//return transactionsList.Layout(gtx, len(transactions), func(gtx C, i int) D {
+	// return box.BoxPanel(g.ui.Theme, func(gtx C) D {
+	// return transactionsList.Layout(gtx, len(transactions), func(gtx C, i int) D {
 	//	tx := transactions[i]
 	//	return material.Clickable(gtx, tx.Btn, func(gtx C) D {
 	//		return lyt.Format(gtx, "vflex(r(_),r(_))",
@@ -73,13 +75,13 @@ func (g *GuiAppModel) sssssStransactionsBody() func(gtx C) D {
 	//			},
 	//			helper.DuoUIline(false, 1, 0, 1, g.ui.Theme.Colors["Border"]))
 	//	})
-	//})
-	//})
+	// })
+	// })
 }
 
 func (g *GuiAppModel) transactionsBody() func(gtx C) D {
 	return func(gtx C) D {
-		return g.Inset(0.25).Embed(
+		return g.Inset(0.25,
 			g.Flex().Flexed(1, func(gtx l.Context) l.Dimensions {
 				return g.lists["latestTransactions"].End().ScrollToEnd().Length(g.worker.solutionCount).ListElement(
 					func(gtx l.Context, i int) l.Dimensions {
@@ -91,7 +93,7 @@ func (g *GuiAppModel) transactionsBody() func(gtx C) D {
 								g.modalOn = true
 							})).Text(fmt.Sprint(g.worker.solutions[i].height)).Inset(0.5).Fn,
 						).Flexed(1,
-							g.Inset(0.25).Embed(
+							g.Inset(0.25,
 								g.Flex().Vertical().Rigid(
 									g.Flex().Rigid(
 										g.Body1(g.worker.solutions[i].algo).Font("plan9").Fn,

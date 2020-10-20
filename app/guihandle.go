@@ -1,8 +1,8 @@
 // +build !headless
 
-//package app
+// package app
 //
-//import (
+// import (
 //	"github.com/p9c/pod/cmd/kopach"
 //	"github.com/p9c/pod/pkg/chain/config/netparams"
 //	"github.com/p9c/pod/pkg/chain/fork"
@@ -15,9 +15,9 @@
 //	"github.com/p9c/pod/app/conte"
 //
 //	_ "gioui.org/app/permission/storage"
-//)
+// )
 
-//var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
+// var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 //	return func(c *cli.Context) (err error) {
 //		config.Configure(cx, c.Command.Name, true)
 //		Warn("starting GUI")
@@ -70,13 +70,14 @@
 //		}
 //		return
 //	}
-//}
+// }
 
 package app
 
 import (
-	"github.com/p9c/pod/cmd/gui"
 	"os"
+
+	"github.com/p9c/pod/cmd/gui"
 
 	"github.com/p9c/pod/pkg/util/interrupt"
 
@@ -88,11 +89,10 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
-	//func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+	// func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Info("starting up GUI for parallelcoin")
 		Debug(os.Args)

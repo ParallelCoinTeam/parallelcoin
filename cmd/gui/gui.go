@@ -2,15 +2,18 @@ package gui
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
-	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 	"image"
 	"runtime"
 	"time"
 
+	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
+
 	"gioui.org/app"
 	l "gioui.org/layout"
 	"gioui.org/text"
+
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
@@ -52,10 +55,10 @@ func (w *Worker) Run() {
 		solButtons[i] = th.Clickable()
 	}
 	guiAppModel := w.NewGuiApp()
-	//lists := map[string]*p9.List{
+	// lists := map[string]*p9.List{
 	//	"found": th.List().Vertical().Start(),
-	//}
-	//guiAppModel := &GuiAppModel{
+	// }
+	// guiAppModel := &GuiAppModel{
 	//	Cx:        w.cx,
 	//	worker:    w,
 	//	Theme:     th,
@@ -72,15 +75,15 @@ func (w *Worker) Run() {
 	//	modalClose:      th.Clickable(),
 	//	threadsMax:      th.Clickable(),
 	//	threadsMin:      th.Clickable(),
-	//}
-	//guiAppModel.SetTheme(guiAppModel.DarkTheme)
-	//guiAppModel.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
-	//guiAppModel.passInput = th.SimpleInput(guiAppModel.pass).Color("DocText")
-	//guiAppModel.unhideButton = th.IconButton(guiAppModel.unhideClickable).
+	// }
+	// guiAppModel.SetTheme(guiAppModel.DarkTheme)
+	// guiAppModel.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
+	// guiAppModel.passInput = th.SimpleInput(guiAppModel.pass).Color("DocText")
+	// guiAppModel.unhideButton = th.IconButton(guiAppModel.unhideClickable).
 	//	Background("").
 	//	Color("Primary").
 	//	Icon(icons2.ActionVisibility)
-	//showClickableFn := func() {
+	// showClickableFn := func() {
 	//	guiAppModel.hide = !guiAppModel.hide
 	//	if !guiAppModel.hide {
 	//		guiAppModel.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
@@ -91,9 +94,9 @@ func (w *Worker) Run() {
 	//		guiAppModel.pass.Mask(0)
 	//		guiAppModel.passInput.Color("DocText")
 	//	}
-	//}
-	//guiAppModel.unhideClickable.SetClick(showClickableFn)
-	//guiAppModel.pass.SetText(*w.cx.Config.MinerPass).Mask('•').SetSubmit(func(txt string) {
+	// }
+	// guiAppModel.unhideClickable.SetClick(showClickableFn)
+	// guiAppModel.pass.SetText(*w.cx.Config.MinerPass).Mask('•').SetSubmit(func(txt string) {
 	//	if !guiAppModel.hide {
 	//		showClickableFn()
 	//	}
@@ -104,13 +107,13 @@ func (w *Worker) Run() {
 	//		w.Stop()
 	//		w.Start()
 	//	}()
-	//}).SetChange(func(txt string) {
+	// }).SetChange(func(txt string) {
 	//	send keystrokes to the NSA
-	//})
-	//for i := 0; i < 201; i++ {
+	// })
+	// for i := 0; i < 201; i++ {
 	//	guiAppModel.solButtons[i] = th.Clickable()
-	//}
-	//guiAppModel.logoButton.SetClick(
+	// }
+	// guiAppModel.logoButton.SetClick(
 	//	func() {
 	//		guiAppModel.FlipTheme()
 	//		Info("clicked logo button")
@@ -120,16 +123,18 @@ func (w *Worker) Run() {
 	showClickableFn := func() {
 		guiAppModel.hide = !guiAppModel.hide
 		if !guiAppModel.hide {
-			guiAppModel.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+			guiAppModel.unhideButton.Color("Primary").
+				Icon(guiAppModel.Icon().Src(icons2.ActionVisibility))
 			guiAppModel.pass.Mask('•')
 			guiAppModel.passInput.Color("Primary")
 		} else {
-			guiAppModel.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
+			guiAppModel.unhideButton.Color("DocText").
+				Icon(guiAppModel.Icon().Src(icons2.ActionVisibilityOff))
 			guiAppModel.pass.Mask(0)
 			guiAppModel.passInput.Color("DocText")
 		}
 	}
-	win := f.Window()
+	win := f.NewWindow()
 	guiAppModel.hide = !guiAppModel.hide
 	showClickableFn()
 	go func() {
@@ -168,8 +173,8 @@ func (m *GuiAppModel) Widget(gtx C) D {
 			m.Flex().Vertical().
 				Rigid(m.Header).
 				Flexed(1,
-					m.Fill("DocBg").Embed(
-						m.Inset(0.5).Embed(
+					m.Fill("DocBg",
+						m.Inset(0.5,
 							m.Flex().Vertical().
 								Rigid(m.H5("miner settings").Fn).
 								Rigid(m.RunControl).
@@ -178,7 +183,7 @@ func (m *GuiAppModel) Widget(gtx C) D {
 								Rigid(m.VSpacer).
 								Rigid(m.H5("found blocks").Fn).
 								Flexed(1,
-									m.Fill("PanelBg").Embed(m.FoundBlocks).Fn,
+									m.Fill("PanelBg", m.FoundBlocks).Fn,
 								).Fn,
 						).Fn,
 					).Fn,
@@ -188,7 +193,7 @@ func (m *GuiAppModel) Widget(gtx C) D {
 		Stacked(func(gtx C) D {
 			if m.modalOn {
 				// return m.modalWidget(gtx)
-				return m.Fill("scrim").Embed(
+				return m.Fill("scrim",
 					m.Flex().
 						Vertical().
 						// AlignMiddle().
@@ -261,24 +266,24 @@ func (m *GuiAppModel) VSpacer(gtx C) D {
 }
 
 func (m *GuiAppModel) Header(gtx C) D {
-	return m.Fill("Primary").Embed(
+	return m.Fill("Primary",
 		m.Flex().Rigid(
-			m.Inset(0.25).Embed(
+			m.Inset(0.25,
 				m.IconButton(m.logoButton).
 					Color("Light").
 					Background("Dark").
 					Scale(p9.Scales["H4"]).
-					Icon(icons.ParallelCoin).
+					Icon(m.Icon().Src(icons.ParallelCoin)).
 					Fn,
 			).Fn,
 		).Rigid(
-			m.Inset(0.5).Embed(
+			m.Inset(0.5,
 				m.H5("kopach").
 					Color("DocBg").
 					Fn,
 			).Fn,
 		).Flexed(1,
-			m.Inset(0.5).Embed(
+			m.Inset(0.5,
 				m.Body1(fmt.Sprintf("%d hash/s", int(m.worker.hashrate))).
 					Color("DocBg").
 					Alignment(text.End).
@@ -289,7 +294,7 @@ func (m *GuiAppModel) Header(gtx C) D {
 }
 
 func (m *GuiAppModel) RunControl(gtx C) D {
-	return m.Inset(0.25).Embed(
+	return m.Inset(0.25,
 		m.Flex().Flexed(0.5,
 			m.Body1("enable mining").
 				Color("DocText").
@@ -312,7 +317,7 @@ func (m *GuiAppModel) RunControl(gtx C) D {
 
 func (m *GuiAppModel) SetThreads(gtx C) D {
 	return m.Flex().Rigid(
-		m.Inset(0.25).Embed(
+		m.Inset(0.25,
 			m.Flex().Flexed(0.5,
 				m.Body1("number of mining threads"+
 					fmt.Sprintf("%3v", int(m.cores.Value()+0.5))).
@@ -331,7 +336,7 @@ func (m *GuiAppModel) SetThreads(gtx C) D {
 						Text("0").
 						Fn,
 				).Flexed(1,
-					m.Inset(0.25).Embed(
+					m.Inset(0.25,
 						m.Slider().
 							Float(m.cores.SetHook(func(fl float32) {
 								iFl := int(fl + 0.5)
@@ -364,7 +369,7 @@ func (m *GuiAppModel) SetThreads(gtx C) D {
 }
 
 func (m *GuiAppModel) PreSharedKey(gtx C) D {
-	return m.Inset(0.25).Embed(
+	return m.Inset(0.25,
 		m.Flex().Flexed(0.5,
 			m.Body1("cluster preshared key").
 				Color("DocText").
@@ -372,7 +377,7 @@ func (m *GuiAppModel) PreSharedKey(gtx C) D {
 		).Flexed(0.5,
 			m.Border().Embed(
 				m.Flex().Flexed(1,
-					m.Inset(0.25).Embed(m.passInput.Fn).Fn,
+					m.Inset(0.25, m.passInput.Fn).Fn,
 				).Rigid(
 					m.unhideButton.Fn,
 				).Fn,
@@ -390,13 +395,13 @@ func (m *GuiAppModel) BlockInfoModalCloser(gtx C) D {
 var currentBlock SolutionData
 
 func (m *GuiAppModel) BlockDetails(gtx C) D {
-	return m.Fill("DocBg").Embed(
+	return m.Fill("DocBg",
 		m.Flex().Vertical().AlignMiddle().Rigid(
-			m.Inset(0.5).Embed(
+			m.Inset(0.5,
 				m.H5("Block Information").Alignment(text.Middle).Color("DocText").Fn,
 			).Fn,
 		).Rigid(
-			m.Inset(0.5).Embed(
+			m.Inset(0.5,
 				m.Flex().Rigid(
 					m.Flex().Vertical().
 						Rigid(
@@ -553,7 +558,7 @@ func (m *GuiAppModel) BlockDetails(gtx C) D {
 				).Fn,
 			).Fn,
 		).Rigid(
-			m.Inset(0.5).Embed(
+			m.Inset(0.5,
 				m.BlockInfoModalCloser,
 			).Fn,
 		).Fn,
@@ -561,7 +566,7 @@ func (m *GuiAppModel) BlockDetails(gtx C) D {
 }
 
 func (m *GuiAppModel) FoundBlocks(gtx C) D {
-	return m.Inset(0.25).Embed(
+	return m.Inset(0.25,
 		m.Flex().Flexed(1, func(gtx C) D {
 			return m.lists["found"].End().ScrollToEnd().Length(m.worker.solutionCount).ListElement(
 				func(gtx C, i int) D {
@@ -573,7 +578,7 @@ func (m *GuiAppModel) FoundBlocks(gtx C) D {
 							m.modalOn = true
 						})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
 					).Flexed(1,
-						m.Inset(0.25).Embed(
+						m.Inset(0.25,
 							m.Flex().Vertical().Rigid(
 								m.Flex().Rigid(
 									m.Body1(m.worker.solutions[i].algo).Font("plan9").Fn,

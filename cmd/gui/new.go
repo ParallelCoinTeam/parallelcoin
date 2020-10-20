@@ -2,8 +2,11 @@ package gui
 
 import (
 	"fmt"
+
 	"gioui.org/unit"
 	"gioui.org/widget"
+	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -12,31 +15,30 @@ import (
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
-	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 )
 
 func (w *Worker) NewGuiApp() *GuiAppModel {
 
-	//ww := map[string]*win.Window{
+	// ww := map[string]*win.Window{
 	//	"main": &win.Window{
 	//		W: app.NewWindow(
 	//			app.Size(unit.Dp(1024), unit.Dp(800)),
 	//			app.Title("ParallelCoin"),
 	//		)},
-	//}
+	// }
 
 	n := &nav.Navigation{
 		Name: "Navigacion",
-		//Bg:           d.UI.Theme.Colors["NavBg"],
+		// Bg:           d.UI.Theme.Colors["NavBg"],
 		ItemIconSize: unit.Px(24),
 	}
 
-	//s := &mod.Settings{
+	// s := &mod.Settings{
 	//	Dir: appdata.Dir("dap", false),
-	//}
-	//d.S = s
+	// }
+	// d.S = s
 
-	//Debug("New DAP", d)
+	// Debug("New DAP", d)
 
 	th := p9.NewTheme(p9fonts.Collection(), w.quit)
 	solButtons := make([]*p9.Clickable, 201)
@@ -67,9 +69,9 @@ func (w *Worker) NewGuiApp() *GuiAppModel {
 			Theme: theme.NewTheme(),
 			N:     n,
 			R:     res.Resposnsivity(0, 0),
-			//W: &win.Windows{
+			// W: &win.Windows{
 			//	W: ww,
-			//},
+			// },
 		},
 	}
 	g.SetTheme(g.DarkTheme)
@@ -78,15 +80,15 @@ func (w *Worker) NewGuiApp() *GuiAppModel {
 	g.unhideButton = th.IconButton(g.unhideClickable).
 		Background("").
 		Color("Primary").
-		Icon(icons2.ActionVisibility)
+		Icon(g.Icon().Src(icons2.ActionVisibility))
 	showClickableFn := func() {
 		g.hide = !g.hide
 		if !g.hide {
-			g.unhideButton.Color("Primary").Icon(icons2.ActionVisibility)
+			g.unhideButton.Color("Primary").Icon(g.Icon().Src(icons2.ActionVisibility))
 			g.pass.Mask('•')
 			g.passInput.Color("Primary")
 		} else {
-			g.unhideButton.Color("DocText").Icon(icons2.ActionVisibilityOff)
+			g.unhideButton.Color("DocText").Icon(g.Icon().Src(icons2.ActionVisibilityOff))
 			g.pass.Mask(0)
 			g.passInput.Color("DocText")
 		}
@@ -156,8 +158,8 @@ func (g *GuiAppModel) getMenuItems(ui *mod.UserInterface) []nav.Item {
 		g.getMenuItem(false, "Send", g.sendHeader(), g.sendBody(), g.sendFooter()),
 		g.getMenuItem(false, "Receive", g.receiveHeader(), g.receiveBody(), noReturn),
 		g.getMenuItem(false, "Transactions", g.transactionsHeader(), g.transactionsBody(), noReturn),
-		//g.getMenuItem(true, "Explore", g.exploreHeader(), g.exploreBody(), noReturn),
-		//g.getMenuItem(true, "Peers", g.peersHeader(), g.peersBody(), noReturn),
-		//g.getMenuItem(true, "Settings", g.settingsHeader(), g.settingsBody(), noReturn),
+		// g.getMenuItem(true, "Explore", g.exploreHeader(), g.exploreBody(), noReturn),
+		// g.getMenuItem(true, "Peers", g.peersHeader(), g.peersBody(), noReturn),
+		// g.getMenuItem(true, "Settings", g.settingsHeader(), g.settingsBody(), noReturn),
 	}
 }
