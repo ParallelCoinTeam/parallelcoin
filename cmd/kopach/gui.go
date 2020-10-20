@@ -412,7 +412,6 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 							m.H6("Nonce").Font("bariol bold").Fn,
 						).
 						Fn,
-
 				).Rigid(
 					m.Flex().Vertical().
 						Rigid(
@@ -534,7 +533,6 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 								).Fn,
 						).Fn,
 				).Fn,
-
 			).Fn,
 		).Rigid(
 			m.Inset(0.5).Embed(
@@ -582,4 +580,3 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 		}).Fn,
 	).Fn(gtx)
 }
-QmcgJ1tojM9v6Ynqyafh6SLUKCZC71yXwkyjLaMFmCe3ix
