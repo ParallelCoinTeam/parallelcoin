@@ -30,12 +30,14 @@ type NodeGUI struct {
 	th   *p9.Theme
 	size *int
 	*p9.App
-	sidebarButtons      []*p9.Clickable
-	buttonBarButtons    []*p9.Clickable
-	statusBarButtons    []*p9.Clickable
-	quitClickable       *p9.Clickable
-	invalidate          chan struct{}
-	quit                chan struct{}
+	sidebarButtons   []*p9.Clickable
+	buttonBarButtons []*p9.Clickable
+	statusBarButtons []*p9.Clickable
+	bools            map[string]*p9.Bool
+	lists            map[string]*p9.List
+	quitClickable    *p9.Clickable
+	invalidate       chan struct{}
+	quit             chan struct{}
 }
 
 func (ng *NodeGUI) Run() (err error) {
@@ -52,6 +54,14 @@ func (ng *NodeGUI) Run() (err error) {
 	ng.statusBarButtons = make([]*p9.Clickable, 3)
 	for i := range ng.statusBarButtons {
 		ng.statusBarButtons[i] = ng.th.Clickable()
+	}
+	ng.bools = map[string]*p9.Bool{
+		"runstate": ng.th.Bool(false).SetOnChange(func(b bool) {
+			Debug("run state is now", b)
+		}),
+	}
+	ng.lists = map[string]*p9.List{
+		"overview": ng.th.List(),
 	}
 	ng.quitClickable = ng.th.Clickable()
 	ng.w = f.NewWindow()
