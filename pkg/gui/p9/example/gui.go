@@ -75,14 +75,14 @@ func (m *MinerModel) testLabels(gtx layout.Context) layout.Dimensions {
 	return th.Flex().Flexed(1,
 		th.Flex().Rigid(
 			th.Flex().Flexed(0.5,
-				th.Fill("PanelBg").Embed(
-					th.Inset(0.25).Embed(
+				th.Fill("PanelBg",
+					th.Inset(0.25,
 						m.blocks(),
 					).Fn,
 				).Fn,
 			).Flexed(0.5,
-				th.Fill("DocBg").Embed(
-					th.Inset(0.25).Embed(
+				th.Fill("DocBg",
+					th.Inset(0.25,
 						m.buttons(),
 					).Fn,
 				).Fn,
@@ -94,7 +94,7 @@ func (m *MinerModel) testLabels(gtx layout.Context) layout.Dimensions {
 func (m *MinerModel) blocks() layout.Widget {
 	th := m.th
 	return th.Flex().Vertical().Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.Flex().Rigid(
 				th.H1("this is a H1").
 					Color("PanelText").
@@ -102,48 +102,48 @@ func (m *MinerModel) blocks() layout.Widget {
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.H2("this is a H2").
 				Font("bariol regular").
 				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.H3("this is a H3").
 				Alignment(text.End).
 				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Fill("DocBg").Embed(
-			th.Inset(0.25).Embed(
+		th.Fill("DocBg",
+			th.Inset(0.25,
 				th.H4("this is a H4").
 					Alignment(text.Middle).
 					Color("DocText").Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.Fill("PanelBg").Embed(
-			th.Inset(0.25).Embed(
+		th.Fill("PanelBg",
+			th.Inset(0.25,
 				th.H5("this is a H5").
 					Color("PanelText").
 					Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.H6("this is a H6").
 				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.Body1("this is a Body1").Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.Body2("this is a Body2").Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.Caption("this is a Caption").Color("PanelText").Fn,
 		).Fn,
 	).Fn
@@ -152,7 +152,7 @@ func (m *MinerModel) blocks() layout.Widget {
 func (m *MinerModel) buttons() layout.Widget {
 	th := m.th
 	return th.Flex().Vertical().Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.Flex().Rigid(
 				th.Button(
 					m.button0.SetClick(func() {
@@ -170,36 +170,36 @@ func (m *MinerModel) buttons() layout.Widget {
 		).Fn,
 	).Rigid(
 		th.Flex().Rigid(
-			th.Inset(0.25).Embed(
+			th.Inset(0.25,
 				th.Button(
 					m.button2).
 					Text("default style").
 					Fn,
 			).Fn,
 		).Rigid(
-			th.Inset(0.25).Embed(
+			th.Inset(0.25,
 				th.Flex().Rigid(
 					th.Indefinite().Color("Primary").Fn,
 				).Fn,
 			).Fn,
 		).Rigid(
-			th.Inset(0.25).Embed(
+			th.Inset(0.25,
 				th.IconButton(m.iconbutton.SetClick(
 					func() {
 						Debug("clicked parallelcoin button")
 					})).
-					Icon(icons.ParallelCoin).
+					Icon(th.Icon().Src(icons.ParallelCoin)).
 					Fn,
 			).Fn,
 		).Rigid(
-			th.Inset(0.25).Embed(
+			th.Inset(0.25,
 				th.IconButton(m.iconbutton1.SetClick(
 					func() {
 						Debug("clicked android button")
 					})).
 					Scale(1).
 					Background("Secondary").
-					Icon(mico.ActionAndroid).
+					Icon(th.Icon().Src(mico.ActionAndroid)).
 					Fn,
 			).Fn,
 		).Fn,
@@ -244,9 +244,9 @@ func (m *MinerModel) buttons() layout.Widget {
 				Fn,
 		).Fn,
 	).Rigid(
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.Border().Embed(
-				th.Inset(0.25).Embed(
+				th.Inset(0.25,
 					th.SimpleInput(m.lineEditor.
 						SetChange(func(txt string) {
 							Debug("lineEditor changed to:\n" + txt)
@@ -261,9 +261,9 @@ func (m *MinerModel) buttons() layout.Widget {
 			).Fn,
 		).Fn,
 	).Flexed(1,
-		th.Inset(0.25).Embed(
+		th.Inset(0.25,
 			th.Border().Embed(
-				th.Inset(0.25).Embed(
+				th.Inset(0.25,
 					th.SimpleInput(m.areaEditor.
 						SetChange(func(txt string) {
 							Debug("areaEditor changed to:\n" + txt)

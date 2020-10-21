@@ -21,9 +21,9 @@ func (th *Theme) CardList(list *List, background string, widgets ...l.Widget) fu
 
 func (th *Theme) CardContent(title, color string, w l.Widget) func(gtx l.Context) l.Dimensions {
 	out := th.VFlex()
-	out.Rigid(
-		th.H5(title).Color(color).Fn,
-	)
+	if title != "" {
+		out.Rigid(th.H5(title).Color(color).Fn)
+	}
 	out.Rigid(w)
 	return out.Fn
 }

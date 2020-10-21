@@ -245,9 +245,9 @@ func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensio
 				current := dims.PositionToCoordinate(li.position, li.axis)
 				var d int
 				if li.axis == l.Horizontal {
-					d = int(de.Position.X)*2 + current
+					d = int(de.Position.X) + current
 				} else {
-					d = int(de.Position.Y)*2 + current
+					d = int(de.Position.Y) + current
 				}
 				li.position = dims.CoordinateToPosition(d, li.axis)
 			}

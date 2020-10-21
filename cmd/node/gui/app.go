@@ -19,42 +19,76 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 			p9.WidgetSize{
 				Widget:
 				func(gtx l.Context) l.Dimensions {
-					return ng.VFlex().
-						Rigid(
-							ng.CardList(ng.lists["overview"], ng.CardBackgroundGet(),
-								ng.CardContent("status", ng.CardColorGet(),
+					return ng.VFlex().Rigid(
+						ng.CardList(ng.lists["overview"], ng.CardBackgroundGet(),
+							ng.CardContent("run settings", "Primary",
+								ng.VFlex().Rigid(
 									ng.Flex().
+										Rigid(
+											ng.Body1("run").Fn,
+										).
 										Rigid(
 											ng.Switch(ng.bools["runstate"]).Fn,
 										).
-										Rigid(
-											ng.Body1("run the node").Color(ng.CardColorGet()).Fn,
-										).
 										Fn,
-								),
-								ng.CardContent("mining info", ng.CardColorGet(),
+								).Rigid(
 									ng.Flex().
 										Rigid(
-											ng.Body1("I will show the current data about difficulty adjustment").Color(ng.CardColorGet()).Fn,
+											ng.Body1("mode").Fn,
 										).
-										Fn,
-								),
-								ng.CardContent("log", ng.CardColorGet(),
-									ng.Flex().
-										Flexed(1,
-											ng.Body1("i will become a log viewer").Color(ng.CardColorGet()).Fn,
-										).
-										Fn,
-								),
-								ng.CardContent("hash", ng.CardColorGet(),
-									ng.Flex().
 										Rigid(
-											ng.Body1("i will show a graph of the hashrate on the lan").Color(ng.CardColorGet()).Fn,
-										).
-										Fn,
-								),
+											ng.Responsive(*ng.Size, p9.Widgets{
+												{
+													Widget: ng.VFlex().
+														Rigid(
+															ng.RadioButton(ng.enums["runmode"], "node", "node").Fn,
+														).
+														Rigid(
+															ng.RadioButton(ng.enums["runmode"], "wallet", "wallet").Fn,
+														).
+														Rigid(
+															ng.RadioButton(ng.enums["runmode"], "shell", "shell").Fn,
+														).Fn,
+												},
+												{Size: 512,
+													Widget: ng.Flex().
+														Rigid(
+															ng.RadioButton(ng.enums["runmode"], "node", "node").Fn,
+														).
+														Rigid(
+															ng.RadioButton(ng.enums["runmode"], "wallet", "wallet").Fn,
+														).
+														Rigid(
+															ng.RadioButton(ng.enums["runmode"], "shell", "shell").Fn,
+														).Fn,
+												},
+											}).Fn,
+										).Fn,
+								).Fn,
 							),
-						).Fn(gtx)
+							ng.CardContent("mining info", ng.CardColorGet(),
+								ng.Flex().
+									Rigid(
+										ng.Body1("I will show the current data about difficulty adjustment").Color(ng.CardColorGet()).Fn,
+									).
+									Fn,
+							),
+							ng.CardContent("network hashrate", ng.CardColorGet(),
+								ng.Flex().
+									Rigid(
+										ng.Body1("i will show a graph of the hashrate on the lan").Color(ng.CardColorGet()).Fn,
+									).
+									Fn,
+							),
+							ng.CardContent("log", ng.CardColorGet(),
+								ng.Flex().
+									Flexed(1,
+										ng.Body1("i will become a log viewer").Color(ng.CardColorGet()).Fn,
+									).
+									Fn,
+							),
+						),
+					).Fn(gtx)
 				},
 			},
 		}),
@@ -82,7 +116,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 							Rigid(
 								ng.Button(ng.quitClickable.SetClick(func() {
 									interrupt.Request()
-								})).Color(ng.TitleBarColorGet()).TextScale(2).Text("yes").Fn,
+								})).Color(ng.TitleBarColorGet()).TextScale(2).Text("yes!!!").Fn,
 							).Fn,
 					).
 					Fn(gtx)
@@ -93,20 +127,24 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 	ng.SideBar([]l.Widget{
 		ng.SideBarButton("overview", "main", 0),
 		ng.SideBarButton("settings", "settings", 5),
-		ng.SideBarButton("help", "help", 6),
+		// ng.SideBarButton("help", "help", 6),
 		ng.SideBarButton("log", "log", 7),
-		ng.SideBarButton("quit", "quit", 8),
+		// ng.SideBarButton("quit", "quit", 8),
 	})
 	ng.ButtonBar([]l.Widget{
 		ng.PageTopBarButton("help", 0, icons.ActionHelp),
-		ng.PageTopBarButton("log", 1, icons.ActionList),
-		ng.PageTopBarButton("settings", 2, icons.ActionSettings),
+		// ng.PageTopBarButton("log", 1, icons.ActionList),
+		// ng.PageTopBarButton("settings", 2, icons.ActionSettings),
 		ng.PageTopBarButton("quit", 3, icons.ActionExitToApp),
 	})
 	ng.StatusBar([]l.Widget{
-		ng.StatusBarButton("help", 0, icons.ActionHelp),
-		ng.StatusBarButton("log", 1, icons.ActionList),
-		ng.StatusBarButton("settings", 2, icons.ActionSettings),
+		ng.RunStatusButton(),
+		// ng.StatusBarButton("help", 0, icons.AVPlayArrow),
+		ng.Flex().Rigid(
+			ng.StatusBarButton("log", 1, icons.ActionList),
+		).Rigid(
+			ng.StatusBarButton("settings", 2, icons.ActionSettings),
+		).Fn,
 	})
 	ng.Title("node")
 	return
@@ -123,7 +161,13 @@ func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.D
 				Rigid(
 					ng.Responsive(*ng.Size, p9.Widgets{
 						{
-							Widget: ng.Inset(0.25, ng.H5(title).Color(ng.BodyColorGet()).Fn).Fn,
+							Widget: func(gtx l.Context) l.Dimensions {
+								if ng.MenuOpen {
+									return p9.EmptySpace(0, 0)(gtx)
+								} else {
+									return ng.Inset(0.25, ng.H6(title).Color(ng.BodyColorGet()).Fn).Fn(gtx)
+								}
+							},
 						},
 						{
 							Size:   800,
@@ -214,8 +258,11 @@ func (ng *NodeGUI) StatusBarButton(name string, index int, ico []byte) func(gtx 
 	return func(gtx l.Context) l.Dimensions {
 		background := ng.StatusBarBackgroundGet()
 		color := ng.StatusBarColorGet()
+		if ng.ActivePageGet() == name {
+			background = ng.BodyBackgroundGet()
+		}
 		ic := ng.Icon().
-			Scale(p9.Scales["H5"]).
+			Scale(p9.Scales["H4"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -224,7 +271,7 @@ func (ng *NodeGUI) StatusBarButton(name string, index int, ico []byte) func(gtx 
 				ng.ButtonLayout(ng.statusBarButtons[index]).
 					CornerRadius(0).
 					Embed(
-						ic,
+						ng.Inset(0.066, ic).Fn,
 					).
 					Background(background).
 					SetClick(
@@ -236,5 +283,62 @@ func (ng *NodeGUI) StatusBarButton(name string, index int, ico []byte) func(gtx 
 						}).
 					Fn,
 			).Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
+	t, f := icons.AVStop, icons.AVPlayArrow
+	return func(gtx l.Context) l.Dimensions {
+		state := ng.bools["runstate"].GetValue()
+		background := ng.StatusBarBackgroundGet()
+		color := ng.StatusBarColorGet()
+		var st bool
+		if state {
+			st = true
+			background = "Primary"
+		}
+		var ico []byte
+		if st {
+			ico = t
+		} else {
+			ico = f
+		}
+		ic := ng.Icon().
+			Scale(p9.Scales["H4"]).
+			Color(color).
+			Src(ico).
+			Fn
+		return ng.Flex().
+			Rigid(
+				ng.ButtonLayout(ng.statusBarButtons[0]).
+					CornerRadius(0).
+					Embed(
+						ng.Inset(0.066, ic).Fn,
+					).
+					Background(background).
+					SetClick(
+						func() {
+							ng.bools["runstate"].Value(!ng.bools["runstate"].GetValue())
+						}).
+					Fn,
+			).
+			Rigid(
+				ng.Inset(0.33,
+					p9.If(ng.bools["runstate"].GetValue(),
+						ng.Indefinite().Scale(p9.Scales["H5"]).Fn,
+						ng.Icon().
+							Scale(p9.Scales["H5"]).
+							Color("Primary").
+							Src(icons.ActionCheckCircle).
+							Fn,
+					),
+				).Fn,
+			).
+			Rigid(
+				ng.Inset(0.33,
+					ng.H5("256789").Color(color).Fn,
+				).Fn,
+			).
+			Fn(gtx)
 	}
 }

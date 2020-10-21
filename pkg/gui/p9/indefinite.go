@@ -11,13 +11,12 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/unit"
 )
 
 type Indefinite struct {
 	th    *Theme
 	color color.RGBA
-	scale unit.Value
+	scale float32
 }
 
 // Indefinite creates an indefinite loading animation icon
@@ -30,7 +29,7 @@ func (th *Theme) Indefinite() *Indefinite {
 
 // Scale sets the size of the spinner
 func (lo *Indefinite) Scale(scale float32) *Indefinite {
-	lo.scale = lo.th.TextSize.Scale(scale)
+	lo.scale = scale
 	return lo
 }
 
@@ -47,7 +46,7 @@ func (lo *Indefinite) Fn(gtx l.Context) l.Dimensions {
 		diam = minY
 	}
 	if diam == 0 {
-		diam = gtx.Px(lo.th.TextSize.Scale( 2))
+		diam = gtx.Px(lo.th.TextSize.Scale(lo.scale))
 	}
 	sz := gtx.Constraints.Constrain(image.Pt(diam, diam))
 	radius := float64(sz.X) * .5

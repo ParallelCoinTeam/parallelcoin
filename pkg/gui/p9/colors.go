@@ -177,10 +177,10 @@ func (c Colors) SetTheme(dark bool) {
 		c["Secondary"] = c["SecondaryDim"]
 
 		c["DocText"] = c["light"]
-		c["DocBg"] = c["black"]
+		c["DocBg"] = c["dark"]
 
 		c["PanelText"] = c["light"]
-		c["PanelBg"] = c["dark"]
+		c["PanelBg"] = c["black"]
 
 		c["PanelTextDim"] = c["light-grayii"]
 		c["PanelBgDim"] = c["light-gray"]

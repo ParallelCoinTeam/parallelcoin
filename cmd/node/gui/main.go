@@ -24,17 +24,19 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 }
 
 type NodeGUI struct {
-	cx   *conte.Xt
-	c    *cli.Context
-	w    *f.Window
-	th   *p9.Theme
-	size *int
+	cx      *conte.Xt
+	c       *cli.Context
+	w       *f.Window
+	th      *p9.Theme
+	size    *int
+	runMode string
 	*p9.App
 	sidebarButtons   []*p9.Clickable
 	buttonBarButtons []*p9.Clickable
 	statusBarButtons []*p9.Clickable
 	bools            map[string]*p9.Bool
 	lists            map[string]*p9.List
+	enums            map[string]*p9.Enum
 	quitClickable    *p9.Clickable
 	invalidate       chan struct{}
 	quit             chan struct{}
@@ -43,6 +45,7 @@ type NodeGUI struct {
 func (ng *NodeGUI) Run() (err error) {
 	ng.th = p9.NewTheme(p9fonts.Collection(), ng.quit)
 	ng.th.Colors.SetTheme(ng.th.Dark)
+	ng.runMode = "node"
 	ng.sidebarButtons = make([]*p9.Clickable, 9)
 	for i := range ng.sidebarButtons {
 		ng.sidebarButtons[i] = ng.th.Clickable()
@@ -54,6 +57,9 @@ func (ng *NodeGUI) Run() (err error) {
 	ng.statusBarButtons = make([]*p9.Clickable, 3)
 	for i := range ng.statusBarButtons {
 		ng.statusBarButtons[i] = ng.th.Clickable()
+	}
+	ng.enums = map[string]*p9.Enum{
+		"runmode": ng.th.Enum().SetValue(ng.runMode),
 	}
 	ng.bools = map[string]*p9.Bool{
 		"runstate": ng.th.Bool(false).SetOnChange(func(b bool) {

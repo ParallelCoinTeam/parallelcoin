@@ -64,11 +64,11 @@ func (th *Theme) App(size int) *App {
 		layers:              nil,
 		pages:               make(map[string]l.Widget),
 		root:                th.Stack(),
-		sideBarSize:         th.TextSize.Scale(20),
+		sideBarSize:         th.TextSize.Scale(12),
 		sideBarBackground:   "DocBg",
 		sideBarColor:        "DocText",
-		statusBarBackground: "DocText",
-		statusBarColor:      "DocBg",
+		statusBarBackground: "DocBg",
+		statusBarColor:      "DocText",
 		sideBarList:         th.List(),
 		logo:                ico.ParallelCoin,
 		logoClickable:       th.Clickable(),
@@ -114,9 +114,9 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 	}
 	out :=
 	// a.Fill("PanelBg",
-		a.Inset(0.25,
-			bar.Fn,
-		).Fn
+	// 	a.Inset(0.25,
+			bar.Fn
+		// ).Fn
 	// ).Fn
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	dims := a.Fill(a.statusBarBackground, out).Fn(gtx)
@@ -265,8 +265,8 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 			a.Responsive(*a.Size, Widgets{
 				{Size: 800,
 					Widget:
-					a.Inset(0.375,
-						a.H6(a.title).Color("Light").Fn,
+					a.Inset(0.33,
+						a.H5(a.title).Color("Light").Fn,
 					).Fn,
 				},
 				{
@@ -315,10 +315,16 @@ func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
 
 func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
-		out := a.VFlex()
-		for i := range a.sideBar {
-			out.Rigid(a.sideBar[i])
-		}
+		out := a.sideBarList.Length(len(a.sideBar)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+			gtx.Constraints.Max.X = int(a.sideBarSize.V) - 2*a.scrollBarSize
+			gtx.Constraints.Min.X = 0
+			return a.sideBar[index](gtx)
+			// out := a.VFlex()
+			// for i := range a.sideBar {
+			// 	out.Rigid(a.sideBar[i])
+			// }
+			// return out.Fn(gtx)
+		})
 		// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
 		return out.Fn(gtx)
 	}
