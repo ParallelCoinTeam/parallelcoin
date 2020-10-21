@@ -32,7 +32,7 @@ type App struct {
 	menuColor           string
 	menuIcon            []byte
 	MenuOpen            bool
-	pages               map[string]l.Widget
+	pages               WidgetMap
 	root                *Stack
 	sideBar             []l.Widget
 	sideBarBackground   string
@@ -49,6 +49,8 @@ type App struct {
 	titleFont           string
 }
 
+type WidgetMap map[string]l.Widget
+
 func (th *Theme) App(size int) *App {
 	mc := th.Clickable()
 	return &App{
@@ -62,7 +64,7 @@ func (th *Theme) App(size int) *App {
 		hideSideBar:         false,
 		hideTitleBar:        false,
 		layers:              nil,
-		pages:               make(map[string]l.Widget),
+		pages:               make(WidgetMap),
 		root:                th.Stack(),
 		sideBarSize:         th.TextSize.Scale(12),
 		sideBarBackground:   "DocBg",
@@ -426,11 +428,11 @@ func (a *App) MenuIconGet() []byte {
 	return a.menuIcon
 }
 
-func (a *App) Pages(widgets map[string]l.Widget) *App {
+func (a *App) Pages(widgets WidgetMap) *App {
 	a.pages = widgets
 	return a
 }
-func (a *App) PagesGet() map[string]l.Widget {
+func (a *App) PagesGet() WidgetMap {
 	return a.pages
 }
 

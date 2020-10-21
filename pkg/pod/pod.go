@@ -80,6 +80,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 			options = network
 		}
 		f := Field{
+			Slug:        field.Name,
 			Group:       field.Tag.Get("group"),
 			Type:        field.Tag.Get("type"),
 			Label:       field.Tag.Get("label"),
