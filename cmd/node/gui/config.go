@@ -10,10 +10,11 @@ import (
 )
 
 type Item struct {
+	slug        string
 	typ         string
 	label       string
 	description string
-	inputType   string
+	widget      string
 	dataType    string
 	options     []string
 	slot        interface{}
@@ -81,14 +82,7 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 			li = append(li, ListItem{
 				name: j,
 				widget: func(gtx l.Context) l.Dimensions {
-					return ng.VFlex().
-						Rigid(
-							ng.Body1(gmij.label).Fn,
-						).
-						Rigid(
-							ng.Caption(gmij.description).Fn,
-						).
-						Fn(gtx)
+					return ng.RenderConfigItem(gmij)(gtx)
 				},
 			})
 		}
@@ -132,7 +126,25 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 	}
 }
 
-
+func (ng *NodeGUI) RenderConfigItem(item *Item) l.Widget {
+	sl := item.slug
+	ty := item.typ
+	wi := item.widget
+	// dt := item.dataType
+	opts := item.options
+	slot := item.slot
+	Debug(sl, wi, ty, opts, slot)
+	return func(gtx l.Context) l.Dimensions {
+		return ng.VFlex().
+			Rigid(
+				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.Caption(item.description).Fn,
+			).
+			Fn(gtx)
+	}
+}
 
 func (ng *NodeGUI) Config() l.Widget {
 	schema := pod.GetConfigSchema(ng.cx.Config, ng.cx.ConfigMap)
@@ -145,10 +157,11 @@ func (ng *NodeGUI) Config() l.Widget {
 				tabNames[sgf.Group] = make(ItemMap)
 			}
 			tabNames[sgf.Group][sgf.Slug] = &Item{
+				slug:        sgf.Slug,
 				typ:         sgf.Type,
 				label:       sgf.Label,
 				description: sgf.Description,
-				inputType:   sgf.InputType,
+				widget:      sgf.Widget,
 				dataType:    sgf.Datatype,
 				options:     sgf.Options,
 			}
