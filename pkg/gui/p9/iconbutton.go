@@ -32,7 +32,7 @@ func (th *Theme) IconButton(button *Clickable) *IconButton {
 		background: th.Colors.Get("Primary"),
 		color:      th.Colors.Get("DocBg"),
 		size:       th.TextSize,
-		inset:      th.Inset(0.33),
+		inset:      th.Inset(0.33, nil),
 		button:     button,
 		icon:       th.Icon(),
 	}
@@ -51,22 +51,20 @@ func (b *IconButton) Color(color string) *IconButton {
 }
 
 // Icon sets the icon to display
-func (b *IconButton) Icon(data []byte) *IconButton {
-	b.icon.color = b.color
-	b.icon.Size(b.size)
-	b.icon.Src(data)
+func (b *IconButton) Icon(ic *Icon) *IconButton {
+	b.icon = ic
 	return b
 }
 
 // Scale changes the size of the icon as a ratio of the base font size
 func (b *IconButton) Scale(scale float32) *IconButton {
-	b.size = b.th.TextSize.Scale(scale*0.72)
+	b.size = b.th.TextSize.Scale(scale * 0.72)
 	return b
 }
 
 // Inset sets the size of inset that goes in between the button background and the icon
 func (b *IconButton) Inset(inset float32) *IconButton {
-	b.inset = b.th.Inset(inset).Embed(b.button.Fn)
+	b.inset = b.th.Inset(inset, b.button.Fn)
 	return b
 }
 

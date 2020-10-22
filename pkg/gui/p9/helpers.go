@@ -3,9 +3,12 @@ package p9
 import (
 	"image"
 	"image/color"
+	"time"
 
 	"gioui.org/f32"
+	"gioui.org/io/system"
 	l "gioui.org/layout"
+	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/text"
 )
@@ -69,7 +72,6 @@ func axisMain(a l.Axis, sz image.Point) int {
 	}
 }
 
-
 func axisCross(a l.Axis, sz image.Point) int {
 	if a == l.Horizontal {
 		return sz.Y
@@ -99,5 +101,86 @@ func axisConstraints(a l.Axis, mainMin, mainMax, crossMin, crossMax int) l.Const
 		return l.Constraints{Min: image.Pt(mainMin, crossMin), Max: image.Pt(mainMax, crossMax)}
 	} else {
 		return l.Constraints{Min: image.Pt(crossMin, mainMin), Max: image.Pt(crossMax, mainMax)}
+	}
+}
+
+func EmptySpace(x, y int) func(gtx l.Context) l.Dimensions {
+	return func(gtx l.Context) l.Dimensions {
+		return l.Dimensions{
+			Size: image.Point{
+				X: x,
+				Y: y,
+			},
+		}
+	}
+}
+
+func EmptyFromSize(size image.Point) func(gtx l.Context) l.Dimensions {
+	return func(gtx l.Context) l.Dimensions {
+		return l.Dimensions{
+			Size: size,
+		}
+	}
+}
+
+func EmptyMaxWidth() func(gtx l.Context) l.Dimensions {
+	return func(gtx l.Context) l.Dimensions {
+		return l.Dimensions{
+			Size:     image.Point{X: gtx.Constraints.Max.X},
+			Baseline: 0,
+		}
+	}
+}
+func EmptyMaxHeight() func(gtx l.Context) l.Dimensions {
+	return func(gtx l.Context) l.Dimensions {
+		return l.Dimensions{Size: image.Point{X: gtx.Constraints.Min.X, Y: gtx.Constraints.Max.Y}}
+	}
+}
+
+func EmptyMinWidth() func(gtx l.Context) l.Dimensions {
+	return func(gtx l.Context) l.Dimensions {
+		return l.Dimensions{
+			Size:     image.Point{X: gtx.Constraints.Min.X},
+			Baseline: 0,
+		}
+	}
+}
+func EmptyMinHeight() func(gtx l.Context) l.Dimensions {
+	return func(gtx l.Context) l.Dimensions {
+		return l.Dimensions{Size: image.Point{Y: gtx.Constraints.Min.Y}}
+	}
+}
+
+// CopyContextDimensions copies the dimensions out with infinite along the axis for precomputing dimensions
+func CopyContextDimensions(gtx l.Context, size image.Point, axis l.Axis) l.Context {
+	ip := image.Point{}
+	if axis == l.Horizontal {
+		ip.Y = size.Y
+		ip.X = Inf
+	} else {
+		ip.Y = Inf
+		ip.X = size.X
+	}
+	var ops op.Ops
+	gtx1 := l.NewContext(&ops, system.FrameEvent{
+		Now:    time.Now(),
+		Metric: gtx.Metric,
+		Size:   ip,
+	})
+	if axis == l.Horizontal {
+		gtx1.Constraints.Min.X = 0
+		gtx1.Constraints.Min.Y = gtx.Constraints.Min.Y
+	} else {
+		gtx1.Constraints.Min.X = gtx.Constraints.Min.X
+		gtx1.Constraints.Min.Y = 0
+	}
+	return gtx1
+}
+
+func If(value bool, t, f l.Widget) l.Widget {
+	if value {
+		return t
+	} else {
+		return f
 	}
 }

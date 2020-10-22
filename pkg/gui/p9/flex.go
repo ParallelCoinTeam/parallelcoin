@@ -10,8 +10,12 @@ type Flex struct {
 
 // Flex creates a new flex layout
 func (th *Theme) Flex() (out *Flex) {
-	out = &Flex{}
-	return
+	return new(Flex)
+}
+
+// Flex creates a new flex layout
+func (th *Theme) VFlex() (out *Flex) {
+	return new(Flex).Vertical()
 }
 
 // alignment setters
@@ -39,7 +43,6 @@ func (f *Flex) AlignBaseline() (out *Flex) {
 	f.flex.Alignment = l.Baseline
 	return f
 }
-
 
 // Axis setters
 

@@ -11,13 +11,11 @@ type Inset struct {
 }
 
 // Inset creates a padded empty space around a widget
-func (th *Theme) Inset(pad float32) (out *Inset) {
+func (th *Theme) Inset(pad float32, w l.Widget) (out *Inset) {
 	out = &Inset{
 		th: th,
-		in: l.UniformInset(
-			th.
-				TextSize.
-				Scale(pad)),
+		in: l.UniformInset(th.TextSize.Scale(pad)),
+		w:  w,
 	}
 	return
 }

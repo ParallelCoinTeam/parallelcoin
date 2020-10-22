@@ -15,9 +15,9 @@ type (
 
 type Page struct {
 	Title  string
-	Header layout.Widget
-	Body   layout.Widget
-	Footer layout.Widget
+	Header W
+	Body   W
+	Footer W
 }
 
 func (p *Page) P(th *theme.Theme, ly string) func(gtx C) D {

@@ -80,6 +80,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 			options = network
 		}
 		f := Field{
+			Slug:        field.Name,
 			Group:       field.Tag.Get("group"),
 			Type:        field.Tag.Get("type"),
 			Label:       field.Tag.Get("label"),
@@ -136,11 +137,11 @@ type Config struct {
 	BlockPrioritySize      *int             `group:"mining" label:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"input" inputType:"number" json:"BlockPrioritySize" hook:"restart"`
 	BlocksOnly             *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" json:"BlocksOnly" hook:"restart"`
 	CAFile                 *string          `group:"tls" label:"Certificate Authority File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" json:"CAFile" hook:"restart"`
-	ConfigFile             *string          `group:"" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"input" inputType:"text" json:"ConfigFile" hook:"restart"`
+	ConfigFile             *string          `group:"config" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"input" inputType:"text" json:"ConfigFile" hook:"restart"`
 	ConnectPeers           *cli.StringSlice `group:"node" label:"Connect Peers" description:"connect ONLY to these addresses (disables inbound connections)" type:"stringSlice" inputType:"text" json:"ConnectPeers" hook:"restart"`
 	Controller             *string          `group:"mining" label:"Controller Listener" description:"address to bind miner controller to" type:"input" inputType:"text" json:"Controller" hook:"controller"`
 	CPUProfile             *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" json:"CPUProfile" hook:"restart"`
-	DataDir                *string          `group:"" label:"Data Directory" description:"root folder where application data is stored" type:"input" inputType:"text" json:"DataDir" hook:"restart"`
+	DataDir                *string          `group:"config" label:"Data Directory" description:"root folder where application data is stored" type:"input" inputType:"text" json:"DataDir" hook:"restart"`
 	DbType                 *string          `group:"debug" label:"Database Type" description:"type of database storage engine to use (only one right now)" type:"input" inputType:"text" json:"DbType" hook:"restart"`
 	DisableBanning         *bool            `group:"debug" label:"Disable Banning" description:"disables banning of misbehaving peers" type:"switch" json:"DisableBanning" hook:"restart"`
 	DisableCheckpoints     *bool            `group:"debug" label:"Disable Checkpoints" description:"disables all checkpoints" type:"switch" json:"DisableCheckpoints" hook:"restart"`
@@ -160,7 +161,7 @@ type Config struct {
 	MaxOrphanTxs           *int             `group:"policy" label:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"input" inputType:"number" json:"MaxOrphanTxs" hook:"restart"`
 	MaxPeers               *int             `group:"node" label:"Max Peers" description:"maximum number of peers to hold connections with" type:"input" inputType:"number" json:"MaxPeers" hook:"restart"`
 	MinerPass              *string          `group:"mining" label:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"password" json:"MinerPass" hook:"restart"`
-	MiningAddrs            *cli.StringSlice `group:"" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"stringSlice" inputType:"text" json:"MiningAddrs" hook:"miningaddr"`
+	MiningAddrs            *cli.StringSlice `group:"mining" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"stringSlice" inputType:"text" json:"MiningAddrs" hook:"miningaddr"`
 	MinRelayTxFee          *float64         `group:"policy" label:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"decimal" json:"MinRelayTxFee" hook:"restart"`
 	Network                *string          `group:"node" label:"Network" description:"connect to this network: mainnet, testnet)" type:"input" inputType:"text" json:"Network" hook:"restart"`
 	NoCFilters             *bool            `group:"node" label:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" json:"NoCFilters" hook:"restart"`
@@ -174,7 +175,7 @@ type Config struct {
 	OnionProxyPass         *string          `group:"proxy" label:"Onion Proxy Pass" description:"password for tor proxy" type:"input" inputType:"password" json:"OnionProxyPass" hook:"restart"`
 	OnionProxyUser         *string          `group:"proxy" label:"Onion Proxy User" description:"tor proxy username" type:"input" inputType:"text" json:"OnionProxyUser" hook:"restart"`
 	Password               *string          `group:"rpc" label:"Password" description:"password for client RPC connections" type:"input" inputType:"password" json:"Password" hook:"restart"`
-	PipeLog                *bool            `group:"" label:"" description:"enable pipe based loggerIPC" type:"switch" json:"PipeLog" hook:""`
+	PipeLog                *bool            `group:"config" label:"" description:"enable pipe based loggerIPC" type:"switch" json:"PipeLog" hook:""`
 	Profile                *string          `group:"debug" label:"Profile" description:"http profiling on given port (1024-40000)" type:"input" inputType:"text" json:"Profile" hook:"restart"`
 	Proxy                  *string          `group:"proxy" label:"Proxy" description:"address of proxy to connect to for outbound connections" type:"input" inputType:"text" json:"Proxy" hook:"restart"`
 	ProxyPass              *string          `group:"proxy" label:"Proxy Pass" description:"proxy password, if required" type:"input" inputType:"password" json:"ProxyPass" hook:"restart"`
@@ -213,7 +214,8 @@ type Config struct {
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"stringSlice" inputType:"text" json:"Whitelists" hook:"restart"`
 	LAN                    *bool            `group:"debug" label:"LAN" description:"run without any connection to nodes on the internet (does not apply on mainnet)" type:"switch" json:"LAN" hook:"restart"`
 	KopachGUI              *bool            `group:"mining" label:"Kopach GUI" description:"enables GUI for miner" type:"switch" json:"kopachgui" hook:"restart"`
-	DarkTheme              *bool            `group:"" label:"Dark Theme" description:"sets dark theme for GUI" type:"switch" json:"darktheme" hook:"restart"`
+	GUI                    *bool            `group:"mining" label:"GUI" description:"enables GUI" type:"switch" json:"gui" hook:"restart"`
+	DarkTheme              *bool            `group:"config" label:"Dark Theme" description:"sets dark theme for GUI" type:"switch" json:"darktheme" hook:"restart"`
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
@@ -249,6 +251,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		Generate:               newbool(),
 		GenThreads:             newint(),
 		KopachGUI:              newbool(),
+		GUI:                    newbool(),
 		LAN:                    newbool(),
 		Language:               newstring(),
 		LimitPass:              newstring(),
@@ -342,6 +345,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"Generate":               c.Generate,
 		"GenThreads":             c.GenThreads,
 		"KopachGUI":              c.KopachGUI,
+		"GUI":                    c.GUI,
 		"LAN":                    c.LAN,
 		"Language":               c.Language,
 		"LimitPass":              c.LimitPass,

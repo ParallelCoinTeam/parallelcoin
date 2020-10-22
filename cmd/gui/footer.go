@@ -1,4 +1,4 @@
-package gwallet
+package gui
 
 import (
 	"gioui.org/text"
@@ -21,7 +21,7 @@ var (
 	}
 )
 
-func (g *GioWallet) footer() func(gtx C) D {
+func (g *GuiAppModel) footer() func(gtx C) D {
 	//return ContainerLayout(d.UI.Theme.Colors["Info"], d.UI.Theme.Colors["Info"], d.UI.Theme.Colors["Info"], 0, 0, 0, func(gtx C) D {
 	return box.BoxBase(g.ui.Theme.Colors["FooterBg"], func(gtx C) D {
 		return lyt.Format(gtx, "hflex(middle,f(1,inset(16dp0dp16dp6dp,_)),r(inset(0dp0dp0dp0dp,_)))",
@@ -31,7 +31,7 @@ func (g *GioWallet) footer() func(gtx C) D {
 	})
 }
 
-func (g *GioWallet) footerMenu() func(gtx C) D {
+func (g *GuiAppModel) footerMenu() func(gtx C) D {
 	return func(gtx C) D {
 		return lyt.Format(gtx, "hflex(middle,r(_),r(_),r(_))",
 			footerButton(g.ui.Theme, sendBtn, "Send", func() {}),
@@ -42,7 +42,7 @@ func (g *GioWallet) footerMenu() func(gtx C) D {
 
 }
 
-func (g *GioWallet) footerStatus() func(gtx C) D {
+func (g *GuiAppModel) footerStatus() func(gtx C) D {
 	return func(gtx C) D {
 		return lyt.Format(gtx, "hflex(middle,r(inset(0dp0dp0dp0dp,_)),f(1,_))",
 			//ContainerLayout(d.UI.Theme.Colors["White"], d.UI.Theme.Colors["Dark"], d.UI.Theme.Colors["White"], 1, 1, 1, func(gtx C) D {

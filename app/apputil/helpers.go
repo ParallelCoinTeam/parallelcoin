@@ -7,8 +7,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-// NewCommand returns a cli.Command
-func NewCommand(name string, usage string, action interface{}, subcommands cli.Commands, flags []cli.Flag, aliases ...string) cli.Command {
+// Command returns a cli.Command
+func Command(name string, usage string, action interface{}, subcommands cli.Commands, flags []cli.Flag, aliases ...string) cli.Command {
 	return cli.Command{
 		Name:        name,
 		Aliases:     aliases,

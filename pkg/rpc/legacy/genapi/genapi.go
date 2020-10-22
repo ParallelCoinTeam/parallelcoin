@@ -490,13 +490,13 @@ func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet,
 
 // RPC API functions to use with net/rpc
 {{range .}}
-func (c *CAPI) {{.Handler}}(req *{{.Cmd}}, resp *{{.ResType}}) (err error) {
+func (c *CAPI) {{.Handler}}(req {{.Cmd}}, resp {{.ResType}}) (err error) {
 	nrh := ` + RPCMapName + `
 	res := nrh["{{.Method}}"].Result()
 	res.Params = req
 	nrh["{{.Method}}"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan {{.ResType}}):
+	case resp = <-res.Ch.(chan {{.ResType}}):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 

@@ -2543,611 +2543,611 @@ func RunAPI(server *Server, quit chan struct{}) {
 
 // RPC API functions to use with net/rpc
 
-func (c *CAPI) AddNode(req **btcjson.AddNodeCmd, resp *None) (err error) {
+func (c *CAPI) AddNode(req *btcjson.AddNodeCmd, resp None) (err error) {
 	nrh := RPCHandlers
 	res := nrh["addnode"].Result()
 	res.Params = req
 	nrh["addnode"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan None):
+	case resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) CreateRawTransaction(req **btcjson.CreateRawTransactionCmd, resp *string) (err error) {
+func (c *CAPI) CreateRawTransaction(req *btcjson.CreateRawTransactionCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["createrawtransaction"].Result()
 	res.Params = req
 	nrh["createrawtransaction"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) DecodeRawTransaction(req **btcjson.DecodeRawTransactionCmd, resp *btcjson.TxRawDecodeResult) (err error) {
+func (c *CAPI) DecodeRawTransaction(req *btcjson.DecodeRawTransactionCmd, resp btcjson.TxRawDecodeResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["decoderawtransaction"].Result()
 	res.Params = req
 	nrh["decoderawtransaction"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.TxRawDecodeResult):
+	case resp = <-res.Ch.(chan btcjson.TxRawDecodeResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) DecodeScript(req **btcjson.DecodeScriptCmd, resp *btcjson.DecodeScriptResult) (err error) {
+func (c *CAPI) DecodeScript(req *btcjson.DecodeScriptCmd, resp btcjson.DecodeScriptResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["decodescript"].Result()
 	res.Params = req
 	nrh["decodescript"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.DecodeScriptResult):
+	case resp = <-res.Ch.(chan btcjson.DecodeScriptResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) EstimateFee(req **btcjson.EstimateFeeCmd, resp *float64) (err error) {
+func (c *CAPI) EstimateFee(req *btcjson.EstimateFeeCmd, resp float64) (err error) {
 	nrh := RPCHandlers
 	res := nrh["estimatefee"].Result()
 	res.Params = req
 	nrh["estimatefee"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan float64):
+	case resp = <-res.Ch.(chan float64):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) Generate(req **None, resp *[]string) (err error) {
+func (c *CAPI) Generate(req *None, resp []string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["generate"].Result()
 	res.Params = req
 	nrh["generate"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan []string):
+	case resp = <-res.Ch.(chan []string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetAddedNodeInfo(req **btcjson.GetAddedNodeInfoCmd, resp *[]btcjson.GetAddedNodeInfoResultAddr) (err error) {
+func (c *CAPI) GetAddedNodeInfo(req *btcjson.GetAddedNodeInfoCmd, resp []btcjson.GetAddedNodeInfoResultAddr) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getaddednodeinfo"].Result()
 	res.Params = req
 	nrh["getaddednodeinfo"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan []btcjson.GetAddedNodeInfoResultAddr):
+	case resp = <-res.Ch.(chan []btcjson.GetAddedNodeInfoResultAddr):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetBestBlock(req **None, resp *btcjson.GetBestBlockResult) (err error) {
+func (c *CAPI) GetBestBlock(req *None, resp btcjson.GetBestBlockResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getbestblock"].Result()
 	res.Params = req
 	nrh["getbestblock"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.GetBestBlockResult):
+	case resp = <-res.Ch.(chan btcjson.GetBestBlockResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetBestBlockHash(req **None, resp *string) (err error) {
+func (c *CAPI) GetBestBlockHash(req *None, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getbestblockhash"].Result()
 	res.Params = req
 	nrh["getbestblockhash"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetBlock(req **btcjson.GetBlockCmd, resp *btcjson.GetBlockVerboseResult) (err error) {
+func (c *CAPI) GetBlock(req *btcjson.GetBlockCmd, resp btcjson.GetBlockVerboseResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getblock"].Result()
 	res.Params = req
 	nrh["getblock"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.GetBlockVerboseResult):
+	case resp = <-res.Ch.(chan btcjson.GetBlockVerboseResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetBlockChainInfo(req **None, resp *btcjson.GetBlockChainInfoResult) (err error) {
+func (c *CAPI) GetBlockChainInfo(req *None, resp btcjson.GetBlockChainInfoResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getblockchaininfo"].Result()
 	res.Params = req
 	nrh["getblockchaininfo"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.GetBlockChainInfoResult):
+	case resp = <-res.Ch.(chan btcjson.GetBlockChainInfoResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetBlockCount(req **None, resp *int64) (err error) {
+func (c *CAPI) GetBlockCount(req *None, resp int64) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getblockcount"].Result()
 	res.Params = req
 	nrh["getblockcount"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan int64):
+	case resp = <-res.Ch.(chan int64):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetBlockHash(req **btcjson.GetBlockHashCmd, resp *string) (err error) {
+func (c *CAPI) GetBlockHash(req *btcjson.GetBlockHashCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getblockhash"].Result()
 	res.Params = req
 	nrh["getblockhash"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetBlockHeader(req **btcjson.GetBlockHeaderCmd, resp *btcjson.GetBlockHeaderVerboseResult) (err error) {
+func (c *CAPI) GetBlockHeader(req *btcjson.GetBlockHeaderCmd, resp btcjson.GetBlockHeaderVerboseResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getblockheader"].Result()
 	res.Params = req
 	nrh["getblockheader"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.GetBlockHeaderVerboseResult):
+	case resp = <-res.Ch.(chan btcjson.GetBlockHeaderVerboseResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetBlockTemplate(req **btcjson.GetBlockTemplateCmd, resp *string) (err error) {
+func (c *CAPI) GetBlockTemplate(req *btcjson.GetBlockTemplateCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getblocktemplate"].Result()
 	res.Params = req
 	nrh["getblocktemplate"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetCFilter(req **btcjson.GetCFilterCmd, resp *string) (err error) {
+func (c *CAPI) GetCFilter(req *btcjson.GetCFilterCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getcfilter"].Result()
 	res.Params = req
 	nrh["getcfilter"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetCFilterHeader(req **btcjson.GetCFilterHeaderCmd, resp *string) (err error) {
+func (c *CAPI) GetCFilterHeader(req *btcjson.GetCFilterHeaderCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getcfilterheader"].Result()
 	res.Params = req
 	nrh["getcfilterheader"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetConnectionCount(req **None, resp *int32) (err error) {
+func (c *CAPI) GetConnectionCount(req *None, resp int32) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getconnectioncount"].Result()
 	res.Params = req
 	nrh["getconnectioncount"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan int32):
+	case resp = <-res.Ch.(chan int32):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetCurrentNet(req **None, resp *string) (err error) {
+func (c *CAPI) GetCurrentNet(req *None, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getcurrentnet"].Result()
 	res.Params = req
 	nrh["getcurrentnet"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetDifficulty(req **btcjson.GetDifficultyCmd, resp *float64) (err error) {
+func (c *CAPI) GetDifficulty(req *btcjson.GetDifficultyCmd, resp float64) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getdifficulty"].Result()
 	res.Params = req
 	nrh["getdifficulty"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan float64):
+	case resp = <-res.Ch.(chan float64):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetGenerate(req **btcjson.GetHeadersCmd, resp *bool) (err error) {
+func (c *CAPI) GetGenerate(req *btcjson.GetHeadersCmd, resp bool) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getgenerate"].Result()
 	res.Params = req
 	nrh["getgenerate"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan bool):
+	case resp = <-res.Ch.(chan bool):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetHashesPerSec(req **None, resp *float64) (err error) {
+func (c *CAPI) GetHashesPerSec(req *None, resp float64) (err error) {
 	nrh := RPCHandlers
 	res := nrh["gethashespersec"].Result()
 	res.Params = req
 	nrh["gethashespersec"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan float64):
+	case resp = <-res.Ch.(chan float64):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetHeaders(req **btcjson.GetHeadersCmd, resp *[]string) (err error) {
+func (c *CAPI) GetHeaders(req *btcjson.GetHeadersCmd, resp []string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getheaders"].Result()
 	res.Params = req
 	nrh["getheaders"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan []string):
+	case resp = <-res.Ch.(chan []string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetInfo(req **None, resp *btcjson.InfoChainResult0) (err error) {
+func (c *CAPI) GetInfo(req *None, resp btcjson.InfoChainResult0) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getinfo"].Result()
 	res.Params = req
 	nrh["getinfo"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.InfoChainResult0):
+	case resp = <-res.Ch.(chan btcjson.InfoChainResult0):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetMempoolInfo(req **None, resp *btcjson.GetMempoolInfoResult) (err error) {
+func (c *CAPI) GetMempoolInfo(req *None, resp btcjson.GetMempoolInfoResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getmempoolinfo"].Result()
 	res.Params = req
 	nrh["getmempoolinfo"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.GetMempoolInfoResult):
+	case resp = <-res.Ch.(chan btcjson.GetMempoolInfoResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetMiningInfo(req **None, resp *btcjson.GetMiningInfoResult) (err error) {
+func (c *CAPI) GetMiningInfo(req *None, resp btcjson.GetMiningInfoResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getmininginfo"].Result()
 	res.Params = req
 	nrh["getmininginfo"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.GetMiningInfoResult):
+	case resp = <-res.Ch.(chan btcjson.GetMiningInfoResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetNetTotals(req **None, resp *btcjson.GetNetTotalsResult) (err error) {
+func (c *CAPI) GetNetTotals(req *None, resp btcjson.GetNetTotalsResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getnettotals"].Result()
 	res.Params = req
 	nrh["getnettotals"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.GetNetTotalsResult):
+	case resp = <-res.Ch.(chan btcjson.GetNetTotalsResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetNetworkHashPS(req **btcjson.GetNetworkHashPSCmd, resp *[]btcjson.GetPeerInfoResult) (err error) {
+func (c *CAPI) GetNetworkHashPS(req *btcjson.GetNetworkHashPSCmd, resp []btcjson.GetPeerInfoResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getnetworkhashps"].Result()
 	res.Params = req
 	nrh["getnetworkhashps"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan []btcjson.GetPeerInfoResult):
+	case resp = <-res.Ch.(chan []btcjson.GetPeerInfoResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetPeerInfo(req **None, resp *[]btcjson.GetPeerInfoResult) (err error) {
+func (c *CAPI) GetPeerInfo(req *None, resp []btcjson.GetPeerInfoResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getpeerinfo"].Result()
 	res.Params = req
 	nrh["getpeerinfo"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan []btcjson.GetPeerInfoResult):
+	case resp = <-res.Ch.(chan []btcjson.GetPeerInfoResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetRawMempool(req **btcjson.GetRawMempoolCmd, resp *[]string) (err error) {
+func (c *CAPI) GetRawMempool(req *btcjson.GetRawMempoolCmd, resp []string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getrawmempool"].Result()
 	res.Params = req
 	nrh["getrawmempool"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan []string):
+	case resp = <-res.Ch.(chan []string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetRawTransaction(req **btcjson.GetRawTransactionCmd, resp *string) (err error) {
+func (c *CAPI) GetRawTransaction(req *btcjson.GetRawTransactionCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["getrawtransaction"].Result()
 	res.Params = req
 	nrh["getrawtransaction"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) GetTxOut(req **btcjson.GetTxOutCmd, resp *string) (err error) {
+func (c *CAPI) GetTxOut(req *btcjson.GetTxOutCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["gettxout"].Result()
 	res.Params = req
 	nrh["gettxout"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) Help(req **btcjson.HelpCmd, resp *string) (err error) {
+func (c *CAPI) Help(req *btcjson.HelpCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["help"].Result()
 	res.Params = req
 	nrh["help"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) Node(req **btcjson.NodeCmd, resp *None) (err error) {
+func (c *CAPI) Node(req *btcjson.NodeCmd, resp None) (err error) {
 	nrh := RPCHandlers
 	res := nrh["node"].Result()
 	res.Params = req
 	nrh["node"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan None):
+	case resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) Ping(req **None, resp *None) (err error) {
+func (c *CAPI) Ping(req *None, resp None) (err error) {
 	nrh := RPCHandlers
 	res := nrh["ping"].Result()
 	res.Params = req
 	nrh["ping"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan None):
+	case resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) ResetChain(req **None, resp *None) (err error) {
+func (c *CAPI) ResetChain(req *None, resp None) (err error) {
 	nrh := RPCHandlers
 	res := nrh["resetchain"].Result()
 	res.Params = req
 	nrh["resetchain"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan None):
+	case resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) Restart(req **None, resp *None) (err error) {
+func (c *CAPI) Restart(req *None, resp None) (err error) {
 	nrh := RPCHandlers
 	res := nrh["restart"].Result()
 	res.Params = req
 	nrh["restart"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan None):
+	case resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) SearchRawTransactions(req **btcjson.SearchRawTransactionsCmd, resp *[]btcjson.SearchRawTransactionsResult) (err error) {
+func (c *CAPI) SearchRawTransactions(req *btcjson.SearchRawTransactionsCmd, resp []btcjson.SearchRawTransactionsResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["searchrawtransactions"].Result()
 	res.Params = req
 	nrh["searchrawtransactions"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan []btcjson.SearchRawTransactionsResult):
+	case resp = <-res.Ch.(chan []btcjson.SearchRawTransactionsResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) SendRawTransaction(req **btcjson.SendRawTransactionCmd, resp *None) (err error) {
+func (c *CAPI) SendRawTransaction(req *btcjson.SendRawTransactionCmd, resp None) (err error) {
 	nrh := RPCHandlers
 	res := nrh["sendrawtransaction"].Result()
 	res.Params = req
 	nrh["sendrawtransaction"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan None):
+	case resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) SetGenerate(req **btcjson.SetGenerateCmd, resp *None) (err error) {
+func (c *CAPI) SetGenerate(req *btcjson.SetGenerateCmd, resp None) (err error) {
 	nrh := RPCHandlers
 	res := nrh["setgenerate"].Result()
 	res.Params = req
 	nrh["setgenerate"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan None):
+	case resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) Stop(req **None, resp *None) (err error) {
+func (c *CAPI) Stop(req *None, resp None) (err error) {
 	nrh := RPCHandlers
 	res := nrh["stop"].Result()
 	res.Params = req
 	nrh["stop"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan None):
+	case resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) SubmitBlock(req **btcjson.SubmitBlockCmd, resp *string) (err error) {
+func (c *CAPI) SubmitBlock(req *btcjson.SubmitBlockCmd, resp string) (err error) {
 	nrh := RPCHandlers
 	res := nrh["submitblock"].Result()
 	res.Params = req
 	nrh["submitblock"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan string):
+	case resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) Uptime(req **None, resp *btcjson.GetMempoolInfoResult) (err error) {
+func (c *CAPI) Uptime(req *None, resp btcjson.GetMempoolInfoResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["uptime"].Result()
 	res.Params = req
 	nrh["uptime"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.GetMempoolInfoResult):
+	case resp = <-res.Ch.(chan btcjson.GetMempoolInfoResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) ValidateAddress(req **btcjson.ValidateAddressCmd, resp *btcjson.ValidateAddressChainResult) (err error) {
+func (c *CAPI) ValidateAddress(req *btcjson.ValidateAddressCmd, resp btcjson.ValidateAddressChainResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["validateaddress"].Result()
 	res.Params = req
 	nrh["validateaddress"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan btcjson.ValidateAddressChainResult):
+	case resp = <-res.Ch.(chan btcjson.ValidateAddressChainResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) VerifyChain(req **btcjson.VerifyChainCmd, resp *bool) (err error) {
+func (c *CAPI) VerifyChain(req *btcjson.VerifyChainCmd, resp bool) (err error) {
 	nrh := RPCHandlers
 	res := nrh["verifychain"].Result()
 	res.Params = req
 	nrh["verifychain"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan bool):
+	case resp = <-res.Ch.(chan bool):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) VerifyMessage(req **btcjson.VerifyMessageCmd, resp *bool) (err error) {
+func (c *CAPI) VerifyMessage(req *btcjson.VerifyMessageCmd, resp bool) (err error) {
 	nrh := RPCHandlers
 	res := nrh["verifymessage"].Result()
 	res.Params = req
 	nrh["verifymessage"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan bool):
+	case resp = <-res.Ch.(chan bool):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 
 	return 
 }
 
-func (c *CAPI) Version(req **btcjson.VersionCmd, resp *map[string]btcjson.VersionResult) (err error) {
+func (c *CAPI) Version(req *btcjson.VersionCmd, resp map[string]btcjson.VersionResult) (err error) {
 	nrh := RPCHandlers
 	res := nrh["version"].Result()
 	res.Params = req
 	nrh["version"].Call <- res
 	select {
-	case *resp = <-res.Ch.(chan map[string]btcjson.VersionResult):
+	case resp = <-res.Ch.(chan map[string]btcjson.VersionResult):
 	case <-time.After(c.Timeout):
 	case <- c.quit:
 	} 

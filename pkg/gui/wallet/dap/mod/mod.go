@@ -1,27 +1,25 @@
-// SPDX-License-Identifier: Unlicense OR MIT
-
 package mod
 
 import (
-	"context"
-	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
+	"github.com/p9c/pod/pkg/gui/wallet/dap/win"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )
 
 //Duo App Platform
 type Dap struct {
+	Rc         *RcVar
 	BeforeMain map[int]func()
 	Main       func()
 	AfterMain  map[int]func()
-	Ctx        context.Context
-	Tik        map[int]func()
-	UI         *UserInterface
-	S          *Settings
-	Apps       map[string]Sap
+	//Ctx        context.Context
+	//Tik        map[int]func()
+	UI   *UserInterface
+	S    *Settings
+	Apps map[string]Sap
 }
 
 type Sap struct {
@@ -36,8 +34,9 @@ type Settings struct {
 
 type UserInterface struct {
 	Device string
-	Window *app.Window
-	Theme  *theme.Theme
+	W      *win.Windows
+
+	Theme *theme.Theme
 	//Ekran   func(gtx C) D
 	FontSize float32
 	R        *res.Responsive
