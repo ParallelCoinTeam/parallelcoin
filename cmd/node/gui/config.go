@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"runtime"
 	"sort"
 
 	l "gioui.org/layout"
@@ -71,16 +70,25 @@ func (l Lists) Swap(i, j int) {
 }
 
 func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
-	_, file, line, _ := runtime.Caller(2)
-	Debugf("%s:%d", file, line)
+	// _, file, line, _ := runtime.Caller(2)
+	// Debugf("%s:%d", file, line)
 	var groups Lists
 	for i := range gm {
 		var li ListItems
-		for j := range gm[i] {
+		gmi := gm[i]
+		for j := range gmi {
+			gmij := gmi[j]
 			li = append(li, ListItem{
 				name: j,
 				widget: func(gtx l.Context) l.Dimensions {
-					return ng.H6(gm[i][j].label).Fn(gtx)
+					return ng.VFlex().
+						Rigid(
+							ng.Body1(gmij.label).Fn,
+						).
+						Rigid(
+							ng.Caption(gmij.description).Fn,
+						).
+						Fn(gtx)
 				},
 			})
 		}
@@ -91,34 +99,40 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 	var out []l.Widget
 	first := true
 	for i := range groups {
-		Debug(groups[i].name)
+		// Debug(groups[i].name)
 		g := groups[i]
 		if !first {
+			// put a space between the sections
 			out = append(out, func(gtx l.Context) l.Dimensions {
 				return ng.Inset(0.5, p9.EmptySpace(0, 0)).Fn(gtx)
 			})
 		} else {
 			first = false
 		}
+		// put in the header
 		out = append(out, func(gtx l.Context) l.Dimensions {
-			return ng.Inset(0.25, ng.H4(g.name).Fn).Fn(gtx)
+			return ng.Inset(0.25, ng.H6(g.name).Fn).Fn(gtx)
 		})
+		// add the widgets
 		for j := range groups[i].items {
-			Debugf("\t%s", groups[i].items[j].name)
+			// Debugf("\t%s", groups[i].items[j].name)
 			gi := groups[i].items[j]
 			out = append(out, func(gtx l.Context) l.Dimensions {
-				return ng.Inset(0.5, ng.Body1(gi.name).Fn).Fn(gtx)
+				return ng.Inset(0.5,
+					gi.widget,
+				).Fn(gtx)
 			})
 		}
 	}
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return out[index](gtx)
-		// return l.Dimensions{}
 	}
 	return func(gtx l.Context) l.Dimensions {
 		return ng.lists["settings"].Vertical().Length(len(out)).ListElement(le).Fn(gtx)
 	}
 }
+
+
 
 func (ng *NodeGUI) Config() l.Widget {
 	schema := pod.GetConfigSchema(ng.cx.Config, ng.cx.ConfigMap)
