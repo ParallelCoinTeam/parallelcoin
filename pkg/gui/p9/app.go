@@ -202,13 +202,14 @@ func (a *App) MenuButton(gtx l.Context) l.Dimensions {
 	color := a.menuColor
 	if a.MenuOpen {
 		color = "DocText"
+		bg = a.sideBarBackground
 	}
 	return a.Flex().Rigid(
 		// a.Inset(0.25,
 		a.ButtonLayout(a.menuClickable).
 			CornerRadius(0).
 			Embed(
-				a.Inset(0.25,
+				a.Inset(0.375,
 					a.Icon().
 						Scale(Scales["H5"]).
 						Color(color).
@@ -274,8 +275,8 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 				{
 					Widget:
 					a.ButtonLayout(a.logoClickable).Embed(
-						a.Inset(0.375,
-							a.H6(a.title).Color("Light").Fn,
+						a.Inset(0.333,
+							a.H5(a.title).Color("Light").Fn,
 						).Fn,
 					).Background("Transparent").Fn,
 				},

@@ -68,6 +68,7 @@ func (ng *NodeGUI) Run() (err error) {
 	}
 	ng.lists = map[string]*p9.List{
 		"overview": ng.th.List(),
+		"settings": ng.th.List(),
 	}
 	ng.quitClickable = ng.th.Clickable()
 	ng.w = f.NewWindow()

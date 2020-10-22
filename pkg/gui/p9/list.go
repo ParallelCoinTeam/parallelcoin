@@ -134,6 +134,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	dims := GetDimensionList(gtx1, li.length, li.w)
 	_, view := axisMainConstraint(li.axis, gtx.Constraints)
 	total, before := dims.GetSizes(li.position, li.axis)
+	if total == 0 {
+		// if there is no children just return a big empty box
+		return EmptyFromSize(gtx.Constraints.Max)(gtx)
+	}
 	top := before * (view - li.scrollWidth) / total
 	middle := view * (view - li.scrollWidth) / total
 	bottom := (total - before - view) * (view - li.scrollWidth) / total
