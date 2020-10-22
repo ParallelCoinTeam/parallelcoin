@@ -66,7 +66,7 @@ func (th *Theme) App(size int) *App {
 		layers:              nil,
 		pages:               make(WidgetMap),
 		root:                th.Stack(),
-		sideBarSize:         th.TextSize.Scale(12),
+		sideBarSize:         th.TextSize.Scale(14),
 		sideBarBackground:   "DocBg",
 		sideBarColor:        "DocText",
 		statusBarBackground: "DocBg",
@@ -117,8 +117,8 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 	out :=
 	// a.Fill("PanelBg",
 	// 	a.Inset(0.25,
-			bar.Fn
-		// ).Fn
+		bar.Fn
+	// ).Fn
 	// ).Fn
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	dims := a.Fill(a.statusBarBackground, out).Fn(gtx)
@@ -209,7 +209,7 @@ func (a *App) MenuButton(gtx l.Context) l.Dimensions {
 		a.ButtonLayout(a.menuClickable).
 			CornerRadius(0).
 			Embed(
-				a.Inset(0.375,
+				a.Inset(0.4,
 					a.Icon().
 						Scale(Scales["H5"]).
 						Color(color).
@@ -240,25 +240,25 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 					Widget: EmptySpace(0, 0),
 				},
 				{Size: 800,
-					Widget: a.Inset(0.125,
-						a.Inset(0.125,
-							a.IconButton(
-								a.logoClickable.SetClick(
+					Widget: a.Inset(0.25,
+						a.IconButton(
+							a.logoClickable.
+								SetClick(
 									func() {
 										Debug("clicked logo")
 										a.Dark = !a.Dark
 										a.Theme.Colors.SetTheme(a.Dark)
-									}),
-							).
-								Icon(
-									a.Icon().
-										Scale(Scales["H6"]).
-										Color("Light").
-										Src(a.logo)).
-								Background("Dark").Color("Light").
-								Inset(0.25).
-								Fn,
-						).Fn,
+									},
+								),
+						).
+							Icon(
+								a.Icon().
+									Scale(Scales["H6"]).
+									Color("Light").
+									Src(a.logo)).
+							Background("Dark").Color("Light").
+							Inset(0.25).
+							Fn,
 					).Fn,
 				},
 			},
@@ -268,7 +268,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 			a.Responsive(*a.Size, Widgets{
 				{Size: 800,
 					Widget:
-					a.Inset(0.33,
+					a.Inset(0.333,
 						a.H5(a.title).Color("Light").Fn,
 					).Fn,
 				},
@@ -320,7 +320,7 @@ func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		out := a.sideBarList.Length(len(a.sideBar)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
 			gtx.Constraints.Max.X = int(a.sideBarSize.V) - 2*a.scrollBarSize
-			gtx.Constraints.Min.X = 0
+			// gtx.Constraints.Min.X = 0
 			return a.sideBar[index](gtx)
 			// out := a.VFlex()
 			// for i := range a.sideBar {

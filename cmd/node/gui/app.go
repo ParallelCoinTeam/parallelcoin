@@ -14,8 +14,6 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 	ng.App = a
 	ng.size = ng.Size
 	ng.Theme.Colors.SetTheme(ng.Dark)
-	// cfg := ng.Config()
-	// _ = cfg
 	ng.Pages(p9.WidgetMap{
 		"main": ng.Page("overview", p9.Widgets{
 			p9.WidgetSize{
@@ -251,7 +249,7 @@ func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx
 			ng.ButtonLayout(ng.buttonBarButtons[index]).
 				CornerRadius(0).
 				Embed(
-					ng.Inset(0.375,
+					ng.Inset(0.4,
 						ic,
 					).Fn,
 				).
