@@ -127,13 +127,104 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 }
 
 func (ng *NodeGUI) RenderConfigItem(item *Item) l.Widget {
-	sl := item.slug
-	ty := item.typ
-	wi := item.widget
-	// dt := item.dataType
-	opts := item.options
-	slot := item.slot
-	Debug(sl, wi, ty, opts, slot)
+	switch item.widget {
+	case "toggle":
+		return ng.RenderToggle(item)
+	case "integer":
+		return ng.RenderInteger(item)
+	case "time":
+		return ng.RenderTime(item)
+	case "float":
+		return ng.RenderFloat(item)
+	case "string":
+		return ng.RenderString(item)
+	case "multi":
+		return ng.RenderMulti(item)
+	case "radio":
+		return ng.RenderRadio(item)
+	}
+	return func(l.Context) l.Dimensions { return l.Dimensions{} }
+}
+
+func (ng *NodeGUI) RenderToggle(item *Item) l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return ng.VFlex().
+			Rigid(
+				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.Caption(item.description).Fn,
+			).
+			Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) RenderInteger(item *Item) l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return ng.VFlex().
+			Rigid(
+				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.Caption(item.description).Fn,
+			).
+			Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) RenderTime(item *Item) l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return ng.VFlex().
+			Rigid(
+				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.Caption(item.description).Fn,
+			).
+			Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) RenderFloat(item *Item) l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return ng.VFlex().
+			Rigid(
+				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.Caption(item.description).Fn,
+			).
+			Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) RenderString(item *Item) l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return ng.VFlex().
+			Rigid(
+				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.Caption(item.description).Fn,
+			).
+			Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) RenderMulti(item *Item) l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return ng.VFlex().
+			Rigid(
+				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.Caption(item.description).Fn,
+			).
+			Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) RenderRadio(item *Item) l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return ng.VFlex().
 			Rigid(
@@ -164,6 +255,7 @@ func (ng *NodeGUI) Config() l.Widget {
 				widget:      sgf.Widget,
 				dataType:    sgf.Datatype,
 				options:     sgf.Options,
+				slot:        ng.cx.ConfigMap[sgf.Slug],
 			}
 			// Debugs(sgf)
 		}
