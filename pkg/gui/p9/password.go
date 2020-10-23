@@ -7,90 +7,120 @@ import (
 
 type Password struct {
 	*Theme
-	pass            *Editor
-	passInput       *TextInput
-	unhideClickable *Clickable
-	unhideButton    *IconButton
-	GetPassword     func() string
-	hide            bool
-	size            int
+	pass                 *Editor
+	passInput            *TextInput
+	unhideClickable      *Clickable
+	unhideButton         *IconButton
+	GetPassword          func() string
+	hide                 bool
+	size                 int
+	borderColor          string
+	borderColorUnfocused string
+	borderColorFocused   string
+	focused              bool
+	showClickableFn      func(col string)
+	password             *string
+	handle               func(pass string)
 }
 
-func (th *Theme) Password(password *string, size int, handle func(pass string)) *Password {
+func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfocused string, size int, handle func(pass string)) *Password {
 	pass := th.Editor().Mask('•').SingleLine().Submit(true)
-	passInput := th.SimpleInput(pass).Color("DocText")
+	passInput := th.SimpleInput(pass).Color(borderColorUnfocused)
 	p := &Password{
-		Theme:           th,
-		unhideButton:    nil,
-		unhideClickable: th.Clickable(),
-		pass:            pass,
-		passInput:       passInput,
-		size:            size,
+		Theme:                th,
+		unhideButton:         nil,
+		unhideClickable:      th.Clickable(),
+		pass:                 pass,
+		passInput:            passInput,
+		size:                 size,
+		borderColorUnfocused: borderColorUnfocused,
+		borderColorFocused:   borderColorFocused,
+		borderColor:          borderColorUnfocused,
+		handle:               handle,
+		password:             password,
 	}
 	p.GetPassword = func() string {
 		return p.pass.Text()
 	}
 	p.unhideButton = th.IconButton(p.unhideClickable).
-		Background("").
-		Icon(th.Icon().Color("Primary").Src(icons2.ActionVisibility))
-	showClickableFn := func() {
+		Background("Transparent").
+		Icon(th.Icon().Color(p.borderColor).Src(icons2.ActionVisibility))
+	p.showClickableFn = func(col string) {
 		p.hide = !p.hide
 		if !p.hide {
 			p.unhideButton.
 				// Color("Primary").
 				Icon(
 					th.Icon().
-						Color("Primary").
+						Color(col).
 						Src(icons2.ActionVisibility))
 			p.pass.Mask('•')
-			p.passInput.Color("Primary")
+			p.passInput.Color(col)
 		} else {
 			p.unhideButton.
 				// Color("DocText").
 				Icon(
 					th.Icon().
-						Color("DocText").
+						Color(p.borderColor).
 						Src(icons2.ActionVisibilityOff),
 				)
 			p.pass.Mask(0)
-			p.passInput.Color("DocText")
+			p.passInput.Color(col)
 		}
 	}
 	p.unhideButton.
 		// Color("Primary").
 		Icon(
 			th.Icon().
-				Color("Primary").
+				Color(p.borderColor).
 				Src(icons2.ActionVisibility),
 		)
 	p.pass.Mask('•')
-	p.passInput.Color("Primary")
-	p.unhideClickable.SetClick(showClickableFn)
-	p.pass.SetText(*password).Mask('•').SetSubmit(func(txt string) {
-		if !p.hide {
-			showClickableFn()
+	p.pass.SetFocus(func(is bool) {
+		if is {
+			p.borderColor = p.borderColorFocused
+		} else {
+			p.borderColor = p.borderColorUnfocused
+			p.hide = true
 		}
-		showClickableFn()
+	})
+	p.passInput.Color(p.borderColor)
+	p.pass.SetText(*p.password).Mask('•').SetSubmit(func(txt string) {
+		// if !p.hide {
+		// 	p.showClickableFn(p.borderColor)
+		// }
+		// p.showClickableFn(p.borderColor)
 		go func() {
-			handle(txt)
+			p.handle(txt)
 		}()
 	}).SetChange(func(txt string) {
 		// send keystrokes to the NSA
 	})
-
 	return p
 }
 
 func (p *Password) Fn(gtx l.Context) l.Dimensions {
 	gtx.Constraints.Max.X = int(p.TextSize.Scale(float32(p.size)).V)
 	gtx.Constraints.Min.X = 0
-	return p.Border().Embed(
-		p.Flex().
-			Flexed(1,
-				p.Inset(0.25, p.passInput.Fn).Fn,
-			).
-			Rigid(
-				p.unhideButton.Fn,
-			).Fn,
-	).Fn(gtx)
+	return func(gtx l.Context) l.Dimensions {
+		p.passInput.Color(p.borderColor)
+		p.unhideButton.Color(p.borderColor)
+		p.unhideClickable.SetClick(func() { p.showClickableFn(p.borderColor) })
+		if p.hide {
+			p.pass.Mask('•')
+		} else {
+			p.pass.Mask(0)
+		}
+		return p.Border().Color(p.borderColor).Embed(
+			p.Flex().
+				Flexed(1,
+					p.Inset(0.25, p.passInput.Color(p.borderColor).Fn).Fn,
+				).
+				Rigid(
+					p.unhideButton.
+						Background("Transparent").
+						Icon(p.Icon().Color(p.borderColor).Src(icons2.ActionVisibility)).Fn,
+				).Fn,
+		).Fn(gtx)
+	}(gtx)
 }

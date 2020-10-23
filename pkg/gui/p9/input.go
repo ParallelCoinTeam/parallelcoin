@@ -7,15 +7,19 @@ import (
 
 type Input struct {
 	*Theme
-	editor         *Editor
-	input          *TextInput
-	clearClickable *Clickable
-	clearButton    *IconButton
-	GetText        func() string
-	size           int
+	editor               *Editor
+	input                *TextInput
+	clearClickable       *Clickable
+	clearButton          *IconButton
+	GetText              func() string
+	size                 int
+	borderColor          string
+	borderColorUnfocused string
+	borderColorFocused   string
+	focused              bool
 }
 
-func (th *Theme) Input(txt string, size int, handle func(txt string)) *Input {
+func (th *Theme) Input(txt, borderColorFocused, borderColorUnfocused string, size int, handle func(txt string)) *Input {
 	editor := th.Editor().SingleLine().Submit(true)
 	input := th.SimpleInput(editor)
 	p := &Input{
@@ -25,6 +29,8 @@ func (th *Theme) Input(txt string, size int, handle func(txt string)) *Input {
 		editor:         editor,
 		input:          input,
 		size:           size,
+		borderColorUnfocused: borderColorUnfocused,
+		borderColorFocused: borderColorFocused,
 	}
 	p.GetText = func() string {
 		return p.editor.Text()
@@ -48,14 +54,20 @@ func (th *Theme) Input(txt string, size int, handle func(txt string)) *Input {
 	}).SetChange(func(txt string) {
 		// send keystrokes to the NSA
 	})
-
+	p.editor.SetFocus(func(is bool) {
+		if is {
+			p.borderColor = p.borderColorFocused
+		} else {
+			p.borderColor = p.borderColorUnfocused
+		}
+	})
 	return p
 }
 
 func (in *Input) Fn(gtx l.Context) l.Dimensions {
 	gtx.Constraints.Max.X = int(in.TextSize.Scale(float32(in.size)).V)
 	gtx.Constraints.Min.X = 0
-	return in.Border().Color("DocText").Embed(
+	return in.Border().Color(in.borderColor).Embed(
 		in.Flex().
 			Flexed(1,
 				in.Inset(0.25, in.input.Color("DocText").Fn).Fn,
@@ -63,7 +75,7 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 			Rigid(
 				in.clearButton.
 					Background("").
-					Icon(in.Icon().Color("DocText").Src(icons2.ContentBackspace)).Fn,
+					Icon(in.Icon().Color(in.borderColor).Src(icons2.ContentBackspace)).Fn,
 			).
 			Fn,
 	).Fn(gtx)

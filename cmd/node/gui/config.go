@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"time"
 
 	l "gioui.org/layout"
@@ -98,25 +99,30 @@ func (ng *NodeGUI) Config() l.Widget {
 			case "toggle":
 				ng.bools[sgf.Slug] = ng.Bool(*tabNames[sgf.Group][sgf.Slug].slot.(*bool))
 			case "integer":
-				ng.inputs[sgf.Slug] = ng.Input(fmt.Sprint(*tabNames[sgf.Group][sgf.Slug].slot.(*int)), 20, func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-				})
+				ng.inputs[sgf.Slug] = ng.Input(fmt.Sprint(*tabNames[sgf.Group][sgf.Slug].slot.(*int)),
+					"Primary", "PanelBg", 24, func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+					})
 			case "time":
-				ng.inputs[sgf.Slug] = ng.Input(fmt.Sprint(*tabNames[sgf.Group][sgf.Slug].slot.(*time.Duration)), 20, func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-				})
+				ng.inputs[sgf.Slug] = ng.Input(fmt.Sprint(*tabNames[sgf.Group][sgf.Slug].slot.(*time.Duration)),
+					"Primary", "PanelBg", 24, func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+					})
 			case "float":
-				ng.inputs[sgf.Slug] = ng.Input(fmt.Sprintf("%0.8f",*tabNames[sgf.Group][sgf.Slug].slot.(*float64)), 20, func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-				})
+				ng.inputs[sgf.Slug] = ng.Input(strconv.FormatFloat(*tabNames[sgf.Group][sgf.Slug].slot.(*float64), 'f', -1, 64),
+					"Primary", "PanelBg", 24, func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+					})
 			case "string":
-				ng.inputs[sgf.Slug] = ng.Input(*tabNames[sgf.Group][sgf.Slug].slot.(*string), 20, func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-				})
+				ng.inputs[sgf.Slug] = ng.Input(*tabNames[sgf.Group][sgf.Slug].slot.(*string),
+					"Primary", "PanelBg", 24, func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+					})
 			case "password":
-				ng.passwords[sgf.Slug] = ng.Password(tabNames[sgf.Group][sgf.Slug].slot.(*string), 20, func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-				})
+				ng.passwords[sgf.Slug] = ng.Password(tabNames[sgf.Group][sgf.Slug].slot.(*string),
+					"Primary", "PanelBg", 24, func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+					})
 			case "multi":
 			case "radio":
 				ng.enums[sgf.Slug] = ng.Enum().SetValue(*tabNames[sgf.Group][sgf.Slug].slot.(*string))

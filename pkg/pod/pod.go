@@ -153,7 +153,7 @@ type Config struct {
 	Generate               *bool            `group:"mining" label:"Generate Blocks" description:"turn on Kopach CPU miner" type:"" widget:"toggle" json:"Generate" hook:"generate"`
 	GenThreads             *int             `group:"mining" label:"Gen Threads" description:"number of threads to mine with" type:"" widget:"integer" json:"GenThreads" hook:"genthreads"`
 	Language               *string          `group:"config" label:"Language" description:"user interface language i18 localization" type:"" widget:"string" json:"Language" hook:"language"`
-	LimitPass              *string          `group:"rpc" label:"Limit Pass" description:"limited user password" type:"" widget:"string" json:"LimitPass" hook:"restart"`
+	LimitPass              *string          `group:"rpc" label:"Limit Pass" description:"limited user password" type:"" widget:"password" json:"LimitPass" hook:"restart"`
 	LimitUser              *string          `group:"rpc" label:"Limit User" description:"limited user name" type:"" widget:"string" json:"LimitUser" hook:"restart"`
 	Listeners              *cli.StringSlice `group:"node" label:"Listeners" description:"list of addresses to bind the node listener to" type:"address" widget:"multi" json:"Listeners" hook:"restart"`
 	LogDir                 *string          `group:"config" label:"Log Dir" description:"folder where log files are written" type:"path" widget:"string" json:"LogDir" hook:"restart"`

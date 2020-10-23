@@ -61,7 +61,7 @@ func (w *Worker) Run() {
 		lists:      lists,
 		modalScrim: th.Clickable(),
 		modalClose: th.Clickable(),
-		password: th.Password(w.cx.Config.MinerPass,20, func(pass string) {
+		password: th.Password(w.cx.Config.MinerPass,"Primary","PanelBg",30, func(pass string) {
 			Debug("changed password")
 			*w.cx.Config.MinerPass = pass
 			save.Pod(w.cx.Config)
