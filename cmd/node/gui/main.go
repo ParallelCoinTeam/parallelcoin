@@ -37,6 +37,7 @@ type NodeGUI struct {
 	bools            map[string]*p9.Bool
 	lists            map[string]*p9.List
 	enums            map[string]*p9.Enum
+	checkables       map[string]*p9.Checkable
 	clickables       map[string]*p9.Clickable
 	editors          map[string]*p9.Editor
 	inputs           map[string]*p9.Input
@@ -75,6 +76,11 @@ func (ng *NodeGUI) Run() (err error) {
 	}
 	ng.clickables = map[string]*p9.Clickable{
 		"quit": ng.th.Clickable(),
+	}
+	ng.checkables = map[string]*p9.Checkable{
+		"runmodenode": ng.th.Checkable(),
+		"runmodewallet": ng.th.Checkable(),
+		"runmodeshell": ng.th.Checkable(),
 	}
 	ng.editors = make(map[string]*p9.Editor)
 	ng.inputs = make(map[string]*p9.Input)

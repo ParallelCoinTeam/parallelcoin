@@ -223,12 +223,12 @@ func (m *MinerModel) buttons() layout.Widget {
 	).Rigid(
 		th.Flex().Rigid(
 			th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
-		).Rigid(
-			th.RadioButton(m.radio, "first", "first").Fn,
-		).Rigid(
-			th.RadioButton(m.radio, "second", "second").Fn,
-		).Rigid(
-			th.RadioButton(m.radio, "third", "third").Fn,
+		// ).Rigid(
+		// 	th.RadioButton(m.radio, "first", "first").Fn,
+		// ).Rigid(
+		// 	th.RadioButton(m.radio, "second", "second").Fn,
+		// ).Rigid(
+		// 	th.RadioButton(m.radio, "third", "third").Fn,
 		).Rigid(
 			th.Switch(m.boolButton2.SetOnChange(func(b bool) {
 				Debug("switch state set to", b)

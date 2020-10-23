@@ -125,6 +125,10 @@ func (ng *NodeGUI) Config() l.Widget {
 					})
 			case "multi":
 			case "radio":
+				// ng.checkables[sgf.Slug] = ng.Checkable()
+				for i := range sgf.Options {
+					ng.checkables[sgf.Slug+sgf.Options[i]] = ng.Checkable()
+				}
 				ng.enums[sgf.Slug] = ng.Enum().SetValue(*tabNames[sgf.Group][sgf.Slug].slot.(*string))
 				ng.lists[sgf.Slug] = ng.List()
 			}
@@ -333,9 +337,13 @@ func (ng *NodeGUI) RenderMulti(item *Item) l.Widget {
 func (ng *NodeGUI) RenderRadio(item *Item) l.Widget {
 	var options []l.Widget
 	for i := range item.options {
+		color := "DocText"
+		if ng.enums[item.slug].Value() == item.options[i] {
+			color = "Primary"
+		}
 		options = append(options,
-			ng.RadioButton(ng.enums[item.slug],
-				item.options[i], item.options[i]).Fn)
+			ng.RadioButton(ng.checkables[item.slug+item.options[i]].IconColor(color).Color(color),
+				ng.enums[item.slug], item.options[i], item.options[i]).Fn)
 	}
 	out := func(gtx l.Context) l.Dimensions {
 		return ng.VFlex().

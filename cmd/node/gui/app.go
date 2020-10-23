@@ -41,25 +41,43 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 												{
 													Widget: ng.VFlex().
 														Rigid(
-															ng.RadioButton(ng.enums["runmode"], "node", "node").Fn,
+															ng.RadioButton(ng.checkables["runmodenode"].
+																Color("DocText").
+																IconColor("DocText"), ng.enums["runmode"],
+																"node", "node").Fn,
 														).
 														Rigid(
-															ng.RadioButton(ng.enums["runmode"], "wallet", "wallet").Fn,
+															ng.RadioButton(ng.checkables["runmodewallet"].
+																Color("DocText").
+																IconColor("DocText"), ng.enums["runmode"],
+																"wallet", "wallet").Fn,
 														).
 														Rigid(
-															ng.RadioButton(ng.enums["runmode"], "shell", "shell").Fn,
+															ng.RadioButton(ng.checkables["runmodeshell"].
+																Color("DocText").
+																IconColor("DocText"), ng.enums["runmode"],
+																"shell", "shell").Fn,
 														).Fn,
 												},
 												{Size: 512,
 													Widget: ng.Flex().
 														Rigid(
-															ng.RadioButton(ng.enums["runmode"], "node", "node").Fn,
+															ng.RadioButton(ng.checkables["runmodenode"].
+																Color("DocText").
+																IconColor("DocText"), ng.enums["runmode"],
+																"node", "node").Fn,
 														).
 														Rigid(
-															ng.RadioButton(ng.enums["runmode"], "wallet", "wallet").Fn,
+															ng.RadioButton(ng.checkables["runmodewallet"].
+																Color("DocText").
+																IconColor("DocText"), ng.enums["runmode"],
+																"wallet", "wallet").Fn,
 														).
 														Rigid(
-															ng.RadioButton(ng.enums["runmode"], "shell", "shell").Fn,
+															ng.RadioButton(ng.checkables["runmodeshell"].
+																Color("DocText").
+																IconColor("DocText"), ng.enums["runmode"],
+																"shell", "shell").Fn,
 														).Fn,
 												},
 											}).Fn,
@@ -208,15 +226,15 @@ func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Conte
 				}
 				return ng.Inset(outPad,
 					ng.Fill(background,
-					ng.Flex().
-						Flexed(1,
-							ng.Inset(inPad,
-								ng.H6(title).
-									Color(color).
-									Fn,
+						ng.Flex().
+							Flexed(1,
+								ng.Inset(inPad,
+									ng.H6(title).
+										Color(color).
+										Fn,
+								).Fn,
 							).Fn,
-							).Fn,
-						).Fn,
+					).Fn,
 				).Fn(gtx)
 			},
 		).
