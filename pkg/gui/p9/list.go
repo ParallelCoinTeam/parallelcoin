@@ -47,6 +47,7 @@ type List struct {
 	top, middle, bottom int
 	scrollBarPad        int
 	lastWidth           int
+	recalculate         bool
 }
 
 // List returns a new scrollable List widget
@@ -137,6 +138,9 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	}
 	if li.lastWidth != gtx.Constraints.Max.X {
 		li.lastWidth = gtx.Constraints.Max.X
+		li.recalculate = true
+	}
+	if li.recalculate {
 		// get the size of the scrollbar
 		// scrollWidth := int(li.th.TextSize.V * 1.5)
 		li.scrollBarPad = int(li.th.TextSize.V * 0.5)
@@ -146,6 +150,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		gtx1 := CopyContextDimensions(gtx, gtx.Constraints.Max, li.axis)
 		// generate the dimensions for all the list elements
 		li.dims = GetDimensionList(gtx1, li.length, li.w)
+		li.recalculate = false
 	}
 	_, li.view = axisMainConstraint(li.axis, gtx.Constraints)
 	li.total, li.before = li.dims.GetSizes(li.position, li.axis)

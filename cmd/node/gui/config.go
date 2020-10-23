@@ -1,7 +1,9 @@
 package gui
 
 import (
+	"fmt"
 	"sort"
+	"time"
 
 	l "gioui.org/layout"
 
@@ -70,6 +72,66 @@ func (l Lists) Swap(i, j int) {
 	l[i], l[j] = l[j], l[i]
 }
 
+func (ng *NodeGUI) Config() l.Widget {
+	schema := pod.GetConfigSchema(ng.cx.Config, ng.cx.ConfigMap)
+	tabNames := make(GroupsMap)
+	// tabs := make(p9.WidgetMap)
+	for i := range schema.Groups {
+		for j := range schema.Groups[i].Fields {
+			sgf := schema.Groups[i].Fields[j]
+			if _, ok := tabNames[sgf.Group]; !ok {
+				tabNames[sgf.Group] = make(ItemMap)
+			}
+			tabNames[sgf.Group][sgf.Slug] = &Item{
+				slug:        sgf.Slug,
+				typ:         sgf.Type,
+				label:       sgf.Label,
+				description: sgf.Description,
+				widget:      sgf.Widget,
+				dataType:    sgf.Datatype,
+				options:     sgf.Options,
+				slot:        ng.cx.ConfigMap[sgf.Slug],
+			}
+			// Debugs(sgf)
+			// create all the necessary widgets required before display
+			switch sgf.Widget {
+			case "toggle":
+				ng.bools[sgf.Slug] = ng.Bool(*tabNames[sgf.Group][sgf.Slug].slot.(*bool))
+			case "integer":
+				ng.inputs[sgf.Slug] = ng.Input(fmt.Sprint(*tabNames[sgf.Group][sgf.Slug].slot.(*int)), 20, func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+				})
+			case "time":
+				ng.inputs[sgf.Slug] = ng.Input(fmt.Sprint(*tabNames[sgf.Group][sgf.Slug].slot.(*time.Duration)), 20, func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+				})
+			case "float":
+				ng.inputs[sgf.Slug] = ng.Input(fmt.Sprintf("%0.8f",*tabNames[sgf.Group][sgf.Slug].slot.(*float64)), 20, func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+				})
+			case "string":
+				ng.inputs[sgf.Slug] = ng.Input(*tabNames[sgf.Group][sgf.Slug].slot.(*string), 20, func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+				})
+			case "password":
+				ng.passwords[sgf.Slug] = ng.Password(tabNames[sgf.Group][sgf.Slug].slot.(*string), 20, func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+				})
+			case "multi":
+			case "radio":
+				ng.enums[sgf.Slug] = ng.Enum().SetValue(*tabNames[sgf.Group][sgf.Slug].slot.(*string))
+				ng.lists[sgf.Slug] = ng.List()
+			}
+		}
+	}
+
+	// Debugs(tabNames)
+	return tabNames.Widget(ng)
+	// return func(gtx l.Context) l.Dimensions {
+	// 	return l.Dimensions{}
+	// }
+}
+
 func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 	// _, file, line, _ := runtime.Caller(2)
 	// Debugf("%s:%d", file, line)
@@ -112,7 +174,7 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 			gi := groups[i].items[j]
 			out = append(out, func(gtx l.Context) l.Dimensions {
 				return ng.Fill("DocBg",
-					ng.Inset(0.5,
+					ng.Inset(0.25,
 						gi.widget,
 					).Fn,
 				).Fn(gtx)
@@ -176,6 +238,9 @@ func (ng *NodeGUI) RenderInteger(item *Item) l.Widget {
 				ng.Body1(item.label).Fn,
 			).
 			Rigid(
+				ng.inputs[item.slug].Fn,
+			).
+			Rigid(
 				ng.Caption(item.description).Fn,
 			).
 			Fn(gtx)
@@ -189,6 +254,9 @@ func (ng *NodeGUI) RenderTime(item *Item) l.Widget {
 				ng.Body1(item.label).Fn,
 			).
 			Rigid(
+				ng.inputs[item.slug].Fn,
+			).
+			Rigid(
 				ng.Caption(item.description).Fn,
 			).
 			Fn(gtx)
@@ -200,6 +268,9 @@ func (ng *NodeGUI) RenderFloat(item *Item) l.Widget {
 		return ng.VFlex().
 			Rigid(
 				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.inputs[item.slug].Fn,
 			).
 			Rigid(
 				ng.Caption(item.description).Fn,
@@ -284,55 +355,4 @@ func (ng *NodeGUI) RenderRadio(item *Item) l.Widget {
 			Fn(gtx)
 	}
 	return out
-}
-
-func (ng *NodeGUI) Config() l.Widget {
-	schema := pod.GetConfigSchema(ng.cx.Config, ng.cx.ConfigMap)
-	tabNames := make(GroupsMap)
-	// tabs := make(p9.WidgetMap)
-	for i := range schema.Groups {
-		for j := range schema.Groups[i].Fields {
-			sgf := schema.Groups[i].Fields[j]
-			if _, ok := tabNames[sgf.Group]; !ok {
-				tabNames[sgf.Group] = make(ItemMap)
-			}
-			tabNames[sgf.Group][sgf.Slug] = &Item{
-				slug:        sgf.Slug,
-				typ:         sgf.Type,
-				label:       sgf.Label,
-				description: sgf.Description,
-				widget:      sgf.Widget,
-				dataType:    sgf.Datatype,
-				options:     sgf.Options,
-				slot:        ng.cx.ConfigMap[sgf.Slug],
-			}
-			// Debugs(sgf)
-			// create all the necessary widgets required before display
-			switch sgf.Widget {
-			case "toggle":
-				ng.bools[sgf.Slug] = ng.Bool(*tabNames[sgf.Group][sgf.Slug].slot.(*bool))
-			case "integer":
-			case "time":
-			case "float":
-			case "string":
-				ng.inputs[sgf.Slug] = ng.Input(*tabNames[sgf.Group][sgf.Slug].slot.(*string), 20, func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-				})
-			case "password":
-				ng.passwords[sgf.Slug] = ng.Password(tabNames[sgf.Group][sgf.Slug].slot.(*string), 20, func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-				})
-			case "multi":
-			case "radio":
-				ng.enums[sgf.Slug] = ng.Enum().SetValue(*tabNames[sgf.Group][sgf.Slug].slot.(*string))
-				ng.lists[sgf.Slug] = ng.List()
-			}
-		}
-	}
-
-	// Debugs(tabNames)
-	return tabNames.Widget(ng)
-	// return func(gtx l.Context) l.Dimensions {
-	// 	return l.Dimensions{}
-	// }
 }
