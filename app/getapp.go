@@ -29,7 +29,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Version:     "v0.0.1",
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
-		Action:      guiHandle(cx),
+		Action:      walletGUIHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
 			Trace("subcommand completed", os.Args)
@@ -45,7 +45,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				}, apputil.SubCommands(), nil, "v"),
 			//apputil.NewCommand("gui", "run GUI",
 			//	guiHandle(cx), apputil.SubCommands(), nil, "gui"),
-			apputil.NewCommand("gui", "start wallet GUI", guiHandle(cx),
+			apputil.NewCommand("nodegui", "start node GUI", walletGUIHandle(cx),
 				apputil.SubCommands(), nil),
 			apputil.NewCommand("nodegui", "start node GUI", nodeGUIHandle(cx),
 				apputil.SubCommands(), nil),
