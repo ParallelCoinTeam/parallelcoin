@@ -3,9 +3,9 @@ package p9
 import l "gioui.org/layout"
 
 func (th *Theme) Card(background string, w l.Widget) func(gtx l.Context) l.Dimensions {
-	return th.Inset(0.25,
+	return th.Inset(0.0,
 		th.Fill(background,
-			th.Inset(0.5,
+			th.Inset(0.25,
 				w,
 			).Fn,
 		).Fn,

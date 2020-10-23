@@ -174,17 +174,18 @@ func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 							{
 								Widget: func(gtx l.Context) l.Dimensions {
 									return If(a.MenuOpen,
-										a.Fill(a.sideBarBackground,
+										// a.Fill(a.sideBarBackground,
 											a.renderSideBar(),
-										).Fn,
+										// ).Fn,
 										EmptySpace(0, 0),
 									)(gtx)
 								},
 							},
 							{Size: 800,
-								Widget: a.Fill(a.sideBarBackground,
+								Widget:
+								// a.Fill(a.sideBarBackground,
 									a.renderSideBar(),
-								).Fn,
+								// ).Fn,
 							},
 						},
 						).Fn,
@@ -319,9 +320,12 @@ func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
 func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		out := a.sideBarList.Length(len(a.sideBar)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
-			gtx.Constraints.Max.X = int(a.sideBarSize.V) - 2*a.scrollBarSize
+			// gtx.Constraints.Max.X = int(a.sideBarSize.V)
 			// gtx.Constraints.Min.X = 0
-			return a.sideBar[index](gtx)
+			// gtx.Constraints.Max.X = gtx.Constraints.Min.X
+			dims := a.sideBar[index](gtx)
+			// Debug(dims)
+			return dims
 			// out := a.VFlex()
 			// for i := range a.sideBar {
 			// 	out.Rigid(a.sideBar[i])

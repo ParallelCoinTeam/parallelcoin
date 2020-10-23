@@ -105,15 +105,16 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 		}
 		// put in the header
 		out = append(out, func(gtx l.Context) l.Dimensions {
-			return ng.Inset(0.25, ng.H6(g.name).Fn).Fn(gtx)
+			return ng.Inset(0.0, ng.Fill("DocText", ng.Inset(0.5, ng.H6(g.name).Color("DocBg").Fn).Fn).Fn).Fn(gtx)
 		})
 		// add the widgets
 		for j := range groups[i].items {
-			// Debugf("\t%s", groups[i].items[j].name)
 			gi := groups[i].items[j]
 			out = append(out, func(gtx l.Context) l.Dimensions {
-				return ng.Inset(0.5,
-					gi.widget,
+				return ng.Fill("DocBg",
+					ng.Inset(0.5,
+						gi.widget,
+					).Fn,
 				).Fn(gtx)
 			})
 		}
@@ -138,24 +139,33 @@ func (ng *NodeGUI) RenderConfigItem(item *Item) l.Widget {
 		return ng.RenderFloat(item)
 	case "string":
 		return ng.RenderString(item)
+	case "password":
+		return ng.RenderPassword(item)
 	case "multi":
 		return ng.RenderMulti(item)
 	case "radio":
 		return ng.RenderRadio(item)
 	}
+	Debug("fallthrough", item.widget)
 	return func(l.Context) l.Dimensions { return l.Dimensions{} }
 }
 
 func (ng *NodeGUI) RenderToggle(item *Item) l.Widget {
 	return func(gtx l.Context) l.Dimensions {
-		return ng.VFlex().
+		return ng.Flex().
 			Rigid(
-				ng.Body1(item.label).Fn,
+				ng.th.Switch(ng.bools[item.slug]).Fn,
+				// p9.EmptySpace(0, 0),
 			).
 			Rigid(
-				ng.Caption(item.description).Fn,
-			).
-			Fn(gtx)
+				ng.VFlex().
+					Rigid(
+						ng.Body1(item.label).Fn,
+					).
+					Rigid(
+						ng.Caption(item.description).Fn,
+					).Fn,
+			).Fn(gtx)
 	}
 }
 
@@ -205,6 +215,25 @@ func (ng *NodeGUI) RenderString(item *Item) l.Widget {
 				ng.Body1(item.label).Fn,
 			).
 			Rigid(
+				ng.inputs[item.slug].Fn,
+			).
+			Rigid(
+				ng.Caption(item.description).Fn,
+			).
+			Fn(gtx)
+	}
+}
+
+func (ng *NodeGUI) RenderPassword(item *Item) l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return ng.VFlex().
+			Rigid(
+				ng.Body1(item.label).Fn,
+			).
+			Rigid(
+				ng.passwords[item.slug].Fn,
+			).
+			Rigid(
 				ng.Caption(item.description).Fn,
 			).
 			Fn(gtx)
@@ -225,16 +254,36 @@ func (ng *NodeGUI) RenderMulti(item *Item) l.Widget {
 }
 
 func (ng *NodeGUI) RenderRadio(item *Item) l.Widget {
-	return func(gtx l.Context) l.Dimensions {
+	var options []l.Widget
+	for i := range item.options {
+		options = append(options,
+			ng.RadioButton(ng.enums[item.slug],
+				item.options[i], item.options[i]).Fn)
+	}
+	out := func(gtx l.Context) l.Dimensions {
 		return ng.VFlex().
 			Rigid(
 				ng.Body1(item.label).Fn,
 			).
 			Rigid(
-				ng.Caption(item.description).Fn,
+				ng.Flex().
+					Rigid(
+						func(gtx l.Context) l.Dimensions {
+							gtx.Constraints.Max.X = int(ng.TextSize.Scale(10).V)
+							// return ng.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+							// 	return options[index](gtx)
+							// }).Fn(gtx)
+							return ng.lists[item.slug].Slice(gtx, options...)(gtx)
+						},
+					).
+					Rigid(
+						ng.Caption(item.description).Fn,
+					).
+					Fn,
 			).
 			Fn(gtx)
 	}
+	return out
 }
 
 func (ng *NodeGUI) Config() l.Widget {
@@ -258,8 +307,29 @@ func (ng *NodeGUI) Config() l.Widget {
 				slot:        ng.cx.ConfigMap[sgf.Slug],
 			}
 			// Debugs(sgf)
+			// create all the necessary widgets required before display
+			switch sgf.Widget {
+			case "toggle":
+				ng.bools[sgf.Slug] = ng.Bool(*tabNames[sgf.Group][sgf.Slug].slot.(*bool))
+			case "integer":
+			case "time":
+			case "float":
+			case "string":
+				ng.inputs[sgf.Slug] = ng.Input(*tabNames[sgf.Group][sgf.Slug].slot.(*string), 20, func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+				})
+			case "password":
+				ng.passwords[sgf.Slug] = ng.Password(tabNames[sgf.Group][sgf.Slug].slot.(*string), 20, func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+				})
+			case "multi":
+			case "radio":
+				ng.enums[sgf.Slug] = ng.Enum().SetValue(*tabNames[sgf.Group][sgf.Slug].slot.(*string))
+				ng.lists[sgf.Slug] = ng.List()
+			}
 		}
 	}
+
 	// Debugs(tabNames)
 	return tabNames.Widget(ng)
 	// return func(gtx l.Context) l.Dimensions {

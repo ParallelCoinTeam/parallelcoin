@@ -135,7 +135,7 @@ type Config struct {
 	BlockMinSize           *int             `group:"mining" label:"Block Min Size" description:"minimum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMinSize" hook:"restart"`
 	BlockMinWeight         *int             `group:"mining" label:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMinWeight" hook:"restart"`
 	BlockPrioritySize      *int             `group:"mining" label:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"" widget:"integer" json:"BlockPrioritySize" hook:"restart"`
-	BlocksOnly             *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"" widget:"string" json:"BlocksOnly" hook:"restart"`
+	BlocksOnly             *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"" widget:"toggle" json:"BlocksOnly" hook:"restart"`
 	CAFile                 *string          `group:"tls" label:"Certificate Authority File" description:"certificate authority file for TLS certificate validation" type:"path" widget:"string" json:"CAFile" hook:"restart"`
 	ConfigFile             *string          `group:"config" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"path" widget:"string" json:"ConfigFile" hook:"restart"`
 	ConnectPeers           *cli.StringSlice `group:"node" label:"Connect Peers" description:"connect ONLY to these addresses (disables inbound connections)" type:"address" widget:"multi" json:"ConnectPeers" hook:"restart"`
@@ -171,7 +171,7 @@ type Config struct {
 	NoRelayPriority        *bool            `group:"policy" label:"No Relay Priority" description:"do not require free or low-fee transactions to have high priority for relaying" type:"" widget:"toggle" json:"NoRelayPriority" hook:"restart"`
 	OneTimeTLSKey          *bool            `group:"wallet" label:"One Time TLS Key" description:"generate a new TLS certificate pair at startup, but only write the certificate to disk" type:"" widget:"toggle" json:"OneTimeTLSKey" hook:"restart"`
 	Onion                  *bool            `group:"proxy" label:"Onion" description:"enable tor proxy" type:"" widget:"toggle" json:"Onion" hook:"restart"`
-	OnionProxy             *string          `group:"proxy" label:"Onion Proxy" description:"address of tor proxy you want to connect to" type:"address" widget:"toggle" json:"OnionProxy" hook:"restart"`
+	OnionProxy             *string          `group:"proxy" label:"Onion Proxy" description:"address of tor proxy you want to connect to" type:"address" widget:"string" json:"OnionProxy" hook:"restart"`
 	OnionProxyPass         *string          `group:"proxy" label:"Onion Proxy Pass" description:"password for tor proxy" type:"" widget:"password" json:"OnionProxyPass" hook:"restart"`
 	OnionProxyUser         *string          `group:"proxy" label:"Onion Proxy User" description:"tor proxy username" type:"" widget:"string" json:"OnionProxyUser" hook:"restart"`
 	Password               *string          `group:"rpc" label:"Password" description:"password for client RPC connections" type:"" widget:"password" json:"Password" hook:"restart"`

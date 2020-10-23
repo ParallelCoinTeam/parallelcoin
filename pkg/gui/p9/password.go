@@ -13,10 +13,11 @@ type Password struct {
 	unhideButton    *IconButton
 	GetPassword     func() string
 	hide            bool
+	size            int
 }
 
-func (th *Theme) Password(password *string, handle func(pass string)) *Password {
-	pass := th.Editor().Mask('•').SingleLine(true).Submit(true)
+func (th *Theme) Password(password *string, size int, handle func(pass string)) *Password {
+	pass := th.Editor().Mask('•').SingleLine().Submit(true)
 	passInput := th.SimpleInput(pass).Color("DocText")
 	p := &Password{
 		Theme:           th,
@@ -24,6 +25,7 @@ func (th *Theme) Password(password *string, handle func(pass string)) *Password 
 		unhideClickable: th.Clickable(),
 		pass:            pass,
 		passInput:       passInput,
+		size:            size,
 	}
 	p.GetPassword = func() string {
 		return p.pass.Text()
@@ -80,11 +82,15 @@ func (th *Theme) Password(password *string, handle func(pass string)) *Password 
 }
 
 func (p *Password) Fn(gtx l.Context) l.Dimensions {
+	gtx.Constraints.Max.X = int(p.TextSize.Scale(float32(p.size)).V)
+	gtx.Constraints.Min.X = 0
 	return p.Border().Embed(
-		p.Flex().Flexed(1,
-			p.Inset(0.25, p.passInput.Fn).Fn,
-		).Rigid(
-			p.unhideButton.Fn,
-		).Fn,
+		p.Flex().
+			Flexed(1,
+				p.Inset(0.25, p.passInput.Fn).Fn,
+			).
+			Rigid(
+				p.unhideButton.Fn,
+			).Fn,
 	).Fn(gtx)
 }

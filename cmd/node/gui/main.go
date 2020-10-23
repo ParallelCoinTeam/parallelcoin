@@ -37,7 +37,10 @@ type NodeGUI struct {
 	bools            map[string]*p9.Bool
 	lists            map[string]*p9.List
 	enums            map[string]*p9.Enum
-	quitClickable    *p9.Clickable
+	clickables       map[string]*p9.Clickable
+	editors          map[string]*p9.Editor
+	inputs           map[string]*p9.Input
+	passwords        map[string]*p9.Password
 	invalidate       chan struct{}
 	quit             chan struct{}
 }
@@ -70,7 +73,12 @@ func (ng *NodeGUI) Run() (err error) {
 		"overview": ng.th.List(),
 		"settings": ng.th.List(),
 	}
-	ng.quitClickable = ng.th.Clickable()
+	ng.clickables = map[string]*p9.Clickable{
+		"quit": ng.th.Clickable(),
+	}
+	ng.editors = make(map[string]*p9.Editor)
+	ng.inputs = make(map[string]*p9.Input)
+	ng.passwords = make(map[string]*p9.Password)
 	ng.w = f.NewWindow()
 	ng.App = ng.GetAppWidget()
 	go func() {

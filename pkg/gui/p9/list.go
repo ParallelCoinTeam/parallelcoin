@@ -119,6 +119,14 @@ func (li *List) Active(color string) *List {
 	return li
 }
 
+func (li *List) Slice(gtx l.Context, widgets ...l.Widget) l.Widget {
+	// return func(gtx l.Context) l.Dimensions {
+	return li.Length(len(widgets)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+		return widgets[index](gtx)
+	}).Fn
+	// }
+}
+
 // Fn runs the layout in the configured context. The ListElement function returns the widget at the given index
 func (li *List) Fn(gtx l.Context) l.Dimensions {
 	if li.length == 0 {
@@ -127,7 +135,9 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	}
 	// get the size of the scrollbar
 	// scrollWidth := int(li.th.TextSize.V * 1.5)
-	scrollWidth := li.scrollWidth
+	scrollBarPad := int(li.th.TextSize.V * 0.5)
+	scrollWidth := li.scrollWidth // + scrollBarPad
+	li.th.scrollBarSize = scrollWidth + scrollBarPad
 	// render the widgets onto a second context to get their dimensions
 	gtx1 := CopyContextDimensions(gtx, gtx.Constraints.Max, li.axis)
 	// generate the dimensions for all the list elements
@@ -151,28 +161,48 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		// if the contents fit the view, don't show the scrollbar
 		top, middle, bottom = 0, 0, 0
 		scrollWidth = 0
+		scrollBarPad = 0
 	}
+	// scrollWidth += scrollBarPad
+
 	// now lay it all out and draw the list and scrollbar
 	var container l.Widget
 	if li.axis == l.Horizontal {
-		container = li.th.Flex().Vertical().
-			Rigid(li.embedWidget(scrollWidth)).
+		container = li.th.VFlex().
+			Rigid(li.embedWidget(scrollWidth+scrollBarPad)).
+			// Rigid(EmptySpace(scrollBarPad, 0)).
 			Rigid(
-				li.th.Flex().Vertical().
-					Rigid(li.pageUpDown(dims, view, total, top, scrollWidth, false)).
-					Rigid(li.grabber(dims, middle, scrollWidth)).
-					Rigid(li.pageUpDown(dims, view, total, bottom, scrollWidth, true)).
+				// li.th.Inset(0.125,
+				li.th.VFlex().
+					Rigid(
+						li.th.Fill("PanelBg", EmptySpace(0, scrollBarPad)).Fn,
+					).
+					Rigid(
+						li.th.Flex().
+							Rigid(li.pageUpDown(dims, view, total, top, scrollWidth, false)).
+							Rigid(li.grabber(dims, middle, scrollWidth)).
+							Rigid(li.pageUpDown(dims, view, total, bottom, scrollWidth, true)).
+							Fn,
+					).
 					Fn,
+				// ).Fn,
 			).Fn
 	} else {
 		container = li.th.Flex().
-			Rigid(li.embedWidget(scrollWidth)).
+			Rigid(li.embedWidget(scrollWidth+scrollBarPad)).
+			// Rigid(EmptySpace(0, scrollBarPad)).
 			Rigid(
-				li.th.Flex().Vertical().
-					Rigid(li.pageUpDown(dims, view, total, scrollWidth, top, false)).
-					Rigid(li.grabber(dims, scrollWidth, middle)).
-					Rigid(li.pageUpDown(dims, view, total, scrollWidth, bottom, true)).
-					Fn,
+				li.th.Flex().
+					Rigid(
+						li.th.Fill("PanelBg", EmptySpace(scrollBarPad, 0)).Fn,
+					).
+					Rigid(
+						li.th.Flex().Vertical().
+							Rigid(li.pageUpDown(dims, view, total, scrollWidth, top, false)).
+							Rigid(li.grabber(dims, scrollWidth, middle)).
+							Rigid(li.pageUpDown(dims, view, total, scrollWidth, bottom, true)).
+							Fn,
+					).Fn,
 			).Fn
 	}
 	return container(gtx)
@@ -249,9 +279,13 @@ func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensio
 				current := dims.PositionToCoordinate(li.position, li.axis)
 				var d int
 				if li.axis == l.Horizontal {
-					d = int(de.Position.X) + current
+					d = int(de.Position.X)*2 + current
 				} else {
-					d = int(de.Position.Y) + current
+					d = int(de.Position.Y)*2 + current
+				}
+				total := dims.GetTotal(gtx, li.axis)
+				if d > total {
+					d = total - 1
 				}
 				li.position = dims.CoordinateToPosition(d, li.axis)
 			}

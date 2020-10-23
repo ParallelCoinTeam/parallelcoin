@@ -46,8 +46,8 @@ func main() {
 		slider:      th.Float().SetHook(func(fl float32) {
 			Debug("float now at value", fl)
 		}),
-		lineEditor:  th.Editor().SingleLine(true).Submit(true),
-		areaEditor:  th.Editor().SingleLine(false).Submit(false),
+		lineEditor:  th.Editor().SingleLine().Submit(true),
+		areaEditor:  th.Editor().SingleLine().Submit(false),
 		radio: th.Enum().SetOnChange(func(value string) {
 			Debug("changed radio button to", value)
 		}),

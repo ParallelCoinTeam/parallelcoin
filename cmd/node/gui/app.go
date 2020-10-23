@@ -120,7 +120,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 						ng.Flex().
 							SpaceEvenly().
 							Rigid(
-								ng.Button(ng.quitClickable.SetClick(func() {
+								ng.Button(ng.clickables["quit"].SetClick(func() {
 									interrupt.Request()
 								})).Color(ng.TitleBarColorGet()).TextScale(2).Text("yes!!!").Fn,
 							).Fn,
@@ -192,9 +192,10 @@ func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.D
 
 func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
+		gtx.Constraints.Max.X = int(ng.TextSize.Scale(12).V)
+		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		return ng.ButtonLayout(ng.sidebarButtons[index]).Embed(
 			func(gtx l.Context) l.Dimensions {
-				// gtx.Constraints.Max.X = int(ng.TextSize.Scale(12).V)
 				background := "Transparent"
 				color := "DocText"
 				if ng.ActivePageGet() == page {
@@ -207,15 +208,15 @@ func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Conte
 				}
 				return ng.Inset(outPad,
 					ng.Fill(background,
-						ng.Flex().
-							Flexed(1,
-								ng.Inset(inPad,
-									ng.H6(title).
-										Color(color).
-										Fn,
-								).Fn,
+					ng.Flex().
+						Flexed(1,
+							ng.Inset(inPad,
+								ng.H6(title).
+									Color(color).
+									Fn,
 							).Fn,
-					).Fn,
+							).Fn,
+						).Fn,
 				).Fn(gtx)
 			},
 		).
