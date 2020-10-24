@@ -42,14 +42,14 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				func(c *cli.Context) error {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
-				}, apputil.SubCommands(), nil, "v"),
-			//apputil.NewCommand("gui", "run GUI",
+				}, au.SubCommands(), nil, "v"),
+			// apputil.NewCommand("gui", "run GUI",
 			//	guiHandle(cx), apputil.SubCommands(), nil, "gui"),
-			apputil.NewCommand("nodegui", "start node GUI", walletGUIHandle(cx),
-				apputil.SubCommands(), nil),
-			apputil.NewCommand("nodegui", "start node GUI", nodeGUIHandle(cx),
-				apputil.SubCommands(), nil),
-			apputil.NewCommand("ctl",
+			au.Command("gui", "start wallet GUI", walletGUIHandle(cx),
+				au.SubCommands(), nil),
+			au.Command("nodegui", "start node GUI", nodeGUIHandle(cx),
+				au.SubCommands(), nil),
+			au.Command("ctl",
 				"send RPC commands to a node or wallet and print the result",
 				ctlHandle(cx), au.SubCommands(
 					au.Command(
