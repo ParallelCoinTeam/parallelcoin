@@ -97,8 +97,8 @@ func (e *Editor) Alignment(alignment text.Alignment) *Editor {
 	return e
 }
 
-func (e *Editor) SingleLine(singleLine bool) *Editor {
-	e.singleLine = singleLine
+func (e *Editor) SingleLine() *Editor {
+	e.singleLine = true
 	return e
 }
 

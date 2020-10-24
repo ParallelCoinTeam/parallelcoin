@@ -42,7 +42,7 @@ func (th *Theme) Checkable() *Checkable {
 	return &Checkable{
 		th:                 th,
 		label:              "checkable",
-		color:              th.Colors.Get("DocText"),
+		color:              th.Colors.Get("Primary"),
 		font:               f,
 		textSize:           th.TextSize.Scale(14.0 / 16.0),
 		iconColor:          th.Colors.Get("Primary"),

@@ -8,6 +8,10 @@ import (
 
 type ContextWidget func(l.Context) l.Widget
 
+// WidgetSize is a widget with a specification of the minimum size to select it for viewing.
+// Note that the widgets you put in here should be wrapped in func(l.Context) l.Dimensions otherwise
+// any parameters retrieved from the controlling state variable will be from initialization and not
+// at execution of the widget in the render process
 type WidgetSize struct {
 	Size   int
 	Widget l.Widget

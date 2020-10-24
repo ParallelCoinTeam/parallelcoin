@@ -3,28 +3,35 @@
 package p9
 
 import (
+	"os"
+	"runtime/debug"
+
 	"gioui.org/layout"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
+type RadioButton struct {
+	*Checkable
+	th    *Theme
+	key   string
+	group *Enum
+}
+
 // RadioButton returns a RadioButton with a label. The key specifies the value for the Enum.
-func (th *Theme) RadioButton(group *Enum, key, label string) *RadioButton {
+func (th *Theme) RadioButton(checkable *Checkable, group *Enum, key, label string) *RadioButton {
+	if checkable == nil {
+		debug.PrintStack()
+		os.Exit(0)
+	}
 	return &RadioButton{
 		group: group,
 		th:    th,
-		Checkable: *th.Checkable().
+		Checkable: checkable.
 			CheckedStateIcon(th.Icon().Src(icons.ToggleRadioButtonChecked)).
 			UncheckedStateIcon(th.Icon().Src(icons.ToggleRadioButtonUnchecked)).
 			Label(label),
 		key: key,
 	}
-}
-
-type RadioButton struct {
-	Checkable
-	th    *Theme
-	key   string
-	group *Enum
 }
 
 // Key sets the key initially active on the radiobutton

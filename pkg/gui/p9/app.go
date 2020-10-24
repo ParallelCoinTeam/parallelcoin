@@ -18,34 +18,38 @@ type App struct {
 	activePage          string
 	bodyBackground      string
 	bodyColor           string
+	cardBackground      string
+	cardColor           string
 	buttonBar           []l.Widget
 	hideSideBar         bool
 	hideTitleBar        bool
 	layers              []l.Widget
-	pages               map[string]l.Widget
-	root                *Stack
-	sideBar             []l.Widget
-	sideBarSize         unit.Value
-	sideBarColor        string
-	sideBarBackground   string
-	statusBar           []l.Widget
-	statusBarColor      string
-	statusBarBackground string
 	logo                []byte
 	logoClickable       *Clickable
+	menuBackground      string
+	menuButton          *IconButton
+	menuClickable       *Clickable
+	menuColor           string
+	menuIcon            []byte
+	MenuOpen            bool
+	pages               WidgetMap
+	root                *Stack
+	sideBar             []l.Widget
+	sideBarBackground   string
+	sideBarColor        string
+	sideBarSize         unit.Value
+	sideBarList         *List
+	Size                *int
+	statusBar           []l.Widget
+	statusBarBackground string
+	statusBarColor      string
 	title               string
 	titleBarBackground  string
 	titleBarColor       string
 	titleFont           string
-	menuClickable       *Clickable
-	menuButton          *IconButton
-	menuIcon            []byte
-	menuColor           string
-	menuBackground      string
-	MenuOpen            bool
-	responsive          *Responsive
-	Size                *int
 }
+
+type WidgetMap map[string]l.Widget
 
 func (th *Theme) App(size int) *App {
 	mc := th.Clickable()
@@ -54,19 +58,20 @@ func (th *Theme) App(size int) *App {
 		activePage:          "main",
 		bodyBackground:      "PanelBg",
 		bodyColor:           "PanelText",
+		cardBackground:      "DocBg",
+		cardColor:           "DocText",
 		buttonBar:           nil,
 		hideSideBar:         false,
 		hideTitleBar:        false,
 		layers:              nil,
-		pages:               make(map[string]l.Widget),
+		pages:               make(WidgetMap),
 		root:                th.Stack(),
-		sideBarSize:         th.TextSize.Scale(20),
-		sideBarColor:        "DocText",
+		sideBarSize:         th.TextSize.Scale(14),
 		sideBarBackground:   "DocBg",
-		statusBarColor:
-			"DocBg",
-		statusBarBackground:
-			"DocText",
+		sideBarColor:        "DocText",
+		statusBarBackground: "DocBg",
+		statusBarColor:      "DocText",
+		sideBarList:         th.List(),
 		logo:                ico.ParallelCoin,
 		logoClickable:       th.Clickable(),
 		title:               "parallelcoin",
@@ -87,6 +92,7 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		x := gtx.Constraints.Max.X
 		a.Size = &x
+		// TODO: put the root stack in here
 		return a.Flex().Rigid(
 			a.VFlex().
 				Rigid(
@@ -110,9 +116,9 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 	}
 	out :=
 	// a.Fill("PanelBg",
-		a.Inset(0.25,
-			bar.Fn,
-		).Fn
+	// 	a.Inset(0.25,
+		bar.Fn
+	// ).Fn
 	// ).Fn
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	dims := a.Fill(a.statusBarBackground, out).Fn(gtx)
@@ -168,17 +174,18 @@ func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 							{
 								Widget: func(gtx l.Context) l.Dimensions {
 									return If(a.MenuOpen,
-										a.Fill(a.sideBarBackground,
+										// a.Fill(a.sideBarBackground,
 											a.renderSideBar(),
-										).Fn,
+										// ).Fn,
 										EmptySpace(0, 0),
 									)(gtx)
 								},
 							},
 							{Size: 800,
-								Widget: a.Fill(a.sideBarBackground,
+								Widget:
+								// a.Fill(a.sideBarBackground,
 									a.renderSideBar(),
-								).Fn,
+								// ).Fn,
 							},
 						},
 						).Fn,
@@ -196,13 +203,14 @@ func (a *App) MenuButton(gtx l.Context) l.Dimensions {
 	color := a.menuColor
 	if a.MenuOpen {
 		color = "DocText"
+		bg = a.sideBarBackground
 	}
 	return a.Flex().Rigid(
 		// a.Inset(0.25,
 		a.ButtonLayout(a.menuClickable).
 			CornerRadius(0).
 			Embed(
-				a.Inset(0.25,
+				a.Inset(0.4,
 					a.Icon().
 						Scale(Scales["H5"]).
 						Color(color).
@@ -233,25 +241,25 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 					Widget: EmptySpace(0, 0),
 				},
 				{Size: 800,
-					Widget: a.Inset(0.125,
-						a.Inset(0.125,
-							a.IconButton(
-								a.logoClickable.SetClick(
+					Widget: a.Inset(0.25,
+						a.IconButton(
+							a.logoClickable.
+								SetClick(
 									func() {
 										Debug("clicked logo")
 										a.Dark = !a.Dark
 										a.Theme.Colors.SetTheme(a.Dark)
-									}),
-							).
-								Icon(
-									a.Icon().
-										Scale(Scales["H6"]).
-										Color("Light").
-										Src(a.logo)).
-								Background("Dark").Color("Light").
-								Inset(0.25).
-								Fn,
-						).Fn,
+									},
+								),
+						).
+							Icon(
+								a.Icon().
+									Scale(Scales["H6"]).
+									Color("Light").
+									Src(a.logo)).
+							Background("Dark").Color("Light").
+							Inset(0.25).
+							Fn,
 					).Fn,
 				},
 			},
@@ -261,15 +269,15 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 			a.Responsive(*a.Size, Widgets{
 				{Size: 800,
 					Widget:
-					a.Inset(0.375,
-						a.H6(a.title).Color("Light").Fn,
+					a.Inset(0.333,
+						a.H5(a.title).Color("Light").Fn,
 					).Fn,
 				},
 				{
 					Widget:
 					a.ButtonLayout(a.logoClickable).Embed(
-						a.Inset(0.375,
-							a.H6(a.title).Color("Light").Fn,
+						a.Inset(0.333,
+							a.H5(a.title).Color("Light").Fn,
 						).Fn,
 					).Background("Transparent").Fn,
 				},
@@ -311,12 +319,19 @@ func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
 
 func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
-		gtx.Constraints.Max.X = 200 // a.scrollBarSize
-		// gtx.Constraints.Min.X = a.scrollBarSize
-		out := a.VFlex()
-		for i := range a.sideBar {
-			out.Rigid(a.sideBar[i])
-		}
+		out := a.sideBarList.Length(len(a.sideBar)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+			// gtx.Constraints.Max.X = int(a.sideBarSize.V)
+			// gtx.Constraints.Min.X = 0
+			// gtx.Constraints.Max.X = gtx.Constraints.Min.X
+			dims := a.sideBar[index](gtx)
+			// Debug(dims)
+			return dims
+			// out := a.VFlex()
+			// for i := range a.sideBar {
+			// 	out.Rigid(a.sideBar[i])
+			// }
+			// return out.Fn(gtx)
+		})
 		// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
 		return out.Fn(gtx)
 	}
@@ -344,6 +359,22 @@ func (a *App) BodyColor(bodyColor string) *App {
 }
 func (a *App) BodyColorGet() string {
 	return a.bodyColor
+}
+
+func (a *App) CardBackground(cardBackground string) *App {
+	a.cardBackground = cardBackground
+	return a
+}
+func (a *App) CardBackgroundGet() string {
+	return a.cardBackground
+}
+
+func (a *App) CardColor(cardColor string) *App {
+	a.cardColor = cardColor
+	return a
+}
+func (a *App) CardColorGet() string {
+	return a.cardColor
 }
 
 func (a *App) ButtonBar(bar []l.Widget) *App {
@@ -402,11 +433,11 @@ func (a *App) MenuIconGet() []byte {
 	return a.menuIcon
 }
 
-func (a *App) Pages(widgets map[string]l.Widget) *App {
+func (a *App) Pages(widgets WidgetMap) *App {
 	a.pages = widgets
 	return a
 }
-func (a *App) PagesGet() map[string]l.Widget {
+func (a *App) PagesGet() WidgetMap {
 	return a.pages
 }
 
@@ -422,10 +453,6 @@ func (a *App) SideBar(widgets []l.Widget) *App {
 	a.sideBar = widgets
 	return a
 }
-func (a *App) SideBarGet() []l.Widget {
-	return a.sideBar
-}
-
 func (a *App) SideBarBackground(sideBarBackground string) *App {
 	a.sideBarBackground = sideBarBackground
 	return a
@@ -442,12 +469,13 @@ func (a *App) SideBarColorGet() string {
 	return a.sideBarColor
 }
 
+func (a *App) SideBarGet() []l.Widget {
+	return a.sideBar
+}
+
 func (a *App) StatusBar(bar []l.Widget) *App {
 	a.statusBar = bar
 	return a
-}
-func (a *App) StatusBarGet() (bar []l.Widget) {
-	return a.statusBar
 }
 func (a *App) StatusBarBackground(statusBarBackground string) *App {
 	a.statusBarBackground = statusBarBackground
@@ -465,14 +493,13 @@ func (a *App) StatusBarColorGet() string {
 	return a.statusBarColor
 }
 
+func (a *App) StatusBarGet() (bar []l.Widget) {
+	return a.statusBar
+}
 func (a *App) Title(title string) *App {
 	a.title = title
 	return a
 }
-func (a *App) TitleGet() string {
-	return a.title
-}
-
 func (a *App) TitleBarBackground(TitleBarBackground string) *App {
 	a.bodyBackground = TitleBarBackground
 	return a
@@ -495,4 +522,7 @@ func (a *App) TitleFont(font string) *App {
 }
 func (a *App) TitleFontGet() string {
 	return a.titleFont
+}
+func (a *App) TitleGet() string {
+	return a.title
 }
