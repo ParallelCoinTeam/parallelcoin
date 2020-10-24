@@ -3,6 +3,8 @@ package p9
 import (
 	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/p9c/pod/pkg/gui/clipboard"
 )
 
 type Input struct {
@@ -11,6 +13,10 @@ type Input struct {
 	input                *TextInput
 	clearClickable       *Clickable
 	clearButton          *IconButton
+	copyClickable        *Clickable
+	copyButton           *IconButton
+	pasteClickable       *Clickable
+	pasteButton          *IconButton
 	GetText              func() string
 	size                 int
 	borderColor          string
@@ -19,25 +25,40 @@ type Input struct {
 	focused              bool
 }
 
-func (th *Theme) Input(txt, borderColorFocused, borderColorUnfocused string, size int, handle func(txt string)) *Input {
+func (th *Theme) Input(txt, borderColorFocused, borderColorUnfocused string,
+	size int, handle func(txt string)) *Input {
 	editor := th.Editor().SingleLine().Submit(true)
 	input := th.SimpleInput(editor)
 	p := &Input{
-		Theme:          th,
-		clearButton:    nil,
-		clearClickable: th.Clickable(),
-		editor:         editor,
-		input:          input,
-		size:           size,
+		Theme:                th,
+		clearClickable:       th.Clickable(),
+		copyClickable:        th.Clickable(),
+		pasteClickable:       th.Clickable(),
+		editor:               editor,
+		input:                input,
+		size:                 size,
 		borderColorUnfocused: borderColorUnfocused,
-		borderColorFocused: borderColorFocused,
+		borderColorFocused:   borderColorFocused,
 	}
 	p.GetText = func() string {
 		return p.editor.Text()
 	}
 	p.clearButton = th.IconButton(p.clearClickable)
+	p.copyButton = th.IconButton(p.copyClickable)
+	p.pasteButton = th.IconButton(p.pasteClickable)
 	clearClickableFn := func() {
 		p.editor.SetText("")
+	}
+	copyClickableFn := func() {
+		go clipboard.Set(p.editor.Text())
+	}
+	pasteClickableFn := func() {
+		go func() {
+			txt := p.editor.Text()
+			txt = txt[:p.editor.caret.col] + clipboard.Get() + txt[p.editor.caret.col:]
+			p.editor.SetText(txt)
+		}()
+
 	}
 	p.clearButton.
 		Icon(
@@ -45,8 +66,22 @@ func (th *Theme) Input(txt, borderColorFocused, borderColorUnfocused string, siz
 				Color("DocText").
 				Src(icons2.ContentBackspace),
 		)
+	p.copyButton.
+		Icon(
+			th.Icon().
+				Color("DocText").
+				Src(icons2.ContentContentCopy),
+		)
+	p.pasteButton.
+		Icon(
+			th.Icon().
+				Color("DocText").
+				Src(icons2.ContentContentPaste),
+		)
 	p.input.Color("DocText")
 	p.clearClickable.SetClick(clearClickableFn)
+	p.copyClickable.SetClick(copyClickableFn)
+	p.pasteClickable.SetClick(pasteClickableFn)
 	p.editor.SetText(txt).SetSubmit(func(txt string) {
 		go func() {
 			handle(txt)
@@ -73,9 +108,25 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 				in.Inset(0.25, in.input.Color("DocText").Fn).Fn,
 			).
 			Rigid(
+				in.copyButton.
+					Background("").
+					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(icons2.ContentContentCopy)).
+					Inset(0.25).
+					Fn,
+			).
+			Rigid(
+				in.pasteButton.
+					Background("").
+					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(icons2.ContentContentPaste)).
+					Inset(0.25).
+					Fn,
+			).
+			Rigid(
 				in.clearButton.
 					Background("").
-					Icon(in.Icon().Color(in.borderColor).Src(icons2.ContentBackspace)).Fn,
+					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(icons2.ContentBackspace)).
+					Inset(0.25).
+					Fn,
 			).
 			Fn,
 	).Fn(gtx)
