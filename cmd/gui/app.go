@@ -97,34 +97,45 @@ func (ng *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l
 }
 
 func (ng *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
-	return ng.ButtonLayout(ng.sidebarButtons[index]).Embed(
-		func(gtx l.Context) l.Dimensions {
-			background := "Transparent"
-			color := "DocText"
-			if ng.ActivePageGet() == page {
-				background = "PanelBg"
-				color = "PanelText"
-			}
-			return ng.Fill(background,
-				ng.Flex().Flexed(1,
-					ng.th.Inset(0.5,
-						ng.th.H6(title).
-							Color(color).
-							Fn,
-					).Fn,
-				).Fn,
-			).Fn(gtx)
-		},
-	).
-		Background("Transparent").
-		SetClick(
-			func() {
-				if ng.MenuOpen {
-					ng.MenuOpen = false
+	return func(gtx l.Context) l.Dimensions {
+		gtx.Constraints.Max.X = int(ng.TextSize.Scale(12).V)
+		gtx.Constraints.Min.X = gtx.Constraints.Max.X
+		return ng.ButtonLayout(ng.sidebarButtons[index]).Embed(
+			func(gtx l.Context) l.Dimensions {
+				background := "Transparent"
+				color := "DocText"
+				if ng.ActivePageGet() == page {
+					background = "PanelBg"
+					color = "PanelText"
 				}
-				ng.ActivePage(page)
-			}).
-		Fn
+				var inPad, outPad float32 = 0.5, 0.25
+				if *ng.Size >= 800 {
+					inPad, outPad = 0.75, 0
+				}
+				return ng.Inset(outPad,
+					ng.Fill(background,
+						ng.Flex().
+							Flexed(1,
+								ng.Inset(inPad,
+									ng.H6(title).
+										Color(color).
+										Fn,
+								).Fn,
+							).Fn,
+					).Fn,
+				).Fn(gtx)
+			},
+		).
+			Background("Transparent").
+			SetClick(
+				func() {
+					if ng.MenuOpen {
+						ng.MenuOpen = false
+					}
+					ng.ActivePage(page)
+				}).
+			Fn(gtx)
+	}
 }
 
 func (ng *WalletGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
