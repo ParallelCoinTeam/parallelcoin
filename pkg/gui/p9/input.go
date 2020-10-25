@@ -48,9 +48,11 @@ func (th *Theme) Input(txt, borderColorFocused, borderColorUnfocused string,
 	p.pasteButton = th.IconButton(p.pasteClickable)
 	clearClickableFn := func() {
 		p.editor.SetText("")
+		p.editor.Focus()
 	}
 	copyClickableFn := func() {
 		go clipboard.Set(p.editor.Text())
+		p.editor.Focus()
 	}
 	pasteClickableFn := func() {
 		go func() {
@@ -58,7 +60,7 @@ func (th *Theme) Input(txt, borderColorFocused, borderColorUnfocused string,
 			txt = txt[:p.editor.caret.col] + clipboard.Get() + txt[p.editor.caret.col:]
 			p.editor.SetText(txt)
 		}()
-
+		p.editor.Focus()
 	}
 	p.clearButton.
 		Icon(

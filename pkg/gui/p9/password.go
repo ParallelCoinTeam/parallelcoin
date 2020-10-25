@@ -3,6 +3,8 @@ package p9
 import (
 	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/p9c/pod/pkg/gui/clipboard"
 )
 
 type Password struct {
@@ -11,6 +13,10 @@ type Password struct {
 	passInput            *TextInput
 	unhideClickable      *Clickable
 	unhideButton         *IconButton
+	copyClickable        *Clickable
+	copyButton           *IconButton
+	pasteClickable       *Clickable
+	pasteButton          *IconButton
 	GetPassword          func() string
 	hide                 bool
 	size                 int
@@ -28,8 +34,9 @@ func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfoc
 	passInput := th.SimpleInput(pass).Color(borderColorUnfocused)
 	p := &Password{
 		Theme:                th,
-		unhideButton:         nil,
 		unhideClickable:      th.Clickable(),
+		copyClickable:        th.Clickable(),
+		pasteClickable:       th.Clickable(),
 		pass:                 pass,
 		passInput:            passInput,
 		size:                 size,
@@ -42,6 +49,8 @@ func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfoc
 	p.GetPassword = func() string {
 		return p.pass.Text()
 	}
+	p.copyButton = th.IconButton(p.copyClickable)
+	p.pasteButton = th.IconButton(p.pasteClickable)
 	p.unhideButton = th.IconButton(p.unhideClickable).
 		Background("Transparent").
 		Icon(th.Icon().Color(p.borderColor).Src(icons2.ActionVisibility))
@@ -67,7 +76,22 @@ func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfoc
 			p.pass.Mask(0)
 			p.passInput.Color(col)
 		}
+		p.pass.Focus()
 	}
+	copyClickableFn := func() {
+		go clipboard.Set(p.pass.Text())
+		p.pass.Focus()
+	}
+	pasteClickableFn := func() {
+		go func() {
+			txt := p.pass.Text()
+			txt = txt[:p.pass.caret.col] + clipboard.Get() + txt[p.pass.caret.col:]
+			p.pass.SetText(txt)
+		}()
+		p.pass.Focus()
+	}
+	p.copyClickable.SetClick(copyClickableFn)
+	p.pasteClickable.SetClick(pasteClickableFn)
 	p.unhideButton.
 		// Color("Primary").
 		Icon(
@@ -117,10 +141,25 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 					p.Inset(0.25, p.passInput.Color(p.borderColor).Fn).Fn,
 				).
 				Rigid(
+					p.copyButton.
+						Background("").
+						Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(icons2.ContentContentCopy)).
+						Inset(0.25).
+						Fn,
+				).
+				Rigid(
+					p.pasteButton.
+						Background("").
+						Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(icons2.ContentContentPaste)).
+						Inset(0.25).
+						Fn,
+				).
+				Rigid(
 					p.unhideButton.
 						Background("Transparent").
 						Icon(p.Icon().Color(p.borderColor).Src(icons2.ActionVisibility)).Fn,
-				).Fn,
+				).
+				Fn,
 		).Fn(gtx)
 	}(gtx)
 }
