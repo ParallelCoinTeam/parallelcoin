@@ -128,8 +128,8 @@ func (ng *NodeGUI) Config() GroupsMap {
 			case "multi":
 				ng.multis[sgf.Slug] = ng.th.Multiline(tgs.slot.(*cli.StringSlice),
 					"Primary", "PanelBg", 30, func(txt []string) {
-					Debug(sgf.Slug, "submitted", txt)
-				})
+						Debug(sgf.Slug, "submitted", txt)
+					})
 				// ng.multis[sgf.Slug]
 			case "radio":
 				ng.checkables[sgf.Slug] = ng.th.Checkable()
@@ -363,13 +363,15 @@ func (ng *NodeGUI) RenderRadio(item *Item) l.Widget {
 			Rigid(
 				ng.th.Flex().
 					Rigid(
-						func(gtx l.Context) l.Dimensions {
-							gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(10).V)
-							// return ng.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
-							// 	return options[index](gtx)
-							// }).Fn(gtx)
-							return ng.lists[item.slug].Slice(gtx, options...)(gtx)
-						},
+						ng.lists[item.slug].DisableScroll(true).Slice(gtx, options...),
+						// func(gtx l.Context) l.Dimensions {
+						// 	gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(10).V)
+						// 	// return ng.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+						// 	// 	return options[index](gtx)
+						// 	// }).Fn(gtx)
+						// 	return ng.lists[item.slug].Slice(gtx, options...)(gtx)
+						// 	// return l.Dimensions{}
+						// },
 					).
 					Rigid(
 						ng.th.Caption(item.description).Fn,
