@@ -42,48 +42,141 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 												{
 													Widget: ng.th.VFlex().
 														Rigid(
-															ng.th.RadioButton(ng.checkables["runmodenode"].
-																Color("DocText").
-																IconColor("DocText"), ng.enums["runmode"],
-																"node", "node").Fn,
+															ng.th.Inset(0.125,
+																ng.th.RadioButton(ng.checkables["runmodenode"].
+																	Color("DocText").
+																	IconColor("DocText"), ng.enums["runmode"],
+																	"node", "node").Fn,
+															).Fn,
 														).
 														Rigid(
-															ng.th.RadioButton(ng.checkables["runmodewallet"].
-																Color("DocText").
-																IconColor("DocText"), ng.enums["runmode"],
-																"wallet", "wallet").Fn,
+															ng.th.Inset(0.125,
+																ng.th.RadioButton(ng.checkables["runmodewallet"].
+																	Color("DocText").
+																	IconColor("DocText"), ng.enums["runmode"],
+																	"wallet", "wallet").Fn,
+															).Fn,
 														).
 														Rigid(
-															ng.th.RadioButton(ng.checkables["runmodeshell"].
-																Color("DocText").
-																IconColor("DocText"), ng.enums["runmode"],
-																"shell", "shell").Fn,
+															ng.th.Inset(0.125,
+																ng.th.RadioButton(ng.checkables["runmodeshell"].
+																	Color("DocText").
+																	IconColor("DocText"), ng.enums["runmode"],
+																	"shell", "shell").Fn,
+															).Fn,
 														).Fn,
 												},
 												{Size: 512,
 													Widget: ng.th.Flex().
 														Rigid(
-															ng.th.RadioButton(ng.checkables["runmodenode"].
-																Color("DocText").
-																IconColor("DocText"), ng.enums["runmode"],
-																"node", "node").Fn,
+															ng.th.Inset(0.125,
+																ng.th.RadioButton(ng.checkables["runmodenode"].
+																	Color("DocText").
+																	IconColor("DocText"), ng.enums["runmode"],
+																	"node", "node").Fn,
+															).Fn,
 														).
 														Rigid(
-															ng.th.RadioButton(ng.checkables["runmodewallet"].
-																Color("DocText").
-																IconColor("DocText"), ng.enums["runmode"],
-																"wallet", "wallet").Fn,
+															ng.th.Inset(0.125,
+																ng.th.RadioButton(ng.checkables["runmodewallet"].
+																	Color("DocText").
+																	IconColor("DocText"), ng.enums["runmode"],
+																	"wallet", "wallet").Fn,
+															).Fn,
 														).
 														Rigid(
-															ng.th.RadioButton(ng.checkables["runmodeshell"].
-																Color("DocText").
-																IconColor("DocText"), ng.enums["runmode"],
-																"shell", "shell").Fn,
+															ng.th.Inset(0.125,
+																ng.th.RadioButton(ng.checkables["runmodeshell"].
+																	Color("DocText").
+																	IconColor("DocText"), ng.enums["runmode"],
+																	"shell", "shell").Fn,
+															).Fn,
 														).Fn,
 												},
 											}).Fn,
 										).Fn,
 								).Fn,
+							),
+							ng.th.CardContent("mining info", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Rigid(
+										ng.th.Body1("I will show the current data about difficulty adjustment").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
+							),
+							ng.th.CardContent("network hashrate", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Rigid(
+										ng.th.Body1("i will show a graph of the hashrate on the lan").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
+							),
+							ng.th.CardContent("log", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Flexed(1,
+										ng.th.Body1("i will become a log viewer").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
+							),
+							ng.th.CardContent("mining info", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Rigid(
+										ng.th.Body1("I will show the current data about difficulty adjustment").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
+							),
+							ng.th.CardContent("network hashrate", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Rigid(
+										ng.th.Body1("i will show a graph of the hashrate on the lan").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
+							),
+							ng.th.CardContent("log", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Flexed(1,
+										ng.th.Body1("i will become a log viewer").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
+							),
+							ng.th.CardContent("mining info", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Rigid(
+										ng.th.Body1("I will show the current data about difficulty adjustment").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
+							),
+							ng.th.CardContent("network hashrate", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Rigid(
+										ng.th.Body1("i will show a graph of the hashrate on the lan").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
+							),
+							ng.th.CardContent("log", ng.app.CardColorGet(),
+								ng.th.Flex().
+									Flexed(1,
+										ng.th.Body1("i will become a log viewer").
+											Color(ng.app.CardColorGet()).
+											Fn,
+									).
+									Fn,
 							),
 							ng.th.CardContent("mining info", ng.app.CardColorGet(),
 								ng.th.Flex().

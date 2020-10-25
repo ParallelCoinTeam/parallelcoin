@@ -43,7 +43,7 @@ func (th *Theme) Checkable() *Checkable {
 		font:               f,
 		textSize:           th.TextSize.Scale(14.0 / 16.0),
 		iconColor:          "Primary",
-		size:               th.TextSize.Scale(1),
+		size:               th.TextSize.Scale(1.5),
 		checkedStateIcon:   icons.ToggleCheckBox,
 		uncheckedStateIcon: icons.ToggleCheckBoxOutlineBlank,
 		shaper:             th.shaper,
@@ -108,19 +108,18 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	var icon *Icon
 	if checked {
 		icon = c.th.Icon().
-			Scale(1.5).
 			Color(c.color).
 			Src(c.checkedStateIcon)
 	} else {
 		icon = c.th.Icon().
-			Scale(1.5).
 			Color(c.color).
 			Src(c.uncheckedStateIcon)
 	}
+	icon.size = c.size
 	// Debugs(icon)
 	dims :=
 		c.th.Flex().Rigid(
-			c.th.Inset(0.25,
+			// c.th.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
 					size := gtx.Px(c.size)
 					// icon.color = c.iconColor
@@ -133,14 +132,15 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 					return l.Dimensions{
 						Size: image.Point{X: size, Y: size},
 					}
-				}).Fn,
+				},
+			// ).Fn,
 		).Rigid(
-			c.th.Inset(0.25,
+			// c.th.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
 					paint.ColorOp{Color: c.th.Colors.Get(c.color)}.Add(gtx.Ops)
 					return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
 				},
-			).Fn,
+			// ).Fn,
 		).Fn(gtx)
 	pointer.Rect(image.Rectangle{Max: dims.Size}).Add(gtx.Ops)
 	return dims
