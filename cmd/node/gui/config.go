@@ -126,13 +126,13 @@ func (ng *NodeGUI) Config() GroupsMap {
 						Debug(sgf.Slug, "submitted", txt)
 					})
 			case "multi":
-				ng.multis[sgf.Slug] = ng.th.Multiline(*tgs.slot.(*cli.StringSlice),
+				ng.multis[sgf.Slug] = ng.th.Multiline(tgs.slot.(*cli.StringSlice),
 					"Primary", "PanelBg", 30, func(txt []string) {
 					Debug(sgf.Slug, "submitted", txt)
 				})
 				// ng.multis[sgf.Slug]
 			case "radio":
-				// ng.checkables[sgf.Slug] = ng.Checkable()
+				ng.checkables[sgf.Slug] = ng.th.Checkable()
 				for i := range sgf.Options {
 					ng.checkables[sgf.Slug+sgf.Options[i]] = ng.th.Checkable()
 				}

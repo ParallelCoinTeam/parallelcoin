@@ -114,6 +114,7 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	} else {
 		icon = c.uncheckedStateIcon.Scale(1.5)
 	}
+	// Debugs(icon)
 	dims :=
 		c.th.Flex().Rigid(
 			c.th.Inset(0.25,

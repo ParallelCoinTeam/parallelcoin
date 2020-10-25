@@ -44,7 +44,9 @@ func (i *Icon) RGBA(rgba color.RGBA) *Icon {
 func (i *Icon) Src(data []byte) *Icon {
 	_, err := iconvg.DecodeMetadata(data)
 	if Check(err) {
-		return nil
+		Debug("no image data, crashing")
+		panic(err)
+		// return nil
 	}
 	i.src = data
 	return i
@@ -64,6 +66,9 @@ func (i *Icon) Size(size unit.Value) *Icon {
 // Fn renders the icon
 func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 	ico := i.image(gtx.Px(i.size))
+	if i.src == nil {
+		panic("icon is nil")
+	}
 	ico.Add(gtx.Ops)
 	paint.PaintOp{
 		Rect: f32.Rectangle{
