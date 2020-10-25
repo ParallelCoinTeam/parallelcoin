@@ -130,11 +130,9 @@ func (li *List) Active(color string) *List {
 }
 
 func (li *List) Slice(gtx l.Context, widgets ...l.Widget) l.Widget {
-	// return func(gtx l.Context) l.Dimensions {
 	return li.Length(len(widgets)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
 		return widgets[index](gtx)
 	}).Fn
-	// }
 }
 
 // Fn runs the layout in the configured context. The ListElement function returns the widget at the given index
@@ -152,9 +150,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		}
 		if li.recalculate {
 			// get the size of the scrollbar
-			// scrollWidth := int(li.th.TextSize.V * 1.5)
 			li.scrollBarPad = int(li.th.TextSize.V * 0.5)
-			// li.scrollWidth = li.scrollWidth // + scrollBarPad
 			li.th.scrollBarSize = li.scrollWidth + li.scrollBarPad
 			// render the widgets onto a second context to get their dimensions
 			gtx1 := CopyContextDimensions(gtx, gtx.Constraints.Max, li.axis)
@@ -183,16 +179,12 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			li.scrollWidth = 0
 			li.scrollBarPad = 0
 		}
-		// scrollWidth += scrollBarPad
-
 		// now lay it all out and draw the list and scrollbar
 		var container l.Widget
 		if li.axis == l.Horizontal {
 			container = li.th.VFlex().
 				Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad)).
-				// Rigid(EmptySpace(scrollBarPad, 0)).
 				Rigid(
-					// li.th.Inset(0.125,
 					li.th.VFlex().
 						Rigid(
 							li.th.Fill("PanelBg", EmptySpace(0, li.scrollBarPad)).Fn,
@@ -205,12 +197,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 								Fn,
 						).
 						Fn,
-					// ).Fn,
 				).Fn
 		} else {
 			container = li.th.Flex().
 				Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad)).
-				// Rigid(EmptySpace(0, scrollBarPad)).
 				Rigid(
 					li.th.Flex().
 						Rigid(

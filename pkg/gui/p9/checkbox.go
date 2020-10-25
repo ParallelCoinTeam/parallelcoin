@@ -32,13 +32,13 @@ type Checkbox struct {
 
 // IconColor sets the color of the icon in the checkbox
 func (c *Checkbox) IconColor(color string) *Checkbox {
-	c.Checkable.iconColor = c.th.Colors.Get(color)
+	c.Checkable.iconColor = color
 	return c
 }
 
 // TextColor sets the color of the text label
 func (c *Checkbox) TextColor(color string) *Checkbox {
-	c.Checkable.color = c.th.Colors.Get(color)
+	c.Checkable.color = color
 	return c
 }
 

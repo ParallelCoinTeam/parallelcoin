@@ -2,7 +2,6 @@ package p9
 
 import (
 	"image"
-	"image/color"
 
 	"gioui.org/io/pointer"
 	l "gioui.org/layout"
@@ -11,20 +10,18 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-
-	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
 type Checkable struct {
 	th                 *Theme
 	label              string
-	color              color.RGBA
+	color              string
 	font               text.Font
 	textSize           unit.Value
-	iconColor          color.RGBA
+	iconColor          string
 	size               unit.Value
-	checkedStateIcon   *Icon
-	uncheckedStateIcon *Icon
+	checkedStateIcon   []byte
+	uncheckedStateIcon []byte
 	shaper             text.Shaper
 	checked            bool
 }
@@ -42,13 +39,13 @@ func (th *Theme) Checkable() *Checkable {
 	return &Checkable{
 		th:                 th,
 		label:              "checkable",
-		color:              th.Colors.Get("Primary"),
+		color:              "Primary",
 		font:               f,
 		textSize:           th.TextSize.Scale(14.0 / 16.0),
-		iconColor:          th.Colors.Get("Primary"),
+		iconColor:          "Primary",
 		size:               th.TextSize.Scale(1),
-		checkedStateIcon:   th.Icon().Src(icons.ToggleCheckBox).Color("Primary"),
-		uncheckedStateIcon: th.Icon().Src(icons.ToggleCheckBoxOutlineBlank).Color("Primary"),
+		checkedStateIcon:   icons.ToggleCheckBox,
+		uncheckedStateIcon: icons.ToggleCheckBoxOutlineBlank,
 		shaper:             th.shaper,
 	}
 }
@@ -61,7 +58,7 @@ func (c *Checkable) Label(txt string) *Checkable {
 
 // Color sets the color of the checkbox label
 func (c *Checkable) Color(color string) *Checkable {
-	c.color = c.th.Colors.Get(color)
+	c.color = color
 	return c
 }
 
@@ -84,7 +81,7 @@ func (c *Checkable) TextScale(scale float32) *Checkable {
 
 // IconColor sets the color of the icon
 func (c *Checkable) IconColor(color string) *Checkable {
-	c.iconColor = c.th.Colors.Get(color)
+	c.iconColor = color
 	return c
 }
 
@@ -95,13 +92,13 @@ func (c *Checkable) Scale(size float32) *Checkable {
 }
 
 // CheckedStateIcon loads the icon for the checked state
-func (c *Checkable) CheckedStateIcon(ic *Icon) *Checkable {
+func (c *Checkable) CheckedStateIcon(ic []byte) *Checkable {
 	c.checkedStateIcon = ic
 	return c
 }
 
 // UncheckedStateIcon loads the icon for the unchecked state
-func (c *Checkable) UncheckedStateIcon(ic *Icon) *Checkable {
+func (c *Checkable) UncheckedStateIcon(ic []byte) *Checkable {
 	c.uncheckedStateIcon = ic
 	return c
 }
@@ -110,9 +107,15 @@ func (c *Checkable) UncheckedStateIcon(ic *Icon) *Checkable {
 func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	var icon *Icon
 	if checked {
-		icon = c.checkedStateIcon.Scale(1.5)
+		icon = c.th.Icon().
+			Scale(1.5).
+			Color(c.color).
+			Src(c.checkedStateIcon)
 	} else {
-		icon = c.uncheckedStateIcon.Scale(1.5)
+		icon = c.th.Icon().
+			Scale(1.5).
+			Color(c.color).
+			Src(c.uncheckedStateIcon)
 	}
 	// Debugs(icon)
 	dims :=
@@ -120,10 +123,12 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 			c.th.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
 					size := gtx.Px(c.size)
-					icon.color = c.iconColor
-					if gtx.Queue == nil {
-						icon.color = f32color.MulAlpha(icon.color, 150)
-					}
+					// icon.color = c.iconColor
+					// TODO: maybe make a special code for raw colors to do this kind of alpha
+					//  or add a parameter to apply it
+					// if gtx.Queue == nil {
+					// 	icon.color = f32color.MulAlpha(c.th.Colors.Get(icon.color), 150)
+					// }
 					icon.Fn(gtx)
 					return l.Dimensions{
 						Size: image.Point{X: size, Y: size},
@@ -132,7 +137,7 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 		).Rigid(
 			c.th.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
-					paint.ColorOp{Color: c.color}.Add(gtx.Ops)
+					paint.ColorOp{Color: c.th.Colors.Get(c.color)}.Add(gtx.Ops)
 					return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
 				},
 			).Fn,

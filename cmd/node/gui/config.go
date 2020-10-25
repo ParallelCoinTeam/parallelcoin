@@ -8,6 +8,7 @@ import (
 
 	l "gioui.org/layout"
 	"github.com/urfave/cli"
+	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/pod"
@@ -345,17 +346,23 @@ func (ng *NodeGUI) RenderMulti(item *Item) l.Widget {
 }
 
 func (ng *NodeGUI) RenderRadio(item *Item) l.Widget {
-	var options []l.Widget
-	for i := range item.options {
-		color := "DocText"
-		if ng.enums[item.slug].Value() == item.options[i] {
-			color = "Primary"
-		}
-		options = append(options,
-			ng.th.RadioButton(ng.checkables[item.slug+item.options[i]].IconColor(color).Color(color),
-				ng.enums[item.slug], item.options[i], item.options[i]).Fn)
-	}
+
 	out := func(gtx l.Context) l.Dimensions {
+		var options []l.Widget
+		for i := range item.options {
+			color := "DocText"
+			if ng.enums[item.slug].Value() == item.options[i] {
+				color = "Primary"
+			}
+			options = append(options,
+				ng.th.RadioButton(
+					ng.checkables[item.slug+item.options[i]].
+						IconColor(color).
+						Color(color).
+						CheckedStateIcon(icons.ToggleRadioButtonChecked).
+						UncheckedStateIcon(icons.ToggleRadioButtonUnchecked),
+					ng.enums[item.slug], item.options[i], item.options[i]).Fn)
+		}
 		return ng.th.VFlex().
 			Rigid(
 				ng.th.Body1(item.label).Fn,
@@ -363,15 +370,15 @@ func (ng *NodeGUI) RenderRadio(item *Item) l.Widget {
 			Rigid(
 				ng.th.Flex().
 					Rigid(
-						ng.lists[item.slug].DisableScroll(true).Slice(gtx, options...),
-						// func(gtx l.Context) l.Dimensions {
-						// 	gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(10).V)
-						// 	// return ng.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
-						// 	// 	return options[index](gtx)
-						// 	// }).Fn(gtx)
-						// 	return ng.lists[item.slug].Slice(gtx, options...)(gtx)
-						// 	// return l.Dimensions{}
-						// },
+						func(gtx l.Context) l.Dimensions {
+							gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(10).V)
+							return ng.lists[item.slug].DisableScroll(true).Slice(gtx, options...)(gtx)
+							// 	// return ng.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+							// 	// 	return options[index](gtx)
+							// 	// }).Fn(gtx)
+							// 	return ng.lists[item.slug].Slice(gtx, options...)(gtx)
+							// 	// return l.Dimensions{}
+						},
 					).
 					Rigid(
 						ng.th.Caption(item.description).Fn,
