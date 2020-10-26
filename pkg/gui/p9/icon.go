@@ -74,7 +74,7 @@ func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 
 func (i *Icon) image(sz int) paint.ImageOp {
 	if sz == i.imgSize && i.color == i.imgColor {
-		Debug("reusing old icon")
+		// Debug("reusing old icon")
 		return i.op
 	}
 	m, _ := iconvg.DecodeMetadata(i.src)
