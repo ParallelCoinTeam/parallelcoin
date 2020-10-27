@@ -308,8 +308,13 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 		Debug("editor", "is focused", is)
 		if !is {
 			m.input.borderColor = m.input.borderColorUnfocused
-			// m.inputLocation = mi
-			m.inputLocation = -1
+			// submit the current edit if any
+			txt := m.input.editor.Text()
+			cur := (*m.lines)[m.inputLocation]
+			if txt != cur {
+				// run submit hook
+				m.input.editor.submitHook(txt)
+			}
 		} else {
 			m.input.borderColor = m.input.borderColorFocused
 			m.inputLocation = mi
