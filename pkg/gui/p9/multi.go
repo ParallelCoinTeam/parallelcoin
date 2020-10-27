@@ -318,6 +318,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 				// run submit hook
 				m.input.editor.submitHook(txt)
 			}
+			m.inputLocation = -1
 		} else {
 			m.input.borderColor = m.input.borderColorFocused
 			m.inputLocation = mi

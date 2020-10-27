@@ -5,6 +5,7 @@ import (
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -14,9 +15,8 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 	ng.app = a
 	// ng.size = ng.size
 	ng.th.Colors.SetTheme(ng.app.Dark)
-	ng.configs = ng.Config()
-	// var setWidget l.Widget
-	// setWidget =
+	ng.config = cfg.New(ng.cx)
+	ng.configs = ng.config.Config()
 	ng.app.Pages(p9.WidgetMap{
 		"main": ng.Page("overview", p9.Widgets{
 			p9.WidgetSize{
@@ -214,7 +214,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 		}),
 		"settings": ng.Page("settings", p9.Widgets{
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
-				return ng.configs.Widget(ng)(gtx)
+				return ng.configs.Widget(ng.config)(gtx)
 			}},
 		}),
 		"help": ng.Page("help", p9.Widgets{

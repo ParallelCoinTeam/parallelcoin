@@ -5,6 +5,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -24,13 +25,13 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 }
 
 type NodeGUI struct {
-	cx      *conte.Xt
-	c       *cli.Context
-	w       *f.Window
-	th      *p9.Theme
-	size    *int
-	runMode string
-	app *p9.App
+	cx               *conte.Xt
+	c                *cli.Context
+	w                *f.Window
+	th               *p9.Theme
+	size             *int
+	runMode          string
+	app              *p9.App
 	sidebarButtons   []*p9.Clickable
 	buttonBarButtons []*p9.Clickable
 	statusBarButtons []*p9.Clickable
@@ -42,7 +43,8 @@ type NodeGUI struct {
 	editors          map[string]*p9.Editor
 	inputs           map[string]*p9.Input
 	multis           map[string]*p9.Multi
-	configs          GroupsMap
+	configs          cfg.GroupsMap
+	config           *cfg.Config
 	passwords        map[string]*p9.Password
 	invalidate       chan struct{}
 	quit             chan struct{}
