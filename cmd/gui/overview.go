@@ -19,11 +19,13 @@ func (wg *WalletGUI) balances() l.Widget {
 		wg.th.VFlex().
 			Rigid(
 				wg.row("Available:", "0.00000000 DUO"),
-			).Rigid(
-			wg.row("Pending:", "0.00000000 DUO"),
-		).Rigid(
-			wg.row("Total:", "0.00000000 DUO"),
-		).Fn,
+			).
+			Rigid(
+				wg.row("Pending:", "0.00000000 DUO"),
+			).
+			Rigid(
+				wg.row("Total:", "0.00000000 DUO"),
+			).Fn,
 	).Fn
 }
 
