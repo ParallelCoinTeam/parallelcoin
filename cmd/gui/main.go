@@ -13,14 +13,14 @@ import (
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	var size int
-	ng := &WalletGUI{
+	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
 		size:       &size,
 	}
-	return ng.Run()
+	return wg.Run()
 }
 
 type WalletGUI struct {
@@ -34,35 +34,49 @@ type WalletGUI struct {
 	buttonBarButtons []*p9.Clickable
 	statusBarButtons []*p9.Clickable
 	quitClickable    *p9.Clickable
-	invalidate       chan struct{}
-	quit             chan struct{}
+	lists            map[string]*p9.List
+	clickables       map[string]*p9.Clickable
+
+	invalidate chan struct{}
+	quit       chan struct{}
 }
 
-func (ng *WalletGUI) Run() (err error) {
-	ng.th = p9.NewTheme(p9fonts.Collection(), ng.quit)
-	ng.th.Colors.SetTheme(ng.th.Dark)
-	ng.sidebarButtons = make([]*p9.Clickable, 9)
-	for i := range ng.sidebarButtons {
-		ng.sidebarButtons[i] = ng.th.Clickable()
+func (wg *WalletGUI) Run() (err error) {
+	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
+	wg.th.Colors.SetTheme(wg.th.Dark)
+	wg.sidebarButtons = make([]*p9.Clickable, 9)
+	for i := range wg.sidebarButtons {
+		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
-	ng.buttonBarButtons = make([]*p9.Clickable, 4)
-	for i := range ng.buttonBarButtons {
-		ng.buttonBarButtons[i] = ng.th.Clickable()
+	wg.buttonBarButtons = make([]*p9.Clickable, 4)
+	for i := range wg.buttonBarButtons {
+		wg.buttonBarButtons[i] = wg.th.Clickable()
 	}
-	ng.statusBarButtons = make([]*p9.Clickable, 3)
-	for i := range ng.statusBarButtons {
-		ng.statusBarButtons[i] = ng.th.Clickable()
+	wg.statusBarButtons = make([]*p9.Clickable, 3)
+	for i := range wg.statusBarButtons {
+		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
-	ng.quitClickable = ng.th.Clickable()
-	ng.w = f.NewWindow()
-	ng.App = ng.GetAppWidget()
+	wg.lists = map[string]*p9.List{
+		"overview": wg.th.List(),
+		"send":     wg.th.List(),
+		"settings": wg.th.List(),
+	}
+	wg.clickables = map[string]*p9.Clickable{
+		"quit":         wg.th.Clickable(),
+		"send":         wg.th.Clickable(),
+		"clearall":     wg.th.Clickable(),
+		"addrecipient": wg.th.Clickable(),
+	}
+	wg.quitClickable = wg.th.Clickable()
+	wg.w = f.NewWindow()
+	wg.App = wg.GetAppWidget()
 	go func() {
-		if err := ng.w.
+		if err := wg.w.
 			Size(640, 480).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				ng.Fn(),
+				wg.Fn(),
 				func() {
 					Debug("quitting wallet gui")
 					interrupt.Request()
@@ -73,9 +87,9 @@ func (ng *WalletGUI) Run() (err error) {
 	out:
 		for {
 			select {
-			case <-ng.invalidate:
-				ng.w.Window.Invalidate()
-			case <-ng.quit:
+			case <-wg.invalidate:
+				wg.w.Window.Invalidate()
+			case <-wg.quit:
 				break out
 			}
 		}

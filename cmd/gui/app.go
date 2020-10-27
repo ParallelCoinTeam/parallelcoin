@@ -9,35 +9,38 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-func (ng *WalletGUI) GetAppWidget() (a *p9.App) {
-	a = ng.th.App(*ng.size)
-	ng.App = a
-	ng.size = a.Size
+func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
+	a = wg.th.App(*wg.size)
+	wg.App = a
+	wg.size = a.Size
 	a.Pages(map[string]l.Widget{
-		"main": ng.Page("overview", p9.Widgets{
+		"main": wg.Page("overview", p9.Widgets{
+			p9.WidgetSize{Widget: wg.OverviewPage()},
+		}),
+		"send": wg.Page("send", p9.Widgets{
+			p9.WidgetSize{Widget: wg.SendPage()},
+		}),
+		"settings": wg.Page("settings", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
-		"settings": ng.Page("settings", p9.Widgets{
+		"help": wg.Page("help", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
-		"help": ng.Page("help", p9.Widgets{
+		"log": wg.Page("log", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
-		"log": ng.Page("log", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		}),
-		"quit": ng.Page("quit", p9.Widgets{
+		"quit": wg.Page("quit", p9.Widgets{
 			p9.WidgetSize{Widget: a.VFlex().
 				SpaceEvenly().
 				// AlignMiddle().
 				Rigid(
-					a.H4("are you sure?").Color(ng.BodyColorGet()).Alignment(text.Middle).Fn,
+					a.H4("are you sure?").Color(wg.BodyColorGet()).Alignment(text.Middle).Fn,
 				).
 				Rigid(
 					a.Flex().
 						SpaceEvenly().
 						Rigid(
-							a.Button(ng.quitClickable.SetClick(func() {
+							a.Button(wg.quitClickable.SetClick(func() {
 								interrupt.Request()
 							})).TextScale(2).Text("yes").Fn,
 						).Fn,
@@ -46,78 +49,78 @@ func (ng *WalletGUI) GetAppWidget() (a *p9.App) {
 		}),
 	})
 	a.SideBar([]l.Widget{
-		ng.SideBarButton("overview", "overview", 0),
-		ng.SideBarButton("send", "send", 1),
-		ng.SideBarButton("receive", "receive", 2),
-		ng.SideBarButton("transactions", "transactions", 3),
-		ng.SideBarButton("settings", "settings", 5),
-		ng.SideBarButton("help", "help", 6),
-		ng.SideBarButton("log", "log", 7),
-		ng.SideBarButton("quit", "quit", 8),
+		wg.SideBarButton("overview", "overview", 0),
+		wg.SideBarButton("send", "send", 1),
+		wg.SideBarButton("receive", "receive", 2),
+		wg.SideBarButton("transactions", "transactions", 3),
+		wg.SideBarButton("settings", "settings", 5),
+		wg.SideBarButton("help", "help", 6),
+		wg.SideBarButton("log", "log", 7),
+		wg.SideBarButton("quit", "quit", 8),
 	})
 	a.ButtonBar([]l.Widget{
-		ng.PageTopBarButton("help", 0, icons.ActionHelp),
-		ng.PageTopBarButton("log", 1, icons.ActionList),
-		ng.PageTopBarButton("settings", 2, icons.ActionSettings),
-		ng.PageTopBarButton("quit", 3, icons.ActionExitToApp),
+		wg.PageTopBarButton("help", 0, icons.ActionHelp),
+		wg.PageTopBarButton("log", 1, icons.ActionList),
+		wg.PageTopBarButton("settings", 2, icons.ActionSettings),
+		wg.PageTopBarButton("quit", 3, icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
-		ng.StatusBarButton("help", 0, icons.ActionHelp),
-		ng.StatusBarButton("log", 1, icons.ActionList),
-		ng.StatusBarButton("settings", 2, icons.ActionSettings),
+		wg.StatusBarButton("help", 0, icons.ActionHelp),
+		wg.StatusBarButton("log", 1, icons.ActionList),
+		wg.StatusBarButton("settings", 2, icons.ActionSettings),
 	})
 	return
 }
 
-func (ng *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
-	a := ng.th
+func (wg *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
+	a := wg.th
 	return func(gtx l.Context) l.Dimensions {
-		return a.Fill(ng.BodyBackgroundGet(),
+		return a.Fill(wg.BodyBackgroundGet(),
 			a.VFlex().
 				SpaceEvenly().
 				Rigid(
-					a.Responsive(*ng.Size, p9.Widgets{
+					a.Responsive(*wg.Size, p9.Widgets{
 						p9.WidgetSize{
-							Widget: a.Inset(0.25, a.H5(title).Color(ng.BodyColorGet()).Fn).Fn,
+							Widget: a.Inset(0.25, a.H5(title).Color(wg.BodyColorGet()).Fn).Fn,
 						},
 						p9.WidgetSize{
 							Size:   800,
 							Widget: p9.EmptySpace(0, 0),
-							// a.Inset(0.25, a.Caption(title).Color(ng.BodyColorGet()).Fn).Fn,
+							// a.Inset(0.25, a.Caption(title).Color(wg.BodyColorGet()).Fn).Fn,
 						},
 					}).Fn,
 				).
 				Flexed(1,
 					a.Inset(0.25,
-						a.Responsive(*ng.Size, widget).Fn,
+						a.Responsive(*wg.Size, widget).Fn,
 					).Fn,
 				).Fn,
 		).Fn(gtx)
 	}
 }
 
-func (ng *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		gtx.Constraints.Max.X = int(ng.TextSize.Scale(12).V)
+		gtx.Constraints.Max.X = int(wg.TextSize.Scale(12).V)
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
-		return ng.ButtonLayout(ng.sidebarButtons[index]).Embed(
+		return wg.ButtonLayout(wg.sidebarButtons[index]).Embed(
 			func(gtx l.Context) l.Dimensions {
 				background := "Transparent"
 				color := "DocText"
-				if ng.ActivePageGet() == page {
+				if wg.ActivePageGet() == page {
 					background = "PanelBg"
 					color = "PanelText"
 				}
 				var inPad, outPad float32 = 0.5, 0.25
-				if *ng.Size >= 800 {
+				if *wg.Size >= 800 {
 					inPad, outPad = 0.75, 0
 				}
-				return ng.Inset(outPad,
-					ng.Fill(background,
-						ng.Flex().
+				return wg.Inset(outPad,
+					wg.Fill(background,
+						wg.Flex().
 							Flexed(1,
-								ng.Inset(inPad,
-									ng.H6(title).
+								wg.Inset(inPad,
+									wg.H6(title).
 										Color(color).
 										Fn,
 								).Fn,
@@ -129,44 +132,44 @@ func (ng *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 			Background("Transparent").
 			SetClick(
 				func() {
-					if ng.MenuOpen {
-						ng.MenuOpen = false
+					if wg.MenuOpen {
+						wg.MenuOpen = false
 					}
-					ng.ActivePage(page)
+					wg.ActivePage(page)
 				}).
 			Fn(gtx)
 	}
 }
 
-func (ng *WalletGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := ng.TitleBarBackgroundGet()
-		color := ng.MenuColorGet()
-		if ng.ActivePageGet() == name {
+		background := wg.TitleBarBackgroundGet()
+		color := wg.MenuColorGet()
+		if wg.ActivePageGet() == name {
 			color = "PanelText"
 			background = "PanelBg"
 		}
-		ic := ng.Icon().
+		ic := wg.Icon().
 			Scale(p9.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return ng.Flex().Rigid(
-			// ng.Inset(0.25,
-			ng.ButtonLayout(ng.buttonBarButtons[index]).
+		return wg.Flex().Rigid(
+			// wg.Inset(0.25,
+			wg.ButtonLayout(wg.buttonBarButtons[index]).
 				CornerRadius(0).
 				Embed(
-					ng.Inset(0.375,
+					wg.Inset(0.375,
 						ic,
 					).Fn,
 				).
 				Background(background).
 				SetClick(
 					func() {
-						if ng.MenuOpen {
-							ng.MenuOpen = false
+						if wg.MenuOpen {
+							wg.MenuOpen = false
 						}
-						ng.ActivePage(name)
+						wg.ActivePage(name)
 					}).
 				Fn,
 			// ).Fn,
@@ -174,18 +177,18 @@ func (ng *WalletGUI) PageTopBarButton(name string, index int, ico []byte) func(g
 	}
 }
 
-func (ng *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := ng.StatusBarBackgroundGet()
-		color := ng.StatusBarColorGet()
-		ic := ng.Icon().
+		background := wg.StatusBarBackgroundGet()
+		color := wg.StatusBarColorGet()
+		ic := wg.Icon().
 			Scale(p9.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return ng.Flex().
+		return wg.Flex().
 			Rigid(
-				ng.ButtonLayout(ng.statusBarButtons[index]).
+				wg.ButtonLayout(wg.statusBarButtons[index]).
 					CornerRadius(0).
 					Embed(
 						ic,
@@ -193,10 +196,10 @@ func (ng *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gt
 					Background(background).
 					SetClick(
 						func() {
-							if ng.MenuOpen {
-								ng.MenuOpen = false
+							if wg.MenuOpen {
+								wg.MenuOpen = false
 							}
-							ng.ActivePage(name)
+							wg.ActivePage(name)
 						}).
 					Fn,
 			).Fn(gtx)
