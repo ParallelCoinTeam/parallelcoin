@@ -16,7 +16,7 @@ func (d DimensionList) GetTotal(gtx l.Context, axis l.Axis) (total int) {
 }
 
 func (d DimensionList) PositionToCoordinate(position Position, axis l.Axis) (coordinate int) {
-	for i := 0; i <= position.First; i++ {
+	for i := 0; i < position.First; i++ {
 		coordinate += axisMain(axis, d[i].Size)
 	}
 	return coordinate + position.Offset
