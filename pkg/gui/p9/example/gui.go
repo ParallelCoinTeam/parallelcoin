@@ -46,8 +46,8 @@ func main() {
 		slider:      th.Float().SetHook(func(fl float32) {
 			Debug("float now at value", fl)
 		}),
-		lineEditor:  th.Editor().SingleLine(true).Submit(true),
-		areaEditor:  th.Editor().SingleLine(false).Submit(false),
+		lineEditor:  th.Editor().SingleLine().Submit(true),
+		areaEditor:  th.Editor().SingleLine().Submit(false),
 		radio: th.Enum().SetOnChange(func(value string) {
 			Debug("changed radio button to", value)
 		}),
@@ -223,12 +223,12 @@ func (m *MinerModel) buttons() layout.Widget {
 	).Rigid(
 		th.Flex().Rigid(
 			th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
-		).Rigid(
-			th.RadioButton(m.radio, "first", "first").Fn,
-		).Rigid(
-			th.RadioButton(m.radio, "second", "second").Fn,
-		).Rigid(
-			th.RadioButton(m.radio, "third", "third").Fn,
+		// ).Rigid(
+		// 	th.RadioButton(m.radio, "first", "first").Fn,
+		// ).Rigid(
+		// 	th.RadioButton(m.radio, "second", "second").Fn,
+		// ).Rigid(
+		// 	th.RadioButton(m.radio, "third", "third").Fn,
 		).Rigid(
 			th.Switch(m.boolButton2.SetOnChange(func(b bool) {
 				Debug("switch state set to", b)

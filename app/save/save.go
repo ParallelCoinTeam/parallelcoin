@@ -15,7 +15,8 @@ import (
 
 // Pod saves the configuration to the configured location
 func Pod(c *pod.Config) (success bool) {
-	Trace("saving configuration to", *c.ConfigFile)
+	// Debugs(c)
+	Debug("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice
 	if len(*c.UserAgentComments) > 0 {
 		uac = make(cli.StringSlice, len(*c.UserAgentComments))

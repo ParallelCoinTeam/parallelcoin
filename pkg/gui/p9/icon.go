@@ -2,7 +2,6 @@ package p9
 
 import (
 	"image"
-	"image/color"
 	"image/draw"
 
 	"gioui.org/f32"
@@ -14,29 +13,24 @@ import (
 
 type Icon struct {
 	th    *Theme
-	color color.RGBA
+	color string
 	src   []byte
 	size  unit.Value
 	// Cached values.
 	sz       int
 	op       paint.ImageOp
 	imgSize  int
-	imgColor color.RGBA
+	imgColor string
 }
 
 // Icon returns a new Icon from iconVG data.
 func (th *Theme) Icon() *Icon {
-	return &Icon{th: th, size: th.TextSize, color: rgb(0xff000000)}
+	return &Icon{th: th, size: th.TextSize, color: "Black"}
 }
 
 // Color sets the color of the icon image. It must be called before creating the image
 func (i *Icon) Color(color string) *Icon {
-	i.color = i.th.Colors.Get(color)
-	return i
-}
-
-func (i *Icon) RGBA(rgba color.RGBA) *Icon {
-	i.color = rgba
+	i.color = color
 	return i
 }
 
@@ -44,7 +38,9 @@ func (i *Icon) RGBA(rgba color.RGBA) *Icon {
 func (i *Icon) Src(data []byte) *Icon {
 	_, err := iconvg.DecodeMetadata(data)
 	if Check(err) {
-		return nil
+		Debug("no image data, crashing")
+		panic(err)
+		// return nil
 	}
 	i.src = data
 	return i
@@ -64,6 +60,9 @@ func (i *Icon) Size(size unit.Value) *Icon {
 // Fn renders the icon
 func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 	ico := i.image(gtx.Px(i.size))
+	if i.src == nil {
+		panic("icon is nil")
+	}
 	ico.Add(gtx.Ops)
 	paint.PaintOp{
 		Rect: f32.Rectangle{
@@ -75,6 +74,7 @@ func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 
 func (i *Icon) image(sz int) paint.ImageOp {
 	if sz == i.imgSize && i.color == i.imgColor {
+		// Debug("reusing old icon")
 		return i.op
 	}
 	m, _ := iconvg.DecodeMetadata(i.src)
@@ -83,10 +83,11 @@ func (i *Icon) image(sz int) paint.ImageOp {
 		Y: int(float32(sz) * dy / dx)}})
 	var ico iconvg.Rasterizer
 	ico.SetDstImage(img, img.Bounds(), draw.Src)
-	m.Palette[0] = i.color
-	iconvg.Decode(&ico, i.src, &iconvg.DecodeOptions{
+	m.Palette[0] = i.th.Colors.Get(i.color)
+	if err := iconvg.Decode(&ico, i.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
-	})
+	}); Check(err) {
+	}
 	i.op = paint.NewImageOp(img)
 	i.imgSize = sz
 	i.imgColor = i.color

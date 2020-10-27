@@ -75,7 +75,7 @@ func (w *Worker) NewGuiApp() *GuiAppModel {
 		},
 	}
 	g.SetTheme(g.DarkTheme)
-	g.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
+	g.pass = th.Editor().Mask('•').SingleLine().Submit(true)
 	g.passInput = th.SimpleInput(g.pass).Color("DocText")
 	g.unhideButton = th.IconButton(g.unhideClickable).
 		Background("").

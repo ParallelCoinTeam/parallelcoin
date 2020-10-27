@@ -3,9 +3,9 @@ package p9
 import l "gioui.org/layout"
 
 func (th *Theme) Card(background string, w l.Widget) func(gtx l.Context) l.Dimensions {
-	return th.Inset(0.25,
+	return th.Inset(0.0,
 		th.Fill(background,
-			th.Inset(0.5,
+			th.Inset(0.25,
 				w,
 			).Fn,
 		).Fn,
@@ -22,7 +22,7 @@ func (th *Theme) CardList(list *List, background string, widgets ...l.Widget) fu
 func (th *Theme) CardContent(title, color string, w l.Widget) func(gtx l.Context) l.Dimensions {
 	out := th.VFlex()
 	if title != "" {
-		out.Rigid(th.H5(title).Color(color).Fn)
+		out.Rigid(th.H6(title).Color(color).Fn)
 	}
 	out.Rigid(w)
 	return out.Fn

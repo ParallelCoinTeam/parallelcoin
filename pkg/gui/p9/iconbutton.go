@@ -9,6 +9,7 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/unit"
+	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
@@ -34,7 +35,7 @@ func (th *Theme) IconButton(button *Clickable) *IconButton {
 		size:       th.TextSize,
 		inset:      th.Inset(0.33, nil),
 		button:     button,
-		icon:       th.Icon(),
+		icon:       th.Icon().Src(icons.AlertError),
 	}
 }
 

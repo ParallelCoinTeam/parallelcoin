@@ -30,14 +30,20 @@ type NodeGUI struct {
 	th      *p9.Theme
 	size    *int
 	runMode string
-	*p9.App
+	app *p9.App
 	sidebarButtons   []*p9.Clickable
 	buttonBarButtons []*p9.Clickable
 	statusBarButtons []*p9.Clickable
 	bools            map[string]*p9.Bool
 	lists            map[string]*p9.List
 	enums            map[string]*p9.Enum
-	quitClickable    *p9.Clickable
+	checkables       map[string]*p9.Checkable
+	clickables       map[string]*p9.Clickable
+	editors          map[string]*p9.Editor
+	inputs           map[string]*p9.Input
+	multis           map[string]*p9.Multi
+	configs          GroupsMap
+	passwords        map[string]*p9.Password
 	invalidate       chan struct{}
 	quit             chan struct{}
 }
@@ -70,16 +76,27 @@ func (ng *NodeGUI) Run() (err error) {
 		"overview": ng.th.List(),
 		"settings": ng.th.List(),
 	}
-	ng.quitClickable = ng.th.Clickable()
+	ng.clickables = map[string]*p9.Clickable{
+		"quit": ng.th.Clickable(),
+	}
+	ng.checkables = map[string]*p9.Checkable{
+		"runmodenode":   ng.th.Checkable(),
+		"runmodewallet": ng.th.Checkable(),
+		"runmodeshell":  ng.th.Checkable(),
+	}
+	ng.editors = make(map[string]*p9.Editor)
+	ng.inputs = make(map[string]*p9.Input)
+	ng.multis = make(map[string]*p9.Multi)
+	ng.passwords = make(map[string]*p9.Password)
 	ng.w = f.NewWindow()
-	ng.App = ng.GetAppWidget()
+	ng.app = ng.GetAppWidget()
 	go func() {
 		if err := ng.w.
 			Size(640, 480).
 			Title("parallelcoin node control panel").
 			Open().
 			Run(
-				ng.Fn(),
+				ng.app.Fn(),
 				func() {
 					Debug("quitting node gui")
 					interrupt.Request()
