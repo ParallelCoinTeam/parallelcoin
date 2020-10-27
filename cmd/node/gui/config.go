@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/pod"
 )
@@ -100,36 +101,65 @@ func (ng *NodeGUI) Config() GroupsMap {
 			tgs := tabNames[sgf.Group][sgf.Slug]
 			switch sgf.Widget {
 			case "toggle":
-				ng.bools[sgf.Slug] = ng.th.Bool(*tgs.slot.(*bool))
+				ng.bools[sgf.Slug] = ng.th.Bool(*tgs.slot.(*bool)).SetOnChange(func(b bool) {
+					Debug(sgf.Slug, "submitted", b)
+					bb := ng.cx.ConfigMap[sgf.Slug].(*bool)
+					*bb = b
+					save.Pod(ng.cx.Config)
+				})
 			case "integer":
 				ng.inputs[sgf.Slug] = ng.th.Input(fmt.Sprint(*tgs.slot.(*int)),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
+						i := ng.cx.ConfigMap[sgf.Slug].(*int)
+						if n, err := strconv.Atoi(txt); !Check(err) {
+							*i = n
+						}
+						save.Pod(ng.cx.Config)
 					})
 			case "time":
 				ng.inputs[sgf.Slug] = ng.th.Input(fmt.Sprint(*tgs.slot.(*time.Duration)),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
+						tt := ng.cx.ConfigMap[sgf.Slug].(*time.Duration)
+						if d, err := time.ParseDuration(txt); !Check(err) {
+							*tt = d
+						}
+						save.Pod(ng.cx.Config)
 					})
 			case "float":
 				ng.inputs[sgf.Slug] = ng.th.Input(strconv.FormatFloat(*tgs.slot.(*float64), 'f', -1, 64),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
+						ff := ng.cx.ConfigMap[sgf.Slug].(*float64)
+						if f, err := strconv.ParseFloat(txt, 64); !Check(err) {
+							*ff = f
+						}
+						save.Pod(ng.cx.Config)
 					})
 			case "string":
 				ng.inputs[sgf.Slug] = ng.th.Input(*tgs.slot.(*string),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
+						ss := ng.cx.ConfigMap[sgf.Slug].(*string)
+						*ss = txt
+						save.Pod(ng.cx.Config)
 					})
 			case "password":
 				ng.passwords[sgf.Slug] = ng.th.Password(tgs.slot.(*string),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
+						pp := ng.cx.ConfigMap[sgf.Slug].(*string)
+						*pp = txt
+						save.Pod(ng.cx.Config)
 					})
 			case "multi":
 				ng.multis[sgf.Slug] = ng.th.Multiline(tgs.slot.(*cli.StringSlice),
 					"Primary", "PanelBg", 30, func(txt []string) {
 						Debug(sgf.Slug, "submitted", txt)
+						sss := ng.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
+						*sss = txt
+						save.Pod(ng.cx.Config)
 					})
 				// ng.multis[sgf.Slug]
 			case "radio":
@@ -137,7 +167,12 @@ func (ng *NodeGUI) Config() GroupsMap {
 				for i := range sgf.Options {
 					ng.checkables[sgf.Slug+sgf.Options[i]] = ng.th.Checkable()
 				}
-				ng.enums[sgf.Slug] = ng.th.Enum().SetValue(*tabNames[sgf.Group][sgf.Slug].slot.(*string))
+				txt := *tabNames[sgf.Group][sgf.Slug].slot.(*string)
+				ng.enums[sgf.Slug] = ng.th.Enum().SetValue(txt).SetOnChange(func(value string) {
+					rr := ng.cx.ConfigMap[sgf.Slug].(*string)
+					*rr = value
+					save.Pod(ng.cx.Config)
+				})
 				ng.lists[sgf.Slug] = ng.th.List()
 			}
 		}

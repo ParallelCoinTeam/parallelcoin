@@ -213,9 +213,9 @@ type Config struct {
 	WalletServer           *string          `group:"wallet" label:"Wallet Server" description:"node address to connect wallet server to" type:"address" widget:"string" json:"WalletServer" hook:"restart"`
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"address" widget:"multi" json:"Whitelists" hook:"restart"`
 	LAN                    *bool            `group:"debug" label:"LAN" description:"run without any connection to nodes on the internet (does not apply on mainnet)" type:"" widget:"toggle" json:"LAN" hook:"restart"`
-	KopachGUI              *bool            `group:"mining" label:"Kopach GUI" description:"enables GUI for miner" type:"" widget:"toggle" json:"kopachgui" hook:"restart"`
-	GUI                    *bool            `group:"mining" label:"GUI" description:"enables GUI" type:"" widget:"toggle" json:"gui" hook:"restart"`
-	DarkTheme              *bool            `group:"config" label:"Dark Theme" description:"sets dark theme for GUI" type:"" widget:"toggle" json:"darktheme" hook:"restart"`
+	KopachGUI              *bool            `group:"mining" label:"Kopach GUI" description:"enables GUI for miner" type:"" widget:"toggle" json:"KopachGUI" hook:"restart"`
+	GUI                    *bool            `group:"mining" label:"GUI" description:"enables GUI" type:"" widget:"toggle" json:"GUI" hook:"restart"`
+	DarkTheme              *bool            `group:"config" label:"Dark Theme" description:"sets dark theme for GUI" type:"" widget:"toggle" json:"DarkTheme" hook:"restart"`
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {

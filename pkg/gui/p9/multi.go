@@ -16,6 +16,7 @@ type Multi struct {
 	addClickable     *Clickable
 	removeClickables []*Clickable
 	removeButtons    []*IconButton
+	handle           func(txt []string)
 }
 
 func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColorUnfocused string,
@@ -31,13 +32,14 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 		lines:         txt,
 		inputLocation: -1,
 		addClickable:  addClickable,
+		handle:        handle,
 	}
 	handleChange := func(txt string) {
 		Debug("handleChange", m.inputLocation)
 		(*m.lines)[m.inputLocation] = txt
 		// after submit clear the editor
 		m.inputLocation = -1
-		handle(*m.lines)
+		m.handle(*m.lines)
 	}
 	m.input = th.Input("", borderColorFocused, borderColorUnfocused, size, handleChange)
 	m.clickables = append(m.clickables, (*Clickable)(nil))
@@ -58,7 +60,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 			m.clickables[i] = clickable
 		}
 		Debug("making button")
-		btn := m.Theme.ButtonLayout(clickable).CornerRadius(0).Background("transparent").
+		btn := m.Theme.ButtonLayout(clickable).CornerRadius(0).Background("Transparent").
 			Embed(
 				m.Theme.Flex().
 					Rigid(
@@ -170,7 +172,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 		// m.clickables[i]
 		if m.buttons[i] == nil {
 			added = true
-			btn := m.Theme.ButtonLayout(m.clickables[i]).CornerRadius(0).Background("transparent")
+			btn := m.Theme.ButtonLayout(m.clickables[i]).CornerRadius(0).Background("Transparent")
 			m.buttons[i] = btn
 		}
 		m.buttons[i].Embed(
@@ -199,11 +201,12 @@ func (m *Multi) PopulateWidgets() *Multi {
 					} else {
 						*m.lines = append((*m.lines)[:x], (*m.lines)[x+1:]...)
 					}
+					m.handle(m.lines.Value())
 				})).
 				Icon(
 					m.Theme.Icon().Scale(1.5).Color("DocText").Src(icons.ActionDelete),
 				).
-				Background("DocBg")
+				Background("Transparent")
 		}
 	}
 	if added {
@@ -334,7 +337,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 					m.input.editor.Focus()
 					m.UpdateWidgets()
 					m.PopulateWidgets()
-				})).CornerRadius(0).Background("transparent").
+				})).CornerRadius(0).Background("Transparent").
 				Embed(
 					func(gtx l.Context) l.Dimensions {
 						return m.Theme.Flex().

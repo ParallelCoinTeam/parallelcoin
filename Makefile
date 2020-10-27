@@ -20,8 +20,8 @@ kopach:
 
 nodegui:
 	go install -v
-	pod -D test0 -n testnet -l trace nodegui
+	pod -D test0 -n testnet nodegui
 
 gui:
 	go install -v
-	pod -D test0 -n testnet -l debug
+	pod -D test0 -n testnet
