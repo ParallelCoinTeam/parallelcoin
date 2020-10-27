@@ -5,6 +5,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -36,7 +37,8 @@ type WalletGUI struct {
 	quitClickable    *p9.Clickable
 	lists            map[string]*p9.List
 	clickables       map[string]*p9.Clickable
-
+	configs          cfg.GroupsMap
+	config           *cfg.Config
 	invalidate chan struct{}
 	quit       chan struct{}
 }

@@ -5,6 +5,7 @@ import (
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -13,6 +14,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a = wg.th.App(*wg.size)
 	wg.App = a
 	wg.size = a.Size
+	wg.config = cfg.New(wg.cx)
+	wg.configs = wg.config.Config()
 	a.Pages(map[string]l.Widget{
 		"main": wg.Page("overview", p9.Widgets{
 			p9.WidgetSize{Widget: wg.OverviewPage()},
@@ -21,7 +24,9 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			p9.WidgetSize{Widget: wg.SendPage()},
 		}),
 		"settings": wg.Page("settings", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+				return wg.configs.Widget(wg.config)(gtx)
+			}},
 		}),
 		"help": wg.Page("help", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
