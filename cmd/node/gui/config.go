@@ -163,7 +163,7 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 				name: j,
 				widget:
 				func() []l.Widget {
-					return ng.RenderConfigItem(gmij)
+					return ng.RenderConfigItem(gmij, len(li))
 				},
 				// },
 			})
@@ -195,13 +195,17 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 			for x := range gi.widget() {
 				k := x
 				out = append(out, func(gtx l.Context) l.Dimensions {
-					return ng.th.Fill("DocBg",
-						ng.th.Inset(0.25,
-							func(gtx l.Context) l.Dimensions {
-								return gi.widget()[k](gtx)
-							},
-						).Fn,
-					).Fn(gtx)
+					// return ng.th.Fill("DocBg",
+					// 	ng.th.Inset(0.25,
+					// 		return func(gtx l.Context) l.Dimensions {
+					if k < len(gi.widget()) {
+
+						return ng.th.Fill("DocBg", gi.widget()[k]).Fn(gtx)
+					}
+					return l.Dimensions{}
+					// }
+					// ).Fn,
+					// ).Fn(gtx)
 				})
 			}
 		}
@@ -214,7 +218,10 @@ func (gm GroupsMap) Widget(ng *NodeGUI) l.Widget {
 	}
 }
 
-func (ng *NodeGUI) RenderConfigItem(item *Item) []l.Widget {
+// RenderConfigItem renders a config item. It takes a position variable which tells it which index it begins on
+// the bigger config widget list, with this and its current data set the multi can insert and delete elements above
+// its add button without rerendering the config item or worse, the whole config widget
+func (ng *NodeGUI) RenderConfigItem(item *Item, position int) []l.Widget {
 	switch item.widget {
 	case "toggle":
 		return ng.RenderToggle(item)
@@ -229,7 +236,7 @@ func (ng *NodeGUI) RenderConfigItem(item *Item) []l.Widget {
 	case "password":
 		return ng.RenderPassword(item)
 	case "multi":
-		return ng.RenderMulti(item)
+		return ng.RenderMulti(item, position)
 	case "radio":
 		return ng.RenderRadio(item)
 	}
@@ -240,10 +247,9 @@ func (ng *NodeGUI) RenderConfigItem(item *Item) []l.Widget {
 func (ng *NodeGUI) RenderToggle(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.Flex().
+			return ng.th.Inset(0.5, ng.th.Flex().
 				Rigid(
 					ng.th.Switch(ng.bools[item.slug]).Fn,
-					// p9.EmptySpace(0, 0),
 				).
 				Rigid(
 					ng.th.VFlex().
@@ -252,8 +258,10 @@ func (ng *NodeGUI) RenderToggle(item *Item) []l.Widget {
 						).
 						Rigid(
 							ng.th.Caption(item.description).Fn,
-						).Fn,
-				).Fn(gtx)
+						).
+						Fn,
+				).Fn,
+			).Fn(gtx)
 		},
 	}
 }
@@ -261,7 +269,7 @@ func (ng *NodeGUI) RenderToggle(item *Item) []l.Widget {
 func (ng *NodeGUI) RenderInteger(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.VFlex().
+			return ng.th.Inset(0.5, ng.th.VFlex().
 				Rigid(
 					ng.th.Body1(item.label).Fn,
 				).
@@ -271,6 +279,8 @@ func (ng *NodeGUI) RenderInteger(item *Item) []l.Widget {
 				Rigid(
 					ng.th.Caption(item.description).Fn,
 				).
+				Fn,
+			).
 				Fn(gtx)
 		},
 	}
@@ -279,7 +289,7 @@ func (ng *NodeGUI) RenderInteger(item *Item) []l.Widget {
 func (ng *NodeGUI) RenderTime(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.VFlex().
+			return ng.th.Inset(0.5, ng.th.VFlex().
 				Rigid(
 					ng.th.Body1(item.label).Fn,
 				).
@@ -289,6 +299,8 @@ func (ng *NodeGUI) RenderTime(item *Item) []l.Widget {
 				Rigid(
 					ng.th.Caption(item.description).Fn,
 				).
+				Fn,
+			).
 				Fn(gtx)
 		},
 	}
@@ -297,7 +309,7 @@ func (ng *NodeGUI) RenderTime(item *Item) []l.Widget {
 func (ng *NodeGUI) RenderFloat(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.VFlex().
+			return ng.th.Inset(0.5, ng.th.VFlex().
 				Rigid(
 					ng.th.Body1(item.label).Fn,
 				).
@@ -307,6 +319,8 @@ func (ng *NodeGUI) RenderFloat(item *Item) []l.Widget {
 				Rigid(
 					ng.th.Caption(item.description).Fn,
 				).
+				Fn,
+			).
 				Fn(gtx)
 		},
 	}
@@ -314,8 +328,8 @@ func (ng *NodeGUI) RenderFloat(item *Item) []l.Widget {
 
 func (ng *NodeGUI) RenderString(item *Item) []l.Widget {
 	return []l.Widget{
-		func(gtx l.Context) l.Dimensions {
-			return ng.th.VFlex().
+		ng.th.Inset(0.5,
+			ng.th.VFlex().
 				Rigid(
 					ng.th.Body1(item.label).Fn,
 				).
@@ -325,15 +339,16 @@ func (ng *NodeGUI) RenderString(item *Item) []l.Widget {
 				Rigid(
 					ng.th.Caption(item.description).Fn,
 				).
-				Fn(gtx)
-		},
+				Fn,
+		).
+			Fn,
 	}
 }
 
 func (ng *NodeGUI) RenderPassword(item *Item) []l.Widget {
 	return []l.Widget{
-		func(gtx l.Context) l.Dimensions {
-			return ng.th.VFlex().
+		ng.th.Inset(0.5,
+			ng.th.VFlex().
 				Rigid(
 					ng.th.Body1(item.label).Fn,
 				).
@@ -343,25 +358,25 @@ func (ng *NodeGUI) RenderPassword(item *Item) []l.Widget {
 				Rigid(
 					ng.th.Caption(item.description).Fn,
 				).
-				Fn(gtx)
-		},
+				Fn,
+		).
+			Fn,
 	}
 }
 
-func (ng *NodeGUI) RenderMulti(item *Item) []l.Widget {
+func (ng *NodeGUI) RenderMulti(item *Item, position int) []l.Widget {
 	// Debug("rendering multi")
 	w := []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.VFlex().
-				Rigid(
-					ng.th.Body1(item.label).Fn,
-				).
-				Rigid(
-					ng.th.Caption(item.description).Fn,
-				).
-				// Rigid(
-				// 	ng.multis[item.slug].Fn,
-				// ).
+			return ng.th.Inset(0.5,
+				ng.th.VFlex().
+					Rigid(
+						ng.th.Body1(item.label).Fn,
+					).
+					Rigid(
+						ng.th.Caption(item.description).Fn,
+					).Fn,
+			).
 				Fn(gtx)
 		},
 	}
@@ -388,28 +403,30 @@ func (ng *NodeGUI) RenderRadio(item *Item) []l.Widget {
 						UncheckedStateIcon(icons.ToggleRadioButtonUnchecked),
 					ng.enums[item.slug], item.options[i], item.options[i]).Fn)
 		}
-		return ng.th.VFlex().
-			Rigid(
-				ng.th.Body1(item.label).Fn,
-			).
-			Rigid(
-				ng.th.Flex().
-					Rigid(
-						func(gtx l.Context) l.Dimensions {
-							gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(10).V)
-							return ng.lists[item.slug].DisableScroll(true).Slice(gtx, options...)(gtx)
-							// 	// return ng.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
-							// 	// 	return options[index](gtx)
-							// 	// }).Fn(gtx)
-							// 	return ng.lists[item.slug].Slice(gtx, options...)(gtx)
-							// 	// return l.Dimensions{}
-						},
-					).
-					Rigid(
-						ng.th.Caption(item.description).Fn,
-					).
-					Fn,
-			).
+		return ng.th.Inset(0.5,
+			ng.th.VFlex().
+				Rigid(
+					ng.th.Body1(item.label).Fn,
+				).
+				Rigid(
+					ng.th.Flex().
+						Rigid(
+							func(gtx l.Context) l.Dimensions {
+								gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(10).V)
+								return ng.lists[item.slug].DisableScroll(true).Slice(gtx, options...)(gtx)
+								// 	// return ng.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+								// 	// 	return options[index](gtx)
+								// 	// }).Fn(gtx)
+								// 	return ng.lists[item.slug].Slice(gtx, options...)(gtx)
+								// 	// return l.Dimensions{}
+							},
+						).
+						Rigid(
+							ng.th.Caption(item.description).Fn,
+						).
+						Fn,
+				).Fn,
+		).
 			Fn(gtx)
 	}
 	return []l.Widget{out}

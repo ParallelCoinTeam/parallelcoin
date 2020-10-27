@@ -199,7 +199,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	var container l.Widget
 	if li.axis == l.Horizontal {
 		container = li.th.VFlex().
-			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad)).
+			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad*2)).
 			Rigid(
 				li.th.VFlex().
 					Rigid(
@@ -216,7 +216,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			).Fn
 	} else {
 		container = li.th.Flex().
-			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad)).
+			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad*2)).
 			Rigid(
 				li.th.Flex().
 					Rigid(
