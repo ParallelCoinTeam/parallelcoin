@@ -407,7 +407,7 @@ func (n *Node) Start() {
 	if atomic.AddInt32(&n.Started, 1) != 1 {
 		return
 	}
-	Trace("starting server")
+	Debug("starting server")
 	// Server startup time. Used for the uptime command for uptime calculation.
 	n.StartupTime = time.Now().Unix()
 	// Start the peer handler which in turn starts the address and block managers.
