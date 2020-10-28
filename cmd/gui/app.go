@@ -5,6 +5,7 @@ import (
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -14,7 +15,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a = wg.th.App(*wg.size)
 	wg.App = a
 	wg.size = a.Size
-	wg.config = cfg.New(wg.cx)
+	wg.config = cfg.New(wg.cx, wg.th)
 	wg.configs = wg.config.Config()
 	a.Pages(map[string]l.Widget{
 		"main": wg.Page("overview", p9.Widgets{
@@ -217,10 +218,34 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gt
 	}
 }
 
+func (wg *WalletGUI) SetRunState(b bool) {
+	go func() {
+		Debug("run state is now", b)
+		wg.running = b
+		if b {
+			*wg.cx.Config.NodeOff = false
+			*wg.cx.Config.WalletOff = false
+			save.Pod(wg.cx.Config)
+			// stop shell
+			wg.cx.RealNode.Start()
+			wg.cx.WalletServer.Start()
+		} else {
+			*wg.cx.Config.NodeOff = true
+			*wg.cx.Config.WalletOff = true
+			save.Pod(wg.cx.Config)
+			// stop shell
+			wg.cx.RealNode.Stop()
+			wg.cx.WalletServer.Stop()
+		}
+	}()
+}
+
 func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 	t, f := icons.AVStop, icons.AVPlayArrow
 	return func(gtx l.Context) l.Dimensions {
 		state := wg.bools["runstate"].GetValue()
+		wg.bools["runstate"].SetOnChange(wg.SetRunState)
+		// wg.SetRunState(wg.running)
 		background := wg.App.StatusBarBackgroundGet()
 		color := wg.App.StatusBarColorGet()
 		var st bool

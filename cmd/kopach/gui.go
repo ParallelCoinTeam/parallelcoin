@@ -393,7 +393,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 									Debug("clicked for block", currentBlock.height)
 									m.modalWidget = m.BlockDetails
 									m.modalOn = true
-								})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
+								})).Color("DocBg").Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
 							).Flexed(1,
 							m.Inset(0.25,
 								m.VFlex().

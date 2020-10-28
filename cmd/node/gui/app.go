@@ -15,7 +15,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 	ng.app = a
 	// ng.size = ng.size
 	ng.th.Colors.SetTheme(ng.app.Dark)
-	ng.config = cfg.New(ng.cx)
+	ng.config = cfg.New(ng.cx, ng.th)
 	ng.configs = ng.config.Config()
 	ng.app.Pages(p9.WidgetMap{
 		"main": ng.Page("overview", p9.Widgets{

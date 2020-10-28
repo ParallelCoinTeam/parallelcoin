@@ -75,24 +75,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"addrecipient": wg.th.Clickable(),
 	}
 	wg.bools = map[string]*p9.Bool{
-		"runstate": wg.th.Bool(false).SetOnChange(func(b bool) {
-			Debug("run state is now", b)
-			wg.running = b
-			if b {
-				*wg.cx.Config.NodeOff = false
-				*wg.cx.Config.WalletOff = false
-				// stop shell
-				wg.cx.RealNode.Start()
-				wg.cx.WalletServer.Start()
-			} else {
-				*wg.cx.Config.NodeOff = true
-				*wg.cx.Config.WalletOff = true
-				// stop shell
-				wg.cx.RealNode.Stop()
-				wg.cx.WalletServer.Stop()
-			}
-		}),
+		"runstate": wg.th.Bool(wg.running),
 	}
+
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
 	wg.App = wg.GetAppWidget()
