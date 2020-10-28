@@ -57,7 +57,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		}),
 	})
 	a.SideBar([]l.Widget{
-		wg.SideBarButton("overview", "overview", 0),
+		wg.SideBarButton("overview", "main", 0),
 		wg.SideBarButton("send", "send", 1),
 		wg.SideBarButton("receive", "receive", 2),
 		wg.SideBarButton("transactions", "transactions", 3),
@@ -68,14 +68,17 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	})
 	a.ButtonBar([]l.Widget{
 		wg.PageTopBarButton("help", 0, icons.ActionHelp),
-		wg.PageTopBarButton("log", 1, icons.ActionList),
+		// wg.PageTopBarButton("log", 1, icons.ActionList),
 		wg.PageTopBarButton("settings", 2, icons.ActionSettings),
 		wg.PageTopBarButton("quit", 3, icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
-		wg.StatusBarButton("help", 0, icons.ActionHelp),
-		wg.StatusBarButton("log", 1, icons.ActionList),
-		wg.StatusBarButton("settings", 2, icons.ActionSettings),
+		wg.RunStatusButton(),
+		wg.th.Flex().Rigid(
+			wg.StatusBarButton("log", 1, icons.ActionList),
+		).Rigid(
+			wg.StatusBarButton("settings", 2, icons.ActionSettings),
+		).Fn,
 	})
 	return
 }
@@ -211,5 +214,62 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gt
 						}).
 					Fn,
 			).Fn(gtx)
+	}
+}
+
+func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
+	t, f := icons.AVStop, icons.AVPlayArrow
+	return func(gtx l.Context) l.Dimensions {
+		state := wg.bools["runstate"].GetValue()
+		background := wg.App.StatusBarBackgroundGet()
+		color := wg.App.StatusBarColorGet()
+		var st bool
+		if state {
+			st = true
+			background = "Primary"
+		}
+		var ico []byte
+		if st {
+			ico = t
+		} else {
+			ico = f
+		}
+		ic := wg.th.Icon().
+			Scale(p9.Scales["H4"]).
+			Color(color).
+			Src(ico).
+			Fn
+		return wg.th.Flex().
+			Rigid(
+				wg.th.ButtonLayout(wg.statusBarButtons[0]).
+					CornerRadius(0).
+					Embed(
+						wg.th.Inset(0.066, ic).Fn,
+					).
+					Background(background).
+					SetClick(
+						func() {
+							wg.bools["runstate"].Value(!wg.bools["runstate"].GetValue())
+						}).
+					Fn,
+			).
+			Rigid(
+				wg.th.Inset(0.33,
+					p9.If(wg.bools["runstate"].GetValue(),
+						wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
+						wg.th.Icon().
+							Scale(p9.Scales["H5"]).
+							Color("Primary").
+							Src(icons.ActionCheckCircle).
+							Fn,
+					),
+				).Fn,
+			).
+			Rigid(
+				wg.th.Inset(0.33,
+					wg.th.H5("256789").Color(color).Fn,
+				).Fn,
+			).
+			Fn(gtx)
 	}
 }

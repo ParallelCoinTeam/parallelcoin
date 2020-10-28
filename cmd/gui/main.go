@@ -34,6 +34,7 @@ type WalletGUI struct {
 	sidebarButtons   []*p9.Clickable
 	buttonBarButtons []*p9.Clickable
 	statusBarButtons []*p9.Clickable
+	bools            map[string]*p9.Bool
 	quitClickable    *p9.Clickable
 	lists            map[string]*p9.List
 	clickables       map[string]*p9.Clickable
@@ -68,6 +69,11 @@ func (wg *WalletGUI) Run() (err error) {
 		"send":         wg.th.Clickable(),
 		"clearall":     wg.th.Clickable(),
 		"addrecipient": wg.th.Clickable(),
+	}
+	wg.bools = map[string]*p9.Bool{
+		"runstate": wg.th.Bool(false).SetOnChange(func(b bool) {
+			Debug("run state is now", b)
+		}),
 	}
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
