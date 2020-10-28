@@ -21,6 +21,9 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 		quit:       cx.KillAll,
 		size:       &size,
 	}
+	if !*(wg.cx.Config.NodeOff) && !*(wg.cx.Config.WalletOff) {
+		wg.running = true
+	}
 	return wg.Run()
 }
 
@@ -40,8 +43,9 @@ type WalletGUI struct {
 	clickables       map[string]*p9.Clickable
 	configs          cfg.GroupsMap
 	config           *cfg.Config
-	invalidate chan struct{}
-	quit       chan struct{}
+	running          bool
+	invalidate       chan struct{}
+	quit             chan struct{}
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -73,6 +77,20 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.bools = map[string]*p9.Bool{
 		"runstate": wg.th.Bool(false).SetOnChange(func(b bool) {
 			Debug("run state is now", b)
+			wg.running = b
+			if b {
+				*wg.cx.Config.NodeOff = false
+				*wg.cx.Config.WalletOff = false
+				// stop shell
+				wg.cx.RealNode.Start()
+				wg.cx.WalletServer.Start()
+			} else {
+				*wg.cx.Config.NodeOff = true
+				*wg.cx.Config.WalletOff = true
+				// stop shell
+				wg.cx.RealNode.Stop()
+				wg.cx.WalletServer.Stop()
+			}
 		}),
 	}
 	wg.quitClickable = wg.th.Clickable()
@@ -91,6 +109,18 @@ func (wg *WalletGUI) Run() (err error) {
 				}); Check(err) {
 		}
 	}()
+	// start up node
+	go func() {
+
+	stopServer:
+		for {
+			select {
+			case <-wg.quit:
+				break stopServer
+			}
+		}
+	}()
+	// tickers and triggers
 	go func() {
 	out:
 		for {

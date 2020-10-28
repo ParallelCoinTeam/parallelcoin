@@ -148,7 +148,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 						}, au.SubCommands(), nil),
 				), nil, "w"),
 			au.Command("shell", "start combined wallet/node shell",
-				shellHandle(cx), au.SubCommands(), nil, "s"),
+				ShellHandle(cx), au.SubCommands(), nil, "s"),
 			au.Command("kopach", "standalone miner for clusters",
 				KopachHandle(cx), au.SubCommands(), nil, "k"),
 			au.Command(
