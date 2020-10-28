@@ -39,8 +39,8 @@ type WalletGUI struct {
 	clickables       map[string]*p9.Clickable
 	configs          cfg.GroupsMap
 	config           *cfg.Config
-	invalidate chan struct{}
-	quit       chan struct{}
+	invalidate       chan struct{}
+	quit             chan struct{}
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -72,6 +72,8 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
 	wg.App = wg.GetAppWidget()
+	wg.CreateSendAddressItem()()
+
 	go func() {
 		if err := wg.w.
 			Size(640, 480).

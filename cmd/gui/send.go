@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"fmt"
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -45,19 +46,21 @@ type SendAddress struct {
 
 func (wg *WalletGUI) SendPage() l.Widget {
 	//var out []l.Widget
-
-	//le := func(gtx l.Context, index int) l.Dimensions {
-	//	return out[index](gtx)
-	//}
+	fmt.Print("sss", sendAddresses)
+	le := func(gtx l.Context, index int) l.Dimensions {
+		return wg.Caption("BalaaaaaaaaaaaaaaaO").Color("DocText").Fn(gtx)
+	}
 	return wg.th.VFlex().
 		Flexed(1,
 
 			//wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5, wg.H6("title").Color("DocBg").Fn).Fn).Fn).Fn,
-			//wg.lists["send"].Vertical().Length(len(out)).ListElement(le).Fn,
-			func(gtx l.Context) l.Dimensions {
-				//return sendAddressesList.Layout(gtx, len(sendAddresses), wg.singleSendAddress())
-				return l.Dimensions{}
-			}).
+			wg.lists["send"].Vertical().Length(len(sendAddresses)).ListElement(le).Fn,
+
+		//func(gtx l.Context) l.Dimensions {
+		//return sendAddressesList.Layout(gtx, len(sendAddresses), wg.singleSendAddress())
+		//return l.Dimensions{}
+		//}
+		).
 		Rigid(
 			wg.sendFooter(),
 		).Fn
@@ -67,40 +70,38 @@ func (wg *WalletGUI) GetSend() {
 
 }
 
-func CreateSendAddressItem() func() {
-	return func() {
-		sendAddresses = append(sendAddresses,
-			&SendAddress{
-				AddressInput: &p9.Editor{
-					//SingleLine: true,
-					//Submit:     true,
-				},
-				LabelInput: &p9.Editor{
-					//SingleLine: true,
-					//Submit:     true,
-				},
-				//AmountInput: &counter.Counter{
-				//	Value:        1,
-				//	OperateValue: 1,
-				//	From:         1,
-				//	To:           999,
-				//	CounterInput: &p9.Editor{
-				//		//Alignment:  text.Middle,
-				//		//SingleLine: true,
-				//		//Submit:     true,
-				//	},
-				//	//PageFunction:    w.PrikazaniElementSumaRacunica(),
-				//	CounterIncrease: new(p9.Clickable),
-				//	CounterDecrease: new(p9.Clickable),
-				//	CounterReset:    new(p9.Clickable),
-				//},
-				AddressBookBtn:    new(p9.Clickable),
-				PasteClipboardBtn: new(p9.Clickable),
-				ClearBtn:          new(p9.Clickable),
-				SubtractFee:       new(p9.Bool),
-				AllAvailableBtn:   new(p9.Clickable),
-			})
-	}
+func (wg *WalletGUI) CreateSendAddressItem() {
+	sendAddresses = append(sendAddresses,
+		&SendAddress{
+			AddressInput: &p9.Editor{
+				//SingleLine: true,
+				//Submit:     true,
+			},
+			LabelInput: &p9.Editor{
+				//SingleLine: true,
+				//Submit:     true,
+			},
+			//AmountInput: &counter.Counter{
+			//	Value:        1,
+			//	OperateValue: 1,
+			//	From:         1,
+			//	To:           999,
+			//	CounterInput: &p9.Editor{
+			//		//Alignment:  text.Middle,
+			//		//SingleLine: true,
+			//		//Submit:     true,
+			//	},
+			//	//PageFunction:    w.PrikazaniElementSumaRacunica(),
+			//	CounterIncrease: new(p9.Clickable),
+			//	CounterDecrease: new(p9.Clickable),
+			//	CounterReset:    new(p9.Clickable),
+			//},
+			AddressBookBtn:    new(p9.Clickable),
+			PasteClipboardBtn: new(p9.Clickable),
+			ClearBtn:          new(p9.Clickable),
+			SubtractFee:       new(p9.Bool),
+			AllAvailableBtn:   new(p9.Clickable),
+		})
 }
 
 //func ClearAddress(i int) func() {
