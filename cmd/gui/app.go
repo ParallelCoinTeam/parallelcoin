@@ -35,22 +35,25 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
 		"quit": wg.Page("quit", p9.Widgets{
-			p9.WidgetSize{Widget: a.VFlex().
-				SpaceEvenly().
-				// AlignMiddle().
-				Rigid(
-					a.H4("are you sure?").Color(wg.BodyColorGet()).Alignment(text.Middle).Fn,
-				).
-				Rigid(
-					a.Flex().
-						SpaceEvenly().
-						Rigid(
-							a.Button(wg.quitClickable.SetClick(func() {
-								interrupt.Request()
-							})).TextScale(2).Text("yes").Fn,
-						).Fn,
-				).
-				Fn},
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+				return wg.th.VFlex().
+					SpaceEvenly().
+					// AlignMiddle().
+					Rigid(
+						wg.th.H4("are you sure?").Color(wg.App.BodyColorGet()).Alignment(text.Middle).Fn,
+					).
+					Rigid(
+						wg.th.Flex().
+							SpaceEvenly().
+							Rigid(
+								wg.th.Button(wg.clickables["quit"].SetClick(func() {
+									interrupt.Request()
+								})).Color(wg.App.TitleBarColorGet()).TextScale(2).Text("yes!!!").Fn,
+							).Fn,
+					).
+					Fn(gtx)
+			},
+			},
 		}),
 	})
 	a.SideBar([]l.Widget{
