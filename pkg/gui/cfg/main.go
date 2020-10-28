@@ -2,14 +2,14 @@ package cfg
 
 import (
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
-func New(cx *conte.Xt) *Config {
+func New(cx *conte.Xt, th *p9.Theme) *Config {
 	cfg := &Config{
-		cx:         cx,
-		quit:       cx.KillAll,
+		th:   th,
+		cx:   cx,
+		quit: cx.KillAll,
 	}
 	return cfg.Init()
 }
@@ -31,7 +31,7 @@ type Config struct {
 }
 
 func (c *Config) Init() *Config {
-	c.th = p9.NewTheme(p9fonts.Collection(), c.cx.KillAll)
+	// c.th = p9.NewTheme(p9fonts.Collection(), c.cx.KillAll)
 	c.th.Colors.SetTheme(c.th.Dark)
 	c.enums = map[string]*p9.Enum{
 		// "runmode": ng.th.Enum().SetValue(ng.runMode),

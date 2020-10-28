@@ -15,7 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
 		Debug("starting shell")

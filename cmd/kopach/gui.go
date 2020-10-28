@@ -61,7 +61,7 @@ func (w *Worker) Run() {
 		lists:      lists,
 		modalScrim: th.Clickable(),
 		modalClose: th.Clickable(),
-		password: th.Password(w.cx.Config.MinerPass,"Primary","PanelBg",30, func(pass string) {
+		password: th.Password(w.cx.Config.MinerPass, "Primary", "PanelBg", 30, func(pass string) {
 			Debug("changed password")
 			*w.cx.Config.MinerPass = pass
 			save.Pod(w.cx.Config)
@@ -358,8 +358,7 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 							m.Flex().
 								AlignBaseline().
 								Rigid(m.H6(" ").Font("bariol bold").Fn).
-								Rigid(m.Body1(fmt.Sprintf("%x", currentBlock.bits)).Fn,
-								).Fn,
+								Rigid(m.Body1(fmt.Sprintf("%x", currentBlock.bits)).Fn).Fn,
 						).
 						Rigid(
 							m.Flex().AlignBaseline().
@@ -393,7 +392,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 									Debug("clicked for block", currentBlock.height)
 									m.modalWidget = m.BlockDetails
 									m.modalOn = true
-								})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
+								})).Color("DocBg").Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
 							).Flexed(1,
 							m.Inset(0.25,
 								m.VFlex().
