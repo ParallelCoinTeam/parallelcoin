@@ -39,7 +39,7 @@ type WalletGUI struct {
 	lists            map[string]*p9.List
 	checkables       map[string]*p9.Checkable
 	clickables       map[string]*p9.Clickable
-	editors          map[string]*p9.Editor
+	passwords        map[string]*p9.Password
 	configs          cfg.GroupsMap
 	config           *cfg.Config
 	running          bool
@@ -81,9 +81,12 @@ func (wg *WalletGUI) Run() (err error) {
 		"seed":       wg.th.Bool(false),
 		"testnet":    wg.th.Bool(false),
 	}
-	wg.editors = map[string]*p9.Editor{
-		"passEditor":        wg.Editor().SingleLine().Submit(true),
-		"confirmPassEditor": wg.Editor().SingleLine().Submit(true),
+
+	pass := "password"
+
+	wg.passwords = map[string]*p9.Password{
+		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
+		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
 
 	wg.quitClickable = wg.th.Clickable()
