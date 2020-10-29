@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	sendAddresses     []*SendAddress
+	//sendAddresses     []*SendAddress
 	sendAddressesList = &l.List{
 		Axis: l.Vertical,
 	}
@@ -46,7 +46,7 @@ type SendAddress struct {
 
 func (wg *WalletGUI) SendPage() l.Widget {
 	//var out []l.Widget
-	fmt.Print("sss", sendAddresses)
+	fmt.Print("sss", wg.sendAddresses)
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return wg.Caption("BalaaaaaaaaaaaaaaaO").Color("DocText").Fn(gtx)
 	}
@@ -54,7 +54,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 		Flexed(1,
 
 			//wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5, wg.H6("title").Color("DocBg").Fn).Fn).Fn).Fn,
-			wg.lists["send"].Vertical().Length(len(sendAddresses)).ListElement(le).Fn,
+			wg.lists["send"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
 
 		//func(gtx l.Context) l.Dimensions {
 		//return sendAddressesList.Layout(gtx, len(sendAddresses), wg.singleSendAddress())
@@ -71,7 +71,8 @@ func (wg *WalletGUI) GetSend() {
 }
 
 func (wg *WalletGUI) CreateSendAddressItem() {
-	sendAddresses = append(sendAddresses,
+	fmt.Println("tsete", wg.sendAddresses)
+	wg.sendAddresses = append(wg.sendAddresses,
 		&SendAddress{
 			AddressInput: &p9.Editor{
 				//SingleLine: true,
@@ -146,10 +147,10 @@ func (wg *WalletGUI) sendFooter() l.Widget {
 						wg.sendButton(wg.clickables["send"], "Send", func() {}),
 					).
 					Rigid(
-						wg.sendButton(wg.clickables["send"], "Clear All", func() {}),
+						wg.sendButton(wg.clickables["clearall"], "Clear All", func() {}),
 					).
 					Rigid(
-						wg.sendButton(wg.clickables["send"], "Add Recipient", func() {}),
+						wg.sendButton(wg.clickables["addrecipient"], "Add Recipient", wg.CreateSendAddressItem),
 					).
 					Flexed(1,
 						wg.Inset(0.0, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,

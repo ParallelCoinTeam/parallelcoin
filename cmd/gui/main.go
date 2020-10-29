@@ -45,6 +45,8 @@ type WalletGUI struct {
 	running          bool
 	invalidate       chan struct{}
 	quit             chan struct{}
+
+	sendAddresses []*SendAddress
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -92,14 +94,16 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
 	wg.App = wg.GetAppWidget()
+
+	wg.CreateSendAddressItem()
 	go func() {
 		if err := wg.w.
 			Size(640, 480).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				//wg.Fn(),
-				wg.InitWallet(),
+				wg.Fn(),
+				//wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
 					interrupt.Request()
