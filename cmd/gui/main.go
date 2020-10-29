@@ -37,7 +37,9 @@ type WalletGUI struct {
 	bools            map[string]*p9.Bool
 	quitClickable    *p9.Clickable
 	lists            map[string]*p9.List
+	checkables       map[string]*p9.Checkable
 	clickables       map[string]*p9.Clickable
+	editors          map[string]*p9.Editor
 	configs          cfg.GroupsMap
 	config           *cfg.Config
 	running          bool
@@ -61,18 +63,27 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
 	wg.lists = map[string]*p9.List{
-		"overview": wg.th.List(),
-		"send":     wg.th.List(),
-		"settings": wg.th.List(),
+		"createwallet": wg.th.List(),
+		"overview":     wg.th.List(),
+		"send":         wg.th.List(),
+		"settings":     wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
+		"createwallet": wg.th.Clickable(),
 		"quit":         wg.th.Clickable(),
 		"send":         wg.th.Clickable(),
 		"clearall":     wg.th.Clickable(),
 		"addrecipient": wg.th.Clickable(),
 	}
 	wg.bools = map[string]*p9.Bool{
-		"runstate": wg.th.Bool(wg.running),
+		"runstate":   wg.th.Bool(wg.running),
+		"encryption": wg.th.Bool(false),
+		"seed":       wg.th.Bool(false),
+		"testnet":    wg.th.Bool(false),
+	}
+	wg.editors = map[string]*p9.Editor{
+		"passEditor":        wg.Editor().SingleLine().Submit(true),
+		"confirmPassEditor": wg.Editor().SingleLine().Submit(true),
 	}
 
 	wg.quitClickable = wg.th.Clickable()
@@ -84,7 +95,8 @@ func (wg *WalletGUI) Run() (err error) {
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				wg.Fn(),
+				//wg.Fn(),
+				wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
 					interrupt.Request()
