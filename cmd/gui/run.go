@@ -59,7 +59,10 @@ func (wg *WalletGUI) Runner() (err error) {
 					// } else {
 					// 	Debug(err)
 					// }
-					wg.running = false
+					go func() {
+						// time.Sleep(time.Second * 4)
+						wg.running = false
+					}()
 				case "restart":
 					Debug("restart called")
 					go func() {

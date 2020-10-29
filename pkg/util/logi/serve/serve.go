@@ -2,7 +2,6 @@ package serve
 
 import (
 	"os"
-	"time"
 
 	"go.uber.org/atomic"
 
@@ -46,7 +45,7 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool)) {
 			case "kill":
 				Debug("received kill signal from pipe, shutting down")
 				interrupt.Request()
-				time.Sleep(time.Second*5)
+				// time.Sleep(time.Second*5)
 				// close(quit)
 				os.Exit(0)
 			}
