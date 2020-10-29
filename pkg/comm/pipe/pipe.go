@@ -56,6 +56,7 @@ func Serve(quit chan struct{}, handler func([]byte) error) stdconn.StdConn {
 			}
 			if n > 0 {
 				if err := handler(data[:n]); Check(err) {
+					// break out
 				}
 			}
 		}

@@ -22,7 +22,7 @@ func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			fork.IsTestnet = true
 		}
 		interrupt.AddHandler(func() {
-			Debug("node gui is shut down")
+			Debug("wallet gui is shut down")
 			os.Exit(0)
 		})
 		if err := gui.Main(cx, c); Check(err) {

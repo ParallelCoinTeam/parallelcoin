@@ -76,8 +76,8 @@ func (l Lists) Swap(i, j int) {
 	l[i], l[j] = l[j], l[i]
 }
 
-func (ng *Config) Config() GroupsMap {
-	schema := pod.GetConfigSchema(ng.cx.Config, ng.cx.ConfigMap)
+func (c *Config) Config() GroupsMap {
+	schema := pod.GetConfigSchema(c.cx.Config, c.cx.ConfigMap)
 	tabNames := make(GroupsMap)
 	// tabs := make(p9.WidgetMap)
 	for i := range schema.Groups {
@@ -94,92 +94,92 @@ func (ng *Config) Config() GroupsMap {
 				widget:      sgf.Widget,
 				dataType:    sgf.Datatype,
 				options:     sgf.Options,
-				slot:        ng.cx.ConfigMap[sgf.Slug],
+				slot:        c.cx.ConfigMap[sgf.Slug],
 			}
 			// Debugs(sgf)
 			// create all the necessary widgets required before display
 			tgs := tabNames[sgf.Group][sgf.Slug]
 			switch sgf.Widget {
 			case "toggle":
-				ng.bools[sgf.Slug] = ng.th.Bool(*tgs.slot.(*bool)).SetOnChange(func(b bool) {
+				c.bools[sgf.Slug] = c.th.Bool(*tgs.slot.(*bool)).SetOnChange(func(b bool) {
 					Debug(sgf.Slug, "submitted", b)
-					bb := ng.cx.ConfigMap[sgf.Slug].(*bool)
+					bb := c.cx.ConfigMap[sgf.Slug].(*bool)
 					*bb = b
-					save.Pod(ng.cx.Config)
+					save.Pod(c.cx.Config)
 				})
 			case "integer":
-				ng.inputs[sgf.Slug] = ng.th.Input(fmt.Sprint(*tgs.slot.(*int)),
+				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.slot.(*int)),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
-						i := ng.cx.ConfigMap[sgf.Slug].(*int)
+						i := c.cx.ConfigMap[sgf.Slug].(*int)
 						if n, err := strconv.Atoi(txt); !Check(err) {
 							*i = n
 						}
-						save.Pod(ng.cx.Config)
+						save.Pod(c.cx.Config)
 					})
 			case "time":
-				ng.inputs[sgf.Slug] = ng.th.Input(fmt.Sprint(*tgs.slot.(*time.Duration)),
+				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.slot.(*time.Duration)),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
-						tt := ng.cx.ConfigMap[sgf.Slug].(*time.Duration)
+						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
 						if d, err := time.ParseDuration(txt); !Check(err) {
 							*tt = d
 						}
-						save.Pod(ng.cx.Config)
+						save.Pod(c.cx.Config)
 					})
 			case "float":
-				ng.inputs[sgf.Slug] = ng.th.Input(strconv.FormatFloat(*tgs.slot.(*float64), 'f', -1, 64),
+				c.inputs[sgf.Slug] = c.th.Input(strconv.FormatFloat(*tgs.slot.(*float64), 'f', -1, 64),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
-						ff := ng.cx.ConfigMap[sgf.Slug].(*float64)
+						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
 						if f, err := strconv.ParseFloat(txt, 64); !Check(err) {
 							*ff = f
 						}
-						save.Pod(ng.cx.Config)
+						save.Pod(c.cx.Config)
 					})
 			case "string":
-				ng.inputs[sgf.Slug] = ng.th.Input(*tgs.slot.(*string),
+				c.inputs[sgf.Slug] = c.th.Input(*tgs.slot.(*string),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
-						ss := ng.cx.ConfigMap[sgf.Slug].(*string)
+						ss := c.cx.ConfigMap[sgf.Slug].(*string)
 						*ss = txt
-						save.Pod(ng.cx.Config)
+						save.Pod(c.cx.Config)
 					})
 			case "password":
-				ng.passwords[sgf.Slug] = ng.th.Password(tgs.slot.(*string),
+				c.passwords[sgf.Slug] = c.th.Password(tgs.slot.(*string),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
-						pp := ng.cx.ConfigMap[sgf.Slug].(*string)
+						pp := c.cx.ConfigMap[sgf.Slug].(*string)
 						*pp = txt
-						save.Pod(ng.cx.Config)
+						save.Pod(c.cx.Config)
 					})
 			case "multi":
-				ng.multis[sgf.Slug] = ng.th.Multiline(tgs.slot.(*cli.StringSlice),
+				c.multis[sgf.Slug] = c.th.Multiline(tgs.slot.(*cli.StringSlice),
 					"Primary", "PanelBg", 30, func(txt []string) {
 						Debug(sgf.Slug, "submitted", txt)
-						sss := ng.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
+						sss := c.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
 						*sss = txt
-						save.Pod(ng.cx.Config)
+						save.Pod(c.cx.Config)
 					})
-				// ng.multis[sgf.Slug]
+				// c.multis[sgf.Slug]
 			case "radio":
-				ng.checkables[sgf.Slug] = ng.th.Checkable()
+				c.checkables[sgf.Slug] = c.th.Checkable()
 				for i := range sgf.Options {
-					ng.checkables[sgf.Slug+sgf.Options[i]] = ng.th.Checkable()
+					c.checkables[sgf.Slug+sgf.Options[i]] = c.th.Checkable()
 				}
 				txt := *tabNames[sgf.Group][sgf.Slug].slot.(*string)
-				ng.enums[sgf.Slug] = ng.th.Enum().SetValue(txt).SetOnChange(func(value string) {
-					rr := ng.cx.ConfigMap[sgf.Slug].(*string)
+				c.enums[sgf.Slug] = c.th.Enum().SetValue(txt).SetOnChange(func(value string) {
+					rr := c.cx.ConfigMap[sgf.Slug].(*string)
 					*rr = value
-					save.Pod(ng.cx.Config)
+					save.Pod(c.cx.Config)
 				})
-				ng.lists[sgf.Slug] = ng.th.List()
+				c.lists[sgf.Slug] = c.th.List()
 			}
 		}
 	}
 
 	// Debugs(tabNames)
-	return tabNames // .Widget(ng)
+	return tabNames // .Widget(c)
 	// return func(gtx l.Context) l.Dimensions {
 	// 	return l.Dimensions{}
 	// }
@@ -256,43 +256,43 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 // RenderConfigItem renders a config item. It takes a position variable which tells it which index it begins on
 // the bigger config widget list, with this and its current data set the multi can insert and delete elements above
 // its add button without rerendering the config item or worse, the whole config widget
-func (ng *Config) RenderConfigItem(item *Item, position int) []l.Widget {
+func (c *Config) RenderConfigItem(item *Item, position int) []l.Widget {
 	switch item.widget {
 	case "toggle":
-		return ng.RenderToggle(item)
+		return c.RenderToggle(item)
 	case "integer":
-		return ng.RenderInteger(item)
+		return c.RenderInteger(item)
 	case "time":
-		return ng.RenderTime(item)
+		return c.RenderTime(item)
 	case "float":
-		return ng.RenderFloat(item)
+		return c.RenderFloat(item)
 	case "string":
-		return ng.RenderString(item)
+		return c.RenderString(item)
 	case "password":
-		return ng.RenderPassword(item)
+		return c.RenderPassword(item)
 	case "multi":
-		return ng.RenderMulti(item, position)
+		return c.RenderMulti(item, position)
 	case "radio":
-		return ng.RenderRadio(item)
+		return c.RenderRadio(item)
 	}
 	Debug("fallthrough", item.widget)
 	return []l.Widget{func(l.Context) l.Dimensions { return l.Dimensions{} }}
 }
 
-func (ng *Config) RenderToggle(item *Item) []l.Widget {
+func (c *Config) RenderToggle(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.Inset(0.5, ng.th.Flex().
+			return c.th.Inset(0.5, c.th.Flex().
 				Rigid(
-					ng.th.Switch(ng.bools[item.slug]).Fn,
+					c.th.Switch(c.bools[item.slug]).Fn,
 				).
 				Rigid(
-					ng.th.VFlex().
+					c.th.VFlex().
 						Rigid(
-							ng.th.Body1(item.label).Fn,
+							c.th.Body1(item.label).Fn,
 						).
 						Rigid(
-							ng.th.Caption(item.description).Fn,
+							c.th.Caption(item.description).Fn,
 						).
 						Fn,
 				).Fn,
@@ -301,18 +301,18 @@ func (ng *Config) RenderToggle(item *Item) []l.Widget {
 	}
 }
 
-func (ng *Config) RenderInteger(item *Item) []l.Widget {
+func (c *Config) RenderInteger(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.Inset(0.5, ng.th.VFlex().
+			return c.th.Inset(0.5, c.th.VFlex().
 				Rigid(
-					ng.th.Body1(item.label).Fn,
+					c.th.Body1(item.label).Fn,
 				).
 				Rigid(
-					ng.inputs[item.slug].Fn,
+					c.inputs[item.slug].Fn,
 				).
 				Rigid(
-					ng.th.Caption(item.description).Fn,
+					c.th.Caption(item.description).Fn,
 				).
 				Fn,
 			).
@@ -321,18 +321,18 @@ func (ng *Config) RenderInteger(item *Item) []l.Widget {
 	}
 }
 
-func (ng *Config) RenderTime(item *Item) []l.Widget {
+func (c *Config) RenderTime(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.Inset(0.5, ng.th.VFlex().
+			return c.th.Inset(0.5, c.th.VFlex().
 				Rigid(
-					ng.th.Body1(item.label).Fn,
+					c.th.Body1(item.label).Fn,
 				).
 				Rigid(
-					ng.inputs[item.slug].Fn,
+					c.inputs[item.slug].Fn,
 				).
 				Rigid(
-					ng.th.Caption(item.description).Fn,
+					c.th.Caption(item.description).Fn,
 				).
 				Fn,
 			).
@@ -341,18 +341,18 @@ func (ng *Config) RenderTime(item *Item) []l.Widget {
 	}
 }
 
-func (ng *Config) RenderFloat(item *Item) []l.Widget {
+func (c *Config) RenderFloat(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.Inset(0.5, ng.th.VFlex().
+			return c.th.Inset(0.5, c.th.VFlex().
 				Rigid(
-					ng.th.Body1(item.label).Fn,
+					c.th.Body1(item.label).Fn,
 				).
 				Rigid(
-					ng.inputs[item.slug].Fn,
+					c.inputs[item.slug].Fn,
 				).
 				Rigid(
-					ng.th.Caption(item.description).Fn,
+					c.th.Caption(item.description).Fn,
 				).
 				Fn,
 			).
@@ -361,18 +361,18 @@ func (ng *Config) RenderFloat(item *Item) []l.Widget {
 	}
 }
 
-func (ng *Config) RenderString(item *Item) []l.Widget {
+func (c *Config) RenderString(item *Item) []l.Widget {
 	return []l.Widget{
-		ng.th.Inset(0.5,
-			ng.th.VFlex().
+		c.th.Inset(0.5,
+			c.th.VFlex().
 				Rigid(
-					ng.th.Body1(item.label).Fn,
+					c.th.Body1(item.label).Fn,
 				).
 				Rigid(
-					ng.inputs[item.slug].Fn,
+					c.inputs[item.slug].Fn,
 				).
 				Rigid(
-					ng.th.Caption(item.description).Fn,
+					c.th.Caption(item.description).Fn,
 				).
 				Fn,
 		).
@@ -380,18 +380,18 @@ func (ng *Config) RenderString(item *Item) []l.Widget {
 	}
 }
 
-func (ng *Config) RenderPassword(item *Item) []l.Widget {
+func (c *Config) RenderPassword(item *Item) []l.Widget {
 	return []l.Widget{
-		ng.th.Inset(0.5,
-			ng.th.VFlex().
+		c.th.Inset(0.5,
+			c.th.VFlex().
 				Rigid(
-					ng.th.Body1(item.label).Fn,
+					c.th.Body1(item.label).Fn,
 				).
 				Rigid(
-					ng.passwords[item.slug].Fn,
+					c.passwords[item.slug].Fn,
 				).
 				Rigid(
-					ng.th.Caption(item.description).Fn,
+					c.th.Caption(item.description).Fn,
 				).
 				Fn,
 		).
@@ -399,65 +399,66 @@ func (ng *Config) RenderPassword(item *Item) []l.Widget {
 	}
 }
 
-func (ng *Config) RenderMulti(item *Item, position int) []l.Widget {
+func (c *Config) RenderMulti(item *Item, position int) []l.Widget {
 	// Debug("rendering multi")
+	// c.multis[item.slug].
 	w := []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return ng.th.Inset(0.5,
-				ng.th.VFlex().
+			return c.th.Inset(0.5,
+				c.th.VFlex().
 					Rigid(
-						ng.th.Body1(item.label).Fn,
+						c.th.Body1(item.label).Fn,
 					).
 					Rigid(
-						ng.th.Caption(item.description).Fn,
+						c.th.Caption(item.description).Fn,
 					).Fn,
 			).
 				Fn(gtx)
 		},
 	}
-	widgets := ng.multis[item.slug].Widgets()
+	widgets := c.multis[item.slug].Widgets()
 	// Debug(widgets)
 	w = append(w, widgets...)
 	return w
 }
 
-func (ng *Config) RenderRadio(item *Item) []l.Widget {
+func (c *Config) RenderRadio(item *Item) []l.Widget {
 	out := func(gtx l.Context) l.Dimensions {
 		var options []l.Widget
 		for i := range item.options {
 			color := "DocText"
-			if ng.enums[item.slug].Value() == item.options[i] {
+			if c.enums[item.slug].Value() == item.options[i] {
 				color = "Primary"
 			}
 			options = append(options,
-				ng.th.RadioButton(
-					ng.checkables[item.slug+item.options[i]].
+				c.th.RadioButton(
+					c.checkables[item.slug+item.options[i]].
 						IconColor(color).
 						Color(color).
 						CheckedStateIcon(icons.ToggleRadioButtonChecked).
 						UncheckedStateIcon(icons.ToggleRadioButtonUnchecked),
-					ng.enums[item.slug], item.options[i], item.options[i]).Fn)
+					c.enums[item.slug], item.options[i], item.options[i]).Fn)
 		}
-		return ng.th.Inset(0.5,
-			ng.th.VFlex().
+		return c.th.Inset(0.5,
+			c.th.VFlex().
 				Rigid(
-					ng.th.Body1(item.label).Fn,
+					c.th.Body1(item.label).Fn,
 				).
 				Rigid(
-					ng.th.Flex().
+					c.th.Flex().
 						Rigid(
 							func(gtx l.Context) l.Dimensions {
-								gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(10).V)
-								return ng.lists[item.slug].DisableScroll(true).Slice(gtx, options...)(gtx)
-								// 	// return ng.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+								gtx.Constraints.Max.X = int(c.th.TextSize.Scale(10).V)
+								return c.lists[item.slug].DisableScroll(true).Slice(gtx, options...)(gtx)
+								// 	// return c.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
 								// 	// 	return options[index](gtx)
 								// 	// }).Fn(gtx)
-								// 	return ng.lists[item.slug].Slice(gtx, options...)(gtx)
+								// 	return c.lists[item.slug].Slice(gtx, options...)(gtx)
 								// 	// return l.Dimensions{}
 							},
 						).
 						Rigid(
-							ng.th.Caption(item.description).Fn,
+							c.th.Caption(item.description).Fn,
 						).
 						Fn,
 				).Fn,

@@ -223,9 +223,12 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gt
 func (wg *WalletGUI) SetRunState(b bool) {
 	go func() {
 		Debug("run state is now", b)
-		wg.running = b
 		if b {
+			wg.RunCommandChan <- "run"
+			// wg.running = b
 		} else {
+			wg.RunCommandChan <- "stop"
+			// wg.running = b
 		}
 	}()
 }
