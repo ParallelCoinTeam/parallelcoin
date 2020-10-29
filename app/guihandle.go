@@ -25,11 +25,6 @@ func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			Debug("node gui is shut down")
 			os.Exit(0)
 		})
-		// start up shell
-		go func() {
-			if err := ShellHandle(cx)(c); Check(err) {
-			}
-		}()
 		if err := gui.Main(cx, c); Check(err) {
 		}
 		Debug("node gui finished")

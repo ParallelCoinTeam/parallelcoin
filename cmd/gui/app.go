@@ -5,7 +5,6 @@ import (
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -223,19 +222,7 @@ func (wg *WalletGUI) SetRunState(b bool) {
 		Debug("run state is now", b)
 		wg.running = b
 		if b {
-			*wg.cx.Config.NodeOff = false
-			*wg.cx.Config.WalletOff = false
-			save.Pod(wg.cx.Config)
-			// stop shell
-			wg.cx.RealNode.Start()
-			wg.cx.WalletServer.Start()
 		} else {
-			*wg.cx.Config.NodeOff = true
-			*wg.cx.Config.WalletOff = true
-			save.Pod(wg.cx.Config)
-			// stop shell
-			wg.cx.RealNode.Stop()
-			wg.cx.WalletServer.Stop()
 		}
 	}()
 }
@@ -243,18 +230,10 @@ func (wg *WalletGUI) SetRunState(b bool) {
 func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 	t, f := icons.AVStop, icons.AVPlayArrow
 	return func(gtx l.Context) l.Dimensions {
-		state := wg.bools["runstate"].GetValue()
-		wg.bools["runstate"].SetOnChange(wg.SetRunState)
-		// wg.SetRunState(wg.running)
 		background := wg.App.StatusBarBackgroundGet()
 		color := wg.App.StatusBarColorGet()
-		var st bool
-		if state {
-			st = true
-			background = "Primary"
-		}
 		var ico []byte
-		if st {
+		if wg.running {
 			ico = t
 		} else {
 			ico = f
@@ -274,13 +253,13 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 					Background(background).
 					SetClick(
 						func() {
-							wg.bools["runstate"].Value(!wg.bools["runstate"].GetValue())
+							wg.SetRunState(!wg.running)
 						}).
 					Fn,
 			).
 			Rigid(
 				wg.th.Inset(0.33,
-					p9.If(wg.bools["runstate"].GetValue(),
+					p9.If(wg.running,
 						wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
 						wg.th.Icon().
 							Scale(p9.Scales["H5"]).

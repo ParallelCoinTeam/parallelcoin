@@ -30,23 +30,26 @@ type List struct {
 	// scroll the list programmatically, update Position (e.g. restore it from a saved value) before calling Layout.
 	position Position
 	// nextUp, nextDown Position
-	len          int
-	drag         gesture.Drag
-	color        string
-	active       string
-	currentColor string
-	scrollWidth  int
+	len             int
+	drag            gesture.Drag
+	color           string
+	active          string
+	currentColor    string
+	scrollWidth     int
+	setScrollWidth  int
+	scrollBarPad    int
+	setScrollBarPad int
 	// maxSize is the total size of visible children.
 	maxSize             int
 	children            []scrollChild
 	dir                 iterationDir
 	length              int
+	prevLength          int
 	w                   ListElement
 	pageUp, pageDown    *Clickable
 	dims                DimensionList
 	view, total, before int
 	top, middle, bottom int
-	scrollBarPad        int
 	lastWidth           int
 	recalculateTime     time.Time
 	recalculate         bool
@@ -62,6 +65,9 @@ func (th *Theme) List() (out *List) {
 		color:           "DocBg",
 		active:          "Primary",
 		scrollWidth:     int(th.TextSize.V),
+		setScrollWidth:  int(th.TextSize.V),
+		scrollBarPad:    int(th.TextSize.V * 0.5),
+		setScrollBarPad: int(th.TextSize.V * 0.5),
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}
@@ -103,14 +109,20 @@ func (li *List) ScrollToEnd() (out *List) {
 }
 
 func (li *List) Length(length int) *List {
+	li.prevLength = li.length
 	li.length = length
 	return li
 }
 
 func (li *List) DisableScroll(disable bool) *List {
 	li.disableScroll = disable
-	li.scrollWidth = 0
-	li.scrollBarPad = 0
+	if disable {
+		li.scrollWidth = 0
+		li.scrollBarPad = 0
+	} else {
+		li.scrollWidth = li.setScrollWidth
+		li.scrollBarPad = li.setScrollBarPad
+	}
 	return li
 }
 
@@ -121,6 +133,7 @@ func (li *List) ListElement(w ListElement) *List {
 
 func (li *List) ScrollWidth(width int) *List {
 	li.scrollWidth = width
+	li.setScrollWidth = width
 	return li
 }
 
@@ -163,7 +176,6 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		// if li.recalculate && !li.changing {
 		Debug("recalculating")
 		// get the size of the scrollbar
-		li.scrollBarPad = int(li.th.TextSize.V * 0.5)
 		li.th.scrollBarSize = li.scrollWidth + li.scrollBarPad
 		// render the widgets onto a second context to get their dimensions
 		gtx1 := CopyContextDimensions(gtx, gtx.Constraints.Max, li.axis)
@@ -185,6 +197,8 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		li.scrollWidth = 0
 		li.scrollBarPad = 0
 	} else {
+		li.scrollWidth = li.setScrollWidth
+		li.scrollBarPad = li.setScrollBarPad
 		li.top = li.before * (li.view - li.scrollWidth) / li.total
 		li.middle = li.view * (li.view - li.scrollWidth) / li.total
 		li.bottom = (li.total - li.before - li.view) * (li.view - li.scrollWidth) / li.total
