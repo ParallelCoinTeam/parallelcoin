@@ -70,6 +70,13 @@ func Stop(w *worker.Worker) {
 	}
 }
 
+func Kill(w *worker.Worker) {
+	Debug("sending kill signal")
+	if n, err := w.StdConn.Write([]byte("kill")); n < 1 || Check(err) {
+		Debug("failed to write")
+	}
+}
+
 func SetLevel(w *worker.Worker, level string) {
 	if w == nil {
 		return

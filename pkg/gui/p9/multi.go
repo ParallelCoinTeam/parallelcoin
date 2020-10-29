@@ -213,6 +213,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 	if added {
 		Debug("clearing editor")
 		m.input.editor.SetText("")
+		m.input.editor.Focus()
 	}
 	return m
 }
@@ -280,16 +281,16 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 	}
 	widgets = append(widgets, addButton.SetClick(func() {
 		Debug("clicked add")
-		m.inputLocation = len(*m.lines)
 		*m.lines = append(*m.lines, "")
+		m.inputLocation = len(*m.lines) - 1
 		Debugs([]string(*m.lines))
 		m.UpdateWidgets()
 		m.PopulateWidgets()
 		m.input.editor.SetText("")
 		m.input.editor.Focus()
 	}).Background("DocBg").Fn)
-	m.UpdateWidgets()
-	m.PopulateWidgets()
+	// m.UpdateWidgets()
+	// m.PopulateWidgets()
 	// Debug(m.inputLocation)
 	// if m.inputLocation > 0 {
 	// 	m.input.Editor().Focus()
@@ -307,22 +308,30 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 	if m.inputLocation > 0 && m.inputLocation < len(*m.lines) {
 		m.input.Editor().SetText((*m.lines)[m.inputLocation])
 	}
-	mi := m.inputLocation
 	focusFunc := func(is bool) {
+		mi := m.inputLocation
 		Debug("editor", "is focused", is)
+		// debug.PrintStack()
 		if !is {
 			m.input.borderColor = m.input.borderColorUnfocused
 			// submit the current edit if any
 			txt := m.input.editor.Text()
 			cur := (*m.lines)[m.inputLocation]
 			if txt != cur {
+				Debug("changed text")
 				// run submit hook
 				m.input.editor.submitHook(txt)
+			} else {
+				Debug("text not changed")
+				// When a new item is added this unfocus event occurs and this makes it behave correctly
+				// Normally the editor would not be rendered if not focused so setting it to focus does no harm in the
+				// case of switching to another
 			}
-			m.inputLocation = -1
+			// m.inputLocation = -1
 		} else {
 			m.input.borderColor = m.input.borderColorFocused
 			m.inputLocation = mi
+			// m.input.editor.Focus()
 		}
 	}
 	m.input.editor.SetFocus(focusFunc)
@@ -334,11 +343,11 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			btn := m.Theme.ButtonLayout(m.clickables[i].SetClick(
 				func() {
 					Debug("button pressed", (*m.lines)[i], i, m.inputLocation)
+					m.UpdateWidgets()
+					m.PopulateWidgets()
 					m.inputLocation = i
 					m.input.editor.SetText((*m.lines)[i])
 					m.input.editor.Focus()
-					m.UpdateWidgets()
-					m.PopulateWidgets()
 				})).CornerRadius(0).Background("Transparent").
 				Embed(
 					func(gtx l.Context) l.Dimensions {
@@ -371,12 +380,12 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			// Debug("rendering button", i)
 			m.clickables[i].SetClick(
 				func() {
+					m.UpdateWidgets()
+					m.PopulateWidgets()
 					m.inputLocation = i
 					m.input.editor.SetText((*m.lines)[i])
 					m.input.editor.Focus()
 					Debug("setting", i, m.inputLocation)
-					m.UpdateWidgets()
-					m.PopulateWidgets()
 				})
 			button := func(gtx l.Context) l.Dimensions {
 				return m.Flex().
@@ -399,10 +408,10 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			Debug("clicked add")
 			m.inputLocation = len(*m.lines)
 			*m.lines = append(*m.lines, "")
+			m.input.editor.SetText("")
 			Debugs([]string(*m.lines))
 			m.UpdateWidgets()
 			m.PopulateWidgets()
-			m.input.editor.SetText("")
 			m.input.editor.Focus()
 		}).Background("DocBg").Fn
 		widgets = append(widgets, addb)

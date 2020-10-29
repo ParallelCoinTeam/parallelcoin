@@ -5,6 +5,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
@@ -47,6 +48,8 @@ type WalletGUI struct {
 	quit             chan struct{}
 
 	sendAddresses []*SendAddress
+	Worker           *worker.Worker
+	RunCommandChan   chan string
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -91,6 +94,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
 
+	wg.RunCommandChan = make(chan string)
+	if err = wg.Runner(); Check(err) {
+	}
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
 	wg.App = wg.GetAppWidget()
