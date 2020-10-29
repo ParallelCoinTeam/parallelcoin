@@ -16,7 +16,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 		).
 		Flexed(1,
 			wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5,
-				wg.lists["send"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
+				wg.lists["received"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
 			).Fn).Fn).Fn,
 		).Fn
 }

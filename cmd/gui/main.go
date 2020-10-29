@@ -48,9 +48,9 @@ type WalletGUI struct {
 	invalidate       chan struct{}
 	quit             chan struct{}
 
-	sendAddresses []*SendAddress
-	Worker           *worker.Worker
-	RunCommandChan   chan string
+	sendAddresses  []*SendAddress
+	Worker         *worker.Worker
+	RunCommandChan chan string
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -69,11 +69,12 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
 	wg.lists = map[string]*p9.List{
-		"createWallet":                   wg.th.List(),
-		"overview":                       wg.th.List(),
-		"send":                           wg.th.List(),
-		"settings":                       wg.th.List(),
-		"receiveRequestedPaymentHistory": wg.th.List(),
+		"createWallet": wg.th.List(),
+		"overview":     wg.th.List(),
+		"send":         wg.th.List(),
+		"transactions": wg.th.List(),
+		"settings":     wg.th.List(),
+		"received":     wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
