@@ -162,7 +162,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	if li.disableScroll {
 		return li.embedWidget(0)(gtx)
 	}
-	if li.lastWidth != gtx.Constraints.Max.X && li.notFirst {
+	if li.length != li.prevLength {
+		li.recalculate = true
+		li.recalculateTime = time.Now().Add(-time.Millisecond * 100)
+	} else if li.lastWidth != gtx.Constraints.Max.X && li.notFirst {
 		li.recalculateTime = time.Now().Add(time.Millisecond * 100)
 		li.recalculate = true
 	}
@@ -186,12 +189,14 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		li.recalculate = false
 	}
 	_, li.view = axisMainConstraint(li.axis, gtx.Constraints)
+	// Debugs(li.dims)
 	li.total, li.before = li.dims.GetSizes(li.position, li.axis)
 	if li.total == 0 {
 		// if there is no children just return a big empty box
 		return EmptyFromSize(gtx.Constraints.Max)(gtx)
 	}
 	if li.total < li.view {
+		// Debug("not showing scrollbar", li.total, li.view)
 		// if the contents fit the view, don't show the scrollbar
 		li.top, li.middle, li.bottom = 0, 0, 0
 		li.scrollWidth = 0
