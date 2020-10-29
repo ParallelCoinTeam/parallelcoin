@@ -100,6 +100,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 				} else {
 					*m.lines = append((*m.lines)[:y+1], (*m.lines)[y+2:]...)
 				}
+				m.handle(*m.lines)
 				// Debug("remove button", i, "clicked")
 				// m.inputLocation = -1
 				// ll := len(*m.lines)-1
