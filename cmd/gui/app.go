@@ -128,7 +128,7 @@ func (wg *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l
 
 func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		gtx.Constraints.Max.X = int(wg.TextSize.Scale(12).V)
+		gtx.Constraints.Max.X = int(wg.TextSize.Scale(16).V)
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		return wg.ButtonLayout(wg.sidebarButtons[index]).Embed(
 			func(gtx l.Context) l.Dimensions {
