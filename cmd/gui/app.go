@@ -5,6 +5,7 @@ import (
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -13,6 +14,18 @@ import (
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a = wg.th.App(*wg.size)
 	wg.App = a
+	wg.App.ThemeHook(func(){
+		Debug("theme hook")
+		Debug(wg.bools)
+		*wg.cx.Config.DarkTheme = *wg.Dark
+		a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
+		*a = *wg.Dark
+		if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
+			wgb.Value(*wg.Dark)
+		}
+		save.Pod(wg.cx.Config)
+
+	})
 	wg.size = a.Size
 	wg.config = cfg.New(wg.cx, wg.th)
 	wg.configs = wg.config.Config()

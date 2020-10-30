@@ -52,7 +52,7 @@ type NodeGUI struct {
 
 func (ng *NodeGUI) Run() (err error) {
 	ng.th = p9.NewTheme(p9fonts.Collection(), ng.quit)
-	ng.th.Colors.SetTheme(ng.th.Dark)
+	ng.th.Colors.SetTheme(*ng.th.Dark)
 	ng.runMode = "node"
 	ng.sidebarButtons = make([]*p9.Clickable, 9)
 	for i := range ng.sidebarButtons {

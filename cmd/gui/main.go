@@ -48,14 +48,15 @@ type WalletGUI struct {
 	invalidate       chan struct{}
 	quit             chan struct{}
 
-	sendAddresses []*SendAddress
-	Worker           *worker.Worker
-	RunCommandChan   chan string
+	sendAddresses  []*SendAddress
+	Worker         *worker.Worker
+	RunCommandChan chan string
 }
 
 func (wg *WalletGUI) Run() (err error) {
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
-	wg.th.Colors.SetTheme(wg.th.Dark)
+	wg.th.Dark = wg.cx.Config.DarkTheme
+	wg.th.Colors.SetTheme(*wg.th.Dark)
 	wg.sidebarButtons = make([]*p9.Clickable, 9)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
@@ -109,6 +110,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.RunCommandChan = make(chan string)
 	if err = wg.Runner(); Check(err) {
 	}
+	wg.RunCommandChan <- "run"
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
 
@@ -122,7 +124,7 @@ func (wg *WalletGUI) Run() (err error) {
 			Open().
 			Run(
 				wg.Fn(),
-				//wg.InitWallet(),
+				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
 					interrupt.Request()
