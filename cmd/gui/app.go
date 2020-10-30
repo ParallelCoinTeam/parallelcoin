@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"strconv"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -290,7 +292,7 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				wg.th.Inset(0.33,
-					wg.th.H5("256789").Color(color).Fn,
+					wg.th.H5(strconv.FormatInt(int64(wg.State.bestBlockHeight), 10)).Color(color).Fn,
 				).Fn,
 			).
 			Fn(gtx)

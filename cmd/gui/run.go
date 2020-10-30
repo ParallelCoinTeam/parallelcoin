@@ -30,7 +30,9 @@ func (wg *WalletGUI) Runner() (err error) {
 						break
 					}
 					Debug("run called")
-					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "shell"}
+					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
+						"--servertls=false", "--clienttls=false",
+						"--pipelog", "shell"}
 					args = apputil.PrependForWindows(args)
 					wg.Shell = consume.Log(wg.quit, func(ent *logi.Entry) (err error) {
 						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)

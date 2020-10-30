@@ -5,7 +5,8 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/p9c/pod/cmd/walletmain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 func (wg *WalletGUI) ConnectChainRPC() {
@@ -16,46 +17,30 @@ func (wg *WalletGUI) ConnectChainRPC() {
 			select {
 			case <-ticker:
 				Debug("connectChainRPC ticker")
-				if wg.ChainClient == nil {
-					// update the configuration
-					b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
-					if err == nil {
-						err = json.Unmarshal(b, wg.cx.Config)
-						if err != nil {
-						}
-					} else {
-					}
-					Debug("connecting to", *wg.cx.Config.RPCConnect)
-					if client, err := walletmain.StartChainRPC(wg.cx.Config, wg.cx.ActiveNet,
-						walletmain.ReadCAFile(wg.cx.Config)); !Check(err) {
-						wg.ChainClient = client
-						if err := client.Start(); Check(err) {
-							break
-						}
-						// if err := wg.ChainClient.Start(); Check(err) {
-						// 	break
-						// }
-						// Debug("chain RPC connection succeeded")
-						if h, height, err := wg.ChainClient.GetBestBlock(); !Check(err) {
-							Debug("updating best block hash and height", h, height)
-							wg.State.SetBestBlockHash(h)
-							wg.State.SetBestBlockHeight(int(height))
-						}
-					} else {
-						Debug("chain RPC connection failed")
-						break
-					}
-				} else {
-					Debug("connected, updating data")
-					if h, height, err := wg.ChainClient.GetBestBlock(); !Check(err) {
-						Debug("updating best block hash and height", h, height)
-						wg.State.SetBestBlockHash(h)
-						wg.State.SetBestBlockHeight(int(height))
+				// update the configuration
+				b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
+				if err == nil {
+					err = json.Unmarshal(b, wg.cx.Config)
+					if err != nil {
 					}
 				}
-				if wg.WalletClient == nil {
-
+				var client *rpcclient.Client
+				connConfig := &rpcclient.ConnConfig{
+					Host:                 *wg.cx.Config.RPCConnect,
+					User:                 *wg.cx.Config.Username,
+					Pass:                 *wg.cx.Config.Password,
+					HTTPPostMode:         true,
 				}
+				if client, err = rpcclient.New(connConfig, nil); Check(err) {
+					break
+				}
+				var height int32
+				var h *chainhash.Hash
+				if h, height, err = client.GetBestBlock(); Check(err){
+					break
+				}
+				wg.State.bestBlockHeight = int(height)
+				wg.State.bestBlockHash = h
 			case <-wg.quit:
 				break out
 			}
