@@ -47,7 +47,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 	m.removeClickables = append(m.removeClickables, (*Clickable)(nil))
 	m.removeButtons = append(m.removeButtons, (*IconButton)(nil))
 	for i := range *m.lines {
-		Debug("making clickables")
+		// Debug("making clickables")
 		x := i
 		clickable := m.Theme.Clickable().SetClick(
 			func() {
@@ -59,7 +59,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 		} else {
 			m.clickables[i] = clickable
 		}
-		Debug("making button")
+		// Debug("making button")
 		btn := m.Theme.ButtonLayout(clickable).CornerRadius(0).Background("Transparent").
 			Embed(
 				m.Theme.Flex().
@@ -76,14 +76,14 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 		} else {
 			m.buttons[i] = btn
 		}
-		Debug("making clickables")
+		// Debug("making clickables")
 		removeClickable := m.Theme.Clickable()
 		if len(*m.lines) > len(m.removeClickables) {
 			m.removeClickables = append(m.removeClickables, removeClickable)
 		} else {
 			m.removeClickables[i] = removeClickable
 		}
-		Debug("making remove button")
+		// Debug("making remove button")
 		y := i
 		removeBtn := m.Theme.IconButton(removeClickable).
 			Icon(

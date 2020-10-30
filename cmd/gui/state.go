@@ -11,7 +11,7 @@ type State struct {
 	mutex              sync.Mutex
 	lastUpdated        time.Time
 	bestBlockHeight    int
-	bestBlockHash      chainhash.Hash
+	bestBlockHash      *chainhash.Hash
 	balanceTotal       float64
 	balanceUnconfirmed float64
 	balanceConfirmed   float64
@@ -29,7 +29,7 @@ func (s *State) BestBlockHeight() int {
 	return s.bestBlockHeight
 }
 
-func (s *State) BestBlockHash() chainhash.Hash {
+func (s *State) BestBlockHash() *chainhash.Hash {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	return s.bestBlockHash
@@ -60,7 +60,7 @@ func (s *State) SetBestBlockHeight(height int) {
 	s.bestBlockHeight = height
 }
 
-func (s *State) SetBestBlockHash(h chainhash.Hash) {
+func (s *State) SetBestBlockHash(h *chainhash.Hash) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()

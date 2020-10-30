@@ -2898,7 +2898,6 @@ func SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error
 	for _, addr := range netAddrs {
 		listener, err := listenFunc(addr.Network(), addr.String())
 		if err != nil {
-			Error(err)
 			Errorf("can't listen on %s: %v", addr, err)
 			continue
 		}

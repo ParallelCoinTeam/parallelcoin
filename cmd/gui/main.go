@@ -1,8 +1,6 @@
 package gui
 
 import (
-	"time"
-
 	"gioui.org/app"
 	"github.com/urfave/cli"
 
@@ -12,7 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -53,6 +53,8 @@ type WalletGUI struct {
 	Shell            *worker.Worker
 	RunCommandChan   chan string
 	State            State
+	ChainClient      *chain.RPCClient
+	WalletClient     *rpcclient.Client
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -95,30 +97,25 @@ func (wg *WalletGUI) Run() (err error) {
 		"seed":       wg.th.Bool(false),
 		"testnet":    wg.th.Bool(false),
 	}
-
 	pass := "password"
-
 	wg.inputs = map[string]*p9.Input{
 		"receiveLabel":   wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
 		"receiveAmount":  wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
 		"receiveMessage": wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
 	}
-
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
-
 	wg.RunCommandChan = make(chan string)
 	if err = wg.Runner(); Check(err) {
 	}
 	wg.RunCommandChan <- "run"
+	wg.ConnectChainRPC()
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
-
 	wg.CreateSendAddressItem()
 	wg.App = wg.GetAppWidget()
-
 	go func() {
 		if err := wg.w.
 			Size(640, 480).
@@ -135,12 +132,9 @@ func (wg *WalletGUI) Run() (err error) {
 	}()
 	// tickers and triggers
 	go func() {
-		ticker := time.Tick(time.Second)
 	out:
 		for {
 			select {
-			case <-ticker:
-
 			case <-wg.invalidate:
 				wg.w.Window.Invalidate()
 			case <-wg.quit:

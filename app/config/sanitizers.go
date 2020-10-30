@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -201,7 +202,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 				}
 			}
 		}
-
+		cx.StateCfg.Save = true
 	}
 	if *cfg.RPCConnect == "" {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
@@ -249,6 +250,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		splitted := strings.Split((*cfg.WalletRPCListeners)[0], ":")
 		*cfg.WalletServer = "localhost:" + splitted[1]
 	}
+	save.Pod(cfg)
 }
 
 // GetFreePort asks the kernel for free open ports that are ready to use.

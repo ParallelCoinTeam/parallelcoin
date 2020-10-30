@@ -33,13 +33,14 @@ func (wg *WalletGUI) Runner() (err error) {
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "shell"}
 					args = apputil.PrependForWindows(args)
 					wg.Shell = consume.Log(wg.quit, func(ent *logi.Entry) (err error) {
-						Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 						return
 					}, func(pkg string) (out bool) {
 						return false
 					},args...)
 					consume.Start(wg.Shell)
 					wg.running = true
+
 				case "stop":
 					if !wg.running {
 						break
