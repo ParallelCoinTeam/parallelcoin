@@ -4,11 +4,19 @@ import (
 	"os"
 	"time"
 
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
 )
 
 func (wg *WalletGUI) Runner() (err error) {
+	interrupt.AddHandler(func() {
+		if wg.running {
+			// 		wg.RunCommandChan <- "stop"
+			consume.Kill(wg.Worker)
+		}
+		close(wg.quit)
+	})
 	go func() {
 		Debug("starting node run controller")
 	out:
@@ -59,10 +67,10 @@ func (wg *WalletGUI) Runner() (err error) {
 					// } else {
 					// 	Debug(err)
 					// }
-					go func() {
-						// time.Sleep(time.Second * 4)
-						wg.running = false
-					}()
+					// go func() {
+					// time.Sleep(time.Second * 4)
+					wg.running = false
+					// }()
 				case "restart":
 					Debug("restart called")
 					go func() {
@@ -72,6 +80,8 @@ func (wg *WalletGUI) Runner() (err error) {
 					}()
 				}
 			case <-wg.quit:
+				Debug("runner received quit signal")
+				consume.Kill(wg.Worker)
 				break out
 			}
 		}
