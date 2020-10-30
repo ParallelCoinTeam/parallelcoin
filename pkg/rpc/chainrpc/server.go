@@ -22,7 +22,10 @@ import (
 	uberatomic "go.uber.org/atomic"
 
 	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/util/logi"
 	log "github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
@@ -44,7 +47,6 @@ import (
 	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const DefaultMaxOrphanTxSize = 100000
@@ -427,32 +429,27 @@ func (n *Node) Start() {
 		}
 	}
 	// Start the CPU miner if generation is enabled.
-	if *n.Config.Generate {
-		Debug("starting miner") // cpuminer
-		args := []string{os.Args[0], "-D", *n.Config.DataDir, "kopach"}
-		args = apputil.PrependForWindows(args)
-		n.CPUMiner = exec.Command(args[0], args[1:]...)
-		n.CPUMiner.Stdin = os.Stdin
-		n.CPUMiner.Stdout = os.Stdout
-		n.CPUMiner.Stderr = os.Stderr
-		var err error
-		if err = n.CPUMiner.Start(); Check(err) {
+	if *n.Config.Generate && *n.Config.GenThreads != 0 {
+		Debug("starting miner")
+		args := []string{os.Args[0], "-D", *n.Config.DataDir}
+		if *n.Config.KopachGUI {
+			args = append(args, "--kopachgui")
 		}
-		interrupt.AddHandler(func() {
-			// Stop the CPU miner if needed
-			var err error
-			Debug("stopping the miner")
-			if err = n.CPUMiner.Process.Kill(); Check(err) {
-			}
-			if runtime.GOOS != "windows" {
-				if err = n.CPUMiner.Process.Signal(os.Interrupt); Check(err) {
-				}
-			}
-			if err = n.CPUMiner.Wait(); Check(err) {
-			}
-			Debug("miner has stopped")
-		})
+		args = append(args, "kopach")
+		args = apputil.PrependForWindows(args)
+		n.StateCfg.Miner = consume.Log(n.Quit, func(ent *logi.Entry) (err error) {
+			Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+			return
+		}, func(pkg string) (out bool) {
+			return false
+		}, args...)
+		consume.Start(n.StateCfg.Miner)
 	}
+	interrupt.AddHandler(func() {
+		// Stop the CPU miner if needed
+		consume.Kill(n.StateCfg.Miner)
+		Debug("miner has stopped")
+	})
 }
 
 // Stop gracefully shuts down the server by stopping and disconnecting all peers and the main listener.
@@ -2767,13 +2764,14 @@ func NewNode(listenAddrs []string, db database.DB,
 				DB:          db,
 				TxMemPool:   s.TxMemPool,
 				// Generator:    blockTemplateGenerator,
-				CPUMiner:     s.CPUMiner,
+				// CPUMiner:     s.CPUMiner,
 				TxIndex:      s.TxIndex,
 				AddrIndex:    s.AddrIndex,
 				CfIndex:      s.CFIndex,
 				FeeEstimator: s.FeeEstimator,
 				Algo:         l,
 				Hashrate:     cx.Hashrate,
+				Quit:         s.Quit,
 			}, cx.StateCfg, cx.Config)
 			if err != nil {
 				Error(err)

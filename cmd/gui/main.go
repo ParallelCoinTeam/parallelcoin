@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"time"
+
 	"gioui.org/app"
 	"github.com/urfave/cli"
 
@@ -47,10 +49,10 @@ type WalletGUI struct {
 	running          bool
 	invalidate       chan struct{}
 	quit             chan struct{}
-
-	sendAddresses  []*SendAddress
-	Worker         *worker.Worker
-	RunCommandChan chan string
+	sendAddresses    []*SendAddress
+	Shell            *worker.Worker
+	RunCommandChan   chan string
+	State            State
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -133,9 +135,12 @@ func (wg *WalletGUI) Run() (err error) {
 	}()
 	// tickers and triggers
 	go func() {
+		ticker := time.Tick(time.Second)
 	out:
 		for {
 			select {
+			case <-ticker:
+
 			case <-wg.invalidate:
 				wg.w.Window.Invalidate()
 			case <-wg.quit:

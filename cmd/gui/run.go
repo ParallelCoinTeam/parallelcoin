@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
@@ -13,7 +14,7 @@ func (wg *WalletGUI) Runner() (err error) {
 	interrupt.AddHandler(func() {
 		if wg.running {
 			// 		wg.RunCommandChan <- "stop"
-			consume.Kill(wg.Worker)
+			consume.Kill(wg.Shell)
 		}
 		close(wg.quit)
 	})
@@ -29,48 +30,23 @@ func (wg *WalletGUI) Runner() (err error) {
 						break
 					}
 					Debug("run called")
-					wg.Worker = consume.Log(wg.quit, func(ent *logi.Entry) (err error) {
+					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "shell"}
+					args = apputil.PrependForWindows(args)
+					wg.Shell = consume.Log(wg.quit, func(ent *logi.Entry) (err error) {
 						Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 						return
 					}, func(pkg string) (out bool) {
 						return false
-					}, os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "shell")
-					consume.Start(wg.Worker)
+					},args...)
+					consume.Start(wg.Shell)
 					wg.running = true
-					// go func() {
-					// 	if err = wg.Worker.Wait(); !Check(err) {
-					// 		wg.running = false
-					// 	}
-					// }()
 				case "stop":
 					if !wg.running {
 						break
 					}
 					Debug("stop called")
-					// consume.Stop(wg.Worker)
-					consume.Kill(wg.Worker)
-					// if err = wg.Worker.Stop(); !Check(err) {
-					// 	Debug("stopped worker")
-					// }
-					// if err = wg.Worker.Interrupt(); !Check(err) {
-					// 	Debug("interrupted worker")
-					// } else {
-					// 	Debug(err)
-					// }
-					// if err = wg.Worker.Kill(); !Check(err) {
-					// 	Debug("killed worker")
-					// } else {
-					// 	Debug(err)
-					// }
-					// if err = wg.Worker.StdConn.Close(); !Check(err) {
-					// 	Debug("closed worker connection")
-					// } else {
-					// 	Debug(err)
-					// }
-					// go func() {
-					// time.Sleep(time.Second * 4)
+					consume.Kill(wg.Shell)
 					wg.running = false
-					// }()
 				case "restart":
 					Debug("restart called")
 					go func() {
@@ -81,7 +57,7 @@ func (wg *WalletGUI) Runner() (err error) {
 				}
 			case <-wg.quit:
 				Debug("runner received quit signal")
-				consume.Kill(wg.Worker)
+				consume.Kill(wg.Shell)
 				break out
 			}
 		}

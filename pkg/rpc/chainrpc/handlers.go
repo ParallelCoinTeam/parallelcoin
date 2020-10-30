@@ -9,14 +9,14 @@ import (
 	"math/big"
 	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/p9c/pod/app/apputil"
-	log "github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi"
+
+	"github.com/p9c/pod/pkg/util/logi/consume"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/mempool"
@@ -496,7 +496,7 @@ func HandleGetAddedNodeInfo(
 			addr.Address = ip
 			addr.Connected = "false"
 			if ip == host && peer.Connected() {
-				addr.Connected = log.DirectionString(peer.Inbound())
+				addr.Connected = logi.DirectionString(peer.Inbound())
 			}
 			addrs = append(addrs, addr)
 		}
@@ -1306,7 +1306,7 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 
 // HandleGetGenerate implements the getgenerate command.
 func HandleGetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
-	generating := s.Cfg.CPUMiner != nil
+	generating := s.StateCfg.Miner != nil
 	if generating {
 		Debug("miner is running internally")
 	} else {
@@ -1317,7 +1317,7 @@ func HandleGetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	return generating, nil
 }
 
-var startTime = time.Now()
+// var startTime = time.Now()
 
 // HandleGetHashesPerSec implements the gethashespersec command.
 func HandleGetHashesPerSec(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
@@ -1527,9 +1527,7 @@ func HandleGetMempoolInfo(s *Server, cmd interface{}, closeChan <-chan struct{})
 func HandleGetMiningInfo(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (ret interface{}, err error) {
 	// cpuminer
-	// Create a default g,
-
-	// etnetworkhashps command to use defaults and make use of the existing getnetworkhashps handler.
+	// Create a default getnetworkhashps command to use defaults and make use of the existing getnetworkhashps handler.
 	gnhpsCmd := btcjson.NewGetNetworkHashPSCmd(nil, nil)
 	networkHashesPerSecIface, err := HandleGetNetworkHashPS(s, gnhpsCmd, closeChan)
 	if err != nil {
@@ -1597,19 +1595,19 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 			TestNet:       (*s.Config.Network)[0] == 't',
 		}
 	case 1:
-		foundcount, height := 0, best.Height
-		for foundcount < 9 && height > fork.List[fork.GetCurrent(height)].ActivationHeight-512 {
+		fc, height := 0, best.Height
+		for fc < 9 && height > fork.List[fork.GetCurrent(height)].ActivationHeight-512 {
 			switch fork.GetAlgoName(v.Header().Version, height) {
 			case fork.Scrypt:
 				if lastbitsScrypt == 0 {
-					foundcount++
+					fc++
 					lastbitsScrypt = v.Header().Bits
 					dScrypt = GetDifficultyRatio(lastbitsScrypt,
 						s.Cfg.ChainParams, v.Header().Version)
 				}
 			case fork.SHA256d:
 				if lastbitsSHA256D == 0 {
-					foundcount++
+					fc++
 					lastbitsSHA256D = v.Header().Bits
 					dSHA256D = GetDifficultyRatio(lastbitsSHA256D,
 						s.Cfg.ChainParams, v.Header().Version)
@@ -2591,27 +2589,30 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	// }
 	*s.Config.Generate = generate
 	*s.Config.GenThreads = genProcLimit
-	if s.Cfg.CPUMiner != nil {
-		Debug("stopping existing process")
-		err := s.Cfg.CPUMiner.Process.Kill()
-		if err != nil {
-			Error(err)
-		}
+	if s.StateCfg.Miner != nil {
+		Debug("stopping existing miner")
+		consume.Kill(s.StateCfg.Miner)
+		s.StateCfg.Miner = nil
 	}
 	Debug("saving configuration")
 	save.Pod(s.Config)
 	if *s.Config.Generate && *s.Config.GenThreads != 0 {
 		Debug("starting miner")
-		args := []string{os.Args[0], "-D", *s.Config.DataDir, "kopach"}
-		args = apputil.PrependForWindows(args)
-		s.Cfg.CPUMiner = exec.Command(args[0], args[1:]...)
-		s.Cfg.CPUMiner.Stdin = os.Stdin
-		s.Cfg.CPUMiner.Stdout = os.Stdout
-		s.Cfg.CPUMiner.Stderr = os.Stderr
-		if err = s.Cfg.CPUMiner.Start(); Check(err) {
+		args := []string{os.Args[0], "-D", *s.Config.DataDir}
+		if *s.Config.KopachGUI {
+			args = append(args, "--kopachgui")
 		}
+		args = append(args, "kopach")
+		// args = apputil.PrependForWindows(args)
+		s.StateCfg.Miner = consume.Log(s.Quit, func(ent *logi.Entry) (err error) {
+			Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+			return
+		}, func(pkg string) (out bool) {
+			return false
+		}, args...)
+		consume.Start(s.StateCfg.Miner)
 	} else {
-		s.Cfg.CPUMiner = nil
+		consume.Kill(s.StateCfg.Miner)
 	}
 	return nil, nil
 }
