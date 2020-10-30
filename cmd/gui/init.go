@@ -65,7 +65,7 @@ func (wg *WalletGUI) loaderCreateWallet() l.Widget {
 			Text("Use testnet?").
 			Fn,
 		wg.Button(
-			wg.clickables["createwallet"].SetClick(func() {
+			wg.clickables["createWallet"].SetClick(func() {
 				Info("clicked customised button")
 			})).
 			CornerRadius(0).
@@ -81,6 +81,6 @@ func (wg *WalletGUI) loaderCreateWallet() l.Widget {
 		return createWalletLayoutList[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return wg.lists["createwallet"].Vertical().Length(len(createWalletLayoutList)).ListElement(le).Fn(gtx)
+		return wg.lists["createWallet"].Vertical().Length(len(createWalletLayoutList)).ListElement(le).Fn(gtx)
 	}
 }

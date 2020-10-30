@@ -40,6 +40,7 @@ type WalletGUI struct {
 	lists            map[string]*p9.List
 	checkables       map[string]*p9.Checkable
 	clickables       map[string]*p9.Clickable
+	inputs           map[string]*p9.Input
 	passwords        map[string]*p9.Password
 	configs          cfg.GroupsMap
 	config           *cfg.Config
@@ -68,17 +69,22 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
 	wg.lists = map[string]*p9.List{
-		"createwallet": wg.th.List(),
-		"overview":     wg.th.List(),
-		"send":         wg.th.List(),
-		"settings":     wg.th.List(),
+		"createWallet":                   wg.th.List(),
+		"overview":                       wg.th.List(),
+		"send":                           wg.th.List(),
+		"settings":                       wg.th.List(),
+		"receiveRequestedPaymentHistory": wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
-		"createwallet": wg.th.Clickable(),
-		"quit":         wg.th.Clickable(),
-		"send":         wg.th.Clickable(),
-		"clearall":     wg.th.Clickable(),
-		"addrecipient": wg.th.Clickable(),
+		"createWallet":            wg.th.Clickable(),
+		"quit":                    wg.th.Clickable(),
+		"sendSend":                wg.th.Clickable(),
+		"sendClearAll":            wg.th.Clickable(),
+		"sendAddRecipient":        wg.th.Clickable(),
+		"receiveCreateNewAddress": wg.th.Clickable(),
+		"receiveClear":            wg.th.Clickable(),
+		"receiveShow":             wg.th.Clickable(),
+		"receiveRemove":           wg.th.Clickable(),
 	}
 	wg.bools = map[string]*p9.Bool{
 		"runstate":   wg.th.Bool(wg.running),
@@ -88,6 +94,12 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 
 	pass := "password"
+
+	wg.inputs = map[string]*p9.Input{
+		"receiveLabel":   wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveAmount":  wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveMessage": wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
+	}
 
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
@@ -99,9 +111,10 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
-	wg.App = wg.GetAppWidget()
 
 	wg.CreateSendAddressItem()
+	wg.App = wg.GetAppWidget()
+
 	go func() {
 		if err := wg.w.
 			Size(640, 480).

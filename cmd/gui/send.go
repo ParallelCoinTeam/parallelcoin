@@ -7,32 +7,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
-var (
-	//sendAddresses     []*SendAddress
-	sendAddressesList = &l.List{
-		Axis: l.Vertical,
-	}
-	sendChooseFeeBtn = new(p9.Clickable)
-	sendClearAllBtn  = new(p9.Clickable)
-	sendBtn          = new(p9.Clickable)
-	addRecipientBtn  = new(p9.Clickable)
-	//amountCnt        = &counter.Counter{
-	//	Value:        1,
-	//	OperateValue: 1,
-	//	From:         1,
-	//	To:           999,
-	//	CounterInput: &p9.Editor{
-	//		//Alignment:  text.Middle,
-	//		//SingleLine: true,
-	//		//Submit:     true,
-	//	},
-	//	PageFunction:    func() {},
-	//	CounterIncrease: new(p9.Clickable),
-	//	CounterDecrease: new(p9.Clickable),
-	//	CounterReset:    new(p9.Clickable),
-	//}
-)
-
 type SendAddress struct {
 	AddressInput      *p9.Editor
 	AddressBookBtn    *p9.Clickable
@@ -45,17 +19,16 @@ type SendAddress struct {
 }
 
 func (wg *WalletGUI) SendPage() l.Widget {
-	//var out []l.Widget
 	fmt.Print("sss", wg.sendAddresses)
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return wg.Caption("BalaaaaaaaaaaaaaaaO").Color("DocText").Fn(gtx)
+		return wg.Caption("BalaaaaaaaaaaaaaaaO_" + fmt.Sprint(index)).Color("DocBg").Fn(gtx)
 	}
 	return wg.th.VFlex().
 		Flexed(1,
 
-			//wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5, wg.H6("title").Color("DocBg").Fn).Fn).Fn).Fn,
-			wg.lists["send"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
-
+			wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5,
+				wg.lists["send"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
+			).Fn).Fn).Fn,
 		//func(gtx l.Context) l.Dimensions {
 		//return sendAddressesList.Layout(gtx, len(sendAddresses), wg.singleSendAddress())
 		//return l.Dimensions{}
@@ -64,10 +37,6 @@ func (wg *WalletGUI) SendPage() l.Widget {
 		Rigid(
 			wg.sendFooter(),
 		).Fn
-}
-
-func (wg *WalletGUI) GetSend() {
-
 }
 
 func (wg *WalletGUI) CreateSendAddressItem() {
@@ -105,19 +74,19 @@ func (wg *WalletGUI) CreateSendAddressItem() {
 		})
 }
 
-//func ClearAddress(i int) func() {
-//	return func() {
-//		sendAddresses = remove(sendAddresses, i)
-//	}
-//}
-//
-//func ClearAllAddresses() func() {
-//	return func() {
-//		sendAddresses = []*SendAddress{}
-//		CreateSendAddressItem()()
-//	}
-//}
-//
+func (wg *WalletGUI) Send() {
+	// ToDo Send RPC command
+
+}
+
+func (wg *WalletGUI) ClearAddress(i int) {
+	wg.sendAddresses = remove(wg.sendAddresses, i)
+}
+
+func (wg *WalletGUI) ClearAllAddresses() {
+	wg.sendAddresses = []*SendAddress{}
+	wg.CreateSendAddressItem()
+}
 
 func (wg *WalletGUI) sendFooter() l.Widget {
 	return wg.Inset(0.25,
@@ -144,13 +113,13 @@ func (wg *WalletGUI) sendFooter() l.Widget {
 				wg.th.Flex().
 					SpaceBetween().
 					Rigid(
-						wg.sendButton(wg.clickables["send"], "Send", func() {}),
+						wg.sendButton(wg.clickables["sendSend"], "Send", wg.Send),
 					).
 					Rigid(
-						wg.sendButton(wg.clickables["clearall"], "Clear All", func() {}),
+						wg.sendButton(wg.clickables["sendClearAll"], "Clear All", wg.ClearAllAddresses),
 					).
 					Rigid(
-						wg.sendButton(wg.clickables["addrecipient"], "Add Recipient", wg.CreateSendAddressItem),
+						wg.sendButton(wg.clickables["sendAddRecipient"], "Add Recipient", wg.CreateSendAddressItem),
 					).
 					Flexed(1,
 						wg.Inset(0.0, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
@@ -188,13 +157,13 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Widget {
 		wg.th.Flex().
 			SpaceBetween().
 			Rigid(
-				wg.sendButton(wg.clickables["send"], "Send", func() {}),
+				wg.sendButton(wg.clickables["sendSend"], "Send", func() {}),
 			).
 			Rigid(
-				wg.sendButton(wg.clickables["send"], "Clear All", func() {}),
+				wg.sendButton(wg.clickables["sendSend"], "Clear All", func() {}),
 			).
 			Rigid(
-				wg.sendButton(wg.clickables["send"], "Add Recipient", func() {}),
+				wg.sendButton(wg.clickables["sendSend"], "Add Recipient", func() {}),
 			).
 			Rigid(
 				wg.Inset(0.5, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
@@ -282,9 +251,11 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Widget {
 //	})
 //}
 //
-//func remove(slice []*SendAddress, s int) []*SendAddress {
-//	return append(slice[:s], slice[s+1:]...)
-//}
+
+func remove(slice []*SendAddress, s int) []*SendAddress {
+	return append(slice[:s], slice[s+1:]...)
+}
+
 func (wg *WalletGUI) sendButton(b *p9.Clickable, title string, click func()) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		gtx.Constraints.Max.X = int(wg.TextSize.Scale(8).V)

@@ -23,6 +23,9 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		"send": wg.Page("send", p9.Widgets{
 			p9.WidgetSize{Widget: wg.SendPage()},
 		}),
+		"receive": wg.Page("receive", p9.Widgets{
+			p9.WidgetSize{Widget: wg.ReceivePage()},
+		}),
 		"settings": wg.Page("settings", p9.Widgets{
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return wg.configs.Widget(wg.config)(gtx)
