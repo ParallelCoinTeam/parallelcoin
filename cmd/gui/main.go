@@ -47,10 +47,11 @@ type WalletGUI struct {
 	running          bool
 	invalidate       chan struct{}
 	quit             chan struct{}
-	sendAddresses  []SendAddress
-	Worker         *worker.Worker
-	RunCommandChan chan string
+	sendAddresses    []SendAddress
+	Worker           *worker.Worker
+	RunCommandChan   chan string
 	State            State
+	Shell            *worker.Worker
 }
 
 func (wg *WalletGUI) Run() (err error) {
