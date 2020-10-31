@@ -1,9 +1,11 @@
 package gui
 
 import (
+	"fmt"
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/util"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
@@ -67,7 +69,17 @@ func (wg *WalletGUI) CreateSendAddressItem() {
 
 func (wg *WalletGUI) Send() {
 	// ToDo Send RPC command
-
+	fmt.Println("dddddddddd")
+	chainClient, err := wg.chainClient()
+	if err != nil {
+	}
+	for _, sendAddress := range wg.sendAddresses {
+		fmt.Println(sendAddress)
+		address, err := util.DecodeAddress(sendAddress.AmountInput.GetText(), nil)
+		if err != nil {
+		}
+		chainClient.SendToAddress(address, 0)
+	}
 }
 
 func (wg *WalletGUI) ClearAddress(i int) {
@@ -138,15 +150,15 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
 										).
 										Rigid(
 											//wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
-											wg.sendIconButton("settings", 2, icons.ActionBook),
+											wg.Inset(0.1, wg.sendIconButton("settings", 2, icons.ActionBook)).Fn,
 										).
 										Rigid(
 											//wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
-											wg.sendIconButton("settings", 2, icons.ActionSettings),
+											wg.Inset(0.1, wg.sendIconButton("settings", 2, icons.ActionSettings)).Fn,
 										).
 										Rigid(
 											//wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
-											wg.sendIconButton("settings", 2, icons.ActionSettings),
+											wg.Inset(0.1, wg.sendIconButton("settings", 2, icons.ActionSettings)).Fn,
 										).Fn,
 								).Fn,
 						).Fn,
@@ -177,10 +189,10 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
 											wg.sendAddresses[index].AmountInput.Fn,
 										).
 										Rigid(
-											wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Subtract fee from amount", func() {}),
+											wg.Inset(0.1, wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Subtract fee from amount", func() {})).Fn,
 										).
 										Rigid(
-											wg.sendButton(wg.sendAddresses[index].ClearBtn, "Use available balance", func() {}),
+											wg.Inset(0.1, wg.sendButton(wg.sendAddresses[index].ClearBtn, "Use available balance", func() {})).Fn,
 										).Fn,
 								).Fn,
 						).Fn,
