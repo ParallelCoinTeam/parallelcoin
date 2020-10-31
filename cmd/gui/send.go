@@ -3,8 +3,9 @@ package gui
 import (
 	l "gioui.org/layout"
 	"gioui.org/text"
-	"github.com/p9c/pod/pkg/gui/p9"
 	"golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 type SendAddress struct {
@@ -14,22 +15,22 @@ type SendAddress struct {
 	PasteClipboardBtn *p9.Clickable
 	ClearBtn          *p9.Clickable
 	AmountInput       *p9.Input
-	//AmountInput       *counter.Counter
+	// AmountInput       *counter.Counter
 	SubtractFee     *p9.Bool
 	AllAvailableBtn *p9.Clickable
 }
 
 func (wg *WalletGUI) SendPage() l.Widget {
-	le := func(gtx l.Context, index int) l.Dimensions {
-		return wg.singleSendAddress(gtx, index)
-	}
+	// le := func(gtx l.Context, index int) l.Dimensions {
+	// 	return wg.singleSendAddress(gtx, index)
+	// }
 	return wg.th.VFlex().
 		Flexed(1,
-			wg.Inset(0.0, wg.Inset(0.5,
+			// wg.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
-					return wg.lists["send"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn(gtx)
+					return wg.lists["send"].Vertical().Length(len(wg.sendAddresses)).ListElement(wg.singleSendAddress).Fn(gtx)
 				},
-			).Fn).Fn,
+			// ).Fn,
 		).
 		Rigid(
 			wg.sendFooter(),
@@ -42,7 +43,7 @@ func (wg *WalletGUI) CreateSendAddressItem() {
 			AddressInput: wg.th.Input("Enter a ParallelCoin address (e.g. 9ef0sdjifvmlkdsfnsdlkg)", "Primary", "DocText", 26, func(pass string) {}),
 			LabelInput:   wg.th.Input("Enter a label for this address to add it to the list of used addresses", "Primary", "DocText", 26, func(pass string) {}),
 			AmountInput:  wg.th.Input("Enter amount", "Primary", "DocText", 10, func(pass string) {}),
-			//AmountInput: &counter.Counter{
+			// AmountInput: &counter.Counter{
 			//	Value:        1,
 			//	OperateValue: 1,
 			//	From:         1,
@@ -56,7 +57,7 @@ func (wg *WalletGUI) CreateSendAddressItem() {
 			//	CounterIncrease: new(p9.Clickable),
 			//	CounterDecrease: new(p9.Clickable),
 			//	CounterReset:    new(p9.Clickable),
-			//},
+			// },
 			AddressBookBtn:    new(p9.Clickable),
 			PasteClipboardBtn: new(p9.Clickable),
 			ClearBtn:          new(p9.Clickable),
@@ -137,15 +138,15 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
 											wg.sendAddresses[index].AddressInput.Fn,
 										).
 										Rigid(
-											//wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
+											// wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
 											wg.sendIconButton("settings", 2, icons.ActionBook),
 										).
 										Rigid(
-											//wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
+											// wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
 											wg.sendIconButton("settings", 2, icons.ActionSettings),
 										).
 										Rigid(
-											//wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
+											// wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
 											wg.sendIconButton("settings", 2, icons.ActionSettings),
 										).Fn,
 								).Fn,

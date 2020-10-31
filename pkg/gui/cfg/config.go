@@ -252,7 +252,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		return out[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return ng.lists["settings"].Vertical().Length(len(out)).ListElement(le).Fn(gtx)
+		return ng.th.Inset(0.25, ng.lists["settings"].Vertical().Length(len(out)).ListElement(le).Fn).Fn(gtx)
 	}
 }
 

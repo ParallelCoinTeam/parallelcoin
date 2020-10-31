@@ -11,7 +11,7 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 	}
 	return wg.th.VFlex().
 		Flexed(1,
-			wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5,
+			wg.Inset(0.25, wg.Fill("DocText", wg.Inset(0.5,
 				wg.lists["transactions"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
 			).Fn).Fn).Fn,
 		).Fn
