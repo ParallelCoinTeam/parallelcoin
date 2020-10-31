@@ -47,15 +47,16 @@ type WalletGUI struct {
 	running          bool
 	invalidate       chan struct{}
 	quit             chan struct{}
-
 	sendAddresses  []SendAddress
 	Worker         *worker.Worker
 	RunCommandChan chan string
+	State            State
 }
 
 func (wg *WalletGUI) Run() (err error) {
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
-	wg.th.Colors.SetTheme(wg.th.Dark)
+	wg.th.Dark = wg.cx.Config.DarkTheme
+	wg.th.Colors.SetTheme(*wg.th.Dark)
 	wg.sidebarButtons = make([]*p9.Clickable, 9)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
@@ -93,29 +94,25 @@ func (wg *WalletGUI) Run() (err error) {
 		"seed":       wg.th.Bool(false),
 		"testnet":    wg.th.Bool(false),
 	}
-
 	pass := "password"
-
 	wg.inputs = map[string]*p9.Input{
 		"receiveLabel":   wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
 		"receiveAmount":  wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
 		"receiveMessage": wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
 	}
-
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
-
 	wg.RunCommandChan = make(chan string)
 	if err = wg.Runner(); Check(err) {
 	}
+	wg.RunCommandChan <- "run"
+	wg.ConnectChainRPC()
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
-
 	wg.CreateSendAddressItem()
 	wg.App = wg.GetAppWidget()
-
 	go func() {
 		if err := wg.w.
 			Size(800, 600).
@@ -123,7 +120,7 @@ func (wg *WalletGUI) Run() (err error) {
 			Open().
 			Run(
 				wg.Fn(),
-				//wg.InitWallet(),
+				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
 					interrupt.Request()

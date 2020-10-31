@@ -1,10 +1,13 @@
 package gui
 
 import (
+	"strconv"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -13,6 +16,18 @@ import (
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a = wg.th.App(*wg.size)
 	wg.App = a
+	wg.App.ThemeHook(func(){
+		Debug("theme hook")
+		Debug(wg.bools)
+		*wg.cx.Config.DarkTheme = *wg.Dark
+		a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
+		*a = *wg.Dark
+		if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
+			wgb.Value(*wg.Dark)
+		}
+		save.Pod(wg.cx.Config)
+
+	})
 	wg.size = a.Size
 	wg.config = cfg.New(wg.cx, wg.th)
 	wg.configs = wg.config.Config()
@@ -66,7 +81,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("overview", "main", 0),
 		wg.SideBarButton("send", "send", 1),
 		wg.SideBarButton("receive", "receive", 2),
-		wg.SideBarButton("transactions", "transactions", 3),
+		wg.SideBarButton("history", "transactions", 3),
 		wg.SideBarButton("settings", "settings", 5),
 		wg.SideBarButton("help", "help", 6),
 		wg.SideBarButton("log", "log", 7),
@@ -280,7 +295,7 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				wg.th.Inset(0.33,
-					wg.th.H5("256789").Color(color).Fn,
+					wg.th.H5(strconv.FormatInt(int64(wg.State.bestBlockHeight), 10)).Color(color).Fn,
 				).Fn,
 			).
 			Fn(gtx)

@@ -13,7 +13,7 @@ type Theme struct {
 	Colors        Colors
 	icons         map[string]*Icon
 	scrollBarSize int
-	Dark          bool
+	Dark          *bool
 }
 
 // NewTheme creates a new theme to use for rendering a user interface

@@ -23,4 +23,5 @@ nodegui:
 
 gui:
 	go install -v
+	pod -D test0 wallet drophistory
 	pod -D test0 -n testnet

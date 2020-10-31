@@ -175,7 +175,7 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 		// 	}
 		// } else {
 		var cc *chain.RPCClient
-		cc, err = startChainRPC(cx.Config, cx.ActiveNet, certs)
+		cc, err = StartChainRPC(cx.Config, cx.ActiveNet, certs)
 		if err != nil {
 			Error(
 				"unable to open connection to consensus RPC server:", err)
@@ -225,10 +225,10 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 	}
 }
 
-// startChainRPC opens a RPC client connection to a pod server for blockchain services. This function uses the RPC
+// StartChainRPC opens a RPC client connection to a pod server for blockchain services. This function uses the RPC
 // options from the global config and there is no recovery in case the server is not available or if there is an
 // authentication error. Instead, all requests to the client will simply error.
-func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, error) {
+func StartChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, error) {
 	Tracef(
 		"attempting RPC client connection to %v, TLS: %s",
 		*config.RPCConnect, fmt.Sprint(*config.TLS),

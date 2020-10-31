@@ -23,7 +23,7 @@ type Item struct {
 	widget      string
 	dataType    string
 	options     []string
-	slot        interface{}
+	Slot        interface{}
 }
 
 func (it *Item) Item(ng *Config) l.Widget {
@@ -94,21 +94,24 @@ func (c *Config) Config() GroupsMap {
 				widget:      sgf.Widget,
 				dataType:    sgf.Datatype,
 				options:     sgf.Options,
-				slot:        c.cx.ConfigMap[sgf.Slug],
+				Slot:        c.cx.ConfigMap[sgf.Slug],
 			}
 			// Debugs(sgf)
 			// create all the necessary widgets required before display
 			tgs := tabNames[sgf.Group][sgf.Slug]
 			switch sgf.Widget {
 			case "toggle":
-				c.bools[sgf.Slug] = c.th.Bool(*tgs.slot.(*bool)).SetOnChange(func(b bool) {
+				c.Bools[sgf.Slug] = c.th.Bool(*tgs.Slot.(*bool)).SetOnChange(func(b bool) {
 					Debug(sgf.Slug, "submitted", b)
 					bb := c.cx.ConfigMap[sgf.Slug].(*bool)
 					*bb = b
 					save.Pod(c.cx.Config)
+					if sgf.Slug == "DarkTheme" {
+						c.th.Colors.SetTheme(b)
+					}
 				})
 			case "integer":
-				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.slot.(*int)),
+				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*int)),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						i := c.cx.ConfigMap[sgf.Slug].(*int)
@@ -118,7 +121,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "time":
-				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.slot.(*time.Duration)),
+				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*time.Duration)),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
@@ -128,7 +131,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "float":
-				c.inputs[sgf.Slug] = c.th.Input(strconv.FormatFloat(*tgs.slot.(*float64), 'f', -1, 64),
+				c.inputs[sgf.Slug] = c.th.Input(strconv.FormatFloat(*tgs.Slot.(*float64), 'f', -1, 64),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
@@ -138,7 +141,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "string":
-				c.inputs[sgf.Slug] = c.th.Input(*tgs.slot.(*string),
+				c.inputs[sgf.Slug] = c.th.Input(*tgs.Slot.(*string),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						ss := c.cx.ConfigMap[sgf.Slug].(*string)
@@ -146,7 +149,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "password":
-				c.passwords[sgf.Slug] = c.th.Password(tgs.slot.(*string),
+				c.passwords[sgf.Slug] = c.th.Password(tgs.Slot.(*string),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						pp := c.cx.ConfigMap[sgf.Slug].(*string)
@@ -154,7 +157,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "multi":
-				c.multis[sgf.Slug] = c.th.Multiline(tgs.slot.(*cli.StringSlice),
+				c.multis[sgf.Slug] = c.th.Multiline(tgs.Slot.(*cli.StringSlice),
 					"Primary", "PanelBg", 30, func(txt []string) {
 						Debug(sgf.Slug, "submitted", txt)
 						sss := c.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
@@ -167,7 +170,7 @@ func (c *Config) Config() GroupsMap {
 				for i := range sgf.Options {
 					c.checkables[sgf.Slug+sgf.Options[i]] = c.th.Checkable()
 				}
-				txt := *tabNames[sgf.Group][sgf.Slug].slot.(*string)
+				txt := *tabNames[sgf.Group][sgf.Slug].Slot.(*string)
 				c.enums[sgf.Slug] = c.th.Enum().SetValue(txt).SetOnChange(func(value string) {
 					rr := c.cx.ConfigMap[sgf.Slug].(*string)
 					*rr = value
@@ -284,7 +287,7 @@ func (c *Config) RenderToggle(item *Item) []l.Widget {
 		func(gtx l.Context) l.Dimensions {
 			return c.th.Inset(0.5, c.th.Flex().
 				Rigid(
-					c.th.Switch(c.bools[item.slug]).Fn,
+					c.th.Switch(c.Bools[item.slug]).Fn,
 				).
 				Rigid(
 					c.th.VFlex().

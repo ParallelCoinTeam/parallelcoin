@@ -3,6 +3,7 @@ package kopach
 import (
 	"fmt"
 	"image"
+	"os"
 	"runtime"
 	"time"
 
@@ -80,6 +81,10 @@ func (w *Worker) Run() {
 			Info("clicked logo button")
 		})
 	win := f.NewWindow()
+	interrupt.AddHandler(func(){
+		close(w.quit)
+		os.Exit(0)
+	})
 	go func() {
 		if err := win.
 			Size(640, 480).
@@ -89,7 +94,6 @@ func (w *Worker) Run() {
 				minerModel.Widget,
 				func() {
 					Debug("quitting miner")
-					close(w.quit)
 					interrupt.Request()
 				}); Check(err) {
 		}

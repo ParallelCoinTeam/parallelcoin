@@ -16,7 +16,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
@@ -104,7 +103,7 @@ type Server struct {
 	GBTWorkState           *GBTWorkState
 	HelpCacher             *HelpCacher
 	RequestProcessShutdown chan struct{}
-	Quit                   chan int
+	Quit                   chan struct{}
 	Started                int32
 	Shutdown               int32
 	NumClients             int32
@@ -153,9 +152,10 @@ type ServerConfig struct {
 	FeeEstimator *mempool.FeeEstimator
 	// Algo sets the algorithm expected from the RPC endpoint. This allows multiple ports to serve multiple types of
 	// miners with one main node per algorithm. Currently 514 for Scrypt and anything else passes for SHA256d.
-	Algo     string
-	CPUMiner *exec.Cmd
+	Algo string
+	// CPUMiner *exec.Cmd
 	Hashrate uberatomic.Uint64
+	Quit     chan struct{}
 }
 
 // ServerConnManager represents a connection manager for use with the RPC server. The interface contract requires that
@@ -2003,7 +2003,7 @@ func NewRPCServer(config *ServerConfig, statecfg *state.Config,
 		GBTWorkState:           NewGbtWorkState(config.TimeSource, config.Algo),
 		HelpCacher:             NewHelpCacher(),
 		RequestProcessShutdown: make(chan struct{}),
-		Quit:                   make(chan int),
+		Quit:                   config.Quit,
 	}
 	if *podcfg.Username != "" && *podcfg.Password != "" {
 		login := *podcfg.Username + ":" + *podcfg.Password

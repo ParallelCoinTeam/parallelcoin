@@ -17,7 +17,7 @@ func New(cx *conte.Xt, th *p9.Theme) *Config {
 type Config struct {
 	cx         *conte.Xt
 	th         *p9.Theme
-	bools      map[string]*p9.Bool
+	Bools      map[string]*p9.Bool
 	lists      map[string]*p9.List
 	enums      map[string]*p9.Enum
 	checkables map[string]*p9.Checkable
@@ -32,11 +32,11 @@ type Config struct {
 
 func (c *Config) Init() *Config {
 	// c.th = p9.NewTheme(p9fonts.Collection(), c.cx.KillAll)
-	c.th.Colors.SetTheme(c.th.Dark)
+	c.th.Colors.SetTheme(*c.th.Dark)
 	c.enums = map[string]*p9.Enum{
 		// "runmode": ng.th.Enum().SetValue(ng.runMode),
 	}
-	c.bools = map[string]*p9.Bool{
+	c.Bools = map[string]*p9.Bool{
 		// "runstate": ng.th.Bool(false).SetOnChange(func(b bool) {
 		// 	Debug("run state is now", b)
 		// }),
