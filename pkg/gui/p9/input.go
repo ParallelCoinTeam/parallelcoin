@@ -25,10 +25,10 @@ type Input struct {
 	focused              bool
 }
 
-func (th *Theme) Input(txt, borderColorFocused, borderColorUnfocused string,
+func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused string,
 	size int, handle func(txt string)) *Input {
 	editor := th.Editor().SingleLine().Submit(true)
-	input := th.SimpleInput(editor)
+	input := th.SimpleInput(editor, hint)
 	p := &Input{
 		Theme:                th,
 		clearClickable:       th.Clickable(),

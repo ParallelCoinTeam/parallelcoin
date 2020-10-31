@@ -38,7 +38,6 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 }
 
 func (wg *WalletGUI) Transactions() {
-	// ToDo Send RPC command
 	chainClient, err := wg.chainClient()
 	if err != nil {
 	}
@@ -74,3 +73,7 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 		).Fn,
 	).Fn(gtx)
 }
+
+//func (wg *WalletGUI) ClearAddress(i int) {
+//	wg.sendAddresses = remove(wg.sendAddresses, i)
+//}

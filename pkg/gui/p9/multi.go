@@ -41,7 +41,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 		m.inputLocation = -1
 		m.handle(*m.lines)
 	}
-	m.input = th.Input("", borderColorFocused, borderColorUnfocused, size, handleChange)
+	m.input = th.Input("", "", borderColorFocused, borderColorUnfocused, size, handleChange)
 	m.clickables = append(m.clickables, (*Clickable)(nil))
 	m.buttons = append(m.buttons, (*ButtonLayout)(nil))
 	m.removeClickables = append(m.removeClickables, (*Clickable)(nil))

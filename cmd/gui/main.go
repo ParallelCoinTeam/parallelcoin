@@ -99,9 +99,9 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	pass := "password"
 	wg.inputs = map[string]*p9.Input{
-		"receiveLabel":   wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
-		"receiveAmount":  wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
-		"receiveMessage": wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 25, func(pass string) {}),
 	}
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),

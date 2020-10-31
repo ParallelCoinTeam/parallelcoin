@@ -111,7 +111,7 @@ func (c *Config) Config() GroupsMap {
 					}
 				})
 			case "integer":
-				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*int)),
+				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug,
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						i := c.cx.ConfigMap[sgf.Slug].(*int)
@@ -121,7 +121,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "time":
-				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*time.Duration)),
+				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*time.Duration)), sgf.Slug,
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
@@ -131,7 +131,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "float":
-				c.inputs[sgf.Slug] = c.th.Input(strconv.FormatFloat(*tgs.Slot.(*float64), 'f', -1, 64),
+				c.inputs[sgf.Slug] = c.th.Input(strconv.FormatFloat(*tgs.Slot.(*float64), 'f', -1, 64), sgf.Slug,
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
@@ -141,7 +141,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "string":
-				c.inputs[sgf.Slug] = c.th.Input(*tgs.Slot.(*string),
+				c.inputs[sgf.Slug] = c.th.Input(*tgs.Slot.(*string), sgf.Slug,
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						ss := c.cx.ConfigMap[sgf.Slug].(*string)
