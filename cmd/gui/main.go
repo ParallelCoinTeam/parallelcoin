@@ -10,9 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -53,8 +51,6 @@ type WalletGUI struct {
 	Shell            *worker.Worker
 	RunCommandChan   chan string
 	State            State
-	ChainClient      *chain.RPCClient
-	WalletClient     *rpcclient.Client
 }
 
 func (wg *WalletGUI) Run() (err error) {
