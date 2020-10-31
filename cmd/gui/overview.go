@@ -34,9 +34,9 @@ func (wg *WalletGUI) row(title, value string) l.Widget {
 		wg.th.Flex().
 			SpaceBetween().
 			Rigid(
-				wg.Inset(0.0, wg.Inset(0.5, wg.Body1(title).Color("DocText").Fn).Fn).Fn,
+				wg.Inset(0.5, wg.Body1(title).Color("DocText").Fn).Fn,
 			).Flexed(1,
-			wg.Inset(0.0, wg.Inset(0.5, wg.Caption(value).Color("DocText").Fn).Fn).Fn,
+			wg.Inset(0.5, wg.Caption(value).Color("DocText").Fn).Fn,
 		).Fn,
 	).Fn
 }

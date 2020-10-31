@@ -1,41 +1,35 @@
 package gui
 
 import (
-	"fmt"
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
 type SendAddress struct {
-	AddressInput      *p9.Editor
+	AddressInput      *p9.Input
+	LabelInput        *p9.Input
 	AddressBookBtn    *p9.Clickable
 	PasteClipboardBtn *p9.Clickable
 	ClearBtn          *p9.Clickable
-	LabelInput        *p9.Editor
+	AmountInput       *p9.Input
 	//AmountInput       *counter.Counter
 	SubtractFee     *p9.Bool
 	AllAvailableBtn *p9.Clickable
 }
 
 func (wg *WalletGUI) SendPage() l.Widget {
-	createWalletLayoutList := []l.Widget{
-		wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.H6("Enter the private passphrase for your new wallet:").Color("DocText").Fn).Fn).Fn).Fn,
-	}
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return createWalletLayoutList[index](gtx)
+		return wg.singleSendAddress(gtx, index)
 	}
 	return wg.th.VFlex().
 		Flexed(1,
-			wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5,
+			wg.Inset(0.0, wg.Inset(0.5,
 				func(gtx l.Context) l.Dimensions {
-					return wg.lists["createWallet"].Vertical().Length(len(createWalletLayoutList)).ListElement(le).Fn(gtx)
+					return wg.lists["send"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn(gtx)
 				},
-			).Fn).Fn).Fn,
-		//func(gtx l.Context) l.Dimensions {
-		//return sendAddressesList.Layout(gtx, len(sendAddresses), wg.singleSendAddress())
-		//return l.Dimensions{}
-		//}
+			).Fn).Fn,
 		).
 		Rigid(
 			wg.sendFooter(),
@@ -43,17 +37,11 @@ func (wg *WalletGUI) SendPage() l.Widget {
 }
 
 func (wg *WalletGUI) CreateSendAddressItem() {
-	fmt.Println("tsete", wg.sendAddresses)
 	wg.sendAddresses = append(wg.sendAddresses,
 		SendAddress{
-			AddressInput: &p9.Editor{
-				//SingleLine: true,
-				//Submit:     true,
-			},
-			LabelInput: &p9.Editor{
-				//SingleLine: true,
-				//Submit:     true,
-			},
+			AddressInput: wg.th.Input("Enter a ParallelCoin address (e.g. 9ef0sdjifvmlkdsfnsdlkg)", "Primary", "DocText", 26, func(pass string) {}),
+			LabelInput:   wg.th.Input("Enter a label for this address to add it to the list of used addresses", "Primary", "DocText", 26, func(pass string) {}),
+			AmountInput:  wg.th.Input("Enter amount", "Primary", "DocText", 10, func(pass string) {}),
 			//AmountInput: &counter.Counter{
 			//	Value:        1,
 			//	OperateValue: 1,
@@ -132,80 +120,74 @@ func (wg *WalletGUI) sendFooter() l.Widget {
 	).Fn
 }
 
-func (wg *WalletGUI) singleSendAddress(gtx l.Context) l.Widget {
+func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
 	return wg.Inset(0.25,
-		wg.th.Flex().
-			SpaceBetween().
-			Rigid(
-				wg.sendButton(wg.clickables["sendSend"], "Send", func() {}),
-			).
-			Rigid(
-				wg.sendButton(wg.clickables["sendSend"], "Clear All", func() {}),
-			).
-			Rigid(
-				wg.sendButton(wg.clickables["sendSend"], "Add Recipient", func() {}),
-			).
-			Rigid(
-				wg.Inset(0.5, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
+		wg.Fill("DocBg",
+			wg.Inset(0.25,
+				wg.th.VFlex().
+					Rigid(
+						wg.Inset(0.25,
+							wg.th.Flex().
+								Rigid(
+									wg.Caption("Pay to:").Color("DocText").Fn,
+								).
+								Rigid(
+									wg.th.Flex().
+										Rigid(
+											wg.sendAddresses[index].AddressInput.Fn,
+										).
+										Rigid(
+											//wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
+											wg.sendIconButton("settings", 2, icons.ActionBook),
+										).
+										Rigid(
+											//wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
+											wg.sendIconButton("settings", 2, icons.ActionSettings),
+										).
+										Rigid(
+											//wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
+											wg.sendIconButton("settings", 2, icons.ActionSettings),
+										).Fn,
+								).Fn,
+						).Fn,
+					).
+					Rigid(
+						wg.Inset(0.25,
+							wg.th.Flex().
+								Rigid(
+									wg.Caption("Label:").Color("DocText").Fn,
+								).
+								Rigid(
+									wg.th.Flex().
+										Rigid(
+											wg.sendAddresses[index].LabelInput.Fn,
+										).Fn,
+								).Fn,
+						).Fn,
+					).
+					Rigid(
+						wg.Inset(0.25,
+							wg.th.Flex().
+								Rigid(
+									wg.Caption("Amount:").Color("DocText").Fn,
+								).
+								Rigid(
+									wg.Flex().
+										Rigid(
+											wg.sendAddresses[index].AmountInput.Fn,
+										).
+										Rigid(
+											wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Subtract fee from amount", func() {}),
+										).
+										Rigid(
+											wg.sendButton(wg.sendAddresses[index].ClearBtn, "Use available balance", func() {}),
+										).Fn,
+								).Fn,
+						).Fn,
+					).Fn,
 			).Fn,
-	).Fn
-	//return func(gtx gui.C, i int) gui.D {
-	//	return lyt.Format(gtx, "vflex(start,r(inset(0dp0dp4dp0dp,_)),r(inset(0dp0dp4dp0dp,_)),r(inset(0dp0dp4dp0dp,_)),r(inset(0dp0dp0dp0dp,_))))",
-	//		gui.labeledRow(th, "Pay to:",
-	//			func(gtx gui.C) gui.D {
-	//				return lyt.Format(gtx, "hflex(middle,f(1,inset(0dp0dp0dp0dp,_)),r(inset(0dp0dp0dp4dp,_)),r(inset(0dp4dp0dp4dp,_)),r(_))",
-	//					box.BoxEditor(th, func(gtx gui.C) gui.D {
-	//						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-	//						e := material.Editor(th.T, sendAddresses[i].AddressInput, "Enter a ParallelCoin address (e.g. 9ef0sdjifvmlkdsfnsdlkg)")
-	//						return e.Layout(gtx)
-	//					}),
-	//					sendButton(th, sendAddresses[i].AddressBookBtn, "AddressBook", "max(inset(0dp0dp0dp0dp,_))", "", func() {}),
-	//					sendButton(th, sendAddresses[i].PasteClipboardBtn, "Paste", "max(inset(0dp0dp0dp0dp,_))", "", func() {}),
-	//					sendButton(th, sendAddresses[i].ClearBtn, "Close", "max(inset(0dp0dp0dp0dp,_))", "", ClearAddress(i)),
-	//				)
-	//			}),
-	//		gui.labeledRow(th, "Label:",
-	//			func(gtx gui.C) gui.D {
-	//				return lyt.Format(gtx, "hflex(middle,f(1,inset(0dp0dp0dp0dp,_)))",
-	//					box.BoxEditor(th, func(gtx gui.C) gui.D {
-	//						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-	//						e := material.Editor(th.T, sendAddresses[i].LabelInput, "Enter a label for this address to add it to the list of used addresses")
-	//						return e.Layout(gtx)
-	//					}),
-	//				)
-	//			}),
-	//		gui.labeledRow(th, "Amount:",
-	//			func(gtx gui.C) gui.D {
-	//				return lyt.Format(gtx, "hflex(middle,r(_),r(_),r(_),r(_))",
-	//					counter.CounterSt(th, sendAddresses[i].AmountInput).Layout(th, fmt.Sprint(sendAddresses[i].AmountInput.Value)),
-	//					//func(gtx C) D {return D{}},
-	//					func(gtx gui.C) gui.D {
-	//						btn := material.IconButton(th.T, gui.connectionsBtn, th.Icons["networkIcon"])
-	//						btn.Inset = layout.Inset{unit.Dp(2), unit.Dp(2), unit.Dp(2), unit.Dp(2)}
-	//						btn.Size = unit.Dp(21)
-	//						btn.Background = helper.HexARGB(th.Colors["Secondary"])
-	//						for gui.connectionsBtn.Clicked() {
-	//							//ui.N.CurrentPage = "Welcome"
-	//						}
-	//						return btn.Layout(gtx)
-	//					},
-	//					func(gtx gui.C) gui.D {
-	//						return material.CheckBox(th.T, sendAddresses[i].SubtractFee, "Subtract fee from amount").Layout(gtx)
-	//					},
-	//					func(gtx gui.C) gui.D {
-	//						btn := material.Button(th.T, sendAddresses[i].AllAvailableBtn, "Use available balance")
-	//						btn.Inset = layout.Inset{unit.Dp(2), unit.Dp(2), unit.Dp(2), unit.Dp(2)}
-	//						btn.Background = helper.HexARGB(th.Colors["Secondary"])
-	//						for gui.connectionsBtn.Clicked() {
-	//							//ui.N.CurrentPage = "Welcome"
-	//						}
-	//						return btn.Layout(gtx)
-	//					},
-	//				)
-	//			}),
-	//		helper.DuoUIline(false, 8, 0, 1, th.Colors["Border"]),
-	//	)
-	//}
+		).Fn,
+	).Fn(gtx)
 }
 
 func remove(slice []SendAddress, s int) []SendAddress {
@@ -241,5 +223,41 @@ func (wg *WalletGUI) sendButton(b *p9.Clickable, title string, click func()) fun
 			Background("Transparent").
 			SetClick(click).
 			Fn(gtx)
+	}
+}
+
+func (wg *WalletGUI) sendIconButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+	return func(gtx l.Context) l.Dimensions {
+		background := wg.TitleBarBackgroundGet()
+		color := wg.MenuColorGet()
+		if wg.ActivePageGet() == name {
+			color = "PanelText"
+			background = "PanelBg"
+		}
+		ic := wg.Icon().
+			Scale(p9.Scales["H5"]).
+			Color(color).
+			Src(ico).
+			Fn
+		return wg.Flex().Rigid(
+			// wg.Inset(0.25,
+			wg.ButtonLayout(wg.buttonBarButtons[index]).
+				CornerRadius(0).
+				Embed(
+					wg.Inset(0.375,
+						ic,
+					).Fn,
+				).
+				Background(background).
+				SetClick(
+					func() {
+						if wg.MenuOpen {
+							wg.MenuOpen = false
+						}
+						wg.ActivePage(name)
+					}).
+				Fn,
+			// ).Fn,
+		).Fn(gtx)
 	}
 }

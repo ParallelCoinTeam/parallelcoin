@@ -6,7 +6,6 @@ import (
 )
 
 func (wg *WalletGUI) ReceivePage() l.Widget {
-	fmt.Print("sss", wg.sendAddresses)
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return wg.Caption("BalaaaaaaaaaaaaaaaO_" + fmt.Sprint(index)).Color("DocBg").Fn(gtx)
 	}
