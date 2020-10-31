@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"fmt"
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -68,7 +69,17 @@ func (wg *WalletGUI) CreateSendAddressItem() {
 
 func (wg *WalletGUI) Send() {
 	// ToDo Send RPC command
-
+	fmt.Println("dddddddddd")
+	chainClient, err := wg.chainClient()
+	if err != nil {
+	}
+	for _, sendAddress := range wg.sendAddresses {
+		fmt.Println(sendAddress)
+		address, err := util.DecodeAddress(sendAddress.AmountInput.GetText(), nil)
+		if err != nil {
+		}
+		chainClient.SendToAddress(address, 0)
+	}
 }
 
 func (wg *WalletGUI) ClearAddress(i int) {
@@ -105,16 +116,16 @@ func (wg *WalletGUI) sendFooter() l.Widget {
 				wg.th.Flex().
 					SpaceBetween().
 					Rigid(
-						wg.sendButton(wg.clickables["sendSend"], "Send", wg.Send),
+						wg.Inset(0.1, wg.sendButton(wg.clickables["sendSend"], "Send", wg.Send)).Fn,
 					).
 					Rigid(
-						wg.sendButton(wg.clickables["sendClearAll"], "Clear All", wg.ClearAllAddresses),
+						wg.Inset(0.1, wg.sendButton(wg.clickables["sendClearAll"], "Clear All", wg.ClearAllAddresses)).Fn,
 					).
 					Rigid(
-						wg.sendButton(wg.clickables["sendAddRecipient"], "Add Recipient", wg.CreateSendAddressItem),
+						wg.Inset(0.1, wg.sendButton(wg.clickables["sendAddRecipient"], "Add Recipient", wg.CreateSendAddressItem)).Fn,
 					).
 					Flexed(1,
-						wg.Inset(0.0, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
+						wg.Inset(0.1, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
 					).Fn,
 			).Fn,
 		).Fn,
@@ -178,10 +189,10 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
 											wg.sendAddresses[index].AmountInput.Fn,
 										).
 										Rigid(
-											wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Subtract fee from amount", func() {}),
+											wg.Inset(0.1, wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Subtract fee from amount", func() {})).Fn,
 										).
 										Rigid(
-											wg.sendButton(wg.sendAddresses[index].ClearBtn, "Use available balance", func() {}),
+											wg.Inset(0.1, wg.sendButton(wg.sendAddresses[index].ClearBtn, "Use available balance", func() {})).Fn,
 										).Fn,
 								).Fn,
 						).Fn,
@@ -203,10 +214,7 @@ func (wg *WalletGUI) sendButton(b *p9.Clickable, title string, click func()) fun
 			func(gtx l.Context) l.Dimensions {
 				background := "DocText"
 				color := "DocBg"
-				var inPad, outPad float32 = 0.5, 0.25
-				if *wg.Size >= 800 {
-					inPad, outPad = 0.75, 0
-				}
+				var inPad, outPad float32 = 0.5, 0
 				return wg.Inset(outPad,
 					wg.Fill(background,
 						wg.Flex().

@@ -11,6 +11,15 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
+func (wg *WalletGUI) chainClient() (*rpcclient.Client, error) {
+	return rpcclient.New(&rpcclient.ConnConfig{
+		Host:         *wg.cx.Config.RPCConnect,
+		User:         *wg.cx.Config.Username,
+		Pass:         *wg.cx.Config.Password,
+		HTTPPostMode: true,
+	}, nil)
+}
+
 func (wg *WalletGUI) ConnectChainRPC() {
 	go func() {
 		ticker := time.Tick(time.Second)
@@ -28,13 +37,13 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				}
 				// update chain data
 				var chainClient *rpcclient.Client
-				chainConnConfig := &rpcclient.ConnConfig{
-					Host:         *wg.cx.Config.RPCConnect,
-					User:         *wg.cx.Config.Username,
-					Pass:         *wg.cx.Config.Password,
-					HTTPPostMode: true,
-				}
-				if chainClient, err = rpcclient.New(chainConnConfig, nil); Check(err) {
+				//chainConnConfig := &rpcclient.ConnConfig{
+				//	Host:         *wg.cx.Config.RPCConnect,
+				//	User:         *wg.cx.Config.Username,
+				//	Pass:         *wg.cx.Config.Password,
+				//	HTTPPostMode: true,
+				//}
+				if chainClient, err = wg.chainClient(); Check(err) {
 					break
 				}
 				var height int32
@@ -52,10 +61,10 @@ func (wg *WalletGUI) ConnectChainRPC() {
 					walletServer = net.JoinHostPort("127.0.0.1", port)
 				}
 				walletConnConfig := &rpcclient.ConnConfig{
-					Host:                 walletServer,
-					User:                 *wg.cx.Config.Username,
-					Pass:                 *wg.cx.Config.Password,
-					HTTPPostMode:         true,
+					Host:         walletServer,
+					User:         *wg.cx.Config.Username,
+					Pass:         *wg.cx.Config.Password,
+					HTTPPostMode: true,
 				}
 				if walletClient, err = rpcclient.New(walletConnConfig, nil); Check(err) {
 					break
