@@ -1093,7 +1093,7 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error
 		shutdown:        make(chan struct{}),
 	}
 	if start {
-		Info("established connection to RPC server", config.Host)
+		Trace("established connection to RPC server", config.Host)
 		close(connEstablished)
 		client.start()
 		if !client.config.HTTPPostMode && !client.config.DisableAutoReconnect {

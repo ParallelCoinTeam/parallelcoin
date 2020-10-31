@@ -1,10 +1,14 @@
 package gui
 
 import (
+	"strconv"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -12,7 +16,21 @@ import (
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a = wg.th.App(*wg.size)
 	wg.App = a
+	wg.App.ThemeHook(func(){
+		Debug("theme hook")
+		Debug(wg.bools)
+		*wg.cx.Config.DarkTheme = *wg.Dark
+		a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
+		*a = *wg.Dark
+		if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
+			wgb.Value(*wg.Dark)
+		}
+		save.Pod(wg.cx.Config)
+
+	})
 	wg.size = a.Size
+	wg.config = cfg.New(wg.cx, wg.th)
+	wg.configs = wg.config.Config()
 	a.Pages(map[string]l.Widget{
 		"main": wg.Page("overview", p9.Widgets{
 			p9.WidgetSize{Widget: wg.OverviewPage()},
@@ -20,8 +38,13 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		"send": wg.Page("send", p9.Widgets{
 			p9.WidgetSize{Widget: wg.SendPage()},
 		}),
+		"receive": wg.Page("receive", p9.Widgets{
+			p9.WidgetSize{Widget: wg.ReceivePage()},
+		}),
 		"settings": wg.Page("settings", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+				return wg.configs.Widget(wg.config)(gtx)
+			}},
 		}),
 		"help": wg.Page("help", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
@@ -30,29 +53,32 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
 		"quit": wg.Page("quit", p9.Widgets{
-			p9.WidgetSize{Widget: a.VFlex().
-				SpaceEvenly().
-				// AlignMiddle().
-				Rigid(
-					a.H4("are you sure?").Color(wg.BodyColorGet()).Alignment(text.Middle).Fn,
-				).
-				Rigid(
-					a.Flex().
-						SpaceEvenly().
-						Rigid(
-							a.Button(wg.quitClickable.SetClick(func() {
-								interrupt.Request()
-							})).TextScale(2).Text("yes").Fn,
-						).Fn,
-				).
-				Fn},
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+				return wg.th.VFlex().
+					SpaceEvenly().
+					// AlignMiddle().
+					Rigid(
+						wg.th.H4("are you sure?").Color(wg.App.BodyColorGet()).Alignment(text.Middle).Fn,
+					).
+					Rigid(
+						wg.th.Flex().
+							SpaceEvenly().
+							Rigid(
+								wg.th.Button(wg.clickables["quit"].SetClick(func() {
+									interrupt.Request()
+								})).Color(wg.App.TitleBarColorGet()).TextScale(2).Text("yes!!!").Fn,
+							).Fn,
+					).
+					Fn(gtx)
+			},
+			},
 		}),
 	})
 	a.SideBar([]l.Widget{
-		wg.SideBarButton("overview", "overview", 0),
+		wg.SideBarButton("overview", "main", 0),
 		wg.SideBarButton("send", "send", 1),
 		wg.SideBarButton("receive", "receive", 2),
-		wg.SideBarButton("transactions", "transactions", 3),
+		wg.SideBarButton("history", "transactions", 3),
 		wg.SideBarButton("settings", "settings", 5),
 		wg.SideBarButton("help", "help", 6),
 		wg.SideBarButton("log", "log", 7),
@@ -60,14 +86,17 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	})
 	a.ButtonBar([]l.Widget{
 		wg.PageTopBarButton("help", 0, icons.ActionHelp),
-		wg.PageTopBarButton("log", 1, icons.ActionList),
+		// wg.PageTopBarButton("log", 1, icons.ActionList),
 		wg.PageTopBarButton("settings", 2, icons.ActionSettings),
 		wg.PageTopBarButton("quit", 3, icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
-		wg.StatusBarButton("help", 0, icons.ActionHelp),
-		wg.StatusBarButton("log", 1, icons.ActionList),
-		wg.StatusBarButton("settings", 2, icons.ActionSettings),
+		wg.RunStatusButton(),
+		wg.th.Flex().Rigid(
+			wg.StatusBarButton("log", 1, icons.ActionList),
+		).Rigid(
+			wg.StatusBarButton("settings", 2, icons.ActionSettings),
+		).Fn,
 	})
 	return
 }
@@ -203,5 +232,69 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gt
 						}).
 					Fn,
 			).Fn(gtx)
+	}
+}
+
+func (wg *WalletGUI) SetRunState(b bool) {
+	go func() {
+		Debug("run state is now", b)
+		if b {
+			wg.RunCommandChan <- "run"
+			// wg.running = b
+		} else {
+			wg.RunCommandChan <- "stop"
+			// wg.running = b
+		}
+	}()
+}
+
+func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
+	t, f := icons.AVStop, icons.AVPlayArrow
+	return func(gtx l.Context) l.Dimensions {
+		background := wg.App.StatusBarBackgroundGet()
+		color := wg.App.StatusBarColorGet()
+		var ico []byte
+		if wg.running {
+			ico = t
+		} else {
+			ico = f
+		}
+		ic := wg.th.Icon().
+			Scale(p9.Scales["H4"]).
+			Color(color).
+			Src(ico).
+			Fn
+		return wg.th.Flex().
+			Rigid(
+				wg.th.ButtonLayout(wg.statusBarButtons[0]).
+					CornerRadius(0).
+					Embed(
+						wg.th.Inset(0.066, ic).Fn,
+					).
+					Background(background).
+					SetClick(
+						func() {
+							wg.SetRunState(!wg.running)
+						}).
+					Fn,
+			).
+			Rigid(
+				wg.th.Inset(0.33,
+					p9.If(wg.running,
+						wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
+						wg.th.Icon().
+							Scale(p9.Scales["H5"]).
+							Color("Primary").
+							Src(icons.ActionCheckCircle).
+							Fn,
+					),
+				).Fn,
+			).
+			Rigid(
+				wg.th.Inset(0.33,
+					wg.th.H5(strconv.FormatInt(int64(wg.State.bestBlockHeight), 10)).Color(color).Fn,
+				).Fn,
+			).
+			Fn(gtx)
 	}
 }

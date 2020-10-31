@@ -65,6 +65,7 @@ type Controller struct {
 
 func Run(cx *conte.Xt) (quit chan struct{}) {
 	mining := true
+	cx.Controller.Store(true)
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
 		// Warn("no mining addresses, not starting controller")
 		// return
@@ -122,6 +123,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		}
 		if err = ctrl.multiConn.Close(); Check(err) {
 		}
+		close(ctrl.quit)
 	})
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
 	if mining {
@@ -152,6 +154,14 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 			Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
 		case <-ctrl.quit:
 			Debug("quitting on close quit channel")
+			cont = false
+			ctrl.active.Store(false)
+		case <-ctrl.cx.NodeKill:
+			Debug("quitting on NodeKill")
+			cont = false
+			ctrl.active.Store(false)
+		case <-ctrl.cx.KillAll:
+			Debug("quitting on KillAll")
 			cont = false
 			ctrl.active.Store(false)
 		case <-interrupt.HandlersDone:

@@ -5,6 +5,7 @@ import (
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -13,15 +14,14 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 	a = ng.th.App(*ng.size)
 	ng.app = a
 	// ng.size = ng.size
-	ng.th.Colors.SetTheme(ng.app.Dark)
-	ng.configs = ng.Config()
-	// var setWidget l.Widget
-	// setWidget =
+	ng.th.Colors.SetTheme(*ng.app.Dark)
+	ng.config = cfg.New(ng.cx, ng.th)
+	ng.configs = ng.config.Config()
+	ng.app.ThemeHook(func(){})
 	ng.app.Pages(p9.WidgetMap{
 		"main": ng.Page("overview", p9.Widgets{
 			p9.WidgetSize{
-				Widget:
-				func(gtx l.Context) l.Dimensions {
+				Widget: func(gtx l.Context) l.Dimensions {
 					return ng.th.VFlex().Rigid(
 						ng.th.CardList(ng.lists["overview"], ng.app.CardBackgroundGet(),
 							ng.app.CardContent("run settings", "Primary",
@@ -126,87 +126,6 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 									).
 									Fn,
 							),
-							ng.th.CardContent("mining info", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Rigid(
-										ng.th.Body1("I will show the current data about difficulty adjustment").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
-							ng.th.CardContent("network hashrate", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Rigid(
-										ng.th.Body1("i will show a graph of the hashrate on the lan").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
-							ng.th.CardContent("log", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Flexed(1,
-										ng.th.Body1("i will become a log viewer").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
-							ng.th.CardContent("mining info", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Rigid(
-										ng.th.Body1("I will show the current data about difficulty adjustment").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
-							ng.th.CardContent("network hashrate", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Rigid(
-										ng.th.Body1("i will show a graph of the hashrate on the lan").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
-							ng.th.CardContent("log", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Flexed(1,
-										ng.th.Body1("i will become a log viewer").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
-							ng.th.CardContent("mining info", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Rigid(
-										ng.th.Body1("I will show the current data about difficulty adjustment").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
-							ng.th.CardContent("network hashrate", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Rigid(
-										ng.th.Body1("i will show a graph of the hashrate on the lan").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
-							ng.th.CardContent("log", ng.app.CardColorGet(),
-								ng.th.Flex().
-									Flexed(1,
-										ng.th.Body1("i will become a log viewer").
-											Color(ng.app.CardColorGet()).
-											Fn,
-									).
-									Fn,
-							),
 						),
 					).Fn(gtx)
 				},
@@ -214,7 +133,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 		}),
 		"settings": ng.Page("settings", p9.Widgets{
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
-				return ng.configs.Widget(ng)(gtx)
+				return ng.configs.Widget(ng.config)(gtx)
 			}},
 		}),
 		"help": ng.Page("help", p9.Widgets{
@@ -224,8 +143,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
 		"quit": ng.Page("quit", p9.Widgets{
-			p9.WidgetSize{Widget:
-			func(gtx l.Context) l.Dimensions {
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return ng.th.VFlex().
 					SpaceEvenly().
 					// AlignMiddle().

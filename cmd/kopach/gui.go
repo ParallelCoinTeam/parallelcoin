@@ -3,6 +3,7 @@ package kopach
 import (
 	"fmt"
 	"image"
+	"os"
 	"runtime"
 	"time"
 
@@ -45,9 +46,6 @@ func (w *Worker) Run() {
 	for i := range solButtons {
 		solButtons[i] = th.Clickable()
 	}
-	lists := map[string]*p9.List{
-		"found": th.List().Vertical().Start(),
-	}
 	minerModel := &MinerModel{
 		Cx:        w.cx,
 		worker:    w,
@@ -58,10 +56,10 @@ func (w *Worker) Run() {
 		}),
 		mineToggle: th.Bool(*w.cx.Config.Generate),
 		solButtons: solButtons,
-		lists:      lists,
+		// lists:      lists,
 		modalScrim: th.Clickable(),
 		modalClose: th.Clickable(),
-		password: th.Password(w.cx.Config.MinerPass,"Primary","PanelBg",30, func(pass string) {
+		password: th.Password(w.cx.Config.MinerPass, "Primary", "PanelBg", 30, func(pass string) {
 			Debug("changed password")
 			*w.cx.Config.MinerPass = pass
 			save.Pod(w.cx.Config)
@@ -69,6 +67,9 @@ func (w *Worker) Run() {
 		threadSlider: th.IntSlider().Min(0).Max(maxThreads).Value(*w.cx.Config.GenThreads).Hook(func(v int) {
 			w.SetThreads <- v
 		}),
+	}
+	minerModel.lists = map[string]*p9.List{
+		"found": minerModel.Theme.List(), // .Vertical().Start(), // .DisableScroll(false),
 	}
 	minerModel.SetTheme(minerModel.DarkTheme)
 	for i := 0; i < 201; i++ {
@@ -80,6 +81,10 @@ func (w *Worker) Run() {
 			Info("clicked logo button")
 		})
 	win := f.NewWindow()
+	interrupt.AddHandler(func(){
+		close(w.quit)
+		os.Exit(0)
+	})
 	go func() {
 		if err := win.
 			Size(640, 480).
@@ -89,7 +94,6 @@ func (w *Worker) Run() {
 				minerModel.Widget,
 				func() {
 					Debug("quitting miner")
-					close(w.quit)
 					interrupt.Request()
 				}); Check(err) {
 		}
@@ -119,7 +123,7 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 							Rigid(m.PreSharedKey).
 							Rigid(m.VSpacer).
 							Rigid(m.H5("found blocks").Fn).
-							Flexed(1,
+							Rigid(
 								m.Fill("PanelBg",
 									m.FoundBlocks,
 								).Fn,
@@ -358,8 +362,7 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 							m.Flex().
 								AlignBaseline().
 								Rigid(m.H6(" ").Font("bariol bold").Fn).
-								Rigid(m.Body1(fmt.Sprintf("%x", currentBlock.bits)).Fn,
-								).Fn,
+								Rigid(m.Body1(fmt.Sprintf("%x", currentBlock.bits)).Fn).Fn,
 						).
 						Rigid(
 							m.Flex().AlignBaseline().
@@ -377,52 +380,67 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 }
 
 func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
+	var widgets []l.Widget
+	for x := range m.worker.solutions {
+		i := x
+		widgets = append(widgets, func(gtx l.Context) l.Dimensions {
+			return m.Flex().
+				Rigid(
+					m.Button(m.solButtons[i].SetClick(func() {
+						currentBlock = m.worker.solutions[i]
+						Debug("clicked for block", currentBlock.height)
+						m.modalWidget = m.BlockDetails
+						m.modalOn = true
+					})).Color("DocBg").
+						Text(fmt.Sprint(m.worker.solutions[i].height)).
+						Inset(0.5).Fn,
+				).Flexed(1,
+				m.Inset(0.25,
+					m.VFlex().
+						Rigid(
+							m.Flex().
+								Rigid(
+									m.Body1(m.worker.solutions[i].algo).Font("plan9").Fn,
+								).
+								Flexed(1,
+									m.VFlex().
+										Rigid(
+											m.Body1(m.worker.solutions[i].hash).
+												Font("go regular").
+												TextScale(0.75).
+												Alignment(text.End).
+												Fn,
+										).
+										Rigid(
+											m.Caption(fmt.Sprint(
+												m.worker.solutions[i].time.Format(time.RFC3339))).
+												Alignment(text.End).
+												Fn,
+										).
+										Fn,
+								).Fn,
+						).Fn,
+				).Fn,
+			).Fn(gtx)
+		})
+	}
 	return m.Inset(0.25,
-		m.Flex().Flexed(1, func(gtx l.Context) l.Dimensions {
+		// m.Flex().Flexed(1,
+		func(gtx l.Context) l.Dimensions {
+
+			// Debugs(widgets)
 			return m.lists["found"].
 				End().
-				ScrollWidth(int(m.Theme.TextSize.V)).
+				// ScrollWidth(int(m.Theme.TextSize.V * 3)).
+				Vertical().
+				Length(len(widgets)).
 				ScrollToEnd().
-				Length(m.worker.solutionCount).
-				ListElement(
-					func(gtx l.Context, i int) l.Dimensions {
-						return m.Flex().
-							Rigid(
-								m.Button(m.solButtons[i].SetClick(func() {
-									currentBlock = m.worker.solutions[i]
-									Debug("clicked for block", currentBlock.height)
-									m.modalWidget = m.BlockDetails
-									m.modalOn = true
-								})).Text(fmt.Sprint(m.worker.solutions[i].height)).Inset(0.5).Fn,
-							).Flexed(1,
-							m.Inset(0.25,
-								m.VFlex().
-									Rigid(
-										m.Flex().
-											Rigid(
-												m.Body1(m.worker.solutions[i].algo).Font("plan9").Fn,
-											).
-											Flexed(1,
-												m.VFlex().
-													Rigid(
-														m.Body1(m.worker.solutions[i].hash).
-															Font("go regular").
-															TextScale(0.75).
-															Alignment(text.End).
-															Fn,
-													).
-													Rigid(
-														m.Caption(fmt.Sprint(
-															m.worker.solutions[i].time.Format(time.RFC3339))).
-															Alignment(text.End).
-															Fn,
-													).
-													Fn,
-											).Fn,
-									).Fn,
-							).Fn,
-						).Fn(gtx)
-					}).Fn(gtx)
-		}).Fn,
+				DisableScroll(false).
+				ListElement(func(gtx l.Context, index int) l.Dimensions {
+					return widgets[index](gtx)
+				}).Fn(gtx)
+			// Slice(gtx, widgets...)(gtx)
+		},
+		// ).Fn,
 	).Fn(gtx)
 }

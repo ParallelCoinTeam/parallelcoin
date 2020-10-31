@@ -152,9 +152,9 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	return listeners
 }
 
-// openRPCKeyPair creates or loads the RPC TLS keypair specified by the application config. This function respects the
+// OpenRPCKeyPair creates or loads the RPC TLS keypair specified by the application config. This function respects the
 // pod.Config.OneTimeTLSKey setting.
-func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
+func OpenRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 	// Check for existence of the TLS key file. If one time TLS keys are enabled but a key already exists, this function
 	// should error since it's possible that a persistent certificate was copied to a remote machine. Otherwise,
 	// generate a new keypair when the key is missing. When generating new persistent keys, overwriting an existing cert
@@ -187,7 +187,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 	if !*config.TLS {
 		Info("server TLS is disabled - only legacy RPC may be used")
 	} else {
-		keyPair, err = openRPCKeyPair(config)
+		keyPair, err = OpenRPCKeyPair(config)
 		if err != nil {
 			Error(err)
 			return nil, err
