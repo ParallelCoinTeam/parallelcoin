@@ -19,15 +19,18 @@ type SendAddress struct {
 }
 
 func (wg *WalletGUI) SendPage() l.Widget {
-	fmt.Print("sss", wg.sendAddresses)
+	createWalletLayoutList := []l.Widget{
+		wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.H6("Enter the private passphrase for your new wallet:").Color("DocText").Fn).Fn).Fn).Fn,
+	}
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return wg.Caption("BalaaaaaaaaaaaaaaaO_" + fmt.Sprint(index)).Color("DocBg").Fn(gtx)
+		return createWalletLayoutList[index](gtx)
 	}
 	return wg.th.VFlex().
 		Flexed(1,
-
 			wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5,
-				wg.lists["send"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
+				func(gtx l.Context) l.Dimensions {
+					return wg.lists["createWallet"].Vertical().Length(len(createWalletLayoutList)).ListElement(le).Fn(gtx)
+				},
 			).Fn).Fn).Fn,
 		//func(gtx l.Context) l.Dimensions {
 		//return sendAddressesList.Layout(gtx, len(sendAddresses), wg.singleSendAddress())
@@ -42,7 +45,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 func (wg *WalletGUI) CreateSendAddressItem() {
 	fmt.Println("tsete", wg.sendAddresses)
 	wg.sendAddresses = append(wg.sendAddresses,
-		&SendAddress{
+		SendAddress{
 			AddressInput: &p9.Editor{
 				//SingleLine: true,
 				//Submit:     true,
@@ -84,7 +87,7 @@ func (wg *WalletGUI) ClearAddress(i int) {
 }
 
 func (wg *WalletGUI) ClearAllAddresses() {
-	wg.sendAddresses = []*SendAddress{}
+	wg.sendAddresses = []SendAddress{}
 	wg.CreateSendAddressItem()
 }
 
@@ -127,32 +130,9 @@ func (wg *WalletGUI) sendFooter() l.Widget {
 			).Fn,
 		).Fn,
 	).Fn
-
-	//return func(gtx gui.C) gui.D {
-	//				return lyt.Format(gtx, "hmax(hflex(middle,r(_),r(inset(0dp8dp0dp8dp,_)),r(_),f(1,inset(8dp8dp8dp8dp,_))))",
-	//					sendButton(th, sendBtn, "Send", "hflex(r(_),r(_)))", "Send", func() {}),
-	//					sendButton(th, sendClearAllBtn, "Close", "hflex(r(_),r(_)))", "Clear All", ClearAllAddresses()),
-	//					sendButton(th, addRecipientBtn, "CounterPlus", "hflex(r(_),r(_)))", "Add Recipient", CreateSendAddressItem()),
-	//					func(gtx gui.C) gui.D {
-	//						title := theme.H6(th, "Balance: 15.26656.5664654 DUO")
-	//						title.Alignment = text.Start
-	//						return title.Layout(gtx)
-	//					},
-	//				)
-	//			}
-	//		}
 }
 
-//func (wg *WalletGUI) sendBody() func(gtx gui.C) gui.D {
-//	return box.BoxPanel(g.ui.Theme, func(gtx gui.C) gui.D {
-//		return lyt.Format(gtx, "max(hflex(middle,f(1,_)))",
-//			func(gtx gui.C) gui.D {
-//				return sendAddressesList.Layout(gtx, len(sendAddresses), singleAddress(g.ui.Theme))
-//			})
-//	})
-//}
-//
-func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Widget {
+func (wg *WalletGUI) singleSendAddress(gtx l.Context) l.Widget {
 	return wg.Inset(0.25,
 		wg.th.Flex().
 			SpaceBetween().
@@ -228,31 +208,7 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Widget {
 	//}
 }
 
-//
-//func sendButton(th *theme.Theme, c *widget.Clickable, icon, lay, label string, onClick func()) func(gtx gui.C) gui.D {
-//	return box.BoxButton(th, func(gtx gui.C) gui.D {
-//		noLabel := true
-//		if label != "" {
-//			noLabel = true
-//		}
-//		b := btn.IconTextBtn(th, c, lay, noLabel, label)
-//		b.TextSize = unit.Dp(8)
-//		b.Background = th.Colors["ButtonBg"]
-//		b.Icon = th.Icons[icon]
-//		b.IconSize = unit.Dp(15)
-//		b.CornerRadius = unit.Dp(0)
-//		//b.Background = th.Colors["NavBg"]
-//		b.TextColor = th.Colors["ButtonText"]
-//		for c.Clicked() {
-//			//n.CurrentPage = item.Page
-//			onClick()
-//		}
-//		return b.Layout(gtx)
-//	})
-//}
-//
-
-func remove(slice []*SendAddress, s int) []*SendAddress {
+func remove(slice []SendAddress, s int) []SendAddress {
 	return append(slice[:s], slice[s+1:]...)
 }
 

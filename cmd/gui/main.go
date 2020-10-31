@@ -48,7 +48,7 @@ type WalletGUI struct {
 	invalidate       chan struct{}
 	quit             chan struct{}
 
-	sendAddresses  []*SendAddress
+	sendAddresses  []SendAddress
 	Worker         *worker.Worker
 	RunCommandChan chan string
 }
@@ -118,7 +118,7 @@ func (wg *WalletGUI) Run() (err error) {
 
 	go func() {
 		if err := wg.w.
-			Size(640, 480).
+			Size(800, 600).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
