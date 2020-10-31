@@ -104,16 +104,16 @@ func (wg *WalletGUI) sendFooter() l.Widget {
 				wg.th.Flex().
 					SpaceBetween().
 					Rigid(
-						wg.sendButton(wg.clickables["sendSend"], "Send", wg.Send),
+						wg.Inset(0.1, wg.sendButton(wg.clickables["sendSend"], "Send", wg.Send)).Fn,
 					).
 					Rigid(
-						wg.sendButton(wg.clickables["sendClearAll"], "Clear All", wg.ClearAllAddresses),
+						wg.Inset(0.1, wg.sendButton(wg.clickables["sendClearAll"], "Clear All", wg.ClearAllAddresses)).Fn,
 					).
 					Rigid(
-						wg.sendButton(wg.clickables["sendAddRecipient"], "Add Recipient", wg.CreateSendAddressItem),
+						wg.Inset(0.1, wg.sendButton(wg.clickables["sendAddRecipient"], "Add Recipient", wg.CreateSendAddressItem)).Fn,
 					).
 					Flexed(1,
-						wg.Inset(0.0, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
+						wg.Inset(0.1, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
 					).Fn,
 			).Fn,
 		).Fn,
@@ -202,10 +202,7 @@ func (wg *WalletGUI) sendButton(b *p9.Clickable, title string, click func()) fun
 			func(gtx l.Context) l.Dimensions {
 				background := "DocText"
 				color := "DocBg"
-				var inPad, outPad float32 = 0.5, 0.25
-				if *wg.Size >= 800 {
-					inPad, outPad = 0.75, 0
-				}
+				var inPad, outPad float32 = 0.5, 0
 				return wg.Inset(outPad,
 					wg.Fill(background,
 						wg.Flex().
