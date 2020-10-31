@@ -7,12 +7,70 @@ import (
 
 func (wg *WalletGUI) TransactionsPage() l.Widget {
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return wg.Caption("BalaaaaaaaaaaaaaaaO_" + fmt.Sprint(index)).Color("DocBg").Fn(gtx)
+		return wg.singleTransaction(gtx, index)
 	}
 	return wg.th.VFlex().
+		Rigid(
+			wg.Inset(0.25,
+				wg.th.Flex().
+					Rigid(
+						wg.Inset(0.1, wg.Caption("Date:").Color("DocText").Fn).Fn,
+					).
+					Rigid(
+						//wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
+						wg.Inset(0.1, wg.Caption("Type:").Color("DocText").Fn).Fn,
+					).
+					Flexed(1,
+						//wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
+						wg.Inset(0.1, wg.Caption("Label:").Color("DocText").Fn).Fn,
+					).
+					Rigid(
+						//wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
+						wg.Inset(0.1, wg.Caption("Amount(DUO):").Color("DocText").Fn).Fn,
+					).Fn,
+			).Fn,
+		).
 		Flexed(1,
-			wg.Inset(0.0, wg.Fill("DocText", wg.Inset(0.5,
-				wg.lists["transactions"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
+			wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5,
+				wg.lists["transactions"].Vertical().Length(len(wg.txs)).ListElement(le).Fn,
 			).Fn).Fn).Fn,
 		).Fn
+}
+
+func (wg *WalletGUI) Transactions() {
+	// ToDo Send RPC command
+	chainClient, err := wg.chainClient()
+	if err != nil {
+	}
+	txs, err := chainClient.ListTransactions("")
+	if err != nil {
+	}
+	wg.txs = txs
+}
+
+func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
+	return wg.Inset(0.25,
+		wg.Fill("DocBg",
+			wg.Inset(0.25,
+				wg.th.VFlex().
+					Rigid(
+						wg.Inset(0.25,
+							wg.th.Flex().
+								Rigid(
+									wg.Inset(0.1, wg.Caption(fmt.Sprint(wg.txs[i].Time)).Color("DocText").Fn).Fn,
+								).
+								Rigid(
+									wg.Inset(0.1, wg.Caption(fmt.Sprint(wg.txs[i].Category)).Color("DocText").Fn).Fn,
+								).
+								Flexed(1,
+									wg.Inset(0.1, wg.Caption(fmt.Sprint(wg.txs[i].Comment)).Color("DocText").Fn).Fn,
+								).
+								Rigid(
+									wg.Inset(0.1, wg.Caption(fmt.Sprint(wg.txs[i].Amount)).Color("DocText").Fn).Fn,
+								).Fn,
+						).Fn,
+					).Fn,
+			).Fn,
+		).Fn,
+	).Fn(gtx)
 }

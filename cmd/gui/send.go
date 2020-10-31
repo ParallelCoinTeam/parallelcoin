@@ -69,16 +69,15 @@ func (wg *WalletGUI) CreateSendAddressItem() {
 
 func (wg *WalletGUI) Send() {
 	// ToDo Send RPC command
-	fmt.Println("dddddddddd")
 	chainClient, err := wg.chainClient()
 	if err != nil {
 	}
 	for _, sendAddress := range wg.sendAddresses {
-		fmt.Println(sendAddress)
-		address, err := util.DecodeAddress(sendAddress.AmountInput.GetText(), nil)
+		fmt.Println(sendAddress.AmountInput.GetText())
+		address, err := util.DecodeAddress("sendAddress.AmountInput.GetText()", nil)
 		if err != nil {
 		}
-		chainClient.SendToAddress(address, 0)
+		chainClient.SendToAddress(address, 1)
 	}
 }
 
@@ -132,7 +131,7 @@ func (wg *WalletGUI) sendFooter() l.Widget {
 	).Fn
 }
 
-func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
+func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Dimensions {
 	return wg.Inset(0.25,
 		wg.Fill("DocBg",
 			wg.Inset(0.25,
@@ -146,7 +145,7 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
 								Rigid(
 									wg.th.Flex().
 										Rigid(
-											wg.sendAddresses[index].AddressInput.Fn,
+											wg.sendAddresses[i].AddressInput.Fn,
 										).
 										Rigid(
 											//wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
@@ -172,7 +171,7 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
 								Rigid(
 									wg.th.Flex().
 										Rigid(
-											wg.sendAddresses[index].LabelInput.Fn,
+											wg.sendAddresses[i].LabelInput.Fn,
 										).Fn,
 								).Fn,
 						).Fn,
@@ -186,13 +185,13 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, index int) l.Dimensions {
 								Rigid(
 									wg.Flex().
 										Rigid(
-											wg.sendAddresses[index].AmountInput.Fn,
+											wg.sendAddresses[i].AmountInput.Fn,
 										).
 										Rigid(
-											wg.Inset(0.1, wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Subtract fee from amount", func() {})).Fn,
+											wg.Inset(0.1, wg.sendButton(wg.sendAddresses[i].PasteClipboardBtn, "Subtract fee from amount", func() {})).Fn,
 										).
 										Rigid(
-											wg.Inset(0.1, wg.sendButton(wg.sendAddresses[index].ClearBtn, "Use available balance", func() {})).Fn,
+											wg.Inset(0.1, wg.sendButton(wg.sendAddresses[i].ClearBtn, "Use available balance", func() {})).Fn,
 										).Fn,
 								).Fn,
 						).Fn,

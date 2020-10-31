@@ -2,6 +2,7 @@ package gui
 
 import (
 	"gioui.org/app"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
@@ -48,6 +49,7 @@ type WalletGUI struct {
 	invalidate       chan struct{}
 	quit             chan struct{}
 	sendAddresses    []SendAddress
+	txs              []btcjson.ListTransactionsResult
 	Worker           *worker.Worker
 	RunCommandChan   chan string
 	State            State
