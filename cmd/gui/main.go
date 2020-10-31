@@ -116,7 +116,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.App = wg.GetAppWidget()
 	go func() {
 		if err := wg.w.
-			Size(800, 600).
+			Size(800, 480).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(

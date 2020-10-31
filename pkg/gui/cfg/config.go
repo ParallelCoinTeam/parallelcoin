@@ -218,7 +218,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		if !first {
 			// put a space between the sections
 			out = append(out, func(gtx l.Context) l.Dimensions {
-				return ng.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn(gtx)
+				return ng.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn(gtx)
 			})
 		} else {
 			first = false
