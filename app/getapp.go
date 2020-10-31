@@ -47,6 +47,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			//	guiHandle(cx), apputil.SubCommands(), nil, "gui"),
 			au.Command("gui", "start wallet GUI", walletGUIHandle(cx),
 				au.SubCommands(), nil),
+			au.Command("explorer", "start explorer GUI", explorerHandle(cx),
+				au.SubCommands(), nil),
 			au.Command("nodegui", "start node GUI", nodeGUIHandle(cx),
 				au.SubCommands(), nil),
 			au.Command("ctl",

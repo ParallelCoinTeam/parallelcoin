@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"gioui.org/app"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
@@ -49,6 +50,7 @@ type Explorer struct {
 	RunCommandChan   chan string
 	State            State
 	Shell            *worker.Worker
+	blocks           []btcjson.BlockDetails
 }
 
 func (ex *Explorer) Run() (err error) {
@@ -64,7 +66,7 @@ func (ex *Explorer) Run() (err error) {
 		ex.statusBarButtons[i] = ex.th.Clickable()
 	}
 	ex.lists = map[string]*p9.List{
-		"overview": ex.th.List(),
+		"blocks": ex.th.List(),
 	}
 	ex.clickables = map[string]*p9.Clickable{
 		"quit": ex.th.Clickable(),
