@@ -12,9 +12,8 @@ type State struct {
 	lastUpdated        time.Time
 	bestBlockHeight    int
 	bestBlockHash      *chainhash.Hash
-	balanceTotal       float64
+	balance       float64
 	balanceUnconfirmed float64
-	balanceConfirmed   float64
 }
 
 func (s *State) LastUpdated() time.Time {
@@ -35,22 +34,16 @@ func (s *State) BestBlockHash() *chainhash.Hash {
 	return s.bestBlockHash
 }
 
-func (s *State) BalanceTotal() float64 {
+func (s *State) Balance() float64 {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	return s.balanceTotal
+	return s.balance
 }
 
 func (s *State) BalanceUnconfirmed() float64 {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	return s.balanceUnconfirmed
-}
-
-func (s *State) BalanceConfirmed() float64 {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	return s.balanceConfirmed
 }
 
 func (s *State) SetBestBlockHeight(height int) {
@@ -67,11 +60,11 @@ func (s *State) SetBestBlockHash(h *chainhash.Hash) {
 	s.bestBlockHash = h
 }
 
-func (s *State) SetBalanceTotal(total float64) {
+func (s *State) SetBalance(total float64) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()
-	s.balanceTotal = total
+	s.balance = total
 }
 
 func (s *State) SetBalanceUnconfirmed(unconfirmed float64) {
@@ -79,11 +72,4 @@ func (s *State) SetBalanceUnconfirmed(unconfirmed float64) {
 	defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()
 	s.balanceUnconfirmed = unconfirmed
-}
-
-func (s *State) SetBalanceConfirmed(confirmed float64) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	s.lastUpdated = time.Now()
-	s.balanceConfirmed = confirmed
 }

@@ -16,7 +16,7 @@ func (wg *WalletGUI) ConnectChainRPC() {
 		for {
 			select {
 			case <-ticker:
-				Debug("connectChainRPC ticker")
+				// Debug("connectChainRPC ticker")
 				// update the configuration
 				b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
 				if err == nil {
@@ -39,8 +39,8 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				if h, height, err = client.GetBestBlock(); Check(err){
 					break
 				}
-				wg.State.bestBlockHeight = int(height)
-				wg.State.bestBlockHash = h
+				wg.State.SetBestBlockHeight(int(height))
+				wg.State.SetBestBlockHash(h)
 			case <-wg.quit:
 				break out
 			}
