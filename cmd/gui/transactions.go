@@ -14,24 +14,24 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 			wg.Inset(0.25,
 				wg.th.Flex().
 					Rigid(
-						wg.Inset(0.1, wg.Caption("Date:").Color("DocText").Fn).Fn,
+						wg.Inset(0.25, wg.Caption("Date:").Color("DocText").Fn).Fn,
 					).
 					Rigid(
 						//wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
-						wg.Inset(0.1, wg.Caption("Type:").Color("DocText").Fn).Fn,
+						wg.Inset(0.25, wg.Caption("Type:").Color("DocText").Fn).Fn,
 					).
 					Flexed(1,
 						//wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
-						wg.Inset(0.1, wg.Caption("Label:").Color("DocText").Fn).Fn,
+						wg.Inset(0.25, wg.Caption("Label:").Color("DocText").Fn).Fn,
 					).
 					Rigid(
 						//wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
-						wg.Inset(0.1, wg.Caption("Amount(DUO):").Color("DocText").Fn).Fn,
+						wg.Inset(0.25, wg.Caption("Amount(DUO):").Color("DocText").Fn).Fn,
 					).Fn,
 			).Fn,
 		).
 		Flexed(1,
-			wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5,
+			wg.Inset(0.25, wg.Fill("DocBg", wg.Inset(0.25,
 				wg.lists["transactions"].Vertical().Length(len(wg.txs)).ListElement(le).Fn,
 			).Fn).Fn).Fn,
 		).Fn
