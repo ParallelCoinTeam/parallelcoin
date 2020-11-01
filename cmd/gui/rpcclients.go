@@ -37,12 +37,6 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				}
 				// update chain data
 				var chainClient *rpcclient.Client
-				//chainConnConfig := &rpcclient.ConnConfig{
-				//	Host:         *wg.cx.Config.RPCConnect,
-				//	User:         *wg.cx.Config.Username,
-				//	Pass:         *wg.cx.Config.Password,
-				//	HTTPPostMode: true,
-				//}
 				if chainClient, err = wg.chainClient(); Check(err) {
 					break
 				}
