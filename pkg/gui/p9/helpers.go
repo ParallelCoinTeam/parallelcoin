@@ -184,3 +184,16 @@ func If(value bool, t, f l.Widget) l.Widget {
 		return f
 	}
 }
+
+func (th *Theme) SliceToWidget(w []l.Widget, axis l.Axis) l.Widget {
+	var out *Flex
+	if axis == l.Horizontal {
+		out = th.Flex()
+	} else {
+		out = th.VFlex()
+	}
+	for i := range w {
+		out.Rigid(w[i])
+	}
+	return out.Fn
+}

@@ -124,44 +124,45 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 // Config is
 type Config struct {
 	sync.Mutex
-	AddCheckpoints         *cli.StringSlice `group:"debug" label:"AddCheckpoints" description:"add custom checkpoints" type:"" widget:"multi" json:"AddCheckpoints" hook:"restart"`
-	AddPeers               *cli.StringSlice `group:"node" label:"Add Peers" description:"manually adds addresses to try to connect to" type:"address" widget:"multi" json:"AddPeers" hook:"addpeer"`
-	AddrIndex              *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"" widget:"toggle"  json:"AddrIndex" hook:"dropaddrindex"`
-	AutoPorts              *bool            `group:"node" label:"AutomaticPorts" description:"RPC and controller ports are randomized, use with controller for automatic peer discovery" type:"" widget:"toggle" json:"AutoPorts" hook:"restart"`
-	BanDuration            *time.Duration   `group:"debug" label:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"" widget:"time" json:"BanDuration" hook:"restart"`
-	BanThreshold           *int             `group:"debug" label:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"" widget:"integer" json:"BanThreshold" hook:"restart"`
-	BlockMaxSize           *int             `group:"mining" label:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMaxSize" hook:"restart"`
-	BlockMaxWeight         *int             `group:"mining" label:"Block Max Weight" description:"maximum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMaxWeight" hook:"restart"`
-	BlockMinSize           *int             `group:"mining" label:"Block Min Size" description:"minimum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMinSize" hook:"restart"`
-	BlockMinWeight         *int             `group:"mining" label:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMinWeight" hook:"restart"`
-	BlockPrioritySize      *int             `group:"mining" label:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"" widget:"integer" json:"BlockPrioritySize" hook:"restart"`
-	BlocksOnly             *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"" widget:"toggle" json:"BlocksOnly" hook:"restart"`
-	CAFile                 *string          `group:"tls" label:"Certificate Authority File" description:"certificate authority file for TLS certificate validation" type:"path" widget:"string" json:"CAFile" hook:"restart"`
-	ConfigFile             *string          `group:"config" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"path" widget:"string" json:"ConfigFile" hook:"restart"`
-	ConnectPeers           *cli.StringSlice `group:"node" label:"Connect Peers" description:"connect ONLY to these addresses (disables inbound connections)" type:"address" widget:"multi" json:"ConnectPeers" hook:"restart"`
-	Controller             *string          `group:"mining" label:"Controller Listener" description:"address to bind miner controller to" type:"address" widget:"string" json:"Controller" hook:"controller"`
-	CPUProfile             *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"path" widget:"string" json:"CPUProfile" hook:"restart"`
-	DataDir                *string          `group:"config" label:"Data Directory" description:"root folder where application data is stored" type:"path" widget:"string" json:"DataDir" hook:"restart"`
-	DbType                 *string          `group:"debug" label:"Database Type" description:"type of database storage engine to use (only one right now)" type:"" widget:"string" json:"DbType" hook:"restart"`
-	DisableBanning         *bool            `group:"debug" label:"Disable Banning" description:"disables banning of misbehaving peers" type:"" widget:"toggle" json:"DisableBanning" hook:"restart"`
-	DisableCheckpoints     *bool            `group:"debug" label:"Disable Checkpoints" description:"disables all checkpoints" type:"" widget:"toggle" json:"DisableCheckpoints" hook:"restart"`
-	DisableDNSSeed         *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"" widget:"toggle" json:"DisableDNSSeed" hook:"restart"`
-	DisableListen          *bool            `group:"node" label:"Disable Listen" description:"disables inbound connections for the peer to peer network" type:"" widget:"toggle" json:"DisableListen" hook:"restart"`
-	DisableRPC             *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers" type:"" widget:"toggle" json:"DisableRPC" hook:"restart"`
-	ExternalIPs            *cli.StringSlice `group:"node" label:"External IP Addresses" description:"extra addresses to tell peers they can connect to" type:"address" widget:"multi" json:"ExternalIPs" hook:"restart"`
-	FreeTxRelayLimit       *float64         `group:"policy" label:"Free Tx Relay Limit" description:"limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"" widget:"float" json:"FreeTxRelayLimit" hook:"restart"`
-	Generate               *bool            `group:"mining" label:"Generate Blocks" description:"turn on Kopach CPU miner" type:"" widget:"toggle" json:"Generate" hook:"generate"`
-	GenThreads             *int             `group:"mining" label:"Gen Threads" description:"number of threads to mine with" type:"" widget:"integer" json:"GenThreads" hook:"genthreads"`
-	Language               *string          `group:"config" label:"Language" description:"user interface language i18 localization" type:"" widget:"string" json:"Language" hook:"language"`
-	LimitPass              *string          `group:"rpc" label:"Limit Pass" description:"limited user password" type:"" widget:"password" json:"LimitPass" hook:"restart"`
-	LimitUser              *string          `group:"rpc" label:"Limit User" description:"limited user name" type:"" widget:"string" json:"LimitUser" hook:"restart"`
-	Listeners              *cli.StringSlice `group:"node" label:"Listeners" description:"list of addresses to bind the node listener to" type:"address" widget:"multi" json:"Listeners" hook:"restart"`
-	LogDir                 *string          `group:"config" label:"Log Dir" description:"folder where log files are written" type:"path" widget:"string" json:"LogDir" hook:"restart"`
-	LogLevel               *string          `group:"config" label:"Log Level" description:"maximum log level to output\n(fatal error check warning info debug trace - what is selected includes all items to the left of the one in that list)" type:"" widget:"radio" json:"LogLevel" hook:"loglevel"`
-	MaxOrphanTxs           *int             `group:"policy" label:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"" widget:"integer" json:"MaxOrphanTxs" hook:"restart"`
-	MaxPeers               *int             `group:"node" label:"Max Peers" description:"maximum number of peers to hold connections with" type:"" widget:"integer" json:"MaxPeers" hook:"restart"`
-	MinerPass              *string          `group:"mining" label:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"" widget:"password" json:"MinerPass" hook:"restart"`
-	MiningAddrs            *cli.StringSlice `group:"mining" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"base58" widget:"multi" json:"MiningAddrs" hook:"miningaddr"`
+	AddCheckpoints     *cli.StringSlice `group:"debug" label:"AddCheckpoints" description:"add custom checkpoints" type:"" widget:"multi" json:"AddCheckpoints" hook:"restart"`
+	AddPeers           *cli.StringSlice `group:"node" label:"Add Peers" description:"manually adds addresses to try to connect to" type:"address" widget:"multi" json:"AddPeers" hook:"addpeer"`
+	AddrIndex          *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"" widget:"toggle"  json:"AddrIndex" hook:"dropaddrindex"`
+	AutoPorts          *bool            `group:"node" label:"AutomaticPorts" description:"RPC and controller ports are randomized, use with controller for automatic peer discovery" type:"" widget:"toggle" json:"AutoPorts" hook:"restart"`
+	BanDuration        *time.Duration   `group:"debug" label:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"" widget:"time" json:"BanDuration" hook:"restart"`
+	BanThreshold       *int             `group:"debug" label:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"" widget:"integer" json:"BanThreshold" hook:"restart"`
+	BlockMaxSize       *int             `group:"mining" label:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMaxSize" hook:"restart"`
+	BlockMaxWeight     *int             `group:"mining" label:"Block Max Weight" description:"maximum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMaxWeight" hook:"restart"`
+	BlockMinSize       *int             `group:"mining" label:"Block Min Size" description:"minimum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMinSize" hook:"restart"`
+	BlockMinWeight     *int             `group:"mining" label:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMinWeight" hook:"restart"`
+	BlockPrioritySize  *int             `group:"mining" label:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"" widget:"integer" json:"BlockPrioritySize" hook:"restart"`
+	BlocksOnly         *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"" widget:"toggle" json:"BlocksOnly" hook:"restart"`
+	CAFile             *string          `group:"tls" label:"Certificate Authority File" description:"certificate authority file for TLS certificate validation" type:"path" widget:"string" json:"CAFile" hook:"restart"`
+	ConfigFile         *string          `group:"config" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"path" widget:"string" json:"ConfigFile" hook:"restart"`
+	ConnectPeers       *cli.StringSlice `group:"node" label:"Connect Peers" description:"connect ONLY to these addresses (disables inbound connections)" type:"address" widget:"multi" json:"ConnectPeers" hook:"restart"`
+	Controller         *string          `group:"mining" label:"Controller Listener" description:"address to bind miner controller to" type:"address" widget:"string" json:"Controller" hook:"controller"`
+	CPUProfile         *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"path" widget:"string" json:"CPUProfile" hook:"restart"`
+	DataDir            *string          `group:"config" label:"Data Directory" description:"root folder where application data is stored" type:"path" widget:"string" json:"DataDir" hook:"restart"`
+	DbType             *string          `group:"debug" label:"Database Type" description:"type of database storage engine to use (only one right now)" type:"" widget:"string" json:"DbType" hook:"restart"`
+	DisableBanning     *bool            `group:"debug" label:"Disable Banning" description:"disables banning of misbehaving peers" type:"" widget:"toggle" json:"DisableBanning" hook:"restart"`
+	DisableCheckpoints *bool            `group:"debug" label:"Disable Checkpoints" description:"disables all checkpoints" type:"" widget:"toggle" json:"DisableCheckpoints" hook:"restart"`
+	DisableDNSSeed     *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"" widget:"toggle" json:"DisableDNSSeed" hook:"restart"`
+	DisableListen      *bool            `group:"node" label:"Disable Listen" description:"disables inbound connections for the peer to peer network" type:"" widget:"toggle" json:"DisableListen" hook:"restart"`
+	DisableRPC         *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers" type:"" widget:"toggle" json:"DisableRPC" hook:"restart"`
+	ExternalIPs        *cli.StringSlice `group:"node" label:"External IP Addresses" description:"extra addresses to tell peers they can connect to" type:"address" widget:"multi" json:"ExternalIPs" hook:"restart"`
+	FreeTxRelayLimit   *float64         `group:"policy" label:"Free Tx Relay Limit" description:"limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"" widget:"float" json:"FreeTxRelayLimit" hook:"restart"`
+	Generate           *bool            `group:"mining" label:"Generate Blocks" description:"turn on Kopach CPU miner" type:"" widget:"toggle" json:"Generate" hook:"generate"`
+	GenThreads         *int             `group:"mining" label:"Gen Threads" description:"number of threads to mine with" type:"" widget:"integer" json:"GenThreads" hook:"genthreads"`
+	Language           *string          `group:"config" label:"Language" description:"user interface language i18 localization" type:"" widget:"string" json:"Language" hook:"language"`
+	LimitPass          *string          `group:"rpc" label:"Limit Pass" description:"limited user password" type:"" widget:"password" json:"LimitPass" hook:"restart"`
+	LimitUser          *string          `group:"rpc" label:"Limit User" description:"limited user name" type:"" widget:"string" json:"LimitUser" hook:"restart"`
+	Listeners          *cli.StringSlice `group:"node" label:"Listeners" description:"list of addresses to bind the node listener to" type:"address" widget:"multi" json:"Listeners" hook:"restart"`
+	LogDir             *string          `group:"config" label:"Log Dir" description:"folder where log files are written" type:"path" widget:"string" json:"LogDir" hook:"restart"`
+	LogLevel           *string          `group:"config" label:"Log Level" description:"maximum log level to output\n(fatal error check warning info debug trace - what is selected includes all items to the left of the one in that list)" type:"" widget:"radio" json:"LogLevel" hook:"loglevel"`
+	MaxOrphanTxs       *int             `group:"policy" label:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"" widget:"integer" json:"MaxOrphanTxs" hook:"restart"`
+	MaxPeers           *int             `group:"node" label:"Max Peers" description:"maximum number of peers to hold connections with" type:"" widget:"integer" json:"MaxPeers" hook:"restart"`
+	MinerPass          *string          `group:"mining" label:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"" widget:"password" json:"MinerPass" hook:"restart"`
+	MiningAddrs        *cli.StringSlice
+	// `group:"mining" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"base58" widget:"multi" json:"MiningAddrs" hook:"miningaddr"`
 	MinRelayTxFee          *float64         `group:"policy" label:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"" widget:"float" json:"MinRelayTxFee" hook:"restart"`
 	Network                *string          `group:"node" label:"Network" description:"connect to this network: mainnet, testnet)" type:"" widget:"radio" json:"Network" hook:"restart"`
 	NoCFilters             *bool            `group:"node" label:"No CFilters" description:"disable committed filtering (CF) support" type:"" widget:"toggle" json:"NoCFilters" hook:"restart"`

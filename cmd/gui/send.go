@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -83,42 +84,40 @@ func (wg *WalletGUI) Send() {
 }
 
 func (wg *WalletGUI) sendFooter() l.Widget {
-	return wg.Inset(0.25,
-		wg.th.VFlex().
-			Rigid(
-				wg.Inset(0.25,
-					wg.th.Flex().
-						SpaceBetween().
-						Rigid(
-							wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.Caption("Transaction Fee:").Color("DocText").Fn).Fn).Fn).Fn,
-						).
-						Rigid(
-							wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.Caption("0.00000 DUO/kb").Color("DocText").Fn).Fn).Fn).Fn,
-						).
-						Rigid(
-							wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.Caption("net").Color("DocText").Fn).Fn).Fn).Fn,
-						).
-						Flexed(1,
-							wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.Caption("Balance 0.00000 DUO").Color("DocText").Fn).Fn).Fn).Fn,
-						).Fn,
-				).Fn,
-			).Rigid(
+	return wg.th.VFlex().
+		Rigid(
 			wg.Inset(0.25,
 				wg.th.Flex().
 					SpaceBetween().
 					Rigid(
-						wg.Inset(0.1, wg.sendButton(wg.clickables["sendSend"], "Send", wg.Send)).Fn,
+						wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.Caption("Transaction Fee:").Color("DocText").Fn).Fn).Fn).Fn,
 					).
 					Rigid(
-						wg.Inset(0.1, wg.sendButton(wg.clickables["sendClearAll"], "Clear All", wg.ClearAllAddresses)).Fn,
+						wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.Caption("0.00000 DUO/kb").Color("DocText").Fn).Fn).Fn).Fn,
 					).
 					Rigid(
-						wg.Inset(0.1, wg.sendButton(wg.clickables["sendAddRecipient"], "Add Recipient", wg.CreateSendAddressItem)).Fn,
+						wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.Caption("net").Color("DocText").Fn).Fn).Fn).Fn,
 					).
 					Flexed(1,
-						wg.Inset(0.1, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
+						wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.Caption("Balance 0.00000 DUO").Color("DocText").Fn).Fn).Fn).Fn,
 					).Fn,
 			).Fn,
+		).Rigid(
+		wg.Inset(0.25,
+			wg.th.Flex().
+				SpaceBetween().
+				Rigid(
+					wg.Inset(0.1, wg.sendButton(wg.clickables["sendSend"], "Send", wg.Send)).Fn,
+				).
+				Rigid(
+					wg.Inset(0.1, wg.sendButton(wg.clickables["sendClearAll"], "Clear All", wg.ClearAllAddresses)).Fn,
+				).
+				Rigid(
+					wg.Inset(0.1, wg.sendButton(wg.clickables["sendAddRecipient"], "Add Recipient", wg.CreateSendAddressItem)).Fn,
+				).
+				Flexed(1,
+					wg.Inset(0.1, wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
+				).Fn,
 		).Fn,
 	).Fn
 }
