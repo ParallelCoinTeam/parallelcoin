@@ -49,8 +49,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						},
 					).
 					Rigid(
-						wg.panel("Recent transactions", true,
-							wg.th.Body1("transactions").Color("PanelText").Fn),
+						wg.panel("Recent transactions", true, wg.RecentTransactions()),
 					).
 					Fn,
 			},
@@ -89,11 +88,16 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						},
 					).
 					Flexed(1,
-						wg.panel("Recent transactions", true,
-							wg.th.Body1("transactions").Color("PanelText").Fn),
+						wg.panel("Recent transactions", true, wg.RecentTransactions()),
 					).Fn,
 			},
 		}).Fn(gtx)
+	}
+}
+
+func (wg *WalletGUI) RecentTransactions() l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return wg.th.Body1("transactions").Color("PanelText").Fn(gtx)
 	}
 }
 
