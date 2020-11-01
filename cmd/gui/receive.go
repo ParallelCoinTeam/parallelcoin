@@ -15,7 +15,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 			wg.receiveTop(),
 		).
 		Flexed(1,
-			wg.Inset(0.25, wg.Fill("DocText", wg.Inset(0.25,
+			wg.Inset(0.25, wg.Fill("DocBg", wg.Inset(0.25,
 				wg.lists["received"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
 			).Fn).Fn).Fn,
 		).Fn
@@ -81,10 +81,14 @@ func (wg *WalletGUI) receiveTop() l.Widget {
 						wg.th.Flex().
 							SpaceBetween().
 							Rigid(
-								wg.sendButton(wg.clickables["receiveCreateNewAddress"], "Create new receiving address", wg.Send),
+								wg.Inset(0.1,
+									wg.sendButton(wg.clickables["receiveCreateNewAddress"], "Create new receiving address", wg.Send),
+								).Fn,
 							).
 							Rigid(
-								wg.sendButton(wg.clickables["receiveClear"], "Clear", wg.ClearAllAddresses),
+								wg.Inset(0.1,
+									wg.sendButton(wg.clickables["receiveClear"], "Clear", wg.ClearAllAddresses),
+								).Fn,
 							).Fn,
 					).Fn,
 				).Fn,

@@ -27,14 +27,14 @@ type TextInput struct {
 }
 
 // SimpleInput creates a simple text input widget
-func (th *Theme) SimpleInput(editor *Editor) *TextInput {
+func (th *Theme) SimpleInput(editor *Editor, hint string) *TextInput {
 	e := &TextInput{
 		th:        th,
 		editor:    editor,
 		textSize:  th.TextSize,
 		color:     th.Colors.Get("DocText"),
 		shaper:    th.shaper,
-		hint:      "hint",
+		hint:      hint,
 		hintColor: th.Colors.Get("Hint"),
 	}
 	e.Font("bariol regular")
