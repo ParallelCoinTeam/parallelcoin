@@ -338,8 +338,7 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			}
 			switch client := chainClient.(type) {
 			case *chain.RPCClient:
-				resp, err := handlerData.Handler(cmd,
-					w, client)
+				resp, err := handlerData.Handler(cmd, w, client)
 				if err != nil {
 					Error(err)
 					return nil, JSONError(err)
@@ -489,7 +488,7 @@ func MakeMultiSigScript(w *wallet.Wallet, keys []string, nRequired int) ([]byte,
 
 // AddMultiSigAddress handles an addmultisigaddress request by adding a
 // multisig address to the given wallet.
-func AddMultiSigAddress(icmd interface{}, w *wallet.Wallet,	chainClient ...*chain.RPCClient) (interface{}, error) {
+func AddMultiSigAddress(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.RPCClient) (interface{}, error) {
 	var msg string
 	cmd, ok := icmd.(*btcjson.AddMultisigAddressCmd)
 	// cmd, ok := icmd.(*btcjson.ListTransactionsCmd)
@@ -1544,8 +1543,9 @@ func ListSinceBlock(icmd interface{}, w *wallet.Wallet,
 
 // ListTransactions handles a listtransactions request by returning an array of maps with details of sent and recevied
 // wallet transactions.
-func ListTransactions(icmd interface{}, w *wallet.Wallet,
-	chainClient ...*chain.RPCClient) (txs interface{}, err error) {
+func ListTransactions(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.RPCClient) (txs interface{}, err error) {
+	// Debugs(icmd)
+	// Debug("ListTransactions")
 	if len(chainClient) < 1 || chainClient[0] == nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCNoChain,
@@ -1553,24 +1553,25 @@ func ListTransactions(icmd interface{}, w *wallet.Wallet,
 		}
 	}
 	cmd, ok := icmd.(*btcjson.ListTransactionsCmd)
-	if !ok || cmd.From == nil || cmd.Count == nil || cmd.Account != nil {
+	if !ok { // || cmd.From == nil || cmd.Count == nil || cmd.Account != nil {
+		Error("invalid parameter ok", !ok, "from", cmd.From == nil, "count", cmd.Count == nil, "account", cmd.Account != nil)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidParameter,
 			Message: HelpDescsEnUS()["listtransactions"],
-			// "invalid subcommand for addnode",
 		}
 	}
-	// TODO: ListTransactions does not currently understand the difference
-	//  between transactions pertaining to one account from another.  This
-	//  will be resolved when wtxmgr is combined with the waddrmgr namespace.
-	if *cmd.Account != "*" {
-		// For now, don't bother trying to continue if the user specified an account, since this can't be (easily or
-		// efficiently) calculated.
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCWallet,
-			Message: "Transactions are not yet grouped by account",
-		}
-	}
+	// // TODO: ListTransactions does not currently understand the difference
+	// //  between transactions pertaining to one account from another.  This
+	// //  will be resolved when wtxmgr is combined with the waddrmgr namespace.
+	// if *cmd.Account != "*" {
+	// 	// For now, don't bother trying to continue if the user specified an account, since this can't be (easily or
+	// 	// efficiently) calculated.
+	// 	Error("you must use * for account, as transactions are not yet grouped by account")
+	// 	return nil, &btcjson.RPCError{
+	// 		Code:    btcjson.ErrRPCWallet,
+	// 		Message: "Transactions are not yet grouped by account",
+	// 	}
+	// }
 	txs, err = w.ListTransactions(*cmd.From, *cmd.Count)
 	return txs, err
 }

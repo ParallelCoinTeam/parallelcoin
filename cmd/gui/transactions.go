@@ -43,7 +43,7 @@ func (wg *WalletGUI) Transactions() {
 	chainClient, err := wg.chainClient()
 	if err != nil {
 	}
-	txs, err := chainClient.ListTransactions("")
+	txs, err := chainClient.ListTransactions(nil)
 	if err != nil {
 	}
 	wg.txs = txs

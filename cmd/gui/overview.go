@@ -28,14 +28,11 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 									wg.th.SliceToWidget(
 										append([]l.Widget{
 											func(gtx l.Context) l.Dimensions {
-												// render the widgets onto a second context to get their dimensions
-												gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
-												dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
-												gtx.Constraints.Max.X = dim.Size.X
-												gtx.Constraints.Min.X = dim.Size.X
+												_, bc = balanceColumn(gtx)
+												gtx.Constraints.Max.X = *wg.Size
 												return wg.th.Fill("DocText",
 													wg.th.Flex().
-														Flexed(1,
+														Rigid(
 															wg.th.Inset(0.5,
 																wg.th.H6("Balances").
 																	// Font("bariol bold").
@@ -52,9 +49,9 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						},
 					).
 					Rigid(
-						wg.panel("Recent transactions", true,
-							wg.th.Body1("transactions").Color("PanelText").Fn),
-					).Fn,
+						wg.panel("Recent transactions", true, wg.RecentTransactions()),
+					).
+					Fn,
 			},
 			{
 				Size: 1280,
@@ -91,11 +88,16 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						},
 					).
 					Flexed(1,
-						wg.panel("Recent transactions", true,
-							wg.th.Body1("transactions").Color("PanelText").Fn),
+						wg.panel("Recent transactions", true, wg.RecentTransactions()),
 					).Fn,
 			},
 		}).Fn(gtx)
+	}
+}
+
+func (wg *WalletGUI) RecentTransactions() l.Widget {
+	return func(gtx l.Context) l.Dimensions {
+		return wg.th.Body1("transactions").Color("PanelText").Fn(gtx)
 	}
 }
 
@@ -110,7 +112,7 @@ func leftPadTo(length, limit int, txt string) string {
 func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 	bal := leftPadTo(15, 15, fmt.Sprintf("%6.8f", balance))
 	return wg.th.Inset(0.25,
-		wg.th.Flex().AlignBaseline().
+		wg.th.Flex().AlignEnd().
 			Rigid(wg.th.Body1(" ").Fn).
 			Rigid(
 				wg.th.Caption(bal).
