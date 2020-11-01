@@ -10,15 +10,17 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return wg.Caption("BalaaaaaaaaaaaaaaaO_" + fmt.Sprint(index)).Color("DocBg").Fn(gtx)
 	}
-	return wg.th.VFlex().
-		Rigid(
-			wg.receiveTop(),
-		).
-		Flexed(1,
-			wg.Inset(0.25, wg.Fill("DocBg", wg.Inset(0.25,
-				wg.lists["received"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
-			).Fn).Fn).Fn,
-		).Fn
+	return func(gtx l.Context) l.Dimensions {
+		return wg.th.VFlex().
+			Rigid(
+				wg.receiveTop(),
+			).
+			Flexed(1,
+				wg.Inset(0.25, wg.Fill("DocBg", wg.Inset(0.25,
+					wg.lists["received"].Vertical().Length(len(wg.sendAddresses)).ListElement(le).Fn,
+				).Fn).Fn).Fn,
+			).Fn(gtx)
+	}
 }
 
 func (wg *WalletGUI) receiveTop() l.Widget {

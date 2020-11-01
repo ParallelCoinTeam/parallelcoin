@@ -217,6 +217,13 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		if !first {
 			// put a space between the sections
 			out = append(out, func(gtx l.Context) l.Dimensions {
+				return ng.th.Fill("DocBg",
+					ng.th.Inset(0.25,
+						ng.th.Flex().Flexed(1, p9.EmptySpace(0, 0)).Fn,
+					).Fn,
+				).Fn(gtx)
+			})
+			out = append(out, func(gtx l.Context) l.Dimensions {
 				return ng.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn(gtx)
 			})
 		} else {
@@ -225,6 +232,13 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		// put in the header
 		out = append(out, func(gtx l.Context) l.Dimensions {
 			return ng.th.Inset(0.0, ng.th.Fill("DocText", ng.th.Inset(0.5, ng.th.H6(g.name).Color("DocBg").Fn).Fn).Fn).Fn(gtx)
+		})
+		out = append(out, func(gtx l.Context) l.Dimensions {
+			return ng.th.Fill("DocBg",
+				ng.th.Inset(0.25,
+					ng.th.Flex().Flexed(1, p9.EmptySpace(0, 0)).Fn,
+				).Fn,
+			).Fn(gtx)
 		})
 		// add the widgets
 		for j := range groups[i].items {
@@ -237,7 +251,15 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 					// 		return func(gtx l.Context) l.Dimensions {
 					if k < len(gi.widget()) {
 
-						return ng.th.Fill("DocBg", gi.widget()[k]).Fn(gtx)
+						return ng.th.Fill("DocBg",
+							ng.th.Flex().
+								Rigid(
+									ng.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn,
+								).
+								Rigid(
+									gi.widget()[k],
+								).Fn,
+						).Fn(gtx)
 					}
 					return l.Dimensions{}
 					// }
@@ -284,7 +306,7 @@ func (c *Config) RenderConfigItem(item *Item, position int) []l.Widget {
 func (c *Config) RenderToggle(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.5, c.th.Flex().
+			return c.th.Inset(0.25, c.th.Flex().
 				Rigid(
 					c.th.Switch(c.Bools[item.slug]).Fn,
 				).
@@ -306,7 +328,7 @@ func (c *Config) RenderToggle(item *Item) []l.Widget {
 func (c *Config) RenderInteger(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.5, c.th.VFlex().
+			return c.th.Inset(0.25, c.th.VFlex().
 				Rigid(
 					c.th.Body1(item.label).Fn,
 				).
@@ -326,7 +348,7 @@ func (c *Config) RenderInteger(item *Item) []l.Widget {
 func (c *Config) RenderTime(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.5, c.th.VFlex().
+			return c.th.Inset(0.25, c.th.VFlex().
 				Rigid(
 					c.th.Body1(item.label).Fn,
 				).
@@ -346,7 +368,7 @@ func (c *Config) RenderTime(item *Item) []l.Widget {
 func (c *Config) RenderFloat(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.5, c.th.VFlex().
+			return c.th.Inset(0.25, c.th.VFlex().
 				Rigid(
 					c.th.Body1(item.label).Fn,
 				).
@@ -365,7 +387,7 @@ func (c *Config) RenderFloat(item *Item) []l.Widget {
 
 func (c *Config) RenderString(item *Item) []l.Widget {
 	return []l.Widget{
-		c.th.Inset(0.5,
+		c.th.Inset(0.25,
 			c.th.VFlex().
 				Rigid(
 					c.th.Body1(item.label).Fn,
@@ -384,7 +406,7 @@ func (c *Config) RenderString(item *Item) []l.Widget {
 
 func (c *Config) RenderPassword(item *Item) []l.Widget {
 	return []l.Widget{
-		c.th.Inset(0.5,
+		c.th.Inset(0.25,
 			c.th.VFlex().
 				Rigid(
 					c.th.Body1(item.label).Fn,
@@ -406,7 +428,7 @@ func (c *Config) RenderMulti(item *Item, position int) []l.Widget {
 	// c.multis[item.slug].
 	w := []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.5,
+			return c.th.Inset(0.25,
 				c.th.VFlex().
 					Rigid(
 						c.th.Body1(item.label).Fn,
@@ -441,7 +463,7 @@ func (c *Config) RenderRadio(item *Item) []l.Widget {
 						UncheckedStateIcon(icons.ToggleRadioButtonUnchecked),
 					c.enums[item.slug], item.options[i], item.options[i]).Fn)
 		}
-		return c.th.Inset(0.5,
+		return c.th.Inset(0.25,
 			c.th.VFlex().
 				Rigid(
 					c.th.Body1(item.label).Fn,

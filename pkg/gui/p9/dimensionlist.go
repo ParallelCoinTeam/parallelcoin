@@ -59,6 +59,13 @@ func GetDimensionList(gtx l.Context, length int, listElement ListElement) (dims 
 	return
 }
 
+func GetDimension(gtx l.Context, w l.Widget) (dim l.Dimensions) {
+	child := op.Record(gtx.Ops)
+	dim = w(gtx)
+	_ = child.Stop()
+	return
+}
+
 func (d DimensionList) GetSizes(position Position, axis l.Axis) (total, before int) {
 	for i := range d {
 		inc := axisMain(axis, d[i].Size)

@@ -12,7 +12,7 @@ type State struct {
 	lastUpdated        time.Time
 	bestBlockHeight    int
 	bestBlockHash      *chainhash.Hash
-	balance       float64
+	balance            float64
 	balanceUnconfirmed float64
 }
 

@@ -23,5 +23,4 @@ nodegui:
 
 gui:
 	go install -v
-	pod -D test0 wallet drophistory
 	pod -D test0 -n testnet -g -G 1 --lan --solo --kopachgui testnet
