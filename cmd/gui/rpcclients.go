@@ -7,6 +7,7 @@ import (
 	"time"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -85,6 +86,13 @@ func (wg *WalletGUI) ConnectChainRPC() {
 					break
 				}
 				wg.State.SetBalance(confirmed.ToDUO())
+				var ltr []btcjson.ListTransactionsResult
+				// TODO: for some reason this function returns half as many as requested
+				if ltr, err = walletClient.ListTransactionsCount("default", 20); Check(err) {
+					break
+				}
+				// Debugs(ltr)
+				wg.State.SetLastTxs(ltr)
 			case <-wg.quit:
 				break out
 			}

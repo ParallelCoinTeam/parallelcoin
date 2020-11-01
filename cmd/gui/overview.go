@@ -29,13 +29,6 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 										append([]l.Widget{
 											func(gtx l.Context) l.Dimensions {
 												_, bc = balanceColumn(gtx)
-												// // render the widgets onto a second context to get their dimensions
-												// gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
-												// dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
-												// gtx.Constraints.Max.X = dim.Size.X
-												// gtx.Constraints.Min.X = 0
-												// gtx.Constraints.Max.X = dim.Size.Y
-												// gtx.Constraints.Min.X = 0
 												gtx.Constraints.Max.X = *wg.Size
 												return wg.th.Fill("DocText",
 													wg.th.Flex().
