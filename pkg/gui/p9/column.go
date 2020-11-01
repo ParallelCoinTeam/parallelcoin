@@ -32,7 +32,7 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 		return c.th.Label().Text(c.rows[index].Label).Font(c.font).TextScale(c.scale).Fn(gtx)
 	}
 	// render the widgets onto a second context to get their dimensions
-	gtx1 := CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
+	gtx1 := CopyContextDimensions(gtx, gtx.Constraints.Max, l.Horizontal)
 	// generate the dimensions for all the list elements
 	dims := GetDimensionList(gtx1, len(c.rows), le)
 	for i := range dims {
@@ -44,13 +44,14 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 		i := x
 		out = append(out, func(gtx l.Context) l.Dimensions {
 			return c.th.Inset(0.25, func(gtx l.Context) l.Dimensions {
-				gtx.Constraints.Max.Y = dims[i].Size.Y
-				gtx.Constraints.Min.Y = dims[i].Size.Y
+				// gtx.Constraints.Max.Y = dims[i].Size.Y
+				// gtx.Constraints.Min.Y = dims[i].Size.Y
+				// gtx.Constraints.Min.X = max
 				return c.th.Flex().AlignBaseline().
 					Rigid(
 						func(gtx l.Context) l.Dimensions {
-							gtx.Constraints.Max.X = max
-							gtx.Constraints.Min.X = max
+							gtx.Constraints.Min.X = max // dims[i].Size.X
+							// gtx.Constraints.Max.X = max
 							return c.th.Label().Text(c.rows[i].Label).Font(c.font).TextScale(c.scale).Fn(gtx)
 						},
 					).

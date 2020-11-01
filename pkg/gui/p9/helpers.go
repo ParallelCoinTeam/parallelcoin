@@ -156,9 +156,9 @@ func CopyContextDimensions(gtx l.Context, size image.Point, axis l.Axis) l.Conte
 	ip := image.Point{}
 	if axis == l.Horizontal {
 		ip.Y = size.Y
-		ip.X = Inf
+		ip.X = gtx.Constraints.Max.X
 	} else {
-		ip.Y = Inf
+		ip.Y = gtx.Constraints.Max.Y
 		ip.X = size.X
 	}
 	var ops op.Ops
