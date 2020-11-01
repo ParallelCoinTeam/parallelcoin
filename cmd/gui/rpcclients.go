@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net"
 	"time"
 
@@ -21,27 +23,31 @@ func (wg *WalletGUI) chainClient() (*rpcclient.Client, error) {
 func (wg *WalletGUI) ConnectChainRPC() {
 	go func() {
 		ticker := time.Tick(time.Second)
+		connectedOnce := false
 	out:
 		for {
 			select {
 			case <-ticker:
 				// Debug("connectChainRPC ticker")
-				// // update the configuration
-				// b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
-				// if err == nil {
-				// 	err = json.Unmarshal(b, wg.cx.Config)
-				// 	if err != nil {
-				// 	}
-				// }
+				// update the configuration
+				var err error
+				if !connectedOnce {
+					var b []byte
+					b, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile)
+					if err == nil {
+						err = json.Unmarshal(b, wg.cx.Config)
+						if err != nil {
+						}
+					}
+				}
 				// update chain data
 				var chainClient *rpcclient.Client
-				//chainConnConfig := &rpcclient.ConnConfig{
+				// chainConnConfig := &rpcclient.ConnConfig{
 				//	Host:         *wg.cx.Config.RPCConnect,
 				//	User:         *wg.cx.Config.Username,
 				//	Pass:         *wg.cx.Config.Password,
 				//	HTTPPostMode: true,
-				//}
-				var err error
+				// }
 				if chainClient, err = wg.chainClient(); Check(err) {
 					break
 				}
@@ -50,6 +56,7 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				if h, height, err = chainClient.GetBestBlock(); Check(err) {
 					break
 				}
+				connectedOnce = true
 				wg.State.SetBestBlockHeight(int(height))
 				wg.State.SetBestBlockHash(h)
 				// update wallet data
