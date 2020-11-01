@@ -1,8 +1,6 @@
 package gui
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net"
 	"time"
 
@@ -28,13 +26,13 @@ func (wg *WalletGUI) ConnectChainRPC() {
 			select {
 			case <-ticker:
 				// Debug("connectChainRPC ticker")
-				// update the configuration
-				b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
-				if err == nil {
-					err = json.Unmarshal(b, wg.cx.Config)
-					if err != nil {
-					}
-				}
+				// // update the configuration
+				// b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
+				// if err == nil {
+				// 	err = json.Unmarshal(b, wg.cx.Config)
+				// 	if err != nil {
+				// 	}
+				// }
 				// update chain data
 				var chainClient *rpcclient.Client
 				//chainConnConfig := &rpcclient.ConnConfig{
@@ -43,6 +41,7 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				//	Pass:         *wg.cx.Config.Password,
 				//	HTTPPostMode: true,
 				//}
+				var err error
 				if chainClient, err = wg.chainClient(); Check(err) {
 					break
 				}
