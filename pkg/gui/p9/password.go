@@ -31,7 +31,7 @@ type Password struct {
 
 func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfocused string, size int, handle func(pass string)) *Password {
 	pass := th.Editor().Mask('•').SingleLine().Submit(true)
-	passInput := th.SimpleInput(pass).Color(borderColorUnfocused)
+	passInput := th.SimpleInput(pass, "*******").Color(borderColorUnfocused)
 	p := &Password{
 		Theme:                th,
 		unhideClickable:      th.Clickable(),

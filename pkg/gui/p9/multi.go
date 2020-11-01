@@ -41,7 +41,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 		m.inputLocation = -1
 		m.handle(*m.lines)
 	}
-	m.input = th.Input("", borderColorFocused, borderColorUnfocused, size, handleChange)
+	m.input = th.Input("", "", borderColorFocused, borderColorUnfocused, size, handleChange)
 	m.clickables = append(m.clickables, (*Clickable)(nil))
 	m.buttons = append(m.buttons, (*ButtonLayout)(nil))
 	m.removeClickables = append(m.removeClickables, (*Clickable)(nil))
@@ -89,7 +89,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 			Icon(
 				m.Theme.Icon().Scale(1.5).Color("DocText").Src(icons.ActionDelete),
 			).
-			Background("DocBg").
+			Background("Transparent").
 			SetClick(func() {
 				Debug("remove button", y, "clicked", len(*m.lines))
 				m.inputLocation = -1
@@ -237,7 +237,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 					m.inputLocation = x
 					m.input.editor.SetText((*m.lines)[x])
 					m.input.editor.Focus()
-				})).CornerRadius(0).Background("transparent").
+				})).CornerRadius(0).Background("Transparent").
 				Embed(
 					m.Theme.Flex().
 						Rigid(
@@ -288,7 +288,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 		m.PopulateWidgets()
 		m.input.editor.SetText("")
 		m.input.editor.Focus()
-	}).Background("DocBg").Fn)
+	}).Background("Transparent").Fn)
 	// m.UpdateWidgets()
 	// m.PopulateWidgets()
 	// Debug(m.inputLocation)
@@ -413,7 +413,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			m.UpdateWidgets()
 			m.PopulateWidgets()
 			m.input.editor.Focus()
-		}).Background("DocBg").Fn
+		}).Background("Transparent").Fn
 		widgets = append(widgets, addb)
 		return addb(gtx)
 	}

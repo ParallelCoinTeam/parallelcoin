@@ -161,7 +161,8 @@ type Config struct {
 	MaxOrphanTxs           *int             `group:"policy" label:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"" widget:"integer" json:"MaxOrphanTxs" hook:"restart"`
 	MaxPeers               *int             `group:"node" label:"Max Peers" description:"maximum number of peers to hold connections with" type:"" widget:"integer" json:"MaxPeers" hook:"restart"`
 	MinerPass              *string          `group:"mining" label:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"" widget:"password" json:"MinerPass" hook:"restart"`
-	MiningAddrs            *cli.StringSlice `group:"mining" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"base58" widget:"multi" json:"MiningAddrs" hook:"miningaddr"`
+	MiningAddrs            *cli.StringSlice
+	// `group:"mining" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"base58" widget:"multi" json:"MiningAddrs" hook:"miningaddr"`
 	MinRelayTxFee          *float64         `group:"policy" label:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"" widget:"float" json:"MinRelayTxFee" hook:"restart"`
 	Network                *string          `group:"node" label:"Network" description:"connect to this network: mainnet, testnet)" type:"" widget:"radio" json:"Network" hook:"restart"`
 	NoCFilters             *bool            `group:"node" label:"No CFilters" description:"disable committed filtering (CF) support" type:"" widget:"toggle" json:"NoCFilters" hook:"restart"`

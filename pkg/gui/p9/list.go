@@ -64,10 +64,10 @@ func (th *Theme) List() (out *List) {
 		pageDown:        th.Clickable(),
 		color:           "DocBg",
 		active:          "Primary",
-		scrollWidth:     int(th.TextSize.V),
-		setScrollWidth:  int(th.TextSize.V),
-		scrollBarPad:    int(th.TextSize.V * 0.5),
-		setScrollBarPad: int(th.TextSize.V * 0.5),
+		scrollWidth:     int(th.TextSize.Scale(1).V),
+		setScrollWidth:  int(th.TextSize.Scale(1).V),
+		scrollBarPad:    int(th.TextSize.Scale(0.25).V),
+		setScrollBarPad: int(th.TextSize.Scale(0.25).V),
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}
@@ -218,7 +218,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	var container l.Widget
 	if li.axis == l.Horizontal {
 		container = li.th.VFlex().
-			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad)).
+			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad*2)).
 			Rigid(
 				li.th.VFlex().
 					Rigid(
@@ -239,7 +239,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			Rigid(
 				li.th.Flex().
 					Rigid(
-						li.th.Fill("PanelBg", EmptySpace(li.scrollBarPad, 0)).Fn,
+						li.th.Fill("PanelBg", EmptySpace(li.scrollBarPad*2, 0)).Fn,
 					).
 					Rigid(
 						li.th.Flex().Vertical().

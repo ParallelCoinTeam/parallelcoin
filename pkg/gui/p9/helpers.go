@@ -156,9 +156,9 @@ func CopyContextDimensions(gtx l.Context, size image.Point, axis l.Axis) l.Conte
 	ip := image.Point{}
 	if axis == l.Horizontal {
 		ip.Y = size.Y
-		ip.X = Inf
+		ip.X = gtx.Constraints.Max.X
 	} else {
-		ip.Y = Inf
+		ip.Y = gtx.Constraints.Max.Y
 		ip.X = size.X
 	}
 	var ops op.Ops
@@ -183,4 +183,17 @@ func If(value bool, t, f l.Widget) l.Widget {
 	} else {
 		return f
 	}
+}
+
+func (th *Theme) SliceToWidget(w []l.Widget, axis l.Axis) l.Widget {
+	var out *Flex
+	if axis == l.Horizontal {
+		out = th.Flex()
+	} else {
+		out = th.VFlex()
+	}
+	for i := range w {
+		out.Rigid(w[i])
+	}
+	return out.Fn
 }

@@ -2,6 +2,7 @@ package gui
 
 import (
 	"gioui.org/app"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
@@ -10,9 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -49,12 +48,12 @@ type WalletGUI struct {
 	running          bool
 	invalidate       chan struct{}
 	quit             chan struct{}
-	sendAddresses    []*SendAddress
-	Shell            *worker.Worker
+	sendAddresses    []SendAddress
+	txs              []btcjson.ListTransactionsResult
+	Worker           *worker.Worker
 	RunCommandChan   chan string
 	State            State
-	ChainClient      *chain.RPCClient
-	WalletClient     *rpcclient.Client
+	Shell            *worker.Worker
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -74,11 +73,12 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
 	wg.lists = map[string]*p9.List{
-		"createWallet":                   wg.th.List(),
-		"overview":                       wg.th.List(),
-		"send":                           wg.th.List(),
-		"settings":                       wg.th.List(),
-		"receiveRequestedPaymentHistory": wg.th.List(),
+		"createWallet": wg.th.List(),
+		"overview":     wg.th.List(),
+		"send":         wg.th.List(),
+		"transactions": wg.th.List(),
+		"settings":     wg.th.List(),
+		"received":     wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
@@ -99,9 +99,9 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	pass := "password"
 	wg.inputs = map[string]*p9.Input{
-		"receiveLabel":   wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
-		"receiveAmount":  wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
-		"receiveMessage": wg.th.Input("label", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 25, func(pass string) {}),
 	}
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
@@ -118,7 +118,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.App = wg.GetAppWidget()
 	go func() {
 		if err := wg.w.
-			Size(640, 480).
+			Size(800, 480).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(

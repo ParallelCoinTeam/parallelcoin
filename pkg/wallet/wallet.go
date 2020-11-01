@@ -1742,12 +1742,12 @@ func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) (txList []btcjson.
 // for listtransactions RPC replies.
 func (w *Wallet) ListTransactions(from, count int) (txList []btcjson.ListTransactionsResult, err error) {
 	// txList := []btcjson.ListTransactionsResult{}
-	Trace("ListTransactions", from, count)
+	// Debug("ListTransactions", from, count)
 	if err = walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		// Get current block. The block height used for calculating the number of tx confirmations.
 		syncBlock := w.Manager.SyncedTo()
-		Trace("synced to", syncBlock)
+		// Debug("synced to", syncBlock)
 		// Need to skip the first from transactions, and after those, only include the next count transactions.
 		skipped := 0
 		n := 0
