@@ -7,6 +7,7 @@ import (
 
 	l "gioui.org/layout"
 	"gioui.org/op"
+	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
 )
@@ -101,12 +102,45 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 // fields to use: Address, Amount, BlockIndex, BlockTime, Category, Confirmations, Generated
 func (wg *WalletGUI) RecentTransactions() l.Widget {
 	out := wg.th.VFlex()
-	for i := range wg.State.lastTxs {
+	for x := range wg.State.lastTxs {
+		i := x
 		out.Rigid(wg.th.Flex().SpaceBetween().AlignBaseline().Rigid(
 			wg.th.H6(fmt.Sprintf("%-6.8f", wg.State.lastTxs[i].Amount)).Color("PanelText").Fn,
 		).Rigid(
 			wg.th.Caption(wg.State.lastTxs[i].Address).Font("go regular").Color("PanelText").TextScale(0.66).Fn,
 		).Fn)
+		out.Rigid(func(gtx l.Context) l.Dimensions {
+			return wg.th.Flex().
+				Rigid(
+					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.MapsLayers).Fn,
+				).
+				Rigid(
+					wg.th.Caption(
+						fmt.Sprintf("%d", *wg.State.lastTxs[i].BlockIndex),
+					).Color("PanelText").Fn,
+				).
+				Rigid(
+					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.ActionCheckCircle).Fn,
+				).
+				Rigid(
+					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.AVNewReleases).Fn,
+				).
+				Rigid(
+					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.AVPlaylistAddCheck).Fn,
+				).
+				Rigid(
+					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.DeviceAccessTime).Fn,
+				).
+				Rigid(
+					wg.th.Caption(
+						fmt.Sprintf("%v", time.Unix(wg.State.lastTxs[i].BlockTime, 0)),
+					).Color("PanelText").Fn,
+				).
+				// Rigid(
+				// wg.Icon().Color("Primary").Scale(1.5).Src(icons2.).Fn,
+				// ).
+				Fn(gtx)
+		})
 		out.Rigid(wg.th.Caption(
 			fmt.Sprintf("in block: %d at %v",
 				*wg.State.lastTxs[i].BlockIndex,
@@ -118,7 +152,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 			wg.State.lastTxs[i].Generated,
 		),
 		).Color("PanelText").Fn)
-		out.Rigid(wg.th.Caption(fmt.Sprintf("%v")).Color("PanelText").Fn)
+		// out.Rigid(wg.th.Caption(fmt.Sprintf("%v")).Color("PanelText").Fn)
 		out.Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn)
 	}
 	return func(gtx l.Context) l.Dimensions {
