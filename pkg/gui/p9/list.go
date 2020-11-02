@@ -34,6 +34,7 @@ type List struct {
 	drag            gesture.Drag
 	color           string
 	active          string
+	background      string
 	currentColor    string
 	scrollWidth     int
 	setScrollWidth  int
@@ -57,13 +58,14 @@ type List struct {
 }
 
 // List returns a new scrollable List widget
-func (th *Theme) List() (out *List) {
-	out = &List{
+func (th *Theme) List() (li *List) {
+	li = &List{
 		th:              th,
 		pageUp:          th.Clickable(),
 		pageDown:        th.Clickable(),
-		color:           "DocBg",
-		active:          "Primary",
+		color:           "Primary",
+		background:      "Transparent",
+		active:          "DocBg",
 		scrollWidth:     int(th.TextSize.Scale(1).V),
 		setScrollWidth:  int(th.TextSize.Scale(1).V),
 		scrollBarPad:    int(th.TextSize.Scale(0.25).V),
@@ -71,7 +73,7 @@ func (th *Theme) List() (out *List) {
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}
-	out.currentColor = out.color
+	li.currentColor = li.color
 	return
 }
 
@@ -139,6 +141,12 @@ func (li *List) ScrollWidth(width int) *List {
 
 func (li *List) Color(color string) *List {
 	li.color = color
+	li.currentColor = li.color
+	return li
+}
+
+func (li *List) Background(color string) *List {
+	li.background = color
 	return li
 }
 
@@ -223,32 +231,36 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			Rigid(
 				li.th.VFlex().
 					Rigid(
-						li.th.Fill("PanelBg", EmptySpace(0, li.scrollBarPad)).Fn,
+						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad*2)).Fn,
 					).
 					Rigid(
-						li.th.Flex().
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.top, li.scrollWidth, false)).
-							Rigid(li.grabber(li.dims, li.middle, li.scrollWidth)).
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.bottom, li.scrollWidth, true)).
-							Fn,
+						li.th.Fill(li.background,
+							li.th.Flex().
+								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
+								Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
+								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
+								Fn,
+						).Fn,
 					).
 					Fn,
 			).Fn
 	} else {
 		container = li.th.Flex().
-			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad)).
+			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad*2)).
 			Rigid(
-				li.th.Flex().
-					Rigid(
-						li.th.Fill("PanelBg", EmptySpace(li.scrollBarPad*2, 0)).Fn,
-					).
-					Rigid(
-						li.th.Flex().Vertical().
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
-							Fn,
-					).Fn,
+				li.th.Fill(li.background,
+					li.th.Flex().
+						Rigid(
+							EmptySpace(li.scrollBarPad*2, 0),
+						).
+						Rigid(
+							li.th.Flex().Vertical().
+								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
+								Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
+								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
+								Fn,
+						).Fn,
+				).Fn,
 			).Fn
 	}
 	return container(gtx)
@@ -257,10 +269,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 func (li *List) embedWidget(scrollWidth int) func(l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		if li.axis == l.Horizontal {
-			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y - scrollWidth
+			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y - scrollWidth // - li.scrollBarPad
 			gtx.Constraints.Max.Y = gtx.Constraints.Min.Y
 		} else {
-			gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth
+			gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth // - li.scrollBarPad
 			gtx.Constraints.Max.X = gtx.Constraints.Min.X
 		}
 		return li.Layout(gtx, li.length, li.w)
@@ -292,10 +304,10 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 			}
 			li.position = dims.CoordinateToPosition(newPos, li.axis)
 		})).Embed(
-			li.th.Fill("PanelBg",
+			li.th.Fill(li.background,
 				EmptySpace(x, y),
 			).Fn,
-		).Background("PanelBg").CornerRadius(0).Fn(gtx)
+		).Background(li.background).CornerRadius(0).Fn(gtx)
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 
 	l "gioui.org/layout"
 	"gioui.org/op"
+	"github.com/kofoworola/godate"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -50,8 +51,31 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 							).Fn(gtx)
 						},
 					).
-					Rigid(
-						wg.panel("Recent transactions", true, wg.RecentTransactions()),
+					Flexed(1,
+						wg.th.Inset(0.25,
+							wg.th.VFlex().Rigid(
+								wg.Fill("DocText",
+									wg.th.Flex().
+										Rigid(
+											wg.Inset(0.5,
+												wg.H6("recent transactions").Color("DocBg").Fn,
+											).Fn,
+										).Fn,
+								).
+									Fn,
+							).Rigid(
+								wg.th.Fill("DocBg",
+									wg.th.Flex().
+										Rigid(
+											wg.th.Inset(0.5,
+												p9.EmptySpace(0, 0)).Fn,
+										).
+										Flexed(1,
+											wg.RecentTransactions(),
+										).Fn,
+								).Fn,
+							).Fn,
+						).Fn,
 					).
 					Fn,
 			},
@@ -90,8 +114,32 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						},
 					).
 					Flexed(1,
-						wg.panel("Recent transactions", true, wg.RecentTransactions()),
-					).Fn,
+						wg.th.Inset(0.25,
+							wg.th.VFlex().Rigid(
+								wg.Fill("DocText",
+									wg.th.Flex().
+										Rigid(
+											wg.Inset(0.5,
+												wg.H6("recent transactions").Color("DocBg").Fn,
+											).Fn,
+										).Fn,
+								).
+									Fn,
+							).Rigid(
+								wg.th.Fill("DocBg",
+									wg.th.Flex().
+										Rigid(
+											wg.th.Inset(0.5,
+												p9.EmptySpace(0, 0)).Fn,
+										).
+										Flexed(1,
+											wg.RecentTransactions(),
+										).Fn,
+								).Fn,
+							).Fn,
+						).Fn,
+					).
+					Fn,
 			},
 		}).Fn(gtx)
 	}
@@ -101,62 +149,119 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 //
 // fields to use: Address, Amount, BlockIndex, BlockTime, Category, Confirmations, Generated
 func (wg *WalletGUI) RecentTransactions() l.Widget {
-	out := wg.th.VFlex()
+	var out []l.Widget
+	// first := true
+	out = append(out,
+
+	)
 	for x := range wg.State.lastTxs {
 		i := x
-		out.Rigid(wg.th.Flex().SpaceBetween().AlignBaseline().Rigid(
-			wg.th.H6(fmt.Sprintf("%-6.8f", wg.State.lastTxs[i].Amount)).Color("PanelText").Fn,
-		).Rigid(
-			wg.th.Caption(wg.State.lastTxs[i].Address).Font("go regular").Color("PanelText").TextScale(0.66).Fn,
-		).Fn)
-		out.Rigid(func(gtx l.Context) l.Dimensions {
-			return wg.th.Flex().
-				Rigid(
-					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.MapsLayers).Fn,
+		// spacer
+		// if first {
+		// 	first = false
+		// } else {
+		out = append(out,
+			wg.th.Fill("DocBg",
+				wg.th.Inset(0.5, p9.EmptyMaxWidth()).Fn,
+			).Fn,
+		)
+		// }
+
+		out = append(out,
+			wg.th.Fill("DocBg",
+				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.lastTxs[i].Amount)).Color("PanelText").Fn,
+			).Fn,
+		)
+
+		out = append(out,
+			wg.th.Fill("DocBg",
+				wg.th.Caption(wg.State.lastTxs[i].Address).
+					Font("go regular").
+					Color("PanelText").
+					TextScale(0.66).Fn,
+			).Fn,
+		)
+
+		out = append(out,
+			func(gtx l.Context) l.Dimensions {
+				return wg.th.Fill("DocBg",
+					wg.th.Flex().AlignMiddle(). // SpaceBetween().
+						Rigid(
+							wg.th.Flex().AlignMiddle().
+								Rigid(
+									wg.Icon().Color("Primary").Scale(1.5).Src(icons2.DeviceWidgets).Fn,
+								).
+								Rigid(
+									wg.th.Caption(fmt.Sprintf("%d", *wg.State.lastTxs[i].BlockIndex)).Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							wg.th.Flex().AlignMiddle().
+								Rigid(
+									wg.Icon().Color("Primary").Scale(1.5).Src(icons2.ActionCheckCircle).Fn,
+								).
+								Rigid(
+									wg.th.Caption(fmt.Sprintf("%d", wg.State.lastTxs[i].Confirmations)).Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							wg.th.Flex().AlignMiddle().
+								Rigid(
+									func(gtx l.Context) l.Dimensions {
+										switch wg.State.lastTxs[i].Category {
+										case "generate":
+											return wg.Icon().Color("Primary").Scale(1.5).Src(icons2.ActionStars).Fn(gtx)
+										case "immature":
+											return wg.Icon().Color("Primary").Scale(1.5).Src(icons2.ImageTimeLapse).Fn(gtx)
+										case "receive":
+											return wg.Icon().Color("Primary").Scale(1.5).Src(icons2.ActionPlayForWork).Fn(gtx)
+										case "unknown":
+											return wg.Icon().Color("Primary").Scale(1.5).Src(icons2.AVNewReleases).Fn(gtx)
+										}
+										return l.Dimensions{}
+									},
+								).
+								Rigid(
+									wg.th.Caption(wg.State.lastTxs[i].Category).Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							wg.th.Flex().AlignMiddle().
+								Rigid(
+									wg.Icon().Color("Primary").Scale(1.5).Src(icons2.DeviceAccessTime).Fn,
+								).
+								Rigid(
+									wg.th.Caption(
+										fmt.Sprintf("%v", godate.Now(time.Local).
+											DifferenceForHumans(godate.Create(time.Unix(wg.State.lastTxs[i].BlockTime, 0)))),
+									).Color("PanelText").Fn,
+								).
+								Fn,
+						).Fn,
 				).
-				Rigid(
-					wg.th.Caption(
-						fmt.Sprintf("%d", *wg.State.lastTxs[i].BlockIndex),
-					).Color("PanelText").Fn,
-				).
-				Rigid(
-					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.ActionCheckCircle).Fn,
-				).
-				Rigid(
-					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.AVNewReleases).Fn,
-				).
-				Rigid(
-					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.AVPlaylistAddCheck).Fn,
-				).
-				Rigid(
-					wg.Icon().Color("Primary").Scale(1.5).Src(icons2.DeviceAccessTime).Fn,
-				).
-				Rigid(
-					wg.th.Caption(
-						fmt.Sprintf("%v", time.Unix(wg.State.lastTxs[i].BlockTime, 0)),
-					).Color("PanelText").Fn,
-				).
-				// Rigid(
-				// wg.Icon().Color("Primary").Scale(1.5).Src(icons2.).Fn,
-				// ).
-				Fn(gtx)
-		})
-		out.Rigid(wg.th.Caption(
-			fmt.Sprintf("in block: %d at %v",
-				*wg.State.lastTxs[i].BlockIndex,
-				time.Unix(wg.State.lastTxs[i].BlockTime, 0)),
-		).Color("PanelText").Fn)
-		out.Rigid(wg.th.Caption(fmt.Sprintf("status: %s confirmations: %d generated: %v",
-			wg.State.lastTxs[i].Category,
-			wg.State.lastTxs[i].Confirmations,
-			wg.State.lastTxs[i].Generated,
-		),
-		).Color("PanelText").Fn)
-		// out.Rigid(wg.th.Caption(fmt.Sprintf("%v")).Color("PanelText").Fn)
-		out.Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn)
+					Fn(gtx)
+			})
+	}
+	out = append(out,
+		wg.th.Fill("DocBg",
+			wg.th.Inset(0.5, p9.EmptyMaxWidth()).Fn,
+		).Fn,
+	)
+	le := func(gtx l.Context, index int) l.Dimensions {
+		return out[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return out.Fn(gtx)
+		return wg.lists["recent"].
+			Vertical().
+			// Color("PanelText").
+			Background("DocBg").
+			Active("DocText").
+			Length(len(out)).
+			ListElement(le).
+			Fn(gtx)
 	}
 }
 
