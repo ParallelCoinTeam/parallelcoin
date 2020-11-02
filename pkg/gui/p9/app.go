@@ -321,7 +321,10 @@ func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
 
 func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
-		out := a.sideBarList.Length(len(a.sideBar)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+		out := a.sideBarList.
+			Length(len(a.sideBar)).
+			Vertical().Background("PanelBg").
+			ListElement(func(gtx l.Context, index int) l.Dimensions {
 			// gtx.Constraints.Max.X = int(a.sideBarSize.V)
 			// gtx.Constraints.Min.X = 0
 			// gtx.Constraints.Max.X = gtx.Constraints.Min.X

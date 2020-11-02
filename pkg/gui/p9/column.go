@@ -52,7 +52,12 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 						func(gtx l.Context) l.Dimensions {
 							gtx.Constraints.Min.X = max // dims[i].Size.X
 							// gtx.Constraints.Max.X = max
-							return c.th.Label().Text(c.rows[i].Label).Font(c.font).TextScale(c.scale).Fn(gtx)
+							return c.th.Inset(0.25,
+								c.th.Label().
+									Text(c.rows[i].Label).
+									Font(c.font).
+									TextScale(c.scale).Fn,
+							).Fn(gtx)
 						},
 					).
 					Rigid(

@@ -2,8 +2,9 @@ package gui
 
 import (
 	"gioui.org/app"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -79,6 +80,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"transactions": wg.th.List(),
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
+		"recent":       wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),

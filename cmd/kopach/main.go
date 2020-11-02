@@ -139,7 +139,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			StartChan:     make(chan struct{}),
 			StopChan:      make(chan struct{}),
 			SetThreads:    make(chan int),
-			solutions:     make([]SolutionData, 0, 201),
+			solutions:     make([]SolutionData, 0, 20048),
 			Update:        make(chan struct{}),
 			hashSampleBuf: ring.NewBufferUint64(1000),
 		}
@@ -330,8 +330,8 @@ var handlers = transport.Handlers{
 					nonce:      blok.Header.Nonce,
 				},
 				}...)
-				if len(w.solutions) > 200 {
-					w.solutions = w.solutions[:200]
+				if len(w.solutions) > 2047 {
+					w.solutions = w.solutions[len(w.solutions)-2047:]
 				}
 				w.solutionCount = len(w.solutions)
 				w.Update <- struct{}{}
