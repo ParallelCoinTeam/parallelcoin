@@ -256,7 +256,7 @@ func (m *MinerModel) buttons() layout.Widget {
 						}).
 						SetSubmit(func(txt string) {
 							Debug("lineEditor submitted with text:\n" + txt)
-						})).Fn,
+						}), "hint").Fn,
 				).Fn,
 			).Fn,
 		).Fn,
@@ -273,7 +273,7 @@ func (m *MinerModel) buttons() layout.Widget {
 						}).
 						SetSubmit(func(txt string) {
 							Debug("areaEditor submitted with text:\n" + txt)
-						})).Fn,
+						}), "hint").Fn,
 				).Fn,
 			).Fn,
 		).Fn,
