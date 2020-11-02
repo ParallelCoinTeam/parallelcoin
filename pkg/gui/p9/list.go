@@ -170,6 +170,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		li.recalculate = true
 	}
 	if !li.notFirst {
+		li.recalculateTime = time.Now().Add(-time.Millisecond * 100)
 		li.notFirst = true
 	}
 	li.lastWidth = gtx.Constraints.Max.X
