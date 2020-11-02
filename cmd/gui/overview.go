@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	l "gioui.org/layout"
 	"gioui.org/op"
@@ -95,9 +96,33 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 	}
 }
 
+// RecentTransactions generates a display showing recent transactions
+//
+// fields to use: Address, Amount, BlockIndex, BlockTime, Category, Confirmations, Generated
 func (wg *WalletGUI) RecentTransactions() l.Widget {
+	out := wg.th.VFlex()
+	for i := range wg.State.lastTxs {
+		out.Rigid(wg.th.Flex().SpaceBetween().AlignBaseline().Rigid(
+			wg.th.H6(fmt.Sprintf("%-6.8f", wg.State.lastTxs[i].Amount)).Color("PanelText").Fn,
+		).Rigid(
+			wg.th.Caption(wg.State.lastTxs[i].Address).Font("go regular").Color("PanelText").TextScale(0.66).Fn,
+		).Fn)
+		out.Rigid(wg.th.Caption(
+			fmt.Sprintf("in block: %d at %v",
+				*wg.State.lastTxs[i].BlockIndex,
+				time.Unix(wg.State.lastTxs[i].BlockTime, 0)),
+		).Color("PanelText").Fn)
+		out.Rigid(wg.th.Caption(fmt.Sprintf("status: %s confirmations: %d generated: %v",
+			wg.State.lastTxs[i].Category,
+			wg.State.lastTxs[i].Confirmations,
+			wg.State.lastTxs[i].Generated,
+		),
+		).Color("PanelText").Fn)
+		out.Rigid(wg.th.Caption(fmt.Sprintf("%v")).Color("PanelText").Fn)
+		out.Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn)
+	}
 	return func(gtx l.Context) l.Dimensions {
-		return wg.th.Body1("transactions").Color("PanelText").Fn(gtx)
+		return out.Fn(gtx)
 	}
 }
 

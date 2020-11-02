@@ -1602,6 +1602,7 @@ func listTransactions(tx walletdb.ReadTx, details *wtxmgr.TxDetails, addrMgr *wa
 	}
 	results := []btcjson.ListTransactionsResult{}
 	txHashStr := details.Hash.String()
+
 	received := details.Received.Unix()
 	generated := blockchain.IsCoinBaseTx(&details.MsgTx)
 	recvCat := RecvCategory(details, syncHeight, net).String()
@@ -1653,10 +1654,11 @@ outputs:
 			}
 		}
 		amountF64 := util.Amount(output.Value).ToDUO()
+		blockIndex := int64(details.Block.Height)
 		result := btcjson.ListTransactionsResult{
 			// Fields left zeroed:
 			//   InvolvesWatchOnly
-			//   BlockIndex
+			//   BlockIndex X
 			//
 			// Fields set below:
 			//   Account (only for non-"send" categories)
@@ -1668,6 +1670,7 @@ outputs:
 			Confirmations:   confirmations,
 			Generated:       generated,
 			BlockHash:       blockHashStr,
+			BlockIndex:      &blockIndex,
 			BlockTime:       blockTime,
 			TxID:            txHashStr,
 			WalletConflicts: []string{},

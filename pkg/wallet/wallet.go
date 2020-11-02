@@ -1675,6 +1675,7 @@ outputs:
 			}
 		}
 		amountF64 := util.Amount(output.Value).ToDUO()
+		blockIndex := int64(details.Block.Height)
 		result := btcjson.ListTransactionsResult{
 			// Fields left zeroed:
 			//   InvolvesWatchOnly
@@ -1690,6 +1691,7 @@ outputs:
 			Confirmations:   confirmations,
 			Generated:       generated,
 			BlockHash:       blockHashStr,
+			BlockIndex:      &blockIndex,
 			BlockTime:       blockTime,
 			TxID:            txHashStr,
 			WalletConflicts: []string{},
