@@ -186,13 +186,22 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 		)
 
 		out = append(out,
+			wg.th.Fill("DocBg",
+				wg.th.Caption(wg.State.lastTxs[i].TxID).
+					Font("go regular").
+					Color("PanelText").
+					TextScale(0.5).Fn,
+			).Fn,
+		)
+
+		out = append(out,
 			func(gtx l.Context) l.Dimensions {
 				return wg.th.Fill("DocBg",
 					wg.th.Flex().AlignMiddle(). // SpaceBetween().
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1.5).Src(icons2.DeviceWidgets).Fn,
+									wg.Icon().Color("DocText").Scale(1).Src(icons2.DeviceWidgets).Fn,
 								).
 								Rigid(
 									wg.th.Caption(fmt.Sprintf("%d ", *wg.State.lastTxs[i].BlockIndex)).Fn,
@@ -202,7 +211,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1.5).Src(icons2.ActionCheckCircle).Fn,
+									wg.Icon().Color("DocText").Scale(1).Src(icons2.ActionCheckCircle).Fn,
 								).
 								Rigid(
 									wg.th.Caption(fmt.Sprintf("%d ", wg.State.lastTxs[i].Confirmations)).Fn,
@@ -215,13 +224,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 									func(gtx l.Context) l.Dimensions {
 										switch wg.State.lastTxs[i].Category {
 										case "generate":
-											return wg.Icon().Color("DocText").Scale(1.5).Src(icons2.ActionStars).Fn(gtx)
+											return wg.Icon().Color("DocText").Scale(1).Src(icons2.ActionStars).Fn(gtx)
 										case "immature":
-											return wg.Icon().Color("DocText").Scale(1.5).Src(icons2.ImageTimeLapse).Fn(gtx)
+											return wg.Icon().Color("DocText").Scale(1).Src(icons2.ImageTimeLapse).Fn(gtx)
 										case "receive":
-											return wg.Icon().Color("DocText").Scale(1.5).Src(icons2.ActionPlayForWork).Fn(gtx)
+											return wg.Icon().Color("DocText").Scale(1).Src(icons2.ActionPlayForWork).Fn(gtx)
 										case "unknown":
-											return wg.Icon().Color("DocText").Scale(1.5).Src(icons2.AVNewReleases).Fn(gtx)
+											return wg.Icon().Color("DocText").Scale(1).Src(icons2.AVNewReleases).Fn(gtx)
 										}
 										return l.Dimensions{}
 									},
@@ -234,7 +243,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1.5).Src(icons2.DeviceAccessTime).Fn,
+									wg.Icon().Color("DocText").Scale(1).Src(icons2.DeviceAccessTime).Fn,
 								).
 								Rigid(
 									wg.th.Caption(
