@@ -3,10 +3,8 @@ package gui
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	l "gioui.org/layout"
-	"github.com/kofoworola/godate"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -246,8 +244,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								).
 								Rigid(
 									wg.th.Caption(
-										fmt.Sprintf("%v", godate.Now(time.Local).
-											DifferenceForHumans(godate.Create(time.Unix(wg.State.lastTxs[i].BlockTime, 0)))),
+										wg.State.lastTimeStrings[i],
 									).Color("DocText").Fn,
 								).
 								Fn,
