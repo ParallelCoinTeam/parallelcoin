@@ -23,7 +23,7 @@ func nodeGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		}
 		interrupt.AddHandler(func() {
 			Debug("node gui is shut down")
-			os.Exit(0)
+			// os.Exit(0)
 		})
 		if err := gui.Main(cx, c); Check(err) {
 		}

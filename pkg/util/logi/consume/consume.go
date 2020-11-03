@@ -72,6 +72,10 @@ func Stop(w *worker.Worker) {
 
 func Kill(w *worker.Worker) {
 	Debug("sending kill signal")
+	if w == nil {
+		Debug("asked to kill worker that is already nil")
+		return
+	}
 	if n, err := w.StdConn.Write([]byte("kill")); n < 1 || Check(err) {
 		Debug("failed to write")
 	}

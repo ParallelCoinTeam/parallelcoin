@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"gioui.org/app"
 	"gioui.org/layout"
@@ -59,7 +58,7 @@ func main() {
 			Open().
 			Run(minerModel.testLabels, func() {
 				close(quit)
-				os.Exit(0)
+				// os.Exit(0)
 			}); Check(err) {
 		}
 	}()

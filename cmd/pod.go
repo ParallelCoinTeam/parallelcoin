@@ -8,8 +8,7 @@ import (
 	"runtime"
 	"runtime/debug"
 	"runtime/trace"
-
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"time"
 
 	"github.com/p9c/pod/app"
 	"github.com/p9c/pod/pkg/util/limits"
@@ -19,33 +18,43 @@ import (
 func Main() {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 3)
 	debug.SetGCPercent(10)
+	var err error
 	if runtime.GOOS != "darwin" {
-		if err := limits.SetLimits(); err != nil { // todo: doesn't work on non-linux
+		if err = limits.SetLimits(); err != nil { // todo: doesn't work on non-linux
 			_, _ = fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
 			os.Exit(1)
 		}
 	}
+	var f *os.File
 	if os.Getenv("POD_TRACE") == "on" {
-		if f, err := os.Create("testtrace.out"); err != nil {
+		Debug("starting trace")
+		if f, err = os.Create(fmt.Sprintf("%v.trace", time.Now().Unix())); err != nil {
 			Error("tracing env POD_TRACE=on but we can't write to it",
 				err)
 		} else {
-			Debug("tracing started")
 			err = trace.Start(f)
 			if err != nil {
 				Error("could not start tracing", err)
 			} else {
-				interrupt.AddHandler(func() {
-					Debug("stopping trace")
-					trace.Stop()
-					err := f.Close()
-					if err != nil {
-						Error(err)
-					}
-				},
-				)
+				Debug("tracing started")
+				// interrupt.AddHandler(func() {
+				// 	Debug("stopping trace")
+				// 	trace.Stop()
+				// 	err := f.Close()
+				// 	if err != nil {
+				// 		Error(err)
+				// 	}
+				// },
+				// )
 			}
 		}
 	}
-	app.Main()
+	res := app.Main()
+	if os.Getenv("POD_TRACE") == "on" {
+		Debug("stopping trace")
+		trace.Stop()
+		time.Sleep(time.Second*3)
+		f.Close()
+	}
+	os.Exit(res)
 }

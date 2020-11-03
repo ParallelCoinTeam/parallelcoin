@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	gioui.org v0.0.0-20200929170715-d2e06d938930
+	gioui.org/cmd v0.0.0-20201102184644-18869735db19 // indirect
 	github.com/BurntSushi/xgb v0.0.0-20200324125942-20f126ea2843
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
