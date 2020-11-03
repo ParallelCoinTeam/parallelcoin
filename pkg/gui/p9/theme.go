@@ -14,6 +14,7 @@ type Theme struct {
 	icons         map[string]*Icon
 	scrollBarSize int
 	Dark          *bool
+	iconCache     IconCache
 }
 
 // NewTheme creates a new theme to use for rendering a user interface
@@ -25,6 +26,7 @@ func NewTheme(fontCollection []text.FontFace, quit chan struct{}) (th *Theme) {
 		TextSize:      unit.Sp(16),
 		Colors:        NewColors(),
 		scrollBarSize: 0,
+		iconCache:     make(IconCache),
 	}
 	return
 }

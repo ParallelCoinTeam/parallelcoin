@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
@@ -33,7 +32,7 @@ func (ex *Explorer) Runner() (err error) {
 					args := []string{os.Args[0], "-D", *ex.cx.Config.DataDir,
 						"--servertls=false", "--clienttls=false",
 						"--pipelog", "shell"}
-					args = apputil.PrependForWindows(args)
+					// args = apputil.PrependForWindows(args)
 					ex.Shell = consume.Log(ex.quit, func(ent *logi.Entry) (err error) {
 						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 						return

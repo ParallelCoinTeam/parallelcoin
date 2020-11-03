@@ -61,13 +61,13 @@ func (ex *Explorer) GetAppWidget() (a *p9.App) {
 		}),
 	})
 	a.ButtonBar([]l.Widget{
-		ex.PageTopBarButton("help", 0, icons.ActionHelp),
-		ex.PageTopBarButton("quit", 3, icons.ActionExitToApp),
+		ex.PageTopBarButton("help", 0, &icons.ActionHelp),
+		ex.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
 		ex.RunStatusButton(),
 		ex.th.Flex().Rigid(
-			ex.StatusBarButton("log", 1, icons.ActionList),
+			ex.StatusBarButton("log", 1, &icons.ActionList),
 		).Fn,
 	})
 	return
@@ -100,7 +100,7 @@ func (ex *Explorer) Page(title string, widget p9.Widgets) func(gtx l.Context) l.
 	}
 }
 
-func (ex *Explorer) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (ex *Explorer) PageTopBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := ex.TitleBarBackgroundGet()
 		color := ex.MenuColorGet()
@@ -136,7 +136,7 @@ func (ex *Explorer) PageTopBarButton(name string, index int, ico []byte) func(gt
 	}
 }
 
-func (ex *Explorer) StatusBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (ex *Explorer) StatusBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := ex.StatusBarBackgroundGet()
 		color := ex.StatusBarColorGet()
@@ -179,11 +179,11 @@ func (ex *Explorer) SetRunState(b bool) {
 }
 
 func (ex *Explorer) RunStatusButton() func(gtx l.Context) l.Dimensions {
-	t, f := icons.AVStop, icons.AVPlayArrow
+	t, f := &icons.AVStop, &icons.AVPlayArrow
 	return func(gtx l.Context) l.Dimensions {
 		background := ex.App.StatusBarBackgroundGet()
 		color := ex.App.StatusBarColorGet()
-		var ico []byte
+		var ico *[]byte
 		if ex.running {
 			ico = t
 		} else {
@@ -215,7 +215,7 @@ func (ex *Explorer) RunStatusButton() func(gtx l.Context) l.Dimensions {
 						ex.th.Icon().
 							Scale(p9.Scales["H5"]).
 							Color("Primary").
-							Src(icons.ActionCheckCircle).
+							Src(&icons.ActionCheckCircle).
 							Fn,
 					),
 				).Fn,

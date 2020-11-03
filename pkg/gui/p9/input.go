@@ -66,19 +66,19 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused strin
 		Icon(
 			th.Icon().
 				Color("DocText").
-				Src(icons2.ContentBackspace),
+				Src(&icons2.ContentBackspace),
 		)
 	p.copyButton.
 		Icon(
 			th.Icon().
 				Color("DocText").
-				Src(icons2.ContentContentCopy),
+				Src(&icons2.ContentContentCopy),
 		)
 	p.pasteButton.
 		Icon(
 			th.Icon().
 				Color("DocText").
-				Src(icons2.ContentContentPaste),
+				Src(&icons2.ContentContentPaste),
 		)
 	p.input.Color("DocText")
 	p.clearClickable.SetClick(clearClickableFn)
@@ -112,21 +112,21 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 			Rigid(
 				in.copyButton.
 					Background("").
-					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(icons2.ContentContentCopy)).
+					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
 					Inset(0.25).
 					Fn,
 			).
 			Rigid(
 				in.pasteButton.
 					Background("").
-					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(icons2.ContentContentPaste)).
+					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
 					Inset(0.25).
 					Fn,
 			).
 			Rigid(
 				in.clearButton.
 					Background("").
-					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(icons2.ContentBackspace)).
+					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentBackspace)).
 					Inset(0.25).
 					Fn,
 			).

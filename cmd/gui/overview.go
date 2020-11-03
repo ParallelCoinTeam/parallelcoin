@@ -3,11 +3,8 @@ package gui
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	l "gioui.org/layout"
-	"gioui.org/op"
-	"github.com/kofoworola/godate"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -201,7 +198,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(icons2.DeviceWidgets).Fn,
+									wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
 								).
 								Rigid(
 									wg.th.Caption(fmt.Sprintf("%d ", *wg.State.lastTxs[i].BlockIndex)).Fn,
@@ -211,7 +208,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(icons2.ActionCheckCircle).Fn,
+									wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
 								).
 								Rigid(
 									wg.th.Caption(fmt.Sprintf("%d ", wg.State.lastTxs[i].Confirmations)).Fn,
@@ -224,13 +221,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 									func(gtx l.Context) l.Dimensions {
 										switch wg.State.lastTxs[i].Category {
 										case "generate":
-											return wg.Icon().Color("DocText").Scale(1).Src(icons2.ActionStars).Fn(gtx)
+											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
 										case "immature":
-											return wg.Icon().Color("DocText").Scale(1).Src(icons2.ImageTimeLapse).Fn(gtx)
+											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
 										case "receive":
-											return wg.Icon().Color("DocText").Scale(1).Src(icons2.ActionPlayForWork).Fn(gtx)
+											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
 										case "unknown":
-											return wg.Icon().Color("DocText").Scale(1).Src(icons2.AVNewReleases).Fn(gtx)
+											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
 										}
 										return l.Dimensions{}
 									},
@@ -243,12 +240,11 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(icons2.DeviceAccessTime).Fn,
+									wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
 								).
 								Rigid(
 									wg.th.Caption(
-										fmt.Sprintf("%v", godate.Now(time.Local).
-											DifferenceForHumans(godate.Create(time.Unix(wg.State.lastTxs[i].BlockTime, 0)))),
+										wg.State.lastTimeStrings[i],
 									).Color("DocText").Fn,
 								).
 								Fn,
@@ -298,62 +294,62 @@ func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 			Fn,
 	).Fn
 }
-
-func (wg *WalletGUI) panel(title string, fill bool, content l.Widget) l.Widget {
-	return func(gtx l.Context) l.Dimensions {
-		w := wg.Inset(0.25,
-			wg.Fill("DocBg",
-				wg.th.VFlex().
-					Rigid(
-						wg.Fill("DocText",
-							wg.th.Flex().
-								Rigid(
-									wg.Inset(0.5,
-										wg.H6(title).Color("DocBg").Fn,
-									).Fn,
-								).Fn,
-						).Fn,
-					).
-					Rigid(
-						wg.Fill("DocBg",
-							wg.Inset(0.25,
-								content,
-							).Fn,
-						).Fn,
-					).Fn,
-			).Fn,
-		).Fn
-		if !fill {
-			// render the widgets onto a second context to get their dimensions
-			gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
-			// generate the dimensions for all the list elements
-			child := op.Record(gtx1.Ops)
-			d := w(gtx1)
-			_ = child.Stop()
-			gtx.Constraints.Max.X = d.Size.X
-			gtx.Constraints.Max.Y = d.Size.Y
-			gtx.Constraints.Min = gtx.Constraints.Max
-			w = wg.Inset(0.25,
-				wg.th.VFlex().
-					Rigid(
-						wg.Fill("DocText",
-							wg.th.Flex().
-								Flexed(1,
-									wg.Inset(0.5,
-										wg.H6(title).Color("DocBg").Fn,
-									).Fn,
-								).Fn,
-						).Fn,
-					).
-					Rigid(
-						wg.Fill("DocBg",
-							wg.Inset(0.25,
-								content,
-							).Fn,
-						).Fn,
-					).Fn,
-			).Fn
-		}
-		return w(gtx)
-	}
-}
+//
+// func (wg *WalletGUI) panel(title string, fill bool, content l.Widget) l.Widget {
+// 	return func(gtx l.Context) l.Dimensions {
+// 		w := wg.Inset(0.25,
+// 			wg.Fill("DocBg",
+// 				wg.th.VFlex().
+// 					Rigid(
+// 						wg.Fill("DocText",
+// 							wg.th.Flex().
+// 								Rigid(
+// 									wg.Inset(0.5,
+// 										wg.H6(title).Color("DocBg").Fn,
+// 									).Fn,
+// 								).Fn,
+// 						).Fn,
+// 					).
+// 					Rigid(
+// 						wg.Fill("DocBg",
+// 							wg.Inset(0.25,
+// 								content,
+// 							).Fn,
+// 						).Fn,
+// 					).Fn,
+// 			).Fn,
+// 		).Fn
+// 		if !fill {
+// 			// render the widgets onto a second context to get their dimensions
+// 			gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
+// 			// generate the dimensions for all the list elements
+// 			child := op.Record(gtx1.Ops)
+// 			d := w(gtx1)
+// 			_ = child.Stop()
+// 			gtx.Constraints.Max.X = d.Size.X
+// 			gtx.Constraints.Max.Y = d.Size.Y
+// 			gtx.Constraints.Min = gtx.Constraints.Max
+// 			w = wg.Inset(0.25,
+// 				wg.th.VFlex().
+// 					Rigid(
+// 						wg.Fill("DocText",
+// 							wg.th.Flex().
+// 								Flexed(1,
+// 									wg.Inset(0.5,
+// 										wg.H6(title).Color("DocBg").Fn,
+// 									).Fn,
+// 								).Fn,
+// 						).Fn,
+// 					).
+// 					Rigid(
+// 						wg.Fill("DocBg",
+// 							wg.Inset(0.25,
+// 								content,
+// 							).Fn,
+// 						).Fn,
+// 					).Fn,
+// 			).Fn
+// 		}
+// 		return w(gtx)
+// 	}
+// }

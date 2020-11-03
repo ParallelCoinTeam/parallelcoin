@@ -20,8 +20,8 @@ type Checkable struct {
 	textSize           unit.Value
 	iconColor          string
 	size               unit.Value
-	checkedStateIcon   []byte
-	uncheckedStateIcon []byte
+	checkedStateIcon   *[]byte
+	uncheckedStateIcon *[]byte
 	shaper             text.Shaper
 	checked            bool
 }
@@ -44,8 +44,8 @@ func (th *Theme) Checkable() *Checkable {
 		textSize:           th.TextSize.Scale(14.0 / 16.0),
 		iconColor:          "Primary",
 		size:               th.TextSize.Scale(1.5),
-		checkedStateIcon:   icons.ToggleCheckBox,
-		uncheckedStateIcon: icons.ToggleCheckBoxOutlineBlank,
+		checkedStateIcon:   &icons.ToggleCheckBox,
+		uncheckedStateIcon: &icons.ToggleCheckBoxOutlineBlank,
 		shaper:             th.shaper,
 	}
 }
@@ -92,13 +92,13 @@ func (c *Checkable) Scale(size float32) *Checkable {
 }
 
 // CheckedStateIcon loads the icon for the checked state
-func (c *Checkable) CheckedStateIcon(ic []byte) *Checkable {
+func (c *Checkable) CheckedStateIcon(ic *[]byte) *Checkable {
 	c.checkedStateIcon = ic
 	return c
 }
 
 // UncheckedStateIcon loads the icon for the unchecked state
-func (c *Checkable) UncheckedStateIcon(ic []byte) *Checkable {
+func (c *Checkable) UncheckedStateIcon(ic *[]byte) *Checkable {
 	c.uncheckedStateIcon = ic
 	return c
 }

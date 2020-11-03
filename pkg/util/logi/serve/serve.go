@@ -1,6 +1,8 @@
 package serve
 
 import (
+	"os"
+
 	"go.uber.org/atomic"
 
 	"github.com/p9c/pod/pkg/comm/pipe"
@@ -42,11 +44,12 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool)) {
 				}
 			case "kill":
 				Debug("received kill signal from pipe, shutting down")
-				interrupt.Request()
 				// time.Sleep(time.Second*5)
 				close(quit)
 				// os.Exit(0)
+				interrupt.Request()
 				// break
+				os.Exit(0)
 			}
 		}
 		return

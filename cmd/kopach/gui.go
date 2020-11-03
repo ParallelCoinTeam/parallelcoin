@@ -198,7 +198,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 				m.IconButton(m.logoButton).
 					Color("Light").
 					Background("Dark").
-					Icon(m.Icon().Color("Light").Scale(p9.Scales["H5"]).Src(icons.ParallelCoin)).
+					Icon(m.Icon().Color("Light").Scale(p9.Scales["H5"]).Src(&icons.ParallelCoin)).
 					Fn,
 			).Fn,
 		).Rigid(

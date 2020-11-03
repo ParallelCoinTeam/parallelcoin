@@ -24,8 +24,8 @@ func (th *Theme) RadioButton(checkable *Checkable, group *Enum, key, label strin
 		group: group,
 		th:    th,
 		Checkable: checkable.
-			CheckedStateIcon(icons.ToggleRadioButtonChecked).
-			UncheckedStateIcon(icons.ToggleRadioButtonUnchecked).
+			CheckedStateIcon(&icons.ToggleRadioButtonChecked).
+			UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked).
 			Label(label),
 		key: key,
 	}

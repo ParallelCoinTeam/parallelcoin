@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
@@ -33,7 +32,7 @@ func (wg *WalletGUI) Runner() (err error) {
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--servertls=false", "--clienttls=false",
 						"--pipelog", "shell"}
-					args = apputil.PrependForWindows(args)
+					// args = apputil.PrependForWindows(args)
 					wg.Shell = consume.Log(wg.quit, func(ent *logi.Entry) (err error) {
 						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 						return
@@ -49,6 +48,12 @@ func (wg *WalletGUI) Runner() (err error) {
 					}
 					Debug("stop called")
 					consume.Kill(wg.Shell)
+					Debug("stopping")
+					Check(wg.Shell.Stop())
+					Debug("interrupting")
+					Check(wg.Shell.Interrupt())
+					Debug("killing")
+					Check(wg.Shell.Kill())
 					wg.running = false
 				case "restart":
 					Debug("restart called")
