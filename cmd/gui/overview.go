@@ -6,7 +6,6 @@ import (
 	"time"
 
 	l "gioui.org/layout"
-	"gioui.org/op"
 	"github.com/kofoworola/godate"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -298,62 +297,62 @@ func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 			Fn,
 	).Fn
 }
-
-func (wg *WalletGUI) panel(title string, fill bool, content l.Widget) l.Widget {
-	return func(gtx l.Context) l.Dimensions {
-		w := wg.Inset(0.25,
-			wg.Fill("DocBg",
-				wg.th.VFlex().
-					Rigid(
-						wg.Fill("DocText",
-							wg.th.Flex().
-								Rigid(
-									wg.Inset(0.5,
-										wg.H6(title).Color("DocBg").Fn,
-									).Fn,
-								).Fn,
-						).Fn,
-					).
-					Rigid(
-						wg.Fill("DocBg",
-							wg.Inset(0.25,
-								content,
-							).Fn,
-						).Fn,
-					).Fn,
-			).Fn,
-		).Fn
-		if !fill {
-			// render the widgets onto a second context to get their dimensions
-			gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
-			// generate the dimensions for all the list elements
-			child := op.Record(gtx1.Ops)
-			d := w(gtx1)
-			_ = child.Stop()
-			gtx.Constraints.Max.X = d.Size.X
-			gtx.Constraints.Max.Y = d.Size.Y
-			gtx.Constraints.Min = gtx.Constraints.Max
-			w = wg.Inset(0.25,
-				wg.th.VFlex().
-					Rigid(
-						wg.Fill("DocText",
-							wg.th.Flex().
-								Flexed(1,
-									wg.Inset(0.5,
-										wg.H6(title).Color("DocBg").Fn,
-									).Fn,
-								).Fn,
-						).Fn,
-					).
-					Rigid(
-						wg.Fill("DocBg",
-							wg.Inset(0.25,
-								content,
-							).Fn,
-						).Fn,
-					).Fn,
-			).Fn
-		}
-		return w(gtx)
-	}
-}
+//
+// func (wg *WalletGUI) panel(title string, fill bool, content l.Widget) l.Widget {
+// 	return func(gtx l.Context) l.Dimensions {
+// 		w := wg.Inset(0.25,
+// 			wg.Fill("DocBg",
+// 				wg.th.VFlex().
+// 					Rigid(
+// 						wg.Fill("DocText",
+// 							wg.th.Flex().
+// 								Rigid(
+// 									wg.Inset(0.5,
+// 										wg.H6(title).Color("DocBg").Fn,
+// 									).Fn,
+// 								).Fn,
+// 						).Fn,
+// 					).
+// 					Rigid(
+// 						wg.Fill("DocBg",
+// 							wg.Inset(0.25,
+// 								content,
+// 							).Fn,
+// 						).Fn,
+// 					).Fn,
+// 			).Fn,
+// 		).Fn
+// 		if !fill {
+// 			// render the widgets onto a second context to get their dimensions
+// 			gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
+// 			// generate the dimensions for all the list elements
+// 			child := op.Record(gtx1.Ops)
+// 			d := w(gtx1)
+// 			_ = child.Stop()
+// 			gtx.Constraints.Max.X = d.Size.X
+// 			gtx.Constraints.Max.Y = d.Size.Y
+// 			gtx.Constraints.Min = gtx.Constraints.Max
+// 			w = wg.Inset(0.25,
+// 				wg.th.VFlex().
+// 					Rigid(
+// 						wg.Fill("DocText",
+// 							wg.th.Flex().
+// 								Flexed(1,
+// 									wg.Inset(0.5,
+// 										wg.H6(title).Color("DocBg").Fn,
+// 									).Fn,
+// 								).Fn,
+// 						).Fn,
+// 					).
+// 					Rigid(
+// 						wg.Fill("DocBg",
+// 							wg.Inset(0.25,
+// 								content,
+// 							).Fn,
+// 						).Fn,
+// 					).Fn,
+// 			).Fn
+// 		}
+// 		return w(gtx)
+// 	}
+// }

@@ -4,7 +4,6 @@ import (
 	"go.uber.org/atomic"
 
 	"github.com/p9c/pod/pkg/comm/pipe"
-	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
@@ -42,7 +41,7 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool)) {
 				}
 			case "kill":
 				Debug("received kill signal from pipe, shutting down")
-				interrupt.Request()
+				// interrupt.Request()
 				// time.Sleep(time.Second*5)
 				close(quit)
 				// os.Exit(0)
