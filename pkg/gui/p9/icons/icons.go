@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"sort"
 
 	"gioui.org/app"
@@ -46,7 +45,7 @@ func main() {
 				},
 				func() {
 					close(quit)
-					os.Exit(0)
+					// os.Exit(0)
 				},
 			); Check(err) {
 		}

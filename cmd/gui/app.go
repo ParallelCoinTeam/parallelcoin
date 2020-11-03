@@ -10,7 +10,6 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
@@ -68,7 +67,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 							SpaceEvenly().
 							Rigid(
 								wg.th.Button(wg.clickables["quit"].SetClick(func() {
-									interrupt.Request()
+									close(wg.quit)
 								})).Color(wg.App.TitleBarColorGet()).TextScale(2).Text("yes!!!").Fn,
 							).Fn,
 					).

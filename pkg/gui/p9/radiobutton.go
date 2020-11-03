@@ -3,9 +3,6 @@
 package p9
 
 import (
-	"os"
-	"runtime/debug"
-
 	"gioui.org/layout"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
@@ -19,10 +16,10 @@ type RadioButton struct {
 
 // RadioButton returns a RadioButton with a label. The key specifies the value for the Enum.
 func (th *Theme) RadioButton(checkable *Checkable, group *Enum, key, label string) *RadioButton {
-	if checkable == nil {
-		debug.PrintStack()
-		os.Exit(0)
-	}
+	// if checkable == nil {
+	// 	debug.PrintStack()
+	// 	os.Exit(0)
+	// }
 	return &RadioButton{
 		group: group,
 		th:    th,

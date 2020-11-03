@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"gioui.org/app"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -12,7 +11,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -112,7 +110,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.RunCommandChan = make(chan string)
 	if err = wg.Runner(); Check(err) {
 	}
-	wg.RunCommandChan <- "run"
+	// wg.RunCommandChan <- "run"
 	wg.ConnectChainRPC()
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
@@ -128,22 +126,24 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					interrupt.Request()
+					// interrupt.Request()
+					close(wg.quit)
 				}); Check(err) {
 		}
 	}()
 	// tickers and triggers
-	go func() {
+	// go func() {
 	out:
 		for {
 			select {
 			case <-wg.invalidate:
 				wg.w.Window.Invalidate()
 			case <-wg.quit:
+				Debug("closing GUI on quit signal")
 				break out
 			}
 		}
-	}()
-	app.Main()
+	// }()
+	// app.Main()
 	return
 }

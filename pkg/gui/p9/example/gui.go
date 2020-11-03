@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"gioui.org/app"
 	"gioui.org/layout"
@@ -59,7 +58,7 @@ func main() {
 			Open().
 			Run(minerModel.testLabels, func() {
 				close(quit)
-				os.Exit(0)
+				// os.Exit(0)
 			}); Check(err) {
 		}
 	}()
@@ -256,7 +255,7 @@ func (m *MinerModel) buttons() layout.Widget {
 						}).
 						SetSubmit(func(txt string) {
 							Debug("lineEditor submitted with text:\n" + txt)
-						})).Fn,
+						}), "hint").Fn,
 				).Fn,
 			).Fn,
 		).Fn,
@@ -273,7 +272,7 @@ func (m *MinerModel) buttons() layout.Widget {
 						}).
 						SetSubmit(func(txt string) {
 							Debug("areaEditor submitted with text:\n" + txt)
-						})).Fn,
+						}), "hint").Fn,
 				).Fn,
 			).Fn,
 		).Fn,

@@ -3,7 +3,6 @@ package kopach
 import (
 	"fmt"
 	"image"
-	"os"
 	"runtime"
 	"time"
 
@@ -83,7 +82,7 @@ func (w *Worker) Run() {
 	win := f.NewWindow()
 	interrupt.AddHandler(func(){
 		close(w.quit)
-		os.Exit(0)
+		// os.Exit(0)
 	})
 	go func() {
 		if err := win.

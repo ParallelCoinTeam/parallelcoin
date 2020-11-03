@@ -137,7 +137,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							go func() {
 								Warn("starting wallet")
 								if err = walletmain.Main(cx); Check(err) {
-									os.Exit(1)
+									// os.Exit(1)
 								} else {
 									Debug("wallet started")
 								}

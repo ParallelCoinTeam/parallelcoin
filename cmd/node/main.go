@@ -67,6 +67,8 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		if e != nil {
 			Warn("failed to start up cpu profiler:", e)
 		} else {
+			defer f.Close()
+			defer pprof.StopCPUProfile()
 			// go func() {
 			//	DBError(http.ListenAndServe(":6060", nil))
 			// }()
