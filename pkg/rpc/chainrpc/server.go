@@ -21,7 +21,6 @@ import (
 
 	uberatomic "go.uber.org/atomic"
 
-	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	log "github.com/p9c/pod/pkg/util/logi"
@@ -436,7 +435,7 @@ func (n *Node) Start() {
 			args = append(args, "--kopachgui")
 		}
 		args = append(args, "kopach")
-		args = apputil.PrependForWindows(args)
+		// args = apputil.PrependForWindows(args)
 		n.StateCfg.Miner = consume.Log(n.Quit, func(ent *logi.Entry) (err error) {
 			Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 			return

@@ -7,7 +7,6 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/comm/stdconn"
 )
 
@@ -23,7 +22,7 @@ func Spawn(args ...string) (w *Worker, err error) {
 	// if runtime.GOOS == "windows" {
 	// 	args = append([]string{"cmd.exe", "/C", "start"}, args...)
 	// }
-	args = apputil.PrependForWindows(args)
+	// args = apputil.PrependForWindows(args)
 	w = &Worker{
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,

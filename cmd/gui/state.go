@@ -31,8 +31,11 @@ func (s *State) LastTxs() []btcjson.ListTransactionsResult {
 func (s *State) SetLastTxs(txs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	if txs == nil {
+		return
+	}
 	s.lastTxs = txs
-	s.lastTimeStrings = nil
+	s.lastTimeStrings = make([]string, 10)
 	for i := range s.lastTxs {
 		s.lastTimeStrings = append(s.lastTimeStrings,
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
