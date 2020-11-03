@@ -140,15 +140,15 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Dimensions {
 										).
 										Rigid(
 											// wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
-											wg.sendIconButton("settings", 2, icons.ActionBook),
+											wg.sendIconButton("settings", 2, &icons.ActionBook),
 										).
 										Rigid(
 											// wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
-											wg.sendIconButton("settings", 2, icons.ActionSettings),
+											wg.sendIconButton("settings", 2, &icons.ActionSettings),
 										).
 										Rigid(
 											// wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
-											wg.sendIconButton("settings", 2, icons.ActionSettings),
+											wg.sendIconButton("settings", 2, &icons.ActionSettings),
 										).Fn,
 								).Fn,
 						).Fn,
@@ -222,7 +222,7 @@ func (wg *WalletGUI) sendButton(b *p9.Clickable, title string, click func()) fun
 	}
 }
 
-func (wg *WalletGUI) sendIconButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) sendIconButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.TitleBarBackgroundGet()
 		color := wg.MenuColorGet()

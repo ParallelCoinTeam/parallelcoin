@@ -87,17 +87,17 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 8),
 	})
 	a.ButtonBar([]l.Widget{
-		wg.PageTopBarButton("help", 0, icons.ActionHelp),
+		wg.PageTopBarButton("help", 0, &icons.ActionHelp),
 		// wg.PageTopBarButton("log", 1, icons.ActionList),
-		wg.PageTopBarButton("settings", 2, icons.ActionSettings),
-		wg.PageTopBarButton("quit", 3, icons.ActionExitToApp),
+		wg.PageTopBarButton("settings", 2, &icons.ActionSettings),
+		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
 		wg.RunStatusButton(),
 		wg.th.Flex().Rigid(
-			wg.StatusBarButton("log", 1, icons.ActionList),
+			wg.StatusBarButton("log", 1, &icons.ActionList),
 		).Rigid(
-			wg.StatusBarButton("settings", 2, icons.ActionSettings),
+			wg.StatusBarButton("settings", 2, &icons.ActionSettings),
 		).Fn,
 	})
 	return
@@ -172,7 +172,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 	}
 }
 
-func (wg *WalletGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.TitleBarBackgroundGet()
 		color := wg.MenuColorGet()
@@ -208,7 +208,7 @@ func (wg *WalletGUI) PageTopBarButton(name string, index int, ico []byte) func(g
 	}
 }
 
-func (wg *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.StatusBarBackgroundGet()
 		color := wg.StatusBarColorGet()
@@ -255,11 +255,11 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.App.StatusBarBackgroundGet()
 		color := wg.App.StatusBarColorGet()
-		var ico []byte
+		var ico *[]byte
 		if wg.running {
-			ico = t
+			ico = &t
 		} else {
-			ico = f
+			ico = &f
 		}
 		ic := wg.th.Icon().
 			Scale(p9.Scales["H4"]).
@@ -287,7 +287,7 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 						wg.th.Icon().
 							Scale(p9.Scales["H5"]).
 							Color("Primary").
-							Src(icons.ActionCheckCircle).
+							Src(&icons.ActionCheckCircle).
 							Fn,
 					),
 				).Fn,

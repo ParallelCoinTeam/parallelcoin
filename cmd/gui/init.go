@@ -2,6 +2,7 @@ package gui
 
 import (
 	l "gioui.org/layout"
+
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
 )
 
@@ -22,7 +23,7 @@ func (wg *WalletGUI) InitWallet() func(gtx l.Context) l.Dimensions {
 func (wg *WalletGUI) loaderCreateWallet() l.Widget {
 	createWalletLayoutList := []l.Widget{
 
-		wg.Icon().Scale(5).Color("DocText").Src(icons.ParallelCoinRound).Fn,
+		wg.Icon().Scale(5).Color("DocText").Src(&icons.ParallelCoinRound).Fn,
 
 		wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.5, wg.H6("Enter the private passphrase for your new wallet:").Color("DocText").Fn).Fn).Fn).Fn,
 		wg.Inset(0.25,

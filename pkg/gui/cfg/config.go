@@ -459,8 +459,8 @@ func (c *Config) RenderRadio(item *Item) []l.Widget {
 					c.checkables[item.slug+item.options[i]].
 						IconColor(color).
 						Color(color).
-						CheckedStateIcon(icons.ToggleRadioButtonChecked).
-						UncheckedStateIcon(icons.ToggleRadioButtonUnchecked),
+						CheckedStateIcon(&icons.ToggleRadioButtonChecked).
+						UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked),
 					c.enums[item.slug], item.options[i], item.options[i]).Fn)
 		}
 		return c.th.Inset(0.25,

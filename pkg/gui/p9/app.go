@@ -24,14 +24,14 @@ type App struct {
 	hideSideBar         bool
 	hideTitleBar        bool
 	layers              []l.Widget
-	logo                []byte
+	logo                *[]byte
 	logoClickable       *Clickable
 	themeHook           func()
 	menuBackground      string
 	menuButton          *IconButton
 	menuClickable       *Clickable
 	menuColor           string
-	menuIcon            []byte
+	menuIcon            *[]byte
 	MenuOpen            bool
 	pages               WidgetMap
 	root                *Stack
@@ -73,13 +73,13 @@ func (th *Theme) App(size int) *App {
 		statusBarBackground: "DocBg",
 		statusBarColor:      "DocText",
 		sideBarList:         th.List(),
-		logo:                ico.ParallelCoin,
+		logo:                &ico.ParallelCoin,
 		logoClickable:       th.Clickable(),
 		title:               "parallelcoin",
 		titleBarBackground:  "Primary",
 		titleBarColor:       "DocBg",
 		titleFont:           "plan9",
-		menuIcon:            icons.NavigationMenu,
+		menuIcon:            &icons.NavigationMenu,
 		menuClickable:       mc,
 		menuButton:          th.IconButton(mc),
 		menuColor:           "Light",
@@ -215,7 +215,7 @@ func (a *App) MenuButton(gtx l.Context) l.Dimensions {
 					a.Icon().
 						Scale(Scales["H5"]).
 						Color(color).
-						Src(icons.NavigationMenu).
+						Src(&icons.NavigationMenu).
 						Fn,
 				).Fn,
 			).
@@ -430,11 +430,11 @@ func (a *App) MenuColorGet() string {
 	return a.menuColor
 }
 
-func (a *App) MenuIcon(menuIcon []byte) *App {
+func (a *App) MenuIcon(menuIcon *[]byte) *App {
 	a.menuIcon = menuIcon
 	return a
 }
-func (a *App) MenuIconGet() []byte {
+func (a *App) MenuIconGet() *[]byte {
 	return a.menuIcon
 }
 
