@@ -12,13 +12,14 @@ func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *wo
 	var n int
 	var err error
 	Debug("spawning worker process", args)
-	w, _ := worker.Spawn(args...)
+	w, _ := worker.Spawn(quit, args...)
 	data := make([]byte, 8192)
 	go func() {
 	out:
 		for {
 			select {
 			case <-quit:
+				Debug("quitting log consumer")
 				break out
 			default:
 			}

@@ -77,18 +77,22 @@ func (w *Window) Open() (out *Window) {
 	return w
 }
 
-func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy func()) (err error) {
+func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy func(), quit chan struct{}) (err error) {
 	var ops op.Ops
 	for {
-		e := <-w.Window.Events()
-		switch e := e.(type) {
-		case system.DestroyEvent:
-			destroy()
-			return e.Err
-		case system.FrameEvent:
-			ctx := layout.NewContext(&ops, e)
-			frame(ctx)
-			e.Frame(ctx.Ops)
+		select {
+		case <-quit:
+			return nil
+		case e := <-w.Window.Events():
+			switch e := e.(type) {
+			case system.DestroyEvent:
+				destroy()
+				return e.Err
+			case system.FrameEvent:
+				ctx := layout.NewContext(&ops, e)
+				frame(ctx)
+				e.Frame(ctx.Ops)
+			}
 		}
 	}
 }

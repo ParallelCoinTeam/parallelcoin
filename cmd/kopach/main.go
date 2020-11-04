@@ -88,7 +88,7 @@ func (w *Worker) Start() {
 	w.clients = []*client.Client{}
 	for i := 0; i < *w.cx.Config.GenThreads; i++ {
 		Debug("starting worker", i)
-		cmd, _ := worker.Spawn(os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, *w.cx.Config.LogLevel)
+		cmd, _ := worker.Spawn(w.quit, os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, *w.cx.Config.LogLevel)
 		w.workers = append(w.workers, cmd)
 		w.clients = append(w.clients, client.New(cmd.StdConn))
 	}

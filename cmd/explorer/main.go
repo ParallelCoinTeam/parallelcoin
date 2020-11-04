@@ -2,8 +2,9 @@ package explorer
 
 import (
 	"gioui.org/app"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -103,7 +104,7 @@ func (ex *Explorer) Run() (err error) {
 				func() {
 					Debug("quitting wallet gui")
 					interrupt.Request()
-				}); Check(err) {
+				}, ex.quit); Check(err) {
 		}
 	}()
 	// tickers and triggers

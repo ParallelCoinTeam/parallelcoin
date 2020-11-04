@@ -20,7 +20,8 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
-		size:       &size,
+		// runnerQuit: make(chan struct{}),
+		size: &size,
 	}
 	return wg.Run()
 }
@@ -47,6 +48,7 @@ type WalletGUI struct {
 	running          bool
 	invalidate       chan struct{}
 	quit             chan struct{}
+	runnerQuit       chan struct{}
 	sendAddresses    []SendAddress
 	txs              []btcjson.ListTransactionsResult
 	Worker           *worker.Worker
@@ -110,7 +112,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.RunCommandChan = make(chan string)
 	if err = wg.Runner(); Check(err) {
 	}
-	// wg.RunCommandChan <- "run"
+	wg.RunCommandChan <- "run"
 	wg.ConnectChainRPC()
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
@@ -127,22 +129,24 @@ func (wg *WalletGUI) Run() (err error) {
 				func() {
 					Debug("quitting wallet gui")
 					// interrupt.Request()
+					// close(wg.runnerQuit)
 					close(wg.quit)
-				}); Check(err) {
+				}, wg.quit); Check(err) {
 		}
 	}()
 	// tickers and triggers
 	// go func() {
-	out:
-		for {
-			select {
-			case <-wg.invalidate:
-				wg.w.Window.Invalidate()
-			case <-wg.quit:
-				Debug("closing GUI on quit signal")
-				break out
-			}
+out:
+	for {
+		select {
+		case <-wg.invalidate:
+			Debug("invalidating render queue")
+			wg.w.Window.Invalidate()
+		case <-wg.quit:
+			Debug("closing GUI on quit signal")
+			break out
 		}
+	}
 	// }()
 	// app.Main()
 	return

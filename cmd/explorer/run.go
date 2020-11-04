@@ -30,6 +30,7 @@ func (ex *Explorer) Runner() (err error) {
 					}
 					Debug("run called")
 					args := []string{os.Args[0], "-D", *ex.cx.Config.DataDir,
+						"--rpclisten", *ex.cx.Config.RPCConnect,
 						"--servertls=false", "--clienttls=false",
 						"--pipelog", "shell"}
 					// args = apputil.PrependForWindows(args)

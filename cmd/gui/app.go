@@ -15,7 +15,7 @@ import (
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a = wg.th.App(*wg.size)
 	wg.App = a
-	wg.App.ThemeHook(func(){
+	wg.App.ThemeHook(func() {
 		Debug("theme hook")
 		Debug(wg.bools)
 		*wg.cx.Config.DarkTheme = *wg.Dark
@@ -32,18 +32,23 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	wg.configs = wg.config.Config()
 	a.Pages(map[string]l.Widget{
 		"main": wg.Page("overview", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.OverviewPage()},
 		}),
 		"send": wg.Page("send", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.SendPage()},
 		}),
 		"receive": wg.Page("receive", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.ReceivePage()},
 		}),
 		"transactions": wg.Page("receive", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.TransactionsPage()},
 		}),
 		"settings": wg.Page("settings", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return wg.configs.Widget(wg.config)(gtx)
 			}},
