@@ -34,9 +34,8 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 			return nil
 		}
-		shutdownChan := make(chan struct{})
 		go func() {
-			err := node.Main(cx, shutdownChan)
+			err := node.Main(cx)
 			if err != nil {
 				Error("error starting node ", err)
 			}
@@ -46,6 +45,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		close(cx.NodeReady)
 		cx.Node.Store(true)
 		cx.WaitGroup.Wait()
+		close(cx.NodeKill)
 		return nil
 	}
 }

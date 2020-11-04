@@ -3,6 +3,7 @@ package pipe
 import (
 	"io"
 	"os"
+	"syscall"
 
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -62,5 +63,11 @@ func Serve(quit chan struct{}, handler func([]byte) error) stdconn.StdConn {
 			}
 		}
 	}()
+	si, _ := os.Stdin.Stat()
+	imod := si.Mode()
+	os.Stdin.Chmod(imod&^syscall.O_NONBLOCK)
+	so, _ := os.Stdin.Stat()
+	omod := so.Mode()
+	os.Stdin.Chmod(omod&^syscall.O_NONBLOCK)
 	return stdconn.New(os.Stdin, os.Stdout, quit)
 }

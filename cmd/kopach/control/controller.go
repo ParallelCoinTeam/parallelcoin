@@ -336,7 +336,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
 	adv := p2padvt.Get(c.cx)
-	Traces(adv)
+	// Traces(adv)
 	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, &c.coinbases)
 	jobShards := transport.GetShards(fMC.Data)
 	shardsLen := len(jobShards)

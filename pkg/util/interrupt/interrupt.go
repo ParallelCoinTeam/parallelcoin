@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"syscall"
 
 	"github.com/kardianos/osext"
@@ -75,6 +76,7 @@ func Listener() {
 			Debug("received interrupt signal", sig)
 			requested = true
 			invokeCallbacks()
+			pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 			return
 		case <-ShutdownRequestChan:
 			Warn("received shutdown request - shutting down...")

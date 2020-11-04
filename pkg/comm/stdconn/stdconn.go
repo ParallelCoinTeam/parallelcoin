@@ -13,7 +13,21 @@ type StdConn struct {
 }
 
 func New(in io.ReadCloser, out io.WriteCloser, quit chan struct{}) (s StdConn) {
-	return StdConn{in, out, quit}
+	s = StdConn{in, out, quit}
+	go func() {
+	out:
+		for {
+			select {
+			case <-quit:
+				if err := s.ReadCloser.Close(); Check(err) {
+				}
+				if err := s.WriteCloser.Close(); Check(err) {
+				}
+				break out
+			}
+		}
+	}()
+	return
 }
 
 func (s StdConn) Read(b []byte) (n int, err error) {
@@ -25,18 +39,7 @@ func (s StdConn) Write(b []byte) (n int, err error) {
 }
 
 func (s StdConn) Close() (err error) {
-	var ok bool
-	select {
-	case _, ok = <-s.Quit:
-	default:
-	}
-	if ok {
-		close(s.Quit)
-		if err = s.ReadCloser.Close(); Check(err) {
-		}
-		if err = s.WriteCloser.Close(); Check(err) {
-		}
-	}
+	close(s.Quit)
 	return
 }
 
