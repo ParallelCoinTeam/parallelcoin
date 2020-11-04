@@ -90,6 +90,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"receiveClear":            wg.th.Clickable(),
 		"receiveShow":             wg.th.Clickable(),
 		"receiveRemove":           wg.th.Clickable(),
+		"transactions10":          wg.th.Clickable(),
+		"transactions30":          wg.th.Clickable(),
+		"transactions50":          wg.th.Clickable(),
 	}
 	wg.bools = map[string]*p9.Bool{
 		"runstate":   wg.th.Bool(wg.running),
@@ -133,16 +136,16 @@ func (wg *WalletGUI) Run() (err error) {
 	}()
 	// tickers and triggers
 	// go func() {
-	out:
-		for {
-			select {
-			case <-wg.invalidate:
-				wg.w.Window.Invalidate()
-			case <-wg.quit:
-				Debug("closing GUI on quit signal")
-				break out
-			}
+out:
+	for {
+		select {
+		case <-wg.invalidate:
+			wg.w.Window.Invalidate()
+		case <-wg.quit:
+			Debug("closing GUI on quit signal")
+			break out
 		}
+	}
 	// }()
 	// app.Main()
 	return

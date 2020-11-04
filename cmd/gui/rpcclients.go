@@ -13,8 +13,31 @@ import (
 )
 
 func (wg *WalletGUI) chainClient() (*rpcclient.Client, error) {
+	// update the configuration
+	b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
+	if err == nil {
+		err = json.Unmarshal(b, wg.cx.Config)
+		if err != nil {
+		}
+	}
 	return rpcclient.New(&rpcclient.ConnConfig{
 		Host:         *wg.cx.Config.RPCConnect,
+		User:         *wg.cx.Config.Username,
+		Pass:         *wg.cx.Config.Password,
+		HTTPPostMode: true,
+	}, nil)
+}
+
+func (wg *WalletGUI) walletClient() (*rpcclient.Client, error) {
+	// update wallet data
+	walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
+	var walletServer, port string
+	var err error
+	if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
+		walletServer = net.JoinHostPort("127.0.0.1", port)
+	}
+	return rpcclient.New(&rpcclient.ConnConfig{
+		Host:         walletServer,
 		User:         *wg.cx.Config.Username,
 		Pass:         *wg.cx.Config.Password,
 		HTTPPostMode: true,
@@ -29,21 +52,8 @@ func (wg *WalletGUI) ConnectChainRPC() {
 			select {
 			case <-ticker:
 				// Debug("connectChainRPC ticker")
-				// update the configuration
-				b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
-				if err == nil {
-					err = json.Unmarshal(b, wg.cx.Config)
-					if err != nil {
-					}
-				}
-				// update chain data
 				var chainClient *rpcclient.Client
-				//chainConnConfig := &rpcclient.ConnConfig{
-				//	Host:         *wg.cx.Config.RPCConnect,
-				//	User:         *wg.cx.Config.Username,
-				//	Pass:         *wg.cx.Config.Password,
-				//	HTTPPostMode: true,
-				//}
+				var err error
 				if chainClient, err = wg.chainClient(); Check(err) {
 					break
 				}
@@ -54,20 +64,20 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				}
 				wg.State.SetBestBlockHeight(int(height))
 				wg.State.SetBestBlockHash(h)
-				// update wallet data
-				walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
+				//// update wallet data
+				//walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 				var walletClient *rpcclient.Client
-				var walletServer, port string
-				if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
-					walletServer = net.JoinHostPort("127.0.0.1", port)
-				}
-				walletConnConfig := &rpcclient.ConnConfig{
-					Host:         walletServer,
-					User:         *wg.cx.Config.Username,
-					Pass:         *wg.cx.Config.Password,
-					HTTPPostMode: true,
-				}
-				if walletClient, err = rpcclient.New(walletConnConfig, nil); Check(err) {
+				//var walletServer, port string
+				//if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
+				//	walletServer = net.JoinHostPort("127.0.0.1", port)
+				//}
+				//walletConnConfig := &rpcclient.ConnConfig{
+				//	Host:         walletServer,
+				//	User:         *wg.cx.Config.Username,
+				//	Pass:         *wg.cx.Config.Password,
+				//	HTTPPostMode: true,
+				//}
+				if walletClient, err = wg.walletClient(); Check(err) {
 					break
 				}
 				var unconfirmed util.Amount
