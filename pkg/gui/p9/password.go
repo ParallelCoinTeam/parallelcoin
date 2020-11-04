@@ -53,7 +53,7 @@ func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfoc
 	p.pasteButton = th.IconButton(p.pasteClickable)
 	p.unhideButton = th.IconButton(p.unhideClickable).
 		Background("Transparent").
-		Icon(th.Icon().Color(p.borderColor).Src(icons2.ActionVisibility))
+		Icon(th.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility))
 	p.showClickableFn = func(col string) {
 		p.hide = !p.hide
 		if !p.hide {
@@ -62,7 +62,7 @@ func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfoc
 				Icon(
 					th.Icon().
 						Color(col).
-						Src(icons2.ActionVisibility))
+						Src(&icons2.ActionVisibility))
 			p.pass.Mask('•')
 			p.passInput.Color(col)
 		} else {
@@ -71,7 +71,7 @@ func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfoc
 				Icon(
 					th.Icon().
 						Color(p.borderColor).
-						Src(icons2.ActionVisibilityOff),
+						Src(&icons2.ActionVisibilityOff),
 				)
 			p.pass.Mask(0)
 			p.passInput.Color(col)
@@ -97,7 +97,7 @@ func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfoc
 		Icon(
 			th.Icon().
 				Color(p.borderColor).
-				Src(icons2.ActionVisibility),
+				Src(&icons2.ActionVisibility),
 		)
 	p.pass.Mask('•')
 	p.pass.SetFocus(func(is bool) {
@@ -143,21 +143,21 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 				Rigid(
 					p.copyButton.
 						Background("").
-						Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(icons2.ContentContentCopy)).
+						Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
 						Inset(0.25).
 						Fn,
 				).
 				Rigid(
 					p.pasteButton.
 						Background("").
-						Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(icons2.ContentContentPaste)).
+						Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
 						Inset(0.25).
 						Fn,
 				).
 				Rigid(
 					p.unhideButton.
 						Background("Transparent").
-						Icon(p.Icon().Color(p.borderColor).Src(icons2.ActionVisibility)).Fn,
+						Icon(p.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility)).Fn,
 				).
 				Fn,
 		).Fn(gtx)

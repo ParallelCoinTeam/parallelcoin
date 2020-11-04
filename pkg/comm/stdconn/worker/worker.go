@@ -7,7 +7,6 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/comm/stdconn"
 )
 
@@ -15,18 +14,20 @@ type Worker struct {
 	cmd     *exec.Cmd
 	args    []string
 	StdConn stdconn.StdConn
+	Quit    chan struct{}
 }
 
 // Spawn starts up an arbitrary executable file with given arguments and
 // attaches a connection to its stdin/stdout
-func Spawn(args ...string) (w *Worker, err error) {
+func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 	// if runtime.GOOS == "windows" {
 	// 	args = append([]string{"cmd.exe", "/C", "start"}, args...)
 	// }
-	args = apputil.PrependForWindows(args)
+	// args = apputil.PrependForWindows(args)
 	w = &Worker{
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
+		Quit: quit,
 	}
 	// w.cmd.Stderr = os.Stderr
 	var cmdOut io.ReadCloser
@@ -38,9 +39,24 @@ func Spawn(args ...string) (w *Worker, err error) {
 		return
 	}
 	w.cmd.Stderr = os.Stderr
-	w.StdConn = stdconn.New(cmdOut, cmdIn, make(chan struct{}))
+	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
 	if err = w.cmd.Start(); Check(err) {
 	}
+	go func() {
+	out:
+		for {
+			select {
+			case <-w.Quit:
+				Debug("stopping")
+				Check(w.Stop())
+				Debug("interrupting")
+				Check(w.Interrupt())
+				Debug("killing")
+				Check(w.Kill())
+				break out
+			}
+		}
+	}()
 	return
 }
 

@@ -87,7 +87,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 		y := i
 		removeBtn := m.Theme.IconButton(removeClickable).
 			Icon(
-				m.Theme.Icon().Scale(1.5).Color("DocText").Src(icons.ActionDelete),
+				m.Theme.Icon().Scale(1.5).Color("DocText").Src(&icons.ActionDelete),
 			).
 			Background("Transparent").
 			SetClick(func() {
@@ -205,7 +205,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 					m.handle(m.lines.Value())
 				})).
 				Icon(
-					m.Theme.Icon().Scale(1.5).Color("DocText").Src(icons.ActionDelete),
+					m.Theme.Icon().Scale(1.5).Color("DocText").Src(&icons.ActionDelete),
 				).
 				Background("Transparent")
 		}
@@ -222,7 +222,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 	m.UpdateWidgets()
 	m.PopulateWidgets()
 	addButton := m.Theme.IconButton(m.addClickable).Icon(
-		m.Theme.Icon().Scale(1.5).Color("Primary").Src(icons.ContentAdd),
+		m.Theme.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
 	)
 	var widgets []l.Widget
 	if m.inputLocation > 0 && m.inputLocation < len(*m.lines) {
@@ -403,7 +403,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 	// Debug("widgets", widgets)
 	addButton := func(gtx l.Context) l.Dimensions {
 		addb := m.Theme.IconButton(m.addClickable).Icon(
-			m.Theme.Icon().Scale(1.5).Color("Primary").Src(icons.ContentAdd),
+			m.Theme.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
 		).SetClick(func() {
 			Debug("clicked add")
 			m.inputLocation = len(*m.lines)

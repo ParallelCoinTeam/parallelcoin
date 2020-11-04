@@ -1,9 +1,9 @@
 package gui
 
 import (
-	"gioui.org/app"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -11,7 +11,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -21,7 +20,8 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
-		size:       &size,
+		// runnerQuit: make(chan struct{}),
+		size: &size,
 	}
 	return wg.Run()
 }
@@ -48,6 +48,7 @@ type WalletGUI struct {
 	running          bool
 	invalidate       chan struct{}
 	quit             chan struct{}
+	runnerQuit       chan struct{}
 	sendAddresses    []SendAddress
 	txs              []btcjson.ListTransactionsResult
 	Worker           *worker.Worker
@@ -79,6 +80,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"transactions": wg.th.List(),
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
+		"recent":       wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
@@ -126,22 +128,26 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					interrupt.Request()
-				}); Check(err) {
+					// interrupt.Request()
+					// close(wg.runnerQuit)
+					close(wg.quit)
+				}, wg.quit); Check(err) {
 		}
 	}()
 	// tickers and triggers
-	go func() {
-	out:
-		for {
-			select {
-			case <-wg.invalidate:
-				wg.w.Window.Invalidate()
-			case <-wg.quit:
-				break out
-			}
+	// go func() {
+out:
+	for {
+		select {
+		case <-wg.invalidate:
+			Debug("invalidating render queue")
+			wg.w.Window.Invalidate()
+		case <-wg.quit:
+			Debug("closing GUI on quit signal")
+			break out
 		}
-	}()
-	app.Main()
+	}
+	// }()
+	// app.Main()
 	return
 }

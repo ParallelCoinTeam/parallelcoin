@@ -1,8 +1,11 @@
 package gui
 
 import (
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/kofoworola/godate"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -16,6 +19,7 @@ type State struct {
 	balance            float64
 	balanceUnconfirmed float64
 	lastTxs            []btcjson.ListTransactionsResult
+	lastTimeStrings    []string
 }
 
 func (s *State) LastTxs() []btcjson.ListTransactionsResult {
@@ -27,7 +31,16 @@ func (s *State) LastTxs() []btcjson.ListTransactionsResult {
 func (s *State) SetLastTxs(txs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	if txs == nil {
+		return
+	}
 	s.lastTxs = txs
+	s.lastTimeStrings = make([]string, 10)
+	for i := range s.lastTxs {
+		s.lastTimeStrings = append(s.lastTimeStrings,
+			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
+				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0)))))
+	}
 }
 
 func (s *State) LastUpdated() time.Time {

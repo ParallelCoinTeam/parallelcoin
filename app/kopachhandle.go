@@ -27,7 +27,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		interrupt.AddHandler(func() {
 			Debug("Handle interrupt")
 			close(quit)
-			os.Exit(0)
+			// os.Exit(0)
 		})
 		err = kopach.Handle(cx)(c)
 		<-quit

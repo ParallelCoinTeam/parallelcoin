@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	gioui.org v0.0.0-20200929170715-d2e06d938930
+	gioui.org/cmd v0.0.0-20201102184644-18869735db19 // indirect
 	github.com/BurntSushi/xgb v0.0.0-20200324125942-20f126ea2843
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
@@ -34,9 +35,10 @@ require (
 	github.com/ipfs/go-merkledag v0.3.2
 	github.com/ipfs/go-unixfs v0.2.4
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
+	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
+	github.com/kofoworola/godate v1.2.1
 	github.com/kr/text v0.2.0 // indirect
 	github.com/libp2p/go-libp2p v0.11.0
 	github.com/libp2p/go-libp2p-connmgr v0.2.4

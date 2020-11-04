@@ -65,8 +65,9 @@ func Listener() {
 			}
 		}
 		// time.Sleep(time.Second * 3)
-		os.Exit(1)
+		// os.Exit(1)
 	}
+	defer Debug("interrupt listener terminated")
 	for {
 		select {
 		case sig := <-Chan:

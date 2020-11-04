@@ -29,7 +29,7 @@ func (wg *WalletGUI) ConnectChainRPC() {
 		for {
 			select {
 			case <-ticker:
-				// Debug("connectChainRPC ticker")
+				Debug("connectChainRPC ticker")
 				// update the configuration
 				var err error
 				if !connectedOnce {

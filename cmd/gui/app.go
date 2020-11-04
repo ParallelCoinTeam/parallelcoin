@@ -10,13 +10,12 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a = wg.th.App(*wg.size)
 	wg.App = a
-	wg.App.ThemeHook(func(){
+	wg.App.ThemeHook(func() {
 		Debug("theme hook")
 		Debug(wg.bools)
 		*wg.cx.Config.DarkTheme = *wg.Dark
@@ -33,18 +32,23 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	wg.configs = wg.config.Config()
 	a.Pages(map[string]l.Widget{
 		"main": wg.Page("overview", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.OverviewPage()},
 		}),
 		"send": wg.Page("send", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.SendPage()},
 		}),
 		"receive": wg.Page("receive", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.ReceivePage()},
 		}),
 		"transactions": wg.Page("receive", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.TransactionsPage()},
 		}),
 		"settings": wg.Page("settings", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return wg.configs.Widget(wg.config)(gtx)
 			}},
@@ -68,7 +72,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 							SpaceEvenly().
 							Rigid(
 								wg.th.Button(wg.clickables["quit"].SetClick(func() {
-									interrupt.Request()
+									close(wg.quit)
 								})).Color(wg.App.TitleBarColorGet()).TextScale(2).Text("yes!!!").Fn,
 							).Fn,
 					).
@@ -88,17 +92,17 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 8),
 	})
 	a.ButtonBar([]l.Widget{
-		wg.PageTopBarButton("help", 0, icons.ActionHelp),
+		wg.PageTopBarButton("help", 0, &icons.ActionHelp),
 		// wg.PageTopBarButton("log", 1, icons.ActionList),
-		wg.PageTopBarButton("settings", 2, icons.ActionSettings),
-		wg.PageTopBarButton("quit", 3, icons.ActionExitToApp),
+		wg.PageTopBarButton("settings", 2, &icons.ActionSettings),
+		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
 		wg.RunStatusButton(),
 		wg.th.Flex().Rigid(
-			wg.StatusBarButton("log", 1, icons.ActionList),
+			wg.StatusBarButton("log", 1, &icons.ActionList),
 		).Rigid(
-			wg.StatusBarButton("settings", 2, icons.ActionSettings),
+			wg.StatusBarButton("settings", 2, &icons.ActionSettings),
 		).Fn,
 	})
 	return
@@ -173,7 +177,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 	}
 }
 
-func (wg *WalletGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.TitleBarBackgroundGet()
 		color := wg.MenuColorGet()
@@ -209,7 +213,7 @@ func (wg *WalletGUI) PageTopBarButton(name string, index int, ico []byte) func(g
 	}
 }
 
-func (wg *WalletGUI) StatusBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.StatusBarBackgroundGet()
 		color := wg.StatusBarColorGet()
@@ -256,11 +260,11 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.App.StatusBarBackgroundGet()
 		color := wg.App.StatusBarColorGet()
-		var ico []byte
+		var ico *[]byte
 		if wg.running {
-			ico = t
+			ico = &t
 		} else {
-			ico = f
+			ico = &f
 		}
 		ic := wg.th.Icon().
 			Scale(p9.Scales["H4"]).
@@ -288,7 +292,7 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 						wg.th.Icon().
 							Scale(p9.Scales["H5"]).
 							Color("Primary").
-							Src(icons.ActionCheckCircle).
+							Src(&icons.ActionCheckCircle).
 							Fn,
 					),
 				).Fn,

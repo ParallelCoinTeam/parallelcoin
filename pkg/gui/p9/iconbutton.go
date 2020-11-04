@@ -35,7 +35,7 @@ func (th *Theme) IconButton(button *Clickable) *IconButton {
 		size:       th.TextSize,
 		inset:      th.Inset(0.33, nil),
 		button:     button,
-		icon:       th.Icon().Src(icons.AlertError),
+		icon:       th.Icon().Src(&icons.AlertError),
 	}
 }
 

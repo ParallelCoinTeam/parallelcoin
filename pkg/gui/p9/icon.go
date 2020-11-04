@@ -14,7 +14,7 @@ import (
 type Icon struct {
 	th    *Theme
 	color string
-	src   []byte
+	src   *[]byte
 	size  unit.Value
 	// Cached values.
 	sz       int
@@ -22,6 +22,10 @@ type Icon struct {
 	imgSize  int
 	imgColor string
 }
+
+type IconByColor map[string]paint.ImageOp
+type IconBySize map[float32]IconByColor
+type IconCache map[*[]byte]IconBySize
 
 // Icon returns a new Icon from iconVG data.
 func (th *Theme) Icon() *Icon {
@@ -35,8 +39,8 @@ func (i *Icon) Color(color string) *Icon {
 }
 
 // Src sets the icon source to draw from
-func (i *Icon) Src(data []byte) *Icon {
-	_, err := iconvg.DecodeMetadata(data)
+func (i *Icon) Src(data *[]byte) *Icon {
+	_, err := iconvg.DecodeMetadata(*data)
 	if Check(err) {
 		Debug("no image data, crashing")
 		panic(err)
@@ -48,7 +52,7 @@ func (i *Icon) Src(data []byte) *Icon {
 
 // Scale changes the size relative to the base font size
 func (i *Icon) Scale(scale float32) *Icon {
-	i.size = i.th.TextSize.Scale(scale * 1)
+	i.size = i.th.TextSize.Scale(scale)
 	return i
 }
 
@@ -77,19 +81,32 @@ func (i *Icon) image(sz int) paint.ImageOp {
 		// Debug("reusing old icon")
 		return i.op
 	}
-	m, _ := iconvg.DecodeMetadata(i.src)
+	if ico, ok := i.th.iconCache[i.src]; ok {
+		if isz, ok := ico[i.size.V]; ok {
+			if icl, ok := isz[i.color]; ok {
+				return icl
+			}
+		}
+	}
+	m, _ := iconvg.DecodeMetadata(*i.src)
 	dx, dy := m.ViewBox.AspectRatio()
 	img := image.NewRGBA(image.Rectangle{Max: image.Point{X: sz,
 		Y: int(float32(sz) * dy / dx)}})
 	var ico iconvg.Rasterizer
 	ico.SetDstImage(img, img.Bounds(), draw.Src)
 	m.Palette[0] = i.th.Colors.Get(i.color)
-	if err := iconvg.Decode(&ico, i.src, &iconvg.DecodeOptions{
+	if err := iconvg.Decode(&ico, *i.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
 	}); Check(err) {
 	}
-	i.op = paint.NewImageOp(img)
-	i.imgSize = sz
-	i.imgColor = i.color
-	return i.op
+	operation := paint.NewImageOp(img)
+	// create the maps if they don't exist
+	if _, ok := i.th.iconCache[i.src]; !ok {
+		i.th.iconCache[i.src] = make(IconBySize)
+	}
+	if _, ok := i.th.iconCache[i.src][i.size.V]; !ok {
+		i.th.iconCache[i.src][i.size.V] = make(IconByColor)
+	}
+	i.th.iconCache[i.src][i.size.V][i.color] = operation
+	return operation
 }

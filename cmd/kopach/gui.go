@@ -3,7 +3,6 @@ package kopach
 import (
 	"fmt"
 	"image"
-	"os"
 	"runtime"
 	"time"
 
@@ -81,9 +80,9 @@ func (w *Worker) Run() {
 			Info("clicked logo button")
 		})
 	win := f.NewWindow()
-	interrupt.AddHandler(func(){
+	interrupt.AddHandler(func() {
 		close(w.quit)
-		os.Exit(0)
+		// os.Exit(0)
 	})
 	go func() {
 		if err := win.
@@ -95,7 +94,7 @@ func (w *Worker) Run() {
 				func() {
 					Debug("quitting miner")
 					interrupt.Request()
-				}); Check(err) {
+				}, w.quit); Check(err) {
 		}
 	}()
 	go func() {
@@ -199,7 +198,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 				m.IconButton(m.logoButton).
 					Color("Light").
 					Background("Dark").
-					Icon(m.Icon().Color("Light").Scale(p9.Scales["H5"]).Src(icons.ParallelCoin)).
+					Icon(m.Icon().Color("Light").Scale(p9.Scales["H5"]).Src(&icons.ParallelCoin)).
 					Fn,
 			).Fn,
 		).Rigid(

@@ -102,7 +102,7 @@ func (ng *NodeGUI) Run() (err error) {
 				func() {
 					Debug("quitting node gui")
 					interrupt.Request()
-				}); Check(err) {
+				}, ng.quit); Check(err) {
 		}
 	}()
 	go func() {

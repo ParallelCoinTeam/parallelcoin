@@ -137,7 +137,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							go func() {
 								Warn("starting wallet")
 								if err = walletmain.Main(cx); Check(err) {
-									os.Exit(1)
+									// os.Exit(1)
 								} else {
 									Debug("wallet started")
 								}
@@ -481,7 +481,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					" and other node peers",
 				":0",
 				cx.Config.Controller),
-			au.BoolTrue(
+			au.Bool(
 				"autoports",
 				"uses random automatic ports for p2p, rpc and controller",
 				cx.Config.AutoPorts),

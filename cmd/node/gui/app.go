@@ -172,18 +172,18 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 		// ng.SideBarButton("quit", "quit", 8),
 	})
 	ng.app.ButtonBar([]l.Widget{
-		ng.PageTopBarButton("help", 0, icons.ActionHelp),
+		ng.PageTopBarButton("help", 0, &icons.ActionHelp),
 		// ng.PageTopBarButton("log", 1, icons.ActionList),
 		// ng.PageTopBarButton("settings", 2, icons.ActionSettings),
-		ng.PageTopBarButton("quit", 3, icons.ActionExitToApp),
+		ng.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
 	})
 	ng.app.StatusBar([]l.Widget{
 		ng.RunStatusButton(),
 		// ng.StatusBarButton("help", 0, icons.AVPlayArrow),
 		ng.th.Flex().Rigid(
-			ng.StatusBarButton("log", 1, icons.ActionList),
+			ng.StatusBarButton("log", 1, &icons.ActionList),
 		).Rigid(
-			ng.StatusBarButton("settings", 2, icons.ActionSettings),
+			ng.StatusBarButton("settings", 2, &icons.ActionSettings),
 		).Fn,
 	})
 	ng.app.Title("node")
@@ -266,7 +266,7 @@ func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Conte
 	}
 }
 
-func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (ng *NodeGUI) PageTopBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := ng.app.TitleBarBackgroundGet()
 		color := ng.app.MenuColorGet()
@@ -302,7 +302,7 @@ func (ng *NodeGUI) PageTopBarButton(name string, index int, ico []byte) func(gtx
 	}
 }
 
-func (ng *NodeGUI) StatusBarButton(name string, index int, ico []byte) func(gtx l.Context) l.Dimensions {
+func (ng *NodeGUI) StatusBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := ng.app.StatusBarBackgroundGet()
 		color := ng.app.StatusBarColorGet()
@@ -335,7 +335,7 @@ func (ng *NodeGUI) StatusBarButton(name string, index int, ico []byte) func(gtx 
 }
 
 func (ng *NodeGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
-	t, f := icons.AVStop, icons.AVPlayArrow
+	t, f := &icons.AVStop, &icons.AVPlayArrow
 	return func(gtx l.Context) l.Dimensions {
 		state := ng.bools["runstate"].GetValue()
 		background := ng.app.StatusBarBackgroundGet()
@@ -345,7 +345,7 @@ func (ng *NodeGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			st = true
 			background = "Primary"
 		}
-		var ico []byte
+		var ico *[]byte
 		if st {
 			ico = t
 		} else {
@@ -377,7 +377,7 @@ func (ng *NodeGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 						ng.th.Icon().
 							Scale(p9.Scales["H5"]).
 							Color("Primary").
-							Src(icons.ActionCheckCircle).
+							Src(&icons.ActionCheckCircle).
 							Fn,
 					),
 				).Fn,
