@@ -51,77 +51,103 @@ func (wg *WalletGUI) walletClient() (*rpcclient.Client, error) {
 
 func (wg *WalletGUI) Tickers() {
 	go func() {
+		var chainClient, walletClient *rpcclient.Client
+		var err error
 		seconds := time.Tick(time.Second)
 		// fiveSeconds := time.Tick(time.Second * 5)
-	out:
+	totalOut:
 		for {
-			select {
-			case <-seconds:
-				// Debug("connectChainRPC ticker")
-				var chainClient *rpcclient.Client
-				var err error
-				if chainClient, err = wg.chainClient(); Check(err) {
-					break
-				}
-				var height int32
-				var h *chainhash.Hash
-				if h, height, err = chainClient.GetBestBlock(); Check(err) {
-					break
-				}
-				wg.State.SetBestBlockHeight(int(height))
-				wg.State.SetBestBlockHash(h)
-				// // update wallet data
-				// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
-				var walletClient *rpcclient.Client
-				// var walletServer, port string
-				// if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
-				//	walletServer = net.JoinHostPort("127.0.0.1", port)
-				// }
-				// walletConnConfig := &rpcclient.ConnConfig{
-				//	Host:         walletServer,
-				//	User:         *wg.cx.Config.Username,
-				//	Pass:         *wg.cx.Config.Password,
-				//	HTTPPostMode: true,
-				// }
-				if walletClient, err = wg.walletClient(); Check(err) {
-					break
-				}
-				var unconfirmed util.Amount
-				if unconfirmed, err = walletClient.GetUnconfirmedBalance("default"); Check(err) {
-					break
-				}
-				wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
-				var confirmed util.Amount
-				if confirmed, err = walletClient.GetBalance("default"); Check(err) {
-					break
-				}
-				wg.State.SetBalance(confirmed.ToDUO())
-				var ltr []btcjson.ListTransactionsResult
-				// TODO: for some reason this function returns half as many as requested
-				if ltr, err = walletClient.ListTransactionsCount("default", 20); Check(err) {
-					break
-				}
-				// Debugs(ltr)
-				wg.State.SetLastTxs(ltr)
-			// case <-fiveSeconds:
-				var b []byte
-				buf := bytes.NewBuffer(b)
-				pprof.Lookup("goroutine").WriteTo(buf, 2)
-				Debug(buf.String())
-				lines := strings.Split(buf.String(), "\n")
-				var out []l.Widget
-				for i := range lines {
-					var text string
-					if strings.HasPrefix(lines[i], "goroutine") && i < len(lines)-2 {
-						text = lines[i+2]
-						text = strings.TrimSpace(strings.Split(text, " ")[0])
-						out = append(out, wg.th.Caption(text).Color("DocText").Fn)
+		preconnect:
+			for {
+				select {
+				case <-seconds:
+					if chainClient != nil {
+						chainClient.Disconnect()
 					}
+					if chainClient, err = wg.chainClient(); Check(err) {
+						break
+					}
+					if walletClient != nil {
+						walletClient.Disconnect()
+					}
+					if walletClient, err = wg.walletClient(); Check(err) {
+						break
+					}
+					// if we got to here both are connected
+					break preconnect
+				case <-wg.quit:
+					break totalOut
 				}
-				wg.State.SetGoroutines(out)
-			case <-wg.quit:
-				break out
+			}
+		out:
+			for {
+				select {
+				case <-seconds:
+					// Debug("connectChainRPC ticker")
+					var err error
+
+					var height int32
+					var h *chainhash.Hash
+					if h, height, err = chainClient.GetBestBlock(); Check(err) {
+						break out
+					}
+					wg.State.SetBestBlockHeight(int(height))
+					wg.State.SetBestBlockHash(h)
+					// // update wallet data
+					// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
+					// var walletServer, port string
+					// if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
+					//	walletServer = net.JoinHostPort("127.0.0.1", port)
+					// }
+					// walletConnConfig := &rpcclient.ConnConfig{
+					//	Host:         walletServer,
+					//	User:         *wg.cx.Config.Username,
+					//	Pass:         *wg.cx.Config.Password,
+					//	HTTPPostMode: true,
+					// }
+					var unconfirmed util.Amount
+					if unconfirmed, err = walletClient.GetUnconfirmedBalance("default"); Check(err) {
+						break out
+					}
+					wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+					var confirmed util.Amount
+					if confirmed, err = walletClient.GetBalance("default"); Check(err) {
+						break out
+					}
+					wg.State.SetBalance(confirmed.ToDUO())
+					var ltr []btcjson.ListTransactionsResult
+					// TODO: for some reason this function returns half as many as requested
+					if ltr, err = walletClient.ListTransactionsCount("default", 20); Check(err) {
+						break out
+					}
+					// Debugs(ltr)
+					wg.State.SetLastTxs(ltr)
+					// case <-fiveSeconds:
+					var b []byte
+					buf := bytes.NewBuffer(b)
+					if err = pprof.Lookup("goroutine").WriteTo(buf, 2); Check(err) {
+						break out
+					}
+					// Debug(buf.String())
+					lines := strings.Split(buf.String(), "\n")
+					var out []l.Widget
+					var outString string
+					for i := range lines {
+						var text string
+						if strings.HasPrefix(lines[i], "goroutine") && i < len(lines)-2 {
+							text = lines[i+2]
+							text = strings.TrimSpace(strings.Split(text, " ")[0])
+							outString += text + "\n"
+							out = append(out, wg.th.Caption(text).Color("DocText").Fn)
+						}
+					}
+					Debug(outString)
+					wg.State.SetGoroutines(out)
+				case <-wg.quit:
+					break totalOut
+				}
 			}
 		}
+
 	}()
 }

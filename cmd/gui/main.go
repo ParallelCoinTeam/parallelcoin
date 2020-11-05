@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -135,11 +136,13 @@ func (wg *WalletGUI) Run() (err error) {
 					wg.RunCommandChan <- "stop"
 					// close(wg.runnerQuit)
 					// close(wg.cx.StateCfg.Miner.Quit)
-					if wg.running {
-						if wg.Worker != nil {
-							close(wg.Worker.Quit)
-						}
-					}
+					consume.Kill(wg.Worker)
+					// if wg.running {
+					// 	if wg.Worker != nil {
+					// 		Debug("closing worker quit channel")
+					// 		close(wg.Worker.Quit)
+					// }
+					// }
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
