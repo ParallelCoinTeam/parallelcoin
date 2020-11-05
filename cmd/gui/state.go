@@ -2,13 +2,13 @@ package gui
 
 import (
 	"fmt"
+	l "gioui.org/layout"
 	"github.com/kofoworola/godate"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"sync"
 	"time"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 type State struct {
@@ -19,6 +19,21 @@ type State struct {
 	balance            float64
 	balanceUnconfirmed float64
 	txs                []tx
+	lastTxs            []btcjson.ListTransactionsResult
+	lastTimeStrings    []string
+	goroutines         []l.Widget
+}
+
+func (s *State) Goroutines() []l.Widget {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	return s.goroutines
+}
+
+func (s *State) SetGoroutines(gr []l.Widget) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.goroutines = gr
 }
 
 func (s *State) Txs() []tx {

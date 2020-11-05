@@ -31,11 +31,9 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 							wg.buttonText(wg.clickables["transactions10"], "10", wg.Transactions),
 						).
 						Rigid(
-							//wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
 							wg.buttonText(wg.clickables["transactions30"], "30", wg.Transactions),
 						).
 						Rigid(
-							//wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
 							wg.buttonText(wg.clickables["transactions50"], "50", wg.Transactions),
 						).Fn,
 				).Fn,
@@ -47,15 +45,12 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 							wg.Inset(0.25, wg.Caption("Date:").Color("DocText").Fn).Fn,
 						).
 						Rigid(
-							//wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
 							wg.Inset(0.25, wg.Caption("Type:").Color("DocText").Fn).Fn,
 						).
 						Flexed(1,
-							//wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
 							wg.Inset(0.25, wg.Caption("Label:").Color("DocText").Fn).Fn,
 						).
 						Rigid(
-							//wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
 							wg.Inset(0.25, wg.Caption("Amount(DUO):").Color("DocText").Fn).Fn,
 						).Fn,
 				).Fn,
@@ -69,13 +64,20 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 }
 
 func (wg *WalletGUI) Transactions() {
-	walletClient, err := wg.walletClient()
-	if err != nil {
-	}
-	txs, err := walletClient.ListTransactionsCount("default", 20)
+	txs, err := wg.WalletClient.ListTransactionsCount("default", 20)
 	if err != nil {
 	}
 	wg.txs = txs
+	// go func() {
+	// TODO: this code will block for a lot longer than a single frame time
+	// if wg.WalletClient != nil {
+	// 	txs, err := wg.WalletClient.ListTransactionsCount("default", 20)
+	// 	if err != nil {
+	// 	}
+	// 	wg.txs = txs
+	// 	fmt.Println("txs:", txs)
+	// }
+	// }()
 }
 
 func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
@@ -166,9 +168,9 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 	).Fn(gtx)
 }
 
-//func (wg *WalletGUI) ClearAddress(i int) {
+// func (wg *WalletGUI) ClearAddress(i int) {
 //	wg.sendAddresses = remove(wg.sendAddresses, i)
-//}
+// }
 
 func (wg *WalletGUI) txIitem(label, data string) l.Widget {
 	if data != "" {

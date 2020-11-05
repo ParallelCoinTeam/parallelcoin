@@ -10,6 +10,7 @@ import (
 )
 
 func (wg *WalletGUI) Runner() (err error) {
+	wg.RunCommandChan = make(chan string)
 	interrupt.AddHandler(func() {
 		if wg.running {
 			// 		wg.RunCommandChan <- "stop"
@@ -25,35 +26,32 @@ func (wg *WalletGUI) Runner() (err error) {
 			case cmd := <-wg.RunCommandChan:
 				switch cmd {
 				case "run":
+					Debug("run called")
 					if wg.running {
+						Debug("already running...")
 						break
 					}
-					Debug("run called")
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
+						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"--servertls=false", "--clienttls=false",
 						"--pipelog", "shell"}
 					// args = apputil.PrependForWindows(args)
-					wg.Shell = consume.Log(wg.quit, func(ent *logi.Entry) (err error) {
+					wg.runnerQuit = make(chan struct{})
+					wg.Shell = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
 						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 						return
 					}, func(pkg string) (out bool) {
 						return false
-					},args...)
+					}, args...)
 					consume.Start(wg.Shell)
 					wg.running = true
-
 				case "stop":
+					Debug("stop called")
 					if !wg.running {
+						Debug("wasn't running...")
 						break
 					}
-					Debug("stop called")
 					consume.Kill(wg.Shell)
-					Debug("stopping")
-					Check(wg.Shell.Stop())
-					Debug("interrupting")
-					Check(wg.Shell.Interrupt())
-					Debug("killing")
-					Check(wg.Shell.Kill())
 					wg.running = false
 				case "restart":
 					Debug("restart called")
@@ -70,5 +68,6 @@ func (wg *WalletGUI) Runner() (err error) {
 			}
 		}
 	}()
+	wg.RunCommandChan <- "run"
 	return nil
 }

@@ -80,8 +80,8 @@ func (w *Worker) Run() {
 			Info("clicked logo button")
 		})
 	win := f.NewWindow()
-	interrupt.AddHandler(func(){
-		close(w.quit)
+	interrupt.AddHandler(func() {
+		// close(w.quit)
 		// os.Exit(0)
 	})
 	go func() {
@@ -93,8 +93,9 @@ func (w *Worker) Run() {
 				minerModel.Widget,
 				func() {
 					Debug("quitting miner")
-					interrupt.Request()
-				}); Check(err) {
+					// interrupt.Request()
+					close(w.quit)
+				}, w.quit); Check(err) {
 		}
 	}()
 	go func() {

@@ -88,7 +88,7 @@ func (w *Worker) Start() {
 	w.clients = []*client.Client{}
 	for i := 0; i < *w.cx.Config.GenThreads; i++ {
 		Debug("starting worker", i)
-		cmd, _ := worker.Spawn(os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, *w.cx.Config.LogLevel)
+		cmd, _ := worker.Spawn(w.quit, os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, *w.cx.Config.LogLevel)
 		w.workers = append(w.workers, cmd)
 		w.clients = append(w.clients, client.New(cmd.StdConn))
 	}
@@ -139,7 +139,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			StartChan:     make(chan struct{}),
 			StopChan:      make(chan struct{}),
 			SetThreads:    make(chan int),
-			solutions:     make([]SolutionData, 0, 20048),
+			solutions:     make([]SolutionData, 0, 2048),
 			Update:        make(chan struct{}),
 			hashSampleBuf: ring.NewBufferUint64(1000),
 		}
@@ -227,6 +227,9 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
+		interrupt.AddHandler(func() {
+			close(w.quit)
+		})
 		<-w.quit
 		Info("kopach shutting down")
 		return

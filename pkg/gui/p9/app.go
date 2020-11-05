@@ -116,8 +116,8 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 		bar.Rigid(a.statusBar[i])
 	}
 	out :=
-	// a.Fill("PanelBg",
-	// 	a.Inset(0.25,
+		// a.Fill("PanelBg",
+		// 	a.Inset(0.25,
 		bar.Fn
 	// ).Fn
 	// ).Fn
@@ -270,14 +270,12 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 		Rigid(
 			a.Responsive(*a.Size, Widgets{
 				{Size: 800,
-					Widget:
-					a.Inset(0.333,
+					Widget: a.Inset(0.333,
 						a.H5(a.title).Color("Light").Fn,
 					).Fn,
 				},
 				{
-					Widget:
-					a.ButtonLayout(a.logoClickable).Embed(
+					Widget: a.ButtonLayout(a.logoClickable).Embed(
 						a.Inset(0.333,
 							a.H5(a.title).Color("Light").Fn,
 						).Fn,
@@ -309,6 +307,8 @@ func (a *App) RenderPage(gtx l.Context) l.Dimensions {
 						).Fn,
 					).Fn(gtx)
 			} else {
+				// _ = page
+				// return EmptyMaxHeight()(gtx)
 				return page(gtx)
 			}
 		},
@@ -325,18 +325,18 @@ func (a *App) renderSideBar() l.Widget {
 			Length(len(a.sideBar)).
 			Vertical().Background("PanelBg").
 			ListElement(func(gtx l.Context, index int) l.Dimensions {
-			// gtx.Constraints.Max.X = int(a.sideBarSize.V)
-			// gtx.Constraints.Min.X = 0
-			// gtx.Constraints.Max.X = gtx.Constraints.Min.X
-			dims := a.sideBar[index](gtx)
-			// Debug(dims)
-			return dims
-			// out := a.VFlex()
-			// for i := range a.sideBar {
-			// 	out.Rigid(a.sideBar[i])
-			// }
-			// return out.Fn(gtx)
-		})
+				// gtx.Constraints.Max.X = int(a.sideBarSize.V)
+				// gtx.Constraints.Min.X = 0
+				// gtx.Constraints.Max.X = gtx.Constraints.Min.X
+				dims := a.sideBar[index](gtx)
+				// Debug(dims)
+				return dims
+				// out := a.VFlex()
+				// for i := range a.sideBar {
+				// 	out.Rigid(a.sideBar[i])
+				// }
+				// return out.Fn(gtx)
+			})
 		// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
 		return out.Fn(gtx)
 	}

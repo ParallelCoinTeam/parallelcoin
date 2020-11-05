@@ -23,7 +23,6 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			// generate the tls certificate if configured
 			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
 		}
-		shutdownChan := make(chan struct{})
 		dbFilename :=
 			*cx.Config.DataDir + slash +
 				cx.ActiveNet.Params.Name + slash +
@@ -39,7 +38,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		Warn("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
-				err = node.Main(cx, shutdownChan)
+				err = node.Main(cx)
 				if err != nil {
 					Error("error starting node ", err)
 				}

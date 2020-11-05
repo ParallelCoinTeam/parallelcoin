@@ -3,6 +3,7 @@ package pipe
 import (
 	"io"
 	"os"
+	"syscall"
 
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -12,13 +13,14 @@ func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *wo
 	var n int
 	var err error
 	Debug("spawning worker process", args)
-	w, _ := worker.Spawn(args...)
+	w, _ := worker.Spawn(quit, args...)
 	data := make([]byte, 8192)
 	go func() {
 	out:
 		for {
 			select {
 			case <-quit:
+				Debug("quitting log consumer")
 				break out
 			default:
 			}
@@ -61,5 +63,11 @@ func Serve(quit chan struct{}, handler func([]byte) error) stdconn.StdConn {
 			}
 		}
 	}()
+	si, _ := os.Stdin.Stat()
+	imod := si.Mode()
+	os.Stdin.Chmod(imod &^ syscall.O_NONBLOCK)
+	so, _ := os.Stdin.Stat()
+	omod := so.Mode()
+	os.Stdin.Chmod(omod &^ syscall.O_NONBLOCK)
 	return stdconn.New(os.Stdin, os.Stdout, quit)
 }

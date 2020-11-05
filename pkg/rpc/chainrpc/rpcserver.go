@@ -1117,7 +1117,8 @@ func (s *Server) Start() {
 				Trace(err)
 			}
 			Trace("chain RPC listener done for", listener.Addr())
-
+			if err := listener.Close(); Check(err) {
+			}
 			s.WG.Done()
 		}(listener)
 	}

@@ -78,6 +78,13 @@ func Kill(w *worker.Worker) {
 	}
 	if n, err := w.StdConn.Write([]byte("kill")); n < 1 || Check(err) {
 		Debug("failed to write")
+		return
+	}
+	// Debug("closing worker StdConn quit channel")
+	// close(w.StdConn.Quit)
+	Debug("closing worker quit channel")
+	close(w.Quit)
+	if err := w.Kill(); Check(err) {
 	}
 }
 

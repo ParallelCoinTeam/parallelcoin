@@ -15,7 +15,7 @@ import (
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a = wg.th.App(*wg.size)
 	wg.App = a
-	wg.App.ThemeHook(func(){
+	wg.App.ThemeHook(func() {
 		Debug("theme hook")
 		Debug(wg.bools)
 		*wg.cx.Config.DarkTheme = *wg.Dark
@@ -32,18 +32,23 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	wg.configs = wg.config.Config()
 	a.Pages(map[string]l.Widget{
 		"main": wg.Page("overview", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.OverviewPage()},
 		}),
 		"send": wg.Page("send", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.SendPage()},
 		}),
 		"receive": wg.Page("receive", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.ReceivePage()},
 		}),
 		"transactions": wg.Page("receive", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.TransactionsPage()},
 		}),
 		"settings": wg.Page("settings", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return wg.configs.Widget(wg.config)(gtx)
 			}},
@@ -75,6 +80,32 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			},
 			},
 		}),
+		"goroutines": wg.Page("log", p9.Widgets{
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+				le := func(gtx l.Context, index int) l.Dimensions {
+					return wg.State.goroutines[index](gtx)
+				}
+				return func(gtx l.Context) l.Dimensions {
+					return wg.lists["recent"].
+						Vertical().
+						// Color("PanelText").
+						Background("DocBg").
+						Active("DocText").
+						Length(len(wg.State.goroutines)).
+						ListElement(le).
+						Fn(gtx)
+				}(gtx)
+				// wg.RunCommandChan <- "stop"
+				// consume.Kill(wg.Worker)
+				// consume.Kill(wg.cx.StateCfg.Miner)
+				// close(wg.cx.NodeKill)
+				// close(wg.cx.KillAll)
+				// time.Sleep(time.Second*3)
+				// interrupt.Request()
+				// os.Exit(0)
+				// return l.Dimensions{}
+			}},
+		}),
 	})
 	a.SideBar([]l.Widget{
 		wg.SideBarButton("overview", "main", 0),
@@ -87,8 +118,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 8),
 	})
 	a.ButtonBar([]l.Widget{
+		wg.PageTopBarButton("goroutines", 1, &icons.ActionBugReport),
 		wg.PageTopBarButton("help", 0, &icons.ActionHelp),
-		// wg.PageTopBarButton("log", 1, icons.ActionList),
 		wg.PageTopBarButton("settings", 2, &icons.ActionSettings),
 		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
 	})

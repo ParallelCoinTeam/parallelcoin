@@ -7,6 +7,7 @@ import (
 	"gioui.org/text"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -71,15 +72,19 @@ func (wg *WalletGUI) CreateSendAddressItem() {
 
 func (wg *WalletGUI) Send() {
 	// ToDo Send RPC command
-	chainClient, err := wg.chainClient()
-	if err != nil {
-	}
-	for _, sendAddress := range wg.sendAddresses {
-		fmt.Println(sendAddress.AmountInput.GetText())
-		address, err := util.DecodeAddress("sendAddress.AmountInput.GetText()", nil)
-		if err != nil {
+	// TODO: yes, do one like the runner in run.go
+	if wg.WalletClient != nil {
+		for _, sendAddress := range wg.sendAddresses {
+			fmt.Println(sendAddress.AmountInput.GetText())
+			address, err := util.DecodeAddress("sendAddress.AmountInput.GetText()", nil)
+			if err != nil {
+			}
+			var h *chainhash.Hash
+			if h, err = wg.ChainClient.SendToAddress(address, 1); Check(err) {
+			}
+			// TODO: this is the txid hash
+			_ = h
 		}
-		chainClient.SendToAddress(address, 1)
 	}
 }
 

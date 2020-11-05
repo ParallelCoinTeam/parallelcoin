@@ -34,28 +34,28 @@ func (wg *WalletGUI) blockIitem(label, data string) l.Widget {
 func (wg *WalletGUI) blockPage(blockHeight int64) func() {
 	b := wg.getBlock(blockHeight)
 	blockLayout := []l.Widget{
-		//wg.blockIitem("Block Height:", fmt.Sprint(b.data.Height)),
+		wg.blockIitem("Block Height:", fmt.Sprint(b.data.Height)),
 		wg.blockIitem("Hash:", fmt.Sprint(blockHeight)),
-		//wg.blockIitem("Confirmations:", fmt.Sprint(b.data.Confirmations)),
-		//wg.blockIitem("Stripped Size:", fmt.Sprint(b.data.StrippedSize)),
-		//wg.blockIitem("Size:", fmt.Sprint(b.data.Size)),
-		//wg.blockIitem("Weight:", fmt.Sprint(b.data.Weight)),
-		//wg.blockIitem("Height:", fmt.Sprint(b.data.Height)),
-		//wg.blockIitem("Version:", fmt.Sprint(b.data.Version)),
-		//wg.blockIitem("Version Hex:", fmt.Sprint(b.data.VersionHex)),
-		//wg.blockIitem("Pow Algo ID:", fmt.Sprint(b.data.PowAlgoID)),
-		//wg.blockIitem("Pow Algo:", fmt.Sprint(b.data.PowAlgo)),
-		//wg.blockIitem("Pow Hash:", fmt.Sprint(b.data.PowHash)),
-		//wg.blockIitem("Merkle Root:", fmt.Sprint(b.data.MerkleRoot)),
-		//wg.blockIitem("Transactions Number:", fmt.Sprint(b.data.TxNum)),
-		//wg.blockIitem("Transaction:", fmt.Sprint(b.data.Tx)),
-		//wg.blockIitem("Raw Transaction:", fmt.Sprint(b.data.RawTx)),
-		//wg.blockIitem("Time:", fmt.Sprint(b.data.Time)),
-		//wg.blockIitem("Nonce:", fmt.Sprint(b.data.Nonce)),
-		//wg.blockIitem("Bits:", fmt.Sprint(b.data.Bits)),
-		//wg.blockIitem("Difficulty:", fmt.Sprint(b.data.Difficulty)),
-		//wg.blockIitem("Previous Hash:", fmt.Sprint(b.data.PreviousHash)),
-		//wg.blockIitem("Next Hash:", fmt.Sprint(b.data.NextHash)),
+		wg.blockIitem("Confirmations:", fmt.Sprint(b.data.Confirmations)),
+		wg.blockIitem("Stripped Size:", fmt.Sprint(b.data.StrippedSize)),
+		wg.blockIitem("Size:", fmt.Sprint(b.data.Size)),
+		wg.blockIitem("Weight:", fmt.Sprint(b.data.Weight)),
+		wg.blockIitem("Height:", fmt.Sprint(b.data.Height)),
+		wg.blockIitem("Version:", fmt.Sprint(b.data.Version)),
+		wg.blockIitem("Version Hex:", fmt.Sprint(b.data.VersionHex)),
+		wg.blockIitem("Pow Algo ID:", fmt.Sprint(b.data.PowAlgoID)),
+		wg.blockIitem("Pow Algo:", fmt.Sprint(b.data.PowAlgo)),
+		wg.blockIitem("Pow Hash:", fmt.Sprint(b.data.PowHash)),
+		wg.blockIitem("Merkle Root:", fmt.Sprint(b.data.MerkleRoot)),
+		wg.blockIitem("Transactions Number:", fmt.Sprint(b.data.TxNum)),
+		wg.blockIitem("Transaction:", fmt.Sprint(b.data.Tx)),
+		wg.blockIitem("Raw Transaction:", fmt.Sprint(b.data.RawTx)),
+		wg.blockIitem("Time:", fmt.Sprint(b.data.Time)),
+		wg.blockIitem("Nonce:", fmt.Sprint(b.data.Nonce)),
+		wg.blockIitem("Bits:", fmt.Sprint(b.data.Bits)),
+		wg.blockIitem("Difficulty:", fmt.Sprint(b.data.Difficulty)),
+		wg.blockIitem("Previous Hash:", fmt.Sprint(b.data.PreviousHash)),
+		wg.blockIitem("Next Hash:", fmt.Sprint(b.data.NextHash)),
 	}
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return blockLayout[index](gtx)
@@ -110,16 +110,12 @@ func (wg *WalletGUI) blockPage(blockHeight int64) func() {
 }
 
 func (wg *WalletGUI) getBlock(blockHeight int64) *block {
-	chainClient, err := wg.chainClient()
+	blockHash, err := wg.ChainClient.GetBlockHash(blockHeight)
 	if err != nil {
 	}
-	blockHash, err := chainClient.GetBlockHash(blockHeight)
+	data, err := wg.ChainClient.GetBlockVerbose(blockHash)
 	if err != nil {
 	}
-	data, err := chainClient.GetBlockVerbose(blockHash)
-	if err != nil {
-	}
-	fmt.Println("dadad", data)
 	return &block{
 		data:      data,
 		clickPrev: wg.th.Clickable(),

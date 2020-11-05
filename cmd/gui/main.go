@@ -12,6 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -21,7 +22,8 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
-		size:       &size,
+		// runnerQuit: make(chan struct{}),
+		size: &size,
 	}
 	return wg.Run()
 }
@@ -33,27 +35,29 @@ type WalletGUI struct {
 	th   *p9.Theme
 	size *int
 	*p9.App
-	sidebarButtons   []*p9.Clickable
-	buttonBarButtons []*p9.Clickable
-	statusBarButtons []*p9.Clickable
-	bools            map[string]*p9.Bool
-	quitClickable    *p9.Clickable
-	lists            map[string]*p9.List
-	checkables       map[string]*p9.Checkable
-	clickables       map[string]*p9.Clickable
-	inputs           map[string]*p9.Input
-	passwords        map[string]*p9.Password
-	configs          cfg.GroupsMap
-	config           *cfg.Config
-	running          bool
-	invalidate       chan struct{}
-	quit             chan struct{}
-	sendAddresses    []SendAddress
-	txs              []btcjson.ListTransactionsResult
-	Worker           *worker.Worker
-	RunCommandChan   chan string
-	State            State
-	Shell            *worker.Worker
+	sidebarButtons            []*p9.Clickable
+	buttonBarButtons          []*p9.Clickable
+	statusBarButtons          []*p9.Clickable
+	bools                     map[string]*p9.Bool
+	quitClickable             *p9.Clickable
+	lists                     map[string]*p9.List
+	checkables                map[string]*p9.Checkable
+	clickables                map[string]*p9.Clickable
+	inputs                    map[string]*p9.Input
+	passwords                 map[string]*p9.Password
+	configs                   cfg.GroupsMap
+	config                    *cfg.Config
+	running                   bool
+	invalidate                chan struct{}
+	quit                      chan struct{}
+	runnerQuit                chan struct{}
+	sendAddresses             []SendAddress
+	txs                       []btcjson.ListTransactionsResult
+	Worker                    *worker.Worker
+	RunCommandChan            chan string
+	State                     State
+	Shell                     *worker.Worker
+	ChainClient, WalletClient *rpcclient.Client
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -111,11 +115,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
-	wg.RunCommandChan = make(chan string)
 	if err = wg.Runner(); Check(err) {
 	}
 	// wg.RunCommandChan <- "run"
-	wg.ConnectChainRPC()
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
@@ -142,11 +144,9 @@ func (wg *WalletGUI) newWindow(id, title string, x, y int, layout l.Widget) {
 					Debug("Quitting " + title)
 					// interrupt.Request()
 					close(wg.quit)
-				}); Check(err) {
+				}, wg.quit); Check(err) {
 		}
 	}()
-	// tickers and triggers
-	// go func() {
 out:
 	for {
 		select {
@@ -157,7 +157,7 @@ out:
 			break out
 		}
 	}
-	// }()
+	// app.Main is just a synonym for select{} so don't do it, we want to be able to shut down
 	// app.Main()
 	return
 }
