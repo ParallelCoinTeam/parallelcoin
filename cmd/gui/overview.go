@@ -264,9 +264,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.lists["recent"].
 			Vertical().
-			// Color("PanelText").
-			Background("DocBg").
-			Active("DocText").
+			Background("DocBg").Color("DocText").Active("Primary").
 			Length(len(out)).
 			ListElement(le).
 			Fn(gtx)
@@ -283,17 +281,16 @@ func leftPadTo(length, limit int, txt string) string {
 
 func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 	bal := leftPadTo(15, 15, fmt.Sprintf("%6.8f", balance))
-	return wg.th.Inset(0.5,
-		wg.th.Flex().AlignEnd().
-			Rigid(wg.th.Body1(" ").Fn).
-			Rigid(
-				wg.th.Caption(bal).
-					Font("go regular").
-					Fn,
-			).
-			Fn,
-	).Fn
+	return wg.th.Flex().AlignEnd().
+		Rigid(wg.th.Body1(" ").Fn).
+		Rigid(
+			wg.th.Caption(bal).
+				Font("go regular").
+				Fn,
+		).
+		Fn
 }
+
 //
 // func (wg *WalletGUI) panel(title string, fill bool, content l.Widget) l.Widget {
 // 	return func(gtx l.Context) l.Dimensions {

@@ -90,9 +90,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 						wg.Fill("DocBg",
 							wg.lists["recent"].
 								Vertical().
-								Color("Primary").
-								Background("Transparent").
-								Active("DocText").
+								Background("DocBg").Color("DocText").Active("Primary").
 								Length(len(wg.State.goroutines)).
 								ListElement(le).
 								Fn,
@@ -178,9 +176,9 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 					background = "PanelBg"
 					color = "PanelText"
 				}
-				var inPad, outPad float32 = 0.5, 0.25
+				var inPad, outPad float32 = 0.25, 0.25
 				if *wg.Size >= 800 {
-					inPad, outPad = 0.75, 0
+					inPad, outPad = 0.5, 0
 				}
 				return wg.Inset(outPad,
 					wg.Fill(background,

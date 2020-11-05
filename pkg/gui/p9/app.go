@@ -116,8 +116,8 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 		bar.Rigid(a.statusBar[i])
 	}
 	out :=
-		// a.Fill("PanelBg",
-		// 	a.Inset(0.25,
+	// a.Fill("PanelBg",
+	// 	a.Inset(0.25,
 		bar.Fn
 	// ).Fn
 	// ).Fn
@@ -323,7 +323,11 @@ func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		out := a.sideBarList.
 			Length(len(a.sideBar)).
-			Vertical().Background("PanelBg").
+			LeftSide(true).
+			Vertical().
+			Background("DocBg").
+			Color("DocText").
+			Active("Primary").
 			ListElement(func(gtx l.Context, index int) l.Dimensions {
 				// gtx.Constraints.Max.X = int(a.sideBarSize.V)
 				// gtx.Constraints.Min.X = 0

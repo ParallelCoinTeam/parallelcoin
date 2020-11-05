@@ -55,6 +55,7 @@ type List struct {
 	recalculateTime     time.Time
 	recalculate         bool
 	notFirst            bool
+	leftSide            bool
 }
 
 // List returns a new scrollable List widget
@@ -68,8 +69,8 @@ func (th *Theme) List() (li *List) {
 		active:          "DocBg",
 		scrollWidth:     int(th.TextSize.Scale(1).V),
 		setScrollWidth:  int(th.TextSize.Scale(1).V),
-		scrollBarPad:    int(th.TextSize.Scale(0.25).V),
-		setScrollBarPad: int(th.TextSize.Scale(0.25).V),
+		scrollBarPad:    int(th.TextSize.Scale(0.5).V),
+		setScrollBarPad: int(th.TextSize.Scale(0.5).V),
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}
@@ -107,6 +108,11 @@ func (li *List) Baseline() *List {
 // to the end (or bottom) of the List
 func (li *List) ScrollToEnd() (out *List) {
 	li.scrollToEnd = true
+	return li
+}
+
+func (li *List) LeftSide(b bool) (out *List) {
+	li.leftSide = b
 	return li
 }
 
@@ -226,42 +232,73 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	// now lay it all out and draw the list and scrollbar
 	var container l.Widget
 	if li.axis == l.Horizontal {
-		container = li.th.VFlex().
-			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad*2)).
-			Rigid(
-				li.th.VFlex().
+		containerFlex := li.th.VFlex()
+		if !li.leftSide {
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad))
+		}
+		containerFlex.Rigid(
+			li.th.VFlex().
+				Rigid(
+					If(!li.leftSide,
+						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad)).Fn,
+						EmptySpace(0, 0),
+					),
+				).
+				Rigid(
+					li.th.Fill(li.background,
+						li.th.Flex().
+							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
+							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
+							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
+							Fn,
+					).Fn,
+				).
+				Rigid(
+					If(li.leftSide,
+						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad+li.scrollWidth)).Fn,
+						EmptySpace(0, 0),
+					),
+				).
+				Fn,
+		)
+		if li.leftSide {
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad))
+		}
+		container = containerFlex.Fn
+	} else {
+		containerFlex := li.th.Flex()
+		if !li.leftSide {
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad))
+		}
+		containerFlex.Rigid(
+			li.th.Fill(li.background,
+				li.th.Flex().
 					Rigid(
-						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad*2)).Fn,
+						If(!li.leftSide,
+							EmptySpace(li.scrollBarPad, 0),
+							EmptySpace(0, 0),
+						),
 					).
 					Rigid(
-						li.th.Fill(li.background,
-							li.th.Flex().
-								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-								Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
-								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
-								Fn,
-						).Fn,
+						li.th.Flex().Vertical().
+							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
+							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
+							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
+							Fn,
+					).
+					Rigid(
+						// If(li.leftSide,
+						// 	EmptySpace(li.scrollBarPad, 0),
+						EmptySpace(0, 0),
+						// ),
 					).
 					Fn,
-			).Fn
-	} else {
-		container = li.th.Flex().
-			Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad*2)).
-			Rigid(
-				li.th.Fill(li.background,
-					li.th.Flex().
-						Rigid(
-							EmptySpace(li.scrollBarPad*2, 0),
-						).
-						Rigid(
-							li.th.Flex().Vertical().
-								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-								Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
-								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
-								Fn,
-						).Fn,
-				).Fn,
-			).Fn
+			).Fn,
+		)
+		if li.leftSide {
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth))
+		}
+		container = containerFlex.Fn
 	}
 	return container(gtx)
 }
