@@ -152,7 +152,7 @@ func (wg *WalletGUI) Tickers() {
 							text = lines[i+2]
 							text = strings.TrimSpace(strings.Split(text, " ")[0])
 							// outString += text + "\n"
-							out = append(out, wg.th.Caption(text).Color("DocText").Fn)
+							out = append(out, wg.Inset(0.25, wg.th.Caption(text).Color("DocText").Fn).Fn)
 						}
 					}
 					// Debug(outString)

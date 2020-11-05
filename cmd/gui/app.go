@@ -86,13 +86,18 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 					return wg.State.goroutines[index](gtx)
 				}
 				return func(gtx l.Context) l.Dimensions {
-					return wg.lists["recent"].
-						Vertical().
-						// Color("PanelText").
-						Background("DocBg").
-						Active("DocText").
-						Length(len(wg.State.goroutines)).
-						ListElement(le).
+					return wg.Inset(0.25,
+						wg.Fill("DocBg",
+							wg.lists["recent"].
+								Vertical().
+								Color("Primary").
+								Background("Transparent").
+								Active("DocText").
+								Length(len(wg.State.goroutines)).
+								ListElement(le).
+								Fn,
+						).Fn,
+					).
 						Fn(gtx)
 				}(gtx)
 				// wg.RunCommandChan <- "stop"
