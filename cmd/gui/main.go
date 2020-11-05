@@ -92,6 +92,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"receiveClear":            wg.th.Clickable(),
 		"receiveShow":             wg.th.Clickable(),
 		"receiveRemove":           wg.th.Clickable(),
+		"transactions10":          wg.th.Clickable(),
+		"transactions30":          wg.th.Clickable(),
+		"transactions50":          wg.th.Clickable(),
 	}
 	wg.bools = map[string]*p9.Bool{
 		"runstate":   wg.th.Bool(wg.running),

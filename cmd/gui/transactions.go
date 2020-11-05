@@ -6,11 +6,29 @@ import (
 )
 
 func (wg *WalletGUI) TransactionsPage() l.Widget {
-	le := func(gtx l.Context, index int) l.Dimensions {
-		return wg.singleTransaction(gtx, index)
-	}
 	return func(gtx l.Context) l.Dimensions {
 		return wg.th.VFlex().
+			Rigid(
+				wg.Inset(0.25,
+					wg.th.Flex().
+						Rigid(
+							wg.Inset(0.1,
+								wg.Inset(0.25, wg.Caption("Number of displayed transactions:").Color("DocText").Fn).Fn,
+							).Fn,
+						).
+						Rigid(
+							wg.sendButton(wg.clickables["transactions10"], "10", wg.Transactions),
+						).
+						Rigid(
+							//wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
+							wg.sendButton(wg.clickables["transactions30"], "30", wg.Transactions),
+						).
+						Rigid(
+							//wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
+							wg.sendButton(wg.clickables["transactions50"], "50", wg.Transactions),
+						).Fn,
+				).Fn,
+			).
 			Rigid(
 				wg.Inset(0.25,
 					wg.th.Flex().
@@ -33,20 +51,21 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 			).
 			Flexed(1,
 				wg.Inset(0.25, wg.Fill("DocBg", wg.Inset(0.25,
-					wg.lists["transactions"].Vertical().Length(len(wg.txs)).ListElement(le).Fn,
+					wg.lists["transactions"].Vertical().Length(len(wg.txs)).ListElement(wg.singleTransaction).Fn,
 				).Fn).Fn).Fn,
 			).Fn(gtx)
 	}
 }
 
 func (wg *WalletGUI) Transactions() {
-	chainClient, err := wg.chainClient()
+	walletClient, err := wg.walletClient()
 	if err != nil {
 	}
-	txs, err := chainClient.ListTransactions(nil)
+	txs, err := walletClient.ListTransactionsCount("default", 20)
 	if err != nil {
 	}
 	wg.txs = txs
+	fmt.Println("txs:", txs)
 }
 
 func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
