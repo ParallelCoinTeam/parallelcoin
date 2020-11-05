@@ -4,6 +4,7 @@ import (
 	"os"
 	"runtime/pprof"
 	"strconv"
+	"time"
 
 	l "gioui.org/layout"
 	"gioui.org/text"
@@ -12,6 +13,7 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
@@ -85,6 +87,13 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		"kill": wg.Page("log", p9.Widgets{
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				pprof.Lookup("goroutine").WriteTo(os.Stderr, 1)
+				wg.RunCommandChan <- "stop"
+				consume.Kill(wg.Worker)
+				consume.Kill(wg.cx.StateCfg.Miner)
+				// close(wg.cx.NodeKill)
+				// close(wg.cx.KillAll)
+				time.Sleep(time.Second*3)
+				// interrupt.Request()
 				os.Exit(0)
 				return l.Dimensions{}
 			}},
