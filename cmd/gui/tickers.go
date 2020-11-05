@@ -52,7 +52,7 @@ func (wg *WalletGUI) walletClient() (*rpcclient.Client, error) {
 func (wg *WalletGUI) Tickers() {
 	go func() {
 		seconds := time.Tick(time.Second)
-		fiveSeconds := time.Tick(time.Second * 5)
+		// fiveSeconds := time.Tick(time.Second * 5)
 	out:
 		for {
 			select {
@@ -103,15 +103,20 @@ func (wg *WalletGUI) Tickers() {
 				}
 				// Debugs(ltr)
 				wg.State.SetLastTxs(ltr)
-			case <-fiveSeconds:
+			// case <-fiveSeconds:
 				var b []byte
 				buf := bytes.NewBuffer(b)
 				pprof.Lookup("goroutine").WriteTo(buf, 2)
+				Debug(buf.String())
 				lines := strings.Split(buf.String(), "\n")
-				Debugs(lines)
 				var out []l.Widget
 				for i := range lines {
-					out = append(out, wg.th.Caption(lines[i]).Color("DocText").Fn)
+					var text string
+					if strings.HasPrefix(lines[i], "goroutine") && i < len(lines)-2 {
+						text = lines[i+2]
+						text = strings.TrimSpace(strings.Split(text, " ")[0])
+						out = append(out, wg.th.Caption(text).Color("DocText").Fn)
+					}
 				}
 				wg.State.SetGoroutines(out)
 			case <-wg.quit:

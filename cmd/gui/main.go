@@ -135,7 +135,11 @@ func (wg *WalletGUI) Run() (err error) {
 					wg.RunCommandChan <- "stop"
 					// close(wg.runnerQuit)
 					// close(wg.cx.StateCfg.Miner.Quit)
-					close(wg.Worker.Quit)
+					if wg.running {
+						if wg.Worker != nil {
+							close(wg.Worker.Quit)
+						}
+					}
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
