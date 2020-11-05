@@ -264,7 +264,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.lists["recent"].
 			Vertical().
-			Background("DocBg").Color("DocText").Active("Primary").
+			// Background("DocBg").Color("DocText").Active("Primary").
 			Length(len(out)).
 			ListElement(le).
 			Fn(gtx)

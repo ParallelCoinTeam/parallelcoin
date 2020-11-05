@@ -64,13 +64,13 @@ func (th *Theme) List() (li *List) {
 		th:              th,
 		pageUp:          th.Clickable(),
 		pageDown:        th.Clickable(),
-		color:           "Primary",
-		background:      "Transparent",
-		active:          "DocBg",
+		color:           "DocText",
+		background:      "DocBg",
+		active:          "Primary",
 		scrollWidth:     int(th.TextSize.Scale(1).V),
 		setScrollWidth:  int(th.TextSize.Scale(1).V),
-		scrollBarPad:    int(th.TextSize.Scale(0.5).V),
-		setScrollBarPad: int(th.TextSize.Scale(0.5).V),
+		scrollBarPad:    int(th.TextSize.Scale(0.25).V),
+		setScrollBarPad: int(th.TextSize.Scale(0.25).V),
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}
@@ -364,11 +364,12 @@ func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensio
 		}
 		if de != nil {
 			// respond to the event
-			if de.Type == pointer.Press || de.Type == pointer.Drag {
-				li.currentColor = li.active
-			}
+			// if de.Type == pointer.Press || de.Type == pointer.Drag || de.Type != pointer.Release {
+			// }
 			if de.Type == pointer.Release {
 				li.currentColor = li.color
+			} else {
+				li.currentColor = li.active
 			}
 			if de.Type == pointer.Drag {
 				current := dims.PositionToCoordinate(li.position, li.axis)

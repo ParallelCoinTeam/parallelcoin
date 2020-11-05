@@ -46,7 +46,7 @@ func main() {
 				func() {
 					close(quit)
 					// os.Exit(0)
-				},
+				}, quit,
 			); Check(err) {
 		}
 	}()

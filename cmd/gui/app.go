@@ -90,7 +90,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 						wg.Fill("DocBg",
 							wg.lists["recent"].
 								Vertical().
-								Background("DocBg").Color("DocText").Active("Primary").
+								// Background("DocBg").Color("DocText").Active("Primary").
 								Length(len(wg.State.goroutines)).
 								ListElement(le).
 								Fn,

@@ -325,9 +325,9 @@ func (a *App) renderSideBar() l.Widget {
 			Length(len(a.sideBar)).
 			LeftSide(true).
 			Vertical().
-			Background("DocBg").
-			Color("DocText").
-			Active("Primary").
+			// Background("DocBg").
+			// Color("DocText").
+			// Active("Primary").
 			ListElement(func(gtx l.Context, index int) l.Dimensions {
 				// gtx.Constraints.Max.X = int(a.sideBarSize.V)
 				// gtx.Constraints.Min.X = 0

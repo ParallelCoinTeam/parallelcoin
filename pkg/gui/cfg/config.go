@@ -276,7 +276,8 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		return ng.th.Inset(0.25, ng.lists["settings"].
 			Vertical().
 			Length(len(out)).
-			Background("PanelBg").Color("DocText").Active("Primary").
+			Background("PanelBg").
+			// Color("DocText").Active("Primary").
 			ListElement(le).Fn).Fn(gtx)
 	}
 }
