@@ -2470,7 +2470,7 @@ func NewNode(listenAddrs []string, db database.DB,
 	} else {
 		thr = *cx.Config.GenThreads
 	}
-	Trace("set genthreads to ", nThreads)
+	Trace("set genthreads to ", thr)
 	s := Node{
 		ChainParams:          cx.ActiveNet,
 		AddrManager:          aMgr,

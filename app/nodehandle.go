@@ -35,17 +35,21 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			return nil
 		}
 		go func() {
+			Debug("starting node")
 			err := node.Main(cx)
 			if err != nil {
 				Error("error starting node ", err)
 			}
+			Debug("node finished")
+			cx.WaitGroup.Done()
+			Debug("waitgroup decremented")
 		}()
 		Debug("sending back node rpc server handler")
 		cx.RPCServer = <-cx.NodeChan
 		close(cx.NodeReady)
 		cx.Node.Store(true)
 		cx.WaitGroup.Wait()
-		close(cx.NodeKill)
+		Debug("node is now fully shut down")
 		return nil
 	}
 }

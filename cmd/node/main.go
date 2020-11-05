@@ -36,8 +36,7 @@ func Main(cx *conte.Xt) (err error) {
 	if *cx.Config.Profile != "" {
 		Debug("profiling requested")
 		go func() {
-			listenAddr := net.JoinHostPort("",
-				*cx.Config.Profile)
+			listenAddr := net.JoinHostPort("", *cx.Config.Profile)
 			Info("profile server listening on", listenAddr)
 			profileRedirect := http.RedirectHandler("/debug/pprof", http.StatusSeeOther)
 			http.Handle("/", profileRedirect)
@@ -86,7 +85,7 @@ func Main(cx *conte.Xt) (err error) {
 		return
 	}
 	closeDb := func() {
-		// ensure the database is sync'd and closed on shutdown
+		// ensure the database is synced and closed on shutdown
 		Trace("gracefully shutting down the database")
 		db.Close()
 	}
@@ -138,7 +137,9 @@ func Main(cx *conte.Xt) (err error) {
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
-	stopController := control.Run(cx)
+	Debug("starting controller")
+	control.Run(cx)
+	Debug("controller started")
 	cx.Controller.Store(true)
 	gracefulShutdown := func() {
 		Info("gracefully shutting down the server...")
@@ -148,26 +149,27 @@ func Main(cx *conte.Xt) (err error) {
 		if e != nil {
 			Warn("failed to stop server", e)
 		}
-		if cx.Controller.Load() {
-			close(stopController)
-		}
+		// if cx.Controller.Load() {
+		// 	Debug("stopping controller")
+		// 	close(stopController)
+		// }
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
 	}
-	if shutdownChan != nil {
-		interrupt.AddHandler(func() {
-			Debug("node.Main is shutting down")
-			close(shutdownChan)
-		})
-	}
+	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)
 	// Wait until the interrupt signal is received from an OS signal or shutdown is requested through one of the
 	// subsystems such as the RPC server.
 	select {
 	case <-cx.NodeKill:
+		Debug("NodeKill")
 		gracefulShutdown()
 	case <-cx.KillAll:
+		Debug("KillAll")
+		gracefulShutdown()
+	case <-interrupt.ShutdownRequestChan:
+		Debug("interrupt request")
 		gracefulShutdown()
 	}
 	return nil

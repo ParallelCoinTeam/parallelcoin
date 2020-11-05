@@ -39,7 +39,7 @@ func (s StdConn) Write(b []byte) (n int, err error) {
 }
 
 func (s StdConn) Close() (err error) {
-	close(s.Quit)
+	// close(s.Quit)
 	return
 }
 
