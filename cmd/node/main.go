@@ -7,23 +7,18 @@ import (
 	// _ "net/http/pprof"
 	"os"
 	"runtime/pprof"
-	"time"
-
-	"github.com/p9c/pod/cmd/kopach/control"
-	"github.com/p9c/pod/pkg/db/blockdb"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/node/path"
 	"github.com/p9c/pod/cmd/node/version"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/db/blockdb"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
-
-// var StateCfg = new(state.Config)
-// var cfg *pod.Config
 
 // winServiceMain is only invoked on Windows. It detects when pod is running as a service and reacts accordingly.
 var winServiceMain func() (bool, error)
@@ -31,31 +26,24 @@ var winServiceMain func() (bool, error)
 // Main is the real main function for pod. It is necessary to work around the fact that deferred functions do not run
 // when os.Exit() is called. The optional serverChan parameter is mainly used by the service code to be notified with
 // the server once it is setup so it can gracefully stop it when requested from the service control manager.
-//
-//  - shutdownchan can be used to wait for the node to shut down
-//
-//  - killswitch can be closed to shut the node down
-func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
+func Main(cx *conte.Xt) (err error) {
 	Trace("starting up node main")
 	cx.WaitGroup.Add(1)
-
 	// show version at startup
 	Info("version", version.Version())
 	// enable http profiling server if requested
 	if *cx.Config.Profile != "" {
 		Debug("profiling requested")
 		go func() {
-			listenAddr := net.JoinHostPort("",
-				*cx.Config.Profile)
+			listenAddr := net.JoinHostPort("", *cx.Config.Profile)
 			Info("profile server listening on", listenAddr)
-			profileRedirect := http.RedirectHandler(
-				"/debug/pprof", http.StatusSeeOther)
+			profileRedirect := http.RedirectHandler("/debug/pprof", http.StatusSeeOther)
 			http.Handle("/", profileRedirect)
-			Error("profile server", http.ListenAndServe(listenAddr, nil))
+			Debug("profile server", http.ListenAndServe(listenAddr, nil))
 		}()
 	}
 	// write cpu profile if requested
-	if *cx.Config.CPUProfile != "" {
+	if *cx.Config.CPUProfile != "" && os.Getenv("POD_TRACE") != "on" {
 		Warn("cpu profiling enabled")
 		var f *os.File
 		f, err = os.Create(*cx.Config.CPUProfile)
@@ -69,9 +57,6 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		} else {
 			defer f.Close()
 			defer pprof.StopCPUProfile()
-			// go func() {
-			//	DBError(http.ListenAndServe(":6060", nil))
-			// }()
 			interrupt.AddHandler(func() {
 				Warn("stopping CPU profiler")
 				err := f.Close()
@@ -84,8 +69,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		}
 	}
 	// perform upgrades to pod as new versions require it
-	if err = doUpgrades(cx); err != nil {
-		Error(err)
+	if err = doUpgrades(cx); Check(err) {
 		return
 	}
 	// return now if an interrupt signal was triggered
@@ -99,12 +83,13 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		Error(err)
 		return
 	}
-	defer func() {
-		// ensure the database is sync'd and closed on shutdown
+	closeDb := func() {
+		// ensure the database is synced and closed on shutdown
 		Trace("gracefully shutting down the database")
 		db.Close()
-		time.Sleep(time.Second / 4)
-	}()
+	}
+	defer closeDb()
+	interrupt.AddHandler(closeDb)
 	// return now if an interrupt signal was triggered
 	if interrupt.Requested() {
 		return nil
@@ -113,29 +98,20 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	// the address index since it relies on it
 	if cx.StateCfg.DropAddrIndex {
 		Warn("dropping address index")
-		if err = indexers.DropAddrIndex(db,
-			interrupt.ShutdownRequestChan); err != nil {
-			Error(err)
+		if err = indexers.DropAddrIndex(db, interrupt.ShutdownRequestChan); Check(err) {
 			return
 		}
 	}
 	if cx.StateCfg.DropTxIndex {
 		Warn("dropping transaction index")
-		if err = indexers.DropTxIndex(db,
-			interrupt.ShutdownRequestChan); err != nil {
-			Error(err)
+		if err = indexers.DropTxIndex(db, interrupt.ShutdownRequestChan); Check(err) {
 			return
 		}
 	}
 	if cx.StateCfg.DropCfIndex {
 		Warn("dropping cfilter index")
-		if err = indexers.DropCfIndex(db,
-			interrupt.ShutdownRequestChan); err != nil {
-			Error(err)
-			if err != nil {
-				Error(err)
-				return
-			}
+		if err = indexers.DropCfIndex(db, interrupt.ShutdownRequestChan); Check(err) {
+			return
 		}
 	}
 	// return now if an interrupt signal was triggered
@@ -143,14 +119,11 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		return nil
 	}
 	// create server and start it
-	server, err := chainrpc.NewNode(*cx.Config.Listeners, db,
-		interrupt.ShutdownRequestChan, conte.GetContext(cx))
+	server, err := chainrpc.NewNode(*cx.Config.Listeners, db, interrupt.ShutdownRequestChan, conte.GetContext(cx))
 	if err != nil {
-		Errorf("unable to start server on %v: %v",
-			*cx.Config.Listeners, err)
+		Errorf("unable to start server on %v: %v", *cx.Config.Listeners, err)
 		return err
 	}
-
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 {
@@ -163,41 +136,37 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
-	stopController := control.Run(cx)
+	Debug("starting controller")
+	control.Run(cx)
+	Debug("controller started")
 	cx.Controller.Store(true)
 	gracefulShutdown := func() {
 		Info("gracefully shutting down the server...")
-		// server.CPUMiner.Stop()
 		Debug("stopping controller")
 		e := server.Stop()
 		if e != nil {
 			Warn("failed to stop server", e)
 		}
-		if cx.Controller.Load() {
-			close(stopController)
-		}
+		// Debug("stopping miner")
+		// consume.Kill(cx.StateCfg.Miner)
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
 	}
-	if shutdownChan != nil {
-		interrupt.AddHandler(func() {
-			Debug("node.Main interrupt")
-			if cx.Controller.Load() {
-				gracefulShutdown()
-			}
-			close(shutdownChan)
-		})
-	}
-	// interrupt.AddHandler(gracefulShutdown)
-
+	Debug("adding interrupt handler for node")
+	interrupt.AddHandler(gracefulShutdown)
 	// Wait until the interrupt signal is received from an OS signal or shutdown is requested through one of the
 	// subsystems such as the RPC server.
 	select {
 	case <-cx.NodeKill:
+		Debug("NodeKill")
 		gracefulShutdown()
-		// case <-interrupt.HandlersDone:
-		//	wg.Done()
+	case <-cx.KillAll:
+		Debug("KillAll")
+		gracefulShutdown()
+	case <-interrupt.ShutdownRequestChan:
+		Debug("interrupt request")
+		gracefulShutdown()
 	}
 	return nil
 }

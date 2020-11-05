@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	l "gioui.org/layout"
 	"github.com/kofoworola/godate"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -20,6 +21,19 @@ type State struct {
 	balanceUnconfirmed float64
 	lastTxs            []btcjson.ListTransactionsResult
 	lastTimeStrings    []string
+	goroutines         []l.Widget
+}
+
+func (s *State) Goroutines() []l.Widget {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	return s.goroutines
+}
+
+func (s *State) SetGoroutines(gr []l.Widget) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.goroutines = gr
 }
 
 func (s *State) LastTxs() []btcjson.ListTransactionsResult {

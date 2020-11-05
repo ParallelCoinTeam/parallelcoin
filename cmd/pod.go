@@ -37,6 +37,8 @@ func Main() {
 				Error("could not start tracing", err)
 			} else {
 				Debug("tracing started")
+				defer trace.Stop()
+				defer f.Close()
 				interrupt.AddHandler(func() {
 					Debug("stopping trace")
 					trace.Stop()

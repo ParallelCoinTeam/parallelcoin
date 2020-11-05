@@ -10,6 +10,7 @@ import (
 )
 
 func (wg *WalletGUI) Runner() (err error) {
+	wg.RunCommandChan = make(chan string)
 	interrupt.AddHandler(func() {
 		if wg.running {
 			// 		wg.RunCommandChan <- "stop"
@@ -54,10 +55,6 @@ func (wg *WalletGUI) Runner() (err error) {
 					wg.running = false
 				case "restart":
 					Debug("restart called")
-					if !wg.running {
-						Debug("wasn't running...")
-						break
-					}
 					go func() {
 						wg.RunCommandChan <- "stop"
 						time.Sleep(time.Second)
@@ -71,5 +68,6 @@ func (wg *WalletGUI) Runner() (err error) {
 			}
 		}
 	}()
+	wg.RunCommandChan <- "run"
 	return nil
 }

@@ -141,34 +141,36 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 	factor := 10
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	cont := true
-	for cont {
-		select {
-		case <-ticker.C:
-			if !ctrl.Ready.Load() {
-				if cx.IsCurrent() {
-					Info("ready to send out jobs!")
-					ctrl.Ready.Store(true)
-					ctrl.active.Store(true)
+	go func() {
+		for cont {
+			select {
+			case <-ticker.C:
+				if !ctrl.Ready.Load() {
+					if cx.IsCurrent() {
+						Info("ready to send out jobs!")
+						ctrl.Ready.Store(true)
+						ctrl.active.Store(true)
+					}
 				}
+				Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
+			case <-ctrl.quit:
+				Debug("quitting on close quit channel")
+				cont = false
+				ctrl.active.Store(false)
+			case <-ctrl.cx.NodeKill:
+				Debug("quitting on NodeKill")
+				cont = false
+				ctrl.active.Store(false)
+			case <-ctrl.cx.KillAll:
+				Debug("quitting on KillAll")
+				cont = false
+				ctrl.active.Store(false)
+			case <-interrupt.HandlersDone:
+				cont = false
 			}
-			Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
-		case <-ctrl.quit:
-			Debug("quitting on close quit channel")
-			cont = false
-			ctrl.active.Store(false)
-		case <-ctrl.cx.NodeKill:
-			Debug("quitting on NodeKill")
-			cont = false
-			ctrl.active.Store(false)
-		case <-ctrl.cx.KillAll:
-			Debug("quitting on KillAll")
-			cont = false
-			ctrl.active.Store(false)
-		case <-interrupt.HandlersDone:
-			cont = false
 		}
-	}
-	Trace("controller exiting")
+		Trace("controller exiting")
+	}()
 	return
 }
 
@@ -336,7 +338,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
 	adv := p2padvt.Get(c.cx)
-	Traces(adv)
+	// Traces(adv)
 	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, &c.coinbases)
 	jobShards := transport.GetShards(fMC.Data)
 	shardsLen := len(jobShards)

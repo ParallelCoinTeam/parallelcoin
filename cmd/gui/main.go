@@ -3,14 +3,14 @@ package gui
 import (
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -33,28 +33,29 @@ type WalletGUI struct {
 	th   *p9.Theme
 	size *int
 	*p9.App
-	sidebarButtons   []*p9.Clickable
-	buttonBarButtons []*p9.Clickable
-	statusBarButtons []*p9.Clickable
-	bools            map[string]*p9.Bool
-	quitClickable    *p9.Clickable
-	lists            map[string]*p9.List
-	checkables       map[string]*p9.Checkable
-	clickables       map[string]*p9.Clickable
-	inputs           map[string]*p9.Input
-	passwords        map[string]*p9.Password
-	configs          cfg.GroupsMap
-	config           *cfg.Config
-	running          bool
-	invalidate       chan struct{}
-	quit             chan struct{}
-	runnerQuit       chan struct{}
-	sendAddresses    []SendAddress
-	txs              []btcjson.ListTransactionsResult
-	Worker           *worker.Worker
-	RunCommandChan   chan string
-	State            State
-	Shell            *worker.Worker
+	sidebarButtons            []*p9.Clickable
+	buttonBarButtons          []*p9.Clickable
+	statusBarButtons          []*p9.Clickable
+	bools                     map[string]*p9.Bool
+	quitClickable             *p9.Clickable
+	lists                     map[string]*p9.List
+	checkables                map[string]*p9.Checkable
+	clickables                map[string]*p9.Clickable
+	inputs                    map[string]*p9.Input
+	passwords                 map[string]*p9.Password
+	configs                   cfg.GroupsMap
+	config                    *cfg.Config
+	running                   bool
+	invalidate                chan struct{}
+	quit                      chan struct{}
+	runnerQuit                chan struct{}
+	sendAddresses             []SendAddress
+	txs                       []btcjson.ListTransactionsResult
+	Worker                    *worker.Worker
+	RunCommandChan            chan string
+	State                     State
+	Shell                     *worker.Worker
+	ChainClient, WalletClient *rpcclient.Client
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -81,6 +82,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
 		"recent":       wg.th.List(),
+		"goroutines":   wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
@@ -92,6 +94,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"receiveClear":            wg.th.Clickable(),
 		"receiveShow":             wg.th.Clickable(),
 		"receiveRemove":           wg.th.Clickable(),
+		"transactions10":          wg.th.Clickable(),
+		"transactions30":          wg.th.Clickable(),
+		"transactions50":          wg.th.Clickable(),
 	}
 	wg.bools = map[string]*p9.Bool{
 		"runstate":   wg.th.Bool(wg.running),
@@ -109,11 +114,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
-	wg.RunCommandChan = make(chan string)
 	if err = wg.Runner(); Check(err) {
 	}
-	wg.RunCommandChan <- "run"
-	wg.ConnectChainRPC()
+	wg.Tickers()
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
 	wg.CreateSendAddressItem()
@@ -128,14 +131,11 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					// interrupt.Request()
-					// close(wg.runnerQuit)
+					wg.RunCommandChan <- "stop"
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
-	// tickers and triggers
-	// go func() {
 out:
 	for {
 		select {
@@ -147,7 +147,7 @@ out:
 			break out
 		}
 	}
-	// }()
+	// app.Main is just a synonym for select{} so don't do it, we want to be able to shut down
 	// app.Main()
 	return
 }
