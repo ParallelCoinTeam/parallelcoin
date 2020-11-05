@@ -17,41 +17,49 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-func (wg *WalletGUI) chainClient() (*rpcclient.Client, error) {
+func (wg *WalletGUI) updateThingies() (err error) {
 	// update the configuration
-	b, err := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
-	if err == nil {
-		err = json.Unmarshal(b, wg.cx.Config)
-		if err != nil {
+	var b []byte
+	if b, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); !Check(err) {
+		if err = json.Unmarshal(b, wg.cx.Config); !Check(err) {
+			return
 		}
 	}
-	return rpcclient.New(&rpcclient.ConnConfig{
+	return
+}
+
+func (wg *WalletGUI) chainClient() (err error) {
+	if err = wg.updateThingies(); Check(err) {
+	}
+	wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
 		Host:         *wg.cx.Config.RPCConnect,
 		User:         *wg.cx.Config.Username,
 		Pass:         *wg.cx.Config.Password,
 		HTTPPostMode: true,
 	}, nil)
+	return
 }
 
-func (wg *WalletGUI) walletClient() (*rpcclient.Client, error) {
+func (wg *WalletGUI) walletClient() (err error) {
+	if err = wg.updateThingies(); Check(err) {
+	}
 	// update wallet data
 	walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 	var walletServer, port string
-	var err error
 	if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
 		walletServer = net.JoinHostPort("127.0.0.1", port)
 	}
-	return rpcclient.New(&rpcclient.ConnConfig{
+	wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
 		Host:         walletServer,
 		User:         *wg.cx.Config.Username,
 		Pass:         *wg.cx.Config.Password,
 		HTTPPostMode: true,
 	}, nil)
+	return
 }
 
 func (wg *WalletGUI) Tickers() {
 	go func() {
-		var chainClient, walletClient *rpcclient.Client
 		var err error
 		seconds := time.Tick(time.Second)
 		// fiveSeconds := time.Tick(time.Second * 5)
@@ -61,16 +69,22 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					if chainClient != nil {
-						chainClient.Disconnect()
+					if wg.ChainClient != nil {
+						wg.ChainClient.Disconnect()
+						if wg.ChainClient.Disconnected() {
+							wg.ChainClient = nil
+						}
 					}
-					if chainClient, err = wg.chainClient(); Check(err) {
+					if err = wg.chainClient(); Check(err) {
 						break
 					}
-					if walletClient != nil {
-						walletClient.Disconnect()
+					if wg.WalletClient != nil {
+						wg.WalletClient.Disconnect()
+						if wg.WalletClient.Disconnected() {
+							wg.WalletClient = nil
+						}
 					}
-					if walletClient, err = wg.walletClient(); Check(err) {
+					if err = wg.walletClient(); Check(err) {
 						break
 					}
 					// if we got to here both are connected
@@ -88,7 +102,7 @@ func (wg *WalletGUI) Tickers() {
 
 					var height int32
 					var h *chainhash.Hash
-					if h, height, err = chainClient.GetBestBlock(); Check(err) {
+					if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
 						break out
 					}
 					wg.State.SetBestBlockHeight(int(height))
@@ -106,18 +120,18 @@ func (wg *WalletGUI) Tickers() {
 					//	HTTPPostMode: true,
 					// }
 					var unconfirmed util.Amount
-					if unconfirmed, err = walletClient.GetUnconfirmedBalance("default"); Check(err) {
+					if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
 						break out
 					}
 					wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
 					var confirmed util.Amount
-					if confirmed, err = walletClient.GetBalance("default"); Check(err) {
+					if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
 						break out
 					}
 					wg.State.SetBalance(confirmed.ToDUO())
 					var ltr []btcjson.ListTransactionsResult
 					// TODO: for some reason this function returns half as many as requested
-					if ltr, err = walletClient.ListTransactionsCount("default", 20); Check(err) {
+					if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
 						break out
 					}
 					// Debugs(ltr)
@@ -131,17 +145,17 @@ func (wg *WalletGUI) Tickers() {
 					// Debug(buf.String())
 					lines := strings.Split(buf.String(), "\n")
 					var out []l.Widget
-					var outString string
+					// var outString string
 					for i := range lines {
 						var text string
 						if strings.HasPrefix(lines[i], "goroutine") && i < len(lines)-2 {
 							text = lines[i+2]
 							text = strings.TrimSpace(strings.Split(text, " ")[0])
-							outString += text + "\n"
+							// outString += text + "\n"
 							out = append(out, wg.th.Caption(text).Color("DocText").Fn)
 						}
 					}
-					Debug(outString)
+					// Debug(outString)
 					wg.State.SetGoroutines(out)
 				case <-wg.quit:
 					break totalOut
