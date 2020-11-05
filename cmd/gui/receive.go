@@ -84,12 +84,12 @@ func (wg *WalletGUI) receiveTop() l.Widget {
 							SpaceBetween().
 							Rigid(
 								wg.Inset(0.1,
-									wg.sendButton(wg.clickables["receiveCreateNewAddress"], "Create new receiving address", wg.Send),
+									wg.buttonText(wg.clickables["receiveCreateNewAddress"], "Create new receiving address", wg.Send),
 								).Fn,
 							).
 							Rigid(
 								wg.Inset(0.1,
-									wg.sendButton(wg.clickables["receiveClear"], "Clear", wg.ClearAllAddresses),
+									wg.buttonText(wg.clickables["receiveClear"], "Clear", wg.ClearAllAddresses),
 								).Fn,
 							).Fn,
 					).Fn,

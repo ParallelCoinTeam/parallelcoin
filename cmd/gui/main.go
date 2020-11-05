@@ -1,6 +1,7 @@
 package gui
 
 import (
+	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -28,7 +29,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 type WalletGUI struct {
 	cx   *conte.Xt
 	c    *cli.Context
-	w    *f.Window
+	w    map[string]*f.Window
 	th   *p9.Theme
 	size *int
 	*p9.App
@@ -116,19 +117,29 @@ func (wg *WalletGUI) Run() (err error) {
 	// wg.RunCommandChan <- "run"
 	wg.ConnectChainRPC()
 	wg.quitClickable = wg.th.Clickable()
-	wg.w = f.NewWindow()
+	wg.w = map[string]*f.Window{
+		"splash": f.NewWindow(),
+	}
+
 	wg.CreateSendAddressItem()
 	wg.App = wg.GetAppWidget()
+	wg.newWindow("main", "ParallelCoin Wallet", 800, 600, wg.Fn())
+	return
+}
+
+func (wg *WalletGUI) newWindow(id, title string, x, y int, layout l.Widget) {
+	wg.w[id] = f.NewWindow()
 	go func() {
-		if err := wg.w.
-			Size(800, 480).
-			Title("ParallelCoin Wallet").
+		if err := wg.w[id].
+			Size(x, y).
+			Title(title).
 			Open().
 			Run(
-				wg.Fn(),
+				//wg.Fn(),
+				layout,
 				// wg.InitWallet(),
 				func() {
-					Debug("quitting wallet gui")
+					Debug("Quitting " + title)
 					// interrupt.Request()
 					close(wg.quit)
 				}); Check(err) {
@@ -140,7 +151,7 @@ out:
 	for {
 		select {
 		case <-wg.invalidate:
-			wg.w.Window.Invalidate()
+			wg.w[id].Window.Invalidate()
 		case <-wg.quit:
 			Debug("closing GUI on quit signal")
 			break out

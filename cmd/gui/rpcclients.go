@@ -65,18 +65,7 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				wg.State.SetBestBlockHeight(int(height))
 				wg.State.SetBestBlockHash(h)
 				//// update wallet data
-				//walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 				var walletClient *rpcclient.Client
-				//var walletServer, port string
-				//if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
-				//	walletServer = net.JoinHostPort("127.0.0.1", port)
-				//}
-				//walletConnConfig := &rpcclient.ConnConfig{
-				//	Host:         walletServer,
-				//	User:         *wg.cx.Config.Username,
-				//	Pass:         *wg.cx.Config.Password,
-				//	HTTPPostMode: true,
-				//}
 				if walletClient, err = wg.walletClient(); Check(err) {
 					break
 				}
@@ -92,11 +81,13 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				wg.State.SetBalance(confirmed.ToDUO())
 				var ltr []btcjson.ListTransactionsResult
 				// TODO: for some reason this function returns half as many as requested
-				if ltr, err = walletClient.ListTransactionsCount("default", 20); Check(err) {
-					break
+				if wg.ActivePageGet() == "main" {
+					if ltr, err = walletClient.ListTransactionsCount("default", 20); Check(err) {
+						break
+					}
 				}
 				// Debugs(ltr)
-				wg.State.SetLastTxs(ltr)
+				wg.State.SetLastTxs(wg.Theme, ltr)
 			case <-wg.quit:
 				break out
 			}

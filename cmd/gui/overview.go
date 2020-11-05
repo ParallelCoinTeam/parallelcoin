@@ -152,10 +152,8 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 func (wg *WalletGUI) RecentTransactions() l.Widget {
 	var out []l.Widget
 	first := true
-	out = append(out,
-
-	)
-	for x := range wg.State.lastTxs {
+	out = append(out)
+	for x := range wg.State.txs {
 		i := x
 		// spacer
 		if !first {
@@ -169,13 +167,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 		}
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.lastTxs[i].Amount)).Color("PanelText").Fn,
+				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.txs[i].data.Amount)).Color("PanelText").Fn,
 			).Fn,
 		)
 
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Caption(wg.State.lastTxs[i].Address).
+				wg.th.Caption(wg.State.txs[i].data.Address).
 					Font("go regular").
 					Color("PanelText").
 					TextScale(0.66).Fn,
@@ -184,42 +182,27 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Caption(wg.State.lastTxs[i].TxID).
+				wg.th.Caption(wg.State.txs[i].data.TxID).
 					Font("go regular").
 					Color("PanelText").
 					TextScale(0.5).Fn,
 			).Fn,
 		)
-
 		out = append(out,
 			func(gtx l.Context) l.Dimensions {
 				return wg.th.Fill("DocBg",
 					wg.th.Flex().AlignMiddle(). // SpaceBetween().
-						Rigid(
+									Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
-								).
-								Rigid(
-									wg.th.Caption(fmt.Sprintf("%d ", *wg.State.lastTxs[i].BlockIndex)).Fn,
-								).
-								Fn,
-						).
-						Rigid(
-							wg.th.Flex().AlignMiddle().
-								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
-								).
-								Rigid(
-									wg.th.Caption(fmt.Sprintf("%d ", wg.State.lastTxs[i].Confirmations)).Fn,
-								).
-								Fn,
+									wg.buttonIconText(wg.State.txs[i].clickBlock, fmt.Sprint(*wg.State.txs[i].data.BlockIndex), &icons2.DeviceWidgets, wg.blockPage(*wg.State.txs[i].data.BlockIndex)),
+								).Fn,
 						).
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
 									func(gtx l.Context) l.Dimensions {
-										switch wg.State.lastTxs[i].Category {
+										switch wg.State.txs[i].data.Category {
 										case "generate":
 											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
 										case "immature":
@@ -233,7 +216,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 									},
 								).
 								Rigid(
-									wg.th.Caption(wg.State.lastTxs[i].Category+" ").Fn,
+									wg.th.Caption(wg.State.txs[i].data.Category+" ").Fn,
 								).
 								Fn,
 						).
@@ -244,20 +227,18 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								).
 								Rigid(
 									wg.th.Caption(
-										wg.State.lastTimeStrings[i],
+										wg.State.txs[i].time,
 									).Color("DocText").Fn,
 								).
 								Fn,
+						).
+						Rigid(
+							wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
 						).Fn,
 				).
 					Fn(gtx)
 			})
 	}
-	// out = append(out,
-	// 	wg.th.Fill("DocBg",
-	// 		wg.th.Inset(0.25, p9.EmptyMaxWidth()).Fn,
-	// 	).Fn,
-	// )
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return out[index](gtx)
 	}
@@ -294,62 +275,3 @@ func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 			Fn,
 	).Fn
 }
-//
-// func (wg *WalletGUI) panel(title string, fill bool, content l.Widget) l.Widget {
-// 	return func(gtx l.Context) l.Dimensions {
-// 		w := wg.Inset(0.25,
-// 			wg.Fill("DocBg",
-// 				wg.th.VFlex().
-// 					Rigid(
-// 						wg.Fill("DocText",
-// 							wg.th.Flex().
-// 								Rigid(
-// 									wg.Inset(0.5,
-// 										wg.H6(title).Color("DocBg").Fn,
-// 									).Fn,
-// 								).Fn,
-// 						).Fn,
-// 					).
-// 					Rigid(
-// 						wg.Fill("DocBg",
-// 							wg.Inset(0.25,
-// 								content,
-// 							).Fn,
-// 						).Fn,
-// 					).Fn,
-// 			).Fn,
-// 		).Fn
-// 		if !fill {
-// 			// render the widgets onto a second context to get their dimensions
-// 			gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
-// 			// generate the dimensions for all the list elements
-// 			child := op.Record(gtx1.Ops)
-// 			d := w(gtx1)
-// 			_ = child.Stop()
-// 			gtx.Constraints.Max.X = d.Size.X
-// 			gtx.Constraints.Max.Y = d.Size.Y
-// 			gtx.Constraints.Min = gtx.Constraints.Max
-// 			w = wg.Inset(0.25,
-// 				wg.th.VFlex().
-// 					Rigid(
-// 						wg.Fill("DocText",
-// 							wg.th.Flex().
-// 								Flexed(1,
-// 									wg.Inset(0.5,
-// 										wg.H6(title).Color("DocBg").Fn,
-// 									).Fn,
-// 								).Fn,
-// 						).Fn,
-// 					).
-// 					Rigid(
-// 						wg.Fill("DocBg",
-// 							wg.Inset(0.25,
-// 								content,
-// 							).Fn,
-// 						).Fn,
-// 					).Fn,
-// 			).Fn
-// 		}
-// 		return w(gtx)
-// 	}
-// }

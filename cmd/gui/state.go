@@ -2,10 +2,10 @@ package gui
 
 import (
 	"fmt"
+	"github.com/kofoworola/godate"
+	"github.com/p9c/pod/pkg/gui/p9"
 	"sync"
 	"time"
-
-	"github.com/kofoworola/godate"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -18,29 +18,33 @@ type State struct {
 	bestBlockHash      *chainhash.Hash
 	balance            float64
 	balanceUnconfirmed float64
-	lastTxs            []btcjson.ListTransactionsResult
-	lastTimeStrings    []string
+	txs                []tx
 }
 
-func (s *State) LastTxs() []btcjson.ListTransactionsResult {
+func (s *State) Txs() []tx {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	return s.lastTxs
+	return s.txs
 }
 
-func (s *State) SetLastTxs(txs []btcjson.ListTransactionsResult) {
+func (s *State) SetLastTxs(th *p9.Theme, txs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	if txs == nil {
 		return
 	}
-	s.lastTxs = txs
-	s.lastTimeStrings = make([]string, 10)
-	for i := range s.lastTxs {
-		s.lastTimeStrings = append(s.lastTimeStrings,
-			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
-				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0)))))
+	var txsOut []tx
+	for i := range txs {
+		txsOut = append(txsOut, tx{
+			time: fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
+				godate.Create(time.Unix(txs[i].BlockTime, 0)))),
+			data:       txs[i],
+			clickTx:    th.Clickable(),
+			clickBlock: th.Clickable(),
+			list:       th.List(),
+		})
 	}
+	s.txs = txsOut
 }
 
 func (s *State) LastUpdated() time.Time {
