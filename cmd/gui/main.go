@@ -11,6 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -136,6 +137,11 @@ func (wg *WalletGUI) Run() (err error) {
 				}, wg.quit); Check(err) {
 		}
 	}()
+	interrupt.AddHandler(func() {
+		Debug("quitting wallet gui")
+		wg.RunCommandChan <- "stop"
+		close(wg.quit)
+	})
 out:
 	for {
 		select {
