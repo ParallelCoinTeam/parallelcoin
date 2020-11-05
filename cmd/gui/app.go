@@ -1,10 +1,7 @@
 package gui
 
 import (
-	"os"
-	"runtime/pprof"
 	"strconv"
-	"time"
 
 	l "gioui.org/layout"
 	"gioui.org/text"
@@ -13,7 +10,6 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/util/logi/consume"
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
@@ -84,21 +80,32 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			},
 			},
 		}),
-		"kill": wg.Page("log", p9.Widgets{
+		"goroutines": wg.Page("log", p9.Widgets{
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
-				pprof.Lookup("goroutine").WriteTo(os.Stderr, 1)
-				wg.RunCommandChan <- "stop"
-				consume.Kill(wg.Worker)
-				consume.Kill(wg.cx.StateCfg.Miner)
+				le := func(gtx l.Context, index int) l.Dimensions {
+					return wg.State.goroutines[index](gtx)
+				}
+				return func(gtx l.Context) l.Dimensions {
+					return wg.lists["recent"].
+						Vertical().
+						// Color("PanelText").
+						Background("DocBg").
+						Active("DocText").
+						Length(len(wg.State.goroutines)).
+						ListElement(le).
+						Fn(gtx)
+				}(gtx)
+				// wg.RunCommandChan <- "stop"
+				// consume.Kill(wg.Worker)
+				// consume.Kill(wg.cx.StateCfg.Miner)
 				// close(wg.cx.NodeKill)
 				// close(wg.cx.KillAll)
-				time.Sleep(time.Second*3)
+				// time.Sleep(time.Second*3)
 				// interrupt.Request()
-				os.Exit(0)
-				return l.Dimensions{}
+				// os.Exit(0)
+				// return l.Dimensions{}
 			}},
 		}),
-
 	})
 	a.SideBar([]l.Widget{
 		wg.SideBarButton("overview", "main", 0),
@@ -111,7 +118,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 8),
 	})
 	a.ButtonBar([]l.Widget{
-		wg.PageTopBarButton("kill", 1, &icons.NavigationClose),
+		wg.PageTopBarButton("goroutines", 1, &icons.ActionBugReport),
 		wg.PageTopBarButton("help", 0, &icons.ActionHelp),
 		wg.PageTopBarButton("settings", 2, &icons.ActionSettings),
 		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),

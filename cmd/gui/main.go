@@ -80,6 +80,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
 		"recent":       wg.th.List(),
+		"goroutines":   wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
@@ -115,7 +116,7 @@ func (wg *WalletGUI) Run() (err error) {
 	if err = wg.Runner(); Check(err) {
 	}
 	wg.RunCommandChan <- "run"
-	wg.ConnectChainRPC()
+	wg.Tickers()
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = f.NewWindow()
 	wg.CreateSendAddressItem()
@@ -133,6 +134,8 @@ func (wg *WalletGUI) Run() (err error) {
 					// interrupt.Request()
 					wg.RunCommandChan <- "stop"
 					// close(wg.runnerQuit)
+					// close(wg.cx.StateCfg.Miner.Quit)
+					close(wg.Worker.Quit)
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}

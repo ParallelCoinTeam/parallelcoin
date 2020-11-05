@@ -1,10 +1,15 @@
 package gui
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net"
+	"runtime/pprof"
+	"strings"
 	"time"
+
+	l "gioui.org/layout"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -44,13 +49,14 @@ func (wg *WalletGUI) walletClient() (*rpcclient.Client, error) {
 	}, nil)
 }
 
-func (wg *WalletGUI) ConnectChainRPC() {
+func (wg *WalletGUI) Tickers() {
 	go func() {
-		ticker := time.Tick(time.Second)
+		seconds := time.Tick(time.Second)
+		fiveSeconds := time.Tick(time.Second * 5)
 	out:
 		for {
 			select {
-			case <-ticker:
+			case <-seconds:
 				// Debug("connectChainRPC ticker")
 				var chainClient *rpcclient.Client
 				var err error
@@ -64,19 +70,19 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				}
 				wg.State.SetBestBlockHeight(int(height))
 				wg.State.SetBestBlockHash(h)
-				//// update wallet data
-				//walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
+				// // update wallet data
+				// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 				var walletClient *rpcclient.Client
-				//var walletServer, port string
-				//if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
+				// var walletServer, port string
+				// if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
 				//	walletServer = net.JoinHostPort("127.0.0.1", port)
-				//}
-				//walletConnConfig := &rpcclient.ConnConfig{
+				// }
+				// walletConnConfig := &rpcclient.ConnConfig{
 				//	Host:         walletServer,
 				//	User:         *wg.cx.Config.Username,
 				//	Pass:         *wg.cx.Config.Password,
 				//	HTTPPostMode: true,
-				//}
+				// }
 				if walletClient, err = wg.walletClient(); Check(err) {
 					break
 				}
@@ -97,6 +103,17 @@ func (wg *WalletGUI) ConnectChainRPC() {
 				}
 				// Debugs(ltr)
 				wg.State.SetLastTxs(ltr)
+			case <-fiveSeconds:
+				var b []byte
+				buf := bytes.NewBuffer(b)
+				pprof.Lookup("goroutine").WriteTo(buf, 2)
+				lines := strings.Split(buf.String(), "\n")
+				// Debugs(lines)
+				var out []l.Widget
+				for i := range lines {
+					out = append(out, wg.th.Caption(lines[i]).Color("DocText").Fn)
+				}
+				wg.State.SetGoroutines(out)
 			case <-wg.quit:
 				break out
 			}
