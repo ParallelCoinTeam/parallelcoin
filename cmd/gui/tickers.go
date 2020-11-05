@@ -162,6 +162,21 @@ func (wg *WalletGUI) Tickers() {
 				}
 			}
 		}
-
+		Debug("disconnecting chain client")
+		if wg.ChainClient != nil {
+			wg.ChainClient.Disconnect()
+			if wg.ChainClient.Disconnected() {
+				wg.ChainClient = nil
+			}
+		}
+		Debug("disconnecting wallet client")
+		if wg.WalletClient != nil {
+			wg.WalletClient.Disconnect()
+			if wg.WalletClient.Disconnected() {
+				wg.WalletClient = nil
+			}
+		}
+		Debug("stopping shell")
+		wg.RunCommandChan <- "stop"
 	}()
 }
