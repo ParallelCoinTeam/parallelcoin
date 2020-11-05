@@ -54,10 +54,6 @@ func (wg *WalletGUI) Runner() (err error) {
 					wg.running = false
 				case "restart":
 					Debug("restart called")
-					if !wg.running {
-						Debug("wasn't running...")
-						break
-					}
 					go func() {
 						wg.RunCommandChan <- "stop"
 						time.Sleep(time.Second)

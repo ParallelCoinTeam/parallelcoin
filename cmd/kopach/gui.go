@@ -81,7 +81,7 @@ func (w *Worker) Run() {
 		})
 	win := f.NewWindow()
 	interrupt.AddHandler(func() {
-		close(w.quit)
+		// close(w.quit)
 		// os.Exit(0)
 	})
 	go func() {
@@ -93,7 +93,8 @@ func (w *Worker) Run() {
 				minerModel.Widget,
 				func() {
 					Debug("quitting miner")
-					interrupt.Request()
+					// interrupt.Request()
+					close(w.quit)
 				}, w.quit); Check(err) {
 		}
 	}()

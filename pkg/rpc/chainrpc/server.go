@@ -21,8 +21,6 @@ import (
 
 	uberatomic "go.uber.org/atomic"
 
-	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/logi"
 	log "github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
 
@@ -427,28 +425,29 @@ func (n *Node) Start() {
 			n.RPCServers[i].Start()
 		}
 	}
-	// Start the CPU miner if generation is enabled.
-	if *n.Config.Generate && *n.Config.GenThreads != 0 {
-		Debug("starting miner")
-		args := []string{os.Args[0], "-D", *n.Config.DataDir}
-		if *n.Config.KopachGUI {
-			args = append(args, "--kopachgui")
-		}
-		args = append(args, "kopach")
-		// args = apputil.PrependForWindows(args)
-		n.StateCfg.Miner = consume.Log(n.Quit, func(ent *logi.Entry) (err error) {
-			Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
-			return
-		}, func(pkg string) (out bool) {
-			return false
-		}, args...)
-		consume.Start(n.StateCfg.Miner)
-	}
-	interrupt.AddHandler(func() {
-		// Stop the CPU miner if needed
-		consume.Kill(n.StateCfg.Miner)
-		Debug("miner has stopped")
-	})
+	// // Start the CPU miner if generation is enabled.
+	// if *n.Config.Generate && *n.Config.GenThreads != 0 {
+	// 	Debug("starting miner")
+	// 	args := []string{os.Args[0], "-D", *n.Config.DataDir}
+	// 	if *n.Config.KopachGUI {
+	// 		args = append(args, "--kopachgui")
+	// 	}
+	// 	args = append(args, "kopach")
+	// 	// args = apputil.PrependForWindows(args)
+	// 	n.StateCfg.Miner = consume.Log(n.Quit, func(ent *logi.Entry) (err error) {
+	// 		Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+	// 		return
+	// 	}, func(pkg string) (out bool) {
+	// 		return false
+	// 	}, args...)
+	// 	consume.Start(n.StateCfg.Miner)
+	// 	// defer consume.Kill(n.StateCfg.Miner)
+	// }
+	// interrupt.AddHandler(func() {
+	// 	// Stop the CPU miner if needed
+	// 	consume.Kill(n.StateCfg.Miner)
+	// 	Debug("miner has stopped")
+	// })
 }
 
 // Stop gracefully shuts down the server by stopping and disconnecting all peers and the main listener.
@@ -479,7 +478,9 @@ func (n *Node) Stop() (err error) {
 		return nil
 	}); Check(err) {
 	}
-
+	// Stop the CPU miner if needed
+	consume.Kill(n.StateCfg.Miner)
+	Debug("miner has stopped")
 	// Signal the remaining goroutines to quit.
 	close(n.Quit)
 	return

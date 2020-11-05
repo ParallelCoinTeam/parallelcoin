@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"os"
+	"runtime/pprof"
 	"strconv"
 
 	l "gioui.org/layout"
@@ -80,6 +82,14 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			},
 			},
 		}),
+		"kill": wg.Page("log", p9.Widgets{
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+				pprof.Lookup("goroutine").WriteTo(os.Stderr, 1)
+				os.Exit(0)
+				return l.Dimensions{}
+			}},
+		}),
+
 	})
 	a.SideBar([]l.Widget{
 		wg.SideBarButton("overview", "main", 0),
@@ -92,8 +102,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 8),
 	})
 	a.ButtonBar([]l.Widget{
+		wg.PageTopBarButton("kill", 1, &icons.NavigationClose),
 		wg.PageTopBarButton("help", 0, &icons.ActionHelp),
-		// wg.PageTopBarButton("log", 1, icons.ActionList),
 		wg.PageTopBarButton("settings", 2, &icons.ActionSettings),
 		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
 	})

@@ -3,14 +3,13 @@ package gui
 import (
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -132,6 +131,7 @@ func (wg *WalletGUI) Run() (err error) {
 				func() {
 					Debug("quitting wallet gui")
 					// interrupt.Request()
+					wg.RunCommandChan <- "stop"
 					// close(wg.runnerQuit)
 					close(wg.quit)
 				}, wg.quit); Check(err) {

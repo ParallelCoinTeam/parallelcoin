@@ -8,15 +8,14 @@ import (
 	"os"
 	"runtime/pprof"
 
-	"github.com/p9c/pod/cmd/kopach/control"
-	"github.com/p9c/pod/pkg/db/blockdb"
-
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/node/path"
 	"github.com/p9c/pod/cmd/node/version"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/db/blockdb"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -143,16 +142,13 @@ func Main(cx *conte.Xt) (err error) {
 	cx.Controller.Store(true)
 	gracefulShutdown := func() {
 		Info("gracefully shutting down the server...")
-		// server.CPUMiner.Stop()
 		Debug("stopping controller")
 		e := server.Stop()
 		if e != nil {
 			Warn("failed to stop server", e)
 		}
-		// if cx.Controller.Load() {
-		// 	Debug("stopping controller")
-		// 	close(stopController)
-		// }
+		// Debug("stopping miner")
+		// consume.Kill(cx.StateCfg.Miner)
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
