@@ -108,7 +108,7 @@ func (wg *WalletGUI) Tickers() {
 				buf := bytes.NewBuffer(b)
 				pprof.Lookup("goroutine").WriteTo(buf, 2)
 				lines := strings.Split(buf.String(), "\n")
-				// Debugs(lines)
+				Debugs(lines)
 				var out []l.Widget
 				for i := range lines {
 					out = append(out, wg.th.Caption(lines[i]).Color("DocText").Fn)
