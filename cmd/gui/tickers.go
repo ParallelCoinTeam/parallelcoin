@@ -157,9 +157,9 @@ func (wg *WalletGUI) Tickers() {
 				select {
 				case <-seconds:
 					wg.goRoutines()
-					// the remaining actions require a running shell
+					// the remaining actions require a running shell, if it has been stopped we need to stop
 					if !wg.running {
-						break
+						break out
 					}
 					var err error
 
