@@ -167,13 +167,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 		}
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.txs[i].data.Amount)).Color("PanelText").Fn,
+				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.lastTxs[i].Amount)).Color("PanelText").Fn,
 			).Fn,
 		)
 
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Caption(wg.State.txs[i].data.Address).
+				wg.th.Caption(wg.State.lastTxs[i].Address).
 					Font("go regular").
 					Color("PanelText").
 					TextScale(0.66).Fn,
@@ -182,7 +182,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Caption(wg.State.txs[i].data.TxID).
+				wg.th.Caption(wg.State.lastTxs[i].TxID).
 					Font("go regular").
 					Color("PanelText").
 					TextScale(0.5).Fn,
@@ -192,11 +192,11 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 			func(gtx l.Context) l.Dimensions {
 				return wg.th.Fill("DocBg",
 					wg.th.Flex().AlignMiddle(). // SpaceBetween().
-									Rigid(
+						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
 									wg.th.Caption(fmt.Sprint(*wg.State.lastTxs[i].BlockIndex)).Fn,
-								// wg.buttonIconText(wg.State.lastTxs[i].clickBlock,
+									// wg.buttonIconText(wg.State.lastTxs[i].clickBlock,
 									// 	fmt.Sprint(*wg.State.lastTxs[i].BlockIndex),
 									// 	&icons2.DeviceWidgets,
 									// 	wg.blockPage(*wg.State.lastTxs[i].BlockIndex)),
@@ -210,7 +210,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 							wg.th.Flex().AlignMiddle().
 								Rigid(
 									func(gtx l.Context) l.Dimensions {
-										switch wg.State.txs[i].data.Category {
+										switch wg.State.lastTxs[i].Category {
 										case "generate":
 											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
 										case "immature":
@@ -224,7 +224,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 									},
 								).
 								Rigid(
-									wg.th.Caption(wg.State.txs[i].data.Category+" ").Fn,
+									wg.th.Caption(wg.State.lastTxs[i].Category+" ").Fn,
 								).
 								Fn,
 						).
@@ -241,9 +241,18 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								).
 								Fn,
 						).
-						Rigid(
-							wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
-						).Fn,
+						// TODO: this thing hasn't got data going in yet, before we can display anything we need data
+						//  also the index `i` is not from wg.State.txs it is from wg.State.lastTxs
+						//  - even if these two data sets overlap if you want them to relate to each other you need
+						//  to define their integration. Simple way would be for eg: as you intend, to merge them into
+						//  one and only update (add) the extra data on page display. I think that it's so trivial for
+						//  10 instances of the listtransactions result struct just keep them separate so the logic is
+						//  cleaner. In other words, add a second fetcher in ticker.go for the history/tx page, and
+						//  handle the damn empty list, nil panics are Satan.
+						// Rigid(
+						// 	wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
+						// ).
+						Fn,
 				).
 					Fn(gtx)
 			})

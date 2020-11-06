@@ -1,7 +1,6 @@
 package gui
 
 import (
-	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -124,31 +123,23 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
 	}
-
+	wg.Tickers()
 	wg.w["main"] = f.NewWindow()
 	wg.CreateSendAddressItem()
 	wg.App = wg.GetAppWidget()
-	wg.newWindow("main", "ParallelCoin Wallet", 800, 600, wg.Fn())
-	return
-}
-
-func (wg *WalletGUI) newWindow(id, title string, x, y int, layout l.Widget) {
-	wg.w[id] = f.NewWindow()
 	go func() {
 		if err := wg.w["main"].
 			Size(800, 480).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				//wg.Fn(),
-				layout,
+				wg.Fn(),
 				// wg.InitWallet(),
 				func() {
-					Debug("Quitting " + title)
-					// interrupt.Request()
+					Debug("quitting wallet gui")
+					wg.RunCommandChan <- "stop"
 					close(wg.quit)
-				}, wg.quit,
-			); Check(err) {
+				}, wg.quit); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {

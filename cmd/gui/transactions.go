@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+
 	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -10,15 +11,13 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-type tx struct {
-	time       string
-	data       btcjson.ListTransactionsResult
-	clickTx    *p9.Clickable
-	clickBlock *p9.Clickable
-	list       *p9.List
-}
-
 func (wg *WalletGUI) TransactionsPage() l.Widget {
+	// TODO: this page doesn't have data being populated yet
+	if true {
+		return func(l.Context) l.Dimensions {
+			return l.Dimensions{}
+		}
+	}
 	return func(gtx l.Context) l.Dimensions {
 		return wg.th.VFlex().
 			Rigid(
@@ -191,6 +190,10 @@ func (wg *WalletGUI) txIitem(label, data string) l.Widget {
 }
 
 func (wg *WalletGUI) txPage(i int) func() {
+	// TODO: this page doesn't have data being populated yet
+	if true {
+		return func() {}
+	}
 	txLayout := []l.Widget{
 		wg.txIitem("TxId:", wg.State.txs[i].data.TxID),
 		wg.txIitem("Comment:", wg.State.txs[i].data.Comment),
