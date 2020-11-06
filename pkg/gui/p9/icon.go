@@ -2,6 +2,7 @@ package p9
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 
 	"gioui.org/f32"
@@ -23,13 +24,13 @@ type Icon struct {
 	imgColor string
 }
 
-type IconByColor map[string]paint.ImageOp
+type IconByColor map[color.RGBA]paint.ImageOp
 type IconBySize map[float32]IconByColor
 type IconCache map[*[]byte]IconBySize
 
 // Icon returns a new Icon from iconVG data.
 func (th *Theme) Icon() *Icon {
-	return &Icon{th: th, size: th.TextSize, color: "Black"}
+	return &Icon{th: th, size: th.TextSize, color: "DocText"}
 }
 
 // Color sets the color of the icon image. It must be called before creating the image
@@ -77,13 +78,13 @@ func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 }
 
 func (i *Icon) image(sz int) paint.ImageOp {
-	if sz == i.imgSize && i.color == i.imgColor {
-		// Debug("reusing old icon")
-		return i.op
-	}
+	// if sz == i.imgSize && i.color == i.imgColor {
+	// 	// Debug("reusing old icon")
+	// 	return i.op
+	// }
 	if ico, ok := i.th.iconCache[i.src]; ok {
 		if isz, ok := ico[i.size.V]; ok {
-			if icl, ok := isz[i.color]; ok {
+			if icl, ok := isz[i.th.Colors.Get(i.color)]; ok {
 				return icl
 			}
 		}
@@ -107,6 +108,6 @@ func (i *Icon) image(sz int) paint.ImageOp {
 	if _, ok := i.th.iconCache[i.src][i.size.V]; !ok {
 		i.th.iconCache[i.src][i.size.V] = make(IconByColor)
 	}
-	i.th.iconCache[i.src][i.size.V][i.color] = operation
+	i.th.iconCache[i.src][i.size.V][i.th.Colors.Get(i.color)] = operation
 	return operation
 }

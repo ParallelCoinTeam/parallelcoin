@@ -19,7 +19,7 @@ type IncDec struct {
 }
 
 // IncDec is a simple increment/decrement for a number setting
-func (th *Theme) IncDec(nDigits, min, max, current int, color, background, inactive string, changeHook func(n int)) (out *IncDec) {
+func (th *Theme) IncDec(nDigits, min, max, current int, changeHook func(n int)) (out *IncDec) {
 	out = &IncDec{
 		th:         th,
 		nDigits:    nDigits,
@@ -29,11 +29,25 @@ func (th *Theme) IncDec(nDigits, min, max, current int, color, background, inact
 		changeHook: changeHook,
 		inc:        th.Clickable(),
 		dec:        th.Clickable(),
-		color:      color,
-		background: background,
-		inactive:   inactive,
+		// color:      color,
+		// background: background,
+		// inactive:   inactive,
 	}
 	return
+}
+
+func (in *IncDec) SetColor(color string) *IncDec {
+	in.color = color
+	return in
+}
+
+func (in *IncDec) SetBackground(color string) *IncDec {
+	in.background = color
+	return in
+}
+func (in *IncDec) SetInactive(color string) *IncDec {
+	in.inactive = color
+	return in
 }
 
 func (in *IncDec) Fn(gtx l.Context) l.Dimensions {

@@ -36,7 +36,9 @@ func Pod(c *pod.Config) (success bool) {
 		}
 		success = true
 	}
-	*c.UserAgentComments = uac
+	if c.UserAgentComments != nil {
+		*c.UserAgentComments = uac
+	}
 	*c.PipeLog = pipeLogOn
 	return
 }

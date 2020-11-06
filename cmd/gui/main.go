@@ -127,15 +127,14 @@ func (wg *WalletGUI) Run() (err error) {
 		"splash": f.NewWindow(),
 		"main":   f.NewWindow(),
 	}
-	wg.App = wg.GetAppWidget()
 	wg.incdecs = map[string]*p9.IncDec{
 		"generatethreads": wg.th.IncDec(2, 0, runtime.NumCPU(), *wg.cx.Config.GenThreads,
-			wg.App.StatusBarColorGet(), wg.App.StatusBarBackgroundGet(), "scrim",
 			func(n int) {
 				Debug("threads value now", n)
 			},
 		),
 	}
+	wg.App = wg.GetAppWidget()
 	wg.Tickers()
 	wg.CreateSendAddressItem()
 	go func() {

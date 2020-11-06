@@ -111,21 +111,24 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
-	bar := a.Flex().SpaceBetween()
-	for i := range a.statusBar {
-		bar.Rigid(a.statusBar[i])
-	}
-	out :=
-	// a.Fill("PanelBg",
-	// 	a.Inset(0.25,
-		bar.Fn
-	// ).Fn
-	// ).Fn
-	gtx.Constraints.Min.X = gtx.Constraints.Max.X
-	dims := a.Fill(a.statusBarBackground, out).Fn(gtx)
-	gtx.Constraints.Min = dims.Size
-	gtx.Constraints.Max = dims.Size
-	return dims
+	return func(gtx l.Context) l.Dimensions {
+		bar := a.Flex().SpaceBetween()
+		for x := range a.statusBar {
+			i := x
+			bar.Rigid(a.statusBar[i])
+		}
+		// out :=
+		// a.Fill("PanelBg",
+		// 	a.Inset(0.25,
+		// 	bar.Fn
+		// ).Fn
+		// ).Fn
+		gtx.Constraints.Min.X = gtx.Constraints.Max.X
+		dims := a.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
+		gtx.Constraints.Min = dims.Size
+		gtx.Constraints.Max = dims.Size
+		return dims
+	}(gtx)
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
