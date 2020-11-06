@@ -195,14 +195,27 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.th.Caption(fmt.Sprint(*wg.State.lastTxs[i].BlockIndex)).Fn,
-									// wg.buttonIconText(wg.State.lastTxs[i].clickBlock,
-									// 	fmt.Sprint(*wg.State.lastTxs[i].BlockIndex),
-									// 	&icons2.DeviceWidgets,
-									// 	wg.blockPage(*wg.State.lastTxs[i].BlockIndex)),
+									wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
 								).
+								// Rigid(
+								// 	wg.th.Caption(fmt.Sprint(*wg.State.lastTxs[i].BlockIndex)).Fn,
+								// 	// wg.buttonIconText(wg.State.lastTxs[i].clickBlock,
+								// 	// 	fmt.Sprint(*wg.State.lastTxs[i].BlockIndex),
+								// 	// 	&icons2.DeviceWidgets,
+								// 	// 	wg.blockPage(*wg.State.lastTxs[i].BlockIndex)),
+								// ).
 								Rigid(
 									wg.th.Caption(fmt.Sprintf("%d ", *wg.State.lastTxs[i].BlockIndex)).Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							wg.th.Flex().AlignMiddle().
+								Rigid(
+									wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
+								).
+								Rigid(
+									wg.th.Caption(fmt.Sprintf("%d ", wg.State.lastTxs[i].Confirmations)).Fn,
 								).
 								Fn,
 						).
