@@ -1,7 +1,7 @@
 package gui
 
 import (
-	"strconv"
+	"fmt"
 
 	l "gioui.org/layout"
 	"gioui.org/text"
@@ -110,6 +110,9 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				// return l.Dimensions{}
 			}},
 		}),
+		"mining": wg.Page("mining", p9.Widgets{
+			p9.WidgetSize{Widget: wg.th.VFlex().SpaceAround().AlignMiddle().Rigid(wg.th.H1("mining").Alignment(text.Middle).Fn).Fn},
+		}),
 	})
 	a.SideBar([]l.Widget{
 		wg.SideBarButton("overview", "main", 0),
@@ -117,13 +120,14 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("receive", "receive", 2),
 		wg.SideBarButton("history", "transactions", 3),
 		wg.SideBarButton("settings", "settings", 5),
-		wg.SideBarButton("help", "help", 6),
-		wg.SideBarButton("log", "log", 7),
-		wg.SideBarButton("quit", "quit", 8),
+		wg.SideBarButton("mining", "mining", 6),
+		wg.SideBarButton("help", "help", 7),
+		wg.SideBarButton("log", "log", 8),
+		wg.SideBarButton("quit", "quit", 9),
 	})
 	a.ButtonBar([]l.Widget{
-		wg.PageTopBarButton("goroutines", 1, &icons.ActionBugReport),
-		wg.PageTopBarButton("help", 0, &icons.ActionHelp),
+		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport),
+		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
 		wg.PageTopBarButton("settings", 2, &icons.ActionSettings),
 		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
 	})
@@ -257,7 +261,7 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(g
 				wg.ButtonLayout(wg.statusBarButtons[index]).
 					CornerRadius(0).
 					Embed(
-						ic,
+						wg.th.Inset(0.25, ic).Fn,
 					).
 					Background(background).
 					SetClick(
@@ -297,16 +301,20 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			ico = &f
 		}
 		ic := wg.th.Icon().
-			Scale(p9.Scales["H4"]).
+			Scale(p9.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
+		ic2 := &p9icons.Mine
+		if !wg.mining {
+			ic2 = &p9icons.NoMine
+		}
 		return wg.th.Flex().
 			Rigid(
 				wg.th.ButtonLayout(wg.statusBarButtons[0]).
 					CornerRadius(0).
 					Embed(
-						wg.th.Inset(0.066, ic).Fn,
+						wg.th.Inset(0.25, ic).Fn,
 					).
 					Background(background).
 					SetClick(
@@ -316,7 +324,7 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 					Fn,
 			).
 			Rigid(
-				wg.th.Inset(0.33,
+				wg.th.Inset(0.25,
 					p9.If(wg.running,
 						wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
 						wg.th.Icon().
@@ -329,8 +337,29 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				wg.th.Inset(0.33,
-					wg.th.Body1(strconv.FormatInt(int64(wg.State.bestBlockHeight), 10)).Color(color).Fn,
+					wg.th.Body1(fmt.Sprintf("%-8d",wg.State.bestBlockHeight)).Font("go regular").Color(color).Fn,
 				).Fn,
+			).
+			Rigid(
+				wg.th.ButtonLayout(wg.statusBarButtons[3]).CornerRadius(0).
+					Embed(
+						wg.th.Inset(0.25,
+							wg.th.Icon().
+								Color(wg.App.StatusBarColorGet()).
+								Scale(p9.Scales["H5"]).
+								Src(ic2).Fn).Fn,
+					).
+					Background(wg.App.StatusBarBackgroundGet()).
+					SetClick(
+						func() {
+							Debug("clicked miner control stop/start button")
+							wg.mining = !wg.mining
+							// wg.SetRunState(!wg.running)
+						}).
+					Fn,
+			).
+			Rigid(
+				wg.incdecs["generatethreads"].Fn,
 			).
 			Fn(gtx)
 	}

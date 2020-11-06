@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"runtime"
+
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -45,9 +47,10 @@ type WalletGUI struct {
 	clickables                map[string]*p9.Clickable
 	inputs                    map[string]*p9.Input
 	passwords                 map[string]*p9.Password
+	incdecs                   map[string]*p9.IncDec
 	configs                   cfg.GroupsMap
 	config                    *cfg.Config
-	running                   bool
+	running, mining           bool
 	invalidate                chan struct{}
 	quit                      chan struct{}
 	runnerQuit                chan struct{}
@@ -64,7 +67,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
-	wg.sidebarButtons = make([]*p9.Clickable, 9)
+	wg.sidebarButtons = make([]*p9.Clickable, 10)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
@@ -72,7 +75,7 @@ func (wg *WalletGUI) Run() (err error) {
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.th.Clickable()
 	}
-	wg.statusBarButtons = make([]*p9.Clickable, 3)
+	wg.statusBarButtons = make([]*p9.Clickable, 4)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
@@ -122,11 +125,19 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
+		"main":   f.NewWindow(),
+	}
+	wg.App = wg.GetAppWidget()
+	wg.incdecs = map[string]*p9.IncDec{
+		"generatethreads": wg.th.IncDec(2, 0, runtime.NumCPU(), *wg.cx.Config.GenThreads,
+			wg.App.StatusBarColorGet(), wg.App.StatusBarBackgroundGet(), "scrim",
+			func(n int) {
+				Debug("threads value now", n)
+			},
+		),
 	}
 	wg.Tickers()
-	wg.w["main"] = f.NewWindow()
 	wg.CreateSendAddressItem()
-	wg.App = wg.GetAppWidget()
 	go func() {
 		if err := wg.w["main"].
 			Size(800, 480).
