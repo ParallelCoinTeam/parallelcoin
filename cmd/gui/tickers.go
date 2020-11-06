@@ -131,61 +131,67 @@ func (wg *WalletGUI) Tickers() {
 						break out
 					}
 					wg.State.SetBalance(confirmed.ToDUO())
-					var ltr []btcjson.ListTransactionsResult
-					// TODO: for some reason this function returns half as many as requested
-					if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
-						break out
-					}
-					// Debugs(ltr)
-					wg.State.SetLastTxs(ltr)
-					// case <-fiveSeconds:
-					var b []byte
-					buf := bytes.NewBuffer(b)
-					if err = pprof.Lookup("goroutine").WriteTo(buf, 2); Check(err) {
-						break out
-					}
-					// Debug(buf.String())
-					lines := strings.Split(buf.String(), "\n")
-					var out []l.Widget
-					// var outString string
-					var clickables []*p9.Clickable
-					for x := range lines {
-						i := x
-						clickables = append(clickables, wg.th.Clickable())
-						var text string
-						if strings.HasPrefix(lines[i], "goroutine") && i < len(lines)-2 {
-							text = lines[i+2]
-							text = strings.TrimSpace(strings.Split(text, " ")[0])
-							// outString += text + "\n"
-							out = append(out, func(gtx l.Context) l.Dimensions {
-								return wg.th.ButtonLayout(clickables[i]).Embed(
-									wg.th.Inset(0.25,
-										wg.th.Caption(text).
-											Color("DocText").Fn,
-									).Fn,
-								).Background("Transparent").SetClick(func() {
-									go func() {
-										out := make([]string, 2)
-										split := strings.Split(text, ":")
-										if len(split) > 2 {
-											out[0] = strings.Join(split[:len(split)-1], ":")
-											out[1] = split[len(split)-1]
-										} else {
-											out[0] = split[0]
-											out[1] = split[1]
-										}
-										Debug("path", out[0], "line", out[1])
-										goland := "C:\\Program Files\\JetBrains\\GoLand 2020.2.3\\bin\\goland64.exe"
-										launch := exec.Command(goland, "--line", out[1], out[0])
-										launch.Start()
-									}()
-								}).
-									Fn(gtx)
-							})
+					// don't update this unless it's in view
+					if wg.ActivePageGet() == "main" {
+						Debug("updating recent transactions")
+						var ltr []btcjson.ListTransactionsResult
+						// TODO: for some reason this function returns half as many as requested
+						if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
+							break out
 						}
+						// Debugs(ltr)
+						wg.State.SetLastTxs(ltr)
 					}
-					// Debug(outString)
-					wg.State.SetGoroutines(out)
+					// case <-fiveSeconds:
+					if wg.ActivePageGet() == "goroutines" {
+						var b []byte
+						buf := bytes.NewBuffer(b)
+						if err = pprof.Lookup("goroutine").WriteTo(buf, 2); Check(err) {
+							break out
+						}
+						// Debug(buf.String())
+						lines := strings.Split(buf.String(), "\n")
+						var out []l.Widget
+						// var outString string
+						var clickables []*p9.Clickable
+						for x := range lines {
+							i := x
+							clickables = append(clickables, wg.th.Clickable())
+							var text string
+							if strings.HasPrefix(lines[i], "goroutine") && i < len(lines)-2 {
+								text = lines[i+2]
+								text = strings.TrimSpace(strings.Split(text, " ")[0])
+								// outString += text + "\n"
+								out = append(out, func(gtx l.Context) l.Dimensions {
+									return wg.th.ButtonLayout(clickables[i]).Embed(
+										wg.th.Inset(0.25,
+											wg.th.Caption(text).
+												Color("DocText").Fn,
+										).Fn,
+									).Background("Transparent").SetClick(func() {
+										go func() {
+											out := make([]string, 2)
+											split := strings.Split(text, ":")
+											if len(split) > 2 {
+												out[0] = strings.Join(split[:len(split)-1], ":")
+												out[1] = split[len(split)-1]
+											} else {
+												out[0] = split[0]
+												out[1] = split[1]
+											}
+											Debug("path", out[0], "line", out[1])
+											goland := "C:\\Program Files\\JetBrains\\GoLand 2020.2.3\\bin\\goland64.exe"
+											launch := exec.Command(goland, "--line", out[1], out[0])
+											launch.Start()
+										}()
+									}).
+										Fn(gtx)
+								})
+							}
+						}
+						// Debug(outString)
+						wg.State.SetGoroutines(out)
+					}
 				case <-wg.quit:
 					break totalOut
 				}

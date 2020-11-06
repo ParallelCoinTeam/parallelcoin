@@ -51,12 +51,12 @@ type WalletGUI struct {
 	quit                      chan struct{}
 	runnerQuit                chan struct{}
 	sendAddresses             []SendAddress
-	txs                       []btcjson.ListTransactionsResult
 	Worker                    *worker.Worker
 	RunCommandChan            chan string
 	State                     State
 	Shell                     *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
+	txs                       []btcjson.ListTransactionsResult
 }
 
 func (wg *WalletGUI) Run() (err error) {

@@ -9,6 +9,7 @@ import (
 	"github.com/kofoworola/godate"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -21,7 +22,16 @@ type State struct {
 	balanceUnconfirmed float64
 	lastTxs            []btcjson.ListTransactionsResult
 	lastTimeStrings    []string
+	txs                []tx
 	goroutines         []l.Widget
+}
+
+type tx struct {
+	time       string
+	data       btcjson.ListTransactionsResult
+	clickTx    *p9.Clickable
+	clickBlock *p9.Clickable
+	list       *p9.List
 }
 
 func (s *State) Goroutines() []l.Widget {
@@ -42,19 +52,32 @@ func (s *State) LastTxs() []btcjson.ListTransactionsResult {
 	return s.lastTxs
 }
 
-func (s *State) SetLastTxs(txs []btcjson.ListTransactionsResult) {
+func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	if txs == nil {
-		return
-	}
-	s.lastTxs = txs
+	s.lastTxs = lastTxs
 	s.lastTimeStrings = make([]string, 10)
 	for i := range s.lastTxs {
 		s.lastTimeStrings = append(s.lastTimeStrings,
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
 				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0)))))
 	}
+}
+
+
+func (s *State) Txs() []tx {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	return s.txs
+}
+
+func (s *State) SetTxs(txs []tx) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if txs == nil {
+		return
+	}
+	s.txs = txs
 }
 
 func (s *State) LastUpdated() time.Time {
