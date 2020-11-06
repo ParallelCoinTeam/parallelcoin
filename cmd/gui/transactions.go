@@ -2,7 +2,6 @@ package gui
 
 import (
 	"fmt"
-
 	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -10,6 +9,14 @@ import (
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
+
+type tx struct {
+	time       string
+	data       btcjson.ListTransactionsResult
+	clickTx    *p9.Clickable
+	clickBlock *p9.Clickable
+	list       *p9.List
+}
 
 func (wg *WalletGUI) TransactionsPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
@@ -42,15 +49,12 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 							wg.Inset(0.25, wg.Caption("Date:").Color("DocText").Fn).Fn,
 						).
 						Rigid(
-							// wg.sendButton(wg.sendAddresses[index].AddressBookBtn, "AddressBook", func() {}),
 							wg.Inset(0.25, wg.Caption("Type:").Color("DocText").Fn).Fn,
 						).
 						Flexed(1,
-							// wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
 							wg.Inset(0.25, wg.Caption("Label:").Color("DocText").Fn).Fn,
 						).
 						Rigid(
-							// wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
 							wg.Inset(0.25, wg.Caption("Amount(DUO):").Color("DocText").Fn).Fn,
 						).Fn,
 				).Fn,

@@ -2,15 +2,13 @@ package gui
 
 import (
 	"fmt"
-	"sync"
-	"time"
-
 	l "gioui.org/layout"
 	"github.com/kofoworola/godate"
-
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"sync"
+	"time"
 )
 
 type State struct {
@@ -20,6 +18,7 @@ type State struct {
 	bestBlockHash      *chainhash.Hash
 	balance            float64
 	balanceUnconfirmed float64
+	txs                []tx
 	lastTxs            []btcjson.ListTransactionsResult
 	lastTimeStrings    []string
 	txs                []tx
@@ -46,10 +45,10 @@ func (s *State) SetGoroutines(gr []l.Widget) {
 	s.goroutines = gr
 }
 
-func (s *State) LastTxs() []btcjson.ListTransactionsResult {
+func (s *State) Txs() []tx {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	return s.lastTxs
+	return s.txs
 }
 
 func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
@@ -62,6 +61,7 @@ func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
 				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0)))))
 	}
+	s.txs = txsOut
 }
 
 

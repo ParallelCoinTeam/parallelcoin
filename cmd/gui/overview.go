@@ -167,13 +167,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 		}
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.lastTxs[i].Amount)).Color("PanelText").Fn,
+				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.txs[i].data.Amount)).Color("PanelText").Fn,
 			).Fn,
 		)
 
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Caption(wg.State.lastTxs[i].Address).
+				wg.th.Caption(wg.State.txs[i].data.Address).
 					Font("go regular").
 					Color("PanelText").
 					TextScale(0.66).Fn,
@@ -182,18 +182,17 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Caption(wg.State.lastTxs[i].TxID).
+				wg.th.Caption(wg.State.txs[i].data.TxID).
 					Font("go regular").
 					Color("PanelText").
 					TextScale(0.5).Fn,
 			).Fn,
 		)
-
 		out = append(out,
 			func(gtx l.Context) l.Dimensions {
 				return wg.th.Fill("DocBg",
 					wg.th.Flex().AlignMiddle(). // SpaceBetween().
-						Rigid(
+									Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
 									wg.th.Caption(fmt.Sprint(*wg.State.lastTxs[i].BlockIndex)).Fn,
@@ -210,18 +209,8 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
-								).
-								Rigid(
-									wg.th.Caption(fmt.Sprintf("%d ", wg.State.lastTxs[i].Confirmations)).Fn,
-								).
-								Fn,
-						).
-						Rigid(
-							wg.th.Flex().AlignMiddle().
-								Rigid(
 									func(gtx l.Context) l.Dimensions {
-										switch wg.State.lastTxs[i].Category {
+										switch wg.State.txs[i].data.Category {
 										case "generate":
 											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
 										case "immature":
@@ -235,7 +224,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 									},
 								).
 								Rigid(
-									wg.th.Caption(wg.State.lastTxs[i].Category+" ").Fn,
+									wg.th.Caption(wg.State.txs[i].data.Category+" ").Fn,
 								).
 								Fn,
 						).
@@ -251,16 +240,14 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 									).Color("DocText").Fn,
 								).
 								Fn,
+						).
+						Rigid(
+							wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
 						).Fn,
 				).
 					Fn(gtx)
 			})
 	}
-	// out = append(out,
-	// 	wg.th.Fill("DocBg",
-	// 		wg.th.Inset(0.25, p9.EmptyMaxWidth()).Fn,
-	// 	).Fn,
-	// )
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return out[index](gtx)
 	}

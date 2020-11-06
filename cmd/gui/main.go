@@ -1,7 +1,10 @@
 package gui
 
 import (
+	l "gioui.org/layout"
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -9,7 +12,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -83,7 +85,6 @@ func (wg *WalletGUI) Run() (err error) {
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
 		"recent":       wg.th.List(),
-		"goroutines":   wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
@@ -118,22 +119,33 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
 	}
-	wg.Tickers()
+	// wg.RunCommandChan <- "run"
 	wg.quitClickable = wg.th.Clickable()
+	wg.w = map[string]*f.Window{
+		"splash": f.NewWindow(),
+	}
+
 	wg.w["main"] = f.NewWindow()
 	wg.CreateSendAddressItem()
 	wg.App = wg.GetAppWidget()
+	wg.newWindow("main", "ParallelCoin Wallet", 800, 600, wg.Fn())
+	return
+}
+
+func (wg *WalletGUI) newWindow(id, title string, x, y int, layout l.Widget) {
+	wg.w[id] = f.NewWindow()
 	go func() {
 		if err := wg.w["main"].
 			Size(800, 480).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				wg.Fn(),
+				//wg.Fn(),
+				layout,
 				// wg.InitWallet(),
 				func() {
-					Debug("quitting wallet gui")
-					wg.RunCommandChan <- "stop"
+					Debug("Quitting " + title)
+					// interrupt.Request()
 					close(wg.quit)
 				}, wg.quit,
 			); Check(err) {

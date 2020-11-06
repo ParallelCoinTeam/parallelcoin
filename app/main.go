@@ -25,7 +25,7 @@ const (
 func Main() int {
 	cx := conte.GetNewContext(Name, appLanguage, "main")
 	cx.App = GetApp(cx)
- 	e := cx.App.Run(os.Args)
+	e := cx.App.Run(os.Args)
 	if e != nil {
 		fmt.Println("Pod ERROR:", e)
 		return 1
