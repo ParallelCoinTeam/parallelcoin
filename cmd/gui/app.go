@@ -9,6 +9,7 @@ import (
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
+	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
@@ -285,7 +286,7 @@ func (wg *WalletGUI) SetRunState(b bool) {
 }
 
 func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
-	t, f := icons.AVStop, icons.AVPlayArrow
+	t, f := p9icons.Link, p9icons.LinkOff
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.App.StatusBarBackgroundGet()
 		color := wg.App.StatusBarColorGet()
@@ -328,7 +329,7 @@ func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				wg.th.Inset(0.33,
-					wg.th.H5(strconv.FormatInt(int64(wg.State.bestBlockHeight), 10)).Color(color).Fn,
+					wg.th.Body1(strconv.FormatInt(int64(wg.State.bestBlockHeight), 10)).Color(color).Fn,
 				).Fn,
 			).
 			Fn(gtx)

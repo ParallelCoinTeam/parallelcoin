@@ -249,6 +249,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						//  10 instances of the listtransactions result struct just keep them separate so the logic is
 						//  cleaner. In other words, add a second fetcher in ticker.go for the history/tx page, and
 						//  handle the damn empty list, nil panics are Satan.
+						//  my advice is use the second field and keep them separated
 						// Rigid(
 						// 	wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
 						// ).

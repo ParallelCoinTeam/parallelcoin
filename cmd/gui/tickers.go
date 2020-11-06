@@ -71,6 +71,9 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
+					if !wg.running {
+						break
+					}
 					if wg.ChainClient != nil {
 						wg.ChainClient.Disconnect()
 						if wg.ChainClient.Disconnected() {
@@ -99,6 +102,9 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
+					if !wg.running {
+						break
+					}
 					// Debug("connectChainRPC ticker")
 					var err error
 
