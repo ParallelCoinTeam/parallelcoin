@@ -1,9 +1,9 @@
 package gui
 
 import (
-	"runtime"
-
 	"github.com/urfave/cli"
+	"runtime"
+	"time"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 
@@ -83,11 +83,12 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.lists = map[string]*p9.List{
 		"createWallet": wg.th.List(),
 		"overview":     wg.th.List(),
+		"recent":       wg.th.List(),
 		"send":         wg.th.List(),
 		"transactions": wg.th.List(),
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
-		"console":      wg.th.List().Vertical().End(),
+		"console":      wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
@@ -120,6 +121,19 @@ func (wg *WalletGUI) Run() (err error) {
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
+	wg.console = &Console{
+		Commands: []ConsoleCommand{
+			{
+				ComID:    "input",
+				Category: "input",
+				Time:     time.Now(),
+
+				// Out: input(duo),
+			},
+		},
+		CommandsNumber: 1,
+	}
+
 	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
 	}

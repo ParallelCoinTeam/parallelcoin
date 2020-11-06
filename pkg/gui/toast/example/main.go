@@ -16,8 +16,10 @@ import (
 )
 
 var (
-	th  = p9.NewTheme(p9fonts.Collection(), nil)
-	btn = th.Clickable()
+	th         = p9.NewTheme(p9fonts.Collection(), nil)
+	btnDanger  = th.Clickable()
+	btnWarning = th.Clickable()
+	btnSuccess = th.Clickable()
 )
 
 func main() {
@@ -44,10 +46,26 @@ func loop(w *app.Window) error {
 			paint.Fill(gtx.Ops, helper.HexARGB("e5e5e5FF"))
 			op.InvalidateOp{}.Add(gtx.Ops)
 
-			th.Button(btn).Text("TOAST").Fn(gtx)
+			th.Inset(0.25,
+				th.VFlex().
+					Rigid(
+						th.Button(btnDanger).Text("Danger").Fn,
+					).
+					Rigid(
+						th.Button(btnWarning).Text("Warning").Fn,
+					).
+					Rigid(
+						th.Button(btnSuccess).Text("Success").Color("TextBg").Fn,
+					).Fn).Fn(gtx)
 
-			for btn.Clicked() {
-				t.AddToast("test333", "sadrozaj sadrozaj sadrozaj ")
+			for btnDanger.Clicked() {
+				t.AddToast("Danger", "Danger content", "Danger")
+			}
+			for btnSuccess.Clicked() {
+				t.AddToast("Success", "Success content", "Success")
+			}
+			for btnWarning.Clicked() {
+				t.AddToast("Warning", "Warning content", "Warning")
 			}
 
 			t.DrawToasts(gtx)

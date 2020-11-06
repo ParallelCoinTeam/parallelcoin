@@ -1,6 +1,7 @@
 package toast
 
 import (
+	"fmt"
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
@@ -29,7 +30,9 @@ type Toasts struct {
 
 type toast struct {
 	title, content, level string
-	background            color.RGBA
+	headerBackground      color.RGBA
+	bodyBackground        color.RGBA
+	icon                  *[]byte
 	time                  time.Time
 	close                 p9.Clickable
 	cornerRadius          unit.Value
@@ -41,30 +44,50 @@ func New(th *p9.Theme) *Toasts {
 		layout:             th.List(),
 		theme:              th,
 		duration:           3000,
-		singleSize:         image.Pt(250, 50),
+		singleSize:         image.Pt(300, 80),
 		singleCornerRadius: unit.Dp(5),
 		singleElevation:    unit.Dp(5),
 	}
 }
-func (t *Toasts) AddToast(title, content string) {
+func (t *Toasts) AddToast(title, content, level string) {
+	ic := &icons2.ActionInfo
+	switch level {
+	case "Warning":
+		ic = &icons2.AlertWarning
+	case "Success":
+		ic = &icons2.NavigationCheck
+	case "Danger":
+		ic = &icons2.AlertError
+	case "Info":
+		ic = &icons2.ActionInfo
+	}
 	t.toasts = append(t.toasts, toast{
-		title:        title,
-		content:      content,
-		time:         time.Now().Add(time.Duration(t.duration) * time.Millisecond),
-		background:   helper.HexARGB("ffffffff"),
-		cornerRadius: t.singleCornerRadius,
-		elevation:    t.singleElevation,
+		title:            title,
+		content:          content,
+		level:            level,
+		time:             time.Now().Add(time.Duration(t.duration)),
+		headerBackground: helper.HexARGB(t.theme.Colors[level]),
+		bodyBackground:   helper.HexARGB(t.theme.Colors["PanelBg"]),
+		cornerRadius:     t.singleCornerRadius,
+		elevation:        t.singleElevation,
+		icon:             ic,
 	})
 }
 
 func (t *Toasts) DrawToasts(gtx l.Context) {
-	t.layout.Vertical().Length(len(t.toasts)).ListElement(t.singleToast).Fn(gtx)
+	defer op.Push(gtx.Ops).Pop()
+	op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-250, 0)).Add(gtx.Ops)
+	gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Max.X)
+	gtx.Constraints.Max.X = 250
+	t.theme.VFlex().AlignEnd().Rigid(t.layout.Vertical().Length(len(t.toasts)).ListElement(t.singleToast).Fn).Fn(gtx)
 }
 
 func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
+	fmt.Println("THEN:", t.toasts[index].time)
+	fmt.Println("NOW:", time.Now())
 	if t.toasts[index].time != time.Now() {
-		gtx.Constraints.Min = image.Pt(t.singleSize.X, t.singleSize.Y)
-		gtx.Constraints.Max = image.Pt(t.singleSize.X, t.singleSize.Y)
+		gtx.Constraints.Min = t.singleSize
+		gtx.Constraints.Max = t.singleSize
 		sz := gtx.Constraints.Min
 		rr := float32(gtx.Px(t.singleCornerRadius))
 
@@ -72,7 +95,7 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 		t.toasts[index].singleToastLayoutShadow(gtx, r, rr)
 		clip.UniformRRect(r, rr).Add(gtx.Ops)
 
-		paint.Fill(gtx.Ops, t.toasts[index].background)
+		paint.Fill(gtx.Ops, t.toasts[index].bodyBackground)
 
 		return l.Flex{Axis: l.Vertical, Alignment: l.Middle}.Layout(gtx,
 			l.Flexed(1,
@@ -80,26 +103,18 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 					return t.theme.Inset(0.25,
 						t.theme.VFlex().
 							Rigid(
-								t.theme.Fill("PanelBg",
-									t.theme.Flex().
-										Flexed(1,
-											func(gtx l.Context) l.Dimensions {
-												switch t.toasts[index].level {
-												case "Warning":
-													return t.theme.Icon().Color("DocText").Scale(1).Src(&icons2.AlertWarning).Fn(gtx)
-												case "Success":
-													return t.theme.Icon().Color("DocText").Scale(1).Src(&icons2.NavigationCheck).Fn(gtx)
-												case "Danger":
-													return t.theme.Icon().Color("DocText").Scale(1).Src(&icons2.AlertError).Fn(gtx)
-												case "Info":
-													return t.theme.Icon().Color("DocText").Scale(1).Src(&icons2.ActionInfo).Fn(gtx)
-												}
-												return l.Dimensions{}
-											},
-										).
-										Rigid(
-											t.theme.H6(t.toasts[index].title).Color("PanelText").Fn,
-										).Fn,
+								t.theme.Inset(0.1,
+									t.theme.Fill(t.toasts[index].level,
+										t.theme.Flex().
+											Rigid(
+												func(gtx l.Context) l.Dimensions {
+													return t.theme.Icon().Color("DocText").Scale(1).Src(t.toasts[index].icon).Fn(gtx)
+												},
+											).
+											Flexed(1,
+												t.theme.H6(t.toasts[index].title).Color("PanelBg").Fn,
+											).Fn,
+									).Fn,
 								).Fn,
 							).
 							Rigid(
@@ -124,7 +139,7 @@ func (t *toast) singleToastLayoutShadow(gtx l.Context, r f32.Rectangle, rr float
 		d = 4
 	}
 
-	a := float32(t.background.A) / 0xff
+	a := float32(t.bodyBackground.A) / 0xff
 	background := (f32color.RGBA{A: a * 0.4 / float32(d*d)}).SRGB()
 	for x := 0; x <= d; x++ {
 		for y := 0; y <= d; y++ {

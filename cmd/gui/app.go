@@ -54,6 +54,10 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				return wg.configs.Widget(wg.config)(gtx)
 			}},
 		}),
+		"console": wg.Page("console", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			p9.WidgetSize{Widget: wg.ConsolePage()},
+		}),
 		"help": wg.Page("help", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
@@ -120,7 +124,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("receive", "receive", 2),
 		wg.SideBarButton("history", "transactions", 3),
 		wg.SideBarButton("settings", "settings", 5),
-		wg.SideBarButton("mining", "mining", 6),
+		wg.SideBarButton("console", "console", 6),
+		//wg.SideBarButton("mining", "mining", 6),
 		wg.SideBarButton("help", "help", 7),
 		wg.SideBarButton("log", "log", 8),
 		wg.SideBarButton("quit", "quit", 9),

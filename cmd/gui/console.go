@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	l "gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/rpc/legacy"
@@ -16,9 +15,6 @@ import (
 type Console struct {
 	Commands       []ConsoleCommand
 	CommandsNumber int
-
-	consoleInputField p9.Input
-	consoleOutputList p9.List
 }
 type ConsoleCommand struct {
 	Com      interface{}
@@ -72,7 +68,7 @@ func (wg *WalletGUI) consoleRow(gtx l.Context, i int) l.Dimensions {
 }
 
 func (wg *WalletGUI) consoleInput() l.Widget {
-	return wg.inputs["console"].Input("", "Run command", "Secondary", "Primary", 5, func(pass string) {
+	return wg.inputs["console"].Input("", "Run command", "Secondary", "Primary", 25, func(pass string) {
 		//func(e gel.SubmitEvent) {
 		wg.console.Commands = append(
 			wg.console.Commands,
