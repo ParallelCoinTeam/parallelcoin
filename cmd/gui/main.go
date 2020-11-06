@@ -58,6 +58,7 @@ type WalletGUI struct {
 	Shell                     *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
+	console                   *Console
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -83,7 +84,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"transactions": wg.th.List(),
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
-		"recent":       wg.th.List(),
+		"console":      wg.th.List().Vertical().End(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
@@ -110,6 +111,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 25, func(pass string) {}),
 		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 25, func(pass string) {}),
 		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 25, func(pass string) {}),
+		"console":        wg.th.Input("", "ParallelCoin console", "Primary", "DocText", 25, func(pass string) {}),
 	}
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
