@@ -172,7 +172,7 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 //	wg.sendAddresses = remove(wg.sendAddresses, i)
 // }
 
-func (wg *WalletGUI) txIitem(label, data string) l.Widget {
+func (wg *WalletGUI) txItem(label, data string) l.Widget {
 	if data != "" {
 		return wg.Inset(0.25,
 			wg.th.VFlex().
@@ -190,25 +190,25 @@ func (wg *WalletGUI) txIitem(label, data string) l.Widget {
 
 func (wg *WalletGUI) txPage(i int) func() {
 	txLayout := []l.Widget{
-		wg.txIitem("TxId:", wg.State.txs[i].data.TxID),
-		wg.txIitem("Comment:", wg.State.txs[i].data.Comment),
-		wg.txIitem("Category:", wg.State.txs[i].data.Category),
-		wg.txIitem("Address:", wg.State.txs[i].data.Address),
-		wg.txIitem("Generated:", fmt.Sprint(wg.State.txs[i].data.Generated)),
-		wg.txIitem("BIP125Replaceable:", wg.State.txs[i].data.BIP125Replaceable),
-		wg.txIitem("Block Hash:", wg.State.txs[i].data.BlockHash),
-		wg.txIitem("Block Index:", fmt.Sprint(wg.State.txs[i].data.BlockIndex)),
-		wg.txIitem("BlockTime:", fmt.Sprint(wg.State.txs[i].data.BlockTime)),
-		wg.txIitem("Category:", wg.State.txs[i].data.Category),
-		wg.txIitem("Confirmations:", fmt.Sprint(wg.State.txs[i].data.Confirmations)),
-		wg.txIitem("Fee:", fmt.Sprint(wg.State.txs[i].data.Fee)),
-		wg.txIitem("InvolvesWatchOnly:", fmt.Sprint(wg.State.txs[i].data.InvolvesWatchOnly)),
-		wg.txIitem("Time:", fmt.Sprint(wg.State.txs[i].data.Time)),
-		wg.txIitem("TimeReceived:", fmt.Sprint(wg.State.txs[i].data.TimeReceived)),
-		wg.txIitem("Vout:", fmt.Sprint(wg.State.txs[i].data.Vout)),
-		wg.txIitem("WalletConflicts:", fmt.Sprint(wg.State.txs[i].data.WalletConflicts)),
-		wg.txIitem("Comment:", wg.State.txs[i].data.Comment),
-		wg.txIitem("OtherAccount:", wg.State.txs[i].data.OtherAccount),
+		wg.txItem("TxId:", wg.State.txs[i].data.TxID),
+		wg.txItem("Comment:", wg.State.txs[i].data.Comment),
+		wg.txItem("Category:", wg.State.txs[i].data.Category),
+		wg.txItem("Address:", wg.State.txs[i].data.Address),
+		wg.txItem("Generated:", fmt.Sprint(wg.State.txs[i].data.Generated)),
+		wg.txItem("BIP125Replaceable:", wg.State.txs[i].data.BIP125Replaceable),
+		wg.txItem("Block Hash:", wg.State.txs[i].data.BlockHash),
+		wg.txItem("Block Index:", fmt.Sprint(wg.State.txs[i].data.BlockIndex)),
+		wg.txItem("BlockTime:", fmt.Sprint(wg.State.txs[i].data.BlockTime)),
+		wg.txItem("Category:", wg.State.txs[i].data.Category),
+		wg.txItem("Confirmations:", fmt.Sprint(wg.State.txs[i].data.Confirmations)),
+		wg.txItem("Fee:", fmt.Sprint(wg.State.txs[i].data.Fee)),
+		wg.txItem("InvolvesWatchOnly:", fmt.Sprint(wg.State.txs[i].data.InvolvesWatchOnly)),
+		wg.txItem("Time:", fmt.Sprint(wg.State.txs[i].data.Time)),
+		wg.txItem("TimeReceived:", fmt.Sprint(wg.State.txs[i].data.TimeReceived)),
+		wg.txItem("Vout:", fmt.Sprint(wg.State.txs[i].data.Vout)),
+		wg.txItem("WalletConflicts:", fmt.Sprint(wg.State.txs[i].data.WalletConflicts)),
+		wg.txItem("Comment:", wg.State.txs[i].data.Comment),
+		wg.txItem("OtherAccount:", wg.State.txs[i].data.OtherAccount),
 	}
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return txLayout[index](gtx)
