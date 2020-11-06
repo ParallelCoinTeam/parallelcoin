@@ -195,14 +195,27 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.th.Caption(fmt.Sprint(*wg.State.lastTxs[i].BlockIndex)).Fn,
-									// wg.buttonIconText(wg.State.lastTxs[i].clickBlock,
-									// 	fmt.Sprint(*wg.State.lastTxs[i].BlockIndex),
-									// 	&icons2.DeviceWidgets,
-									// 	wg.blockPage(*wg.State.lastTxs[i].BlockIndex)),
+									wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
 								).
+								// Rigid(
+								// 	wg.th.Caption(fmt.Sprint(*wg.State.lastTxs[i].BlockIndex)).Fn,
+								// 	// wg.buttonIconText(wg.State.lastTxs[i].clickBlock,
+								// 	// 	fmt.Sprint(*wg.State.lastTxs[i].BlockIndex),
+								// 	// 	&icons2.DeviceWidgets,
+								// 	// 	wg.blockPage(*wg.State.lastTxs[i].BlockIndex)),
+								// ).
 								Rigid(
 									wg.th.Caption(fmt.Sprintf("%d ", *wg.State.lastTxs[i].BlockIndex)).Fn,
+								).
+								Fn,
+						).
+						Rigid(
+							wg.th.Flex().AlignMiddle().
+								Rigid(
+									wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
+								).
+								Rigid(
+									wg.th.Caption(fmt.Sprintf("%d ", wg.State.lastTxs[i].Confirmations)).Fn,
 								).
 								Fn,
 						).
@@ -249,6 +262,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						//  10 instances of the listtransactions result struct just keep them separate so the logic is
 						//  cleaner. In other words, add a second fetcher in ticker.go for the history/tx page, and
 						//  handle the damn empty list, nil panics are Satan.
+						//  my advice is use the second field and keep them separated
 						// Rigid(
 						// 	wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
 						// ).
@@ -263,7 +277,6 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.lists["recent"].
 			Vertical().
-			// Background("DocBg").Color("DocText").Active("Primary").
 			Length(len(out)).
 			ListElement(le).
 			Fn(gtx)

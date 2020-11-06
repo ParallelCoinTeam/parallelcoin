@@ -2,13 +2,15 @@ package gui
 
 import (
 	"fmt"
+	"sync"
+	"time"
+
 	l "gioui.org/layout"
 	"github.com/kofoworola/godate"
+
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"sync"
-	"time"
 )
 
 type State struct {
@@ -48,14 +50,15 @@ func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.lastTxs = lastTxs
-	s.lastTimeStrings = make([]string, 10)
+	if s.lastTimeStrings == nil {
+		s.lastTimeStrings = make([]string, len(s.lastTxs))
+	}
 	for i := range s.lastTxs {
-		s.lastTimeStrings = append(s.lastTimeStrings,
+		s.lastTimeStrings[i] =
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
-				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0)))))
+				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0))))
 	}
 }
-
 
 func (s *State) Txs() []tx {
 	s.mutex.Lock()
