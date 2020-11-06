@@ -30,7 +30,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 type WalletGUI struct {
 	cx   *conte.Xt
 	c    *cli.Context
-	w    *f.Window
+	w    map[string]*f.Window
 	th   *p9.Theme
 	size *int
 	*p9.App
@@ -115,15 +115,16 @@ func (wg *WalletGUI) Run() (err error) {
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
+	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
 	}
 	wg.Tickers()
 	wg.quitClickable = wg.th.Clickable()
-	wg.w = f.NewWindow()
+	wg.w["main"] = f.NewWindow()
 	wg.CreateSendAddressItem()
 	wg.App = wg.GetAppWidget()
 	go func() {
-		if err := wg.w.
+		if err := wg.w["main"].
 			Size(800, 480).
 			Title("ParallelCoin Wallet").
 			Open().
@@ -134,7 +135,8 @@ func (wg *WalletGUI) Run() (err error) {
 					Debug("quitting wallet gui")
 					wg.RunCommandChan <- "stop"
 					close(wg.quit)
-				}, wg.quit); Check(err) {
+				}, wg.quit,
+			); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {
@@ -147,7 +149,7 @@ out:
 		select {
 		case <-wg.invalidate:
 			Debug("invalidating render queue")
-			wg.w.Window.Invalidate()
+			wg.w["main"].Window.Invalidate()
 		case <-wg.quit:
 			Debug("closing GUI on quit signal")
 			break out
