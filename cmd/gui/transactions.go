@@ -2,21 +2,22 @@ package gui
 
 import (
 	"fmt"
+
 	l "gioui.org/layout"
+	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-type tx struct {
-	time       string
-	data       btcjson.ListTransactionsResult
-	clickTx    *p9.Clickable
-	clickBlock *p9.Clickable
-	list       *p9.List
-}
-
 func (wg *WalletGUI) TransactionsPage() l.Widget {
+	// TODO: this page doesn't have data being populated yet
+	if true {
+		return func(l.Context) l.Dimensions {
+			return l.Dimensions{}
+		}
+	}
 	return func(gtx l.Context) l.Dimensions {
 		return wg.th.VFlex().
 			Rigid(
@@ -31,9 +32,11 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 							wg.buttonText(wg.clickables["transactions10"], "10", wg.Transactions),
 						).
 						Rigid(
+							// wg.sendButton(wg.sendAddresses[index].PasteClipboardBtn, "Paste", func() {}),
 							wg.buttonText(wg.clickables["transactions30"], "30", wg.Transactions),
 						).
 						Rigid(
+							// wg.sendButton(wg.sendAddresses[index].ClearBtn, "Close", func() {}),
 							wg.buttonText(wg.clickables["transactions50"], "50", wg.Transactions),
 						).Fn,
 				).Fn,
@@ -64,20 +67,18 @@ func (wg *WalletGUI) TransactionsPage() l.Widget {
 }
 
 func (wg *WalletGUI) Transactions() {
-	txs, err := wg.WalletClient.ListTransactionsCount("default", 20)
-	if err != nil {
+	// walletClient, err := wg.walletClient()
+	// if err != nil {
+	// }
+	if wg.WalletClient == nil {
+		Debug("not connected to wallet yet")
+		return
+	}
+	var txs []btcjson.ListTransactionsResult
+	var err error
+	if txs, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
 	}
 	wg.txs = txs
-	// go func() {
-	// TODO: this code will block for a lot longer than a single frame time
-	// if wg.WalletClient != nil {
-	// 	txs, err := wg.WalletClient.ListTransactionsCount("default", 20)
-	// 	if err != nil {
-	// 	}
-	// 	wg.txs = txs
-	// 	fmt.Println("txs:", txs)
-	// }
-	// }()
 }
 
 func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
@@ -104,7 +105,7 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 					).Rigid(
 					wg.th.Fill("DocBg",
 						wg.th.Flex().AlignMiddle(). // SpaceBetween().
-										Rigid(
+							Rigid(
 								wg.th.Flex().AlignMiddle().
 									Rigid(
 										wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
@@ -189,6 +190,10 @@ func (wg *WalletGUI) txItem(label, data string) l.Widget {
 }
 
 func (wg *WalletGUI) txPage(i int) func() {
+	// TODO: this page doesn't have data being populated yet
+	if true {
+		return func() {}
+	}
 	txLayout := []l.Widget{
 		wg.txItem("TxId:", wg.State.txs[i].data.TxID),
 		wg.txItem("Comment:", wg.State.txs[i].data.Comment),
@@ -215,31 +220,45 @@ func (wg *WalletGUI) txPage(i int) func() {
 	}
 
 	return func() {
-		wg.newWindow(wg.State.txs[i].data.TxID, "Tx: "+wg.State.txs[i].data.TxID, 600, 800,
-			wg.th.VFlex().
-				Rigid(
-					wg.Inset(0.0, wg.Fill("Primary", wg.Inset(0.5, wg.Caption(wg.State.txs[i].data.TxID).Color("DocBg").Fn).Fn).Fn).Fn,
-				).Flexed(1,
-				wg.Inset(0,
-					func(gtx l.Context) l.Dimensions {
-						return wg.State.txs[i].list.Vertical().Length(len(txLayout)).ListElement(le).Fn(gtx)
+		wg.w[wg.State.txs[i].data.TxID] = f.NewWindow()
+		go func() {
+			if err := wg.w[wg.State.txs[i].data.TxID].
+				Size(600, 800).
+				Title("Tx: "+wg.State.txs[i].data.TxID).
+				Open().
+				Run(
+					wg.th.VFlex().
+						Rigid(
+							wg.Inset(0.0, wg.Fill("Primary", wg.Inset(0.5, wg.Caption(wg.State.txs[i].data.TxID).Color("DocBg").Fn).Fn).Fn).Fn,
+						).
+						Flexed(1,
+							wg.Inset(0,
+								func(gtx l.Context) l.Dimensions {
+									return wg.State.txs[i].list.Vertical().Length(len(txLayout)).ListElement(le).Fn(gtx)
+								},
+							).Fn,
+						).
+						Rigid(
+							wg.Button(
+								wg.State.txs[i].clickTx.SetClick(func() {
+									wg.w[wg.State.txs[i].data.TxID].Window.Close()
+								})).
+								CornerRadius(0).
+								Background("Primary").
+								Color("Dark").
+								Font("bariol bold").
+								TextScale(1).
+								Text("CLOSE").
+								Inset(0.5).
+								Fn,
+						).Fn,
+					func() {
+						Debug("closing tx window", wg.State.txs[i].data.TxID)
 					},
-				).Fn,
-			).
-				Rigid(
-					wg.Button(
-						wg.State.txs[i].clickTx.SetClick(func() {
-							wg.w[wg.State.txs[i].data.TxID].Window.Close()
-						})).
-						CornerRadius(0).
-						Background("Primary").
-						Color("Dark").
-						Font("bariol bold").
-						TextScale(1).
-						Text("CLOSE").
-						Inset(0.5).
-						Fn,
-				).Fn,
-		)
+					wg.quit,
+				); Check(err) {
+			}
+
+		}()
 	}
 }

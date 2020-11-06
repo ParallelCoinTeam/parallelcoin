@@ -24,6 +24,14 @@ type State struct {
 	goroutines         []l.Widget
 }
 
+type tx struct {
+	time       string
+	data       btcjson.ListTransactionsResult
+	clickTx    *p9.Clickable
+	clickBlock *p9.Clickable
+	list       *p9.List
+}
+
 func (s *State) Goroutines() []l.Widget {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -36,30 +44,32 @@ func (s *State) SetGoroutines(gr []l.Widget) {
 	s.goroutines = gr
 }
 
+func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.lastTxs = lastTxs
+	s.lastTimeStrings = make([]string, 10)
+	for i := range s.lastTxs {
+		s.lastTimeStrings = append(s.lastTimeStrings,
+			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
+				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0)))))
+	}
+}
+
+
 func (s *State) Txs() []tx {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	return s.txs
 }
 
-func (s *State) SetLastTxs(th *p9.Theme, txs []btcjson.ListTransactionsResult) {
+func (s *State) SetTxs(txs []tx) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	if txs == nil {
 		return
 	}
-	var txsOut []tx
-	for i := range txs {
-		txsOut = append(txsOut, tx{
-			time: fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
-				godate.Create(time.Unix(txs[i].BlockTime, 0)))),
-			data:       txs[i],
-			clickTx:    th.Clickable(),
-			clickBlock: th.Clickable(),
-			list:       th.List(),
-		})
-	}
-	s.txs = txsOut
+	s.txs = txs
 }
 
 func (s *State) LastUpdated() time.Time {

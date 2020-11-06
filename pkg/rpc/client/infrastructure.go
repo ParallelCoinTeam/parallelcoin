@@ -589,7 +589,7 @@ out:
 // the unmarshalled result to the provided response channel.
 func (c *Client) handleSendPostMessage(details *sendPostDetails) {
 	jReq := details.jsonRequest
-	Tracef("sending command [%s] with id %d", jReq.method, jReq.id)
+	// Tracef("sending command [%s] with id %d", jReq.method, jReq.id)
 	httpResponse, err := c.httpClient.Do(details.httpRequest)
 	if err != nil {
 		Error(err)
@@ -709,7 +709,7 @@ func (c *Client) sendPost(jReq *jsonRequest) {
 	httpReq.Header.Set("Content-Type", "application/json")
 	// Configure basic access authorization.
 	httpReq.SetBasicAuth(c.config.User, c.config.Pass)
-	Tracef("sending command [%s] with id %d", jReq.method, jReq.id)
+	// Tracef("sending command [%s] with id %d", jReq.method, jReq.id)
 	c.sendPostRequest(httpReq, jReq)
 }
 

@@ -153,7 +153,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	var out []l.Widget
 	first := true
 	out = append(out)
-	for x := range wg.State.txs {
+	for x := range wg.State.lastTxs {
 		i := x
 		// spacer
 		if !first {
@@ -167,13 +167,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 		}
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.txs[i].data.Amount)).Color("PanelText").Fn,
+				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", wg.State.lastTxs[i].Amount)).Color("PanelText").Fn,
 			).Fn,
 		)
 
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Caption(wg.State.txs[i].data.Address).
+				wg.th.Caption(wg.State.lastTxs[i].Address).
 					Font("go regular").
 					Color("PanelText").
 					TextScale(0.66).Fn,
@@ -182,7 +182,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 
 		out = append(out,
 			wg.th.Fill("DocBg",
-				wg.th.Caption(wg.State.txs[i].data.TxID).
+				wg.th.Caption(wg.State.lastTxs[i].TxID).
 					Font("go regular").
 					Color("PanelText").
 					TextScale(0.5).Fn,
@@ -192,17 +192,25 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 			func(gtx l.Context) l.Dimensions {
 				return wg.th.Fill("DocBg",
 					wg.th.Flex().AlignMiddle(). // SpaceBetween().
-									Rigid(
+						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.buttonIconText(wg.State.txs[i].clickBlock, fmt.Sprint(*wg.State.txs[i].data.BlockIndex), &icons2.DeviceWidgets, wg.blockPage(*wg.State.txs[i].data.BlockIndex)),
-								).Fn,
+									wg.th.Caption(fmt.Sprint(*wg.State.lastTxs[i].BlockIndex)).Fn,
+									// wg.buttonIconText(wg.State.lastTxs[i].clickBlock,
+									// 	fmt.Sprint(*wg.State.lastTxs[i].BlockIndex),
+									// 	&icons2.DeviceWidgets,
+									// 	wg.blockPage(*wg.State.lastTxs[i].BlockIndex)),
+								).
+								Rigid(
+									wg.th.Caption(fmt.Sprintf("%d ", *wg.State.lastTxs[i].BlockIndex)).Fn,
+								).
+								Fn,
 						).
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
 									func(gtx l.Context) l.Dimensions {
-										switch wg.State.txs[i].data.Category {
+										switch wg.State.lastTxs[i].Category {
 										case "generate":
 											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
 										case "immature":
@@ -216,7 +224,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 									},
 								).
 								Rigid(
-									wg.th.Caption(wg.State.txs[i].data.Category+" ").Fn,
+									wg.th.Caption(wg.State.lastTxs[i].Category+" ").Fn,
 								).
 								Fn,
 						).
@@ -227,14 +235,24 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								).
 								Rigid(
 									wg.th.Caption(
-										wg.State.txs[i].time,
+										wg.State.lastTimeStrings[i],
+										// wg.State.lastTxs[i].time,
 									).Color("DocText").Fn,
 								).
 								Fn,
 						).
-						Rigid(
-							wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
-						).Fn,
+						// TODO: this thing hasn't got data going in yet, before we can display anything we need data
+						//  also the index `i` is not from wg.State.txs it is from wg.State.lastTxs
+						//  - even if these two data sets overlap if you want them to relate to each other you need
+						//  to define their integration. Simple way would be for eg: as you intend, to merge them into
+						//  one and only update (add) the extra data on page display. I think that it's so trivial for
+						//  10 instances of the listtransactions result struct just keep them separate so the logic is
+						//  cleaner. In other words, add a second fetcher in ticker.go for the history/tx page, and
+						//  handle the damn empty list, nil panics are Satan.
+						// Rigid(
+						// 	wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
+						// ).
+						Fn,
 				).
 					Fn(gtx)
 			})
@@ -245,9 +263,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.lists["recent"].
 			Vertical().
-			// Color("PanelText").
-			Background("DocBg").
-			Active("DocText").
+			// Background("DocBg").Color("DocText").Active("Primary").
 			Length(len(out)).
 			ListElement(le).
 			Fn(gtx)
@@ -264,14 +280,72 @@ func leftPadTo(length, limit int, txt string) string {
 
 func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 	bal := leftPadTo(15, 15, fmt.Sprintf("%6.8f", balance))
-	return wg.th.Inset(0.5,
-		wg.th.Flex().AlignEnd().
-			Rigid(wg.th.Body1(" ").Fn).
-			Rigid(
-				wg.th.Caption(bal).
-					Font("go regular").
-					Fn,
-			).
-			Fn,
-	).Fn
+	return wg.th.Flex().AlignEnd().
+		Rigid(wg.th.Body1(" ").Fn).
+		Rigid(
+			wg.th.Caption(bal).
+				Font("go regular").
+				Fn,
+		).
+		Fn
 }
+
+//
+// func (wg *WalletGUI) panel(title string, fill bool, content l.Widget) l.Widget {
+// 	return func(gtx l.Context) l.Dimensions {
+// 		w := wg.Inset(0.25,
+// 			wg.Fill("DocBg",
+// 				wg.th.VFlex().
+// 					Rigid(
+// 						wg.Fill("DocText",
+// 							wg.th.Flex().
+// 								Rigid(
+// 									wg.Inset(0.5,
+// 										wg.H6(title).Color("DocBg").Fn,
+// 									).Fn,
+// 								).Fn,
+// 						).Fn,
+// 					).
+// 					Rigid(
+// 						wg.Fill("DocBg",
+// 							wg.Inset(0.25,
+// 								content,
+// 							).Fn,
+// 						).Fn,
+// 					).Fn,
+// 			).Fn,
+// 		).Fn
+// 		if !fill {
+// 			// render the widgets onto a second context to get their dimensions
+// 			gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
+// 			// generate the dimensions for all the list elements
+// 			child := op.Record(gtx1.Ops)
+// 			d := w(gtx1)
+// 			_ = child.Stop()
+// 			gtx.Constraints.Max.X = d.Size.X
+// 			gtx.Constraints.Max.Y = d.Size.Y
+// 			gtx.Constraints.Min = gtx.Constraints.Max
+// 			w = wg.Inset(0.25,
+// 				wg.th.VFlex().
+// 					Rigid(
+// 						wg.Fill("DocText",
+// 							wg.th.Flex().
+// 								Flexed(1,
+// 									wg.Inset(0.5,
+// 										wg.H6(title).Color("DocBg").Fn,
+// 									).Fn,
+// 								).Fn,
+// 						).Fn,
+// 					).
+// 					Rigid(
+// 						wg.Fill("DocBg",
+// 							wg.Inset(0.25,
+// 								content,
+// 							).Fn,
+// 						).Fn,
+// 					).Fn,
+// 			).Fn
+// 		}
+// 		return w(gtx)
+// 	}
+// }

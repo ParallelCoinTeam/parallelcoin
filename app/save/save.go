@@ -18,7 +18,9 @@ func Pod(c *pod.Config) (success bool) {
 	// Debugs(c)
 	Debug("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice
-	if len(*c.UserAgentComments) > 0 {
+	// need to remove this before saving
+	if c.UserAgentComments != nil && len(*c.UserAgentComments) > 0 {
+		// TODO: there is a bug here if the user edits them in configuration
 		uac = make(cli.StringSlice, len(*c.UserAgentComments))
 		copy(uac, *c.UserAgentComments)
 		*c.UserAgentComments = uac[1:]

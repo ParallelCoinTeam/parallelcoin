@@ -1,7 +1,6 @@
 package gui
 
 import (
-	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -13,6 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -52,12 +52,12 @@ type WalletGUI struct {
 	quit                      chan struct{}
 	runnerQuit                chan struct{}
 	sendAddresses             []SendAddress
-	txs                       []btcjson.ListTransactionsResult
 	Worker                    *worker.Worker
 	RunCommandChan            chan string
 	State                     State
 	Shell                     *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
+	txs                       []btcjson.ListTransactionsResult
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -115,6 +115,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
+	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
 	}
 	// wg.RunCommandChan <- "run"
@@ -122,36 +123,36 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
 	}
-
+	wg.Tickers()
+	wg.w["main"] = f.NewWindow()
 	wg.CreateSendAddressItem()
 	wg.App = wg.GetAppWidget()
-	wg.newWindow("main", "ParallelCoin Wallet", 800, 600, wg.Fn())
-	return
-}
-
-func (wg *WalletGUI) newWindow(id, title string, x, y int, layout l.Widget) {
-	wg.w[id] = f.NewWindow()
 	go func() {
-		if err := wg.w[id].
-			Size(x, y).
-			Title(title).
+		if err := wg.w["main"].
+			Size(800, 480).
+			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				//wg.Fn(),
-				layout,
+				wg.Fn(),
 				// wg.InitWallet(),
 				func() {
-					Debug("Quitting " + title)
-					// interrupt.Request()
+					Debug("quitting wallet gui")
+					wg.RunCommandChan <- "stop"
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
+	interrupt.AddHandler(func() {
+		Debug("quitting wallet gui")
+		wg.RunCommandChan <- "stop"
+		close(wg.quit)
+	})
 out:
 	for {
 		select {
 		case <-wg.invalidate:
-			wg.w[id].Window.Invalidate()
+			Debug("invalidating render queue")
+			wg.w["main"].Window.Invalidate()
 		case <-wg.quit:
 			Debug("closing GUI on quit signal")
 			break out

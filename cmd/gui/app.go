@@ -86,13 +86,16 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 					return wg.State.goroutines[index](gtx)
 				}
 				return func(gtx l.Context) l.Dimensions {
-					return wg.lists["recent"].
-						Vertical().
-						// Color("PanelText").
-						Background("DocBg").
-						Active("DocText").
-						Length(len(wg.State.goroutines)).
-						ListElement(le).
+					return wg.Inset(0.25,
+						wg.Fill("DocBg",
+							wg.lists["recent"].
+								Vertical().
+								// Background("DocBg").Color("DocText").Active("Primary").
+								Length(len(wg.State.goroutines)).
+								ListElement(le).
+								Fn,
+						).Fn,
+					).
 						Fn(gtx)
 				}(gtx)
 				// wg.RunCommandChan <- "stop"
@@ -173,9 +176,9 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 					background = "PanelBg"
 					color = "PanelText"
 				}
-				var inPad, outPad float32 = 0.5, 0.25
+				var inPad, outPad float32 = 0.25, 0.25
 				if *wg.Size >= 800 {
-					inPad, outPad = 0.75, 0
+					inPad, outPad = 0.5, 0
 				}
 				return wg.Inset(outPad,
 					wg.Fill(background,
