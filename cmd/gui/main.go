@@ -127,7 +127,6 @@ func (wg *WalletGUI) Run() (err error) {
 				ComID:    "input",
 				Category: "input",
 				Time:     time.Now(),
-
 				// Out: input(duo),
 			},
 		},

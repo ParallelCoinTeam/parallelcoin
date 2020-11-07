@@ -14,7 +14,6 @@ import (
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 	"image"
 	"image/color"
-	"time"
 )
 
 type Toasts struct {
@@ -33,7 +32,7 @@ type toast struct {
 	headerBackground      color.RGBA
 	bodyBackground        color.RGBA
 	icon                  *[]byte
-	time                  time.Time
+	ticker                float32
 	close                 p9.Clickable
 	cornerRadius          unit.Value
 	elevation             unit.Value
@@ -43,7 +42,7 @@ func New(th *p9.Theme) *Toasts {
 	return &Toasts{
 		layout:             th.List(),
 		theme:              th,
-		duration:           3000,
+		duration:           10,
 		singleSize:         image.Pt(300, 80),
 		singleCornerRadius: unit.Dp(5),
 		singleElevation:    unit.Dp(5),
@@ -65,7 +64,7 @@ func (t *Toasts) AddToast(title, content, level string) {
 		title:            title,
 		content:          content,
 		level:            level,
-		time:             time.Now().Add(time.Duration(t.duration)),
+		ticker:           0,
 		headerBackground: helper.HexARGB(t.theme.Colors[level]),
 		bodyBackground:   helper.HexARGB(t.theme.Colors["PanelBg"]),
 		cornerRadius:     t.singleCornerRadius,
@@ -79,13 +78,15 @@ func (t *Toasts) DrawToasts(gtx l.Context) {
 	op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-250, 0)).Add(gtx.Ops)
 	gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Max.X)
 	gtx.Constraints.Max.X = 250
-	t.theme.VFlex().AlignEnd().Rigid(t.layout.Vertical().Length(len(t.toasts)).ListElement(t.singleToast).Fn).Fn(gtx)
+	t.layout.Vertical().ScrollToEnd().Length(len(t.toasts)).ListElement(t.singleToast).Fn(gtx)
 }
 
 func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
-	fmt.Println("THEN:", t.toasts[index].time)
-	fmt.Println("NOW:", time.Now())
-	if t.toasts[index].time != time.Now() {
+	fmt.Println("Tic:", t.toasts[index].ticker)
+	fmt.Println("duration:", t.duration)
+
+	if t.toasts[index].ticker < float32(t.duration) {
+		t.toasts[index].ticker += 0.1
 		gtx.Constraints.Min = t.singleSize
 		gtx.Constraints.Max = t.singleSize
 		sz := gtx.Constraints.Min
