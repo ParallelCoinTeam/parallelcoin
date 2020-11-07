@@ -1,7 +1,6 @@
 package toast
 
 import (
-	"fmt"
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
@@ -42,7 +41,7 @@ func New(th *p9.Theme) *Toasts {
 	return &Toasts{
 		layout:             th.List(),
 		theme:              th,
-		duration:           10,
+		duration:           100,
 		singleSize:         image.Pt(300, 80),
 		singleCornerRadius: unit.Dp(5),
 		singleElevation:    unit.Dp(5),
@@ -76,17 +75,14 @@ func (t *Toasts) AddToast(title, content, level string) {
 func (t *Toasts) DrawToasts(gtx l.Context) {
 	defer op.Push(gtx.Ops).Pop()
 	op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-250, 0)).Add(gtx.Ops)
-	gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Max.X)
+	gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Min.Y)
 	gtx.Constraints.Max.X = 250
 	t.layout.Vertical().ScrollToEnd().Length(len(t.toasts)).ListElement(t.singleToast).Fn(gtx)
 }
 
 func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
-	fmt.Println("Tic:", t.toasts[index].ticker)
-	fmt.Println("duration:", t.duration)
-
 	if t.toasts[index].ticker < float32(t.duration) {
-		t.toasts[index].ticker += 0.1
+		t.toasts[index].ticker += 1
 		gtx.Constraints.Min = t.singleSize
 		gtx.Constraints.Max = t.singleSize
 		sz := gtx.Constraints.Min

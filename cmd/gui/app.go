@@ -134,7 +134,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
 		wg.PageTopBarButton("console", 2, &icons.MapsLocalHotel),
 		wg.PageTopBarButton("settings", 3, &icons.ActionSettings),
-		//wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
+		wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
 		func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
@@ -338,15 +338,24 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 				),
 			).Fn,
 		).
-		Rigid(wg.th.
-			Inset(0.25,
-				wg.Icon().
-					Scale(p9.Scales["H5"]).
-					Color("DocText").
-					Src(&icons.DeviceWidgets).
-					Fn,
-			).
-			Fn,
+		Rigid(
+			wg.th.ButtonLayout(wg.statusBarButtons[4]).
+				CornerRadius(0).
+				Embed(
+					wg.th.Inset(0.25,
+						wg.th.Icon().
+							Scale(p9.Scales["H5"]).
+							Color("DocText").
+							Src(&icons.DeviceWidgets).
+							Fn,
+					).Fn,
+				).
+				Background("DocBg").
+				SetClick(
+					func() {
+						wg.blockPage(wg.State.bestBlockHeight)
+					}).
+				Fn,
 		).
 		Rigid(
 			wg.th.Inset(0.33,

@@ -72,11 +72,11 @@ func (wg *WalletGUI) Run() (err error) {
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
-	wg.buttonBarButtons = make([]*p9.Clickable, 4)
+	wg.buttonBarButtons = make([]*p9.Clickable, 5)
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.th.Clickable()
 	}
-	wg.statusBarButtons = make([]*p9.Clickable, 4)
+	wg.statusBarButtons = make([]*p9.Clickable, 5)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
