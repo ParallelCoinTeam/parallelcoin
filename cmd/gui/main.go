@@ -1,9 +1,10 @@
 package gui
 
 import (
-	"github.com/urfave/cli"
 	"runtime"
 	"time"
+
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 
@@ -55,10 +56,11 @@ type WalletGUI struct {
 	quit                      chan struct{}
 	runnerQuit                chan struct{}
 	sendAddresses             []SendAddress
-	Worker                    *worker.Worker
-	RunCommandChan            chan string
+	NodeRunCommandChan        chan string
+	MinerRunCommandChan       chan string
+	MinerThreadsChan          chan int
 	State                     State
-	Shell                     *worker.Worker
+	Shell, Miner              *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
 	console                   *Console
@@ -132,11 +134,9 @@ func (wg *WalletGUI) Run() (err error) {
 		},
 		CommandsNumber: 1,
 	}
-
 	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
 	}
-	// wg.RunCommandChan <- "run"
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
@@ -146,12 +146,25 @@ func (wg *WalletGUI) Run() (err error) {
 		"generatethreads": wg.th.IncDec(2, 0, runtime.NumCPU(), *wg.cx.Config.GenThreads,
 			func(n int) {
 				Debug("threads value now", n)
+				go func() {
+					Debug("sending thread count on channel")
+					wg.MinerThreadsChan <- n
+					Debug("sent thread count on channel")
+				}()
 			},
 		),
 	}
 	wg.App = wg.GetAppWidget()
 	wg.Tickers()
 	wg.CreateSendAddressItem()
+	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
+	wg.mining = *wg.cx.Config.Generate
+	if wg.running {
+		wg.NodeRunCommandChan <- "run"
+	}
+	if wg.mining {
+		wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
+	}
 	go func() {
 		if err := wg.w["main"].
 			Size(800, 480).
@@ -162,14 +175,14 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					wg.RunCommandChan <- "stop"
+					wg.NodeRunCommandChan <- "stop"
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {
 		Debug("quitting wallet gui")
-		wg.RunCommandChan <- "stop"
+		wg.NodeRunCommandChan <- "stop"
 		close(wg.quit)
 	})
 out:

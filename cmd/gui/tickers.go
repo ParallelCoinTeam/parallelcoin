@@ -213,6 +213,6 @@ func (wg *WalletGUI) Tickers() {
 			}
 		}
 		Debug("stopping shell")
-		wg.RunCommandChan <- "stop"
+		wg.NodeRunCommandChan <- "stop"
 	}()
 }

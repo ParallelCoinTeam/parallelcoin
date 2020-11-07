@@ -2,28 +2,31 @@ package gui
 
 import (
 	"os"
-	"time"
+	"runtime"
 
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
 )
 
 func (wg *WalletGUI) Runner() (err error) {
-	wg.RunCommandChan = make(chan string)
+	wg.NodeRunCommandChan = make(chan string)
+	wg.MinerRunCommandChan = make(chan string)
+	wg.MinerThreadsChan = make(chan int)
 	interrupt.AddHandler(func() {
 		if wg.running {
-			// 		wg.RunCommandChan <- "stop"
+			// 		wg.NodeRunCommandChan <- "stop"
 			consume.Kill(wg.Shell)
 		}
-		close(wg.quit)
+		// close(wg.quit)
 	})
 	go func() {
 		Debug("starting node run controller")
 	out:
 		for {
 			select {
-			case cmd := <-wg.RunCommandChan:
+			case cmd := <-wg.NodeRunCommandChan:
 				switch cmd {
 				case "run":
 					Debug("run called")
@@ -56,9 +59,42 @@ func (wg *WalletGUI) Runner() (err error) {
 				case "restart":
 					Debug("restart called")
 					go func() {
-						wg.RunCommandChan <- "stop"
-						time.Sleep(time.Second)
-						wg.RunCommandChan <- "run"
+						wg.NodeRunCommandChan <- "stop"
+						wg.NodeRunCommandChan <- "run"
+					}()
+				}
+			case cmd := <-wg.MinerRunCommandChan:
+				switch cmd {
+				case "run":
+					Debug("run called for miner")
+					wg.mining = true
+					*wg.cx.Config.Generate = true
+					save.Pod(wg.cx.Config)
+				case "stop":
+					Debug("stop called for miner")
+					wg.mining = false
+					*wg.cx.Config.Generate = false
+					save.Pod(wg.cx.Config)
+				case "restart":
+					Debug("restart called for miner")
+					wg.mining = true
+					*wg.cx.Config.Generate = true
+					save.Pod(wg.cx.Config)
+				}
+			case *wg.cx.Config.GenThreads = <-wg.MinerThreadsChan:
+				Debug("setting threads to", *wg.cx.Config.GenThreads)
+				if *wg.cx.Config.GenThreads == 0 {
+					go func() {
+						wg.MinerRunCommandChan <- "stop"
+					}()
+					break
+				}
+				if *wg.cx.Config.GenThreads < 0 {
+					*wg.cx.Config.GenThreads = runtime.NumCPU()
+				}
+				if wg.mining {
+					go func() {
+						wg.MinerRunCommandChan <- "restart"
 					}()
 				}
 			case <-wg.quit:
@@ -68,6 +104,6 @@ func (wg *WalletGUI) Runner() (err error) {
 			}
 		}
 	}()
-	wg.RunCommandChan <- "run"
+	wg.NodeRunCommandChan <- "run"
 	return nil
 }
