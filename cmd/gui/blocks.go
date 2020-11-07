@@ -35,8 +35,8 @@ func (wg *WalletGUI) blockIitem(label, data string) l.Widget {
 	}
 }
 
-func (wg *WalletGUI) blockPage(blockHeight int64) func() {
-	b := wg.getBlock(blockHeight)
+func (wg *WalletGUI) blockPage(blockHeight int) func() {
+	b := wg.getBlock(int64(blockHeight))
 	blockLayout := []l.Widget{
 		// wg.blockIitem("Block Height:", fmt.Sprint(b.data.Height)),
 		wg.blockIitem("Hash:", fmt.Sprint(blockHeight)),

@@ -134,11 +134,11 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 9),
 	})
 	a.ButtonBar([]l.Widget{
-		wg.PageTopBarButton("goroutines", 2, &icons.ActionBugReport),
-		wg.PageTopBarButton("help", 3, &icons.ActionHelp),
-		wg.PageTopBarButton("console", 4, &icons.MapsLocalHotel),
-		wg.PageTopBarButton("settings", 5, &icons.ActionSettings),
-		// wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
+		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport),
+		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
+		wg.PageTopBarButton("console", 2, &icons.MapsLocalHotel),
+		wg.PageTopBarButton("settings", 3, &icons.ActionSettings),
+		wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
