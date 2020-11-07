@@ -3,17 +3,18 @@ package parts
 import (
 	"gioui.org/text"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )
 
 func (g *GioWallet) GetSettings() {
-	//f, err := g.sh.ID()
-	//checkError(err)
-	//fv, ft, err := g.sh.Version()
-	//checkError(err)
-	//g.Status = Status{
+	// f, err := g.sh.ID()
+	// checkError(err)
+	// fv, ft, err := g.sh.Version()
+	// checkError(err)
+	// g.Status = Status{
 	//	Title: "string",
 	//	//HostingSize: "uint",
 	//	PeerId:  f.ID,
@@ -22,7 +23,7 @@ func (g *GioWallet) GetSettings() {
 	//	//Api:       "string",
 	//	Addresses: f.Addresses,
 	//	Pub:       f.PublicKey,
-	//}
+	// }
 }
 
 func (g *GioWallet) settingsHeader() func(gtx C) D {

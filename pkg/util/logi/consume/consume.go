@@ -82,10 +82,15 @@ func Kill(w *worker.Worker) {
 	}
 	// Debug("closing worker StdConn quit channel")
 	// close(w.StdConn.Quit)
+	var err error
+	if err = w.Interrupt(); Check(err) {
+	}
+	if err = w.Stop(); Check(err) {
+	}
+	if err = w.Kill(); Check(err) {
+	}
 	Debug("closing worker quit channel")
 	close(w.Quit)
-	if err := w.Kill(); Check(err) {
-	}
 }
 
 func SetLevel(w *worker.Worker, level string) {

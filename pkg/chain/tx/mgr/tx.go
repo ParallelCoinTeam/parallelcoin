@@ -43,8 +43,7 @@ type (
 		index uint32
 	}
 	// debit records the debits a transaction record makes from previous wallet transaction credits.
-	debit struct
-	{
+	debit struct {
 		txHash chainhash.Hash
 		index  uint32
 		amount util.Amount

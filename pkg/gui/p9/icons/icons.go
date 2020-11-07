@@ -46,7 +46,7 @@ func main() {
 				func() {
 					close(quit)
 					// os.Exit(0)
-				},
+				}, quit,
 			); Check(err) {
 		}
 	}()
@@ -1047,7 +1047,7 @@ func (m *Icons) icons() []l.Widget {
 		i := x
 		widgets = append(widgets, func(gtx l.Context) l.Dimensions {
 			return m.th.Flex().Rigid(
-				m.th.Icon().Scale(2).Color("Dark").Src(iconSlice[i].icon).Fn,
+				m.th.Icon().Scale(2).Color("Dark").Src(&iconSlice[i].icon).Fn,
 			).Rigid(
 				m.th.Body1(iconSlice[i].name).Color("Dark").Fn,
 			).Fn(gtx)

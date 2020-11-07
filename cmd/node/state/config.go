@@ -23,5 +23,5 @@ type Config struct {
 	DropTxIndex         bool
 	DropCfIndex         bool
 	Save                bool
-	Miner              *worker.Worker
+	Miner               *worker.Worker
 }

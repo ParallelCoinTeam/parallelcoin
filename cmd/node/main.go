@@ -161,12 +161,15 @@ func Main(cx *conte.Xt) (err error) {
 	case <-cx.NodeKill:
 		Debug("NodeKill")
 		gracefulShutdown()
+		break
 	case <-cx.KillAll:
 		Debug("KillAll")
 		gracefulShutdown()
+		break
 	case <-interrupt.ShutdownRequestChan:
 		Debug("interrupt request")
 		gracefulShutdown()
+		break
 	}
 	return nil
 }

@@ -111,21 +111,24 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
-	bar := a.Flex().SpaceBetween()
-	for i := range a.statusBar {
-		bar.Rigid(a.statusBar[i])
-	}
-	out :=
+	return func(gtx l.Context) l.Dimensions {
+		bar := a.Flex().SpaceBetween()
+		for x := range a.statusBar {
+			i := x
+			bar.Rigid(a.statusBar[i])
+		}
+		// out :=
 		// a.Fill("PanelBg",
 		// 	a.Inset(0.25,
-		bar.Fn
-	// ).Fn
-	// ).Fn
-	gtx.Constraints.Min.X = gtx.Constraints.Max.X
-	dims := a.Fill(a.statusBarBackground, out).Fn(gtx)
-	gtx.Constraints.Min = dims.Size
-	gtx.Constraints.Max = dims.Size
-	return dims
+		// 	bar.Fn
+		// ).Fn
+		// ).Fn
+		gtx.Constraints.Min.X = gtx.Constraints.Max.X
+		dims := a.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
+		gtx.Constraints.Min = dims.Size
+		gtx.Constraints.Max = dims.Size
+		return dims
+	}(gtx)
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
@@ -323,7 +326,11 @@ func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		out := a.sideBarList.
 			Length(len(a.sideBar)).
-			Vertical().Background("PanelBg").
+			LeftSide(true).
+			Vertical().
+			// Background("DocBg").
+			// Color("DocText").
+			// Active("Primary").
 			ListElement(func(gtx l.Context, index int) l.Dimensions {
 				// gtx.Constraints.Max.X = int(a.sideBarSize.V)
 				// gtx.Constraints.Min.X = 0

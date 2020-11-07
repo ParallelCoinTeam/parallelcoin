@@ -1,20 +1,22 @@
 package dap
 
 import (
+	"image"
+
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
-	"image"
 )
 
 func (d *dap) SplashScreen(gtx C) D {
 	return box.BoxPanel(d.boot.UI.Theme, func(gtx C) D {
-		//if d.boot.Rc.IsReady {
+		// if d.boot.Rc.IsReady {
 
-		//}
+		// }
 		return lyt.Format(gtx,
 			"max(vflex(middle,r(inset(0dp0dp0dp0dp,_)),r(inset(0dp0dp0dp0dp,_)),f(1,inset(0dp0dp0dp0dp,_))))",
 			logo(d.boot.UI.Theme),
@@ -51,7 +53,7 @@ func headline(th *theme.Theme) func(gtx C) D {
 
 func liveLog(th *theme.Theme) func(gtx C) D {
 	return noReturn
-	//return func(gtx C) D {
-	//layout.Flexed(1, component.DuoUIlogger(ui.rc, ui.ly.Context, ui.ly.Theme)),
-	//}
+	// return func(gtx C) D {
+	// layout.Flexed(1, component.DuoUIlogger(ui.rc, ui.ly.Context, ui.ly.Theme)),
+	// }
 }

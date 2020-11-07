@@ -216,13 +216,13 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		g := groups[i]
 		if !first {
 			// put a space between the sections
-			out = append(out, func(gtx l.Context) l.Dimensions {
-				return ng.th.Fill("DocBg",
-					ng.th.Inset(0.25,
-						ng.th.Flex().Flexed(1, p9.EmptySpace(0, 0)).Fn,
-					).Fn,
-				).Fn(gtx)
-			})
+			// out = append(out, func(gtx l.Context) l.Dimensions {
+			// 	return ng.th.Fill("DocBg",
+			// 		ng.th.Inset(0.25,
+			// 			ng.th.Flex().Flexed(1, p9.EmptySpace(0, 0)).Fn,
+			// 		).Fn,
+			// 	).Fn(gtx)
+			// })
 			out = append(out, func(gtx l.Context) l.Dimensions {
 				return ng.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn(gtx)
 			})
@@ -231,7 +231,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		}
 		// put in the header
 		out = append(out, func(gtx l.Context) l.Dimensions {
-			return ng.th.Inset(0.0, ng.th.Fill("DocText", ng.th.Inset(0.5, ng.th.H6(g.name).Color("DocBg").Fn).Fn).Fn).Fn(gtx)
+			return ng.th.Inset(0.0, ng.th.Fill("Primary", ng.th.Inset(0.5, ng.th.H6(g.name).Color("DocText").Fn).Fn).Fn).Fn(gtx)
 		})
 		out = append(out, func(gtx l.Context) l.Dimensions {
 			return ng.th.Fill("DocBg",
@@ -273,7 +273,12 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		return out[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return ng.th.Inset(0.25, ng.lists["settings"].Vertical().Length(len(out)).ListElement(le).Fn).Fn(gtx)
+		return ng.th.Inset(0.25, ng.lists["settings"].
+			Vertical().
+			Length(len(out)).
+			Background("PanelBg").
+			// Color("DocText").Active("Primary").
+			ListElement(le).Fn).Fn(gtx)
 	}
 }
 

@@ -120,26 +120,26 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	dims :=
 		c.th.Flex().Rigid(
 			// c.th.Inset(0.25,
-				func(gtx l.Context) l.Dimensions {
-					size := gtx.Px(c.size)
-					// icon.color = c.iconColor
-					// TODO: maybe make a special code for raw colors to do this kind of alpha
-					//  or add a parameter to apply it
-					// if gtx.Queue == nil {
-					// 	icon.color = f32color.MulAlpha(c.th.Colors.Get(icon.color), 150)
-					// }
-					icon.Fn(gtx)
-					return l.Dimensions{
-						Size: image.Point{X: size, Y: size},
-					}
-				},
+			func(gtx l.Context) l.Dimensions {
+				size := gtx.Px(c.size)
+				// icon.color = c.iconColor
+				// TODO: maybe make a special code for raw colors to do this kind of alpha
+				//  or add a parameter to apply it
+				// if gtx.Queue == nil {
+				// 	icon.color = f32color.MulAlpha(c.th.Colors.Get(icon.color), 150)
+				// }
+				icon.Fn(gtx)
+				return l.Dimensions{
+					Size: image.Point{X: size, Y: size},
+				}
+			},
 			// ).Fn,
 		).Rigid(
 			// c.th.Inset(0.25,
-				func(gtx l.Context) l.Dimensions {
-					paint.ColorOp{Color: c.th.Colors.Get(c.color)}.Add(gtx.Ops)
-					return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
-				},
+			func(gtx l.Context) l.Dimensions {
+				paint.ColorOp{Color: c.th.Colors.Get(c.color)}.Add(gtx.Ops)
+				return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
+			},
 			// ).Fn,
 		).Fn(gtx)
 	pointer.Rect(image.Rectangle{Max: dims.Size}).Add(gtx.Ops)

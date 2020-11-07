@@ -8,10 +8,8 @@ import (
 	"gioui.org/text"
 	mico "golang.org/x/exp/shiny/materialdesign/icons"
 
-	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	"github.com/p9c/pod/pkg/gui/ico/svg"
-
 	"github.com/p9c/pod/pkg/gui/f"
+	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
@@ -30,10 +28,10 @@ func main() {
 	quit := make(chan struct{})
 	th := p9.NewTheme(p9fonts.Collection(), quit)
 	minerModel := MinerModel{
-		th:          th,
-		button0:     th.Clickable(),
-		button1:     th.Clickable(),
-		button2:     th.Clickable().SetClick(func() {
+		th:      th,
+		button0: th.Clickable(),
+		button1: th.Clickable(),
+		button2: th.Clickable().SetClick(func() {
 			Info("clicked default style button")
 		}),
 		boolButton1: th.Bool(false),
@@ -42,11 +40,11 @@ func main() {
 		iconbutton1: th.Clickable(),
 		quit:        make(chan struct{}),
 		progress:    0,
-		slider:      th.Float().SetHook(func(fl float32) {
+		slider: th.Float().SetHook(func(fl float32) {
 			Debug("float now at value", fl)
 		}),
-		lineEditor:  th.Editor().SingleLine().Submit(true),
-		areaEditor:  th.Editor().SingleLine().Submit(false),
+		lineEditor: th.Editor().SingleLine().Submit(true),
+		areaEditor: th.Editor().SingleLine().Submit(false),
 		radio: th.Enum().SetOnChange(func(value string) {
 			Debug("changed radio button to", value)
 		}),
@@ -222,12 +220,12 @@ func (m *MinerModel) buttons() layout.Widget {
 	).Rigid(
 		th.Flex().Rigid(
 			th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
-		// ).Rigid(
-		// 	th.RadioButton(m.radio, "first", "first").Fn,
-		// ).Rigid(
-		// 	th.RadioButton(m.radio, "second", "second").Fn,
-		// ).Rigid(
-		// 	th.RadioButton(m.radio, "third", "third").Fn,
+			// ).Rigid(
+			// 	th.RadioButton(m.radio, "first", "first").Fn,
+			// ).Rigid(
+			// 	th.RadioButton(m.radio, "second", "second").Fn,
+			// ).Rigid(
+			// 	th.RadioButton(m.radio, "third", "third").Fn,
 		).Rigid(
 			th.Switch(m.boolButton2.SetOnChange(func(b bool) {
 				Debug("switch state set to", b)

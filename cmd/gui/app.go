@@ -1,7 +1,7 @@
 package gui
 
 import (
-	"strconv"
+	"fmt"
 
 	l "gioui.org/layout"
 	"gioui.org/text"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
+	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
@@ -53,6 +54,10 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				return wg.configs.Widget(wg.config)(gtx)
 			}},
 		}),
+		"console": wg.Page("console", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			p9.WidgetSize{Widget: wg.ConsolePage()},
+		}),
 		"help": wg.Page("help", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 		}),
@@ -86,16 +91,19 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 					return wg.State.goroutines[index](gtx)
 				}
 				return func(gtx l.Context) l.Dimensions {
-					return wg.lists["recent"].
-						Vertical().
-						// Color("PanelText").
-						Background("DocBg").
-						Active("DocText").
-						Length(len(wg.State.goroutines)).
-						ListElement(le).
+					return wg.Inset(0.25,
+						wg.Fill("DocBg",
+							wg.lists["recent"].
+								Vertical().
+								// Background("DocBg").Color("DocText").Active("Primary").
+								Length(len(wg.State.goroutines)).
+								ListElement(le).
+								Fn,
+						).Fn,
+					).
 						Fn(gtx)
 				}(gtx)
-				// wg.RunCommandChan <- "stop"
+				// wg.NodeRunCommandChan <- "stop"
 				// consume.Kill(wg.Worker)
 				// consume.Kill(wg.cx.StateCfg.Miner)
 				// close(wg.cx.NodeKill)
@@ -106,6 +114,9 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				// return l.Dimensions{}
 			}},
 		}),
+		"mining": wg.Page("mining", p9.Widgets{
+			p9.WidgetSize{Widget: wg.th.VFlex().SpaceAround().AlignMiddle().Rigid(wg.th.H1("mining").Alignment(text.Middle).Fn).Fn},
+		}),
 	})
 	a.SideBar([]l.Widget{
 		wg.SideBarButton("overview", "main", 0),
@@ -113,18 +124,20 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("receive", "receive", 2),
 		wg.SideBarButton("history", "transactions", 3),
 		wg.SideBarButton("settings", "settings", 5),
-		wg.SideBarButton("help", "help", 6),
-		wg.SideBarButton("log", "log", 7),
-		wg.SideBarButton("quit", "quit", 8),
+		wg.SideBarButton("mining", "mining", 6),
+		wg.SideBarButton("help", "help", 7),
+		wg.SideBarButton("log", "log", 8),
+		wg.SideBarButton("quit", "quit", 9),
 	})
 	a.ButtonBar([]l.Widget{
-		wg.PageTopBarButton("goroutines", 1, &icons.ActionBugReport),
-		wg.PageTopBarButton("help", 0, &icons.ActionHelp),
-		wg.PageTopBarButton("settings", 2, &icons.ActionSettings),
-		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
+		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport),
+		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
+		wg.PageTopBarButton("console", 2, &icons.MapsLocalHotel),
+		wg.PageTopBarButton("settings", 3, &icons.ActionSettings),
+		// wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
-		wg.RunStatusButton(),
+		func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 		wg.th.Flex().Rigid(
 			wg.StatusBarButton("log", 1, &icons.ActionList),
 		).Rigid(
@@ -173,9 +186,9 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 					background = "PanelBg"
 					color = "PanelText"
 				}
-				var inPad, outPad float32 = 0.5, 0.25
+				var inPad, outPad float32 = 0.25, 0.25
 				if *wg.Size >= 800 {
-					inPad, outPad = 0.75, 0
+					inPad, outPad = 0.5, 0
 				}
 				return wg.Inset(outPad,
 					wg.Fill(background,
@@ -253,7 +266,7 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(g
 				wg.ButtonLayout(wg.statusBarButtons[index]).
 					CornerRadius(0).
 					Embed(
-						ic,
+						wg.th.Inset(0.25, ic).Fn,
 					).
 					Background(background).
 					SetClick(
@@ -272,62 +285,102 @@ func (wg *WalletGUI) SetRunState(b bool) {
 	go func() {
 		Debug("run state is now", b)
 		if b {
-			wg.RunCommandChan <- "run"
+			wg.NodeRunCommandChan <- "run"
 			// wg.running = b
 		} else {
-			wg.RunCommandChan <- "stop"
+			wg.NodeRunCommandChan <- "stop"
 			// wg.running = b
 		}
 	}()
 }
 
-func (wg *WalletGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
-	t, f := icons.AVStop, icons.AVPlayArrow
-	return func(gtx l.Context) l.Dimensions {
-		background := wg.App.StatusBarBackgroundGet()
-		color := wg.App.StatusBarColorGet()
-		var ico *[]byte
-		if wg.running {
-			ico = &t
-		} else {
-			ico = &f
-		}
-		ic := wg.th.Icon().
-			Scale(p9.Scales["H4"]).
-			Color(color).
-			Src(ico).
-			Fn
-		return wg.th.Flex().
-			Rigid(
-				wg.th.ButtonLayout(wg.statusBarButtons[0]).
-					CornerRadius(0).
-					Embed(
-						wg.th.Inset(0.066, ic).Fn,
-					).
-					Background(background).
-					SetClick(
-						func() {
-							wg.SetRunState(!wg.running)
-						}).
-					Fn,
-			).
-			Rigid(
-				wg.th.Inset(0.33,
-					p9.If(wg.running,
-						wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
+func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
+	t, f := &p9icons.Link, &p9icons.LinkOff
+	var runningIcon *[]byte
+	if wg.running {
+		runningIcon = t
+	} else {
+		runningIcon = f
+	}
+	miningIcon := &p9icons.Mine
+	if !wg.mining {
+		miningIcon = &p9icons.NoMine
+	}
+	return wg.th.Flex().
+		Rigid(
+			wg.th.ButtonLayout(wg.statusBarButtons[0]).
+				CornerRadius(0).
+				Embed(
+					wg.th.Inset(0.25,
 						wg.th.Icon().
 							Scale(p9.Scales["H5"]).
-							Color("Primary").
-							Src(&icons.ActionCheckCircle).
+							Color("DocText").
+							Src(runningIcon).
 							Fn,
-					),
-				).Fn,
+					).Fn,
+				).
+				Background("DocBg").
+				SetClick(
+					func() {
+						wg.SetRunState(!wg.running)
+					}).
+				Fn,
+		).
+		Rigid(
+			wg.th.Inset(0.25,
+				p9.If(wg.running,
+					wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
+					wg.th.Icon().
+						Scale(p9.Scales["H5"]).
+						Color("Primary").
+						Src(&icons.ActionCheckCircle).
+						Fn,
+				),
+			).Fn,
+		).
+		Rigid(wg.th.
+			Inset(0.25,
+				wg.Icon().
+					Scale(p9.Scales["H5"]).
+					Color("DocText").
+					Src(&icons.DeviceWidgets).
+					Fn,
 			).
-			Rigid(
-				wg.th.Inset(0.33,
-					wg.th.H5(strconv.FormatInt(int64(wg.State.bestBlockHeight), 10)).Color(color).Fn,
-				).Fn,
-			).
-			Fn(gtx)
-	}
+			Fn,
+		).
+		Rigid(
+			wg.th.Inset(0.33,
+				wg.th.Body1(fmt.Sprintf("%-8d", wg.State.bestBlockHeight)).
+					Font("go regular").
+					Color("DocText").
+					Fn,
+			).Fn,
+		).
+		Rigid(
+			wg.th.ButtonLayout(wg.statusBarButtons[3]).
+				CornerRadius(0).
+				Embed(wg.th.
+					Inset(0.25, wg.th.
+						Icon().
+						Scale(p9.Scales["H5"]).
+						Color("DocText").
+						Src(miningIcon).Fn,
+					).Fn,
+				).
+				Background("DocBg").
+				SetClick(
+					func() {
+						Debug("clicked miner control stop/start button")
+						wg.mining = !wg.mining
+						// wg.SetRunState(!wg.running)
+					}).
+				Fn,
+		).
+		Rigid(
+			wg.incdecs["generatethreads"].
+				SetColor("DocText").
+				SetBackground("DocBg").
+				Fn,
+		).
+		Fn(gtx)
 }

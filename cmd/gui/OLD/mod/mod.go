@@ -4,6 +4,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/widget"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/win"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"
@@ -41,10 +42,10 @@ type UserInterface struct {
 	W      *win.Windows
 
 	Theme *theme.Theme
-	//Ekran   func(gtx C) D
+	// Ekran   func(gtx C) D
 	FontSize float32
 	R        *res.Responsive
-	//P        Pages
+	// P        Pages
 	N   *nav.Navigation
 	F   func(gtx layout.Context) layout.Dimensions
 	G   layout.Context
@@ -52,4 +53,4 @@ type UserInterface struct {
 	Ops op.Ops
 }
 
-//type Pages map[string]Page
+// type Pages map[string]Page

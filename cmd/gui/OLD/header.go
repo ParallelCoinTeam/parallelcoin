@@ -1,7 +1,7 @@
 package gui
 
 //
-//var (
+// var (
 //	submitBtn         = new(widget.Clickable)
 //	tourBtn           = new(widget.Clickable)
 //	welcomeBtn        = new(widget.Clickable)
@@ -20,7 +20,7 @@ package gui
 //	currentPage         string
 //	)
 //
-//func (g *GioWallet) header() func(gtx C) D {
+// func (g *GioWallet) header() func(gtx C) D {
 //	return ContainerLayout(th.Colors["Info"], 0, 0, 0, 0, func(gtx C) D {
 //		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 //		return lyt.Format(gtx, "hflex(middle,r(inset(0dp0dp0dp6dp,_)),r(inset(20dp30dp20dp3dp,_)))",
@@ -28,8 +28,8 @@ package gui
 //			g.headerMenu(),
 //		)
 //	})
-//}
-//func (g *GioWallet) headerMenu() func(gtx C) D {
+// }
+// func (g *GioWallet) headerMenu() func(gtx C) D {
 //	return func(gtx C) D {
 //		for tourBtn.Clicked() {
 //
@@ -53,9 +53,9 @@ package gui
 //		)
 //	}
 //
-//}
+// }
 //
-//func (g *GioWallet) headerSearch() func(gtx C) D {
+// func (g *GioWallet) headerSearch() func(gtx C) D {
 //	return func(gtx C) D {
 //		return lyt.Format(gtx, "hflex(middle,r(inset(20dp0dp20dp30dp,_)),r(_))",
 //			ContainerLayout(th.Colors["White"], 8, 8, 8, 8, func(gtx C) D {
@@ -76,4 +76,4 @@ package gui
 //			},
 //		)
 //	}
-//}
+// }

@@ -152,9 +152,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 func (wg *WalletGUI) RecentTransactions() l.Widget {
 	var out []l.Widget
 	first := true
-	out = append(out,
-
-	)
+	out = append(out)
 	for x := range wg.State.lastTxs {
 		i := x
 		// spacer
@@ -190,7 +188,6 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 					TextScale(0.5).Fn,
 			).Fn,
 		)
-
 		out = append(out,
 			func(gtx l.Context) l.Dimensions {
 				return wg.th.Fill("DocBg",
@@ -200,6 +197,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								Rigid(
 									wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
 								).
+								// Rigid(
+								// 	wg.th.Caption(fmt.Sprint(*wg.State.lastTxs[i].BlockIndex)).Fn,
+								// 	// wg.buttonIconText(wg.State.lastTxs[i].clickBlock,
+								// 	// 	fmt.Sprint(*wg.State.lastTxs[i].BlockIndex),
+								// 	// 	&icons2.DeviceWidgets,
+								// 	// 	wg.blockPage(*wg.State.lastTxs[i].BlockIndex)),
+								// ).
 								Rigid(
 									wg.th.Caption(fmt.Sprintf("%d ", *wg.State.lastTxs[i].BlockIndex)).Fn,
 								).
@@ -245,28 +249,34 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								Rigid(
 									wg.th.Caption(
 										wg.State.lastTimeStrings[i],
+										// wg.State.lastTxs[i].time,
 									).Color("DocText").Fn,
 								).
 								Fn,
-						).Fn,
+						).
+						// TODO: this thing hasn't got data going in yet, before we can display anything we need data
+						//  also the index `i` is not from wg.State.txs it is from wg.State.lastTxs
+						//  - even if these two data sets overlap if you want them to relate to each other you need
+						//  to define their integration. Simple way would be for eg: as you intend, to merge them into
+						//  one and only update (add) the extra data on page display. I think that it's so trivial for
+						//  10 instances of the listtransactions result struct just keep them separate so the logic is
+						//  cleaner. In other words, add a second fetcher in ticker.go for the history/tx page, and
+						//  handle the damn empty list, nil panics are Satan.
+						//  my advice is use the second field and keep them separated
+						// Rigid(
+						// 	wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
+						// ).
+						Fn,
 				).
 					Fn(gtx)
 			})
 	}
-	// out = append(out,
-	// 	wg.th.Fill("DocBg",
-	// 		wg.th.Inset(0.25, p9.EmptyMaxWidth()).Fn,
-	// 	).Fn,
-	// )
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return out[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
 		return wg.lists["recent"].
 			Vertical().
-			// Color("PanelText").
-			Background("DocBg").
-			Active("DocText").
 			Length(len(out)).
 			ListElement(le).
 			Fn(gtx)
@@ -283,17 +293,16 @@ func leftPadTo(length, limit int, txt string) string {
 
 func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 	bal := leftPadTo(15, 15, fmt.Sprintf("%6.8f", balance))
-	return wg.th.Inset(0.5,
-		wg.th.Flex().AlignEnd().
-			Rigid(wg.th.Body1(" ").Fn).
-			Rigid(
-				wg.th.Caption(bal).
-					Font("go regular").
-					Fn,
-			).
-			Fn,
-	).Fn
+	return wg.th.Flex().AlignEnd().
+		Rigid(wg.th.Body1(" ").Fn).
+		Rigid(
+			wg.th.Caption(bal).
+				Font("go regular").
+				Fn,
+		).
+		Fn
 }
+
 //
 // func (wg *WalletGUI) panel(title string, fill bool, content l.Widget) l.Widget {
 // 	return func(gtx l.Context) l.Dimensions {

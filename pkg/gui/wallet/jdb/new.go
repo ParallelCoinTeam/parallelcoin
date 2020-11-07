@@ -5,10 +5,11 @@ package jdb
 
 import (
 	"context"
+
 	"github.com/ipfs/go-cid"
 
 	format "github.com/ipfs/go-ipld-format"
-	crypto "github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p-core/crypto"
 )
 
 // JavazacDb Structure

@@ -1,7 +1,12 @@
 package gui
 
 import (
+	"runtime"
+	"time"
+
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -9,8 +14,8 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
@@ -29,7 +34,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 type WalletGUI struct {
 	cx   *conte.Xt
 	c    *cli.Context
-	w    *f.Window
+	w    map[string]*f.Window
 	th   *p9.Theme
 	size *int
 	*p9.App
@@ -43,26 +48,28 @@ type WalletGUI struct {
 	clickables                map[string]*p9.Clickable
 	inputs                    map[string]*p9.Input
 	passwords                 map[string]*p9.Password
+	incdecs                   map[string]*p9.IncDec
 	configs                   cfg.GroupsMap
 	config                    *cfg.Config
-	running                   bool
+	running, mining           bool
 	invalidate                chan struct{}
 	quit                      chan struct{}
 	runnerQuit                chan struct{}
 	sendAddresses             []SendAddress
-	txs                       []btcjson.ListTransactionsResult
-	Worker                    *worker.Worker
-	RunCommandChan            chan string
 	State                     State
-	Shell                     *worker.Worker
+	NodeRunCommandChan        chan string
+	MinerRunCommandChan       chan string
+	Shell, Miner              *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
+	txs                       []btcjson.ListTransactionsResult
+	console                   *Console
 }
 
 func (wg *WalletGUI) Run() (err error) {
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
-	wg.sidebarButtons = make([]*p9.Clickable, 9)
+	wg.sidebarButtons = make([]*p9.Clickable, 10)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
@@ -70,19 +77,19 @@ func (wg *WalletGUI) Run() (err error) {
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.th.Clickable()
 	}
-	wg.statusBarButtons = make([]*p9.Clickable, 3)
+	wg.statusBarButtons = make([]*p9.Clickable, 4)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
 	wg.lists = map[string]*p9.List{
 		"createWallet": wg.th.List(),
 		"overview":     wg.th.List(),
+		"recent":       wg.th.List(),
 		"send":         wg.th.List(),
 		"transactions": wg.th.List(),
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
-		"recent":       wg.th.List(),
-		"goroutines":   wg.th.List(),
+		"console":      wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
@@ -109,20 +116,45 @@ func (wg *WalletGUI) Run() (err error) {
 		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 25, func(pass string) {}),
 		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 25, func(pass string) {}),
 		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 25, func(pass string) {}),
+		"console":        wg.th.Input("", "ParallelCoin console", "Primary", "DocText", 25, func(pass string) {}),
 	}
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
 	}
+	wg.console = &Console{
+		Commands: []ConsoleCommand{
+			{
+				ComID:    "input",
+				Category: "input",
+				Time:     time.Now(),
+				// Out: input(duo),
+			},
+		},
+		CommandsNumber: 1,
+	}
+
+	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
 	}
-	wg.Tickers()
+	// wg.NodeRunCommandChan <- "run"
 	wg.quitClickable = wg.th.Clickable()
-	wg.w = f.NewWindow()
-	wg.CreateSendAddressItem()
+	wg.w = map[string]*f.Window{
+		"splash": f.NewWindow(),
+		"main":   f.NewWindow(),
+	}
+	wg.incdecs = map[string]*p9.IncDec{
+		"generatethreads": wg.th.IncDec(2, 0, runtime.NumCPU(), *wg.cx.Config.GenThreads,
+			func(n int) {
+				Debug("threads value now", n)
+			},
+		),
+	}
 	wg.App = wg.GetAppWidget()
+	wg.Tickers()
+	wg.CreateSendAddressItem()
 	go func() {
-		if err := wg.w.
+		if err := wg.w["main"].
 			Size(800, 480).
 			Title("ParallelCoin Wallet").
 			Open().
@@ -131,17 +163,22 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					wg.RunCommandChan <- "stop"
+					wg.NodeRunCommandChan <- "stop"
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
+	interrupt.AddHandler(func() {
+		Debug("quitting wallet gui")
+		wg.NodeRunCommandChan <- "stop"
+		close(wg.quit)
+	})
 out:
 	for {
 		select {
 		case <-wg.invalidate:
 			Debug("invalidating render queue")
-			wg.w.Window.Invalidate()
+			wg.w["main"].Window.Invalidate()
 		case <-wg.quit:
 			Debug("closing GUI on quit signal")
 			break out

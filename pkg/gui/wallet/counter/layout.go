@@ -1,16 +1,18 @@
 package counter
 
 import (
+	"image"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
-	"image"
 )
 
 type (
@@ -38,7 +40,7 @@ func CounterSt(t *theme.Theme, cc *Counter) CounterStyle {
 		increase: iconButton(t.T, t.Icons["Down"], cc.CounterIncrease, t.Colors["Light"]),
 		decrease: iconButton(t.T, t.Icons["Up"], cc.CounterDecrease, t.Colors["Light"]),
 		input:    material.Editor(t.T, cc.CounterInput, "0"),
-		//pageFunction: pageFunction,
+		// pageFunction: pageFunction,
 		Font: text.Font{
 			Typeface: t.Fonts["Primary"],
 		},
@@ -77,7 +79,7 @@ func (c CounterStyle) Layout(th *theme.Theme, value string) func(gtx C) D {
 					})
 			})
 	}
-	//return func(gtx layout.Context) layout.Dimensions {
+	// return func(gtx layout.Context) layout.Dimensions {
 	//	c.c.CounterInput.SetText(value)
 	//	bgColor := c.BgColor
 	//	return layout.Stack{Alignment: layout.Center}.Layout(g,
@@ -139,7 +141,7 @@ func (c CounterStyle) Layout(th *theme.Theme, value string) func(gtx C) D {
 	//		}),
 	//	)
 	//
-	//}
+	// }
 }
 
 type iconBtn struct {

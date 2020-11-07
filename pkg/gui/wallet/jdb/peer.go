@@ -2,6 +2,7 @@ package jdb
 
 import (
 	"context"
+
 	"github.com/ipfs/go-blockservice"
 	"github.com/ipfs/go-datastore"
 	blockstore "github.com/ipfs/go-ipfs-blockstore"
@@ -36,9 +37,9 @@ func GetPeer(ctx context.Context, ds datastore.Batching) *Peer {
 		panic(err)
 	}
 	listen, _ := multiaddr.NewMultiaddr("/ip4/0.0.0.0/tcp/4005")
-	//ob, _ := pub.Bytes()
-	//pp := hex.EncodeToString(ob)
-	//fmt.Println("Pub", pp)
+	// ob, _ := pub.Bytes()
+	// pp := hex.EncodeToString(ob)
+	// fmt.Println("Pub", pp)
 	h, dht, err := SetupLibp2p(
 		ctx,
 		priv,

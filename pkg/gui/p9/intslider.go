@@ -47,7 +47,7 @@ func (i *IntSlider) Value(value int) *IntSlider {
 }
 
 func (i *IntSlider) GetValue() int {
-	return int(i.floater.Value()+0.5)
+	return int(i.floater.Value() + 0.5)
 }
 
 func (i *IntSlider) Fn(gtx l.Context) l.Dimensions {
