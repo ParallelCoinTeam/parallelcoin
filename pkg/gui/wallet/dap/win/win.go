@@ -8,6 +8,7 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
+
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )
 
@@ -30,12 +31,12 @@ func (w *Window) Loop(events <-chan event.Event) error {
 		case system.DestroyEvent:
 			return e.Err
 		case system.FrameEvent:
-			//for w.more.Clicked() {
+			// for w.more.Clicked() {
 			//	newWindow()
-			//}
-			//for w.close.Clicked() {
+			// }
+			// for w.close.Clicked() {
 			//	w.Close()
-			//}
+			// }
 			gtx := layout.NewContext(&ops, e)
 
 			w.L(gtx)

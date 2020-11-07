@@ -10,14 +10,14 @@ const (
 	EventCount
 )
 
-//type Event struct {
+// type Event struct {
 //	Type    uint32
 //	Payload []byte
-//}
+// }
 
-//var EventsChan = make(chan Event, 1)
+// var EventsChan = make(chan Event, 1)
 
-//func (r *RcVar) ListenInit(trigger chan struct{}) {
+// func (r *RcVar) ListenInit(trigger chan struct{}) {
 //	//L.Debug("listeninit")
 //	//r.Events = EventsChan
 //	//r.UpdateTrigger = trigger
@@ -68,19 +68,19 @@ const (
 //	}()
 //	//L.Warn("event update listener started")
 //	return
-//}
+// }
 
 func update(r *RcVar) {
 	fmt.Println("kakakak")
 	// L.Warn("GetDuoUIbalance")
-	//r.GetDuoUIbalance()
+	// r.GetDuoUIbalance()
 	// L.Warn("GetDuoUIunconfirmedBalance")
-	//r.GetDuoUIunconfirmedBalance()
+	// r.GetDuoUIunconfirmedBalance()
 	// L.Warn("GetDuoUItransactionsNumber")
-	//r.GetDuoUItransactionsNumber()
+	// r.GetDuoUItransactionsNumber()
 	// r.GetTransactions()
 	// L.Warn("GetLatestTransactions")
-	//r.GetLatestTransactions()
+	// r.GetLatestTransactions()
 	// L.Info("")
 	// L.Info("UPDATE")
 	// L.Trace(r.History.PerPage)
@@ -89,9 +89,9 @@ func update(r *RcVar) {
 	// r.GetDuoUIlocalLost()
 	// r.GetDuoUIblockHeight()
 	// L.Warn("GetDuoUIblockCount")
-	//r.GetDuoUIdifficulty()
-	//r.GetDuoUIblockCount()
-	//r.GetPeerInfo()
+	// r.GetDuoUIdifficulty()
+	// r.GetDuoUIblockCount()
+	// r.GetPeerInfo()
 	// L.Warn("GetDuoUIdifficulty")
-	//r.UpdateTrigger <- struct{}{}
+	// r.UpdateTrigger <- struct{}{}
 }

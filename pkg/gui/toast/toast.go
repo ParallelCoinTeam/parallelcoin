@@ -2,6 +2,9 @@ package toast
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
@@ -10,10 +13,9 @@ import (
 	"gioui.org/unit"
 	"github.com/egonelbre/expgio/surface/f32color"
 	"github.com/gioapp/gel/helper"
-	"github.com/p9c/pod/pkg/gui/p9"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
-	"image"
-	"image/color"
+
+	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 type Toasts struct {

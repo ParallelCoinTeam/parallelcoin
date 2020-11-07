@@ -8,14 +8,14 @@ import (
 
 	"github.com/ipfs/go-bitswap"
 	"github.com/ipfs/go-bitswap/network"
-	blockservice "github.com/ipfs/go-blockservice"
+	"github.com/ipfs/go-blockservice"
 	blockstore "github.com/ipfs/go-ipfs-blockstore"
 	offline "github.com/ipfs/go-ipfs-exchange-offline"
 	provider "github.com/ipfs/go-ipfs-provider"
 	"github.com/ipfs/go-ipfs-provider/queue"
 	"github.com/ipfs/go-ipfs-provider/simple"
 	"github.com/ipfs/go-merkledag"
-	peer "github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p-core/peer"
 )
 
 // Config wraps configuration options for the Peer.
@@ -105,7 +105,7 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) {
 
 	var wg sync.WaitGroup
 	for _, pinfo := range peers {
-		//h.Peerstore().AddAddrs(pinfo.ID, pinfo.Addrs, peerstore.PermanentAddrTTL)
+		// h.Peerstore().AddAddrs(pinfo.ID, pinfo.Addrs, peerstore.PermanentAddrTTL)
 		wg.Add(1)
 		go func(pinfo peer.AddrInfo) {
 			defer wg.Done()

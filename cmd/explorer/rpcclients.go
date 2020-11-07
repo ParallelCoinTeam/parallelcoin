@@ -37,12 +37,12 @@ func (ex *Explorer) ConnectChainRPC() {
 				}
 				// update chain data
 				var chainClient *rpcclient.Client
-				//chainConnConfig := &rpcclient.ConnConfig{
+				// chainConnConfig := &rpcclient.ConnConfig{
 				//	Host:         *ex.cx.Config.RPCConnect,
 				//	User:         *ex.cx.Config.Username,
 				//	Pass:         *ex.cx.Config.Password,
 				//	HTTPPostMode: true,
-				//}
+				// }
 				if chainClient, err = ex.chainClient(); Check(err) {
 					break
 				}

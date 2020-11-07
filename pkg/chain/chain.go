@@ -19,8 +19,8 @@ import (
 )
 
 const // maxOrphanBlocks is the maximum number of orphan blocks that can be
-// queued.
-maxOrphanBlocks = 100
+	// queued.
+	maxOrphanBlocks = 100
 
 // BlockLocator is used to help locate a specific block. The algorithm for building the block locator is to add the
 // hashes in reverse order until the genesis block is reached. In order to keep the list of locator hashes to a
@@ -1128,7 +1128,7 @@ func (b *BlockChain) BlockHashByHeight(blockHeight int32) (*chainhash.Hash, erro
 //
 // This function is safe for concurrent access.
 func (b *BlockChain) HeightRange(startHeight, endHeight int32) ([]chainhash.
-	Hash, error) {
+Hash, error) {
 	// Ensure requested heights are sane.
 	if startHeight < 0 {
 		return nil, fmt.Errorf("start height of fetch range must not be less"+

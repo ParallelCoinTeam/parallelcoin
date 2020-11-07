@@ -4,6 +4,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
+
 	"github.com/p9c/pod/pkg/gui/wallet/btn"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/page"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
@@ -62,7 +63,7 @@ func (n *Navigation) Nav(th *theme.Theme, gtx C) layout.Widget {
 		navList.Axis = n.Axis
 		return lyt.Format(gtx, n.NavLayout,
 			n.LogoWidget,
-			//func(gtx C)D{ return D{}},
+			// func(gtx C)D{ return D{}},
 			func(gtx C) D {
 				return navList.Layout(gtx, len(n.MenuItems), func(gtx C, i int) D {
 					b := D{}
@@ -82,7 +83,7 @@ func (n *Navigation) Nav(th *theme.Theme, gtx C) layout.Widget {
 						b = btn.Layout(gtx)
 					}
 					return b
-					//func(gtx C)D{ return D{}})
+					// func(gtx C)D{ return D{}})
 				})
 			})
 	}

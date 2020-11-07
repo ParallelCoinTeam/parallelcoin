@@ -4,11 +4,12 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"gioui.org/layout"
 	"net"
 	"os"
 	"strings"
 	"time"
+
+	"gioui.org/layout"
 
 	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
@@ -155,18 +156,18 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			hashSampleBuf: ring.NewBufferUint64(1000),
 		}
 		//
-		//d := dap.NewDap(cx, "Duo App Plan9")
-		//b := d.BOOT()
-		//d.NewSap(gwallet.NewGioWallet(b))
+		// d := dap.NewDap(cx, "Duo App Plan9")
+		// b := d.BOOT()
+		// d.NewSap(gwallet.NewGioWallet(b))
 
-		//d.DAP()
+		// d.DAP()
 		//
 
-		//Warn("GUI", *cx.Config.GUI)
-		//if *cx.Config.GUI {
+		// Warn("GUI", *cx.Config.GUI)
+		// if *cx.Config.GUI {
 		//	Info("opening GUI")
 		go w.Run()
-		//}
+		// }
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
 		Debug("opening broadcast channel listener")

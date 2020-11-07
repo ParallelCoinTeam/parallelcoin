@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
@@ -8,11 +11,10 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/toast"
-	"log"
-	"os"
 )
 
 var (

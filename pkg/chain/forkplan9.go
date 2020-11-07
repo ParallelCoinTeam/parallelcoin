@@ -130,7 +130,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	if last != nil {
 		bits = last.bits
 	}
-	//Debug(
+	// Debug(
 	//	"allAv", allAv,
 	//	"fork.P9Average", fork.P9Average,
 	//	"allAv/fork.P9Average", allAv/fork.P9Average,
@@ -203,7 +203,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		return
 	}
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-		dayDiv := b.GetCommonP9Averages(lastNode, nH)
+	dayDiv := b.GetCommonP9Averages(lastNode, nH)
 	algoVer := fork.GetAlgoVer(algoName, nH)
 	since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode, algoVer)
 	if last == nil {

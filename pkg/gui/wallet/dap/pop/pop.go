@@ -2,6 +2,7 @@ package pop
 
 import (
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/gui/wallet/container"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )

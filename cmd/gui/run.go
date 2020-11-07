@@ -10,10 +10,10 @@ import (
 )
 
 func (wg *WalletGUI) Runner() (err error) {
-	wg.RunCommandChan = make(chan string)
+	wg.NodeRunCommandChan = make(chan string)
 	interrupt.AddHandler(func() {
 		if wg.running {
-			// 		wg.RunCommandChan <- "stop"
+			// 		wg.NodeRunCommandChan <- "stop"
 			consume.Kill(wg.Shell)
 		}
 		close(wg.quit)
@@ -23,7 +23,7 @@ func (wg *WalletGUI) Runner() (err error) {
 	out:
 		for {
 			select {
-			case cmd := <-wg.RunCommandChan:
+			case cmd := <-wg.NodeRunCommandChan:
 				switch cmd {
 				case "run":
 					Debug("run called")
@@ -56,11 +56,23 @@ func (wg *WalletGUI) Runner() (err error) {
 				case "restart":
 					Debug("restart called")
 					go func() {
-						wg.RunCommandChan <- "stop"
+						wg.NodeRunCommandChan <- "stop"
 						time.Sleep(time.Second)
-						wg.RunCommandChan <- "run"
+						wg.NodeRunCommandChan <- "run"
 					}()
 				}
+				case cmd := <-wg.MinerRunCommandChan:
+					switch cmd {
+					case "run":
+						Debug("run called for miner")
+
+					case "stop":
+						Debug("stop called for miner")
+
+					case "restart":
+						Debug("restart called for miner")
+						
+					}
 			case <-wg.quit:
 				Debug("runner received quit signal")
 				consume.Kill(wg.Shell)
@@ -68,6 +80,9 @@ func (wg *WalletGUI) Runner() (err error) {
 			}
 		}
 	}()
-	wg.RunCommandChan <- "run"
+	wg.NodeRunCommandChan <- "run"
+	if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads > 0 {
+		wg.MinerRunCommandChan <- "run"
+	}
 	return nil
 }

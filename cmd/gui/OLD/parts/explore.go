@@ -3,43 +3,44 @@ package parts
 import (
 	"gioui.org/text"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )
 
 func (g *GioWallet) GetExplore() {
-	//f, err := g.sh.ID()
-	//checkError(err)
-	//fv, ft, err := g.sh.Version()
-	//checkError(err)
-	//g.Status = Status{
+	// f, err := g.sh.ID()
+	// checkError(err)
+	// fv, ft, err := g.sh.Version()
+	// checkError(err)
+	// g.Status = Status{
 	//	Title: "string",
 	//	HostingSize: "uint",
-	//PeerId:  f.ID,
-	//Version: fv + " " + ft,
-	//Gateway:   ,
-	//Api:       "string",
-	//Addresses: f.Addresses,
-	//Pub:       f.PublicKey,
-	//}
+	// PeerId:  f.ID,
+	// Version: fv + " " + ft,
+	// Gateway:   ,
+	// Api:       "string",
+	// Addresses: f.Addresses,
+	// Pub:       f.PublicKey,
+	// }
 }
 
 func (g *GioWallet) exploreHeader() func(gtx C) D {
 	return func(gtx C) D {
-		//return ContainerLayout(th.Colors["PanelBg"], 10, 10, 10, 10, func(gtx C) D {
+		// return ContainerLayout(th.Colors["PanelBg"], 10, 10, 10, 10, func(gtx C) D {
 		//
-		//})
+		// })
 		return D{}
 	}
 }
 
 func (g *GioWallet) exploreBody() func(gtx C) D {
-	//return g.twoPanels(10, 0, g.exploreLeft(), g.exploreRight())
+	// return g.twoPanels(10, 0, g.exploreLeft(), g.exploreRight())
 	return noReturn
 }
 
-//func (g *GioWallet) exploreBody() []func(gtx C) D {
+// func (g *GioWallet) exploreBody() []func(gtx C) D {
 //	retu//		ContainerLayout(th.Colors["Silver"], 1, 1, 1, 1, ContainerLayout(th.Colors["PanelBg"], 30, 30, 30, 30, func(gtx C) D {
 //			gtx.Constraints.Min.X = gtx.Constraints.Max.X
 //			return lyt.Format(gtx, "vflex(middle,f(0.6,inset(5dp0dp5dp0dp,_)),f(0.4, inset(5dp0dp5dp0dp,_))))",
@@ -54,8 +55,8 @@ func (g *GioWallet) exploreBody() func(gtx C) D {
 //				})
 //		})))
 
-//}
-//}
+// }
+// }
 func (g *GioWallet) exploreLeft() func(gtx C) D {
 	return func(gtx C) D {
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
@@ -77,7 +78,7 @@ func (g *GioWallet) exploreLeft() func(gtx C) D {
 func (g *GioWallet) exploreRight() func(gtx C) D {
 	return box.BoxPanel(g.ui.Theme, func(gtx C) D {
 
-		//return container.C().OutsideColor(th.Colors["PanelBg"],).Layout(func(gtx C) D {
+		// return container.C().OutsideColor(th.Colors["PanelBg"],).Layout(func(gtx C) D {
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		return lyt.Format(gtx, "vflex(start,r(inset(0dp0dp0dp0dp,_)),r(inset(0dp0dp0dp0dp,_)))",
 			func(gtx C) D {

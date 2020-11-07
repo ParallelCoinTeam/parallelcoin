@@ -1,27 +1,27 @@
 package mod
 
 type RcVar struct {
-	//db            *DuoUIdb
+	// db            *DuoUIdb
 	Boot *Boot
-	//Events        chan Event
-	//UpdateTrigger chan struct{}
-	//Status         *model.DuoUIstatus
+	// Events        chan Event
+	// UpdateTrigger chan struct{}
+	// Status         *model.DuoUIstatus
 	Dialog *Dialog
-	//Log            *model.DuoUIlog
-	//ConsoleHistory *model.DuoUIconsoleHistory
+	// Log            *model.DuoUIlog
+	// ConsoleHistory *model.DuoUIconsoleHistory
 
 	Commands *Commands
 
-	//Settings  *model.DuoUIsettings
-	//Sent      bool
-	//Toasts    []model.DuoUItoast
-	//Localhost model.DuoUIlocalHost
+	// Settings  *model.DuoUIsettings
+	// Sent      bool
+	// Toasts    []model.DuoUItoast
+	// Localhost model.DuoUIlocalHost
 	Uptime int
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
-	//Quit    chan struct{}
-	//Ready   chan struct{}
-	//IsReady bool
+	// Quit    chan struct{}
+	// Ready   chan struct{}
+	// IsReady bool
 }
 
 type Boot struct {

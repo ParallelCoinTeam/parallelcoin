@@ -1,9 +1,10 @@
 package gui
 
 import (
-	"github.com/urfave/cli"
 	"runtime"
 	"time"
+
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 
@@ -55,10 +56,10 @@ type WalletGUI struct {
 	quit                      chan struct{}
 	runnerQuit                chan struct{}
 	sendAddresses             []SendAddress
-	Worker                    *worker.Worker
-	RunCommandChan            chan string
 	State                     State
-	Shell                     *worker.Worker
+	NodeRunCommandChan        chan string
+	MinerRunCommandChan       chan string
+	Shell, Miner              *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
 	console                   *Console
@@ -136,7 +137,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
 	}
-	// wg.RunCommandChan <- "run"
+	// wg.NodeRunCommandChan <- "run"
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
@@ -162,14 +163,14 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					wg.RunCommandChan <- "stop"
+					wg.NodeRunCommandChan <- "stop"
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {
 		Debug("quitting wallet gui")
-		wg.RunCommandChan <- "stop"
+		wg.NodeRunCommandChan <- "stop"
 		close(wg.quit)
 	})
 out:

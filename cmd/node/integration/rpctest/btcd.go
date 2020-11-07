@@ -52,7 +52,7 @@ func podExecutablePath() (string, error) {
 		outputPath += ".exe"
 	}
 	var gb string
-	if gb, err = gobin.Get(); Check(err){
+	if gb, err = gobin.Get(); Check(err) {
 		return "", err
 	}
 	cmd := exec.Command(gb, "build", "-o", outputPath, podPkg.ImportPath)

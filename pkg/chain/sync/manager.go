@@ -803,7 +803,7 @@ func (sm *SyncManager) handleHeadersMsg(hmsg *headersMsg) {
 				)
 			} else {
 				Tracef(
-					"block header at height %d/hash %s from peer %s does NOT match expected checkpoint hash of" +
+					"block header at height %d/hash %s from peer %s does NOT match expected checkpoint hash of"+
 						" %s -- disconnecting",
 					node.height,
 					node.hash,

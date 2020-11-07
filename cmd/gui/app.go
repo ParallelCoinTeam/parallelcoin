@@ -103,7 +103,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 					).
 						Fn(gtx)
 				}(gtx)
-				// wg.RunCommandChan <- "stop"
+				// wg.NodeRunCommandChan <- "stop"
 				// consume.Kill(wg.Worker)
 				// consume.Kill(wg.cx.StateCfg.Miner)
 				// close(wg.cx.NodeKill)
@@ -134,7 +134,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
 		wg.PageTopBarButton("console", 2, &icons.MapsLocalHotel),
 		wg.PageTopBarButton("settings", 3, &icons.ActionSettings),
-		//wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
+		// wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
 		func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
@@ -285,10 +285,10 @@ func (wg *WalletGUI) SetRunState(b bool) {
 	go func() {
 		Debug("run state is now", b)
 		if b {
-			wg.RunCommandChan <- "run"
+			wg.NodeRunCommandChan <- "run"
 			// wg.running = b
 		} else {
-			wg.RunCommandChan <- "stop"
+			wg.NodeRunCommandChan <- "stop"
 			// wg.running = b
 		}
 	}()

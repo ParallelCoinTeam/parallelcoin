@@ -2,12 +2,14 @@ package gui
 
 import (
 	"fmt"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/counter"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
@@ -34,7 +36,7 @@ var (
 			SingleLine: true,
 			Submit:     true,
 		},
-		//PageFunction:    w.PrikazaniElementSumaRacunica(),
+		// PageFunction:    w.PrikazaniElementSumaRacunica(),
 		CounterIncrease: new(widget.Clickable),
 		CounterDecrease: new(widget.Clickable),
 		CounterReset:    new(widget.Clickable),
@@ -74,7 +76,7 @@ func (g *GuiAppModel) receiveHeader() func(gtx C) D {
 							btn.Size = unit.Dp(21)
 							btn.Background = helper.HexARGB(g.ui.Theme.Colors["Secondary"])
 							for connectionsBtn.Clicked() {
-								//ui.N.CurrentPage = "Welcome"
+								// ui.N.CurrentPage = "Welcome"
 							}
 							return btn.Layout(gtx)
 						},
@@ -84,7 +86,7 @@ func (g *GuiAppModel) receiveHeader() func(gtx C) D {
 							btn.Size = unit.Dp(21)
 							btn.Background = helper.HexARGB(g.ui.Theme.Colors["Secondary"])
 							for connectionsBtn.Clicked() {
-								//ui.N.CurrentPage = "Welcome"
+								// ui.N.CurrentPage = "Welcome"
 							}
 							return btn.Layout(gtx)
 						},
@@ -94,7 +96,7 @@ func (g *GuiAppModel) receiveHeader() func(gtx C) D {
 							btn.Size = unit.Dp(21)
 							btn.Background = helper.HexARGB(g.ui.Theme.Colors["Secondary"])
 							for connectionsBtn.Clicked() {
-								//ui.N.CurrentPage = "Welcome"
+								// ui.N.CurrentPage = "Welcome"
 							}
 							return btn.Layout(gtx)
 						},
@@ -104,7 +106,7 @@ func (g *GuiAppModel) receiveHeader() func(gtx C) D {
 							btn.Size = unit.Dp(21)
 							btn.Background = helper.HexARGB(g.ui.Theme.Colors["Secondary"])
 							for connectionsBtn.Clicked() {
-								//ui.N.CurrentPage = "Welcome"
+								// ui.N.CurrentPage = "Welcome"
 							}
 							return btn.Layout(gtx)
 						},
@@ -129,7 +131,7 @@ func (g *GuiAppModel) receiveHeader() func(gtx C) D {
 							btn.Size = unit.Dp(21)
 							btn.Background = helper.HexARGB(g.ui.Theme.Colors["Secondary"])
 							for connectionsBtn.Clicked() {
-								//ui.N.CurrentPage = "Welcome"
+								// ui.N.CurrentPage = "Welcome"
 							}
 							return btn.Layout(gtx)
 						},
@@ -139,7 +141,7 @@ func (g *GuiAppModel) receiveHeader() func(gtx C) D {
 							btn.Size = unit.Dp(21)
 							btn.Background = helper.HexARGB(g.ui.Theme.Colors["Secondary"])
 							for connectionsBtn.Clicked() {
-								//ui.N.CurrentPage = "Welcome"
+								// ui.N.CurrentPage = "Welcome"
 							}
 							return btn.Layout(gtx)
 						},

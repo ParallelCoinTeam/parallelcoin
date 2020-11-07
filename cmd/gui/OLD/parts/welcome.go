@@ -1,14 +1,14 @@
 package parts
 
 //
-//var (
+// var (
 //	apiAddressInput = &widget.Editor{
 //		SingleLine: true,
 //		Submit:     true,
 //	}
-//)
+// )
 //
-//func (g *GioWallet) GetWelcome() {
+// func (g *GioWallet) GetWelcome() {
 //	//f, err := g.sh.ID()
 //	//checkError(err)
 //	//fv, ft, err := g.sh.Version()
@@ -23,31 +23,31 @@ package parts
 //	//	Addresses: f.Addresses,
 //	//	Pub:       f.PublicKey,
 //	//}
-//}
+// }
 //
-//func (g *GioWallet) welcomeHeader() func(gtx C) D {
+// func (g *GioWallet) welcomeHeader() func(gtx C) D {
 //	return box.BoxBase(g.ui.Theme.Colors["PanelBg"], func(gtx C) D {
 //		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 //		helper.Fill(gtx, helper.HexARGB(g.ui.Theme.Colors["PanelBg"]))
 //		return D{}
 //	})
-//}
+// }
 //
-//func (g *GioWallet) welcomeBody() func(gtx C) D {
+// func (g *GioWallet) welcomeBody() func(gtx C) D {
 //	//return g.twoPanels(10, 0, g.welcomeLeft(), g.welcomeRight())
 //	return noReturn
-//}
+// }
 //
-//func (g *GioWallet) welcomeLeft() func(gtx C) D {
+// func (g *GioWallet) welcomeLeft() func(gtx C) D {
 //	return func(gtx C) D {
 //		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 //		return lyt.Format(gtx, "vflex(start,r(_),r(_))",
 //			g.welcomeLeftTop(),
 //			g.welcomeLeftBottom())
 //	}
-//}
+// }
 //
-//func (g *GioWallet) welcomeLeftTop() func(gtx C) D {
+// func (g *GioWallet) welcomeLeftTop() func(gtx C) D {
 //	var d func(gtx C) D
 //	var tt bool
 //	//if g.sh.IsUp() {
@@ -104,9 +104,9 @@ package parts
 //		}
 //	}
 //	return d
-//}
+// }
 //
-//func (g *GioWallet) welcomeLeftBottom() func(gtx C) D {
+// func (g *GioWallet) welcomeLeftBottom() func(gtx C) D {
 //	return func(gtx C) D {
 //		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 //		return lyt.Format(gtx, "vflex(start,r(inset(0dp0dp10dp0dp,_)),r(inset(0dp0dp10dp0dp,_)),r(inset(0dp0dp10dp0dp,_)),r(inset(0dp0dp0dp0dp,_)),r(inset(0dp0dp0dp0dp,_)))",
@@ -144,9 +144,9 @@ package parts
 //			})
 //
 //	}
-//}
+// }
 //
-//func (g *GioWallet) welcomeRight() func(gtx C) D {
+// func (g *GioWallet) welcomeRight() func(gtx C) D {
 //	return box.BoxBase(g.ui.Theme.Colors["PanelBg"], func(gtx C) D {
 //		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 //		return lyt.Format(gtx, "vflex(start,r(inset(0dp0dp0dp0dp,_)),r(inset(0dp0dp0dp0dp,_)))",
@@ -161,4 +161,4 @@ package parts
 //				return title.Layout(gtx)
 //			})
 //	})
-//}
+// }

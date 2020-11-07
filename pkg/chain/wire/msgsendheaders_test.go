@@ -98,7 +98,7 @@ func TestSendHeadersCrossProtocol(t *testing.T) {
 	readmsg := NewMsgSendHeaders()
 	err = readmsg.BtcDecode(&buf, SendHeadersVersion, enc)
 	if err != nil {
-		t.Errorf("decode of MsgSendHeaders failed [%v] err <%v>", buf,			err)
+		t.Errorf("decode of MsgSendHeaders failed [%v] err <%v>", buf, err)
 	}
 }
 

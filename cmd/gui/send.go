@@ -234,6 +234,7 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Dimensions {
 		).Fn,
 	).Fn(gtx)
 }
+
 //
 // func (wg *WalletGUI) sendButton(b *p9.Clickable, title string, click func()) func(gtx l.Context) l.Dimensions {
 // 	return func(gtx l.Context) l.Dimensions {

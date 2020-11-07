@@ -5,6 +5,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/btn"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
@@ -22,7 +23,7 @@ var (
 )
 
 func (g *GuiAppModel) footer() func(gtx C) D {
-	//return ContainerLayout(d.UI.Theme.Colors["Info"], d.UI.Theme.Colors["Info"], d.UI.Theme.Colors["Info"], 0, 0, 0, func(gtx C) D {
+	// return ContainerLayout(d.UI.Theme.Colors["Info"], d.UI.Theme.Colors["Info"], d.UI.Theme.Colors["Info"], 0, 0, 0, func(gtx C) D {
 	return box.BoxBase(g.ui.Theme.Colors["FooterBg"], func(gtx C) D {
 		return lyt.Format(gtx, "hflex(middle,f(1,inset(16dp0dp16dp6dp,_)),r(inset(0dp0dp0dp0dp,_)))",
 			g.footerStatus(),
@@ -45,7 +46,7 @@ func (g *GuiAppModel) footerMenu() func(gtx C) D {
 func (g *GuiAppModel) footerStatus() func(gtx C) D {
 	return func(gtx C) D {
 		return lyt.Format(gtx, "hflex(middle,r(inset(0dp0dp0dp0dp,_)),f(1,_))",
-			//ContainerLayout(d.UI.Theme.Colors["White"], d.UI.Theme.Colors["Dark"], d.UI.Theme.Colors["White"], 1, 1, 1, func(gtx C) D {
+			// ContainerLayout(d.UI.Theme.Colors["White"], d.UI.Theme.Colors["Dark"], d.UI.Theme.Colors["White"], 1, 1, 1, func(gtx C) D {
 			func(gtx C) D {
 				title := theme.Body(g.ui.Theme, "Connectiong to peers...")
 				title.Alignment = text.Start

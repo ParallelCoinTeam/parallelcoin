@@ -3,6 +3,7 @@ package parts
 import (
 	"gioui.org/layout"
 	"gioui.org/widget"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/mod"
 )
 
@@ -18,7 +19,7 @@ type (
 )
 
 type GioWallet struct {
-	//rpc    *rpcclient.Client
+	// rpc    *rpcclient.Client
 	Status Status
 	ui     *mod.UserInterface
 }

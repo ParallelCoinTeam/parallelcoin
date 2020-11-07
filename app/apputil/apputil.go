@@ -45,7 +45,6 @@ func PrependForWindows(args []string) []string {
 	return args
 }
 
-
 func PrependForWindowsWithStart(args []string) []string {
 	if runtime.GOOS == "windows" {
 		args = append(
