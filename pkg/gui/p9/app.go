@@ -38,7 +38,7 @@ type App struct {
 	sideBar             []l.Widget
 	sideBarBackground   string
 	sideBarColor        string
-	sideBarSize         unit.Value
+	SideBarSize         unit.Value
 	sideBarList         *List
 	Size                *int
 	statusBar           []l.Widget
@@ -68,7 +68,7 @@ func (th *Theme) App(size int) *App {
 		layers:              nil,
 		pages:               make(WidgetMap),
 		root:                th.Stack(),
-		sideBarSize:         th.TextSize.Scale(14),
+		SideBarSize:         th.TextSize.Scale(14),
 		sideBarBackground:   "DocBg",
 		sideBarColor:        "DocText",
 		statusBarBackground: "DocBg",

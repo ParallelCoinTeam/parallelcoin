@@ -49,13 +49,16 @@ func loop(w *app.Window) error {
 			th.Inset(0.25,
 				th.VFlex().
 					Rigid(
-						th.Button(btnDanger).Text("Danger").Color("Danger").Fn,
+						th.Inset(0.1,
+							th.Button(btnDanger).Text("Danger").Background("Gray").Color("Danger").Fn).Fn,
 					).
 					Rigid(
-						th.Button(btnWarning).Text("Warning").Color("Warning").Fn,
+						th.Inset(0.1,
+							th.Button(btnWarning).Text("Warning").Background("Gray").Color("Warning").Fn).Fn,
 					).
 					Rigid(
-						th.Button(btnSuccess).Text("Success").Color("Success").Fn,
+						th.Inset(0.1,
+							th.Button(btnSuccess).Text("Success").Background("Gray").Color("Success").Fn).Fn,
 					).Fn).Fn(gtx)
 
 			for btnDanger.Clicked() {

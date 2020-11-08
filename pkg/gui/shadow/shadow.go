@@ -7,50 +7,30 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/egonelbre/expgio/surface/f32color"
-	"github.com/gioapp/gel/helper"
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui/f32color"
 	"image/color"
 )
 
-type shadow struct {
-	theme        *p9.Theme
-	cornerRadius unit.Value
-	elevation    unit.Value
-	color        color.RGBA
+func Shadow(gtx l.Context, cornerRadius, elevation unit.Value, shadowColor color.RGBA, content func(gtx l.Context) l.Dimensions) l.Dimensions {
+	sz := content(gtx).Size
+	rr := float32(gtx.Px(cornerRadius))
+	r := f32.Rect(0, 0, float32(sz.X), float32(sz.Y))
+	layoutShadow(gtx, r, elevation, rr, shadowColor)
+	clip.UniformRRect(r, rr).Add(gtx.Ops)
+	return content(gtx)
 }
 
-func Shadow(th *p9.Theme) *shadow {
-	return &shadow{
-		theme:        th,
-		cornerRadius: unit.Dp(5),
-		elevation:    unit.Dp(5),
-		color:        helper.HexARGB(th.Colors["PanelBg"]),
-	}
-}
-
-func (s *shadow) Drop(w l.Dimensions) func(gtx l.Context) l.Dimensions {
-	return func(gtx l.Context) l.Dimensions {
-		sz := gtx.Constraints.Min
-		rr := float32(gtx.Px(s.cornerRadius))
-		r := f32.Rect(0, 0, float32(sz.X), float32(sz.Y))
-		s.layout(gtx, r, rr)
-		clip.UniformRRect(r, rr).Add(gtx.Ops)
-		paint.Fill(gtx.Ops, s.color)
-		return w
-	}
-}
-
-func (s *shadow) layout(gtx l.Context, r f32.Rectangle, rr float32) {
-	if s.elevation.V <= 0 {
+//TODO: Shadow directions
+func layoutShadow(gtx l.Context, r f32.Rectangle, elevation unit.Value, rr float32, shadowColor color.RGBA) {
+	if elevation.V <= 0 {
 		return
 	}
-	offset := pxf(gtx.Metric, s.elevation)
+	offset := pxf(gtx.Metric, elevation)
 	d := int(offset + 1)
 	if d > 4 {
 		d = 4
 	}
-	a := float32(s.color.A) / 0xff
+	a := float32(shadowColor.A) / 0xff
 	background := (f32color.RGBA{A: a * 0.4 / float32(d*d)}).SRGB()
 	for x := 0; x <= d; x++ {
 		for y := 0; y <= d; y++ {

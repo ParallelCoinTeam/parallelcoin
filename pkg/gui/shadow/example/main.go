@@ -42,12 +42,34 @@ func loop(w *app.Window) error {
 			paint.Fill(gtx.Ops, helper.HexARGB("e5e5e5FF"))
 			op.InvalidateOp{}.Add(gtx.Ops)
 
-			th.Inset(0.25,
+			th.Inset(5,
 				th.VFlex().
-					Rigid(
-						shadow.Shadow(th).Drop(th.H6("Success").Color("Success").Fn(gtx)),
-					).Fn).Fn(gtx)
-
+					Flexed(1,
+						th.VFlex().AlignMiddle().
+							Rigid(
+								th.Inset(1,
+									func(gtx layout.Context) layout.Dimensions {
+										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(3), helper.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 3").Color("PanelText").Fn).Fn).Fn)
+									},
+								).Fn).
+							Rigid(
+								th.Inset(1,
+									func(gtx layout.Context) layout.Dimensions {
+										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(5), helper.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 5").Color("PanelText").Fn).Fn).Fn)
+									},
+								).Fn).
+							Rigid(
+								th.Inset(1,
+									func(gtx layout.Context) layout.Dimensions {
+										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(8), helper.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 8").Color("PanelText").Fn).Fn).Fn)
+									},
+								).Fn).
+							Rigid(
+								th.Inset(1,
+									func(gtx layout.Context) layout.Dimensions {
+										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(12), helper.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 12").Color("PanelText").Fn).Fn).Fn)
+									},
+								).Fn).Fn).Fn).Fn(gtx)
 			e.Frame(gtx.Ops)
 			w.Invalidate()
 		}
