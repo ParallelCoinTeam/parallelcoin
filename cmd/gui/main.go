@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli"
 
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/logi/consume"
 
@@ -149,9 +150,15 @@ func (wg *WalletGUI) Run() (err error) {
 			func(n int) {
 				Debug("threads value now", n)
 				go func() {
-					Debug("sending thread count on channel")
-					wg.MinerThreadsChan <- n
-					Debug("sent thread count on channel")
+					Debug("setting thread count")
+					*wg.cx.Config.GenThreads = n
+					save.Pod(wg.cx.Config)
+					// wg.MinerThreadsChan <- n
+					if wg.mining {
+						Debug("restarting miner")
+						wg.MinerRunCommandChan <- "stop"
+						wg.MinerRunCommandChan <- "start"
+					}
 				}()
 			},
 		),
@@ -160,7 +167,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.Tickers()
 	// wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
-	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads > 0
+	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
 	if wg.running {
 		wg.ShellRunCommandChan <- "run"
 	}
