@@ -1,13 +1,13 @@
 package gui
 
 import (
-	"github.com/p9c/pod/pkg/gui/dialog"
-	"github.com/p9c/pod/pkg/gui/toast"
-	"github.com/urfave/cli"
 	"runtime"
 	"time"
 
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/pkg/gui/dialog"
+	"github.com/p9c/pod/pkg/gui/toast"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
