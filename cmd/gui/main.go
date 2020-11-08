@@ -58,7 +58,7 @@ type WalletGUI struct {
 	runnerQuit                chan struct{}
 	minerQuit                 chan struct{}
 	sendAddresses             []SendAddress
-	NodeRunCommandChan        chan string
+	ShellRunCommandChan       chan string
 	MinerRunCommandChan       chan string
 	MinerThreadsChan          chan int
 	State                     State
@@ -76,11 +76,11 @@ func (wg *WalletGUI) Run() (err error) {
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
-	wg.buttonBarButtons = make([]*p9.Clickable, 4)
+	wg.buttonBarButtons = make([]*p9.Clickable, 6)
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.th.Clickable()
 	}
-	wg.statusBarButtons = make([]*p9.Clickable, 4)
+	wg.statusBarButtons = make([]*p9.Clickable, 5)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
@@ -160,12 +160,13 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.Tickers()
 	// wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
-	wg.mining = *wg.cx.Config.Generate
+	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads > 0
 	if wg.running {
-		wg.NodeRunCommandChan <- "run"
+		wg.ShellRunCommandChan <- "run"
 	}
 	if wg.mining {
 		wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
+		wg.MinerRunCommandChan <- "start"
 	}
 	go func() {
 		if err := wg.w["main"].
@@ -177,14 +178,16 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					wg.NodeRunCommandChan <- "stop"
+					consume.Kill(wg.Shell)
+					consume.Kill(wg.Miner)
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {
 		Debug("quitting wallet gui")
-		wg.NodeRunCommandChan <- "stop"
+		consume.Kill(wg.Shell)
+		consume.Kill(wg.Miner)
 		close(wg.quit)
 	})
 out:
@@ -211,7 +214,7 @@ out:
 			}
 			if wg.Shell != nil {
 				Debug("stopping shell")
-				// wg.NodeRunCommandChan <- "stop"
+				// wg.ShellRunCommandChan <- "stop"
 				consume.Kill(wg.Shell)
 			}
 			if wg.Miner != nil {

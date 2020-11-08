@@ -2,6 +2,8 @@ package gui
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 
 	l "gioui.org/layout"
 	"gioui.org/text"
@@ -105,7 +107,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 					).
 						Fn(gtx)
 				}(gtx)
-				// wg.NodeRunCommandChan <- "stop"
+				// wg.ShellRunCommandChan <- "stop"
 				// consume.Kill(wg.Worker)
 				// consume.Kill(wg.cx.StateCfg.Miner)
 				// close(wg.cx.NodeKill)
@@ -132,10 +134,10 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 9),
 	})
 	a.ButtonBar([]l.Widget{
-		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport),
-		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
-		wg.PageTopBarButton("console", 2, &icons.MapsLocalHotel),
-		wg.PageTopBarButton("settings", 3, &icons.ActionSettings),
+		wg.PageTopBarButton("goroutines", 2, &icons.ActionBugReport),
+		wg.PageTopBarButton("help", 3, &icons.ActionHelp),
+		wg.PageTopBarButton("console", 4, &icons.MapsLocalHotel),
+		wg.PageTopBarButton("settings", 5, &icons.ActionSettings),
 		// wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
@@ -288,10 +290,10 @@ func (wg *WalletGUI) SetRunState(b bool) {
 	go func() {
 		Debug("run state is now", b)
 		if b {
-			wg.NodeRunCommandChan <- "run"
+			wg.ShellRunCommandChan <- "run"
 			// wg.running = b
 		} else {
-			wg.NodeRunCommandChan <- "stop"
+			wg.ShellRunCommandChan <- "stop"
 			// wg.running = b
 		}
 	}()
@@ -376,14 +378,15 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						func() {
 							go func() {
 								Debug("clicked miner control stop/start button", wg.mining)
+								wg.mining = !wg.mining
 								if *wg.cx.Config.GenThreads == 0 {
 									Debug("was zero threads")
-									wg.MinerThreadsChan <- 1
-									wg.MinerRunCommandChan <- "run"
-									wg.incdecs["generatethreads"].SetCurrent(1)
+									wg.mining = false
+									// wg.MinerThreadsChan <- 1
+									// wg.MinerRunCommandChan <- "run"
+									// wg.incdecs["generatethreads"].SetCurrent(1)
 									return
 								}
-								wg.mining = !wg.mining
 								if !wg.mining {
 									wg.MinerRunCommandChan <- "stop"
 								} else {
@@ -398,6 +401,49 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetColor("DocText").
 					SetBackground("DocBg").
 					Fn,
+			).
+			Rigid(
+				func(gtx l.Context) l.Dimensions {
+					background := wg.StatusBarBackgroundGet()
+					color := wg.StatusBarColorGet()
+					ic := wg.Icon().
+						Scale(p9.Scales["H5"]).
+						Color(color).
+						Src(&icons.NavigationRefresh).
+						Fn
+					return wg.Flex().
+						Rigid(
+							wg.ButtonLayout(wg.statusBarButtons[4]).
+								CornerRadius(0).
+								Embed(
+									wg.th.Inset(0.25, ic).Fn,
+								).
+								Background(background).
+								SetClick(
+									func() {
+										Debug("clicked reset wallet button")
+										go func() {
+											wasRunning := wg.running
+											Debug("was running", wasRunning)
+											if wasRunning {
+												wg.ShellRunCommandChan <- "stop"
+											}
+											args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
+												"--pipelog", "wallet", "drophistory"}
+											runner := exec.Command(args[0], args[1:]...)
+											runner.Stderr = os.Stderr
+											runner.Stdout = os.Stderr
+											if err := runner.Run(); Check(err) {
+											}
+											if wasRunning {
+												wg.ShellRunCommandChan <- "restart"
+											}
+
+										}()
+									}).
+								Fn,
+						).Fn(gtx)
+				},
 			).
 			Fn(gtx)
 	}(gtx)

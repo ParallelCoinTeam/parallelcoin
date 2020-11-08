@@ -167,31 +167,31 @@ func (wg *WalletGUI) Tickers() {
 					var height int32
 					var h *chainhash.Hash
 					if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
-						break out
+						// break out
 					}
 					wg.State.SetBestBlockHeight(int(height))
 					wg.State.SetBestBlockHash(h)
 					var unconfirmed util.Amount
 					if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
-						break out
+						// break out
 					}
 					wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
 					var confirmed util.Amount
 					if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
-						break out
+						// break out
 					}
 					wg.State.SetBalance(confirmed.ToDUO())
 					// don't update this unless it's in view
-					if wg.ActivePageGet() == "main" {
-						// Debug("updating recent transactions")
-						var ltr []btcjson.ListTransactionsResult
-						// TODO: for some reason this function returns half as many as requested
-						if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
-							break out
-						}
-						// Debugs(ltr)
-						wg.State.SetLastTxs(ltr)
+					// if wg.ActivePageGet() == "main" {
+					// Debug("updating recent transactions")
+					var ltr []btcjson.ListTransactionsResult
+					// TODO: for some reason this function returns half as many as requested
+					if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
+						// break out
 					}
+					// Debugs(ltr)
+					wg.State.SetLastTxs(ltr)
+					// }
 					// case <-fiveSeconds:
 					wg.invalidate <- struct{}{}
 				case <-wg.quit:
