@@ -94,7 +94,6 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		x := gtx.Constraints.Max.X
 		a.Size = &x
-		// TODO: put the root stack in here
 		return a.Flex().Rigid(
 			a.VFlex().
 				Rigid(

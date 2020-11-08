@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui/dialog"
 	"github.com/p9c/pod/pkg/gui/toast"
 
@@ -72,6 +73,7 @@ type WalletGUI struct {
 	console                   *Console
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
+	noWallet                  bool
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -146,8 +148,6 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.dialog = dialog.New(wg.th)
 
 	wg.w = make(map[string]*f.Window)
-	if err = wg.Runner(); Check(err) {
-	}
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
@@ -172,15 +172,22 @@ func (wg *WalletGUI) Run() (err error) {
 		),
 	}
 	wg.App = wg.GetAppWidget()
-	wg.Tickers()
 	// wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
 	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
+	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
+		wg.noWallet = true
+		wg.running = false
+		wg.mining = false
+	}
+	if err = wg.Runner(); Check(err) {
+	}
 	if wg.running {
 		wg.ShellRunCommandChan <- "run"
+		wg.Tickers()
 	}
 	if wg.mining {
-		wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
+		// wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
 		wg.MinerRunCommandChan <- "start"
 	}
 	go func() {
@@ -189,7 +196,10 @@ func (wg *WalletGUI) Run() (err error) {
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				wg.Fn(),
+				p9.If(wg.noWallet,
+					wg.CreateWallet,
+					wg.Fn(),
+				),
 				wg.Overlay(),
 				// wg.InitWallet(),
 				func() {

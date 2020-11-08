@@ -642,6 +642,11 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"sets the dark theme on the gui interface",
 				cx.Config.DarkTheme,
 			),
+			au.Bool(
+				"notty",
+				"tells pod there is no keyboard input available",
+				nil,
+			),
 		},
 	}
 }

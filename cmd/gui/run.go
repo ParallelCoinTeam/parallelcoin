@@ -39,7 +39,7 @@ func (wg *WalletGUI) Runner() (err error) {
 					save.Pod(wg.cx.Config)
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--rpclisten", *wg.cx.Config.RPCConnect,
-						"--servertls=false", "--clienttls=false",
+						"--servertls=false", "--clienttls=false", "--notty",
 						"--pipelog", "shell"}
 					// args = apputil.PrependForWindows(args)
 					wg.runnerQuit = make(chan struct{})
@@ -139,11 +139,11 @@ func (wg *WalletGUI) Runner() (err error) {
 			}
 		}
 	}()
-	if !(*wg.cx.Config.NodeOff && *wg.cx.Config.WalletOff) {
+	if wg.running {
 		Debug("starting shell")
 		wg.ShellRunCommandChan <- "run"
 	}
-	if *wg.cx.Config.Generate {
+	if wg.mining {
 		Debug("starting miner")
 		wg.MinerRunCommandChan <- "run"
 	}

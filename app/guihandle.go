@@ -1,8 +1,6 @@
 package app
 
 import (
-	"os"
-
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/config"
@@ -16,7 +14,7 @@ import (
 func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Info("starting up node gui for parallelcoin")
-		Debug(os.Args)
+		// Debug(os.Args)
 		config.Configure(cx, c.Command.Name, true)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true

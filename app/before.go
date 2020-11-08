@@ -369,6 +369,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("darktheme") {
 			*cx.Config.DarkTheme = c.Bool("darktheme")
 		}
+		if c.IsSet("notty") {
+			cx.IsGUI = true
+		}
 		if c.IsSet("save") {
 			Info("saving configuration")
 			cx.StateCfg.Save = true

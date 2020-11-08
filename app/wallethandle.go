@@ -21,7 +21,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.WalletDbName
 		// dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
 		// 	Params.Name + slash + wallet.WalletDbName
-		if !apputil.FileExists(*cx.Config.WalletFile) {
+		if !apputil.FileExists(*cx.Config.WalletFile) && !cx.IsGUI {
 			// Debug(cx.ActiveNet.Name, *cx.Config.WalletFile)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				Error("failed to create wallet", err)
