@@ -4,10 +4,12 @@ import (
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"github.com/gioapp/gel/helper"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui/shadow"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 	"image"
 	"image/color"
@@ -73,7 +75,7 @@ func (t *Toasts) AddToast(title, content, level string) {
 func (t *Toasts) DrawToasts() func(gtx l.Context) {
 	return func(gtx l.Context) {
 		defer op.Push(gtx.Ops).Pop()
-		op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-250, 0)).Add(gtx.Ops)
+		op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-310, 0)).Add(gtx.Ops)
 		gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Min.Y)
 		gtx.Constraints.Max.X = 250
 		//paint.Fill(gtx.Ops,  helper.HexARGB("ff559988"))
@@ -85,19 +87,19 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 	if t.toasts[index].ticker < float32(t.duration) {
 		t.toasts[index].ticker += 1
 		gtx.Constraints.Min = t.singleSize
-		gtx.Constraints.Max = t.singleSize
-		//gtx.Constraints.Max.X = t.singleSize.X
-		//sz := gtx.Constraints.Min
-		//rr := float32(gtx.Px(t.singleCornerRadius))
+		//gtx.Constraints.Max = t.singleSize
+		gtx.Constraints.Max.X = t.singleSize.X
+		sz := gtx.Constraints.Min
+		rr := float32(gtx.Px(t.singleCornerRadius))
 
-		//r := f32.Rect(0, 0, float32(sz.X), float32(sz.Y))
-		//clip.UniformRRect(r, rr).Add(gtx.Ops)
+		r := f32.Rect(0, 0, float32(sz.X), float32(sz.Y))
 
-		paint.Fill(gtx.Ops, t.toasts[index].bodyBackground)
-
-		return t.theme.Inset(1,
-			t.theme.Flex().Flexed(1,
+		return t.theme.Inset(0.05, func(gtx l.Context) l.Dimensions {
+			return shadow.Shadow(gtx, unit.Dp(3), unit.Dp(1), helper.HexARGB("ee000000"), t.theme.Flex().Flexed(1,
 				func(gtx l.Context) l.Dimensions {
+					clip.UniformRRect(r, rr).Add(gtx.Ops)
+					paint.Fill(gtx.Ops, t.toasts[index].bodyBackground)
+
 					return t.theme.Inset(0.25,
 						t.theme.VFlex().
 							Rigid(
@@ -118,7 +120,8 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 							Rigid(
 								t.theme.Body1(t.toasts[index].content).Color("PanelText").Fn,
 							).Fn).Fn(gtx)
-				}).Fn).Fn(gtx)
+				}).Fn)
+		}).Fn(gtx)
 	} else {
 		t.toasts = remove(t.toasts, index)
 		return p9.EmptySpace(0, 0)(gtx)
