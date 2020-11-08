@@ -91,6 +91,7 @@ func (w *Worker) Run() {
 			Open().
 			Run(
 				minerModel.Widget,
+				func(gtx l.Context) {},
 				func() {
 					Debug("quitting miner")
 					// interrupt.Request()

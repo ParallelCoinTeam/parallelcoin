@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"github.com/p9c/pod/pkg/gui/dialog"
+	"github.com/p9c/pod/pkg/gui/toast"
 	"github.com/urfave/cli"
 	"runtime"
 	"time"
@@ -62,6 +64,8 @@ type WalletGUI struct {
 	ChainClient, WalletClient *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
 	console                   *Console
+	toasts                    *toast.Toasts
+	dialog                    *dialog.Dialog
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -132,6 +136,8 @@ func (wg *WalletGUI) Run() (err error) {
 		},
 		CommandsNumber: 1,
 	}
+	wg.toasts = toast.New(wg.th)
+	wg.dialog = dialog.New(wg.th)
 
 	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
@@ -159,6 +165,7 @@ func (wg *WalletGUI) Run() (err error) {
 			Open().
 			Run(
 				wg.Fn(),
+				wg.Overlay(),
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")

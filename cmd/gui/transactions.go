@@ -105,7 +105,7 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 					).Rigid(
 					wg.th.Fill("DocBg",
 						wg.th.Flex().AlignMiddle(). // SpaceBetween().
-							Rigid(
+										Rigid(
 								wg.th.Flex().AlignMiddle().
 									Rigid(
 										wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
@@ -252,6 +252,7 @@ func (wg *WalletGUI) txPage(i int) func() {
 								Inset(0.5).
 								Fn,
 						).Fn,
+					func(gtx l.Context) {},
 					func() {
 						Debug("closing tx window", wg.State.txs[i].data.TxID)
 					},

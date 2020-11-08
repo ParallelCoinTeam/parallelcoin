@@ -77,7 +77,7 @@ func (w *Window) Open() (out *Window) {
 	return w
 }
 
-func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy func(), quit chan struct{}) (err error) {
+func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, overlay func(ctx layout.Context), destroy func(), quit chan struct{}) (err error) {
 	var ops op.Ops
 	for {
 		select {
@@ -91,6 +91,7 @@ func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy f
 			case system.FrameEvent:
 				ctx := layout.NewContext(&ops, e)
 				frame(ctx)
+				overlay(ctx)
 				e.Frame(ctx.Ops)
 			}
 		}

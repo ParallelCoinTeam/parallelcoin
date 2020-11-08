@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"gioui.org/app"
+	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -12,6 +13,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -34,24 +36,25 @@ type Explorer struct {
 	th   *p9.Theme
 	size *int
 	*p9.App
-	buttonBarButtons []*p9.Clickable
-	statusBarButtons []*p9.Clickable
-	bools            map[string]*p9.Bool
-	quitClickable    *p9.Clickable
-	lists            map[string]*p9.List
-	checkables       map[string]*p9.Checkable
-	clickables       map[string]*p9.Clickable
-	inputs           map[string]*p9.Input
-	configs          cfg.GroupsMap
-	config           *cfg.Config
-	running          bool
-	invalidate       chan struct{}
-	quit             chan struct{}
-	Worker           *worker.Worker
-	RunCommandChan   chan string
-	State            State
-	Shell            *worker.Worker
-	blocks           []btcjson.BlockDetails
+	buttonBarButtons          []*p9.Clickable
+	statusBarButtons          []*p9.Clickable
+	bools                     map[string]*p9.Bool
+	quitClickable             *p9.Clickable
+	lists                     map[string]*p9.List
+	checkables                map[string]*p9.Checkable
+	clickables                map[string]*p9.Clickable
+	inputs                    map[string]*p9.Input
+	configs                   cfg.GroupsMap
+	config                    *cfg.Config
+	running                   bool
+	invalidate                chan struct{}
+	quit                      chan struct{}
+	Worker                    *worker.Worker
+	RunCommandChan            chan string
+	State                     State
+	Shell                     *worker.Worker
+	blocks                    []btcjson.BlockDetails
+	ChainClient, WalletClient *rpcclient.Client
 }
 
 func (ex *Explorer) Run() (err error) {
@@ -89,7 +92,6 @@ func (ex *Explorer) Run() (err error) {
 	if err = ex.Runner(); Check(err) {
 	}
 	ex.RunCommandChan <- "run"
-	ex.ConnectChainRPC()
 	ex.quitClickable = ex.th.Clickable()
 	ex.w = f.NewWindow()
 
@@ -101,6 +103,7 @@ func (ex *Explorer) Run() (err error) {
 			Open().
 			Run(
 				ex.Fn(),
+				func(gtx l.Context) {},
 				func() {
 					Debug("quitting wallet gui")
 					interrupt.Request()
