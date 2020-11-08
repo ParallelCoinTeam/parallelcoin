@@ -323,7 +323,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Background("DocBg").
 					SetClick(
 						func() {
-							wg.SetRunState(!wg.running)
+							go wg.SetRunState(!wg.running)
 						}).
 					Fn,
 			).
