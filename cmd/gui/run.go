@@ -126,6 +126,7 @@ func (wg *WalletGUI) Runner() (err error) {
 				if *wg.cx.Config.GenThreads < 0 {
 					*wg.cx.Config.GenThreads = runtime.NumCPU()
 				}
+				save.Pod(wg.cx.Config)
 				if wg.mining {
 					go func() {
 						wg.MinerRunCommandChan <- "restart"

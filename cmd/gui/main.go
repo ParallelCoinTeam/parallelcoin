@@ -1,21 +1,24 @@
 package gui
 
 import (
-	"github.com/urfave/cli"
 	"runtime"
 	"time"
 
+	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/pkg/gui/dialog"
+	"github.com/p9c/pod/pkg/gui/toast"
+
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/logi/consume"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	"github.com/p9c/pod/pkg/gui/dialog"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/gui/toast"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -145,7 +148,6 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.w = make(map[string]*f.Window)
 	if err = wg.Runner(); Check(err) {
 	}
-	// wg.RunCommandChan <- "run"
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
@@ -156,18 +158,24 @@ func (wg *WalletGUI) Run() (err error) {
 			func(n int) {
 				Debug("threads value now", n)
 				go func() {
-					Debug("sending thread count on channel")
-					wg.MinerThreadsChan <- n
-					Debug("sent thread count on channel")
+					Debug("setting thread count")
+					*wg.cx.Config.GenThreads = n
+					save.Pod(wg.cx.Config)
+					// wg.MinerThreadsChan <- n
+					if wg.mining {
+						Debug("restarting miner")
+						wg.MinerRunCommandChan <- "stop"
+						wg.MinerRunCommandChan <- "start"
+					}
 				}()
 			},
 		),
 	}
 	wg.App = wg.GetAppWidget()
 	wg.Tickers()
-	wg.CreateSendAddressItem()
+	// wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
-	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads > 0
+	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
 	if wg.running {
 		wg.ShellRunCommandChan <- "run"
 	}
