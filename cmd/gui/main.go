@@ -1,20 +1,21 @@
 package gui
 
 import (
-	"github.com/p9c/pod/pkg/gui/dialog"
-	"github.com/p9c/pod/pkg/gui/toast"
 	"github.com/urfave/cli"
 	"runtime"
 	"time"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/gui/cfg"
+	"github.com/p9c/pod/pkg/gui/dialog"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui/toast"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -56,11 +57,13 @@ type WalletGUI struct {
 	invalidate                chan struct{}
 	quit                      chan struct{}
 	runnerQuit                chan struct{}
+	minerQuit                 chan struct{}
 	sendAddresses             []SendAddress
-	Worker                    *worker.Worker
-	RunCommandChan            chan string
+	ShellRunCommandChan       chan string
+	MinerRunCommandChan       chan string
+	MinerThreadsChan          chan int
 	State                     State
-	Shell                     *worker.Worker
+	Shell, Miner              *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
 	console                   *Console
@@ -76,7 +79,7 @@ func (wg *WalletGUI) Run() (err error) {
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
-	wg.buttonBarButtons = make([]*p9.Clickable, 5)
+	wg.buttonBarButtons = make([]*p9.Clickable, 6)
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.th.Clickable()
 	}
@@ -152,12 +155,26 @@ func (wg *WalletGUI) Run() (err error) {
 		"generatethreads": wg.th.IncDec(2, 0, runtime.NumCPU(), *wg.cx.Config.GenThreads,
 			func(n int) {
 				Debug("threads value now", n)
+				go func() {
+					Debug("sending thread count on channel")
+					wg.MinerThreadsChan <- n
+					Debug("sent thread count on channel")
+				}()
 			},
 		),
 	}
 	wg.App = wg.GetAppWidget()
 	wg.Tickers()
 	wg.CreateSendAddressItem()
+	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
+	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads > 0
+	if wg.running {
+		wg.ShellRunCommandChan <- "run"
+	}
+	if wg.mining {
+		wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
+		wg.MinerRunCommandChan <- "start"
+	}
 	go func() {
 		if err := wg.w["main"].
 			Size(800, 480).
@@ -169,24 +186,50 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					wg.RunCommandChan <- "stop"
+					consume.Kill(wg.Shell)
+					consume.Kill(wg.Miner)
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {
 		Debug("quitting wallet gui")
-		wg.RunCommandChan <- "stop"
+		consume.Kill(wg.Shell)
+		consume.Kill(wg.Miner)
 		close(wg.quit)
 	})
 out:
 	for {
 		select {
 		case <-wg.invalidate:
-			Debug("invalidating render queue")
+			// Debug("invalidating render queue")
 			wg.w["main"].Window.Invalidate()
 		case <-wg.quit:
 			Debug("closing GUI on quit signal")
+			Debug("disconnecting chain client")
+			if wg.ChainClient != nil {
+				wg.ChainClient.Disconnect()
+				if wg.ChainClient.Disconnected() {
+					wg.ChainClient = nil
+				}
+			}
+			Debug("disconnecting wallet client")
+			if wg.WalletClient != nil {
+				wg.WalletClient.Disconnect()
+				if wg.WalletClient.Disconnected() {
+					wg.WalletClient = nil
+				}
+			}
+			if wg.Shell != nil {
+				Debug("stopping shell")
+				// wg.ShellRunCommandChan <- "stop"
+				consume.Kill(wg.Shell)
+			}
+			if wg.Miner != nil {
+				Debug("stopping miner")
+				consume.Kill(wg.Miner)
+				// wg.MinerRunCommandChan <- "stop"
+			}
 			break out
 		}
 	}
