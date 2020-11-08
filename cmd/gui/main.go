@@ -190,7 +190,7 @@ out:
 	for {
 		select {
 		case <-wg.invalidate:
-			Debug("invalidating render queue")
+			// Debug("invalidating render queue")
 			wg.w["main"].Window.Invalidate()
 		case <-wg.quit:
 			Debug("closing GUI on quit signal")

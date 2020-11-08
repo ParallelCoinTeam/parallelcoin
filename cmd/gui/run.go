@@ -34,6 +34,9 @@ func (wg *WalletGUI) Runner() (err error) {
 						Debug("already running...")
 						break
 					}
+					*wg.cx.Config.NodeOff = false
+					*wg.cx.Config.WalletOff = false
+					save.Pod(wg.cx.Config)
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"--servertls=false", "--clienttls=false",
@@ -56,6 +59,9 @@ func (wg *WalletGUI) Runner() (err error) {
 					}
 					consume.Kill(wg.Shell)
 					wg.running = false
+					*wg.cx.Config.NodeOff = true
+					*wg.cx.Config.WalletOff = true
+					save.Pod(wg.cx.Config)
 				case "restart":
 					Debug("restart called")
 					go func() {
@@ -104,6 +110,8 @@ func (wg *WalletGUI) Runner() (err error) {
 			}
 		}
 	}()
-	wg.NodeRunCommandChan <- "run"
+	if !(*wg.cx.Config.NodeOff && *wg.cx.Config.WalletOff) {
+		wg.NodeRunCommandChan <- "run"
+	}
 	return nil
 }

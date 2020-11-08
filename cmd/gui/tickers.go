@@ -183,7 +183,7 @@ func (wg *WalletGUI) Tickers() {
 					wg.State.SetBalance(confirmed.ToDUO())
 					// don't update this unless it's in view
 					if wg.ActivePageGet() == "main" {
-						Debug("updating recent transactions")
+						// Debug("updating recent transactions")
 						var ltr []btcjson.ListTransactionsResult
 						// TODO: for some reason this function returns half as many as requested
 						if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
@@ -193,7 +193,7 @@ func (wg *WalletGUI) Tickers() {
 						wg.State.SetLastTxs(ltr)
 					}
 					// case <-fiveSeconds:
-
+					wg.invalidate <- struct{}{}
 				case <-wg.quit:
 					break totalOut
 				}
