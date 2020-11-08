@@ -156,7 +156,7 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	wg.App = wg.GetAppWidget()
 	wg.Tickers()
-	wg.CreateSendAddressItem()
+	// wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
 	wg.mining = *wg.cx.Config.Generate
 	if wg.running {

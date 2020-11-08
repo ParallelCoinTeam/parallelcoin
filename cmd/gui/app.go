@@ -78,7 +78,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 							Rigid(
 								wg.th.Button(wg.clickables["quit"].SetClick(func() {
 									close(wg.quit)
-								})).Color(wg.App.TitleBarColorGet()).TextScale(2).Text("yes!!!").Fn,
+								})).Color(wg.App.CardColorGet()).TextScale(2).Text("yes!!!").Fn,
 							).Fn,
 					).
 					Fn(gtx)
@@ -86,6 +86,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			},
 		}),
 		"goroutines": wg.Page("log", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				le := func(gtx l.Context, index int) l.Dimensions {
 					return wg.State.goroutines[index](gtx)
@@ -137,7 +139,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		// wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
-		func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
+		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
+		wg.RunStatusPanel,
 		wg.th.Flex().Rigid(
 			wg.StatusBarButton("log", 1, &icons.ActionList),
 		).Rigid(
@@ -327,18 +330,18 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						}).
 					Fn,
 			).
-			Rigid(
-				wg.th.Inset(0.25,
-					p9.If(wg.running,
-						wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
-						wg.th.Icon().
-							Scale(p9.Scales["H5"]).
-							Color("Primary").
-							Src(&icons.ActionCheckCircle).
-							Fn,
-					),
-				).Fn,
-			).
+			// Rigid(
+			// 	wg.th.Inset(0.25,
+			// 		p9.If(wg.running,
+			// 			wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
+			// 			wg.th.Icon().
+			// 				Scale(p9.Scales["H5"]).
+			// 				Color("Primary").
+			// 				Src(&icons.ActionCheckCircle).
+			// 				Fn,
+			// 		),
+			// 	).Fn,
+			// ).
 			Rigid(wg.th.
 				Inset(0.25,
 					wg.Icon().

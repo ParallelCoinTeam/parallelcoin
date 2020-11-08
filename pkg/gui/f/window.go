@@ -86,7 +86,7 @@ func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, destroy f
 		case e := <-w.Window.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
-				destroy()
+				go destroy()
 				return e.Err
 			case system.FrameEvent:
 				ctx := layout.NewContext(&ops, e)

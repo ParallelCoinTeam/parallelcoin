@@ -63,6 +63,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 func (wg *WalletGUI) goRoutines() {
 	var err error
 	if wg.ActivePageGet() == "goroutines" {
+		Debug("updating goroutines data")
 		var b []byte
 		buf := bytes.NewBuffer(b)
 		if err = pprof.Lookup("goroutine").WriteTo(buf, 2); Check(err) {
