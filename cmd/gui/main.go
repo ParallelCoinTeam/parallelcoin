@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -193,6 +194,30 @@ out:
 			wg.w["main"].Window.Invalidate()
 		case <-wg.quit:
 			Debug("closing GUI on quit signal")
+			Debug("disconnecting chain client")
+			if wg.ChainClient != nil {
+				wg.ChainClient.Disconnect()
+				if wg.ChainClient.Disconnected() {
+					wg.ChainClient = nil
+				}
+			}
+			Debug("disconnecting wallet client")
+			if wg.WalletClient != nil {
+				wg.WalletClient.Disconnect()
+				if wg.WalletClient.Disconnected() {
+					wg.WalletClient = nil
+				}
+			}
+			if wg.Shell != nil {
+				Debug("stopping shell")
+				// wg.NodeRunCommandChan <- "stop"
+				consume.Kill(wg.Shell)
+			}
+			if wg.Miner != nil {
+				Debug("stopping miner")
+				consume.Kill(wg.Miner)
+				// wg.MinerRunCommandChan <- "stop"
+			}
 			break out
 		}
 	}
