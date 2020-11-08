@@ -1,15 +1,15 @@
 package gui
 
 import (
-	"fmt"
-
 	l "gioui.org/layout"
 	"gioui.org/text"
-	"golang.org/x/exp/shiny/materialdesign/icons"
-
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/coding/base58"
 	"github.com/p9c/pod/pkg/util"
+	"golang.org/x/exp/shiny/materialdesign/icons"
+	"strconv"
+
+	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 type SendAddress struct {
@@ -44,9 +44,11 @@ func (wg *WalletGUI) SendPage() l.Widget {
 func (wg *WalletGUI) CreateSendAddressItem() {
 	wg.sendAddresses = append(wg.sendAddresses,
 		SendAddress{
-			AddressInput: wg.th.Input("", "Enter a ParallelCoin address (e.g. 9ef0sdjifvmlkdsfnsdlkg)", "Primary", "DocText", 26, func(pass string) {}),
-			LabelInput:   wg.th.Input("", "Enter a label for this address to add it to the list of used addresses", "Primary", "DocText", 26, func(pass string) {}),
-			AmountInput:  wg.th.Input("", "Enter amount", "Primary", "DocText", 10, func(pass string) {}),
+			AddressInput: wg.th.Input("", "Enter a ParallelCoin address (e.g. 9ef0sdjifvmlkdsfnsdlkg)", "Primary", "DocText", 26, func(txt string) {
+
+			}),
+			LabelInput:  wg.th.Input("", "Enter a label for this address to add it to the list of used addresses", "Primary", "DocText", 26, func(pass string) {}),
+			AmountInput: wg.th.Input("", "Enter amount", "Primary", "DocText", 10, func(pass string) {}),
 			// AmountInput: &counter.Counter{
 			//	Value:        1,
 			//	OperateValue: 1,
@@ -70,20 +72,70 @@ func (wg *WalletGUI) CreateSendAddressItem() {
 		})
 }
 
+func (wg *WalletGUI) checkSendItem(address, amount string) (check bool) {
+	switch {
+	case address == "" && amount != "":
+		go wg.toasts.AddToast("Address error", "Address field is empty", "Danger")
+	case address != "" && amount == "":
+		go wg.toasts.AddToast("Amount error", "Amount is 0", "Danger")
+		_, _, err := base58.CheckDecode(address)
+		if err != nil {
+			Error(err)
+			if err == base58.ErrChecksum {
+				go wg.toasts.AddToast("Address error", "Address checksum mismatch", "Danger")
+			}
+			go wg.toasts.AddToast("Address error", "Address is of unknown format", "Danger")
+		}
+	case address == "" && amount == "":
+		go wg.toasts.AddToast("Address and amount error", "Address is empty and amount is 0", "Danger")
+	case address != "" && amount != "":
+		_, _, err := base58.CheckDecode(address)
+		if err != nil {
+			Error(err)
+			if err == base58.ErrChecksum {
+				go wg.toasts.AddToast("Address error", "Address checksum mismatch", "Danger")
+			}
+			go wg.toasts.AddToast("Address error", "Address is of unknown format", "Danger")
+		} else {
+			check = true
+		}
+	}
+	return
+}
+
 func (wg *WalletGUI) Send() {
 	// ToDo Send RPC command
 	// TODO: yes, do one like the runner in run.go
 	if wg.WalletClient != nil {
-		for _, sendAddress := range wg.sendAddresses {
-			fmt.Println(sendAddress.AmountInput.GetText())
-			address, err := util.DecodeAddress("sendAddress.AmountInput.GetText()", nil)
-			if err != nil {
+		if len(wg.sendAddresses) < 2 {
+			if wg.checkSendItem(wg.sendAddresses[0].AddressInput.GetText(), wg.sendAddresses[0].AmountInput.GetText()) {
+				address, err := util.DecodeAddress(wg.sendAddresses[0].AddressInput.GetText(), nil)
+				if err != nil {
+				}
+				var h *chainhash.Hash
+				amountFloat, err := strconv.ParseFloat(wg.sendAddresses[0].AmountInput.GetText(), 32)
+				if err != nil {
+				}
+				amount, err := util.NewAmount(amountFloat)
+				if err != nil {
+				}
+				if h, err = wg.ChainClient.SendToAddress(address, amount); Check(err) {
+					go wg.toasts.AddToast("TxID", h.String(), "Danger")
+				}
+				// TODO: this is the txid hash
 			}
-			var h *chainhash.Hash
-			if h, err = wg.ChainClient.SendToAddress(address, 1); Check(err) {
-			}
-			// TODO: this is the txid hash
-			_ = h
+		} else {
+			//		for _, sendAddress := range wg.sendAddresses {
+			//			fmt.Println(sendAddress.AmountInput.GetText())
+			//			address, err := util.DecodeAddress("sendAddress.AmountInput.GetText()", nil)
+			//			if err != nil {
+			//			}
+			//			var h *chainhash.Hash
+			//			if h, err = wg.ChainClient.SendToAddress(address, 1); Check(err) {
+			//			}
+			//			// TODO: this is the txid hash
+			//			_ = h
+			//		}
 		}
 	}
 }
@@ -234,6 +286,7 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Dimensions {
 		).Fn,
 	).Fn(gtx)
 }
+
 //
 // func (wg *WalletGUI) sendButton(b *p9.Clickable, title string, click func()) func(gtx l.Context) l.Dimensions {
 // 	return func(gtx l.Context) l.Dimensions {

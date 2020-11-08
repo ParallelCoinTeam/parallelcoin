@@ -114,6 +114,7 @@ func (wg *WalletGUI) blockPage(blockHeight int) func() {
 										Fn,
 								).Fn,
 						).Fn,
+					func(gtx l.Context) {},
 					func() {
 						// we don't have to do anything here, user closes window, end
 						// if we want to close by a widget we need to make a new quit channel

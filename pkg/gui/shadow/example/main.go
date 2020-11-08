@@ -10,16 +10,13 @@ import (
 	"github.com/gioapp/gel/helper"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/gui/toast"
+	"github.com/p9c/pod/pkg/gui/shadow"
 	"log"
 	"os"
 )
 
 var (
-	th         = p9.NewTheme(p9fonts.Collection(), nil)
-	btnDanger  = th.Clickable()
-	btnWarning = th.Clickable()
-	btnSuccess = th.Clickable()
+	th = p9.NewTheme(p9fonts.Collection(), nil)
 )
 
 func main() {
@@ -35,7 +32,6 @@ func main() {
 
 func loop(w *app.Window) error {
 	var ops op.Ops
-	t := toast.New(th)
 	for {
 		e := <-w.Events()
 		switch e := e.(type) {
@@ -49,26 +45,9 @@ func loop(w *app.Window) error {
 			th.Inset(0.25,
 				th.VFlex().
 					Rigid(
-						th.Button(btnDanger).Text("Danger").Color("Danger").Fn,
-					).
-					Rigid(
-						th.Button(btnWarning).Text("Warning").Color("Warning").Fn,
-					).
-					Rigid(
-						th.Button(btnSuccess).Text("Success").Color("Success").Fn,
+						shadow.Shadow(th).Drop(th.H6("Success").Color("Success").Fn(gtx)),
 					).Fn).Fn(gtx)
 
-			for btnDanger.Clicked() {
-				t.AddToast("Danger", "Danger content", "Danger")
-			}
-			for btnSuccess.Clicked() {
-				t.AddToast("Success", "Success content", "Success")
-			}
-			for btnWarning.Clicked() {
-				t.AddToast("Warning", "Warning content", "Warning")
-			}
-
-			t.DrawToasts()(gtx)
 			e.Frame(gtx.Ops)
 			w.Invalidate()
 		}

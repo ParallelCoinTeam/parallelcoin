@@ -149,6 +149,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			wg.StatusBarButton("settings", 2, &icons.ActionSettings),
 		).Fn,
 	})
+	a.AddOverlay(wg.toasts.DrawToasts())
+	a.AddOverlay(wg.dialog.DrawDialog())
 	return
 }
 

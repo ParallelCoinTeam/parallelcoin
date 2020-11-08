@@ -72,14 +72,15 @@ func (t *Toasts) AddToast(title, content, level string) {
 	})
 }
 
-func (t *Toasts) DrawToasts(gtx l.Context) {
-	defer op.Push(gtx.Ops).Pop()
-	op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-250, 0)).Add(gtx.Ops)
-	gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Min.Y)
-	gtx.Constraints.Max.X = 250
-	t.layout.Vertical().ScrollToEnd().Length(len(t.toasts)).ListElement(t.singleToast).Fn(gtx)
+func (t *Toasts) DrawToasts() func(gtx l.Context) {
+	return func(gtx l.Context) {
+		defer op.Push(gtx.Ops).Pop()
+		op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-250, 0)).Add(gtx.Ops)
+		gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Min.Y)
+		gtx.Constraints.Max.X = 250
+		t.layout.Vertical().ScrollToEnd().Length(len(t.toasts)).ListElement(t.singleToast).Fn(gtx)
+	}
 }
-
 func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 	if t.toasts[index].ticker < float32(t.duration) {
 		t.toasts[index].ticker += 1
@@ -128,14 +129,11 @@ func (t *toast) singleToastLayoutShadow(gtx l.Context, r f32.Rectangle, rr float
 	if t.elevation.V <= 0 {
 		return
 	}
-
 	offset := pxf(gtx.Metric, t.elevation)
-
 	d := int(offset + 1)
 	if d > 4 {
 		d = 4
 	}
-
 	a := float32(t.bodyBackground.A) / 0xff
 	background := (f32color.RGBA{A: a * 0.4 / float32(d*d)}).SRGB()
 	for x := 0; x <= d; x++ {
