@@ -44,6 +44,7 @@ func (wg *WalletGUI) Runner() (err error) {
 					// args = apputil.PrependForWindows(args)
 					wg.runnerQuit = make(chan struct{})
 					wg.Shell = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
+						// TODO: make a log view for this
 						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 						return
 					}, func(pkg string) (out bool) {
@@ -62,6 +63,11 @@ func (wg *WalletGUI) Runner() (err error) {
 					*wg.cx.Config.NodeOff = true
 					*wg.cx.Config.WalletOff = true
 					save.Pod(wg.cx.Config)
+					if wg.mining {
+						go func(){
+							wg.MinerRunCommandChan <- "stop"
+						}()
+					}
 				case "restart":
 					Debug("restart called")
 					go func() {
@@ -73,19 +79,37 @@ func (wg *WalletGUI) Runner() (err error) {
 				switch cmd {
 				case "run":
 					Debug("run called for miner")
+					if wg.running == false {
+						Debug("not running because shell is not running")
+						wg.mining = false
+						break
+					}
 					wg.mining = true
 					*wg.cx.Config.Generate = true
 					save.Pod(wg.cx.Config)
+					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach"}
+					// args = apputil.PrependForWindows(args)
+					wg.minerQuit = make(chan struct{})
+					wg.Miner = consume.Log(wg.minerQuit, func(ent *logi.Entry) (err error) {
+						// TODO: make a log view for this
+						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+						return
+					}, func(pkg string) (out bool) {
+						return false
+					}, args...)
+					consume.Start(wg.Miner)
 				case "stop":
 					Debug("stop called for miner")
 					wg.mining = false
+					consume.Kill(wg.Miner)
 					*wg.cx.Config.Generate = false
 					save.Pod(wg.cx.Config)
 				case "restart":
 					Debug("restart called for miner")
-					wg.mining = true
-					*wg.cx.Config.Generate = true
-					save.Pod(wg.cx.Config)
+					go func(){
+						wg.MinerRunCommandChan <- "stop"
+						wg.MinerRunCommandChan <- "start"
+					}()
 				}
 			case *wg.cx.Config.GenThreads = <-wg.MinerThreadsChan:
 				Debug("setting threads to", *wg.cx.Config.GenThreads)
@@ -112,6 +136,9 @@ func (wg *WalletGUI) Runner() (err error) {
 	}()
 	if !(*wg.cx.Config.NodeOff && *wg.cx.Config.WalletOff) {
 		wg.NodeRunCommandChan <- "run"
+	}
+	if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads > 0 {
+		wg.MinerRunCommandChan <- "run"
 	}
 	return nil
 }

@@ -56,6 +56,7 @@ type WalletGUI struct {
 	invalidate                chan struct{}
 	quit                      chan struct{}
 	runnerQuit                chan struct{}
+	minerQuit                 chan struct{}
 	sendAddresses             []SendAddress
 	NodeRunCommandChan        chan string
 	MinerRunCommandChan       chan string
