@@ -2,29 +2,29 @@ package dap
 
 func (d *dap) StartServices() (err error) {
 	Debug("starting up services")
-	//Start Node
+	// Start Node
 	Debug("starting up SERVICES")
 
-	//err = d.NodeService()
-	//if err != nil {
+	// err = d.NodeService()
+	// if err != nil {
 	//	Error(err)
-	//}
-	//d.boot.Rc.Cx.RPCServer = <-d.boot.Rc.Cx.NodeChan
-	//d.boot.Rc.Cx.Node.Store(true)
+	// }
+	// d.boot.Rc.Cx.RPCServer = <-d.boot.Rc.Cx.NodeChan
+	// d.boot.Rc.Cx.Node.Store(true)
 
 	// Start wallet
-	//err = d.WalletService()
-	//if err != nil {
+	// err = d.WalletService()
+	// if err != nil {
 	//	Error(err)
-	//}
-	//d.boot.Rc.Cx.WalletServer = <-d.boot.Rc.Cx.WalletChan
-	//d.boot.Rc.Cx.Wallet.Store(true)
-	//d.boot.Rc.Cx.WalletServer.Rescan(nil, nil)
-	//d.boot.Rc.Ready <- struct{}{}
+	// }
+	// d.boot.Rc.Cx.WalletServer = <-d.boot.Rc.Cx.WalletChan
+	// d.boot.Rc.Cx.Wallet.Store(true)
+	// d.boot.Rc.Cx.WalletServer.Rescan(nil, nil)
+	// d.boot.Rc.Ready <- struct{}{}
 	return
 }
 
-//func (d *dap) WalletService() error {
+// func (d *dap) WalletService() error {
 //	d.boot.Rc.Cx.WalletKill = make(chan struct{})
 //	d.boot.Rc.Cx.Wallet.Store(false)
 //	var err error
@@ -45,9 +45,9 @@ func (d *dap) StartServices() (err error) {
 //		close(d.boot.Rc.Cx.WalletKill)
 //	})
 //	return err
-//}
+// }
 
-//func (d *dap) NodeService() error {
+// func (d *dap) NodeService() error {
 //	d.boot.Rc.Cx.NodeKill = make(chan struct{})
 //	d.boot.Rc.Cx.Node.Store(false)
 //	var err error
@@ -68,4 +68,4 @@ func (d *dap) StartServices() (err error) {
 //		close(d.boot.Rc.Cx.NodeKill)
 //	})
 //	return err
-//}
+// }

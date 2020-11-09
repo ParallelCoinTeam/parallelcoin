@@ -2,6 +2,7 @@ package gui
 
 import (
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/res"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
@@ -19,14 +20,14 @@ func (g *GuiAppModel) BeforeMain(gtx C) {
 }
 
 func (g *GuiAppModel) AfterMain(gtx C) {
-	//pop.Popup(gtx, g.ui.Theme, func(gtx C)D{return material.H3(g.ui.Theme.T,"tetstette").Layout(gtx)})
-	//return lyt.Format(gtx, "hflex(middle,f(1,inset(8dp8dp8dp8dp,_)))",
-	//pop.Popup(g.ui.Theme, func(gtx C) D {
+	// pop.Popup(gtx, g.ui.Theme, func(gtx C)D{return material.H3(g.ui.Theme.T,"tetstette").Layout(gtx)})
+	// return lyt.Format(gtx, "hflex(middle,f(1,inset(8dp8dp8dp8dp,_)))",
+	// pop.Popup(g.ui.Theme, func(gtx C) D {
 	//	title := theme.Body(g.ui.Theme, "Requested payments history")
 	//	title.Alignment = text.Start
 	//	return title.Layout(gtx)
 	//	}),
-	//})
+	// })
 
 }
 

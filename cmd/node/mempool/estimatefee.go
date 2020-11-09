@@ -75,9 +75,9 @@ type observedTxSet []*observedTransaction
 // registeredBlock has the hash of a block and the list of transactions it mined which had been previously observed by
 // the FeeEstimator. It is used if Rollback is called to reverse the effect of registering a block.
 type registeredBlock struct {
-		hash         chainhash.Hash
-		transactions []*observedTransaction
-	}
+	hash         chainhash.Hash
+	transactions []*observedTransaction
+}
 
 // TODO incorporate Alex Morcos' modifications to Gavin's initial model
 //  https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2014-October/006824.html

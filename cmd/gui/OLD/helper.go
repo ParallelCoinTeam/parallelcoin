@@ -2,6 +2,7 @@ package gui
 
 import (
 	"gioui.org/text"
+
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )

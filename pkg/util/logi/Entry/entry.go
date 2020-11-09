@@ -2,10 +2,12 @@
 package Entry
 
 import (
+	"time"
+
 	"github.com/davecgh/go-spew/spew"
+
 	"github.com/p9c/pod/pkg/coding/simplebuffer/String"
 	"github.com/p9c/pod/pkg/util/logi"
-	"time"
 
 	"github.com/p9c/pod/pkg/coding/simplebuffer"
 	"github.com/p9c/pod/pkg/coding/simplebuffer/Time"

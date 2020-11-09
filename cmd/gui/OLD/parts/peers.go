@@ -5,6 +5,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 )
 
@@ -13,11 +14,11 @@ var (
 )
 
 func (g *GioWallet) GetPeers() {
-	//f, err := g.sh.ID()
-	//checkError(err)
-	//fv, ft, err := g.sh.Version()
-	//checkError(err)
-	//g.Status = Status{
+	// f, err := g.sh.ID()
+	// checkError(err)
+	// fv, ft, err := g.sh.Version()
+	// checkError(err)
+	// g.Status = Status{
 	//	Title: "string",
 	//	//HostingSize: "uint",
 	//	PeerId:  f.ID,
@@ -26,7 +27,7 @@ func (g *GioWallet) GetPeers() {
 	//	//Api:       "string",
 	//	Addresses: f.Addresses,
 	//	Pub:       f.PublicKey,
-	//}
+	// }
 }
 
 func (g *GioWallet) peersHeader() func(gtx C) D {
@@ -45,12 +46,12 @@ func (g *GioWallet) peersHeader() func(gtx C) D {
 
 func (g *GioWallet) peersBody() func(gtx C) D {
 	return func(gtx C) D {
-		//return lyt.Format(gtx, "vflex(middle,r(inset(5dp0dp5dp0dp,_)),r(inset(5dp0dp30dp0dp,_)),r(inset(5dp0dp5dp0dp,_),r(inset(5dp0dp5dp0dp,_)))",
+		// return lyt.Format(gtx, "vflex(middle,r(inset(5dp0dp5dp0dp,_)),r(inset(5dp0dp30dp0dp,_)),r(inset(5dp0dp5dp0dp,_),r(inset(5dp0dp5dp0dp,_)))",
 		//	statusRow(g.UI.Theme, "RateIn: ", row(g.UI.Theme, fmt.Sprint(g.Status.Live.RateIn))),
 		//	statusRow(g.UI.Theme, "RateOut: ", row(g.UI.Theme, fmt.Sprint(g.Status.Live.RateOut))),
 		//	statusRow(g.UI.Theme, "TotalIn: ", row(g.UI.Theme, fmt.Sprint(g.Status.Live.TotalIn))),
 		//	statusRow(g.UI.Theme, "TotalOut: ", row(g.UI.Theme, fmt.Sprint(g.Status.Live.TotalOut))),
-		//)
+		// )
 		return D{}
 	}
 }

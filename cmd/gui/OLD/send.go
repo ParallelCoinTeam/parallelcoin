@@ -2,12 +2,14 @@ package gui
 
 import (
 	"fmt"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/btn"
 	"github.com/p9c/pod/pkg/gui/wallet/counter"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
@@ -78,7 +80,7 @@ func CreateSendAddressItem() func() {
 						SingleLine: true,
 						Submit:     true,
 					},
-					//PageFunction:    w.PrikazaniElementSumaRacunica(),
+					// PageFunction:    w.PrikazaniElementSumaRacunica(),
 					CounterIncrease: new(widget.Clickable),
 					CounterDecrease: new(widget.Clickable),
 					CounterReset:    new(widget.Clickable),
@@ -159,7 +161,7 @@ func sendFooterTop(th *theme.Theme) func(gtx C) D {
 				btn.Size = unit.Dp(21)
 				btn.Background = helper.HexARGB(th.Colors["Secondary"])
 				for connectionsBtn.Clicked() {
-					//ui.N.CurrentPage = "Welcome"
+					// ui.N.CurrentPage = "Welcome"
 				}
 				return btn.Layout(gtx)
 			},
@@ -210,14 +212,14 @@ func singleAddress(th *theme.Theme) func(gtx C, i int) D {
 				func(gtx C) D {
 					return lyt.Format(gtx, "hflex(middle,r(_),r(_),r(_),r(_))",
 						counter.CounterSt(th, sendAddresses[i].AmountInput).Layout(th, fmt.Sprint(sendAddresses[i].AmountInput.Value)),
-						//func(gtx C) D {return D{}},
+						// func(gtx C) D {return D{}},
 						func(gtx C) D {
 							btn := material.IconButton(th.T, connectionsBtn, th.Icons["networkIcon"])
 							btn.Inset = layout.Inset{unit.Dp(2), unit.Dp(2), unit.Dp(2), unit.Dp(2)}
 							btn.Size = unit.Dp(21)
 							btn.Background = helper.HexARGB(th.Colors["Secondary"])
 							for connectionsBtn.Clicked() {
-								//ui.N.CurrentPage = "Welcome"
+								// ui.N.CurrentPage = "Welcome"
 							}
 							return btn.Layout(gtx)
 						},
@@ -229,7 +231,7 @@ func singleAddress(th *theme.Theme) func(gtx C, i int) D {
 							btn.Inset = layout.Inset{unit.Dp(2), unit.Dp(2), unit.Dp(2), unit.Dp(2)}
 							btn.Background = helper.HexARGB(th.Colors["Secondary"])
 							for connectionsBtn.Clicked() {
-								//ui.N.CurrentPage = "Welcome"
+								// ui.N.CurrentPage = "Welcome"
 							}
 							return btn.Layout(gtx)
 						},
@@ -252,10 +254,10 @@ func sendButton(th *theme.Theme, c *widget.Clickable, icon, lay, label string, o
 		b.Icon = th.Icons[icon]
 		b.IconSize = unit.Dp(15)
 		b.CornerRadius = unit.Dp(0)
-		//b.Background = th.Colors["NavBg"]
+		// b.Background = th.Colors["NavBg"]
 		b.TextColor = th.Colors["ButtonText"]
 		for c.Clicked() {
-			//n.CurrentPage = item.Page
+			// n.CurrentPage = item.Page
 			onClick()
 		}
 		return b.Layout(gtx)

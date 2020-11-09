@@ -10,6 +10,7 @@ import (
 	"github.com/gioapp/gel/helper"
 
 	"github.com/p9c/pod/cmd/gui/mod"
+
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/nav"

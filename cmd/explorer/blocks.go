@@ -2,7 +2,9 @@ package explorer
 
 import (
 	"fmt"
+
 	l "gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/gui/p9"
 )
@@ -33,10 +35,10 @@ func (ex *Explorer) Blocks() l.Widget {
 						// ex.Inset(0.25,
 						func(gtx l.Context) l.Dimensions {
 							return ex.lists["blocks"].Vertical().Length(listPageSize).ListElement(le).Fn(gtx)
-							//).
-							//Rigid(
-							//ex.sendFooter(),
-							//).Fn
+							// ).
+							// Rigid(
+							// ex.sendFooter(),
+							// ).Fn
 							//		).Fn},
 						}).Fn,
 			},

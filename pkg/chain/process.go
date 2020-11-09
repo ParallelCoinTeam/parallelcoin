@@ -130,7 +130,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
 			if currentTarget.Cmp(requiredTarget) > 0 {
 				str := fmt.Sprintf(
 					"processing: block target difficulty of %064x is too low when compared to the previous"+
-					" checkpoint", currentTarget)
+						" checkpoint", currentTarget)
 				return false, false, ruleError(ErrDifficultyTooLow, str)
 			}
 		}

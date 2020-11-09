@@ -2,16 +2,15 @@ package parts
 
 import (
 	"math"
-
 	"strconv"
 )
 
 var (
 	noReturn = func(gtx C) D { return D{} }
 
-	//contentList = &layout.List{
+	// contentList = &layout.List{
 	//	Axis: layout.Vertical,
-	//}
+	// }
 	suffixes = [7]string{
 		0: "B",
 		1: "KB",
@@ -38,16 +37,16 @@ func Round(val float64, roundOn float64, places int) (newVal float64) {
 }
 
 func formatByteSize(size float64) string {
-	//size := sizeInMB * 1024 * 1024
+	// size := sizeInMB * 1024 * 1024
 	base := math.Log(size) / math.Log(1024)
 	getSize := Round(math.Pow(1024, base-math.Floor(base)), .5, 2)
 	getSuffix := suffixes[int(math.Floor(base))]
-	//fmt.Println("dole", strconv.FormatFloat(getSize, 'f', -1, 64)+" "+string(getSuffix))
+	// fmt.Println("dole", strconv.FormatFloat(getSize, 'f', -1, 64)+" "+string(getSuffix))
 	return strconv.FormatFloat(getSize, 'f', -1, 64) + " " + string(getSuffix)
 }
 
 //
-//func BoxBase(color string, content layout.Widget) layout.Widget {
+// func BoxBase(color string, content layout.Widget) layout.Widget {
 //	return container.C().
 //		OutsideColor(color).
 //		BorderColor(color).
@@ -56,8 +55,8 @@ func formatByteSize(size float64) string {
 //		Border(0).
 //		Padding(0).
 //		Layout(content)
-//}
-//func boxPanel(th *theme.Theme, content layout.Widget) layout.Widget {
+// }
+// func boxPanel(th *theme.Theme, content layout.Widget) layout.Widget {
 //	return container.C().
 //		OutsideColor(th.Colors["PanelBg"]).
 //		BorderColor(th.Colors["Border"]).
@@ -66,8 +65,8 @@ func formatByteSize(size float64) string {
 //		Border(1).
 //		Padding(8).
 //		Layout(content)
-//}
-//func boxEditor(th *theme.Theme, content layout.Widget) layout.Widget {
+// }
+// func boxEditor(th *theme.Theme, content layout.Widget) layout.Widget {
 //	return container.C().
 //		OutsideColor(th.Colors["White"]).
 //		BorderColor(th.Colors["White"]).
@@ -76,4 +75,4 @@ func formatByteSize(size float64) string {
 //		Border(8).
 //		Padding(8).
 //		Layout(content)
-//}
+// }

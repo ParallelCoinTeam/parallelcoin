@@ -1,20 +1,20 @@
 package panel
 
 //
-//import (
+// import (
 //	"gioui.org/io/pointer"
 //	"gioui.org/layout"
 //	"gioui.org/unit"
 //	"github.com/p9c/pod/pkg/gui/gel"
 //	"image"
-//)
+// )
 //
-//var (
+// var (
 //	widgetButtonUp   = new(gel.Button)
 //	widgetButtonDown = new(gel.Button)
-//)
+// )
 //
-//type ScrollBar struct {
+// type ScrollBar struct {
 //	ColorBg      string
 //	BorderRadius [4]float32
 //	OperateValue interface{}
@@ -22,14 +22,14 @@ package panel
 //	up           IconButton
 //	down         IconButton
 //	container    DuoUIcontainer
-//}
+// }
 //
-//type ScrollBarSlider struct {
+// type ScrollBarSlider struct {
 //	container DuoUIcontainer
 //	Icon      DuoUIicon
-//}
+// }
 //
-//func (t *DuoUItheme) ScrollBar(leftMargin int) *ScrollBar {
+// func (t *DuoUItheme) ScrollBar(leftMargin int) *ScrollBar {
 //	slider := &ScrollBarSlider{
 //		container: t.DuoUIcontainer(0, t.Colors["Primary"]),
 //		Icon:      *t.Icons["Grab"],
@@ -45,9 +45,9 @@ package panel
 //	}
 //	scrollbar.container.PaddingLeft = leftMargin
 //	return scrollbar
-//}
+// }
 //
-//func (p *DuoUIpanel) ScrollBarLayout(gtx *layout.Context, panel *gel.Panel) {
+// func (p *DuoUIpanel) ScrollBarLayout(gtx *layout.Context, panel *gel.Panel) {
 //	p.ScrollBar.container.Layout(gtx, layout.Center, func() {
 //
 //		layout.Flex{
@@ -82,9 +82,9 @@ package panel
 //			}),
 //		)
 //	})
-//}
+// }
 //
-//func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
+// func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 //	layout.Flex{
 //		Axis: layout.Vertical,
 //	}.Layout(gtx,
@@ -112,4 +112,4 @@ package panel
 //			})
 //		}),
 //	)
-//}
+// }

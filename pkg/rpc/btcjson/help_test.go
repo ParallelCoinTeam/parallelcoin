@@ -150,7 +150,7 @@ func TestHelpReflectInternals(t *testing.T) {
 			help:        "{\n} ",
 		},
 		{
-			name: "struct indent level 1",
+			name:        "struct indent level 1",
 			reflectType: reflect.TypeOf(struct{ field int }{}),
 			indentLevel: 1,
 			key:         "json-type-object",

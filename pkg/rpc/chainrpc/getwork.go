@@ -326,7 +326,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 		// Anything other than a rule violation is an unexpected error, so return that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
 			return nil, &btcjson.RPCError{
-				Code: btcjson.ErrRPCInternal.Code,
+				Code:    btcjson.ErrRPCInternal.Code,
 				Message: fmt.Sprintf("Unexpected error while processing block: %v", err),
 			}
 		}

@@ -3,13 +3,15 @@ package gui
 import (
 	"encoding/json"
 	"fmt"
-	l "gioui.org/layout"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
-	"github.com/p9c/pod/pkg/rpc/legacy"
 	"sort"
 	"strings"
 	"time"
+
+	l "gioui.org/layout"
+
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
+	"github.com/p9c/pod/pkg/rpc/legacy"
 )
 
 type Console struct {
@@ -28,13 +30,13 @@ type ConsoleCommandsNumber struct {
 	CommandsNumber int
 }
 
-//var (
+// var (
 //	consoleInputField = wg.th.Input("", "Amount", "Primary", "DocText", 25, func(pass string) {})
 //	consoleOutputList = &layout.List{
 //		Axis:        layout.Vertical,
 //		ScrollToEnd: true,
 //	}
-//)
+// )
 
 func (wg *WalletGUI) ConsolePage() l.Widget {
 	return wg.th.VFlex().
@@ -69,7 +71,7 @@ func (wg *WalletGUI) consoleRow(gtx l.Context, i int) l.Dimensions {
 
 func (wg *WalletGUI) consoleInput() l.Widget {
 	return wg.inputs["console"].Input("", "Run command", "Secondary", "Primary", 25, func(pass string) {
-		//func(e gel.SubmitEvent) {
+		// func(e gel.SubmitEvent) {
 		wg.console.Commands = append(
 			wg.console.Commands,
 			ConsoleCommand{
@@ -117,7 +119,7 @@ func (wg *WalletGUI) ConsoleCmd(com string) (o string) {
 			}
 		} else {
 			method = args[0]
-			//L.Debug("finding help for command", method)
+			// L.Debug("finding help for command", method)
 			if help, err := wg.cx.RPCServer.HelpCacher.RPCMethodHelp(
 				method); Check(err) {
 				o += err.Error() + "\n"

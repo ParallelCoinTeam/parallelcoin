@@ -2,12 +2,13 @@ package box
 
 import (
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/gui/wallet/container"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
 )
 
 var (
-//noReturn = func(gtx C) D { return D{} }
+// noReturn = func(gtx C) D { return D{} }
 )
 
 func BoxBase(color string, content layout.Widget) layout.Widget {

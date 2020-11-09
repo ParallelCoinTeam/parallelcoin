@@ -29,7 +29,7 @@ var (
 // CalcNextRequiredDifficulty calculates the required difficulty for the block after the end of the current best chain
 // based on the difficulty retarget rules. This function is safe for concurrent access.
 func (b *BlockChain) CalcNextRequiredDifficulty(workerNumber uint32, timestamp time.
-	Time, algo string) (difficulty uint32, err error) {
+Time, algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
 	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.BestChain.
 		Tip(), timestamp, algo, false)

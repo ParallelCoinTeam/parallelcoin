@@ -21,7 +21,7 @@ import (
 	"github.com/ipfs/go-unixfs/importer/helpers"
 	"github.com/ipfs/go-unixfs/importer/trickle"
 	ufsio "github.com/ipfs/go-unixfs/io"
-	multihash "github.com/multiformats/go-multihash"
+	"github.com/multiformats/go-multihash"
 )
 
 func init() {
