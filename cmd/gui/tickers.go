@@ -189,7 +189,7 @@ func (wg *WalletGUI) Tickers() {
 					if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
 						break out
 					}
-					// Debugs(ltr)
+					Debugs(ltr)
 					wg.State.SetLastTxs(ltr)
 					// }
 					// case <-fiveSeconds:

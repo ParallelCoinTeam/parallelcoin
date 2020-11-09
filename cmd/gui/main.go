@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"runtime"
 	"time"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui/dialog"
 	"github.com/p9c/pod/pkg/gui/toast"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -124,12 +127,15 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	pass := ""
 	passConfirm := ""
+	seed := make([]byte, hdkeychain.MaxSeedBytes)
+	_, _ = rand.Read(seed)
+	seedString := hex.EncodeToString(seed)
 	wg.inputs = map[string]*p9.Input{
 		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 32, func(pass string) {}),
 		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 32, func(pass string) {}),
 		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 32, func(pass string) {}),
 		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", 32, func(pass string) {}),
-		"walletSeed":     wg.th.Input("", "wallet seed (optional)", "Primary", "DocText", 32, func(pass string) {}),
+		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", 32, func(pass string) {}),
 	}
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", 32, func(pass string) { }),
