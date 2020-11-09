@@ -62,7 +62,9 @@ func Main(cx *conte.Xt) (err error) {
 			return
 		}
 		go func() {
+			Warn("refilling mining addresses")
 			addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
+			Warn("done refilling mining addresses")
 		}()
 		go rpcClientConnectLoop(cx, legacyServer, loader)
 		loader.Wallet = w

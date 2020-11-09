@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
@@ -214,10 +215,12 @@ func (wg *WalletGUI) Run() (err error) {
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				p9.If(*wg.noWallet,
-					wg.WalletPage,
-					wg.Fn(),
-				),
+				func(gtx l.Context) l.Dimensions {
+					return p9.If(*wg.noWallet,
+						wg.WalletPage,
+						wg.App.Fn(),
+					)(gtx)
+				},
 				wg.Overlay(),
 				// wg.InitWallet(),
 				func() {

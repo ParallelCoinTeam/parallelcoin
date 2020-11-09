@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/p9c/pod/app/config"
-
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/app/config"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
@@ -43,7 +43,9 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 					Error("error starting node ", err)
 				}
 			}()
+			Info("starting node")
 			cx.RPCServer = <-cx.NodeChan
+			Info("node started")
 		}
 		if !*cx.Config.WalletOff {
 			go func() {
@@ -52,7 +54,9 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 					fmt.Println("error running wallet:", err)
 				}
 			}()
+			Info("starting wallet")
 			cx.WalletServer = <-cx.WalletChan
+			Info("wallet started")
 		}
 		Debug("shell started")
 		cx.WaitGroup.Wait()

@@ -545,8 +545,8 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		*cfg.RPCListeners = make([]string, 0, len(addrs))
 		Debug("setting listeners")
 		for _, addr := range addrs {
-			addr = net.JoinHostPort(addr, params.RPCClientPort)
 			*cfg.RPCListeners = append(*cfg.RPCListeners, addr)
+			addr = net.JoinHostPort(addr, params.RPCClientPort)
 		}
 	}
 	Trace("checking rpc max concurrent requests")
