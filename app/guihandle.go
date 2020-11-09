@@ -6,8 +6,6 @@ import (
 	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -16,9 +14,6 @@ func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		Info("starting up node gui for parallelcoin")
 		// Debug(os.Args)
 		config.Configure(cx, c.Command.Name, true)
-		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
-			fork.IsTestnet = true
-		}
 		interrupt.AddHandler(func() {
 			Debug("wallet gui is shut down")
 			// os.Exit(0)

@@ -56,7 +56,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
-	Debug("CreateWallet", loader.ChainParams.Name)
+	Debug("WalletPage", loader.ChainParams.Name)
 	// When there is a legacy keystore, open it now to ensure any errors don't end up exiting the process after the user
 	// has spent time entering a bunch of information.
 	netDir := NetworkDir(*config.DataDir, activenet)

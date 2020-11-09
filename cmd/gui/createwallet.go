@@ -1,7 +1,11 @@
 package gui
 
-import l "gioui.org/layout"
+import (
+	l "gioui.org/layout"
+)
 
-func (wg *WalletGUI) CreateWallet(gtx l.Context) l.Dimensions {
-	return l.Dimensions{}
+
+
+func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
+	return wg.walletPage.Fn()(gtx)
 }

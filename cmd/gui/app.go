@@ -16,7 +16,7 @@ import (
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
-	a = wg.th.App(*wg.size)
+	a = wg.th.App(wg.w["main"].Width)
 	wg.App = a
 	wg.App.ThemeHook(func() {
 		Debug("theme hook")
@@ -28,7 +28,6 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			wgb.Value(*wg.Dark)
 		}
 		save.Pod(wg.cx.Config)
-
 	})
 	wg.size = a.Size
 	wg.config = cfg.New(wg.cx, wg.th)

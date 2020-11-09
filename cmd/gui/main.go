@@ -4,6 +4,7 @@ import (
 	"runtime"
 	"time"
 
+	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
@@ -74,6 +75,7 @@ type WalletGUI struct {
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
 	noWallet                  bool
+	walletPage                *p9.App
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -172,7 +174,29 @@ func (wg *WalletGUI) Run() (err error) {
 		),
 	}
 	wg.App = wg.GetAppWidget()
-	// wg.CreateSendAddressItem()
+	wg.walletPage = wg.th.App(wg.w["main"].Width).Title("")
+	wg.walletPage.ThemeHook(func() {
+		Debug("theme hook")
+		*wg.cx.Config.DarkTheme = *wg.Dark
+		a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
+		*a = *wg.Dark
+		if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
+			wgb.Value(*wg.Dark)
+		}
+		save.Pod(wg.cx.Config)
+	})
+	wg.walletPage.Pages(map[string]l.Widget{
+		"main": wg.Page("overview", p9.Widgets{
+			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			p9.WidgetSize{Widget: wg.th.Flex().SpaceAround().AlignMiddle().Rigid(
+				wg.th.H3("create a new wallet").Fn,
+				).Fn},
+			p9.WidgetSize{Size: 800, Widget: wg.th.Flex().SpaceAround().AlignMiddle().Rigid(
+				wg.th.H3("create a new wallet").Fn,
+			).Fn},
+		}),
+	})
+	wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
 	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
@@ -190,6 +214,7 @@ func (wg *WalletGUI) Run() (err error) {
 		// wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
 		wg.MinerRunCommandChan <- "start"
 	}
+	wg.Size = wg.w["main"].Width
 	go func() {
 		if err := wg.w["main"].
 			Size(800, 480).
@@ -197,7 +222,7 @@ func (wg *WalletGUI) Run() (err error) {
 			Open().
 			Run(
 				p9.If(wg.noWallet,
-					wg.CreateWallet,
+					wg.WalletPage,
 					wg.Fn(),
 				),
 				wg.Overlay(),
