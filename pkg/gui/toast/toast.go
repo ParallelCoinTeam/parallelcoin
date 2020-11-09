@@ -1,6 +1,9 @@
 package toast
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
@@ -12,9 +15,6 @@ import (
 
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/shadow"
-	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
-	"image"
-	"image/color"
 )
 
 type Toasts struct {
@@ -80,7 +80,7 @@ func (t *Toasts) DrawToasts() func(gtx l.Context) {
 		op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-310, 0)).Add(gtx.Ops)
 		gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Min.Y)
 		gtx.Constraints.Max.X = 250
-		//paint.Fill(gtx.Ops,  helper.HexARGB("ff559988"))
+		// paint.Fill(gtx.Ops,  helper.HexARGB("ff559988"))
 		t.theme.Inset(0,
 			t.layout.Vertical().ScrollToEnd().Length(len(t.toasts)).ListElement(t.singleToast).Fn).Fn(gtx)
 	}
@@ -89,7 +89,7 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 	if t.toasts[index].ticker < float32(t.duration) {
 		t.toasts[index].ticker += 1
 		gtx.Constraints.Min = t.singleSize
-		//gtx.Constraints.Max = t.singleSize
+		// gtx.Constraints.Max = t.singleSize
 		gtx.Constraints.Max.X = t.singleSize.X
 		sz := gtx.Constraints.Min
 		rr := float32(gtx.Px(t.singleCornerRadius))
