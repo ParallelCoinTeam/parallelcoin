@@ -4,7 +4,6 @@ import (
 	"runtime"
 	"time"
 
-	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
@@ -74,7 +73,6 @@ type WalletGUI struct {
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
 	noWallet                  bool
-	walletPage                *p9.App
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -122,17 +120,21 @@ func (wg *WalletGUI) Run() (err error) {
 		"encryption": wg.th.Bool(false),
 		"seed":       wg.th.Bool(false),
 		"testnet":    wg.th.Bool(false),
+		"ihaveread":  wg.th.Bool(false),
 	}
-	pass := "password"
+	pass := ""
+	passConfirm := ""
 	wg.inputs = map[string]*p9.Input{
-		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 25, func(pass string) {}),
-		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 25, func(pass string) {}),
-		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 25, func(pass string) {}),
-		"console":        wg.th.Input("", "ParallelCoin console", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 32, func(pass string) {}),
+		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 32, func(pass string) {}),
+		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 32, func(pass string) {}),
+		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", 32, func(pass string) {}),
+		"walletSeed":     wg.th.Input("", "wallet seed (optional)", "Primary", "DocText", 32, func(pass string) {}),
 	}
 	wg.passwords = map[string]*p9.Password{
-		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
-		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
+		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", 32, func(pass string) { }),
+		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", 32, func(pass string) {}),
+		"publicPassEditor":  wg.th.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", 32, func(pass string) {}),
 	}
 	wg.console = &Console{
 		Commands: []ConsoleCommand{
@@ -176,28 +178,6 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	wg.Tickers()
 	wg.App = wg.GetAppWidget()
-	wg.walletPage = wg.th.App(wg.w["main"].Width).Title("")
-	wg.walletPage.ThemeHook(func() {
-		Debug("theme hook")
-		*wg.cx.Config.DarkTheme = *wg.Dark
-		a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-		*a = *wg.Dark
-		if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
-			wgb.Value(*wg.Dark)
-		}
-		save.Pod(wg.cx.Config)
-	})
-	wg.walletPage.Pages(map[string]l.Widget{
-		"main": wg.Page("overview", p9.Widgets{
-			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-			p9.WidgetSize{Widget: wg.th.Flex().SpaceAround().AlignMiddle().Rigid(
-				wg.th.H3("create a new wallet").Fn,
-			).Fn},
-			p9.WidgetSize{Size: 800, Widget: wg.th.Flex().SpaceAround().AlignMiddle().Rigid(
-				wg.th.H3("create a new wallet").Fn,
-			).Fn},
-		}),
-	})
 	wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
 	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
@@ -205,6 +185,8 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.noWallet = true
 		wg.running = false
 		wg.mining = false
+		wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
+
 	}
 	if wg.running {
 		Debug("initial starting shell")

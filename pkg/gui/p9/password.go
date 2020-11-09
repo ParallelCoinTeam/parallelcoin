@@ -17,7 +17,6 @@ type Password struct {
 	copyButton           *IconButton
 	pasteClickable       *Clickable
 	pasteButton          *IconButton
-	GetPassword          func() string
 	hide                 bool
 	size                 int
 	borderColor          string
@@ -29,9 +28,9 @@ type Password struct {
 	handle               func(pass string)
 }
 
-func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfocused string, size int, handle func(pass string)) *Password {
+func (th *Theme) Password(hint string, password *string, borderColorFocused, borderColorUnfocused string, size int, handle func(pass string)) *Password {
 	pass := th.Editor().Mask('•').SingleLine().Submit(true)
-	passInput := th.SimpleInput(pass, "*******").Color(borderColorUnfocused)
+	passInput := th.SimpleInput(pass, hint).Color(borderColorUnfocused)
 	p := &Password{
 		Theme:                th,
 		unhideClickable:      th.Clickable(),
@@ -45,9 +44,6 @@ func (th *Theme) Password(password *string, borderColorFocused, borderColorUnfoc
 		borderColor:          borderColorUnfocused,
 		handle:               handle,
 		password:             password,
-	}
-	p.GetPassword = func() string {
-		return p.pass.Text()
 	}
 	p.copyButton = th.IconButton(p.copyClickable)
 	p.pasteButton = th.IconButton(p.pasteClickable)
@@ -162,4 +158,8 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 				Fn,
 		).Fn(gtx)
 	}(gtx)
+}
+
+func (p *Password) GetPassword() string {
+	return p.passInput.editor.Text()
 }
