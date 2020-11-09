@@ -2,11 +2,16 @@ package gui
 
 import (
 	"encoding/hex"
+	"os"
 	"time"
 
 	l "gioui.org/layout"
 
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
@@ -116,8 +121,18 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 													Background("Primary").
 													Color("Light").
 													SetClick(func() {
-														Debug("clicked submit wallet")
-														go func() {
+														// go func() {
+															Debug("clicked submit wallet")
+															if wg.bools["testnet"].GetValue() {
+																wg.cx.ActiveNet = &netparams.TestNet3Params
+																fork.IsTestnet = true
+															} else {
+																wg.cx.ActiveNet = &netparams.MainNetParams
+																fork.IsTestnet = false
+															}
+															*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
+																string(os.PathSeparator) + wg.cx.ActiveNet.Name +
+																string(os.PathSeparator) + wallet.WalletDbName
 															dbDir := *wg.cx.Config.WalletFile
 															loader := wallet.NewLoader(wg.cx.ActiveNet, dbDir, 250)
 															seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())
@@ -133,11 +148,41 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 																panic(err)
 															}
 															w.Manager.Close()
-															wg.noWallet = false
-															Debug("starting up shell")
+															Debug("starting up shell first time")
+															network := wg.cx.ActiveNet.Name
+															Debug("network")
+															args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
+																"-n", network,
+																"--rpclisten", *wg.cx.Config.RPCConnect,
+																"--servertls=false", "--clienttls=false", "--notty",
+																"--pipelog", "wallet"}
+																// "wallet"}
+															// args = apputil.PrependForWindows(args)
+															quit := make(chan struct{})
+															wg.Shell = consume.Log(quit, func(ent *logi.Entry) (err error) {
+																return
+															}, func(pkg string) (out bool) {
+																return false
+															}, args...)
+															consume.Start(wg.Shell)
+															time.Sleep(time.Second * 2)
+															consume.Kill(wg.Shell)
+															// panic("did we get here?")
+															Debug("starting up shell second time")
+															quit = make(chan struct{})
+															wg.Shell = consume.Log(quit, func(ent *logi.Entry) (err error) {
+																return
+															}, func(pkg string) (out bool) {
+																return false
+															}, args...)
+															consume.Start(wg.Shell)
+															time.Sleep(time.Second * 2)
+															consume.Kill(wg.Shell)
+															Debug("switching to wallet")
+															*wg.noWallet = false
 															wg.running = false
 															wg.ShellRunCommandChan <- "run"
-														}()
+														// }()
 													}).
 													CornerRadius(0).
 													Inset(0.5).

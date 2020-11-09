@@ -39,8 +39,7 @@ func Main(cx *conte.Xt) (err error) {
 	// Create and start HTTP server to serve wallet client connections. This will be updated with the wallet and chain
 	// server RPC client created below after each is created.
 	Trace("starting RPC servers")
-	legacyServer, err := startRPCServers(cx.Config, cx.StateCfg, cx.ActiveNet,
-		loader)
+	legacyServer, err := startRPCServers(cx.Config, cx.StateCfg, cx.ActiveNet, loader)
 	if err != nil {
 		Error("unable to create RPC servers:", err)
 		return

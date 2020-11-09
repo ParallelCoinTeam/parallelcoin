@@ -45,7 +45,6 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}()
 			cx.RPCServer = <-cx.NodeChan
 		}
-		Warn("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
 				err = walletmain.Main(cx)

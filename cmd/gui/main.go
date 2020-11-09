@@ -29,13 +29,15 @@ import (
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	var size int
+	var noWallet bool
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
 		// runnerQuit: make(chan struct{}),
-		size: &size,
+		size:     &size,
+		noWallet: &noWallet,
 	}
 	return wg.Run()
 }
@@ -75,7 +77,7 @@ type WalletGUI struct {
 	console                   *Console
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
-	noWallet                  bool
+	noWallet                  *bool
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -138,7 +140,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", 32, func(pass string) {}),
 	}
 	wg.passwords = map[string]*p9.Password{
-		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", 32, func(pass string) { }),
+		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", 32, func(pass string) {}),
 		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", 32, func(pass string) {}),
 		"publicPassEditor":  wg.th.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", 32, func(pass string) {}),
 	}
@@ -188,7 +190,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
 	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
-		wg.noWallet = true
+		*wg.noWallet = true
 		wg.running = false
 		wg.mining = false
 		wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
@@ -212,7 +214,7 @@ func (wg *WalletGUI) Run() (err error) {
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				p9.If(wg.noWallet,
+				p9.If(*wg.noWallet,
 					wg.WalletPage,
 					wg.Fn(),
 				),
