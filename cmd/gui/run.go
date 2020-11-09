@@ -3,7 +3,6 @@ package gui
 import (
 	"os"
 
-	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -40,7 +39,7 @@ func (wg *WalletGUI) Runner() (err error) {
 						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"--servertls=false", "--clienttls=false", "--notty",
 						"--pipelog", "shell"}
-					args = apputil.PrependForWindows(args)
+					// args = apputil.PrependForWindows(args)
 					wg.runnerQuit = make(chan struct{})
 					wg.Shell = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
 						// TODO: make a log view for this

@@ -120,74 +120,89 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 												Background("Primary").
 												Color("Light").
 												SetClick(func() {
-													go func() {
-														Debug("clicked submit wallet")
-														if wg.bools["testnet"].GetValue() {
-															wg.cx.ActiveNet = &netparams.TestNet3Params
-															fork.IsTestnet = true
-														} else {
-															wg.cx.ActiveNet = &netparams.MainNetParams
-															fork.IsTestnet = false
-														}
-														*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
-															string(os.PathSeparator) + wg.cx.ActiveNet.Name +
-															string(os.PathSeparator) + wallet.WalletDbName
-														dbDir := *wg.cx.Config.WalletFile
-														loader := wallet.NewLoader(wg.cx.ActiveNet, dbDir, 250)
-														seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())
-														w, err := loader.CreateNewWallet(
-															[]byte(wg.passwords["publicPassEditor"].GetPassword()),
-															[]byte(wg.passwords["passEditor"].GetPassword()),
-															seed,
-															time.Now(),
-															false,
-															wg.cx.Config,
-														)
-														if Check(err) {
-															panic(err)
-														}
-														// w.Manager.Close()
-														// Debug("starting up shell first time")
-														rand.Seed(time.Now().Unix())
-														nodeport := rand.Intn(60000) + 1024
-														walletport := rand.Intn(60000) + 1024
-														*wg.cx.Config.RPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", nodeport)}
-														*wg.cx.Config.RPCConnect = fmt.Sprintf("127.0.0.1:%d", nodeport)
-														*wg.cx.Config.WalletRPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", walletport)}
-														*wg.cx.Config.WalletServer = fmt.Sprintf("127.0.0.1:%d", walletport)
-														*wg.cx.Config.ServerTLS = false
-														*wg.cx.Config.TLS = false
-														*wg.cx.Config.GenThreads = 1  // probably want it to be max ultimately
-														*wg.cx.Config.Generate = true // probably don't want on ultimately
-														save.Pod(wg.cx.Config)
+													// go func() {
+													// wg.ShellRunCommandChan <- "stop"
+													Debug("clicked submit wallet")
+													if wg.bools["testnet"].GetValue() {
+														wg.cx.ActiveNet = &netparams.TestNet3Params
+														fork.IsTestnet = true
+													} else {
+														wg.cx.ActiveNet = &netparams.MainNetParams
+														fork.IsTestnet = false
+													}
+													*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
+														string(os.PathSeparator) + wg.cx.ActiveNet.Name +
+														string(os.PathSeparator) + wallet.WalletDbName
+													dbDir := *wg.cx.Config.WalletFile
+													loader := wallet.NewLoader(wg.cx.ActiveNet, dbDir, 250)
+													seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())
+													w, err := loader.CreateNewWallet(
+														[]byte(wg.passwords["publicPassEditor"].GetPassword()),
+														[]byte(wg.passwords["passEditor"].GetPassword()),
+														seed,
+														time.Now(),
+														false,
+														wg.cx.Config,
+													)
+													if Check(err) {
+														panic(err)
+													}
+													Warn("refilling mining addresses")
+													addresses.RefillMiningAddresses(w, wg.cx.Config, wg.cx.StateCfg)
+													Warn("done refilling mining addresses")
+													w.Manager.Close()
+													w.Stop()
+													// Debug("starting up shell first time")
+													rand.Seed(time.Now().Unix())
+													nodeport := rand.Intn(60000) + 1024
+													walletport := rand.Intn(60000) + 1024
+													*wg.cx.Config.RPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", nodeport)}
+													*wg.cx.Config.RPCConnect = fmt.Sprintf("127.0.0.1:%d", nodeport)
+													*wg.cx.Config.WalletRPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", walletport)}
+													*wg.cx.Config.WalletServer = fmt.Sprintf("127.0.0.1:%d", walletport)
+													*wg.cx.Config.ServerTLS = false
+													*wg.cx.Config.TLS = false
+													*wg.cx.Config.GenThreads = 1 // probably want it to be max ultimately
+													wg.incdecs["generatethreads"].Current = 1
+													*wg.cx.Config.Generate = true // probably don't want on ultimately
+													save.Pod(wg.cx.Config)
 
-														// Debug("opening wallet")
-														// w, err = loader.OpenExistingWallet([]byte(*wg.cx.Config.WalletPass),
-														// 	false, wg.cx.Config)
-														// if err != nil {
-														// 	panic(err)
-														// }
-														Warn("refilling mining addresses")
-														addresses.RefillMiningAddresses(w, wg.cx.Config, wg.cx.StateCfg)
-														Warn("done refilling mining addresses")
-
-														// time.Sleep(time.Second * 10)
-														// wg.ShellRunCommandChan <- "stop"
-														// time.Sleep(time.Second * 10)
-														// wg.ShellRunCommandChan <- "run"
-														// time.Sleep(time.Second * 2)
-														// interrupt.RequestRestart()
-
-														// procAttr := new(os.ProcAttr)
-														// procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
-														// os.StartProcess(os.Args[0], os.Args[1:], procAttr)
-														// *wg.App = *wg.GetAppWidget()
-														Debug("starting main app")
-														*wg.noWallet = false
-														wg.running = false
-														wg.ShellRunCommandChan <- "run"
-														// Exec()
-													}()
+													// Debug("opening wallet")
+													// w, err = loader.OpenExistingWallet([]byte(*wg.cx.Config.WalletPass),
+													// 	false, wg.cx.Config)
+													// if err != nil {
+													// 	panic(err)
+													// }
+													// args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
+													// 	"--pipelog", "wallet", "drophistory"}
+													// runner := exec.Command(args[0], args[1:]...)
+													// runner.Stderr = os.Stderr
+													// runner.Stdout = os.Stderr
+													// if err := runner.Start(); Check(err) {
+													// }
+													// time.Sleep(time.Second * 10)
+													// wg.ShellRunCommandChan <- "run"
+													// wg.ShellRunCommandChan <- "stop"
+													// wg.ShellRunCommandChan <- "run"
+													// wg.ShellRunCommandChan <- "stop"
+													// wg.ShellRunCommandChan <- "run"
+													// time.Sleep(time.Second * 10)
+													// time.Sleep(time.Second * 2)
+													// interrupt.RequestRestart()
+													if err = wg.Runner(); Check(err) {
+													}
+													// procAttr := new(os.ProcAttr)
+													// procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
+													// os.StartProcess(os.Args[0], os.Args[1:], procAttr)
+													// *wg.App = *wg.GetAppWidget()
+													Debug("starting main app")
+													*wg.noWallet = false
+													wg.running = false
+													wg.mining = false
+													wg.ShellRunCommandChan <- "run"
+													wg.MinerRunCommandChan <- "run"
+													// Exec()
+													// }()
 												}).
 												CornerRadius(0).
 												Inset(0.5).

@@ -183,8 +183,6 @@ func (wg *WalletGUI) Run() (err error) {
 			},
 		),
 	}
-	if err = wg.Runner(); Check(err) {
-	}
 	wg.Tickers()
 	wg.App = wg.GetAppWidget()
 	wg.CreateSendAddressItem()
@@ -195,7 +193,9 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.running = false
 		wg.mining = false
 		wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
-
+	} else {
+		if err = wg.Runner(); Check(err) {
+		}
 	}
 	if wg.running {
 		Debug("initial starting shell")
