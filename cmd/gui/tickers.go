@@ -137,10 +137,10 @@ func (wg *WalletGUI) Tickers() {
 							wg.WalletClient = nil
 						}
 					}
-					// the remaining actions require a running shell
-					if !wg.running {
-						break
-					}
+					// // the remaining actions require a running shell
+					// if !wg.running {
+					// 	break
+					// }
 					if err = wg.chainClient(); Check(err) {
 						break
 					}
