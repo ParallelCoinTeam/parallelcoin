@@ -333,6 +333,8 @@ func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
 
 func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
+		gtx.Constraints.Max.X = int(a.SideBarSize.V)
+		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		out := a.sideBarList.
 			Length(len(a.sideBar)).
 			LeftSide(true).

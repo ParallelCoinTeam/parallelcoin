@@ -149,7 +149,7 @@ func (c *Config) Config() GroupsMap {
 						save.Pod(c.cx.Config)
 					})
 			case "password":
-				c.passwords[sgf.Slug] = c.th.Password(tgs.Slot.(*string),
+				c.passwords[sgf.Slug] = c.th.Password("password", tgs.Slot.(*string),
 					"Primary", "PanelBg", 26, func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						pp := c.cx.ConfigMap[sgf.Slug].(*string)
