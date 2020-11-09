@@ -68,7 +68,7 @@ func (th *Theme) App(size int) *App {
 		layers:              nil,
 		pages:               make(WidgetMap),
 		root:                th.Stack(),
-		SideBarSize:         th.TextSize.Scale(19),
+		SideBarSize:         th.TextSize.Scale(14),
 		sideBarBackground:   "DocBg",
 		sideBarColor:        "DocText",
 		statusBarBackground: "DocBg",
@@ -343,6 +343,8 @@ func (a *App) renderSideBar() l.Widget {
 			// Color("DocText").
 			// Active("Primary").
 			ListElement(func(gtx l.Context, index int) l.Dimensions {
+				// gtx.Constraints.Max.X = int(a.sideBarSize.V)
+				// gtx.Constraints.Min.X = 0
 				// gtx.Constraints.Max.X = gtx.Constraints.Min.X
 				dims := a.sideBar[index](gtx)
 				// Debug(dims)
@@ -353,7 +355,7 @@ func (a *App) renderSideBar() l.Widget {
 				// }
 				// return out.Fn(gtx)
 			})
-		// out.Rigid(EmptySpace(int(a.SideBarSize.V), 0))
+		// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
 		return out.Fn(gtx)
 	}
 }

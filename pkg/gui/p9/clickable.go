@@ -35,13 +35,13 @@ func (th *Theme) Clickable() (c *Clickable) {
 		history:    nil,
 		Events: clickEvents{
 			Click:  func() {
-				// Debug("click event")
+				Debug("click event")
 			},
 			Cancel: func() {
-				// Debug("cancel event")
+				Debug("cancel event")
 			},
 			Press:  func() {
-				// Debug("press event")
+				Debug("press event")
 			},
 		},
 	}

@@ -63,7 +63,7 @@ func (wg *WalletGUI) Runner() (err error) {
 					*wg.cx.Config.WalletOff = true
 					save.Pod(wg.cx.Config)
 					if wg.mining {
-						go func(){
+						go func() {
 							wg.MinerRunCommandChan <- "stop"
 						}()
 					}
@@ -110,7 +110,7 @@ func (wg *WalletGUI) Runner() (err error) {
 					wg.mining = false
 				case "restart":
 					Debug("restart called for miner")
-					go func(){
+					go func() {
 						wg.MinerRunCommandChan <- "stop"
 						wg.MinerRunCommandChan <- "start"
 					}()

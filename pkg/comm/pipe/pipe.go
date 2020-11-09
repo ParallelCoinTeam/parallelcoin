@@ -24,9 +24,7 @@ func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *wo
 				break out
 			default:
 			}
-			// Debug("reading from pipe...")
 			n, err = w.StdConn.Read(data)
-			// Debug("read", n, "bytes on pipe")
 			if err != nil && err != io.EOF {
 				// Probably the child process has died, so quit
 				Error("err:", err)

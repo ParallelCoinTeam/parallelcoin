@@ -36,11 +36,6 @@ func (th *Theme) IncDec(nDigits, min, max, current int, changeHook func(n int)) 
 	return
 }
 
-func (in *IncDec) SetCurrent(cur int) *IncDec {
-	in.current = cur
-	return in
-}
-
 func (in *IncDec) SetColor(color string) *IncDec {
 	in.color = color
 	return in

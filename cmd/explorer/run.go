@@ -12,7 +12,7 @@ import (
 func (ex *Explorer) Runner() (err error) {
 	interrupt.AddHandler(func() {
 		if ex.running {
-			// 		ex.ShellRunCommandChan <- "stop"
+			// 		ex.RunCommandChan <- "stop"
 			consume.Kill(ex.Shell)
 		}
 		close(ex.quit)
