@@ -2,7 +2,6 @@ package gui
 
 import (
 	"os"
-	"runtime"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -13,7 +12,6 @@ import (
 func (wg *WalletGUI) Runner() (err error) {
 	wg.ShellRunCommandChan = make(chan string)
 	wg.MinerRunCommandChan = make(chan string)
-	wg.MinerThreadsChan = make(chan int)
 	interrupt.AddHandler(func() {
 		if wg.running {
 			// 		wg.ShellRunCommandChan <- "stop"
@@ -112,24 +110,7 @@ func (wg *WalletGUI) Runner() (err error) {
 					Debug("restart called for miner")
 					go func() {
 						wg.MinerRunCommandChan <- "stop"
-						wg.MinerRunCommandChan <- "start"
-					}()
-				}
-			case *wg.cx.Config.GenThreads = <-wg.MinerThreadsChan:
-				Debug("setting threads to", *wg.cx.Config.GenThreads)
-				if *wg.cx.Config.GenThreads == 0 {
-					go func() {
-						wg.MinerRunCommandChan <- "stop"
-					}()
-					break
-				}
-				if *wg.cx.Config.GenThreads < 0 {
-					*wg.cx.Config.GenThreads = runtime.NumCPU()
-				}
-				save.Pod(wg.cx.Config)
-				if wg.mining {
-					go func() {
-						wg.MinerRunCommandChan <- "restart"
+						wg.MinerRunCommandChan <- "run"
 					}()
 				}
 			case <-wg.quit:

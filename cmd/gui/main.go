@@ -66,7 +66,6 @@ type WalletGUI struct {
 	sendAddresses             []SendAddress
 	ShellRunCommandChan       chan string
 	MinerRunCommandChan       chan string
-	MinerThreadsChan          chan int
 	State                     State
 	Shell, Miner              *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
@@ -167,12 +166,15 @@ func (wg *WalletGUI) Run() (err error) {
 					if wg.mining {
 						Debug("restarting miner")
 						wg.MinerRunCommandChan <- "stop"
-						wg.MinerRunCommandChan <- "start"
+						wg.MinerRunCommandChan <- "run"
 					}
 				}()
 			},
 		),
 	}
+	if err = wg.Runner(); Check(err) {
+	}
+	wg.Tickers()
 	wg.App = wg.GetAppWidget()
 	wg.walletPage = wg.th.App(wg.w["main"].Width).Title("")
 	wg.walletPage.ThemeHook(func() {
@@ -190,7 +192,7 @@ func (wg *WalletGUI) Run() (err error) {
 			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.th.Flex().SpaceAround().AlignMiddle().Rigid(
 				wg.th.H3("create a new wallet").Fn,
-				).Fn},
+			).Fn},
 			p9.WidgetSize{Size: 800, Widget: wg.th.Flex().SpaceAround().AlignMiddle().Rigid(
 				wg.th.H3("create a new wallet").Fn,
 			).Fn},
@@ -204,15 +206,16 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.running = false
 		wg.mining = false
 	}
-	if err = wg.Runner(); Check(err) {
-	}
 	if wg.running {
+		Debug("initial starting shell")
+		wg.running = false
 		wg.ShellRunCommandChan <- "run"
-		wg.Tickers()
 	}
 	if wg.mining {
 		// wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
-		wg.MinerRunCommandChan <- "start"
+		Debug("initial starting miner")
+		wg.mining = false
+		wg.MinerRunCommandChan <- "run"
 	}
 	wg.Size = wg.w["main"].Width
 	go func() {
