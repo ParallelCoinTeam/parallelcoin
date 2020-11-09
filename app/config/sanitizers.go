@@ -56,6 +56,7 @@ func initDictionary(cfg *pod.Config) {
 
 func initDataDir(cfg *pod.Config) {
 	if cfg.DataDir == nil || *cfg.DataDir == "" {
+		Debug("setting default data dir")
 		*cfg.DataDir = appdata.Dir("pod", false)
 	}
 	Trace("datadir set to", *cfg.DataDir)

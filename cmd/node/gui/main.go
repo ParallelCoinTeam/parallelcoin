@@ -2,6 +2,7 @@ package gui
 
 import (
 	"gioui.org/app"
+	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
@@ -99,6 +100,7 @@ func (ng *NodeGUI) Run() (err error) {
 			Open().
 			Run(
 				ng.app.Fn(),
+				func(gtx l.Context) {},
 				func() {
 					Debug("quitting node gui")
 					interrupt.Request()

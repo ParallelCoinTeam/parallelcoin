@@ -50,9 +50,9 @@ func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.lastTxs = lastTxs
-	if s.lastTimeStrings == nil {
-		s.lastTimeStrings = make([]string, len(s.lastTxs))
-	}
+	// if s.lastTimeStrings == nil {
+	s.lastTimeStrings = make([]string, len(s.lastTxs))
+	// }
 	for i := range s.lastTxs {
 		s.lastTimeStrings[i] =
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(

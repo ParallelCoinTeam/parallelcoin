@@ -33,7 +33,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
 			cx.DataDir = c.String("datadir")
+			Debug("datadir", *cx.Config.DataDir)
 		}
+		Debug(c.IsSet("D"), c.IsSet("datadir"))
 		// propagate datadir path to interrupt for restart handling
 		interrupt.DataDir = cx.DataDir
 		// if there is a delaystart requested, pause for 3 seconds
@@ -368,6 +370,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("darktheme") {
 			*cx.Config.DarkTheme = c.Bool("darktheme")
+		}
+		if c.IsSet("notty") {
+			cx.IsGUI = true
 		}
 		if c.IsSet("save") {
 			Info("saving configuration")

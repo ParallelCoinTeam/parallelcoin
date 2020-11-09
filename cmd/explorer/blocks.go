@@ -11,18 +11,15 @@ import (
 
 func (ex *Explorer) Blocks() l.Widget {
 	listPageSize := 10
-	chainClient, err := ex.chainClient()
-	if err != nil {
-	}
 
 	fmt.Println("Best Block Height:", ex.State.bestBlockHeight)
 	le := func(gtx l.Context, index int) l.Dimensions {
 		b := l.Dimensions{}
 		if ex.State.bestBlockHeight > 0 {
-			blockHash, err := chainClient.GetBlockHash(int64(ex.State.bestBlockHeight - index))
+			blockHash, err := ex.ChainClient.GetBlockHash(int64(ex.State.bestBlockHeight - index))
 			if err != nil {
 			}
-			block, err := chainClient.GetBlock(blockHash)
+			block, err := ex.ChainClient.GetBlock(blockHash)
 			if err != nil {
 			}
 			fmt.Println("Block:", block)

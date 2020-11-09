@@ -38,7 +38,7 @@ type App struct {
 	sideBar             []l.Widget
 	sideBarBackground   string
 	sideBarColor        string
-	sideBarSize         unit.Value
+	SideBarSize         unit.Value
 	sideBarList         *List
 	Size                *int
 	statusBar           []l.Widget
@@ -48,11 +48,12 @@ type App struct {
 	titleBarBackground  string
 	titleBarColor       string
 	titleFont           string
+	overlay             []func(gtx l.Context)
 }
 
 type WidgetMap map[string]l.Widget
 
-func (th *Theme) App(size int) *App {
+func (th *Theme) App(size *int) *App {
 	mc := th.Clickable()
 	return &App{
 		Theme:               th,
@@ -67,7 +68,7 @@ func (th *Theme) App(size int) *App {
 		layers:              nil,
 		pages:               make(WidgetMap),
 		root:                th.Stack(),
-		sideBarSize:         th.TextSize.Scale(14),
+		SideBarSize:         th.TextSize.Scale(14),
 		sideBarBackground:   "DocBg",
 		sideBarColor:        "DocText",
 		statusBarBackground: "DocBg",
@@ -84,16 +85,13 @@ func (th *Theme) App(size int) *App {
 		menuButton:          th.IconButton(mc),
 		menuColor:           "Light",
 		MenuOpen:            false,
-		Size:                &size,
+		Size:                size,
 	}
 }
 
 // Fn renders the app widget
 func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		x := gtx.Constraints.Max.X
-		a.Size = &x
-		// TODO: put the root stack in here
 		return a.Flex().Rigid(
 			a.VFlex().
 				Rigid(
@@ -107,6 +105,17 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 				).
 				Fn,
 		).Fn(gtx)
+	}
+}
+func (a *App) AddOverlay(overlay func(gtx l.Context)) *App {
+	a.overlay = append(a.overlay, overlay)
+	return a
+}
+func (a *App) Overlay() func(gtx l.Context) {
+	return func(gtx l.Context) {
+		for _, overlay := range a.overlay {
+			overlay(gtx)
+		}
 	}
 }
 
