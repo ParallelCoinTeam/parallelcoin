@@ -36,8 +36,11 @@ func (th *Theme) Clickable() (c *Clickable) {
 		Events: clickEvents{
 			Click: func() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 				// Debug("click event")
 =======
+=======
+>>>>>>> refgui
 				Debug("click event")
 >>>>>>> refgui
 			},
@@ -46,8 +49,11 @@ func (th *Theme) Clickable() (c *Clickable) {
 			},
 			Press: func() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 				// Debug("press event")
 =======
+=======
+>>>>>>> refgui
 				Debug("press event")
 >>>>>>> refgui
 			},
