@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"net"
 	"os/exec"
 	"runtime/pprof"
 	"strings"
@@ -31,8 +30,8 @@ func (wg *WalletGUI) updateThingies() (err error) {
 }
 
 func (wg *WalletGUI) chainClient() (err error) {
-	if err = wg.updateThingies(); Check(err) {
-	}
+	// if err = wg.updateThingies(); Check(err) {
+	// }
 	wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
 		Host:         *wg.cx.Config.RPCConnect,
 		User:         *wg.cx.Config.Username,
@@ -43,16 +42,12 @@ func (wg *WalletGUI) chainClient() (err error) {
 }
 
 func (wg *WalletGUI) walletClient() (err error) {
-	if err = wg.updateThingies(); Check(err) {
-	}
+	// if err = wg.updateThingies(); Check(err) {
+	// }
 	// update wallet data
 	walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
-	var walletServer, port string
-	if _, port, err = net.SplitHostPort(walletRPC); !Check(err) {
-		walletServer = net.JoinHostPort("127.0.0.1", port)
-	}
 	wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
-		Host:         walletServer,
+		Host:         walletRPC,
 		User:         *wg.cx.Config.Username,
 		Pass:         *wg.cx.Config.Password,
 		HTTPPostMode: true,

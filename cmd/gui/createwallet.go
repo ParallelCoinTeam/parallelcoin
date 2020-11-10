@@ -2,14 +2,12 @@ package gui
 
 import (
 	"encoding/hex"
-	"fmt"
 	"math/rand"
 	"os"
 	"time"
 
 	l "gioui.org/layout"
 
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
@@ -154,18 +152,18 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 													w.Stop()
 													// Debug("starting up shell first time")
 													rand.Seed(time.Now().Unix())
-													nodeport := rand.Intn(60000) + 1024
-													walletport := rand.Intn(60000) + 1024
-													*wg.cx.Config.RPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", nodeport)}
-													*wg.cx.Config.RPCConnect = fmt.Sprintf("127.0.0.1:%d", nodeport)
-													*wg.cx.Config.WalletRPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", walletport)}
-													*wg.cx.Config.WalletServer = fmt.Sprintf("127.0.0.1:%d", walletport)
-													*wg.cx.Config.ServerTLS = false
-													*wg.cx.Config.TLS = false
-													*wg.cx.Config.GenThreads = 1 // probably want it to be max ultimately
-													wg.incdecs["generatethreads"].Current = 1
-													*wg.cx.Config.Generate = true // probably don't want on ultimately
-													save.Pod(wg.cx.Config)
+													// nodeport := rand.Intn(60000) + 1024
+													// walletport := rand.Intn(60000) + 1024
+													// *wg.cx.Config.RPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", nodeport)}
+													// *wg.cx.Config.RPCConnect = fmt.Sprintf("127.0.0.1:%d", nodeport)
+													// *wg.cx.Config.WalletRPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", walletport)}
+													// *wg.cx.Config.WalletServer = fmt.Sprintf("127.0.0.1:%d", walletport)
+													// *wg.cx.Config.ServerTLS = false
+													// *wg.cx.Config.TLS = false
+													// *wg.cx.Config.GenThreads = 1 // probably want it to be max ultimately
+													// wg.incdecs["generatethreads"].Current = 1
+													// *wg.cx.Config.Generate = true // probably don't want on ultimately
+													// save.Pod(wg.cx.Config)
 
 													// Debug("opening wallet")
 													// w, err = loader.OpenExistingWallet([]byte(*wg.cx.Config.WalletPass),
@@ -181,7 +179,6 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 													// if err := runner.Start(); Check(err) {
 													// }
 													// time.Sleep(time.Second * 10)
-													// wg.ShellRunCommandChan <- "run"
 													// wg.ShellRunCommandChan <- "stop"
 													// wg.ShellRunCommandChan <- "run"
 													// wg.ShellRunCommandChan <- "stop"
@@ -189,8 +186,6 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 													// time.Sleep(time.Second * 10)
 													// time.Sleep(time.Second * 2)
 													// interrupt.RequestRestart()
-													if err = wg.Runner(); Check(err) {
-													}
 													// procAttr := new(os.ProcAttr)
 													// procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
 													// os.StartProcess(os.Args[0], os.Args[1:], procAttr)
@@ -199,6 +194,8 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 													*wg.noWallet = false
 													wg.running = false
 													wg.mining = false
+													if err = wg.Runner(); Check(err) {
+													}
 													wg.ShellRunCommandChan <- "run"
 													wg.MinerRunCommandChan <- "run"
 													// Exec()

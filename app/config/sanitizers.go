@@ -15,7 +15,6 @@ import (
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/forkhash"
@@ -134,32 +133,39 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	*cfg.Controller = net.JoinHostPort("0.0.0.0", fmt.Sprint(fP))
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
 		len(*cfg.ConnectPeers) < 1 {
-		cfg.Listeners = &cli.StringSlice{":" + cx.ActiveNet.DefaultPort}
-	}
-	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
-		*cfg.WalletRPCListeners = append(*cfg.WalletRPCListeners,
-			":"+cx.ActiveNet.WalletRPCServerPort)
-		Trace("setting save flag because wallet rpc listeners is empty and" +
-			" rpc is not disabled")
+		if fP, e = GetFreePort(); Check(e) {
+		}
+		cfg.Listeners = &cli.StringSlice{fmt.Sprintf("0.0.0.0:%d", fP)}
 		cx.StateCfg.Save = true
 	}
 	if len(*cfg.RPCListeners) < 1 {
-		*cfg.RPCListeners = append(*cfg.RPCListeners,
-			":"+cx.ActiveNet.RPCClientPort)
+		if fP, e = GetFreePort(); Check(e) {
+		}
+		*cfg.RPCListeners = cli.StringSlice{fmt.Sprintf("127.0.0.1:%d", fP)}
+		*cfg.RPCConnect = fmt.Sprintf("127.0.0.1:%d", fP)
 		Trace("setting save flag because rpc listeners is empty and rpc is" +
 			" not disabled")
 		cx.StateCfg.Save = true
 	}
-	msgBase := pause.GetPauseContainer(cx)
-	// mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
-	listenHost := msgBase.GetIPs()[0].String() + ":0"
-	switch commandName {
-	// only the wallet listener is important with shell as it proxies for
-	// node, the rest better they are automatic
-	case "shell":
-		*cfg.Listeners = cli.StringSlice{listenHost}
-		*cfg.RPCListeners = cli.StringSlice{listenHost}
+	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
+		if fP, e = GetFreePort(); Check(e) {
+		}
+		*cfg.WalletRPCListeners = cli.StringSlice{fmt.Sprintf("127.0.0.1:%d", fP)}
+		*cfg.WalletServer = fmt.Sprintf("127.0.0.1:%d", fP)
+		Trace("setting save flag because wallet rpc listeners is empty and" +
+			" rpc is not disabled")
+		cx.StateCfg.Save = true
 	}
+	// msgBase := pause.GetPauseContainer(cx)
+	// mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
+	// listenHost := msgBase.GetIPs()[0].String() + ":0"
+	// switch commandName {
+	// // only the wallet listener is important with shell as it proxies for
+	// // node, the rest better they are automatic
+	// case "shell":
+	// 	*cfg.Listeners = cli.StringSlice{listenHost}
+	// 	*cfg.RPCListeners = cli.StringSlice{listenHost}
+	// }
 	if *cx.Config.AutoPorts || !initial {
 		if fP, e = GetFreePort(); Check(e) {
 		}

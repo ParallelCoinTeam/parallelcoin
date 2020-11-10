@@ -465,7 +465,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"genthreads, G",
 				"Number of CPU threads to use with CPU miner"+
 					" -1 = all cores",
-				-1,
+				1,
 				cx.Config.GenThreads),
 			au.Bool(
 				"solo",

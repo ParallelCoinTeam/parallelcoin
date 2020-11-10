@@ -120,13 +120,13 @@ func (wg *WalletGUI) Runner() (err error) {
 			}
 		}
 	}()
-	if wg.running {
-		Debug("starting shell")
-		wg.ShellRunCommandChan <- "run"
-	}
-	if wg.mining {
-		Debug("starting miner")
-		wg.MinerRunCommandChan <- "run"
-	}
+	// if wg.running {
+	// 	Debug("starting shell")
+	// 	wg.ShellRunCommandChan <- "run"
+	// }
+	// if wg.mining {
+	// 	Debug("starting miner")
+	// 	wg.MinerRunCommandChan <- "run"
+	// }
 	return nil
 }
