@@ -23,11 +23,27 @@ nodegui:
 
 gui:
 	go install -v
+<<<<<<< HEAD
+<<<<<<< HEAD
+	pod -D test0 -n testnet --lan --solo
+
+guihttpprof:
+	go install -v
+	pod -D test0 -n testnet --lan --solo --kopachgui --profile 6969 testnet
+=======
 	pod -D test0 -n testnet -l debug --lan --solo
 
 guihttpprof:
 	go install -v
 	pod -D test0 -n testnet --lan --solo --kopachgui --profile 6969
+>>>>>>> refgui
+=======
+	pod -D test0 -n testnet -l debug --lan --solo
+
+guihttpprof:
+	go install -v
+	pod -D test0 -n testnet --lan --solo --kopachgui --profile 6969
+>>>>>>> refgui
 
 guiprof:
 	go install -v
