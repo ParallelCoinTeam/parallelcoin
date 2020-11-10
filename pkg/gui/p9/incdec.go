@@ -37,7 +37,7 @@ func (th *Theme) IncDec(nDigits, min, max, current int, changeHook func(n int)) 
 }
 
 func (in *IncDec) SetCurrent(cur int) *IncDec {
-	in.current = cur
+	in.Current = cur
 	return in
 }
 
