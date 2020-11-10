@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"runtime"
-	"time"
 
 	l "gioui.org/layout"
 	"github.com/urfave/cli"
@@ -85,7 +84,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
-	wg.sidebarButtons = make([]*p9.Clickable, 10)
+	wg.sidebarButtons = make([]*p9.Clickable, 11)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
@@ -145,20 +144,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", 32, func(pass string) {}),
 		"publicPassEditor":  wg.th.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", 32, func(pass string) {}),
 	}
-	wg.console = &Console{
-		Commands: []ConsoleCommand{
-			{
-				ComID:    "input",
-				Category: "input",
-				Time:     time.Now(),
-				// Out: input(duo),
-			},
-		},
-		CommandsNumber: 1,
-	}
 	wg.toasts = toast.New(wg.th)
 	wg.dialog = dialog.New(wg.th)
-
+	wg.console = wg.ConsolePage()
 	wg.w = make(map[string]*f.Window)
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{

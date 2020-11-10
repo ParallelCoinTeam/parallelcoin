@@ -31,6 +31,7 @@ var list = []struct {
 	{"Send", Send},
 	{"Sent", Sent},
 	{"Settings", Settings},
+	{"Terminal", Terminal},
 	{"TxNumber", TxNumber},
 	{"Unconfirmed", Unconfirmed},
 }

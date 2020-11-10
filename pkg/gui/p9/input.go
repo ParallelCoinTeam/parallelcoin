@@ -28,7 +28,7 @@ type Input struct {
 func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused string,
 	size int, handle func(txt string)) *Input {
 	editor := th.Editor().SingleLine().Submit(true)
-	input := th.SimpleInput(editor, hint)
+	input := th.TextInput(editor, hint)
 	p := &Input{
 		Theme:                th,
 		clearClickable:       th.Clickable(),

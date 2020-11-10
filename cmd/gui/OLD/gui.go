@@ -78,7 +78,7 @@ func (w *Worker) Run() {
 	// }
 	// guiAppModel.SetTheme(guiAppModel.DarkTheme)
 	// guiAppModel.pass = th.Editor().Mask('•').SingleLine(true).Submit(true)
-	// guiAppModel.passInput = th.SimpleInput(guiAppModel.pass).Color("DocText")
+	// guiAppModel.passInput = th.TextInput(guiAppModel.pass).Color("DocText")
 	// guiAppModel.unhideButton = th.IconButton(guiAppModel.unhideClickable).
 	//	Background("").
 	//	Color("Primary").

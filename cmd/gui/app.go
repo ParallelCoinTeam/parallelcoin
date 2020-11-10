@@ -57,7 +57,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		}),
 		"console": wg.Page("console", p9.Widgets{
 			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-			p9.WidgetSize{Widget: wg.ConsolePage()},
+			p9.WidgetSize{Widget: wg.console.Fn},
 		}),
 		"help": wg.Page("help", p9.Widgets{
 			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
@@ -129,13 +129,14 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("settings", "settings", 5),
 		wg.SideBarButton("mining", "mining", 6),
 		wg.SideBarButton("help", "help", 7),
-		wg.SideBarButton("log", "log", 8),
-		wg.SideBarButton("quit", "quit", 9),
+		wg.SideBarButton("console", "console", 8),
+		wg.SideBarButton("log", "log", 9),
+		wg.SideBarButton("quit", "quit", 10),
 	})
 	a.ButtonBar([]l.Widget{
 		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport),
 		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
-		wg.PageTopBarButton("console", 2, &icons.MapsLocalHotel),
+		wg.PageTopBarButton("console", 2, &p9icons.Terminal),
 		wg.PageTopBarButton("settings", 3, &icons.ActionSettings),
 		wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
 	})

@@ -10,6 +10,7 @@ import (
 
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
+	icons "github.com/p9c/pod/pkg/gui/ico/svg"
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
@@ -219,7 +220,7 @@ func (m *MinerModel) buttons() layout.Widget {
 			).Fn,
 	).Rigid(
 		th.Flex().Rigid(
-			th.Icon().Scale(2).Color("DocText").Src(icons.ParallelCoinRound).Fn,
+			th.Icon().Scale(2).Color("DocText").Src(&icons.ParallelCoinRound).Fn,
 			// ).Rigid(
 			// 	th.RadioButton(m.radio, "first", "first").Fn,
 			// ).Rigid(
@@ -244,7 +245,7 @@ func (m *MinerModel) buttons() layout.Widget {
 		th.Inset(0.25,
 			th.Border().Embed(
 				th.Inset(0.25,
-					th.SimpleInput(m.lineEditor.
+					th.TextInput(m.lineEditor.
 						SetChange(func(txt string) {
 							Debug("lineEditor changed to:\n" + txt)
 						}).
@@ -261,7 +262,7 @@ func (m *MinerModel) buttons() layout.Widget {
 		th.Inset(0.25,
 			th.Border().Embed(
 				th.Inset(0.25,
-					th.SimpleInput(m.areaEditor.
+					th.TextInput(m.areaEditor.
 						SetChange(func(txt string) {
 							Debug("areaEditor changed to:\n" + txt)
 						}).
