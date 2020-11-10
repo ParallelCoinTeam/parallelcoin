@@ -1,8 +1,12 @@
 package gui
 
 import (
+	"regexp"
+
 	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/atotto/clipboard"
 
 	"github.com/p9c/pod/pkg/gui/p9"
 )
@@ -18,6 +22,8 @@ type Console struct {
 	pasteButton    *p9.IconButton
 }
 
+var findSpaceRegexp = regexp.MustCompile(`\s+`)
+
 func (wg *WalletGUI) ConsolePage() *Console {
 	c := &Console{
 		editor:         wg.th.Editor().SingleLine(),
@@ -25,24 +31,53 @@ func (wg *WalletGUI) ConsolePage() *Console {
 		copyClickable:  wg.th.Clickable(),
 		pasteClickable: wg.th.Clickable(),
 	}
-	c.clearButton = wg.th.IconButton(c.clearClickable).
+	clearClickableFn := func() {
+		c.editor.SetText("")
+		c.editor.Focus()
+	}
+	copyClickableFn := func() {
+		go clipboard.WriteAll(c.editor.Text())
+		c.editor.Focus()
+	}
+	pasteClickableFn := func() {
+		col := c.editor.Caret.Col
+		go func() {
+			txt := c.editor.Text()
+			var err error
+			var cb string
+			if cb, err = clipboard.ReadAll(); Check(err) {
+			}
+			cb = findSpaceRegexp.ReplaceAllString(cb, " ")
+			txt = txt[:col] + cb + txt[col:]
+			c.editor.SetText(txt)
+			c.editor.Move(col + len(cb))
+		}()
+		// c.editor.Focus()
+	}
+	c.clearButton = wg.th.IconButton(c.clearClickable.SetClick(clearClickableFn)).
 		Icon(
 			wg.th.Icon().
 				Color("DocText").
 				Src(&icons2.ContentBackspace),
-		).Background("Transparent").Inset(0.25)
-	c.copyButton = wg.th.IconButton(c.copyClickable).
+		).
+		Background("Transparent").
+		Inset(0.25)
+	c.copyButton = wg.th.IconButton(c.copyClickable.SetClick(copyClickableFn)).
 		Icon(
 			wg.th.Icon().
 				Color("DocText").
 				Src(&icons2.ContentContentCopy),
-		).Background("Transparent").Inset(0.25)
-	c.pasteButton = wg.th.IconButton(c.pasteClickable).
+		).
+		Background("Transparent").
+		Inset(0.25)
+	c.pasteButton = wg.th.IconButton(c.pasteClickable.SetClick(pasteClickableFn)).
 		Icon(
 			wg.th.Icon().
 				Color("DocText").
 				Src(&icons2.ContentContentPaste),
-		).Background("Transparent").Inset(0.25)
+		).
+		Background("Transparent").
+		Inset(0.25)
 	c.w = func(gtx l.Context) l.Dimensions {
 		return wg.th.VFlex().
 			Flexed(1,

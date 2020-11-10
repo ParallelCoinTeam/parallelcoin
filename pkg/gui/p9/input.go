@@ -1,10 +1,12 @@
 package p9
 
 import (
+	"regexp"
+
 	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
-	"github.com/p9c/pod/pkg/gui/clipboard"
+	"github.com/atotto/clipboard"
 )
 
 type Input struct {
@@ -24,6 +26,9 @@ type Input struct {
 	borderColorFocused   string
 	focused              bool
 }
+
+
+var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
 func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused string,
 	size int, handle func(txt string)) *Input {
@@ -51,14 +56,21 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused strin
 		p.editor.Focus()
 	}
 	copyClickableFn := func() {
-		go clipboard.Set(p.editor.Text())
+		go clipboard.WriteAll(p.editor.Text())
 		p.editor.Focus()
 	}
 	pasteClickableFn := func() {
+		col := p.editor.Caret.Col
 		go func() {
 			txt := p.editor.Text()
-			txt = txt[:p.editor.caret.col] + clipboard.Get() + txt[p.editor.caret.col:]
+			var err error
+			var cb string
+			if cb, err = clipboard.ReadAll(); Check(err) {
+			}
+			cb = findSpaceRegexp.ReplaceAllString(cb, " ")
+			txt = txt[:col] + cb + txt[col:]
 			p.editor.SetText(txt)
+			p.editor.Move(col + len(cb))
 		}()
 		p.editor.Focus()
 	}

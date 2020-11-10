@@ -81,7 +81,7 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 	pasteClickableFn := func() {
 		go func() {
 			txt := p.pass.Text()
-			txt = txt[:p.pass.caret.col] + clipboard.Get() + txt[p.pass.caret.col:]
+			txt = txt[:p.pass.Caret.Col] + clipboard.Get() + txt[p.pass.Caret.Col:]
 			p.pass.SetText(txt)
 		}()
 		p.pass.Focus()
