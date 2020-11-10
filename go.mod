@@ -3,8 +3,7 @@ module github.com/p9c/pod
 go 1.14
 
 require (
-	gioui.org v0.0.0-20201031091437-39b50261d082
-	gioui.org/cmd v0.0.0-20201102184644-18869735db19 // indirect
+	gioui.org v0.0.0-20201109100145-fb70fb1c95ca
 	github.com/BurntSushi/xgb v0.0.0-20200324125942-20f126ea2843
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
@@ -17,7 +16,6 @@ require (
 	github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
-	github.com/egonelbre/expgio v0.0.0-20201101174813-bf265dd8d318 // indirect
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
 	github.com/gioapp/gel v0.0.0-20201002070804-a38b199dc376
 	github.com/ipfs/go-bitswap v0.2.20
@@ -37,7 +35,6 @@ require (
 	github.com/ipfs/go-merkledag v0.3.2
 	github.com/ipfs/go-unixfs v0.2.4
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
 	github.com/kofoworola/godate v1.2.1

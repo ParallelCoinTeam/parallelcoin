@@ -95,7 +95,7 @@ func (s *Slider) Fn(c l.Context) l.Dimensions {
 	}
 	clip.RRect{Rect: track}.Add(c.Ops)
 	paint.ColorOp{Color: color}.Add(c.Ops)
-	paint.PaintOp{Rect: track}.Add(c.Ops)
+	paint.PaintOp{}.Add(c.Ops)
 	st.Pop()
 
 	// Draw track after thumb.
@@ -104,7 +104,7 @@ func (s *Slider) Fn(c l.Context) l.Dimensions {
 	track.Max.X = float32(size.X) - halfWidth
 	clip.RRect{Rect: track}.Add(c.Ops)
 	paint.ColorOp{Color: f32color.MulAlpha(color, 96)}.Add(c.Ops)
-	paint.PaintOp{Rect: track}.Add(c.Ops)
+	paint.PaintOp{}.Add(c.Ops)
 	st.Pop()
 
 	// Draw thumb.
@@ -125,7 +125,7 @@ func (s *Slider) Fn(c l.Context) l.Dimensions {
 		NE:   rr, NW: rr, SE: rr, SW: rr,
 	}.Add(c.Ops)
 	paint.ColorOp{Color: color}.Add(c.Ops)
-	paint.PaintOp{Rect: thumb}.Add(c.Ops)
+	paint.PaintOp{}.Add(c.Ops)
 	st.Pop()
 
 	return l.Dimensions{Size: size}

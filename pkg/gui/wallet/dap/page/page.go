@@ -40,7 +40,7 @@ func (p *Page) P(th *theme.Theme, ly string) func(gtx C) D {
 //		btn := material.IconButton(th.T, b, th.Icons[icon])
 //		btn.Inset = layout.Inset{unit.Dp(2), unit.Dp(2), unit.Dp(2), unit.Dp(2)}
 //		btn.Size = unit.Dp(21)
-//		btn.Background = helper.HexARGB(th.Colors["Secondary"])
+//		btn.Background = p9.HexARGB(th.Colors["Secondary"])
 //		for b.Clicked() {
 //			f()
 //			//d.UI.N.CurrentPage = page

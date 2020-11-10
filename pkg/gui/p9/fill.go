@@ -3,8 +3,9 @@ package p9
 import (
 	"image"
 
-	"gioui.org/f32"
 	l "gioui.org/layout"
+	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 )
 
@@ -25,20 +26,26 @@ func (f *Filler) Embed(w l.Widget) *Filler {
 }
 
 func (f *Filler) Fn(gtx l.Context) l.Dimensions {
-	return f.th.Stack().Stacked(f.w).Expanded(
-		func(c l.Context) l.Dimensions {
-			dims := f.w(gtx)
-			cs := gtx.Constraints
-			d := image.Point{X: cs.Max.X, Y: cs.Max.Y}
-			dr := f32.Rectangle{
-				Max: f32.Point{X: float32(dims.Size.X), Y: float32(dims.Size.Y)},
-			}
-			paint.ColorOp{Color: f.th.Colors.Get(f.col)}.Add(gtx.Ops)
-			paint.PaintOp{Rect: dr}.Add(gtx.Ops)
-			gtx.Constraints.Constrain(d)
-			f.w(gtx)
-			gtx.Constraints.Constrain(dims.Size)
-			return dims
-		},
-	).Fn(gtx)
+	return f.th.Stack().
+		Expanded(
+			func(c l.Context) l.Dimensions {
+				d := f.w(gtx).Size
+				// cs := gtx.Constraints
+				// d := cs.Min
+				clipRect := image.Rectangle{
+					Max: image.Point{X: d.X, Y: d.Y},
+				}
+				st := op.Push(gtx.Ops)
+				clip.Rect(clipRect).Add(gtx.Ops)
+				paint.ColorOp{Color: f.th.Colors.Get(f.col)}.Add(gtx.Ops)
+				paint.PaintOp{}.Add(gtx.Ops)
+				st.Pop()
+				gtx.Constraints.Constrain(d)
+				return l.Dimensions{
+					Size: image.Point{X: d.X, Y: d.Y},
+				}
+			},
+		).
+		Stacked(f.w).
+		Fn(gtx)
 }

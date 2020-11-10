@@ -10,7 +10,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -66,8 +65,8 @@ func (t *Toasts) AddToast(title, content, level string) {
 		content:          content,
 		level:            level,
 		ticker:           0,
-		headerBackground: helper.HexARGB(t.theme.Colors[level]),
-		bodyBackground:   helper.HexARGB(t.theme.Colors["PanelBg"]),
+		headerBackground: p9.HexARGB(t.theme.Colors[level]),
+		bodyBackground:   p9.HexARGB(t.theme.Colors["PanelBg"]),
 		cornerRadius:     t.singleCornerRadius,
 		elevation:        t.singleElevation,
 		icon:             ic,
@@ -80,7 +79,7 @@ func (t *Toasts) DrawToasts() func(gtx l.Context) {
 		op.Offset(f32.Pt(float32(gtx.Constraints.Max.X)-310, 0)).Add(gtx.Ops)
 		gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Min.Y)
 		gtx.Constraints.Max.X = 250
-		// paint.Fill(gtx.Ops,  helper.HexARGB("ff559988"))
+		// paint.Fill(gtx.Ops,  p9.HexARGB("ff559988"))
 		t.theme.Inset(0,
 			t.layout.Vertical().ScrollToEnd().Length(len(t.toasts)).ListElement(t.singleToast).Fn).Fn(gtx)
 	}
@@ -97,7 +96,7 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 		r := f32.Rect(0, 0, float32(sz.X), float32(sz.Y))
 
 		return t.theme.Inset(0.05, func(gtx l.Context) l.Dimensions {
-			return shadow.Shadow(gtx, unit.Dp(3), unit.Dp(1), helper.HexARGB("ee000000"), t.theme.Flex().Flexed(1,
+			return shadow.Shadow(gtx, unit.Dp(3), unit.Dp(1), p9.HexARGB("ee000000"), t.theme.Flex().Flexed(1,
 				func(gtx l.Context) l.Dimensions {
 					clip.UniformRRect(r, rr).Add(gtx.Ops)
 					paint.Fill(gtx.Ops, t.toasts[index].bodyBackground)

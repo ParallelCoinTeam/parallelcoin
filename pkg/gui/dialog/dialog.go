@@ -1,15 +1,16 @@
 package dialog
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/io/pointer"
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/p9"
-	"image"
-	"image/color"
 )
 
 type Dialog struct {
@@ -39,7 +40,7 @@ func New(th *p9.Theme) *Dialog {
 		theme:          th,
 		duration:       100,
 		close:          th.Clickable(),
-		bodyBackground: helper.HexARGB("ee000000"),
+		bodyBackground: p9.HexARGB("ee000000"),
 		//singleSize:         image.Pt(300, 80),
 		singleCornerRadius: unit.Dp(5),
 		singleElevation:    unit.Dp(5),

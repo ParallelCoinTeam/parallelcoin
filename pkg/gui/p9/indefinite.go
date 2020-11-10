@@ -63,7 +63,7 @@ func (lo *Indefinite) Fn(gtx l.Context) l.Dimensions {
 	}.Add(gtx.Ops)
 	op.Offset(f32.Pt(-float32(radius), -float32(radius))).Add(gtx.Ops)
 	paint.PaintOp{
-		Rect: f32.Rectangle{Max: l.FPt(sz)},
+		// Rect: f32.Rectangle{Max: l.FPt(sz)},
 	}.Add(gtx.Ops)
 	op.InvalidateOp{}.Add(gtx.Ops)
 	return l.Dimensions{

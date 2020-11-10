@@ -66,11 +66,11 @@ func (b *Border) Fn(gtx layout.Context) layout.Dimensions {
 		NE: rr, NW: rr, SE: rr, SW: rr,
 		Width: float32(width),
 	}.Add(gtx.Ops)
-	dr := f32.Rectangle{
-		Max: layout.FPt(sz),
-	}
+	// dr := f32.Rectangle{
+	// 	Max: layout.FPt(sz),
+	// }
 	paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
 	st.Pop()
 	return dims
 }

@@ -6,6 +6,8 @@ gioui.org v0.0.0-20200929170715-d2e06d938930/go.mod h1:Y+uS7hHMvku1Q+ooaoq6fYD5B
 gioui.org v0.0.0-20201031091437-39b50261d082 h1:s06tBBOVh38cXDQVjhM8SdhXOrOSXpC+bAo/V1cpzNc=
 gioui.org v0.0.0-20201031091437-39b50261d082/go.mod h1:Y+uS7hHMvku1Q+ooaoq6fYD5B2LGoT8JtFgvmYmRzTw=
 gioui.org v0.0.0-20201102184644-18869735db19 h1:4604gLj02l61jqMlCscYnZZorOSVgUJxL+wA3LI/Jps=
+gioui.org v0.0.0-20201109100145-fb70fb1c95ca h1:RmXl6o34WI2Kvw378blAZ98MbJZYhpBLoxur+lb28Eo=
+gioui.org v0.0.0-20201109100145-fb70fb1c95ca/go.mod h1:Y+uS7hHMvku1Q+ooaoq6fYD5B2LGoT8JtFgvmYmRzTw=
 gioui.org/cmd v0.0.0-20201102184644-18869735db19 h1:9Q6Of/9Fl4VyNtnobW7eP2lb4EsltsnvcM9QQIW4vsA=
 gioui.org/cmd v0.0.0-20201102184644-18869735db19/go.mod h1:dlmJnCEkOpRaChYxRmJZ5S4jk6y7DCfWnec39xGbUYk=
 github.com/AndreasBriese/bbloom v0.0.0-20180913140656-343706a395b7/go.mod h1:bOvUY6CB00SOBii9/FifXqc0awNKxLFCL/+pkDPuyl8=

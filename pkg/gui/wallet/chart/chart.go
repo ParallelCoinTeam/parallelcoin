@@ -34,6 +34,6 @@ var (
 //
 // func verticalPart(c string) func(gtx C) D {
 //	return func(gtx C) D {
-//		return helper.Fill(gtx, helper.HexARGB(c))
+//		return p9.Fill(gtx, p9.HexARGB(c))
 //	}
 // }

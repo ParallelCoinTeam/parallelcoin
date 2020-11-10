@@ -10,7 +10,6 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
 
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -45,7 +44,7 @@ func loop(w *app.Window) error {
 			return e.Err
 		case system.FrameEvent:
 			gtx := layout.NewContext(&ops, e)
-			paint.Fill(gtx.Ops, helper.HexARGB("e5e5e5FF"))
+			paint.Fill(gtx.Ops, p9.HexARGB("e5e5e5FF"))
 			op.InvalidateOp{}.Add(gtx.Ops)
 
 			th.Inset(0.25,

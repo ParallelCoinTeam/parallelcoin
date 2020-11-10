@@ -5,8 +5,8 @@ import (
 
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
 
+	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
@@ -31,7 +31,7 @@ func logo(th *theme.Theme) func(gtx C) D {
 		logo := th.Icons["Logo"]
 		var dim D
 		size := gtx.Px(unit.Dp((float32(gtx.Constraints.Max.Y) * 0.236)))
-		logo.Color = helper.HexARGB(th.Colors["Bg"])
+		logo.Color = p9.HexARGB(th.Colors["Bg"])
 		logo.Layout(gtx, unit.Px(float32(size)))
 		dim = D{
 			Size: image.Point{X: size, Y: size},
@@ -43,7 +43,7 @@ func logo(th *theme.Theme) func(gtx C) D {
 func headline(th *theme.Theme) func(gtx C) D {
 	return func(gtx C) D {
 		txt := theme.H1(th, "PLAN NINE FROM FAR, FAR AWAY SPACE")
-		txt.Color = helper.HexARGB(th.Colors["Silver"])
+		txt.Color = p9.HexARGB(th.Colors["Silver"])
 		txt.TextSize = unit.Dp((float32(gtx.Constraints.Max.Y) * 0.118))
 
 		txt.Alignment = text.Middle

@@ -8,8 +8,8 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"github.com/gioapp/gel/helper"
 
+	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/wallet/dap/box"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
@@ -84,7 +84,7 @@ func (c CounterStyle) Layout(th *theme.Theme, value string) func(gtx C) D {
 	//	bgColor := c.BgColor
 	//	return layout.Stack{Alignment: layout.Center}.Layout(g,
 	//		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-	//			return helper.Fill(g, helper.HexARGB(bgColor))
+	//			return p9.Fill(g, p9.HexARGB(bgColor))
 	//		}),
 	//		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 	//			return layout.Center.Layout(g, func(gtx layout.Context) layout.Dimensions {
@@ -114,7 +114,7 @@ func (c CounterStyle) Layout(th *theme.Theme, value string) func(gtx C) D {
 	//								}.Layout(gtx,
 	//									layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 	//										c.input.Font.Typeface = c.Font.Typeface
-	//										c.input.Color = helper.HexARGB(c.TxColor)
+	//										c.input.Color = p9.HexARGB(c.TxColor)
 	//										for _, e := range c.c.CounterInput.Events() {
 	//											switch e.(type) {
 	//											case widget.ChangeEvent:
@@ -124,7 +124,7 @@ func (c CounterStyle) Layout(th *theme.Theme, value string) func(gtx C) D {
 	//											}
 	//										}
 	//										return c.input.Layout(gtx)
-	//										paint.ColorOp{Color: helper.HexARGB(c.TxColor)}.Add(gtx.Ops)
+	//										paint.ColorOp{Color: p9.HexARGB(c.TxColor)}.Add(gtx.Ops)
 	//										return material.Body1(th.T, value).Layout(gtx)
 	//									}))
 	//							})
@@ -164,7 +164,7 @@ func iconButton(t *material.Theme, i *widget.Icon, c *widget.Clickable, bg strin
 func (b iconBtn) Layout(gtx layout.Context) layout.Dimensions {
 	btn := material.ButtonLayout(b.theme, b.button)
 	btn.CornerRadius = unit.Dp(0)
-	btn.Background = helper.HexARGB(b.bg)
+	btn.Background = p9.HexARGB(b.bg)
 	return btn.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.UniformInset(unit.Dp(1)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			iconAndLabel := layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}

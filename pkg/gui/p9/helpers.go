@@ -9,6 +9,7 @@ import (
 	"gioui.org/io/system"
 	l "gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
 )
@@ -26,11 +27,14 @@ const Inf = 1e6
 func Fill(gtx l.Context, col color.RGBA) l.Dimensions {
 	cs := gtx.Constraints
 	d := cs.Min
-	dr := f32.Rectangle{
-		Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
+	clipRect := image.Rectangle{
+		Max: image.Point{X: d.X, Y: d.Y},
 	}
+	st := op.Push(gtx.Ops)
+	clip.Rect(clipRect).Add(gtx.Ops)
 	paint.ColorOp{Color: col}.Add(gtx.Ops)
-	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
+	st.Pop()
 	gtx.Constraints.Constrain(d)
 	return l.Dimensions{Size: d}
 }

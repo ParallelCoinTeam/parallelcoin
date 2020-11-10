@@ -3,7 +3,8 @@ package container
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
+
+	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 type container struct {
@@ -56,7 +57,7 @@ func stack(color string, size int, content layout.Widget) layout.Widget {
 	return func(gtx layout.Context) layout.Dimensions {
 		return layout.Stack{Alignment: layout.W}.Layout(gtx,
 			layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-				return helper.Fill(gtx, helper.HexARGB(color))
+				return p9.Fill(gtx, p9.HexARGB(color))
 			}),
 			layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{
