@@ -57,7 +57,7 @@ var (
 		Debug: 6,
 		Trace: 7,
 	}
-	StartupTime    = time.Now()
+	StartupTime = time.Now()
 )
 
 type LogWriter struct {

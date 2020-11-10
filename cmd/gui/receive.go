@@ -91,7 +91,8 @@ func (wg *WalletGUI) receiveTop() l.Widget {
 								wg.Inset(0.25,
 									wg.buttonText(wg.clickables["receiveClear"], "Clear", wg.ClearAllAddresses),
 								).Fn,
-							).Fn,
+							).
+						Fn,
 					).Fn,
 				).Fn,
 			).Fn,

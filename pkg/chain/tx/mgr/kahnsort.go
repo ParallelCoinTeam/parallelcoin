@@ -72,7 +72,7 @@ func graphRoots(graph hashGraph) []*TxRecord {
 // Kahn's algorithm.
 func dependencySort(txs map[chainhash.Hash]*TxRecord) []*TxRecord {
 	graph := makeGraph(txs)
-s := graphRoots(graph)
+	s := graphRoots(graph)
 	// If there are no edges (no transactions from the map reference each other), then Kahn's algorithm is unnecessary.
 	if len(s) == len(txs) {
 		return s

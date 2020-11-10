@@ -179,7 +179,6 @@ func dbFetchOrCreateVersion(dbTx database.Tx, key []byte, defaultVersion uint32)
 //      - 0xb2...ec: pubkey hash
 // -----------------------------------------------------------------------------
 
-
 // SpentTxOut contains a spent transaction output and potentially additional contextual information such as whether or
 // not it was contained
 //
@@ -653,7 +652,7 @@ func dbFetchUtxoEntry(dbTx database.Tx, outpoint wire.OutPoint) (*UtxoEntry, err
 // view contents and state.
 //
 // In particular, only the entries that have been marked as modified are written to the database.
-func  dbPutUtxoView(dbTx database.Tx, view *UtxoViewpoint) error {
+func dbPutUtxoView(dbTx database.Tx, view *UtxoViewpoint) error {
 	utxoBucket := dbTx.Metadata().Bucket(utxoSetBucketName)
 	for outpoint, entry := range view.entries {
 		// No need to update the database if the entry was not modified.

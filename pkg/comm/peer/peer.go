@@ -918,7 +918,7 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) error {
 		return o + spew.Sdump(buf.Bytes())
 	})
 	cmd := msg.Command()
-	if cmd != "ping" && cmd != "pong" && cmd != "inv"{
+	if cmd != "ping" && cmd != "pong" && cmd != "inv" {
 		Debugc(func() string {
 			// Debug summary of message.
 			summary := messageSummary(msg)

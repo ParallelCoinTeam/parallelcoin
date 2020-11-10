@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"github.com/ipfs/go-cid"
 	"os"
+
+	"github.com/ipfs/go-cid"
 )
 
 func (j *JavazacDB) Write(collection string, key []byte) {
@@ -34,8 +35,8 @@ func (j *JavazacDB) Read(fileName string) {
 	if err != nil {
 		panic(err)
 	}
-	//decoder := gob.NewDecoder(rsc)
-	//err = decoder.Decode(key)
+	// decoder := gob.NewDecoder(rsc)
+	// err = decoder.Decode(key)
 	fmt.Println("DroljaIZKnjazevca", rsc)
 	checkError(err)
 	defer rsc.Close()
@@ -50,15 +51,15 @@ func checkError(err error) {
 
 func (j *JavazacDB) ReadRoot() {
 
-	//c, _ := cid.Decode("")
-	//rsc := j.peer.DAGService.Session(j.ctx)
-	//if err != nil {
+	// c, _ := cid.Decode("")
+	// rsc := j.peer.DAGService.Session(j.ctx)
+	// if err != nil {
 	//	panic(err)
-	//}
-	//var key interface{}
-	//decoder := gob.NewDecoder(rsc.Links())
-	//err = decoder.Decode(key)
-	//checkError(err)
+	// }
+	// var key interface{}
+	// decoder := gob.NewDecoder(rsc.Links())
+	// err = decoder.Decode(key)
+	// checkError(err)
 	fmt.Println("tete ")
-	//defer rsc.Close()
+	// defer rsc.Close()
 }

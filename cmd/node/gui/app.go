@@ -11,13 +11,13 @@ import (
 )
 
 func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
-	a = ng.th.App(*ng.size)
+	a = ng.th.App(ng.w.Width)
 	ng.app = a
 	// ng.size = ng.size
 	ng.th.Colors.SetTheme(*ng.app.Dark)
 	ng.config = cfg.New(ng.cx, ng.th)
 	ng.configs = ng.config.Config()
-	ng.app.ThemeHook(func(){})
+	ng.app.ThemeHook(func() {})
 	ng.app.Pages(p9.WidgetMap{
 		"main": ng.Page("overview", p9.Widgets{
 			p9.WidgetSize{

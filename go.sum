@@ -6,6 +6,8 @@ gioui.org v0.0.0-20200929170715-d2e06d938930/go.mod h1:Y+uS7hHMvku1Q+ooaoq6fYD5B
 gioui.org v0.0.0-20201031091437-39b50261d082 h1:s06tBBOVh38cXDQVjhM8SdhXOrOSXpC+bAo/V1cpzNc=
 gioui.org v0.0.0-20201031091437-39b50261d082/go.mod h1:Y+uS7hHMvku1Q+ooaoq6fYD5B2LGoT8JtFgvmYmRzTw=
 gioui.org v0.0.0-20201102184644-18869735db19 h1:4604gLj02l61jqMlCscYnZZorOSVgUJxL+wA3LI/Jps=
+gioui.org v0.0.0-20201109100145-fb70fb1c95ca h1:RmXl6o34WI2Kvw378blAZ98MbJZYhpBLoxur+lb28Eo=
+gioui.org v0.0.0-20201109100145-fb70fb1c95ca/go.mod h1:Y+uS7hHMvku1Q+ooaoq6fYD5B2LGoT8JtFgvmYmRzTw=
 gioui.org/cmd v0.0.0-20201102184644-18869735db19 h1:9Q6Of/9Fl4VyNtnobW7eP2lb4EsltsnvcM9QQIW4vsA=
 gioui.org/cmd v0.0.0-20201102184644-18869735db19/go.mod h1:dlmJnCEkOpRaChYxRmJZ5S4jk6y7DCfWnec39xGbUYk=
 github.com/AndreasBriese/bbloom v0.0.0-20180913140656-343706a395b7/go.mod h1:bOvUY6CB00SOBii9/FifXqc0awNKxLFCL/+pkDPuyl8=
@@ -28,6 +30,8 @@ github.com/VividCortex/ewma v1.1.1/go.mod h1:2Tkkvm3sRDVXaiyucHiACn4cqf7DpdyLvmx
 github.com/aead/siphash v1.0.1 h1:FwHfE/T45KPKYuuSAKyyvE+oPWcaQ+CUmFW0bPlM+kg=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
 github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6/go.mod h1:grANhF5doyWs3UAsr3K4I6qtAmlQcZDesFNEHPZAzj8=
+github.com/atotto/clipboard v0.1.2 h1:YZCtFu5Ie8qX2VmVTBnrqLSiU9XOWwqNRmdT3gIQzbY=
+github.com/atotto/clipboard v0.1.2/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/benbjohnson/clock v1.0.2 h1:Z0CN0Yb4ig9sGPXkvAQcGJfnrrMQ5QYLCMPRi9iD7YE=
 github.com/benbjohnson/clock v1.0.2/go.mod h1:bGMdMPoPVvcYyt1gHDf4J2KE153Yf9BuiUKYMaxlTDM=
 github.com/bitbandi/go-x11 v0.0.0-20171024232457-5fddbc9b2b09 h1:Gv0u6/aDygacB8WwTZCQURvifjTit87CdXAMuD+OEAY=

@@ -1,13 +1,17 @@
 package gui
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"runtime"
-	"time"
 
+	l "gioui.org/layout"
 	"github.com/urfave/cli"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui/dialog"
 	"github.com/p9c/pod/pkg/gui/toast"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -25,13 +29,15 @@ import (
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	var size int
+	var noWallet bool
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
 		// runnerQuit: make(chan struct{}),
-		size: &size,
+		size:     &size,
+		noWallet: &noWallet,
 	}
 	return wg.Run()
 }
@@ -64,7 +70,6 @@ type WalletGUI struct {
 	sendAddresses             []SendAddress
 	ShellRunCommandChan       chan string
 	MinerRunCommandChan       chan string
-	MinerThreadsChan          chan int
 	State                     State
 	Shell, Miner              *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
@@ -72,13 +77,14 @@ type WalletGUI struct {
 	console                   *Console
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
+	noWallet                  *bool
 }
 
 func (wg *WalletGUI) Run() (err error) {
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
-	wg.sidebarButtons = make([]*p9.Clickable, 10)
+	wg.sidebarButtons = make([]*p9.Clickable, 11)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
@@ -119,35 +125,29 @@ func (wg *WalletGUI) Run() (err error) {
 		"encryption": wg.th.Bool(false),
 		"seed":       wg.th.Bool(false),
 		"testnet":    wg.th.Bool(false),
+		"ihaveread":  wg.th.Bool(false),
 	}
-	pass := "password"
+	pass := ""
+	passConfirm := ""
+	seed := make([]byte, hdkeychain.MaxSeedBytes)
+	_, _ = rand.Read(seed)
+	seedString := hex.EncodeToString(seed)
 	wg.inputs = map[string]*p9.Input{
-		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 25, func(pass string) {}),
-		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 25, func(pass string) {}),
-		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 25, func(pass string) {}),
-		"console":        wg.th.Input("", "ParallelCoin console", "Primary", "DocText", 25, func(pass string) {}),
+		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 32, func(pass string) {}),
+		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 32, func(pass string) {}),
+		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 32, func(pass string) {}),
+		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", 32, func(pass string) {}),
+		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", 32, func(pass string) {}),
 	}
 	wg.passwords = map[string]*p9.Password{
-		"passEditor":        wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
-		"confirmPassEditor": wg.th.Password(&pass, "Primary", "DocText", 25, func(pass string) {}),
-	}
-	wg.console = &Console{
-		Commands: []ConsoleCommand{
-			{
-				ComID:    "input",
-				Category: "input",
-				Time:     time.Now(),
-				// Out: input(duo),
-			},
-		},
-		CommandsNumber: 1,
+		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", 32, func(pass string) {}),
+		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", 32, func(pass string) {}),
+		"publicPassEditor":  wg.th.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", 32, func(pass string) {}),
 	}
 	wg.toasts = toast.New(wg.th)
 	wg.dialog = dialog.New(wg.th)
-
+	wg.console = wg.ConsolePage()
 	wg.w = make(map[string]*f.Window)
-	if err = wg.Runner(); Check(err) {
-	}
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{
 		"splash": f.NewWindow(),
@@ -165,31 +165,50 @@ func (wg *WalletGUI) Run() (err error) {
 					if wg.mining {
 						Debug("restarting miner")
 						wg.MinerRunCommandChan <- "stop"
-						wg.MinerRunCommandChan <- "start"
+						wg.MinerRunCommandChan <- "run"
 					}
 				}()
 			},
 		),
 	}
-	wg.App = wg.GetAppWidget()
 	wg.Tickers()
-	// wg.CreateSendAddressItem()
+	wg.App = wg.GetAppWidget()
+	wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
 	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
+	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
+		*wg.noWallet = true
+		wg.running = false
+		wg.mining = false
+		wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
+	} else {
+		if err = wg.Runner(); Check(err) {
+		}
+	}
 	if wg.running {
+		Debug("initial starting shell")
+		wg.running = false
 		wg.ShellRunCommandChan <- "run"
 	}
 	if wg.mining {
-		wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
-		wg.MinerRunCommandChan <- "start"
+		// wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
+		Debug("initial starting miner")
+		wg.mining = false
+		wg.MinerRunCommandChan <- "run"
 	}
+	wg.Size = wg.w["main"].Width
 	go func() {
 		if err := wg.w["main"].
 			Size(800, 480).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
-				wg.Fn(),
+				func(gtx l.Context) l.Dimensions {
+					return p9.If(*wg.noWallet,
+						wg.WalletPage,
+						wg.App.Fn(),
+					)(gtx)
+				},
 				wg.Overlay(),
 				// wg.InitWallet(),
 				func() {

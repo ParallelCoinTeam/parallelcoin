@@ -26,8 +26,8 @@ type TextInput struct {
 	shaper    text.Shaper
 }
 
-// SimpleInput creates a simple text input widget
-func (th *Theme) SimpleInput(editor *Editor, hint string) *TextInput {
+// TextInput creates a simple text input widget
+func (th *Theme) TextInput(editor *Editor, hint string) *TextInput {
 	e := &TextInput{
 		th:        th,
 		editor:    editor,

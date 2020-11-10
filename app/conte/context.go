@@ -73,6 +73,8 @@ type Xt struct {
 	Controller atomic.Bool
 	// OtherNodes is the count of nodes connected automatically on the LAN
 	OtherNodes atomic.Int32
+	// IsGUI indicates if we have the possibility of terminal input
+	IsGUI bool
 }
 
 // GetNewContext returns a fresh new context

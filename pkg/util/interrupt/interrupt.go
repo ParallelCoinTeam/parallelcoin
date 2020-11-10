@@ -55,14 +55,23 @@ func Listener() {
 					Fatal(err)
 				}
 			} else {
-				s := []string{"cmd.exe", "/C", "start"}
+				Debug("doing windows restart")
+
+				// procAttr := new(os.ProcAttr)
+				// procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
+				// os.StartProcess(os.Args[0], os.Args[1:], procAttr)
+
+				var s []string
+				// s = []string{"cmd.exe", "/C", "start"}
 				s = append(s, os.Args[0])
-				s = append(s, "--delaystart")
+				// s = append(s, "--delaystart")
 				s = append(s, os.Args[1:]...)
 				cmd := exec.Command(s[0], s[1:]...)
-				if err = cmd.Run(); Check(err) {
+				Debug("windows restart done")
+				if err = cmd.Start(); Check(err) {
 				}
-
+				// // select{}
+				// os.Exit(0)
 			}
 		}
 		// time.Sleep(time.Second * 3)

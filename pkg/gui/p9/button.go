@@ -228,5 +228,6 @@ func drawInk(c l.Context, p press) {
 		}},
 		NE: rr, NW: rr, SE: rr, SW: rr,
 	}.Add(c.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: size, Y: size}}}.Add(c.Ops)
+	// Rect: f32.Rectangle{Max: f32.Point{X: size, Y: size}}
+	paint.PaintOp{}.Add(c.Ops)
 }

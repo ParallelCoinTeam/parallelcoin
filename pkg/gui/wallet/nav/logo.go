@@ -1,14 +1,15 @@
 package nav
 
 import (
+	"image"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
-	"image"
 )
 
 var (
@@ -49,7 +50,7 @@ func (n *Navigation) LogoLayout(th *theme.Theme) func(gtx C) D {
 				}
 				var d D
 				size := gtx.Px(unit.Dp(48))
-				logo.Color = helper.HexARGB(th.Colors["PanelBg"])
+				logo.Color = p9.HexARGB(th.Colors["PanelBg"])
 				logo.Layout(gtx, unit.Px(float32(size)))
 				d = D{
 					Size: image.Point{X: size, Y: size},

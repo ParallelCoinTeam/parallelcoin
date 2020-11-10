@@ -1,174 +1,108 @@
 package gui
 
 import (
-	"encoding/json"
-	"fmt"
+	"regexp"
+
 	l "gioui.org/layout"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
-	"github.com/p9c/pod/pkg/rpc/legacy"
-	"sort"
-	"strings"
-	"time"
+	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	"github.com/atotto/clipboard"
+
+	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 type Console struct {
-	Commands       []ConsoleCommand
-	CommandsNumber int
-}
-type ConsoleCommand struct {
-	Com      interface{}
-	ComID    string
-	Category string
-	Out      string
-	Time     time.Time
-}
-
-type ConsoleCommandsNumber struct {
-	CommandsNumber int
+	w              l.Widget
+	editor         *p9.Editor
+	clearClickable *p9.Clickable
+	clearButton    *p9.IconButton
+	copyClickable  *p9.Clickable
+	copyButton     *p9.IconButton
+	pasteClickable *p9.Clickable
+	pasteButton    *p9.IconButton
 }
 
-//var (
-//	consoleInputField = wg.th.Input("", "Amount", "Primary", "DocText", 25, func(pass string) {})
-//	consoleOutputList = &layout.List{
-//		Axis:        layout.Vertical,
-//		ScrollToEnd: true,
-//	}
-//)
+var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
-func (wg *WalletGUI) ConsolePage() l.Widget {
-	return wg.th.VFlex().
-		Flexed(1,
-			wg.Inset(0.25,
-				func(gtx l.Context) l.Dimensions {
-					return wg.lists["console"].Vertical().Length(len(wg.sendAddresses)).ListElement(wg.consoleRow).Fn(gtx)
-				},
-			).Fn,
+func (wg *WalletGUI) ConsolePage() *Console {
+	c := &Console{
+		editor:         wg.th.Editor().SingleLine(),
+		clearClickable: wg.th.Clickable(),
+		copyClickable:  wg.th.Clickable(),
+		pasteClickable: wg.th.Clickable(),
+	}
+	clearClickableFn := func() {
+		c.editor.SetText("")
+		c.editor.Focus()
+	}
+	copyClickableFn := func() {
+		go clipboard.WriteAll(c.editor.Text())
+		c.editor.Focus()
+	}
+	pasteClickableFn := func() {
+		col := c.editor.Caret.Col
+		go func() {
+			txt := c.editor.Text()
+			var err error
+			var cb string
+			if cb, err = clipboard.ReadAll(); Check(err) {
+			}
+			cb = findSpaceRegexp.ReplaceAllString(cb, " ")
+			txt = txt[:col] + cb + txt[col:]
+			c.editor.SetText(txt)
+			c.editor.Move(col + len(cb))
+		}()
+		// c.editor.Focus()
+	}
+	c.clearButton = wg.th.IconButton(c.clearClickable.SetClick(clearClickableFn)).
+		Icon(
+			wg.th.Icon().
+				Color("DocText").
+				Src(&icons2.ContentBackspace),
 		).
-		Rigid(
-			wg.consoleInput(),
-		).Fn
-}
-
-func (wg *WalletGUI) consoleRow(gtx l.Context, i int) l.Dimensions {
-	t := wg.console.Commands[i]
-	return wg.Flex().Vertical().AlignEnd().
-		Rigid(
-			wg.th.Caption("ds://" + t.ComID).
-				Font("go regular").
-				Color("PanelText").
-				TextScale(0.66).Fn,
+		Background("Transparent").
+		Inset(0.25)
+	c.copyButton = wg.th.IconButton(c.copyClickable.SetClick(copyClickableFn)).
+		Icon(
+			wg.th.Icon().
+				Color("DocText").
+				Src(&icons2.ContentContentCopy),
 		).
-		Rigid(
-			wg.th.Caption(t.Out).
-				Font("go regular").
-				Color("PanelText").
-				TextScale(0.66).Fn,
-		).Fn(gtx)
+		Background("Transparent").
+		Inset(0.25)
+	c.pasteButton = wg.th.IconButton(c.pasteClickable.SetClick(pasteClickableFn)).
+		Icon(
+			wg.th.Icon().
+				Color("DocText").
+				Src(&icons2.ContentContentPaste),
+		).
+		Background("Transparent").
+		Inset(0.25)
+	c.w = func(gtx l.Context) l.Dimensions {
+		return wg.th.VFlex().
+			Flexed(1,
+				wg.th.Fill("DocBg",
+					p9.EmptyMaxHeight(),
+				).Fn,
+			).
+			Rigid(
+				wg.th.Fill("PanelBg",
+					wg.th.Inset(0.25,
+						wg.th.Flex().
+							Flexed(1,
+								wg.th.TextInput(c.editor, "enter an rpc command").Color("DocText").Fn,
+							).
+							Rigid(c.copyButton.Fn).
+							Rigid(c.pasteButton.Fn).
+							Rigid(c.clearButton.Fn).
+							Fn,
+					).Fn,
+				).Fn,
+			).Fn(gtx)
+	}
+	return c
 }
 
-func (wg *WalletGUI) consoleInput() l.Widget {
-	return wg.inputs["console"].Input("", "Run command", "Secondary", "Primary", 25, func(pass string) {
-		//func(e gel.SubmitEvent) {
-		wg.console.Commands = append(
-			wg.console.Commands,
-			ConsoleCommand{
-				ComID: wg.inputs["console"].GetText(),
-				Time:  time.Time{},
-				Out:   wg.ConsoleCmd(wg.inputs["console"].GetText()),
-			})
-	}).Fn
-}
-func (wg *WalletGUI) ConsoleCmd(com string) (o string) {
-	split := strings.Split(com, " ")
-	method := split[0]
-	args := split[1:]
-	var cmd, res interface{}
-	var err error
-	var errString, prev string
-	if method == "help" {
-		if len(args) < 1 {
-			method = ""
-			cmd = &btcjson.HelpCmd{Command: &method}
-			if res, err = chainrpc.RPCHandlers["help"].Fn(wg.cx.RPCServer, cmd, nil); Check(err) {
-				errString += fmt.Sprintln(err)
-			}
-			o += fmt.Sprintln(res)
-			if res, err = legacy.RPCHandlers["help"].
-				Handler(cmd, wg.cx.WalletServer, wg.cx.ChainClient); Check(err) {
-				errString += fmt.Sprintln(err)
-			}
-			o += fmt.Sprintln(res)
-			splitted := strings.Split(o, "\n")
-			sort.Strings(splitted)
-			var dedup []string
-			for i := range splitted {
-				if i > 0 {
-					if splitted[i] != prev {
-						dedup = append(dedup, splitted[i])
-					}
-				}
-				prev = splitted[i]
-			}
-			o = strings.Join(dedup, "\n")
-			if errString != "" {
-				o += "Error:\n"
-				o += errString
-			}
-		} else {
-			method = args[0]
-			//L.Debug("finding help for command", method)
-			if help, err := wg.cx.RPCServer.HelpCacher.RPCMethodHelp(
-				method); Check(err) {
-				o += err.Error() + "\n"
-				o += fmt.Sprintln(res)
-				cmd = &btcjson.HelpCmd{Command: &method}
-				if res, err = legacy.RPCHandlers["help"].
-					Handler(cmd, wg.cx.WalletServer, wg.cx.ChainClient); Check(err) {
-					errString += fmt.Sprintln(err)
-				}
-				o += fmt.Sprintln(res)
-			} else {
-				o += help
-			}
-			// if _, ok := legacy.RPCHandlers[method]; ok {
-			// 	o += "wallet server:\n"
-			// 	o += legacy.HelpDescsEnUS()[method]
-			// }
-			// if _, ok := rpc.RPCHandlers[method]; ok {
-			// 	o += "chain server:\n"
-			// 	o += rpc.HelpDescsEnUS[method]
-			// }
-		}
-		return
-	}
-	params := make([]interface{}, 0, len(split[1:]))
-	for _, arg := range args {
-		params = append(params, arg)
-	}
-	if cmd, err = btcjson.NewCmd(method, params...); Check(err) {
-		o += fmt.Sprintln(err)
-	}
-	if x, ok := chainrpc.RPCHandlers[method]; !ok {
-		if x, ok := legacy.RPCHandlers[method]; ok {
-			if res, err = x.Handler(cmd, wg.cx.WalletServer,
-				wg.cx.ChainClient); Check(err) {
-				o += err.Error()
-			}
-			// o += fmt.Sprintln(res)
-		}
-	} else {
-		if res, err = x.Fn(wg.cx.RPCServer, cmd, nil); Check(err) {
-			o += err.Error()
-		}
-		// o += fmt.Sprintln(res)
-	}
-	if res != nil {
-		if j, err := json.MarshalIndent(res, "",
-			"  "); !Check(err) {
-			o += string(j)
-		}
-	}
-	return
-
+func (c *Console) Fn(gtx l.Context) l.Dimensions {
+	return c.w(gtx)
 }

@@ -6,7 +6,6 @@
 
 package main
 
-
 // This program generates the subdirectories of Go packages that contain []byte versions of the TrueType font files
 // under ./ttfs.
 //

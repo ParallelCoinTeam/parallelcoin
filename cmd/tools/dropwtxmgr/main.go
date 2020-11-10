@@ -4,10 +4,9 @@ package main
 import (
 	"bufio"
 	"encoding/binary"
+	"fmt"
 	"os"
 	"path/filepath"
-
-	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/jessevdk/go-flags"
 
@@ -33,7 +32,6 @@ var opts = struct {
 func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
-		Error(err)
 		os.Exit(1)
 	}
 }
@@ -78,7 +76,7 @@ func mainInt() int {
 		return 1
 	}
 	for !opts.Force {
-		log.Print("Drop all mod transaction history? [y/N] ")
+		fmt.Print("Drop all mod transaction history? [y/N] ")
 		scanner := bufio.NewScanner(bufio.NewReader(os.Stdin))
 		if !scanner.Scan() {
 			// Exit on EOF.
@@ -86,7 +84,6 @@ func mainInt() int {
 		}
 		err := scanner.Err()
 		if err != nil {
-			Error(err)
 			return 1
 		}
 		resp := scanner.Text()
@@ -112,19 +109,16 @@ func mainInt() int {
 		}
 		ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
 		if err != nil {
-			Error(err)
 			return err
 		}
 		err = wtxmgr.Create(ns)
 		if err != nil {
-			Error(err)
 			return err
 		}
 		ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 		startBlock := ns.Get(startBlockName)
 		err = ns.Put(syncedToName, startBlock)
 		if err != nil {
-			Error(err)
 			return err
 		}
 		recentBlocks := make([]byte, 40)
@@ -134,7 +128,6 @@ func mainInt() int {
 		return ns.Put(recentBlocksName, recentBlocks)
 	})
 	if err != nil {
-		Error(err)
 		fmt.Println("Failed to drop and re-create namespace:", err)
 		return 1
 	}

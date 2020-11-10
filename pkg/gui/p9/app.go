@@ -53,7 +53,7 @@ type App struct {
 
 type WidgetMap map[string]l.Widget
 
-func (th *Theme) App(size int) *App {
+func (th *Theme) App(size *int) *App {
 	mc := th.Clickable()
 	return &App{
 		Theme:               th,
@@ -85,16 +85,13 @@ func (th *Theme) App(size int) *App {
 		menuButton:          th.IconButton(mc),
 		menuColor:           "Light",
 		MenuOpen:            false,
-		Size:                &size,
+		Size:                size,
 	}
 }
 
 // Fn renders the app widget
 func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		x := gtx.Constraints.Max.X
-		a.Size = &x
-		// TODO: put the root stack in here
 		return a.Flex().Rigid(
 			a.VFlex().
 				Rigid(
@@ -336,6 +333,8 @@ func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
 
 func (a *App) renderSideBar() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
+		gtx.Constraints.Max.X = int(a.SideBarSize.V)
+		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		out := a.sideBarList.
 			Length(len(a.sideBar)).
 			LeftSide(true).

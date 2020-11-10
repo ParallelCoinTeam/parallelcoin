@@ -141,7 +141,6 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv6Addrs {
 		listener, err := listen("tcp6", addr)
 		if err != nil {
-			Error(err)
 			Warnf(
 				"Can't listen on %s: %v", addr, err,
 			)

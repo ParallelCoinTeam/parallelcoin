@@ -350,7 +350,7 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 	w.stopChan <- struct{}{}
 	defer close(w.Quit)
 	*reply = true
-	time.Sleep(time.Second*3)
+	time.Sleep(time.Second * 3)
 	os.Exit(0)
 	return
 }

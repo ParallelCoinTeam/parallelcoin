@@ -11,7 +11,7 @@ type IncDec struct {
 	th                *Theme
 	nDigits           int
 	min, max          int
-	current           int
+	Current           int
 	changeHook        func(n int)
 	inc, dec          *Clickable
 	color, background string
@@ -25,7 +25,7 @@ func (th *Theme) IncDec(nDigits, min, max, current int, changeHook func(n int)) 
 		nDigits:    nDigits,
 		min:        min,
 		max:        max,
-		current:    current,
+		Current:    current,
 		changeHook: changeHook,
 		inc:        th.Clickable(),
 		dec:        th.Clickable(),
@@ -58,13 +58,13 @@ func (in *IncDec) SetInactive(color string) *IncDec {
 func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	out := in.th.Flex().AlignMiddle()
 	incColor, decColor := in.color, in.color
-	if in.current == in.min {
+	if in.Current == in.min {
 		decColor = in.inactive
 	}
-	if in.current == in.max {
+	if in.Current == in.max {
 		incColor = in.inactive
 	}
-	if in.current == in.min {
+	if in.Current == in.min {
 		out.Rigid(
 			in.th.Inset(0.25,
 				in.th.Icon().Color(decColor).Scale(Scales["H5"]).Src(&icons.ContentRemove).Fn,
@@ -73,11 +73,11 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	} else {
 		out.Rigid(in.th.Inset(0.25,
 			in.th.ButtonLayout(in.inc.SetClick(func() {
-				in.current--
-				if in.current < in.min {
-					in.current = in.min
+				in.Current--
+				if in.Current < in.min {
+					in.Current = in.min
 				} else {
-					in.changeHook(in.current)
+					in.changeHook(in.Current)
 				}
 			})).Background("Transparent").Embed(
 				in.th.Icon().Color(decColor).Scale(Scales["H5"]).Src(&icons.ContentRemove).Fn,
@@ -85,9 +85,9 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 		).Fn,
 		)
 	}
-	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.current)
+	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.Current)
 	out.Rigid(in.th.Body1(cur).Color(in.color).Font("go regular").Fn)
-	if in.current == in.max {
+	if in.Current == in.max {
 		out.Rigid(
 			in.th.Inset(0.25,
 				in.th.Icon().Color(incColor).Scale(Scales["H5"]).Src(&icons.ContentAdd).Fn,
@@ -97,11 +97,11 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 		out.Rigid(
 			in.th.Inset(0.25,
 				in.th.ButtonLayout(in.dec.SetClick(func() {
-					in.current++
-					if in.current > in.max {
-						in.current = in.max
+					in.Current++
+					if in.Current > in.max {
+						in.Current = in.max
 					} else {
-						in.changeHook(in.current)
+						in.changeHook(in.Current)
 					}
 				})).Background("Transparent").Embed(
 					in.th.Icon().Color(incColor).Scale(Scales["H5"]).Src(&icons.ContentAdd).Fn,

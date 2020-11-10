@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/p9c/pod/cmd/explorer"
 	"os"
+
+	"github.com/p9c/pod/cmd/explorer"
 
 	"github.com/urfave/cli"
 

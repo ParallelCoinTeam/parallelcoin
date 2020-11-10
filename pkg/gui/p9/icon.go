@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"image/draw"
 
-	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
@@ -70,9 +69,9 @@ func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 	}
 	ico.Add(gtx.Ops)
 	paint.PaintOp{
-		Rect: f32.Rectangle{
-			Max: toPointF(ico.Size()),
-		},
+		// Rect: f32.Rectangle{
+		// 	Max: toPointF(ico.Size()),
+		// },
 	}.Add(gtx.Ops)
 	return l.Dimensions{Size: ico.Size()}
 }

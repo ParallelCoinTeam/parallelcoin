@@ -32,14 +32,14 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 			*cfg.MiningAddrs = append(*cfg.MiningAddrs, addr.EncodeAddress())
 			// add them to the active mining address list so they
 			// are ready to use
-			stateCfg.ActiveMiningAddrs = append(stateCfg.
-				ActiveMiningAddrs, addr)
+			stateCfg.ActiveMiningAddrs = append(stateCfg.ActiveMiningAddrs, addr)
 		} else {
 			Error("error adding new address ", err)
 		}
 	}
 	if save.Pod(cfg) {
 		Warn("saved config with new addresses")
+
 		// Info("you can now start up a node in the same config folder with fresh addresses ready to mine with")
 		// os.Exit(0)
 	} else {

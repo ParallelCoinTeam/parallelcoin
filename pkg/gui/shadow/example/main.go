@@ -1,18 +1,19 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
+
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/shadow"
-	"log"
-	"os"
 )
 
 var (
@@ -39,7 +40,7 @@ func loop(w *app.Window) error {
 			return e.Err
 		case system.FrameEvent:
 			gtx := layout.NewContext(&ops, e)
-			paint.Fill(gtx.Ops, helper.HexARGB("e5e5e5FF"))
+			paint.Fill(gtx.Ops, p9.HexARGB("e5e5e5FF"))
 			op.InvalidateOp{}.Add(gtx.Ops)
 
 			th.Inset(5,
@@ -49,25 +50,25 @@ func loop(w *app.Window) error {
 							Rigid(
 								th.Inset(1,
 									func(gtx layout.Context) layout.Dimensions {
-										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(3), helper.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 3").Color("PanelText").Fn).Fn).Fn)
+										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(3), p9.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 3").Color("PanelText").Fn).Fn).Fn)
 									},
 								).Fn).
 							Rigid(
 								th.Inset(1,
 									func(gtx layout.Context) layout.Dimensions {
-										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(5), helper.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 5").Color("PanelText").Fn).Fn).Fn)
+										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(5), p9.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 5").Color("PanelText").Fn).Fn).Fn)
 									},
 								).Fn).
 							Rigid(
 								th.Inset(1,
 									func(gtx layout.Context) layout.Dimensions {
-										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(8), helper.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 8").Color("PanelText").Fn).Fn).Fn)
+										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(8), p9.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 8").Color("PanelText").Fn).Fn).Fn)
 									},
 								).Fn).
 							Rigid(
 								th.Inset(1,
 									func(gtx layout.Context) layout.Dimensions {
-										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(12), helper.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 12").Color("PanelText").Fn).Fn).Fn)
+										return shadow.Shadow(gtx, unit.Dp(5), unit.Dp(12), p9.HexARGB("ee000000"), th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 12").Color("PanelText").Fn).Fn).Fn)
 									},
 								).Fn).Fn).Fn).Fn(gtx)
 			e.Frame(gtx.Ops)

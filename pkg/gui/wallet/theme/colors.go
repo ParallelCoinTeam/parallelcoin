@@ -99,7 +99,7 @@ func NewColors() (c map[string]string) {
 	c["FooterBg"] = c["dark-grayi"]
 	c["PanelBg"] = c["light-grayiii"]
 	c["PanelBorder"] = c["dark"]
-	//c["PanelBg"] = c["dark-white"]
+	// c["PanelBg"] = c["dark-white"]
 	c["PanelBgDim"] = c["light-grayi"]
 	c["PanelText"] = c["light"]
 	c["PanelTextDim"] = c["LightGrayI"]

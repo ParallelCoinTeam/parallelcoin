@@ -465,7 +465,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"genthreads, G",
 				"Number of CPU threads to use with CPU miner"+
 					" -1 = all cores",
-				-1,
+				1,
 				cx.Config.GenThreads),
 			au.Bool(
 				"solo",
@@ -641,6 +641,11 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"darktheme",
 				"sets the dark theme on the gui interface",
 				cx.Config.DarkTheme,
+			),
+			au.Bool(
+				"notty",
+				"tells pod there is no keyboard input available",
+				nil,
 			),
 		},
 	}

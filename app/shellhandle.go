@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/p9c/pod/app/config"
-
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/app/config"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
@@ -27,7 +27,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			*cx.Config.DataDir + slash +
 				cx.ActiveNet.Params.Name + slash +
 				wallet.WalletDbName
-		if !apputil.FileExists(dbFilename) {
+		if !apputil.FileExists(dbFilename) && !cx.IsGUI {
 			// log.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				Error("failed to create wallet", err)
@@ -43,9 +43,10 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 					Error("error starting node ", err)
 				}
 			}()
+			Info("starting node")
 			cx.RPCServer = <-cx.NodeChan
+			Info("node started")
 		}
-		Warn("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
 				err = walletmain.Main(cx)
@@ -53,7 +54,9 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 					fmt.Println("error running wallet:", err)
 				}
 			}()
+			Info("starting wallet")
 			cx.WalletServer = <-cx.WalletChan
+			Info("wallet started")
 		}
 		Debug("shell started")
 		cx.WaitGroup.Wait()

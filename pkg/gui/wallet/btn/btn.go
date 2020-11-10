@@ -2,15 +2,17 @@ package btn
 
 import (
 	"fmt"
+	"image"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"github.com/gioapp/gel/helper"
+
+	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/wallet/lyt"
 	"github.com/p9c/pod/pkg/gui/wallet/theme"
-	"image"
 )
 
 var (
@@ -89,9 +91,9 @@ func (b IconTextButton) icon() func(gtx C) D {
 		return layout.Inset{}.Layout(gtx, func(gtx C) D {
 			var d D
 			if b.Icon != nil {
-				//size := gtx.Px(b.IconSize) - 2*gtx.Px(unit.Dp(16))
+				// size := gtx.Px(b.IconSize) - 2*gtx.Px(unit.Dp(16))
 				size := gtx.Px(b.IconSize)
-				b.Icon.Color = helper.HexARGB(b.IconColor)
+				b.Icon.Color = p9.HexARGB(b.IconColor)
 				b.Icon.Layout(gtx, unit.Px(float32(size)))
 				d = D{
 					Size: image.Point{X: size, Y: size},
@@ -113,7 +115,7 @@ func (b IconTextButton) label(label string) func(gtx C) D {
 			l := theme.Body(b.Theme, label)
 			l.TextSize = b.TextSize
 			l.Alignment = text.Start
-			l.Color = helper.HexARGB(b.TextColor)
+			l.Color = p9.HexARGB(b.TextColor)
 			return l.Layout(gtx)
 		})
 	}

@@ -32,15 +32,18 @@ type Window struct {
 	Window *app.Window
 	opts   []app.Option
 	scale  *scaledConfig
+	Width   *int // stores the width at the beginning of render
 }
 
 // NewWindow creates a new window
 func NewWindow() (out *Window) {
 	var ops op.Ops
 	var e system.FrameEvent
+	var width int
 	out = &Window{
 		Ctx:   layout.NewContext(&ops, e),
 		scale: &scaledConfig{1},
+		Width: &width,
 	}
 	// out.set()
 	return
@@ -90,6 +93,8 @@ func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, overlay f
 				return e.Err
 			case system.FrameEvent:
 				ctx := layout.NewContext(&ops, e)
+				// update width for responsive sizing widgets
+				*w.Width = ctx.Constraints.Max.X
 				frame(ctx)
 				overlay(ctx)
 				e.Frame(ctx.Ops)

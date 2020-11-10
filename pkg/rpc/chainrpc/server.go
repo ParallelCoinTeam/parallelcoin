@@ -2442,7 +2442,7 @@ type Context struct {
 // TODO: simplify/modularise this
 func NewNode(listenAddrs []string, db database.DB,
 	interruptChan <-chan struct{}, cx *Context) (*Node, error) {
-	Trace("listenAddrs ", listenAddrs)
+	Debug("listenAddrs ", listenAddrs)
 	services := DefaultServices
 	if *cx.Config.NoPeerBloomFilters {
 		services &^= wire.SFNodeBloom
