@@ -27,6 +27,15 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+func (th *Theme) Editor() *Editor {
+	e := &Editor{
+		submitHook: func(string) {},
+		changeHook: func(string) {},
+		focusHook:  func(bool) {},
+	}
+	return e
+}
+
 // Editor implements an editable and scrollable text area.
 type Editor struct {
 	alignment text.Alignment
@@ -78,19 +87,12 @@ type Editor struct {
 	// events is the list of events not yet processed.
 	events []EditorEvent
 	// prevEvents is the number of events from the previous frame.
-	prevEvents int
-	submitHook func(string)
-	changeHook func(string)
-	focusHook  func(bool)
-}
-
-func (th *Theme) Editor() *Editor {
-	e := &Editor{
-		submitHook: func(string) {},
-		changeHook: func(string) {},
-		focusHook:  func(bool) {},
-	}
-	return e
+	prevEvents    int
+	submitHook    func(string)
+	changeHook    func(string)
+	focusHook     func(bool)
+	lastPress     key.Event
+	lastPressTime time.Time
 }
 
 func (e *Editor) Alignment(alignment text.Alignment) *Editor {
@@ -144,7 +146,8 @@ func (m *maskReader) Reset(r io.RuneReader, mr rune) {
 	m.mask = m.maskBuf[:n]
 }
 
-// Read reads from the underlying reader and replaces every rune with the mask rune.
+// Read reads from the underlying reader and replaces every
+// rune with the mask rune.
 func (m *maskReader) Read(b []byte) (n int, err error) {
 	for len(b) > 0 {
 		var replacement []byte
@@ -177,7 +180,8 @@ type EditorEvent interface {
 // A ChangeEvent is generated for every user change to the text.
 type ChangeEvent struct{}
 
-// A SubmitEvent is generated when submit is set and a carriage return key is pressed.
+// A SubmitEvent is generated when Submit is set
+// and a carriage return key is pressed.
 type SubmitEvent struct {
 	Text string
 }
@@ -201,7 +205,7 @@ func (e *Editor) Events() []EditorEvent {
 }
 
 func (e *Editor) processEvents(gtx layout.Context) {
-	// Flush events from before the previous Open.
+	// Flush events from before the previous Layout.
 	n := copy(e.events, e.events[e.prevEvents:])
 	e.events = e.events[:n]
 	e.prevEvents = n
@@ -276,7 +280,6 @@ func (e *Editor) processKey(gtx layout.Context) {
 		switch ke := ke.(type) {
 		case key.FocusEvent:
 			e.focused = ke.Focus
-			e.focusHook(ke.Focus)
 		case key.Event:
 			if !e.focused {
 				break
@@ -286,7 +289,6 @@ func (e *Editor) processKey(gtx layout.Context) {
 					e.events = append(e.events, SubmitEvent{
 						Text: e.Text(),
 					})
-					e.submitHook(e.Text())
 					return
 				}
 			}
@@ -301,7 +303,6 @@ func (e *Editor) processKey(gtx layout.Context) {
 		}
 		if e.rr.Changed() {
 			e.events = append(e.events, ChangeEvent{})
-			e.changeHook(e.Text())
 		}
 	}
 }
@@ -314,6 +315,9 @@ func (e *Editor) command(k key.Event) bool {
 	modSkip := key.ModCtrl
 	if runtime.GOOS == "darwin" {
 		modSkip = key.ModAlt
+	}
+	if k.State == key.Release {
+		return false
 	}
 	switch k.Name {
 	case key.NameReturn, key.NameEnter:
@@ -360,7 +364,7 @@ func (e *Editor) command(k key.Event) bool {
 	return true
 }
 
-// Focus requests the input focus for the _editor.
+// Focus requests the input focus for the Editor.
 func (e *Editor) Focus() {
 	e.requestFocus = true
 }
@@ -475,7 +479,6 @@ func (e *Editor) PaintText(gtx layout.Context) {
 		stack := op.Push(gtx.Ops)
 		op.Offset(shape.offset).Add(gtx.Ops)
 		shape.clip.Add(gtx.Ops)
-		// Rect: layout.FRect(clip).Sub(shape.offset)
 		paint.PaintOp{}.Add(gtx.Ops)
 		stack.Pop()
 	}
@@ -610,9 +613,10 @@ func (e *Editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	}
 	dims := linesDimensions(lines)
 	for i := 0; i < len(lines)-1; i++ {
-		// To avoid layout flickering while editing, assume a soft newline takes up all available space.
-		if lay := lines[i].Layout; len(lay) > 0 {
-			r := lay[len(lay)-1].Rune
+		// To avoid layout flickering while editing, assume a soft newline takes
+		// up all available space.
+		if lo := lines[i].Layout; len(lo) > 0 {
+			r := lo[len(lo)-1].Rune
 			if r != '\n' {
 				dims.Size.X = e.maxWidth
 				break
@@ -880,11 +884,9 @@ func (e *Editor) moveWord(distance int) {
 	}
 }
 
-// deleteWord the next word(s) in the specified direction. Unlike moveWord, deleteWord treats whitespace as a word
-// itself.
-//
+// deleteWord the next word(s) in the specified direction.
+// Unlike moveWord, deleteWord treats whitespace as a word itself.
 // Positive is forward, negative is backward.
-//
 // Absolute values greater than one will delete that many words.
 func (e *Editor) deleteWord(distance int) {
 	e.makeValid()
@@ -960,14 +962,14 @@ func (e *Editor) NumLines() int {
 }
 
 func nullLayout(r io.Reader) ([]text.Line, error) {
-	var layout []text.Glyph
+	var lo []text.Glyph
 	rr := bufio.NewReader(r)
 	var rerr error
 	var n int
 	for {
 		r, s, err := rr.ReadRune()
 		n += s
-		layout = append(layout, text.Glyph{Rune: r})
+		lo = append(lo, text.Glyph{Rune: r})
 		if err != nil {
 			rerr = err
 			break
@@ -975,7 +977,7 @@ func nullLayout(r io.Reader) ([]text.Line, error) {
 	}
 	return []text.Line{
 		{
-			Layout: layout,
+			Layout: lo,
 			Len:    n,
 		},
 	}, rerr
