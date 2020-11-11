@@ -8,6 +8,7 @@ import (
 
 	l "gioui.org/layout"
 
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
@@ -54,6 +55,15 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 									gtx.Constraints.Min.X = int(wg.th.TextSize.Scale(16).V)
 									return wg.CheckBox(wg.bools["testnet"].SetOnChange(func(b bool) {
 										Debug("testnet on?", b)
+										if b {
+											wg.cx.ActiveNet = &netparams.TestNet3Params
+											fork.IsTestnet = true
+										} else {
+											wg.cx.ActiveNet = &netparams.MainNetParams
+											fork.IsTestnet = false
+										}
+										Info("activenet:", wg.cx.ActiveNet.Name)
+										save.Pod(wg.cx.Config)
 									})).
 										IconColor("Primary").
 										TextColor("DocText").
@@ -121,13 +131,6 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 													// go func() {
 													// wg.ShellRunCommandChan <- "stop"
 													Debug("clicked submit wallet")
-													if wg.bools["testnet"].GetValue() {
-														wg.cx.ActiveNet = &netparams.TestNet3Params
-														fork.IsTestnet = true
-													} else {
-														wg.cx.ActiveNet = &netparams.MainNetParams
-														fork.IsTestnet = false
-													}
 													*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
 														string(os.PathSeparator) + wg.cx.ActiveNet.Name +
 														string(os.PathSeparator) + wallet.WalletDbName
