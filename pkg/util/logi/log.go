@@ -281,7 +281,7 @@ func (l *Logger) LoadConfig(configFile []byte) {
 }
 
 func init() {
-	L.SetLevel("trace", true, "pod")
+	L.SetLevel("info", true, "pod")
 	L.Writer.SetLogWriter(os.Stderr)
 	L.Writer.write = true
 	L.Trace("starting up logger")

@@ -369,9 +369,9 @@ func initLogLevel(cfg *pod.Config) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
-		Info("log level", loglevel)
+		Debug("log level", loglevel)
 	default:
-		Info("unrecognised loglevel", loglevel, "setting default info")
+		Error("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
 	}
 	color := true

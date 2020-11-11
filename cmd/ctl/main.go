@@ -61,7 +61,12 @@ func Main(args []string, cx *conte.Xt) {
 		}
 		params = append(params, arg)
 	}
-	result := ctl.Call(cx, method, params...)
+	var result []byte
+	result, err = ctl.Call(cx, method, params...)
+	if err != nil {
+		Error(err)
+		return
+	}
 	// // Attempt to create the appropriate command using the arguments provided by the user.
 	// cmd, err := btcjson.NewCmd(method, params...)
 	// if err != nil {
