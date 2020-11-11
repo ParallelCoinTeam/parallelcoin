@@ -13,6 +13,8 @@ import (
 
 type Console struct {
 	w              l.Widget
+	output         []l.Widget
+	outputList     *p9.List
 	editor         *p9.Editor
 	clearClickable *p9.Clickable
 	clearButton    *p9.IconButton
@@ -26,11 +28,17 @@ var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
 func (wg *WalletGUI) ConsolePage() *Console {
 	c := &Console{
-		editor:         wg.th.Editor().SingleLine(),
+		editor:         wg.th.Editor().SingleLine().Submit(true),
 		clearClickable: wg.th.Clickable(),
 		copyClickable:  wg.th.Clickable(),
 		pasteClickable: wg.th.Clickable(),
+		outputList:     wg.th.List().ScrollToEnd(),
 	}
+	c.editor.SetSubmit(func(txt string) {
+		Debug("submit", txt)
+		c.output = append(c.output,
+			wg.th.Body1(txt).Color("DocText").Fn)
+	})
 	clearClickableFn := func() {
 		c.editor.SetText("")
 		c.editor.Focus()
@@ -82,7 +90,25 @@ func (wg *WalletGUI) ConsolePage() *Console {
 		return wg.th.VFlex().
 			Flexed(1,
 				wg.th.Fill("DocBg",
-					p9.EmptyMaxHeight(),
+					// p9.EmptyMaxHeight(),
+					// wg.th.H6("output area").Color("DocText").Fn,
+					func(gtx l.Context) l.Dimensions {
+						le := func(gtx l.Context, index int) l.Dimensions {
+							return c.output[index](gtx)
+						}
+						return func(gtx l.Context) l.Dimensions {
+							return wg.Inset(0.25,
+								wg.Fill("DocBg",
+									c.outputList.
+										Vertical().
+										// Background("DocBg").Color("DocText").Active("Primary").
+										Length(len(c.output)).
+										ListElement(le).
+										Fn,
+								).Fn,
+							).
+								Fn(gtx)
+						}(gtx)					},
 				).Fn,
 			).
 			Rigid(
@@ -90,7 +116,10 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					wg.th.Inset(0.25,
 						wg.th.Flex().
 							Flexed(1,
-								wg.th.TextInput(c.editor, "enter an rpc command").Color("DocText").Fn,
+								wg.th.TextInput(c.editor, "enter an rpc command").
+								Color("DocText").
+
+								Fn,
 							).
 							Rigid(c.copyButton.Fn).
 							Rigid(c.pasteButton.Fn).

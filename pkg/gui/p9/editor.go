@@ -281,6 +281,9 @@ func (e *Editor) processKey(gtx layout.Context) {
 				break
 			}
 			if e.submit && (ke.Name == key.NameReturn || ke.Name == key.NameEnter) {
+				if ke.State == key.Release {
+					break
+				}
 				if !ke.Modifiers.Contain(key.ModShift) {
 					e.events = append(e.events, SubmitEvent{
 						Text: e.Text(),
