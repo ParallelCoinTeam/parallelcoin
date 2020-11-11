@@ -9,9 +9,10 @@ import (
 )
 
 // Call uses settings in the context to call the method with the given parameters and returns the raw json bytes
-func Call(cx *conte.Xt, method string, params ...interface{}) (result []byte){
+func Call(cx *conte.Xt, method string, params ...interface{}) (result []byte, err error){
 	// Ensure the specified method identifies a valid registered command and is one of the usable types.
-	usageFlags, err := btcjson.MethodUsageFlags(method)
+	var usageFlags btcjson.UsageFlag
+	usageFlags, err = btcjson.MethodUsageFlags(method)
 	if err != nil {
 		Error(err)
 		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
@@ -28,7 +29,8 @@ func Call(cx *conte.Xt, method string, params ...interface{}) (result []byte){
 		return
 	}
 	// Attempt to create the appropriate command using the arguments provided by the user.
-	cmd, err := btcjson.NewCmd(method, params...)
+	var cmd interface{}
+	cmd, err = btcjson.NewCmd(method, params...)
 	if err != nil {
 		Error(err)
 		// Show the error along with its error code when it's a json. BTCJSONError as it realistically will always be
@@ -47,7 +49,8 @@ func Call(cx *conte.Xt, method string, params ...interface{}) (result []byte){
 		return
 	}
 	// Marshal the command into a JSON-RPC byte slice in preparation for sending it to the RPC server.
-	marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
+	var marshalledJSON []byte
+	marshalledJSON, err = btcjson.MarshalCmd(1, cmd)
 	if err != nil {
 		Error(err)
 		// fmt.Println(err)
