@@ -64,6 +64,12 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 										}
 										Info("activenet:", wg.cx.ActiveNet.Name)
 										*wg.cx.Config.Network = wg.cx.ActiveNet.Name
+										Debug("")
+										if wg.cx.ActiveNet.Name == "testnet" {
+											// TODO: obviously when we get to starting testnets this should not be done
+											*wg.cx.Config.LAN = true // mines without peer outside lan
+											*wg.cx.Config.Solo = true // mines without peers
+										}
 										save.Pod(wg.cx.Config)
 									})).
 										IconColor("Primary").
