@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"regexp"
+	"sort"
 	"strings"
 
 	l "gioui.org/layout"
@@ -51,26 +52,82 @@ func (wg *WalletGUI) ConsolePage() *Console {
 		split := strings.Split(txt, " ")
 		method, args := split[0], split[1:]
 		var params []interface{}
+		var err error
+		var result []byte
+		var o string
+		var errString, prev string
 		for i := range args {
 			params = append(params, args[i])
 		}
-		Debug("method", method, "args", args)
-		var err error
-		var result []byte
-		if result, err = ctl.Call(wg.cx, method, params...); Check(err) {
+		if method == "help" {
+			Debug("rpc called help")
+			// var subcommand string
+			// if len(args) > 0 {
+			// 	subcommand = args[0]
+			// }
+			// cmd := &btcjson.HelpCmd{Command: &subcommand}
+
+			if result, err = ctl.Call(wg.cx, method, params...); Check(err) {
+			}
+			// Debug(string(result))
+			o = string(result)
+			Debug(o)
+			// if res, err = chainrpc.RPCHandlers["help"].Fn(rpcSrv, cmd, nil); Check(err) {
+			// 	errString += fmt.Sprintln(err)
+			// }
+			// o += fmt.Sprintln(res)
+			// if res, err = lrpcHnd["help"].Handler(cmd, ws, cc); Check(err) {
+			// 	errString += fmt.Sprintln(err)
+			// }
+			// o += fmt.Sprintln(res)
+			o = strings.ReplaceAll(o, "\\\"", "'")
+			splitted := strings.Split(o, "\\n")
+			sort.Strings(splitted)
+			var dedup []string
+			for i := range splitted {
+				if i > 0 {
+					if splitted[i] != prev {
+						dedup = append(dedup, splitted[i])
+					}
+				}
+				prev = splitted[i]
+			}
+			Debug(dedup)
+			o = strings.Join(dedup, "\n")
+			if errString != "" {
+				o += "BTCJSONError:\n"
+				o += errString
+			}
+			splitResult := strings.Split(o, "\n")
+			for i := range splitResult {
+				sri := splitResult[i]
+				c.output = append(c.output,
+					func(gtx l.Context) l.Dimensions {
+						return wg.th.Caption(sri).Color("DocText").Font("go regular").Fn(gtx)
+					})
+			}
+			return
+		} else {
+			Debug("method", method, "args", args)
+			if result, err = ctl.Call(wg.cx, method, params...); Check(err) {
+			}
+			var buf bytes.Buffer
+			json.Indent(&buf, result, "", "  ")
+			out := buf.String()
+			Debug(out)
+			splitResult := strings.Split(out, "\n")
+			for i := range splitResult {
+				sri := splitResult[i]
+				c.output = append(c.output,
+					func(gtx l.Context) l.Dimensions {
+						return wg.th.Caption(sri).Color("DocText").Font("go regular").Fn(gtx)
+					})
+			}
 		}
-		var buf bytes.Buffer
-		json.Indent(&buf, result, "", "  ")
-		out := buf.String()
-		Debug(out)
-		splitResult := strings.Split(out, "\n")
-		for i := range splitResult {
-			sri := splitResult[i]
-			c.output = append(c.output,
-				func(gtx l.Context) l.Dimensions {
-					return wg.th.Caption(sri).Color("DocText").Font("go regular").Fn(gtx)
-				})
+		var ifc interface{}
+		if err = json.Unmarshal(result, &ifc); Check(err) {
 		}
+		Debugs(ifc)
 	})
 	clearClickableFn := func() {
 		c.editor.SetText("")
@@ -168,4 +225,17 @@ func (wg *WalletGUI) ConsolePage() *Console {
 
 func (c *Console) Fn(gtx l.Context) l.Dimensions {
 	return c.w(gtx)
+}
+
+// CommandUsage display the usage for a specific command.
+func CommandUsage(method string) (usage string) {
+	var err error
+	usage, err = btcjson.MethodUsageText(method)
+	if err != nil {
+		Error(err)
+		// This should never happen since the method was already checked before calling this function, but be safe.
+		usage = "Failed to obtain command usage: " + err.Error()
+		return
+	}
+	return
 }
