@@ -63,6 +63,7 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 											fork.IsTestnet = false
 										}
 										Info("activenet:", wg.cx.ActiveNet.Name)
+										*wg.cx.Config.Network = wg.cx.ActiveNet.Name
 										save.Pod(wg.cx.Config)
 									})).
 										IconColor("Primary").
