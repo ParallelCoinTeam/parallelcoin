@@ -8,7 +8,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
@@ -138,7 +137,8 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 			// c.th.Inset(0.25,
 			func(gtx l.Context) l.Dimensions {
 				paint.ColorOp{Color: c.th.Colors.Get(c.color)}.Add(gtx.Ops)
-				return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
+				return c.th.Caption(c.label).Color(c.color).Fn(gtx)
+				// return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
 			},
 			// ).Fn,
 		).Fn(gtx)

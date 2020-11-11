@@ -80,7 +80,8 @@ func (w *Window) Open() (out *Window) {
 	return w
 }
 
-func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions, overlay func(ctx layout.Context), destroy func(), quit chan struct{}) (err error) {
+func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions,
+	overlay func(ctx layout.Context), destroy func(), quit chan struct{}) (err error) {
 	var ops op.Ops
 	for {
 		select {

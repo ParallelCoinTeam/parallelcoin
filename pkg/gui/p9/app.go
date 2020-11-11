@@ -8,7 +8,7 @@ import (
 	"gioui.org/unit"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
-	"github.com/p9c/pod/pkg/gui/wallet/ico"
+	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 )
 
 // App defines an application with a header, sidebar/menu, right side button bar, changeable body page widget and
@@ -74,7 +74,7 @@ func (th *Theme) App(size *int) *App {
 		statusBarBackground: "DocBg",
 		statusBarColor:      "DocText",
 		sideBarList:         th.List(),
-		logo:                &ico.ParallelCoin,
+		logo:                &p9icons.ParallelCoin,
 		logoClickable:       th.Clickable(),
 		title:               "parallelcoin",
 		titleBarBackground:  "Primary",

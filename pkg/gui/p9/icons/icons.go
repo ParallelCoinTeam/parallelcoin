@@ -43,6 +43,9 @@ func main() {
 						return ic.th.Fill("PanelBg", ic.th.Inset(0.25, ic.lists["icons"].Vertical().Length(len(ic.listWidgets)).ListElement(le).Fn).Fn).Fn(gtx)
 					}(gtx)
 				},
+				func(gtx l.Context)  {
+					// we has no dimensions because it is the window
+				},
 				func() {
 					close(quit)
 					// os.Exit(0)
