@@ -57,3 +57,5 @@ app/launcher/launcher.exe
 
 pod.exe~
 *.trace
+
+\[pod -D test0 --rpclisten 127.0.0.1

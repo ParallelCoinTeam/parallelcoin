@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
@@ -128,7 +127,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						o += errString
 					}
 					splitResult := strings.Split(o, "\n")
-					const maxPerWidget = 16
+					const maxPerWidget = 6
 					for i := 0; i < len(splitResult)-maxPerWidget; i += maxPerWidget {
 						sri := strings.Join(splitResult[i:i+maxPerWidget], "\n")
 						c.output = append(c.output,
@@ -240,10 +239,10 @@ func (wg *WalletGUI) ConsolePage() *Console {
 }
 
 func (c *Console) Fn(gtx l.Context) l.Dimensions {
-	tn := time.Now()
-	defer func() {
-		Debugf("console render time %d", time.Now().Sub(tn))
-	}()
+	// tn := time.Now()
+	// defer func() {
+	// 	Debugf("console render time %d", time.Now().Sub(tn))
+	// }()
 	le := func(gtx l.Context, index int) l.Dimensions {
 		if index >= len(c.output) {
 			return l.Dimensions{}
