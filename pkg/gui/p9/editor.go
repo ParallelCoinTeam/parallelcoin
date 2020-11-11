@@ -314,6 +314,9 @@ func (e *Editor) command(k key.Event) bool {
 	if runtime.GOOS == "darwin" {
 		modSkip = key.ModAlt
 	}
+	if k.State == key.Release {
+		return false
+	}
 	switch k.Name {
 	case key.NameReturn, key.NameEnter:
 		e.append("\n")
