@@ -400,8 +400,8 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				wg.incdecs["generatethreads"].
-					SetColor("DocText").
-					SetBackground("DocBg").
+					Color("DocText").
+					Background("DocBg").
 					Fn,
 			).
 			Rigid(

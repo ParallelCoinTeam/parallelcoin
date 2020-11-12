@@ -11,7 +11,7 @@ type IncDec struct {
 	th                *Theme
 	nDigits           int
 	min, max          int
-	Current           int
+	current           int
 	changeHook        func(n int)
 	inc, dec          *Clickable
 	color, background string
@@ -19,14 +19,14 @@ type IncDec struct {
 }
 
 // IncDec is a simple increment/decrement for a number setting
-func (th *Theme) IncDec(nDigits, min, max, current int, changeHook func(n int)) (out *IncDec) {
+func (th *Theme) IncDec() (out *IncDec) {
 	out = &IncDec{
 		th:         th,
-		nDigits:    nDigits,
-		min:        min,
-		max:        max,
-		Current:    current,
-		changeHook: changeHook,
+		// nDigits:    nDigits,
+		// min:        min,
+		// max:        max,
+		// current:    current,
+		// changeHook: changeHook,
 		inc:        th.Clickable(),
 		dec:        th.Clickable(),
 		// color:      color,
@@ -36,16 +36,41 @@ func (th *Theme) IncDec(nDigits, min, max, current int, changeHook func(n int)) 
 	return
 }
 
-func (in *IncDec) SetColor(color string) *IncDec {
+func (in *IncDec) ChangeHook(fn func(n int)) *IncDec {
+	in.changeHook = fn
+	return in
+}
+
+func (in *IncDec) SetCurrent(current int) *IncDec {
+	in.current = current
+	return in
+}
+
+func (in *IncDec) Max(max int) *IncDec {
+	in.max = max
+	return in
+}
+
+func (in *IncDec) Min(min int) *IncDec {
+	in.min = min
+	return in
+}
+
+func (in *IncDec) NDigits(nDigits int) *IncDec {
+	in.nDigits = nDigits
+	return in
+}
+
+func (in *IncDec) Color(color string) *IncDec {
 	in.color = color
 	return in
 }
 
-func (in *IncDec) SetBackground(color string) *IncDec {
+func (in *IncDec) Background(color string) *IncDec {
 	in.background = color
 	return in
 }
-func (in *IncDec) SetInactive(color string) *IncDec {
+func (in *IncDec) Inactive(color string) *IncDec {
 	in.inactive = color
 	return in
 }
@@ -53,13 +78,13 @@ func (in *IncDec) SetInactive(color string) *IncDec {
 func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	out := in.th.Flex().AlignMiddle()
 	incColor, decColor := in.color, in.color
-	if in.Current == in.min {
+	if in.current == in.min {
 		decColor = in.inactive
 	}
-	if in.Current == in.max {
+	if in.current == in.max {
 		incColor = in.inactive
 	}
-	if in.Current == in.min {
+	if in.current == in.min {
 		out.Rigid(
 			in.th.Inset(0.25,
 				in.th.Icon().Color(decColor).Scale(Scales["H5"]).Src(&icons.ContentRemove).Fn,
@@ -68,11 +93,11 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	} else {
 		out.Rigid(in.th.Inset(0.25,
 			in.th.ButtonLayout(in.inc.SetClick(func() {
-				in.Current--
-				if in.Current < in.min {
-					in.Current = in.min
+				in.current--
+				if in.current < in.min {
+					in.current = in.min
 				} else {
-					in.changeHook(in.Current)
+					in.changeHook(in.current)
 				}
 			})).Background("Transparent").Embed(
 				in.th.Icon().Color(decColor).Scale(Scales["H5"]).Src(&icons.ContentRemove).Fn,
@@ -80,9 +105,9 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 		).Fn,
 		)
 	}
-	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.Current)
+	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.current)
 	out.Rigid(in.th.Body1(cur).Color(in.color).Font("go regular").Fn)
-	if in.Current == in.max {
+	if in.current == in.max {
 		out.Rigid(
 			in.th.Inset(0.25,
 				in.th.Icon().Color(incColor).Scale(Scales["H5"]).Src(&icons.ContentAdd).Fn,
@@ -92,11 +117,11 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 		out.Rigid(
 			in.th.Inset(0.25,
 				in.th.ButtonLayout(in.dec.SetClick(func() {
-					in.Current++
-					if in.Current > in.max {
-						in.Current = in.max
+					in.current++
+					if in.current > in.max {
+						in.current = in.max
 					} else {
-						in.changeHook(in.Current)
+						in.changeHook(in.current)
 					}
 				})).Background("Transparent").Embed(
 					in.th.Icon().Color(incColor).Scale(Scales["H5"]).Src(&icons.ContentAdd).Fn,

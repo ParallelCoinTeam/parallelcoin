@@ -41,6 +41,7 @@
       <w>blocktime</w>
       <w>bogusmethod</w>
       <w>bolditalic</w>
+      <w>bools</w>
       <w>btcjson</w>
       <w>btcsuite</w>
       <w>btcwallet</w>
@@ -53,8 +54,10 @@
       <w>chaincfg</w>
       <w>chainhash</w>
       <w>checkable</w>
+      <w>checkables</w>
       <w>checkpt</w>
       <w>ciph</w>
+      <w>clickables</w>
       <w>cmds</w>
       <w>coinbaseaux</w>
       <w>cointype</w>

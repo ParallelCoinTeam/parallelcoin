@@ -52,8 +52,8 @@ type WalletGUI struct {
 	sidebarButtons            []*p9.Clickable
 	buttonBarButtons          []*p9.Clickable
 	statusBarButtons          []*p9.Clickable
-	bools                     map[string]*p9.Bool
 	quitClickable             *p9.Clickable
+	bools                     map[string]*p9.Bool
 	lists                     map[string]*p9.List
 	checkables                map[string]*p9.Checkable
 	clickables                map[string]*p9.Clickable
@@ -153,22 +153,27 @@ func (wg *WalletGUI) Run() (err error) {
 		"main":   f.NewWindow(),
 	}
 	wg.incdecs = map[string]*p9.IncDec{
-		"generatethreads": wg.th.IncDec(2, 0, runtime.NumCPU(), *wg.cx.Config.GenThreads,
-			func(n int) {
-				Debug("threads value now", n)
-				go func() {
-					Debug("setting thread count")
-					*wg.cx.Config.GenThreads = n
-					save.Pod(wg.cx.Config)
-					// wg.MinerThreadsChan <- n
-					if wg.mining {
-						Debug("restarting miner")
-						wg.MinerRunCommandChan <- "stop"
-						wg.MinerRunCommandChan <- "run"
-					}
-				}()
-			},
-		),
+		"generatethreads": wg.th.IncDec().
+			NDigits(2).
+			Min(0).
+			Max(runtime.NumCPU()).
+			SetCurrent(*wg.cx.Config.GenThreads).
+			ChangeHook(
+				func(n int) {
+					Debug("threads value now", n)
+					go func() {
+						Debug("setting thread count")
+						*wg.cx.Config.GenThreads = n
+						save.Pod(wg.cx.Config)
+						// wg.MinerThreadsChan <- n
+						if wg.mining {
+							Debug("restarting miner")
+							wg.MinerRunCommandChan <- "stop"
+							wg.MinerRunCommandChan <- "run"
+						}
+					}()
+				},
+			),
 	}
 	wg.Tickers()
 	wg.App = wg.GetAppWidget()
