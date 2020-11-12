@@ -87,8 +87,8 @@ func Kill(w *worker.Worker) {
 	}
 	if err = w.Stop(); Check(err) {
 	}
-	if err = w.Kill(); Check(err) {
-	}
+	// if err = w.Kill(); Check(err) {
+	// }
 	// Debug("closing worker quit channel")
 	// close(w.Quit)
 }
