@@ -247,7 +247,7 @@ func (a *App) NoMenuButton(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
-	return a.Flex().
+	return a.Flex().AlignBaseline().
 		Rigid(
 			a.Responsive(*a.Size, Widgets{
 				{
@@ -282,13 +282,13 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 		Rigid(
 			a.Responsive(*a.Size, Widgets{
 				{Size: 800,
-					Widget: a.Inset(0.333,
+					Widget: a.Inset(0.0,
 						a.H5(a.title).Color("Light").Fn,
 					).Fn,
 				},
 				{
 					Widget: a.ButtonLayout(a.logoClickable).Embed(
-						a.Inset(0.333,
+						a.Inset(0.0,
 							a.H5(a.title).Color("Light").Fn,
 						).Fn,
 					).Background("Transparent").Fn,

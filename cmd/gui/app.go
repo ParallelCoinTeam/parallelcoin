@@ -120,18 +120,22 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		"mining": wg.Page("mining", p9.Widgets{
 			p9.WidgetSize{Widget: wg.th.VFlex().SpaceAround().AlignMiddle().Rigid(wg.th.H1("mining").Alignment(text.Middle).Fn).Fn},
 		}),
+		"explorer": wg.Page("explorer", p9.Widgets{
+			p9.WidgetSize{Widget: wg.th.VFlex().SpaceAround().AlignMiddle().Rigid(wg.th.H1("explorer").Alignment(text.Middle).Fn).Fn},
+		}),
 	})
 	a.SideBar([]l.Widget{
 		wg.SideBarButton("overview", "main", 0),
 		wg.SideBarButton("send", "send", 1),
 		wg.SideBarButton("receive", "receive", 2),
 		wg.SideBarButton("history", "transactions", 3),
+		wg.SideBarButton("explorer", "explorer", 6),
+		wg.SideBarButton("mining", "mining", 7),
+		wg.SideBarButton("console", "console", 9),
 		wg.SideBarButton("settings", "settings", 5),
-		wg.SideBarButton("mining", "mining", 6),
-		wg.SideBarButton("help", "help", 7),
-		wg.SideBarButton("console", "console", 8),
-		wg.SideBarButton("log", "log", 9),
-		wg.SideBarButton("quit", "quit", 10),
+		wg.SideBarButton("log", "log", 10),
+		wg.SideBarButton("help", "help", 8),
+		wg.SideBarButton("quit", "quit", 11),
 	})
 	a.ButtonBar([]l.Widget{
 		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport),
@@ -204,6 +208,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 								wg.Inset(inPad,
 									wg.H6(title).
 										Color(color).
+										TextScale(p9.Scales["Body1"]).
 										Fn,
 								).Fn,
 							).Fn,

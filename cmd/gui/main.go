@@ -84,7 +84,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
-	wg.sidebarButtons = make([]*p9.Clickable, 11)
+	wg.sidebarButtons = make([]*p9.Clickable, 12)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
