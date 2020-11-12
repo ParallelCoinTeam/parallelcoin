@@ -21,14 +21,14 @@ type IncDec struct {
 // IncDec is a simple increment/decrement for a number setting
 func (th *Theme) IncDec() (out *IncDec) {
 	out = &IncDec{
-		th:         th,
+		th: th,
 		// nDigits:    nDigits,
 		// min:        min,
 		// max:        max,
 		// current:    current,
 		// changeHook: changeHook,
-		inc:        th.Clickable(),
-		dec:        th.Clickable(),
+		inc: th.Clickable(),
+		dec: th.Clickable(),
 		// color:      color,
 		// background: background,
 		// inactive:   inactive,

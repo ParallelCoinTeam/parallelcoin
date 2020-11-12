@@ -6,7 +6,7 @@ import (
 )
 
 // Call uses settings in the context to call the method with the given parameters and returns the raw json bytes
-func Call(cx *conte.Xt, method string, params ...interface{}) (result []byte, err error) {
+func Call(cx *conte.Xt, wallet bool, method string, params ...interface{}) (result []byte, err error) {
 	// Ensure the specified method identifies a valid registered command and is one of the usable types.
 	var usageFlags btcjson.UsageFlag
 	usageFlags, err = btcjson.MethodUsageFlags(method)
@@ -45,7 +45,7 @@ func Call(cx *conte.Xt, method string, params ...interface{}) (result []byte, er
 		return
 	}
 	// Send the JSON-RPC request to the server using the user-specified connection configuration.
-	result, err = sendPostRequest(marshalledJSON, cx)
+	result, err = sendPostRequest(marshalledJSON, cx, wallet)
 	if err != nil {
 		Error(err)
 		return

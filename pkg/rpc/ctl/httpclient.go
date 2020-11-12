@@ -94,14 +94,14 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, func(), error) {
 // sendPostRequest sends the marshalled JSON-RPC command using HTTP-POST mode to the server described in the passed
 // config struct. It also attempts to unmarshal the response as a JSON-RPC response and returns either the result field
 // or the error field depending on whether or not there is an error.
-func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
+func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, error) {
 	// Generate a request to the configured RPC server.
 	protocol := "http"
 	if *cx.Config.TLS {
 		protocol = "https"
 	}
 	serverAddr := *cx.Config.RPCConnect
-	if *cx.Config.Wallet {
+	if wallet {
 		serverAddr = *cx.Config.WalletServer
 		fmt.Println("using wallet server", serverAddr)
 	}

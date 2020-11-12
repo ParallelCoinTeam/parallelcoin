@@ -10,8 +10,8 @@ type Pool struct {
 	checkablesInUse int
 	clickables      []*Clickable
 	clickablesInUse int
-	editors          []*Editor
-	editorsInUse     int
+	editors         []*Editor
+	editorsInUse    int
 	incDecs         []*IncDec
 	incDecsInUse    int
 }

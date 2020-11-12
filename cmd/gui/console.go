@@ -3,6 +3,7 @@ package gui
 import (
 	"bytes"
 	"encoding/json"
+	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
@@ -79,7 +80,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 
 					*wg.cx.Config.Wallet = true
 					var result1, result2 []byte
-					if result1, err = ctl.Call(wg.cx, method, params...); Check(err) {
+					if result1, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
 					}
 					r1 := string(result1)
 					// Debug(r1)
@@ -88,7 +89,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					o = r1 + "\n"
 
 					*wg.cx.Config.Wallet = false
-					if result2, err = ctl.Call(wg.cx, method, params...); Check(err) {
+					if result2, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
 					}
 					r2 := string(result2)
 					// Debug(r2)
@@ -140,7 +141,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					}
 					return
 				} else {
-					if result, err = ctl.Call(wg.cx, method, params...); Check(err) {
+					if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
 					}
 					var out string
 					if out, err = strconv.Unquote(string(result)); Check(err) {
@@ -164,7 +165,11 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				}
 			} else {
 				Debug("method", method, "args", args)
-				if result, err = ctl.Call(wg.cx, method, params...); Check(err) {
+				if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
+					if result, err = ctl.Call(wg.cx, true, method, params...); Check(err) {
+						// todo: create an error display widget
+						return
+					}
 				}
 				var buf bytes.Buffer
 				json.Indent(&buf, result, "", "  ")
@@ -176,7 +181,10 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					c.output = append(c.output,
 						func(gtx l.Context) l.Dimensions {
 							return wg.th.Flex().Rigid(
-								wg.th.Caption(sri).Color("DocText").Font("go regular").MaxLines(4).Fn,
+								wg.th.Caption(sri).
+									Color("DocText").
+									Font("go regular").
+									MaxLines(4).Fn,
 							).Fn(gtx)
 						})
 				}
@@ -184,7 +192,8 @@ func (wg *WalletGUI) ConsolePage() *Console {
 			var ifc interface{}
 			if err = json.Unmarshal(result, &ifc); Check(err) {
 			}
-			Debugs(ifc)
+			Debug("result type", reflect.TypeOf(ifc))
+			// Debugs(ifc)
 		}()
 	}
 	clearClickableFn := func() {
