@@ -1,9 +1,6 @@
 package gui
 
 import (
-	"bytes"
-	"encoding/json"
-	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
@@ -15,12 +12,10 @@ import (
 	"github.com/atotto/clipboard"
 
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/ctl"
 )
 
 type Console struct {
-	// w              l.Widget
 	th             *p9.Theme
 	output         []l.Widget
 	outputList     *p9.List
@@ -32,9 +27,8 @@ type Console struct {
 	pasteClickable *p9.Clickable
 	pasteButton    *p9.IconButton
 	submitFunc     func(txt string)
+	clickables     []*p9.Clickable
 }
-
-const unusableFlags = btcjson.UFWebsocketOnly | btcjson.UFNotification
 
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
@@ -67,49 +61,31 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				params = append(params, args[i])
 			}
 			if method == "clear" || method == "cls" {
+				// clear the list of display widgets
 				c.output = c.output[:0]
+				// free up the pool widgets used in the current output
+				for i := range c.clickables {
+					wg.th.WidgetPool.FreeClickable(c.clickables[i])
+				}
+				c.clickables = c.clickables[:0]
+				return
 			}
 			if method == "help" {
 				if len(args) == 0 {
 					Debug("rpc called help")
-					// var subcommand string
-					// if len(args) > 0 {
-					// 	subcommand = args[0]
-					// }
-					// cmd := &btcjson.HelpCmd{Command: &subcommand}
-
-					*wg.cx.Config.Wallet = true
 					var result1, result2 []byte
 					if result1, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
 					}
 					r1 := string(result1)
-					// Debug(r1)
 					if r1, err = strconv.Unquote(r1); Check(err) {
 					}
 					o = r1 + "\n"
-
-					*wg.cx.Config.Wallet = false
-					if result2, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
+					if result2, err = ctl.Call(wg.cx, true, method, params...); Check(err) {
 					}
 					r2 := string(result2)
-					// Debug(r2)
-					// r2 = strings.ReplaceAll(r2, "`", "")
 					if r2, err = strconv.Unquote(r2); Check(err) {
 					}
 					o += r2 + "\n"
-
-					// Debug(o)
-					// if res, err = chainrpc.RPCHandlers["help"].Fn(rpcSrv, cmd, nil); Check(err) {
-					// 	errString += fmt.Sprintln(err)
-					// }
-					// o += fmt.Sprintln(res)
-					// if res, err = lrpcHnd["help"].Handler(cmd, ws, cc); Check(err) {
-					// 	errString += fmt.Sprintln(err)
-					// }
-					// o += fmt.Sprintln(res)
-					// o = strings.ReplaceAll(o, "\\\"", "'")
-
-					// strings.ReplaceAll(o, "\t", "  ")
 					splitted := strings.Split(o, "\n")
 					sort.Strings(splitted)
 					var dedup []string
@@ -121,7 +97,6 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						}
 						prev = splitted[i]
 					}
-					// Debug(dedup)
 					o = strings.Join(dedup, "\n")
 					if errString != "" {
 						o += "BTCJSONError:\n"
@@ -135,7 +110,8 @@ func (wg *WalletGUI) ConsolePage() *Console {
 							func(gtx l.Context) l.Dimensions {
 								return wg.th.Caption(sri).
 									Color("DocText").
-									Font("go regular").MaxLines(maxPerWidget).
+									Font("bariol regular").
+									MaxLines(maxPerWidget).
 									Fn(gtx)
 							})
 					}
@@ -167,33 +143,31 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				Debug("method", method, "args", args)
 				if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
 					if result, err = ctl.Call(wg.cx, true, method, params...); Check(err) {
-						// todo: create an error display widget
-						return
+						c.output = append(c.output, wg.th.Caption(err.Error()).Color("Error").Fn)
+						// return
 					}
 				}
-				var buf bytes.Buffer
-				json.Indent(&buf, result, "", "  ")
-				out := buf.String()
-				Debug(out)
-				splitResult := strings.Split(out, "\n")
-				for i := range splitResult {
-					sri := splitResult[i]
-					c.output = append(c.output,
-						func(gtx l.Context) l.Dimensions {
-							return wg.th.Flex().Rigid(
-								wg.th.Caption(sri).
-									Color("DocText").
-									Font("go regular").
-									MaxLines(4).Fn,
-							).Fn(gtx)
-						})
-				}
+				c.output = append(c.output, wg.console.JSONWidget("DocText", result)...)
+				// Debugs(c.output)
+				// plain vanilla string output of json with indentation
+				// var buf bytes.Buffer
+				// json.Indent(&buf, result, "", "  ")
+				// out := buf.String()
+				// splitResult := strings.Split(out, "\n")
+				// for i := range splitResult {
+				// 	sri := splitResult[i]
+				// 	c.output = append(c.output,
+				// 		func(gtx l.Context) l.Dimensions {
+				// 			return wg.th.Flex().Rigid(
+				// 				wg.th.Caption(sri).
+				// 					Color("DocText").
+				// 					Font("go regular").
+				// 					// MaxLines(4).
+				// 					Fn,
+				// 			).Fn(gtx)
+				// 		})
+				// }
 			}
-			var ifc interface{}
-			if err = json.Unmarshal(result, &ifc); Check(err) {
-			}
-			Debug("result type", reflect.TypeOf(ifc))
-			// Debugs(ifc)
 		}()
 	}
 	clearClickableFn := func() {
@@ -217,7 +191,6 @@ func (wg *WalletGUI) ConsolePage() *Console {
 			c.editor.SetText(txt)
 			c.editor.Move(col + len(cb))
 		}()
-		// c.editor.Focus()
 	}
 	c.clearButton = wg.th.IconButton(c.clearClickable.SetClick(clearClickableFn)).
 		Icon(
@@ -248,10 +221,6 @@ func (wg *WalletGUI) ConsolePage() *Console {
 }
 
 func (c *Console) Fn(gtx l.Context) l.Dimensions {
-	// tn := time.Now()
-	// defer func() {
-	// 	Debugf("console render time %d", time.Now().Sub(tn))
-	// }()
 	le := func(gtx l.Context, index int) l.Dimensions {
 		if index >= len(c.output) {
 			return l.Dimensions{}
@@ -259,25 +228,20 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 			return c.output[index](gtx)
 		}
 	}
-	// gtx.Constraints.Min = gtx.Constraints.Max
 	fn := c.th.VFlex().
 		Flexed(0.1,
-			c.th.Fill("DocBg",
-				// p9.EmptyMaxHeight(),
-				// wg.th.H6("output area").Color("DocText").Fn,
+			c.th.Fill("PanelBg",
 				func(gtx l.Context) l.Dimensions {
-					// gtx.Constraints.Max =
-					// 	gtx.Constraints.Min
 					return c.th.Inset(0.25,
 						c.outputList.
+							Background("PanelBg").
+							Color("PanelText").
+							Active("Primary").
 							Vertical().
-							// Background("DocBg").Color("DocText").Active("Primary").
 							Length(len(c.output)).
 							ListElement(le).
 							Fn,
 					).
-						// Fn,
-						// ).
 						Fn(gtx)
 				},
 			).Fn,
@@ -289,7 +253,6 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 						Flexed(1,
 							c.th.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
 								Color("DocText").
-
 								Fn,
 						).
 						Rigid(c.copyButton.Fn).
@@ -301,17 +264,4 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 		).
 		Fn
 	return fn(gtx)
-}
-
-// CommandUsage display the usage for a specific command.
-func CommandUsage(method string) (usage string) {
-	var err error
-	usage, err = btcjson.MethodUsageText(method)
-	if err != nil {
-		Error(err)
-		// This should never happen since the method was already checked before calling this function, but be safe.
-		usage = "Failed to obtain command usage: " + err.Error()
-		return
-	}
-	return
 }

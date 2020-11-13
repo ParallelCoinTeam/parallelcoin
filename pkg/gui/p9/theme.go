@@ -15,6 +15,7 @@ type Theme struct {
 	scrollBarSize int
 	Dark          *bool
 	iconCache     IconCache
+	WidgetPool    *Pool
 }
 
 // NewTheme creates a new theme to use for rendering a user interface
@@ -28,5 +29,6 @@ func NewTheme(fontCollection []text.FontFace, quit chan struct{}) (th *Theme) {
 		scrollBarSize: 0,
 		iconCache:     make(IconCache),
 	}
+	th.WidgetPool = th.NewPool()
 	return
 }
