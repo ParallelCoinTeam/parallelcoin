@@ -119,12 +119,20 @@ func (wg *WalletGUI) Run() (err error) {
 		"transactions30":          wg.th.Clickable(),
 		"transactions50":          wg.th.Clickable(),
 	}
+	wg.checkables = map[string]*p9.Checkable{
+		"showGenerate": wg.th.Checkable(),
+		"showSent": wg.th.Checkable(),
+		"showReceived": wg.th.Checkable(),
+	}
 	wg.bools = map[string]*p9.Bool{
 		"runstate":   wg.th.Bool(wg.running),
 		"encryption": wg.th.Bool(false),
 		"seed":       wg.th.Bool(false),
 		"testnet":    wg.th.Bool(false),
 		"ihaveread":  wg.th.Bool(false),
+		"showGenerate": wg.th.Bool(true),
+		"showSent":     wg.th.Bool(true),
+		"showReceive":  wg.th.Bool(true),
 	}
 	pass := ""
 	passConfirm := ""
@@ -174,6 +182,15 @@ func (wg *WalletGUI) Run() (err error) {
 					}()
 				},
 			),
+		"transactionsPerPage": wg.th.IncDec().
+			Min(10).
+			Max(100).
+			NDigits(3).
+			Amount(10).
+			ChangeHook(func(n int) {
+				Debug("showing", n, "per page")
+				wg.txPerPage = n
+			}),
 	}
 	wg.Tickers()
 	wg.App = wg.GetAppWidget()
