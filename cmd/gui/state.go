@@ -24,6 +24,8 @@ type State struct {
 	lastTxs            []btcjson.ListTransactionsResult
 	lastTimeStrings    []string
 	goroutines         []l.Widget
+	txPerPage          int
+	txPage             int
 }
 
 type tx struct {

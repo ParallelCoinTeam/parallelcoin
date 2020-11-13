@@ -10,8 +10,8 @@ import (
 func (wg *WalletGUI) HistoryPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.th.VFlex().Rigid(
-			wg.th.Fill("DocBg",
-				wg.th.Inset(0.25,
+			wg.th.Inset(0.25,
+				wg.th.Fill("DocBg",
 					wg.th.Flex().AlignMiddle().
 						Rigid(
 							// p9.If(wg.incdecs["transactionsPerPage"].GetCurrent() > 10,
@@ -29,6 +29,27 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 							// ),
 						).
 						Rigid(
+							wg.th.Inset(0.25,
+								wg.th.Body1("page 000").Fn,
+							).Fn,
+						).
+						Rigid(
+							// p9.If(wg.incdecs["transactionsPerPage"].GetCurrent() < 100,
+							wg.th.IconButton(wg.clickables["txPageForward"]).
+								Background("Transparent").
+								Color("DocText").
+								Scale(1).
+								Icon(
+									wg.th.Icon().Color("DocText").
+										Scale(1).
+										Src(&icons.NavigationArrowForward),
+								).
+								Fn,
+							// p9.EmptySpace(0, 0),
+							// ),
+						).
+						Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+						Rigid(
 							wg.incdecs["transactionsPerPage"].
 								Color("DocText").Background("DocBg").Fn,
 						).
@@ -37,6 +58,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 								wg.th.Body1("tx/page").Fn,
 							).Fn,
 						).
+						Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 						Rigid(
 							wg.th.Inset(0.25,
 								wg.th.Body1("show").Font("bariol bold").Fn,
@@ -79,22 +101,8 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 								},
 							).Fn,
 						).
-						Flexed(1, p9.EmptyMaxWidth()).
-						Rigid(
-							// p9.If(wg.incdecs["transactionsPerPage"].GetCurrent() < 100,
-							wg.th.IconButton(wg.clickables["txPageForward"]).
-								Background("Transparent").
-								Color("DocText").
-								Scale(1).
-								Icon(
-									wg.th.Icon().Color("DocText").
-										Scale(1).
-										Src(&icons.NavigationArrowForward),
-								).
-								Fn,
-							// p9.EmptySpace(0, 0),
-							// ),
-						).
+						// Flexed(1, p9.EmptyMaxWidth()).
+
 						Fn,
 				).Fn,
 			).Fn,
