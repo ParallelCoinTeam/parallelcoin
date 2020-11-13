@@ -53,6 +53,10 @@ func (in *IncDec) SetCurrent(current int) *IncDec {
 	return in
 }
 
+func (in *IncDec) GetCurrent() int {
+	return in.current
+}
+
 func (in *IncDec) Max(max int) *IncDec {
 	in.max = max
 	return in
