@@ -11,13 +11,13 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-func (wg *WalletGUI) TransactionsPage() l.Widget {
-	// TODO: this page doesn't have data being populated yet
-	if true {
-		return func(l.Context) l.Dimensions {
-			return l.Dimensions{}
-		}
-	}
+func (wg *WalletGUI) OldTransactionsPage() l.Widget {
+	// // TODO: this page doesn't have data being populated yet
+	// if true {
+	// 	return func(l.Context) l.Dimensions {
+	// 		return l.Dimensions{}
+	// 	}
+	// }
 	return func(gtx l.Context) l.Dimensions {
 		return wg.th.VFlex().
 			Rigid(
@@ -111,7 +111,7 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 										wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
 									).
 									Rigid(
-										wg.th.Caption(fmt.Sprintf("%d ", *wg.State.txs[i].data.BlockIndex)).Fn,
+										wg.th.Caption(fmt.Sprintf("%d ", *wg.txs[i].BlockIndex)).Fn,
 									).
 									Fn,
 							).
@@ -121,7 +121,7 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 										wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
 									).
 									Rigid(
-										wg.th.Caption(fmt.Sprintf("%d ", wg.State.txs[i].data.Confirmations)).Fn,
+										wg.th.Caption(fmt.Sprintf("%d ", wg.txs[i].Confirmations)).Fn,
 									).
 									Rigid(
 										wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
@@ -132,7 +132,7 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 								wg.th.Flex().AlignMiddle().
 									Rigid(
 										func(gtx l.Context) l.Dimensions {
-											switch wg.State.txs[i].data.Category {
+											switch wg.txs[i].Category {
 											case "generate":
 												return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
 											case "immature":
@@ -146,7 +146,7 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 										},
 									).
 									Rigid(
-										wg.th.Caption(wg.State.txs[i].data.Category+" ").Fn,
+										wg.th.Caption(wg.txs[i].Category+" ").Fn,
 									).
 									Fn,
 							).
@@ -155,11 +155,11 @@ func (wg *WalletGUI) singleTransaction(gtx l.Context, i int) l.Dimensions {
 									Rigid(
 										wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
 									).
-									Rigid(
-										wg.th.Caption(
-											wg.State.txs[i].time,
-										).Color("DocText").Fn,
-									).
+									// Rigid(
+									// 	wg.th.Caption(
+									// 		wg.txs[i].time,
+									// 	).Color("DocText").Fn,
+									// ).
 									Fn,
 							).Fn,
 					).Fn,

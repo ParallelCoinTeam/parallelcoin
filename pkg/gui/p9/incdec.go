@@ -11,6 +11,7 @@ type IncDec struct {
 	th                *Theme
 	nDigits           int
 	min, max          int
+	amount            int
 	current           int
 	changeHook        func(n int)
 	inc, dec          *Clickable
@@ -32,8 +33,14 @@ func (th *Theme) IncDec() (out *IncDec) {
 		// color:      color,
 		// background: background,
 		// inactive:   inactive,
+		amount: 1,
 	}
 	return
+}
+
+func (in *IncDec) Amount(n int) *IncDec {
+	in.amount = n
+	return in
 }
 
 func (in *IncDec) ChangeHook(fn func(n int)) *IncDec {
@@ -93,7 +100,7 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	} else {
 		out.Rigid(in.th.Inset(0.25,
 			in.th.ButtonLayout(in.inc.SetClick(func() {
-				in.current--
+				in.current -= in.amount
 				if in.current < in.min {
 					in.current = in.min
 				} else {
@@ -117,7 +124,7 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 		out.Rigid(
 			in.th.Inset(0.25,
 				in.th.ButtonLayout(in.dec.SetClick(func() {
-					in.current++
+					in.current += in.amount
 					if in.current > in.max {
 						in.current = in.max
 					} else {
