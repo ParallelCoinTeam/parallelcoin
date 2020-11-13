@@ -58,6 +58,28 @@ type List struct {
 	leftSide            bool
 }
 
+func (li *List) Position() Position {
+	return li.position
+}
+
+func (li *List) SetPosition(position Position) {
+	li.position = position
+}
+
+func (li *List) JumpToStart() {
+	li.position = Position{}
+}
+
+func (li *List) JumpToEnd() {
+	// li.position = li.dims.CoordinateToPosition(li.total-1, li.axis)
+	li.position = Position{
+		BeforeEnd: false,
+		First:     len(li.dims),
+		Offset:    axisMain(li.axis, li.dims[len(li.dims)-1].Size),
+	}
+
+}
+
 // List returns a new scrollable List widget
 func (th *Theme) List() (li *List) {
 	li = &List{

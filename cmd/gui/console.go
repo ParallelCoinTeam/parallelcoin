@@ -148,26 +148,8 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					}
 				}
 				c.output = append(c.output, wg.console.JSONWidget("DocText", result)...)
-				// Debugs(c.output)
-				// plain vanilla string output of json with indentation
-				// var buf bytes.Buffer
-				// json.Indent(&buf, result, "", "  ")
-				// out := buf.String()
-				// splitResult := strings.Split(out, "\n")
-				// for i := range splitResult {
-				// 	sri := splitResult[i]
-				// 	c.output = append(c.output,
-				// 		func(gtx l.Context) l.Dimensions {
-				// 			return wg.th.Flex().Rigid(
-				// 				wg.th.Caption(sri).
-				// 					Color("DocText").
-				// 					Font("go regular").
-				// 					// MaxLines(4).
-				// 					Fn,
-				// 			).Fn(gtx)
-				// 		})
-				// }
 			}
+			c.outputList.JumpToEnd()
 		}()
 	}
 	clearClickableFn := func() {
@@ -216,13 +198,17 @@ func (wg *WalletGUI) ConsolePage() *Console {
 		).
 		Background("Transparent").
 		Inset(0.25)
-
+	c.output = append(c.output, func(gtx l.Context) l.Dimensions {
+		return c.th.H6("Welcome to the Parallelcoin RPC console").Color("DocText").Fn(gtx)
+	}, func(gtx l.Context) l.Dimensions {
+		return c.th.Caption("Type 'help' to get available commands and 'clear' or 'cls' to clear the screen").Color("DocText").Fn(gtx)
+	})
 	return c
 }
 
 func (c *Console) Fn(gtx l.Context) l.Dimensions {
 	le := func(gtx l.Context, index int) l.Dimensions {
-		if index >= len(c.output) {
+		if index >= len(c.output) || index < 0 {
 			return l.Dimensions{}
 		} else {
 			return c.output[index](gtx)
@@ -234,6 +220,8 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 				func(gtx l.Context) l.Dimensions {
 					return c.th.Inset(0.25,
 						c.outputList.
+							ScrollToEnd().
+							End().
 							Background("PanelBg").
 							Color("PanelText").
 							Active("Primary").

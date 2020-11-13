@@ -6,6 +6,8 @@ import (
 	"sort"
 
 	l "gioui.org/layout"
+	"github.com/atotto/clipboard"
+	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
 )
@@ -113,39 +115,101 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		case string:
 			Debug("got type string")
 			res := res.value.(string)
+			clk := c.th.WidgetPool.GetClickable()
 			out = append(out,
-				c.jsonElement(key, color, depth, c.th.Caption(res).Color(color).Fn),
+				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
+					return c.th.Flex().
+						Rigid(c.th.Caption("\"" + res + "\"").Color(color).Fn).
+						Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
+						Rigid(c.th.IconButton(clk).
+							Background("Transparent").
+							Inset(0).
+							Color(color).
+							Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
+							SetClick(func() {
+								go clipboard.WriteAll(res)
+							}).Fn,
+						).Fn(gtx)
+				}),
 			)
 		case float64:
 			Debug("got type float64")
 			res := res.value.(float64)
+			clk := c.th.WidgetPool.GetClickable()
 			out = append(out,
-				c.jsonElement(key, color, depth, c.th.Caption(fmt.Sprint(res)).Color(color).Fn),
+				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
+					return c.th.Flex().
+						Rigid(c.th.Caption(fmt.Sprint(res)).Color(color).Fn).
+						Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
+						Rigid(c.th.IconButton(clk).
+							Background("Transparent").
+							Inset(0).
+							Color(color).
+							Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
+							SetClick(func() {
+								go clipboard.WriteAll(fmt.Sprint(res))
+							}).Fn,
+						).Fn(gtx)
+					// return c.th.ButtonLayout(clk).Embed(c.th.Caption().Color(color).Fn).Fn(gtx)
+				}),
 			)
 		case bool:
 			Debug("got type bool")
 			res := res.value.(bool)
 			out = append(out,
-				c.jsonElement(key, color, depth, c.th.Caption(fmt.Sprint(res)).Color(color).Fn),
+				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
+					return c.th.Caption(fmt.Sprint(res)).Color(color).Fn(gtx)
+				}),
 			)
 		}
 	case string:
 		Debug("got type string")
 		res := in.(string)
+		clk := c.th.WidgetPool.GetClickable()
 		out = append(out,
-			c.jsonElement(key, color, depth, c.th.Caption(res).Color(color).Fn),
+			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
+				return c.th.Flex().
+					Rigid(c.th.Caption("\"" + res + "\"").Color(color).Fn).
+					Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
+					Rigid(c.th.IconButton(clk).
+						Background("Transparent").
+						Inset(0).
+						Color(color).
+						Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
+						SetClick(func() {
+							go clipboard.WriteAll(res)
+						}).Fn,
+					).Fn(gtx)
+			}),
 		)
 	case float64:
 		Debug("got type float64")
 		res := in.(float64)
+		clk := c.th.WidgetPool.GetClickable()
 		out = append(out,
-			c.jsonElement(key, color, depth, c.th.Caption(fmt.Sprint(res)).Color(color).Fn),
+			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
+				return c.th.Flex().
+					Rigid(c.th.Caption(fmt.Sprint(res)).Color(color).Fn).
+					Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
+					Rigid(c.th.IconButton(clk).
+						Background("Transparent").
+						Inset(0).
+						Color(color).
+						Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
+						SetClick(func() {
+							go clipboard.WriteAll(fmt.Sprint(res))
+						}).Fn,
+					).Fn(gtx)
+				// return c.th.ButtonLayout(clk).Embed(c.th.Caption(fmt.Sprint(res)).Color(color).Fn).Fn(gtx)
+			}),
 		)
 	case bool:
 		Debug("got type bool")
 		res := in.(bool)
 		out = append(out,
-			c.jsonElement(key, color, depth, c.th.Caption(fmt.Sprint(res)).Color(color).Fn),
+			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
+				return c.th.Caption(fmt.Sprint(res)).Color(color).Fn(gtx)
+			}),
 		)
 	default:
 		Debugs(in)
