@@ -70,7 +70,6 @@ func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
 						IconScale(1).
 						Fn(gtx)
 				},
-				// wg.th.Body1("generated").Fn,
 			).Fn,
 		).
 		Rigid(
@@ -100,47 +99,67 @@ func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
 		Fn
 }
 
+func (wg *WalletGUI) HistoryPageView() l.Widget {
+	return wg.th.Fill("DocBg",
+		p9.EmptySpace(0, 0),
+	).Fn
+}
+
 func (wg *WalletGUI) HistoryPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
-		return wg.th.VFlex().Rigid(
-			wg.th.Inset(0.25,
-				wg.th.Fill("DocBg",
-					wg.th.Responsive(*wg.Size, p9.Widgets{
-						p9.WidgetSize{
-							Widget: wg.th.VFlex().Rigid(
-								wg.th.Flex().AlignMiddle().SpaceBetween().
-									Rigid(
-										wg.HistoryPager(),
-									).
-									Rigid(
-										wg.HistoryPagePerPageCount(),
-									).
-									Fn,
-							).Rigid(
-								wg.th.Flex().AlignMiddle().SpaceBetween().
-									Rigid(
-										wg.HistoryPageStatusFilter(),
-									).
-									Fn,
-							).Fn,
-						},
-						p9.WidgetSize{
-							Size: 1024,
-							Widget: wg.th.Flex().AlignMiddle().SpaceBetween().
-								Rigid(
-									wg.HistoryPager(),
-								).
-								Rigid(
-									wg.HistoryPageStatusFilter(),
-								).
-								Rigid(
-									wg.HistoryPagePerPageCount(),
-								).
-								Fn,
-						},
-					}).Fn,
+		return wg.th.VFlex().
+			Rigid(
+				wg.th.Inset(0.25,
+					wg.th.Fill("DocBg",
+						wg.th.Inset(0.25,
+							wg.th.Responsive(*wg.Size, p9.Widgets{
+								{
+									Widget: wg.th.VFlex().
+										Flexed(1, wg.HistoryPageView()).
+										Rigid(
+											wg.th.Inset(0.25,
+												wg.th.Flex().AlignMiddle().SpaceBetween().
+													Rigid(
+														wg.HistoryPageStatusFilter(),
+													).
+													Fn,
+											).Fn,
+										).
+										Rigid(
+											wg.th.Flex().AlignMiddle().SpaceBetween().
+												Rigid(
+													wg.HistoryPager(),
+												).
+												Rigid(
+													wg.HistoryPagePerPageCount(),
+												).
+												Fn,
+										).
+										Fn,
+								},
+								{
+									Size: 1024,
+									Widget: wg.th.VFlex().
+										Flexed(1, wg.HistoryPageView()).
+										Rigid(
+											wg.th.Flex().AlignMiddle().SpaceBetween().
+												Rigid(
+													wg.HistoryPager(),
+												).
+												Rigid(
+													wg.HistoryPageStatusFilter(),
+												).
+												Rigid(
+													wg.HistoryPagePerPageCount(),
+												).
+												Fn,
+										).
+										Fn,
+								},
+							}).Fn,
+						).Fn,
+					).Fn,
 				).Fn,
-			).Fn,
-		).Fn(gtx)
+			).Fn(gtx)
 	}
 }
