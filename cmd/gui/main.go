@@ -73,6 +73,7 @@ type WalletGUI struct {
 	State                     State
 	Shell, Miner              *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
+	ChainSocket, WalletSocket *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
 	console                   *Console
 	toasts                    *toast.Toasts
