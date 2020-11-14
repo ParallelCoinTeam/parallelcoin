@@ -7,6 +7,82 @@ import (
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
+func (wg *WalletGUI) HistoryPage() l.Widget {
+
+	return func(gtx l.Context) l.Dimensions {
+		return wg.th.VFlex().
+			Rigid(
+				wg.th.Inset(0.25,
+					wg.th.Fill("PanelBg",
+						// wg.th.Inset(0.25,
+						wg.th.Responsive(*wg.Size, p9.Widgets{
+							{
+								Widget: wg.th.VFlex().
+									Flexed(1, wg.HistoryPageView()).
+									Rigid(
+										wg.th.Fill("DocBg",
+											wg.th.Flex().AlignMiddle().SpaceBetween().
+												Flexed(0.5, p9.EmptyMaxWidth()).
+												Rigid(
+													// wg.th.Inset(0.25,
+													wg.HistoryPageStatusFilter(),
+													// ).
+													// 	Fn,
+												).
+												Flexed(0.5, p9.EmptyMaxWidth()).
+												Fn,
+										).Fn,
+									).
+									Rigid(
+										wg.th.Fill("DocBg",
+											wg.th.Flex().AlignMiddle().SpaceBetween().
+												Rigid(
+													wg.HistoryPager(),
+												).
+												Rigid(
+													wg.HistoryPagePerPageCount(),
+												).
+												Fn,
+										).Fn,
+									).
+									Fn,
+							},
+							{
+								Size: 800,
+								Widget: wg.th.VFlex().
+									Flexed(1, wg.HistoryPageView()).
+									Rigid(
+										wg.th.Fill("DocBg",
+											wg.th.Flex().AlignMiddle().SpaceBetween().
+												Rigid(
+													wg.HistoryPager(),
+												).
+												Rigid(
+													wg.HistoryPageStatusFilter(),
+												).
+												Rigid(
+													wg.HistoryPagePerPageCount(),
+												).
+												Fn,
+										).Fn,
+									).
+									Fn,
+							},
+						}).Fn,
+						// ).Fn,
+					).Fn,
+				).Fn,
+			).Fn(gtx)
+	}
+}
+
+func (wg *WalletGUI) HistoryPageView() l.Widget {
+	return wg.th.Fill("DocBg",
+
+		p9.EmptySpace(0, 0),
+	).Fn
+}
+
 func (wg *WalletGUI) HistoryPager() l.Widget {
 	return wg.th.Flex().AlignMiddle().
 		Rigid(
@@ -23,7 +99,7 @@ func (wg *WalletGUI) HistoryPager() l.Widget {
 		).
 		Rigid(
 			wg.th.Inset(0.25,
-				wg.th.Body1("page 000").Fn,
+				wg.th.Caption("page 1/20").Fn,
 			).Fn,
 		).
 		Rigid(
@@ -44,11 +120,11 @@ func (wg *WalletGUI) HistoryPagePerPageCount() l.Widget {
 	return wg.th.Flex().AlignMiddle().
 		Rigid(
 			wg.incdecs["transactionsPerPage"].
-				Color("DocText").Background("DocBg").Fn,
+				Color("DocText").Background("DocBg").Scale(1).Fn,
 		).
 		Rigid(
 			wg.th.Inset(0.25,
-				wg.th.Body1("tx/page").Fn,
+				wg.th.Caption("tx/page").Fn,
 			).Fn,
 		).Fn
 }
@@ -57,7 +133,7 @@ func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
 	return wg.th.Flex().AlignMiddle().
 		Rigid(
 			wg.th.Inset(0.25,
-				wg.th.Body1("show").Font("bariol bold").Fn,
+				wg.th.Caption("show").Fn,
 			).Fn,
 		).
 		Rigid(
@@ -97,69 +173,4 @@ func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
 			).Fn,
 		).
 		Fn
-}
-
-func (wg *WalletGUI) HistoryPageView() l.Widget {
-	return wg.th.Fill("DocBg",
-		p9.EmptySpace(0, 0),
-	).Fn
-}
-
-func (wg *WalletGUI) HistoryPage() l.Widget {
-	return func(gtx l.Context) l.Dimensions {
-		return wg.th.VFlex().
-			Rigid(
-				wg.th.Inset(0.25,
-					wg.th.Fill("DocBg",
-						wg.th.Inset(0.25,
-							wg.th.Responsive(*wg.Size, p9.Widgets{
-								{
-									Widget: wg.th.VFlex().
-										Flexed(1, wg.HistoryPageView()).
-										Rigid(
-											wg.th.Inset(0.25,
-												wg.th.Flex().AlignMiddle().SpaceBetween().
-													Rigid(
-														wg.HistoryPageStatusFilter(),
-													).
-													Fn,
-											).Fn,
-										).
-										Rigid(
-											wg.th.Flex().AlignMiddle().SpaceBetween().
-												Rigid(
-													wg.HistoryPager(),
-												).
-												Rigid(
-													wg.HistoryPagePerPageCount(),
-												).
-												Fn,
-										).
-										Fn,
-								},
-								{
-									Size: 1024,
-									Widget: wg.th.VFlex().
-										Flexed(1, wg.HistoryPageView()).
-										Rigid(
-											wg.th.Flex().AlignMiddle().SpaceBetween().
-												Rigid(
-													wg.HistoryPager(),
-												).
-												Rigid(
-													wg.HistoryPageStatusFilter(),
-												).
-												Rigid(
-													wg.HistoryPagePerPageCount(),
-												).
-												Fn,
-										).
-										Fn,
-								},
-							}).Fn,
-						).Fn,
-					).Fn,
-				).Fn,
-			).Fn(gtx)
-	}
 }

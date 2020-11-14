@@ -17,6 +17,7 @@ type IncDec struct {
 	inc, dec          *Clickable
 	color, background string
 	inactive          string
+	scale             float32
 }
 
 // IncDec is a simple increment/decrement for a number setting
@@ -34,8 +35,15 @@ func (th *Theme) IncDec() (out *IncDec) {
 		// background: background,
 		// inactive:   inactive,
 		amount: 1,
+		scale: 1,
 	}
 	return
+}
+
+
+func (in *IncDec) Scale(n float32) *IncDec {
+	in.scale = n
+	return in
 }
 
 func (in *IncDec) Amount(n int) *IncDec {
@@ -98,7 +106,7 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	if in.current == in.min {
 		out.Rigid(
 			in.th.Inset(0.25,
-				in.th.Icon().Color(decColor).Scale(Scales["H5"]).Src(&icons.ContentRemove).Fn,
+				in.th.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentRemove).Fn,
 			).Fn,
 		)
 	} else {
@@ -111,17 +119,17 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 					in.changeHook(in.current)
 				}
 			})).Background("Transparent").Embed(
-				in.th.Icon().Color(decColor).Scale(Scales["H5"]).Src(&icons.ContentRemove).Fn,
+				in.th.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
 			).Fn,
 		).Fn,
 		)
 	}
 	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.current)
-	out.Rigid(in.th.Body1(cur).Color(in.color).Font("go regular").Fn)
+	out.Rigid(in.th.Caption(cur).Color(in.color).TextScale(in.scale).Font("go regular").Fn)
 	if in.current == in.max {
 		out.Rigid(
 			in.th.Inset(0.25,
-				in.th.Icon().Color(incColor).Scale(Scales["H5"]).Src(&icons.ContentAdd).Fn,
+				in.th.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentAdd).Fn,
 			).Fn,
 		)
 	} else {
@@ -135,7 +143,7 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 						in.changeHook(in.current)
 					}
 				})).Background("Transparent").Embed(
-					in.th.Icon().Color(incColor).Scale(Scales["H5"]).Src(&icons.ContentAdd).Fn,
+					in.th.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
 				).Fn,
 			).Fn,
 		)

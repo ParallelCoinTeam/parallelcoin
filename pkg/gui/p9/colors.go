@@ -85,6 +85,7 @@ func NewColors() (c Colors) {
 		"dark-white":            "ffdddddd",
 		"yellow":                "ffcfcf30",
 		"halfdim":               "88000000",
+		"halfbright":            "88888888",
 	}
 
 	c["Black"] = c["black"]
@@ -148,7 +149,7 @@ func NewColors() (c Colors) {
 	c["Success"] = c["dark-green"]
 	c["Check"] = c["orange"]
 	c["DocBgHilite"] = c["dark-white"]
-	c["scrim"] = c["halfdim"]
+	c["scrim"] = c["halfbright"]
 	return c
 }
 
@@ -190,6 +191,6 @@ func (c Colors) SetTheme(dark bool) {
 		c["Success"] = c["green"]
 		c["Check"] = c["orange"]
 		c["DocBgHilite"] = c["light-black"]
-		c["scrim"] = c["halfdim"]
+		c["scrim"] = c["halfbright"]
 	}
 }
