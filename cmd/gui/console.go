@@ -235,7 +235,7 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 			).Fn,
 		).
 		Rigid(
-			c.th.Fill("PanelBg",
+			c.th.Fill("DocBg",
 				c.th.Inset(0.25,
 					c.th.Flex().
 						Flexed(1,
