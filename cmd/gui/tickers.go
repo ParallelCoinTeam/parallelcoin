@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os/exec"
+	"runtime"
 	"runtime/pprof"
 	"strings"
 	"time"
@@ -92,7 +93,10 @@ func (wg *WalletGUI) goRoutines() {
 								out[1] = split[1]
 							}
 							Debug("path", out[0], "line", out[1])
-							goland := "C:\\Program Files\\JetBrains\\GoLand 2020.2.3\\bin\\goland64.exe"
+							goland := "goland64.exe"
+							if runtime.GOOS != "windows" {
+								goland = "goland"
+							}
 							launch := exec.Command(goland, "--line", out[1], out[0])
 							launch.Start()
 						}()
@@ -186,8 +190,13 @@ func (wg *WalletGUI) Tickers() {
 					}
 					// Debugs(ltr)
 					wg.State.SetLastTxs(ltr)
-					// }
-					// case <-fiveSeconds:
+					var atr []btcjson.ListTransactionsResult
+					// TODO: for some reason this function returns half as many as requested
+					if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
+						// break out
+					}
+					Debug(len(atr))
+					wg.State.SetAllTxs(atr)
 					wg.invalidate <- struct{}{}
 				case <-wg.quit:
 					break totalOut

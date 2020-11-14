@@ -26,6 +26,8 @@ type State struct {
 	goroutines         []l.Widget
 	txPerPage          int
 	txPage             int
+	allTxs             []btcjson.ListTransactionsResult
+	allTimeStrings     []string
 }
 
 type tx struct {
@@ -59,6 +61,20 @@ func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
 		s.lastTimeStrings[i] =
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
 				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0))))
+	}
+}
+
+func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.allTxs = allTxs
+	// if s.lastTimeStrings == nil {
+	s.allTimeStrings = make([]string, len(s.allTxs))
+	// }
+	for i := range s.allTxs {
+		s.allTimeStrings[i] =
+			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
+				godate.Create(time.Unix(s.allTxs[i].BlockTime, 0))))
 	}
 }
 

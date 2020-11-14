@@ -79,7 +79,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 							Rigid(
 								wg.th.Button(wg.clickables["quit"].SetClick(func() {
 									close(wg.quit)
-								})).Color(wg.App.CardColorGet()).TextScale(2).Text("yes!!!").Fn,
+								})).Color("Light").TextScale(2).Text("yes!!!").Fn,
 							).Fn,
 					).
 					Fn(gtx)

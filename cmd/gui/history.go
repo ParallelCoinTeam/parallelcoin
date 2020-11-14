@@ -14,7 +14,6 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 			Rigid(
 				wg.th.Inset(0.25,
 					wg.th.Fill("PanelBg",
-						// wg.th.Inset(0.25,
 						wg.th.Responsive(*wg.Size, p9.Widgets{
 							{
 								Widget: wg.th.VFlex().
@@ -23,12 +22,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 										wg.th.Fill("DocBg",
 											wg.th.Flex().AlignMiddle().SpaceBetween().
 												Flexed(0.5, p9.EmptyMaxWidth()).
-												Rigid(
-													// wg.th.Inset(0.25,
-													wg.HistoryPageStatusFilter(),
-													// ).
-													// 	Fn,
-												).
+												Rigid(wg.HistoryPageStatusFilter()).
 												Flexed(0.5, p9.EmptyMaxWidth()).
 												Fn,
 										).Fn,
@@ -36,12 +30,8 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 									Rigid(
 										wg.th.Fill("DocBg",
 											wg.th.Flex().AlignMiddle().SpaceBetween().
-												Rigid(
-													wg.HistoryPager(),
-												).
-												Rigid(
-													wg.HistoryPagePerPageCount(),
-												).
+												Rigid(wg.HistoryPager()).
+												Rigid(wg.HistoryPagePerPageCount()).
 												Fn,
 										).Fn,
 									).
@@ -54,15 +44,9 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 									Rigid(
 										wg.th.Fill("DocBg",
 											wg.th.Flex().AlignMiddle().SpaceBetween().
-												Rigid(
-													wg.HistoryPager(),
-												).
-												Rigid(
-													wg.HistoryPageStatusFilter(),
-												).
-												Rigid(
-													wg.HistoryPagePerPageCount(),
-												).
+												Rigid(wg.HistoryPager()).
+												Rigid(wg.HistoryPageStatusFilter()).
+												Rigid(wg.HistoryPagePerPageCount()).
 												Fn,
 										).Fn,
 									).
@@ -120,7 +104,7 @@ func (wg *WalletGUI) HistoryPagePerPageCount() l.Widget {
 	return wg.th.Flex().AlignMiddle().
 		Rigid(
 			wg.incdecs["transactionsPerPage"].
-				Color("DocText").Background("DocBg").Scale(1).Fn,
+				Color("DocText").Background("DocBg").Scale(p9.Scales["Caption"]).Fn,
 		).
 		Rigid(
 			wg.th.Inset(0.25,
