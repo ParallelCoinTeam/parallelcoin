@@ -33,12 +33,12 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 												return wg.th.Fill("PanelBg",
 													wg.th.Flex().
 														Rigid(
-															wg.th.Inset(0.5,
-																wg.th.H5("Balances").
-																	// Font("bariol bold").
-																	Color("PanelText").
-																	Fn,
-															).Fn,
+															// wg.th.Inset(0.5,
+															wg.th.H6("Balances").
+																// Font("bariol bold").
+																Color("PanelText").
+																Fn,
+															// ).Fn,
 														).Fn,
 												).Fn(gtx)
 											},

@@ -138,20 +138,25 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 11),
 	})
 	a.ButtonBar([]l.Widget{
+		wg.PageTopBarButton("console", 2, &p9icons.Terminal),
 		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport),
 		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
-		wg.PageTopBarButton("console", 2, &p9icons.Terminal),
-		wg.PageTopBarButton("settings", 3, &icons.ActionSettings),
-		wg.PageTopBarButton("quit", 4, &icons.ActionExitToApp),
+		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
 	})
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 		wg.RunStatusPanel,
-		wg.th.Flex().Rigid(
-			wg.StatusBarButton("log", 1, &icons.ActionList),
-		).Rigid(
-			wg.StatusBarButton("settings", 2, &icons.ActionSettings),
-		).Fn,
+		wg.th.Flex().
+			// Rigid(
+			// 	wg.StatusBarButton("console", 3, &p9icons.Terminal),
+			// ).
+			Rigid(
+				wg.StatusBarButton("log", 4, &icons.ActionList),
+			).
+			Rigid(
+				wg.StatusBarButton("settings", 5, &icons.ActionSettings),
+			).
+			Fn,
 	})
 	a.AddOverlay(wg.toasts.DrawToasts())
 	a.AddOverlay(wg.dialog.DrawDialog())
@@ -268,6 +273,9 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(g
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.StatusBarBackgroundGet()
 		color := wg.StatusBarColorGet()
+		if wg.ActivePageGet() == name {
+			background = "PanelBg"
+		}
 		ic := wg.Icon().
 			Scale(p9.Scales["H5"]).
 			Color(color).
@@ -319,7 +327,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 		if !wg.mining {
 			miningIcon = &p9icons.NoMine
 		}
-		return wg.th.Flex().
+		return wg.th.Flex().AlignMiddle().
 			Rigid(
 				wg.th.ButtonLayout(wg.statusBarButtons[0]).
 					CornerRadius(0).
@@ -351,26 +359,26 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			// 		),
 			// 	).Fn,
 			// ).
-			Rigid(wg.th.
-				Inset(0.25,
-					wg.Icon().
-						Scale(p9.Scales["H5"]).
-						Color("DocText").
-						Src(&icons.DeviceWidgets).
-						Fn,
-				).
-				Fn,
-			).
+			// Rigid(wg.th.
+			// 	Inset(0.25,
+			// 		wg.Icon().
+			// 			Scale(p9.Scales["H5"]).
+			// 			Color("DocText").
+			// 			Src(&icons.DeviceWidgets).
+			// 			Fn,
+			// 	).
+			// 	Fn,
+			// ).
 			Rigid(
 				wg.th.Inset(0.33,
-					wg.th.Body1(fmt.Sprintf("%-8d", wg.State.bestBlockHeight)).
-						Font("go regular").
+					wg.th.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight)).
+						Font("go regular").TextScale(p9.Scales["Caption"]).
 						Color("DocText").
 						Fn,
 				).Fn,
 			).
 			Rigid(
-				wg.th.ButtonLayout(wg.statusBarButtons[3]).
+				wg.th.ButtonLayout(wg.statusBarButtons[1]).
 					CornerRadius(0).
 					Embed(wg.th.
 						Inset(0.25, wg.th.
@@ -420,7 +428,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						Fn
 					return wg.Flex().
 						Rigid(
-							wg.ButtonLayout(wg.statusBarButtons[4]).
+							wg.ButtonLayout(wg.statusBarButtons[2]).
 								CornerRadius(0).
 								Embed(
 									wg.th.Inset(0.25, ic).Fn,

@@ -218,27 +218,28 @@ func (a *App) MenuButton(gtx l.Context) l.Dimensions {
 		color = "DocText"
 		bg = a.sideBarBackground
 	}
-	return a.Flex().Rigid(
-		// a.Inset(0.25,
-		a.ButtonLayout(a.menuClickable).
-			CornerRadius(0).
-			Embed(
-				a.Inset(0.4,
-					a.Icon().
-						Scale(Scales["H5"]).
-						Color(color).
-						Src(&icons.NavigationMenu).
-						Fn,
-				).Fn,
-			).
-			Background(bg).
-			SetClick(
-				func() {
-					a.MenuOpen = !a.MenuOpen
-				}).
-			Fn,
-		// ).Fn,
-	).Fn(gtx)
+	return a.Flex().SpaceEvenly().AlignEnd().
+		Rigid(
+			// a.Inset(0.25,
+			a.ButtonLayout(a.menuClickable).
+				CornerRadius(0).
+				Embed(
+					a.Inset(0.375,
+						a.Icon().
+							Scale(Scales["H5"]).
+							Color(color).
+							Src(&icons.NavigationMenu).
+							Fn,
+					).Fn,
+				).
+				Background(bg).
+				SetClick(
+					func() {
+						a.MenuOpen = !a.MenuOpen
+					}).
+				Fn,
+			// ).Fn,
+		).Fn(gtx)
 }
 
 func (a *App) NoMenuButton(gtx l.Context) l.Dimensions {
@@ -247,15 +248,12 @@ func (a *App) NoMenuButton(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
-	return a.Flex().AlignBaseline().
-		Rigid(
-			a.Responsive(*a.Size, Widgets{
-				{
-					Widget: EmptySpace(0, 0),
-				},
-				{Size: 800,
-					Widget: a.Inset(0.25,
-						a.IconButton(
+	return a.Responsive(*a.Size, Widgets{
+		{
+			Widget:a.Flex().AlignBaseline().
+				Rigid(a.
+					Inset(0.25, a.
+						IconButton(
 							a.logoClickable.
 								SetClick(
 									func() {
@@ -266,35 +264,104 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 									},
 								),
 						).
-							Icon(
-								a.Icon().
-									Scale(Scales["H6"]).
-									Color("Light").
-									Src(a.logo)).
-							Background("Dark").Color("Light").
-							Inset(0.25).
-							Fn,
-					).Fn,
-				},
-			},
-			).Fn,
-		).
-		Rigid(
-			a.Responsive(*a.Size, Widgets{
-				{Size: 800,
-					Widget: a.Inset(0.0,
-						a.H5(a.title).Color("Light").Fn,
-					).Fn,
-				},
-				{
-					Widget: a.ButtonLayout(a.logoClickable).Embed(
-						a.Inset(0.0,
-							a.H5(a.title).Color("Light").Fn,
-						).Fn,
-					).Background("Transparent").Fn,
-				},
-			}).Fn,
-		).Fn(gtx)
+						Icon(
+							a.Icon().
+								Scale(Scales["H6"]).
+								Color("Light").
+								Src(a.logo),
+						).
+						Background("Dark").Color("Light").
+						Inset(0.25).
+						Fn,
+					).
+					Fn,
+				).
+				Rigid(
+					a.H5("wallet").Color("Light").Fn,
+				).
+				Fn,
+		},
+		{Size: 800,
+			Widget: a.Flex().AlignBaseline().
+				Rigid(a.
+					Inset(0.25, a.
+						IconButton(
+							a.logoClickable.
+								SetClick(
+									func() {
+										Debug("clicked logo")
+										*a.Dark = !*a.Dark
+										a.Theme.Colors.SetTheme(*a.Dark)
+										a.themeHook()
+									},
+								),
+						).
+						Icon(
+							a.Icon().
+								Scale(Scales["H6"]).
+								Color("Light").
+								Src(a.logo),
+						).
+						Background("Dark").Color("Light").
+						Inset(0.25).
+						Fn,
+					).
+					Fn,
+				).
+				Rigid(
+					a.H5(a.title).Color("Light").Fn,
+				).
+				Fn,
+		},
+	},
+	).Fn(gtx)
+	// return a.Flex().AlignBaseline().
+	// 	Rigid(
+	// 		a.Responsive(*a.Size, Widgets{
+	// 			{
+	// 				Widget: EmptySpace(0, 0),
+	// 			},
+	// 			{Size: 800,
+	// 				Widget: a.Flex().Rigid(
+	// 					a.Inset(0.25,
+	// 						a.IconButton(
+	// 							a.logoClickable.
+	// 								SetClick(
+	// 									func() {
+	// 										Debug("clicked logo")
+	// 										*a.Dark = !*a.Dark
+	// 										a.Theme.Colors.SetTheme(*a.Dark)
+	// 										a.themeHook()
+	// 									},
+	// 								),
+	// 						).
+	// 							Icon(
+	// 								a.Icon().
+	// 									Scale(Scales["H6"]).
+	// 									Color("Light").
+	// 									Src(a.logo)).
+	// 							Background("Dark").Color("Light").
+	// 							Inset(0.25).
+	// 							Fn,
+	// 					).Fn,
+	// 				).Fn,
+	// 			},
+	// 		},
+	// 		).Fn,
+	// 	).
+	// 	Rigid(
+	// 		a.Responsive(*a.Size, Widgets{
+	// 			{Size: 800,
+	// 				Widget:
+	// 				a.H5(a.title).Color("Light").Fn,
+	// 			},
+	// 			{
+	// 				Widget: a.ButtonLayout(a.logoClickable).Embed(
+	// 					a.H5(a.title).Color("Light").Fn,
+	// 				).Background("Transparent").Fn,
+	// 			},
+	// 		}).Fn,
+	// 	).Fn(gtx)
 }
 
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
