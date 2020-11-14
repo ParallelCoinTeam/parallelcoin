@@ -195,7 +195,7 @@ func (wg *WalletGUI) Tickers() {
 					if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
 						// break out
 					}
-					Debug(len(atr))
+					// Debug(len(atr))
 					wg.State.SetAllTxs(atr)
 					wg.invalidate <- struct{}{}
 				case <-wg.quit:

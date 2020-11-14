@@ -68,7 +68,7 @@ func (th *Theme) App(size *int) *App {
 		layers:              nil,
 		pages:               make(WidgetMap),
 		root:                th.Stack(),
-		SideBarSize:         th.TextSize.Scale(8),
+		SideBarSize:         th.TextSize.Scale(10),
 		sideBarBackground:   "DocBg",
 		sideBarColor:        "DocText",
 		statusBarBackground: "DocBg",

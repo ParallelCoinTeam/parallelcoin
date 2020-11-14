@@ -88,8 +88,7 @@ type // NotificationHandlers defines callback function pointers to invoke with
 		// invoked if a preceding call to NotifyBlocks has been made to register for the notification and the function is
 		// non-nil. Its parameters differ from OnBlockConnected: it receives the block's height, header, and relevant
 		// transactions.
-		OnFilteredBlockConnected func(height int32, header *wire.BlockHeader,
-			txs []*util.Tx)
+		OnFilteredBlockConnected func(height int32, header *wire.BlockHeader, txs []*util.Tx)
 		// OnBlockDisconnected is invoked when a block is disconnected from the longest (best) chain. It will only be
 		// invoked if a preceding call to NotifyBlocks has been made to register for the notification and the function is
 		// non-nil. NOTE: Deprecated. Use OnFilteredBlockDisconnected instead.
