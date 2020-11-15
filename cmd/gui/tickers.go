@@ -55,13 +55,6 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 		// break out
 	}
 	wg.State.SetBalance(confirmed.ToDUO())
-	var ltr []btcjson.ListTransactionsResult
-	// TODO: for some reason this function returns half as many as requested
-	if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
-		// break out
-	}
-	// Debugs(ltr)
-	wg.State.SetLastTxs(ltr)
 	var atr []btcjson.ListTransactionsResult
 	// TODO: for some reason this function returns half as many as requested
 	if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
@@ -175,7 +168,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 		// 	Debug("wallet OnBlockConnected", hash, height, t)
 		// 	wg.processWalletBlockNotification()
 		// 	wg.processChainBlockNotification(hash, height, t)
-			// wg.invalidate <- struct{}{}
+		// wg.invalidate <- struct{}{}
 		// },
 		// OnFilteredBlockConnected:    func(height int32, header *wire.BlockHeader, txs []*util.Tx) {},
 		// OnBlockDisconnected:         func(hash *chainhash.Hash, height int32, t time.Time) {},
@@ -384,24 +377,12 @@ func (wg *WalletGUI) Tickers() {
 							// break out
 						}
 						wg.State.SetBalance(confirmed.ToDUO())
-						// don't update this unless it's in view
-						if wg.ActivePageGet() == "main" {
-							Debug("updating recent transactions")
-							var ltr []btcjson.ListTransactionsResult
-							// TODO: for some reason this function returns half as many as requested
-							if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
-								// break out
-							}
-							// Debugs(ltr)
-							wg.State.SetLastTxs(ltr)
-							var atr []btcjson.ListTransactionsResult
-							// TODO: for some reason this function returns half as many as requested
-							if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
-								// break out
-							}
-							// Debug(len(atr))
-							wg.State.SetAllTxs(atr)
+						Debug("updating recent transactions")
+						var atr []btcjson.ListTransactionsResult
+						// TODO: for some reason this function returns half as many as requested
+						if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
 						}
+						wg.State.SetAllTxs(atr)
 						wg.invalidate <- struct{}{}
 						first = false
 					}

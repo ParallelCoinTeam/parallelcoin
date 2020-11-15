@@ -153,9 +153,12 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	var out []l.Widget
 	first := true
 	// out = append(out)
-	for x := range wg.State.lastTxs {
+	for x := 0; x < 10; x ++ {
 		i := x
-		txs := wg.State.lastTxs[i]
+		if len(wg.State.allTimeStrings) <= i {
+			break
+		}
+		txs := wg.State.allTxs[i]
 		// spacer
 		if !first {
 			out = append(out,
@@ -249,14 +252,14 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								).
 								Rigid(
 									wg.th.Caption(
-										wg.State.lastTimeStrings[i],
+										wg.State.allTimeStrings[i],
 										// txs.time,
 									).Color("DocText").Fn,
 								).
 								Fn,
 						).
 						// TODO: this thing hasn't got data going in yet, before we can display anything we need data
-						//  also the index `i` is not from wg.State.txs it is from wg.State.lastTxs
+						//  also the index `i` is not from wg.State.txs it is from wg.State.allTxs
 						//  - even if these two data sets overlap if you want them to relate to each other you need
 						//  to define their integration. Simple way would be for eg: as you intend, to merge them into
 						//  one and only update (add) the extra data on page display. I think that it's so trivial for

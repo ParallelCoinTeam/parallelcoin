@@ -21,8 +21,6 @@ type State struct {
 	balance            float64
 	balanceUnconfirmed float64
 	txs                []tx
-	lastTxs            []btcjson.ListTransactionsResult
-	lastTimeStrings    []string
 	goroutines         []l.Widget
 	txPerPage          int
 	txPage             int
@@ -48,23 +46,6 @@ func (s *State) SetGoroutines(gr []l.Widget) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.goroutines = gr
-}
-
-func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
-	if lastTxs == nil {
-		return
-	}
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	s.lastTxs = lastTxs
-	// if s.lastTimeStrings == nil {
-	s.lastTimeStrings = make([]string, len(s.lastTxs))
-	// }
-	for i := range s.lastTxs {
-		s.lastTimeStrings[i] =
-			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
-				godate.Create(time.Unix(s.lastTxs[i].BlockTime, 0))))
-	}
 }
 
 func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
