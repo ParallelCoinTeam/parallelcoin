@@ -31,6 +31,194 @@ func (wg *WalletGUI) updateThingies() (err error) {
 	return
 }
 
+func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
+	Debug("processChainBlockNotification")
+	// update best block height
+	wg.State.SetBestBlockHeight(int(height))
+	wg.State.SetBestBlockHash(hash)
+}
+
+func (wg *WalletGUI) processWalletBlockNotification() {
+	Debug("processWalletBlockNotification", wg.WalletClient != nil)
+	if wg.WalletClient == nil {
+		return
+	}
+	// check account balance
+	var unconfirmed util.Amount
+	var err error
+	if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
+		// break out
+	}
+	wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+	var confirmed util.Amount
+	if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
+		// break out
+	}
+	wg.State.SetBalance(confirmed.ToDUO())
+	var ltr []btcjson.ListTransactionsResult
+	// TODO: for some reason this function returns half as many as requested
+	if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
+		// break out
+	}
+	// Debugs(ltr)
+	wg.State.SetLastTxs(ltr)
+	var atr []btcjson.ListTransactionsResult
+	// TODO: for some reason this function returns half as many as requested
+	if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
+		// break out
+	}
+	// Debug(len(atr))
+	wg.State.SetAllTxs(atr)
+
+}
+
+func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
+	return &rpcclient.NotificationHandlers{
+		OnClientConnected: func() {
+			// go func() {
+			Debug("CHAIN CLIENT CONNECTED!")
+			// var err error
+			// var height int32
+			// var h *chainhash.Hash
+			// if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+			// }
+			// wg.State.SetBestBlockHeight(int(height))
+			// wg.State.SetBestBlockHash(h)
+			// wg.invalidate <- struct{}{}
+			// }()
+		},
+		OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
+			Debug("chain OnBlockConnected", hash, height, t)
+			wg.processChainBlockNotification(hash, height, t)
+			wg.processWalletBlockNotification()
+			// pop up new block toast
+
+			wg.invalidate <- struct{}{}
+		},
+		// OnFilteredBlockConnected:    func(height int32, header *wire.BlockHeader, txs []*util.Tx) {},
+		// OnBlockDisconnected:         func(hash *chainhash.Hash, height int32, t time.Time) {},
+		// OnFilteredBlockDisconnected: func(height int32, header *wire.BlockHeader) {},
+		// OnRecvTx:                    func(transaction *util.Tx, details *btcjson.BlockDetails) {},
+		// OnRedeemingTx:               func(transaction *util.Tx, details *btcjson.BlockDetails) {},
+		// OnRelevantTxAccepted:        func(transaction []byte) {},
+		// OnRescanFinished: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
+		// 	Debug("OnRescanFinished", hash, height, blkTime)
+		// 	// update best block height
+		//
+		// 	// stop showing syncing indicator
+		//
+		// },
+		// OnRescanProgress: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
+		// 	Debug("OnRescanProgress", hash, height, blkTime)
+		// 	// update best block height
+		//
+		// 	// set to show syncing indicator
+		//
+		// },
+		// OnTxAccepted:        func(hash *chainhash.Hash, amount util.Amount) {},
+		// OnTxAcceptedVerbose: func(txDetails *btcjson.TxRawResult) {},
+		// OnPodConnected:      func(connected bool) {},
+		// OnAccountBalance: func(account string, balance util.Amount, confirmed bool) {
+		// 	Debug("OnAccountBalance")
+		// 	// what does this actually do
+		// 	Debug(account, balance, confirmed)
+		// },
+		// OnWalletLockState: func(locked bool) {
+		// 	Debug("OnWalletLockState", locked)
+		// 	// switch interface to unlock page
+		//
+		// 	// TODO: lock when idle... how to get trigger for idleness in UI?
+		// },
+		// OnUnknownNotification: func(method string, params []json.RawMessage) {},
+	}
+
+}
+
+func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
+	return &rpcclient.NotificationHandlers{
+		OnClientConnected: func() {
+			go func() {
+				Debug("WALLET CLIENT CONNECTED!")
+				// // time.Sleep(time.Second * 3)
+				// var unconfirmed util.Amount
+				// var err error
+				// if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
+				// 	// break out
+				// }
+				// wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+				// var confirmed util.Amount
+				// if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
+				// 	// break out
+				// }
+				// wg.State.SetBalance(confirmed.ToDUO())
+				// // don't update this unless it's in view
+				// // if wg.ActivePageGet() == "main" {
+				// Debug("updating recent transactions")
+				// var ltr []btcjson.ListTransactionsResult
+				// // TODO: for some reason this function returns half as many as requested
+				// if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
+				// 	// break out
+				// }
+				// // Debugs(ltr)
+				// wg.State.SetLastTxs(ltr)
+				// var atr []btcjson.ListTransactionsResult
+				// // TODO: for some reason this function returns half as many as requested
+				// if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
+				// 	// break out
+				// }
+				// // Debug(len(atr))
+				// wg.State.SetAllTxs(atr)
+				// wg.invalidate <- struct{}{}
+			}()
+		},
+		// OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
+		// 	Debug("wallet OnBlockConnected", hash, height, t)
+		// 	wg.processWalletBlockNotification()
+		// 	wg.processChainBlockNotification(hash, height, t)
+			// wg.invalidate <- struct{}{}
+		// },
+		// OnFilteredBlockConnected:    func(height int32, header *wire.BlockHeader, txs []*util.Tx) {},
+		// OnBlockDisconnected:         func(hash *chainhash.Hash, height int32, t time.Time) {},
+		// OnFilteredBlockDisconnected: func(height int32, header *wire.BlockHeader) {},
+		// OnRecvTx:                    func(transaction *util.Tx, details *btcjson.BlockDetails) {},
+		// OnRedeemingTx:               func(transaction *util.Tx, details *btcjson.BlockDetails) {},
+		// OnRelevantTxAccepted:        func(transaction []byte) {},
+		OnRescanFinished: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
+			Debug("OnRescanFinished", hash, height, blkTime)
+			// update best block height
+			wg.processWalletBlockNotification()
+			// stop showing syncing indicator
+
+			wg.invalidate <- struct{}{}
+		},
+		OnRescanProgress: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
+			Debug("OnRescanProgress", hash, height, blkTime)
+			// update best block height
+			wg.processWalletBlockNotification()
+			// set to show syncing indicator
+
+			wg.invalidate <- struct{}{}
+		},
+		// OnTxAccepted:        func(hash *chainhash.Hash, amount util.Amount) {},
+		// OnTxAcceptedVerbose: func(txDetails *btcjson.TxRawResult) {},
+		// // OnPodConnected:      func(connected bool) {},
+		OnAccountBalance: func(account string, balance util.Amount, confirmed bool) {
+			Debug("OnAccountBalance")
+			// what does this actually do
+			Debug(account, balance, confirmed)
+		},
+		OnWalletLockState: func(locked bool) {
+			Debug("OnWalletLockState", locked)
+			// switch interface to unlock page
+
+			// TODO: lock when idle... how to get trigger for idleness in UI?
+			wg.invalidate <- struct{}{}
+		},
+		// OnUnknownNotification: func(method string, params []json.RawMessage) {},
+	}
+
+}
+
 func (wg *WalletGUI) chainClient() (err error) {
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
@@ -42,14 +230,17 @@ func (wg *WalletGUI) chainClient() (err error) {
 		Certificates:         certs,
 		DisableAutoReconnect: false,
 		DisableConnectOnNew:  false,
-	}, nil)
+	}, wg.ChainNotifications())
+	if err = wg.ChainClient.NotifyBlocks(); Check(err) {
+	}
+	wg.invalidate <- struct{}{}
 	return
 }
 
 func (wg *WalletGUI) walletClient() (err error) {
 	walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 	certs := walletmain.ReadCAFile(wg.cx.Config)
-	Info("config.tls",*wg.cx.Config.TLS)
+	Info("config.tls", *wg.cx.Config.TLS)
 	wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
 		Host:                 walletRPC,
 		Endpoint:             "ws",
@@ -59,7 +250,11 @@ func (wg *WalletGUI) walletClient() (err error) {
 		Certificates:         certs,
 		DisableAutoReconnect: false,
 		DisableConnectOnNew:  false,
-	}, nil)
+	}, wg.WalletNotifications())
+	if err = wg.WalletClient.NotifyNewTransactions(true); !Check(err) {
+		defer wg.WalletNotifications()
+	}
+	wg.invalidate <- struct{}{}
 	return
 }
 
@@ -114,10 +309,12 @@ func (wg *WalletGUI) goRoutines() {
 		}
 		// Debug(outString)
 		wg.State.SetGoroutines(out)
+		wg.invalidate <- struct{}{}
 	}
 }
 
 func (wg *WalletGUI) Tickers() {
+	first := true
 	go func() {
 		var err error
 		seconds := time.Tick(time.Second)
@@ -143,10 +340,10 @@ func (wg *WalletGUI) Tickers() {
 							wg.WalletClient = nil
 						}
 					}
-					// // the remaining actions require a running shell
-					// if !wg.running {
-					// 	break
-					// }
+					// the remaining actions require a running shell
+					if !wg.running {
+						break
+					}
 					if err = wg.chainClient(); Check(err) {
 						break
 					}
@@ -168,43 +365,46 @@ func (wg *WalletGUI) Tickers() {
 					if !wg.running {
 						break out
 					}
-					var err error
-
-					var height int32
-					var h *chainhash.Hash
-					if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
-						// break out
+					// var err error
+					if first {
+						var height int32
+						var h *chainhash.Hash
+						if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+							// break out
+						}
+						wg.State.SetBestBlockHeight(int(height))
+						wg.State.SetBestBlockHash(h)
+						var unconfirmed util.Amount
+						if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
+							// break out
+						}
+						wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+						var confirmed util.Amount
+						if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
+							// break out
+						}
+						wg.State.SetBalance(confirmed.ToDUO())
+						// don't update this unless it's in view
+						if wg.ActivePageGet() == "main" {
+							Debug("updating recent transactions")
+							var ltr []btcjson.ListTransactionsResult
+							// TODO: for some reason this function returns half as many as requested
+							if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
+								// break out
+							}
+							// Debugs(ltr)
+							wg.State.SetLastTxs(ltr)
+							var atr []btcjson.ListTransactionsResult
+							// TODO: for some reason this function returns half as many as requested
+							if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
+								// break out
+							}
+							// Debug(len(atr))
+							wg.State.SetAllTxs(atr)
+						}
+						wg.invalidate <- struct{}{}
+						first = false
 					}
-					wg.State.SetBestBlockHeight(int(height))
-					wg.State.SetBestBlockHash(h)
-					var unconfirmed util.Amount
-					if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
-						// break out
-					}
-					wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
-					var confirmed util.Amount
-					if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
-						// break out
-					}
-					wg.State.SetBalance(confirmed.ToDUO())
-					// don't update this unless it's in view
-					// if wg.ActivePageGet() == "main" {
-					// Debug("updating recent transactions")
-					var ltr []btcjson.ListTransactionsResult
-					// TODO: for some reason this function returns half as many as requested
-					if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
-						// break out
-					}
-					// Debugs(ltr)
-					wg.State.SetLastTxs(ltr)
-					var atr []btcjson.ListTransactionsResult
-					// TODO: for some reason this function returns half as many as requested
-					if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
-						// break out
-					}
-					// Debug(len(atr))
-					wg.State.SetAllTxs(atr)
-					wg.invalidate <- struct{}{}
 				case <-wg.quit:
 					break totalOut
 				}
