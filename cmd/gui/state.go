@@ -51,6 +51,9 @@ func (s *State) SetGoroutines(gr []l.Widget) {
 }
 
 func (s *State) SetLastTxs(lastTxs []btcjson.ListTransactionsResult) {
+	if lastTxs == nil {
+		return
+	}
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.lastTxs = lastTxs
@@ -68,7 +71,7 @@ func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.allTxs = allTxs
-	// if s.lastTimeStrings == nil {
+	// if s.allTimeStrings == nil {
 	s.allTimeStrings = make([]string, len(s.allTxs))
 	// }
 	for i := range s.allTxs {
