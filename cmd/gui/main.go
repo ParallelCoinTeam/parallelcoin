@@ -74,6 +74,7 @@ type WalletGUI struct {
 	Shell, Miner              *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
+	historyCurPage            int
 	console                   *Console
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
@@ -132,6 +133,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"showGenerate": wg.th.Bool(true),
 		"showSent":     wg.th.Bool(true),
 		"showReceived": wg.th.Bool(true),
+		"showImmature": wg.th.Bool(true),
 	}
 	pass := ""
 	passConfirm := ""

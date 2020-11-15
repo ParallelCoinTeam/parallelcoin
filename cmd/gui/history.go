@@ -1,10 +1,13 @@
 package gui
 
 import (
+	"fmt"
+
 	l "gioui.org/layout"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 func (wg *WalletGUI) HistoryPage() l.Widget {
@@ -38,7 +41,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 									Fn,
 							},
 							{
-								Size: 800,
+								Size: 1280,
 								Widget: wg.th.VFlex().
 									Flexed(1, wg.HistoryPageView()).
 									Rigid(
@@ -61,6 +64,30 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
+	gen := wg.bools["showGenerate"].GetValue()
+	sent := wg.bools["showSent"].GetValue()
+	recv := wg.bools["showReceived"].GetValue()
+	imma := wg.bools["showImmature"].GetValue()
+	current := wg.incdecs["transactionsPerPage"].GetCurrent()
+	cursor := wg.historyCurPage * current
+	var out []btcjson.ListTransactionsResult
+	for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
+		for ; cursor < len(wg.State.allTxs); cursor++ {
+			if wg.State.allTxs[cursor].Generated && gen ||
+				wg.State.allTxs[cursor].Category == "send" && sent ||
+				wg.State.allTxs[cursor].Category == "generate" && gen ||
+				wg.State.allTxs[cursor].Category == "immature" && imma ||
+				wg.State.allTxs[cursor].Category == "receive" && recv ||
+				wg.State.allTxs[cursor].Category == "unknown" {
+				out = append(out, wg.State.allTxs[cursor])
+				break
+			}
+		}
+		if cursor == len(wg.State.allTxs)-1 {
+			break
+		}
+	}
+	Debugs(out)
 	return wg.th.Fill("DocBg",
 
 		p9.EmptySpace(0, 0),
@@ -68,6 +95,12 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPager() l.Widget {
+	v := wg.incdecs["transactionsPerPage"].GetCurrent()
+	vd := len(wg.State.allTxs) / v
+	vm := len(wg.State.allTxs) % v
+	if vm != 0 {
+		vd++
+	}
 	return wg.th.Flex().AlignMiddle().
 		Rigid(
 			wg.th.IconButton(wg.clickables["txPageBack"]).
@@ -83,7 +116,7 @@ func (wg *WalletGUI) HistoryPager() l.Widget {
 		).
 		Rigid(
 			wg.th.Inset(0.25,
-				wg.th.Caption("page 1/20").Fn,
+				wg.th.Caption(fmt.Sprintf("page %d/%d", wg.historyCurPage, vd)).Fn,
 			).Fn,
 		).
 		Rigid(
@@ -151,6 +184,18 @@ func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
 						TextColor("DocText").
 						TextScale(1).
 						Text("received").
+						IconScale(1).
+						Fn(gtx)
+				},
+			).Fn,
+		).
+		Rigid(
+			wg.th.Inset(0.25,
+				func(gtx l.Context) l.Dimensions {
+					return wg.th.CheckBox(wg.bools["showImmature"]).
+						TextColor("DocText").
+						TextScale(1).
+						Text("immature").
 						IconScale(1).
 						Fn(gtx)
 				},
