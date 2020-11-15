@@ -193,6 +193,7 @@ func (wg *WalletGUI) Run() (err error) {
 			}),
 	}
 	wg.Tickers()
+	// wg.Subscriber()
 	wg.App = wg.GetAppWidget()
 	wg.CreateSendAddressItem()
 	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)

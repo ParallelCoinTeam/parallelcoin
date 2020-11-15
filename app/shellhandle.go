@@ -21,7 +21,12 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
-			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
+			if apputil.FileExists(*cx.Config.RPCCert) && apputil.FileExists(*cx.Config.RPCKey) &&
+				apputil.FileExists(*cx.Config.CAFile) {
+
+			} else {
+				_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
+			}
 		}
 		dbFilename :=
 			*cx.Config.DataDir + slash +
@@ -35,7 +40,6 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			fmt.Println("restart to complete initial setup")
 			os.Exit(1)
 		}
-		Warn("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
 				err = node.Main(cx)

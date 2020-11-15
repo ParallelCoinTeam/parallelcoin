@@ -12,6 +12,7 @@ import (
 
 	l "gioui.org/layout"
 
+	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -31,27 +32,33 @@ func (wg *WalletGUI) updateThingies() (err error) {
 }
 
 func (wg *WalletGUI) chainClient() (err error) {
-	// if err = wg.updateThingies(); Check(err) {
-	// }
+	certs := walletmain.ReadCAFile(wg.cx.Config)
 	wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
-		Host:         *wg.cx.Config.RPCConnect,
-		User:         *wg.cx.Config.Username,
-		Pass:         *wg.cx.Config.Password,
-		HTTPPostMode: true,
+		Host:                 *wg.cx.Config.RPCConnect,
+		Endpoint:             "ws",
+		User:                 *wg.cx.Config.Username,
+		Pass:                 *wg.cx.Config.Password,
+		TLS:                  *wg.cx.Config.TLS,
+		Certificates:         certs,
+		DisableAutoReconnect: false,
+		DisableConnectOnNew:  false,
 	}, nil)
 	return
 }
 
 func (wg *WalletGUI) walletClient() (err error) {
-	// if err = wg.updateThingies(); Check(err) {
-	// }
-	// update wallet data
 	walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
+	certs := walletmain.ReadCAFile(wg.cx.Config)
+	Info("config.tls",*wg.cx.Config.TLS)
 	wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
-		Host:         walletRPC,
-		User:         *wg.cx.Config.Username,
-		Pass:         *wg.cx.Config.Password,
-		HTTPPostMode: true,
+		Host:                 walletRPC,
+		Endpoint:             "ws",
+		User:                 *wg.cx.Config.Username,
+		Pass:                 *wg.cx.Config.Password,
+		TLS:                  *wg.cx.Config.TLS,
+		Certificates:         certs,
+		DisableAutoReconnect: false,
+		DisableConnectOnNew:  false,
 	}, nil)
 	return
 }

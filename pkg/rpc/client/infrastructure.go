@@ -995,11 +995,12 @@ func dial(config *ConnConfig) (*websocket.Conn, error) {
 	// Setup TLS if not disabled.
 	var tlsConfig *tls.Config
 	var scheme = "ws"
-	if !config.TLS {
+	if config.TLS {
 		tlsConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
 		}
 		if len(config.Certificates) > 0 {
+			Debug("no certificates for verification")
 			pool := x509.NewCertPool()
 			pool.AppendCertsFromPEM(config.Certificates)
 			tlsConfig.RootCAs = pool

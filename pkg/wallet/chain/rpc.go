@@ -38,7 +38,7 @@ type RPCClient struct {
 // be done using the Start method. If the remote server does not operate on the same bitcoin network as described by the
 // passed chain parameters, the connection will be disconnected.
 func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
-	certs []byte, disableTLS bool, reconnectAttempts int) (*RPCClient, error) {
+	certs []byte, tls bool, reconnectAttempts int) (*RPCClient, error) {
 	Warn("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
@@ -52,7 +52,7 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
 			Certificates:         certs,
 			DisableAutoReconnect: false,
 			DisableConnectOnNew:  true,
-			TLS:                  disableTLS,
+			TLS:                  tls,
 		},
 		chainParams:         chainParams,
 		reconnectAttempts:   reconnectAttempts,

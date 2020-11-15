@@ -39,7 +39,8 @@ func (wg *WalletGUI) Runner() (err error) {
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"-n", wg.cx.ActiveNet.Name,
-						"--servertls=false", "--clienttls=false", "--notty",
+						"--servertls=true", "--clienttls=true",
+						"--notty",
 						"--pipelog", "shell"}
 					// args = apputil.PrependForWindows(args)
 					wg.runnerQuit = make(chan struct{})

@@ -235,7 +235,7 @@ func StartChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte
 		*config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
 	rpcC, err := chain.NewRPCClient(activeNet, *config.RPCConnect,
-		*config.Username, *config.Password, certs, !*config.TLS, 0)
+		*config.Username, *config.Password, certs, *config.TLS, 0)
 	if err != nil {
 		Error(err)
 		return nil, err
