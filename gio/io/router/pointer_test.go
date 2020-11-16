@@ -1,0 +1,511 @@
+// SPDX-License-Identifier: Unlicense OR MIT
+
+package router
+
+import (
+	"fmt"
+	"image"
+	"reflect"
+	"testing"
+
+	"gioui.org/f32"
+	"gioui.org/io/event"
+	"gioui.org/io/pointer"
+	"gioui.org/op"
+)
+
+func TestPointerDrag(t *testing.T) {
+	handler := new(int)
+	var ops op.Ops
+	addPointerHandler(&ops, handler, image.Rect(0, 0, 100, 100))
+
+	var r Router
+	r.Frame(&ops)
+	r.Add(
+		// Press.
+		pointer.Event{
+			Type:     pointer.Press,
+			Position: f32.Pt(50, 50),
+		},
+		// Move outside the area.
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(150, 150),
+		},
+	)
+	assertEventSequence(t, r.Events(handler), pointer.Cancel, pointer.Enter, pointer.Press, pointer.Leave, pointer.Drag)
+}
+
+func TestPointerMove(t *testing.T) {
+	handler1 := new(int)
+	handler2 := new(int)
+	var ops op.Ops
+
+	types := pointer.Move | pointer.Enter | pointer.Leave
+
+	// Handler 1 area: (0, 0) - (100, 100)
+	pointer.Rect(image.Rect(0, 0, 100, 100)).Add(&ops)
+	pointer.InputOp{Tag: handler1, Types: types}.Add(&ops)
+	// Handler 2 area: (50, 50) - (100, 100) (areas intersect).
+	pointer.Rect(image.Rect(50, 50, 200, 200)).Add(&ops)
+	pointer.InputOp{Tag: handler2, Types: types}.Add(&ops)
+
+	var r Router
+	r.Frame(&ops)
+	r.Add(
+		// Hit both handlers.
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(50, 50),
+		},
+		// Hit handler 1.
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(49, 50),
+		},
+		// Hit no handlers.
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(100, 50),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Cancel, pointer.Enter, pointer.Move, pointer.Move, pointer.Leave)
+	assertEventSequence(t, r.Events(handler2), pointer.Cancel, pointer.Enter, pointer.Move, pointer.Leave)
+}
+
+func TestPointerTypes(t *testing.T) {
+	handler := new(int)
+	var ops op.Ops
+	pointer.Rect(image.Rect(0, 0, 100, 100)).Add(&ops)
+	pointer.InputOp{
+		Tag:   handler,
+		Types: pointer.Press | pointer.Release,
+	}.Add(&ops)
+
+	var r Router
+	r.Frame(&ops)
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Press,
+			Position: f32.Pt(50, 50),
+		},
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(150, 150),
+		},
+		pointer.Event{
+			Type:     pointer.Release,
+			Position: f32.Pt(150, 150),
+		},
+	)
+	assertEventSequence(t, r.Events(handler), pointer.Cancel, pointer.Press, pointer.Release)
+}
+
+func TestPointerPriority(t *testing.T) {
+	handler1 := new(int)
+	handler2 := new(int)
+	var ops op.Ops
+
+	pointer.Rect(image.Rect(0, 0, 100, 100)).Add(&ops)
+	pointer.InputOp{Tag: handler1, Types: pointer.Scroll}.Add(&ops)
+
+	pointer.Rect(image.Rect(0, 0, 100, 50)).Add(&ops)
+	pointer.InputOp{Tag: handler2, Types: pointer.Scroll}.Add(&ops)
+
+	var r Router
+	r.Frame(&ops)
+	r.Add(
+		// Hit both handlers.
+		pointer.Event{
+			Type:     pointer.Scroll,
+			Position: f32.Pt(50, 25),
+		},
+		// Hit handler 1.
+		pointer.Event{
+			Type:     pointer.Scroll,
+			Position: f32.Pt(50, 75),
+		},
+		// Hit no handlers.
+		pointer.Event{
+			Type:     pointer.Scroll,
+			Position: f32.Pt(50, 125),
+		},
+	)
+	hev1 := r.Events(handler1)
+	hev2 := r.Events(handler2)
+	assertEventSequence(t, hev1, pointer.Cancel, pointer.Scroll, pointer.Scroll)
+	assertEventSequence(t, hev2, pointer.Cancel, pointer.Scroll)
+	assertEventPriorities(t, hev1, pointer.Shared, pointer.Shared, pointer.Foremost)
+	assertEventPriorities(t, hev2, pointer.Shared, pointer.Foremost)
+}
+
+func TestPointerEnterLeave(t *testing.T) {
+	handler1 := new(int)
+	handler2 := new(int)
+	var ops op.Ops
+
+	// Handler 1 area: (0, 0) - (100, 100)
+	addPointerHandler(&ops, handler1, image.Rect(0, 0, 100, 100))
+
+	// Handler 2 area: (50, 50) - (200, 200) (areas overlap).
+	addPointerHandler(&ops, handler2, image.Rect(50, 50, 200, 200))
+
+	var r Router
+	r.Frame(&ops)
+	// Hit both handlers.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(50, 50),
+		},
+	)
+	// First event for a handler is always a Cancel.
+	// Only handler2 should receive the enter/move events because it is on top
+	// and handler1 is not an ancestor in the hit tree.
+	assertEventSequence(t, r.Events(handler1), pointer.Cancel)
+	assertEventSequence(t, r.Events(handler2), pointer.Cancel, pointer.Enter, pointer.Move)
+
+	// Leave the second area by moving into the first.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(45, 45),
+		},
+	)
+	// The cursor leaves handler2 and enters handler1.
+	assertEventSequence(t, r.Events(handler1), pointer.Enter, pointer.Move)
+	assertEventSequence(t, r.Events(handler2), pointer.Leave)
+
+	// Move, but stay within the same hit area.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(40, 40),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Move)
+	assertEventSequence(t, r.Events(handler2))
+
+	// Move outside of both inputs.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(300, 300),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Leave)
+	assertEventSequence(t, r.Events(handler2))
+
+	// Check that a Press event generates Enter Events.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Press,
+			Position: f32.Pt(125, 125),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1))
+	assertEventSequence(t, r.Events(handler2), pointer.Enter, pointer.Press)
+
+	// Check that a drag only affects the participating handlers.
+	r.Add(
+		// Leave
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(25, 25),
+		},
+		// Enter
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(50, 50),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1))
+	assertEventSequence(t, r.Events(handler2), pointer.Leave, pointer.Drag, pointer.Enter, pointer.Drag)
+
+	// Check that a Release event generates Enter/Leave Events.
+	r.Add(
+		pointer.Event{
+			Type: pointer.Release,
+			Position: f32.Pt(25,
+				25),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Enter)
+	// The second handler gets the release event because the press started inside it.
+	assertEventSequence(t, r.Events(handler2), pointer.Release, pointer.Leave)
+
+}
+
+func TestMultipleAreas(t *testing.T) {
+	handler := new(int)
+
+	var ops op.Ops
+
+	addPointerHandler(&ops, handler, image.Rect(0, 0, 100, 100))
+	st := op.Push(&ops)
+	pointer.Rect(image.Rect(50, 50, 200, 200)).Add(&ops)
+	// Second area has no Types set, yet should receive events because
+	// Types for the same handles are or-ed together.
+	pointer.InputOp{Tag: handler}.Add(&ops)
+	st.Pop()
+
+	var r Router
+	r.Frame(&ops)
+	// Hit first area, then second area, then both.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(25, 25),
+		},
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(150, 150),
+		},
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(50, 50),
+		},
+	)
+	assertEventSequence(t, r.Events(handler), pointer.Cancel, pointer.Enter, pointer.Move, pointer.Move, pointer.Move)
+}
+
+func TestPointerEnterLeaveNested(t *testing.T) {
+	handler1 := new(int)
+	handler2 := new(int)
+	var ops op.Ops
+
+	types := pointer.Press | pointer.Move | pointer.Release | pointer.Enter | pointer.Leave
+
+	// Handler 1 area: (0, 0) - (100, 100)
+	pointer.Rect(image.Rect(0, 0, 100, 100)).Add(&ops)
+	pointer.InputOp{Tag: handler1, Types: types}.Add(&ops)
+
+	// Handler 2 area: (25, 25) - (75, 75) (nested within first).
+	pointer.Rect(image.Rect(25, 25, 75, 75)).Add(&ops)
+	pointer.InputOp{Tag: handler2, Types: types}.Add(&ops)
+
+	var r Router
+	r.Frame(&ops)
+	// Hit both handlers.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(50, 50),
+		},
+	)
+	// First event for a handler is always a Cancel.
+	// Both handlers should receive the Enter and Move events because handler2 is a child of handler1.
+	assertEventSequence(t, r.Events(handler1), pointer.Cancel, pointer.Enter, pointer.Move)
+	assertEventSequence(t, r.Events(handler2), pointer.Cancel, pointer.Enter, pointer.Move)
+
+	// Leave the second area by moving into the first.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(20, 20),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Move)
+	assertEventSequence(t, r.Events(handler2), pointer.Leave)
+
+	// Move, but stay within the same hit area.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(10, 10),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Move)
+	assertEventSequence(t, r.Events(handler2))
+
+	// Move outside of both inputs.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(200, 200),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Leave)
+	assertEventSequence(t, r.Events(handler2))
+
+	// Check that a Press event generates Enter Events.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Press,
+			Position: f32.Pt(50, 50),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Enter, pointer.Press)
+	assertEventSequence(t, r.Events(handler2), pointer.Enter, pointer.Press)
+
+	// Check that a Release event generates Enter/Leave Events.
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Release,
+			Position: f32.Pt(20, 20),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Release)
+	assertEventSequence(t, r.Events(handler2), pointer.Release, pointer.Leave)
+}
+
+func TestPointerActiveInputDisappears(t *testing.T) {
+	handler1 := new(int)
+	var ops op.Ops
+	var r Router
+
+	// Draw handler.
+	ops.Reset()
+	addPointerHandler(&ops, handler1, image.Rect(0, 0, 100, 100))
+	r.Frame(&ops)
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(25, 25),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Cancel, pointer.Enter, pointer.Move)
+
+	// Re-render with handler missing.
+	ops.Reset()
+	r.Frame(&ops)
+	r.Add(
+		pointer.Event{
+			Type:     pointer.Move,
+			Position: f32.Pt(25, 25),
+		},
+	)
+	assertEventSequence(t, r.Events(handler1), pointer.Cancel)
+}
+
+func TestMultitouch(t *testing.T) {
+	var ops op.Ops
+
+	// Add two separate handlers.
+	h1, h2 := new(int), new(int)
+	addPointerHandler(&ops, h1, image.Rect(0, 0, 100, 100))
+	addPointerHandler(&ops, h2, image.Rect(0, 100, 100, 200))
+
+	h1pt, h2pt := f32.Pt(0, 0), f32.Pt(0, 100)
+	var p1, p2 pointer.ID = 0, 1
+
+	var r Router
+	r.Frame(&ops)
+	r.Add(
+		pointer.Event{
+			Type:      pointer.Press,
+			Position:  h1pt,
+			PointerID: p1,
+		},
+	)
+	r.Add(
+		pointer.Event{
+			Type:      pointer.Press,
+			Position:  h2pt,
+			PointerID: p2,
+		},
+	)
+	r.Add(
+		pointer.Event{
+			Type:      pointer.Release,
+			Position:  h2pt,
+			PointerID: p2,
+		},
+	)
+	assertEventSequence(t, r.Events(h1), pointer.Cancel, pointer.Enter, pointer.Press)
+	assertEventSequence(t, r.Events(h2), pointer.Cancel, pointer.Enter, pointer.Press, pointer.Release)
+}
+
+// addPointerHandler adds a pointer.InputOp for the tag in a
+// rectangular area.
+func addPointerHandler(ops *op.Ops, tag event.Tag, area image.Rectangle) {
+	defer op.Push(ops).Pop()
+	pointer.Rect(area).Add(ops)
+	pointer.InputOp{
+		Tag:   tag,
+		Types: pointer.Press | pointer.Release | pointer.Move | pointer.Drag | pointer.Enter | pointer.Leave,
+	}.Add(ops)
+}
+
+// pointerTypes converts a sequence of event.Event to their pointer.Types. It assumes
+// that all input events are of underlying type pointer.Event, and thus will
+// panic if some are not.
+func pointerTypes(events []event.Event) []pointer.Type {
+	var types []pointer.Type
+	for _, e := range events {
+		if e, ok := e.(pointer.Event); ok {
+			types = append(types, e.Type)
+		}
+	}
+	return types
+}
+
+// assertEventSequence checks that the provided events match the expected pointer event types
+// in the provided order.
+func assertEventSequence(t *testing.T, events []event.Event, expected ...pointer.Type) {
+	t.Helper()
+	got := pointerTypes(events)
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("expected %v events, got %v", expected, got)
+	}
+}
+
+// assertEventPriorities checks that the pointer.Event priorities of events match prios.
+func assertEventPriorities(t *testing.T, events []event.Event, prios ...pointer.Priority) {
+	t.Helper()
+	var got []pointer.Priority
+	for _, e := range events {
+		if e, ok := e.(pointer.Event); ok {
+			got = append(got, e.Priority)
+		}
+	}
+	if !reflect.DeepEqual(got, prios) {
+		t.Errorf("expected priorities %v, got %v", prios, got)
+	}
+}
+
+func BenchmarkRouterAdd(b *testing.B) {
+	// Set this to the number of overlapping handlers that you want to
+	// evaluate performance for. Typical values for the example applications
+	// are 1-3, though checking highers values helps evaluate performance for
+	// more complex applications.
+	const startingHandlerCount = 3
+	const maxHandlerCount = 100
+	for i := startingHandlerCount; i < maxHandlerCount; i *= 3 {
+		handlerCount := i
+		b.Run(fmt.Sprintf("%d-handlers", i), func(b *testing.B) {
+			handlers := make([]event.Tag, handlerCount)
+			for i := 0; i < handlerCount; i++ {
+				h := new(int)
+				*h = i
+				handlers[i] = h
+			}
+			var ops op.Ops
+
+			for i := range handlers {
+				pointer.Rect(image.Rectangle{
+					Max: image.Point{
+						X: 100,
+						Y: 100,
+					},
+				}).Add(&ops)
+				pointer.InputOp{
+					Tag:   handlers[i],
+					Types: pointer.Move,
+				}.Add(&ops)
+			}
+			var r Router
+			r.Frame(&ops)
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				r.Add(
+					pointer.Event{
+						Type:     pointer.Move,
+						Position: f32.Pt(50, 50),
+					},
+				)
+			}
+		})
+	}
+}
