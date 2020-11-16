@@ -32,7 +32,7 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 		return c.th.Label().Text(c.rows[index].Label).Font(c.font).TextScale(c.scale).Fn(gtx)
 	}
 	// render the widgets onto a second context to get their dimensions
-	gtx1 := CopyContextDimensions(gtx, gtx.Constraints.Max, l.Horizontal)
+	gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Horizontal)
 	// generate the dimensions for all the list elements
 	dims := GetDimensionList(gtx1, len(c.rows), le)
 	for i := range dims {
@@ -66,7 +66,7 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 		})
 	}
 	// // render the widgets onto a second context to get their dimensions
-	// gtx1 = CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
+	// gtx1 = CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
 	// dim := GetDimension(gtx1, c.th.SliceToWidget(out, l.Vertical))
 	// max = dim.Size.X
 	return

@@ -151,8 +151,8 @@ func EmptyMinHeight() func(gtx l.Context) l.Dimensions {
 	}
 }
 
-// CopyContextDimensions copies the dimensions out with infinite along the axis for precomputing dimensions
-func CopyContextDimensions(gtx l.Context, size image.Point, axis l.Axis) l.Context {
+// CopyContextDimensionsWithMaxAxis copies the dimensions out with the max set by an image.Point along the axis
+func CopyContextDimensionsWithMaxAxis(gtx l.Context, size image.Point, axis l.Axis) l.Context {
 	ip := image.Point{}
 	if axis == l.Horizontal {
 		ip.Y = size.Y
@@ -174,6 +174,20 @@ func CopyContextDimensions(gtx l.Context, size image.Point, axis l.Axis) l.Conte
 		gtx1.Constraints.Min.X = gtx.Constraints.Min.X
 		gtx1.Constraints.Min.Y = 0
 	}
+	return gtx1
+}
+
+// GetInfContext creates a context with infinite max constraints
+func GetInfContext(gtx l.Context) l.Context {
+	ip := image.Point{}
+	ip.Y = Inf
+	ip.X = Inf
+	var ops op.Ops
+	gtx1 := l.NewContext(&ops, system.FrameEvent{
+		Now:    time.Now(),
+		Metric: gtx.Metric,
+		Size:   ip,
+	})
 	return gtx1
 }
 

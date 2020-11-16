@@ -218,7 +218,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		// get the size of the scrollbar
 		li.th.scrollBarSize = li.scrollWidth + li.scrollBarPad
 		// render the widgets onto a second context to get their dimensions
-		gtx1 := CopyContextDimensions(gtx, gtx.Constraints.Max, li.axis)
+		gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, li.axis)
 		// generate the dimensions for all the list elements
 		li.dims = GetDimensionList(gtx1, li.length, li.w)
 		// li.recalculate = false

@@ -90,7 +90,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 										append([]l.Widget{
 											func(gtx l.Context) l.Dimensions {
 												// render the widgets onto a second context to get their dimensions
-												gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
+												gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
 												dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
 												gtx.Constraints.Max.X = dim.Size.X
 												gtx.Constraints.Min.X = dim.Size.X
@@ -334,7 +334,7 @@ func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 // 		).Fn
 // 		if !fill {
 // 			// render the widgets onto a second context to get their dimensions
-// 			gtx1 := p9.CopyContextDimensions(gtx, gtx.Constraints.Max, l.Vertical)
+// 			gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
 // 			// generate the dimensions for all the list elements
 // 			child := op.Record(gtx1.Ops)
 // 			d := w(gtx1)
