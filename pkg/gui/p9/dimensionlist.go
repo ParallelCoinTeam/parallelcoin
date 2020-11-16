@@ -34,7 +34,7 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 				break
 			}
 			cursor -= axisMain(axis, d[i].Size)
-			position.First = i - 1
+			position.First = i
 			position.Offset = coordinate - cursor
 			position.BeforeEnd = true
 			if i == len(d)-1 {

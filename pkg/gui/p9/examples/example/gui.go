@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 
-	"gioui.org/app"
-	"gioui.org/layout"
+	l "gioui.org/layout"
 	"gioui.org/text"
 	mico "golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -55,16 +54,17 @@ func main() {
 			Size(800, 600).
 			Title("example").
 			Open().
-			Run(minerModel.testLabels, func() {
+			Run(minerModel.testLabels, func(l.Context) {}, func() {
 				close(quit)
 				// os.Exit(0)
-			}); Check(err) {
+			}, quit); Check(err) {
 		}
 	}()
-	app.Main()
+	<-quit
+	// app.Main()
 }
 
-func (m *MinerModel) testLabels(gtx layout.Context) layout.Dimensions {
+func (m *MinerModel) testLabels(gtx l.Context) l.Dimensions {
 	m.progress++
 	if m.progress == 100 {
 		m.progress = 0
@@ -89,7 +89,7 @@ func (m *MinerModel) testLabels(gtx layout.Context) layout.Dimensions {
 	).Fn(gtx)
 }
 
-func (m *MinerModel) blocks() layout.Widget {
+func (m *MinerModel) blocks() l.Widget {
 	th := m.th
 	return th.Flex().Vertical().Rigid(
 		th.Inset(0.25,
@@ -147,7 +147,7 @@ func (m *MinerModel) blocks() layout.Widget {
 	).Fn
 }
 
-func (m *MinerModel) buttons() layout.Widget {
+func (m *MinerModel) buttons() l.Widget {
 	th := m.th
 	return th.Flex().Vertical().Rigid(
 		th.Inset(0.25,
@@ -186,7 +186,7 @@ func (m *MinerModel) buttons() layout.Widget {
 					func() {
 						Debug("clicked parallelcoin button")
 					})).
-					Icon(th.Icon().Src(icons.ParallelCoin)).
+					Icon(th.Icon().Src(&icons.ParallelCoin)).
 					Fn,
 			).Fn,
 		).Rigid(
@@ -197,12 +197,12 @@ func (m *MinerModel) buttons() layout.Widget {
 					})).
 					Scale(1).
 					Background("Secondary").
-					Icon(th.Icon().Src(mico.ActionAndroid)).
+					Icon(th.Icon().Src(&mico.ActionAndroid)).
 					Fn,
 			).Fn,
 		).Fn,
 	).Rigid(
-		th.ProgressBar().Color("Primary").SetProgress(int(m.progress)).Fn,
+		th.ProgressBar().Color("Primary").SetProgress(m.progress).Fn,
 	).Rigid(
 		th.ProgressBar().Color("Primary").SetProgress(int(m.slider.Value())).Fn,
 	).Rigid(
