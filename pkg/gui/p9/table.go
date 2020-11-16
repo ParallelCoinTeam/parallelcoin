@@ -30,7 +30,7 @@ func (c CellRow) GetPriority() (out CellPriority) {
 	for i := range c {
 		out = append(out, c[i].Priority)
 	}
-	sort.Sort(out)
+	// sort.Sort(out)
 	return
 }
 
@@ -125,11 +125,38 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		}
 		columnsToRender = append(columnsToRender, priorities[i])
 	}
+	// render the columns to render into their original order
+	sort.Ints(columnsToRender)
 	// All fields will be expanded by the following ratio to reach the target width
 	expansionFactor := float32(maxWidth) / float32(prev)
-	for i := range t.X {
-		t.X[i] = int(float32(t.X[i]) * expansionFactor)
+	outColWidths := make([]int, len(columnsToRender))
+	for i := range columnsToRender {
+		outColWidths[i] = int(float32(t.X[columnsToRender[i]]) * expansionFactor)
 	}
-
+	// assemble the grid to be rendered as a two dimensional slice
+	grid := make([][]l.Widget, len(t.body)+1)
+	for i := range t.header {
+		grid[0] = append(grid[0], t.header[i].Widget)
+	}
+	for i := range t.body {
+		for j := range t.body[i] {
+			grid[i+1] = append(grid[i+1], t.body[i][j].Widget)
+		}
+	}
+	// assemble each row into a flex
+	out := make([]l.Widget, len(grid))
+	for i := range grid {
+		outFlex := t.th.Flex()
+		for j := range grid[i] {
+			outFlex.Rigid(func(gtx l.Context) l.Dimensions {
+				// lock the cell to the calculated size. Horizontal is not so important because of scrolling though we
+				// have that info
+				gtx.Constraints.Max.X = outColWidths[i]
+				gtx.Constraints.Min.X = gtx.Constraints.Max.X
+				return grid[i][j](gtx)
+			})
+		}
+		out[i] = outFlex.Fn
+	}
 	return l.Dimensions{}
 }

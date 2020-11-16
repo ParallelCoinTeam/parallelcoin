@@ -253,23 +253,10 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								Rigid(
 									wg.th.Caption(
 										wg.State.allTimeStrings[i],
-										// txs.time,
 									).Color("DocText").Fn,
 								).
 								Fn,
 						).
-						// TODO: this thing hasn't got data going in yet, before we can display anything we need data
-						//  also the index `i` is not from wg.State.txs it is from wg.State.allTxs
-						//  - even if these two data sets overlap if you want them to relate to each other you need
-						//  to define their integration. Simple way would be for eg: as you intend, to merge them into
-						//  one and only update (add) the extra data on page display. I think that it's so trivial for
-						//  10 instances of the listtransactions result struct just keep them separate so the logic is
-						//  cleaner. In other words, add a second fetcher in ticker.go for the history/tx page, and
-						//  handle the damn empty list, nil panics are Satan.
-						//  my advice is use the second field and keep them separated
-						// Rigid(
-						// 	wg.Inset(0.1, wg.buttonText(wg.State.txs[i].clickTx, "details", wg.txPage(i))).Fn,
-						// ).
 						Fn,
 				).
 					Fn(gtx)
