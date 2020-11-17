@@ -310,7 +310,7 @@ func (wg *WalletGUI) Tickers() {
 	first := true
 	go func() {
 		var err error
-		seconds := time.Tick(time.Second)
+		seconds := time.Tick(time.Second*2)
 		// fiveSeconds := time.Tick(time.Second * 5)
 	totalOut:
 		for {
@@ -359,7 +359,7 @@ func (wg *WalletGUI) Tickers() {
 						break out
 					}
 					// var err error
-					if first {
+					// if first {
 						var height int32
 						var h *chainhash.Hash
 						if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
@@ -385,7 +385,7 @@ func (wg *WalletGUI) Tickers() {
 						wg.State.SetAllTxs(atr)
 						wg.invalidate <- struct{}{}
 						first = false
-					}
+					// }
 				case <-wg.quit:
 					break totalOut
 				}
