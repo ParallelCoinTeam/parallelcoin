@@ -3,8 +3,9 @@ package gui
 import (
 	"fmt"
 
-	l "gioui.org/layout"
 	"golang.org/x/exp/shiny/materialdesign/icons"
+
+	l "gioui.org/layout"
 
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -88,8 +89,86 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 		}
 	}
 	Debugs(out)
-	// create the header and body structures
-	
+	// create the header
+	header := p9.CellRow{
+		{
+			Widget:   wg.th.Body1("Amount").Fn,
+			Priority: 0,
+		},
+		{
+			Widget:   wg.th.Body1("Address").Fn,
+			Priority: 1,
+		},
+		{
+			Widget:   wg.th.Body1("Category").Fn,
+			Priority: 2,
+		},
+		{
+			Widget:   wg.th.Body1("Confirmations").Fn,
+			Priority: 3,
+		},
+		{
+			Widget:   wg.th.Body1("Transaction ID").Fn,
+			Priority: 4,
+		},
+		{
+			Widget:   wg.th.Body1("Time").Fn,
+			Priority: 5,
+		},
+		{
+			Widget:   wg.th.Body1("Comment").Fn,
+			Priority: 6,
+		},
+		{
+			Widget:   wg.th.Body1("Fee").Fn,
+			Priority: 7,
+		},
+		{
+			Widget:   wg.th.Body1("BlockHash").Fn,
+			Priority: 8,
+		},
+		{
+			Widget:   wg.th.Body1("BlockTime").Fn,
+			Priority: 9,
+		},
+		{
+			Widget:   wg.th.Body1("Generated").Fn,
+			Priority: 10,
+		},
+		{
+			Widget:   wg.th.Body1("Abandoned").Fn,
+			Priority: 11,
+		},
+		{
+			Widget:   wg.th.Body1("Time Received").Fn,
+			Priority: 12,
+		},
+		{
+			Widget:   wg.th.Body1("Trusted").Fn,
+			Priority: 13,
+		},
+		{
+			Widget:   wg.th.Body1("Vout").Fn,
+			Priority: 14,
+		},
+		{
+			Widget:   wg.th.Body1("Wallet Conflicts").Fn,
+			Priority: 15,
+		},
+		{
+			Widget:   wg.th.Body1("Account").Fn,
+			Priority: 16,
+		},
+		{
+			Widget:   wg.th.Body1("Other Account").Fn,
+			Priority: 17,
+		},
+		{
+			Widget:   wg.th.Body1("Involves Watch Only").Fn,
+			Priority: 18,
+		},
+	}
+	_ = header
 	return wg.th.Fill("DocBg",
 
 		p9.EmptySpace(0, 0),
