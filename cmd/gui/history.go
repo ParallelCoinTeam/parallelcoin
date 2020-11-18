@@ -88,6 +88,8 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 		}
 	}
 	Debugs(out)
+	// create the header and body structures
+	
 	return wg.th.Fill("DocBg",
 
 		p9.EmptySpace(0, 0),

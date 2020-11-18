@@ -56,12 +56,14 @@ type Table struct {
 	th     *Theme
 	header CellRow
 	body   CellGrid
+	list *List
 	Y, X   []int
 }
 
 func (th *Theme) Table() *Table {
 	return &Table{
 		th: th,
+		list: th.List(),
 	}
 }
 
@@ -87,15 +89,15 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	for i := range t.header {
 		t.header[i].getWidgetDimensions(gtx1)
 	}
-	Debugs(t.header)
+	// Debugs(t.header)
 	for i := range t.body {
 		for j := range t.body[i] {
 			t.body[i][j].getWidgetDimensions(gtx1)
 		}
 	}
-	Debugs(t.body)
+	// Debugs(t.body)
 	// find the max of each row and column
-	var table []CellRow
+	var table CellGrid
 	table = append(table, t.header)
 	table = append(table, t.body...)
 	t.Y = make([]int, len(table))
@@ -125,7 +127,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		}
 		columnsToRender = append(columnsToRender, priorities[i])
 	}
-	// render the columns to render into their original order
+	// sort the columns to render into their original order
 	sort.Ints(columnsToRender)
 	// All fields will be expanded by the following ratio to reach the target width
 	expansionFactor := float32(maxWidth) / float32(prev)
@@ -149,8 +151,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		outFlex := t.th.Flex()
 		for j := range grid[i] {
 			outFlex.Rigid(func(gtx l.Context) l.Dimensions {
-				// lock the cell to the calculated size. Horizontal is not so important because of scrolling though we
-				// have that info
+				// lock the cell to the calculated width.
 				gtx.Constraints.Max.X = outColWidths[i]
 				gtx.Constraints.Min.X = gtx.Constraints.Max.X
 				return grid[i][j](gtx)
@@ -158,5 +159,8 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		}
 		out[i] = outFlex.Fn
 	}
-	return l.Dimensions{}
+	le := func(gtx l.Context, index int) l.Dimensions {
+		return out[index](gtx)
+	}
+	return t.list.Layout(gtx, len(out), le)
 }
