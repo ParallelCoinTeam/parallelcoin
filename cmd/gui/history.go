@@ -90,88 +90,60 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 	}
 	Debugs(out)
 	// create the header
-	header := p9.CellRow{
-		{
-			Widget:   wg.th.Body1("Amount").Fn,
-			Priority: 0,
-		},
-		{
-			Widget:   wg.th.Body1("Address").Fn,
-			Priority: 1,
-		},
-		{
-			Widget:   wg.th.Body1("Category").Fn,
-			Priority: 2,
-		},
-		{
-			Widget:   wg.th.Body1("Confirmations").Fn,
-			Priority: 3,
-		},
-		{
-			Widget:   wg.th.Body1("Transaction ID").Fn,
-			Priority: 4,
-		},
-		{
-			Widget:   wg.th.Body1("Time").Fn,
-			Priority: 5,
-		},
-		{
-			Widget:   wg.th.Body1("Comment").Fn,
-			Priority: 6,
-		},
-		{
-			Widget:   wg.th.Body1("Fee").Fn,
-			Priority: 7,
-		},
-		{
-			Widget:   wg.th.Body1("BlockHash").Fn,
-			Priority: 8,
-		},
-		{
-			Widget:   wg.th.Body1("BlockTime").Fn,
-			Priority: 9,
-		},
-		{
-			Widget:   wg.th.Body1("Generated").Fn,
-			Priority: 10,
-		},
-		{
-			Widget:   wg.th.Body1("Abandoned").Fn,
-			Priority: 11,
-		},
-		{
-			Widget:   wg.th.Body1("Time Received").Fn,
-			Priority: 12,
-		},
-		{
-			Widget:   wg.th.Body1("Trusted").Fn,
-			Priority: 13,
-		},
-		{
-			Widget:   wg.th.Body1("Vout").Fn,
-			Priority: 14,
-		},
-		{
-			Widget:   wg.th.Body1("Wallet Conflicts").Fn,
-			Priority: 15,
-		},
-		{
-			Widget:   wg.th.Body1("Account").Fn,
-			Priority: 16,
-		},
-		{
-			Widget:   wg.th.Body1("Other Account").Fn,
-			Priority: 17,
-		},
-		{
-			Widget:   wg.th.Body1("Involves Watch Only").Fn,
-			Priority: 18,
-		},
+	header := p9.TextTableHeader{
+		{Text: "Amount", Priority: 0},
+		{Text: "Transaction ID", Priority: 4},
+		{Text: "Address", Priority: 2},
+		{Text: "Category", Priority: 1},
+		{Text: "Confirmations", Priority: 3},
+		{Text: "Time", Priority: 5},
+		{Text: "Comment", Priority: 6},
+		{Text: "Fee", Priority: 7},
+		{Text: "BlockHash", Priority: 8},
+		{Text: "BlockTime", Priority: 9},
+		{Text: "Generated", Priority: 10},
+		{Text: "Abandoned", Priority: 11},
+		{Text: "Time Received", Priority: 12},
+		{Text: "Trusted", Priority: 13},
+		{Text: "Vout", Priority: 14},
+		{Text: "Wallet Conflicts", Priority: 15},
+		{Text: "Account", Priority: 16},
+		{Text: "Other Account", Priority: 17},
+		{Text: "Involves Watch Only", Priority: 18},
 	}
-	_ = header
-	return wg.th.Fill("DocBg",
+	body := p9.TextTableBody{}
+	for i := range wg.State.allTxs {
+		body = append(body, p9.TextTableRow{
+			fmt.Sprintf("%v", wg.State.allTxs[i].Amount),
+			wg.State.allTxs[i].TxID,
+			wg.State.allTxs[i].Address,
+			wg.State.allTxs[i].Category,
+			fmt.Sprintf("%v", wg.State.allTxs[i].Confirmations),
+			fmt.Sprintf("%v", wg.State.allTxs[i].Time),
+			wg.State.allTxs[i].Comment,
+			fmt.Sprintf("%v", wg.State.allTxs[i].Fee),
+			wg.State.allTxs[i].BlockHash,
+			fmt.Sprintf("%v", wg.State.allTxs[i].BlockTime),
+			fmt.Sprintf("%v", wg.State.allTxs[i].Generated),
+			fmt.Sprintf("%v", wg.State.allTxs[i].Abandoned),
+			fmt.Sprintf("%v", wg.State.allTxs[i].Time),
+			fmt.Sprintf("%v", wg.State.allTxs[i].Trusted),
+			fmt.Sprintf("%v", wg.State.allTxs[i].Vout),
+			fmt.Sprintf("%v", wg.State.allTxs[i].WalletConflicts),
+			wg.State.allTxs[i].Account,
+			wg.State.allTxs[i].OtherAccount,
+			fmt.Sprintf("%v", wg.State.allTxs[i].InvolvesWatchOnly),
+		})
+	}
+	table := &p9.TextTable{
+		Header: header,
+		Body:   body,
+		Inset:  0.25,
+	}
 
-		p9.EmptySpace(0, 0),
+	return wg.th.Fill("DocBg",
+		table.Fn,
+		// p9.EmptySpace(0, 0),
 	).Fn
 }
 
