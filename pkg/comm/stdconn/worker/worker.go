@@ -49,10 +49,10 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 			case <-w.Quit:
 				Debug("stopping")
 				Check(w.Stop())
-				//Debug("interrupting")
-				//Check(w.Interrupt())
-				//Debug("killing")
-				//Check(w.Kill())
+				// Debug("interrupting")
+				// Check(w.Interrupt())
+				// Debug("killing")
+				// Check(w.Kill())
 				break out
 			}
 		}

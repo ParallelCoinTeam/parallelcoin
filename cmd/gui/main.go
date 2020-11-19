@@ -5,8 +5,9 @@ import (
 	"encoding/hex"
 	"runtime"
 
-	l "gioui.org/layout"
 	"github.com/urfave/cli"
+
+	l "gioui.org/layout"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui/dialog"
@@ -105,6 +106,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"transactions": wg.th.List(),
 		"settings":     wg.th.List(),
 		"received":     wg.th.List(),
+		"history":      wg.th.List(),
 	}
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),

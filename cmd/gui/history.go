@@ -136,9 +136,11 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 		})
 	}
 	table := &p9.TextTable{
+		Theme:  wg.th,
 		Header: header,
 		Body:   body,
 		Inset:  0.25,
+		List:   wg.lists["history"],
 	}
 
 	return wg.th.Fill("DocBg",
