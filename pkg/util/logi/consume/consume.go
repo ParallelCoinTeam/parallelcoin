@@ -1,6 +1,8 @@
 package consume
 
 import (
+	"runtime"
+
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -87,10 +89,12 @@ func Kill(w *worker.Worker) {
 	}
 	if err = w.Interrupt(); Check(err) {
 	}
-	if err = w.Stop(); Check(err) {
+	if runtime.GOOS != "windows" {
+		if err = w.Stop(); Check(err) {
+		}
 	}
-	//Debug("closing worker quit channel")
-	//close(w.Quit)
+	// Debug("closing worker quit channel")
+	// close(w.Quit)
 }
 
 func SetLevel(w *worker.Worker, level string) {
