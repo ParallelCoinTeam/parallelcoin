@@ -88,7 +88,7 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 			break
 		}
 	}
-	Debugs(out)
+	// Debugs(out)
 	// create the header
 	header := p9.TextTableHeader{
 		{Text: "Amount", Priority: 0},

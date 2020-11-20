@@ -104,7 +104,9 @@ func (t *Text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.V
 		lines = lines[:max]
 	}
 	dims := linesDimensions(lines)
-	dims.Size = cs.Constrain(dims.Size)
+	// Debugs(dims)
+	// dims.Size = cs.Constrain(dims.Size)
+	// Debugs(dims)
 	clip := textPadding(lines)
 	clip.Max = clip.Max.Add(dims.Size)
 	it := lineIterator{
@@ -126,6 +128,7 @@ func (t *Text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.V
 		paint.PaintOp{Rect: lclip}.Add(gtx.Ops)
 		stack.Pop()
 	}
+	// Debugs(dims)
 	return dims
 }
 

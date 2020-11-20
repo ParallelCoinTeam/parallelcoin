@@ -2,6 +2,7 @@ package main
 
 import (
 	l "gioui.org/layout"
+	"github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
@@ -14,9 +15,10 @@ type App struct {
 }
 
 func main() {
+	logi.L.SetLevel("trace", false, "pod")
 	quit := make(chan struct{})
 	th := p9.NewTheme(p9fonts.Collection(), quit)
-	minerModel := App{
+	model := App{
 		th: th,
 	}
 	go func() {
@@ -24,7 +26,7 @@ func main() {
 			Size(800, 600).
 			Title("table example").
 			Open().
-			Run(minerModel.mainWidget, func(l.Context) {}, func() {
+			Run(model.mainWidget, func(l.Context) {}, func() {
 				close(quit)
 			}, quit); Check(err) {
 		}
@@ -34,7 +36,10 @@ func main() {
 
 func (m *App) mainWidget(gtx l.Context) l.Dimensions {
 	th := m.th
-	return th.Flex().Rigid(
-		p9.EmptyMaxWidth(),
+	gtx.Constraints.Max = gtx.Constraints.Min
+	dims := th.Flex().AlignStart().Rigid(
+		m.th.Body1("test").Fn,
 	).Fn(gtx)
+	Infos(dims)
+	return dims
 }

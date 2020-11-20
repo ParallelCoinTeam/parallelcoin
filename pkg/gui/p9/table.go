@@ -15,35 +15,43 @@ type Cell struct {
 	Priority int
 }
 
-func (c *Cell) getWidgetDimensions(gtx l.Context) {
+func (c *Cell) getWidgetDimensions(gtx l.Context, th *Theme) {
 	// gather the dimensions of the list elements
 	gtx.Ops.Reset()
 	child := op.Record(gtx.Ops)
-	c.dims = c.Widget(gtx)
+	c.dims = th.Flex().Rigid(c.Widget).Fn(gtx)
 	_ = child.Stop()
 	return
 }
 
 type CellRow []Cell
 
-func (c CellRow) GetPriority() (out CellPriority) {
+func (c CellRow) GetPriority() (out CellPriorities) {
 	for i := range c {
-		out = append(out, c[i].Priority)
+		var cp CellPriority
+		cp.Priority = c[i].Priority
+		cp.Column = i
+		out = append(out, cp)
 	}
-	// sort.Sort(out)
+	sort.Sort(out)
 	return
 }
 
-type CellPriority []int
+type CellPriority struct {
+	Column   int
+	Priority int
+}
+
+type CellPriorities []CellPriority
 
 // sort a cell row by priority
-func (c CellPriority) Len() int {
+func (c CellPriorities) Len() int {
 	return len(c)
 }
-func (c CellPriority) Less(i, j int) bool {
-	return c[i] < c[j]
+func (c CellPriorities) Less(i, j int) bool {
+	return c[i].Priority < c[j].Priority
 }
-func (c CellPriority) Swap(i, j int) {
+func (c CellPriorities) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 
@@ -56,13 +64,13 @@ type Table struct {
 	th     *Theme
 	header CellRow
 	body   CellGrid
-	list *List
+	list   *List
 	Y, X   []int
 }
 
 func (th *Theme) Table() *Table {
 	return &Table{
-		th: th,
+		th:   th,
 		list: th.List(),
 	}
 }
@@ -78,6 +86,10 @@ func (t *Table) Body(g CellGrid) *Table {
 }
 
 func (t *Table) Fn(gtx l.Context) l.Dimensions {
+	// Debug(len(t.body), len(t.header))
+	if len(t.body) == 0 || len(t.header) == 0 {
+		return l.Dimensions{}
+	}
 	for i := range t.body {
 		if len(t.header) != len(t.body[i]) {
 			// this should never happen hence panic
@@ -87,12 +99,12 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	gtx1 := GetInfContext(gtx)
 	// gather the dimensions from all cells
 	for i := range t.header {
-		t.header[i].getWidgetDimensions(gtx1)
+		t.header[i].getWidgetDimensions(gtx1, t.th)
 	}
 	// Debugs(t.header)
 	for i := range t.body {
 		for j := range t.body[i] {
-			t.body[i][j].getWidgetDimensions(gtx1)
+			t.body[i][j].getWidgetDimensions(gtx1, t.th)
 		}
 	}
 	// Debugs(t.body)
@@ -114,21 +126,26 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 			}
 		}
 	}
+	Debugs(t.Y)
+	Debugs(t.X)
 	// find the columns that will be rendered into the existing width
 	maxWidth := gtx.Constraints.Max.X
+	// Debugs(t.header)
 	priorities := t.header.GetPriority()
+	// Debugs(priorities)
 	var runningTotal, prev int
 	var columnsToRender []int
 	for i := range priorities {
 		prev = runningTotal
-		runningTotal += t.header[priorities[i]].dims.Size.X
+		runningTotal += t.header[priorities[i].Column].dims.Size.X
 		if runningTotal > maxWidth {
 			break
 		}
-		columnsToRender = append(columnsToRender, priorities[i])
+		columnsToRender = append(columnsToRender, priorities[i].Column)
 	}
 	// sort the columns to render into their original order
 	sort.Ints(columnsToRender)
+	Debugs(columnsToRender)
 	// All fields will be expanded by the following ratio to reach the target width
 	expansionFactor := float32(maxWidth) / float32(prev)
 	outColWidths := make([]int, len(columnsToRender))
@@ -152,7 +169,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		for j := range grid[i] {
 			outFlex.Rigid(func(gtx l.Context) l.Dimensions {
 				// lock the cell to the calculated width.
-				gtx.Constraints.Max.X = outColWidths[i]
+				gtx.Constraints.Max.X = outColWidths[j]
 				gtx.Constraints.Min.X = gtx.Constraints.Max.X
 				return grid[i][j](gtx)
 			})
