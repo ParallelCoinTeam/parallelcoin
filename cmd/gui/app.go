@@ -21,7 +21,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	wg.App = a
 	wg.App.ThemeHook(func() {
 		Debug("theme hook")
-		Debug(wg.bools)
+		// Debug(wg.bools)
 		*wg.cx.Config.DarkTheme = *wg.Dark
 		a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
 		*a = *wg.Dark
@@ -446,9 +446,13 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 										Debug("clicked reset wallet button")
 										go func() {
 											wasRunning := wg.running
+											wasMining := wg.mining
 											Debug("was running", wasRunning)
 											if wasRunning {
 												wg.ShellRunCommandChan <- "stop"
+											}
+											if wasMining{
+												wg.MinerRunCommandChan <- "stop"
 											}
 											args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 												"--pipelog", "wallet", "drophistory"}
@@ -458,9 +462,11 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											if err := runner.Run(); Check(err) {
 											}
 											if wasRunning {
-												wg.ShellRunCommandChan <- "restart"
+												wg.ShellRunCommandChan <- "run"
 											}
-
+											if wasMining{
+												wg.MinerRunCommandChan <- "run"
+											}
 										}()
 									}).
 								Fn,
