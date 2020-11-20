@@ -231,7 +231,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		}
 		// put in the header
 		out = append(out, func(gtx l.Context) l.Dimensions {
-			return ng.th.Inset(0.0, ng.th.Fill("Primary", ng.th.Inset(0.5, ng.th.H6(g.name).Color("Light").Fn).Fn).Fn).Fn(gtx)
+			return ng.th.Inset(0.0, ng.th.H6(g.name).Color("PanelText").Fn).Fn(gtx)
 		})
 		out = append(out, func(gtx l.Context) l.Dimensions {
 			return ng.th.Fill("DocBg",

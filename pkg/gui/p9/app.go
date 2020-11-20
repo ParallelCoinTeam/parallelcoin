@@ -3,10 +3,11 @@ package p9
 import (
 	"fmt"
 
+	"golang.org/x/exp/shiny/materialdesign/icons"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 )
@@ -250,7 +251,7 @@ func (a *App) NoMenuButton(gtx l.Context) l.Dimensions {
 func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 	return a.Responsive(*a.Size, Widgets{
 		{
-			Widget:a.Flex().AlignBaseline().
+			Widget: a.Flex().AlignBaseline().
 				Rigid(a.
 					Inset(0.25, a.
 						IconButton(
@@ -412,7 +413,8 @@ func (a *App) renderSideBar() l.Widget {
 			ListElement(func(gtx l.Context, index int) l.Dimensions {
 				// gtx.Constraints.Max.X = int(a.sideBarSize.V)
 				// gtx.Constraints.Min.X = 0
-				// gtx.Constraints.Max.X = gtx.Constraints.Min.X
+				// gtx.Constraints.Min.X = gtx.Constraints.Max.X
+				// gtx.Constraints.Constrain(gtx.Constraints.Max)
 				dims := a.sideBar[index](gtx)
 				// Debug(dims)
 				return dims

@@ -5,9 +5,10 @@ import (
 	"os"
 	"os/exec"
 
+	"golang.org/x/exp/shiny/materialdesign/icons"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
-	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
@@ -69,7 +70,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return wg.th.VFlex().
 					SpaceEvenly().
-					// AlignMiddle().
+					AlignMiddle().
 					Rigid(
 						wg.th.H4("are you sure?").Color(wg.App.BodyColorGet()).Alignment(text.Middle).Fn,
 					).
@@ -118,10 +119,21 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			}},
 		}),
 		"mining": wg.Page("mining", p9.Widgets{
-			p9.WidgetSize{Widget: wg.th.VFlex().SpaceAround().AlignMiddle().Rigid(wg.th.H1("mining").Alignment(text.Middle).Fn).Fn},
+			p9.WidgetSize{Widget: wg.th.VFlex().AlignMiddle().SpaceEvenly().Flexed(0.5, p9.EmptySpace(0, 0)).Rigid(
+				wg.th.Flex().AlignMiddle().SpaceEvenly().Flexed(0.5, p9.EmptySpace(0, 0)).Rigid(
+					wg.th.H1("mining").Fn,
+				).Flexed(0.5, p9.EmptySpace(0, 0)).Fn,
+			).Flexed(0.5, p9.EmptySpace(0, 0)).Fn,
+			},
 		}),
 		"explorer": wg.Page("explorer", p9.Widgets{
-			p9.WidgetSize{Widget: wg.th.VFlex().SpaceAround().AlignMiddle().Rigid(wg.th.H1("explorer").Alignment(text.Middle).Fn).Fn},
+			p9.WidgetSize{Widget:
+			wg.th.VFlex().AlignMiddle().SpaceEvenly().Flexed(0.5, p9.EmptySpace(0, 0)).Rigid(
+				wg.th.Flex().AlignMiddle().SpaceEvenly().Flexed(0.5, p9.EmptySpace(0, 0)).Rigid(
+					wg.th.H1("explorer").Fn,
+				).Flexed(0.5, p9.EmptySpace(0, 0)).Fn,
+			).Flexed(0.5, p9.EmptySpace(0, 0)).Fn,
+			},
 		}),
 	})
 	a.SideBar([]l.Widget{
@@ -192,31 +204,25 @@ func (wg *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l
 
 func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		gtx.Constraints.Max.X = int(wg.App.SideBarSize.V)
-		gtx.Constraints.Min.X = int(wg.App.SideBarSize.V)
-		return wg.ButtonLayout(wg.sidebarButtons[index]).Embed(
+		// gtx.Constraints.Max.X = int(wg.App.SideBarSize.V)
+		// gtx.Constraints.Min.X = int(wg.App.SideBarSize.V)
+		background := "DocBg"
+		color := "DocText"
+		if wg.ActivePageGet() == page {
+			background = "PanelBg"
+			color = "PanelText"
+		}
+		return wg.Fill(background, wg.ButtonLayout(wg.sidebarButtons[index]).Embed(
 			func(gtx l.Context) l.Dimensions {
-				background := "Transparent"
-				color := "DocText"
-				if wg.ActivePageGet() == page {
-					background = "PanelBg"
-					color = "PanelText"
-				}
-				var inPad, outPad float32 = 0.25, 0.25
-				if *wg.Size >= 800 {
-					inPad, outPad = 0.5, 0
-				}
-				return wg.Inset(outPad,
-					wg.Fill(background,
-						wg.Flex().
-							Flexed(1,
-								wg.Inset(inPad,
-									wg.H6(title).
-										Color(color).
-										TextScale(p9.Scales["Body1"]).
-										Fn,
-								).Fn,
-							).Fn,
+				gtx.Constraints.Min.X =
+					gtx.Constraints.Max.X
+				var pad float32 = 0.5
+				return wg.th.Flex().Rigid(
+					wg.th.Inset(pad,
+						wg.th.H6(title).
+							Color(color).
+							TextScale(p9.Scales["Body1"]).
+							Fn,
 					).Fn,
 				).Fn(gtx)
 			},
@@ -229,7 +235,8 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 					}
 					wg.ActivePage(page)
 				}).
-			Fn(gtx)
+			Fn,
+		).Fn(gtx)
 	}
 }
 
