@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	l "gioui.org/layout"
 
 	"github.com/atotto/clipboard"
 
@@ -47,7 +48,15 @@ func (wg *WalletGUI) ConsolePage() *Console {
 			Debug("submit", txt)
 			c.output = append(c.output,
 				func(gtx l.Context) l.Dimensions {
-					return wg.th.Body1(txt).Color("DocText").Font("bariol bold").Fn(gtx)
+					return wg.th.VFlex().
+						Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+						Rigid(
+							wg.th.Flex().
+								Flexed(1,
+									wg.th.Body1(txt).Color("DocText").Font("bariol bold").Fn,
+								).
+								Fn,
+						).Fn(gtx)
 				})
 			c.editor.SetText("")
 			split := strings.Split(txt, " ")
@@ -108,10 +117,13 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						sri := strings.Join(splitResult[i:i+maxPerWidget], "\n")
 						c.output = append(c.output,
 							func(gtx l.Context) l.Dimensions {
-								return wg.th.Caption(sri).
-									Color("DocText").
-									Font("bariol regular").
-									MaxLines(maxPerWidget).
+								return wg.th.Flex().
+									Flexed(1,
+										wg.th.Caption(sri).
+											Color("DocText").
+											Font("bariol regular").
+											MaxLines(maxPerWidget).Fn,
+									).
 									Fn(gtx)
 							})
 					}
@@ -129,7 +141,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						sri := splitResult[i]
 						c.output = append(c.output,
 							func(gtx l.Context) l.Dimensions {
-								return wg.th.Flex().Rigid(
+								return wg.th.Flex().Flexed(1,
 									wg.th.Caption(sri).
 										Color("DocText").
 										Font("go regular").MaxLines(4).
@@ -199,9 +211,9 @@ func (wg *WalletGUI) ConsolePage() *Console {
 		Background("Transparent").
 		Inset(0.25)
 	c.output = append(c.output, func(gtx l.Context) l.Dimensions {
-		return c.th.H6("Welcome to the Parallelcoin RPC console").Color("DocText").Fn(gtx)
+		return c.th.Flex().AlignStart().Rigid(c.th.H6("Welcome to the Parallelcoin RPC console").Color("DocText").Fn).Fn(gtx)
 	}, func(gtx l.Context) l.Dimensions {
-		return c.th.Caption("Type 'help' to get available commands and 'clear' or 'cls' to clear the screen").Color("DocText").Fn(gtx)
+		return c.th.Flex().AlignStart().Rigid(c.th.Caption("Type 'help' to get available commands and 'clear' or 'cls' to clear the screen").Color("DocText").Fn).Fn(gtx)
 	})
 	return c
 }
