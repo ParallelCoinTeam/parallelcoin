@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	l "gioui.org/layout"
 
 	"github.com/p9c/pod/pkg/gui/p9"
 )
@@ -16,7 +17,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 			{Label: "Available:", W: wg.balanceWidget(wg.State.balance)},
 			{Label: "Unconfirmed:", W: wg.balanceWidget(wg.State.balanceUnconfirmed)},
 			{Label: "Total:", W: wg.balanceWidget(wg.State.balance + wg.State.balanceUnconfirmed)},
-		}, "bariol bold", 1).List
+		}, "bariol bold", 1, "DocText", "DocBg").List
 		return wg.th.Responsive(*wg.App.Size, p9.Widgets{
 			{
 				Widget: wg.th.VFlex().
@@ -24,26 +25,26 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						func(gtx l.Context) l.Dimensions {
 							_, bc := balanceColumn(gtx)
 							return wg.th.Inset(0.25,
-								wg.th.Fill("DocBg",
-									wg.th.SliceToWidget(
-										append([]l.Widget{
+								// wg.th.Fill("DocBg",
+								wg.th.SliceToWidget(
+									append([]l.Widget{
+										wg.th.Fill("PanelBg",
 											func(gtx l.Context) l.Dimensions {
 												// _, bc = balanceColumn(gtx)
-												return wg.th.Fill("PanelBg",
-													wg.th.Flex().
-														Rigid(
-															// wg.th.Inset(0.5,
-															wg.th.H6("Balances").
-																// Font("bariol bold").
-																Color("PanelText").
-																Fn,
-															// ).Fn,
-														).Fn,
-												).Fn(gtx)
+												return wg.th.Flex().
+													Rigid(
+														// wg.th.Inset(0.5,
+														wg.th.H6("Balances").
+															// Font("bariol bold").
+															Color("PanelText").
+															Fn,
+														// ).Fn,
+													).Fn(gtx)
 											},
-										},
-											bc...), l.Vertical),
-								).Fn,
+										).Fn,
+									},
+										bc...), l.Vertical),
+								// ).Fn,
 							).Fn(gtx)
 						},
 					).
@@ -152,7 +153,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	var out []l.Widget
 	first := true
 	// out = append(out)
-	for x := 0; x < 10; x ++ {
+	for x := 0; x < 10; x++ {
 		i := x
 		if len(wg.State.allTimeStrings) <= i {
 			break

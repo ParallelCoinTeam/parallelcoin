@@ -105,7 +105,7 @@ func (t *Text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.V
 	}
 	dims := linesDimensions(lines)
 	// Debugs(dims)
-	// dims.Size = cs.Constrain(dims.Size)
+	dims.Size = cs.Constrain(dims.Size)
 	// Debugs(dims)
 	clip := textPadding(lines)
 	clip.Max = clip.Max.Add(dims.Size)

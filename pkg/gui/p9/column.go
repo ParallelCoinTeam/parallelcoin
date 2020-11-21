@@ -12,14 +12,15 @@ type ColumnRow struct {
 type Rows []ColumnRow
 
 type Column struct {
-	th    *Theme
-	rows  []ColumnRow
-	font  string
-	scale float32
+	th                *Theme
+	rows              []ColumnRow
+	font              string
+	scale             float32
+	color, background string
 }
 
-func (th *Theme) Column(rows Rows, font string, scale float32) *Column {
-	return &Column{th: th, rows: rows, font: font, scale: scale}
+func (th *Theme) Column(rows Rows, font string, scale float32, color string, background string) *Column {
+	return &Column{th: th, rows: rows, font: font, scale: scale, color: color, background: background}
 }
 
 func (c *Column) Fn(gtx l.Context) l.Dimensions {
@@ -48,21 +49,27 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 		i := x
 		_ = i
 		out = append(out, func(gtx l.Context) l.Dimensions {
-			return c.th.Flex().
-				Rigid(
-					c.th.Fill("Primary", func(gtx l.Context) l.Dimensions {
-						gtx.Constraints.Max.X = max
-						gtx.Constraints.Min.X = max
-						return c.th.Label().
-							Text(c.rows[i].Label).
-							Font(c.font).
-							TextScale(c.scale).
-							Fn(gtx)
-					}).Fn,
-				).
-				Rigid(
-					c.rows[i].W,
-				).
+			return c.th.Fill(c.background,
+				c.th.Flex().
+					Rigid(
+						c.th.Inset(0.5, func(gtx l.Context) l.Dimensions {
+							gtx.Constraints.Max.X = max
+							gtx.Constraints.Min.X = max
+							return c.th.Label().
+								Text(c.rows[i].Label).
+								Font(c.font).
+								TextScale(c.scale).
+								Color(c.color).
+								Fn(gtx)
+						}).Fn,
+					).
+					Rigid(
+						c.th.Inset(0.5,
+							c.rows[i].W,
+						).Fn,
+					).
+					Fn,
+			).
 				Fn(gtx)
 			// return c.th.Fill("Primary",
 			// 	c.th.Flex().AlignEnd().SpaceBetween().

@@ -76,12 +76,15 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 					).
 					Rigid(
 						wg.th.Flex().
-							SpaceEvenly().
+							// SpaceEvenly().
+							Flexed(0.5, p9.EmptyMaxWidth()).
 							Rigid(
 								wg.th.Button(wg.clickables["quit"].SetClick(func() {
 									close(wg.quit)
 								})).Color("Light").TextScale(2).Text("yes!!!").Fn,
-							).Fn,
+							).
+							Flexed(0.5, p9.EmptyMaxWidth()).
+							Fn,
 					).
 					Fn(gtx)
 			},
@@ -119,20 +122,35 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			}},
 		}),
 		"mining": wg.Page("mining", p9.Widgets{
-			p9.WidgetSize{Widget: wg.th.VFlex().AlignMiddle().SpaceEvenly().Flexed(0.5, p9.EmptySpace(0, 0)).Rigid(
-				wg.th.Flex().AlignMiddle().SpaceEvenly().Flexed(0.5, p9.EmptySpace(0, 0)).Rigid(
-					wg.th.H1("mining").Fn,
-				).Flexed(0.5, p9.EmptySpace(0, 0)).Fn,
-			).Flexed(0.5, p9.EmptySpace(0, 0)).Fn,
+			p9.WidgetSize{Widget: wg.th.VFlex().
+				AlignMiddle().
+				SpaceSides().
+				Rigid(
+					wg.th.Flex().
+						Flexed(0.5, p9.EmptyMaxWidth()).
+						Rigid(
+							wg.th.H1("Mining").Fn,
+						).
+						Flexed(0.5, p9.EmptyMaxWidth()).
+						Fn,
+				).
+				Fn,
 			},
 		}),
 		"explorer": wg.Page("explorer", p9.Widgets{
-			p9.WidgetSize{Widget:
-			wg.th.VFlex().AlignMiddle().SpaceEvenly().Flexed(0.5, p9.EmptySpace(0, 0)).Rigid(
-				wg.th.Flex().AlignMiddle().SpaceEvenly().Flexed(0.5, p9.EmptySpace(0, 0)).Rigid(
-					wg.th.H1("explorer").Fn,
-				).Flexed(0.5, p9.EmptySpace(0, 0)).Fn,
-			).Flexed(0.5, p9.EmptySpace(0, 0)).Fn,
+			p9.WidgetSize{Widget: wg.th.VFlex().
+				AlignMiddle().
+				SpaceSides().
+				Rigid(
+					wg.th.Flex().
+						Flexed(0.5, p9.EmptyMaxWidth()).
+						Rigid(
+							wg.th.H1("explorer").Fn,
+						).
+						Flexed(0.5, p9.EmptyMaxWidth()).
+						Fn,
+				).
+				Fn,
 			},
 		}),
 	})
@@ -451,7 +469,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											if wasRunning {
 												wg.ShellRunCommandChan <- "stop"
 											}
-											if wasMining{
+											if wasMining {
 												wg.MinerRunCommandChan <- "stop"
 											}
 											args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
@@ -464,7 +482,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											if wasRunning {
 												wg.ShellRunCommandChan <- "run"
 											}
-											if wasMining{
+											if wasMining {
 												wg.MinerRunCommandChan <- "run"
 											}
 										}()
