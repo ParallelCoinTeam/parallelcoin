@@ -3,8 +3,9 @@
 package p9
 
 import (
-	"gioui.org/layout"
 	"golang.org/x/exp/shiny/materialdesign/icons"
+
+	"gioui.org/layout"
 )
 
 type RadioButton struct {
@@ -24,9 +25,9 @@ func (th *Theme) RadioButton(checkable *Checkable, group *Enum, key, label strin
 		group: group,
 		th:    th,
 		Checkable: checkable.
-			CheckedStateIcon(&icons.ToggleRadioButtonChecked).
-			UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked).
-			Label(label),
+			CheckedStateIcon(&icons.ToggleRadioButtonChecked). // Color("Primary").
+			UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked). // Color("PanelBg").
+			Label(label), // .Color("DocText").IconColor("PanelBg"),
 		key: key,
 	}
 }

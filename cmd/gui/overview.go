@@ -28,8 +28,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 									wg.th.SliceToWidget(
 										append([]l.Widget{
 											func(gtx l.Context) l.Dimensions {
-												_, bc = balanceColumn(gtx)
-												gtx.Constraints.Max.X = *wg.Size
+												// _, bc = balanceColumn(gtx)
 												return wg.th.Fill("PanelBg",
 													wg.th.Flex().
 														Rigid(

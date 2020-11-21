@@ -181,30 +181,26 @@ func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
 func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 	return a.Flex().
 		Rigid(
-			a.Flex().
-				Rigid(
-					a.Fill(a.sideBarBackground,
+			a.Fill(a.sideBarBackground,
+				a.VFlex().
+					Flexed(1,
 						a.Responsive(*a.Size, Widgets{
 							{
 								Widget: func(gtx l.Context) l.Dimensions {
 									return If(a.MenuOpen,
-										// a.Fill(a.sideBarBackground,
 										a.renderSideBar(),
-										// ).Fn,
 										EmptySpace(0, 0),
 									)(gtx)
 								},
 							},
 							{Size: 800,
 								Widget:
-								// a.Fill(a.sideBarBackground,
 								a.renderSideBar(),
-								// ).Fn,
 							},
 						},
 						).Fn,
 					).Fn,
-				).Fn,
+			).Fn,
 		).
 		Flexed(1,
 			a.RenderPage,

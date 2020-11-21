@@ -107,11 +107,11 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	var icon *Icon
 	if checked {
 		icon = c.th.Icon().
-			Color(c.color).
+			Color(c.iconColor).
 			Src(c.checkedStateIcon)
 	} else {
 		icon = c.th.Icon().
-			Color(c.color).
+			Color(c.iconColor).
 			Src(c.uncheckedStateIcon)
 	}
 	icon.size = c.size

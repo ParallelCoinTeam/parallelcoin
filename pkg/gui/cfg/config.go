@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	l "gioui.org/layout"
 	"github.com/urfave/cli"
 	"golang.org/x/exp/shiny/materialdesign/icons"
+
+	l "gioui.org/layout"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -455,15 +456,16 @@ func (c *Config) RenderRadio(item *Item) []l.Widget {
 	out := func(gtx l.Context) l.Dimensions {
 		var options []l.Widget
 		for i := range item.options {
-			color := "DocText"
+			var color string
+			color = "PanelBg"
 			if c.enums[item.slug].Value() == item.options[i] {
 				color = "Primary"
 			}
 			options = append(options,
 				c.th.RadioButton(
 					c.checkables[item.slug+item.options[i]].
+						Color("DocText").
 						IconColor(color).
-						Color(color).
 						CheckedStateIcon(&icons.ToggleRadioButtonChecked).
 						UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked),
 					c.enums[item.slug], item.options[i], item.options[i]).Fn)
