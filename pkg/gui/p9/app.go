@@ -121,8 +121,10 @@ func (a *App) Overlay() func(gtx l.Context) {
 }
 
 func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
+	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	return func(gtx l.Context) l.Dimensions {
-		bar := a.Flex().SpaceBetween()
+		bar := a.Flex().SpaceBetween().AlignMiddle()
+		// bar.Flexed(1, EmptyMaxWidth())
 		for x := range a.statusBar {
 			i := x
 			bar.Rigid(a.statusBar[i])
@@ -133,10 +135,9 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 		// 	bar.Fn
 		// ).Fn
 		// ).Fn
-		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		dims := a.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
-		gtx.Constraints.Min = dims.Size
-		gtx.Constraints.Max = dims.Size
+		// gtx.Constraints.Min = dims.Size
+		// gtx.Constraints.Max = dims.Size
 		return dims
 	}(gtx)
 }

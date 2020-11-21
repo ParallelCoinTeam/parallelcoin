@@ -122,35 +122,39 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			}},
 		}),
 		"mining": wg.Page("mining", p9.Widgets{
-			p9.WidgetSize{Widget: wg.th.VFlex().
-				AlignMiddle().
-				SpaceSides().
-				Rigid(
-					wg.th.Flex().
-						Flexed(0.5, p9.EmptyMaxWidth()).
-						Rigid(
-							wg.th.H1("Mining").Fn,
-						).
-						Flexed(0.5, p9.EmptyMaxWidth()).
-						Fn,
-				).
-				Fn,
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+				return wg.th.VFlex().
+					AlignMiddle().
+					SpaceSides().
+					Rigid(
+						wg.th.Flex().
+							Flexed(0.5, p9.EmptyMaxWidth()).
+							Rigid(
+								wg.th.H1("Mining").Fn,
+							).
+							Flexed(0.5, p9.EmptyMaxWidth()).
+							Fn,
+					).
+					Fn(gtx)
+			},
 			},
 		}),
 		"explorer": wg.Page("explorer", p9.Widgets{
-			p9.WidgetSize{Widget: wg.th.VFlex().
-				AlignMiddle().
-				SpaceSides().
-				Rigid(
-					wg.th.Flex().
-						Flexed(0.5, p9.EmptyMaxWidth()).
-						Rigid(
-							wg.th.H1("explorer").Fn,
-						).
-						Flexed(0.5, p9.EmptyMaxWidth()).
-						Fn,
-				).
-				Fn,
+			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+				return wg.th.VFlex().
+					AlignMiddle().
+					SpaceSides().
+					Rigid(
+						wg.th.Flex().
+							Flexed(0.5, p9.EmptyMaxWidth()).
+							Rigid(
+								wg.th.H1("explorer").Fn,
+							).
+							Flexed(0.5, p9.EmptyMaxWidth()).
+							Fn,
+					).
+					Fn(gtx)
+			},
 			},
 		}),
 	})
@@ -176,17 +180,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 		wg.RunStatusPanel,
-		wg.th.Flex().
-			// Rigid(
-			// 	wg.StatusBarButton("console", 3, &p9icons.Terminal),
-			// ).
-			Rigid(
-				wg.StatusBarButton("log", 4, &icons.ActionList),
-			).
-			Rigid(
-				wg.StatusBarButton("settings", 5, &icons.ActionSettings),
-			).
-			Fn,
+		wg.StatusBarButton("log", 4, &icons.ActionList),
+		wg.StatusBarButton("settings", 5, &icons.ActionSettings),
 	})
 	a.AddOverlay(wg.toasts.DrawToasts())
 	a.AddOverlay(wg.dialog.DrawDialog())
