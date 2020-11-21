@@ -20,44 +20,52 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 		}, "bariol bold", 1, "DocText", "DocBg").List
 		return wg.th.Responsive(*wg.App.Size, p9.Widgets{
 			{
-				Widget: wg.th.VFlex().
+				Widget: wg.th.VFlex().AlignMiddle().
 					Rigid(
 						func(gtx l.Context) l.Dimensions {
 							_, bc := balanceColumn(gtx)
 							return wg.th.Inset(0.25,
-								// wg.th.Fill("DocBg",
-								wg.th.SliceToWidget(
-									append([]l.Widget{
-										wg.th.Fill("PanelBg",
+								wg.th.Fill("DocBg",
+									wg.th.SliceToWidget(
+										append([]l.Widget{
 											func(gtx l.Context) l.Dimensions {
-												// _, bc = balanceColumn(gtx)
-												return wg.th.Flex().
-													Rigid(
-														// wg.th.Inset(0.5,
-														wg.th.H6("Balances").
-															// Font("bariol bold").
-															Color("PanelText").
-															Fn,
-														// ).Fn,
-													).Fn(gtx)
+												// render the widgets onto a second context to get their dimensions
+												// gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
+												// dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
+												// gtx.Constraints.Max.X = dim.Size.X
+												// gtx.Constraints.Min.X = dim.Size.X
+												// gtx.Constraints.Max.Y = dim.Size.Y
+												// gtx.Constraints.Min.Y = dim.Size.Y
+												return wg.th.Fill("PanelBg",
+													wg.th.Flex().
+														Rigid(
+															// wg.th.Inset(0.5,
+															wg.th.H6("Balances").
+																// Font("bariol bold").
+																Color("PanelText").
+																Fn,
+															// ).Fn,
+														).
+														// Flexed(1, p9.EmptyMaxWidth()).
+														Fn,
+												).Fn(gtx)
 											},
-										).Fn,
-									},
-										bc...), l.Vertical),
-								// ).Fn,
+										},
+											bc...), l.Vertical),
+								).Fn,
 							).Fn(gtx)
 						},
 					).
-					Flexed(1,
+					Rigid(
 						wg.th.Inset(0.25,
 							wg.th.VFlex().Rigid(
 								wg.Fill("PanelBg",
 									wg.th.Flex().
 										Rigid(
 											// wg.Inset(0.5,
-											wg.H6("recent transactions").Color("PanelText").Fn,
+											wg.H6("recent transactions").Color("DocText").Fn,
+											// ).Fn,
 										).Fn,
-									// ).Fn,
 								).
 									Fn,
 							).Rigid(
@@ -112,7 +120,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 							).Fn(gtx)
 						},
 					).
-					Flexed(1,
+					Rigid(
 						wg.th.Inset(0.25,
 							wg.th.VFlex().Rigid(
 								wg.Fill("PanelBg",
@@ -284,7 +292,7 @@ func leftPadTo(length, limit int, txt string) string {
 
 func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
 	bal := leftPadTo(15, 15, fmt.Sprintf("%6.8f", balance))
-	return wg.th.Flex().AlignEnd().
+	return wg.th.Flex(). // AlignEnd().
 		Rigid(wg.th.Body1(" ").Fn).
 		Rigid(
 			wg.th.Caption(bal).

@@ -202,9 +202,9 @@ func If(value bool, t, f l.Widget) l.Widget {
 func (th *Theme) SliceToWidget(w []l.Widget, axis l.Axis) l.Widget {
 	var out *Flex
 	if axis == l.Horizontal {
-		out = th.Flex()
+		out = th.Flex().AlignStart()
 	} else {
-		out = th.VFlex()
+		out = th.VFlex().AlignStart()
 	}
 	for i := range w {
 		out.Rigid(w[i])
