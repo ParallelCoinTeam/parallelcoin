@@ -1,6 +1,7 @@
 package p9
 
 import (
+	"image"
 	"sort"
 
 	l "gioui.org/layout"
@@ -19,7 +20,7 @@ func (c *Cell) getWidgetDimensions(gtx l.Context, th *Theme) {
 	// gather the dimensions of the list elements
 	gtx.Ops.Reset()
 	child := op.Record(gtx.Ops)
-	c.dims = th.Flex().Rigid(c.Widget).Fn(gtx)
+	c.dims = c.Widget(gtx)
 	_ = child.Stop()
 	return
 }
@@ -61,11 +62,13 @@ type CellGrid []CellRow
 // scales the remaining space evenly after pruning off columns that cause the table to exceed the maximum width by
 // adding columns with the highest priority (lowest value) first.
 type Table struct {
-	th     *Theme
-	header CellRow
-	body   CellGrid
-	list   *List
-	Y, X   []int
+	th               *Theme
+	header           CellRow
+	body             CellGrid
+	list             *List
+	Y, X             []int
+	headerBackground string
+	cellBackground   string
 }
 
 func (th *Theme) Table() *Table {
@@ -73,6 +76,16 @@ func (th *Theme) Table() *Table {
 		th:   th,
 		list: th.List(),
 	}
+}
+
+func (t *Table) HeaderBackground(color string) *Table {
+	t.headerBackground = color
+	return t
+}
+
+func (t *Table) CellBackground(color string) *Table {
+	t.cellBackground = color
+	return t
 }
 
 func (t *Table) Header(h CellRow) *Table {
@@ -96,7 +109,8 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 			panic("not all rows are equal number of cells")
 		}
 	}
-	gtx1 := GetInfContext(gtx)
+	gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
+	gtx1.Constraints.Max = image.Point{X: Inf, Y: Inf}
 	// gather the dimensions from all cells
 	for i := range t.header {
 		t.header[i].getWidgetDimensions(gtx1, t.th)
@@ -126,58 +140,162 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 			}
 		}
 	}
-	Debugs(t.Y)
-	Debugs(t.X)
-	// find the columns that will be rendered into the existing width
+	// // Debugs(t.Y)
+	// Debugs(t.X)
+	var total int
+	for i := range t.X {
+		total += t.X[i]
+	}
+	// Debugs(t.X)
+	// Debug(total)
 	maxWidth := gtx.Constraints.Max.X
-	// Debugs(t.header)
-	priorities := t.header.GetPriority()
-	// Debugs(priorities)
-	var runningTotal, prev int
-	var columnsToRender []int
-	for i := range priorities {
-		prev = runningTotal
-		runningTotal += t.header[priorities[i].Column].dims.Size.X
-		if runningTotal > maxWidth {
-			break
-		}
-		columnsToRender = append(columnsToRender, priorities[i].Column)
+	for i := range t.X {
+		t.X[i] = int(float32(t.X[i]) * float32(maxWidth) / float32(total))
 	}
-	// sort the columns to render into their original order
-	sort.Ints(columnsToRender)
-	Debugs(columnsToRender)
-	// All fields will be expanded by the following ratio to reach the target width
-	expansionFactor := float32(maxWidth) / float32(prev)
-	outColWidths := make([]int, len(columnsToRender))
-	for i := range columnsToRender {
-		outColWidths[i] = int(float32(t.X[columnsToRender[i]]) * expansionFactor)
+	// Debugs(t.X)
+	// Debug(maxWidth)
+	// // find the columns that will be rendered into the existing width
+	// // Debugs(t.header)
+	// priorities := t.header.GetPriority()
+	// // Debugs(priorities)
+	// var runningTotal, prev int
+	// columnsToRender := make([]int, 0)
+	// for i := range priorities {
+	// 	prev = runningTotal
+	// 	x := t.header[priorities[i].Column].dims.Size.X
+	// 	// Debug(priorities[i], x)
+	// 	runningTotal += x
+	//
+	// 	if runningTotal > maxWidth {
+	// 		// Debug(runningTotal, prev, maxWidth)
+	// 		break
+	// 	}
+	// 	columnsToRender = append(columnsToRender, priorities[i].Column)
+	// }
+	// // sort the columns to render into their original order
+	// sort.Ints(columnsToRender)
+	// // Debugs(columnsToRender)
+	// // Debug(len(columnsToRender))
+	// // All fields will be expanded by the following ratio to reach the target width
+	// expansionFactor := float32(maxWidth) / float32(prev)
+	// outColWidths := make([]int, len(columnsToRender))
+	// for i := range columnsToRender {
+	// 	outColWidths[i] = int(float32(t.X[columnsToRender[i]]) * expansionFactor)
+	// }
+	// // Debug(outColWidths)
+	// // assemble the grid to be rendered as a two dimensional slice
+	// grid := make([][]l.Widget, len(t.body)+1)
+	// for i := 0; i < len(columnsToRender); i++ {
+	// 	grid[0] = append(grid[0], t.header[columnsToRender[i]].Widget)
+	// }
+	// // for i := 0; i < len(columnsToRender); i++ {
+	// // 	for j := range t.body[i] {
+	// // 		grid[i+1] = append(grid[i+1], t.body[i][j].Widget)
+	// // 	}
+	// // }
+	// // Debugs(grid)
+	// // assemble each row into a flex
+	// out := make([]l.Widget, len(grid))
+	// for i := range grid {
+	// 	outFlex := t.th.Flex()
+	// 	for jj, j := range grid[i] {
+	// 		x := j
+	// 		_ = jj
+	// 		// outFlex.Rigid(x)
+	// 		outFlex.Rigid(func(gtx l.Context) l.Dimensions {
+	// 			// lock the cell to the calculated width.
+	// 			gtx.Constraints.Max.X = outColWidths[jj]
+	// 			gtx.Constraints.Min.X = gtx.Constraints.Max.X
+	// 			return x(gtx)
+	// 		})
+	// 	}
+	// 	out[i] = outFlex.Fn
+	// }
+
+	h := t.th.Flex() // .SpaceEvenly()
+	for x, oi := range t.header {
+		i := x
+		// header is not in the list but drawn above it
+		oie := oi
+		txi := t.X[i]
+		tyi := t.Y[0]
+		h.Rigid(func(gtx l.Context) l.Dimensions {
+			cs := gtx.Constraints
+			cs.Max.X = txi
+			cs.Min.X = gtx.Constraints.Max.X
+			cs.Max.Y = tyi
+			cs.Min.Y = gtx.Constraints.Max.Y
+			// gtx.Constraints.Constrain(image.Point{X: txi, Y: tyi})
+			dims := t.th.Fill(t.headerBackground, EmptySpace(txi, tyi)).Fn(gtx)
+			oie.Widget(gtx)
+			return dims
+		})
 	}
-	// assemble the grid to be rendered as a two dimensional slice
-	grid := make([][]l.Widget, len(t.body)+1)
-	for i := range t.header {
-		grid[0] = append(grid[0], t.header[i].Widget)
-	}
-	for i := range t.body {
-		for j := range t.body[i] {
-			grid[i+1] = append(grid[i+1], t.body[i][j].Widget)
-		}
-	}
-	// assemble each row into a flex
-	out := make([]l.Widget, len(grid))
-	for i := range grid {
-		outFlex := t.th.Flex()
-		for j := range grid[i] {
-			outFlex.Rigid(func(gtx l.Context) l.Dimensions {
-				// lock the cell to the calculated width.
-				gtx.Constraints.Max.X = outColWidths[j]
-				gtx.Constraints.Min.X = gtx.Constraints.Max.X
-				return grid[i][j](gtx)
-			})
-		}
-		out[i] = outFlex.Fn
-	}
+
+	out := append(CellGrid{t.header}, t.body...)
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return out[index](gtx)
+		f := t.th.Flex() // .SpaceEvenly()
+		oi := out[index]
+		for x, oiee := range oi {
+			i := x
+			if index == 0 {
+				// header is not in the list but drawn above it
+				// oie := oiee
+				// // txi := t.X[i]
+				// // tyi := t.Y[index]
+				// h.Rigid(func(gtx l.Context) l.Dimensions {
+				// 	// gtx.Constraints.Constrain(image.Point{
+				// 	// 	X: t.X[i],
+				// 	// 	Y: t.Y[index],
+				// 	// })
+				// 	// gtx.Constraints.Max.X = txi
+				// 	// gtx.Constraints.Min.X = gtx.Constraints.Max.X
+				// 	// gtx.Constraints.Max.Y = tyi
+				// 	// gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
+				// 	// dims := EmptyMaxWidth()
+				// 	// col := t.headerBackground
+				// 	// if index < 1 {
+				// 	// 	col = t.cellBackground
+				// 	// }
+				// 	// t.th.Fill(col, dims).Fn(gtx)
+				// 	// Fill(gtx, t.th.Colors.Get(col))
+				// 	return oie.Widget(gtx)
+				// 	// return dims(gtx)
+				// })
+			} else {
+				oie := oiee
+				txi := t.X[i]
+				tyi := t.Y[index]
+				f.Rigid(func(gtx l.Context) l.Dimensions {
+					// gtx.Constraints.Constrain(image.Point{
+					// 	X: t.X[i],
+					// 	Y: t.Y[index],
+					// })
+					gtx.Constraints.Max.X = txi
+					// gtx.Constraints.Min.X = gtx.Constraints.Max.X
+					gtx.Constraints.Max.Y = tyi
+					// gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
+					dims := EmptySpace(txi, tyi)
+					t.th.Fill(t.cellBackground, dims).Fn(gtx)
+					oie.Widget(gtx)
+					return dims(gtx)
+				})
+			}
+		}
+		return f.Fn(gtx)
 	}
-	return t.list.Layout(gtx, len(out), le)
+	_ = le
+	return t.th.VFlex().
+		Rigid(func(gtx l.Context) l.Dimensions {
+			return t.th.Fill(t.headerBackground, h.Fn).Fn(gtx)
+		}).
+		Flexed(1,
+			func(gtx l.Context) l.Dimensions {
+				return t.list.Vertical().
+					Length(len(out)).
+					ListElement(le).
+					Fn(gtx)
+			},
+		).
+		Fn(gtx)
 }

@@ -2,12 +2,7 @@ package p9
 
 import l "gioui.org/layout"
 
-type TextTableHeaderItem struct {
-	Text     string
-	Priority int
-}
-
-type TextTableHeader []TextTableHeaderItem
+type TextTableHeader []string
 
 type TextTableRow []string
 
@@ -38,10 +33,10 @@ func (tt *TextTable) Fn(gtx l.Context) l.Dimensions {
 		tt.HeaderBackground = "PanelBg"
 	}
 	if tt.HeaderFont == "" {
-		tt.HeaderFont = "bariol regular"
+		tt.HeaderFont = "bariol bold"
 	}
 	if tt.HeaderFontScale == 0 {
-		tt.HeaderFontScale = Scales["Body1"]
+		tt.HeaderFontScale = Scales["Caption"]
 	}
 	if tt.CellColor == "" {
 		tt.CellColor = "DocText"
@@ -50,24 +45,24 @@ func (tt *TextTable) Fn(gtx l.Context) l.Dimensions {
 		tt.CellBackground = "DocBg"
 	}
 	if tt.CellFont == "" {
-		tt.CellFont = "bariol regular"
+		tt.CellFont = "go regular"
 	}
 	if tt.CellFontScale == 0 {
-		tt.CellFontScale = Scales["Body1"]
+		tt.CellFontScale = Scales["Caption"]
 	}
 	// we assume the caller has intended a zero inset if it is zero
 	var header CellRow
 	for i := range tt.Header {
 		header = append(header, Cell{
-			Widget: tt.Theme.Fill(tt.HeaderBackground,
-				tt.Theme.Inset(tt.Inset,
-					tt.Theme.Body1(tt.Header[i].Text).
-						Color(tt.HeaderColor).
-						TextScale(tt.HeaderFontScale).
-						Font(tt.HeaderFont).
-						Fn,
-				).Fn,
+			Widget: // tt.Theme.Fill(tt.HeaderBackground,
+			tt.Theme.Inset(tt.Inset,
+				tt.Theme.Body1(tt.Header[i]).
+					Color(tt.HeaderColor).
+					TextScale(tt.HeaderFontScale).
+					Font(tt.HeaderFont).MaxLines(1).
+					Fn,
 			).Fn,
+			// ).Fn,
 		})
 	}
 	var body CellGrid
@@ -75,24 +70,24 @@ func (tt *TextTable) Fn(gtx l.Context) l.Dimensions {
 		row := CellRow{}
 		for j := range tt.Body[i] {
 			row = append(row, Cell{
-				Widget: tt.Theme.Fill(tt.CellBackground,
-					tt.Theme.Inset(tt.Inset,
-						tt.Theme.Body1(tt.Body[i][j]).
-							Color(tt.CellColor).
-							TextScale(tt.CellFontScale).
-							Font(tt.CellFont).
-							Fn,
-					).Fn,
+				Widget: tt.Theme.Inset(0.25,
+					tt.Theme.Body1(tt.Body[i][j]).
+						Color(tt.CellColor).
+						TextScale(tt.CellFontScale).
+						Font(tt.CellFont).MaxLines(1).
+						Fn,
 				).Fn,
 			})
 		}
 		body = append(body, row)
 	}
 	table := Table{
-		th:     tt.Theme,
-		header: header,
-		body:   body,
-		list:   tt.List,
+		th:               tt.Theme,
+		header:           header,
+		body:             body,
+		list:             tt.List,
+		headerBackground: tt.HeaderBackground,
+		cellBackground:   tt.CellBackground,
 	}
 	return table.Fn(gtx)
 }
