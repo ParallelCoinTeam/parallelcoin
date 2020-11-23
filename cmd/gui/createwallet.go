@@ -2,7 +2,6 @@ package gui
 
 import (
 	"encoding/hex"
-	"math/rand"
 	"os"
 	"time"
 
@@ -16,7 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 	return wg.th.
 		Fill("PanelBg",
 			wg.th.Flex().SpaceAround().AlignMiddle().
@@ -161,7 +160,7 @@ func (wg *WalletGUI) WalletPage(gtx l.Context) l.Dimensions {
 													w.Manager.Close()
 													w.Stop()
 													// Debug("starting up shell first time")
-													rand.Seed(time.Now().Unix())
+													// rand.Seed(time.Now().Unix())
 													// nodeport := rand.Intn(60000) + 1024
 													// walletport := rand.Intn(60000) + 1024
 													// *wg.cx.Config.RPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", nodeport)}

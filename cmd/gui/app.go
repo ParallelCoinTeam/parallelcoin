@@ -180,8 +180,11 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 		wg.RunStatusPanel,
-		wg.StatusBarButton("log", 4, &icons.ActionList),
-		wg.StatusBarButton("settings", 5, &icons.ActionSettings),
+		wg.th.Flex().Rigid(
+			wg.StatusBarButton("log", 4, &icons.ActionList),
+		).Rigid(
+			wg.StatusBarButton("settings", 5, &icons.ActionSettings),
+		).Fn,
 	})
 	a.AddOverlay(wg.toasts.DrawToasts())
 	a.AddOverlay(wg.dialog.DrawDialog())

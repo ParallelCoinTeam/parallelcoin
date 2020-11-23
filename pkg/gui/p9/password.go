@@ -120,8 +120,8 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 }
 
 func (p *Password) Fn(gtx l.Context) l.Dimensions {
-	gtx.Constraints.Max.X = int(p.TextSize.Scale(float32(p.size)).V)
-	gtx.Constraints.Min.X = 0
+	// gtx.Constraints.Max.X = int(p.TextSize.Scale(float32(p.size)).V)
+	// gtx.Constraints.Min.X = 0
 	return func(gtx l.Context) l.Dimensions {
 		p.passInput.Color(p.borderColor)
 		p.unhideButton.Color(p.borderColor)

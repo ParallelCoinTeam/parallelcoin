@@ -230,7 +230,7 @@ func (wg *WalletGUI) Run() (err error) {
 			Run(
 				func(gtx l.Context) l.Dimensions {
 					return p9.If(*wg.noWallet,
-						wg.WalletPage,
+						wg.CreateWalletPage,
 						wg.App.Fn(),
 					)(gtx)
 				},

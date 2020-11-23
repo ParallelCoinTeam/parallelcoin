@@ -114,8 +114,8 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused strin
 }
 
 func (in *Input) Fn(gtx l.Context) l.Dimensions {
-	gtx.Constraints.Max.X = int(in.TextSize.Scale(float32(in.size)).V)
-	gtx.Constraints.Min.X = 0
+	// gtx.Constraints.Max.X = int(in.TextSize.Scale(float32(in.size)).V)
+	// gtx.Constraints.Min.X = 0
 	return in.Border().Color(in.borderColor).Embed(
 		in.Flex().
 			Flexed(1,
