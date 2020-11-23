@@ -73,7 +73,9 @@ func (wg *WalletGUI) Runner() (err error) {
 					Debug("restart called")
 					go func() {
 						wg.ShellRunCommandChan <- "stop"
+						wg.running = false
 						wg.ShellRunCommandChan <- "run"
+						wg.running = true
 					}()
 				}
 			case cmd := <-wg.MinerRunCommandChan:
@@ -113,7 +115,9 @@ func (wg *WalletGUI) Runner() (err error) {
 					Debug("restart called for miner")
 					go func() {
 						wg.MinerRunCommandChan <- "stop"
+						wg.mining = false
 						wg.MinerRunCommandChan <- "run"
+						wg.mining = true
 					}()
 				}
 			case <-wg.quit:

@@ -29,8 +29,9 @@ require (
 	github.com/onsi/ginkgo v1.12.1 // indirect
 	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
-	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
+	github.com/stalker-loki/alo v0.0.4
 	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/templexxx/reedsolomon v1.1.3
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
 	github.com/urfave/cli v1.22.4
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
@@ -40,7 +41,6 @@ require (
 	golang.org/x/exp v0.0.0-20200924195034-c827fd4f18b9
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
-	golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d // indirect
 	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/protobuf v1.23.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect

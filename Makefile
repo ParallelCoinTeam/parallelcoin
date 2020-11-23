@@ -23,7 +23,7 @@ nodegui:
 
 gui:
 	go install -v
-	pod -D test0 -n testnet -l debug --lan --solo
+	pod -D test0 -n testnet -l debug --lan
 
 guihttpprof:
 	go install -v

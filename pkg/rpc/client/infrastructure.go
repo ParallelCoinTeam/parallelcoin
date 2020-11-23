@@ -442,7 +442,7 @@ func (c *Client) reregisterNtfns() error {
 	}
 	// Reregister notifynewtransactions if needed.
 	if stateCopy.notifyNewTx || stateCopy.notifyNewTxVerbose {
-		Debugf("reregistering [notifynewtransactions] (verbose=%v) %s",
+		Debugf("reregistering [notifynewtransactions] (verbose=%v)",
 			stateCopy.notifyNewTxVerbose)
 		err := c.NotifyNewTransactions(stateCopy.notifyNewTxVerbose)
 		if err != nil {
