@@ -232,8 +232,11 @@ func (p *Partials) AddShard(newShard []byte) (err error) {
 // HasAllDataShards returns true if all data shards are present in a Partials
 func (p *Partials) HasAllDataShards() bool {
 	for i := range p.segments {
+		if i > p.segments[i].data {
+			break
+		}
 		s := p.segments[i]
-		if s.segment == nil || !s.hasAll {
+		if s.segment == nil {
 			return false
 		}
 	}
@@ -300,7 +303,7 @@ func (p *Partials) Decode() (final []byte, err error) {
 		// if all data shards were received we can just join them together and return the original data
 		for i := range p.segments {
 			for j := range p.segments[i].segment {
-				if j <= p.segments[i].data {
+				if j < p.segments[i].data {
 					parts = append(parts, p.segments[i].segment[j])
 				} else {
 					break
@@ -309,10 +312,15 @@ func (p *Partials) Decode() (final []byte, err error) {
 		}
 		var cursor int
 		for i := range parts {
-			copy(final[cursor:cursor+len(parts[i])], parts[i])
-			cursor += len(parts[i])
+			if cursor > p.length {
+				break
+			}
+			l := cursor + p.length
+			copy(final[cursor:], parts[i])
+			cursor = l
 		}
 		p.decoded = true
+		final = final[:p.length]
 		return
 	}
 	if !p.HasMinimum() {
@@ -323,27 +331,28 @@ func (p *Partials) Decode() (final []byte, err error) {
 	}
 	// if we don't have all data shards but have total shards equal to the original we can reconstruct the original
 	var needReconst, dpHas []int
+	var rs *reedsolomon.RS
 	for i := range p.segments {
-		if rs, err := reedsolomon.New(p.segments[i].data, p.segments[i].parity); !Check(err) {
+		if rs, err = reedsolomon.New(p.segments[i].data, p.segments[i].parity); !Check(err) {
 			for j := range p.segments[i].segment {
 				// if the segment is empty it wasn't received or deciphered but we only need reconstruction on the
 				// data shards, append to the list for the reconstruction
-				if p.segments[i].segment[j] == nil && j < p.segments[i].data {
+				if j < p.segments[i].data && p.segments[i].segment[j] == nil {
 					needReconst = append(needReconst, j)
 				} else {
 					dpHas = append(dpHas, j)
 				}
-				if err = rs.Reconst(p.segments[i].segment, dpHas, needReconst); Check(err) {
-					return
-				}
+			}
+			Info(dpHas, needReconst)
+			if err = rs.Reconst(p.segments[i].segment, dpHas, needReconst); Check(err) {
+				return
 			}
 		}
 	}
 	var parts [][]byte
-	// if all data shards were received we can just join them together and return the original data
 	for i := range p.segments {
 		for j := range p.segments[i].segment {
-			if j <= p.segments[i].data {
+			if j < p.segments[i].data {
 				parts = append(parts, p.segments[i].segment[j])
 			} else {
 				break
@@ -357,5 +366,6 @@ func (p *Partials) Decode() (final []byte, err error) {
 		cursor += lp
 	}
 	p.decoded = true
+	final = final[:p.length]
 	return
 }
