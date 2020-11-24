@@ -1,4 +1,4 @@
-package fec_test
+package alo_test
 
 import (
 	"crypto/rand"

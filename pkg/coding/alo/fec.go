@@ -1,6 +1,6 @@
-// Package fec implements a forward error correction scheme using Reed Solomon Erasure Coding.
-
-package fec
+// Package alo implements a forward error correction scheme using Reed Solomon Erasure Coding. It segments the data into
+// 1kb chunks in 16kb segments and contains a function for use in a network handler to process received packets
+package alo
 
 import (
 	"encoding/binary"
@@ -28,9 +28,7 @@ func getEmptyShards(size, count int) (out Segments) {
 
 // GetShards returns a bundle of segments to be sent or stored in a 1kb segment size with redundancy shards added to
 // each segment's shards that can reconstruct the original message by derivation via the available parity shards.
-func GetShards(
-	buf []byte, redundancy int,
-) (out ShardedSegments) {
+func GetShards(buf []byte, redundancy int, ) (out ShardedSegments) {
 	prefix := make([]byte, 4)
 	binary.LittleEndian.PutUint32(prefix, uint32(len(buf)))
 	// the following was eliminated to avoid a second copy of the buffer for 4 bytes
@@ -97,6 +95,7 @@ func GetShards(
 // }
 // Debug(st)
 
+// SegmentBytes breaks a chunk of data into requested sized limit chunks
 func SegmentBytes(buf []byte, lim int) (out [][]byte) {
 	p := Pieces(len(buf), lim)
 	chunks := make([][]byte, p)
@@ -110,6 +109,7 @@ func SegmentBytes(buf []byte, lim int) (out [][]byte) {
 	return chunks
 }
 
+// Pieces computes the number of pieces based on a given chunk size
 func Pieces(dLen, size int) (s int) {
 	sm := dLen % size
 	if sm > 0 {
@@ -118,19 +118,18 @@ func Pieces(dLen, size int) (s int) {
 	return dLen / size
 }
 
-// GetShardCodecParams reads the shard's prefix to provide the correct parameters for the RS codec the packet requires
+// GetParams reads the shard's prefix to provide the correct parameters for the RS codec the packet requires
 // based on the prefix on a shard (presumably to create the codec when a new packet/group of shards arrives)
-func GetShardCodecParams(data []byte) (
-	seg, segTot, num, tot, req, size int, err error,
+func GetParams(data []byte) (
+	p ShardPrefix, err error,
 ) {
 	if len(data) <= 3 {
 		err = errors.New("provided data is not long enough to be a shard")
 		return
 	}
-	seg, segTot, num, tot = int(data[0]), int(data[1]), int(data[2]), int(data[3])
-	length := binary.LittleEndian.Uint32(data[4:8])
-	size = int(length)
-	req = Pieces(size, ShardSize)
+	p.segment, p.totalSegments, p.shard, p.totalShards = int(data[0]), int(data[1]), int(data[2]), int(data[3])
+	p.length = int(binary.LittleEndian.Uint32(data[4:8]))
+	p.requiredShards = Pieces(p.length, ShardSize)
 	return
 }
 
@@ -142,6 +141,7 @@ type PartialSegment struct {
 	hasAll       bool
 }
 
+// GetShardCount returns the number of shards already acquired
 func (p PartialSegment) GetShardCount() (count int) {
 	for i := range p.segment {
 		if p.segment[i] == nil || len(p.segment[i]) > 0 {
@@ -153,63 +153,68 @@ func (p PartialSegment) GetShardCount() (count int) {
 
 // Partials is a structure for storing a new inbound packet
 type Partials struct {
-	nSegs, length int
-	segments      []PartialSegment
+	totalSegments, length int
+	segments              []PartialSegment
+}
+
+type ShardPrefix struct {
+	segment, totalSegments, shard, totalShards, requiredShards, length int
 }
 
 // NewPacket creates a new structure to store a collection of incoming shards when the first of a new packet arrives
 func NewPacket(firstShard []byte) (o *Partials, err error) {
 	o = &Partials{}
-	var segment, totalSegments, shard, totalShards, requiredShards, length int
-	segment, totalSegments, shard, totalShards, requiredShards, length, err = GetShardCodecParams(firstShard)
-	o.nSegs = totalSegments
-	o.length = length
-	o.segments = make([]PartialSegment, o.nSegs)
-	o.segments[segment] = PartialSegment{
-		data:    requiredShards,
-		parity:  totalShards - requiredShards,
-		segment: make(Segments, totalShards),
+	var p ShardPrefix
+	if p, err = GetParams(firstShard); Check(err) {
 	}
-	if o.segments[segment].segment == nil {
-		o.segments[segment].segment = make(Segments, totalShards)
+	o.totalSegments = p.totalSegments
+	o.length = p.length
+	o.segments = make([]PartialSegment, o.totalSegments)
+	o.segments[p.segment] = PartialSegment{
+		data:    p.requiredShards,
+		parity:  p.totalShards - p.requiredShards,
+		segment: make(Segments, p.totalShards),
 	}
-	o.segments[segment].segment[shard] = firstShard[8:]
+	if o.segments[p.segment].segment == nil {
+		o.segments[p.segment].segment = make(Segments, p.totalShards)
+	}
+	o.segments[p.segment].segment[p.shard] = firstShard[8:]
 	return
 }
 
 // AddShard adds a newly received shard to a Partials, ensuring that it has matching parameters (if the HMAC on the
 // packet's wrapper passes it should be unless someone is playing silly buggers)
 func (p *Partials) AddShard(newShard []byte) (err error) {
-	var segment, totalSegments, shard, totalShards, requiredShards, length int
-	if segment, totalSegments, shard, totalShards, requiredShards, length, err = GetShardCodecParams(newShard); Check(err) {
+	var params ShardPrefix
+	if params, err = GetParams(newShard); Check(err) {
 	}
-	if p.nSegs != totalSegments {
+	if p.totalSegments != params.totalSegments {
 		return errors.New("shard has incorrect segment count for bundle")
 	}
-	if p.length != length {
+	if p.length != params.length {
 		return errors.New("shard specifies different length from the bundle")
 	}
-	p.segments[segment].data = requiredShards
-	p.segments[segment].parity = totalShards - requiredShards
-	if p.segments[segment].segment == nil {
-		p.segments[segment].segment = make(Segments, totalShards)
+	p.segments[params.segment].data = params.requiredShards
+	p.segments[params.segment].parity = params.totalShards - params.requiredShards
+	if p.segments[params.segment].segment == nil {
+		p.segments[params.segment].segment = make(Segments, params.totalShards)
 	}
-	p.segments[segment].segment[shard] = newShard[8:]
+	p.segments[params.segment].segment[params.shard] = newShard[8:]
 	// as the pieces are likely to arrive more or less in order, check when the data shards are done and mark the
 	// segment as ready to decode
-	if !p.segments[segment].hasAll {
+	if !p.segments[params.segment].hasAll {
 		var count int
 		// if we count all of the data shards are present mark the segment as ready to decode
-		for i := range p.segments[segment].segment {
-			if p.segments[segment].segment[i] != nil || len(p.segments[segment].segment[i]) != 0 {
+		for i := range p.segments[params.segment].segment {
+			if p.segments[params.segment].segment[i] != nil || len(p.segments[params.segment].segment[i]) != 0 {
 				count++
 			} else {
 				// if we encounter empty shards, stop counting
 				break
 			}
 		}
-		if count >= p.segments[segment].data {
-			p.segments[segment].hasAll = true
+		if count >= p.segments[params.segment].data {
+			p.segments[params.segment].hasAll = true
 		}
 	}
 	return
@@ -278,6 +283,7 @@ func (p *Partials) GetRatio() (out float64) {
 	return
 }
 
+// Decode the received message if we have sufficient pieces
 func (p *Partials) Decode() (final []byte, err error) {
 	final = make([]byte, p.length)
 	if p.HasAllDataShards() {
@@ -306,5 +312,6 @@ func (p *Partials) Decode() (final []byte, err error) {
 		)
 	}
 	// if we don't have all data shards but have above minimum extra of parity shards we can reconstruct the original
+
 	return
 }
