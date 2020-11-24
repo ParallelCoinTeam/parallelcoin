@@ -286,6 +286,7 @@
       <w>readd</w>
       <w>reallocations</w>
       <w>reconsiderblock</w>
+      <w>reconst</w>
       <w>recoveraddresses</w>
       <w>recursing</w>
       <w>recvtx</w>

@@ -47,7 +47,7 @@ func GetShards(buf []byte, redundancy int, ) (out ShardedSegments) {
 		// add 4 bytes for the shard identifier prefix (segment/segments/shard/shards) and 4 bytes for the total data
 		// payload length which gives required also from a segment (last segments can differ in length), and 8 bytes
 		// means no alignment cost for the copy
-		out[i] = getEmptyShards(ShardSize, len(sharded[i])*(redundancy+100)/100)
+		out[i] = getEmptyShards(ShardSize, ShardsPerRedundancy(len(sharded[i]), redundancy))
 	}
 	for i := range sharded {
 		for j := range sharded[i] {
@@ -84,6 +84,10 @@ func GetShards(buf []byte, redundancy int, ) (out ShardedSegments) {
 	}
 	// fmt.Println()
 	return
+}
+
+func ShardsPerRedundancy(nShards, redundancy int) int {
+	return nShards * (redundancy + 100) / 100
 }
 
 // TODO: this might be a useful thing with a closure for debugging library
@@ -155,6 +159,11 @@ func (p PartialSegment) GetShardCount() (count int) {
 type Partials struct {
 	totalSegments, length int
 	segments              []PartialSegment
+	decoded               bool
+}
+
+func (p *Partials) IsDecoded() bool {
+	return p.decoded
 }
 
 type ShardPrefix struct {
@@ -303,6 +312,7 @@ func (p *Partials) Decode() (final []byte, err error) {
 			copy(final[cursor:cursor+len(parts[i])], parts[i])
 			cursor += len(parts[i])
 		}
+		p.decoded = true
 		return
 	}
 	if !p.HasMinimum() {
@@ -311,7 +321,41 @@ func (p *Partials) Decode() (final []byte, err error) {
 			-p.GetRatio(),
 		)
 	}
-	// if we don't have all data shards but have above minimum extra of parity shards we can reconstruct the original
-
+	// if we don't have all data shards but have total shards equal to the original we can reconstruct the original
+	var needReconst, dpHas []int
+	for i := range p.segments {
+		if rs, err := reedsolomon.New(p.segments[i].data, p.segments[i].parity); !Check(err) {
+			for j := range p.segments[i].segment {
+				// if the segment is empty it wasn't received or deciphered but we only need reconstruction on the
+				// data shards, append to the list for the reconstruction
+				if p.segments[i].segment[j] == nil && j < p.segments[i].data {
+					needReconst = append(needReconst, j)
+				} else {
+					dpHas = append(dpHas, j)
+				}
+				if err = rs.Reconst(p.segments[i].segment, dpHas, needReconst); Check(err) {
+					return
+				}
+			}
+		}
+	}
+	var parts [][]byte
+	// if all data shards were received we can just join them together and return the original data
+	for i := range p.segments {
+		for j := range p.segments[i].segment {
+			if j <= p.segments[i].data {
+				parts = append(parts, p.segments[i].segment[j])
+			} else {
+				break
+			}
+		}
+	}
+	var cursor int
+	for i := range parts {
+		lp := len(parts[i])
+		copy(final[cursor:cursor+lp], parts[i])
+		cursor += lp
+	}
+	p.decoded = true
 	return
 }
