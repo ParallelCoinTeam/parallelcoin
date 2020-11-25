@@ -56,6 +56,9 @@ func (srs Serializers) CreateContainer(magic []byte) (out *Container) {
 }
 
 func (c *Container) Count() uint16 {
+	if len(c.Data) < 8 {
+		return 0
+	}
 	size := binary.BigEndian.Uint32(c.Data[4:8])
 	// Debug("size", size)
 	if len(c.Data) >= int(size) {
