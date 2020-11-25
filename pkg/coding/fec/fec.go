@@ -4,6 +4,7 @@ package fec
 
 import (
 	"encoding/binary"
+	"errors"
 
 	"github.com/vivint/infectious"
 )
@@ -69,6 +70,11 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 
 func Decode(chunks [][]byte) (data []byte, err error) {
 	var shares []infectious.Share
+	if len(chunks) < 1 {
+		Debug("nil chunks")
+		return nil, errors.New("asked to decode nothing")
+	}
+	totalLen := 0
 	for i := range chunks {
 		// bodyLen := len(chunks[i])
 		// log.SPEW(chunks[i])
@@ -78,8 +84,18 @@ func Decode(chunks [][]byte) (data []byte, err error) {
 			Data:   body[1:],
 		}
 		shares = append(shares, share)
+		totalLen += len(share.Data)
 	}
-	data, err = rsFEC.Decode(nil, shares)
+	if shares == nil {
+		panic("shares are nil")
+	}
+	data = make([]byte, totalLen)
+	dataLen := len(shares[0].Data)
+	if err = rsFEC.Rebuild(shares, func(s infectious.Share) {
+		copy(data[s.Number*dataLen:], s.Data)
+	}); Check(err) {
+	}
+	// data, err = rsFEC.Decode(nil, shares)
 	if len(data) > 4 {
 		prefix := data[:4]
 		data = data[4:]
