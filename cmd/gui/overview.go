@@ -167,6 +167,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 			break
 		}
 		txs := wg.State.allTxs[i]
+		times := wg.State.allTimeStrings
 		// spacer
 		if !first {
 			out = append(out,
@@ -260,7 +261,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								).
 								Rigid(
 									wg.th.Caption(
-										wg.State.allTimeStrings[i],
+										times[i],
 									).Color("DocText").Fn,
 								).
 								Fn,
