@@ -6,6 +6,7 @@
       <w>acctnameidx</w>
       <w>addmultisigaddress</w>
       <w>addnode</w>
+      <w>addpeer</w>
       <w>addracctidx</w>
       <w>addrindex</w>
       <w>addrlocal</w>
@@ -62,6 +63,7 @@
       <w>coinbaseaux</w>
       <w>cointype</w>
       <w>confs</w>
+      <w>connectpeer</w>
       <w>connmgr</w>
       <w>conntime</w>
       <w>cpriv</w>
@@ -292,7 +294,9 @@
       <w>recvtx</w>
       <w>redeemingtx</w>
       <w>registertestcmd</w>
+      <w>rejectnonstd</w>
       <w>relayfee</w>
+      <w>relaynonstd</w>
       <w>relaytxes</w>
       <w>relevanttxaccepted</w>
       <w>relevantxaccepted</w>

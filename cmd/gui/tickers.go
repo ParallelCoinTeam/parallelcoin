@@ -214,7 +214,8 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 
 func (wg *WalletGUI) chainClient() (err error) {
 	certs := walletmain.ReadCAFile(wg.cx.Config)
-	wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
+	Debug(*wg.cx.Config.RPCConnect)
+	if wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
 		Host:                 *wg.cx.Config.RPCConnect,
 		Endpoint:             "ws",
 		User:                 *wg.cx.Config.Username,
@@ -223,8 +224,11 @@ func (wg *WalletGUI) chainClient() (err error) {
 		Certificates:         certs,
 		DisableAutoReconnect: false,
 		DisableConnectOnNew:  false,
-	}, wg.ChainNotifications())
+	}, wg.ChainNotifications()); Check(err) {
+		return
+	}
 	if err = wg.ChainClient.NotifyBlocks(); Check(err) {
+		return
 	}
 	wg.invalidate <- struct{}{}
 	return
@@ -234,7 +238,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 	walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Info("config.tls", *wg.cx.Config.TLS)
-	wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
+	if wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
 		Host:                 walletRPC,
 		Endpoint:             "ws",
 		User:                 *wg.cx.Config.Username,
@@ -243,7 +247,9 @@ func (wg *WalletGUI) walletClient() (err error) {
 		Certificates:         certs,
 		DisableAutoReconnect: false,
 		DisableConnectOnNew:  false,
-	}, wg.WalletNotifications())
+	}, wg.WalletNotifications()); Check(err) {
+		return
+	}
 	if err = wg.WalletClient.NotifyNewTransactions(true); !Check(err) {
 		defer wg.WalletNotifications()
 	}

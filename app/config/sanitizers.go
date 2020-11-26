@@ -148,8 +148,8 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if len(*cfg.RPCListeners) < 1 {
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.RPCListeners = cli.StringSlice{fmt.Sprintf(routeableAddress+"%d", fP)}
-		*cfg.RPCConnect = fmt.Sprintf(routeableAddress+":%d", fP)
+		*cfg.RPCListeners = cli.StringSlice{fmt.Sprintf("%s:%d", routeableAddress, fP)}
+		*cfg.RPCConnect = fmt.Sprintf("%s:%d", routeableAddress, fP)
 		Trace("setting save flag because rpc listeners is empty and rpc is" +
 			" not disabled")
 		cx.StateCfg.Save = true
@@ -176,13 +176,13 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if *cx.Config.AutoPorts || !initial {
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}
+		*cfg.Listeners = cli.StringSlice{routeableAddress + ":" + fmt.Sprint(fP)}
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.RPCListeners = cli.StringSlice{":" + fmt.Sprint(fP)}
+		*cfg.RPCListeners = cli.StringSlice{routeableAddress + ":" + fmt.Sprint(fP)}
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.WalletRPCListeners = cli.StringSlice{":" + fmt.Sprint(fP)}
+		*cfg.WalletRPCListeners = cli.StringSlice{routeableAddress + ":" + fmt.Sprint(fP)}
 		cx.StateCfg.Save = true
 	} else {
 		// sanitize user input and set auto on any that fail
@@ -194,7 +194,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
-					(*l)[i] = ":" + fmt.Sprint(fP)
+					(*l)[i] = routeableAddress + ":" + fmt.Sprint(fP)
 				}
 			}
 		}
@@ -203,24 +203,24 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
-					(*r)[i] = ":" + fmt.Sprint(fP)
+					(*r)[i] = routeableAddress + ":" + fmt.Sprint(fP)
 				}
 			}
 		}
+		// if *cfg.RPCConnect == "" {
+		// 	*cfg.RPCConnect = routeableAddress + ":" + fmt.Sprint(fP)
+		// 	Debug("setting save flag because rpcconnect was not configured")
+		// 	cx.StateCfg.Save = true
+		// }
 		for i := range *w {
 			if _, p, e := net.SplitHostPort((*w)[i]); !Check(e) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
-					(*w)[i] = ":" + fmt.Sprint(fP)
+					(*w)[i] = routeableAddress + ":" + fmt.Sprint(fP)
 				}
 			}
 		}
-		cx.StateCfg.Save = true
-	}
-	if *cfg.RPCConnect == "" {
-		*cfg.RPCConnect = routeableAddress+":" + cx.ActiveNet.RPCClientPort
-		Debug("setting save flag because rpcconnect was not configured")
 		cx.StateCfg.Save = true
 	}
 	// all of these can be autodiscovered/set but to do that and know what they are we have to reserve them
@@ -256,14 +256,14 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		}
 		Trace("removed", peersFile)
 	}
-	*cfg.RPCConnect = (*cfg.RPCListeners)[0]
-	h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
-	if h == "" {
-		*cfg.RPCConnect = net.JoinHostPort(routeableAddress, p)
-	}
+	// *cfg.RPCConnect = (*cfg.RPCListeners)[0]
+	// h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
+	// if h == "" {
+	// 	*cfg.RPCConnect = net.JoinHostPort(routeableAddress, p)
+	// }
 	if len(*cfg.WalletRPCListeners) > 0 {
 		splitted := strings.Split((*cfg.WalletRPCListeners)[0], ":")
-		*cfg.WalletServer = routeableAddress+":" + splitted[1]
+		*cfg.WalletServer = routeableAddress + ":" + splitted[1]
 	}
 	save.Pod(cfg)
 }
@@ -471,19 +471,21 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 					str := err.Error() + " %s: The whitelist value of '%s' is invalid"
 					err = fmt.Errorf(str, funcName, addr)
 					Error(err)
-					fmt.Fprintln(os.Stderr, err)
+					_, _ = fmt.Fprintln(os.Stderr, err)
+					interrupt.Request()
 					// os.Exit(1)
-				}
-				var bits int
-				if ip.To4() == nil {
-					// IPv6
-					bits = 128
 				} else {
-					bits = 32
-				}
-				ipnet = &net.IPNet{
-					IP:   ip,
-					Mask: net.CIDRMask(bits, bits),
+					var bits int
+					if ip.To4() == nil {
+						// IPv6
+						bits = 128
+					} else {
+						bits = 32
+					}
+					ipnet = &net.IPNet{
+						IP:   ip,
+						Mask: net.CIDRMask(bits, bits),
+					}
 				}
 			}
 			st.ActiveWhitelists = append(st.ActiveWhitelists, ipnet)
@@ -497,7 +499,7 @@ func validatePeerLists(cfg *pod.Config) {
 		err := fmt.Errorf(
 			"%s: the --addpeer and --connect options can not be mixed",
 			funcName)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 }
@@ -524,7 +526,7 @@ func validateUsers(cfg *pod.Config) {
 		*cfg.Username == *cfg.LimitUser {
 		str := "%s: --username and --limituser must not specify the same username"
 		err := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 	// Check to make sure limited and admin users don't have the same password
@@ -533,7 +535,7 @@ func validateUsers(cfg *pod.Config) {
 		*cfg.Password == *cfg.LimitPass {
 		str := "%s: --password and --limitpass must not specify the same password"
 		err := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 }
@@ -568,7 +570,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be" +
 			" less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.RPCMaxConcurrentReqs)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 	Trace("checking rpc listener addresses")
@@ -596,7 +598,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		Error(err)
 		str := "%s: invalid minrelaytxfee: %v"
 		err := fmt.Errorf(str, funcName, err)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 	// Limit the max block size to a sane value.
@@ -606,7 +608,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: The blockmaxsize option must be in between %d and %d -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, node.BlockMaxSizeMin,
 			node.BlockMaxSizeMax, *cfg.BlockMaxSize)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 	// Limit the max block weight to a sane value.
@@ -616,7 +618,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: The blockmaxweight option must be in between %d and %d -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, node.BlockMaxWeightMin,
 			node.BlockMaxWeightMax, *cfg.BlockMaxWeight)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 	// Limit the max orphan count to a sane vlue.
@@ -624,7 +626,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	if *cfg.MaxOrphanTxs < 0 {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 	// Limit the block priority and minimum block sizes to max block size.
@@ -657,7 +659,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 			err := fmt.Errorf("%s: The following characters must not "+
 				"appear in user agent comments: '/', ':', '(', ')'",
 				funcName)
-			fmt.Fprintln(os.Stderr, err)
+			_, _ = fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
 		}
 	}
@@ -669,7 +671,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		Error(err)
 		str := "%s: Error parsing checkpoints: %v"
 		err := fmt.Errorf(str, funcName, err)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 }
@@ -687,7 +689,7 @@ func validateOnions(cfg *pod.Config) {
 		*cfg.OnionProxy == "" {
 		str := "%s: Tor stream isolation requires either proxy or onionproxy to be set"
 		err := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
 	if !*cfg.Onion {
@@ -707,14 +709,14 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 			Error(err)
 			str := "%s: mining address '%s' failed to decode: %v"
 			err := fmt.Errorf(str, funcName, strAddr, err)
-			fmt.Fprintln(os.Stderr, err)
+			_, _ = fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
 			continue
 		}
 		if !addr.IsForNet(params) {
 			str := "%s: mining address '%s' is on the wrong network"
 			err := fmt.Errorf(str, funcName, strAddr)
-			fmt.Fprintln(os.Stderr, err)
+			_, _ = fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
 			continue
 		}
@@ -748,7 +750,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			Error(err)
 			str := "%s: Proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.Proxy, err)
-			fmt.Fprintln(os.Stderr, err)
+			_, _ = fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
 		}
 		// Tor isolation flag means proxy credentials will be overridden unless there is also an onion proxy configured
@@ -789,7 +791,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			Error(err)
 			str := "%s: Onion proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.OnionProxy, err)
-			fmt.Fprintln(os.Stderr, err)
+			_, _ = fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
 		}
 		// Tor isolation flag means onion proxy credentials will be overridden.

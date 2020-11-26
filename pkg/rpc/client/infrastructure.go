@@ -15,6 +15,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"runtime/debug"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -1029,6 +1030,7 @@ func dial(config *ConnConfig) (*websocket.Conn, error) {
 	wsConn, resp, err := dialer.Dial(address, requestHeader)
 	if err != nil {
 		Error(err)
+		debug.PrintStack()
 		if err != websocket.ErrBadHandshake || resp == nil {
 			return nil, err
 		}
