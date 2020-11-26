@@ -14,6 +14,8 @@ import (
 	"net"
 
 	"golang.org/x/net/ipv4"
+
+	"github.com/p9c/pod/pkg/util/routeable"
 )
 
 func Conn(port int) (conn *net.UDPConn, err error) {
@@ -23,22 +25,23 @@ func Conn(port int) (conn *net.UDPConn, err error) {
 	}
 
 	pc := ipv4.NewPacketConn(conn)
-	var ifaces []net.Interface
-	var iface net.Interface
-	if ifaces, err = net.Interfaces(); Check(err) {
-	}
-	// This grabs the first physical interface with multicast that is up. Note that this should filter out
-	// VPN connections which would normally be selected first but don't actually have a multicast connection
-	// to the local area network.
-	for i := range ifaces {
-		if ifaces[i].Flags&net.FlagMulticast != 0 &&
-			ifaces[i].Flags&net.FlagUp != 0 &&
-			ifaces[i].HardwareAddr != nil {
-			iface = ifaces[i]
-			break
-		}
-	}
-	if err = pc.JoinGroup(&iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); Check(err) {
+	// var ifaces []net.Interface
+	var iface *net.Interface
+	// if ifaces, err = net.Interfaces(); Check(err) {
+	// }
+	// // This grabs the first physical interface with multicast that is up. Note that this should filter out
+	// // VPN connections which would normally be selected first but don't actually have a multicast connection
+	// // to the local area network.
+	// for i := range ifaces {
+	// 	if ifaces[i].Flags&net.FlagMulticast != 0 &&
+	// 		ifaces[i].Flags&net.FlagUp != 0 &&
+	// 		ifaces[i].HardwareAddr != nil {
+	// 		iface = ifaces[i]
+	// 		break
+	// 	}
+	// }
+	iface = routeable.GetInterface()[0]
+	if err = pc.JoinGroup(iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); Check(err) {
 		return
 	}
 	// test

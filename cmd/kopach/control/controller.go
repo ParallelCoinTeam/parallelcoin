@@ -278,11 +278,15 @@ var handlersMulticast = transport.Handlers{
 			// Debug("not active")
 			return
 		}
+		Debug(src, dst)
 		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
+		Debug(otherIPs)
 		// Trace("otherIPs", otherIPs)
 		otherPort := fmt.Sprint(j.GetP2PListenersPort())
+		Debug(otherPort)
 		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
+		Debug(myPort)
 		// Trace("myPort", myPort,*c.cx.Config.Listeners)
 		for i := range otherIPs {
 			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)

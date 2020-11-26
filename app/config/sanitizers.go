@@ -22,6 +22,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/normalize"
+	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/p9c/pod/pkg/wallet"
 
 	"github.com/btcsuite/go-socks/socks"
@@ -130,19 +131,23 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	var e error
 	if fP, e = GetFreePort(); Check(e) {
 	}
-	*cfg.Controller = net.JoinHostPort("0.0.0.0", fmt.Sprint(fP))
+	var routeableAddresses []net.Addr
+	routeableAddresses, e = routeable.GetInterface()[0].Addrs()
+	routeableAddress := routeableAddresses[0].String()
+	// Debug("********************", routeableAddress)
+	*cfg.Controller = net.JoinHostPort(routeableAddress, fmt.Sprint(fP))
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
 		len(*cfg.ConnectPeers) < 1 {
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		cfg.Listeners = &cli.StringSlice{fmt.Sprintf("0.0.0.0:%d", fP)}
+		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(routeableAddress+":%d", fP)}
 		cx.StateCfg.Save = true
 	}
 	if len(*cfg.RPCListeners) < 1 {
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.RPCListeners = cli.StringSlice{fmt.Sprintf("127.0.0.1:%d", fP)}
-		*cfg.RPCConnect = fmt.Sprintf("127.0.0.1:%d", fP)
+		*cfg.RPCListeners = cli.StringSlice{fmt.Sprintf(routeableAddress+"%d", fP)}
+		*cfg.RPCConnect = fmt.Sprintf(routeableAddress+":%d", fP)
 		Trace("setting save flag because rpc listeners is empty and rpc is" +
 			" not disabled")
 		cx.StateCfg.Save = true
@@ -150,8 +155,8 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.WalletRPCListeners = cli.StringSlice{fmt.Sprintf("127.0.0.1:%d", fP)}
-		*cfg.WalletServer = fmt.Sprintf("127.0.0.1:%d", fP)
+		*cfg.WalletRPCListeners = cli.StringSlice{fmt.Sprintf(routeableAddress+":%d", fP)}
+		*cfg.WalletServer = fmt.Sprintf(routeableAddress+":%d", fP)
 		Trace("setting save flag because wallet rpc listeners is empty and" +
 			" rpc is not disabled")
 		cx.StateCfg.Save = true
@@ -212,7 +217,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		cx.StateCfg.Save = true
 	}
 	if *cfg.RPCConnect == "" {
-		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
+		*cfg.RPCConnect = routeableAddress+":" + cx.ActiveNet.RPCClientPort
 		Debug("setting save flag because rpcconnect was not configured")
 		cx.StateCfg.Save = true
 	}
@@ -243,9 +248,10 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	//
 	// if lan mode is set, remove the peers.json so no unwanted nodes are connected to
 	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
-		peersFile := filepath.Join(filepath.Join(
-			*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
-		os.Remove(peersFile)
+		peersFile := filepath.Join(filepath.Join(*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
+		var err error
+		if err = os.Remove(peersFile); Check(err) {
+		}
 		Trace("removed", peersFile)
 	}
 	*cfg.RPCConnect = (*cfg.RPCListeners)[0]
