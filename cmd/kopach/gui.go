@@ -79,14 +79,14 @@ func (w *Worker) Run() {
 			minerModel.FlipTheme()
 			Info("clicked logo button")
 		})
-	win := f.NewWindow()
+	win := f.NewWindow(th)
 	interrupt.AddHandler(func() {
 		// close(w.quit)
 		// os.Exit(0)
 	})
 	go func() {
 		if err := win.
-			Size(640, 480).
+			Size(64, 32).
 			Title("kopach").
 			Open().
 			Run(

@@ -220,10 +220,10 @@ func (wg *WalletGUI) txPage(i int) func() {
 	}
 
 	return func() {
-		wg.w[wg.State.txs[i].data.TxID] = f.NewWindow()
+		wg.w[wg.State.txs[i].data.TxID] = f.NewWindow(wg.th)
 		go func() {
 			if err := wg.w[wg.State.txs[i].data.TxID].
-				Size(600, 800).
+				Size(64, 32).
 				Title("Tx: "+wg.State.txs[i].data.TxID).
 				Open().
 				Run(

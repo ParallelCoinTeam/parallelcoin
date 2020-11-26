@@ -93,12 +93,12 @@ func (ex *Explorer) Run() (err error) {
 	}
 	ex.RunCommandChan <- "run"
 	ex.quitClickable = ex.th.Clickable()
-	ex.w = f.NewWindow()
+	ex.w = f.NewWindow(ex.th)
 
 	ex.App = ex.GetAppWidget()
 	go func() {
 		if err := ex.w.
-			Size(800, 480).
+			Size(64, 32).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(

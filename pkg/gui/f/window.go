@@ -9,6 +9,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 type scaledConfig struct {
@@ -29,19 +30,21 @@ func (s *scaledConfig) Px(v unit.Value) int {
 
 type Window struct {
 	Ctx    layout.Context
+	Theme  *p9.Theme
 	Window *app.Window
 	opts   []app.Option
 	scale  *scaledConfig
-	Width   *int // stores the width at the beginning of render
+	Width  *int // stores the width at the beginning of render
 }
 
 // NewWindow creates a new window
-func NewWindow() (out *Window) {
+func NewWindow(th *p9.Theme) (out *Window) {
 	var ops op.Ops
 	var e system.FrameEvent
 	var width int
 	out = &Window{
 		Ctx:   layout.NewContext(&ops, e),
+		Theme: th,
 		scale: &scaledConfig{1},
 		Width: &width,
 	}
@@ -56,9 +59,9 @@ func (w *Window) Title(title string) (out *Window) {
 }
 
 // Size sets the dimensions of the window
-func (w *Window) Size(width, height int) (out *Window) {
+func (w *Window) Size(width, height float32) (out *Window) {
 	w.opts = append(w.opts,
-		app.Size(unit.Sp(float32(width)), unit.Sp(float32(height))))
+		app.Size(w.Theme.TextSize.Scale(width), w.Theme.TextSize.Scale(height)))
 	return w
 }
 

@@ -91,11 +91,11 @@ func (ng *NodeGUI) Run() (err error) {
 	ng.inputs = make(map[string]*p9.Input)
 	ng.multis = make(map[string]*p9.Multi)
 	ng.passwords = make(map[string]*p9.Password)
-	ng.w = f.NewWindow()
+	ng.w = f.NewWindow(ng.th)
 	ng.app = ng.GetAppWidget()
 	go func() {
 		if err := ng.w.
-			Size(640, 480).
+			Size(64, 32).
 			Title("parallelcoin node control panel").
 			Open().
 			Run(

@@ -29,8 +29,8 @@ func main() {
 	}
 	ic.listWidgets = ic.icons()
 	go func() {
-		if err := f.NewWindow().
-			Size(800, 600).
+		if err := f.NewWindow(th).
+			Size(64, 32).
 			Title("example").
 			Open().
 			Run(

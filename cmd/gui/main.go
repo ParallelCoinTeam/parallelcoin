@@ -160,8 +160,8 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.w = make(map[string]*f.Window)
 	wg.quitClickable = wg.th.Clickable()
 	wg.w = map[string]*f.Window{
-		"splash": f.NewWindow(),
-		"main":   f.NewWindow(),
+		"splash": f.NewWindow(wg.th),
+		"main":   f.NewWindow(wg.th),
 	}
 	wg.incdecs = map[string]*p9.IncDec{
 		"generatethreads": wg.th.IncDec().
@@ -224,7 +224,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.Size = wg.w["main"].Width
 	go func() {
 		if err := wg.w["main"].
-			Size(800, 480).
+			Size(64, 32).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(

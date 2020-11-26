@@ -6,7 +6,7 @@ import (
 )
 
 // GetInterface returns the address and interface of multicast capable interfaces
-func GetInterface() (lanInterface []*net.Interface) {
+func GetInterface() (interfaces []net.Interface, addresses []string) {
 	var err error
 	var nif []net.Interface
 	nif, err = net.Interfaces()
@@ -35,16 +35,20 @@ func GetInterface() (lanInterface []*net.Interface) {
 			continue
 		}
 		// todo: below here add discovered useful non-physical network interface tests like the one above
-		addresses, _ := nif[i].Addrs()
-		for i := range addresses {
+		addrs, _ := nif[i].Addrs()
+		for j := range addrs {
 			// Debug(addresses[i].String())
-			if !strings.ContainsAny(addresses[i].String(), ":") {
-				routeableAddress = strings.Split(addresses[i].String(), "/")[0]
+			if !strings.ContainsAny(addrs[j].String(), ":") {
+				routeableAddress = strings.Split(addrs[j].String(), "/")[0]
 				if routeableAddress != "" {
-					lanInterface = []*net.Interface{&nif[i]}
-					break
+					addresses = append(addresses, routeableAddress)
+
 				}
+				break
 			}
+		}
+		if len(addresses) > 0 {
+			interfaces = append(interfaces, nif[i])
 		}
 	}
 	if routeableAddress == "" {

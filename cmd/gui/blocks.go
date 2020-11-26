@@ -66,10 +66,10 @@ func (wg *WalletGUI) blockPage(blockHeight int) func() {
 	}
 
 	return func() {
-		wg.w[b.data.Hash] = f.NewWindow()
+		wg.w[b.data.Hash] = f.NewWindow(wg.th)
 		go func() {
 			if err := wg.w[b.data.Hash].
-				Size(600, 800).
+				Size(64, 32).
 				Open().
 				Run(
 					wg.th.VFlex().

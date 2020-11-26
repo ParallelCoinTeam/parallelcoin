@@ -131,9 +131,11 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	var e error
 	if fP, e = GetFreePort(); Check(e) {
 	}
-	var routeableAddresses []net.Addr
-	routeableAddresses, e = routeable.GetInterface()[0].Addrs()
-	routeableAddress := routeableAddresses[0].String()
+	// var routeableAddresses []net.Addr
+	_, addresses := routeable.GetInterface()
+	// routeableAddresses, e = routeableInterface[0].Addrs()
+	// Debug(routeableAddresses)
+	routeableAddress := addresses[0]
 	// Debug("********************", routeableAddress)
 	*cfg.Controller = net.JoinHostPort(routeableAddress, fmt.Sprint(fP))
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
@@ -257,11 +259,11 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	*cfg.RPCConnect = (*cfg.RPCListeners)[0]
 	h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
 	if h == "" {
-		*cfg.RPCConnect = net.JoinHostPort("127.0.0.1", p)
+		*cfg.RPCConnect = net.JoinHostPort(routeableAddress, p)
 	}
 	if len(*cfg.WalletRPCListeners) > 0 {
 		splitted := strings.Split((*cfg.WalletRPCListeners)[0], ":")
-		*cfg.WalletServer = "localhost:" + splitted[1]
+		*cfg.WalletServer = routeableAddress+":" + splitted[1]
 	}
 	save.Pod(cfg)
 }

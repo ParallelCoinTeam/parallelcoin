@@ -1,20 +1,25 @@
 package main
 
 import (
-	"gioui.org/app"
 	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
+	"github.com/p9c/pod/pkg/gui/p9"
 
 	"github.com/p9c/pod/pkg/gui/f"
 )
 
 func main() {
-	if err := f.NewWindow().Title("Parallelcoin").Size(640, 480).
+	quit := make(chan struct{})
+	if err := f.NewWindow(p9.NewTheme(p9fonts.Collection(), quit)).Title("Parallelcoin").Size(10, 20).
 		Run(func(layout.Context) layout.Dimensions {
 			Info("frame")
 			return layout.Dimensions{}
+		}, func(layout.Context) {
+			Info("overlay")
 		}, func() {
 			Info("destroy")
-		}); Check(err) {
+		}, quit); Check(err) {
 	}
-	app.Main()
+	<-quit
+	// app.Main()
 }

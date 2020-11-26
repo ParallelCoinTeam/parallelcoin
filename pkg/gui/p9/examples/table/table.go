@@ -22,8 +22,8 @@ func main() {
 		th: th,
 	}
 	go func() {
-		if err := f.NewWindow().
-			Size(800, 600).
+		if err := f.NewWindow(th).
+			Size(64, 32).
 			Title("table example").
 			Open().
 			Run(model.mainWidget, func(l.Context) {}, func() {

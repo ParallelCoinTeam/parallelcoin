@@ -68,7 +68,7 @@ func (ips *IPs) Get() (out []*net.IP) {
 
 func GetListenable() simplebuffer.Serializer {
 	// first add the interface addresses
-	rI := routeable.GetInterface()
+	rI, _ := routeable.GetInterface()
 	var lA []net.Addr
 	for i := range rI {
 		l, err := rI[i].Addrs()
