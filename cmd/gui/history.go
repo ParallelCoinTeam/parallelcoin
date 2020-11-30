@@ -128,7 +128,7 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
 				godate.Create(time.Unix(oi.Time, 0)))),
 			fmt.Sprintf("%v", oi.Confirmations),
-			fmt.Sprintf("%v", *wg.State.allTxs[i].BlockIndex),
+			fmt.Sprintf("%v", *oi.BlockIndex),
 			// wg.State.allTxs[i].TxID,
 			// wg.State.allTxs[i].Comment,
 			// fmt.Sprintf("%v", wg.State.allTxs[i].Fee),
