@@ -93,6 +93,7 @@
       <w>descs</w>
       <w>deserialisation</w>
       <w>divhash</w>
+      <w>drophistory</w>
       <w>dropwallethistory</w>
       <w>dumpprivkey</w>
       <w>dumpwallet</w>
@@ -113,6 +114,7 @@
       <w>filteredblockdisconnected</w>
       <w>genalgo</w>
       <w>genapi</w>
+      <w>generatethreads</w>
       <w>genproclimit</w>
       <w>getaccount</w>
       <w>getaccountaddress</w>
@@ -173,10 +175,12 @@
       <w>hashrate</w>
       <w>hashrates</w>
       <w>hdkeychain</w>
+      <w>ihaveread</w>
       <w>importaddress</w>
       <w>importprivkey</w>
       <w>importpubkey</w>
       <w>importwallet</w>
+      <w>incdecs</w>
       <w>incrementalfee</w>
       <w>indirected</w>
       <w>indirecting</w>
@@ -269,6 +273,7 @@
       <w>paytxfee</w>
       <w>pingtime</w>
       <w>pingwait</w>
+      <w>pipelog</w>
       <w>pkgs</w>
       <w>podconnected</w>
       <w>podjsonrpcapi</w>

@@ -3,9 +3,10 @@ package explorer
 import (
 	"strconv"
 
+	"golang.org/x/exp/shiny/materialdesign/icons"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
-	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
@@ -19,11 +20,11 @@ func (ex *Explorer) GetAppWidget() (a *p9.App) {
 	ex.App.ThemeHook(func() {
 		Debug("theme hook")
 		Debug(ex.bools)
-		*ex.cx.Config.DarkTheme = *ex.Dark
+		*ex.cx.Config.DarkTheme = *ex.th.Dark
 		a := ex.configs["config"]["DarkTheme"].Slot.(*bool)
-		*a = *ex.Dark
+		*a = *ex.th.Dark
 		if wgb, ok := ex.config.Bools["DarkTheme"]; ok {
-			wgb.Value(*ex.Dark)
+			wgb.Value(*ex.th.Dark)
 		}
 		save.Pod(ex.cx.Config)
 
@@ -108,17 +109,17 @@ func (ex *Explorer) PageTopBarButton(name string, index int, ico *[]byte) func(g
 			color = "PanelText"
 			background = "PanelBg"
 		}
-		ic := ex.Icon().
+		ic := ex.th.Icon().
 			Scale(p9.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return ex.Flex().Rigid(
+		return ex.th.Flex().Rigid(
 			// ex.Inset(0.25,
-			ex.ButtonLayout(ex.buttonBarButtons[index]).
+			ex.th.ButtonLayout(ex.buttonBarButtons[index]).
 				CornerRadius(0).
 				Embed(
-					ex.Inset(0.375,
+					ex.th.Inset(0.375,
 						ic,
 					).Fn,
 				).
@@ -140,14 +141,14 @@ func (ex *Explorer) StatusBarButton(name string, index int, ico *[]byte) func(gt
 	return func(gtx l.Context) l.Dimensions {
 		background := ex.StatusBarBackgroundGet()
 		color := ex.StatusBarColorGet()
-		ic := ex.Icon().
+		ic := ex.th.Icon().
 			Scale(p9.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return ex.Flex().
+		return ex.th.Flex().
 			Rigid(
-				ex.ButtonLayout(ex.statusBarButtons[index]).
+				ex.th.ButtonLayout(ex.statusBarButtons[index]).
 					CornerRadius(0).
 					Embed(
 						ic,

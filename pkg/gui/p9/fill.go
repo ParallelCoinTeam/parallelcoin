@@ -29,7 +29,7 @@ func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 		func(c l.Context) l.Dimensions {
 			// gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
 			// render the widgets onto a second context to get their dimensions
-			gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
+			gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Horizontal)
 			// generate the dimensions for all the list elements
 			dd := GetDimensionList(gtx1, 1, func(gtx l.Context, index int) l.Dimensions {
 				return f.w(gtx)

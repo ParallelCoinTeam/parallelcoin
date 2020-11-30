@@ -259,7 +259,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 
 func (wg *WalletGUI) goRoutines() {
 	var err error
-	if wg.ActivePageGet() == "goroutines" {
+	if wg.App.ActivePageGet() == "goroutines" {
 		Debug("updating goroutines data")
 		var b []byte
 		buf := bytes.NewBuffer(b)
@@ -299,7 +299,8 @@ func (wg *WalletGUI) goRoutines() {
 								goland = "goland"
 							}
 							launch := exec.Command(goland, "--line", out[1], out[0])
-							launch.Start()
+							if err = launch.Start(); Check(err) {
+							}
 						}()
 					}).
 						Fn(gtx)

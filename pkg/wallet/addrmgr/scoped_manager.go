@@ -274,8 +274,7 @@ func (s *ScopedKeyManager) loadAccountInfo(ns walletdb.ReadBucket,
 	acctKeyPub, err := hdkeychain.NewKeyFromString(string(serializedKeyPub))
 	if err != nil {
 		Error(err)
-		str := fmt.Sprintf("failed to create extended public key for "+
-			"account %d", account)
+		str := fmt.Sprintf("failed to create extended public key for account %d", account)
 		return nil, managerError(ErrKeyChain, str, err)
 	}
 	// Create the new account info with the known information. The rest of the fields are filled out below.

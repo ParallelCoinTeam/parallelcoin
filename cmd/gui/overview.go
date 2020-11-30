@@ -59,11 +59,11 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 					Rigid(
 						wg.th.Inset(0.25,
 							wg.th.VFlex().Rigid(
-								wg.Fill("PanelBg",
+								wg.th.Fill("PanelBg",
 									wg.th.Flex().
 										Rigid(
 											// wg.Inset(0.5,
-											wg.H6("recent transactions").Color("DocText").Fn,
+											wg.th.H6("recent transactions").Color("DocText").Fn,
 											// ).Fn,
 										).Fn,
 								).
@@ -123,11 +123,11 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 					Rigid(
 						wg.th.Inset(0.25,
 							wg.th.VFlex().Rigid(
-								wg.Fill("PanelBg",
+								wg.th.Fill("PanelBg",
 									wg.th.Flex().
 										Rigid(
 											// wg.Inset(0.5,
-											wg.H6("recent transactions").Color("DocText").Fn,
+											wg.th.H6("recent transactions").Color("DocText").Fn,
 											// ).Fn,
 										).Fn,
 								).
@@ -208,7 +208,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
+									wg.th.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
 								).
 								// Rigid(
 								// 	wg.th.Caption(fmt.Sprint(*txs.BlockIndex)).Fn,
@@ -225,7 +225,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
+									wg.th.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
 								).
 								Rigid(
 									wg.th.Caption(fmt.Sprintf("%d ", txs.Confirmations)).Fn,
@@ -238,13 +238,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 									func(gtx l.Context) l.Dimensions {
 										switch txs.Category {
 										case "generate":
-											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
+											return wg.th.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
 										case "immature":
-											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
+											return wg.th.Icon().Color("DocText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
 										case "receive":
-											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
+											return wg.th.Icon().Color("DocText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
 										case "unknown":
-											return wg.Icon().Color("DocText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
+											return wg.th.Icon().Color("DocText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
 										}
 										return l.Dimensions{}
 									},
@@ -257,7 +257,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 						Rigid(
 							wg.th.Flex().AlignMiddle().
 								Rigid(
-									wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
+									wg.th.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
 								).
 								Rigid(
 									wg.th.Caption(

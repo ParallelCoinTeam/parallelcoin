@@ -126,7 +126,7 @@ func EmptyFromSize(size image.Point) func(gtx l.Context) l.Dimensions {
 func EmptyMaxWidth() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		return l.Dimensions{
-			Size:     image.Point{X: gtx.Constraints.Max.X},
+			Size:     image.Point{X: gtx.Constraints.Max.X, Y: gtx.Constraints.Min.Y},
 			Baseline: 0,
 		}
 	}
@@ -140,7 +140,7 @@ func EmptyMaxHeight() func(gtx l.Context) l.Dimensions {
 func EmptyMinWidth() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		return l.Dimensions{
-			Size:     image.Point{X: gtx.Constraints.Min.X},
+			Size:     image.Point{X: gtx.Constraints.Min.X, Y: gtx.Constraints.Min.Y},
 			Baseline: 0,
 		}
 	}
@@ -150,6 +150,7 @@ func EmptyMinHeight() func(gtx l.Context) l.Dimensions {
 		return l.Dimensions{Size: image.Point{Y: gtx.Constraints.Min.Y}}
 	}
 }
+
 
 // CopyContextDimensionsWithMaxAxis copies the dimensions out with the max set by an image.Point along the axis
 func CopyContextDimensionsWithMaxAxis(gtx l.Context, size image.Point, axis l.Axis) l.Context {

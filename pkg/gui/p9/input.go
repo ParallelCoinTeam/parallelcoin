@@ -3,8 +3,9 @@ package p9
 import (
 	"regexp"
 
-	l "gioui.org/layout"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
+
+	l "gioui.org/layout"
 
 	"github.com/atotto/clipboard"
 )
@@ -20,18 +21,17 @@ type Input struct {
 	pasteClickable       *Clickable
 	pasteButton          *IconButton
 	GetText              func() string
-	size                 int
+	size                 float32
 	borderColor          string
 	borderColorUnfocused string
 	borderColorFocused   string
 	focused              bool
 }
 
-
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
 func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused string,
-	size int, handle func(txt string)) *Input {
+	size float32, handle func(txt string)) *Input {
 	editor := th.Editor().SingleLine().Submit(true)
 	input := th.TextInput(editor, hint)
 	p := &Input{
@@ -116,6 +116,8 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused strin
 func (in *Input) Fn(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Max.X = int(in.TextSize.Scale(float32(in.size)).V)
 	// gtx.Constraints.Min.X = 0
+	width := int(in.Theme.TextSize.Scale(in.size).V)
+	gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
 	return in.Border().Color(in.borderColor).Embed(
 		in.Flex().
 			Flexed(1,

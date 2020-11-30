@@ -1,9 +1,10 @@
 package gui
 
 import (
+	"golang.org/x/exp/shiny/materialdesign/icons"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
-	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -14,7 +15,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 	a = ng.th.App(ng.w.Width)
 	ng.app = a
 	// ng.size = ng.size
-	ng.th.Colors.SetTheme(*ng.app.Dark)
+	ng.th.Colors.SetTheme(*ng.th.Dark)
 	ng.config = cfg.New(ng.cx, ng.th)
 	ng.configs = ng.config.Config()
 	ng.app.ThemeHook(func() {})
@@ -24,7 +25,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 				Widget: func(gtx l.Context) l.Dimensions {
 					return ng.th.VFlex().Rigid(
 						ng.th.CardList(ng.lists["overview"], ng.app.CardBackgroundGet(),
-							ng.app.CardContent("run settings", "Primary",
+							ng.th.CardContent("run settings", "Primary",
 								ng.th.VFlex().Rigid(
 									ng.th.Flex().
 										Rigid(

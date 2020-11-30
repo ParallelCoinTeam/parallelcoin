@@ -1,13 +1,15 @@
 package gui
 
 import (
+	"strconv"
+
+	"golang.org/x/exp/shiny/materialdesign/icons"
+
 	l "gioui.org/layout"
 	"gioui.org/text"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/coding/base58"
 	"github.com/p9c/pod/pkg/util"
-	"golang.org/x/exp/shiny/materialdesign/icons"
-	"strconv"
 
 	"github.com/p9c/pod/pkg/gui/p9"
 )
@@ -143,40 +145,40 @@ func (wg *WalletGUI) Send() {
 func (wg *WalletGUI) sendFooter() l.Widget {
 	return wg.th.VFlex().
 		Rigid(
-			wg.Inset(0.25,
+			wg.th.Inset(0.25,
 				wg.th.Flex().
 					SpaceBetween().
 					Rigid(
-						wg.Inset(0.0, wg.Fill("DocBg",
-							wg.Inset(0.5,
-								wg.Caption("Transaction Fee:").
+						wg.th.Inset(0.0, wg.th.Fill("DocBg",
+							wg.th.Inset(0.5,
+								wg.th.Caption("Transaction Fee:").
 									Color("DocText").Fn,
 							).Fn,
 						).Fn,
 						).Fn,
 					).
 					Rigid(
-						wg.Inset(0.0, wg.Fill("DocBg",
-							wg.Inset(0.5,
-								wg.Caption("0.00000 DUO/kb").
+						wg.th.Inset(0.0, wg.th.Fill("DocBg",
+							wg.th.Inset(0.5,
+								wg.th.Caption("0.00000 DUO/kb").
 									Color("DocText").Fn,
 							).Fn,
 						).Fn,
 						).Fn,
 					).
 					Rigid(
-						wg.Inset(0.0, wg.Fill("DocBg",
-							wg.Inset(0.5,
-								wg.Caption("net").
+						wg.th.Inset(0.0, wg.th.Fill("DocBg",
+							wg.th.Inset(0.5,
+								wg.th.Caption("net").
 									Color("DocText").Fn,
 							).Fn,
 						).Fn,
 						).Fn,
 					).
 					Flexed(1,
-						wg.Inset(0.0, wg.Fill("DocBg",
-							wg.Inset(0.5,
-								wg.Caption("Balance 0.00000 DUO").
+						wg.th.Inset(0.0, wg.th.Fill("DocBg",
+							wg.th.Inset(0.5,
+								wg.th.Caption("Balance 0.00000 DUO").
 									Color("DocText").Fn,
 							).Fn,
 						).Fn,
@@ -184,39 +186,39 @@ func (wg *WalletGUI) sendFooter() l.Widget {
 					).Fn,
 			).Fn,
 		).Rigid(
-		wg.Inset(0.25,
+		wg.th.Inset(0.25,
 			wg.th.Flex().
 				SpaceBetween().
 				Rigid(
-					wg.Inset(0.25,
+					wg.th.Inset(0.25,
 						wg.buttonText(wg.clickables["sendSend"],
 							"Send", wg.Send)).Fn,
 				).
 				Rigid(
-					wg.Inset(0.25,
+					wg.th.Inset(0.25,
 						wg.buttonText(wg.clickables["sendClearAll"],
 							"Clear All", wg.ClearAllAddresses)).Fn,
 				).
 				Rigid(
-					wg.Inset(0.25,
+					wg.th.Inset(0.25,
 						wg.buttonText(wg.clickables["sendAddRecipient"],
 							"Add Recipient", wg.CreateSendAddressItem)).Fn,
 				).
 				Flexed(1,
-					wg.Inset(0.25,
-						wg.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
+					wg.th.Inset(0.25,
+						wg.th.Caption("Balance:0.00000000").Alignment(text.End).Color("DocText").Fn).Fn,
 				).Fn,
 		).Fn,
 	).Fn
 }
 
 func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Dimensions {
-	return wg.Inset(0.25,
-		wg.Fill("DocBg",
-			wg.Inset(0.25,
+	return wg.th.Inset(0.25,
+		wg.th.Fill("DocBg",
+			wg.th.Inset(0.25,
 				wg.th.VFlex().
 					Rigid(
-						wg.Inset(0.25,
+						wg.th.Inset(0.25,
 							wg.th.Flex().
 								Rigid(
 									wg.rowLabel("Pay to:"),
@@ -245,7 +247,7 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Dimensions {
 						).Fn,
 					).
 					Rigid(
-						wg.Inset(0.25,
+						wg.th.Inset(0.25,
 							wg.th.Flex().
 								Rigid(
 									wg.rowLabel("Label:"),
@@ -259,23 +261,23 @@ func (wg *WalletGUI) singleSendAddress(gtx l.Context, i int) l.Dimensions {
 						).Fn,
 					).
 					Rigid(
-						wg.Inset(0.25,
+						wg.th.Inset(0.25,
 							wg.th.Flex().
 								Rigid(
 									wg.rowLabel("Amount:"),
 								).
 								Rigid(
-									wg.Flex().
+									wg.th.Flex().
 										Rigid(
 											wg.sendAddresses[i].AmountInput.Fn,
 										).
 										Rigid(
-											wg.Inset(0.25,
+											wg.th.Inset(0.25,
 												wg.buttonText(wg.sendAddresses[i].PasteClipboardBtn,
 													"Subtract fee from amount", func() {})).Fn,
 										).
 										Rigid(
-											wg.Inset(0.25,
+											wg.th.Inset(0.25,
 												wg.buttonText(wg.sendAddresses[i].ClearBtn,
 													"Use available balance", func() {})).Fn,
 										).Fn,
@@ -365,9 +367,9 @@ func (wg *WalletGUI) ClearAllAddresses() {
 
 func (wg *WalletGUI) rowLabel(label string) l.Widget {
 	return func(gtx l.Context) l.Dimensions {
-		gtx.Constraints.Max.X = int(wg.TextSize.Scale(3).V)
+		gtx.Constraints.Max.X = int(wg.th.TextSize.Scale(3).V)
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
-		return wg.Caption(label).Color("Primary").Alignment(text.End).Fn(gtx)
+		return wg.th.Caption(label).Color("Primary").Alignment(text.End).Fn(gtx)
 	}
 }
 func remove(slice []SendAddress, s int) []SendAddress {

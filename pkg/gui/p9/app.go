@@ -15,7 +15,7 @@ import (
 // App defines an application with a header, sidebar/menu, right side button bar, changeable body page widget and
 // pop-over layers
 type App struct {
-	*Theme
+	th                  *Theme
 	activePage          string
 	bodyBackground      string
 	bodyColor           string
@@ -57,7 +57,7 @@ type WidgetMap map[string]l.Widget
 func (th *Theme) App(size *int) *App {
 	mc := th.Clickable()
 	return &App{
-		Theme:               th,
+		th:               th,
 		activePage:          "main",
 		bodyBackground:      "PanelBg",
 		bodyColor:           "PanelText",
@@ -93,8 +93,8 @@ func (th *Theme) App(size *int) *App {
 // Fn renders the app widget
 func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		return a.Flex().Rigid(
-			a.VFlex().
+		return a.th.Flex().Rigid(
+			a.th.VFlex().
 				Rigid(
 					a.RenderHeader,
 				).
@@ -123,7 +123,7 @@ func (a *App) Overlay() func(gtx l.Context) {
 func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	return func(gtx l.Context) l.Dimensions {
-		bar := a.Flex().SpaceBetween().AlignMiddle()
+		bar := a.th.Flex().SpaceBetween().AlignMiddle()
 		// bar.Flexed(1, EmptyMaxWidth())
 		for x := range a.statusBar {
 			i := x
@@ -135,7 +135,7 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 		// 	bar.Fn
 		// ).Fn
 		// ).Fn
-		dims := a.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
+		dims := a.th.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
 		// gtx.Constraints.Min = dims.Size
 		// gtx.Constraints.Max = dims.Size
 		return dims
@@ -143,11 +143,11 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	return a.Flex().Flexed(1,
-		a.Fill(a.titleBarBackground,
-			a.Flex().
+	return a.th.Flex().Flexed(1,
+		a.th.Fill(a.titleBarBackground,
+			a.th.Flex().
 				Rigid(
-					a.Responsive(*a.Size,
+					a.th.Responsive(*a.Size,
 						Widgets{
 							{Widget: a.MenuButton},
 							{Size: 800, Widget: a.NoMenuButton}}).
@@ -169,7 +169,7 @@ func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
-	out := a.Flex()
+	out := a.th.Flex()
 	for i := range a.buttonBar {
 		out.Rigid(a.buttonBar[i])
 	}
@@ -180,12 +180,12 @@ func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) MainFrame(gtx l.Context) l.Dimensions {
-	return a.Flex().
+	return a.th.Flex().
 		Rigid(
-			a.Fill(a.sideBarBackground,
-				a.VFlex().
+			a.th.Fill(a.sideBarBackground,
+				a.th.VFlex().
 					Flexed(1,
-						a.Responsive(*a.Size, Widgets{
+						a.th.Responsive(*a.Size, Widgets{
 							{
 								Widget: func(gtx l.Context) l.Dimensions {
 									return If(a.MenuOpen,
@@ -216,14 +216,14 @@ func (a *App) MenuButton(gtx l.Context) l.Dimensions {
 		color = "DocText"
 		bg = a.sideBarBackground
 	}
-	return a.Flex().SpaceEvenly().AlignEnd().
+	return a.th.Flex().SpaceEvenly().AlignEnd().
 		Rigid(
 			// a.Inset(0.25,
-			a.ButtonLayout(a.menuClickable).
+			a.th.ButtonLayout(a.menuClickable).
 				CornerRadius(0).
 				Embed(
-					a.Inset(0.375,
-						a.Icon().
+					a.th.Inset(0.375,
+						a.th.Icon().
 							Scale(Scales["H5"]).
 							Color(color).
 							Src(&icons.NavigationMenu).
@@ -246,24 +246,24 @@ func (a *App) NoMenuButton(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
-	return a.Responsive(*a.Size, Widgets{
+	return a.th.Responsive(*a.Size, Widgets{
 		{
-			Widget: a.Flex().AlignBaseline().
+			Widget: a.th.Flex().AlignBaseline().
 				Rigid(a.
-					Inset(0.25, a.
-						IconButton(
+				th.Inset(0.25, a.
+				th.IconButton(
 							a.logoClickable.
 								SetClick(
 									func() {
 										Debug("clicked logo")
-										*a.Dark = !*a.Dark
-										a.Theme.Colors.SetTheme(*a.Dark)
+										*a.th.Dark = !*a.th.Dark
+										a.th.Colors.SetTheme(*a.th.Dark)
 										a.themeHook()
 									},
 								),
 						).
 						Icon(
-							a.Icon().
+							a.th.Icon().
 								Scale(Scales["H6"]).
 								Color("Light").
 								Src(a.logo),
@@ -275,27 +275,27 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 					Fn,
 				).
 				Rigid(
-					a.H5("wallet").Color("Light").Fn,
+					a.th.H5("wallet").Color("Light").Fn,
 				).
 				Fn,
 		},
 		{Size: 800,
-			Widget: a.Flex().AlignBaseline().
+			Widget: a.th.Flex().AlignBaseline().
 				Rigid(a.
-					Inset(0.25, a.
-						IconButton(
+				th.Inset(0.25, a.
+				th.IconButton(
 							a.logoClickable.
 								SetClick(
 									func() {
 										Debug("clicked logo")
-										*a.Dark = !*a.Dark
-										a.Theme.Colors.SetTheme(*a.Dark)
+										*a.th.Dark = !*a.th.Dark
+										a.th.Colors.SetTheme(*a.th.Dark)
 										a.themeHook()
 									},
 								),
 						).
 						Icon(
-							a.Icon().
+							a.th.Icon().
 								Scale(Scales["H6"]).
 								Color("Light").
 								Src(a.logo),
@@ -307,7 +307,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 					Fn,
 				).
 				Rigid(
-					a.H5(a.title).Color("Light").Fn,
+					a.th.H5(a.title).Color("Light").Fn,
 				).
 				Fn,
 		},
@@ -363,20 +363,20 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
-	return a.Fill(a.bodyBackground,
+	return a.th.Fill(a.bodyBackground,
 		func(gtx l.Context) l.Dimensions {
 			if page, ok := a.pages[a.activePage]; !ok {
-				return a.Flex().
+				return a.th.Flex().
 					Flexed(1,
-						a.Inset(0.5,
-							a.VFlex().SpaceEvenly().
+						a.th.Inset(0.5,
+							a.th.VFlex().SpaceEvenly().
 								Rigid(
-									a.H1("404").
+									a.th.H1("404").
 										Alignment(text.Middle).
 										Fn,
 								).
 								Rigid(
-									a.Body1("page not found").
+									a.th.Body1("page not found").
 										Alignment(text.Middle).
 										Fn,
 								).
@@ -393,7 +393,7 @@ func (a *App) RenderPage(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
-	return a.Caption(fmt.Sprintf("%dx%d", gtx.Constraints.Max.X, gtx.Constraints.Max.Y)).Fn(gtx)
+	return a.th.Caption(fmt.Sprintf("%dx%d", gtx.Constraints.Max.X, gtx.Constraints.Max.Y)).Fn(gtx)
 }
 
 func (a *App) renderSideBar() l.Widget {

@@ -21,13 +21,13 @@ type block struct {
 
 func (wg *WalletGUI) blockIitem(label, data string) l.Widget {
 	if data != "" {
-		return wg.Inset(0.25,
+		return wg.th.Inset(0.25,
 			wg.th.VFlex().
 				Rigid(
-					wg.Inset(0.0, wg.Fill("PanelBg", wg.Inset(0.2, wg.H6(label).Color("DocText").Fn).Fn).Fn).Fn,
+					wg.th.Inset(0.0, wg.th.Fill("PanelBg", wg.th.Inset(0.2, wg.th.H6(label).Color("DocText").Fn).Fn).Fn).Fn,
 				).
 				Rigid(
-					wg.Inset(0.0, wg.Fill("DocBg", wg.Inset(0.2, wg.Body1(data).Color("DocText").Font("go regular").Fn).Fn).Fn).Fn,
+					wg.th.Inset(0.0, wg.th.Fill("DocBg", wg.th.Inset(0.2, wg.th.Body1(data).Color("DocText").Font("go regular").Fn).Fn).Fn).Fn,
 				).Fn,
 		).Fn
 	} else {
@@ -74,10 +74,10 @@ func (wg *WalletGUI) blockPage(blockHeight int) func() {
 				Run(
 					wg.th.VFlex().
 						Rigid(
-							wg.Inset(0.0, wg.Fill("Primary", wg.Inset(0.5, wg.Caption("Block "+fmt.Sprint(blockHeight)).Color("DocBg").Fn).Fn).Fn).Fn,
+							wg.th.Inset(0.0, wg.th.Fill("Primary", wg.th.Inset(0.5, wg.th.Caption("Block "+fmt.Sprint(blockHeight)).Color("DocBg").Fn).Fn).Fn).Fn,
 						).
 						Flexed(1,
-							wg.Inset(0,
+							wg.th.Inset(0,
 								func(gtx l.Context) l.Dimensions {
 									return b.list.Vertical().Length(len(blockLayout)).ListElement(le).Fn(gtx)
 								},
@@ -86,7 +86,7 @@ func (wg *WalletGUI) blockPage(blockHeight int) func() {
 						Rigid(
 							wg.th.Flex().
 								Flexed(0.5,
-									wg.Button(
+									wg.th.Button(
 										b.clickPrev.SetClick(func() {
 											// wg.w[wg.State.txs[i].data.TxID].Window.Close()
 										})).
@@ -100,7 +100,7 @@ func (wg *WalletGUI) blockPage(blockHeight int) func() {
 										Fn,
 								).
 								Flexed(0.5,
-									wg.Button(
+									wg.th.Button(
 										b.clickNext.SetClick(func() {
 											// wg.w[wg.State.txs[i].data.TxID].Window.Close()
 										})).
@@ -151,7 +151,7 @@ func (wg *WalletGUI) getBlock(blockHeight int64) (bl *block) {
 	}
 	if data, err = wg.ChainClient.GetBlockVerbose(blockHash); Check(err) {
 	}
-	fmt.Println("dadad", data)
+	Debug("data", data)
 	bl.data = data
 	return
 }

@@ -8,20 +8,20 @@ import (
 
 func (wg *WalletGUI) buttonText(b *p9.Clickable, label string, click func()) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		gtx.Constraints.Max.X = int(wg.TextSize.Scale(10).V)
+		gtx.Constraints.Max.X = int(wg.th.TextSize.Scale(10).V)
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 
-		return wg.ButtonLayout(b).Embed(
+		return wg.th.ButtonLayout(b).Embed(
 			func(gtx l.Context) l.Dimensions {
 				background := "DocText"
 				color := "DocBg"
 				var inPad, outPad float32 = 0.5, 0
-				return wg.Inset(outPad,
-					wg.Fill(background,
-						wg.Flex().
+				return wg.th.Inset(outPad,
+					wg.th.Fill(background,
+						wg.th.Flex().
 							Flexed(1,
-								wg.Inset(inPad,
-									wg.Caption(label).
+								wg.th.Inset(inPad,
+									wg.th.Caption(label).
 										Color(color).
 										Fn,
 								).Fn,
@@ -38,33 +38,33 @@ func (wg *WalletGUI) buttonText(b *p9.Clickable, label string, click func()) fun
 
 func (wg *WalletGUI) buttonIcon(b *p9.Clickable, label string, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := wg.TitleBarBackgroundGet()
-		color := wg.MenuColorGet()
-		if wg.ActivePageGet() == label {
+		background := wg.App.TitleBarBackgroundGet()
+		color := wg.App.MenuColorGet()
+		if wg.App.ActivePageGet() == label {
 			color = "PanelText"
 			background = "PanelBg"
 		}
-		ic := wg.Icon().
+		ic := wg.th.Icon().
 			Scale(p9.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return wg.Flex().Rigid(
+		return wg.th.Flex().Rigid(
 			// wg.Inset(0.25,
-			wg.ButtonLayout(b).
+			wg.th.ButtonLayout(b).
 				CornerRadius(0).
 				Embed(
-					wg.Inset(0.375,
+					wg.th.Inset(0.375,
 						ic,
 					).Fn,
 				).
 				Background(background).
 				SetClick(
 					func() {
-						if wg.MenuOpen {
-							wg.MenuOpen = false
+						if wg.App.MenuOpen {
+							wg.App.MenuOpen = false
 						}
-						wg.ActivePage(label)
+						wg.App.ActivePage(label)
 					}).
 				Fn,
 			// ).Fn,
@@ -74,20 +74,20 @@ func (wg *WalletGUI) buttonIcon(b *p9.Clickable, label string, ico *[]byte) func
 
 func (wg *WalletGUI) buttonIconText(b *p9.Clickable, label string, ico *[]byte, onClick func()) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		ic := wg.Icon().
+		ic := wg.th.Icon().
 			Scale(1).
 			Color("DocText").
 			Src(ico).
 			Fn
-		return wg.Flex().Rigid(
+		return wg.th.Flex().Rigid(
 			// wg.Inset(0.25,
-			wg.ButtonLayout(b).
+			wg.th.ButtonLayout(b).
 				CornerRadius(0).
 				Embed(
 					wg.th.Flex().AlignMiddle().
-						Rigid(wg.Inset(0, ic).Fn).
+						Rigid(wg.th.Inset(0, ic).Fn).
 						Rigid(
-							wg.Caption(label).Color("DocText").Fn,
+							wg.th.Caption(label).Color("DocText").Fn,
 						).
 						Fn,
 				).

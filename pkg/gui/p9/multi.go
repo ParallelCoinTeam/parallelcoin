@@ -20,7 +20,7 @@ type Multi struct {
 }
 
 func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColorUnfocused string,
-	size int, handle func(txt []string)) (m *Multi) {
+	size float32, handle func(txt []string)) (m *Multi) {
 	if handle == nil {
 		handle = func(txt []string) {
 			Debug(txt)

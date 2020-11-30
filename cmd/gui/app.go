@@ -22,11 +22,11 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	wg.App.ThemeHook(func() {
 		Debug("theme hook")
 		// Debug(wg.bools)
-		*wg.cx.Config.DarkTheme = *wg.Dark
+		*wg.cx.Config.DarkTheme = *wg.th.Dark
 		a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-		*a = *wg.Dark
+		*a = *wg.th.Dark
 		if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
-			wgb.Value(*wg.Dark)
+			wgb.Value(*wg.th.Dark)
 		}
 		save.Pod(wg.cx.Config)
 	})
@@ -98,8 +98,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 					return wg.State.goroutines[index](gtx)
 				}
 				return func(gtx l.Context) l.Dimensions {
-					return wg.Inset(0.25,
-						wg.Fill("DocBg",
+					return wg.th.Inset(0.25,
+						wg.th.Fill("DocBg",
 							wg.lists["recent"].
 								Vertical().
 								// Background("DocBg").Color("DocText").Active("Primary").
@@ -194,13 +194,13 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 func (wg *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
 	a := wg.th
 	return func(gtx l.Context) l.Dimensions {
-		return a.Fill(wg.BodyBackgroundGet(),
+		return a.Fill(wg.App.BodyBackgroundGet(),
 			a.VFlex().
 				SpaceEvenly().
 				Rigid(
 					a.Responsive(*wg.Size, p9.Widgets{
 						p9.WidgetSize{
-							Widget: a.Inset(0.25, a.H5(title).Color(wg.BodyColorGet()).Fn).Fn,
+							Widget: a.Inset(0.25, a.H5(title).Color(wg.App.BodyColorGet()).Fn).Fn,
 						},
 						p9.WidgetSize{
 							Size:   800,
@@ -224,11 +224,11 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 		// gtx.Constraints.Min.X = int(wg.App.SideBarSize.V)
 		background := "DocBg"
 		color := "DocText"
-		if wg.ActivePageGet() == page {
+		if wg.App.ActivePageGet() == page {
 			background = "PanelBg"
 			color = "PanelText"
 		}
-		return wg.Fill(background, wg.ButtonLayout(wg.sidebarButtons[index]).Embed(
+		return wg.th.Fill(background, wg.th.ButtonLayout(wg.sidebarButtons[index]).Embed(
 			func(gtx l.Context) l.Dimensions {
 				gtx.Constraints.Min.X =
 					gtx.Constraints.Max.X
@@ -246,10 +246,10 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 			Background("Transparent").
 			SetClick(
 				func() {
-					if wg.MenuOpen {
-						wg.MenuOpen = false
+					if wg.App.MenuOpen {
+						wg.App.MenuOpen = false
 					}
-					wg.ActivePage(page)
+					wg.App.ActivePage(page)
 				}).
 			Fn,
 		).Fn(gtx)
@@ -258,33 +258,33 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 
 func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := wg.TitleBarBackgroundGet()
-		color := wg.MenuColorGet()
-		if wg.ActivePageGet() == name {
+		background := wg.App.TitleBarBackgroundGet()
+		color := wg.App.MenuColorGet()
+		if wg.App.ActivePageGet() == name {
 			color = "PanelText"
 			background = "PanelBg"
 		}
-		ic := wg.Icon().
+		ic := wg.th.Icon().
 			Scale(p9.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return wg.Flex().Rigid(
+		return wg.th.Flex().Rigid(
 			// wg.Inset(0.25,
-			wg.ButtonLayout(wg.buttonBarButtons[index]).
+			wg.th.ButtonLayout(wg.buttonBarButtons[index]).
 				CornerRadius(0).
 				Embed(
-					wg.Inset(0.375,
+					wg.th.Inset(0.375,
 						ic,
 					).Fn,
 				).
 				Background(background).
 				SetClick(
 					func() {
-						if wg.MenuOpen {
-							wg.MenuOpen = false
+						if wg.App.MenuOpen {
+							wg.App.MenuOpen = false
 						}
-						wg.ActivePage(name)
+						wg.App.ActivePage(name)
 					}).
 				Fn,
 			// ).Fn,
@@ -294,19 +294,19 @@ func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte) func(
 
 func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := wg.StatusBarBackgroundGet()
-		color := wg.StatusBarColorGet()
-		if wg.ActivePageGet() == name {
+		background := wg.App.StatusBarBackgroundGet()
+		color := wg.App.StatusBarColorGet()
+		if wg.App.ActivePageGet() == name {
 			background = "PanelBg"
 		}
-		ic := wg.Icon().
+		ic := wg.th.Icon().
 			Scale(p9.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return wg.Flex().
+		return wg.th.Flex().
 			Rigid(
-				wg.ButtonLayout(wg.statusBarButtons[index]).
+				wg.th.ButtonLayout(wg.statusBarButtons[index]).
 					CornerRadius(0).
 					Embed(
 						wg.th.Inset(0.25, ic).Fn,
@@ -314,10 +314,10 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(g
 					Background(background).
 					SetClick(
 						func() {
-							if wg.MenuOpen {
-								wg.MenuOpen = false
+							if wg.App.MenuOpen {
+								wg.App.MenuOpen = false
 							}
-							wg.ActivePage(name)
+							wg.App.ActivePage(name)
 						}).
 					Fn,
 			).Fn(gtx)
@@ -442,16 +442,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
-					background := wg.StatusBarBackgroundGet()
-					color := wg.StatusBarColorGet()
-					ic := wg.Icon().
+					background := wg.App.StatusBarBackgroundGet()
+					color := wg.App.StatusBarColorGet()
+					ic := wg.th.Icon().
 						Scale(p9.Scales["H5"]).
 						Color(color).
 						Src(&icons.NavigationRefresh).
 						Fn
-					return wg.Flex().
+					return wg.th.Flex().
 						Rigid(
-							wg.ButtonLayout(wg.statusBarButtons[2]).
+							wg.th.ButtonLayout(wg.statusBarButtons[2]).
 								CornerRadius(0).
 								Embed(
 									wg.th.Inset(0.25, ic).Fn,

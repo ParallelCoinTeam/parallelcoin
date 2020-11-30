@@ -30,26 +30,28 @@ import (
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	var size int
-	var noWallet bool
+	var noWallet, walletUnlocked bool
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
 		// runnerQuit: make(chan struct{}),
-		size:     &size,
-		noWallet: &noWallet,
+		size:           &size,
+		noWallet:       &noWallet,
+		walletUnlocked: &walletUnlocked,
 	}
 	return wg.Run()
 }
 
 type WalletGUI struct {
-	cx   *conte.Xt
-	c    *cli.Context
-	w    map[string]*f.Window
-	th   *p9.Theme
-	size *int
-	*p9.App
+	cx                        *conte.Xt
+	c                         *cli.Context
+	w                         map[string]*f.Window
+	th                        *p9.Theme
+	size                      *int
+	App                       *p9.App
+	unlockPage                *p9.App
 	sidebarButtons            []*p9.Clickable
 	buttonBarButtons          []*p9.Clickable
 	statusBarButtons          []*p9.Clickable
@@ -80,6 +82,8 @@ type WalletGUI struct {
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
 	noWallet                  *bool
+	walletUnlocked            *bool
+	Size                      *int
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -231,10 +235,13 @@ func (wg *WalletGUI) Run() (err error) {
 				func(gtx l.Context) l.Dimensions {
 					return p9.If(*wg.noWallet,
 						wg.CreateWalletPage,
-						wg.App.Fn(),
+						p9.If(*wg.walletUnlocked,
+							wg.App.Fn(),
+							wg.WalletUnlockPage,
+						),
 					)(gtx)
 				},
-				wg.Overlay(),
+				wg.App.Overlay(),
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
