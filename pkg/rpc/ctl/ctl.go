@@ -1,6 +1,9 @@
 package ctl
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -11,7 +14,7 @@ func Call(cx *conte.Xt, wallet bool, method string, params ...interface{}) (resu
 	var usageFlags btcjson.UsageFlag
 	usageFlags, err = btcjson.MethodUsageFlags(method)
 	if err != nil {
-		Errorf("Unrecognized command '%s'\n", method)
+		err = errors.New("Unrecognized command '" + method + "' : " + err.Error())
 		// HelpPrint()
 		return
 	}
@@ -27,13 +30,15 @@ func Call(cx *conte.Xt, wallet bool, method string, params ...interface{}) (resu
 		// Show the error along with its error code when it's a json. BTCJSONError as it realistically will always be
 		// since the NewCmd function is only supposed to return errors of that type.
 		if jerr, ok := err.(btcjson.BTCJSONError); ok {
-			Errorf("%s command: %v (code: %s)\n", method, err, jerr.ErrorCode)
+			errText := fmt.Sprintf("%s command: %v (code: %s)\n", method, err, jerr.ErrorCode)
+			err = errors.New(errText)
 			// CommandUsage(method)
 			return
 		}
 		// The error is not a json.BTCJSONError and this really should not happen. Nevertheless fall back to just
 		// showing the error if it should happen due to a bug in the package.
-		Errorf("%s command: %v\n", method, err)
+		errText := fmt.Sprintf("%s command: %v\n", method, err)
+		err = errors.New(errText)
 		// CommandUsage(method)
 		return
 	}

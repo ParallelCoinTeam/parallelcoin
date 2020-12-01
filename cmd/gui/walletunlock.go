@@ -251,19 +251,19 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a.ButtonBar([]l.Widget{
 		wg.PageTopBarButton("main", 4, &icons.ActionLock, func(name string) {
 			wg.unlockPage.ActivePage(name)
-		}, wg.unlockPage),
+		}, wg.unlockPage, "Danger"),
 		wg.PageTopBarButton("console", 2, &p9icons.Terminal, func(name string) {
 			wg.unlockPage.ActivePage(name)
-		}, wg.unlockPage),
+		}, wg.unlockPage, ""),
 		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport, func(name string) {
 			wg.unlockPage.ActivePage(name)
-		}, wg.unlockPage),
+		}, wg.unlockPage, ""),
 		wg.PageTopBarButton("help", 1, &icons.ActionHelp, func(name string) {
 			wg.unlockPage.ActivePage(name)
-		}, wg.unlockPage),
+		}, wg.unlockPage, ""),
 		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp, func(name string) {
 			wg.unlockPage.ActivePage(name)
-		}, wg.unlockPage),
+		}, wg.unlockPage, ""),
 	})
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },

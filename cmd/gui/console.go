@@ -129,24 +129,36 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					}
 					return
 				} else {
-					if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
-					}
 					var out string
-					if out, err = strconv.Unquote(string(result)); Check(err) {
+					var isErr bool
+					if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
+						isErr = true
+						out = err.Error()
+						Info(out)
+						// if out, err = strconv.Unquote(); Check(err) {
+						// }
+					} else {
+						if out, err = strconv.Unquote(string(result)); Check(err) {
+						}
 					}
 					strings.ReplaceAll(out, "\t", "  ")
 					Debug(out)
 					splitResult := strings.Split(out, "\n")
+					outputColor := "DocText"
+					if isErr {
+						outputColor = "Danger"
+					}
 					for i := range splitResult {
 						sri := splitResult[i]
 						c.output = append(c.output,
 							func(gtx l.Context) l.Dimensions {
-								return wg.th.Flex().Flexed(1,
-									wg.th.Caption(sri).
-										Color("DocText").
+								return c.th.Flex().AlignStart().
+									Rigid(wg.th.Body1(sri).
+										Color(outputColor).
 										Font("go regular").MaxLines(4).
 										Fn,
-								).Fn(gtx)
+									).
+									Fn(gtx)
 							})
 					}
 					return
@@ -155,9 +167,14 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				Debug("method", method, "args", args)
 				if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
 					if result, err = ctl.Call(wg.cx, true, method, params...); Check(err) {
-						c.output = append(c.output, wg.th.Caption(err.Error()).Color("Error").Fn)
-						// return
+						c.output = append(c.output, c.th.Flex().AlignStart().
+							Rigid(wg.th.Body1(err.Error()).Color("Danger").Fn).Fn)
+						return
 					}
+					c.output = append(c.output, c.th.Flex().AlignStart().
+						Rigid(wg.th.Body1(err.Error()).Color("Danger").Fn,
+						).Fn,
+					)
 				}
 				c.output = append(c.output, wg.console.JSONWidget("DocText", result)...)
 			}

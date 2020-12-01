@@ -66,7 +66,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if key != "" {
 			out = append(out, c.getIndent(depth, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Caption(key).Font("bariol bold").Color(color).Fn(gtx)
+					return c.th.Body1(key).Font("bariol bold").Color(color).Fn(gtx)
 				},
 			))
 		}
@@ -75,7 +75,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if len(res) == 0 {
 			out = append(out, c.getIndent(depth+1, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Caption("[]").Color(color).Fn(gtx)
+					return c.th.Body1("[]").Color(color).Fn(gtx)
 				},
 			))
 		} else {
@@ -88,7 +88,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if key != "" {
 			out = append(out, c.getIndent(depth, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Caption(key).Font("bariol bold").Color(color).Fn(gtx)
+					return c.th.Body1(key).Font("bariol bold").Color(color).Fn(gtx)
 				},
 			))
 		}
@@ -99,7 +99,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if len(res) == 0 {
 			out = append(out, c.getIndent(depth+1, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Caption("{}").Color(color).Fn(gtx)
+					return c.th.Body1("{}").Color(color).Fn(gtx)
 				},
 			))
 		} else {
@@ -119,7 +119,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 					return c.th.Flex().
-						Rigid(c.th.Caption("\"" + res + "\"").Color(color).Fn).
+						Rigid(c.th.Body1("\"" + res + "\"").Color(color).Fn).
 						Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
 						Rigid(c.th.IconButton(clk).
 							Background("Transparent").
@@ -139,7 +139,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 					return c.th.Flex().
-						Rigid(c.th.Caption(fmt.Sprint(res)).Color(color).Fn).
+						Rigid(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).
 						Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
 						Rigid(c.th.IconButton(clk).
 							Background("Transparent").
@@ -150,7 +150,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 								go clipboard.WriteAll(fmt.Sprint(res))
 							}).Fn,
 						).Fn(gtx)
-					// return c.th.ButtonLayout(clk).Embed(c.th.Caption().Color(color).Fn).Fn(gtx)
+					// return c.th.ButtonLayout(clk).Embed(c.th.Body1().Color(color).Fn).Fn(gtx)
 				}),
 			)
 		case bool:
@@ -158,7 +158,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			res := res.value.(bool)
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-					return c.th.Caption(fmt.Sprint(res)).Color(color).Fn(gtx)
+					return c.th.Body1(fmt.Sprint(res)).Color(color).Fn(gtx)
 				}),
 			)
 		}
@@ -169,7 +169,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 				return c.th.Flex().
-					Rigid(c.th.Caption("\"" + res + "\"").Color(color).Fn).
+					Rigid(c.th.Body1("\"" + res + "\"").Color(color).Fn).
 					Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
 					Rigid(c.th.IconButton(clk).
 						Background("Transparent").
@@ -189,7 +189,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 				return c.th.Flex().
-					Rigid(c.th.Caption(fmt.Sprint(res)).Color(color).Fn).
+					Rigid(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).
 					Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
 					Rigid(c.th.IconButton(clk).
 						Background("Transparent").
@@ -200,7 +200,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 							go clipboard.WriteAll(fmt.Sprint(res))
 						}).Fn,
 					).Fn(gtx)
-				// return c.th.ButtonLayout(clk).Embed(c.th.Caption(fmt.Sprint(res)).Color(color).Fn).Fn(gtx)
+				// return c.th.ButtonLayout(clk).Embed(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).Fn(gtx)
 			}),
 		)
 	case bool:
@@ -208,7 +208,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		res := in.(bool)
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-				return c.th.Caption(fmt.Sprint(res)).Color(color).Fn(gtx)
+				return c.th.Body1(fmt.Sprint(res)).Color(color).Fn(gtx)
 			}),
 		)
 	default:
@@ -221,7 +221,7 @@ func (c *Console) jsonElement(key, color string, depth int, w l.Widget) l.Widget
 	return func(gtx l.Context) l.Dimensions {
 		return c.th.Flex().
 			Rigid(c.getIndent(depth, 1,
-				c.th.Caption(key).Font("bariol bold").Color(color).Fn)).
+				c.th.Body1(key).Font("bariol bold").Color(color).Fn)).
 			Rigid(c.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 			Rigid(w).
 			Fn(gtx)

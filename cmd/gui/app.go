@@ -174,16 +174,16 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a.ButtonBar([]l.Widget{
 		wg.PageTopBarButton("console", 2, &p9icons.Terminal, func(name string) {
 			wg.App.ActivePage(name)
-		}, a),
+		}, a, ""),
 		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport, func(name string) {
 			wg.App.ActivePage(name)
-		}, a),
+		}, a, ""),
 		wg.PageTopBarButton("help", 1, &icons.ActionHelp, func(name string) {
 			wg.App.ActivePage(name)
-		}, a),
+		}, a, ""),
 		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp, func(name string) {
 			wg.App.ActivePage(name)
-		}, a),
+		}, a, "Danger"),
 	})
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
@@ -276,13 +276,18 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 	}
 }
 
-func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte, onClick func(string), app *p9.App) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte, onClick func(string), app *p9.App,
+	highlightColor string) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := app.TitleBarBackgroundGet()
 		color := app.MenuColorGet()
+
 		if app.ActivePageGet() == name {
 			color = "PanelText"
 			background = "PanelBg"
+		}
+		if highlightColor != "" {
+			color = highlightColor
 		}
 		ic := wg.th.Icon().
 			Scale(p9.Scales["H5"]).
