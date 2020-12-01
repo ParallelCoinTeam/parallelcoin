@@ -32,15 +32,15 @@ func (wg *WalletGUI) updateThingies() (err error) {
 }
 
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
-	Debug("processChainBlockNotification")
+	// Debug("processChainBlockNotification")
 	// update best block height
 	wg.State.SetBestBlockHeight(int(height))
 	wg.State.SetBestBlockHash(hash)
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() {
-	Debug("processWalletBlockNotification", wg.WalletClient != nil)
-	if wg.WalletClient == nil {
+	// Debug("processWalletBlockNotification", wg.WalletClient != nil)
+	if wg.WalletClient == nil || !*wg.walletUnlocked {
 		return
 	}
 	// check account balance
@@ -128,6 +128,9 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 }
 
 func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
+	if !*wg.walletUnlocked {
+		return nil
+	}
 	return &rpcclient.NotificationHandlers{
 		OnClientConnected: func() {
 			go func() {
@@ -259,7 +262,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 
 func (wg *WalletGUI) goRoutines() {
 	var err error
-	if wg.App.ActivePageGet() == "goroutines" {
+	if wg.App.ActivePageGet() == "goroutines" || wg.unlockPage.ActivePageGet() == "goroutines" {
 		Debug("updating goroutines data")
 		var b []byte
 		buf := bytes.NewBuffer(b)
@@ -372,24 +375,27 @@ func (wg *WalletGUI) Tickers() {
 					if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
 						// break out
 					}
-					wg.State.SetBestBlockHeight(int(height))
-					wg.State.SetBestBlockHash(h)
-					var unconfirmed util.Amount
-					if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
-						// break out
+					if *wg.walletUnlocked {
+						Debug("wallet is unlocked")
+						wg.State.SetBestBlockHeight(int(height))
+						wg.State.SetBestBlockHash(h)
+						var unconfirmed util.Amount
+						if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
+							// break out
+						}
+						wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+						var confirmed util.Amount
+						if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
+							// break out
+						}
+						wg.State.SetBalance(confirmed.ToDUO())
+						// Debug("updating recent transactions")
+						var atr []btcjson.ListTransactionsResult
+						// TODO: for some reason this function returns half as many as requested
+						if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<24, 0); Check(err) {
+						}
+						wg.State.SetAllTxs(atr)
 					}
-					wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
-					var confirmed util.Amount
-					if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
-						// break out
-					}
-					wg.State.SetBalance(confirmed.ToDUO())
-					// Debug("updating recent transactions")
-					var atr []btcjson.ListTransactionsResult
-					// TODO: for some reason this function returns half as many as requested
-					if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
-					}
-					wg.State.SetAllTxs(atr)
 					wg.invalidate <- struct{}{}
 					first = false
 					// }

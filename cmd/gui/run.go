@@ -40,6 +40,7 @@ func (wg *WalletGUI) Runner() (err error) {
 						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"-n", wg.cx.ActiveNet.Name,
 						"--servertls=true", "--clienttls=true",
+						"--noinitialload",
 						"--notty",
 						"--pipelog", "shell"}
 					// args = apputil.PrependForWindows(args)
