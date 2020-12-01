@@ -1,6 +1,9 @@
 package gui
 
 import (
+	"fmt"
+	"time"
+
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	l "gioui.org/layout"
@@ -55,7 +58,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 									wg.th.Flex().AlignMiddle().
 										Flexed(0.5, p9.EmptyMaxWidth()).
 										Rigid(
-											wg.th.VFlex().
+											wg.th.VFlex().AlignMiddle().
 												Rigid(
 													wg.th.Flex().AlignEnd().
 														Rigid(
@@ -69,6 +72,19 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 												Rigid(
 													wg.unlockPassword.Fn,
+												).
+												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+												Rigid(
+													wg.incdecs["idleTimeout"].
+														Color("Danger").Background("DocBg").Scale(p9.Scales["Caption"]).Fn,
+												).
+												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+												Rigid(
+													wg.th.Body2(
+														fmt.Sprintf("%v idle timeout",
+															time.Duration(wg.incdecs["idleTimeout"].GetCurrent())*time.Second)).
+														Color("Danger").
+														Fn,
 												).
 												// Rigid(
 												// 	// wg.th.VFlex().

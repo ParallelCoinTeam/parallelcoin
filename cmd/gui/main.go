@@ -46,25 +46,25 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 }
 
 type WalletGUI struct {
-	cx                        *conte.Xt
-	c                         *cli.Context
-	w                         map[string]*f.Window
-	th                        *p9.Theme
-	size                      *int
-	App                       *p9.App
-	unlockPage                *p9.App
-	unlockPassword            *p9.Password
-	sidebarButtons            []*p9.Clickable
-	buttonBarButtons          []*p9.Clickable
-	statusBarButtons          []*p9.Clickable
-	quitClickable             *p9.Clickable
-	bools                     map[string]*p9.Bool
-	lists                     map[string]*p9.List
-	checkables                map[string]*p9.Checkable
-	clickables                map[string]*p9.Clickable
-	inputs                    map[string]*p9.Input
-	passwords                 map[string]*p9.Password
-	incdecs                   map[string]*p9.IncDec
+	cx               *conte.Xt
+	c                *cli.Context
+	w                map[string]*f.Window
+	th               *p9.Theme
+	size             *int
+	App              *p9.App
+	unlockPage       *p9.App
+	unlockPassword   *p9.Password
+	sidebarButtons   []*p9.Clickable
+	buttonBarButtons []*p9.Clickable
+	statusBarButtons []*p9.Clickable
+	quitClickable    *p9.Clickable
+	bools            map[string]*p9.Bool
+	lists            map[string]*p9.List
+	checkables       map[string]*p9.Checkable
+	clickables       map[string]*p9.Clickable
+	inputs           map[string]*p9.Input
+	passwords        map[string]*p9.Password
+	incdecs          map[string]*p9.IncDec
 	// intSliders                map[string]*p9.IntSlider
 	configs                   cfg.GroupsMap
 	config                    *cfg.Config
@@ -213,6 +213,16 @@ func (wg *WalletGUI) Run() (err error) {
 			SetCurrent(10).
 			ChangeHook(func(n int) {
 				Debug("showing", n, "per page")
+			}),
+		"idleTimeout": wg.th.IncDec().
+			Scale(4).
+			Min(30).
+			Max(3600).
+			NDigits(4).
+			Amount(60).
+			SetCurrent(300).
+			ChangeHook(func(n int) {
+				Debug("idle timeout", time.Duration(n)*time.Second)
 			}),
 	}
 	wg.Tickers()
