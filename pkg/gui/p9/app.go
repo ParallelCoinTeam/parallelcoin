@@ -123,8 +123,8 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	// return func(gtx l.Context) l.Dimensions {
 	bar := a.th.Flex()
-		// SpaceBetween().
-		// AlignMiddle()
+	// SpaceBetween().
+	// AlignMiddle()
 	// bar.Flexed(1, EmptyMaxWidth())
 	for x := range a.statusBar {
 		i := x
@@ -151,7 +151,7 @@ func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
 				Rigid(
 					a.th.Responsive(*a.Size,
 						Widgets{
-							{Widget: a.MenuButton},
+							{Widget: If(len(a.sideBar) > 0, a.MenuButton, a.NoMenuButton)},
 							{Size: 800, Widget: a.NoMenuButton}}).
 						Fn,
 				).
