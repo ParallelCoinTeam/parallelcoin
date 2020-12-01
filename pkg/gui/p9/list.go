@@ -91,8 +91,8 @@ func (th *Theme) List() (li *List) {
 		active:          "Primary",
 		scrollWidth:     int(th.TextSize.Scale(1).V),
 		setScrollWidth:  int(th.TextSize.Scale(1).V),
-		scrollBarPad:    int(th.TextSize.Scale(0.25).V),
-		setScrollBarPad: int(th.TextSize.Scale(0.25).V),
+		scrollBarPad:    int(th.TextSize.Scale(0.5).V),
+		setScrollBarPad: int(th.TextSize.Scale(0.5).V),
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}

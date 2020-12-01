@@ -172,18 +172,38 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 11),
 	})
 	a.ButtonBar([]l.Widget{
-		wg.PageTopBarButton("console", 2, &p9icons.Terminal),
-		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport),
-		wg.PageTopBarButton("help", 1, &icons.ActionHelp),
-		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp),
+		wg.PageTopBarButton("console", 2, &p9icons.Terminal, func(name string) {
+			wg.App.ActivePage(name)
+		}, a),
+		wg.PageTopBarButton("goroutines", 0, &icons.ActionBugReport, func(name string) {
+			wg.App.ActivePage(name)
+		}, a),
+		wg.PageTopBarButton("help", 1, &icons.ActionHelp, func(name string) {
+			wg.App.ActivePage(name)
+		}, a),
+		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp, func(name string) {
+			wg.App.ActivePage(name)
+		}, a),
 	})
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 		wg.RunStatusPanel,
 		wg.th.Flex().Rigid(
-			wg.StatusBarButton("log", 4, &icons.ActionList),
+			wg.StatusBarButton("log", 4, &icons.ActionList, func(name string) {
+				Debug("click on button", name)
+				if wg.App.MenuOpen {
+					wg.App.MenuOpen = false
+				}
+				wg.App.ActivePage(name)
+			}, a),
 		).Rigid(
-			wg.StatusBarButton("settings", 5, &icons.ActionSettings),
+			wg.StatusBarButton("settings", 5, &icons.ActionSettings, func(name string) {
+				Debug("click on button", name)
+				if wg.App.MenuOpen {
+					wg.App.MenuOpen = false
+				}
+				wg.App.ActivePage(name)
+			}, a),
 		).Fn,
 	})
 	a.AddOverlay(wg.toasts.DrawToasts())
@@ -256,11 +276,11 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 	}
 }
 
-func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte, onClick func(string), app *p9.App) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := wg.App.TitleBarBackgroundGet()
-		color := wg.App.MenuColorGet()
-		if wg.App.ActivePageGet() == name {
+		background := app.TitleBarBackgroundGet()
+		color := app.MenuColorGet()
+		if app.ActivePageGet() == name {
 			color = "PanelText"
 			background = "PanelBg"
 		}
@@ -279,25 +299,20 @@ func (wg *WalletGUI) PageTopBarButton(name string, index int, ico *[]byte) func(
 					).Fn,
 				).
 				Background(background).
-				SetClick(
-					func() {
-						if wg.App.MenuOpen {
-							wg.App.MenuOpen = false
-						}
-						wg.App.ActivePage(name)
-					}).
+				SetClick(func() { onClick(name) }).
 				Fn,
 			// ).Fn,
 		).Fn(gtx)
 	}
 }
 
-func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte, onClick func(string), app *p9.App) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := wg.App.StatusBarBackgroundGet()
-		color := wg.App.StatusBarColorGet()
-		if wg.App.ActivePageGet() == name {
+		background := app.StatusBarBackgroundGet()
+		color := app.StatusBarColorGet()
+		if app.ActivePageGet() == name {
 			background = "PanelBg"
+			// color = "Danger"
 		}
 		ic := wg.th.Icon().
 			Scale(p9.Scales["H5"]).
@@ -312,13 +327,7 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte) func(g
 						wg.th.Inset(0.25, ic).Fn,
 					).
 					Background(background).
-					SetClick(
-						func() {
-							if wg.App.MenuOpen {
-								wg.App.MenuOpen = false
-							}
-							wg.App.ActivePage(name)
-						}).
+					SetClick(func() { onClick(name) }).
 					Fn,
 			).Fn(gtx)
 	}
@@ -363,7 +372,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								Fn,
 						).Fn,
 					).
-					Background("DocBg").
+					Background("Transparent").
 					SetClick(
 						func() {
 							go wg.SetRunState(!wg.running)
@@ -411,7 +420,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 							Src(miningIcon).Fn,
 						).Fn,
 					).
-					Background("DocBg").
+					Background("Transparent").
 					SetClick(
 						func() {
 							go func() {
@@ -442,7 +451,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
-					background := wg.App.StatusBarBackgroundGet()
+					// background := wg.App.StatusBarBackgroundGet()
 					color := wg.App.StatusBarColorGet()
 					ic := wg.th.Icon().
 						Scale(p9.Scales["H5"]).
@@ -456,7 +465,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								Embed(
 									wg.th.Inset(0.25, ic).Fn,
 								).
-								Background(background).
+								Background("Transparent").
 								SetClick(
 									func() {
 										Debug("clicked reset wallet button")

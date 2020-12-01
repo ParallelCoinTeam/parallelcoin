@@ -27,7 +27,7 @@ gui:
 
 guis:
 	go install -v
-	pod -D test1 -n testnet -l debug --lan --solo -g -G 1
+	pod -D test1 -n testnet -l debug --lan --solo
 
 guihttpprof:
 	go install -v

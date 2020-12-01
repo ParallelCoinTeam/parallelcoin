@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"runtime"
+	"time"
 
 	"github.com/urfave/cli"
 
@@ -52,6 +53,7 @@ type WalletGUI struct {
 	size                      *int
 	App                       *p9.App
 	unlockPage                *p9.App
+	unlockPassword            *p9.Password
 	sidebarButtons            []*p9.Clickable
 	buttonBarButtons          []*p9.Clickable
 	statusBarButtons          []*p9.Clickable
@@ -63,6 +65,7 @@ type WalletGUI struct {
 	inputs                    map[string]*p9.Input
 	passwords                 map[string]*p9.Password
 	incdecs                   map[string]*p9.IncDec
+	// intSliders                map[string]*p9.IntSlider
 	configs                   cfg.GroupsMap
 	config                    *cfg.Config
 	running, mining           bool
@@ -83,6 +86,8 @@ type WalletGUI struct {
 	dialog                    *dialog.Dialog
 	noWallet                  *bool
 	walletUnlocked            *bool
+	walletToLock              time.Time
+	walletLockTime            int
 	Size                      *int
 }
 
@@ -94,7 +99,7 @@ func (wg *WalletGUI) Run() (err error) {
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
-	wg.buttonBarButtons = make([]*p9.Clickable, 4)
+	wg.buttonBarButtons = make([]*p9.Clickable, 5)
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.th.Clickable()
 	}
@@ -102,6 +107,17 @@ func (wg *WalletGUI) Run() (err error) {
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
+	// wg.intSliders = map[string]*p9.IntSlider{
+	// 	"lockTimeout": wg.th.IntSlider().
+	// 		// TextColor("Danger").
+	// 		// SliderColor("Danger").
+	// 		Min(30).Max(3600).Value(300).
+	// 		Hook(func(v int) {
+	// 			wg.walletLockTime = v
+	// 			wg.walletToLock = time.Now().Add(time.Duration(v) * time.Second)
+	// 			// wg.intSliders["lockTimeout"].Value(v)
+	// 		}),
+	// }
 	wg.lists = map[string]*p9.List{
 		"createWallet": wg.th.List(),
 		"overview":     wg.th.List(),
@@ -226,6 +242,7 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.MinerRunCommandChan <- "run"
 	}
 	wg.Size = wg.w["main"].Width
+	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	go func() {
 		if err := wg.w["main"].
 			Size(64, 32).
@@ -237,7 +254,7 @@ func (wg *WalletGUI) Run() (err error) {
 						wg.CreateWalletPage,
 						p9.If(*wg.walletUnlocked,
 							wg.App.Fn(),
-							wg.WalletUnlockPage,
+							wg.unlockPage.Fn(),
 						),
 					)(gtx)
 				},

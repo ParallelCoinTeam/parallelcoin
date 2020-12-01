@@ -57,7 +57,7 @@ type WidgetMap map[string]l.Widget
 func (th *Theme) App(size *int) *App {
 	mc := th.Clickable()
 	return &App{
-		th:               th,
+		th:                  th,
 		activePage:          "main",
 		bodyBackground:      "PanelBg",
 		bodyColor:           "PanelText",
@@ -93,19 +93,18 @@ func (th *Theme) App(size *int) *App {
 // Fn renders the app widget
 func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		return a.th.Flex().Rigid(
-			a.th.VFlex().
-				Rigid(
-					a.RenderHeader,
-				).
-				Flexed(1,
-					a.MainFrame,
-				).
-				Rigid(
-					a.RenderStatusBar,
-				).
-				Fn,
-		).Fn(gtx)
+		return a.th.VFlex().
+			Rigid(
+				a.RenderHeader,
+			).
+			Flexed(1,
+				// EmptyMaxWidth(),
+				a.MainFrame,
+			).
+			Rigid(
+				a.RenderStatusBar,
+			).
+			Fn(gtx)
 	}
 }
 func (a *App) AddOverlay(overlay func(gtx l.Context)) *App {
@@ -121,25 +120,28 @@ func (a *App) Overlay() func(gtx l.Context) {
 }
 
 func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
-	gtx.Constraints.Min.X = gtx.Constraints.Max.X
-	return func(gtx l.Context) l.Dimensions {
-		bar := a.th.Flex().SpaceBetween().AlignMiddle()
-		// bar.Flexed(1, EmptyMaxWidth())
-		for x := range a.statusBar {
-			i := x
-			bar.Rigid(a.statusBar[i])
-		}
-		// out :=
-		// a.Fill("PanelBg",
-		// 	a.Inset(0.25,
-		// 	bar.Fn
-		// ).Fn
-		// ).Fn
-		dims := a.th.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
-		// gtx.Constraints.Min = dims.Size
-		// gtx.Constraints.Max = dims.Size
-		return dims
-	}(gtx)
+	// gtx.Constraints.Min.X = gtx.Constraints.Max.X
+	// return func(gtx l.Context) l.Dimensions {
+	bar := a.th.Flex()
+		// SpaceBetween().
+		// AlignMiddle()
+	// bar.Flexed(1, EmptyMaxWidth())
+	for x := range a.statusBar {
+		i := x
+		bar.Rigid(a.statusBar[i])
+	}
+	// out :=
+	// a.Fill("PanelBg",
+	// 	a.Inset(0.25,
+	// 	bar.Fn
+	// ).Fn
+	// ).Fn
+	// dims := a.th.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
+	// gtx.Constraints.Min = dims.Size
+	// gtx.Constraints.Max = dims.Size
+	// return dims
+	return a.th.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
+	// }(gtx)
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
@@ -182,7 +184,7 @@ func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
 func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 	return a.th.Flex().
 		Rigid(
-			a.th.Fill(a.sideBarBackground,
+			a.th.Fill("dark-red", // a.sideBarBackground,
 				a.th.VFlex().
 					Flexed(1,
 						a.th.Responsive(*a.Size, Widgets{
@@ -250,28 +252,28 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 		{
 			Widget: a.th.Flex().AlignBaseline().
 				Rigid(a.
-				th.Inset(0.25, a.
-				th.IconButton(
-							a.logoClickable.
-								SetClick(
-									func() {
-										Debug("clicked logo")
-										*a.th.Dark = !*a.th.Dark
-										a.th.Colors.SetTheme(*a.th.Dark)
-										a.themeHook()
-									},
-								),
-						).
-						Icon(
-							a.th.Icon().
-								Scale(Scales["H6"]).
-								Color("Light").
-								Src(a.logo),
-						).
-						Background("Dark").Color("Light").
-						Inset(0.25).
-						Fn,
+					th.Inset(0.25, a.
+					th.IconButton(
+					a.logoClickable.
+						SetClick(
+							func() {
+								Debug("clicked logo")
+								*a.th.Dark = !*a.th.Dark
+								a.th.Colors.SetTheme(*a.th.Dark)
+								a.themeHook()
+							},
+						),
+				).
+					Icon(
+						a.th.Icon().
+							Scale(Scales["H6"]).
+							Color("Light").
+							Src(a.logo),
 					).
+					Background("Dark").Color("Light").
+					Inset(0.25).
+					Fn,
+				).
 					Fn,
 				).
 				Rigid(
@@ -282,28 +284,28 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 		{Size: 800,
 			Widget: a.th.Flex().AlignBaseline().
 				Rigid(a.
-				th.Inset(0.25, a.
-				th.IconButton(
-							a.logoClickable.
-								SetClick(
-									func() {
-										Debug("clicked logo")
-										*a.th.Dark = !*a.th.Dark
-										a.th.Colors.SetTheme(*a.th.Dark)
-										a.themeHook()
-									},
-								),
-						).
-						Icon(
-							a.th.Icon().
-								Scale(Scales["H6"]).
-								Color("Light").
-								Src(a.logo),
-						).
-						Background("Dark").Color("Light").
-						Inset(0.25).
-						Fn,
+					th.Inset(0.25, a.
+					th.IconButton(
+					a.logoClickable.
+						SetClick(
+							func() {
+								Debug("clicked logo")
+								*a.th.Dark = !*a.th.Dark
+								a.th.Colors.SetTheme(*a.th.Dark)
+								a.themeHook()
+							},
+						),
+				).
+					Icon(
+						a.th.Icon().
+							Scale(Scales["H6"]).
+							Color("Light").
+							Src(a.logo),
 					).
+					Background("Dark").Color("Light").
+					Inset(0.25).
+					Fn,
+				).
 					Fn,
 				).
 				Rigid(
@@ -397,32 +399,36 @@ func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) renderSideBar() l.Widget {
-	return func(gtx l.Context) l.Dimensions {
-		gtx.Constraints.Max.X = int(a.SideBarSize.V)
-		gtx.Constraints.Min.X = gtx.Constraints.Max.X
-		out := a.sideBarList.
-			Length(len(a.sideBar)).
-			LeftSide(true).
-			Vertical().
-			// Background("DocBg").
-			// Color("DocText").
-			// Active("Primary").
-			ListElement(func(gtx l.Context, index int) l.Dimensions {
-				// gtx.Constraints.Max.X = int(a.sideBarSize.V)
-				// gtx.Constraints.Min.X = 0
-				// gtx.Constraints.Min.X = gtx.Constraints.Max.X
-				// gtx.Constraints.Constrain(gtx.Constraints.Max)
-				dims := a.sideBar[index](gtx)
-				// Debug(dims)
-				return dims
-				// out := a.VFlex()
-				// for i := range a.sideBar {
-				// 	out.Rigid(a.sideBar[i])
-				// }
-				// return out.Fn(gtx)
-			})
-		// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
-		return out.Fn(gtx)
+	if len(a.sideBar) > 0 {
+		return func(gtx l.Context) l.Dimensions {
+			gtx.Constraints.Max.X = int(a.SideBarSize.V)
+			gtx.Constraints.Min.X = gtx.Constraints.Max.X
+			out := a.sideBarList.
+				Length(len(a.sideBar)).
+				LeftSide(true).
+				Vertical().
+				// Background("DocBg").
+				// Color("DocText").
+				// Active("Primary").
+				ListElement(func(gtx l.Context, index int) l.Dimensions {
+					// gtx.Constraints.Max.X = int(a.sideBarSize.V)
+					// gtx.Constraints.Min.X = 0
+					// gtx.Constraints.Min.X = gtx.Constraints.Max.X
+					// gtx.Constraints.Constrain(gtx.Constraints.Max)
+					dims := a.sideBar[index](gtx)
+					// Debug(dims)
+					return dims
+					// out := a.VFlex()
+					// for i := range a.sideBar {
+					// 	out.Rigid(a.sideBar[i])
+					// }
+					// return out.Fn(gtx)
+				})
+			// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
+			return out.Fn(gtx)
+		}
+	} else {
+		return EmptySpace(0, 0)
 	}
 }
 
