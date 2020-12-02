@@ -70,14 +70,14 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		OnClientConnected: func() {
 			// go func() {
 			Debug("CHAIN CLIENT CONNECTED!")
-			// var err error
-			// var height int32
-			// var h *chainhash.Hash
-			// if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
-			// }
-			// wg.State.SetBestBlockHeight(int(height))
-			// wg.State.SetBestBlockHash(h)
-			// wg.invalidate <- struct{}{}
+			var err error
+			var height int32
+			var h *chainhash.Hash
+			if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+			}
+			wg.State.SetBestBlockHeight(int(height))
+			wg.State.SetBestBlockHash(h)
+			wg.invalidate <- struct{}{}
 			// }()
 		},
 		OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {

@@ -642,6 +642,11 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"tells pod there is no keyboard input available",
 				nil,
 			),
+			au.Bool(
+				"runasservice",
+				"tells wallet to shut down when the wallet locks",
+				cx.Config.RunAsService,
+			),
 		},
 	}
 }

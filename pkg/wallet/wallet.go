@@ -1122,6 +1122,10 @@ out:
 		} else {
 			Info("the wallet has been locked")
 		}
+		if *w.PodConfig.RunAsService {
+			// if we are running as a service this means shut down on lock as unlocking happens only at startup
+			break out
+		}
 	}
 	w.wg.Done()
 }

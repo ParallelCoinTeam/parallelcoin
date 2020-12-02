@@ -65,6 +65,7 @@ func (wg *WalletGUI) Runner() (err error) {
 						"-n", wg.cx.ActiveNet.Name,
 						"--servertls=true", "--clienttls=true",
 						// "--noinitialload",
+						"--runasservice",
 						"--notty",
 						"--pipelog", "shell"}
 					// args = apputil.PrependForWindows(args)
