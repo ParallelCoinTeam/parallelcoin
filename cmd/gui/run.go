@@ -37,7 +37,7 @@ func (wg *WalletGUI) Runner() (err error) {
 						break
 					}
 					*wg.cx.Config.NodeOff = false
-					*wg.cx.Config.WalletOff = !*wg.walletLocked
+					*wg.cx.Config.WalletOff = *wg.walletLocked
 					*wg.cx.Config.Network = wg.cx.ActiveNet.Name
 					save.Pod(wg.cx.Config)
 					if !*wg.cx.Config.WalletOff {

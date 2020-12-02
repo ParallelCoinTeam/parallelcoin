@@ -206,7 +206,7 @@ type Config struct {
 	Wallet                 *bool            `group:"debug" label:"Connect to Wallet" description:"set ctl to connect to wallet instead of chain server" type:"" widget:"toggle" json:"Wallet"`
 	WalletFile             *string          `group:"config" label:"Wallet File" description:"wallet database file" type:"path" widget:"string" featured:"true" json:"WalletFile" hook:"restart"`
 	WalletOff              *bool            `group:"debug" label:"Wallet Off" description:"turn off the wallet backend" type:"" widget:"toggle" json:"WalletOff" hook:"wallet"`
-	WalletPass             *string          `group:"wallet" label:"Wallet Pass" description:"password encrypting public data in wallet" type:"" widget:"password" json:"WalletPass" hook:"restart"`
+	WalletPass             *string          `group:"" label:"Wallet Pass" description:"password encrypting public data in wallet" type:"" widget:"password" json:"WalletPass" hook:"restart"`
 	WalletRPCListeners     *cli.StringSlice `group:"wallet" label:"Legacy RPC Listeners" description:"addresses for wallet RPC server to listen on" type:"address" widget:"multi" json:"WalletRPCListeners" hook:"restart"`
 	WalletRPCMaxClients    *int             `group:"wallet" label:"Legacy RPC Max Clients" description:"maximum number of RPC clients allowed for wallet RPC" type:"" widget:"integer" json:"WalletRPCMaxClients" hook:"restart"`
 	WalletRPCMaxWebsockets *int             `group:"wallet" label:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"" widget:"integer" json:"WalletRPCMaxWebsockets" hook:"restart"`

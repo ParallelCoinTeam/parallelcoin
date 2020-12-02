@@ -96,6 +96,8 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
 	wg.sidebarButtons = make([]*p9.Clickable, 12)
+	wl := true
+	wg.walletLocked = &wl
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
@@ -216,7 +218,7 @@ func (wg *WalletGUI) Run() (err error) {
 			}),
 		"idleTimeout": wg.th.IncDec().
 			Scale(4).
-			Min(30).
+			Min(60).
 			Max(3600).
 			NDigits(4).
 			Amount(60).
@@ -263,8 +265,8 @@ func (wg *WalletGUI) Run() (err error) {
 					return p9.If(*wg.noWallet,
 						wg.CreateWalletPage,
 						p9.If(*wg.walletLocked,
-							wg.App.Fn(),
 							wg.unlockPage.Fn(),
+							wg.App.Fn(),
 						),
 					)(gtx)
 				},

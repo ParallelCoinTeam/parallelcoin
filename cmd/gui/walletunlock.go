@@ -29,6 +29,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	password := ""
 	wg.unlockPassword = wg.th.Password("", &password, "Primary", "DocText", 26, func(pass string) {
 		Debug("entered password", pass)
+		//
+
 	})
 	wg.unlockPage.ThemeHook(func() {
 		Debug("theme hook")
@@ -84,7 +86,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 												Rigid(
 													wg.th.Flex().Rigid(
-														wg.th.Body1("Time until lock in seconds:").Color("DocText").Fn,
+														wg.th.Body1("Idle timeout in seconds:").Color("DocText").Fn,
 													).Rigid(
 														wg.incdecs["idleTimeout"].Color("DocText").Background("DocBg").Scale(p9.Scales["Caption"]).Fn,
 													).Fn,

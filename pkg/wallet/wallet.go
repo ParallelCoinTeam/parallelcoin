@@ -1043,6 +1043,8 @@ func (w *Wallet) walletLocker() {
 	var timeout <-chan time.Time
 	holdChan := make(heldUnlock)
 	quit := w.quitChan()
+	// this flips to false once the first unlock has been done, for runasservice option which shuts down on lock
+	first := true
 out:
 	for {
 		select {
@@ -1112,7 +1114,9 @@ out:
 		case <-quit:
 			break out
 		case <-w.lockRequests:
+			first = false
 		case <-timeout:
+			first = false
 		}
 		// Select statement fell through by an explicit lock or the timer expiring. Lock the manager here.
 		timeout = nil
@@ -1122,7 +1126,7 @@ out:
 		} else {
 			Info("the wallet has been locked")
 		}
-		if *w.PodConfig.RunAsService {
+		if *w.PodConfig.RunAsService && !first {
 			// if we are running as a service this means shut down on lock as unlocking happens only at startup
 			break out
 		}

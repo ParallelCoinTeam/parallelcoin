@@ -136,35 +136,28 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			go func() {
 				Debug("WALLET CLIENT CONNECTED!")
 				// // time.Sleep(time.Second * 3)
-				// var unconfirmed util.Amount
-				// var err error
-				// if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
-				// 	// break out
-				// }
-				// wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
-				// var confirmed util.Amount
-				// if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
-				// 	// break out
-				// }
-				// wg.State.SetBalance(confirmed.ToDUO())
-				// // don't update this unless it's in view
-				// // if wg.ActivePageGet() == "main" {
-				// Debug("updating recent transactions")
-				// var ltr []btcjson.ListTransactionsResult
-				// // TODO: for some reason this function returns half as many as requested
-				// if ltr, err = wg.WalletClient.ListTransactionsCount("default", 20); Check(err) {
-				// 	// break out
-				// }
-				// // Debugs(ltr)
-				// wg.State.SetLastTxs(ltr)
-				// var atr []btcjson.ListTransactionsResult
-				// // TODO: for some reason this function returns half as many as requested
-				// if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
-				// 	// break out
-				// }
-				// // Debug(len(atr))
-				// wg.State.SetAllTxs(atr)
-				// wg.invalidate <- struct{}{}
+				var unconfirmed util.Amount
+				var err error
+				if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
+					// break out
+				}
+				wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+				var confirmed util.Amount
+				if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
+					// break out
+				}
+				wg.State.SetBalance(confirmed.ToDUO())
+				// don't update this unless it's in view
+				// if wg.ActivePageGet() == "main" {
+				Debug("updating recent transactions")
+				var atr []btcjson.ListTransactionsResult
+				// TODO: for some reason this function returns half as many as requested
+				if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
+					// break out
+				}
+				// Debug(len(atr))
+				wg.State.SetAllTxs(atr)
+				wg.invalidate <- struct{}{}
 			}()
 		},
 		// OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
@@ -206,7 +199,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 		OnWalletLockState: func(locked bool) {
 			Debug("OnWalletLockState", locked)
 			// switch interface to unlock page
-
+			*wg.walletLocked = true
 			// TODO: lock when idle... how to get trigger for idleness in UI?
 			wg.invalidate <- struct{}{}
 		},
@@ -385,10 +378,10 @@ func (wg *WalletGUI) Tickers() {
 					if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
 						// break out
 					}
-					if *wg.walletLocked {
+					wg.State.SetBestBlockHeight(int(height))
+					wg.State.SetBestBlockHash(h)
+					if !*wg.walletLocked {
 						Debug("wallet is unlocked")
-						wg.State.SetBestBlockHeight(int(height))
-						wg.State.SetBestBlockHash(h)
 						var unconfirmed util.Amount
 						if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
 							// break out
