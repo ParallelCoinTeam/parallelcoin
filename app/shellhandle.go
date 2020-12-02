@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/urfave/cli"
@@ -39,6 +40,21 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}
 			fmt.Println("restart to complete initial setup")
 			os.Exit(1)
+		}
+		// for security with apps launching the wallet, the public password can be set with a file that is deleted after
+		walletPassPath := *cx.Config.DataDir + slash + cx.ActiveNet.Params.Name + slash + "wp.txt"
+		if !apputil.FileExists(walletPassPath) {
+			var b []byte
+			if b, err = ioutil.ReadFile(walletPassPath); !Check(err) {
+				*cx.Config.WalletPass = string(b)
+				for i := range b {
+					b[i] = 0
+				}
+				if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+				}
+				if err = os.Remove(walletPassPath); Check(err) {
+				}
+			}
 		}
 		if !*cx.Config.NodeOff {
 			go func() {

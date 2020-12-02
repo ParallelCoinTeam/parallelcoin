@@ -1,13 +1,17 @@
 package gui
 
 import (
+	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
 )
+
+const slash = string(os.PathSeparator)
 
 func (wg *WalletGUI) Runner() (err error) {
 	wg.ShellRunCommandChan = make(chan string)
@@ -36,6 +40,26 @@ func (wg *WalletGUI) Runner() (err error) {
 					*wg.cx.Config.WalletOff = !*wg.walletLocked
 					*wg.cx.Config.Network = wg.cx.ActiveNet.Name
 					save.Pod(wg.cx.Config)
+					if !*wg.cx.Config.WalletOff {
+						// for security with apps launching the wallet, the public password can be set with a file that is deleted after
+						walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
+						b := []byte(*wg.cx.Config.WalletPass)
+						if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+						}
+						go func() {
+							// after 5 seconds the shell should have started
+							time.Sleep(time.Second*5)
+							// first zero what is there
+							for i := range b {
+								b[i] = 0
+							}
+							if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+							}
+							// we delete it afterwards if it wasn't already as a safety precaution
+							if err = os.Remove(walletPassPath); Check(err) {
+							}
+						}()
+					}
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"-n", wg.cx.ActiveNet.Name,

@@ -560,16 +560,13 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			),
 			au.Bool(
 				"relaynonstd",
-				"Relay non-standard transactions regardless of the default"+
-					" settings for the active network.",
+				"Relay non-standard transactions regardless of the default settings for the active network.",
 				cx.Config.RelayNonStd), au.Bool("rejectnonstd",
-				"Reject non-standard transactions regardless of"+
-					" the default settings for the active network.",
+				"Reject non-standard transactions regardless of the default settings for the active network.",
 				cx.Config.RejectNonStd),
 			au.Bool(
 				"noinitialload",
-				"Defer wallet creation/opening on startup and"+
-					" enable loading wallets over RPC",
+				"Defer wallet creation/opening on startup and enable loading wallets over RPC (loading not yet implemented)",
 				cx.Config.NoInitialLoad),
 			au.Bool(
 				"walletconnect, wc",
@@ -582,14 +579,12 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.WalletServer),
 			au.String(
 				"walletpass",
-				"The public wallet password -- Only required if"+
-					" the wallet was created with one",
+				"The public wallet password -- Only required if the wallet was created with one",
 				"",
 				cx.Config.WalletPass),
 			au.Bool(
 				"onetimetlskey",
-				"Generate a new TLS certpair at startup, but"+
-					" only write the certificate to disk",
+				"Generate a new TLS certificate pair at startup, but only write the certificate to disk",
 				cx.Config.OneTimeTLSKey),
 			au.Bool(
 				"tlsskipverify",

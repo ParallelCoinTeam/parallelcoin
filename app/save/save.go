@@ -25,6 +25,9 @@ func Pod(c *pod.Config) (success bool) {
 		copy(uac, *c.UserAgentComments)
 		*c.UserAgentComments = uac[1:]
 	}
+	// we also don't write this one to disk for security reasons
+	wp := *c.WalletPass
+	*c.WalletPass = ""
 	// don't save pipe log setting as we want it to only be active from a flag or environment variable
 	pipeLogOn := *c.PipeLog
 	*c.PipeLog = false
@@ -39,6 +42,7 @@ func Pod(c *pod.Config) (success bool) {
 	if c.UserAgentComments != nil {
 		*c.UserAgentComments = uac
 	}
+	*c.WalletPass = wp
 	*c.PipeLog = pipeLogOn
 	return
 }
