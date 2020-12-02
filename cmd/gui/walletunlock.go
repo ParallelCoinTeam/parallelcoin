@@ -27,7 +27,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a = wg.th.App(wg.w["main"].Width)
 	wg.unlockPage = a
 	password := ""
-	wg.unlockPassword = wg.th.Password("", &password, "Danger", "DocText", 26, func(pass string) {
+	wg.unlockPassword = wg.th.Password("", &password, "Primary", "DocText", 26, func(pass string) {
 		Debug("entered password", pass)
 	})
 	wg.unlockPage.ThemeHook(func() {
@@ -50,6 +50,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					SpaceEvenly().
 					AlignMiddle().
 					Flexed(1,
+						// wg.th.Fill("black",
 						wg.th.VFlex().Flexed(0.5, p9.EmptyMaxHeight()).Rigid(
 							wg.th.Flex().
 								SpaceEvenly().
@@ -60,12 +61,19 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 										Rigid(
 											wg.th.VFlex().AlignMiddle().
 												Rigid(
-													wg.th.Flex().AlignEnd().
+													wg.th.Flex().AlignBaseline().
 														Rigid(
-															wg.th.Icon().Scale(p9.Scales["H1"]).Color("Danger").Src(&icons.ActionLock).Fn,
+															wg.th.Fill("Primary",
+																wg.th.Inset(0.5,
+																	wg.th.Icon().Scale(p9.Scales["H3"]).Color("PanelBg").Src(&icons.ActionLock).Fn,
+																).Fn,
+															).Fn,
 														).
 														Rigid(
-															wg.th.H2("locked").Color("Danger").Fn,
+															wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn,
+														).
+														Rigid(
+															wg.th.H2("locked").Color("Primary").Fn,
 														).
 														Fn,
 												).
@@ -75,15 +83,18 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 												).
 												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 												Rigid(
-													wg.incdecs["idleTimeout"].
-														Color("Danger").Background("DocBg").Scale(p9.Scales["Caption"]).Fn,
+													wg.th.Flex().Rigid(
+														wg.th.Body1("Time until lock in seconds:").Color("DocText").Fn,
+													).Rigid(
+														wg.incdecs["idleTimeout"].Color("DocText").Background("DocBg").Scale(p9.Scales["Caption"]).Fn,
+													).Fn,
 												).
 												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 												Rigid(
 													wg.th.Body2(
 														fmt.Sprintf("%v idle timeout",
 															time.Duration(wg.incdecs["idleTimeout"].GetCurrent())*time.Second)).
-														Color("Danger").
+														Color("DocText").
 														Fn,
 												).
 												// Rigid(
@@ -108,6 +119,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 								).
 								Fn,
 						).Flexed(0.5, p9.EmptyMaxHeight()).Fn,
+						// ).Fn,
 					).
 					Fn(gtx)
 			},
