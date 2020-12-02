@@ -33,14 +33,14 @@ func (wg *WalletGUI) Runner() (err error) {
 						break
 					}
 					*wg.cx.Config.NodeOff = false
-					*wg.cx.Config.WalletOff = false
+					*wg.cx.Config.WalletOff = !*wg.walletLocked
 					*wg.cx.Config.Network = wg.cx.ActiveNet.Name
 					save.Pod(wg.cx.Config)
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"-n", wg.cx.ActiveNet.Name,
 						"--servertls=true", "--clienttls=true",
-						"--noinitialload",
+						// "--noinitialload",
 						"--notty",
 						"--pipelog", "shell"}
 					// args = apputil.PrependForWindows(args)

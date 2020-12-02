@@ -31,16 +31,16 @@ import (
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	var size int
-	var noWallet, walletUnlocked bool
+	var noWallet, walletLocked bool
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
 		// runnerQuit: make(chan struct{}),
-		size:           &size,
-		noWallet:       &noWallet,
-		walletUnlocked: &walletUnlocked,
+		size:         &size,
+		noWallet:     &noWallet,
+		walletLocked: &walletLocked,
 	}
 	return wg.Run()
 }
@@ -85,7 +85,7 @@ type WalletGUI struct {
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
 	noWallet                  *bool
-	walletUnlocked            *bool
+	walletLocked              *bool
 	walletToLock              time.Time
 	walletLockTime            int
 	Size                      *int
@@ -229,7 +229,7 @@ func (wg *WalletGUI) Run() (err error) {
 	// wg.Subscriber()
 	wg.App = wg.GetAppWidget()
 	wg.CreateSendAddressItem()
-	wg.running = !(*wg.cx.Config.NodeOff || *wg.cx.Config.WalletOff)
+	wg.running = !(*wg.cx.Config.NodeOff) // || *wg.cx.Config.WalletOff)
 	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 		*wg.noWallet = true
@@ -262,7 +262,7 @@ func (wg *WalletGUI) Run() (err error) {
 				func(gtx l.Context) l.Dimensions {
 					return p9.If(*wg.noWallet,
 						wg.CreateWalletPage,
-						p9.If(*wg.walletUnlocked,
+						p9.If(*wg.walletLocked,
 							wg.App.Fn(),
 							wg.unlockPage.Fn(),
 						),

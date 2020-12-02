@@ -40,7 +40,7 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 
 func (wg *WalletGUI) processWalletBlockNotification() {
 	// Debug("processWalletBlockNotification", wg.WalletClient != nil)
-	if wg.WalletClient == nil || !*wg.walletUnlocked {
+	if wg.WalletClient == nil || *wg.walletLocked {
 		return
 	}
 	// check account balance
@@ -128,7 +128,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 }
 
 func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
-	if !*wg.walletUnlocked {
+	if *wg.walletLocked {
 		return nil
 	}
 	return &rpcclient.NotificationHandlers{
@@ -216,6 +216,9 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 }
 
 func (wg *WalletGUI) chainClient() (err error) {
+	if *wg.cx.Config.NodeOff {
+		return nil
+	}
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Debug(*wg.cx.Config.RPCConnect)
 	if wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
@@ -225,7 +228,7 @@ func (wg *WalletGUI) chainClient() (err error) {
 		Pass:                 *wg.cx.Config.Password,
 		TLS:                  *wg.cx.Config.TLS,
 		Certificates:         certs,
-		DisableAutoReconnect: false,
+		DisableAutoReconnect: true,
 		DisableConnectOnNew:  false,
 	}, wg.ChainNotifications()); Check(err) {
 		return
@@ -238,6 +241,9 @@ func (wg *WalletGUI) chainClient() (err error) {
 }
 
 func (wg *WalletGUI) walletClient() (err error) {
+	if *wg.cx.Config.WalletOff {
+		return nil
+	}
 	walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Info("config.tls", *wg.cx.Config.TLS)
@@ -248,7 +254,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 		Pass:                 *wg.cx.Config.Password,
 		TLS:                  *wg.cx.Config.TLS,
 		Certificates:         certs,
-		DisableAutoReconnect: false,
+		DisableAutoReconnect: true,
 		DisableConnectOnNew:  false,
 	}, wg.WalletNotifications()); Check(err) {
 		return
@@ -347,11 +353,15 @@ func (wg *WalletGUI) Tickers() {
 					if !wg.running {
 						break
 					}
-					if err = wg.chainClient(); Check(err) {
-						break
+					if !*wg.cx.Config.NodeOff {
+						if err = wg.chainClient(); Check(err) {
+							break
+						}
 					}
-					if err = wg.walletClient(); Check(err) {
-						break
+					if !*wg.cx.Config.WalletOff || !*wg.walletLocked {
+						if err = wg.walletClient(); Check(err) {
+							break
+						}
 					}
 					// if we got to here both are connected
 					break preconnect
@@ -375,7 +385,7 @@ func (wg *WalletGUI) Tickers() {
 					if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
 						// break out
 					}
-					if *wg.walletUnlocked {
+					if *wg.walletLocked {
 						Debug("wallet is unlocked")
 						wg.State.SetBestBlockHeight(int(height))
 						wg.State.SetBestBlockHash(h)

@@ -8,9 +8,8 @@ import (
 	"sync"
 
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/chain/mining/addresses"
-
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -39,8 +38,8 @@ func Main(cx *conte.Xt) (err error) {
 	// Create and start HTTP server to serve wallet client connections. This will be updated with the wallet and chain
 	// server RPC client created below after each is created.
 	Trace("starting RPC servers")
-	legacyServer, err := startRPCServers(cx.Config, cx.StateCfg, cx.ActiveNet, loader)
-	if err != nil {
+	var legacyServer *legacy.Server
+	if legacyServer, err = startRPCServers(cx.Config, cx.StateCfg, cx.ActiveNet, loader); Check(err) {
 		Error("unable to create RPC servers:", err)
 		return
 	}
@@ -49,48 +48,8 @@ func Main(cx *conte.Xt) (err error) {
 		startWalletRPCServices(w, legacyServer)
 	})
 	if !*cx.Config.NoInitialLoad {
-		Trace("starting rpc client connection handler")
-		// Create and start chain RPC client so it's ready to connect to the wallet when loaded later.
-		Trace("loading database")
-		// Load the wallet database. It must have been created already or this will return an appropriate error.
-		var w *wallet.Wallet
-		w, err = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass),
-			true, cx.Config)
-		// Warn("wallet", w)
-		if err != nil {
-			Error(err)
-			return
+		if err = LoadWallet(loader, cx, legacyServer); Check(err) {
 		}
-		go func() {
-			Warn("refilling mining addresses")
-			addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
-			Warn("done refilling mining addresses")
-		}()
-		go rpcClientConnectLoop(cx, legacyServer, loader)
-		loader.Wallet = w
-		Trace("sending back wallet")
-		cx.WalletChan <- w
-		Trace("adding interrupt handler to unload wallet")
-		// Add interrupt handlers to shutdown the various process components before exiting. Interrupt handlers run in
-		// LIFO order, so the wallet (which should be closed last) is added first.
-		interrupt.AddHandler(func() {
-			Debug("wallet.Main interrupt")
-			err := loader.UnloadWallet()
-			if err != nil && err != wallet.ErrNotLoaded {
-				Error("failed to close wallet:", err)
-			}
-		})
-		if legacyServer != nil {
-			interrupt.AddHandler(func() {
-				Trace("stopping wallet RPC server")
-				legacyServer.Stop()
-				Trace("wallet RPC server shutdown")
-			})
-		}
-		go func() {
-			<-legacyServer.RequestProcessShutdownChan()
-			interrupt.Request()
-		}()
 	}
 	select {
 	case <-cx.WalletKill:
@@ -126,6 +85,52 @@ func ReadCAFile(config *pod.Config) []byte {
 		Info("chain server RPC TLS is disabled")
 	}
 	return certs
+}
+
+func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server) (err error) {
+	Trace("starting rpc client connection handler")
+	// Create and start chain RPC client so it's ready to connect to the wallet when loaded later.
+	Trace("loading database")
+	// Load the wallet database. It must have been created already or this will return an appropriate error.
+	var w *wallet.Wallet
+	w, err = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass),
+		true, cx.Config)
+	// Warn("wallet", w)
+	if err != nil {
+		Error(err)
+		return
+	}
+	go func() {
+		Warn("refilling mining addresses")
+		addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
+		Warn("done refilling mining addresses")
+		rpcClientConnectLoop(cx, legacyServer, loader)
+	}()
+	loader.Wallet = w
+	Trace("sending back wallet")
+	cx.WalletChan <- w
+	Trace("adding interrupt handler to unload wallet")
+	// Add interrupt handlers to shutdown the various process components before exiting. Interrupt handlers run in
+	// LIFO order, so the wallet (which should be closed last) is added first.
+	interrupt.AddHandler(func() {
+		Debug("wallet.Main interrupt")
+		err := loader.UnloadWallet()
+		if err != nil && err != wallet.ErrNotLoaded {
+			Error("failed to close wallet:", err)
+		}
+	})
+	if legacyServer != nil {
+		interrupt.AddHandler(func() {
+			Trace("stopping wallet RPC server")
+			legacyServer.Stop()
+			Trace("wallet RPC server shutdown")
+		})
+	}
+	go func() {
+		<-legacyServer.RequestProcessShutdownChan()
+		interrupt.Request()
+	}()
+	return
 }
 
 // rpcClientConnectLoop continuously attempts a connection to the consensus RPC server. When a connection is
