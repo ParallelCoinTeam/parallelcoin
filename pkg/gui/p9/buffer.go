@@ -35,6 +35,12 @@ func (e *EditBuffer) Changed() bool {
 	return c
 }
 
+func (e *EditBuffer) Zero() {
+	for i := range e.text {
+		e.text[i] = 0
+	}
+}
+
 func (e *EditBuffer) deleteRunes(runes int) {
 	e.moveGap(0)
 	for ; runes < 0 && e.gapstart > 0; runes++ {

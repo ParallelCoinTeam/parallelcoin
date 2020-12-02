@@ -535,6 +535,8 @@ func (e *Editor) Text() string {
 
 // SetText replaces the contents of the editor.
 func (e *Editor) SetText(s string) *Editor {
+	// this isn't necessary for normal inputs but should be done to password inputs, it isn't expensive anyway
+	e.rr.Zero()
 	e.rr = EditBuffer{}
 	e.Caret.xoff = 0
 	e.prepend(s)
