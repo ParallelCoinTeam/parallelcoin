@@ -89,30 +89,21 @@ func (wg *WalletGUI) Runner() (err error) {
 					*wg.cx.Config.NodeOff = true
 					*wg.cx.Config.WalletOff = true
 					save.Pod(wg.cx.Config)
-					// if wg.mining {
-					// 	go func() {
-					// 		wg.MinerRunCommandChan <- "stop"
-					// 	}()
-					// }
+					*wg.walletLocked = true
 					wg.running = false
 				case "restart":
 					Debug("restart called")
 					go func() {
 						wg.ShellRunCommandChan <- "stop"
-						wg.running = false
+						// wg.running = false
 						wg.ShellRunCommandChan <- "run"
-						wg.running = true
+						// wg.running = true
 					}()
 				}
 			case cmd := <-wg.MinerRunCommandChan:
 				switch cmd {
 				case "run":
 					Debug("run called for miner")
-					// if wg.running == false {
-					// 	Debug("not running because shell is not running")
-					// 	wg.mining = false
-					// 	break
-					// }
 					if *wg.cx.Config.GenThreads == 0 {
 						wg.mining = false
 						break
@@ -153,13 +144,5 @@ func (wg *WalletGUI) Runner() (err error) {
 			}
 		}
 	}()
-	// if wg.running {
-	// 	Debug("starting shell")
-	// 	wg.ShellRunCommandChan <- "run"
-	// }
-	// if wg.mining {
-	// 	Debug("starting miner")
-	// 	wg.MinerRunCommandChan <- "run"
-	// }
 	return nil
 }

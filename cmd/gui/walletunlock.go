@@ -13,23 +13,15 @@ import (
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
-//
-// func (wg *WalletGUI) WalletUnlockPage(gtx l.Context) l.Dimensions {
-// 	return wg.th.Fill("PanelBg",
-// 		wg.th.Inset(0.5,
-// 			wg.th.H4("unlock wallet").Fn,
-// 			// p9.EmptyMaxWidth(),
-// 		).Fn,
-// 	).Fn(gtx)
-// }
-
 func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a = wg.th.App(wg.w["main"].Width)
 	wg.unlockPage = a
 	password := ""
-	wg.unlockPassword = wg.th.Password("", &password, "Primary", "DocText", 26, func(pass string) {
+	wg.unlockPassword = wg.th.Password("", &password, "Primary", "DocText", 24, func(pass string) {
 		Debug("entered password", pass)
-		//
+		// unlock wallet
+		wg.cx.Config.WalletPass = &pass
+		*wg.cx.Config.WalletOff = false
 
 	})
 	wg.unlockPage.ThemeHook(func() {
@@ -52,103 +44,83 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					SpaceEvenly().
 					AlignMiddle().
 					Flexed(1,
-						// wg.th.Fill("black",
-						wg.th.VFlex().Flexed(0.5, p9.EmptyMaxHeight()).Rigid(
-							wg.th.Flex().
-								SpaceEvenly().
-								AlignMiddle().
-								Flexed(1,
-									wg.th.Flex().AlignMiddle().
-										Flexed(0.5, p9.EmptyMaxWidth()).
-										Rigid(
-											wg.th.VFlex().AlignMiddle().
-												Rigid(
-													wg.th.Flex().AlignBaseline().
-														Rigid(
-															wg.th.Fill("Primary",
-																wg.th.Inset(0.5,
-																	wg.th.Icon().Scale(p9.Scales["H3"]).Color("PanelBg").Src(&icons.ActionLock).Fn,
+						wg.th.VFlex().Flexed(0.5, p9.EmptyMaxHeight()).
+							Rigid(
+								wg.th.Flex().
+									SpaceEvenly().
+									AlignMiddle().
+									Flexed(1,
+										wg.th.Flex().
+											AlignMiddle().
+											Flexed(0.5, p9.EmptyMaxWidth()).
+											Rigid(
+												wg.th.VFlex().
+													AlignMiddle().
+													Rigid(
+														wg.th.Flex().
+															AlignBaseline().
+															Rigid(
+																wg.th.Fill("Primary",
+																	wg.th.Inset(0.5,
+																		wg.th.Icon().
+																			Scale(p9.Scales["H3"]).
+																			Color("PanelBg").
+																			Src(&icons.ActionLock).Fn,
+																	).Fn,
 																).Fn,
-															).Fn,
-														).
-														Rigid(
-															wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn,
-														).
-														Rigid(
-															wg.th.H2("locked").Color("Primary").Fn,
-														).
-														Fn,
-												).
-												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
-												Rigid(
-													wg.unlockPassword.Fn,
-												).
-												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
-												Rigid(
-													wg.th.Flex().Rigid(
-														wg.th.Body1("Idle timeout in seconds:").Color("DocText").Fn,
-													).Rigid(
-														wg.incdecs["idleTimeout"].Color("DocText").Background("DocBg").Scale(p9.Scales["Caption"]).Fn,
-													).Fn,
-												).
-												Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
-												Rigid(
-													wg.th.Body2(
-														fmt.Sprintf("%v idle timeout",
-															time.Duration(wg.incdecs["idleTimeout"].GetCurrent())*time.Second)).
-														Color("DocText").
-														Fn,
-												).
-												// Rigid(
-												// 	// wg.th.VFlex().
-												// 	wg.th.Body1(fmt.Sprintf("lock automatically in %v",
-												// 		time.Second*time.Duration(wg.intSliders["lockTimeout"].GetValue()))).Color("Danger").Fn,
-												//
-												// ).
-												// Rigid(
-												// 	func(gtx l.Context) l.Dimensions {
-												// 		cs := gtx.Constraints
-												// 		cs.Max.X = int(wg.th.TextSize.Scale(24).V)
-												// 		// cs.Max.X = 200
-												// 		cs.Min.X = cs.Max.X
-												// 		cs.Constrain(image.Point{X: cs.Max.X, Y: cs.Max.Y})
-												// 		return wg.intSliders["lockTimeout"].Fn(gtx)
-												// 	},
-												// ).
-												Fn,
-										).
-										Flexed(0.5, p9.EmptyMaxWidth()).Fn,
-								).
-								Fn,
-						).Flexed(0.5, p9.EmptyMaxHeight()).Fn,
-						// ).Fn,
+															).
+															Rigid(
+																wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn,
+															).
+															Rigid(
+																wg.th.H2("locked").Color("Primary").Fn,
+															).
+															Fn,
+													).
+													Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+													Rigid(
+														wg.unlockPassword.Fn,
+													).
+													Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+													Rigid(
+														wg.th.Flex().
+															Rigid(
+																wg.th.Body1("Idle timeout in seconds:").Color("DocText").Fn,
+															).
+															Rigid(
+																wg.incdecs["idleTimeout"].
+																	Color("DocText").
+																	Background("DocBg").
+																	Scale(p9.Scales["Caption"]).
+																	Fn,
+															).
+															Fn,
+													).
+													Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+													Rigid(
+														wg.th.Body2(
+															fmt.Sprintf("%v idle timeout",
+																time.Duration(wg.incdecs["idleTimeout"].GetCurrent())*time.Second)).
+															Color("DocText").
+															Fn,
+													).
+													Fn,
+											).
+											Flexed(0.5, p9.EmptyMaxWidth()).Fn,
+									).
+									Fn,
+							).Flexed(0.5, p9.EmptyMaxHeight()).Fn,
 					).
 					Fn(gtx)
 			},
 			},
-			// p9.WidgetSize{Widget: p9.EmptyMaxWidth()},
-			// p9.WidgetSize{Widget: wg.OverviewPage()},
 		}),
-		// "send": wg.Page("send", p9.Widgets{
-		// 	// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		// 	p9.WidgetSize{Widget: wg.SendPage()},
-		// }),
-		// "receive": wg.Page("receive", p9.Widgets{
-		// 	// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		// 	p9.WidgetSize{Widget: wg.ReceivePage()},
-		// }),
-		// "history": wg.Page("history", p9.Widgets{
-		// 	// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-		// 	p9.WidgetSize{Widget: wg.HistoryPage()},
-		// }),
 		"settings": wg.Page("settings", p9.Widgets{
-			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return wg.configs.Widget(wg.config)(gtx)
 			}},
 		}),
 		"console": wg.Page("console", p9.Widgets{
-			// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 			p9.WidgetSize{Widget: wg.console.Fn},
 		}),
 		"help": wg.Page("help", p9.Widgets{
