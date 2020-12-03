@@ -11,11 +11,6 @@
 
 Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for Parallelcoin
 
-~~~~
-φ plan 9 crypto
-    protocols and back end           David Vennik
-    gui                              Djordje Marcetin
-~~~~
 ## Installation
 
 Straight to business, this is the part I am looking for, so it's here at the top.
