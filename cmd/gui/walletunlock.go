@@ -38,7 +38,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 			bh :=  blake3.Sum256([]byte(pass))
 			if *cfg.WalletPass == string(bh[:]) {
 				// the entered password matches the stored hash
-
+				cfg.WalletPassHash = bh[:]
 			}
 		}
 	})

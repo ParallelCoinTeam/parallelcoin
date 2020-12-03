@@ -45,10 +45,14 @@ func Pod(c *pod.Config) (success bool) {
 	// regime. for users of the server in CLI environments, the empty password would have to be specified --walletpass=""
 	// or this check will fail when starting up.
 	//
-	// TODO: we may rethink this later, maybe handle the empty password better in the wallet startup.
-	wp := *c.WalletPass
-	bh :=  blake3.Sum256([]byte(wp))
-	*c.WalletPass = hex.EncodeToString(bh[:])
+	var wp string
+	if c.WalletPass != nil {
+		wp = *c.WalletPass
+		bh := blake3.Sum256([]byte(wp))
+		*c.WalletPass = hex.EncodeToString(bh[:])
+	} else {
+
+	}
 	// don't save pipe log setting as we want it to only be active from a flag or environment variable
 	pipeLogOn := *c.PipeLog
 	*c.PipeLog = false
