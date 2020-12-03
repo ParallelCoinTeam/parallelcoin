@@ -1,4 +1,4 @@
-# ![Logo](https://raw.githubusercontent.com/stalker-loki/pod/master/pkg/gui/logo/logo.svg) Parallelcoin Pod 
+# ![Logo](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo.svg) Parallelcoin Pod 
 
 [![github](https://img.shields.io/badge/github-page-blue.svg)](https://p9c.github.io/pod)
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
