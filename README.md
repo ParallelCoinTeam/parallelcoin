@@ -31,7 +31,8 @@ cd /where/you/keep/your/things
 git clone git@github.com:p9c/pod.git
 ```
 
-Before you can build it, though, see [gioui.org install instructions](https://gioui.org/doc/install)
+Before you can build it, though, see [gioui.org install instructions](https://gioui.org/doc/install) - note that on 
+linux xsel or other clipboard apps are required for clipboard functionality. 
 
 Several important libraries are required to build on each platform.
 Linux needs some input related X libraries, wayland and their GL
