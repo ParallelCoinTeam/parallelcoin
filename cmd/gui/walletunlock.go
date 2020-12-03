@@ -1,16 +1,20 @@
 package gui
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"golang.org/x/exp/shiny/materialdesign/icons"
+	"lukechampine.com/blake3"
 
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/p9c/pod/app/save"
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/pod"
 )
 
 func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
@@ -22,7 +26,21 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 		// unlock wallet
 		wg.cx.Config.WalletPass = &pass
 		*wg.cx.Config.WalletOff = false
+		// load config into a fresh variable
+		cfg, _ := pod.EmptyConfig()
+		var cfgFile []byte
+		var err error
+		if cfgFile, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); Check(err){
+			// this should not happen
+			panic("config file does not exist")
+		}
+		if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
+			bh :=  blake3.Sum256([]byte(pass))
+			if *cfg.WalletPass == string(bh[:]) {
+				// the entered password matches the stored hash
 
+			}
+		}
 	})
 	wg.unlockPage.ThemeHook(func() {
 		Debug("theme hook")

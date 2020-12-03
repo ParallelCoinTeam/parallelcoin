@@ -343,6 +343,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("walletpass") {
 			*cx.Config.WalletPass = c.String("walletpass")
+		} else {
+			// if this is not set, the config will be storing the hash and hashes on save, so we set explicitly to empty
+			*cx.Config.WalletPass = ""
 		}
 		if c.IsSet("onetimetlskey") {
 			*cx.Config.OneTimeTLSKey = c.Bool("onetimetlskey")

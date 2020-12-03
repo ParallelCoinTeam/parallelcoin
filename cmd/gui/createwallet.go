@@ -161,6 +161,8 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 													Warn("done refilling mining addresses")
 													w.Manager.Close()
 													w.Stop()
+													*wg.cx.Config.WalletPass = string(pass)
+													save.Pod(wg.cx.Config)
 													// Debug("starting up shell first time")
 													// rand.Seed(time.Now().Unix())
 													// nodeport := rand.Intn(60000) + 1024

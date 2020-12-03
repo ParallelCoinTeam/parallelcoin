@@ -1,9 +1,12 @@
 package save
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
+
+	"lukechampine.com/blake3"
 
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 
@@ -25,9 +28,27 @@ func Pod(c *pod.Config) (success bool) {
 		copy(uac, *c.UserAgentComments)
 		*c.UserAgentComments = uac[1:]
 	}
-	// we also don't write this one to disk for security reasons
+	// we also don't write this one to disk for security reasons, instead we write the hash to validate it.
+	//
+	// to run the wallet in a secure environment the password must be given on the commandline so that it decrypts
+	//
+	// also there is a file that can contain the password,
+	//
+	// 		walletPassPath := *cx.Config.DataDir + slash + cx.ActiveNet.Params.Name + slash + "wp.txt"
+	//
+	// which is automatically read (and then zeroed and deleted) and overrides anything in the configuration. The
+	// password is kept when unlocked in this variable and zeroed when locked, and input passwords are hashed to check
+	// before starting the wallet
+	//
+	// the wallet encrypts all data with a 'public' password which used to be empty. this will of course still hash to
+	// the same for the check but the wallet uses the same for both this and the secret, hence the enhanced security
+	// regime. for users of the server in CLI environments, the empty password would have to be specified --walletpass=""
+	// or this check will fail when starting up.
+	//
+	// TODO: we may rethink this later, maybe handle the empty password better in the wallet startup.
 	wp := *c.WalletPass
-	*c.WalletPass = ""
+	bh :=  blake3.Sum256([]byte(wp))
+	*c.WalletPass = hex.EncodeToString(bh[:])
 	// don't save pipe log setting as we want it to only be active from a flag or environment variable
 	pipeLogOn := *c.PipeLog
 	*c.PipeLog = false
