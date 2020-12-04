@@ -368,7 +368,8 @@ func (wg *WalletGUI) Tickers() {
 				case <-seconds:
 					wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
-					if !wg.running {
+					if !wg.running || wg.ChainClient != nil || wg.WalletClient != nil ||
+						wg.ChainClient.Disconnected() || wg.WalletClient.Disconnected() {
 						break out
 					}
 					// var err error
@@ -380,7 +381,7 @@ func (wg *WalletGUI) Tickers() {
 					}
 					wg.State.SetBestBlockHeight(int(height))
 					wg.State.SetBestBlockHash(h)
-					if !*wg.walletLocked {
+					if !*wg.walletLocked && wg.WalletClient != nil && !wg.WalletClient.Disconnected() {
 						Debug("wallet is unlocked")
 						var unconfirmed util.Amount
 						if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
