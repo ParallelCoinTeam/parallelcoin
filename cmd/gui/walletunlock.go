@@ -28,6 +28,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 			// unlock wallet
 			wg.cx.Config.WalletPass = &pass
 			*wg.cx.Config.WalletOff = false
+			wg.unlockPassword.GetPassword()
 			// load config into a fresh variable
 			cfg, _ := pod.EmptyConfig()
 			var cfgFile []byte
@@ -47,6 +48,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					// the entered password matches the stored hash
 					Debug("now we can open the wallet")
 					wg.ShellRunCommandChan <- "stop"
+					time.Sleep(time.Second*3)
 					*wg.cx.Config.WalletPass = pass
 					wg.ShellRunCommandChan <- "run"
 					*wg.walletLocked = false

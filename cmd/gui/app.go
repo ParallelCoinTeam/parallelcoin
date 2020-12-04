@@ -2,8 +2,10 @@ package gui
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"time"
 
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -172,6 +174,11 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.SideBarButton("quit", "quit", 11),
 	})
 	a.ButtonBar([]l.Widget{
+		wg.PageTopBarButton("lock", 4, &icons.ActionLockOpen, func(name string) {
+			// wg.unlockPage.ActivePage(name)
+			wg.unlockPassword.Wipe()
+			*wg.walletLocked = true
+		}, a, ""),
 		wg.PageTopBarButton("console", 2, &p9icons.Terminal, func(name string) {
 			wg.App.ActivePage(name)
 		}, a, ""),
@@ -183,7 +190,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		}, a, ""),
 		wg.PageTopBarButton("quit", 3, &icons.ActionExitToApp, func(name string) {
 			wg.App.ActivePage(name)
-		}, a, "Danger"),
+		}, a, ""),
 	})
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
@@ -475,6 +482,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 									func() {
 										Debug("clicked reset wallet button")
 										go func() {
+											var err error
 											wasRunning := wg.running
 											wasMining := wg.mining
 											Debug("was running", wasRunning)
@@ -485,15 +493,24 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 												wg.MinerRunCommandChan <- "stop"
 											}
 											args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
-												"--pipelog", "wallet", "drophistory"}
+												"--pipelog", "shell", "drophistory"}
 											runner := exec.Command(args[0], args[1:]...)
 											runner.Stderr = os.Stderr
 											runner.Stdout = os.Stderr
+											// for security with apps launching the wallet, the public password can be set with a file that is deleted after
+											walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
+											Debug("runner", walletPassPath)
+											wp := *wg.cx.Config.WalletPass
+											b := []byte(wp)
+											if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+											}
+											Debug("created password cookie")
 											if err := runner.Run(); Check(err) {
 											}
 											if wasRunning {
 												wg.ShellRunCommandChan <- "run"
 											}
+											time.Sleep(time.Second*3)
 											if wasMining {
 												wg.MinerRunCommandChan <- "run"
 											}

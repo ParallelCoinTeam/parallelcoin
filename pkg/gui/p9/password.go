@@ -168,3 +168,8 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 func (p *Password) GetPassword() string {
 	return p.passInput.editor.Text()
 }
+
+func (p *Password) Wipe() {
+	p.passInput.editor.rr.Zero()
+	p.passInput.editor.SetText("")
+}

@@ -56,7 +56,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				}
 				if err = os.Remove(walletPassPath); Check(err) {
 				}
-				Debug("wallet cookie deleted")
+				Debug("wallet cookie deleted", *cx.Config.WalletPass)
 			}
 		}
 		if !*cx.Config.NodeOff {
