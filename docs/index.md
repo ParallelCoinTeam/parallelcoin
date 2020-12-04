@@ -1,4 +1,4 @@
-# ![](https://raw.githubusercontent.com/stalker-loki/pod/master/pkg/gui/logo/logo.svg) parallelcoin pod
+# ![](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo.svg) parallelcoin pod
 
 ## all-in-one-everything for parallelcoin
 

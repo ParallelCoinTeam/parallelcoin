@@ -1,4 +1,4 @@
-# ![Logo](https://raw.githubusercontent.com/stalker-loki/pod/master/pkg/gui/logo/logo.svg) Parallelcoin Pod 
+# ![Logo](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo.svg) ParallelCoin Pod 
 
 [![github](https://img.shields.io/badge/github-page-blue.svg)](https://p9c.github.io/pod)
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
@@ -9,13 +9,8 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![CodeScene general](https://codescene.io/images/analyzed-by-codescene-badge.svg)](https://codescene.io/projects/7291)
 
-Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for Parallelcoin
+Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for ParallelCoin
 
-~~~~
-φ plan 9 crypto
-    protocols and back end           David Vennik
-    gui                              Djordje Marcetin
-~~~~
 ## Installation
 
 Straight to business, this is the part I am looking for, so it's here at the top.
@@ -31,7 +26,8 @@ cd /where/you/keep/your/things
 git clone git@github.com:p9c/pod.git
 ```
 
-Before you can build it, though, see [gioui.org install instructions](https://gioui.org/doc/install)
+Before you can build it, though, see [gioui.org install instructions](https://gioui.org/doc/install) - note that on 
+linux xsel or other clipboard apps are required for clipboard functionality. 
 
 Several important libraries are required to build on each platform.
 Linux needs some input related X libraries, wayland and their GL
