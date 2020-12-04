@@ -2532,6 +2532,7 @@ func HandleSendRawTransaction(
 }
 
 // HandleSetGenerate implements the setgenerate command.
+// TODO: this and lots of RPC needs to be revised before release
 func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
 	var msg string
 	var err error

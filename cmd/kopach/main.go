@@ -16,7 +16,6 @@ import (
 	"github.com/p9c/pod/pkg/data/ring"
 
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/kopach/client"
 	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
@@ -191,20 +190,20 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					w.hashrate = w.HashReport()
 				case <-w.StartChan:
 					*cx.Config.Generate = true
-					save.Pod(cx.Config)
+					// save.Pod(cx.Config)
 					w.Start()
 				case <-w.StopChan:
 					*cx.Config.Generate = false
-					save.Pod(cx.Config)
+					// save.Pod(cx.Config)
 					w.Stop()
 				case s := <-w.PassChan:
 					*cx.Config.MinerPass = s
-					save.Pod(cx.Config)
+					// save.Pod(cx.Config)
 					w.Stop()
 					w.Start()
 				case n := <-w.SetThreads:
 					*cx.Config.GenThreads = n
-					save.Pod(cx.Config)
+					// save.Pod(cx.Config)
 					if *cx.Config.Generate {
 						// always sanitise
 						if n < 0 {

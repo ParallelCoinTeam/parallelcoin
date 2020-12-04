@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/forkhash"
@@ -144,24 +143,27 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		}
 		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(routeableAddress+":%d", fP)}
 		cx.StateCfg.Save = true
+		Debug("Listeners")
 	}
 	if len(*cfg.RPCListeners) < 1 {
 		if fP, e = GetFreePort(); Check(e) {
 		}
 		*cfg.RPCListeners = cli.StringSlice{fmt.Sprintf("%s:%d", routeableAddress, fP)}
 		*cfg.RPCConnect = fmt.Sprintf("%s:%d", routeableAddress, fP)
-		Trace("setting save flag because rpc listeners is empty and rpc is" +
+		Debug("setting save flag because rpc listeners is empty and rpc is" +
 			" not disabled")
 		cx.StateCfg.Save = true
+		Debug("RPCListeners")
 	}
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
 		if fP, e = GetFreePort(); Check(e) {
 		}
 		*cfg.WalletRPCListeners = cli.StringSlice{fmt.Sprintf(routeableAddress+":%d", fP)}
 		*cfg.WalletServer = fmt.Sprintf(routeableAddress+":%d", fP)
-		Trace("setting save flag because wallet rpc listeners is empty and" +
+		Debug("setting save flag because wallet rpc listeners is empty and" +
 			" rpc is not disabled")
 		cx.StateCfg.Save = true
+		Debug("WalletRPCListeners")
 	}
 	// msgBase := pause.GetPauseContainer(cx)
 	// mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
@@ -184,6 +186,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		}
 		*cfg.WalletRPCListeners = cli.StringSlice{routeableAddress + ":" + fmt.Sprint(fP)}
 		cx.StateCfg.Save = true
+		Debug("autoports")
 	} else {
 		// sanitize user input and set auto on any that fail
 		l := cfg.Listeners
@@ -195,6 +198,8 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
 					(*l)[i] = routeableAddress + ":" + fmt.Sprint(fP)
+					cx.StateCfg.Save = true
+					Debug("port not validate Listeners")
 				}
 			}
 		}
@@ -204,6 +209,8 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
 					(*r)[i] = routeableAddress + ":" + fmt.Sprint(fP)
+					cx.StateCfg.Save = true
+					Debug("port not validate RPCListeners")
 				}
 			}
 		}
@@ -218,10 +225,11 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
 					(*w)[i] = routeableAddress + ":" + fmt.Sprint(fP)
+					cx.StateCfg.Save = true
+					Debug("port not validate WalletRPCListeners")
 				}
 			}
 		}
-		cx.StateCfg.Save = true
 	}
 	// all of these can be autodiscovered/set but to do that and know what they are we have to reserve them
 	//
@@ -265,7 +273,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		splitted := strings.Split((*cfg.WalletRPCListeners)[0], ":")
 		*cfg.WalletServer = routeableAddress + ":" + splitted[1]
 	}
-	save.Pod(cfg)
+	// save.Pod(cfg)
 }
 
 // GetFreePort asks the kernel for free open ports that are ready to use.

@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -22,25 +23,33 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	wg.unlockPage = a
 	password := ""
 	wg.unlockPassword = wg.th.Password("", &password, "Primary", "DocText", 24, func(pass string) {
-		Debug("entered password", pass)
-		// unlock wallet
-		wg.cx.Config.WalletPass = &pass
-		*wg.cx.Config.WalletOff = false
-		// load config into a fresh variable
-		cfg, _ := pod.EmptyConfig()
-		var cfgFile []byte
-		var err error
-		if cfgFile, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); Check(err){
-			// this should not happen
-			panic("config file does not exist")
-		}
-		if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
-			bh :=  blake3.Sum256([]byte(pass))
-			if *cfg.WalletPass == string(bh[:]) {
-				// the entered password matches the stored hash
-				cfg.WalletPassHash = bh[:]
+		go func() {
+			Debug("entered password", pass)
+			// unlock wallet
+			wg.cx.Config.WalletPass = &pass
+			*wg.cx.Config.WalletOff = false
+			// load config into a fresh variable
+			cfg, _ := pod.EmptyConfig()
+			var cfgFile []byte
+			var err error
+			if cfgFile, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); Check(err) {
+				// this should not happen
+				// TODO: panic-type conditions - for gui should have a notification maybe?
+				panic("config file does not exist")
 			}
-		}
+			Debug("loaded config")
+			if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
+				Debug("unmarshaled config")
+				bhb := blake3.Sum256([]byte(pass))
+				bh := hex.EncodeToString(bhb[:])
+				Debug(pass, bh, *cfg.WalletPass)
+				if *cfg.WalletPass == bh {
+					// the entered password matches the stored hash
+					Debug("now we can open the wallet")
+				}
+			}
+			Debug("failed to unlock the wallet")
+		}()
 	})
 	wg.unlockPage.ThemeHook(func() {
 		Debug("theme hook")

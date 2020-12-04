@@ -3123,7 +3123,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks,
 		var err error
 		addrMgr, err = waddrmgr.Open(addrmgrNs, pubPass, params)
 		if err != nil {
-			Error(err)
+			Error(err, "'"+string(pubPass)+"'")
 			return err
 		}
 		txMgr, err = wtxmgr.Open(txmgrNs, params)

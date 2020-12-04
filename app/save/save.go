@@ -16,6 +16,9 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
+var eh = blake3.Sum256([]byte(""))
+var emptyhash = hex.EncodeToString(eh[:])
+
 // Pod saves the configuration to the configured location
 func Pod(c *pod.Config) (success bool) {
 	// Debugs(c)
@@ -42,17 +45,29 @@ func Pod(c *pod.Config) (success bool) {
 	//
 	// the wallet encrypts all data with a 'public' password which used to be empty. this will of course still hash to
 	// the same for the check but the wallet uses the same for both this and the secret, hence the enhanced security
-	// regime. for users of the server in CLI environments, the empty password would have to be specified --walletpass=""
-	// or this check will fail when starting up.
-	//
-	var wp string
-	if c.WalletPass != nil {
-		wp = *c.WalletPass
-		bh := blake3.Sum256([]byte(wp))
-		*c.WalletPass = hex.EncodeToString(bh[:])
-	} else {
+	// regime.
 
+	// wallet password needs special handling, if config exists we don't change this value unless we mean to
+	// load config into a fresh variable
+	cfg, _ := pod.EmptyConfig()
+	var cfgFile []byte
+	var err error
+	wp := *c.WalletPass
+	if *c.WalletPass == "" {
+		if cfgFile, err = ioutil.ReadFile(*c.ConfigFile); !Check(err) {
+			Debug("loaded config")
+			if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
+				Debug("unmarshaled config")
+				*c.WalletPass = wp
+			}
+		} else {
+			*c.WalletPass = emptyhash
+		}
+	} else {
+		bh := blake3.Sum256([]byte(*c.WalletPass))
+		*c.WalletPass = hex.EncodeToString(bh[:])
 	}
+	Debug("'"+wp+"'", *c.WalletPass)
 	// don't save pipe log setting as we want it to only be active from a flag or environment variable
 	pipeLogOn := *c.PipeLog
 	*c.PipeLog = false
