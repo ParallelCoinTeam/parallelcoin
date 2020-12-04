@@ -145,7 +145,7 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 			ObtainPrivatePass: noConsole,
 		}
 	}
-	Trace("opening wallet")
+	Debug("opening wallet '"+string(pubPassphrase)+"'")
 	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig)
 	if err != nil {
 		Info("failed to open wallet", err)

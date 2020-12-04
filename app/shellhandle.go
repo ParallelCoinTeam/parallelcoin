@@ -43,10 +43,12 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		}
 		// for security with apps launching the wallet, the public password can be set with a file that is deleted after
 		walletPassPath := *cx.Config.DataDir + slash + cx.ActiveNet.Params.Name + slash + "wp.txt"
-		if !apputil.FileExists(walletPassPath) {
+		Debug("reading password from", walletPassPath)
+		if apputil.FileExists(walletPassPath) {
 			var b []byte
 			if b, err = ioutil.ReadFile(walletPassPath); !Check(err) {
 				*cx.Config.WalletPass = string(b)
+				Debug("read password '" + string(b) + "'")
 				for i := range b {
 					b[i] = 0
 				}
@@ -54,6 +56,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				}
 				if err = os.Remove(walletPassPath); Check(err) {
 				}
+				Debug("wallet cookie deleted")
 			}
 		}
 		if !*cx.Config.NodeOff {

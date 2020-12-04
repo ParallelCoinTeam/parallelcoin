@@ -48,6 +48,7 @@ func Main(cx *conte.Xt) (err error) {
 		startWalletRPCServices(w, legacyServer)
 	})
 	if !*cx.Config.NoInitialLoad {
+		Debug("loading wallet", *cx.Config.WalletPass)
 		if err = LoadWallet(loader, cx, legacyServer); Check(err) {
 		}
 	}
@@ -88,9 +89,8 @@ func ReadCAFile(config *pod.Config) []byte {
 }
 
 func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server) (err error) {
-	Trace("starting rpc client connection handler")
+	Debug("starting rpc client connection handler", *cx.Config.WalletPass)
 	// Create and start chain RPC client so it's ready to connect to the wallet when loaded later.
-	Trace("loading database")
 	// Load the wallet database. It must have been created already or this will return an appropriate error.
 	var w *wallet.Wallet
 	w, err = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass),

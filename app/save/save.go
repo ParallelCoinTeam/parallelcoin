@@ -53,12 +53,13 @@ func Pod(c *pod.Config) (success bool) {
 	var cfgFile []byte
 	var err error
 	wp := *c.WalletPass
+	Debug("wp", wp)
 	if *c.WalletPass == "" {
 		if cfgFile, err = ioutil.ReadFile(*c.ConfigFile); !Check(err) {
 			Debug("loaded config")
 			if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
-				Debug("unmarshaled config")
-				*c.WalletPass = wp
+				*c.WalletPass = *cfg.WalletPass
+				Debug("unmarshaled config", wp, *c.WalletPass)
 			}
 		} else {
 			*c.WalletPass = emptyhash
@@ -84,6 +85,7 @@ func Pod(c *pod.Config) (success bool) {
 	}
 	*c.WalletPass = wp
 	*c.PipeLog = pipeLogOn
+	Debug("walletpass", *c.WalletPass)
 	return
 }
 

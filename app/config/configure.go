@@ -12,7 +12,7 @@ import (
 
 // Configure loads and sanitises the configuration from urfave/cli
 func Configure(cx *conte.Xt, commandName string, initial bool) {
-	Debug("running Configure", commandName)
+	Debug("running Configure", commandName, *cx.Config.WalletPass)
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *chainrpc.Server)
 	// theoretically, the configuration should be accessed only when locked
@@ -123,9 +123,12 @@ func Configure(cx *conte.Xt, commandName string, initial bool) {
 	}
 	// if the user set the save flag, or file doesn't exist save the file now
 	if cx.StateCfg.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
+		cx.StateCfg.Save = false
+		if commandName == "kopach" {
+			return
+		}
 		Trace("saving configuration")
 		save.Pod(cx.Config)
-		cx.StateCfg.Save = false
 	}
 	if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 		fork.IsTestnet = true

@@ -165,7 +165,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())
 														pass := []byte(wg.passwords["passEditor"].GetPassword())
 														*wg.cx.Config.WalletPass = string(pass)
-														Debug("password", pass)
+														Debug("password", string(pass))
 														save.Pod(wg.cx.Config)
 														w, err := loader.CreateNewWallet(
 															pass, pass,

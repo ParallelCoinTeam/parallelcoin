@@ -3,7 +3,6 @@ package gui
 import (
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -36,6 +35,7 @@ func (wg *WalletGUI) Runner() (err error) {
 						Debug("already running...")
 						break
 					}
+					wp := *wg.cx.Config.WalletPass
 					*wg.cx.Config.NodeOff = false
 					*wg.cx.Config.WalletOff = *wg.walletLocked
 					// todo: if locked shouldn't pass be zeroed?
@@ -44,22 +44,25 @@ func (wg *WalletGUI) Runner() (err error) {
 					if !*wg.cx.Config.WalletOff {
 						// for security with apps launching the wallet, the public password can be set with a file that is deleted after
 						walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
-						b := []byte(*wg.cx.Config.WalletPass)
+						Debug("runner", walletPassPath)
+						b := []byte(wp)
 						if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
 						}
-						go func() {
-							// after 5 seconds the shell should have started
-							time.Sleep(time.Second*5)
-							// first zero what is there
-							for i := range b {
-								b[i] = 0
-							}
-							if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
-							}
-							// we delete it afterwards if it wasn't already as a safety precaution
-							if err = os.Remove(walletPassPath); Check(err) {
-							}
-						}()
+						Debug("created password cookie")
+						// go func() {
+						// 	// after 5 seconds the shell should have started
+						// 	time.Sleep(time.Second*5)
+						// 	Debug("clearing password cookie")
+						// 	// first zero what is there
+						// 	for i := range b {
+						// 		b[i] = 0
+						// 	}
+						// 	if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+						// 	}
+						// 	// we delete it afterwards if it wasn't already as a safety precaution
+						// 	if err = os.Remove(walletPassPath); Check(err) {
+						// 	}
+						// }()
 					}
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--rpclisten", *wg.cx.Config.RPCConnect,
