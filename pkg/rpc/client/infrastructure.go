@@ -299,7 +299,7 @@ func (c *Client) handleMessage(msg []byte) {
 		return
 	}
 	id := uint64(*in.ID)
-	Tracef("received response for id %d (result %s)", id, in.Result)
+	// Tracef("received response for id %d (result %s)", id, in.Result)
 	request := c.removeRequest(id)
 	// Nothing more to do if there is no request associated with this reply.
 	if request == nil || request.responseChan == nil {

@@ -239,35 +239,17 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		for x, oiee := range oi {
 			i := x
 			if index == 0 {
-				// header is not in the list but drawn above it
-				// oie := oiee
-				// // txi := t.X[i]
-				// // tyi := t.Y[index]
-				// h.Rigid(func(gtx l.Context) l.Dimensions {
-				// 	// gtx.Constraints.Constrain(image.Point{
-				// 	// 	X: t.X[i],
-				// 	// 	Y: t.Y[index],
-				// 	// })
-				// 	// gtx.Constraints.Max.X = txi
-				// 	// gtx.Constraints.Min.X = gtx.Constraints.Max.X
-				// 	// gtx.Constraints.Max.Y = tyi
-				// 	// gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
-				// 	// dims := EmptyMaxWidth()
-				// 	// col := t.headerBackground
-				// 	// if index < 1 {
-				// 	// 	col = t.cellBackground
-				// 	// }
-				// 	// t.th.Fill(col, dims).Fn(gtx)
-				// 	// Fill(gtx, t.th.Colors.Get(col))
-				// 	return oie.Widget(gtx)
-				// 	// return dims(gtx)
-				// })
+
 			} else {
 				oie := oiee
 				txi := t.X[i]
 				tyi := t.Y[index]
-				f.Rigid(func(gtx l.Context) l.Dimensions {
-					// gtx.Constraints.Constrain(image.Point{
+				f.Rigid(t.th.Fill(t.cellBackground, func(gtx l.Context) l.Dimensions {
+					cs := gtx.Constraints
+					cs.Max.X = txi
+					cs.Min.X = gtx.Constraints.Max.X
+					cs.Max.Y = tyi
+					cs.Min.Y = gtx.Constraints.Max.Y // gtx.Constraints.Constrain(image.Point{
 					// 	X: t.X[i],
 					// 	Y: t.Y[index],
 					// })
@@ -275,11 +257,11 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 					// gtx.Constraints.Min.X = gtx.Constraints.Max.X
 					gtx.Constraints.Max.Y = tyi
 					// gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
-					dims := EmptySpace(txi, tyi)
-					t.th.Fill(t.cellBackground, dims).Fn(gtx)
+					dims := t.th.Fill(t.cellBackground, EmptySpace(txi, tyi)).Fn(gtx)
+					// dims
 					oie.Widget(gtx)
-					return dims(gtx)
-				})
+					return dims
+				}).Fn)
 			}
 		}
 		return f.Fn(gtx)
@@ -290,12 +272,15 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 			return t.th.Fill(t.headerBackground, h.Fn).Fn(gtx)
 		}).
 		Flexed(1,
-			func(gtx l.Context) l.Dimensions {
-				return t.list.Vertical().
-					Length(len(out)).
-					ListElement(le).
-					Fn(gtx)
-			},
+			t.th.Fill(t.cellBackground,
+				func(gtx l.Context) l.Dimensions {
+					return t.list.Vertical().
+						Length(len(out)).
+						Background(t.cellBackground).
+						ListElement(le).
+						Fn(gtx)
+				},
+			).Fn,
 		).
 		Fn(gtx)
 }

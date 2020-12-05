@@ -19,7 +19,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 		return wg.th.VFlex().
 			Rigid(
 				wg.th.Inset(0.25,
-					wg.th.Fill("PanelBg",
+					wg.th.Fill("DocBg",
 						wg.th.Responsive(*wg.Size, p9.Widgets{
 							{
 								Widget: wg.th.VFlex().
@@ -188,7 +188,8 @@ func (wg *WalletGUI) HistoryPager() l.Widget {
 				Color("DocText").
 				Scale(1).
 				Icon(
-					wg.th.Icon().Color("DocText").
+					wg.th.Icon().
+						Color("DocText").
 						Scale(1).
 						Src(&icons.NavigationArrowBack),
 				).
