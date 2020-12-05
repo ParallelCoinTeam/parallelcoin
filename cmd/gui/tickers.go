@@ -333,6 +333,7 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
+					Debug("preconnect loop")
 					// update goroutines data
 					wg.goRoutines()
 					// close clients if they are open
@@ -353,11 +354,13 @@ func (wg *WalletGUI) Tickers() {
 						break
 					}
 					if !*wg.cx.Config.NodeOff {
+						Debug("connecting to chain")
 						if err = wg.chainClient(); Check(err) {
 							break
 						}
 					}
 					if !*wg.cx.Config.WalletOff || !*wg.walletLocked {
+						Debug("connecting to wallet")
 						if err = wg.walletClient(); Check(err) {
 							break
 						}
@@ -372,12 +375,29 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
+					Debug("connected loop")
 					wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
-					if !wg.running || wg.ChainClient != nil || wg.WalletClient != nil ||
-						wg.ChainClient.Disconnected() || wg.WalletClient.Disconnected() {
+					if !wg.running {
+						Debug("breaking out not running")
 						break out
 					}
+					if wg.ChainClient == nil {
+						Debug("breaking out chainclient is nil")
+						break out
+					}
+					// if  wg.WalletClient == nil && wg.running{
+					// 	Debug("breaking out walletclient is nil")
+					// 	break out
+					// }
+					if wg.ChainClient.Disconnected() {
+						Debug("breaking out chainclient disconnected")
+						break out
+					}
+					// if wg.WalletClient.Disconnected() {
+					// 	Debug("breaking out walletclient disconnected")
+					// 	break out
+					// }
 					// var err error
 					// if first {
 					var height int32
@@ -413,6 +433,7 @@ func (wg *WalletGUI) Tickers() {
 					break totalOut
 				}
 			}
+			wg.running = false
 		}
 		// Debug("*** Sending shutdown signal")
 		// close(wg.quit)
