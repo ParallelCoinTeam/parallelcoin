@@ -257,7 +257,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 					// gtx.Constraints.Min.X = gtx.Constraints.Max.X
 					gtx.Constraints.Max.Y = tyi
 					// gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
-					dims := t.th.Fill(t.cellBackground, EmptySpace(txi, tyi)).Fn(gtx)
+					dims := EmptySpace(txi, tyi)(gtx)
 					// dims
 					oie.Widget(gtx)
 					return dims

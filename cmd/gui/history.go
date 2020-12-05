@@ -25,22 +25,22 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 								Widget: wg.th.VFlex().
 									Flexed(1, wg.HistoryPageView()).
 									Rigid(
-										wg.th.Fill("DocBg",
-											wg.th.Flex().AlignMiddle().SpaceBetween().
-												Flexed(0.5, p9.EmptyMaxWidth()).
-												Rigid(wg.HistoryPageStatusFilter()).
-												Flexed(0.5, p9.EmptyMaxWidth()).
-												Fn,
-										).Fn,
+										// 	wg.th.Fill("DocBg",
+										wg.th.Flex().AlignMiddle().SpaceBetween().
+											Flexed(0.5, p9.EmptyMaxWidth()).
+											Rigid(wg.HistoryPageStatusFilter()).
+											Flexed(0.5, p9.EmptyMaxWidth()).
+											Fn,
+										// 	).Fn,
 									).
-									Rigid(
-										wg.th.Fill("DocBg",
-											wg.th.Flex().AlignMiddle().SpaceBetween().
-												Rigid(wg.HistoryPager()).
-												Rigid(wg.HistoryPagePerPageCount()).
-												Fn,
-										).Fn,
-									).
+									// Rigid(
+									// 	wg.th.Fill("DocBg",
+									// 		wg.th.Flex().AlignMiddle().SpaceBetween().
+									// 			Rigid(wg.HistoryPager()).
+									// 			Rigid(wg.HistoryPagePerPageCount()).
+									// 			Fn,
+									// 	).Fn,
+									// ).
 									Fn,
 							},
 							{
@@ -48,13 +48,15 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 								Widget: wg.th.VFlex().
 									Flexed(1, wg.HistoryPageView()).
 									Rigid(
-										wg.th.Fill("DocBg",
-											wg.th.Flex().AlignMiddle().SpaceBetween().
-												Rigid(wg.HistoryPager()).
-												Rigid(wg.HistoryPageStatusFilter()).
-												Rigid(wg.HistoryPagePerPageCount()).
-												Fn,
-										).Fn,
+										// 	wg.th.Fill("DocBg",
+										wg.th.Flex().AlignMiddle().SpaceBetween().
+											// 			Rigid(wg.HistoryPager()).
+											Flexed(0.5, p9.EmptyMaxWidth()).
+											Rigid(wg.HistoryPageStatusFilter()).
+											Flexed(0.5, p9.EmptyMaxWidth()).
+											// 			Rigid(wg.HistoryPagePerPageCount()).
+											Fn,
+										// 	).Fn,
 									).
 									Fn,
 							},
@@ -71,28 +73,30 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 	sent := wg.bools["showSent"].GetValue()
 	recv := wg.bools["showReceived"].GetValue()
 	imma := wg.bools["showImmature"].GetValue()
-	current := wg.incdecs["transactionsPerPage"].GetCurrent()
-	cursor := wg.historyCurPage * current
+	// current := wg.incdecs["transactionsPerPage"].GetCurrent()
+	cursor := 0 // wg.historyCurPage * current
 	// Debug(cursor, wg.historyCurPage, current, *wg.Size)
 	var out []btcjson.ListTransactionsResult
-	for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
-		for ; cursor < len(wg.State.allTxs)-1; {
-			wsa := wg.State.allTxs[cursor]
-			if wsa.Generated && gen ||
-				wsa.Category == "send" && sent ||
-				wsa.Category == "generate" && gen ||
-				wsa.Category == "immature" && imma ||
-				wsa.Category == "receive" && recv ||
-				wsa.Category == "unknown" {
-				out = append(out, wsa)
-				cursor++
-				break
-			}
+	// for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
+	// Debugs(wg.State.allTxs)
+	ws := wg.State.allTxs
+	for ; cursor < len(ws)-1; cursor++ {
+		wsa := ws[cursor]
+		if wsa.Generated && gen ||
+			wsa.Category == "send" && sent ||
+			wsa.Category == "generate" && gen ||
+			wsa.Category == "immature" && imma ||
+			wsa.Category == "receive" && recv ||
+			wsa.Category == "unknown" {
+			out = append(out, wsa)
+			// break
 		}
-		// if cursor == len(wg.State.allTxs)-1 {
-		// 	break
-		// }
+
 	}
+	// if cursor == len(wg.State.allTxs)-1 {
+	// 	break
+	// }
+	// }
 	// Debugs(out)
 	// create the header
 	header := p9.TextTableHeader{
