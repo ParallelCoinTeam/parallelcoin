@@ -25,34 +25,34 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						func(gtx l.Context) l.Dimensions {
 							_, bc := balanceColumn(gtx)
 							return wg.th.Inset(0.25,
-								wg.th.Fill("DocBg",
-									wg.th.SliceToWidget(
-										append([]l.Widget{
-											func(gtx l.Context) l.Dimensions {
-												// render the widgets onto a second context to get their dimensions
-												// gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
-												// dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
-												// gtx.Constraints.Max.X = dim.Size.X
-												// gtx.Constraints.Min.X = dim.Size.X
-												// gtx.Constraints.Max.Y = dim.Size.Y
-												// gtx.Constraints.Min.Y = dim.Size.Y
-												return wg.th.Fill("PanelBg",
-													wg.th.Flex().
-														Rigid(
-															// wg.th.Inset(0.5,
-															wg.th.H6("Balances").
-																// Font("bariol bold").
-																Color("PanelText").
-																Fn,
-															// ).Fn,
-														).
-														// Flexed(1, p9.EmptyMaxWidth()).
+								// wg.th.Fill("PanelBg",
+								wg.th.SliceToWidget(
+									append([]l.Widget{
+										func(gtx l.Context) l.Dimensions {
+											// render the widgets onto a second context to get their dimensions
+											// gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
+											// dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
+											// gtx.Constraints.Max.X = dim.Size.X
+											// gtx.Constraints.Min.X = dim.Size.X
+											// gtx.Constraints.Max.Y = dim.Size.Y
+											// gtx.Constraints.Min.Y = dim.Size.Y
+											return wg.th.Flex().
+												// wg.th.Fill("PanelBg",
+												Flexed(1,
+													// wg.th.Inset(0.5,
+													wg.th.H6("Balances").
+														// Font("bariol bold").
+														Color("PanelText").
 														Fn,
+													// ).Fn,
+													// ).
+													// Flexed(1, p9.EmptyMaxWidth()).
+													// Fn,
 												).Fn(gtx)
-											},
 										},
-											bc...), l.Vertical),
-								).Fn,
+									},
+										bc...), l.Vertical),
+								// ).Fn,
 							).Fn(gtx)
 						},
 					).
@@ -93,29 +93,29 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						func(gtx l.Context) l.Dimensions {
 							_, bc := balanceColumn(gtx)
 							return wg.th.Inset(0.25,
-								wg.th.Fill("DocBg",
-									wg.th.SliceToWidget(
-										append([]l.Widget{
-											func(gtx l.Context) l.Dimensions {
-												// render the widgets onto a second context to get their dimensions
-												gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
-												dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
-												gtx.Constraints.Max.X = dim.Size.X
-												gtx.Constraints.Min.X = dim.Size.X
-												return wg.th.Fill("PanelBg",
-													wg.th.Flex().
-														Flexed(1,
-															// wg.th.Inset(0.5,
-															wg.th.H6("Balances").
-																// Font("bariol bold").
-																Color("PanelText").
-																Fn,
-															// ).Fn,
-														).Fn,
+								wg.th.Fill("PanelBg",
+								wg.th.SliceToWidget(
+									append([]l.Widget{
+										func(gtx l.Context) l.Dimensions {
+											// render the widgets onto a second context to get their dimensions
+											gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
+											dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
+											gtx.Constraints.Max.X = dim.Size.X
+											gtx.Constraints.Min.X = dim.Size.X
+											// wg.th.Fill("PanelBg",
+											return wg.th.Flex().
+												Flexed(1,
+													// wg.th.Inset(0.5,
+													wg.th.H6("Balances").
+														// Font("bariol bold").
+														Color("PanelText").
+														Fn,
+													// ).Fn,
+													// ).Fn,
 												).Fn(gtx)
-											},
 										},
-											bc...), l.Vertical),
+									},
+										bc...), l.Vertical),
 								).Fn,
 							).Fn(gtx)
 						},

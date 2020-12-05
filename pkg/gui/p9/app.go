@@ -184,7 +184,7 @@ func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
 func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 	return a.th.Flex().
 		Rigid(
-			a.th.Fill("dark-red", // a.sideBarBackground,
+			a.th.Fill("PanelBg",
 				a.th.VFlex().
 					Flexed(1,
 						a.th.Responsive(*a.Size, Widgets{
@@ -405,9 +405,10 @@ func (a *App) renderSideBar() l.Widget {
 			gtx.Constraints.Min.X = gtx.Constraints.Max.X
 			out := a.sideBarList.
 				Length(len(a.sideBar)).
-				LeftSide(true).
+				// LeftSide(true).
+
 				Vertical().
-				// Background("DocBg").
+				Background("PanelBg").
 				// Color("DocText").
 				// Active("Primary").
 				ListElement(func(gtx l.Context, index int) l.Dimensions {
@@ -425,7 +426,7 @@ func (a *App) renderSideBar() l.Widget {
 					// return out.Fn(gtx)
 				})
 			// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
-			return out.Fn(gtx)
+			return a.th.VFlex().Flexed(1,out.Fn).Rigid( a.th.Inset(0.25, EmptyMaxWidth()).Fn).Fn(gtx)
 		}
 	} else {
 		return EmptySpace(0, 0)

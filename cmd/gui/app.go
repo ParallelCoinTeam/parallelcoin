@@ -194,23 +194,27 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a.StatusBar([]l.Widget{
 		// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 		wg.RunStatusPanel,
-		wg.th.Flex().Rigid(
-			wg.StatusBarButton("log", 4, &icons.ActionList, func(name string) {
-				Debug("click on button", name)
-				if wg.App.MenuOpen {
-					wg.App.MenuOpen = false
-				}
-				wg.App.ActivePage(name)
-			}, a),
-		).Rigid(
-			wg.StatusBarButton("settings", 5, &icons.ActionSettings, func(name string) {
-				Debug("click on button", name)
-				if wg.App.MenuOpen {
-					wg.App.MenuOpen = false
-				}
-				wg.App.ActivePage(name)
-			}, a),
-		).Fn,
+		wg.th.Flex().
+			Flexed(1, p9.EmptyMaxWidth()).
+			Rigid(
+				wg.StatusBarButton("log", 4, &icons.ActionList, func(name string) {
+					Debug("click on button", name)
+					if wg.App.MenuOpen {
+						wg.App.MenuOpen = false
+					}
+					wg.App.ActivePage(name)
+				}, a),
+			).
+			Rigid(
+				wg.StatusBarButton("settings", 5, &icons.ActionSettings, func(name string) {
+					Debug("click on button", name)
+					if wg.App.MenuOpen {
+						wg.App.MenuOpen = false
+					}
+					wg.App.ActivePage(name)
+				}, a),
+			).
+			Fn,
 	})
 	a.AddOverlay(wg.toasts.DrawToasts())
 	a.AddOverlay(wg.dialog.DrawDialog())
