@@ -34,6 +34,9 @@ func (wg *WalletGUI) updateThingies() (err error) {
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
 	// Debug("processChainBlockNotification")
 	// update best block height
+	if wg.ChainClient == nil {
+		return
+	}
 	wg.State.SetBestBlockHeight(int(height))
 	wg.State.SetBestBlockHash(hash)
 }
@@ -134,6 +137,9 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 	return &rpcclient.NotificationHandlers{
 		OnClientConnected: func() {
 			go func() {
+				if wg.WalletClient == nil || *wg.walletLocked {
+					return
+				}
 				Debug("WALLET CLIENT CONNECTED!")
 				// // time.Sleep(time.Second * 3)
 				var unconfirmed util.Amount

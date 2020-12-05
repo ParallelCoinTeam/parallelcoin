@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"time"
 
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -463,6 +462,9 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
+					if *wg.walletLocked {
+						return l.Dimensions{}
+					}
 					// background := wg.App.StatusBarBackgroundGet()
 					color := wg.App.StatusBarColorGet()
 					ic := wg.th.Icon().
@@ -484,16 +486,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 										go func() {
 											var err error
 											wasRunning := wg.running
-											wasMining := wg.mining
+											// wasMining := wg.mining
 											Debug("was running", wasRunning)
 											if wasRunning {
 												wg.ShellRunCommandChan <- "stop"
 											}
-											if wasMining {
-												wg.MinerRunCommandChan <- "stop"
-											}
+											// if wasMining {
+											// 	wg.MinerRunCommandChan <- "stop"
+											// }
 											args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
-												"--pipelog", "shell", "drophistory"}
+												"--pipelog", "--walletpass", *wg.cx.Config.WalletPass, "wallet", "drophistory"}
 											runner := exec.Command(args[0], args[1:]...)
 											runner.Stderr = os.Stderr
 											runner.Stdout = os.Stderr
@@ -510,10 +512,10 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											if wasRunning {
 												wg.ShellRunCommandChan <- "run"
 											}
-											time.Sleep(time.Second*3)
-											if wasMining {
-												wg.MinerRunCommandChan <- "run"
-											}
+											// time.Sleep(time.Second*3)
+											// if wasMining {
+											// 	wg.MinerRunCommandChan <- "run"
+											// }
 										}()
 									}).
 								Fn,
