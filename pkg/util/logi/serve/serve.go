@@ -1,12 +1,9 @@
 package serve
 
 import (
-	"os"
-
 	"go.uber.org/atomic"
 
 	"github.com/p9c/pod/pkg/comm/pipe"
-	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
@@ -47,9 +44,9 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool)) {
 				// time.Sleep(time.Second*5)
 				close(quit)
 				// os.Exit(0)
-				interrupt.Request()
+				//interrupt.Request()
 				// break
-				os.Exit(0)
+				//os.Exit(0)
 			}
 		}
 		return

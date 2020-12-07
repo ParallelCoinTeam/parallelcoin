@@ -1,9 +1,10 @@
 package app
 
 import (
-	"github.com/urfave/cli"
-
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node"
@@ -34,22 +35,37 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 			return nil
 		}
-		go func() {
-			Debug("starting node")
-			err := node.Main(cx)
-			if err != nil {
-				Error("error starting node ", err)
+		config.Configure(cx, c.Command.Name, true)
+		Debug("starting shell")
+		if *cx.Config.TLS || *cx.Config.ServerTLS {
+			// generate the tls certificate if configured
+			if apputil.FileExists(*cx.Config.RPCCert) && apputil.FileExists(*cx.Config.RPCKey) &&
+				apputil.FileExists(*cx.Config.CAFile) {
+
+			} else {
+				_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
 			}
-			Debug("node finished")
-			cx.WaitGroup.Done()
-			Debug("waitgroup decremented")
-		}()
-		Debug("sending back node rpc server handler")
-		cx.RPCServer = <-cx.NodeChan
-		close(cx.NodeReady)
-		cx.Node.Store(true)
+		}
+		if !*cx.Config.NodeOff {
+			go func() {
+				cx.WaitGroup.Add(1)
+				err = node.Main(cx)
+				if err != nil {
+					Error("error starting node ", err)
+				}
+				cx.WaitGroup.Done()
+				close(cx.KillAll)
+			}()
+			Info("starting node")
+			if !*cx.Config.DisableRPC {
+				cx.RPCServer = <-cx.NodeChan
+			}
+			close(cx.NodeReady)
+			cx.Node.Store(true)
+			Info("node started")
+		}
 		cx.WaitGroup.Wait()
-		Debug("node is now fully shut down")
+		<-cx.KillAll
 		return nil
 	}
 }

@@ -426,9 +426,7 @@ func (cm *ConnManager) listenHandler(listener net.Listener) {
 	cm.wg.Done()
 	if err := listener.Close(); Check(err) {
 	}
-	Trace(func() string {
-		return fmt.Sprint("listener handler done for ", listener.Addr())
-	})
+	Trace(fmt.Sprint("listener handler done for ", listener.Addr()))
 }
 
 // Start launches the connection manager and begins connecting to the network.

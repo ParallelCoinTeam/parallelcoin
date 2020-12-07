@@ -447,7 +447,6 @@ func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error 
 //
 // This function MUST be called with the database write lock held.
 func (c *dbCache) flush() error {
-	Trace("syncing database to disk")
 	c.lastFlush = time.Now()
 	// Sync the current write file associated with the block store.
 	//
@@ -475,6 +474,7 @@ func (c *dbCache) flush() error {
 	c.cachedKeys = treap.NewImmutable()
 	c.cachedRemove = treap.NewImmutable()
 	c.cacheLock.Unlock()
+	Info("synced database to disk")
 	return nil
 }
 

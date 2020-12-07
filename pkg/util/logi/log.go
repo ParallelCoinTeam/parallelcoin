@@ -380,7 +380,7 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 		}
 		text := trimReturn(fmt.Sprintln(a...))
 		if l.Writer.write {
-			l.Writer.Println(Composite(text, l.Level))
+			l.Writer.Println(Composite(text, level))
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)

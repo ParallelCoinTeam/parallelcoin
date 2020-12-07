@@ -36,3 +36,7 @@ guihttpprof:
 guiprof:
 	go install -v
 	pod -D test0 -n testnet --lan --solo --kopachgui
+
+node:
+	go install -v
+	pod -D test0 -n testnet --norpc -l trace node

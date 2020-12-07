@@ -127,19 +127,20 @@ func Main(cx *conte.Xt) (err error) {
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 {
+		Debug("starting cAPI.....")
 		chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
-		Trace("propagating rpc server handle (node has started)")
+		Debug("propagating rpc server handle (node has started)")
 		cx.RPCServer = server.RPCServers[0]
 		if cx.NodeChan != nil {
-			Trace("sending back node")
+			Debug("sending back node")
 			cx.NodeChan <- server.RPCServers[0]
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
-	Debug("starting controller")
+	//Debug("starting controller")
 	control.Run(cx)
-	Debug("controller started")
-	cx.Controller.Store(true)
+	//Debug("controller started")
+	//cx.Controller.Store(true)
 	gracefulShutdown := func() {
 		Info("gracefully shutting down the server...")
 		Debug("stopping controller")
@@ -152,6 +153,7 @@ func Main(cx *conte.Xt) (err error) {
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
+		close(cx.KillAll)
 	}
 	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)
