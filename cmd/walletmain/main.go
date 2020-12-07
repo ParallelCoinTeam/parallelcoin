@@ -21,7 +21,6 @@ import (
 // with calls to os.Exit. Instead, main runs this function and checks for a non-nil error, at point any defers have
 // already run, and if the error is non-nil, the program can be exited with an error exit status.
 func Main(cx *conte.Xt) (err error) {
-	Info("starting wallet")
 	cx.WaitGroup.Add(1)
 
 	// if *config.Profile != "" {
@@ -37,7 +36,7 @@ func Main(cx *conte.Xt) (err error) {
 	loader := wallet.NewLoader(cx.ActiveNet, *cx.Config.WalletFile, 250)
 	// Create and start HTTP server to serve wallet client connections. This will be updated with the wallet and chain
 	// server RPC client created below after each is created.
-	Trace("starting RPC servers")
+	Debug("starting RPC servers")
 	var legacyServer *legacy.Server
 	if legacyServer, err = startRPCServers(cx.Config, cx.StateCfg, cx.ActiveNet, loader); Check(err) {
 		Error("unable to create RPC servers:", err)

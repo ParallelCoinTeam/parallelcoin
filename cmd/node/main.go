@@ -166,7 +166,7 @@ func Main(cx *conte.Xt) (err error) {
 		break
 	case <-cx.KillAll:
 		Debug("KillAll")
-		gracefulShutdown()
+		//gracefulShutdown()
 		break
 	case <-interrupt.ShutdownRequestChan:
 		Debug("interrupt request")

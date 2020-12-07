@@ -27,7 +27,7 @@ gui:
 
 guis:
 	go install -v
-	pod -D test1 -n testnet --lan --solo
+	pod -D test1 -n testnet --lan --solo -l trace
 
 guihttpprof:
 	go install -v
@@ -37,6 +37,6 @@ guiprof:
 	go install -v
 	pod -D test0 -n testnet --lan --solo --kopachgui
 
-node:
+testnode:
 	go install -v
 	pod -D test0 -n testnet --norpc -l trace node

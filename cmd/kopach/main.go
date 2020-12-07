@@ -227,7 +227,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
 		interrupt.AddHandler(func() {
-			close(w.quit)
+			//close(w.quit)
 		})
 		<-w.quit
 		Info("kopach shutting down")

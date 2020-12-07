@@ -435,11 +435,11 @@ func (wg *WalletGUI) walletClient() (err error) {
 	if *wg.cx.Config.WalletOff {
 		return nil
 	}
-	walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
+	//walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Info("config.tls", *wg.cx.Config.TLS)
 	if wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
-		Host:                 walletRPC,
+		Host:                 *wg.cx.Config.WalletServer,
 		Endpoint:             "ws",
 		User:                 *wg.cx.Config.Username,
 		Pass:                 *wg.cx.Config.Password,

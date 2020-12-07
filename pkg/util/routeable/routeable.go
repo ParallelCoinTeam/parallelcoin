@@ -41,6 +41,7 @@ func GetInterface() (interfaces []net.Interface, addresses []string) {
 			// Debug(addresses[i].String())
 			if !strings.ContainsAny(addrs[j].String(), ":") {
 				routeableAddress = strings.Split(addrs[j].String(), "/")[0]
+				// all addresses except localhost can exit potentially to the internet, on linux often these show first
 				if strings.HasPrefix(routeableAddress, "127") {
 					continue
 				}

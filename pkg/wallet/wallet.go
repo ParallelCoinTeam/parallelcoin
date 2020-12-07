@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"runtime/debug"
 	"sort"
 	"strings"
 	"sync"
@@ -3082,7 +3081,7 @@ func Create(db walletdb.DB, pubPass, privPass, seed []byte, params *netparams.Pa
 // Open loads an already-created wallet from the passed database and namespaces.
 func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks,
 	params *netparams.Params, recoveryWindow uint32, podConfig *pod.Config) (*Wallet, error) {
-	debug.PrintStack()
+	//debug.PrintStack()
 	Warn("opening wallet", string(pubPass))
 	err := walletdb.View(db, func(tx walletdb.ReadTx) error {
 		waddrmgrBucket := tx.ReadBucket(waddrmgrNamespaceKey)

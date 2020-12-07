@@ -48,7 +48,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					// the entered password matches the stored hash
 					Debug("now we can open the wallet")
 					wg.ShellRunCommandChan <- "stop"
-					time.Sleep(time.Second * 3)
+					time.Sleep(time.Second * 5)
 					*wg.cx.Config.WalletPass = pass
 					wg.ShellRunCommandChan <- "run"
 					*wg.walletLocked = false
