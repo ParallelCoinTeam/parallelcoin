@@ -18,116 +18,41 @@ func Configure(cx *conte.Xt, commandName string, initial bool) {
 	// theoretically, the configuration should be accessed only when locked
 	// cfg := cx.Config
 	Debug("DATADIR", *cx.Config.DataDir)
-	if cx.StateCfg.Save {
-		Debug("save was set")
-	}
 	initLogLevel(cx.Config)
 	Debug("set log level")
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	initDictionary(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	initParams(cx)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	initDataDir(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	initTLSStuffs(cx.Config, cx.StateCfg)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	initConfigFile(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	initLogDir(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	initWalletFile(cx)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	initListeners(cx, commandName, initial)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	// Don't add peers from the config file when in regression test mode.
 	if ((*cx.Config.Network)[0] == 'r') && len(*cx.Config.AddPeers) > 0 {
 		*cx.Config.AddPeers = nil
 	}
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	normalizeAddresses(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	setRelayReject(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validateDBtype(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validateProfilePort(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validateBanDuration(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validateWhitelists(cx.Config, cx.StateCfg)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validatePeerLists(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	configListener(cx.Config, cx.ActiveNet)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validateUsers(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	configRPC(cx.Config, cx.ActiveNet)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validatePolicies(cx.Config, cx.StateCfg)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validateOnions(cx.Config)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	validateMiningStuff(cx.Config, cx.StateCfg, cx.ActiveNet)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	setDiallers(cx.Config, cx.StateCfg)
-	if cx.StateCfg.Save {
-		Debug("save was set", commandName, initial)
-	}
 	// if the user set the save flag, or file doesn't exist save the file now
 	if cx.StateCfg.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
 		cx.StateCfg.Save = false
 		if commandName == "kopach" {
 			return
 		}
-		Trace("saving configuration")
+		Debug("saving configuration")
 		save.Pod(cx.Config)
 	}
 	if cx.ActiveNet.Name == netparams.TestNet3Params.Name {

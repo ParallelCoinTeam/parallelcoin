@@ -126,8 +126,8 @@ func validatePort(port string) bool {
 
 func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	cfg := cx.Config
-	var fP int
 	var e error
+	var fP int
 	if fP, e = GetFreePort(); Check(e) {
 	}
 	// var routeableAddresses []net.Addr
@@ -137,29 +137,23 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	routeableAddress := addresses[0]
 	// Debug("********************", routeableAddress)
 	*cfg.Controller = net.JoinHostPort(routeableAddress, fmt.Sprint(fP))
-	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
-		len(*cfg.ConnectPeers) < 1 {
-		if fP, e = GetFreePort(); Check(e) {
-		}
-		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(routeableAddress+":%d", fP)}
+	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
+		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(routeableAddress + ":" + cx.ActiveNet.DefaultPort)}
 		cx.StateCfg.Save = true
 		Debug("Listeners")
 	}
 	if len(*cfg.RPCListeners) < 1 {
-		if fP, e = GetFreePort(); Check(e) {
-		}
-		*cfg.RPCListeners = cli.StringSlice{fmt.Sprintf("%s:%d", routeableAddress, fP)}
-		*cfg.RPCConnect = fmt.Sprintf("%s:%d", routeableAddress, fP)
-		Debug("setting save flag because rpc listeners is empty and rpc is" +
-			" not disabled")
+		address := fmt.Sprintf("%s:%s", routeableAddress, cx.ActiveNet.RPCClientPort)
+		*cfg.RPCListeners = cli.StringSlice{address}
+		*cfg.RPCConnect = address
+		Debug("setting save flag because rpc listeners is empty and rpc is not disabled")
 		cx.StateCfg.Save = true
 		Debug("RPCListeners")
 	}
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
-		if fP, e = GetFreePort(); Check(e) {
-		}
-		*cfg.WalletRPCListeners = cli.StringSlice{fmt.Sprintf(routeableAddress+":%d", fP)}
-		*cfg.WalletServer = fmt.Sprintf(routeableAddress+":%d", fP)
+		address := fmt.Sprintf(routeableAddress + ":" + cx.ActiveNet.WalletRPCServerPort)
+		*cfg.WalletRPCListeners = cli.StringSlice{address}
+		*cfg.WalletServer = address
 		Debug("setting save flag because wallet rpc listeners is empty and" +
 			" rpc is not disabled")
 		cx.StateCfg.Save = true
