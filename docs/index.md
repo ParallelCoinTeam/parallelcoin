@@ -20,7 +20,7 @@ The hard fork includes the following new features:
   different difficulty target and proportional block reward. 
   This allows a broader scale dynamic between small and larger 
   miners, who have different needs for payment regularity.
-  The average block time is 18 seconds, which is sufficient
+  The average block time is 36 seconds, which is sufficient
   for many retail operation types.
   
 - **Multi-platform touch-friendly wallet GUI** - A responsive and 
