@@ -2,15 +2,12 @@ package gui
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/kofoworola/godate"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	l "gioui.org/layout"
 
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 func (wg *WalletGUI) HistoryPage() l.Widget {
@@ -69,103 +66,37 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	gen := wg.bools["showGenerate"].GetValue()
-	sent := wg.bools["showSent"].GetValue()
-	recv := wg.bools["showReceived"].GetValue()
-	imma := wg.bools["showImmature"].GetValue()
-	// current := wg.incdecs["transactionsPerPage"].GetCurrent()
-	cursor := 0 // wg.historyCurPage * current
-	// Debug(cursor, wg.historyCurPage, current, *wg.Size)
-	var out []btcjson.ListTransactionsResult
-	// for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
-	// Debugs(wg.State.allTxs)
-	ws := wg.State.allTxs
-	for ; cursor < len(ws)-1; cursor++ {
-		wsa := ws[cursor]
-		if wsa.Generated && gen ||
-			wsa.Category == "send" && sent ||
-			wsa.Category == "generate" && gen ||
-			wsa.Category == "immature" && imma ||
-			wsa.Category == "receive" && recv ||
-			wsa.Category == "unknown" {
-			out = append(out, wsa)
-			// break
-		}
-
-	}
-	// if cursor == len(wg.State.allTxs)-1 {
+	// gen := wg.bools["showGenerate"].GetValue()
+	// sent := wg.bools["showSent"].GetValue()
+	// recv := wg.bools["showReceived"].GetValue()
+	// imma := wg.bools["showImmature"].GetValue()
+	// // current := wg.incdecs["transactionsPerPage"].GetCurrent()
+	// cursor := 0 // wg.historyCurPage * current
+	// // Debug(cursor, wg.historyCurPage, current, *wg.Size)
+	// var out []btcjson.ListTransactionsResult
+	// // for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
+	// // Debugs(wg.State.AllTxs)
+	// ws := wg.State.AllTxs
+	// for ; cursor < len(ws)-1; cursor++ {
+	// 	wsa := ws[cursor]
+	// 	if wsa.Generated && gen ||
+	// 		wsa.Category == "send" && sent ||
+	// 		wsa.Category == "generate" && gen ||
+	// 		wsa.Category == "immature" && imma ||
+	// 		wsa.Category == "receive" && recv ||
+	// 		wsa.Category == "unknown" {
+	// 		out = append(out, wsa)
+	// 		// break
+	// 	}
+	//
+	// }
+	// if cursor == len(wg.State.AllTxs)-1 {
 	// 	break
 	// }
 	// }
 	// Debugs(out)
-	// create the header
-	header := p9.TextTableHeader{
-		"Amount",
-		"Category",
-		"Address",
-		"Time",
-		"Conf",
-		"In Block",
-		// "Transaction ID",
-		// "Comment",
-		// "Fee",
-		// "BlockHash",
-		// "BlockTime",
-		// "Generated",
-		// "Abandoned",
-		// "Time Received",
-		// "Trusted",
-		// "Vout",
-		// "Wallet Conflicts",
-		// "Account",
-		// "Other Account",
-		// "Involves Watch Only",
-	}
-	body := p9.TextTableBody{}
-	for x := range out {
-		i := x
-		oi := out[i]
-		body = append(body, p9.TextTableRow{
-			fmt.Sprintf("%6.8f", oi.Amount),
-			oi.Category,
-			oi.Address,
-			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
-				godate.Create(time.Unix(oi.Time, 0)))),
-			fmt.Sprintf("%v", oi.Confirmations),
-			fmt.Sprintf("%v", *oi.BlockIndex),
-			// wg.State.allTxs[i].TxID,
-			// wg.State.allTxs[i].Comment,
-			// fmt.Sprintf("%v", wg.State.allTxs[i].Fee),
-			// wg.State.allTxs[i].BlockHash,
-			// fmt.Sprintf("%v", wg.State.allTxs[i].BlockTime),
-			// fmt.Sprintf("%v", wg.State.allTxs[i].Generated),
-			// fmt.Sprintf("%v", wg.State.allTxs[i].Abandoned),
-			// fmt.Sprintf("%v", wg.State.allTxs[i].Time),
-			// fmt.Sprintf("%v", wg.State.allTxs[i].Trusted),
-			// fmt.Sprintf("%v", wg.State.allTxs[i].Vout),
-			// fmt.Sprintf("%v", wg.State.allTxs[i].WalletConflicts),
-			// wg.State.allTxs[i].Account,
-			// wg.State.allTxs[i].OtherAccount,
-			// fmt.Sprintf("%v", wg.State.allTxs[i].InvolvesWatchOnly),
-		})
-	}
-	table := &p9.TextTable{
-		Theme:            wg.th,
-		Header:           header,
-		Body:             body,
-		HeaderColor:      "DocText",
-		HeaderBackground: "DocBg",
-		HeaderFont:       "bariol bold",
-		HeaderFontScale:  1,
-		CellColor:        "PanelText",
-		CellBackground:   "PanelBg",
-		CellFont:         "go regular",
-		CellFontScale:    p9.Scales["Caption"],
-		Inset:            0.25,
-		List:             wg.lists["history"],
-	}
 
-	return table.Fn
+	return wg.th.VFlex().Flexed(1, wg.historyTable.Fn).Fn
 	// wg.th.Fill("DocBg",
 	// p9.EmptySpace(0, 0),
 	// ).Fn
@@ -173,8 +104,8 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 
 func (wg *WalletGUI) HistoryPager() l.Widget {
 	v := wg.incdecs["transactionsPerPage"].GetCurrent()
-	vd := len(wg.State.allTxs) / v
-	vm := len(wg.State.allTxs) % v
+	vd := len(wg.State.AllTxs) / v
+	vm := len(wg.State.AllTxs) % v
 	if vm != 0 {
 		vd++
 	}
@@ -208,7 +139,7 @@ func (wg *WalletGUI) HistoryPager() l.Widget {
 			wg.th.IconButton(wg.clickables["txPageForward"].
 				SetClick(func() {
 					wg.historyCurPage++
-					pLen := len(wg.State.allTxs) / wg.incdecs["transactionsPerPage"].GetCurrent()
+					pLen := len(wg.State.AllTxs) / wg.incdecs["transactionsPerPage"].GetCurrent()
 					if wg.historyCurPage > pLen {
 						wg.historyCurPage = pLen
 					}

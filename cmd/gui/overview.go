@@ -163,11 +163,11 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	// out = append(out)
 	for x := 0; x < 10; x++ {
 		i := x
-		if len(wg.State.allTimeStrings) <= i {
+		if len(wg.State.AllTimeStrings) <= i {
 			break
 		}
-		txs := wg.State.allTxs[i]
-		times := wg.State.allTimeStrings
+		txs := wg.State.AllTxs[i]
+		times := wg.State.AllTimeStrings
 		// spacer
 		if !first {
 			out = append(out,

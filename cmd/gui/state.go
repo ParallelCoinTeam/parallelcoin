@@ -5,27 +5,61 @@ import (
 	"sync"
 	"time"
 
-	l "gioui.org/layout"
 	"github.com/kofoworola/godate"
+
+	l "gioui.org/layout"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
+// CategoryFilter marks which transactions to omit from the filtered transaction list
+type CategoryFilter struct {
+	Send     bool
+	Generate bool
+	Immature bool
+	Receive  bool
+	Unknown  bool
+}
+
+func (c *CategoryFilter) Filter(s string) (include bool) {
+	include = true
+	if c.Send && s == "send" {
+		include = false
+	}
+	if c.Generate && s == "generate" {
+		include = false
+	}
+	if c.Immature && s == "immature" {
+		include = false
+	}
+	if c.Receive && s == "receive" {
+		include = false
+	}
+	if c.Unknown && s == "unknown" {
+		include = false
+	}
+	return
+}
+
 type State struct {
-	mutex              sync.Mutex
-	lastUpdated        time.Time
-	bestBlockHeight    int
-	bestBlockHash      *chainhash.Hash
-	balance            float64
-	balanceUnconfirmed float64
-	txs                []tx
-	goroutines         []l.Widget
-	txPerPage          int
-	txPage             int
-	allTxs             []btcjson.ListTransactionsResult
-	allTimeStrings     []string
+	mutex               sync.Mutex
+	lastUpdated         time.Time
+	bestBlockHeight     int
+	bestBlockHash       *chainhash.Hash
+	balance             float64
+	balanceUnconfirmed  float64
+	txs                 []tx
+	goroutines          []l.Widget
+	txPerPage           int
+	txPage              int
+	AllTxs              []btcjson.ListTransactionsResult
+	AllTimeStrings      []string
+	FilteredTxs         []btcjson.ListTransactionsResult
+	FilteredTimeStrings []string
+	Filter              CategoryFilter
+	FilterChanged       bool
 }
 
 type tx struct {
@@ -51,15 +85,32 @@ func (s *State) SetGoroutines(gr []l.Widget) {
 func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	s.allTxs = allTxs
-	// if s.allTimeStrings == nil {
-	s.allTimeStrings = make([]string, len(s.allTxs))
+	s.AllTxs = allTxs
+	// if s.AllTimeStrings == nil {
+	s.AllTimeStrings = make([]string, len(s.AllTxs))
 	// }
-	for i := range s.allTxs {
-		s.allTimeStrings[i] =
+	for i := range s.AllTxs {
+		s.AllTimeStrings[i] =
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
-				godate.Create(time.Unix(s.allTxs[i].BlockTime, 0))))
+				godate.Create(time.Unix(s.AllTxs[i].BlockTime, 0))))
 	}
+	// generate filtered state
+	s.FilteredTxs = make([]btcjson.ListTransactionsResult, 0, len(s.AllTxs))
+	s.FilteredTimeStrings = make([]string, 0, len(s.AllTxs))
+	for i := range s.AllTxs {
+		if s.Filter.Filter(s.AllTxs[i].Category) {
+			s.FilteredTxs = append(s.FilteredTxs, s.AllTxs[i])
+			s.FilteredTimeStrings = append(s.FilteredTimeStrings, s.AllTimeStrings[i])
+		}
+	}
+	// // reverse the filtered tx's because they are in reverse chronological order and prepend rather than append, and
+	// // the history view needs them to be immutable but they can grow
+	// lf := len(s.AllTxs) - 1
+	// if lf > 0 {
+	// 	for i := 0; i < lf/2; i++ {
+	// 		s.FilteredTxs[i], s.FilteredTxs[lf-i] = s.FilteredTxs[lf-i], s.FilteredTxs[i]
+	// 	}
+	// }
 }
 
 func (s *State) Txs() []tx {

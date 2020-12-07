@@ -10,17 +10,22 @@ import (
 
 type Cell struct {
 	l.Widget
-	dims l.Dimensions
+	dims     l.Dimensions
+	computed bool
 	// priority only has meaning for the header row in defining an order of eliminating elements to fit a width.
 	// When trimming size to fit width add from highest to lowest priority and stop when dimensions exceed the target.
 	Priority int
 }
 
 func (c *Cell) getWidgetDimensions(gtx l.Context, th *Theme) {
+	if c.computed {
+		return
+	}
 	// gather the dimensions of the list elements
 	gtx.Ops.Reset()
 	child := op.Record(gtx.Ops)
 	c.dims = c.Widget(gtx)
+	c.computed = true
 	_ = child.Stop()
 	return
 }
@@ -59,8 +64,7 @@ func (c CellPriorities) Swap(i, j int) {
 type CellGrid []CellRow
 
 // Table is a super simple table widget that finds the dimensions of all cells, sets all to max of each axis, and then
-// scales the remaining space evenly after pruning off columns that cause the table to exceed the maximum width by
-// adding columns with the highest priority (lowest value) first.
+// scales the remaining space evenly
 type Table struct {
 	th               *Theme
 	header           CellRow
@@ -69,6 +73,7 @@ type Table struct {
 	Y, X             []int
 	headerBackground string
 	cellBackground   string
+	reverse          bool
 }
 
 func (th *Theme) Table() *Table {
@@ -76,6 +81,11 @@ func (th *Theme) Table() *Table {
 		th:   th,
 		list: th.List(),
 	}
+}
+
+func (t *Table) SetReverse(color string) *Table {
+	t.reverse = true
+	return t
 }
 
 func (t *Table) HeaderBackground(color string) *Table {
@@ -100,9 +110,13 @@ func (t *Table) Body(g CellGrid) *Table {
 
 func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	// Debug(len(t.body), len(t.header))
-	if len(t.body) == 0 || len(t.header) == 0 {
+	if len(t.header) == 0 {
 		return l.Dimensions{}
 	}
+	// if len(t.body) == 0 || len(t.header) == 0 {
+	// 	return l.Dimensions{}
+	// }
+
 	for i := range t.body {
 		if len(t.header) != len(t.body[i]) {
 			// this should never happen hence panic
@@ -122,6 +136,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		}
 	}
 	// Debugs(t.body)
+
 	// find the max of each row and column
 	var table CellGrid
 	table = append(table, t.header)
@@ -211,15 +226,14 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	// 	}
 	// 	out[i] = outFlex.Fn
 	// }
-
-	h := t.th.Flex() // .SpaceEvenly()
+	header := t.th.Flex() // .SpaceEvenly()
 	for x, oi := range t.header {
 		i := x
 		// header is not in the list but drawn above it
 		oie := oi
 		txi := t.X[i]
 		tyi := t.Y[0]
-		h.Rigid(func(gtx l.Context) l.Dimensions {
+		header.Rigid(func(gtx l.Context) l.Dimensions {
 			cs := gtx.Constraints
 			cs.Max.X = txi
 			cs.Min.X = gtx.Constraints.Max.X
@@ -232,15 +246,29 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		})
 	}
 
-	out := append(CellGrid{t.header}, t.body...)
+	var out CellGrid
+	out = CellGrid{t.header}
+	if t.reverse {
+		// append the body elements in reverse order stored
+		lb := len(t.body) - 1
+		for i := range t.body {
+			out = append(out, t.body[lb-i])
+		}
+	} else {
+		out = append(out, t.body...)
+	}
 	le := func(gtx l.Context, index int) l.Dimensions {
 		f := t.th.Flex() // .SpaceEvenly()
 		oi := out[index]
 		for x, oiee := range oi {
 			i := x
 			if index == 0 {
-
+				// we skip the header, not implemented but the header could be part of the scrollable area if need
+				// arises later, unwrap this block on a flag
 			} else {
+				if index >= len(t.Y) {
+					break
+				}
 				oie := oiee
 				txi := t.X[i]
 				tyi := t.Y[index]
@@ -266,13 +294,14 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		}
 		return f.Fn(gtx)
 	}
-	_ = le
 	return t.th.VFlex().
 		Rigid(func(gtx l.Context) l.Dimensions {
-			return t.th.Fill(t.headerBackground, h.Fn).Fn(gtx)
+			// header is fixed to the top of the widget
+			return t.th.Fill(t.headerBackground, header.Fn).Fn(gtx)
 		}).
 		Flexed(1,
 			t.th.Fill(t.cellBackground,
+				// the table is a scrollable vertical list that fills the remaining space
 				func(gtx l.Context) l.Dimensions {
 					return t.list.Vertical().
 						Length(len(out)).

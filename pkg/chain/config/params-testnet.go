@@ -14,7 +14,7 @@ var TestNet3Params = Params{
 	Net:         wire.TestNet3,
 	DefaultPort: "21047",
 	DNSSeeds: []DNSSeed{
-		// {"testnet-seed.bitcoin.jonasschnelli.ch", true},
+		// {"seed1.parallelcoin.io", true},
 	},
 	// Chain parameters
 	GenesisBlock:             &testNet3GenesisBlock,

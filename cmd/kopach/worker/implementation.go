@@ -135,7 +135,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit chan struct{
 	w.startNonce = uint32(w.roller.C.Load())
 	interrupt.AddHandler(func() {
 		Debug("worker quitting")
-		close(w.Quit)
+		// close(w.Quit)
 		// w.pipeConn.Close()
 		w.dispatchReady.Store(false)
 	})

@@ -89,6 +89,7 @@ type WalletGUI struct {
 	walletToLock              time.Time
 	walletLockTime            int
 	Size                      *int
+	historyTable              *p9.TextTable
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -130,6 +131,20 @@ func (wg *WalletGUI) Run() (err error) {
 		"received":     wg.th.List(),
 		"history":      wg.th.List(),
 	}
+	wg.historyTable = (&p9.TextTable{
+		Theme:            wg.th,
+		HeaderColor:      "DocText",
+		HeaderBackground: "DocBg",
+		HeaderFont:       "bariol bold",
+		HeaderFontScale:  1,
+		CellColor:        "PanelText",
+		CellBackground:   "PanelBg",
+		CellFont:         "go regular",
+		CellFontScale:    p9.Scales["Caption"],
+		Inset:            0.25,
+		List:             wg.lists["history"],
+	}).
+		SetDefaults()
 	wg.clickables = map[string]*p9.Clickable{
 		"createWallet":            wg.th.Clickable(),
 		"quit":                    wg.th.Clickable(),
