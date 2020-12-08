@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
+	"runtime"
 )
 
 func Log(quit chan struct{}, handler func(ent *logi.Entry) (
@@ -86,17 +87,19 @@ func Kill(w *worker.Worker) {
 	// Debug("closing worker StdConn quit channel")
 	// close(w.StdConn.Quit)
 	// var err error
-	// if runtime.GOOS != "windows" {
-	//	if err = w.Stop(); Check(err) {
-	//	}
-	// }
-	Debug("sending interrupt")
-	if err = w.Interrupt(); Check(err) {
+	if runtime.GOOS != "windows" {
+		Debug("stopping")
+		if err = w.Stop(); Check(err) {
+		}
+	} else {
+		Debug("sending interrupt")
+		if err = w.Interrupt(); Check(err) {
+		}
 	}
 	// if err = w.Kill(); Check(err) {
 	// }
-	// Debug("closing worker quit channel")
-	// close(w.Quit)
+	Debug("closing worker quit channel")
+	close(w.Quit)
 }
 
 func SetLevel(w *worker.Worker, level string) {
