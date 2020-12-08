@@ -15,16 +15,14 @@ import (
 	"github.com/p9c/pod/pkg/gui/toast"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util/logi/consume"
-
 	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -290,21 +288,21 @@ func (wg *WalletGUI) Run() (err error) {
 				func() {
 					Debug("quitting wallet gui")
 					if wg.running {
+						//consume.Kill(wg.Node)
 						close(wg.Node.Quit)
 					}
 					if wg.mining {
+						//consume.Kill(wg.Miner)
 						close(wg.Miner.Quit)
 					}
-					//consume.Kill(wg.Node)
-					//consume.Kill(wg.Miner)
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {
 		Debug("quitting wallet gui")
-		consume.Kill(wg.Node)
-		consume.Kill(wg.Miner)
+		//consume.Kill(wg.Node)
+		//consume.Kill(wg.Miner)
 		close(wg.quit)
 	})
 out:
@@ -329,16 +327,16 @@ out:
 					wg.WalletClient = nil
 				}
 			}
-			if wg.Node != nil {
-				Debug("stopping shell")
-				// wg.ShellRunCommandChan <- "stop"
-				consume.Kill(wg.Node)
-			}
-			if wg.Miner != nil {
-				Debug("stopping miner")
-				consume.Kill(wg.Miner)
-				// wg.MinerRunCommandChan <- "stop"
-			}
+			//if wg.Node != nil {
+			//	Debug("stopping shell")
+			//	// wg.ShellRunCommandChan <- "stop"
+			//	consume.Kill(wg.Node)
+			//}
+			//if wg.Miner != nil {
+			//	Debug("stopping miner")
+			//	consume.Kill(wg.Miner)
+			//	// wg.MinerRunCommandChan <- "stop"
+			//}
 			break out
 		}
 	}

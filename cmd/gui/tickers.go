@@ -35,7 +35,7 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					Debug("preconnect loop")
+					//Debug("preconnect loop")
 					// update goroutines data
 					wg.goRoutines()
 					// close clients if they are open

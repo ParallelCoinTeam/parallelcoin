@@ -16,9 +16,6 @@ import (
 
 	"github.com/p9c/pod/pkg/util/logi"
 
-	"github.com/p9c/pod/pkg/util/logi/consume"
-
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/version"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -1306,15 +1303,15 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 
 // HandleGetGenerate implements the getgenerate command.
 func HandleGetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
-	generating := s.StateCfg.Miner != nil
-	if generating {
-		Debug("miner is running internally")
-	} else {
-		Debug("miner is not running")
-	}
+	//generating := s.StateCfg.Miner != nil
+	//if generating {
+	//	Debug("miner is running internally")
+	//} else {
+	//	Debug("miner is not running")
+	//}
 	// return nil, nil
 	// return s.Cfg.CPUMiner.IsMining(), nil
-	return generating, nil
+	return false, errors.New("there is no internal cpu miner anymore")
 }
 
 // var startTime = time.Now()
@@ -2534,87 +2531,88 @@ func HandleSendRawTransaction(
 // HandleSetGenerate implements the setgenerate command.
 // TODO: this and lots of RPC needs to be revised before release
 func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
-	var msg string
-	var err error
-	// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
-	c, ok := cmd.(*btcjson.SetGenerateCmd)
-	if !ok {
-		var h string
-		h, err = s.HelpCacher.RPCMethodHelp("setgenerate")
-		if err != nil {
-			msg = err.Error() + "\n\n"
-		}
-		msg += h
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCInvalidParameter,
-			Message: msg,
-			// "invalid subcommand for addnode",
-		}
-	}
-	Debugs(c)
-	// Disable generation regardless of the provided generate flag if the maximum number of threads (goroutines for our
-	// purposes) is 0. Otherwise enable or disable it depending on the provided flag. l.ScriptError(*c.GenProcLimit,
-	// c.Generate)
-	generate := c.Generate
-	genProcLimit := *s.Config.GenThreads
-	if c.GenProcLimit != nil {
-		genProcLimit = *c.GenProcLimit
-		if !generate {
-			*c.GenProcLimit = 0
-		}
-		if *c.GenProcLimit == 0 {
-			generate = false
-		}
-	}
-	Debug("generating", generate, "threads", genProcLimit)
-	// if s.Cfg.CPUMiner.IsMining() {
-	// 	// if s.cfg.CPUMiner.GetAlgo() != s.cfg.Algo {
-	// 	s.Cfg.CPUMiner.Stop()
-	// 	generate = true
-	// 	// }
-	// }
-	// if !generate {
-	// 	s.Cfg.CPUMiner.Stop()
-	// } else {
-	// 	// Respond with an error if there are no addresses to pay the created
-	// 	// blocks to.
-	// 	if len(s.StateCfg.ActiveMiningAddrs) == 0 {
-	// 		return nil, &btcjson.RPCError{
-	// 			Code:    btcjson.ErrRPCInternal.Code,
-	// 			Message: "no payment addresses specified via --miningaddr",
-	// 		}
-	// 	}
-	// 	// It's safe to call start even if it's already started.
-	// 	s.Cfg.CPUMiner.SetNumWorkers(int32(genProcLimit))
-	// 	s.Cfg.CPUMiner.Start()
-	// }
-	*s.Config.Generate = generate
-	*s.Config.GenThreads = genProcLimit
-	if s.StateCfg.Miner != nil {
-		Debug("stopping existing miner")
-		consume.Kill(s.StateCfg.Miner)
-		s.StateCfg.Miner = nil
-	}
-	Debug("saving configuration")
-	save.Pod(s.Config)
-	if *s.Config.Generate && *s.Config.GenThreads != 0 {
-		Debug("starting miner")
-		args := []string{os.Args[0], "-D", *s.Config.DataDir}
-		if *s.Config.KopachGUI {
-			args = append(args, "--kopachgui")
-		}
-		args = append(args, "kopach")
-		// args = apputil.PrependForWindows(args)
-		s.StateCfg.Miner = consume.Log(s.Quit, func(ent *logi.Entry) (err error) {
-			Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
-			return
-		}, func(pkg string) (out bool) {
-			return false
-		}, args...)
-		consume.Start(s.StateCfg.Miner)
-	} else {
-		consume.Kill(s.StateCfg.Miner)
-	}
+	return nil, errors.New("there is no internal cpu miner")
+	//var msg string
+	//var err error
+	//// c, ok := cmd.(*btcjson.GetRawTransactionCmd)
+	//c, ok := cmd.(*btcjson.SetGenerateCmd)
+	//if !ok {
+	//	var h string
+	//	h, err = s.HelpCacher.RPCMethodHelp("setgenerate")
+	//	if err != nil {
+	//		msg = err.Error() + "\n\n"
+	//	}
+	//	msg += h
+	//	return nil, &btcjson.RPCError{
+	//		Code:    btcjson.ErrRPCInvalidParameter,
+	//		Message: msg,
+	//		// "invalid subcommand for addnode",
+	//	}
+	//}
+	//Debugs(c)
+	//// Disable generation regardless of the provided generate flag if the maximum number of threads (goroutines for our
+	//// purposes) is 0. Otherwise enable or disable it depending on the provided flag. l.ScriptError(*c.GenProcLimit,
+	//// c.Generate)
+	//generate := c.Generate
+	//genProcLimit := *s.Config.GenThreads
+	//if c.GenProcLimit != nil {
+	//	genProcLimit = *c.GenProcLimit
+	//	if !generate {
+	//		*c.GenProcLimit = 0
+	//	}
+	//	if *c.GenProcLimit == 0 {
+	//		generate = false
+	//	}
+	//}
+	//Debug("generating", generate, "threads", genProcLimit)
+	//// if s.Cfg.CPUMiner.IsMining() {
+	//// 	// if s.cfg.CPUMiner.GetAlgo() != s.cfg.Algo {
+	//// 	s.Cfg.CPUMiner.Stop()
+	//// 	generate = true
+	//// 	// }
+	//// }
+	//// if !generate {
+	//// 	s.Cfg.CPUMiner.Stop()
+	//// } else {
+	//// 	// Respond with an error if there are no addresses to pay the created
+	//// 	// blocks to.
+	//// 	if len(s.StateCfg.ActiveMiningAddrs) == 0 {
+	//// 		return nil, &btcjson.RPCError{
+	//// 			Code:    btcjson.ErrRPCInternal.Code,
+	//// 			Message: "no payment addresses specified via --miningaddr",
+	//// 		}
+	//// 	}
+	//// 	// It's safe to call start even if it's already started.
+	//// 	s.Cfg.CPUMiner.SetNumWorkers(int32(genProcLimit))
+	//// 	s.Cfg.CPUMiner.Start()
+	//// }
+	////*s.Config.Generate = generate
+	////*s.Config.GenThreads = genProcLimit
+	////if s.StateCfg.Miner != nil {
+	////	Debug("stopping existing miner")
+	////	consume.Kill(s.StateCfg.Miner)
+	////	s.StateCfg.Miner = nil
+	////}
+	//Debug("saving configuration")
+	//save.Pod(s.Config)
+	////if *s.Config.Generate && *s.Config.GenThreads != 0 {
+	////	Debug("starting miner")
+	////	args := []string{os.Args[0], "-D", *s.Config.DataDir}
+	////	if *s.Config.KopachGUI {
+	////		args = append(args, "--kopachgui")
+	////	}
+	////	args = append(args, "kopach")
+	////	// args = apputil.PrependForWindows(args)
+	////	s.StateCfg.Miner = consume.Log(s.Quit, func(ent *logi.Entry) (err error) {
+	////		Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+	////		return
+	////	}, func(pkg string) (out bool) {
+	////		return false
+	////	}, args...)
+	////	consume.Start(s.StateCfg.Miner)
+	////} else {
+	////	consume.Kill(s.StateCfg.Miner)
+	////}
 	return nil, nil
 }
 

@@ -21,9 +21,6 @@ import (
 
 	uberatomic "go.uber.org/atomic"
 
-	log "github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/consume"
-
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/version"
@@ -44,6 +41,7 @@ import (
 	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
+	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 const DefaultMaxOrphanTxSize = 100000
@@ -479,8 +477,8 @@ func (n *Node) Stop() (err error) {
 	}); Check(err) {
 	}
 	// Stop the CPU miner if needed
-	consume.Kill(n.StateCfg.Miner)
-	Debug("miner has stopped")
+	//consume.Kill(n.StateCfg.Miner)
+	//Debug("miner has stopped")
 	// Signal the remaining goroutines to quit.
 	close(n.Quit)
 	return

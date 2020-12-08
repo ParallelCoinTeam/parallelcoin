@@ -38,7 +38,7 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 	if cmdIn, err = w.cmd.StdinPipe(); Check(err) {
 		return
 	}
-	//w.cmd.Stderr = os.Stderr
+	w.cmd.Stderr = os.Stderr
 	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
 	if err = w.cmd.Start(); Check(err) {
 	}
@@ -47,12 +47,10 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 		for {
 			select {
 			case <-w.Quit:
-				Debug("stopping")
-				Check(w.Stop())
-				// Debug("interrupting")
-				// Check(w.Interrupt())
-				// Debug("killing")
-				// Check(w.Kill())
+				//Debug("stopping", Check(w.Stop()))
+				//Debug("interrupting", Check(w.Interrupt()))
+				//Debug("killing", Check(w.Kill()))
+				//close(w.StdConn.Quit)
 				break out
 			}
 		}
@@ -71,9 +69,9 @@ func (w *Worker) Interrupt() (err error) {
 	if err = w.cmd.Process.Signal(syscall.SIGINT); !Check(err) {
 		Debug("interrupted")
 	}
-	if err = w.cmd.Process.Release(); !Check(err) {
-		Debug("released")
-	}
+	//if err = w.cmd.Process.Release(); !Check(err) {
+	//	Debug("released")
+	//}
 	return
 }
 

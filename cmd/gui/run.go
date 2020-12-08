@@ -61,8 +61,7 @@ func (wg *WalletGUI) Runner() (err error) {
 					wg.runnerQuit = make(chan struct{})
 					wg.Node = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
 						// TODO: make a log view for this
-						Debug(
-							"NODE:",
+						Debugf("NODE[%s] %s %s",
 							ent.Level,
 							//ent.Time.Format(time.RFC3339),
 							ent.Text,
@@ -134,8 +133,10 @@ func (wg *WalletGUI) Runner() (err error) {
 				}
 			case <-wg.quit:
 				Debug("runner received quit signal")
-				consume.Kill(wg.Miner)
-				consume.Kill(wg.Node)
+				wg.ShellRunCommandChan <- "stop"
+				wg.MinerRunCommandChan <- "stop"
+				//consume.Kill(wg.Miner)
+				//consume.Kill(wg.Node)
 				break out
 			}
 		}
