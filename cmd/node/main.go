@@ -6,6 +6,7 @@ import (
 	// // This enables pprof
 	// _ "net/http/pprof"
 	"os"
+	"runtime/debug"
 	"runtime/pprof"
 
 	"github.com/p9c/pod/app/apputil"
@@ -127,8 +128,8 @@ func Main(cx *conte.Xt) (err error) {
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 {
-		Debug("starting cAPI.....")
-		chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
+		// Debug("starting cAPI.....")
+		// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
 		Debug("propagating rpc server handle (node has started)")
 		cx.RPCServer = server.RPCServers[0]
 		if cx.NodeChan != nil {
@@ -137,23 +138,32 @@ func Main(cx *conte.Xt) (err error) {
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
-	//Debug("starting controller")
+	// Debug("starting controller")
 	control.Run(cx)
-	//Debug("controller started")
-	//cx.Controller.Store(true)
+	// Debug("controller started")
+	// cx.Controller.Store(true)
+	shutted := false
 	gracefulShutdown := func() {
 		Info("gracefully shutting down the server...")
-		Debug("stopping controller")
-		e := server.Stop()
-		if e != nil {
-			Warn("failed to stop server", e)
+		if shutted {
+			Debug("gracefulShutdown called twice")
+			debug.PrintStack()
+			return
 		}
+		Debug("stopping controller")
+		go func() {
+			e := server.Stop()
+			if e != nil {
+				Warn("failed to stop server", e)
+			}
+		}()
 		// Debug("stopping miner")
 		// consume.Kill(cx.StateCfg.Miner)
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
-		//close(cx.KillAll)
+		shutted = true
+		// close(cx.KillAll)
 	}
 	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)
@@ -162,16 +172,22 @@ func Main(cx *conte.Xt) (err error) {
 	select {
 	case <-cx.NodeKill:
 		Debug("NodeKill")
-		gracefulShutdown()
+		// gracefulShutdown()
+		if !interrupt.Requested() {
+			interrupt.Request()
+		}
 		break
 	case <-cx.KillAll:
 		Debug("KillAll")
-		gracefulShutdown()
+		if !interrupt.Requested() {
+			interrupt.Request()
+		}
+		// gracefulShutdown()
 		break
-	case <-interrupt.ShutdownRequestChan:
-		Debug("interrupt request")
-		gracefulShutdown()
-		break
+		// case <-interrupt.ShutdownRequestChan:
+		// 	Debug("interrupt request")
+		// 	// gracefulShutdown()
+		// 	break
 	}
 	return nil
 }

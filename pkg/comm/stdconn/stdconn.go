@@ -22,11 +22,11 @@ func New(in io.ReadCloser, out io.WriteCloser, quit chan struct{}) (s StdConn) {
 			case <-quit:
 				Debug("!!!! closing StdConn")
 				debug.PrintStack()
-				//time.Sleep(time.Second*8)
-				//if err := s.ReadCloser.Close(); Check(err) {
-				//}
-				//if err := s.WriteCloser.Close(); Check(err) {
-				//}
+				// time.Sleep(time.Second*8)
+				if err := s.ReadCloser.Close(); Check(err) {
+				}
+				if err := s.WriteCloser.Close(); Check(err) {
+				}
 				break out
 			}
 		}

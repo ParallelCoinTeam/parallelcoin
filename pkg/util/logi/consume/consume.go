@@ -7,7 +7,6 @@ import (
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
-	"runtime/debug"
 )
 
 func Log(quit chan struct{}, handler func(ent *logi.Entry) (
@@ -73,28 +72,29 @@ func Stop(w *worker.Worker) {
 
 func Kill(w *worker.Worker) {
 	var err error
-	//if w == nil {
+	// if w == nil {
 	//	Debug("asked to kill worker that is already nil")
 	//	return
-	//}
-	var n int
-	Debug("sending kill signal")
-	debug.PrintStack()
-	if n, err = w.StdConn.Write([]byte("kill")); n < 1 || Check(err) {
-		Debug("failed to write")
-		return
-	}
-	//Debug("closing worker StdConn quit channel")
-	//close(w.StdConn.Quit)
-	//var err error
-	//if runtime.GOOS != "windows" {
+	// }
+	// var n int
+	// Debug("sending kill signal")
+	// if n, err = w.StdConn.Write([]byte("kill")); n < 1 || Check(err) {
+	// 	Debug("failed to write")
+	// 	return
+	// }
+	// Debug("sent kill signal")
+	// Debug("closing worker StdConn quit channel")
+	// close(w.StdConn.Quit)
+	// var err error
+	// if runtime.GOOS != "windows" {
 	//	if err = w.Stop(); Check(err) {
 	//	}
-	//}
-	//if err = w.Interrupt(); Check(err) {
-	//}
-	//if err = w.Kill(); Check(err) {
-	//}
+	// }
+	Debug("sending interrupt")
+	if err = w.Interrupt(); Check(err) {
+	}
+	// if err = w.Kill(); Check(err) {
+	// }
 	// Debug("closing worker quit channel")
 	// close(w.Quit)
 }

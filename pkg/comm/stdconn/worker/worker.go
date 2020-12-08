@@ -47,10 +47,10 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 		for {
 			select {
 			case <-w.Quit:
-				//Debug("stopping", Check(w.Stop()))
-				//Debug("interrupting", Check(w.Interrupt()))
-				//Debug("killing", Check(w.Kill()))
-				//close(w.StdConn.Quit)
+				// Debug("stopping", Check(w.Stop()))
+				Debug("interrupting", Check(w.Interrupt()))
+				// Debug("killing", Check(w.Kill()))
+				// close(w.StdConn.Quit)
 				break out
 			}
 		}
@@ -64,14 +64,16 @@ func (w *Worker) Wait() (err error) {
 
 func (w *Worker) Interrupt() (err error) {
 	if runtime.GOOS == "windows" {
+		if err = w.cmd.Process.Kill(); Check(err) {
+		}
 		return
 	}
 	if err = w.cmd.Process.Signal(syscall.SIGINT); !Check(err) {
 		Debug("interrupted")
 	}
-	//if err = w.cmd.Process.Release(); !Check(err) {
+	// if err = w.cmd.Process.Release(); !Check(err) {
 	//	Debug("released")
-	//}
+	// }
 	return
 }
 

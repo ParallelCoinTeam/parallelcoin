@@ -1,12 +1,12 @@
 package gui
 
 import (
+	"os"
+
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
-	"io/ioutil"
-	"os"
 )
 
 const slash = string(os.PathSeparator)
@@ -34,21 +34,21 @@ func (wg *WalletGUI) Runner() (err error) {
 						Debug("already running...")
 						break
 					}
-					wp := *wg.cx.Config.WalletPass
+					// wp := *wg.cx.Config.WalletPass
 					*wg.cx.Config.NodeOff = false
-					*wg.cx.Config.WalletOff = *wg.walletLocked
+					// *wg.cx.Config.WalletOff = *wg.walletLocked
 					// todo: if locked shouldn't pass be zeroed?
 					*wg.cx.Config.Network = wg.cx.ActiveNet.Name
 					save.Pod(wg.cx.Config)
-					if !*wg.cx.Config.WalletOff {
-						// for security with apps launching the wallet, the public password can be set with a file that is deleted after
-						walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
-						Debug("runner", walletPassPath)
-						b := []byte(wp)
-						if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
-						}
-						Debug("created password cookie")
-					}
+					// if !*wg.cx.Config.WalletOff {
+					// 	// for security with apps launching the wallet, the public password can be set with a file that is deleted after
+					// 	walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
+					// 	Debug("runner", walletPassPath)
+					// 	b := []byte(wp)
+					// 	if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+					// 	}
+					// 	Debug("created password cookie")
+					// }
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"-n", wg.cx.ActiveNet.Name,
