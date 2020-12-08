@@ -91,6 +91,8 @@ func Kill(w *worker.Worker) {
 		Debug("stopping")
 		if err = w.Stop(); Check(err) {
 		}
+		Debug("closing worker quit channel")
+		close(w.Quit)
 	} else {
 		Debug("sending interrupt")
 		if err = w.Interrupt(); Check(err) {
@@ -98,8 +100,6 @@ func Kill(w *worker.Worker) {
 	}
 	// if err = w.Kill(); Check(err) {
 	// }
-	Debug("closing worker quit channel")
-	close(w.Quit)
 }
 
 func SetLevel(w *worker.Worker, level string) {
