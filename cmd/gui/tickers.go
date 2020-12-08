@@ -52,7 +52,7 @@ func (wg *WalletGUI) Tickers() {
 						}
 					}
 					// the remaining actions require a running shell
-					if !wg.running {
+					if !wg.runningNode {
 						break
 					}
 					if !*wg.cx.Config.NodeOff {
@@ -80,7 +80,7 @@ func (wg *WalletGUI) Tickers() {
 					Debug("connected loop")
 					wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
-					if !wg.running {
+					if !wg.runningNode {
 						Debug("breaking out not running")
 						break out
 					}
@@ -205,7 +205,7 @@ func (wg *WalletGUI) Tickers() {
 					break totalOut
 				}
 			}
-			wg.running = false
+			wg.runningNode = false
 		}
 		// Debug("*** Sending shutdown signal")
 		// close(wg.quit)

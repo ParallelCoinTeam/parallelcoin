@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"io/ioutil"
 	"os"
 
 	"github.com/p9c/pod/app/save"
@@ -12,25 +13,27 @@ import (
 const slash = string(os.PathSeparator)
 
 func (wg *WalletGUI) Runner() (err error) {
-	wg.ShellRunCommandChan = make(chan string)
+	wg.NodeRunCommandChan = make(chan string)
+	wg.WalletRunCommandChan = make(chan string)
 	wg.MinerRunCommandChan = make(chan string)
 	interrupt.AddHandler(func() {
-		if wg.running {
-			// 		wg.ShellRunCommandChan <- "stop"
+		if wg.runningNode {
+			// 		wg.NodeRunCommandChan <- "stop"
 			consume.Kill(wg.Node)
 		}
 		// close(wg.quit)
 	})
+	wg.runnerQuit = wg.quit
 	go func() {
 		Debug("starting node run controller")
 	out:
 		for {
 			select {
-			case cmd := <-wg.ShellRunCommandChan:
+			case cmd := <-wg.NodeRunCommandChan:
 				switch cmd {
 				case "run":
 					Debug("run called")
-					if wg.running {
+					if wg.runningNode {
 						Debug("already running...")
 						break
 					}
@@ -50,20 +53,19 @@ func (wg *WalletGUI) Runner() (err error) {
 					// 	Debug("created password cookie")
 					// }
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
-						"--rpclisten", *wg.cx.Config.RPCConnect,
-						"-n", wg.cx.ActiveNet.Name,
+						// "--rpclisten", *wg.cx.Config.RPCConnect,
+						// "-n", wg.cx.ActiveNet.Name,
 						"--servertls=true", "--clienttls=true",
 						// "--noinitialload",
-						//"--runasservice",
-						//"--notty",
+						// "--runasservice",
+						// "--notty",
 						"--pipelog", "node"}
 					// args = apputil.PrependForWindows(args)
-					wg.runnerQuit = make(chan struct{})
 					wg.Node = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
 						// TODO: make a log view for this
 						Debugf("NODE[%s] %s %s",
 							ent.Level,
-							//ent.Time.Format(time.RFC3339),
+							// ent.Time.Format(time.RFC3339),
 							ent.Text,
 							ent.CodeLocation,
 						)
@@ -72,25 +74,94 @@ func (wg *WalletGUI) Runner() (err error) {
 						return false
 					}, args...)
 					consume.Start(wg.Node)
-					wg.running = true
+					wg.runningNode = true
 				case "stop":
 					Debug("stop called")
-					if !wg.running {
+					if !wg.runningNode {
 						Debug("wasn't running...")
 						break
 					}
+					if wg.runningWallet {
+						wg.WalletRunCommandChan <- "stop"
+						*wg.walletLocked = true
+					}
 					consume.Kill(wg.Node)
 					*wg.cx.Config.NodeOff = true
-					*wg.cx.Config.WalletOff = true
 					save.Pod(wg.cx.Config)
-					*wg.walletLocked = true
-					wg.running = false
+					wg.runningNode = false
 				case "restart":
 					Debug("restart called")
 					go func() {
-						wg.ShellRunCommandChan <- "stop"
+						wg.NodeRunCommandChan <- "stop"
 						// wg.running = false
-						wg.ShellRunCommandChan <- "run"
+						wg.NodeRunCommandChan <- "run"
+						// wg.running = true
+					}()
+				}
+			case cmd := <-wg.WalletRunCommandChan:
+				switch cmd {
+				case "run":
+					Debug("run called")
+					if wg.runningWallet {
+						Debug("already running...")
+						break
+					}
+					wp := *wg.cx.Config.WalletPass
+					// *wg.cx.Config.WalletOff = false
+					// *wg.cx.Config.WalletOff = *wg.walletLocked
+					// todo: if locked shouldn't pass be zeroed?
+					*wg.cx.Config.Network = wg.cx.ActiveNet.Name
+					save.Pod(wg.cx.Config)
+					if !*wg.cx.Config.WalletOff {
+						// for security with apps launching the wallet, the public password can be set with a file that is deleted after
+						walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
+						Debug("runner", walletPassPath)
+						b := []byte(wp)
+						if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+						}
+						Debug("created password cookie")
+					}
+					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
+						// "--rpcconnect", *wg.cx.Config.RPCConnect,
+						// "-n", wg.cx.ActiveNet.Name,
+						"--servertls=true", "--clienttls=true",
+						// "--noinitialload",
+						// "--runasservice",
+						// "--notty",
+						"--pipelog", "wallet"}
+					// args = apputil.PrependForWindows(args)
+					wg.Wallet = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
+						// TODO: make a log view for this
+						Debugf("WALLET[%s] %s %s",
+							ent.Level,
+							// ent.Time.Format(time.RFC3339),
+							ent.Text,
+							ent.CodeLocation,
+						)
+						return
+					}, func(pkg string) (out bool) {
+						return false
+					}, args...)
+					consume.Start(wg.Wallet)
+					*wg.walletLocked = false
+					wg.runningWallet = true
+				case "stop":
+					Debug("stop called")
+					if !wg.runningWallet {
+						Debug("wasn't running...")
+						break
+					}
+					consume.Kill(wg.Wallet)
+					*wg.cx.Config.WalletOff = true
+					save.Pod(wg.cx.Config)
+					*wg.walletLocked = true
+					wg.runningWallet = false
+				case "restart":
+					Debug("restart called")
+					go func() {
+						wg.WalletRunCommandChan <- "stop"
+						// wg.running = false
+						wg.WalletRunCommandChan <- "run"
 						// wg.running = true
 					}()
 				}
@@ -133,10 +204,10 @@ func (wg *WalletGUI) Runner() (err error) {
 				}
 			case <-wg.quit:
 				Debug("runner received quit signal")
-				wg.ShellRunCommandChan <- "stop"
+				wg.NodeRunCommandChan <- "stop"
 				wg.MinerRunCommandChan <- "stop"
-				//consume.Kill(wg.Miner)
-				//consume.Kill(wg.Node)
+				// consume.Kill(wg.Miner)
+				// consume.Kill(wg.Node)
 				break out
 			}
 		}

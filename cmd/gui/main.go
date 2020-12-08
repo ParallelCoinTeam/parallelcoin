@@ -64,30 +64,31 @@ type WalletGUI struct {
 	passwords        map[string]*p9.Password
 	incdecs          map[string]*p9.IncDec
 	// intSliders                map[string]*p9.IntSlider
-	configs                   cfg.GroupsMap
-	config                    *cfg.Config
-	running, mining           bool
-	invalidate                chan struct{}
-	quit                      chan struct{}
-	runnerQuit                chan struct{}
-	minerQuit                 chan struct{}
-	sendAddresses             []SendAddress
-	ShellRunCommandChan       chan string
-	MinerRunCommandChan       chan string
-	State                     State
-	Node, Miner               *worker.Worker
-	ChainClient, WalletClient *rpcclient.Client
-	txs                       []btcjson.ListTransactionsResult
-	historyCurPage            int
-	console                   *Console
-	toasts                    *toast.Toasts
-	dialog                    *dialog.Dialog
-	noWallet                  *bool
-	walletLocked              *bool
-	walletToLock              time.Time
-	walletLockTime            int
-	Size                      *int
-	historyTable              *p9.TextTable
+	configs                            cfg.GroupsMap
+	config                             *cfg.Config
+	runningNode, runningWallet, mining bool
+	invalidate                         chan struct{}
+	quit                               chan struct{}
+	runnerQuit                         chan struct{}
+	minerQuit                          chan struct{}
+	sendAddresses                      []SendAddress
+	NodeRunCommandChan                 chan string
+	WalletRunCommandChan               chan string
+	MinerRunCommandChan                chan string
+	State                              State
+	Node, Wallet, Miner                        *worker.Worker
+	ChainClient, WalletClient          *rpcclient.Client
+	txs                                []btcjson.ListTransactionsResult
+	historyCurPage                     int
+	console                            *Console
+	toasts                             *toast.Toasts
+	dialog                             *dialog.Dialog
+	noWallet                           *bool
+	walletLocked                       *bool
+	walletToLock                       time.Time
+	walletLockTime                     int
+	Size                               *int
+	historyTable                       *p9.TextTable
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -162,7 +163,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.checkables = map[string]*p9.Checkable{
 	}
 	wg.bools = map[string]*p9.Bool{
-		"runstate":     wg.th.Bool(wg.running),
+		"runstate":     wg.th.Bool(wg.runningNode),
 		"encryption":   wg.th.Bool(false),
 		"seed":         wg.th.Bool(false),
 		"testnet":      wg.th.Bool(false),
@@ -244,21 +245,21 @@ func (wg *WalletGUI) Run() (err error) {
 	// wg.Subscriber()
 	wg.App = wg.GetAppWidget()
 	wg.CreateSendAddressItem()
-	wg.running = !(*wg.cx.Config.NodeOff) // || *wg.cx.Config.WalletOff)
+	wg.runningNode = !(*wg.cx.Config.NodeOff) // || *wg.cx.Config.WalletOff)
 	wg.mining = *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 		*wg.noWallet = true
-		wg.running = false
+		wg.runningNode = false
 		wg.mining = false
 		wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
 	} else {
 		if err = wg.Runner(); Check(err) {
 		}
 	}
-	if wg.running {
+	if wg.runningNode {
 		Debug("initial starting shell")
-		wg.running = false
-		wg.ShellRunCommandChan <- "run"
+		wg.runningNode = false
+		wg.NodeRunCommandChan <- "run"
 	}
 	if wg.mining {
 		// wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
@@ -287,22 +288,22 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					if wg.running {
-						//consume.Kill(wg.Node)
+					if wg.runningNode {
+						// consume.Kill(wg.Node)
 						close(wg.Node.Quit)
 					}
 					if wg.mining {
-						//consume.Kill(wg.Miner)
+						// consume.Kill(wg.Miner)
 						close(wg.Miner.Quit)
 					}
-					close(wg.quit)
+					// close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {
 		Debug("quitting wallet gui")
-		//consume.Kill(wg.Node)
-		//consume.Kill(wg.Miner)
+		// consume.Kill(wg.Node)
+		// consume.Kill(wg.Miner)
 		close(wg.quit)
 	})
 out:
@@ -327,16 +328,16 @@ out:
 					wg.WalletClient = nil
 				}
 			}
-			//if wg.Node != nil {
+			// if wg.Node != nil {
 			//	Debug("stopping shell")
-			//	// wg.ShellRunCommandChan <- "stop"
+			//	// wg.NodeRunCommandChan <- "stop"
 			//	consume.Kill(wg.Node)
-			//}
-			//if wg.Miner != nil {
+			// }
+			// if wg.Miner != nil {
 			//	Debug("stopping miner")
 			//	consume.Kill(wg.Miner)
 			//	// wg.MinerRunCommandChan <- "stop"
-			//}
+			// }
 			break out
 		}
 	}

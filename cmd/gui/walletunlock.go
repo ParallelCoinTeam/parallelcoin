@@ -26,7 +26,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 		go func() {
 			Debug("entered password", pass)
 			// unlock wallet
-			wg.cx.Config.WalletPass = &pass
+			*wg.cx.Config.WalletPass = pass
 			*wg.cx.Config.WalletOff = false
 			wg.unlockPassword.GetPassword()
 			// load config into a fresh variable
@@ -47,11 +47,11 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 				if *cfg.WalletPass == bh {
 					// the entered password matches the stored hash
 					Debug("now we can open the wallet")
-					wg.ShellRunCommandChan <- "stop"
-					time.Sleep(time.Second * 5)
-					*wg.cx.Config.WalletPass = pass
-					wg.ShellRunCommandChan <- "run"
-					*wg.walletLocked = false
+					// wg.WalletRunCommandChan <- "stop"
+					// time.Sleep(time.Second * 5)
+					// *wg.cx.Config.WalletPass = pass
+					wg.WalletRunCommandChan <- "run"
+					// *wg.walletLocked = false
 				}
 			} else {
 				Debug("failed to unlock the wallet")
@@ -207,7 +207,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					).
 						Fn(gtx)
 				}(gtx)
-				// wg.ShellRunCommandChan <- "stop"
+				// wg.NodeRunCommandChan <- "stop"
 				// consume.Kill(wg.Worker)
 				// consume.Kill(wg.cx.StateCfg.Miner)
 				// close(wg.cx.NodeKill)

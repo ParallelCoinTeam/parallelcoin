@@ -38,7 +38,7 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 	if cmdIn, err = w.cmd.StdinPipe(); Check(err) {
 		return
 	}
-	w.cmd.Stderr = os.Stderr
+	// w.cmd.Stderr = os.Stderr
 	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
 	if err = w.cmd.Start(); Check(err) {
 	}

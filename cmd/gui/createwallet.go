@@ -155,7 +155,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 												Color("Light").
 												SetClick(func() {
 													go func() {
-														// wg.ShellRunCommandChan <- "stop"
+														// wg.NodeRunCommandChan <- "stop"
 														Debug("clicked submit wallet")
 														*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
 															string(os.PathSeparator) + wg.cx.ActiveNet.Name +
@@ -210,10 +210,10 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														// if err := runner.Start(); Check(err) {
 														// }
 														// time.Sleep(time.Second * 10)
-														// wg.ShellRunCommandChan <- "stop"
-														// wg.ShellRunCommandChan <- "run"
-														// wg.ShellRunCommandChan <- "stop"
-														// wg.ShellRunCommandChan <- "run"
+														// wg.NodeRunCommandChan <- "stop"
+														// wg.NodeRunCommandChan <- "run"
+														// wg.NodeRunCommandChan <- "stop"
+														// wg.NodeRunCommandChan <- "run"
 														// time.Sleep(time.Second * 10)
 														// time.Sleep(time.Second * 2)
 														// interrupt.RequestRestart()
@@ -223,12 +223,12 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														// *wg.App = *wg.GetAppWidget()
 														Debug("starting main app")
 														*wg.noWallet = false
-														wg.running = false
+														wg.runningNode = false
 														wg.mining = false
 														*wg.walletLocked = false
 														if err = wg.Runner(); Check(err) {
 														}
-														wg.ShellRunCommandChan <- "run"
+														wg.NodeRunCommandChan <- "run"
 														wg.MinerRunCommandChan <- "run"
 														// TODO: send unlock command here - and wipe input
 
