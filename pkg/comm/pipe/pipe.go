@@ -26,9 +26,9 @@ func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *wo
 			}
 			n, err = w.StdConn.Read(data)
 			// Trace("read from stdconn", n, args)
-			if n == 0 {
-				close(quit)
-			}
+			//if n == 0 {
+			//	close(quit)
+			//}
 			if err != nil && err != io.EOF {
 				// Probably the child process has died, so quit
 				Error("err:", err)

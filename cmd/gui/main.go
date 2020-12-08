@@ -77,7 +77,7 @@ type WalletGUI struct {
 	ShellRunCommandChan       chan string
 	MinerRunCommandChan       chan string
 	State                     State
-	Shell, Miner              *worker.Worker
+	Node, Miner               *worker.Worker
 	ChainClient, WalletClient *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
 	historyCurPage            int
@@ -289,15 +289,21 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					consume.Kill(wg.Shell)
-					consume.Kill(wg.Miner)
+					if wg.running {
+						close(wg.Node.Quit)
+					}
+					if wg.mining {
+						close(wg.Miner.Quit)
+					}
+					//consume.Kill(wg.Node)
+					//consume.Kill(wg.Miner)
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()
 	interrupt.AddHandler(func() {
 		Debug("quitting wallet gui")
-		consume.Kill(wg.Shell)
+		consume.Kill(wg.Node)
 		consume.Kill(wg.Miner)
 		close(wg.quit)
 	})
@@ -323,10 +329,10 @@ out:
 					wg.WalletClient = nil
 				}
 			}
-			if wg.Shell != nil {
+			if wg.Node != nil {
 				Debug("stopping shell")
 				// wg.ShellRunCommandChan <- "stop"
-				consume.Kill(wg.Shell)
+				consume.Kill(wg.Node)
 			}
 			if wg.Miner != nil {
 				Debug("stopping miner")

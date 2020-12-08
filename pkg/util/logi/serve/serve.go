@@ -1,6 +1,7 @@
 package serve
 
 import (
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"go.uber.org/atomic"
 
 	"github.com/p9c/pod/pkg/comm/pipe"
@@ -10,7 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
 
-func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool)) {
+func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName string) {
 	Debug("starting log server")
 	lc := logi.L.AddLogChan()
 	pkgChan := make(chan Pk.Package)
@@ -40,11 +41,11 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool)) {
 					Error("failed to save log filter configuration")
 				}
 			case "kill":
-				Debug("received kill signal from pipe, shutting down")
+				Debug("received kill signal from pipe, shutting down", appName)
 				// time.Sleep(time.Second*5)
 				close(quit)
 				// os.Exit(0)
-				//interrupt.Request()
+				interrupt.Request()
 				// break
 				//os.Exit(0)
 			}

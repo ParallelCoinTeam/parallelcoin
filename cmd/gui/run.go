@@ -1,13 +1,12 @@
 package gui
 
 import (
-	"io/ioutil"
-	"os"
-
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
+	"io/ioutil"
+	"os"
 )
 
 const slash = string(os.PathSeparator)
@@ -18,7 +17,7 @@ func (wg *WalletGUI) Runner() (err error) {
 	interrupt.AddHandler(func() {
 		if wg.running {
 			// 		wg.ShellRunCommandChan <- "stop"
-			consume.Kill(wg.Shell)
+			consume.Kill(wg.Node)
 		}
 		// close(wg.quit)
 	})
@@ -49,39 +48,31 @@ func (wg *WalletGUI) Runner() (err error) {
 						if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
 						}
 						Debug("created password cookie")
-						// go func() {
-						// 	// after 5 seconds the shell should have started
-						// 	time.Sleep(time.Second*5)
-						// 	Debug("clearing password cookie")
-						// 	// first zero what is there
-						// 	for i := range b {
-						// 		b[i] = 0
-						// 	}
-						// 	if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
-						// 	}
-						// 	// we delete it afterwards if it wasn't already as a safety precaution
-						// 	if err = os.Remove(walletPassPath); Check(err) {
-						// 	}
-						// }()
 					}
 					args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 						"--rpclisten", *wg.cx.Config.RPCConnect,
 						"-n", wg.cx.ActiveNet.Name,
 						"--servertls=true", "--clienttls=true",
 						// "--noinitialload",
-						"--runasservice",
-						"--notty",
-						"--pipelog", "shell"}
+						//"--runasservice",
+						//"--notty",
+						"--pipelog", "node"}
 					// args = apputil.PrependForWindows(args)
 					wg.runnerQuit = make(chan struct{})
-					wg.Shell = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
+					wg.Node = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
 						// TODO: make a log view for this
-						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+						Debug(
+							"NODE:",
+							ent.Level,
+							//ent.Time.Format(time.RFC3339),
+							ent.Text,
+							ent.CodeLocation,
+						)
 						return
 					}, func(pkg string) (out bool) {
 						return false
 					}, args...)
-					consume.Start(wg.Shell)
+					consume.Start(wg.Node)
 					wg.running = true
 				case "stop":
 					Debug("stop called")
@@ -89,7 +80,7 @@ func (wg *WalletGUI) Runner() (err error) {
 						Debug("wasn't running...")
 						break
 					}
-					consume.Kill(wg.Shell)
+					consume.Kill(wg.Node)
 					*wg.cx.Config.NodeOff = true
 					*wg.cx.Config.WalletOff = true
 					save.Pod(wg.cx.Config)
@@ -119,7 +110,7 @@ func (wg *WalletGUI) Runner() (err error) {
 					wg.minerQuit = make(chan struct{})
 					wg.Miner = consume.Log(wg.minerQuit, func(ent *logi.Entry) (err error) {
 						// TODO: make a log view for this
-						// Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+						Debug(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 						return
 					}, func(pkg string) (out bool) {
 						return false
@@ -143,7 +134,8 @@ func (wg *WalletGUI) Runner() (err error) {
 				}
 			case <-wg.quit:
 				Debug("runner received quit signal")
-				consume.Kill(wg.Shell)
+				consume.Kill(wg.Miner)
+				consume.Kill(wg.Node)
 				break out
 			}
 		}

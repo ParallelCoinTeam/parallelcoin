@@ -153,7 +153,7 @@ func Main(cx *conte.Xt) (err error) {
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
-		close(cx.KillAll)
+		//close(cx.KillAll)
 	}
 	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)
@@ -166,7 +166,7 @@ func Main(cx *conte.Xt) (err error) {
 		break
 	case <-cx.KillAll:
 		Debug("KillAll")
-		//gracefulShutdown()
+		gracefulShutdown()
 		break
 	case <-interrupt.ShutdownRequestChan:
 		Debug("interrupt request")

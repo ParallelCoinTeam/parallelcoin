@@ -1,8 +1,6 @@
 package consume
 
 import (
-	"runtime"
-
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -84,15 +82,15 @@ func Kill(w *worker.Worker) {
 	}
 	// Debug("closing worker StdConn quit channel")
 	// close(w.StdConn.Quit)
-	var err error
-	if runtime.GOOS != "windows" {
-		if err = w.Stop(); Check(err) {
-		}
-	}
-	if err = w.Interrupt(); Check(err) {
-	}
-	if err = w.Kill(); Check(err) {
-	}
+	//var err error
+	//if runtime.GOOS != "windows" {
+	//	if err = w.Stop(); Check(err) {
+	//	}
+	//}
+	//if err = w.Interrupt(); Check(err) {
+	//}
+	//if err = w.Kill(); Check(err) {
+	//}
 	// Debug("closing worker quit channel")
 	// close(w.Quit)
 }

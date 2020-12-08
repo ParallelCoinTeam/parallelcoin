@@ -26,7 +26,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		Debug("running beforeFunc")
+		Debug("running beforeFunc", c.Command.Name)
 		Debug(Name, pod.Tag, pod.GitCommit, pod.BuildTime)
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
@@ -45,7 +45,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("pipelog") {
 			Warn("pipe logger enabled")
 			*cx.Config.PipeLog = c.Bool("pipelog")
-			serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir))
+			serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir), c.Command.Name)
 		}
 		if c.IsSet("walletfile") {
 			*cx.Config.WalletFile = c.String("walletfile")
