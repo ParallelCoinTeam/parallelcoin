@@ -152,7 +152,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 						ctrl.active.Store(true)
 					}
 				}
-				Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
+				// Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
 			case <-ctrl.quit:
 				Debug("quitting on close quit channel")
 				cont = false
@@ -437,7 +437,7 @@ out:
 			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
 				LastUpdated() && time.Now().After(time.Unix(0,
 				c.lastGenerated.Load().(int64)+int64(time.Minute))) {
-				Debug("block is stale")
+				Trace("block is stale, regenerating")
 				c.UpdateAndSendTemplate()
 				break
 			}

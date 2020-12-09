@@ -15,7 +15,7 @@ import (
 
 const (
 	// defaultCacheSize is the default size for the database cache.
-	defaultCacheSize = 4 * 1024 * 1024
+	defaultCacheSize = 64 * 1024 * 1024
 	// defaultFlushSecs is the default number of seconds to use as a threshold in between database cache flushes when
 	// the cache size has not been exceeded.
 	defaultFlushSecs = 1
@@ -474,7 +474,7 @@ func (c *dbCache) flush() error {
 	c.cachedKeys = treap.NewImmutable()
 	c.cachedRemove = treap.NewImmutable()
 	c.cacheLock.Unlock()
-	Info("synced database to disk")
+	Trace("synced database to disk")
 	return nil
 }
 

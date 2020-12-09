@@ -77,7 +77,7 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					Debug("connected loop")
+					// Debug("connected loop")
 					wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
 					if !wg.runningNode {
@@ -110,7 +110,7 @@ func (wg *WalletGUI) Tickers() {
 					wg.State.SetBestBlockHeight(int(height))
 					wg.State.SetBestBlockHash(h)
 					if !*wg.walletLocked && wg.WalletClient != nil && !wg.WalletClient.Disconnected() {
-						Debug("wallet is unlocked")
+						// Debug("wallet is unlocked")
 						var unconfirmed util.Amount
 						if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
 							// break out
@@ -276,7 +276,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			// }()
 		},
 		OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
-			Debug("chain OnBlockConnected", hash, height, t)
+			Trace("chain OnBlockConnected", hash, height, t)
 			wg.processChainBlockNotification(hash, height, t)
 			wg.processWalletBlockNotification()
 			// pop up new block toast

@@ -3,7 +3,6 @@ package stdconn
 import (
 	"io"
 	"net"
-	"runtime/debug"
 	"time"
 )
 
@@ -21,7 +20,7 @@ func New(in io.ReadCloser, out io.WriteCloser, quit chan struct{}) (s StdConn) {
 			select {
 			case <-quit:
 				Debug("!!!! closing StdConn")
-				debug.PrintStack()
+				// debug.PrintStack()
 				// time.Sleep(time.Second*8)
 				if err := s.ReadCloser.Close(); Check(err) {
 				}

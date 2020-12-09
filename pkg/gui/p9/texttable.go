@@ -58,7 +58,7 @@ func (tt *TextTable) Regenerate(fully bool) {
 		tt.Table.body = tt.Table.body[:0]
 	}
 	startIndex = len(tt.Table.body)
-	Debug("startIndex", startIndex, len(tt.Body))
+	// Debug("startIndex", startIndex, len(tt.Body))
 	if startIndex < len(tt.Body) {
 		bd := tt.Body[startIndex:]
 		// Debug(len(bd))

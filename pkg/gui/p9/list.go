@@ -214,7 +214,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		// return li.embedWidget(li.scrollWidth)(gtx)
 		// } else {
 		// if li.recalculate && !li.changing {
-		Debug("recalculating")
+		// Debug("recalculating")
 		// get the size of the scrollbar
 		li.th.scrollBarSize = li.scrollWidth + li.scrollBarPad
 		// render the widgets onto a second context to get their dimensions

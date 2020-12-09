@@ -20,7 +20,7 @@ func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		})
 		if err := gui.Main(cx, c); Check(err) {
 		}
-		Debug("node gui finished")
+		Debug("pod gui finished")
 		return
 	}
 }

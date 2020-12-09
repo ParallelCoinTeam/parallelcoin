@@ -137,7 +137,17 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	//	"algAv", algAv,
 	//	"algAdj", algAdj,
 	//	"allAdj", allAdj)
+
 	adjustment = algAdj * allAdj
+
+	// thisInterval := fork.P9AlgosNumeric[algoVer].VersionInterval
+	// baseInterval := fork.P9AlgosNumeric[5].VersionInterval
+	// timeFactor := float64(baseInterval) / float64(thisInterval)
+	// // if adjustment < 1 {
+	// // if the difficulty is adjusting upwards, accelerate it in proportion with block interval's ratio
+	// adjustment *= timeFactor
+	// // }
+
 	// adjustment *= adjustment
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))
@@ -153,7 +163,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	}
 	if l {
 		// if lastNode.version == algoVer {
-		Debugc(func() string {
+		Debug(func() string {
 			an := fork.List[1].AlgoVers[algoVer]
 			pad := 8 - len(an)
 			if pad > 0 {
@@ -172,7 +182,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 			if lastNode.version == algoVer {
 				isNewest = "*"
 			}
-			return fmt.Sprintf("%s %s av %s/%2.0f %s %s %08x %08x%s",
+			return fmt.Sprintf("%s %s av %s/%2.2f %s %s %08x %08x%s",
 				an,
 				RightJustify(fmt.Sprintf("%4.2f", algAv), 8),
 				RightJustify(fmt.Sprintf("%4.2f", allAv), 7),
@@ -183,7 +193,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 				newTargetBits,
 				isNewest,
 			)
-		})
+		}())
 		// }
 	}
 	return

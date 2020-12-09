@@ -35,15 +35,13 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
-const IntervalBase = 36
-
 func init() {
 	Trace("running fork data init")
-	for i := range p9AlgosNumeric {
-		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", p9AlgosNumeric[i].VersionInterval)
+	for i := range P9AlgosNumeric {
+		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", P9AlgosNumeric[i].VersionInterval)
 	}
 	for i, v := range P9AlgoVers {
-		List[1].Algos[v] = p9AlgosNumeric[i]
+		List[1].Algos[v] = P9AlgosNumeric[i]
 	}
 	AlgoSlices = append(AlgoSlices, AlgoSpecs{})
 	for i := range Algos {
@@ -70,7 +68,7 @@ func init() {
 		vi := float64(P9Algos[i.Name].VersionInterval)
 		p9a := baseVersionInterval / vi
 		P9Average += p9a
-		Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
+		// Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
 	}
 	Trace(P9Average)
 	P9Average = baseVersionInterval / P9Average
@@ -152,18 +150,20 @@ var (
 	// P9AlgoVers is the lookup for after 1st hardfork
 	P9AlgoVers = make(map[int32]string)
 
+	P9PrimeSequence               = []int{2, 3, 5, 7, 11, 13, 17, 19, 23}
+	IntervalBase, IntervalDivisor = 36, 1
 	// P9Algos is the algorithm specifications after the hard fork
 	P9Algos        = make(map[string]AlgoParams)
-	p9AlgosNumeric = map[int32]AlgoParams{
-		5:  {5, FirstPowLimitBits, 0, 1 << 1 * IntervalBase},  // 2
-		6:  {6, FirstPowLimitBits, 1, 1 << 2 * IntervalBase},  // 3
-		7:  {7, FirstPowLimitBits, 2, 1 << 3 * IntervalBase},  // 5
-		8:  {8, FirstPowLimitBits, 3, 1 << 4 * IntervalBase},  // 7
-		9:  {9, FirstPowLimitBits, 4, 1 << 5 * IntervalBase},  // 11
-		10: {10, FirstPowLimitBits, 5, 1 << 6 * IntervalBase}, // 13
-		11: {11, FirstPowLimitBits, 7, 1 << 7 * IntervalBase}, // 17
-		12: {12, FirstPowLimitBits, 6, 1 << 8 * IntervalBase}, // 19
-		13: {13, FirstPowLimitBits, 8, 1 << 9 * IntervalBase}, // 23
+	P9AlgosNumeric = map[int32]AlgoParams{
+		5:  {5, FirstPowLimitBits, 0, IntervalBase * P9PrimeSequence[0] / IntervalDivisor},  // 2
+		6:  {6, FirstPowLimitBits, 1, IntervalBase * P9PrimeSequence[1] / IntervalDivisor},  // 3
+		7:  {7, FirstPowLimitBits, 2, IntervalBase * P9PrimeSequence[2] / IntervalDivisor},  // 5
+		8:  {8, FirstPowLimitBits, 3, IntervalBase * P9PrimeSequence[3] / IntervalDivisor},  // 7
+		9:  {9, FirstPowLimitBits, 4, IntervalBase * P9PrimeSequence[4] / IntervalDivisor},  // 11
+		10: {10, FirstPowLimitBits, 5, IntervalBase * P9PrimeSequence[5] / IntervalDivisor}, // 13
+		11: {11, FirstPowLimitBits, 7, IntervalBase * P9PrimeSequence[7] / IntervalDivisor}, // 17
+		12: {12, FirstPowLimitBits, 6, IntervalBase * P9PrimeSequence[6] / IntervalDivisor}, // 19
+		13: {13, FirstPowLimitBits, 8, IntervalBase * P9PrimeSequence[8] / IntervalDivisor}, // 23
 	}
 
 	P9Average float64
