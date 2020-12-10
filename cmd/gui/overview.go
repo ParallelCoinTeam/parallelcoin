@@ -14,9 +14,9 @@ import (
 func (wg *WalletGUI) OverviewPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		balanceColumn := wg.th.Column(p9.Rows{
-			{Label: "Available:", W: wg.balanceWidget(wg.State.balance)},
-			{Label: "Unconfirmed:", W: wg.balanceWidget(wg.State.balanceUnconfirmed)},
-			{Label: "Total:", W: wg.balanceWidget(wg.State.balance + wg.State.balanceUnconfirmed)},
+			{Label: "Available:", W: wg.balanceWidget(wg.State.balance.Load())},
+			{Label: "Unconfirmed:", W: wg.balanceWidget(wg.State.balanceUnconfirmed.Load())},
+			{Label: "Total:", W: wg.balanceWidget(wg.State.balance.Load() + wg.State.balanceUnconfirmed.Load())},
 		}, "bariol bold", 1, "DocText", "DocBg").List
 		return wg.th.Responsive(*wg.App.Size, p9.Widgets{
 			{
@@ -163,7 +163,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	// out = append(out)
 	for x := 0; x < 10; x++ {
 		i := x
-		if len(wg.State.AllTimeStrings) <= i {
+		if len(wg.State.AllTimeStrings.Load().([]string)) <= i {
 			break
 		}
 		txs := wg.State.AllTxs[i]
@@ -261,7 +261,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 								).
 								Rigid(
 									wg.th.Caption(
-										times[i],
+										times.Load().([]string)[i],
 									).Color("DocText").Fn,
 								).
 								Fn,

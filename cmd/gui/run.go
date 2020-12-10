@@ -17,7 +17,7 @@ func (wg *WalletGUI) Runner() (err error) {
 	wg.WalletRunCommandChan = make(chan string)
 	wg.MinerRunCommandChan = make(chan string)
 	interrupt.AddHandler(func() {
-		if wg.runningNode {
+		if wg.runningNode.Load() {
 			// 		wg.NodeRunCommandChan <- "stop"
 			consume.Kill(wg.Node)
 		}
@@ -33,7 +33,7 @@ func (wg *WalletGUI) Runner() (err error) {
 				switch cmd {
 				case "run":
 					Debug("run called")
-					if wg.runningNode {
+					if wg.runningNode.Load() {
 						Debug("already running...")
 						break
 					}
@@ -74,21 +74,21 @@ func (wg *WalletGUI) Runner() (err error) {
 						return false
 					}, args...)
 					consume.Start(wg.Node)
-					wg.runningNode = true
+					wg.runningNode.Store(true)
 				case "stop":
 					Debug("stop called")
-					if !wg.runningNode {
+					if !wg.runningNode.Load() {
 						Debug("wasn't running...")
 						break
 					}
-					if wg.runningWallet {
+					if wg.runningWallet.Load() {
 						wg.WalletRunCommandChan <- "stop"
-						*wg.walletLocked = true
+						wg.walletLocked.Store(true)
 					}
 					consume.Kill(wg.Node)
 					*wg.cx.Config.NodeOff = true
 					save.Pod(wg.cx.Config)
-					wg.runningNode = false
+					wg.runningNode.Store(false)
 				case "restart":
 					Debug("restart called")
 					go func() {
@@ -102,7 +102,7 @@ func (wg *WalletGUI) Runner() (err error) {
 				switch cmd {
 				case "run":
 					Debug("run called")
-					if wg.runningWallet {
+					if wg.runningWallet.Load() {
 						Debug("already running...")
 						break
 					}
@@ -143,19 +143,19 @@ func (wg *WalletGUI) Runner() (err error) {
 						return false
 					}, args...)
 					consume.Start(wg.Wallet)
-					*wg.walletLocked = false
-					wg.runningWallet = true
+					wg.walletLocked.Store(false)
+					wg.runningWallet.Store(true)
 				case "stop":
 					Debug("stop called")
-					if !wg.runningWallet {
+					if !wg.runningWallet.Load() {
 						Debug("wasn't running...")
 						break
 					}
 					consume.Kill(wg.Wallet)
 					*wg.cx.Config.WalletOff = true
 					save.Pod(wg.cx.Config)
-					*wg.walletLocked = true
-					wg.runningWallet = false
+					wg.walletLocked.Store(true)
+					wg.runningWallet.Store(false)
 				case "restart":
 					Debug("restart called")
 					go func() {
@@ -170,7 +170,7 @@ func (wg *WalletGUI) Runner() (err error) {
 				case "run":
 					Debug("run called for miner")
 					if *wg.cx.Config.GenThreads == 0 {
-						wg.mining = false
+						wg.mining.Store(false)
 						break
 					}
 					*wg.cx.Config.Generate = true
@@ -186,20 +186,20 @@ func (wg *WalletGUI) Runner() (err error) {
 						return false
 					}, args...)
 					consume.Start(wg.Miner)
-					wg.mining = true
+					wg.mining.Store(true)
 				case "stop":
 					Debug("stop called for miner")
 					consume.Kill(wg.Miner)
 					*wg.cx.Config.Generate = false
 					save.Pod(wg.cx.Config)
-					wg.mining = false
+					wg.mining.Store(false)
 				case "restart":
 					Debug("restart called for miner")
 					go func() {
 						wg.MinerRunCommandChan <- "stop"
-						wg.mining = false
+						wg.mining.Store(false)
 						wg.MinerRunCommandChan <- "run"
-						wg.mining = true
+						wg.mining.Store(true)
 					}()
 				}
 			case <-wg.quit:

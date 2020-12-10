@@ -21,6 +21,8 @@ var emptyhash = hex.EncodeToString(eh[:])
 
 // Pod saves the configuration to the configured location
 func Pod(c *pod.Config) (success bool) {
+	c.Lock()
+	defer c.Unlock()
 	// Debugs(c)
 	Debug("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice

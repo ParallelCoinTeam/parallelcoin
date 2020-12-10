@@ -117,7 +117,9 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 												len(wg.passwords["passEditor"].GetPassword()) >= 8 ||
 												wg.passwords["passEditor"].GetPassword() ==
 													wg.passwords["confirmPassEditor"].GetPassword() {
+												wg.cx.Config.Lock()
 												*wg.cx.Config.WalletPass = wg.passwords["confirmPassEditor"].GetPassword()
+												wg.cx.Config.Unlock()
 											}
 										})).
 											IconColor("Primary").
@@ -223,9 +225,9 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														// *wg.App = *wg.GetAppWidget()
 														Debug("starting main app")
 														*wg.noWallet = false
-														wg.runningNode = false
-														wg.mining = false
-														*wg.walletLocked = false
+														wg.runningNode.Store(false)
+														wg.mining.Store(false)
+														wg.walletLocked.Store(false)
 														if err = wg.Runner(); Check(err) {
 														}
 														wg.NodeRunCommandChan <- "run"

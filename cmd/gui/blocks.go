@@ -141,6 +141,8 @@ func (wg *WalletGUI) getBlock(blockHeight int64) (bl *block) {
 		clickNext: wg.th.Clickable(),
 		list:      wg.th.List(),
 	}
+	wg.ChainMutex.Lock()
+	defer wg.ChainMutex.Unlock()
 	if wg.ChainClient == nil {
 		Debug("not connected to chain yet")
 		// this returns a block struct with empty data, other end needs to be aware of it coming back empty

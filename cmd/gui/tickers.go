@@ -35,37 +35,49 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					//Debug("preconnect loop")
+					// Debug("preconnect loop")
 					// update goroutines data
 					wg.goRoutines()
 					// close clients if they are open
+					wg.ChainMutex.Lock()
 					if wg.ChainClient != nil {
 						wg.ChainClient.Disconnect()
 						if wg.ChainClient.Disconnected() {
 							wg.ChainClient = nil
 						}
 					}
+					wg.ChainMutex.Unlock()
+					wg.WalletMutex.Lock()
 					if wg.WalletClient != nil {
 						wg.WalletClient.Disconnect()
 						if wg.WalletClient.Disconnected() {
 							wg.WalletClient = nil
 						}
 					}
+					wg.WalletMutex.Unlock()
 					// the remaining actions require a running shell
-					if !wg.runningNode {
+					if !wg.runningNode.Load() {
 						break
 					}
+					wg.cx.Config.Lock()
 					if !*wg.cx.Config.NodeOff {
+						wg.cx.Config.Unlock()
 						Debug("connecting to chain")
 						if err = wg.chainClient(); Check(err) {
 							break
 						}
+					} else {
+						wg.cx.Config.Unlock()
 					}
-					if !*wg.cx.Config.WalletOff || !*wg.walletLocked {
+					wg.cx.Config.Lock()
+					if !*wg.cx.Config.WalletOff || !wg.walletLocked.Load() {
+						wg.cx.Config.Unlock()
 						Debug("connecting to wallet")
 						if err = wg.walletClient(); Check(err) {
 							break
 						}
+					} else {
+						wg.cx.Config.Unlock()
 					}
 					// if we got to here both are connected
 					break preconnect
@@ -80,14 +92,17 @@ func (wg *WalletGUI) Tickers() {
 					// Debug("connected loop")
 					wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
-					if !wg.runningNode {
+					if !wg.runningNode.Load() {
 						Debug("breaking out not running")
 						break out
 					}
+					wg.ChainMutex.Lock()
 					if wg.ChainClient == nil {
+						wg.ChainMutex.Unlock()
 						Debug("breaking out chainclient is nil")
 						break out
 					}
+					wg.ChainMutex.Unlock()
 					// if  wg.WalletClient == nil && wg.running{
 					// 	Debug("breaking out walletclient is nil")
 					// 	break out
@@ -109,7 +124,7 @@ func (wg *WalletGUI) Tickers() {
 					}
 					wg.State.SetBestBlockHeight(int(height))
 					wg.State.SetBestBlockHash(h)
-					if !*wg.walletLocked && wg.WalletClient != nil && !wg.WalletClient.Disconnected() {
+					if !wg.walletLocked.Load() && wg.WalletClient != nil && !wg.WalletClient.Disconnected() {
 						// Debug("wallet is unlocked")
 						var unconfirmed util.Amount
 						if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
@@ -196,7 +211,7 @@ func (wg *WalletGUI) Tickers() {
 							// }
 						}
 						wg.historyTable.Body = bd // wg.historyTable.Body[:0]
-						wg.historyTable.Regenerate(true)
+						wg.historyTable.Regenerate(false)
 					}
 					wg.invalidate <- struct{}{}
 					first = false
@@ -205,7 +220,7 @@ func (wg *WalletGUI) Tickers() {
 					break totalOut
 				}
 			}
-			wg.runningNode = false
+			wg.runningNode.Store(false)
 		}
 		// Debug("*** Sending shutdown signal")
 		// close(wg.quit)
@@ -226,6 +241,8 @@ func (wg *WalletGUI) updateThingies() (err error) {
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
 	// Debug("processChainBlockNotification")
 	// update best block height
+	wg.ChainMutex.Lock()
+	defer wg.ChainMutex.Unlock()
 	if wg.ChainClient == nil {
 		return
 	}
@@ -235,7 +252,7 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 
 func (wg *WalletGUI) processWalletBlockNotification() {
 	// Debug("processWalletBlockNotification", wg.WalletClient != nil)
-	if wg.WalletClient == nil || *wg.walletLocked {
+	if wg.WalletClient == nil || wg.walletLocked.Load() {
 		return
 	}
 	// check account balance
@@ -323,15 +340,18 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 }
 
 func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
-	if *wg.walletLocked {
+	if wg.walletLocked.Load() {
 		return nil
 	}
 	return &rpcclient.NotificationHandlers{
 		OnClientConnected: func() {
 			go func() {
-				if wg.WalletClient == nil || *wg.walletLocked {
+				wg.WalletMutex.Lock()
+				if wg.WalletClient == nil || wg.walletLocked.Load() {
+					wg.WalletMutex.Unlock()
 					return
 				}
+				wg.WalletMutex.Unlock()
 				Debug("WALLET CLIENT CONNECTED!")
 				// // time.Sleep(time.Second * 3)
 				var unconfirmed util.Amount
@@ -397,7 +417,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 		OnWalletLockState: func(locked bool) {
 			Debug("OnWalletLockState", locked)
 			// switch interface to unlock page
-			*wg.walletLocked = true
+			wg.walletLocked.Store(true)
 			// TODO: lock when idle... how to get trigger for idleness in UI?
 			wg.invalidate <- struct{}{}
 		},
@@ -412,6 +432,8 @@ func (wg *WalletGUI) chainClient() (err error) {
 	}
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Debug(*wg.cx.Config.RPCConnect)
+	wg.ChainMutex.Lock()
+	defer wg.ChainMutex.Unlock()
 	if wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
 		Host:                 *wg.cx.Config.RPCConnect,
 		Endpoint:             "ws",
@@ -435,9 +457,10 @@ func (wg *WalletGUI) walletClient() (err error) {
 	if *wg.cx.Config.WalletOff {
 		return nil
 	}
-	//walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
+	// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Info("config.tls", *wg.cx.Config.TLS)
+	wg.WalletMutex.Lock()
 	if wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
 		Host:                 *wg.cx.Config.WalletServer,
 		Endpoint:             "ws",
@@ -448,8 +471,10 @@ func (wg *WalletGUI) walletClient() (err error) {
 		DisableAutoReconnect: true,
 		DisableConnectOnNew:  false,
 	}, wg.WalletNotifications()); Check(err) {
+		wg.WalletMutex.Unlock()
 		return
 	}
+	wg.WalletMutex.Unlock()
 	if err = wg.WalletClient.NotifyNewTransactions(true); !Check(err) {
 		defer wg.WalletNotifications()
 	}

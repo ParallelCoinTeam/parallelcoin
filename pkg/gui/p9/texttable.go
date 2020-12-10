@@ -31,6 +31,9 @@ type TextTable struct {
 
 // Regenerate the text table.
 func (tt *TextTable) Regenerate(fully bool) {
+	if len(tt.Header) == 0 || len(tt.Body) == 0 {
+		return
+	}
 	// // set defaults if unset
 	// tt.SetDefaults()
 	if tt.Table.header == nil || len(tt.Table.header) < 1 {
@@ -49,37 +52,42 @@ func (tt *TextTable) Regenerate(fully bool) {
 			})
 		}
 	}
-	var startIndex int
+	// var startIndex int
 	// if tt.Table.body == nil || len(tt.Table.body) < 1 {
 	// 	// tt.Table.body = tt.Table.body[:0]
 	// } else {
-	if fully {
-		// tt.Body = tt.Body[:0]
-		tt.Table.body = tt.Table.body[:0]
-	}
-	startIndex = len(tt.Table.body)
+	// if fully {
+	// tt.Body = tt.Body[:0]
+	// tt.Table.body = tt.Table.body[:0]
+	// }
+	// startIndex = len(tt.Table.body)
 	// Debug("startIndex", startIndex, len(tt.Body))
-	if startIndex < len(tt.Body) {
-		bd := tt.Body[startIndex:]
-		// Debug(len(bd))
-		var body CellGrid
-		for i := range bd {
-			var row CellRow
-			for j := range bd[i] {
-				row = append(row, Cell{
-					Widget: tt.Theme.Inset(0.25,
-						tt.Theme.Body1(bd[i][j]).
-							Color(tt.CellColor).
-							TextScale(tt.CellFontScale).
-							Font(tt.CellFont).MaxLines(1).
-							Fn,
-					).Fn,
-				})
-			}
-			body = append(body, row)
-		}
-		tt.Table.body = append(tt.Table.body, body...)
+	// if startIndex < len(tt.Body) {
+
+	// bd := tt.Body // [startIndex:]
+	diff := len(tt.Table.body) - len(tt.Body)
+	if diff > 0 {
+		tt.Table.body = append(tt.Table.body, make(CellGrid, diff)...)
 	}
+	// Debug(len(bd))
+	var body CellGrid
+	for i := range tt.Body {
+		var row CellRow
+		for j := range tt.Body[i] {
+			tt.Table.body[i][j] = Cell{
+				Widget: tt.Theme.Inset(0.25,
+					tt.Theme.Body1(tt.Body[i][j]).
+						Color(tt.CellColor).
+						TextScale(tt.CellFontScale).
+						Font(tt.CellFont).MaxLines(1).
+						Fn,
+				).Fn,
+			}
+		}
+		body = append(body, row)
+	}
+	// tt.Table.body = append(tt.Table.body, body...)
+	// }
 	// }
 }
 

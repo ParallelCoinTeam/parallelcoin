@@ -3,6 +3,7 @@ package p9
 import (
 	"fmt"
 
+	uberatomic "go.uber.org/atomic"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	l "gioui.org/layout"
@@ -16,7 +17,7 @@ import (
 // pop-over layers
 type App struct {
 	th                  *Theme
-	activePage          string
+	activePage          *uberatomic.String
 	bodyBackground      string
 	bodyColor           string
 	cardBackground      string
@@ -58,7 +59,7 @@ func (th *Theme) App(size *int) *App {
 	mc := th.Clickable()
 	return &App{
 		th:                  th,
-		activePage:          "main",
+		activePage:          uberatomic.NewString("main"),
 		bodyBackground:      "PanelBg",
 		bodyColor:           "PanelText",
 		cardBackground:      "DocBg",
@@ -367,7 +368,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
 	return a.th.Fill(a.bodyBackground,
 		func(gtx l.Context) l.Dimensions {
-			if page, ok := a.pages[a.activePage]; !ok {
+			if page, ok := a.pages[a.activePage.Load()]; !ok {
 				return a.th.Flex().
 					Flexed(1,
 						a.th.Inset(0.5,
@@ -434,11 +435,11 @@ func (a *App) renderSideBar() l.Widget {
 }
 
 func (a *App) ActivePage(activePage string) *App {
-	a.activePage = activePage
+	a.activePage.Store(activePage)
 	return a
 }
 func (a *App) ActivePageGet() string {
-	return a.activePage
+	return a.activePage.Load()
 }
 
 func (a *App) BodyBackground(bodyBackground string) *App {

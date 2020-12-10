@@ -176,7 +176,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		wg.PageTopBarButton("lock", 4, &icons.ActionLockOpen, func(name string) {
 			// wg.unlockPage.ActivePage(name)
 			wg.unlockPassword.Wipe()
-			*wg.walletLocked = true
+			wg.walletLocked.Store(true)
 			wg.WalletRunCommandChan <- "stop"
 		}, a, ""),
 		wg.PageTopBarButton("console", 2, &p9icons.Terminal, func(name string) {
@@ -366,15 +366,17 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		t, f := &p9icons.Link, &p9icons.LinkOff
 		var runningIcon *[]byte
-		if wg.runningNode {
+		if wg.runningNode.Load() {
 			runningIcon = t
 		} else {
 			runningIcon = f
 		}
 		miningIcon := &p9icons.Mine
-		if !wg.mining {
+		if !wg.mining.Load() {
 			miningIcon = &p9icons.NoMine
 		}
+		wg.State.mutex.Lock()
+		defer wg.State.mutex.Unlock()
 		return wg.th.Flex().AlignMiddle().
 			Rigid(
 				wg.th.ButtonLayout(wg.statusBarButtons[0]).
@@ -391,7 +393,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Background("Transparent").
 					SetClick(
 						func() {
-							go wg.SetRunState(!wg.runningNode)
+							go wg.SetRunState(!wg.runningNode.Load())
 						}).
 					Fn,
 			).
@@ -441,16 +443,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						func() {
 							go func() {
 								Debug("clicked miner control stop/start button", wg.mining)
-								wg.mining = !wg.mining
+								wg.mining.Store(!wg.mining.Load())
 								if *wg.cx.Config.GenThreads == 0 {
 									Debug("was zero threads")
-									wg.mining = false
+									wg.mining.Store(false)
 									// wg.MinerThreadsChan <- 1
 									// wg.MinerRunCommandChan <- "run"
 									// wg.incdecs["generatethreads"].SetCurrent(1)
 									return
 								}
-								if !wg.mining {
+								if !wg.mining.Load() {
 									wg.MinerRunCommandChan <- "stop"
 								} else {
 									wg.MinerRunCommandChan <- "run"
@@ -467,7 +469,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
-					if *wg.walletLocked {
+					if wg.walletLocked.Load() {
 						return l.Dimensions{}
 					}
 					// background := wg.App.StatusBarBackgroundGet()

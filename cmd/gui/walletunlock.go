@@ -26,8 +26,10 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 		go func() {
 			Debug("entered password", pass)
 			// unlock wallet
+			wg.cx.Config.Lock()
 			*wg.cx.Config.WalletPass = pass
 			*wg.cx.Config.WalletOff = false
+			wg.cx.Config.Unlock()
 			wg.unlockPassword.GetPassword()
 			// load config into a fresh variable
 			cfg, _ := pod.EmptyConfig()

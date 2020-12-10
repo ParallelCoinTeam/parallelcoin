@@ -3,9 +3,11 @@ package gui
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/kofoworola/godate"
+	uberatomic "go.uber.org/atomic"
 
 	l "gioui.org/layout"
 
@@ -44,22 +46,23 @@ func (c *CategoryFilter) Filter(s string) (include bool) {
 }
 
 type State struct {
-	mutex               sync.Mutex
-	lastUpdated         time.Time
-	bestBlockHeight     int
-	bestBlockHash       *chainhash.Hash
-	balance             float64
-	balanceUnconfirmed  float64
-	txs                 []tx
-	goroutines          []l.Widget
-	txPerPage           int
-	txPage              int
-	AllTxs              []btcjson.ListTransactionsResult
-	AllTimeStrings      []string
-	FilteredTxs         []btcjson.ListTransactionsResult
-	FilteredTimeStrings []string
-	Filter              CategoryFilter
-	FilterChanged       bool
+	mutex                   sync.Mutex
+	lastUpdated             time.Time
+	bestBlockHeight         int
+	bestBlockHash           *chainhash.Hash
+	balance                 uberatomic.Float64
+	balanceUnconfirmed      uberatomic.Float64
+	txs                     []tx
+	goroutines              []l.Widget
+	txPerPage               int
+	txPage                  int
+	AllMutex, FilteredMutex sync.Mutex
+	AllTxs                  []btcjson.ListTransactionsResult
+	AllTimeStrings          atomic.Value
+	FilteredTxs             []btcjson.ListTransactionsResult
+	FilteredTimeStrings     []string
+	Filter                  CategoryFilter
+	FilterChanged           bool
 }
 
 type tx struct {
@@ -85,22 +88,26 @@ func (s *State) SetGoroutines(gr []l.Widget) {
 func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	s.AllMutex.Lock()
+	defer s.AllMutex.Unlock()
 	s.AllTxs = allTxs
 	// if s.AllTimeStrings == nil {
-	s.AllTimeStrings = make([]string, len(s.AllTxs))
+	s.AllTimeStrings.Store(make([]string, len(s.AllTxs)))
 	// }
 	for i := range s.AllTxs {
-		s.AllTimeStrings[i] =
+		s.AllTimeStrings.Load().([]string)[i] =
 			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
 				godate.Create(time.Unix(s.AllTxs[i].BlockTime, 0))))
 	}
 	// generate filtered state
+	s.FilteredMutex.Lock()
+	defer s.FilteredMutex.Unlock()
 	s.FilteredTxs = make([]btcjson.ListTransactionsResult, 0, len(s.AllTxs))
 	s.FilteredTimeStrings = make([]string, 0, len(s.AllTxs))
 	for i := range s.AllTxs {
 		if s.Filter.Filter(s.AllTxs[i].Category) {
 			s.FilteredTxs = append(s.FilteredTxs, s.AllTxs[i])
-			s.FilteredTimeStrings = append(s.FilteredTimeStrings, s.AllTimeStrings[i])
+			s.FilteredTimeStrings = append(s.FilteredTimeStrings, s.AllTimeStrings.Load().([]string)[i])
 		}
 	}
 	// // reverse the filtered tx's because they are in reverse chronological order and prepend rather than append, and
@@ -149,13 +156,13 @@ func (s *State) BestBlockHash() *chainhash.Hash {
 func (s *State) Balance() float64 {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	return s.balance
+	return s.balance.Load()
 }
 
 func (s *State) BalanceUnconfirmed() float64 {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	return s.balanceUnconfirmed
+	return s.balanceUnconfirmed.Load()
 }
 
 func (s *State) SetBestBlockHeight(height int) {
@@ -176,12 +183,12 @@ func (s *State) SetBalance(total float64) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()
-	s.balance = total
+	s.balance.Store(total)
 }
 
 func (s *State) SetBalanceUnconfirmed(unconfirmed float64) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()
-	s.balanceUnconfirmed = unconfirmed
+	s.balanceUnconfirmed.Store(unconfirmed)
 }

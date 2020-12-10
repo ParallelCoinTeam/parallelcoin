@@ -21,6 +21,7 @@
       <w>ancestorfees</w>
       <w>ancestorsize</w>
       <w>anyonecanpay</w>
+      <w>apputil</w>
       <w>backupwallet</w>
       <w>bailment</w>
       <w>bals</w>
@@ -59,6 +60,7 @@
       <w>checkpt</w>
       <w>ciph</w>
       <w>clickables</w>
+      <w>clienttls</w>
       <w>cmds</w>
       <w>coinbaseaux</w>
       <w>cointype</w>
@@ -188,6 +190,7 @@
       <w>intn</w>
       <w>invalidateblock</w>
       <w>involveswatchonly</w>
+      <w>ioutil</w>
       <w>iscompressed</w>
       <w>ismine</w>
       <w>isscript</w>
@@ -254,11 +257,13 @@
       <w>newtx</w>
       <w>nextblockhash</w>
       <w>noderpc</w>
+      <w>noinitialload</w>
       <w>noonion</w>
       <w>notifyblocks</w>
       <w>notifynewtransactions</w>
       <w>notifyreceived</w>
       <w>notifyspent</w>
+      <w>notty</w>
       <w>ntfn</w>
       <w>ntfns</w>
       <w>oldpath</w>
@@ -321,9 +326,12 @@
       <w>routeable</w>
       <w>rpc</w>
       <w>rpcclient</w>
+      <w>rpcconnect</w>
       <w>rpchandlers</w>
+      <w>rpclisten</w>
       <w>rpcs</w>
       <w>rpcserver</w>
+      <w>runasservice</w>
       <w>satan</w>
       <w>satoshis</w>
       <w>searchrawtransaction</w>
@@ -335,6 +343,7 @@
       <w>sendrawtransaction</w>
       <w>sendtoaddress</w>
       <w>serialize's</w>
+      <w>servertls</w>
       <w>setaccount</w>
       <w>setgenerate</w>
       <w>settxfee</w>
