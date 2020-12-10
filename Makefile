@@ -26,8 +26,8 @@ gui:
 	pod -D test0 -n testnet --lan
 
 guis:
-	go install -race -v
-	pod -D test1 -n testnet
+	go install -v
+	pod -D test1 -n testnet -l trace
 
 guihttpprof:
 	go install -v

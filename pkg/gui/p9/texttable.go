@@ -65,11 +65,16 @@ func (tt *TextTable) Regenerate(fully bool) {
 	// if startIndex < len(tt.Body) {
 
 	// bd := tt.Body // [startIndex:]
-	diff := len(tt.Table.body) - len(tt.Body)
+	diff := len(tt.Body) - len(tt.Table.body)
+	Debug(len(tt.Table.body), len(tt.Body), diff)
 	if diff > 0 {
-		tt.Table.body = append(tt.Table.body, make(CellGrid, diff)...)
+		cg := make(CellGrid, diff)
+		for i := range cg {
+			cg[i] = make(CellRow, len(tt.Header))
+		}
+		tt.Table.body = append(tt.Table.body, cg...)
 	}
-	// Debug(len(bd))
+	Debug(len(tt.Table.body), len(tt.Body))
 	var body CellGrid
 	for i := range tt.Body {
 		var row CellRow

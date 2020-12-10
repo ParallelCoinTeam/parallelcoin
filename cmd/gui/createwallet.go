@@ -176,9 +176,11 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															false,
 															wg.cx.Config,
 														)
+														Debug("*** created wallet")
 														if Check(err) {
 															panic(err)
 														}
+														Debug("refilling mining addresses")
 														addresses.RefillMiningAddresses(w, wg.cx.Config, wg.cx.StateCfg)
 														Warn("done refilling mining addresses")
 														w.Manager.Close()
