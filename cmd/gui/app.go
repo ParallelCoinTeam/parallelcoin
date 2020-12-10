@@ -29,6 +29,9 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
 			wgb.Value(*wg.th.Dark)
 		}
+		if wg.historyTable != nil {
+			wg.historyTable.Regenerate(true)
+		}
 		save.Pod(wg.cx.Config)
 	})
 	wg.size = a.Size

@@ -124,6 +124,7 @@ func (wg *WalletGUI) Tickers() {
 					}
 					wg.State.SetBestBlockHeight(int(height))
 					wg.State.SetBestBlockHash(h)
+					// Debug(!wg.walletLocked.Load(), wg.WalletClient != nil, !wg.WalletClient.Disconnected())
 					if !wg.walletLocked.Load() && wg.WalletClient != nil && !wg.WalletClient.Disconnected() {
 						// Debug("wallet is unlocked")
 						var unconfirmed util.Amount
@@ -441,7 +442,7 @@ func (wg *WalletGUI) chainClient() (err error) {
 		Pass:                 *wg.cx.Config.Password,
 		TLS:                  *wg.cx.Config.TLS,
 		Certificates:         certs,
-		DisableAutoReconnect: true,
+		DisableAutoReconnect: false,
 		DisableConnectOnNew:  false,
 	}, wg.ChainNotifications()); Check(err) {
 		return
@@ -468,7 +469,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 		Pass:                 *wg.cx.Config.Password,
 		TLS:                  *wg.cx.Config.TLS,
 		Certificates:         certs,
-		DisableAutoReconnect: true,
+		DisableAutoReconnect: false,
 		DisableConnectOnNew:  false,
 	}, wg.WalletNotifications()); Check(err) {
 		wg.WalletMutex.Unlock()

@@ -17,6 +17,7 @@ type TextTable struct {
 	Header           TextTableHeader
 	Body             TextTableBody
 	HeaderColor      string
+	HeaderDarkTheme  bool
 	HeaderBackground string
 	HeaderFont       string
 	HeaderFontScale  float32
@@ -36,7 +37,10 @@ func (tt *TextTable) Regenerate(fully bool) {
 	}
 	// // set defaults if unset
 	// tt.SetDefaults()
-	if tt.Table.header == nil || len(tt.Table.header) < 1 {
+	if tt.Table.header == nil || len(tt.Table.header) < 1 || tt.HeaderDarkTheme != *tt.Theme.Dark {
+		tt.HeaderDarkTheme = *tt.Theme.Dark
+		// if this is being regenerated due to theme change
+		tt.Table.header = tt.Table.header[:0]
 		// this only has to be created once
 		for i := range tt.Header {
 			tt.Table.header = append(tt.Table.header, Cell{

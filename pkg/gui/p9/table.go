@@ -18,6 +18,10 @@ type Cell struct {
 }
 
 func (c *Cell) getWidgetDimensions(gtx l.Context, th *Theme) {
+	if c.Widget == nil {
+		// this happens when new items are added if a frame reads the cell, it just - can't - be rendered!
+		return
+	}
 	if c.computed {
 		return
 	}
