@@ -98,6 +98,7 @@ func Kill(w *worker.Worker) {
 		if err = w.Interrupt(); Check(err) {
 		}
 	}
+	close(w.Quit)
 	// if err = w.Kill(); Check(err) {
 	// }
 }

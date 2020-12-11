@@ -37,7 +37,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 		c:          c,
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
-		// runnerQuit: make(chan struct{}),
+		// nodeQuit: make(chan struct{}),
 		size:         &size,
 		noWallet:     &noWallet,
 		walletLocked: uberatomic.NewBool(walletLocked),
@@ -71,7 +71,8 @@ type WalletGUI struct {
 	runningNode, runningWallet, mining uberatomic.Bool
 	invalidate                         chan struct{}
 	quit                               chan struct{}
-	runnerQuit                         chan struct{}
+	nodeQuit                           chan struct{}
+	walletQuit                           chan struct{}
 	minerQuit                          chan struct{}
 	sendAddresses                      []SendAddress
 	NodeRunCommandChan                 chan string
@@ -300,7 +301,7 @@ func (wg *WalletGUI) Run() (err error) {
 						// consume.Kill(wg.Miner)
 						close(wg.Miner.Quit)
 					}
-					// close(wg.quit)
+					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
 	}()

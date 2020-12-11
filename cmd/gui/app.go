@@ -352,14 +352,27 @@ func (wg *WalletGUI) StatusBarButton(name string, index int, ico *[]byte, onClic
 	}
 }
 
-func (wg *WalletGUI) SetRunState(b bool) {
+func (wg *WalletGUI) SetNodeRunState(b bool) {
 	go func() {
-		Debug("run state is now", b)
+		Debug("node run state is now", b)
 		if b {
 			wg.NodeRunCommandChan <- "run"
 			// wg.running = b
 		} else {
 			wg.NodeRunCommandChan <- "stop"
+			// wg.running = b
+		}
+	}()
+}
+
+func (wg *WalletGUI) SetWalletRunState(b bool) {
+	go func() {
+		Debug("node run state is now", b)
+		if b {
+			wg.WalletRunCommandChan <- "run"
+			// wg.running = b
+		} else {
+			wg.WalletRunCommandChan <- "stop"
 			// wg.running = b
 		}
 	}()
@@ -396,7 +409,15 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Background("Transparent").
 					SetClick(
 						func() {
-							go wg.SetRunState(!wg.runningNode.Load())
+							go func() {
+								if wg.runningNode.Load() {
+									wg.NodeRunCommandChan <- "stop"
+									wg.WalletRunCommandChan <- "stop"
+									wg.unlockPassword.Wipe()
+								} else {
+									wg.NodeRunCommandChan <- "run"
+								}
+							}()
 						}).
 					Fn,
 			).

@@ -23,7 +23,6 @@ func (wg *WalletGUI) Runner() (err error) {
 		}
 		// close(wg.quit)
 	})
-	wg.runnerQuit = wg.quit
 	go func() {
 		Debug("starting node run controller")
 	out:
@@ -32,6 +31,7 @@ func (wg *WalletGUI) Runner() (err error) {
 			case cmd := <-wg.NodeRunCommandChan:
 				switch cmd {
 				case "run":
+					wg.nodeQuit = make(chan struct{})
 					Debug("run called")
 					if wg.runningNode.Load() {
 						Debug("already running...")
@@ -61,7 +61,7 @@ func (wg *WalletGUI) Runner() (err error) {
 						// "--notty",
 						"--pipelog", "node"}
 					// args = apputil.PrependForWindows(args)
-					wg.Node = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
+					wg.Node = consume.Log(wg.nodeQuit, func(ent *logi.Entry) (err error) {
 						// TODO: make a log view for this
 						Debugf("NODE[%s] %s %s",
 							ent.Level,
@@ -101,6 +101,7 @@ func (wg *WalletGUI) Runner() (err error) {
 			case cmd := <-wg.WalletRunCommandChan:
 				switch cmd {
 				case "run":
+					wg.walletQuit = make(chan struct{})
 					Debug("run called")
 					if wg.runningWallet.Load() {
 						Debug("already running...")
@@ -130,7 +131,7 @@ func (wg *WalletGUI) Runner() (err error) {
 						// "--notty",
 						"--pipelog", "wallet"}
 					// args = apputil.PrependForWindows(args)
-					wg.Wallet = consume.Log(wg.runnerQuit, func(ent *logi.Entry) (err error) {
+					wg.Wallet = consume.Log(wg.walletQuit, func(ent *logi.Entry) (err error) {
 						// TODO: make a log view for this
 						Debugf("WALLET[%s] %s %s",
 							ent.Level,
