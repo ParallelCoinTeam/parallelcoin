@@ -67,33 +67,35 @@ type WalletGUI struct {
 	passwords        map[string]*p9.Password
 	incdecs          map[string]*p9.IncDec
 	// intSliders                map[string]*p9.IntSlider
-	configs                            cfg.GroupsMap
-	config                             *cfg.Config
+	configs cfg.GroupsMap
+	config  *cfg.Config
+
 	runningNode, runningWallet, mining uberatomic.Bool
-	invalidate                         chan struct{}
-	quit                               chan struct{}
-	nodeQuit                           chan struct{}
-	walletQuit                         chan struct{}
-	minerQuit                          chan struct{}
-	sendAddresses                      []SendAddress
 	NodeRunCommandChan                 chan string
 	WalletRunCommandChan               chan string
 	MinerRunCommandChan                chan string
-	State                              State
-	Node, Wallet, Miner                *worker.Worker
-	ChainMutex, WalletMutex            sync.Mutex
-	ChainClient, WalletClient          *rpcclient.Client
-	txs                                []btcjson.ListTransactionsResult
-	historyCurPage                     int
-	console                            *Console
-	toasts                             *toast.Toasts
-	dialog                             *dialog.Dialog
-	noWallet                           *bool
-	walletLocked                       *uberatomic.Bool
-	walletToLock                       time.Time
-	walletLockTime                     int
-	Size                               *int
-	historyTable                       *p9.TextTable
+
+	invalidate                chan struct{}
+	quit                      chan struct{}
+	nodeQuit                  chan struct{}
+	walletQuit                chan struct{}
+	minerQuit                 chan struct{}
+	sendAddresses             []SendAddress
+	State                     State
+	Node, Wallet, Miner       *worker.Worker
+	ChainMutex, WalletMutex   sync.Mutex
+	ChainClient, WalletClient *rpcclient.Client
+	txs                       []btcjson.ListTransactionsResult
+	historyCurPage            int
+	console                   *Console
+	toasts                    *toast.Toasts
+	dialog                    *dialog.Dialog
+	noWallet                  *bool
+	walletLocked              *uberatomic.Bool
+	walletToLock              time.Time
+	walletLockTime            int
+	Size                      *int
+	historyTable              *p9.TextTable
 }
 
 func (wg *WalletGUI) Run() (err error) {
