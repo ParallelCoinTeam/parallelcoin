@@ -180,7 +180,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			// wg.unlockPage.ActivePage(name)
 			wg.unlockPassword.Wipe()
 			wg.walletLocked.Store(true)
-			wg.WalletRunCommandChan <- "stop"
+			wg.wallet.RunCommandChan <- "stop"
 		}, a, ""),
 		wg.PageTopBarButton("console", 2, &p9icons.Terminal, func(name string) {
 			wg.App.ActivePage(name)
@@ -356,10 +356,10 @@ func (wg *WalletGUI) SetNodeRunState(b bool) {
 	go func() {
 		Debug("node run state is now", b)
 		if b {
-			wg.NodeRunCommandChan <- "run"
+			wg.node.RunCommandChan <- "run"
 			// wg.running = b
 		} else {
-			wg.NodeRunCommandChan <- "stop"
+			wg.node.RunCommandChan <- "stop"
 			// wg.running = b
 		}
 	}()
@@ -369,10 +369,10 @@ func (wg *WalletGUI) SetWalletRunState(b bool) {
 	go func() {
 		Debug("node run state is now", b)
 		if b {
-			wg.WalletRunCommandChan <- "run"
+			wg.wallet.RunCommandChan <- "run"
 			// wg.running = b
 		} else {
-			wg.WalletRunCommandChan <- "stop"
+			wg.wallet.RunCommandChan <- "stop"
 			// wg.running = b
 		}
 	}()
@@ -382,13 +382,13 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		t, f := &p9icons.Link, &p9icons.LinkOff
 		var runningIcon *[]byte
-		if wg.runningNode.Load() {
+		if wg.node.running.Load() {
 			runningIcon = t
 		} else {
 			runningIcon = f
 		}
 		miningIcon := &p9icons.Mine
-		if !wg.mining.Load() {
+		if !wg.miner.running.Load() {
 			miningIcon = &p9icons.NoMine
 		}
 		wg.State.mutex.Lock()
@@ -410,12 +410,12 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							go func() {
-								if wg.runningNode.Load() {
-									wg.NodeRunCommandChan <- "stop"
-									wg.WalletRunCommandChan <- "stop"
+								if wg.node.running.Load() {
+									wg.node.RunCommandChan <- "stop"
+									wg.wallet.RunCommandChan <- "stop"
 									wg.unlockPassword.Wipe()
 								} else {
-									wg.NodeRunCommandChan <- "run"
+									wg.node.RunCommandChan <- "run"
 								}
 							}()
 						}).
@@ -466,20 +466,20 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							go func() {
-								Debug("clicked miner control stop/start button", wg.mining)
-								wg.mining.Store(!wg.mining.Load())
+								Debug("clicked miner control stop/start button", wg.miner.running.Load())
+								wg.miner.running.Store(!wg.miner.running.Load())
 								if *wg.cx.Config.GenThreads == 0 {
 									Debug("was zero threads")
-									wg.mining.Store(false)
+									wg.miner.running.Store(false)
 									// wg.MinerThreadsChan <- 1
 									// wg.MinerRunCommandChan <- "run"
 									// wg.incdecs["generatethreads"].SetCurrent(1)
 									return
 								}
-								if !wg.mining.Load() {
-									wg.MinerRunCommandChan <- "stop"
+								if !wg.miner.running.Load() {
+									wg.miner.RunCommandChan <- "stop"
 								} else {
-									wg.MinerRunCommandChan <- "run"
+									wg.miner.RunCommandChan <- "run"
 								}
 							}()
 						}).
@@ -516,11 +516,11 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 										Debug("clicked reset wallet button")
 										go func() {
 											var err error
-											wasRunning := wg.runningNode.Load()
+											wasRunning := wg.node.running.Load()
 											// wasMining := wg.mining
 											Debug("was running", wasRunning)
 											if wasRunning {
-												wg.WalletRunCommandChan <- "stop"
+												wg.wallet.RunCommandChan <- "stop"
 											}
 											// if wasMining {
 											// 	wg.MinerRunCommandChan <- "stop"
@@ -543,7 +543,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											if err = runner.Process.Kill(); Check(err) {
 											}
 											if wasRunning {
-												wg.WalletRunCommandChan <- "run"
+												wg.wallet.RunCommandChan <- "run"
 											}
 											// time.Sleep(time.Second*3)
 											// if wasMining {

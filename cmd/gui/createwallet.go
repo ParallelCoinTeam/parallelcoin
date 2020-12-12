@@ -227,14 +227,14 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														// *wg.App = *wg.GetAppWidget()
 														Debug("starting main app")
 														*wg.noWallet = false
-														wg.runningNode.Store(false)
-														wg.runningWallet.Store(false)
-														wg.mining.Store(false)
+														wg.node.running.Store(false)
+														wg.wallet.running.Store(false)
+														wg.miner.running.Store(false)
 														wg.walletLocked.Store(false)
 														if err = wg.Runner(); Check(err) {
 														}
-														wg.NodeRunCommandChan <- "run"
-														wg.MinerRunCommandChan <- "run"
+														wg.node.RunCommandChan <- "run"
+														wg.node.RunCommandChan <- "run"
 														// TODO: send unlock command here - and wipe input
 
 														// Exec()

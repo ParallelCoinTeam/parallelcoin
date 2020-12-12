@@ -48,9 +48,9 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 			select {
 			case <-w.Quit:
 				// Debug("stopping", Check(w.Stop()))
-				Debug("interrupting", Check(w.Interrupt()))
+				// Debug("interrupting", Check(w.Interrupt()))
 				// Debug("killing", Check(w.Kill()))
-				// close(w.StdConn.Quit)
+				// close(quit)
 				break out
 			}
 		}
