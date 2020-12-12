@@ -41,18 +41,20 @@ func (wg *WalletGUI) Tickers() {
 					// close clients if they are open
 					wg.ChainMutex.Lock()
 					if wg.ChainClient != nil {
-						wg.ChainClient.Disconnect()
-						if wg.ChainClient.Disconnected() {
-							wg.ChainClient = nil
-						}
+						wg.ChainClient.Shutdown()
+						// wg.ChainClient.Disconnect()
+						// if wg.ChainClient.Disconnected() {
+						wg.ChainClient = nil
+						// }
 					}
 					wg.ChainMutex.Unlock()
 					wg.WalletMutex.Lock()
 					if wg.WalletClient != nil {
-						wg.WalletClient.Disconnect()
-						if wg.WalletClient.Disconnected() {
-							wg.WalletClient = nil
-						}
+						wg.WalletClient.Shutdown()
+						// wg.WalletClient.Disconnect()
+						// if wg.WalletClient.Disconnected() {
+						wg.WalletClient = nil
+						// }
 					}
 					wg.WalletMutex.Unlock()
 					// the remaining actions require a running shell
@@ -447,10 +449,11 @@ func (wg *WalletGUI) chainClient() (err error) {
 	}, wg.ChainNotifications()); Check(err) {
 		return
 	}
-	if err = wg.ChainClient.NotifyBlocks(); Check(err) {
-		return
+	if err = wg.ChainClient.NotifyBlocks(); !Check(err) {
+		Debug("subscribed to new transactions")
+		// wg.WalletNotifications()
+		wg.invalidate <- struct{}{}
 	}
-	wg.invalidate <- struct{}{}
 	return
 }
 
@@ -477,9 +480,10 @@ func (wg *WalletGUI) walletClient() (err error) {
 	}
 	wg.WalletMutex.Unlock()
 	if err = wg.WalletClient.NotifyNewTransactions(true); !Check(err) {
-		defer wg.WalletNotifications()
+		Debug("subscribed to new transactions")
+		// wg.WalletNotifications()
+		wg.invalidate <- struct{}{}
 	}
-	wg.invalidate <- struct{}{}
 	return
 }
 

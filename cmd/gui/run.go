@@ -18,8 +18,12 @@ func (wg *WalletGUI) Runner() (err error) {
 	wg.MinerRunCommandChan = make(chan string)
 	interrupt.AddHandler(func() {
 		if wg.runningNode.Load() {
-			// 		wg.NodeRunCommandChan <- "stop"
-			consume.Kill(wg.Node)
+					wg.NodeRunCommandChan <- "stop"
+			// consume.Kill(wg.Node)
+		}
+		if wg.runningWallet.Load() {
+			wg.WalletRunCommandChan <- "stop"
+			// consume.Kill(wg.Node)
 		}
 		// close(wg.quit)
 	})
@@ -77,10 +81,10 @@ func (wg *WalletGUI) Runner() (err error) {
 					wg.runningNode.Store(true)
 				case "stop":
 					Debug("stop called")
-					if !wg.runningNode.Load() {
-						Debug("wasn't running...")
-						break
-					}
+					// if !wg.runningNode.Load() {
+					// 	Debug("wasn't running...")
+					// 	break
+					// }
 					if wg.runningWallet.Load() {
 						wg.WalletRunCommandChan <- "stop"
 						wg.walletLocked.Store(true)

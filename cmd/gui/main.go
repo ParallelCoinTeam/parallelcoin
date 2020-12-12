@@ -11,6 +11,7 @@ import (
 	uberatomic "go.uber.org/atomic"
 
 	l "gioui.org/layout"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui/dialog"
@@ -72,7 +73,7 @@ type WalletGUI struct {
 	invalidate                         chan struct{}
 	quit                               chan struct{}
 	nodeQuit                           chan struct{}
-	walletQuit                           chan struct{}
+	walletQuit                         chan struct{}
 	minerQuit                          chan struct{}
 	sendAddresses                      []SendAddress
 	NodeRunCommandChan                 chan string
@@ -251,19 +252,21 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.Tickers()
 	wg.CreateSendAddressItem()
-	wg.runningNode.Store(!(*wg.cx.Config.NodeOff)) // || *wg.cx.Config.WalletOff)
+	wg.runningNode.Store(!(*wg.cx.Config.NodeOff))     // || *wg.cx.Config.WalletOff)
+	wg.runningWallet.Store(!(*wg.cx.Config.WalletOff)) // || *wg.cx.Config.WalletOff)
 	wg.mining.Store(*wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0)
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 		*wg.noWallet = true
 		wg.runningNode.Store(false)
+		wg.runningWallet.Store(false)
 		wg.mining.Store(false)
-		wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
+		// wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
 	} else {
 		if err = wg.Runner(); Check(err) {
 		}
 	}
 	if wg.runningNode.Load() {
-		Debug("initial starting shell")
+		Debug("initial starting node")
 		wg.runningNode.Store(false)
 		wg.NodeRunCommandChan <- "run"
 	}
@@ -294,12 +297,14 @@ func (wg *WalletGUI) Run() (err error) {
 				func() {
 					Debug("quitting wallet gui")
 					if wg.runningNode.Load() {
-						// consume.Kill(wg.Node)
-						close(wg.Node.Quit)
+						consume.Kill(wg.Node)
+						// close(wg.Node.Quit)
+						// wg.NodeRunCommandChan <- "stop"
 					}
 					if wg.mining.Load() {
-						// consume.Kill(wg.Miner)
-						close(wg.Miner.Quit)
+						consume.Kill(wg.Miner)
+						// close(wg.Miner.Quit)
+						// wg.WalletRunCommandChan <- "stop"
 					}
 					close(wg.quit)
 				}, wg.quit); Check(err) {
@@ -319,24 +324,36 @@ out:
 			wg.w["main"].Window.Invalidate()
 		case <-wg.quit:
 			Debug("closing GUI on quit signal")
-			Debug("disconnecting chain client")
 			wg.ChainMutex.Lock()
 			if wg.ChainClient != nil {
-				wg.ChainClient.Disconnect()
-				if wg.ChainClient.Disconnected() {
-					wg.ChainClient = nil
-				}
+				wg.ChainClient.Shutdown()
+				// wg.ChainClient.Disconnect()
+				// if wg.ChainClient.Disconnected() {
+				wg.ChainClient = nil
+				// }
 			}
 			wg.ChainMutex.Unlock()
-			Debug("disconnecting wallet client")
 			wg.WalletMutex.Lock()
 			if wg.WalletClient != nil {
-				wg.WalletClient.Disconnect()
-				if wg.WalletClient.Disconnected() {
-					wg.WalletClient = nil
-				}
+				wg.WalletClient.Shutdown()
+				// wg.WalletClient.Disconnect()
+				// if wg.WalletClient.Disconnected() {
+				wg.WalletClient = nil
+				// }
 			}
 			wg.WalletMutex.Unlock()
+			if wg.mining.Load() {
+				Debug("shutting down miner")
+				wg.MinerRunCommandChan <- "stop"
+			}
+			if wg.runningWallet.Load() {
+				Debug("shutting down wallet")
+				wg.WalletRunCommandChan <- "stop"
+			}
+			if wg.runningNode.Load() {
+				Debug("shutting down node")
+				wg.NodeRunCommandChan <- "stop"
+			}
 			// if wg.Node != nil {
 			//	Debug("stopping shell")
 			//	// wg.NodeRunCommandChan <- "stop"

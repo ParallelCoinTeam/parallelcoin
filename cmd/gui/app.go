@@ -516,12 +516,12 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 										Debug("clicked reset wallet button")
 										go func() {
 											var err error
-											// wasRunning := wg.runningNode
+											wasRunning := wg.runningNode.Load()
 											// wasMining := wg.mining
-											// Debug("was running", wasRunning)
-											// if wasRunning {
-											wg.WalletRunCommandChan <- "stop"
-											// }
+											Debug("was running", wasRunning)
+											if wasRunning {
+												wg.WalletRunCommandChan <- "stop"
+											}
 											// if wasMining {
 											// 	wg.MinerRunCommandChan <- "stop"
 											// }
@@ -540,10 +540,11 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											Debug("created password cookie")
 											if err := runner.Run(); Check(err) {
 											}
-											runner.Process.Kill()
-											// if wasRunning {
-											wg.WalletRunCommandChan <- "run"
-											// }
+											if err = runner.Process.Kill(); Check(err) {
+											}
+											if wasRunning {
+												wg.WalletRunCommandChan <- "run"
+											}
 											// time.Sleep(time.Second*3)
 											// if wasMining {
 											// 	wg.MinerRunCommandChan <- "run"

@@ -228,6 +228,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														Debug("starting main app")
 														*wg.noWallet = false
 														wg.runningNode.Store(false)
+														wg.runningWallet.Store(false)
 														wg.mining.Store(false)
 														wg.walletLocked.Store(false)
 														if err = wg.Runner(); Check(err) {

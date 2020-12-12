@@ -53,9 +53,11 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					// time.Sleep(time.Second * 5)
 					// *wg.cx.Config.WalletPass = pass
 					if !wg.runningNode.Load() {
+						wg.runningNode.Store(false)
 						// wallet doesn't work without the node
 						wg.NodeRunCommandChan <- "run"
 					}
+					wg.runningWallet.Store(false)
 					wg.WalletRunCommandChan <- "run"
 					// *wg.walletLocked = false
 					wg.unlockPassword.Wipe()
