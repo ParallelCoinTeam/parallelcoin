@@ -10,6 +10,20 @@ import (
 	"runtime"
 )
 
+func FilterNone(string) bool {
+	return true
+}
+
+func SimpleLog(ent *logi.Entry) (err error) {
+	Debugf("NODE[%s] %s %s",
+		ent.Level,
+		// ent.Time.Format(time.RFC3339),
+		ent.Text,
+		ent.CodeLocation,
+	)
+	return
+}
+
 func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 	err error), filter func(pkg string) (out bool),
 	args ...string) *worker.Worker {

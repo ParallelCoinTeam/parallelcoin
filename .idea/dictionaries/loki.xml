@@ -393,6 +393,7 @@
       <w>txout</w>
       <w>txscript</w>
       <w>txstore</w>
+      <w>uberatomic</w>
       <w>unconfirming</w>
       <w>unconfirms</w>
       <w>unfound</w>

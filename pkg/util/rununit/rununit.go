@@ -1,64 +1,81 @@
 package rununit
 
-import "sync"
+import (
+	uberatomic "go.uber.org/atomic"
 
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/consume"
+)
+
+// RunUnit handles correctly starting and stopping child processes that have StdConn pipe logging enabled, allowing
+// custom hooks to run on start and stop,
 type RunUnit struct {
-	sync.Mutex
-	name        string
-	running     bool
-	commandChan chan string
+	running     uberatomic.Bool
+	commandChan chan bool
+	worker      *worker.Worker
 	quit        chan struct{}
 }
 
-func New(run, stop func(), args ...string) (out *RunUnit) {
-	out = &RunUnit{commandChan: make(chan string), name: args[0]}
+// New creates and starts a new rununit. run and stop functions are executed after starting and stopping. logger
+// receives log entries and processes them (such as logging them).
+func New(run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter func(pkg string) (out bool),
+	args ...string) (r *RunUnit) {
+	r = &RunUnit{
+		commandChan: make(chan bool),
+		quit:        make(chan struct{}),
+	}
 	go func() {
 	out:
 		for {
 			select {
-			case cmd := <-out.commandChan:
+			case cmd := <-r.commandChan:
 				switch cmd {
-				case "run":
-					Debug("run called for", args[0])
-
+				case true:
+					Debug("run called for", args)
+					if r.running.Load() {
+						Debug("already running", args)
+						continue
+					}
+					r.worker = consume.Log(r.quit, logger, pkgFilter, args...)
+					consume.Start(r.worker)
 					run()
-					out.running = true
-				case "stop":
-					Debug("stop called for", args[0])
-
+					r.running.Store(true)
+				case false:
+					Debug("stop called for", args)
+					if r.running.Load() {
+						Debug("wasn't running", args)
+						continue
+					}
+					consume.Kill(r.worker)
 					stop()
-					out.running = false
+					r.running.Store(false)
 				}
-			case <-out.quit:
-				out.commandChan <- "stop"
+			case <-r.quit:
+				r.commandChan <- false
 				break out
 			}
 		}
 	}()
 	return
 }
-//
-// func (r *RunUnit) Chan() chan<- string {
-// 	return r.commandChan
-// }
 
+// Running returns whether the unit is running
 func (r *RunUnit) Running() bool {
-	return r.running
+	return r.running.Load()
 }
 
+// Run signals the run unit to start
 func (r *RunUnit) Run() {
-	r.commandChan <- "run"
-	r.Lock()
-	defer r.Unlock()
+	r.commandChan <- true
 }
 
+// Stop signals the run unit to stop
 func (r *RunUnit) Stop() {
-	r.commandChan <- "stop"
-	r.Lock()
-	defer r.Unlock()
-	r.running = false
+	r.commandChan <- false
 }
 
+// Shutdown terminates the run unit
 func (r *RunUnit) Shutdown() {
 	close(r.quit)
 }
