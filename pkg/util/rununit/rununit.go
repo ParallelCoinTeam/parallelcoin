@@ -40,21 +40,32 @@ func New(run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter f
 						continue
 					}
 					r.worker = consume.Log(r.quit, logger, pkgFilter, args...)
+					//Debug(r.worker)
 					consume.Start(r.worker)
-					run()
 					r.running.Store(true)
+					run()
+					Debug(r.running.Load())
 				case false:
+					Debug(r.running.Load())
 					Debug("stop called for", args)
-					if r.running.Load() {
+					if !r.running.Load() {
 						Debug("wasn't running", args)
 						continue
 					}
 					consume.Kill(r.worker)
-					stop()
 					r.running.Store(false)
+					stop()
 				}
 			case <-r.quit:
-				r.commandChan <- false
+				Debug("quitting on run unit quit channel", args, r.running.Load())
+				if r.running.Load() {
+					Debug("wasn't running", args)
+					//continue
+				}
+				consume.Kill(r.worker)
+				r.running.Store(false)
+				stop()
+				//r.commandChan <- false
 				break out
 			}
 		}
@@ -81,7 +92,7 @@ func (r *RunUnit) Stop() {
 func (r *RunUnit) Shutdown() {
 	// debug.PrintStack()
 	if !r.shuttingDown.Load() && r.running.Load() {
-		r.shuttingDown.Store(false)
+		r.shuttingDown.Store(true)
 		close(r.quit)
 	}
 }

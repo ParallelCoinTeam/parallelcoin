@@ -164,6 +164,9 @@ func (wg *WalletGUI) Run() (err error) {
 		"--servertls=true", "--clienttls=true",
 		"--pipelog", "node"}
 	wg.node = rununit.New(func() {}, func() {}, consume.SimpleLog, consume.FilterNone, nodeArgs...)
+	if !*wg.cx.Config.NodeOff {
+		wg.node.Start()
+	}
 	walletArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 		"--servertls=true", "--clienttls=true",
 		"--pipelog", "wallet"}
@@ -220,7 +223,6 @@ func (wg *WalletGUI) Run() (err error) {
 						Debug("setting thread count")
 						*wg.cx.Config.GenThreads = n
 						save.Pod(wg.cx.Config)
-						// wg.MinerThreadsChan <- n
 						if wg.miner.Running() {
 							Debug("restarting miner")
 							wg.miner.Stop()
@@ -261,6 +263,7 @@ func (wg *WalletGUI) Run() (err error) {
 		if err = wg.Runner(); Check(err) {
 		}
 	}
+
 	wg.Size = wg.w["main"].Width
 	go func() {
 		if err := wg.w["main"].

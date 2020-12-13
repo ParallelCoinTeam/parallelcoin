@@ -406,11 +406,17 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						func() {
 							go func() {
 								if wg.node.Running() {
-									wg.wallet.Stop()
+									if wg.wallet.Running() {
+										wg.wallet.Stop()
+									}
 									wg.node.Stop()
 									wg.unlockPassword.Wipe()
+									*wg.cx.Config.NodeOff = true
+									save.Pod(wg.cx.Config)
 								} else {
 									wg.node.Start()
+									*wg.cx.Config.NodeOff = false
+									save.Pod(wg.cx.Config)
 								}
 							}()
 						}).
