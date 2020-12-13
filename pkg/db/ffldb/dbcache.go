@@ -474,7 +474,7 @@ func (c *dbCache) flush() error {
 	c.cachedKeys = treap.NewImmutable()
 	c.cachedRemove = treap.NewImmutable()
 	c.cacheLock.Unlock()
-	Trace("synced database to disk")
+	Info("synced database to disk")
 	return nil
 }
 

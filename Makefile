@@ -39,4 +39,4 @@ guiprof:
 
 testnode:
 	go install -v
-	pod -D test0 -n testnet node
+	pod -D test0 -n testnet -l debug node

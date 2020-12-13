@@ -4,7 +4,6 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
@@ -49,13 +48,13 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				//cx.WaitGroup.Add(1)
+				cx.WaitGroup.Add(1)
 				err = node.Main(cx)
 				if err != nil {
 					Error("error starting node ", err)
 				}
-				//cx.WaitGroup.Done()
-				//close(cx.KillAll)
+				cx.WaitGroup.Done()
+				// close(cx.KillAll)
 			}()
 			Info("starting node")
 			if !*cx.Config.DisableRPC {
@@ -66,9 +65,6 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			Info("node started")
 		}
 		cx.WaitGroup.Wait()
-		interrupt.AddHandler(func() {
-			close(cx.KillAll)
-		})
 		<-cx.KillAll
 		return nil
 	}

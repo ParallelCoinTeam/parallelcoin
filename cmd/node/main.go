@@ -6,9 +6,8 @@ import (
 	// // This enables pprof
 	// _ "net/http/pprof"
 	"os"
-	"runtime/debug"
 	"runtime/pprof"
-
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/control"
@@ -58,15 +57,17 @@ func Main(cx *conte.Xt) (err error) {
 		} else {
 			defer f.Close()
 			defer pprof.StopCPUProfile()
-			interrupt.AddHandler(func() {
-				Warn("stopping CPU profiler")
-				err := f.Close()
-				if err != nil {
-					Error(err)
-				}
-				pprof.StopCPUProfile()
-				Warn("finished cpu profiling", *cx.Config.CPUProfile)
-			})
+			interrupt.AddHandler(
+				func() {
+					Warn("stopping CPU profiler")
+					err := f.Close()
+					if err != nil {
+						Error(err)
+					}
+					pprof.StopCPUProfile()
+					Warn("finished cpu profiling", *cx.Config.CPUProfile)
+				},
+			)
 		}
 	}
 	// perform upgrades to pod as new versions require it
@@ -128,8 +129,8 @@ func Main(cx *conte.Xt) (err error) {
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 {
-		// Debug("starting cAPI.....")
-		// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
+		Debug("starting cAPI.....")
+		chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
 		Debug("propagating rpc server handle (node has started)")
 		cx.RPCServer = server.RPCServers[0]
 		if cx.NodeChan != nil {
@@ -142,14 +143,13 @@ func Main(cx *conte.Xt) (err error) {
 	control.Run(cx)
 	// Debug("controller started")
 	// cx.Controller.Store(true)
-	shutted := false
 	gracefulShutdown := func() {
 		Info("gracefully shutting down the server...")
-		if shutted {
-			Debug("gracefulShutdown called twice")
-			debug.PrintStack()
-			return
-		}
+		// if shutted {
+		// 	Debug("gracefulShutdown called twice")
+		// 	debug.PrintStack()
+		// 	return
+		// }
 		Debug("stopping controller")
 		go func() {
 			e := server.Stop()
@@ -162,8 +162,7 @@ func Main(cx *conte.Xt) (err error) {
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
-		shutted = true
-		// close(cx.KillAll)
+		close(cx.KillAll)
 	}
 	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)
@@ -179,9 +178,9 @@ func Main(cx *conte.Xt) (err error) {
 		break
 	case <-cx.KillAll:
 		Debug("KillAll")
-		if !interrupt.Requested() {
-			interrupt.Request()
-		}
+		// if !interrupt.Requested() {
+		// 	interrupt.Request()
+		// }
 		// gracefulShutdown()
 		break
 		// case <-interrupt.ShutdownRequestChan:
@@ -291,6 +290,7 @@ func warnMultipleDBs(cx *conte.Xt) {
 				"\nYour current database is located at [%v]."+
 				"\nThe additional database is located at %v",
 			selectedDbPath,
-			duplicateDbPaths)
+			duplicateDbPaths,
+		)
 	}
 }

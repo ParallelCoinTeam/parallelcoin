@@ -123,7 +123,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		}
 		if err = ctrl.multiConn.Close(); Check(err) {
 		}
-		close(ctrl.quit)
+		// close(ctrl.quit)
 	})
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
 	if mining {
