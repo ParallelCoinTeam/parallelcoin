@@ -34,7 +34,6 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		}
 		save.Pod(wg.cx.Config)
 	})
-	wg.size = a.Size
 	wg.config = cfg.New(wg.cx, wg.th)
 	wg.configs = wg.config.Config()
 	a.Pages(map[string]l.Widget{
@@ -180,7 +179,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			// wg.unlockPage.ActivePage(name)
 			wg.unlockPassword.Wipe()
 			wg.walletLocked.Store(true)
-			wg.WalletRunCommandChan <- "stop"
+			wg.wallet.Stop()
 		}, a, ""),
 		wg.PageTopBarButton("console", 2, &p9icons.Terminal, func(name string) {
 			wg.App.ActivePage(name)
@@ -356,11 +355,9 @@ func (wg *WalletGUI) SetNodeRunState(b bool) {
 	go func() {
 		Debug("node run state is now", b)
 		if b {
-			wg.NodeRunCommandChan <- "run"
-			// wg.running = b
+			wg.node.Start()
 		} else {
-			wg.NodeRunCommandChan <- "stop"
-			// wg.running = b
+			wg.node.Stop()
 		}
 	}()
 }
@@ -369,11 +366,9 @@ func (wg *WalletGUI) SetWalletRunState(b bool) {
 	go func() {
 		Debug("node run state is now", b)
 		if b {
-			wg.WalletRunCommandChan <- "run"
-			// wg.running = b
+			wg.wallet.Start()
 		} else {
-			wg.WalletRunCommandChan <- "stop"
-			// wg.running = b
+			wg.wallet.Stop()
 		}
 	}()
 }
@@ -382,13 +377,13 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		t, f := &p9icons.Link, &p9icons.LinkOff
 		var runningIcon *[]byte
-		if wg.runningNode.Load() {
+		if wg.node.Running() {
 			runningIcon = t
 		} else {
 			runningIcon = f
 		}
 		miningIcon := &p9icons.Mine
-		if !wg.mining.Load() {
+		if !wg.miner.Running() {
 			miningIcon = &p9icons.NoMine
 		}
 		wg.State.mutex.Lock()
@@ -410,39 +405,17 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							go func() {
-								if wg.runningNode.Load() {
-									wg.NodeRunCommandChan <- "stop"
-									wg.WalletRunCommandChan <- "stop"
+								if wg.node.Running() {
+									wg.wallet.Stop()
+									wg.node.Stop()
 									wg.unlockPassword.Wipe()
 								} else {
-									wg.NodeRunCommandChan <- "run"
+									wg.node.Start()
 								}
 							}()
 						}).
 					Fn,
 			).
-			// Rigid(
-			// 	wg.th.Inset(0.25,
-			// 		p9.If(wg.running,
-			// 			wg.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
-			// 			wg.th.Icon().
-			// 				Scale(p9.Scales["H5"]).
-			// 				Color("Primary").
-			// 				Src(&icons.ActionCheckCircle).
-			// 				Fn,
-			// 		),
-			// 	).Fn,
-			// ).
-			// Rigid(wg.th.
-			// 	Inset(0.25,
-			// 		wg.Icon().
-			// 			Scale(p9.Scales["H5"]).
-			// 			Color("DocText").
-			// 			Src(&icons.DeviceWidgets).
-			// 			Fn,
-			// 	).
-			// 	Fn,
-			// ).
 			Rigid(
 				wg.th.Inset(0.33,
 					wg.th.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight)).
@@ -466,20 +439,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							go func() {
-								Debug("clicked miner control stop/start button", wg.mining)
-								wg.mining.Store(!wg.mining.Load())
+								Debug("clicked miner control stop/start button", wg.miner.Running())
 								if *wg.cx.Config.GenThreads == 0 {
 									Debug("was zero threads")
-									wg.mining.Store(false)
-									// wg.MinerThreadsChan <- 1
-									// wg.MinerRunCommandChan <- "run"
-									// wg.incdecs["generatethreads"].SetCurrent(1)
+									wg.miner.Stop()
 									return
 								}
-								if !wg.mining.Load() {
-									wg.MinerRunCommandChan <- "stop"
+								if !wg.miner.Running() {
+									wg.miner.Stop()
 								} else {
-									wg.MinerRunCommandChan <- "run"
+									wg.miner.Start()
 								}
 							}()
 						}).
@@ -516,15 +485,11 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 										Debug("clicked reset wallet button")
 										go func() {
 											var err error
-											wasRunning := wg.runningNode.Load()
-											// wasMining := wg.mining
+											wasRunning := wg.wallet.Running()
 											Debug("was running", wasRunning)
 											if wasRunning {
-												wg.WalletRunCommandChan <- "stop"
+												wg.wallet.Stop()
 											}
-											// if wasMining {
-											// 	wg.MinerRunCommandChan <- "stop"
-											// }
 											args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 												"--pipelog", "--walletpass", *wg.cx.Config.WalletPass, "wallet", "drophistory"}
 											runner := exec.Command(args[0], args[1:]...)
@@ -540,15 +505,9 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											Debug("created password cookie")
 											if err := runner.Run(); Check(err) {
 											}
-											if err = runner.Process.Kill(); Check(err) {
-											}
 											if wasRunning {
-												wg.WalletRunCommandChan <- "run"
+												wg.wallet.Start()
 											}
-											// time.Sleep(time.Second*3)
-											// if wasMining {
-											// 	wg.MinerRunCommandChan <- "run"
-											// }
 										}()
 									}).
 								Fn,

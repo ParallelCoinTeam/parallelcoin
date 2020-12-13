@@ -184,7 +184,11 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														addresses.RefillMiningAddresses(w, wg.cx.Config, wg.cx.StateCfg)
 														Warn("done refilling mining addresses")
 														w.Manager.Close()
+														Debug("closed wallet manager")
 														w.Stop()
+														Debug("signalled to stop wallet")
+														w.WaitForShutdown()
+														Debug("wallet stopped")
 														// Debug("starting up shell first time")
 														// rand.Seed(time.Now().Unix())
 														// nodeport := rand.Intn(60000) + 1024
@@ -227,17 +231,15 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														// *wg.App = *wg.GetAppWidget()
 														Debug("starting main app")
 														*wg.noWallet = false
-														wg.runningNode.Store(false)
-														wg.runningWallet.Store(false)
-														wg.mining.Store(false)
 														wg.walletLocked.Store(false)
 														if err = wg.Runner(); Check(err) {
 														}
-														wg.NodeRunCommandChan <- "run"
-														wg.MinerRunCommandChan <- "run"
-														// TODO: send unlock command here - and wipe input
-
-														// Exec()
+														if !*wg.cx.Config.NodeOff {
+															wg.node.Start()
+														}
+														if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads > 0 {
+															wg.miner.Start()
+														}
 													}()
 												}).
 												CornerRadius(0).

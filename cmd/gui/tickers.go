@@ -58,7 +58,7 @@ func (wg *WalletGUI) Tickers() {
 					}
 					wg.WalletMutex.Unlock()
 					// the remaining actions require a running shell
-					if !wg.runningNode.Load() {
+					if !wg.node.Running() {
 						break
 					}
 					wg.cx.Config.Lock()
@@ -94,7 +94,7 @@ func (wg *WalletGUI) Tickers() {
 					// Debug("connected loop")
 					wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
-					if !wg.runningNode.Load() {
+					if !wg.node.Running() {
 						Debug("breaking out not running")
 						break out
 					}
@@ -223,7 +223,7 @@ func (wg *WalletGUI) Tickers() {
 					break totalOut
 				}
 			}
-			wg.runningNode.Store(false)
+			// wg.runningNode.Store(false)
 		}
 		// Debug("*** Sending shutdown signal")
 		// close(wg.quit)

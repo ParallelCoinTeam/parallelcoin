@@ -52,13 +52,11 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					// wg.WalletRunCommandChan <- "stop"
 					// time.Sleep(time.Second * 5)
 					// *wg.cx.Config.WalletPass = pass
-					if !wg.runningNode.Load() {
-						wg.runningNode.Store(false)
+					if !wg.node.Running() {
 						// wallet doesn't work without the node
-						wg.NodeRunCommandChan <- "run"
+						wg.node.Start()
 					}
-					wg.runningWallet.Store(false)
-					wg.WalletRunCommandChan <- "run"
+					wg.wallet.Start()
 					// *wg.walletLocked = false
 					wg.unlockPassword.Wipe()
 				}
@@ -78,7 +76,6 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 		}
 		save.Pod(wg.cx.Config)
 	})
-	wg.size = a.Size
 	a.Pages(map[string]l.Widget{
 		"main": wg.Page("overview", p9.Widgets{
 			p9.WidgetSize{Widget:

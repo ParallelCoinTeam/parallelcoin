@@ -11,10 +11,10 @@ import (
 // RunUnit handles correctly starting and stopping child processes that have StdConn pipe logging enabled, allowing
 // custom hooks to run on start and stop,
 type RunUnit struct {
-	running     uberatomic.Bool
-	commandChan chan bool
-	worker      *worker.Worker
-	quit        chan struct{}
+	running, shuttingDown uberatomic.Bool
+	commandChan           chan bool
+	worker                *worker.Worker
+	quit                  chan struct{}
 }
 
 // New creates and starts a new rununit. run and stop functions are executed after starting and stopping. logger
@@ -25,6 +25,8 @@ func New(run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter f
 		commandChan: make(chan bool),
 		quit:        make(chan struct{}),
 	}
+	r.running.Store(false)
+	r.shuttingDown.Store(false)
 	go func() {
 	out:
 		for {
@@ -66,7 +68,7 @@ func (r *RunUnit) Running() bool {
 }
 
 // Run signals the run unit to start
-func (r *RunUnit) Run() {
+func (r *RunUnit) Start() {
 	r.commandChan <- true
 }
 
@@ -77,5 +79,9 @@ func (r *RunUnit) Stop() {
 
 // Shutdown terminates the run unit
 func (r *RunUnit) Shutdown() {
-	close(r.quit)
+	// debug.PrintStack()
+	if !r.shuttingDown.Load() && r.running.Load() {
+		r.shuttingDown.Store(false)
+		close(r.quit)
+	}
 }

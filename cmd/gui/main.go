@@ -3,6 +3,7 @@ package gui
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"os"
 	"runtime"
 	"sync"
 	"time"
@@ -12,6 +13,7 @@ import (
 
 	l "gioui.org/layout"
 	"github.com/p9c/pod/pkg/util/logi/consume"
+	"github.com/p9c/pod/pkg/util/rununit"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui/dialog"
@@ -20,7 +22,6 @@ import (
 
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
@@ -39,7 +40,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 		invalidate: make(chan struct{}),
 		quit:       cx.KillAll,
 		// nodeQuit: make(chan struct{}),
-		size:         &size,
+		Size:         &size,
 		noWallet:     &noWallet,
 		walletLocked: uberatomic.NewBool(walletLocked),
 	}
@@ -51,7 +52,6 @@ type WalletGUI struct {
 	c                *cli.Context
 	w                map[string]*f.Window
 	th               *p9.Theme
-	size             *int
 	App              *p9.App
 	unlockPage       *p9.App
 	unlockPassword   *p9.Password
@@ -67,22 +67,12 @@ type WalletGUI struct {
 	passwords        map[string]*p9.Password
 	incdecs          map[string]*p9.IncDec
 	// intSliders                map[string]*p9.IntSlider
-	configs cfg.GroupsMap
-	config  *cfg.Config
-
-	runningNode, runningWallet, mining uberatomic.Bool
-	NodeRunCommandChan                 chan string
-	WalletRunCommandChan               chan string
-	MinerRunCommandChan                chan string
-
+	configs                   cfg.GroupsMap
+	config                    *cfg.Config
 	invalidate                chan struct{}
 	quit                      chan struct{}
-	nodeQuit                  chan struct{}
-	walletQuit                chan struct{}
-	minerQuit                 chan struct{}
 	sendAddresses             []SendAddress
 	State                     State
-	Node, Wallet, Miner       *worker.Worker
 	ChainMutex, WalletMutex   sync.Mutex
 	ChainClient, WalletClient *rpcclient.Client
 	txs                       []btcjson.ListTransactionsResult
@@ -90,6 +80,7 @@ type WalletGUI struct {
 	console                   *Console
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
+	node, wallet, miner       *rununit.RunUnit
 	noWallet                  *bool
 	walletLocked              *uberatomic.Bool
 	walletToLock              time.Time
@@ -103,8 +94,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
 	wg.sidebarButtons = make([]*p9.Clickable, 12)
-	wl := true
-	wg.walletLocked.Store(wl)
+	wg.walletLocked.Store(true)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
@@ -170,8 +160,18 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	wg.checkables = map[string]*p9.Checkable{
 	}
+	nodeArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
+		"--servertls=true", "--clienttls=true",
+		"--pipelog", "node"}
+	wg.node = rununit.New(func() {}, func() {}, consume.SimpleLog, consume.FilterNone, nodeArgs...)
+	walletArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
+		"--servertls=true", "--clienttls=true",
+		"--pipelog", "wallet"}
+	wg.wallet = rununit.New(func() {}, func() {}, consume.SimpleLog, consume.FilterNone, walletArgs...)
+	minerArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach"}
+	wg.miner = rununit.New(func() {}, func() {}, consume.SimpleLog, consume.FilterNone, minerArgs...)
 	wg.bools = map[string]*p9.Bool{
-		"runstate":     wg.th.Bool(wg.runningNode.Load()),
+		"runstate":     wg.th.Bool(wg.node.Running()),
 		"encryption":   wg.th.Bool(false),
 		"seed":         wg.th.Bool(false),
 		"testnet":      wg.th.Bool(false),
@@ -221,10 +221,10 @@ func (wg *WalletGUI) Run() (err error) {
 						*wg.cx.Config.GenThreads = n
 						save.Pod(wg.cx.Config)
 						// wg.MinerThreadsChan <- n
-						if wg.mining.Load() {
+						if wg.miner.Running() {
 							Debug("restarting miner")
-							wg.MinerRunCommandChan <- "stop"
-							wg.MinerRunCommandChan <- "run"
+							wg.miner.Stop()
+							wg.miner.Start()
 						}
 					}()
 				},
@@ -254,29 +254,12 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.Tickers()
 	wg.CreateSendAddressItem()
-	wg.runningNode.Store(!(*wg.cx.Config.NodeOff))     // || *wg.cx.Config.WalletOff)
-	wg.runningWallet.Store(!(*wg.cx.Config.WalletOff)) // || *wg.cx.Config.WalletOff)
-	wg.mining.Store(*wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0)
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 		*wg.noWallet = true
-		wg.runningNode.Store(false)
-		wg.runningWallet.Store(false)
-		wg.mining.Store(false)
 		// wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
 	} else {
 		if err = wg.Runner(); Check(err) {
 		}
-	}
-	if wg.runningNode.Load() {
-		Debug("initial starting node")
-		wg.runningNode.Store(false)
-		wg.NodeRunCommandChan <- "run"
-	}
-	if wg.mining.Load() {
-		// wg.MinerThreadsChan <- *wg.cx.Config.GenThreads
-		Debug("initial starting miner")
-		wg.mining.Store(false)
-		wg.MinerRunCommandChan <- "run"
 	}
 	wg.Size = wg.w["main"].Width
 	go func() {
@@ -298,16 +281,27 @@ func (wg *WalletGUI) Run() (err error) {
 				// wg.InitWallet(),
 				func() {
 					Debug("quitting wallet gui")
-					if wg.runningNode.Load() {
-						consume.Kill(wg.Node)
-						// close(wg.Node.Quit)
-						// wg.NodeRunCommandChan <- "stop"
+					if wg.miner.Running() {
+						wg.miner.Shutdown()
 					}
-					if wg.mining.Load() {
-						consume.Kill(wg.Miner)
-						// close(wg.Miner.Quit)
-						// wg.WalletRunCommandChan <- "stop"
+					if wg.wallet.Running() {
+						wg.wallet.Shutdown()
 					}
+					if wg.node.Running() {
+						wg.node.Shutdown()
+					}
+					wg.ChainMutex.Lock()
+					if wg.ChainClient != nil {
+						wg.ChainClient.Shutdown()
+						wg.ChainClient = nil
+					}
+					wg.ChainMutex.Unlock()
+					wg.WalletMutex.Lock()
+					if wg.WalletClient != nil {
+						wg.WalletClient.Shutdown()
+						wg.WalletClient = nil
+					}
+					wg.WalletMutex.Unlock()
 					close(wg.quit)
 				}, wg.quit); Check(err) {
 		}
@@ -316,7 +310,7 @@ func (wg *WalletGUI) Run() (err error) {
 		Debug("quitting wallet gui")
 		// consume.Kill(wg.Node)
 		// consume.Kill(wg.Miner)
-		// close(wg.quit)
+		close(wg.quit)
 	})
 out:
 	for {
@@ -325,51 +319,21 @@ out:
 			// Debug("invalidating render queue")
 			wg.w["main"].Window.Invalidate()
 		case <-wg.quit:
-			Debug("closing GUI on quit signal")
-			wg.ChainMutex.Lock()
-			if wg.ChainClient != nil {
-				wg.ChainClient.Shutdown()
-				// wg.ChainClient.Disconnect()
-				// if wg.ChainClient.Disconnected() {
-				wg.ChainClient = nil
-				// }
-			}
-			wg.ChainMutex.Unlock()
-			wg.WalletMutex.Lock()
-			if wg.WalletClient != nil {
-				wg.WalletClient.Shutdown()
-				// wg.WalletClient.Disconnect()
-				// if wg.WalletClient.Disconnected() {
-				wg.WalletClient = nil
-				// }
-			}
-			wg.WalletMutex.Unlock()
-			if wg.mining.Load() {
-				Debug("shutting down miner")
-				wg.MinerRunCommandChan <- "stop"
-			}
-			if wg.runningWallet.Load() {
-				Debug("shutting down wallet")
-				wg.WalletRunCommandChan <- "stop"
-			}
-			if wg.runningNode.Load() {
-				Debug("shutting down node")
-				wg.NodeRunCommandChan <- "stop"
-			}
-			// if wg.Node != nil {
-			//	Debug("stopping shell")
-			//	// wg.NodeRunCommandChan <- "stop"
-			//	consume.Kill(wg.Node)
+			// Debug("closing GUI on quit signal")
+			// if wg.miner.Running() {
+			// 	Debug("shutting down miner")
+			// 	wg.miner.Shutdown()
 			// }
-			// if wg.Miner != nil {
-			//	Debug("stopping miner")
-			//	consume.Kill(wg.Miner)
-			//	// wg.MinerRunCommandChan <- "stop"
+			// if wg.wallet.Running() {
+			// 	Debug("shutting down wallet")
+			// 	wg.wallet.Shutdown()
+			// }
+			// if wg.node.Running() {
+			// 	Debug("shutting down node")
+			// 	wg.node.Shutdown()
 			// }
 			break out
 		}
 	}
-	// app.Main is just a synonym for select{} so don't do it, we want to be able to shut down
-	// app.Main()
 	return
 }
