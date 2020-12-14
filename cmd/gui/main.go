@@ -164,9 +164,6 @@ func (wg *WalletGUI) Run() (err error) {
 		"--servertls=true", "--clienttls=true",
 		"--pipelog", "node"}
 	wg.node = rununit.New(func() {}, func() {}, consume.SimpleLog("NODE"), consume.FilterNone, nodeArgs...)
-	if !*wg.cx.Config.NodeOff {
-		wg.node.Start()
-	}
 	walletArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 		"--servertls=true", "--clienttls=true",
 		"--pipelog", "wallet"}
@@ -263,7 +260,9 @@ func (wg *WalletGUI) Run() (err error) {
 		if err = wg.Runner(); Check(err) {
 		}
 	}
-
+	if !*wg.cx.Config.NodeOff && !*wg.noWallet {
+		wg.node.Start()
+	}
 	wg.Size = wg.w["main"].Width
 	go func() {
 		if err := wg.w["main"].

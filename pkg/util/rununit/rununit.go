@@ -63,10 +63,11 @@ func New(
 				if r.running.Load() {
 					Debug("wasn't running", args)
 					// continue
+				} else {
+					consume.Kill(r.worker)
+					r.running.Store(false)
+					stop()
 				}
-				consume.Kill(r.worker)
-				r.running.Store(false)
-				stop()
 				// r.commandChan <- false
 				break out
 			}
