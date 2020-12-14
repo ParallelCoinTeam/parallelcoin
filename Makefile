@@ -15,7 +15,7 @@ kopachgui:
 
 kopach:
 	go install -v
-	pod -D test0 -n testnet -l debug -g -G 1 --lan --solo --kopachgui node
+	pod -D test0 -n testnet -l debug -g -G 1 --lan --solo kopach
 
 nodegui:
 	go install -v
@@ -40,3 +40,7 @@ guiprof:
 testnode:
 	go install -v
 	pod -D test0 -n testnet -l debug node
+
+testwallet:
+	go install -v
+	pod -D test0 -n testnet -l debug wallet

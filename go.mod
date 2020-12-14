@@ -24,12 +24,11 @@ require (
 	github.com/kofoworola/godate v1.2.1
 	github.com/kr/text v0.2.0 // indirect
 	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
-	github.com/minio/highwayhash v1.0.1
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.12.1 // indirect
 	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
-	github.com/stalker-loki/alo v0.0.4
+	github.com/spacemonkeygo/errors v0.0.0-20201030155909-2f5f890dbc62 // indirect
 	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/templexxx/reedsolomon v1.1.3
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
