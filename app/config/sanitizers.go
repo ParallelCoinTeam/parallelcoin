@@ -729,7 +729,7 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 	if (*cfg.Generate) && len(state.ActiveMiningAddrs) == 0 {
 		Error("the generate flag is set, " +
 			"but there are no mining addresses specified ")
-		Traces(cfg)
+		// Traces(cfg)
 		*cfg.Generate = false
 		// os.Exit(1)
 	}

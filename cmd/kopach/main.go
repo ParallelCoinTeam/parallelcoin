@@ -162,6 +162,9 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		if *cx.Config.Generate {
 			w.Start()
 		}
+		interrupt.AddHandler(func() {
+			close(w.quit)
+		})
 		// controller watcher thread
 		go func() {
 			Debug("starting controller watcher")
@@ -219,17 +222,15 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					Debug("stopping from killall")
 					// close(w.quit)
 					break out
-				case <-w.quit:
-					Debug("stopping from quit")
-					break out
+				// case <-w.quit:
+					// Debug("stopping from quit")
+					// break out
 				}
 			}
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
-		interrupt.AddHandler(func() {
-			//close(w.quit)
-		})
-		<-w.quit
+		// <-w.quit
+		<-cx.KillAll
 		Info("kopach shutting down")
 		return
 	}
