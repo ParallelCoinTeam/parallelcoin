@@ -72,7 +72,7 @@ func (wg *WalletGUI) Tickers() {
 						wg.cx.Config.Unlock()
 					}
 					wg.cx.Config.Lock()
-					if !*wg.cx.Config.WalletOff || !wg.walletLocked.Load() {
+					if !*wg.cx.Config.WalletOff && !wg.walletLocked.Load() {
 						wg.cx.Config.Unlock()
 						Debug("connecting to wallet")
 						if err = wg.walletClient(); Check(err) {

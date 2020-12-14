@@ -3,7 +3,6 @@ package serve
 import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"go.uber.org/atomic"
-	"time"
 	
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -18,7 +17,6 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 	logQuit := make(chan struct{})
 	interrupt.AddHandler(
 		func() {
-			time.Sleep(time.Second)
 			close(logQuit)
 		},
 	)

@@ -15,7 +15,11 @@ kopachgui:
 
 kopach:
 	go install -v
-	pod -D test0 -n testnet -l debug -g -G 1 --lan --solo kopach
+	pod -D test0 -n testnet -l trace -g -G 1 --lan --solo kopach
+
+testnode:
+	go install -v
+	pod -D test0 -n testnet -l debug --solo --lan node
 
 nodegui:
 	go install -v
@@ -37,17 +41,13 @@ guiprof:
 	go install -v
 	pod -D test0 -n testnet --lan --solo --kopachgui
 
-testnode:
-	go install -v
-	pod -D test0 -n testnet -l debug --solo --lan node
-
 mainnode:
 	go install -v
 	pod -D testmain -n mainnet -l info --connect seed3.parallelcoin.io:11047 node
 
 testwallet:
 	go install -v
-	pod -D test0 -n testnet -l trace wallet
+	pod -D test0 -n testnet -l trace --walletpass aoeuaoeu wallet
 
 mainwallet:
 	go install -v

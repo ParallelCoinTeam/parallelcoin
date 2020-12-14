@@ -92,7 +92,7 @@ func Listener() {
 			invokeCallbacks()
 			return
 		case handler := <-AddHandlerChan:
-			Debug("adding handler")
+			// Debug("adding handler")
 			interruptCallbacks = append(interruptCallbacks, handler)
 		}
 	}

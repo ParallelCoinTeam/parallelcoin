@@ -272,7 +272,7 @@ func New(id string, quit chan struct{}) (w *Worker, conn net.Conn) {
 // NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
 // work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
-	Trace("starting new job")
+	Debug("starting new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
 		*reply = true
 		return
@@ -293,6 +293,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.lastMerkle = j.Hashes[5]
 	*reply = true
 	// halting current work
+	Debug("halting current work")
 	w.stopChan <- struct{}{}
 	newHeight := job.GetNewHeight()
 
@@ -330,6 +331,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.msgBlock.Store(*mb)
 	w.senderPort.Store(uint32(job.GetControllerListenerPort()))
 	// halting current work
+	Debug("switching to new job")
 	// w.stopChan <- struct{}{}
 	w.startChan <- struct{}{}
 	return

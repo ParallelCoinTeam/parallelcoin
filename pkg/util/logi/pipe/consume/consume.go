@@ -8,63 +8,72 @@ import (
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
-	"time"
 )
 
 func FilterNone(string) bool {
 	return false
 }
 
-func SimpleLog(ent *logi.Entry) (err error) {
-	Debugf("NODE[%s] %s %s",
-		ent.Level,
-		// ent.Time.Format(time.RFC3339),
-		ent.Text,
-		ent.CodeLocation,
-	)
-	return
+func SimpleLog(name string) func(ent *logi.Entry) (err error) {
+	return func(ent *logi.Entry) (err error) {
+		Debugf(
+			"%s[%s] %s %s",
+			name,
+			ent.Level,
+			// ent.Time.Format(time.RFC3339),
+			ent.Text,
+			ent.CodeLocation,
+		)
+		return
+	}
 }
 
-func Log(quit chan struct{}, handler func(ent *logi.Entry) (
-	err error), filter func(pkg string) (out bool),
-	args ...string) *worker.Worker {
+func Log(
+	quit chan struct{}, handler func(ent *logi.Entry) (
+	err error,
+), filter func(pkg string) (out bool),
+	args ...string,
+) *worker.Worker {
 	Debug("starting log consumer")
 	logQuit := make(chan struct{})
-	interrupt.AddHandler(func(){
-		time.Sleep(time.Second)
-		close(logQuit)
-	})
-	return pipe.Consume(logQuit, func(b []byte) (err error) {
-		// we are only listening for entries
-		if len(b) >= 4 {
-			magic := string(b[:4])
-			switch magic {
-			case "entr":
-				// Debug(b)
-				e := Entry.LoadContainer(b).Struct()
-				if filter(e.Package) {
-					// if the worker filter is out of sync this stops it printing
-					return
-				}
-				switch e.Level {
-				case logi.Fatal:
-				case logi.Error:
-				case logi.Warn:
-				case logi.Info:
-				case logi.Check:
-				case logi.Debug:
-				case logi.Trace:
-				default:
-					Debug("got an empty log entry")
-					return
-				}
-				// Debugf("%s%s %s%s", color, e.Text, logi.ColorOff, e.CodeLocation)
-				if err := handler(e); Check(err) {
+	interrupt.AddHandler(
+		func() {
+			close(logQuit)
+		},
+	)
+	return pipe.Consume(
+		logQuit, func(b []byte) (err error) {
+			// we are only listening for entries
+			if len(b) >= 4 {
+				magic := string(b[:4])
+				switch magic {
+				case "entr":
+					// Debug(b)
+					e := Entry.LoadContainer(b).Struct()
+					if filter(e.Package) {
+						// if the worker filter is out of sync this stops it printing
+						return
+					}
+					switch e.Level {
+					case logi.Fatal:
+					case logi.Error:
+					case logi.Warn:
+					case logi.Info:
+					case logi.Check:
+					case logi.Debug:
+					case logi.Trace:
+					default:
+						Debug("got an empty log entry")
+						return
+					}
+					// Debugf("%s%s %s%s", color, e.Text, logi.ColorOff, e.CodeLocation)
+					if err := handler(e); Check(err) {
+					}
 				}
 			}
-		}
-		return
-	}, args...)
+			return
+		}, args...,
+	)
 }
 
 func Start(w *worker.Worker) {

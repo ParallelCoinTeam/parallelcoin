@@ -163,16 +163,16 @@ func (wg *WalletGUI) Run() (err error) {
 	nodeArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 		"--servertls=true", "--clienttls=true",
 		"--pipelog", "node"}
-	wg.node = rununit.New(func() {}, func() {}, consume.SimpleLog, consume.FilterNone, nodeArgs...)
+	wg.node = rununit.New(func() {}, func() {}, consume.SimpleLog("NODE"), consume.FilterNone, nodeArgs...)
 	if !*wg.cx.Config.NodeOff {
 		wg.node.Start()
 	}
 	walletArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
 		"--servertls=true", "--clienttls=true",
 		"--pipelog", "wallet"}
-	wg.wallet = rununit.New(func() {}, func() {}, consume.SimpleLog, consume.FilterNone, walletArgs...)
+	wg.wallet = rununit.New(func() {}, func() {}, consume.SimpleLog("WLLT"), consume.FilterNone, walletArgs...)
 	minerArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach"}
-	wg.miner = rununit.New(func() {}, func() {}, consume.SimpleLog, consume.FilterNone, minerArgs...)
+	wg.miner = rununit.New(func() {}, func() {}, consume.SimpleLog("MINE"), consume.FilterNone, minerArgs...)
 	wg.bools = map[string]*p9.Bool{
 		"runstate":     wg.th.Bool(wg.node.Running()),
 		"encryption":   wg.th.Bool(false),
