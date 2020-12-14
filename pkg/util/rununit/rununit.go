@@ -99,3 +99,7 @@ func (r *RunUnit) Shutdown() {
 		close(r.quit)
 	}
 }
+
+func (r *RunUnit) ShuttingDown() bool {
+	return r.shuttingDown.Load()
+}
