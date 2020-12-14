@@ -12,7 +12,7 @@ import (
 	uberatomic "go.uber.org/atomic"
 
 	l "gioui.org/layout"
-	"github.com/p9c/pod/pkg/util/logi/consume"
+	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 	"github.com/p9c/pod/pkg/util/rununit"
 
 	"github.com/p9c/pod/app/apputil"

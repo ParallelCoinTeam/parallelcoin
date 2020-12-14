@@ -6,7 +6,7 @@ import (
 
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/consume"
+	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 )
 
 func (ex *Explorer) Runner() (err error) {

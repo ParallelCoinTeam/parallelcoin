@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/serve"
+	"github.com/p9c/pod/pkg/util/logi/pipe/serve"
 
 	"github.com/urfave/cli"
 

@@ -43,7 +43,7 @@ testnode:
 
 mainnode:
 	go install -v
-	pod -D testmain -n mainnet -l debug node
+	pod -D testmain -n mainnet -l info --connect seed3.parallelcoin.io:11047 node
 
 testwallet:
 	go install -v

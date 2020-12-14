@@ -2,10 +2,10 @@ package rununit
 
 import (
 	uberatomic "go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/consume"
+	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 )
 
 // RunUnit handles correctly starting and stopping child processes that have StdConn pipe logging enabled, allowing
@@ -19,8 +19,10 @@ type RunUnit struct {
 
 // New creates and starts a new rununit. run and stop functions are executed after starting and stopping. logger
 // receives log entries and processes them (such as logging them).
-func New(run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter func(pkg string) (out bool),
-	args ...string) (r *RunUnit) {
+func New(
+	run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter func(pkg string) (out bool),
+	args ...string,
+) (r *RunUnit) {
 	r = &RunUnit{
 		commandChan: make(chan bool),
 		quit:        make(chan struct{}),
@@ -40,7 +42,7 @@ func New(run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter f
 						continue
 					}
 					r.worker = consume.Log(r.quit, logger, pkgFilter, args...)
-					//Debug(r.worker)
+					// Debug(r.worker)
 					consume.Start(r.worker)
 					r.running.Store(true)
 					run()
@@ -60,12 +62,12 @@ func New(run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter f
 				Debug("quitting on run unit quit channel", args, r.running.Load())
 				if r.running.Load() {
 					Debug("wasn't running", args)
-					//continue
+					// continue
 				}
 				consume.Kill(r.worker)
 				r.running.Store(false)
 				stop()
-				//r.commandChan <- false
+				// r.commandChan <- false
 				break out
 			}
 		}

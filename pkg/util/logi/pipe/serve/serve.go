@@ -1,11 +1,9 @@
 package serve
 
 import (
-	"os"
-	"runtime/pprof"
-
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/Entry"
@@ -45,12 +43,13 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 			case "kill":
 				Debug("received kill signal from pipe, shutting down", appName)
 				// time.Sleep(time.Second*5)
-				close(quit)
+				// close(quit)
 				// time.Sleep(time.Second * 3)
-				pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
+				interrupt.Request()
+				
+				// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 
 				// os.Exit(0)
-				// interrupt.Request()
 				// break
 				// os.Exit(0)
 			}

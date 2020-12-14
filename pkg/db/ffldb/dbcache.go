@@ -18,7 +18,7 @@ const (
 	defaultCacheSize = 64 * 1024 * 1024
 	// defaultFlushSecs is the default number of seconds to use as a threshold in between database cache flushes when
 	// the cache size has not been exceeded.
-	defaultFlushSecs = 1
+	defaultFlushSecs = 36
 	// ldbBatchHeaderSize is the size of a leveldb batch header which includes the sequence header and record counter.
 	ldbBatchHeaderSize = 12
 	// ldbRecordIKeySize is the size of the ikey used internally by leveldb when appending a record to a batch.
@@ -474,7 +474,7 @@ func (c *dbCache) flush() error {
 	c.cachedKeys = treap.NewImmutable()
 	c.cachedRemove = treap.NewImmutable()
 	c.cacheLock.Unlock()
-	Info("synced database to disk")
+	Debug("synced database to disk")
 	return nil
 }
 

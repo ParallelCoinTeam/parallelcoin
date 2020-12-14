@@ -1,12 +1,11 @@
 package pipe
 
 import (
+	"github.com/p9c/pod/pkg/comm/stdconn"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"io"
 	"os"
 	"syscall"
-
-	"github.com/p9c/pod/pkg/comm/stdconn"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 )
 
 func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *worker.Worker {
@@ -25,10 +24,10 @@ func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *wo
 			default:
 			}
 			n, err = w.StdConn.Read(data)
-			// Trace("read from stdconn", n, args)
-			// if n == 0 {
-			//	close(quit)
-			// }
+			Debug("read from stdconn", n, args)
+			if n == 0 {
+				close(quit)
+			}
 			if err != nil && err != io.EOF {
 				// Probably the child process has died, so quit
 				Error("err:", err)
