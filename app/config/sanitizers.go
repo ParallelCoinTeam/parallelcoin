@@ -254,7 +254,8 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
 		peersFile := filepath.Join(filepath.Join(*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
 		var err error
-		if err = os.Remove(peersFile); Check(err) {
+		if err = os.Remove(peersFile); err!=nil {
+			Trace("nothing to remove?", err)
 		}
 		Trace("removed", peersFile)
 	}

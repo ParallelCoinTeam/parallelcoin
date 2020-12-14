@@ -48,7 +48,6 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				Debug("wallet cookie deleted", *cx.Config.WalletPass)
 			}
 		}
-		walletChan := make(chan *wallet.Wallet)
 		cx.WalletKill = make(chan struct{})
 		go func() {
 			err = walletmain.Main(cx)
@@ -56,7 +55,9 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				Error("failed to start up wallet", err)
 			}
 		}()
-		cx.WalletServer = <-walletChan
+		if !*cx.Config.DisableRPC {
+			cx.WalletServer = <-cx.WalletChan
+		}
 		cx.WaitGroup.Wait()
 		return
 	}

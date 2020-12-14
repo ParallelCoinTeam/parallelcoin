@@ -62,7 +62,7 @@ func Main(args []string, cx *conte.Xt) {
 		params = append(params, arg)
 	}
 	var result []byte
-	result, err = ctl.Call(cx, false, method, params...)
+	result, err = ctl.Call(cx, *cx.Config.Wallet, method, params...)
 	if err != nil {
 		Error(err)
 		return

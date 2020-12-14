@@ -4,11 +4,11 @@ package conte
 
 import (
 	"sync"
-
+	
 	"go.uber.org/atomic"
-
+	
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
@@ -56,7 +56,8 @@ type Xt struct {
 	WalletKill chan struct{}
 	// RPCServer is needed to directly query data
 	RPCServer *chainrpc.Server
-	NodeChan  chan *chainrpc.Server
+	// NodeChan relays the chain RPC server to the main
+	NodeChan chan *chainrpc.Server
 	// WalletServer is needed to query the wallet
 	WalletServer *wallet.Wallet
 	// WalletChan is a channel used to return the wallet server pointer when it starts
@@ -92,6 +93,8 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		StateCfg:         new(state.Config),
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
+		WalletChan:       make(chan *wallet.Wallet),
+		NodeChan:         make(chan *chainrpc.Server),
 	}
 }
 
@@ -119,7 +122,9 @@ func (cx *Xt) IsCurrent() (is bool) {
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load() || *cx.Config.Solo
-	Trace("is current:", is, "-", rn.Chain.IsCurrent(), rn.SyncManager.IsCurrent(), !*cx.Config.Solo, "connected",
-		rn.HighestKnown.Load(), rn.Chain.BestChain.Height())
+	Trace(
+		"is current:", is, "-", rn.Chain.IsCurrent(), rn.SyncManager.IsCurrent(), !*cx.Config.Solo, "connected",
+		rn.HighestKnown.Load(), rn.Chain.BestChain.Height(),
+	)
 	return is
 }

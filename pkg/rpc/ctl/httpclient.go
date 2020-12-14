@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/btcsuite/go-socks/socks"
 
@@ -103,7 +104,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, 
 	serverAddr := *cx.Config.RPCConnect
 	if wallet {
 		serverAddr = *cx.Config.WalletServer
-		fmt.Println("using wallet server", serverAddr)
+		fmt.Fprintln(os.Stderr, "using wallet server", serverAddr)
 	}
 	url := protocol + "://" + serverAddr
 	bodyReader := bytes.NewReader(marshalledJSON)

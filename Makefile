@@ -39,8 +39,16 @@ guiprof:
 
 testnode:
 	go install -v
-	pod -D test0 -n testnet -l debug node
+	pod -D test0 -n testnet -l debug --solo --lan node
+
+mainnode:
+	go install -v
+	pod -D testmain -n mainnet -l debug node
 
 testwallet:
 	go install -v
-	pod -D test0 -n testnet -l debug wallet
+	pod -D test0 -n testnet -l trace wallet
+
+mainwallet:
+	go install -v
+	pod -D testmain -n mainnet -l trace wallet
