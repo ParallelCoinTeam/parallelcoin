@@ -59,3 +59,5 @@ pod.exe~
 *.trace
 
 \[pod -D test0 --rpclisten 127.0.0.1
+
+pkg/util/logi/pipe/pipe
