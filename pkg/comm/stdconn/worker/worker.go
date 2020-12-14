@@ -29,7 +29,7 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 		args: args,
 		Quit: quit,
 	}
-	w.cmd.Stderr = os.Stderr
+	// w.cmd.Stderr = os.Stderr
 	var cmdOut io.ReadCloser
 	if cmdOut, err = w.cmd.StdoutPipe(); Check(err) {
 		return

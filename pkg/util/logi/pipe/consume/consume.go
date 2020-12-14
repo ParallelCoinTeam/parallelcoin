@@ -3,14 +3,16 @@ package consume
 import (
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
+	"time"
 )
 
 func FilterNone(string) bool {
-	return true
+	return false
 }
 
 func SimpleLog(ent *logi.Entry) (err error) {
@@ -27,7 +29,12 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 	err error), filter func(pkg string) (out bool),
 	args ...string) *worker.Worker {
 	Debug("starting log consumer")
-	return pipe.Consume(quit, func(b []byte) (err error) {
+	logQuit := make(chan struct{})
+	interrupt.AddHandler(func(){
+		time.Sleep(time.Second)
+		close(logQuit)
+	})
+	return pipe.Consume(logQuit, func(b []byte) (err error) {
 		// we are only listening for entries
 		if len(b) >= 4 {
 			magic := string(b[:4])
@@ -39,24 +46,14 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 					// if the worker filter is out of sync this stops it printing
 					return
 				}
-				// Debugs(e)
-				// color := logi.ColorYellow
-				// Debug(e.Level)
 				switch e.Level {
 				case logi.Fatal:
-					// color = logi.ColorRed
 				case logi.Error:
-					// color = logi.ColorOrange
 				case logi.Warn:
-					// color = logi.ColorYellow
 				case logi.Info:
-					// color = logi.ColorGreen
 				case logi.Check:
-					// color = logi.ColorCyan
 				case logi.Debug:
-					// color = logi.ColorBlue
 				case logi.Trace:
-					// color = logi.ColorViolet
 				default:
 					Debug("got an empty log entry")
 					return
@@ -97,23 +94,6 @@ func Kill(w *worker.Worker) {
 		return
 	}
 	Debug("sent kill signal")
-	// Debug("closing worker StdConn quit channel")
-	// close(w.StdConn.Quit)
-	// var err error
-	//if runtime.GOOS != "windows" {
-	//	Debug("stopping")
-	//	if err = w.Stop(); Check(err) {
-	//	}
-	//	Debug("closing worker quit channel")
-	//	close(w.Quit)
-	//} else {
-	//	Debug("sending interrupt")
-	//	if err = w.Interrupt(); Check(err) {
-	//	}
-	//}
-	//close(w.Quit)
-	// if err = w.Kill(); Check(err) {
-	// }
 }
 
 func SetLevel(w *worker.Worker, level string) {

@@ -55,11 +55,11 @@ func Listener() {
 				}
 			} else {
 				Debug("doing windows restart")
-
+				
 				// procAttr := new(os.ProcAttr)
 				// procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
 				// os.StartProcess(os.Args[0], os.Args[1:], procAttr)
-
+				
 				var s []string
 				// s = []string{"cmd.exe", "/C", "start"}
 				s = append(s, os.Args[0])
@@ -102,6 +102,8 @@ func Listener() {
 func AddHandler(handler func()) {
 	// Create the channel and start the main interrupt handler which invokes all other callbacks and exits if not
 	// already done.
+	_, loc, line, _ := runtime.Caller(1)
+	Debugf("handler added by: %s:%d", loc, line)
 	if Chan == nil {
 		Chan = make(chan os.Signal, 1)
 		signal.Notify(Chan, Signals...)
