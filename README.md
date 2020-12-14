@@ -1,15 +1,15 @@
-# ![Logo](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo.svg) ParallelCoin Pod 
+# ![Logo](https://raw.githubusercontent.com/p9c/pod/l0k1/pkg/gui/logo/logo_small.svg) ParallelCoin Pod
+
+Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for ParallelCoin
 
 [![github](https://img.shields.io/badge/github-page-blue.svg)](https://p9c.github.io/pod)
-[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
+[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod)
 [![Go Report Card](https://goreportcard.com/badge/github.com/p9c/pod)](https://goreportcard.com/report/github.com/p9c/pod)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=alert_status)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=bugs)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=ncloc)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![CodeScene general](https://codescene.io/images/analyzed-by-codescene-badge.svg)](https://codescene.io/projects/7291)
-
-Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for ParallelCoin
 
 ## Installation
 
