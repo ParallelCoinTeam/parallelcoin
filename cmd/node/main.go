@@ -162,6 +162,7 @@ func Main(cx *conte.Xt) (err error) {
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		cx.WaitGroup.Done()
+		<-interrupt.HandlersDone
 		close(cx.KillAll)
 	}
 	Debug("adding interrupt handler for node")
@@ -175,19 +176,19 @@ func Main(cx *conte.Xt) (err error) {
 		if !interrupt.Requested() {
 			interrupt.Request()
 		}
-		break
+		// break
 	case <-cx.KillAll:
 		Debug("KillAll")
 		// if !interrupt.Requested() {
 		// 	interrupt.Request()
 		// }
-		// gracefulShutdown()
-		break
+		// break
 		// case <-interrupt.ShutdownRequestChan:
 		// 	Debug("interrupt request")
 		// 	// gracefulShutdown()
 		// 	break
 	}
+	gracefulShutdown()
 	return nil
 }
 

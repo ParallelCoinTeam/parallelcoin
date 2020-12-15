@@ -331,8 +331,11 @@ out:
 func (wg *WalletGUI) gracefulShutdown() {
 	Debug("quitting wallet gui")
 	wg.stopMiner()
+	wg.miner.Shutdown()
 	wg.stopWallet()
+	wg.wallet.Shutdown()
 	wg.stopNode()
+	wg.node.Shutdown()
 	wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
 		wg.ChainClient.Shutdown()

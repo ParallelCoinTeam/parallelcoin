@@ -3,6 +3,8 @@ package serve
 import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"go.uber.org/atomic"
+	"os"
+	"runtime/pprof"
 	
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -50,14 +52,15 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 				case "kill":
 					Debug("received kill signal from pipe, shutting down", appName)
 					// time.Sleep(time.Second*5)
-					// close(quit)
 					// time.Sleep(time.Second * 3)
+					// close(logQuit)
+					// close(quit)
 					interrupt.Request()
-					// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
-					
 					// os.Exit(0)
 					// break
 					// os.Exit(0)
+					// <-interrupt.HandlersDone
+					pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 				}
 			}
 			return
@@ -67,6 +70,9 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 	out:
 		for {
 			select {
+			case <-quit:
+				// close(logQuit)
+				interrupt.Request()
 			case <-logQuit:
 				Debug("quitting pipe logger")
 				break out
@@ -86,5 +92,6 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 				}
 			}
 		}
+		Debug("finished pipe logger")
 	}()
 }

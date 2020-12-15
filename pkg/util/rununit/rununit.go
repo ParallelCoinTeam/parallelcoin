@@ -60,7 +60,7 @@ func New(
 				}
 			case <-r.quit:
 				Debug("quitting on run unit quit channel", args, r.running.Load())
-				if r.running.Load() {
+				if !r.running.Load() {
 					Debug("wasn't running", args)
 					// continue
 				} else {

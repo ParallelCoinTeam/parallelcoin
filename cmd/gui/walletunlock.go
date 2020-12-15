@@ -183,7 +183,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 							Flexed(0.5, p9.EmptyMaxWidth()).
 							Rigid(
 								wg.th.Button(wg.clickables["quit"].SetClick(func() {
-									close(wg.quit)
+									wg.gracefulShutdown()
+									// close(wg.quit)
 								})).Color("Light").TextScale(2).Text("yes!!!").Fn,
 							).
 							Flexed(0.5, p9.EmptyMaxWidth()).

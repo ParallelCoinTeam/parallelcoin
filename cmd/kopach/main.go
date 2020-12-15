@@ -8,13 +8,13 @@ import (
 	"os"
 	"strings"
 	"time"
-
+	
 	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/pkg/data/ring"
-
+	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/client"
 	"github.com/p9c/pod/cmd/kopach/control"
@@ -99,9 +99,11 @@ func (w *Worker) Start() {
 		}
 	}
 	w.active.Store(true)
-	interrupt.AddHandler(func() {
-		w.Stop()
-	})
+	interrupt.AddHandler(
+		func() {
+			w.Stop()
+		},
+	)
 }
 
 func (w *Worker) Stop() {
@@ -113,8 +115,8 @@ func (w *Worker) Stop() {
 		}
 	}
 	for i := range w.workers {
-		if err = w.workers[i].Interrupt(); !Check(err) {
-		}
+		// if err = w.workers[i].Interrupt(); !Check(err) {
+		// }
 		if err = w.workers[i].Kill(); !Check(err) {
 		}
 		Debug("stopped worker", i)
@@ -125,15 +127,15 @@ func (w *Worker) Stop() {
 func Handle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		Debug("miner controller starting")
-		ctx, cancel := context.WithCancel(context.Background())
+		// ctx, cancel := context.WithCancel(context.Background())
 		randomBytes := make([]byte, 4)
 		if _, err = rand.Read(randomBytes); Check(err) {
 		}
 		w := &Worker{
 			id:            fmt.Sprintf("%x", randomBytes),
 			cx:            cx,
-			ctx:           ctx,
-			quit:          cx.KillAll,
+			// ctx:           ctx,
+			quit:          make(chan struct{}),
 			sendAddresses: []*net.UDPAddr{},
 			StartChan:     make(chan struct{}),
 			StopChan:      make(chan struct{}),
@@ -150,21 +152,26 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
 		Debug("opening broadcast channel listener")
-		w.conn, err = transport.NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
+		w.conn, err = transport.NewBroadcastChannel(
+			"kopachmain", w, *cx.Config.MinerPass,
 			transport.DefaultPort, control.MaxDatagramSize, handlers,
-			cx.KillAll)
+			w.quit,
+		)
 		if err != nil {
 			Error(err)
-			cancel()
+			// cancel()
+			close(w.quit)
 			return
 		}
 		// start up the workers
 		if *cx.Config.Generate {
 			w.Start()
 		}
-		interrupt.AddHandler(func() {
-			close(w.quit)
-		})
+		interrupt.AddHandler(
+			func() {
+				close(w.quit)
+			},
+		)
 		// controller watcher thread
 		go func() {
 			Debug("starting controller watcher")
@@ -220,17 +227,20 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					}
 				case <-cx.KillAll:
 					Debug("stopping from killall")
-					// close(w.quit)
+					close(w.quit)
 					break out
-				// case <-w.quit:
-					// Debug("stopping from quit")
-					// break out
+				case <-w.quit:
+					Debug("stopping from quit")
+					break out
 				}
 			}
+			w.Stop()
+			interrupt.Request()
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
 		// <-w.quit
-		<-cx.KillAll
+		// <-cx.KillAll
+		<-interrupt.HandlersDone
 		Info("kopach shutting down")
 		return
 	}
@@ -254,8 +264,10 @@ var handlers = transport.Handlers{
 		c.hashCount.Store(c.hashCount.Load() + uint64(count))
 		return
 	},
-	string(job.Magic): func(ctx interface{}, src net.Addr, dst string,
-		b []byte) (err error) {
+	string(job.Magic): func(
+		ctx interface{}, src net.Addr, dst string,
+		b []byte,
+	) (err error) {
 		w := ctx.(*Worker)
 		if !w.active.Load() {
 			Debug("not active")
@@ -301,8 +313,10 @@ var handlers = transport.Handlers{
 		}
 		return
 	},
-	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string,
-		b []byte) (err error) {
+	string(sol.SolutionMagic): func(
+		ctx interface{}, src net.Addr, dst string,
+		b []byte,
+	) (err error) {
 		w := ctx.(*Worker)
 		portSlice := strings.Split(w.FirstSender.Load(), ":")
 		if len(portSlice) < 2 {
@@ -318,21 +332,25 @@ var handlers = transport.Handlers{
 			if *w.cx.Config.KopachGUI {
 				// Debug("length solutions", len(w.solutions))
 				blok := j.GetMsgBlock()
-				w.solutions = append(w.solutions, []SolutionData{{
-					time:   time.Now(),
-					height: int(w.height),
-					algo: fmt.Sprint(
-						fork.GetAlgoName(blok.Header.Version, w.height)),
-					hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
-					indexHash:  blok.Header.BlockHash().String(),
-					version:    blok.Header.Version,
-					prevBlock:  blok.Header.PrevBlock.String(),
-					merkleRoot: blok.Header.MerkleRoot.String(),
-					timestamp:  blok.Header.Timestamp,
-					bits:       blok.Header.Bits,
-					nonce:      blok.Header.Nonce,
-				},
-				}...)
+				w.solutions = append(
+					w.solutions, []SolutionData{
+						{
+							time:   time.Now(),
+							height: int(w.height),
+							algo: fmt.Sprint(
+								fork.GetAlgoName(blok.Header.Version, w.height),
+							),
+							hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
+							indexHash:  blok.Header.BlockHash().String(),
+							version:    blok.Header.Version,
+							prevBlock:  blok.Header.PrevBlock.String(),
+							merkleRoot: blok.Header.MerkleRoot.String(),
+							timestamp:  blok.Header.Timestamp,
+							bits:       blok.Header.Bits,
+							nonce:      blok.Header.Nonce,
+						},
+					}...,
+				)
 				if len(w.solutions) > 2047 {
 					w.solutions = w.solutions[len(w.solutions)-2047:]
 				}
@@ -350,17 +368,19 @@ func (w *Worker) HashReport() float64 {
 	av := ewma.NewMovingAverage()
 	var i int
 	var prev uint64
-	if err := w.hashSampleBuf.ForEach(func(v uint64) error {
-		if i < 1 {
-			prev = v
-		} else {
-			interval := v - prev
-			av.Add(float64(interval))
-			prev = v
-		}
-		i++
-		return nil
-	}); Check(err) {
+	if err := w.hashSampleBuf.ForEach(
+		func(v uint64) error {
+			if i < 1 {
+				prev = v
+			} else {
+				interval := v - prev
+				av.Add(float64(interval))
+				prev = v
+			}
+			i++
+			return nil
+		},
+	); Check(err) {
 	}
 	return av.Value()
 }

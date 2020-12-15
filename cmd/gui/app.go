@@ -108,9 +108,9 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 											wg.th.Button(
 												wg.clickables["quit"].SetClick(
 													func() {
-														// close(wg.quit)
-														// go interrupt.Request()
+														// interrupt.Request()
 														wg.gracefulShutdown()
+														// close(wg.quit)
 													},
 												),
 											).Color("Light").TextScale(2).Text("yes!!!").Fn,
