@@ -41,6 +41,10 @@ func New(
 						Debug("already running", args)
 						continue
 					}
+					if r.worker != nil {
+						if err := r.worker.Kill(); Check(err) {
+						}
+					}
 					r.worker = consume.Log(r.quit, logger, pkgFilter, args...)
 					// Debug(r.worker)
 					consume.Start(r.worker)
@@ -62,14 +66,16 @@ func New(
 				Debug("quitting on run unit quit channel", args, r.running.Load())
 				if !r.running.Load() {
 					Debug("wasn't running", args)
-					// continue
 				} else {
 					consume.Kill(r.worker)
 					r.running.Store(false)
 					stop()
 				}
-				// r.commandChan <- false
 				break out
+			}
+		}
+		if r.worker != nil {
+			if err := r.worker.Kill(); Check(err) {
 			}
 		}
 	}()

@@ -569,15 +569,9 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											runner := exec.Command(args[0], args[1:]...)
 											runner.Stderr = os.Stderr
 											runner.Stdout = os.Stderr
-											// for security with apps launching the wallet, the public password can be set with a file that is deleted after
-											walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
-											Debug("runner", walletPassPath)
-											wp := *wg.cx.Config.WalletPass
-											b := []byte(wp)
-											if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+											if err = wg.writeWalletCookie(); Check(err) {
 											}
-											Debug("created password cookie")
-											if err := runner.Run(); Check(err) {
+											if err = runner.Run(); Check(err) {
 											}
 											if wasRunning {
 												wg.wallet.Start()
@@ -591,6 +585,18 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			).
 			Fn(gtx)
 	}(gtx)
+}
+
+func (wg *WalletGUI) writeWalletCookie() (err error) {
+	// for security with apps launching the wallet, the public password can be set with a file that is deleted after
+	walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
+	Debug("runner", walletPassPath)
+	wp := *wg.cx.Config.WalletPass
+	b := []byte(wp)
+	if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+	}
+	Debug("created password cookie")
+	return
 }
 
 func (wg *WalletGUI) toggleNode() {
@@ -666,6 +672,9 @@ func (wg *WalletGUI) toggleWallet() {
 }
 
 func (wg *WalletGUI) startWallet() {
+	if !wg.node.Running() {
+		wg.startNode()
+	}
 	if !wg.wallet.Running() {
 		wg.wg.Add(1)
 		wg.wallet.Start()
