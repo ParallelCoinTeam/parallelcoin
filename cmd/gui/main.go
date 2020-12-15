@@ -165,15 +165,33 @@ func (wg *WalletGUI) Run() (err error) {
 		"--servertls=true", "--clienttls=true",
 		"--pipelog", "node",
 	}
-	wg.node = rununit.New(func() {}, func() {}, consume.SimpleLog("NODE"), consume.FilterNone, nodeArgs...)
+	wg.node = rununit.New(
+		func() { wg.wg.Add(1) },
+		func() { wg.wg.Done() },
+		consume.SimpleLog("NODE"),
+		consume.FilterNone,
+		nodeArgs...,
+	)
 	walletArgs := []string{
 		os.Args[0], "-D", *wg.cx.Config.DataDir,
 		"--servertls=true", "--clienttls=true",
 		"--pipelog", "wallet",
 	}
-	wg.wallet = rununit.New(func() {}, func() {}, consume.SimpleLog("WLLT"), consume.FilterNone, walletArgs...)
+	wg.wallet = rununit.New(
+		func() { wg.wg.Add(1) },
+		func() { wg.wg.Done() },
+		consume.SimpleLog("WLLT"),
+		consume.FilterNone,
+		walletArgs...,
+	)
 	minerArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach"}
-	wg.miner = rununit.New(func() {}, func() {}, consume.SimpleLog("MINE"), consume.FilterNone, minerArgs...)
+	wg.miner = rununit.New(
+		func() { wg.wg.Add(1) },
+		func() { wg.wg.Done() },
+		consume.SimpleLog("MINE"),
+		consume.FilterNone,
+		minerArgs...,
+	)
 	wg.bools = map[string]*p9.Bool{
 		"runstate":     wg.th.Bool(wg.node.Running()),
 		"encryption":   wg.th.Bool(false),
@@ -330,12 +348,20 @@ out:
 
 func (wg *WalletGUI) gracefulShutdown() {
 	Debug("quitting wallet gui")
-	wg.stopMiner()
-	wg.miner.Shutdown()
-	wg.stopWallet()
-	wg.wallet.Shutdown()
-	wg.stopNode()
-	wg.node.Shutdown()
+	if wg.miner.Running() {
+		wg.stopMiner()
+		wg.miner.Shutdown()
+	}
+	if wg.wallet.Running() {
+		wg.stopWallet()
+		wg.wallet.Shutdown()
+		wg.unlockPassword.Wipe()
+		wg.walletLocked.Store(true)
+	}
+	if wg.node.Running() {
+		wg.stopNode()
+		wg.node.Shutdown()
+	}
 	wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
 		wg.ChainClient.Shutdown()

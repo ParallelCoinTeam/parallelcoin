@@ -612,7 +612,6 @@ func (wg *WalletGUI) toggleNode() {
 
 func (wg *WalletGUI) startNode() {
 	if !wg.node.Running() {
-		wg.wg.Add(1)
 		wg.node.Start()
 	}
 	Debug("startNode")
@@ -621,12 +620,12 @@ func (wg *WalletGUI) startNode() {
 func (wg *WalletGUI) stopNode() {
 	if wg.wallet.Running() {
 		wg.stopWallet()
+		wg.unlockPassword.Wipe()
+		wg.walletLocked.Store(true)
 	}
 	if wg.node.Running() {
 		wg.node.Stop()
-		wg.wg.Done()
 	}
-	wg.unlockPassword.Wipe()
 	Debug("stopNode")
 }
 
@@ -646,7 +645,6 @@ func (wg *WalletGUI) startMiner() {
 		wg.stopMiner()
 		Debug("was zero threads")
 	} else {
-		wg.wg.Add(1)
 		wg.miner.Start()
 		Debug("startMiner")
 	}
@@ -655,7 +653,6 @@ func (wg *WalletGUI) startMiner() {
 func (wg *WalletGUI) stopMiner() {
 	if wg.miner.Running() {
 		wg.miner.Stop()
-		wg.wg.Done()
 	}
 	Debug("stopMiner")
 }
@@ -676,8 +673,9 @@ func (wg *WalletGUI) startWallet() {
 		wg.startNode()
 	}
 	if !wg.wallet.Running() {
-		wg.wg.Add(1)
 		wg.wallet.Start()
+		wg.unlockPassword.Wipe()
+		wg.walletLocked.Store(false)
 	}
 	Debug("startWallet")
 }
@@ -685,7 +683,8 @@ func (wg *WalletGUI) startWallet() {
 func (wg *WalletGUI) stopWallet() {
 	if wg.wallet.Running() {
 		wg.wallet.Stop()
-		wg.wg.Done()
+		// wg.unlockPassword.Wipe()
+		wg.walletLocked.Store(true)
 	}
 	wg.unlockPassword.Wipe()
 	Debug("stopWallet")
