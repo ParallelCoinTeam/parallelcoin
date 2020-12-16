@@ -3,6 +3,7 @@ package chain
 import (
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"time"
 
@@ -30,8 +31,8 @@ type NeutrinoClient struct {
 	startTime           time.Time
 	lastProgressSent    bool
 	currentBlock        chan *waddrmgr.BlockStamp
-	quit                chan struct{}
-	rescanQuit          chan struct{}
+	quit                qu.C
+	rescanQuit          qu.C
 	rescanErr           <-chan error
 	wg                  sync.WaitGroup
 	started             bool
@@ -64,7 +65,7 @@ func (s *NeutrinoClient) Start() error {
 		s.enqueueNotification = make(chan interface{})
 		s.dequeueNotification = make(chan interface{})
 		s.currentBlock = make(chan *waddrmgr.BlockStamp)
-		s.quit = make(chan struct{})
+		s.quit = make(qu.C)
 		s.started = true
 		s.wg.Add(1)
 		go func() {
@@ -303,7 +304,7 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 		s.rescan = nil
 		s.rescanErr = nil
 	}
-	s.rescanQuit = make(chan struct{})
+	s.rescanQuit = make(qu.C)
 	s.scanning = true
 	s.finished = false
 	s.lastProgressSent = false
@@ -383,7 +384,7 @@ func (s *NeutrinoClient) NotifyReceived(addrs []util.Address) error {
 		s.clientMtx.Unlock()
 		return s.rescan.Update(sac.AddAddrs(addrs...))
 	}
-	s.rescanQuit = make(chan struct{})
+	s.rescanQuit = make(qu.C)
 	s.scanning = true
 	// Don't need RescanFinished or RescanProgress notifications.
 	s.finished = true

@@ -269,7 +269,7 @@ func testInitialSync(harness *neutrinoHarness, t *testing.T) {
 
 // Variables used to track state between multiple rescan tests.
 var (
-	quitRescan                chan struct{}
+	quitRescan                qu.C
 	errChan                   <-chan error
 	rescan                    *spv.Rescan
 	startBlock                waddrmgr.BlockStamp
@@ -382,7 +382,7 @@ func testRescan(harness *neutrinoHarness, t *testing.T) {
 func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 	// Start a rescan with notifications in another goroutine. We'll kill it with a quit channel at the end and make
 	// sure we got the expected results.
-	quitRescan = make(chan struct{})
+	quitRescan = make(qu.C)
 	startBlock = waddrmgr.BlockStamp{Height: 1095}
 	rescan, errChan = startRescan(t, harness.svc, addr1, &startBlock,
 		quitRescan)
@@ -730,7 +730,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 	errChan := make(chan error, haveBest.Height)
 	// Test getting all of the blocks and filters.
 	var wg sync.WaitGroup
-	workerQueue := make(chan struct{}, numQueryThreads)
+	workerQueue := make(qu.C, numQueryThreads)
 	for i := int32(1); i <= haveBest.Height; i++ {
 		wg.Add(1)
 		height := uint32(i)
@@ -1235,7 +1235,7 @@ func waitForSync(t *testing.T, svc *spv.ChainService,
 // should match one we precomputed based on the flow of the test. The rescan starts at the genesis block and the
 // notifications continue until the `quit` channel is closed.
 func startRescan(t *testing.T, svc *spv.ChainService, addr util.Address,
-	startBlock *waddrmgr.BlockStamp, quit <-chan struct{}) (
+	startBlock *waddrmgr.BlockStamp, quit <-qu.C) (
 	*spv.Rescan, <-chan error) {
 	rescan := svc.NewRescan(
 		spv.QuitChan(quit),

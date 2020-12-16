@@ -91,7 +91,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// responses.
 // 		bm.server.queryBatch = func(msgs []wire.Message,
 // 			f func(*ServerPeer, wire.Message, wire.Message) bool,
-// 			q <-chan struct{}, qo ...QueryOption) {
+// 			q <-qu.C, qo ...QueryOption) {
 // 			responses, err := generateResponses(msgs, headers)
 // 			if err != nil {
 // 				t.Fatalf("unable to generate responses: %v",
@@ -263,7 +263,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		}
 // 		bm.server.queryBatch = func(msgs []wire.Message,
 // 			f func(*ServerPeer, wire.Message, wire.Message) bool,
-// 			q <-chan struct{}, qo ...QueryOption) {
+// 			q <-qu.C, qo ...QueryOption) {
 // 			responses, err := generateResponses(msgs, headers)
 // 			if err != nil {
 // 				t.Fatalf("unable to generate responses: %v",

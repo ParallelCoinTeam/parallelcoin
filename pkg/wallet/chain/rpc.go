@@ -2,6 +2,7 @@ package chain
 
 import (
 	"errors"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"time"
 
@@ -27,7 +28,7 @@ type RPCClient struct {
 	enqueueNotification chan interface{}
 	dequeueNotification chan interface{}
 	currentBlock        chan *wm.BlockStamp
-	quit                chan struct{}
+	quit                qu.C
 	wg                  sync.WaitGroup
 	started             bool
 	quitMtx             sync.Mutex
@@ -59,7 +60,7 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
 		enqueueNotification: make(chan interface{}),
 		dequeueNotification: make(chan interface{}),
 		currentBlock:        make(chan *wm.BlockStamp),
-		quit:                make(chan struct{}),
+		quit:                make(qu.C),
 	}
 	ntfnCallbacks := &rpcclient.NotificationHandlers{
 		OnClientConnected:   client.onClientConnect,

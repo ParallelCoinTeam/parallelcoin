@@ -1,6 +1,7 @@
 package kopach_worker
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net/rpc"
 	"os"
 
@@ -32,12 +33,12 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			log.L.SetLevel(os.Args[4], true, "pod")
 		}
 		Debug("miner worker starting")
-		w, conn := worker.New(os.Args[2], cx.KillAll)
+		w, conn := worker.New(os.Args[2], qu.T())
 		interrupt.AddHandler(func() {
 			Debug("KopachWorkerHandle interrupt")
-			if err := conn.Close(); Check(err) {
-			}
-			close(w.Quit)
+			// if err := conn.Close(); Check(err) {
+			// }
+			w.Quit()
 		})
 		err := rpc.Register(w)
 		if err != nil {
@@ -47,8 +48,9 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 		Debug("starting up worker IPC")
 		rpc.ServeConn(conn)
 		Debug("stopping worker IPC")
-		if err := conn.Close(); Check(err) {
-		}
+		// if err := conn.Close(); Check(err) {
+		// }
+		w.Quit()
 		Debug("finished")
 		return nil
 	}

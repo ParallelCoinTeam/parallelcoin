@@ -2,7 +2,8 @@ package spv
 
 import (
 	"fmt"
-
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
@@ -24,7 +25,7 @@ type (
 		onDisconnect   chan<- wire.BlockHeader
 		quit           <-chan struct{}
 		notifyBlock    chan *blockMessage
-		intQuit        chan struct{}
+		intQuit        qu.C
 	}
 
 	// messageType describes the type of blockMessage.
@@ -65,7 +66,7 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 		onDisconnect:   onDisconnect,
 		quit:           quit,
 		notifyBlock:    make(chan *blockMessage),
-		intQuit:        make(chan struct{}),
+		intQuit:        make(qu.C),
 	}
 	// At this point, we'll now check to see if we need to deliver any backlog notifications as its possible that while
 	// the caller is requesting right after a new set of blocks has been connected.

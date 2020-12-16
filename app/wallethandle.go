@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io/ioutil"
 	"os"
 
@@ -48,7 +49,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				Debug("wallet cookie deleted", *cx.Config.WalletPass)
 			}
 		}
-		cx.WalletKill = make(chan struct{})
+		cx.WalletKill = make(qu.C)
 		go func() {
 			err = walletmain.Main(cx)
 			if err != nil {
@@ -58,7 +59,8 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !*cx.Config.DisableRPC {
 			cx.WalletServer = <-cx.WalletChan
 		}
-		cx.WaitGroup.Wait()
+		// cx.WaitGroup.Wait()
+		cx.WaitWait()
 		return
 	}
 }

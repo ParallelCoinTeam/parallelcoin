@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
 	"math/big"
 	"sync"
@@ -121,7 +122,7 @@ type (
 		// peerChan is a channel for messages that come from peers
 		peerChan            chan interface{}
 		wg                  sync.WaitGroup
-		quit                chan struct{}
+		quit                qu.C
 		headerList          headerlist.Chain
 		reorgList           headerlist.Chain
 		startHeader         *headerlist.Node
@@ -153,7 +154,7 @@ func newBlockManager(s *ChainService) (*blockManager, error) {
 		reorgList: headerlist.NewBoundedMemoryChain(
 			numMaxMemHeaders,
 		),
-		quit:                make(chan struct{}),
+		quit:                make(qu.C),
 		blocksPerRetarget:   int32(targetTimespan / targetTimePerBlock),
 		minRetargetTimespan: targetTimespan / adjustmentFactor,
 		maxRetargetTimespan: targetTimespan * adjustmentFactor,
@@ -217,7 +218,7 @@ func (b *blockManager) Stop() error {
 		return nil
 	}
 	// We'll send out update signals before the quit to ensure that any goroutines waiting on them will properly exit.
-	done := make(chan struct{})
+	done := make(qu.C)
 	go func() {
 		ticker := time.NewTicker(time.Millisecond * 50)
 		defer ticker.Stop()

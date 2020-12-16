@@ -3,6 +3,7 @@ package connmgr
 import (
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -123,7 +124,7 @@ type Config struct {
 // callers to cancel pending connection attempts before their successful or in the case they're not longer wanted.
 type registerPending struct {
 	c    *ConnReq
-	done chan struct{}
+	done qu.C
 }
 
 // handleConnected is used to queue a successful connection.
@@ -154,7 +155,7 @@ type ConnManager struct {
 	wg             sync.WaitGroup
 	failedAttempts uint64
 	requests       chan interface{}
-	quit           chan struct{}
+	quit           qu.C
 }
 
 // handleFailedConn handles a connection failed due to a disconnect or any other failure.
@@ -302,7 +303,7 @@ func (cm *ConnManager) NewConnReq() {
 	atomic.StoreUint64(&c.id, atomic.AddUint64(&cm.connReqCount, 1))
 	// Submit a request of a pending connection attempt to the connection manager. By registering the id before the
 	// connection is even established, we'll be able to later cancel the connection via the Remove method.
-	done := make(chan struct{})
+	done := make(qu.C)
 	select {
 	case cm.requests <- registerPending{c, done}:
 	case <-cm.quit:
@@ -343,7 +344,7 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 		// Submit a request of a pending connection attempt to the connection manager. By registering the id before the
 		// connection is even established, we'll be able to later cancel the connection via the Remove method.
 		Trace("sending request to register connection")
-		done := make(chan struct{})
+		done := make(qu.C)
 		select {
 		case cm.requests <- registerPending{c, done}:
 		case <-cm.quit:
@@ -485,7 +486,7 @@ func New(cfg *Config) (*ConnManager, error) {
 	cm := ConnManager{
 		Cfg:      *cfg, // Copy so caller can't mutate
 		requests: make(chan interface{}),
-		quit:     make(chan struct{}),
+		quit:     make(qu.C),
 	}
 	return &cm, nil
 }

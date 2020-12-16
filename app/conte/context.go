@@ -3,6 +3,10 @@
 package conte
 
 import (
+	"fmt"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/util/quit"
+	"runtime"
 	"sync"
 	
 	"go.uber.org/atomic"
@@ -27,7 +31,7 @@ var _d _dtype
 type Xt struct {
 	sync.Mutex
 	WaitGroup sync.WaitGroup
-	KillAll   chan struct{}
+	KillAll   qu.C
 	// App is the heart of the application system, this creates and initialises it.
 	App *cli.App
 	// AppContext is the urfave/cli app context
@@ -47,13 +51,13 @@ type Xt struct {
 	// Node is the run state of the node
 	Node atomic.Bool
 	// NodeReady is closed when it is ready then always returns
-	NodeReady chan struct{}
+	NodeReady qu.C
 	// NodeKill is the killswitch for the Node
-	NodeKill chan struct{}
+	NodeKill qu.C
 	// Wallet is the run state of the wallet
 	Wallet atomic.Bool
 	// WalletKill is the killswitch for the Wallet
-	WalletKill chan struct{}
+	WalletKill qu.C
 	// RPCServer is needed to directly query data
 	RPCServer *chainrpc.Server
 	// NodeChan relays the chain RPC server to the main
@@ -63,7 +67,7 @@ type Xt struct {
 	// WalletChan is a channel used to return the wallet server pointer when it starts
 	WalletChan chan *wallet.Wallet
 	// ChainClientChan returns the chainclient
-	ChainClientReady chan struct{}
+	ChainClientReady qu.C
 	// ChainClient is the wallet's chain RPC client
 	ChainClient *chain.RPCClient
 	// RealNode is the main node
@@ -76,6 +80,41 @@ type Xt struct {
 	OtherNodes atomic.Int32
 	// IsGUI indicates if we have the possibility of terminal input
 	IsGUI bool
+	
+	waitChangers []string
+	waitCounter int
+}
+
+func (cx *Xt) WaitAdd() {
+	_, file, line, _ := runtime.Caller(1)
+	record := fmt.Sprintf("+ %s:%d", file, line)
+	cx.waitChangers = append(cx.waitChangers, record)
+	cx.waitCounter++
+	Debug("added to waitgroup", record, cx.waitCounter)
+	cx.PrintWaitChangers()
+}
+
+func (cx *Xt) WaitDone() {
+	_, file, line, _ := runtime.Caller(1)
+	record := fmt.Sprintf("- %s:%d", file, line)
+	cx.waitChangers = append(cx.waitChangers, record)
+	cx.waitCounter--
+	Debug("removed from waitgroup", record, cx.waitCounter)
+	cx.PrintWaitChangers()
+}
+
+func (cx *Xt) WaitWait() {
+	cx.PrintWaitChangers()
+	cx.WaitGroup.Wait()
+}
+
+func (cx *Xt) PrintWaitChangers() {
+	o := "Calls that change context waitgroup values:\n"
+	for i := range cx.waitChangers {
+		o+=cx.waitChangers[i]+"\n"
+	}
+	o+="current total:"
+	o+= fmt.Sprint(cx.waitCounter)
 }
 
 // GetNewContext returns a fresh new context
@@ -83,10 +122,10 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 	hr := &atomic.Value{}
 	hr.Store(int(0))
 	config, configMap := pod.EmptyConfig()
-	chainClientReady := make(chan struct{})
-	return &Xt{
+	chainClientReady := qu.T()
+	cx := &Xt{
 		ChainClientReady: chainClientReady,
-		KillAll:          make(chan struct{}),
+		KillAll:          make(qu.C),
 		App:              cli.NewApp(),
 		Config:           config,
 		ConfigMap:        configMap,
@@ -96,6 +135,10 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		WalletChan:       make(chan *wallet.Wallet),
 		NodeChan:         make(chan *chainrpc.Server),
 	}
+	interrupt.AddHandler(func(){
+		cx.PrintWaitChangers()
+	})
+	return cx
 }
 
 func GetContext(cx *Xt) *chainrpc.Context {

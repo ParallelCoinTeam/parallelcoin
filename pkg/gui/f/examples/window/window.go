@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	quit := make(chan struct{})
+	quit := make(qu.C)
 	if err := f.NewWindow(p9.NewTheme(p9fonts.Collection(), quit)).Title("Parallelcoin").Size(10, 20).
 		Run(func(layout.Context) layout.Dimensions {
 			Info("frame")

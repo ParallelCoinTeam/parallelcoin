@@ -1,6 +1,7 @@
 package worker
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"os"
 	"os/exec"
@@ -14,12 +15,12 @@ type Worker struct {
 	cmd     *exec.Cmd
 	args    []string
 	StdConn stdconn.StdConn
-	Quit    chan struct{}
+	qu.C
 }
 
 // Spawn starts up an arbitrary executable file with given arguments and
 // attaches a connection to its stdin/stdout
-func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
+func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 	// if runtime.GOOS == "windows" {
 	// 	args = append([]string{"cmd.exe", "/C", "start"}, args...)
 	// }
@@ -27,7 +28,7 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 	w = &Worker{
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
-		Quit: make(chan struct{}),
+		C: qu.T(),
 	}
 	w.cmd.Stderr = os.Stderr
 	var cmdOut io.ReadCloser
@@ -39,7 +40,7 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 		return
 	}
 	// w.cmd.Stderr = os.Stderr
-	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
+	w.StdConn = stdconn.New(cmdOut, cmdIn, w.C)
 	if err = w.cmd.Start(); Check(err) {
 	}
 	go func() {
@@ -47,12 +48,16 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 		for {
 			select {
 			case <-quit:
-				close(w.Quit)
-			case <-w.Quit:
+				Debug("passed quit chan closed", args)
+				w.Quit()
+				break out
+			case <-w.C:
+				Debug("stdconn chan closed", args)
+				// time.Sleep(time.Second)
+				// w.StdConn.Quit.Quit()
 				// Debug("stopping", Check(w.Stop()))
 				// Debug("interrupting", Check(w.Interrupt()))
 				// Debug("killing", Check(w.Kill()))
-				// close(w.StdConn.Quit)
 				break out
 			}
 		}

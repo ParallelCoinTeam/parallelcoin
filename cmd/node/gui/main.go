@@ -3,6 +3,7 @@ package gui
 import (
 	"gioui.org/app"
 	l "gioui.org/layout"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/conte"
@@ -18,7 +19,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	ng := &NodeGUI{
 		cx:         cx,
 		c:          c,
-		invalidate: make(chan struct{}),
+		invalidate: make(qu.C),
 		quit:       cx.KillAll,
 		size:       &size,
 	}
@@ -47,8 +48,8 @@ type NodeGUI struct {
 	configs          cfg.GroupsMap
 	config           *cfg.Config
 	passwords        map[string]*p9.Password
-	invalidate       chan struct{}
-	quit             chan struct{}
+	invalidate       qu.C
+	quit             qu.C
 }
 
 func (ng *NodeGUI) Run() (err error) {

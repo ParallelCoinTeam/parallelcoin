@@ -1,6 +1,7 @@
 package interrupt
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -24,7 +25,7 @@ var (
 	AddHandlerChan = make(chan func())
 	// HandlersDone is closed after all interrupt handlers run the first time
 	// an interrupt is signaled.
-	HandlersDone = make(chan struct{})
+	HandlersDone = make(qu.C)
 	DataDir      string
 )
 
@@ -87,6 +88,9 @@ func Listener() {
 			// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 			return
 		case <-ShutdownRequestChan:
+			if requested {
+				return
+			}
 			Warn("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
@@ -114,7 +118,8 @@ func AddHandler(handler func()) {
 
 // Request programmatically requests a shutdown
 func Request() {
-	Debug("interrupt requested")
+	_,f,l,_:=runtime.Caller(1)
+	Debugf("interrupt requested %s:%d", f, l)
 	ShutdownRequestChan <- struct{}{}
 	// var ok bool
 	// select {
@@ -125,6 +130,13 @@ func Request() {
 	// if ok {
 	// 	close(ShutdownRequestChan)
 	// }
+}
+
+// GoroutineDump returns a string with the current goroutine dump in order to show what's going on in case of timeout.
+func GoroutineDump() string {
+	buf := make([]byte, 1<<18)
+	n := runtime.Stack(buf, true)
+	return string(buf[:n])
 }
 
 // RequestRestart sets the reset flag and requests a restart

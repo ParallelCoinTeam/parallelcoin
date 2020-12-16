@@ -9,6 +9,7 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"io/ioutil"
 	"math"
@@ -123,9 +124,9 @@ type Client struct {
 	// Networking infrastructure.
 	sendChan        chan []byte
 	sendPostChan    chan *sendPostDetails
-	connEstablished chan struct{}
-	disconnect      chan struct{}
-	shutdown        chan struct{}
+	connEstablished qu.C
+	disconnect      qu.C
+	shutdown        qu.C
 	wg              sync.WaitGroup
 }
 
@@ -570,7 +571,7 @@ out:
 			c.wsConn = wsConn
 			c.retryCount = 0
 			c.mtx.Lock()
-			c.disconnect = make(chan struct{})
+			c.disconnect = make(qu.C)
 			c.disconnected = false
 			c.mtx.Unlock()
 			// Start processing input and output for the new connection.
@@ -1059,7 +1060,7 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error
 	// notification handlers to nil when running in HTTP POST mode.
 	var wsConn *websocket.Conn
 	var httpClient *http.Client
-	connEstablished := make(chan struct{})
+	connEstablished := make(qu.C)
 	var start bool
 	if config.HTTPPostMode {
 		ntfnHandlers = nil
@@ -1092,8 +1093,8 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error
 		sendChan:        make(chan []byte, sendBufferSize),
 		sendPostChan:    make(chan *sendPostDetails, sendPostBufferSize),
 		connEstablished: connEstablished,
-		disconnect:      make(chan struct{}),
-		shutdown:        make(chan struct{}),
+		disconnect:      make(qu.C),
+		shutdown:        make(qu.C),
 	}
 	if start {
 		Trace("established connection to RPC server", config.Host)

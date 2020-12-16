@@ -342,11 +342,11 @@ type API struct {
 // CAPI is the central structure for configuration and access to a net/rpc API access endpoint for this RPC API
 type CAPI struct {
 	Timeout time.Duration
-	quit    chan struct{}
+	quit    qu.C
 }
 
 // NewCAPI returns a new CAPI 
-func NewCAPI(quit chan struct{}, timeout ...time.Duration) (c *CAPI) {
+func NewCAPI(quit qu.C, timeout ...time.Duration) (c *CAPI) {
 	c = &CAPI{quit: quit}
 	if len(timeout)>0 {
 		c.Timeout = timeout[0]
@@ -465,7 +465,7 @@ func (a API) {{.Handler}}Wait(cmd {{.Cmd}}) (out *{{.ResType}}, err error) {
 // Note that the parameters are type asserted to prevent the consumer of the API from sending wrong message types not
 // because it's necessary since they are interfaces end to end
 func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet, 
-	quit chan struct{}) {
+	quit qu.C) {
 	nrh := ` + RPCMapName + `
 	go func() {
 		Debug("starting up wallet cAPI")

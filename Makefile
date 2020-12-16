@@ -52,3 +52,8 @@ testwallet:
 mainwallet:
 	go install -v
 	pod -D testmain -n mainnet -l trace wallet
+
+teststop:
+	go install -v
+	go install -v ./pkg/util/logi/pipe
+	pipe pod -D test0 --pipelog node

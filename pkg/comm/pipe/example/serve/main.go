@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	p := pipe.Serve(make(chan struct{}), func(b []byte) (err error) {
+	p := pipe.Serve(make(qu.C), func(b []byte) (err error) {
 		fmt.Print("from parent: ", string(b))
 		return
 	})

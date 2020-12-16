@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"runtime"
 	"strings"
@@ -38,7 +39,7 @@ type (
 	Handlers    map[string]HandlerFunc
 	Channel     struct {
 		buffers         map[string]*MsgBuffer
-		Ready           chan struct{}
+		Ready           qu.C
 		context         interface{}
 		Creator         string
 		firstSender     *string
@@ -109,7 +110,7 @@ func GetShards(data []byte) (shards [][]byte) {
 
 // NewUnicastChannel sets up a listener and sender for a specified destination
 func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver string, maxDatagramSize int,
-	handlers Handlers, quit chan struct{}) (channel *Channel, err error) {
+	handlers Handlers, quit qu.C) (channel *Channel, err error) {
 	channel = &Channel{
 		Creator:         creator,
 		MaxDatagramSize: maxDatagramSize,
@@ -152,7 +153,7 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 // Listen binds to the UDP Address and port given and writes packets received from that Address to a buffer which is
 // passed to a handler
 func Listen(address string, channel *Channel, maxDatagramSize int, handlers Handlers,
-	quit chan struct{}) (conn *net.UDPConn, err error) {
+	quit qu.C) (conn *net.UDPConn, err error) {
 	var addr *net.UDPAddr
 	if addr, err = net.ResolveUDPAddr("udp4", address); Check(err) {
 		return
@@ -172,9 +173,9 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 // NewBroadcastChannel returns a broadcaster and listener with a given handler on a multicast address and specified
 // port. The handlers define the messages that will be processed and any other messages are ignored
 func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
-	quit chan struct{}) (channel *Channel, err error) {
+	quit qu.C) (channel *Channel, err error) {
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
-		buffers: make(map[string]*MsgBuffer), context: ctx, Ready: make(chan struct{})}
+		buffers: make(map[string]*MsgBuffer), context: ctx, Ready: make(qu.C)}
 	if channel.sendCiph, err = gcm.GetCipher(key); Check(err) {
 	}
 	if channel.sendCiph == nil {
@@ -208,7 +209,7 @@ func ListenBroadcast(
 	channel *Channel,
 	maxDatagramSize int,
 	handlers Handlers,
-	quit chan struct{},
+	quit qu.C,
 ) (conn *net.UDPConn, err error) {
 	if conn, err = multicast.Conn(port); Check(err) {
 		return
@@ -241,7 +242,7 @@ func handleNetworkError(address string, err error) (result int) {
 // Handle listens for messages, decodes them, aggregates them, recovers the data from the reed solomon fec shards
 // received and invokes the handler provided matching the magic on the complete received messages
 func Handle(address string, channel *Channel,
-	handlers Handlers, maxDatagramSize int, quit chan struct{}) {
+	handlers Handlers, maxDatagramSize int, quit qu.C) {
 	buffer := make([]byte, maxDatagramSize)
 	Debug("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed

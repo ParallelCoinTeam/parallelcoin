@@ -3,6 +3,7 @@ package spv
 import (
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"strconv"
 	"sync"
@@ -44,7 +45,7 @@ type (
 			chan<- struct{}), ...QueryOption)
 		// queryBatch will be called to distribute a batch of messages across our connected peers.
 		queryBatch func([]wire.Message, func(*ServerPeer, wire.Message,
-			wire.Message) bool, <-chan struct{}, ...QueryOption)
+			wire.Message) bool, qu.C, ...QueryOption)
 		chainParams       netparams.Params
 		addrManager       *addrmgr.AddrManager
 		connManager       *connmgr.ConnManager
@@ -55,7 +56,7 @@ type (
 		query             chan interface{}
 		peerHeightsUpdate chan updatePeerHeightsMsg
 		wg                sync.WaitGroup
-		quit              chan struct{}
+		quit              qu.C
 		timeSource        blockchain.MedianTimeSource
 		services          wire.ServiceFlag
 		blockSubscribers  map[*blockSubscription]struct{}
@@ -113,7 +114,7 @@ type (
 		// requestQueue   []*wire.InvVect
 		knownAddresses map[string]struct{}
 		banScore       connmgr.DynamicBanScore
-		quit           chan struct{}
+		quit           qu.C
 		// The following map of subcribers is used to subscribe to messages from the peer. This allows broadcast to
 		// multiple subscribers at once, allowing for multiple queries to be going to multiple peers at any one time.
 		// The mutex is for subscribe/unsubscribe functionality. The sends on these channels WILL NOT block; any
@@ -136,7 +137,7 @@ type (
 	// spMsgSubscription sends all messages from a peer over a channel, allowing pluggable filtering of the messages.
 	spMsgSubscription struct {
 		msgChan  chan<- spMsg
-		quitChan <-chan struct{}
+		quitChan qu.C
 	}
 	// updatePeerHeightsMsg is a message sent from the blockmanager to the server after a new block has been accepted.
 	// The purpose of the message is to update the heights of peers that were known to announce the block before we
@@ -982,7 +983,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 		donePeers:           make(chan *ServerPeer, MaxPeers),
 		banPeers:            make(chan *ServerPeer, MaxPeers),
 		query:               make(chan interface{}),
-		quit:                make(chan struct{}),
+		quit:                make(qu.C),
 		peerHeightsUpdate:   make(chan updatePeerHeightsMsg),
 		timeSource:          blockchain.NewMedianTime(),
 		services:            Services,
@@ -1001,7 +1002,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 	}
 	// We do the same for queryBatch.
 	s.queryBatch = func(msgs []wire.Message, f func(*ServerPeer,
-		wire.Message, wire.Message) bool, q <-chan struct{},
+		wire.Message, wire.Message) bool, q qu.C,
 		qo ...QueryOption) {
 		queryChainServiceBatch(&s, msgs, f, q, qo...)
 	}
@@ -1173,7 +1174,7 @@ func newServerPeer(s *ChainService, isPersistent bool) *ServerPeer {
 		server:          s,
 		persistent:      isPersistent,
 		knownAddresses:  make(map[string]struct{}),
-		quit:            make(chan struct{}),
+		quit:            make(qu.C),
 		recvSubscribers: make(map[spMsgSubscription]struct{}),
 	}
 }

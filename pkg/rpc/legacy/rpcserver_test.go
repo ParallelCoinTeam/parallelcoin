@@ -9,7 +9,7 @@ import (
 
 func TestThrottle(t *testing.T) {
 	const threshold = 1
-	busy := make(chan struct{})
+	busy := make(qu.C)
 	srv := httptest.NewServer(ThrottledFn(threshold,
 		func(w http.ResponseWriter, r *http.Request) {
 			<-busy

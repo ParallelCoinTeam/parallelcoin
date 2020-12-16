@@ -9,6 +9,7 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -48,7 +49,7 @@ const (
 )
 
 type CommandHandler struct {
-	Fn     func(*Server, interface{}, <-chan struct{}) (interface{}, error)
+	Fn     func(*Server, interface{}, qu.C) (interface{}, error)
 	Call   chan API
 	Result func() API
 }
@@ -61,7 +62,7 @@ type GBTWorkState struct {
 	prevHash      *chainhash.Hash
 	MinTimestamp  time.Time
 	Template      *mining.BlockTemplate
-	NotifyMap     map[chainhash.Hash]map[int64]chan struct{}
+	NotifyMap     map[chainhash.Hash]map[int64]qu.C
 	TimeSource    blockchain.MedianTimeSource
 	Algo          string
 	StateCfg      *state.Config
@@ -102,8 +103,8 @@ type Server struct {
 	WG                     sync.WaitGroup
 	GBTWorkState           *GBTWorkState
 	HelpCacher             *HelpCacher
-	RequestProcessShutdown chan struct{}
-	Quit                   chan struct{}
+	// RequestProcessShutdown chan struct{}
+	Quit                   qu.C
 	Started                int32
 	Shutdown               int32
 	NumClients             int32
@@ -155,7 +156,7 @@ type ServerConfig struct {
 	Algo string
 	// CPUMiner *exec.Cmd
 	Hashrate uberatomic.Uint64
-	Quit     chan struct{}
+	Quit     qu.C
 }
 
 // ServerConnManager represents a connection manager for use with the RPC server. The interface contract requires that
@@ -894,19 +895,19 @@ func (state *GBTWorkState) NotifyLongPollers(latestHash *chainhash.Hash,
 // without requiring a different channel for each client.
 //
 // This function MUST be called with the state locked.
-func (state *GBTWorkState) TemplateUpdateChan(prevHash *chainhash.Hash, lastGenerated int64) chan struct{} {
+func (state *GBTWorkState) TemplateUpdateChan(prevHash *chainhash.Hash, lastGenerated int64) qu.C {
 	// Either get the current list of channels waiting for updates about changes to block template for the previous hash
 	// or create a new one.
 	channels, ok := state.NotifyMap[*prevHash]
 	if !ok {
-		m := make(map[int64]chan struct{})
+		m := make(map[int64]qu.C)
 		state.NotifyMap[*prevHash] = m
 		channels = m
 	}
 	// Get the current channel associated with the time the block template was last generated or create a new one.
 	c, ok := channels[lastGenerated]
 	if !ok {
-		c = make(chan struct{})
+		c = make(qu.C)
 		channels[lastGenerated] = c
 	}
 	return c
@@ -1052,8 +1053,8 @@ func (s *Server) NotifyNewTransactions(txns []*mempool.TxDesc) {
 
 // RequestedProcessShutdown returns a channel that is sent to when an authorized RPC client requests the process to
 // shutdown. If the request can not be read immediately, it is dropped.
-func (s *Server) RequestedProcessShutdown() <-chan struct{} {
-	return s.RequestProcessShutdown
+func (s *Server) RequestedProcessShutdown() qu.C {
+	return s.Quit
 }
 
 // Start is used by server.go_ to start the rpc listener.
@@ -1350,7 +1351,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		responseID = request.ID
 		// Setup a close notifier. Since the connection is hijacked, the CloseNotifer on the ResponseWriter is not
 		// available.
-		closeChan := make(chan struct{}, 1)
+		closeChan := make(qu.C, 1)
 		go func() {
 			_, err := conn.Read(make([]byte, 1))
 			if err != nil {
@@ -1426,7 +1427,7 @@ func (s *Server) LimitConnections(w http.ResponseWriter, remoteAddr string) bool
 //
 // Any commands which are not recognized or not implemented will return an error suitable for use in replies.
 func (s *Server) StandardCmdResult(cmd *ParsedRPCCmd,
-	closeChan <-chan struct{}) (interface{}, error) {
+	closeChan qu.C) (interface{}, error) {
 	handler, ok := RPCHandlers[cmd.Method]
 	if ok {
 		goto handled
@@ -1987,7 +1988,7 @@ func MessageToHex(msg wire.Message) (string, error) {
 func NewGbtWorkState(timeSource blockchain.MedianTimeSource,
 	algoName string) *GBTWorkState {
 	return &GBTWorkState{
-		NotifyMap:  make(map[chainhash.Hash]map[int64]chan struct{}),
+		NotifyMap:  make(map[chainhash.Hash]map[int64]qu.C),
 		TimeSource: timeSource,
 		Algo:       algoName,
 	}
@@ -2003,7 +2004,7 @@ func NewRPCServer(config *ServerConfig, statecfg *state.Config,
 		StatusLines:            make(map[int]string),
 		GBTWorkState:           NewGbtWorkState(config.TimeSource, config.Algo),
 		HelpCacher:             NewHelpCacher(),
-		RequestProcessShutdown: make(chan struct{}),
+		// RequestProcessShutdown: make(chan struct{}),
 		Quit:                   config.Quit,
 	}
 	if *podcfg.Username != "" && *podcfg.Password != "" {
@@ -2138,7 +2139,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 
 /*
 // handleDebugLevel handles debuglevel commands.
-func handleDebugLevel(	s *RPCServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+func handleDebugLevel(	s *RPCServer, cmd interface{}, closeChan <-qu.C) (interface{}, error) {
 	c := cmd.(*json.DebugLevelCmd)
 	// Special show command to list supported subsystems.
 	if c.LevelSpec == "show" {

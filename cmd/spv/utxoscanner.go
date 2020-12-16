@@ -2,6 +2,7 @@ package spv
 
 import (
 	"container/heap"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -25,7 +26,7 @@ type (
 		result *getUtxoResult
 		// mu ensures the first response delivered via resultChan is in fact what gets cached in result.
 		mu   sync.Mutex
-		quit chan struct{}
+		quit qu.C
 	}
 	// A GetUtxoRequestPQ implements heap.Interface and holds GetUtxoRequests. The queue maintains that heap. Pop()
 	// will always return the GetUtxo request with the least starting height. This allows us to add new GetUtxo requests
@@ -43,8 +44,8 @@ type (
 		mu        sync.Mutex
 		cv        *sync.Cond
 		wg        sync.WaitGroup
-		quit      chan struct{}
-		shutdown  chan struct{}
+		quit      qu.C
+		shutdown  qu.C
 	}
 	// UtxoScannerConfig exposes configurable methods for interacting with the blockchain.
 	UtxoScannerConfig struct {
@@ -65,7 +66,7 @@ type (
 )
 
 // Result is callback returning either a spend report or an error.
-func (r *GetUtxoRequest) Result(cancel <-chan struct{}) (*SpendReport, error) {
+func (r *GetUtxoRequest) Result(cancel qu.C) (*SpendReport, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	select {
@@ -338,8 +339,8 @@ func (pq GetUtxoRequestPQ) Swap(i, j int)      { pq[i], pq[j] = pq[j], pq[i] }
 func NewUtxoScanner(cfg *UtxoScannerConfig) *UtxoScanner {
 	scanner := &UtxoScanner{
 		cfg:      cfg,
-		quit:     make(chan struct{}),
-		shutdown: make(chan struct{}),
+		quit:     make(qu.C),
+		shutdown: make(qu.C),
 	}
 	scanner.cv = sync.NewCond(&scanner.mu)
 	return scanner

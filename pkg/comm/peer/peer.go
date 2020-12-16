@@ -5,6 +5,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"math/rand"
 	"net"
@@ -378,12 +379,12 @@ type Peer struct {
 	stallControl       chan stallControlMsg
 	outputQueue        chan outMsg
 	sendQueue          chan outMsg
-	sendDoneQueue      chan struct{}
+	sendDoneQueue      qu.C
 	outputInvChan      chan *wire.InvVect
-	inQuit             chan struct{}
-	queueQuit          chan struct{}
-	outQuit            chan struct{}
-	quit               chan struct{}
+	inQuit             qu.C
+	queueQuit          qu.C
+	outQuit            qu.C
+	quit               qu.C
 }
 
 // String returns the peer's address and directionality as a human-readable string.
@@ -824,7 +825,7 @@ func (p *Peer) PushRejectMsg(command string, code wire.RejectCode, reason string
 		return
 	}
 	// Send the message and block until it has been sent before returning.
-	doneChan := make(chan struct{}, 1)
+	doneChan := make(qu.C, 1)
 	p.QueueMessage(msg, doneChan)
 	<-doneChan
 }
@@ -1902,12 +1903,12 @@ func newPeerBase(origCfg *Config, inbound bool) *Peer {
 		stallControl:    make(chan stallControlMsg, 1), // nonblocking sync
 		outputQueue:     make(chan outMsg, outputBufferSize),
 		sendQueue:       make(chan outMsg, 1),   // nonblocking sync
-		sendDoneQueue:   make(chan struct{}, 1), // nonblocking sync
+		sendDoneQueue:   make(qu.C, 1), // nonblocking sync
 		outputInvChan:   make(chan *wire.InvVect, outputBufferSize),
-		inQuit:          make(chan struct{}),
-		queueQuit:       make(chan struct{}),
-		outQuit:         make(chan struct{}),
-		quit:            make(chan struct{}),
+		inQuit:          make(qu.C),
+		queueQuit:       make(qu.C),
+		outQuit:         make(qu.C),
+		quit:            make(qu.C),
 		cfg:             cfg, // Copy so caller can't mutate.
 		services:        cfg.Services,
 		protocolVersion: cfg.ProtocolVersion,

@@ -147,7 +147,7 @@ func Confirms(txHeight, curHeight int32) int32 {
 // 	},
 // 	"keypoolrefill": {
 // 		Handler: KeypoolRefill,
-// 		Params:  make(chan struct{}),
+// 		Params:  make(qu.C),
 // 		Return:  func() interface{} { return make(chan KeypoolRefillRes) },
 // 	},
 // 	"listaccounts": {
@@ -157,7 +157,7 @@ func Confirms(txHeight, curHeight int32) int32 {
 // 	},
 // 	"listlockunspent": {
 // 		Handler: ListLockUnspent,
-// 		Params:  make(chan struct{}),
+// 		Params:  make(qu.C),
 // 		Return:  func() interface{} { return make(chan ListLockUnspentRes) },
 // 	},
 // 	"listreceivedbyaccount": {
@@ -232,7 +232,7 @@ func Confirms(txHeight, curHeight int32) int32 {
 // 	},
 // 	"walletlock": {
 // 		Handler: WalletLock,
-// 		Params:  make(chan struct{}),
+// 		Params:  make(qu.C),
 // 		Return:  func() interface{} { return make(chan WalletLockRes) },
 // 	},
 // 	"walletpassphrase": {
@@ -264,7 +264,7 @@ func Confirms(txHeight, curHeight int32) int32 {
 // 	},
 // 	"getbestblock": {
 // 		Handler: GetBestBlock,
-// 		Params:  make(chan struct{}),
+// 		Params:  make(qu.C),
 // 		Return:  func() interface{} { return make(chan GetBestBlockRes) },
 // 	},
 // 	// This was an extension but the reference implementation added it as
@@ -293,12 +293,12 @@ func Confirms(txHeight, curHeight int32) int32 {
 // 	},
 // 	"walletislocked": {
 // 		Handler: WalletIsLocked,
-// 		Params:  make(chan struct{}),
+// 		Params:  make(qu.C),
 // 		Return:  func() interface{} { return make(chan WalletIsLockedRes) },
 // 	},
 // 	"dropwallethistory": {
 // 		Handler: HandleDropWalletHistory,
-// 		Params:  make(chan struct{}),
+// 		Params:  make(qu.C),
 // 		Return:  func() interface{} { return make(chan DropWalletHistoryRes) },
 // 	},
 // }

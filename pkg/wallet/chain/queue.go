@@ -2,6 +2,7 @@ package chain
 
 import (
 	"container/list"
+	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
 // ConcurrentQueue is a concurrent-safe FIFO queue with unbounded capacity. Clients interact with the queue by pushing
@@ -10,7 +11,7 @@ import (
 type ConcurrentQueue struct {
 	chanIn   chan interface{}
 	chanOut  chan interface{}
-	quit     chan struct{}
+	quit     qu.C
 	overflow *list.List
 }
 
@@ -21,7 +22,7 @@ func NewConcurrentQueue(bufferSize int) *ConcurrentQueue {
 	return &ConcurrentQueue{
 		chanIn:   make(chan interface{}),
 		chanOut:  make(chan interface{}, bufferSize),
-		quit:     make(chan struct{}),
+		quit:     make(qu.C),
 		overflow: list.New(),
 	}
 }

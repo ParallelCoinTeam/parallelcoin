@@ -21,7 +21,7 @@ var (
 func main() {
 	log.L.SetLevel("trace", true, "pod")
 	Debug("starting test")
-	quit := make(chan struct{})
+	quit := make(qu.C)
 	var c *transport.Channel
 	var err error
 	if c, err = transport.NewBroadcastChannel("test", nil, "cipher",

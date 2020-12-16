@@ -1,31 +1,39 @@
 package stdconn
 
 import (
+	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"net"
+	"runtime"
+	"runtime/debug"
 	"time"
 )
 
 type StdConn struct {
 	io.ReadCloser
 	io.WriteCloser
-	Quit chan struct{}
+	Quit qu.C
 }
 
-func New(in io.ReadCloser, out io.WriteCloser, quit chan struct{}) (s StdConn) {
+func New(in io.ReadCloser, out io.WriteCloser, quit qu.C) (s StdConn) {
 	s = StdConn{in, out, quit}
+	_, file, line, _ := runtime.Caller(1)
+	o := fmt.Sprintf("%s:%d", file, line)
+	Debug("new StdConn at", o)
 	go func() {
 	out:
 		for {
 			select {
 			case <-quit:
-				Debug("!!!! closing StdConn")
-				// debug.PrintStack()
-				// time.Sleep(time.Second*8)
-				if err := s.ReadCloser.Close(); Check(err) {
-				}
-				if err := s.WriteCloser.Close(); Check(err) {
-				}
+				Debug("!!!! closing StdConn", o)
+				debug.PrintStack()
+				// time.Sleep(time.Second*2)
+				// if err := s.ReadCloser.Close(); Check(err) {
+				// }
+				// if err := s.WriteCloser.Close(); Check(err) {
+				// }
+				// Debug(interrupt.GoroutineDump())
 				break out
 			}
 		}
@@ -42,7 +50,7 @@ func (s StdConn) Write(b []byte) (n int, err error) {
 }
 
 func (s StdConn) Close() (err error) {
-	// close(s.Quit)
+	close(s.Quit)
 	return
 }
 

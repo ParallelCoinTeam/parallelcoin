@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	quit := make(chan struct{})
+	quit := make(qu.C)
 	p := pipe.Consume(quit, func(b []byte) (err error) {
 		fmt.Println("from child:", string(b))
 		return

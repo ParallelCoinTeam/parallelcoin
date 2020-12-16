@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -77,7 +78,7 @@ type BitcoindClient struct {
 	zmqTxNtfns chan *wire.MsgTx
 	// zmqBlockNtfns is a channel through which ZMQ block events will be retrieved from the backing bitcoind connection.
 	zmqBlockNtfns chan *wire.MsgBlock
-	quit          chan struct{}
+	quit          qu.C
 	wg            sync.WaitGroup
 }
 

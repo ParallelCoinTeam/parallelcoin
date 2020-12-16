@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -36,7 +37,7 @@ type rescanOptions struct {
 	watchList    [][]byte
 	txIdx        uint32
 	update       <-chan *updateOptions
-	quit         <-chan struct{}
+	quit         qu.C
 }
 
 // RescanOption is a functional option argument to any of the rescan and notification subscription methods. These are
@@ -129,7 +130,7 @@ func TxIdx(txIdx uint32) RescanOption {
 // QuitChan specifies the quit channel. This can be used by the caller to let an indefinite rescan (one with no EndBlock
 // set) know it should gracefully shut down. If this isn't specified, an end block MUST be specified as Rescan must know
 // when to stop. This is enforced at runtime.
-func QuitChan(quit <-chan struct{}) RescanOption {
+func QuitChan(quit qu.C) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.quit = quit
 	}
@@ -254,7 +255,7 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 	)
 	// We'll wait here at this point until we have enough filter headers to actually start walking forwards in the
 	// chain. To be able to wake up in cause we are being asked to exit, we'll launch a new goroutine to wait.
-	done := make(chan struct{})
+	done := make(qu.C)
 	go func() {
 		s.blockManager.newFilterHeadersMtx.Lock()
 		for s.blockManager.filterHeaderTip < uint32(curStamp.Height) {
@@ -826,7 +827,7 @@ txOutLoop:
 // contains information about whether a goroutine is running.
 type Rescan struct {
 	started    uint32
-	running    chan struct{}
+	running    qu.C
 	updateChan chan *updateOptions
 	options    []RescanOption
 	chain      *ChainService
@@ -839,7 +840,7 @@ type Rescan struct {
 // long-running rescan object, and a channel which returns any error on termination of the rescan process.
 func (s *ChainService) NewRescan(options ...RescanOption) *Rescan {
 	return &Rescan{
-		running:    make(chan struct{}),
+		running:    make(qu.C),
 		options:    options,
 		updateChan: make(chan *updateOptions),
 		chain:      s,

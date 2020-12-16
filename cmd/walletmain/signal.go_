@@ -21,9 +21,9 @@ var addHandlerChannel = make(chan func())
 // interruptHandlersDone is closed after all interrupt handlers run the first
 
 // time an interrupt is signaled.
-var interruptHandlersDone = make(chan struct{})
+var interruptHandlersDone = make(qu.C)
 
-var simulateInterruptChannel = make(chan struct{}, 1)
+var simulateInterruptChannel = make(qu.C, 1)
 
 
 // signals defines the signals that are handled to do a clean shutdown.

@@ -3,6 +3,7 @@ package node
 import (
 	"net"
 	"net/http"
+	
 	// // This enables pprof
 	// _ "net/http/pprof"
 	"os"
@@ -28,7 +29,8 @@ var winServiceMain func() (bool, error)
 // the server once it is setup so it can gracefully stop it when requested from the service control manager.
 func Main(cx *conte.Xt) (err error) {
 	Trace("starting up node main")
-	cx.WaitGroup.Add(1)
+	// cx.WaitGroup.Add(1)
+	cx.WaitAdd()
 	// show version at startup
 	Info("version", version.Version())
 	// enable http profiling server if requested
@@ -128,19 +130,19 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	server.Start()
 	cx.RealNode = server
-	if len(server.RPCServers) > 0 {
+	if len(server.RPCServers) > 0 && *cx.Config.CAPI {
 		Debug("starting cAPI.....")
 		chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
-		Debug("propagating rpc server handle (node has started)")
-		cx.RPCServer = server.RPCServers[0]
-		if cx.NodeChan != nil {
-			Debug("sending back node")
-			cx.NodeChan <- server.RPCServers[0]
-		}
+		// Debug("propagating rpc server handle (node has started)")
+	}
+	cx.RPCServer = server.RPCServers[0]
+	if cx.NodeChan != nil && cx.RPCServer != nil {
+		Debug("sending back node")
+		cx.NodeChan <- cx.RPCServer
 	}
 	// set up interrupt shutdown handlers to stop servers
 	// Debug("starting controller")
-	control.Run(cx)
+	controlQuit := control.Run(cx)
 	// Debug("controller started")
 	// cx.Controller.Store(true)
 	gracefulShutdown := func() {
@@ -151,19 +153,22 @@ func Main(cx *conte.Xt) (err error) {
 		// 	return
 		// }
 		Debug("stopping controller")
-		go func() {
-			e := server.Stop()
-			if e != nil {
-				Warn("failed to stop server", e)
-			}
-		}()
+		controlQuit.Quit()
+		Debug("stopping server")
+		e := server.Stop()
+		if e != nil {
+			Warn("failed to stop server", e)
+		}
 		// Debug("stopping miner")
 		// consume.Kill(cx.StateCfg.Miner)
 		server.WaitForShutdown()
 		Info("server shutdown complete")
-		cx.WaitGroup.Done()
-		<-interrupt.HandlersDone
+		cx.WaitDone()
+		// cx.WaitGroup.Done()
 		close(cx.KillAll)
+		close(cx.NodeKill)
+		// Debug(interrupt.GoroutineDump())
+		// <-interrupt.HandlersDone
 	}
 	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)
@@ -171,24 +176,26 @@ func Main(cx *conte.Xt) (err error) {
 	// subsystems such as the RPC server.
 	select {
 	case <-cx.NodeKill:
-		Debug("NodeKill")
+		// Debug("NodeKill", interrupt.GoroutineDump())
 		// gracefulShutdown()
 		if !interrupt.Requested() {
 			interrupt.Request()
 		}
-		// break
+		break
 	case <-cx.KillAll:
-		Debug("KillAll")
-		// if !interrupt.Requested() {
-		// 	interrupt.Request()
-		// }
+		// Debug("KillAll", interrupt.GoroutineDump())
+		if !interrupt.Requested() {
+			interrupt.Request()
+		}
 		// break
 		// case <-interrupt.ShutdownRequestChan:
 		// 	Debug("interrupt request")
 		// 	// gracefulShutdown()
-		// 	break
+		break
 	}
-	gracefulShutdown()
+	// Debug(interrupt.GoroutineDump())
+	// gracefulShutdown()
+	cx.WaitWait()
 	return nil
 }
 

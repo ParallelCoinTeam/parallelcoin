@@ -5,6 +5,7 @@ package gui
 // Multiple windows in Gio.
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"log"
 	"os"
 	"sync/atomic"
@@ -21,7 +22,7 @@ import (
 
 type window struct {
 	*app.Window
-	quit chan struct{}
+	quit qu.C
 	more  *p9.Clickable
 	close *p9.Clickable
 }
@@ -38,7 +39,7 @@ func newWindow() {
 	go func() {
 		w := new(window)
 		if w.quit == nil {
-			w.quit = make(chan struct{})
+			w.quit = make(qu.C)
 		}
 		w.Window = app.NewWindow()
 		if err := w.loop(w.Events()); err != nil {

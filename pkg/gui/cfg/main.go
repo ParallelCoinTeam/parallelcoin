@@ -3,6 +3,7 @@ package cfg
 import (
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/p9"
+	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
 func New(cx *conte.Xt, th *p9.Theme) *Config {
@@ -27,7 +28,7 @@ type Config struct {
 	multis     map[string]*p9.Multi
 	configs    GroupsMap
 	passwords  map[string]*p9.Password
-	quit       chan struct{}
+	quit       qu.C
 }
 
 func (c *Config) Init() *Config {

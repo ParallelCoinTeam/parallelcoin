@@ -21,8 +21,8 @@ import (
 // with calls to os.Exit. Instead, main runs this function and checks for a non-nil error, at point any defers have
 // already run, and if the error is non-nil, the program can be exited with an error exit status.
 func Main(cx *conte.Xt) (err error) {
-	cx.WaitGroup.Add(1)
-	
+	// cx.WaitGroup.Add(1)
+	cx.WaitAdd()
 	// if *config.Profile != "" {
 	//	go func() {
 	//		listenAddr := net.JoinHostPort("127.0.0.1", *config.Profile)
@@ -70,7 +70,8 @@ func Main(cx *conte.Xt) (err error) {
 			Info("stopped wallet RPC server")
 		}
 		Info("wallet shutdown from killswitch complete")
-		cx.WaitGroup.Done()
+		// cx.WaitGroup.Done()
+		cx.WaitDone()
 		return
 		// <-legacyServer.RequestProcessShutdownChan()
 	case <-cx.KillAll:
@@ -79,7 +80,8 @@ func Main(cx *conte.Xt) (err error) {
 	case <-interrupt.HandlersDone:
 	}
 	Info("wallet shutdown complete")
-	cx.WaitGroup.Done()
+	// cx.WaitGroup.Done()
+	cx.WaitDone()
 	return
 }
 

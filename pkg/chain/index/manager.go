@@ -2,7 +2,7 @@ package indexers
 
 import (
 	"fmt"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	database "github.com/p9c/pod/pkg/db"

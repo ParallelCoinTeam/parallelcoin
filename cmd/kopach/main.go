@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"os"
 	"strings"
@@ -56,7 +57,7 @@ type Worker struct {
 	active              atomic.Bool
 	conn                *transport.Channel
 	ctx                 context.Context
-	quit                chan struct{}
+	quit                qu.C
 	sendAddresses       []*net.UDPAddr
 	clients             []*client.Client
 	workers             []*worker.Worker
@@ -65,12 +66,12 @@ type Worker struct {
 	Status              atomic.String
 	HashTick            chan HashCount
 	LastHash            *chainhash.Hash
-	StartChan, StopChan chan struct{}
+	StartChan, StopChan qu.C
 	SetThreads          chan int
 	PassChan            chan string
 	solutions           []SolutionData
 	solutionCount       int
-	Update              chan struct{}
+	Update              qu.C
 	hashCount           atomic.Uint64
 	hashSampleBuf       *rav.BufferUint64
 	hashrate            float64
@@ -135,13 +136,13 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			id:            fmt.Sprintf("%x", randomBytes),
 			cx:            cx,
 			// ctx:           ctx,
-			quit:          make(chan struct{}),
+			quit:          make(qu.C),
 			sendAddresses: []*net.UDPAddr{},
-			StartChan:     make(chan struct{}),
-			StopChan:      make(chan struct{}),
+			StartChan:     make(qu.C),
+			StopChan:      make(qu.C),
 			SetThreads:    make(chan int),
 			solutions:     make([]SolutionData, 0, 2048),
-			Update:        make(chan struct{}),
+			Update:        make(qu.C),
 			hashSampleBuf: ring.NewBufferUint64(1000),
 		}
 		Warn("kopachgui", *cx.Config.KopachGUI)

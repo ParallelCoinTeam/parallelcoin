@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"math/big"
 	"math/rand"
 	"time"
@@ -62,7 +63,7 @@ func BigToLEUint256(n *big.Int) [Uint256Size]byte {
 }
 
 // HandleGetWork handles the getwork call
-func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+func HandleGetWork(s *Server, cmd interface{}, closeChan qu.C) (interface{}, error) {
 	c := cmd.(*btcjson.GetWorkCmd)
 	if len(s.StateCfg.ActiveMiningAddrs) == 0 {
 		return nil, &btcjson.RPCError{

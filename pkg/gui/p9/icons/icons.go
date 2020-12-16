@@ -19,7 +19,7 @@ type Icons struct {
 }
 
 func main() {
-	quit := make(chan struct{})
+	quit := make(qu.C)
 	th := p9.NewTheme(p9fonts.Collection(), quit)
 	ic := Icons{
 		th: th,

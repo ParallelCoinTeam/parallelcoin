@@ -8,7 +8,7 @@ import (
 // StartAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
 // Note that the parameters are type asserted to prevent the consumer of the API from sending wrong message types not
 // because it's necessary since they are interfaces end to end
-func StartAPI(server *chainrpc.Server, quit chan struct{}) {
+func StartAPI(server *chainrpc.Server, quit qu.C) {
 	nrh := chainrpc.RPCHandlers
 	go func() {
 		var err error

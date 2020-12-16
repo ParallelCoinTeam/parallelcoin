@@ -80,7 +80,7 @@ type memWallet struct {
 	// wallet's set of spendable utxos.
 	reorgJournal      map[int32]*undoEntry
 	chainUpdates      []*chainUpdate
-	chainUpdateSignal chan struct{}
+	chainUpdateSignal qu.C
 	chainMtx          sync.Mutex
 	net               *netparams.Params
 	rpc               *rpcclient.Client
@@ -127,7 +127,7 @@ func newMemWallet(net *netparams.Params, harnessID uint32) (*memWallet, error) {
 		hdRoot:            hdRoot,
 		addrs:             addrs,
 		utxos:             make(map[wire.OutPoint]*utxo),
-		chainUpdateSignal: make(chan struct{}),
+		chainUpdateSignal: make(qu.C),
 		reorgJournal:      make(map[int32]*undoEntry),
 	}, nil
 }

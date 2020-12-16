@@ -2,6 +2,7 @@ package serve
 
 import (
 	"github.com/p9c/pod/pkg/util/interrupt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"go.uber.org/atomic"
 	"os"
 	"runtime/pprof"
@@ -13,10 +14,10 @@ import (
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
 
-func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName string) {
+func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) {
 	Debug("starting log server")
 	lc := logi.L.AddLogChan()
-	logQuit := make(chan struct{})
+	logQuit := make(qu.C)
 	interrupt.AddHandler(
 		func() {
 			close(logQuit)
@@ -53,13 +54,14 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 					Debug("received kill signal from pipe, shutting down", appName)
 					// time.Sleep(time.Second*5)
 					// time.Sleep(time.Second * 3)
-					close(logQuit)
-					close(quit)
 					interrupt.Request()
+					// close(logQuit)
+					// close(quit)
 					// os.Exit(0)
 					// break
 					// os.Exit(0)
 					// <-interrupt.HandlersDone
+					// goroutineDump()
 					pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 				}
 			}
@@ -71,8 +73,9 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 		for {
 			select {
 			case <-quit:
-				// close(logQuit)
 				interrupt.Request()
+				close(logQuit)
+				continue
 			case <-logQuit:
 				Debug("quitting pipe logger")
 				break out
@@ -82,6 +85,8 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 						if n < 1 {
 							Error("short write")
 						}
+					} else {
+						break out
 					}
 				}
 			case pk := <-pkgChan:
@@ -89,6 +94,7 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 					if n < 1 {
 						Error("short write")
 					}
+					break out
 				}
 			}
 		}

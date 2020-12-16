@@ -3,12 +3,13 @@ package pipe
 import (
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"os"
-	"syscall"
 )
 
-func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *worker.Worker {
+func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Worker {
 	var n int
 	var err error
 	Debug("spawning worker process", args)
@@ -45,16 +46,20 @@ func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *wo
 	return w
 }
 
-func Serve(quit chan struct{}, handler func([]byte) error) stdconn.StdConn {
+func Serve(quit qu.C, handler func([]byte) error) stdconn.StdConn {
 	var n int
 	var err error
+	qChan := qu.T()
 	data := make([]byte, 8192)
 	go func() {
 		Debug("starting pipe server")
 	out:
 		for {
 			select {
+			case <-qChan:
+				break out
 			case <-quit:
+				qChan.Quit()
 				break out
 			default:
 			}
@@ -64,16 +69,18 @@ func Serve(quit chan struct{}, handler func([]byte) error) stdconn.StdConn {
 			}
 			if n > 0 {
 				if err := handler(data[:n]); Check(err) {
-					// break out
+					break out
 				}
 			}
 		}
+		Debug(interrupt.GoroutineDump())
+		Debug("pipe server shut down")
 	}()
-	si, _ := os.Stdin.Stat()
-	imod := si.Mode()
-	os.Stdin.Chmod(imod &^ syscall.O_NONBLOCK)
-	so, _ := os.Stdin.Stat()
-	omod := so.Mode()
-	os.Stdin.Chmod(omod &^ syscall.O_NONBLOCK)
-	return stdconn.New(os.Stdin, os.Stdout, quit)
+	// si, _ := os.Stdin.Stat()
+	// imod := si.Mode()
+	// os.Stdin.Chmod(imod &^ syscall.O_NONBLOCK)
+	// so, _ := os.Stdin.Stat()
+	// omod := so.Mode()
+	// os.Stdin.Chmod(omod &^ syscall.O_NONBLOCK)
+	return stdconn.New(os.Stdin, os.Stdout, qChan)
 }

@@ -7,6 +7,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
 	"net"
 	"os"
@@ -18,9 +20,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
 	uberatomic "go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/version"
@@ -137,7 +139,7 @@ type (
 		Broadcast            chan BroadcastMsg
 		PeerHeightsUpdate    chan UpdatePeerHeightsMsg
 		WG                   sync.WaitGroup
-		Quit                 chan struct{}
+		Quit                 qu.C
 		NAT                  upnp.NAT
 		DB                   database.DB
 		TimeSource           blockchain.MedianTimeSource
@@ -176,10 +178,10 @@ type (
 		Filter         *bloom.Filter
 		KnownAddresses map[string]struct{}
 		BanScore       connmgr.DynamicBanScore
-		Quit           chan struct{}
+		Quit           qu.C
 		// The following chans are used to sync blockmanager and server.
-		TxProcessed    chan struct{}
-		BlockProcessed chan struct{}
+		TxProcessed    qu.C
+		BlockProcessed qu.C
 		SentAddrs      bool
 		IsWhitelisted  bool
 		Persistent     bool
@@ -963,7 +965,7 @@ cleanup:
 // PushBlockMsg sends a block message for the provided block hash to the connected peer. An error is returned if the
 // block hash is not known.
 func (n *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
-	doneChan chan<- struct{}, waitChan <-chan struct{},
+	doneChan chan<- struct{}, waitChan qu.C,
 	encoding wire.MessageEncoding) error {
 	// Fetch the raw block bytes from the database.
 	var blockBytes []byte
@@ -1025,7 +1027,7 @@ func (n *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 //
 // An error is returned if the block hash is not known.
 func (n *Node) PushMerkleBlockMsg(sp *NodePeer, hash *chainhash.Hash,
-	doneChan chan<- struct{}, waitChan <-chan struct{},
+	doneChan chan<- struct{}, waitChan qu.C,
 	encoding wire.MessageEncoding) error {
 	// Do not send a response if the peer doesn't have a filter loaded.
 	if !sp.Filter.IsLoaded() {
@@ -1076,7 +1078,7 @@ func (n *Node) PushMerkleBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 //
 // An error is returned if the transaction hash is not known.
 func (n *Node) PushTxMsg(sp *NodePeer, hash *chainhash.Hash,
-	doneChan chan<- struct{}, waitChan <-chan struct{},
+	doneChan chan<- struct{}, waitChan qu.C,
 	encoding wire.MessageEncoding) error {
 	// Attempt to fetch the requested transaction from the pool. A call could be made to check for existence first, but
 	// simply trying to fetch a missing transaction results in the same behavior.
@@ -1672,16 +1674,16 @@ func (np *NodePeer) OnGetData(_ *peer.Peer, msg *wire.MsgGetData) {
 	// wasting memory.
 	//
 	// The waiting occurs after the database fetch for the next one to provide a little pipelining.
-	var waitChan chan struct{}
-	doneChan := make(chan struct{}, 1)
+	var waitChan qu.C
+	doneChan := make(qu.C, 1)
 	for i, iv := range msg.InvList {
-		var c chan struct{}
+		var c qu.C
 		// If this will be the last message we send.
 		if i == length-1 && len(notFound.InvList) == 0 {
 			c = doneChan
 		} else if (i+1)%3 == 0 {
 			// Buffered so as to not make the send goroutine block.
-			c = make(chan struct{}, 1)
+			c = make(qu.C, 1)
 		}
 		var err error
 		switch iv.Type {
@@ -2439,7 +2441,7 @@ type Context struct {
 //
 // TODO: simplify/modularise this
 func NewNode(listenAddrs []string, db database.DB,
-	interruptChan <-chan struct{}, cx *Context) (*Node, error) {
+	interruptChan qu.C, cx *Context) (*Node, error) {
 	Debug("listenAddrs ", listenAddrs)
 	services := DefaultServices
 	if *cx.Config.NoPeerBloomFilters {
@@ -2479,7 +2481,7 @@ func NewNode(listenAddrs []string, db database.DB,
 		Query:                make(chan interface{}),
 		RelayInv:             make(chan RelayMsg, *cx.Config.MaxPeers),
 		Broadcast:            make(chan BroadcastMsg, *cx.Config.MaxPeers),
-		Quit:                 make(chan struct{}),
+		Quit:                 make(qu.C),
 		ModifyRebroadcastInv: make(chan interface{}),
 		PeerHeightsUpdate:    make(chan UpdatePeerHeightsMsg),
 		NAT:                  nat,
@@ -2782,7 +2784,7 @@ func NewNode(listenAddrs []string, db database.DB,
 			for i := range s.RPCServers {
 				<-s.RPCServers[i].RequestedProcessShutdown()
 			}
-			// interrupt.Request()
+			interrupt.Request()
 		}()
 	}
 	return &s, nil
@@ -2795,9 +2797,9 @@ func NewServerPeer(s *Node, isPersistent bool) *NodePeer {
 		Persistent:     isPersistent,
 		Filter:         bloom.LoadFilter(nil),
 		KnownAddresses: make(map[string]struct{}),
-		Quit:           make(chan struct{}),
-		TxProcessed:    make(chan struct{}, 1),
-		BlockProcessed: make(chan struct{}, 1),
+		Quit:           make(qu.C),
+		TxProcessed:    make(qu.C, 1),
+		BlockProcessed: make(qu.C, 1),
 	}
 }
 

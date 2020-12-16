@@ -282,7 +282,7 @@ func TestRetryPermanent(t *testing.T) {
 // TestMaxRetryDuration tests the maximum retry duration. We have a timed dialer which initially returns err but after
 // RetryDuration hits maxRetryDuration returns a mock conn.
 func TestMaxRetryDuration(t *testing.T) {
-	networkUp := make(chan struct{})
+	networkUp := make(qu.C)
 	time.AfterFunc(5*time.Millisecond, func() {
 		close(networkUp)
 	})
@@ -363,7 +363,7 @@ func TestNetworkFailure(t *testing.T) {
 // stop flag on the conn manager and returns an err so that the handler assumes that the conn manager is stopped and
 // ignores the failure.
 func TestStopFailed(t *testing.T) {
-	done := make(chan struct{}, 1)
+	done := make(qu.C, 1)
 	waitDialer := func(addr net.Addr) (net.Conn, error) {
 		done <- struct{}{}
 		time.Sleep(time.Millisecond)
@@ -398,7 +398,7 @@ func TestStopFailed(t *testing.T) {
 // the ConnMgr.
 func TestRemovePendingConnection(t *testing.T) {
 	// Create a ConnMgr instance with an instance of a dialer that'll never succeed.
-	wait := make(chan struct{})
+	wait := make(qu.C)
 	indefiniteDialer := func(addr net.Addr) (net.Conn, error) {
 		<-wait
 		return nil, fmt.Errorf("error")
@@ -443,7 +443,7 @@ func TestCancelIgnoreDelayedConnection(t *testing.T) {
 	retryTimeout := 10 * time.Millisecond
 	// Setup a dialer that will continue to return an error until the connect chan is signaled, the dial attempt
 	// immediately after will succeed in returning a connection.
-	connect := make(chan struct{})
+	connect := make(qu.C)
 	failingDialer := func(addr net.Addr) (net.Conn, error) {
 		select {
 		case <-connect:

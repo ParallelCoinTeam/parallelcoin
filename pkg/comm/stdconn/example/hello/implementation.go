@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net/rpc"
 	"os"
 
@@ -9,11 +10,11 @@ import (
 )
 
 type Hello struct {
-	Quit chan struct{}
+	Quit qu.C
 }
 
 func NewHello() *Hello {
-	return &Hello{make(chan struct{})}
+	return &Hello{make(qu.C)}
 }
 
 func (h *Hello) Say(name string, reply *string) (err error) {
@@ -39,7 +40,7 @@ func main() {
 		return
 	}
 	go rpc.ServeConn(stdConn)
-	<-hello.Quit
+	hello.Quit.Wait()
 	printlnE("i am dead! x_X")
 }
 

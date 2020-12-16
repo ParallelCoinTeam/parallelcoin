@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"math/rand"
 	"net"
@@ -35,7 +36,7 @@ type AddrManager struct {
 	started        int32
 	shutdown       int32
 	wg             sync.WaitGroup
-	quit           chan struct{}
+	quit           qu.C
 	nTried         int
 	nNew           int
 	lamtx          sync.Mutex
@@ -971,7 +972,7 @@ func New(dataDir string, lookupFunc func(string) ([]net.IP, error)) *AddrManager
 		PeersFile:      filepath.Join(dataDir, "peers.json"),
 		lookupFunc:     lookupFunc,
 		rand:           rand.New(rand.NewSource(time.Now().UnixNano())),
-		quit:           make(chan struct{}),
+		quit:           make(qu.C),
 		localAddresses: make(map[string]*localAddress),
 	}
 	am.reset()

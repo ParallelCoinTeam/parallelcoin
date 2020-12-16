@@ -39,11 +39,11 @@ type CPUMiner struct {
 	submitBlockLock   sync.Mutex
 	wg                sync.WaitGroup
 	workerWg          sync.WaitGroup
-	updateNumWorkers  chan struct{}
+	updateNumWorkers  qu.C
 	queryHashesPerSec chan float64
 	updateHashes      chan uint64
-	speedMonitorQuit  chan struct{}
-	quit              chan struct{}
+	speedMonitorQuit  qu.C
+	quit              qu.C
 	rotator           atomic.Uint64
 }
 
@@ -126,7 +126,7 @@ func (m *CPUMiner) GenerateNBlocks(workerNumber uint32, n uint32,
 	}
 	m.started = true
 	m.discreteMining = true
-	m.speedMonitorQuit = make(chan struct{})
+	m.speedMonitorQuit = make(qu.C)
 	m.wg.Add(1)
 	go m.speedMonitor()
 	m.Unlock()
@@ -268,8 +268,8 @@ func (m *CPUMiner) Start() {
 	// randomize the starting point so all network is mining different
 	m.rotator.Store(uint64(rand.Intn(
 		len(fork.List[fork.GetCurrent(m.b.BestSnapshot().Height)].Algos))))
-	m.quit = make(chan struct{})
-	m.speedMonitorQuit = make(chan struct{})
+	m.quit = make(qu.C)
+	m.speedMonitorQuit = make(qu.C)
 	m.wg.Add(2)
 	go m.speedMonitor()
 	go m.miningWorkerController()
@@ -299,7 +299,7 @@ func (m *CPUMiner) Stop() {
 // solve them while detecting when it is performing stale work and reacting
 // accordingly by generating a new block template.  When a block is solved, it
 // is submitted. It must be run as a goroutine.
-func (m *CPUMiner) generateBlocks(workerNumber uint32, quit chan struct{}) {
+func (m *CPUMiner) generateBlocks(workerNumber uint32, quit qu.C) {
 	// Start a ticker which is used to signal checks for stale work and updates
 	// to the speed monitor.
 	ticker := time.NewTicker(time.Second / 3) // * hashUpdateSecs)
@@ -410,10 +410,10 @@ func (m *CPUMiner) miningWorkerController() {
 	L.Trace("starting mining worker controller")
 	// launchWorkers groups common code to launch a specified number of workers
 	// for generating blocks.
-	var runningWorkers []chan struct{}
+	var runningWorkers []qu.C
 	launchWorkers := func(numWorkers uint32) {
 		for i := uint32(0); i < numWorkers; i++ {
-			quit := make(chan struct{})
+			quit := make(qu.C)
 			runningWorkers = append(runningWorkers, quit)
 			m.workerWg.Add(1)
 			go m.generateBlocks(i, quit)
@@ -421,7 +421,7 @@ func (m *CPUMiner) miningWorkerController() {
 	}
 	L.Tracef("spawning %d worker(s)", m.numWorkers)
 	// Launch the current number of workers by default.
-	runningWorkers = make([]chan struct{}, 0, m.numWorkers)
+	runningWorkers = make([]qu.C, 0, m.numWorkers)
 	launchWorkers(m.numWorkers)
 out:
 	for {
@@ -467,7 +467,7 @@ out:
 // and enough time has elapsed without finding a solution.
 func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 	blockHeight int32, testnet bool, ticker *time.Ticker,
-	quit chan struct{}) bool {
+	quit qu.C) bool {
 	//L.Trace("running solveBlock")
 	// algoName := fork.GetAlgoName(
 	// 	msgBlock.Header.Version, m.b.BestSnapshot().Height)
@@ -718,7 +718,7 @@ func New(cfg *Config) *CPUMiner {
 		g:                 cfg.BlockTemplateGenerator,
 		cfg:               *cfg,
 		numWorkers:        cfg.NumThreads,
-		updateNumWorkers:  make(chan struct{}),
+		updateNumWorkers:  make(qu.C),
 		queryHashesPerSec: make(chan float64),
 		updateHashes:      make(chan uint64),
 	}

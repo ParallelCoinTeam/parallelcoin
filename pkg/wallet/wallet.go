@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sort"
 	"strings"
 	"sync"
@@ -79,7 +80,7 @@ type Wallet struct {
 	createTxRequests chan createTxRequest
 	// Channels for the manager locker.
 	unlockRequests     chan unlockRequest
-	lockRequests       chan struct{}
+	lockRequests       qu.C
 	holdUnlockRequests chan chan heldUnlock
 	lockState          chan bool
 	changePassphrase   chan changePassphraseRequest
@@ -93,9 +94,9 @@ type Wallet struct {
 	chainParams *netparams.Params
 	wg          sync.WaitGroup
 	started     bool
-	quit        chan struct{}
+	quit        qu.C
 	quitMu      sync.Mutex
-	Update      chan struct{}
+	Update      qu.C
 }
 
 // Start starts the goroutines necessary to manage a wallet.
@@ -107,7 +108,7 @@ func (w *Wallet) Start() {
 		Trace("waiting for wallet shutdown")
 		// Restart the wallet goroutines after shutdown finishes.
 		w.WaitForShutdown()
-		w.quit = make(chan struct{})
+		w.quit = make(qu.C)
 	default:
 		if w.started {
 			// Ignore when the wallet is still running.
@@ -186,7 +187,7 @@ func (w *Wallet) ChainClient() chain.Interface {
 }
 
 // quitChan atomically reads the quit channel.
-func (w *Wallet) quitChan() <-chan struct{} {
+func (w *Wallet) quitChan() qu.C {
 	w.quitMu.Lock()
 	c := w.quit
 	w.quitMu.Unlock()
@@ -1061,7 +1062,7 @@ type (
 	// heldUnlock is a tool to prevent the wallet from automatically locking after some timeout before an operation
 	// which needed the unlocked wallet has finished. Any acquired heldUnlock *must* be released (preferably with a
 	// defer) or the wallet will forever remain unlocked.
-	heldUnlock chan struct{}
+	heldUnlock qu.C
 )
 
 // walletLocker manages the locked/unlocked state of a wallet.
@@ -1975,7 +1976,7 @@ type GetTransactionsResult struct {
 //
 // Transaction results are organized by blocks in ascending order and unmined transactions in an unspecified order.
 // Mined transactions are saved in a Block structure which records properties about the block.
-func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel <-chan struct{}) (
+func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel qu.C) (
 	*GetTransactionsResult,
 	error,
 ) {
@@ -3357,14 +3358,14 @@ func Open(
 		rescanFinished:      make(chan *RescanFinishedMsg),
 		createTxRequests:    make(chan createTxRequest),
 		unlockRequests:      make(chan unlockRequest),
-		lockRequests:        make(chan struct{}),
+		lockRequests:        make(qu.C),
 		holdUnlockRequests:  make(chan chan heldUnlock),
 		lockState:           make(chan bool),
 		changePassphrase:    make(chan changePassphraseRequest),
 		changePassphrases:   make(chan changePassphrasesRequest),
 		chainParams:         params,
 		PodConfig:           podConfig,
-		quit:                make(chan struct{}),
+		quit:                make(qu.C),
 	}
 	w.NtfnServer = newNotificationServer(w)
 	w.TxStore.NotifyUnspent = func(hash *chainhash.Hash, index uint32) {

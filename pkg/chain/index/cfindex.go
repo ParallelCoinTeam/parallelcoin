@@ -2,7 +2,8 @@ package indexers
 
 import (
 	"errors"
-
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -317,6 +318,6 @@ func NewCfIndex(db database.DB, chainParams *netparams.Params) *CFIndex {
 }
 
 // DropCfIndex drops the CF index from the provided database if exists.
-func DropCfIndex(db database.DB, interrupt <-chan struct{}) error {
+func DropCfIndex(db database.DB, interrupt qu.C) error {
 	return dropIndex(db, cfIndexParentBucketKey, cfIndexName, interrupt)
 }

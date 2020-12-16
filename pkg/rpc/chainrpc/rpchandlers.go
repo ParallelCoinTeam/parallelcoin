@@ -4,6 +4,7 @@
 package chainrpc
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"net/rpc"
 	"time"
@@ -23,11 +24,11 @@ type API struct {
 // net/rpc API access endpoint for this RPC API
 type CAPI struct {
 	Timeout time.Duration
-	quit    chan struct{}
+	quit    qu.C
 }
 
 // NewCAPI returns a new CAPI 
-func NewCAPI(quit chan struct{}, timeout ...time.Duration) (c *CAPI) {
+func NewCAPI(quit qu.C, timeout ...time.Duration) (c *CAPI) {
 	c = &CAPI{quit: quit}
 	if len(timeout) > 0 {
 		c.Timeout = timeout[0]
@@ -2381,7 +2382,7 @@ func (a API) VersionWait(cmd *btcjson.VersionCmd) (out *map[string]btcjson.Versi
 // RunAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
 // Note that the parameters are type asserted to prevent the consumer of the API from sending wrong message types not
 // because it's necessary since they are interfaces end to end
-func RunAPI(server *Server, quit chan struct{}) {
+func RunAPI(server *Server, quit qu.C) {
 	nrh := RPCHandlers
 	go func() {
 		Debug("starting up node cAPI")

@@ -4,14 +4,15 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/util/quit"
 	"math/rand"
 	"net"
 	"strings"
 	"time"
-
+	
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
@@ -40,7 +41,7 @@ type Controller struct {
 	multiConn *transport.Channel
 	// uniConn                *transport.Channel
 	active                 atomic.Bool
-	quit                   chan struct{}
+	quit                   qu.C
 	cx                     *conte.Xt
 	Ready                  atomic.Bool
 	height                 atomic.Uint64
@@ -63,7 +64,7 @@ type Controller struct {
 	lastNonce              int32
 }
 
-func Run(cx *conte.Xt) (quit chan struct{}) {
+func Run(cx *conte.Xt) (quit qu.C) {
 	mining := true
 	cx.Controller.Store(true)
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
@@ -80,7 +81,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		return
 	}
 	ctrl := &Controller{
-		quit:                   cx.KillAll,
+		quit:                   make(qu.C),
 		cx:                     cx,
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
@@ -92,16 +93,19 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
 		hashSampleBuf:          rav.NewBufferUint64(100),
 	}
+	interrupt.AddHandler(ctrl.quit.Quit)
 	quit = ctrl.quit
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
 	ctrl.height.Store(0)
 	ctrl.active.Store(false)
 	var err error
-	ctrl.multiConn, err = transport.NewBroadcastChannel("controller",
+	ctrl.multiConn, err = transport.NewBroadcastChannel(
+		"controller",
 		ctrl, *cx.Config.MinerPass,
 		transport.DefaultPort, MaxDatagramSize, handlersMulticast,
-		ctrl.quit)
+		quit,
+	)
 	if err != nil {
 		Error(err)
 		close(ctrl.quit)
@@ -114,17 +118,19 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		ctrl.active.Store(true)
 	}
 	// ctrl.oldBlocks.Store(pauseShards)
-	interrupt.AddHandler(func() {
-		Debug("miner controller shutting down")
-		ctrl.active.Store(false)
-		err := ctrl.multiConn.SendMany(pause.PauseMagic, pauseShards)
-		if err != nil {
-			Error(err)
-		}
-		if err = ctrl.multiConn.Close(); Check(err) {
-		}
-		// close(ctrl.quit)
-	})
+	interrupt.AddHandler(
+		func() {
+			Debug("miner controller shutting down")
+			ctrl.active.Store(false)
+			err := ctrl.multiConn.SendMany(pause.PauseMagic, pauseShards)
+			if err != nil {
+				Error(err)
+			}
+			if err = ctrl.multiConn.Close(); Check(err) {
+			}
+			close(ctrl.quit)
+		},
+	)
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
 	if mining {
 		err = ctrl.sendNewBlockTemplate()
@@ -140,11 +146,12 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 	go advertiser(ctrl)
 	factor := 10
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
-	cont := true
 	go func() {
-		for cont {
+	out:
+		for {
 			select {
 			case <-ticker.C:
+				Debug("controller ticker")
 				if !ctrl.Ready.Load() {
 					if cx.IsCurrent() {
 						Info("ready to send out jobs!")
@@ -155,21 +162,20 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 				// Debugf("cluster hashrate %.2f", ctrl.HashReport()/float64(factor))
 			case <-ctrl.quit:
 				Debug("quitting on close quit channel")
-				cont = false
-				ctrl.active.Store(false)
+				break out
 			case <-ctrl.cx.NodeKill:
 				Debug("quitting on NodeKill")
-				cont = false
-				ctrl.active.Store(false)
+				close(ctrl.quit)
+				// break out
 			case <-ctrl.cx.KillAll:
 				Debug("quitting on KillAll")
-				cont = false
-				ctrl.active.Store(false)
-			case <-interrupt.HandlersDone:
-				cont = false
+				close(ctrl.quit)
+				// break out
 			}
 		}
-		Trace("controller exiting")
+		ctrl.active.Store(false)
+		panic("aren't we stopped???")
+		Debug("controller exiting")
 	}()
 	return
 }
@@ -179,25 +185,29 @@ func (c *Controller) HashReport() float64 {
 	av := ewma.NewMovingAverage()
 	var i int
 	var prev uint64
-	if err := c.hashSampleBuf.ForEach(func(v uint64) error {
-		if i < 1 {
-			prev = v
-		} else {
-			interval := v - prev
-			av.Add(float64(interval))
-			prev = v
-		}
-		i++
-		return nil
-	}); Check(err) {
+	if err := c.hashSampleBuf.ForEach(
+		func(v uint64) error {
+			if i < 1 {
+				prev = v
+			} else {
+				interval := v - prev
+				av.Add(float64(interval))
+				prev = v
+			}
+			i++
+			return nil
+		},
+	); Check(err) {
 	}
 	return av.Value()
 }
 
 var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
-	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string,
-		b []byte) (err error) {
+	string(sol.SolutionMagic): func(
+		ctx interface{}, src net.Addr, dst string,
+		b []byte,
+	) (err error) {
 		Trace("received solution")
 		c := ctx.(*Controller)
 		if !c.active.Load() { // || !c.cx.Node.Load() {
@@ -210,8 +220,10 @@ var handlersMulticast = transport.Handlers{
 			return
 		}
 		msgBlock := j.GetMsgBlock()
-		if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
-			BestSnapshot().Hash) {
+		if !msgBlock.Header.PrevBlock.IsEqual(
+			&c.cx.RPCServer.Cfg.Chain.
+				BestSnapshot().Hash,
+		) {
 			Debug("block submitted by kopach miner worker is stale")
 			// c.UpdateAndSendTemplate()
 			return
@@ -235,14 +247,17 @@ var handlersMulticast = transport.Handlers{
 			return
 		}
 		block := util.NewBlock(msgBlock)
-		isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(block,
-			blockchain.BFNone)
+		isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(
+			block,
+			blockchain.BFNone,
+		)
 		if err != nil {
 			// Anything other than a rule violation is an unexpected error, so log that error as an internal error.
 			if _, ok := err.(blockchain.RuleError); !ok {
 				Warnf(
 					"Unexpected error while processing block submitted"+
-						" via kopach miner:", err)
+						" via kopach miner:", err,
+				)
 				return
 			} else {
 				Warn("block submitted via kopach miner rejected:", err)
@@ -260,19 +275,25 @@ var handlersMulticast = transport.Handlers{
 		prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
 		since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
 		bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
-		Warnf("new block height %d %08x %s%10d %08x %v %s %ds since prev",
+		Warnf(
+			"new block height %d %08x %s%10d %08x %v %s %ds since prev",
 			block.Height(),
 			prevBlock.MsgBlock().Header.Bits,
 			bHash,
 			block.MsgBlock().Header.Timestamp.Unix(),
 			block.MsgBlock().Header.Bits,
 			util.Amount(coinbaseTx.Value),
-			fork.GetAlgoName(block.MsgBlock().Header.Version,
-				block.Height()), since)
+			fork.GetAlgoName(
+				block.MsgBlock().Header.Version,
+				block.Height(),
+			), since,
+		)
 		return
 	},
-	string(p2padvt.Magic): func(ctx interface{}, src net.Addr, dst string,
-		b []byte) (err error) {
+	string(p2padvt.Magic): func(
+		ctx interface{}, src net.Addr, dst string,
+		b []byte,
+	) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
 			// Debug("not active")
@@ -292,8 +313,10 @@ var handlersMulticast = transport.Handlers{
 			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
 			if otherPort != myPort {
 				if _, ok := c.otherNodes[o]; !ok {
-					Debug("ctrl", j.GetControllerListenerPort(), "P2P",
-						j.GetP2PListenersPort(), "rpc", j.GetRPCListenersPort())
+					Debug(
+						"ctrl", j.GetControllerListenerPort(), "P2P",
+						j.GetP2PListenersPort(), "rpc", j.GetRPCListenersPort(),
+					)
 					// because nodes can be set to change their port each launch this always reconnects (for lan,
 					// autoports is recommended).
 					Info("connecting to lan peer with same PSK", o, otherIPs)
@@ -361,7 +384,8 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	return
 }
 
-func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
+func getNewBlockTemplate(
+	cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 ) (template *mining.BlockTemplate) {
 	Trace("getting new block template")
 	if len(*cx.Config.MiningAddrs) < 1 {
@@ -370,11 +394,17 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 	}
 	// Choose a payment address at random.
 	rand.Seed(time.Now().UnixNano())
-	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
-		MiningAddrs))]
+	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(
+		len(
+			*cx.Config.
+				MiningAddrs,
+		),
+	)]
 	Trace("calling new block template")
-	template, err := bTG.NewBlockTemplate(0, payToAddr,
-		fork.SHA256d)
+	template, err := bTG.NewBlockTemplate(
+		0, payToAddr,
+		fork.SHA256d,
+	)
 	if err != nil {
 		Error(err)
 	} else {
@@ -393,24 +423,26 @@ func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 		TxMinFreeFee:      cx.StateCfg.ActiveMinRelayTxFee,
 	}
 	s := cx.RealNode
-	return mining.NewBlkTmplGenerator(&policy,
+	return mining.NewBlkTmplGenerator(
+		&policy,
 		s.ChainParams, s.TxMemPool, s.Chain, s.TimeSource,
-		s.SigCache, s.HashCache)
+		s.SigCache, s.HashCache,
+	)
 }
 
-func advertiser(ctrl *Controller) {
+func advertiser(c *Controller) {
 	advertismentTicker := time.NewTicker(time.Second)
-	advt := p2padvt.Get(ctrl.cx)
+	advt := p2padvt.Get(c.cx)
 	ad := transport.GetShards(advt.CreateContainer(p2padvt.Magic).Data)
 out:
 	for {
 		select {
 		case <-advertismentTicker.C:
-			err := ctrl.multiConn.SendMany(p2padvt.Magic, ad)
+			err := c.multiConn.SendMany(p2padvt.Magic, ad)
 			if err != nil {
 				Error(err)
 			}
-		case <-ctrl.quit:
+		case <-c.quit:
 			break out
 		}
 	}
@@ -435,8 +467,12 @@ out:
 			// The current block is stale if the memory pool has been updated since the block template was generated and
 			// it has been at least one minute.
 			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
-				LastUpdated() && time.Now().After(time.Unix(0,
-				c.lastGenerated.Load().(int64)+int64(time.Minute))) {
+				LastUpdated() && time.Now().After(
+				time.Unix(
+					0,
+					c.lastGenerated.Load().(int64)+int64(time.Minute),
+				),
+			) {
 				Trace("block is stale, regenerating")
 				c.UpdateAndSendTemplate()
 				break
@@ -513,8 +549,10 @@ func (c *Controller) UpdateAndSendTemplate() {
 		}
 		msgB := template.Block
 		var mC job.Container
-		mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB),
-			p2padvt.Get(c.cx), &c.coinbases)
+		mC, c.transactions = job.Get(
+			c.cx, util.NewBlock(msgB),
+			p2padvt.Get(c.cx), &c.coinbases,
+		)
 		nH := mC.GetNewHeight()
 		if c.height.Load() < uint64(nH) {
 			Trace("new height", nH)

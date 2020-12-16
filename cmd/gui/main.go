@@ -3,6 +3,7 @@ package gui
 import (
 	"crypto/rand"
 	"encoding/hex"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"runtime"
 	"sync"
@@ -35,9 +36,9 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
-		invalidate: make(chan struct{}),
-		quit:       make(chan struct{}),
-		// nodeQuit: make(chan struct{}),
+		invalidate: make(qu.C),
+		quit:       make(qu.C),
+		// nodeQuit: make(qu.C),
 		Size:     &size,
 		noWallet: &noWallet,
 		// walletLocked: uberatomic.NewBool(walletLocked),
@@ -68,8 +69,8 @@ type WalletGUI struct {
 	// intSliders                map[string]*p9.IntSlider
 	configs                   cfg.GroupsMap
 	config                    *cfg.Config
-	invalidate                chan struct{}
-	quit                      chan struct{}
+	invalidate                qu.C
+	quit                      qu.C
 	sendAddresses             []SendAddress
 	State                     State
 	ChainMutex, WalletMutex   sync.Mutex

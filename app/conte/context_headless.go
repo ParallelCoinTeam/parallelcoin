@@ -39,11 +39,11 @@ type Xt struct {
 	// Node is the run state of the node
 	Node *atomic.Value
 	// NodeKill is the killswitch for the Node
-	NodeKill chan struct{}
+	NodeKill qu.C
 	// Wallet is the run state of the wallet
 	Wallet *atomic.Value
 	// WalletKill is the killswitch for the Wallet
-	WalletKill chan struct{}
+	WalletKill qu.C
 	// // Window is the fyne window when running GUI
 	// Window *fyne.Window
 	// RPCServer is needed to directly query data

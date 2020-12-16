@@ -2,6 +2,7 @@ package rpctest
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"testing"
 	"time"
@@ -174,7 +175,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 		t.Fatalf("send transaction failed: %v", err)
 	}
 	// Wait until the transaction shows up to ensure the two mempools are not the same.
-	harnessSynced := make(chan struct{})
+	harnessSynced := make(qu.C)
 	go func() {
 		for {
 			poolHashes, err := r.Node.GetRawMempool()
@@ -194,7 +195,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 		t.Fatalf("harness node never received transaction")
 	}
 	// This select case should fall through to the default as the goroutine should be blocked on the JoinNodes call.
-	poolsSynced := make(chan struct{})
+	poolsSynced := make(qu.C)
 	go func() {
 		if err := JoinNodes(nodeSlice, Mempools); err != nil {
 			t.Fatalf("unable to join node on mempools: %v", err)
@@ -237,7 +238,7 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	}
 	defer harness.TearDown()
 	nodeSlice := []*Harness{r, harness}
-	blocksSynced := make(chan struct{})
+	blocksSynced := make(qu.C)
 	go func() {
 		if err := JoinNodes(nodeSlice, Blocks); err != nil {
 			t.Fatalf("unable to join node on blocks: %v", err)

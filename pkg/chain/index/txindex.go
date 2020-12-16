@@ -3,7 +3,8 @@ package indexers
 import (
 	"errors"
 	"fmt"
-
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -417,7 +418,7 @@ func dropBlockIDIndex(db database.DB) error {
 
 // DropTxIndex drops the transaction index from the provided database if it exists. Since the address index relies on
 // it, the address index will also be dropped when it exists.
-func DropTxIndex(db database.DB, interrupt <-chan struct{}) error {
+func DropTxIndex(db database.DB, interrupt qu.C) error {
 	err := dropIndex(db, addrIndexKey, addrIndexName, interrupt)
 	if err != nil {
 		Error(err)

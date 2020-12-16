@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
 	"runtime"
 
@@ -23,7 +24,7 @@ type txValidateItem struct {
 // communication and a processing function that is intended to be in run multiple goroutines.
 type txValidator struct {
 	validateChan chan *txValidateItem
-	quitChan     chan struct{}
+	quitChan     qu.C
 	resultChan   chan error
 	utxoView     *UtxoViewpoint
 	flags        txscript.ScriptFlags
@@ -165,7 +166,7 @@ func newTxValidator(utxoView *UtxoViewpoint, flags txscript.ScriptFlags,
 	sigCache *txscript.SigCache, hashCache *txscript.HashCache) *txValidator {
 	return &txValidator{
 		validateChan: make(chan *txValidateItem),
-		quitChan:     make(chan struct{}),
+		quitChan:     make(qu.C),
 		resultChan:   make(chan error),
 		utxoView:     utxoView,
 		sigCache:     sigCache,

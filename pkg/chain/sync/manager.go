@@ -3,6 +3,7 @@ package netsync
 import (
 	"container/list"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -34,7 +35,7 @@ type (
 		progressLogger *blockProgressLogger
 		msgChan        chan interface{}
 		wg             sync.WaitGroup
-		quit           chan struct{}
+		quit           qu.C
 		// These fields should only be accessed from the blockHandler thread
 		rejectedTxns    map[chainhash.Hash]struct{}
 		requestedTxns   map[chainhash.Hash]struct{}
@@ -54,7 +55,7 @@ type (
 	blockMsg struct {
 		block *util.Block
 		peer  *peerpkg.Peer
-		reply chan struct{}
+		reply qu.C
 	}
 	// donePeerMsg signifies a newly disconnected peer to the block handler.
 	donePeerMsg struct {
@@ -93,7 +94,7 @@ type (
 	// pauseMsg is a message type to be sent across the message channel for pausing the sync manager. This effectively
 	// provides the caller with exclusive access over the manager until a receive is performed on the unpause channel.
 	pauseMsg struct {
-		unpause <-chan struct{}
+		unpause qu.C
 	}
 	// peerSyncState stores additional information that the SyncManager tracks about a peer.
 	peerSyncState struct {
@@ -121,7 +122,7 @@ type (
 	txMsg struct {
 		tx    *util.Tx
 		peer  *peerpkg.Peer
-		reply chan struct{}
+		reply qu.C
 	}
 )
 
@@ -170,7 +171,7 @@ func (sm *SyncManager) NewPeer(peer *peerpkg.Peer) {
 // Note that while paused, all peer and block processing is halted. The message sender should avoid pausing the sync
 // manager for long durations.
 func (sm *SyncManager) Pause() chan<- struct{} {
-	c := make(chan struct{})
+	c := make(qu.C)
 	sm.msgChan <- pauseMsg{c}
 	return c
 }
@@ -189,7 +190,7 @@ func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.Behavior
 
 // QueueBlock adds the passed block message and peer to the block handling queue. Responds to the done channel argument
 // after the block message is processed.
-func (sm *SyncManager) QueueBlock(block *util.Block, peer *peerpkg.Peer, done chan struct{}) {
+func (sm *SyncManager) QueueBlock(block *util.Block, peer *peerpkg.Peer, done qu.C) {
 	// Don't accept more blocks if we're shutting down.
 	if atomic.LoadInt32(&sm.shutdown) != 0 {
 		done <- struct{}{}
@@ -218,7 +219,7 @@ func (sm *SyncManager) QueueInv(inv *wire.MsgInv, peer *peerpkg.Peer) {
 
 // QueueTx adds the passed transaction message and peer to the block handling queue. Responds to the done channel
 // argument after the tx message is processed.
-func (sm *SyncManager) QueueTx(tx *util.Tx, peer *peerpkg.Peer, done chan struct{}) {
+func (sm *SyncManager) QueueTx(tx *util.Tx, peer *peerpkg.Peer, done qu.C) {
 	// Don't accept more transactions if we're shutting down.
 	if atomic.LoadInt32(&sm.shutdown) != 0 {
 		done <- struct{}{}
@@ -1291,7 +1292,7 @@ func New(config *Config) (*SyncManager, error) {
 		progressLogger:  newBlockProgressLogger("processed"),
 		msgChan:         make(chan interface{}, config.MaxPeers*3),
 		headerList:      list.New(),
-		quit:            make(chan struct{}),
+		quit:            make(qu.C),
 		feeEstimator:    config.FeeEstimator,
 	}
 	best := sm.chain.BestSnapshot()

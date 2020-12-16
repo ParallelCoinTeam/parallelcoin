@@ -1,6 +1,7 @@
 package f
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
 	"time"
 
@@ -86,7 +87,7 @@ func (w *Window) Open() (out *Window) {
 }
 
 func (w *Window) Run(frame func(ctx layout.Context) layout.Dimensions,
-	overlay func(ctx layout.Context), destroy func(), quit chan struct{}) (err error) {
+	overlay func(ctx layout.Context), destroy func(), quit qu.C) (err error) {
 	var ops op.Ops
 	for {
 		select {

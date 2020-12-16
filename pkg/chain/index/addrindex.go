@@ -3,6 +3,7 @@ package indexers
 import (
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -771,6 +772,6 @@ func NewAddrIndex(db database.DB, chainParams *netparams.Params) *AddrIndex {
 }
 
 // DropAddrIndex drops the address index from the provided database if it exists.
-func DropAddrIndex(db database.DB, interrupt <-chan struct{}) error {
+func DropAddrIndex(db database.DB, interrupt qu.C) error {
 	return dropIndex(db, addrIndexKey, addrIndexName, interrupt)
 }

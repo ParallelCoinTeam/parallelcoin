@@ -2,6 +2,7 @@ package spv
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -190,7 +191,7 @@ func queryChainServiceBatch(
 	queryStates := make([]uint32, len(queryMsgs))
 	// subscription allows us to subscribe to notifications from peers.
 	msgChan := make(chan spMsg, len(queryMsgs))
-	subQuit := make(chan struct{})
+	subQuit := make(qu.C)
 	subscription := spMsgSubscription{
 		msgChan:  msgChan,
 		quitChan: subQuit,
@@ -217,7 +218,7 @@ func queryChainServiceBatch(
 			select {
 			case <-queryQuit:
 				return
-			case <-s.quit:
+			case <-s.quit.Wait():
 				return
 			case <-quit:
 				return
@@ -311,10 +312,10 @@ func queryChainServiceBatch(
 		}
 	}
 	// peerQuits holds per-peer quit channels so we can kill the goroutines when they disconnect.
-	peerQuits := make(map[string]chan struct{})
+	peerQuits := make(map[string]qu.C)
 	// matchSignals holds per-peer answer channels that get a notice that the query got a match. If it's the peer's
 	// match, the peer can mark the query a success and move on to the next query ahead of timeout.
-	matchSignals := make(map[string]chan struct{})
+	matchSignals := make(map[string]qu.C)
 	// Clean up on exit.
 	defer func() {
 		for _, quitChan := range peerQuits {
@@ -326,8 +327,8 @@ func queryChainServiceBatch(
 		for _, peer := range s.Peers() {
 			sp := peer.Addr()
 			if _, ok := peerQuits[sp]; !ok && peer.Connected() {
-				peerQuits[sp] = make(chan struct{})
-				matchSignals[sp] = make(chan struct{})
+				peerQuits[sp] = make(qu.C)
+				matchSignals[sp] = make(qu.C)
 				go peerGoroutine(
 					peer, peerQuits[sp], matchSignals[sp],
 				)
@@ -399,8 +400,8 @@ func (s *ChainService) queryAllPeers(
 	// of the query framework that requires access to peerState, so it's done once per query.
 	peers := s.Peers()
 	// This will be shared state between the per-peer goroutines.
-	queryQuit := make(chan struct{})
-	allQuit := make(chan struct{})
+	queryQuit := make(qu.C)
+	allQuit := make(qu.C)
 	var wg sync.WaitGroup
 	msgChan := make(chan spMsg)
 	subscription := spMsgSubscription{
@@ -408,12 +409,12 @@ func (s *ChainService) queryAllPeers(
 		quitChan: allQuit,
 	}
 	// Now we start a goroutine for each peer which manages the peer's message subscription.
-	peerQuits := make(map[string]chan struct{})
+	peerQuits := make(map[string]qu.C)
 	for _, sp := range peers {
 		sp.subscribeRecvMsg(subscription)
 		wg.Add(1)
-		peerQuits[sp.Addr()] = make(chan struct{})
-		go func(sp *ServerPeer, peerQuit <-chan struct{}) {
+		peerQuits[sp.Addr()] = make(qu.C)
+		go func(sp *ServerPeer, peerQuit qu.C) {
 			defer wg.Done()
 			defer sp.unsubscribeRecvMsgs(subscription)
 			for i := uint8(0); i < qo.numRetries; i++ {
@@ -492,8 +493,8 @@ func queryChainServicePeers(
 	queryPeer := s.blockManager.SyncPeer()
 	peerTries := make(map[string]uint8)
 	// This will be state used by the peer query goroutine.
-	queryQuit := make(chan struct{})
-	subQuit := make(chan struct{})
+	queryQuit := make(qu.C)
+	subQuit := make(qu.C)
 	// Increase this number to be able to handle more queries at once as each channel gets results for all queries,
 	// otherwise messages can get mixed and there's a vicious cycle of retries causing a bigger message flood, more of
 	// which get missed.

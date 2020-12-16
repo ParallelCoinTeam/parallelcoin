@@ -1,6 +1,7 @@
 package rununit
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
@@ -14,7 +15,7 @@ type RunUnit struct {
 	running, shuttingDown uberatomic.Bool
 	commandChan           chan bool
 	worker                *worker.Worker
-	quit                  chan struct{}
+	quit                  qu.C
 }
 
 // New creates and starts a new rununit. run and stop functions are executed after starting and stopping. logger
@@ -25,7 +26,7 @@ func New(
 ) (r *RunUnit) {
 	r = &RunUnit{
 		commandChan: make(chan bool),
-		quit:        make(chan struct{}),
+		quit:        make(qu.C),
 	}
 	r.running.Store(false)
 	r.shuttingDown.Store(false)

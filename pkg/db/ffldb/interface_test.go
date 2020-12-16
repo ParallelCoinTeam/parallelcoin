@@ -1773,8 +1773,8 @@ func testConcurrency(tc *testContext) bool {
 	// data was set.
 	concurrentKey := []byte("notthere")
 	concurrentVal := []byte("someval")
-	started := make(chan struct{})
-	writeComplete := make(chan struct{})
+	started := make(qu.C)
+	writeComplete := make(qu.C)
 	reader = func(blockNum int) {
 		err := tc.db.View(func(tx database.Tx) error {
 			started <- struct{}{}
@@ -1862,8 +1862,8 @@ func testConcurrentClose(tc *testContext) bool {
 	// the transactions stay open until they are explicitly signalled to be closed.
 	var activeReaders int32
 	numReaders := 3
-	started := make(chan struct{})
-	finishReaders := make(chan struct{})
+	started := make(qu.C)
+	finishReaders := make(qu.C)
 	resultChan := make(chan bool, numReaders+1)
 	reader := func() {
 		err := tc.db.View(func(tx database.Tx) error {
@@ -1888,7 +1888,7 @@ func testConcurrentClose(tc *testContext) bool {
 	}
 	// Close the database in a separate goroutine. This should block until the transactions are finished. Once the close
 	// has taken place, the dbClosed channel is closed to signal the main goroutine below.
-	dbClosed := make(chan struct{})
+	dbClosed := make(qu.C)
 	go func() {
 		started <- struct{}{}
 		err := tc.db.Close()

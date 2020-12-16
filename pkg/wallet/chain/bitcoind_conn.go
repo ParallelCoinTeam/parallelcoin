@@ -3,6 +3,7 @@ package chain
 import (
 	"bytes"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -40,7 +41,7 @@ type BitcoindConn struct {
 	// rescanClients is the set of active bitcoind rescan clients to which ZMQ event notfications will be sent to.
 	rescanClientsMtx sync.Mutex
 	rescanClients    map[uint64]*BitcoindClient
-	quit             chan struct{}
+	quit             qu.C
 	wg               sync.WaitGroup
 }
 
@@ -71,7 +72,7 @@ func NewBitcoindConn(chainParams *netparams.Params,
 		zmqTxHost:       zmqTxHost,
 		zmqPollInterval: zmqPollInterval,
 		rescanClients:   make(map[uint64]*BitcoindClient),
-		quit:            make(chan struct{}),
+		quit:            make(qu.C),
 	}
 	return conn, nil
 }
@@ -299,7 +300,7 @@ func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, error) {
 // connection using multiple clients.
 func (c *BitcoindConn) NewBitcoindClient() *BitcoindClient {
 	return &BitcoindClient{
-		quit:              make(chan struct{}),
+		quit:              make(qu.C),
 		id:                atomic.AddUint64(&c.rescanClientCounter, 1),
 		chainParams:       c.chainParams,
 		chainConn:         c,

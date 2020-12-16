@@ -44,7 +44,7 @@ type blockImporter struct {
 	processQueue      chan []byte
 	doneChan          chan bool
 	errChan           chan error
-	quit              chan struct{}
+	quit              qu.C
 	wg                sync.WaitGroup
 	blocksProcessed   int64
 	blocksImported    int64
@@ -284,7 +284,7 @@ func newBlockImporter(	db database.DB, r io.ReadSeeker) *blockImporter {
 		processQueue: make(chan []byte, 2),
 		doneChan:     make(chan bool),
 		errChan:      make(chan error),
-		quit:         make(chan struct{}),
+		quit:         make(qu.C),
 		lastLogTime:  time.Now(),
 	}
 }

@@ -86,7 +86,8 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			Info("wallet started")
 		}
 		Debug("shell started")
-		cx.WaitGroup.Wait()
+		// cx.WaitGroup.Wait()
+		cx.WaitWait()
 		return nil
 	}
 }

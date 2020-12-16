@@ -17,7 +17,7 @@ type MinerModel struct {
 	th                                                 *p9.Theme
 	button0, button1, button2, iconbutton, iconbutton1 *p9.Clickable
 	boolButton1, boolButton2                           *p9.Bool
-	quit                                               chan struct{}
+	quit                                               qu.C
 	progress                                           int
 	slider                                             *p9.Float
 	lineEditor, areaEditor                             *p9.Editor
@@ -25,7 +25,7 @@ type MinerModel struct {
 }
 
 func main() {
-	quit := make(chan struct{})
+	quit := make(qu.C)
 	th := p9.NewTheme(p9fonts.Collection(), quit)
 	minerModel := MinerModel{
 		th:      th,
@@ -38,7 +38,7 @@ func main() {
 		boolButton2: th.Bool(false),
 		iconbutton:  th.Clickable(),
 		iconbutton1: th.Clickable(),
-		quit:        make(chan struct{}),
+		quit:        make(qu.C),
 		progress:    0,
 		slider: th.Float().SetHook(func(fl float32) {
 			Debug("float now at value", fl)

@@ -3,6 +3,7 @@ package explorer
 import (
 	"gioui.org/app"
 	l "gioui.org/layout"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -22,7 +23,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	ex := &Explorer{
 		cx:         cx,
 		c:          c,
-		invalidate: make(chan struct{}),
+		invalidate: make(qu.C),
 		quit:       cx.KillAll,
 		size:       &size,
 	}
@@ -47,8 +48,8 @@ type Explorer struct {
 	configs                   cfg.GroupsMap
 	config                    *cfg.Config
 	running                   bool
-	invalidate                chan struct{}
-	quit                      chan struct{}
+	invalidate                qu.C
+	quit                      qu.C
 	Worker                    *worker.Worker
 	RunCommandChan            chan string
 	State                     State

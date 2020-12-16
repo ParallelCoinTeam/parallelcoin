@@ -10,11 +10,11 @@ import (
 
 type App struct {
 	th   *p9.Theme
-	quit chan struct{}
+	quit qu.C
 }
 
 func main() {
-	quit := make(chan struct{})
+	quit := make(qu.C)
 	th := p9.NewTheme(p9fonts.Collection(), quit)
 	minerModel := App{
 		th: th,

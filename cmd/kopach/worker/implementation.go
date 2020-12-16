@@ -3,20 +3,21 @@ package worker
 import (
 	"crypto/cipher"
 	"errors"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"math/rand"
 	"net"
 	"os"
 	"sync"
 	"time"
-
+	
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
-
+	
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -37,7 +38,7 @@ type Worker struct {
 	dispatchConn  *transport.Channel
 	dispatchReady atomic.Bool
 	ciph          cipher.AEAD
-	Quit          chan struct{}
+	qu.C
 	block         atomic.Value
 	senderPort    atomic.Uint32
 	msgBlock      atomic.Value // *wire.MsgBlock
@@ -46,8 +47,8 @@ type Worker struct {
 	lastMerkle    *chainhash.Hash
 	roller        *Counter
 	startNonce    uint32
-	startChan     chan struct{}
-	stopChan      chan struct{}
+	startChan     qu.C
+	stopChan      qu.C
 	running       atomic.Bool
 	hashCount     atomic.Uint64
 	hashSampleBuf *ring.BufferUint64
@@ -98,17 +99,19 @@ func (w *Worker) hashReport() {
 	av := ewma.NewMovingAverage(15)
 	var i int
 	var prev uint64
-	if err := w.hashSampleBuf.ForEach(func(v uint64) error {
-		if i < 1 {
-			prev = v
-		} else {
-			interval := v - prev
-			av.Add(float64(interval))
-			prev = v
-		}
-		i++
-		return nil
-	}); Check(err) {
+	if err := w.hashSampleBuf.ForEach(
+		func(v uint64) error {
+			if i < 1 {
+				prev = v
+			} else {
+				interval := v - prev
+				av.Add(float64(interval))
+				prev = v
+			}
+			i++
+			return nil
+		},
+	); Check(err) {
 	}
 	// Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
 	Tracef("average hashrate %.2f", av.Value())
@@ -116,16 +119,16 @@ func (w *Worker) hashReport() {
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
 // allow a worker to be configured to run on a bare metal system with a different launcher main
-func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit chan struct{}) *Worker {
+func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worker {
 	Debug("creating new worker")
 	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		id:            id,
 		pipeConn:      conn,
-		Quit:          quit,
+		C:             qu.T(),
 		roller:        NewCounter(RoundsPerAlgo),
-		startChan:     make(chan struct{}),
-		stopChan:      make(chan struct{}),
+		startChan:     make(qu.C),
+		stopChan:      make(qu.C),
 		hashSampleBuf: ring.NewBufferUint64(1000),
 	}
 	w.msgBlock.Store(msgBlock)
@@ -133,12 +136,15 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit chan struct{
 	w.dispatchReady.Store(false)
 	// with this we can report cumulative hash counts as well as using it to distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C.Load())
-	interrupt.AddHandler(func() {
-		Debug("worker quitting")
-		// close(w.Quit)
-		// w.pipeConn.Close()
-		w.dispatchReady.Store(false)
-	})
+	interrupt.AddHandler(
+		func() {
+			Debug("worker quitting")
+			w.stopChan.Quit()
+			w.Quit()
+			_ = w.pipeConn.Close()
+			w.dispatchReady.Store(false)
+		},
+	)
 	go worker(w)
 	return w
 }
@@ -163,8 +169,9 @@ out:
 			case <-w.startChan:
 				Trace("received start signal")
 				break pausing
-			case <-w.Quit:
+			case <-w.C:
 				Trace("quitting")
+				w.stopChan.Quit()
 				break out
 			}
 		}
@@ -186,7 +193,7 @@ out:
 				// w.bitses.Store((blockchain.TargetBits)(nil))
 				// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 				break running
-			case <-w.Quit:
+			case <-w.C:
 				Trace("worker stopping while running")
 				break out
 			default:
@@ -222,7 +229,7 @@ out:
 					var nextAlgo int32
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 						select {
-						case <-w.Quit:
+						case <-w.C:
 							Trace("worker stopping on pausing message")
 							break out
 						default:
@@ -231,8 +238,10 @@ out:
 						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
 						nextAlgo = w.roller.C.Load() + 1
 						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH, w.id)
-						err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
-							transport.GetShards(hashReport.Data))
+						err := w.dispatchConn.SendMany(
+							hashrate.HashrateMagic,
+							transport.GetShards(hashReport.Data),
+						)
 						if err != nil {
 							Error(err)
 						}
@@ -241,13 +250,15 @@ out:
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
 						srs := sol.GetSolContainer(w.senderPort.Load(), mb)
-						err := w.dispatchConn.SendMany(sol.SolutionMagic,
-							transport.GetShards(srs.Data))
+						err := w.dispatchConn.SendMany(
+							sol.SolutionMagic,
+							transport.GetShards(srs.Data),
+						)
 						if err != nil {
 							Error(err)
 						}
 						Trace("sent solution")
-
+						
 						break running
 					}
 					mb.Header.Version = nextAlgo
@@ -263,7 +274,7 @@ out:
 
 // New initialises the state for a worker, loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
-func New(id string, quit chan struct{}) (w *Worker, conn net.Conn) {
+func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
 	sc := stdconn.New(os.Stdin, os.Stdout, quit)
 	return NewWithConnAndSemaphore(id, &sc, quit), &sc
@@ -296,7 +307,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	Debug("halting current work")
 	w.stopChan <- struct{}{}
 	newHeight := job.GetNewHeight()
-
+	
 	if len(algos) > 0 {
 		// if we didn't get them in the job don't update the old
 		w.roller.Algos.Store(algos)
@@ -350,10 +361,10 @@ func (w *Worker) Pause(_ int, reply *bool) (err error) {
 func (w *Worker) Stop(_ int, reply *bool) (err error) {
 	Debug("stopping from IPC")
 	w.stopChan <- struct{}{}
-	defer close(w.Quit)
+	defer w.C.Quit()
 	*reply = true
-	time.Sleep(time.Second * 3)
-	os.Exit(0)
+	// time.Sleep(time.Second * 3)
+	// os.Exit(0)
 	return
 }
 
@@ -367,7 +378,8 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	var conn *transport.Channel
 	conn, err = transport.NewBroadcastChannel(
 		"kopachworker", w, pass, transport.DefaultPort,
-		control.MaxDatagramSize, transport.Handlers{}, w.Quit)
+		control.MaxDatagramSize, transport.Handlers{}, w.C,
+	)
 	if err != nil {
 		Error(err)
 	}

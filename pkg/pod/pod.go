@@ -5,10 +5,10 @@ import (
 	"sort"
 	"sync"
 	"time"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	log "github.com/p9c/pod/pkg/util/logi"
-
+	
 	"github.com/urfave/cli"
 )
 
@@ -66,7 +66,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 		levelOptions = append(levelOptions, i)
 	}
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
-
+	
 	//  groups = []string{"config", "node", "debug", "rpc", "wallet", "proxy", "policy", "mining", "tls"}
 	// var groups []string
 	rawFields := make(map[string]Fields)
@@ -217,6 +217,7 @@ type Config struct {
 	GUI                    *bool            `group:"" label:"GUI" description:"enables GUI" type:"" widget:"toggle" json:"GUI" hook:"restart"`
 	DarkTheme              *bool            `group:"config" label:"Dark Theme" description:"sets dark theme for GUI" type:"" widget:"toggle" json:"DarkTheme" hook:"restart"`
 	RunAsService           *bool            `group:"" label:"Run As Service" description:"shuts down on lock timeout" type:"" widget:"toggle" json:"" hook:"restart"`
+	CAPI                   *bool            `group:"" label:"Enable cAPI" description:"disable cAPI rpc" type:"" widget:"toggle" json:"CAPI" hook:"restart"`
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
@@ -235,6 +236,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		BlockPrioritySize:      newint(),
 		BlocksOnly:             newbool(),
 		CAFile:                 newstring(),
+		CAPI:                   newbool(),
 		ConfigFile:             newstring(),
 		ConnectPeers:           newStringSlice(),
 		Controller:             newstring(),
@@ -330,6 +332,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"BlockPrioritySize":      c.BlockPrioritySize,
 		"BlocksOnly":             c.BlocksOnly,
 		"CAFile":                 c.CAFile,
+		"CAPI":                   c.CAPI,
 		"ConfigFile":             c.ConfigFile,
 		"ConnectPeers":           c.ConnectPeers,
 		"Controller":             c.Controller,

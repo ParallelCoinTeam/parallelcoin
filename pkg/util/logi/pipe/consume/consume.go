@@ -3,10 +3,12 @@ package consume
 import (
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
+	"github.com/p9c/pod/pkg/util/quit"
 )
 
 func FilterNone(string) bool {
@@ -28,18 +30,19 @@ func SimpleLog(name string) func(ent *logi.Entry) (err error) {
 }
 
 func Log(
-	quit chan struct{}, handler func(ent *logi.Entry) (
+	quit qu.C, handler func(ent *logi.Entry) (
 	err error,
 ), filter func(pkg string) (out bool),
 	args ...string,
 ) *worker.Worker {
 	Debug("starting log consumer")
-	logQuit := make(chan struct{})
-	// interrupt.AddHandler(
-	// 	func() {
-	// 		close(logQuit)
-	// 	},
-	// )
+	logQuit := qu.T()
+	interrupt.AddHandler(
+		func() {
+			logQuit.Quit()
+			quit.Quit()
+		},
+	)
 	return pipe.Consume(
 		logQuit, func(b []byte) (err error) {
 			// we are only listening for entries
@@ -101,7 +104,7 @@ func Kill(w *worker.Worker) {
 		Debug("failed to write")
 		return
 	}
-	close(w.Quit)
+	// close(w.Quit)
 	Debug("sent kill signal")
 }
 

@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	js "encoding/json"
 	"errors"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"io/ioutil"
 	"net"
@@ -28,7 +29,7 @@ type WebsocketClient struct {
 	remoteAddr    string
 	allRequests   chan []byte
 	responses     chan []byte
-	quit          chan struct{} // closed on disconnect
+	quit          qu.C // closed on disconnect
 	wg            sync.WaitGroup
 }
 
@@ -39,7 +40,7 @@ func NewWebsocketClient(c *websocket.Conn, authenticated bool, remoteAddr string
 		remoteAddr:    remoteAddr,
 		allRequests:   make(chan []byte),
 		responses:     make(chan []byte),
-		quit:          make(chan struct{}),
+		quit:          make(qu.C),
 	}
 }
 func (c *WebsocketClient) Send(b []byte) error {
@@ -66,9 +67,9 @@ type Server struct {
 	MaxPostClients      int64 // Max concurrent HTTP POST clients.
 	MaxWebsocketClients int64 // Max concurrent websocket clients.
 	WG                  sync.WaitGroup
-	Quit                chan struct{}
+	Quit                qu.C
 	QuitMutex           sync.Mutex
-	RequestShutdownChan chan struct{}
+	RequestShutdownChan qu.C
 }
 
 // JSONAuthFail sends a message back to the client if the http auth is rejected.
@@ -97,8 +98,8 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 			// Allow all origins.
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
-		Quit:                make(chan struct{}),
-		RequestShutdownChan: make(chan struct{}, 1),
+		Quit:                make(qu.C),
+		RequestShutdownChan: make(qu.C, 1),
 	}
 	serveMux.Handle("/", ThrottledFn(opts.MaxPOSTClients,
 		func(w http.ResponseWriter, r *http.Request) {
@@ -626,6 +627,6 @@ func (s *Server) RequestProcessShutdown() {
 }
 
 // RequestProcessShutdownChan returns a channel that is sent to when an authorized client requests remote shutdown.
-func (s *Server) RequestProcessShutdownChan() <-chan struct{} {
+func (s *Server) RequestProcessShutdownChan() qu.C {
 	return s.RequestShutdownChan
 }
