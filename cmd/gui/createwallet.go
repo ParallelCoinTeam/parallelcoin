@@ -266,7 +266,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															wg.miner.Start()
 															
 															*wg.noWallet = false
-															wg.walletLocked.Store(false)
+															// wg.walletLocked.Store(false)
 															wg.node.Start()
 															// for security with apps launching the wallet, the public password can be set with a file that is deleted after
 															walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"

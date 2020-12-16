@@ -9,7 +9,6 @@ import (
 	"time"
 	
 	"github.com/urfave/cli"
-	uberatomic "go.uber.org/atomic"
 	
 	l "gioui.org/layout"
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
@@ -32,16 +31,16 @@ import (
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	var size int
-	var noWallet, walletLocked bool
+	var noWallet bool
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
 		invalidate: make(chan struct{}),
-		quit:       cx.KillAll,
+		quit:       make(chan struct{}),
 		// nodeQuit: make(chan struct{}),
-		Size:         &size,
-		noWallet:     &noWallet,
-		walletLocked: uberatomic.NewBool(walletLocked),
+		Size:     &size,
+		noWallet: &noWallet,
+		// walletLocked: uberatomic.NewBool(walletLocked),
 	}
 	return wg.Run()
 }
@@ -82,11 +81,11 @@ type WalletGUI struct {
 	dialog                    *dialog.Dialog
 	node, wallet, miner       *rununit.RunUnit
 	noWallet                  *bool
-	walletLocked              *uberatomic.Bool
-	walletToLock              time.Time
-	walletLockTime            int
-	Size                      *int
-	historyTable              *p9.TextTable
+	// walletLocked              *uberatomic.Bool
+	walletToLock   time.Time
+	walletLockTime int
+	Size           *int
+	historyTable   *p9.TextTable
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -94,7 +93,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
 	wg.sidebarButtons = make([]*p9.Clickable, 12)
-	wg.walletLocked.Store(true)
+	// wg.walletLocked.Store(true)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
@@ -311,7 +310,7 @@ func (wg *WalletGUI) Run() (err error) {
 						*wg.noWallet,
 						wg.CreateWalletPage,
 						p9.If(
-							wg.walletLocked.Load(),
+							!wg.wallet.Running(),
 							wg.unlockPage.Fn(),
 							wg.App.Fn(),
 						),
@@ -339,6 +338,8 @@ out:
 		case <-wg.invalidate:
 			Trace("invalidating render queue")
 			wg.w["main"].Window.Invalidate()
+		case <-wg.cx.KillAll:
+			close(wg.quit)
 		case <-wg.quit:
 			break out
 		}
@@ -356,7 +357,7 @@ func (wg *WalletGUI) gracefulShutdown() {
 		wg.stopWallet()
 		wg.wallet.Shutdown()
 		wg.unlockPassword.Wipe()
-		wg.walletLocked.Store(true)
+		// wg.walletLocked.Store(true)
 	}
 	if wg.node.Running() {
 		wg.stopNode()

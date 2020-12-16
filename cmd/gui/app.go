@@ -225,7 +225,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				"lock", 4, &icons.ActionLockOpen, func(name string) {
 					// wg.unlockPage.ActivePage(name)
 					wg.unlockPassword.Wipe()
-					wg.walletLocked.Store(true)
+					// wg.walletLocked.Store(true)
 					wg.wallet.Stop()
 				}, a, "",
 			),
@@ -528,7 +528,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
-					if wg.walletLocked.Load() {
+					if !wg.wallet.Running() {
 						return l.Dimensions{}
 					}
 					// background := wg.App.StatusBarBackgroundGet()
@@ -621,7 +621,7 @@ func (wg *WalletGUI) stopNode() {
 	if wg.wallet.Running() {
 		wg.stopWallet()
 		wg.unlockPassword.Wipe()
-		wg.walletLocked.Store(true)
+		// wg.walletLocked.Store(true)
 	}
 	if wg.node.Running() {
 		wg.node.Stop()
@@ -675,7 +675,7 @@ func (wg *WalletGUI) startWallet() {
 	if !wg.wallet.Running() {
 		wg.wallet.Start()
 		wg.unlockPassword.Wipe()
-		wg.walletLocked.Store(false)
+		// wg.walletLocked.Store(false)
 	}
 	Debug("startWallet")
 }
@@ -684,7 +684,7 @@ func (wg *WalletGUI) stopWallet() {
 	if wg.wallet.Running() {
 		wg.wallet.Stop()
 		// wg.unlockPassword.Wipe()
-		wg.walletLocked.Store(true)
+		// wg.walletLocked.Store(true)
 	}
 	wg.unlockPassword.Wipe()
 	Debug("stopWallet")

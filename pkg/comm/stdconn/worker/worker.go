@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"syscall"
-
+	
 	"github.com/p9c/pod/pkg/comm/stdconn"
 )
 
@@ -27,9 +27,9 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 	w = &Worker{
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
-		Quit: quit,
+		Quit: make(chan struct{}),
 	}
-	// w.cmd.Stderr = os.Stderr
+	w.cmd.Stderr = os.Stderr
 	var cmdOut io.ReadCloser
 	if cmdOut, err = w.cmd.StdoutPipe(); Check(err) {
 		return
@@ -46,9 +46,11 @@ func Spawn(quit chan struct{}, args ...string) (w *Worker, err error) {
 	out:
 		for {
 			select {
+			case <-quit:
+				close(w.Quit)
 			case <-w.Quit:
 				// Debug("stopping", Check(w.Stop()))
-				Debug("interrupting", Check(w.Interrupt()))
+				// Debug("interrupting", Check(w.Interrupt()))
 				// Debug("killing", Check(w.Kill()))
 				// close(w.StdConn.Quit)
 				break out

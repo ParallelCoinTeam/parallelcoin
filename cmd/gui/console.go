@@ -5,13 +5,13 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
+	
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
-
+	
 	"github.com/atotto/clipboard"
-
+	
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/ctl"
 )
@@ -46,18 +46,21 @@ func (wg *WalletGUI) ConsolePage() *Console {
 	c.submitFunc = func(txt string) {
 		go func() {
 			Debug("submit", txt)
-			c.output = append(c.output,
+			c.output = append(
+				c.output,
 				func(gtx l.Context) l.Dimensions {
 					return wg.th.VFlex().
 						Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 						Rigid(
 							wg.th.Flex().
-								Flexed(1,
+								Flexed(
+									1,
 									wg.th.Body1(txt).Color("DocText").Font("bariol bold").Fn,
 								).
 								Fn,
 						).Fn(gtx)
-				})
+				},
+			)
 			c.editor.SetText("")
 			split := strings.Split(txt, " ")
 			method, args := split[0], split[1:]
@@ -115,17 +118,20 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					const maxPerWidget = 6
 					for i := 0; i < len(splitResult)-maxPerWidget; i += maxPerWidget {
 						sri := strings.Join(splitResult[i:i+maxPerWidget], "\n")
-						c.output = append(c.output,
+						c.output = append(
+							c.output,
 							func(gtx l.Context) l.Dimensions {
 								return wg.th.Flex().
-									Flexed(1,
+									Flexed(
+										1,
 										wg.th.Caption(sri).
 											Color("DocText").
 											Font("bariol regular").
 											MaxLines(maxPerWidget).Fn,
 									).
 									Fn(gtx)
-							})
+							},
+						)
 					}
 					return
 				} else {
@@ -150,30 +156,44 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					}
 					for i := range splitResult {
 						sri := splitResult[i]
-						c.output = append(c.output,
+						c.output = append(
+							c.output,
 							func(gtx l.Context) l.Dimensions {
 								return c.th.Flex().AlignStart().
-									Rigid(wg.th.Body1(sri).
-										Color(outputColor).
-										Font("go regular").MaxLines(4).
-										Fn,
+									Rigid(
+										wg.th.Body1(sri).
+											Color(outputColor).
+											Font("go regular").MaxLines(4).
+											Fn,
 									).
 									Fn(gtx)
-							})
+							},
+						)
 					}
 					return
 				}
 			} else {
 				Debug("method", method, "args", args)
 				if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
+					var errR string
 					if result, err = ctl.Call(wg.cx, true, method, params...); Check(err) {
-						c.output = append(c.output, c.th.Flex().AlignStart().
-							Rigid(wg.th.Body1(err.Error()).Color("Danger").Fn).Fn)
+						if err != nil {
+							errR = err.Error()
+						}
+						c.output = append(
+							c.output, c.th.Flex().AlignStart().
+								Rigid(wg.th.Body1(errR).Color("Danger").Fn).Fn,
+						)
 						return
 					}
-					c.output = append(c.output, c.th.Flex().AlignStart().
-						Rigid(wg.th.Body1(err.Error()).Color("Danger").Fn,
-						).Fn,
+					if err != nil {
+						errR = err.Error()
+					}
+					c.output = append(
+						c.output, c.th.Flex().AlignStart().
+							Rigid(
+								wg.th.Body1(errR).Color("Danger").Fn,
+							).Fn,
 					)
 				}
 				c.output = append(c.output, wg.console.JSONWidget("DocText", result)...)
@@ -227,11 +247,13 @@ func (wg *WalletGUI) ConsolePage() *Console {
 		).
 		Background("Transparent").
 		Inset(0.25)
-	c.output = append(c.output, func(gtx l.Context) l.Dimensions {
-		return c.th.Flex().AlignStart().Rigid(c.th.H6("Welcome to the Parallelcoin RPC console").Color("DocText").Fn).Fn(gtx)
-	}, func(gtx l.Context) l.Dimensions {
-		return c.th.Flex().AlignStart().Rigid(c.th.Caption("Type 'help' to get available commands and 'clear' or 'cls' to clear the screen").Color("DocText").Fn).Fn(gtx)
-	})
+	c.output = append(
+		c.output, func(gtx l.Context) l.Dimensions {
+			return c.th.Flex().AlignStart().Rigid(c.th.H6("Welcome to the Parallelcoin RPC console").Color("DocText").Fn).Fn(gtx)
+		}, func(gtx l.Context) l.Dimensions {
+			return c.th.Flex().AlignStart().Rigid(c.th.Caption("Type 'help' to get available commands and 'clear' or 'cls' to clear the screen").Color("DocText").Fn).Fn(gtx)
+		},
+	)
 	return c
 }
 
@@ -244,10 +266,13 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 		}
 	}
 	fn := c.th.VFlex().
-		Flexed(0.1,
-			c.th.Fill("PanelBg",
+		Flexed(
+			0.1,
+			c.th.Fill(
+				"PanelBg",
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Inset(0.25,
+					return c.th.Inset(
+						0.25,
 						c.outputList.
 							ScrollToEnd().
 							End().
@@ -264,10 +289,13 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 			).Fn,
 		).
 		Rigid(
-			c.th.Fill("DocBg",
-				c.th.Inset(0.25,
+			c.th.Fill(
+				"DocBg",
+				c.th.Inset(
+					0.25,
 					c.th.Flex().
-						Flexed(1,
+						Flexed(
+							1,
 							c.th.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
 								Color("DocText").
 								Fn,

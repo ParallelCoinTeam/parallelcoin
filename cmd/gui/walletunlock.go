@@ -60,7 +60,6 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 						if err = wg.writeWalletCookie(); Check(err) {
 						}
 						wg.startWallet()
-						wg.walletLocked.Store(false)
 						*wg.cx.Config.NodeOff = false
 						*wg.cx.Config.WalletOff = false
 						save.Pod(wg.cx.Config)

@@ -53,8 +53,8 @@ func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool), appName
 					Debug("received kill signal from pipe, shutting down", appName)
 					// time.Sleep(time.Second*5)
 					// time.Sleep(time.Second * 3)
-					// close(logQuit)
-					// close(quit)
+					close(logQuit)
+					close(quit)
 					interrupt.Request()
 					// os.Exit(0)
 					// break

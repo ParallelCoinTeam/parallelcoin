@@ -10,11 +10,11 @@ import (
 	"runtime/pprof"
 	"strings"
 	"time"
-
+	
 	"github.com/kofoworola/godate"
-
+	
 	l "gioui.org/layout"
-
+	
 	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -22,6 +22,10 @@ import (
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
 )
+
+func (wg *WalletGUI) WalletAndClientRunning() bool {
+	return wg.wallet.Running() && wg.WalletClient != nil && !wg.WalletClient.Disconnected()
+}
 
 func (wg *WalletGUI) Tickers() {
 	first := true
@@ -35,51 +39,38 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					// Debug("preconnect loop")
+					Debug("preconnect loop")
 					// update goroutines data
 					wg.goRoutines()
 					// close clients if they are open
 					wg.ChainMutex.Lock()
 					if wg.ChainClient != nil {
+						wg.ChainClient.Disconnect()
 						wg.ChainClient.Shutdown()
-						// wg.ChainClient.Disconnect()
-						// if wg.ChainClient.Disconnected() {
 						wg.ChainClient = nil
-						// }
 					}
 					wg.ChainMutex.Unlock()
 					wg.WalletMutex.Lock()
 					if wg.WalletClient != nil {
+						wg.WalletClient.Disconnect()
 						wg.WalletClient.Shutdown()
-						// wg.WalletClient.Disconnect()
-						// if wg.WalletClient.Disconnected() {
 						wg.WalletClient = nil
-						// }
 					}
 					wg.WalletMutex.Unlock()
-					// the remaining actions require a running shell
 					if !wg.node.Running() {
 						break
 					}
-					wg.cx.Config.Lock()
 					if !*wg.cx.Config.NodeOff {
-						wg.cx.Config.Unlock()
 						Debug("connecting to chain")
 						if err = wg.chainClient(); Check(err) {
 							break
 						}
-					} else {
-						wg.cx.Config.Unlock()
 					}
-					wg.cx.Config.Lock()
-					if !*wg.cx.Config.WalletOff && !wg.walletLocked.Load() {
-						wg.cx.Config.Unlock()
+					if wg.wallet.Running() {
 						Debug("connecting to wallet")
 						if err = wg.walletClient(); Check(err) {
 							break
 						}
-					} else {
-						wg.cx.Config.Unlock()
 					}
 					// if we got to here both are connected
 					break preconnect
@@ -91,21 +82,18 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					// Debug("connected loop")
+					Debug("connected loop")
 					wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
 					if !wg.node.Running() {
-						Debug("breaking out not running")
+						Debug("breaking out node not running")
 						break out
 					}
-					wg.ChainMutex.Lock()
 					if wg.ChainClient == nil {
-						wg.ChainMutex.Unlock()
 						Debug("breaking out chainclient is nil")
 						break out
 					}
-					wg.ChainMutex.Unlock()
-					// if  wg.WalletClient == nil && wg.running{
+					// if  wg.WalletClient == nil {
 					// 	Debug("breaking out walletclient is nil")
 					// 	break out
 					// }
@@ -126,26 +114,34 @@ func (wg *WalletGUI) Tickers() {
 					}
 					wg.State.SetBestBlockHeight(int(height))
 					wg.State.SetBestBlockHash(h)
-					// Debug(!wg.walletLocked.Load(), wg.WalletClient != nil, !wg.WalletClient.Disconnected())
-					if !wg.walletLocked.Load() && wg.WalletClient != nil && !wg.WalletClient.Disconnected() {
-						// Debug("wallet is unlocked")
+					Debug("wallet running:", wg.wallet.Running())
+					Debug("wallet client running:", wg.WalletClient != nil)
+					if wg.wallet.Running() && wg.WalletClient == nil {
+						Debug("connecting to wallet")
+						if err = wg.walletClient(); Check(err) {
+							break
+						}
+					}
+					if wg.WalletAndClientRunning() {
+						Debug(!wg.WalletClient.Disconnected())
+						Debug("wallet is unlocked")
 						var unconfirmed util.Amount
 						if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
-							// break out
+							break out
 						}
 						wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
 						var confirmed util.Amount
 						if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
-							// break out
+							break out
 						}
 						wg.State.SetBalance(confirmed.ToDUO())
-						// Debug("updating recent transactions")
+						Debug("updating recent transactions")
 						var atr []btcjson.ListTransactionsResult
 						// TODO: for some reason this function returns half as many as requested
 						if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<24, 0); Check(err) {
 						}
 						wg.State.SetAllTxs(atr)
-						// generate the widgets for the updated transactions
+						Debug("generate the widgets for the updated transactions")
 						out := wg.State.FilteredTxs
 						if wg.historyTable.Header == nil {
 							// create the header
@@ -188,29 +184,34 @@ func (wg *WalletGUI) Tickers() {
 						for x := range o {
 							i := x
 							oi := out[i]
-							bd = append(bd, p9.TextTableRow{
-								fmt.Sprintf("%6.8f", oi.Amount),
-								oi.Category,
-								oi.Address,
-								fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
-									godate.Create(time.Unix(oi.Time, 0)))),
-								fmt.Sprintf("%v", oi.Confirmations),
-								fmt.Sprintf("%v", *oi.BlockIndex),
-								// wg.State.AllTxs[i].TxID,
-								// wg.State.AllTxs[i].Comment,
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
-								// wg.State.AllTxs[i].BlockHash,
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
-								// wg.State.AllTxs[i].Account,
-								// wg.State.AllTxs[i].OtherAccount,
-								// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
-							})
+							bd = append(
+								bd, p9.TextTableRow{
+									fmt.Sprintf("%6.8f", oi.Amount),
+									oi.Category,
+									oi.Address,
+									fmt.Sprintf(
+										"%v", godate.Now(time.Local).DifferenceForHumans(
+											godate.Create(time.Unix(oi.Time, 0)),
+										),
+									),
+									fmt.Sprintf("%v", oi.Confirmations),
+									fmt.Sprintf("%v", *oi.BlockIndex),
+									// wg.State.AllTxs[i].TxID,
+									// wg.State.AllTxs[i].Comment,
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
+									// wg.State.AllTxs[i].BlockHash,
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
+									// wg.State.AllTxs[i].Account,
+									// wg.State.AllTxs[i].OtherAccount,
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
+								},
+							)
 							// }
 						}
 						wg.historyTable.Body = bd // wg.historyTable.Body[:0]
@@ -246,7 +247,7 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 	// update best block height
 	wg.ChainMutex.Lock()
 	defer wg.ChainMutex.Unlock()
-	if wg.ChainClient == nil {
+	if wg.ChainClient == nil || wg.ChainClient.Disconnected() {
 		return
 	}
 	wg.State.SetBestBlockHeight(int(height))
@@ -255,7 +256,7 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 
 func (wg *WalletGUI) processWalletBlockNotification() {
 	// Debug("processWalletBlockNotification", wg.WalletClient != nil)
-	if wg.WalletClient == nil || wg.walletLocked.Load() {
+	if !wg.WalletAndClientRunning() {
 		return
 	}
 	// check account balance
@@ -277,7 +278,7 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 	}
 	// Debug(len(atr))
 	wg.State.SetAllTxs(atr)
-
+	
 }
 
 func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
@@ -300,7 +301,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			wg.processChainBlockNotification(hash, height, t)
 			wg.processWalletBlockNotification()
 			// pop up new block toast
-
+			
 			wg.invalidate <- struct{}{}
 		},
 		// OnFilteredBlockConnected:    func(height int32, header *wire.BlockHeader, txs []*util.Tx) {},
@@ -339,22 +340,19 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		// },
 		// OnUnknownNotification: func(method string, params []json.RawMessage) {},
 	}
-
+	
 }
 
 func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
-	if wg.walletLocked.Load() {
+	if !wg.wallet.Running() || wg.WalletClient == nil || wg.WalletClient.Disconnected() {
 		return nil
 	}
 	return &rpcclient.NotificationHandlers{
 		OnClientConnected: func() {
 			go func() {
-				wg.WalletMutex.Lock()
-				if wg.WalletClient == nil || wg.walletLocked.Load() {
-					wg.WalletMutex.Unlock()
+				if !wg.WalletAndClientRunning() {
 					return
 				}
-				wg.WalletMutex.Unlock()
 				Debug("WALLET CLIENT CONNECTED!")
 				// // time.Sleep(time.Second * 3)
 				var unconfirmed util.Amount
@@ -398,7 +396,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			// update best block height
 			wg.processWalletBlockNotification()
 			// stop showing syncing indicator
-
+			
 			wg.invalidate <- struct{}{}
 		},
 		OnRescanProgress: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
@@ -406,7 +404,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			// update best block height
 			wg.processWalletBlockNotification()
 			// set to show syncing indicator
-
+			
 			wg.invalidate <- struct{}{}
 		},
 		// OnTxAccepted:        func(hash *chainhash.Hash, amount util.Amount) {},
@@ -420,33 +418,37 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 		OnWalletLockState: func(locked bool) {
 			Debug("OnWalletLockState", locked)
 			// switch interface to unlock page
-			wg.walletLocked.Store(true)
+			wg.stopWallet()
 			// TODO: lock when idle... how to get trigger for idleness in UI?
 			wg.invalidate <- struct{}{}
 		},
 		// OnUnknownNotification: func(method string, params []json.RawMessage) {},
 	}
-
+	
 }
 
 func (wg *WalletGUI) chainClient() (err error) {
+	Debug("starting up chain client")
 	if *wg.cx.Config.NodeOff {
+		Warn("node is disabled")
 		return nil
 	}
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Debug(*wg.cx.Config.RPCConnect)
 	wg.ChainMutex.Lock()
 	defer wg.ChainMutex.Unlock()
-	if wg.ChainClient, err = rpcclient.New(&rpcclient.ConnConfig{
-		Host:                 *wg.cx.Config.RPCConnect,
-		Endpoint:             "ws",
-		User:                 *wg.cx.Config.Username,
-		Pass:                 *wg.cx.Config.Password,
-		TLS:                  *wg.cx.Config.TLS,
-		Certificates:         certs,
-		DisableAutoReconnect: false,
-		DisableConnectOnNew:  false,
-	}, wg.ChainNotifications()); Check(err) {
+	if wg.ChainClient, err = rpcclient.New(
+		&rpcclient.ConnConfig{
+			Host:                 *wg.cx.Config.RPCConnect,
+			Endpoint:             "ws",
+			User:                 *wg.cx.Config.Username,
+			Pass:                 *wg.cx.Config.Password,
+			TLS:                  *wg.cx.Config.TLS,
+			Certificates:         certs,
+			DisableAutoReconnect: false,
+			DisableConnectOnNew:  false,
+		}, wg.ChainNotifications(),
+	); Check(err) {
 		return
 	}
 	if err = wg.ChainClient.NotifyBlocks(); !Check(err) {
@@ -458,23 +460,27 @@ func (wg *WalletGUI) chainClient() (err error) {
 }
 
 func (wg *WalletGUI) walletClient() (err error) {
+	Debug("connecting to wallet")
 	if *wg.cx.Config.WalletOff {
+		Warn("wallet is disabled")
 		return nil
 	}
 	// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Info("config.tls", *wg.cx.Config.TLS)
 	wg.WalletMutex.Lock()
-	if wg.WalletClient, err = rpcclient.New(&rpcclient.ConnConfig{
-		Host:                 *wg.cx.Config.WalletServer,
-		Endpoint:             "ws",
-		User:                 *wg.cx.Config.Username,
-		Pass:                 *wg.cx.Config.Password,
-		TLS:                  *wg.cx.Config.TLS,
-		Certificates:         certs,
-		DisableAutoReconnect: false,
-		DisableConnectOnNew:  false,
-	}, wg.WalletNotifications()); Check(err) {
+	if wg.WalletClient, err = rpcclient.New(
+		&rpcclient.ConnConfig{
+			Host:                 *wg.cx.Config.WalletServer,
+			Endpoint:             "ws",
+			User:                 *wg.cx.Config.Username,
+			Pass:                 *wg.cx.Config.Password,
+			TLS:                  *wg.cx.Config.TLS,
+			Certificates:         certs,
+			DisableAutoReconnect: false,
+			DisableConnectOnNew:  false,
+		}, wg.WalletNotifications(),
+	); Check(err) {
 		wg.WalletMutex.Unlock()
 		return
 	}
@@ -484,6 +490,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 		// wg.WalletNotifications()
 		wg.invalidate <- struct{}{}
 	}
+	Debug("wallet connected")
 	return
 }
 
@@ -506,35 +513,40 @@ func (wg *WalletGUI) goRoutines() {
 				text = lines[i+2]
 				text = strings.TrimSpace(strings.Split(text, " ")[0])
 				// outString += text + "\n"
-				out = append(out, func(gtx l.Context) l.Dimensions {
-					return wg.th.ButtonLayout(clickables[i]).Embed(
-						wg.th.Inset(0.25,
-							wg.th.Caption(text).
-								Color("DocText").Fn,
-						).Fn,
-					).Background("Transparent").SetClick(func() {
-						go func() {
-							out := make([]string, 2)
-							split := strings.Split(text, ":")
-							if len(split) > 2 {
-								out[0] = strings.Join(split[:len(split)-1], ":")
-								out[1] = split[len(split)-1]
-							} else {
-								out[0] = split[0]
-								out[1] = split[1]
-							}
-							Debug("path", out[0], "line", out[1])
-							goland := "goland64.exe"
-							if runtime.GOOS != "windows" {
-								goland = "goland"
-							}
-							launch := exec.Command(goland, "--line", out[1], out[0])
-							if err = launch.Start(); Check(err) {
-							}
-						}()
-					}).
-						Fn(gtx)
-				})
+				out = append(
+					out, func(gtx l.Context) l.Dimensions {
+						return wg.th.ButtonLayout(clickables[i]).Embed(
+							wg.th.Inset(
+								0.25,
+								wg.th.Caption(text).
+									Color("DocText").Fn,
+							).Fn,
+						).Background("Transparent").SetClick(
+							func() {
+								go func() {
+									out := make([]string, 2)
+									split := strings.Split(text, ":")
+									if len(split) > 2 {
+										out[0] = strings.Join(split[:len(split)-1], ":")
+										out[1] = split[len(split)-1]
+									} else {
+										out[0] = split[0]
+										out[1] = split[1]
+									}
+									Debug("path", out[0], "line", out[1])
+									goland := "goland64.exe"
+									if runtime.GOOS != "windows" {
+										goland = "goland"
+									}
+									launch := exec.Command(goland, "--line", out[1], out[0])
+									if err = launch.Start(); Check(err) {
+									}
+								}()
+							},
+						).
+							Fn(gtx)
+					},
+				)
 			}
 		}
 		// Debug(outString)
