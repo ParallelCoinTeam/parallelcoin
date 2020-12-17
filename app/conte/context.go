@@ -4,7 +4,6 @@ package conte
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/quit"
 	"runtime"
 	"sync"
@@ -138,12 +137,12 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		WalletChan:       make(chan *wallet.Wallet),
 		NodeChan:         make(chan *chainrpc.Server),
 	}
-	interrupt.AddHandler(func(){
-	// 	chainClientReady.Q()
-	// 	cx.PrintWaitChangers()
-		cx.ChainClientReady.Q()
-		cx.KillAll.Q()
-	})
+	// interrupt.AddHandler(func(){
+	// // 	chainClientReady.Q()
+	// // 	cx.PrintWaitChangers()
+	// 	cx.ChainClientReady.Q()
+	// 	cx.KillAll.Q()
+	// })
 	return cx
 }
 

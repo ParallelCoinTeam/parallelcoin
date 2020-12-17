@@ -1,6 +1,7 @@
 package main
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"log"
 
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
@@ -16,7 +17,7 @@ func main() {
 		TLS:          false, // Bitcoin core does not provide TLS by default
 	}
 	// Notice the notification parameter is nil since notifications are not supported in HTTP POST mode.
-	client, err := rpcclient.New(connCfg, nil)
+	client, err := rpcclient.New(connCfg, nil, qu.T())
 	if err != nil {
 		Fatal(err)
 	}

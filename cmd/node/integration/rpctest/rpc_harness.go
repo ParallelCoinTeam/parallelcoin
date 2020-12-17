@@ -2,6 +2,7 @@ package rpctest
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io/ioutil"
 	"net"
 	"os"
@@ -246,7 +247,7 @@ func (h *Harness) connectRPCClient() error {
 	var err error
 	rpcConf := h.node.config.rpcConnConfig()
 	for i := 0; i < h.maxConnRetries; i++ {
-		if client, err = rpcclient.New(&rpcConf, h.handlers); err != nil {
+		if client, err = rpcclient.New(&rpcConf, h.handlers, qu.T()); err != nil {
 			time.Sleep(time.Duration(i) * 50 * time.Millisecond)
 			continue
 		}

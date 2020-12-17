@@ -38,8 +38,14 @@ type RPCClient struct {
 // remote RPC certificate must be provided in the certs slice. The connection is not established immediately, but must
 // be done using the Start method. If the remote server does not operate on the same bitcoin network as described by the
 // passed chain parameters, the connection will be disconnected.
-func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
-	certs []byte, tls bool, reconnectAttempts int) (*RPCClient, error) {
+func NewRPCClient(
+	chainParams *netparams.Params,
+	connect, user, pass string,
+	certs []byte,
+	tls bool,
+	reconnectAttempts int,
+	quit qu.C,
+) (*RPCClient, error) {
 	Warn("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
@@ -60,7 +66,7 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
 		enqueueNotification: make(chan interface{}),
 		dequeueNotification: make(chan interface{}),
 		currentBlock:        make(chan *wm.BlockStamp),
-		quit:                qu.T(),
+		quit:                quit,
 	}
 	ntfnCallbacks := &rpcclient.NotificationHandlers{
 		OnClientConnected:   client.onClientConnect,
@@ -72,7 +78,7 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
 		OnRescanProgress:    client.onRescanProgress,
 	}
 	// Warn("*actually* creating rpc client")
-	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks)
+	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks, client.quit)
 	if err != nil {
 		Error(err)
 		return nil, err
@@ -401,5 +407,5 @@ out:
 func (c *RPCClient) POSTClient() (*rpcclient.Client, error) {
 	configCopy := *c.connConfig
 	configCopy.HTTPPostMode = true
-	return rpcclient.New(&configCopy, nil)
+	return rpcclient.New(&configCopy, nil, qu.T())
 }

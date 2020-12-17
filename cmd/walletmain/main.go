@@ -2,6 +2,7 @@ package walletmain
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io/ioutil"
 	// This enables pprof
 	// _ "net/http/pprof"
@@ -200,7 +201,7 @@ func rpcClientConnectLoop(
 		// 	}
 		// } else {
 		var cc *chain.RPCClient
-		cc, err = StartChainRPC(cx.Config, cx.ActiveNet, certs)
+		cc, err = StartChainRPC(cx.Config, cx.ActiveNet, certs, cx.KillAll)
 		if err != nil {
 			Error(
 				"unable to open connection to consensus RPC server:", err,
@@ -256,14 +257,20 @@ func rpcClientConnectLoop(
 // StartChainRPC opens a RPC client connection to a pod server for blockchain services. This function uses the RPC
 // options from the global config and there is no recovery in case the server is not available or if there is an
 // authentication error. Instead, all requests to the client will simply error.
-func StartChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, error) {
+func StartChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte, quit qu.C) (*chain.RPCClient, error) {
 	Tracef(
 		"attempting RPC client connection to %v, TLS: %s",
 		*config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
 	rpcC, err := chain.NewRPCClient(
-		activeNet, *config.RPCConnect,
-		*config.Username, *config.Password, certs, *config.TLS, 0,
+		activeNet,
+		*config.RPCConnect,
+		*config.Username,
+		*config.Password,
+		certs,
+		*config.TLS,
+		0,
+		quit,
 	)
 	if err != nil {
 		Error(err)

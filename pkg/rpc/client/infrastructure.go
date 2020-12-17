@@ -1055,7 +1055,7 @@ func dial(config *ConnConfig) (*websocket.Conn, error) {
 //
 // The notification handlers parameter may be nil if you are not interested in receiving notifications and will be
 // ignored if the configuration is set to run in HTTP POST mode.
-func New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error) {
+func New(config *ConnConfig, ntfnHandlers *NotificationHandlers, quit qu.C) (*Client, error) {
 	// Either open a websocket connection or create an HTTP client depending on the HTTP POST mode. Also, set the
 	// notification handlers to nil when running in HTTP POST mode.
 	var wsConn *websocket.Conn
@@ -1094,7 +1094,7 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error
 		sendPostChan:    make(chan *sendPostDetails, sendPostBufferSize),
 		connEstablished: connEstablished,
 		disconnect:      qu.T(),
-		shutdown:        qu.T(),
+		shutdown:        quit,
 	}
 	if start {
 		Trace("established connection to RPC server", config.Host)

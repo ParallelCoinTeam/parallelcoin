@@ -4,16 +4,18 @@ import (
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 	qu "github.com/p9c/pod/pkg/util/quit"
-	"strings"
+	"os"
 	"time"
 )
 
 func main() {
 	// var err error
 	logi.L.SetLevel("trace", false, "pod")
-	command := "pod -D test0 -n testnet -l trace --solo --lan --pipelog node"
+	// command := "pod -D test0 -n testnet -l trace --solo --lan --pipelog node"
 	quit := qu.T()
-	w := consume.Log(quit, consume.SimpleLog("node"), consume.FilterNone, strings.Split(command, " ")...)
+	// splitted := strings.Split(command, " ")
+	splitted := os.Args[1:]
+	w := consume.Log(quit, consume.SimpleLog(splitted[len(splitted)-1]), consume.FilterNone, splitted...)
 	consume.Start(w)
 	time.Sleep(time.Second * 5)
 	consume.Kill(w)

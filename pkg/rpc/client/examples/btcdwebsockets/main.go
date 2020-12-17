@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -40,7 +41,7 @@ func main() {
 		Pass:         "yourrpcpass",
 		Certificates: certs,
 	}
-	client, err := rpcclient.New(connCfg, &ntfnHandlers)
+	client, err := rpcclient.New(connCfg, &ntfnHandlers, qu.T())
 	if err != nil {
 		Fatal(err)
 	}

@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -212,14 +213,15 @@ func sweep() error {
 		Error(err)
 		return errContext(err, "failed to read RPC certificate")
 	}
-	rpcClient, err := rpcclient.New(&rpcclient.ConnConfig{
-		Host:         opts.RPCConnect,
-		User:         opts.RPCUsername,
-		Pass:         rpcPassword,
-		Certificates: rpcCertificate,
-		HTTPPostMode: true,
-	},
-		nil)
+	rpcClient, err := rpcclient.New(
+		&rpcclient.ConnConfig{
+			Host:         opts.RPCConnect,
+			User:         opts.RPCUsername,
+			Pass:         rpcPassword,
+			Certificates: rpcCertificate,
+			HTTPPostMode: true,
+		}, nil, qu.T(),
+	)
 	if err != nil {
 		Error(err)
 		return errContext(err, "failed to create RPC client")
