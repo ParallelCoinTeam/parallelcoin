@@ -39,7 +39,7 @@ func Main(cx *conte.Xt) (err error) {
 	// server RPC client created below after each is created.
 	Debug("starting RPC servers")
 	var legacyServer *legacy.Server
-	if legacyServer, err = startRPCServers(cx.Config, cx.StateCfg, cx.ActiveNet, loader); Check(err) {
+	if legacyServer, err = startRPCServers(cx, loader); Check(err) {
 		Error("unable to create RPC servers:", err)
 		return
 	}

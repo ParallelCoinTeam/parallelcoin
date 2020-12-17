@@ -9,6 +9,10 @@ import (
 )
 
 func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Config) {
+	if w == nil {
+		Debug("trying to refill without a wallet")
+		return
+	}
 	// we make the list up to 1000 so the user does not have to attend to this too often
 	miningAddressLen := len(*cfg.MiningAddrs)
 	toMake := 99 - miningAddressLen

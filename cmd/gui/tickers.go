@@ -46,14 +46,16 @@ func (wg *WalletGUI) Tickers() {
 					wg.ChainMutex.Lock()
 					if wg.ChainClient != nil {
 						wg.ChainClient.Disconnect()
-						wg.ChainClient.Shutdown()
+						// if wg.ChainClient.Disconnected() {
+						// 	wg.ChainClient.Shutdown()
 						wg.ChainClient = nil
+						// }
 					}
 					wg.ChainMutex.Unlock()
 					wg.WalletMutex.Lock()
 					if wg.WalletClient != nil {
 						wg.WalletClient.Disconnect()
-						wg.WalletClient.Shutdown()
+						// wg.WalletClient.Shutdown()
 						wg.WalletClient = nil
 					}
 					wg.WalletMutex.Unlock()

@@ -67,13 +67,13 @@ func New(
 				break
 			case <-r.quit:
 				Debug("quitting on run unit quit channel", args, r.running.Load())
-				if !r.running.Load() {
-					Debug("wasn't running", args)
-				} else {
-					consume.Kill(r.worker)
-					r.running.Store(false)
-					stop()
-				}
+				// if !r.running.Load() {
+				// 	Debug("wasn't running", args)
+				// } else {
+				consume.Kill(r.worker)
+				r.running.Store(false)
+				stop()
+				// }
 				break out
 			}
 		}

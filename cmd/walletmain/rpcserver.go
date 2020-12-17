@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/app/conte"
 	"io/ioutil"
 	"net"
 	"os"
@@ -11,9 +12,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
-	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
@@ -100,7 +99,8 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 			Error(err)
 			// Shouldn't happen due to already being normalized.
 			Errorf(
-				"`%s` is not a normalized listener address", addr)
+				"`%s` is not a normalized listener address", addr,
+			)
 			continue
 		}
 		// Empty host or host of * on plan9 is both IPv4 and IPv6.
@@ -163,8 +163,10 @@ func OpenRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 	keyExists := !os.IsNotExist(e)
 	switch {
 	case *config.OneTimeTLSKey && keyExists:
-		err := fmt.Errorf("one time TLS keys are enabled, "+
-			"but TLS key `%s` already exists", *config.RPCKey)
+		err := fmt.Errorf(
+			"one time TLS keys are enabled, "+
+				"but TLS key `%s` already exists", *config.RPCKey,
+		)
 		return tls.Certificate{}, err
 	case *config.OneTimeTLSKey:
 		return GenerateRPCKeyPair(config, false)
@@ -174,8 +176,7 @@ func OpenRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 		return tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)
 	}
 }
-func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netparams.Params,
-	walletLoader *wallet.Loader) (*legacy.Server, error) {
+func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server, error) {
 	Trace("startRPCServers")
 	var (
 		legacyServer *legacy.Server
@@ -183,10 +184,10 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 		keyPair      tls.Certificate
 		err          error
 	)
-	if !*config.TLS {
+	if !*cx.Config.TLS {
 		Info("server TLS is disabled - only legacy RPC may be used")
 	} else {
-		keyPair, err = OpenRPCKeyPair(config)
+		keyPair, err = OpenRPCKeyPair(cx.Config)
 		if err != nil {
 			Error(err)
 			return nil, err
@@ -196,27 +197,27 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 			Certificates:       []tls.Certificate{keyPair},
 			MinVersion:         tls.VersionTLS12,
 			NextProtos:         []string{"h2"}, // HTTP/2 over TLS
-			InsecureSkipVerify: *config.TLSSkipVerify,
+			InsecureSkipVerify: *cx.Config.TLSSkipVerify,
 		}
 		walletListen = func(net string, laddr string) (net.Listener, error) {
 			return tls.Listen(net, laddr, tlsConfig)
 		}
 	}
-	if *config.Username == "" || *config.Password == "" {
+	if *cx.Config.Username == "" || *cx.Config.Password == "" {
 		Info("legacy RPC server disabled (requires username and password)")
-	} else if len(*config.WalletRPCListeners) != 0 {
-		listeners := makeListeners(*config.WalletRPCListeners, walletListen)
+	} else if len(*cx.Config.WalletRPCListeners) != 0 {
+		listeners := makeListeners(*cx.Config.WalletRPCListeners, walletListen)
 		if len(listeners) == 0 {
 			err := errors.New("failed to create listeners for legacy RPC server")
 			return nil, err
 		}
 		opts := legacy.Options{
-			Username:            *config.Username,
-			Password:            *config.Password,
-			MaxPOSTClients:      int64(*config.WalletRPCMaxClients),
-			MaxWebsocketClients: int64(*config.WalletRPCMaxWebsockets),
+			Username:            *cx.Config.Username,
+			Password:            *cx.Config.Password,
+			MaxPOSTClients:      int64(*cx.Config.WalletRPCMaxClients),
+			MaxWebsocketClients: int64(*cx.Config.WalletRPCMaxWebsockets),
 		}
-		legacyServer = legacy.NewServer(&opts, walletLoader, listeners)
+		legacyServer = legacy.NewServer(&opts, walletLoader, listeners, nil)
 	}
 	// Error when no legacy RPC servers can be started.
 	if legacyServer == nil {

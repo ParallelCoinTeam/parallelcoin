@@ -27,17 +27,16 @@ import (
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	var size int
-	var noWallet bool
+	noWallet := true
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
 		invalidate: qu.T(),
-		quit:      cx.KillAll,
+		quit:       cx.KillAll,
 		// nodeQuit: qu.T(),
 		Size:     &size,
 		noWallet: &noWallet,
@@ -166,8 +165,8 @@ func (wg *WalletGUI) Run() (err error) {
 		"--pipelog", "node",
 	}
 	wg.node = rununit.New(
-		func() { wg.wg.Add(1) },
-		func() { wg.wg.Done() },
+		func() { Debug("running before") },
+		func() { Debug("running after") },
 		consume.SimpleLog("NODE"),
 		consume.FilterNone,
 		wg.quit,
@@ -179,8 +178,8 @@ func (wg *WalletGUI) Run() (err error) {
 		"--pipelog", "wallet",
 	}
 	wg.wallet = rununit.New(
-		func() { wg.wg.Add(1) },
-		func() { wg.wg.Done() },
+		func() { Debug("running before") },
+		func() { Debug("running after") },
 		consume.SimpleLog("WLLT"),
 		consume.FilterNone,
 		wg.quit,
@@ -188,8 +187,8 @@ func (wg *WalletGUI) Run() (err error) {
 	)
 	minerArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach"}
 	wg.miner = rununit.New(
-		func() { wg.wg.Add(1) },
-		func() { wg.wg.Done() },
+		func() { Debug("running before") },
+		func() { Debug("running after") },
 		consume.SimpleLog("MINE"),
 		consume.FilterNone,
 		wg.quit,
@@ -292,12 +291,9 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.Tickers()
 	wg.CreateSendAddressItem()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
-		*wg.noWallet = true
-		// wg.inputs["walletseed"] = wg.th.Input("", "wallet seed", "Primary", "DocText", 25, func(pass string) {})
 	} else {
-		if !*wg.cx.Config.NodeOff && !*wg.noWallet {
-			wg.startNode()
-		}
+		*wg.noWallet = false
+		wg.startNode()
 	}
 	if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0 {
 		wg.startMiner()
@@ -327,15 +323,15 @@ func (wg *WalletGUI) Run() (err error) {
 			); Check(err) {
 		}
 	}()
-	interrupt.AddHandler(
-		func() {
-			Debug("quitting wallet gui")
-			// consume.Kill(wg.Node)
-			// consume.Kill(wg.Miner)
-			wg.quit.Q()
-			// wg.gracefulShutdown()
-		},
-	)
+	// interrupt.AddHandler(
+	// 	func() {
+	// 		Debug("quitting wallet gui")
+	// 		// consume.Kill(wg.Node)
+	// 		// consume.Kill(wg.Miner)
+	// 		wg.quit.Q()
+	// 		// wg.gracefulShutdown()
+	// 	},
+	// )
 out:
 	for {
 		select {
@@ -354,27 +350,32 @@ out:
 func (wg *WalletGUI) gracefulShutdown() {
 	Debug("quitting wallet gui")
 	if wg.miner.Running() {
+		Debug("stopping miner")
 		wg.stopMiner()
 		wg.miner.Shutdown()
 	}
 	if wg.wallet.Running() {
+		Debug("stopping wallet")
 		wg.stopWallet()
 		wg.wallet.Shutdown()
 		wg.unlockPassword.Wipe()
 		// wg.walletLocked.Store(true)
 	}
 	if wg.node.Running() {
+		Debug("stopping node")
 		wg.stopNode()
 		wg.node.Shutdown()
 	}
 	wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
+		Debug("stopping chain client")
 		wg.ChainClient.Shutdown()
 		wg.ChainClient = nil
 	}
 	wg.ChainMutex.Unlock()
 	wg.WalletMutex.Lock()
 	if wg.WalletClient != nil {
+		Debug("stopping wallet client")
 		wg.WalletClient.Shutdown()
 		wg.WalletClient = nil
 	}

@@ -79,7 +79,7 @@ func JSONAuthFail(w http.ResponseWriter) {
 }
 
 // NewServer creates a new server for serving legacy RPC client connections, both HTTP POST and websocket.
-func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Listener) *Server {
+func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Listener, quit qu.C) *Server {
 	serveMux := http.NewServeMux()
 	const rpcAuthTimeoutSeconds = 10
 	server := &Server{
