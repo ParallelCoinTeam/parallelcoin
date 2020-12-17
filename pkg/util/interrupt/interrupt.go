@@ -42,7 +42,7 @@ var interruptCallbackSources []string
 // required
 func Listener() {
 	invokeCallbacks := func() {
-		Debug("running interrupt callbacks")
+		Debug("running interrupt callbacks", len(interruptCallbacks), interruptCallbackSources)
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
@@ -85,6 +85,7 @@ func Listener() {
 		}
 		// time.Sleep(time.Second * 3)
 		// os.Exit(1)
+		// close(HandlersDone)
 	}
 out:
 	for {
@@ -97,11 +98,13 @@ out:
 			invokeCallbacks()
 			// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 			// }
+			break out
 		case <-ShutdownRequestChan:
 			// if !requested {
 			Warn("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
+			break out
 			// }
 		case handler := <-AddHandlerChan:
 			// if !requested {
@@ -136,12 +139,13 @@ func AddHandler(handler func()) {
 func Request() {
 	_, f, l, _ := runtime.Caller(1)
 	Debugf("interrupt requested %s:%d %v", f, l, requested)
-	qu.PrintChanState()
 	if requested {
 		Debug("requested again")
 		return
 	}
-	ShutdownRequestChan.Q() // <- struct{}{}
+	requested = true
+	ShutdownRequestChan.Q()
+	qu.PrintChanState()
 	// var ok bool
 	// select {
 	// case _, ok = <-ShutdownRequestChan:

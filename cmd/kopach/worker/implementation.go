@@ -140,7 +140,6 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worke
 		func() {
 			Debug("worker quitting")
 			w.stopChan <- struct{}{}
-			// w.quit.Q()
 			// _ = w.pipeConn.Close()
 			w.dispatchReady.Store(false)
 		},
@@ -180,6 +179,7 @@ out:
 		for {
 			select {
 			case <-sampleTicker.C:
+				Debug(interrupt.GoroutineDump())
 				w.hashReport()
 				break
 			case <-w.startChan:
@@ -188,9 +188,6 @@ out:
 				break
 			case <-w.stopChan:
 				Trace("received pause signal while running")
-				// w.block.Store(&util.Block{})
-				// w.bitses.Store((blockchain.TargetBits)(nil))
-				// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 				break running
 			case <-w.quit:
 				Trace("worker stopping while running")
@@ -198,14 +195,11 @@ out:
 			default:
 				if w.block.Load() == nil || w.bitses.Load() == nil ||
 					w.hashes.Load() == nil || !w.dispatchReady.Load() {
-					// Info("stop was called before we started working")
 				} else {
 					// work
 					nH := w.block.Load().(*util.Block).Height()
 					hv := w.roller.GetAlgoVer()
-					// Debug(hv)
 					h := w.hashes.Load().(map[int32]*chainhash.Hash)
-					// Debug("hashes", hv, h)
 					mmb := w.msgBlock.Load().(wire.MsgBlock)
 					mb := &mmb
 					mb.Header.Version = hv
@@ -269,6 +263,7 @@ out:
 		}
 	}
 	Debug("worker finished")
+	interrupt.Request()
 }
 
 // New initialises the state for a worker, loading the work function handler that runs a round of processing between

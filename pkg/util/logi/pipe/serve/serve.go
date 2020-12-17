@@ -4,8 +4,6 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"go.uber.org/atomic"
-	"os"
-	"runtime/pprof"
 	
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -18,7 +16,7 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 	Debug("starting log server")
 	lc := logi.L.AddLogChan()
 	// interrupt.AddHandler(func(){
-	// 	logi.L.RemoveLogChan(lc)
+	// 	// logi.L.RemoveLogChan(lc)
 	// })
 	pkgChan := make(chan Pk.Package)
 	var logOn atomic.Bool
@@ -61,7 +59,8 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 					<-interrupt.HandlersDone
 					// quit.Q()
 					// goroutineDump()
-					pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
+					// Debug(interrupt.GoroutineDump())
+					// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 				}
 			}
 			return
@@ -73,8 +72,14 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 			select {
 			case <-quit:
 				// interrupt.Request()
-				Debug("quitting pipe logger")
+				if !logi.L.LogChanDisabled {
+					logi.L.LogChanDisabled = true
+				}
+				logi.L.Writer.Write = true
+				Debug("quitting pipe logger", interrupt.GoroutineDump())
+				interrupt.Request()
 				logOn.Store(false)
+				// <-interrupt.HandlersDone
 				break out
 			case e := <-lc:
 				if !logOn.Load() {
@@ -102,7 +107,8 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 				}
 			}
 		}
-		// <-interrupt.HandlersDone
+		
+		<-interrupt.HandlersDone
 		Debug("finished pipe logger")
 	}()
 }

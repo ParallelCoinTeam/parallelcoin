@@ -33,6 +33,7 @@ func New(
 	go func() {
 	out:
 		for {
+			Debug("run unit command loop")
 			select {
 			case cmd := <-r.commandChan:
 				switch cmd {
@@ -63,6 +64,7 @@ func New(
 					r.running.Store(false)
 					stop()
 				}
+				break
 			case <-r.quit:
 				Debug("quitting on run unit quit channel", args, r.running.Load())
 				if !r.running.Load() {
@@ -75,10 +77,12 @@ func New(
 				break out
 			}
 		}
-		if r.worker != nil {
-			if err := r.worker.Kill(); Check(err) {
-			}
-		}
+		// if r.worker != nil {
+		// 	Debug("killing worker")
+		// 	if err := r.worker.Kill(); Check(err) {
+		// 	}
+		// }
+		Debug("finished running", args)
 	}()
 	return
 }

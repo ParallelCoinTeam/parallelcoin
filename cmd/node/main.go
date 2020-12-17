@@ -1,6 +1,7 @@
 package node
 
 import (
+	"github.com/p9c/pod/pkg/util/logi"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"net/http"
@@ -165,12 +166,15 @@ func Main(cx *conte.Xt) (err error) {
 		// consume.Kill(cx.StateCfg.Miner)
 		server.WaitForShutdown()
 		Info("server shutdown complete")
+		logi.L.LogChanDisabled = true
+		logi.L.Writer.Write = true
 		cx.WaitDone()
+		<-cx.KillAll
 		// cx.WaitGroup.Done()
 		// cx.KillAll.Q()
 		// cx.NodeKill.Q()
 		// Debug(interrupt.GoroutineDump())
-		// <-interrupt.HandlersDone
+		<-interrupt.HandlersDone
 	}
 	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)

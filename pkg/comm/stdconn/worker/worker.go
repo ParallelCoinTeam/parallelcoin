@@ -12,8 +12,10 @@ import (
 )
 
 type Worker struct {
-	cmd     *exec.Cmd
-	args    []string
+	Cmd  *exec.Cmd
+	args []string
+	// Stderr  io.WriteCloser
+	StdPipe io.ReadCloser
 	StdConn *stdconn.StdConn
 }
 
@@ -21,26 +23,32 @@ type Worker struct {
 // attaches a connection to its stdin/stdout
 func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 	// if runtime.GOOS == "windows" {
-	// 	args = append([]string{"cmd.exe", "/C", "start"}, args...)
+	// 	args = append([]string{"Cmd.exe", "/C", "start"}, args...)
 	// }
 	// args = apputil.PrependForWindows(args)
-	w = &Worker{
-		cmd:  exec.Command(args[0], args[1:]...),
-		args: args,
+	var pipeReader, pipeWriter *os.File
+	if pipeReader, pipeWriter, err = os.Pipe(); Check(err) {
 	}
-	// w.cmd.Stderr = os.Stderr
+	w = &Worker{
+		Cmd:  exec.Command(args[0], args[1:]...),
+		args: args,
+		// Stderr:  pipeWriter,
+		StdPipe: pipeReader,
+	}
+	w.Cmd.Stderr = pipeWriter
 	var cmdOut io.ReadCloser
-	if cmdOut, err = w.cmd.StdoutPipe(); Check(err) {
+	if cmdOut, err = w.Cmd.StdoutPipe(); Check(err) {
 		return
 	}
 	var cmdIn io.WriteCloser
-	if cmdIn, err = w.cmd.StdinPipe(); Check(err) {
+	if cmdIn, err = w.Cmd.StdinPipe(); Check(err) {
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
-	// w.cmd.Stderr = os.Stderr
-	if err = w.cmd.Start(); Check(err) {
+	// w.Cmd.Stderr = os.Stderr
+	if err = w.Cmd.Start(); Check(err) {
 	}
+	// data := make([]byte, 8192)
 	// go func() {
 	// out:
 	// 	for {
@@ -48,6 +56,15 @@ func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 	// 		case <-quit:
 	// 			Debug("passed quit chan closed", args)
 	// 			break out
+	// 		default:
+	// 		}
+	// 		var n int
+	// 		if n, err = w.StdPipe.Read(data); Check(err) {
+	// 		}
+	// 		// if !onBackup {
+	// 		if n > 0 {
+	// 			if n, err = os.Stderr.Write(append([]byte("PIPED:\n"), data[:n]...)); Check(err) {
+	// 			}
 	// 		}
 	// 	}
 	// }()
@@ -55,19 +72,19 @@ func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 }
 
 func (w *Worker) Wait() (err error) {
-	return w.cmd.Wait()
+	return w.Cmd.Wait()
 }
 
 func (w *Worker) Interrupt() (err error) {
 	if runtime.GOOS == "windows" {
-		if err = w.cmd.Process.Kill(); Check(err) {
+		if err = w.Cmd.Process.Kill(); Check(err) {
 		}
 		return
 	}
-	if err = w.cmd.Process.Signal(syscall.SIGINT); !Check(err) {
+	if err = w.Cmd.Process.Signal(syscall.SIGINT); !Check(err) {
 		Debug("interrupted")
 	}
-	// if err = w.cmd.Process.Release(); !Check(err) {
+	// if err = w.Cmd.Process.Release(); !Check(err) {
 	//	Debug("released")
 	// }
 	return
@@ -75,7 +92,7 @@ func (w *Worker) Interrupt() (err error) {
 
 // Kill forces the child process to shut down without cleanup
 func (w *Worker) Kill() (err error) {
-	if err = w.cmd.Process.Kill(); !Check(err) {
+	if err = w.Cmd.Process.Kill(); !Check(err) {
 		Debug("killed")
 	}
 	return
@@ -87,5 +104,5 @@ func (w *Worker) Kill() (err error) {
 //
 // It is possible and neater to put a quit method in the IPC API and use the quit channel built into the StdConn
 func (w *Worker) Stop() (err error) {
-	return w.cmd.Process.Signal(os.Interrupt)
+	return w.Cmd.Process.Signal(os.Interrupt)
 }

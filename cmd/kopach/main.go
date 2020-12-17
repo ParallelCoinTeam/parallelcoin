@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/pkg/util/logi"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"os"
@@ -110,6 +111,8 @@ func (w *Worker) Start() {
 func (w *Worker) Stop() {
 	var err error
 	for i := range w.clients {
+		if err = w.clients[i].Pause(); Check(err) {
+		}
 		if err = w.clients[i].Stop(); Check(err) {
 		}
 		if err = w.clients[i].Close(); Check(err) {
@@ -134,8 +137,8 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		if _, err = rand.Read(randomBytes); Check(err) {
 		}
 		w := &Worker{
-			id:            fmt.Sprintf("%x", randomBytes),
-			cx:            cx,
+			id: fmt.Sprintf("%x", randomBytes),
+			cx: cx,
 			// ctx:           ctx,
 			quit:          cx.KillAll,
 			sendAddresses: []*net.UDPAddr{},
@@ -167,8 +170,12 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		// start up the workers
 		if *cx.Config.Generate {
 			w.Start()
+			interrupt.AddHandler(
+				func() {
+					w.Stop()
+				},
+			)
 		}
-
 		// controller watcher thread
 		go func() {
 			Debug("starting controller watcher")
@@ -195,6 +202,9 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						}
 					}
 					w.hashrate = w.HashReport()
+					if interrupt.Requested() {
+						w.quit.Q()
+					}
 				case <-w.StartChan:
 					*cx.Config.Generate = true
 					// save.Pod(cx.Config)
@@ -214,7 +224,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					if *cx.Config.Generate {
 						// always sanitise
 						if n < 0 {
-							n = 0
+							n = int(maxThreads)
 						}
 						if n > int(maxThreads) {
 							n = int(maxThreads)
@@ -222,23 +232,21 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						w.Stop()
 						w.Start()
 					}
-				case <-cx.KillAll:
-					Debug("stopping from killall")
-					w.quit.Q()
-					break out
 				case <-w.quit:
 					Debug("stopping from quit")
+					interrupt.Request()
 					break out
 				}
 			}
-			w.Stop()
-			interrupt.Request()
+			Debug("finished kopach miner work loop")
+			logi.L.LogChanDisabled = true
+			logi.L.Writer.Write = true
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
-		// <-w.quit
-		// <-cx.KillAll
-		// <-interrupt.HandlersDone
-		Info("kopach shutting down")
+		<-w.quit
+		Info("kopach shutting down", interrupt.GoroutineDump())
+		<-interrupt.HandlersDone
+		Info("kopach finished shutdown")
 		return
 	}
 }

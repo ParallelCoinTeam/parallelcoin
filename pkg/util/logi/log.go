@@ -62,7 +62,7 @@ var (
 
 type LogWriter struct {
 	io.Writer
-	write bool
+	Write bool
 }
 
 // DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
@@ -81,19 +81,19 @@ func PickNoun(n int, singular, plural string) string {
 }
 
 func (w *LogWriter) Print(a ...interface{}) {
-	if w.write {
+	if w.Write {
 		_, _ = fmt.Fprint(w.Writer, a...)
 	}
 }
 
 func (w *LogWriter) Printf(format string, a ...interface{}) {
-	if w.write {
+	if w.Write {
 		_, _ = fmt.Fprintf(w.Writer, format, a...)
 	}
 }
 
 func (w *LogWriter) Println(a ...interface{}) {
-	if w.write {
+	if w.Write {
 		_, _ = fmt.Fprintln(w.Writer, a...)
 	}
 }
@@ -157,19 +157,19 @@ var L = NewLogger()
 func init() {
 	L.SetLevel("info", true, "pod")
 	L.Writer.SetLogWriter(os.Stderr)
-	L.Writer.write = true
+	L.Writer.Write = true
 	L.Trace("starting up logger")
 }
 
 // AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() (ch chan Entry) {
+	l.LogChanDisabled = false
 	if l.LogChan != nil {
 		L.Debug("trying to add a second logging channel")
 		panic("warning warning")
 	}
+	// L.Writer.Write = false
 	l.LogChan = make(chan Entry)
-	l.LogChanDisabled = false
-	// L.Writer.write = false
 	return L.LogChan
 }
 
@@ -229,7 +229,7 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 			),
 		)
 		if err != nil {
-			if L.Writer.write {
+			if L.Writer.Write {
 				L.Writer.Println("error rotating log", err)
 			}
 			return
@@ -237,7 +237,7 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	}
 	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		if L.Writer.write {
+		if L.Writer.Write {
 			L.Writer.Println("error opening log file", logFileName)
 		}
 	}
@@ -342,7 +342,7 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
 			return
 		}
-		if l.Writer.write || (*l.Packages)[pkg] {
+		if l.Writer.Write || (*l.Packages)[pkg] {
 			l.Writer.Println(Composite(text, level))
 		}
 		if !l.LogChanDisabled && l.LogChan != nil {
@@ -366,7 +366,7 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 		}
 		t := fn()
 		text := trimReturn(t)
-		if l.Writer.write {
+		if l.Writer.Write {
 			l.Writer.Println(Composite(text, level))
 		}
 		if !l.LogChanDisabled && l.LogChan != nil {
@@ -389,7 +389,7 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 			return
 		}
 		text := trimReturn(fmt.Sprintln(a...))
-		if l.Writer.write {
+		if l.Writer.Write {
 			l.Writer.Println(Composite(text, level))
 		}
 		if !l.LogChanDisabled && l.LogChan != nil {
@@ -415,7 +415,7 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 			return false
 		}
 		text := err.Error()
-		if l.Writer.write {
+		if l.Writer.Write {
 			l.Writer.Println(Composite(text, "CHK"))
 		}
 		if !l.LogChanDisabled && l.LogChan != nil {
@@ -441,7 +441,7 @@ func (l *Logger) spewFunc(level string) SpewFunc {
 		text := trimReturn(spew.Sdump(a))
 		o := "" + Composite("spew:", level)
 		o += "\n" + text + "\n"
-		if l.Writer.write {
+		if l.Writer.Write {
 			l.Writer.Print(o)
 		}
 		if !l.LogChanDisabled && l.LogChan != nil {
