@@ -81,7 +81,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		return
 	}
 	ctrl := &Controller{
-		quit:                   make(qu.C),
+		quit:                   qu.T(),
 		cx:                     cx,
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
@@ -93,7 +93,6 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
 		hashSampleBuf:          rav.NewBufferUint64(100),
 	}
-	interrupt.AddHandler(ctrl.quit.Quit)
 	quit = ctrl.quit
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
@@ -108,7 +107,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	)
 	if err != nil {
 		Error(err)
-		close(ctrl.quit)
+		ctrl.quit.Q()
 		return
 	}
 	pM := pause.GetPauseContainer(cx)
@@ -128,7 +127,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 			}
 			if err = ctrl.multiConn.Close(); Check(err) {
 			}
-			close(ctrl.quit)
+			ctrl.quit.Q()
 		},
 	)
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
@@ -144,13 +143,14 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		go submitter(ctrl)
 	}
 	go advertiser(ctrl)
-	factor := 10
+	factor := 1
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	go func() {
 	out:
 		for {
 			select {
 			case <-ticker.C:
+				// qu.PrintChanState()
 				Debug("controller ticker")
 				if !ctrl.Ready.Load() {
 					if cx.IsCurrent() {
@@ -165,12 +165,12 @@ func Run(cx *conte.Xt) (quit qu.C) {
 				break out
 			case <-ctrl.cx.NodeKill:
 				Debug("quitting on NodeKill")
-				close(ctrl.quit)
-				// break out
+				ctrl.quit.Q()
+				break out
 			case <-ctrl.cx.KillAll:
 				Debug("quitting on KillAll")
-				close(ctrl.quit)
-				// break out
+				ctrl.quit.Q()
+				break out
 			}
 		}
 		ctrl.active.Store(false)

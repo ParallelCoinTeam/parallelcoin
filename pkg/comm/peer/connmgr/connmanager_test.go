@@ -3,6 +3,7 @@ package connmgr
 import (
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"net"
 	"sync/atomic"
@@ -282,9 +283,9 @@ func TestRetryPermanent(t *testing.T) {
 // TestMaxRetryDuration tests the maximum retry duration. We have a timed dialer which initially returns err but after
 // RetryDuration hits maxRetryDuration returns a mock conn.
 func TestMaxRetryDuration(t *testing.T) {
-	networkUp := make(qu.C)
+	networkUp := qu.T()
 	time.AfterFunc(5*time.Millisecond, func() {
-		close(networkUp)
+		networkUp.Q()
 	})
 	timedDialer := func(addr net.Addr) (net.Conn, error) {
 		select {
@@ -363,7 +364,7 @@ func TestNetworkFailure(t *testing.T) {
 // stop flag on the conn manager and returns an err so that the handler assumes that the conn manager is stopped and
 // ignores the failure.
 func TestStopFailed(t *testing.T) {
-	done := make(qu.C, 1)
+	done := qu.Ts(1)
 	waitDialer := func(addr net.Addr) (net.Conn, error) {
 		done <- struct{}{}
 		time.Sleep(time.Millisecond)
@@ -398,7 +399,7 @@ func TestStopFailed(t *testing.T) {
 // the ConnMgr.
 func TestRemovePendingConnection(t *testing.T) {
 	// Create a ConnMgr instance with an instance of a dialer that'll never succeed.
-	wait := make(qu.C)
+	wait := qu.T()
 	indefiniteDialer := func(addr net.Addr) (net.Conn, error) {
 		<-wait
 		return nil, fmt.Errorf("error")
@@ -433,7 +434,7 @@ func TestRemovePendingConnection(t *testing.T) {
 	if cr.State() != ConnCanceled {
 		t.Fatalf("request wasn't canceled, status is: %v", cr.State())
 	}
-	close(wait)
+	wait.Q()
 	cmgr.Stop()
 }
 
@@ -443,7 +444,7 @@ func TestCancelIgnoreDelayedConnection(t *testing.T) {
 	retryTimeout := 10 * time.Millisecond
 	// Setup a dialer that will continue to return an error until the connect chan is signaled, the dial attempt
 	// immediately after will succeed in returning a connection.
-	connect := make(qu.C)
+	connect := qu.T()
 	failingDialer := func(addr net.Addr) (net.Conn, error) {
 		select {
 		case <-connect:
@@ -483,7 +484,7 @@ func TestCancelIgnoreDelayedConnection(t *testing.T) {
 	}
 	// Remove the connection, and then immediately allow the next connection to succeed.
 	cmgr.Remove(cr.ID())
-	close(connect)
+	connect.Q()
 	// Allow the connection manager to process the removal.
 	time.Sleep(5 * time.Millisecond)
 	// Now examine the status of the connection request, it should read a status of canceled.

@@ -23,7 +23,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	ex := &Explorer{
 		cx:         cx,
 		c:          c,
-		invalidate: make(qu.C),
+		invalidate: qu.T(),
 		quit:       cx.KillAll,
 		size:       &size,
 	}

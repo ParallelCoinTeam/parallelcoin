@@ -10,6 +10,7 @@ import (
 	"compress/bzip2"
 	"encoding/binary"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"os"
 	"path/filepath"
@@ -1773,8 +1774,8 @@ func testConcurrency(tc *testContext) bool {
 	// data was set.
 	concurrentKey := []byte("notthere")
 	concurrentVal := []byte("someval")
-	started := make(qu.C)
-	writeComplete := make(qu.C)
+	started := qu.T()
+	writeComplete := qu.T()
 	reader = func(blockNum int) {
 		err := tc.db.View(func(tx database.Tx) error {
 			started <- struct{}{}
@@ -1810,7 +1811,7 @@ func testConcurrency(tc *testContext) bool {
 		tc.t.Errorf("Unexpected error in update: %v", err)
 		return false
 	}
-	close(writeComplete)
+	writeComplete.Q()
 	// Wait for reader results.
 	for i := 0; i < numReaders; i++ {
 		if result := <-resultChan; !result {
@@ -1862,8 +1863,8 @@ func testConcurrentClose(tc *testContext) bool {
 	// the transactions stay open until they are explicitly signalled to be closed.
 	var activeReaders int32
 	numReaders := 3
-	started := make(qu.C)
-	finishReaders := make(qu.C)
+	started := qu.T()
+	finishReaders := qu.T()
 	resultChan := make(chan bool, numReaders+1)
 	reader := func() {
 		err := tc.db.View(func(tx database.Tx) error {
@@ -1888,7 +1889,7 @@ func testConcurrentClose(tc *testContext) bool {
 	}
 	// Close the database in a separate goroutine. This should block until the transactions are finished. Once the close
 	// has taken place, the dbClosed channel is closed to signal the main goroutine below.
-	dbClosed := make(qu.C)
+	dbClosed := qu.T()
 	go func() {
 		started <- struct{}{}
 		err := tc.db.Close()
@@ -1897,14 +1898,14 @@ func testConcurrentClose(tc *testContext) bool {
 				err)
 			resultChan <- false
 		}
-		close(dbClosed)
+		dbClosed.Q()
 		resultChan <- true
 	}()
 	<-started
 	// Wait a short period and then signal the reader transactions to finish. When the db closed channel is received,
 	// ensure there are no active readers open.
 	time.AfterFunc(time.Millisecond*250, func() {
-		close(finishReaders)
+		finishReaders.Q()
 	})
 	<-dbClosed
 	if nr := atomic.LoadInt32(&activeReaders); nr != 0 {

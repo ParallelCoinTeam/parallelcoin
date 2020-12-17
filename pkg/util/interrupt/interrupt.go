@@ -1,6 +1,7 @@
 package interrupt
 
 import (
+	"fmt"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"os/exec"
@@ -11,6 +12,11 @@ import (
 	"github.com/kardianos/osext"
 )
 
+type HandlerWithSource struct {
+	Source string
+	Fn     func()
+}
+
 var (
 	Restart   bool // = true
 	requested bool
@@ -19,29 +25,32 @@ var (
 	// Signals is the list of signals that cause the interrupt
 	Signals = []os.Signal{os.Interrupt}
 	// ShutdownRequestChan is a channel that can receive shutdown requests
-	ShutdownRequestChan = make(chan struct{})
+	ShutdownRequestChan = qu.T()
 	// AddHandlerChan is used to add an interrupt handler to the list of
 	// handlers to be invoked on SIGINT (Ctrl+C) signals.
-	AddHandlerChan = make(chan func())
+	AddHandlerChan = make(chan HandlerWithSource)
 	// HandlersDone is closed after all interrupt handlers run the first time
 	// an interrupt is signaled.
 	HandlersDone = make(qu.C)
 	DataDir      string
 )
 
+var interruptCallbacks []func()
+var interruptCallbackSources []string
+
 // Receiver listens for interrupt signals, registers interrupt callbacks, and responds to custom shutdown signals as
 // required
 func Listener() {
-	var interruptCallbacks []func()
 	invokeCallbacks := func() {
 		Debug("running interrupt callbacks")
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
+			Debug("running callback", idx, interruptCallbackSources[idx])
 			interruptCallbacks[idx]()
 		}
-		close(HandlersDone)
 		Debug("interrupt handlers finished")
+		HandlersDone.Q()
 		if Restart {
 			file, err := osext.Executable()
 			if err != nil {
@@ -77,27 +86,31 @@ func Listener() {
 		// time.Sleep(time.Second * 3)
 		// os.Exit(1)
 	}
-	defer Debug("interrupt listener terminated")
+out:
 	for {
 		select {
 		case sig := <-Chan:
-			// L.Printf("\r>>> received signal (%s)\n", sig)
+			// if !requested {
+			// 	L.Printf("\r>>> received signal (%s)\n", sig)
 			Debug("received interrupt signal", sig)
 			requested = true
 			invokeCallbacks()
 			// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
-			return
+			// }
 		case <-ShutdownRequestChan:
-			if requested {
-				return
-			}
+			// if !requested {
 			Warn("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
-			return
+			// }
 		case handler := <-AddHandlerChan:
+			// if !requested {
 			// Debug("adding handler")
-			interruptCallbacks = append(interruptCallbacks, handler)
+			interruptCallbacks = append(interruptCallbacks, handler.Fn)
+			interruptCallbackSources = append(interruptCallbackSources, handler.Source)
+			// }
+		case <-HandlersDone:
+			break out
 		}
 	}
 }
@@ -107,20 +120,28 @@ func AddHandler(handler func()) {
 	// Create the channel and start the main interrupt handler which invokes all other callbacks and exits if not
 	// already done.
 	_, loc, line, _ := runtime.Caller(1)
-	Debugf("handler added by: %s:%d", loc, line)
+	msg := fmt.Sprintf("%s:%d", loc, line)
+	Debug("handler added by:", msg)
 	if Chan == nil {
-		Chan = make(chan os.Signal, 1)
+		Chan = make(chan os.Signal)
 		signal.Notify(Chan, Signals...)
 		go Listener()
 	}
-	AddHandlerChan <- handler
+	AddHandlerChan <- HandlerWithSource{
+		msg, handler,
+	}
 }
 
 // Request programmatically requests a shutdown
 func Request() {
-	_,f,l,_:=runtime.Caller(1)
-	Debugf("interrupt requested %s:%d", f, l)
-	ShutdownRequestChan <- struct{}{}
+	_, f, l, _ := runtime.Caller(1)
+	Debugf("interrupt requested %s:%d %v", f, l, requested)
+	qu.PrintChanState()
+	if requested {
+		Debug("requested again")
+		return
+	}
+	ShutdownRequestChan.Q() // <- struct{}{}
 	// var ok bool
 	// select {
 	// case _, ok = <-ShutdownRequestChan:

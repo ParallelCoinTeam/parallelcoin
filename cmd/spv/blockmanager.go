@@ -154,7 +154,7 @@ func newBlockManager(s *ChainService) (*blockManager, error) {
 		reorgList: headerlist.NewBoundedMemoryChain(
 			numMaxMemHeaders,
 		),
-		quit:                make(qu.C),
+		quit:                qu.T(),
 		blocksPerRetarget:   int32(targetTimespan / targetTimePerBlock),
 		minRetargetTimespan: targetTimespan / adjustmentFactor,
 		maxRetargetTimespan: targetTimespan * adjustmentFactor,
@@ -218,7 +218,7 @@ func (b *blockManager) Stop() error {
 		return nil
 	}
 	// We'll send out update signals before the quit to ensure that any goroutines waiting on them will properly exit.
-	done := make(qu.C)
+	done := qu.T()
 	go func() {
 		ticker := time.NewTicker(time.Millisecond * 50)
 		defer ticker.Stop()
@@ -233,9 +233,9 @@ func (b *blockManager) Stop() error {
 		}
 	}()
 	Info("Block manager shutting down")
-	close(b.quit)
+	b.quit.Q()
 	b.wg.Wait()
-	close(done)
+	done.Q()
 	return nil
 }
 
@@ -1340,7 +1340,7 @@ out:
 				b.handleDonePeerMsg(candidatePeers, msg.peer)
 			default:
 				Warnf(
-					"invalid message type in block handler: %T", msg,
+					"invalid message type in block handler: %Ter", msg,
 				)
 			}
 		case <-b.quit:

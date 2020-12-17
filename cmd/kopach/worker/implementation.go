@@ -38,7 +38,7 @@ type Worker struct {
 	dispatchConn  *transport.Channel
 	dispatchReady atomic.Bool
 	ciph          cipher.AEAD
-	qu.C
+	quit          qu.C
 	block         atomic.Value
 	senderPort    atomic.Uint32
 	msgBlock      atomic.Value // *wire.MsgBlock
@@ -125,10 +125,10 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worke
 	w := &Worker{
 		id:            id,
 		pipeConn:      conn,
-		C:             qu.T(),
+		quit:          quit,
 		roller:        NewCounter(RoundsPerAlgo),
-		startChan:     make(qu.C),
-		stopChan:      make(qu.C),
+		startChan:     qu.T(),
+		stopChan:      qu.T(),
 		hashSampleBuf: ring.NewBufferUint64(1000),
 	}
 	w.msgBlock.Store(msgBlock)
@@ -139,9 +139,9 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worke
 	interrupt.AddHandler(
 		func() {
 			Debug("worker quitting")
-			w.stopChan.Quit()
-			w.Quit()
-			_ = w.pipeConn.Close()
+			w.stopChan <- struct{}{}
+			// w.quit.Q()
+			// _ = w.pipeConn.Close()
 			w.dispatchReady.Store(false)
 		},
 	)
@@ -169,9 +169,8 @@ out:
 			case <-w.startChan:
 				Trace("received start signal")
 				break pausing
-			case <-w.C:
+			case <-w.quit:
 				Trace("quitting")
-				w.stopChan.Quit()
 				break out
 			}
 		}
@@ -193,7 +192,7 @@ out:
 				// w.bitses.Store((blockchain.TargetBits)(nil))
 				// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 				break running
-			case <-w.C:
+			case <-w.quit:
 				Trace("worker stopping while running")
 				break out
 			default:
@@ -229,7 +228,7 @@ out:
 					var nextAlgo int32
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 						select {
-						case <-w.C:
+						case <-w.quit:
 							Trace("worker stopping on pausing message")
 							break out
 						default:
@@ -277,7 +276,8 @@ out:
 func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
 	sc := stdconn.New(os.Stdin, os.Stdout, quit)
-	return NewWithConnAndSemaphore(id, &sc, quit), &sc
+	
+	return NewWithConnAndSemaphore(id, sc, quit), sc
 }
 
 // NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
@@ -361,7 +361,7 @@ func (w *Worker) Pause(_ int, reply *bool) (err error) {
 func (w *Worker) Stop(_ int, reply *bool) (err error) {
 	Debug("stopping from IPC")
 	w.stopChan <- struct{}{}
-	defer w.C.Quit()
+	defer w.quit.Q()
 	*reply = true
 	// time.Sleep(time.Second * 3)
 	// os.Exit(0)
@@ -377,8 +377,13 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	// rp := fmt.Sprint(rand.Intn(32767) + 1025)
 	var conn *transport.Channel
 	conn, err = transport.NewBroadcastChannel(
-		"kopachworker", w, pass, transport.DefaultPort,
-		control.MaxDatagramSize, transport.Handlers{}, w.C,
+		"kopachworker",
+		w,
+		pass,
+		transport.DefaultPort,
+		control.MaxDatagramSize,
+		transport.Handlers{},
+		w.quit,
 	)
 	if err != nil {
 		Error(err)

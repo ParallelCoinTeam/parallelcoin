@@ -2,6 +2,7 @@ package spv
 
 import (
 	"errors"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"reflect"
 	"sync"
 	"testing"
@@ -331,7 +332,7 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	mockChainClient.SetBlockHash(100000, &block100000Hash)
 	mockChainClient.SetBlock(&block100000Hash, util.NewBlock(&Block100000))
 	var snapshotLock sync.Mutex
-	waitForSnapshot := make(qu.C)
+	waitForSnapshot := qu.T()
 	scanner := NewUtxoScanner(&UtxoScannerConfig{
 		GetBlock:     mockChainClient.GetBlockFromNetwork,
 		GetBlockHash: mockChainClient.GetBlockHash,
@@ -391,7 +392,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	fetchErr := errors.New("cannot fetch block")
 	// Create a mock function that will block when the utxoscanner tries to retrieve a block from the network. It will
 	// return fetchErr when it finally returns.
-	block := make(qu.C)
+	block := qu.T()
 	scanner := NewUtxoScanner(&UtxoScannerConfig{
 		GetBlock: func(chainhash.Hash, ...QueryOption,
 		) (*util.Block, error) {
@@ -420,7 +421,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
 	// Spawn our first task with a cancel chan, which we'll test to make sure it can break away early.
-	cancel100000 := make(qu.C)
+	cancel100000 := qu.T()
 	err100000 := make(chan error, 1)
 	go func() {
 		_, err := req100000.Result(cancel100000)
@@ -444,7 +445,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	case <-time.After(50 * time.Millisecond):
 	}
 	// Cancel the first request, which should cause it to return ErrGetUtxoCancelled.
-	close(cancel100000)
+	cancel100000.Q()
 	select {
 	case err := <-err100000:
 		if err != ErrGetUtxoCancelled {

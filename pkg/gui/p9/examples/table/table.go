@@ -3,7 +3,8 @@ package main
 import (
 	l "gioui.org/layout"
 	"github.com/p9c/pod/pkg/util/logi"
-
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -16,7 +17,7 @@ type App struct {
 
 func main() {
 	logi.L.SetLevel("trace", false, "pod")
-	quit := make(qu.C)
+	quit := qu.T()
 	th := p9.NewTheme(p9fonts.Collection(), quit)
 	model := App{
 		th: th,
@@ -26,9 +27,11 @@ func main() {
 			Size(64, 32).
 			Title("table example").
 			Open().
-			Run(model.mainWidget, func(l.Context) {}, func() {
-				close(quit)
-			}, quit); Check(err) {
+			Run(
+				model.mainWidget, func(l.Context) {}, func() {
+					quit.Q()
+				}, quit,
+		); Check(err) {
 		}
 	}()
 	<-quit

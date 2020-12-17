@@ -171,7 +171,7 @@ func (sm *SyncManager) NewPeer(peer *peerpkg.Peer) {
 // Note that while paused, all peer and block processing is halted. The message sender should avoid pausing the sync
 // manager for long durations.
 func (sm *SyncManager) Pause() chan<- struct{} {
-	c := make(qu.C)
+	c := qu.T()
 	sm.msgChan <- pauseMsg{c}
 	return c
 }
@@ -246,7 +246,7 @@ func (sm *SyncManager) Stop() error {
 		return nil
 	}
 	// DEBUG{"sync manager shutting down"}
-	close(sm.quit)
+	sm.quit.Q()
 	sm.wg.Wait()
 	return nil
 }
@@ -323,7 +323,7 @@ out:
 				// Wait until the sender unpauses the manager.
 				<-msg.unpause
 			default:
-				Tracef("invalid message type in block handler: %T", msg)
+				Tracef("invalid message type in block handler: %Ter", msg)
 			}
 		case <-sm.quit:
 			break out
@@ -1292,7 +1292,7 @@ func New(config *Config) (*SyncManager, error) {
 		progressLogger:  newBlockProgressLogger("processed"),
 		msgChan:         make(chan interface{}, config.MaxPeers*3),
 		headerList:      list.New(),
-		quit:            make(qu.C),
+		quit:            qu.T(),
 		feeEstimator:    config.FeeEstimator,
 	}
 	best := sm.chain.BestSnapshot()

@@ -122,6 +122,7 @@ func (w *Worker) Stop() {
 		}
 		Debug("stopped worker", i)
 	}
+	w.quit.Q()
 	w.active.Store(false)
 }
 
@@ -136,13 +137,13 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			id:            fmt.Sprintf("%x", randomBytes),
 			cx:            cx,
 			// ctx:           ctx,
-			quit:          make(qu.C),
+			quit:          cx.KillAll,
 			sendAddresses: []*net.UDPAddr{},
-			StartChan:     make(qu.C),
-			StopChan:      make(qu.C),
+			StartChan:     qu.T(),
+			StopChan:      qu.T(),
 			SetThreads:    make(chan int),
 			solutions:     make([]SolutionData, 0, 2048),
-			Update:        make(qu.C),
+			Update:        qu.T(),
 			hashSampleBuf: ring.NewBufferUint64(1000),
 		}
 		Warn("kopachgui", *cx.Config.KopachGUI)
@@ -161,18 +162,13 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		if err != nil {
 			Error(err)
 			// cancel()
-			close(w.quit)
 			return
 		}
 		// start up the workers
 		if *cx.Config.Generate {
 			w.Start()
 		}
-		interrupt.AddHandler(
-			func() {
-				close(w.quit)
-			},
-		)
+
 		// controller watcher thread
 		go func() {
 			Debug("starting controller watcher")
@@ -228,7 +224,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					}
 				case <-cx.KillAll:
 					Debug("stopping from killall")
-					close(w.quit)
+					w.quit.Q()
 					break out
 				case <-w.quit:
 					Debug("stopping from quit")
@@ -241,7 +237,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		Debug("listening on", control.UDP4MulticastAddress)
 		// <-w.quit
 		// <-cx.KillAll
-		<-interrupt.HandlersDone
+		// <-interrupt.HandlersDone
 		Info("kopach shutting down")
 		return
 	}

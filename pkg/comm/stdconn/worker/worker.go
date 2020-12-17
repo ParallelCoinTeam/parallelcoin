@@ -14,8 +14,7 @@ import (
 type Worker struct {
 	cmd     *exec.Cmd
 	args    []string
-	StdConn stdconn.StdConn
-	qu.C
+	StdConn *stdconn.StdConn
 }
 
 // Spawn starts up an arbitrary executable file with given arguments and
@@ -28,9 +27,8 @@ func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 	w = &Worker{
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
-		C: qu.T(),
 	}
-	w.cmd.Stderr = os.Stderr
+	// w.cmd.Stderr = os.Stderr
 	var cmdOut io.ReadCloser
 	if cmdOut, err = w.cmd.StdoutPipe(); Check(err) {
 		return
@@ -39,29 +37,20 @@ func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 	if cmdIn, err = w.cmd.StdinPipe(); Check(err) {
 		return
 	}
+	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
 	// w.cmd.Stderr = os.Stderr
-	w.StdConn = stdconn.New(cmdOut, cmdIn, w.C)
 	if err = w.cmd.Start(); Check(err) {
 	}
-	go func() {
-	out:
-		for {
-			select {
-			case <-quit:
-				Debug("passed quit chan closed", args)
-				w.Quit()
-				break out
-			case <-w.C:
-				Debug("stdconn chan closed", args)
-				// time.Sleep(time.Second)
-				// w.StdConn.Quit.Quit()
-				// Debug("stopping", Check(w.Stop()))
-				// Debug("interrupting", Check(w.Interrupt()))
-				// Debug("killing", Check(w.Kill()))
-				break out
-			}
-		}
-	}()
+	// go func() {
+	// out:
+	// 	for {
+	// 		select {
+	// 		case <-quit:
+	// 			Debug("passed quit chan closed", args)
+	// 			break out
+	// 		}
+	// 	}
+	// }()
 	return
 }
 
@@ -86,7 +75,7 @@ func (w *Worker) Interrupt() (err error) {
 
 // Kill forces the child process to shut down without cleanup
 func (w *Worker) Kill() (err error) {
-	if err = w.cmd.Process.Signal(syscall.SIGKILL); !Check(err) {
+	if err = w.cmd.Process.Kill(); !Check(err) {
 		Debug("killed")
 	}
 	return

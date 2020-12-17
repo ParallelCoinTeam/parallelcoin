@@ -1,17 +1,15 @@
 package kopach_worker
 
 import (
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net/rpc"
 	"os"
-
+	
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/worker"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
 )
 
@@ -33,13 +31,15 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			log.L.SetLevel(os.Args[4], true, "pod")
 		}
 		Debug("miner worker starting")
-		w, conn := worker.New(os.Args[2], qu.T())
-		interrupt.AddHandler(func() {
-			Debug("KopachWorkerHandle interrupt")
-			// if err := conn.Close(); Check(err) {
-			// }
-			w.Quit()
-		})
+		w, conn := worker.New(os.Args[2], cx.KillAll)
+		// interrupt.AddHandler(
+		// 	func() {
+		// 		Debug("KopachWorkerHandle interrupt")
+		// 		// if err := conn.Close(); Check(err) {
+		// 		// }
+		// 		// quit.Q()
+		// 	},
+		// )
 		err := rpc.Register(w)
 		if err != nil {
 			Debug(err)
@@ -50,7 +50,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 		Debug("stopping worker IPC")
 		// if err := conn.Close(); Check(err) {
 		// }
-		w.Quit()
+		// quit.Quit()
 		Debug("finished")
 		return nil
 	}

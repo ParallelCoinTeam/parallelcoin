@@ -49,7 +49,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				Debug("wallet cookie deleted", *cx.Config.WalletPass)
 			}
 		}
-		cx.WalletKill = make(qu.C)
+		cx.WalletKill = qu.T()
 		go func() {
 			err = walletmain.Main(cx)
 			if err != nil {

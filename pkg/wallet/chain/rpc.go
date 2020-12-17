@@ -60,7 +60,7 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
 		enqueueNotification: make(chan interface{}),
 		dequeueNotification: make(chan interface{}),
 		currentBlock:        make(chan *wm.BlockStamp),
-		quit:                make(qu.C),
+		quit:                qu.T(),
 	}
 	ntfnCallbacks := &rpcclient.NotificationHandlers{
 		OnClientConnected:   client.onClientConnect,
@@ -122,7 +122,7 @@ func (c *RPCClient) Stop() {
 	select {
 	case <-c.quit:
 	default:
-		close(c.quit)
+		c.quit.Q()
 		c.Client.Shutdown()
 		if !c.started {
 			close(c.dequeueNotification)

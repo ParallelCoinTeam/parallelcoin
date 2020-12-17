@@ -86,12 +86,13 @@ type Xt struct {
 }
 
 func (cx *Xt) WaitAdd() {
+	cx.WaitGroup.Add(1)
 	_, file, line, _ := runtime.Caller(1)
 	record := fmt.Sprintf("+ %s:%d", file, line)
 	cx.waitChangers = append(cx.waitChangers, record)
 	cx.waitCounter++
 	Debug("added to waitgroup", record, cx.waitCounter)
-	cx.PrintWaitChangers()
+	Debug(cx.PrintWaitChangers())
 }
 
 func (cx *Xt) WaitDone() {
@@ -100,21 +101,23 @@ func (cx *Xt) WaitDone() {
 	cx.waitChangers = append(cx.waitChangers, record)
 	cx.waitCounter--
 	Debug("removed from waitgroup", record, cx.waitCounter)
-	cx.PrintWaitChangers()
+	Debug(cx.PrintWaitChangers())
+	cx.WaitGroup.Done()
 }
 
 func (cx *Xt) WaitWait() {
-	cx.PrintWaitChangers()
+	Debug(cx.PrintWaitChangers())
 	cx.WaitGroup.Wait()
 }
 
-func (cx *Xt) PrintWaitChangers() {
+func (cx *Xt) PrintWaitChangers() string {
 	o := "Calls that change context waitgroup values:\n"
 	for i := range cx.waitChangers {
 		o+=cx.waitChangers[i]+"\n"
 	}
 	o+="current total:"
 	o+= fmt.Sprint(cx.waitCounter)
+	return o
 }
 
 // GetNewContext returns a fresh new context
@@ -125,7 +128,7 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 	chainClientReady := qu.T()
 	cx := &Xt{
 		ChainClientReady: chainClientReady,
-		KillAll:          make(qu.C),
+		KillAll:          qu.T(),
 		App:              cli.NewApp(),
 		Config:           config,
 		ConfigMap:        configMap,
@@ -136,7 +139,10 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		NodeChan:         make(chan *chainrpc.Server),
 	}
 	interrupt.AddHandler(func(){
-		cx.PrintWaitChangers()
+	// 	chainClientReady.Q()
+	// 	cx.PrintWaitChangers()
+		cx.ChainClientReady.Q()
+		cx.KillAll.Q()
 	})
 	return cx
 }

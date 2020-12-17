@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -127,7 +128,7 @@ func newMemWallet(net *netparams.Params, harnessID uint32) (*memWallet, error) {
 		hdRoot:            hdRoot,
 		addrs:             addrs,
 		utxos:             make(map[wire.OutPoint]*utxo),
-		chainUpdateSignal: make(qu.C),
+		chainUpdateSignal: qu.T(),
 		reorgJournal:      make(map[int32]*undoEntry),
 	}, nil
 }

@@ -72,7 +72,7 @@ func NewBitcoindConn(chainParams *netparams.Params,
 		zmqTxHost:       zmqTxHost,
 		zmqPollInterval: zmqPollInterval,
 		rescanClients:   make(map[uint64]*BitcoindClient),
-		quit:            make(qu.C),
+		quit:            qu.T(),
 	}
 	return conn, nil
 }
@@ -130,7 +130,7 @@ func (c *BitcoindConn) Stop() {
 	for _, client := range c.rescanClients {
 		client.Stop()
 	}
-	close(c.quit)
+	c.quit.Q()
 	c.client.Shutdown()
 	c.client.WaitForShutdown()
 	c.wg.Wait()
@@ -300,7 +300,7 @@ func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, error) {
 // connection using multiple clients.
 func (c *BitcoindConn) NewBitcoindClient() *BitcoindClient {
 	return &BitcoindClient{
-		quit:              make(qu.C),
+		quit:              qu.T(),
 		id:                atomic.AddUint64(&c.rescanClientCounter, 1),
 		chainParams:       c.chainParams,
 		chainConn:         c,

@@ -160,7 +160,7 @@ bi.errChan <- fmt.Errorf("Error reading from input "+
 		}
 	}
 	// Close the processing channel to signal no more blocks are coming.
-	close(bi.processQueue)
+	bi.processQueue.Q()
 	bi.wg.Done()
 }
 

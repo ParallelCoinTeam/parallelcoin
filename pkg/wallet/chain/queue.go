@@ -22,7 +22,7 @@ func NewConcurrentQueue(bufferSize int) *ConcurrentQueue {
 	return &ConcurrentQueue{
 		chanIn:   make(chan interface{}),
 		chanOut:  make(chan interface{}, bufferSize),
-		quit:     make(qu.C),
+		quit:     qu.T(),
 		overflow: list.New(),
 	}
 }
@@ -76,5 +76,5 @@ func (cq *ConcurrentQueue) Start() {
 
 // Stop ends the goroutine that moves items from the in channel to the out channel.
 func (cq *ConcurrentQueue) Stop() {
-	close(cq.quit)
+	cq.quit.Q()
 }

@@ -126,7 +126,7 @@ func (m *CPUMiner) GenerateNBlocks(workerNumber uint32, n uint32,
 	}
 	m.started = true
 	m.discreteMining = true
-	m.speedMonitorQuit = make(qu.C)
+	m.speedMonitorQuit = qu.Ter()
 	m.wg.Add(1)
 	go m.speedMonitor()
 	m.Unlock()
@@ -268,8 +268,8 @@ func (m *CPUMiner) Start() {
 	// randomize the starting point so all network is mining different
 	m.rotator.Store(uint64(rand.Intn(
 		len(fork.List[fork.GetCurrent(m.b.BestSnapshot().Height)].Algos))))
-	m.quit = make(qu.C)
-	m.speedMonitorQuit = make(qu.C)
+	m.quit = qu.Ter()
+	m.speedMonitorQuit = qu.Ter()
 	m.wg.Add(2)
 	go m.speedMonitor()
 	go m.miningWorkerController()
@@ -410,10 +410,10 @@ func (m *CPUMiner) miningWorkerController() {
 	L.Trace("starting mining worker controller")
 	// launchWorkers groups common code to launch a specified number of workers
 	// for generating blocks.
-	var runningWorkers []qu.C
+	var runningWorkers qu.Ters
 	launchWorkers := func(numWorkers uint32) {
 		for i := uint32(0); i < numWorkers; i++ {
-			quit := make(qu.C)
+			quit := qu.Ter()
 			runningWorkers = append(runningWorkers, quit)
 			m.workerWg.Add(1)
 			go m.generateBlocks(i, quit)
@@ -421,7 +421,7 @@ func (m *CPUMiner) miningWorkerController() {
 	}
 	L.Tracef("spawning %d worker(s)", m.numWorkers)
 	// Launch the current number of workers by default.
-	runningWorkers = make([]qu.C, 0, m.numWorkers)
+	runningWorkers = make(qu.Ters, 0, m.numWorkers)
 	launchWorkers(m.numWorkers)
 out:
 	for {
@@ -718,7 +718,7 @@ func New(cfg *Config) *CPUMiner {
 		g:                 cfg.BlockTemplateGenerator,
 		cfg:               *cfg,
 		numWorkers:        cfg.NumThreads,
-		updateNumWorkers:  make(qu.C),
+		updateNumWorkers:  qu.Ter(),
 		queryHashesPerSec: make(chan float64),
 		updateHashes:      make(chan uint64),
 	}

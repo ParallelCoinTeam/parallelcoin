@@ -31,7 +31,7 @@ gui:
 
 guis:
 	go install -v
-	pod -D test1
+	pod -D test1 -l trace
 
 guihttpprof:
 	go install -v
@@ -56,4 +56,4 @@ mainwallet:
 teststop:
 	go install -v
 	go install -v ./pkg/util/logi/pipe
-	pipe pod -D test0 --pipelog node
+	pipe pod -D test0 --pipelog -l trace node

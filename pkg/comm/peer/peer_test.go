@@ -2,6 +2,7 @@ package peer_test
 
 import (
 	"errors"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"net"
 	"strconv"
@@ -187,7 +188,7 @@ func testPeer(t *testing.T, p *peer.Peer, s peerStats) {
 
 // TestPeerConnection tests connection between inbound and outbound peers.
 func TestPeerConnection(t *testing.T) {
-	verack := make(qu.C)
+	verack := qu.T()
 	peer1Cfg := &peer.Config{
 		Listeners: peer.MessageListeners{
 			OnVerAck: func(p *peer.Peer, msg *wire.MsgVerAck) {
@@ -318,7 +319,7 @@ func TestPeerConnection(t *testing.T) {
 
 // TestPeerListeners tests that the peer listeners are called as expected.
 func TestPeerListeners(t *testing.T) {
-	verack := make(qu.C, 1)
+	verack := qu.Ts(1)
 	ok := make(chan wire.Message, 20)
 	peerCfg := &peer.Config{
 		Listeners: peer.MessageListeners{
@@ -591,7 +592,7 @@ func TestOutboundPeer(t *testing.T) {
 	// Test trying to connect twice.
 	p.AssociateConnection(c)
 	p.AssociateConnection(c)
-	disconnected := make(qu.C)
+	disconnected := make(chan struct{})
 	go func() {
 		p.WaitForDisconnect()
 		disconnected <- struct{}{}
@@ -614,7 +615,7 @@ func TestOutboundPeer(t *testing.T) {
 	p.QueueInventory(fakeInv)
 	fakeMsg := wire.NewMsgVerAck()
 	p.QueueMessage(fakeMsg, nil)
-	done := make(qu.C)
+	done := qu.T()
 	p.QueueMessage(fakeMsg, done)
 	<-done
 	p.Disconnect()
@@ -764,7 +765,7 @@ func TestOutboundPeer(t *testing.T) {
 // 		t.Fatalf("wire.WriteMessageN: unexpected err - %v\n", err)
 // 	}
 // 	// Expect peer to disconnect automatically
-// 	disconnected := make(qu.C)
+// 	disconnected := qu.T()
 // 	go func() {
 // 		p.WaitForDisconnect()
 // 		disconnected <- struct{}{}
@@ -790,7 +791,7 @@ func TestOutboundPeer(t *testing.T) {
 // peer being disconnected.
 func TestDuplicateVersionMsg(t *testing.T) {
 	// Create a pair of peers that are connected to each other using a fake connection.
-	verack := make(qu.C)
+	verack := qu.T()
 	peerCfg := &peer.Config{
 		Listeners: peer.MessageListeners{
 			OnVerAck: func(p *peer.Peer, msg *wire.MsgVerAck) {
@@ -822,7 +823,7 @@ func TestDuplicateVersionMsg(t *testing.T) {
 		}
 	}
 	// Queue a duplicate version message from the outbound peer and wait until it is sent.
-	done := make(qu.C)
+	done := qu.T()
 	outPeer.QueueMessage(&wire.MsgVersion{}, done)
 	select {
 	case <-done:
@@ -830,7 +831,7 @@ func TestDuplicateVersionMsg(t *testing.T) {
 		t.Fatal("send duplicate version timeout")
 	}
 	// Ensure the peer that is the recipient of the duplicate version closes the connection.
-	disconnected := make(qu.C, 1)
+	disconnected := qu.Ts(1)
 	go func() {
 		inPeer.WaitForDisconnect()
 		disconnected <- struct{}{}

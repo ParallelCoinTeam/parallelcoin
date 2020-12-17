@@ -1,6 +1,7 @@
 package main
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sort"
 
 	"gioui.org/app"
@@ -19,7 +20,7 @@ type Icons struct {
 }
 
 func main() {
-	quit := make(qu.C)
+	quit := qu.T()
 	th := p9.NewTheme(p9fonts.Collection(), quit)
 	ic := Icons{
 		th: th,
@@ -47,7 +48,7 @@ func main() {
 					// we has no dimensions because it is the window
 				},
 				func() {
-					close(quit)
+					quit.Q()
 					// os.Exit(0)
 				}, quit,
 			); Check(err) {

@@ -7,9 +7,8 @@
 package app
 
 import (
-	"fmt"
 	"os"
-
+	
 	"github.com/p9c/pod/app/conte"
 )
 
@@ -25,9 +24,7 @@ const (
 func Main() int {
 	cx := conte.GetNewContext(Name, appLanguage, "main")
 	cx.App = GetApp(cx)
-	e := cx.App.Run(os.Args)
-	if e != nil {
-		fmt.Println("Pod ERROR:", e)
+	if e := cx.App.Run(os.Args);Check(e){
 		return 1
 	}
 	return 0

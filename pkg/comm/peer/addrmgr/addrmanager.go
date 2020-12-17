@@ -490,7 +490,7 @@ func (a *AddrManager) Stop() error {
 		return nil
 	}
 	// Debug("address manager shutting down"}
-	close(a.quit)
+	a.quit.Q()
 	a.wg.Wait()
 	return nil
 }
@@ -972,7 +972,7 @@ func New(dataDir string, lookupFunc func(string) ([]net.IP, error)) *AddrManager
 		PeersFile:      filepath.Join(dataDir, "peers.json"),
 		lookupFunc:     lookupFunc,
 		rand:           rand.New(rand.NewSource(time.Now().UnixNano())),
-		quit:           make(qu.C),
+		quit:           qu.T(),
 		localAddresses: make(map[string]*localAddress),
 	}
 	am.reset()

@@ -175,7 +175,7 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
 	quit qu.C) (channel *Channel, err error) {
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
-		buffers: make(map[string]*MsgBuffer), context: ctx, Ready: make(qu.C)}
+		buffers: make(map[string]*MsgBuffer), context: ctx, Ready: qu.T()}
 	if channel.sendCiph, err = gcm.GetCipher(key); Check(err) {
 	}
 	if channel.sendCiph == nil {
@@ -190,7 +190,7 @@ func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, 
 	}
 	if channel.Sender, err = NewBroadcaster(port, maxDatagramSize); Check(err) {
 	}
-	close(channel.Ready)
+	channel.Ready.Q()
 	return
 }
 

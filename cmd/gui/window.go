@@ -9,23 +9,24 @@ import (
 	"log"
 	"os"
 	"sync/atomic"
-
+	
 	"gioui.org/app"
 	"gioui.org/io/event"
 	"gioui.org/io/system"
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
-
+	
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 type window struct {
 	*app.Window
-	quit qu.C
+	quit  qu.C
 	more  *p9.Clickable
 	close *p9.Clickable
 }
+
 //
 // func _main() {
 // 	newWindow()
@@ -39,7 +40,7 @@ func newWindow() {
 	go func() {
 		w := new(window)
 		if w.quit == nil {
-			w.quit = make(qu.C)
+			w.quit = qu.T()
 		}
 		w.Window = app.NewWindow()
 		if err := w.loop(w.Events()); err != nil {
@@ -67,23 +68,27 @@ func (w *window) loop(events <-chan event.Event) error {
 				w.Close()
 			}
 			gtx := l.NewContext(&ops, e)
-
-			l.Center.Layout(gtx, func(gtx l.Context) l.Dimensions {
-				return l.Dimensions{}
-				// return layout.Flex{
-				// 	Alignment: layout.Middle,
-				// }.Layout(gtx,
-				// 	RigidInset(material.Button(th, &w.more, "More!").Layout),
-				// 	RigidInset(material.Button(th, &w.close, "Close").Layout),
-				// )
-			})
+			
+			l.Center.Layout(
+				gtx, func(gtx l.Context) l.Dimensions {
+					return l.Dimensions{}
+					// return layout.Flex{
+					// 	Alignment: layout.Middle,
+					// }.Layout(gtx,
+					// 	RigidInset(material.Button(th, &w.more, "More!").Layout),
+					// 	RigidInset(material.Button(th, &w.close, "Close").Layout),
+					// )
+				},
+			)
 			e.Frame(gtx.Ops)
 		}
 	}
 }
 
 func RigidInset(w l.Widget) l.FlexChild {
-	return l.Rigid(func(gtx l.Context) l.Dimensions {
-		return l.UniformInset(unit.Sp(5)).Layout(gtx, w)
-	})
+	return l.Rigid(
+		func(gtx l.Context) l.Dimensions {
+			return l.UniformInset(unit.Sp(5)).Layout(gtx, w)
+		},
+	)
 }

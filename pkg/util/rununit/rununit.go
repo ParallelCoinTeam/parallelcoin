@@ -21,12 +21,12 @@ type RunUnit struct {
 // New creates and starts a new rununit. run and stop functions are executed after starting and stopping. logger
 // receives log entries and processes them (such as logging them).
 func New(
-	run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter func(pkg string) (out bool),
+	run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter func(pkg string) (out bool), quit qu.C,
 	args ...string,
 ) (r *RunUnit) {
 	r = &RunUnit{
 		commandChan: make(chan bool),
-		quit:        make(qu.C),
+		quit:        quit,
 	}
 	r.running.Store(false)
 	r.shuttingDown.Store(false)
@@ -101,9 +101,9 @@ func (r *RunUnit) Stop() {
 // Shutdown terminates the run unit
 func (r *RunUnit) Shutdown() {
 	// debug.PrintStack()
-	if !r.shuttingDown.Load() && r.running.Load() {
+	if !r.shuttingDown.Load() {
 		r.shuttingDown.Store(true)
-		close(r.quit)
+		r.quit.Q()
 	}
 }
 

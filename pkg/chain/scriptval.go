@@ -152,12 +152,12 @@ func (v *txValidator) Validate(items []*txValidateItem) error {
 			processedItems++
 			if err != nil {
 				Error(err)
-				close(v.quitChan)
+				v.quitChan.Q()
 				return err
 			}
 		}
 	}
-	close(v.quitChan)
+	v.quitChan.Q()
 	return nil
 }
 
@@ -166,7 +166,7 @@ func newTxValidator(utxoView *UtxoViewpoint, flags txscript.ScriptFlags,
 	sigCache *txscript.SigCache, hashCache *txscript.HashCache) *txValidator {
 	return &txValidator{
 		validateChan: make(chan *txValidateItem),
-		quitChan:     make(qu.C),
+		quitChan:     qu.T(),
 		resultChan:   make(chan error),
 		utxoView:     utxoView,
 		sigCache:     sigCache,

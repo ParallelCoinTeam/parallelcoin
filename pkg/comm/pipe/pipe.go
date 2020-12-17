@@ -19,7 +19,7 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 	out:
 		for {
 			select {
-			case <-quit:
+			case <-interrupt.HandlersDone:
 				Debug("quitting log consumer")
 				break out
 			default:
@@ -46,20 +46,16 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 	return w
 }
 
-func Serve(quit qu.C, handler func([]byte) error) stdconn.StdConn {
+func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 	var n int
 	var err error
-	qChan := qu.T()
 	data := make([]byte, 8192)
 	go func() {
 		Debug("starting pipe server")
 	out:
 		for {
 			select {
-			case <-qChan:
-				break out
-			case <-quit:
-				qChan.Quit()
+			case <-interrupt.HandlersDone:
 				break out
 			default:
 			}
@@ -82,5 +78,5 @@ func Serve(quit qu.C, handler func([]byte) error) stdconn.StdConn {
 	// so, _ := os.Stdin.Stat()
 	// omod := so.Mode()
 	// os.Stdin.Chmod(omod &^ syscall.O_NONBLOCK)
-	return stdconn.New(os.Stdin, os.Stdout, qChan)
+	return stdconn.New(os.Stdin, os.Stdout, quit)
 }

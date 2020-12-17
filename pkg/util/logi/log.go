@@ -9,9 +9,9 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
+	
 	"github.com/davecgh/go-spew/spew"
-
+	
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
 
@@ -113,62 +113,76 @@ type (
 	PrintlnFunc func(pkg string, a ...interface{})
 	CheckFunc   func(pkg string, err error) bool
 	SpewFunc    func(pkg string, a interface{})
-
+	
 	// Logger is a struct containing all the functions with nice handy names
 	Logger struct {
-		Packages      *Pk.Package
-		Level         string
-		Fatal         PrintlnFunc
-		Error         PrintlnFunc
-		Warn          PrintlnFunc
-		Info          PrintlnFunc
-		Check         CheckFunc
-		Debug         PrintlnFunc
-		Trace         PrintlnFunc
-		Fatalf        PrintfFunc
-		Errorf        PrintfFunc
-		Warnf         PrintfFunc
-		Infof         PrintfFunc
-		Debugf        PrintfFunc
-		Tracef        PrintfFunc
-		Fatalc        PrintcFunc
-		Errorc        PrintcFunc
-		Warnc         PrintcFunc
-		Infoc         PrintcFunc
-		Debugc        PrintcFunc
-		Tracec        PrintcFunc
-		Fatals        SpewFunc
-		Errors        SpewFunc
-		Warns         SpewFunc
-		Infos         SpewFunc
-		Debugs        SpewFunc
-		Traces        SpewFunc
-		LogFileHandle *os.File
-		Writer        LogWriter
-		Color         bool
-		Split         string
-		LogChan       []chan Entry
+		Packages        *Pk.Package
+		Level           string
+		Fatal           PrintlnFunc
+		Error           PrintlnFunc
+		Warn            PrintlnFunc
+		Info            PrintlnFunc
+		Check           CheckFunc
+		Debug           PrintlnFunc
+		Trace           PrintlnFunc
+		Fatalf          PrintfFunc
+		Errorf          PrintfFunc
+		Warnf           PrintfFunc
+		Infof           PrintfFunc
+		Debugf          PrintfFunc
+		Tracef          PrintfFunc
+		Fatalc          PrintcFunc
+		Errorc          PrintcFunc
+		Warnc           PrintcFunc
+		Infoc           PrintcFunc
+		Debugc          PrintcFunc
+		Tracec          PrintcFunc
+		Fatals          SpewFunc
+		Errors          SpewFunc
+		Warns           SpewFunc
+		Infos           SpewFunc
+		Debugs          SpewFunc
+		Traces          SpewFunc
+		LogFileHandle   *os.File
+		Writer          LogWriter
+		Color           bool
+		Split           string
+		LogChan         chan Entry
+		LogChanDisabled bool
 	}
 )
 
 var L = NewLogger()
 
+func init() {
+	L.SetLevel("info", true, "pod")
+	L.Writer.SetLogWriter(os.Stderr)
+	L.Writer.write = true
+	L.Trace("starting up logger")
+}
+
 // AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() (ch chan Entry) {
-	L.LogChan = append(L.LogChan, make(chan Entry))
-	// L.Write = false
-	return L.LogChan[len(L.LogChan)-1]
+	if l.LogChan != nil {
+		L.Debug("trying to add a second logging channel")
+		panic("warning warning")
+	}
+	l.LogChan = make(chan Entry)
+	l.LogChanDisabled = false
+	// L.Writer.write = false
+	return L.LogChan
 }
 
 func NewLogger() (l *Logger) {
 	p := make(Pk.Package)
 	l = &Logger{
-		Packages:      &p,
-		Level:         "trace",
-		LogFileHandle: os.Stderr,
-		Color:         true,
-		Split:         "pod",
-		LogChan:       nil,
+		Packages:        &p,
+		Level:           "trace",
+		LogFileHandle:   os.Stderr,
+		Color:           true,
+		Split:           "pod",
+		LogChan:         nil,
+		LogChanDisabled: true,
 	}
 	l.Fatal = l.printlnFunc(Fatal)
 	l.Error = l.printlnFunc(Error)
@@ -195,7 +209,6 @@ func NewLogger() (l *Logger) {
 	l.Infos = l.spewFunc(Info)
 	l.Debugs = l.spewFunc(Debug)
 	l.Traces = l.spewFunc(Trace)
-
 	return
 }
 
@@ -209,8 +222,12 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	path := filepath.Join(logFileName, logPath)
 	var logFileHandle *os.File
 	if FileExists(path) {
-		err := os.Rename(path, filepath.Join(logPath,
-			time.Now().Format(timeFormat)+".json"))
+		err := os.Rename(
+			path, filepath.Join(
+				logPath,
+				time.Now().Format(timeFormat)+".json",
+			),
+		)
 		if err != nil {
 			if L.Writer.write {
 				L.Writer.Println("error rotating log", err)
@@ -280,13 +297,6 @@ func (l *Logger) LoadConfig(configFile []byte) {
 	}
 }
 
-func init() {
-	L.SetLevel("info", true, "pod")
-	L.Writer.SetLogWriter(os.Stderr)
-	L.Writer.write = true
-	L.Trace("starting up logger")
-}
-
 func sanitizeLoglevel(level string) string {
 	found := false
 	for i := range Levels {
@@ -335,14 +345,14 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 		if l.Writer.write || (*l.Packages)[pkg] {
 			l.Writer.Println(Composite(text, level))
 		}
-		if l.LogChan != nil {
+		if !l.LogChanDisabled && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
-			out := Entry{time.Now(), level,
-				pkg, l.GetLoc(loc, line), text}
-			for i := range l.LogChan {
-				l.LogChan[i] <- out
+			out := Entry{
+				time.Now(), level,
+				pkg, l.GetLoc(loc, line), text,
 			}
+			l.LogChan <- out
 		}
 	}
 	return f
@@ -359,14 +369,14 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 		if l.Writer.write {
 			l.Writer.Println(Composite(text, level))
 		}
-		if l.LogChan != nil {
+		if !l.LogChanDisabled && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
-			out := Entry{time.Now(), level,
-				pkg, l.GetLoc(loc, line), text}
-			for i := range l.LogChan {
-				l.LogChan[i] <- out
+			out := Entry{
+				time.Now(), level,
+				pkg, l.GetLoc(loc, line), text,
 			}
+			l.LogChan <- out
 		}
 	}
 	return f
@@ -382,14 +392,14 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 		if l.Writer.write {
 			l.Writer.Println(Composite(text, level))
 		}
-		if l.LogChan != nil {
+		if !l.LogChanDisabled && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
-			out := Entry{time.Now(), level, pkg,
-				l.GetLoc(loc, line), text}
-			for i := range l.LogChan {
-				l.LogChan[i] <- out
+			out := Entry{
+				time.Now(), level, pkg,
+				l.GetLoc(loc, line), text,
 			}
+			l.LogChan <- out
 		}
 	}
 	return f
@@ -408,14 +418,14 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 		if l.Writer.write {
 			l.Writer.Println(Composite(text, "CHK"))
 		}
-		if l.LogChan != nil {
+		if !l.LogChanDisabled && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
-			out := Entry{time.Now(), level,
-				pkg, l.GetLoc(loc, line), text}
-			for i := range l.LogChan {
-				l.LogChan[i] <- out
+			out := Entry{
+				time.Now(), level,
+				pkg, l.GetLoc(loc, line), text,
 			}
+			l.LogChan <- out
 		}
 		return true
 	}
@@ -434,15 +444,16 @@ func (l *Logger) spewFunc(level string) SpewFunc {
 		if l.Writer.write {
 			l.Writer.Print(o)
 		}
-		if l.LogChan != nil {
+		if !l.LogChanDisabled && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
-			out := Entry{time.Now(), level, pkg,
-				l.GetLoc(loc, line), text}
-			for i := range l.LogChan {
-				l.LogChan[i] <- out
+			out := Entry{
+				time.Now(), level, pkg,
+				l.GetLoc(loc, line), text,
 			}
-
+			if l.LogChan != nil {
+				l.LogChan <- out
+			}
 		}
 	}
 	return f
@@ -458,4 +469,11 @@ func Composite(text, level string) (final string) {
 	since := fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Millisecond*time.Millisecond)
 	final = Tags[level] + " " + since + " " + text + " " + loc + ":" + line
 	return final
+}
+
+func Caller(comment string, skip int) string {
+	_, file, line, _ := runtime.Caller(skip + 1)
+	o := fmt.Sprintf("%s: %s:%d", comment, file, line)
+	L.Debug(o)
+	return o
 }

@@ -95,7 +95,7 @@ func (w *Worker) Run() {
 				func() {
 					Debug("quitting miner")
 					// interrupt.Request()
-					close(w.quit)
+					w.quit.Q()
 				}, w.quit); Check(err) {
 		}
 	}()

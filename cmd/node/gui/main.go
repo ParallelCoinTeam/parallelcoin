@@ -19,7 +19,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	ng := &NodeGUI{
 		cx:         cx,
 		c:          c,
-		invalidate: make(qu.C),
+		invalidate: qu.T(),
 		quit:       cx.KillAll,
 		size:       &size,
 	}

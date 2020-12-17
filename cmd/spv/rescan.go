@@ -255,7 +255,7 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 	)
 	// We'll wait here at this point until we have enough filter headers to actually start walking forwards in the
 	// chain. To be able to wake up in cause we are being asked to exit, we'll launch a new goroutine to wait.
-	done := make(qu.C)
+	done := qu.T()
 	go func() {
 		s.blockManager.newFilterHeadersMtx.Lock()
 		for s.blockManager.filterHeaderTip < uint32(curStamp.Height) {
@@ -840,7 +840,7 @@ type Rescan struct {
 // long-running rescan object, and a channel which returns any error on termination of the rescan process.
 func (s *ChainService) NewRescan(options ...RescanOption) *Rescan {
 	return &Rescan{
-		running:    make(qu.C),
+		running:    qu.T(),
 		options:    options,
 		updateChan: make(chan *updateOptions),
 		chain:      s,
@@ -865,7 +865,7 @@ func (r *Rescan) Start() <-chan error {
 		defer r.wg.Done()
 		rescanArgs := append(r.options, updateChan(r.updateChan))
 		err := r.chain.rescan(rescanArgs...)
-		close(r.running)
+		r.running.Q()
 		r.errMtx.Lock()
 		r.err = err
 		r.errMtx.Unlock()

@@ -3,7 +3,6 @@ package consume
 import (
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
-	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
@@ -36,15 +35,8 @@ func Log(
 	args ...string,
 ) *worker.Worker {
 	Debug("starting log consumer")
-	logQuit := qu.T()
-	interrupt.AddHandler(
-		func() {
-			logQuit.Quit()
-			quit.Quit()
-		},
-	)
 	return pipe.Consume(
-		logQuit, func(b []byte) (err error) {
+		quit, func(b []byte) (err error) {
 			// we are only listening for entries
 			if len(b) >= 4 {
 				magic := string(b[:4])
@@ -105,6 +97,7 @@ func Kill(w *worker.Worker) {
 		return
 	}
 	// close(w.Quit)
+	// w.StdConn.Quit.Q()
 	Debug("sent kill signal")
 }
 

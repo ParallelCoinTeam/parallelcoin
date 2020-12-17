@@ -65,7 +65,7 @@ func (s *NeutrinoClient) Start() error {
 		s.enqueueNotification = make(chan interface{})
 		s.dequeueNotification = make(chan interface{})
 		s.currentBlock = make(chan *waddrmgr.BlockStamp)
-		s.quit = make(qu.C)
+		s.quit = qu.T()
 		s.started = true
 		s.wg.Add(1)
 		go func() {
@@ -86,7 +86,7 @@ func (s *NeutrinoClient) Stop() {
 	if !s.started {
 		return
 	}
-	close(s.quit)
+	s.quit.Q()
 	s.started = false
 }
 
@@ -297,14 +297,14 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	}
 	if s.scanning {
 		// Restart the rescan by killing the existing rescan.
-		close(s.rescanQuit)
+		s.rescanQuit.Q()
 		s.clientMtx.Unlock()
 		s.rescan.WaitForShutdown()
 		s.clientMtx.Lock()
 		s.rescan = nil
 		s.rescanErr = nil
 	}
-	s.rescanQuit = make(qu.C)
+	s.rescanQuit = qu.T()
 	s.scanning = true
 	s.finished = false
 	s.lastProgressSent = false
@@ -384,7 +384,7 @@ func (s *NeutrinoClient) NotifyReceived(addrs []util.Address) error {
 		s.clientMtx.Unlock()
 		return s.rescan.Update(sac.AddAddrs(addrs...))
 	}
-	s.rescanQuit = make(qu.C)
+	s.rescanQuit = qu.T()
 	s.scanning = true
 	// Don't need RescanFinished or RescanProgress notifications.
 	s.finished = true

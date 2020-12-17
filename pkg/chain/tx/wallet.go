@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sort"
 	"strings"
 	"sync"
@@ -101,7 +102,7 @@ func (w *Wallet) Start() {
 	case <-w.quit:
 		// Restart the wallet goroutines after shutdown finishes.
 		w.WaitForShutdown()
-		w.quit = make(qu.C)
+		w.quit = qu.T()
 	default:
 		// Ignore when the wallet is still running.
 		if w.started {
@@ -179,7 +180,7 @@ func (w *Wallet) ChainClient() chain.Interface {
 }
 
 // quitChan atomically reads the quit channel.
-func (w *Wallet) quitChan() <-qu.C {
+func (w *Wallet) quitChan() qu.C {
 	w.quitMu.Lock()
 	c := w.quit
 	w.quitMu.Unlock()
@@ -194,7 +195,7 @@ func (w *Wallet) Stop() {
 	select {
 	case <-quit:
 	default:
-		close(quit)
+		quit.Q()
 		w.chainClientLock.Lock()
 		if w.chainClient != nil {
 			w.chainClient.Stop()
@@ -1854,7 +1855,7 @@ type GetTransactionsResult struct {
 //
 // Transaction results are organized by blocks in ascending order and unmined transactions in an unspecified order.
 // Mined transactions are saved in a Block structure which records properties about the block.
-func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel <-qu.C) (*GetTransactionsResult, error) {
+func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel qu.C) (*GetTransactionsResult, error) {
 	var start, end int32 = 0, -1
 	w.chainClientLock.Lock()
 	chainClient := w.chainClient
@@ -3110,13 +3111,13 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 		rescanFinished:      make(chan *RescanFinishedMsg),
 		createTxRequests:    make(chan createTxRequest),
 		unlockRequests:      make(chan unlockRequest),
-		lockRequests:        make(qu.C),
+		lockRequests:        qu.T(),
 		holdUnlockRequests:  make(chan chan heldUnlock),
 		lockState:           make(chan bool),
 		changePassphrase:    make(chan changePassphraseRequest),
 		changePassphrases:   make(chan changePassphrasesRequest),
 		chainParams:         params,
-		quit:                make(qu.C),
+		quit:                qu.T(),
 	}
 	w.NtfnServer = newNotificationServer(w)
 	w.TxStore.NotifyUnspent = func(hash *chainhash.Hash, index uint32) {

@@ -23,10 +23,10 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
 		}
-		// quit := make(qu.C)
+		// quit := qu.T()
 		interrupt.AddHandler(func() {
 			Debug("Handle interrupt")
-			close(cx.KillAll)
+			cx.KillAll.Q()
 			// os.Exit(0)
 		})
 		err = kopach.Handle(cx)(c)

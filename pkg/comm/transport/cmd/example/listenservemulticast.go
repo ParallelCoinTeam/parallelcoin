@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"time"
 
@@ -21,7 +22,7 @@ var (
 func main() {
 	log.L.SetLevel("trace", true, "pod")
 	Debug("starting test")
-	quit := make(qu.C)
+	quit := qu.T()
 	var c *transport.Channel
 	var err error
 	if c, err = transport.NewBroadcastChannel("test", nil, "cipher",
@@ -49,5 +50,5 @@ func main() {
 	if err = c.Close(); !Check(err) {
 		time.Sleep(time.Second * 1)
 	}
-	close(quit)
+	quit.Q()
 }

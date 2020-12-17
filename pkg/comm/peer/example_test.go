@@ -2,6 +2,7 @@ package peer_test
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"time"
 
@@ -48,7 +49,7 @@ func Example_newOutboundPeer() {
 		return
 	}
 	// Create an outbound peer that is configured to act as a simnet node that offers no services and has listeners for the version and verack messages.  The verack listener is used here to signal the code below when the handshake has been finished by signalling a channel.
-	verack := make(qu.C)
+	verack := qu.T()
 	peerCfg := &peer.Config{
 		UserAgentName:    "peer",  // User agent name to advertise.
 		UserAgentVersion: "1.0.0", // User agent version to advertise.

@@ -66,7 +66,7 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 		onDisconnect:   onDisconnect,
 		quit:           quit,
 		notifyBlock:    make(chan *blockMessage),
-		intQuit:        make(qu.C),
+		intQuit:        qu.T(),
 	}
 	// At this point, we'll now check to see if we need to deliver any backlog notifications as its possible that while
 	// the caller is requesting right after a new set of blocks has been connected.
@@ -121,7 +121,7 @@ func (s *ChainService) unsubscribeBlockMsgs(subscription *blockSubscription) {
 	s.mtxSubscribers.Lock()
 	delete(s.blockSubscribers, subscription)
 	s.mtxSubscribers.Unlock()
-	close(subscription.intQuit)
+	subscription.intQuit.Q()
 	// Drain the inbound notification channel
 cleanup:
 	for {

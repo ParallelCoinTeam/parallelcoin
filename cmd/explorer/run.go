@@ -1,12 +1,10 @@
 package explorer
 
 import (
-	"os"
-	"time"
-
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
+	"os"
 )
 
 func (ex *Explorer) Runner() (err error) {
@@ -15,7 +13,7 @@ func (ex *Explorer) Runner() (err error) {
 			// 		ex.NodeRunCommandChan <- "stop"
 			consume.Kill(ex.Shell)
 		}
-		close(ex.quit)
+		ex.quit.Q()
 	})
 	go func() {
 		Debug("starting node run controller")
@@ -54,7 +52,7 @@ func (ex *Explorer) Runner() (err error) {
 					Debug("restart called")
 					go func() {
 						ex.RunCommandChan <- "stop"
-						time.Sleep(time.Second)
+						// time.Sleep(time.Second)
 						ex.RunCommandChan <- "run"
 					}()
 				}

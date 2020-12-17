@@ -1,6 +1,7 @@
 package legacy
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -9,7 +10,7 @@ import (
 
 func TestThrottle(t *testing.T) {
 	const threshold = 1
-	busy := make(qu.C)
+	busy := qu.T()
 	srv := httptest.NewServer(ThrottledFn(threshold,
 		func(w http.ResponseWriter, r *http.Request) {
 			<-busy
@@ -29,7 +30,7 @@ func TestThrottle(t *testing.T) {
 	for i := 0; i < cap(codes); i++ {
 		got[<-codes]++
 		if i == 0 {
-			close(busy)
+			busy.Q()
 		}
 	}
 	want := map[int]int{200: 1, 429: 1}

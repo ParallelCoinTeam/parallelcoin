@@ -17,17 +17,14 @@ import (
 func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) {
 	Debug("starting log server")
 	lc := logi.L.AddLogChan()
-	logQuit := make(qu.C)
-	interrupt.AddHandler(
-		func() {
-			close(logQuit)
-		},
-	)
+	// interrupt.AddHandler(func(){
+	// 	logi.L.RemoveLogChan(lc)
+	// })
 	pkgChan := make(chan Pk.Package)
 	var logOn atomic.Bool
 	logOn.Store(false)
 	p := pipe.Serve(
-		logQuit, func(b []byte) (err error) {
+		quit, func(b []byte) (err error) {
 			// listen for commands to enable/disable logging
 			if len(b) >= 4 {
 				magic := string(b[:4])
@@ -54,13 +51,15 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 					Debug("received kill signal from pipe, shutting down", appName)
 					// time.Sleep(time.Second*5)
 					// time.Sleep(time.Second * 3)
+					// quit.Q()
+					// logi.L.LogChanDisabled = true
+					// logi.L.LogChan = nil
 					interrupt.Request()
-					// close(logQuit)
-					// close(quit)
 					// os.Exit(0)
 					// break
 					// os.Exit(0)
-					// <-interrupt.HandlersDone
+					<-interrupt.HandlersDone
+					// quit.Q()
 					// goroutineDump()
 					pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 				}
@@ -73,31 +72,37 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 		for {
 			select {
 			case <-quit:
-				interrupt.Request()
-				close(logQuit)
-				continue
-			case <-logQuit:
+				// interrupt.Request()
 				Debug("quitting pipe logger")
+				logOn.Store(false)
 				break out
 			case e := <-lc:
-				if logOn.Load() {
-					if n, err := p.Write(Entry.Get(&e).Data); !Check(err) {
-						if n < 1 {
-							Error("short write")
-						}
-					} else {
-						break out
+				if !logOn.Load() {
+					break out
+				}
+				if n, err := p.Write(Entry.Get(&e).Data); !Check(err) {
+					// Debug(interrupt.GoroutineDump())
+					if n < 1 {
+						Error("short write")
 					}
+				} else {
+					break out
+					// 	quit.Q()
 				}
 			case pk := <-pkgChan:
+				if !logOn.Load() {
+					break out
+				}
 				if n, err := p.Write(Pkg.Get(pk).Data); !Check(err) {
 					if n < 1 {
 						Error("short write")
 					}
+				} else {
 					break out
 				}
 			}
 		}
+		// <-interrupt.HandlersDone
 		Debug("finished pipe logger")
 	}()
 }

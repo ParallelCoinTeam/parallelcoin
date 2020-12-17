@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"time"
 
 	"github.com/p9c/pod/pkg/comm/pipe"
 )
 
 func main() {
-	p := pipe.Serve(make(qu.C), func(b []byte) (err error) {
+	p := pipe.Serve(qu.T(), func(b []byte) (err error) {
 		fmt.Print("from parent: ", string(b))
 		return
 	})

@@ -117,7 +117,7 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 			if *b.Hash() == inv.Hash {
 // 				// Execute the callback with the found block,
 // 				// and wait for the quit channel to be closed.
-// 				quit := make(qu.C)
+// 				quit := qu.T()
 // 				f(nil, b.MsgBlock(), quit)
 // 				select {
 // 				case <-quit:

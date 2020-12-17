@@ -215,7 +215,7 @@ out:
 				connReq := msg.c
 				connReq.updateState(ConnPending)
 				pending[msg.c.id] = connReq
-				close(msg.done)
+				msg.done.Q()
 			case handleConnected:
 				connReq := msg.c
 				if _, ok := pending[connReq.id]; !ok {
@@ -303,7 +303,7 @@ func (cm *ConnManager) NewConnReq() {
 	atomic.StoreUint64(&c.id, atomic.AddUint64(&cm.connReqCount, 1))
 	// Submit a request of a pending connection attempt to the connection manager. By registering the id before the
 	// connection is even established, we'll be able to later cancel the connection via the Remove method.
-	done := make(qu.C)
+	done := qu.T()
 	select {
 	case cm.requests <- registerPending{c, done}:
 	case <-cm.quit:
@@ -344,7 +344,7 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 		// Submit a request of a pending connection attempt to the connection manager. By registering the id before the
 		// connection is even established, we'll be able to later cancel the connection via the Remove method.
 		Trace("sending request to register connection")
-		done := make(qu.C)
+		done := qu.T()
 		select {
 		case cm.requests <- registerPending{c, done}:
 		case <-cm.quit:
@@ -467,7 +467,7 @@ func (cm *ConnManager) Stop() {
 		// Ignore the error since this is shutdown and there is no way to recover anyways.
 		_ = listener.Close()
 	}
-	close(cm.quit)
+	cm.quit.Q()
 }
 
 // New returns a new connection manager. Use Start to start connecting to the network.
@@ -486,7 +486,7 @@ func New(cfg *Config) (*ConnManager, error) {
 	cm := ConnManager{
 		Cfg:      *cfg, // Copy so caller can't mutate
 		requests: make(chan interface{}),
-		quit:     make(qu.C),
+		quit:     qu.T(),
 	}
 	return &cm, nil
 }

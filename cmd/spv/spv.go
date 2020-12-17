@@ -317,7 +317,7 @@ func (s *ChainService) Stop() error {
 		return nil
 	}
 	// Signal the remaining goroutines to quit.
-	close(s.quit)
+	s.quit.Q()
 	s.wg.Wait()
 	return nil
 }
@@ -511,7 +511,7 @@ func (s *ChainService) peerDoneHandler(sp *ServerPeer) {
 	if sp.VersionKnown() {
 		s.blockManager.DonePeer(sp)
 	}
-	close(sp.quit)
+	sp.quit.Q()
 }
 
 // peerHandler is used to handle peer operations such as adding and removing peers to and from the server, banning
@@ -983,7 +983,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 		donePeers:           make(chan *ServerPeer, MaxPeers),
 		banPeers:            make(chan *ServerPeer, MaxPeers),
 		query:               make(chan interface{}),
-		quit:                make(qu.C),
+		quit:                qu.T(),
 		peerHeightsUpdate:   make(chan updatePeerHeightsMsg),
 		timeSource:          blockchain.NewMedianTime(),
 		services:            Services,
@@ -1174,7 +1174,7 @@ func newServerPeer(s *ChainService, isPersistent bool) *ServerPeer {
 		server:          s,
 		persistent:      isPersistent,
 		knownAddresses:  make(map[string]struct{}),
-		quit:            make(qu.C),
+		quit:            qu.T(),
 		recvSubscribers: make(map[spMsgSubscription]struct{}),
 	}
 }

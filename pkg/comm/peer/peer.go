@@ -825,7 +825,7 @@ func (p *Peer) PushRejectMsg(command string, code wire.RejectCode, reason string
 		return
 	}
 	// Send the message and block until it has been sent before returning.
-	doneChan := make(qu.C, 1)
+	doneChan := qu.Ts(1)
 	p.QueueMessage(msg, doneChan)
 	<-doneChan
 }
@@ -1346,7 +1346,7 @@ out:
 	idleTimer.Stop()
 	// Ensure connection is closed.
 	p.Disconnect()
-	close(p.inQuit)
+	p.inQuit.Q()
 	Trace("peer input handler done for", p)
 }
 
@@ -1472,7 +1472,7 @@ cleanup:
 			break cleanup
 		}
 	}
-	close(p.queueQuit)
+	p.queueQuit.Q()
 	Trace("peer queue handler done for", p)
 }
 
@@ -1553,7 +1553,7 @@ cleanup:
 			break cleanup
 		}
 	}
-	close(p.outQuit)
+	p.outQuit.Q()
 	Trace("peer output handler done for", p)
 }
 
@@ -1638,7 +1638,7 @@ func (p *Peer) Disconnect() {
 	if atomic.LoadInt32(&p.connected) != 0 {
 		_ = p.conn.Close()
 	}
-	close(p.quit)
+	p.quit.Q()
 }
 
 // readRemoteVersionMsg waits for the next message to arrive from the remote peer. If the next message is not a version
@@ -1903,12 +1903,12 @@ func newPeerBase(origCfg *Config, inbound bool) *Peer {
 		stallControl:    make(chan stallControlMsg, 1), // nonblocking sync
 		outputQueue:     make(chan outMsg, outputBufferSize),
 		sendQueue:       make(chan outMsg, 1),   // nonblocking sync
-		sendDoneQueue:   make(qu.C, 1), // nonblocking sync
+		sendDoneQueue:   qu.Ts(1), // nonblocking sync
 		outputInvChan:   make(chan *wire.InvVect, outputBufferSize),
-		inQuit:          make(qu.C),
-		queueQuit:       make(qu.C),
-		outQuit:         make(qu.C),
-		quit:            make(qu.C),
+		inQuit:          qu.T(),
+		queueQuit:       qu.T(),
+		outQuit:         qu.T(),
+		quit:            qu.T(),
 		cfg:             cfg, // Copy so caller can't mutate.
 		services:        cfg.Services,
 		protocolVersion: cfg.ProtocolVersion,

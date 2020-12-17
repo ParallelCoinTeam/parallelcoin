@@ -2,7 +2,8 @@ package main
 
 import (
 	l "gioui.org/layout"
-
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -14,7 +15,7 @@ type App struct {
 }
 
 func main() {
-	quit := make(qu.C)
+	quit := qu.T()
 	th := p9.NewTheme(p9fonts.Collection(), quit)
 	minerModel := App{
 		th: th,
@@ -24,9 +25,11 @@ func main() {
 			Size(64, 32).
 			Title("nothing to see here").
 			Open().
-			Run(minerModel.mainWidget, func(l.Context) {}, func() {
-				close(quit)
-			}, quit); Check(err) {
+			Run(
+				minerModel.mainWidget, func(l.Context) {}, func() {
+					quit.Q()
+				}, quit,
+		); Check(err) {
 		}
 	}()
 	<-quit

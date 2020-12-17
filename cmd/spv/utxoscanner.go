@@ -161,7 +161,7 @@ func (s *UtxoScanner) Stop() error {
 	if !atomic.CompareAndSwapUint32(&s.stopped, 0, 1) {
 		return nil
 	}
-	close(s.quit)
+	s.quit.Q()
 batchShutdown:
 	for {
 		select {
@@ -184,7 +184,7 @@ batchShutdown:
 //
 // NOTE: This method MUST be spawned as a goroutine.
 func (s *UtxoScanner) batchManager() {
-	defer close(s.shutdown)
+	defer s.shutdown.Q()
 	for {
 		s.cv.L.Lock()
 		// Re-queue previously skipped requests for next batch.
@@ -339,8 +339,8 @@ func (pq GetUtxoRequestPQ) Swap(i, j int)      { pq[i], pq[j] = pq[j], pq[i] }
 func NewUtxoScanner(cfg *UtxoScannerConfig) *UtxoScanner {
 	scanner := &UtxoScanner{
 		cfg:      cfg,
-		quit:     make(qu.C),
-		shutdown: make(qu.C),
+		quit:     qu.T(),
+		shutdown: qu.T(),
 	}
 	scanner.cv = sync.NewCond(&scanner.mu)
 	return scanner

@@ -571,7 +571,7 @@ out:
 			c.wsConn = wsConn
 			c.retryCount = 0
 			c.mtx.Lock()
-			c.disconnect = make(qu.C)
+			c.disconnect = qu.T()
 			c.disconnected = false
 			c.mtx.Unlock()
 			// Start processing input and output for the new connection.
@@ -813,7 +813,7 @@ func (c *Client) doDisconnect() bool {
 		return false
 	}
 	Trace("disconnecting RPC client", c.config.Host)
-	close(c.disconnect)
+	c.disconnect.Q()
 	if c.wsConn != nil {
 		c.wsConn.Close()
 	}
@@ -834,7 +834,7 @@ func (c *Client) doShutdown() bool {
 	default:
 	}
 	Trace("shutting down RPC client", c.config.Host)
-	close(c.shutdown)
+	c.shutdown.Q()
 	return true
 }
 
@@ -1001,7 +1001,7 @@ func dial(config *ConnConfig) (*websocket.Conn, error) {
 			MinVersion: tls.VersionTLS12,
 		}
 		if len(config.Certificates) > 0 {
-			Debug("no certificates for verification")
+			// Debug("no certificates for verification")
 			pool := x509.NewCertPool()
 			pool.AppendCertsFromPEM(config.Certificates)
 			tlsConfig.RootCAs = pool
@@ -1060,7 +1060,7 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error
 	// notification handlers to nil when running in HTTP POST mode.
 	var wsConn *websocket.Conn
 	var httpClient *http.Client
-	connEstablished := make(qu.C)
+	connEstablished := qu.T()
 	var start bool
 	if config.HTTPPostMode {
 		ntfnHandlers = nil
@@ -1093,12 +1093,12 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error
 		sendChan:        make(chan []byte, sendBufferSize),
 		sendPostChan:    make(chan *sendPostDetails, sendPostBufferSize),
 		connEstablished: connEstablished,
-		disconnect:      make(qu.C),
-		shutdown:        make(qu.C),
+		disconnect:      qu.T(),
+		shutdown:        qu.T(),
 	}
 	if start {
 		Trace("established connection to RPC server", config.Host)
-		close(connEstablished)
+		connEstablished.Q()
 		client.start()
 		if !client.config.HTTPPostMode && !client.config.DisableAutoReconnect {
 			client.wg.Add(1)
@@ -1144,7 +1144,7 @@ func (c *Client) Connect(tries int) error {
 		// necessary to run the client.
 		Debug("established connection to RPC server", c.config.Host)
 		c.wsConn = wsConn
-		close(c.connEstablished)
+		c.connEstablished.Q()
 		c.start()
 		if !c.config.DisableAutoReconnect {
 			c.wg.Add(1)

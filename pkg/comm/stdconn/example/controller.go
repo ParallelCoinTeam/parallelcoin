@@ -10,7 +10,7 @@ import (
 func main() {
 	log.L.SetLevel("trace", true, "pod")
 	Info("starting up example controller")
-	cmd, _ := worker.Spawn(make(qu.C), "go", "run", "hello/worker.go")
+	cmd, _ := worker.Spawn(qu.T(), "go", "run", "hello/worker.go")
 	client := hello.NewClient(cmd.StdConn)
 	Info("calling Hello.Say with 'worker'")
 	Info("reply:", client.Say("worker"))

@@ -58,7 +58,7 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	interrupt.AddHandler(
 		func() {
-			close(cx.WalletKill)
+			cx.WalletKill.Q()
 		},
 	)
 	select {
@@ -76,7 +76,7 @@ func Main(cx *conte.Xt) (err error) {
 		// <-legacyServer.RequestProcessShutdownChan()
 	case <-cx.KillAll:
 		Debug("killall")
-		close(cx.WalletKill)
+		cx.WalletKill.Q()
 	case <-interrupt.HandlersDone:
 	}
 	Info("wallet shutdown complete")
@@ -208,7 +208,7 @@ func rpcClientConnectLoop(
 			continue
 		}
 		cx.ChainClient = cc
-		close(cx.ChainClientReady)
+		cx.ChainClientReady.Q()
 		chainClient = cc
 		// Rather than inlining this logic directly into the loader callback, a function variable is used to avoid
 		// running any of this after the client disconnects by setting it to nil. This prevents the callback from

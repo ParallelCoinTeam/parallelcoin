@@ -108,7 +108,7 @@ func (w *Wallet) Start() {
 		Trace("waiting for wallet shutdown")
 		// Restart the wallet goroutines after shutdown finishes.
 		w.WaitForShutdown()
-		w.quit = make(qu.C)
+		w.quit = qu.T()
 	default:
 		if w.started {
 			// Ignore when the wallet is still running.
@@ -202,7 +202,7 @@ func (w *Wallet) Stop() {
 	select {
 	case <-quit:
 	default:
-		close(quit)
+		quit.Q()
 		w.chainClientLock.Lock()
 		if w.chainClient != nil {
 			w.chainClient.Stop()
@@ -3358,14 +3358,14 @@ func Open(
 		rescanFinished:      make(chan *RescanFinishedMsg),
 		createTxRequests:    make(chan createTxRequest),
 		unlockRequests:      make(chan unlockRequest),
-		lockRequests:        make(qu.C),
+		lockRequests:        qu.T(),
 		holdUnlockRequests:  make(chan chan heldUnlock),
 		lockState:           make(chan bool),
 		changePassphrase:    make(chan changePassphraseRequest),
 		changePassphrases:   make(chan changePassphrasesRequest),
 		chainParams:         params,
 		PodConfig:           podConfig,
-		quit:                make(qu.C),
+		quit:                qu.T(),
 	}
 	w.NtfnServer = newNotificationServer(w)
 	w.TxStore.NotifyUnspent = func(hash *chainhash.Hash, index uint32) {

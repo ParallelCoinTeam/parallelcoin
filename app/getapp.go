@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
+	
 	"github.com/urfave/cli"
-
+	
 	au "github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/app/conte"
@@ -32,7 +32,9 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Action:      walletGUIHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			Trace("subcommand completed", os.Args)
+			Debug("subcommand completed", os.Args) // , string(debug.Stack()), interrupt.GoroutineDump())
+			// debug.PrintStack()
+			// Debug(interrupt.GoroutineDump())
 			if interrupt.Restart {
 			}
 			return nil

@@ -40,7 +40,7 @@ func NewWebsocketClient(c *websocket.Conn, authenticated bool, remoteAddr string
 		remoteAddr:    remoteAddr,
 		allRequests:   make(chan []byte),
 		responses:     make(chan []byte),
-		quit:          make(qu.C),
+		quit:          qu.T(),
 	}
 }
 func (c *WebsocketClient) Send(b []byte) error {
@@ -98,8 +98,8 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 			// Allow all origins.
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
-		Quit:                make(qu.C),
-		RequestShutdownChan: make(qu.C, 1),
+		Quit:                qu.T(),
+		RequestShutdownChan: qu.Ts(1),
 	}
 	serveMux.Handle("/", ThrottledFn(opts.MaxPOSTClients,
 		func(w http.ResponseWriter, r *http.Request) {
@@ -217,7 +217,7 @@ func (s *Server) Stop() {
 		}
 	}
 	// Signal the remaining goroutines to stop.
-	close(s.Quit)
+	s.Quit.Q()
 	s.QuitMutex.Unlock()
 	// First wait for the wallet and chain server to stop, if they were ever set.
 	if wllt != nil {
@@ -514,7 +514,7 @@ out:
 			break out
 		}
 	}
-	close(wsc.quit)
+	wsc.quit.Q()
 	Info("disconnected websocket client", wsc.remoteAddr)
 	s.WG.Done()
 }

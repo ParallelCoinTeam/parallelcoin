@@ -1,6 +1,7 @@
 package node
 
 import (
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"net/http"
 	
@@ -132,17 +133,18 @@ func Main(cx *conte.Xt) (err error) {
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 && *cx.Config.CAPI {
 		Debug("starting cAPI.....")
-		chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
+		// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
 		// Debug("propagating rpc server handle (node has started)")
 	}
-	cx.RPCServer = server.RPCServers[0]
-	if cx.NodeChan != nil && cx.RPCServer != nil {
+	var controlQuit qu.C
+	if len(server.RPCServers) > 0 {
+		cx.RPCServer = server.RPCServers[0]
 		Debug("sending back node")
 		cx.NodeChan <- cx.RPCServer
+		// set up interrupt shutdown handlers to stop servers
+		// Debug("starting controller")
+		controlQuit = control.Run(cx)
 	}
-	// set up interrupt shutdown handlers to stop servers
-	// Debug("starting controller")
-	controlQuit := control.Run(cx)
 	// Debug("controller started")
 	// cx.Controller.Store(true)
 	gracefulShutdown := func() {
@@ -153,7 +155,7 @@ func Main(cx *conte.Xt) (err error) {
 		// 	return
 		// }
 		Debug("stopping controller")
-		controlQuit.Quit()
+		controlQuit.Q()
 		Debug("stopping server")
 		e := server.Stop()
 		if e != nil {
@@ -165,8 +167,8 @@ func Main(cx *conte.Xt) (err error) {
 		Info("server shutdown complete")
 		cx.WaitDone()
 		// cx.WaitGroup.Done()
-		close(cx.KillAll)
-		close(cx.NodeKill)
+		// cx.KillAll.Q()
+		// cx.NodeKill.Q()
 		// Debug(interrupt.GoroutineDump())
 		// <-interrupt.HandlersDone
 	}
@@ -194,8 +196,7 @@ func Main(cx *conte.Xt) (err error) {
 		break
 	}
 	// Debug(interrupt.GoroutineDump())
-	// gracefulShutdown()
-	cx.WaitWait()
+	gracefulShutdown()
 	return nil
 }
 

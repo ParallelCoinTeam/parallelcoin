@@ -36,9 +36,9 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
-		invalidate: make(qu.C),
-		quit:       make(qu.C),
-		// nodeQuit: make(qu.C),
+		invalidate: qu.T(),
+		quit:      cx.KillAll,
+		// nodeQuit: qu.T(),
 		Size:     &size,
 		noWallet: &noWallet,
 		// walletLocked: uberatomic.NewBool(walletLocked),
@@ -170,6 +170,7 @@ func (wg *WalletGUI) Run() (err error) {
 		func() { wg.wg.Done() },
 		consume.SimpleLog("NODE"),
 		consume.FilterNone,
+		wg.quit,
 		nodeArgs...,
 	)
 	walletArgs := []string{
@@ -182,6 +183,7 @@ func (wg *WalletGUI) Run() (err error) {
 		func() { wg.wg.Done() },
 		consume.SimpleLog("WLLT"),
 		consume.FilterNone,
+		wg.quit,
 		walletArgs...,
 	)
 	minerArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach"}
@@ -190,6 +192,7 @@ func (wg *WalletGUI) Run() (err error) {
 		func() { wg.wg.Done() },
 		consume.SimpleLog("MINE"),
 		consume.FilterNone,
+		wg.quit,
 		minerArgs...,
 	)
 	wg.bools = map[string]*p9.Bool{
@@ -329,8 +332,8 @@ func (wg *WalletGUI) Run() (err error) {
 			Debug("quitting wallet gui")
 			// consume.Kill(wg.Node)
 			// consume.Kill(wg.Miner)
-			// close(wg.quit)
-			wg.gracefulShutdown()
+			wg.quit.Q()
+			// wg.gracefulShutdown()
 		},
 	)
 out:
@@ -340,7 +343,7 @@ out:
 			Trace("invalidating render queue")
 			wg.w["main"].Window.Invalidate()
 		case <-wg.cx.KillAll:
-			close(wg.quit)
+			wg.quit.Q()
 		case <-wg.quit:
 			break out
 		}
@@ -376,6 +379,6 @@ func (wg *WalletGUI) gracefulShutdown() {
 		wg.WalletClient = nil
 	}
 	wg.WalletMutex.Unlock()
-	close(wg.quit)
+	wg.quit.Q()
 	wg.wg.Wait()
 }

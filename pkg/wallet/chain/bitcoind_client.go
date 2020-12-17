@@ -262,7 +262,7 @@ func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) error 
 			[]*chainhash.Hash:
 			// Proceed to check the next filter type.
 		default:
-			return fmt.Errorf("unsupported filter type %T", filter)
+			return fmt.Errorf("unsupported filter type %Ter", filter)
 		}
 	}
 	for _, filter := range filters {
@@ -389,7 +389,7 @@ func (c *BitcoindClient) Stop() {
 	if !atomic.CompareAndSwapInt32(&c.stopped, 0, 1) {
 		return
 	}
-	close(c.quit)
+	c.quit.Q()
 	// Remove this client's reference from the bitcoind connection to prevent sending notifications to it after it's
 	// been stopped.
 	c.chainConn.RemoveClient(c.id)
@@ -468,7 +468,7 @@ func (c *BitcoindClient) rescanHandler() {
 				}
 			default:
 				Warnf(
-					"received unexpected filter type %T", update,
+					"received unexpected filter type %Ter", update,
 				)
 			}
 		case <-c.quit:

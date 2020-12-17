@@ -14,7 +14,7 @@ type Hello struct {
 }
 
 func NewHello() *Hello {
-	return &Hello{make(qu.C)}
+	return &Hello{qu.T()}
 }
 
 func (h *Hello) Say(name string, reply *string) (err error) {
@@ -26,7 +26,7 @@ func (h *Hello) Say(name string, reply *string) (err error) {
 func (h *Hello) Bye(_ int, reply *string) (err error) {
 	r := "i hear and obey *dies*"
 	*reply = r
-	close(h.Quit)
+	h.Quit.Q()
 	return
 }
 
