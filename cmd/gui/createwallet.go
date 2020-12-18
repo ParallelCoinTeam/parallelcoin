@@ -190,11 +190,13 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															Debug("password", string(pass))
 															save.Pod(wg.cx.Config)
 															w, err := loader.CreateNewWallet(
-																pass, pass,
+																pass,
+																pass,
 																seed,
 																time.Now(),
 																false,
 																wg.cx.Config,
+																nil,
 															)
 															Debug("*** created wallet")
 															if Check(err) {

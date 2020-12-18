@@ -82,7 +82,7 @@ func New(
 		// 	if err := r.worker.Kill(); Check(err) {
 		// 	}
 		// }
-		Debug("finished running", args)
+		Debug("runner stopped for", args)
 	}()
 	return
 }

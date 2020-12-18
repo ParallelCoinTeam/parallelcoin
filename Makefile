@@ -56,4 +56,4 @@ mainwallet:
 teststop:
 	go install -v
 	go install -v ./pkg/util/logi/pipe
-	pipe pod -D test0 --pipelog -l trace node
+	pipe pod -D test1 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan kopach

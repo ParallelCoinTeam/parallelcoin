@@ -98,7 +98,7 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 			// Allow all origins.
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
-		Quit:                qu.T(),
+		Quit:                quit,
 		RequestShutdownChan: qu.Ts(1),
 	}
 	serveMux.Handle("/", ThrottledFn(opts.MaxPOSTClients,

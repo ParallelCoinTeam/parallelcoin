@@ -3283,8 +3283,13 @@ func Create(
 
 // Open loads an already-created wallet from the passed database and namespaces.
 func Open(
-	db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks,
-	params *netparams.Params, recoveryWindow uint32, podConfig *pod.Config,
+	db walletdb.DB,
+	pubPass []byte,
+	cbs *waddrmgr.OpenCallbacks,
+	params *netparams.Params,
+	recoveryWindow uint32,
+	podConfig *pod.Config,
+	quit qu.C,
 ) (*Wallet, error) {
 	// debug.PrintStack()
 	Warn("opening wallet", string(pubPass))
@@ -3365,7 +3370,7 @@ func Open(
 		changePassphrases:   make(chan changePassphrasesRequest),
 		chainParams:         params,
 		PodConfig:           podConfig,
-		quit:                qu.T(),
+		quit:                quit,
 	}
 	w.NtfnServer = newNotificationServer(w)
 	w.TxStore.NotifyUnspent = func(hash *chainhash.Hash, index uint32) {

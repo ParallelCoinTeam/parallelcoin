@@ -73,14 +73,14 @@ func Log(
 func Start(w *worker.Worker) {
 	Debug("sending start signal")
 	if n, err := w.StdConn.Write([]byte("run ")); n < 1 || Check(err) {
-		Debug("failed to write")
+		Debug("failed to write", w.Args)
 	}
 }
 
 func Stop(w *worker.Worker) {
 	Debug("sending stop signal")
 	if n, err := w.StdConn.Write([]byte("stop")); n < 1 || Check(err) {
-		Debug("failed to write")
+		Debug("failed to write", w.Args)
 	}
 }
 

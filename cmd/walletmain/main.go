@@ -108,7 +108,7 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	// Create and start chain RPC client so it's ready to connect to the wallet when loaded later.
 	// Load the wallet database. It must have been created already or this will return an appropriate error.
 	var w *wallet.Wallet
-	w, err = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass), true, cx.Config)
+	w, err = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass), true, cx.Config, nil)
 	// Warn("wallet", w)
 	if err != nil {
 		Error(err)

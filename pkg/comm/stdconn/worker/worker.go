@@ -13,7 +13,7 @@ import (
 
 type Worker struct {
 	Cmd  *exec.Cmd
-	args []string
+	Args []string
 	// Stderr  io.WriteCloser
 	StdPipe io.ReadCloser
 	StdConn *stdconn.StdConn
@@ -31,7 +31,7 @@ func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 	}
 	w = &Worker{
 		Cmd:  exec.Command(args[0], args[1:]...),
-		args: args,
+		Args: args,
 		// Stderr:  pipeWriter,
 		StdPipe: pipeReader,
 	}

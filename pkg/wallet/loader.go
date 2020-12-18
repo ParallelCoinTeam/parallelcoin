@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"errors"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"path/filepath"
 	"sync"
@@ -49,8 +50,13 @@ var (
 
 // CreateNewWallet creates a new wallet using the provided public and private passphrases. The seed is optional. If
 // non-nil, addresses are derived from this seed. If nil, a secure random seed is generated.
-func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bday time.Time, noStart bool,
-	podConfig *pod.Config) (*Wallet, error) {
+func (ld *Loader) CreateNewWallet(
+	pubPassphrase, privPassphrase, seed []byte,
+	bday time.Time,
+	noStart bool,
+	podConfig *pod.Config,
+	quit qu.C,
+) (*Wallet, error) {
 	ld.Mutex.Lock()
 	defer ld.Mutex.Unlock()
 	if ld.Loaded {
@@ -84,7 +90,7 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 		return nil, err
 	}
 	// Open the newly-created wallet.
-	w, err := Open(db, pubPassphrase, nil, ld.ChainParams, ld.RecoveryWindow, podConfig)
+	w, err := Open(db, pubPassphrase, nil, ld.ChainParams, ld.RecoveryWindow, podConfig, quit)
 	if err != nil {
 		Error(err)
 		return nil, err
@@ -110,7 +116,12 @@ func (ld *Loader) LoadedWallet() (*Wallet, bool) {
 // OpenExistingWallet opens the wallet from the loader's wallet database path and the public passphrase. If the loader
 // is being called by a context where standard input prompts may be used during wallet upgrades, setting
 // canConsolePrompt will enables these prompts.
-func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool, podConfig *pod.Config) (*Wallet, error) {
+func (ld *Loader) OpenExistingWallet(
+	pubPassphrase []byte,
+	canConsolePrompt bool,
+	podConfig *pod.Config,
+	quit qu.C,
+) (*Wallet, error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	// INFO("opening existing wallet", ld.DDDirPath}
@@ -146,7 +157,7 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 		}
 	}
 	Debug("opening wallet '"+string(pubPassphrase)+"'")
-	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig)
+	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig, quit)
 	if err != nil {
 		Info("failed to open wallet", err)
 		// If opening the wallet fails (e.g. because of wrong passphrase), we must close the backing database to allow

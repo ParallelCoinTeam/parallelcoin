@@ -34,7 +34,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		After: func(c *cli.Context) error {
 			Debug("subcommand completed", os.Args) // , string(debug.Stack()), interrupt.GoroutineDump())
 			// debug.PrintStack()
-			// Debug(interrupt.GoroutineDump())
+			Debug(interrupt.GoroutineDump())
 			if interrupt.Restart {
 			}
 			return nil
