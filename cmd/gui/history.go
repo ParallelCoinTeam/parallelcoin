@@ -1,12 +1,8 @@
 package gui
 
 import (
-	"fmt"
-
-	"golang.org/x/exp/shiny/materialdesign/icons"
-
 	l "gioui.org/layout"
-
+	
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
@@ -100,73 +96,6 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 	// wg.th.Fill("DocBg",
 	// p9.EmptySpace(0, 0),
 	// ).Fn
-}
-
-func (wg *WalletGUI) HistoryPager() l.Widget {
-	v := wg.incdecs["transactionsPerPage"].GetCurrent()
-	vd := len(wg.State.AllTxs) / v
-	vm := len(wg.State.AllTxs) % v
-	if vm != 0 {
-		vd++
-	}
-	return wg.th.Flex().AlignMiddle().
-		Rigid(
-			wg.th.IconButton(wg.clickables["txPageBack"].
-				SetClick(func() {
-					wg.historyCurPage--
-					if wg.historyCurPage < 0 {
-						wg.historyCurPage = 0
-					}
-					// if wg.historyCurPage > wg.hist
-				})).
-				Background("Transparent").
-				Color("DocText").
-				Scale(1).
-				Icon(
-					wg.th.Icon().
-						Color("DocText").
-						Scale(1).
-						Src(&icons.NavigationArrowBack),
-				).
-				Fn,
-		).
-		Rigid(
-			wg.th.Inset(0.25,
-				wg.th.Caption(fmt.Sprintf("page %d/%d", wg.historyCurPage, vd)).Fn,
-			).Fn,
-		).
-		Rigid(
-			wg.th.IconButton(wg.clickables["txPageForward"].
-				SetClick(func() {
-					wg.historyCurPage++
-					pLen := len(wg.State.AllTxs) / wg.incdecs["transactionsPerPage"].GetCurrent()
-					if wg.historyCurPage > pLen {
-						wg.historyCurPage = pLen
-					}
-				})).
-				Background("Transparent").
-				Color("DocText").
-				Scale(1).
-				Icon(
-					wg.th.Icon().Color("DocText").
-						Scale(1).
-						Src(&icons.NavigationArrowForward),
-				).
-				Fn,
-		).Fn
-}
-
-func (wg *WalletGUI) HistoryPagePerPageCount() l.Widget {
-	return wg.th.Flex().AlignMiddle().
-		Rigid(
-			wg.incdecs["transactionsPerPage"].
-				Color("DocText").Background("DocBg").Scale(p9.Scales["Caption"]).Fn,
-		).
-		Rigid(
-			wg.th.Inset(0.25,
-				wg.th.Caption("tx/page").Fn,
-			).Fn,
-		).Fn
 }
 
 func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {

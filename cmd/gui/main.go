@@ -3,6 +3,7 @@ package gui
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"runtime"
@@ -25,7 +26,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
@@ -37,61 +37,56 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 		c:          c,
 		invalidate: qu.T(),
 		quit:       cx.KillAll,
-		// nodeQuit: qu.T(),
-		Size:     &size,
-		noWallet: &noWallet,
-		// walletLocked: uberatomic.NewBool(walletLocked),
+		Size:       &size,
+		noWallet:   &noWallet,
 	}
 	return wg.Run()
 }
 
 type WalletGUI struct {
-	wg               sync.WaitGroup
-	cx               *conte.Xt
-	c                *cli.Context
-	w                map[string]*f.Window
-	th               *p9.Theme
-	App              *p9.App
-	unlockPage       *p9.App
-	unlockPassword   *p9.Password
-	sidebarButtons   []*p9.Clickable
-	buttonBarButtons []*p9.Clickable
-	statusBarButtons []*p9.Clickable
-	quitClickable    *p9.Clickable
-	bools            map[string]*p9.Bool
-	lists            map[string]*p9.List
-	checkables       map[string]*p9.Checkable
-	clickables       map[string]*p9.Clickable
-	inputs           map[string]*p9.Input
-	passwords        map[string]*p9.Password
-	incdecs          map[string]*p9.IncDec
-	// intSliders                map[string]*p9.IntSlider
-	configs                   cfg.GroupsMap
-	config                    *cfg.Config
-	invalidate                qu.C
+	wg                        sync.WaitGroup
+	cx                        *conte.Xt
+	c                         *cli.Context
 	quit                      qu.C
-	sendAddresses             []SendAddress
 	State                     State
+	noWallet                  *bool
+	node, wallet, miner       *rununit.RunUnit
+	walletToLock              time.Time
+	walletLockTime            int
 	ChainMutex, WalletMutex   sync.Mutex
 	ChainClient, WalletClient *rpcclient.Client
-	txs                       []btcjson.ListTransactionsResult
-	historyCurPage            int
+	w                         map[string]*f.Window
+	Size                      *int
+	th                        *p9.Theme
+	App                       *p9.App
+	invalidate                qu.C
+	unlockPage                *p9.App
+	config                    *cfg.Config
+	configs                   cfg.GroupsMap
+	unlockPassword            *p9.Password
+	sidebarButtons            []*p9.Clickable
+	buttonBarButtons          []*p9.Clickable
+	statusBarButtons          []*p9.Clickable
+	quitClickable             *p9.Clickable
+	bools                     map[string]*p9.Bool
+	lists                     map[string]*p9.List
+	checkables                map[string]*p9.Checkable
+	clickables                map[string]*p9.Clickable
+	inputs                    map[string]*p9.Input
+	passwords                 map[string]*p9.Password
+	incdecs                   map[string]*p9.IncDec
+	historyTable              *p9.TextTable
+	sendAddresses             []SendAddress
 	console                   *Console
 	toasts                    *toast.Toasts
 	dialog                    *dialog.Dialog
-	node, wallet, miner       *rununit.RunUnit
-	noWallet                  *bool
-	// walletLocked              *uberatomic.Bool
-	walletToLock   time.Time
-	walletLockTime int
-	Size           *int
-	historyTable   *p9.TextTable
 }
 
 func (wg *WalletGUI) Run() (err error) {
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
+	*wg.noWallet = true
 	wg.sidebarButtons = make([]*p9.Clickable, 12)
 	// wg.walletLocked.Store(true)
 	for i := range wg.sidebarButtons {
@@ -117,16 +112,7 @@ func (wg *WalletGUI) Run() (err error) {
 	// 		}),
 	// }
 	wg.State.AllTimeStrings.Store([]string{})
-	wg.lists = map[string]*p9.List{
-		"createWallet": wg.th.List(),
-		"overview":     wg.th.List(),
-		"recent":       wg.th.List(),
-		"send":         wg.th.List(),
-		"transactions": wg.th.List(),
-		"settings":     wg.th.List(),
-		"received":     wg.th.List(),
-		"history":      wg.th.List(),
-	}
+	wg.lists = wg.GetLists()
 	wg.historyTable = (&p9.TextTable{
 		Theme:            wg.th,
 		HeaderColor:      "DocText",
@@ -141,70 +127,25 @@ func (wg *WalletGUI) Run() (err error) {
 		List:             wg.lists["history"],
 	}).
 		SetDefaults()
-	wg.clickables = map[string]*p9.Clickable{
-		"createWallet":            wg.th.Clickable(),
-		"quit":                    wg.th.Clickable(),
-		"sendSend":                wg.th.Clickable(),
-		"sendClearAll":            wg.th.Clickable(),
-		"sendAddRecipient":        wg.th.Clickable(),
-		"receiveCreateNewAddress": wg.th.Clickable(),
-		"receiveClear":            wg.th.Clickable(),
-		"receiveShow":             wg.th.Clickable(),
-		"receiveRemove":           wg.th.Clickable(),
-		"transactions10":          wg.th.Clickable(),
-		"transactions30":          wg.th.Clickable(),
-		"transactions50":          wg.th.Clickable(),
-		"txPageForward":           wg.th.Clickable(),
-		"txPageBack":              wg.th.Clickable(),
-	}
+	wg.clickables = wg.GetClickables()
 	wg.checkables = map[string]*p9.Checkable{
 	}
-	nodeArgs := []string{
-		os.Args[0], "-D", *wg.cx.Config.DataDir,
-		"--servertls=true", "--clienttls=true",
-		"--pipelog", "node",
-	}
-	wg.node = rununit.New(
-		func() { Debug("running before") },
-		func() { Debug("running after") },
-		consume.SimpleLog("NODE"),
-		consume.FilterNone,
-		wg.quit,
-		nodeArgs...,
+	before := func() { Debug("running before") }
+	after := func() { Debug("running after") }
+	
+	wg.node = wg.GetRunUnit(
+		"NODE", before, after,
+		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "node",
 	)
-	walletArgs := []string{
-		os.Args[0], "-D", *wg.cx.Config.DataDir,
-		"--servertls=true", "--clienttls=true",
-		"--pipelog", "wallet",
-	}
-	wg.wallet = rununit.New(
-		func() { Debug("running before") },
-		func() { Debug("running after") },
-		consume.SimpleLog("WLLT"),
-		consume.FilterNone,
-		wg.quit,
-		walletArgs...,
+	wg.wallet = wg.GetRunUnit(
+		"WLLT", before, after,
+		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "wallet",
 	)
-	minerArgs := []string{os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach"}
-	wg.miner = rununit.New(
-		func() { Debug("running before") },
-		func() { Debug("running after") },
-		consume.SimpleLog("MINE"),
-		consume.FilterNone,
-		wg.quit,
-		minerArgs...,
+	wg.miner = wg.GetRunUnit(
+		"MINE", before, after,
+		os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach",
 	)
-	wg.bools = map[string]*p9.Bool{
-		"runstate":     wg.th.Bool(wg.node.Running()),
-		"encryption":   wg.th.Bool(false),
-		"seed":         wg.th.Bool(false),
-		"testnet":      wg.th.Bool(false),
-		"ihaveread":    wg.th.Bool(false),
-		"showGenerate": wg.th.Bool(true),
-		"showSent":     wg.th.Bool(true),
-		"showReceived": wg.th.Bool(true),
-		"showImmature": wg.th.Bool(true),
-	}
+	wg.bools = wg.GetBools()
 	pass := ""
 	passConfirm := ""
 	seed := make([]byte, hdkeychain.MaxSeedBytes)
@@ -323,15 +264,14 @@ func (wg *WalletGUI) Run() (err error) {
 			); Check(err) {
 		}
 	}()
-	// interrupt.AddHandler(
-	// 	func() {
-	// 		Debug("quitting wallet gui")
-	// 		// consume.Kill(wg.Node)
-	// 		// consume.Kill(wg.Miner)
-	// 		wg.quit.Q()
-	// 		// wg.gracefulShutdown()
-	// 	},
-	// )
+	interrupt.AddHandler(
+		func() {
+			Debug("quitting wallet gui")
+			// consume.Kill(wg.Node)
+			// consume.Kill(wg.Miner)
+			wg.quit.Q()
+		},
+	)
 out:
 	for {
 		select {
@@ -344,7 +284,63 @@ out:
 			break out
 		}
 	}
+	wg.gracefulShutdown()
 	return
+}
+func (wg *WalletGUI) GetRunUnit(name string, before, after func(), args ...string) *rununit.RunUnit {
+	return rununit.New(
+		before,
+		after,
+		consume.SimpleLog(name),
+		consume.FilterNone,
+		wg.quit,
+		args...,
+	)
+}
+
+func (wg *WalletGUI) GetLists() (o map[string]*p9.List) {
+	return map[string]*p9.List{
+		"createWallet": wg.th.List(),
+		"overview":     wg.th.List(),
+		"recent":       wg.th.List(),
+		"send":         wg.th.List(),
+		"transactions": wg.th.List(),
+		"settings":     wg.th.List(),
+		"received":     wg.th.List(),
+		"history":      wg.th.List(),
+	}
+}
+
+func (wg *WalletGUI) GetClickables() map[string]*p9.Clickable {
+	return map[string]*p9.Clickable{
+		"createWallet":            wg.th.Clickable(),
+		"quit":                    wg.th.Clickable(),
+		"sendSend":                wg.th.Clickable(),
+		"sendClearAll":            wg.th.Clickable(),
+		"sendAddRecipient":        wg.th.Clickable(),
+		"receiveCreateNewAddress": wg.th.Clickable(),
+		"receiveClear":            wg.th.Clickable(),
+		"receiveShow":             wg.th.Clickable(),
+		"receiveRemove":           wg.th.Clickable(),
+		"transactions10":          wg.th.Clickable(),
+		"transactions30":          wg.th.Clickable(),
+		"transactions50":          wg.th.Clickable(),
+		"txPageForward":           wg.th.Clickable(),
+		"txPageBack":              wg.th.Clickable(),
+	}
+}
+func (wg *WalletGUI) GetBools() map[string]*p9.Bool {
+	return map[string]*p9.Bool{
+		"runstate":     wg.th.Bool(wg.node.Running()),
+		"encryption":   wg.th.Bool(false),
+		"seed":         wg.th.Bool(false),
+		"testnet":      wg.th.Bool(false),
+		"ihaveread":    wg.th.Bool(false),
+		"showGenerate": wg.th.Bool(true),
+		"showSent":     wg.th.Bool(true),
+		"showReceived": wg.th.Bool(true),
+		"showImmature": wg.th.Bool(true),
+	}
 }
 
 func (wg *WalletGUI) gracefulShutdown() {
@@ -380,6 +376,6 @@ func (wg *WalletGUI) gracefulShutdown() {
 		wg.WalletClient = nil
 	}
 	wg.WalletMutex.Unlock()
-	wg.quit.Q()
-	wg.wg.Wait()
+	// wg.quit.Q()
+	// wg.wg.Wait()
 }

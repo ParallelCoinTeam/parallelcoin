@@ -98,6 +98,8 @@ func Kill(w *worker.Worker) {
 	}
 	// close(w.Quit)
 	// w.StdConn.Quit.Q()
+	if err = w.Cmd.Wait(); Check(err) {
+	}
 	Debug("sent kill signal")
 }
 

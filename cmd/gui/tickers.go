@@ -47,7 +47,7 @@ func (wg *WalletGUI) Tickers() {
 					if wg.ChainClient != nil {
 						wg.ChainClient.Disconnect()
 						// if wg.ChainClient.Disconnected() {
-						// 	wg.ChainClient.Shutdown()
+						wg.ChainClient.Shutdown()
 						wg.ChainClient = nil
 						// }
 					}
@@ -55,26 +55,21 @@ func (wg *WalletGUI) Tickers() {
 					wg.WalletMutex.Lock()
 					if wg.WalletClient != nil {
 						wg.WalletClient.Disconnect()
-						// wg.WalletClient.Shutdown()
+						wg.WalletClient.Shutdown()
 						wg.WalletClient = nil
 					}
 					wg.WalletMutex.Unlock()
 					if !wg.node.Running() {
 						break
 					}
-					if !*wg.cx.Config.NodeOff {
-						Debug("connecting to chain")
-						if err = wg.chainClient(); Check(err) {
-							break
-						}
+					Debug("connecting to chain")
+					if err = wg.chainClient(); Check(err) {
+						break
 					}
-					if wg.wallet.Running() {
-						Debug("connecting to wallet")
-						if err = wg.walletClient(); Check(err) {
-							break
-						}
+					Debug("connecting to wallet")
+					if err = wg.walletClient(); Check(err) {
+						// break
 					}
-					// if we got to here both are connected
 					break preconnect
 				case <-wg.quit:
 					break totalOut
