@@ -19,18 +19,19 @@ func T() C {
 	createdList = append(createdList, logi.Caller("remaining quit channel from", 1))
 	o := make(C)
 	createdChannels = append(createdChannels, o)
-	Debug("open channels:", len(createdList), len(createdChannels), occ)
+	Trace("open channels:", len(createdList), len(createdChannels), occ)
 	return o
 }
 
 func Ts(n int) C {
+	PrintChanState()
 	occ := GetOpenChanCount()
 	// mx.Lock()
 	// defer mx.Unlock()
-	createdList = append(createdList, logi.Caller("created quit channel at", 1))
+	createdList = append(createdList, logi.Caller("remaining buffered quit channel at", 1))
 	o := make(C, n)
 	createdChannels = append(createdChannels, o)
-	Debug("open channels:", occ)
+	Trace("open channels:", len(createdList), len(createdChannels), occ)
 	return o
 }
 
@@ -40,15 +41,15 @@ func (c C) Q() {
 	// defer mx.Unlock()
 	if !testChanIsClosed(c) {
 		close(c)
-		Debug("closed channel from " + loc, logi.Caller("from", 1))
+		Trace("closing channel from " + loc, logi.Caller("from", 1))
 	} else {
-		Debug("#### channel", loc, "was already closed")
+		Trace("#### channel", loc, "was already closed")
 	}
 	PrintChanState()
 }
 
 func (c C) Wait() <-chan struct{} {
-	Debug(logi.Caller(">>>> waiting on quit channel at", 1))
+	Trace(logi.Caller(">>>> waiting on quit channel at", 1))
 	return c
 }
 
@@ -85,10 +86,10 @@ func PrintChanState() {
 			break
 		}
 		if testChanIsClosed(createdChannels[i]) {
-			// Debug("still open", createdList[i])
+			Trace("closed", createdList[i])
 			// createdChannels[i].Q()
 		} else {
-			Debug(">>>> ", createdList[i])
+			Trace("open", createdList[i])
 		}
 		// Debug(">>>>>>>>>>>")
 	}

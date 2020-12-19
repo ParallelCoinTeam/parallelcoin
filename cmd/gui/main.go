@@ -9,18 +9,18 @@ import (
 	"runtime"
 	"sync"
 	"time"
-	
+
 	"github.com/urfave/cli"
-	
+
 	l "gioui.org/layout"
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 	"github.com/p9c/pod/pkg/util/rununit"
-	
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui/dialog"
 	"github.com/p9c/pod/pkg/gui/toast"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	
+
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
@@ -87,52 +87,15 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
 	*wg.noWallet = true
-	wg.sidebarButtons = make([]*p9.Clickable, 12)
-	// wg.walletLocked.Store(true)
-	for i := range wg.sidebarButtons {
-		wg.sidebarButtons[i] = wg.th.Clickable()
-	}
-	wg.buttonBarButtons = make([]*p9.Clickable, 5)
-	for i := range wg.buttonBarButtons {
-		wg.buttonBarButtons[i] = wg.th.Clickable()
-	}
-	wg.statusBarButtons = make([]*p9.Clickable, 6)
-	for i := range wg.statusBarButtons {
-		wg.statusBarButtons[i] = wg.th.Clickable()
-	}
-	// wg.intSliders = map[string]*p9.IntSlider{
-	// 	"lockTimeout": wg.th.IntSlider().
-	// 		// TextColor("Danger").
-	// 		// SliderColor("Danger").
-	// 		Min(30).Max(3600).Value(300).
-	// 		Hook(func(v int) {
-	// 			wg.walletLockTime = v
-	// 			wg.walletToLock = time.Now().Add(time.Duration(v) * time.Second)
-	// 			// wg.intSliders["lockTimeout"].Value(v)
-	// 		}),
-	// }
+	wg.GetButtons()
 	wg.State.AllTimeStrings.Store([]string{})
 	wg.lists = wg.GetLists()
-	wg.historyTable = (&p9.TextTable{
-		Theme:            wg.th,
-		HeaderColor:      "DocText",
-		HeaderBackground: "DocBg",
-		HeaderFont:       "bariol bold",
-		HeaderFontScale:  1,
-		CellColor:        "PanelText",
-		CellBackground:   "PanelBg",
-		CellFont:         "go regular",
-		CellFontScale:    p9.Scales["Caption"],
-		Inset:            0.25,
-		List:             wg.lists["history"],
-	}).
-		SetDefaults()
 	wg.clickables = wg.GetClickables()
 	wg.checkables = map[string]*p9.Checkable{
 	}
 	before := func() { Debug("running before") }
 	after := func() { Debug("running after") }
-	
+
 	wg.node = wg.GetRunUnit(
 		"NODE", before, after,
 		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "node",
@@ -146,30 +109,8 @@ func (wg *WalletGUI) Run() (err error) {
 		os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach",
 	)
 	wg.bools = wg.GetBools()
-	pass := ""
-	passConfirm := ""
-	seed := make([]byte, hdkeychain.MaxSeedBytes)
-	_, _ = rand.Read(seed)
-	seedString := hex.EncodeToString(seed)
-	wg.inputs = map[string]*p9.Input{
-		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 32, func(pass string) {}),
-		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 32, func(pass string) {}),
-		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 32, func(pass string) {}),
-		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", 32, func(pass string) {}),
-		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", 32, func(pass string) {}),
-	}
-	wg.passwords = map[string]*p9.Password{
-		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", 32, func(pass string) {}),
-		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", 32, func(pass string) {}),
-		"publicPassEditor": wg.th.Password(
-			"public password (optional)",
-			wg.cx.Config.WalletPass,
-			"Primary",
-			"DocText",
-			32,
-			func(pass string) {},
-		),
-	}
+	wg.GetInputs()
+	wg.GetPasswords()
 	wg.toasts = toast.New(wg.th)
 	wg.dialog = dialog.New(wg.th)
 	wg.console = wg.ConsolePage()
@@ -179,54 +120,7 @@ func (wg *WalletGUI) Run() (err error) {
 		"splash": f.NewWindow(wg.th),
 		"main":   f.NewWindow(wg.th),
 	}
-	wg.incdecs = map[string]*p9.IncDec{
-		"generatethreads": wg.th.IncDec().
-			NDigits(2).
-			Min(0).
-			Max(runtime.NumCPU()).
-			SetCurrent(*wg.cx.Config.GenThreads).
-			ChangeHook(
-				func(n int) {
-					Debug("threads value now", n)
-					go func() {
-						Debug("setting thread count")
-						*wg.cx.Config.GenThreads = n
-						wg.stopMiner()
-						wg.startMiner()
-						// save.Pod(wg.cx.Config)
-						// if wg.miner.Running() {
-						// 	Debug("restarting miner")
-						// 	wg.miner.Stop()
-						// 	wg.miner.Start()
-						// }
-					}()
-				},
-			),
-		"transactionsPerPage": wg.th.IncDec().
-			Min(10).
-			Max(100).
-			NDigits(3).
-			Amount(10).
-			SetCurrent(10).
-			ChangeHook(
-				func(n int) {
-					Debug("showing", n, "per page")
-				},
-			),
-		"idleTimeout": wg.th.IncDec().
-			Scale(4).
-			Min(60).
-			Max(3600).
-			NDigits(4).
-			Amount(60).
-			SetCurrent(300).
-			ChangeHook(
-				func(n int) {
-					Debug("idle timeout", time.Duration(n)*time.Second)
-				},
-			),
-	}
-	// wg.Subscriber()
+	wg.GetIncDecs()
 	wg.App = wg.GetAppWidget()
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.Tickers()
@@ -235,9 +129,9 @@ func (wg *WalletGUI) Run() (err error) {
 	} else {
 		*wg.noWallet = false
 		wg.startNode()
-	}
-	if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0 {
-		wg.startMiner()
+		if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0 {
+			wg.startMiner()
+		}
 	}
 	wg.Size = wg.w["main"].Width
 	go func() {
@@ -287,6 +181,120 @@ out:
 	wg.gracefulShutdown()
 	return
 }
+
+func (wg *WalletGUI) GetButtons() {
+	wg.sidebarButtons = make([]*p9.Clickable, 12)
+	// wg.walletLocked.Store(true)
+	for i := range wg.sidebarButtons {
+		wg.sidebarButtons[i] = wg.th.Clickable()
+	}
+	wg.buttonBarButtons = make([]*p9.Clickable, 5)
+	for i := range wg.buttonBarButtons {
+		wg.buttonBarButtons[i] = wg.th.Clickable()
+	}
+	wg.statusBarButtons = make([]*p9.Clickable, 6)
+	for i := range wg.statusBarButtons {
+		wg.statusBarButtons[i] = wg.th.Clickable()
+	}
+}
+
+func (wg *WalletGUI) GetHistoryTable() {
+	wg.historyTable = (&p9.TextTable{
+		Theme:            wg.th,
+		HeaderColor:      "DocText",
+		HeaderBackground: "DocBg",
+		HeaderFont:       "bariol bold",
+		HeaderFontScale:  1,
+		CellColor:        "PanelText",
+		CellBackground:   "PanelBg",
+		CellFont:         "go regular",
+		CellFontScale:    p9.Scales["Caption"],
+		Inset:            0.25,
+		List:             wg.lists["history"],
+	}).
+		SetDefaults()
+}
+
+func (wg *WalletGUI) GetInputs() {
+	seed := make([]byte, hdkeychain.MaxSeedBytes)
+	_, _ = rand.Read(seed)
+	seedString := hex.EncodeToString(seed)
+	wg.inputs = map[string]*p9.Input{
+		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 32, func(pass string) {}),
+		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 32, func(pass string) {}),
+		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 32, func(pass string) {}),
+		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", 32, func(pass string) {}),
+		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", 32, func(pass string) {}),
+	}
+}
+
+func (wg *WalletGUI) GetPasswords() {
+	pass := ""
+	passConfirm := ""
+	wg.passwords = map[string]*p9.Password{
+		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", 32, func(pass string) {}),
+		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", 32, func(pass string) {}),
+		"publicPassEditor": wg.th.Password(
+			"public password (optional)",
+			wg.cx.Config.WalletPass,
+			"Primary",
+			"DocText",
+			32,
+			func(pass string) {},
+		),
+	}
+}
+
+func (wg *WalletGUI) GetIncDecs() {
+	wg.incdecs = map[string]*p9.IncDec{
+		"generatethreads": wg.th.IncDec().
+			NDigits(2).
+			Min(0).
+			Max(runtime.NumCPU()).
+			SetCurrent(*wg.cx.Config.GenThreads).
+			ChangeHook(
+				func(n int) {
+					Debug("threads value now", n)
+					go func() {
+						Debug("setting thread count")
+						*wg.cx.Config.GenThreads = n
+						wg.stopMiner()
+						wg.startMiner()
+						// save.Pod(wg.cx.Config)
+						// if wg.miner.Running() {
+						// 	Debug("restarting miner")
+						// 	wg.miner.Stop()
+						// 	wg.miner.Start()
+						// }
+					}()
+				},
+			),
+		"transactionsPerPage": wg.th.IncDec().
+			Min(10).
+			Max(100).
+			NDigits(3).
+			Amount(10).
+			SetCurrent(10).
+			ChangeHook(
+				func(n int) {
+					Debug("showing", n, "per page")
+				},
+			),
+		"idleTimeout": wg.th.IncDec().
+			Scale(4).
+			Min(60).
+			Max(3600).
+			NDigits(4).
+			Amount(60).
+			SetCurrent(300).
+			ChangeHook(
+				func(n int) {
+					Debug("idle timeout", time.Duration(n)*time.Second)
+				},
+			),
+	}
+}
+
 func (wg *WalletGUI) GetRunUnit(name string, before, after func(), args ...string) *rununit.RunUnit {
 	return rununit.New(
 		before,
@@ -329,6 +337,7 @@ func (wg *WalletGUI) GetClickables() map[string]*p9.Clickable {
 		"txPageBack":              wg.th.Clickable(),
 	}
 }
+
 func (wg *WalletGUI) GetBools() map[string]*p9.Bool {
 	return map[string]*p9.Bool{
 		"runstate":     wg.th.Bool(wg.node.Running()),
@@ -345,23 +354,23 @@ func (wg *WalletGUI) GetBools() map[string]*p9.Bool {
 
 func (wg *WalletGUI) gracefulShutdown() {
 	Debug("quitting wallet gui")
-	// if wg.miner.Running() {
-	// 	Debug("stopping miner")
-	wg.stopMiner()
-	wg.miner.Shutdown()
-	// }
-	// if wg.wallet.Running() {
-	// 	Debug("stopping wallet")
-	wg.stopWallet()
-	wg.wallet.Shutdown()
-	// 	wg.unlockPassword.Wipe()
-	// 	// wg.walletLocked.Store(true)
-	// }
-	// if wg.node.Running() {
-	// 	Debug("stopping node")
-	wg.stopNode()
-	wg.node.Shutdown()
-	// }
+	//// if wg.miner.Running() {
+	//// 	Debug("stopping miner")
+	//wg.stopMiner()
+	//wg.miner.Shutdown()
+	//// }
+	//// if wg.wallet.Running() {
+	//// 	Debug("stopping wallet")
+	//wg.stopWallet()
+	//wg.wallet.Shutdown()
+	//// 	wg.unlockPassword.Wipe()
+	//// 	// wg.walletLocked.Store(true)
+	//// }
+	//// if wg.node.Running() {
+	//// 	Debug("stopping node")
+	//wg.stopNode()
+	//wg.node.Shutdown()
+	//// }
 	wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
 		Debug("stopping chain client")

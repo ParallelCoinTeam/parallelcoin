@@ -3,7 +3,7 @@ package rununit
 import (
 	qu "github.com/p9c/pod/pkg/util/quit"
 	uberatomic "go.uber.org/atomic"
-	
+
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
@@ -21,12 +21,15 @@ type RunUnit struct {
 // New creates and starts a new rununit. run and stop functions are executed after starting and stopping. logger
 // receives log entries and processes them (such as logging them).
 func New(
-	run, stop func(), logger func(ent *logi.Entry) (err error), pkgFilter func(pkg string) (out bool), quit qu.C,
+	run, stop func(),
+	logger func(ent *logi.Entry) (err error),
+	pkgFilter func(pkg string) (out bool),
+	quit qu.C,
 	args ...string,
 ) (r *RunUnit) {
 	r = &RunUnit{
 		commandChan: make(chan bool),
-		quit:        quit,
+		quit:        qu.T(),
 	}
 	r.running.Store(false)
 	r.shuttingDown.Store(false)
@@ -38,7 +41,7 @@ func New(
 			case cmd := <-r.commandChan:
 				switch cmd {
 				case true:
-					Debug("run called for", args)
+					Debug(r.running.Load(), "run called for", args)
 					if r.running.Load() {
 						Debug("already running", args)
 						continue
@@ -47,6 +50,7 @@ func New(
 						if err := r.worker.Kill(); Check(err) {
 						}
 					}
+					// quit from rununit's quit, which closes after the main quit triggers stopping in the watcher loop
 					r.worker = consume.Log(r.quit, logger, pkgFilter, args...)
 					// Debug(r.worker)
 					consume.Start(r.worker)
@@ -54,8 +58,7 @@ func New(
 					run()
 					Debug(r.running.Load())
 				case false:
-					Debug(r.running.Load())
-					Debug("stop called for", args)
+					Debug(r.running.Load(), "stop called for", args)
 					if !r.running.Load() {
 						Debug("wasn't running", args)
 						continue
@@ -63,26 +66,23 @@ func New(
 					consume.Kill(r.worker)
 					r.running.Store(false)
 					stop()
+					Debug(r.running.Load())
 				}
 				break
 			case <-r.quit:
-				Debug("quitting on run unit quit channel", args, r.running.Load())
-				// if !r.running.Load() {
-				// 	Debug("wasn't running", args)
-				// } else {
-				consume.Kill(r.worker)
-				r.running.Store(false)
-				stop()
-				// }
 				break out
 			}
 		}
-		// if r.worker != nil {
-		// 	Debug("killing worker")
-		// 	if err := r.worker.Kill(); Check(err) {
-		// 	}
-		// }
 		Debug("runner stopped for", args)
+	}()
+	// when the main quit signal is triggered, stop the run unit cleanly
+	go func() {
+		select {
+		case <-quit:
+			Debug("runner quit trigger called", args)
+			r.Stop()
+			r.quit.Q()
+		}
 	}()
 	return
 }

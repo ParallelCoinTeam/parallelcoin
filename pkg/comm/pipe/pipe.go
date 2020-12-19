@@ -31,23 +31,16 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 				break out
 			default:
 			}
-			// if n, err = os.Stderr.Write(append([]byte("BACKUP:\n"), data[:n]...)); Check(err) {
-			// }
 			n, err = w.StdConn.Read(data)
 			if n == 0 {
 				Trace("read zero from stdconn", args)
 				onBackup = true
 				logi.L.LogChanDisabled = true
-				// break out
-				// close(quit)
 			}
 			if err != nil && err != io.EOF {
 				// Probably the child process has died, so quit
 				Error("err:", err)
-				// if err = w.Interrupt(); Check(err) {
-				// }
 				onBackup = true
-				// break out
 			} else if n > 0 {
 				if err := handler(data[:n]); Check(err) {
 				}
@@ -63,23 +56,9 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 				printIt := true
 				if logi.L.LogChanDisabled {
 					printIt = false
-					// prefix += "l"
 				}
-				// switch {
-				// case onBackup:
-				// 	prefix = "onBackup"
-				// 	// fallthrough
-				// case logi.L.LogChanDisabled:
-				// 	// printIt = false
-				// 	// prefix += "LogChanDisabled"
-				// }
-				// if onBackup || logi.L.LogChanDisabled {
-				// 	prefix +=
-				// printIt = false
-				// }
 				if printIt {
 					fmt.Fprint(os.Stderr, prefix+" "+string(data[:n]))
-					// Debug(prefix, onBackup, logi.L.LogChanDisabled, strings.TrimSpace(string(data[:n])))
 				}
 			}
 		}
@@ -99,14 +78,6 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 			case <-quit:
 				Debug(interrupt.GoroutineDump())
 				break out
-			// case l := <-logi.L.LogChan:
-			// 	if l.CodeLocation == "" && l.Level == "" && l.Package == "" && l.Text == "" && l.Time.Equal(time.Time{}) {
-			// 		Debug("log chan has closed")
-			// 		break out
-			// 	} else {
-			// 		// send it back
-			// 		logi.L.LogChan <- l
-			// 	}
 			default:
 			}
 			n, err = os.Stdin.Read(data)
@@ -122,11 +93,5 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 		Debug(interrupt.GoroutineDump())
 		Debug("pipe server shut down")
 	}()
-	// si, _ := os.Stdin.Stat()
-	// imod := si.Mode()
-	// os.Stdin.Chmod(imod &^ syscall.O_NONBLOCK)
-	// so, _ := os.Stdin.Stat()
-	// omod := so.Mode()
-	// os.Stdin.Chmod(omod &^ syscall.O_NONBLOCK)
 	return stdconn.New(os.Stdin, os.Stdout, quit)
 }
