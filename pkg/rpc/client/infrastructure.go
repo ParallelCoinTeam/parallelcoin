@@ -1094,8 +1094,19 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers, quit qu.C) (*Cl
 		sendPostChan:    make(chan *sendPostDetails, sendPostBufferSize),
 		connEstablished: connEstablished,
 		disconnect:      qu.T(),
-		shutdown:        quit,
+		shutdown:        qu.T(),
 	}
+	go func() {
+		out:
+			for{
+				select{
+				case <-quit:
+					client.disconnect.Q()
+					client.shutdown.Q()
+					break out
+				}
+			}
+	}()
 	if start {
 		Trace("established connection to RPC server", config.Host)
 		connEstablished.Q()

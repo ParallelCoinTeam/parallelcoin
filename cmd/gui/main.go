@@ -128,7 +128,9 @@ func (wg *WalletGUI) Run() (err error) {
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 	} else {
 		*wg.noWallet = false
-		wg.startNode()
+		if !*wg.cx.Config.NodeOff {
+			wg.startNode()
+		}
 		if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0 {
 			wg.startMiner()
 		}
@@ -353,7 +355,7 @@ func (wg *WalletGUI) GetBools() map[string]*p9.Bool {
 }
 
 func (wg *WalletGUI) gracefulShutdown() {
-	Debug("quitting wallet gui")
+	Debug("\n\nquitting wallet gui")
 	//// if wg.miner.Running() {
 	//// 	Debug("stopping miner")
 	//wg.stopMiner()
