@@ -169,9 +169,9 @@ func Main(cx *conte.Xt) (err error) {
 		logi.L.LogChanDisabled = true
 		logi.L.Writer.Write = true
 		cx.WaitDone()
-		<-cx.KillAll
+		// <-cx.KillAll
 		// cx.WaitGroup.Done()
-		// cx.KillAll.Q()
+		cx.KillAll.Q()
 		// cx.NodeKill.Q()
 		// Debug(interrupt.GoroutineDump())
 		<-interrupt.HandlersDone

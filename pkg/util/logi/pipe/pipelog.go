@@ -19,7 +19,7 @@ func main() {
 	consume.Start(w)
 	time.Sleep(time.Second * 5)
 	consume.Kill(w)
-	time.Sleep(time.Second * 5)
+	// time.Sleep(time.Second * 5)
 	// Debug(interrupt.GoroutineDump())
 	// if err = w.Wait(); Check(err) {
 	// }

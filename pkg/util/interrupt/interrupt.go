@@ -145,16 +145,16 @@ func Request() {
 	}
 	requested = true
 	ShutdownRequestChan.Q()
-	qu.PrintChanState()
-	// var ok bool
-	// select {
-	// case _, ok = <-ShutdownRequestChan:
-	// default:
-	// }
-	// Debug("shutdownrequestchan", ok)
-	// if ok {
-	// 	close(ShutdownRequestChan)
-	// }
+	// qu.PrintChanState()
+	var ok bool
+	select {
+	case _, ok = <-ShutdownRequestChan:
+	default:
+	}
+	Debug("shutdownrequestchan", ok)
+	if ok {
+		close(ShutdownRequestChan)
+	}
 }
 
 // GoroutineDump returns a string with the current goroutine dump in order to show what's going on in case of timeout.

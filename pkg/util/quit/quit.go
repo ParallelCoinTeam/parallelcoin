@@ -13,7 +13,7 @@ var createdChannels []C
 var mx sync.Mutex
 
 func T() C {
-	PrintChanState()
+	// PrintChanState()
 	occ := GetOpenChanCount()
 	mx.Lock()
 	defer mx.Unlock()
@@ -25,7 +25,7 @@ func T() C {
 }
 
 func Ts(n int) C {
-	PrintChanState()
+	// PrintChanState()
 	occ := GetOpenChanCount()
 	mx.Lock()
 	defer mx.Unlock()
@@ -38,15 +38,15 @@ func Ts(n int) C {
 
 func (c C) Q() {
 	loc := GetLocForChan(c)
-	mx.Lock()
 	if !testChanIsClosed(c) {
 		Trace("closing channel from " + loc, logi.Caller("from", 1))
+		// mx.Lock()
 		close(c)
+		// mx.Unlock()
 	} else {
 		Trace("#### channel", loc, "was already closed")
 	}
-	mx.Unlock()
-	PrintChanState()
+	// PrintChanState()
 }
 
 func (c C) Wait() <-chan struct{} {

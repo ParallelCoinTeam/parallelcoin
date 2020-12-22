@@ -53,7 +53,17 @@ mainwallet:
 	go install -v
 	pod -D testmain -n mainnet -l trace wallet
 
-teststop:
+teststopkopach:
 	go install -v
 	go install -v ./pkg/util/logi/pipe
 	pipe pod -D test1 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan kopach
+
+teststopnode:
+	go install -v
+	go install -v ./pkg/util/logi/pipe
+	pipe pod -D test1 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan node
+
+teststopwallet:
+	go install -v
+	go install -v ./pkg/util/logi/pipe
+	pipe pod -D test1 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan wallet

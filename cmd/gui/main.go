@@ -93,6 +93,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.clickables = wg.GetClickables()
 	wg.checkables = map[string]*p9.Checkable{
 	}
+	wg.GetHistoryTable()
 	before := func() { Debug("running before") }
 	after := func() { Debug("running after") }
 
@@ -356,23 +357,23 @@ func (wg *WalletGUI) GetBools() map[string]*p9.Bool {
 
 func (wg *WalletGUI) gracefulShutdown() {
 	Debug("\n\nquitting wallet gui")
-	//// if wg.miner.Running() {
-	//// 	Debug("stopping miner")
-	//wg.stopMiner()
-	//wg.miner.Shutdown()
-	//// }
-	//// if wg.wallet.Running() {
-	//// 	Debug("stopping wallet")
-	//wg.stopWallet()
-	//wg.wallet.Shutdown()
-	//// 	wg.unlockPassword.Wipe()
-	//// 	// wg.walletLocked.Store(true)
-	//// }
-	//// if wg.node.Running() {
-	//// 	Debug("stopping node")
-	//wg.stopNode()
-	//wg.node.Shutdown()
-	//// }
+	// // if wg.miner.Running() {
+	// // 	Debug("stopping miner")
+	// wg.stopMiner()
+	// wg.miner.Shutdown()
+	// // }
+	// // if wg.wallet.Running() {
+	// // 	Debug("stopping wallet")
+	// wg.stopWallet()
+	// wg.wallet.Shutdown()
+	// // 	wg.unlockPassword.Wipe()
+	// // 	// wg.walletLocked.Store(true)
+	// // }
+	// // if wg.node.Running() {
+	// // 	Debug("stopping node")
+	// wg.stopNode()
+	// wg.node.Shutdown()
+	// // }
 	wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
 		Debug("stopping chain client")
@@ -387,6 +388,7 @@ func (wg *WalletGUI) gracefulShutdown() {
 		wg.WalletClient = nil
 	}
 	wg.WalletMutex.Unlock()
+	interrupt.Request()
 	// wg.quit.Q()
 	// wg.wg.Wait()
 }

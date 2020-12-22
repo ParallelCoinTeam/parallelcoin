@@ -53,10 +53,8 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 					// logi.L.LogChanDisabled = true
 					// logi.L.LogChan = nil
 					interrupt.Request()
-					// os.Exit(0)
-					// break
-					// os.Exit(0)
-					<-interrupt.HandlersDone
+					// <-interrupt.HandlersDone
+					
 					// quit.Q()
 					// goroutineDump()
 					// Debug(interrupt.GoroutineDump())
