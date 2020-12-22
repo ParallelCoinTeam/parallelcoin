@@ -2,6 +2,7 @@ package qu
 
 import (
 	"github.com/p9c/pod/pkg/util/logi"
+	"sync"
 )
 
 type C chan struct{}
@@ -9,13 +10,13 @@ type C chan struct{}
 var createdList []string
 var createdChannels []C
 
-// var mx sync.Mutex
+var mx sync.Mutex
 
 func T() C {
 	PrintChanState()
 	occ := GetOpenChanCount()
-	// mx.Lock()
-	// defer mx.Unlock()
+	mx.Lock()
+	defer mx.Unlock()
 	createdList = append(createdList, logi.Caller("remaining quit channel from", 1))
 	o := make(C)
 	createdChannels = append(createdChannels, o)
@@ -26,8 +27,8 @@ func T() C {
 func Ts(n int) C {
 	PrintChanState()
 	occ := GetOpenChanCount()
-	// mx.Lock()
-	// defer mx.Unlock()
+	mx.Lock()
+	defer mx.Unlock()
 	createdList = append(createdList, logi.Caller("remaining buffered quit channel at", 1))
 	o := make(C, n)
 	createdChannels = append(createdChannels, o)
@@ -37,34 +38,39 @@ func Ts(n int) C {
 
 func (c C) Q() {
 	loc := GetLocForChan(c)
-	// mx.Lock()
-	// defer mx.Unlock()
+	mx.Lock()
 	if !testChanIsClosed(c) {
-		close(c)
 		Trace("closing channel from " + loc, logi.Caller("from", 1))
+		close(c)
 	} else {
 		Trace("#### channel", loc, "was already closed")
 	}
+	mx.Unlock()
 	PrintChanState()
 }
 
 func (c C) Wait() <-chan struct{} {
-	Trace(logi.Caller(">>>> waiting on quit channel at", 1))
+	Trace(logi.Caller(">>> waiting on quit channel at", 1))
 	return c
 }
 
 func testChanIsClosed(ch C) (o bool) {
+	if ch == nil {
+		return true
+	}
 	select {
 	case <-ch:
+		Debug("chan is closed")
 		o = true
 	default:
 	}
+	Debug("chan is not closed")
 	return
 }
 
 func GetLocForChan(c C) string {
-	// mx.Lock()
-	// defer mx.Unlock()
+	mx.Lock()
+	defer mx.Unlock()
 	for i := range createdList {
 		if i >= len(createdChannels) {
 			break
@@ -77,8 +83,8 @@ func GetLocForChan(c C) string {
 }
 
 func PrintChanState() {
-	// mx.Lock()
-	// defer mx.Unlock()
+	mx.Lock()
+	defer mx.Unlock()
 	
 	// Debug(">>>>>>>>>>>")
 	for i := range createdChannels {
@@ -86,18 +92,18 @@ func PrintChanState() {
 			break
 		}
 		if testChanIsClosed(createdChannels[i]) {
-			Trace("closed", createdList[i])
+			Trace(">>> closed", createdList[i])
 			// createdChannels[i].Q()
 		} else {
-			Trace("open", createdList[i])
+			Trace("<<< open", createdList[i])
 		}
 		// Debug(">>>>>>>>>>>")
 	}
 }
 
 func GetOpenChanCount() (o int) {
-	// mx.Lock()
-	// defer mx.Unlock()
+	mx.Lock()
+	defer mx.Unlock()
 	// Debug(">>>>>>>>>>>")
 	for i := range createdChannels {
 		if i >= len(createdChannels) {

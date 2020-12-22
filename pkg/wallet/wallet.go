@@ -197,19 +197,19 @@ func (w *Wallet) quitChan() qu.C {
 // Stop signals all wallet goroutines to shutdown.
 func (w *Wallet) Stop() {
 	w.quitMu.Lock()
-	quit := w.quit
-	w.quitMu.Unlock()
 	select {
-	case <-quit:
+	case <-w.quit:
 	default:
-		quit.Q()
 		w.chainClientLock.Lock()
 		if w.chainClient != nil {
 			w.chainClient.Stop()
 			w.chainClient = nil
 		}
 		w.chainClientLock.Unlock()
+		// w.quit.Q()
+		// return
 	}
+	w.quitMu.Unlock()
 }
 
 // ShuttingDown returns whether the wallet is currently in the process of shutting down or not.
@@ -224,12 +224,17 @@ func (w *Wallet) ShuttingDown() bool {
 
 // WaitForShutdown blocks until all wallet goroutines have finished executing.
 func (w *Wallet) WaitForShutdown() {
+	Debug("waiting for shutdown")
 	w.chainClientLock.Lock()
+	Debug("locked", w.chainClient)
 	if w.chainClient != nil {
+		Debug("calling WaitForShutdown")
 		w.chainClient.WaitForShutdown()
 	}
+	Debug("unlocking")
 	w.chainClientLock.Unlock()
-	w.wg.Wait()
+	// Debug("waiting on waitgroup")
+	// w.wg.Wait()
 }
 
 // SynchronizingToNetwork returns whether the wallet is currently synchronizing with the Bitcoin network.
@@ -1071,7 +1076,7 @@ func (w *Wallet) walletLocker() {
 	holdChan := make(heldUnlock)
 	quit := w.quitChan()
 	// this flips to false once the first unlock has been done, for runasservice option which shuts down on lock
-	first := true
+	// first := true
 out:
 	for {
 		select {
@@ -1147,9 +1152,9 @@ out:
 		case <-quit:
 			break out
 		case <-w.lockRequests:
-			first = false
+			// first = false
 		case <-timeout:
-			first = false
+			// first = false
 		}
 		// Select statement fell through by an explicit lock or the timer expiring. Lock the manager here.
 		timeout = nil
@@ -1159,10 +1164,10 @@ out:
 		} else {
 			Info("the wallet has been locked")
 		}
-		if *w.PodConfig.RunAsService && !first {
-			// if we are running as a service this means shut down on lock as unlocking happens only at startup
-			break out
-		}
+		// if *w.PodConfig.RunAsService && !first {
+		// 	// if we are running as a service this means shut down on lock as unlocking happens only at startup
+		// 	break out
+		// }
 	}
 	w.wg.Done()
 }
