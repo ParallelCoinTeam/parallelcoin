@@ -1,8 +1,9 @@
 package rununit
 
 import (
-	qu "github.com/p9c/pod/pkg/util/quit"
 	uberatomic "go.uber.org/atomic"
+
+	qu "github.com/p9c/pod/pkg/util/quit"
 
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -64,6 +65,9 @@ func New(
 						continue
 					}
 					consume.Kill(r.worker)
+					var err error
+					if err = r.worker.Wait(); Check(err) {
+					}
 					r.running.Store(false)
 					stop()
 					Debug(r.running.Load())

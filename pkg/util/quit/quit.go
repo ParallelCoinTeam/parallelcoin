@@ -1,8 +1,9 @@
 package qu
 
 import (
-	"github.com/p9c/pod/pkg/util/logi"
 	"sync"
+
+	"github.com/p9c/pod/pkg/util/logi"
 )
 
 type C chan struct{}
@@ -38,14 +39,14 @@ func Ts(n int) C {
 
 func (c C) Q() {
 	loc := GetLocForChan(c)
+	mx.Lock()
 	if !testChanIsClosed(c) {
-		Trace("closing channel from " + loc, logi.Caller("from", 1))
-		// mx.Lock()
+		Trace("closing channel from "+loc, logi.Caller("from", 1))
 		close(c)
-		// mx.Unlock()
 	} else {
 		Trace("#### channel", loc, "was already closed")
 	}
+	mx.Unlock()
 	// PrintChanState()
 }
 
@@ -68,24 +69,24 @@ func testChanIsClosed(ch C) (o bool) {
 	return
 }
 
-func GetLocForChan(c C) string {
+func GetLocForChan(c C) (s string) {
+	s = "not found"
 	mx.Lock()
-	defer mx.Unlock()
 	for i := range createdList {
 		if i >= len(createdChannels) {
 			break
 		}
 		if createdChannels[i] == c {
-			return createdList[i]
+			s = createdList[i]
 		}
 	}
-	return "not found"
+	mx.Unlock()
+	return
 }
 
 func PrintChanState() {
 	mx.Lock()
-	defer mx.Unlock()
-	
+
 	// Debug(">>>>>>>>>>>")
 	for i := range createdChannels {
 		if i >= len(createdList) {
@@ -99,11 +100,11 @@ func PrintChanState() {
 		}
 		// Debug(">>>>>>>>>>>")
 	}
+	mx.Unlock()
 }
 
 func GetOpenChanCount() (o int) {
 	mx.Lock()
-	defer mx.Unlock()
 	// Debug(">>>>>>>>>>>")
 	for i := range createdChannels {
 		if i >= len(createdChannels) {
@@ -118,6 +119,7 @@ func GetOpenChanCount() (o int) {
 		}
 		// Debug(">>>>>>>>>>>")
 	}
+	mx.Unlock()
 	// o -= len(createdChannels)
 	return
 }

@@ -5,12 +5,12 @@ import (
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"net/http"
-	
+
 	// // This enables pprof
 	// _ "net/http/pprof"
 	"os"
 	"runtime/pprof"
-	
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/control"
@@ -148,7 +148,14 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	// Debug("controller started")
 	// cx.Controller.Store(true)
+	once := true
 	gracefulShutdown := func() {
+		if !once {
+			return
+		}
+		if once {
+			once = false
+		}
 		Info("gracefully shutting down the server...")
 		// if shutted {
 		// 	Debug("gracefulShutdown called twice")
