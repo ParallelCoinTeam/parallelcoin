@@ -6,7 +6,6 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"image"
 	"image/color"
@@ -17,10 +16,10 @@ type Dialog struct {
 	duration           int
 	singleCornerRadius unit.Value
 	singleElevation    unit.Value
-
+	
 	content          *content
-	headerBackground color.RGBA
-	bodyBackground   color.RGBA
+	headerBackground color.NRGBA
+	bodyBackground   color.NRGBA
 	icon             *[]byte
 	ticker           float32
 	hideTitle        bool
@@ -39,8 +38,8 @@ func New(th *p9.Theme) *Dialog {
 		theme:          th,
 		duration:       100,
 		close:          th.Clickable(),
-		bodyBackground: helper.HexARGB("ee000000"),
-		//singleSize:         image.Pt(300, 80),
+		bodyBackground: p9.HexNRGB("ee000000"),
+		// singleSize:         image.Pt(300, 80),
 		singleCornerRadius: unit.Dp(5),
 		singleElevation:    unit.Dp(5),
 	}
@@ -57,17 +56,17 @@ func (d *Dialog) ShowDialog(title, level string, contentInterface interface{}) f
 }
 
 func (d *Dialog) DrawDialog() func(gtx l.Context) {
-	//switch d.content.level {
-	//case "Warning":
+	// switch d.content.level {
+	// case "Warning":
 	//	//ic = &icons2.AlertWarning
-	//case "Success":
+	// case "Success":
 	//	//ic = &icons2.NavigationCheck
-	//case "Danger":
+	// case "Danger":
 	//	//ic = &icons2.AlertError
-	//case "Info":
+	// case "Info":
 	//	//ic = &icons2.ActionInfo
-	//}
-
+	// }
+	
 	return func(gtx l.Context) {
 		if d.content != nil {
 			var content func(gtx l.Context) l.Dimensions
@@ -77,20 +76,26 @@ func (d *Dialog) DrawDialog() func(gtx l.Context) {
 			case func(gtx l.Context) l.Dimensions:
 				content = c
 			}
-
+			
 			defer op.Push(gtx.Ops).Pop()
 			gtx.Constraints.Min = gtx.Constraints.Max
 			d.theme.Stack().Alignment(l.Center).Expanded(
 				func(gtx l.Context) l.Dimensions {
 					paint.Fill(gtx.Ops, d.bodyBackground)
 					pointer.Rect(
-						image.Rectangle{Max: gtx.Constraints.Max}).Add(gtx.Ops)
+						image.Rectangle{Max: gtx.Constraints.Max},
+					).Add(gtx.Ops)
 					return l.Dimensions{Size: gtx.Constraints.Max}
-				}).Stacked(
-				d.theme.Fill("DocBg",
-					d.theme.Inset(0.25,
-						d.theme.Fill("PanelBg",
-							d.theme.Inset(1,
+				},
+			).Stacked(
+				d.theme.Fill(
+					"DocBg",
+					d.theme.Inset(
+						0.25,
+						d.theme.Fill(
+							"PanelBg",
+							d.theme.Inset(
+								1,
 								d.theme.VFlex().
 									Rigid(
 										d.theme.Body1(d.content.title).Color("PanelText").Fn,
@@ -98,7 +103,12 @@ func (d *Dialog) DrawDialog() func(gtx l.Context) {
 									Rigid(content).
 									Rigid(
 										d.theme.Button(d.close).Text("CLOSE").Color("Warning").SetClick(d.Close).Fn,
-									).Fn).Fn).Fn).Fn).Fn).Fn(gtx)
+									).Fn,
+							).Fn,
+						).Fn,
+					).Fn,
+				).Fn,
+			).Fn(gtx)
 		}
 	}
 }

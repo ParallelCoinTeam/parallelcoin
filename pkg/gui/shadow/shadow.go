@@ -11,7 +11,7 @@ import (
 	"image/color"
 )
 
-func Shadow(gtx l.Context, cornerRadius, elevation unit.Value, shadowColor color.RGBA, content func(gtx l.Context) l.Dimensions) l.Dimensions {
+func Shadow(gtx l.Context, cornerRadius, elevation unit.Value, shadowColor color.NRGBA, content func(gtx l.Context) l.Dimensions) l.Dimensions {
 	sz := content(gtx).Size
 	rr := float32(gtx.Px(cornerRadius))
 	r := f32.Rect(0, 0, float32(sz.X), float32(sz.Y))
@@ -21,7 +21,7 @@ func Shadow(gtx l.Context, cornerRadius, elevation unit.Value, shadowColor color
 }
 
 //TODO: Shadow directions
-func layoutShadow(gtx l.Context, r f32.Rectangle, elevation unit.Value, rr float32, shadowColor color.RGBA) {
+func layoutShadow(gtx l.Context, r f32.Rectangle, elevation unit.Value, rr float32, shadowColor color.NRGBA) {
 	if elevation.V <= 0 {
 		return
 	}
@@ -38,7 +38,7 @@ func layoutShadow(gtx l.Context, r f32.Rectangle, elevation unit.Value, rr float
 			stack := op.Push(gtx.Ops)
 			op.Offset(f32.Pt(px*offset, py*offset)).Add(gtx.Ops)
 			clip.UniformRRect(r, rr).Add(gtx.Ops)
-			paint.Fill(gtx.Ops, background)
+			paint.Fill(gtx.Ops, color.NRGBA(background))
 			stack.Pop()
 		}
 	}

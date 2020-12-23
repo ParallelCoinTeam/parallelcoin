@@ -4,6 +4,8 @@ package p9
 
 import (
 	"bufio"
+	"bytes"
+	"gioui.org/op/clip"
 	"image"
 	"io"
 	"math"
@@ -44,7 +46,7 @@ type Editor struct {
 	textSize     fixed.Int26_6
 	blinkStart   time.Time
 	focused      bool
-	rr           EditBuffer
+	rr           editBuffer
 	maskReader   maskReader
 	lastMask     rune
 	maxWidth     int
@@ -437,7 +439,7 @@ func (e *Editor) layout(gtx layout.Context) layout.Dimensions {
 	}
 	e.shapes = e.shapes[:0]
 	for {
-		_, _, layout, off, ok := it.Next()
+		layout, off, ok := it.Next()
 		if !ok {
 			break
 		}
@@ -482,7 +484,7 @@ func (e *Editor) PaintText(gtx layout.Context) {
 		stack := op.Push(gtx.Ops)
 		op.Offset(shape.offset).Add(gtx.Ops)
 		shape.clip.Add(gtx.Ops)
-		paint.PaintOp{Rect: layout.FRect(clip).Sub(shape.offset)}.Add(gtx.Ops)
+		paint.PaintOp{}.Add(gtx.Ops)
 		stack.Pop()
 	}
 }
@@ -507,19 +509,22 @@ func (e *Editor) PaintCaret(gtx layout.Context) {
 		X: -e.scrollOff.X,
 		Y: -e.scrollOff.Y,
 	})
-	clip := textPadding(e.lines)
+	cl := textPadding(e.lines)
 	// Account for caret width to each side.
 	whalf := (carWidth / 2).Ceil()
-	if clip.Max.X < whalf {
-		clip.Max.X = whalf
+	if cl.Max.X < whalf {
+		cl.Max.X = whalf
 	}
-	if clip.Min.X > -whalf {
-		clip.Min.X = -whalf
+	if cl.Min.X > -whalf {
+		cl.Min.X = -whalf
 	}
-	clip.Max = clip.Max.Add(e.viewSize)
-	carRect = clip.Intersect(carRect)
+	cl.Max = cl.Max.Add(e.viewSize)
+	carRect = cl.Intersect(carRect)
 	if !carRect.Empty() {
-		paint.PaintOp{Rect: layout.FRect(carRect)}.Add(gtx.Ops)
+		st := op.Push(gtx.Ops)
+		clip.Rect(carRect).Add(gtx.Ops)
+		paint.PaintOp{}.Add(gtx.Ops)
+		st.Pop()
 	}
 }
 
@@ -537,7 +542,7 @@ func (e *Editor) Text() string {
 func (e *Editor) SetText(s string) *Editor {
 	// this isn't necessary for normal inputs but should be done to password inputs, it isn't expensive anyway
 	e.rr.Zero()
-	e.rr = EditBuffer{}
+	e.rr = editBuffer{}
 	e.Caret.xoff = 0
 	e.prepend(s)
 	return e
@@ -613,11 +618,11 @@ func (e *Editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	} else {
 		lines, _ = nullLayout(r)
 	}
-	dims := linesDimensions(lines)
+	dims := linesDimens(lines)
 	for i := 0; i < len(lines)-1; i++ {
 		// To avoid layout flickering while editing, assume a soft newline takes up all available space.
-		if lay := lines[i].Layout; len(lay) > 0 {
-			r := lay[len(lay)-1].Rune
+		if lay := lines[i].Layout; len(lay.Text) > 0 {
+			r := lay.Text[len(lay.Text)-1]
 			if r != '\n' {
 				dims.Size.X = e.maxWidth
 				break
@@ -650,11 +655,11 @@ loop:
 		l := e.lines[line]
 		y += (prevDesc + l.Ascent).Ceil()
 		prevDesc = l.Descent
-		for _, g := range l.Layout {
+		for _, adv := range l.Layout.Advances {
 			if idx == e.rr.caret {
 				break loop
 			}
-			x += g.Advance
+			x += adv
 			_, s := e.rr.runeAt(idx)
 			idx += s
 			col++
@@ -754,7 +759,7 @@ func (e *Editor) moveToLine(x fixed.Int26_6, line int) {
 		prevDesc = l.Descent
 		e.Caret.Line--
 		l = e.lines[e.Caret.Line]
-		e.Caret.Col = len(l.Layout) - 1
+		e.Caret.Col = len(l.Layout.Advances) - 1
 	}
 
 	e.moveStart()
@@ -766,15 +771,15 @@ func (e *Editor) moveToLine(x fixed.Int26_6, line int) {
 		end = 1
 	}
 	// Move to rune closest to x.
-	for i := 0; i < len(l.Layout)-end; i++ {
-		g := l.Layout[i]
+	for i := 0; i < len(l.Layout.Advances)-end; i++ {
+		adv := l.Layout.Advances[i]
 		if e.Caret.x >= x {
 			break
 		}
-		if e.Caret.x+g.Advance-x >= x-e.Caret.x {
+		if e.Caret.x+adv-x >= x-e.Caret.x {
 			break
 		}
-		e.Caret.x += g.Advance
+		e.Caret.x += adv
 		_, s := e.rr.runeAt(e.rr.caret)
 		e.rr.caret += s
 		e.Caret.Col++
@@ -796,7 +801,7 @@ func (e *Editor) Move(distance int) {
 		_, s := e.rr.runeBefore(e.rr.caret)
 		e.rr.caret -= s
 		e.Caret.Col--
-		e.Caret.x -= l[e.Caret.Col].Advance
+		e.Caret.x -= l.Advances[e.Caret.Col]
 	}
 	for ; distance > 0 && e.rr.caret < e.rr.len(); distance-- {
 		l := e.lines[e.Caret.Line].Layout
@@ -805,12 +810,12 @@ func (e *Editor) Move(distance int) {
 		if e.Caret.Line < len(e.lines)-1 {
 			end = 1
 		}
-		if e.Caret.Col >= len(l)-end {
+		if e.Caret.Col >= len(l.Advances)-end {
 			// Move to start of next line.
 			e.moveToLine(0, e.Caret.Line+1)
 			continue
 		}
-		e.Caret.x += l[e.Caret.Col].Advance
+		e.Caret.x += l.Advances[e.Caret.Col]
 		_, s := e.rr.runeAt(e.rr.caret)
 		e.rr.caret += s
 		e.Caret.Col++
@@ -824,7 +829,7 @@ func (e *Editor) moveStart() {
 	for i := e.Caret.Col - 1; i >= 0; i-- {
 		_, s := e.rr.runeBefore(e.rr.caret)
 		e.rr.caret -= s
-		e.Caret.x -= layout[i].Advance
+		e.Caret.x -= layout.Advances[i]
 	}
 	e.Caret.Col = 0
 	e.Caret.xoff = -e.Caret.x
@@ -839,8 +844,8 @@ func (e *Editor) moveEnd() {
 		end = 1
 	}
 	layout := l.Layout
-	for i := e.Caret.Col; i < len(layout)-end; i++ {
-		adv := layout[i].Advance
+	for i := e.Caret.Col; i < len(layout.Advances)-end; i++ {
+		adv := layout.Advances[i]
 		_, s := e.rr.runeAt(e.rr.caret)
 		e.rr.caret += s
 		e.Caret.x += adv
@@ -965,14 +970,14 @@ func (e *Editor) NumLines() int {
 }
 
 func nullLayout(r io.Reader) ([]text.Line, error) {
-	var layout []text.Glyph
 	rr := bufio.NewReader(r)
 	var rerr error
 	var n int
+	var buf bytes.Buffer
 	for {
 		r, s, err := rr.ReadRune()
 		n += s
-		layout = append(layout, text.Glyph{Rune: r})
+		buf.WriteRune(r)
 		if err != nil {
 			rerr = err
 			break
@@ -980,8 +985,10 @@ func nullLayout(r io.Reader) ([]text.Line, error) {
 	}
 	return []text.Line{
 		{
-			Layout: layout,
-			Len:    n,
+			Layout: text.Layout{
+				Text:     buf.String(),
+				Advances: make([]fixed.Int26_6, n),
+			},
 		},
 	}, rerr
 }

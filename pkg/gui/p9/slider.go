@@ -17,7 +17,7 @@ import (
 type Slider struct {
 	th       *Theme
 	min, max float32
-	color    color.RGBA
+	color    color.NRGBA
 	float    *Float
 }
 
@@ -54,35 +54,35 @@ func (s *Slider) Float(f *Float) *Slider {
 }
 
 // Fn renders the slider
-func (s *Slider) Fn(c l.Context) l.Dimensions {
-	thumbRadiusInt := c.Px(unit.Sp(6))
-	trackWidth := float32(c.Px(unit.Sp(2)))
+func (s *Slider) Fn(gtx l.Context) l.Dimensions {
+	thumbRadiusInt := gtx.Px(unit.Dp(6))
+	trackWidth := float32(gtx.Px(unit.Dp(2)))
 	thumbRadius := float32(thumbRadiusInt)
 	halfWidthInt := 2 * thumbRadiusInt
 	halfWidth := float32(halfWidthInt)
-
-	size := c.Constraints.Max
+	
+	size := gtx.Constraints.Min
 	// Keep a minimum length so that the track is always visible.
 	minLength := halfWidthInt + 3*thumbRadiusInt + halfWidthInt
 	if size.X < minLength {
 		size.X = minLength
 	}
 	size.Y = 2 * halfWidthInt
-
-	st := op.Push(c.Ops)
-	op.Offset(f32.Pt(halfWidth, 0)).Add(c.Ops)
-	c.Constraints.Min = image.Pt(size.X-2*halfWidthInt, size.Y)
-	s.float.Fn(c, halfWidthInt, s.min, s.max)
+	
+	st := op.Push(gtx.Ops)
+	op.Offset(f32.Pt(halfWidth, 0)).Add(gtx.Ops)
+	gtx.Constraints.Min = image.Pt(size.X-2*halfWidthInt, size.Y)
+	s.float.Fn(gtx, halfWidthInt, s.min, s.max)
 	thumbPos := halfWidth + s.float.Pos()
 	st.Pop()
-
+	
 	color := s.color
-	if c.Queue == nil {
+	if gtx.Queue == nil {
 		color = f32color.MulAlpha(color, 150)
 	}
-
+	
 	// Draw track before thumb.
-	st = op.Push(c.Ops)
+	st = op.Push(gtx.Ops)
 	track := f32.Rectangle{
 		Min: f32.Point{
 			X: halfWidth,
@@ -93,22 +93,22 @@ func (s *Slider) Fn(c l.Context) l.Dimensions {
 			Y: halfWidth + trackWidth/2,
 		},
 	}
-	clip.RRect{Rect: track}.Add(c.Ops)
-	paint.ColorOp{Color: color}.Add(c.Ops)
-	paint.PaintOp{Rect: track}.Add(c.Ops)
+	clip.RRect{Rect: track}.Add(gtx.Ops)
+	paint.ColorOp{Color: color}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
 	st.Pop()
-
+	
 	// Draw track after thumb.
-	st = op.Push(c.Ops)
+	st = op.Push(gtx.Ops)
 	track.Min.X = thumbPos
 	track.Max.X = float32(size.X) - halfWidth
-	clip.RRect{Rect: track}.Add(c.Ops)
-	paint.ColorOp{Color: f32color.MulAlpha(color, 96)}.Add(c.Ops)
-	paint.PaintOp{Rect: track}.Add(c.Ops)
+	clip.RRect{Rect: track}.Add(gtx.Ops)
+	paint.ColorOp{Color: f32color.MulAlpha(color, 96)}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
 	st.Pop()
-
+	
 	// Draw thumb.
-	st = op.Push(c.Ops)
+	st = op.Push(gtx.Ops)
 	thumb := f32.Rectangle{
 		Min: f32.Point{
 			X: thumbPos - thumbRadius,
@@ -123,10 +123,10 @@ func (s *Slider) Fn(c l.Context) l.Dimensions {
 	clip.RRect{
 		Rect: thumb,
 		NE:   rr, NW: rr, SE: rr, SW: rr,
-	}.Add(c.Ops)
-	paint.ColorOp{Color: color}.Add(c.Ops)
-	paint.PaintOp{Rect: thumb}.Add(c.Ops)
+	}.Add(gtx.Ops)
+	paint.ColorOp{Color: color}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
 	st.Pop()
-
+	
 	return l.Dimensions{Size: size}
 }

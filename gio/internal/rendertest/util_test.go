@@ -14,6 +14,8 @@ import (
 	"testing"
 
 	"gioui.org/app/headless"
+	"gioui.org/f32"
+	"gioui.org/internal/f32color"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"golang.org/x/image/colornames"
@@ -22,6 +24,15 @@ import (
 var (
 	dumpImages = flag.Bool("saveimages", false, "save test images")
 	squares    paint.ImageOp
+)
+
+var (
+	red     = f32color.RGBAToNRGBA(colornames.Red)
+	green   = f32color.RGBAToNRGBA(colornames.Green)
+	blue    = f32color.RGBAToNRGBA(colornames.Blue)
+	magenta = f32color.RGBAToNRGBA(colornames.Magenta)
+	black   = f32color.RGBAToNRGBA(colornames.Black)
+	white   = f32color.RGBAToNRGBA(colornames.White)
 )
 
 func init() {
@@ -176,7 +187,7 @@ func close(b1, b2 uint8) bool {
 		b1, b2 = b2, b1
 	}
 	diff := b2 - b1
-	return diff < 20
+	return diff < 10
 }
 
 func (r result) expect(x, y int, col color.RGBA) {
@@ -209,4 +220,8 @@ func newWindow(t testing.TB, width, height int) *headless.Window {
 	}
 	t.Cleanup(w.Release)
 	return w
+}
+
+func scale(sx, sy float32) op.TransformOp {
+	return op.Affine(f32.Affine2D{}.Scale(f32.Point{}, f32.Pt(sx, sy)))
 }

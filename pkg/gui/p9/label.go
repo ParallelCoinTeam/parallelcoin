@@ -14,7 +14,7 @@ type Label struct {
 	// Face defines the text style.
 	font text.Font
 	// Color is the text color.
-	color color.RGBA
+	color color.NRGBA
 	// Alignment specify the text alignment.
 	alignment text.Alignment
 	// MaxLines limits the number of lines. Zero means no limit.

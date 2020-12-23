@@ -16,9 +16,9 @@ import (
 
 type IconButton struct {
 	th         *Theme
-	background color.RGBA
+	background color.NRGBA
 	// Color is the icon color.
-	color color.RGBA
+	color color.NRGBA
 	icon  *Icon
 	// Size is the icon size.
 	size   unit.Value

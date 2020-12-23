@@ -7,7 +7,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	"gioui.org/f32"
+	"gioui.org/internal/f32color"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
@@ -15,12 +15,12 @@ import (
 )
 
 type Icon struct {
-	Color color.RGBA
+	Color color.NRGBA
 	src   []byte
 	// Cached values.
 	op       paint.ImageOp
 	imgSize  int
-	imgColor color.RGBA
+	imgColor color.NRGBA
 }
 
 // NewIcon returns a new Icon from IconVG data.
@@ -29,17 +29,13 @@ func NewIcon(data []byte) (*Icon, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Icon{src: data, Color: color.RGBA{A: 0xff}}, nil
+	return &Icon{src: data, Color: color.NRGBA{A: 0xff}}, nil
 }
 
 func (ic *Icon) Layout(gtx layout.Context, sz unit.Value) layout.Dimensions {
 	ico := ic.image(gtx.Px(sz))
 	ico.Add(gtx.Ops)
-	paint.PaintOp{
-		Rect: f32.Rectangle{
-			Max: layout.FPt(ico.Size()),
-		},
-	}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
 	return layout.Dimensions{
 		Size: ico.Size(),
 	}
@@ -54,7 +50,7 @@ func (ic *Icon) image(sz int) paint.ImageOp {
 	img := image.NewRGBA(image.Rectangle{Max: image.Point{X: sz, Y: int(float32(sz) * dy / dx)}})
 	var ico iconvg.Rasterizer
 	ico.SetDstImage(img, img.Bounds(), draw.Src)
-	m.Palette[0] = ic.Color
+	m.Palette[0] = f32color.NRGBAToRGBA(ic.Color)
 	iconvg.Decode(&ico, ic.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
 	})

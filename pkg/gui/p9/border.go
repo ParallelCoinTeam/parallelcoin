@@ -2,7 +2,7 @@ package p9
 
 import (
 	"image/color"
-
+	
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -14,7 +14,7 @@ import (
 // Border lays out a widget and draws a border inside it.
 type Border struct {
 	th           *Theme
-	color        color.RGBA
+	color        color.NRGBA
 	cornerRadius unit.Value
 	width        unit.Value
 	w            layout.Widget
@@ -66,11 +66,8 @@ func (b *Border) Fn(gtx layout.Context) layout.Dimensions {
 		NE: rr, NW: rr, SE: rr, SW: rr,
 		Width: float32(width),
 	}.Add(gtx.Ops)
-	dr := f32.Rectangle{
-		Max: layout.FPt(sz),
-	}
 	paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
 	st.Pop()
 	return dims
 }

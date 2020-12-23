@@ -3,7 +3,7 @@ module github.com/p9c/pod
 go 1.14
 
 require (
-	gioui.org v0.0.0-20201031091437-39b50261d082
+	gioui.org v0.0.0-20201119103011-21ef492cc9df
 	github.com/BurntSushi/xgb v0.0.0-20200324125942-20f126ea2843
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
@@ -17,7 +17,7 @@ require (
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
-	github.com/gioapp/gel v0.0.0-20201002070804-a38b199dc376
+	//github.com/gioapp/gel v0.0.0-20201002070804-a38b199dc376
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
@@ -47,4 +47,4 @@ require (
 
 )
 
-replace gioui.org => ./gio
+//replace gioui.org => ./gio

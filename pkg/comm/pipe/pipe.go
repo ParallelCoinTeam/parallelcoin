@@ -1,7 +1,6 @@
 package pipe
 
 import (
-	"fmt"
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -36,31 +35,33 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 				Trace("read zero from stdconn", args)
 				onBackup = true
 				logi.L.LogChanDisabled = true
+				break out
 			}
 			if err != nil && err != io.EOF {
 				// Probably the child process has died, so quit
 				Error("err:", err)
 				onBackup = true
+				break out
 			} else if n > 0 {
 				if err := handler(data[:n]); Check(err) {
 				}
 			}
-			if n, err = w.StdPipe.Read(data); Check(err) {
-			}
-			// when the child stops sending over RPC, fall back to the also working but not printing stderr
-			if n > 0 {
-				prefix := "[" + args[len(args)-1] + "]"
-				if onBackup {
-					prefix += "b"
-				}
-				printIt := true
-				if logi.L.LogChanDisabled {
-					printIt = false
-				}
-				if printIt {
-					fmt.Fprint(os.Stderr, prefix+" "+string(data[:n]))
-				}
-			}
+			// if n, err = w.StdPipe.Read(data); Check(err) {
+			// }
+			// // when the child stops sending over RPC, fall back to the also working but not printing stderr
+			// if n > 0 {
+			// 	prefix := "[" + args[len(args)-1] + "]"
+			// 	if onBackup {
+			// 		prefix += "b"
+			// 	}
+			// 	printIt := true
+			// 	if logi.L.LogChanDisabled {
+			// 		printIt = false
+			// 	}
+			// 	if printIt {
+			// 		fmt.Fprint(os.Stderr, prefix+" "+string(data[:n]))
+			// 	}
+			// }
 		}
 	}()
 	return w
@@ -83,6 +84,7 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 			n, err = os.Stdin.Read(data)
 			if err != nil && err != io.EOF {
 				Debug("err: ", err)
+				break out
 			}
 			if n > 0 {
 				if err := handler(data[:n]); Check(err) {

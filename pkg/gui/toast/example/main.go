@@ -3,15 +3,13 @@ package main
 import (
 	"log"
 	"os"
-
+	
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
-
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/toast"
@@ -45,24 +43,32 @@ func loop(w *app.Window) error {
 			return e.Err
 		case system.FrameEvent:
 			gtx := layout.NewContext(&ops, e)
-			paint.Fill(gtx.Ops, helper.HexARGB("e5e5e5FF"))
+			paint.Fill(gtx.Ops, p9.HexNRGB("e5e5e5FF"))
 			op.InvalidateOp{}.Add(gtx.Ops)
-
-			th.Inset(0.25,
+			
+			th.Inset(
+				0.25,
 				th.VFlex().
 					Rigid(
-						th.Inset(0.1,
-							th.Button(btnDanger).Text("Danger").Background("Gray").Color("Danger").Fn).Fn,
+						th.Inset(
+							0.1,
+							th.Button(btnDanger).Text("Danger").Background("Gray").Color("Danger").Fn,
+						).Fn,
 					).
 					Rigid(
-						th.Inset(0.1,
-							th.Button(btnWarning).Text("Warning").Background("Gray").Color("Warning").Fn).Fn,
+						th.Inset(
+							0.1,
+							th.Button(btnWarning).Text("Warning").Background("Gray").Color("Warning").Fn,
+						).Fn,
 					).
 					Rigid(
-						th.Inset(0.1,
-							th.Button(btnSuccess).Text("Success").Background("Gray").Color("Success").Fn).Fn,
-					).Fn).Fn(gtx)
-
+						th.Inset(
+							0.1,
+							th.Button(btnSuccess).Text("Success").Background("Gray").Color("Success").Fn,
+						).Fn,
+					).Fn,
+			).Fn(gtx)
+			
 			for btnDanger.Clicked() {
 				t.AddToast("Danger", "Danger content", "Danger")
 			}
@@ -72,7 +78,7 @@ func loop(w *app.Window) error {
 			for btnWarning.Clicked() {
 				t.AddToast("Warning", "Warning content", "Warning")
 			}
-
+			
 			t.DrawToasts()(gtx)
 			e.Frame(gtx.Ops)
 			w.Invalidate()

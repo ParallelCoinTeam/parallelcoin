@@ -16,9 +16,13 @@ func main() {
 	// splitted := strings.Split(command, " ")
 	splitted := os.Args[1:]
 	w := consume.Log(quit, consume.SimpleLog(splitted[len(splitted)-1]), consume.FilterNone, splitted...)
+	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>>")
 	consume.Start(w)
+	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>>")
 	time.Sleep(time.Second * 5)
+	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>>")
 	consume.Kill(w)
+	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>>")
 	// time.Sleep(time.Second * 5)
 	// Debug(interrupt.GoroutineDump())
 	// if err = w.Wait(); Check(err) {

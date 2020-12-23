@@ -7,7 +7,6 @@ package gui
 import (
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"log"
-	"os"
 	"sync/atomic"
 	
 	"gioui.org/app"
@@ -47,7 +46,7 @@ func newWindow() {
 			log.Fatal(err)
 		}
 		if c := atomic.AddInt32(&windowCount, -1); c == 0 {
-			os.Exit(0)
+			// os.Exit(0)
 		}
 	}()
 }

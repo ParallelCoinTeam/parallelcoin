@@ -27,9 +27,11 @@ type window struct {
 	redraw                js.Func
 	clipboardCallback     js.Func
 	requestAnimationFrame js.Value
+	browserHistory        js.Value
 	cleanfuncs            []func()
 	touches               []js.Value
 	composing             bool
+	requestFocus          bool
 
 	mu        sync.Mutex
 	scale     float32
@@ -50,6 +52,7 @@ func NewWindow(win Callbacks, opts *Options) error {
 		clipboard: js.Global().Get("navigator").Get("clipboard"),
 	}
 	w.requestAnimationFrame = w.window.Get("requestAnimationFrame")
+	w.browserHistory = w.window.Get("history")
 	w.redraw = w.funcOf(func(this js.Value, args []js.Value) interface{} {
 		w.animCallback()
 		return nil
@@ -60,6 +63,7 @@ func NewWindow(win Callbacks, opts *Options) error {
 		return nil
 	})
 	w.addEventListeners()
+	w.addHistory()
 	w.w = win
 	go func() {
 		w.w.SetDriver(w)
@@ -120,12 +124,29 @@ func (w *window) addEventListeners() {
 		w.draw(true)
 		return nil
 	})
+	w.addEventListener(w.window, "contextmenu", func(this js.Value, args []js.Value) interface{} {
+		args[0].Call("preventDefault")
+		return nil
+	})
+	w.addEventListener(w.window, "popstate", func(this js.Value, args []js.Value) interface{} {
+		ev := &system.CommandEvent{Type: system.CommandBack}
+		w.w.Event(ev)
+		if ev.Cancel {
+			return w.browserHistory.Call("forward")
+		}
+
+		return w.browserHistory.Call("back")
+	})
 	w.addEventListener(w.cnv, "mousemove", func(this js.Value, args []js.Value) interface{} {
 		w.pointerEvent(pointer.Move, 0, 0, args[0])
 		return nil
 	})
 	w.addEventListener(w.cnv, "mousedown", func(this js.Value, args []js.Value) interface{} {
 		w.pointerEvent(pointer.Press, 0, 0, args[0])
+		if w.requestFocus {
+			w.focus()
+			w.requestFocus = false
+		}
 		return nil
 	})
 	w.addEventListener(w.cnv, "mouseup", func(this js.Value, args []js.Value) interface{} {
@@ -149,6 +170,10 @@ func (w *window) addEventListeners() {
 	})
 	w.addEventListener(w.cnv, "touchstart", func(this js.Value, args []js.Value) interface{} {
 		w.touchEvent(pointer.Press, args[0])
+		if w.requestFocus {
+			w.focus()
+			w.requestFocus = false
+		}
 		return nil
 	})
 	w.addEventListener(w.cnv, "touchend", func(this js.Value, args []js.Value) interface{} {
@@ -205,6 +230,10 @@ func (w *window) addEventListeners() {
 	})
 }
 
+func (w *window) addHistory() {
+	w.browserHistory.Call("pushState", nil, nil, w.window.Get("location").Get("href"))
+}
+
 func (w *window) flushInput() {
 	val := w.tarea.Get("value").String()
 	w.tarea.Set("value", "")
@@ -217,6 +246,7 @@ func (w *window) blur() {
 
 func (w *window) focus() {
 	w.tarea.Call("focus")
+	w.requestFocus = true
 }
 
 func (w *window) keyEvent(e js.Value, ks key.State) {

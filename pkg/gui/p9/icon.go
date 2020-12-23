@@ -4,8 +4,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-
-	"gioui.org/f32"
+	
 	l "gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
@@ -24,7 +23,7 @@ type Icon struct {
 	imgColor string
 }
 
-type IconByColor map[color.RGBA]paint.ImageOp
+type IconByColor map[color.NRGBA]paint.ImageOp
 type IconBySize map[float32]IconByColor
 type IconCache map[*[]byte]IconBySize
 
@@ -70,9 +69,9 @@ func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 	}
 	ico.Add(gtx.Ops)
 	paint.PaintOp{
-		Rect: f32.Rectangle{
-			Max: toPointF(ico.Size()),
-		},
+		// Rect: f32.Rectangle{
+		// 	Max: toPointF(ico.Size()),
+		// },
 	}.Add(gtx.Ops)
 	return l.Dimensions{Size: ico.Size()}
 }
@@ -95,7 +94,7 @@ func (i *Icon) image(sz int) paint.ImageOp {
 		Y: int(float32(sz) * dy / dx)}})
 	var ico iconvg.Rasterizer
 	ico.SetDstImage(img, img.Bounds(), draw.Src)
-	m.Palette[0] = i.th.Colors.Get(i.color)
+	m.Palette[0] = color.RGBA(i.th.Colors.Get(i.color))
 	if err := iconvg.Decode(&ico, *i.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
 	}); Check(err) {

@@ -14,12 +14,18 @@ func HexARGB(s string) (c color.RGBA) {
 	return
 }
 
+// HexNRGB converts a 32 bit hex string into a color specification
+func HexNRGB(s string) (c color.NRGBA) {
+	_, _ = fmt.Sscanf(s, "%02x%02x%02x%02x", &c.A, &c.R, &c.G, &c.B)
+	return
+}
+
 // Get returns the named color from the map
-func (c Colors) Get(co string) color.RGBA {
+func (c Colors) Get(co string) color.NRGBA {
 	if col, ok := c[co]; ok {
-		return HexARGB(col)
+		return HexNRGB(col)
 	}
-	return color.RGBA{}
+	return color.NRGBA{}
 }
 
 // NewColors creates the base palette for the theme

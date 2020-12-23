@@ -3,16 +3,15 @@ package toast
 import (
 	"image"
 	"image/color"
-
+	
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/gioapp/gel/helper"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/shadow"
 )
@@ -30,8 +29,8 @@ type Toasts struct {
 
 type toast struct {
 	title, content, level string
-	headerBackground      color.RGBA
-	bodyBackground        color.RGBA
+	headerBackground      color.NRGBA
+	bodyBackground        color.NRGBA
 	icon                  *[]byte
 	ticker                float32
 	close                 p9.Clickable
@@ -61,17 +60,19 @@ func (t *Toasts) AddToast(title, content, level string) {
 	case "Info":
 		ic = &icons2.ActionInfo
 	}
-	t.toasts = append(t.toasts, toast{
-		title:            title,
-		content:          content,
-		level:            level,
-		ticker:           0,
-		headerBackground: helper.HexARGB(t.theme.Colors[level]),
-		bodyBackground:   helper.HexARGB(t.theme.Colors["PanelBg"]),
-		cornerRadius:     t.singleCornerRadius,
-		elevation:        t.singleElevation,
-		icon:             ic,
-	})
+	t.toasts = append(
+		t.toasts, toast{
+			title:            title,
+			content:          content,
+			level:            level,
+			ticker:           0,
+			headerBackground: p9.HexNRGB(t.theme.Colors[level]),
+			bodyBackground:   p9.HexNRGB(t.theme.Colors["PanelBg"]),
+			cornerRadius:     t.singleCornerRadius,
+			elevation:        t.singleElevation,
+			icon:             ic,
+		},
+	)
 }
 
 func (t *Toasts) DrawToasts() func(gtx l.Context) {
@@ -81,8 +82,10 @@ func (t *Toasts) DrawToasts() func(gtx l.Context) {
 		gtx.Constraints.Min = image.Pt(250, gtx.Constraints.Min.Y)
 		gtx.Constraints.Max.X = 250
 		// paint.Fill(gtx.Ops,  helper.HexARGB("ff559988"))
-		t.theme.Inset(0,
-			t.layout.Vertical().ScrollToEnd().Length(len(t.toasts)).ListElement(t.singleToast).Fn).Fn(gtx)
+		t.theme.Inset(
+			0,
+			t.layout.Vertical().ScrollToEnd().Length(len(t.toasts)).ListElement(t.singleToast).Fn,
+		).Fn(gtx)
 	}
 }
 func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
@@ -93,37 +96,48 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 		gtx.Constraints.Max.X = t.singleSize.X
 		sz := gtx.Constraints.Min
 		rr := float32(gtx.Px(t.singleCornerRadius))
-
+		
 		r := f32.Rect(0, 0, float32(sz.X), float32(sz.Y))
-
-		return t.theme.Inset(0.05, func(gtx l.Context) l.Dimensions {
-			return shadow.Shadow(gtx, unit.Dp(3), unit.Dp(1), helper.HexARGB("ee000000"), t.theme.Flex().Flexed(1,
-				func(gtx l.Context) l.Dimensions {
-					clip.UniformRRect(r, rr).Add(gtx.Ops)
-					paint.Fill(gtx.Ops, t.toasts[index].bodyBackground)
-
-					return t.theme.Inset(0.25,
-						t.theme.VFlex().
-							Rigid(
-								t.theme.Inset(0.1,
-									t.theme.Fill(t.toasts[index].level,
-										t.theme.Flex().
-											Rigid(
-												func(gtx l.Context) l.Dimensions {
-													return t.theme.Icon().Color("DocText").Scale(1).Src(t.toasts[index].icon).Fn(gtx)
-												},
-											).
-											Flexed(1,
-												t.theme.H6(t.toasts[index].title).Color("PanelBg").Fn,
+		
+		return t.theme.Inset(
+			0.05, func(gtx l.Context) l.Dimensions {
+				return shadow.Shadow(
+					gtx, unit.Dp(3), unit.Dp(1), p9.HexNRGB("ee000000"), t.theme.Flex().Flexed(
+						1,
+						func(gtx l.Context) l.Dimensions {
+							clip.UniformRRect(r, rr).Add(gtx.Ops)
+							paint.Fill(gtx.Ops, t.toasts[index].bodyBackground)
+							
+							return t.theme.Inset(
+								0.25,
+								t.theme.VFlex().
+									Rigid(
+										t.theme.Inset(
+											0.1,
+											t.theme.Fill(
+												t.toasts[index].level,
+												t.theme.Flex().
+													Rigid(
+														func(gtx l.Context) l.Dimensions {
+															return t.theme.Icon().Color("DocText").Scale(1).Src(t.toasts[index].icon).Fn(gtx)
+														},
+													).
+													Flexed(
+														1,
+														t.theme.H6(t.toasts[index].title).Color("PanelBg").Fn,
+													).Fn,
 											).Fn,
+										).Fn,
+									).
+									Rigid(
+										t.theme.Body1(t.toasts[index].content).Color("PanelText").Fn,
 									).Fn,
-								).Fn,
-							).
-							Rigid(
-								t.theme.Body1(t.toasts[index].content).Color("PanelText").Fn,
-							).Fn).Fn(gtx)
-				}).Fn)
-		}).Fn(gtx)
+							).Fn(gtx)
+						},
+					).Fn,
+				)
+			},
+		).Fn(gtx)
 	} else {
 		t.toasts = remove(t.toasts, index)
 		return p9.EmptySpace(0, 0)(gtx)

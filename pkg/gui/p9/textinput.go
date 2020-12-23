@@ -17,11 +17,11 @@ type TextInput struct {
 	font     text.Font
 	textSize unit.Value
 	// Color is the text color.
-	color color.RGBA
+	color color.NRGBA
 	// Hint contains the text displayed when the editor is empty.
 	hint string
 	// HintColor is the color of hint text.
-	hintColor color.RGBA
+	hintColor color.NRGBA
 	editor    *Editor
 	shaper    text.Shaper
 }

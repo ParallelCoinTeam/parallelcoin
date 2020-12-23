@@ -111,7 +111,7 @@ func buildAndroid(tmpDir string, bi *buildInfo) error {
 			"CGO_ENABLED=1",
 		),
 	}
-	pkgs, err := packages.Load(cfg, bi.pkg)
+	pkgs, err := packages.Load(cfg, bi.pkgPath)
 	if err != nil {
 		return err
 	}
@@ -205,12 +205,13 @@ func compileAndroid(tmpDir string, tools *androidTools, bi *buildInfo) (err erro
 			"-buildmode=c-shared",
 			"-tags", bi.tags,
 			"-o", libFile,
-			bi.pkg,
+			bi.pkgPath,
 		)
 		cmd.Env = append(
 			os.Environ(),
 			"GOOS=android",
 			"GOARCH="+a,
+			"GOARM=7", // Avoid softfloat.
 			"CGO_ENABLED=1",
 			"CC="+clang,
 		)
@@ -352,7 +353,7 @@ func exeAndroid(tmpDir string, tools *androidTools, bi *buildInfo, extraJars, pe
 	}
 	icon := *iconPath
 	if icon == "" {
-		icon = filepath.Join(bi.dir, "appicon.png")
+		icon = filepath.Join(bi.pkgDir, "appicon.png")
 	}
 	iconSnip := ""
 	if _, err := os.Stat(icon); err == nil {

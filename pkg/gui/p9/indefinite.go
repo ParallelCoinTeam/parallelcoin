@@ -15,7 +15,7 @@ import (
 
 type Indefinite struct {
 	th    *Theme
-	color color.RGBA
+	color color.NRGBA
 	scale float32
 }
 
@@ -63,7 +63,7 @@ func (lo *Indefinite) Fn(gtx l.Context) l.Dimensions {
 	}.Add(gtx.Ops)
 	op.Offset(f32.Pt(-float32(radius), -float32(radius))).Add(gtx.Ops)
 	paint.PaintOp{
-		Rect: f32.Rectangle{Max: l.FPt(sz)},
+		// Rect: f32.Rectangle{Max: l.FPt(sz)},
 	}.Add(gtx.Ops)
 	op.InvalidateOp{}.Add(gtx.Ops)
 	return l.Dimensions{
@@ -73,25 +73,25 @@ func (lo *Indefinite) Fn(gtx l.Context) l.Dimensions {
 
 func clipLoader(ops *op.Ops, startAngle, endAngle, radius float64) {
 	const thickness = .25
+	
 	var (
-		outer  = float32(radius)
-		delta  = float32(endAngle - startAngle)
+		width = float32(radius * thickness)
+		delta = float32(endAngle - startAngle)
+		
 		vy, vx = math.Sincos(startAngle)
-		pen    = f32.Pt(float32(vx), float32(vy)).Mul(outer)
+		
+		pen    = f32.Pt(float32(vx), float32(vy)).Mul(float32(radius))
 		center = f32.Pt(0, 0).Sub(pen)
-		p      clip.Path
+		
+		style = clip.StrokeStyle{
+			Cap: clip.FlatCap,
+		}
+		
+		p clip.Path
 	)
+	
 	p.Begin(ops)
 	p.Move(pen)
-	// Outer arc.
 	p.Arc(center, center, delta)
-	// Arc cap.
-	pen = p.Pos()
-	capacity := pen.Mul(1 - thickness)
-	p.Line(capacity.Sub(pen))
-	// Inner arc.
-	center = f32.Pt(0, 0).Sub(p.Pos())
-	p.Arc(center, center, -delta)
-	// Second arc cap automatically completed by End.
-	p.End().Add(ops)
+	p.Stroke(width, style).Add(ops)
 }

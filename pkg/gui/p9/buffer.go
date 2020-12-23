@@ -11,17 +11,17 @@ import (
 
 const bufferDebug = false
 
-// EditBuffer implements a gap buffer for text editing.
-type EditBuffer struct {
+// editBuffer implements a gap buffer for text editing.
+type editBuffer struct {
 	// caret is the caret position in bytes.
 	caret int
 	// pos is the byte position for Read and ReadRune.
 	pos int
-
+	
 	// The gap start and end in bytes.
 	gapstart, gapend int
 	text             []byte
-
+	
 	// changed tracks whether the buffer content
 	// has changed since the last call to Changed.
 	changed bool
@@ -29,19 +29,19 @@ type EditBuffer struct {
 
 const minSpace = 5
 
-func (e *EditBuffer) Changed() bool {
-	c := e.changed
-	e.changed = false
-	return c
-}
-
-func (e *EditBuffer) Zero() {
+func (e *editBuffer) Zero() {
 	for i := range e.text {
 		e.text[i] = 0
 	}
 }
 
-func (e *EditBuffer) deleteRunes(runes int) {
+func (e *editBuffer) Changed() bool {
+	c := e.changed
+	e.changed = false
+	return c
+}
+
+func (e *editBuffer) deleteRunes(runes int) {
 	e.moveGap(0)
 	for ; runes < 0 && e.gapstart > 0; runes++ {
 		_, s := utf8.DecodeLastRune(e.text[:e.gapstart])
@@ -59,7 +59,7 @@ func (e *EditBuffer) deleteRunes(runes int) {
 
 // moveGap moves the gap to the caret position. After returning,
 // the gap is guaranteed to be at least space bytes long.
-func (e *EditBuffer) moveGap(space int) {
+func (e *editBuffer) moveGap(space int) {
 	if e.gapLen() < space {
 		if space < minSpace {
 			space = minSpace
@@ -93,19 +93,19 @@ func (e *EditBuffer) moveGap(space int) {
 	e.dump()
 }
 
-func (e *EditBuffer) len() int {
+func (e *editBuffer) len() int {
 	return len(e.text) - e.gapLen()
 }
 
-func (e *EditBuffer) gapLen() int {
+func (e *editBuffer) gapLen() int {
 	return e.gapend - e.gapstart
 }
 
-func (e *EditBuffer) Reset() {
+func (e *editBuffer) Reset() {
 	e.pos = 0
 }
 
-func (e *EditBuffer) Read(p []byte) (int, error) {
+func (e *editBuffer) Read(p []byte) (int, error) {
 	if e.pos == e.len() {
 		return 0, io.EOF
 	}
@@ -127,7 +127,7 @@ func (e *EditBuffer) Read(p []byte) (int, error) {
 	return total, nil
 }
 
-func (e *EditBuffer) ReadRune() (rune, int, error) {
+func (e *editBuffer) ReadRune() (rune, int, error) {
 	if e.pos == e.len() {
 		return 0, 0, io.EOF
 	}
@@ -136,7 +136,7 @@ func (e *EditBuffer) ReadRune() (rune, int, error) {
 	return r, s, nil
 }
 
-func (e *EditBuffer) String() string {
+func (e *editBuffer) String() string {
 	var b strings.Builder
 	b.Grow(e.len())
 	b.Write(e.text[:e.gapstart])
@@ -144,7 +144,7 @@ func (e *EditBuffer) String() string {
 	return b.String()
 }
 
-func (e *EditBuffer) prepend(s string) {
+func (e *editBuffer) prepend(s string) {
 	e.moveGap(len(s))
 	copy(e.text[e.caret:], s)
 	e.gapstart += len(s)
@@ -152,20 +152,20 @@ func (e *EditBuffer) prepend(s string) {
 	e.dump()
 }
 
-func (e *EditBuffer) dump() {
+func (e *editBuffer) dump() {
 	if bufferDebug {
 		fmt.Printf("len(e.text) %d e.len() %d e.gapstart %d e.gapend %d e.caret %d txt:\n'%+x'<-%d->'%+x'\n", len(e.text), e.len(), e.gapstart, e.gapend, e.caret, e.text[:e.gapstart], e.gapLen(), e.text[e.gapend:])
 	}
 }
 
-func (e *EditBuffer) runeBefore(idx int) (rune, int) {
+func (e *editBuffer) runeBefore(idx int) (rune, int) {
 	if idx > e.gapstart {
 		idx += e.gapLen()
 	}
 	return utf8.DecodeLastRune(e.text[:idx])
 }
 
-func (e *EditBuffer) runeAt(idx int) (rune, int) {
+func (e *editBuffer) runeAt(idx int) (rune, int) {
 	if idx >= e.gapstart {
 		idx += e.gapLen()
 	}

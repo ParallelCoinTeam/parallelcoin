@@ -192,20 +192,18 @@ func (x *Context) DispatchKey(keyCode uint32, state key.State) (events []event.E
 		}
 	}
 	// Report only printable runes.
-	if state == key.Press {
-		var n int
-		for n < len(str) {
-			r, s := utf8.DecodeRune(str)
-			if unicode.IsPrint(r) {
-				n += s
-			} else {
-				copy(str[n:], str[n+s:])
-				str = str[:len(str)-s]
-			}
+	var n int
+	for n < len(str) {
+		r, s := utf8.DecodeRune(str)
+		if unicode.IsPrint(r) {
+			n += s
+		} else {
+			copy(str[n:], str[n+s:])
+			str = str[:len(str)-s]
 		}
-		if len(str) > 0 {
-			events = append(events, key.EditEvent{Text: string(str)})
-		}
+	}
+	if state == key.Press && len(str) > 0 {
+		events = append(events, key.EditEvent{Text: string(str)})
 	}
 	return
 }

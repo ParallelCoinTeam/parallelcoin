@@ -68,39 +68,45 @@ func TestEndToEnd(t *testing.T) {
 
 	t.Parallel()
 
+	const (
+		testdataWithGoImportPkgPath = "gioui.org/cmd/gogio/testdata"
+		testdataWithRelativePkgPath = "testdata/testdata.go"
+	)
 	// Keep this list local, to not reuse TestDriver objects.
 	subtests := []struct {
-		name   string
-		driver TestDriver
+		name    string
+		driver  TestDriver
+		pkgPath string
 	}{
-		{"X11", &X11TestDriver{}},
-		{"Wayland", &WaylandTestDriver{}},
-		{"JS", &JSTestDriver{}},
-		{"Android", &AndroidTestDriver{}},
-		{"Windows", &WineTestDriver{}},
+		{"X11 using go import path", &X11TestDriver{}, testdataWithGoImportPkgPath},
+		{"X11", &X11TestDriver{}, testdataWithRelativePkgPath},
+		{"Wayland", &WaylandTestDriver{}, testdataWithRelativePkgPath},
+		{"JS", &JSTestDriver{}, testdataWithRelativePkgPath},
+		{"Android", &AndroidTestDriver{}, testdataWithRelativePkgPath},
+		{"Windows", &WineTestDriver{}, testdataWithRelativePkgPath},
 	}
 
 	for _, subtest := range subtests {
 		t.Run(subtest.name, func(t *testing.T) {
 			subtest := subtest // copy the changing loop variable
 			t.Parallel()
-			runEndToEndTest(t, subtest.driver)
+			runEndToEndTest(t, subtest.driver, subtest.pkgPath)
 		})
 	}
 }
 
-func runEndToEndTest(t *testing.T, driver TestDriver) {
+func runEndToEndTest(t *testing.T, driver TestDriver, pkgPath string) {
 	size := image.Point{X: 800, Y: 600}
 	driver.initBase(t, size.X, size.Y)
 
 	t.Log("starting driver and gio app")
-	driver.Start("testdata/red.go")
+	driver.Start(pkgPath)
 
-	beef := color.RGBA{R: 0xde, G: 0xad, B: 0xbe}
-	white := color.RGBA{R: 0xff, G: 0xff, B: 0xff}
-	black := color.RGBA{R: 0x00, G: 0x00, B: 0x00}
-	gray := color.RGBA{R: 0xbb, G: 0xbb, B: 0xbb}
-	red := color.RGBA{R: 0xff, G: 0x00, B: 0x00}
+	beef := color.NRGBA{R: 0xde, G: 0xad, B: 0xbe, A: 0xff}
+	white := color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+	black := color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xff}
+	gray := color.NRGBA{R: 0xbb, G: 0xbb, B: 0xbb, A: 0xff}
+	red := color.NRGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff}
 
 	// These are the four colors at the beginning.
 	t.Log("taking initial screenshot")
@@ -181,7 +187,7 @@ func (m colorMismatch) String() string {
 	)
 }
 
-func checkImageCorners(img image.Image, topLeft, topRight, botLeft, botRight color.RGBA) error {
+func checkImageCorners(img image.Image, topLeft, topRight, botLeft, botRight color.Color) error {
 	// The colors are split in four rectangular sections. Check the corners
 	// of each of the sections. We check the corners left to right, top to
 	// bottom, like when reading left-to-right text.

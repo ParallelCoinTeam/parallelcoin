@@ -18,8 +18,8 @@ import (
 type Switch struct {
 	th    *Theme
 	color struct {
-		enabled  color.RGBA
-		disabled color.RGBA
+		enabled  color.NRGBA
+		disabled color.NRGBA
 	}
 	swtch *Bool
 }
@@ -56,10 +56,10 @@ func (s *Switch) SetHook(fn func(b bool)) *Switch {
 func (s *Switch) Fn(gtx l.Context) l.Dimensions {
 	return s.th.Inset(0.25, func(gtx l.Context) l.Dimensions {
 		trackWidth := gtx.Px(s.th.TextSize.Scale(2.5))
-		trackHeight := gtx.Px(s.th.TextSize.Scale(0.75))
-		thumbSize := gtx.Px(s.th.TextSize.Scale(1.125))
+		trackHeight := gtx.Px(unit.Dp(16))
+		thumbSize := gtx.Px(unit.Dp(20))
 		trackOff := float32(thumbSize-trackHeight) * .5
-
+		
 		// Draw track.
 		stack := op.Push(gtx.Ops)
 		trackCorner := float32(trackHeight) / 2
@@ -68,7 +68,7 @@ func (s *Switch) Fn(gtx l.Context) l.Dimensions {
 			Y: float32(trackHeight),
 		}}
 		col := s.color.disabled
-		if s.swtch.GetValue() {
+		if s.swtch.value {
 			col = s.color.enabled
 		}
 		if gtx.Queue == nil {
@@ -81,49 +81,50 @@ func (s *Switch) Fn(gtx l.Context) l.Dimensions {
 			NE:   trackCorner, NW: trackCorner, SE: trackCorner, SW: trackCorner,
 		}.Add(gtx.Ops)
 		paint.ColorOp{Color: trackColor}.Add(gtx.Ops)
-		paint.PaintOp{Rect: trackRect}.Add(gtx.Ops)
+		paint.PaintOp{}.Add(gtx.Ops)
 		stack.Pop()
-		// TODO: change this to animating the thumb slide with color fades
-		// // Draw thumb ink.
-		// stack = op.Push(gtx.Ops)
-		// inkSize := gtx.Px(unit.Dp(44))
-		// rr := float32(inkSize) * .5
-		// inkOff := f32.Point{
-		// 	X: float32(trackWidth)*.5 - rr,
-		// 	Y: -rr + float32(trackHeight)*.5 + trackOff,
-		// }
-		// op.Offset(inkOff).Add(gtx.Ops)
-		// gtx.Constraints.Min = image.Pt(inkSize, inkSize)
-		// clip.RRect{
-		// 	Rect: f32.Rectangle{
-		// 		Max: l.FPt(gtx.Constraints.Min),
-		// 	},
-		// 	NE: rr, NW: rr, SE: rr, SW: rr,
-		// }.Add(gtx.Ops)
-		// // for _, p := range s.swtch.History() {
-		// // 	drawInk(gtx, p)
-		// // }
-		// stack.Pop()
-
+		
+		// Draw thumb ink.
+		stack = op.Push(gtx.Ops)
+		inkSize := gtx.Px(unit.Dp(44))
+		rr := float32(inkSize) * .5
+		inkOff := f32.Point{
+			X: float32(trackWidth)*.5 - rr,
+			Y: -rr + float32(trackHeight)*.5 + trackOff,
+		}
+		op.Offset(inkOff).Add(gtx.Ops)
+		gtx.Constraints.Min = image.Pt(inkSize, inkSize)
+		clip.RRect{
+			Rect: f32.Rectangle{
+				Max: l.FPt(gtx.Constraints.Min),
+			},
+			NE: rr, NW: rr, SE: rr, SW: rr,
+		}.Add(gtx.Ops)
+		for _, p := range s.swtch.History() {
+			drawInk(gtx, p)
+		}
+		stack.Pop()
+		
 		// Compute thumb offset and color.
 		stack = op.Push(gtx.Ops)
-		if s.swtch.GetValue() {
+		if s.swtch.value {
 			off := trackWidth - thumbSize
 			op.Offset(f32.Point{X: float32(off)}).Add(gtx.Ops)
 		}
-
-		// Draw thumb shadow, a translucent disc slightly larger than the thumb itself.
+		
+		// Draw thumb shadow, a translucent disc slightly larger than the
+		// thumb itself.
 		shadowStack := op.Push(gtx.Ops)
 		shadowSize := float32(2)
 		// Center shadow horizontally and slightly adjust its Y.
-		op.Offset(f32.Point{X: -shadowSize / 2, Y: -.5}).Add(gtx.Ops)
-		drawDisc(gtx.Ops, float32(thumbSize)+shadowSize, argb(0x55000000))
+		op.Offset(f32.Point{X: -shadowSize / 2, Y: -.75}).Add(gtx.Ops)
+		drawDisc(gtx.Ops, float32(thumbSize)+shadowSize, color.NRGBA(argb(0x55000000)))
 		shadowStack.Pop()
-
+		
 		// Draw thumb.
 		drawDisc(gtx.Ops, float32(thumbSize), col)
 		stack.Pop()
-
+		
 		// Set up click area.
 		stack = op.Push(gtx.Ops)
 		clickSize := gtx.Px(unit.Dp(40))
@@ -137,13 +138,13 @@ func (s *Switch) Fn(gtx l.Context) l.Dimensions {
 		gtx.Constraints.Min = sz
 		s.swtch.Fn(gtx)
 		stack.Pop()
-
+		
 		dims := image.Point{X: trackWidth, Y: thumbSize}
 		return l.Dimensions{Size: dims}
 	}).Fn(gtx)
 }
 
-func drawDisc(ops *op.Ops, sz float32, col color.RGBA) {
+func drawDisc(ops *op.Ops, sz float32, col color.NRGBA) {
 	defer op.Push(ops).Pop()
 	rr := sz / 2
 	r := f32.Rectangle{Max: f32.Point{X: sz, Y: sz}}
@@ -152,5 +153,5 @@ func drawDisc(ops *op.Ops, sz float32, col color.RGBA) {
 		NE:   rr, NW: rr, SE: rr, SW: rr,
 	}.Add(ops)
 	paint.ColorOp{Color: col}.Add(ops)
-	paint.PaintOp{Rect: r}.Add(ops)
+	paint.PaintOp{}.Add(ops)
 }

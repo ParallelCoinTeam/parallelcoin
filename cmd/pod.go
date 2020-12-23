@@ -55,13 +55,14 @@ func Main() {
 		}
 	}
 	res := app.Main()
-	Debug("returning value", res)
+	Debug("returning value", res, os.Args)
 	if os.Getenv("POD_TRACE") == "on" {
 		Debug("stopping trace")
 		trace.Stop()
 		f.Close()
 	}
 	if res != 0 {
+		Warn("quitting with error")
 		os.Exit(res)
 	}
 }

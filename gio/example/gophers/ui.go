@@ -102,12 +102,12 @@ func newUI(fetchCommits func(string)) *UI {
 	return u
 }
 
-func rgb(c uint32) color.RGBA {
+func rgb(c uint32) color.NRGBA {
 	return argb((0xff << 24) | c)
 }
 
-func argb(c uint32) color.RGBA {
-	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
+func argb(c uint32) color.NRGBA {
+	return color.NRGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
 }
 
 func (u *UI) layoutTimings(gtx layout.Context) {
@@ -321,17 +321,16 @@ func (u *user) layoutAvatar(gtx layout.Context) layout.Dimensions {
 }
 
 type fill struct {
-	col color.RGBA
+	col color.NRGBA
 }
 
 func (f fill) Layout(gtx layout.Context) layout.Dimensions {
 	cs := gtx.Constraints
 	d := cs.Min
-	dr := f32.Rectangle{
-		Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
+	dr := image.Rectangle{
+		Max: image.Point{X: d.X, Y: d.Y},
 	}
-	paint.ColorOp{Color: f.col}.Add(gtx.Ops)
-	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	paint.FillShape(gtx.Ops, f.col, clip.Rect(dr).Op())
 	return layout.Dimensions{Size: d}
 }
 

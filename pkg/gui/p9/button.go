@@ -18,8 +18,8 @@ import (
 
 type Button struct {
 	th           *Theme
-	background   color.RGBA
-	color        color.RGBA
+	background   color.NRGBA
+	color        color.NRGBA
 	cornerRadius unit.Value
 	font         text.Font
 	inset        *l.Inset
@@ -175,7 +175,7 @@ func drawInk(c l.Context, p press) {
 			// Too old.
 			return
 		}
-
+		
 		alphat = half1 + half2
 	}
 	// Compute the expand position in [0;1].
@@ -213,7 +213,7 @@ func drawInk(c l.Context, p press) {
 	const col = 0.8
 	ba, bc := byte(alpha*0xff), byte(col*0xff)
 	defer op.Push(c.Ops).Pop()
-	rgba := f32color.MulAlpha(color.RGBA{A: 0xff, R: bc, G: bc, B: bc}, ba)
+	rgba := f32color.MulAlpha(color.NRGBA{A: 0xff, R: bc, G: bc, B: bc}, ba)
 	ink := paint.ColorOp{Color: rgba}
 	ink.Add(c.Ops)
 	rr := size * .5
@@ -228,5 +228,5 @@ func drawInk(c l.Context, p press) {
 		}},
 		NE: rr, NW: rr, SE: rr, SW: rr,
 	}.Add(c.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: size, Y: size}}}.Add(c.Ops)
+	paint.PaintOp{}.Add(c.Ops)
 }

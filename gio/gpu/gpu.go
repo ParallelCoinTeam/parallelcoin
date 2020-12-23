@@ -25,7 +25,7 @@ import (
 	gunsafe "gioui.org/internal/unsafe"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/paint"
+	"gioui.org/op/clip"
 )
 
 type GPU struct {
@@ -78,7 +78,13 @@ type drawState struct {
 	// Current paint.ImageOp
 	image imageOpData
 	// Current paint.ColorOp, if any.
-	color color.RGBA
+	color color.NRGBA
+
+	// Current paint.LinearGradientOp.
+	stop1  f32.Point
+	stop2  f32.Point
+	color1 color.NRGBA
+	color2 color.NRGBA
 }
 
 type pathOp struct {
@@ -97,7 +103,6 @@ type pathOp struct {
 type imageOp struct {
 	z        float32
 	path     *pathOp
-	off      f32.Point
 	clip     image.Rectangle
 	material material
 	clipType clipType
@@ -109,6 +114,9 @@ type material struct {
 	opaque   bool
 	// For materialTypeColor.
 	color f32color.RGBA
+	// For materialTypeLinearGradient.
+	color1 f32color.RGBA
+	color2 f32color.RGBA
 	// For materialTypeTexture.
 	texture *texture
 	uvTrans f32.Affine2D
@@ -118,13 +126,21 @@ type material struct {
 type clipOp struct {
 	// TODO: Use image.Rectangle?
 	bounds f32.Rectangle
+	width  float32
+	style  clip.StrokeStyle
 }
 
 // imageOpData is the shadow of paint.ImageOp.
 type imageOpData struct {
-	rect   image.Rectangle
 	src    *image.RGBA
 	handle interface{}
+}
+
+type linearGradientOpData struct {
+	stop1  f32.Point
+	color1 color.NRGBA
+	stop2  f32.Point
+	color2 color.NRGBA
 }
 
 func (op *clipOp) decode(data []byte) {
@@ -144,6 +160,12 @@ func (op *clipOp) decode(data []byte) {
 	}
 	*op = clipOp{
 		bounds: layout.FRect(r),
+		width:  math.Float32frombits(bo.Uint32(data[17:])),
+		style: clip.StrokeStyle{
+			Cap:   clip.StrokeCap(data[21]),
+			Join:  clip.StrokeJoin(data[22]),
+			Miter: math.Float32frombits(bo.Uint32(data[23:])),
+		},
 	}
 }
 
@@ -155,28 +177,17 @@ func decodeImageOp(data []byte, refs []interface{}) imageOpData {
 	if handle == nil {
 		return imageOpData{}
 	}
-	bo := binary.LittleEndian
 	return imageOpData{
-		rect: image.Rectangle{
-			Min: image.Point{
-				X: int(int32(bo.Uint32(data[1:]))),
-				Y: int(int32(bo.Uint32(data[5:]))),
-			},
-			Max: image.Point{
-				X: int(int32(bo.Uint32(data[9:]))),
-				Y: int(int32(bo.Uint32(data[13:]))),
-			},
-		},
 		src:    refs[0].(*image.RGBA),
 		handle: handle,
 	}
 }
 
-func decodeColorOp(data []byte) color.RGBA {
+func decodeColorOp(data []byte) color.NRGBA {
 	if opconst.OpType(data[0]) != opconst.TypeColor {
 		panic("invalid op")
 	}
-	return color.RGBA{
+	return color.NRGBA{
 		R: data[1],
 		G: data[2],
 		B: data[3],
@@ -184,23 +195,32 @@ func decodeColorOp(data []byte) color.RGBA {
 	}
 }
 
-func decodePaintOp(data []byte) paint.PaintOp {
-	bo := binary.LittleEndian
-	if opconst.OpType(data[0]) != opconst.TypePaint {
+func decodeLinearGradientOp(data []byte) linearGradientOpData {
+	if opconst.OpType(data[0]) != opconst.TypeLinearGradient {
 		panic("invalid op")
 	}
-	r := f32.Rectangle{
-		Min: f32.Point{
+	bo := binary.LittleEndian
+	return linearGradientOpData{
+		stop1: f32.Point{
 			X: math.Float32frombits(bo.Uint32(data[1:])),
 			Y: math.Float32frombits(bo.Uint32(data[5:])),
 		},
-		Max: f32.Point{
+		stop2: f32.Point{
 			X: math.Float32frombits(bo.Uint32(data[9:])),
 			Y: math.Float32frombits(bo.Uint32(data[13:])),
 		},
-	}
-	return paint.PaintOp{
-		Rect: r,
+		color1: color.NRGBA{
+			R: data[17+0],
+			G: data[17+1],
+			B: data[17+2],
+			A: data[17+3],
+		},
+		color2: color.NRGBA{
+			R: data[21+0],
+			G: data[21+1],
+			B: data[21+2],
+			A: data[21+3],
+		},
 	}
 }
 
@@ -216,13 +236,14 @@ type texture struct {
 }
 
 type blitter struct {
-	ctx         backend.Device
-	viewport    image.Point
-	prog        [2]*program
-	layout      backend.InputLayout
-	colUniforms *blitColUniforms
-	texUniforms *blitTexUniforms
-	quadVerts   backend.Buffer
+	ctx                    backend.Device
+	viewport               image.Point
+	prog                   [3]*program
+	layout                 backend.InputLayout
+	colUniforms            *blitColUniforms
+	texUniforms            *blitTexUniforms
+	linearGradientUniforms *blitLinearGradientUniforms
+	quadVerts              backend.Buffer
 }
 
 type blitColUniforms struct {
@@ -239,6 +260,16 @@ type blitTexUniforms struct {
 	vert struct {
 		blitUniforms
 		_ [12]byte // Padding to a multiple of 16.
+	}
+}
+
+type blitLinearGradientUniforms struct {
+	vert struct {
+		blitUniforms
+		_ [12]byte // Padding to a multiple of 16.
+	}
+	frag struct {
+		gradientUniforms
 	}
 }
 
@@ -264,6 +295,11 @@ type colorUniforms struct {
 	color f32color.RGBA
 }
 
+type gradientUniforms struct {
+	color1 f32color.RGBA
+	color2 f32color.RGBA
+}
+
 type materialType uint8
 
 const (
@@ -274,6 +310,7 @@ const (
 
 const (
 	materialColor materialType = iota
+	materialLinearGradient
 	materialTexture
 )
 
@@ -342,8 +379,10 @@ func (g *GPU) BeginFrame() {
 	}
 	g.ctx.BindFramebuffer(g.defFBO)
 	g.ctx.DepthFunc(backend.DepthFuncGreater)
-	g.ctx.ClearDepth(0.0)
+	// Note that Clear must be before ClearDepth if nothing else is rendered
+	// (len(zimageOps) == 0). If not, the Fairphone 2 will corrupt the depth buffer.
 	g.ctx.Clear(g.drawOps.clearColor.Float32())
+	g.ctx.ClearDepth(0.0)
 	g.ctx.Viewport(0, 0, viewport.X, viewport.Y)
 	g.renderer.drawZOps(g.drawOps.zimageOps)
 	g.zopsTimer.end()
@@ -445,8 +484,11 @@ func newBlitter(ctx backend.Device) *blitter {
 	}
 	b.colUniforms = new(blitColUniforms)
 	b.texUniforms = new(blitTexUniforms)
+	b.linearGradientUniforms = new(blitLinearGradientUniforms)
 	prog, layout, err := createColorPrograms(ctx, shader_blit_vert, shader_blit_frag,
-		[2]interface{}{&b.colUniforms.vert, &b.texUniforms.vert}, [2]interface{}{&b.colUniforms.frag, nil})
+		[3]interface{}{&b.colUniforms.vert, &b.linearGradientUniforms.vert, &b.texUniforms.vert},
+		[3]interface{}{&b.colUniforms.frag, &b.linearGradientUniforms.frag, nil},
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -463,37 +505,59 @@ func (b *blitter) release() {
 	b.layout.Release()
 }
 
-func createColorPrograms(b backend.Device, vsSrc backend.ShaderSources, fsSrc [2]backend.ShaderSources, vertUniforms, fragUniforms [2]interface{}) ([2]*program, backend.InputLayout, error) {
-	var progs [2]*program
-	prog, err := b.NewProgram(vsSrc, fsSrc[materialTexture])
-	if err != nil {
-		return progs, nil, err
+func createColorPrograms(b backend.Device, vsSrc backend.ShaderSources, fsSrc [3]backend.ShaderSources, vertUniforms, fragUniforms [3]interface{}) ([3]*program, backend.InputLayout, error) {
+	var progs [3]*program
+	{
+		prog, err := b.NewProgram(vsSrc, fsSrc[materialTexture])
+		if err != nil {
+			return progs, nil, err
+		}
+		var vertBuffer, fragBuffer *uniformBuffer
+		if u := vertUniforms[materialTexture]; u != nil {
+			vertBuffer = newUniformBuffer(b, u)
+			prog.SetVertexUniforms(vertBuffer.buf)
+		}
+		if u := fragUniforms[materialTexture]; u != nil {
+			fragBuffer = newUniformBuffer(b, u)
+			prog.SetFragmentUniforms(fragBuffer.buf)
+		}
+		progs[materialTexture] = newProgram(prog, vertBuffer, fragBuffer)
 	}
-	var vertBuffer *uniformBuffer
-	if u := vertUniforms[materialTexture]; u != nil {
-		vertBuffer = newUniformBuffer(b, u)
-		prog.SetVertexUniforms(vertBuffer.buf)
+	{
+		var vertBuffer, fragBuffer *uniformBuffer
+		prog, err := b.NewProgram(vsSrc, fsSrc[materialColor])
+		if err != nil {
+			progs[materialTexture].Release()
+			return progs, nil, err
+		}
+		if u := vertUniforms[materialColor]; u != nil {
+			vertBuffer = newUniformBuffer(b, u)
+			prog.SetVertexUniforms(vertBuffer.buf)
+		}
+		if u := fragUniforms[materialColor]; u != nil {
+			fragBuffer = newUniformBuffer(b, u)
+			prog.SetFragmentUniforms(fragBuffer.buf)
+		}
+		progs[materialColor] = newProgram(prog, vertBuffer, fragBuffer)
 	}
-	var fragBuffer *uniformBuffer
-	if u := fragUniforms[materialTexture]; u != nil {
-		fragBuffer = newUniformBuffer(b, u)
-		prog.SetFragmentUniforms(fragBuffer.buf)
+	{
+		var vertBuffer, fragBuffer *uniformBuffer
+		prog, err := b.NewProgram(vsSrc, fsSrc[materialLinearGradient])
+		if err != nil {
+			progs[materialTexture].Release()
+			progs[materialColor].Release()
+			return progs, nil, err
+		}
+		if u := vertUniforms[materialLinearGradient]; u != nil {
+			vertBuffer = newUniformBuffer(b, u)
+			prog.SetVertexUniforms(vertBuffer.buf)
+		}
+		if u := fragUniforms[materialLinearGradient]; u != nil {
+			fragBuffer = newUniformBuffer(b, u)
+			prog.SetFragmentUniforms(fragBuffer.buf)
+		}
+		progs[materialLinearGradient] = newProgram(prog, vertBuffer, fragBuffer)
 	}
-	progs[materialTexture] = newProgram(prog, vertBuffer, fragBuffer)
-	prog, err = b.NewProgram(vsSrc, fsSrc[materialColor])
-	if err != nil {
-		progs[materialTexture].Release()
-		return progs, nil, err
-	}
-	if u := vertUniforms[materialColor]; u != nil {
-		vertBuffer = newUniformBuffer(b, u)
-		prog.SetVertexUniforms(vertBuffer.buf)
-	}
-	if u := fragUniforms[materialColor]; u != nil {
-		fragBuffer = newUniformBuffer(b, u)
-		prog.SetFragmentUniforms(fragBuffer.buf)
-	}
-	progs[materialColor] = newProgram(prog, vertBuffer, fragBuffer)
 	layout, err := b.NewInputLayout(vsSrc, []backend.InputDesc{
 		{Type: backend.DataTypeFloat, Size: 2, Offset: 0},
 		{Type: backend.DataTypeFloat, Size: 2, Offset: 4 * 2},
@@ -501,6 +565,7 @@ func createColorPrograms(b backend.Device, vsSrc backend.ShaderSources, fsSrc [2
 	if err != nil {
 		progs[materialTexture].Release()
 		progs[materialColor].Release()
+		progs[materialLinearGradient].Release()
 		return progs, nil, err
 	}
 	return progs, layout, nil
@@ -684,7 +749,7 @@ func (d *drawOps) collect(cache *resourceCache, root *op.Ops, viewport image.Poi
 	state := drawState{
 		clip:  clip,
 		rect:  true,
-		color: color.RGBA{A: 0xff},
+		color: color.NRGBA{A: 0xff},
 	}
 	d.collectOps(&d.reader, state)
 }
@@ -749,7 +814,7 @@ loop:
 					// Why is this not used for the offset shapes?
 					op.bounds = v.bounds
 				} else {
-					aux, op.bounds = d.buildVerts(aux, trans)
+					aux, op.bounds = d.buildVerts(aux, trans, op.width, op.style)
 					// add it to the cache, without GPU data, so the transform can be
 					// reused.
 					d.pathCache.put(auxKey, opCacheValue{bounds: op.bounds})
@@ -766,16 +831,29 @@ loop:
 		case opconst.TypeColor:
 			state.matType = materialColor
 			state.color = decodeColorOp(encOp.Data)
+		case opconst.TypeLinearGradient:
+			state.matType = materialLinearGradient
+			op := decodeLinearGradientOp(encOp.Data)
+			state.stop1 = op.stop1
+			state.stop2 = op.stop2
+			state.color1 = op.color1
+			state.color2 = op.color2
 		case opconst.TypeImage:
 			state.matType = materialTexture
 			state.image = decodeImageOp(encOp.Data, encOp.Refs)
 		case opconst.TypePaint:
-			op := decodePaintOp(encOp.Data)
 			// Transform (if needed) the painting rectangle and if so generate a clip path,
 			// for those cases also compute a partialTrans that maps texture coordinates between
 			// the new bounding rectangle and the transformed original paint rectangle.
 			trans, off := splitTransform(state.t)
-			clipData, bnd, partialTrans := d.boundsForTransformedRect(op.Rect, trans)
+			// Fill the clip area, unless the material is a (bounded) image.
+			// TODO: Find a tighter bound.
+			inf := float32(1e6)
+			dst := f32.Rect(-inf, -inf, inf, inf)
+			if state.matType == materialTexture {
+				dst = layout.FRect(state.image.src.Rect)
+			}
+			clipData, bnd, partialTrans := d.boundsForTransformedRect(dst, trans)
 			clip := state.clip.Intersect(bnd.Add(off))
 			if clip.Empty() {
 				continue
@@ -792,7 +870,7 @@ loop:
 			bounds := boundRectF(clip)
 			mat := state.materialFor(d.cache, bnd, off, partialTrans, bounds)
 
-			if bounds.Min == (image.Point{}) && bounds.Max == d.viewport && state.rect && mat.opaque && mat.material == materialColor {
+			if bounds.Min == (image.Point{}) && bounds.Max == d.viewport && state.rect && mat.opaque && (mat.material == materialColor) {
 				// The image is a uniform opaque color and takes up the whole screen.
 				// Scrap images up to and including this image and set clear color.
 				d.zimageOps = d.zimageOps[:0]
@@ -813,7 +891,6 @@ loop:
 			img := imageOp{
 				z:        zf,
 				path:     state.cpath,
-				off:      off,
 				clip:     bounds,
 				material: mat,
 			}
@@ -853,27 +930,34 @@ func (d *drawState) materialFor(cache *resourceCache, rect f32.Rectangle, off f3
 	switch d.matType {
 	case materialColor:
 		m.material = materialColor
-		m.color = f32color.RGBAFromSRGB(d.color)
+		m.color = f32color.LinearFromSRGB(d.color)
 		m.opaque = m.color.A == 1.0
+	case materialLinearGradient:
+		m.material = materialLinearGradient
+
+		m.color1 = f32color.LinearFromSRGB(d.color1)
+		m.color2 = f32color.LinearFromSRGB(d.color2)
+		m.opaque = m.color1.A == 1.0 && m.color2.A == 1.0
+
+		m.uvTrans = trans.Mul(gradientSpaceTransform(clip, off, d.stop1, d.stop2))
 	case materialTexture:
 		m.material = materialTexture
 		dr := boundRectF(rect.Add(off))
 		sz := d.image.src.Bounds().Size()
-		sr := layout.FRect(d.image.rect)
-		if dx := float32(dr.Dx()); dx != 0 {
-			// Don't clip 1 px width sources.
-			if sdx := sr.Dx(); sdx > 1 {
-				sr.Min.X += (float32(clip.Min.X-dr.Min.X)*sdx + dx/2) / dx
-				sr.Max.X -= (float32(dr.Max.X-clip.Max.X)*sdx + dx/2) / dx
-			}
+		sr := f32.Rectangle{
+			Max: f32.Point{
+				X: float32(sz.X),
+				Y: float32(sz.Y),
+			},
 		}
-		if dy := float32(dr.Dy()); dy != 0 {
-			// Don't clip 1 px height sources.
-			if sdy := sr.Dy(); sdy > 1 {
-				sr.Min.Y += (float32(clip.Min.Y-dr.Min.Y)*sdy + dy/2) / dy
-				sr.Max.Y -= (float32(dr.Max.Y-clip.Max.Y)*sdy + dy/2) / dy
-			}
-		}
+		dx := float32(dr.Dx())
+		sdx := sr.Dx()
+		sr.Min.X += float32(clip.Min.X-dr.Min.X) * sdx / dx
+		sr.Max.X -= float32(dr.Max.X-clip.Max.X) * sdx / dx
+		dy := float32(dr.Dy())
+		sdy := sr.Dy()
+		sr.Min.Y += float32(clip.Min.Y-dr.Min.Y) * sdy / dy
+		sr.Max.Y -= float32(dr.Max.Y-clip.Max.Y) * sdy / dy
 		tex, exists := cache.get(d.image.handle)
 		if !exists {
 			t := &texture{
@@ -903,7 +987,7 @@ func (r *renderer) drawZOps(ops []imageOp) {
 		}
 		drc := img.clip
 		scale, off := clipSpaceTransform(drc, r.blitter.viewport)
-		r.blitter.blit(img.z, m.material, m.color, scale, off, m.uvTrans)
+		r.blitter.blit(img.z, m.material, m.color, m.color1, m.color2, scale, off, m.uvTrans)
 	}
 	r.ctx.SetDepthTest(false)
 }
@@ -927,7 +1011,7 @@ func (r *renderer) drawOps(ops []imageOp) {
 		var fbo stencilFBO
 		switch img.clipType {
 		case clipTypeNone:
-			r.blitter.blit(img.z, m.material, m.color, scale, off, m.uvTrans)
+			r.blitter.blit(img.z, m.material, m.color, m.color1, m.color2, scale, off, m.uvTrans)
 			continue
 		case clipTypePath:
 			fbo = r.pather.stenciler.cover(img.place.Idx)
@@ -943,13 +1027,13 @@ func (r *renderer) drawOps(ops []imageOp) {
 			Max: img.place.Pos.Add(drc.Size()),
 		}
 		coverScale, coverOff := texSpaceTransform(toRectF(uv), fbo.size)
-		r.pather.cover(img.z, m.material, m.color, scale, off, m.uvTrans, coverScale, coverOff)
+		r.pather.cover(img.z, m.material, m.color, m.color1, m.color2, scale, off, m.uvTrans, coverScale, coverOff)
 	}
 	r.ctx.DepthMask(true)
 	r.ctx.SetDepthTest(false)
 }
 
-func (b *blitter) blit(z float32, mat materialType, col f32color.RGBA, scale, off f32.Point, uvTrans f32.Affine2D) {
+func (b *blitter) blit(z float32, mat materialType, col f32color.RGBA, col1, col2 f32color.RGBA, scale, off f32.Point, uvTrans f32.Affine2D) {
 	p := b.prog[mat]
 	b.ctx.BindProgram(p.prog)
 	var uniforms *blitUniforms
@@ -962,6 +1046,14 @@ func (b *blitter) blit(z float32, mat materialType, col f32color.RGBA, scale, of
 		b.texUniforms.vert.blitUniforms.uvTransformR1 = [4]float32{t1, t2, t3, 0}
 		b.texUniforms.vert.blitUniforms.uvTransformR2 = [4]float32{t4, t5, t6, 0}
 		uniforms = &b.texUniforms.vert.blitUniforms
+	case materialLinearGradient:
+		b.linearGradientUniforms.frag.color1 = col1
+		b.linearGradientUniforms.frag.color2 = col2
+
+		t1, t2, t3, t4, t5, t6 := uvTrans.Elems()
+		b.linearGradientUniforms.vert.blitUniforms.uvTransformR1 = [4]float32{t1, t2, t3, 0}
+		b.linearGradientUniforms.vert.blitUniforms.uvTransformR2 = [4]float32{t4, t5, t6, 0}
+		uniforms = &b.linearGradientUniforms.vert.blitUniforms
 	}
 	uniforms.z = z
 	uniforms.transform = [4]float32{scale.X, scale.Y, off.X, off.Y}
@@ -1032,6 +1124,22 @@ func texSpaceTransform(r f32.Rectangle, bounds image.Point) (f32.Point, f32.Poin
 	scale := f32.Point{X: r.Dx() / size.X, Y: r.Dy() / size.Y}
 	offset := f32.Point{X: r.Min.X / size.X, Y: r.Min.Y / size.Y}
 	return scale, offset
+}
+
+// gradientSpaceTransform transforms stop1 and stop2 to [(0,0), (1,1)].
+func gradientSpaceTransform(clip image.Rectangle, off f32.Point, stop1, stop2 f32.Point) f32.Affine2D {
+	d := stop2.Sub(stop1)
+	l := float32(math.Sqrt(float64(d.X*d.X + d.Y*d.Y)))
+	a := float32(math.Atan2(float64(-d.Y), float64(d.X)))
+
+	// TODO: optimize
+	zp := f32.Point{}
+	return f32.Affine2D{}.
+		Scale(zp, layout.FPt(clip.Size())).            // scale to pixel space
+		Offset(zp.Sub(off).Add(layout.FPt(clip.Min))). // offset to clip space
+		Offset(zp.Sub(stop1)).                         // offset to first stop point
+		Rotate(zp, a).                                 // rotate to align gradient
+		Scale(zp, f32.Pt(1/l, 1/l))                    // scale gradient to right size
 }
 
 // clipSpaceTransform returns the scale and offset that transforms the given
@@ -1105,7 +1213,7 @@ func (d *drawOps) writeVertCache(n int) []byte {
 }
 
 // transform, split paths as needed, calculate maxY, bounds and create GPU vertices.
-func (d *drawOps) buildVerts(aux []byte, tr f32.Affine2D) (verts []byte, bounds f32.Rectangle) {
+func (d *drawOps) buildVerts(aux []byte, tr f32.Affine2D, width float32, sty clip.StrokeStyle) (verts []byte, bounds f32.Rectangle) {
 	inf := float32(math.Inf(+1))
 	d.qs.bounds = f32.Rectangle{
 		Min: f32.Point{X: inf, Y: inf},
@@ -1114,14 +1222,37 @@ func (d *drawOps) buildVerts(aux []byte, tr f32.Affine2D) (verts []byte, bounds 
 	d.qs.d = d
 	bo := binary.LittleEndian
 	startLength := len(d.vertCache)
-	for qi := 0; len(aux) >= (ops.QuadSize + 4); qi++ {
-		d.qs.contour = bo.Uint32(aux)
-		quad := ops.DecodeQuad(aux[4:])
-		quad = quad.Transform(tr)
 
-		d.qs.splitAndEncode(quad)
+	switch {
+	default:
+		// Outline path.
+		for qi := 0; len(aux) >= (ops.QuadSize + 4); qi++ {
+			d.qs.contour = bo.Uint32(aux)
+			quad := ops.DecodeQuad(aux[4:])
+			quad = quad.Transform(tr)
 
-		aux = aux[ops.QuadSize+4:]
+			d.qs.splitAndEncode(quad)
+
+			aux = aux[ops.QuadSize+4:]
+		}
+	case width > 0:
+		// Stroke path.
+		quads := make(strokeQuads, 0, 2*len(aux)/(ops.QuadSize+4))
+		for qi := 0; len(aux) >= (ops.QuadSize + 4); qi++ {
+			quad := strokeQuad{
+				contour: bo.Uint32(aux),
+				quad:    ops.DecodeQuad(aux[4:]),
+			}
+			quads = append(quads, quad)
+			aux = aux[ops.QuadSize+4:]
+		}
+		quads = quads.stroke(width, sty)
+		for _, quad := range quads {
+			d.qs.contour = quad.contour
+			quad.quad = quad.quad.Transform(tr)
+
+			d.qs.splitAndEncode(quad.quad)
+		}
 	}
 
 	fillMaxY(d.vertCache[startLength:])

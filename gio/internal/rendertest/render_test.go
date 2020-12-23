@@ -1,10 +1,13 @@
 package rendertest
 
 import (
+	"image"
+	"image/color"
 	"math"
 	"testing"
 
 	"gioui.org/f32"
+	"gioui.org/internal/f32color"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
@@ -14,29 +17,28 @@ import (
 func TestTransformMacro(t *testing.T) {
 	// testcase resulting from original bug when rendering layout.Stacked
 
-	// pre-build the text
+	// Build clip-path.
 	c := constSqPath()
 
 	run(t, func(o *op.Ops) {
 
 		// render the first Stacked item
 		m1 := op.Record(o)
-		dr := f32.Rect(0, 0, 128, 50)
-		paint.ColorOp{Color: colornames.Black}.Add(o)
-		paint.PaintOp{Rect: dr}.Add(o)
+		dr := image.Rect(0, 0, 128, 50)
+		paint.FillShape(o, black, clip.Rect(dr).Op())
 		c1 := m1.Stop()
 
 		// Render the second stacked item
 		m2 := op.Record(o)
-		paint.ColorOp{Color: colornames.Red}.Add(o)
+		paint.ColorOp{Color: red}.Add(o)
 		// Simulate a draw text call
 		stack := op.Push(o)
 		op.Offset(f32.Pt(0, 10)).Add(o)
 
-		// Actually create the text clip-path
+		// Apply the clip-path.
 		c.Add(o)
 
-		paint.PaintOp{Rect: f32.Rect(0, 0, 10, 10)}.Add(o)
+		paint.PaintOp{}.Add(o)
 		stack.Pop()
 
 		c2 := m2.Stop()
@@ -60,8 +62,7 @@ func TestTransformMacro(t *testing.T) {
 func TestRepeatedPaintsZ(t *testing.T) {
 	run(t, func(o *op.Ops) {
 		// Draw a rectangle
-		paint.ColorOp{Color: colornames.Black}.Add(o)
-		paint.PaintOp{Rect: f32.Rect(0, 0, 128, 50)}.Add(o)
+		paint.FillShape(o, black, clip.Rect(image.Rect(0, 0, 128, 50)).Op())
 
 		builder := clip.Path{}
 		builder.Begin(o)
@@ -70,9 +71,8 @@ func TestRepeatedPaintsZ(t *testing.T) {
 		builder.Line(f32.Pt(0, 10))
 		builder.Line(f32.Pt(-10, 0))
 		builder.Line(f32.Pt(0, -10))
-		builder.End().Add(o)
-		paint.ColorOp{Color: colornames.Red}.Add(o)
-		paint.PaintOp{Rect: f32.Rect(0, 0, 10, 10)}.Add(o)
+		builder.Outline().Add(o)
+		paint.Fill(o, red)
 	}, func(r result) {
 		r.expect(5, 5, colornames.Red)
 		r.expect(11, 15, colornames.Black)
@@ -82,17 +82,15 @@ func TestRepeatedPaintsZ(t *testing.T) {
 
 func TestNoClipFromPaint(t *testing.T) {
 	// ensure that a paint operation does not polute the state
-	// by leaving any clip paths i place.
+	// by leaving any clip paths in place.
 	run(t, func(o *op.Ops) {
 		a := f32.Affine2D{}.Rotate(f32.Pt(20, 20), math.Pi/4)
 		op.Affine(a).Add(o)
-		paint.ColorOp{Color: colornames.Red}.Add(o)
-		paint.PaintOp{Rect: f32.Rect(10, 10, 30, 30)}.Add(o)
+		paint.FillShape(o, red, clip.Rect(image.Rect(10, 10, 30, 30)).Op())
 		a = f32.Affine2D{}.Rotate(f32.Pt(20, 20), -math.Pi/4)
 		op.Affine(a).Add(o)
 
-		paint.ColorOp{Color: colornames.Black}.Add(o)
-		paint.PaintOp{Rect: f32.Rect(0, 0, 50, 50)}.Add(o)
+		paint.FillShape(o, black, clip.Rect(image.Rect(0, 0, 50, 50)).Op())
 	}, func(r result) {
 		r.expect(1, 1, colornames.Black)
 		r.expect(20, 20, colornames.Black)
@@ -111,7 +109,7 @@ func constSqPath() op.CallOp {
 	builder.Line(f32.Pt(0, 10))
 	builder.Line(f32.Pt(-10, 0))
 	builder.Line(f32.Pt(0, -10))
-	builder.End().Add(innerOps)
+	builder.Outline().Add(innerOps)
 	return m.Stop()
 }
 
@@ -126,7 +124,7 @@ func constSqCirc() op.CallOp {
 func drawChild(ops *op.Ops, text op.CallOp) op.CallOp {
 	r1 := op.Record(ops)
 	text.Add(ops)
-	paint.PaintOp{Rect: f32.Rect(0, 0, 10, 10)}.Add(ops)
+	paint.PaintOp{}.Add(ops)
 	return r1.Stop()
 }
 
@@ -161,7 +159,7 @@ func TestBuildOffscreen(t *testing.T) {
 		s := op.Push(o)
 		op.Offset(f32.Pt(0, off)).Add(o)
 		txt.Add(o)
-		paint.PaintOp{Rect: f32.Rect(0, 0, 40, 40)}.Add(o)
+		paint.PaintOp{}.Add(o)
 		s.Pop()
 	}
 
@@ -186,11 +184,123 @@ func TestBuildOffscreen(t *testing.T) {
 func TestNegativeOverlaps(t *testing.T) {
 	run(t, func(ops *op.Ops) {
 		clip.RRect{Rect: f32.Rect(50, 50, 100, 100)}.Add(ops)
-		paint.PaintOp{Rect: f32.Rect(0, 120, 100, 122)}.Add(ops)
+		clip.Rect(image.Rect(0, 120, 100, 122)).Add(ops)
+		paint.PaintOp{}.Add(ops)
 	}, func(r result) {
 		r.expect(60, 60, colornames.White)
 		r.expect(60, 110, colornames.White)
 		r.expect(60, 120, colornames.White)
 		r.expect(60, 122, colornames.White)
 	})
+}
+
+type Gradient struct {
+	From, To color.NRGBA
+}
+
+var gradients = []Gradient{
+	{From: color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xFF}, To: color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}},
+	{From: color.NRGBA{R: 0x19, G: 0xFF, B: 0x19, A: 0xFF}, To: color.NRGBA{R: 0xFF, G: 0x19, B: 0x19, A: 0xFF}},
+	{From: color.NRGBA{R: 0xFF, G: 0x19, B: 0x19, A: 0xFF}, To: color.NRGBA{R: 0x19, G: 0x19, B: 0xFF, A: 0xFF}},
+	{From: color.NRGBA{R: 0x19, G: 0x19, B: 0xFF, A: 0xFF}, To: color.NRGBA{R: 0x19, G: 0xFF, B: 0x19, A: 0xFF}},
+	{From: color.NRGBA{R: 0x19, G: 0xFF, B: 0xFF, A: 0xFF}, To: color.NRGBA{R: 0xFF, G: 0x19, B: 0x19, A: 0xFF}},
+	{From: color.NRGBA{R: 0xFF, G: 0xFF, B: 0x19, A: 0xFF}, To: color.NRGBA{R: 0x19, G: 0x19, B: 0xFF, A: 0xFF}},
+}
+
+func TestLinearGradient(t *testing.T) {
+	t.Skip("linear gradients don't support transformations")
+
+	const gradienth = 8
+	// 0.5 offset from ends to ensure that the center of the pixel
+	// aligns with gradient from and to colors.
+	pixelAligned := f32.Rect(0.5, 0, 127.5, gradienth)
+	samples := []int{0, 12, 32, 64, 96, 115, 127}
+
+	run(t, func(ops *op.Ops) {
+		gr := f32.Rect(0, 0, 128, gradienth)
+		for _, g := range gradients {
+			paint.LinearGradientOp{
+				Stop1:  f32.Pt(gr.Min.X, gr.Min.Y),
+				Color1: g.From,
+				Stop2:  f32.Pt(gr.Max.X, gr.Min.Y),
+				Color2: g.To,
+			}.Add(ops)
+			st := op.Push(ops)
+			clip.RRect{Rect: gr}.Add(ops)
+			op.Affine(f32.Affine2D{}.Offset(pixelAligned.Min)).Add(ops)
+			scale(pixelAligned.Dx()/128, 1).Add(ops)
+			paint.PaintOp{}.Add(ops)
+			st.Pop()
+			gr = gr.Add(f32.Pt(0, gradienth))
+		}
+	}, func(r result) {
+		gr := pixelAligned
+		for _, g := range gradients {
+			from := f32color.LinearFromSRGB(g.From)
+			to := f32color.LinearFromSRGB(g.To)
+			for _, p := range samples {
+				exp := lerp(from, to, float32(p)/float32(r.img.Bounds().Dx()-1))
+				r.expect(p, int(gr.Min.Y+gradienth/2), f32color.NRGBAToRGBA(exp.SRGB()))
+			}
+			gr = gr.Add(f32.Pt(0, gradienth))
+		}
+	})
+}
+
+func TestLinearGradientAngled(t *testing.T) {
+	run(t, func(ops *op.Ops) {
+		paint.LinearGradientOp{
+			Stop1:  f32.Pt(64, 64),
+			Color1: black,
+			Stop2:  f32.Pt(0, 0),
+			Color2: red,
+		}.Add(ops)
+		st := op.Push(ops)
+		clip.Rect(image.Rect(0, 0, 64, 64)).Add(ops)
+		paint.PaintOp{}.Add(ops)
+		st.Pop()
+
+		paint.LinearGradientOp{
+			Stop1:  f32.Pt(64, 64),
+			Color1: white,
+			Stop2:  f32.Pt(128, 0),
+			Color2: green,
+		}.Add(ops)
+		st = op.Push(ops)
+		clip.Rect(image.Rect(64, 0, 128, 64)).Add(ops)
+		paint.PaintOp{}.Add(ops)
+		st.Pop()
+
+		paint.LinearGradientOp{
+			Stop1:  f32.Pt(64, 64),
+			Color1: black,
+			Stop2:  f32.Pt(128, 128),
+			Color2: blue,
+		}.Add(ops)
+		st = op.Push(ops)
+		clip.Rect(image.Rect(64, 64, 128, 128)).Add(ops)
+		paint.PaintOp{}.Add(ops)
+		st.Pop()
+
+		paint.LinearGradientOp{
+			Stop1:  f32.Pt(64, 64),
+			Color1: white,
+			Stop2:  f32.Pt(0, 128),
+			Color2: magenta,
+		}.Add(ops)
+		st = op.Push(ops)
+		clip.Rect(image.Rect(0, 64, 64, 128)).Add(ops)
+		paint.PaintOp{}.Add(ops)
+		st.Pop()
+	}, func(r result) {})
+}
+
+// lerp calculates linear interpolation with color b and p.
+func lerp(a, b f32color.RGBA, p float32) f32color.RGBA {
+	return f32color.RGBA{
+		R: a.R*(1-p) + b.R*p,
+		G: a.G*(1-p) + b.G*p,
+		B: a.B*(1-p) + b.B*p,
+		A: a.A*(1-p) + b.A*p,
+	}
 }

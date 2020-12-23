@@ -15,6 +15,7 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -105,14 +106,9 @@ func drawTabs(gtx layout.Context, th *material.Theme) layout.Dimensions {
 						if tabs.selected != tabIdx {
 							return layout.Dimensions{}
 						}
-						paint.ColorOp{Color: th.Color.Primary}.Add(gtx.Ops)
 						tabHeight := gtx.Px(unit.Dp(4))
-						paint.PaintOp{Rect: f32.Rectangle{
-							Max: f32.Point{
-								X: float32(tabWidth),
-								Y: float32(tabHeight),
-							},
-						}}.Add(gtx.Ops)
+						tabRect := image.Rect(0, 0, tabWidth, tabHeight)
+						paint.FillShape(gtx.Ops, th.Color.Primary, clip.Rect(tabRect).Op())
 						return layout.Dimensions{
 							Size: image.Point{X: tabWidth, Y: tabHeight},
 						}
@@ -122,7 +118,7 @@ func drawTabs(gtx layout.Context, th *material.Theme) layout.Dimensions {
 		}),
 		layout.Flexed(1, func(gtx C) D {
 			return slider.Layout(gtx, func(gtx C) D {
-				fill(gtx, dynamicColor(tabs.selected))
+				fill(gtx, dynamicColor(tabs.selected), dynamicColor(tabs.selected+1))
 				return layout.Center.Layout(gtx,
 					material.H1(th, fmt.Sprintf("Tab content #%d", tabs.selected+1)).Layout,
 				)
@@ -131,23 +127,30 @@ func drawTabs(gtx layout.Context, th *material.Theme) layout.Dimensions {
 	)
 }
 
-func bounds(gtx layout.Context) f32.Rectangle {
-	cs := gtx.Constraints
-	d := cs.Min
-	return f32.Rectangle{
-		Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
-	}
+func fill(gtx layout.Context, col1, col2 color.NRGBA) {
+	dr := image.Rectangle{Max: gtx.Constraints.Min}
+	paint.FillShape(gtx.Ops,
+		color.NRGBA{R: 0, G: 0, B: 0, A: 0xFF},
+		clip.Rect(dr).Op(),
+	)
+
+	col2.R = byte(float32(col2.R))
+	col2.G = byte(float32(col2.G))
+	col2.B = byte(float32(col2.B))
+	paint.LinearGradientOp{
+		Stop1:  f32.Pt(float32(dr.Min.X), 0),
+		Stop2:  f32.Pt(float32(dr.Max.X), 0),
+		Color1: col1,
+		Color2: col2,
+	}.Add(gtx.Ops)
+	defer op.Push(gtx.Ops).Pop()
+	clip.Rect(dr).Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
 }
 
-func fill(gtx layout.Context, col color.RGBA) {
-	dr := bounds(gtx)
-	paint.ColorOp{Color: col}.Add(gtx.Ops)
-	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
-}
-
-func dynamicColor(i int) color.RGBA {
+func dynamicColor(i int) color.NRGBA {
 	sn, cs := math.Sincos(float64(i) * math.Phi)
-	return color.RGBA{
+	return color.NRGBA{
 		R: 0xA0 + byte(0x30*sn),
 		G: 0xA0 + byte(0x30*cs),
 		B: 0xD0,

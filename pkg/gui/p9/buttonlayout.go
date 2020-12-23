@@ -13,7 +13,7 @@ import (
 
 type ButtonLayout struct {
 	th           *Theme
-	background   color.RGBA
+	background   color.NRGBA
 	cornerRadius unit.Value
 	button       *Clickable
 	w            l.Widget

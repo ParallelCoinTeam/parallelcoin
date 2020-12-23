@@ -4,12 +4,11 @@ import (
 	"image"
 	"image/color"
 	"time"
-
+	
 	"gioui.org/f32"
 	"gioui.org/io/system"
 	l "gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/paint"
 	"gioui.org/text"
 )
 
@@ -23,14 +22,15 @@ type (
 const Inf = 1e6
 
 // Fill is a general fill function that covers the background of the current context space
-func Fill(gtx l.Context, col color.RGBA) l.Dimensions {
+func Fill(gtx l.Context, col color.NRGBA) l.Dimensions {
 	cs := gtx.Constraints
 	d := cs.Min
-	dr := f32.Rectangle{
-		Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
-	}
-	paint.ColorOp{Color: col}.Add(gtx.Ops)
-	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	// dr := f32.Rectangle{
+	// 	Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
+	// }
+	// paint.ColorOp{Color: col}.Add(gtx.Ops)
+	// paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	fill(gtx, col, col)
 	gtx.Constraints.Constrain(d)
 	return l.Dimensions{Size: d}
 }
@@ -151,7 +151,6 @@ func EmptyMinHeight() func(gtx l.Context) l.Dimensions {
 	}
 }
 
-
 // CopyContextDimensionsWithMaxAxis copies the dimensions out with the max set by an image.Point along the axis
 func CopyContextDimensionsWithMaxAxis(gtx l.Context, size image.Point, axis l.Axis) l.Context {
 	ip := image.Point{}
@@ -163,11 +162,13 @@ func CopyContextDimensionsWithMaxAxis(gtx l.Context, size image.Point, axis l.Ax
 		ip.X = size.X
 	}
 	var ops op.Ops
-	gtx1 := l.NewContext(&ops, system.FrameEvent{
-		Now:    time.Now(),
-		Metric: gtx.Metric,
-		Size:   ip,
-	})
+	gtx1 := l.NewContext(
+		&ops, system.FrameEvent{
+			Now:    time.Now(),
+			Metric: gtx.Metric,
+			Size:   ip,
+		},
+	)
 	if axis == l.Horizontal {
 		gtx1.Constraints.Min.X = 0
 		gtx1.Constraints.Min.Y = gtx.Constraints.Min.Y
@@ -184,11 +185,13 @@ func GetInfContext(gtx l.Context) l.Context {
 	ip.Y = Inf
 	ip.X = Inf
 	var ops op.Ops
-	gtx1 := l.NewContext(&ops, system.FrameEvent{
-		Now:    time.Now(),
-		Metric: gtx.Metric,
-		Size:   ip,
-	})
+	gtx1 := l.NewContext(
+		&ops, system.FrameEvent{
+			Now:    time.Now(),
+			Metric: gtx.Metric,
+			Size:   ip,
+		},
+	)
 	return gtx1
 }
 
