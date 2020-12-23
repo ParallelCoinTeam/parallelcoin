@@ -19,8 +19,12 @@ type Multi struct {
 	handle           func(txt []string)
 }
 
-func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColorUnfocused string,
-	size float32, handle func(txt []string)) (m *Multi) {
+func (th *Theme) Multiline(
+	txt *cli.StringSlice,
+	borderColorFocused, borderColorUnfocused, backgroundColor string,
+	size float32,
+	handle func(txt []string),
+) (m *Multi) {
 	if handle == nil {
 		handle = func(txt []string) {
 			Debug(txt)
@@ -41,7 +45,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 		m.inputLocation = -1
 		m.handle(*m.lines)
 	}
-	m.input = th.Input("", "", borderColorFocused, borderColorUnfocused, size, handleChange)
+	m.input = th.Input("", "", borderColorFocused, borderColorUnfocused, backgroundColor, size, handleChange)
 	m.clickables = append(m.clickables, (*Clickable)(nil))
 	m.buttons = append(m.buttons, (*ButtonLayout)(nil))
 	m.removeClickables = append(m.removeClickables, (*Clickable)(nil))
@@ -60,7 +64,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 			m.clickables[i] = clickable
 		}
 		// Debug("making button")
-		btn := m.Theme.ButtonLayout(clickable).CornerRadius(0).Background("Transparent").
+		btn := m.Theme.ButtonLayout(clickable).CornerRadius(0).Background(backgroundColor).
 			Embed(
 				m.Theme.Flex().
 					Rigid(
@@ -89,7 +93,7 @@ func (th *Theme) Multiline(txt *cli.StringSlice, borderColorFocused, borderColor
 			Icon(
 				m.Theme.Icon().Scale(1.5).Color("DocText").Src(&icons.ActionDelete),
 			).
-			Background("Transparent").
+			Background("").
 			SetClick(func() {
 				Debug("remove button", y, "clicked", len(*m.lines))
 				m.inputLocation = -1
@@ -207,7 +211,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 				Icon(
 					m.Theme.Icon().Scale(1.5).Color("DocText").Src(&icons.ActionDelete),
 				).
-				Background("Transparent")
+				Background("")
 		}
 	}
 	if added {
@@ -288,7 +292,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 		m.PopulateWidgets()
 		m.input.editor.SetText("")
 		m.input.editor.Focus()
-	}).Background("Transparent").Fn)
+	}).Background("").Fn)
 	// m.UpdateWidgets()
 	// m.PopulateWidgets()
 	// Debug(m.inputLocation)
@@ -413,7 +417,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			m.UpdateWidgets()
 			m.PopulateWidgets()
 			m.input.editor.Focus()
-		}).Background("Transparent").Fn
+		}).Background("").Fn
 		widgets = append(widgets, addb)
 		return addb(gtx)
 	}

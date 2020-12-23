@@ -3,24 +3,25 @@ package gui
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"runtime"
 	"sync"
 	"time"
-
+	
 	"github.com/urfave/cli"
-
+	
 	l "gioui.org/layout"
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 	"github.com/p9c/pod/pkg/util/rununit"
-
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/gui/dialog"
 	"github.com/p9c/pod/pkg/gui/toast"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-
+	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/gui/f"
@@ -96,7 +97,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.GetHistoryTable()
 	before := func() { Debug("running before") }
 	after := func() { Debug("running after") }
-
+	
 	wg.node = wg.GetRunUnit(
 		"NODE", before, after,
 		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "node",
@@ -223,11 +224,11 @@ func (wg *WalletGUI) GetInputs() {
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
 	wg.inputs = map[string]*p9.Input{
-		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", 32, func(pass string) {}),
-		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", 32, func(pass string) {}),
-		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", 32, func(pass string) {}),
-		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", 32, func(pass string) {}),
-		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", 32, func(pass string) {}),
+		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
+		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
+		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
+		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
+		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
 	}
 }
 
@@ -235,13 +236,22 @@ func (wg *WalletGUI) GetPasswords() {
 	pass := ""
 	passConfirm := ""
 	wg.passwords = map[string]*p9.Password{
-		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", 32, func(pass string) {}),
-		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", 32, func(pass string) {}),
+		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", "", 32, func(pass string) {}),
+		"confirmPassEditor": wg.th.Password(
+			"confirm",
+			&passConfirm,
+			"Primary",
+			"DocText",
+			"",
+			32,
+			func(pass string) {},
+		),
 		"publicPassEditor": wg.th.Password(
 			"public password (optional)",
 			wg.cx.Config.WalletPass,
 			"Primary",
 			"DocText",
+			"",
 			32,
 			func(pass string) {},
 		),
@@ -260,10 +270,12 @@ func (wg *WalletGUI) GetIncDecs() {
 					Debug("threads value now", n)
 					go func() {
 						Debug("setting thread count")
+						if wg.miner.Running() {
+							wg.stopMiner()
+							wg.startMiner()
+						}
 						*wg.cx.Config.GenThreads = n
-						wg.stopMiner()
-						wg.startMiner()
-						// save.Pod(wg.cx.Config)
+						save.Pod(wg.cx.Config)
 						// if wg.miner.Running() {
 						// 	Debug("restarting miner")
 						// 	wg.miner.Stop()

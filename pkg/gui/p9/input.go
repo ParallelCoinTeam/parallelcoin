@@ -2,11 +2,11 @@ package p9
 
 import (
 	"regexp"
-
+	
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
-
+	
 	"github.com/atotto/clipboard"
 )
 
@@ -25,13 +25,17 @@ type Input struct {
 	borderColor          string
 	borderColorUnfocused string
 	borderColorFocused   string
+	backgroundColor      string
 	focused              bool
 }
 
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
-func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused string,
-	size float32, handle func(txt string)) *Input {
+func (th *Theme) Input(
+	txt, hint, borderColorFocused, borderColorUnfocused, backgroundColor string,
+	size float32,
+	handle func(txt string),
+) *Input {
 	editor := th.Editor().SingleLine().Submit(true)
 	input := th.TextInput(editor, hint)
 	p := &Input{
@@ -44,6 +48,7 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused strin
 		size:                 size,
 		borderColorUnfocused: borderColorUnfocused,
 		borderColorFocused:   borderColorFocused,
+		backgroundColor:      backgroundColor,
 	}
 	p.GetText = func() string {
 		return p.editor.Text()
@@ -96,20 +101,26 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused strin
 	p.clearClickable.SetClick(clearClickableFn)
 	p.copyClickable.SetClick(copyClickableFn)
 	p.pasteClickable.SetClick(pasteClickableFn)
-	p.editor.SetText(txt).SetSubmit(func(txt string) {
-		go func() {
-			handle(txt)
-		}()
-	}).SetChange(func(txt string) {
-		// send keystrokes to the NSA
-	})
-	p.editor.SetFocus(func(is bool) {
-		if is {
-			p.borderColor = p.borderColorFocused
-		} else {
-			p.borderColor = p.borderColorUnfocused
-		}
-	})
+	p.editor.SetText(txt).SetSubmit(
+		func(txt string) {
+			go func() {
+				handle(txt)
+			}()
+		},
+	).SetChange(
+		func(txt string) {
+			// send keystrokes to the NSA
+		},
+	)
+	p.editor.SetFocus(
+		func(is bool) {
+			if is {
+				p.borderColor = p.borderColorFocused
+			} else {
+				p.borderColor = p.borderColorUnfocused
+			}
+		},
+	)
 	return p
 }
 
@@ -120,7 +131,8 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 	gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
 	return in.Border().Color(in.borderColor).Embed(
 		in.Flex().
-			Flexed(1,
+			Flexed(
+				1,
 				in.Inset(0.25, in.input.Color("DocText").Fn).Fn,
 			).
 			Rigid(

@@ -122,7 +122,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 						Rigid(c.th.Body1("\"" + res + "\"").Color(color).Fn).
 						Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
 						Rigid(c.th.IconButton(clk).
-							Background("Transparent").
+							Background("").
 							Inset(0).
 							Color(color).
 							Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
@@ -142,7 +142,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 						Rigid(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).
 						Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
 						Rigid(c.th.IconButton(clk).
-							Background("Transparent").
+							Background("").
 							Inset(0).
 							Color(color).
 							Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
@@ -172,7 +172,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 					Rigid(c.th.Body1("\"" + res + "\"").Color(color).Fn).
 					Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
 					Rigid(c.th.IconButton(clk).
-						Background("Transparent").
+						Background("").
 						Inset(0).
 						Color(color).
 						Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
@@ -192,7 +192,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 					Rigid(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).
 					Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
 					Rigid(c.th.IconButton(clk).
-						Background("Transparent").
+						Background("").
 						Inset(0).
 						Color(color).
 						Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).

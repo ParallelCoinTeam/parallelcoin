@@ -2,9 +2,9 @@ package p9
 
 import (
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
-
+	
 	"github.com/p9c/pod/pkg/gui/clipboard"
 )
 
@@ -23,13 +23,20 @@ type Password struct {
 	borderColor          string
 	borderColorUnfocused string
 	borderColorFocused   string
+	backgroundColor      string
 	focused              bool
 	showClickableFn      func(col string)
 	password             *string
 	handle               func(pass string)
 }
 
-func (th *Theme) Password(hint string, password *string, borderColorFocused, borderColorUnfocused string, size float32, handle func(pass string)) *Password {
+func (th *Theme) Password(
+	hint string,
+	password *string,
+	borderColorFocused, borderColorUnfocused, backgroundColor string,
+	size float32,
+	handle func(pass string),
+) *Password {
 	pass := th.Editor().Mask('•').SingleLine().Submit(true)
 	passInput := th.TextInput(pass, hint).Color(borderColorUnfocused)
 	p := &Password{
@@ -43,13 +50,14 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 		borderColorUnfocused: borderColorUnfocused,
 		borderColorFocused:   borderColorFocused,
 		borderColor:          borderColorUnfocused,
+		backgroundColor:      backgroundColor,
 		handle:               handle,
 		password:             password,
 	}
 	p.copyButton = th.IconButton(p.copyClickable)
 	p.pasteButton = th.IconButton(p.pasteClickable)
 	p.unhideButton = th.IconButton(p.unhideClickable).
-		Background("Transparent").
+		Background("").
 		Icon(th.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility))
 	p.showClickableFn = func(col string) {
 		p.hide = !p.hide
@@ -59,7 +67,8 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 				Icon(
 					th.Icon().
 						Color(col).
-						Src(&icons2.ActionVisibility))
+						Src(&icons2.ActionVisibility),
+			)
 			p.pass.Mask('•')
 			p.passInput.Color(col)
 		} else {
@@ -97,26 +106,32 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 				Src(&icons2.ActionVisibility),
 		)
 	p.pass.Mask('•')
-	p.pass.SetFocus(func(is bool) {
-		if is {
-			p.borderColor = p.borderColorFocused
-		} else {
-			p.borderColor = p.borderColorUnfocused
-			p.hide = true
-		}
-	})
+	p.pass.SetFocus(
+		func(is bool) {
+			if is {
+				p.borderColor = p.borderColorFocused
+			} else {
+				p.borderColor = p.borderColorUnfocused
+				p.hide = true
+			}
+		},
+	)
 	p.passInput.Color(p.borderColor)
-	p.pass.SetText(*p.password).Mask('•').SetSubmit(func(txt string) {
-		// if !p.hide {
-		// 	p.showClickableFn(p.borderColor)
-		// }
-		// p.showClickableFn(p.borderColor)
-		go func() {
-			p.handle(txt)
-		}()
-	}).SetChange(func(txt string) {
-		// send keystrokes to the NSA
-	})
+	p.pass.SetText(*p.password).Mask('•').SetSubmit(
+		func(txt string) {
+			// if !p.hide {
+			// 	p.showClickableFn(p.borderColor)
+			// }
+			// p.showClickableFn(p.borderColor)
+			go func() {
+				p.handle(txt)
+			}()
+		},
+	).SetChange(
+		func(txt string) {
+			// send keystrokes to the NSA
+		},
+	)
 	return p
 }
 
@@ -135,10 +150,11 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 		} else {
 			p.pass.Mask(0)
 		}
-
+		
 		return p.Border().Color(p.borderColor).Embed(
 			p.Flex().
-				Flexed(1,
+				Flexed(
+					1,
 					p.Inset(0.25, p.passInput.Color(p.borderColor).Fn).Fn,
 				).
 				Rigid(
@@ -157,7 +173,7 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 				).
 				Rigid(
 					p.unhideButton.
-						Background("Transparent").
+						Background("").
 						Icon(p.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility)).Fn,
 				).
 				Fn,

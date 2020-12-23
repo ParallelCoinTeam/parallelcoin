@@ -50,7 +50,7 @@ func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 			//
 			// paint.PaintOp{}.Add(gtx.Ops)
 			// gtx.Constraints.Constrain(d)
-			fill(gtx, f.th.Colors.Get(f.col), f.th.Colors.Get(f.col))
+			fill(gtx, f.th.Colors.Get(f.col), f.th.Colors.Get(f.col), dims.Size)
 			dims = f.w(gtx)
 			gtx.Constraints.Constrain(dims.Size)
 			return dims
@@ -58,8 +58,8 @@ func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 	).Fn(gtx)
 }
 
-func fill(gtx l.Context, col1, col2 color.NRGBA) {
-	dr := image.Rectangle{Max: gtx.Constraints.Min}
+func fill(gtx l.Context, col1, col2 color.NRGBA, bounds image.Point) {
+	dr := image.Rectangle{Max: bounds}
 	paint.FillShape(
 		gtx.Ops,
 		color.NRGBA{R: 0, G: 0, B: 0, A: 0xFF},

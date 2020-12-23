@@ -409,6 +409,7 @@ func (wg *WalletGUI) StatusBarButton(
 		background := app.StatusBarBackgroundGet()
 		color := app.StatusBarColorGet()
 		if app.ActivePageGet() == name {
+			// background, color = color, background
 			background = "PanelBg"
 			// color = "Danger"
 		}
@@ -482,7 +483,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								Fn,
 						).Fn,
 					).
-					Background("Transparent").
+					Background(wg.App.StatusBarBackgroundGet()).
 					SetClick(
 						func() {
 							go wg.toggleNode()
@@ -512,7 +513,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 									Src(miningIcon).Fn,
 							).Fn,
 					).
-					Background("Transparent").
+					Background(wg.App.StatusBarBackgroundGet()).
 					SetClick(
 						func() {
 							go wg.toggleMiner()
@@ -523,7 +524,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			Rigid(
 				wg.incdecs["generatethreads"].
 					Color("DocText").
-					Background("DocBg").
+					Background(wg.App.StatusBarBackgroundGet()).
 					Fn,
 			).
 			Rigid(
@@ -545,7 +546,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								Embed(
 									wg.th.Inset(0.25, ic).Fn,
 								).
-								Background("Transparent").
+								Background(wg.App.StatusBarBackgroundGet()).
 								SetClick(
 									func() {
 										Debug("clicked reset wallet button")

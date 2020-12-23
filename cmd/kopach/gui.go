@@ -63,7 +63,7 @@ func (w *Worker) Run() {
 		modalScrim: th.Clickable(),
 		modalClose: th.Clickable(),
 		password: th.Password(
-			"password", w.cx.Config.MinerPass, "Primary", "PanelBg", 30, func(pass string) {
+			"password", w.cx.Config.MinerPass, "Primary", "PanelBg", "", 30, func(pass string) {
 				Debug("changed password")
 				*w.cx.Config.MinerPass = pass
 				save.Pod(w.cx.Config)
@@ -223,7 +223,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 				0.25,
 				m.IconButton(m.logoButton).
 					Color("Light").
-					Background("Dark").
+					Background("").
 					Icon(m.Icon().Color("Light").Scale(p9.Scales["H5"]).Src(&icons.ParallelCoin)).
 					Fn,
 			).Fn,

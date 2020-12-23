@@ -271,7 +271,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 							Color("Light").
 							Src(a.logo),
 					).
-					Background("Dark").Color("Light").
+					Background("").Color("Light").
 					Inset(0.25).
 					Fn,
 				).

@@ -1,24 +1,22 @@
 package p9
 
 import (
-	"image"
-	"image/color"
-
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
 	l "gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/unit"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-
+	"image"
+	
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
 type IconButton struct {
 	th         *Theme
-	background color.NRGBA
+	background string
 	// Color is the icon color.
-	color color.NRGBA
+	color string
 	icon  *Icon
 	// Size is the icon size.
 	size   unit.Value
@@ -30,8 +28,8 @@ type IconButton struct {
 func (th *Theme) IconButton(button *Clickable) *IconButton {
 	return &IconButton{
 		th:         th,
-		background: th.Colors.Get("Primary"),
-		color:      th.Colors.Get("DocBg"),
+		background: "Primary",
+		color:      "DocBg",
 		size:       th.TextSize,
 		inset:      th.Inset(0.33, nil),
 		button:     button,
@@ -41,13 +39,13 @@ func (th *Theme) IconButton(button *Clickable) *IconButton {
 
 // Background sets the color of the circular background
 func (b *IconButton) Background(color string) *IconButton {
-	b.background = b.th.Colors.Get(color)
+	b.background = color
 	return b
 }
 
 // Color sets the color of the icon
 func (b *IconButton) Color(color string) *IconButton {
-	b.color = b.th.Colors.Get(color)
+	b.color = color
 	return b
 }
 
@@ -95,11 +93,14 @@ func (b *IconButton) Fn(gtx l.Context) l.Dimensions {
 				Rect: f32.Rectangle{Max: f32.Point{X: sizexf, Y: sizeyf}},
 				NE:   rr, NW: rr, SE: rr, SW: rr,
 			}.Add(gtx.Ops)
-			background := b.background
+			background := b.th.Colors.Get(b.background)
 			if gtx.Queue == nil {
-				background = f32color.MulAlpha(b.background, 150)
+				background = f32color.MulAlpha(background, 150)
 			}
-			dims := Fill(gtx, background)
+			var dims l.Dimensions
+			if b.background != "" {
+				dims = Fill(gtx, background)
+			}
 			for _, c := range b.button.History() {
 				drawInk(gtx, c)
 			}
@@ -107,8 +108,10 @@ func (b *IconButton) Fn(gtx l.Context) l.Dimensions {
 		},
 	).Stacked(
 		b.inset.Embed(b.icon.Fn).Fn,
-	).Expanded(func(gtx l.Context) l.Dimensions {
-		pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
-		return b.button.Fn(gtx)
-	}).Fn(gtx)
+	).Expanded(
+		func(gtx l.Context) l.Dimensions {
+			pointer.Ellipse(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
+			return b.button.Fn(gtx)
+		},
+	).Fn(gtx)
 }

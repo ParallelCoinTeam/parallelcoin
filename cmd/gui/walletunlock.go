@@ -23,7 +23,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	wg.unlockPage = a
 	password := ""
 	wg.unlockPassword = wg.th.Password(
-		"", &password, "Primary", "DocText", 24, func(pass string) {
+		"", &password, "Primary", "DocText", "PanelBg", 24, func(pass string) {
 			go func() {
 				Debug("entered password", pass)
 				// unlock wallet

@@ -229,7 +229,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				Color("DocText").
 				Src(&icons2.ContentBackspace),
 		).
-		Background("Transparent").
+		Background("").
 		Inset(0.25)
 	c.copyButton = wg.th.IconButton(c.copyClickable.SetClick(copyClickableFn)).
 		Icon(
@@ -237,7 +237,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				Color("DocText").
 				Src(&icons2.ContentContentCopy),
 		).
-		Background("Transparent").
+		Background("").
 		Inset(0.25)
 	c.pasteButton = wg.th.IconButton(c.pasteClickable.SetClick(pasteClickableFn)).
 		Icon(
@@ -245,7 +245,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				Color("DocText").
 				Src(&icons2.ContentContentPaste),
 		).
-		Background("Transparent").
+		Background("").
 		Inset(0.25)
 	c.output = append(
 		c.output, func(gtx l.Context) l.Dimensions {

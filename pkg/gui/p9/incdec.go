@@ -118,7 +118,7 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 				} else {
 					in.changeHook(in.current)
 				}
-			})).Background("Transparent").Embed(
+			})).Background(in.background).Embed(
 				in.th.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
 			).Fn,
 		).Fn,
@@ -142,7 +142,7 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 					} else {
 						in.changeHook(in.current)
 					}
-				})).Background("Transparent").Embed(
+				})).Background(in.background).Embed(
 					in.th.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
 				).Fn,
 			).Fn,
