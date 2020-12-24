@@ -180,11 +180,12 @@ out:
 			Trace("invalidating render queue")
 			wg.w["main"].Window.Invalidate()
 		case <-wg.cx.KillAll:
-			wg.quit.Q()
+			break out
 		case <-wg.quit:
 			break out
 		}
 	}
+	wg.quit.Q()
 	// wg.gracefulShutdown()
 	return
 }

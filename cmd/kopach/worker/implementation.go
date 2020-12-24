@@ -179,7 +179,7 @@ out:
 		for {
 			select {
 			case <-sampleTicker.C:
-				Debug(interrupt.GoroutineDump())
+				// Debug(interrupt.GoroutineDump())
 				w.hashReport()
 				break
 			case <-w.startChan:
