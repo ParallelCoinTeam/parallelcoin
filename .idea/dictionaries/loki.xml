@@ -297,6 +297,7 @@
       <w>rawtx</w>
       <w>readd</w>
       <w>reallocations</w>
+      <w>rebroadcaster</w>
       <w>reconsiderblock</w>
       <w>reconst</w>
       <w>recoveraddresses</w>

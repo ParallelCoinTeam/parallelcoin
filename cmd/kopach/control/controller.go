@@ -449,11 +449,13 @@ out:
 }
 
 func rebroadcaster(c *Controller) {
+	Debug("starting rebroadcaster")
 	rebroadcastTicker := time.NewTicker(time.Second)
 out:
 	for {
 		select {
 		case <-rebroadcastTicker.C:
+			Debug("rebroadcaster ticker")
 			if !c.cx.IsCurrent() {
 				break
 			}
@@ -497,6 +499,7 @@ out:
 }
 
 func submitter(c *Controller) {
+	Debug("starting submission loop")
 out:
 	for {
 		select {
@@ -517,11 +520,11 @@ out:
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
 		if !c.active.Load() {
-			// Debug("not active")
+			Debug("not active")
 			return
 		}
 		if !c.Ready.Load() {
-			// Debug("not ready")
+			Debug("not ready")
 			return
 		}
 		// First to arrive locks out any others while processing

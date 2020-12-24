@@ -3,17 +3,20 @@ package gui
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/interrupt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"runtime"
 	"sync"
 	"time"
 	
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	log "github.com/p9c/pod/pkg/util/logi"
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/urfave/cli"
 	
 	l "gioui.org/layout"
+	
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 	"github.com/p9c/pod/pkg/util/rununit"
 	
@@ -182,7 +185,7 @@ out:
 			break out
 		}
 	}
-	wg.gracefulShutdown()
+	// wg.gracefulShutdown()
 	return
 }
 
@@ -238,7 +241,7 @@ func (wg *WalletGUI) GetPasswords() {
 	wg.passwords = map[string]*p9.Password{
 		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", "", func(pass string) {}),
 		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", "", func(pass string) {}),
-		"publicPassEditor": wg.th.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", "", func(pass string) {}),
+		"publicPassEditor":  wg.th.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", "", func(pass string) {}),
 	}
 }
 
@@ -351,7 +354,15 @@ func (wg *WalletGUI) GetBools() map[string]*p9.Bool {
 	}
 }
 
+var shuttingDown = false
+
 func (wg *WalletGUI) gracefulShutdown() {
+	if shuttingDown {
+		Debug(log.Caller("already called gracefulShutdown", 1))
+		return
+	} else {
+		shuttingDown = true
+	}
 	Debug("\n\nquitting wallet gui")
 	// // if wg.miner.Running() {
 	// // 	Debug("stopping miner")

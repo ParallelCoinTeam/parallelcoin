@@ -100,12 +100,13 @@ func (w *Worker) Start() {
 			Error(err)
 		}
 	}
+	Debug("setting workers to active")
 	w.active.Store(true)
-	interrupt.AddHandler(
-		func() {
-			w.Stop()
-		},
-	)
+	// interrupt.AddHandler(
+	// 	func() {
+	// 		w.Stop()
+	// 	},
+	// )
 }
 
 func (w *Worker) Stop() {
@@ -244,7 +245,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
 		<-w.quit
-		Info("kopach shutting down", interrupt.GoroutineDump())
+		Info("kopach shutting down") // , interrupt.GoroutineDump())
 		<-interrupt.HandlersDone
 		Info("kopach finished shutdown")
 		return
