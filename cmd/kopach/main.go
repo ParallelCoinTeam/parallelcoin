@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/logi"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
@@ -185,6 +186,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			for {
 				select {
 				case <-ticker.C:
+					Debug("kopach control ticker")
 					// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
 					// so clear FirstSender
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
@@ -203,25 +205,26 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						}
 					}
 					w.hashrate = w.HashReport()
-					if interrupt.Requested() {
-						w.quit.Q()
-					}
+					// if interrupt.Requested() {
+					// 	w.StopChan <- struct{}{}
+					// 	w.quit.Q()
+					// }
 				case <-w.StartChan:
 					*cx.Config.Generate = true
-					// save.Pod(cx.Config)
+					save.Pod(cx.Config)
 					w.Start()
 				case <-w.StopChan:
 					*cx.Config.Generate = false
-					// save.Pod(cx.Config)
+					save.Pod(cx.Config)
 					w.Stop()
 				case s := <-w.PassChan:
 					*cx.Config.MinerPass = s
-					// save.Pod(cx.Config)
+					save.Pod(cx.Config)
 					w.Stop()
 					w.Start()
 				case n := <-w.SetThreads:
 					*cx.Config.GenThreads = n
-					// save.Pod(cx.Config)
+					save.Pod(cx.Config)
 					if *cx.Config.Generate {
 						// always sanitise
 						if n < 0 {

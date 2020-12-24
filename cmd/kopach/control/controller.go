@@ -456,16 +456,21 @@ out:
 		select {
 		case <-rebroadcastTicker.C:
 			Debug("rebroadcaster ticker")
-			if !c.cx.IsCurrent() {
-				break
-			}
+			// if !c.cx.IsCurrent() {
+			// 	Debug("is not current")
+			// 	continue
+			// } else {
+			// 	Debug("is current")
+			// }
+			Debug("checking for new block")
 			// The current block is stale if the best block has changed.
 			best := c.blockTemplateGenerator.BestSnapshot()
 			if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
 				Debug("new best block hash")
 				c.UpdateAndSendTemplate()
-				break
+				continue
 			}
+			Debug("checking for new transactions")
 			// The current block is stale if the memory pool has been updated since the block template was generated and
 			// it has been at least one minute.
 			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
@@ -477,20 +482,23 @@ out:
 			) {
 				Trace("block is stale, regenerating")
 				c.UpdateAndSendTemplate()
-				break
+				continue
 			}
 			oB, ok := c.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 {
 				Warn("template is zero length")
+				continue
 			}
 			if !ok {
 				Debug("template is nil")
+				continue
 			}
+			Debug("sending out job")
 			err := c.multiConn.SendMany(job.Magic, oB)
 			if err != nil {
 				Error(err)
 			}
-			c.oldBlocks.Store(oB)
+			// c.oldBlocks.Store(oB)
 			break
 		case <-c.quit:
 			break out

@@ -280,6 +280,7 @@ func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	Debug("starting new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
+		Debug("dispatch not ready")
 		*reply = true
 		return
 	}
@@ -287,7 +288,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.bitses.Store(j.Bitses)
 	w.hashes.Store(j.Hashes)
 	if j.Hashes[5].IsEqual(w.lastMerkle) {
-		// Debug("not a new job")
+		Debug("not a new job")
 		*reply = true
 		return
 	}
