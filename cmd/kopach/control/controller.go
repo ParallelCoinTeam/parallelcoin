@@ -255,8 +255,7 @@ var handlersMulticast = transport.Handlers{
 			// Anything other than a rule violation is an unexpected error, so log that error as an internal error.
 			if _, ok := err.(blockchain.RuleError); !ok {
 				Warnf(
-					"Unexpected error while processing block submitted"+
-						" via kopach miner:", err,
+					"Unexpected error while processing block submitted via kopach miner:", err,
 				)
 				return
 			} else {

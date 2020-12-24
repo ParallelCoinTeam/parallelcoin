@@ -195,7 +195,9 @@ out:
 			default:
 				if w.block.Load() == nil || w.bitses.Load() == nil ||
 					w.hashes.Load() == nil || !w.dispatchReady.Load() {
+					// Debug("not ready to work")
 				} else {
+					// Debug("working")
 					// work
 					nH := w.block.Load().(*util.Block).Height()
 					hv := w.roller.GetAlgoVer()
@@ -242,6 +244,7 @@ out:
 					hash := mb.Header.BlockHashWithAlgos(nH)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
+						Debug("found solution")
 						srs := sol.GetSolContainer(w.senderPort.Load(), mb)
 						err := w.dispatchConn.SendMany(
 							sol.SolutionMagic,
@@ -250,8 +253,7 @@ out:
 						if err != nil {
 							Error(err)
 						}
-						Trace("sent solution")
-						
+						Debug("sent solution")
 						break running
 					}
 					mb.Header.Version = nextAlgo
@@ -278,7 +280,7 @@ func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
 // NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
 // work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
-	Debug("starting new job")
+	Debug("received new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
 		Debug("dispatch not ready")
 		*reply = true
