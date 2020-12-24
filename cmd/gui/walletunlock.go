@@ -22,55 +22,53 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a = wg.th.App(wg.w["main"].Width)
 	wg.unlockPage = a
 	password := ""
-	wg.unlockPassword = wg.th.Password(
-		"", &password, "Primary", "DocText", "PanelBg", 24, func(pass string) {
-			go func() {
-				Debug("entered password", pass)
-				// unlock wallet
-				wg.cx.Config.Lock()
-				*wg.cx.Config.WalletPass = pass
-				*wg.cx.Config.WalletOff = false
-				wg.cx.Config.Unlock()
-				wg.unlockPassword.GetPassword()
-				// load config into a fresh variable
-				cfg, _ := pod.EmptyConfig()
-				var cfgFile []byte
-				var err error
-				if cfgFile, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); Check(err) {
-					// this should not happen
-					// TODO: panic-type conditions - for gui should have a notification maybe?
-					panic("config file does not exist")
-				}
-				Debug("loaded config")
-				if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
-					Debug("unmarshaled config")
-					bhb := blake3.Sum256([]byte(pass))
-					bh := hex.EncodeToString(bhb[:])
-					Debug(pass, bh, *cfg.WalletPass)
-					if *cfg.WalletPass == bh {
-						// the entered password matches the stored hash
-						Debug("now we can open the wallet")
-						// wg.WalletRunCommandChan <- "stop"
-						// time.Sleep(time.Second * 5)
-						// *wg.cx.Config.WalletPass = pass
-						if !wg.node.Running() {
-							// wallet doesn't work without the node
-							wg.startNode()
-						}
-						if err = wg.writeWalletCookie(); Check(err) {
-						}
-						wg.startWallet()
-						*wg.cx.Config.NodeOff = false
-						*wg.cx.Config.WalletOff = false
-						save.Pod(wg.cx.Config)
-						wg.unlockPassword.Wipe()
+	wg.unlockPassword = wg.th.Password("", &password, "Primary", "DocText", "PanelBg", func(pass string) {
+		go func() {
+			Debug("entered password", pass)
+			// unlock wallet
+			wg.cx.Config.Lock()
+			*wg.cx.Config.WalletPass = pass
+			*wg.cx.Config.WalletOff = false
+			wg.cx.Config.Unlock()
+			wg.unlockPassword.GetPassword()
+			// load config into a fresh variable
+			cfg, _ := pod.EmptyConfig()
+			var cfgFile []byte
+			var err error
+			if cfgFile, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); Check(err) {
+				// this should not happen
+				// TODO: panic-type conditions - for gui should have a notification maybe?
+				panic("config file does not exist")
+			}
+			Debug("loaded config")
+			if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
+				Debug("unmarshaled config")
+				bhb := blake3.Sum256([]byte(pass))
+				bh := hex.EncodeToString(bhb[:])
+				Debug(pass, bh, *cfg.WalletPass)
+				if *cfg.WalletPass == bh {
+					// the entered password matches the stored hash
+					Debug("now we can open the wallet")
+					// wg.WalletRunCommandChan <- "stop"
+					// time.Sleep(time.Second * 5)
+					// *wg.cx.Config.WalletPass = pass
+					if !wg.node.Running() {
+						// wallet doesn't work without the node
+						wg.startNode()
 					}
-				} else {
-					Debug("failed to unlock the wallet")
+					if err = wg.writeWalletCookie(); Check(err) {
+					}
+					wg.startWallet()
+					*wg.cx.Config.NodeOff = false
+					*wg.cx.Config.WalletOff = false
+					save.Pod(wg.cx.Config)
+					wg.unlockPassword.Wipe()
 				}
-			}()
-		},
-	)
+			} else {
+				Debug("failed to unlock the wallet")
+			}
+		}()
+	})
 	wg.unlockPage.ThemeHook(
 		func() {
 			Debug("theme hook")

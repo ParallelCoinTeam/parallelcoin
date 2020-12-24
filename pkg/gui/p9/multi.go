@@ -45,9 +45,9 @@ func (th *Theme) Multiline(
 		m.inputLocation = -1
 		m.handle(*m.lines)
 	}
-	m.input = th.Input("", "", borderColorFocused, borderColorUnfocused, backgroundColor, size, handleChange)
+	m.input = th.Input("", "", borderColorFocused, borderColorUnfocused, backgroundColor, handleChange)
 	m.clickables = append(m.clickables, (*Clickable)(nil))
-	m.buttons = append(m.buttons, (*ButtonLayout)(nil))
+	// m.buttons = append(m.buttons, (*ButtonLayout)(nil))
 	m.removeClickables = append(m.removeClickables, (*Clickable)(nil))
 	m.removeButtons = append(m.removeButtons, (*IconButton)(nil))
 	for i := range *m.lines {
@@ -64,10 +64,11 @@ func (th *Theme) Multiline(
 			m.clickables[i] = clickable
 		}
 		// Debug("making button")
-		btn := m.Theme.ButtonLayout(clickable).CornerRadius(0).Background(backgroundColor).
+		btn := m.Theme.ButtonLayout(clickable).CornerRadius(0).Background(
+			backgroundColor).
 			Embed(
-				m.Theme.Flex().
-					Rigid(
+				m.Theme.Flex().AlignStart().
+					Flexed(1,
 						m.Theme.Fill("Primary",
 							m.Theme.Inset(0.5,
 								m.Theme.Body2((*m.lines)[i]).Color("DocText").Fn,
@@ -258,7 +259,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 				Rigid(
 					m.removeButtons[i].Fn,
 				).
-				Rigid(
+				Flexed(1,
 					m.input.Fn,
 				).
 				Fn
@@ -272,11 +273,11 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 					m.input.editor.SetText((*m.lines)[x])
 					m.input.editor.Focus()
 				})
-			button := m.Flex().
+			button := m.Flex().AlignStart().
 				Rigid(
 					m.removeButtons[i].Fn,
 				).
-				Rigid(
+				Flexed(1,
 					m.buttons[i].Fn,
 				).
 				Fn
@@ -352,11 +353,11 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 					m.inputLocation = i
 					m.input.editor.SetText((*m.lines)[i])
 					m.input.editor.Focus()
-				})).CornerRadius(0).Background("Transparent").
+				})).CornerRadius(0).Background("").
 				Embed(
 					func(gtx l.Context) l.Dimensions {
 						return m.Theme.Flex().
-							Rigid(
+							Flexed(1,
 								m.Theme.Inset(0.5,
 									m.Theme.Body2((*m.lines)[i]).Color("DocText").Fn,
 								).Fn,
@@ -368,15 +369,20 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 		if i == m.inputLocation {
 			// x := i
 			// Debug("rendering editor", x)
-
+			
 			input := func(gtx l.Context) l.Dimensions {
-				return m.Flex().
-					Rigid(
-						m.removeButtons[i].Fn,
-					).
-					Rigid(
-						m.input.Fn,
-					).
+				return m.Theme.Fill("DocBg",
+					m.Theme.Inset(0.5,
+						m.Flex().
+							Rigid(
+								m.removeButtons[i].Fn,
+							).
+							Flexed(1,
+								m.input.Fn,
+							).
+							Fn,
+					).Fn,
+				).
 					Fn(gtx)
 			}
 			widgets = append(widgets, input)
@@ -392,38 +398,58 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 					Debug("setting", i, m.inputLocation)
 				})
 			button := func(gtx l.Context) l.Dimensions {
-				return m.Flex().
-					Rigid(
-						m.removeButtons[i].Fn,
-					).
-					Rigid(
-						m.buttons[i].Fn,
-					).
-					Fn(gtx)
+				return m.Theme.Fill("DocBg",
+					m.Theme.Inset(0.5,
+						m.Flex().AlignStart().
+							Rigid(
+								m.removeButtons[i].Fn,
+							).
+							Rigid(
+								m.buttons[i].Fn,
+							).
+							Flexed(1, EmptyMaxWidth()).
+							Fn,
+					).Fn,
+				).Fn(gtx)
 			}
 			widgets = append(widgets, button)
 		}
 	}
 	// Debug("widgets", widgets)
 	addButton := func(gtx l.Context) l.Dimensions {
-		addb := m.Theme.IconButton(m.addClickable).Icon(
-			m.Theme.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
-		).SetClick(func() {
-			Debug("clicked add")
-			m.inputLocation = len(*m.lines)
-			*m.lines = append(*m.lines, "")
-			m.input.editor.SetText("")
-			Debugs([]string(*m.lines))
-			m.UpdateWidgets()
-			m.PopulateWidgets()
-			m.input.editor.Focus()
-		}).Background("").Fn
+		addb :=
+			m.Theme.Fill("DocBg",
+				m.Theme.Inset(0.5,
+					m.Theme.Flex().AlignStart().
+						Rigid(
+							m.Theme.IconButton(
+								m.addClickable).
+								Icon(
+									m.Theme.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
+								).
+								SetClick(func() {
+									Debug("clicked add")
+									m.inputLocation = len(*m.lines)
+									*m.lines = append(*m.lines, "")
+									m.input.editor.SetText("")
+									Debugs([]string(*m.lines))
+									m.UpdateWidgets()
+									m.PopulateWidgets()
+									m.input.editor.Focus()
+								}).
+								Background("DocBg").
+								Fn,
+						).
+						Flexed(1, EmptyMaxWidth()).
+						Fn,
+				).Fn,
+			).Fn
 		widgets = append(widgets, addb)
 		return addb(gtx)
 	}
 	widgets = append(widgets, addButton)
 	// m.UpdateWidgets()
 	// m.PopulateWidgets()
-
+	
 	return
 }

@@ -19,7 +19,6 @@ type Password struct {
 	pasteClickable       *Clickable
 	pasteButton          *IconButton
 	hide                 bool
-	size                 float32
 	borderColor          string
 	borderColorUnfocused string
 	borderColorFocused   string
@@ -30,13 +29,7 @@ type Password struct {
 	handle               func(pass string)
 }
 
-func (th *Theme) Password(
-	hint string,
-	password *string,
-	borderColorFocused, borderColorUnfocused, backgroundColor string,
-	size float32,
-	handle func(pass string),
-) *Password {
+func (th *Theme) Password(hint string, password *string, borderColorFocused, borderColorUnfocused, backgroundColor string, handle func(pass string), ) *Password {
 	pass := th.Editor().Mask('•').SingleLine().Submit(true)
 	passInput := th.TextInput(pass, hint).Color(borderColorUnfocused)
 	p := &Password{
@@ -46,7 +39,6 @@ func (th *Theme) Password(
 		pasteClickable:       th.Clickable(),
 		pass:                 pass,
 		passInput:            passInput,
-		size:                 size,
 		borderColorUnfocused: borderColorUnfocused,
 		borderColorFocused:   borderColorFocused,
 		borderColor:          borderColorUnfocused,
@@ -139,8 +131,8 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Max.X = int(p.TextSize.Scale(float32(p.size)).V)
 	// gtx.Constraints.Min.X = 0
 	// cs := gtx.Constraints
-	width := int(p.Theme.TextSize.Scale(p.size).V)
-	gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
+	// width := int(p.Theme.TextSize.Scale(p.size).V)
+	// gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
 	return func(gtx l.Context) l.Dimensions {
 		p.passInput.Color(p.borderColor)
 		p.unhideButton.Color(p.borderColor)

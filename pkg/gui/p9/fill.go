@@ -1,13 +1,12 @@
 package p9
 
 import (
-	"gioui.org/op"
-	"gioui.org/op/clip"
 	"image"
 	"image/color"
 	
 	"gioui.org/f32"
 	l "gioui.org/layout"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 )
 
@@ -40,6 +39,9 @@ func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 				},
 			)
 			dims := dd[0]
+			if f.col != "" {
+				fill(gtx, f.th.Colors.Get(f.col), dims.Size)
+			}
 			// // dims := f.w(gtx)
 			// cs := gtx.Constraints
 			// d := image.Point{X: cs.Max.X, Y: cs.Max.Y}
@@ -50,31 +52,16 @@ func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 			//
 			// paint.PaintOp{}.Add(gtx.Ops)
 			// gtx.Constraints.Constrain(d)
-			fill(gtx, f.th.Colors.Get(f.col), f.th.Colors.Get(f.col), dims.Size)
-			dims = f.w(gtx)
 			gtx.Constraints.Constrain(dims.Size)
+			dims = f.w(gtx)
 			return dims
 		},
 	).Fn(gtx)
 }
 
-func fill(gtx l.Context, col1, col2 color.NRGBA, bounds image.Point) {
-	dr := image.Rectangle{Max: bounds}
-	paint.FillShape(
-		gtx.Ops,
-		color.NRGBA{R: 0, G: 0, B: 0, A: 0xFF},
-		clip.Rect(dr).Op(),
-	)
-	col2.R = byte(float32(col2.R))
-	col2.G = byte(float32(col2.G))
-	col2.B = byte(float32(col2.B))
-	paint.LinearGradientOp{
-		Stop1:  f32.Pt(float32(dr.Min.X), 0),
-		Stop2:  f32.Pt(float32(dr.Max.X), 0),
-		Color1: col1,
-		Color2: col2,
-	}.Add(gtx.Ops)
-	defer op.Push(gtx.Ops).Pop()
-	clip.Rect(dr).Add(gtx.Ops)
-	paint.PaintOp{}.Add(gtx.Ops)
+func fill(gtx l.Context, col color.NRGBA, bounds image.Point) {
+	clip.UniformRRect(f32.Rectangle{
+		Max: f32.Pt(float32(bounds.X), float32(bounds.Y)),
+	}, 0).Add(gtx.Ops)
+	paint.Fill(gtx.Ops, col)
 }

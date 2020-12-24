@@ -224,11 +224,11 @@ func (wg *WalletGUI) GetInputs() {
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
 	wg.inputs = map[string]*p9.Input{
-		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
-		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
-		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
-		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
-		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", "DocBg", 32, func(pass string) {}),
+		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", "DocBg", func(pass string) {}),
+		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", "DocBg", func(pass string) {}),
+		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", "DocBg", func(pass string) {}),
+		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", "DocBg", func(pass string) {}),
+		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", "DocBg", func(pass string) {}),
 	}
 }
 
@@ -236,25 +236,9 @@ func (wg *WalletGUI) GetPasswords() {
 	pass := ""
 	passConfirm := ""
 	wg.passwords = map[string]*p9.Password{
-		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", "", 32, func(pass string) {}),
-		"confirmPassEditor": wg.th.Password(
-			"confirm",
-			&passConfirm,
-			"Primary",
-			"DocText",
-			"",
-			32,
-			func(pass string) {},
-		),
-		"publicPassEditor": wg.th.Password(
-			"public password (optional)",
-			wg.cx.Config.WalletPass,
-			"Primary",
-			"DocText",
-			"",
-			32,
-			func(pass string) {},
-		),
+		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", "", func(pass string) {}),
+		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", "", func(pass string) {}),
+		"publicPassEditor": wg.th.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", "", func(pass string) {}),
 	}
 }
 

@@ -46,27 +46,11 @@ func (wg *WalletGUI) SendPage() l.Widget {
 func (wg *WalletGUI) CreateSendAddressItem() {
 	wg.sendAddresses = append(wg.sendAddresses,
 		SendAddress{
-			AddressInput: wg.th.Input(
-				"",
-				"Enter a ParallelCoin address (e.g. 9ef0sdjifvmlkdsfnsdlkg)",
-				"Primary",
-				"DocText",
-				"DocBg",
-				26,
-				func(txt string) {
-				
-				},
-			),
-			LabelInput:  wg.th.Input(
-				"",
-				"Enter a label for this address to add it to the list of used addresses",
-				"Primary",
-				"DocText",
-				"DocBg",
-				26,
-				func(pass string) {},
-			),
-			AmountInput: wg.th.Input("", "Enter amount", "Primary", "DocText", "DocBg", 10, func(pass string) {}),
+			AddressInput: wg.th.Input("", "Enter a ParallelCoin address (e.g. 9ef0sdjifvmlkdsfnsdlkg)", "Primary", "DocText", "DocBg", func(txt string) {
+			
+			}),
+			LabelInput:  wg.th.Input("", "Enter a label for this address to add it to the list of used addresses", "Primary", "DocText", "DocBg", func(pass string) {}),
+			AmountInput: wg.th.Input("", "Enter amount", "Primary", "DocText", "DocBg", func(pass string) {}),
 			// AmountInput: &counter.Counter{
 			//	Value:        1,
 			//	OperateValue: 1,

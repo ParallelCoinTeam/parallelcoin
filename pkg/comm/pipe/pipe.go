@@ -77,7 +77,7 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 		for {
 			select {
 			case <-quit:
-				Debug(interrupt.GoroutineDump())
+				// Debug(interrupt.GoroutineDump())
 				break out
 			default:
 			}
@@ -92,7 +92,7 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 				}
 			}
 		}
-		Debug(interrupt.GoroutineDump())
+		// Debug(interrupt.GoroutineDump())
 		Debug("pipe server shut down")
 	}()
 	return stdconn.New(os.Stdin, os.Stdout, quit)

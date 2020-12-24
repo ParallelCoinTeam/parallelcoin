@@ -21,7 +21,6 @@ type Input struct {
 	pasteClickable       *Clickable
 	pasteButton          *IconButton
 	GetText              func() string
-	size                 float32
 	borderColor          string
 	borderColorUnfocused string
 	borderColorFocused   string
@@ -31,11 +30,7 @@ type Input struct {
 
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
-func (th *Theme) Input(
-	txt, hint, borderColorFocused, borderColorUnfocused, backgroundColor string,
-	size float32,
-	handle func(txt string),
-) *Input {
+func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused, backgroundColor string, handle func(txt string), ) *Input {
 	editor := th.Editor().SingleLine().Submit(true)
 	input := th.TextInput(editor, hint)
 	p := &Input{
@@ -45,7 +40,6 @@ func (th *Theme) Input(
 		pasteClickable:       th.Clickable(),
 		editor:               editor,
 		input:                input,
-		size:                 size,
 		borderColorUnfocused: borderColorUnfocused,
 		borderColorFocused:   borderColorFocused,
 		backgroundColor:      backgroundColor,
@@ -127,8 +121,8 @@ func (th *Theme) Input(
 func (in *Input) Fn(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Max.X = int(in.TextSize.Scale(float32(in.size)).V)
 	// gtx.Constraints.Min.X = 0
-	width := int(in.Theme.TextSize.Scale(in.size).V)
-	gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
+	// width := int(in.Theme.TextSize.Scale(in.size).V)
+	// gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
 	return in.Border().Color(in.borderColor).Embed(
 		in.Flex().
 			Flexed(

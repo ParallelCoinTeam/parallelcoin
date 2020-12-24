@@ -45,7 +45,8 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("pipelog") {
 			Warn("pipe logger enabled")
 			*cx.Config.PipeLog = c.Bool("pipelog")
-			serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir), c.Command.Name)
+			serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir),
+				fmt.Sprint(os.Args))
 		}
 		if c.IsSet("walletfile") {
 			*cx.Config.WalletFile = c.String("walletfile")

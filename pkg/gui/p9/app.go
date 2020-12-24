@@ -2,14 +2,14 @@ package p9
 
 import (
 	"fmt"
-
+	
 	uberatomic "go.uber.org/atomic"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-
+	
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 )
 
@@ -371,20 +371,18 @@ func (a *App) RenderPage(gtx l.Context) l.Dimensions {
 			if page, ok := a.pages[a.activePage.Load()]; !ok {
 				return a.th.Flex().
 					Flexed(1,
-						a.th.Inset(0.5,
-							a.th.VFlex().SpaceEvenly().
-								Rigid(
-									a.th.H1("404").
-										Alignment(text.Middle).
-										Fn,
-								).
-								Rigid(
-									a.th.Body1("page not found").
-										Alignment(text.Middle).
-										Fn,
-								).
-								Fn,
-						).Fn,
+						a.th.VFlex().SpaceEvenly().
+							Rigid(
+								a.th.H1("404").
+									Alignment(text.Middle).
+									Fn,
+							).
+							Rigid(
+								a.th.Body1("page not found").
+									Alignment(text.Middle).
+									Fn,
+							).
+							Fn,
 					).Fn(gtx)
 			} else {
 				// _ = page
@@ -407,7 +405,7 @@ func (a *App) renderSideBar() l.Widget {
 			out := a.sideBarList.
 				Length(len(a.sideBar)).
 				// LeftSide(true).
-
+				
 				Vertical().
 				Background("PanelBg").
 				// Color("DocText").
@@ -427,7 +425,7 @@ func (a *App) renderSideBar() l.Widget {
 					// return out.Fn(gtx)
 				})
 			// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
-			return a.th.VFlex().Flexed(1,out.Fn).Rigid( a.th.Inset(0.25, EmptyMaxWidth()).Fn).Fn(gtx)
+			return a.th.VFlex().Flexed(1, out.Fn).Rigid(a.th.Inset(0.25, EmptyMaxWidth()).Fn).Fn(gtx)
 		}
 	} else {
 		return EmptySpace(0, 0)

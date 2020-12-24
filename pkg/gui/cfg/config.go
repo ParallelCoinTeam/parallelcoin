@@ -5,12 +5,12 @@ import (
 	"sort"
 	"strconv"
 	"time"
-
+	
 	"github.com/urfave/cli"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
-
+	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/pod"
@@ -112,62 +112,46 @@ func (c *Config) Config() GroupsMap {
 					}
 				})
 			case "integer":
-				c.inputs[sgf.Slug] = c.th.Input(
-					fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug, "Primary", "PanelBg", "DocBg", 26, func(txt string) {
-						Debug(sgf.Slug, "submitted", txt)
-						i := c.cx.ConfigMap[sgf.Slug].(*int)
-						if n, err := strconv.Atoi(txt); !Check(err) {
-							*i = n
-						}
-						save.Pod(c.cx.Config)
-					},
-				)
+				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+					i := c.cx.ConfigMap[sgf.Slug].(*int)
+					if n, err := strconv.Atoi(txt); !Check(err) {
+						*i = n
+					}
+					save.Pod(c.cx.Config)
+				})
 			case "time":
-				c.inputs[sgf.Slug] = c.th.Input(
-					fmt.Sprint(*tgs.Slot.(*time.Duration)), sgf.Slug, "Primary", "PanelBg", "DocBg", 26, func(txt string) {
-						Debug(sgf.Slug, "submitted", txt)
-						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
-						if d, err := time.ParseDuration(txt); !Check(err) {
-							*tt = d
-						}
-						save.Pod(c.cx.Config)
-					},
-				)
+				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*time.Duration)), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+					tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
+					if d, err := time.ParseDuration(txt); !Check(err) {
+						*tt = d
+					}
+					save.Pod(c.cx.Config)
+				})
 			case "float":
-				c.inputs[sgf.Slug] = c.th.Input(
-					strconv.FormatFloat(*tgs.Slot.(*float64), 'f', -1, 64),
-					sgf.Slug,
-					"Primary",
-					"PanelBg",
-					"DocBg",
-					26,
-					func(txt string) {
-						Debug(sgf.Slug, "submitted", txt)
-						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
-						if f, err := strconv.ParseFloat(txt, 64); !Check(err) {
-							*ff = f
-						}
-						save.Pod(c.cx.Config)
-					},
-				)
+				c.inputs[sgf.Slug] = c.th.Input(strconv.FormatFloat(*tgs.Slot.(*float64), 'f', -1, 64), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+					ff := c.cx.ConfigMap[sgf.Slug].(*float64)
+					if f, err := strconv.ParseFloat(txt, 64); !Check(err) {
+						*ff = f
+					}
+					save.Pod(c.cx.Config)
+				})
 			case "string":
-				c.inputs[sgf.Slug] = c.th.Input(
-					*tgs.Slot.(*string), sgf.Slug, "Primary", "PanelBg", "DocBg", 26, func(txt string) {
-						Debug(sgf.Slug, "submitted", txt)
-						ss := c.cx.ConfigMap[sgf.Slug].(*string)
-						*ss = txt
-						save.Pod(c.cx.Config)
-					},
-				)
+				c.inputs[sgf.Slug] = c.th.Input(*tgs.Slot.(*string), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+					ss := c.cx.ConfigMap[sgf.Slug].(*string)
+					*ss = txt
+					save.Pod(c.cx.Config)
+				})
 			case "password":
-				c.passwords[sgf.Slug] = c.th.Password(
-					"password", tgs.Slot.(*string), "Primary", "PanelBg", "DocBg", 26, func(txt string) {
-						Debug(sgf.Slug, "submitted", txt)
-						pp := c.cx.ConfigMap[sgf.Slug].(*string)
-						*pp = txt
-						save.Pod(c.cx.Config)
-					},
-				)
+				c.passwords[sgf.Slug] = c.th.Password("password", tgs.Slot.(*string), "Primary", "PanelBg", "DocBg", func(txt string) {
+					Debug(sgf.Slug, "submitted", txt)
+					pp := c.cx.ConfigMap[sgf.Slug].(*string)
+					*pp = txt
+					save.Pod(c.cx.Config)
+				})
 			case "multi":
 				c.multis[sgf.Slug] = c.th.Multiline(
 					tgs.Slot.(*cli.StringSlice), "Primary", "PanelBg", "DocBg", 30, func(txt []string) {
@@ -193,7 +177,7 @@ func (c *Config) Config() GroupsMap {
 			}
 		}
 	}
-
+	
 	// Debugs(tabNames)
 	return tabNames // .Widget(c)
 	// return func(gtx l.Context) l.Dimensions {
@@ -229,30 +213,34 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		g := groups[i]
 		if !first {
 			// put a space between the sections
-			// out = append(out, func(gtx l.Context) l.Dimensions {
-			// 	return ng.th.Fill("DocBg",
-			// 		ng.th.Inset(0.25,
-			// 			ng.th.Flex().Flexed(1, p9.EmptySpace(0, 0)).Fn,
-			// 		).Fn,
-			// 	).Fn(gtx)
-			// })
 			out = append(out, func(gtx l.Context) l.Dimensions {
-				return ng.th.Inset(0.25, p9.EmptyMaxWidth()).Fn(gtx)
+				return ng.th.Fill("PanelBg",
+					ng.th.Inset(0.25,
+						ng.th.Flex().Flexed(1, p9.EmptyMaxWidth()).Fn,
+					).Fn,
+				).Fn(gtx)
 			})
+			// out = append(out, func(gtx l.Context) l.Dimensions {
+			// 	return ng.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn(gtx)
+			// })
 		} else {
 			first = false
 		}
 		// put in the header
 		out = append(out, func(gtx l.Context) l.Dimensions {
-			return ng.th.Inset(0.0, ng.th.H6(g.name).Color("PanelText").Fn).Fn(gtx)
+			return ng.th.Fill("PanelBg", ng.th.Inset(0.5,
+				ng.th.H5(g.name).Color("PanelText").
+					Fn).Fn).Fn(gtx)
 		})
-		out = append(out, func(gtx l.Context) l.Dimensions {
-			return ng.th.Fill("DocBg",
-				ng.th.Inset(0.25,
-					ng.th.Flex().Flexed(1, p9.EmptyMaxWidth()).Fn,
-				).Fn,
-			).Fn(gtx)
-		})
+		// out = append(out, func(gtx l.Context) l.Dimensions {
+		// 	return ng.th.Fill("PanelBg",
+		// 		ng.th.Inset(0.25,
+		// 			ng.th.Flex().Flexed(1,
+		// 				p9.EmptyMaxWidth(),
+		// 			).Fn,
+		// 		).Fn,
+		// 	).Fn(gtx)
+		// })
 		// add the widgets
 		for j := range groups[i].items {
 			gi := groups[i].items[j]
@@ -260,15 +248,13 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 				k := x
 				out = append(out, func(gtx l.Context) l.Dimensions {
 					if k < len(gi.widget()) {
-						return ng.th.Fill("DocBg",
-							ng.th.Flex().
-								Rigid(
-									ng.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn,
-								).
-								Flexed(1,
-									gi.widget()[k],
-								).Fn,
-						).Fn(gtx)
+						return ng.th.Flex().
+							Rigid(
+								ng.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn,
+							).
+							Rigid(
+								gi.widget()[k],
+							).Fn(gtx)
 					}
 					return l.Dimensions{}
 				})
@@ -279,13 +265,12 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		return out[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return ng.th.Inset(0.25,
-			ng.lists["settings"].
-				Vertical().
-				Length(len(out)).
-				Background("PanelBg").
-				// Color("DocText").Active("Primary").
-				ListElement(le).Fn).Fn(gtx)
+		return ng.lists["settings"].
+			Vertical().
+			Length(len(out)).
+			Background("PanelBg").
+			// Color("DocText").Active("Primary").
+			ListElement(le).Fn(gtx)
 	}
 }
 
@@ -318,19 +303,22 @@ func (c *Config) RenderConfigItem(item *Item, position int) []l.Widget {
 func (c *Config) RenderToggle(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.25, c.th.Flex().
-				Rigid(
-					c.th.Switch(c.Bools[item.slug]).Fn,
-				).
-				Flexed(1,
-					c.th.VFlex().
+			return c.th.Fill("DocBg",
+				c.th.Inset(0.5,
+					c.th.Flex().
 						Rigid(
-							c.th.Body1(item.label).Fn,
+							c.th.Switch(c.Bools[item.slug]).Fn,
 						).
-						Rigid(
-							c.th.Caption(item.description).Fn,
-						).
-						Fn,
+						Flexed(1,
+							c.th.VFlex().
+								Rigid(
+									c.th.Body1(item.label).Fn,
+								).
+								Rigid(
+									c.th.Caption(item.description).Fn,
+								).
+								Fn,
+						).Fn,
 				).Fn,
 			).Fn(gtx)
 		},
@@ -340,19 +328,21 @@ func (c *Config) RenderToggle(item *Item) []l.Widget {
 func (c *Config) RenderInteger(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.25,
-				c.th.Flex().Flexed(1,
-					c.th.VFlex().
-						Rigid(
-							c.th.Body1(item.label).Fn,
-						).
-						Rigid(
-							c.inputs[item.slug].Fn,
-						).
-						Flexed(1,
-							c.th.Caption(item.description).Fn,
-						).
-						Fn,
+			return c.th.Fill("DocBg",
+				c.th.Inset(0.5,
+					c.th.Flex().Flexed(1,
+						c.th.VFlex().
+							Rigid(
+								c.th.Body1(item.label).Fn,
+							).
+							Rigid(
+								c.inputs[item.slug].Fn,
+							).
+							Rigid(
+								c.th.Caption(item.description).Fn,
+							).
+							Fn,
+					).Fn,
 				).Fn,
 			).
 				Fn(gtx)
@@ -363,19 +353,21 @@ func (c *Config) RenderInteger(item *Item) []l.Widget {
 func (c *Config) RenderTime(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.25,
-				c.th.Flex().Flexed(1,
-					c.th.VFlex().
-						Rigid(
-							c.th.Body1(item.label).Fn,
-						).
-						Rigid(
-							c.inputs[item.slug].Fn,
-						).
-						Flexed(1,
-							c.th.Caption(item.description).Fn,
-						).
-						Fn,
+			return c.th.Fill("DocBg",
+				c.th.Inset(0.5,
+					c.th.Flex().Flexed(1,
+						c.th.VFlex().
+							Rigid(
+								c.th.Body1(item.label).Fn,
+							).
+							Rigid(
+								c.inputs[item.slug].Fn,
+							).
+							Rigid(
+								c.th.Caption(item.description).Fn,
+							).
+							Fn,
+					).Fn,
 				).Fn,
 			).
 				Fn(gtx)
@@ -386,19 +378,21 @@ func (c *Config) RenderTime(item *Item) []l.Widget {
 func (c *Config) RenderFloat(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.25,
-				c.th.Flex().Flexed(1,
-					c.th.VFlex().
-						Rigid(
-							c.th.Body1(item.label).Fn,
-						).
-						Rigid(
-							c.inputs[item.slug].Fn,
-						).
-						Flexed(1,
-							c.th.Caption(item.description).Fn,
-						).
-						Fn,
+			return c.th.Fill("DocBg",
+				c.th.Inset(0.5,
+					c.th.Flex().Flexed(1,
+						c.th.VFlex().
+							Rigid(
+								c.th.Body1(item.label).Fn,
+							).
+							Rigid(
+								c.inputs[item.slug].Fn,
+							).
+							Rigid(
+								c.th.Caption(item.description).Fn,
+							).
+							Fn,
+					).Fn,
 				).Fn,
 			).
 				Fn(gtx)
@@ -408,19 +402,21 @@ func (c *Config) RenderFloat(item *Item) []l.Widget {
 
 func (c *Config) RenderString(item *Item) []l.Widget {
 	return []l.Widget{
-		c.th.Inset(0.25,
-			c.th.Flex().Flexed(1,
-				c.th.VFlex().
-					Rigid(
-						c.th.Body1(item.label).Fn,
-					).
-					Rigid(
-						c.inputs[item.slug].Fn,
-					).
-					Flexed(1,
-						c.th.Caption(item.description).Fn,
-					).
-					Fn,
+		c.th.Fill("DocBg",
+			c.th.Inset(0.5,
+				c.th.Flex().Flexed(1,
+					c.th.VFlex().
+						Rigid(
+							c.th.Body1(item.label).Fn,
+						).
+						Rigid(
+							c.inputs[item.slug].Fn,
+						).
+						Rigid(
+							c.th.Caption(item.description).Fn,
+						).
+						Fn,
+				).Fn,
 			).Fn,
 		).
 			Fn,
@@ -429,19 +425,21 @@ func (c *Config) RenderString(item *Item) []l.Widget {
 
 func (c *Config) RenderPassword(item *Item) []l.Widget {
 	return []l.Widget{
-		c.th.Inset(0.25,
-			c.th.Flex().Flexed(1,
-				c.th.VFlex().
-					Rigid(
-						c.th.Body1(item.label).Fn,
-					).
-					Rigid(
-						c.passwords[item.slug].Fn,
-					).
-					Rigid(
-						c.th.Caption(item.description).Fn,
-					).
-					Fn,
+		c.th.Fill("DocBg",
+			c.th.Inset(0.5,
+				c.th.Flex().Flexed(1,
+					c.th.VFlex().
+						Rigid(
+							c.th.Body1(item.label).Fn,
+						).
+						Rigid(
+							c.passwords[item.slug].Fn,
+						).
+						Rigid(
+							c.th.Caption(item.description).Fn,
+						).
+						Fn,
+				).Fn,
 			).Fn,
 		).
 			Fn,
@@ -453,15 +451,17 @@ func (c *Config) RenderMulti(item *Item, position int) []l.Widget {
 	// c.multis[item.slug].
 	w := []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.th.Inset(0.25,
-				c.th.Flex().Flexed(1,
-					c.th.VFlex().
-						Rigid(
-							c.th.Body1(item.label).Fn,
-						).
-						Rigid(
-							c.th.Caption(item.description).Fn,
-						).Fn,
+			return c.th.Fill("DocBg",
+				c.th.Inset(0.5,
+					c.th.Flex().Flexed(1,
+						c.th.VFlex().
+							Rigid(
+								c.th.Body1(item.label).Fn,
+							).
+							Rigid(
+								c.th.Caption(item.description).Fn,
+							).Fn,
+					).Fn,
 				).Fn,
 			).
 				Fn(gtx)
@@ -491,29 +491,31 @@ func (c *Config) RenderRadio(item *Item) []l.Widget {
 						UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked),
 					c.enums[item.slug], item.options[i], item.options[i]).Fn)
 		}
-		return c.th.Inset(0.25,
-			c.th.VFlex().
-				Rigid(
-					c.th.Body1(item.label).Fn,
-				).
-				Rigid(
-					c.th.Flex().
-						Rigid(
-							func(gtx l.Context) l.Dimensions {
-								gtx.Constraints.Max.X = int(c.th.TextSize.Scale(10).V)
-								return c.lists[item.slug].DisableScroll(true).Slice(gtx, options...)(gtx)
-								// 	// return c.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
-								// 	// 	return options[index](gtx)
-								// 	// }).Fn(gtx)
-								// 	return c.lists[item.slug].Slice(gtx, options...)(gtx)
-								// 	// return l.Dimensions{}
-							},
-						).
-						Flexed(1,
-							c.th.Caption(item.description).Fn,
-						).
-						Fn,
-				).Fn,
+		return c.th.Fill("DocBg",
+			c.th.Inset(0.5,
+				c.th.VFlex().
+					Rigid(
+						c.th.Body1(item.label).Fn,
+					).
+					Rigid(
+						c.th.Flex().
+							Rigid(
+								func(gtx l.Context) l.Dimensions {
+									gtx.Constraints.Max.X = int(c.th.TextSize.Scale(10).V)
+									return c.lists[item.slug].DisableScroll(true).Slice(gtx, options...)(gtx)
+									// 	// return c.lists[item.slug].Length(len(options)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
+									// 	// 	return options[index](gtx)
+									// 	// }).Fn(gtx)
+									// 	return c.lists[item.slug].Slice(gtx, options...)(gtx)
+									// 	// return l.Dimensions{}
+								},
+							).
+							Flexed(1,
+								c.th.Caption(item.description).Fn,
+							).
+							Fn,
+					).Fn,
+			).Fn,
 		).
 			Fn(gtx)
 	}

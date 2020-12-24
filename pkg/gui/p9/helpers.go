@@ -30,8 +30,7 @@ func Fill(gtx l.Context, col color.NRGBA) l.Dimensions {
 	// }
 	// paint.ColorOp{Color: col}.Add(gtx.Ops)
 	// paint.PaintOp{Rect: dr}.Add(gtx.Ops)
-	fill(gtx, col, col, d)
-	gtx.Constraints.Constrain(d)
+	fill(gtx, col, d)
 	return l.Dimensions{Size: d}
 }
 

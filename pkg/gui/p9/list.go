@@ -3,7 +3,7 @@ package p9
 import (
 	"image"
 	"time"
-
+	
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
 	l "gioui.org/layout"
@@ -77,7 +77,7 @@ func (li *List) JumpToEnd() {
 		First:     len(li.dims),
 		Offset:    axisMain(li.axis, li.dims[len(li.dims)-1].Size),
 	}
-
+	
 }
 
 // List returns a new scrollable List widget
@@ -320,7 +320,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		if li.leftSide {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth))
 		}
-		container = containerFlex.Fn
+		container = li.th.Fill(li.background, containerFlex.Fn).Fn
 	}
 	return container(gtx)
 }
