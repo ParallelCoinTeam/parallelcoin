@@ -455,6 +455,7 @@ func (n *Node) Start() {
 
 // Stop gracefully shuts down the server by stopping and disconnecting all peers and the main listener.
 func (n *Node) Stop() (err error) {
+	Debug("stopping chain rpc server")
 	// Make sure this only happens once.
 	if atomic.AddInt32(&n.Shutdown, 1) != 1 {
 		Debug("server is already in the process of shutting down")
@@ -486,7 +487,7 @@ func (n *Node) Stop() (err error) {
 	// Stop the CPU miner if needed
 	// consume.Kill(n.StateCfg.Miner)
 	// Debug("miner has stopped")
-	// Signal the remaining goroutines to quit.
+	Debug("Signal the remaining goroutines to quit.")
 	n.Quit.Q()
 	return
 }
@@ -961,7 +962,8 @@ out:
 			n.HandleBroadcastMsg(peerState, &bmsg)
 		case qmsg := <-n.Query:
 			n.HandleQuery(peerState, qmsg)
-		case <-n.Quit:
+		case <-n.Quit.Wait():
+			Debug("chain peer server shutting down")
 			// Disconnect all peers on server shutdown.
 			peerState.ForAllPeers(
 				func(sp *NodePeer) {
@@ -1182,7 +1184,7 @@ out:
 				time.Second *
 					time.Duration(RandomUint16Number(1800)),
 			)
-		case <-n.Quit:
+		case <-n.Quit.Wait():
 			break out
 			// default:
 		}
@@ -1248,7 +1250,7 @@ out:
 				first = false
 			}
 			timer.Reset(time.Minute * 15)
-		case <-n.Quit:
+		case <-n.Quit.Wait():
 			break out
 		}
 	}

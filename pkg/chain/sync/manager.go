@@ -181,9 +181,9 @@ func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.Behavior
 	Trace("processing block")
 	// Traces(block)
 	reply := make(chan processBlockResponse, 1)
-	// Trace("sending to msgChan")
+	Trace("sending to msgChan")
 	sm.msgChan <- processBlockMsg{block: block, flags: flags, reply: reply}
-	// Trace("waiting on reply")
+	Trace("waiting on reply")
 	response := <-reply
 	return response.isOrphan, response.err
 }
@@ -289,6 +289,7 @@ out:
 				}
 				msg.reply <- peerID
 			case processBlockMsg:
+				Debug("received processBlockMsg")
 				var heightUpdate int32
 				header := &msg.block.MsgBlock().Header
 				if blockchain.ShouldHaveSerializedBlockHeight(header) {
@@ -302,7 +303,7 @@ out:
 						heightUpdate = cbHeight
 					}
 				}
-				// Trace("passing to chain.ProcessBlock")
+				Trace("passing to chain.ProcessBlock")
 				_, isOrphan, err := sm.chain.ProcessBlock(workerNumber, msg.
 					block, msg.flags, heightUpdate)
 				if err != nil {
@@ -312,7 +313,7 @@ out:
 						err:      err,
 					}
 				}
-				// Trace("sending back message on reply channel")
+				Trace("sending back message on reply channel")
 				msg.reply <- processBlockResponse{
 					isOrphan: isOrphan,
 					err:      nil,

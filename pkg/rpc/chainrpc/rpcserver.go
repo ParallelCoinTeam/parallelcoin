@@ -2068,7 +2068,7 @@ func NewRPCServer(
 		GBTWorkState:           NewGbtWorkState(config.TimeSource, config.Algo),
 		HelpCacher:             NewHelpCacher(),
 		RequestProcessShutdown: qu.T(),
-		Quit:                   config.Quit,
+		Quit:                   qu.T(),
 	}
 	if *podcfg.Username != "" && *podcfg.Password != "" {
 		login := *podcfg.Username + ":" + *podcfg.Password

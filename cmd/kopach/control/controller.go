@@ -174,7 +174,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 			}
 		}
 		ctrl.active.Store(false)
-		panic("aren't we stopped???")
+		// panic("aren't we stopped???")
 		Debug("controller exiting")
 	}()
 	return
@@ -483,6 +483,7 @@ out:
 				c.UpdateAndSendTemplate()
 				continue
 			}
+			Debug("checking that block contains payload")
 			oB, ok := c.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 {
 				Warn("template is zero length")

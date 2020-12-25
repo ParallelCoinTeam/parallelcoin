@@ -41,7 +41,7 @@ func (c C) Q() {
 	loc := GetLocForChan(c)
 	mx.Lock()
 	if !testChanIsClosed(c) {
-		Trace("closing channel from "+loc, logi.Caller("from", 1))
+		Trace("closing channel from "+loc, logi.Caller("\nfrom", 1))
 		close(c)
 	} else {
 		Trace("#### channel", loc, "was already closed")

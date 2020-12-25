@@ -15,7 +15,7 @@ type Worker struct {
 	Cmd  *exec.Cmd
 	Args []string
 	// Stderr  io.WriteCloser
-	StdPipe io.ReadCloser
+	// StdPipe io.ReadCloser
 	StdConn *stdconn.StdConn
 }
 
@@ -26,16 +26,16 @@ func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 	// 	args = append([]string{"Cmd.exe", "/C", "start"}, args...)
 	// }
 	// args = apputil.PrependForWindows(args)
-	var pipeReader, pipeWriter *os.File
-	if pipeReader, pipeWriter, err = os.Pipe(); Check(err) {
-	}
+	// var pipeReader, pipeWriter *os.File
+	// if pipeReader, pipeWriter, err = os.Pipe(); Check(err) {
+	// }
 	w = &Worker{
 		Cmd:  exec.Command(args[0], args[1:]...),
 		Args: args,
 		// Stderr:  pipeWriter,
-		StdPipe: pipeReader,
+		// StdPipe: pipeReader,
 	}
-	w.Cmd.Stderr = pipeWriter
+	// w.Cmd.Stderr = pipeWriter
 	var cmdOut io.ReadCloser
 	if cmdOut, err = w.Cmd.StdoutPipe(); Check(err) {
 		return
@@ -45,7 +45,7 @@ func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
-	w.Cmd.Stderr = os.Stderr
+	// w.Cmd.Stderr = os.Stderr
 	if err = w.Cmd.Start(); Check(err) {
 	}
 	// data := make([]byte, 8192)
