@@ -31,7 +31,7 @@ gui:
 
 guis:
 	go install -v
-	pod -D test1 -l trace
+	pod -D test0 -l trace
 
 guihttpprof:
 	go install -v

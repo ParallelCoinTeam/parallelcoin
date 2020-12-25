@@ -84,8 +84,31 @@ func GetLocForChan(c C) (s string) {
 	return
 }
 
+
+func RemoveClosedChans() {
+	Debug("cleaning up closed channels (more than 50 now closed)")
+	var c []C
+	var l []string
+	// Debug(">>>>>>>>>>>")
+	for i := range createdChannels {
+		if i >= len(createdList) {
+			break
+		}
+		if testChanIsClosed(createdChannels[i]) {
+			// Trace(">>> closed", createdList[i])
+			// createdChannels[i].Q()
+		} else {
+			c = append(c, createdChannels[i])
+			l = append(l, createdList[i])
+			// Trace("<<< open", createdList[i])
+		}
+		// Debug(">>>>>>>>>>>")
+	}
+	createdChannels = c
+	createdList = l
+}
+
 func PrintChanState() {
-	mx.Lock()
 
 	// Debug(">>>>>>>>>>>")
 	for i := range createdChannels {
@@ -100,12 +123,12 @@ func PrintChanState() {
 		}
 		// Debug(">>>>>>>>>>>")
 	}
-	mx.Unlock()
 }
 
 func GetOpenChanCount() (o int) {
 	mx.Lock()
 	// Debug(">>>>>>>>>>>")
+	var c int
 	for i := range createdChannels {
 		if i >= len(createdChannels) {
 			break
@@ -113,11 +136,15 @@ func GetOpenChanCount() (o int) {
 		if testChanIsClosed(createdChannels[i]) {
 			// Debug("still open", createdList[i])
 			// createdChannels[i].Q()
+			c++
 		} else {
 			o++
 			// Debug(">>>> ",createdList[i])
 		}
 		// Debug(">>>>>>>>>>>")
+	}
+	if c > 50 {
+		RemoveClosedChans()
 	}
 	mx.Unlock()
 	// o -= len(createdChannels)
