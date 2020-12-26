@@ -3,15 +3,12 @@ package gui
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"runtime"
 	"runtime/pprof"
 	"strings"
 	"time"
-	
-	"github.com/kofoworola/godate"
 	
 	l "gioui.org/layout"
 	
@@ -39,7 +36,7 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					Debug("preconnect loop")
+					// Debug("preconnect loop")
 					// update goroutines data
 					wg.goRoutines()
 					// close clients if they are open
@@ -79,7 +76,7 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					Debug("connected loop")
+					// Debug("connected loop")
 					wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
 					if !wg.node.Running() {
@@ -138,81 +135,81 @@ func (wg *WalletGUI) Tickers() {
 						if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<24, 0); Check(err) {
 						}
 						wg.State.SetAllTxs(atr)
-						Debug("generate the widgets for the updated transactions")
-						out := wg.State.FilteredTxs
-						if wg.historyTable.Header == nil {
-							// create the header
-							wg.historyTable.Header = p9.TextTableHeader{
-								"Amount",
-								"Category",
-								"Address",
-								"Time",
-								"Conf",
-								"In Block",
-								// "Transaction ID",
-								// "Comment",
-								// "Fee",
-								// "BlockHash",
-								// "BlockTime",
-								// "Generated",
-								// "Abandoned",
-								// "Time Received",
-								// "Trusted",
-								// "Vout",
-								// "Wallet Conflicts",
-								// "Account",
-								// "Other Account",
-								// "Involves Watch Only",
-							}
-						}
-						// startIndex := len(wg.historyTable.Body)
-						// if wg.State.FilterChanged {
-						// 	startIndex = 0
-						// 	// all elements must be generated this time
-						// 	wg.historyTable.Body = wg.historyTable.Body[:0]
+						// Debug("generate the widgets for the updated transactions")
+						// out := wg.State.FilteredTxs
+						// if wg.historyTable.Header == nil {
+						// 	// create the header
+						// 	wg.historyTable.Header = p9.TextTableHeader{
+						// 		"Amount",
+						// 		"Category",
+						// 		"Address",
+						// 		"Time",
+						// 		"Conf",
+						// 		"In Block",
+						// 		// "Transaction ID",
+						// 		// "Comment",
+						// 		// "Fee",
+						// 		// "BlockHash",
+						// 		// "BlockTime",
+						// 		// "Generated",
+						// 		// "Abandoned",
+						// 		// "Time Received",
+						// 		// "Trusted",
+						// 		// "Vout",
+						// 		// "Wallet Conflicts",
+						// 		// "Account",
+						// 		// "Other Account",
+						// 		// "Involves Watch Only",
+						// 	}
 						// }
-						// // append all newly added items to the body. The caller can force regeneration by slicing the
-						// // body to zero elements or nilling it, as then every element of out will be generated and added
-						// // to a fresh empty slice.
-						// if startIndex < len(out) {
-						// 	// there is new elements appended to the end of the list
-						o := out // [startIndex:]
-						var bd p9.TextTableBody
-						for x := range o {
-							i := x
-							oi := out[i]
-							bd = append(
-								bd, p9.TextTableRow{
-									fmt.Sprintf("%6.8f", oi.Amount),
-									oi.Category,
-									oi.Address,
-									fmt.Sprintf(
-										"%v", godate.Now(time.Local).DifferenceForHumans(
-											godate.Create(time.Unix(oi.Time, 0)),
-										),
-									),
-									fmt.Sprintf("%v", oi.Confirmations),
-									fmt.Sprintf("%v", *oi.BlockIndex),
-									// wg.State.AllTxs[i].TxID,
-									// wg.State.AllTxs[i].Comment,
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
-									// wg.State.AllTxs[i].BlockHash,
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
-									// wg.State.AllTxs[i].Account,
-									// wg.State.AllTxs[i].OtherAccount,
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
-								},
-							)
-							// }
-						}
-						wg.historyTable.Body = bd // wg.historyTable.Body[:0]
-						wg.historyTable.Regenerate(false)
+						// // startIndex := len(wg.historyTable.Body)
+						// // if wg.State.FilterChanged {
+						// // 	startIndex = 0
+						// // 	// all elements must be generated this time
+						// // 	wg.historyTable.Body = wg.historyTable.Body[:0]
+						// // }
+						// // // append all newly added items to the body. The caller can force regeneration by slicing the
+						// // // body to zero elements or nilling it, as then every element of out will be generated and added
+						// // // to a fresh empty slice.
+						// // if startIndex < len(out) {
+						// // 	// there is new elements appended to the end of the list
+						// o := out // [startIndex:]
+						// var bd p9.TextTableBody
+						// for x := range o {
+						// 	i := x
+						// 	oi := out[i]
+						// 	bd = append(
+						// 		bd, p9.TextTableRow{
+						// 			fmt.Sprintf("%6.8f", oi.Amount),
+						// 			oi.Category,
+						// 			oi.Address,
+						// 			fmt.Sprintf(
+						// 				"%v", godate.Now(time.Local).DifferenceForHumans(
+						// 					godate.Create(time.Unix(oi.Time, 0)),
+						// 				),
+						// 			),
+						// 			fmt.Sprintf("%v", oi.Confirmations),
+						// 			fmt.Sprintf("%v", *oi.BlockIndex),
+						// 			// wg.State.AllTxs[i].TxID,
+						// 			// wg.State.AllTxs[i].Comment,
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
+						// 			// wg.State.AllTxs[i].BlockHash,
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
+						// 			// wg.State.AllTxs[i].Account,
+						// 			// wg.State.AllTxs[i].OtherAccount,
+						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
+						// 		},
+						// 	)
+						// 	// }
+						// }
+						// wg.historyTable.Body = bd // wg.historyTable.Body[:0]
+						// wg.historyTable.Regenerate(false)
 					}
 					wg.invalidate <- struct{}{}
 					first = false

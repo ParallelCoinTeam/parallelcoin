@@ -282,8 +282,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				Fn,
 		},
 	)
-	a.AddOverlay(wg.toasts.DrawToasts())
-	a.AddOverlay(wg.dialog.DrawDialog())
+	// a.AddOverlay(wg.toasts.DrawToasts())
+	// a.AddOverlay(wg.dialog.DrawDialog())
 	return
 }
 

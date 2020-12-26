@@ -45,7 +45,7 @@ func Spawn(quit qu.C, args ...string) (w *Worker, err error) {
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
-	// w.Cmd.Stderr = os.Stderr
+	w.Cmd.Stderr = os.Stderr
 	if err = w.Cmd.Start(); Check(err) {
 	}
 	// data := make([]byte, 8192)

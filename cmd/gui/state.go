@@ -5,15 +5,16 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
 	"github.com/kofoworola/godate"
 	uberatomic "go.uber.org/atomic"
-
+	
 	l "gioui.org/layout"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // CategoryFilter marks which transactions to omit from the filtered transaction list
@@ -54,8 +55,6 @@ type State struct {
 	balanceUnconfirmed      uberatomic.Float64
 	txs                     []tx
 	goroutines              []l.Widget
-	txPerPage               int
-	txPage                  int
 	AllMutex, FilteredMutex sync.Mutex
 	AllTxs                  []btcjson.ListTransactionsResult
 	AllTimeStrings          atomic.Value
@@ -63,6 +62,48 @@ type State struct {
 	FilteredTimeStrings     []string
 	Filter                  CategoryFilter
 	FilterChanged           bool
+	CurrentReceivingAddress util.Address
+}
+
+type Marshalled struct {
+	LastUpdated        time.Time
+	BestBlockHeight    int
+	BestBlockHash      chainhash.Hash
+	Balance            float64
+	BalanceUnconfirmed float64
+	AllTxs             []btcjson.ListTransactionsResult
+	AllTimeStrings     []string
+	Filter             CategoryFilter
+}
+
+func (s *State) Marshal() (out *Marshalled) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	out = &Marshalled{
+		LastUpdated:        s.lastUpdated,
+		BestBlockHeight:    s.bestBlockHeight,
+		BestBlockHash:      *s.bestBlockHash,
+		Balance:            s.balance.Load(),
+		BalanceUnconfirmed: s.balanceUnconfirmed.Load(),
+		AllTxs:             s.AllTxs,
+		AllTimeStrings:     s.AllTimeStrings.Load().([]string),
+		Filter:             s.Filter,
+	}
+	return
+}
+
+func (m *Marshalled) Unmarshal(s *State) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.lastUpdated = m.LastUpdated
+	s.bestBlockHeight = m.BestBlockHeight
+	s.bestBlockHash = &m.BestBlockHash
+	s.balance.Store(m.Balance)
+	s.balanceUnconfirmed.Store(m.BalanceUnconfirmed)
+	s.AllTxs = m.AllTxs
+	s.AllTimeStrings.Store(m.AllTimeStrings)
+	s.Filter = m.Filter
+	return
 }
 
 type tx struct {

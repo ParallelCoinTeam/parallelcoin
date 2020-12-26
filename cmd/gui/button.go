@@ -36,11 +36,11 @@ func (wg *WalletGUI) buttonText(b *p9.Clickable, label string, click func()) fun
 	}
 }
 
-func (wg *WalletGUI) buttonIcon(b *p9.Clickable, label string, ico *[]byte) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) buttonIcon(b *p9.Clickable, page string, ico *[]byte) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := wg.App.TitleBarBackgroundGet()
 		color := wg.App.MenuColorGet()
-		if wg.App.ActivePageGet() == label {
+		if wg.App.ActivePageGet() == page {
 			color = "PanelText"
 			background = "PanelBg"
 		}
@@ -64,7 +64,7 @@ func (wg *WalletGUI) buttonIcon(b *p9.Clickable, label string, ico *[]byte) func
 						if wg.App.MenuOpen {
 							wg.App.MenuOpen = false
 						}
-						wg.App.ActivePage(label)
+						wg.App.ActivePage(page)
 					}).
 				Fn,
 			// ).Fn,

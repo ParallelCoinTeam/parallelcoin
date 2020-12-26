@@ -21,8 +21,6 @@ import (
 	"github.com/p9c/pod/pkg/util/rununit"
 	
 	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/pkg/gui/dialog"
-	"github.com/p9c/pod/pkg/gui/toast"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	
 	"github.com/p9c/pod/app/conte"
@@ -82,8 +80,8 @@ type WalletGUI struct {
 	historyTable              *p9.TextTable
 	sendAddresses             []SendAddress
 	console                   *Console
-	toasts                    *toast.Toasts
-	dialog                    *dialog.Dialog
+	// toasts                    *toast.Toasts
+	// dialog                    *dialog.Dialog
 }
 
 func (wg *WalletGUI) Run() (err error) {
@@ -116,8 +114,8 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.bools = wg.GetBools()
 	wg.GetInputs()
 	wg.GetPasswords()
-	wg.toasts = toast.New(wg.th)
-	wg.dialog = dialog.New(wg.th)
+	// wg.toasts = toast.New(wg.th)
+	// wg.dialog = dialog.New(wg.th)
 	wg.console = wg.ConsolePage()
 	wg.w = make(map[string]*f.Window)
 	wg.quitClickable = wg.th.Clickable()
@@ -129,7 +127,6 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.App = wg.GetAppWidget()
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.Tickers()
-	wg.CreateSendAddressItem()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 	} else {
 		*wg.noWallet = false
