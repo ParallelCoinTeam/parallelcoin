@@ -13,9 +13,9 @@ kopachgui:
 	go install -v
 	pod -D test0 -n testnet -l debug --lan --solo --kopachgui kopach
 
-kopach:
+testkopach:
 	go install -v
-	pod -D test0 -n testnet -l trace -g -G 1 --lan --solo kopach
+	pod -D test0 -n testnet -l trace -g -G 1 --lan kopach
 
 testnode:
 	go install -v
@@ -31,7 +31,13 @@ gui:
 
 guis:
 	go install -v
-	pod -D test0 -l trace
+	pod -D test1
+
+resetwallet0:
+	pod -D test0 -l trace --walletpass aoeuaoeu wallet drophistory
+
+resetwallet1:
+	pod -D test1 -l trace --walletpass aoeuaoeu wallet drophistory
 
 guihttpprof:
 	go install -v
@@ -56,14 +62,14 @@ mainwallet:
 teststopkopach:
 	go install -v
 	go install -v ./pkg/util/logi/pipe
-	pipe pod -D test1 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan kopach
+	pipe pod -D test0 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan kopach
 
 teststopnode:
 	go install -v
 	go install -v ./pkg/util/logi/pipe
-	pipe pod -D test1 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan node
+	pipe pod -D test0 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan node
 
 teststopwallet:
 	go install -v
 	go install -v ./pkg/util/logi/pipe
-	pipe pod -D test1 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan wallet
+	pipe pod -D test0 --pipelog -l trace --walletpass aoeuaoeu -g -G 1 --solo --lan wallet
