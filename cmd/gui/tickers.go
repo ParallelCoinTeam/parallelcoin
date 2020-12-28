@@ -260,11 +260,17 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 		// break out
 	}
 	wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+	if !wg.WalletAndClientRunning() {
+		return
+	}
 	var confirmed util.Amount
 	if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
 		// break out
 	}
 	wg.State.SetBalance(confirmed.ToDUO())
+	if !wg.WalletAndClientRunning() {
+		return
+	}
 	var atr []btcjson.ListTransactionsResult
 	// TODO: for some reason this function returns half as many as requested
 	if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
