@@ -85,7 +85,7 @@ func New(
 		case <-quit:
 			Debug("runner quit trigger called", args)
 			r.Stop()
-			r.quit.Q()
+			// r.quit.Q()
 		}
 	}()
 	return
