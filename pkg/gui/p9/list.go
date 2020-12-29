@@ -277,24 +277,24 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	// because the initial value of li.view will be zero this will always execute first time, unless there is no widgets
 	if view != li.view || li.position != li.prevPosition {
 		var o l.Dimensions
-		if li.view == 0 {
-			// for the first time we will block the main thread to process
-			o = li.calculateScrollbar(gtx, view)
-			// if the list is empty this returns an empty box filling the space (it is rendered in the function above
-			if o.Size.X != 0 && o.Size.Y != 0 {
-				return o
-			}
-		} else {
-			// because it generally won't hurt to be deferred, the recalculation is done for the next frame in the
-			// background. This call will always have valid dimensions to work with, and view value of the previous
-			// frame, which none of this runs if that value hasn't changed as it doesn't need to be recalculated if it
-			// isn't different - both position and view size, the things the scrollbar visualises.
-			defer func() {
-				li.th.BackgroundProcessingQueue <- func() {
-					o = li.calculateScrollbar(gtx, view)
-				}
-			}()
+		// if li.view == 0 {
+		// for the first time we will block the main thread to process
+		o = li.calculateScrollbar(gtx, view)
+		// the above function returns zero dimensions unless there is no items, in which case return as the job is done
+		if o.Size.X != 0 && o.Size.Y != 0 {
+			return o
 		}
+		// } else {
+		// 	// because it generally won't hurt to be deferred, the recalculation is done for the next frame in the
+		// 	// background. This call will always have valid dimensions to work with, and view value of the previous
+		// 	// frame, which none of this runs if that value hasn't changed as it doesn't need to be recalculated if it
+		// 	// isn't different - both position and view size, the things the scrollbar visualises.
+		// 	defer func() {
+		// 		li.th.BackgroundProcessingQueue <- func() {
+		// 			o = li.calculateScrollbar(gtx, view)
+		// 		}
+		// 	}()
+		// }
 		li.view = view
 	}
 	// now lay it all out and draw the list and scrollbar

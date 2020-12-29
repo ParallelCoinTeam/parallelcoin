@@ -1,7 +1,6 @@
 package f
 
 import (
-	"github.com/p9c/pod/pkg/util/interrupt"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
 	"time"
@@ -93,27 +92,7 @@ func (w *Window) Run(
 	frame func(ctx layout.Context) layout.Dimensions,
 	overlay func(ctx layout.Context), destroy func(), quit qu.C,
 ) (err error) {
-	var lastFrameTime time.Time
-	_ = lastFrameTime
-	frameTicker := time.NewTicker(time.Second / 60)
 	var ops op.Ops
-	var recently bool
-	go func() {
-		for {
-			select {
-			case <-quit:
-				return
-			case <-frameTicker.C:
-				// if the last time a frame event was received is more than what should have been 5 frames, print
-				// goroutine dump
-				timeSinceLastFrame := time.Now().Sub(lastFrameTime)
-				if timeSinceLastFrame > time.Second/5 && recently {
-					Debug(interrupt.GoroutineDump())
-					recently = false
-				}
-			}
-		}
-	}()
 	for {
 		select {
 		case <-quit:
@@ -129,8 +108,6 @@ func (w *Window) Run(
 				w.Window.Close()
 				return e.Err
 			case system.FrameEvent:
-				lastFrameTime = time.Now()
-				recently = true
 				gtx := layout.NewContext(&ops, e)
 				// update dimensions for responsive sizing widgets
 				*w.Width = gtx.Constraints.Max.X
