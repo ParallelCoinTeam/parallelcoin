@@ -36,48 +36,51 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 		return c.th.H6(c.rows[index].Label).Font(c.font).TextScale(c.scale).Fn(gtx)
 	}
 	// render the widgets onto a second context to get their dimensions
-	gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
+	gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max,
+		l.Vertical)
 	// generate the dimensions for all the list elements
 	dims := GetDimensionList(gtx1, len(c.rows), le)
-	// Debugs(dims)
+	Debugs(dims)
 	for i := range dims {
 		if dims[i].Size.X > max {
 			max = dims[i].Size.X
 		}
 	}
-	// Debug(max)
 	for x := range c.rows {
 		i := x
 		_ = i
 		out = append(out, func(gtx l.Context) l.Dimensions {
-			return c.th.Fill(c.background,
-				c.th.Flex().AlignStart().
-					Rigid(EmptySpace(max-dims[i].Size.X, dims[i].Size.Y)).
-					Rigid(
-						c.th.Inset(0.5, func(gtx l.Context) l.Dimensions {
-							gtx.Constraints.Max.X = max
-							gtx.Constraints.Max.Y = dims[i].Size.Y
-							// gtx.Constraints.Min.X = max
-							// gtx.Constraints.Constrain(image.Point{X: max, Y: dims[i].Size.Y})
-							// gtx.Constraints.Max.X = max
-							// gtx.Constraints.Min.Y = 0
-							// gtx.Constraints.Max.Y = dims[i].Size.Y
-							gtx.Constraints.Constrain(dims[i].Size)
-							return c.th.Label().
-								Text(c.rows[i].Label).
-								Font(c.font).
-								TextScale(c.scale).
-								Color(c.color).
-								Fn(gtx)
-						}).Fn,
-					).
-					Rigid(
-						c.th.Inset(0.5,
-							c.rows[i].W,
-						).Fn,
-					).
-					Fn,
-			).
+			return c.th.Flex(). // AlignEnd().SpaceStart().
+				Rigid(
+					c.th.Fill("red",
+						EmptySpace(max-dims[i].Size.X, dims[i].Size.Y)).Fn,
+				).
+				Rigid(
+					c.th.Inset(0.5, func(gtx l.Context) l.Dimensions {
+						// Debug("max!", m)
+						// // gtx.Constraints.Max.X = max
+						// gtx.Constraints.Max.Y = dims[i].Size.Y
+						// gtx.Constraints.Min.Y = dims[i].Size.Y
+						// gtx.Constraints.Min.X = max
+						// gtx.Constraints.Constrain(image.Point{X: max, Y: dims[i].Size.Y})
+						// gtx.Constraints.Max.X = max
+						// gtx.Constraints.Min.Y = 0
+						// gtx.Constraints.Max.Y = dims[i].Size.Y
+						// gtx.Constraints.Constrain(dims[i].Size)
+						dms := c.th.Label().
+							Text(c.rows[i].Label).
+							Font(c.font).
+							TextScale(c.scale).
+							Color(c.color).
+							Fn(gtx)
+						return dms
+					}).Fn,
+				).
+				Rigid(
+					c.th.Inset(0.5,
+						c.rows[i].W,
+					).Fn,
+				).
 				Fn(gtx)
 			// return c.th.Fill("Primary",
 			// 	c.th.Flex().AlignEnd().SpaceBetween().
@@ -91,7 +94,7 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 	// 	return out[index](gtx)
 	// }
 	return max, out
-
+	
 	// // render the widgets onto a second context to get their dimensions
 	// gtx1 = CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
 	// dim := GetDimension(gtx1, c.th.SliceToWidget(out, l.Vertical))

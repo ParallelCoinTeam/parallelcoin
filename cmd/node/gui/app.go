@@ -227,8 +227,8 @@ func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.D
 
 func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(12).V)
-		gtx.Constraints.Min.X = gtx.Constraints.Max.X
+		// gtx.Constraints.Max.X = int(ng.th.TextSize.Scale(12).V)
+		// gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		return ng.th.ButtonLayout(ng.sidebarButtons[index]).Embed(
 			func(gtx l.Context) l.Dimensions {
 				background := "Transparent"

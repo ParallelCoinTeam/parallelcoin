@@ -3,154 +3,98 @@ package gui
 import (
 	"fmt"
 	"strings"
-
+	
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
-
+	
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 func (wg *WalletGUI) OverviewPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
-		balanceColumn := wg.th.Column(p9.Rows{
-			{Label: "Available:", W: wg.balanceWidget(wg.State.balance.Load())},
-			{Label: "Unconfirmed:", W: wg.balanceWidget(wg.State.balanceUnconfirmed.Load())},
-			{Label: "Total:", W: wg.balanceWidget(wg.State.balance.Load() + wg.State.balanceUnconfirmed.Load())},
-		}, "bariol bold", 1, "DocText", "DocBg").List
-		return wg.th.Responsive(*wg.App.Size, p9.Widgets{
-			{
-				Widget: wg.th.VFlex().AlignMiddle().
-					Rigid(
-						func(gtx l.Context) l.Dimensions {
-							_, bc := balanceColumn(gtx)
-							return wg.th.Inset(0.25,
-								// wg.th.Fill("PanelBg",
-								wg.th.SliceToWidget(
-									append([]l.Widget{
-										func(gtx l.Context) l.Dimensions {
-											// render the widgets onto a second context to get their dimensions
-											// gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
-											// dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
-											// gtx.Constraints.Max.X = dim.Size.X
-											// gtx.Constraints.Min.X = dim.Size.X
-											// gtx.Constraints.Max.Y = dim.Size.Y
-											// gtx.Constraints.Min.Y = dim.Size.Y
-											return wg.th.Flex().
-												// wg.th.Fill("PanelBg",
-												Flexed(1,
-													// wg.th.Inset(0.5,
-													wg.th.H6("Balances").
-														// Font("bariol bold").
-														Color("PanelText").
-														Fn,
-													// ).Fn,
-													// ).
-													// Flexed(1, p9.EmptyMaxWidth()).
-													// Fn,
-												).Fn(gtx)
-										},
-									},
-										bc...), l.Vertical),
-								// ).Fn,
-							).Fn(gtx)
-						},
-					).
-					Rigid(
-						wg.th.Inset(0.25,
-							wg.th.VFlex().Rigid(
-								wg.th.Fill("PanelBg",
-									wg.th.Flex().
-										Rigid(
-											// wg.Inset(0.5,
-											wg.th.H6("recent transactions").Color("DocText").Fn,
-											// ).Fn,
-										).Fn,
-								).
+		return wg.th.Flex().AlignEnd().
+			Rigid(
+				wg.th.Fill("DocBg",
+					wg.th.Inset(0.5,
+						wg.th.VFlex().AlignBaseline().
+							Rigid(
+								wg.th.Flex().AlignBaseline().
+									Rigid(
+										wg.th.Body1("confirmed").Fn,
+									).
+									Rigid(
+										wg.th.H6(" ").Fn,
+									).
 									Fn,
-							).Rigid(
-								wg.th.Fill("DocBg",
-									wg.th.Inset(0.25,
-										wg.th.Flex().
-											// Rigid(
-											// 	wg.th.Inset(0.25,
-											// 		p9.EmptySpace(0, 0)).Fn,
-											// ).
-											Flexed(1,
-												wg.RecentTransactions(),
-											).Fn,
-									).Fn,
-								).Fn,
-							).Fn,
-						).Fn,
-					).
-					Fn,
-			},
-			{
-				Size: 1280,
-				Widget: wg.th.Flex().
-					Rigid(
-						func(gtx l.Context) l.Dimensions {
-							_, bc := balanceColumn(gtx)
-							return wg.th.Inset(0.25,
-								wg.th.Fill("PanelBg",
-								wg.th.SliceToWidget(
-									append([]l.Widget{
-										func(gtx l.Context) l.Dimensions {
-											// render the widgets onto a second context to get their dimensions
-											gtx1 := p9.CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, l.Vertical)
-											dim := p9.GetDimension(gtx1, wg.th.SliceToWidget(bc, l.Vertical))
-											gtx.Constraints.Max.X = dim.Size.X
-											gtx.Constraints.Min.X = dim.Size.X
-											// wg.th.Fill("PanelBg",
-											return wg.th.Flex().
-												Flexed(1,
-													// wg.th.Inset(0.5,
-													wg.th.H6("Balances").
-														// Font("bariol bold").
-														Color("PanelText").
-														Fn,
-													// ).Fn,
-													// ).Fn,
-												).Fn(gtx)
-										},
-									},
-										bc...), l.Vertical),
-								).Fn,
-							).Fn(gtx)
-						},
-					).
-					Rigid(
-						wg.th.Inset(0.25,
-							wg.th.VFlex().Rigid(
-								wg.th.Fill("PanelBg",
-									wg.th.Flex().
-										Rigid(
-											// wg.Inset(0.5,
-											wg.th.H6("recent transactions").Color("DocText").Fn,
-											// ).Fn,
-										).Fn,
-								).
+							).
+							Rigid(
+								wg.th.Flex().AlignBaseline().
+									Rigid(
+										wg.th.Body1("unconfirmed").Fn,
+									).
+									Rigid(
+										wg.th.H6(" ").Fn,
+									).
 									Fn,
-							).Rigid(
-								wg.th.Fill("DocBg",
-									wg.th.Inset(0.25,
-										wg.th.Flex().
-											// Rigid(
-											// 	wg.th.Inset(0.25,
-											// 		p9.EmptySpace(0, 0)).Fn,
-											// ).
-											Flexed(1,
-												wg.RecentTransactions(),
-											).Fn,
+							).
+							Rigid(
+								wg.th.Flex().AlignBaseline().
+									Rigid(
+										wg.th.Body1("total").Fn,
+									).
+									Rigid(
+										wg.th.H6(" ").Fn,
+									).
+									Fn,
+							).
+							Fn,
+					).Fn,
+				).Fn,
+			).
+			Rigid(
+				wg.th.Fill("DocBg",
+					wg.th.Inset(0.5,
+						wg.th.VFlex().AlignBaseline().AlignEnd().
+							Rigid(
+								wg.th.Flex().AlignBaseline().
+									Rigid(
+										wg.th.H6(" ").Fn,
+									).
+									Rigid(
+										wg.th.Body2(fmt.Sprintf("%6.8f",
+											wg.State.balance.Load()),
+										).Font("go regular").Fn,
 									).Fn,
-								).Fn,
-							).Fn,
-						).Fn,
-					).
-					Fn,
-			},
-		}).Fn(gtx)
+							).
+							Rigid(
+								wg.th.Flex().AlignBaseline().
+									Rigid(
+										wg.th.H6(" ").Fn,
+									).
+									Rigid(
+										wg.th.Body2(fmt.Sprintf("%6.8f",
+											wg.State.balanceUnconfirmed.Load()),
+										).Font("go regular").Fn,
+									).Fn,
+							).
+							Rigid(
+								wg.th.Flex().AlignBaseline().
+									Rigid(
+										wg.th.H6(" ").Fn,
+									).
+									Rigid(
+										wg.th.Body2(
+											fmt.Sprintf("%6.8f", wg.State.balance.Load()+wg.
+												State.balanceUnconfirmed.Load()),
+										).Font("go regular").Fn,
+									).Fn,
+							).
+							Fn,
+					).Fn,
+				).Fn,
+			).
+			Fn(gtx)
 	}
 }
 
@@ -183,7 +127,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 				wg.th.Body1(fmt.Sprintf("%-6.8f DUO", txs.Amount)).Color("PanelText").Fn,
 			).Fn,
 		)
-
+		
 		out = append(out,
 			wg.th.Fill("DocBg",
 				wg.th.Caption(txs.Address).
@@ -192,7 +136,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 					TextScale(0.66).Fn,
 			).Fn,
 		)
-
+		
 		out = append(out,
 			wg.th.Fill("DocBg",
 				wg.th.Caption(txs.TxID).
@@ -292,9 +236,12 @@ func leftPadTo(length, limit int, txt string) string {
 }
 
 func (wg *WalletGUI) balanceWidget(balance float64) l.Widget {
-	bal := leftPadTo(15, 15, fmt.Sprintf("%6.8f", balance))
-	return wg.th.Flex(). // AlignEnd().
-		Rigid(wg.th.Body1(" ").Fn).
+	bal :=
+	// leftPadTo(15, 15,
+		fmt.Sprintf("%6.8f", balance)
+	// )
+	return wg.th.Flex().AlignEnd().
+		Rigid(wg.th.H6(" ").Fn).
 		Rigid(
 			wg.th.Caption(bal).
 				Font("go regular").

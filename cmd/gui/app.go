@@ -321,8 +321,6 @@ func (wg *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l
 
 func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		// gtx.Constraints.Max.X = int(wg.App.SideBarSize.V)
-		// gtx.Constraints.Min.X = int(wg.App.SideBarSize.V)
 		background := "DocBg"
 		color := "DocText"
 		if wg.App.ActivePageGet() == page {
@@ -332,17 +330,17 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 		return wg.th.Fill(
 			background, wg.th.ButtonLayout(wg.sidebarButtons[index]).Embed(
 				func(gtx l.Context) l.Dimensions {
-					gtx.Constraints.Min.X =
-						gtx.Constraints.Max.X
+					gtx.Constraints.Max.X = int(wg.App.SideBarSize.V)
+					gtx.Constraints.Min.X = int(wg.App.SideBarSize.V)
+					// gtx.Constraints.Min.X = 0
+					// 	gtx.Constraints.Max.X
 					var pad float32 = 0.5
-					return wg.th.Flex().Rigid(
-						wg.th.Inset(
-							pad,
-							wg.th.H6(title).
-								Color(color).
-								TextScale(p9.Scales["Body1"]).
-								Fn,
-						).Fn,
+					return wg.th.Inset(
+						pad,
+						wg.th.H6(title).
+							Color(color).
+							TextScale(p9.Scales["Body1"]).
+							Fn,
 					).Fn(gtx)
 				},
 			).
