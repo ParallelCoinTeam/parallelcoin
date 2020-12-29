@@ -99,8 +99,8 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 				a.RenderHeader,
 			).
 			Flexed(1,
-				EmptyMaxWidth(),
-				// a.MainFrame,
+				// EmptyMaxWidth(),
+				a.MainFrame,
 			).
 			Rigid(
 				a.RenderStatusBar,

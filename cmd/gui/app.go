@@ -9,7 +9,6 @@ import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
 	l "gioui.org/layout"
-	"gioui.org/text"
 	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui/cfg"
@@ -46,162 +45,162 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 					p9.WidgetSize{Widget: wg.OverviewPage()},
 				},
 			),
-			"send": wg.Page(
-				"send", p9.Widgets{
-					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.SendPage()},
-				},
-			),
-			"receive": wg.Page(
-				"receive", p9.Widgets{
-					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.ReceivePage()},
-				},
-			),
-			"history": wg.Page(
-				"history", p9.Widgets{
-					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.HistoryPage()},
-				},
-			),
-			"settings": wg.Page(
-				"settings", p9.Widgets{
-					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.configs.Widget(wg.config)(gtx)
-						},
-					},
-				},
-			),
-			"console": wg.Page(
-				"console", p9.Widgets{
-					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.console.Fn},
-				},
-			),
-			"help": wg.Page(
-				"help", p9.Widgets{
-					p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-				},
-			),
-			"log": wg.Page(
-				"log", p9.Widgets{
-					p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-				},
-			),
-			"quit": wg.Page(
-				"quit", p9.Widgets{
-					p9.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.th.VFlex().
-								SpaceEvenly().
-								AlignMiddle().
-								Rigid(
-									wg.th.H4("are you sure?").Color(wg.App.BodyColorGet()).Alignment(text.Middle).Fn,
-								).
-								Rigid(
-									wg.th.Flex().
-										// SpaceEvenly().
-										Flexed(0.5, p9.EmptyMaxWidth()).
-										Rigid(
-											wg.th.Button(
-												wg.clickables["quit"].SetClick(
-													func() {
-														// interrupt.Request()
-														wg.gracefulShutdown()
-														// close(wg.quit)
-													},
-												),
-											).Color("Light").TextScale(2).Text("yes!!!").Fn,
-										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
-										Fn,
-								).
-								Fn(gtx)
-						},
-					},
-				},
-			),
-			"goroutines": wg.Page(
-				"log", p9.Widgets{
-					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					
-					p9.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							le := func(gtx l.Context, index int) l.Dimensions {
-								return wg.State.goroutines[index](gtx)
-							}
-							return func(gtx l.Context) l.Dimensions {
-								return wg.th.Inset(
-									0.25,
-									wg.th.Fill(
-										"DocBg",
-										wg.lists["recent"].
-											Vertical().
-											// Background("DocBg").Color("DocText").Active("Primary").
-											Length(len(wg.State.goroutines)).
-											ListElement(le).
-											Fn,
-									).Fn,
-								).
-									Fn(gtx)
-							}(gtx)
-							// wg.NodeRunCommandChan <- "stop"
-							// consume.Kill(wg.Worker)
-							// consume.Kill(wg.cx.StateCfg.Miner)
-							// close(wg.cx.NodeKill)
-							// close(wg.cx.KillAll)
-							// time.Sleep(time.Second*3)
-							// interrupt.Request()
-							// os.Exit(0)
-							// return l.Dimensions{}
-						},
-					},
-				},
-			),
-			"mining": wg.Page(
-				"mining", p9.Widgets{
-					p9.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.th.VFlex().
-								AlignMiddle().
-								SpaceSides().
-								Rigid(
-									wg.th.Flex().
-										Flexed(0.5, p9.EmptyMaxWidth()).
-										Rigid(
-											wg.th.H1("Mining").Fn,
-										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
-										Fn,
-								).
-								Fn(gtx)
-						},
-					},
-				},
-			),
-			"explorer": wg.Page(
-				"explorer", p9.Widgets{
-					p9.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.th.VFlex().
-								AlignMiddle().
-								SpaceSides().
-								Rigid(
-									wg.th.Flex().
-										Flexed(0.5, p9.EmptyMaxWidth()).
-										Rigid(
-											wg.th.H1("explorer").Fn,
-										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
-										Fn,
-								).
-								Fn(gtx)
-						},
-					},
-				},
-			),
+			// "send": wg.Page(
+			// 	"send", p9.Widgets{
+			// 		// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			// 		p9.WidgetSize{Widget: wg.SendPage()},
+			// 	},
+			// ),
+			// "receive": wg.Page(
+			// 	"receive", p9.Widgets{
+			// 		// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			// 		p9.WidgetSize{Widget: wg.ReceivePage()},
+			// 	},
+			// ),
+			// "history": wg.Page(
+			// 	"history", p9.Widgets{
+			// 		// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			// 		p9.WidgetSize{Widget: wg.HistoryPage()},
+			// 	},
+			// ),
+			// "settings": wg.Page(
+			// 	"settings", p9.Widgets{
+			// 		// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			// 		p9.WidgetSize{
+			// 			Widget: func(gtx l.Context) l.Dimensions {
+			// 				return wg.configs.Widget(wg.config)(gtx)
+			// 			},
+			// 		},
+			// 	},
+			// ),
+			// "console": wg.Page(
+			// 	"console", p9.Widgets{
+			// 		// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			// 		p9.WidgetSize{Widget: wg.console.Fn},
+			// 	},
+			// ),
+			// "help": wg.Page(
+			// 	"help", p9.Widgets{
+			// 		p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			// 	},
+			// ),
+			// "log": wg.Page(
+			// 	"log", p9.Widgets{
+			// 		p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			// 	},
+			// ),
+			// "quit": wg.Page(
+			// 	"quit", p9.Widgets{
+			// 		p9.WidgetSize{
+			// 			Widget: func(gtx l.Context) l.Dimensions {
+			// 				return wg.th.VFlex().
+			// 					SpaceEvenly().
+			// 					AlignMiddle().
+			// 					Rigid(
+			// 						wg.th.H4("are you sure?").Color(wg.App.BodyColorGet()).Alignment(text.Middle).Fn,
+			// 					).
+			// 					Rigid(
+			// 						wg.th.Flex().
+			// 							// SpaceEvenly().
+			// 							Flexed(0.5, p9.EmptyMaxWidth()).
+			// 							Rigid(
+			// 								wg.th.Button(
+			// 									wg.clickables["quit"].SetClick(
+			// 										func() {
+			// 											// interrupt.Request()
+			// 											wg.gracefulShutdown()
+			// 											// close(wg.quit)
+			// 										},
+			// 									),
+			// 								).Color("Light").TextScale(2).Text("yes!!!").Fn,
+			// 							).
+			// 							Flexed(0.5, p9.EmptyMaxWidth()).
+			// 							Fn,
+			// 					).
+			// 					Fn(gtx)
+			// 			},
+			// 		},
+			// 	},
+			// ),
+			// "goroutines": wg.Page(
+			// 	"log", p9.Widgets{
+			// 		// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			//
+			// 		p9.WidgetSize{
+			// 			Widget: func(gtx l.Context) l.Dimensions {
+			// 				le := func(gtx l.Context, index int) l.Dimensions {
+			// 					return wg.State.goroutines[index](gtx)
+			// 				}
+			// 				return func(gtx l.Context) l.Dimensions {
+			// 					return wg.th.Inset(
+			// 						0.25,
+			// 						wg.th.Fill(
+			// 							"DocBg",
+			// 							wg.lists["recent"].
+			// 								Vertical().
+			// 								// Background("DocBg").Color("DocText").Active("Primary").
+			// 								Length(len(wg.State.goroutines)).
+			// 								ListElement(le).
+			// 								Fn,
+			// 						).Fn,
+			// 					).
+			// 						Fn(gtx)
+			// 				}(gtx)
+			// 				// wg.NodeRunCommandChan <- "stop"
+			// 				// consume.Kill(wg.Worker)
+			// 				// consume.Kill(wg.cx.StateCfg.Miner)
+			// 				// close(wg.cx.NodeKill)
+			// 				// close(wg.cx.KillAll)
+			// 				// time.Sleep(time.Second*3)
+			// 				// interrupt.Request()
+			// 				// os.Exit(0)
+			// 				// return l.Dimensions{}
+			// 			},
+			// 		},
+			// 	},
+			// ),
+			// "mining": wg.Page(
+			// 	"mining", p9.Widgets{
+			// 		p9.WidgetSize{
+			// 			Widget: func(gtx l.Context) l.Dimensions {
+			// 				return wg.th.VFlex().
+			// 					AlignMiddle().
+			// 					SpaceSides().
+			// 					Rigid(
+			// 						wg.th.Flex().
+			// 							Flexed(0.5, p9.EmptyMaxWidth()).
+			// 							Rigid(
+			// 								wg.th.H1("Mining").Fn,
+			// 							).
+			// 							Flexed(0.5, p9.EmptyMaxWidth()).
+			// 							Fn,
+			// 					).
+			// 					Fn(gtx)
+			// 			},
+			// 		},
+			// 	},
+			// ),
+			// "explorer": wg.Page(
+			// 	"explorer", p9.Widgets{
+			// 		p9.WidgetSize{
+			// 			Widget: func(gtx l.Context) l.Dimensions {
+			// 				return wg.th.VFlex().
+			// 					AlignMiddle().
+			// 					SpaceSides().
+			// 					Rigid(
+			// 						wg.th.Flex().
+			// 							Flexed(0.5, p9.EmptyMaxWidth()).
+			// 							Rigid(
+			// 								wg.th.H1("explorer").Fn,
+			// 							).
+			// 							Flexed(0.5, p9.EmptyMaxWidth()).
+			// 							Fn,
+			// 					).
+			// 					Fn(gtx)
+			// 			},
+			// 		},
+			// 	},
+			// ),
 		},
 	)
 	a.SideBar(
@@ -467,8 +466,8 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 		if !wg.miner.Running() {
 			miningIcon = &p9icons.NoMine
 		}
-		wg.State.mutex.Lock()
-		defer wg.State.mutex.Unlock()
+		// wg.State.mutex.Lock()
+		// defer wg.State.mutex.Unlock()
 		return wg.th.Flex().AlignMiddle().
 			Rigid(
 				wg.th.ButtonLayout(wg.statusBarButtons[0]).

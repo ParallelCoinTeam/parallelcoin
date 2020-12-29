@@ -2,11 +2,9 @@ package gui
 
 import (
 	"fmt"
-	"sync"
 	"sync/atomic"
 	"time"
 	
-	"github.com/kofoworola/godate"
 	uberatomic "go.uber.org/atomic"
 	
 	l "gioui.org/layout"
@@ -47,15 +45,15 @@ func (c *CategoryFilter) Filter(s string) (include bool) {
 }
 
 type State struct {
-	mutex                   sync.Mutex
-	lastUpdated             time.Time
-	bestBlockHeight         int
-	bestBlockHash           *chainhash.Hash
-	balance                 uberatomic.Float64
-	balanceUnconfirmed      uberatomic.Float64
-	txs                     []tx
-	goroutines              []l.Widget
-	AllMutex, FilteredMutex sync.Mutex
+	// mutex                   sync.Mutex
+	lastUpdated        time.Time
+	bestBlockHeight    int
+	bestBlockHash      *chainhash.Hash
+	balance            uberatomic.Float64
+	balanceUnconfirmed uberatomic.Float64
+	txs                []tx
+	goroutines         []l.Widget
+	// AllMutex, FilteredMutex sync.Mutex
 	AllTxs                  []btcjson.ListTransactionsResult
 	AllTimeStrings          atomic.Value
 	FilteredTxs             []btcjson.ListTransactionsResult
@@ -77,8 +75,8 @@ type Marshalled struct {
 }
 
 func (s *State) Marshal() (out *Marshalled) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	out = &Marshalled{
 		LastUpdated:        s.lastUpdated,
 		BestBlockHeight:    s.bestBlockHeight,
@@ -93,8 +91,8 @@ func (s *State) Marshal() (out *Marshalled) {
 }
 
 func (m *Marshalled) Unmarshal(s *State) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	s.lastUpdated = m.LastUpdated
 	s.bestBlockHeight = m.BestBlockHeight
 	s.bestBlockHash = &m.BestBlockHash
@@ -115,34 +113,38 @@ type tx struct {
 }
 
 func (s *State) Goroutines() []l.Widget {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	return s.goroutines
 }
 
 func (s *State) SetGoroutines(gr []l.Widget) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	s.goroutines = gr
 }
 
 func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	s.AllMutex.Lock()
-	defer s.AllMutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
+	// s.AllMutex.Lock()
+	// defer s.AllMutex.Unlock()
 	s.AllTxs = allTxs
 	// if s.AllTimeStrings == nil {
 	s.AllTimeStrings.Store(make([]string, len(s.AllTxs)))
 	// }
 	for i := range s.AllTxs {
 		s.AllTimeStrings.Load().([]string)[i] =
-			fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
-				godate.Create(time.Unix(s.AllTxs[i].BlockTime, 0))))
+		// fmt.Sprintf("%v", godate.Now(time.Local).DifferenceForHumans(
+		// 	godate.Create(time.Unix(s.AllTxs[i].BlockTime, 0))))
+			fmt.Sprintf(
+				"%ds ago",
+				time.Now().Unix()-s.AllTxs[i].BlockTime,
+			)
 	}
 	// generate filtered state
-	s.FilteredMutex.Lock()
-	defer s.FilteredMutex.Unlock()
+	// s.FilteredMutex.Lock()
+	// defer s.FilteredMutex.Unlock()
 	s.FilteredTxs = make([]btcjson.ListTransactionsResult, 0, len(s.AllTxs))
 	s.FilteredTimeStrings = make([]string, 0, len(s.AllTxs))
 	for i := range s.AllTxs {
@@ -162,14 +164,14 @@ func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
 }
 
 func (s *State) Txs() []tx {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	return s.txs
 }
 
 func (s *State) SetTxs(txs []tx) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	if txs == nil {
 		return
 	}
@@ -177,59 +179,59 @@ func (s *State) SetTxs(txs []tx) {
 }
 
 func (s *State) LastUpdated() time.Time {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	return s.lastUpdated
 }
 
 func (s *State) BestBlockHeight() int {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	return s.bestBlockHeight
 }
 
 func (s *State) BestBlockHash() *chainhash.Hash {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	return s.bestBlockHash
 }
 
 func (s *State) Balance() float64 {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	return s.balance.Load()
 }
 
 func (s *State) BalanceUnconfirmed() float64 {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	return s.balanceUnconfirmed.Load()
 }
 
 func (s *State) SetBestBlockHeight(height int) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()
 	s.bestBlockHeight = height
 }
 
 func (s *State) SetBestBlockHash(h *chainhash.Hash) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()
 	s.bestBlockHash = h
 }
 
 func (s *State) SetBalance(total float64) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()
 	s.balance.Store(total)
 }
 
 func (s *State) SetBalanceUnconfirmed(unconfirmed float64) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	// s.mutex.Lock()
+	// defer s.mutex.Unlock()
 	s.lastUpdated = time.Now()
 	s.balanceUnconfirmed.Store(unconfirmed)
 }

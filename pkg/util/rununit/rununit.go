@@ -30,7 +30,7 @@ func New(
 ) (r *RunUnit) {
 	r = &RunUnit{
 		commandChan: make(chan bool),
-		quit:        qu.T(),
+		quit:        qu.Ts(1),
 	}
 	r.running.Store(false)
 	r.shuttingDown.Store(false)

@@ -354,7 +354,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a.StatusBar(
 		[]l.Widget{
 			// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
-			wg.RunStatusPanel,
+			// wg.RunStatusPanel,
 			wg.th.Flex().
 				Flexed(1, p9.EmptyMaxWidth()).
 				Rigid(
