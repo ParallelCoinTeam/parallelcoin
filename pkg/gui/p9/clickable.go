@@ -3,7 +3,7 @@ package p9
 import (
 	"image"
 	"time"
-
+	
 	"gioui.org/f32"
 	"gioui.org/gesture"
 	"gioui.org/io/key"
@@ -18,6 +18,7 @@ type clickEvents struct {
 
 // Clickable represents a clickable area.
 type Clickable struct {
+	th     *Theme
 	click  gesture.Click
 	clicks []click
 	// prevClicks is the index into clicks that marks the clicks from the most recent Fn call. prevClicks is used to
@@ -29,6 +30,7 @@ type Clickable struct {
 
 func (th *Theme) Clickable() (c *Clickable) {
 	c = &Clickable{
+		th:         th,
 		click:      gesture.Click{},
 		clicks:     nil,
 		prevClicks: 0,
@@ -143,7 +145,7 @@ func (c *Clickable) update(gtx l.Context) {
 			if l := len(c.history); l > 0 {
 				c.history[l-1].End = gtx.Now
 			}
-			c.Events.Click()
+			c.th.BackgroundProcessingQueue <- c.Events.Click // func() { b.changeState(b.value) }
 		case gesture.TypeCancel:
 			for i := range c.history {
 				c.history[i].Cancelled = true
@@ -151,13 +153,15 @@ func (c *Clickable) update(gtx l.Context) {
 					c.history[i].End = gtx.Now
 				}
 			}
-			c.Events.Cancel()
+			c.th.BackgroundProcessingQueue <- c.Events.Cancel
 		case gesture.TypePress:
-			c.history = append(c.history, press{
-				Position: e.Position,
-				Start:    gtx.Now,
-			})
-			c.Events.Press()
+			c.history = append(
+				c.history, press{
+					Position: e.Position,
+					Start:    gtx.Now,
+				},
+			)
+			c.th.BackgroundProcessingQueue <- c.Events.Press
 		}
 	}
 }

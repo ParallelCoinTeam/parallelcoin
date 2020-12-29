@@ -2,7 +2,7 @@ package p9
 
 import (
 	"fmt"
-
+	
 	l "gioui.org/layout"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
@@ -35,11 +35,10 @@ func (th *Theme) IncDec() (out *IncDec) {
 		// background: background,
 		// inactive:   inactive,
 		amount: 1,
-		scale: 1,
+		scale:  1,
 	}
 	return
 }
-
 
 func (in *IncDec) Scale(n float32) *IncDec {
 	in.scale = n
@@ -105,44 +104,57 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	}
 	if in.current == in.min {
 		out.Rigid(
-			in.th.Inset(0.25,
+			in.th.Inset(
+				0.25,
 				in.th.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentRemove).Fn,
 			).Fn,
 		)
 	} else {
-		out.Rigid(in.th.Inset(0.25,
-			in.th.ButtonLayout(in.inc.SetClick(func() {
-				in.current -= in.amount
-				if in.current < in.min {
-					in.current = in.min
-				} else {
-					in.changeHook(in.current)
-				}
-			})).Background(in.background).Embed(
-				in.th.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
+		out.Rigid(
+			in.th.Inset(
+				0.25,
+				in.th.ButtonLayout(
+					in.inc.SetClick(
+						func() {
+							in.current -= in.amount
+							if in.current < in.min {
+								in.current = in.min
+							} else {
+								in.th.BackgroundProcessingQueue <- func() { in.changeHook(in.current) }
+							}
+						},
+					),
+				).Background(in.background).Embed(
+					in.th.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
+				).Fn,
 			).Fn,
-		).Fn,
 		)
 	}
 	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.current)
 	out.Rigid(in.th.Caption(cur).Color(in.color).TextScale(in.scale).Font("go regular").Fn)
 	if in.current == in.max {
 		out.Rigid(
-			in.th.Inset(0.25,
+			in.th.Inset(
+				0.25,
 				in.th.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentAdd).Fn,
 			).Fn,
 		)
 	} else {
 		out.Rigid(
-			in.th.Inset(0.25,
-				in.th.ButtonLayout(in.dec.SetClick(func() {
-					in.current += in.amount
-					if in.current > in.max {
-						in.current = in.max
-					} else {
-						in.changeHook(in.current)
-					}
-				})).Background(in.background).Embed(
+			in.th.Inset(
+				0.25,
+				in.th.ButtonLayout(
+					in.dec.SetClick(
+						func() {
+							in.current += in.amount
+							if in.current > in.max {
+								in.current = in.max
+							} else {
+								in.th.BackgroundProcessingQueue <- func() { in.changeHook(in.current) }
+							}
+						},
+					),
+				).Background(in.background).Embed(
 					in.th.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
 				).Fn,
 			).Fn,

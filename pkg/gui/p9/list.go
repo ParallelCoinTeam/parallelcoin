@@ -28,7 +28,8 @@ type List struct {
 	scrollDelta   int
 	// Position is updated during Layout. To save the list scroll position, just save Position after Layout finishes. To
 	// scroll the list programmatically, update Position (e.g. restore it from a saved value) before calling Layout.
-	position Position
+	position     Position
+	prevPosition Position
 	// nextUp, nextDown Position
 	len             int
 	drag            gesture.Drag
@@ -184,49 +185,20 @@ func (li *List) Active(color string) *List {
 }
 
 func (li *List) Slice(gtx l.Context, widgets ...l.Widget) l.Widget {
-	return li.Length(len(widgets)).Vertical().ListElement(func(gtx l.Context, index int) l.Dimensions {
-		return widgets[index](gtx)
-	}).Fn
+	return li.Length(len(widgets)).Vertical().ListElement(
+		func(gtx l.Context, index int) l.Dimensions {
+			return widgets[index](gtx)
+		},
+	).Fn
 }
 
-// Fn runs the layout in the configured context. The ListElement function returns the widget at the given index
-func (li *List) Fn(gtx l.Context) l.Dimensions {
-	if li.length == 0 {
-		// if there is no children just return a big empty box
+func (li *List) calculateScrollbar(gtx l.Context, view int) l.Dimensions {
+	li.view = view
+	// Debugs(li.dims)
+	// if the dimensions haven't been calculated, return a big empty box
+	if li.dims == nil {
 		return EmptyFromSize(gtx.Constraints.Max)(gtx)
 	}
-	if li.disableScroll {
-		return li.embedWidget(0)(gtx)
-	}
-	if li.length != li.prevLength {
-		li.recalculate = true
-		li.recalculateTime = time.Now().Add(time.Millisecond * 100)
-	} else if li.lastWidth != gtx.Constraints.Max.X && li.notFirst {
-		li.recalculateTime = time.Now().Add(time.Millisecond * 100)
-		li.recalculate = true
-	}
-	if !li.notFirst {
-		li.recalculateTime = time.Now().Add(-time.Millisecond * 100)
-		li.notFirst = true
-	}
-	li.lastWidth = gtx.Constraints.Max.X
-	if li.recalculateTime.Sub(time.Now()) < 0 && li.recalculate {
-		// return li.embedWidget(li.scrollWidth)(gtx)
-		// } else {
-		// if li.recalculate && !li.changing {
-		// Debug("recalculating")
-		// get the size of the scrollbar
-		li.th.scrollBarSize = li.scrollWidth + li.scrollBarPad
-		// render the widgets onto a second context to get their dimensions
-		gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, li.axis)
-		// generate the dimensions for all the list elements
-		li.dims = GetDimensionList(gtx1, li.length, li.w)
-		// li.recalculate = false
-		li.recalculateTime = time.Time{}
-		li.recalculate = false
-	}
-	_, li.view = axisMainConstraint(li.axis, gtx.Constraints)
-	// Debugs(li.dims)
 	li.total, li.before = li.dims.GetSizes(li.position, li.axis)
 	if li.total == 0 {
 		// if there is no children just return a big empty box
@@ -251,6 +223,80 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			li.middle += li.scrollWidth
 		}
 	}
+	return l.Dimensions{}
+}
+
+// Fn runs the layout in the configured context. The ListElement function returns the widget at the given index
+func (li *List) Fn(gtx l.Context) l.Dimensions {
+	// always take up at least one pixel so empty signifies initial rendering
+	gtx.Constraints.Min = image.Point{
+		X: 1,
+		Y: 1,
+	}
+	if li.length == 0 {
+		// if there is no children just return a big empty box
+		return EmptyFromSize(gtx.Constraints.Max)(gtx)
+	}
+	if li.disableScroll {
+		return li.embedWidget(0)(gtx)
+	}
+	if li.length != li.prevLength {
+		li.recalculate = true
+		li.recalculateTime = time.Now().Add(time.Millisecond * 100)
+	} else if li.lastWidth != gtx.Constraints.Max.X && li.notFirst {
+		li.recalculateTime = time.Now().Add(time.Millisecond * 100)
+		li.recalculate = true
+	}
+	if !li.notFirst {
+		li.recalculateTime = time.Now().Add(-time.Millisecond * 100)
+		li.notFirst = true
+	}
+	li.lastWidth = gtx.Constraints.Max.X
+	if li.recalculateTime.Sub(time.Now()) < 0 && li.recalculate {
+		// this time we will render based on existing data, recalculation is queued after this widget renders
+		// and next frame will render the new data
+		defer func() {
+			li.th.BackgroundProcessingQueue <- func() {
+				// return li.embedWidget(li.scrollWidth)(gtx)
+				// } else {
+				// if li.recalculate && !li.changing {
+				// Debug("recalculating")
+				// get the size of the scrollbar
+				li.th.scrollBarSize = li.scrollWidth + li.scrollBarPad
+				// render the widgets onto a second context to get their dimensions
+				gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, li.axis)
+				// generate the dimensions for all the list elements
+				li.dims = GetDimensionList(gtx1, li.length, li.w)
+				// li.recalculate = false
+				li.recalculateTime = time.Time{}
+				li.recalculate = false
+			}
+		}()
+	}
+	_, view := axisMainConstraint(li.axis, gtx.Constraints)
+	// because the initial value of li.view will be zero this will always execute first time, unless there is no widgets
+	if view != li.view || li.position != li.prevPosition {
+		var o l.Dimensions
+		if li.view == 0 {
+			// for the first time we will block the main thread to process
+			o = li.calculateScrollbar(gtx, view)
+			// if the list is empty this returns an empty box filling the space (it is rendered in the function above
+			if o.Size.X != 0 && o.Size.Y != 0 {
+				return o
+			}
+		} else {
+			// because it generally won't hurt to be deferred, the recalculation is done for the next frame in the
+			// background. This call will always have valid dimensions to work with, and view value of the previous
+			// frame, which none of this runs if that value hasn't changed as it doesn't need to be recalculated if it
+			// isn't different - both position and view size, the things the scrollbar visualises.
+			defer func() {
+				li.th.BackgroundProcessingQueue <- func() {
+					o = li.calculateScrollbar(gtx, view)
+				}
+			}()
+		}
+		li.view = view
+	}
 	// now lay it all out and draw the list and scrollbar
 	var container l.Widget
 	if li.axis == l.Horizontal {
@@ -261,13 +307,15 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		containerFlex.Rigid(
 			li.th.VFlex().
 				Rigid(
-					If(!li.leftSide,
+					If(
+						!li.leftSide,
 						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad)).Fn,
 						EmptySpace(0, 0),
 					),
 				).
 				Rigid(
-					li.th.Fill(li.background,
+					li.th.Fill(
+						li.background,
 						li.th.Flex().
 							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
 							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
@@ -276,7 +324,8 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 					).Fn,
 				).
 				Rigid(
-					If(li.leftSide,
+					If(
+						li.leftSide,
 						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad+li.scrollWidth)).Fn,
 						EmptySpace(0, 0),
 					),
@@ -293,10 +342,12 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad))
 		}
 		containerFlex.Rigid(
-			li.th.Fill(li.background,
+			li.th.Fill(
+				li.background,
 				li.th.Flex().
 					Rigid(
-						If(!li.leftSide,
+						If(
+							!li.leftSide,
 							EmptySpace(li.scrollBarPad, 0),
 							EmptySpace(0, 0),
 						),
@@ -322,6 +373,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		}
 		container = li.th.Fill(li.background, containerFlex.Fn).Fn
 	}
+	li.prevPosition = li.position
 	return container(gtx)
 }
 
@@ -346,24 +398,29 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 	return func(gtx l.Context) l.Dimensions {
 		pointer.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Add(gtx.Ops)
 		li.sideScroll.Add(gtx.Ops)
-		return li.th.ButtonLayout(button.SetClick(func() {
-			current := dims.PositionToCoordinate(li.position, li.axis)
-			var newPos int
-			if down {
-				if current+view > total {
-					newPos = total - view
-				} else {
-					newPos = current + view
-				}
-			} else {
-				newPos = current - view
-				if newPos < 0 {
-					newPos = 0
-				}
-			}
-			li.position = dims.CoordinateToPosition(newPos, li.axis)
-		})).Embed(
-			li.th.Fill(li.background,
+		return li.th.ButtonLayout(
+			button.SetClick(
+				func() {
+					current := dims.PositionToCoordinate(li.position, li.axis)
+					var newPos int
+					if down {
+						if current+view > total {
+							newPos = total - view
+						} else {
+							newPos = current + view
+						}
+					} else {
+						newPos = current - view
+						if newPos < 0 {
+							newPos = 0
+						}
+					}
+					li.position = dims.CoordinateToPosition(newPos, li.axis)
+				},
+			),
+		).Embed(
+			li.th.Fill(
+				li.background,
 				EmptySpace(x, y),
 			).Fn,
 		).Background(li.background).CornerRadius(0).Fn(gtx)
@@ -414,7 +471,8 @@ func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensio
 		li.drag.Add(gtx.Ops)
 		pointer.Rect(image.Rectangle{Max: image.Point{X: x, Y: y}}).Add(gtx.Ops)
 		li.sideScroll.Add(gtx.Ops)
-		return li.th.Fill(li.currentColor,
+		return li.th.Fill(
+			li.currentColor,
 			EmptySpace(x, y),
 		).Fn(gtx)
 	}

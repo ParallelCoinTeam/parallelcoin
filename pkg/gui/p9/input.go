@@ -30,7 +30,10 @@ type Input struct {
 
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
-func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused, backgroundColor string, handle func(txt string), ) *Input {
+func (th *Theme) Input(
+	txt, hint, borderColorFocused, borderColorUnfocused, backgroundColor string,
+	handle, onChange func(txt string),
+) *Input {
 	editor := th.Editor().SingleLine().Submit(true)
 	input := th.TextInput(editor, hint)
 	p := &Input{
@@ -55,22 +58,21 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused, back
 		p.editor.Focus()
 	}
 	copyClickableFn := func() {
-		go clipboard.WriteAll(p.editor.Text())
+		if err := clipboard.WriteAll(p.editor.Text()); Check(err) {
+		}
 		p.editor.Focus()
 	}
 	pasteClickableFn := func() {
 		col := p.editor.Caret.Col
-		go func() {
-			txt := p.editor.Text()
-			var err error
-			var cb string
-			if cb, err = clipboard.ReadAll(); Check(err) {
-			}
-			cb = findSpaceRegexp.ReplaceAllString(cb, " ")
-			txt = txt[:col] + cb + txt[col:]
-			p.editor.SetText(txt)
-			p.editor.Move(col + len(cb))
-		}()
+		txt := p.editor.Text()
+		var err error
+		var cb string
+		if cb, err = clipboard.ReadAll(); Check(err) {
+		}
+		cb = findSpaceRegexp.ReplaceAllString(cb, " ")
+		txt = txt[:col] + cb + txt[col:]
+		p.editor.SetText(txt)
+		p.editor.Move(col + len(cb))
 		p.editor.Focus()
 	}
 	p.clearButton.
@@ -95,17 +97,7 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused, back
 	p.clearClickable.SetClick(clearClickableFn)
 	p.copyClickable.SetClick(copyClickableFn)
 	p.pasteClickable.SetClick(pasteClickableFn)
-	p.editor.SetText(txt).SetSubmit(
-		func(txt string) {
-			go func() {
-				handle(txt)
-			}()
-		},
-	).SetChange(
-		func(txt string) {
-			// send keystrokes to the NSA
-		},
-	)
+	p.editor.SetText(txt).SetSubmit(handle).SetChange(onChange)
 	p.editor.SetFocus(
 		func(is bool) {
 			if is {

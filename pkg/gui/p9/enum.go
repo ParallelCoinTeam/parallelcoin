@@ -2,7 +2,7 @@ package p9
 
 import (
 	"image"
-
+	
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -10,6 +10,7 @@ import (
 )
 
 type Enum struct {
+	th      *Theme
 	value   string
 	changed bool
 	clicks  []gesture.Click
@@ -18,7 +19,7 @@ type Enum struct {
 }
 
 func (th *Theme) Enum() *Enum {
-	return &Enum{hook: func(string) {}}
+	return &Enum{th: th, hook: func(string) {}}
 }
 
 func (e *Enum) Value() string {
@@ -55,7 +56,6 @@ func (e *Enum) Changed() bool {
 func (e *Enum) Fn(gtx layout.Context, key string) layout.Dimensions {
 	defer op.Push(gtx.Ops).Pop()
 	pointer.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Add(gtx.Ops)
-
 	if index(e.values, key) == -1 {
 		e.values = append(e.values, key)
 		e.clicks = append(e.clicks, gesture.Click{})
@@ -66,15 +66,15 @@ func (e *Enum) Fn(gtx layout.Context, key string) layout.Dimensions {
 		for _, ev := range clk.Events(gtx) {
 			switch ev.Type {
 			case gesture.TypeClick:
-				if new := e.values[idx]; new != e.value {
-					e.value = new
+				if newValue := e.values[idx]; newValue != e.value {
+					e.value = newValue
 					e.changed = true
-					e.hook(e.value)
+					e.th.BackgroundProcessingQueue <- func() { e.hook(e.value) }
 				}
 			}
 		}
 		clk.Add(gtx.Ops)
 	}
-
+	
 	return layout.Dimensions{Size: gtx.Constraints.Min}
 }

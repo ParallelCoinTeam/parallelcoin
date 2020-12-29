@@ -45,7 +45,6 @@ type lineIterator struct {
 	Alignment text.Alignment
 	Width     int
 	Offset    image.Point
-	
 	y, prevDesc fixed.Int26_6
 	txtOff      int
 }
@@ -64,38 +63,37 @@ func (l *lineIterator) Next() (text.Layout, f32.Point, bool) {
 		if (off.Y + line.Bounds.Min.Y).Floor() > l.Clip.Max.Y {
 			break
 		}
-		layout := line.Layout
+		layout2 := line.Layout
 		start := l.txtOff
 		l.txtOff += len(line.Layout.Text)
 		if (off.Y + line.Bounds.Max.Y).Ceil() < l.Clip.Min.Y {
 			continue
 		}
-		for len(layout.Advances) > 0 {
-			_, n := utf8.DecodeRuneInString(layout.Text)
-			adv := layout.Advances[0]
+		for len(layout2.Advances) > 0 {
+			_, n := utf8.DecodeRuneInString(layout2.Text)
+			adv := layout2.Advances[0]
 			if (off.X + adv + line.Bounds.Max.X - line.Width).Ceil() >= l.Clip.Min.X {
 				break
 			}
 			off.X += adv
-			layout.Text = layout.Text[n:]
-			layout.Advances = layout.Advances[1:]
+			layout2.Text = layout2.Text[n:]
+			layout2.Advances = layout2.Advances[1:]
 			start += n
 		}
 		end := start
-		endx := off.X
-		rune := 0
-		for n, r := range layout.Text {
-			if (endx + line.Bounds.Min.X).Floor() > l.Clip.Max.X {
-				layout.Advances = layout.Advances[:rune]
-				layout.Text = layout.Text[:n]
+		endX := off.X
+		for n, r := range layout2.Text {
+			if (endX + line.Bounds.Min.X).Floor() > l.Clip.Max.X {
+				layout2.Advances = layout2.Advances[:r]
+				layout2.Text = layout2.Text[:n]
 				break
 			}
 			end += utf8.RuneLen(r)
-			endx += layout.Advances[rune]
-			rune++
+			endX += layout2.Advances[r]
+			r++
 		}
 		offf := f32.Point{X: float32(off.X) / 64, Y: float32(off.Y) / 64}
-		return layout, offf, true
+		return layout2, offf, true
 	}
 	return text.Layout{}, f32.Point{}, false
 }

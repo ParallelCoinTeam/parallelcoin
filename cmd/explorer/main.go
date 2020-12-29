@@ -84,9 +84,9 @@ func (ex *Explorer) Run() (err error) {
 	}
 
 	ex.inputs = map[string]*p9.Input{
-		"receiveLabel":   ex.th.Input("", "Label", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"receiveAmount":  ex.th.Input("", "Amount", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"receiveMessage": ex.th.Input("", "Message", "Primary", "DocText", "DocBg", func(pass string) {}),
+		"receiveLabel":   ex.th.Input("", "Label", "Primary", "DocText", "DocBg", func(pass string) {}, nil),
+		"receiveAmount":  ex.th.Input("", "Amount", "Primary", "DocText", "DocBg", func(pass string) {}, nil),
+		"receiveMessage": ex.th.Input("", "Message", "Primary", "DocText", "DocBg", func(pass string) {}, nil),
 	}
 
 	ex.RunCommandChan = make(chan string)

@@ -225,11 +225,27 @@ func (wg *WalletGUI) GetInputs() {
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
 	wg.inputs = map[string]*p9.Input{
-		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"console":        wg.th.Input("", "enter rpc command", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"walletSeed":     wg.th.Input(seedString, "wallet seed", "Primary", "DocText", "DocBg", func(pass string) {}),
+		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", "DocBg", func(pass string) {}, nil),
+		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", "DocBg", func(pass string) {}, nil),
+		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", "DocBg", func(pass string) {}, nil),
+		"console":        wg.th.Input(
+			"",
+			"enter rpc command",
+			"Primary",
+			"DocText",
+			"DocBg",
+			func(pass string) {},
+			nil,
+		),
+		"walletSeed":     wg.th.Input(
+			seedString,
+			"wallet seed",
+			"Primary",
+			"DocText",
+			"DocBg",
+			func(pass string) {},
+			nil,
+		),
 	}
 }
 

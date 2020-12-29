@@ -2,7 +2,7 @@ package p9
 
 import (
 	"fmt"
-
+	
 	l "gioui.org/layout"
 )
 
@@ -53,34 +53,46 @@ func (i *IntSlider) GetValue() int {
 func (i *IntSlider) Fn(gtx l.Context) l.Dimensions {
 	return i.Flex().Rigid(
 		i.Button(
-			i.min.SetClick(func() {
-				i.floater.SetValue(i.minV)
-				i.hook(int(i.minV))
-			})).
+			i.min.SetClick(
+				func() {
+					i.floater.SetValue(i.minV)
+					i.hook(int(i.minV))
+				},
+			),
+		).
 			Inset(0.25).
 			Color("Primary").
 			Background("Transparent").
 			Font("bariol regular").
 			Text("0").
 			Fn,
-	).Flexed(1,
-		i.Inset(0.25,
+	).Flexed(
+		1,
+		i.Inset(
+			0.25,
 			i.Slider().
-				Float(i.floater.SetHook(func(fl float32) {
-					iFl := int(fl + 0.5)
-					i.value = iFl
-					i.floater.SetValue(float32(iFl))
-					i.hook(iFl)
-				})).
+				Float(
+					i.floater.SetHook(
+						func(fl float32) {
+							iFl := int(fl + 0.5)
+							i.value = iFl
+							i.floater.SetValue(float32(iFl))
+							i.hook(iFl)
+						},
+					),
+				).
 				Min(i.minV).Max(i.maxV).
 				Fn,
 		).Fn,
 	).Rigid(
 		i.Button(
-			i.max.SetClick(func() {
-				i.floater.SetValue(i.maxV)
-				i.hook(int(i.maxV))
-			})).
+			i.max.SetClick(
+				func() {
+					i.floater.SetValue(i.maxV)
+					i.hook(int(i.maxV))
+				},
+			),
+		).
 			Inset(0.25).
 			Color("Primary").
 			Background("Transparent").

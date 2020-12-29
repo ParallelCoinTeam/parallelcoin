@@ -14,6 +14,7 @@ import (
 
 // Image is a widget that displays an image.
 type Image struct {
+	th *Theme
 	// src is the image to display.
 	src paint.ImageOp
 	// scale is the ratio of image pixels to dps. If scale is zero Image falls back to a scale that match a standard 72
@@ -22,7 +23,7 @@ type Image struct {
 }
 
 func (th *Theme) Image() *Image {
-	return &Image{}
+	return &Image{th: th}
 }
 
 func (i *Image) Src(img paint.ImageOp) *Image {

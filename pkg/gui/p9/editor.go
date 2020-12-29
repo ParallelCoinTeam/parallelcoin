@@ -14,7 +14,7 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
-
+	
 	"gioui.org/f32"
 	"gioui.org/gesture"
 	"gioui.org/io/key"
@@ -24,12 +24,13 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-
+	
 	"golang.org/x/image/math/fixed"
 )
 
 // Editor implements an editable and scrollable text area.
 type Editor struct {
+	th        *Theme
 	alignment text.Alignment
 	// singleLine force the text to stay on a single line. singleLine also sets the scrolling direction to horizontal.
 	singleLine bool
@@ -39,7 +40,7 @@ type Editor struct {
 	// mask replaces the visual display of each rune in the contents with the given rune. Newline characters are not
 	// masked. When non-zero, the unmasked contents are accessed by Len, Text, and SetText.
 	mask rune
-
+	
 	eventKey     int
 	font         text.Font
 	shaper       text.Shaper
@@ -59,10 +60,10 @@ type Editor struct {
 	Caret        struct {
 		on     bool
 		scroll bool
-
+		
 		// xoff is the offset to the current caret position when moving between lines.
 		xoff fixed.Int26_6
-
+		
 		// Line is the caret line position as an index into lines.
 		Line int
 		// Col is the caret column measured in runes.
@@ -73,9 +74,9 @@ type Editor struct {
 	}
 	scroller  gesture.Scroll
 	scrollOff image.Point
-
+	
 	clicker gesture.Click
-
+	
 	// events is the list of events not yet processed.
 	events []EditorEvent
 	// prevEvents is the number of events from the previous frame.
@@ -87,9 +88,10 @@ type Editor struct {
 
 func (th *Theme) Editor() *Editor {
 	e := &Editor{
-		submitHook: func(string) {},
-		changeHook: func(string) {},
-		focusHook:  func(bool) {},
+		th:         th,
+		submitHook: func(string) { Debug("submitHook") },
+		changeHook: func(string) { Debug("changeHook") },
+		focusHook:  func(bool) { Debug("focusHook") },
 	}
 	return e
 }
@@ -206,7 +208,7 @@ func (e *Editor) processEvents(gtx layout.Context) {
 	n := copy(e.events, e.events[e.prevEvents:])
 	e.events = e.events[:n]
 	e.prevEvents = n
-
+	
 	if e.shaper == nil {
 		// Can't process events without a shaper.
 		return
@@ -253,10 +255,12 @@ func (e *Editor) processPointer(gtx layout.Context) {
 		case evt.Type == gesture.TypePress && evt.Source == pointer.Mouse,
 			evt.Type == gesture.TypeClick && evt.Source == pointer.Touch:
 			e.blinkStart = gtx.Now
-			e.moveCoord(image.Point{
-				X: int(math.Round(float64(evt.Position.X))),
-				Y: int(math.Round(float64(evt.Position.Y))),
-			})
+			e.moveCoord(
+				image.Point{
+					X: int(math.Round(float64(evt.Position.X))),
+					Y: int(math.Round(float64(evt.Position.Y))),
+				},
+			)
 			e.requestFocus = true
 			if e.scroller.State() != gesture.StateFlinging {
 				e.Caret.scroll = true
@@ -277,7 +281,7 @@ func (e *Editor) processKey(gtx layout.Context) {
 		switch ke := ke.(type) {
 		case key.FocusEvent:
 			e.focused = ke.Focus
-			e.focusHook(ke.Focus)
+			e.th.BackgroundProcessingQueue <- func() { e.focusHook(ke.Focus) }
 		case key.Event:
 			if !e.focused {
 				break
@@ -287,10 +291,12 @@ func (e *Editor) processKey(gtx layout.Context) {
 					break
 				}
 				if !ke.Modifiers.Contain(key.ModShift) {
-					e.events = append(e.events, SubmitEvent{
-						Text: e.Text(),
-					})
-					e.submitHook(e.Text())
+					e.events = append(
+						e.events, SubmitEvent{
+							Text: e.Text(),
+						},
+					)
+					e.th.BackgroundProcessingQueue <- func() { e.submitHook(e.Text()) }
 					return
 				}
 			}
@@ -305,7 +311,7 @@ func (e *Editor) processKey(gtx layout.Context) {
 		}
 		if e.rr.Changed() {
 			e.events = append(e.events, ChangeEvent{})
-			e.changeHook(e.Text())
+			e.th.BackgroundProcessingQueue <- func() { e.changeHook(e.Text()) }
 		}
 	}
 }
@@ -401,52 +407,48 @@ func (e *Editor) Layout(gtx layout.Context, sh text.Shaper, font text.Font, size
 		e.lastMask = e.mask
 		e.invalidate()
 	}
-
 	e.makeValid()
 	e.processEvents(gtx)
 	e.makeValid()
-
 	if viewSize := gtx.Constraints.Constrain(e.dims.Size); viewSize != e.viewSize {
 		e.viewSize = viewSize
 		e.invalidate()
 	}
 	e.makeValid()
-
+	
 	return e.layout(gtx)
 }
 
 func (e *Editor) layout(gtx layout.Context) layout.Dimensions {
 	// Adjust scrolling for new viewport and layout.
 	e.scrollRel(0, 0)
-
 	if e.Caret.scroll {
 		e.Caret.scroll = false
 		e.scrollToCaret()
 	}
-
+	
 	off := image.Point{
 		X: -e.scrollOff.X,
 		Y: -e.scrollOff.Y,
 	}
-	clip := textPadding(e.lines)
-	clip.Max = clip.Max.Add(e.viewSize)
+	clipP := textPadding(e.lines)
+	clipP.Max = clipP.Max.Add(e.viewSize)
 	it := lineIterator{
 		Lines:     e.lines,
-		Clip:      clip,
+		Clip:      clipP,
 		Alignment: e.alignment,
 		Width:     e.viewSize.X,
 		Offset:    off,
 	}
 	e.shapes = e.shapes[:0]
 	for {
-		layout, off, ok := it.Next()
+		layoutX, off, ok := it.Next()
 		if !ok {
 			break
 		}
-		path := e.shaper.Shape(e.font, e.textSize, layout)
+		path := e.shaper.Shape(e.font, e.textSize, layoutX)
 		e.shapes = append(e.shapes, line{off, path})
 	}
-
 	key.InputOp{Tag: &e.eventKey, Focus: e.requestFocus}.Add(gtx.Ops)
 	e.requestFocus = false
 	pointerPadding := gtx.Px(unit.Dp(4))
@@ -473,7 +475,7 @@ func (e *Editor) layout(gtx layout.Context) layout.Dimensions {
 		}
 		e.Caret.on = e.focused && (!blinking || dt%timePerBlink < timePerBlink/2)
 	}
-
+	
 	return layout.Dimensions{Size: e.viewSize, Baseline: e.dims.Baseline}
 }
 
@@ -497,7 +499,7 @@ func (e *Editor) PaintCaret(gtx layout.Context) {
 	carWidth := fixed.I(gtx.Px(unit.Dp(1)))
 	carX := e.Caret.x
 	carY := e.Caret.y
-
+	
 	defer op.Push(gtx.Ops).Pop()
 	carX -= carWidth / 2
 	carAsc, carDesc := -e.lines[e.Caret.Line].Bounds.Min.Y, e.lines[e.Caret.Line].Bounds.Max.Y
@@ -505,10 +507,12 @@ func (e *Editor) PaintCaret(gtx layout.Context) {
 		Min: image.Point{X: carX.Ceil(), Y: carY - carAsc.Ceil()},
 		Max: image.Point{X: carX.Ceil() + carWidth.Ceil(), Y: carY + carDesc.Ceil()},
 	}
-	carRect = carRect.Add(image.Point{
-		X: -e.scrollOff.X,
-		Y: -e.scrollOff.Y,
-	})
+	carRect = carRect.Add(
+		image.Point{
+			X: -e.scrollOff.X,
+			Y: -e.scrollOff.Y,
+		},
+	)
 	cl := textPadding(e.lines)
 	// Account for caret width to each side.
 	whalf := (carWidth / 2).Ceil()
@@ -738,7 +742,7 @@ func (e *Editor) moveToLine(x fixed.Int26_6, line int) {
 	if line >= len(e.lines) {
 		line = len(e.lines) - 1
 	}
-
+	
 	prevDesc := e.lines[line].Descent
 	for e.Caret.Line < line {
 		e.moveEnd()
@@ -761,7 +765,7 @@ func (e *Editor) moveToLine(x fixed.Int26_6, line int) {
 		l = e.lines[e.Caret.Line]
 		e.Caret.Col = len(l.Layout.Advances) - 1
 	}
-
+	
 	e.moveStart()
 	l := e.lines[line]
 	e.Caret.x = align(e.alignment, l.Width, e.viewSize.X)

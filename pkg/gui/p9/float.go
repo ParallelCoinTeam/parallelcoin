@@ -4,7 +4,7 @@ package p9
 
 import (
 	"image"
-
+	
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -13,6 +13,7 @@ import (
 
 // Float is for selecting a value in a range.
 type Float struct {
+	th         *Theme
 	value      float32
 	drag       gesture.Drag
 	pos        float32 // position normalized to [0, 1]
@@ -22,7 +23,7 @@ type Float struct {
 }
 
 func (th *Theme) Float() *Float {
-	return &Float{changeHook: func(float32) {}}
+	return &Float{th: th, changeHook: func(float32) {}}
 }
 
 func (f *Float) SetValue(value float32) *Float {
@@ -48,7 +49,7 @@ func (f *Float) Fn(gtx layout.Context, pointerMargin int, min, max float32) layo
 			de = &e
 		}
 		if e.Type == pointer.Release {
-			f.changeHook(f.value)
+			f.th.BackgroundProcessingQueue <- func() { f.changeHook(f.value) }
 		}
 	}
 	value := f.value
@@ -60,20 +61,17 @@ func (f *Float) Fn(gtx layout.Context, pointerMargin int, min, max float32) layo
 	}
 	// Unconditionally call setValue in case min, max, or value changed.
 	f.setValue(value, min, max)
-
 	if f.pos < 0 {
 		f.pos = 0
 	} else if f.pos > 1 {
 		f.pos = 1
 	}
-
 	defer op.Push(gtx.Ops).Pop()
 	rect := image.Rectangle{Max: size}
 	rect.Min.X -= pointerMargin
 	rect.Max.X += pointerMargin
 	pointer.Rect(rect).Add(gtx.Ops)
 	f.drag.Add(gtx.Ops)
-
 	return layout.Dimensions{Size: size}
 }
 

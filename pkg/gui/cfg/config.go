@@ -112,39 +112,53 @@ func (c *Config) Config() GroupsMap {
 					}
 				})
 			case "integer":
-				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					i := c.cx.ConfigMap[sgf.Slug].(*int)
-					if n, err := strconv.Atoi(txt); !Check(err) {
-						*i = n
-					}
-					save.Pod(c.cx.Config)
-				})
+				c.inputs[sgf.Slug] = c.th.Input(
+					fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+						i := c.cx.ConfigMap[sgf.Slug].(*int)
+						if n, err := strconv.Atoi(txt); !Check(err) {
+							*i = n
+						}
+						save.Pod(c.cx.Config)
+					}, nil,
+				)
 			case "time":
-				c.inputs[sgf.Slug] = c.th.Input(fmt.Sprint(*tgs.Slot.(*time.Duration)), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
-					if d, err := time.ParseDuration(txt); !Check(err) {
-						*tt = d
-					}
-					save.Pod(c.cx.Config)
-				})
+				c.inputs[sgf.Slug] = c.th.Input(
+					fmt.Sprint(*tgs.Slot.(*time.Duration)), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
+						if d, err := time.ParseDuration(txt); !Check(err) {
+							*tt = d
+						}
+						save.Pod(c.cx.Config)
+					}, nil,
+				)
 			case "float":
-				c.inputs[sgf.Slug] = c.th.Input(strconv.FormatFloat(*tgs.Slot.(*float64), 'f', -1, 64), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					ff := c.cx.ConfigMap[sgf.Slug].(*float64)
-					if f, err := strconv.ParseFloat(txt, 64); !Check(err) {
-						*ff = f
-					}
-					save.Pod(c.cx.Config)
-				})
+				c.inputs[sgf.Slug] = c.th.Input(
+					strconv.FormatFloat(*tgs.Slot.(*float64), 'f', -1, 64),
+					sgf.Slug,
+					"Primary",
+					"PanelBg",
+					"DocBg",
+					func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
+						if f, err := strconv.ParseFloat(txt, 64); !Check(err) {
+							*ff = f
+						}
+						save.Pod(c.cx.Config)
+					},
+					nil,
+				)
 			case "string":
-				c.inputs[sgf.Slug] = c.th.Input(*tgs.Slot.(*string), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					ss := c.cx.ConfigMap[sgf.Slug].(*string)
-					*ss = txt
-					save.Pod(c.cx.Config)
-				})
+				c.inputs[sgf.Slug] = c.th.Input(
+					*tgs.Slot.(*string), sgf.Slug, "Primary", "PanelBg", "DocBg", func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+						ss := c.cx.ConfigMap[sgf.Slug].(*string)
+						*ss = txt
+						save.Pod(c.cx.Config)
+					}, nil,
+				)
 			case "password":
 				c.passwords[sgf.Slug] = c.th.Password("password", tgs.Slot.(*string), "Primary", "PanelBg", "DocBg", func(txt string) {
 					Debug(sgf.Slug, "submitted", txt)

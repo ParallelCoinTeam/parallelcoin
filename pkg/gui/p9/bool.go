@@ -59,7 +59,7 @@ func (b *Bool) Fn(gtx layout.Context) layout.Dimensions {
 	for b.clk.Clicked() {
 		b.value = !b.value
 		b.changed = true
-		b.changeState(b.value)
+		b.th.BackgroundProcessingQueue <- func() { b.changeState(b.value) }
 	}
 	return dims
 }

@@ -29,7 +29,12 @@ type Password struct {
 	handle               func(pass string)
 }
 
-func (th *Theme) Password(hint string, password *string, borderColorFocused, borderColorUnfocused, backgroundColor string, handle func(pass string), ) *Password {
+func (th *Theme) Password(
+	hint string,
+	password *string,
+	borderColorFocused, borderColorUnfocused, backgroundColor string,
+	handle func(pass string),
+) *Password {
 	pass := th.Editor().Mask('•').SingleLine().Submit(true)
 	passInput := th.TextInput(pass, hint).Color(borderColorUnfocused)
 	p := &Password{
@@ -60,7 +65,7 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 					th.Icon().
 						Color(col).
 						Src(&icons2.ActionVisibility),
-			)
+				)
 			p.pass.Mask('•')
 			p.passInput.Color(col)
 		} else {
@@ -77,15 +82,13 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 		p.pass.Focus()
 	}
 	copyClickableFn := func() {
-		go clipboard.Set(p.pass.Text())
+		clipboard.Set(p.pass.Text())
 		p.pass.Focus()
 	}
 	pasteClickableFn := func() {
-		go func() {
-			txt := p.pass.Text()
-			txt = txt[:p.pass.Caret.Col] + clipboard.Get() + txt[p.pass.Caret.Col:]
-			p.pass.SetText(txt)
-		}()
+		txt := p.pass.Text()
+		txt = txt[:p.pass.Caret.Col] + clipboard.Get() + txt[p.pass.Caret.Col:]
+		p.pass.SetText(txt)
 		p.pass.Focus()
 	}
 	p.copyClickable.SetClick(copyClickableFn)
@@ -111,13 +114,7 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 	p.passInput.Color(p.borderColor)
 	p.pass.SetText(*p.password).Mask('•').SetSubmit(
 		func(txt string) {
-			// if !p.hide {
-			// 	p.showClickableFn(p.borderColor)
-			// }
-			// p.showClickableFn(p.borderColor)
-			go func() {
-				p.handle(txt)
-			}()
+			p.handle(txt)
 		},
 	).SetChange(
 		func(txt string) {

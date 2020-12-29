@@ -86,11 +86,11 @@ func (b *IconButton) SetCancel(fn func()) *IconButton {
 func (b *IconButton) Fn(gtx l.Context) l.Dimensions {
 	return b.th.Stack().Expanded(
 		func(gtx l.Context) l.Dimensions {
-			sizex, sizey := gtx.Constraints.Min.X, gtx.Constraints.Min.Y
-			sizexf, sizeyf := float32(sizex), float32(sizey)
-			rr := (sizexf + sizeyf) * .25
+			sizeX, sizeY := gtx.Constraints.Min.X, gtx.Constraints.Min.Y
+			sizeXf, sizeYf := float32(sizeX), float32(sizeY)
+			rr := (sizeXf + sizeYf) * .25
 			clip.RRect{
-				Rect: f32.Rectangle{Max: f32.Point{X: sizexf, Y: sizeyf}},
+				Rect: f32.Rectangle{Max: f32.Point{X: sizeXf, Y: sizeYf}},
 				NE:   rr, NW: rr, SE: rr, SW: rr,
 			}.Add(gtx.Ops)
 			background := b.th.Colors.Get(b.background)
