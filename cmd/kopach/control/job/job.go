@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net"
 	"sort"
+	"sync"
 	"time"
-
+	
 	"github.com/p9c/pod/app/conte"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
@@ -39,17 +40,44 @@ type Job struct {
 	CoinBases       map[int32]*util.Tx
 }
 
+type CoinBases struct {
+	CoinBaseMap
+	sync.Mutex
+}
+
+type CoinBaseMap map[int32]*util.Tx
+
+func NewCoinBases() CoinBases {
+	cb := make(CoinBaseMap)
+	return CoinBases{
+		CoinBaseMap: cb,
+	}
+}
+
+func (cbs *CoinBases) Load() CoinBaseMap {
+	cbs.Lock()
+	defer cbs.Unlock()
+	return cbs.CoinBaseMap
+}
+
+func (cbs *CoinBases) Store(cbm CoinBaseMap) {
+	cbs.Lock()
+	defer cbs.Unlock()
+	cbs.CoinBaseMap = cbm
+}
+
 // Get returns a message broadcast by a node and each field is decoded where possible avoiding memory allocation
 // (slicing the data). Yes, this is not concurrent safe, put a mutex in to share it. Using the same principles as used
 // in FlatBuffers, we define a message type that instead of using a reflect based encoder, there is a creation function,
 // and a set of methods that extracts the individual requested field without copying memory, or deserialize their
 // contents which will be concurrent safe The varying coinbase payment values are in transaction 0 last output, the
 // individual varying transactions are stored separately and will be reassembled at the end
-func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[int32]*util.Tx) (out Container, txr []*util.Tx) {
+func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers,
+	cbs CoinBases) (out Container, txr []*util.Tx) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
-	if txr == nil {
-		txr = []*util.Tx{}
-	}
+	// if txr == nil {
+	txr = []*util.Tx{}
+	// }
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
 	msg = append(msg, nBH)
@@ -100,20 +128,22 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 			nbH == fork.List[1].TestnetStart) {
 		nbH++
 	}
+	ti := cbs.Load()
 	for i := range bitsMap {
 		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
 		txc := txs.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
 		// Traces(txs)
-		(*cbs)[i] = txx
+		ti[i] = txx
 		// Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, txr...), false)
 		// Traces(mTree[len(mTree)-1].CloneBytes())
 		mTS[i] = &chainhash.Hash{}
-		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
+		_ = mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
+	cbs.Store(ti)
 	// Traces(mTS)
 	mHashes := Hashes.NewHashes()
 	mHashes.Put(mTS)
@@ -211,7 +241,7 @@ func (j *Container) String() (s string) {
 		s += fmt.Sprintf("  %2d %s\n", sortedBitses[i],
 			hashes[int32(sortedBitses[i])].String())
 	}
-
+	
 	// s += spew.Sdump(j.GetHashes())
 	return
 }

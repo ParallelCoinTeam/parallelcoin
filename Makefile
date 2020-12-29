@@ -31,7 +31,7 @@ gui:
 
 guis:
 	go install -v
-	pod -D test1
+	pod -D test1 --minerpass pa55word
 
 resetwallet0:
 	pod -D test0 -l trace --walletpass aoeuaoeu wallet drophistory

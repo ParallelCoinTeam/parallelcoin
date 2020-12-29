@@ -4,11 +4,12 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/util/quit"
 	"math/rand"
 	"net"
 	"strings"
 	"time"
+	
+	"github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
@@ -46,7 +47,7 @@ type Controller struct {
 	Ready                  atomic.Bool
 	height                 atomic.Uint64
 	blockTemplateGenerator *mining.BlkTmplGenerator
-	coinbases              map[int32]*util.Tx
+	coinbases              job.CoinBases
 	transactions           []*util.Tx
 	oldBlocks              atomic.Value
 	prevHash               atomic.Value
@@ -65,12 +66,12 @@ type Controller struct {
 }
 
 func Run(cx *conte.Xt) (quit qu.C) {
-	mining := true
+	isMining := true
 	cx.Controller.Store(true)
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
 		// Warn("no mining addresses, not starting controller")
 		// return
-		mining = false
+		isMining = false
 	}
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		Warn("not running controller without RPC enabled")
@@ -86,7 +87,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
-		coinbases:              make(map[int32]*util.Tx),
+		coinbases:              job.NewCoinBases(), // make(map[int32]*util.Tx),
 		buffer:                 ring.New(BufferSize),
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
@@ -131,7 +132,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		},
 	)
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
-	if mining {
+	if isMining {
 		err = ctrl.sendNewBlockTemplate()
 		if err != nil {
 			Error(err)
@@ -229,7 +230,7 @@ var handlersMulticast = transport.Handlers{
 			return
 		}
 		// Warn(msgBlock.Header.Version)
-		cb, ok := c.coinbases[msgBlock.Header.Version]
+		cb, ok := c.coinbases.Load()[msgBlock.Header.Version]
 		if !ok {
 			Debug("coinbases not found", cb)
 			return
@@ -361,11 +362,11 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 		return
 	}
 	msgB := template.Block
-	c.coinbases = make(map[int32]*util.Tx)
+	c.coinbases = job.NewCoinBases()
 	var fMC job.Container
 	adv := p2padvt.Get(c.cx)
 	// Traces(adv)
-	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, &c.coinbases)
+	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, c.coinbases)
 	jobShards := transport.GetShards(fMC.Data)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {
@@ -551,7 +552,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 }
 
 func (c *Controller) UpdateAndSendTemplate() {
-	c.coinbases = make(map[int32]*util.Tx)
+	c.coinbases = job.NewCoinBases()
 	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 	if template != nil {
 		c.transactions = []*util.Tx{}
@@ -562,7 +563,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 		var mC job.Container
 		mC, c.transactions = job.Get(
 			c.cx, util.NewBlock(msgB),
-			p2padvt.Get(c.cx), &c.coinbases,
+			p2padvt.Get(c.cx), c.coinbases,
 		)
 		nH := mC.GetNewHeight()
 		if c.height.Load() < uint64(nH) {
