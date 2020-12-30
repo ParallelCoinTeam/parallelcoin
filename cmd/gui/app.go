@@ -225,6 +225,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				"lock", 4, &icons.ActionLockOpen, func(name string) {
 					// wg.unlockPage.ActivePage(name)
 					wg.unlockPassword.Wipe()
+					wg.unlockPassword.Focus()
 					// wg.walletLocked.Store(true)
 					wg.wallet.Stop()
 				}, a, "",
