@@ -3,7 +3,7 @@ module github.com/p9c/pod
 go 1.14
 
 require (
-	gioui.org v0.0.0-20201119103011-21ef492cc9df
+	gioui.org v0.0.0-20201229000053-33103593a1b4
 	github.com/BurntSushi/xgb v0.0.0-20200324125942-20f126ea2843
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1

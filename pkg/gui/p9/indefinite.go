@@ -52,11 +52,9 @@ func (lo *Indefinite) Fn(gtx l.Context) l.Dimensions {
 	radius := float64(sz.X) * .5
 	defer op.Push(gtx.Ops).Pop()
 	op.Offset(f32.Pt(float32(radius), float32(radius))).Add(gtx.Ops)
-
 	dt := (time.Duration(gtx.Now.UnixNano()) % (time.Second)).Seconds()
 	startAngle := dt * math.Pi * 2
 	endAngle := startAngle + math.Pi*1.5
-
 	clipLoader(gtx.Ops, startAngle, endAngle, radius)
 	paint.ColorOp{
 		Color: lo.color,
@@ -73,7 +71,6 @@ func (lo *Indefinite) Fn(gtx l.Context) l.Dimensions {
 
 func clipLoader(ops *op.Ops, startAngle, endAngle, radius float64) {
 	const thickness = .25
-	
 	var (
 		width = float32(radius * thickness)
 		delta = float32(endAngle - startAngle)
@@ -83,15 +80,16 @@ func clipLoader(ops *op.Ops, startAngle, endAngle, radius float64) {
 		pen    = f32.Pt(float32(vx), float32(vy)).Mul(float32(radius))
 		center = f32.Pt(0, 0).Sub(pen)
 		
-		style = clip.StrokeStyle{
-			Cap: clip.FlatCap,
-		}
-		
 		p clip.Path
 	)
-	
 	p.Begin(ops)
 	p.Move(pen)
 	p.Arc(center, center, delta)
-	p.Stroke(width, style).Add(ops)
+	clip.Stroke{
+		Path: p.End(),
+		Style: clip.StrokeStyle{
+			Width: width,
+			Cap:   clip.FlatCap,
+		},
+	}.Op().Add(ops)
 }

@@ -5,9 +5,9 @@ import (
 	"image"
 	"unicode/utf8"
 	
-	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
@@ -17,6 +17,7 @@ import (
 
 // Text is a widget for laying out and drawing text.
 type Text struct {
+	th *Theme
 	// alignment specify the text alignment.
 	alignment text.Alignment
 	// maxLines limits the number of lines. Zero means no limit.
@@ -24,7 +25,7 @@ type Text struct {
 }
 
 func (th *Theme) Text() *Text {
-	return &Text{}
+	return &Text{th: th}
 }
 
 // Alignment sets the alignment for the text
@@ -50,7 +51,7 @@ type lineIterator struct {
 	txtOff      int
 }
 
-func (l *lineIterator) Next() (text.Layout, f32.Point, bool) {
+func (l *lineIterator) Next() (text.Layout, image.Point, bool) {
 	for len(l.Lines) > 0 {
 		line := l.Lines[0]
 		l.Lines = l.Lines[1:]
@@ -64,42 +65,41 @@ func (l *lineIterator) Next() (text.Layout, f32.Point, bool) {
 		if (off.Y + line.Bounds.Min.Y).Floor() > l.Clip.Max.Y {
 			break
 		}
-		layout := line.Layout
+		lo := line.Layout
 		start := l.txtOff
 		l.txtOff += len(line.Layout.Text)
 		if (off.Y + line.Bounds.Max.Y).Ceil() < l.Clip.Min.Y {
 			continue
 		}
-		for len(layout.Advances) > 0 {
-			_, n := utf8.DecodeRuneInString(layout.Text)
-			adv := layout.Advances[0]
+		for len(lo.Advances) > 0 {
+			_, n := utf8.DecodeRuneInString(lo.Text)
+			adv := lo.Advances[0]
 			if (off.X + adv + line.Bounds.Max.X - line.Width).Ceil() >= l.Clip.Min.X {
 				break
 			}
 			off.X += adv
-			layout.Text = layout.Text[n:]
-			layout.Advances = layout.Advances[1:]
+			lo.Text = lo.Text[n:]
+			lo.Advances = lo.Advances[1:]
 			start += n
 		}
 		end := start
 		endx := off.X
-		rune := 0
-		for n, r := range layout.Text {
+		rn := 0
+		for n, r := range lo.Text {
 			if (endx + line.Bounds.Min.X).Floor() > l.Clip.Max.X {
-				layout.Advances = layout.Advances[:rune]
-				layout.Text = layout.Text[:n]
+				lo.Advances = lo.Advances[:rn]
+				lo.Text = lo.Text[:n]
 				break
 			}
 			end += utf8.RuneLen(r)
-			endx += layout.Advances[rune]
-			rune++
+			endx += lo.Advances[rn]
+			rn++
 		}
-		offf := f32.Point{X: float32(off.X) / 64, Y: float32(off.Y) / 64}
-		return layout, offf, true
+		offf := image.Point{X: off.X.Floor(), Y: off.Y.Floor()}
+		return lo, offf, true
 	}
-	return text.Layout{}, f32.Point{}, false
+	return text.Layout{}, image.Point{}, false
 }
-
 
 func linesDimens(lines []text.Line) layout.Dimensions {
 	var width fixed.Int26_6
@@ -127,7 +127,6 @@ func linesDimens(lines []text.Line) layout.Dimensions {
 	}
 }
 
-
 func (t *Text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.Value, txt string) layout.Dimensions {
 	cs := gtx.Constraints
 	textSize := fixed.I(gtx.Px(size))
@@ -137,11 +136,11 @@ func (t *Text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.V
 	}
 	dims := linesDimens(lines)
 	dims.Size = cs.Constrain(dims.Size)
-	clip := textPadding(lines)
-	clip.Max = clip.Max.Add(dims.Size)
+	cl := textPadding(lines)
+	cl.Max = cl.Max.Add(dims.Size)
 	it := lineIterator{
 		Lines:     lines,
-		Clip:      clip,
+		Clip:      cl,
 		Alignment: t.alignment,
 		Width:     dims.Size.X,
 	}
@@ -151,8 +150,9 @@ func (t *Text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.V
 			break
 		}
 		stack := op.Push(gtx.Ops)
-		op.Offset(off).Add(gtx.Ops)
+		op.Offset(layout.FPt(off)).Add(gtx.Ops)
 		s.Shape(font, textSize, l).Add(gtx.Ops)
+		clip.Rect(cl.Sub(off)).Add(gtx.Ops)
 		paint.PaintOp{}.Add(gtx.Ops)
 		stack.Pop()
 	}
