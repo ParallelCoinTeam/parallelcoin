@@ -61,6 +61,9 @@ func init() {
 	sort.Sort(AlgoSlices[1])
 	Debug(P9AlgoVers)
 	baseVersionName := AlgoSlices[1][0].Name
+	for i := range P9AlgosNumeric {
+		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", P9AlgosNumeric[i].VersionInterval)
+	}
 	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
 	Debug(baseVersionName, baseVersionInterval)
 	P9Average = 0
@@ -149,7 +152,7 @@ var (
 	}
 	// P9AlgoVers is the lookup for after 1st hardfork
 	P9AlgoVers = make(map[int32]string)
-
+	
 	P9PrimeSequence               = []int{2, 3, 5, 7, 11, 13, 17, 19, 23}
 	IntervalBase, IntervalDivisor = 103, 1
 	// P9Algos is the algorithm specifications after the hard fork
@@ -165,9 +168,9 @@ var (
 		12: {12, FirstPowLimitBits, 6, IntervalBase * P9PrimeSequence[6] / IntervalDivisor}, // 19
 		13: {13, FirstPowLimitBits, 8, IntervalBase * P9PrimeSequence[8] / IntervalDivisor}, // 23
 	}
-
+	
 	P9Average float64
-
+	
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
