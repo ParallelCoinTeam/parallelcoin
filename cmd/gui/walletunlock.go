@@ -12,6 +12,7 @@ import (
 	
 	l "gioui.org/layout"
 	"gioui.org/text"
+	
 	"github.com/p9c/pod/app/save"
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -22,7 +23,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a = wg.th.App(wg.w["main"].Width)
 	wg.unlockPage = a
 	password := ""
-	wg.unlockPassword = wg.th.Password("", &password, "Primary", "DocText", "PanelBg", func(pass string) {
+	wg.unlockPassword = wg.th.Password("enter password", &password, "Primary",
+		"DocText", "PanelBg", func(pass string) {
 		go func() {
 			Debug("entered password", pass)
 			// unlock wallet
@@ -49,19 +51,12 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 				if *cfg.WalletPass == bh {
 					// the entered password matches the stored hash
 					Debug("now we can open the wallet")
-					// wg.WalletRunCommandChan <- "stop"
-					// time.Sleep(time.Second * 5)
-					// *wg.cx.Config.WalletPass = pass
-					if !wg.node.Running() {
-						// wallet doesn't work without the node
-						wg.startNode()
-					}
 					if err = wg.writeWalletCookie(); Check(err) {
 					}
-					wg.startWallet()
 					*wg.cx.Config.NodeOff = false
 					*wg.cx.Config.WalletOff = false
 					save.Pod(wg.cx.Config)
+					wg.wallet.Start()
 					wg.unlockPassword.Wipe()
 				}
 			} else {
@@ -89,6 +84,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					p9.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
+							var dims l.Dimensions
 							return wg.th.Flex().
 								SpaceEvenly().
 								AlignMiddle().
@@ -108,31 +104,40 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 															wg.th.VFlex().
 																AlignMiddle().
 																Rigid(
-																	wg.th.Flex().
-																		AlignBaseline().
-																		Rigid(
-																			wg.th.Fill(
-																				"Primary",
-																				wg.th.Inset(
-																					0.5,
-																					wg.th.Icon().
-																						Scale(p9.Scales["H3"]).
-																						Color("PanelBg").
-																						Src(&icons.ActionLock).Fn,
+																	func(gtx l.Context) l.
+																	Dimensions {
+																		dims = wg.th.Flex().
+																			AlignBaseline().
+																			Rigid(
+																				wg.th.Fill(
+																					"Primary",
+																					wg.th.Inset(
+																						0.5,
+																						wg.th.Icon().
+																							Scale(p9.Scales["H3"]).
+																							Color("PanelBg").
+																							Src(&icons.ActionLock).Fn,
+																					).Fn,
 																				).Fn,
-																			).Fn,
-																		).
-																		Rigid(
-																			wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn,
-																		).
-																		Rigid(
-																			wg.th.H2("locked").Color("Primary").Fn,
-																		).
-																		Fn,
-																).
+																			).
+																			Rigid(
+																				wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn,
+																			).
+																			Rigid(
+																				wg.th.H2("locked").Color("Primary").Fn,
+																			).
+																			Fn(gtx)
+																		return dims
+																	}).
 																Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 																Rigid(
-																	wg.unlockPassword.Fn,
+																	func(gtx l.Context) l.
+																	Dimensions {
+																		gtx.Constraints.Max.
+																			X = dims.Size.X
+																		return wg.unlockPassword.
+																			Fn(gtx)
+																	},
 																).
 																Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
 																Rigid(

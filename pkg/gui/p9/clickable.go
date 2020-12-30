@@ -143,7 +143,7 @@ func (c *Clickable) update(gtx l.Context) {
 			if l := len(c.history); l > 0 {
 				c.history[l-1].End = gtx.Now
 			}
-			c.Events.Click()
+			go c.Events.Click()
 		case gesture.TypeCancel:
 			for i := range c.history {
 				c.history[i].Cancelled = true
@@ -151,13 +151,13 @@ func (c *Clickable) update(gtx l.Context) {
 					c.history[i].End = gtx.Now
 				}
 			}
-			c.Events.Cancel()
+			go c.Events.Cancel()
 		case gesture.TypePress:
 			c.history = append(c.history, press{
 				Position: e.Position,
 				Start:    gtx.Now,
 			})
-			c.Events.Press()
+			go c.Events.Press()
 		}
 	}
 }

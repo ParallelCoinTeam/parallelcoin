@@ -484,7 +484,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Background(wg.App.StatusBarBackgroundGet()).
 					SetClick(
 						func() {
-							go wg.toggleNode()
+							Debug("clicked node run control button", wg.node.Running())
+							// wg.toggleNode()
+							if wg.node.Running() {
+								if wg.wallet.Running() {
+									wg.wallet.Stop()
+								}
+								wg.node.Stop()
+							} else {
+								wg.node.Start()
+							}
 						},
 					).
 					Fn,
@@ -502,19 +511,30 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 				wg.th.ButtonLayout(wg.statusBarButtons[1]).
 					CornerRadius(0).
 					Embed(
-						wg.th.
-							Inset(
-								0.25, wg.th.
-									Icon().
-									Scale(p9.Scales["H5"]).
-									Color("DocText").
-									Src(miningIcon).Fn,
-							).Fn,
+						func(gtx l.Context) l.Dimensions {
+							clr := "DocText"
+							if *wg.cx.Config.GenThreads == 0 {
+								clr = "scrim"
+							}
+							return wg.th.
+								Inset(
+									0.25, wg.th.
+										Icon().
+										Scale(p9.Scales["H5"]).
+										Color(clr).
+										Src(miningIcon).Fn,
+								).Fn(gtx)
+						},
 					).
 					Background(wg.App.StatusBarBackgroundGet()).
 					SetClick(
 						func() {
-							go wg.toggleMiner()
+							// wg.toggleMiner()
+							if wg.miner.Running(){
+								wg.miner.Stop()
+							} else {
+								wg.miner.Start()
+							}
 						},
 					).
 					Fn,
@@ -597,94 +617,95 @@ func (wg *WalletGUI) writeWalletCookie() (err error) {
 	Debug("created password cookie")
 	return
 }
-
-func (wg *WalletGUI) toggleNode() {
-	if wg.node.Running() {
-		wg.stopNode()
-		*wg.cx.Config.NodeOff = true
-	} else {
-		wg.startNode()
-		*wg.cx.Config.NodeOff = false
-	}
-	save.Pod(wg.cx.Config)
-}
-
-func (wg *WalletGUI) startNode() {
-	if !wg.node.Running() {
-		wg.node.Start()
-	}
-	Debug("startNode")
-}
-
-func (wg *WalletGUI) stopNode() {
-	if wg.wallet.Running() {
-		wg.stopWallet()
-		wg.unlockPassword.Wipe()
-		// wg.walletLocked.Store(true)
-	}
-	if wg.node.Running() {
-		wg.node.Stop()
-	}
-	Debug("stopNode")
-}
-
-func (wg *WalletGUI) toggleMiner() {
-	if *wg.cx.Config.GenThreads == 0 || wg.miner.Running() {
-		wg.stopMiner()
-		*wg.cx.Config.Generate = false
-	} else {
-		wg.startMiner()
-		*wg.cx.Config.Generate = true
-	}
-	save.Pod(wg.cx.Config)
-}
-
-func (wg *WalletGUI) startMiner() {
-	if *wg.cx.Config.GenThreads == 0 && wg.miner.Running() {
-		wg.stopMiner()
-		Debug("was zero threads")
-	} else {
-		wg.miner.Start()
-		Debug("startMiner")
-	}
-}
-
-func (wg *WalletGUI) stopMiner() {
-	if wg.miner.Running() {
-		wg.miner.Stop()
-	}
-	Debug("stopMiner")
-}
-
-func (wg *WalletGUI) toggleWallet() {
-	if wg.wallet.Running() {
-		wg.stopWallet()
-		*wg.cx.Config.WalletOff = true
-	} else {
-		wg.startWallet()
-		*wg.cx.Config.WalletOff = false
-	}
-	save.Pod(wg.cx.Config)
-}
-
-func (wg *WalletGUI) startWallet() {
-	if !wg.node.Running() {
-		wg.startNode()
-	}
-	if !wg.wallet.Running() {
-		wg.wallet.Start()
-		wg.unlockPassword.Wipe()
-		// wg.walletLocked.Store(false)
-	}
-	Debug("startWallet")
-}
-
-func (wg *WalletGUI) stopWallet() {
-	if wg.wallet.Running() {
-		wg.wallet.Stop()
-		// wg.unlockPassword.Wipe()
-		// wg.walletLocked.Store(true)
-	}
-	wg.unlockPassword.Wipe()
-	Debug("stopWallet")
-}
+//
+// func (wg *WalletGUI) toggleNode() {
+// 	if wg.node.Running() {
+// 		wg.node.Stop()
+// 		*wg.cx.Config.NodeOff = true
+// 	} else {
+// 		wg.node.Start()
+// 		*wg.cx.Config.NodeOff = false
+// 	}
+// 	save.Pod(wg.cx.Config)
+// }
+//
+// func (wg *WalletGUI) startNode() {
+// 	if !wg.node.Running() {
+// 		wg.node.Start()
+// 	}
+// 	Debug("startNode")
+// }
+//
+// func (wg *WalletGUI) stopNode() {
+// 	if wg.wallet.Running() {
+// 		wg.stopWallet()
+// 		wg.unlockPassword.Wipe()
+// 		// wg.walletLocked.Store(true)
+// 	}
+// 	if wg.node.Running() {
+// 		wg.node.Stop()
+// 	}
+// 	Debug("stopNode")
+// }
+//
+// func (wg *WalletGUI) toggleMiner() {
+// 	if wg.miner.Running() {
+// 		wg.miner.Stop()
+// 		*wg.cx.Config.Generate = false
+// 	}
+// 	if !wg.miner.Running() && *wg.cx.Config.GenThreads > 0 {
+// 		wg.miner.Start()
+// 		*wg.cx.Config.Generate = true
+// 	}
+// 	save.Pod(wg.cx.Config)
+// }
+//
+// func (wg *WalletGUI) startMiner() {
+// 	if *wg.cx.Config.GenThreads == 0 && wg.miner.Running() {
+// 		wg.stopMiner()
+// 		Debug("was zero threads")
+// 	} else {
+// 		wg.miner.Start()
+// 		Debug("startMiner")
+// 	}
+// }
+//
+// func (wg *WalletGUI) stopMiner() {
+// 	if wg.miner.Running() {
+// 		wg.miner.Stop()
+// 	}
+// 	Debug("stopMiner")
+// }
+//
+// func (wg *WalletGUI) toggleWallet() {
+// 	if wg.wallet.Running() {
+// 		wg.stopWallet()
+// 		*wg.cx.Config.WalletOff = true
+// 	} else {
+// 		wg.startWallet()
+// 		*wg.cx.Config.WalletOff = false
+// 	}
+// 	save.Pod(wg.cx.Config)
+// }
+//
+// func (wg *WalletGUI) startWallet() {
+// 	if !wg.node.Running() {
+// 		wg.startNode()
+// 	}
+// 	if !wg.wallet.Running() {
+// 		wg.wallet.Start()
+// 		wg.unlockPassword.Wipe()
+// 		// wg.walletLocked.Store(false)
+// 	}
+// 	Debug("startWallet")
+// }
+//
+// func (wg *WalletGUI) stopWallet() {
+// 	if wg.wallet.Running() {
+// 		wg.wallet.Stop()
+// 		// wg.unlockPassword.Wipe()
+// 		// wg.walletLocked.Store(true)
+// 	}
+// 	wg.unlockPassword.Wipe()
+// 	Debug("stopWallet")
+// }

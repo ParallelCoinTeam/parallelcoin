@@ -2,9 +2,10 @@ package rununit
 
 import (
 	uberatomic "go.uber.org/atomic"
-
+	
+	"github.com/p9c/pod/pkg/util/interrupt"
 	qu "github.com/p9c/pod/pkg/util/quit"
-
+	
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
@@ -37,7 +38,7 @@ func New(
 	go func() {
 	out:
 		for {
-			Debug("run unit command loop")
+			Debug("run unit command loop", args)
 			select {
 			case cmd := <-r.commandChan:
 				switch cmd {
@@ -71,24 +72,39 @@ func New(
 					}
 					r.running.Store(false)
 					stop()
-					Debug(args, "after stop",r.running.Load())
+					Debug(args, "after stop", r.running.Load())
 				}
 				break
 			case <-r.quit:
+				Debug("runner stopped for", args)
 				break out
 			}
 		}
-		Debug("runner stopped for", args)
 	}()
 	// when the main quit signal is triggered, stop the run unit cleanly
 	go func() {
+	out:
 		select {
-		case <-quit:
+		case <-quit.Wait():
 			Debug("runner quit trigger called", args)
-			r.Stop()
+			running := r.running.Load()
+			if !running {
+				Debug("wasn't running", args)
+				break out
+			}
 			// r.quit.Q()
+			consume.Kill(r.worker)
+			var err error
+			if err = r.worker.Wait(); Check(err) {
+			}
+			r.running.Store(false)
+			stop()
+			Debug(args, "after stop", r.running.Load())
 		}
 	}()
+	interrupt.AddHandler(func() {
+		quit.Q()
+	})
 	return
 }
 

@@ -130,11 +130,14 @@ func (wg *WalletGUI) Run() (err error) {
 	} else {
 		*wg.noWallet = false
 		if !*wg.cx.Config.NodeOff {
-			wg.startNode()
+			// wg.startNode()
+			wg.node.Start()
 		}
 		if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0 {
-			wg.startMiner()
+			// wg.startMiner()
+			wg.miner.Start()
 		}
+		
 	}
 	wg.Size = wg.w["main"].Width
 	go func() {
@@ -256,9 +259,12 @@ func (wg *WalletGUI) GetIncDecs() {
 					Debug("threads value now", n)
 					go func() {
 						Debug("setting thread count")
-						if wg.miner.Running() {
-							wg.stopMiner()
-							wg.startMiner()
+						if wg.miner.Running() && n != 0 {
+							wg.miner.Stop()
+							wg.miner.Start()
+						}
+						if n == 0 {
+							wg.miner.Stop()
 						}
 						*wg.cx.Config.GenThreads = n
 						save.Pod(wg.cx.Config)

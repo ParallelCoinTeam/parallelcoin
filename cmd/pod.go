@@ -63,6 +63,7 @@ func Main() {
 	}
 	if res != 0 {
 		Warn("quitting with error")
+		Debug(interrupt.GoroutineDump())
 		os.Exit(res)
 	}
 }

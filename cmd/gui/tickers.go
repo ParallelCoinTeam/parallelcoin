@@ -404,7 +404,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 		OnWalletLockState: func(locked bool) {
 			Debug("OnWalletLockState", locked)
 			// switch interface to unlock page
-			wg.stopWallet()
+			wg.wallet.Stop()
 			// TODO: lock when idle... how to get trigger for idleness in UI?
 			wg.invalidate <- struct{}{}
 		},
