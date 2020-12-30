@@ -182,8 +182,8 @@ out:
 			break out
 		}
 	}
+	wg.gracefulShutdown()
 	wg.quit.Q()
-	// wg.gracefulShutdown()
 	return
 }
 
