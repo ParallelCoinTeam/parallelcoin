@@ -9,6 +9,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	
@@ -393,7 +394,7 @@ func (wg *WalletGUI) gracefulShutdown() {
 		wg.WalletClient = nil
 	}
 	wg.WalletMutex.Unlock()
-	// interrupt.Request()
-	// time.Sleep(time.Second)
+	interrupt.Request()
+	time.Sleep(time.Second)
 	wg.quit.Q()
 }
