@@ -9,7 +9,6 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	
@@ -157,18 +156,20 @@ func (wg *WalletGUI) Run() (err error) {
 				wg.App.Overlay(),
 				// wg.InitWallet(),
 				wg.gracefulShutdown,
+				// func() { interrupt.Request() },
 				wg.quit,
 			); Check(err) {
 		}
 	}()
-	interrupt.AddHandler(
-		func() {
-			Debug("quitting wallet gui")
-			// consume.Kill(wg.Node)
-			// consume.Kill(wg.Miner)
-			wg.quit.Q()
-		},
-	)
+	// interrupt.AddHandler(
+	// 	func() {
+	// 		Debug("quitting wallet gui")
+	// 		// consume.Kill(wg.Node)
+	// 		// consume.Kill(wg.Miner)
+	// 		// wg.gracefulShutdown()
+	// 		// wg.quit.Q()
+	// 	},
+	// )
 out:
 	for {
 		select {
@@ -361,23 +362,23 @@ func (wg *WalletGUI) gracefulShutdown() {
 		shuttingDown = true
 	}
 	Debug("\n\nquitting wallet gui")
-	// // if wg.miner.Running() {
-	// // 	Debug("stopping miner")
-	// wg.stopMiner()
-	// wg.miner.Shutdown()
-	// // }
-	// // if wg.wallet.Running() {
-	// // 	Debug("stopping wallet")
-	// wg.stopWallet()
-	// wg.wallet.Shutdown()
-	// // 	wg.unlockPassword.Wipe()
-	// // 	// wg.walletLocked.Store(true)
-	// // }
-	// // if wg.node.Running() {
-	// // 	Debug("stopping node")
-	// wg.stopNode()
-	// wg.node.Shutdown()
-	// // }
+	if wg.miner.Running() {
+		Debug("stopping miner")
+		wg.stopMiner()
+		wg.miner.Shutdown()
+	}
+	if wg.wallet.Running() {
+		Debug("stopping wallet")
+		wg.stopWallet()
+		wg.wallet.Shutdown()
+		wg.unlockPassword.Wipe()
+		// wg.walletLocked.Store(true)
+	}
+	if wg.node.Running() {
+		Debug("stopping node")
+		wg.stopNode()
+		wg.node.Shutdown()
+	}
 	wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
 		Debug("stopping chain client")
@@ -393,5 +394,6 @@ func (wg *WalletGUI) gracefulShutdown() {
 	}
 	wg.WalletMutex.Unlock()
 	// interrupt.Request()
+	// time.Sleep(time.Second)
 	wg.quit.Q()
 }
