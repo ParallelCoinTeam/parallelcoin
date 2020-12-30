@@ -363,38 +363,38 @@ func (wg *WalletGUI) gracefulShutdown() {
 		shuttingDown = true
 	}
 	Debug("\n\nquitting wallet gui")
-	if wg.miner.Running() {
-		Debug("stopping miner")
-		wg.stopMiner()
-		wg.miner.Shutdown()
-	}
-	if wg.wallet.Running() {
-		Debug("stopping wallet")
-		wg.stopWallet()
-		wg.wallet.Shutdown()
-		wg.unlockPassword.Wipe()
-		// wg.walletLocked.Store(true)
-	}
-	if wg.node.Running() {
-		Debug("stopping node")
-		wg.stopNode()
-		wg.node.Shutdown()
-	}
-	wg.ChainMutex.Lock()
+	// if wg.miner.Running() {
+	Debug("stopping miner")
+	wg.miner.Stop()
+	wg.miner.Shutdown()
+	// }
+	// if wg.wallet.Running() {
+	Debug("stopping wallet")
+	wg.wallet.Stop()
+	wg.wallet.Shutdown()
+	wg.unlockPassword.Wipe()
+	// wg.walletLocked.Store(true)
+	// }
+	// if wg.node.Running() {
+	Debug("stopping node")
+	wg.node.Stop()
+	wg.node.Shutdown()
+	// }
+	// wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
 		Debug("stopping chain client")
 		wg.ChainClient.Shutdown()
 		wg.ChainClient = nil
 	}
-	wg.ChainMutex.Unlock()
-	wg.WalletMutex.Lock()
+	// wg.ChainMutex.Unlock()
+	// wg.WalletMutex.Lock()
 	if wg.WalletClient != nil {
 		Debug("stopping wallet client")
 		wg.WalletClient.Shutdown()
 		wg.WalletClient = nil
 	}
-	wg.WalletMutex.Unlock()
+	// wg.WalletMutex.Unlock()
 	interrupt.Request()
-	// time.Sleep(time.Second)
+	time.Sleep(time.Second)
 	wg.quit.Q()
 }
