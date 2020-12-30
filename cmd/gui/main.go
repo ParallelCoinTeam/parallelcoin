@@ -395,6 +395,6 @@ func (wg *WalletGUI) gracefulShutdown() {
 	}
 	wg.WalletMutex.Unlock()
 	interrupt.Request()
-	time.Sleep(time.Second)
+	// time.Sleep(time.Second)
 	wg.quit.Q()
 }

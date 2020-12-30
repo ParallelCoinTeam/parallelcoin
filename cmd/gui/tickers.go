@@ -32,7 +32,7 @@ func (wg *WalletGUI) Tickers() {
 					// update goroutines data
 					// wg.goRoutines()
 					// close clients if they are open
-					wg.ChainMutex.Lock()
+					// wg.ChainMutex.Lock()
 					if wg.ChainClient != nil {
 						wg.ChainClient.Disconnect()
 						// if wg.ChainClient.Disconnected() {
@@ -40,14 +40,14 @@ func (wg *WalletGUI) Tickers() {
 						wg.ChainClient = nil
 						// }
 					}
-					wg.ChainMutex.Unlock()
-					wg.WalletMutex.Lock()
+					// wg.ChainMutex.Unlock()
+					// wg.WalletMutex.Lock()
 					if wg.WalletClient != nil {
 						wg.WalletClient.Disconnect()
 						wg.WalletClient.Shutdown()
 						wg.WalletClient = nil
 					}
-					wg.WalletMutex.Unlock()
+					// wg.WalletMutex.Unlock()
 					if !wg.node.Running() {
 						break
 					}
@@ -231,8 +231,8 @@ func (wg *WalletGUI) updateThingies() (err error) {
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
 	// Debug("processChainBlockNotification")
 	// update best block height
-	wg.ChainMutex.Lock()
-	defer wg.ChainMutex.Unlock()
+	// wg.ChainMutex.Lock()
+	// defer wg.ChainMutex.Unlock()
 	if wg.ChainClient == nil || wg.ChainClient.Disconnected() {
 		return
 	}
@@ -421,8 +421,8 @@ func (wg *WalletGUI) chainClient() (err error) {
 	}
 	certs := walletmain.ReadCAFile(wg.cx.Config)
 	Debug(*wg.cx.Config.RPCConnect)
-	wg.ChainMutex.Lock()
-	defer wg.ChainMutex.Unlock()
+	// wg.ChainMutex.Lock()
+	// defer wg.ChainMutex.Unlock()
 	if wg.ChainClient, err = rpcclient.New(
 		&rpcclient.ConnConfig{
 			Host:                 *wg.cx.Config.RPCConnect,
