@@ -67,9 +67,9 @@ func New(
 						continue
 					}
 					consume.Kill(r.worker)
-					var err error
-					if err = r.worker.Wait(); Check(err) {
-					}
+					// var err error
+					// if err = r.worker.Wait(); Check(err) {
+					// }
 					r.running.Store(false)
 					stop()
 					Debug(args, "after stop", r.running.Load())
