@@ -59,10 +59,10 @@ func init() {
 	}
 	sort.Sort(AlgoSlices[0])
 	sort.Sort(AlgoSlices[1])
-	Trace(P9AlgoVers)
+	Debug(P9AlgoVers)
 	baseVersionName := AlgoSlices[1][0].Name
 	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
-	Trace(baseVersionName, baseVersionInterval)
+	Debug(baseVersionName, baseVersionInterval)
 	P9Average = 0
 	for _, i := range AlgoSlices[1] {
 		vi := float64(P9Algos[i.Name].VersionInterval)
@@ -70,9 +70,9 @@ func init() {
 		P9Average += p9a
 		// Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
 	}
-	Trace(P9Average)
+	Debug(P9Average)
 	P9Average = baseVersionInterval / P9Average
-	Trace(P9Average)
+	Debug(P9Average)
 }
 
 type AlgoSpec struct {
@@ -151,7 +151,7 @@ var (
 	P9AlgoVers = make(map[int32]string)
 
 	P9PrimeSequence               = []int{2, 3, 5, 7, 11, 13, 17, 19, 23}
-	IntervalBase, IntervalDivisor = 36, 1
+	IntervalBase, IntervalDivisor = 103, 1
 	// P9Algos is the algorithm specifications after the hard fork
 	P9Algos        = make(map[string]AlgoParams)
 	P9AlgosNumeric = map[int32]AlgoParams{
