@@ -59,8 +59,9 @@ func New(
 					run()
 					Debug(r.running.Load())
 				case false:
-					Debug(r.running.Load(), "stop called for", args)
-					if !r.running.Load() {
+					running := r.running.Load()
+					Debug("stop called for", args, running)
+					if !running {
 						Debug("wasn't running", args)
 						continue
 					}
@@ -70,7 +71,7 @@ func New(
 					}
 					r.running.Store(false)
 					stop()
-					Debug(r.running.Load())
+					Debug(args, "after stop",r.running.Load())
 				}
 				break
 			case <-r.quit:

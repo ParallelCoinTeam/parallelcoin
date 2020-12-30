@@ -49,13 +49,13 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 					Debug("received kill signal from pipe, shutting down", appName)
 					// time.Sleep(time.Second*5)
 					// time.Sleep(time.Second * 3)
-					quit.Q()
+					// quit.Q()
 					// logi.L.LogChanDisabled = true
 					// logi.L.LogChan = nil
 					interrupt.Request()
-					<-interrupt.HandlersDone
+					// <-interrupt.HandlersDone
 
-					// quit.Q()
+					quit.Q()
 					// goroutineDump()
 					// Debug(interrupt.GoroutineDump())
 					// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
