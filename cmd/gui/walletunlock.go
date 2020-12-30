@@ -138,7 +138,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 																	Dimensions {
 																		gtx.Constraints.Max.
 																			X = dims.Size.X
-																		return wg.unlockPassword.
+																		return wg.
+																			unlockPassword.
 																			Fn(gtx)
 																	},
 																).

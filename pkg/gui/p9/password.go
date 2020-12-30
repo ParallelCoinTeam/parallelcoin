@@ -181,3 +181,7 @@ func (p *Password) Wipe() {
 	p.passInput.editor.rr.Zero()
 	p.passInput.editor.SetText("")
 }
+
+func (p *Password) Focus() {
+	p.passInput.editor.Focus()
+}

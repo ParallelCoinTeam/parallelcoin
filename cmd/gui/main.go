@@ -137,7 +137,7 @@ func (wg *WalletGUI) Run() (err error) {
 			// wg.startMiner()
 			wg.miner.Start()
 		}
-		
+		wg.unlockPassword.Focus()
 	}
 	wg.Size = wg.w["main"].Width
 	go func() {
