@@ -37,9 +37,6 @@ type HardForks struct {
 
 func init() {
 	Trace("running fork data init")
-	for i := range P9AlgosNumeric {
-		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", P9AlgosNumeric[i].VersionInterval)
-	}
 	for i, v := range P9AlgoVers {
 		List[1].Algos[v] = P9AlgosNumeric[i]
 	}
@@ -69,6 +66,9 @@ func init() {
 		p9a := baseVersionInterval / vi
 		P9Average += p9a
 		// Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
+	}
+	for i := range P9AlgosNumeric {
+		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", P9AlgosNumeric[i].VersionInterval)
 	}
 	Trace(P9Average)
 	P9Average = baseVersionInterval / P9Average
@@ -151,7 +151,7 @@ var (
 	P9AlgoVers = make(map[int32]string)
 
 	P9PrimeSequence               = []int{2, 3, 5, 7, 11, 13, 17, 19, 23}
-	IntervalBase, IntervalDivisor = 36, 1
+	IntervalBase, IntervalDivisor = 103, 1
 	// P9Algos is the algorithm specifications after the hard fork
 	P9Algos        = make(map[string]AlgoParams)
 	P9AlgosNumeric = map[int32]AlgoParams{
