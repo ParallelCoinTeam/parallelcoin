@@ -61,9 +61,6 @@ func init() {
 	sort.Sort(AlgoSlices[1])
 	Debug(P9AlgoVers)
 	baseVersionName := AlgoSlices[1][0].Name
-	for i := range P9AlgosNumeric {
-		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", P9AlgosNumeric[i].VersionInterval)
-	}
 	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
 	Debug(baseVersionName, baseVersionInterval)
 	P9Average = 0
