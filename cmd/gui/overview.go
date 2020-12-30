@@ -15,93 +15,117 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.th.Flex().
 			Rigid(
-				wg.th.VFlex().
-					Rigid(wg.th.H5("balances").Fn).
-					Rigid(
-						wg.th.Flex().AlignEnd().
+				wg.th.Inset(0.25,
+					wg.th.Inset(0.25,
+						wg.th.VFlex().AlignMiddle().
 							Rigid(
 								wg.th.Fill("DocBg",
-									wg.th.Inset(0.5,
-										wg.th.VFlex().AlignBaseline().
-											Rigid(
-												wg.th.Flex().AlignBaseline().
-													Rigid(
-														wg.th.Body1("confirmed").Fn,
-													).
-													Rigid(
-														wg.th.H6(" ").Fn,
-													).
-													Fn,
-											).
-											Rigid(
-												wg.th.Flex().AlignBaseline().
-													Rigid(
-														wg.th.Body1("unconfirmed").Fn,
-													).
-													Rigid(
-														wg.th.H6(" ").Fn,
-													).
-													Fn,
-											).
-											Rigid(
-												wg.th.Flex().AlignBaseline().
-													Rigid(
-														wg.th.Body1("total").Fn,
-													).
-													Rigid(
-														wg.th.H6(" ").Fn,
-													).
-													Fn,
-											).
-											Fn,
+									wg.th.Inset(0.25,
+										wg.th.H5("balances").Fn,
 									).Fn,
 								).Fn,
 							).
 							Rigid(
-								wg.th.Fill("DocBg",
-									wg.th.Inset(0.5,
-										wg.th.VFlex().AlignBaseline().AlignEnd().
+								wg.th.Fill("PanelBg",
+									wg.th.Inset(0.25,
+										wg.th.Flex().AlignEnd().
 											Rigid(
-												wg.th.Flex().AlignBaseline().
-													Rigid(
-														wg.th.H6(" ").Fn,
-													).
-													Rigid(
-														wg.th.Body2(fmt.Sprintf("%6.8f",
-															wg.State.balance.Load()),
-														).Font("go regular").Fn,
-													).Fn,
+												wg.th.Inset(0.5,
+													wg.th.VFlex().AlignBaseline().
+														Rigid(
+															wg.th.Flex().AlignBaseline().
+																Rigid(
+																	wg.th.Body1("confirmed").Fn,
+																).
+																Rigid(
+																	wg.th.H6(" ").Fn,
+																).
+																Fn,
+														).
+														Rigid(
+															wg.th.Flex().AlignBaseline().
+																Rigid(
+																	wg.th.Body1("unconfirmed").Fn,
+																).
+																Rigid(
+																	wg.th.H6(" ").Fn,
+																).
+																Fn,
+														).
+														Rigid(
+															wg.th.Flex().AlignBaseline().
+																Rigid(
+																	wg.th.Body1("total").Fn,
+																).
+																Rigid(
+																	wg.th.H6(" ").Fn,
+																).
+																Fn,
+														).
+														Fn,
+												).Fn,
 											).
 											Rigid(
-												wg.th.Flex().AlignBaseline().
-													Rigid(
-														wg.th.H6(" ").Fn,
-													).
-													Rigid(
-														wg.th.Body2(fmt.Sprintf("%6.8f",
-															wg.State.balanceUnconfirmed.Load()),
-														).Font("go regular").Fn,
-													).Fn,
-											).
-											Rigid(
-												wg.th.Flex().AlignBaseline().
-													Rigid(
-														wg.th.H6(" ").Fn,
-													).
-													Rigid(
-														wg.th.Body2(
-															fmt.Sprintf("%6.8f", wg.State.balance.Load()+wg.
-																State.balanceUnconfirmed.Load()),
-														).Font("go regular").Fn,
-													).Fn,
-											).
-											Fn,
+												wg.th.Inset(0.5,
+													wg.th.VFlex().AlignBaseline().AlignEnd().
+														Rigid(
+															wg.th.Flex().AlignBaseline().
+																Rigid(
+																	wg.th.H6(" ").Fn,
+																).
+																Rigid(
+																	wg.th.Body2(fmt.Sprintf("%6.8f",
+																		wg.State.balance.Load()),
+																	).Font("go regular").Fn,
+																).Fn,
+														).
+														Rigid(
+															wg.th.Flex().AlignBaseline().
+																Rigid(
+																	wg.th.H6(" ").Fn,
+																).
+																Rigid(
+																	wg.th.Body2(fmt.Sprintf("%6.8f",
+																		wg.State.balanceUnconfirmed.Load()),
+																	).Font("go regular").Fn,
+																).Fn,
+														).
+														Rigid(
+															wg.th.Flex().AlignBaseline().
+																Rigid(
+																	wg.th.H6(" ").Fn,
+																).
+																Rigid(
+																	wg.th.Body2(
+																		fmt.Sprintf("%6.8f", wg.State.balance.Load()+wg.
+																			State.balanceUnconfirmed.Load()),
+																	).Font("go regular").Fn,
+																).Fn,
+														).
+														Fn,
+												).Fn,
+											).Fn,
 									).Fn,
 								).Fn,
 							).Fn,
 					).Fn,
+				).Fn,
 			).
-			Flexed(1, p9.EmptyMaxWidth()).
+			Rigid(
+				wg.th.Inset(0.25,
+					wg.th.Fill("DocBg",
+						wg.th.Inset(0.25,
+							wg.th.VFlex().AlignMiddle().
+								Rigid(wg.th.Inset(0.25,
+									wg.th.H5("recent transactions").Fn).Fn).
+								Flexed(1,
+									p9.EmptyMaxWidth(),
+								).
+								Fn,
+						).Fn,
+					).Fn,
+				).Fn,
+			).
 			Fn(gtx)
 	}
 }
