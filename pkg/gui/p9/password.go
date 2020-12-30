@@ -52,28 +52,29 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 		Background("").
 		Icon(th.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility))
 	p.showClickableFn = func(col string) {
+		Debug("show clickable clickeded")
 		p.hide = !p.hide
-		if !p.hide {
-			p.unhideButton.
-				// Color("Primary").
-				Icon(
-					th.Icon().
-						Color(col).
-						Src(&icons2.ActionVisibility),
-			)
-			p.pass.Mask('•')
-			p.passInput.Color(col)
-		} else {
-			p.unhideButton.
-				// Color("DocText").
-				Icon(
-					th.Icon().
-						Color(p.borderColor).
-						Src(&icons2.ActionVisibilityOff),
-				)
-			p.pass.Mask(0)
-			p.passInput.Color(col)
-		}
+		// if !p.hide {
+		// 	p.unhideButton = p.unhideButton.
+		// 		Color("Primary").
+		// 		Icon(
+		// 			th.Icon().
+		// 				Color(col).
+		// 				Src(&icons2.ActionVisibility),
+		// 		)
+		// 	// p.pass.Mask('•')
+		// 	p.passInput.Color(col)
+		// } else {
+		// 	p.unhideButton = p.unhideButton.
+		// 		Color("DocText").
+		// 		Icon(
+		// 			th.Icon().
+		// 				Color(p.borderColor).
+		// 				Src(&icons2.ActionVisibilityOff),
+		// 		)
+		// 	// p.pass.Mask(0)
+		// 	p.passInput.Color(col)
+		// }
 		p.pass.Focus()
 	}
 	copyClickableFn := func() {
@@ -108,6 +109,8 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 			}
 		},
 	)
+	p.passInput.editor.Mask('•')
+	p.hide = true
 	p.passInput.Color(p.borderColor)
 	p.pass.SetText(*p.password).Mask('•').SetSubmit(
 		func(txt string) {
@@ -137,9 +140,11 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 		p.passInput.Color(p.borderColor)
 		p.unhideButton.Color(p.borderColor)
 		p.unhideClickable.SetClick(func() { p.showClickableFn(p.borderColor) })
+		visIcon := &icons2.ActionVisibility
 		if p.hide {
 			p.pass.Mask('•')
 		} else {
+			visIcon = &icons2.ActionVisibilityOff
 			p.pass.Mask(0)
 		}
 		
@@ -166,7 +171,7 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 				Rigid(
 					p.unhideButton.
 						Background("").
-						Icon(p.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility)).Fn,
+						Icon(p.Icon().Color(p.borderColor).Src(visIcon)).Fn,
 				).
 				Fn,
 		).Fn(gtx)
@@ -184,4 +189,16 @@ func (p *Password) Wipe() {
 
 func (p *Password) Focus() {
 	p.passInput.editor.Focus()
+}
+
+func (p *Password) Blur() {
+	p.passInput.editor.focused = false
+}
+
+func (p *Password) Hide() {
+	p.passInput.editor.Mask('*')
+}
+
+func (p *Password) Show() {
+	p.passInput.editor.Mask(0)
 }
