@@ -98,7 +98,6 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.GetHistoryTable()
 	before := func() { Debug("running before") }
 	after := func() { Debug("running after") }
-	
 	wg.node = wg.GetRunUnit(
 		"NODE", before, after,
 		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "node",
@@ -393,7 +392,6 @@ func (wg *WalletGUI) gracefulShutdown() {
 		wg.WalletClient = nil
 	}
 	wg.WalletMutex.Unlock()
-	interrupt.Request()
-	// wg.quit.Q()
-	// wg.wg.Wait()
+	// interrupt.Request()
+	wg.quit.Q()
 }

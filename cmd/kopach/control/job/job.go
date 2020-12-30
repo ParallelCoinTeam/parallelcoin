@@ -47,21 +47,17 @@ type CoinBases struct {
 
 type CoinBaseMap map[int32]*util.Tx
 
-func NewCoinBases() CoinBases {
+func NewCoinBases() CoinBaseMap {
 	cb := make(CoinBaseMap)
-	return CoinBases{
-		CoinBaseMap: cb,
-	}
+	return cb
 }
 
 func (cbs *CoinBases) Load() CoinBaseMap {
 	cbs.Lock()
-	defer cbs.Unlock()
 	return cbs.CoinBaseMap
 }
 
 func (cbs *CoinBases) Store(cbm CoinBaseMap) {
-	cbs.Lock()
 	defer cbs.Unlock()
 	cbs.CoinBaseMap = cbm
 }
@@ -73,7 +69,7 @@ func (cbs *CoinBases) Store(cbm CoinBaseMap) {
 // contents which will be concurrent safe The varying coinbase payment values are in transaction 0 last output, the
 // individual varying transactions are stored separately and will be reassembled at the end
 func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers,
-	cbs CoinBases) (out Container, txr []*util.Tx) {
+	cbs CoinBaseMap) (out Container, txr []*util.Tx) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
 	// if txr == nil {
 	txr = []*util.Tx{}
@@ -128,14 +124,13 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers,
 			nbH == fork.List[1].TestnetStart) {
 		nbH++
 	}
-	ti := cbs.Load()
 	for i := range bitsMap {
 		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
 		txc := txs.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
 		// Traces(txs)
-		ti[i] = txx
+		cbs[i] = txx
 		// Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, txr...), false)
@@ -143,7 +138,6 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers,
 		mTS[i] = &chainhash.Hash{}
 		_ = mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
-	cbs.Store(ti)
 	// Traces(mTS)
 	mHashes := Hashes.NewHashes()
 	mHashes.Put(mTS)

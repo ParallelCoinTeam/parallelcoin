@@ -179,9 +179,9 @@ func Main(cx *conte.Xt) (err error) {
 		// <-cx.KillAll
 		// cx.WaitGroup.Done()
 		cx.KillAll.Q()
-		// cx.NodeKill.Q()
+		cx.NodeKill.Q()
 		// Debug(interrupt.GoroutineDump())
-		<-interrupt.HandlersDone
+		// <-interrupt.HandlersDone
 	}
 	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)

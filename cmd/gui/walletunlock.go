@@ -228,43 +228,43 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					},
 				},
 			),
-			"goroutines": wg.Page(
-				"log", p9.Widgets{
-					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					
-					p9.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							le := func(gtx l.Context, index int) l.Dimensions {
-								return wg.State.goroutines[index](gtx)
-							}
-							return func(gtx l.Context) l.Dimensions {
-								return wg.th.Inset(
-									0.25,
-									wg.th.Fill(
-										"DocBg",
-										wg.lists["recent"].
-											Vertical().
-											// Background("DocBg").Color("DocText").Active("Primary").
-											Length(len(wg.State.goroutines)).
-											ListElement(le).
-											Fn,
-									).Fn,
-								).
-									Fn(gtx)
-							}(gtx)
-							// wg.NodeRunCommandChan <- "stop"
-							// consume.Kill(wg.Worker)
-							// consume.Kill(wg.cx.StateCfg.Miner)
-							// close(wg.cx.NodeKill)
-							// close(wg.cx.KillAll)
-							// time.Sleep(time.Second*3)
-							// interrupt.Request()
-							// os.Exit(0)
-							// return l.Dimensions{}
-						},
-					},
-				},
-			),
+			// "goroutines": wg.Page(
+			// 	"log", p9.Widgets{
+			// 		// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+			//
+			// 		p9.WidgetSize{
+			// 			Widget: func(gtx l.Context) l.Dimensions {
+			// 				le := func(gtx l.Context, index int) l.Dimensions {
+			// 					return wg.State.goroutines[index](gtx)
+			// 				}
+			// 				return func(gtx l.Context) l.Dimensions {
+			// 					return wg.th.Inset(
+			// 						0.25,
+			// 						wg.th.Fill(
+			// 							"DocBg",
+			// 							wg.lists["recent"].
+			// 								Vertical().
+			// 								// Background("DocBg").Color("DocText").Active("Primary").
+			// 								Length(len(wg.State.goroutines)).
+			// 								ListElement(le).
+			// 								Fn,
+			// 						).Fn,
+			// 					).
+			// 						Fn(gtx)
+			// 				}(gtx)
+			// 				// wg.NodeRunCommandChan <- "stop"
+			// 				// consume.Kill(wg.Worker)
+			// 				// consume.Kill(wg.cx.StateCfg.Miner)
+			// 				// close(wg.cx.NodeKill)
+			// 				// close(wg.cx.KillAll)
+			// 				// time.Sleep(time.Second*3)
+			// 				// interrupt.Request()
+			// 				// os.Exit(0)
+			// 				// return l.Dimensions{}
+			// 			},
+			// 		},
+			// 	},
+			// ),
 			"mining": wg.Page(
 				"mining", p9.Widgets{
 					p9.WidgetSize{
@@ -334,11 +334,11 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage, "",
 			),
-			wg.PageTopBarButton(
-				"goroutines", 0, &icons.ActionBugReport, func(name string) {
-					wg.unlockPage.ActivePage(name)
-				}, wg.unlockPage, "",
-			),
+			// wg.PageTopBarButton(
+			// 	"goroutines", 0, &icons.ActionBugReport, func(name string) {
+			// 		wg.unlockPage.ActivePage(name)
+			// 	}, wg.unlockPage, "",
+			// ),
 			wg.PageTopBarButton(
 				"help", 1, &icons.ActionHelp, func(name string) {
 					wg.unlockPage.ActivePage(name)
