@@ -484,16 +484,18 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Background(wg.App.StatusBarBackgroundGet()).
 					SetClick(
 						func() {
-							Debug("clicked node run control button", wg.node.Running())
-							// wg.toggleNode()
-							if wg.node.Running() {
-								if wg.wallet.Running() {
-									wg.wallet.Stop()
+							go func() {
+								Debug("clicked node run control button", wg.node.Running())
+								// wg.toggleNode()
+								if wg.node.Running() {
+									if wg.wallet.Running() {
+										wg.wallet.Stop()
+									}
+									wg.node.Stop()
+								} else {
+									wg.node.Start()
 								}
-								wg.node.Stop()
-							} else {
-								wg.node.Start()
-							}
+							}()
 						},
 					).
 					Fn,
@@ -530,11 +532,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							// wg.toggleMiner()
-							if wg.miner.Running(){
-								wg.miner.Stop()
-							} else {
-								wg.miner.Start()
-							}
+							go func() {
+								if wg.miner.Running() {
+									*wg.cx.Config.Generate = false
+									wg.miner.Stop()
+								} else {
+									wg.miner.Start()
+									*wg.cx.Config.Generate = true
+								}
+								save.Pod(wg.cx.Config)
+							}()
 						},
 					).
 					Fn,
@@ -617,6 +624,7 @@ func (wg *WalletGUI) writeWalletCookie() (err error) {
 	Debug("created password cookie")
 	return
 }
+
 //
 // func (wg *WalletGUI) toggleNode() {
 // 	if wg.node.Running() {

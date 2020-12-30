@@ -4,13 +4,14 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"os"
 	"strings"
 	"time"
+	
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/util/logi"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
@@ -103,11 +104,7 @@ func (w *Worker) Start() {
 	}
 	Debug("setting workers to active")
 	w.active.Store(true)
-	// interrupt.AddHandler(
-	// 	func() {
-	// 		w.Stop()
-	// 	},
-	// )
+
 }
 
 func (w *Worker) Stop() {
@@ -127,8 +124,8 @@ func (w *Worker) Stop() {
 		}
 		Debug("stopped worker", i)
 	}
-	w.quit.Q()
 	w.active.Store(false)
+	w.quit.Q()
 }
 
 func Handle(cx *conte.Xt) func(c *cli.Context) error {
@@ -205,10 +202,10 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						}
 					}
 					w.hashrate = w.HashReport()
-					// if interrupt.Requested() {
-					// 	w.StopChan <- struct{}{}
-					// 	w.quit.Q()
-					// }
+					if interrupt.Requested() {
+						w.StopChan <- struct{}{}
+						w.quit.Q()
+					}
 				case <-w.StartChan:
 					*cx.Config.Generate = true
 					save.Pod(cx.Config)
@@ -249,7 +246,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		Debug("listening on", control.UDP4MulticastAddress)
 		<-w.quit
 		Info("kopach shutting down") // , interrupt.GoroutineDump())
-		<-interrupt.HandlersDone
+		// <-interrupt.HandlersDone
 		Info("kopach finished shutdown")
 		return
 	}
