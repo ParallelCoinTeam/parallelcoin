@@ -106,6 +106,7 @@ func (wg *WalletGUI) Tickers() {
 						wg.State.SetBestBlockHash(h)
 						Debug("wallet running:", wg.wallet.Running())
 						Debug("wallet client running:", wg.WalletClient != nil)
+						wg.invalidate <- struct{}{}
 					}
 					if wg.wallet.Running() && wg.WalletClient == nil {
 						Debug("connecting to wallet")
@@ -120,17 +121,20 @@ func (wg *WalletGUI) Tickers() {
 								break out
 							}
 							wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+							wg.invalidate <- struct{}{}
 							var confirmed util.Amount
 							if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
 								break out
 							}
 							wg.State.SetBalance(confirmed.ToDUO())
+							wg.invalidate <- struct{}{}
 							Debug("updating recent transactions")
 							var atr []btcjson.ListTransactionsResult
 							// TODO: for some reason this function returns half as many as requested
 							if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<24, 0); Check(err) {
 							}
 							wg.State.SetAllTxs(atr)
+							wg.invalidate <- struct{}{}
 						}
 						if wg.historyTable.Header == nil {
 							Debug("generate the widgets for the updated transactions")
@@ -173,13 +177,13 @@ func (wg *WalletGUI) Tickers() {
 						// 	// there is new elements appended to the end of the list
 						// if first {
 						
+					wg.historyTable.Regenerate(true)
+					wg.UpdateHistoryTable()
 					}
 					wg.invalidate <- struct{}{}
 					first = false
 				// }
 				case <-fiveSeconds:
-					wg.historyTable.Regenerate(true)
-					wg.UpdateHistoryTable()
 					wg.invalidate <- struct{}{}
 				case <-wg.quit:
 					break totalOut

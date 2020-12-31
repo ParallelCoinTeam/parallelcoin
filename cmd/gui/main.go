@@ -37,7 +37,7 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	wg := &WalletGUI{
 		cx:         cx,
 		c:          c,
-		invalidate: qu.T(),
+		invalidate: qu.Ts(16),
 		quit:       cx.KillAll,
 		Size:       &size,
 		noWallet:   &noWallet,
