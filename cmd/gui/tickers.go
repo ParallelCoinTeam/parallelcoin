@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"time"
 	
-	"github.com/kofoworola/godate"
-	
 	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -24,7 +22,7 @@ func (wg *WalletGUI) Tickers() {
 	first := true
 	go func() {
 		var err error
-		seconds := time.Tick(time.Second*3)
+		seconds := time.Tick(time.Second * 3)
 		// fiveSeconds := time.Tick(time.Second * 5)
 	totalOut:
 		for {
@@ -96,16 +94,17 @@ func (wg *WalletGUI) Tickers() {
 					// 	break out
 					// }
 					// var err error
-					// if first {
-					var height int32
-					var h *chainhash.Hash
-					if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
-						// break out
+					if first {
+						var height int32
+						var h *chainhash.Hash
+						if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+							// break out
+						}
+						wg.State.SetBestBlockHeight(int(height))
+						wg.State.SetBestBlockHash(h)
+						Debug("wallet running:", wg.wallet.Running())
+						Debug("wallet client running:", wg.WalletClient != nil)
 					}
-					wg.State.SetBestBlockHeight(int(height))
-					wg.State.SetBestBlockHash(h)
-					Debug("wallet running:", wg.wallet.Running())
-					Debug("wallet client running:", wg.WalletClient != nil)
 					if wg.wallet.Running() && wg.WalletClient == nil {
 						Debug("connecting to wallet")
 						if err = wg.walletClient(); Check(err) {
@@ -113,27 +112,26 @@ func (wg *WalletGUI) Tickers() {
 						}
 					}
 					if wg.WalletAndClientRunning() {
-						Debug(!wg.WalletClient.Disconnected())
-						Debug("wallet is unlocked")
-						var unconfirmed util.Amount
-						if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
-							break out
+						if first {
+							var unconfirmed util.Amount
+							if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
+								break out
+							}
+							wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
+							var confirmed util.Amount
+							if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
+								break out
+							}
+							wg.State.SetBalance(confirmed.ToDUO())
+							Debug("updating recent transactions")
+							var atr []btcjson.ListTransactionsResult
+							// TODO: for some reason this function returns half as many as requested
+							if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<24, 0); Check(err) {
+							}
+							wg.State.SetAllTxs(atr)
 						}
-						wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
-						var confirmed util.Amount
-						if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
-							break out
-						}
-						wg.State.SetBalance(confirmed.ToDUO())
-						Debug("updating recent transactions")
-						var atr []btcjson.ListTransactionsResult
-						// TODO: for some reason this function returns half as many as requested
-						if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<24, 0); Check(err) {
-						}
-						wg.State.SetAllTxs(atr)
-						Debug("generate the widgets for the updated transactions")
-						out := wg.State.FilteredTxs
 						if wg.historyTable.Header == nil {
+							Debug("generate the widgets for the updated transactions")
 							// create the header
 							wg.historyTable.Header = p9.TextTableHeader{
 								"Amount",
@@ -157,6 +155,7 @@ func (wg *WalletGUI) Tickers() {
 								// "Other Account",
 								// "Involves Watch Only",
 							}
+							wg.UpdateHistoryTable()
 						}
 						// startIndex := len(wg.historyTable.Body)
 						// if wg.State.FilterChanged {
@@ -170,46 +169,7 @@ func (wg *WalletGUI) Tickers() {
 						// if startIndex < len(out) {
 						// 	// there is new elements appended to the end of the list
 						// if first {
-						wg.historyTable.Regenerate(false)
-						// }
-						// if wg.App.ActivePageGet() == "history" || first {
-						o := out // [startIndex:]
-						var bd p9.TextTableBody
-						for x := range o {
-							i := x
-							oi := out[i]
-							bd = append(
-								bd, p9.TextTableRow{
-									fmt.Sprintf("%6.8f", oi.Amount),
-									oi.Category,
-									oi.Address,
-									fmt.Sprintf(
-										"%v", godate.Now(time.Local).DifferenceForHumans(
-											godate.Create(time.Unix(oi.Time, 0)),
-										),
-									),
-									fmt.Sprintf("%v", oi.Confirmations),
-									fmt.Sprintf("%v", *oi.BlockIndex),
-									// wg.State.AllTxs[i].TxID,
-									// wg.State.AllTxs[i].Comment,
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
-									// wg.State.AllTxs[i].BlockHash,
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
-									// wg.State.AllTxs[i].Account,
-									// wg.State.AllTxs[i].OtherAccount,
-									// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
-								},
-							)
-							// }
-						}
-						wg.historyTable.Body = bd // wg.historyTable.Body[:0]
-						// }
+						
 					}
 					wg.invalidate <- struct{}{}
 					first = false
@@ -236,6 +196,43 @@ func (wg *WalletGUI) updateThingies() (err error) {
 	return
 }
 
+func (wg *WalletGUI) UpdateHistoryTable() {
+	wg.historyTable.Regenerate(true)
+	out := wg.State.FilteredTxs
+	o := out // [startIndex:]
+	var bd p9.TextTableBody
+	for x := range o {
+		i := x
+		oi := out[i]
+		bd = append(
+			bd, p9.TextTableRow{
+				fmt.Sprintf("%6.8f", oi.Amount),
+				oi.Category,
+				oi.Address,
+				fmt.Sprintf("%v", time.Unix(oi.Time, 0)),
+				fmt.Sprintf("%v", oi.Confirmations),
+				fmt.Sprintf("%v", *oi.BlockIndex),
+				// wg.State.AllTxs[i].TxID,
+				// wg.State.AllTxs[i].Comment,
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
+				// wg.State.AllTxs[i].BlockHash,
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
+				// wg.State.AllTxs[i].Account,
+				// wg.State.AllTxs[i].OtherAccount,
+				// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
+			},
+		)
+		// }
+	}
+	wg.historyTable.Body = bd // wg.historyTable.Body[:0]
+}
+
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
 	// Debug("processChainBlockNotification")
 	// update best block height
@@ -246,7 +243,8 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 	}
 	wg.State.SetBestBlockHeight(int(height))
 	wg.State.SetBestBlockHash(hash)
-	wg.historyTable.Regenerate(true)
+	// }
+	// if wg.App.ActivePageGet() == "history" || first {
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() {
@@ -273,7 +271,7 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 	}
 	// Debug(len(atr))
 	wg.State.SetAllTxs(atr)
-	
+	wg.UpdateHistoryTable()
 }
 
 func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
