@@ -33,7 +33,7 @@ func (ex *Explorer) GetAppWidget() (a *p9.App) {
 	ex.config = cfg.New(ex.cx, ex.th)
 	ex.configs = ex.config.Config()
 	a.Pages(map[string]l.Widget{
-		"main": ex.Page("overview", p9.Widgets{
+		"home": ex.Page("home", p9.Widgets{
 			p9.WidgetSize{Widget: ex.Blocks()},
 		}),
 		"help": ex.Page("help", p9.Widgets{

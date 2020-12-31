@@ -59,7 +59,7 @@ func (th *Theme) App(size *int) *App {
 	mc := th.Clickable()
 	return &App{
 		th:                  th,
-		activePage:          uberatomic.NewString("main"),
+		activePage:          uberatomic.NewString("home"),
 		bodyBackground:      "PanelBg",
 		bodyColor:           "PanelText",
 		cardBackground:      "DocBg",
@@ -290,7 +290,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 							Fn,
 					).
 					Rigid(
-						a.th.H5("wallet").Color("Light").Fn,
+						a.th.H5(a.ActivePageGet()).Color("Light").Fn,
 					).
 					Fn,
 			},
@@ -393,7 +393,7 @@ func (a *App) RenderPage(gtx l.Context) l.Dimensions {
 								Fn,
 						).
 						Rigid(
-							a.th.Body1("page not found").
+							a.th.Body1("page "+a.activePage.Load()+" not found").
 								Alignment(text.Middle).
 								Fn,
 						).

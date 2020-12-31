@@ -36,6 +36,8 @@ func (c Colors) Get(co string) color.NRGBA {
 
 // NewColors creates the base palette for the theme
 func NewColors() (c Colors) {
+	c.Lock()
+	defer c.Unlock()
 	c.m = map[string]string{
 		"black":                 "ff000000",
 		"light-black":           "ff222222",

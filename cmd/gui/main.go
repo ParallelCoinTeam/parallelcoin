@@ -317,6 +317,7 @@ func (wg *WalletGUI) GetLists() (o map[string]*p9.List) {
 	return map[string]*p9.List{
 		"createWallet": wg.th.List(),
 		"overview":     wg.th.List(),
+		"balances":     wg.th.List(),
 		"recent":       wg.th.List(),
 		"send":         wg.th.List(),
 		"transactions": wg.th.List(),

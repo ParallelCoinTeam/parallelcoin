@@ -87,7 +87,7 @@ func (th *Theme) List() (li *List) {
 		pageUp:          th.Clickable(),
 		pageDown:        th.Clickable(),
 		color:           "DocText",
-		background:      "DocBg",
+		background:      "Transparent",
 		active:          "Primary",
 		scrollWidth:     int(th.TextSize.Scale(1).V),
 		setScrollWidth:  int(th.TextSize.Scale(1).V),

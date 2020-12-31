@@ -40,8 +40,8 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	wg.configs = wg.config.Config()
 	a.Pages(
 		map[string]l.Widget{
-			"main": wg.Page(
-				"overview", p9.Widgets{
+			"home": wg.Page(
+				"home", p9.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 					p9.WidgetSize{Widget: wg.OverviewPage()},
 				},
@@ -206,7 +206,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	)
 	a.SideBar(
 		[]l.Widget{
-			wg.SideBarButton("overview", "main", 0),
+			wg.SideBarButton("home", "home", 0),
 			wg.SideBarButton("send", "send", 1),
 			wg.SideBarButton("receive", "receive", 2),
 			wg.SideBarButton("history", "history", 3),
@@ -296,11 +296,11 @@ func (wg *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l
 			Rigid(
 				a.Responsive(
 					*wg.Size, p9.Widgets{
+						// p9.WidgetSize{
+						// 	Widget: a.Inset(0.25, a.H5(title).Color(wg.App.BodyColorGet()).Fn).Fn,
+						// },
 						p9.WidgetSize{
-							Widget: a.Inset(0.25, a.H5(title).Color(wg.App.BodyColorGet()).Fn).Fn,
-						},
-						p9.WidgetSize{
-							Size:   800,
+							// Size:   800,
 							Widget: p9.EmptySpace(0, 0),
 							// a.Inset(0.25, a.Caption(title).Color(wg.BodyColorGet()).Fn).Fn,
 						},
@@ -328,6 +328,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 		max := int(wg.App.SideBarSize.V)
 		gtx.Constraints.Max.X = max
 		gtx.Constraints.Min.X = max
+		// Debug("sideMAXXXXXX!!", max)
 		return wg.th.Fill(background,
 			wg.th.Flex().Flexed(1,
 				wg.th.Button(wg.sidebarButtons[index]).

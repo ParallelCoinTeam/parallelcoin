@@ -353,7 +353,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 				}
 				wg.State.SetBalance(confirmed.ToDUO())
 				// don't update this unless it's in view
-				// if wg.ActivePageGet() == "main" {
+				// if wg.ActivePageGet() == "overview" {
 				Debug("updating recent transactions")
 				var atr []btcjson.ListTransactionsResult
 				// TODO: for some reason this function returns half as many as requested

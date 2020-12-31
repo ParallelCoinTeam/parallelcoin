@@ -82,8 +82,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	)
 	a.Pages(
 		map[string]l.Widget{
-			"main": wg.Page(
-				"overview", p9.Widgets{
+			"home": wg.Page(
+				"home", p9.Widgets{
 					p9.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
@@ -316,7 +316,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 		},
 	)
 	// a.SideBar([]l.Widget{
-	// 	wg.SideBarButton("overview", "main", 0),
+	// 	wg.SideBarButton("overview", "overview", 0),
 	// 	wg.SideBarButton("send", "send", 1),
 	// 	wg.SideBarButton("receive", "receive", 2),
 	// 	wg.SideBarButton("history", "history", 3),
@@ -331,7 +331,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a.ButtonBar(
 		[]l.Widget{
 			wg.PageTopBarButton(
-				"main", 4, &icons.ActionLock, func(name string) {
+				"home", 4, &icons.ActionLock, func(name string) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage, "Danger",
 			),
