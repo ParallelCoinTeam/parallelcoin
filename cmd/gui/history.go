@@ -4,10 +4,11 @@ import (
 	l "gioui.org/layout"
 	
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 func (wg *WalletGUI) HistoryPage() l.Widget {
-
+	
 	return func(gtx l.Context) l.Dimensions {
 		return wg.th.VFlex().
 			Rigid(
@@ -59,36 +60,36 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	// gen := wg.bools["showGenerate"].GetValue()
-	// sent := wg.bools["showSent"].GetValue()
-	// recv := wg.bools["showReceived"].GetValue()
-	// imma := wg.bools["showImmature"].GetValue()
-	// // current := wg.incdecs["transactionsPerPage"].GetCurrent()
-	// cursor := 0 // wg.historyCurPage * current
-	// // Debug(cursor, wg.historyCurPage, current, *wg.Size)
-	// var out []btcjson.ListTransactionsResult
-	// // for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
-	// // Debugs(wg.State.AllTxs)
-	// ws := wg.State.AllTxs
-	// for ; cursor < len(ws)-1; cursor++ {
-	// 	wsa := ws[cursor]
-	// 	if wsa.Generated && gen ||
-	// 		wsa.Category == "send" && sent ||
-	// 		wsa.Category == "generate" && gen ||
-	// 		wsa.Category == "immature" && imma ||
-	// 		wsa.Category == "receive" && recv ||
-	// 		wsa.Category == "unknown" {
-	// 		out = append(out, wsa)
-	// 		// break
-	// 	}
-	//
-	// }
-	// if cursor == len(wg.State.AllTxs)-1 {
-	// 	break
-	// }
-	// }
+	gen := wg.bools["showGenerate"].GetValue()
+	sent := wg.bools["showSent"].GetValue()
+	recv := wg.bools["showReceived"].GetValue()
+	imma := wg.bools["showImmature"].GetValue()
+	// current := wg.incdecs["transactionsPerPage"].GetCurrent()
+	cursor := 0 // wg.historyCurPage * current
+	// Debug(cursor, wg.historyCurPage, current, *wg.Size)
+	var out []btcjson.ListTransactionsResult
+	for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
+		// Debugs(wg.State.AllTxs)
+		ws := wg.State.AllTxs
+		for ; cursor < len(ws)-1; cursor++ {
+			wsa := ws[cursor]
+			if wsa.Generated && gen ||
+				wsa.Category == "send" && sent ||
+				wsa.Category == "generate" && gen ||
+				wsa.Category == "immature" && imma ||
+				wsa.Category == "receive" && recv ||
+				wsa.Category == "unknown" {
+				out = append(out, wsa)
+				// break
+			}
+			
+		}
+		if cursor == len(wg.State.AllTxs)-1 {
+			break
+		}
+	}
 	// Debugs(out)
-
+	
 	return wg.th.VFlex().Flexed(1, wg.historyTable.Fn).Fn
 	// wg.th.Fill("DocBg",
 	// p9.EmptySpace(0, 0),

@@ -2,11 +2,15 @@ package gui
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"time"
 	
+	"github.com/kofoworola/godate"
+	
 	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -20,7 +24,7 @@ func (wg *WalletGUI) Tickers() {
 	first := true
 	go func() {
 		var err error
-		seconds := time.Tick(time.Second)
+		seconds := time.Tick(time.Second*3)
 		// fiveSeconds := time.Tick(time.Second * 5)
 	totalOut:
 		for {
@@ -127,81 +131,85 @@ func (wg *WalletGUI) Tickers() {
 						if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<24, 0); Check(err) {
 						}
 						wg.State.SetAllTxs(atr)
-						// Debug("generate the widgets for the updated transactions")
-						// out := wg.State.FilteredTxs
-						// if wg.historyTable.Header == nil {
-						// 	// create the header
-						// 	wg.historyTable.Header = p9.TextTableHeader{
-						// 		"Amount",
-						// 		"Category",
-						// 		"Address",
-						// 		"Time",
-						// 		"Conf",
-						// 		"In Block",
-						// 		// "Transaction ID",
-						// 		// "Comment",
-						// 		// "Fee",
-						// 		// "BlockHash",
-						// 		// "BlockTime",
-						// 		// "Generated",
-						// 		// "Abandoned",
-						// 		// "Time Received",
-						// 		// "Trusted",
-						// 		// "Vout",
-						// 		// "Wallet Conflicts",
-						// 		// "Account",
-						// 		// "Other Account",
-						// 		// "Involves Watch Only",
-						// 	}
+						Debug("generate the widgets for the updated transactions")
+						out := wg.State.FilteredTxs
+						if wg.historyTable.Header == nil {
+							// create the header
+							wg.historyTable.Header = p9.TextTableHeader{
+								"Amount",
+								"Category",
+								"Address",
+								"Time",
+								"Conf",
+								"In Block",
+								// "Transaction ID",
+								// "Comment",
+								// "Fee",
+								// "BlockHash",
+								// "BlockTime",
+								// "Generated",
+								// "Abandoned",
+								// "Time Received",
+								// "Trusted",
+								// "Vout",
+								// "Wallet Conflicts",
+								// "Account",
+								// "Other Account",
+								// "Involves Watch Only",
+							}
+						}
+						// startIndex := len(wg.historyTable.Body)
+						// if wg.State.FilterChanged {
+						// 	startIndex = 0
+						// 	// all elements must be generated this time
+						// 	wg.historyTable.Body = wg.historyTable.Body[:0]
 						// }
-						// // startIndex := len(wg.historyTable.Body)
-						// // if wg.State.FilterChanged {
-						// // 	startIndex = 0
-						// // 	// all elements must be generated this time
-						// // 	wg.historyTable.Body = wg.historyTable.Body[:0]
-						// // }
-						// // // append all newly added items to the body. The caller can force regeneration by slicing the
-						// // // body to zero elements or nilling it, as then every element of out will be generated and added
-						// // // to a fresh empty slice.
-						// // if startIndex < len(out) {
-						// // 	// there is new elements appended to the end of the list
-						// o := out // [startIndex:]
-						// var bd p9.TextTableBody
-						// for x := range o {
-						// 	i := x
-						// 	oi := out[i]
-						// 	bd = append(
-						// 		bd, p9.TextTableRow{
-						// 			fmt.Sprintf("%6.8f", oi.Amount),
-						// 			oi.Category,
-						// 			oi.Address,
-						// 			fmt.Sprintf(
-						// 				"%v", godate.Now(time.Local).DifferenceForHumans(
-						// 					godate.Create(time.Unix(oi.Time, 0)),
-						// 				),
-						// 			),
-						// 			fmt.Sprintf("%v", oi.Confirmations),
-						// 			fmt.Sprintf("%v", *oi.BlockIndex),
-						// 			// wg.State.AllTxs[i].TxID,
-						// 			// wg.State.AllTxs[i].Comment,
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
-						// 			// wg.State.AllTxs[i].BlockHash,
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
-						// 			// wg.State.AllTxs[i].Account,
-						// 			// wg.State.AllTxs[i].OtherAccount,
-						// 			// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
-						// 		},
-						// 	)
-						// 	// }
+						// // append all newly added items to the body. The caller can force regeneration by slicing the
+						// // body to zero elements or nilling it, as then every element of out will be generated and added
+						// // to a fresh empty slice.
+						// if startIndex < len(out) {
+						// 	// there is new elements appended to the end of the list
+						// if first {
+						wg.historyTable.Regenerate(false)
 						// }
-						// wg.historyTable.Body = bd // wg.historyTable.Body[:0]
-						// wg.historyTable.Regenerate(false)
+						// if wg.App.ActivePageGet() == "history" || first {
+						o := out // [startIndex:]
+						var bd p9.TextTableBody
+						for x := range o {
+							i := x
+							oi := out[i]
+							bd = append(
+								bd, p9.TextTableRow{
+									fmt.Sprintf("%6.8f", oi.Amount),
+									oi.Category,
+									oi.Address,
+									fmt.Sprintf(
+										"%v", godate.Now(time.Local).DifferenceForHumans(
+											godate.Create(time.Unix(oi.Time, 0)),
+										),
+									),
+									fmt.Sprintf("%v", oi.Confirmations),
+									fmt.Sprintf("%v", *oi.BlockIndex),
+									// wg.State.AllTxs[i].TxID,
+									// wg.State.AllTxs[i].Comment,
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
+									// wg.State.AllTxs[i].BlockHash,
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
+									// wg.State.AllTxs[i].Account,
+									// wg.State.AllTxs[i].OtherAccount,
+									// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
+								},
+							)
+							// }
+						}
+						wg.historyTable.Body = bd // wg.historyTable.Body[:0]
+						// }
 					}
 					wg.invalidate <- struct{}{}
 					first = false
@@ -238,6 +246,7 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 	}
 	wg.State.SetBestBlockHeight(int(height))
 	wg.State.SetBestBlockHash(hash)
+	wg.historyTable.Regenerate(true)
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() {
