@@ -35,7 +35,7 @@ func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 		return f.w(gtx)
 	})
 	fill(gtx, f.th.Colors.Get(f.col), dL[0].Size)
-	return f.w(gtx)
+	return f.dxn.Layout(gtx, f.w)
 }
 
 func fill(gtx l.Context, col color.NRGBA, bounds image.Point) {

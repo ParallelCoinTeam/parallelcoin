@@ -3,10 +3,14 @@ package p9
 import (
 	"fmt"
 	"image/color"
+	"sync"
 )
 
 // Colors is a map of names to hex strings specifying colors
-type Colors map[string]string
+type Colors struct {
+	sync.Mutex
+	m map[string]string
+}
 
 // HexARGB converts a 32 bit hex string into a color specification
 func HexARGB(s string) (c color.RGBA) {
@@ -22,7 +26,9 @@ func HexNRGB(s string) (c color.NRGBA) {
 
 // Get returns the named color from the map
 func (c Colors) Get(co string) color.NRGBA {
-	if col, ok := c[co]; ok {
+	c.Lock()
+	defer c.Unlock()
+	if col, ok := c.m[co]; ok {
 		return HexNRGB(col)
 	}
 	return color.NRGBA{}
@@ -30,7 +36,7 @@ func (c Colors) Get(co string) color.NRGBA {
 
 // NewColors creates the base palette for the theme
 func NewColors() (c Colors) {
-	c = map[string]string{
+	c.m = map[string]string{
 		"black":                 "ff000000",
 		"light-black":           "ff222222",
 		"blue":                  "ff3030cf",
@@ -93,110 +99,112 @@ func NewColors() (c Colors) {
 		"halfdim":               "88000000",
 		"halfbright":            "88888888",
 	}
-
-	c["Black"] = c["black"]
-	c["ButtonBg"] = c["blue-lite-blue"]
-	c["ButtonBgDim"] = "ff30809a"
-	c["ButtonText"] = c["White"]
-	c["ButtonTextDim"] = c["light-grayii"]
-	c["Check"] = c["orange"]
-	c["Check"] = c["orange"]
-	c["Danger"] = c["red"]
-	c["Dark"] = c["dark"]
-	c["DarkGray"] = c["dark-grayii"]
-	c["DarkGrayI"] = c["dark-grayi"]
-	c["DarkGrayII"] = c["dark-gray"]
-	c["DarkGrayIII"] = c["dark"]
-	c["DocBg"] = c["white"]
-	c["DocBgDim"] = c["light-grayii"]
-	c["DocBgHilite"] = c["dark-white"]
-	c["DocText"] = c["dark"]
-	c["DocTextDim"] = c["light-grayi"]
-	c["Fatal"] = "ff880000"
-	c["Gray"] = c["gray"]
-	c["Hint"] = c["light-gray"]
-	c["Info"] = c["blue-lite-blue"]
-	c["InvText"] = c["light"]
-	c["Light"] = c["light"]
-	c["LightGray"] = c["light-grayiii"]
-	c["LightGrayI"] = c["light-grayii"]
-	c["LightGrayII"] = c["light-grayi"]
-	c["LightGrayIII"] = c["light-gray"]
-	c["PanelBg"] = c["light"]
-	c["PanelBgDim"] = c["dark-grayi"]
-	c["PanelText"] = c["dark"]
-	c["PanelTextDim"] = c["light-grayii"]
-	c["PrimaryLight"] = c["green-blue"]
-	c["Primary"] = c["PrimaryLight"]
-	c["PrimaryDim"] = c["dark-green-blue"]
-	c["SecondaryLight"] = c["purple"]
-	c["Secondary"] = c["purple"]
-	c["SecondaryDim"] = c["dark-purple"]
-	c["Success"] = c["green"]
-	c["Transparent"] = c["00000000"]
-	c["Warning"] = c["light-orange"]
-	c["White"] = c["white"]
-	c["scrim"] = c["halfdim"]
-
-	c["Primary"] = c["PrimaryLight"]
-	c["Secondary"] = c["SecondaryLight"]
-
-	c["DocText"] = c["dark"]
-	c["DocBg"] = c["white"]
-
-	c["PanelText"] = c["dark"]
-	c["PanelBg"] = c["light"]
-
-	c["PanelTextDim"] = c["dark-grayii"]
-	c["PanelBgDim"] = c["dark-grayi"]
-	c["DocTextDim"] = c["light-grayi"]
-	c["DocBgDim"] = c["dark-grayi"]
-	c["Warning"] = c["light-orange"]
-	c["Success"] = c["dark-green"]
-	c["Check"] = c["orange"]
-	c["DocBgHilite"] = c["dark-white"]
-	c["scrim"] = c["halfbright"]
+	
+	c.m["Black"] = c.m["black"]
+	c.m["ButtonBg"] = c.m["blue-lite-blue"]
+	c.m["ButtonBgDim"] = "ff30809a"
+	c.m["ButtonText"] = c.m["White"]
+	c.m["ButtonTextDim"] = c.m["light-grayii"]
+	c.m["Check"] = c.m["orange"]
+	c.m["Check"] = c.m["orange"]
+	c.m["Danger"] = c.m["red"]
+	c.m["Dark"] = c.m["dark"]
+	c.m["DarkGray"] = c.m["dark-grayii"]
+	c.m["DarkGrayI"] = c.m["dark-grayi"]
+	c.m["DarkGrayII"] = c.m["dark-gray"]
+	c.m["DarkGrayIII"] = c.m["dark"]
+	c.m["DocBg"] = c.m["white"]
+	c.m["DocBgDim"] = c.m["light-grayii"]
+	c.m["DocBgHilite"] = c.m["dark-white"]
+	c.m["DocText"] = c.m["dark"]
+	c.m["DocTextDim"] = c.m["light-grayi"]
+	c.m["Fatal"] = "ff880000"
+	c.m["Gray"] = c.m["gray"]
+	c.m["Hint"] = c.m["light-gray"]
+	c.m["Info"] = c.m["blue-lite-blue"]
+	c.m["InvText"] = c.m["light"]
+	c.m["Light"] = c.m["light"]
+	c.m["LightGray"] = c.m["light-grayiii"]
+	c.m["LightGrayI"] = c.m["light-grayii"]
+	c.m["LightGrayII"] = c.m["light-grayi"]
+	c.m["LightGrayIII"] = c.m["light-gray"]
+	c.m["PanelBg"] = c.m["light"]
+	c.m["PanelBgDim"] = c.m["dark-grayi"]
+	c.m["PanelText"] = c.m["dark"]
+	c.m["PanelTextDim"] = c.m["light-grayii"]
+	c.m["PrimaryLight"] = c.m["green-blue"]
+	c.m["Primary"] = c.m["PrimaryLight"]
+	c.m["PrimaryDim"] = c.m["dark-green-blue"]
+	c.m["SecondaryLight"] = c.m["purple"]
+	c.m["Secondary"] = c.m["purple"]
+	c.m["SecondaryDim"] = c.m["dark-purple"]
+	c.m["Success"] = c.m["green"]
+	c.m["Transparent"] = c.m["00000000"]
+	c.m["Warning"] = c.m["light-orange"]
+	c.m["White"] = c.m["white"]
+	c.m["scrim"] = c.m["halfdim"]
+	
+	c.m["Primary"] = c.m["PrimaryLight"]
+	c.m["Secondary"] = c.m["SecondaryLight"]
+	
+	c.m["DocText"] = c.m["dark"]
+	c.m["DocBg"] = c.m["white"]
+	
+	c.m["PanelText"] = c.m["dark"]
+	c.m["PanelBg"] = c.m["light"]
+	
+	c.m["PanelTextDim"] = c.m["dark-grayii"]
+	c.m["PanelBgDim"] = c.m["dark-grayi"]
+	c.m["DocTextDim"] = c.m["light-grayi"]
+	c.m["DocBgDim"] = c.m["dark-grayi"]
+	c.m["Warning"] = c.m["light-orange"]
+	c.m["Success"] = c.m["dark-green"]
+	c.m["Check"] = c.m["orange"]
+	c.m["DocBgHilite"] = c.m["dark-white"]
+	c.m["scrim"] = c.m["halfbright"]
 	return c
 }
 
 func (c Colors) SetTheme(dark bool) {
+	c.Lock()
+	defer c.Unlock()
 	if !dark {
-		c["Primary"] = c["PrimaryLight"]
-		c["Secondary"] = c["SecondaryLight"]
-
-		c["DocText"] = c["dark"]
-		c["DocBg"] = c["white"]
-
-		c["PanelText"] = c["dark"]
-		c["PanelBg"] = c["light"]
-
-		c["PanelTextDim"] = c["dark-grayii"]
-		c["PanelBgDim"] = c["dark-grayi"]
-		c["DocTextDim"] = c["light-grayi"]
-		c["DocBgDim"] = c["dark-grayi"]
-		c["Warning"] = c["light-orange"]
-		c["Success"] = c["dark-green"]
-		c["Check"] = c["orange"]
-		c["DocBgHilite"] = c["dark-white"]
-		c["scrim"] = c["halfdim"]
+		c.m["Primary"] = c.m["PrimaryLight"]
+		c.m["Secondary"] = c.m["SecondaryLight"]
+		
+		c.m["DocText"] = c.m["dark"]
+		c.m["DocBg"] = c.m["white"]
+		
+		c.m["PanelText"] = c.m["dark"]
+		c.m["PanelBg"] = c.m["light"]
+		
+		c.m["PanelTextDim"] = c.m["dark-grayii"]
+		c.m["PanelBgDim"] = c.m["dark-grayi"]
+		c.m["DocTextDim"] = c.m["light-grayi"]
+		c.m["DocBgDim"] = c.m["dark-grayi"]
+		c.m["Warning"] = c.m["light-orange"]
+		c.m["Success"] = c.m["dark-green"]
+		c.m["Check"] = c.m["orange"]
+		c.m["DocBgHilite"] = c.m["dark-white"]
+		c.m["scrim"] = c.m["halfdim"]
 	} else {
-		c["Primary"] = c["PrimaryDim"]
-		c["Secondary"] = c["SecondaryDim"]
-
-		c["DocText"] = c["light"]
-		c["DocBg"] = c["dark"]
-
-		c["PanelText"] = c["light"]
-		c["PanelBg"] = c["black"]
-
-		c["PanelTextDim"] = c["light-grayii"]
-		c["PanelBgDim"] = c["light-gray"]
-		c["DocTextDim"] = c["light-gray"]
-		c["DocBgDim"] = c["light-grayii"]
-		c["Warning"] = c["yellow"]
-		c["Success"] = c["green"]
-		c["Check"] = c["orange"]
-		c["DocBgHilite"] = c["light-black"]
-		c["scrim"] = c["halfbright"]
+		c.m["Primary"] = c.m["PrimaryDim"]
+		c.m["Secondary"] = c.m["SecondaryDim"]
+		
+		c.m["DocText"] = c.m["light"]
+		c.m["DocBg"] = c.m["dark"]
+		
+		c.m["PanelText"] = c.m["light"]
+		c.m["PanelBg"] = c.m["black"]
+		
+		c.m["PanelTextDim"] = c.m["light-grayii"]
+		c.m["PanelBgDim"] = c.m["light-gray"]
+		c.m["DocTextDim"] = c.m["light-gray"]
+		c.m["DocBgDim"] = c.m["light-grayii"]
+		c.m["Warning"] = c.m["yellow"]
+		c.m["Success"] = c.m["green"]
+		c.m["Check"] = c.m["orange"]
+		c.m["DocBgHilite"] = c.m["light-black"]
+		c.m["scrim"] = c.m["halfbright"]
 	}
 }

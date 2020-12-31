@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 	
+	"gioui.org/text"
 	"github.com/urfave/cli"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
@@ -225,11 +226,17 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 			first = false
 		}
 		// put in the header
-		out = append(out, func(gtx l.Context) l.Dimensions {
-			return ng.th.Fill("PanelBg", ng.th.Inset(0.5,
-				ng.th.H5(g.name).Color("PanelText").
-					Fn).Fn, l.Center).Fn(gtx)
-		})
+		out = append(out,
+			// ng.th.Fill("PanelBg",
+			ng.th.Inset(0.5,
+				ng.th.H5(g.name).
+					Color("PanelText").
+					Alignment(text.Middle).
+					Fn,
+			).Fn,
+			// 	l.Center,
+			// ).Fn,
+		)
 		// out = append(out, func(gtx l.Context) l.Dimensions {
 		// 	return ng.th.Fill("PanelBg",
 		// 		ng.th.Inset(0.25,

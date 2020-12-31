@@ -3,6 +3,7 @@ package p9
 import (
 	"gioui.org/text"
 	"gioui.org/unit"
+	
 	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
@@ -38,7 +39,6 @@ func NewTheme(fontCollection []text.FontFace, quit qu.C) (th *Theme) {
 		iconCache:     make(IconCache),
 		// 32 should buffer all pending events without blocking during normal operation
 		BackgroundProcessingQueue: NewCallbackQueue(32),
-		
 	}
 	th.WidgetPool = th.NewPool()
 	// callback channel handler

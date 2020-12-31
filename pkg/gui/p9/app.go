@@ -438,16 +438,20 @@ func (a *App) renderSideBar() l.Widget {
 			gtx.Constraints.Min.X = max
 			out := a.sideBarList.
 				Length(len(a.sideBar)).
-				// LeftSide(true).
+				LeftSide(true).
 				
 				Vertical().
 				Background("PanelBg").
-				ScrollWidth(20).
+				// ScrollWidth(20).
 				// Color("DocText").
 				// Active("Primary").
 				ListElement(le)
 			// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
-			return out.Fn(gtx)
+			return a.th.Fill(
+				"DocBg",
+				out.Fn,
+				l.Center,
+			).Fn(gtx)
 		}
 	} else {
 		return EmptySpace(0, 0)
