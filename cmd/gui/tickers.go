@@ -23,7 +23,7 @@ func (wg *WalletGUI) Tickers() {
 	go func() {
 		var err error
 		seconds := time.Tick(time.Second * 3)
-		// fiveSeconds := time.Tick(time.Second * 5)
+		fiveSeconds := time.Tick(time.Second * 5)
 	totalOut:
 		for {
 		preconnect:
@@ -62,6 +62,8 @@ func (wg *WalletGUI) Tickers() {
 						// break
 					}
 					break preconnect
+				case <-fiveSeconds:
+					continue
 				case <-wg.quit:
 					break totalOut
 				}
@@ -155,8 +157,9 @@ func (wg *WalletGUI) Tickers() {
 								// "Other Account",
 								// "Involves Watch Only",
 							}
-							wg.UpdateHistoryTable()
 						}
+						// if first || len(wg.historyTable.Body) < 1 {
+						// }
 						// startIndex := len(wg.historyTable.Body)
 						// if wg.State.FilterChanged {
 						// 	startIndex = 0
@@ -173,7 +176,11 @@ func (wg *WalletGUI) Tickers() {
 					}
 					wg.invalidate <- struct{}{}
 					first = false
-					// }
+				// }
+				case <-fiveSeconds:
+					wg.historyTable.Regenerate(true)
+					wg.UpdateHistoryTable()
+					wg.invalidate <- struct{}{}
 				case <-wg.quit:
 					break totalOut
 				}
