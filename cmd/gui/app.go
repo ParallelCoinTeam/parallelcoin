@@ -24,12 +24,14 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 		func() {
 			Debug("theme hook")
 			// Debug(wg.bools)
-			*wg.cx.Config.DarkTheme = *wg.th.Dark
-			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-			*a = *wg.th.Dark
-			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
-				wgb.Value(*wg.th.Dark)
-			}
+			// wg.th.Colors.Lock()
+			// *wg.cx.Config.DarkTheme = *wg.th.Dark
+			// a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
+			// *a = *wg.th.Dark
+			// if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
+			// 	wgb.Value(*wg.th.Dark)
+			// }
+			// wg.th.Colors.Unlock()
 			if wg.historyTable != nil {
 				wg.historyTable.Regenerate(true)
 			}
