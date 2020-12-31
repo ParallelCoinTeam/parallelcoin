@@ -432,7 +432,7 @@ func (a *App) renderSideBar() l.Widget {
 					max = i.Size.X
 				}
 			}
-			Debug(max)
+			// Debug(max)
 			a.SideBarSize.V = float32(max)
 			gtx.Constraints.Max.X = max
 			gtx.Constraints.Min.X = max

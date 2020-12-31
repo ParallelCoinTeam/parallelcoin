@@ -325,11 +325,13 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 			background = "PanelBg"
 			color = "PanelText"
 		}
-		return func(gtx l.Context) l.Dimensions {
-			return wg.th.Fill(background,
+		max := int(wg.App.SideBarSize.V)
+		gtx.Constraints.Max.X = max
+		gtx.Constraints.Min.X = max
+		return wg.th.Fill(background,
+			wg.th.Flex().Flexed(1,
 				wg.th.Button(wg.sidebarButtons[index]).
-					Text(title).
-					Color(color).
+					Text(title).Color(color).
 					Background("Transparent").
 					SetClick(
 						func() {
@@ -338,9 +340,9 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 							}
 							wg.App.ActivePage(page)
 						},
-					).Fn, l.W,
-			).Fn(gtx)
-		}(gtx)
+					).Fn,
+			).Fn, l.Center,
+		).Fn(gtx)
 	}
 }
 
