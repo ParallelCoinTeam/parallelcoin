@@ -112,16 +112,13 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 																		dims = wg.th.Flex().
 																			AlignBaseline().
 																			Rigid(
-																				wg.th.Fill(
-																					"Primary",
-																					wg.th.Inset(
-																						0.5,
-																						wg.th.Icon().
-																							Scale(p9.Scales["H3"]).
-																							Color("PanelBg").
-																							Src(&icons.ActionLock).Fn,
-																					).Fn,
-																				).Fn,
+																				wg.th.Fill("Primary", wg.th.Inset(
+																					0.5,
+																					wg.th.Icon().
+																						Scale(p9.Scales["H3"]).
+																						Color("PanelBg").
+																						Src(&icons.ActionLock).Fn,
+																				).Fn, l.Center).Fn,
 																			).
 																			Rigid(
 																				wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn,

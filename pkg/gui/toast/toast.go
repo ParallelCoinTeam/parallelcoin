@@ -114,19 +114,16 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 									Rigid(
 										t.theme.Inset(
 											0.1,
-											t.theme.Fill(
-												t.toasts[index].level,
-												t.theme.Flex().
-													Rigid(
-														func(gtx l.Context) l.Dimensions {
-															return t.theme.Icon().Color("DocText").Scale(1).Src(t.toasts[index].icon).Fn(gtx)
-														},
-													).
-													Flexed(
-														1,
-														t.theme.H6(t.toasts[index].title).Color("PanelBg").Fn,
-													).Fn,
-											).Fn,
+											t.theme.Fill(t.toasts[index].level, t.theme.Flex().
+												Rigid(
+													func(gtx l.Context) l.Dimensions {
+														return t.theme.Icon().Color("DocText").Scale(1).Src(t.toasts[index].icon).Fn(gtx)
+													},
+												).
+												Flexed(
+													1,
+													t.theme.H6(t.toasts[index].title).Color("PanelBg").Fn,
+												).Fn, l.Center).Fn,
 										).Fn,
 									).
 									Rigid(

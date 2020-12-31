@@ -268,44 +268,38 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 	fn := c.th.VFlex().
 		Flexed(
 			0.1,
-			c.th.Fill(
-				"PanelBg",
-				func(gtx l.Context) l.Dimensions {
-					return c.th.Inset(
-						0.25,
-						c.outputList.
-							ScrollToEnd().
-							End().
-							Background("PanelBg").
-							Color("PanelText").
-							Active("Primary").
-							Vertical().
-							Length(len(c.output)).
-							ListElement(le).
-							Fn,
-					).
-						Fn(gtx)
-				},
-			).Fn,
+			c.th.Fill("PanelBg", func(gtx l.Context) l.Dimensions {
+				return c.th.Inset(
+					0.25,
+					c.outputList.
+						ScrollToEnd().
+						End().
+						Background("PanelBg").
+						Color("PanelText").
+						Active("Primary").
+						Vertical().
+						Length(len(c.output)).
+						ListElement(le).
+						Fn,
+				).
+					Fn(gtx)
+			}, l.Center).Fn,
 		).
 		Rigid(
-			c.th.Fill(
-				"DocBg",
-				c.th.Inset(
-					0.25,
-					c.th.Flex().
-						Flexed(
-							1,
-							c.th.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
-								Color("DocText").
-								Fn,
-						).
-						Rigid(c.copyButton.Fn).
-						Rigid(c.pasteButton.Fn).
-						Rigid(c.clearButton.Fn).
-						Fn,
-				).Fn,
-			).Fn,
+			c.th.Fill("DocBg", c.th.Inset(
+				0.25,
+				c.th.Flex().
+					Flexed(
+						1,
+						c.th.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
+							Color("DocText").
+							Fn,
+					).
+					Rigid(c.copyButton.Fn).
+					Rigid(c.pasteButton.Fn).
+					Rigid(c.clearButton.Fn).
+					Fn,
+			).Fn, l.Center).Fn,
 		).
 		Fn
 	return fn(gtx)

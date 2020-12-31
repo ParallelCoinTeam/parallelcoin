@@ -2,9 +2,9 @@ package gui
 
 import (
 	"fmt"
-
+	
 	l "gioui.org/layout"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/p9"
@@ -24,10 +24,10 @@ func (wg *WalletGUI) blockIitem(label, data string) l.Widget {
 		return wg.th.Inset(0.25,
 			wg.th.VFlex().
 				Rigid(
-					wg.th.Inset(0.0, wg.th.Fill("PanelBg", wg.th.Inset(0.2, wg.th.H6(label).Color("DocText").Fn).Fn).Fn).Fn,
+					wg.th.Inset(0.0, wg.th.Fill("PanelBg", wg.th.Inset(0.2, wg.th.H6(label).Color("DocText").Fn).Fn, l.Center).Fn).Fn,
 				).
 				Rigid(
-					wg.th.Inset(0.0, wg.th.Fill("DocBg", wg.th.Inset(0.2, wg.th.Body1(data).Color("DocText").Font("go regular").Fn).Fn).Fn).Fn,
+					wg.th.Inset(0.0, wg.th.Fill("DocBg", wg.th.Inset(0.2, wg.th.Body1(data).Color("DocText").Font("go regular").Fn).Fn, l.Center).Fn).Fn,
 				).Fn,
 		).Fn
 	} else {
@@ -64,7 +64,7 @@ func (wg *WalletGUI) blockPage(blockHeight int) func() {
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return blockLayout[index](gtx)
 	}
-
+	
 	return func() {
 		wg.w[b.data.Hash] = f.NewWindow(wg.th)
 		go func() {
@@ -74,7 +74,7 @@ func (wg *WalletGUI) blockPage(blockHeight int) func() {
 				Run(
 					wg.th.VFlex().
 						Rigid(
-							wg.th.Inset(0.0, wg.th.Fill("Primary", wg.th.Inset(0.5, wg.th.Caption("Block "+fmt.Sprint(blockHeight)).Color("DocBg").Fn).Fn).Fn).Fn,
+							wg.th.Inset(0.0, wg.th.Fill("Primary", wg.th.Inset(0.5, wg.th.Caption("Block "+fmt.Sprint(blockHeight)).Color("DocBg").Fn).Fn, l.Center).Fn).Fn,
 						).
 						Flexed(1,
 							wg.th.Inset(0,
@@ -124,7 +124,7 @@ func (wg *WalletGUI) blockPage(blockHeight int) func() {
 			}
 		}()
 		// b.data.Hash, "Block: "+fmt.Sprint(b.data.Height), 600, 800,
-
+		
 	}
 }
 

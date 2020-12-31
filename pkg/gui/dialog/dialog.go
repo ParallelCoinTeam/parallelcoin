@@ -1,14 +1,16 @@
 package dialog
 
 import (
+	"image"
+	"image/color"
+	
 	"gioui.org/io/pointer"
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+	
 	"github.com/p9c/pod/pkg/gui/p9"
-	"image"
-	"image/color"
 )
 
 type Dialog struct {
@@ -88,26 +90,23 @@ func (d *Dialog) DrawDialog() func(gtx l.Context) {
 					return l.Dimensions{Size: gtx.Constraints.Max}
 				},
 			).Stacked(
-				d.theme.Fill(
-					"DocBg",
-					d.theme.Inset(
-						0.25,
-						d.theme.Fill(
-							"PanelBg",
-							d.theme.Inset(
-								1,
-								d.theme.VFlex().
-									Rigid(
-										d.theme.Body1(d.content.title).Color("PanelText").Fn,
-									).
-									Rigid(content).
-									Rigid(
-										d.theme.Button(d.close).Text("CLOSE").Color("Warning").SetClick(d.Close).Fn,
-									).Fn,
-							).Fn,
+				d.theme.Fill("DocBg", d.theme.Inset(
+					0.25,
+					d.theme.Fill(
+						"PanelBg",
+						d.theme.Inset(
+							1,
+							d.theme.VFlex().
+								Rigid(
+									d.theme.Body1(d.content.title).Color("PanelText").Fn,
+								).
+								Rigid(content).
+								Rigid(
+									d.theme.Button(d.close).Text("CLOSE").Color("Warning").SetClick(d.Close).Fn,
+								).Fn,
 						).Fn,
-					).Fn,
-				).Fn,
+						l.Center).Fn,
+				).Fn, 0).Fn,
 			).Fn(gtx)
 		}
 	}

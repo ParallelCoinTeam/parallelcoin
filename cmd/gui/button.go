@@ -17,16 +17,14 @@ func (wg *WalletGUI) buttonText(b *p9.Clickable, label string, click func()) fun
 				color := "DocBg"
 				var inPad, outPad float32 = 0.5, 0
 				return wg.th.Inset(outPad,
-					wg.th.Fill(background,
-						wg.th.Flex().
-							Flexed(1,
-								wg.th.Inset(inPad,
-									wg.th.Caption(label).
-										Color(color).
-										Fn,
-								).Fn,
+					wg.th.Fill(background, wg.th.Flex().
+						Flexed(1,
+							wg.th.Inset(inPad,
+								wg.th.Caption(label).
+									Color(color).
+									Fn,
 							).Fn,
-					).Fn,
+						).Fn, l.Center).Fn,
 				).Fn(gtx)
 			},
 		).

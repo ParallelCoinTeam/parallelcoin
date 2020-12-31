@@ -41,7 +41,7 @@ func main() {
 					}
 					// Debug(len(ic.listWidgets))
 					return func(gtx l.Context) l.Dimensions {
-						return ic.th.Fill("PanelBg", ic.th.Inset(0.25, ic.lists["icons"].Vertical().Length(len(ic.listWidgets)).ListElement(le).Fn).Fn).Fn(gtx)
+						return ic.th.Fill("PanelBg", ic.th.Inset(0.25, ic.lists["icons"].Vertical().Length(len(ic.listWidgets)).ListElement(le).Fn).Fn, l.Center).Fn(gtx)
 					}(gtx)
 				},
 				func(gtx l.Context)  {

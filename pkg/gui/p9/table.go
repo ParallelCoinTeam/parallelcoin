@@ -244,7 +244,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 			cs.Max.Y = tyi
 			cs.Min.Y = gtx.Constraints.Max.Y
 			// gtx.Constraints.Constrain(image.Point{X: txi, Y: tyi})
-			dims := t.th.Fill(t.headerBackground, EmptySpace(txi, tyi)).Fn(gtx)
+			dims := t.th.Fill(t.headerBackground, EmptySpace(txi, tyi), l.Center).Fn(gtx)
 			oie.Widget(gtx)
 			return dims
 		})
@@ -293,7 +293,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 					// dims
 					oie.Widget(gtx)
 					return dims
-				}).Fn)
+				}, l.Center).Fn)
 			}
 		}
 		return f.Fn(gtx)
@@ -301,19 +301,16 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	return t.th.VFlex().
 		Rigid(func(gtx l.Context) l.Dimensions {
 			// header is fixed to the top of the widget
-			return t.th.Fill(t.headerBackground, header.Fn).Fn(gtx)
+			return t.th.Fill(t.headerBackground, header.Fn, l.Center).Fn(gtx)
 		}).
 		Flexed(1,
-			t.th.Fill(t.cellBackground,
-				// the table is a scrollable vertical list that fills the remaining space
-				func(gtx l.Context) l.Dimensions {
-					return t.list.Vertical().
-						Length(len(out)).
-						Background(t.cellBackground).
-						ListElement(le).
-						Fn(gtx)
-				},
-			).Fn,
+			t.th.Fill(t.cellBackground, func(gtx l.Context) l.Dimensions {
+				return t.list.Vertical().
+					Length(len(out)).
+					Background(t.cellBackground).
+					ListElement(le).
+					Fn(gtx)
+			}, l.Center).Fn,
 		).
 		Fn(gtx)
 }

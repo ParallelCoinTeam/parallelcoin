@@ -135,7 +135,7 @@ func (t *Text) Fn(gtx layout.Context, s text.Shaper, font text.Font, size unit.V
 		lines = lines[:max]
 	}
 	dims := linesDimens(lines)
-	// dims.Size = cs.Constrain(dims.Size)
+	dims.Size = cs.Constrain(dims.Size)
 	cl := textPadding(lines)
 	cl.Max = cl.Max.Add(dims.Size)
 	it := lineIterator{

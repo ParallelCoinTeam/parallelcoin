@@ -291,32 +291,29 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 func (wg *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
 	a := wg.th
 	return func(gtx l.Context) l.Dimensions {
-		return a.Fill(
-			wg.App.BodyBackgroundGet(),
-			a.VFlex().
-				SpaceEvenly().
-				Rigid(
-					a.Responsive(
-						*wg.Size, p9.Widgets{
-							p9.WidgetSize{
-								Widget: a.Inset(0.25, a.H5(title).Color(wg.App.BodyColorGet()).Fn).Fn,
-							},
-							p9.WidgetSize{
-								Size:   800,
-								Widget: p9.EmptySpace(0, 0),
-								// a.Inset(0.25, a.Caption(title).Color(wg.BodyColorGet()).Fn).Fn,
-							},
+		return a.Fill(wg.App.BodyBackgroundGet(), a.VFlex().
+			SpaceEvenly().
+			Rigid(
+				a.Responsive(
+					*wg.Size, p9.Widgets{
+						p9.WidgetSize{
+							Widget: a.Inset(0.25, a.H5(title).Color(wg.App.BodyColorGet()).Fn).Fn,
 						},
-					).Fn,
-				).
-				Flexed(
-					1,
-					a.Inset(
-						0.25,
-						a.Responsive(*wg.Size, widget).Fn,
-					).Fn,
+						p9.WidgetSize{
+							Size:   800,
+							Widget: p9.EmptySpace(0, 0),
+							// a.Inset(0.25, a.Caption(title).Color(wg.BodyColorGet()).Fn).Fn,
+						},
+					},
 				).Fn,
-		).Fn(gtx)
+			).
+			Flexed(
+				1,
+				a.Inset(
+					0.25,
+					a.Responsive(*wg.Size, widget).Fn,
+				).Fn,
+			).Fn, l.Center).Fn(gtx)
 	}
 }
 
@@ -328,34 +325,22 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 			background = "PanelBg"
 			color = "PanelText"
 		}
-		return wg.th.Fill(
-			background, wg.th.ButtonLayout(wg.sidebarButtons[index]).Embed(
-				func(gtx l.Context) l.Dimensions {
-					gtx.Constraints.Max.X = int(wg.App.SideBarSize.V)
-					gtx.Constraints.Min.X = int(wg.App.SideBarSize.V)
-					// gtx.Constraints.Min.X = 0
-					// 	gtx.Constraints.Max.X
-					var pad float32 = 0.5
-					return wg.th.Inset(
-						pad,
-						wg.th.H6(title).
-							Color(color).
-							TextScale(p9.Scales["Body1"]).
-							Fn,
-					).Fn(gtx)
-				},
-			).
-				Background("Transparent").
-				SetClick(
-					func() {
-						if wg.App.MenuOpen {
-							wg.App.MenuOpen = false
-						}
-						wg.App.ActivePage(page)
-					},
-				).
-				Fn,
-		).Fn(gtx)
+		return func(gtx l.Context) l.Dimensions {
+			return wg.th.Fill(background,
+				wg.th.Button(wg.sidebarButtons[index]).
+					Text(title).
+					Color(color).
+					Background("Transparent").
+					SetClick(
+						func() {
+							if wg.App.MenuOpen {
+								wg.App.MenuOpen = false
+							}
+							wg.App.ActivePage(page)
+						},
+					).Fn, l.W,
+			).Fn(gtx)
+		}(gtx)
 	}
 }
 

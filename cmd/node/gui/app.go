@@ -196,32 +196,30 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 // and not at the time of execution.
 func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		return ng.th.Fill(ng.app.BodyBackgroundGet(),
-			ng.th.VFlex().
-				SpaceEvenly().
-				Rigid(
-					ng.th.Responsive(*ng.app.Size, p9.Widgets{
-						{
-							Widget: func(gtx l.Context) l.Dimensions {
-								if ng.app.MenuOpen {
-									return p9.EmptySpace(0, 0)(gtx)
-								} else {
-									return ng.th.Inset(0.25, ng.th.H6(title).Color(ng.app.BodyColorGet()).Fn).Fn(gtx)
-								}
-							},
+		return ng.th.Fill(ng.app.BodyBackgroundGet(), ng.th.VFlex().
+			SpaceEvenly().
+			Rigid(
+				ng.th.Responsive(*ng.app.Size, p9.Widgets{
+					{
+						Widget: func(gtx l.Context) l.Dimensions {
+							if ng.app.MenuOpen {
+								return p9.EmptySpace(0, 0)(gtx)
+							} else {
+								return ng.th.Inset(0.25, ng.th.H6(title).Color(ng.app.BodyColorGet()).Fn).Fn(gtx)
+							}
 						},
-						{
-							Size:   800,
-							Widget: p9.EmptySpace(0, 0),
-						},
-					}).Fn,
-				).
-				Flexed(1,
-					ng.th.Inset(0.25,
-						ng.th.Responsive(*ng.app.Size, widget).Fn,
-					).Fn,
+					},
+					{
+						Size:   800,
+						Widget: p9.EmptySpace(0, 0),
+					},
+				}).Fn,
+			).
+			Flexed(1,
+				ng.th.Inset(0.25,
+					ng.th.Responsive(*ng.app.Size, widget).Fn,
 				).Fn,
-		).Fn(gtx)
+			).Fn, l.Center).Fn(gtx)
 	}
 }
 
@@ -242,16 +240,14 @@ func (ng *NodeGUI) SideBarButton(title, page string, index int) func(gtx l.Conte
 					inPad, outPad = 0.75, 0
 				}
 				return ng.th.Inset(outPad,
-					ng.th.Fill(background,
-						ng.th.Flex().
-							Flexed(1,
-								ng.th.Inset(inPad,
-									ng.th.H6(title).
-										Color(color).
-										Fn,
-								).Fn,
+					ng.th.Fill(background, ng.th.Flex().
+						Flexed(1,
+							ng.th.Inset(inPad,
+								ng.th.H6(title).
+									Color(color).
+									Fn,
 							).Fn,
-					).Fn,
+						).Fn, l.Center).Fn,
 				).Fn(gtx)
 			},
 		).

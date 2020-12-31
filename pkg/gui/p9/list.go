@@ -262,22 +262,20 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			li.th.VFlex().
 				Rigid(
 					If(!li.leftSide,
-						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad)).Fn,
+						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad), l.Center).Fn,
 						EmptySpace(0, 0),
 					),
 				).
 				Rigid(
-					li.th.Fill(li.background,
-						li.th.Flex().
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
-							Fn,
-					).Fn,
+					li.th.Fill(li.background, li.th.Flex().
+						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
+						Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
+						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
+						Fn, l.Center).Fn,
 				).
 				Rigid(
 					If(li.leftSide,
-						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad+li.scrollWidth)).Fn,
+						li.th.Fill(li.background, EmptySpace(0, li.scrollBarPad+li.scrollWidth), l.Center).Fn,
 						EmptySpace(0, 0),
 					),
 				).
@@ -293,34 +291,32 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad))
 		}
 		containerFlex.Rigid(
-			li.th.Fill(li.background,
-				li.th.Flex().
-					Rigid(
-						If(!li.leftSide,
-							EmptySpace(li.scrollBarPad, 0),
-							EmptySpace(0, 0),
-						),
-					).
-					Rigid(
-						li.th.Flex().Vertical().
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
-							Fn,
-					).
-					Rigid(
-						// If(li.leftSide,
-						// 	EmptySpace(li.scrollBarPad, 0),
+			li.th.Fill(li.background, li.th.Flex().
+				Rigid(
+					If(!li.leftSide,
+						EmptySpace(li.scrollBarPad, 0),
 						EmptySpace(0, 0),
-						// ),
-					).
-					Fn,
-			).Fn,
+					),
+				).
+				Rigid(
+					li.th.Flex().Vertical().
+						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
+						Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
+						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
+						Fn,
+				).
+				Rigid(
+					// If(li.leftSide,
+					// 	EmptySpace(li.scrollBarPad, 0),
+					EmptySpace(0, 0),
+					// ),
+				).
+				Fn, l.Center).Fn,
 		)
 		if li.leftSide {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth))
 		}
-		container = li.th.Fill(li.background, containerFlex.Fn).Fn
+		container = li.th.Fill(li.background, containerFlex.Fn, l.Center).Fn
 	}
 	return container(gtx)
 }
@@ -363,9 +359,7 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 			}
 			li.position = dims.CoordinateToPosition(newPos, li.axis)
 		})).Embed(
-			li.th.Fill(li.background,
-				EmptySpace(x, y),
-			).Fn,
+			li.th.Fill(li.background, EmptySpace(x, y), l.Center).Fn,
 		).Background(li.background).CornerRadius(0).Fn(gtx)
 	}
 }
@@ -414,9 +408,7 @@ func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensio
 		li.drag.Add(gtx.Ops)
 		pointer.Rect(image.Rectangle{Max: image.Point{X: x, Y: y}}).Add(gtx.Ops)
 		li.sideScroll.Add(gtx.Ops)
-		return li.th.Fill(li.currentColor,
-			EmptySpace(x, y),
-		).Fn(gtx)
+		return li.th.Fill(li.currentColor, EmptySpace(x, y), l.Center).Fn(gtx)
 	}
 }
 

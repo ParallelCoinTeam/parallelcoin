@@ -16,7 +16,7 @@ func (wg *WalletGUI) InitWallet() func(gtx l.Context) l.Dimensions {
 			wg.th.Fill("DocText", wg.th.Inset(1,
 				wg.th.Fill("DocBg", wg.th.Inset(1,
 					wg.loaderCreateWallet(),
-				).Fn).Fn).Fn).Fn).Fn(gtx)
+				).Fn, l.Center).Fn).Fn, 0).Fn).Fn(gtx)
 	}
 }
 
@@ -25,7 +25,7 @@ func (wg *WalletGUI) loaderCreateWallet() l.Widget {
 
 		wg.th.Icon().Scale(5).Color("DocText").Src(&icons.ParallelCoinRound).Fn,
 
-		wg.th.Inset(0.0, wg.th.Fill("DocBg", wg.th.Inset(0.5, wg.th.H6("Enter the private passphrase for your new wallet:").Color("DocText").Fn).Fn).Fn).Fn,
+		wg.th.Inset(0.0, wg.th.Fill("DocBg", wg.th.Inset(0.5, wg.th.H6("Enter the private passphrase for your new wallet:").Color("DocText").Fn).Fn, l.Center).Fn).Fn,
 		wg.th.Inset(0.25,
 			wg.th.Border().Embed(
 				wg.th.Inset(0.25,

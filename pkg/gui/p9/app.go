@@ -144,40 +144,35 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Min = dims.Size
 	// gtx.Constraints.Max = dims.Size
 	// return dims
-	return a.th.Fill(a.statusBarBackground, bar.Fn).Fn(gtx)
+	return a.th.Fill(a.statusBarBackground, bar.Fn, l.Center).Fn(gtx)
 	// }(gtx)
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	return a.th.Flex().Flexed(
-		1,
-		a.th.Fill(
-			a.titleBarBackground,
-			a.th.Flex().
-				Rigid(
-					a.th.Responsive(
-						*a.Size,
-						Widgets{
-							{Widget: If(len(a.sideBar) > 0, a.MenuButton, a.NoMenuButton)},
-							{Size: 800, Widget: a.NoMenuButton},
-						},
-					).
-						Fn,
+	return a.th.Fill(a.titleBarBackground,
+		a.th.Flex().
+			Rigid(
+				a.th.Responsive(
+					*a.Size,
+					Widgets{
+						{Widget: If(len(a.sideBar) > 0, a.MenuButton, a.NoMenuButton)},
+						{Size: 800, Widget: a.NoMenuButton},
+					},
 				).
-				Rigid(a.LogoAndTitle).
-				Flexed(
-					1,
-					EmptyMinWidth(),
-				).
-				// Rigid(
-				// 	a.DimensionCaption,
-				// ).
-				Rigid(
-					a.RenderButtonBar,
-				).
-				Fn,
-		).Fn,
-	).Fn(gtx)
+					Fn,
+			).
+			Rigid(a.LogoAndTitle).
+			Flexed(1,
+				EmptyMinWidth(),
+			).
+			// Rigid(
+			// 	a.DimensionCaption,
+			// ).
+			Rigid(
+				a.RenderButtonBar,
+			).
+			Fn,
+		l.Center).Fn(gtx)
 }
 
 func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
@@ -194,31 +189,28 @@ func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
 func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 	return a.th.Flex().
 		Rigid(
-			a.th.Fill(
-				"PanelBg",
-				a.th.VFlex().
-					Flexed(
-						1,
-						a.th.Responsive(
-							*a.Size, Widgets{
-								{
-									Widget: func(gtx l.Context) l.Dimensions {
-										return If(
-											a.MenuOpen,
-											a.renderSideBar(),
-											EmptySpace(0, 0),
-										)(gtx)
-									},
-								},
-								{
-									Size: 800,
-									Widget:
-									a.renderSideBar(),
+			a.th.Fill("PanelBg", a.th.VFlex().
+				Flexed(
+					1,
+					a.th.Responsive(
+						*a.Size, Widgets{
+							{
+								Widget: func(gtx l.Context) l.Dimensions {
+									return If(
+										a.MenuOpen,
+										a.renderSideBar(),
+										EmptySpace(0, 0),
+									)(gtx)
 								},
 							},
-						).Fn,
+							{
+								Size: 800,
+								Widget:
+								a.renderSideBar(),
+							},
+						},
 					).Fn,
-			).Fn,
+				).Fn, l.Center).Fn,
 		).
 		Flexed(
 			1,
@@ -254,7 +246,7 @@ func (a *App) MenuButton(gtx l.Context) l.Dimensions {
 					func() {
 						a.MenuOpen = !a.MenuOpen
 					},
-			).
+				).
 				Fn,
 			// ).Fn,
 		).Fn(gtx)
@@ -389,33 +381,30 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
-	return a.th.Fill(
-		a.bodyBackground,
-		func(gtx l.Context) l.Dimensions {
-			if page, ok := a.pages[a.activePage.Load()]; !ok {
-				return a.th.Flex().
-					Flexed(
-						1,
-						a.th.VFlex().SpaceEvenly().
-							Rigid(
-								a.th.H1("404").
-									Alignment(text.Middle).
-									Fn,
-							).
-							Rigid(
-								a.th.Body1("page not found").
-									Alignment(text.Middle).
-									Fn,
-							).
-							Fn,
-					).Fn(gtx)
-			} else {
-				// _ = page
-				// return EmptyMaxHeight()(gtx)
-				return page(gtx)
-			}
-		},
-	).Fn(gtx)
+	return a.th.Fill(a.bodyBackground, func(gtx l.Context) l.Dimensions {
+		if page, ok := a.pages[a.activePage.Load()]; !ok {
+			return a.th.Flex().
+				Flexed(
+					1,
+					a.th.VFlex().SpaceEvenly().
+						Rigid(
+							a.th.H1("404").
+								Alignment(text.Middle).
+								Fn,
+						).
+						Rigid(
+							a.th.Body1("page not found").
+								Alignment(text.Middle).
+								Fn,
+						).
+						Fn,
+				).Fn(gtx)
+		} else {
+			// _ = page
+			// return EmptyMaxHeight()(gtx)
+			return page(gtx)
+		}
+	}, l.Center).Fn(gtx)
 }
 
 func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
@@ -424,9 +413,29 @@ func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
 
 func (a *App) renderSideBar() l.Widget {
 	if len(a.sideBar) > 0 {
+		le := func(gtx l.Context, index int) l.Dimensions {
+			// if a.ActivePageGet() == page {
+			// 	// background = "PanelBg"
+			// 	color := "PanelText"
+			// }
+			dims := a.sideBar[index](gtx)
+			return dims
+		}
 		return func(gtx l.Context) l.Dimensions {
-			gtx.Constraints.Max.X = int(a.SideBarSize.V)
-			gtx.Constraints.Min.X = gtx.Constraints.Max.X
+			gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max,
+				l.Vertical)
+			// generate the dimensions for all the list elements
+			allDims := GetDimensionList(gtx1, len(a.sideBar), le)
+			max := 0
+			for _, i := range allDims {
+				if i.Size.X > max {
+					max = i.Size.X
+				}
+			}
+			Debug(max)
+			a.SideBarSize.V = float32(max)
+			gtx.Constraints.Max.X = max
+			gtx.Constraints.Min.X = max
 			out := a.sideBarList.
 				Length(len(a.sideBar)).
 				// LeftSide(true).
@@ -435,24 +444,9 @@ func (a *App) renderSideBar() l.Widget {
 				Background("PanelBg").
 				// Color("DocText").
 				// Active("Primary").
-				ListElement(
-					func(gtx l.Context, index int) l.Dimensions {
-						// gtx.Constraints.Max.X = int(a.sideBarSize.V)
-						// gtx.Constraints.Min.X = 0
-						// gtx.Constraints.Min.X = gtx.Constraints.Max.X
-						// gtx.Constraints.Constrain(gtx.Constraints.Max)
-						dims := a.sideBar[index](gtx)
-						// Debug(dims)
-						return dims
-						// out := a.VFlex()
-						// for i := range a.sideBar {
-						// 	out.Rigid(a.sideBar[i])
-						// }
-						// return out.Fn(gtx)
-					},
-			)
+				ListElement(le)
 			// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
-			return a.th.VFlex().Flexed(1, out.Fn).Rigid(a.th.Inset(0.25, EmptyMaxWidth()).Fn).Fn(gtx)
+			return out.Fn(gtx)
 		}
 	} else {
 		return EmptySpace(0, 0)

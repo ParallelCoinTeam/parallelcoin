@@ -77,27 +77,25 @@ func (ex *Explorer) GetAppWidget() (a *p9.App) {
 func (ex *Explorer) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
 	a := ex.th
 	return func(gtx l.Context) l.Dimensions {
-		return a.Fill(ex.BodyBackgroundGet(),
-			a.VFlex().
-				SpaceEvenly().
-				Rigid(
-					a.Responsive(*ex.Size, p9.Widgets{
-						p9.WidgetSize{
-							Widget: a.Inset(0.25, a.H5(title).Color(ex.BodyColorGet()).Fn).Fn,
-						},
-						p9.WidgetSize{
-							Size:   800,
-							Widget: p9.EmptySpace(0, 0),
-							// a.Inset(0.25, a.Caption(title).Color(ex.BodyColorGet()).Fn).Fn,
-						},
-					}).Fn,
-				).
-				Flexed(1,
-					a.Inset(0.25,
-						a.Responsive(*ex.Size, widget).Fn,
-					).Fn,
+		return a.Fill(ex.BodyBackgroundGet(), a.VFlex().
+			SpaceEvenly().
+			Rigid(
+				a.Responsive(*ex.Size, p9.Widgets{
+					p9.WidgetSize{
+						Widget: a.Inset(0.25, a.H5(title).Color(ex.BodyColorGet()).Fn).Fn,
+					},
+					p9.WidgetSize{
+						Size:   800,
+						Widget: p9.EmptySpace(0, 0),
+						// a.Inset(0.25, a.Caption(title).Color(ex.BodyColorGet()).Fn).Fn,
+					},
+				}).Fn,
+			).
+			Flexed(1,
+				a.Inset(0.25,
+					a.Responsive(*ex.Size, widget).Fn,
 				).Fn,
-		).Fn(gtx)
+			).Fn, l.Center).Fn(gtx)
 	}
 }
 

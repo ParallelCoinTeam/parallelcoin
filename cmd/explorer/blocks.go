@@ -48,24 +48,22 @@ func (ex *Explorer) Blocks() l.Widget {
 
 func (ex *Explorer) singleBlock(gtx l.Context, block *wire.MsgBlock) l.Dimensions {
 	return ex.th.Inset(0.25,
-		ex.th.Fill("DocBg",
-			ex.th.Inset(0.25,
-				ex.th.VFlex().
-					Rigid(
-						ex.th.Inset(0.2,
-							ex.th.Caption(block.Header.BlockHash().String()).
-								Color("PanelText").
-								Fn,
-						).Fn,
-					).
-					Rigid(
-						ex.th.Inset(0.2,
-							ex.th.Caption(block.Header.Timestamp.Format("")).
-								Color("PanelText").
-								Fn,
-						).Fn,
+		ex.th.Fill("DocBg", ex.th.Inset(0.25,
+			ex.th.VFlex().
+				Rigid(
+					ex.th.Inset(0.2,
+						ex.th.Caption(block.Header.BlockHash().String()).
+							Color("PanelText").
+							Fn,
 					).Fn,
-			).Fn,
-		).Fn,
+				).
+				Rigid(
+					ex.th.Inset(0.2,
+						ex.th.Caption(block.Header.Timestamp.Format("")).
+							Color("PanelText").
+							Fn,
+					).Fn,
+				).Fn,
+		).Fn, l.Center).Fn,
 	).Fn(gtx)
 }

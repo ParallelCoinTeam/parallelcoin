@@ -84,22 +84,16 @@ func (m *MinerModel) testLabels(gtx l.Context) l.Dimensions {
 		th.Flex().Rigid(
 			th.Flex().Flexed(
 				0.5,
-				th.Fill(
-					"PanelBg",
-					th.Inset(
-						0.25,
-						m.blocks(),
-					).Fn,
-				).Fn,
+				th.Fill("PanelBg", th.Inset(
+					0.25,
+					m.blocks(),
+				).Fn, l.Center).Fn,
 			).Flexed(
 				0.5,
-				th.Fill(
-					"DocBg",
-					th.Inset(
-						0.25,
-						m.buttons(),
-					).Fn,
-				).Fn,
+				th.Fill("DocBg", th.Inset(
+					0.25,
+					m.buttons(),
+				).Fn, l.Center).Fn,
 			).Fn,
 		).Fn,
 	).Fn(gtx)
@@ -131,25 +125,19 @@ func (m *MinerModel) blocks() l.Widget {
 				Color("PanelText").Fn,
 		).Fn,
 	).Rigid(
-		th.Fill(
-			"DocBg",
-			th.Inset(
-				0.25,
-				th.H4("this is a H4").
-					Alignment(text.Middle).
-					Color("DocText").Fn,
-			).Fn,
-		).Fn,
+		th.Fill("DocBg", th.Inset(
+			0.25,
+			th.H4("this is a H4").
+				Alignment(text.Middle).
+				Color("DocText").Fn,
+		).Fn, l.Center).Fn,
 	).Rigid(
-		th.Fill(
-			"PanelBg",
-			th.Inset(
-				0.25,
-				th.H5("this is a H5").
-					Color("PanelText").
-					Fn,
-			).Fn,
-		).Fn,
+		th.Fill("PanelBg", th.Inset(
+			0.25,
+			th.H5("this is a H5").
+				Color("PanelText").
+				Fn,
+		).Fn, l.Center).Fn,
 	).Rigid(
 		th.Inset(
 			0.25,
