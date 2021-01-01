@@ -158,7 +158,7 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() {
-	// Debug("processWalletBlockNotification", wg.WalletClient != nil)
+	Debug("processWalletBlockNotification")
 	if !wg.WalletAndClientRunning() {
 		return
 	}
@@ -181,6 +181,8 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 	}
 	// Debug(len(atr))
 	wg.State.SetAllTxs(atr)
+	wg.txHistoryPage = wg.State.filteredTxs.Load()
+	wg.txRecentList = atr[:10]
 	wg.RecentTransactionsWidget = wg.RecentTransactions(10, "recent")
 	wg.HistoryWidget = wg.RecentTransactions(-1, "history")
 }

@@ -5,6 +5,7 @@ import (
 	
 	"go.uber.org/atomic"
 	
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -109,45 +110,44 @@ func (at *Hash) Swap(n chainhash.Hash) chainhash.Hash {
 	return o
 }
 
-
 // Hash is an atomic wrapper around chainhash.Hash
 // Note that there isn't really any reason to have CAS or arithmetic or
 // comparisons as it is fine to do these non-atomically between Load / Store and
 // they are (slightly) long operations)
 type Address struct {
-	*Value
+	*atomic.String
+	forNet *netparams.Params
 }
 
 // NewAddress creates a Hash.
-func NewAddress(tt util.Address) *Address {
-	t := &Value{
-		Value: &atomic.Value{},
-	}
-	t.Store(tt)
-	return &Address{Value: t}
+func NewAddress(tt util.Address, forNet *netparams.Params) *Address {
+	t := atomic.NewString(tt.EncodeAddress())
+	return &Address{String: t, forNet: forNet}
 }
 
 // Load atomically loads the wrapped value.
 // The returned value copied so as to prevent mutation by concurrent users
 // of the atomic, as arrays, slices and maps are pass-by-reference variables
 func (at *Address) Load() util.Address {
-	o := at.Value.Load().(util.Address)
-	return o
+	addr, err := util.DecodeAddress(at.String.Load(), at.forNet)
+	if err != nil {
+		return nil
+	}
+	return addr
 }
 
 // Store atomically stores the passed value.
 // The passed value is copied so further mutations are not propagated.
 func (at *Address) Store(h util.Address) {
-	at.Value.Store(h)
+	at.String.Store(h.EncodeAddress())
 }
 
 // Swap atomically swaps the wrapped util.Address and returns the old value.
-func (at *Address) Swap(n chainhash.Hash) chainhash.Hash {
-	o := at.Value.Load().(chainhash.Hash)
-	at.Value.Store(n)
+func (at *Address) Swap(n util.Address) util.Address {
+	o := at.Load()
+	at.Store(n)
 	return o
 }
-
 
 // ListTransactionsResult is an atomic wrapper around
 // []btcjson.ListTransactionsResult

@@ -10,6 +10,7 @@ import (
 	l "gioui.org/layout"
 	
 	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
@@ -187,7 +188,13 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	var out []l.Widget
 	first := true
 	// out = append(out)
-	wga := wg.State.allTxs.Load()
+	var wga []btcjson.ListTransactionsResult
+	switch listName {
+	case "history":
+		wga = wg.txHistoryPage
+	case "recent":
+		wga = wg.txRecentList
+	}
 	if len(wga) == 0 {
 		return func(gtx l.Context) l.Dimensions {
 			return l.Dimensions{Size: gtx.

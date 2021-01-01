@@ -11,6 +11,7 @@ import (
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
 	qu "github.com/p9c/pod/pkg/util/quit"
@@ -73,23 +74,24 @@ type WalletGUI struct {
 	statusBarButtons          []*p9.Clickable
 	quitClickable             *p9.Clickable
 	bools                     map[string]*p9.Bool
-	lists                     map[string]*p9.List
-	checkables                map[string]*p9.Checkable
-	clickables                map[string]*p9.Clickable
-	inputs                    map[string]*p9.Input
-	passwords                 map[string]*p9.Password
-	incdecs                   map[string]*p9.IncDec
-	sendAddresses             []SendAddress
-	console                   *Console
-	RecentTransactionsWidget  l.Widget
-	HistoryWidget             l.Widget
-	Syncing                   uberatomic.Bool
+	lists                       map[string]*p9.List
+	checkables                  map[string]*p9.Checkable
+	clickables                  map[string]*p9.Clickable
+	inputs                      map[string]*p9.Input
+	passwords                   map[string]*p9.Password
+	incdecs                     map[string]*p9.IncDec
+	sendAddresses               []SendAddress
+	console                     *Console
+	RecentTransactionsWidget    l.Widget
+	HistoryWidget               l.Widget
+	txRecentList, txHistoryPage []btcjson.ListTransactionsResult
+	Syncing                     uberatomic.Bool
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
 
 func (wg *WalletGUI) Run() (err error) {
-	wg.State = GetNewState()
+	wg.State = GetNewState(wg.cx.ActiveNet)
 	wg.Syncing.Store(false)
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme

@@ -6,6 +6,7 @@ import (
 	l "gioui.org/layout"
 	uberatomic "go.uber.org/atomic"
 	
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -56,7 +57,7 @@ type State struct {
 	activePage              *uberatomic.String
 }
 
-func GetNewState() *State {
+func GetNewState(params *netparams.Params) *State {
 	fc := &atom.Bool{
 		Bool: uberatomic.NewBool(false),
 	}
@@ -72,10 +73,11 @@ func GetNewState() *State {
 			[]btcjson.ListTransactionsResult{}),
 		filteredTxs: atom.NewListTransactionsResult(
 			[]btcjson.ListTransactionsResult{}),
-		filter:                  CategoryFilter{},
-		filterChanged:           fc,
-		currentReceivingAddress: atom.NewAddress(&util.AddressPubKeyHash{}),
-		activePage:              uberatomic.NewString("home"),
+		filter:        CategoryFilter{},
+		filterChanged: fc,
+		currentReceivingAddress: atom.NewAddress(&util.AddressPubKeyHash{},
+			params),
+		activePage: uberatomic.NewString("home"),
 	}
 }
 
@@ -91,6 +93,7 @@ type Marshalled struct {
 	BalanceUnconfirmed float64
 	AllTxs             []btcjson.ListTransactionsResult
 	Filter             CategoryFilter
+	ReceivingAddress   util.Address
 	ActivePage         string
 }
 
@@ -103,6 +106,7 @@ func (s *State) Marshal() (out *Marshalled) {
 		BalanceUnconfirmed: s.balanceUnconfirmed.Load(),
 		AllTxs:             s.allTxs.Load(),
 		Filter:             s.filter,
+		ReceivingAddress:   s.currentReceivingAddress.Load(),
 		ActivePage:         s.activePage.Load(),
 	}
 	return
@@ -116,6 +120,7 @@ func (m *Marshalled) Unmarshal(s *State) {
 	s.balanceUnconfirmed.Store(m.BalanceUnconfirmed)
 	s.allTxs.Store(m.AllTxs)
 	s.filter = m.Filter
+	s.currentReceivingAddress.Store(m.ReceivingAddress)
 	s.activePage.Store(m.ActivePage)
 	return
 }
@@ -138,6 +143,7 @@ func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
 			filteredTxs = append(filteredTxs, atxs[i])
 		}
 	}
+	s.filteredTxs.Store(filteredTxs)
 }
 
 func (s *State) LastUpdated() time.Time {
