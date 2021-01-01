@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"time"
 	
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -56,13 +57,15 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 						*wg.cx.Config.NodeOff = false
 						*wg.cx.Config.WalletOff = false
 						save.Pod(wg.cx.Config)
+						filename := filepath.Join(wg.cx.DataDir, "state.json")
+						wg.State.Load(filename, wg.cx.Config.WalletPass)
 						if !wg.node.Running() {
 							wg.node.Start()
 						}
 						wg.wallet.Start()
 						wg.unlockPassword.Wipe()
-						wg.RecentTransactionsWidget = wg.RecentTransactions(10, "recent")
-						wg.HistoryWidget = wg.RecentTransactions(-1, "history")
+						go wg.RecentTransactions(10, "recent")
+						go wg.RecentTransactions(-1, "history")
 					}
 				} else {
 					Debug("failed to unlock the wallet")

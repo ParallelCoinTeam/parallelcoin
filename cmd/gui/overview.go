@@ -108,6 +108,11 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 }
 
 func (wg *WalletGUI) OverviewPage() l.Widget {
+	if wg.RecentTransactionsWidget == nil {
+		wg.RecentTransactionsWidget = func(gtx l.Context) l.Dimensions {
+			return l.Dimensions{Size: gtx.Constraints.Max}
+		}
+	}
 	return func(gtx l.Context) l.Dimensions {
 		return wg.th.Responsive(*wg.Size, p9.Widgets{
 			{
@@ -303,13 +308,21 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return out[index](gtx)
 	}
-	return func(gtx l.Context) l.Dimensions {
+	
+	wo := func(gtx l.Context) l.Dimensions {
 		return wg.lists[listName].
 			Vertical().
 			Length(len(out)).
 			ListElement(le).
 			Fn(gtx)
 	}
+	switch listName {
+	case "history":
+		wg.HistoryWidget = wo
+	case "recent":
+		wg.RecentTransactionsWidget = wo
+	}
+	return wo
 }
 
 func leftPadTo(length, limit int, txt string) string {

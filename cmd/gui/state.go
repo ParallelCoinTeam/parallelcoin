@@ -102,7 +102,7 @@ func (s *State) Save(filename string, pass *string) (err error) {
 	var j []byte
 	j, err = json.MarshalIndent(marshalled, "", "  ")
 	Check(err)
-	Debug(string(j))
+	// Debug(string(j))
 	var ciph cipher.AEAD
 	ciph, err = gcm.GetCipher(*pass)
 	var nonce []byte

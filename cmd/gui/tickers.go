@@ -117,7 +117,6 @@ func (wg *WalletGUI) Tickers() {
 					filename := filepath.Join(wg.cx.DataDir, "state.json")
 					if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
 					} else {
-						wg.State.Load(filename, wg.cx.Config.WalletPass)
 					}
 					
 					// wg.invalidate <- struct{}{}
