@@ -188,8 +188,8 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 		atrl = len(atr)
 	}
 	wg.txRecentList = atr[:atrl]
-	wg.RecentTransactionsWidget = wg.RecentTransactions(10, "recent")
-	wg.HistoryWidget = wg.RecentTransactions(-1, "history")
+	wg.RecentTransactions(10, "recent")
+	wg.RecentTransactions(-1, "history")
 }
 
 func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {

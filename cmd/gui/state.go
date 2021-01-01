@@ -182,7 +182,7 @@ func (m *Marshalled) Unmarshal(s *State) {
 		ad = &util.AddressPubKeyHash{}
 	}
 	s.currentReceivingAddress.Store(ad)
-	s.activePage.Store(m.ActivePage)
+	s.SetActivePage(m.ActivePage)
 	s.addressBook = m.AddressBook
 	return
 }

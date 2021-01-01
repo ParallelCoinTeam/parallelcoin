@@ -21,7 +21,7 @@ import (
 )
 
 func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
-	a = wg.th.App(wg.w["main"].Width)
+	a = wg.th.App(wg.w["main"].Width, wg.State.activePage, wg.invalidate)
 	wg.unlockPage = a
 	password := ""
 	wg.unlockPassword = wg.th.Password("enter password", &password, "Primary",
@@ -335,11 +335,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	// })
 	a.ButtonBar(
 		[]l.Widget{
-			wg.PageTopBarButton(
-				"home", 4, &icons.ActionLock, func(name string) {
-					wg.unlockPage.ActivePage(name)
-				}, wg.unlockPage, "Danger",
-			),
+			
 			wg.PageTopBarButton(
 				"console", 2, &p9icons.Terminal, func(name string) {
 					wg.unlockPage.ActivePage(name)
@@ -356,6 +352,11 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 				}, wg.unlockPage, "",
 			),
 			wg.PageTopBarButton(
+				"home", 4, &icons.ActionLock, func(name string) {
+					wg.unlockPage.ActivePage(name)
+				}, wg.unlockPage, "Danger",
+			),
+			wg.PageTopBarButton(
 				"quit", 3, &icons.ActionExitToApp, func(name string) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage, "",
@@ -365,6 +366,17 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a.StatusBar(
 		[]l.Widget{
 			// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
+			
+			// wg.PageTopBarButton(
+			// 	"home", 4, &icons.ActionLockOpen, func(name string) {
+			// 		wg.unlockPassword.Wipe()
+			// 		wg.unlockPassword.Focus()
+			// 		// wg.walletLocked.Store(true)
+			// 		wg.wallet.Stop()
+			// 		wg.unlockPage.ActivePage(name)
+			// 	}, a, "Success",
+			// ),
+			
 			wg.RunStatusPanel,
 			wg.th.Flex().
 				Flexed(1, p9.EmptyMaxWidth()).

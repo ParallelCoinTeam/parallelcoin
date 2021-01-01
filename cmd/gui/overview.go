@@ -202,8 +202,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	}
 	if len(wga) == 0 {
 		return func(gtx l.Context) l.Dimensions {
-			return l.Dimensions{Size: gtx.
-				Constraints.Max}
+			return l.Dimensions{Size: gtx.Constraints.Max}
 		}
 	}
 	for x := range wga {

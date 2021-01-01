@@ -64,8 +64,8 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		cx.WaitWait()
 		Info("node is now fully shut down")
-		// cx.WaitGroup.Wait()
-		// <-cx.KillAll
+		cx.WaitGroup.Wait()
+		<-cx.KillAll
 		return nil
 	}
 }

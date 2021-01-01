@@ -15,7 +15,7 @@ import (
 )
 
 func (ex *Explorer) GetAppWidget() (a *p9.App) {
-	a = ex.th.App(ex.w.Width)
+	a = ex.th.App(ex.w.Width, nil, nil)
 	ex.App = a
 	ex.App.ThemeHook(func() {
 		Debug("theme hook")

@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	
+	uberatomic "go.uber.org/atomic"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
 	l "gioui.org/layout"
@@ -18,21 +19,24 @@ import (
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
-	a = wg.th.App(wg.w["main"].Width)
+	a = wg.th.App(wg.w["main"].Width, uberatomic.NewString("home"),
+		wg.invalidate)
 	wg.App = a
 	wg.App.ThemeHook(
 		func() {
 			Debug("theme hook")
 			// Debug(wg.bools)
 			// wg.th.Colors.Lock()
-			// *wg.cx.Config.DarkTheme = *wg.th.Dark
+			*wg.cx.Config.DarkTheme = *wg.th.Dark
 			// a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
 			// *a = *wg.th.Dark
 			// if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
 			// 	wgb.Value(*wg.th.Dark)
 			// }
 			// wg.th.Colors.Unlock()
-			// save.Pod(wg.cx.Config)
+			save.Pod(wg.cx.Config)
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
 		},
 	)
 	wg.config = cfg.New(wg.cx, wg.th)
@@ -221,15 +225,6 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a.ButtonBar(
 		[]l.Widget{
 			wg.PageTopBarButton(
-				"lock", 4, &icons.ActionLockOpen, func(name string) {
-					// wg.unlockPage.ActivePage(name)
-					wg.unlockPassword.Wipe()
-					wg.unlockPassword.Focus()
-					// wg.walletLocked.Store(true)
-					wg.wallet.Stop()
-				}, a, "",
-			),
-			wg.PageTopBarButton(
 				"console", 2, &p9icons.Terminal, func(name string) {
 					wg.App.ActivePage(name)
 				}, a, "",
@@ -243,6 +238,15 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				"help", 1, &icons.ActionHelp, func(name string) {
 					wg.App.ActivePage(name)
 				}, a, "",
+			),
+			wg.PageTopBarButton(
+				"home", 4, &icons.ActionLockOpen, func(name string) {
+					wg.unlockPassword.Wipe()
+					wg.unlockPassword.Focus()
+					// wg.walletLocked.Store(true)
+					wg.wallet.Stop()
+					wg.unlockPage.ActivePage(name)
+				}, a, "Success",
 			),
 			wg.PageTopBarButton(
 				"quit", 3, &icons.ActionExitToApp, func(name string) {
@@ -351,12 +355,16 @@ func (wg *WalletGUI) PageTopBarButton(
 	highlightColor string,
 ) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := app.TitleBarBackgroundGet()
+		background := "Transparent"
+		// background := app.TitleBarBackgroundGet()
 		color := app.MenuColorGet()
 		
 		if app.ActivePageGet() == name {
 			color = "PanelText"
-			background = "PanelBg"
+			// background = "PanelBg"
+		}
+		if name == "home" {
+			background = "PrimaryDim"
 		}
 		if highlightColor != "" {
 			color = highlightColor

@@ -18,6 +18,7 @@ import (
 type App struct {
 	th                  *Theme
 	activePage          *uberatomic.String
+	invalidate          chan struct{}
 	bodyBackground      string
 	bodyColor           string
 	cardBackground      string
@@ -55,11 +56,11 @@ type App struct {
 
 type WidgetMap map[string]l.Widget
 
-func (th *Theme) App(size *int) *App {
+func (th *Theme) App(size *int, activePage *uberatomic.String, invalidate chan struct{}) *App {
 	mc := th.Clickable()
 	return &App{
 		th:                  th,
-		activePage:          uberatomic.NewString("home"),
+		activePage:          activePage,
 		bodyBackground:      "PanelBg",
 		bodyColor:           "PanelText",
 		cardBackground:      "DocBg",
@@ -88,6 +89,7 @@ func (th *Theme) App(size *int) *App {
 		menuColor:           "Light",
 		MenuOpen:            false,
 		Size:                size,
+		invalidate:          invalidate,
 	}
 }
 
@@ -459,6 +461,7 @@ func (a *App) renderSideBar() l.Widget {
 }
 
 func (a *App) ActivePage(activePage string) *App {
+	a.invalidate <- struct{}{}
 	a.activePage.Store(activePage)
 	return a
 }

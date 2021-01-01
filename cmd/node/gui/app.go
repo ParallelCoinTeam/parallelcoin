@@ -12,7 +12,7 @@ import (
 )
 
 func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
-	a = ng.th.App(ng.w.Width)
+	a = ng.th.App(ng.w.Width, nil, nil)
 	ng.app = a
 	// ng.size = ng.size
 	ng.th.Colors.SetTheme(*ng.th.Dark)
