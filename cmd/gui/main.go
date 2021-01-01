@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
@@ -186,6 +187,10 @@ out:
 		case <-wg.invalidate:
 			Trace("invalidating render queue")
 			wg.w["main"].Window.Invalidate()
+			filename := filepath.Join(wg.cx.DataDir, "state.json")
+			if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+			} else {
+			}
 		case <-wg.cx.KillAll:
 			break out
 		case <-wg.quit:

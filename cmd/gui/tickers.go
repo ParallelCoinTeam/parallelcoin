@@ -3,7 +3,6 @@ package gui
 import (
 	"encoding/json"
 	"io/ioutil"
-	"path/filepath"
 	"time"
 	
 	"github.com/p9c/pod/cmd/walletmain"
@@ -114,10 +113,7 @@ func (wg *WalletGUI) Tickers() {
 					first = false
 				// }
 				case <-fiveSeconds:
-					filename := filepath.Join(wg.cx.DataDir, "state.json")
-					if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
-					} else {
-					}
+
 					
 					// wg.invalidate <- struct{}{}
 				case <-wg.quit:
@@ -153,14 +149,13 @@ func (wg *WalletGUI) updateChainBlock() {
 	}
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(h)
-	wg.invalidate <- struct{}{}
 }
 
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
 	Debug("processChainBlockNotification")
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(hash)
-	wg.invalidate <- struct{}{}
+	// wg.invalidate <- struct{}{}
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() {

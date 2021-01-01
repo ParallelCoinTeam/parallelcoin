@@ -98,6 +98,7 @@ func (s *State) BumpLastUpdated() {
 }
 
 func (s *State) Save(filename string, pass *string) (err error) {
+	Debug("saving state...")
 	marshalled := s.Marshal()
 	var j []byte
 	j, err = json.MarshalIndent(marshalled, "", "  ")
