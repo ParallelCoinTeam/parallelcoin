@@ -50,7 +50,7 @@ type WalletGUI struct {
 	cx                        *conte.Xt
 	c                         *cli.Context
 	quit                      qu.C
-	State                     State
+	State                     *State
 	noWallet                  *bool
 	node, wallet, miner       *rununit.RunUnit
 	walletToLock              time.Time
@@ -85,12 +85,12 @@ type WalletGUI struct {
 }
 
 func (wg *WalletGUI) Run() (err error) {
+	wg.State = GetNewState()
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
 	*wg.noWallet = true
 	wg.GetButtons()
-	wg.State.AllTimeStrings.Store([]string{})
 	wg.lists = wg.GetLists()
 	wg.clickables = wg.GetClickables()
 	wg.checkables = map[string]*p9.Checkable{

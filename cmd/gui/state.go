@@ -4,6 +4,7 @@ import (
 	"time"
 	
 	l "gioui.org/layout"
+	uberatomic "go.uber.org/atomic"
 	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -41,17 +42,41 @@ func (c *CategoryFilter) Filter(s string) (include bool) {
 }
 
 type State struct {
-	lastUpdated             atom.Time
-	bestBlockHeight         atom.Int32
-	bestBlockHash           *chainhash.Hash
-	balance                 atom.Float64
-	balanceUnconfirmed      atom.Float64
+	lastUpdated             *atom.Time
+	bestBlockHeight         *atom.Int32
+	bestBlockHash           *atom.Hash
+	balance                 *atom.Float64
+	balanceUnconfirmed      *atom.Float64
 	goroutines              []l.Widget
-	AllTxs                  []btcjson.ListTransactionsResult
-	FilteredTxs             []btcjson.ListTransactionsResult
-	Filter                  CategoryFilter
-	FilterChanged           bool
-	CurrentReceivingAddress util.Address
+	allTxs                  *atom.ListTransactionsResult
+	filteredTxs             *atom.ListTransactionsResult
+	filter                  CategoryFilter
+	filterChanged           *atom.Bool
+	currentReceivingAddress util.Address
+	activePage              *uberatomic.String
+}
+
+func GetNewState() *State {
+	fc := &atom.Bool{
+		Bool: uberatomic.NewBool(false),
+	}
+	return &State{
+		lastUpdated:     atom.NewTime(time.Now()),
+		bestBlockHeight: &atom.Int32{Int32: uberatomic.NewInt32(0)},
+		bestBlockHash:   atom.NewHash(chainhash.Hash{}),
+		balance:         &atom.Float64{Float64: uberatomic.NewFloat64(0)},
+		balanceUnconfirmed: &atom.Float64{Float64: uberatomic.NewFloat64(0),
+		},
+		goroutines: nil,
+		allTxs: atom.NewListTransactionsResult(
+			[]btcjson.ListTransactionsResult{}),
+		filteredTxs: atom.NewListTransactionsResult(
+			[]btcjson.ListTransactionsResult{}),
+		filter:                  CategoryFilter{},
+		filterChanged:           fc,
+		currentReceivingAddress: &util.AddressPubKeyHash{},
+		activePage:              uberatomic.NewString("home"),
+	}
 }
 
 func (s *State) BumpLastUpdated() {
@@ -66,17 +91,19 @@ type Marshalled struct {
 	BalanceUnconfirmed float64
 	AllTxs             []btcjson.ListTransactionsResult
 	Filter             CategoryFilter
+	ActivePage         string
 }
 
 func (s *State) Marshal() (out *Marshalled) {
 	out = &Marshalled{
 		LastUpdated:        s.lastUpdated.Load(),
 		BestBlockHeight:    s.bestBlockHeight.Load(),
-		BestBlockHash:      *s.bestBlockHash,
+		BestBlockHash:      s.bestBlockHash.Load(),
 		Balance:            s.balance.Load(),
 		BalanceUnconfirmed: s.balanceUnconfirmed.Load(),
-		AllTxs:             s.AllTxs,
-		Filter:             s.Filter,
+		AllTxs:             s.allTxs.Load(),
+		Filter:             s.filter,
+		ActivePage:         s.activePage.Load(),
 	}
 	return
 }
@@ -84,11 +111,12 @@ func (s *State) Marshal() (out *Marshalled) {
 func (m *Marshalled) Unmarshal(s *State) {
 	s.lastUpdated.Store(m.LastUpdated)
 	s.bestBlockHeight.Store(m.BestBlockHeight)
-	*s.bestBlockHash = m.BestBlockHash
+	s.bestBlockHash.Store(m.BestBlockHash)
 	s.balance.Store(m.Balance)
 	s.balanceUnconfirmed.Store(m.BalanceUnconfirmed)
-	s.AllTxs = m.AllTxs
-	s.Filter = m.Filter
+	s.allTxs.Store(m.AllTxs)
+	s.filter = m.Filter
+	s.activePage.Store(m.ActivePage)
 	return
 }
 
@@ -101,12 +129,13 @@ func (s *State) SetGoroutines(gr []l.Widget) {
 }
 
 func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
-	s.AllTxs = allTxs
+	s.allTxs.Store(allTxs)
 	// generate filtered state
-	s.FilteredTxs = make([]btcjson.ListTransactionsResult, 0, len(s.AllTxs))
-	for i := range s.AllTxs {
-		if s.Filter.Filter(s.AllTxs[i].Category) {
-			s.FilteredTxs = append(s.FilteredTxs, s.AllTxs[i])
+	filteredTxs := make([]btcjson.ListTransactionsResult, 0, len(s.allTxs.Load()))
+	atxs := s.allTxs.Load()
+	for i := range atxs {
+		if s.filter.Filter(atxs[i].Category) {
+			filteredTxs = append(filteredTxs, atxs[i])
 		}
 	}
 }
@@ -120,7 +149,8 @@ func (s *State) BestBlockHeight() int32 {
 }
 
 func (s *State) BestBlockHash() *chainhash.Hash {
-	return s.bestBlockHash
+	o := s.bestBlockHash.Load()
+	return &o
 }
 
 func (s *State) Balance() float64 {
@@ -131,6 +161,14 @@ func (s *State) BalanceUnconfirmed() float64 {
 	return s.balanceUnconfirmed.Load()
 }
 
+func (s *State) ActivePage() string {
+	return s.activePage.Load()
+}
+
+func (s *State) SetActivePage(page string) {
+	s.activePage.Store(page)
+}
+
 func (s *State) SetBestBlockHeight(height int32) {
 	s.BumpLastUpdated()
 	s.bestBlockHeight.Store(height)
@@ -138,7 +176,7 @@ func (s *State) SetBestBlockHeight(height int32) {
 
 func (s *State) SetBestBlockHash(h *chainhash.Hash) {
 	s.BumpLastUpdated()
-	s.bestBlockHash = h
+	s.bestBlockHash.Store(*h)
 }
 
 func (s *State) SetBalance(total float64) {

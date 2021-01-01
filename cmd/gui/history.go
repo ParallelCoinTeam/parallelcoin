@@ -69,8 +69,8 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 	// Debug(cursor, wg.historyCurPage, current, *wg.Size)
 	var out []btcjson.ListTransactionsResult
 	for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
-		// Debugs(wg.State.AllTxs)
-		ws := wg.State.AllTxs
+		// Debugs(wg.State.allTxs)
+		ws := wg.State.allTxs.Load()
 		for ; cursor < len(ws)-1; cursor++ {
 			wsa := ws[cursor]
 			if wsa.Generated && gen ||
@@ -84,16 +84,8 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 			}
 			
 		}
-		if cursor == len(wg.State.AllTxs)-1 {
-			break
-		}
 	}
-	// Debugs(out)
-	
 	return wg.th.VFlex().Flexed(1, wg.historyTable.Fn).Fn
-	// wg.th.Fill("DocBg",
-	// p9.EmptySpace(0, 0),
-	// ).Fn
 }
 
 func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {

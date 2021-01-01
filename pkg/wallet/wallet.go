@@ -5,11 +5,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/davecgh/go-spew/spew"
 	
@@ -1777,7 +1778,7 @@ outputs:
 			Confirmations:   confirmations,
 			Generated:       generated,
 			BlockHash:       blockHashStr,
-			BlockIndex:      &blockIndex,
+			BlockIndex:      blockIndex,
 			BlockTime:       blockTime,
 			TxID:            txHashStr,
 			WalletConflicts: []string{},
@@ -1793,14 +1794,14 @@ outputs:
 		if send || spentCredit {
 			result.Category = "send"
 			result.Amount = -amountF64
-			result.Fee = &feeF64
+			result.Fee = feeF64
 			results = append(results, result)
 		}
 		if isCredit {
 			result.Account = accountName
 			result.Category = recvCat
 			result.Amount = amountF64
-			result.Fee = nil
+			result.Fee = 0
 			results = append(results, result)
 		}
 	}

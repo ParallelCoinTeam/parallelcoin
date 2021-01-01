@@ -456,8 +456,6 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 		if !wg.miner.Running() {
 			miningIcon = &p9icons.NoMine
 		}
-		wg.State.mutex.Lock()
-		defer wg.State.mutex.Unlock()
 		return wg.th.Flex().AlignMiddle().
 			Rigid(
 				wg.th.ButtonLayout(wg.statusBarButtons[0]).
@@ -494,7 +492,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			Rigid(
 				wg.th.Inset(
 					0.33,
-					wg.th.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight)).
+					wg.th.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight.Load())).
 						Font("go regular").TextScale(p9.Scales["Caption"]).
 						Color("DocText").
 						Fn,

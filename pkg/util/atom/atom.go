@@ -6,18 +6,19 @@ import (
 	"go.uber.org/atomic"
 	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // import all the atomics from uber atomic
 type (
-	Int32    struct{ atomic.Int32 }
-	Int64    struct{ atomic.Int64 }
-	Uint32   struct{ atomic.Uint32 }
-	Uint64   struct{ atomic.Uint64 }
-	Bool     struct{ atomic.Bool }
-	Float64  struct{ atomic.Float64 }
-	Duration struct{ atomic.Duration }
-	Value    struct{ atomic.Value }
+	Int32    struct{ *atomic.Int32 }
+	Int64    struct{ *atomic.Int64 }
+	Uint32   struct{ *atomic.Uint32 }
+	Uint64   struct{ *atomic.Uint64 }
+	Bool     struct{ *atomic.Bool }
+	Float64  struct{ *atomic.Float64 }
+	Duration struct{ *atomic.Duration }
+	Value    struct{ *atomic.Value }
 )
 
 // The following are types added for handling cryptocurrency data for
@@ -31,8 +32,7 @@ type Time struct {
 
 // NewTime creates a Time.
 func NewTime(tt time.Time) *Time {
-	t := &Int64{}
-	t.Store(tt.UnixNano())
+	t := &Int64{atomic.NewInt64(tt.UnixNano())}
 	return &Time{v: t}
 }
 
@@ -68,32 +68,90 @@ func (at *Time) CAS(old, new time.Time) bool {
 
 // Hash is an atomic wrapper around chainhash.Hash
 // Note that there isn't really any reason to have CAS or arithmetic or
-// comparisons as it is fine to do these non-atomically between Load/Store and
+// comparisons as it is fine to do these non-atomically between Load / Store and
 // they are (slightly) long operations)
 type Hash struct {
-	v *Value
+	*Value
 }
 
 // NewHash creates a Hash.
 func NewHash(tt chainhash.Hash) *Hash {
-	t := &Value{}
+	t := &Value{
+		Value: &atomic.Value{},
+	}
 	t.Store(tt)
-	return &Hash{v: t}
+	return &Hash{Value: t}
 }
 
 // Load atomically loads the wrapped value.
+// The returned value copied so as to prevent mutation by concurrent users
+// of the atomic, as arrays, slices and maps are pass-by-reference variables
 func (at *Hash) Load() chainhash.Hash {
-	return at.v.Load().(chainhash.Hash)
+	o := at.Value.Load().(chainhash.Hash)
+	var v chainhash.Hash
+	copy(v[:], o[:])
+	return v
 }
 
 // Store atomically stores the passed value.
+// The passed value is copied so further mutations are not propagated.
 func (at *Hash) Store(h chainhash.Hash) {
-	at.v.Store(h)
+	var v chainhash.Hash
+	copy(v[:], h[:])
+	at.Value.Store(v)
 }
 
 // Swap atomically swaps the wrapped chainhash.Hash and returns the old value.
 func (at *Hash) Swap(n chainhash.Hash) chainhash.Hash {
-	o := at.v.Load().(chainhash.Hash)
+	o := at.Value.Load().(chainhash.Hash)
+	at.Value.Store(n)
+	return o
+}
+
+// ListTransactionsResult is an atomic wrapper around
+// []btcjson.ListTransactionsResult
+type ListTransactionsResult struct {
+	v *Value
+}
+
+// NewListTransactionsResult creates a btcjson.ListTransactionsResult.
+func NewListTransactionsResult(ltr []btcjson.ListTransactionsResult) *ListTransactionsResult {
+	t := &Value{
+		Value: &atomic.Value{},
+	}
+	v := make([]btcjson.ListTransactionsResult, len(ltr))
+	copy(v, ltr)
+	t.Store(v)
+	return &ListTransactionsResult{v: t}
+}
+
+// Load atomically loads the wrapped value.
+// Note that it is copied and the stored value remains as it is
+func (at *ListTransactionsResult) Load() []btcjson.ListTransactionsResult {
+	ltr := at.v.Load().([]btcjson.ListTransactionsResult)
+	v := make([]btcjson.ListTransactionsResult, len(ltr))
+	copy(v, ltr)
+	return v
+}
+
+// Store atomically stores the passed value.
+// Note that it is copied and the passed value remains as it is
+func (at *ListTransactionsResult) Store(ltr []btcjson.ListTransactionsResult) {
+	v := make([]btcjson.ListTransactionsResult, len(ltr))
+	copy(v, ltr)
+	at.v.Store(v)
+}
+
+// Swap atomically swaps the wrapped chainhash.ListTransactionsResult and
+// returns the old value.
+func (at *ListTransactionsResult) Swap(n []btcjson.ListTransactionsResult,
+) []btcjson.ListTransactionsResult {
+	o := at.v.Load().([]btcjson.ListTransactionsResult)
 	at.v.Store(n)
 	return o
+}
+
+// Len returns the length of the []btcjson.ListTransactionsResult
+func (at *ListTransactionsResult) Len() int {
+	return len(at.v.Load().([]btcjson.ListTransactionsResult))
 }

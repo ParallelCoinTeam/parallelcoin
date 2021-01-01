@@ -185,13 +185,13 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	var out []l.Widget
 	first := true
 	// out = append(out)
+	wga := wg.State.allTxs.Load()
+	if len(wga) == 0 {
+		return func(gtx l.Context) l.Dimensions { return l.Dimensions{} }
+	}
 	for x := 0; x < 10; x++ {
 		i := x
-		if len(wg.State.AllTimeStrings.Load().([]string)) <= i {
-			break
-		}
-		txs := wg.State.AllTxs[i]
-		times := wg.State.AllTimeStrings
+		txs := wga[i]
 		// spacer
 		if !first {
 			out = append(out,
@@ -233,7 +233,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 							// 	// 	wg.blockPage(*txs.BlockIndex)),
 							// ).
 							Rigid(
-								wg.th.Caption(fmt.Sprintf("%d ", *txs.BlockIndex)).Fn,
+								wg.th.Caption(fmt.Sprintf("%d ", txs.BlockIndex)).Fn,
 							).
 							Fn,
 					).
@@ -276,7 +276,7 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 							).
 							Rigid(
 								wg.th.Caption(
-									times.Load().([]string)[i],
+									fmt.Sprint(txs.Time),
 								).Color("DocText").Fn,
 							).
 							Fn,

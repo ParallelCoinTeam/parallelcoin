@@ -102,7 +102,7 @@ func (wg *WalletGUI) Tickers() {
 						if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
 							// break out
 						}
-						wg.State.SetBestBlockHeight(int(height))
+						wg.State.SetBestBlockHeight(height)
 						wg.State.SetBestBlockHash(h)
 						Debug("wallet running:", wg.wallet.Running())
 						Debug("wallet client running:", wg.WalletClient != nil)
@@ -165,7 +165,7 @@ func (wg *WalletGUI) Tickers() {
 						// if first || len(wg.historyTable.Body) < 1 {
 						// }
 						// startIndex := len(wg.historyTable.Body)
-						// if wg.State.FilterChanged {
+						// if wg.State.filterChanged {
 						// 	startIndex = 0
 						// 	// all elements must be generated this time
 						// 	wg.historyTable.Body = wg.historyTable.Body[:0]
@@ -209,7 +209,7 @@ func (wg *WalletGUI) updateThingies() (err error) {
 
 func (wg *WalletGUI) UpdateHistoryTable() {
 	wg.historyTable.Regenerate(true)
-	out := wg.State.FilteredTxs
+	out := wg.State.filteredTxs.Load()
 	o := out // [startIndex:]
 	var bd p9.TextTableBody
 	for x := range o {
@@ -222,21 +222,21 @@ func (wg *WalletGUI) UpdateHistoryTable() {
 				oi.Address,
 				fmt.Sprintf("%v", time.Unix(oi.Time, 0)),
 				fmt.Sprintf("%v", oi.Confirmations),
-				fmt.Sprintf("%v", *oi.BlockIndex),
-				// wg.State.AllTxs[i].TxID,
-				// wg.State.AllTxs[i].Comment,
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].Fee),
-				// wg.State.AllTxs[i].BlockHash,
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].BlockTime),
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].Generated),
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].Abandoned),
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].Time),
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].Trusted),
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].Vout),
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].WalletConflicts),
-				// wg.State.AllTxs[i].Account,
-				// wg.State.AllTxs[i].OtherAccount,
-				// fmt.Sprintf("%v", wg.State.AllTxs[i].InvolvesWatchOnly),
+				fmt.Sprintf("%v", oi.BlockIndex),
+				// wg.State.allTxs[i].TxID,
+				// wg.State.allTxs[i].Comment,
+				// fmt.Sprintf("%v", wg.State.allTxs[i].Fee),
+				// wg.State.allTxs[i].BlockHash,
+				// fmt.Sprintf("%v", wg.State.allTxs[i].BlockTime),
+				// fmt.Sprintf("%v", wg.State.allTxs[i].Generated),
+				// fmt.Sprintf("%v", wg.State.allTxs[i].Abandoned),
+				// fmt.Sprintf("%v", wg.State.allTxs[i].Time),
+				// fmt.Sprintf("%v", wg.State.allTxs[i].Trusted),
+				// fmt.Sprintf("%v", wg.State.allTxs[i].Vout),
+				// fmt.Sprintf("%v", wg.State.allTxs[i].WalletConflicts),
+				// wg.State.allTxs[i].Account,
+				// wg.State.allTxs[i].OtherAccount,
+				// fmt.Sprintf("%v", wg.State.allTxs[i].InvolvesWatchOnly),
 			},
 		)
 		// }
@@ -252,7 +252,7 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 	if wg.ChainClient == nil || wg.ChainClient.Disconnected() {
 		return
 	}
-	wg.State.SetBestBlockHeight(int(height))
+	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(hash)
 	// }
 	// if wg.App.ActivePageGet() == "history" || first {
