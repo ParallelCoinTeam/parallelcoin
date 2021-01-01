@@ -465,6 +465,9 @@ func (a *App) ActivePage(activePage string) *App {
 func (a *App) ActivePageGet() string {
 	return a.activePage.Load()
 }
+func (a *App) ActivePageGetAtomic() *uberatomic.String {
+	return a.activePage
+}
 
 func (a *App) BodyBackground(bodyBackground string) *App {
 	a.bodyBackground = bodyBackground

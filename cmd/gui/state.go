@@ -1,6 +1,9 @@
 package gui
 
 import (
+	"crypto/cipher"
+	"encoding/json"
+	"io/ioutil"
 	"time"
 	
 	l "gioui.org/layout"
@@ -8,6 +11,8 @@ import (
 	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/coding/gcm"
+	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/atom"
@@ -42,6 +47,11 @@ func (c *CategoryFilter) Filter(s string) (include bool) {
 	return
 }
 
+type AddressEntry struct {
+	Address, Comment  string
+	Created, Modified time.Time
+}
+
 type State struct {
 	lastUpdated             *atom.Time
 	bestBlockHeight         *atom.Int32
@@ -55,9 +65,11 @@ type State struct {
 	filterChanged           *atom.Bool
 	currentReceivingAddress *atom.Address
 	activePage              *uberatomic.String
+	addressBook             []AddressEntry
 }
 
-func GetNewState(params *netparams.Params) *State {
+func GetNewState(params *netparams.Params,
+	activePage *uberatomic.String) *State {
 	fc := &atom.Bool{
 		Bool: uberatomic.NewBool(false),
 	}
@@ -77,12 +89,53 @@ func GetNewState(params *netparams.Params) *State {
 		filterChanged: fc,
 		currentReceivingAddress: atom.NewAddress(&util.AddressPubKeyHash{},
 			params),
-		activePage: uberatomic.NewString("home"),
+		activePage: activePage,
 	}
 }
 
 func (s *State) BumpLastUpdated() {
 	s.lastUpdated.Store(time.Now())
+}
+
+func (s *State) Save(filename string, pass *string) (err error) {
+	marshalled := s.Marshal()
+	var j []byte
+	j, err = json.MarshalIndent(marshalled, "", "  ")
+	Check(err)
+	Debug(string(j))
+	var ciph cipher.AEAD
+	ciph, err = gcm.GetCipher(*pass)
+	var nonce []byte
+	nonce, err = transport.GetNonce(ciph)
+	if err = ioutil.WriteFile(filename, append(nonce, ciph.Seal(nil, nonce, j,
+		nil)...), 0700); Check(err) {
+	}
+	return
+}
+
+func (s *State) Load(filename string, pass *string) {
+	var err error
+	var data []byte
+	var ciph cipher.AEAD
+	if data, err = ioutil.ReadFile(filename); Check(err) {
+		return
+	}
+	if ciph, err = gcm.GetCipher(*pass); Check(err) {
+		return
+	}
+	nonce := data[:ciph.NonceSize()]
+	data = data[ciph.NonceSize():]
+	var b []byte
+	if b, err = ciph.Open(nil, nonce, data, nil); Check(err) {
+		return
+	}
+	// yay, right password, now unmarshal
+	ss := &Marshalled{}
+	if err = json.Unmarshal(b, ss); Check(err) {
+		return
+	}
+	ss.Unmarshal(s)
+	return
 }
 
 type Marshalled struct {
@@ -95,6 +148,7 @@ type Marshalled struct {
 	Filter             CategoryFilter
 	ReceivingAddress   string
 	ActivePage         string
+	AddressBook        []AddressEntry
 }
 
 func (s *State) Marshal() (out *Marshalled) {
@@ -108,6 +162,7 @@ func (s *State) Marshal() (out *Marshalled) {
 		Filter:             s.filter,
 		ReceivingAddress:   s.currentReceivingAddress.Load().EncodeAddress(),
 		ActivePage:         s.activePage.Load(),
+		AddressBook:        s.addressBook,
 	}
 	return
 }
@@ -127,6 +182,7 @@ func (m *Marshalled) Unmarshal(s *State) {
 	}
 	s.currentReceivingAddress.Store(ad)
 	s.activePage.Store(m.ActivePage)
+	s.addressBook = m.AddressBook
 	return
 }
 

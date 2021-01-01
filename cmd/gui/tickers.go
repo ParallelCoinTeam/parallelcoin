@@ -3,6 +3,7 @@ package gui
 import (
 	"encoding/json"
 	"io/ioutil"
+	"path/filepath"
 	"time"
 	
 	"github.com/p9c/pod/cmd/walletmain"
@@ -113,7 +114,13 @@ func (wg *WalletGUI) Tickers() {
 					first = false
 				// }
 				case <-fiveSeconds:
-					wg.invalidate <- struct{}{}
+					filename := filepath.Join(wg.cx.DataDir, "state.json")
+					if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+					} else {
+						wg.State.Load(filename, wg.cx.Config.WalletPass)
+					}
+					
+					// wg.invalidate <- struct{}{}
 				case <-wg.quit:
 					break totalOut
 				}

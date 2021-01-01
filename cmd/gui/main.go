@@ -91,7 +91,6 @@ type WalletGUI struct {
 }
 
 func (wg *WalletGUI) Run() (err error) {
-	wg.State = GetNewState(wg.cx.ActiveNet)
 	wg.Syncing.Store(false)
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
@@ -130,6 +129,7 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	wg.GetIncDecs()
 	wg.App = wg.GetAppWidget()
+	wg.State = GetNewState(wg.cx.ActiveNet, wg.App.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.Tickers()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
