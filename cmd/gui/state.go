@@ -93,7 +93,7 @@ type Marshalled struct {
 	BalanceUnconfirmed float64
 	AllTxs             []btcjson.ListTransactionsResult
 	Filter             CategoryFilter
-	ReceivingAddress   util.Address
+	ReceivingAddress   string
 	ActivePage         string
 }
 
@@ -106,7 +106,7 @@ func (s *State) Marshal() (out *Marshalled) {
 		BalanceUnconfirmed: s.balanceUnconfirmed.Load(),
 		AllTxs:             s.allTxs.Load(),
 		Filter:             s.filter,
-		ReceivingAddress:   s.currentReceivingAddress.Load(),
+		ReceivingAddress:   s.currentReceivingAddress.Load().EncodeAddress(),
 		ActivePage:         s.activePage.Load(),
 	}
 	return
@@ -120,7 +120,12 @@ func (m *Marshalled) Unmarshal(s *State) {
 	s.balanceUnconfirmed.Store(m.BalanceUnconfirmed)
 	s.allTxs.Store(m.AllTxs)
 	s.filter = m.Filter
-	s.currentReceivingAddress.Store(m.ReceivingAddress)
+	ad, err := util.DecodeAddress(m.ReceivingAddress,
+		s.currentReceivingAddress.ForNet)
+	if err != nil {
+		ad = &util.AddressPubKeyHash{}
+	}
+	s.currentReceivingAddress.Store(ad)
 	s.activePage.Store(m.ActivePage)
 	return
 }

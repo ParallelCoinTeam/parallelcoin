@@ -116,20 +116,20 @@ func (at *Hash) Swap(n chainhash.Hash) chainhash.Hash {
 // they are (slightly) long operations)
 type Address struct {
 	*atomic.String
-	forNet *netparams.Params
+	ForNet *netparams.Params
 }
 
 // NewAddress creates a Hash.
 func NewAddress(tt util.Address, forNet *netparams.Params) *Address {
 	t := atomic.NewString(tt.EncodeAddress())
-	return &Address{String: t, forNet: forNet}
+	return &Address{String: t, ForNet: forNet}
 }
 
 // Load atomically loads the wrapped value.
 // The returned value copied so as to prevent mutation by concurrent users
 // of the atomic, as arrays, slices and maps are pass-by-reference variables
 func (at *Address) Load() util.Address {
-	addr, err := util.DecodeAddress(at.String.Load(), at.forNet)
+	addr, err := util.DecodeAddress(at.String.Load(), at.ForNet)
 	if err != nil {
 		return nil
 	}

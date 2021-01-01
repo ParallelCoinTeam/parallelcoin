@@ -182,7 +182,11 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 	// Debug(len(atr))
 	wg.State.SetAllTxs(atr)
 	wg.txHistoryPage = wg.State.filteredTxs.Load()
-	wg.txRecentList = atr[:10]
+	atrl := 10
+	if len(atr) < atrl {
+		atrl = len(atr)
+	}
+	wg.txRecentList = atr[:atrl]
 	wg.RecentTransactionsWidget = wg.RecentTransactions(10, "recent")
 	wg.HistoryWidget = wg.RecentTransactions(-1, "history")
 }
