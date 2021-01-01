@@ -67,7 +67,8 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 											wg.th.H6(" ").Fn,
 										).
 										Rigid(
-											wg.th.Body2(leftPadTo(14, 14, fmt.Sprintf("%6.8f",
+											wg.th.Caption(leftPadTo(14, 14,
+												fmt.Sprintf("%6.8f",
 												wg.State.balance.Load())),
 											).Font("go regular").Fn,
 										).Fn,
@@ -78,7 +79,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 											wg.th.H6(" ").Fn,
 										).
 										Rigid(
-											wg.th.Body2(leftPadTo(14, 14,
+											wg.th.Caption(leftPadTo(14, 14,
 												fmt.Sprintf("%6.8f",
 													wg.State.balanceUnconfirmed.Load())),
 											).Font("go regular").Fn,
@@ -90,7 +91,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 											wg.th.H6(" ").Fn,
 										).
 										Rigid(
-											wg.th.Body2(
+											wg.th.Caption(
 												leftPadTo(14, 14, fmt.Sprintf("%6.8f", wg.State.balance.Load()+wg.
 													State.balanceUnconfirmed.Load())),
 											).Font("go regular").Fn,
@@ -187,7 +188,10 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 	// out = append(out)
 	wga := wg.State.allTxs.Load()
 	if len(wga) == 0 {
-		return func(gtx l.Context) l.Dimensions { return l.Dimensions{} }
+		return func(gtx l.Context) l.Dimensions {
+			return l.Dimensions{Size: gtx.
+				Constraints.Max}
+		}
 	}
 	for x := 0; x < 10; x++ {
 		i := x
