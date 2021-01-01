@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 	
+	uberatomic "go.uber.org/atomic"
+	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
@@ -80,12 +82,15 @@ type WalletGUI struct {
 	sendAddresses             []SendAddress
 	console                   *Console
 	RecentTransactionsWidget  l.Widget
+	HistoryWidget             l.Widget
+	Syncing                   uberatomic.Bool
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
 
 func (wg *WalletGUI) Run() (err error) {
 	wg.State = GetNewState()
+	wg.Syncing.Store(false)
 	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)

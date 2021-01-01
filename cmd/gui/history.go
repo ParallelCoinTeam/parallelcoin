@@ -59,7 +59,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	return wg.th.VFlex().Rigid(wg.RecentTransactionsWidget).Fn
+	return wg.th.VFlex().Rigid(wg.HistoryWidget).Fn
 }
 
 func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {

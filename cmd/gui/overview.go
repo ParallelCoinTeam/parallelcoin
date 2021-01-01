@@ -132,7 +132,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								Flexed(1,
 									wg.th.Fill("DocBg",
 										wg.th.Inset(0.25,
-											wg.RecentTransactions(10),
+											wg.RecentTransactionsWidget,
 											// p9.EmptyMaxWidth(),
 										).Fn,
 										l.Center).Fn,
@@ -165,7 +165,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								Flexed(1,
 									wg.th.Fill("DocBg",
 										wg.th.Inset(0.25,
-											wg.RecentTransactions(10),
+											wg.RecentTransactionsWidget,
 											// p9.EmptyMaxWidth(),
 										).Fn,
 										l.Center).Fn,
@@ -183,7 +183,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 // RecentTransactions generates a display showing recent transactions
 //
 // fields to use: Address, Amount, BlockIndex, BlockTime, Category, Confirmations, Generated
-func (wg *WalletGUI) RecentTransactions(n int) l.Widget {
+func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	var out []l.Widget
 	first := true
 	// out = append(out)
@@ -297,7 +297,7 @@ func (wg *WalletGUI) RecentTransactions(n int) l.Widget {
 		return out[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return wg.lists["recent"].
+		return wg.lists[listName].
 			Vertical().
 			Length(len(out)).
 			ListElement(le).

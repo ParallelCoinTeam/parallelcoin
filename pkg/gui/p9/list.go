@@ -383,7 +383,7 @@ func (li *List) grabber(dims DimensionList, x, y, viewSize int) func(l.Context) 
 			// if de.Type == pointer.Press || de.Type == pointer.Drag || de.Type != pointer.Release {
 			// }
 			if de.Type == pointer.Press {
-				Debug("press position", de.Position)
+				// Debug("press position", de.Position)
 			}
 			if de.Type == pointer.Release {
 				li.currentColor = li.color
@@ -391,7 +391,7 @@ func (li *List) grabber(dims DimensionList, x, y, viewSize int) func(l.Context) 
 				li.currentColor = li.active
 			}
 			if de.Type == pointer.Drag {
-				Debug("drag position", de.Position)
+				// Debug("drag position", de.Position)
 				current := dims.PositionToCoordinate(li.position, li.axis)
 				total := dims.GetTotal(gtx, li.axis)
 				var d int
@@ -404,7 +404,7 @@ func (li *List) grabber(dims DimensionList, x, y, viewSize int) func(l.Context) 
 					if viewPosition < 0 {
 						viewPosition = 0
 					}
-					Debug(viewPosition)
+					// Debug(viewPosition)
 					d = viewPosition / viewSize * total
 				} else {
 					positionY := int(de.Position.Y)
@@ -416,7 +416,7 @@ func (li *List) grabber(dims DimensionList, x, y, viewSize int) func(l.Context) 
 					if d > total {
 						d = total - 1
 					}
-					Debug(current, total, positionY, viewSize, d)
+					// Debug(current, total, positionY, viewSize, d)
 				}
 				// if d > total {
 				// 	d = total - 1

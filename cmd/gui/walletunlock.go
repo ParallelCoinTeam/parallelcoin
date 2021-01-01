@@ -61,7 +61,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 						}
 						wg.wallet.Start()
 						wg.unlockPassword.Wipe()
-						wg.RecentTransactionsWidget = wg.RecentTransactions(-1)
+						wg.RecentTransactionsWidget = wg.RecentTransactions(10, "recent")
+						wg.HistoryWidget = wg.RecentTransactions(-1, "history")
 					}
 				} else {
 					Debug("failed to unlock the wallet")
