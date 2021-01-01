@@ -141,7 +141,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 					Fn,
 			},
 			{
-				Size: 1024,
+				Size: 1280,
 				Widget: wg.th.Flex().SpaceAround().AlignMiddle(). // SpaceSides().AlignMiddle().
 					Rigid(
 						// wg.th.Inset(0.25,
