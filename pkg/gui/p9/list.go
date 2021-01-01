@@ -269,7 +269,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 				Rigid(
 					li.th.Fill(li.background, li.th.Flex().
 						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-						Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
+						Rigid(li.grabber(li.dims, li.scrollWidth, li.middle, li.view)).
 						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
 						Fn, l.Center).Fn,
 				).
@@ -301,7 +301,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 				Rigid(
 					li.th.Flex().Vertical().
 						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-						Rigid(li.grabber(li.dims, li.scrollWidth, li.middle)).
+						Rigid(li.grabber(li.dims, li.scrollWidth, li.middle, li.view)).
 						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
 						Fn,
 				).
@@ -364,7 +364,7 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 	}
 }
 
-func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensions {
+func (li *List) grabber(dims DimensionList, x, y, viewSize int) func(l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		ax := gesture.Vertical
 		if li.axis == l.Horizontal {
@@ -382,24 +382,50 @@ func (li *List) grabber(dims DimensionList, x, y int) func(l.Context) l.Dimensio
 			// respond to the event
 			// if de.Type == pointer.Press || de.Type == pointer.Drag || de.Type != pointer.Release {
 			// }
+			if de.Type == pointer.Press {
+				Debug("press position", de.Position)
+			}
 			if de.Type == pointer.Release {
 				li.currentColor = li.color
 			} else {
 				li.currentColor = li.active
 			}
 			if de.Type == pointer.Drag {
+				Debug("drag position", de.Position)
 				current := dims.PositionToCoordinate(li.position, li.axis)
+				total := dims.GetTotal(gtx, li.axis)
 				var d int
 				if li.axis == l.Horizontal {
-					d = int(de.Position.X) + current
+					positionX := int(de.Position.X)
+					viewPosition := viewSize + positionX
+					if viewPosition > viewSize {
+						viewPosition = viewSize
+					}
+					if viewPosition < 0 {
+						viewPosition = 0
+					}
+					Debug(viewPosition)
+					d = viewPosition / viewSize * total
 				} else {
-					d = int(de.Position.Y) + current
+					positionY := int(de.Position.Y)
+					// d = current + total*positionY/viewSize
+					d = current + positionY*(total/viewSize)
+					if d < 0 {
+						d = 0
+					}
+					if d > total {
+						d = total - 1
+					}
+					Debug(current, total, positionY, viewSize, d)
 				}
-				total := dims.GetTotal(gtx, li.axis)
-				if d > total {
-					d = total - 1
-				}
-				li.position = dims.CoordinateToPosition(d, li.axis)
+				// if d > total {
+				// 	d = total - 1
+				// }
+				// if d < 0 {
+				// 	d = 0
+				// }
+				li.SetPosition(dims.CoordinateToPosition(d, li.axis))
+				
 			}
 			// if de.Type == pointer.Scroll {
 		}

@@ -56,11 +56,12 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 						*wg.cx.Config.NodeOff = false
 						*wg.cx.Config.WalletOff = false
 						save.Pod(wg.cx.Config)
-						wg.wallet.Start()
 						if !wg.node.Running() {
 							wg.node.Start()
 						}
+						wg.wallet.Start()
 						wg.unlockPassword.Wipe()
+						wg.RecentTransactionsWidget = wg.RecentTransactions(-1)
 					}
 				} else {
 					Debug("failed to unlock the wallet")

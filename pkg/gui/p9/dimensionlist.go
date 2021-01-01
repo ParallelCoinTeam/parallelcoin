@@ -33,15 +33,11 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 				position.BeforeEnd = true
 				break
 			}
+			// step back
 			cursor -= axisMain(axis, d[i].Size)
-			position.First = i
+			position.First = i - 1
 			position.Offset = coordinate - cursor
 			position.BeforeEnd = true
-			if i == len(d)-1 {
-				if position.Offset == 0 {
-					position.BeforeEnd = false
-				}
-			}
 			break
 		}
 	}

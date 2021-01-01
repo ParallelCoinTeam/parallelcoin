@@ -32,10 +32,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			// 	wgb.Value(*wg.th.Dark)
 			// }
 			// wg.th.Colors.Unlock()
-			if wg.historyTable != nil {
-				wg.historyTable.Regenerate(true)
-			}
-			save.Pod(wg.cx.Config)
+			// save.Pod(wg.cx.Config)
 		},
 	)
 	wg.config = cfg.New(wg.cx, wg.th)

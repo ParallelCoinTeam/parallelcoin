@@ -77,9 +77,9 @@ type WalletGUI struct {
 	inputs                    map[string]*p9.Input
 	passwords                 map[string]*p9.Password
 	incdecs                   map[string]*p9.IncDec
-	historyTable              *p9.TextTable
 	sendAddresses             []SendAddress
 	console                   *Console
+	RecentTransactionsWidget  l.Widget
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
@@ -95,7 +95,6 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.clickables = wg.GetClickables()
 	wg.checkables = map[string]*p9.Checkable{
 	}
-	wg.GetHistoryTable()
 	before := func() { Debug("running before") }
 	after := func() { Debug("running after") }
 	wg.node = wg.GetRunUnit(
@@ -207,23 +206,6 @@ func (wg *WalletGUI) GetButtons() {
 	}
 }
 
-func (wg *WalletGUI) GetHistoryTable() {
-	wg.historyTable = (&p9.TextTable{
-		Theme:            wg.th,
-		HeaderColor:      "DocText",
-		HeaderBackground: "DocBg",
-		HeaderFont:       "bariol bold",
-		HeaderFontScale:  1,
-		CellColor:        "PanelText",
-		CellBackground:   "PanelBg",
-		CellFont:         "go regular",
-		CellFontScale:    p9.Scales["Caption"],
-		Inset:            0.25,
-		List:             wg.lists["history"],
-	}).
-		SetDefaults()
-}
-
 func (wg *WalletGUI) GetInputs() {
 	seed := make([]byte, hdkeychain.MaxSeedBytes)
 	_, _ = rand.Read(seed)
@@ -274,17 +256,6 @@ func (wg *WalletGUI) GetIncDecs() {
 						// 	wg.miner.Start()
 						// }
 					}()
-				},
-			),
-		"transactionsPerPage": wg.th.IncDec().
-			Min(10).
-			Max(100).
-			NDigits(3).
-			Amount(10).
-			SetCurrent(10).
-			ChangeHook(
-				func(n int) {
-					Debug("showing", n, "per page")
 				},
 			),
 		"idleTimeout": wg.th.IncDec().

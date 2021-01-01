@@ -52,7 +52,7 @@ type State struct {
 	filteredTxs             *atom.ListTransactionsResult
 	filter                  CategoryFilter
 	filterChanged           *atom.Bool
-	currentReceivingAddress util.Address
+	currentReceivingAddress *atom.Address
 	activePage              *uberatomic.String
 }
 
@@ -74,7 +74,7 @@ func GetNewState() *State {
 			[]btcjson.ListTransactionsResult{}),
 		filter:                  CategoryFilter{},
 		filterChanged:           fc,
-		currentReceivingAddress: &util.AddressPubKeyHash{},
+		currentReceivingAddress: atom.NewAddress(&util.AddressPubKeyHash{}),
 		activePage:              uberatomic.NewString("home"),
 	}
 }

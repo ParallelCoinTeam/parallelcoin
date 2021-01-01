@@ -4,7 +4,6 @@ import (
 	l "gioui.org/layout"
 	
 	"github.com/p9c/pod/pkg/gui/p9"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 func (wg *WalletGUI) HistoryPage() l.Widget {
@@ -60,32 +59,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	gen := wg.bools["showGenerate"].GetValue()
-	sent := wg.bools["showSent"].GetValue()
-	recv := wg.bools["showReceived"].GetValue()
-	imma := wg.bools["showImmature"].GetValue()
-	// current := wg.incdecs["transactionsPerPage"].GetCurrent()
-	cursor := 0 // wg.historyCurPage * current
-	// Debug(cursor, wg.historyCurPage, current, *wg.Size)
-	var out []btcjson.ListTransactionsResult
-	for i := 0; i < wg.incdecs["transactionsPerPage"].GetCurrent(); i++ {
-		// Debugs(wg.State.allTxs)
-		ws := wg.State.allTxs.Load()
-		for ; cursor < len(ws)-1; cursor++ {
-			wsa := ws[cursor]
-			if wsa.Generated && gen ||
-				wsa.Category == "send" && sent ||
-				wsa.Category == "generate" && gen ||
-				wsa.Category == "immature" && imma ||
-				wsa.Category == "receive" && recv ||
-				wsa.Category == "unknown" {
-				out = append(out, wsa)
-				// break
-			}
-			
-		}
-	}
-	return wg.th.VFlex().Flexed(1, wg.historyTable.Fn).Fn
+	return wg.th.VFlex().Rigid(wg.RecentTransactionsWidget).Fn
 }
 
 func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {

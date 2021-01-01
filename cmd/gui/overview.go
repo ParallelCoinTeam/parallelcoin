@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	"strings"
+	"time"
 	
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 	
@@ -69,7 +70,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 										Rigid(
 											wg.th.Caption(leftPadTo(14, 14,
 												fmt.Sprintf("%6.8f",
-												wg.State.balance.Load())),
+													wg.State.balance.Load())),
 											).Font("go regular").Fn,
 										).Fn,
 								).
@@ -131,7 +132,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								Flexed(1,
 									wg.th.Fill("DocBg",
 										wg.th.Inset(0.25,
-											wg.RecentTransactions(),
+											wg.RecentTransactions(10),
 											// p9.EmptyMaxWidth(),
 										).Fn,
 										l.Center).Fn,
@@ -164,7 +165,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								Flexed(1,
 									wg.th.Fill("DocBg",
 										wg.th.Inset(0.25,
-											wg.RecentTransactions(),
+											wg.RecentTransactions(10),
 											// p9.EmptyMaxWidth(),
 										).Fn,
 										l.Center).Fn,
@@ -182,7 +183,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 // RecentTransactions generates a display showing recent transactions
 //
 // fields to use: Address, Amount, BlockIndex, BlockTime, Category, Confirmations, Generated
-func (wg *WalletGUI) RecentTransactions() l.Widget {
+func (wg *WalletGUI) RecentTransactions(n int) l.Widget {
 	var out []l.Widget
 	first := true
 	// out = append(out)
@@ -193,7 +194,10 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 				Constraints.Max}
 		}
 	}
-	for x := 0; x < 10; x++ {
+	for x := range wga {
+		if x > n && n > 0 {
+			break
+		}
 		i := x
 		txs := wga[i]
 		// spacer
@@ -280,7 +284,8 @@ func (wg *WalletGUI) RecentTransactions() l.Widget {
 							).
 							Rigid(
 								wg.th.Caption(
-									fmt.Sprint(txs.Time),
+									time.Unix(txs.Time,
+										0).Format("02 Jan 06 15:04:05 MST"),
 								).Color("DocText").Fn,
 							).
 							Fn,

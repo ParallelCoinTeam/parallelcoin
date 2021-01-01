@@ -2,13 +2,11 @@ package gui
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"time"
 	
 	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -136,49 +134,6 @@ func (wg *WalletGUI) Tickers() {
 							wg.State.SetAllTxs(atr)
 							wg.invalidate <- struct{}{}
 						}
-						if wg.historyTable.Header == nil {
-							Debug("generate the widgets for the updated transactions")
-							// create the header
-							wg.historyTable.Header = p9.TextTableHeader{
-								"Amount",
-								"Category",
-								"Address",
-								"Time",
-								"Conf",
-								"In Block",
-								// "Transaction ID",
-								// "Comment",
-								// "Fee",
-								// "BlockHash",
-								// "BlockTime",
-								// "Generated",
-								// "Abandoned",
-								// "Time Received",
-								// "Trusted",
-								// "Vout",
-								// "Wallet Conflicts",
-								// "Account",
-								// "Other Account",
-								// "Involves Watch Only",
-							}
-						}
-						// if first || len(wg.historyTable.Body) < 1 {
-						// }
-						// startIndex := len(wg.historyTable.Body)
-						// if wg.State.filterChanged {
-						// 	startIndex = 0
-						// 	// all elements must be generated this time
-						// 	wg.historyTable.Body = wg.historyTable.Body[:0]
-						// }
-						// // append all newly added items to the body. The caller can force regeneration by slicing the
-						// // body to zero elements or nilling it, as then every element of out will be generated and added
-						// // to a fresh empty slice.
-						// if startIndex < len(out) {
-						// 	// there is new elements appended to the end of the list
-						// if first {
-						
-					wg.historyTable.Regenerate(true)
-					wg.UpdateHistoryTable()
 					}
 					wg.invalidate <- struct{}{}
 					first = false
@@ -205,43 +160,6 @@ func (wg *WalletGUI) updateThingies() (err error) {
 		}
 	}
 	return
-}
-
-func (wg *WalletGUI) UpdateHistoryTable() {
-	wg.historyTable.Regenerate(true)
-	out := wg.State.filteredTxs.Load()
-	o := out // [startIndex:]
-	var bd p9.TextTableBody
-	for x := range o {
-		i := x
-		oi := out[i]
-		bd = append(
-			bd, p9.TextTableRow{
-				fmt.Sprintf("%6.8f", oi.Amount),
-				oi.Category,
-				oi.Address,
-				fmt.Sprintf("%v", time.Unix(oi.Time, 0)),
-				fmt.Sprintf("%v", oi.Confirmations),
-				fmt.Sprintf("%v", oi.BlockIndex),
-				// wg.State.allTxs[i].TxID,
-				// wg.State.allTxs[i].Comment,
-				// fmt.Sprintf("%v", wg.State.allTxs[i].Fee),
-				// wg.State.allTxs[i].BlockHash,
-				// fmt.Sprintf("%v", wg.State.allTxs[i].BlockTime),
-				// fmt.Sprintf("%v", wg.State.allTxs[i].Generated),
-				// fmt.Sprintf("%v", wg.State.allTxs[i].Abandoned),
-				// fmt.Sprintf("%v", wg.State.allTxs[i].Time),
-				// fmt.Sprintf("%v", wg.State.allTxs[i].Trusted),
-				// fmt.Sprintf("%v", wg.State.allTxs[i].Vout),
-				// fmt.Sprintf("%v", wg.State.allTxs[i].WalletConflicts),
-				// wg.State.allTxs[i].Account,
-				// wg.State.allTxs[i].OtherAccount,
-				// fmt.Sprintf("%v", wg.State.allTxs[i].InvolvesWatchOnly),
-			},
-		)
-		// }
-	}
-	wg.historyTable.Body = bd // wg.historyTable.Body[:0]
 }
 
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
@@ -282,7 +200,7 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 	}
 	// Debug(len(atr))
 	wg.State.SetAllTxs(atr)
-	wg.UpdateHistoryTable()
+	wg.RecentTransactionsWidget = wg.RecentTransactions(-1)
 }
 
 func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
