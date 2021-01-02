@@ -1,10 +1,11 @@
 package serve
 
 import (
+	"go.uber.org/atomic"
+	
 	"github.com/p9c/pod/pkg/util/interrupt"
 	qu "github.com/p9c/pod/pkg/util/quit"
-	"go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/Entry"
@@ -54,7 +55,7 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 					// logi.L.LogChan = nil
 					interrupt.Request()
 					// <-interrupt.HandlersDone
-
+					
 					// quit.Q()
 					// goroutineDump()
 					// Debug(interrupt.GoroutineDump())
@@ -70,10 +71,10 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 			select {
 			case <-quit:
 				// interrupt.Request()
-				if !logi.L.LogChanDisabled {
-					logi.L.LogChanDisabled = true
+				if !logi.L.LogChanDisabled.Load() {
+					logi.L.LogChanDisabled.Store(true)
 				}
-				logi.L.Writer.Write = true
+				logi.L.Writer.Write.Store(true)
 				Debug("quitting pipe logger") // , interrupt.GoroutineDump())
 				interrupt.Request()
 				logOn.Store(false)
@@ -105,7 +106,7 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 				}
 			}
 		}
-
+		
 		<-interrupt.HandlersDone
 		Debug("finished pipe logger")
 	}()

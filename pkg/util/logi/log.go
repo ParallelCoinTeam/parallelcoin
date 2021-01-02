@@ -63,7 +63,7 @@ var (
 
 type LogWriter struct {
 	io.Writer
-	Write bool
+	Write uberatomic.Bool
 }
 
 // DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
@@ -82,19 +82,19 @@ func PickNoun(n int, singular, plural string) string {
 }
 
 func (w *LogWriter) Print(a ...interface{}) {
-	if w.Write {
+	if w.Write .Load() {
 		_, _ = fmt.Fprint(w.Writer, a...)
 	}
 }
 
 func (w *LogWriter) Printf(format string, a ...interface{}) {
-	if w.Write {
+	if w.Write .Load() {
 		_, _ = fmt.Fprintf(w.Writer, format, a...)
 	}
 }
 
 func (w *LogWriter) Println(a ...interface{}) {
-	if w.Write {
+	if w.Write .Load() {
 		_, _ = fmt.Fprintln(w.Writer, a...)
 	}
 }
@@ -149,7 +149,7 @@ type (
 		Color           bool
 		Split           string
 		LogChan         chan Entry
-		LogChanDisabled bool
+		LogChanDisabled *uberatomic.Bool
 	}
 )
 
@@ -158,18 +158,18 @@ var L = NewLogger()
 func init() {
 	L.SetLevel("info", true, "pod")
 	L.Writer.SetLogWriter(os.Stderr)
-	L.Writer.Write = true
+	L.Writer.Write.Store( true)
 	L.Trace("starting up logger")
 }
 
 // AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() (ch chan Entry) {
-	l.LogChanDisabled = false
+	l.LogChanDisabled.Store(false)
 	if l.LogChan != nil {
 		L.Debug("trying to add a second logging channel")
 		panic("warning warning")
 	}
-	// L.Writer.Write = false
+	// L.Writer.Write.Store( false
 	l.LogChan = make(chan Entry)
 	return L.LogChan
 }
@@ -183,7 +183,7 @@ func NewLogger() (l *Logger) {
 		Color:           true,
 		Split:           "pod",
 		LogChan:         nil,
-		LogChanDisabled: true,
+		LogChanDisabled: uberatomic.NewBool(true),
 	}
 	l.Fatal = l.printlnFunc(Fatal)
 	l.Error = l.printlnFunc(Error)
@@ -230,7 +230,7 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 			),
 		)
 		if err != nil {
-			if L.Writer.Write {
+			if L.Writer.Write.Load() {
 				L.Writer.Println("error rotating log", err)
 			}
 			return
@@ -238,7 +238,7 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	}
 	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		if L.Writer.Write {
+		if L.Writer.Write.Load() {
 			L.Writer.Println("error opening log file", logFileName)
 		}
 	}
@@ -343,10 +343,10 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
 			return
 		}
-		if l.Writer.Write || (*l.Packages)[pkg] {
+		if l.Writer.Write.Load() || (*l.Packages)[pkg] {
 			l.Writer.Println(Composite(text, level))
 		}
-		if !l.LogChanDisabled && l.LogChan != nil {
+		if !l.LogChanDisabled.Load() && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
 			out := Entry{
@@ -367,10 +367,10 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 		}
 		t := fn()
 		text := trimReturn(t)
-		if l.Writer.Write {
+		if l.Writer.Write.Load() {
 			l.Writer.Println(Composite(text, level))
 		}
-		if !l.LogChanDisabled && l.LogChan != nil {
+		if !l.LogChanDisabled.Load() && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
 			out := Entry{
@@ -390,10 +390,10 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 			return
 		}
 		text := trimReturn(fmt.Sprintln(a...))
-		if l.Writer.Write {
+		if l.Writer.Write.Load() {
 			l.Writer.Println(Composite(text, level))
 		}
-		if !l.LogChanDisabled && l.LogChan != nil {
+		if !l.LogChanDisabled.Load() && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
 			out := Entry{
@@ -416,10 +416,10 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 			return false
 		}
 		text := err.Error()
-		if l.Writer.Write {
+		if l.Writer.Write.Load() {
 			l.Writer.Println(Composite(text, "CHK"))
 		}
-		if !l.LogChanDisabled && l.LogChan != nil {
+		if !l.LogChanDisabled.Load() && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
 			out := Entry{
@@ -442,10 +442,10 @@ func (l *Logger) spewFunc(level string) SpewFunc {
 		text := trimReturn(spew.Sdump(a))
 		o := "" + Composite("spew:", level)
 		o += "\n" + text + "\n"
-		if l.Writer.Write {
+		if l.Writer.Write.Load() {
 			l.Writer.Print(o)
 		}
-		if !l.LogChanDisabled && l.LogChan != nil {
+		if !l.LogChanDisabled.Load() && l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
 			out := Entry{

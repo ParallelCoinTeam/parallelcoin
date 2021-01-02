@@ -240,8 +240,8 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 				}
 			}
 			Debug("finished kopach miner work loop")
-			logi.L.LogChanDisabled = true
-			logi.L.Writer.Write = true
+			logi.L.LogChanDisabled.Store(true)
+			logi.L.Writer.Write.Store(true)
 		}()
 		Debug("listening on", control.UDP4MulticastAddress)
 		<-w.quit

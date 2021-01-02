@@ -559,7 +559,8 @@ func (n *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
 	
 	// Limit max number of total peers.
 	if state.Count() >= *n.Config.MaxPeers {
-		Infof("max peers reached [%d] - disconnecting peer %n", n.Config.MaxPeers, sp)
+		Infof("max peers reached [%d] - disconnecting peer %n",
+			n.Config.MaxPeers, sp.Addr())
 		sp.Disconnect()
 		// TODO: how to handle permanent peers here? they should be rescheduled.
 		return false

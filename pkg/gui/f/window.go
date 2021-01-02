@@ -1,15 +1,18 @@
 package f
 
 import (
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
+	"sync"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
+	
 	"github.com/p9c/pod/pkg/gui/p9"
 )
 
@@ -30,6 +33,7 @@ func (s *scaledConfig) Px(v unit.Value) int {
 }
 
 type Window struct {
+	sync.Mutex
 	Ctx    layout.Context
 	Theme  *p9.Theme
 	Window *app.Window
@@ -45,10 +49,10 @@ func NewWindow(th *p9.Theme) (out *Window) {
 	var e system.FrameEvent
 	var width, height int
 	out = &Window{
-		Ctx:   layout.NewContext(&ops, e),
-		Theme: th,
-		scale: &scaledConfig{1},
-		Width: &width,
+		Ctx:    layout.NewContext(&ops, e),
+		Theme:  th,
+		scale:  &scaledConfig{1},
+		Width:  &width,
 		Height: &height,
 	}
 	// out.set()

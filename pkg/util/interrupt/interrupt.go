@@ -2,6 +2,9 @@ package interrupt
 
 import (
 	"fmt"
+	
+	uberatomic "go.uber.org/atomic"
+	
 	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"os/exec"
@@ -19,7 +22,7 @@ type HandlerWithSource struct {
 
 var (
 	Restart   bool // = true
-	requested bool
+	requested uberatomic.Bool
 	// Chan is used to receive SIGINT (Ctrl+C) signals.
 	Chan chan os.Signal
 	// Signals is the list of signals that cause the interrupt
@@ -94,7 +97,7 @@ out:
 			// if !requested {
 			// 	L.Printf("\r>>> received signal (%s)\n", sig)
 			Debug("received interrupt signal", sig)
-			requested = true
+			requested.Store(true)
 			invokeCallbacks()
 			// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 			// }
@@ -102,7 +105,7 @@ out:
 		case <-ShutdownRequestChan:
 			// if !requested {
 			Warn("received shutdown request - shutting down...")
-			requested = true
+			requested.Store(true)
 			invokeCallbacks()
 			break out
 			// }
@@ -139,11 +142,11 @@ func AddHandler(handler func()) {
 func Request() {
 	_, f, l, _ := runtime.Caller(1)
 	Debugf("interrupt requested %s:%d %v", f, l, requested)
-	if requested {
+	if requested.Load() {
 		Debug("requested again")
 		return
 	}
-	requested = true
+	requested.Store(true)
 	ShutdownRequestChan.Q()
 	// qu.PrintChanState()
 	var ok bool
@@ -173,5 +176,5 @@ func RequestRestart() {
 
 // Requested returns true if an interrupt has been requested
 func Requested() bool {
-	return requested
+	return requested.Load()
 }

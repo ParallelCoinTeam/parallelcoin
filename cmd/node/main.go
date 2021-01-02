@@ -173,8 +173,8 @@ func Main(cx *conte.Xt) (err error) {
 		// consume.Kill(cx.StateCfg.Miner)
 		server.WaitForShutdown()
 		Info("server shutdown complete")
-		logi.L.LogChanDisabled = true
-		logi.L.Writer.Write = true
+		logi.L.LogChanDisabled.Store(true)
+		logi.L.Writer.Write.Store(true)
 		cx.WaitDone()
 		// <-cx.KillAll
 		// cx.WaitGroup.Done()

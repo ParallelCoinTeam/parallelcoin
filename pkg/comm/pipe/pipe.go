@@ -34,7 +34,7 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 			if n == 0 {
 				Trace("read zero from stdconn", args)
 				onBackup = true
-				logi.L.LogChanDisabled = true
+				logi.L.LogChanDisabled.Store(true)
 				break out
 			}
 			if err != nil && err != io.EOF {

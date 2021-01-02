@@ -49,7 +49,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				err = node.Main(cx)
+				err := node.Main(cx)
 				if err != nil {
 					Error("error starting node ", err)
 				}
