@@ -30,20 +30,20 @@ func (w *Window) Switch(swtch *Bool) *Switch {
 		Window: w,
 		swtch:  swtch,
 	}
-	sw.color.enabled = w.Colors.Get("Primary")
-	sw.color.disabled = w.Colors.Get("PanelBg")
+	sw.color.enabled = w.Colors.GetNRGBAFromName("Primary")
+	sw.color.disabled = w.Colors.GetNRGBAFromName("PanelBg")
 	return sw
 }
 
 // EnabledColor sets the color to draw for the enabled state
 func (s *Switch) EnabledColor(color string) *Switch {
-	s.color.enabled = s.Theme.Colors.Get(color)
+	s.color.enabled = s.Theme.Colors.GetNRGBAFromName(color)
 	return s
 }
 
 // DisabledColor sets the color to draw for the disabled state
 func (s *Switch) DisabledColor() *Switch {
-	s.color.disabled = s.Theme.Colors.Get("Primary")
+	s.color.disabled = s.Theme.Colors.GetNRGBAFromName("Primary")
 	return s
 }
 

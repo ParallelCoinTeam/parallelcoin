@@ -23,7 +23,7 @@ type Indefinite struct {
 func (w *Window) Indefinite() *Indefinite {
 	return &Indefinite{
 		Window: w,
-		color:  w.Colors.Get("Primary"),
+		color:  w.Colors.GetNRGBAFromName("Primary"),
 	}
 }
 
@@ -35,7 +35,7 @@ func (lo *Indefinite) Scale(scale float32) *Indefinite {
 
 // Color sets the color of the spinner
 func (lo *Indefinite) Color(color string) *Indefinite {
-	lo.color = lo.Theme.Colors.Get(color)
+	lo.color = lo.Theme.Colors.GetNRGBAFromName(color)
 	return lo
 }
 

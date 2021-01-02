@@ -83,7 +83,7 @@ func (i *Icon) image(sz int) paint.ImageOp {
 	// }
 	if ico, ok := i.Theme.iconCache[i.src]; ok {
 		if isz, ok := ico[i.size.V]; ok {
-			if icl, ok := isz[i.Theme.Colors.Get(i.color)]; ok {
+			if icl, ok := isz[i.Theme.Colors.GetNRGBAFromName(i.color)]; ok {
 				return icl
 			}
 		}
@@ -94,7 +94,7 @@ func (i *Icon) image(sz int) paint.ImageOp {
 		Y: int(float32(sz) * dy / dx)}})
 	var ico iconvg.Rasterizer
 	ico.SetDstImage(img, img.Bounds(), draw.Src)
-	m.Palette[0] = color.RGBA(i.Theme.Colors.Get(i.color))
+	m.Palette[0] = color.RGBA(i.Theme.Colors.GetNRGBAFromName(i.color))
 	if err := iconvg.Decode(&ico, *i.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
 	}); Check(err) {
@@ -107,6 +107,6 @@ func (i *Icon) image(sz int) paint.ImageOp {
 	if _, ok := i.Theme.iconCache[i.src][i.size.V]; !ok {
 		i.Theme.iconCache[i.src][i.size.V] = make(IconByColor)
 	}
-	i.Theme.iconCache[i.src][i.size.V][i.Theme.Colors.Get(i.color)] = operation
+	i.Theme.iconCache[i.src][i.size.V][i.Theme.Colors.GetNRGBAFromName(i.color)] = operation
 	return operation
 }

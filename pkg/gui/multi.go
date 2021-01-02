@@ -54,7 +54,7 @@ func (w *Window) Multiline(
 	for i := range *m.lines {
 		// Debug("making clickables")
 		x := i
-		clickable := m.Theme.Clickable().SetClick(
+		clickable := m.Clickable().SetClick(
 			func() {
 				m.inputLocation = x
 				Debug("button clicked", x, m.inputLocation)
@@ -81,7 +81,7 @@ func (w *Window) Multiline(
 			m.buttons[i] = btn
 		}
 		// Debug("making clickables")
-		removeClickable := m.Theme.Clickable()
+		removeClickable := m.Clickable()
 		if len(*m.lines) > len(m.removeClickables) {
 			m.removeClickables = append(m.removeClickables, removeClickable)
 		} else {
@@ -161,7 +161,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 			added = true
 			Debug("making clickables", i)
 			x := i
-			m.clickables[i] = m.Theme.Clickable().SetClick(
+			m.clickables[i] = m.Clickable().SetClick(
 				func() {
 					Debug("clicked", x, m.inputLocation)
 					m.inputLocation = x
@@ -190,7 +190,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 		)
 		if m.removeClickables[i] == nil {
 			added = true
-			removeClickable := m.Theme.Clickable()
+			removeClickable := m.Clickable()
 			m.removeClickables[i] = removeClickable
 		}
 		if m.removeButtons[i] == nil {

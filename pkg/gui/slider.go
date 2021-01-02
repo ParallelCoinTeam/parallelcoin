@@ -25,7 +25,7 @@ type Slider struct {
 func (w *Window) Slider() *Slider {
 	return &Slider{
 		Window: w,
-		color: w.Colors.Get("Primary"),
+		color: w.Colors.GetNRGBAFromName("Primary"),
 	}
 }
 
@@ -43,7 +43,7 @@ func (s *Slider) Max(max float32) *Slider {
 
 // Color sets the color to draw the slider in
 func (s *Slider) Color(color string) *Slider {
-	s.color = s.Theme.Colors.Get(color)
+	s.color = s.Theme.Colors.GetNRGBAFromName(color)
 	return s
 }
 

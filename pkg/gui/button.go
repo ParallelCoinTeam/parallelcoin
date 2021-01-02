@@ -4,7 +4,7 @@ import (
 	"image/color"
 	"math"
 	"strings"
-
+	
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
@@ -17,7 +17,7 @@ import (
 )
 
 type Button struct {
-*Window
+	*Window
 	background   color.NRGBA
 	color        color.NRGBA
 	cornerRadius unit.Value
@@ -33,12 +33,12 @@ type Button struct {
 func (w *Window) Button(btn *Clickable) *Button {
 	return &Button{
 		Window: w,
-		text:  strings.ToUpper("text unset"),
+		text:   strings.ToUpper("text unset"),
 		// default sets
 		font:         w.collection[0].Font,
-		color:        w.Colors.Get("ButtonText"),
+		color:        w.Colors.GetNRGBAFromName("ButtonText"),
 		cornerRadius: w.TextSize.Scale(0.125),
-		background:   w.Colors.Get("Primary"),
+		background:   w.Colors.GetNRGBAFromName("Primary"),
 		textSize:     w.TextSize,
 		inset: &l.Inset{
 			Top:    w.TextSize.Scale(0.5),
@@ -53,13 +53,13 @@ func (w *Window) Button(btn *Clickable) *Button {
 
 // Background sets the background color
 func (b *Button) Background(background string) *Button {
-	b.background = b.Theme.Colors.Get(background)
+	b.background = b.Theme.Colors.GetNRGBAFromName(background)
 	return b
 }
 
 // Color sets the text color
 func (b *Button) Color(color string) *Button {
-	b.color = b.Theme.Colors.Get(color)
+	b.color = b.Theme.Colors.GetNRGBAFromName(color)
 	return b
 }
 
@@ -71,11 +71,8 @@ func (b *Button) CornerRadius(cornerRadius float32) *Button {
 
 // Font sets the font style
 func (b *Button) Font(font string) *Button {
-	for i := range b.Theme.collection {
-		if b.Theme.collection[i].Font.Typeface == text.Typeface(font) {
-			b.font = b.Theme.collection[i].Font
-			return b
-		}
+	if fon, err := b.Theme.collection.Font(font); !Check(err) {
+		b.font = fon
 	}
 	return b
 }

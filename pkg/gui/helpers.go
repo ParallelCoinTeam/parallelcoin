@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"errors"
 	"image"
 	"image/color"
 	"time"
@@ -18,6 +19,17 @@ type (
 	Icons      map[string]*Icon
 	Collection []text.FontFace
 )
+
+func (c Collection) Font(font string) (out text.Font, err error) {
+	for i := range c {
+		if c[i].Font.Typeface == text.Typeface(font) {
+			out = c[i].Font
+			return
+		}
+	}
+	return out, errors.New("font " + font + " not found")
+	
+}
 
 const Inf = 1e6
 

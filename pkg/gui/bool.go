@@ -17,7 +17,7 @@ type Bool struct {
 // Bool creates a new boolean widget
 func (w *Window) Bool(value bool) *Bool {
 	return &Bool{
-		Window:       w,
+		Window:      w,
 		value:       value,
 		clk:         w.Clickable(),
 		changed:     false,
@@ -59,7 +59,7 @@ func (b *Bool) Fn(gtx layout.Context) layout.Dimensions {
 	for b.clk.Clicked() {
 		b.value = !b.value
 		b.changed = true
-		b.changeState(b.value)
+		b.Window.Runner <- func() error { b.changeState(b.value); return nil }
 	}
 	return dims
 }

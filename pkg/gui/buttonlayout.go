@@ -24,14 +24,14 @@ func (w *Window) ButtonLayout(button *Clickable) *ButtonLayout {
 	return &ButtonLayout{
 		Window:       w,
 		button:       button,
-		background:   w.Colors.Get("ButtonBg"),
+		background:   w.Colors.GetNRGBAFromName("ButtonBg"),
 		cornerRadius: w.TextSize.Scale(0.125),
 	}
 }
 
 // Background sets the background color of the button
 func (b *ButtonLayout) Background(color string) *ButtonLayout {
-	b.background = b.Theme.Colors.Get(color)
+	b.background = b.Theme.Colors.GetNRGBAFromName(color)
 	return b
 }
 

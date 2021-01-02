@@ -33,10 +33,10 @@ func (w *Window) TextInput(editor *Editor, hint string) *TextInput {
 		Window:    w,
 		editor:    editor,
 		textSize:  w.TextSize,
-		color:     w.Colors.Get("DocText"),
+		color:     w.Colors.GetNRGBAFromName("DocText"),
 		shaper:    w.shaper,
 		hint:      hint,
-		hintColor: w.Colors.Get("Hint"),
+		hintColor: w.Colors.GetNRGBAFromName("Hint"),
 	}
 	e.Font("bariol regular")
 	return e
@@ -44,11 +44,8 @@ func (w *Window) TextInput(editor *Editor, hint string) *TextInput {
 
 // Font sets the font for the text input widget
 func (e *TextInput) Font(font string) *TextInput {
-	for i := range e.Theme.collection {
-		if e.Theme.collection[i].Font.Typeface == text.Typeface(font) {
-			e.font = e.Theme.collection[i].Font
-			break
-		}
+	if fon, err := e.Theme.collection.Font(font); !Check(err) {
+		e.editor.font = fon
 	}
 	return e
 }
@@ -61,7 +58,7 @@ func (e *TextInput) TextScale(scale float32) *TextInput {
 
 // Color sets the color to render the text
 func (e *TextInput) Color(color string) *TextInput {
-	e.color = e.Theme.Colors.Get(color)
+	e.color = e.Theme.Colors.GetNRGBAFromName(color)
 	return e
 }
 
@@ -73,7 +70,7 @@ func (e *TextInput) Hint(hint string) *TextInput {
 
 // HintColor sets the color of the hint text
 func (e *TextInput) HintColor(color string) *TextInput {
-	e.hintColor = e.Theme.Colors.Get(color)
+	e.hintColor = e.Theme.Colors.GetNRGBAFromName(color)
 	return e
 }
 

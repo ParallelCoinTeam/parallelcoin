@@ -22,16 +22,14 @@ type Border struct {
 
 // Border creates a border with configurable color, width and corner radius.
 func (w *Window) Border() *Border {
-	b := &Border{
-		Window: w,
-	}
+	b := &Border{Window: w}
 	b.CornerRadius(0.25).Color("Primary").Width(0.125)
 	return b
 }
 
 // Color sets the color to render the border in
 func (b *Border) Color(color string) *Border {
-	b.color = b.Theme.Colors.Get(color)
+	b.color = b.Theme.Colors.GetNRGBAFromName(color)
 	return b
 }
 

@@ -3,7 +3,7 @@ package gui
 import (
 	"image"
 	"time"
-
+	
 	"gioui.org/f32"
 	"gioui.org/gesture"
 	"gioui.org/io/key"
@@ -18,6 +18,7 @@ type clickEvents struct {
 
 // Clickable represents a clickable area.
 type Clickable struct {
+	*Window
 	click  gesture.Click
 	clicks []click
 	// prevClicks is the index into clicks that marks the clicks from the most recent Fn call. prevClicks is used to
@@ -27,8 +28,9 @@ type Clickable struct {
 	Events     clickEvents
 }
 
-func (th *Theme) Clickable() (c *Clickable) {
+func (w *Window) Clickable() (c *Clickable) {
 	c = &Clickable{
+		Window:     w,
 		click:      gesture.Click{},
 		clicks:     nil,
 		prevClicks: 0,
@@ -140,10 +142,10 @@ func (c *Clickable) update(gtx l.Context) {
 				NumClicks: e.NumClicks,
 			}
 			c.clicks = append(c.clicks, click)
-			if l := len(c.history); l > 0 {
-				c.history[l-1].End = gtx.Now
+			if ll := len(c.history); ll > 0 {
+				c.history[ll-1].End = gtx.Now
 			}
-			go c.Events.Click()
+			c.Window.Runner <- func() error { c.Events.Click(); return nil }
 		case gesture.TypeCancel:
 			for i := range c.history {
 				c.history[i].Cancelled = true
@@ -151,13 +153,20 @@ func (c *Clickable) update(gtx l.Context) {
 					c.history[i].End = gtx.Now
 				}
 			}
-			go c.Events.Cancel()
+			c.Window.Runner <- func() error { c.Events.Cancel(); return nil }
 		case gesture.TypePress:
 			c.history = append(c.history, press{
 				Position: e.Position,
 				Start:    gtx.Now,
 			})
-			go c.Events.Press()
+			c.
+				Window.
+				Runner <- func() error {
+				c.
+					Events.
+					Press()
+				return nil
+			}
 		}
 	}
 }

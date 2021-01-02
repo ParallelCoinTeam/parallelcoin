@@ -34,7 +34,7 @@ guis:
 	pod -D test1 --minerpass pa55word
 
 guass:
-	go install -v -race
+	go install -v
 	pod -D test0 --minerpass pa55word
 
 resetwallet0:

@@ -4,6 +4,8 @@ import (
 	"math"
 	"time"
 	
+	"gioui.org/io/event"
+	
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	
@@ -13,6 +15,12 @@ import (
 	"gioui.org/op"
 	"gioui.org/unit"
 )
+
+type CallbackQueue chan func() error
+
+func NewCallbackQueue(bufSize int) CallbackQueue {
+	return make(CallbackQueue, bufSize)
+}
 
 type scaledConfig struct {
 	Scale float32
@@ -32,7 +40,6 @@ func (s *scaledConfig) Px(v unit.Value) int {
 
 type Window struct {
 	*Theme
-	l.Context
 	*app.Window
 	opts   []app.Option
 	scale  *scaledConfig
@@ -40,16 +47,17 @@ type Window struct {
 	Height int
 	ops    op.Ops
 	evQ    system.FrameEvent
+	Runner CallbackQueue
 }
 
 // NewWindowP9 creates a new window
 func NewWindowP9(quit chan struct{}) (out *Window) {
 	out = &Window{
-		Theme: NewTheme(p9fonts.Collection(), quit),
-		scale: &scaledConfig{1},
+		Theme:  NewTheme(p9fonts.Collection(), quit),
+		scale:  &scaledConfig{1},
+		Runner: NewCallbackQueue(32),
 	}
-	out.WidgetPool = out.NewPool()
-	out.Context = l.NewContext(&out.ops, out.evQ)
+	out.Theme.WidgetPool = out.NewPool()
 	return
 }
 
@@ -59,7 +67,6 @@ func NewWindow(th *Theme) (out *Window) {
 		Theme: th,
 		scale: &scaledConfig{1},
 	}
-	out.Context = l.NewContext(&out.ops, out.evQ)
 	return
 }
 
@@ -96,25 +103,71 @@ func (w *Window) Open() (out *Window) {
 
 func (w *Window) Run(frame func(ctx l.Context) l.Dimensions,
 	overlay func(ctx l.Context), destroy func(), quit qu.C) (err error) {
-	var ops op.Ops
 	for {
 		select {
+		case fn := <-w.Runner:
+			if err = fn(); Check(err) {
+				return
+			}
 		case <-quit:
 			return nil
+			// by repeating selectors we decrease the chance of a runner delaying
+			// a frame event hitting the physical frame deadline
 		case e := <-w.Window.Events():
-			switch e := e.(type) {
-			case system.DestroyEvent:
-				destroy()
-				return e.Err
-			case system.FrameEvent:
-				ctx := l.NewContext(&ops, e)
-				// update dimensions for responsive sizing widgets
-				w.Width = ctx.Constraints.Max.X
-				w.Height = ctx.Constraints.Max.Y
-				frame(ctx)
-				overlay(ctx)
-				e.Frame(ctx.Ops)
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
+			}
+		case e := <-w.Window.Events():
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
+			}
+		case e := <-w.Window.Events():
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
+			}
+		case e := <-w.Window.Events():
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
+			}
+		case e := <-w.Window.Events():
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
+			}
+		case e := <-w.Window.Events():
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
+			}
+		case e := <-w.Window.Events():
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
+			}
+		case e := <-w.Window.Events():
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
+			}
+		case e := <-w.Window.Events():
+			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+				return
 			}
 		}
 	}
+}
+
+func (w *Window) processEvents(e event.Event, frame func(ctx l.Context) l.Dimensions,
+	overlay func(ctx l.Context), destroy func()) error {
+	var ops op.Ops
+	switch e := e.(type) {
+	case system.DestroyEvent:
+		destroy()
+		return e.Err
+	case system.FrameEvent:
+		c := l.NewContext(&ops, e)
+		// update dimensions for responsive sizing widgets
+		w.Width = c.Constraints.Max.X
+		w.Height = c.Constraints.Max.Y
+		frame(c)
+		overlay(c)
+		e.Frame(c.Ops)
+	}
+	return nil
 }

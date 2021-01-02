@@ -29,12 +29,15 @@ type Checkable struct {
 func (w *Window) Checkable() *Checkable {
 	font := "bariol regular"
 	var f text.Font
-	for i := range w.collection {
-		if w.collection[i].Font.Typeface == text.Typeface(font) {
-			f = w.collection[i].Font
-			break
-		}
+	if fon, err := w.Theme.collection.Font(font); !Check(err) {
+		f = fon
 	}
+	// for i := range w.collection {
+	// 	if w.collection[i].Font.Typeface == text.Typeface(font) {
+	// 		f = w.collection[i].Font
+	// 		break
+	// 	}
+	// }
 	return &Checkable{
 		Window:              w,
 		label:              "checkable",
@@ -63,11 +66,8 @@ func (c *Checkable) Color(color string) *Checkable {
 
 // Font sets the font used on the label
 func (c *Checkable) Font(font string) *Checkable {
-	for i := range c.Theme.collection {
-		if c.Theme.collection[i].Font.Typeface == text.Typeface(font) {
-			c.font = c.Theme.collection[i].Font
-			break
-		}
+	if fon, err := c.Theme.collection.Font(font); !Check(err) {
+		c.font = fon
 	}
 	return c
 }
@@ -138,7 +138,7 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 			Rigid(
 				// c.Theme.ButtonInset(0.25,
 				func(gtx l.Context) l.Dimensions {
-					paint.ColorOp{Color: c.Theme.Colors.Get(c.color)}.Add(gtx.Ops)
+					paint.ColorOp{Color: c.Theme.Colors.GetNRGBAFromName(c.color)}.Add(gtx.Ops)
 					return c.Caption(c.label).Color(c.color).Fn(gtx)
 					// return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
 				},

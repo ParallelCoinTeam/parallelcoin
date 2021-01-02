@@ -21,22 +21,20 @@ type Label struct {
 	maxLines int
 	text     string
 	textSize unit.Value
-	shaper text.Shaper
+	shaper   text.Shaper
 }
 
 // Text creates a label that prints a block of text
 func (w *Window) Label() (l *Label) {
 	var f text.Font
-	for i := range w.collection {
-		if w.collection[i].Font.Typeface == "plan9" {
-			f = w.collection[i].Font
-		}
+	if fon, err := w.Theme.collection.Font("plan9"); !Check(err) {
+		f = fon
 	}
 	return &Label{
 		Window:   w,
 		text:     "",
 		font:     f,
-		color:    w.Colors.Get("DocText"),
+		color:    w.Colors.GetNRGBAFromName("DocText"),
 		textSize: unit.Sp(1),
 		shaper:   w.shaper,
 	}
@@ -68,20 +66,15 @@ func (l *Label) Alignment(alignment text.Alignment) *Label {
 
 // Color sets the color of the label font
 func (l *Label) Color(color string) *Label {
-	l.color = l.Theme.Colors.Get(color)
+	l.color = l.Theme.Colors.GetNRGBAFromName(color)
 	return l
 }
 
 // Font sets the font out of the available font collection
 func (l *Label) Font(font string) *Label {
-	var f text.Font
-	for i := range l.Theme.collection {
-		// Debug(Theme.Collection[i].Font)
-		if l.Theme.collection[i].Font.Typeface == text.Typeface(font) {
-			f = l.Theme.collection[i].Font
-		}
+	if fon, err := l.Theme.collection.Font(font); !Check(err) {
+		l.font = fon
 	}
-	l.font = f
 	return l
 }
 

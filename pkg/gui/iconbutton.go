@@ -94,7 +94,7 @@ func (b *IconButton) Fn(gtx l.Context) l.Dimensions {
 				Rect: f32.Rectangle{Max: f32.Point{X: sizexf, Y: sizeyf}},
 				NE:   rr, NW: rr, SE: rr, SW: rr,
 			}.Add(gtx.Ops)
-			background := b.Theme.Colors.Get(b.background)
+			background := b.Theme.Colors.GetNRGBAFromName(b.background)
 			if gtx.Queue == nil {
 				background = f32color.MulAlpha(background, 150)
 			}

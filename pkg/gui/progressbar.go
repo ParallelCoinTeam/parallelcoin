@@ -24,7 +24,7 @@ func (w *Window) ProgressBar() *ProgressBar {
 	return &ProgressBar{
 		Window: w,
 		progress: 0,
-		color:    w.Colors.Get("Primary"),
+		color:    w.Colors.GetNRGBAFromName("Primary"),
 	}
 }
 
@@ -36,7 +36,7 @@ func (p *ProgressBar) SetProgress(progress int) *ProgressBar {
 
 // Color sets the color to render the bar in
 func (p *ProgressBar) Color(c string) *ProgressBar {
-	p.color = p.Theme.Colors.Get(c)
+	p.color = p.Theme.Colors.GetNRGBAFromName(c)
 	return p
 }
 
