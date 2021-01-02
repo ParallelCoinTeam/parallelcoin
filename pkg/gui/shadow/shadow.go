@@ -1,14 +1,16 @@
 package shadow
 
 import (
+	"image/color"
+	
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+	
 	"github.com/p9c/pod/pkg/gui/f32color"
-	"image/color"
 )
 
 func Shadow(gtx l.Context, cornerRadius, elevation unit.Value, shadowColor color.NRGBA, content func(gtx l.Context) l.Dimensions) l.Dimensions {

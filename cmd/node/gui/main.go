@@ -3,14 +3,14 @@ package gui
 import (
 	"gioui.org/app"
 	l "gioui.org/layout"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"github.com/urfave/cli"
-
+	
+	"github.com/p9c/pod/pkg/gui"
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -29,70 +29,70 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 type NodeGUI struct {
 	cx               *conte.Xt
 	c                *cli.Context
-	w                *f.Window
-	th               *p9.Theme
+	w                *gui.Window
+	th               *gui.Theme
 	size             *int
 	runMode          string
-	app              *p9.App
-	sidebarButtons   []*p9.Clickable
-	buttonBarButtons []*p9.Clickable
-	statusBarButtons []*p9.Clickable
-	bools            map[string]*p9.Bool
-	lists            map[string]*p9.List
-	enums            map[string]*p9.Enum
-	checkables       map[string]*p9.Checkable
-	clickables       map[string]*p9.Clickable
-	editors          map[string]*p9.Editor
-	inputs           map[string]*p9.Input
-	multis           map[string]*p9.Multi
+	app              *gui.App
+	sidebarButtons   []*gui.Clickable
+	buttonBarButtons []*gui.Clickable
+	statusBarButtons []*gui.Clickable
+	bools            map[string]*gui.Bool
+	lists            map[string]*gui.List
+	enums            map[string]*gui.Enum
+	checkables       map[string]*gui.Checkable
+	clickables       map[string]*gui.Clickable
+	editors          map[string]*gui.Editor
+	inputs           map[string]*gui.Input
+	multis           map[string]*gui.Multi
 	configs          cfg.GroupsMap
 	config           *cfg.Config
-	passwords        map[string]*p9.Password
+	passwords        map[string]*gui.Password
 	invalidate       qu.C
 	quit             qu.C
 }
 
 func (ng *NodeGUI) Run() (err error) {
-	ng.th = p9.NewTheme(p9fonts.Collection(), ng.quit)
+	ng.th = gui.NewTheme(p9fonts.Collection(), ng.quit)
 	ng.th.Colors.SetTheme(*ng.th.Dark)
 	ng.runMode = "node"
-	ng.sidebarButtons = make([]*p9.Clickable, 9)
+	ng.sidebarButtons = make([]*gui.Clickable, 9)
 	for i := range ng.sidebarButtons {
 		ng.sidebarButtons[i] = ng.th.Clickable()
 	}
-	ng.buttonBarButtons = make([]*p9.Clickable, 4)
+	ng.buttonBarButtons = make([]*gui.Clickable, 4)
 	for i := range ng.buttonBarButtons {
 		ng.buttonBarButtons[i] = ng.th.Clickable()
 	}
-	ng.statusBarButtons = make([]*p9.Clickable, 3)
+	ng.statusBarButtons = make([]*gui.Clickable, 3)
 	for i := range ng.statusBarButtons {
 		ng.statusBarButtons[i] = ng.th.Clickable()
 	}
-	ng.enums = map[string]*p9.Enum{
+	ng.enums = map[string]*gui.Enum{
 		"runmode": ng.th.Enum().SetValue(ng.runMode),
 	}
-	ng.bools = map[string]*p9.Bool{
+	ng.bools = map[string]*gui.Bool{
 		"runstate": ng.th.Bool(false).SetOnChange(func(b bool) {
 			Debug("run state is now", b)
 		}),
 	}
-	ng.lists = map[string]*p9.List{
+	ng.lists = map[string]*gui.List{
 		"overview": ng.th.List(),
 		"settings": ng.th.List(),
 	}
-	ng.clickables = map[string]*p9.Clickable{
+	ng.clickables = map[string]*gui.Clickable{
 		"quit": ng.th.Clickable(),
 	}
-	ng.checkables = map[string]*p9.Checkable{
+	ng.checkables = map[string]*gui.Checkable{
 		"runmodenode":   ng.th.Checkable(),
 		"runmodewallet": ng.th.Checkable(),
 		"runmodeshell":  ng.th.Checkable(),
 	}
-	ng.editors = make(map[string]*p9.Editor)
-	ng.inputs = make(map[string]*p9.Input)
-	ng.multis = make(map[string]*p9.Multi)
-	ng.passwords = make(map[string]*p9.Password)
-	ng.w = f.NewWindow(ng.th)
+	ng.editors = make(map[string]*gui.Editor)
+	ng.inputs = make(map[string]*gui.Input)
+	ng.multis = make(map[string]*gui.Multi)
+	ng.passwords = make(map[string]*gui.Password)
+	ng.w = gui.NewWindow(ng.th)
 	ng.app = ng.GetAppWidget()
 	go func() {
 		if err := ng.w.

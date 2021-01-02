@@ -9,7 +9,7 @@ import (
 	
 	l "gioui.org/layout"
 	
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -114,7 +114,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 		}
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return wg.th.Responsive(*wg.Size, p9.Widgets{
+		return wg.th.Responsive(*wg.Size, gui.Widgets{
 			{
 				Size: 0,
 				Widget: wg.th.VFlex().SpaceAround().AlignMiddle().
@@ -214,7 +214,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		// spacer
 		if !first {
 			out = append(out,
-				wg.th.Inset(0.25, p9.EmptyMaxWidth()).Fn,
+				wg.th.Inset(0.25, gui.EmptyMaxWidth()).Fn,
 			)
 		} else {
 			first = false

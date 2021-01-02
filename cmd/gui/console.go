@@ -12,23 +12,23 @@ import (
 	
 	"github.com/atotto/clipboard"
 	
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/rpc/ctl"
 )
 
 type Console struct {
-	th             *p9.Theme
+	th             *gui.Theme
 	output         []l.Widget
-	outputList     *p9.List
-	editor         *p9.Editor
-	clearClickable *p9.Clickable
-	clearButton    *p9.IconButton
-	copyClickable  *p9.Clickable
-	copyButton     *p9.IconButton
-	pasteClickable *p9.Clickable
-	pasteButton    *p9.IconButton
+	outputList     *gui.List
+	editor         *gui.Editor
+	clearClickable *gui.Clickable
+	clearButton    *gui.IconButton
+	copyClickable  *gui.Clickable
+	copyButton     *gui.IconButton
+	pasteClickable *gui.Clickable
+	pasteButton    *gui.IconButton
 	submitFunc     func(txt string)
-	clickables     []*p9.Clickable
+	clickables     []*gui.Clickable
 }
 
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
@@ -50,7 +50,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				c.output,
 				func(gtx l.Context) l.Dimensions {
 					return wg.th.VFlex().
-						Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+						Rigid(wg.th.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 						Rigid(
 							wg.th.Flex().
 								Flexed(

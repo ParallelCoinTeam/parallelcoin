@@ -11,13 +11,13 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/gui/shadow"
 )
 
 var (
-	th = p9.NewTheme(p9fonts.Collection(), nil)
+	th = gui.NewTheme(p9fonts.Collection(), nil)
 )
 
 func main() {
@@ -40,7 +40,7 @@ func loop(w *app.Window) error {
 			return e.Err
 		case system.FrameEvent:
 			gtx := l.NewContext(&ops, e)
-			paint.Fill(gtx.Ops, p9.HexNRGB("e5e5e5FF"))
+			paint.Fill(gtx.Ops, gui.HexNRGB("e5e5e5FF"))
 			op.InvalidateOp{}.Add(gtx.Ops)
 			
 			th.Inset(
@@ -57,7 +57,7 @@ func loop(w *app.Window) error {
 											gtx,
 											unit.Dp(5),
 											unit.Dp(3),
-											p9.HexNRGB("ee000000"),
+											gui.HexNRGB("ee000000"),
 											th.Fill("DocBg", th.Inset(3,
 												th.Body1("Shadow test 3").Color(
 													"PanelText").Fn).Fn, l.Center).Fn,
@@ -73,7 +73,7 @@ func loop(w *app.Window) error {
 											gtx,
 											unit.Dp(5),
 											unit.Dp(5),
-											p9.HexNRGB("ee000000"),
+											gui.HexNRGB("ee000000"),
 											th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 5").Color("PanelText").Fn).Fn, l.Center).Fn,
 										)
 									},
@@ -87,7 +87,7 @@ func loop(w *app.Window) error {
 											gtx,
 											unit.Dp(5),
 											unit.Dp(8),
-											p9.HexNRGB("ee000000"),
+											gui.HexNRGB("ee000000"),
 											th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 8").Color("PanelText").Fn).Fn, l.Center).Fn,
 										)
 									},
@@ -101,7 +101,7 @@ func loop(w *app.Window) error {
 											gtx,
 											unit.Dp(5),
 											unit.Dp(12),
-											p9.HexNRGB("ee000000"),
+											gui.HexNRGB("ee000000"),
 											th.Fill("DocBg", th.Inset(3, th.Body1("Shadow test 12").Color("PanelText").Fn).Fn, l.Center).Fn,
 										)
 									},

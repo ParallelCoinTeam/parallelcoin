@@ -7,11 +7,12 @@ import (
 	"time"
 	
 	l "gioui.org/layout"
+	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -23,7 +24,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 		0.5,
 		wg.th.Flex().
 			SpaceAround().
-			Flexed(0.5, p9.EmptyMaxHeight()).
+			Flexed(0.5, gui.EmptyMaxHeight()).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
 					return wg.th.VFlex().
@@ -296,6 +297,6 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 						Fn(gtx)
 				},
 			).
-			Flexed(0.5, p9.EmptyMaxWidth()).Fn,
+			Flexed(0.5, gui.EmptyMaxWidth()).Fn,
 	).Fn, l.Center).Fn(gtx)
 }

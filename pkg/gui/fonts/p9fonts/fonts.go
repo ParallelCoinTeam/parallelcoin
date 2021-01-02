@@ -10,7 +10,7 @@ import (
 	"golang.org/x/image/font/gofont/gomonobold"
 	"golang.org/x/image/font/gofont/gomonobolditalic"
 	"golang.org/x/image/font/gofont/gomonoitalic"
-
+	
 	"github.com/p9c/pod/pkg/gui/fonts/bariolbold"
 	"github.com/p9c/pod/pkg/gui/fonts/bariolbolditalic"
 	"github.com/p9c/pod/pkg/gui/fonts/bariollight"

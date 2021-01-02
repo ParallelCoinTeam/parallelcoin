@@ -11,30 +11,29 @@ import (
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/gui/f"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
-	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 var maxThreads = float32(runtime.NumCPU())
 
 type MinerModel struct {
-	*p9.Theme
+	*gui.Theme
 	Cx                     *conte.Xt
 	worker                 *Worker
 	DarkTheme              bool
-	logoButton             *p9.Clickable
-	mineToggle             *p9.Bool
+	logoButton             *gui.Clickable
+	mineToggle             *gui.Bool
 	nCores                 int
-	solButtons             []*p9.Clickable
-	lists                  map[string]*p9.List
+	solButtons             []*gui.Clickable
+	lists                  map[string]*gui.List
 	solutionCount          int
 	modalWidget            l.Widget
 	modalOn                bool
-	modalScrim, modalClose *p9.Clickable
-	password               *p9.Password
-	threadSlider           *p9.IntSlider
+	modalScrim, modalClose *gui.Clickable
+	password               *gui.Password
+	threadSlider           *gui.IntSlider
 }
 
 func (w *Worker) Run() {
@@ -42,8 +41,8 @@ func (w *Worker) Run() {
 		Debug("not running GUI ")
 		return
 	}
-	th := p9.NewTheme(p9fonts.Collection(), w.quit)
-	solButtons := make([]*p9.Clickable, 201)
+	th := gui.NewTheme(p9fonts.Collection(), w.quit)
+	solButtons := make([]*gui.Clickable, 201)
 	for i := range solButtons {
 		solButtons[i] = th.Clickable()
 	}
@@ -73,7 +72,7 @@ func (w *Worker) Run() {
 			},
 		),
 	}
-	minerModel.lists = map[string]*p9.List{
+	minerModel.lists = map[string]*gui.List{
 		"found": minerModel.Theme.List(), // .Vertical().Start(), // .DisableScroll(false),
 	}
 	minerModel.SetTheme(minerModel.DarkTheme)
@@ -86,7 +85,7 @@ func (w *Worker) Run() {
 			Info("clicked logo button")
 		},
 	)
-	win := f.NewWindow(th)
+	win := gui.NewWindow(th)
 	// interrupt.AddHandler(func() {
 	// 	// close(w.quit)
 	// 	// os.Exit(0)
@@ -214,7 +213,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 			m.IconButton(m.logoButton).
 				Color("Light").
 				Background("").
-				Icon(m.Icon().Color("Light").Scale(p9.Scales["H5"]).Src(&icons.ParallelCoin)).
+				Icon(m.Icon().Color("Light").Scale(gui.Scales["H5"]).Src(&icons.ParallelCoin)).
 				Fn,
 		).Fn,
 	).Rigid(

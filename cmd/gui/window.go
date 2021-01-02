@@ -5,9 +5,11 @@ package gui
 // Multiple windows in Gio.
 
 import (
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"log"
 	"sync/atomic"
+	
+	"github.com/p9c/pod/pkg/gui"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"gioui.org/app"
 	"gioui.org/io/event"
@@ -15,15 +17,13 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
-	
-	"github.com/p9c/pod/pkg/gui/p9"
 )
 
 type window struct {
 	*app.Window
 	quit  qu.C
-	more  *p9.Clickable
-	close *p9.Clickable
+	more  *gui.Clickable
+	close *gui.Clickable
 }
 
 //

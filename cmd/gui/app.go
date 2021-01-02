@@ -13,13 +13,13 @@ import (
 	"gioui.org/text"
 	
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
-	"github.com/p9c/pod/pkg/gui/p9"
 )
 
-func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
-	a = wg.th.App(wg.w["main"].Width, uberatomic.NewString("home"),
+func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
+	a = wg.th.App(&wg.w.Width, uberatomic.NewString("home"),
 		wg.invalidate)
 	wg.App = a
 	wg.App.ThemeHook(
@@ -44,33 +44,33 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	a.Pages(
 		map[string]l.Widget{
 			"home": wg.Page(
-				"home", p9.Widgets{
+				"home", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.OverviewPage()},
+					gui.WidgetSize{Widget: wg.OverviewPage()},
 				},
 			),
 			"send": wg.Page(
-				"send", p9.Widgets{
+				"send", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.SendPage()},
+					gui.WidgetSize{Widget: wg.SendPage()},
 				},
 			),
 			"receive": wg.Page(
-				"receive", p9.Widgets{
+				"receive", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.ReceivePage()},
+					gui.WidgetSize{Widget: wg.ReceivePage()},
 				},
 			),
 			"history": wg.Page(
-				"history", p9.Widgets{
+				"history", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.HistoryPage()},
+					gui.WidgetSize{Widget: wg.HistoryPage()},
 				},
 			),
 			"settings": wg.Page(
-				"settings", p9.Widgets{
+				"settings", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{
+					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.configs.Widget(wg.config)(gtx)
 						},
@@ -78,24 +78,24 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				},
 			),
 			"console": wg.Page(
-				"console", p9.Widgets{
+				"console", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					p9.WidgetSize{Widget: wg.console.Fn},
+					gui.WidgetSize{Widget: wg.console.Fn},
 				},
 			),
 			"help": wg.Page(
-				"help", p9.Widgets{
-					p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+				"help", gui.Widgets{
+					gui.WidgetSize{Widget: gui.EmptyMaxHeight()},
 				},
 			),
 			"log": wg.Page(
-				"log", p9.Widgets{
-					p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+				"log", gui.Widgets{
+					gui.WidgetSize{Widget: gui.EmptyMaxHeight()},
 				},
 			),
 			"quit": wg.Page(
-				"quit", p9.Widgets{
-					p9.WidgetSize{
+				"quit", gui.Widgets{
+					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.th.VFlex().
 								SpaceEvenly().
@@ -106,7 +106,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 								Rigid(
 									wg.th.Flex().
 										// SpaceEvenly().
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
 											wg.th.Button(
 												wg.clickables["quit"].SetClick(
@@ -118,7 +118,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 												),
 											).Color("Light").TextScale(2).Text("yes!!!").Fn,
 										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
 								).
 								Fn(gtx)
@@ -164,19 +164,19 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			// 	},
 			// ),
 			"mining": wg.Page(
-				"mining", p9.Widgets{
-					p9.WidgetSize{
+				"mining", gui.Widgets{
+					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.th.VFlex().
 								AlignMiddle().
 								SpaceSides().
 								Rigid(
 									wg.th.Flex().
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
 											wg.th.H1("Mining").Fn,
 										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
 								).
 								Fn(gtx)
@@ -185,19 +185,19 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 				},
 			),
 			"explorer": wg.Page(
-				"explorer", p9.Widgets{
-					p9.WidgetSize{
+				"explorer", gui.Widgets{
+					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.th.VFlex().
 								AlignMiddle().
 								SpaceSides().
 								Rigid(
 									wg.th.Flex().
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
 											wg.th.H1("explorer").Fn,
 										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
 								).
 								Fn(gtx)
@@ -260,7 +260,7 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 			// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 			wg.RunStatusPanel,
 			wg.th.Flex().
-				Flexed(1, p9.EmptyMaxWidth()).
+				Flexed(1, gui.EmptyMaxWidth()).
 				Rigid(
 					wg.StatusBarButton(
 						"log", 4, &icons.ActionList, func(name string) {
@@ -291,20 +291,20 @@ func (wg *WalletGUI) GetAppWidget() (a *p9.App) {
 	return
 }
 
-func (wg *WalletGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) l.Dimensions {
 	a := wg.th
 	return func(gtx l.Context) l.Dimensions {
 		return a.Fill(wg.App.BodyBackgroundGet(), a.VFlex().
 			SpaceEvenly().
 			Rigid(
 				a.Responsive(
-					*wg.Size, p9.Widgets{
+					*wg.Size, gui.Widgets{
 						// p9.WidgetSize{
 						// 	Widget: a.Inset(0.25, a.H5(title).Color(wg.App.BodyColorGet()).Fn).Fn,
 						// },
-						p9.WidgetSize{
+						gui.WidgetSize{
 							// Size:   800,
-							Widget: p9.EmptySpace(0, 0),
+							Widget: gui.EmptySpace(0, 0),
 							// a.Inset(0.25, a.Caption(title).Color(wg.BodyColorGet()).Fn).Fn,
 						},
 					},
@@ -351,7 +351,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 }
 
 func (wg *WalletGUI) PageTopBarButton(
-	name string, index int, ico *[]byte, onClick func(string), app *p9.App,
+	name string, index int, ico *[]byte, onClick func(string), app *gui.App,
 	highlightColor string,
 ) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
@@ -370,7 +370,7 @@ func (wg *WalletGUI) PageTopBarButton(
 			color = highlightColor
 		}
 		ic := wg.th.Icon().
-			Scale(p9.Scales["H5"]).
+			Scale(gui.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -397,7 +397,7 @@ func (wg *WalletGUI) StatusBarButton(
 	index int,
 	ico *[]byte,
 	onClick func(string),
-	app *p9.App,
+	app *gui.App,
 ) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		background := app.StatusBarBackgroundGet()
@@ -408,7 +408,7 @@ func (wg *WalletGUI) StatusBarButton(
 			// color = "Danger"
 		}
 		ic := wg.th.Icon().
-			Scale(p9.Scales["H5"]).
+			Scale(gui.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -469,7 +469,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						wg.th.Inset(
 							0.25,
 							wg.th.Icon().
-								Scale(p9.Scales["H5"]).
+								Scale(gui.Scales["H5"]).
 								Color("DocText").
 								Src(runningIcon).
 								Fn,
@@ -498,7 +498,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 				wg.th.Inset(
 					0.33,
 					wg.th.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight.Load())).
-						Font("go regular").TextScale(p9.Scales["Caption"]).
+						Font("go regular").TextScale(gui.Scales["Caption"]).
 						Color("DocText").
 						Fn,
 				).Fn,
@@ -516,7 +516,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								Inset(
 									0.25, wg.th.
 										Icon().
-										Scale(p9.Scales["H5"]).
+										Scale(gui.Scales["H5"]).
 										Color(clr).
 										Src(miningIcon).Fn,
 								).Fn(gtx)
@@ -554,7 +554,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					// background := wg.App.StatusBarBackgroundGet()
 					color := wg.App.StatusBarColorGet()
 					ic := wg.th.Icon().
-						Scale(p9.Scales["H5"]).
+						Scale(gui.Scales["H5"]).
 						Color(color).
 						Src(&icons.NavigationRefresh).
 						Fn

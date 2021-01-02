@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-
+	
 	l "gioui.org/layout"
 	"github.com/atotto/clipboard"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-
-	"github.com/p9c/pod/pkg/gui/p9"
+	
+	"github.com/p9c/pod/pkg/gui"
 )
 
 type JSONElement struct {
@@ -45,7 +45,7 @@ func GetJSONElements(in map[string]interface{}) (je JSONElements) {
 func (c *Console) getIndent(n int, size float32, widget l.Widget) (out l.Widget) {
 	o := c.th.Flex()
 	for i := 0; i < n; i++ {
-		o.Rigid(c.th.Inset(size/2, p9.EmptySpace(0, 0)).Fn)
+		o.Rigid(c.th.Inset(size/2, gui.EmptySpace(0, 0)).Fn)
 	}
 	o.Rigid(widget)
 	out = o.Fn
@@ -120,7 +120,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 					return c.th.Flex().
 						Rigid(c.th.Body1("\"" + res + "\"").Color(color).Fn).
-						Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
+						Rigid(c.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Rigid(c.th.IconButton(clk).
 							Background("").
 							Inset(0).
@@ -140,7 +140,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 					return c.th.Flex().
 						Rigid(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).
-						Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
+						Rigid(c.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Rigid(c.th.IconButton(clk).
 							Background("").
 							Inset(0).
@@ -170,7 +170,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 				return c.th.Flex().
 					Rigid(c.th.Body1("\"" + res + "\"").Color(color).Fn).
-					Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
+					Rigid(c.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 					Rigid(c.th.IconButton(clk).
 						Background("").
 						Inset(0).
@@ -190,7 +190,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 				return c.th.Flex().
 					Rigid(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).
-					Rigid(c.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn).
+					Rigid(c.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 					Rigid(c.th.IconButton(clk).
 						Background("").
 						Inset(0).
@@ -222,7 +222,7 @@ func (c *Console) jsonElement(key, color string, depth int, w l.Widget) l.Widget
 		return c.th.Flex().
 			Rigid(c.getIndent(depth, 1,
 				c.th.Body1(key).Font("bariol bold").Color(color).Fn)).
-			Rigid(c.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+			Rigid(c.th.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 			Rigid(w).
 			Fn(gtx)
 	}

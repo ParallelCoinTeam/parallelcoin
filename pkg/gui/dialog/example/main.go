@@ -1,21 +1,23 @@
 package main
 
 import (
+	"log"
+	"os"
+	
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+	
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/dialog"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	"github.com/p9c/pod/pkg/gui/p9"
-	"log"
-	"os"
 )
 
 var (
-	th         = p9.NewTheme(p9fonts.Collection(), nil)
+	th         = gui.NewTheme(p9fonts.Collection(), nil)
 	btnDanger  = th.Clickable()
 	btnWarning = th.Clickable()
 	btnSuccess = th.Clickable()
@@ -42,7 +44,7 @@ func loop(w *app.Window) error {
 			return e.Err
 		case system.FrameEvent:
 			gtx := layout.NewContext(&ops, e)
-			paint.Fill(gtx.Ops, p9.HexNRGB("e5e5e5FF"))
+			paint.Fill(gtx.Ops, gui.HexNRGB("e5e5e5FF"))
 			op.InvalidateOp{}.Add(gtx.Ops)
 			
 			th.Inset(

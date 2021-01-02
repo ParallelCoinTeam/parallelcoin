@@ -13,7 +13,7 @@ import (
 	l "gioui.org/layout"
 	
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -216,7 +216,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 			// put a space between the sections
 			out = append(out, func(gtx l.Context) l.Dimensions {
 				return ng.th.Fill("PanelBg", ng.th.Inset(0.25,
-					ng.th.Flex().Flexed(1, p9.EmptyMaxWidth()).Fn,
+					ng.th.Flex().Flexed(1, gui.EmptyMaxWidth()).Fn,
 				).Fn, l.Center).Fn(gtx)
 			})
 			// out = append(out, func(gtx l.Context) l.Dimensions {
@@ -255,7 +255,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 					if k < len(gi.widget()) {
 						return ng.th.Flex().
 							Rigid(
-								ng.th.Inset(0.25, p9.EmptySpace(0, 0)).Fn,
+								ng.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
 							).
 							Rigid(
 								gi.widget()[k],

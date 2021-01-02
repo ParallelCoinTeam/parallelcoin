@@ -3,7 +3,7 @@ package gui
 import (
 	l "gioui.org/layout"
 	
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 )
 
 func (wg *WalletGUI) HistoryPage() l.Widget {
@@ -16,16 +16,16 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 		return wg.th.VFlex().
 			Rigid(
 				wg.th.Inset(0.25,
-					wg.th.Fill("DocBg", wg.th.Responsive(*wg.Size, p9.Widgets{
+					wg.th.Fill("DocBg", wg.th.Responsive(*wg.Size, gui.Widgets{
 						{
 							Widget: wg.th.VFlex().
 								Flexed(1, wg.HistoryPageView()).
 								Rigid(
 									// 	wg.th.Fill("DocBg",
 									wg.th.Flex().AlignMiddle().SpaceBetween().
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(wg.HistoryPageStatusFilter()).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
 									// 	).Fn,
 								).
@@ -47,9 +47,9 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 									// 	wg.th.Fill("DocBg",
 									wg.th.Flex().AlignMiddle().SpaceBetween().
 										// 			Rigid(wg.HistoryPager()).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(wg.HistoryPageStatusFilter()).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										// 			Rigid(wg.HistoryPagePerPageCount()).
 										Fn,
 									// 	).Fn,

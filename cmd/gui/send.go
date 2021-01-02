@@ -3,19 +3,19 @@ package gui
 import (
 	l "gioui.org/layout"
 	
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 )
 
 type SendAddress struct {
-	AddressInput      *p9.Input
-	LabelInput        *p9.Input
-	AddressBookBtn    *p9.Clickable
-	PasteClipboardBtn *p9.Clickable
-	ClearBtn          *p9.Clickable
-	AmountInput       *p9.Input
+	AddressInput      *gui.Input
+	LabelInput        *gui.Input
+	AddressBookBtn    *gui.Clickable
+	PasteClipboardBtn *gui.Clickable
+	ClearBtn          *gui.Clickable
+	AmountInput       *gui.Input
 	// AmountInput       *counter.Counter
-	SubtractFee     *p9.Bool
-	AllAvailableBtn *p9.Clickable
+	SubtractFee     *gui.Bool
+	AllAvailableBtn *gui.Clickable
 }
 
 func (wg *WalletGUI) SendPage() l.Widget {
@@ -24,11 +24,11 @@ func (wg *WalletGUI) SendPage() l.Widget {
 		SpaceSides().
 		Rigid(
 			wg.th.Flex().
-				Flexed(0.5, p9.EmptyMaxWidth()).
+				Flexed(0.5, gui.EmptyMaxWidth()).
 				Rigid(
 					wg.th.H1("send").Fn,
 				).
-				Flexed(0.5, p9.EmptyMaxWidth()).
+				Flexed(0.5, gui.EmptyMaxWidth()).
 				Fn,
 		).
 		Fn

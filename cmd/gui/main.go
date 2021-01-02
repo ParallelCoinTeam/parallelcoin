@@ -12,6 +12,7 @@ import (
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
@@ -29,9 +30,7 @@ import (
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	"github.com/p9c/pod/pkg/gui/f"
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	"github.com/p9c/pod/pkg/gui/p9"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
@@ -51,36 +50,36 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 
 type WalletGUI struct {
 	wg                        sync.WaitGroup
-	cx                        *conte.Xt
-	c                         *cli.Context
-	quit                      qu.C
-	State                     *State
-	noWallet                  *bool
-	node, wallet, miner       *rununit.RunUnit
-	walletToLock              time.Time
-	walletLockTime            int
-	ChainMutex, WalletMutex   sync.Mutex
-	ChainClient, WalletClient *rpcclient.Client
-	w                         map[string]*f.Window
-	Size                      *int
-	th                        *p9.Theme
-	App                       *p9.App
-	invalidate                qu.C
-	unlockPage                *p9.App
-	config                    *cfg.Config
-	configs                   cfg.GroupsMap
-	unlockPassword            *p9.Password
-	sidebarButtons            []*p9.Clickable
-	buttonBarButtons          []*p9.Clickable
-	statusBarButtons          []*p9.Clickable
-	quitClickable             *p9.Clickable
-	bools                     map[string]*p9.Bool
-	lists                       map[string]*p9.List
-	checkables                  map[string]*p9.Checkable
-	clickables                  map[string]*p9.Clickable
-	inputs                      map[string]*p9.Input
-	passwords                   map[string]*p9.Password
-	incdecs                     map[string]*p9.IncDec
+	cx                          *conte.Xt
+	c                           *cli.Context
+	quit                        qu.C
+	State                       *State
+	noWallet                    *bool
+	node, wallet, miner         *rununit.RunUnit
+	walletToLock                time.Time
+	walletLockTime              int
+	ChainMutex, WalletMutex     sync.Mutex
+	ChainClient, WalletClient   *rpcclient.Client
+	w                           *gui.Window
+	Size                        *int
+	th                          *gui.Theme
+	App                         *gui.App
+	invalidate                  qu.C
+	unlockPage                  *gui.App
+	config                      *cfg.Config
+	configs                     cfg.GroupsMap
+	unlockPassword              *gui.Password
+	sidebarButtons              []*gui.Clickable
+	buttonBarButtons            []*gui.Clickable
+	statusBarButtons            []*gui.Clickable
+	quitClickable               *gui.Clickable
+	bools                       map[string]*gui.Bool
+	lists                       map[string]*gui.List
+	checkables                  map[string]*gui.Checkable
+	clickables                  map[string]*gui.Clickable
+	inputs                      map[string]*gui.Input
+	passwords                   map[string]*gui.Password
+	incdecs                     map[string]*gui.IncDec
 	sendAddresses               []SendAddress
 	console                     *Console
 	RecentTransactionsWidget    l.Widget
@@ -93,14 +92,14 @@ type WalletGUI struct {
 
 func (wg *WalletGUI) Run() (err error) {
 	wg.Syncing.Store(false)
-	wg.th = p9.NewTheme(p9fonts.Collection(), wg.quit)
+	wg.th = gui.NewTheme(p9fonts.Collection(), wg.quit)
 	wg.th.Dark = wg.cx.Config.DarkTheme
 	wg.th.Colors.SetTheme(*wg.th.Dark)
 	*wg.noWallet = true
 	wg.GetButtons()
 	wg.lists = wg.GetLists()
 	wg.clickables = wg.GetClickables()
-	wg.checkables = map[string]*p9.Checkable{
+	wg.checkables = map[string]*gui.Checkable{
 	}
 	before := func() { Debug("running before") }
 	after := func() { Debug("running after") }
@@ -122,12 +121,8 @@ func (wg *WalletGUI) Run() (err error) {
 	// wg.toasts = toast.New(wg.th)
 	// wg.dialog = dialog.New(wg.th)
 	wg.console = wg.ConsolePage()
-	wg.w = make(map[string]*f.Window)
 	wg.quitClickable = wg.th.Clickable()
-	wg.w = map[string]*f.Window{
-		"splash": f.NewWindow(wg.th),
-		"main":   f.NewWindow(wg.th),
-	}
+	wg.w = gui.NewWindow(wg.th)
 	wg.GetIncDecs()
 	wg.App = wg.GetAppWidget()
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.App.ActivePageGetAtomic())
@@ -146,18 +141,18 @@ func (wg *WalletGUI) Run() (err error) {
 		}
 		wg.unlockPassword.Focus()
 	}
-	wg.Size = wg.w["main"].Width
+	wg.Size = &wg.w.Width
 	go func() {
-		if err := wg.w["main"].
+		if err := wg.w.
 			Size(64, 32).
 			Title("ParallelCoin Wallet").
 			Open().
 			Run(
 				func(gtx l.Context) l.Dimensions {
-					return p9.If(
+					return gui.If(
 						*wg.noWallet,
 						wg.CreateWalletPage,
-						p9.If(
+						gui.If(
 							!wg.wallet.Running(),
 							wg.unlockPage.Fn(),
 							wg.App.Fn(),
@@ -186,7 +181,7 @@ out:
 		select {
 		case <-wg.invalidate:
 			Trace("invalidating render queue")
-			wg.w["main"].Window.Invalidate()
+			wg.w.Window.Invalidate()
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
 			if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
 			} else {
@@ -203,16 +198,16 @@ out:
 }
 
 func (wg *WalletGUI) GetButtons() {
-	wg.sidebarButtons = make([]*p9.Clickable, 12)
+	wg.sidebarButtons = make([]*gui.Clickable, 12)
 	// wg.walletLocked.Store(true)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.th.Clickable()
 	}
-	wg.buttonBarButtons = make([]*p9.Clickable, 5)
+	wg.buttonBarButtons = make([]*gui.Clickable, 5)
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.th.Clickable()
 	}
-	wg.statusBarButtons = make([]*p9.Clickable, 6)
+	wg.statusBarButtons = make([]*gui.Clickable, 6)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.th.Clickable()
 	}
@@ -222,7 +217,7 @@ func (wg *WalletGUI) GetInputs() {
 	seed := make([]byte, hdkeychain.MaxSeedBytes)
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
-	wg.inputs = map[string]*p9.Input{
+	wg.inputs = map[string]*gui.Input{
 		"receiveLabel":   wg.th.Input("", "Label", "Primary", "DocText", "DocBg", func(pass string) {}),
 		"receiveAmount":  wg.th.Input("", "Amount", "Primary", "DocText", "DocBg", func(pass string) {}),
 		"receiveMessage": wg.th.Input("", "Message", "Primary", "DocText", "DocBg", func(pass string) {}),
@@ -234,7 +229,7 @@ func (wg *WalletGUI) GetInputs() {
 func (wg *WalletGUI) GetPasswords() {
 	pass := ""
 	passConfirm := ""
-	wg.passwords = map[string]*p9.Password{
+	wg.passwords = map[string]*gui.Password{
 		"passEditor":        wg.th.Password("password", &pass, "Primary", "DocText", "", func(pass string) {}),
 		"confirmPassEditor": wg.th.Password("confirm", &passConfirm, "Primary", "DocText", "", func(pass string) {}),
 		"publicPassEditor":  wg.th.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", "", func(pass string) {}),
@@ -242,7 +237,7 @@ func (wg *WalletGUI) GetPasswords() {
 }
 
 func (wg *WalletGUI) GetIncDecs() {
-	wg.incdecs = map[string]*p9.IncDec{
+	wg.incdecs = map[string]*gui.IncDec{
 		"generatethreads": wg.th.IncDec().
 			NDigits(2).
 			Min(0).
@@ -296,8 +291,8 @@ func (wg *WalletGUI) GetRunUnit(name string, before, after func(), args ...strin
 	)
 }
 
-func (wg *WalletGUI) GetLists() (o map[string]*p9.List) {
-	return map[string]*p9.List{
+func (wg *WalletGUI) GetLists() (o map[string]*gui.List) {
+	return map[string]*gui.List{
 		"createWallet": wg.th.List(),
 		"overview":     wg.th.List(),
 		"balances":     wg.th.List(),
@@ -310,8 +305,8 @@ func (wg *WalletGUI) GetLists() (o map[string]*p9.List) {
 	}
 }
 
-func (wg *WalletGUI) GetClickables() map[string]*p9.Clickable {
-	return map[string]*p9.Clickable{
+func (wg *WalletGUI) GetClickables() map[string]*gui.Clickable {
+	return map[string]*gui.Clickable{
 		"createWallet":            wg.th.Clickable(),
 		"quit":                    wg.th.Clickable(),
 		"sendSend":                wg.th.Clickable(),
@@ -329,8 +324,8 @@ func (wg *WalletGUI) GetClickables() map[string]*p9.Clickable {
 	}
 }
 
-func (wg *WalletGUI) GetBools() map[string]*p9.Bool {
-	return map[string]*p9.Bool{
+func (wg *WalletGUI) GetBools() map[string]*gui.Bool {
+	return map[string]*gui.Bool{
 		"runstate":     wg.th.Bool(wg.node.Running()),
 		"encryption":   wg.th.Bool(false),
 		"seed":         wg.th.Bool(false),

@@ -3,7 +3,7 @@ package gui
 import (
 	l "gioui.org/layout"
 	
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 )
 
 func (wg *WalletGUI) ReceivePage() l.Widget {
@@ -12,11 +12,11 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 		SpaceSides().
 		Rigid(
 			wg.th.Flex().
-				Flexed(0.5, p9.EmptyMaxWidth()).
+				Flexed(0.5, gui.EmptyMaxWidth()).
 				Rigid(
 					wg.th.H1("receive").Fn,
 				).
-				Flexed(0.5, p9.EmptyMaxWidth()).
+				Flexed(0.5, gui.EmptyMaxWidth()).
 				Fn,
 		).
 		Fn

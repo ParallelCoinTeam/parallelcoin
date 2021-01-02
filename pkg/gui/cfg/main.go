@@ -2,11 +2,11 @@ package cfg
 
 import (
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
-func New(cx *conte.Xt, th *p9.Theme) *Config {
+func New(cx *conte.Xt, th *gui.Theme) *Config {
 	cfg := &Config{
 		th:   th,
 		cx:   cx,
@@ -17,46 +17,46 @@ func New(cx *conte.Xt, th *p9.Theme) *Config {
 
 type Config struct {
 	cx         *conte.Xt
-	th         *p9.Theme
-	Bools      map[string]*p9.Bool
-	lists      map[string]*p9.List
-	enums      map[string]*p9.Enum
-	checkables map[string]*p9.Checkable
-	clickables map[string]*p9.Clickable
-	editors    map[string]*p9.Editor
-	inputs     map[string]*p9.Input
-	multis     map[string]*p9.Multi
+	th         *gui.Theme
+	Bools      map[string]*gui.Bool
+	lists      map[string]*gui.List
+	enums      map[string]*gui.Enum
+	checkables map[string]*gui.Checkable
+	clickables map[string]*gui.Clickable
+	editors    map[string]*gui.Editor
+	inputs     map[string]*gui.Input
+	multis     map[string]*gui.Multi
 	configs    GroupsMap
-	passwords  map[string]*p9.Password
+	passwords  map[string]*gui.Password
 	quit       qu.C
 }
 
 func (c *Config) Init() *Config {
 	// c.th = p9.NewTheme(p9fonts.Collection(), c.cx.KillAll)
 	c.th.Colors.SetTheme(*c.th.Dark)
-	c.enums = map[string]*p9.Enum{
+	c.enums = map[string]*gui.Enum{
 		// "runmode": ng.th.Enum().SetValue(ng.runMode),
 	}
-	c.Bools = map[string]*p9.Bool{
+	c.Bools = map[string]*gui.Bool{
 		// "runstate": ng.th.Bool(false).SetOnChange(func(b bool) {
 		// 	Debug("run state is now", b)
 		// }),
 	}
-	c.lists = map[string]*p9.List{
+	c.lists = map[string]*gui.List{
 		// "overview": ng.th.List(),
 		"settings": c.th.List(),
 	}
-	c.clickables = map[string]*p9.Clickable{
+	c.clickables = map[string]*gui.Clickable{
 		// "quit": ng.th.Clickable(),
 	}
-	c.checkables = map[string]*p9.Checkable{
+	c.checkables = map[string]*gui.Checkable{
 		// "runmodenode":   ng.th.Checkable(),
 		// "runmodewallet": ng.th.Checkable(),
 		// "runmodeshell":  ng.th.Checkable(),
 	}
-	c.editors = make(map[string]*p9.Editor)
-	c.inputs = make(map[string]*p9.Input)
-	c.multis = make(map[string]*p9.Multi)
-	c.passwords = make(map[string]*p9.Password)
+	c.editors = make(map[string]*gui.Editor)
+	c.inputs = make(map[string]*gui.Input)
+	c.multis = make(map[string]*gui.Multi)
+	c.passwords = make(map[string]*gui.Password)
 	return c
 }

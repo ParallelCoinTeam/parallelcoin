@@ -10,11 +10,11 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 )
 
 type Dialog struct {
-	theme              *p9.Theme
+	theme              *gui.Theme
 	duration           int
 	singleCornerRadius unit.Value
 	singleElevation    unit.Value
@@ -25,7 +25,7 @@ type Dialog struct {
 	icon             *[]byte
 	ticker           float32
 	hideTitle        bool
-	close            *p9.Clickable
+	close            *gui.Clickable
 	cornerRadius     unit.Value
 	elevation        unit.Value
 }
@@ -35,12 +35,12 @@ type content struct {
 	content      interface{}
 }
 
-func New(th *p9.Theme) *Dialog {
+func New(th *gui.Theme) *Dialog {
 	return &Dialog{
 		theme:          th,
 		duration:       100,
 		close:          th.Clickable(),
-		bodyBackground: p9.HexNRGB("ee000000"),
+		bodyBackground: gui.HexNRGB("ee000000"),
 		// singleSize:         image.Pt(300, 80),
 		singleCornerRadius: unit.Dp(5),
 		singleElevation:    unit.Dp(5),

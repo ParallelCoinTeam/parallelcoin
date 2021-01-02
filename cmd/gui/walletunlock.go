@@ -15,13 +15,13 @@ import (
 	"gioui.org/text"
 	
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/gui"
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
-	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/pod"
 )
 
-func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
-	a = wg.th.App(wg.w["main"].Width, wg.State.activePage, wg.invalidate)
+func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
+	a = wg.th.App(&wg.w.Width, wg.State.activePage, wg.invalidate)
 	wg.unlockPage = a
 	password := ""
 	wg.unlockPassword = wg.th.Password("enter password", &password, "Primary",
@@ -88,8 +88,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 	a.Pages(
 		map[string]l.Widget{
 			"home": wg.Page(
-				"home", p9.Widgets{
-					p9.WidgetSize{
+				"home", gui.Widgets{
+					gui.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
 							var dims l.Dimensions
@@ -98,7 +98,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 								AlignMiddle().
 								Flexed(
 									1,
-									wg.th.VFlex().Flexed(0.5, p9.EmptyMaxHeight()).
+									wg.th.VFlex().Flexed(0.5, gui.EmptyMaxHeight()).
 										Rigid(
 											wg.th.Flex().
 												SpaceEvenly().
@@ -107,7 +107,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 													1,
 													wg.th.Flex().
 														AlignMiddle().
-														Flexed(0.5, p9.EmptyMaxWidth()).
+														Flexed(0.5, gui.EmptyMaxWidth()).
 														Rigid(
 															wg.th.VFlex().
 																AlignMiddle().
@@ -120,13 +120,13 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 																				wg.th.Fill("Primary", wg.th.Inset(
 																					0.5,
 																					wg.th.Icon().
-																						Scale(p9.Scales["H3"]).
+																						Scale(gui.Scales["H3"]).
 																						Color("PanelBg").
 																						Src(&icons.ActionLock).Fn,
 																				).Fn, l.Center).Fn,
 																			).
 																			Rigid(
-																				wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn,
+																				wg.th.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
 																			).
 																			Rigid(
 																				wg.th.H2("locked").Color("Primary").Fn,
@@ -134,7 +134,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 																			Fn(gtx)
 																		return dims
 																	}).
-																Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+																Rigid(wg.th.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 																Rigid(
 																	func(gtx l.Context) l.
 																	Dimensions {
@@ -145,7 +145,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 																			Fn(gtx)
 																	},
 																).
-																Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+																Rigid(wg.th.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 																Rigid(
 																	wg.th.Flex().
 																		Rigid(
@@ -155,12 +155,12 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 																			wg.incdecs["idleTimeout"].
 																				Color("DocText").
 																				Background("DocBg").
-																				Scale(p9.Scales["Caption"]).
+																				Scale(gui.Scales["Caption"]).
 																				Fn,
 																		).
 																		Fn,
 																).
-																Rigid(wg.th.Inset(0.5, p9.EmptySpace(0, 0)).Fn).
+																Rigid(wg.th.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 																Rigid(
 																	wg.th.Body2(
 																		fmt.Sprintf(
@@ -173,10 +173,10 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 																).
 																Fn,
 														).
-														Flexed(0.5, p9.EmptyMaxWidth()).Fn,
+														Flexed(0.5, gui.EmptyMaxWidth()).Fn,
 												).
 												Fn,
-										).Flexed(0.5, p9.EmptyMaxHeight()).Fn,
+										).Flexed(0.5, gui.EmptyMaxHeight()).Fn,
 								).
 								Fn(gtx)
 						},
@@ -184,8 +184,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 				},
 			),
 			"settings": wg.Page(
-				"settings", p9.Widgets{
-					p9.WidgetSize{
+				"settings", gui.Widgets{
+					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.configs.Widget(wg.config)(gtx)
 						},
@@ -193,23 +193,23 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 				},
 			),
 			"console": wg.Page(
-				"console", p9.Widgets{
-					p9.WidgetSize{Widget: wg.console.Fn},
+				"console", gui.Widgets{
+					gui.WidgetSize{Widget: wg.console.Fn},
 				},
 			),
 			"help": wg.Page(
-				"help", p9.Widgets{
-					p9.WidgetSize{Widget: p9.EmptyMaxWidth()},
+				"help", gui.Widgets{
+					gui.WidgetSize{Widget: gui.EmptyMaxWidth()},
 				},
 			),
 			"log": wg.Page(
-				"log", p9.Widgets{
-					p9.WidgetSize{Widget: p9.EmptyMaxWidth()},
+				"log", gui.Widgets{
+					gui.WidgetSize{Widget: gui.EmptyMaxWidth()},
 				},
 			),
 			"quit": wg.Page(
-				"quit", p9.Widgets{
-					p9.WidgetSize{
+				"quit", gui.Widgets{
+					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.th.VFlex().
 								SpaceEvenly().
@@ -220,7 +220,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 								Rigid(
 									wg.th.Flex().
 										// SpaceEvenly().
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
 											wg.th.Button(
 												wg.clickables["quit"].SetClick(
@@ -231,7 +231,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 												),
 											).Color("Light").TextScale(2).Text("yes!!!").Fn,
 										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
 								).
 								Fn(gtx)
@@ -277,19 +277,19 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 			// 	},
 			// ),
 			"mining": wg.Page(
-				"mining", p9.Widgets{
-					p9.WidgetSize{
+				"mining", gui.Widgets{
+					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.th.VFlex().
 								AlignMiddle().
 								SpaceSides().
 								Rigid(
 									wg.th.Flex().
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
 											wg.th.H1("Mining").Fn,
 										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
 								).
 								Fn(gtx)
@@ -298,19 +298,19 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 				},
 			),
 			"explorer": wg.Page(
-				"explorer", p9.Widgets{
-					p9.WidgetSize{
+				"explorer", gui.Widgets{
+					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.th.VFlex().
 								AlignMiddle().
 								SpaceSides().
 								Rigid(
 									wg.th.Flex().
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
 											wg.th.H1("explorer").Fn,
 										).
-										Flexed(0.5, p9.EmptyMaxWidth()).
+										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
 								).
 								Fn(gtx)
@@ -379,7 +379,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *p9.App) {
 			
 			wg.RunStatusPanel,
 			wg.th.Flex().
-				Flexed(1, p9.EmptyMaxWidth()).
+				Flexed(1, gui.EmptyMaxWidth()).
 				Rigid(
 					wg.StatusBarButton(
 						"log", 4, &icons.ActionList, func(name string) {

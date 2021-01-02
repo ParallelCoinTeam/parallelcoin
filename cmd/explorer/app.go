@@ -2,20 +2,20 @@ package explorer
 
 import (
 	"strconv"
-
+	
 	"golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
 	"gioui.org/text"
-
+	
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-func (ex *Explorer) GetAppWidget() (a *p9.App) {
-	a = ex.th.App(ex.w.Width, nil, nil)
+func (ex *Explorer) GetAppWidget() (a *gui.App) {
+	a = ex.th.App(&ex.w.Width, nil, nil)
 	ex.App = a
 	ex.App.ThemeHook(func() {
 		Debug("theme hook")
@@ -33,14 +33,14 @@ func (ex *Explorer) GetAppWidget() (a *p9.App) {
 	ex.config = cfg.New(ex.cx, ex.th)
 	ex.configs = ex.config.Config()
 	a.Pages(map[string]l.Widget{
-		"home": ex.Page("home", p9.Widgets{
-			p9.WidgetSize{Widget: ex.Blocks()},
+		"home": ex.Page("home", gui.Widgets{
+			gui.WidgetSize{Widget: ex.Blocks()},
 		}),
-		"help": ex.Page("help", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		"help": ex.Page("help", gui.Widgets{
+			gui.WidgetSize{Widget: gui.EmptyMaxHeight()},
 		}),
-		"quit": ex.Page("quit", p9.Widgets{
-			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+		"quit": ex.Page("quit", gui.Widgets{
+			gui.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return ex.th.VFlex().
 					SpaceEvenly().
 					// AlignMiddle().
@@ -74,19 +74,19 @@ func (ex *Explorer) GetAppWidget() (a *p9.App) {
 	return
 }
 
-func (ex *Explorer) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
+func (ex *Explorer) Page(title string, widget gui.Widgets) func(gtx l.Context) l.Dimensions {
 	a := ex.th
 	return func(gtx l.Context) l.Dimensions {
 		return a.Fill(ex.BodyBackgroundGet(), a.VFlex().
 			SpaceEvenly().
 			Rigid(
-				a.Responsive(*ex.Size, p9.Widgets{
-					p9.WidgetSize{
+				a.Responsive(*ex.Size, gui.Widgets{
+					gui.WidgetSize{
 						Widget: a.Inset(0.25, a.H5(title).Color(ex.BodyColorGet()).Fn).Fn,
 					},
-					p9.WidgetSize{
+					gui.WidgetSize{
 						Size:   800,
-						Widget: p9.EmptySpace(0, 0),
+						Widget: gui.EmptySpace(0, 0),
 						// a.Inset(0.25, a.Caption(title).Color(ex.BodyColorGet()).Fn).Fn,
 					},
 				}).Fn,
@@ -108,7 +108,7 @@ func (ex *Explorer) PageTopBarButton(name string, index int, ico *[]byte) func(g
 			background = "PanelBg"
 		}
 		ic := ex.th.Icon().
-			Scale(p9.Scales["H5"]).
+			Scale(gui.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -140,7 +140,7 @@ func (ex *Explorer) StatusBarButton(name string, index int, ico *[]byte) func(gt
 		background := ex.StatusBarBackgroundGet()
 		color := ex.StatusBarColorGet()
 		ic := ex.th.Icon().
-			Scale(p9.Scales["H5"]).
+			Scale(gui.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -189,7 +189,7 @@ func (ex *Explorer) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			ico = f
 		}
 		ic := ex.th.Icon().
-			Scale(p9.Scales["H4"]).
+			Scale(gui.Scales["H4"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -209,10 +209,10 @@ func (ex *Explorer) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				ex.th.Inset(0.33,
-					p9.If(ex.running,
-						ex.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
+					gui.If(ex.running,
+						ex.th.Indefinite().Scale(gui.Scales["H5"]).Fn,
 						ex.th.Icon().
-							Scale(p9.Scales["H5"]).
+							Scale(gui.Scales["H5"]).
 							Color("Primary").
 							Src(&icons.ActionCheckCircle).
 							Fn,

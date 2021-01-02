@@ -2,11 +2,11 @@ package explorer
 
 import (
 	"fmt"
-
+	
 	l "gioui.org/layout"
-
+	
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 )
 
 func (ex *Explorer) Blocks() l.Widget {
@@ -28,7 +28,7 @@ func (ex *Explorer) Blocks() l.Widget {
 		return b
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return ex.th.Responsive(*ex.App.Size, p9.Widgets{
+		return ex.th.Responsive(*ex.App.Size, gui.Widgets{
 			{
 				Widget: ex.th.VFlex().
 					Flexed(1,

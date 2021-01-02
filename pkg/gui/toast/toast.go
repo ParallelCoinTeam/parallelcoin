@@ -12,14 +12,14 @@ import (
 	"gioui.org/unit"
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 	
-	"github.com/p9c/pod/pkg/gui/p9"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/shadow"
 )
 
 type Toasts struct {
 	toasts             []toast
-	layout             *p9.List
-	theme              *p9.Theme
+	layout             *gui.List
+	theme              *gui.Theme
 	offset             image.Point
 	duration           int
 	singleSize         image.Point
@@ -33,12 +33,12 @@ type toast struct {
 	bodyBackground        color.NRGBA
 	icon                  *[]byte
 	ticker                float32
-	close                 p9.Clickable
+	close                 gui.Clickable
 	cornerRadius          unit.Value
 	elevation             unit.Value
 }
 
-func New(th *p9.Theme) *Toasts {
+func New(th *gui.Theme) *Toasts {
 	return &Toasts{
 		layout:             th.List(),
 		theme:              th,
@@ -66,8 +66,8 @@ func (t *Toasts) AddToast(title, content, level string) {
 			content:          content,
 			level:            level,
 			ticker:           0,
-			headerBackground: p9.HexNRGB(t.theme.Colors[level]),
-			bodyBackground:   p9.HexNRGB(t.theme.Colors["PanelBg"]),
+			headerBackground: gui.HexNRGB(t.theme.Colors[level]),
+			bodyBackground:   gui.HexNRGB(t.theme.Colors["PanelBg"]),
 			cornerRadius:     t.singleCornerRadius,
 			elevation:        t.singleElevation,
 			icon:             ic,
@@ -102,7 +102,7 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 		return t.theme.Inset(
 			0.05, func(gtx l.Context) l.Dimensions {
 				return shadow.Shadow(
-					gtx, unit.Dp(3), unit.Dp(1), p9.HexNRGB("ee000000"), t.theme.Flex().Flexed(
+					gtx, unit.Dp(3), unit.Dp(1), gui.HexNRGB("ee000000"), t.theme.Flex().Flexed(
 						1,
 						func(gtx l.Context) l.Dimensions {
 							clip.UniformRRect(r, rr).Add(gtx.Ops)
@@ -137,7 +137,7 @@ func (t *Toasts) singleToast(gtx l.Context, index int) l.Dimensions {
 		).Fn(gtx)
 	} else {
 		t.toasts = remove(t.toasts, index)
-		return p9.EmptySpace(0, 0)(gtx)
+		return gui.EmptySpace(0, 0)(gtx)
 	}
 }
 

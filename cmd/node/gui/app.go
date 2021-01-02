@@ -2,26 +2,26 @@ package gui
 
 import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
 	"gioui.org/text"
-
+	
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	"github.com/p9c/pod/pkg/gui/p9"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
-	a = ng.th.App(ng.w.Width, nil, nil)
+func (ng *NodeGUI) GetAppWidget() (a *gui.App) {
+	a = ng.th.App(&ng.w.Width, nil, nil)
 	ng.app = a
 	// ng.size = ng.size
 	ng.th.Colors.SetTheme(*ng.th.Dark)
 	ng.config = cfg.New(ng.cx, ng.th)
 	ng.configs = ng.config.Config()
 	ng.app.ThemeHook(func() {})
-	ng.app.Pages(p9.WidgetMap{
-		"main": ng.Page("overview", p9.Widgets{
-			p9.WidgetSize{
+	ng.app.Pages(gui.WidgetMap{
+		"main": ng.Page("overview", gui.Widgets{
+			gui.WidgetSize{
 				Widget: func(gtx l.Context) l.Dimensions {
 					return ng.th.VFlex().Rigid(
 						ng.th.CardList(ng.lists["overview"], ng.app.CardBackgroundGet(),
@@ -41,7 +41,7 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 											ng.th.Body1("mode").Fn,
 										).
 										Rigid(
-											ng.th.Responsive(gtx.Constraints.Max.X, p9.Widgets{
+											ng.th.Responsive(gtx.Constraints.Max.X, gui.Widgets{
 												{
 													Widget: ng.th.VFlex().
 														Rigid(
@@ -132,19 +132,19 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 				},
 			},
 		}),
-		"settings": ng.Page("settings", p9.Widgets{
-			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+		"settings": ng.Page("settings", gui.Widgets{
+			gui.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return ng.configs.Widget(ng.config)(gtx)
 			}},
 		}),
-		"help": ng.Page("help", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		"help": ng.Page("help", gui.Widgets{
+			gui.WidgetSize{Widget: gui.EmptyMaxHeight()},
 		}),
-		"log": ng.Page("log", p9.Widgets{
-			p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
+		"log": ng.Page("log", gui.Widgets{
+			gui.WidgetSize{Widget: gui.EmptyMaxHeight()},
 		}),
-		"quit": ng.Page("quit", p9.Widgets{
-			p9.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
+		"quit": ng.Page("quit", gui.Widgets{
+			gui.WidgetSize{Widget: func(gtx l.Context) l.Dimensions {
 				return ng.th.VFlex().
 					SpaceEvenly().
 					// AlignMiddle().
@@ -194,16 +194,16 @@ func (ng *NodeGUI) GetAppWidget() (a *p9.App) {
 // Page renders a page. Note that the widgets you give it should be written wrapped in functions if
 // the fluent declarations are used for values inside the ng parent type, as they are computed then at declaration
 // and not at the time of execution.
-func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.Dimensions {
+func (ng *NodeGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		return ng.th.Fill(ng.app.BodyBackgroundGet(), ng.th.VFlex().
 			SpaceEvenly().
 			Rigid(
-				ng.th.Responsive(*ng.app.Size, p9.Widgets{
+				ng.th.Responsive(*ng.app.Size, gui.Widgets{
 					{
 						Widget: func(gtx l.Context) l.Dimensions {
 							if ng.app.MenuOpen {
-								return p9.EmptySpace(0, 0)(gtx)
+								return gui.EmptySpace(0, 0)(gtx)
 							} else {
 								return ng.th.Inset(0.25, ng.th.H6(title).Color(ng.app.BodyColorGet()).Fn).Fn(gtx)
 							}
@@ -211,7 +211,7 @@ func (ng *NodeGUI) Page(title string, widget p9.Widgets) func(gtx l.Context) l.D
 					},
 					{
 						Size:   800,
-						Widget: p9.EmptySpace(0, 0),
+						Widget: gui.EmptySpace(0, 0),
 					},
 				}).Fn,
 			).
@@ -272,7 +272,7 @@ func (ng *NodeGUI) PageTopBarButton(name string, index int, ico *[]byte) func(gt
 			background = "PanelBg"
 		}
 		ic := ng.th.Icon().
-			Scale(p9.Scales["H5"]).
+			Scale(gui.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -307,7 +307,7 @@ func (ng *NodeGUI) StatusBarButton(name string, index int, ico *[]byte) func(gtx
 			background = ng.app.BodyBackgroundGet()
 		}
 		ic := ng.th.Icon().
-			Scale(p9.Scales["H4"]).
+			Scale(gui.Scales["H4"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -349,7 +349,7 @@ func (ng *NodeGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			ico = f
 		}
 		ic := ng.th.Icon().
-			Scale(p9.Scales["H4"]).
+			Scale(gui.Scales["H4"]).
 			Color(color).
 			Src(ico).
 			Fn
@@ -369,10 +369,10 @@ func (ng *NodeGUI) RunStatusButton() func(gtx l.Context) l.Dimensions {
 			).
 			Rigid(
 				ng.th.Inset(0.33,
-					p9.If(ng.bools["runstate"].GetValue(),
-						ng.th.Indefinite().Scale(p9.Scales["H5"]).Fn,
+					gui.If(ng.bools["runstate"].GetValue(),
+						ng.th.Indefinite().Scale(gui.Scales["H5"]).Fn,
 						ng.th.Icon().
-							Scale(p9.Scales["H5"]).
+							Scale(gui.Scales["H5"]).
 							Color("Primary").
 							Src(&icons.ActionCheckCircle).
 							Fn,
