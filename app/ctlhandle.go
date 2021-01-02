@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 	"time"
-
+	
 	"github.com/p9c/pod/app/config"
-
+	
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/ctl"
 )
@@ -43,7 +43,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		config.Configure(cx, c.Command.Name, true)
-
+		
 		return nil
 	}
 }

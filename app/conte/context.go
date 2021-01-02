@@ -4,9 +4,10 @@ package conte
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/util/quit"
 	"runtime"
 	"sync"
+	
+	"github.com/p9c/pod/pkg/util/quit"
 	
 	"go.uber.org/atomic"
 	
@@ -81,7 +82,7 @@ type Xt struct {
 	IsGUI bool
 	
 	waitChangers []string
-	waitCounter int
+	waitCounter  int
 }
 
 func (cx *Xt) WaitAdd() {
@@ -112,10 +113,10 @@ func (cx *Xt) WaitWait() {
 func (cx *Xt) PrintWaitChangers() string {
 	o := "Calls that change context waitgroup values:\n"
 	for i := range cx.waitChangers {
-		o+=cx.waitChangers[i]+"\n"
+		o += cx.waitChangers[i] + "\n"
 	}
-	o+="current total:"
-	o+= fmt.Sprint(cx.waitCounter)
+	o += "current total:"
+	o += fmt.Sprint(cx.waitCounter)
 	return o
 }
 

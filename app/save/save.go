@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
-
+	
 	"lukechampine.com/blake3"
-
+	
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
-
+	
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/pod"
 )
@@ -48,7 +48,7 @@ func Pod(c *pod.Config) (success bool) {
 	// the wallet encrypts all data with a 'public' password which used to be empty. this will of course still hash to
 	// the same for the check but the wallet uses the same for both this and the secret, hence the enhanced security
 	// regime.
-
+	
 	// wallet password needs special handling, if config exists we don't change this value unless we mean to
 	// load config into a fresh variable
 	cfg, _ := pod.EmptyConfig()

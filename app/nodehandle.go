@@ -1,12 +1,13 @@
 package app
 
 import (
+	"github.com/urfave/cli"
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/cmd/walletmain"
 	qu "github.com/p9c/pod/pkg/util/quit"
-	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node"
 )
@@ -42,7 +43,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			// generate the tls certificate if configured
 			if apputil.FileExists(*cx.Config.RPCCert) && apputil.FileExists(*cx.Config.RPCKey) &&
 				apputil.FileExists(*cx.Config.CAFile) {
-
+				
 			} else {
 				_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
 			}

@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -23,10 +23,10 @@ import (
 	"github.com/p9c/pod/pkg/util/normalize"
 	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/p9c/pod/pkg/wallet"
-
+	
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/state"
@@ -254,7 +254,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
 		peersFile := filepath.Join(filepath.Join(*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
 		var err error
-		if err = os.Remove(peersFile); err!=nil {
+		if err = os.Remove(peersFile); err != nil {
 			Trace("nothing to remove?", err)
 		}
 		Trace("removed", peersFile)
@@ -278,7 +278,7 @@ func GetFreePort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
+	
 	l, err := net.ListenTCP("tcp", addr)
 	if err != nil {
 		return 0, err
@@ -593,7 +593,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 
 func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	var err error
-
+	
 	// Validate the the minrelaytxfee.
 	Trace("checking min relay tx fee")
 	stateConfig.ActiveMinRelayTxFee, err = util.NewAmount(*cfg.MinRelayTxFee)
@@ -698,7 +698,7 @@ func validateOnions(cfg *pod.Config) {
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
 	}
-
+	
 }
 
 func validateMiningStuff(cfg *pod.Config, state *state.Config,
@@ -815,7 +815,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			}
 			return proxy.DialTimeout(network, addr, timeout)
 		}
-
+	
 	// When configured in bridge mode (both --onion and --proxy are configured), it means that the proxy configured by
 	// --proxy is not a tor proxy, so override the DNS resolution to use the onion-specific proxy.
 	Trace("setting proxy lookup")
