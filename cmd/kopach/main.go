@@ -26,7 +26,6 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
-	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
@@ -147,11 +146,6 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			solutions:     make([]SolutionData, 0, 2048),
 			Update:        qu.T(),
 			hashSampleBuf: ring.NewBufferUint64(1000),
-		}
-		Warn("kopachgui", *cx.Config.KopachGUI)
-		if *cx.Config.KopachGUI {
-			Info("opening miner controller GUI")
-			go w.Run()
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
@@ -329,41 +323,41 @@ var handlers = transport.Handlers{
 			Debug("error with solution", w.FirstSender.Load(), portSlice)
 			return
 		}
-		port := portSlice[1]
-		j := sol.LoadSolContainer(b)
-		senderPort := j.GetSenderPort()
-		if fmt.Sprint(senderPort) == port {
-			// Warn("we found a solution")
-			// prepend to list of solutions for GUI display if enabled
-			if *w.cx.Config.KopachGUI {
-				// Debug("length solutions", len(w.solutions))
-				blok := j.GetMsgBlock()
-				w.solutions = append(
-					w.solutions, []SolutionData{
-						{
-							time:   time.Now(),
-							height: int(w.height),
-							algo: fmt.Sprint(
-								fork.GetAlgoName(blok.Header.Version, w.height),
-							),
-							hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
-							indexHash:  blok.Header.BlockHash().String(),
-							version:    blok.Header.Version,
-							prevBlock:  blok.Header.PrevBlock.String(),
-							merkleRoot: blok.Header.MerkleRoot.String(),
-							timestamp:  blok.Header.Timestamp,
-							bits:       blok.Header.Bits,
-							nonce:      blok.Header.Nonce,
-						},
-					}...,
-				)
-				if len(w.solutions) > 2047 {
-					w.solutions = w.solutions[len(w.solutions)-2047:]
-				}
-				w.solutionCount = len(w.solutions)
-				w.Update <- struct{}{}
-			}
-		}
+		// port := portSlice[1]
+		// j := sol.LoadSolContainer(b)
+		// senderPort := j.GetSenderPort()
+		// if fmt.Sprint(senderPort) == port {
+			// // Warn("we found a solution")
+			// // prepend to list of solutions for GUI display if enabled
+			// if *w.cx.Config.KopachGUI {
+			// 	// Debug("length solutions", len(w.solutions))
+			// 	blok := j.GetMsgBlock()
+			// 	w.solutions = append(
+			// 		w.solutions, []SolutionData{
+			// 			{
+			// 				time:   time.Now(),
+			// 				height: int(w.height),
+			// 				algo: fmt.Sprint(
+			// 					fork.GetAlgoName(blok.Header.Version, w.height),
+			// 				),
+			// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
+			// 				indexHash:  blok.Header.BlockHash().String(),
+			// 				version:    blok.Header.Version,
+			// 				prevBlock:  blok.Header.PrevBlock.String(),
+			// 				merkleRoot: blok.Header.MerkleRoot.String(),
+			// 				timestamp:  blok.Header.Timestamp,
+			// 				bits:       blok.Header.Bits,
+			// 				nonce:      blok.Header.Nonce,
+			// 			},
+			// 		}...,
+			// 	)
+			// 	if len(w.solutions) > 2047 {
+			// 		w.solutions = w.solutions[len(w.solutions)-2047:]
+			// 	}
+			// 	w.solutionCount = len(w.solutions)
+			// 	w.Update <- struct{}{}
+			// }
+		// }
 		w.FirstSender.Store("")
 		return
 	},

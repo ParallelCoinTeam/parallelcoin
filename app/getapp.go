@@ -49,10 +49,6 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			//	guiHandle(cx), apputil.SubCommands(), nil, "gui"),
 			au.Command("gui", "start wallet GUI", walletGUIHandle(cx),
 				au.SubCommands(), nil),
-			au.Command("explorer", "start explorer GUI", explorerHandle(cx),
-				au.SubCommands(), nil),
-			au.Command("nodegui", "start node GUI", nodeGUIHandle(cx),
-				au.SubCommands(), nil),
 			au.Command("ctl",
 				"send RPC commands to a node or wallet and print the result",
 				ctlHandle(cx), au.SubCommands(
@@ -623,16 +619,6 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"delaystart",
 				"pauses for 3 seconds before starting, for internal use with restart function",
 				nil,
-			),
-			au.Bool(
-				"kopachgui",
-				"enables the GUI for the kopach miner",
-				cx.Config.KopachGUI,
-			),
-			au.Bool(
-				"gui",
-				"enables the GUI",
-				cx.Config.GUI,
 			),
 			au.Bool(
 				"darktheme",

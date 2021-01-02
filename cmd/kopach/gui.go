@@ -10,9 +10,7 @@ import (
 	"gioui.org/text"
 	
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
 )
 
@@ -36,88 +34,6 @@ type MinerModel struct {
 	threadSlider           *gui.IntSlider
 }
 
-func (w *Worker) Run() {
-	if !*w.cx.Config.KopachGUI {
-		Debug("not running GUI ")
-		return
-	}
-	th := gui.NewTheme(p9fonts.Collection(), w.quit)
-	solButtons := make([]*gui.Clickable, 201)
-	for i := range solButtons {
-		solButtons[i] = th.Clickable()
-	}
-	minerModel := &MinerModel{
-		Cx:        w.cx,
-		worker:    w,
-		Theme:     th,
-		DarkTheme: *w.cx.Config.DarkTheme,
-		logoButton: th.Clickable().SetClick(
-			func() {
-				Debug("clicked logo button")
-			},
-		),
-		mineToggle: th.Bool(*w.cx.Config.Generate),
-		solButtons: solButtons,
-		// lists:      lists,
-		modalScrim: th.Clickable(),
-		modalClose: th.Clickable(),
-		password: th.Password("password", w.cx.Config.MinerPass, "Primary", "PanelBg", "", func(pass string) {
-			Debug("changed password")
-			*w.cx.Config.MinerPass = pass
-			save.Pod(w.cx.Config)
-		}),
-		threadSlider: th.IntSlider().Min(0).Max(maxThreads).Value(*w.cx.Config.GenThreads).Hook(
-			func(v int) {
-				w.SetThreads <- v
-			},
-		),
-	}
-	minerModel.lists = map[string]*gui.List{
-		"found": minerModel.Theme.List(), // .Vertical().Start(), // .DisableScroll(false),
-	}
-	minerModel.SetTheme(minerModel.DarkTheme)
-	for i := 0; i < 201; i++ {
-		minerModel.solButtons[i] = th.Clickable()
-	}
-	minerModel.logoButton.SetClick(
-		func() {
-			minerModel.FlipTheme()
-			Info("clicked logo button")
-		},
-	)
-	win := gui.NewWindow(th)
-	// interrupt.AddHandler(func() {
-	// 	// close(w.quit)
-	// 	// os.Exit(0)
-	// })
-	go func() {
-		if err := win.
-			Size(64, 32).
-			Title("kopach").
-			Open().
-			Run(
-				minerModel.Widget,
-				func(gtx l.Context) {},
-				func() {
-					Debug("quitting miner")
-					// interrupt.Request()
-					w.quit.Q()
-				}, w.quit,
-			); Check(err) {
-		}
-	}()
-	go func() {
-	out:
-		for {
-			select {
-			case <-minerModel.worker.Update:
-				win.Window.Invalidate()
-			case <-w.quit:
-				break out
-			}
-		}
-	}()
-}
 
 func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 	return m.Stack().Stacked(
