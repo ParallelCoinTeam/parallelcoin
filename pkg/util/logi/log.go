@@ -11,6 +11,7 @@ import (
 	"time"
 	
 	"github.com/davecgh/go-spew/spew"
+	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
@@ -117,7 +118,7 @@ type (
 	// Logger is a struct containing all the functions with nice handy names
 	Logger struct {
 		Packages        *Pk.Package
-		Level           string
+		Level           *uberatomic.String
 		Fatal           PrintlnFunc
 		Error           PrintlnFunc
 		Warn            PrintlnFunc
@@ -177,7 +178,7 @@ func NewLogger() (l *Logger) {
 	p := make(Pk.Package)
 	l = &Logger{
 		Packages:        &p,
-		Level:           "trace",
+		Level:           uberatomic.NewString("trace"),
 		LogFileHandle:   os.Stderr,
 		Color:           true,
 		Split:           "pod",
@@ -251,7 +252,7 @@ func FileExists(filePath string) bool {
 }
 
 func (l *Logger) SetLevel(level string, color bool, split string) {
-	l.Level = sanitizeLoglevel(level)
+	l.Level.Store(sanitizeLoglevel(level))
 	sep := string(os.PathSeparator)
 	if runtime.GOOS == "windows" {
 		sep = "\\"
@@ -319,7 +320,7 @@ func trimReturn(s string) string {
 }
 
 func (l *Logger) LevelIsActive(level string) (out bool) {
-	if LevelsMap[l.Level] >= LevelsMap[level] {
+	if LevelsMap[l.Level.Load()] >= LevelsMap[level] {
 		out = true
 	}
 	return
