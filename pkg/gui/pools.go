@@ -1,7 +1,7 @@
 package gui
 
 type Pool struct {
-	th              *Theme
+	*Window
 	bools           []*Bool
 	boolsInUse      int
 	lists           []*List
@@ -16,8 +16,8 @@ type Pool struct {
 	incDecsInUse    int
 }
 
-func (th *Theme) NewPool() *Pool {
-	return &Pool{th: th}
+func (w *Window) NewPool() *Pool {
+	return &Pool{Window: w}
 }
 
 func (p *Pool) Reset() {

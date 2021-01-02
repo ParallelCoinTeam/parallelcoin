@@ -12,7 +12,7 @@ import (
 )
 
 type Icon struct {
-	th    *Theme
+	*Window
 	color string
 	src   *[]byte
 	size  unit.Value
@@ -28,8 +28,8 @@ type IconBySize map[float32]IconByColor
 type IconCache map[*[]byte]IconBySize
 
 // Icon returns a new Icon from iconVG data.
-func (th *Theme) Icon() *Icon {
-	return &Icon{th: th, size: th.TextSize, color: "DocText"}
+func (w *Window) Icon() *Icon {
+	return &Icon{Window: w, size: w.TextSize, color: "DocText"}
 }
 
 // Color sets the color of the icon image. It must be called before creating the image
@@ -52,7 +52,7 @@ func (i *Icon) Src(data *[]byte) *Icon {
 
 // Scale changes the size relative to the base font size
 func (i *Icon) Scale(scale float32) *Icon {
-	i.size = i.th.TextSize.Scale(scale)
+	i.size = i.Theme.TextSize.Scale(scale)
 	return i
 }
 
@@ -81,9 +81,9 @@ func (i *Icon) image(sz int) paint.ImageOp {
 	// 	// Debug("reusing old icon")
 	// 	return i.op
 	// }
-	if ico, ok := i.th.iconCache[i.src]; ok {
+	if ico, ok := i.Theme.iconCache[i.src]; ok {
 		if isz, ok := ico[i.size.V]; ok {
-			if icl, ok := isz[i.th.Colors.Get(i.color)]; ok {
+			if icl, ok := isz[i.Theme.Colors.Get(i.color)]; ok {
 				return icl
 			}
 		}
@@ -94,19 +94,19 @@ func (i *Icon) image(sz int) paint.ImageOp {
 		Y: int(float32(sz) * dy / dx)}})
 	var ico iconvg.Rasterizer
 	ico.SetDstImage(img, img.Bounds(), draw.Src)
-	m.Palette[0] = color.RGBA(i.th.Colors.Get(i.color))
+	m.Palette[0] = color.RGBA(i.Theme.Colors.Get(i.color))
 	if err := iconvg.Decode(&ico, *i.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
 	}); Check(err) {
 	}
 	operation := paint.NewImageOp(img)
 	// create the maps if they don't exist
-	if _, ok := i.th.iconCache[i.src]; !ok {
-		i.th.iconCache[i.src] = make(IconBySize)
+	if _, ok := i.Theme.iconCache[i.src]; !ok {
+		i.Theme.iconCache[i.src] = make(IconBySize)
 	}
-	if _, ok := i.th.iconCache[i.src][i.size.V]; !ok {
-		i.th.iconCache[i.src][i.size.V] = make(IconByColor)
+	if _, ok := i.Theme.iconCache[i.src][i.size.V]; !ok {
+		i.Theme.iconCache[i.src][i.size.V] = make(IconByColor)
 	}
-	i.th.iconCache[i.src][i.size.V][i.th.Colors.Get(i.color)] = operation
+	i.Theme.iconCache[i.src][i.size.V][i.Theme.Colors.Get(i.color)] = operation
 	return operation
 }

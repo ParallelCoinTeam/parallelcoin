@@ -2,7 +2,7 @@ package gui
 
 import (
 	"image/color"
-
+	
 	l "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
@@ -13,7 +13,8 @@ import (
 )
 
 type TextInput struct {
-	th       *Theme
+	*Window
+	// Theme    *Theme
 	font     text.Font
 	textSize unit.Value
 	// Color is the text color.
@@ -27,15 +28,15 @@ type TextInput struct {
 }
 
 // TextInput creates a simple text input widget
-func (th *Theme) TextInput(editor *Editor, hint string) *TextInput {
+func (w *Window) TextInput(editor *Editor, hint string) *TextInput {
 	e := &TextInput{
-		th:        th,
+		Window:    w,
 		editor:    editor,
-		textSize:  th.TextSize,
-		color:     th.Colors.Get("DocText"),
-		shaper:    th.shaper,
+		textSize:  w.TextSize,
+		color:     w.Colors.Get("DocText"),
+		shaper:    w.shaper,
 		hint:      hint,
-		hintColor: th.Colors.Get("Hint"),
+		hintColor: w.Colors.Get("Hint"),
 	}
 	e.Font("bariol regular")
 	return e
@@ -43,9 +44,9 @@ func (th *Theme) TextInput(editor *Editor, hint string) *TextInput {
 
 // Font sets the font for the text input widget
 func (e *TextInput) Font(font string) *TextInput {
-	for i := range e.th.collection {
-		if e.th.collection[i].Font.Typeface == text.Typeface(font) {
-			e.font = e.th.collection[i].Font
+	for i := range e.Theme.collection {
+		if e.Theme.collection[i].Font.Typeface == text.Typeface(font) {
+			e.font = e.Theme.collection[i].Font
 			break
 		}
 	}
@@ -54,13 +55,13 @@ func (e *TextInput) Font(font string) *TextInput {
 
 // TextScale sets the size of the text relative to the base font size
 func (e *TextInput) TextScale(scale float32) *TextInput {
-	e.textSize = e.th.TextSize.Scale(scale)
+	e.textSize = e.Theme.TextSize.Scale(scale)
 	return e
 }
 
 // Color sets the color to render the text
 func (e *TextInput) Color(color string) *TextInput {
-	e.color = e.th.Colors.Get(color)
+	e.color = e.Theme.Colors.Get(color)
 	return e
 }
 
@@ -72,7 +73,7 @@ func (e *TextInput) Hint(hint string) *TextInput {
 
 // HintColor sets the color of the hint text
 func (e *TextInput) HintColor(color string) *TextInput {
-	e.hintColor = e.th.Colors.Get(color)
+	e.hintColor = e.Theme.Colors.Get(color)
 	return e
 }
 

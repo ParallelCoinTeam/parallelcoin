@@ -3,7 +3,7 @@ package gui
 import (
 	"image"
 	"sort"
-
+	
 	l "gioui.org/layout"
 	"gioui.org/op"
 )
@@ -17,7 +17,7 @@ type Cell struct {
 	Priority int
 }
 
-func (c *Cell) getWidgetDimensions(gtx l.Context, th *Theme) {
+func (c *Cell) getWidgetDimensions(gtx l.Context) {
 	if c.Widget == nil {
 		// this happens when new items are added if a frame reads the cell, it just - can't - be rendered!
 		return
@@ -70,7 +70,7 @@ type CellGrid []CellRow
 // Table is a super simple table widget that finds the dimensions of all cells, sets all to max of each axis, and then
 // scales the remaining space evenly
 type Table struct {
-	th               *Theme
+	*Window
 	header           CellRow
 	body             CellGrid
 	list             *List
@@ -80,10 +80,10 @@ type Table struct {
 	reverse          bool
 }
 
-func (th *Theme) Table() *Table {
+func (w *Window) Table() *Table {
 	return &Table{
-		th:   th,
-		list: th.List(),
+		Window: w,
+		list:   w.List(),
 	}
 }
 
@@ -120,7 +120,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	// if len(t.body) == 0 || len(t.header) == 0 {
 	// 	return l.Dimensions{}
 	// }
-
+	
 	for i := range t.body {
 		if len(t.header) != len(t.body[i]) {
 			// this should never happen hence panic
@@ -131,16 +131,16 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	gtx1.Constraints.Max = image.Point{X: Inf, Y: Inf}
 	// gather the dimensions from all cells
 	for i := range t.header {
-		t.header[i].getWidgetDimensions(gtx1, t.th)
+		t.header[i].getWidgetDimensions(gtx1)
 	}
 	// Debugs(t.header)
 	for i := range t.body {
 		for j := range t.body[i] {
-			t.body[i][j].getWidgetDimensions(gtx1, t.th)
+			t.body[i][j].getWidgetDimensions(gtx1)
 		}
 	}
 	// Debugs(t.body)
-
+	
 	// find the max of each row and column
 	var table CellGrid
 	table = append(table, t.header)
@@ -216,7 +216,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	// // assemble each row into a flex
 	// out := make([]l.Widget, len(grid))
 	// for i := range grid {
-	// 	outFlex := t.th.Flex()
+	// 	outFlex := t.Theme.Flex()
 	// 	for jj, j := range grid[i] {
 	// 		x := j
 	// 		_ = jj
@@ -230,7 +230,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	// 	}
 	// 	out[i] = outFlex.Fn
 	// }
-	header := t.th.Flex() // .SpaceEvenly()
+	header := t.Theme.Flex() // .SpaceEvenly()
 	for x, oi := range t.header {
 		i := x
 		// header is not in the list but drawn above it
@@ -244,12 +244,12 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 			cs.Max.Y = tyi
 			cs.Min.Y = gtx.Constraints.Max.Y
 			// gtx.Constraints.Constrain(image.Point{X: txi, Y: tyi})
-			dims := t.th.Fill(t.headerBackground, EmptySpace(txi, tyi), l.Center).Fn(gtx)
+			dims := t.Fill(t.headerBackground, EmptySpace(txi, tyi), l.Center).Fn(gtx)
 			oie.Widget(gtx)
 			return dims
 		})
 	}
-
+	
 	var out CellGrid
 	out = CellGrid{t.header}
 	if t.reverse {
@@ -262,7 +262,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		out = append(out, t.body...)
 	}
 	le := func(gtx l.Context, index int) l.Dimensions {
-		f := t.th.Flex() // .SpaceEvenly()
+		f := t.Theme.Flex() // .SpaceEvenly()
 		oi := out[index]
 		for x, oiee := range oi {
 			i := x
@@ -276,7 +276,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 				oie := oiee
 				txi := t.X[i]
 				tyi := t.Y[index]
-				f.Rigid(t.th.Fill(t.cellBackground, func(gtx l.Context) l.Dimensions {
+				f.Rigid(t.Fill(t.cellBackground, func(gtx l.Context) l.Dimensions {
 					cs := gtx.Constraints
 					cs.Max.X = txi
 					cs.Min.X = gtx.Constraints.Max.X
@@ -298,13 +298,13 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 		}
 		return f.Fn(gtx)
 	}
-	return t.th.VFlex().
+	return t.Theme.VFlex().
 		Rigid(func(gtx l.Context) l.Dimensions {
 			// header is fixed to the top of the widget
-			return t.th.Fill(t.headerBackground, header.Fn, l.Center).Fn(gtx)
+			return t.Fill(t.headerBackground, header.Fn, l.Center).Fn(gtx)
 		}).
 		Flexed(1,
-			t.th.Fill(t.cellBackground, func(gtx l.Context) l.Dimensions {
+			t.Fill(t.cellBackground, func(gtx l.Context) l.Dimensions {
 				return t.list.Vertical().
 					Length(len(out)).
 					Background(t.cellBackground).

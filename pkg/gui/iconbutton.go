@@ -14,7 +14,7 @@ import (
 )
 
 type IconButton struct {
-	th         *Theme
+	*Window
 	background string
 	// Color is the icon color.
 	color string
@@ -26,15 +26,15 @@ type IconButton struct {
 }
 
 // IconButton creates an icon with a circular background and an icon placed in the centre
-func (th *Theme) IconButton(button *Clickable) *IconButton {
+func (w *Window) IconButton(button *Clickable) *IconButton {
 	return &IconButton{
-		th:         th,
+		Window:      w,
 		background: "Primary",
 		color:      "DocBg",
-		size:       th.TextSize,
-		inset:      th.Inset(0.33, nil),
+		size:       w.TextSize,
+		inset:      w.Inset(0.33, nil),
 		button:     button,
-		icon:       th.Icon().Src(&icons.AlertError),
+		icon:       w.Icon().Src(&icons.AlertError),
 	}
 }
 
@@ -58,13 +58,13 @@ func (b *IconButton) Icon(ic *Icon) *IconButton {
 
 // Scale changes the size of the icon as a ratio of the base font size
 func (b *IconButton) Scale(scale float32) *IconButton {
-	b.size = b.th.TextSize.Scale(scale * 0.72)
+	b.size = b.Theme.TextSize.Scale(scale * 0.72)
 	return b
 }
 
 // Inset sets the size of inset that goes in between the button background and the icon
-func (b *IconButton) Inset(inset float32) *IconButton {
-	b.inset = b.th.Inset(inset, b.button.Fn)
+func (b *IconButton) ButtonInset(inset float32) *IconButton {
+	b.inset = b.Inset(inset, b.button.Fn)
 	return b
 }
 
@@ -85,7 +85,7 @@ func (b *IconButton) SetCancel(fn func()) *IconButton {
 
 // Fn renders the icon button
 func (b *IconButton) Fn(gtx l.Context) l.Dimensions {
-	return b.th.Stack().Expanded(
+	return b.Stack().Expanded(
 		func(gtx l.Context) l.Dimensions {
 			sizex, sizey := gtx.Constraints.Min.X, gtx.Constraints.Min.Y
 			sizexf, sizeyf := float32(sizex), float32(sizey)
@@ -94,7 +94,7 @@ func (b *IconButton) Fn(gtx l.Context) l.Dimensions {
 				Rect: f32.Rectangle{Max: f32.Point{X: sizexf, Y: sizeyf}},
 				NE:   rr, NW: rr, SE: rr, SW: rr,
 			}.Add(gtx.Ops)
-			background := b.th.Colors.Get(b.background)
+			background := b.Theme.Colors.Get(b.background)
 			if gtx.Queue == nil {
 				background = f32color.MulAlpha(background, 150)
 			}

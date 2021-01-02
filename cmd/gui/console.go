@@ -20,7 +20,7 @@ import (
 )
 
 type Console struct {
-	th             *gui.Theme
+	*gui.Window
 	output         []l.Widget
 	outputList     *gui.List
 	editor         *gui.Editor
@@ -39,12 +39,12 @@ var findSpaceRegexp = regexp.MustCompile(`\s+`)
 func (wg *WalletGUI) ConsolePage() *Console {
 	Debug("running ConsolePage")
 	c := &Console{
-		th:             wg.th,
-		editor:         wg.th.Editor().SingleLine().Submit(true),
-		clearClickable: wg.th.Clickable(),
-		copyClickable:  wg.th.Clickable(),
-		pasteClickable: wg.th.Clickable(),
-		outputList:     wg.th.List().ScrollToEnd(),
+		Window:         wg.Window,
+		editor:         wg.Editor().SingleLine().Submit(true),
+		clearClickable: wg.Clickable(),
+		copyClickable:  wg.Clickable(),
+		pasteClickable: wg.Clickable(),
+		outputList:     wg.List().ScrollToEnd(),
 	}
 	c.submitFunc = func(txt string) {
 		go func() {
@@ -52,13 +52,13 @@ func (wg *WalletGUI) ConsolePage() *Console {
 			c.output = append(
 				c.output,
 				func(gtx l.Context) l.Dimensions {
-					return wg.th.VFlex().
-						Rigid(wg.th.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
+					return wg.VFlex().
+						Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 						Rigid(
-							wg.th.Flex().
+							wg.Flex().
 								Flexed(
 									1,
-									wg.th.Body1(txt).Color("DocText").Font("bariol bold").Fn,
+									wg.Body1(txt).Color("DocText").Font("bariol bold").Fn,
 								).
 								Fn,
 						).Fn(gtx)
@@ -80,7 +80,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				c.output = c.output[:0]
 				// free up the pool widgets used in the current output
 				for i := range c.clickables {
-					wg.th.WidgetPool.FreeClickable(c.clickables[i])
+					wg.WidgetPool.FreeClickable(c.clickables[i])
 				}
 				c.clickables = c.clickables[:0]
 				return
@@ -124,10 +124,10 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						c.output = append(
 							c.output,
 							func(gtx l.Context) l.Dimensions {
-								return wg.th.Flex().
+								return wg.Flex().
 									Flexed(
 										1,
-										wg.th.Caption(sri).
+										wg.Caption(sri).
 											Color("DocText").
 											Font("bariol regular").
 											MaxLines(maxPerWidget).Fn,
@@ -162,9 +162,9 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						c.output = append(
 							c.output,
 							func(gtx l.Context) l.Dimensions {
-								return c.th.Flex().AlignStart().
+								return c.Theme.Flex().AlignStart().
 									Rigid(
-										wg.th.Body1(sri).
+										wg.Body1(sri).
 											Color(outputColor).
 											Font("go regular").MaxLines(4).
 											Fn,
@@ -184,8 +184,8 @@ func (wg *WalletGUI) ConsolePage() *Console {
 							errR = err.Error()
 						}
 						c.output = append(
-							c.output, c.th.Flex().AlignStart().
-								Rigid(wg.th.Body1(errR).Color("Danger").Fn).Fn,
+							c.output, c.Theme.Flex().AlignStart().
+								Rigid(wg.Body1(errR).Color("Danger").Fn).Fn,
 						)
 						return
 					}
@@ -193,9 +193,9 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						errR = err.Error()
 					}
 					c.output = append(
-						c.output, c.th.Flex().AlignStart().
+						c.output, c.Theme.Flex().AlignStart().
 							Rigid(
-								wg.th.Body1(errR).Color("Danger").Fn,
+								wg.Body1(errR).Color("Danger").Fn,
 							).Fn,
 					)
 				}
@@ -226,35 +226,35 @@ func (wg *WalletGUI) ConsolePage() *Console {
 			c.editor.Move(col + len(cb))
 		}()
 	}
-	c.clearButton = wg.th.IconButton(c.clearClickable.SetClick(clearClickableFn)).
+	c.clearButton = wg.IconButton(c.clearClickable.SetClick(clearClickableFn)).
 		Icon(
-			wg.th.Icon().
+			wg.Icon().
 				Color("DocText").
 				Src(&icons2.ContentBackspace),
 		).
 		Background("").
-		Inset(0.25)
-	c.copyButton = wg.th.IconButton(c.copyClickable.SetClick(copyClickableFn)).
+		ButtonInset(0.25)
+	c.copyButton = wg.IconButton(c.copyClickable.SetClick(copyClickableFn)).
 		Icon(
-			wg.th.Icon().
+			wg.Icon().
 				Color("DocText").
 				Src(&icons2.ContentContentCopy),
 		).
 		Background("").
-		Inset(0.25)
-	c.pasteButton = wg.th.IconButton(c.pasteClickable.SetClick(pasteClickableFn)).
+		ButtonInset(0.25)
+	c.pasteButton = wg.IconButton(c.pasteClickable.SetClick(pasteClickableFn)).
 		Icon(
-			wg.th.Icon().
+			wg.Icon().
 				Color("DocText").
 				Src(&icons2.ContentContentPaste),
 		).
 		Background("").
-		Inset(0.25)
+		ButtonInset(0.25)
 	c.output = append(
 		c.output, func(gtx l.Context) l.Dimensions {
-			return c.th.Flex().AlignStart().Rigid(c.th.H6("Welcome to the Parallelcoin RPC console").Color("DocText").Fn).Fn(gtx)
+			return c.Theme.Flex().AlignStart().Rigid(c.H6("Welcome to the Parallelcoin RPC console").Color("DocText").Fn).Fn(gtx)
 		}, func(gtx l.Context) l.Dimensions {
-			return c.th.Flex().AlignStart().Rigid(c.th.Caption("Type 'help' to get available commands and 'clear' or 'cls' to clear the screen").Color("DocText").Fn).Fn(gtx)
+			return c.Theme.Flex().AlignStart().Rigid(c.Caption("Type 'help' to get available commands and 'clear' or 'cls' to clear the screen").Color("DocText").Fn).Fn(gtx)
 		},
 	)
 	return c
@@ -268,11 +268,11 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 			return c.output[index](gtx)
 		}
 	}
-	fn := c.th.VFlex().
+	fn := c.Theme.VFlex().
 		Flexed(
 			0.1,
-			c.th.Fill("PanelBg", func(gtx l.Context) l.Dimensions {
-				return c.th.Inset(
+			c.Fill("PanelBg", func(gtx l.Context) l.Dimensions {
+				return c.Inset(
 					0.25,
 					c.outputList.
 						ScrollToEnd().
@@ -289,12 +289,12 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 			}, l.Center).Fn,
 		).
 		Rigid(
-			c.th.Fill("DocBg", c.th.Inset(
+			c.Fill("DocBg", c.Inset(
 				0.25,
-				c.th.Flex().
+				c.Theme.Flex().
 					Flexed(
 						1,
-						c.th.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
+						c.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
 							Color("DocText").
 							Fn,
 					).
@@ -339,9 +339,9 @@ func GetJSONElements(in map[string]interface{}) (je JSONElements) {
 }
 
 func (c *Console) getIndent(n int, size float32, widget l.Widget) (out l.Widget) {
-	o := c.th.Flex()
+	o := c.Theme.Flex()
 	for i := 0; i < n; i++ {
-		o.Rigid(c.th.Inset(size/2, gui.EmptySpace(0, 0)).Fn)
+		o.Rigid(c.Inset(size/2, gui.EmptySpace(0, 0)).Fn)
 	}
 	o.Rigid(widget)
 	out = o.Fn
@@ -362,7 +362,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if key != "" {
 			out = append(out, c.getIndent(depth, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Body1(key).Font("bariol bold").Color(color).Fn(gtx)
+					return c.Body1(key).Font("bariol bold").Color(color).Fn(gtx)
 				},
 			))
 		}
@@ -371,7 +371,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if len(res) == 0 {
 			out = append(out, c.getIndent(depth+1, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Body1("[]").Color(color).Fn(gtx)
+					return c.Body1("[]").Color(color).Fn(gtx)
 				},
 			))
 		} else {
@@ -384,7 +384,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if key != "" {
 			out = append(out, c.getIndent(depth, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Body1(key).Font("bariol bold").Color(color).Fn(gtx)
+					return c.Body1(key).Font("bariol bold").Color(color).Fn(gtx)
 				},
 			))
 		}
@@ -395,7 +395,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if len(res) == 0 {
 			out = append(out, c.getIndent(depth+1, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.th.Body1("{}").Color(color).Fn(gtx)
+					return c.Body1("{}").Color(color).Fn(gtx)
 				},
 			))
 		} else {
@@ -411,17 +411,17 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		case string:
 			Debug("got type string")
 			res := res.value.(string)
-			clk := c.th.WidgetPool.GetClickable()
+			clk := c.Theme.WidgetPool.GetClickable()
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-					return c.th.Flex().
-						Rigid(c.th.Body1("\"" + res + "\"").Color(color).Fn).
-						Rigid(c.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
-						Rigid(c.th.IconButton(clk).
+					return c.Theme.Flex().
+						Rigid(c.Body1("\"" + res + "\"").Color(color).Fn).
+						Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+						Rigid(c.IconButton(clk).
 							Background("").
-							Inset(0).
+							ButtonInset(0).
 							Color(color).
-							Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
+							Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 							SetClick(func() {
 								go clipboard.WriteAll(res)
 							}).Fn,
@@ -431,17 +431,17 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		case float64:
 			Debug("got type float64")
 			res := res.value.(float64)
-			clk := c.th.WidgetPool.GetClickable()
+			clk := c.Theme.WidgetPool.GetClickable()
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-					return c.th.Flex().
-						Rigid(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).
-						Rigid(c.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
-						Rigid(c.th.IconButton(clk).
+					return c.Theme.Flex().
+						Rigid(c.Body1(fmt.Sprint(res)).Color(color).Fn).
+						Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+						Rigid(c.IconButton(clk).
 							Background("").
-							Inset(0).
+							ButtonInset(0).
 							Color(color).
-							Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
+							Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 							SetClick(func() {
 								go clipboard.WriteAll(fmt.Sprint(res))
 							}).Fn,
@@ -454,24 +454,24 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			res := res.value.(bool)
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-					return c.th.Body1(fmt.Sprint(res)).Color(color).Fn(gtx)
+					return c.Body1(fmt.Sprint(res)).Color(color).Fn(gtx)
 				}),
 			)
 		}
 	case string:
 		Debug("got type string")
 		res := in.(string)
-		clk := c.th.WidgetPool.GetClickable()
+		clk := c.Theme.WidgetPool.GetClickable()
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-				return c.th.Flex().
-					Rigid(c.th.Body1("\"" + res + "\"").Color(color).Fn).
-					Rigid(c.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
-					Rigid(c.th.IconButton(clk).
+				return c.Theme.Flex().
+					Rigid(c.Body1("\"" + res + "\"").Color(color).Fn).
+					Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+					Rigid(c.IconButton(clk).
 						Background("").
-						Inset(0).
+						ButtonInset(0).
 						Color(color).
-						Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
+						Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 						SetClick(func() {
 							go clipboard.WriteAll(res)
 						}).Fn,
@@ -481,17 +481,17 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 	case float64:
 		Debug("got type float64")
 		res := in.(float64)
-		clk := c.th.WidgetPool.GetClickable()
+		clk := c.Theme.WidgetPool.GetClickable()
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-				return c.th.Flex().
-					Rigid(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).
-					Rigid(c.th.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
-					Rigid(c.th.IconButton(clk).
+				return c.Theme.Flex().
+					Rigid(c.Body1(fmt.Sprint(res)).Color(color).Fn).
+					Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+					Rigid(c.IconButton(clk).
 						Background("").
-						Inset(0).
+						ButtonInset(0).
 						Color(color).
-						Icon(c.th.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
+						Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 						SetClick(func() {
 							go clipboard.WriteAll(fmt.Sprint(res))
 						}).Fn,
@@ -504,7 +504,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		res := in.(bool)
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-				return c.th.Body1(fmt.Sprint(res)).Color(color).Fn(gtx)
+				return c.Body1(fmt.Sprint(res)).Color(color).Fn(gtx)
 			}),
 		)
 	default:
@@ -515,10 +515,10 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 
 func (c *Console) jsonElement(key, color string, depth int, w l.Widget) l.Widget {
 	return func(gtx l.Context) l.Dimensions {
-		return c.th.Flex().
+		return c.Theme.Flex().
 			Rigid(c.getIndent(depth, 1,
-				c.th.Body1(key).Font("bariol bold").Color(color).Fn)).
-			Rigid(c.th.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
+				c.Body1(key).Font("bariol bold").Color(color).Fn)).
+			Rigid(c.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 			Rigid(w).
 			Fn(gtx)
 	}

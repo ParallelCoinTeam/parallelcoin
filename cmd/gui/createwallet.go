@@ -20,48 +20,48 @@ import (
 const slash = string(os.PathSeparator)
 
 func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
-	return wg.th.Fill("PanelBg", wg.th.Inset(
+	return wg.Fill("PanelBg", wg.Inset(
 		0.5,
-		wg.th.Flex().
+		wg.Flex().
 			SpaceAround().
 			Flexed(0.5, gui.EmptyMaxHeight()).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
-					return wg.th.VFlex().
+					return wg.VFlex().
 						AlignMiddle().
 						SpaceSides().
 						Rigid(
-							wg.th.H4("create new wallet").
+							wg.H4("create new wallet").
 								Color("PanelText").
 								Fn,
 						).
 						Rigid(
-							wg.th.Inset(
+							wg.Inset(
 								0.25,
 								wg.passwords["passEditor"].Fn,
 							).
 								Fn,
 						).
 						Rigid(
-							wg.th.Inset(
+							wg.Inset(
 								0.25,
 								wg.passwords["confirmPassEditor"].Fn,
 							).
 								Fn,
 						).
 						Rigid(
-							wg.th.Inset(
+							wg.Inset(
 								0.25,
 								wg.inputs["walletSeed"].Fn,
 							).
 								Fn,
 						).
 						Rigid(
-							wg.th.Inset(
+							wg.Inset(
 								0.25,
 								func(gtx l.Context) l.Dimensions {
-									// gtx.Constraints.Min.X = int(wg.th.TextSize.Scale(16).V)
-									return wg.th.CheckBox(
+									// gtx.Constraints.Min.X = int(wg.TextSize.Scale(16).V)
+									return wg.CheckBox(
 										wg.bools["testnet"].SetOnChange(
 											func(b bool) {
 												go func() {
@@ -102,26 +102,26 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 							).Fn,
 						).
 						Rigid(
-							wg.th.Body1("your seed").
+							wg.Body1("your seed").
 								Color("PanelText").
 								Fn,
 						).
 						Rigid(
 							func(gtx l.Context) l.Dimensions {
-								gtx.Constraints.Max.X = int(wg.th.TextSize.Scale(22).V)
-								return wg.th.Caption(wg.inputs["walletSeed"].GetText()).
+								gtx.Constraints.Max.X = int(wg.TextSize.Scale(22).V)
+								return wg.Caption(wg.inputs["walletSeed"].GetText()).
 									Font("go regular").
 									TextScale(0.66).
 									Fn(gtx)
 							},
 						).
 						Rigid(
-							wg.th.Inset(
+							wg.Inset(
 								0.5,
 								func(gtx l.Context) l.Dimensions {
-									gtx.Constraints.Max.X = int(wg.th.TextSize.Scale(32).V)
-									gtx.Constraints.Min.X = int(wg.th.TextSize.Scale(16).V)
-									return wg.th.CheckBox(
+									gtx.Constraints.Max.X = int(wg.TextSize.Scale(32).V)
+									gtx.Constraints.Min.X = int(wg.TextSize.Scale(16).V)
+									return wg.CheckBox(
 										wg.bools["ihaveread"].SetOnChange(
 											func(b bool) {
 												Debug("confirmed read", b)
@@ -168,9 +168,9 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 									!wg.bools["ihaveread"].GetValue() {
 									gtx = gtx.Disabled()
 								}
-								return wg.th.Flex().
+								return wg.Flex().
 									Rigid(
-										wg.th.Button(wg.clickables["createWallet"]).
+										wg.Button(wg.clickables["createWallet"]).
 											Background("Primary").
 											Color("Light").
 											SetClick(
@@ -230,7 +230,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														// save.Pod(wg.cx.Config)
 														
 														// Debug("opening wallet")
-														// w, err = loader.OpenExistingWallet([]byte(*wg.cx.Config.WalletPass),
+														// Window, err = loader.OpenExistingWallet([]byte(*wg.cx.Config.WalletPass),
 														// 	false, wg.cx.Config)
 														// if err != nil {
 														// 	panic(err)

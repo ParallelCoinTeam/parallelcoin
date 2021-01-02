@@ -2,13 +2,13 @@ package gui
 
 import (
 	"fmt"
-
+	
 	l "gioui.org/layout"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
 type IncDec struct {
-	th                *Theme
+	*Window
 	nDigits           int
 	min, max          int
 	amount            int
@@ -21,25 +21,24 @@ type IncDec struct {
 }
 
 // IncDec is a simple increment/decrement for a number setting
-func (th *Theme) IncDec() (out *IncDec) {
+func (w *Window) IncDec() (out *IncDec) {
 	out = &IncDec{
-		th: th,
+		Window: w,
 		// nDigits:    nDigits,
 		// min:        min,
 		// max:        max,
 		// current:    current,
 		// changeHook: changeHook,
-		inc: th.Clickable(),
-		dec: th.Clickable(),
+		inc: w.Clickable(),
+		dec: w.Clickable(),
 		// color:      color,
 		// background: background,
 		// inactive:   inactive,
 		amount: 1,
-		scale: 1,
+		scale:  1,
 	}
 	return
 }
-
 
 func (in *IncDec) Scale(n float32) *IncDec {
 	in.scale = n
@@ -95,7 +94,7 @@ func (in *IncDec) Inactive(color string) *IncDec {
 }
 
 func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
-	out := in.th.Flex().AlignMiddle()
+	out := in.Theme.Flex().AlignMiddle()
 	incColor, decColor := in.color, in.color
 	if in.current == in.min {
 		decColor = in.inactive
@@ -105,13 +104,13 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	}
 	if in.current == in.min {
 		out.Rigid(
-			in.th.Inset(0.25,
-				in.th.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentRemove).Fn,
+			in.Inset(0.25,
+				in.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentRemove).Fn,
 			).Fn,
 		)
 	} else {
-		out.Rigid(in.th.Inset(0.25,
-			in.th.ButtonLayout(in.inc.SetClick(func() {
+		out.Rigid(in.Inset(0.25,
+			in.ButtonLayout(in.inc.SetClick(func() {
 				in.current -= in.amount
 				if in.current < in.min {
 					in.current = in.min
@@ -119,23 +118,23 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 					in.changeHook(in.current)
 				}
 			})).Background(in.background).Embed(
-				in.th.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
+				in.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
 			).Fn,
 		).Fn,
 		)
 	}
 	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.current)
-	out.Rigid(in.th.Caption(cur).Color(in.color).TextScale(in.scale).Font("go regular").Fn)
+	out.Rigid(in.Caption(cur).Color(in.color).TextScale(in.scale).Font("go regular").Fn)
 	if in.current == in.max {
 		out.Rigid(
-			in.th.Inset(0.25,
-				in.th.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentAdd).Fn,
+			in.Inset(0.25,
+				in.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentAdd).Fn,
 			).Fn,
 		)
 	} else {
 		out.Rigid(
-			in.th.Inset(0.25,
-				in.th.ButtonLayout(in.dec.SetClick(func() {
+			in.Inset(0.25,
+				in.ButtonLayout(in.dec.SetClick(func() {
 					in.current += in.amount
 					if in.current > in.max {
 						in.current = in.max
@@ -143,7 +142,7 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 						in.changeHook(in.current)
 					}
 				})).Background(in.background).Embed(
-					in.th.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
+					in.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
 				).Fn,
 			).Fn,
 		)

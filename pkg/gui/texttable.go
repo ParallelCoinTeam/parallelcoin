@@ -13,7 +13,7 @@ type TextTableBody []TextTableRow
 // data that is not immutable, nilling the body will cause it to be wholly regenerated, updating older content than the
 // longest length the list has reached.
 type TextTable struct {
-	*Theme
+	*Window
 	Header           TextTableHeader
 	Body             TextTableBody
 	HeaderColor      string
@@ -25,7 +25,7 @@ type TextTable struct {
 	CellBackground   string
 	CellFont         string
 	CellFontScale    float32
-	Inset            float32
+	CellInset        float32
 	List             *List
 	Table            *Table
 }
@@ -36,7 +36,7 @@ func (tt *TextTable) Regenerate(fully bool) {
 		return
 	}
 	// // set defaults if unset
-	// tt.SetDefaults()
+	tt.SetDefaults()
 	if tt.Table.header == nil || len(tt.Table.header) < 1 || tt.HeaderDarkTheme != *tt.Theme.Dark {
 		tt.HeaderDarkTheme = *tt.Theme.Dark
 		// if this is being regenerated due to theme change
@@ -45,8 +45,8 @@ func (tt *TextTable) Regenerate(fully bool) {
 		for i := range tt.Header {
 			tt.Table.header = append(tt.Table.header, Cell{
 				Widget: // tt.Theme.Fill(tt.HeaderBackground,
-				tt.Theme.Inset(tt.Inset,
-					tt.Theme.Body1(tt.Header[i]).
+				tt.Inset(tt.CellInset,
+					tt.Body1(tt.Header[i]).
 						Color(tt.HeaderColor).
 						TextScale(tt.HeaderFontScale).
 						Font(tt.HeaderFont).MaxLines(1).
@@ -67,7 +67,7 @@ func (tt *TextTable) Regenerate(fully bool) {
 	// startIndex = len(tt.Table.body)
 	// Debug("startIndex", startIndex, len(tt.Body))
 	// if startIndex < len(tt.Body) {
-
+	
 	// bd := tt.Body // [startIndex:]
 	diff := len(tt.Body) - len(tt.Table.body)
 	// Debug(len(tt.Table.body), len(tt.Body), diff)
@@ -84,8 +84,8 @@ func (tt *TextTable) Regenerate(fully bool) {
 		var row CellRow
 		for j := range tt.Body[i] {
 			tt.Table.body[i][j] = Cell{
-				Widget: tt.Theme.Inset(0.25,
-					tt.Theme.Body1(tt.Body[i][j]).
+				Widget: tt.Inset(0.25,
+					tt.Body1(tt.Body[i][j]).
 						Color(tt.CellColor).
 						TextScale(tt.CellFontScale).
 						Font(tt.CellFont).MaxLines(1).
@@ -133,7 +133,7 @@ func (tt *TextTable) SetDefaults() *TextTable {
 	// we assume the caller has intended a zero inset if it is zero
 	if tt.Table == nil {
 		tt.Table = &Table{
-			th:               tt.Theme,
+			Window:           tt.Window,
 			list:             tt.List,
 			headerBackground: tt.HeaderBackground,
 			cellBackground:   tt.CellBackground,

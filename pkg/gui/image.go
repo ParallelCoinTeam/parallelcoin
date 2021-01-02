@@ -35,19 +35,19 @@ func (i *Image) Scale(scale float32) *Image {
 	return i
 }
 
-func (im Image) Fn(gtx layout.Context) layout.Dimensions {
-	scale := im.scale
+func (i Image) Fn(gtx layout.Context) layout.Dimensions {
+	scale := i.scale
 	if scale == 0 {
 		scale = 160.0 / 72.0
 	}
-	size := im.src.Size()
+	size := i.src.Size()
 	wf, hf := float32(size.X), float32(size.Y)
 	w, h := gtx.Px(unit.Dp(wf*scale)), gtx.Px(unit.Dp(hf*scale))
 	cs := gtx.Constraints
 	d := cs.Constrain(image.Pt(w, h))
 	stack := op.Push(gtx.Ops)
 	clip.Rect(image.Rectangle{Max: d}).Add(gtx.Ops)
-	im.src.Add(gtx.Ops)
+	i.src.Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 	stack.Pop()
 	return layout.Dimensions{Size: d}

@@ -11,7 +11,7 @@ import (
 )
 
 type Filler struct {
-	th  *Theme
+	*Window
 	col string
 	w   l.Widget
 	dxn l.Direction
@@ -19,8 +19,8 @@ type Filler struct {
 
 // Fill fills underneath a widget you can put over top of it, dxn sets which
 // direction to place a smaller object, cardinal axes and center
-func (th *Theme) Fill(col string, w l.Widget, dxn l.Direction) *Filler {
-	return &Filler{th: th, col: col, w: w, dxn: dxn}
+func (w *Window) Fill(col string, embed l.Widget, dxn l.Direction) *Filler {
+	return &Filler{Window: w, col: col, w: embed, dxn: dxn}
 }
 
 func (f *Filler) Embed(w l.Widget) *Filler {
@@ -34,7 +34,7 @@ func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 	dL := GetDimensionList(gtx1, 1, func(gtx l.Context, index int) l.Dimensions {
 		return f.w(gtx)
 	})
-	fill(gtx, f.th.Colors.Get(f.col), dL[0].Size)
+	fill(gtx, f.Theme.Colors.Get(f.col), dL[0].Size)
 	return f.dxn.Layout(gtx, f.w)
 }
 

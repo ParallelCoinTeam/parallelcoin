@@ -2,7 +2,7 @@ package gui
 
 import (
 	"image/color"
-
+	
 	l "gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/text"
@@ -10,7 +10,7 @@ import (
 )
 
 type Label struct {
-	th *Theme
+	*Window
 	// Face defines the text style.
 	font text.Font
 	// Color is the text color.
@@ -21,25 +21,24 @@ type Label struct {
 	maxLines int
 	text     string
 	textSize unit.Value
-
 	shaper text.Shaper
 }
 
 // Text creates a label that prints a block of text
-func (th *Theme) Label() (l *Label) {
+func (w *Window) Label() (l *Label) {
 	var f text.Font
-	for i := range th.collection {
-		if th.collection[i].Font.Typeface == "plan9" {
-			f = th.collection[i].Font
+	for i := range w.collection {
+		if w.collection[i].Font.Typeface == "plan9" {
+			f = w.collection[i].Font
 		}
 	}
 	return &Label{
-		th:       th,
+		Window:   w,
 		text:     "",
 		font:     f,
-		color:    th.Colors.Get("DocText"),
+		color:    w.Colors.Get("DocText"),
 		textSize: unit.Sp(1),
-		shaper:   th.shaper,
+		shaper:   w.shaper,
 	}
 }
 
@@ -51,7 +50,7 @@ func (l *Label) Text(text string) *Label {
 
 // TextScale sets the size of the text relative to the base font size
 func (l *Label) TextScale(scale float32) *Label {
-	l.textSize = l.th.TextSize.Scale(scale)
+	l.textSize = l.Theme.TextSize.Scale(scale)
 	return l
 }
 
@@ -69,17 +68,17 @@ func (l *Label) Alignment(alignment text.Alignment) *Label {
 
 // Color sets the color of the label font
 func (l *Label) Color(color string) *Label {
-	l.color = l.th.Colors.Get(color)
+	l.color = l.Theme.Colors.Get(color)
 	return l
 }
 
 // Font sets the font out of the available font collection
 func (l *Label) Font(font string) *Label {
 	var f text.Font
-	for i := range l.th.collection {
-		// Debug(th.Collection[i].Font)
-		if l.th.collection[i].Font.Typeface == text.Typeface(font) {
-			f = l.th.collection[i].Font
+	for i := range l.Theme.collection {
+		// Debug(Theme.Collection[i].Font)
+		if l.Theme.collection[i].Font.Typeface == text.Typeface(font) {
+			f = l.Theme.collection[i].Font
 		}
 	}
 	l.font = f
@@ -102,48 +101,48 @@ var (
 	}
 )
 
-func (th *Theme) H1(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["H1"]).Font("plan9").Text(txt)
+func (w *Window) H1(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["H1"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H2(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["H2"]).Font("plan9").Text(txt)
+func (w *Window) H2(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["H2"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H3(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["H3"]).Font("plan9").Text(txt)
+func (w *Window) H3(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["H3"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H4(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["H4"]).Font("plan9").Text(txt)
+func (w *Window) H4(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["H4"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H5(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["H5"]).Font("plan9").Text(txt)
+func (w *Window) H5(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["H5"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) H6(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["H6"]).Font("plan9").Text(txt)
+func (w *Window) H6(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["H6"]).Font("plan9").Text(txt)
 	return
 }
 
-func (th *Theme) Body1(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["Body1"]).Font("bariol regular").Text(txt)
+func (w *Window) Body1(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["Body1"]).Font("bariol regular").Text(txt)
 	return
 }
 
-func (th *Theme) Body2(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["Body2"]).Font("bariol regular").Text(txt)
+func (w *Window) Body2(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["Body2"]).Font("bariol regular").Text(txt)
 	return
 }
 
-func (th *Theme) Caption(txt string) (l *Label) {
-	l = th.Label().TextScale(Scales["Caption"]).Font("bariol regular").Text(txt)
+func (w *Window) Caption(txt string) (l *Label) {
+	l = w.Label().TextScale(Scales["Caption"]).Font("bariol regular").Text(txt)
 	return
 }
 

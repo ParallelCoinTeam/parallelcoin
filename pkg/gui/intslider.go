@@ -7,7 +7,7 @@ import (
 )
 
 type IntSlider struct {
-	*Theme
+	*Window
 	min, max   *Clickable
 	floater    *Float
 	hook       func(int)
@@ -15,12 +15,12 @@ type IntSlider struct {
 	minV, maxV float32
 }
 
-func (th *Theme) IntSlider() *IntSlider {
+func (w *Window) IntSlider() *IntSlider {
 	return &IntSlider{
-		Theme:   th,
-		min:     th.Clickable(),
-		max:     th.Clickable(),
-		floater: th.Float(),
+		Window:   w,
+		min:     w.Clickable(),
+		max:     w.Clickable(),
+		floater: w.Float(),
 		hook:    func(int) {},
 	}
 }

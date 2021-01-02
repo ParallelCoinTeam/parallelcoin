@@ -6,8 +6,6 @@ import (
 	l "gioui.org/layout"
 )
 
-type ContextWidget func(l.Context) l.Widget
-
 // WidgetSize is a widget with a specification of the minimum size to select it for viewing.
 // Note that the widgets you put in here should be wrapped in func(l.Context) l.Dimensions otherwise
 // any parameters retrieved from the controlling state variable will be from initialization and not
@@ -39,11 +37,6 @@ type Responsive struct {
 
 func (th *Theme) Responsive(size int, widgets Widgets) *Responsive {
 	return &Responsive{size: size, Widgets: widgets}
-}
-
-func (r *Responsive) Embed(widgets Widgets) *Responsive {
-	r.Widgets = widgets
-	return r
 }
 
 func (r *Responsive) Fn(gtx l.Context) l.Dimensions {

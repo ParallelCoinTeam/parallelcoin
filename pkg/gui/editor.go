@@ -30,7 +30,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-func (th *Theme) Editor() *Editor {
+func (w *Window) Editor() *Editor {
 	e := &Editor{
 		submitHook: func(string) {},
 		changeHook: func(string) {},

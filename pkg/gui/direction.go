@@ -9,7 +9,7 @@ type Direction struct {
 
 // Direction creates a directional layout that sets its contents to align according to the configured direction (8
 // cardinal directions and centered)
-func (th *Theme) Direction() (out *Direction) {
+func (w *Window) Direction() (out *Direction) {
 	out = &Direction{}
 	return
 }

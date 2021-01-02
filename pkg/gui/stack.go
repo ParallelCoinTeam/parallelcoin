@@ -8,7 +8,7 @@ type Stack struct {
 }
 
 // Stack starts a chain of widgets to compose into a stack
-func (th *Theme) Stack() (out *Stack) {
+func (w *Window) Stack() (out *Stack) {
 	out = &Stack{
 		Stack: &l.Stack{},
 	}

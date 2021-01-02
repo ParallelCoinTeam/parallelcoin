@@ -4,6 +4,7 @@ import (
 	"math"
 	"time"
 	
+	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"gioui.org/app"
@@ -39,6 +40,17 @@ type Window struct {
 	Height int
 	ops    op.Ops
 	evQ    system.FrameEvent
+}
+
+// NewWindowP9 creates a new window
+func NewWindowP9(quit chan struct{}) (out *Window) {
+	out = &Window{
+		Theme: NewTheme(p9fonts.Collection(), quit),
+		scale: &scaledConfig{1},
+	}
+	out.WidgetPool = out.NewPool()
+	out.Context = l.NewContext(&out.ops, out.evQ)
+	return
 }
 
 // NewWindow creates a new window

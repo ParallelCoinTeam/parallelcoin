@@ -7,7 +7,7 @@ import (
 )
 
 type Multi struct {
-	*Theme
+	*Window
 	lines            *cli.StringSlice
 	clickables       []*Clickable
 	buttons          []*ButtonLayout
@@ -19,7 +19,7 @@ type Multi struct {
 	handle           func(txt []string)
 }
 
-func (th *Theme) Multiline(
+func (w *Window) Multiline(
 	txt *cli.StringSlice,
 	borderColorFocused, borderColorUnfocused, backgroundColor string,
 	size float32,
@@ -30,9 +30,9 @@ func (th *Theme) Multiline(
 			Debug(txt)
 		}
 	}
-	addClickable := th.Clickable()
+	addClickable := w.Clickable()
 	m = &Multi{
-		Theme:         th,
+		Window:        w,
 		lines:         txt,
 		inputLocation: -1,
 		addClickable:  addClickable,
@@ -45,7 +45,8 @@ func (th *Theme) Multiline(
 		m.inputLocation = -1
 		m.handle(*m.lines)
 	}
-	m.input = th.Input("", "", borderColorFocused, borderColorUnfocused, backgroundColor, handleChange)
+	m.input = w.Input("", "", borderColorFocused, borderColorUnfocused,
+		backgroundColor, handleChange)
 	m.clickables = append(m.clickables, (*Clickable)(nil))
 	// m.buttons = append(m.buttons, (*ButtonLayout)(nil))
 	m.removeClickables = append(m.removeClickables, (*Clickable)(nil))
@@ -64,13 +65,13 @@ func (th *Theme) Multiline(
 			m.clickables[i] = clickable
 		}
 		// Debug("making button")
-		btn := m.Theme.ButtonLayout(clickable).CornerRadius(0).Background(
+		btn := m.ButtonLayout(clickable).CornerRadius(0).Background(
 			backgroundColor).
 			Embed(
 				m.Theme.Flex().AlignStart().
 					Flexed(1,
-						m.Theme.Fill("Primary", m.Theme.Inset(0.5,
-							m.Theme.Body2((*m.lines)[i]).Color("DocText").Fn,
+						m.Fill("Primary", m.Inset(0.5,
+							m.Body2((*m.lines)[i]).Color("DocText").Fn,
 						).Fn, l.Center).Fn,
 					).Fn,
 			)
@@ -88,9 +89,9 @@ func (th *Theme) Multiline(
 		}
 		// Debug("making remove button")
 		y := i
-		removeBtn := m.Theme.IconButton(removeClickable).
+		removeBtn := m.IconButton(removeClickable).
 			Icon(
-				m.Theme.Icon().Scale(1.5).Color("DocText").Src(&icons.ActionDelete),
+				m.Icon().Scale(1.5).Color("DocText").Src(&icons.ActionDelete),
 			).
 			Background("").
 			SetClick(func() {
@@ -176,14 +177,14 @@ func (m *Multi) PopulateWidgets() *Multi {
 		// m.clickables[i]
 		if m.buttons[i] == nil {
 			added = true
-			btn := m.Theme.ButtonLayout(m.clickables[i]).CornerRadius(0).Background("Transparent")
+			btn := m.ButtonLayout(m.clickables[i]).CornerRadius(0).Background("Transparent")
 			m.buttons[i] = btn
 		}
 		m.buttons[i].Embed(
 			m.Theme.Flex().
 				Rigid(
-					m.Theme.Inset(0.5,
-						m.Theme.Body2((*m.lines)[i]).Color("DocText").Fn,
+					m.Inset(0.5,
+						m.Body2((*m.lines)[i]).Color("DocText").Fn,
 					).Fn,
 				).Fn,
 		)
@@ -196,7 +197,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 			added = true
 			Debug("making remove button", i)
 			x := i
-			m.removeButtons[i] = m.Theme.IconButton(m.removeClickables[i].
+			m.removeButtons[i] = m.IconButton(m.removeClickables[i].
 				SetClick(func() {
 					Debug("remove button", x, "clicked", len(*m.lines))
 					m.inputLocation = -1
@@ -208,7 +209,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 					m.handle(m.lines.Value())
 				})).
 				Icon(
-					m.Theme.Icon().Scale(1.5).Color("DocText").Src(&icons.ActionDelete),
+					m.Icon().Scale(1.5).Color("DocText").Src(&icons.ActionDelete),
 				).
 				Background("")
 		}
@@ -224,8 +225,8 @@ func (m *Multi) PopulateWidgets() *Multi {
 func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 	m.UpdateWidgets()
 	m.PopulateWidgets()
-	addButton := m.Theme.IconButton(m.addClickable).Icon(
-		m.Theme.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
+	addButton := m.IconButton(m.addClickable).Icon(
+		m.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
 	)
 	var widgets []l.Widget
 	if m.inputLocation > 0 && m.inputLocation < len(*m.lines) {
@@ -234,7 +235,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 	for i := range *m.lines {
 		if m.buttons[i] == nil {
 			x := i
-			btn := m.Theme.ButtonLayout(m.clickables[i].SetClick(
+			btn := m.ButtonLayout(m.clickables[i].SetClick(
 				func() {
 					Debug("button pressed", (*m.lines)[x], x, m.inputLocation)
 					m.inputLocation = x
@@ -244,8 +245,8 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 				Embed(
 					m.Theme.Flex().
 						Rigid(
-							m.Theme.Inset(0.5,
-								m.Theme.Body2((*m.lines)[x]).Color("DocText").Fn,
+							m.Inset(0.5,
+								m.Body2((*m.lines)[x]).Color("DocText").Fn,
 							).Fn,
 						).Fn,
 				)
@@ -343,7 +344,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 		// Debug("iterating lines", i, len(*m.lines))
 		if m.buttons[i] == nil {
 			Debug("making new button layout")
-			btn := m.Theme.ButtonLayout(m.clickables[i].SetClick(
+			btn := m.ButtonLayout(m.clickables[i].SetClick(
 				func() {
 					Debug("button pressed", (*m.lines)[i], i, m.inputLocation)
 					m.UpdateWidgets()
@@ -356,8 +357,8 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 					func(gtx l.Context) l.Dimensions {
 						return m.Theme.Flex().
 							Flexed(1,
-								m.Theme.Inset(0.5,
-									m.Theme.Body2((*m.lines)[i]).Color("DocText").Fn,
+								m.Inset(0.5,
+									m.Body2((*m.lines)[i]).Color("DocText").Fn,
 								).Fn,
 							).Fn(gtx)
 					},
@@ -369,7 +370,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			// Debug("rendering editor", x)
 			
 			input := func(gtx l.Context) l.Dimensions {
-				return m.Theme.Fill("DocBg", m.Theme.Inset(0.5,
+				return m.Fill("DocBg", m.Inset(0.5,
 					m.Flex().
 						Rigid(
 							m.removeButtons[i].Fn,
@@ -394,7 +395,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 					Debug("setting", i, m.inputLocation)
 				})
 			button := func(gtx l.Context) l.Dimensions {
-				return m.Theme.Fill("DocBg", m.Theme.Inset(0.5,
+				return m.Fill("DocBg", m.Inset(0.5,
 					m.Flex().AlignStart().
 						Rigid(
 							m.removeButtons[i].Fn,
@@ -412,13 +413,13 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 	// Debug("widgets", widgets)
 	addButton := func(gtx l.Context) l.Dimensions {
 		addb :=
-			m.Theme.Fill("DocBg", m.Theme.Inset(0.5,
+			m.Fill("DocBg", m.Inset(0.5,
 				m.Theme.Flex().AlignStart().
 					Rigid(
-						m.Theme.IconButton(
+						m.IconButton(
 							m.addClickable).
 							Icon(
-								m.Theme.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
+								m.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
 							).
 							SetClick(func() {
 								Debug("clicked add")

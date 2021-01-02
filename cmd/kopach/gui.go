@@ -17,7 +17,7 @@ import (
 var maxThreads = float32(runtime.NumCPU())
 
 type MinerModel struct {
-	*gui.Theme
+	*gui.Window
 	Cx                     *conte.Xt
 	worker                 *Worker
 	DarkTheme              bool

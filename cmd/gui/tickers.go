@@ -182,12 +182,14 @@ func (wg *WalletGUI) processWalletBlockNotification() {
 	}
 	// Debug(len(atr))
 	wg.State.SetAllTxs(atr)
-	wg.txHistoryPage = wg.State.filteredTxs.Load()
+	wg.txMx.Lock()
+	wg.txHistoryList = wg.State.filteredTxs.Load()
 	atrl := 10
 	if len(atr) < atrl {
 		atrl = len(atr)
 	}
 	wg.txRecentList = atr[:atrl]
+	wg.txMx.Unlock()
 	wg.RecentTransactions(10, "recent")
 	wg.RecentTransactions(-1, "history")
 }
@@ -391,7 +393,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 // 		var clickables []*p9.Clickable
 // 		for x := range lines {
 // 			i := x
-// 			clickables = append(clickables, wg.th.Clickable())
+// 			clickables = append(clickables, wg.Clickable())
 // 			var text string
 // 			if strings.HasPrefix(lines[i], "goroutine") && i < len(lines)-2 {
 // 				text = lines[i+2]
@@ -399,10 +401,10 @@ func (wg *WalletGUI) walletClient() (err error) {
 // 				// outString += text + "\n"
 // 				out = append(
 // 					out, func(gtx l.Context) l.Dimensions {
-// 						return wg.th.ButtonLayout(clickables[i]).Embed(
-// 							wg.th.Inset(
+// 						return wg.ButtonLayout(clickables[i]).Embed(
+// 							wg.ButtonInset(
 // 								0.25,
-// 								wg.th.Caption(text).
+// 								wg.Caption(text).
 // 									Color("DocText").Fn,
 // 							).Fn,
 // 						).Background("Transparent").SetClick(

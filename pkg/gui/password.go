@@ -9,7 +9,7 @@ import (
 )
 
 type Password struct {
-	*Theme
+	*Window
 	pass                 *Editor
 	passInput            *TextInput
 	unhideClickable      *Clickable
@@ -29,14 +29,15 @@ type Password struct {
 	handle               func(pass string)
 }
 
-func (th *Theme) Password(hint string, password *string, borderColorFocused, borderColorUnfocused, backgroundColor string, handle func(pass string), ) *Password {
-	pass := th.Editor().Mask('•').SingleLine().Submit(true)
-	passInput := th.TextInput(pass, hint).Color(borderColorUnfocused)
+func (w *Window) Password(hint string, password *string, borderColorFocused,
+	borderColorUnfocused, backgroundColor string, handle func(pass string), ) *Password {
+	pass := w.Editor().Mask('•').SingleLine().Submit(true)
+	passInput := w.TextInput(pass, hint).Color(borderColorUnfocused)
 	p := &Password{
-		Theme:                th,
-		unhideClickable:      th.Clickable(),
-		copyClickable:        th.Clickable(),
-		pasteClickable:       th.Clickable(),
+		Window:               w,
+		unhideClickable:      w.Clickable(),
+		copyClickable:        w.Clickable(),
+		pasteClickable:       w.Clickable(),
 		pass:                 pass,
 		passInput:            passInput,
 		borderColorUnfocused: borderColorUnfocused,
@@ -46,11 +47,10 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 		handle:               handle,
 		password:             password,
 	}
-	p.copyButton = th.IconButton(p.copyClickable)
-	p.pasteButton = th.IconButton(p.pasteClickable)
-	p.unhideButton = th.IconButton(p.unhideClickable).
-		Background("").
-		Icon(th.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility))
+	p.copyButton = w.IconButton(p.copyClickable)
+	p.pasteButton = w.IconButton(p.pasteClickable)
+	p.unhideButton = w.IconButton(p.unhideClickable).Background("").
+		Icon(w.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility))
 	p.showClickableFn = func(col string) {
 		Debug("show clickable clickeded")
 		p.hide = !p.hide
@@ -58,7 +58,7 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 		// 	p.unhideButton = p.unhideButton.
 		// 		Color("Primary").
 		// 		Icon(
-		// 			th.Icon().
+		// 			Theme.Icon().
 		// 				Color(col).
 		// 				Src(&icons2.ActionVisibility),
 		// 		)
@@ -68,7 +68,7 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 		// 	p.unhideButton = p.unhideButton.
 		// 		Color("DocText").
 		// 		Icon(
-		// 			th.Icon().
+		// 			Theme.Icon().
 		// 				Color(p.borderColor).
 		// 				Src(&icons2.ActionVisibilityOff),
 		// 		)
@@ -94,7 +94,7 @@ func (th *Theme) Password(hint string, password *string, borderColorFocused, bor
 	p.unhideButton.
 		// Color("Primary").
 		Icon(
-			th.Icon().
+			w.Icon().
 				Color(p.borderColor).
 				Src(&icons2.ActionVisibility),
 		)
@@ -158,14 +158,14 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 					p.copyButton.
 						Background("").
 						Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
-						Inset(0.25).
+						ButtonInset(0.25).
 						Fn,
 				).
 				Rigid(
 					p.pasteButton.
 						Background("").
 						Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
-						Inset(0.25).
+						ButtonInset(0.25).
 						Fn,
 				).
 				Rigid(

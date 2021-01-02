@@ -17,15 +17,15 @@ import (
 
 // Text is a widget for laying out and drawing text.
 type Text struct {
-	th *Theme
+	*Window
 	// alignment specify the text alignment.
 	alignment text.Alignment
 	// maxLines limits the number of lines. Zero means no limit.
 	maxLines int
 }
 
-func (th *Theme) Text() *Text {
-	return &Text{th: th}
+func (w *Window) Text() *Text {
+	return &Text{Window: w}
 }
 
 // Alignment sets the alignment for the text

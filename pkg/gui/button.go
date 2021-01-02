@@ -17,7 +17,7 @@ import (
 )
 
 type Button struct {
-	th           *Theme
+*Window
 	background   color.NRGBA
 	color        color.NRGBA
 	cornerRadius unit.Value
@@ -30,50 +30,50 @@ type Button struct {
 }
 
 // Button is a regular material text button where all the dimensions, colors, corners and font can be changed
-func (th *Theme) Button(btn *Clickable) *Button {
+func (w *Window) Button(btn *Clickable) *Button {
 	return &Button{
-		th:   th,
-		text: strings.ToUpper("text unset"),
+		Window: w,
+		text:  strings.ToUpper("text unset"),
 		// default sets
-		font:         th.collection[0].Font,
-		color:        th.Colors.Get("ButtonText"),
-		cornerRadius: th.TextSize.Scale(0.125),
-		background:   th.Colors.Get("Primary"),
-		textSize:     th.TextSize,
+		font:         w.collection[0].Font,
+		color:        w.Colors.Get("ButtonText"),
+		cornerRadius: w.TextSize.Scale(0.125),
+		background:   w.Colors.Get("Primary"),
+		textSize:     w.TextSize,
 		inset: &l.Inset{
-			Top:    th.TextSize.Scale(0.5),
-			Bottom: th.TextSize.Scale(0.5),
-			Left:   th.TextSize.Scale(0.5),
-			Right:  th.TextSize.Scale(0.5),
+			Top:    w.TextSize.Scale(0.5),
+			Bottom: w.TextSize.Scale(0.5),
+			Left:   w.TextSize.Scale(0.5),
+			Right:  w.TextSize.Scale(0.5),
 		},
 		button: btn,
-		shaper: th.shaper,
+		shaper: w.shaper,
 	}
 }
 
 // Background sets the background color
 func (b *Button) Background(background string) *Button {
-	b.background = b.th.Colors.Get(background)
+	b.background = b.Theme.Colors.Get(background)
 	return b
 }
 
 // Color sets the text color
 func (b *Button) Color(color string) *Button {
-	b.color = b.th.Colors.Get(color)
+	b.color = b.Theme.Colors.Get(color)
 	return b
 }
 
 // CornerRadius sets the corner radius (all measurements are scaled from the base text size)
 func (b *Button) CornerRadius(cornerRadius float32) *Button {
-	b.cornerRadius = b.th.TextSize.Scale(cornerRadius)
+	b.cornerRadius = b.Theme.TextSize.Scale(cornerRadius)
 	return b
 }
 
 // Font sets the font style
 func (b *Button) Font(font string) *Button {
-	for i := range b.th.collection {
-		if b.th.collection[i].Font.Typeface == text.Typeface(font) {
-			b.font = b.th.collection[i].Font
+	for i := range b.Theme.collection {
+		if b.Theme.collection[i].Font.Typeface == text.Typeface(font) {
+			b.font = b.Theme.collection[i].Font
 			return b
 		}
 	}
@@ -83,10 +83,10 @@ func (b *Button) Font(font string) *Button {
 // Inset sets the inset between the button border and the text
 func (b *Button) Inset(scale float32) *Button {
 	b.inset = &l.Inset{
-		Top:    b.th.TextSize.Scale(scale),
-		Right:  b.th.TextSize.Scale(scale),
-		Bottom: b.th.TextSize.Scale(scale),
-		Left:   b.th.TextSize.Scale(scale),
+		Top:    b.Theme.TextSize.Scale(scale),
+		Right:  b.Theme.TextSize.Scale(scale),
+		Bottom: b.Theme.TextSize.Scale(scale),
+		Left:   b.Theme.TextSize.Scale(scale),
 	}
 	return b
 }
@@ -99,7 +99,7 @@ func (b *Button) Text(text string) *Button {
 
 // TextScale sets the dimensions of the text as a fraction of the base text size
 func (b *Button) TextScale(scale float32) *Button {
-	b.textSize = b.th.TextSize.Scale(scale)
+	b.textSize = b.Theme.TextSize.Scale(scale)
 	return b
 }
 
@@ -128,7 +128,7 @@ func (b *Button) Fn(gtx l.Context) l.Dimensions {
 	fn := func(gtx l.Context) l.Dimensions {
 		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
 			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-			return b.th.Text().
+			return b.Window.Text().
 				Alignment(text.Middle).
 				Fn(gtx, b.shaper, b.font, b.textSize, b.text)
 		})

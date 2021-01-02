@@ -3,7 +3,7 @@ package gui
 import (
 	"image"
 	"image/color"
-
+	
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
@@ -15,17 +15,17 @@ import (
 )
 
 type Slider struct {
-	th       *Theme
+	*Window
 	min, max float32
 	color    color.NRGBA
 	float    *Float
 }
 
 // Slider is for selecting a value in a range.
-func (th *Theme) Slider() *Slider {
+func (w *Window) Slider() *Slider {
 	return &Slider{
-		th:    th,
-		color: th.Colors.Get("Primary"),
+		Window: w,
+		color: w.Colors.Get("Primary"),
 	}
 }
 
@@ -43,7 +43,7 @@ func (s *Slider) Max(max float32) *Slider {
 
 // Color sets the color to draw the slider in
 func (s *Slider) Color(color string) *Slider {
-	s.color = s.th.Colors.Get(color)
+	s.color = s.Theme.Colors.Get(color)
 	return s
 }
 

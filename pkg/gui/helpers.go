@@ -34,18 +34,18 @@ func Fill(gtx l.Context, col color.NRGBA) l.Dimensions {
 	return l.Dimensions{Size: d}
 }
 
-func (th *Theme) GetFont(font string) *text.Font {
-	for i := range th.collection {
-		if th.collection[i].Font.Typeface == text.Typeface(font) {
-			return &th.collection[i].Font
-		}
-	}
-	return nil
-}
+// func (th *Theme) GetFont(font string) *text.Font {
+// 	for i := range th.collection {
+// 		if th.collection[i].Font.Typeface == text.Typeface(font) {
+// 			return &th.collection[i].Font
+// 		}
+// 	}
+// 	return nil
+// }
 
-func rgb(c uint32) color.RGBA {
-	return argb(0xff000000 | c)
-}
+// func rgb(c uint32) color.RGBA {
+// 	return argb(0xff000000 | c)
+// }
 
 func argb(c uint32) color.RGBA {
 	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}

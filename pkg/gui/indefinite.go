@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"math"
 	"time"
-
+	
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op"
@@ -14,16 +14,16 @@ import (
 )
 
 type Indefinite struct {
-	th    *Theme
+	*Window
 	color color.NRGBA
 	scale float32
 }
 
 // Indefinite creates an indefinite loading animation icon
-func (th *Theme) Indefinite() *Indefinite {
+func (w *Window) Indefinite() *Indefinite {
 	return &Indefinite{
-		th:    th,
-		color: th.Colors.Get("Primary"),
+		Window: w,
+		color:  w.Colors.Get("Primary"),
 	}
 }
 
@@ -35,7 +35,7 @@ func (lo *Indefinite) Scale(scale float32) *Indefinite {
 
 // Color sets the color of the spinner
 func (lo *Indefinite) Color(color string) *Indefinite {
-	lo.color = lo.th.Colors.Get(color)
+	lo.color = lo.Theme.Colors.Get(color)
 	return lo
 }
 
@@ -46,7 +46,7 @@ func (lo *Indefinite) Fn(gtx l.Context) l.Dimensions {
 		diam = minY
 	}
 	if diam == 0 {
-		diam = gtx.Px(lo.th.TextSize.Scale(lo.scale))
+		diam = gtx.Px(lo.Theme.TextSize.Scale(lo.scale))
 	}
 	sz := gtx.Constraints.Constrain(image.Pt(diam, diam))
 	radius := float64(sz.X) * .5

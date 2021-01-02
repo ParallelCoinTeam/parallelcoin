@@ -40,7 +40,6 @@ func NewTheme(fontCollection []text.FontFace, quit qu.C) (th *Theme) {
 		// 32 should buffer all pending events without blocking during normal operation
 		BackgroundProcessingQueue: NewCallbackQueue(32),
 	}
-	th.WidgetPool = th.NewPool()
 	// callback channel handler
 	go func() {
 		Debug("starting background processing queue")

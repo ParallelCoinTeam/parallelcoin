@@ -12,7 +12,7 @@ import (
 )
 
 type Checkable struct {
-	th                 *Theme
+	*Window
 	label              string
 	color              string
 	font               text.Font
@@ -26,26 +26,26 @@ type Checkable struct {
 }
 
 // Checkable creates a checkbox type widget
-func (th *Theme) Checkable() *Checkable {
+func (w *Window) Checkable() *Checkable {
 	font := "bariol regular"
 	var f text.Font
-	for i := range th.collection {
-		if th.collection[i].Font.Typeface == text.Typeface(font) {
-			f = th.collection[i].Font
+	for i := range w.collection {
+		if w.collection[i].Font.Typeface == text.Typeface(font) {
+			f = w.collection[i].Font
 			break
 		}
 	}
 	return &Checkable{
-		th:                 th,
+		Window:              w,
 		label:              "checkable",
 		color:              "Primary",
 		font:               f,
-		textSize:           th.TextSize.Scale(14.0 / 16.0),
+		textSize:           w.TextSize.Scale(14.0 / 16.0),
 		iconColor:          "Primary",
-		size:               th.TextSize.Scale(1.5),
+		size:               w.TextSize.Scale(1.5),
 		checkedStateIcon:   &icons.ToggleCheckBox,
 		uncheckedStateIcon: &icons.ToggleCheckBoxOutlineBlank,
-		shaper:             th.shaper,
+		shaper:             w.shaper,
 	}
 }
 
@@ -63,9 +63,9 @@ func (c *Checkable) Color(color string) *Checkable {
 
 // Font sets the font used on the label
 func (c *Checkable) Font(font string) *Checkable {
-	for i := range c.th.collection {
-		if c.th.collection[i].Font.Typeface == text.Typeface(font) {
-			c.font = c.th.collection[i].Font
+	for i := range c.Theme.collection {
+		if c.Theme.collection[i].Font.Typeface == text.Typeface(font) {
+			c.font = c.Theme.collection[i].Font
 			break
 		}
 	}
@@ -74,7 +74,7 @@ func (c *Checkable) Font(font string) *Checkable {
 
 // TextScale sets the size of the font relative to the base text size
 func (c *Checkable) TextScale(scale float32) *Checkable {
-	c.textSize = c.th.TextSize.Scale(scale)
+	c.textSize = c.Theme.TextSize.Scale(scale)
 	return c
 }
 
@@ -86,7 +86,7 @@ func (c *Checkable) IconColor(color string) *Checkable {
 
 // Scale sets the size of the checkbox icon relative to the base font size
 func (c *Checkable) Scale(size float32) *Checkable {
-	c.size = c.th.TextSize.Scale(size)
+	c.size = c.Theme.TextSize.Scale(size)
 	return c
 }
 
@@ -106,27 +106,27 @@ func (c *Checkable) UncheckedStateIcon(ic *[]byte) *Checkable {
 func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 	var icon *Icon
 	if checked {
-		icon = c.th.Icon().
+		icon = c.Icon().
 			Color(c.iconColor).
 			Src(c.checkedStateIcon)
 	} else {
-		icon = c.th.Icon().
+		icon = c.Icon().
 			Color(c.iconColor).
 			Src(c.uncheckedStateIcon)
 	}
 	icon.size = c.size
 	// Debugs(icon)
 	dims :=
-		c.th.Flex(). // AlignBaseline().
+		c.Theme.Flex(). // AlignBaseline().
 			Rigid(
-				// c.th.Inset(0.25,
+				// c.Theme.ButtonInset(0.25,
 				func(gtx l.Context) l.Dimensions {
 					size := gtx.Px(c.size)
 					// icon.color = c.iconColor
 					// TODO: maybe make a special code for raw colors to do this kind of alpha
 					//  or add a parameter to apply it
 					// if gtx.Queue == nil {
-					// 	icon.color = f32color.MulAlpha(c.th.Colors.Get(icon.color), 150)
+					// 	icon.color = f32color.MulAlpha(c.Theme.Colors.Get(icon.color), 150)
 					// }
 					icon.Fn(gtx)
 					return l.Dimensions{
@@ -136,10 +136,10 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 				// ).Fn,
 			).
 			Rigid(
-				// c.th.Inset(0.25,
+				// c.Theme.ButtonInset(0.25,
 				func(gtx l.Context) l.Dimensions {
-					paint.ColorOp{Color: c.th.Colors.Get(c.color)}.Add(gtx.Ops)
-					return c.th.Caption(c.label).Color(c.color).Fn(gtx)
+					paint.ColorOp{Color: c.Theme.Colors.Get(c.color)}.Add(gtx.Ops)
+					return c.Caption(c.label).Color(c.color).Fn(gtx)
 					// return widget.Label{}.Layout(gtx, c.shaper, c.font, c.textSize, c.label)
 				},
 				// ).Fn,

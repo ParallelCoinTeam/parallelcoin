@@ -2,7 +2,7 @@ package gui
 
 import (
 	"image/color"
-
+	
 	"gioui.org/f32"
 	l "gioui.org/layout"
 	"gioui.org/op/clip"
@@ -12,7 +12,7 @@ import (
 )
 
 type ButtonLayout struct {
-	th           *Theme
+	*Window
 	background   color.NRGBA
 	cornerRadius unit.Value
 	button       *Clickable
@@ -20,24 +20,24 @@ type ButtonLayout struct {
 }
 
 // ButtonLayout creates a button with a background and another widget over top
-func (th *Theme) ButtonLayout(button *Clickable) *ButtonLayout {
+func (w *Window) ButtonLayout(button *Clickable) *ButtonLayout {
 	return &ButtonLayout{
-		th:           th,
+		Window:       w,
 		button:       button,
-		background:   th.Colors.Get("ButtonBg"),
-		cornerRadius: th.TextSize.Scale(0.125),
+		background:   w.Colors.Get("ButtonBg"),
+		cornerRadius: w.TextSize.Scale(0.125),
 	}
 }
 
 // Background sets the background color of the button
 func (b *ButtonLayout) Background(color string) *ButtonLayout {
-	b.background = b.th.Colors.Get(color)
+	b.background = b.Theme.Colors.Get(color)
 	return b
 }
 
 // CornerRadius sets the radius of the corners of the button
 func (b *ButtonLayout) CornerRadius(radius float32) *ButtonLayout {
-	b.cornerRadius = b.th.TextSize.Scale(radius)
+	b.cornerRadius = b.Theme.TextSize.Scale(radius)
 	return b
 }
 
@@ -65,7 +65,7 @@ func (b *ButtonLayout) SetPress(fn func()) *ButtonLayout {
 // Fn is the function that draws the button and its child widget
 func (b *ButtonLayout) Fn(gtx l.Context) l.Dimensions {
 	min := gtx.Constraints.Min
-	return b.th.Stack().Alignment(l.Center).
+	return b.Stack().Alignment(l.Center).
 		Expanded(
 			func(gtx l.Context) l.Dimensions {
 				rr := float32(gtx.Px(b.cornerRadius))

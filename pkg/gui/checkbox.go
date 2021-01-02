@@ -5,13 +5,13 @@ import (
 )
 
 // CheckBox creates a checkbox with a text label
-func (th *Theme) CheckBox(checkBox *Bool) *Checkbox {
+func (w *Window) CheckBox(checkBox *Bool) *Checkbox {
 	var (
 		color     = "DocText"
 		textColor = "Primary"
 		label     = "this is a label"
 	)
-	chk := th.Checkable()
+	chk := w.Checkable()
 	chk.Font("bariol regular").Color(textColor)
 	return &Checkbox{
 		color:     color,
@@ -44,7 +44,7 @@ func (c *Checkbox) TextColor(color string) *Checkbox {
 
 // TextScale sets the scale relative to the base font size for the text label
 func (c *Checkbox) TextScale(scale float32) *Checkbox {
-	c.textSize = c.th.TextSize.Scale(scale)
+	c.textSize = c.TextSize.Scale(scale)
 	return c
 }
 
@@ -56,7 +56,7 @@ func (c *Checkbox) Text(label string) *Checkbox {
 
 // IconScale sets the scaling of the check icon
 func (c *Checkbox) IconScale(scale float32) *Checkbox {
-	c.size = c.th.TextSize.Scale(scale)
+	c.size = c.TextSize.Scale(scale)
 	return c
 }
 

@@ -13,16 +13,16 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 		}
 	}
 	return func(gtx l.Context) l.Dimensions {
-		return wg.th.VFlex().
+		return wg.VFlex().
 			Rigid(
-				wg.th.Inset(0.25,
-					wg.th.Fill("DocBg", wg.th.Responsive(*wg.Size, gui.Widgets{
+				wg.Inset(0.25,
+					wg.Fill("DocBg", wg.Responsive(*wg.Size, gui.Widgets{
 						{
-							Widget: wg.th.VFlex().
+							Widget: wg.VFlex().
 								Flexed(1, wg.HistoryPageView()).
 								Rigid(
-									// 	wg.th.Fill("DocBg",
-									wg.th.Flex().AlignMiddle().SpaceBetween().
+									// 	wg.Fill("DocBg",
+									wg.Flex().AlignMiddle().SpaceBetween().
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(wg.HistoryPageStatusFilter()).
 										Flexed(0.5, gui.EmptyMaxWidth()).
@@ -30,8 +30,8 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 									// 	).Fn,
 								).
 								// Rigid(
-								// 	wg.th.Fill("DocBg",
-								// 		wg.th.Flex().AlignMiddle().SpaceBetween().
+								// 	wg.Fill("DocBg",
+								// 		wg.Flex().AlignMiddle().SpaceBetween().
 								// 			Rigid(wg.HistoryPager()).
 								// 			Rigid(wg.HistoryPagePerPageCount()).
 								// 			Fn,
@@ -41,11 +41,11 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 						},
 						{
 							Size: 1280,
-							Widget: wg.th.VFlex().
+							Widget: wg.VFlex().
 								Flexed(1, wg.HistoryPageView()).
 								Rigid(
-									// 	wg.th.Fill("DocBg",
-									wg.th.Flex().AlignMiddle().SpaceBetween().
+									// 	wg.Fill("DocBg",
+									wg.Flex().AlignMiddle().SpaceBetween().
 										// 			Rigid(wg.HistoryPager()).
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(wg.HistoryPageStatusFilter()).
@@ -63,20 +63,20 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	return wg.th.VFlex().Rigid(wg.th.Inset(0.25, wg.HistoryWidget).Fn).Fn
+	return wg.VFlex().Rigid(wg.Inset(0.25, wg.HistoryWidget).Fn).Fn
 }
 
 func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
-	return wg.th.Flex().AlignMiddle().
+	return wg.Flex().AlignMiddle().
 		Rigid(
-			wg.th.Inset(0.25,
-				wg.th.Caption("show").Fn,
+			wg.Inset(0.25,
+				wg.Caption("show").Fn,
 			).Fn,
 		).
 		Rigid(
-			wg.th.Inset(0.25,
+			wg.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
-					return wg.th.CheckBox(wg.bools["showGenerate"]).
+					return wg.CheckBox(wg.bools["showGenerate"]).
 						TextColor("DocText").
 						TextScale(1).
 						Text("generate").
@@ -86,9 +86,9 @@ func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
 			).Fn,
 		).
 		Rigid(
-			wg.th.Inset(0.25,
+			wg.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
-					return wg.th.CheckBox(wg.bools["showSent"]).
+					return wg.CheckBox(wg.bools["showSent"]).
 						TextColor("DocText").
 						TextScale(1).
 						Text("sent").
@@ -98,9 +98,9 @@ func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
 			).Fn,
 		).
 		Rigid(
-			wg.th.Inset(0.25,
+			wg.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
-					return wg.th.CheckBox(wg.bools["showReceived"]).
+					return wg.CheckBox(wg.bools["showReceived"]).
 						TextColor("DocText").
 						TextScale(1).
 						Text("received").
@@ -110,9 +110,9 @@ func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
 			).Fn,
 		).
 		Rigid(
-			wg.th.Inset(0.25,
+			wg.Inset(0.25,
 				func(gtx l.Context) l.Dimensions {
-					return wg.th.CheckBox(wg.bools["showImmature"]).
+					return wg.CheckBox(wg.bools["showImmature"]).
 						TextColor("DocText").
 						TextScale(1).
 						Text("immature").

@@ -3,7 +3,7 @@ package gui
 import (
 	"image"
 	"image/color"
-
+	
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
 	l "gioui.org/layout"
@@ -16,7 +16,7 @@ import (
 )
 
 type Switch struct {
-	th    *Theme
+	*Window
 	color struct {
 		enabled  color.NRGBA
 		disabled color.NRGBA
@@ -25,25 +25,25 @@ type Switch struct {
 }
 
 // Switch creates a boolean switch widget (basically a checkbox but looks like a switch)
-func (th *Theme) Switch(swtch *Bool) *Switch {
+func (w *Window) Switch(swtch *Bool) *Switch {
 	sw := &Switch{
-		th:    th,
-		swtch: swtch,
+		Window: w,
+		swtch:  swtch,
 	}
-	sw.color.enabled = th.Colors.Get("Primary")
-	sw.color.disabled = th.Colors.Get("PanelBg")
+	sw.color.enabled = w.Colors.Get("Primary")
+	sw.color.disabled = w.Colors.Get("PanelBg")
 	return sw
 }
 
 // EnabledColor sets the color to draw for the enabled state
 func (s *Switch) EnabledColor(color string) *Switch {
-	s.color.enabled = s.th.Colors.Get(color)
+	s.color.enabled = s.Theme.Colors.Get(color)
 	return s
 }
 
 // DisabledColor sets the color to draw for the disabled state
 func (s *Switch) DisabledColor() *Switch {
-	s.color.disabled = s.th.Colors.Get("Primary")
+	s.color.disabled = s.Theme.Colors.Get("Primary")
 	return s
 }
 
@@ -54,8 +54,8 @@ func (s *Switch) SetHook(fn func(b bool)) *Switch {
 
 // Fn updates the switch and displays it.
 func (s *Switch) Fn(gtx l.Context) l.Dimensions {
-	return s.th.Inset(0.25, func(gtx l.Context) l.Dimensions {
-		trackWidth := gtx.Px(s.th.TextSize.Scale(2.5))
+	return s.Inset(0.25, func(gtx l.Context) l.Dimensions {
+		trackWidth := gtx.Px(s.Theme.TextSize.Scale(2.5))
 		trackHeight := gtx.Px(unit.Dp(16))
 		thumbSize := gtx.Px(unit.Dp(20))
 		trackOff := float32(thumbSize-trackHeight) * .5

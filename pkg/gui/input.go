@@ -11,7 +11,7 @@ import (
 )
 
 type Input struct {
-	*Theme
+	*Window
 	editor               *Editor
 	input                *TextInput
 	clearClickable       *Clickable
@@ -30,14 +30,15 @@ type Input struct {
 
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
-func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused, backgroundColor string, handle func(txt string), ) *Input {
-	editor := th.Editor().SingleLine().Submit(true)
-	input := th.TextInput(editor, hint)
+func (w *Window) Input(txt, hint, borderColorFocused, borderColorUnfocused,
+	backgroundColor string, handle func(txt string), ) *Input {
+	editor := w.Editor().SingleLine().Submit(true)
+	input := w.TextInput(editor, hint)
 	p := &Input{
-		Theme:                th,
-		clearClickable:       th.Clickable(),
-		copyClickable:        th.Clickable(),
-		pasteClickable:       th.Clickable(),
+		Window:               w,
+		clearClickable:       w.Clickable(),
+		copyClickable:        w.Clickable(),
+		pasteClickable:       w.Clickable(),
 		editor:               editor,
 		input:                input,
 		borderColorUnfocused: borderColorUnfocused,
@@ -47,9 +48,9 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused, back
 	p.GetText = func() string {
 		return p.editor.Text()
 	}
-	p.clearButton = th.IconButton(p.clearClickable)
-	p.copyButton = th.IconButton(p.copyClickable)
-	p.pasteButton = th.IconButton(p.pasteClickable)
+	p.clearButton = w.IconButton(p.clearClickable)
+	p.copyButton = w.IconButton(p.copyClickable)
+	p.pasteButton = w.IconButton(p.pasteClickable)
 	clearClickableFn := func() {
 		p.editor.SetText("")
 		p.editor.Focus()
@@ -75,19 +76,19 @@ func (th *Theme) Input(txt, hint, borderColorFocused, borderColorUnfocused, back
 	}
 	p.clearButton.
 		Icon(
-			th.Icon().
+			w.Icon().
 				Color("DocText").
 				Src(&icons2.ContentBackspace),
 		)
 	p.copyButton.
 		Icon(
-			th.Icon().
+			w.Icon().
 				Color("DocText").
 				Src(&icons2.ContentContentCopy),
 		)
 	p.pasteButton.
 		Icon(
-			th.Icon().
+			w.Icon().
 				Color("DocText").
 				Src(&icons2.ContentContentPaste),
 		)
@@ -133,21 +134,21 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 				in.copyButton.
 					Background("").
 					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
-					Inset(0.25).
+					ButtonInset(0.25).
 					Fn,
 			).
 			Rigid(
 				in.pasteButton.
 					Background("").
 					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
-					Inset(0.25).
+					ButtonInset(0.25).
 					Fn,
 			).
 			Rigid(
 				in.clearButton.
 					Background("").
 					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentBackspace)).
-					Inset(0.25).
+					ButtonInset(0.25).
 					Fn,
 			).
 			Fn,

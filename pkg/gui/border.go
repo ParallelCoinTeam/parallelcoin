@@ -13,7 +13,7 @@ import (
 
 // Border lays out a widget and draws a border inside it.
 type Border struct {
-	th           *Theme
+	*Window
 	color        color.NRGBA
 	cornerRadius unit.Value
 	width        unit.Value
@@ -21,9 +21,9 @@ type Border struct {
 }
 
 // Border creates a border with configurable color, width and corner radius.
-func (th *Theme) Border() *Border {
+func (w *Window) Border() *Border {
 	b := &Border{
-		th: th,
+		Window: w,
 	}
 	b.CornerRadius(0.25).Color("Primary").Width(0.125)
 	return b
@@ -31,19 +31,19 @@ func (th *Theme) Border() *Border {
 
 // Color sets the color to render the border in
 func (b *Border) Color(color string) *Border {
-	b.color = b.th.Colors.Get(color)
+	b.color = b.Theme.Colors.Get(color)
 	return b
 }
 
 // CornerRadius sets the radius of the curve on the corners
 func (b *Border) CornerRadius(rad float32) *Border {
-	b.cornerRadius = b.th.TextSize.Scale(rad)
+	b.cornerRadius = b.Theme.TextSize.Scale(rad)
 	return b
 }
 
 // Width sets the width of the border line
 func (b *Border) Width(width float32) *Border {
-	b.width = b.th.TextSize.Scale(width)
+	b.width = b.Theme.TextSize.Scale(width)
 	return b
 }
 

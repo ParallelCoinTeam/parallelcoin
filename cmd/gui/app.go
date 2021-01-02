@@ -19,27 +19,27 @@ import (
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
-	a = wg.th.App(&wg.w.Width, uberatomic.NewString("home"),
+	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"),
 		wg.invalidate)
-	wg.App = a
-	wg.App.ThemeHook(
+	wg.MainApp = a
+	wg.MainApp.ThemeHook(
 		func() {
 			Debug("theme hook")
 			// Debug(wg.bools)
-			// wg.th.Colors.Lock()
-			*wg.cx.Config.DarkTheme = *wg.th.Dark
+			// wg.Colors.Lock()
+			*wg.cx.Config.DarkTheme = *wg.Dark
 			// a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-			// *a = *wg.th.Dark
+			// *a = *wg.Dark
 			// if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
-			// 	wgb.Value(*wg.th.Dark)
+			// 	wgb.Value(*wg.Dark)
 			// }
-			// wg.th.Colors.Unlock()
+			// wg.Colors.Unlock()
 			save.Pod(wg.cx.Config)
 			wg.RecentTransactions(10, "recent")
 			wg.RecentTransactions(-1, "history")
 		},
 	)
-	wg.config = cfg.New(wg.cx, wg.th)
+	wg.config = cfg.New(wg.cx, wg.Window)
 	wg.configs = wg.config.Config()
 	a.Pages(
 		map[string]l.Widget{
@@ -97,18 +97,18 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 				"quit", gui.Widgets{
 					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.th.VFlex().
+							return wg.VFlex().
 								SpaceEvenly().
 								AlignMiddle().
 								Rigid(
-									wg.th.H4("are you sure?").Color(wg.App.BodyColorGet()).Alignment(text.Middle).Fn,
+									wg.H4("are you sure?").Color(wg.MainApp.BodyColorGet()).Alignment(text.Middle).Fn,
 								).
 								Rigid(
-									wg.th.Flex().
+									wg.Flex().
 										// SpaceEvenly().
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
-											wg.th.Button(
+											wg.Button(
 												wg.clickables["quit"].SetClick(
 													func() {
 														// interrupt.Request()
@@ -136,9 +136,9 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			// 					return wg.State.goroutines[index](gtx)
 			// 				}
 			// 				return func(gtx l.Context) l.Dimensions {
-			// 					return wg.th.Inset(
+			// 					return wg.ButtonInset(
 			// 						0.25,
-			// 						wg.th.Fill(
+			// 						wg.Fill(
 			// 							"DocBg",
 			// 							wg.lists["recent"].
 			// 								Vertical().
@@ -167,14 +167,14 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 				"mining", gui.Widgets{
 					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.th.VFlex().
+							return wg.VFlex().
 								AlignMiddle().
 								SpaceSides().
 								Rigid(
-									wg.th.Flex().
+									wg.Flex().
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
-											wg.th.H1("Mining").Fn,
+											wg.H1("Mining").Fn,
 										).
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
@@ -188,14 +188,14 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 				"explorer", gui.Widgets{
 					gui.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.th.VFlex().
+							return wg.VFlex().
 								AlignMiddle().
 								SpaceSides().
 								Rigid(
-									wg.th.Flex().
+									wg.Flex().
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Rigid(
-											wg.th.H1("explorer").Fn,
+											wg.H1("explorer").Fn,
 										).
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
@@ -226,7 +226,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 		[]l.Widget{
 			wg.PageTopBarButton(
 				"console", 2, &p9icons.Terminal, func(name string) {
-					wg.App.ActivePage(name)
+					wg.MainApp.ActivePage(name)
 				}, a, "",
 			),
 			// wg.PageTopBarButton(
@@ -236,7 +236,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			// ),
 			wg.PageTopBarButton(
 				"help", 1, &icons.ActionHelp, func(name string) {
-					wg.App.ActivePage(name)
+					wg.MainApp.ActivePage(name)
 				}, a, "",
 			),
 			wg.PageTopBarButton(
@@ -250,7 +250,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			),
 			wg.PageTopBarButton(
 				"quit", 3, &icons.ActionExitToApp, func(name string) {
-					wg.App.ActivePage(name)
+					wg.MainApp.ActivePage(name)
 				}, a, "",
 			),
 		},
@@ -259,16 +259,16 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 		[]l.Widget{
 			// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 			wg.RunStatusPanel,
-			wg.th.Flex().
+			wg.Flex().
 				Flexed(1, gui.EmptyMaxWidth()).
 				Rigid(
 					wg.StatusBarButton(
 						"log", 4, &icons.ActionList, func(name string) {
 							Debug("click on button", name)
-							if wg.App.MenuOpen {
-								wg.App.MenuOpen = false
+							if wg.MainApp.MenuOpen {
+								wg.MainApp.MenuOpen = false
 							}
-							wg.App.ActivePage(name)
+							wg.MainApp.ActivePage(name)
 						}, a,
 					),
 				).
@@ -276,10 +276,10 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					wg.StatusBarButton(
 						"settings", 5, &icons.ActionSettings, func(name string) {
 							Debug("click on button", name)
-							if wg.App.MenuOpen {
-								wg.App.MenuOpen = false
+							if wg.MainApp.MenuOpen {
+								wg.MainApp.MenuOpen = false
 							}
-							wg.App.ActivePage(name)
+							wg.MainApp.ActivePage(name)
 						}, a,
 					),
 				).
@@ -292,29 +292,28 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 }
 
 func (wg *WalletGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) l.Dimensions {
-	a := wg.th
 	return func(gtx l.Context) l.Dimensions {
-		return a.Fill(wg.App.BodyBackgroundGet(), a.VFlex().
+		return wg.Fill(wg.MainApp.BodyBackgroundGet(), wg.VFlex().
 			SpaceEvenly().
 			Rigid(
-				a.Responsive(
+				wg.Responsive(
 					*wg.Size, gui.Widgets{
 						// p9.WidgetSize{
-						// 	Widget: a.Inset(0.25, a.H5(title).Color(wg.App.BodyColorGet()).Fn).Fn,
+						// 	Widget: a.ButtonInset(0.25, a.H5(title).Color(wg.App.BodyColorGet()).Fn).Fn,
 						// },
 						gui.WidgetSize{
 							// Size:   800,
 							Widget: gui.EmptySpace(0, 0),
-							// a.Inset(0.25, a.Caption(title).Color(wg.BodyColorGet()).Fn).Fn,
+							// a.ButtonInset(0.25, a.Caption(title).Color(wg.BodyColorGet()).Fn).Fn,
 						},
 					},
 				).Fn,
 			).
 			Flexed(
 				1,
-				a.Inset(
+				wg.Inset(
 					0.25,
-					a.Responsive(*wg.Size, widget).Fn,
+					wg.Responsive(*wg.Size, widget).Fn,
 				).Fn,
 			).Fn, l.Center).Fn(gtx)
 	}
@@ -324,25 +323,25 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 	return func(gtx l.Context) l.Dimensions {
 		background := "DocBg"
 		color := "DocText"
-		if wg.App.ActivePageGet() == page {
+		if wg.MainApp.ActivePageGet() == page {
 			background = "PanelBg"
 			color = "PanelText"
 		}
-		max := int(wg.App.SideBarSize.V)
+		max := int(wg.MainApp.SideBarSize.V)
 		gtx.Constraints.Max.X = max
 		gtx.Constraints.Min.X = max
 		// Debug("sideMAXXXXXX!!", max)
-		return wg.th.Fill(background,
-			wg.th.Flex().Flexed(1,
-				wg.th.Button(wg.sidebarButtons[index]).
+		return wg.Fill(background,
+			wg.Flex().Flexed(1,
+				wg.Button(wg.sidebarButtons[index]).
 					Text(title).Color(color).
 					Background("Transparent").
 					SetClick(
 						func() {
-							if wg.App.MenuOpen {
-								wg.App.MenuOpen = false
+							if wg.MainApp.MenuOpen {
+								wg.MainApp.MenuOpen = false
 							}
-							wg.App.ActivePage(page)
+							wg.MainApp.ActivePage(page)
 						},
 					).Fn,
 			).Fn, l.Center,
@@ -369,17 +368,17 @@ func (wg *WalletGUI) PageTopBarButton(
 		if highlightColor != "" {
 			color = highlightColor
 		}
-		ic := wg.th.Icon().
+		ic := wg.Icon().
 			Scale(gui.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return wg.th.Flex().Rigid(
-			// wg.Inset(0.25,
-			wg.th.ButtonLayout(wg.buttonBarButtons[index]).
+		return wg.Flex().Rigid(
+			// wg.ButtonInset(0.25,
+			wg.ButtonLayout(wg.buttonBarButtons[index]).
 				CornerRadius(0).
 				Embed(
-					wg.th.Inset(
+					wg.Inset(
 						0.375,
 						ic,
 					).Fn,
@@ -407,17 +406,17 @@ func (wg *WalletGUI) StatusBarButton(
 			background = "PanelBg"
 			// color = "Danger"
 		}
-		ic := wg.th.Icon().
+		ic := wg.Icon().
 			Scale(gui.Scales["H5"]).
 			Color(color).
 			Src(ico).
 			Fn
-		return wg.th.Flex().
+		return wg.Flex().
 			Rigid(
-				wg.th.ButtonLayout(wg.statusBarButtons[index]).
+				wg.ButtonLayout(wg.statusBarButtons[index]).
 					CornerRadius(0).
 					Embed(
-						wg.th.Inset(0.25, ic).Fn,
+						wg.Inset(0.25, ic).Fn,
 					).
 					Background(background).
 					SetClick(func() { onClick(name) }).
@@ -461,21 +460,21 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 		if !wg.miner.Running() {
 			miningIcon = &p9icons.NoMine
 		}
-		return wg.th.Flex().AlignMiddle().
+		return wg.Flex().AlignMiddle().
 			Rigid(
-				wg.th.ButtonLayout(wg.statusBarButtons[0]).
+				wg.ButtonLayout(wg.statusBarButtons[0]).
 					CornerRadius(0).
 					Embed(
-						wg.th.Inset(
+						wg.Inset(
 							0.25,
-							wg.th.Icon().
+							wg.Icon().
 								Scale(gui.Scales["H5"]).
 								Color("DocText").
 								Src(runningIcon).
 								Fn,
 						).Fn,
 					).
-					Background(wg.App.StatusBarBackgroundGet()).
+					Background(wg.MainApp.StatusBarBackgroundGet()).
 					SetClick(
 						func() {
 							go func() {
@@ -495,16 +494,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Fn,
 			).
 			Rigid(
-				wg.th.Inset(
+				wg.Inset(
 					0.33,
-					wg.th.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight.Load())).
+					wg.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight.Load())).
 						Font("go regular").TextScale(gui.Scales["Caption"]).
 						Color("DocText").
 						Fn,
 				).Fn,
 			).
 			Rigid(
-				wg.th.ButtonLayout(wg.statusBarButtons[1]).
+				wg.ButtonLayout(wg.statusBarButtons[1]).
 					CornerRadius(0).
 					Embed(
 						func(gtx l.Context) l.Dimensions {
@@ -512,9 +511,9 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 							if *wg.cx.Config.GenThreads == 0 {
 								clr = "scrim"
 							}
-							return wg.th.
+							return wg.
 								Inset(
-									0.25, wg.th.
+									0.25, wg.
 										Icon().
 										Scale(gui.Scales["H5"]).
 										Color(clr).
@@ -522,7 +521,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								).Fn(gtx)
 						},
 					).
-					Background(wg.App.StatusBarBackgroundGet()).
+					Background(wg.MainApp.StatusBarBackgroundGet()).
 					SetClick(
 						func() {
 							// wg.toggleMiner()
@@ -543,7 +542,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			Rigid(
 				wg.incdecs["generatethreads"].
 					Color("DocText").
-					Background(wg.App.StatusBarBackgroundGet()).
+					Background(wg.MainApp.StatusBarBackgroundGet()).
 					Fn,
 			).
 			Rigid(
@@ -552,20 +551,20 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						return l.Dimensions{}
 					}
 					// background := wg.App.StatusBarBackgroundGet()
-					color := wg.App.StatusBarColorGet()
-					ic := wg.th.Icon().
+					color := wg.MainApp.StatusBarColorGet()
+					ic := wg.Icon().
 						Scale(gui.Scales["H5"]).
 						Color(color).
 						Src(&icons.NavigationRefresh).
 						Fn
-					return wg.th.Flex().
+					return wg.Flex().
 						Rigid(
-							wg.th.ButtonLayout(wg.statusBarButtons[2]).
+							wg.ButtonLayout(wg.statusBarButtons[2]).
 								CornerRadius(0).
 								Embed(
-									wg.th.Inset(0.25, ic).Fn,
+									wg.Inset(0.25, ic).Fn,
 								).
-								Background(wg.App.StatusBarBackgroundGet()).
+								Background(wg.MainApp.StatusBarBackgroundGet()).
 								SetClick(
 									func() {
 										Debug("clicked reset wallet button")

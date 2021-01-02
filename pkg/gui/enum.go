@@ -17,7 +17,7 @@ type Enum struct {
 	hook    func(value string)
 }
 
-func (th *Theme) Enum() *Enum {
+func (w *Window) Enum() *Enum {
 	return &Enum{hook: func(string) {}}
 }
 

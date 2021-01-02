@@ -5,17 +5,17 @@ import (
 )
 
 type Inset struct {
-	th *Theme
-	in l.Inset
-	w  l.Widget
+	*Window
+	in    l.Inset
+	w     l.Widget
 }
 
 // Inset creates a padded empty space around a widget
-func (th *Theme) Inset(pad float32, w l.Widget) (out *Inset) {
+func (w *Window) Inset(pad float32, embed l.Widget) (out *Inset) {
 	out = &Inset{
-		th: th,
-		in: l.UniformInset(th.TextSize.Scale(pad)),
-		w:  w,
+		Window: w,
+		in:     l.UniformInset(w.TextSize.Scale(pad)),
+		w:      embed,
 	}
 	return
 }

@@ -14,17 +14,17 @@ import (
 )
 
 type ProgressBar struct {
-	th       *Theme
+	*Window
 	color    color.NRGBA
 	progress int
 }
 
 // ProgressBar renders a horizontal bar with an indication of completion of a process
-func (th *Theme) ProgressBar() *ProgressBar {
+func (w *Window) ProgressBar() *ProgressBar {
 	return &ProgressBar{
-		th:       th,
+		Window: w,
 		progress: 0,
-		color:    th.Colors.Get("Primary"),
+		color:    w.Colors.Get("Primary"),
 	}
 }
 
@@ -36,7 +36,7 @@ func (p *ProgressBar) SetProgress(progress int) *ProgressBar {
 
 // Color sets the color to render the bar in
 func (p *ProgressBar) Color(c string) *ProgressBar {
-	p.color = p.th.Colors.Get(c)
+	p.color = p.Theme.Colors.Get(c)
 	return p
 }
 

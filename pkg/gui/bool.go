@@ -7,7 +7,7 @@ import (
 type BoolHook func(b bool)
 
 type Bool struct {
-	th          *Theme
+	*Window
 	value       bool
 	clk         *Clickable
 	changed     bool
@@ -15,11 +15,11 @@ type Bool struct {
 }
 
 // Bool creates a new boolean widget
-func (th *Theme) Bool(value bool) *Bool {
+func (w *Window) Bool(value bool) *Bool {
 	return &Bool{
-		th:          th,
+		Window:       w,
 		value:       value,
-		clk:         th.Clickable(),
+		clk:         w.Clickable(),
 		changed:     false,
 		changeState: func(b bool) {},
 	}

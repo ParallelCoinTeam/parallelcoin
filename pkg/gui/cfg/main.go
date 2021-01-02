@@ -6,18 +6,18 @@ import (
 	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
-func New(cx *conte.Xt, th *gui.Theme) *Config {
+func New(cx *conte.Xt, w *gui.Window) *Config {
 	cfg := &Config{
-		th:   th,
-		cx:   cx,
-		quit: cx.KillAll,
+		Window: w,
+		cx:    cx,
+		quit:  cx.KillAll,
 	}
 	return cfg.Init()
 }
 
 type Config struct {
 	cx         *conte.Xt
-	th         *gui.Theme
+	*gui.Window
 	Bools      map[string]*gui.Bool
 	lists      map[string]*gui.List
 	enums      map[string]*gui.Enum
@@ -33,7 +33,7 @@ type Config struct {
 
 func (c *Config) Init() *Config {
 	// c.th = p9.NewTheme(p9fonts.Collection(), c.cx.KillAll)
-	c.th.Colors.SetTheme(*c.th.Dark)
+	c.Theme.Colors.SetTheme(*c.Theme.Dark)
 	c.enums = map[string]*gui.Enum{
 		// "runmode": ng.th.Enum().SetValue(ng.runMode),
 	}
@@ -44,7 +44,7 @@ func (c *Config) Init() *Config {
 	}
 	c.lists = map[string]*gui.List{
 		// "overview": ng.th.List(),
-		"settings": c.th.List(),
+		"settings": c.List(),
 	}
 	c.clickables = map[string]*gui.Clickable{
 		// "quit": ng.th.Clickable(),

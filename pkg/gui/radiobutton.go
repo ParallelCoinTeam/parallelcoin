@@ -10,20 +10,21 @@ import (
 
 type RadioButton struct {
 	*Checkable
-	th    *Theme
+	*Window
 	key   string
 	group *Enum
 }
 
 // RadioButton returns a RadioButton with a label. The key specifies the value for the Enum.
-func (th *Theme) RadioButton(checkable *Checkable, group *Enum, key, label string) *RadioButton {
+func (w *Window) RadioButton(checkable *Checkable, group *Enum, key,
+	label string) *RadioButton {
 	// if checkable == nil {
 	// 	debug.PrintStack()
 	// 	os.Exit(0)
 	// }
 	return &RadioButton{
 		group: group,
-		th:    th,
+		Window: w,
 		Checkable: checkable.
 			CheckedStateIcon(&icons.ToggleRadioButtonChecked). // Color("Primary").
 			UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked). // Color("PanelBg").
