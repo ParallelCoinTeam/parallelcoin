@@ -1788,7 +1788,7 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 					if knownHead != nil {
 						knownHead, _, err = b.server.BlockHeaders.FetchHeader(
 							&knownHead.PrevBlock)
-						if err != nil && knownHead!= nil {
+						if err != nil && knownHead != nil {
 							Fatalf(
 								"can't get block header for hash %s: %v",
 								knownHead.PrevBlock, err,
@@ -1799,7 +1799,9 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 						}
 					}
 				}
-				knownWork.Add(knownWork, blockchain.CalcWork(knownHead.Bits, knownEl.Height, knownHead.Version))
+				if knownEl != nil {
+					knownWork.Add(knownWork, blockchain.CalcWork(knownHead.Bits, knownEl.Height, knownHead.Version))
+				}
 			}
 			Trace("total work from known chain:", knownWork)
 			// Compare the two work totals and reject the new chain if it doesn't have more work than the previously
