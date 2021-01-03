@@ -60,7 +60,8 @@ type Field struct {
 }
 
 func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
-	t := reflect.TypeOf(*cfg)
+	t := reflect.TypeOf(cfg)
+	t = t.Elem()
 	var levelOptions, network []string
 	for _, i := range log.Levels {
 		levelOptions = append(levelOptions, i)
