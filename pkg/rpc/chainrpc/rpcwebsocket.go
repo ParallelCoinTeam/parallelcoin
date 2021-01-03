@@ -1221,13 +1221,6 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 	var marshalledJSONVerbose []byte
 	for _, wsc := range clients {
 		if wsc.VerboseTxUpdates {
-			if marshalledJSONVerbose != nil {
-				err := wsc.QueueNotification(marshalledJSONVerbose)
-				if err != nil {
-					Debug(err)
-				}
-				continue
-			}
 			net := m.Server.Cfg.ChainParams
 			rawTx, err := CreateTxRawResult(
 				net, mtx, txHashStr, nil,
@@ -1244,6 +1237,13 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 			)
 			if err != nil {
 				Error("failed to marshal verbose tx notification:", err)
+			}
+			if marshalledJSONVerbose != nil {
+				err := wsc.QueueNotification(marshalledJSONVerbose)
+				if err != nil {
+					Debug(err)
+				}
+				continue
 			}
 			return
 		}
