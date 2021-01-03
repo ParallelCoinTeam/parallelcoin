@@ -64,21 +64,21 @@ func (e ErrorCode) String() string {
 	return fmt.Sprintf("Unknown ErrorCode (%d)", int(e))
 }
 
-// BTCJSONError identifies a general error. This differs from an RPCError in that this error typically is used more by
+// Error identifies a general error. This differs from an RPCError in that this error typically is used more by
 // the consumers of the package as opposed to RPCErrors which are intended to be returned to the client across the wire
 // via a JSON-RPC Response. The caller can use type assertions to determine the specific error and access the ErrorCode
 // field.
-type BTCJSONError struct {
+type Error struct {
 	ErrorCode   ErrorCode // Describes the kind of error
 	Description string    // Human readable description of the issue
 }
 
 // BTCJSONError satisfies the error interface and prints human-readable errors.
-func (e BTCJSONError) Error() string {
+func (e Error) Error() string {
 	return e.Description
 }
 
 // makeError creates an BTCJSONError given a set of arguments.
-func makeError(c ErrorCode, desc string) BTCJSONError {
-	return BTCJSONError{ErrorCode: c, Description: desc}
+func makeError(c ErrorCode, desc string) Error {
+	return Error{ErrorCode: c, Description: desc}
 }

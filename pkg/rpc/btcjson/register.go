@@ -201,7 +201,7 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 			rvf := reflect.New(rtf.Type.Elem())
 			err := json.Unmarshal([]byte(tag), rvf.Interface())
 			if err != nil {
-				Error(err)
+				Errorln(err)
 				str := fmt.Sprintf("default value of %q is "+
 					"the wrong type (field name %q)", tag,
 					rtf.Name)

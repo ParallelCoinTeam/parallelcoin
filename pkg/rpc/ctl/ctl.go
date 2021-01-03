@@ -29,7 +29,7 @@ func Call(cx *conte.Xt, wallet bool, method string, params ...interface{}) (resu
 	if err != nil {
 		// Show the error along with its error code when it's a json. BTCJSONError as it realistically will always be
 		// since the NewCmd function is only supposed to return errors of that type.
-		if jerr, ok := err.(btcjson.BTCJSONError); ok {
+		if jerr, ok := err.(btcjson.Error); ok {
 			errText := fmt.Sprintf("%s command: %v (code: %s)\n", method, err, jerr.ErrorCode)
 			err = errors.New(errText)
 			// CommandUsage(method)

@@ -16,7 +16,7 @@ func ExampleMarshalCmd() {
 	id := 1
 	marshalledBytes, err := btcjson.MarshalCmd(id, gbCmd)
 	if err != nil {
-		btcjson.Error(err)
+		btcjson.Errorln(err)
 		return
 	}
 	// Display the marshalled command.  Ordinarily this would be sent across the wire to the RPC server, but for this example, just display it.
@@ -31,22 +31,22 @@ func ExampleUnmarshalCmd() {
 	// Unmarshal the raw bytes from the wire into a JSON-RPC request.
 	var request btcjson.Request
 	if err := json.Unmarshal(data, &request); err != nil {
-		btcjson.Error(err)
+		btcjson.Errorln(err)
 		return
 	}
 	// Typically there isn't any need to examine the request fields directly like this as the caller already knows what response to expect based on the command it sent.  However, this is done here to demonstrate why the unmarshal process is two steps.
 	if request.ID == nil {
-		btcjson.Error("Unexpected notification")
+		btcjson.Errorln("Unexpected notification")
 		return
 	}
 	if request.Method != "getblock" {
-		btcjson.Error("Unexpected method")
+		btcjson.Errorln("Unexpected method")
 		return
 	}
 	// Unmarshal the request into a concrete command.
 	cmd, err := btcjson.UnmarshalCmd(&request)
 	if err != nil {
-		btcjson.Error(err)
+		btcjson.Errorln(err)
 		return
 	}
 	// Type assert the command to the appropriate type.
@@ -70,7 +70,7 @@ func ExampleMarshalResponse() {
 	// Marshal a new JSON-RPC response.  For example, this is a response to a getblockheight request.
 	marshalledBytes, err := btcjson.MarshalResponse(1, 350001, nil)
 	if err != nil {
-		btcjson.Error(err)
+		btcjson.Errorln(err)
 		return
 	}
 	// Display the marshalled response.  Ordinarily this would be sent across the wire to the RPC client, but for this example, just display it.
@@ -85,12 +85,12 @@ func Example_unmarshalResponse() {
 	// Unmarshal the raw bytes from the wire into a JSON-RPC response.
 	var response btcjson.Response
 	if err := json.Unmarshal(data, &response); err != nil {
-		btcjson.Error("Malformed JSON-RPC response:", err)
+		btcjson.Errorln("Malformed JSON-RPC response:", err)
 		return
 	}
 	// Check the response for an error from the server.  For example, the server might return an error if an invalid/unknown block hash is requested.
 	if response.Error != nil {
-		btcjson.Error(response.Error)
+		btcjson.Errorln(response.Error)
 		return
 	}
 	// Unmarshal the result into the expected type for the response.

@@ -1169,13 +1169,13 @@ func TestChainSvrCmdErrors(t *testing.T) {
 			name:       "invalid template request sigoplimit field",
 			result:     &btcjson.TemplateRequest{},
 			marshalled: `{"sigoplimit":"invalid"}`,
-			err:        btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
+			err:        btcjson.Error{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name:       "invalid template request sizelimit field",
 			result:     &btcjson.TemplateRequest{},
 			marshalled: `{"sizelimit":"invalid"}`,
-			err:        btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
+			err:        btcjson.Error{ErrorCode: btcjson.ErrInvalidType},
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
@@ -1186,8 +1186,8 @@ func TestChainSvrCmdErrors(t *testing.T) {
 				"want %T", i, test.name, err, err, test.err)
 			continue
 		}
-		if terr, ok := test.err.(btcjson.BTCJSONError); ok {
-			gotErrorCode := err.(btcjson.BTCJSONError).ErrorCode
+		if terr, ok := test.err.(btcjson.Error); ok {
+			gotErrorCode := err.(btcjson.Error).ErrorCode
 			if gotErrorCode != terr.ErrorCode {
 				t.Errorf("Test #%d (%s) mismatched error code "+
 					"- got %v (%v), want %v", i, test.name,

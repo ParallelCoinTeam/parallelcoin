@@ -70,7 +70,7 @@ func Main(args []string, cx *conte.Xt) {
 	// // Attempt to create the appropriate command using the arguments provided by the user.
 	// cmd, err := btcjson.NewCmd(method, params...)
 	// if err != nil {
-	// 	Error(err)
+	// 	Errorln(err)
 	// 	// Show the error along with its error code when it's a json. BTCJSONError as it realistically will always be
 	// 	// since the NewCmd function is only supposed to return errors of that type.
 	// 	if jerr, ok := err.(btcjson.BTCJSONError); ok {
@@ -87,14 +87,14 @@ func Main(args []string, cx *conte.Xt) {
 	// // Marshal the command into a JSON-RPC byte slice in preparation for sending it to the RPC server.
 	// marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
 	// if err != nil {
-	// 	Error(err)
+	// 	Errorln(err)
 	// 	fmt.Println(err)
 	// 	os.Exit(1)
 	// }
 	// // Send the JSON-RPC request to the server using the user-specified connection configuration.
 	// result, err := sendPostRequest(marshalledJSON, cx)
 	// if err != nil {
-	// 	Error(err)
+	// 	Errorln(err)
 	// 	os.Exit(1)
 	// }
 	// Choose how to display the result based on its type.

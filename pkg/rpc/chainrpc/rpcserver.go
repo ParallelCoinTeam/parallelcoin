@@ -2108,7 +2108,7 @@ func ParseCmd(request *btcjson.Request) *ParsedRPCCmd {
 	if err != nil {
 		Error(err)
 		// When the error is because the method is not registered, produce a method not found RPC error.
-		if jerr, ok := err.(btcjson.BTCJSONError); ok &&
+		if jerr, ok := err.(btcjson.Error); ok &&
 			jerr.ErrorCode == btcjson.ErrUnregisteredMethod {
 			parsedCmd.Err = btcjson.ErrRPCMethodNotFound
 			return &parsedCmd

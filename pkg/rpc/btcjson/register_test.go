@@ -54,7 +54,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 		method  string
 		cmdFunc func() interface{}
 		flags   btcjson.UsageFlag
-		err     btcjson.BTCJSONError
+		err     btcjson.Error
 	}{
 		{
 			name:   "duplicate method",
@@ -62,7 +62,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 			cmdFunc: func() interface{} {
 				return struct{}{}
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrDuplicateMethod},
+			err: btcjson.Error{ErrorCode: btcjson.ErrDuplicateMethod},
 		},
 		{
 			name:   "invalid usage flags",
@@ -71,7 +71,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				return 0
 			},
 			flags: btcjson.TstHighestUsageFlagBit,
-			err:   btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidUsageFlags},
+			err:   btcjson.Error{ErrorCode: btcjson.ErrInvalidUsageFlags},
 		},
 		{
 			name:   "invalid type",
@@ -79,7 +79,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 			cmdFunc: func() interface{} {
 				return 0
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name:   "invalid type 2",
@@ -87,7 +87,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 			cmdFunc: func() interface{} {
 				return &[]string{}
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name:   "embedded field",
@@ -96,7 +96,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				type test struct{ int }
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrEmbeddedType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrEmbeddedType},
 		},
 		{
 			name:   "unexported field",
@@ -105,7 +105,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				type test struct{ a int }
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnexportedField},
+			err: btcjson.Error{ErrorCode: btcjson.ErrUnexportedField},
 		},
 		{
 			name:   "unsupported field type 1",
@@ -114,7 +114,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				type test struct{ A **int }
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnsupportedFieldType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrUnsupportedFieldType},
 		},
 		{
 			name:   "unsupported field type 2",
@@ -123,7 +123,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				type test struct{ A chan int }
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnsupportedFieldType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrUnsupportedFieldType},
 		},
 		{
 			name:   "unsupported field type 3",
@@ -132,7 +132,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				type test struct{ A complex64 }
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnsupportedFieldType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrUnsupportedFieldType},
 		},
 		{
 			name:   "unsupported field type 4",
@@ -141,7 +141,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				type test struct{ A complex128 }
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnsupportedFieldType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrUnsupportedFieldType},
 		},
 		{
 			name:   "unsupported field type 5",
@@ -150,7 +150,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				type test struct{ A func() }
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnsupportedFieldType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrUnsupportedFieldType},
 		},
 		{
 			name:   "unsupported field type 6",
@@ -159,7 +159,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				type test struct{ A interface{} }
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnsupportedFieldType},
+			err: btcjson.Error{ErrorCode: btcjson.ErrUnsupportedFieldType},
 		},
 		{
 			name:   "required after optional",
@@ -171,7 +171,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				}
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrNonOptionalField},
+			err: btcjson.Error{ErrorCode: btcjson.ErrNonOptionalField},
 		},
 		{
 			name:   "non-optional with default",
@@ -182,7 +182,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				}
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrNonOptionalDefault},
+			err: btcjson.Error{ErrorCode: btcjson.ErrNonOptionalDefault},
 		},
 		{
 			name:   "mismatched default",
@@ -193,7 +193,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				}
 				return (*test)(nil)
 			},
-			err: btcjson.BTCJSONError{ErrorCode: btcjson.ErrMismatchedDefault},
+			err: btcjson.Error{ErrorCode: btcjson.ErrMismatchedDefault},
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
@@ -205,7 +205,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 				"want %T", i, test.name, err, test.err)
 			continue
 		}
-		gotErrorCode := err.(btcjson.BTCJSONError).ErrorCode
+		gotErrorCode := err.(btcjson.Error).ErrorCode
 		if gotErrorCode != test.err.ErrorCode {
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v, want %v", i, test.name, gotErrorCode,

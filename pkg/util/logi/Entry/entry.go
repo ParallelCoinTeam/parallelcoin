@@ -13,7 +13,7 @@ import (
 	"github.com/p9c/pod/pkg/coding/simplebuffer/Time"
 )
 
-var EntryMagic = []byte{'e', 'n', 't', 'r'}
+var Magic = []byte{'e', 'n', 't', 'r'}
 
 type Container struct {
 	simplebuffer.Container
@@ -26,7 +26,7 @@ func Get(ent *logi.Entry) Container {
 		String.New().Put(ent.Package),
 		String.New().Put(ent.CodeLocation),
 		String.New().Put(ent.Text),
-	}.CreateContainer(EntryMagic)}
+	}.CreateContainer(Magic)}
 }
 
 // LoadContainer takes a message byte slice payload and loads it into a container ready to be decoded

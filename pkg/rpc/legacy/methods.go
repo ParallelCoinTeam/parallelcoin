@@ -1566,7 +1566,7 @@ func ListTransactions(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.
 	// if *cmd.Account != "*" {
 	// 	// For now, don't bother trying to continue if the user specified an account, since this can't be (easily or
 	// 	// efficiently) calculated.
-	// 	Error("you must use * for account, as transactions are not yet grouped by account")
+	// 	Errorln("you must use * for account, as transactions are not yet grouped by account")
 	// 	return nil, &btcjson.RPCError{
 	// 		Code:    btcjson.ErrRPCWallet,
 	// 		Message: "Transactions are not yet grouped by account",

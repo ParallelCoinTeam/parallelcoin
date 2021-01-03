@@ -13,9 +13,9 @@ func init() {
 	pkg = logi.L.Register(loc)
 }
 
-func Fatal(a ...interface{}) { logi.L.Fatal(pkg, a...) }
-func Error(a ...interface{}) { logi.L.Error(pkg, a...) }
-func Warn(a ...interface{})  { logi.L.Warn(pkg, a...) }
+func Fatal(a ...interface{})   { logi.L.Fatal(pkg, a...) }
+func Errorln(a ...interface{}) { logi.L.Error(pkg, a...) }
+func Warn(a ...interface{})    { logi.L.Warn(pkg, a...) }
 func Info(a ...interface{})  { logi.L.Info(pkg, a...) }
 func Check(err error) bool   { return logi.L.Check(pkg, err) }
 func Debug(a ...interface{}) { logi.L.Debug(pkg, a...) }

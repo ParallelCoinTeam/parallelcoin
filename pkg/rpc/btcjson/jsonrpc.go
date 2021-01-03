@@ -65,12 +65,12 @@ func IsValidIDType(id interface{}) bool {
 func MarshalResponse(id interface{}, result interface{}, rpcErr *RPCError) ([]byte, error) {
 	marshalledResult, err := json.Marshal(result)
 	if err != nil {
-		Error(err)
+		Errorln(err)
 		return nil, err
 	}
 	response, err := NewResponse(id, marshalledResult, rpcErr)
 	if err != nil {
-		Error(err)
+		Errorln(err)
 		return nil, err
 	}
 	return json.Marshal(&response)
@@ -98,7 +98,7 @@ func NewRequest(id interface{}, method string, params []interface{}) (*Request, 
 	for _, param := range params {
 		marshalledParam, err := json.Marshal(param)
 		if err != nil {
-			Error(err)
+			Errorln(err)
 			return nil, err
 		}
 		rawMessage := json.RawMessage(marshalledParam)
