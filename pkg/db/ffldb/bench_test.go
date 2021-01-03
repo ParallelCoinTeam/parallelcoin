@@ -19,8 +19,14 @@ func BenchmarkBlockHeader(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	defer os.RemoveAll(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.RemoveAll(dbPath); Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); Check(err) {
+		}
+	}()
 	err = db.Update(func(tx database.Tx) error {
 		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
@@ -56,8 +62,14 @@ func BenchmarkBlock(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	defer os.RemoveAll(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.RemoveAll(dbPath); Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); Check(err) {
+		}
+	}()
 	err = db.Update(func(tx database.Tx) error {
 		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)

@@ -940,7 +940,7 @@ func setTypeBits(data [][]int, level ECLevel, mask int) [][]int {
 	bits := new(bitBuffer)
 	bits.append(typeInformationTable[level][mask], 15)
 
-	len := len(module)
+	length := len(module)
 
 	for i, b := range *bits {
 		bit := 2
@@ -953,21 +953,21 @@ func setTypeBits(data [][]int, level ECLevel, mask int) [][]int {
 		switch {
 		case i < 6:
 			module[8][i] = bit
-			module[len-1-i][8] = bit
+			module[length-1-i][8] = bit
 		case i == 6:
 			module[8][i+1] = bit
-			module[len-1-i][8] = bit
+			module[length-1-i][8] = bit
 		case i == 7:
-			module[8][len-15+i] = bit
+			module[8][length-15+i] = bit
 			module[8][8] = bit
 		case i == 8:
-			module[8][len-15+i] = bit
+			module[8][length-15+i] = bit
 			module[7][8] = bit
 		case i == 9:
-			module[8][len-15+i] = bit
+			module[8][length-15+i] = bit
 			module[5][8] = bit
 		case i > 9:
-			module[8][len-15+i] = bit
+			module[8][length-15+i] = bit
 			module[(7*2)-i][8] = bit
 		}
 	}

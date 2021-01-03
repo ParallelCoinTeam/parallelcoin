@@ -9,12 +9,12 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/util"
-
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
@@ -67,7 +67,10 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 	} else {
 		dr = fi
 	}
-	defer fi.Close()
+	defer func() {
+		if err := fi.Close(); Check(err) {
+		}
+	}()
 	var block *util.Block
 	err = nil
 	for height := int64(1); err == nil; height++ {
@@ -120,7 +123,8 @@ func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func()
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
 		// done testing.
 		teardown = func() {
-			db.Close()
+			if err := db.Close(); Check(err) {
+			}
 		}
 	} else {
 		// Create the root directory for test databases.
@@ -142,9 +146,12 @@ func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func()
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
 		// done testing.
 		teardown = func() {
-			db.Close()
-			os.RemoveAll(dbPath)
-			os.RemoveAll(testDbRoot)
+			if err := db.Close(); Check(err) {
+			}
+			if err := os.RemoveAll(dbPath); Check(err) {
+			}
+			if err := os.RemoveAll(testDbRoot); Check(err) {
+			}
 		}
 	}
 	// Copy the chain netparams to ensure any modifications the tests do to the chain parameters do not affect the
@@ -186,7 +193,10 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 	} else {
 		r = fi
 	}
-	defer fi.Close()
+	defer func() {
+		if err := fi.Close(); Check(err) {
+		}
+	}()
 	view := NewUtxoViewpoint()
 	for {
 		// Hash of the utxo entry.

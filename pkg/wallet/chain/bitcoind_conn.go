@@ -142,7 +142,10 @@ func (c *BitcoindConn) Stop() {
 // NOTE: This must be run as a goroutine.
 func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); Check(err) {
+		}
+	}()
 	Info(
 		"started listening for bitcoind block notifications via ZMQ on", c.zmqBlockHost,
 	)
@@ -212,7 +215,10 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 // NOTE: This must be run as a goroutine.
 func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); Check(err) {
+		}
+	}()
 	Info(
 		"started listening for bitcoind transaction notifications via ZMQ on",
 		c.zmqTxHost,

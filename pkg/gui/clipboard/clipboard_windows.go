@@ -22,7 +22,7 @@ var (
 	emptyClipboard   = user32.MustFindProc("EmptyClipboard")
 	getClipboardData = user32.MustFindProc("GetClipboardData")
 	setClipboardData = user32.MustFindProc("SetClipboardData")
-
+	
 	kernel32     = syscall.NewLazyDLL("kernel32")
 	globalAlloc  = kernel32.NewProc("GlobalAlloc")
 	globalFree   = kernel32.NewProc("GlobalFree")
@@ -36,25 +36,30 @@ func readAll() (string, error) {
 	if r == 0 {
 		return "", err
 	}
-	defer closeClipboard.Call()
-
-	h, _, err := getClipboardData.Call(cfUnicodetext)
+	defer func() {
+		if _, _, err := closeClipboard.Call(); Check(err) {
+		}
+	}()
+	
+	var h uintptr
+	h, _, err = getClipboardData.Call(cfUnicodetext)
 	if r == 0 {
 		return "", err
 	}
-
-	l, _, err := globalLock.Call(h)
+	
+	var l uintptr
+	l, _, err = globalLock.Call(h)
 	if l == 0 {
 		return "", err
 	}
-
+	
 	text := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(l))[:])
-
+	
 	r, _, err = globalUnlock.Call(h)
 	if r == 0 {
 		return "", err
 	}
-
+	
 	return text, nil
 }
 
@@ -63,35 +68,38 @@ func writeAll(text string) error {
 	if r == 0 {
 		return err
 	}
-	defer closeClipboard.Call()
-
+	defer func() {
+		if _, _, err := closeClipboard.Call(); Check(err) {
+		}
+	}()
+	
 	r, _, err = emptyClipboard.Call(0)
 	if r == 0 {
 		return err
 	}
-
+	
 	data := syscall.StringToUTF16(text)
-
+	
 	h, _, err := globalAlloc.Call(gmemFixed, uintptr(len(data)*int(unsafe.Sizeof(data[0]))))
 	if h == 0 {
 		return err
 	}
-
+	
 	l, _, err := globalLock.Call(h)
 	if l == 0 {
 		return err
 	}
-
+	
 	r, _, err = lstrcpy.Call(l, uintptr(unsafe.Pointer(&data[0])))
 	if r == 0 {
 		return err
 	}
-
+	
 	r, _, err = globalUnlock.Call(h)
 	if r == 0 {
 		return err
 	}
-
+	
 	r, _, err = setClipboardData.Call(cfUnicodetext, h)
 	if r == 0 {
 		return err
@@ -105,7 +113,7 @@ func Start() {
 func Get() string {
 	str, err := readAll()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		return ""
 	}
 	return str
@@ -118,6 +126,6 @@ func GetPrimary() string {
 func Set(text string) {
 	err := writeAll(text)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 	}
 }

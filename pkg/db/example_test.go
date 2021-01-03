@@ -29,8 +29,14 @@ func ExampleCreate() {
 		database.Error(err)
 		return
 	}
-	defer os.RemoveAll(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.RemoveAll(dbPath); database.Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); database.Check(err) {
+		}
+	}()
 	// Output:
 }
 
@@ -53,8 +59,14 @@ func Example_basicUsage() {
 		database.Error(err)
 		return
 	}
-	defer os.RemoveAll(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.RemoveAll(dbPath); database.Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); database.Check(err) {
+		}
+	}()
 	// Use the Update function of the database to perform a managed read-write transaction. The transaction will
 	// automatically be rolled back if the supplied inner function returns a non-nil error.
 	err = db.Update(func(tx database.Tx) error {

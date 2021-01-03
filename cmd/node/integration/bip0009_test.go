@@ -115,7 +115,10 @@ func testBIP0009(t *testing.T, forkKey string, deploymentID uint32) {
 	if err := r.SetUp(false, 0); err != nil {
 		t.Fatalf("unable to setup test chain: %v", err)
 	}
-	defer r.TearDown()
+	defer func() {
+		if err := r.TearDown(); Check(err) {
+		}
+	}()
 	// *** ThresholdDefined *** Assert the chain height is the expected value and the soft fork status starts out as
 	// defined.
 	assertChainHeight(r, t, 0)
@@ -262,7 +265,10 @@ func TestBIP0009Mining(t *testing.T) {
 	if err := r.SetUp(true, 0); err != nil {
 		t.Fatalf("unable to setup test chain: %v", err)
 	}
-	defer r.TearDown()
+	defer func() {
+		if err := r.TearDown(); Check(err) {
+		}
+	}()
 	// Assert the chain only consists of the gensis block.
 	assertChainHeight(r, t, 0)
 	// *** ThresholdDefined *** Generate a block that extends the genesis block. It should not have the test dummy bit

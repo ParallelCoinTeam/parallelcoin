@@ -211,8 +211,8 @@ func GroupKey(na *wire.NetAddress) string {
 	if IsRFC4380(na) {
 		// teredo tunnels have the last 4 bytes as the v4 address XOR 0xff.
 		ip := net.IP(make([]byte, 4))
-		for i, byte := range na.IP[12:16] {
-			ip[i] = byte ^ 0xff
+		for i, byt := range na.IP[12:16] {
+			ip[i] = byt ^ 0xff
 		}
 		return ip.Mask(net.CIDRMask(16, 32)).String()
 	}

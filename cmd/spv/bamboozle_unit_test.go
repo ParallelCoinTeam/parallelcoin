@@ -407,12 +407,18 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 	if err != nil {
 		t.Fatalf("Failed to create temporary directory: %s", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); Check(err) {
+		}
+	}()
 	db, err := walletdb.Create("bdb", tempDir+"/weks.db")
 	if err != nil {
 		t.Fatalf("DBError opening DB: %s", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); Check(err) {
+		}
+	}()
 	hdrStore, err := headerfs.NewBlockHeaderStore(
 		tempDir, db, &netparams.SimNetParams,
 	)
