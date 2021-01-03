@@ -19,9 +19,9 @@ func TestOpcodeDisabled(t *testing.T) {
 	for _, opcodeVal := range tests {
 		pop := parsedOpcode{opcode: &OpcodeArray[opcodeVal], data: nil}
 		err := opcodeDisabled(&pop, nil)
-		if !IsErrorCode(err, errDisabledOpcode) {
+		if !IsErrorCode(err, ErrDisabledOpcode) {
 			t.Errorf("opcodeDisabled: unexpected error - got %v, "+
-				"want %v", err, errDisabledOpcode)
+				"want %v", err, ErrDisabledOpcode)
 			continue
 		}
 	}
@@ -108,7 +108,7 @@ func TestOpcodeDisasm(t *testing.T) {
 			}
 		// OP_UNKNOWN#.
 		case opcodeVal >= 0xba && opcodeVal <= 0xf9 || opcodeVal == 0xfc:
-			expectedStr = "OP_UNKNOWN" + strconv.Itoa(int(opcodeVal))
+			expectedStr = "OP_UNKNOWN" + strconv.Itoa(opcodeVal)
 		}
 		pop := parsedOpcode{opcode: &OpcodeArray[opcodeVal], data: data}
 		gotStr := pop.print(true)
@@ -165,7 +165,7 @@ func TestOpcodeDisasm(t *testing.T) {
 			}
 		// OP_UNKNOWN#.
 		case opcodeVal >= 0xba && opcodeVal <= 0xf9 || opcodeVal == 0xfc:
-			expectedStr = "OP_UNKNOWN" + strconv.Itoa(int(opcodeVal))
+			expectedStr = "OP_UNKNOWN" + strconv.Itoa(opcodeVal)
 		}
 		pop := parsedOpcode{opcode: &OpcodeArray[opcodeVal], data: data}
 		gotStr := pop.print(false)
