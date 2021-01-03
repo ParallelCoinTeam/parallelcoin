@@ -79,7 +79,7 @@ func (l Lists) Swap(i, j int) {
 }
 
 func (c *Config) Config() GroupsMap {
-	schema := pod.GetConfigSchema(c.cx.Config, c.cx.ConfigMap)
+	schema := pod.GetConfigSchema(c.cx.Config)
 	tabNames := make(GroupsMap)
 	// tabs := make(p9.WidgetMap)
 	for i := range schema.Groups {

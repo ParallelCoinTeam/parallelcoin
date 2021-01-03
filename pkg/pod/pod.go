@@ -59,7 +59,8 @@ type Field struct {
 	Hooks       string   `json:"hooks"`
 }
 
-func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
+// GetConfigSchema returns a schema for a given config
+func GetConfigSchema(cfg *Config) Schema {
 	t := reflect.TypeOf(cfg)
 	t = t.Elem()
 	var levelOptions, network []string
@@ -67,9 +68,6 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 		levelOptions = append(levelOptions, i)
 	}
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
-	
-	//  groups = []string{"config", "node", "debug", "rpc", "wallet", "proxy", "policy", "mining", "tls"}
-	// var groups []string
 	rawFields := make(map[string]Fields)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
@@ -92,7 +90,6 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 			Datatype:    field.Type.String(),
 			Model:       field.Tag.Get("json"),
 			Hooks:       field.Tag.Get("hooks"),
-			// value:       cfgMap[field.Tag.Get("model")],
 		}
 		if f.Group != "" {
 			rawFields[f.Group] = append(rawFields[f.Group], f)
