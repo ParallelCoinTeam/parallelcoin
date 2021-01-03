@@ -32,6 +32,7 @@ type List struct {
 	// nextUp, nextDown Position
 	len             int
 	drag            gesture.Drag
+	recentPageClick time.Time
 	color           string
 	active          string
 	background      string
@@ -49,6 +50,7 @@ type List struct {
 	w                   ListElement
 	pageUp, pageDown    *Clickable
 	dims                DimensionList
+	cross               int
 	view, total, before int
 	top, middle, bottom int
 	lastWidth           int
@@ -91,8 +93,8 @@ func (w *Window) List() (li *List) {
 		active:          "Primary",
 		scrollWidth:     int(w.TextSize.Scale(1).V),
 		setScrollWidth:  int(w.TextSize.Scale(1).V),
-		scrollBarPad:    int(w.TextSize.Scale(0.25).V),
-		setScrollBarPad: int(w.TextSize.Scale(0.25).V),
+		scrollBarPad:    int(w.TextSize.Scale(0.5).V),
+		setScrollBarPad: int(w.TextSize.Scale(0.5).V),
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}
@@ -226,6 +228,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		li.recalculate = false
 	}
 	_, li.view = axisMainConstraint(li.axis, gtx.Constraints)
+	_, li.cross = axisCrossConstraint(li.axis, gtx.Constraints)
 	// Debugs(li.dims)
 	li.total, li.before = li.dims.GetSizes(li.position, li.axis)
 	if li.total == 0 {
@@ -267,11 +270,19 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 					),
 				).
 				Rigid(
-					li.Fill(li.background, li.Theme.Flex().
-						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-						Rigid(li.grabber(li.dims, li.scrollWidth, li.middle, li.view)).
-						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
-						Fn, l.Center).Fn,
+					li.Fill(li.background,
+						func(gtx l.Context) l.Dimensions {
+							pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
+								Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
+							li.drag.Add(gtx.Ops)
+							return li.Theme.Flex().
+								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollBarPad+li.scrollWidth, li.top, false)).
+								Rigid(li.grabber(li.dims, li.scrollWidth, li.middle,
+									li.view, gtx.Constraints.Max.X)).
+								Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollBarPad+li.scrollWidth, li.bottom, true)).
+								Fn(gtx)
+						},
+						l.Center).Fn,
 				).
 				Rigid(
 					If(li.leftSide,
@@ -299,11 +310,17 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 					),
 				).
 				Rigid(
-					li.Theme.Flex().Vertical().
-						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.top, false)).
-						Rigid(li.grabber(li.dims, li.scrollWidth, li.middle, li.view)).
-						Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollWidth, li.bottom, true)).
-						Fn,
+					func(gtx l.Context) l.Dimensions {
+						pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
+							Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
+						li.drag.Add(gtx.Ops)
+						return li.Theme.Flex().Vertical().
+							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollBarPad+li.scrollWidth, li.top, false)).
+							Rigid(li.grabber(li.dims, li.scrollBarPad+li.scrollWidth, li.middle,
+								li.view, gtx.Constraints.Max.X)).
+							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollBarPad+li.scrollWidth, li.bottom, true)).
+							Fn(gtx)
+					},
 				).
 				Rigid(
 					// If(li.leftSide,
@@ -316,9 +333,6 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		if li.leftSide {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth))
 		}
-		pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
-			Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
-		li.drag.Add(gtx.Ops)
 		container = li.Fill(li.background, containerFlex.Fn, l.Center).Fn
 	}
 	return container(gtx)
@@ -327,10 +341,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 func (li *List) embedWidget(scrollWidth int) func(l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		if li.axis == l.Horizontal {
-			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y - scrollWidth // - li.scrollBarPad
+			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y - scrollWidth - li.scrollBarPad
 			gtx.Constraints.Max.Y = gtx.Constraints.Min.Y
 		} else {
-			gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth // - li.scrollBarPad
+			gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth - li.scrollBarPad
 			gtx.Constraints.Max.X = gtx.Constraints.Min.X
 		}
 		return li.Layout(gtx, li.length, li.w)
@@ -361,13 +375,14 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 				}
 			}
 			li.position = dims.CoordinateToPosition(newPos, li.axis)
-		})).Embed(
+		}).
+			SetPress(func() { li.recentPageClick = time.Now() })).Embed(
 			li.Fill(li.background, EmptySpace(x, y), l.Center).Fn,
 		).Background(li.background).CornerRadius(0).Fn(gtx)
 	}
 }
 
-func (li *List) grabber(dims DimensionList, x, y, viewSize int) func(l.Context) l.Dimensions {
+func (li *List) grabber(dims DimensionList, x, y, viewAxis, viewCross int) func(l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		ax := gesture.Vertical
 		if li.axis == l.Horizontal {
@@ -382,38 +397,29 @@ func (li *List) grabber(dims DimensionList, x, y, viewSize int) func(l.Context) 
 			}
 		}
 		if de != nil {
-			// respond to the event
-			// if de.Type == pointer.Press || de.Type == pointer.Drag || de.Type != pointer.Release {
-			// }
-			if de.Type == pointer.Press || de.Type == pointer.Drag {
-				// li.Window.overlay = []func(gtx l.Context){
-				// 	func(gtx l.Context) {
-				// 		li.Fill("scrim", EmptyMaxWidth(), l.Center).Fn(gtx)
-				// 		li.H6(spew.Sdump(de)).Fn(gtx)
-				// 	},
-				// }
+			if de.Type == pointer.Press { // || de.Type == pointer.Drag {
 			}
 			if de.Type == pointer.Release {
-				// li.Window.overlay = li.Window.overlay[:0]
 			}
 			if de.Type == pointer.Drag {
 				// Debug("drag position", de.Position)
-				total := dims.GetTotal(gtx, li.axis)
-				var d int
-				if li.axis == l.Horizontal {
-					deltaX := int(de.Position.X)
-					d = deltaX * (total / viewSize)
-				} else {
-					deltaY := int(de.Position.Y)
-					d = deltaY * (total / viewSize)
+				if time.Now().Sub(li.recentPageClick) > time.Second/2 {
+					total := dims.GetTotal(li.axis)
+					var d int
+					if li.axis == l.Horizontal {
+						deltaX := int(de.Position.X)
+						if deltaX > 8 || deltaX < -8 {
+							d = deltaX * (total / viewAxis)
+							li.SetPosition(dims.CoordinateToPosition(d, li.axis))
+						}
+					} else {
+						deltaY := int(de.Position.Y)
+						if deltaY > 8 || deltaY < -8 {
+							d = deltaY * (total / viewAxis)
+							li.SetPosition(dims.CoordinateToPosition(d, li.axis))
+						}
+					}
 				}
-				if d < 0 {
-					d = 0
-				}
-				if d > total {
-					d = total - 1
-				}
-				li.SetPosition(dims.CoordinateToPosition(d, li.axis))
 				li.Window.Invalidate()
 			}
 			// if de.Type == pointer.Scroll {

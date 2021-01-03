@@ -7,11 +7,10 @@ import (
 
 type DimensionList []l.Dimensions
 
-func (d DimensionList) GetTotal(gtx l.Context, axis l.Axis) (total int) {
+func (d DimensionList) GetTotal(axis l.Axis) (total int) {
 	for i := range d {
 		total += axisMain(axis, d[i].Size)
 	}
-	_ = gtx.Metric
 	return total
 }
 
@@ -28,6 +27,14 @@ func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (positi
 	cursor := 0
 	if coordinate < 0 {
 		coordinate = 0
+		return
+	}
+	tot := d.GetTotal(axis)
+	if coordinate > tot {
+		position.First = len(d) - 1
+		position.Offset = axisMain(axis, d[len(d)-1].Size)
+		position.BeforeEnd = false
+		return
 	}
 	var i int
 	for i = range d {
