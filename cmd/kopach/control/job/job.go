@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"sort"
-	"sync"
 	"time"
 	
 	"github.com/p9c/pod/app/conte"
@@ -40,11 +39,12 @@ type Job struct {
 	CoinBases       map[int32]*util.Tx
 }
 
+// CoinBases is a map of coinbases for a block
 type CoinBases struct {
 	CoinBaseMap
-	sync.Mutex
 }
 
+// CoinBaseMap is the actual map in a CoinBases
 type CoinBaseMap map[int32]*util.Tx
 
 func NewCoinBases() CoinBases {
@@ -55,14 +55,10 @@ func NewCoinBases() CoinBases {
 }
 
 func (cbs *CoinBases) Load() CoinBaseMap {
-	cbs.Lock()
-	defer cbs.Unlock()
 	return cbs.CoinBaseMap
 }
 
 func (cbs *CoinBases) Store(cbm CoinBaseMap) {
-	cbs.Lock()
-	defer cbs.Unlock()
 	cbs.CoinBaseMap = cbm
 }
 
