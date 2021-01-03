@@ -76,9 +76,9 @@ func (s *Slider) Fn(gtx l.Context) l.Dimensions {
 	thumbPos := halfWidth + s.float.Pos()
 	st.Pop()
 	
-	color := s.color
+	col := s.color
 	if gtx.Queue == nil {
-		color = f32color.MulAlpha(color, 150)
+		col = f32color.MulAlpha(col, 150)
 	}
 	
 	// Draw track before thumb.
@@ -94,7 +94,7 @@ func (s *Slider) Fn(gtx l.Context) l.Dimensions {
 		},
 	}
 	clip.RRect{Rect: track}.Add(gtx.Ops)
-	paint.ColorOp{Color: color}.Add(gtx.Ops)
+	paint.ColorOp{Color: col}.Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 	st.Pop()
 	
@@ -103,7 +103,7 @@ func (s *Slider) Fn(gtx l.Context) l.Dimensions {
 	track.Min.X = thumbPos
 	track.Max.X = float32(size.X) - halfWidth
 	clip.RRect{Rect: track}.Add(gtx.Ops)
-	paint.ColorOp{Color: f32color.MulAlpha(color, 96)}.Add(gtx.Ops)
+	paint.ColorOp{Color: f32color.MulAlpha(col, 96)}.Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 	st.Pop()
 	
@@ -124,7 +124,7 @@ func (s *Slider) Fn(gtx l.Context) l.Dimensions {
 		Rect: thumb,
 		NE:   rr, NW: rr, SE: rr, SW: rr,
 	}.Add(gtx.Ops)
-	paint.ColorOp{Color: color}.Add(gtx.Ops)
+	paint.ColorOp{Color: col}.Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 	st.Pop()
 	
