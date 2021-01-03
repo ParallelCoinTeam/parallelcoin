@@ -2680,7 +2680,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	// //} else {
 	// //	consume.Kill(s.StateCfg.Miner)
 	// //}
-	return nil, nil
+	// return nil, nil
 }
 
 // HandleStop implements the stop command.

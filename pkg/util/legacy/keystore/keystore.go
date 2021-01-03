@@ -17,9 +17,9 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-
+	
 	"golang.org/x/crypto/ripemd160"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -744,17 +744,20 @@ func (s *Store) WriteIfDirty() error {
 	if err != nil {
 		Error(err)
 		s.mtx.RUnlock()
-		fi.Close()
+		if err := fi.Close(); Check(err) {
+		}
 		return err
 	}
 	err = fi.Sync()
 	if err != nil {
 		Error(err)
 		s.mtx.RUnlock()
-		fi.Close()
+		if err := fi.Close(); Check(err) {
+		}
 		return err
 	}
-	fi.Close()
+	if err := fi.Close(); Check(err) {
+	}
 	err = rename.Atomic(fiPath, s.path)
 	s.mtx.RUnlock()
 	if err == nil {
@@ -776,7 +779,10 @@ func OpenDir(dir string) (*Store, error) {
 		Error(err)
 		return nil, err
 	}
-	defer fi.Close()
+	defer func() {
+		if err := fi.Close(); Check(err) {
+		}
+	}()
 	store := new(Store)
 	_, err = store.ReadFrom(fi)
 	if err != nil {

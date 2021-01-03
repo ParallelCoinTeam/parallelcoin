@@ -9,7 +9,6 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"io/ioutil"
 	"math"
@@ -19,10 +18,12 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/btcsuite/websocket"
-
+	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -288,7 +289,7 @@ func (c *Client) handleMessage(msg []byte) {
 		c.handleNotification(in.rawNotification)
 		return
 	}
-
+	
 	// ensure that in.ID can be converted to an integer without loss of precision
 	if *in.ID < 0 || *in.ID != math.Trunc(*in.ID) {
 		Warn("malformed response: invalid identifier")
@@ -355,7 +356,7 @@ out:
 		}
 		c.handleMessage(msg)
 	}
-
+	
 	// Ensure the connection is closed.
 	c.Disconnect()
 	c.wg.Done()
@@ -598,26 +599,26 @@ func (c *Client) handleSendPostMessage(details *sendPostDetails) {
 		return
 	}
 	// Read the raw bytes and close the response.
-	respBytes, err := ioutil.ReadAll(httpResponse.Body)
-	httpResponse.Body.Close()
-	if err != nil {
-		Error(err)
+	var respBytes []byte
+	if respBytes, err = ioutil.ReadAll(httpResponse.Body); Check(err) {
+	}
+	if err := httpResponse.Body.Close(); Check(err) {
 		err = fmt.Errorf("error reading json reply: %v", err)
 		jReq.responseChan <- &response{err: err}
 		return
 	}
 	// Try to unmarshal the response as a regular JSON-RPC response.
 	var resp rawResponse
-	err = js.Unmarshal(respBytes, &resp)
-	if err != nil {
-		Error(err)
+	if err = js.Unmarshal(respBytes, &resp); Check(err) {
 		// When the response itself isn't a valid JSON-RPC response return an error which includes the HTTP status code
 		// and raw response bytes.
 		err = fmt.Errorf("status code: %d, response: %q", httpResponse.StatusCode, string(respBytes))
 		jReq.responseChan <- &response{err: err}
 		return
 	}
-	res, err := resp.result()
+	var res []byte
+	if res, err = resp.result(); Check(err) {
+	}
 	jReq.responseChan <- &response{result: res, err: err}
 }
 
@@ -815,7 +816,8 @@ func (c *Client) doDisconnect() bool {
 	Trace("disconnecting RPC client", c.config.Host)
 	c.disconnect.Q()
 	if c.wsConn != nil {
-		c.wsConn.Close()
+		if err := c.wsConn.Close(); Check(err) {
+		}
 	}
 	c.disconnected = true
 	return true
@@ -1097,15 +1099,15 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers, quit qu.C) (*Cl
 		shutdown:        qu.T(),
 	}
 	go func() {
-		out:
-			for{
-				select{
-				case <-quit:
-					client.disconnect.Q()
-					client.shutdown.Q()
-					break out
-				}
+	out:
+		for {
+			select {
+			case <-quit:
+				client.disconnect.Q()
+				client.shutdown.Q()
+				break out
 			}
+		}
 	}()
 	if start {
 		Trace("established connection to RPC server", config.Host)
@@ -1163,7 +1165,7 @@ func (c *Client) Connect(tries int) error {
 		}
 		return nil
 	}
-
+	
 	// All connection attempts failed, so return the last error.
 	return err
 }

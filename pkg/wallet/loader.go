@@ -2,12 +2,13 @@ package wallet
 
 import (
 	"errors"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/pod"
@@ -99,7 +100,8 @@ func (ld *Loader) CreateNewWallet(
 		w.Start()
 		ld.onLoaded(db)
 	} else {
-		w.db.Close()
+		if err := w.db.Close(); Check(err) {
+		}
 	}
 	return w, nil
 }
@@ -156,7 +158,7 @@ func (ld *Loader) OpenExistingWallet(
 			ObtainPrivatePass: noConsole,
 		}
 	}
-	Debug("opening wallet '"+string(pubPassphrase)+"'")
+	Debug("opening wallet '" + string(pubPassphrase) + "'")
 	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig, quit)
 	if err != nil {
 		Info("failed to open wallet", err)

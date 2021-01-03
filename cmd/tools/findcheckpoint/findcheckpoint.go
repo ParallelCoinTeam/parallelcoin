@@ -136,7 +136,10 @@ func main() {
 		Error("failed to load database:", err)
 		return
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); Check(err) {
+		}
+	}()
 	// Setup chain.  Ignore notifications since they aren't needed for this util.
 	chain, err := blockchain.New(&blockchain.Config{
 		DB:          db,

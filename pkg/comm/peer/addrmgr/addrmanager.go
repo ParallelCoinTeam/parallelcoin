@@ -7,7 +7,6 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"math/rand"
 	"net"
@@ -18,7 +17,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 )
@@ -337,7 +338,10 @@ func (a *AddrManager) savePeers() {
 		return
 	}
 	enc := json.NewEncoder(w)
-	defer w.Close()
+	defer func() {
+		if err := w.Close(); Check(err) {
+		}
+	}()
 	if err := enc.Encode(&sam); err != nil {
 		Errorf("failed to encode file %s: %v", a.PeersFile, err)
 		return
@@ -348,7 +352,7 @@ func (a *AddrManager) savePeers() {
 // and start fresh
 func (a *AddrManager) loadPeers() {
 	Trace("loading peers")
-
+	
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	err := a.deserializePeers(a.PeersFile)
@@ -379,7 +383,10 @@ func (a *AddrManager) deserializePeers(filePath string) error {
 		Error(err)
 		return fmt.Errorf("%s error opening file: %v", filePath, err)
 	}
-	defer r.Close()
+	defer func() {
+		if err := r.Close(); Check(err) {
+		}
+	}()
 	var sam serializedAddrManager
 	dec := json.NewDecoder(r)
 	err = dec.Decode(&sam)
@@ -824,7 +831,7 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	a.nNew++
 	rmkey := NetAddressKey(rmka.na)
 	Tracef("replacing %s with %s in tried", rmkey, addrKey)
-
+	
 	// We made sure there is space here just above.
 	a.addrNew[newBucket][rmkey] = rmka
 }

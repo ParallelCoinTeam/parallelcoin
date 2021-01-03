@@ -59,7 +59,10 @@ func Main(cx *conte.Xt) (err error) {
 		if e != nil {
 			Warn("failed to start up cpu profiler:", e)
 		} else {
-			defer f.Close()
+			defer func() {
+				if err := f.Close(); Check(err) {
+				}
+			}()
 			defer pprof.StopCPUProfile()
 			interrupt.AddHandler(
 				func() {
@@ -92,7 +95,10 @@ func Main(cx *conte.Xt) (err error) {
 	closeDb := func() {
 		// ensure the database is synced and closed on shutdown
 		Trace("gracefully shutting down the database")
-		db.Close()
+		func() {
+			if err := db.Close(); Check(err) {
+			}
+		}()
 	}
 	defer closeDb()
 	interrupt.AddHandler(closeDb)

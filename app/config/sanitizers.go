@@ -283,7 +283,10 @@ func GetFreePort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer l.Close()
+	defer func() {
+		if err := l.Close(); Check(err) {
+		}
+	}()
 	port = l.Addr().(*net.TCPAddr).Port
 	return port, nil
 }
@@ -468,7 +471,6 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
 				Error(err)
-				err = fmt.Errorf("%s '%s'", err.Error())
 				ip = net.ParseIP(addr)
 				if ip == nil {
 					str := err.Error() + " %s: The whitelist value of '%s' is invalid"

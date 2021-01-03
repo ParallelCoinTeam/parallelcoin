@@ -2,11 +2,12 @@ package rpctest
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"testing"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -94,7 +95,10 @@ func testConnectNode(r *Harness, t *testing.T) {
 	if err := harness.SetUp(false, 0); err != nil {
 		t.Fatalf("unable to complete rpctest setup: %v", err)
 	}
-	defer harness.TearDown()
+	defer func() {
+		if err := harness.TearDown(); Check(err) {
+		}
+	}()
 	// Establish a p2p connection from our new local harness to the main harness.
 	if err := ConnectNode(harness, r); err != nil {
 		t.Fatalf("unable to connect local to main harness: %v", err)
@@ -128,7 +132,10 @@ func testActiveHarnesses(r *Harness, t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer harness1.TearDown()
+	defer func() {
+		if err := harness1.TearDown(); Check(err) {
+		}
+	}()
 	// With the harness created above, a single harness should be detected as active.
 	numActiveHarnesses := len(ActiveHarnesses())
 	if !(numActiveHarnesses > numInitialHarnesses) {
@@ -154,7 +161,10 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	if err := harness.SetUp(false, 0); err != nil {
 		t.Fatalf("unable to complete rpctest setup: %v", err)
 	}
-	defer harness.TearDown()
+	defer func() {
+		if err := harness.TearDown(); Check(err) {
+		}
+	}()
 	nodeSlice := []*Harness{r, harness}
 	// Both mempools should be considered synced as they are empty. Therefore, this should return instantly.
 	if err := JoinNodes(nodeSlice, Mempools); err != nil {
@@ -236,7 +246,10 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	if err := harness.SetUp(false, 0); err != nil {
 		t.Fatalf("unable to complete rpctest setup: %v", err)
 	}
-	defer harness.TearDown()
+	defer func() {
+		if err := harness.TearDown(); Check(err) {
+		}
+	}()
 	nodeSlice := []*Harness{r, harness}
 	blocksSynced := qu.T()
 	go func() {
@@ -394,7 +407,10 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 	if err := harness.SetUp(true, 5); err != nil {
 		t.Fatalf("unable to complete rpctest setup: %v", err)
 	}
-	defer harness.TearDown()
+	defer func() {
+		if err := harness.TearDown(); Check(err) {
+		}
+	}()
 	// The internal wallet of this harness should now have 250 DUO.
 	expectedBalance := util.Amount(250 * util.SatoshiPerBitcoin)
 	walletBalance := harness.ConfirmedBalance()

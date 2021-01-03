@@ -104,7 +104,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, 
 	serverAddr := *cx.Config.RPCConnect
 	if wallet {
 		serverAddr = *cx.Config.WalletServer
-		fmt.Fprintln(os.Stderr, "using wallet server", serverAddr)
+		_, _ = fmt.Fprintln(os.Stderr, "using wallet server", serverAddr)
 	}
 	url := protocol + "://" + serverAddr
 	bodyReader := bytes.NewReader(marshalledJSON)

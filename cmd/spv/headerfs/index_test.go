@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-
+	
 	"github.com/p9c/pod/pkg/db/walletdb"
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
@@ -21,8 +21,10 @@ func createTestIndex() (func(), *headerIndex, error) {
 		return nil, nil, err
 	}
 	cleanUp := func() {
-		os.RemoveAll(tempDir)
-		db.Close()
+		if err := os.RemoveAll(tempDir); Check(err) {
+		}
+		if err := db.Close(); Check(err) {
+		}
 	}
 	filterDB, err := newHeaderIndex(db, Block)
 	if err != nil {

@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
+	
 	"github.com/jessevdk/go-flags"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -41,7 +41,7 @@ func main() {
 		cfg.Directory, err = os.Getwd()
 		if err != nil {
 			Error(err)
-			fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
+			_, _ = fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
 			os.Exit(1)
 		}
 	}
@@ -51,30 +51,32 @@ func main() {
 	keyFile := filepath.Join(cfg.Directory, "rpc.key")
 	if !cfg.Force {
 		if fileExists(certFile) || fileExists(keyFile) {
-			fmt.Fprintf(os.Stderr, "%v: certificate and/or key files exist; use -f to force\n", cfg.Directory)
+			_, _ = fmt.Fprintf(os.Stderr, "%v: certificate and/or key files exist; use -f to force\n", cfg.Directory)
 			os.Exit(1)
 		}
 	}
 	validUntil := time.Now().Add(time.Duration(cfg.Years) * 365 * 24 * time.Hour)
-	cert, key, err := util.NewTLSCertPair(cfg.Organization, validUntil, cfg.ExtraHosts)
+	var cert, key []byte
+	cert, key, err = util.NewTLSCertPair(cfg.Organization, validUntil, cfg.ExtraHosts)
 	if err != nil {
 		Error(err)
-		fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.
 	if err = ioutil.WriteFile(certFile, cert, 0666); err != nil {
-		fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.
 	if err = ioutil.WriteFile(caFile, cert, 0666); err != nil {
-		fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", err)
 		os.Exit(1)
 	}
 	if err = ioutil.WriteFile(keyFile, key, 0600); err != nil {
-		os.Remove(certFile)
-		fmt.Fprintf(os.Stderr, "cannot write key: %v\n", err)
+		if err := os.Remove(certFile); Check(err) {
+		}
+		_, _ = fmt.Fprintf(os.Stderr, "cannot write key: %v\n", err)
 		os.Exit(1)
 	}
 }

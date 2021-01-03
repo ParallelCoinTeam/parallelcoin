@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-
+	
 	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
@@ -591,8 +591,14 @@ func TestInterface(
 		t.Errorf("Failed to create test database (%s) %v", dbType, err)
 		return
 	}
-	defer os.Remove(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.Remove(dbPath); Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); Check(err) {
+		}
+	}()
 	// Run all of the interface tests against the database. Create a test context to pass around.
 	context := testContext{t: t, db: db}
 	// Create a namespace and test the interface for it.

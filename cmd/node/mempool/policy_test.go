@@ -187,7 +187,7 @@ func TestCheckPkScriptStandard(t *testing.T) {
 
 			t.Fatalf("TestCheckPkScriptStandard test '%s' "+
 				"failed: %v", test.name, err)
-			continue
+			// continue
 		}
 		scriptClass := txscript.GetScriptClass(script)
 		got := checkPkScriptStandard(script, scriptClass)
@@ -272,7 +272,7 @@ func TestDust(t *testing.T) {
 
 			t.Fatalf("Dust test '%s' failed: want %v got %v",
 				test.name, test.isDust, res)
-			continue
+			// continue
 		}
 	}
 }

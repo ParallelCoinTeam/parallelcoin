@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
-
+	
 	rpc "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -263,7 +263,10 @@ func genCertPair(certFile, keyFile string) error {
 		return err
 	}
 	if err = ioutil.WriteFile(keyFile, key, 0600); err != nil {
-		os.Remove(certFile)
+		defer func() {
+			if err := os.Remove(certFile); Check(err) {
+			}
+		}()
 		return err
 	}
 	return nil

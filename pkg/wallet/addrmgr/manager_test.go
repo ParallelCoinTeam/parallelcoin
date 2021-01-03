@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
+	
 	"github.com/davecgh/go-spew/spew"
-
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -1452,19 +1452,28 @@ func testWatchingOnly(tc *testContext) bool {
 		return false
 	}
 	if err := tc.db.Copy(fi); err != nil {
-		fi.Close()
+		if err := fi.Close(); waddrmgr.Check(err) {
+		}
 		tc.t.Errorf("%v", err)
 		return false
 	}
-	fi.Close()
-	defer os.Remove(woMgrName)
+	if err := fi.Close(); waddrmgr.Check(err) {
+	}
+	defer func() {
+		if err := os.Remove(woMgrName); waddrmgr.Check(err) {
+		}
+	}()
 	// Open the new database copy and get the address manager namespace.
-	db, err := walletdb.Open("bdb", woMgrName)
-	if err != nil {
+	var db walletdb.DB
+	if db, err = walletdb.Open("bdb", woMgrName); waddrmgr.Check(err) {
 		tc.t.Errorf("openDbNamespace: unexpected error: %v", err)
 		return false
 	}
-	defer db.Close()
+	
+	defer func() {
+		if err := db.Close(); waddrmgr.Check(err) {
+		}
+	}()
 	// Open the manager using the namespace and convert it to watching-only.
 	var mgr *waddrmgr.Manager
 	err = walletdb.View(db, func(tx walletdb.ReadTx) error {

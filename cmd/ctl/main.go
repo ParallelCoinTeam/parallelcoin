@@ -26,12 +26,12 @@ func Main(args []string, cx *conte.Xt) {
 	usageFlags, err := btcjson.MethodUsageFlags(method)
 	if err != nil {
 		Error(err)
-		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
+		_, _ = fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 		HelpPrint()
 		os.Exit(1)
 	}
 	if usageFlags&unusableFlags != 0 {
-		fmt.Fprintf(
+		_, _ = fmt.Fprintf(
 			os.Stderr,
 			"The '%s' command can only be used via websockets\n", method)
 		HelpPrint()
@@ -47,12 +47,12 @@ func Main(args []string, cx *conte.Xt) {
 		if arg == "-" {
 			param, err := bio.ReadString('\n')
 			if err != nil && err != io.EOF {
-				fmt.Fprintf(os.Stderr,
+				_, _ = fmt.Fprintf(os.Stderr,
 					"Failed to read data from stdin: %v\n", err)
 				os.Exit(1)
 			}
 			if err == io.EOF && len(param) == 0 {
-				fmt.Fprintln(os.Stderr, "Not enough lines provided on stdin")
+				_, _ = fmt.Fprintln(os.Stderr, "Not enough lines provided on stdin")
 				os.Exit(1)
 			}
 			param = strings.TrimRight(param, "\r\n")
@@ -110,7 +110,7 @@ func Main(args []string, cx *conte.Xt) {
 	case strings.HasPrefix(strResult, `"`):
 		var str string
 		if err := js.Unmarshal(result, &str); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to unmarshal result: %v",
+			_, _ = fmt.Fprintf(os.Stderr, "Failed to unmarshal result: %v",
 				err)
 			os.Exit(1)
 		}

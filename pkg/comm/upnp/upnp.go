@@ -69,7 +69,10 @@ func Discover() (nat NAT, err error) {
 		return
 	}
 	socket := conn.(*net.UDPConn)
-	defer socket.Close()
+	defer func() {
+		if err := socket.Close(); Check(err) {
+		}
+	}()
 	err = socket.SetDeadline(time.Now().Add(3 * time.Second))
 	if err != nil {
 		Error(err)
@@ -217,7 +220,10 @@ func getServiceURL(rootURL string) (url string, err error) {
 		Error(err)
 		return
 	}
-	defer r.Body.Close()
+	defer func() {
+		if err := r.Body.Close(); Check(err) {
+		}
+	}()
 	if r.StatusCode >= 400 {
 		err = errors.New(string(r.StatusCode))
 		return
@@ -299,7 +305,10 @@ func soapRequest(url, function, message string) (replyXML []byte, err error) {
 		return nil, err
 	}
 	if r.Body != nil {
-		defer r.Body.Close()
+		defer func() {
+			if err := r.Body.Close(); Check(err) {
+			}
+		}()
 	}
 	if r.StatusCode >= 400 {
 		// L.Stderr(function, r.StatusCode)

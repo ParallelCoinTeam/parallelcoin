@@ -10,10 +10,10 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
+	
 	"github.com/btcsuite/goleveldb/leveldb"
 	ldberrors "github.com/btcsuite/goleveldb/leveldb/errors"
-
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
@@ -149,16 +149,19 @@ func TestCornerCases(t *testing.T) {
 		t.Errorf("os.Create: unexpected error: %v", err)
 		return
 	}
-	fi.Close()
+	if err = fi.Close(); Check(err) {
+	}
 	// Ensure creating a new database fails when a file exists where a directory is needed.
 	testName := "openDB: fail due to file at target location"
 	wantErrCode := database.ErrDriverSpecific
-	idb, err := openDB(dbPath, blockDataNet, true)
+	var idb database.DB
+	if idb, err = openDB(dbPath, blockDataNet, true); Check(err) {
+	}
 	if !checkDbError(t, testName, err, wantErrCode) {
-		if err == nil {
-			idb.Close()
+		if err := idb.Close(); Check(err) {
 		}
-		_ = os.RemoveAll(dbPath)
+		if err := os.RemoveAll(dbPath); Check(err) {
+		}
 		return
 	}
 	// Remove the file and create the database to run tests against.  It should be successful this time.
@@ -168,8 +171,12 @@ func TestCornerCases(t *testing.T) {
 		t.Errorf("openDB: unexpected error: %v", err)
 		return
 	}
-	defer os.RemoveAll(dbPath)
-	defer idb.Close()
+	defer func() {
+		if err := os.RemoveAll(dbPath); Check(err) {
+		}
+		if err := idb.Close(); Check(err) {
+		}
+	}()
 	// Ensure attempting to write to a file that can't be created returns the expected error.
 	testName = "writeBlock: open file failure"
 	filePath := blockFilePath(dbPath, 0)
@@ -185,7 +192,8 @@ func TestCornerCases(t *testing.T) {
 	_ = os.RemoveAll(filePath)
 	// Close the underlying leveldb database out from under the database.
 	ldb := idb.(*db).cache.ldb
-	ldb.Close()
+	if err := ldb.Close(); Check(err) {
+	}
 	// Ensure initilization errors in the underlying database work as expected.
 	testName = "initDB: reinitialization"
 	wantErrCode = database.ErrDbNotOpen
@@ -246,7 +254,8 @@ func resetDatabase(tc *testContext) bool {
 	wc := store.writeCursor
 	wc.curFile.Lock()
 	if wc.curFile.file != nil {
-		wc.curFile.file.Close()
+		if err := wc.curFile.file.Close(); Check(err) {
+		}
 		wc.curFile.file = nil
 	}
 	wc.curFile.Unlock()
@@ -392,7 +401,8 @@ func testBlockFileErrors(tc *testContext) bool {
 	}
 	// Close the block file out from under the database.
 	store.writeCursor.curFile.Lock()
-	store.writeCursor.curFile.file.Close()
+	if err := store.writeCursor.curFile.file.Close(); Check(err) {
+	}
 	store.writeCursor.curFile.Unlock()
 	// Ensure failures in FetchBlock and FetchBlockRegion(s) since the underlying file they need to read from has been closed.
 	err = tc.db.View(func(tx database.Tx) error {

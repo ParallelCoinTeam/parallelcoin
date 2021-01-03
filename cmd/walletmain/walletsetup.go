@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
 	ec "github.com/p9c/pod/pkg/coding/elliptic"
@@ -16,7 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/util/prompt"
 	"github.com/p9c/pod/pkg/wallet"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-
+	
 	// This initializes the bdb driver
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
@@ -40,7 +40,10 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 		Error(err)
 		return err
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); Check(err) {
+		}
+	}()
 	// Create the wallet.
 	err = wallet.Create(db, pubPass, privPass, nil, activenet, time.Now())
 	if err != nil {

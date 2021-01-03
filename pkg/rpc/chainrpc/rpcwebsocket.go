@@ -10,11 +10,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"math"
 	"sync"
 	"time"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/btcsuite/websocket"
 	"golang.org/x/crypto/ripemd160"
@@ -251,7 +252,8 @@ func (s *Server) WebsocketHandler(
 			s.Config.RPCMaxWebsockets,
 			remoteAddr,
 		)
-		conn.Close()
+		if err := conn.Close(); Check(err) {
+		}
 		return
 	}
 	// Create a new websocket client to handle the new websocket connection and wait for it to shutdown.
@@ -260,7 +262,8 @@ func (s *Server) WebsocketHandler(
 	client, err := NewWebsocketClient(s, conn, remoteAddr, authenticated, isAdmin)
 	if err != nil {
 		Errorf("failed to serve client %s: %v %s", remoteAddr, err)
-		conn.Close()
+		if err := conn.Close(); Check(err) {
+		}
 		return
 	}
 	s.NtfnMgr.AddClient(client)
@@ -280,7 +283,8 @@ func (c *WSClient) Disconnect() {
 	}
 	Trace("disconnecting websocket client", c.Addr)
 	c.Quit.Q()
-	c.Conn.Close()
+	if err := c.Conn.Close(); Check(err) {
+	}
 	c.Disconnected = true
 }
 

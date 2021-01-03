@@ -9,7 +9,6 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -22,6 +21,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/btcsuite/websocket"
 	uberatomic "go.uber.org/atomic"
@@ -1153,7 +1154,8 @@ func (s *Server) Start() {
 				Debug(err)
 			}
 			Debug("chain RPC listener done for", listener.Addr())
-			listener.Close()
+			if err := listener.Close(); Check(err) {
+			}
 			s.WG.Done()
 		}(listener)
 	}
@@ -1312,8 +1314,12 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		return
 	}
 	// Read and close the JSON-RPC request body from the caller.
-	body, err := ioutil.ReadAll(r.Body)
-	r.Body.Close()
+	var err error
+	var body []byte
+	if body, err = ioutil.ReadAll(r.Body); Check(err) {
+	}
+	if err = r.Body.Close(); Check(err) {
+	}
 	if err != nil {
 		Error(err)
 		errCode := http.StatusBadRequest
@@ -1347,8 +1353,12 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		http.Error(w, strconv.Itoa(errCode)+" "+err.Error(), errCode)
 		return
 	}
-	defer conn.Close()
-	defer buf.Flush()
+	defer func() {
+		if err := conn.Close(); Check(err) {
+		}
+		if err := buf.Flush(); Check(err) {
+		}
+	}()
 	err = conn.SetReadDeadline(TimeZeroVal)
 	if err != nil {
 		Debug(err)
@@ -1965,7 +1975,8 @@ func GenCertPair(certFile, keyFile string) error {
 		return err
 	}
 	if err = ioutil.WriteFile(keyFile, key, 0600); err != nil {
-		os.Remove(certFile)
+		if err := os.Remove(certFile); Check(err) {
+		}
 		return err
 	}
 	Info("Done generating TLS certificates")

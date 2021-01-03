@@ -10,9 +10,9 @@ import (
 	"net"
 	"net/http"
 	"os"
-
+	
 	"github.com/btcsuite/go-socks/socks"
-
+	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -75,7 +75,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	serverAddr := *cx.Config.RPCConnect
 	if *cx.Config.Wallet {
 		serverAddr = *cx.Config.WalletServer
-		fmt.Fprintln(os.Stderr, "ctl: using wallet server", serverAddr)
+		_, _ = fmt.Fprintln(os.Stderr, "ctl: using wallet server", serverAddr)
 	}
 	url := protocol + "://" + serverAddr
 	bodyReader := bytes.NewReader(marshalledJSON)
@@ -101,7 +101,8 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	}
 	// Read the raw bytes and close the response.
 	respBytes, err := ioutil.ReadAll(httpResponse.Body)
-	httpResponse.Body.Close()
+	if err := httpResponse.Body.Close(); Check(err) {
+	}
 	if err != nil {
 		Error(err)
 		err = fmt.Errorf("error reading json reply: %v", err)

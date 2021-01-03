@@ -209,12 +209,13 @@ func resultTypeHelp(xT descLookupFunc, rt reflect.Type, fieldDescKey string) str
 	w.Init(&formatted, 0, 4, 1, ' ', 0)
 	for i, text := range results {
 		if i == len(results)-1 {
-			fmt.Fprintf(w, text)
+			_, _ = fmt.Fprintf(w, text)
 		} else {
-			fmt.Fprintln(w, text)
+			_, _ = fmt.Fprintln(w, text)
 		}
 	}
-	w.Flush()
+	if err := w.Flush(); Check(err) {
+	}
 	return formatted.String()
 }
 
@@ -308,9 +309,10 @@ func argHelp(xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.Value
 	w := new(tabwriter.Writer)
 	w.Init(&formatted, 0, 4, 1, ' ', 0)
 	for _, text := range args {
-		fmt.Fprintln(w, text)
+		_, _ = fmt.Fprintln(w, text)
 	}
-	w.Flush()
+	if err := w.Flush(); Check(err) {
+	}
 	return formatted.String()
 }
 

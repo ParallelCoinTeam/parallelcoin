@@ -40,7 +40,10 @@ func Main() {
 			} else {
 				Debug("tracing started")
 				defer trace.Stop()
-				defer f.Close()
+				defer func() {
+					if err := f.Close(); Check(err) {
+					}
+				}()
 				interrupt.AddHandler(
 					func() {
 						Debug("stopping trace")
@@ -59,7 +62,10 @@ func Main() {
 	if os.Getenv("POD_TRACE") == "on" {
 		Debug("stopping trace")
 		trace.Stop()
-		f.Close()
+		defer func() {
+			if err := f.Close(); Check(err) {
+			}
+		}()
 	}
 	if res != 0 {
 		Warn("quitting with error")

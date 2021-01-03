@@ -18,7 +18,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
+	
 	"golang.org/x/exp/shiny/iconvg"
 	"golang.org/x/image/math/f32"
 )
@@ -30,7 +30,7 @@ var (
 	out      = new(bytes.Buffer)
 	failures = []string{}
 	varNames = []string{}
-
+	
 	totalFiles    int
 	totalIVGBytes int
 	totalSVGBytes int
@@ -47,7 +47,7 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) < 1 {
-		fmt.Fprintf(os.Stderr, "please provide a directory to convert\n")
+		_, _ = fmt.Fprintf(os.Stderr, "please provide a directory to convert\n")
 		os.Exit(2)
 	}
 	iconsDir := args[0]
@@ -58,7 +58,7 @@ func main() {
 	if err := genDir(iconsDir); err != nil {
 		Fatal(err)
 	}
-	fmt.Fprintf(out,
+	_, _ = fmt.Fprintf(out,
 		"// In total, %d SVG bytes in %d files converted to %d IconVG bytes.\n",
 		totalSVGBytes, totalFiles, totalIVGBytes)
 	if len(failures) != 0 {
@@ -90,7 +90,7 @@ func main() {
 		b.WriteString("\n\n")
 		b.WriteString("var list = []struct{ name string; data []byte } {\n")
 		for _, v := range varNames {
-			fmt.Fprintf(b, "{%q, %s},\n", v, v)
+			_, _ = fmt.Fprintf(b, "{%q, %s},\n", v, v)
 		}
 		b.WriteString("}\n\n")
 		raw := b.Bytes()
@@ -110,16 +110,20 @@ func genDir(dirName string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-
-	infos, err := f.Readdir(-1)
+	defer func() {
+		if err := f.Close(); Check(err) {
+		}
+	}()
+	
+	var infos []os.FileInfo
+	infos, err = f.Readdir(-1)
 	if err != nil {
 		Fatal(err)
 	}
 	baseNames, fileNames, sizes := []string{}, map[string]string{}, map[string]int{}
 	for _, info := range infos {
 		name := info.Name()
-
+		
 		nameParts := strings.Split(name, "_")
 		if len(nameParts) != 3 || nameParts[0] != "ic" {
 			continue
@@ -140,7 +144,7 @@ func genDir(dirName string) error {
 			baseNames = append(baseNames, baseName)
 		}
 	}
-
+	
 	sort.Strings(baseNames)
 	for _, baseName := range baseNames {
 		fileName := fileNames[baseName]
@@ -178,7 +182,7 @@ type Path struct {
 	Fill        string   `xml:"fill,attr"`
 	FillOpacity *float32 `xml:"fill-opacity,attr"`
 	Opacity     *float32 `xml:"opacity,attr"`
-
+	
 	creg uint8
 }
 
@@ -193,15 +197,17 @@ func genFile(svgData []byte, baseName string, outSize float32) error {
 	for _, s := range strings.Split(baseName, "_") {
 		varName += upperCase(s)
 	}
-	fmt.Fprintf(out, "var %s = []byte{", varName)
-	defer fmt.Fprintf(out, "\n}\n\n")
+	_, _ = fmt.Fprintf(out, "var %s = []byte{", varName)
+	defer func() {
+		_, _ = fmt.Fprintf(out, "\n}\n\n")
+	}()
 	varNames = append(varNames, varName)
-
+	
 	g := &SVG{}
 	if err := xml.Unmarshal(svgData, g); err != nil {
 		return err
 	}
-
+	
 	var vbx, vby, vbx2, vby2 float32
 	for i, v := range strings.Split(g.ViewBox, " ") {
 		f, err := strconv.ParseFloat(v, 32)
@@ -257,29 +263,29 @@ func genFile(svgData []byte, baseName string, outSize float32) error {
 		},
 		Palette: palette,
 	})
-
+	
 	offset := f32.Vec2{
 		vbx * outSize / size,
 		vby * outSize / size,
 	}
-
+	
 	// adjs maps from opacity to a cReg adj value.
 	adjs := map[float32]uint8{}
-
+	
 	for _, p := range g.Paths {
 		if err := genPath(&enc, p, adjs, outSize, size, offset, g.Circles); err != nil {
 			return err
 		}
 		g.Circles = nil
 	}
-
+	
 	if len(g.Circles) != 0 {
 		if err := genPath(&enc, &Path{}, adjs, outSize, size, offset, g.Circles); err != nil {
 			return err
 		}
 		g.Circles = nil
 	}
-
+	
 	ivgData, err := enc.Bytes()
 	if err != nil {
 		return fmt.Errorf("iconvg encoding failed: %v", err)
@@ -288,9 +294,9 @@ func genFile(svgData []byte, baseName string, outSize float32) error {
 		if i&0x0f == 0x00 {
 			out.WriteByte('\n')
 		}
-		fmt.Fprintf(out, "%#02x, ", x)
+		_, _ = fmt.Fprintf(out, "%#02x, ", x)
 	}
-
+	
 	totalFiles++
 	totalSVGBytes += len(svgData)
 	totalIVGBytes += len(ivgData)
@@ -342,7 +348,7 @@ func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, outSize, size
 	} else {
 		enc.SetCReg(adj, false, iconvg.PaletteIndexColor(p.creg))
 	}
-
+	
 	needStartPath := true
 	if p.D != "" {
 		needStartPath = false
@@ -350,7 +356,7 @@ func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, outSize, size
 			return err
 		}
 	}
-
+	
 	for _, c := range circles {
 		// Normalize.
 		cx := c.Cx * outSize / size
@@ -358,21 +364,21 @@ func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, outSize, size
 		cy := c.Cy * outSize / size
 		cy -= outSize/2 + offset[1]
 		r := c.R * outSize / size
-
+		
 		if needStartPath {
 			needStartPath = false
 			enc.StartPath(adj, cx-r, cy)
 		} else {
 			enc.ClosePathAbsMoveTo(cx-r, cy)
 		}
-
+		
 		// Convert a circle to two relative arcTo ops, each of 180 degrees.
 		// We can't use one 360 degree arcTo as the start and end point
 		// would be coincident and the computation is degenerate.
 		enc.RelArcTo(r, r, 0, false, true, +2*r, 0)
 		enc.RelArcTo(r, r, 0, false, true, -2*r, 0)
 	}
-
+	
 	enc.ClosePathEndPath()
 	return nil
 }
@@ -382,7 +388,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 		pathData = pathData[:len(pathData)-1]
 	}
 	r := strings.NewReader(pathData)
-
+	
 	var args [7]float32
 	op, relative, started := byte(0), false, false
 	var count int
@@ -395,7 +401,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 			return err
 		}
 		count++
-
+		
 		switch {
 		case b == ' ' || b == '\n' || b == '\t':
 			continue
@@ -404,9 +410,10 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 		case 'a' <= b && b <= 'z':
 			op, relative = b, true
 		default:
-			r.UnreadByte()
+			if err := r.UnreadByte(); Check(err) {
+			}
 		}
-
+		
 		n := 0
 		switch op {
 		case 'A', 'a':
@@ -425,10 +432,10 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 		default:
 			return fmt.Errorf("unknown opcode %c\n", b)
 		}
-
+		
 		scan(&args, r, n)
 		normalize(&args, n, op, outSize, size, offset, relative)
-
+		
 		switch op {
 		case 'A':
 			enc.AbsArcTo(args[0], args[1], args[2], args[3] != 0, args[4] != 0, args[5], args[6])
@@ -480,11 +487,12 @@ func scan(args *[7]float32, r *strings.Reader, n int) {
 	for i := 0; i < n; i++ {
 		for {
 			if b, _ := r.ReadByte(); b != ' ' && b != ',' && b != '\n' && b != '\t' {
-				r.UnreadByte()
+				if err := r.UnreadByte(); Check(err) {
+				}
 				break
 			}
 		}
-		fmt.Fscanf(r, "%f", &args[i])
+		_, _ = fmt.Fscanf(r, "%f", &args[i])
 	}
 }
 

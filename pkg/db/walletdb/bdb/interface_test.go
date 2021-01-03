@@ -8,7 +8,8 @@ package bdb_test
 import (
 	"os"
 	"testing"
-
+	
+	"github.com/p9c/pod/pkg/db/walletdb/bdb"
 	walletdbtest "github.com/p9c/pod/pkg/db/walletdb/ci"
 )
 
@@ -16,6 +17,9 @@ import (
 func TestInterface(t *testing.T) {
 
 	dbPath := "interfacetest.db"
-	defer os.RemoveAll(dbPath)
+	defer func() {
+		if err := os.RemoveAll(dbPath); bdb.Check(err) {
+		}
+	}()
 	walletdbtest.TestInterface(t, dbType, dbPath)
 }

@@ -17,11 +17,9 @@ require (
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
-	//github.com/gioapp/gel v0.0.0-20201002070804-a38b199dc376
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
-	github.com/kofoworola/godate v1.2.1
 	github.com/kr/text v0.2.0 // indirect
 	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect

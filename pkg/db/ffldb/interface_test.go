@@ -10,7 +10,6 @@ import (
 	"compress/bzip2"
 	"encoding/binary"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"os"
 	"path/filepath"
@@ -18,7 +17,10 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
-
+	
+	"github.com/p9c/pod/pkg/db/walletdb/bdb"
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -733,10 +735,12 @@ func testManagedTxPanics(tc *testContext) bool {
 	}
 	// Ensure calling Commit on a managed read-only transaction panics.
 	paniced := testPanic(func() {
-		tc.db.View(func(tx database.Tx) error {
-			tx.Commit()
+		if err := tc.db.View(func(tx database.Tx) error {
+			if err := tx.Commit(); bdb.Check(err) {
+			}
 			return nil
-		})
+		}); bdb.Check(err) {
+		}
 	})
 	if !paniced {
 		tc.t.Error("Commit called inside View did not panic")
@@ -744,10 +748,12 @@ func testManagedTxPanics(tc *testContext) bool {
 	}
 	// Ensure calling Rollback on a managed read-only transaction panics.
 	paniced = testPanic(func() {
-		tc.db.View(func(tx database.Tx) error {
-			tx.Rollback()
+		if err := tc.db.View(func(tx database.Tx) error {
+			if err := tx.Rollback(); bdb.Check(err) {
+			}
 			return nil
-		})
+		}); bdb.Check(err) {
+		}
 	})
 	if !paniced {
 		tc.t.Error("Rollback called inside View did not panic")
@@ -755,22 +761,30 @@ func testManagedTxPanics(tc *testContext) bool {
 	}
 	// Ensure calling Commit on a managed read-write transaction panics.
 	paniced = testPanic(func() {
-		tc.db.Update(func(tx database.Tx) error {
-			tx.Commit()
+		if err := tc.db.Update(func(tx database.Tx) error {
+			func() {
+				if err := tx.Commit(); bdb.Check(err) {
+				}
+			}()
 			return nil
-		})
+		}); bdb.Check(err) {
+		}
 	})
 	if !paniced {
 		tc.t.Error("Commit called inside Update did not panic")
 		return false
 	}
 	// Ensure calling Rollback on a managed read-write transaction panics.
-	paniced = testPanic(func() {
-		tc.db.Update(func(tx database.Tx) error {
-			tx.Rollback()
-			return nil
-		})
-	})
+	paniced = testPanic(
+		func() {
+			if err := tc.db.Update(func(tx database.Tx) error {
+				if err := tx.Rollback(); bdb.Check(err) {
+				}
+				return nil
+			}); bdb.Check(err) {
+			}
+		},
+	)
 	if !paniced {
 		tc.t.Error("Rollback called inside Update did not panic")
 		return false

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
+	
 	"github.com/jessevdk/go-flags"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	"github.com/p9c/pod/pkg/db/walletdb"
@@ -100,7 +100,11 @@ func mainInt() int {
 		fmt.Println("failed to open database:", err)
 		return 1
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
 	fmt.Println("dropping wtxmgr namespace")
 	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 		err := tx.DeleteTopLevelBucket(wtxmgrNamespace)

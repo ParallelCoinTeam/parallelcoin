@@ -11,9 +11,9 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
+	
 	"github.com/davecgh/go-spew/spew"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -36,8 +36,10 @@ func createTestBlockHeaderStore() (func(), walletdb.DB, string,
 		return nil, nil, "", nil, err
 	}
 	cleanUp := func() {
-		os.RemoveAll(tempDir)
-		db.Close()
+		if err := os.RemoveAll(tempDir); Check(err) {
+		}
+		if err := db.Close(); Check(err) {
+		}
 	}
 	return cleanUp, db, tempDir, hStore.(*blockHeaderStore), nil
 }
@@ -207,8 +209,10 @@ func createTestFilterHeaderStore() (func(), walletdb.DB, string,
 		return nil, nil, "", nil, err
 	}
 	cleanUp := func() {
-		os.RemoveAll(tempDir)
-		db.Close()
+		if err := os.RemoveAll(tempDir); Check(err) {
+		}
+		if err := db.Close(); Check(err) {
+		}
 	}
 	return cleanUp, db, tempDir, hStore, nil
 }

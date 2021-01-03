@@ -56,7 +56,8 @@ func (w *Window) Input(txt, hint, borderColorFocused, borderColorUnfocused,
 		p.editor.Focus()
 	}
 	copyClickableFn := func() {
-		go clipboard.WriteAll(p.editor.Text())
+		if err := clipboard.WriteAll(p.editor.Text()); Check(err) {
+		}
 		p.editor.Focus()
 	}
 	pasteClickableFn := func() {

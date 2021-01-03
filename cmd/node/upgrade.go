@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/db/blockdb"
@@ -17,7 +17,10 @@ func dirEmpty(dirPath string) (bool, error) {
 		Error(err)
 		return false, err
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); Check(err) {
+		}
+	}()
 	// Read the names of a max of one entry from the directory. When the directory is empty, an io.EOF error will be
 	// returned, so allow it.
 	names, err := f.Readdirnames(1)

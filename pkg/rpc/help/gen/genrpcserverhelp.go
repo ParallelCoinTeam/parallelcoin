@@ -68,7 +68,10 @@ func writeUsage() {
 	writefln("var requestUsages = %q", usages)
 }
 func main() {
-	defer outputFile.Close()
+	defer func() {
+		if err := outputFile.Close(); Check(err) {
+		}
+	}()
 	packageName := "main"
 	if len(os.Args) > 1 {
 		packageName = os.Args[1]

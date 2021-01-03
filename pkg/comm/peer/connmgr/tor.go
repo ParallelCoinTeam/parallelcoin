@@ -45,7 +45,10 @@ func TorLookupIP(host, proxy string) ([]net.IP, error) {
 		Error(err)
 		return nil, err
 	}
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); Check(err) {
+		}
+	}()
 	buf := []byte{'\x05', '\x01', '\x00'}
 	_, err = conn.Write(buf)
 	if err != nil {

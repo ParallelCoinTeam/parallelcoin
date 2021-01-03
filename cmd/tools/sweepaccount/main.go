@@ -4,14 +4,15 @@ package main
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/crypto/ssh/terminal"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -32,8 +33,10 @@ var (
 
 func fatalf(
 	format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, format, args...)
-	os.Stderr.Write(newlineBytes)
+	if _, err := fmt.Fprintf(os.Stderr, format, args...); Check(err) {
+	}
+	if _, err := os.Stderr.Write(newlineBytes); Check(err) {
+	}
 	os.Exit(1)
 }
 func errContext(
@@ -259,8 +262,10 @@ func sweep() error {
 	var totalSwept util.Amount
 	var numErrors int
 	var reportError = func(format string, args ...interface{}) {
-		fmt.Fprintf(os.Stderr, format, args...)
-		os.Stderr.Write(newlineBytes)
+		if _, err := fmt.Fprintf(os.Stderr, format, args...); Check(err) {
+		}
+		if _, err := os.Stderr.Write(newlineBytes); Check(err) {
+		}
 		numErrors++
 	}
 	for _, previousOutputs := range sourceOutputs {

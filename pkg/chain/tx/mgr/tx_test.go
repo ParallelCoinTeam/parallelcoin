@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -51,7 +51,8 @@ func testDB() (walletdb.DB, func(), error) {
 	}
 	db, err := walletdb.Create("bdb", filepath.Join(tmpDir, "db"))
 	return db, func() {
-		os.RemoveAll(tmpDir)
+		if err := os.RemoveAll(tmpDir); Check(err) {
+		}
 	}, err
 }
 
@@ -65,12 +66,15 @@ func testStore() (*Store, walletdb.DB, func(), error) {
 	}
 	db, err := walletdb.Create("bdb", filepath.Join(tmpDir, "db"))
 	if err != nil {
-		os.RemoveAll(tmpDir)
+		if err := os.RemoveAll(tmpDir); Check(err) {
+		}
 		return nil, nil, nil, err
 	}
 	teardown := func() {
-		db.Close()
-		os.RemoveAll(tmpDir)
+		if err := db.Close(); Check(err) {
+		}
+		if err := os.RemoveAll(tmpDir); Check(err) {
+		}
 	}
 	var s *Store
 	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
