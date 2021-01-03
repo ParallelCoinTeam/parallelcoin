@@ -637,30 +637,30 @@ func TestGenerateHelpErrors(t *testing.T) {
 		name        string
 		method      string
 		resultTypes []interface{}
-		err         btcjson.BTCJSONError
+		err         btcjson.Error
 	}{
 		{
 			name:   "unregistered command",
 			method: "boguscommand",
-			err:    btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnregisteredMethod},
+			err:    btcjson.Error{ErrorCode: btcjson.ErrUnregisteredMethod},
 		},
 		{
 			name:        "non-pointer result type",
 			method:      "help",
 			resultTypes: []interface{}{0},
-			err:         btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
+			err:         btcjson.Error{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name:        "invalid result type",
 			method:      "help",
 			resultTypes: []interface{}{(*complex64)(nil)},
-			err:         btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
+			err:         btcjson.Error{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name:        "missing description",
 			method:      "help",
 			resultTypes: []interface{}{(*string)(nil), nil},
-			err:         btcjson.BTCJSONError{ErrorCode: btcjson.ErrMissingDescription},
+			err:         btcjson.Error{ErrorCode: btcjson.ErrMissingDescription},
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
@@ -672,7 +672,7 @@ func TestGenerateHelpErrors(t *testing.T) {
 				"want %T", i, test.name, err, err, test.err)
 			continue
 		}
-		gotErrorCode := err.(btcjson.BTCJSONError).ErrorCode
+		gotErrorCode := err.(btcjson.Error).ErrorCode
 		if gotErrorCode != test.err.ErrorCode {
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,

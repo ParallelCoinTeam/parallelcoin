@@ -2,11 +2,12 @@ package walletmain
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io/ioutil"
 	// This enables pprof
 	// _ "net/http/pprof"
 	"sync"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/chain/config/netparams"

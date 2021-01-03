@@ -2,15 +2,16 @@ package peer_test
 
 import (
 	"errors"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"net"
 	"strconv"
 	"testing"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/btcsuite/go-socks/socks"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"

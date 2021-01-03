@@ -3,14 +3,15 @@ package chain
 import (
 	"bytes"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/tstranex/gozmq"
-
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

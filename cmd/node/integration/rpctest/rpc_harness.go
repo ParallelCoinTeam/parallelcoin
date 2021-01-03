@@ -2,7 +2,6 @@ package rpctest
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io/ioutil"
 	"net"
 	"os"
@@ -11,7 +10,9 @@ import (
 	"sync"
 	"testing"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"

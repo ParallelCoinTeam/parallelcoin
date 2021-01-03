@@ -2,10 +2,11 @@ package peer_test
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"

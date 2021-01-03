@@ -4,11 +4,12 @@
 package chainrpc
 
 import (
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"net/rpc"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

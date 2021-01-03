@@ -6,12 +6,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"math/big"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/p9c/pod/pkg/util/logi"
 	
@@ -2607,7 +2608,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	//	var h string
 	//	h, err = s.HelpCacher.RPCMethodHelp("setgenerate")
 	//	if err != nil {
-	//		msg = err.Error() + "\n\n"
+	//		msg = err.Errorln() + "\n\n"
 	//	}
 	//	msg += h
 	//	return nil, &btcjson.RPCError{

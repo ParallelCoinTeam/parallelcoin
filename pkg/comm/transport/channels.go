@@ -5,12 +5,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"runtime"
 	"strings"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/coding/fec"
 	"github.com/p9c/pod/pkg/coding/gcm"
 	"github.com/p9c/pod/pkg/comm/multicast"

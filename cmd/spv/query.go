@@ -2,13 +2,14 @@ package spv
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/davecgh/go-spew/spew"
-
+	
 	"github.com/p9c/pod/cmd/spv/cache"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	blockchain "github.com/p9c/pod/pkg/chain"

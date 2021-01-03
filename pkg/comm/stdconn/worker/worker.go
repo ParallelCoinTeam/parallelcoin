@@ -1,12 +1,13 @@
 package worker
 
 import (
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"os"
 	"os/exec"
 	"runtime"
 	"syscall"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/p9c/pod/pkg/comm/stdconn"
 )

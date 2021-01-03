@@ -3,10 +3,11 @@ package chain
 import (
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	sac "github.com/p9c/pod/cmd/spv"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

@@ -11,26 +11,28 @@ Although this package was primarily written for pod, it has intentionally been d
 
 ```Go
 package main
+
 import (
-"flag"
-"fmt"
-"github.com/p9c/pod/pkg/chain/config/netparams"
-"log"
-
-
-
-
-"github.com/p9c/pod/pkg/chain/config"
-"git.parallelcoin.io/util"
+	"flag"
+	"fmt"
+	"log"
+	
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	
+	"git.parallelcoin.io/util"
+	"github.com/p9c/pod/pkg/chain/config"
 )
+
 var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
+
 // By default (without -testnet), use mainnet.
 var chainParams = &netparams.MainNetParams
-func main(	) {
+
+func main() {
 	flag.Parse()
 	// Modify active network parameters if operating on testnet.
 	if *testnet {
-        chainParams = &netparams.TestNet3Params 
+		chainParams = &netparams.TestNet3Params
 	}
 	// later...
 	// Create and print new payment address, specific to the active network.

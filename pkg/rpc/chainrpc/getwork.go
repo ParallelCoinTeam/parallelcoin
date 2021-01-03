@@ -5,13 +5,14 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"math/big"
 	"math/rand"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/conformal/fastsha256"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

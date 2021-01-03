@@ -2,11 +2,12 @@ package stdconn
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"net"
 	"runtime"
 	"time"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
 type StdConn struct {

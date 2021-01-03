@@ -1,11 +1,12 @@
 package legacy
 
 import (
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
 func TestThrottle(t *testing.T) {

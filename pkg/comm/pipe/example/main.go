@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"time"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/p9c/pod/pkg/comm/pipe"
 )

@@ -5,11 +5,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"

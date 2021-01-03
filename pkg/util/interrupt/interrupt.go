@@ -2,15 +2,15 @@ package interrupt
 
 import (
 	"fmt"
-	
-	uberatomic "go.uber.org/atomic"
-	
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"os"
 	"os/exec"
 	"os/signal"
 	"runtime"
 	"syscall"
+	
+	uberatomic "go.uber.org/atomic"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/kardianos/osext"
 )

@@ -7,8 +7,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/util/interrupt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
 	"net"
 	"os"
@@ -20,6 +18,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	
+	"github.com/p9c/pod/pkg/util/interrupt"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	uberatomic "go.uber.org/atomic"
 	

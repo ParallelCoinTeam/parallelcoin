@@ -1,11 +1,12 @@
 package main
 
 import (
+	"os"
+	"time"
+	
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 	qu "github.com/p9c/pod/pkg/util/quit"
-	"os"
-	"time"
 )
 
 func main() {

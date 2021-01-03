@@ -3,12 +3,13 @@ package worker
 import (
 	"crypto/cipher"
 	"errors"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"math/rand"
 	"net"
 	"os"
 	"sync"
 	"time"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/sol"

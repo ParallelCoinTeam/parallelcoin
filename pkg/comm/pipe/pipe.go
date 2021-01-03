@@ -1,13 +1,14 @@
 package pipe
 
 import (
+	"io"
+	"os"
+	
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	qu "github.com/p9c/pod/pkg/util/quit"
-	"io"
-	"os"
 )
 
 func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Worker {

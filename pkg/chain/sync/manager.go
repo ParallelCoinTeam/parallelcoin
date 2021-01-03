@@ -3,12 +3,13 @@ package netsync
 import (
 	"container/list"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/cmd/node/mempool"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"

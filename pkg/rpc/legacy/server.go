@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	js "encoding/json"
 	"errors"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"io"
 	"io/ioutil"
 	"net"
@@ -14,9 +13,11 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/btcsuite/websocket"
-
+	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"

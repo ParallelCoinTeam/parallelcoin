@@ -50,22 +50,22 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
+	
 	log "github.com/p9c/pod/pkg/logi"
-"path/filepath"
-
+	
 	pb "git.parallelcoin.io/mod/rpc/walletrpc"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-
+	
 	"github.com/btcsuite/btcutil"
 )
 
 var certificateFile = filepath.Join(btcutil.AppDataDir("mod", false), "rpc.cert")
 
-func main(	) {
-
-
+func main() {
+	
 	creds, err := credentials.NewClientTLSFromFile(certificateFile, "localhost")
 	if err != nil {
 		L.Error(err)
@@ -78,7 +78,7 @@ func main(	) {
 	}
 	defer conn.Close()
 	c := pb.NewWalletServiceClient(conn)
-
+	
 	balanceRequest := &pb.BalanceRequest{
 		AccountNumber:         0,
 		RequiredConfirmations: 1,
@@ -88,9 +88,9 @@ func main(	) {
 		L.Error(err)
 		return
 	}
-
+	
 	log.Println("Spendable balance: ", btcutil.Amount(balanceResponse
-.Spendable))
+	.Spendable))
 }
 ```
 

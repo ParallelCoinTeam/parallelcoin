@@ -2,12 +2,13 @@ package spv
 
 import (
 	"errors"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"

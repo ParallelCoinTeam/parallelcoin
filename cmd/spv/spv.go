@@ -3,13 +3,14 @@ package spv
 import (
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	"github.com/p9c/pod/cmd/spv/headerfs"
