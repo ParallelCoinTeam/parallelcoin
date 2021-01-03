@@ -45,18 +45,18 @@ func (f Fields) Swap(i, j int) {
 }
 
 type Field struct {
-	Group       string   `json:"group"`
-	Type        string   `json:"type"`
-	Label       string   `json:"label"`
-	Slug        string   `json:"slug"`
-	Description string   `json:"help"`
-	Widget      string   `json:"inputType"`
-	Featured    string   `json:"featured"`
-	Model       string   `json:"model"`
 	Datatype    string   `json:"datatype"`
+	Description string   `json:"help"`
+	Featured    string   `json:"featured"`
+	Group       string   `json:"group"`
+	Hooks       string   `json:"hooks"`
+	Label       string   `json:"label"`
+	Model       string   `json:"model"`
 	Options     []string `json:"options"`
 	Restart     string   `json:"restart"`
-	Hooks       string   `json:"hooks"`
+	Slug        string   `json:"slug"`
+	Type        string   `json:"type"`
+	Widget      string   `json:"inputType"`
 }
 
 // GetConfigSchema returns a schema for a given config
@@ -79,17 +79,17 @@ func GetConfigSchema(cfg *Config) Schema {
 			options = network
 		}
 		f := Field{
-			Slug:        field.Name,
-			Group:       field.Tag.Get("group"),
-			Type:        field.Tag.Get("type"),
-			Label:       field.Tag.Get("label"),
-			Description: field.Tag.Get("description"),
-			Widget:      field.Tag.Get("widget"),
-			Featured:    field.Tag.Get("featured"),
-			Options:     options,
 			Datatype:    field.Type.String(),
-			Model:       field.Tag.Get("json"),
+			Description: field.Tag.Get("description"),
+			Featured:    field.Tag.Get("featured"),
+			Group:       field.Tag.Get("group"),
 			Hooks:       field.Tag.Get("hooks"),
+			Label:       field.Tag.Get("label"),
+			Model:       field.Tag.Get("json"),
+			Options:     options,
+			Slug:        field.Name,
+			Type:        field.Tag.Get("type"),
+			Widget:      field.Tag.Get("widget"),
 		}
 		if f.Group != "" {
 			rawFields[f.Group] = append(rawFields[f.Group], f)
