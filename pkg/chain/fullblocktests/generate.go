@@ -1232,9 +1232,9 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		// Create a final tx that includes a non-pay-to-script-hash output with the number of signature operations
 		// needed to push the block to exactly the max allowed.
 		fill := maxBlockSigOps - (txnsNeeded * redeemScriptSigOps)
-		if fill == 0 {
-			return
-		}
+		// if fill == 0 {
+		// 	return
+		// }
 		finalTx := b.Transactions[len(b.Transactions)-1]
 		tx := createSpendTxForTx(finalTx, lowFee)
 		tx.TxOut[0].PkScript = repeatOpcode(txscript.OP_CHECKSIG, fill)
