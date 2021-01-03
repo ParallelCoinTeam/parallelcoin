@@ -25,7 +25,7 @@ func HexNRGB(s string) (c color.NRGBA) {
 }
 
 // GetNRGBAFromName returns the named color from the map
-func (c Colors) GetNRGBAFromName(co string) color.NRGBA {
+func (c *Colors) GetNRGBAFromName(co string) color.NRGBA {
 	c.Lock()
 	defer c.Unlock()
 	if col, ok := c.m[co]; ok {
@@ -34,8 +34,9 @@ func (c Colors) GetNRGBAFromName(co string) color.NRGBA {
 	return color.NRGBA{}
 }
 
-// NewColors creates the base palette for the theme
-func NewColors() (c Colors) {
+// newColors creates the base palette for the theme
+func newColors() (c *Colors) {
+	c = new(Colors)
 	c.Lock()
 	defer c.Unlock()
 	c.m = map[string]string{
@@ -167,7 +168,8 @@ func NewColors() (c Colors) {
 	return c
 }
 
-func (c Colors) SetTheme(dark bool) {
+// SetTheme to dark or light
+func (c *Colors) SetTheme(dark bool) {
 	c.Lock()
 	defer c.Unlock()
 	if !dark {

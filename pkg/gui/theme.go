@@ -12,7 +12,7 @@ type Theme struct {
 	shaper     text.Shaper
 	collection Collection
 	TextSize   unit.Value
-	Colors
+	*Colors
 	icons         map[string]*Icon
 	scrollBarSize int
 	Dark          *bool
@@ -27,7 +27,7 @@ func NewTheme(fontCollection []text.FontFace, quit qu.C) (th *Theme) {
 		shaper:        text.NewCache(fontCollection),
 		collection:    fontCollection,
 		TextSize:      unit.Sp(16),
-		Colors:        NewColors(),
+		Colors:        newColors(),
 		scrollBarSize: 0,
 		iconCache:     make(IconCache),
 	}
