@@ -209,7 +209,7 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) err
 					err)
 				continue
 			}
-			wif, err := util.NewWIF((*ec.PrivateKey)(privKey),
+			wif, err := util.NewWIF(privKey,
 				netParams, addr.Compressed())
 			if err != nil {
 				Warn("Failed to create wallet "+

@@ -192,25 +192,25 @@ func TestAssignFieldErrors(t *testing.T) {
 		{
 			name: "general incompatible int -> string",
 			dest: string(rune(0)),
-			src:  int(0),
+			src:  0,
 			err:  btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name: "overflow source int -> dest int",
 			dest: int8(0),
-			src:  int(128),
+			src:  128,
 			err:  btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name: "overflow source int -> dest uint",
 			dest: uint8(0),
-			src:  int(256),
+			src:  256,
 			err:  btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name: "int -> float",
 			dest: float32(0),
-			src:  int(256),
+			src:  256,
 			err:  btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
@@ -239,7 +239,7 @@ func TestAssignFieldErrors(t *testing.T) {
 		},
 		{
 			name: "float -> int",
-			dest: int(0),
+			dest: 0,
 			src:  float32(1.0),
 			err:  btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType},
 		},

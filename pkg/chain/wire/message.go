@@ -232,7 +232,7 @@ func WriteMessageWithEncodingN(w io.Writer, msg Message, pver uint32,
 			cmd, CommandSize)
 		return totalBytes, messageError("WriteMessage", str)
 	}
-	copy(command[:], []byte(cmd))
+	copy(command[:], cmd)
 	// Encode the message payload.
 	var bw bytes.Buffer
 	err := msg.BtcEncode(&bw, pver, encoding)

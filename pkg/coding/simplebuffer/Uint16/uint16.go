@@ -52,7 +52,7 @@ func GetPort(listener string) simplebuffer.Serializer {
 	// Debug(listener)
 	oI := GetActualPort(listener)
 	port := &Uint16{}
-	port.Put(uint16(oI))
+	port.Put(oI)
 	return port
 }
 

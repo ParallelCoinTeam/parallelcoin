@@ -649,7 +649,7 @@ func TestImportPrivateKey(t *testing.T) {
 		return
 	}
 	// import priv key
-	wif, err := util.NewWIF((*ec.PrivateKey)(pk), tstNetParams, false)
+	wif, err := util.NewWIF(pk, tstNetParams, false)
 	if err != nil {
 		t.Fatal(err)
 	}

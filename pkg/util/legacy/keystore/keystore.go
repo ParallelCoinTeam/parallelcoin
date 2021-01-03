@@ -527,7 +527,7 @@ func New(dir string, desc string, passphrase []byte, net *netparams.Params,
 		missingKeysStart: rootKeyChainIdx,
 		secret:           aeskey,
 	}
-	copy(s.desc[:], []byte(desc))
+	copy(s.desc[:], desc)
 	// Create new root address from key and chaincode.
 	root, err := newRootBtcAddress(s, rootkey, nil, chaincode,
 		createdAt)
@@ -2310,7 +2310,7 @@ func (a *btcAddress) ExportPrivKey() (*util.WIF, error) {
 	}
 	// NewWIF only errors if the network is nil. In this case, panic, as our program's assumptions are so broken that
 	// this needs to be caught immediately, and a stack trace here is more useful than elsewhere.
-	wif, err := util.NewWIF((*ec.PrivateKey)(pk), a.store.netParams(),
+	wif, err := util.NewWIF(pk, a.store.netParams(),
 		a.Compressed())
 	if err != nil {
 		Error(err)

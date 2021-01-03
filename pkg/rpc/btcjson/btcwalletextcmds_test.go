@@ -15,7 +15,7 @@ import (
 // default assigned on unmarshalled commands.
 func TestBtcWalletExtCmds(t *testing.T) {
 	t.Parallel()
-	testID := int(1)
+	testID := 1
 	tests := []struct {
 		name         string
 		newCmd       func() (interface{}, error)

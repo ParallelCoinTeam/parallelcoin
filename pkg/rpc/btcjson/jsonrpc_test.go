@@ -16,7 +16,7 @@ func TestIsValidIDType(t *testing.T) {
 		id      interface{}
 		isValid bool
 	}{
-		{"int", int(1), true},
+		{"int", 1, true},
 		{"int8", int8(1), true},
 		{"int16", int16(1), true},
 		{"int32", int32(1), true},

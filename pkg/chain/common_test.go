@@ -317,8 +317,8 @@ func newFakeChain(params *netparams.Params) *BlockChain {
 	node := NewBlockNode(&params.GenesisBlock.Header, nil)
 	index := newBlockIndex(nil, params)
 	index.AddNode(node)
-	targetTimespan := int64(params.TargetTimespan)
-	targetTimePerBlock := int64(params.TargetTimePerBlock)
+	targetTimespan := params.TargetTimespan
+	targetTimePerBlock := params.TargetTimePerBlock
 	adjustmentFactor := params.RetargetAdjustmentFactor
 	return &BlockChain{
 		params:              params,

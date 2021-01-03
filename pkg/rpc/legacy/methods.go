@@ -420,7 +420,7 @@ func MakeResponse(id, result interface{}, err error) btcjson.Response {
 	}
 	return btcjson.Response{
 		ID:     idPtr,
-		Result: js.RawMessage(resultBytes),
+		Result: resultBytes,
 	}
 }
 
@@ -1262,7 +1262,7 @@ func Help(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCClient) (int
 			rawChainUsage, err := client.RawRequest("help", nil)
 			var chainUsage string
 			if err == nil {
-				_ = js.Unmarshal([]byte(rawChainUsage), &chainUsage)
+				_ = js.Unmarshal(rawChainUsage, &chainUsage)
 			}
 			if chainUsage != "" {
 				usages = "Chain server usage:\n\n" + chainUsage + "\n\n" +
@@ -1293,7 +1293,7 @@ func Help(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCClient) (int
 		param[len(param)-1] = '"'
 		rawChainHelp, err := client.RawRequest("help", []js.RawMessage{param})
 		if err == nil {
-			_ = js.Unmarshal([]byte(rawChainHelp), &chainHelp)
+			_ = js.Unmarshal(rawChainHelp, &chainHelp)
 		}
 	}
 	if chainHelp != "" {

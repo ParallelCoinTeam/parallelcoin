@@ -138,8 +138,8 @@ type (
 // newBlockManager returns a new bitcoin block manager. Use Start to begin processing asynchronous block and inv
 // updates.
 func newBlockManager(s *ChainService) (*blockManager, error) {
-	targetTimespan := int64(s.chainParams.TargetTimespan)
-	targetTimePerBlock := int64(s.chainParams.TargetTimePerBlock)
+	targetTimespan := s.chainParams.TargetTimespan
+	targetTimePerBlock := s.chainParams.TargetTimePerBlock
 	adjustmentFactor := s.chainParams.RetargetAdjustmentFactor
 	bm := blockManager{
 		server:   s,
@@ -668,12 +668,8 @@ func (b *blockManager) getCheckpointedCFHeaders(checkpoints []*chainhash.Hash,
 	for currentInterval < uint32(len(checkpoints)) {
 		// Each checkpoint is spaced wire.CFCheckptInterval after the prior one, so we'll fetch headers in batches using
 		// the checkpoints as a guide.
-		startHeightRange := uint32(
-			currentInterval*wire.CFCheckptInterval,
-		) + 1
-		endHeightRange := uint32(
-			(currentInterval + 1) * wire.CFCheckptInterval,
-		)
+		startHeightRange := currentInterval*wire.CFCheckptInterval + 1
+		endHeightRange := (currentInterval + 1) * wire.CFCheckptInterval
 		Tracef("checkpointed cfheaders request start_range=%v, end_range=%v", startHeightRange, endHeightRange)
 		// In order to fetch the range, we'll need the block header for the end of the height range.
 		stopHeader, err := b.server.BlockHeaders.FetchHeaderByHeight(
@@ -688,7 +684,7 @@ func (b *blockManager) getCheckpointedCFHeaders(checkpoints []*chainhash.Hash,
 		stopHash := stopHeader.BlockHash()
 		// Once we have the stop hash, we can construct the query message itself.
 		queryMsg := wire.NewMsgGetCFHeaders(
-			fType, uint32(startHeightRange), &stopHash,
+			fType, startHeightRange, &stopHash,
 		)
 		// We'll mark that the ith interval is queried by this message, and also map the top hash back to the index of
 		// this message.
@@ -2005,7 +2001,7 @@ func (b *blockManager) calcNextRequiredDifficulty(newBlockTime time.Time,
 	// division to calculate this result.
 	oldTarget := fork.CompactToBig(lastNode.Header.Bits)
 	newTarget := new(big.Int).Mul(oldTarget, big.NewInt(adjustedTimespan))
-	targetTimeSpan := int64(b.server.chainParams.TargetTimespan)
+	targetTimeSpan := b.server.chainParams.TargetTimespan
 	newTarget.Div(newTarget, big.NewInt(targetTimeSpan))
 	// Limit new value to the proof of work limit.
 	if newTarget.Cmp(b.server.chainParams.PowLimit) > 0 {

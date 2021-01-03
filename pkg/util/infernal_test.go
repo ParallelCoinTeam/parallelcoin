@@ -64,7 +64,7 @@ func TstAddressPubKey(serializedPubKey []byte, pubKeyFormat PubKeyFormat,
 	pubKey, _ := ec.ParsePubKey(serializedPubKey, ec.S256())
 	return &AddressPubKey{
 		pubKeyFormat: pubKeyFormat,
-		pubKey:       (*ec.PublicKey)(pubKey),
+		pubKey:       pubKey,
 		pubKeyHashID: netID,
 	}
 }

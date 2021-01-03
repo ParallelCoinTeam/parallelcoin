@@ -31,7 +31,7 @@ func TestHelpers(t *testing.T) {
 				return btcjson.Int(5)
 			},
 			expected: func() interface{} {
-				val := int(5)
+				val := 5
 				return &val
 			}(),
 		},

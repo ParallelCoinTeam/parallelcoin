@@ -188,7 +188,7 @@ func (m *MinerModel) SetThreads(gtx l.Context) l.Dimensions {
 					0.5,
 					m.Body1(
 						"number of mining threads"+
-							fmt.Sprintf("%3v", int(m.threadSlider.GetValue())),
+							fmt.Sprintf("%3v", m.threadSlider.GetValue()),
 					).
 						Fn,
 				).

@@ -200,9 +200,9 @@ func TestElementWireErrors(t *testing.T) {
 			}),
 			0, io.ErrShortWrite, io.EOF,
 		},
-		{ServiceFlag(SFNodeNetwork), 0, io.ErrShortWrite, io.EOF},
-		{InvType(InvTypeTx), 0, io.ErrShortWrite, io.EOF},
-		{BitcoinNet(MainNet), 0, io.ErrShortWrite, io.EOF},
+		{SFNodeNetwork, 0, io.ErrShortWrite, io.EOF},
+		{InvTypeTx, 0, io.ErrShortWrite, io.EOF},
+		{MainNet, 0, io.ErrShortWrite, io.EOF},
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {

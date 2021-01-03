@@ -52,7 +52,7 @@ func testSendOutputs(r *Harness, t *testing.T) {
 		}
 	}
 	// First, generate a small spend which will require only a single input.
-	txid := genSpend(util.Amount(5 * util.SatoshiPerBitcoin))
+	txid := genSpend(5 * util.SatoshiPerBitcoin)
 	// Generate a single block, the transaction the wallet created should be found in this block.
 	blockHashes, err := r.Node.Generate(1)
 	if err != nil {
@@ -60,7 +60,7 @@ func testSendOutputs(r *Harness, t *testing.T) {
 	}
 	assertTxMined(txid, blockHashes[0])
 	// Next, generate a spend much greater than the block reward. This transaction should also have been mined properly.
-	txid = genSpend(util.Amount(500 * util.SatoshiPerBitcoin))
+	txid = genSpend(500 * util.SatoshiPerBitcoin)
 	blockHashes, err = r.Node.Generate(1)
 	if err != nil {
 		t.Fatalf("unable to generate single block: %v", err)
@@ -412,7 +412,7 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 		}
 	}()
 	// The internal wallet of this harness should now have 250 DUO.
-	expectedBalance := util.Amount(250 * util.SatoshiPerBitcoin)
+	expectedBalance := 250 * util.SatoshiPerBitcoin
 	walletBalance := harness.ConfirmedBalance()
 	if expectedBalance != walletBalance {
 		t.Fatalf("wallet balance incorrect: expected %v, got %v",
@@ -447,7 +447,7 @@ func testMemWalletLockedOutputs(r *Harness, t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to create script: %v", err)
 	}
-	outputAmt := util.Amount(50 * util.SatoshiPerBitcoin)
+	outputAmt := 50 * util.SatoshiPerBitcoin
 	output := wire.NewTxOut(int64(outputAmt), pkScript)
 	tx, err := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 	if err != nil {
@@ -517,7 +517,7 @@ func TestMain(m *testing.M) {
 func TestHarness(t *testing.T) {
 	// We should have (numMatureOutputs * 50 DUO) of mature unspendable
 	// outputs.
-	expectedBalance := util.Amount(numMatureOutputs * 50 * util.SatoshiPerBitcoin)
+	expectedBalance := numMatureOutputs * 50 * util.SatoshiPerBitcoin
 	harnessBalance := mainHarness.ConfirmedBalance()
 	if harnessBalance != expectedBalance {
 		t.Fatalf("expected wallet balance of %v instead have %v",

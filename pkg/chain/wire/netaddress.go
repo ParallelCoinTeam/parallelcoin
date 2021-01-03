@@ -96,7 +96,7 @@ func readNetAddress(r io.Reader, pver uint32, na *NetAddress, ts bool) error {
 	*na = NetAddress{
 		Timestamp: na.Timestamp,
 		Services:  na.Services,
-		IP:        net.IP(ip[:]),
+		IP:        ip[:],
 		Port:      port,
 	}
 	return nil

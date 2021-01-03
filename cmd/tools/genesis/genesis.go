@@ -158,8 +158,8 @@ func main() {
 	unixtime := uint32(time.Now().Unix())
 	var blockversion uint32 = 4
 	blockHeader := joinBytes(uint32tobytes(blockversion), make([]byte, 32), tx.merkleHash,
-		uint32tobytes(uint32(unixtime)), // byte 68 - 71
-		uint32tobytes(uint32(nBits)),
+		uint32tobytes(unixtime), // byte 68 - 71
+		uint32tobytes(nBits),
 		uint32tobytes(startNonce)) // byte 76 - 79
 	bytes := nBits >> 24
 	// bytes := 31

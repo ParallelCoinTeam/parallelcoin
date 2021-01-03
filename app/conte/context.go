@@ -123,7 +123,7 @@ func (cx *Xt) PrintWaitChangers() string {
 // GetNewContext returns a fresh new context
 func GetNewContext(appName, appLang, subtext string) *Xt {
 	hr := &atomic.Value{}
-	hr.Store(int(0))
+	hr.Store(0)
 	config, configMap := pod.EmptyConfig()
 	chainClientReady := qu.T()
 	cx := &Xt{

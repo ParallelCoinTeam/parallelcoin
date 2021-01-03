@@ -35,7 +35,7 @@ func makeInputSource(unspents []*wire.TxOut) InputSource {
 		}
 		return currentTotal, currentInputs, currentInputValues, make([][]byte, len(currentInputs)), nil
 	}
-	return InputSource(f)
+	return f
 }
 func TestNewUnsignedTransaction(t *testing.T) {
 	tests := []struct {
