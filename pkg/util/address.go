@@ -29,7 +29,7 @@ func (e UnsupportedWitnessVerError) Error() string {
 type UnsupportedWitnessProgLenError int
 
 func (e UnsupportedWitnessProgLenError) Error() string {
-	return "unsupported witness program length: " + string(e)
+	return "unsupported witness program length: " + string(rune(e))
 }
 
 var (
