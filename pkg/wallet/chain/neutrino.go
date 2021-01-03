@@ -312,12 +312,12 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	bestBlock, err := s.CS.BestBlock()
 	if err != nil {
 		Error(err)
-		return fmt.Errorf("Can't get chain service's best block: %s", err)
+		return fmt.Errorf("can't get chain service's best block: %s", err)
 	}
 	header, err := s.CS.GetBlockHeader(&bestBlock.Hash)
 	if err != nil {
 		Error(err)
-		return fmt.Errorf("Can't get block header for hash %v: %s",
+		return fmt.Errorf("can't get block header for hash %v: %s",
 			bestBlock.Hash, err)
 	}
 	// If the wallet is already fully caught up, or the rescan has started with state that indicates a "fresh" wallet,

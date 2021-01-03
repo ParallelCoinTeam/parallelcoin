@@ -312,7 +312,7 @@ func sweep() error {
 			totalSwept, numPublished, transactionNoun)
 	}
 	if numErrors > 0 {
-		return fmt.Errorf("Failed to publish %d %s", numErrors, transactionNoun)
+		return fmt.Errorf("failed to publish %d %s", numErrors, transactionNoun)
 	}
 	return nil
 }

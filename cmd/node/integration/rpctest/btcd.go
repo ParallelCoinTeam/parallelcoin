@@ -38,13 +38,13 @@ func podExecutablePath() (string, error) {
 	// Determine import path of this package. Not necessarily pod if this is a forked repo.
 	_, rpctestDir, _, ok := runtime.Caller(1)
 	if !ok {
-		return "", fmt.Errorf("Cannot get path to pod source code")
+		return "", fmt.Errorf("cannot get path to pod source code")
 	}
 	podPkgPath := filepath.Join(rpctestDir, "..", "..", "..")
 	podPkg, err := build.ImportDir(podPkgPath, build.FindOnly)
 	if err != nil {
 		Error(err)
-		return "", fmt.Errorf("Failed to build pod: %v", err)
+		return "", fmt.Errorf("failed to build pod: %v", err)
 	}
 	// Build pod and output an executable in a static temp path.
 	outputPath := filepath.Join(testDir, "pod")
@@ -59,7 +59,7 @@ func podExecutablePath() (string, error) {
 	err = cmd.Run()
 	if err != nil {
 		Error(err)
-		return "", fmt.Errorf("Failed to build pod: %v", err)
+		return "", fmt.Errorf("failed to build pod: %v", err)
 	}
 	// Save executable path so future calls do not recompile.
 	executablePath = outputPath

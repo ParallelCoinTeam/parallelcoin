@@ -200,7 +200,7 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 	}
 	// If we don't have a quit channel, and the end height is still unspecified, then we'll exit out here.
 	if ro.quit == nil && ro.endBlock.Height == 0 {
-		return fmt.Errorf("Rescan request must specify a quit channel" +
+		return fmt.Errorf("rescan request must specify a quit channel" +
 			" or valid end block")
 	}
 	// Track our position in the chain.
@@ -584,7 +584,8 @@ func (s *ChainService) extractBlockMatches(ro *rescanOptions,
 		return nil, err
 	}
 	if block == nil {
-		return nil, fmt.Errorf("Couldn't get block %d (%s) from network", curStamp.Height, curStamp.Hash)
+		return nil, fmt.Errorf("couldn't get block %d (%s) from network",
+			curStamp.Height, curStamp.Hash)
 	}
 	blockHeader := block.MsgBlock().Header
 	blockDetails := btcjson.BlockDetails{
@@ -857,7 +858,7 @@ func (r *Rescan) WaitForShutdown() {
 func (r *Rescan) Start() <-chan error {
 	errChan := make(chan error, 1)
 	if !atomic.CompareAndSwapUint32(&r.started, 0, 1) {
-		errChan <- fmt.Errorf("Rescan already started")
+		errChan <- fmt.Errorf("rescan already started")
 		return errChan
 	}
 	r.wg.Add(1)

@@ -643,12 +643,13 @@ func (s *ChainService) GetCFilter(blockHash chainhash.Hash,
 	curHeader, err := getHeader(&blockHash)
 	if err != nil {
 		Error(err)
-		return nil, fmt.Errorf("Couldn't get cfheader for block %s from database", blockHash)
+		return nil, fmt.Errorf("couldn't get cfheader for block %s from" +
+			" database", blockHash)
 	}
 	prevHeader, err := getHeader(&block.PrevBlock)
 	if err != nil {
 		Error(err)
-		return nil, fmt.Errorf("Couldn't get cfheader for block %s "+
+		return nil, fmt.Errorf("couldn't get cfheader for block %s "+
 			"from database", blockHash)
 	}
 	// With all the necessary items retrieved, we'll launch our concurrent query to the set of connected peers.
@@ -719,7 +720,8 @@ func (s *ChainService) GetBlock(blockHash chainhash.Hash,
 	// this so we can't request it.
 	blockHeader, height, err := s.BlockHeaders.FetchHeader(&blockHash)
 	if err != nil || blockHeader.BlockHash() != blockHash {
-		return nil, fmt.Errorf("Couldn't get header for block %s from database", blockHash)
+		return nil, fmt.Errorf("couldn't get header for block %s from database" +
+			"", blockHash)
 	}
 	// Starting with the set of default options, we'll apply any specified functional options to the query so that we
 	// can check what inv type to use.
@@ -798,7 +800,8 @@ func (s *ChainService) GetBlock(blockHash chainhash.Hash,
 		options...,
 	)
 	if foundBlock == nil {
-		return nil, fmt.Errorf("Couldn't retrieve block %s from network", blockHash)
+		return nil, fmt.Errorf("couldn't retrieve block %s from network",
+			blockHash)
 	}
 	// Add block to the cache before returning it.
 	err = s.BlockCache.Put(*inv, &cache.CacheableBlock{Block: foundBlock})

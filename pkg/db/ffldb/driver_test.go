@@ -148,17 +148,17 @@ func TestPersistence(t *testing.T) {
 	err = db.Update(func(tx database.Tx) error {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
-			return fmt.Errorf("Metadata: unexpected nil bucket")
+			return fmt.Errorf("metadata: unexpected nil bucket")
 		}
 		bucket1, err := metadataBucket.CreateBucket(bucket1Key)
 		if err != nil {
-			return fmt.Errorf("CreateBucket: unexpected error: %v",
+			return fmt.Errorf("createBucket: unexpected error: %v",
 				err)
 		}
 		for k, v := range storeValues {
 			err := bucket1.Put([]byte(k), []byte(v))
 			if err != nil {
-				return fmt.Errorf("Put: unexpected error: %v",
+				return fmt.Errorf("put: unexpected error: %v",
 					err)
 			}
 		}

@@ -2557,7 +2557,7 @@ func (w *Wallet) ImportPrivateKey(
 		if err != nil {
 			Error(err)
 			return "", fmt.Errorf(
-				"Failed to subscribe for address ntfns for "+
+				"failed to subscribe for address ntfns for "+
 					"address %s: %s", addr.EncodeAddress(), err,
 			)
 		}

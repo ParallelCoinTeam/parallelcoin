@@ -177,7 +177,7 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	}
 	found := solveBlock(&block.Header, net.PowLimit)
 	if !found {
-		return nil, errors.New("Unable to solve block")
+		return nil, errors.New("unable to solve block")
 	}
 	utilBlock := util.NewBlock(&block)
 	utilBlock.SetHeight(blockHeight)

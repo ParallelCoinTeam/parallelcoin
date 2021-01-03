@@ -206,7 +206,8 @@ func genFile(svgData []byte, baseName string, outSize float32) error {
 	for i, v := range strings.Split(g.ViewBox, " ") {
 		f, err := strconv.ParseFloat(v, 32)
 		if err != nil {
-			return fmt.Errorf("genFile: failed to parse ViewBox (%q):", g.ViewBox, err)
+			return fmt.Errorf("genFile: failed to parse ViewBox (%q): %v",
+				g.ViewBox, err)
 		}
 		switch i {
 		case 0:

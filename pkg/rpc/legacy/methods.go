@@ -1986,7 +1986,7 @@ func SignRawTransaction(icmd interface{}, w *wallet.Wallet,
 	case "SINGLE|ANYONECANPAY":
 		hashType = txscript.SigHashSingle | txscript.SigHashAnyOneCanPay
 	default:
-		e := errors.New("Invalid sighash parameter")
+		e := errors.New("invalid sighash parameter")
 		return nil, InvalidParameterError{e}
 	}
 	// TODO: really we probably should look these up with pod anyway to

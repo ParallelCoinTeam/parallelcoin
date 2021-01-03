@@ -627,7 +627,7 @@ func (b *blockManager) getUncheckpointedCFHeaders(
 	// of headers at all. We'll return nil so we can go to the top of the loop and fetch from a new set of peers.
 	pristineHeaders, ok := headers[key]
 	if !ok {
-		return fmt.Errorf("All peers served bogus headers! Retrying with new set")
+		return fmt.Errorf("all peers served bogus headers. retrying with new set")
 	}
 	_, err = b.writeCFHeadersMsg(pristineHeaders, store)
 	return err
@@ -834,7 +834,7 @@ func (b *blockManager) writeCFHeadersMsg(msg *wire.MsgCFHeaders,
 	}
 	if *tip != msg.PrevFilterHeader {
 		return nil, fmt.Errorf("attempt to write cfheaders out of "+
-			"order! Tip=%v (height=%v), prev_hash=%v.", *tip,
+			"order! Tip=%v (height=%v), prev_hash=%v", *tip,
 			tipHeight, msg.PrevFilterHeader)
 	}
 	// Cycle through the headers and compute each header based on the prev header and the filter hash from the cfheaders
