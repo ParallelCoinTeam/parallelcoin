@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"strings"
-
+	
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/db/walletdb"
@@ -277,27 +277,25 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 	// Send notification of mined or unmined transaction to any interested clients.
 	//
 	// TODO: Avoid the extra db hits.
-	if block == nil {
-		details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, nil)
+	details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, nil)
+	if err != nil {
+		Error(err)
+		// It's possible that the transaction was not found within the wallet's set of unconfirmed transactions due
+		// to it already being confirmed, so we'll avoid notifying it.
+		//
+		// TODO(wilmer): ideally we should find the culprit to why we're receiving an additional unconfirmed
+		//  chain.RelevantTx notification from the chain backend.
+		if details != nil {
+			w.NtfnServer.notifyUnminedTransaction(dbtx, details)
+		}
+	} else {
+		details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
 		if err != nil {
-			Error(err)
-			// It's possible that the transaction was not found within the wallet's set of unconfirmed transactions due
-			// to it already being confirmed, so we'll avoid notifying it.
-			//
-			// TODO(wilmer): ideally we should find the culprit to why we're receiving an additional unconfirmed
-			//  chain.RelevantTx notification from the chain backend.
-			if details != nil {
-				w.NtfnServer.notifyUnminedTransaction(dbtx, details)
-			}
-		} else {
-			details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
-			if err != nil {
-				Error("cannot query transaction details for notification:", err)
-			}
-			// We'll only notify the transaction if it was found within the wallet's set of confirmed transactions.
-			if details != nil {
-				w.NtfnServer.notifyMinedTransaction(dbtx, details, block)
-			}
+			Error("cannot query transaction details for notification:", err)
+		}
+		// We'll only notify the transaction if it was found within the wallet's set of confirmed transactions.
+		if details != nil {
+			w.NtfnServer.notifyMinedTransaction(dbtx, details, block)
 		}
 	}
 	return nil
