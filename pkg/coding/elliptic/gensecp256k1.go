@@ -1,4 +1,4 @@
-// //+build gensecp256k1
+// +build gensecp256k1
 
 //go:generate go run precomp/genprecomps.go precomp/log.go
 
