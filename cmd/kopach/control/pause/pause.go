@@ -10,14 +10,14 @@ import (
 	"github.com/p9c/pod/pkg/coding/simplebuffer/Uint16"
 )
 
-var PauseMagic = []byte{'p', 'a', 'u', 's'}
+var Magic = []byte{'p', 'a', 'u', 's'}
 
 type Container struct {
 	simplebuffer.Container
 }
 
 func GetPauseContainer(cx *conte.Xt) *Container {
-	mB := p2padvt.Get(cx).CreateContainer(PauseMagic)
+	mB := p2padvt.Get(cx).CreateContainer(Magic)
 	return &Container{*mB}
 }
 

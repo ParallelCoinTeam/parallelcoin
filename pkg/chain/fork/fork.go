@@ -150,8 +150,9 @@ var (
 	// P9AlgoVers is the lookup for after 1st hardfork
 	P9AlgoVers = make(map[int32]string)
 	
-	P9PrimeSequence               = []int{2, 3, 5, 7, 11, 13, 17, 19, 23}
-	IntervalBase, IntervalDivisor = 101, 1
+	P9PrimeSequence = []int{2, 3, 5, 7, 11, 13, 17, 19, 23}
+	IntervalDivisor = 1
+	IntervalBase    = 101
 	// P9Algos is the algorithm specifications after the hard fork
 	P9Algos        = make(map[string]AlgoParams)
 	P9AlgosNumeric = map[int32]AlgoParams{

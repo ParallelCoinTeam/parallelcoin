@@ -508,12 +508,12 @@ rescanLoop:
 						"unable to register block subscription: %v", err,
 					)
 				}
-				defer func() {
-					if subscription != nil {
+				if subscription != nil {
+					defer func() {
 						s.unsubscribeBlockMsgs(subscription)
 						subscription = nil
-					}
-				}()
+					}()
+				}
 				continue rescanLoop
 			}
 			// If the next height is known to the chain service, then we'll fetch the next block and send a

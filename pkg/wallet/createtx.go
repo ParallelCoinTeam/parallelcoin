@@ -1,5 +1,4 @@
-// Package wallet
-// Copyright (c) 2015-2016 The btcsuite developers
+// Package wallet Copyright (c) 2015-2016 The btcsuite developers
 package wallet
 
 import (

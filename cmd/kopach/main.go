@@ -248,7 +248,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 
 // these are the handlers for specific message types.
 var handlers = transport.Handlers{
-	string(hashrate.HashrateMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(hashrate.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		c := ctx.(*Worker)
 		if !c.active.Load() {
 			Debug("not active")
@@ -295,7 +295,7 @@ var handlers = transport.Handlers{
 		}
 		return
 	},
-	string(pause.PauseMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(pause.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		w := ctx.(*Worker)
 		p := pause.LoadPauseContainer(b)
 		fs := w.FirstSender.Load()

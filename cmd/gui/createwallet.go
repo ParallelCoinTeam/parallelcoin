@@ -180,7 +180,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														Debug("clicked submit wallet")
 														*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
 															string(os.PathSeparator) + wg.cx.ActiveNet.Name +
-															string(os.PathSeparator) + wallet.WalletDbName
+															string(os.PathSeparator) + wallet.DbName
 														dbDir := *wg.cx.Config.WalletFile
 														loader := wallet.NewLoader(wg.cx.ActiveNet, dbDir, 250)
 														seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())

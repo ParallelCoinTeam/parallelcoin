@@ -18,7 +18,7 @@ import (
 	"github.com/p9c/pod/pkg/coding/simplebuffer/Time"
 )
 
-var HashrateMagic = []byte{'h', 'a', 's', 'h'}
+var Magic = []byte{'h', 'a', 's', 'h'}
 
 type Container struct {
 	simplebuffer.Container
@@ -46,7 +46,7 @@ func Get(count int32, version int32, height int32, id string) Container {
 		Int32.New().Put(height),
 		Int32.New().Put(int32(binary.BigEndian.Uint32(nonce))),
 		String.New().Put(id),
-	}.CreateContainer(HashrateMagic)}
+	}.CreateContainer(Magic)}
 }
 
 // LoadContainer takes a message byte slice payload and loads it into a container
@@ -85,7 +85,7 @@ func (j *Container) GetID() string {
 }
 
 func (j *Container) String() (s string) {
-	s += fmt.Sprint("\ntype '"+string(HashrateMagic)+"' elements:", j.Count())
+	s += fmt.Sprint("\ntype '"+string(Magic)+"' elements:", j.Count())
 	s += "\n"
 	t := j.GetTime()
 	s += "1 Time: "

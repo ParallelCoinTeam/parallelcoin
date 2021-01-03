@@ -235,7 +235,7 @@ out:
 						nextAlgo = w.roller.C.Load() + 1
 						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH, w.id)
 						err := w.dispatchConn.SendMany(
-							hashrate.HashrateMagic,
+							hashrate.Magic,
 							transport.GetShards(hashReport.Data),
 						)
 						if err != nil {

@@ -122,7 +122,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		func() {
 			Debug("miner controller shutting down")
 			ctrl.active.Store(false)
-			err := ctrl.multiConn.SendMany(pause.PauseMagic, pauseShards)
+			err := ctrl.multiConn.SendMany(pause.Magic, pauseShards)
 			if err != nil {
 				Error(err)
 			}
@@ -242,7 +242,7 @@ var handlersMulticast = transport.Handlers{
 			msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 		}
 		// set old blocks to pause and send pause directly as block is probably a solution
-		err = c.multiConn.SendMany(pause.PauseMagic, c.pauseShards)
+		err = c.multiConn.SendMany(pause.Magic, c.pauseShards)
 		if err != nil {
 			Error(err)
 			return
@@ -335,7 +335,7 @@ var handlersMulticast = transport.Handlers{
 		return
 	},
 	// hashrate reports from workers
-	string(hashrate.HashrateMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(hashrate.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
 			Debug("not active")

@@ -20,7 +20,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
 		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
-			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.WalletDbName
+			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.DbName
 		// dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
 		// 	Params.Name + slash + wallet.WalletDbName
 		if !apputil.FileExists(*cx.Config.WalletFile) && !cx.IsGUI {
