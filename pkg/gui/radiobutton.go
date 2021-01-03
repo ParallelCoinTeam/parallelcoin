@@ -23,7 +23,7 @@ func (w *Window) RadioButton(checkable *Checkable, group *Enum, key,
 	// 	os.Exit(0)
 	// }
 	return &RadioButton{
-		group: group,
+		group:  group,
 		Window: w,
 		Checkable: checkable.
 			CheckedStateIcon(&icons.ToggleRadioButtonChecked). // Color("Primary").

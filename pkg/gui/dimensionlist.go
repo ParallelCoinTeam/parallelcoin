@@ -15,6 +15,7 @@ func (d DimensionList) GetTotal(gtx l.Context, axis l.Axis) (total int) {
 	return total
 }
 
+// PositionToCoordinate converts a list position to absolute coordinate
 func (d DimensionList) PositionToCoordinate(position Position, axis l.Axis) (coordinate int) {
 	for i := 0; i < position.First; i++ {
 		coordinate += axisMain(axis, d[i].Size)
@@ -22,28 +23,32 @@ func (d DimensionList) PositionToCoordinate(position Position, axis l.Axis) (coo
 	return coordinate + position.Offset
 }
 
+// CoordinateToPosition converts an absolute coordinate to a list position
 func (d DimensionList) CoordinateToPosition(coordinate int, axis l.Axis) (position Position) {
 	cursor := 0
-	for i := range d {
+	if coordinate < 0 {
+		coordinate = 0
+	}
+	var i int
+	for i = range d {
 		cursor += axisMain(axis, d[i].Size)
-		if cursor > coordinate {
-			if i == 0 {
-				position.First = 0
-				position.Offset = coordinate - cursor
-				position.BeforeEnd = true
-				break
-			}
-			// step back
-			cursor -= axisMain(axis, d[i].Size)
-			position.First = i - 1
+		if cursor >= coordinate {
+			position.First = i
 			position.Offset = coordinate - cursor
 			position.BeforeEnd = true
-			break
+			return
 		}
+	}
+	// if it overshoots, stop it, if it is at the end, mark it
+	if coordinate >= cursor {
+		position.First = len(d) - 1
+		position.Offset = axisMain(axis, d[len(d)-1].Size)
+		position.BeforeEnd = false
 	}
 	return
 }
 
+// GetDimensionList returns a dimensionlist based on the given listelement
 func GetDimensionList(gtx l.Context, length int, listElement ListElement) (dims DimensionList) {
 	// gather the dimensions of the list elements
 	for i := 0; i < length; i++ {

@@ -39,7 +39,7 @@ func (w *Window) Checkable() *Checkable {
 	// 	}
 	// }
 	return &Checkable{
-		Window:              w,
+		Window:             w,
 		label:              "checkable",
 		color:              "Primary",
 		font:               f,

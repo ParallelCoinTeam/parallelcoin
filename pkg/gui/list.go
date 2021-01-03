@@ -15,7 +15,7 @@ import (
 // subsection.
 type List struct {
 	*Window
-	axis  l.Axis
+	axis l.Axis
 	// ScrollToEnd instructs the list to stay scrolled to the far end position once reached. A List with ScrollToEnd ==
 	// true and Position.BeforeEnd == false draws its content with the last item at the bottom of the list area.
 	scrollToEnd bool
@@ -83,7 +83,7 @@ func (li *List) JumpToEnd() {
 // List returns a new scrollable List widget
 func (w *Window) List() (li *List) {
 	li = &List{
-		Window: w,
+		Window:          w,
 		pageUp:          w.Clickable(),
 		pageDown:        w.Clickable(),
 		color:           "DocText",
@@ -316,6 +316,9 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		if li.leftSide {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth))
 		}
+		pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
+			Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
+		li.drag.Add(gtx.Ops)
 		container = li.Fill(li.background, containerFlex.Fn, l.Center).Fn
 	}
 	return container(gtx)
@@ -382,56 +385,40 @@ func (li *List) grabber(dims DimensionList, x, y, viewSize int) func(l.Context) 
 			// respond to the event
 			// if de.Type == pointer.Press || de.Type == pointer.Drag || de.Type != pointer.Release {
 			// }
-			if de.Type == pointer.Press {
-				// Debug("press position", de.Position)
+			if de.Type == pointer.Press || de.Type == pointer.Drag {
+				// li.Window.overlay = []func(gtx l.Context){
+				// 	func(gtx l.Context) {
+				// 		li.Fill("scrim", EmptyMaxWidth(), l.Center).Fn(gtx)
+				// 		li.H6(spew.Sdump(de)).Fn(gtx)
+				// 	},
+				// }
 			}
 			if de.Type == pointer.Release {
-				li.currentColor = li.color
-			} else {
-				li.currentColor = li.active
+				// li.Window.overlay = li.Window.overlay[:0]
 			}
 			if de.Type == pointer.Drag {
 				// Debug("drag position", de.Position)
-				current := dims.PositionToCoordinate(li.position, li.axis)
 				total := dims.GetTotal(gtx, li.axis)
 				var d int
 				if li.axis == l.Horizontal {
-					positionX := int(de.Position.X)
-					viewPosition := viewSize + positionX
-					if viewPosition > viewSize {
-						viewPosition = viewSize
-					}
-					if viewPosition < 0 {
-						viewPosition = 0
-					}
-					// Debug(viewPosition)
-					d = viewPosition / viewSize * total
+					deltaX := int(de.Position.X)
+					d = deltaX * (total / viewSize)
 				} else {
-					positionY := int(de.Position.Y)
-					// d = current + total*positionY/viewSize
-					d = current + positionY*(total/viewSize)
-					if d < 0 {
-						d = 0
-					}
-					if d > total {
-						d = total - 1
-					}
-					// Debug(current, total, positionY, viewSize, d)
+					deltaY := int(de.Position.Y)
+					d = deltaY * (total / viewSize)
 				}
-				// if d > total {
-				// 	d = total - 1
-				// }
-				// if d < 0 {
-				// 	d = 0
-				// }
+				if d < 0 {
+					d = 0
+				}
+				if d > total {
+					d = total - 1
+				}
 				li.SetPosition(dims.CoordinateToPosition(d, li.axis))
-				
+				li.Window.Invalidate()
 			}
 			// if de.Type == pointer.Scroll {
 		}
 		defer op.Push(gtx.Ops).Pop()
-		pointer.Rect(image.Rectangle{Max: image.Point{X: x, Y: y}}).Add(gtx.Ops)
-		li.drag.Add(gtx.Ops)
 		pointer.Rect(image.Rectangle{Max: image.Point{X: x, Y: y}}).Add(gtx.Ops)
 		li.sideScroll.Add(gtx.Ops)
 		return li.Fill(li.currentColor, EmptySpace(x, y), l.Center).Fn(gtx)

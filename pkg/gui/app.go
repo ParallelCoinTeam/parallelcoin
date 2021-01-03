@@ -51,7 +51,6 @@ type App struct {
 	titleBarBackground  string
 	titleBarColor       string
 	titleFont           string
-	overlay             []func(gtx l.Context)
 }
 
 type WidgetMap map[string]l.Widget
@@ -112,17 +111,6 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 				// EmptyMaxWidth(),
 			).
 			Fn(gtx)
-	}
-}
-func (a *App) AddOverlay(overlay func(gtx l.Context)) *App {
-	a.overlay = append(a.overlay, overlay)
-	return a
-}
-func (a *App) Overlay() func(gtx l.Context) {
-	return func(gtx l.Context) {
-		for _, overlay := range a.overlay {
-			overlay(gtx)
-		}
 	}
 }
 

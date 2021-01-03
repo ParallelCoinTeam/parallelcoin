@@ -398,7 +398,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 				Fn,
 		},
 	)
-	// a.AddOverlay(wg.toasts.DrawToasts())
-	// a.AddOverlay(wg.dialog.DrawDialog())
+	// a.PushOverlay(wg.toasts.DrawToasts())
+	// a.PushOverlay(wg.dialog.DrawDialog())
 	return
 }

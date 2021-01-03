@@ -17,7 +17,7 @@ type IntSlider struct {
 
 func (w *Window) IntSlider() *IntSlider {
 	return &IntSlider{
-		Window:   w,
+		Window:  w,
 		min:     w.Clickable(),
 		max:     w.Clickable(),
 		floater: w.Float(),

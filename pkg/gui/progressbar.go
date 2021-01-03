@@ -22,7 +22,7 @@ type ProgressBar struct {
 // ProgressBar renders a horizontal bar with an indication of completion of a process
 func (w *Window) ProgressBar() *ProgressBar {
 	return &ProgressBar{
-		Window: w,
+		Window:   w,
 		progress: 0,
 		color:    w.Colors.GetNRGBAFromName("Primary"),
 	}

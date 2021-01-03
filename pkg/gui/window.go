@@ -41,13 +41,31 @@ func (s *scaledConfig) Px(v unit.Value) int {
 type Window struct {
 	*Theme
 	*app.Window
-	opts   []app.Option
-	scale  *scaledConfig
-	Width  int // stores the width at the beginning of render
-	Height int
-	ops    op.Ops
-	evQ    system.FrameEvent
-	Runner CallbackQueue
+	opts    []app.Option
+	scale   *scaledConfig
+	Width   int // stores the width at the beginning of render
+	Height  int
+	ops     op.Ops
+	evQ     system.FrameEvent
+	Runner  CallbackQueue
+	overlay []func(gtx l.Context)
+}
+
+func (w *Window) PushOverlay(overlay func(gtx l.Context)) {
+	w.overlay = append(w.overlay, overlay)
+}
+
+func (w *Window) PopOverlay() {
+	if len(w.overlay) == 0 {
+		return
+	}
+	w.overlay = w.overlay[:len(w.overlay)-1]
+}
+
+func (w *Window) Overlay(gtx l.Context) {
+	for _, overlay := range w.overlay {
+		overlay(gtx)
+	}
 }
 
 // NewWindowP9 creates a new window
@@ -114,59 +132,58 @@ func (w *Window) Run(frame func(ctx l.Context) l.Dimensions,
 			// by repeating selectors we decrease the chance of a runner delaying
 			// a frame event hitting the physical frame deadline
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, overlay, destroy); Check(err) {
+			if err = w.processEvents(e, frame, destroy); Check(err) {
 				return
 			}
 		}
 	}
 }
 
-func (w *Window) processEvents(e event.Event, frame func(ctx l.Context) l.Dimensions,
-	overlay func(ctx l.Context), destroy func()) error {
-	var ops op.Ops
+func (w *Window) processEvents(e event.Event, frame func(ctx l.Context) l.Dimensions, destroy func()) error {
 	switch e := e.(type) {
 	case system.DestroyEvent:
 		destroy()
 		return e.Err
 	case system.FrameEvent:
+		ops := op.Ops{}
 		c := l.NewContext(&ops, e)
 		// update dimensions for responsive sizing widgets
 		w.Width = c.Constraints.Max.X
 		w.Height = c.Constraints.Max.Y
 		frame(c)
-		overlay(c)
+		w.Overlay(c)
 		e.Frame(c.Ops)
 	}
 	return nil

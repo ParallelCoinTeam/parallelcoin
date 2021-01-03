@@ -28,7 +28,7 @@ type IconButton struct {
 // IconButton creates an icon with a circular background and an icon placed in the centre
 func (w *Window) IconButton(button *Clickable) *IconButton {
 	return &IconButton{
-		Window:      w,
+		Window:     w,
 		background: "Primary",
 		color:      "DocBg",
 		size:       w.TextSize,

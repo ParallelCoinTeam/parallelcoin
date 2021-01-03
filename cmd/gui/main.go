@@ -185,7 +185,7 @@ func (wg *WalletGUI) Run() (err error) {
 					),
 				)(gtx)
 			},
-			wg.MainApp.Overlay(),
+			wg.MainApp.Overlay,
 			// wg.InitWallet(),
 			wg.gracefulShutdown,
 			// func() { interrupt.Request() },

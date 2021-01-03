@@ -25,7 +25,7 @@ type Slider struct {
 func (w *Window) Slider() *Slider {
 	return &Slider{
 		Window: w,
-		color: w.Colors.GetNRGBAFromName("Primary"),
+		color:  w.Colors.GetNRGBAFromName("Primary"),
 	}
 }
 
