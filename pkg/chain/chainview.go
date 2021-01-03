@@ -113,9 +113,12 @@ func (c *chainView) setTip(node *BlockNode) {
 			c.nodes[i] = nil
 		}
 	}
-	for node != nil && c.nodes[node.height] != node {
+	for c.nodes[node.height] != node {
 		c.nodes[node.height] = node
 		node = node.parent
+		if node == nil {
+			break
+		}
 	}
 }
 
