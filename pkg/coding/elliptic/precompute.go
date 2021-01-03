@@ -19,9 +19,9 @@ import (
 func loadS256BytePoints() error {
 	// There will be no byte points to load when generating them.
 	bp := secp256k1BytePoints
-	if len(bp) == 0 {
-		return nil
-	}
+	// if len(bp) == 0 {
+	// 	return nil
+	// }
 	// Decompress the pre-computed table used to accelerate scalar base
 	// multiplication.
 	decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(bp))
