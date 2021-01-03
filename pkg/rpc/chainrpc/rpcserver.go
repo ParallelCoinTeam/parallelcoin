@@ -2127,8 +2127,8 @@ func ParseCmd(request *btcjson.Request) *ParsedRPCCmd {
 //
 // Peer existence is determined using either a target address or node id.
 func PeerExists(connMgr ServerConnManager, addr string, nodeID int32) bool {
-	for _, p := range connMgr.ConnectedPeers() {
-		if p.ToPeer().ID() == nodeID || p.ToPeer().Addr() == addr {
+	for _, pp := range connMgr.ConnectedPeers() {
+		if pp.ToPeer().ID() == nodeID || pp.ToPeer().Addr() == addr {
 			return true
 		}
 	}

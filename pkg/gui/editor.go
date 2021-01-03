@@ -429,22 +429,22 @@ func (e *Editor) layout(gtx layout.Context) layout.Dimensions {
 		X: -e.scrollOff.X,
 		Y: -e.scrollOff.Y,
 	}
-	clip := textPadding(e.lines)
-	clip.Max = clip.Max.Add(e.viewSize)
+	cl := textPadding(e.lines)
+	cl.Max = cl.Max.Add(e.viewSize)
 	it := lineIterator{
 		Lines:     e.lines,
-		Clip:      clip,
+		Clip:      cl,
 		Alignment: e.alignment,
 		Width:     e.viewSize.X,
 		Offset:    off,
 	}
 	e.shapes = e.shapes[:0]
 	for {
-		layout, off, ok := it.Next()
+		lo, off, ok := it.Next()
 		if !ok {
 			break
 		}
-		path := e.shaper.Shape(e.font, e.textSize, layout)
+		path := e.shaper.Shape(e.font, e.textSize, lo)
 		e.shapes = append(e.shapes, line{off, path})
 	}
 	key.InputOp{Tag: &e.eventKey}.Add(gtx.Ops)
@@ -831,11 +831,11 @@ func (e *Editor) Move(distance int) {
 
 func (e *Editor) moveStart() {
 	e.makeValid()
-	layout := e.lines[e.Caret.Line].Layout
+	lo := e.lines[e.Caret.Line].Layout
 	for i := e.Caret.Col - 1; i >= 0; i-- {
 		_, s := e.rr.runeBefore(e.rr.caret)
 		e.rr.caret -= s
-		e.Caret.x -= layout.Advances[i]
+		e.Caret.x -= lo.Advances[i]
 	}
 	e.Caret.Col = 0
 	e.Caret.xoff = -e.Caret.x
@@ -849,9 +849,9 @@ func (e *Editor) moveEnd() {
 	if e.Caret.Line < len(e.lines)-1 {
 		end = 1
 	}
-	layout := l.Layout
-	for i := e.Caret.Col; i < len(layout.Advances)-end; i++ {
-		adv := layout.Advances[i]
+	lo := l.Layout
+	for i := e.Caret.Col; i < len(lo.Advances)-end; i++ {
+		adv := lo.Advances[i]
 		_, s := e.rr.runeAt(e.rr.caret)
 		e.rr.caret += s
 		e.Caret.x += adv

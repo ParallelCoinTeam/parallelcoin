@@ -1860,8 +1860,8 @@ func opcodeSHA1(op *parsedOpcode, vm *Engine) error {
 		Error(err)
 		return err
 	}
-	hash := sha1.Sum(buf)
-	vm.dstack.PushByteArray(hash[:])
+	hassh := sha1.Sum(buf)
+	vm.dstack.PushByteArray(hassh[:])
 	return nil
 }
 
@@ -1874,8 +1874,8 @@ func opcodeSHA256(op *parsedOpcode, vm *Engine) error {
 		Error(err)
 		return err
 	}
-	hash := sha256.Sum256(buf)
-	vm.dstack.PushByteArray(hash[:])
+	hassh := sha256.Sum256(buf)
+	vm.dstack.PushByteArray(hassh[:])
 	return nil
 }
 
@@ -1888,8 +1888,8 @@ func opcodeHash160(op *parsedOpcode, vm *Engine) error {
 		Error(err)
 		return err
 	}
-	hash := sha256.Sum256(buf)
-	vm.dstack.PushByteArray(calcHash(hash[:], ripemd160.New()))
+	hassh := sha256.Sum256(buf)
+	vm.dstack.PushByteArray(calcHash(hassh[:], ripemd160.New()))
 	return nil
 }
 
@@ -1970,7 +1970,7 @@ func opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 	// Get script starting from the most recent OP_CODESEPARATOR.
 	subScript := vm.subScript()
 	// Generate the signature hash based on the signature hash type.
-	var hash []byte
+	var hassh []byte
 	if vm.isWitnessVersionActive(0) {
 		var sigHashes *TxSigHashes
 		if vm.hashCache != nil {
@@ -1978,7 +1978,7 @@ func opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 		} else {
 			sigHashes = NewTxSigHashes(&vm.tx)
 		}
-		hash, err = calcWitnessSignatureHash(subScript, sigHashes, hashType,
+		hassh, err = calcWitnessSignatureHash(subScript, sigHashes, hashType,
 			&vm.tx, vm.txIdx, vm.inputAmount)
 		if err != nil {
 			Error(err)
@@ -1987,7 +1987,7 @@ func opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 	} else {
 		// Remove the signature since there is no way for a signature to sign itself.
 		subScript = removeOpcodeByData(subScript, fullSigBytes)
-		hash = calcSignatureHash(subScript, hashType, &vm.tx, vm.txIdx)
+		hassh = calcSignatureHash(subScript, hashType, &vm.tx, vm.txIdx)
 	}
 	pubKey, err := ec.ParsePubKey(pkBytes, ec.S256())
 	if err != nil {
@@ -2010,14 +2010,14 @@ func opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 	var valid bool
 	if vm.sigCache != nil {
 		var sigHash chainhash.Hash
-		copy(sigHash[:], hash)
+		copy(sigHash[:], hassh)
 		valid = vm.sigCache.Exists(sigHash, signature, pubKey)
-		if !valid && signature.Verify(hash, pubKey) {
+		if !valid && signature.Verify(hassh, pubKey) {
 			vm.sigCache.Add(sigHash, signature, pubKey)
 			valid = true
 		}
 	} else {
-		valid = signature.Verify(hash, pubKey)
+		valid = signature.Verify(hassh, pubKey)
 	}
 	if !valid && vm.hasFlag(ScriptVerifyNullFail) && len(sigBytes) > 0 {
 		str := "signature not empty on failed checksig"

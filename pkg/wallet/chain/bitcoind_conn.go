@@ -86,16 +86,16 @@ func (c *BitcoindConn) Start() error {
 		return nil
 	}
 	// Verify that the node is running on the expected network.
-	net, err := c.getCurrentNet()
+	netw, err := c.getCurrentNet()
 	if err != nil {
 		Error(err)
 		c.client.Disconnect()
 		return err
 	}
-	if net != c.chainParams.Net {
+	if netw != c.chainParams.Net {
 		c.client.Disconnect()
 		return fmt.Errorf("expected network %v, got %v",
-			c.chainParams.Net, net)
+			c.chainParams.Net, netw)
 	}
 	// Establish two different ZMQ connections to bitcoind to retrieve block and transaction event notifications. We'll
 	// use two as a separation of concern to ensure one type of event isn't dropped from the connection queue due to
