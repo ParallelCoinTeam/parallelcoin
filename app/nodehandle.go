@@ -24,7 +24,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		// runServiceCommand is only set to a real function on Windows. It is used to parse and execute service commands
 		// specified via the -s flag.
-		var runServiceCommand func(string) error
+		runServiceCommand := func(string) error { return nil }
 		// Service options which are only added on Windows.
 		serviceOpts := serviceOptions{}
 		// Perform service command and exit if specified. Invalid service commands show an appropriate error. Only runs
