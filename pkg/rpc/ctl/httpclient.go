@@ -57,6 +57,7 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, func(), error) {
 		pem, err := ioutil.ReadFile(*cfg.RPCCert)
 		if err != nil {
 			Error(err)
+			cancel()
 			return nil, nil, err
 		}
 		pool := x509.NewCertPool()
