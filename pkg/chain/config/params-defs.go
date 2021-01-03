@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math/big"
 	"time"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 )
@@ -22,8 +22,8 @@ var (
 	scriptHashAddrIDs    = make(map[byte]struct{})
 	bech32SegwitPrefixes = make(map[string]struct{})
 	hdPrivToPubKeyIDs    = make(map[[4]byte][]byte)
-	// AllOnes is 32 bytes of 0xff, the maximum target
-	AllOnes = func() big.Int {
+	// allOnes is 32 bytes of 0xff, the maximum target
+	allOnes = func() big.Int {
 		b := big.NewInt(1)
 		t := make([]byte, 32)
 		for i := range t {
@@ -51,10 +51,10 @@ var (
 	ScryptPowLimitBits = BigToCompact(&scryptPowLimit)
 	// regressionPowLbimit is the highest proof of work value a Bitcoin block can have for the regression test network.
 	// It is the value 2^255 - 1, all ones, 256 bits.
-	regressionPowLimit = &AllOnes
+	regressionPowLimit = &allOnes
 	// testnetBits = ScryptPowLimitBits testNet3PowLimit = ScryptPowLimit simNetPowLimit is the highest proof of work
 	// value a Bitcoin block can have for the simulation test network. It is the value 2^255 - 1, all ones, 256 bits.
-	simNetPowLimit = &AllOnes
+	simNetPowLimit = &allOnes
 	// Interval is the number of blocks in the averaging window
 	Interval int64 = 100
 	// MaxAdjustDown is the percentage hard limit for downwards difficulty adjustment (ie 90%)
@@ -124,8 +124,9 @@ const (
 	// DeploymentSegwit defines the rule change deployment ID for the Segregated Witness (segwit) soft-fork package. The
 	// segwit package includes the deployment of BIPS 141, 142, 144, 145, 147 and 173.
 	DeploymentSegwit
+	// DefinedDeployments is the number of currently defined deployments.
 	// NOTE: DefinedDeployments must always come last since it is used to determine how many defined deployments there
-	// currently are. DefinedDeployments is the number of currently defined deployments.
+	// currently are.
 	DefinedDeployments
 )
 

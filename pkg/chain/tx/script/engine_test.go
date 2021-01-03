@@ -169,7 +169,7 @@ func TestInvalidFlagCombinations(t *testing.T) {
 	pkScript := []byte{OP_NOP}
 	for i, test := range tests {
 		_, err := NewEngine(pkScript, tx, 0, test, nil, nil, -1)
-		if !IsErrorCode(err, ErrInvalidFlags) {
+		if !IsErrorCode(err, errInvalidFlags) {
 			t.Fatalf("TestInvalidFlagCombinations #%d unexpected "+
 				"error: %v", i, err)
 		}

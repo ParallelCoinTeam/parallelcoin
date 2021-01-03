@@ -161,7 +161,7 @@ func (rm *RecoveryManager) State() *RecoveryState {
 // possible inter-block and intra-block gap between used addresses of a particular branch.
 //
 // These are defined as:
-
+//
 //   - Inter-Block Gap: The maximum difference between the derived child indexes of the last addresses used in any block
 //   and the next address consumedby a later block.
 //

@@ -13,12 +13,11 @@ import (
 	"gioui.org/text"
 )
 
-type (
-	// Defining these as types gives flexibility later to create methods that modify them
-	Fonts      map[string]text.Typeface
-	Icons      map[string]*Icon
-	Collection []text.FontFace
-)
+// Defining these as types gives flexibility later to create methods that modify them
+
+type Fonts map[string]text.Typeface
+type Icons map[string]*Icon
+type Collection []text.FontFace
 
 func (c Collection) Font(font string) (out text.Font, err error) {
 	for i := range c {

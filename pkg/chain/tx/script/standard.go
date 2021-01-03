@@ -36,7 +36,9 @@ const (
 		ScriptVerifyDiscourageUpgradeableWitnessProgram |
 		ScriptVerifyMinimalIf |
 		ScriptVerifyWitnessPubKeyType
+	
 	// Classes of script payment known about in the blockchain.
+	
 	NonStandardTy         ScriptClass = iota // None of the recognized forms.
 	PubKeyTy                                 // Pay pubkey.
 	PubKeyHashTy                             // Pay pubkey hash.
@@ -389,7 +391,7 @@ func PayToAddrScript(addr util.Address) ([]byte, error) {
 }
 
 // NullDataScript creates a provably-prunable script containing OP_RETURN followed by the passed data. An ScriptError
-// with the error code ErrTooMuchNullData will be returned if the length of the passed data exceeds MaxDataCarrierSize.
+// with the error code errTooMuchNullData will be returned if the length of the passed data exceeds MaxDataCarrierSize.
 func NullDataScript(data []byte) ([]byte, error) {
 	if len(data) > MaxDataCarrierSize {
 		str := fmt.Sprintf("data size %d is larger than max "+
@@ -400,7 +402,7 @@ func NullDataScript(data []byte) ([]byte, error) {
 }
 
 // MultiSigScript returns a valid script for a multisignature redemption where nrequired of the keys in pubkeys are
-// required to have signed the transaction for success. An ScriptError with the error code ErrTooManyRequiredSigs will
+// required to have signed the transaction for success. An ScriptError with the error code errTooManyRequiredSigs will
 // be returned if nrequired is larger than the number of keys provided.
 func MultiSigScript(pubkeys []*util.AddressPubKey, nrequired int) ([]byte, error) {
 	if len(pubkeys) < nrequired {

@@ -3,7 +3,7 @@ package state
 import (
 	"net"
 	"time"
-
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -22,5 +22,5 @@ type Config struct {
 	DropTxIndex         bool
 	DropCfIndex         bool
 	Save                bool
-	//Miner               *worker.Worker
+	// Miner               *worker.Worker
 }

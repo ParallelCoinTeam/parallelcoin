@@ -8,21 +8,25 @@ import (
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
-// JoinType is an enum representing a particular type of "node join". A node join is a synchronization tool used to wait
-// until a subset of nodes have a consistent state with respect to an attribute.
+// JoinType is an enum representing a particular type of "node join". A node
+// join is a synchronization tool used to wait until a subset of nodes have a
+// consistent state with respect to an attribute.
 type JoinType uint8
 
 const (
-	// BlockC is a JoinType which waits until all nodes share the same block height.
+	// Blocks is a JoinType which waits until all nodes share the same block
+	// height.
 	Blocks JoinType = iota
 	// Mempools is a JoinType which blocks until all nodes have identical mempool.
 	Mempools
 )
 
-// JoinNodes is a synchronization tool used to block until all passed nodes are fully synced with respect to an
-// attribute. This function will block for a period of time, finally returning once all nodes are synced according to
-// the passed JoinType. This function be used to to ensure all active test harnesses are at a consistent state before
-// proceeding to an assertion or check within rpc tests.
+// JoinNodes is a synchronization tool used to block until all passed nodes are
+// fully synced with respect to an attribute. This function will block for a
+// period of time, finally returning once all nodes are synced according to the
+// passed JoinType. This function be used to to ensure all active test harnesses
+// are at a consistent state before proceeding to an assertion or check within
+// rpc tests.
 func JoinNodes(nodes []*Harness, joinType JoinType) error {
 	switch joinType {
 	case Blocks:
@@ -43,8 +47,9 @@ retry:
 			Error(err)
 			return err
 		}
-		// If all nodes have an identical mempool with respect to the first node, then we're done. Otherwise drop back
-		// to the top of the loop and retry after a short wait period.
+		// If all nodes have an identical mempool with respect to the first node,
+		// then we're done. Otherwise drop back to the top of the loop and retry
+		// after a short wait period.
 		for _, node := range nodes[1:] {
 			nodePool, err := node.Node.GetRawMempool()
 			if err != nil {

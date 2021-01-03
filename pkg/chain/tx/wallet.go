@@ -169,7 +169,7 @@ func (w *Wallet) requireChainClient() (chain.Interface, error) {
 	return chainClient, nil
 }
 
-// ChainClientChan returns the optional consensus RPC client associated with the wallet.
+// ChainClient returns the optional consensus RPC client associated with the wallet.
 //
 // This function is unstable and will be removed once sync logic is moved out of the wallet.
 func (w *Wallet) ChainClient() chain.Interface {
@@ -1671,7 +1671,7 @@ outputs:
 			Confirmations:   confirmations,
 			Generated:       generated,
 			BlockHash:       blockHashStr,
-			BlockIndex:      &blockIndex,
+			BlockIndex:      blockIndex,
 			BlockTime:       blockTime,
 			TxID:            txHashStr,
 			WalletConflicts: []string{},
@@ -1687,14 +1687,14 @@ outputs:
 		if send || spentCredit {
 			result.Category = "send"
 			result.Amount = -amountF64
-			result.Fee = &feeF64
+			result.Fee = feeF64
 			results = append(results, result)
 		}
 		if isCredit {
 			result.Account = accountName
 			result.Category = recvCat
 			result.Amount = amountF64
-			result.Fee = nil
+			result.Fee = 0
 			results = append(results, result)
 		}
 	}

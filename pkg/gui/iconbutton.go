@@ -62,22 +62,26 @@ func (b *IconButton) Scale(scale float32) *IconButton {
 	return b
 }
 
-// Inset sets the size of inset that goes in between the button background and the icon
+// ButtonInset sets the size of inset that goes in between the button background
+// and the icon
 func (b *IconButton) ButtonInset(inset float32) *IconButton {
 	b.inset = b.Inset(inset, b.button.Fn)
 	return b
 }
 
+// SetClick sets the function to run on click
 func (b *IconButton) SetClick(fn func()) *IconButton {
 	b.button.SetClick(fn)
 	return b
 }
 
+// SetPress sets the function to run on press
 func (b *IconButton) SetPress(fn func()) *IconButton {
 	b.button.SetPress(fn)
 	return b
 }
 
+// SetCancel sets the function to run on cancel (click but release outside)
 func (b *IconButton) SetCancel(fn func()) *IconButton {
 	b.button.SetCancel(fn)
 	return b

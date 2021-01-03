@@ -27,8 +27,8 @@ func GetInterface() (interfaces []net.Interface, addresses []string) {
 	// }
 	var routeableAddress string
 	for i := range nif {
-		//Debug(nif[i].Addrs())
-		//Debug(nif[i].HardwareAddr)
+		// Debug(nif[i].Addrs())
+		// Debug(nif[i].HardwareAddr)
 		// filter out known virtual devices
 		// microsoft hyper-v virtual interface
 		if strings.HasPrefix(nif[i].HardwareAddr.String(), "00:15:5d") {
@@ -36,7 +36,7 @@ func GetInterface() (interfaces []net.Interface, addresses []string) {
 		}
 		// todo: below here add discovered useful non-physical network interface tests like the one above
 		addrs, _ := nif[i].Addrs()
-		//Debug(addrs)
+		// Debug(addrs)
 		for j := range addrs {
 			// Debug(addresses[i].String())
 			if !strings.ContainsAny(addrs[j].String(), ":") {
@@ -47,12 +47,12 @@ func GetInterface() (interfaces []net.Interface, addresses []string) {
 				}
 				if routeableAddress != "" {
 					addresses = append(addresses, routeableAddress)
-
+					
 				}
 				break
 			}
 		}
-		//Debug(addresses)
+		// Debug(addresses)
 		if len(addresses) > 0 {
 			interfaces = append(interfaces, nif[i])
 		}

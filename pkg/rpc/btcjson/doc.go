@@ -1,4 +1,6 @@
-/*Package json provides primitives for working with the bitcoin JSON-RPC API.
+// Package btcjson provides primitives for working with the bitcoin JSON-RPC
+/*
+API.
 
 Overview
 

@@ -48,7 +48,7 @@ func checkMinimalDataEncoding(v []byte) error {
 	return nil
 }
 
-// Hash returns the number serialized as a little endian with a sign bit.
+// Bytes returns the number serialized as a little endian with a sign bit.
 // Example encodings:
 //       127 -> [0x7f]
 //      -127 -> [0xff]

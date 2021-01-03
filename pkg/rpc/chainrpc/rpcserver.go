@@ -226,7 +226,7 @@ type ServerSyncManager interface {
 	IsCurrent() bool
 	// SubmitBlock submits the provided block to the network after processing it locally.
 	SubmitBlock(block *util.Block, flags blockchain.BehaviorFlags) (bool, error)
-	// pause pauses the sync manager until the returned channel is closed.
+	// Pause pauses the sync manager until the returned channel is closed.
 	Pause() chan<- struct{}
 	// SyncPeerID returns the ID of the peer that is currently the peer being used to sync from or 0 if there is none.
 	SyncPeerID() int32
@@ -347,7 +347,8 @@ var (
 	//
 	// This is set by init because help references RPCHandlers and thus causes a dependency loop.
 	RPCHandlers map[string]CommandHandler
-	// RPCHandlersBeforeInit is
+	
+	// RPCLimited RPCHandlersBeforeInit is
 	//
 	// RPCHandlersBeforeInit = map[string]CommandHandler{
 	// 	"addnode": {
@@ -2235,6 +2236,7 @@ func handleDebugLevel(	s *RPCServer, cmd interface{}, closeChan <-qu.C) (interfa
 	return "Done.", nil
 }
 */
+
 // WitnessToHex formats the passed witness stack as a slice of hex-encoded strings to be used in a JSON response.
 func WitnessToHex(witness wire.TxWitness) []string {
 	// Ensure nil is returned when there are no entries versus an empty slice so it can properly be omitted as

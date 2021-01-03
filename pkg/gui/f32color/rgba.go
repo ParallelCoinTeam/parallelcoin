@@ -13,8 +13,8 @@ type RGBA struct {
 }
 
 // Array returns rgba values in a [4]float32 array.
-func (rgba RGBA) Array() [4]float32 {
-	return [4]float32{rgba.R, rgba.G, rgba.B, rgba.A}
+func (col RGBA) Array() [4]float32 {
+	return [4]float32{col.R, col.G, col.B, col.A}
 }
 
 // Float32 returns r, g, b, a values.
@@ -22,7 +22,7 @@ func (col RGBA) Float32() (r, g, b, a float32) {
 	return col.R, col.G, col.B, col.A
 }
 
-// SRGBA converts from linear to sRGB color space.
+// SRGB converts from linear to sRGB color space.
 func (col RGBA) SRGB() color.RGBA {
 	return color.RGBA{
 		R: uint8(linearTosRGB(col.R)*255 + .5),

@@ -182,27 +182,27 @@ func parseExpectedResult(expected string) ([]ErrorCode, error) {
 	case "OK":
 		return nil, nil
 	case "UNKNOWN_ERROR":
-		return []ErrorCode{ErrNumberTooBig, ErrMinimalData}, nil
+		return []ErrorCode{errNumberTooBig, errMinimalData}, nil
 	case "PUBKEYTYPE":
 		return []ErrorCode{ErrPubKeyType}, nil
 	case "SIG_DER":
-		return []ErrorCode{ErrSigTooShort, ErrSigTooLong,
-			ErrSigInvalidSeqID, ErrSigInvalidDataLen, ErrSigMissingSTypeID,
+		return []ErrorCode{errSigTooShort, errSigTooLong,
+			errSigInvalidSeqID, ErrSigInvalidDataLen, ErrSigMissingSTypeID,
 			ErrSigMissingSLen, ErrSigInvalidSLen,
 			ErrSigInvalidRIntID, ErrSigZeroRLen, ErrSigNegativeR,
 			ErrSigTooMuchRPadding, ErrSigInvalidSIntID,
 			ErrSigZeroSLen, ErrSigNegativeS, ErrSigTooMuchSPadding,
-			ErrInvalidSigHashType}, nil
+			errInvalidSigHashType}, nil
 	case "EVAL_FALSE":
-		return []ErrorCode{ErrEvalFalse, ErrEmptyStack}, nil
+		return []ErrorCode{errEvalFalse, errEmptyStack}, nil
 	case "EQUALVERIFY":
-		return []ErrorCode{ErrEqualVerify}, nil
+		return []ErrorCode{errEqualVerify}, nil
 	case "NULLFAIL":
 		return []ErrorCode{ErrNullFail}, nil
 	case "SIG_HIGH_S":
 		return []ErrorCode{ErrSigHighS}, nil
 	case "SIG_HASHTYPE":
-		return []ErrorCode{ErrInvalidSigHashType}, nil
+		return []ErrorCode{errInvalidSigHashType}, nil
 	case "SIG_NULLDUMMY":
 		return []ErrorCode{ErrSigNullDummy}, nil
 	case "SIG_PUSHONLY":
@@ -210,18 +210,18 @@ func parseExpectedResult(expected string) ([]ErrorCode, error) {
 	case "CLEANSTACK":
 		return []ErrorCode{ErrCleanStack}, nil
 	case "BAD_OPCODE":
-		return []ErrorCode{ErrReservedOpcode, ErrMalformedPush}, nil
+		return []ErrorCode{errReservedOpcode, errMalformedPush}, nil
 	case "UNBALANCED_CONDITIONAL":
-		return []ErrorCode{ErrUnbalancedConditional,
-			ErrInvalidStackOperation}, nil
+		return []ErrorCode{errUnbalancedConditional,
+			errInvalidStackOperation}, nil
 	case "OP_RETURN":
-		return []ErrorCode{ErrEarlyReturn}, nil
+		return []ErrorCode{errEarlyReturn}, nil
 	case "VERIFY":
-		return []ErrorCode{ErrVerify}, nil
+		return []ErrorCode{errVerify}, nil
 	case "INVALID_STACK_OPERATION", "INVALID_ALTSTACK_OPERATION":
-		return []ErrorCode{ErrInvalidStackOperation}, nil
+		return []ErrorCode{errInvalidStackOperation}, nil
 	case "DISABLED_OPCODE":
-		return []ErrorCode{ErrDisabledOpcode}, nil
+		return []ErrorCode{errDisabledOpcode}, nil
 	case "DISCOURAGE_UPGRADABLE_NOPS":
 		return []ErrorCode{ErrDiscourageUpgradableNOPs}, nil
 	case "PUSH_SIZE":
@@ -237,7 +237,7 @@ func parseExpectedResult(expected string) ([]ErrorCode, error) {
 	case "SIG_COUNT":
 		return []ErrorCode{ErrInvalidSignatureCount}, nil
 	case "MINIMALDATA":
-		return []ErrorCode{ErrMinimalData}, nil
+		return []ErrorCode{errMinimalData}, nil
 	case "NEGATIVE_LOCKTIME":
 		return []ErrorCode{ErrNegativeLockTime}, nil
 	case "UNSATISFIED_LOCKTIME":

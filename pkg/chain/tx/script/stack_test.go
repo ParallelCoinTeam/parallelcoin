@@ -61,7 +61,7 @@ func TestStack(t *testing.T) {
 				_, err := s.PeekByteArray(5)
 				return err
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -71,7 +71,7 @@ func TestStack(t *testing.T) {
 				_, err := s.PeekInt(5)
 				return err
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -81,7 +81,7 @@ func TestStack(t *testing.T) {
 				_, err := s.PeekBool(5)
 				return err
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -127,7 +127,7 @@ func TestStack(t *testing.T) {
 				}
 				return nil
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -169,7 +169,7 @@ func TestStack(t *testing.T) {
 				_, err := s.PopBool()
 				return err
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -391,7 +391,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.DupN(0)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -400,7 +400,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.DupN(-1)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -409,7 +409,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.DupN(2)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -534,7 +534,7 @@ func TestStack(t *testing.T) {
 				// bite off more than we can chew
 				return s.NipN(3)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			[][]byte{{2}, {3}},
 		},
 		{
@@ -552,7 +552,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.Tuck()
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -561,7 +561,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.Tuck()
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -606,7 +606,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.DropN(5)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -615,7 +615,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.DropN(0)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -642,7 +642,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.RotN(1)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -651,7 +651,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.RotN(0)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -678,7 +678,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.SwapN(1)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -687,7 +687,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.SwapN(0)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -714,7 +714,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.OverN(1)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -723,7 +723,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.OverN(0)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -750,7 +750,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.PickN(1)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -777,7 +777,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) error {
 				return s.RollN(1)
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 		{
@@ -874,7 +874,7 @@ func TestStack(t *testing.T) {
 				_, err := s.PopInt()
 				return err
 			},
-			scriptError(ErrInvalidStackOperation, ""),
+			scriptError(errInvalidStackOperation, ""),
 			nil,
 		},
 	}

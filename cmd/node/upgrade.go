@@ -123,7 +123,7 @@ func upgradeDBPaths(cx *conte.Xt) error {
 func upgradeDataPaths() error {
 	// No need to migrate if the old and new home paths are the same.
 	oldHomePath := oldPodHomeDir()
-	newHomePath := DefaultHomeDir
+	newHomePath := defaultHomeDir
 	if oldHomePath == newHomePath {
 		return nil
 	}
@@ -138,8 +138,8 @@ func upgradeDataPaths() error {
 			return err
 		}
 		// Move old pod.conf into new location if needed
-		oldConfPath := filepath.Join(oldHomePath, DefaultConfigFilename)
-		newConfPath := filepath.Join(newHomePath, DefaultConfigFilename)
+		oldConfPath := filepath.Join(oldHomePath, defaultConfigFilename)
+		newConfPath := filepath.Join(newHomePath, defaultConfigFilename)
 		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
 			err := os.Rename(oldConfPath, newConfPath)
 			if err != nil {
@@ -148,8 +148,8 @@ func upgradeDataPaths() error {
 			}
 		}
 		// Move old data directory into new location if needed
-		oldDataPath := filepath.Join(oldHomePath, DefaultDataDirname)
-		newDataPath := filepath.Join(newHomePath, DefaultDataDirname)
+		oldDataPath := filepath.Join(oldHomePath, defaultDataDirname)
+		newDataPath := filepath.Join(newHomePath, defaultDataDirname)
 		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
 			err := os.Rename(oldDataPath, newDataPath)
 			if err != nil {

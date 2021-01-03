@@ -113,7 +113,7 @@ func (r *RunUnit) Running() bool {
 	return r.running.Load()
 }
 
-// Run signals the run unit to start
+// Start signals the run unit to start
 func (r *RunUnit) Start() {
 	r.commandChan <- true
 }

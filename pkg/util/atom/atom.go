@@ -110,10 +110,7 @@ func (at *Hash) Swap(n chainhash.Hash) chainhash.Hash {
 	return o
 }
 
-// Hash is an atomic wrapper around chainhash.Hash
-// Note that there isn't really any reason to have CAS or arithmetic or
-// comparisons as it is fine to do these non-atomically between Load / Store and
-// they are (slightly) long operations)
+// Address is an atomic wrapper around util.Address
 type Address struct {
 	*atomic.String
 	ForNet *netparams.Params
@@ -126,8 +123,6 @@ func NewAddress(tt util.Address, forNet *netparams.Params) *Address {
 }
 
 // Load atomically loads the wrapped value.
-// The returned value copied so as to prevent mutation by concurrent users
-// of the atomic, as arrays, slices and maps are pass-by-reference variables
 func (at *Address) Load() util.Address {
 	addr, err := util.DecodeAddress(at.String.Load(), at.ForNet)
 	if err != nil {

@@ -30,6 +30,7 @@ import (
 )
 
 // Notification types
+
 type NotificationBlockConnected util.Block
 type NotificationBlockDisconnected util.Block
 type NotificationRegisterAddr struct {
@@ -39,6 +40,7 @@ type NotificationRegisterAddr struct {
 type NotificationRegisterBlocks WSClient
 
 // Notification control requests
+
 type NotificationRegisterClient WSClient
 type NotificationRegisterNewMempoolTxs WSClient
 type NotificationRegisterSpent struct {
@@ -759,6 +761,7 @@ func (f *WSClientFilter) ExistsUnspentOutPoint(op *wire.OutPoint) bool {
 // func (f *wsClientFilter) removeUnspentOutPoint(op *wire.OutPoint) {
 // 	delete(f.unspent, *op)
 // }
+
 // AddClient adds the passed websocket client to the notification manager.
 func (m *WSNtfnMgr) AddClient(wsc *WSClient) {
 	m.QueueNotification <- (*NotificationRegisterClient)(wsc)
@@ -1619,7 +1622,7 @@ func HandleNotifyBlocks(wsc *WSClient, icmd interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-// handleNotifyNewTransactions implements the notifynewtransactions command
+// HandleNotifyNewTransactions implements the notifynewtransactions command
 // extension for websocket connections.
 func HandleNotifyNewTransactions(
 	wsc *WSClient,

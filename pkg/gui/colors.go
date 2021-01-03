@@ -24,7 +24,7 @@ func HexNRGB(s string) (c color.NRGBA) {
 	return
 }
 
-// Get returns the named color from the map
+// GetNRGBAFromName returns the named color from the map
 func (c Colors) GetNRGBAFromName(co string) color.NRGBA {
 	c.Lock()
 	defer c.Unlock()

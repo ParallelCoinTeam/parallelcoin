@@ -5,13 +5,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	database "github.com/p9c/pod/pkg/db"
-
+	
 	"github.com/p9c/pod/pkg/comm/peer"
 	// This ensures the database drivers get registered
 	_ "github.com/p9c/pod/pkg/db/ffldb"
@@ -103,70 +103,42 @@ type serviceOptions struct {
 
 // A lotta constants that probably aren't being used
 const (
-	DefaultConfigFilename = "conf.json"
-	DefaultDataDirname    = "node"
-	// DefaultLogLevel              = "info"
-	DefaultLogDirname = "node"
-	// DefaultLogFilename           = "log"
-	// DefaultAddress               = "127.0.0.1"
+	defaultConfigFilename = "conf.json"
+	defaultDataDirname    = "node"
 	DefaultPort = "11047"
-	// DefaultRPCPort               = "11048"
-	// DefalutRPCAddr               = "127.0.0.1"
-	// DefaultRPCServer             = "127.0.0.1:11048"
-	// DefaultListener              = "127.0.0.1:11047"
 	DefaultRPCListener  = "127.0.0.1"
 	DefaultMaxPeers     = 23
 	DefaultBanDuration  = time.Hour * 24
 	DefaultBanThreshold = 100
-	// DefaultConnectTimeout        = time.Second * 30
 	DefaultMaxRPCClients        = 10
 	DefaultMaxRPCWebsockets     = 25
 	DefaultMaxRPCConcurrentReqs = 20
 	DefaultDbType               = "ffldb"
 	DefaultFreeTxRelayLimit     = 15.0
 	DefaultTrickleInterval      = peer.DefaultTrickleInterval
-	// DefaultBlockMinSize          = 80
 	DefaultBlockMaxSize = 200000
-	// DefaultBlockMinWeight        = 10
 	DefaultBlockMaxWeight = 3000000
 	BlockMaxSizeMin       = 1000
 	BlockMaxSizeMax       = blockchain.MaxBlockBaseSize - 1000
 	BlockMaxWeightMin     = 4000
 	BlockMaxWeightMax     = blockchain.MaxBlockWeight - 4000
-	// DefaultGenerate              = false
-	// DefaultGenThreads            = 1
-	// DefaultMinerListener         = "127.0.0.1:11011"
 	DefaultMaxOrphanTransactions = 100
-	// DefaultMaxOrphanTxSize       = 100000
 	DefaultSigCacheMaxSize = 100000
-	// These are set to default on because more often one wants them than not
-	// DefaultTxIndex   = true
-	// DefaultAddrIndex = true
-	// DefaultAlgo      = "random"
 )
 
 var (
-	// // DefaultConfigFile is
-	// DefaultConfigFile = filepath.Join(DefaultHomeDir, DefaultConfigFilename)
-	// // DefaultDataDir is
-	// DefaultDataDir = filepath.Join(DefaultHomeDir, DefaultDataDirname)
-	// DefaultHomeDir is
-	DefaultHomeDir = appdata.Dir("pod", false)
-	// // DefaultLogDir is
-	// DefaultLogDir = filepath.Join(DefaultHomeDir, DefaultLogDirname)
-	// DefaultRPCCertFile is
-	// DefaultRPCCertFile = filepath.Join(DefaultHomeDir, "rpc.cert")
-	// // DefaultRPCKeyFile is
-	// DefaultRPCKeyFile = filepath.Join(DefaultHomeDir, "rpc.key")
-	// // KnownDbTypes is
-	KnownDbTypes = database.SupportedDrivers()
+	// defaultHomeDir is the default home directory location (
+	// this should be centralised)
+	defaultHomeDir = appdata.Dir("pod", false)
+	// KnownDbTypes stores the currently supported database drivers
+	KnownDbTypes   = database.SupportedDrivers()
 	// runServiceCommand is only set to a real function on Windows.
 	// It is used to parse and execute service commands specified via the -s flag.
 	runServiceCommand func(string) error
 )
 
-// NewCheckpointFromStr parses checkpoints in the '<height>:<hash>' format.
-func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
+// newCheckpointFromStr parses checkpoints in the '<height>:<hash>' format.
+func newCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	parts := strings.Split(checkpoint, ":")
 	if len(parts) != 2 {
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
@@ -217,7 +189,7 @@ func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error)
 	}
 	checkpoints := make([]chaincfg.Checkpoint, len(checkpointStrings))
 	for i, cpString := range checkpointStrings {
-		checkpoint, err := NewCheckpointFromStr(cpString)
+		checkpoint, err := newCheckpointFromStr(cpString)
 		if err != nil {
 			Error(err)
 			return nil, err
@@ -237,8 +209,8 @@ func ValidDbType(dbType string) bool {
 	return false
 }
 
-// ValidLogLevel returns whether or not logLevel is a valid debug log level.
-func ValidLogLevel(logLevel string) bool {
+// validLogLevel returns whether or not logLevel is a valid debug log level.
+func validLogLevel(logLevel string) bool {
 	switch logLevel {
 	case "trace":
 		fallthrough

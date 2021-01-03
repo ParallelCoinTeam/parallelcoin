@@ -184,7 +184,7 @@ type cryptoKey struct {
 	snacl.CryptoKey
 }
 
-// Hash returns a copy of this crypto key's byte slice.
+// Bytes returns a copy of this crypto key's byte slice.
 func (ck *cryptoKey) Bytes() []byte {
 	return ck.CryptoKey[:]
 }

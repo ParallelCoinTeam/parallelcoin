@@ -9,8 +9,9 @@ import (
 )
 
 // Note: The following common types should never reference the Wallet type. Long term goal is to move these to their own
-// package so that the database access APIs can create them directly for the wallet to return. BlockIdentity identifies
-// a block, or the lack of one (used to describe an unmined transaction).
+// package so that the database access APIs can create them directly for the wallet to return.
+
+// BlockIdentity identifies a block, or the lack of one (used to describe an unmined transaction).
 type BlockIdentity struct {
 	Hash   chainhash.Hash
 	Height int32

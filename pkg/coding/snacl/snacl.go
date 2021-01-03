@@ -17,7 +17,7 @@ import (
 
 var (
 	prng = rand.Reader
-	// Error types and messages.
+	
 	ErrInvalidPassword = errors.New("invalid password")
 	ErrMalformed       = errors.New("malformed data")
 	ErrDecryptFailed   = errors.New("unable to decrypt")
@@ -25,7 +25,7 @@ var (
 
 // Various constants needed for encryption scheme.
 const (
-	// Expose secretbox's Overhead const here for convenience.
+	// Overhead const here expose secretbox's for convenience.
 	Overhead  = secretbox.Overhead
 	KeySize   = 32
 	NonceSize = 24

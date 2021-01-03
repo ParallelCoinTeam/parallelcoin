@@ -188,7 +188,6 @@ func (iter *dbCacheIterator) Prev() bool {
 // Seek positions the iterator at the first key/value pair that is greater than or equal to the passed seek key.
 //
 // Returns false if no suitable key was found.
-
 // This is part of the leveldb iterator.Iterator interface implementation.
 func (iter *dbCacheIterator) Seek(key []byte) bool {
 	// Seek to the provided key in both the database and cache iterators then choose the iterator that is both valid and

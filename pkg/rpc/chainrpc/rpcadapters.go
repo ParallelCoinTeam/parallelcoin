@@ -224,7 +224,7 @@ func (b *SyncManager) SubmitBlock(block *util.Block,
 	return b.syncMgr.ProcessBlock(block, flags)
 }
 
-// pause pauses the sync manager until the returned channel is closed.
+// Pause pauses the sync manager until the returned channel is closed.
 //
 // This function is safe for concurrent access and is part of the RPCServerSyncManager interface implementation.
 func (b *SyncManager) Pause() chan<- struct{} {
@@ -238,7 +238,8 @@ func (b *SyncManager) SyncPeerID() int32 {
 	return b.syncMgr.SyncPeerID()
 }
 
-// LocateBlocks returns the hashes of the blocks after the first known block in the provided locators until the provided
+// LocateHeaders returns the hashes of the blocks after the first known block in
+// the provided locators until the provided
 // stop hash or the current tip is reached, up to a max of wire.MaxBlockHeadersPerMsg hashes.
 //
 // This function is safe for concurrent access and is part of the RPCServerSyncManager interface implementation.

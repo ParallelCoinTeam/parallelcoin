@@ -25,7 +25,9 @@ const ( // Hash type bits from the end of a signature.
 	SigHashAnyOneCanPay SigHashType = 0x80
 	// sigHashMask defines the number of bits of the hash type which is used to identify which outputs are signed.
 	sigHashMask = 0x1f
+	
 	// These are the constants specified for maximums in individual scripts.
+	
 	MaxOpsPerScript       = 201 // Max number of non-push operations.
 	MaxPubKeysPerMultiSig = 20  // Multisig can't have more sigs than this.
 	MaxScriptElementSize  = 520 // Max bytes pushable to the stack.

@@ -611,7 +611,7 @@ func (b *bucket) CreateBucket(key []byte) (database.Bucket, error) {
 // Returns the following errors as required by the interface contract:
 //
 //   - ErrBucketNameRequired if the key is empty
-
+//
 //   - ErrIncompatibleValue if the key is otherwise invalid for the particular implementation
 //
 //   - ErrTxNotWritable if attempted against a read-only transaction

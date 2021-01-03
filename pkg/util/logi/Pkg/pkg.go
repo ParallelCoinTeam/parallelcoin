@@ -1,4 +1,4 @@
-// Package Package is a message type for logi package filtering
+// Package Pkg is a message type for logi package filtering
 package Pkg
 
 import (

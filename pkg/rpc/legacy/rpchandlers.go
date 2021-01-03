@@ -39,11 +39,12 @@ func NewCAPI(quit chan struct{}, timeout ...time.Duration) (c *CAPI) {
 }
 
 // Wrappers around RPC calls
+
 type CAPIClient struct {
 	*rpc.Client
 }
 
-// New creates a new client for a kopach_worker. Note that any kind of connection can be used here, other than the 
+// NewCAPIClient creates a new client for a kopach_worker. Note that any kind of connection can be used here, other than the
 // StdConn
 func NewCAPIClient(conn io.ReadWriteCloser) *CAPIClient {
 	return &CAPIClient{rpc.NewClient(conn)}

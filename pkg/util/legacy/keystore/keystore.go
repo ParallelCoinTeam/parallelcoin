@@ -717,6 +717,7 @@ func (s *Store) writeTo(w io.Writer) (n int64, err error) {
 }
 
 // TODO: set this automatically.
+
 // MarkDirty is
 func (s *Store) MarkDirty() {
 	s.mtx.Lock()
@@ -1400,10 +1401,11 @@ type WalletAddress interface {
 	AddrHash() string
 	// FirstBlock returns the first block an address could be in.
 	FirstBlock() int32
-	// Compressed returns true if the backing address was imported instead
+	// Imported returns true if the backing address was imported instead
 	// of being part of an address chain.
 	Imported() bool
-	// Compressed returns true if the backing address was created for a change output of a transaction.
+	// Change returns true if the backing address was created for a change output
+	// of a transaction.
 	Change() bool
 	// Compressed returns true if the backing address is compressed.
 	Compressed() bool
@@ -2463,13 +2465,13 @@ type scriptAddress struct {
 // ScriptAddress is an interface representing a Pay-to-Script-Hash style of bitcoind address.
 type ScriptAddress interface {
 	WalletAddress
-	// Returns the script associated with the address.
+	// Script Returns the script associated with the address.
 	Script() []byte
-	// Returns the class of the script associated with the address.
+	// ScriptClass Returns the class of the script associated with the address.
 	ScriptClass() txscript.ScriptClass
-	// Returns the addresses that are required to sign transactions from the script address.
+	// Addresses Returns the addresses that are required to sign transactions from the script address.
 	Addresses() []util.Address
-	// Returns the number of signatures required by the script address.
+	// RequiredSigs Returns the number of signatures required by the script address.
 	RequiredSigs() int
 }
 
@@ -2602,7 +2604,7 @@ func (sa *scriptAddress) WriteTo(w io.Writer) (n int64, err error) {
 	return n, nil
 }
 
-// address returns a util.AddressScriptHash for a btcAddress.
+// Address returns a util.AddressScriptHash for a btcAddress.
 func (sa *scriptAddress) Address() util.Address {
 	return sa.address
 }

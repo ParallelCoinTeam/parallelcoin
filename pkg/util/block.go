@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 )
@@ -40,8 +40,9 @@ func (b *Block) MsgBlock() *wire.MsgBlock {
 	return b.msgBlock
 }
 
-// Hash returns the serialized bytes for the Block. This is equivalent to calling Serialize on the underlying
-// wire.MsgBlock, however it caches the result so subsequent calls are more efficient.
+// Bytes returns the serialized bytes for the Block.
+// This is equivalent to calling Serialize on the underlying wire.MsgBlock,
+// however it caches the result so subsequent calls are more efficient.
 func (b *Block) Bytes() ([]byte, error) {
 	// Return the cached serialized bytes if it has already been generated.
 	if len(b.serializedBlock) != 0 {

@@ -410,7 +410,8 @@ func (f *fieldVal) PutBytes(b *[32]byte) {
 	b[0] = byte((f.n[9] >> 14) & eightBitsMask)
 }
 
-// Hash unpacks the field value to a 32-byte big-endian value. See PutBytes for a variant that allows the a buffer to be
+// Bytes unpacks the field value to a 32-byte big-endian value.
+// See PutBytes for a variant that allows the a buffer to be
 // passed which can be useful to to cut down on the number of allocations by allowing the caller to reuse a buffer.
 //
 // The field value must be normalized for this function to return correct result.
@@ -931,7 +932,7 @@ func (f *fieldVal) Square() *fieldVal {
 // The field value is returned to support chaining.
 //
 // This enables syntax like:
-
+//
 //   f3.SquareVal(f).Mul(f)
 //
 // so that

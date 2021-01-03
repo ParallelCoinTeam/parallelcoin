@@ -24,7 +24,7 @@ type Label struct {
 	shaper   text.Shaper
 }
 
-// Text creates a label that prints a block of text
+// Label creates a label that prints a block of text
 func (w *Window) Label() (l *Label) {
 	var f text.Font
 	if fon, err := w.Theme.collection.Font("plan9"); !Check(err) {

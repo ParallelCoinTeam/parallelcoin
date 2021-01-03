@@ -3,7 +3,7 @@ package txsort
 import (
 	"bytes"
 	"sort"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 )
@@ -48,6 +48,7 @@ type sortableOutputSlice []*wire.TxOut
 
 // For SortableInputSlice and SortableOutputSlice, three functions are needed to make it sortable with sort.Sort() --
 // Len, Less, and Swap Len and Swap are trivial. Less is BIP 69 specific.
+
 func (s sortableInputSlice) Len() int  { return len(s) }
 func (s sortableOutputSlice) Len() int { return len(s) }
 func (s sortableOutputSlice) Swap(i, j int) {
@@ -57,6 +58,7 @@ func (s sortableInputSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 // Input comparison function.
 // First sort based on input hash (reversed / rpc-style), then index.
+
 func (s sortableInputSlice) Less(i, j int) bool {
 	// Input hashes are the same, so compare the index.
 	ihash := s[i].PreviousOutPoint.Hash
@@ -75,6 +77,7 @@ func (s sortableInputSlice) Less(i, j int) bool {
 
 // Output comparison function.
 // First sort based on amount (smallest first), then PkScript.
+
 func (s sortableOutputSlice) Less(i, j int) bool {
 	if s[i].Value == s[j].Value {
 		return bytes.Compare(s[i].PkScript, s[j].PkScript) < 0

@@ -161,7 +161,8 @@ func FromNBytes(P uint8, M uint64, d []byte) (*Filter, error) {
 	return FromBytes(uint32(N), P, M, buffer.Bytes())
 }
 
-// Hash returns the serialized format of the GCS filter, which does not include N or P (returned by separate methods) or
+// Bytes returns the serialized format of the GCS filter,
+// which does not include N or P (returned by separate methods) or
 // the key used by SipHash.
 func (f *Filter) Bytes() ([]byte, error) {
 	filterData := make([]byte, len(f.filterData))

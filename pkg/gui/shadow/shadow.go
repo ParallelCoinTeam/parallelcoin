@@ -22,7 +22,7 @@ func Shadow(gtx l.Context, cornerRadius, elevation unit.Value, shadowColor color
 	return content(gtx)
 }
 
-//TODO: Shadow directions
+// TODO: Shadow directions
 func layoutShadow(gtx l.Context, r f32.Rectangle, elevation unit.Value, rr float32, shadowColor color.NRGBA) {
 	if elevation.V <= 0 {
 		return

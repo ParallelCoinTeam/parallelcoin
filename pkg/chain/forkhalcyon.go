@@ -7,7 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 )
 
-// calcNextRequiredDifficultyHalcyon calculates the required difficulty for the block after the passed previous block
+// CalcNextRequiredDifficultyHalcyon calculates the required difficulty for the block after the passed previous block
 // node based on the difficulty retarget rules. This function differs from the exported CalcNextRequiredDifficulty in
 // that the exported version uses the current best chain as the previous block node while this function accepts any
 // block node.

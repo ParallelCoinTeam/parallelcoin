@@ -41,8 +41,8 @@ var (
 var interruptCallbacks []func()
 var interruptCallbackSources []string
 
-// Receiver listens for interrupt signals, registers interrupt callbacks, and responds to custom shutdown signals as
-// required
+// Listener listens for interrupt signals, registers interrupt callbacks,
+// and responds to custom shutdown signals as required
 func Listener() {
 	invokeCallbacks := func() {
 		Debug("running interrupt callbacks", len(interruptCallbacks), interruptCallbackSources)

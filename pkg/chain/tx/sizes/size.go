@@ -1,5 +1,6 @@
-// Copyright (c) 2016 The btcsuite developers
+// Package txsizes Copyright (c) 2016 The btcsuite developers
 package txsizes
+
 
 import (
 	blockchain "github.com/p9c/pod/pkg/chain"

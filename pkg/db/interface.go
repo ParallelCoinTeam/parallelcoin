@@ -336,10 +336,6 @@ type Tx interface {
 	// after a transaction has ended results in undefined behavior. This constraint prevents additional data copies and
 	// allows support for memory-mapped database implementations.
 	FetchBlockRegions(regions []BlockRegion) ([][]byte, error)
-	// ******************************************************************
-	// Methods related to both atomic metadata storage and block storage.
-	// ******************************************************************
-	//
 	// Commit commits all changes that have been made to the metadata or block storage. Depending on the backend
 	// implementation this could be to a cache that is periodically synced to persistent storage or directly to
 	// persistent storage.

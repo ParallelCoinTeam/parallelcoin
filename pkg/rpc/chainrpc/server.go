@@ -492,7 +492,7 @@ func (n *Node) Stop() (err error) {
 	return
 }
 
-// Transaction has one confirmation on the main chain. Now we can mark it as no longer needing rebroadcasting.
+// TransactionConfirmed has one confirmation on the main chain. Now we can mark it as no longer needing rebroadcasting.
 func (n *Node) TransactionConfirmed(tx *util.Tx) {
 	// Rebroadcasting is only necessary when the RPC server is active.
 	for i := range n.RPCServers {
@@ -832,7 +832,7 @@ func (n *Node) HandleRelayInvMsg(state *PeerState, msg RelayMsg) {
 	)
 }
 
-// handleUpdatePeerHeight updates the heights of all peers who were known to announce a block we recently accepted.
+// HandleUpdatePeerHeights updates the heights of all peers who were known to announce a block we recently accepted.
 func (n *Node) HandleUpdatePeerHeights(
 	state *PeerState,
 	umsg UpdatePeerHeightsMsg,
@@ -1748,7 +1748,7 @@ func (np *NodePeer) OnGetCFilters(
 	}
 }
 
-// handleGetData is invoked when a peer receives a getdata bitcoin message and is used to deliver block and transaction
+// OnGetData is invoked when a peer receives a getdata bitcoin message and is used to deliver block and transaction
 // information.
 func (np *NodePeer) OnGetData(_ *peer.Peer, msg *wire.MsgGetData) {
 	numAdded := 0

@@ -13,8 +13,8 @@ import (
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
-// A bunch of constants
 const (
+	// WalletDbName is the default name of the wallet
 	WalletDbName = "wallet.db"
 )
 

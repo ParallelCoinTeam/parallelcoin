@@ -52,7 +52,7 @@ func (w *Window) Checkable() *Checkable {
 	}
 }
 
-// Text sets the label on the checkbox
+// Label sets the label on the checkbox
 func (c *Checkable) Label(txt string) *Checkable {
 	c.label = txt
 	return c

@@ -79,8 +79,9 @@ type ReadWriteBucket interface {
 	// Delete removes the specified key from the bucket. Deleting a key that does not exist does not return an error.
 	// Returns ErrTxNotWritable if attempted against a read-only transaction.
 	Delete(key []byte) error
-	// Cursor returns a new cursor, allowing for iteration over the bucket's key/value pairs and nested buckets in
-	// forward or backward order.
+	
+	// ReadWriteCursor returns a new cursor, allowing for iteration over the bucket's key/value pairs and nested buckets
+	// in forward or backward order.
 	ReadWriteCursor() ReadWriteCursor
 }
 

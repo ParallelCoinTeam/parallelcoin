@@ -13,7 +13,7 @@ func (th *Theme) Flex() (out *Flex) {
 	return new(Flex)
 }
 
-// Flex creates a new flex layout
+// VFlex creates a new vertical flex layout
 func (th *Theme) VFlex() (out *Flex) {
 	return new(Flex).Vertical()
 }

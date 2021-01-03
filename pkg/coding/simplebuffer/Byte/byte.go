@@ -1,6 +1,6 @@
 package Byte
 
-// Bytes plain old bytes. Maximum length from 32 bits int
+// Byte - plain old byte
 type Byte struct {
 	Byte byte
 }

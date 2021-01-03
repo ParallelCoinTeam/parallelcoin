@@ -25,20 +25,22 @@ type opcode struct {
 	opfunc func(*parsedOpcode, *Engine) error
 }
 
+	// These constants are the values of the official opcodes used on the btc
+	// wiki, in bitcoin core and in most if not all other references and software
+	// related to handling DUO scripts.
+
 const (
-	// These constants are the values of the official opcodes used on the btc wiki, in bitcoin core and in most if not
-	// all other references and software related to handling DUO scripts.
-	OP_0                   = 0x00 // 0
-	OP_FALSE               = 0x00 // 0 - AKA OP_0
-	OP_DATA_1              = 0x01 // 1
-	OP_DATA_2              = 0x02 // 2
-	OP_DATA_3              = 0x03 // 3
-	OP_DATA_4              = 0x04 // 4
-	OP_DATA_5              = 0x05 // 5
-	OP_DATA_6              = 0x06 // 6
-	OP_DATA_7              = 0x07 // 7
-	OP_DATA_8              = 0x08 // 8
-	OP_DATA_9              = 0x09 // 9
+	OP_0      = 0x00              // 0
+	OP_FALSE  = 0x00              // 0 - AKA OP_0
+	OP_DATA_1 = 0x01              // 1
+	OP_DATA_2 = 0x02              // 2
+	OP_DATA_3 = 0x03              // 3
+	OP_DATA_4 = 0x04              // 4
+	OP_DATA_5 = 0x05              // 5
+	OP_DATA_6 = 0x06              // 6
+	OP_DATA_7 = 0x07              // 7
+	OP_DATA_8 = 0x08              // 8
+	OP_DATA_9 = 0x09              // 9
 	OP_DATA_10             = 0x0a // 10
 	OP_DATA_11             = 0x0b // 11
 	OP_DATA_12             = 0x0c // 12
@@ -811,7 +813,7 @@ func (pop *parsedOpcode) bytes() ([]byte, error) {
 func opcodeDisabled(op *parsedOpcode, vm *Engine) error {
 	str := fmt.Sprintf("attempt to execute disabled opcode %s",
 		op.opcode.name)
-	return scriptError(ErrDisabledOpcode, str)
+		return scriptError(ErrDisabledOpcode, str)
 }
 
 // opcodeReserved is a common handler for all reserved opcodes. It returns an appropriate error indicating the opcode is

@@ -54,7 +54,7 @@ type CellPriority struct {
 
 type CellPriorities []CellPriority
 
-// sort a cell row by priority
+// Len sorts a cell row by priority
 func (c CellPriorities) Len() int {
 	return len(c)
 }

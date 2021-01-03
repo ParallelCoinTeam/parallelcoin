@@ -52,7 +52,7 @@ type Block struct {
 //  account support, but do the slow thing instead of the easy thing since the db can be fixed later, and we want the api
 //  correct now.
 
-//  NotificationServer is a server that interested clients may hook into to receive notifications of changes
+// NotificationServer is a server that interested clients may hook into to receive notifications of changes
 //  in a wallet. A client is created for each registered notification. Clients are guaranteed to receive messages in the
 //  order wallet created them, but there is no guaranteed synchronization between different clients.
 type NotificationServer struct {
