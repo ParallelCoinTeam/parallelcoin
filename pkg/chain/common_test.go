@@ -73,7 +73,7 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 	}()
 	var block *util.Block
 	height := int64(1)
-	for err = nil; err == nil; height++ {
+	for ;; height++ {
 		var rintbuf uint32
 		err = binary.Read(dr, binary.LittleEndian, &rintbuf)
 		if err == io.EOF {
