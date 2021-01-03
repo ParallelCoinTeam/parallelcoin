@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
+	
 	"github.com/p9c/pod/pkg/db/walletdb"
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
@@ -27,8 +27,14 @@ func ExampleCreate() {
 		walletdb.Error(err)
 		return
 	}
-	defer os.Remove(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.Remove(dbPath); walletdb.Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); walletdb.Check(err) {
+		}
+	}()
 	// Output:
 }
 
@@ -44,8 +50,10 @@ func exampleLoadDB() (walletdb.DB, func(), error) {
 		return nil, nil, err
 	}
 	teardownFunc := func() {
-		db.Close()
-		os.Remove(dbPath)
+		if err := db.Close(); walletdb.Check(err) {
+		}
+		if err := os.Remove(dbPath); walletdb.Check(err) {
+		}
 	}
 	exampleNum++
 	return db, teardownFunc, err
@@ -103,8 +111,14 @@ func Example_basicUsage() {
 		walletdb.Error(err)
 		return
 	}
-	defer os.Remove(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.Remove(dbPath); walletdb.Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); walletdb.Check(err) {
+		}
+	}()
 	// Get or create a bucket in the database as needed. This bucket is what is typically passed to specific
 	// sub-packages so they have their own area to work in without worrying about conflicting keys.
 	bucketKey := []byte("walletsubpackage")

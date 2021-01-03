@@ -3,11 +3,12 @@ package connmgr
 import (
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
 // maxFailedAttempts is the maximum number of successive failed connection attempts after which network failure is
@@ -220,7 +221,8 @@ out:
 				connReq := msg.c
 				if _, ok := pending[connReq.id]; !ok {
 					if msg.conn != nil {
-						msg.conn.Close()
+						if err := msg.conn.Close(); Check(err) {
+						}
 					}
 					Debug("ignoring connection for canceled connreq", connReq)
 					continue
@@ -254,7 +256,8 @@ out:
 				Trace("disconnected from", connReq)
 				delete(conns, msg.id)
 				if connReq.conn != nil {
-					connReq.conn.Close()
+					if err := connReq.conn.Close(); Check(err) {
+					}
 				}
 				if cm.Cfg.OnDisconnection != nil {
 					go cm.Cfg.OnDisconnection(connReq)

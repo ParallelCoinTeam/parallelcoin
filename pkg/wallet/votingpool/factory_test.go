@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
@@ -328,8 +328,10 @@ func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Poo
 	}
 	tearDownFunc = func() {
 		addrMgr.Close()
-		db.Close()
-		os.RemoveAll(dir)
+		if err := db.Close(); Check(err) {
+		}
+		if err := os.RemoveAll(dir); Check(err) {
+		}
 	}
 	return tearDownFunc, db, pool
 }

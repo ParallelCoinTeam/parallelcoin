@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -237,8 +237,10 @@ func createWalletDB() (walletdb.DB, func(), error) {
 		return nil, nil, err
 	}
 	dbTearDown := func() {
-		db.Close()
-		os.RemoveAll(dir)
+		if err := db.Close(); votingpool.Check(err) {
+		}
+		if err := os.RemoveAll(dir); votingpool.Check(err) {
+		}
 	}
 	return db, dbTearDown, nil
 }

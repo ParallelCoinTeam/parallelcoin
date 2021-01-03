@@ -6,9 +6,10 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
-
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/db/ffldb"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -90,8 +91,14 @@ func TestCreateOpenFail(t *testing.T) {
 		t.Errorf("Create: unexpected error: %v", err)
 		return
 	}
-	defer os.RemoveAll(dbPath)
-	db.Close()
+	defer func() {
+		if err := os.RemoveAll(dbPath); ffldb.Check(err) {
+		}
+	}()
+	func() {
+		if err := db.Close(); ffldb.Check(err) {
+		}
+	}()
 	wantErrCode = database.ErrDbNotOpen
 	err = db.View(func(tx database.Tx) error {
 		return nil
@@ -134,8 +141,14 @@ func TestPersistence(t *testing.T) {
 		t.Errorf("Failed to create test database (%s) %v", dbType, err)
 		return
 	}
-	defer os.RemoveAll(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.RemoveAll(dbPath); ffldb.Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); ffldb.Check(err) {
+		}
+	}()
 	// Create a bucket, put some values into it, and store a block so they can be tested for existence on re-open.
 	bucket1Key := []byte("bucket1")
 	storeValues := map[string]string{
@@ -173,13 +186,17 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	// Close and reopen the database to ensure the values persist.
-	db.Close()
+	if err := db.Close(); ffldb.Check(err) {
+	}
 	db, err = database.Open(dbType, dbPath, blockDataNet)
 	if err != nil {
 		t.Errorf("Failed to open test database (%s) %v", dbType, err)
 		return
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); ffldb.Check(err) {
+		}
+	}()
 	// Ensure the values previously stored in the 3rd namespace still exist and are correct.
 	err = db.View(func(tx database.Tx) error {
 		metadataBucket := tx.Metadata()

@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"path/filepath"
-
-	log "github.com/p9c/pod/pkg/util/logi"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -50,7 +48,7 @@ func findCandidates(
 	if latestCheckpoint == nil {
 		// Set the latest checkpoint to the genesis block if there isn't
 		// already one.
-		latestCheckpoint = &netparams.Checkpoint{
+		latestCheckpoint = &chaincfg.Checkpoint{
 			Hash:   activeNetParams.GenesisHash,
 			Height: 0,
 		}
@@ -76,7 +74,7 @@ func findCandidates(
 	// Indeterminate progress setup.
 	numBlocksToTest := block.Height() - requiredHeight
 	progressInterval := (numBlocksToTest / 100) + 1 // min 1
-	log.Print("Searching for candidates")
+	fmt.Print("Searching for candidates")
 	defer fmt.Println()
 	// Loop backwards through the chain to find checkpoint candidates.
 	candidates := make([]*chaincfg.Checkpoint, 0, cfg.NumCandidates)
@@ -84,7 +82,7 @@ func findCandidates(
 	for len(candidates) < cfg.NumCandidates && block.Height() > requiredHeight {
 		// Display progress.
 		if numTested%progressInterval == 0 {
-			log.Print(".")
+			fmt.Print(".")
 		}
 		// Determine if this block is a checkpoint candidate.
 		isCandidate, err := chain.IsCheckpointCandidate(block)

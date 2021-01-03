@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
-
+	
 	"github.com/p9c/pod/pkg/db/walletdb"
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
@@ -49,7 +49,8 @@ func TestAddDuplicateDriver(t *testing.T) {
 		t.Errorf("failed to create database: %v", err)
 		return
 	}
-	db.Close()
+	if err := db.Close(); walletdb.Check(err) {
+	}
 	_ = os.Remove(dbPath)
 }
 

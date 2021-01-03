@@ -6,7 +6,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
-
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -26,9 +26,10 @@ func createTestDatabase() (func(), FilterDatabase, error) {
 		return nil, nil, err
 	}
 	cleanUp := func() {
-
-		os.RemoveAll(tempDir)
-		db.Close()
+		if err := os.RemoveAll(tempDir); Check(err) {
+		}
+		if err := db.Close(); Check(err) {
+		}
 	}
 	filterDB, err := New(db, netparams.SimNetParams)
 	if err != nil {
@@ -54,7 +55,7 @@ func TestGenesisFilterCreation(t *testing.T) {
 	if regGenesisFilter == nil {
 		t.Fatalf("regular genesis filter is nil")
 	}
-
+	
 }
 func genRandFilter(numElements uint32) (*gcs.Filter, error) {
 	elements := make([][]byte, numElements)
@@ -102,12 +103,12 @@ func TestFilterStorage(t *testing.T) {
 	// With the filter stored, we should be able to retrieve the filter without any issue, and it should match the
 	// stored filter exactly.
 	regFilterDB, err := database.FetchFilter(&randHash, RegularFilter)
-
+	
 	if err != nil {
 		t.Fatalf("unable to retrieve reg filter: %v", err)
 	}
 	if !reflect.DeepEqual(regFilter, regFilterDB) {
-
+		
 		t.Fatalf("regular filter doesn't match!")
 	}
 }

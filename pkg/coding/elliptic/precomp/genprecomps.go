@@ -32,7 +32,8 @@ func main() {
 		Error(err)
 		os.Exit(1)
 	}
-	w.Close()
+	if err := w.Close(); Check(err) {
+	}
 	
 	// Encode the compressed byte points with base64.
 	encoded := make([]byte, base64.StdEncoding.EncodedLen(compressed.Len()))

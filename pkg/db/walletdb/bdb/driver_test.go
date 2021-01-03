@@ -5,8 +5,9 @@ import (
 	"os"
 	"reflect"
 	"testing"
-
+	
 	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/db/walletdb/bdb"
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
 
@@ -63,8 +64,12 @@ func TestCreateOpenFail(t *testing.T) {
 		t.Errorf("Create: unexpected error: %v", err)
 		return
 	}
-	defer os.Remove(dbPath)
-	db.Close()
+	defer func() {
+		if err := os.Remove(dbPath); bdb.Check(err) {
+		}
+	}()
+	if err := db.Close(); bdb.Check(err) {
+	}
 	wantErr = walletdb.ErrDbNotOpen
 	if _, err := db.BeginReadTx(); err != wantErr {
 		t.Errorf("Namespace: did not receive expected error - got %v, "+
@@ -82,8 +87,14 @@ func TestPersistence(t *testing.T) {
 		t.Errorf("Failed to create test database (%s) %v", dbType, err)
 		return
 	}
-	defer os.Remove(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.Remove(dbPath); bdb.Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); bdb.Check(err) {
+		}
+	}()
 	// Create a namespace and put some values into it so they can be tested for existence on re-open.
 	storeValues := map[string]string{
 		"ns1key1": "foo1",
@@ -108,13 +119,17 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	// Close and reopen the database to ensure the values persist.
-	db.Close()
+		if err := db.Close(); bdb.Check(err) {
+		}
 	db, err = walletdb.Open(dbType, dbPath)
 	if err != nil {
 		t.Errorf("failed to open test database (%s) %v", dbType, err)
 		return
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); bdb.Check(err) {
+		}
+	}()
 	// Ensure the values previously stored in the 3rd namespace still exist and are correct.
 	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
 		ns1 := tx.ReadBucket(ns1Key)

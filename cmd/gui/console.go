@@ -209,7 +209,10 @@ func (wg *WalletGUI) ConsolePage() *Console {
 		c.editor.Focus()
 	}
 	copyClickableFn := func() {
-		go clipboard.WriteAll(c.editor.Text())
+		go func() {
+			if err := clipboard.WriteAll(c.editor.Text()); Check(err) {
+			}
+		}()
 		c.editor.Focus()
 	}
 	pasteClickableFn := func() {
@@ -423,7 +426,10 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 							Color(color).
 							Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 							SetClick(func() {
-								go clipboard.WriteAll(res)
+								go func() {
+									if err := clipboard.WriteAll(res); Check(err) {
+									}
+								}()
 							}).Fn,
 						).Fn(gtx)
 				}),
@@ -443,7 +449,10 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 							Color(color).
 							Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 							SetClick(func() {
-								go clipboard.WriteAll(fmt.Sprint(res))
+								go func() {
+									if err := clipboard.WriteAll(fmt.Sprint(res)); Check(err) {
+									}
+								}()
 							}).Fn,
 						).Fn(gtx)
 					// return c.th.ButtonLayout(clk).Embed(c.th.Body1().Color(color).Fn).Fn(gtx)
@@ -473,7 +482,10 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 						Color(color).
 						Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 						SetClick(func() {
-							go clipboard.WriteAll(res)
+							go func() {
+								if err := clipboard.WriteAll(res); Check(err) {
+								}
+							}()
 						}).Fn,
 					).Fn(gtx)
 			}),
@@ -493,7 +505,10 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 						Color(color).
 						Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 						SetClick(func() {
-							go clipboard.WriteAll(fmt.Sprint(res))
+							go func() {
+								if err := clipboard.WriteAll(fmt.Sprint(res)); Check(err) {
+								}
+							}()
 						}).Fn,
 					).Fn(gtx)
 				// return c.th.ButtonLayout(clk).Embed(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).Fn(gtx)

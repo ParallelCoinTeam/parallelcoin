@@ -16,5 +16,6 @@ func main() {
 	Info("reply:", client.Say("worker"))
 	Info("calling Hello.Bye")
 	Info("reply:", client.Bye())
-	cmd.Kill()
+	if err := cmd.Kill(); Check(err) {
+	}
 }

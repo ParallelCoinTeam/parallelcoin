@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"os"
 	"path/filepath"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
@@ -29,8 +29,14 @@ func ExampleBlockChain_ProcessBlock() {
 		log.Printf("Failed to create database: %v\n", err)
 		return
 	}
-	defer os.RemoveAll(dbPath)
-	defer db.Close()
+	defer func() {
+		if err := os.RemoveAll(dbPath); blockchain.Check(err) {
+		}
+	}()
+	defer func() {
+		if err := db.Close(); blockchain.Check(err) {
+		}
+	}()
 	// Create a new BlockChain instance using the underlying database for the main bitcoin network. This example does
 	// not demonstrate some of the other available configuration options such as specifying a notification callback and
 	// signature cache. Also, the caller would ordinarily keep a reference to the median time source and add time values

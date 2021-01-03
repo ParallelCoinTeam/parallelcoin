@@ -7,8 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/db/walletdb"
 	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
@@ -231,8 +232,10 @@ func emptyDB(t *testing.T) (tearDownFunc func(), db walletdb.DB) {
 		t.Fatalf("createDbNamespace: unexpected error: %v", err)
 	}
 	tearDownFunc = func() {
-		db.Close()
-		_ = os.RemoveAll(dirName)
+		if err := db.Close(); addrmgr.Check(err) {
+		}
+		if err := os.RemoveAll(dirName); addrmgr.Check(err) {
+		}
 	}
 	return
 }
@@ -267,13 +270,17 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 		return err
 	})
 	if err != nil {
-		db.Close()
+		func() {
+			if err := db.Close(); addrmgr.Check(err) {
+			}
+		}()
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("Failed to create Manager: %v", err)
 	}
 	tearDownFunc = func() {
 		mgr.Close()
-		db.Close()
+		if err := db.Close(); addrmgr.Check(err) {
+		}
 		_ = os.RemoveAll(dirName)
 	}
 	return tearDownFunc, db, mgr
