@@ -33,7 +33,7 @@ func TestSigCacheAddExists(t *testing.T) {
 	// Generate a random sigCache entry triplet.
 	msg1, sig1, key1, err := genRandomSig()
 	if err != nil {
-		t.Errorf("unable to generate random signature test data")
+		t.Fatalf("unable to generate random signature test data")
 	}
 	// Add the triplet to the signature cache.
 	sigCache.Add(*msg1, sig1, key1)
@@ -97,7 +97,7 @@ func TestSigCacheAddMaxEntriesZeroOrNegative(t *testing.T) {
 	// Generate a random sigCache entry triplet.
 	msg1, sig1, key1, err := genRandomSig()
 	if err != nil {
-		t.Errorf("unable to generate random signature test data")
+		t.Fatalf("unable to generate random signature test data")
 	}
 	// Add the triplet to the signature cache.
 	sigCache.Add(*msg1, sig1, key1)

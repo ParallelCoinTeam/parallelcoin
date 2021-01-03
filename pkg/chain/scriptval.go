@@ -2,10 +2,11 @@ package blockchain
 
 import (
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
 	"runtime"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/pkg/chain/hardfork"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -139,7 +140,7 @@ func (v *txValidator) Validate(items []*txValidateItem) error {
 	for processedItems < numInputs {
 		// Only send items while there are still items that need to be processed. The select statement will never select
 		// a nil channel.
-		var validateChan chan *txValidateItem
+		validateChan := make(chan *txValidateItem)
 		var item *txValidateItem
 		if currentItem < numInputs {
 			validateChan = v.validateChan

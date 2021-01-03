@@ -191,13 +191,15 @@ func (t *Mutable) Delete(key []byte) {
 		parent = child
 	}
 	// Delete the node, which is now a leaf node, by disconnecting it from its parent.
-	if parent.right == node {
-		parent.right = nil
-	} else {
-		parent.left = nil
+	if parent != nil {
+		if parent.right == node {
+			parent.right = nil
+		} else {
+			parent.left = nil
+		}
+		t.count--
+		t.totalSize -= nodeSize(node)
 	}
-	t.count--
-	t.totalSize -= nodeSize(node)
 }
 
 // ForEach invokes the passed function with every key/value pair in the treap in ascending order.

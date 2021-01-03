@@ -812,7 +812,7 @@ func validateLoadAllSeries(t *testing.T, pool *vp.Pool, testID int, seriesData s
 	series := pool.Series(seriesData.id)
 	// Check that the series exists.
 	if series == nil {
-		t.Errorf("Test #%d, series #%d: series not found", testID, seriesData.id)
+		t.Fatalf("Test #%d, series #%d: series not found", testID, seriesData.id)
 	}
 	// Check that reqSigs is what we inserted.
 	if seriesData.reqSigs != series.TstGetReqSigs() {

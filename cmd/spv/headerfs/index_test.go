@@ -34,9 +34,12 @@ func createTestIndex() (func(), *headerIndex, error) {
 }
 
 func TestAddHeadersIndexRetrieve(t *testing.T) {
-	cleanUp, hIndex, err := createTestIndex()
-	defer cleanUp()
-	if err != nil {
+	var err error
+	var hIndex *headerIndex
+	var cleanUp func()
+	if cleanUp, hIndex, err = createTestIndex(); !Check(err) {
+		defer cleanUp()
+	} else {
 		t.Fatalf("unable to create test db: %v", err)
 	}
 	// First, we'll create a a series of random headers that we'll use to write into the database.

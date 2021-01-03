@@ -261,8 +261,9 @@ func votingpoolNamespace(dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
 	return dbtx.ReadWriteBucket(votingpoolNamespaceKey)
 }
 func exampleCreateDBAndMgr() (teardown func(), db walletdb.DB, mgr *waddrmgr.Manager) {
-	db, dbTearDown, err := createWalletDB()
-	if err != nil {
+	var dbTearDown func()
+	var err error
+	if db, dbTearDown, err = createWalletDB(); votingpool.Check(err){
 		dbTearDown()
 		panic(err)
 	}

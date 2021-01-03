@@ -29,7 +29,7 @@ func TestNewTLSCertPair(t *testing.T) {
 	}
 	// Ensure the PEM-encoded key that is returned can be decoded.
 	pemKey, _ := pem.Decode(key)
-	if pemCert == nil {
+	if pemKey == nil {
 		t.Fatalf("pem.Decode was unable to decode the key")
 	}
 	// Ensure the DER-encoded key bytes can be successfully parsed.

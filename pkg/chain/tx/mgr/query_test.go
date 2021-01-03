@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	. "github.com/p9c/pod/pkg/chain/tx/mgr"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -230,9 +230,13 @@ func TestStoreQueries(t *testing.T) {
 	}
 	var tests []queryTest
 	// Create the store and test initial state.
-	s, db, teardown, err := testStore()
+	var s *Store
+	var db walletdb.DB
+	var teardown func()
+	var err error
+	if s, db, teardown, err = testStore(); !Check(err){
 	defer teardown()
-	if err != nil {
+	} else {
 		t.Fatal(err)
 	}
 	lastState := newQueryState()
@@ -497,9 +501,13 @@ func TestStoreQueries(t *testing.T) {
 }
 func TestPreviousPkScripts(t *testing.T) {
 	t.Parallel()
-	s, db, teardown, err := testStore()
-	defer teardown()
-	if err != nil {
+	var err error
+	var teardown func()
+	var db walletdb.DB
+	var s *Store
+	if s, db, teardown, err = testStore(); !Check(err) {
+		defer teardown()
+	} else {
 		t.Fatal(err)
 	}
 	// Invalid scripts but sufficient for testing.

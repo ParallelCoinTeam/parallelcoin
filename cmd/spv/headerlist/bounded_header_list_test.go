@@ -2,7 +2,7 @@ package headerlist
 
 import (
 	"testing"
-
+	
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -76,7 +76,7 @@ func TestBoundedMemoryChainSizeLimit(t *testing.T) {
 	// We'll start out by inserting 20 elements into the memChain. As this is greater than the total number of elements,
 	// we should end up with the chain bounded at the end of the set of insertions.
 	const numElements = 20
-	var totalElems []Node
+	totalElems := []Node{}
 	for i := 0; i < numElements; i++ {
 		node := Node{
 			Height: int32(i),

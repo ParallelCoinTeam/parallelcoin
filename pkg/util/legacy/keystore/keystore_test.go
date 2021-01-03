@@ -554,7 +554,7 @@ func TestWatchingWalletExport(t *testing.T) {
 	}
 	// Test ExtendActiveAddresses for the original wallet after manually
 	// requesting addresses for the watching wallet.
-	newWWAddrs = nil
+	newWWAddrs = newWWAddrs[:0]
 	for i := 0; i < 10; i++ {
 		addr, err := ww.NextChainedAddress(createdAt)
 		if err != nil {

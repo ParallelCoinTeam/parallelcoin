@@ -3,7 +3,7 @@ package blockchain
 import (
 	"fmt"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	database "github.com/p9c/pod/pkg/db"
@@ -82,18 +82,18 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
 	// 	blockHeight), blockHeight, pl)
 	ph := &block.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
+	var pb *BlockNode
 	if pn == nil {
-		// Warn("found no previous node")
 		DoNotCheckPow = true
-	}
-	pb := pn.GetLastWithAlgo(algo)
-	if pb == nil {
-		// pl = &netparams.AllOnes !!!!!!!!!!!!!!!!!!
-		DoNotCheckPow = true
+	} else {
+		pb = pn.GetLastWithAlgo(algo)
+		if pb == nil {
+			DoNotCheckPow = true
+		}
 	}
 	// Warnf("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
-	err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight)
-	if err != nil {
+	if err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow,
+		blockHeight); Check(err) {
 		Error("block processing error: ", err)
 		return false, false, err
 	}

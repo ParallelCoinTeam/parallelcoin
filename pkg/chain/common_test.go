@@ -72,18 +72,14 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 		}
 	}()
 	var block *util.Block
-	err = nil
-	for height := int64(1); err == nil; height++ {
+	height := int64(1)
+	for err = nil; err == nil; height++ {
 		var rintbuf uint32
 		err = binary.Read(dr, binary.LittleEndian, &rintbuf)
 		if err == io.EOF {
 			// hit end of file at expected offset: no warning
 			// height--
 			err = nil
-			break
-		}
-		if err != nil {
-			break
 		}
 		if rintbuf != uint32(network) {
 			break

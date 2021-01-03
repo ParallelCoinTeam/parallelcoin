@@ -39,15 +39,18 @@ func createTestDatabase() (func(), FilterDatabase, error) {
 }
 
 func TestGenesisFilterCreation(t *testing.T) {
-	cleanUp, database, err := createTestDatabase()
-	defer cleanUp()
-	if err != nil {
+	var err error
+	var cleanUp func()
+	var dB FilterDatabase
+	if cleanUp, dB, err = createTestDatabase(); !Check(err) {
+		defer cleanUp()
+	} else {
 		t.Fatalf("unable to create test db: %v", err)
 	}
 	genesisHash := chaincfg.SimNetParams.GenesisHash
 	// With the database initialized, we should be able to fetch the
 	// regular filter for the genesis block.
-	regGenesisFilter, err := database.FetchFilter(genesisHash, RegularFilter)
+	regGenesisFilter, err := dB.FetchFilter(genesisHash, RegularFilter)
 	if err != nil {
 		t.Fatalf("unable to fetch regular genesis filter: %v", err)
 	}
@@ -81,9 +84,12 @@ func genRandFilter(numElements uint32) (*gcs.Filter, error) {
 
 func TestFilterStorage(t *testing.T) {
 	// TODO(roasbeef): use testing.Quick
-	cleanUp, database, err := createTestDatabase()
-	defer cleanUp()
-	if err != nil {
+	var cleanUp func()
+	var dB FilterDatabase
+	var err error
+	if cleanUp, dB, err = createTestDatabase(); !Check(err) {
+		defer cleanUp()
+	} else {
 		t.Fatalf("unable to create test db: %v", err)
 	}
 	// We'll generate a random block hash to create our test filters against.
@@ -96,19 +102,17 @@ func TestFilterStorage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to create random filter: %v", err)
 	}
-	err = database.PutFilter(&randHash, regFilter, RegularFilter)
+	err = dB.PutFilter(&randHash, regFilter, RegularFilter)
 	if err != nil {
 		t.Fatalf("unable to store regular filter: %v", err)
 	}
 	// With the filter stored, we should be able to retrieve the filter without any issue, and it should match the
 	// stored filter exactly.
-	regFilterDB, err := database.FetchFilter(&randHash, RegularFilter)
-	
+	regFilterDB, err := dB.FetchFilter(&randHash, RegularFilter)
 	if err != nil {
 		t.Fatalf("unable to retrieve reg filter: %v", err)
 	}
 	if !reflect.DeepEqual(regFilter, regFilterDB) {
-		
 		t.Fatalf("regular filter doesn't match!")
 	}
 }

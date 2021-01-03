@@ -655,6 +655,7 @@ func testMetadataManualTxInterface(tc *testContext) bool {
 	deleteValues := func(values []keyPair) bool {
 		tx, err := tc.db.Begin(true)
 		if err != nil {
+			return false
 		}
 		defer rollbackOnPanic(tc.t, tx)
 		metadataBucket := tx.Metadata()

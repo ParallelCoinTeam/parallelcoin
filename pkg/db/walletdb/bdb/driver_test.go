@@ -26,7 +26,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// Ensure that attempting to open a database with the wrong number of parameters returns the expected error.
 	wantErr = fmt.Errorf("invalid arguments to %s.Open -- expected "+
 		"database path", dbType)
-	if _, err := walletdb.Open(dbType, 1, 2, 3); err.Error() != wantErr.Error() {
+	if _, err := walletdb.Open(dbType, 1, 2, 3); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -35,7 +35,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// error.
 	wantErr = fmt.Errorf("first argument to %s.Open is invalid -- "+
 		"expected database path string", dbType)
-	if _, err := walletdb.Open(dbType, 1); err.Error() != wantErr.Error() {
+	if _, err := walletdb.Open(dbType, 1); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -43,7 +43,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// Ensure that attempting to create a database with the wrong number of parameters returns the expected error.
 	wantErr = fmt.Errorf("invalid arguments to %s.Create -- expected "+
 		"database path", dbType)
-	if _, err := walletdb.Create(dbType, 1, 2, 3); err.Error() != wantErr.Error() {
+	if _, err := walletdb.Create(dbType, 1, 2, 3); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -52,7 +52,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// error.
 	wantErr = fmt.Errorf("first argument to %s.Create is invalid -- "+
 		"expected database path string", dbType)
-	if _, err := walletdb.Create(dbType, 1); err.Error() != wantErr.Error() {
+	if _, err := walletdb.Create(dbType, 1); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -119,8 +119,8 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	// Close and reopen the database to ensure the values persist.
-		if err := db.Close(); bdb.Check(err) {
-		}
+	if err := db.Close(); bdb.Check(err) {
+	}
 	db, err = walletdb.Open(dbType, dbPath)
 	if err != nil {
 		t.Errorf("failed to open test database (%s) %v", dbType, err)

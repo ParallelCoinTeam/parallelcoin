@@ -69,7 +69,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 		for i := uint32(0); i < externalCount; i++ {
 			keyPath := externalKeyPath(i)
 			addr, err := scopedMgr.DeriveFromKeyPath(ns, keyPath)
-			if err != nil && err != hdkeychain.ErrInvalidChild {
+			if err != nil && err != hdkeychain.ErrInvalidChild||addr==nil {
 				return err
 			} else if err == hdkeychain.ErrInvalidChild {
 				scopeState.ExternalBranch.MarkInvalidChild(i)
@@ -84,7 +84,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 		for i := uint32(0); i < internalCount; i++ {
 			keyPath := internalKeyPath(i)
 			addr, err := scopedMgr.DeriveFromKeyPath(ns, keyPath)
-			if err != nil && err != hdkeychain.ErrInvalidChild {
+			if err != nil && err != hdkeychain.ErrInvalidChild||addr==nil {
 				return err
 			} else if err == hdkeychain.ErrInvalidChild {
 				scopeState.InternalBranch.MarkInvalidChild(i)

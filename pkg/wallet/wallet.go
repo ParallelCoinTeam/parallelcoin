@@ -361,7 +361,7 @@ func (w *Wallet) syncWithChain() error {
 		}
 		ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 		// Only allocate the recoveryMgr if we are actually in recovery mode.
-		var recoveryMgr *RecoveryManager
+		recoveryMgr := &RecoveryManager{}
 		if isRecovery {
 			Info(
 				"RECOVERY MODE ENABLED -- rescanning for used addresses with recovery_window =",

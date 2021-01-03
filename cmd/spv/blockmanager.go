@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"math"
 	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/cmd/spv/headerlist"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -1664,7 +1665,7 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 	// Process all of the received headers ensuring each one connects to the previous and that checkpoints match.
 	receivedCheckpoint := false
 	var (
-		finalHash   *chainhash.Hash
+		finalHash   = &chainhash.Hash{}
 		finalHeight int32
 	)
 	for i, blockHeader := range msg.Headers {
@@ -1784,14 +1785,18 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 					knownHead = &knownEl.Header
 					knownEl = knownEl.Prev()
 				} else {
-					knownHead, _, err = b.server.BlockHeaders.FetchHeader(
-						&knownHead.PrevBlock)
-					if err != nil {
-						Fatalf(
-							"can't get block header for hash %s: %v",
-							knownHead.PrevBlock, err,
-						)
-						// Should we panic here?
+					if knownHead != nil {
+						knownHead, _, err = b.server.BlockHeaders.FetchHeader(
+							&knownHead.PrevBlock)
+						if err != nil && knownHead!= nil {
+							Fatalf(
+								"can't get block header for hash %s: %v",
+								knownHead.PrevBlock, err,
+							)
+							// Should we panic here?
+						} else {
+							panic(err)
+						}
 					}
 				}
 				knownWork.Add(knownWork, blockchain.CalcWork(knownHead.Bits, knownEl.Height, knownHead.Version))

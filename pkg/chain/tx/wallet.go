@@ -5,14 +5,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	"sort"
 	"strings"
 	"sync"
 	"time"
-
+	
+	qu "github.com/p9c/pod/pkg/util/quit"
+	
 	"github.com/davecgh/go-spew/spew"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -343,7 +344,7 @@ func (w *Wallet) syncWithChain() error {
 		ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 		// Only allocate the recoveryMgr if we are actually in recovery
 		// mode.
-		var recoveryMgr *RecoveryManager
+		recoveryMgr := &RecoveryManager{}
 		if isRecovery {
 			Infof("RECOVERY MODE ENABLED -- rescanning for used"+
 				" addresses with recovery_window=%d %s",
@@ -917,7 +918,7 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 		Infof("recovered %d external addrs at height=%d hash=%v", nFoundExternal,
 			block.Height, block.Hash)
 	}
-
+	
 	// Log the number of internal addresses found in this block.
 	var nFoundInternal int
 	for _, indexes := range resp.FoundInternalAddrs {
@@ -927,7 +928,7 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 		Infof("recovered %d internal addrs at height=%d hash=%v",
 			nFoundInternal, block.Height, block.Hash)
 	}
-
+	
 	// Log the number of outpoints found in this block.
 	nFoundOutPoints := len(resp.FoundOutPoints)
 	if nFoundOutPoints > 0 {
@@ -1603,7 +1604,7 @@ func listTransactions(tx walletdb.ReadTx, details *wtxmgr.TxDetails, addrMgr *wa
 	}
 	results := []btcjson.ListTransactionsResult{}
 	txHashStr := details.Hash.String()
-
+	
 	received := details.Received.Unix()
 	generated := blockchain.IsCoinBaseTx(&details.MsgTx)
 	recvCat := RecvCategory(details, syncHeight, net).String()
@@ -2452,7 +2453,7 @@ func (w *Wallet) resendUnminedTxs() {
 			"no chain server available to resend unmined transactions", err)
 		return
 	}
-
+	
 	var txs []*wire.MsgTx
 	err = walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)

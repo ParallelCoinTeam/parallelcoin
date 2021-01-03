@@ -366,7 +366,7 @@ func TestCalcScriptInfo(t *testing.T) {
 			pkScript: "HASH160 DATA_20 0xfe441065b6532231de2fac56" +
 				"3152205ec4f59c",
 			bip16:         true,
-			scriptInfoErr: scriptError(errMalformedPush, ""),
+			scriptInfoErr: scriptError(ErrMalformedPush, ""),
 		},
 		{
 			name: "sigScript doesn't parse",
@@ -376,7 +376,7 @@ func TestCalcScriptInfo(t *testing.T) {
 			pkScript: "HASH160 DATA_20 0xfe441065b6532231de2fac56" +
 				"3152205ec4f59c74 EQUAL",
 			bip16:         true,
-			scriptInfoErr: scriptError(errMalformedPush, ""),
+			scriptInfoErr: scriptError(ErrMalformedPush, ""),
 		},
 		{
 			// Invented scripts, the hashes do not match
@@ -560,7 +560,7 @@ func TestPayToAddrScript(t *testing.T) {
 		t.Fatalf("Unable to create public key hash address: %v", err)
 	}
 	// Taken from transaction: b0539a45de13b3e0403909b8bd1a555b8cbe45fd4e3f3fda76f3a5f52835c29d
-	p2shMain, _ := util.NewAddressScriptHashFromHash(hexToBytes("e8c300"+
+	p2shMain, err := util.NewAddressScriptHashFromHash(hexToBytes("e8c300"+
 		"c87986efa84c37c0519929019ef86eb5b4"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create script hash address: %v", err)
@@ -589,7 +589,7 @@ func TestPayToAddrScript(t *testing.T) {
 			err)
 	}
 	// Errors used in the tests below defined here for convenience and to keep the horizontal test size shorter.
-	errUnsupportedAddress := scriptError(errUnsupportedAddress, "")
+	errUnsupportedAddress := scriptError(ErrUnsupportedAddress, "")
 	tests := []struct {
 		in       util.Address
 		expected string
@@ -719,7 +719,7 @@ func TestMultiSigScript(t *testing.T) {
 			},
 			3,
 			"",
-			scriptError(errTooManyRequiredSigs, ""),
+			scriptError(ErrTooManyRequiredSigs, ""),
 		},
 		{
 			[]*util.AddressPubKey{
@@ -738,7 +738,7 @@ func TestMultiSigScript(t *testing.T) {
 			},
 			2,
 			"",
-			scriptError(errTooManyRequiredSigs, ""),
+			scriptError(ErrTooManyRequiredSigs, ""),
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
@@ -769,14 +769,14 @@ func TestCalcMultiSigStats(t *testing.T) {
 			name: "short script",
 			script: "0x046708afdb0fe5548271967f1a67130b7105cd6a828" +
 				"e03909a67962e0ea1f61d",
-			err: scriptError(errMalformedPush, ""),
+			err: scriptError(ErrMalformedPush, ""),
 		},
 		{
 			name: "stack underflow",
 			script: "RETURN DATA_41 0x046708afdb0fe5548271967f1a" +
 				"67130b7105cd6a828e03909a67962e0ea1f61deb649f6" +
 				"bc3f4cef308",
-			err: scriptError(errNotMultisigScript, ""),
+			err: scriptError(ErrNotMultisigScript, ""),
 		},
 		{
 			name: "multisig script",
@@ -1105,7 +1105,7 @@ func TestNullDataScript(t *testing.T) {
 				"728292a2b2c2d2e2f303132333435363738393a3b3c3" +
 				"d3e3f404142434445464748494a4b4c4d4e4f50"),
 			expected: nil,
-			err:      scriptError(errTooMuchNullData, ""),
+			err:      scriptError(ErrTooMuchNullData, ""),
 			class:    NonStandardTy,
 		},
 	}

@@ -2,6 +2,7 @@ package wallettx
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
@@ -226,6 +227,9 @@ func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) 
 	return nil
 }
 func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, block *wtxmgr.BlockMeta) error {
+	if block == nil {
+		return errors.New("block is nil")
+	}
 	addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 	txmgrNs := dbtx.ReadWriteBucket(wtxmgrNamespaceKey)
 	// At the moment all notified transactions are assumed to actually be relevant. This assumption will not hold true

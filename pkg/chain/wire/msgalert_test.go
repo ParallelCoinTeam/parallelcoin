@@ -269,7 +269,7 @@ func TestAlert(t *testing.T) {
 	serializedpayload := w.Bytes()
 	newAlert, err := NewAlertFromPayload(serializedpayload, pver)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 	if alert.Version != newAlert.Version {
 		t.Errorf("NewAlertFromPayload: wrong Version - got %v, want %v ",

@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"time"
-
+	
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -387,14 +387,16 @@ func (tx *withdrawalTx) rollBackLastOutput() ([]Credit, *withdrawalTxOut, error)
 		return nil, nil, newError(ErrPreconditionNotMet, str, nil)
 	}
 	removedOutput := tx.removeOutput()
-	var removedInputs []Credit
+	removedInputs := []Credit{}
 	// Continue until sum(in) < sum(out) + fee
 	for tx.inputTotal() >= tx.outputTotal()+tx.calculateFee() {
 		removedInputs = append(removedInputs, tx.removeInput())
 	}
 	// Re-add the last item from removedInputs, which is the last popped input.
-	tx.addInput(removedInputs[len(removedInputs)-1])
-	removedInputs = removedInputs[:len(removedInputs)-1]
+	if len(removedInputs) > 0 {
+		tx.addInput(removedInputs[len(removedInputs)-1])
+		removedInputs = removedInputs[:len(removedInputs)-1]
+	}
 	return removedInputs, removedOutput, nil
 }
 func defaultTxOptions(tx *withdrawalTx) {
@@ -674,7 +676,7 @@ func (w *withdrawal) splitLastOutput() error {
 	unspentAmount := tx.inputTotal() - spentAmount
 	output.amount = unspentAmount
 	Debug("updated output amount to", output.amount)
-
+	
 	// Create a new OutputRequest with the amount being the difference between the original amount and what was left in
 	// the tx output above.
 	request := output.request
@@ -960,7 +962,11 @@ func nextChangeAddress(a ChangeAddress) (ChangeAddress, error) {
 	} else {
 		index++
 	}
-	addr, err := a.pool.ChangeAddress(seriesID, index)
+	var addr *ChangeAddress
+	var err error
+	if addr, err = a.pool.ChangeAddress(seriesID, index); Check(err) {
+		return ChangeAddress{}, err
+	}
 	return *addr, err
 }
 func storeTransactions(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket, transactions []*changeAwareTx) error {
