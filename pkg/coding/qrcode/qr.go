@@ -312,9 +312,9 @@ func (qr *Qrcode) Encode() (image.Image, error) {
 	for r, row := range module {
 		for c, cell := range row {
 			if cell {
-				rgba.SetRGBA(c, r, color.RGBA{0, 0, 0, 255})
+				rgba.SetRGBA(c, r, color.RGBA{A: 255})
 			} else {
-				rgba.SetRGBA(c, r, color.RGBA{255, 255, 255, 255})
+				rgba.SetRGBA(c, r, color.RGBA{R: 255, G: 255, B: 255, A: 255})
 			}
 		}
 	}
