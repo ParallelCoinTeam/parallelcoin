@@ -10,6 +10,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/cmd/spv"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/pipe/serve"
@@ -212,6 +213,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("nodnsseed") {
 			*cx.Config.DisableDNSSeed = c.Bool("nodnsseed")
+			spv.DisableDNSSeed = c.Bool("nodnsseed")
 		}
 		if c.IsSet("externalip") {
 			*cx.Config.ExternalIPs = c.StringSlice("externalip")

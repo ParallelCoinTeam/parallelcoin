@@ -4,6 +4,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/cmd/spv"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 )
@@ -18,6 +19,7 @@ func Configure(cx *conte.Xt, commandName string, initial bool) {
 	Debug("DATADIR", *cx.Config.DataDir)
 	initLogLevel(cx.Config)
 	Debug("set log level")
+	spv.DisableDNSSeed = *cx.Config.DisableDNSSeed
 	initDictionary(cx.Config)
 	initParams(cx)
 	initDataDir(cx.Config)
