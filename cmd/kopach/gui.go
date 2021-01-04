@@ -52,12 +52,9 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 						Rigid(m.VSpacer).
 						Rigid(m.H5("found blocks").Fn).
 						Rigid(
-							m.Fill(
-								"PanelBg",
-								m.FoundBlocks, l.Center,
-							).Fn,
+							m.Fill("PanelBg", m.FoundBlocks, l.Center, 0).Fn,
 						).Fn,
-				).Fn, 0).Fn,
+				).Fn, 0, 0).Fn,
 			).Fn,
 		).Fn,
 	).
@@ -93,7 +90,7 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 									}
 								},
 							).Fn,
-						).Fn, l.Center).Fn(gtx)
+						).Fn, l.Center, 0).Fn(gtx)
 				} else {
 					return l.Dimensions{}
 				}
@@ -148,7 +145,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 				Alignment(text.End).
 				Fn,
 		).Fn,
-	).Fn, l.Center).Fn(gtx)
+	).Fn, l.Center, 0).Fn(gtx)
 }
 
 func (m *MinerModel) RunControl(gtx l.Context) l.Dimensions {
@@ -327,7 +324,7 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 			0.5,
 			m.BlockInfoModalCloser,
 		).Fn,
-	).Fn, l.Center).Fn(gtx)
+	).Fn, l.Center, 0).Fn(gtx)
 }
 
 func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {

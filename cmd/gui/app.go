@@ -71,9 +71,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 				"settings", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 					gui.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.configs.Widget(wg.config)(gtx)
-						},
+						Widget: wg.configs.Widget(wg.config),
 					},
 				},
 			),
@@ -229,6 +227,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					wg.MainApp.ActivePage(name)
 				}, a, "",
 			),
+			// gui.EmptyMaxWidth(),
 			// wg.PageTopBarButton(
 			// 	"goroutines", 0, &icons.ActionBugReport, func(name string) {
 			// 		wg.App.ActivePage(name)
@@ -258,32 +257,31 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 	a.StatusBar(
 		[]l.Widget{
 			// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
+			// wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+			wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
 			wg.RunStatusPanel,
-			wg.Flex().
-				Flexed(1, gui.EmptyMaxWidth()).
-				Rigid(
-					wg.StatusBarButton(
-						"log", 4, &icons.ActionList, func(name string) {
-							Debug("click on button", name)
-							if wg.MainApp.MenuOpen {
-								wg.MainApp.MenuOpen = false
-							}
-							wg.MainApp.ActivePage(name)
-						}, a,
-					),
-				).
-				Rigid(
-					wg.StatusBarButton(
-						"settings", 5, &icons.ActionSettings, func(name string) {
-							Debug("click on button", name)
-							if wg.MainApp.MenuOpen {
-								wg.MainApp.MenuOpen = false
-							}
-							wg.MainApp.ActivePage(name)
-						}, a,
-					),
-				).
-				Fn,
+		},
+		[]l.Widget{
+			// gui.EmptyMaxWidth(),
+			wg.StatusBarButton(
+				"log", 4, &icons.ActionList, func(name string) {
+					Debug("click on button", name)
+					if wg.MainApp.MenuOpen {
+						wg.MainApp.MenuOpen = false
+					}
+					wg.MainApp.ActivePage(name)
+				}, a,
+			),
+			wg.StatusBarButton(
+				"settings", 5, &icons.ActionSettings, func(name string) {
+					Debug("click on button", name)
+					if wg.MainApp.MenuOpen {
+						wg.MainApp.MenuOpen = false
+					}
+					wg.MainApp.ActivePage(name)
+				}, a,
+			),
+			wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
 		},
 	)
 	// a.PushOverlay(wg.toasts.DrawToasts())
@@ -315,7 +313,7 @@ func (wg *WalletGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) 
 					0.25,
 					wg.Responsive(*wg.Size, widget).Fn,
 				).Fn,
-			).Fn, l.Center).Fn(gtx)
+			).Fn, l.Center, 0).Fn(gtx)
 	}
 }
 
@@ -331,21 +329,19 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 		gtx.Constraints.Max.X = max
 		gtx.Constraints.Min.X = max
 		// Debug("sideMAXXXXXX!!", max)
-		return wg.Fill(background,
-			wg.Flex().Flexed(1,
-				wg.Button(wg.sidebarButtons[index]).
-					Text(title).Color(color).
-					Background("Transparent").
-					SetClick(
-						func() {
-							if wg.MainApp.MenuOpen {
-								wg.MainApp.MenuOpen = false
-							}
-							wg.MainApp.ActivePage(page)
-						},
-					).Fn,
-			).Fn, l.Center,
-		).Fn(gtx)
+		return wg.Fill(background, wg.Flex().Flexed(1,
+			wg.Button(wg.sidebarButtons[index]).
+				Text(title).Color(color).
+				Background("Transparent").
+				SetClick(
+					func() {
+						if wg.MainApp.MenuOpen {
+							wg.MainApp.MenuOpen = false
+						}
+						wg.MainApp.ActivePage(page)
+					},
+				).Fn,
+		).Fn, l.Center, 0).Fn(gtx)
 	}
 }
 
@@ -360,11 +356,12 @@ func (wg *WalletGUI) PageTopBarButton(
 		
 		if app.ActivePageGet() == name {
 			color = "PanelText"
+			background = "scrim"
 			// background = "PanelBg"
 		}
-		if name == "home" {
-			background = "PrimaryDim"
-		}
+		// if name == "home" {
+		// 	background = "PrimaryDim"
+		// }
 		if highlightColor != "" {
 			color = highlightColor
 		}

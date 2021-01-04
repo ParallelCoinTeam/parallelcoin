@@ -45,6 +45,7 @@ type App struct {
 	sideBarList         *List
 	Size                *int
 	statusBar           []l.Widget
+	statusBarRight      []l.Widget
 	statusBarBackground string
 	statusBarColor      string
 	title               string
@@ -125,6 +126,11 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 		i := x
 		bar.Rigid(a.statusBar[i])
 	}
+	bar.Flexed(1, EmptyMaxWidth())
+	for x := range a.statusBarRight {
+		i := x
+		bar.Rigid(a.statusBarRight[i])
+	}
 	// out :=
 	// a.Fill("PanelBg",
 	// 	a.ButtonInset(0.25,
@@ -135,13 +141,16 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Min = dims.Size
 	// gtx.Constraints.Max = dims.Size
 	// return dims
-	return a.Fill(a.statusBarBackground, bar.Fn, l.Center).Fn(gtx)
+	return bar.Fn(gtx) // a.Fill(a.statusBarBackground, bar.Fn, l.Center, 0).Fn(gtx)
 	// }(gtx)
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	return a.Fill(a.titleBarBackground,
+	return a.Fill("Transparent", // a.titleBarBackground,
 		a.Theme.Flex().
+			Rigid(
+				a.Inset(0.5, EmptySpace(0, 0)).Fn,
+			).
 			Rigid(
 				a.Theme.Responsive(
 					*a.Size,
@@ -162,15 +171,16 @@ func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
 			Rigid(
 				a.RenderButtonBar,
 			).
-			Fn,
-		l.Center).Fn(gtx)
+			Fn, l.Center, 0).Fn(gtx)
 }
 
 func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
 	out := a.Theme.Flex()
+	// out.Rigid(a.Inset(0.5, EmptyMaxWidth()).Fn)
 	for i := range a.buttonBar {
 		out.Rigid(a.buttonBar[i])
 	}
+	out.Rigid(a.Inset(0.5, EmptySpace(0, 0)).Fn)
 	dims := out.Fn(gtx)
 	gtx.Constraints.Min = dims.Size
 	gtx.Constraints.Max = dims.Size
@@ -201,7 +211,7 @@ func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 							},
 						},
 					).Fn,
-				).Fn, l.Center).Fn,
+				).Fn, l.Center, 0).Fn,
 		).
 		Flexed(
 			1,
@@ -211,7 +221,8 @@ func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) MenuButton(gtx l.Context) l.Dimensions {
-	bg := a.titleBarBackground
+	// bg := a.titleBarBackground
+	bg := "Transparent"
 	color := a.menuColor
 	if a.MenuOpen {
 		color = "DocText"
@@ -274,14 +285,14 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 											Color("Light").
 											Src(a.logo),
 									).
-									Background("").Color("Light").
+									Background("Transparent").Color("Light").
 									ButtonInset(0.25).
 									Fn,
 							).
 							Fn,
 					).
 					Rigid(
-						a.H5(a.ActivePageGet()).Color("Light").Fn,
+						a.H5(a.ActivePageGet()).Color("Primary").Fn,
 					).
 					Fn,
 			},
@@ -316,7 +327,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 							Fn,
 					).
 					Rigid(
-						a.H5(a.title).Color("Light").Fn,
+						a.H5(a.title).Color("Primary").Fn,
 					).
 					Fn,
 			},
@@ -372,30 +383,39 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
-	return a.Fill(a.bodyBackground, func(gtx l.Context) l.Dimensions {
-		if page, ok := a.pages[a.activePage.Load()]; !ok {
-			return a.Theme.Flex().
-				Flexed(
-					1,
-					a.Theme.VFlex().SpaceEvenly().
-						Rigid(
-							a.H1("404").
-								Alignment(text.Middle).
-								Fn,
-						).
-						Rigid(
-							a.Body1("page "+a.activePage.Load()+" not found").
-								Alignment(text.Middle).
-								Fn,
-						).
-						Fn,
-				).Fn(gtx)
-		} else {
-			// _ = page
-			// return EmptyMaxHeight()(gtx)
-			return page(gtx)
-		}
-	}, l.Center).Fn(gtx)
+	return a.Fill(a.cardBackground,
+		a.Fill(a.bodyBackground,
+			a.Inset(0.25,
+				func(gtx l.Context) l.
+				Dimensions {
+					if page, ok := a.pages[a.activePage.Load()]; !ok {
+						return a.Flex().
+							Flexed(
+								1,
+								a.VFlex().SpaceEvenly().
+									Rigid(
+										a.H1("404").
+											Alignment(text.Middle).
+											Fn,
+									).
+									Rigid(
+										a.Body1("page "+a.activePage.Load()+" not found").
+											Alignment(text.Middle).
+											Fn,
+									).
+									Fn,
+							).Fn(gtx)
+					} else {
+						// _ = page
+						// return EmptyMaxHeight()(gtx)
+						return page(gtx)
+					}
+				},
+			).Fn,
+			l.Center, a.TextSize.V*1.5,
+		).Fn,
+		l.Center, 0,
+	).Fn(gtx)
 }
 
 func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
@@ -438,11 +458,7 @@ func (a *App) renderSideBar() l.Widget {
 				// Active("Primary").
 				ListElement(le)
 			// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
-			return a.Fill(
-				"DocBg",
-				out.Fn,
-				l.Center,
-			).Fn(gtx)
+			return a.Fill("DocBg", out.Fn, l.Center, 0).Fn(gtx)
 		}
 	} else {
 		return EmptySpace(0, 0)
@@ -589,8 +605,9 @@ func (a *App) SideBarGet() []l.Widget {
 	return a.sideBar
 }
 
-func (a *App) StatusBar(bar []l.Widget) *App {
+func (a *App) StatusBar(bar, barR []l.Widget) *App {
 	a.statusBar = bar
+	a.statusBarRight = barR
 	return a
 }
 func (a *App) StatusBarBackground(statusBarBackground string) *App {

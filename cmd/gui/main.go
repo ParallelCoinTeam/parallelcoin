@@ -174,17 +174,19 @@ func (wg *WalletGUI) Run() (err error) {
 		Title("ParallelCoin Wallet").
 		Open().
 		Run(
-			func(gtx l.Context) l.Dimensions {
-				return gui.If(
-					*wg.noWallet,
-					wg.CreateWalletPage,
-					gui.If(
-						!wg.wallet.Running(),
-						wg.unlockPage.Fn(),
-						wg.MainApp.Fn(),
-					),
-				)(gtx)
-			},
+			wg.Fill("DocBg",
+				func(gtx l.Context) l.Dimensions {
+					return gui.If(
+						*wg.noWallet,
+						wg.CreateWalletPage,
+						gui.If(
+							!wg.wallet.Running(),
+							wg.unlockPage.Fn(),
+							wg.MainApp.Fn(),
+						),
+					)(gtx)
+				},
+				l.W, 0).Fn,
 			wg.MainApp.Overlay,
 			// wg.InitWallet(),
 			wg.gracefulShutdown,

@@ -275,8 +275,7 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 		Flexed(
 			0.1,
 			c.Fill("PanelBg", func(gtx l.Context) l.Dimensions {
-				return c.Inset(
-					0.25,
+				return c.Inset(0.25,
 					c.outputList.
 						ScrollToEnd().
 						End().
@@ -289,10 +288,10 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 						Fn,
 				).
 					Fn(gtx)
-			}, l.Center).Fn,
+			}, l.Center, c.TextSize.V).Fn,
 		).
 		Rigid(
-			c.Fill("DocBg", c.Inset(
+			c.Inset(
 				0.25,
 				c.Theme.Flex().
 					Flexed(
@@ -305,7 +304,7 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 					Rigid(c.pasteButton.Fn).
 					Rigid(c.clearButton.Fn).
 					Fn,
-			).Fn, l.Center).Fn,
+			).Fn,
 		).
 		Fn
 	return fn(gtx)

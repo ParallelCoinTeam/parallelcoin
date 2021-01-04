@@ -123,7 +123,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																						Scale(gui.Scales["H3"]).
 																						Color("PanelBg").
 																						Src(&icons.ActionLock).Fn,
-																				).Fn, l.Center).Fn,
+																				).Fn, l.Center, 0).Fn,
 																			).
 																			Rigid(
 																				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
@@ -365,37 +365,22 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 	)
 	a.StatusBar(
 		[]l.Widget{
-			// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
-			
-			// wg.PageTopBarButton(
-			// 	"home", 4, &icons.ActionLockOpen, func(name string) {
-			// 		wg.unlockPassword.Wipe()
-			// 		wg.unlockPassword.Focus()
-			// 		// wg.walletLocked.Store(true)
-			// 		wg.wallet.Stop()
-			// 		wg.unlockPage.ActivePage(name)
-			// 	}, a, "Success",
-			// ),
-			
+			wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
 			wg.RunStatusPanel,
-			wg.Flex().
-				Flexed(1, gui.EmptyMaxWidth()).
-				Rigid(
-					wg.StatusBarButton(
-						"log", 4, &icons.ActionList, func(name string) {
-							Debug("click on button", name)
-							wg.unlockPage.ActivePage(name)
-						}, wg.unlockPage,
-					),
-				).
-				Rigid(
-					wg.StatusBarButton(
-						"settings", 5, &icons.ActionSettings, func(name string) {
-							wg.unlockPage.ActivePage(name)
-						}, wg.unlockPage,
-					),
-				).
-				Fn,
+		},
+		[]l.Widget{
+			wg.StatusBarButton(
+				"log", 4, &icons.ActionList, func(name string) {
+					Debug("click on button", name)
+					wg.unlockPage.ActivePage(name)
+				}, wg.unlockPage,
+			),
+			wg.StatusBarButton(
+				"settings", 5, &icons.ActionSettings, func(name string) {
+					wg.unlockPage.ActivePage(name)
+				}, wg.unlockPage,
+			),
+			wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
 		},
 	)
 	// a.PushOverlay(wg.toasts.DrawToasts())

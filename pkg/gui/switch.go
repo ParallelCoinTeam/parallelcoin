@@ -31,7 +31,7 @@ func (w *Window) Switch(swtch *Bool) *Switch {
 		swtch:  swtch,
 	}
 	sw.color.enabled = w.Colors.GetNRGBAFromName("Primary")
-	sw.color.disabled = w.Colors.GetNRGBAFromName("PanelBg")
+	sw.color.disabled = w.Colors.GetNRGBAFromName("scrim")
 	return sw
 }
 

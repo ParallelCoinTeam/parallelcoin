@@ -7,7 +7,7 @@ func (w *Window) Card(background string, embed l.Widget,
 	return w.Inset(0.0,
 		w.Fill(background, w.Inset(0.25,
 			embed,
-		).Fn, l.Center).Fn,
+		).Fn, l.Center, 0).Fn,
 	).Fn
 }
 

@@ -2,7 +2,6 @@ package gui
 
 import (
 	"encoding/hex"
-	"io/ioutil"
 	"os"
 	"time"
 	
@@ -208,80 +207,18 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															wg.cx.StateCfg,
 														)
 														Warn("done refilling mining addresses")
-														w.Manager.Close()
-														Debug("closed wallet manager")
-														w.Stop()
-														Debug("signalled to stop wallet")
-														w.WaitForShutdown()
-														Debug("wallet stopped")
-														// Debug("starting up shell first time")
-														// rand.Seed(time.Now().Unix())
-														// nodeport := rand.Intn(60000) + 1024
-														// walletport := rand.Intn(60000) + 1024
-														// *wg.cx.Config.RPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", nodeport)}
-														// *wg.cx.Config.RPCConnect = fmt.Sprintf("127.0.0.1:%d", nodeport)
-														// *wg.cx.Config.WalletRPCListeners = []string{fmt.Sprintf("127.0.0.1:%d", walletport)}
-														// *wg.cx.Config.WalletServer = fmt.Sprintf("127.0.0.1:%d", walletport)
-														// *wg.cx.Config.ServerTLS = false
-														// *wg.cx.Config.TLS = false
-														// *wg.cx.Config.GenThreads = 1 // probably want it to be max ultimately
-														// wg.incdecs["generatethreads"].Current = 1
-														// *wg.cx.Config.Generate = true // probably don't want on ultimately
-														// save.Pod(wg.cx.Config)
-														
-														// Debug("opening wallet")
-														// Window, err = loader.OpenExistingWallet([]byte(*wg.cx.Config.WalletPass),
-														// 	false, wg.cx.Config)
-														// if err != nil {
-														// 	panic(err)
-														// }
-														// args := []string{os.Args[0], "-D", *wg.cx.Config.DataDir,
-														// 	"--pipelog", "wallet", "drophistory"}
-														// runner := exec.Command(args[0], args[1:]...)
-														// runner.Stderr = os.Stderr
-														// runner.Stdout = os.Stderr
-														// if err := runner.Start(); Check(err) {
-														// }
-														// time.Sleep(time.Second * 10)
-														// wg.NodeRunCommandChan <- "stop"
-														// wg.NodeRunCommandChan <- "run"
-														// wg.NodeRunCommandChan <- "stop"
-														// wg.NodeRunCommandChan <- "run"
-														// time.Sleep(time.Second * 10)
-														// time.Sleep(time.Second * 2)
-														// interrupt.RequestRestart()
-														// procAttr := new(os.ProcAttr)
-														// procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
-														// os.StartProcess(os.Args[0], os.Args[1:], procAttr)
-														// *wg.App = *wg.GetAppWidget()
 														Debug("starting main app")
-														
 														*wg.cx.Config.Generate = true
 														*wg.cx.Config.GenThreads = 1
 														*wg.cx.Config.NodeOff = false
 														*wg.cx.Config.WalletOff = false
 														save.Pod(wg.cx.Config)
-														
-														// if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads > 0 {
 														wg.miner.Start()
-														
 														*wg.noWallet = false
-														// wg.walletLocked.Store(false)
 														wg.node.Start()
-														// for security with apps launching the wallet, the public password can be set with a file that is deleted after
-														walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
-														Debug("runner", walletPassPath)
-														b := pass
-														if err = ioutil.WriteFile(
-															walletPassPath,
-															b,
-															0700,
-														); Check(err) {
+														if err = wg.writeWalletCookie(); Check(err) {
 														}
-														Debug("created password cookie")
 														wg.wallet.Start()
-														// }
-														// }
 													}()
 												},
 											).
@@ -298,5 +235,5 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 				},
 			).
 			Flexed(0.5, gui.EmptyMaxWidth()).Fn,
-	).Fn, l.Center).Fn(gtx)
+	).Fn, l.Center, 0).Fn(gtx)
 }

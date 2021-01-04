@@ -56,14 +56,14 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 								).
 								Fn,
 						},
-					}).Fn, l.Center).Fn,
+					}).Fn, l.Center, wg.TextSize.V).Fn,
 				).Fn,
 			).Fn(gtx)
 	}
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	return wg.VFlex().Rigid(wg.Inset(0.25, wg.HistoryWidget).Fn).Fn
+	return wg.VFlex().Rigid(wg.Inset(0.5, wg.HistoryWidget).Fn).Fn
 }
 
 func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {
