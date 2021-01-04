@@ -83,12 +83,12 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			),
 			"help": wg.Page(
 				"help", gui.Widgets{
-					gui.WidgetSize{Widget: gui.EmptyMaxHeight()},
+					gui.WidgetSize{Widget: a.Placeholder("help")},
 				},
 			),
 			"log": wg.Page(
 				"log", gui.Widgets{
-					gui.WidgetSize{Widget: gui.EmptyMaxHeight()},
+					gui.WidgetSize{Widget: a.Placeholder("log")},
 				},
 			),
 			"quit": wg.Page(
@@ -114,7 +114,8 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 														// close(wg.quit)
 													},
 												),
-											).Color("Light").TextScale(2).Text("yes!!!").Fn,
+											).Color("Light").TextScale(5).Text(
+												"yes!!!").Fn,
 										).
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
@@ -164,42 +165,14 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			"mining": wg.Page(
 				"mining", gui.Widgets{
 					gui.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.VFlex().
-								AlignMiddle().
-								SpaceSides().
-								Rigid(
-									wg.Flex().
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Rigid(
-											wg.H1("Mining").Fn,
-										).
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Fn,
-								).
-								Fn(gtx)
-						},
+						Widget: a.Placeholder("mining"),
 					},
 				},
 			),
 			"explorer": wg.Page(
 				"explorer", gui.Widgets{
 					gui.WidgetSize{
-						Widget: func(gtx l.Context) l.Dimensions {
-							return wg.VFlex().
-								AlignMiddle().
-								SpaceSides().
-								Rigid(
-									wg.Flex().
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Rigid(
-											wg.H1("explorer").Fn,
-										).
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Fn,
-								).
-								Fn(gtx)
-						},
+						Widget: a.Placeholder("explorer"),
 					},
 				},
 			),

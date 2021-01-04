@@ -19,17 +19,5 @@ type SendAddress struct {
 }
 
 func (wg *WalletGUI) SendPage() l.Widget {
-	return wg.VFlex().
-		AlignMiddle().
-		SpaceSides().
-		Rigid(
-			wg.Flex().
-				Flexed(0.5, gui.EmptyMaxWidth()).
-				Rigid(
-					wg.H1("send").Fn,
-				).
-				Flexed(0.5, gui.EmptyMaxWidth()).
-				Fn,
-		).
-		Fn
+	return wg.MainApp.Placeholder("send")
 }

@@ -664,3 +664,19 @@ func (a *App) ThemeHook(f func()) *App {
 	a.themeHook = f
 	return a
 }
+
+func (a *App) Placeholder(title string) func(gtx l.Context) l.Dimensions {
+	return a.VFlex().
+		AlignMiddle().
+		SpaceSides().
+		Rigid(
+			a.Flex().
+				Flexed(0.5, EmptyMaxWidth()).
+				Rigid(
+					a.H1(title).Fn,
+				).
+				Flexed(0.5, EmptyMaxWidth()).
+				Fn,
+		).
+		Fn
+}
