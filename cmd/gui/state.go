@@ -135,6 +135,10 @@ func (s *State) Load(filename string, pass *string) {
 	if err = json.Unmarshal(b, ss); Check(err) {
 		return
 	}
+	atx := s.allTxs.Load()
+	if len(atx) >= len(ss.AllTxs) {
+		ss.AllTxs = atx
+	}
 	ss.Unmarshal(s)
 	return
 }
