@@ -4,7 +4,7 @@ CMakeFiles/
 *.s
 CMakeCache.txt
 .qmake.stash
-build/
+stroy/
 parallelcoind
 parallelcoin-qt
 qrc_bitcoin.cpp
