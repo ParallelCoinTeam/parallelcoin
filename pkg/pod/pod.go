@@ -14,12 +14,6 @@ import (
 
 const AppName = "pod"
 
-var (
-	GitCommit string
-	BuildTime string
-	Tag       string
-)
-
 type Schema struct {
 	Groups Groups `json:"groups"`
 }

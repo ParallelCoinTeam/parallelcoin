@@ -14,6 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/pipe/serve"
+	"github.com/p9c/pod/version"
 	
 	"github.com/urfave/cli"
 	
@@ -27,8 +28,10 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		Debug("running beforeFunc", c.Command.Name)
-		Debug(Name, pod.Tag, pod.GitCommit, pod.BuildTime)
+		fmt.Println("running beforeFunc", c.Command.Name)
+		fmt.Println(version.String(), Name, version.URL, version.Tag,
+			version.GitCommit,
+			version.BuildTime)
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
@@ -269,7 +272,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			// if LAN is turned on it means by default we are on testnet
 			cx.ActiveNet = &netparams.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
-				Warn("set lan", c.Bool("lan"))
+				Warn("set lan", c.Bool("lan"), version.String())
 				*cx.Config.LAN = c.Bool("lan")
 				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
 			} else {

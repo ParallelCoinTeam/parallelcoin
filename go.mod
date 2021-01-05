@@ -38,9 +38,9 @@ require (
 	golang.org/x/exp v0.0.0-20200924195034-c827fd4f18b9
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
-	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/protobuf v1.23.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/src-d/go-git.v4 v4.13.1
 	lukechampine.com/blake3 v1.0.0
 
 )

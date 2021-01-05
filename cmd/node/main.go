@@ -15,7 +15,6 @@ import (
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/node/path"
-	"github.com/p9c/pod/cmd/node/version"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/db/blockdb"
@@ -34,7 +33,6 @@ func Main(cx *conte.Xt) (err error) {
 	// cx.WaitGroup.Add(1)
 	cx.WaitAdd()
 	// show version at startup
-	Info("version", version.Version())
 	// enable http profiling server if requested
 	if *cx.Config.Profile != "" {
 		Debug("profiling requested")
