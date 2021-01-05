@@ -14,6 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/pipe/serve"
+	"github.com/p9c/pod/version"
 	
 	"github.com/urfave/cli"
 	
@@ -27,7 +28,6 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		fmt.Println("running beforeFunc", c.Command.Name)
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
@@ -80,6 +80,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				color = false
 			}
 			logi.L.SetLevel(*cx.Config.LogLevel, color, "pod")
+			Info(version.Get())
 		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")
