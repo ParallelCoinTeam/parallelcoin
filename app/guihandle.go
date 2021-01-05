@@ -10,7 +10,6 @@ import (
 
 func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		Info("starting up node gui for parallelcoin")
 		// Debug(os.Args)
 		config.Configure(cx, c.Command.Name, true)
 		// interrupt.AddHandler(func() {

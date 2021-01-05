@@ -82,6 +82,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			logi.L.SetLevel(*cx.Config.LogLevel, color, "pod")
 			Info(version.Get())
 		}
+		Infof("running %s\n%s", os.Args, version.Get())
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")
 			switch *cx.Config.Network {
