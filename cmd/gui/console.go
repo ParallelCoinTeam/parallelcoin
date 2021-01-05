@@ -280,7 +280,7 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 						ScrollToEnd().
 						End().
 						Background("PanelBg").
-						Color("PanelText").
+						Color("DocBg").
 						Active("Primary").
 						Vertical().
 						Length(len(c.output)).
@@ -291,20 +291,22 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 			}, l.Center, c.TextSize.V).Fn,
 		).
 		Rigid(
-			c.Inset(
-				0.25,
-				c.Theme.Flex().
-					Flexed(
-						1,
-						c.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
-							Color("DocText").
-							Fn,
-					).
-					Rigid(c.copyButton.Fn).
-					Rigid(c.pasteButton.Fn).
-					Rigid(c.clearButton.Fn).
-					Fn,
-			).Fn,
+			c.Fill("DocBg",
+				c.Inset(
+					0.25,
+					c.Theme.Flex().
+						Flexed(
+							1,
+							c.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
+								Color("DocText").
+								Fn,
+						).
+						Rigid(c.copyButton.Fn).
+						Rigid(c.pasteButton.Fn).
+						Rigid(c.clearButton.Fn).
+						Fn,
+				).Fn,
+				l.Center, c.TextSize.V).Fn,
 		).
 		Fn
 	return fn(gtx)

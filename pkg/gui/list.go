@@ -4,6 +4,7 @@ import (
 	"image"
 	"time"
 	
+	"gioui.org/f32"
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
 	l "gioui.org/layout"
@@ -88,7 +89,7 @@ func (w *Window) List() (li *List) {
 		Window:          w,
 		pageUp:          w.Clickable(),
 		pageDown:        w.Clickable(),
-		color:           "DocText",
+		color:           "PanelBg",
 		background:      "Transparent",
 		active:          "Primary",
 		scrollWidth:     int(w.TextSize.Scale(0.75).V),
@@ -336,6 +337,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		}
 		container = li.Fill(li.background, containerFlex.Fn, l.Center, 0).Fn
 	}
+	clip.UniformRRect(f32.Rectangle{
+		// Min: f32.Point{},
+		Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
+	}, li.TextSize.V/4).Add(gtx.Ops)
 	return container(gtx)
 }
 

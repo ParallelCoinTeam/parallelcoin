@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 	
+	"gioui.org/f32"
+	"gioui.org/op/clip"
 	"gioui.org/text"
 	"github.com/urfave/cli"
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -236,7 +238,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		// put in the header
 		out = append(out,
 			// ng.th.Fill("PanelBg",
-			ng.Inset(0.5,
+			ng.Inset(0.25,
 				ng.H5(g.name).
 					Color("PanelText").
 					Alignment(text.Middle).
@@ -266,7 +268,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 								ng.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
 							).
 							Rigid(
-								ng.Inset(0.5,
+								ng.Inset(0.25,
 									gi.widget()[k],
 								).Fn,
 							).Fn(gtx)
@@ -280,11 +282,15 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		return out[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
+		clip.UniformRRect(f32.Rectangle{
+			Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
+		}, ng.TextSize.V/3).Add(gtx.Ops)
 		return ng.lists["settings"].
 				Vertical().
 				Length(len(out)).
 				Background("PanelBg").
-				// Color("DocText").Active("Primary").
+				Color("DocBg").
+				Active("Primary").
 				ListElement(le).Fn(gtx)
 	}
 }
@@ -318,7 +324,7 @@ func (c *Config) RenderConfigItem(item *Item, position int) []l.Widget {
 func (c *Config) RenderToggle(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.5,
+			return c.Inset(0.25,
 				c.Flex().
 					Rigid(
 						c.Switch(c.Bools[item.slug]).Fn,
@@ -341,7 +347,7 @@ func (c *Config) RenderToggle(item *Item) []l.Widget {
 func (c *Config) RenderInteger(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.5,
+			return c.Inset(0.25,
 				c.Flex().Flexed(1,
 					c.VFlex().
 						Rigid(
@@ -363,7 +369,7 @@ func (c *Config) RenderInteger(item *Item) []l.Widget {
 func (c *Config) RenderTime(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.5,
+			return c.Inset(0.25,
 				c.Flex().Flexed(1,
 					c.VFlex().
 						Rigid(
@@ -386,7 +392,7 @@ func (c *Config) RenderTime(item *Item) []l.Widget {
 func (c *Config) RenderFloat(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.5,
+			return c.Inset(0.25,
 				c.Flex().Flexed(1,
 					c.VFlex().
 						Rigid(
@@ -408,7 +414,7 @@ func (c *Config) RenderFloat(item *Item) []l.Widget {
 
 func (c *Config) RenderString(item *Item) []l.Widget {
 	return []l.Widget{
-		c.Inset(0.5,
+		c.Inset(0.25,
 			c.Flex().Flexed(1,
 				c.VFlex().
 					Rigid(
@@ -429,7 +435,7 @@ func (c *Config) RenderString(item *Item) []l.Widget {
 
 func (c *Config) RenderPassword(item *Item) []l.Widget {
 	return []l.Widget{
-		c.Inset(0.5,
+		c.Inset(0.25,
 			c.Flex().Flexed(1,
 				c.VFlex().
 					Rigid(
@@ -453,7 +459,7 @@ func (c *Config) RenderMulti(item *Item, position int) []l.Widget {
 	// c.multis[item.slug].
 	w := []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.5,
+			return c.Inset(0.25,
 				c.Flex().Flexed(1,
 					c.VFlex().
 						Rigid(
@@ -491,7 +497,7 @@ func (c *Config) RenderRadio(item *Item) []l.Widget {
 						UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked),
 					c.enums[item.slug], item.options[i], item.options[i]).Fn)
 		}
-		return c.Inset(0.5,
+		return c.Inset(0.25,
 			c.VFlex().
 				Rigid(
 					c.Body1(item.label).Fn,

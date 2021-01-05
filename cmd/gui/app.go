@@ -329,8 +329,8 @@ func (wg *WalletGUI) PageTopBarButton(
 		
 		if app.ActivePageGet() == name {
 			color = "PanelText"
-			background = "scrim"
-			// background = "PanelBg"
+			// background = "scrim"
+			background = "PanelBg"
 		}
 		// if name == "home" {
 		// 	background = "PrimaryDim"
