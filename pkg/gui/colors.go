@@ -99,8 +99,8 @@ func newColors() (c *Colors) {
 		"white":                 "ffffffff",
 		"dark-white":            "ffdddddd",
 		"yellow":                "ffcfcf30",
-		"halfdim":               "88000000",
-		"halfbright":            "88888888",
+		"halfdim":               "44000000",
+		"halfbright":            "44ffffff",
 	}
 	
 	c.m["Black"] = c.m["black"]
@@ -145,7 +145,7 @@ func newColors() (c *Colors) {
 	c.m["Transparent"] = c.m["00000000"]
 	c.m["Warning"] = c.m["light-orange"]
 	c.m["White"] = c.m["white"]
-	c.m["scrim"] = c.m["halfdim"]
+	c.m["scrim"] = c.m["halfbright"]
 	
 	c.m["Primary"] = c.m["PrimaryLight"]
 	c.m["Secondary"] = c.m["SecondaryLight"]
@@ -190,7 +190,9 @@ func (c *Colors) SetTheme(dark bool) {
 		c.m["Success"] = c.m["dark-green"]
 		c.m["Check"] = c.m["orange"]
 		c.m["DocBgHilite"] = c.m["dark-white"]
-		c.m["scrim"] = c.m["halfdim"]
+		c.m["scrim"] = c.m["halfbright"]
+		c.m["Fatal"] = c.m["light-red"]
+		c.m["Info"] = c.m["light-blue"]
 	} else {
 		c.m["Primary"] = c.m["PrimaryDim"]
 		c.m["Secondary"] = c.m["SecondaryDim"]
@@ -209,6 +211,8 @@ func (c *Colors) SetTheme(dark bool) {
 		c.m["Success"] = c.m["green"]
 		c.m["Check"] = c.m["orange"]
 		c.m["DocBgHilite"] = c.m["light-black"]
-		c.m["scrim"] = c.m["halfbright"]
+		c.m["scrim"] = c.m["halfdim"]
+		c.m["Fatal"] = c.m["red"]
+		c.m["Info"] = c.m["blue"]
 	}
 }

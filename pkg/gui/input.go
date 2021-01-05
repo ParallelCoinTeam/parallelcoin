@@ -125,33 +125,37 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Min.X = 0
 	// width := int(in.Theme.TextSize.Scale(in.size).V)
 	// gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
-	return in.Border().Color(in.borderColor).Embed(
-		in.Flex().
-			Flexed(
-				1,
-				in.Inset(0.25, in.input.Color("DocText").Fn).Fn,
-			).
-			Rigid(
-				in.copyButton.
-					Background("").
-					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
-					ButtonInset(0.25).
+	return in.Fill(in.backgroundColor,
+		in.Border().Width(0.25).CornerRadius(0.575).Color(in.borderColor).Embed(
+			in.Inset(0.25,
+				in.Flex().
+					Flexed(
+						1,
+						in.Inset(0.25, in.input.Color("DocText").Fn).Fn,
+					).
+					Rigid(
+						in.copyButton.
+							Background("").
+							Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
+							ButtonInset(0.25).
+							Fn,
+					).
+					Rigid(
+						in.pasteButton.
+							Background("").
+							Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
+							ButtonInset(0.25).
+							Fn,
+					).
+					Rigid(
+						in.clearButton.
+							Background("").
+							Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentBackspace)).
+							ButtonInset(0.25).
+							Fn,
+					).
 					Fn,
-			).
-			Rigid(
-				in.pasteButton.
-					Background("").
-					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
-					ButtonInset(0.25).
-					Fn,
-			).
-			Rigid(
-				in.clearButton.
-					Background("").
-					Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentBackspace)).
-					ButtonInset(0.25).
-					Fn,
-			).
-			Fn,
-	).Fn(gtx)
+			).Fn,
+		).Fn,
+		l.Center, in.TextSize.V).Fn(gtx)
 }

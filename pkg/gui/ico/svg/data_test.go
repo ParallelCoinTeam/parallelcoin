@@ -34,4 +34,5 @@ var list = []struct {
 	{"Terminal", Terminal},
 	{"TxNumber", TxNumber},
 	{"Unconfirmed", Unconfirmed},
+	{"Gio", Gio},
 }

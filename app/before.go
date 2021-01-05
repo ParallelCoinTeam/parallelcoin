@@ -82,7 +82,11 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			logi.L.SetLevel(*cx.Config.LogLevel, color, "pod")
 			Info(version.Get())
 		}
-		Infof("running %s\n%s", os.Args, version.Get())
+		if !*cx.Config.PipeLog {
+			// if/when running further instances of the same version no reason
+			// to print the version message again
+			Infof("running %s\n%s", os.Args, version.Get())
+		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")
 			switch *cx.Config.Network {

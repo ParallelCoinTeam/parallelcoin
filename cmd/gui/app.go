@@ -83,7 +83,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			),
 			"help": wg.Page(
 				"help", gui.Widgets{
-					gui.WidgetSize{Widget: a.Placeholder("help")},
+					gui.WidgetSize{Widget: wg.HelpPage()},
 				},
 			),
 			"log": wg.Page(
@@ -190,7 +190,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			wg.SideBarButton("settings", "settings", 5),
 			wg.SideBarButton("log", "log", 10),
 			wg.SideBarButton("help", "help", 8),
-			wg.SideBarButton("quit", "quit", 11),
+			// wg.SideBarButton("quit", "quit", 11),
 		},
 	)
 	a.ButtonBar(
@@ -220,11 +220,11 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					wg.unlockPage.ActivePage(name)
 				}, a, "Success",
 			),
-			wg.PageTopBarButton(
-				"quit", 3, &icons.ActionExitToApp, func(name string) {
-					wg.MainApp.ActivePage(name)
-				}, a, "",
-			),
+			// wg.PageTopBarButton(
+			// 	"quit", 3, &icons.ActionExitToApp, func(name string) {
+			// 		wg.MainApp.ActivePage(name)
+			// 	}, a, "",
+			// ),
 		},
 	)
 	a.StatusBar(

@@ -29,10 +29,16 @@ type TextInput struct {
 
 // TextInput creates a simple text input widget
 func (w *Window) TextInput(editor *Editor, hint string) *TextInput {
+	var err error
+	var fon text.Font
+	if fon, err = w.collection.Font("bariol regular"); Check(err) {
+		panic(err)
+	}
 	e := &TextInput{
 		Window:    w,
 		editor:    editor,
 		textSize:  w.TextSize,
+		font:      fon,
 		color:     w.Colors.GetNRGBAFromName("DocText"),
 		shaper:    w.shaper,
 		hint:      hint,
