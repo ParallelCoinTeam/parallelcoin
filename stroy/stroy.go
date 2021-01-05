@@ -159,7 +159,7 @@ func populateVersionFlags() bool {
 }
 
 func main() {
-	PrintVersion()
+	fmt.Println(GetVersion())
 	var err error
 	var ok bool
 	var home string
@@ -206,7 +206,9 @@ func main() {
 				// 	split[i] =
 				// 		Infof("'%s'", split[i])
 				// }
-				fmt.Printf("executing item %d of list '%v' '%v' '%v'", i, os.Args[1],
+				fmt.Printf(`executing item %d of list '%v' '%v' '%v'
+
+`, i, os.Args[1],
 					split[0], split[1:])
 				// Infos(split)
 				var cmd *exec.Cmd
@@ -255,11 +257,9 @@ var (
 	Tag       string
 )
 
-func PrintVersion() {
-	fmt.Fprintf(os.Stderr,
-		"running application: repo: %s branch: %s commit: %s built: %s tag: %s" +
-		"\n\n",
-		URL, GitRef, GitCommit, BuildTime, Tag)
+func GetVersion() string {
+	return fmt.Sprintf("app information: repo: %s branch: %s commit: %s built"+
+		": %s tag: %s...\n", URL, GitRef, GitCommit, BuildTime, Tag)
 }
 
 type command struct {
@@ -316,31 +316,31 @@ var commands = map[string][]string{
 		"go test ./...",
 	},
 	"kopachgui": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir -n testnet -l debug --lan --solo --kopachgui kopach",
 	},
 	"testkopach": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir -n testnet -l trace -g -G 1 --lan kopach",
 	},
 	"testnode": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir -n testnet -l debug --solo --lan node",
 	},
 	"nodegui": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir -n testnet nodegui",
 	},
 	"gui": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir -n testnet --lan",
 	},
 	"guis": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D test1 --minerpass pa55word",
 	},
 	"guass": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir --minerpass pa55word",
 	},
 	"resetwallet0": {
@@ -350,40 +350,40 @@ var commands = map[string][]string{
 		"pod -D test1 -l trace --walletpass aoeuaoeu wallet drophistory",
 	},
 	"guihttpprof": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir -n testnet --lan --solo --kopachgui --profile 6969",
 	},
 	"guiprof": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir -n testnet --lan --solo --kopachgui",
 	},
 	"mainnode": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D testmain -n mainnet -l info --connect seed3.parallelcoin." +
 			"io:11047 node",
 	},
 	"testwallet": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D %datadir -n testnet -l trace --walletpass aoeuaoeu wallet",
 	},
 	"mainwallet": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"pod -D testmain -n mainnet -l trace wallet",
 	},
 	"teststopkopach": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"go install -v ./pkg/util/logi/pipe",
 		"pipe pod -D %datadir --pipelog -l trace --walletpass aoeuaoeu -g -G 1" +
 			" --solo --lan kopach",
 	},
 	"teststopnode": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"go install -v ./pkg/util/logi/pipe",
 		"pipe pod -D %datadir --pipelog -l trace --walletpass aoeuaoeu -g -G 1" +
 			" --solo --lan node",
 	},
 	"teststopwallet": {
-		"go install -v -ldflags=\"%ldflags\"",
+		"go install -v %ldflags",
 		"go install -v ./pkg/util/logi/pipe",
 		"pipe pod -D %datadir --pipelog -l trace --walletpass aoeuaoeu -g -G 1" +
 			" --solo --lan wallet",
