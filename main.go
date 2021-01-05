@@ -7,15 +7,20 @@ package main
 import (
 	"fmt"
 	_ "net/http/pprof"
-	"os"
 	
 	_ "github.com/p9c/pod/pkg"
+	"github.com/p9c/pod/version"
 	
 	"github.com/p9c/pod/cmd"
 )
 
 func main() {
-	Print()
+	version.URL = URL
+	version.GitRef = GitRef
+	version.GitCommit = GitCommit
+	version.BuildTime = BuildTime
+	version.Tag = Tag
+	version.Get = GetVersion
 	cmd.Main()
 }
 
@@ -27,11 +32,14 @@ var (
 	Tag       string
 )
 
-// Print the version stored in the version library
-func Print() {
-	_, _ = fmt.Fprintln(os.Stderr, sprintVersion())
-}
-
-func sprintVersion() string {
-	return fmt.Sprintf("%s %s %s %s %s", URL, GitRef, GitCommit, BuildTime, Tag)
+func GetVersion() string {
+	return fmt.Sprintf(
+		`ParallelCoin Pod
+	repo: %s
+	branch: %s
+	commit: %s
+	built: %s
+	tag: %s
+`,
+		URL, GitRef, GitCommit, BuildTime, Tag)
 }

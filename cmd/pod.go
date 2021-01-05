@@ -12,10 +12,12 @@ import (
 	"github.com/p9c/pod/app"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/limits"
+	"github.com/p9c/pod/version"
 )
 
 // Main is the main entry point for pod
 func Main() {
+	Info(version.Get())
 	runtime.GOMAXPROCS(runtime.NumCPU() * 3)
 	debug.SetGCPercent(10)
 	var err error
