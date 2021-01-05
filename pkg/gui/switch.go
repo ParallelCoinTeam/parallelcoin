@@ -42,8 +42,8 @@ func (s *Switch) EnabledColor(color string) *Switch {
 }
 
 // DisabledColor sets the color to draw for the disabled state
-func (s *Switch) DisabledColor() *Switch {
-	s.color.disabled = s.Theme.Colors.GetNRGBAFromName("Primary")
+func (s *Switch) DisabledColor(color string) *Switch {
+	s.color.disabled = s.Theme.Colors.GetNRGBAFromName(color)
 	return s
 }
 
@@ -74,7 +74,7 @@ func (s *Switch) Fn(gtx l.Context) l.Dimensions {
 		if gtx.Queue == nil {
 			col = f32color.MulAlpha(col, 150)
 		}
-		trackColor := f32color.MulAlpha(col, 150)
+		trackColor := f32color.MulAlpha(col, 200)
 		op.Offset(f32.Point{Y: trackOff}).Add(gtx.Ops)
 		clip.RRect{
 			Rect: trackRect,

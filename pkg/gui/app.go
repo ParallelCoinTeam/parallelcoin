@@ -87,7 +87,7 @@ func (w *Window) App(size *int, activePage *uberatomic.String,
 		menuIcon:            &icons.NavigationMenu,
 		menuClickable:       mc,
 		menuButton:          w.IconButton(mc),
-		menuColor:           "Light",
+		menuColor:           "DocText",
 		MenuOpen:            false,
 		Size:                size,
 		invalidate:          invalidate,
@@ -292,7 +292,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 							Fn,
 					).
 					Rigid(
-						a.H5(a.ActivePageGet()).Color("Primary").Fn,
+						a.H5(a.ActivePageGet()).Color("DocText").Fn,
 					).
 					Fn,
 			},
@@ -327,7 +327,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 							Fn,
 					).
 					Rigid(
-						a.H5(a.title).Color("Primary").Fn,
+						a.H5(a.title).Color("DocText").Fn,
 					).
 					Fn,
 			},
@@ -666,17 +666,19 @@ func (a *App) ThemeHook(f func()) *App {
 }
 
 func (a *App) Placeholder(title string) func(gtx l.Context) l.Dimensions {
-	return a.VFlex().
-		AlignMiddle().
-		SpaceSides().
-		Rigid(
-			a.Flex().
-				Flexed(0.5, EmptyMaxWidth()).
-				Rigid(
-					a.H1(title).Fn,
-				).
-				Flexed(0.5, EmptyMaxWidth()).
-				Fn,
-		).
-		Fn
+	return func(gtx l.Context) l.Dimensions {
+		return a.VFlex().
+			AlignMiddle().
+			SpaceSides().
+			Rigid(
+				a.Flex().
+					Flexed(0.5, EmptyMaxWidth()).
+					Rigid(
+						a.H1(title).Fn,
+					).
+					Flexed(0.5, EmptyMaxWidth()).
+					Fn,
+			).
+			Fn(gtx)
+	}
 }

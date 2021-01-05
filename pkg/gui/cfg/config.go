@@ -116,7 +116,7 @@ func (c *Config) Config() GroupsMap {
 				})
 			case "integer":
 				c.inputs[sgf.Slug] = c.Input(fmt.Sprint(*tgs.Slot.(*int)),
-					sgf.Slug, "Primary", "scrim", "DocBg", func(txt string) {
+					sgf.Slug, "Primary", "DocBg", "DocBg", func(txt string) {
 					Debug(sgf.Slug, "submitted", txt)
 					i := c.cx.ConfigMap[sgf.Slug].(*int)
 					if n, err := strconv.Atoi(txt); !Check(err) {
@@ -126,7 +126,7 @@ func (c *Config) Config() GroupsMap {
 				})
 			case "time":
 				c.inputs[sgf.Slug] = c.Input(fmt.Sprint(*tgs.Slot.(*time.
-					Duration)), sgf.Slug, "Primary", "scrim", "DocBg",
+					Duration)), sgf.Slug, "Primary", "DocBg", "DocBg",
 					func(txt string) {
 					Debug(sgf.Slug, "submitted", txt)
 					tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
@@ -137,7 +137,7 @@ func (c *Config) Config() GroupsMap {
 				})
 			case "float":
 				c.inputs[sgf.Slug] = c.Input(strconv.FormatFloat(*tgs.Slot.(
-					*float64), 'f', -1, 64), sgf.Slug, "Primary", "scrim", "DocBg",
+					*float64), 'f', -1, 64), sgf.Slug, "Primary", "DocBg", "DocBg",
 					func(txt string) {
 					Debug(sgf.Slug, "submitted", txt)
 					ff := c.cx.ConfigMap[sgf.Slug].(*float64)
@@ -148,7 +148,7 @@ func (c *Config) Config() GroupsMap {
 				})
 			case "string":
 				c.inputs[sgf.Slug] = c.Input(*tgs.Slot.(*string), sgf.Slug,
-					"Primary", "scrim", "DocBg", func(txt string) {
+					"Primary", "DocBg", "DocBg", func(txt string) {
 					Debug(sgf.Slug, "submitted", txt)
 					ss := c.cx.ConfigMap[sgf.Slug].(*string)
 					*ss = txt
@@ -156,7 +156,7 @@ func (c *Config) Config() GroupsMap {
 				})
 			case "password":
 				c.passwords[sgf.Slug] = c.Password("password",
-					tgs.Slot.(*string), "Primary", "scrim", "DocBg",
+					tgs.Slot.(*string), "Primary", "DocBg", "DocBg",
 					func(txt string) {
 					Debug(sgf.Slug, "submitted", txt)
 					pp := c.cx.ConfigMap[sgf.Slug].(*string)
@@ -165,7 +165,8 @@ func (c *Config) Config() GroupsMap {
 				})
 			case "multi":
 				c.multis[sgf.Slug] = c.Multiline(
-					tgs.Slot.(*cli.StringSlice), "Primary", "PanelBg", "DocBg", 30, func(txt []string) {
+					tgs.Slot.(*cli.StringSlice), "Primary", "PanelBg",
+					"Transparent", 30, func(txt []string) {
 						Debug(sgf.Slug, "submitted", txt)
 						sss := c.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
 						*sss = txt
@@ -327,7 +328,7 @@ func (c *Config) RenderToggle(item *Item) []l.Widget {
 			return c.Inset(0.25,
 				c.Flex().
 					Rigid(
-						c.Switch(c.Bools[item.slug]).Fn,
+						c.Switch(c.Bools[item.slug]).DisabledColor("DocBg").Fn,
 					).
 					Flexed(1,
 						c.VFlex().
@@ -484,7 +485,7 @@ func (c *Config) RenderRadio(item *Item) []l.Widget {
 		var options []l.Widget
 		for i := range item.options {
 			var color string
-			color = "scrim"
+			color = "DocBg"
 			if c.enums[item.slug].Value() == item.options[i] {
 				color = "Primary"
 			}

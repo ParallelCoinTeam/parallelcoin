@@ -70,7 +70,7 @@ func (w *Window) Multiline(
 			Embed(
 				m.Theme.Flex().AlignStart().
 					Flexed(1,
-						m.Fill("Primary", m.Inset(0.5,
+						m.Fill("Primary", m.Inset(0.25,
 							m.Body2((*m.lines)[i]).Color("DocText").Fn,
 						).Fn, l.Center, 0).Fn,
 					).Fn,
@@ -183,7 +183,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 		m.buttons[i].Embed(
 			m.Theme.Flex().
 				Rigid(
-					m.Inset(0.5,
+					m.Inset(0.25,
 						m.Body2((*m.lines)[i]).Color("DocText").Fn,
 					).Fn,
 				).Fn,
@@ -245,7 +245,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 				Embed(
 					m.Theme.Flex().
 						Rigid(
-							m.Inset(0.5,
+							m.Inset(0.25,
 								m.Body2((*m.lines)[x]).Color("DocText").Fn,
 							).Fn,
 						).Fn,
@@ -357,7 +357,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 					func(gtx l.Context) l.Dimensions {
 						return m.Theme.Flex().
 							Flexed(1,
-								m.Inset(0.5,
+								m.Inset(0.25,
 									m.Body2((*m.lines)[i]).Color("DocText").Fn,
 								).Fn,
 							).Fn(gtx)
@@ -370,7 +370,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			// Debug("rendering editor", x)
 			
 			input := func(gtx l.Context) l.Dimensions {
-				return m.Inset(0.5,
+				return m.Inset(0.25,
 					m.Flex().
 						Rigid(
 							m.removeButtons[i].Fn,
@@ -395,7 +395,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 					Debug("setting", i, m.inputLocation)
 				})
 			button := func(gtx l.Context) l.Dimensions {
-				return m.Inset(0.5,
+				return m.Inset(0.25,
 					m.Flex().AlignStart().
 						Rigid(
 							m.removeButtons[i].Fn,
@@ -413,7 +413,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 	// Debug("widgets", widgets)
 	addButton := func(gtx l.Context) l.Dimensions {
 		addb :=
-			m.Inset(0.5,
+			m.Inset(0.25,
 				m.Theme.Flex().AlignStart().
 					Rigid(
 						m.IconButton(
