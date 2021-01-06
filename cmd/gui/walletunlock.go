@@ -22,63 +22,66 @@ import (
 	"github.com/p9c/pod/pkg/util/logi"
 )
 
+func (wg *WalletGUI) unlockWallet(pass string) {
+	Debug("entered password", pass)
+	// unlock wallet
+	wg.cx.Config.Lock()
+	*wg.cx.Config.WalletPass = pass
+	*wg.cx.Config.WalletOff = false
+	wg.cx.Config.Unlock()
+	// load config into a fresh variable
+	cfg, _ := pod.EmptyConfig()
+	var cfgFile []byte
+	var err error
+	if cfgFile, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); Check(err) {
+		// this should not happen
+		// TODO: panic-type conditions - for gui should have a notification maybe?
+		panic("config file does not exist")
+	}
+	Debug("loaded config")
+	if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
+		Debug("unmarshaled config")
+		bhb := blake3.Sum256([]byte(pass))
+		bh := hex.EncodeToString(bhb[:])
+		Debug(pass, bh, *cfg.WalletPass)
+		if *cfg.WalletPass == bh {
+			Debug("loading previously saved state")
+			filename := filepath.Join(wg.cx.DataDir, "state.json")
+			if logi.FileExists(filename) {
+				if err = wg.State.Load(filename, wg.cx.Config.WalletPass); Check(err) {
+					interrupt.Request()
+				}
+			}
+			wg.stateLoaded.Store(true)
+			// the entered password matches the stored hash
+			Debug("now we can open the wallet")
+			if err = wg.writeWalletCookie(); Check(err) {
+			}
+			*wg.cx.Config.NodeOff = false
+			*wg.cx.Config.WalletOff = false
+			save.Pod(wg.cx.Config)
+			if !wg.node.Running() {
+				wg.node.Start()
+			}
+			wg.wallet.Start()
+			wg.unlockPassword.Wipe()
+			go wg.RecentTransactions(10, "recent")
+			go wg.RecentTransactions(-1, "history")
+		}
+	} else {
+		Debug("failed to unlock the wallet")
+	}
+}
+
 func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate)
 	wg.unlockPage = a
 	password := ""
+	exitButton := wg.WidgetPool.GetClickable()
+	unlockButton := wg.WidgetPool.GetClickable()
 	wg.unlockPassword = wg.Password("enter password", &password, "DocText",
 		"DocBg", "PanelBg", func(pass string) {
-			go func() {
-				Debug("entered password", pass)
-				// unlock wallet
-				wg.cx.Config.Lock()
-				*wg.cx.Config.WalletPass = pass
-				*wg.cx.Config.WalletOff = false
-				wg.cx.Config.Unlock()
-				wg.unlockPassword.GetPassword()
-				// load config into a fresh variable
-				cfg, _ := pod.EmptyConfig()
-				var cfgFile []byte
-				var err error
-				if cfgFile, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); Check(err) {
-					// this should not happen
-					// TODO: panic-type conditions - for gui should have a notification maybe?
-					panic("config file does not exist")
-				}
-				Debug("loaded config")
-				if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
-					Debug("unmarshaled config")
-					bhb := blake3.Sum256([]byte(pass))
-					bh := hex.EncodeToString(bhb[:])
-					Debug(pass, bh, *cfg.WalletPass)
-					if *cfg.WalletPass == bh {
-						Debug("loading previously saved state")
-						filename := filepath.Join(wg.cx.DataDir, "state.json")
-						if logi.FileExists(filename) {
-							if err = wg.State.Load(filename, wg.cx.Config.WalletPass); Check(err) {
-								interrupt.Request()
-							}
-						}
-						wg.stateLoaded.Store(true)
-						// the entered password matches the stored hash
-						Debug("now we can open the wallet")
-						if err = wg.writeWalletCookie(); Check(err) {
-						}
-						*wg.cx.Config.NodeOff = false
-						*wg.cx.Config.WalletOff = false
-						save.Pod(wg.cx.Config)
-						if !wg.node.Running() {
-							wg.node.Start()
-						}
-						wg.wallet.Start()
-						wg.unlockPassword.Wipe()
-						go wg.RecentTransactions(10, "recent")
-						go wg.RecentTransactions(-1, "history")
-					}
-				} else {
-					Debug("failed to unlock the wallet")
-				}
-			}()
+			go wg.unlockWallet(pass)
 		})
 	wg.unlockPage.ThemeHook(
 		func() {
@@ -182,7 +185,10 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																			wg.Flex().
 																				Rigid(
 																					wg.Inset(0.25,
-																						wg.Fill("DocText",
+																						wg.ButtonLayout(exitButton.SetClick(func() {
+																							interrupt.Request()
+																						})).Background("DocText").Embed(
+																							// wg.Fill("DocText",
 																							wg.Inset(0.25,
 																								wg.Flex().AlignMiddle().
 																									Rigid(
@@ -206,13 +212,20 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																									).
 																									Fn,
 																							).Fn,
-																							l.Center,
-																							wg.TextSize.V/2).Fn,
+																							// l.Center,
+																							// wg.TextSize.V/2).Fn,
+																						).Fn,
 																					).Fn,
 																				).
 																				Rigid(
 																					wg.Inset(0.25,
-																						wg.Fill("Success",
+																						wg.ButtonLayout(unlockButton.SetClick(func() {
+																							// pass := wg.unlockPassword.Editor().Text()
+																							pass := wg.unlockPassword.GetPassword()
+																							Debug(">>>>>>>>>>> unlock password", pass)
+																							wg.unlockWallet(pass)
+																							
+																						})).Background("Success").Embed(
 																							wg.Inset(0.25,
 																								wg.Flex().AlignMiddle().
 																									Rigid(
@@ -232,7 +245,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																									).
 																									Fn,
 																							).Fn,
-																							l.Center, wg.TextSize.V/2).Fn,
+																						).Fn,
 																					).Fn,
 																				).
 																				Fn,

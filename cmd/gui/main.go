@@ -183,7 +183,7 @@ func (wg *WalletGUI) Run() (err error) {
 						*wg.noWallet,
 						wg.CreateWalletPage,
 						gui.If(
-							!wg.wallet.Running() && !wg.stateLoaded.Load(),
+							!wg.wallet.Running() || !wg.stateLoaded.Load(),
 							wg.unlockPage.Fn(),
 							wg.MainApp.Fn(),
 						),
