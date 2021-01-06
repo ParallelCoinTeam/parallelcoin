@@ -84,13 +84,15 @@ type WalletGUI struct {
 	HistoryWidget               l.Widget
 	txRecentList, txHistoryList []btcjson.ListTransactionsResult
 	txMx                        sync.Mutex
-	Syncing                     uberatomic.Bool
+	Syncing                     *uberatomic.Bool
+	stateLoaded                 *uberatomic.Bool
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
 
 func (wg *WalletGUI) Run() (err error) {
-	wg.Syncing.Store(false)
+	wg.Syncing = uberatomic.NewBool(false)
+	wg.stateLoaded = uberatomic.NewBool(false)
 	// wg.th = gui.NewTheme(p9fonts.Collection(), wg.quit)
 	// wg.Window = gui.NewWindow(wg.th)
 	wg.Window = gui.NewWindowP9(wg.quit)
@@ -147,8 +149,8 @@ func (wg *WalletGUI) Run() (err error) {
 			Debug("quitting wallet gui")
 			// consume.Kill(wg.Node)
 			// consume.Kill(wg.Miner)
-			// wg.gracefulShutdown()
-			// wg.quit.Q()
+			wg.gracefulShutdown()
+			wg.quit.Q()
 		},
 	)
 	go func() {
@@ -158,9 +160,10 @@ func (wg *WalletGUI) Run() (err error) {
 			case <-wg.invalidate:
 				Trace("invalidating render queue")
 				wg.Window.Window.Invalidate()
-				filename := filepath.Join(wg.cx.DataDir, "state.json")
-				if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
-				} else {
+				if wg.wallet.Running() && wg.stateLoaded.Load() {
+					filename := filepath.Join(wg.cx.DataDir, "state.json")
+					if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+					}
 				}
 			case <-wg.cx.KillAll:
 				break out

@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func (wg *WalletGUI) WalletAndClientRunning() bool {
@@ -108,14 +109,23 @@ func (wg *WalletGUI) Tickers() {
 						if first {
 							wg.processWalletBlockNotification()
 						}
+						if wg.stateLoaded.Load() &&
+							!wg.State.IsReceivingAddress() {
+							var addr util.Address
+							if addr, err = wg.WalletClient.GetNewAddress("default"); !Check(err) {
+								Debug("storing new receiving address", addr.EncodeAddress(),
+									"as prior was empty", wg.State.currentReceivingAddress.String.Load())
+								wg.State.SetReceivingAddress(addr)
+								wg.State.isAddress.Store(true)
+								Debugs(wg.State.Marshal())
+								wg.invalidate <- struct{}{}
+							}
+						}
 					}
 					wg.invalidate <- struct{}{}
 					first = false
 				// }
 				case <-fiveSeconds:
-
-					
-					// wg.invalidate <- struct{}{}
 				case <-wg.quit:
 					break totalOut
 				}
@@ -146,6 +156,8 @@ func (wg *WalletGUI) updateChainBlock() {
 	var h *chainhash.Hash
 	var height int32
 	if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+		interrupt.Request()
+		return
 	}
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(h)

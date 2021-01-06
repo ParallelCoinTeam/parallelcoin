@@ -16,6 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/atom"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 // CategoryFilter marks which transactions to omit from the filtered transaction list
@@ -64,6 +65,7 @@ type State struct {
 	filter                  CategoryFilter
 	filterChanged           *atom.Bool
 	currentReceivingAddress *atom.Address
+	isAddress               *atom.Bool
 	activePage              *uberatomic.String
 	addressBook             []AddressEntry
 }
@@ -89,6 +91,7 @@ func GetNewState(params *netparams.Params,
 		filterChanged: fc,
 		currentReceivingAddress: atom.NewAddress(&util.AddressPubKeyHash{},
 			params),
+		isAddress:  &atom.Bool{Bool: uberatomic.NewBool(false)},
 		activePage: activePage,
 	}
 }
@@ -97,37 +100,67 @@ func (s *State) BumpLastUpdated() {
 	s.lastUpdated.Store(time.Now())
 }
 
+func (s *State) SetReceivingAddress(addr util.Address) {
+	s.currentReceivingAddress.Store(addr)
+}
+
+func (s *State) IsReceivingAddress() bool {
+	addr := s.currentReceivingAddress.String.Load()
+	if addr == "1111111111111111111114oLvT2" {
+		s.isAddress.Store(false)
+	} else {
+		s.isAddress.Store(true)
+	}
+	return s.isAddress.Load()
+}
+
 func (s *State) Save(filename string, pass *string) (err error) {
 	Debug("saving state...")
 	marshalled := s.Marshal()
 	var j []byte
-	j, err = json.MarshalIndent(marshalled, "", "  ")
-	Check(err)
-	// Debug(string(j))
+	if j, err = json.MarshalIndent(marshalled, "", "  "); Check(err) {
+		return
+	}
+	Debug(string(j))
 	var ciph cipher.AEAD
-	ciph, err = gcm.GetCipher(*pass)
+	if ciph, err = gcm.GetCipher(*pass); Check(err) {
+		return
+	}
 	var nonce []byte
-	nonce, err = transport.GetNonce(ciph)
-	if err = ioutil.WriteFile(filename, append(nonce, ciph.Seal(nil, nonce, j,
-		nil)...), 0700); Check(err) {
+	if nonce, err = transport.GetNonce(ciph); Check(err) {
+		return
+	}
+	crypted := append(nonce, ciph.Seal(nil, nonce, j, nil)...)
+	var b []byte
+	_ = b
+	if b, err = ciph.Open(nil, nonce, crypted[len(nonce):], nil); Check(err) {
+		interrupt.Request()
+		return
+	}
+	if err = ioutil.WriteFile(filename, crypted, 0700); Check(err) {
+	}
+	if err = ioutil.WriteFile(filename+".clear", j, 0700); Check(err) {
 	}
 	return
 }
 
-func (s *State) Load(filename string, pass *string) {
-	var err error
+func (s *State) Load(filename string, pass *string) (err error) {
 	var data []byte
 	var ciph cipher.AEAD
 	if data, err = ioutil.ReadFile(filename); Check(err) {
 		return
 	}
+	Debug("cipher:", *pass)
 	if ciph, err = gcm.GetCipher(*pass); Check(err) {
 		return
 	}
-	nonce := data[:ciph.NonceSize()]
-	data = data[ciph.NonceSize():]
+	ns := ciph.NonceSize()
+	// Debug("nonce size:", ns)
+	nonce := data[:ns]
+	data = data[ns:]
 	var b []byte
 	if b, err = ciph.Open(nil, nonce, data, nil); Check(err) {
+		interrupt.Request()
 		return
 	}
 	// yay, right password, now unmarshal
@@ -135,10 +168,7 @@ func (s *State) Load(filename string, pass *string) {
 	if err = json.Unmarshal(b, ss); Check(err) {
 		return
 	}
-	atx := s.allTxs.Load()
-	if len(atx) >= len(ss.AllTxs) {
-		ss.AllTxs = atx
-	}
+	Debug(string(b))
 	ss.Unmarshal(s)
 	return
 }
@@ -178,14 +208,18 @@ func (m *Marshalled) Unmarshal(s *State) {
 	s.bestBlockHash.Store(m.BestBlockHash)
 	s.balance.Store(m.Balance)
 	s.balanceUnconfirmed.Store(m.BalanceUnconfirmed)
-	s.allTxs.Store(m.AllTxs)
-	s.filter = m.Filter
-	ad, err := util.DecodeAddress(m.ReceivingAddress,
-		s.currentReceivingAddress.ForNet)
-	if err != nil {
-		ad = &util.AddressPubKeyHash{}
+	if len(s.allTxs.Load()) < len(m.AllTxs) {
+		s.allTxs.Store(m.AllTxs)
 	}
-	s.currentReceivingAddress.Store(ad)
+	s.filter = m.Filter
+	
+	if m.ReceivingAddress != "1111111111111111111114oLvT2" {
+		var err error
+		var ra util.Address
+		if ra, err = util.DecodeAddress(m.ReceivingAddress, s.currentReceivingAddress.ForNet); Check(err) {
+		}
+		s.currentReceivingAddress.Store(ra)
+	}
 	s.SetActivePage(m.ActivePage)
 	s.addressBook = m.AddressBook
 	return

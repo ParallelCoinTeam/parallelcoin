@@ -265,7 +265,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 func (wg *WalletGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.Fill(wg.MainApp.BodyBackgroundGet(), wg.VFlex().
-			SpaceEvenly().
+			// SpaceEvenly().
 			Rigid(
 				wg.Responsive(
 					*wg.Size, gui.Widgets{

@@ -452,7 +452,7 @@ func (a *App) renderSideBar() l.Widget {
 				LeftSide(true).
 				
 				Vertical().
-				Background("PanelBg").
+				// Background("PanelBg").
 				// ScrollWidth(20).
 				// Color("DocText").
 				// Active("Primary").

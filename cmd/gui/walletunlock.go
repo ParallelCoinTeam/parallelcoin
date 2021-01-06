@@ -18,6 +18,8 @@ import (
 	"github.com/p9c/pod/pkg/gui"
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/util/logi"
 )
 
 func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
@@ -50,6 +52,14 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 					bh := hex.EncodeToString(bhb[:])
 					Debug(pass, bh, *cfg.WalletPass)
 					if *cfg.WalletPass == bh {
+						Debug("loading previously saved state")
+						filename := filepath.Join(wg.cx.DataDir, "state.json")
+						if logi.FileExists(filename) {
+							if err = wg.State.Load(filename, wg.cx.Config.WalletPass); Check(err) {
+								interrupt.Request()
+							}
+						}
+						wg.stateLoaded.Store(true)
 						// the entered password matches the stored hash
 						Debug("now we can open the wallet")
 						if err = wg.writeWalletCookie(); Check(err) {
@@ -57,8 +67,6 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 						*wg.cx.Config.NodeOff = false
 						*wg.cx.Config.WalletOff = false
 						save.Pod(wg.cx.Config)
-						filename := filepath.Join(wg.cx.DataDir, "state.json")
-						wg.State.Load(filename, wg.cx.Config.WalletPass)
 						if !wg.node.Running() {
 							wg.node.Start()
 						}
