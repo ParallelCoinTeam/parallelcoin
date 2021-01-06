@@ -194,15 +194,15 @@ type Qrcode struct {
 	penalty        []int   // calculated mask penalty (0-7)
 }
 
-func Encode(data string, version int, level ECLevel) (image.Image, error) {
-
+func Encode(data string, version int, level ECLevel, moduleSize int) (image.Image, error) {
+	
 	qr := new(Qrcode)
 	qr.data = data
 	qr.Version = version
 	qr.Level = level
-	qr.ModuleSize = 1
+	qr.ModuleSize = moduleSize
 	qr.QuietZoneWidth = 4
-
+	
 	return qr.Encode()
 }
 
@@ -210,54 +210,54 @@ func Encode(data string, version int, level ECLevel) (image.Image, error) {
 func (qr *Qrcode) len() int { return qr.Version*4 + (7+1)*2 + 1 }
 
 func (qr *Qrcode) Encode() (image.Image, error) {
-
+	
 	// check version
 	if qr.Version < 0 || 40 < qr.Version {
 		return nil, errInvalidVersion
 	}
-
+	
 	// check level
 	if qr.Level != 0 && len(errorCorrectionTable[1][qr.Level]) == 0 {
 		return nil, errInvalidLevel
 	}
-
+	
 	// check module size
 	if qr.ModuleSize < 1 {
 		return nil, errInvalidModuleSize
 	}
-
+	
 	// check quiet zone width
 	if qr.QuietZoneWidth < 0 {
 		return nil, errInvalidQuietZoneWidth
 	}
-
+	
 	// set encoding mode (kanji mode not supported)
 	qr.selectMode()
-
+	
 	// set version & level
 	qr.selectVersionLevel()
 	if qr.Version == 0 || qr.Level == 0 {
 		return nil, errInvalidDataSize
 	}
-
+	
 	// initialize qrcode
 	for i := 0; i < qr.len(); i++ {
 		s := make([]int, qr.len())
 		qr.module = append(qr.module, s)
 	}
-
+	
 	// place pattern to qr.module
 	qr.placePatterns()
-
+	
 	// encode data -> qr.encodedData
 	qr.encodeData()
-
+	
 	// place encoded data to qr.module
 	qr.mapData()
-
+	
 	// mask
 	qr.maskData()
-
+	
 	// [][]int to [][]bool
 	module := make([][]bool, 0)
 	for _, row := range qr.module {
@@ -271,7 +271,7 @@ func (qr *Qrcode) Encode() (image.Image, error) {
 		}
 		module = append(module, r)
 	}
-
+	
 	// quiet zone
 	for i := 0; i < qr.QuietZoneWidth; i++ {
 		module = append(module, make([]bool, qr.len()))
@@ -282,16 +282,16 @@ func (qr *Qrcode) Encode() (image.Image, error) {
 		row = append(row, make([]bool, qr.QuietZoneWidth)...)
 		module[i] = row
 	}
-
+	
 	// module size
 	if qr.ModuleSize > 1 {
 		l := len(module) * qr.ModuleSize
 		m := make([][]bool, l)
-
+		
 		for i := 0; i < l; i++ {
 			m[i] = make([]bool, l)
 		}
-
+		
 		for r, row := range module {
 			for c, cell := range row {
 				if !cell {
@@ -306,19 +306,19 @@ func (qr *Qrcode) Encode() (image.Image, error) {
 		}
 		module = m
 	}
-
+	
 	rgba := image.NewRGBA(image.Rect(0, 0, len(module), len(module)))
-
+	
 	for r, row := range module {
 		for c, cell := range row {
 			if cell {
-				rgba.SetRGBA(c, r, color.RGBA{A: 255})
+				rgba.SetRGBA(c, r, color.RGBA{A: 255, R: 0, G: 0, B: 0})
 			} else {
-				rgba.SetRGBA(c, r, color.RGBA{R: 255, G: 255, B: 255, A: 255})
+				rgba.SetRGBA(c, r, color.RGBA{})
 			}
 		}
 	}
-
+	
 	return rgba, nil
 }
 
@@ -363,15 +363,15 @@ func (qr *Qrcode) selectMode() {
 func (qr *Qrcode) selectVersionLevel() {
 	firstVer, lastVer := 1, 40
 	errorCorrectionLevel := []ECLevel{ECLevelH, ECLevelQ, ECLevelM, ECLevelL}
-
+	
 	if qr.Version > 0 {
 		firstVer, lastVer = qr.Version, qr.Version
 	}
-
+	
 	if qr.Level > 0 {
 		errorCorrectionLevel = []ECLevel{qr.Level}
 	}
-
+	
 	for i := firstVer; i <= lastVer; i++ {
 		for _, j := range errorCorrectionLevel {
 			if maxDataSize(i, j, qr.mode) >= len(qr.data) {
@@ -388,9 +388,9 @@ func (qr *Qrcode) setTypeBits(mask int) {
 }
 
 func (qr *Qrcode) placePatterns() {
-
+	
 	isBlank := func(r, c int) bool { return qr.module[r][c] == 0 }
-
+	
 	// finder pattern
 	for _, p := range [3][2]int{{0, 0}, {qr.len() - 7, 0}, {0, qr.len() - 7}} {
 		for r := -1; r <= 7; r++ {
@@ -411,17 +411,17 @@ func (qr *Qrcode) placePatterns() {
 			}
 		}
 	}
-
+	
 	// alignment pattern
 	pat := positionAdjustPatternTable[qr.Version]
-
+	
 	for i := 0; i < len(pat); i++ {
 		for j := 0; j < len(pat); j++ {
 			row, col := pat[i], pat[j]
 			if !isBlank(row, col) {
 				continue
 			}
-
+			
 			for r := -2; r <= 2; r++ {
 				for c := -2; c <= 2; c++ {
 					if r == -2 || r == 2 || c == -2 || c == 2 || (r == 0 && c == 0) {
@@ -433,7 +433,7 @@ func (qr *Qrcode) placePatterns() {
 			}
 		}
 	}
-
+	
 	// timing pattern
 	for i := 0; i < qr.len(); i++ {
 		if !isBlank(i, 6) {
@@ -455,11 +455,11 @@ func (qr *Qrcode) placePatterns() {
 			qr.module[6][i] = 2
 		}
 	}
-
+	
 	// version information
 	if qr.Version >= 7 {
 		versionBits := versionInformationTable[qr.Version-7]
-
+		
 		for j := 0; j < 6; j++ {
 			for k := qr.len() - 11; k < qr.len()-8; k++ {
 				if (versionBits & 1) > 0 {
@@ -473,23 +473,23 @@ func (qr *Qrcode) placePatterns() {
 			}
 		}
 	}
-
+	
 	// single bit
 	qr.module[qr.len()-8][8] = 2
-
+	
 	// dummy format infomation (mask v0)
 	qr.setTypeBits(0)
-
+	
 }
 
 func (qr *Qrcode) mapData() {
-
+	
 	// byte slice to bit slice
 	bitbuf := new(bitBuffer)
 	for _, b := range qr.encodedData {
 		bitbuf.appendByte(b)
 	}
-
+	
 	// reminder bits
 	switch qr.Version {
 	case 2, 3, 4, 5, 6:
@@ -499,13 +499,13 @@ func (qr *Qrcode) mapData() {
 	case 21, 22, 23, 24, 25, 26, 27:
 		bitbuf.append(0, 4)
 	}
-
+	
 	r := qr.len() - 1 // row
 	c := qr.len() - 1 // column
 	v := 1            // direction 1:up, -1:down
 	h := 1            // 1:right, -1:left
 	i := 0            // index
-
+	
 	for {
 		if qr.module[r][c] == 0 {
 			if bitbuf.get(i) == true {
@@ -541,53 +541,53 @@ func (qr *Qrcode) mapData() {
 }
 
 func (qr *Qrcode) maskData() {
-
+	
 	qr.penalty = make([]int, 8)
 	c := make(chan int, 8) // channel
-
+	
 	for i := 0; i < 8; i++ {
 		// Penalty
 		go qr.calcPenalty(i, c)
 	}
-
+	
 	for k := 0; k < 8; k++ {
 		<-c
 	}
-
+	
 	mask := 0
 	min := qr.penalty[0]
-
+	
 	for i := 1; i < 8; i++ {
 		if qr.penalty[i] < min {
 			min = qr.penalty[i]
 			mask = i
 		}
 	}
-
+	
 	qr.setTypeBits(mask)
 	qr.module = maskData(mask, qr.module)
 }
 
 func (qr *Qrcode) errorCorrectionCode(data []byte, block, blockIndex int, c chan int) {
-
+	
 	eccw := qr.ecCodeWords()                             // ec code word per block
 	totalBlkCount := qr.blkCount()[0] + qr.blkCount()[1] // total blocks
 	dcw := qr.totalDataCodeWords()                       // total data code words
-
+	
 	// message polynominal
 	msg := polynominal{}
 	for i := 0; i < len(data); i++ {
 		x := len(data) + eccw - 1 - i
 		msg[x] = int2exp[data[i]]
 	}
-
+	
 	// generator polynominal
 	gen := polynominal{0: 0}
 	for i := 0; i < eccw; i++ {
 		p := polynominal{1: 0, 0: i}
 		gen = gen.multiply(p)
 	}
-
+	
 	// error collection code words
 	for i := len(data) - 1; i >= 0; i-- {
 		p := polynominal{i: msg[i+eccw]}
@@ -595,12 +595,12 @@ func (qr *Qrcode) errorCorrectionCode(data []byte, block, blockIndex int, c chan
 		msg = msg.xor(g)
 		delete(msg, i+eccw)
 	}
-
+	
 	ec := make([]byte, eccw)
 	for i := 0; i < eccw; i++ {
 		ec[i] = byte(exp2int[msg[eccw-1-i]])
 	}
-
+	
 	for i, v := range data {
 		j := blockIndex + i*totalBlkCount
 		if j >= dcw {
@@ -608,25 +608,25 @@ func (qr *Qrcode) errorCorrectionCode(data []byte, block, blockIndex int, c chan
 		}
 		qr.encodedData[j] = v
 	}
-
+	
 	for i, v := range ec {
 		qr.encodedData[dcw+blockIndex+i*totalBlkCount] = v
 	}
-
+	
 	c <- 1
 }
 
 func (qr *Qrcode) encodeData() {
-
+	
 	// total data code words
 	dcw := qr.totalDataCodeWords()
-
+	
 	// total code words
 	cw := qr.totalCodeWords()
-
+	
 	// total blocks
 	totalBlkCount := qr.blkCount()[0] + qr.blkCount()[1]
-
+	
 	// encode data
 	var bytebuf *bytes.Buffer
 	switch qr.mode {
@@ -637,7 +637,7 @@ func (qr *Qrcode) encodeData() {
 	default: // default
 		bytebuf = bytes.NewBuffer(qr.encodeByte())
 	}
-
+	
 	// pad codeword
 	for bytebuf.Len() < dcw {
 		bytebuf.WriteByte(0xEC)
@@ -645,21 +645,21 @@ func (qr *Qrcode) encodeData() {
 			bytebuf.WriteByte(0x11)
 		}
 	}
-
+	
 	// 1. split encoded data into blocks
 	// 2. generate error correction code for each block
 	// 3. reallocate data
 	qr.encodedData = make([]byte, cw)
-
+	
 	// goroutine
 	c := make(chan int, totalBlkCount)
-
+	
 	for i, k := 0, 0; i < 2; i++ { // rs block 1, 2
 		for j := 0; j < qr.blkCount()[i]; j, k = j+1, k+1 {
 			go qr.errorCorrectionCode(bytebuf.Next(qr.dataCodeWords()[i]), i, k, c)
 		}
 	}
-
+	
 	// wait
 	for k := 0; k < totalBlkCount; k++ {
 		<-c
@@ -668,13 +668,13 @@ func (qr *Qrcode) encodeData() {
 
 // encode data ( numeric mode )
 func (qr *Qrcode) encodeNumeric() []byte {
-
+	
 	// working bit array
 	bitbuf := new(bitBuffer)
-
+	
 	// mode indicator
 	bitbuf.append(1, 4)
-
+	
 	// character count indicator
 	switch {
 	case qr.Version <= 9:
@@ -684,7 +684,7 @@ func (qr *Qrcode) encodeNumeric() []byte {
 	default:
 		bitbuf.append(len(qr.data), 14)
 	}
-
+	
 	// string to bitstream
 	bytebuf := bytes.NewBufferString(qr.data)
 	for b := bytebuf.Next(3); len(b) > 0; b = bytebuf.Next(3) {
@@ -700,25 +700,25 @@ func (qr *Qrcode) encodeNumeric() []byte {
 			bitbuf.append(n, 10)
 		}
 	}
-
+	
 	// terminator
 	for i := 0; i < 4 && bitbuf.len() < qr.totalDataCodeBits(); i++ {
 		bitbuf.append(0, 1)
 	}
-
+	
 	return bitbuf.bytes()
-
+	
 }
 
 // encode data ( alphanumeric mode )
 func (qr *Qrcode) encodeAlphanum() []byte {
-
+	
 	// working bit array
 	bitbuf := new(bitBuffer)
-
+	
 	// mode indicator
 	bitbuf.append(1<<1, 4)
-
+	
 	// character count indicator
 	switch {
 	case qr.Version <= 9:
@@ -728,7 +728,7 @@ func (qr *Qrcode) encodeAlphanum() []byte {
 	default:
 		bitbuf.append(len(qr.data), 13)
 	}
-
+	
 	// string to bitstream
 	bytebuf := bytes.NewBufferString(qr.data)
 	for b := bytebuf.Next(2); len(b) > 0; b = bytebuf.Next(2) {
@@ -739,24 +739,24 @@ func (qr *Qrcode) encodeAlphanum() []byte {
 			bitbuf.append(alphanumTable[b[0]]*45+alphanumTable[b[1]], 11)
 		}
 	}
-
+	
 	// terminator
 	for i := 0; i < 4 && bitbuf.len() < qr.totalDataCodeBits(); i++ {
 		bitbuf.append(0, 1)
 	}
-
+	
 	return bitbuf.bytes()
 }
 
 // encode data ( 8bitbyte mode )
 func (qr *Qrcode) encodeByte() []byte {
-
+	
 	// working bit array
 	bitbuf := new(bitBuffer)
-
+	
 	// mode indicator
 	bitbuf.append(1<<2, 4)
-
+	
 	// character count indicator
 	switch {
 	case qr.Version <= 9:
@@ -766,27 +766,27 @@ func (qr *Qrcode) encodeByte() []byte {
 	default:
 		bitbuf.append(len(qr.data), 16)
 	}
-
+	
 	// string to bitstream
 	bytebuf := bytes.NewBufferString(qr.data)
 	for c, e := bytebuf.ReadByte(); e == nil; c, e = bytebuf.ReadByte() {
 		bitbuf.appendByte(c)
 	}
-
+	
 	// terminator
 	bitbuf.append(0, 4)
-
+	
 	return bitbuf.bytes()
 }
 
 func (qr *Qrcode) calcPenalty(mask int, c chan int) {
-
+	
 	penalty := 0
-
+	
 	module := maskData(mask, setTypeBits(qr.module, qr.Level, mask))
-
+	
 	isColored := func(r, c int) bool { return module[r][c] > 0 }
-
+	
 	// Rule #1: five or more same colored pixels
 	for r := 0; r < qr.len(); r++ { // horizontal scan
 		for i := 0; i < qr.len()-1; i++ {
@@ -805,7 +805,7 @@ func (qr *Qrcode) calcPenalty(mask int, c chan int) {
 			}
 		}
 	}
-
+	
 	for c := 0; c < qr.len(); c++ { // vertical scan
 		for i := 0; i < qr.len()-1; i++ {
 			for j := 1; ; j++ {
@@ -823,7 +823,7 @@ func (qr *Qrcode) calcPenalty(mask int, c chan int) {
 			}
 		}
 	}
-
+	
 	// Rule #2: 2x2 block of same-colored pixels
 	for r := 0; r < qr.len()-1; r++ {
 		for c := 0; c < qr.len()-1; c++ {
@@ -834,7 +834,7 @@ func (qr *Qrcode) calcPenalty(mask int, c chan int) {
 			}
 		}
 	}
-
+	
 	// Rule #3: o-x-o-o-o-x-o that have four light pixels on either or both sides
 	for r := 0; r < qr.len(); r++ {
 		for c := 0; c < qr.len()-6; c++ {
@@ -854,7 +854,7 @@ func (qr *Qrcode) calcPenalty(mask int, c chan int) {
 			}
 		}
 	}
-
+	
 	for c := 0; c < qr.len(); c++ {
 		for r := 0; r < qr.len()-6; r++ {
 			if isColored(r, c) && !isColored(r+1, c) && isColored(r+2, c) &&
@@ -873,11 +873,11 @@ func (qr *Qrcode) calcPenalty(mask int, c chan int) {
 			}
 		}
 	}
-
+	
 	// Rule #4: Color Ratio
 	total := 0.0
 	black := 0.0
-
+	
 	for r, row := range module {
 		for c := range row {
 			if isColored(r, c) {
@@ -887,14 +887,14 @@ func (qr *Qrcode) calcPenalty(mask int, c chan int) {
 		}
 	}
 	penalty += int(float64(int(math.Abs(black/total*100-50))) / 5 * 10)
-
+	
 	qr.penalty[mask] = penalty
-
+	
 	c <- 1
 }
 
 func maskData(mask int, data [][]int) [][]int {
-
+	
 	// mask 0-7
 	maskFuncs := map[int]func(int, int) bool{
 		0: func(row, col int) bool { return (row+col)%2 == 0 },
@@ -906,7 +906,7 @@ func maskData(mask int, data [][]int) [][]int {
 		6: func(row, col int) bool { return (row*col%2+row*col%3)%2 == 0 },
 		7: func(row, col int) bool { return (row*col%3+(row+col)%2)%2 == 0 },
 	}
-
+	
 	// copy
 	module := make([][]int, 0)
 	for _, row := range data {
@@ -914,7 +914,7 @@ func maskData(mask int, data [][]int) [][]int {
 		copy(c, row)
 		module = append(module, c)
 	}
-
+	
 	for r, row := range module {
 		for c := range row {
 			if !(module[r][c] == 1 || module[r][c] == -1) {
@@ -929,19 +929,19 @@ func maskData(mask int, data [][]int) [][]int {
 }
 
 func setTypeBits(data [][]int, level ECLevel, mask int) [][]int {
-
+	
 	module := make([][]int, 0)
 	for _, row := range data {
 		c := make([]int, len(row))
 		copy(c, row)
 		module = append(module, c)
 	}
-
+	
 	bits := new(bitBuffer)
 	bits.append(typeInformationTable[level][mask], 15)
-
+	
 	length := len(module)
-
+	
 	for i, b := range *bits {
 		bit := 2
 		if b {
@@ -949,7 +949,7 @@ func setTypeBits(data [][]int, level ECLevel, mask int) [][]int {
 		} else {
 			bit = -2
 		}
-
+		
 		switch {
 		case i < 6:
 			module[8][i] = bit
@@ -975,14 +975,14 @@ func setTypeBits(data [][]int, level ECLevel, mask int) [][]int {
 }
 
 func maxDataSize(version int, level ECLevel, mode string) (max int) {
-
+	
 	table := errorCorrectionTable[version][level]
 	dcw := table[1]*table[2] + table[3]*table[4]
-
+	
 	switch mode {
 	case "numeric":
 		bitsCount := dcw*8 - 4 // mode bits(4 bits)
-
+		
 		switch { // data length bits
 		case version <= 9:
 			bitsCount -= 10
@@ -991,7 +991,7 @@ func maxDataSize(version int, level ECLevel, mode string) (max int) {
 		default:
 			bitsCount -= 14
 		}
-
+		
 		max = bitsCount / 10 * 3 // 10bits for 3 chars
 		if bitsCount%10 >= 7 {   // 7bits for 2 chars
 			max += 2
@@ -1000,7 +1000,7 @@ func maxDataSize(version int, level ECLevel, mode string) (max int) {
 		}
 	case "alphanum":
 		bitsCount := dcw*8 - 4 // mode bits(4 bits)
-
+		
 		switch { // data length bits
 		case version <= 9:
 			bitsCount -= 9
@@ -1009,14 +1009,14 @@ func maxDataSize(version int, level ECLevel, mode string) (max int) {
 		default:
 			bitsCount -= 13
 		}
-
+		
 		max = bitsCount / 11 * 2 // 11bits for 2 characters
 		if bitsCount%11 >= 6 {
 			max++
 		}
 	case "8bitbyte":
 		max = dcw - 1 // mode(4bit) + terminal(4bit) = 1byte
-
+		
 		switch { // data length bits
 		case version <= 9:
 			max -= 1
@@ -1053,18 +1053,18 @@ func (p *bitBuffer) appendByte(b byte) {
 }
 
 func (p *bitBuffer) bytes() []byte {
-
+	
 	// copy
 	s := make(bitBuffer, p.len())
 	copy(s, *p)
-
+	
 	for s.len()%8 != 0 {
 		s.append(0, 1)
 	}
-
+	
 	l := len(s) / 8
 	bytebuf := bytes.NewBuffer([]byte{})
-
+	
 	for i := 0; i < l; i++ {
 		bits := s[(i * 8):(i*8 + 8)]
 		c := byte(0)

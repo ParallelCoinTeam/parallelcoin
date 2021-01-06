@@ -62,7 +62,7 @@ var MainNetParams = Params{
 	RelayNonStdTxs: false,
 	// Human-readable part for Bech32 encoded segwit addresses, as defined in
 	// BIP 173.
-	Bech32HRPSegwit: "pc", // always bc for main net
+	Bech32HRPSegwit: "p9", // always bc for main net
 	// Address encoding magics
 	PubKeyHashAddrID:        83,  // 0x00, // starts with 1
 	ScriptHashAddrID:        9,   // 0x05, // starts with 3

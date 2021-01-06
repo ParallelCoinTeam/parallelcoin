@@ -203,6 +203,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		if x > n && n > 0 {
 			break
 		}
+
 		i := x
 		txs := wga[i]
 		// spacer
@@ -301,7 +302,6 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return out[index](gtx)
 	}
-	
 	wo := func(gtx l.Context) l.Dimensions {
 		return wg.lists[listName].
 			Vertical().
@@ -312,6 +312,9 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	switch listName {
 	case "history":
 		wg.HistoryWidget = wo
+		if !wg.txReady.Load() {
+			wg.txReady.Store(true)
+		}
 	case "recent":
 		wg.RecentTransactionsWidget = wo
 	}

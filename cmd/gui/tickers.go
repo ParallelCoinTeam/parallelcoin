@@ -2,11 +2,17 @@ package gui
 
 import (
 	"encoding/json"
+	"fmt"
+	"image"
 	"io/ioutil"
 	"time"
 	
+	"gioui.org/op/paint"
+	"github.com/atotto/clipboard"
+	
 	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/coding/qrcode"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -121,6 +127,36 @@ func (wg *WalletGUI) Tickers() {
 								wg.invalidate <- struct{}{}
 							}
 						}
+					}
+					if wg.currentReceiveQRCode == nil && wg.currentReceiveAddress != "" && wg.stateLoaded.Load() ||
+						wg.currentReceiveRegenerate.Load() {
+						var qrc image.Image
+						wg.currentReceiveRegenerate.Store(false)
+						Debug("generating QR code")
+						var err error
+						qrText := fmt.Sprintf("parallelcoin:%s?amount=%s&message=%s",
+							wg.State.currentReceivingAddress.Load().EncodeAddress(),
+							wg.inputs["receiveAmount"].GetText(),
+							wg.inputs["receiveMessage"].GetText(),
+						)
+						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelQ, 6); !Check(err) {
+							iop := paint.NewImageOp(qrc)
+							wg.currentReceiveQRCode = &iop
+							wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {
+								Debug("clicked qr code copy clicker")
+								if err := clipboard.WriteAll(qrText); Check(err) {
+								}
+							})).
+								CornerRadius(0.5).
+								Background("white").
+								Embed(
+									wg.Inset(0.5,
+										wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
+									).Fn,
+								).Fn
+							// *wg.currentReceiveQRCode = iop
+						}
+						
 					}
 					wg.invalidate <- struct{}{}
 					first = false

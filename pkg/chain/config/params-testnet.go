@@ -62,7 +62,7 @@ var TestNet3Params = Params{
 	// Mempool parameters
 	RelayNonStdTxs: true,
 	// Human-readable part for Bech32 encoded segwit addresses, as defined in BIP 173.
-	Bech32HRPSegwit: "tb", // always tb for test net
+	Bech32HRPSegwit: "t9", // always tb for test net
 	// Address encoding magics
 	PubKeyHashAddrID:        18,   // starts with m or n
 	ScriptHashAddrID:        188,  // starts with 2

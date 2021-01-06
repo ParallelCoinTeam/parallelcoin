@@ -50,5 +50,5 @@ func (i Image) Fn(gtx layout.Context) layout.Dimensions {
 	i.src.Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 	stack.Pop()
-	return layout.Dimensions{Size: d}
+	return layout.Dimensions{Size: size}
 }

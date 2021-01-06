@@ -121,7 +121,7 @@ func (s *State) Save(filename string, pass *string) (err error) {
 	if j, err = json.MarshalIndent(marshalled, "", "  "); Check(err) {
 		return
 	}
-	Debug(string(j))
+	// Debug(string(j))
 	var ciph cipher.AEAD
 	if ciph, err = gcm.GetCipher(*pass); Check(err) {
 		return
@@ -145,12 +145,13 @@ func (s *State) Save(filename string, pass *string) (err error) {
 }
 
 func (s *State) Load(filename string, pass *string) (err error) {
+	Debug("loading state...")
 	var data []byte
 	var ciph cipher.AEAD
 	if data, err = ioutil.ReadFile(filename); Check(err) {
 		return
 	}
-	Debug("cipher:", *pass)
+	// Debug("cipher:", *pass)
 	if ciph, err = gcm.GetCipher(*pass); Check(err) {
 		return
 	}
@@ -168,7 +169,7 @@ func (s *State) Load(filename string, pass *string) (err error) {
 	if err = json.Unmarshal(b, ss); Check(err) {
 		return
 	}
-	Debug(string(b))
+	// Debug(string(b))
 	ss.Unmarshal(s)
 	return
 }
@@ -233,11 +234,10 @@ func (s *State) SetGoroutines(gr []l.Widget) {
 	s.goroutines = gr
 }
 
-func (s *State) SetAllTxs(allTxs []btcjson.ListTransactionsResult) {
-	s.allTxs.Store(allTxs)
+func (s *State) SetAllTxs(atxs []btcjson.ListTransactionsResult) {
+	s.allTxs.Store(atxs)
 	// generate filtered state
 	filteredTxs := make([]btcjson.ListTransactionsResult, 0, len(s.allTxs.Load()))
-	atxs := s.allTxs.Load()
 	for i := range atxs {
 		if s.filter.Filter(atxs[i].Category) {
 			filteredTxs = append(filteredTxs, atxs[i])

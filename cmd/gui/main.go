@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 	
+	"gioui.org/op/paint"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/app/save"
@@ -60,32 +61,39 @@ type WalletGUI struct {
 	ChainMutex, WalletMutex   sync.Mutex
 	ChainClient, WalletClient *rpcclient.Client
 	*gui.Window
-	Size                        *int
-	MainApp                     *gui.App
-	invalidate                  qu.C
-	unlockPage                  *gui.App
-	config                      *cfg.Config
-	configs                     cfg.GroupsMap
-	unlockPassword              *gui.Password
-	sidebarButtons              []*gui.Clickable
-	buttonBarButtons            []*gui.Clickable
-	statusBarButtons            []*gui.Clickable
-	quitClickable               *gui.Clickable
-	bools                       map[string]*gui.Bool
-	lists                       map[string]*gui.List
-	checkables                  map[string]*gui.Checkable
-	clickables                  map[string]*gui.Clickable
-	inputs                      map[string]*gui.Input
-	passwords                   map[string]*gui.Password
-	incdecs                     map[string]*gui.IncDec
-	sendAddresses               []SendAddress
-	console                     *Console
-	RecentTransactionsWidget    l.Widget
-	HistoryWidget               l.Widget
-	txRecentList, txHistoryList []btcjson.ListTransactionsResult
-	txMx                        sync.Mutex
-	Syncing                     *uberatomic.Bool
-	stateLoaded                 *uberatomic.Bool
+	Size                         *int
+	MainApp                      *gui.App
+	invalidate                   qu.C
+	unlockPage                   *gui.App
+	config                       *cfg.Config
+	configs                      cfg.GroupsMap
+	unlockPassword               *gui.Password
+	sidebarButtons               []*gui.Clickable
+	buttonBarButtons             []*gui.Clickable
+	statusBarButtons             []*gui.Clickable
+	quitClickable                *gui.Clickable
+	bools                        map[string]*gui.Bool
+	lists                        map[string]*gui.List
+	checkables                   map[string]*gui.Checkable
+	clickables                   map[string]*gui.Clickable
+	inputs                       map[string]*gui.Input
+	passwords                    map[string]*gui.Password
+	incdecs                      map[string]*gui.IncDec
+	sendAddresses                []SendAddress
+	console                      *Console
+	RecentTransactionsWidget     l.Widget
+	HistoryWidget                l.Widget
+	txRecentList, txHistoryList  []btcjson.ListTransactionsResult
+	txMx                         sync.Mutex
+	Syncing                      *uberatomic.Bool
+	stateLoaded                  *uberatomic.Bool
+	currentReceiveQRCode         *paint.ImageOp
+	currentReceiveAddress        string
+	currentReceiveQR             l.Widget
+	currentReceiveRegenClickable *gui.Clickable
+	currentReceiveCopyClickable  *gui.Clickable
+	currentReceiveRegenerate     *uberatomic.Bool
+	txReady                      *uberatomic.Bool
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
@@ -93,6 +101,8 @@ type WalletGUI struct {
 func (wg *WalletGUI) Run() (err error) {
 	wg.Syncing = uberatomic.NewBool(false)
 	wg.stateLoaded = uberatomic.NewBool(false)
+	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
+	wg.txReady = uberatomic.NewBool(false)
 	// wg.th = gui.NewTheme(p9fonts.Collection(), wg.quit)
 	// wg.Window = gui.NewWindow(wg.th)
 	wg.Window = gui.NewWindowP9(wg.quit)
@@ -144,6 +154,11 @@ func (wg *WalletGUI) Run() (err error) {
 		wg.unlockPassword.Focus()
 	}
 	wg.Size = &wg.Window.Width
+	wg.currentReceiveCopyClickable = wg.WidgetPool.GetClickable()
+	wg.currentReceiveRegenClickable = wg.WidgetPool.GetClickable()
+	wg.currentReceiveQR = func(gtx l.Context) l.Dimensions {
+		return l.Dimensions{}
+	}
 	interrupt.AddHandler(
 		func() {
 			Debug("quitting wallet gui")
@@ -183,8 +198,13 @@ func (wg *WalletGUI) Run() (err error) {
 						*wg.noWallet,
 						wg.CreateWalletPage,
 						gui.If(
-							!wg.wallet.Running() || !wg.stateLoaded.Load(),
-							wg.unlockPage.Fn(),
+							!wg.txReady.Load(),
+							// && !wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
+							gui.If(
+								!wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
+								wg.unlockPage.Fn(),
+								wg.MainApp.Placeholder("loading"),
+							),
 							wg.MainApp.Fn(),
 						),
 					)(gtx)
@@ -224,8 +244,8 @@ func (wg *WalletGUI) GetInputs() {
 	seedString := hex.EncodeToString(seed)
 	wg.inputs = map[string]*gui.Input{
 		"receiveLabel":   wg.Input("", "Label", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"receiveAmount":  wg.Input("", "Amount", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"receiveMessage": wg.Input("", "Message", "Primary", "DocText", "DocBg", func(pass string) {}),
+		"receiveAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
+		"receiveMessage": wg.Input("", "Message", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		"console":        wg.Input("", "enter rpc command", "Primary", "DocText", "DocBg", func(pass string) {}),
 		"walletSeed":     wg.Input(seedString, "wallet seed", "Primary", "DocText", "DocBg", func(pass string) {}),
 	}

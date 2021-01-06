@@ -217,7 +217,9 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					wg.unlockPassword.Focus()
 					// wg.walletLocked.Store(true)
 					wg.wallet.Stop()
-					wg.unlockPage.ActivePage(name)
+					// wg.unlockPage.ActivePage(name)
+					wg.stateLoaded.Store(false)
+					wg.txReady.Store(false)
 				}, a, "Success",
 			),
 			// wg.PageTopBarButton(

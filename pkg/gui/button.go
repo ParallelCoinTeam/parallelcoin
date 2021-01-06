@@ -31,14 +31,18 @@ type Button struct {
 
 // Button is a regular material text button where all the dimensions, colors, corners and font can be changed
 func (w *Window) Button(btn *Clickable) *Button {
+	var font text.Font
+	var err error
+	if font, err = w.collection.Font("plan9"); Check(err) {
+	}
 	return &Button{
 		Window: w,
 		text:   strings.ToUpper("text unset"),
 		// default sets
-		font:         w.collection[0].Font,
-		color:        w.Colors.GetNRGBAFromName("ButtonText"),
-		cornerRadius: w.TextSize.Scale(0.125),
-		background:   w.Colors.GetNRGBAFromName("Primary"),
+		font:         font,
+		color:        w.Colors.GetNRGBAFromName("DocBg"),
+		cornerRadius: w.TextSize.Scale(0.25),
+		background:   w.Colors.GetNRGBAFromName("DocText"),
 		textSize:     w.TextSize,
 		inset: &l.Inset{
 			Top:    w.TextSize.Scale(0.5),
