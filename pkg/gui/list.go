@@ -40,8 +40,8 @@ type List struct {
 	currentColor    string
 	scrollWidth     int
 	setScrollWidth  int
-	scrollBarPad    int
-	setScrollBarPad int
+	// scrollBarPad    int
+	// setScrollBarPad int
 	// maxSize is the total size of visible children.
 	maxSize             int
 	children            []scrollChild
@@ -86,16 +86,16 @@ func (li *List) JumpToEnd() {
 // List returns a new scrollable List widget
 func (w *Window) List() (li *List) {
 	li = &List{
-		Window:          w,
-		pageUp:          w.Clickable(),
-		pageDown:        w.Clickable(),
-		color:           "PanelBg",
-		background:      "Transparent",
-		active:          "Primary",
-		scrollWidth:     int(w.TextSize.Scale(0.75).V),
-		setScrollWidth:  int(w.TextSize.Scale(0.75).V),
-		scrollBarPad:    int(w.TextSize.Scale(0.5).V),
-		setScrollBarPad: int(w.TextSize.Scale(0.5).V),
+		Window:         w,
+		pageUp:         w.Clickable(),
+		pageDown:       w.Clickable(),
+		color:          "PanelBg",
+		background:     "Transparent",
+		active:         "Primary",
+		scrollWidth:    int(w.TextSize.Scale(0.75).V),
+		setScrollWidth: int(w.TextSize.Scale(0.75).V),
+		// scrollBarPad:    int(w.TextSize.Scale(0.5).V),
+		// setScrollBarPad: int(w.TextSize.Scale(0.5).V),
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}
@@ -151,10 +151,10 @@ func (li *List) DisableScroll(disable bool) *List {
 	li.disableScroll = disable
 	if disable {
 		li.scrollWidth = 0
-		li.scrollBarPad = 0
+		// li.scrollBarPad = 0
 	} else {
 		li.scrollWidth = li.setScrollWidth
-		li.scrollBarPad = li.setScrollBarPad
+		// li.scrollBarPad = li.setScrollBarPad
 	}
 	return li
 }
@@ -219,7 +219,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		// if li.recalculate && !li.changing {
 		// Debug("recalculating")
 		// get the size of the scrollbar
-		li.Theme.scrollBarSize = li.scrollWidth + li.scrollBarPad
+		li.Theme.scrollBarSize = li.scrollWidth // + li.scrollBarPad
 		// render the widgets onto a second context to get their dimensions
 		gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, li.axis)
 		// generate the dimensions for all the list elements
@@ -241,10 +241,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		// if the contents fit the view, don't show the scrollbar
 		li.top, li.middle, li.bottom = 0, 0, 0
 		li.scrollWidth = 0
-		li.scrollBarPad = 0
+		// li.scrollBarPad = 0
 	} else {
 		li.scrollWidth = li.setScrollWidth
-		li.scrollBarPad = li.setScrollBarPad
+		// li.scrollBarPad = li.setScrollBarPad
 		li.top = li.before * (li.view - li.scrollWidth) / li.total
 		li.middle = li.view * (li.view - li.scrollWidth) / li.total
 		li.bottom = (li.total - li.before - li.view) * (li.view - li.scrollWidth) / li.total
@@ -260,13 +260,13 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	if li.axis == l.Horizontal {
 		containerFlex := li.Theme.VFlex()
 		if !li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
 		}
 		containerFlex.Rigid(
 			li.Theme.VFlex().
 				Rigid(
 					If(!li.leftSide,
-						li.Fill(li.background, EmptySpace(0, li.scrollBarPad),
+						li.Fill(li.background, EmptySpace(0, 0), // li.scrollBarPad),
 							l.Center, li.TextSize.V/2).Fn,
 						EmptySpace(0, 0),
 					),
@@ -277,17 +277,22 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 							Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
 						li.drag.Add(gtx.Ops)
 						return li.Theme.Flex().
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollBarPad+li.scrollWidth, li.top, false)).
+							Rigid(li.pageUpDown(li.dims, li.view, li.total,
+								// li.scrollBarPad+
+								li.scrollWidth, li.top, false)).
 							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle,
 								li.view, gtx.Constraints.Max.X)).
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollBarPad+li.scrollWidth, li.bottom, true)).
+							Rigid(li.pageUpDown(li.dims, li.view, li.total,
+								// li.scrollBarPad+
+								li.scrollWidth, li.bottom, true)).
 							Fn(gtx)
 					}, l.Center, li.TextSize.V/2).Fn,
 				).
 				Rigid(
 					If(li.leftSide,
 						li.Fill(li.background, EmptySpace(0,
-							li.scrollBarPad+li.scrollWidth), l.Center,
+							// li.scrollBarPad+
+							li.scrollWidth), l.Center,
 							li.TextSize.V/2).Fn,
 						EmptySpace(0, 0),
 					),
@@ -295,21 +300,21 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 				Fn,
 		)
 		if li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
 		}
 		container = containerFlex.Fn
 	} else {
 		containerFlex := li.Theme.Flex()
 		if !li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth + li.scrollBarPad))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
 		}
 		containerFlex.Rigid(
 			li.Fill(li.background, li.Theme.Flex().
 				Rigid(
-					If(!li.leftSide,
-						EmptySpace(li.scrollBarPad, 0),
-						EmptySpace(0, 0),
-					),
+					// If(!li.leftSide,
+					// 	EmptySpace(li.scrollBarPad, 0),
+					EmptySpace(0, 0),
+					// ),
 				).
 				Rigid(
 					func(gtx l.Context) l.Dimensions {
@@ -317,10 +322,16 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 							Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
 						li.drag.Add(gtx.Ops)
 						return li.Theme.Flex().Vertical().
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollBarPad+li.scrollWidth, li.top, false)).
-							Rigid(li.grabber(li.dims, li.scrollBarPad+li.scrollWidth, li.middle,
+							Rigid(li.pageUpDown(li.dims, li.view, li.total,
+								// li.scrollBarPad+
+								li.scrollWidth, li.top, false)).
+							Rigid(li.grabber(li.dims,
+								// li.scrollBarPad+
+								li.scrollWidth, li.middle,
 								li.view, gtx.Constraints.Max.X)).
-							Rigid(li.pageUpDown(li.dims, li.view, li.total, li.scrollBarPad+li.scrollWidth, li.bottom, true)).
+							Rigid(li.pageUpDown(li.dims, li.view, li.total,
+								// li.scrollBarPad+
+								li.scrollWidth, li.bottom, true)).
 							Fn(gtx)
 					},
 				).
@@ -347,10 +358,10 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 func (li *List) embedWidget(scrollWidth int) func(l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		if li.axis == l.Horizontal {
-			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y - scrollWidth - li.scrollBarPad
+			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y - scrollWidth // - li.scrollBarPad
 			gtx.Constraints.Max.Y = gtx.Constraints.Min.Y
 		} else {
-			gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth - li.scrollBarPad
+			gtx.Constraints.Min.X = gtx.Constraints.Max.X - scrollWidth // - li.scrollBarPad
 			gtx.Constraints.Max.X = gtx.Constraints.Min.X
 		}
 		return li.Layout(gtx, li.length, li.w)
@@ -383,8 +394,8 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 			li.position = dims.CoordinateToPosition(newPos, li.axis)
 		}).
 			SetPress(func() { li.recentPageClick = time.Now() })).Embed(
-			li.Fill(li.background, EmptySpace(x, y), l.Center, li.TextSize.V/2).Fn,
-		).Background(li.background).CornerRadius(0).Fn(gtx)
+			li.Fill("scrim", EmptySpace(x, y), l.Center, li.TextSize.V/2).Fn,
+		).Background("Transparent").CornerRadius(0).Fn(gtx)
 	}
 }
 
@@ -434,7 +445,7 @@ func (li *List) grabber(dims DimensionList, x, y, viewAxis, viewCross int) func(
 		pointer.Rect(image.Rectangle{Max: image.Point{X: x, Y: y}}).Add(gtx.Ops)
 		li.sideScroll.Add(gtx.Ops)
 		return li.Fill(li.currentColor, EmptySpace(x, y), l.Center,
-			li.TextSize.V/2).Fn(gtx)
+			li.TextSize.V/4).Fn(gtx)
 	}
 }
 
