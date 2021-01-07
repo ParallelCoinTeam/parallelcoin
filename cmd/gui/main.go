@@ -93,6 +93,7 @@ type WalletGUI struct {
 	currentReceiveRegenClickable *gui.Clickable
 	currentReceiveCopyClickable  *gui.Clickable
 	currentReceiveRegenerate     *uberatomic.Bool
+	currentReceiveGetNew         *uberatomic.Bool
 	txReady                      *uberatomic.Bool
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
@@ -102,6 +103,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.Syncing = uberatomic.NewBool(false)
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
+	wg.currentReceiveGetNew = uberatomic.NewBool(false)
 	wg.txReady = uberatomic.NewBool(false)
 	// wg.th = gui.NewTheme(p9fonts.Collection(), wg.quit)
 	// wg.Window = gui.NewWindow(wg.th)

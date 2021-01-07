@@ -116,53 +116,53 @@ func (c *Config) Config() GroupsMap {
 				})
 			case "integer":
 				c.inputs[sgf.Slug] = c.Input(fmt.Sprint(*tgs.Slot.(*int)),
-					sgf.Slug,  "DocText", "DocBg", "DocBg", func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					i := c.cx.ConfigMap[sgf.Slug].(*int)
-					if n, err := strconv.Atoi(txt); !Check(err) {
-						*i = n
-					}
-					save.Pod(c.cx.Config)
-				})
+					sgf.Slug, "DocText", "DocBg", "DocBg", func(txt string) {
+						Debug(sgf.Slug, "submitted", txt)
+						i := c.cx.ConfigMap[sgf.Slug].(*int)
+						if n, err := strconv.Atoi(txt); !Check(err) {
+							*i = n
+						}
+						save.Pod(c.cx.Config)
+					})
 			case "time":
 				c.inputs[sgf.Slug] = c.Input(fmt.Sprint(*tgs.Slot.(*time.
-					Duration)), sgf.Slug, "DocText", "DocBg", "DocBg",
+				Duration)), sgf.Slug, "DocText", "DocBg", "DocBg",
 					func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
-					if d, err := time.ParseDuration(txt); !Check(err) {
-						*tt = d
-					}
-					save.Pod(c.cx.Config)
-				})
+						Debug(sgf.Slug, "submitted", txt)
+						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
+						if d, err := time.ParseDuration(txt); !Check(err) {
+							*tt = d
+						}
+						save.Pod(c.cx.Config)
+					})
 			case "float":
 				c.inputs[sgf.Slug] = c.Input(strconv.FormatFloat(*tgs.Slot.(
-					*float64), 'f', -1, 64), sgf.Slug,  "DocText", "DocBg", "DocBg",
+				*float64), 'f', -1, 64), sgf.Slug, "DocText", "DocBg", "DocBg",
 					func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					ff := c.cx.ConfigMap[sgf.Slug].(*float64)
-					if f, err := strconv.ParseFloat(txt, 64); !Check(err) {
-						*ff = f
-					}
-					save.Pod(c.cx.Config)
-				})
+						Debug(sgf.Slug, "submitted", txt)
+						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
+						if f, err := strconv.ParseFloat(txt, 64); !Check(err) {
+							*ff = f
+						}
+						save.Pod(c.cx.Config)
+					})
 			case "string":
 				c.inputs[sgf.Slug] = c.Input(*tgs.Slot.(*string), sgf.Slug,
 					"DocText", "DocBg", "DocBg", func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					ss := c.cx.ConfigMap[sgf.Slug].(*string)
-					*ss = txt
-					save.Pod(c.cx.Config)
-				})
+						Debug(sgf.Slug, "submitted", txt)
+						ss := c.cx.ConfigMap[sgf.Slug].(*string)
+						*ss = txt
+						save.Pod(c.cx.Config)
+					})
 			case "password":
 				c.passwords[sgf.Slug] = c.Password("password",
-					tgs.Slot.(*string),  "DocText", "DocBg", "DocBg",
+					tgs.Slot.(*string), "DocText", "DocBg", "DocBg",
 					func(txt string) {
-					Debug(sgf.Slug, "submitted", txt)
-					pp := c.cx.ConfigMap[sgf.Slug].(*string)
-					*pp = txt
-					save.Pod(c.cx.Config)
-				})
+						Debug(sgf.Slug, "submitted", txt)
+						pp := c.cx.ConfigMap[sgf.Slug].(*string)
+						*pp = txt
+						save.Pod(c.cx.Config)
+					})
 			case "multi":
 				c.multis[sgf.Slug] = c.Multiline(
 					tgs.Slot.(*cli.StringSlice), "DocText", "DocBg",
@@ -238,15 +238,14 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		}
 		// put in the header
 		out = append(out,
-			// ng.th.Fill("PanelBg",
-			ng.Inset(0.25,
-				ng.H5(g.name).
-					Color("PanelText").
-					Alignment(text.Middle).
-					Fn,
+			ng.Flex().Flexed(1,
+				ng.Inset(0.5,
+					ng.H3(g.name).
+						Color("Primary").
+						Alignment(text.Start).
+						Fn,
+				).Fn,
 			).Fn,
-			// 	l.Center,
-			// ).Fn,
 		)
 		// out = append(out, func(gtx l.Context) l.Dimensions {
 		// 	return ng.th.Fill("PanelBg",
@@ -287,12 +286,12 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 			Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
 		}, ng.TextSize.V/3).Add(gtx.Ops)
 		return ng.lists["settings"].
-				Vertical().
-				Length(len(out)).
-				Background("PanelBg").
-				Color("DocBg").
-				Active("Primary").
-				ListElement(le).Fn(gtx)
+			Vertical().
+			Length(len(out)).
+			Background("PanelBg").
+			Color("DocBg").
+			Active("Primary").
+			ListElement(le).Fn(gtx)
 	}
 }
 

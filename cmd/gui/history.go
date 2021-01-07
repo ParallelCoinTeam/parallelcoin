@@ -16,19 +16,19 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 		return wg.VFlex().
 			Rigid(
 				wg.Inset(0.25,
-					wg.Fill("DocBg", wg.Responsive(*wg.Size, gui.Widgets{
+					wg.Responsive(*wg.Size, gui.Widgets{
 						{
 							Widget: wg.VFlex().
 								Flexed(1, wg.HistoryPageView()).
-								Rigid(
-									// 	wg.Fill("DocBg",
-									wg.Flex().AlignMiddle().SpaceBetween().
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Rigid(wg.HistoryPageStatusFilter()).
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Fn,
-									// 	).Fn,
-								).
+								// Rigid(
+								// 	// 	wg.Fill("DocBg",
+								// 	wg.Flex().AlignMiddle().SpaceBetween().
+								// 		Flexed(0.5, gui.EmptyMaxWidth()).
+								// 		Rigid(wg.HistoryPageStatusFilter()).
+								// 		Flexed(0.5, gui.EmptyMaxWidth()).
+								// 		Fn,
+								// 	// 	).Fn,
+								// ).
 								// Rigid(
 								// 	wg.Fill("DocBg",
 								// 		wg.Flex().AlignMiddle().SpaceBetween().
@@ -43,27 +43,27 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 							Size: 1280,
 							Widget: wg.VFlex().
 								Flexed(1, wg.HistoryPageView()).
-								Rigid(
-									// 	wg.Fill("DocBg",
-									wg.Flex().AlignMiddle().SpaceBetween().
-										// 			Rigid(wg.HistoryPager()).
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Rigid(wg.HistoryPageStatusFilter()).
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										// 			Rigid(wg.HistoryPagePerPageCount()).
-										Fn,
-									// 	).Fn,
-								).
+								// Rigid(
+								// 	// 	wg.Fill("DocBg",
+								// 	wg.Flex().AlignMiddle().SpaceBetween().
+								// 		// 			Rigid(wg.HistoryPager()).
+								// 		Flexed(0.5, gui.EmptyMaxWidth()).
+								// 		Rigid(wg.HistoryPageStatusFilter()).
+								// 		Flexed(0.5, gui.EmptyMaxWidth()).
+								// 		// 			Rigid(wg.HistoryPagePerPageCount()).
+								// 		Fn,
+								// 	// 	).Fn,
+								// ).
 								Fn,
 						},
-					}).Fn, l.Center, wg.TextSize.V).Fn,
+					}).Fn,
 				).Fn,
 			).Fn(gtx)
 	}
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	return wg.VFlex().Rigid(wg.Inset(0.5, wg.HistoryWidget).Fn).Fn
+	return wg.VFlex().Rigid(wg.Fill("DocBg", wg.Inset(0.5, wg.HistoryWidget).Fn, l.Center, wg.TextSize.V).Fn).Fn
 }
 
 func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {

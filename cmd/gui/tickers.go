@@ -115,8 +115,8 @@ func (wg *WalletGUI) Tickers() {
 						if first {
 							wg.processWalletBlockNotification()
 						}
-						if wg.stateLoaded.Load() &&
-							!wg.State.IsReceivingAddress() {
+						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() || wg.currentReceiveGetNew.Load() {
+							wg.currentReceiveGetNew.Store(false)
 							var addr util.Address
 							if addr, err = wg.WalletClient.GetNewAddress("default"); !Check(err) {
 								Debug("storing new receiving address", addr.EncodeAddress(),
@@ -128,7 +128,7 @@ func (wg *WalletGUI) Tickers() {
 							}
 						}
 					}
-					if wg.currentReceiveQRCode == nil && wg.currentReceiveAddress != "" && wg.stateLoaded.Load() ||
+					if (wg.currentReceiveQRCode == nil && wg.currentReceiveAddress != "" && wg.stateLoaded.Load()) ||
 						wg.currentReceiveRegenerate.Load() {
 						var qrc image.Image
 						wg.currentReceiveRegenerate.Store(false)

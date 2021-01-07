@@ -19,6 +19,8 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
+const ZeroAddress = "1111111111111111111114oLvT2"
+
 // CategoryFilter marks which transactions to omit from the filtered transaction list
 type CategoryFilter struct {
 	Send     bool
@@ -106,7 +108,7 @@ func (s *State) SetReceivingAddress(addr util.Address) {
 
 func (s *State) IsReceivingAddress() bool {
 	addr := s.currentReceivingAddress.String.Load()
-	if addr == "1111111111111111111114oLvT2" {
+	if addr == ZeroAddress {
 		s.isAddress.Store(false)
 	} else {
 		s.isAddress.Store(true)

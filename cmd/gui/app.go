@@ -336,7 +336,7 @@ func (wg *WalletGUI) PageTopBarButton(
 			background = "PanelBg"
 		}
 		if name == "home" {
-			background = "halfbright"
+			background = "halfdim"
 		}
 		if highlightColor != "" {
 			color = highlightColor

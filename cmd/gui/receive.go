@@ -63,10 +63,11 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 							).
 							Rigid(
 								wg.Inset(0.25,
-									wg.Button(wg.currentReceiveRegenClickable).
-										Text("regenerate").SetClick(func() {
-										wg.currentReceiveRegenerate.Store(true)
-									}).
+									wg.Button(wg.currentReceiveRegenClickable.SetClick(func() {
+										Debug("clicked regenerate button")
+										wg.currentReceiveGetNew.Store(true)
+									})).
+										Text("regenerate").
 										Fn,
 								).Fn,
 							).
