@@ -195,11 +195,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 	)
 	a.ButtonBar(
 		[]l.Widget{
-			wg.PageTopBarButton(
-				"console", 2, &p9icons.Terminal, func(name string) {
-					wg.MainApp.ActivePage(name)
-				}, a, "",
-			),
+			
 			// gui.EmptyMaxWidth(),
 			// wg.PageTopBarButton(
 			// 	"goroutines", 0, &icons.ActionBugReport, func(name string) {
@@ -217,10 +213,10 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					wg.unlockPassword.Focus()
 					// wg.walletLocked.Store(true)
 					wg.wallet.Stop()
-					// wg.unlockPage.ActivePage(name)
+					wg.unlockPage.ActivePage(name)
 					wg.stateLoaded.Store(false)
 					wg.txReady.Store(false)
-				}, a, "Success",
+				}, a, "green",
 			),
 			// wg.PageTopBarButton(
 			// 	"quit", 3, &icons.ActionExitToApp, func(name string) {
@@ -238,6 +234,11 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 		},
 		[]l.Widget{
 			// gui.EmptyMaxWidth(),
+			wg.StatusBarButton(
+				"console", 2, &p9icons.Terminal, func(name string) {
+					wg.MainApp.ActivePage(name)
+				}, a,
+			),
 			wg.StatusBarButton(
 				"log", 4, &icons.ActionList, func(name string) {
 					Debug("click on button", name)
@@ -266,7 +267,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 
 func (wg *WalletGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		return wg.Fill(wg.MainApp.BodyBackgroundGet(), wg.VFlex().
+		return wg.VFlex().
 			// SpaceEvenly().
 			Rigid(
 				wg.Responsive(
@@ -288,7 +289,7 @@ func (wg *WalletGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) 
 					0.25,
 					wg.Responsive(*wg.Size, widget).Fn,
 				).Fn,
-			).Fn, l.Center, 0).Fn(gtx)
+			).Fn(gtx)
 	}
 }
 
@@ -334,9 +335,9 @@ func (wg *WalletGUI) PageTopBarButton(
 			// background = "scrim"
 			background = "PanelBg"
 		}
-		// if name == "home" {
-		// 	background = "PrimaryDim"
-		// }
+		if name == "home" {
+			background = "halfbright"
+		}
 		if highlightColor != "" {
 			color = highlightColor
 		}
