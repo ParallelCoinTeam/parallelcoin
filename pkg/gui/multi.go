@@ -70,9 +70,9 @@ func (w *Window) Multiline(
 			Embed(
 				m.Theme.Flex().AlignStart().
 					Flexed(1,
-						m.Fill("Primary", m.Inset(0.25,
+						m.Fill("Primary", l.Center, 0, 0, m.Inset(0.25,
 							m.Body2((*m.lines)[i]).Color("DocText").Fn,
-						).Fn, l.Center, 0).Fn,
+						).Fn).Fn,
 					).Fn,
 			)
 		if len(*m.lines) > len(m.buttons) {

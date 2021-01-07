@@ -21,7 +21,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 			// ).Fn,
 		).
 		Rigid(
-			wg.Fill("Primary", wg.Flex().AlignEnd().
+			wg.Fill("Primary", l.Center, wg.TextSize.V, l.W, wg.Flex().AlignEnd().
 				Rigid(
 					wg.Inset(0.5,
 						wg.VFlex().AlignBaseline().
@@ -99,7 +99,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 							).
 							Fn,
 					).Fn,
-				).Fn, l.Center, wg.TextSize.V).Fn,
+				).Fn).Fn,
 		).Fn(gtx)
 }
 
@@ -125,20 +125,20 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						// ).Fn,
 					).
 					Rigid(
-						wg.Inset(0.25,
-							wg.VFlex().SpaceSides().AlignMiddle().
-								Rigid(
-									wg.Inset(0.25,
-										wg.H5("recent transactions").Fn).Fn,
-								).
-								Flexed(1,
-									wg.Fill("DocBg", wg.Inset(0.5,
-										wg.RecentTransactionsWidget,
-										// p9.EmptyMaxWidth(),
-									).Fn, l.Center, wg.TextSize.V).Fn,
-								).
-								Fn,
-						).Fn,
+						// wg.Inset(0.25,
+						wg.VFlex().SpaceSides().AlignMiddle().
+							Rigid(
+								wg.Inset(0.25,
+									wg.H5("recent transactions").Fn).Fn,
+							).
+							Flexed(1,
+								wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W, wg.Inset(0.5,
+									wg.RecentTransactionsWidget,
+									// p9.EmptyMaxWidth(),
+								).Fn).Fn,
+							).
+							Fn,
+						// ).Fn,
 					).
 					Fn,
 			},
@@ -156,21 +156,21 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						// ).Fn,
 					).
 					Rigid(
-						wg.Inset(0.25,
-							wg.VFlex().SpaceSides().AlignMiddle().
-								Rigid(
-									wg.Inset(0.25,
-										wg.H5("recent transactions").Fn).Fn,
-								).
-								Flexed(1,
-									wg.Fill("DocBg", wg.Inset(0.5,
-										wg.RecentTransactionsWidget,
-										// p9.EmptyMaxWidth(),
-									).Fn, l.Center, wg.TextSize.V).Fn,
-								).
-								Fn,
-						).
+						// wg.Inset(0.25,
+						wg.VFlex().SpaceSides().AlignMiddle().
+							Rigid(
+								wg.Inset(0.25,
+									wg.H5("recent transactions").Fn).Fn,
+							).
+							Flexed(1,
+								wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W, wg.Inset(0.5,
+									wg.RecentTransactionsWidget,
+									// p9.EmptyMaxWidth(),
+								).Fn).Fn,
+							).
 							Fn,
+						// ).
+						// Fn,
 					).
 					Fn,
 			},
@@ -203,7 +203,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		if x > n && n > 0 {
 			break
 		}
-
+		
 		i := x
 		txs := wga[i]
 		// spacer
@@ -232,69 +232,69 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		// 		TextScale(0.5).Fn,
 		// )
 		out = append(out,
-				wg.Flex().
-					Rigid(
-						wg.Flex().
-							Rigid(
-								wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
-							).
-							// Rigid(
-							// 	wg.Caption(fmt.Sprint(*txs.BlockIndex)).Fn,
-							// 	// wg.buttonIconText(txs.clickBlock,
-							// 	// 	fmt.Sprint(*txs.BlockIndex),
-							// 	// 	&icons2.DeviceWidgets,
-							// 	// 	wg.blockPage(*txs.BlockIndex)),
-							// ).
-							Rigid(
-								wg.Caption(fmt.Sprintf("%d ", txs.BlockIndex)).Fn,
-							).
-							Fn,
-					).
-					Rigid(
-						wg.Flex().
-							Rigid(
-								wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
-							).
-							Rigid(
-								wg.Caption(fmt.Sprintf("%d ", txs.Confirmations)).Fn,
-							).
-							Fn,
-					).
-					Rigid(
-						wg.Flex().
-							Rigid(
-								func(gtx l.Context) l.Dimensions {
-									switch txs.Category {
-									case "generate":
-										return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
-									case "immature":
-										return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
-									case "receive":
-										return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
-									case "unknown":
-										return wg.Icon().Color("DocText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
-									}
-									return l.Dimensions{}
-								},
-							).
-							Rigid(
-								wg.Caption(txs.Category+" ").Fn,
-							).
-							Fn,
-					).
-					Rigid(
-						wg.Flex().
-							Rigid(
-								wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
-							).
-							Rigid(
-								wg.Caption(
-									time.Unix(txs.Time,
-										0).Format("02 Jan 06 15:04:05 MST"),
-								).Color("DocText").Fn,
-							).
-							Fn,
-					).Fn,
+			wg.Flex().
+				Rigid(
+					wg.Flex().
+						Rigid(
+							wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
+						).
+						// Rigid(
+						// 	wg.Caption(fmt.Sprint(*txs.BlockIndex)).Fn,
+						// 	// wg.buttonIconText(txs.clickBlock,
+						// 	// 	fmt.Sprint(*txs.BlockIndex),
+						// 	// 	&icons2.DeviceWidgets,
+						// 	// 	wg.blockPage(*txs.BlockIndex)),
+						// ).
+						Rigid(
+							wg.Caption(fmt.Sprintf("%d ", txs.BlockIndex)).Fn,
+						).
+						Fn,
+				).
+				Rigid(
+					wg.Flex().
+						Rigid(
+							wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
+						).
+						Rigid(
+							wg.Caption(fmt.Sprintf("%d ", txs.Confirmations)).Fn,
+						).
+						Fn,
+				).
+				Rigid(
+					wg.Flex().
+						Rigid(
+							func(gtx l.Context) l.Dimensions {
+								switch txs.Category {
+								case "generate":
+									return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
+								case "immature":
+									return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
+								case "receive":
+									return wg.Icon().Color("DocText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
+								case "unknown":
+									return wg.Icon().Color("DocText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
+								}
+								return l.Dimensions{}
+							},
+						).
+						Rigid(
+							wg.Caption(txs.Category+" ").Fn,
+						).
+						Fn,
+				).
+				Rigid(
+					wg.Flex().
+						Rigid(
+							wg.Icon().Color("DocText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
+						).
+						Rigid(
+							wg.Caption(
+								time.Unix(txs.Time,
+									0).Format("02 Jan 06 15:04:05 MST"),
+							).Color("DocText").Fn,
+						).
+						Fn,
+				).Fn,
 		)
 	}
 	le := func(gtx l.Context, index int) l.Dimensions {

@@ -15,7 +15,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.VFlex().
 			Rigid(
-				wg.Inset(0.25,
+				wg.Inset(0.0,
 					wg.Responsive(*wg.Size, gui.Widgets{
 						{
 							Widget: wg.VFlex().
@@ -63,7 +63,8 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	return wg.VFlex().Rigid(wg.Fill("DocBg", wg.Inset(0.5, wg.HistoryWidget).Fn, l.Center, wg.TextSize.V).Fn).Fn
+	return wg.VFlex().Rigid(wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W, wg.Inset(0.5,
+		wg.HistoryWidget).Fn).Fn).Fn
 }
 
 func (wg *WalletGUI) HistoryPageStatusFilter() l.Widget {

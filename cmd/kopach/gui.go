@@ -42,7 +42,7 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 			m.VFlex().
 				Rigid(m.Header).Flexed(
 				1,
-				m.Fill("DocBg", m.Inset(
+				m.Fill("DocBg", 0, 0, 0, m.Inset(
 					0.5,
 					m.VFlex().
 						Rigid(m.H5("miner settings").Fn).
@@ -52,16 +52,16 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 						Rigid(m.VSpacer).
 						Rigid(m.H5("found blocks").Fn).
 						Rigid(
-							m.Fill("PanelBg", m.FoundBlocks, l.Center, 0).Fn,
+							m.Fill("PanelBg", l.Center, 0, l.Center, m.FoundBlocks).Fn,
 						).Fn,
-				).Fn, 0, 0).Fn,
+				).Fn).Fn,
 			).Fn,
 		).Fn,
 	).
 		Stacked(
 			func(gtx l.Context) l.Dimensions {
 				if m.modalOn {
-					return m.Fill("scrim", m.VFlex().
+					return m.Fill("scrim", l.Center, 0, 0, m.VFlex().
 						Flexed(
 							0.1,
 							m.Flex().Rigid(
@@ -90,7 +90,7 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 									}
 								},
 							).Fn,
-						).Fn, l.Center, 0).Fn(gtx)
+						).Fn).Fn(gtx)
 				} else {
 					return l.Dimensions{}
 				}
@@ -120,7 +120,7 @@ func (m *MinerModel) VSpacer(gtx l.Context) l.Dimensions {
 }
 
 func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
-	return m.Fill("Primary", m.Flex().Rigid(
+	return m.Fill("Primary", l.Center, 0, 0, m.Flex().Rigid(
 		m.Inset(
 			0.25,
 			m.IconButton(m.logoButton).
@@ -145,7 +145,7 @@ func (m *MinerModel) Header(gtx l.Context) l.Dimensions {
 				Alignment(text.End).
 				Fn,
 		).Fn,
-	).Fn, l.Center, 0).Fn(gtx)
+	).Fn).Fn(gtx)
 }
 
 func (m *MinerModel) RunControl(gtx l.Context) l.Dimensions {
@@ -226,7 +226,7 @@ func (m *MinerModel) BlockInfoModalCloser(gtx l.Context) l.Dimensions {
 var currentBlock SolutionData
 
 func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
-	return m.Fill("DocBg", m.VFlex().AlignMiddle().Rigid(
+	return m.Fill("DocBg", l.Center, 0, 0, m.VFlex().AlignMiddle().Rigid(
 		m.Inset(
 			0.5,
 			m.H5("Block Information").Alignment(text.Middle).Color("DocText").Fn,
@@ -324,7 +324,7 @@ func (m *MinerModel) BlockDetails(gtx l.Context) l.Dimensions {
 			0.5,
 			m.BlockInfoModalCloser,
 		).Fn,
-	).Fn, l.Center, 0).Fn(gtx)
+	).Fn).Fn(gtx)
 }
 
 func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {

@@ -41,7 +41,7 @@ func Fill(gtx l.Context, col color.NRGBA) l.Dimensions {
 	// }
 	// paint.ColorOp{Color: col}.Add(gtx.Ops)
 	// paint.PaintOp{Rect: dr}.Add(gtx.Ops)
-	fill(gtx, col, d, 0)
+	fill(gtx, col, d, 0, 0)
 	return l.Dimensions{Size: d}
 }
 

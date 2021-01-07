@@ -274,7 +274,7 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 	fn := c.Theme.VFlex().
 		Flexed(
 			0.1,
-			c.Fill("PanelBg", func(gtx l.Context) l.Dimensions {
+			c.Fill("PanelBg", l.Center, c.TextSize.V, l.Center+1, func(gtx l.Context) l.Dimensions {
 				return c.Inset(0.25,
 					c.outputList.
 						ScrollToEnd().
@@ -288,25 +288,23 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 						Fn,
 				).
 					Fn(gtx)
-			}, l.Center, c.TextSize.V).Fn,
+			}).Fn,
 		).
 		Rigid(
-			c.Fill("DocBg",
-				c.Inset(
-					0.25,
-					c.Theme.Flex().
-						Flexed(
-							1,
-							c.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
-								Color("DocText").
-								Fn,
-						).
-						Rigid(c.copyButton.Fn).
-						Rigid(c.pasteButton.Fn).
-						Rigid(c.clearButton.Fn).
-						Fn,
-				).Fn,
-				l.Center, c.TextSize.V).Fn,
+			c.Fill("DocBg", l.Center, c.TextSize.V, l.W, c.Inset(
+				0.25,
+				c.Theme.Flex().
+					Flexed(
+						1,
+						c.TextInput(c.editor.SetSubmit(c.submitFunc), "enter an rpc command").
+							Color("DocText").
+							Fn,
+					).
+					Rigid(c.copyButton.Fn).
+					Rigid(c.pasteButton.Fn).
+					Rigid(c.clearButton.Fn).
+					Fn,
+			).Fn).Fn,
 		).
 		Fn
 	return fn(gtx)

@@ -5,9 +5,9 @@ import l "gioui.org/layout"
 func (w *Window) Card(background string, embed l.Widget,
 ) func(gtx l.Context) l.Dimensions {
 	return w.Inset(0.0,
-		w.Fill(background, w.Inset(0.25,
+		w.Fill(background, l.Center, 0, 0, w.Inset(0.25,
 			embed,
-		).Fn, l.Center, 0).Fn,
+		).Fn).Fn,
 	).Fn
 }
 

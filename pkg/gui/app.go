@@ -52,6 +52,7 @@ type App struct {
 	titleBarBackground  string
 	titleBarColor       string
 	titleFont           string
+	mainDirection       l.Direction
 }
 
 type WidgetMap map[string]l.Widget
@@ -72,7 +73,7 @@ func (w *Window) App(size *int, activePage *uberatomic.String,
 		layers:              nil,
 		pages:               make(WidgetMap),
 		root:                w.Stack(),
-		SideBarSize:         w.TextSize.Scale(10),
+		SideBarSize:         w.TextSize.Scale(14),
 		sideBarBackground:   "DocBg",
 		sideBarColor:        "DocText",
 		statusBarBackground: "DocBg",
@@ -91,7 +92,17 @@ func (w *Window) App(size *int, activePage *uberatomic.String,
 		MenuOpen:            false,
 		Size:                size,
 		invalidate:          invalidate,
+		mainDirection:       l.Center + 1,
 	}
+}
+
+func (a *App) SetMainDirection(direction l.Direction) *App {
+	a.mainDirection = direction
+	return a
+}
+
+func (a *App) MainDirection() l.Direction {
+	return a.mainDirection
 }
 
 // Fn renders the app widget
@@ -99,10 +110,8 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	
 	return func(gtx l.Context) l.Dimensions {
 		a.Flex().Rigid(
-			a.Fill("Primary",
-				EmptySpace(gtx.Constraints.Max.X, int(a.TextSize.Scale(Scales["H1"]).V)),
-				l.Center, 0,
-			).Fn,
+			a.Fill("Primary", l.Center, 0, l.Center, EmptySpace(gtx.Constraints.Max.X,
+				int(a.TextSize.Scale(Scales["H1"]).V))).Fn,
 		).Fn(gtx)
 		return a.VFlex().
 			Rigid(
@@ -153,11 +162,11 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	a.Flex().Flexed(1, a.Direction().Center().Embed(a.LogoAndTitle).Fn).Fn(gtx)
+	a.Flex().Flexed(1, a.Direction().W().Embed(a.LogoAndTitle).Fn).Fn(gtx)
 	return a.Flex().AlignMiddle().
-		Rigid(
-			a.Inset(0.5, EmptySpace(0, 0)).Fn,
-		).
+		// Rigid(
+		// 	a.Inset(0.5, EmptySpace(0, 0)).Fn,
+		// ).
 		// Flexed(0.5,
 		// 	EmptyMinWidth(),
 		// ).
@@ -189,7 +198,7 @@ func (a *App) RenderButtonBar(gtx l.Context) l.Dimensions {
 	for i := range a.buttonBar {
 		out.Rigid(a.buttonBar[i])
 	}
-	out.Rigid(a.Inset(0.5, EmptySpace(0, 0)).Fn)
+	// out.Rigid(a.Inset(0.5, EmptySpace(0, 0)).Fn)
 	dims := out.Fn(gtx)
 	gtx.Constraints.Min = dims.Size
 	gtx.Constraints.Max = dims.Size
@@ -390,39 +399,33 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
-	return a.Fill(a.bodyBackground,
-		// a.Fill(a.bodyBackground,
-		a.Inset(0.25,
-			func(gtx l.Context) l.
-			Dimensions {
-				if page, ok := a.pages[a.activePage.Load()]; !ok {
-					return a.Flex().
-						Flexed(
-							1,
-							a.VFlex().SpaceEvenly().
-								Rigid(
-									a.H1("404").
-										Alignment(text.Middle).
-										Fn,
-								).
-								Rigid(
-									a.Body1("page "+a.activePage.Load()+" not found").
-										Alignment(text.Middle).
-										Fn,
-								).
-								Fn,
-						).Fn(gtx)
-				} else {
-					// _ = page
-					// return EmptyMaxHeight()(gtx)
-					return page(gtx)
-				}
-			},
-		).Fn,
-		l.Center, a.TextSize.V*1.5,
-		// ).Fn,
-		// l.Center, 0,
-	).Fn(gtx)
+	return a.Fill(a.bodyBackground, l.Center, a.TextSize.V*1.5, a.mainDirection, a.Inset(0.25,
+		func(gtx l.Context) l.
+		Dimensions {
+			if page, ok := a.pages[a.activePage.Load()]; !ok {
+				return a.Flex().
+					Flexed(
+						1,
+						a.VFlex().SpaceEvenly().
+							Rigid(
+								a.H1("404").
+									Alignment(text.Middle).
+									Fn,
+							).
+							Rigid(
+								a.Body1("page "+a.activePage.Load()+" not found").
+									Alignment(text.Middle).
+									Fn,
+							).
+							Fn,
+					).Fn(gtx)
+			} else {
+				// _ = page
+				// return EmptyMaxHeight()(gtx)
+				return page(gtx)
+			}
+		},
+	).Fn).Fn(gtx)
 }
 
 func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {

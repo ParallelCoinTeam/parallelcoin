@@ -92,8 +92,8 @@ func (w *Window) List() (li *List) {
 		color:          "PanelBg",
 		background:     "Transparent",
 		active:         "Primary",
-		scrollWidth:    int(w.TextSize.Scale(0.75).V),
-		setScrollWidth: int(w.TextSize.Scale(0.75).V),
+		scrollWidth:    int(w.TextSize.Scale(1.25).V),
+		setScrollWidth: int(w.TextSize.Scale(1.25).V),
 		// scrollBarPad:    int(w.TextSize.Scale(0.5).V),
 		// setScrollBarPad: int(w.TextSize.Scale(0.5).V),
 		recalculateTime: time.Now().Add(-time.Second),
@@ -219,7 +219,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		// if li.recalculate && !li.changing {
 		// Debug("recalculating")
 		// get the size of the scrollbar
-		li.Theme.scrollBarSize = li.scrollWidth // + li.scrollBarPad
+		li.scrollBarSize = li.scrollWidth // + li.scrollBarPad
 		// render the widgets onto a second context to get their dimensions
 		gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max, li.axis)
 		// generate the dimensions for all the list elements
@@ -263,41 +263,27 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
 		}
 		containerFlex.Rigid(
-			li.Theme.VFlex().
-				Rigid(
-					If(!li.leftSide,
-						li.Fill(li.background, EmptySpace(0, 0), // li.scrollBarPad),
-							l.Center, li.TextSize.V/2).Fn,
-						EmptySpace(0, 0),
-					),
-				).
-				Rigid(
-					li.Fill(li.background, func(gtx l.Context) l.Dimensions {
-						pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
-							Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
-						li.drag.Add(gtx.Ops)
-						return li.Theme.Flex().
-							Rigid(li.pageUpDown(li.dims, li.view, li.total,
-								// li.scrollBarPad+
-								li.scrollWidth, li.top, false)).
-							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle,
-								li.view, gtx.Constraints.Max.X)).
-							Rigid(li.pageUpDown(li.dims, li.view, li.total,
-								// li.scrollBarPad+
-								li.scrollWidth, li.bottom, true)).
-							Fn(gtx)
-					}, l.Center, li.TextSize.V/2).Fn,
-				).
-				Rigid(
-					If(li.leftSide,
-						li.Fill(li.background, EmptySpace(0,
-							// li.scrollBarPad+
-							li.scrollWidth), l.Center,
-							li.TextSize.V/2).Fn,
-						EmptySpace(0, 0),
-					),
-				).
-				Fn,
+			li.Fill("red", l.Center, li.TextSize.V, l.Center,
+				li.VFlex().
+					Rigid(
+						func(gtx l.Context) l.Dimensions {
+							pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
+								Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
+							li.drag.Add(gtx.Ops)
+							return li.Theme.Flex().
+								Rigid(li.pageUpDown(li.dims, li.view, li.total,
+									// li.scrollBarPad+
+									li.scrollWidth, li.top, false)).
+								Rigid(li.grabber(li.dims, li.scrollWidth, li.middle,
+									li.view, gtx.Constraints.Max.X)).
+								Rigid(li.pageUpDown(li.dims, li.view, li.total,
+									// li.scrollBarPad+
+									li.scrollWidth, li.bottom, true)).
+								Fn(gtx)
+						},
+					).
+					Fn,
+			).Fn,
 		)
 		if li.leftSide {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
@@ -309,7 +295,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
 		}
 		containerFlex.Rigid(
-			li.Fill(li.background, li.Theme.Flex().
+			li.Fill(li.background, l.Center, 0, 0, li.Theme.Flex().
 				Rigid(
 					// If(!li.leftSide,
 					// 	EmptySpace(li.scrollBarPad, 0),
@@ -341,12 +327,12 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 					EmptySpace(0, 0),
 					// ),
 				).
-				Fn, l.Center, 0).Fn,
+				Fn).Fn,
 		)
 		if li.leftSide {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth))
 		}
-		container = li.Fill(li.background, containerFlex.Fn, l.Center, 0).Fn
+		container = li.Fill(li.background, l.Center, 0, 0, containerFlex.Fn).Fn
 	}
 	clip.UniformRRect(f32.Rectangle{
 		// Min: f32.Point{},
@@ -394,7 +380,13 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 			li.position = dims.CoordinateToPosition(newPos, li.axis)
 		}).
 			SetPress(func() { li.recentPageClick = time.Now() })).Embed(
-			li.Fill("scrim", EmptySpace(x, y), l.Center, li.TextSize.V/2).Fn,
+			li.Flex().
+				Rigid(EmptySpace(x/3, y)).
+				Rigid(
+					li.Fill("scrim", l.Center, li.TextSize.V/2, 0, EmptySpace(x/3, y)).Fn,
+				).
+				Rigid(EmptySpace(x/3, y)).
+				Fn,
 		).Background("Transparent").CornerRadius(0).Fn(gtx)
 	}
 }
@@ -444,8 +436,14 @@ func (li *List) grabber(dims DimensionList, x, y, viewAxis, viewCross int) func(
 		defer op.Push(gtx.Ops).Pop()
 		pointer.Rect(image.Rectangle{Max: image.Point{X: x, Y: y}}).Add(gtx.Ops)
 		li.sideScroll.Add(gtx.Ops)
-		return li.Fill(li.currentColor, EmptySpace(x, y), l.Center,
-			li.TextSize.V/4).Fn(gtx)
+		return li.Flex().
+			Rigid(EmptySpace(x/3, y)).
+			Rigid(
+				li.Fill(li.currentColor, l.Center, li.TextSize.V/4, l.Center, EmptySpace(x/3,					y)).
+					Fn,
+			).
+			Rigid(EmptySpace(x/3, y)).
+			Fn(gtx)
 	}
 }
 

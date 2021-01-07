@@ -19,8 +19,7 @@ import (
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
-	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"),
-		wg.invalidate)
+	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"),		wg.invalidate).SetMainDirection(l.W)
 	wg.MainApp = a
 	wg.MainApp.ThemeHook(
 		func() {
@@ -229,7 +228,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 		[]l.Widget{
 			// func(gtx l.Context) l.Dimensions { return wg.RunStatusPanel(gtx) },
 			// wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-			wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+			// wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
 			wg.RunStatusPanel,
 		},
 		[]l.Widget{
@@ -257,7 +256,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					wg.MainApp.ActivePage(name)
 				}, a,
 			),
-			wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+			// wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
 		},
 	)
 	// a.PushOverlay(wg.toasts.DrawToasts())
@@ -295,29 +294,44 @@ func (wg *WalletGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) 
 
 func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
-		background := "DocBg"
-		color := "DocText"
+		var scale float32
+		scale = gui.Scales["Body1"]
+		var color string
+		background := "Transparent"
+		color = "DocText"
+		var font string
+		font = "bariol regular"
+		var ins float32 = 0.5
 		if wg.MainApp.ActivePageGet() == page {
 			background = "PanelBg"
-			color = "PanelText"
+			scale = gui.Scales["H4"]
+			color = "DocText"
+			font = "bariol bold"
+			ins = 0.5
 		}
 		max := int(wg.MainApp.SideBarSize.V)
 		gtx.Constraints.Max.X = max
 		gtx.Constraints.Min.X = max
 		// Debug("sideMAXXXXXX!!", max)
-		return wg.Fill(background, wg.Flex().Flexed(1,
-			wg.Button(wg.sidebarButtons[index]).
-				Text(title).Color(color).
-				Background("Transparent").
-				SetClick(
-					func() {
-						if wg.MainApp.MenuOpen {
-							wg.MainApp.MenuOpen = false
-						}
-						wg.MainApp.ActivePage(page)
-					},
-				).Fn,
-		).Fn, l.Center, 0).Fn(gtx)
+		return wg.Flex().Rigid(
+			wg.Fill(background, l.Center, 0, l.Center,
+				wg.ButtonLayout(wg.sidebarButtons[index]).Background("Transparent").Embed(
+					wg.Flex().Flexed(1,
+						wg.Inset(ins,
+							wg.Label().Font(font).Text(title).TextScale(scale).Color(color).Fn,
+						).Fn,
+					).Fn,
+				).
+					SetClick(
+						func() {
+							if wg.MainApp.MenuOpen {
+								wg.MainApp.MenuOpen = false
+							}
+							wg.MainApp.ActivePage(page)
+						},
+					).Fn,
+			).Fn,
+		).Fn(gtx)
 	}
 }
 

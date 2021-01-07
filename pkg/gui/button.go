@@ -69,14 +69,16 @@ func (b *Button) Color(color string) *Button {
 
 // CornerRadius sets the corner radius (all measurements are scaled from the base text size)
 func (b *Button) CornerRadius(cornerRadius float32) *Button {
-	b.cornerRadius = b.Theme.TextSize.Scale(cornerRadius)
+	b.cornerRadius = b.TextSize.Scale(cornerRadius)
 	return b
 }
 
 // Font sets the font style
 func (b *Button) Font(font string) *Button {
-	if fon, err := b.Theme.collection.Font(font); !Check(err) {
+	if fon, err := b.collection.Font(font); !Check(err) {
 		b.font = fon
+	} else {
+		panic(err)
 	}
 	return b
 }
@@ -84,10 +86,10 @@ func (b *Button) Font(font string) *Button {
 // Inset sets the inset between the button border and the text
 func (b *Button) Inset(scale float32) *Button {
 	b.inset = &l.Inset{
-		Top:    b.Theme.TextSize.Scale(scale),
-		Right:  b.Theme.TextSize.Scale(scale),
-		Bottom: b.Theme.TextSize.Scale(scale),
-		Left:   b.Theme.TextSize.Scale(scale),
+		Top:    b.TextSize.Scale(scale),
+		Right:  b.TextSize.Scale(scale),
+		Bottom: b.TextSize.Scale(scale),
+		Left:   b.TextSize.Scale(scale),
 	}
 	return b
 }
@@ -128,10 +130,11 @@ func (b *Button) Fn(gtx l.Context) l.Dimensions {
 	}
 	fn := func(gtx l.Context) l.Dimensions {
 		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
-			paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-			return b.Window.Text().
-				Alignment(text.Middle).
-				Fn(gtx, b.shaper, b.font, b.textSize, b.text)
+			// paint.ColorOp{Color: b.color}.Add(gtx.Ops)
+			return b.Flex().Flexed(1, b.Label().Text(b.text).TextScale(b.textSize.V/b.TextSize.V).Fn).Fn(gtx)
+			// b.Window.Text().
+			// Alignment(text.Middle).
+			// Fn(gtx, b.shaper, b.font, b.textSize, b.text)
 		})
 	}
 	bl.Embed(fn)

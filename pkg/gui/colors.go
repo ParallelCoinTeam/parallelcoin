@@ -177,10 +177,10 @@ func (c *Colors) SetTheme(dark bool) {
 		c.m["Secondary"] = c.m["SecondaryLight"]
 		
 		c.m["DocText"] = c.m["dark"]
-		c.m["DocBg"] = c.m["white"]
+		c.m["DocBg"] = c.m["light"]
 		
 		c.m["PanelText"] = c.m["dark"]
-		c.m["PanelBg"] = c.m["light"]
+		c.m["PanelBg"] = c.m["white"]
 		
 		c.m["PanelTextDim"] = c.m["dark-grayii"]
 		c.m["PanelBgDim"] = c.m["dark-grayi"]

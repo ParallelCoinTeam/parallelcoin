@@ -95,6 +95,7 @@ type WalletGUI struct {
 	currentReceiveRegenerate     *uberatomic.Bool
 	currentReceiveGetNew         *uberatomic.Bool
 	txReady                      *uberatomic.Bool
+	mainDirection                l.Direction
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
@@ -194,8 +195,8 @@ func (wg *WalletGUI) Run() (err error) {
 		Title("ParallelCoin Wallet").
 		Open().
 		Run(
-			wg.Fill("DocBg",
-				func(gtx l.Context) l.Dimensions {
+			func(gtx l.Context) l.Dimensions {
+				return wg.Fill("DocBg", l.Center, 0, l.Center+1, func(gtx l.Context) l.Dimensions {
 					return gui.If(
 						*wg.noWallet,
 						wg.CreateWalletPage,
@@ -210,8 +211,8 @@ func (wg *WalletGUI) Run() (err error) {
 							wg.MainApp.Fn(),
 						),
 					)(gtx)
-				},
-				l.W, 0).Fn,
+				}).Fn(gtx)
+			},
 			wg.MainApp.Overlay,
 			// wg.InitWallet(),
 			wg.gracefulShutdown,
