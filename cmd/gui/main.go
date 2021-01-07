@@ -96,6 +96,7 @@ type WalletGUI struct {
 	currentReceiveGetNew         *uberatomic.Bool
 	txReady                      *uberatomic.Bool
 	mainDirection                l.Direction
+	preRendering                 bool
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
@@ -246,11 +247,10 @@ func (wg *WalletGUI) GetInputs() {
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
 	wg.inputs = map[string]*gui.Input{
-		"receiveLabel":   wg.Input("", "Label", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"receiveAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
-		"receiveMessage": wg.Input("", "Message", "DocText", "DocBg", "PanelBg", func(pass string) {}),
-		"console":        wg.Input("", "enter rpc command", "Primary", "DocText", "DocBg", func(pass string) {}),
-		"walletSeed":     wg.Input(seedString, "wallet seed", "Primary", "DocText", "DocBg", func(pass string) {}),
+		"receiveAmount":  wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
+		"receiveMessage": wg.Input("", "Message", "DocText", "DocBg", "DocBg", func(pass string) {}),
+		"console":        wg.Input("", "enter rpc command", "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"walletSeed":     wg.Input(seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 	}
 }
 

@@ -41,7 +41,7 @@ type App struct {
 	sideBar             []l.Widget
 	sideBarBackground   string
 	sideBarColor        string
-	SideBarSize         unit.Value
+	SideBarSize         *unit.Value
 	sideBarList         *List
 	Size                *int
 	statusBar           []l.Widget
@@ -53,6 +53,7 @@ type App struct {
 	titleBarColor       string
 	titleFont           string
 	mainDirection       l.Direction
+	PreRendering        bool
 }
 
 type WidgetMap map[string]l.Widget
@@ -60,7 +61,7 @@ type WidgetMap map[string]l.Widget
 func (w *Window) App(size *int, activePage *uberatomic.String,
 	invalidate chan struct{}) *App {
 	mc := w.Clickable()
-	return &App{
+	a := &App{
 		Window:              w,
 		activePage:          activePage,
 		bodyBackground:      "PanelBg",
@@ -73,7 +74,6 @@ func (w *Window) App(size *int, activePage *uberatomic.String,
 		layers:              nil,
 		pages:               make(WidgetMap),
 		root:                w.Stack(),
-		SideBarSize:         w.TextSize.Scale(14),
 		sideBarBackground:   "DocBg",
 		sideBarColor:        "DocText",
 		statusBarBackground: "DocBg",
@@ -94,6 +94,8 @@ func (w *Window) App(size *int, activePage *uberatomic.String,
 		invalidate:          invalidate,
 		mainDirection:       l.Center + 1,
 	}
+	a.SideBarSize = &unit.Value{}
+	return a
 }
 
 func (a *App) SetMainDirection(direction l.Direction) *App {
@@ -162,7 +164,7 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	a.Flex().Flexed(1, a.Direction().W().Embed(a.LogoAndTitle).Fn).Fn(gtx)
+	a.Flex().Flexed(1, a.Direction().Center().Embed(a.LogoAndTitle).Fn).Fn(gtx)
 	return a.Flex().AlignMiddle().
 		// Rigid(
 		// 	a.Inset(0.5, EmptySpace(0, 0)).Fn,
@@ -443,16 +445,21 @@ func (a *App) renderSideBar() l.Widget {
 			return dims
 		}
 		return func(gtx l.Context) l.Dimensions {
+			a.PreRendering = true
 			gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max,
-				l.Vertical)
+				l.Horizontal)
 			// generate the dimensions for all the list elements
+			
 			allDims := GetDimensionList(gtx1, len(a.sideBar), le)
+			a.PreRendering = false
+			// Debugs(allDims)
 			max := 0
 			for _, i := range allDims {
 				if i.Size.X > max {
 					max = i.Size.X
 				}
 			}
+			// max += int(a.TextSize.V) / 2
 			// Debug(max)
 			a.SideBarSize.V = float32(max)
 			gtx.Constraints.Max.X = max

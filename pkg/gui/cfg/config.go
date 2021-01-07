@@ -116,7 +116,7 @@ func (c *Config) Config() GroupsMap {
 				})
 			case "integer":
 				c.inputs[sgf.Slug] = c.Input(fmt.Sprint(*tgs.Slot.(*int)),
-					sgf.Slug, "DocText", "DocBg", "PaneBg", func(txt string) {
+					sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
 						Debug(sgf.Slug, "submitted", txt)
 						i := c.cx.ConfigMap[sgf.Slug].(*int)
 						if n, err := strconv.Atoi(txt); !Check(err) {
@@ -165,8 +165,7 @@ func (c *Config) Config() GroupsMap {
 					})
 			case "multi":
 				c.multis[sgf.Slug] = c.Multiline(
-					tgs.Slot.(*cli.StringSlice), "DocText", "DocBg",
-					"PanelBg", 30, func(txt []string) {
+					tgs.Slot.(*cli.StringSlice), "DocText", "DocBg", "PanelBg", 30, func(txt []string) {
 						Debug(sgf.Slug, "submitted", txt)
 						sss := c.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
 						*sss = txt
@@ -227,21 +226,21 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 			// put a space between the sections
 			out = append(out, func(gtx l.Context) l.Dimensions {
 				dims := ng.VFlex().
-					Rigid(
-						// ng.Inset(0.25,
-						ng.Fill("DocBg", l.Center, ng.TextSize.V, l.S, ng.Inset(0.5,
-							gui.EmptyMaxWidth()).Fn,
-						).Fn,
-						// ).Fn,
-					).
+					// Rigid(
+					// 	// ng.Inset(0.25,
+					// 	ng.Fill("DocBg", l.Center, ng.TextSize.V, l.S, ng.Inset(0.25,
+					// 		gui.EmptyMaxWidth()).Fn,
+					// 	).Fn,
+					// 	// ).Fn,
+					// ).
 					Rigid(ng.Inset(0.25, gui.EmptyMaxWidth()).Fn).
-					Rigid(
-						// ng.Inset(0.25,
-						ng.Fill("DocBg", l.Center, ng.TextSize.V, l.N, ng.Inset(0.5,
-							gui.EmptyMaxWidth()).Fn,
-						).Fn,
-						// ).Fn,
-					).
+					// Rigid(
+					// 	// ng.Inset(0.25,
+					// 	ng.Fill("DocBg", l.Center, ng.TextSize.V, l.N, ng.Inset(0.25,
+					// 		gui.EmptyMaxWidth()).Fn,
+					// 	).Fn,
+					// 	// ).Fn,
+					// ).
 					Fn(gtx)
 				// ng.Fill("PanelBg", gui.EmptySpace(gtx.Constraints.Max.X, gtx.Constraints.Max.Y), l.Center, 0).Fn(gtx)
 				return dims
@@ -254,11 +253,11 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		}
 		// put in the header
 		out = append(out,
-			ng.Fill("DocBg", l.Center, ng.TextSize.V, 9,
+			ng.Fill("scrim", l.Center, ng.TextSize.V, l.W,
 				ng.Flex().Flexed(1,
-					ng.Inset(0.25,
+					ng.Inset(0.75,
 						ng.H3(g.name).
-							Color("Primary").
+							Color("DocText").
 							Alignment(text.Start).
 							Fn,
 					).Fn,
@@ -283,9 +282,9 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 					if k < len(gi.widget()) {
 						return ng.Fill("DocBg", l.Center, ng.TextSize.V, 9,
 							ng.Flex().
-								Rigid(
-									ng.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
-								).
+								// Rigid(
+								// 	ng.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
+								// ).
 								Rigid(
 									ng.Inset(0.25,
 										gi.widget()[k],

@@ -23,7 +23,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 		Rigid(
 			wg.Fill("Primary", l.Center, wg.TextSize.V, l.W, wg.Flex().AlignEnd().
 				Rigid(
-					wg.Inset(0.5,
+					wg.Inset(0.25,
 						wg.VFlex().AlignBaseline().
 							Rigid(
 								wg.Flex().AlignBaseline().
@@ -59,7 +59,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 					).Fn,
 				).
 				Rigid(
-					wg.Inset(0.5,
+					wg.Inset(0.25,
 						wg.VFlex().AlignBaseline().AlignEnd().
 							Rigid(
 								wg.Flex().AlignBaseline().
@@ -113,14 +113,15 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 		return wg.Responsive(*wg.Size, gui.Widgets{
 			{
 				Size: 0,
-				Widget: wg.VFlex().SpaceAround().AlignMiddle().
+				Widget:
+				wg.VFlex().SpaceAround().AlignMiddle().
 					Rigid(
 						// wg.ButtonInset(0.25,
 						wg.VFlex().SpaceSides().
 							Rigid(
-								wg.Inset(0.25,
-									wg.balanceCard,
-								).Fn,
+								// wg.Inset(0.25,
+								wg.balanceCard,
+								// ).Fn,
 							).Fn,
 						// ).Fn,
 					).
@@ -149,9 +150,9 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						// wg.ButtonInset(0.25,
 						wg.VFlex().SpaceSides().AlignMiddle().
 							Rigid(
-								wg.Inset(0.25,
-									wg.balanceCard,
-								).Fn,
+								// wg.Inset(0.25,
+								wg.balanceCard,
+								// ).Fn,
 							).Fn,
 						// ).Fn,
 					).
@@ -160,13 +161,16 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						wg.VFlex().SpaceSides().AlignMiddle().
 							Rigid(
 								wg.Inset(0.25,
-									wg.H5("recent transactions").Fn).Fn,
+									wg.H5("recent transactions").Fn,
+								).Fn,
 							).
 							Flexed(1,
-								wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W, wg.Inset(0.5,
+								wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W,
+									wg.Inset(0.25,
 									wg.RecentTransactionsWidget,
 									// p9.EmptyMaxWidth(),
-								).Fn).Fn,
+									).Fn,
+								).Fn,
 							).
 							Fn,
 						// ).
@@ -300,12 +304,22 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return out[index](gtx)
 	}
+	// if listName == "recent" {
+	// 	wg.lists[listName].LeftSide(true)
+	// }
 	wo := func(gtx l.Context) l.Dimensions {
-		return wg.lists[listName].
-			Vertical().
-			Length(len(out)).
-			ListElement(le).
-			Fn(gtx)
+		// clip.UniformRRect(f32.Rectangle{
+		// 	Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
+		// }, wg.TextSize.V/4).Add(gtx.Ops)
+		return wg.Fill("DocBg", l.Center, wg.TextSize.V/4, l.W,
+			// wg.Inset(0.25,
+			wg.lists[listName].
+				Vertical().
+				Length(len(out)).
+				ListElement(le).
+				Fn,
+			// ).Fn,
+		).Fn(gtx)
 	}
 	switch listName {
 	case "history":
@@ -316,7 +330,9 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	case "recent":
 		wg.RecentTransactionsWidget = wo
 	}
-	return wo
+	return func(gtx l.Context) l.Dimensions {
+		return wo(gtx)
+	}
 }
 
 func leftPadTo(length, limit int, txt string) string {

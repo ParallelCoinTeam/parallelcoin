@@ -4,7 +4,6 @@ import (
 	"image"
 	"time"
 	
-	"gioui.org/f32"
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
 	l "gioui.org/layout"
@@ -260,48 +259,49 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	if li.axis == l.Horizontal {
 		containerFlex := li.Theme.VFlex()
 		if !li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth + int(li.TextSize.V)/2)) // + li.scrollBarPad))
+			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
 		}
 		containerFlex.Rigid(
-			li.Fill("red", l.Center, li.TextSize.V, l.Center,
-				li.VFlex().
-					Rigid(
-						func(gtx l.Context) l.Dimensions {
-							pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
-								Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
-							li.drag.Add(gtx.Ops)
-							return li.Theme.Flex().
-								Rigid(li.pageUpDown(li.dims, li.view, li.total,
-									// li.scrollBarPad+
-									li.scrollWidth, li.top, false)).
-								Rigid(li.grabber(li.dims, li.scrollWidth, li.middle,
-									li.view, gtx.Constraints.Max.X)).
-								Rigid(li.pageUpDown(li.dims, li.view, li.total,
-									// li.scrollBarPad+
-									li.scrollWidth, li.bottom, true)).
-								Fn(gtx)
-						},
-					).
-					Fn,
-			).Fn,
+			li.VFlex().
+				Rigid(
+					func(gtx l.Context) l.Dimensions {
+						pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
+							Y: gtx.Constraints.Max.Y}}).Add(gtx.Ops)
+						li.drag.Add(gtx.Ops)
+						return li.Theme.Flex().
+							Rigid(li.pageUpDown(li.dims, li.view, li.total,
+								// li.scrollBarPad+
+								li.scrollWidth, li.top, false)).
+							Rigid(li.grabber(li.dims, li.scrollWidth, li.middle,
+								li.view, gtx.Constraints.Max.X)).
+							Rigid(li.pageUpDown(li.dims, li.view, li.total,
+								// li.scrollBarPad+
+								li.scrollWidth, li.bottom, true)).
+							Fn(gtx)
+					},
+				).
+				Fn,
 		)
 		if li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
+			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // li.scrollWidth)) // + li.scrollBarPad))
 		}
 		container = containerFlex.Fn
 	} else {
 		containerFlex := li.Theme.Flex()
 		if !li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // + li.scrollBarPad))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth + int(li.TextSize.V)/2)) // + li.scrollBarPad))
+			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
 		}
 		containerFlex.Rigid(
-			li.Fill(li.background, l.Center, 0, 0, li.Theme.Flex().
-				Rigid(
-					// If(!li.leftSide,
-					// 	EmptySpace(li.scrollBarPad, 0),
-					EmptySpace(0, 0),
-					// ),
-				).
+			li.Fill(li.background, l.Center, li.TextSize.V/4, l.Center, li.Flex().
+				// Rigid(
+				// 	// If(!li.leftSide,
+				// 	// 	EmptySpace(li.scrollBarPad, 0),
+				// 	EmptySpace(0, 0),
+				// 	// ),
+				// ).
 				Rigid(
 					func(gtx l.Context) l.Dimensions {
 						pointer.Rect(image.Rectangle{Max: image.Point{X: gtx.Constraints.Max.X,
@@ -321,23 +321,24 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 							Fn(gtx)
 					},
 				).
-				Rigid(
-					// If(li.leftSide,
-					// 	EmptySpace(li.scrollBarPad, 0),
-					EmptySpace(0, 0),
-					// ),
-				).
+				// Rigid(
+				// 	// If(li.leftSide,
+				// 	// 	EmptySpace(li.scrollBarPad, 0),
+				// 	EmptySpace(0, 0),
+				// 	// ),
+				// ).
 				Fn).Fn,
 		)
 		if li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth))
+			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth+int(li.TextSize.V)/2))
 		}
-		container = li.Fill(li.background, l.Center, 0, 0, containerFlex.Fn).Fn
+		container = li.Fill(li.background, l.Center, 0, l.Center, containerFlex.Fn).Fn
 	}
-	clip.UniformRRect(f32.Rectangle{
-		// Min: f32.Point{},
-		Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
-	}, li.TextSize.V/4).Add(gtx.Ops)
+	// clip.UniformRRect(f32.Rectangle{
+	// 	// Min: f32.Point{},
+	// 	Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
+	// }, li.TextSize.V/4).Add(gtx.Ops)
 	return container(gtx)
 }
 
@@ -381,11 +382,11 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 		}).
 			SetPress(func() { li.recentPageClick = time.Now() })).Embed(
 			li.Flex().
-				Rigid(EmptySpace(x/3, y)).
+				Rigid(EmptySpace(x/4, y)).
 				Rigid(
-					li.Fill("scrim", l.Center, li.TextSize.V/2, 0, EmptySpace(x/3, y)).Fn,
+					li.Fill("scrim", l.Center, li.TextSize.V/4, 0, EmptySpace(x/2, y)).Fn,
 				).
-				Rigid(EmptySpace(x/3, y)).
+				Rigid(EmptySpace(x/4, y)).
 				Fn,
 		).Background("Transparent").CornerRadius(0).Fn(gtx)
 	}
@@ -437,12 +438,12 @@ func (li *List) grabber(dims DimensionList, x, y, viewAxis, viewCross int) func(
 		pointer.Rect(image.Rectangle{Max: image.Point{X: x, Y: y}}).Add(gtx.Ops)
 		li.sideScroll.Add(gtx.Ops)
 		return li.Flex().
-			Rigid(EmptySpace(x/3, y)).
+			// Rigid(EmptySpace(x/4, y)).
 			Rigid(
-				li.Fill(li.currentColor, l.Center, li.TextSize.V/4, l.Center, EmptySpace(x/3,					y)).
+				li.Fill(li.currentColor, l.Center, li.TextSize.V/4, l.Center, EmptySpace(x, y)).
 					Fn,
 			).
-			Rigid(EmptySpace(x/3, y)).
+			// Rigid(EmptySpace(x/4, y)).
 			Fn(gtx)
 	}
 }

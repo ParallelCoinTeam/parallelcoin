@@ -116,10 +116,9 @@ func (wg *WalletGUI) Tickers() {
 							wg.processWalletBlockNotification()
 						}
 						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() || wg.currentReceiveGetNew.Load() {
-							wg.currentReceiveGetNew.Store(false)
 							var addr util.Address
 							if addr, err = wg.WalletClient.GetNewAddress("default"); !Check(err) {
-								Debug("storing new receiving address", addr.EncodeAddress(),
+								Debug("getting new address new receiving address", addr.EncodeAddress(),
 									"as prior was empty", wg.State.currentReceivingAddress.String.Load())
 								wg.State.SetReceivingAddress(addr)
 								wg.State.isAddress.Store(true)
@@ -129,7 +128,8 @@ func (wg *WalletGUI) Tickers() {
 						}
 					}
 					if (wg.currentReceiveQRCode == nil && wg.currentReceiveAddress != "" && wg.stateLoaded.Load()) ||
-						wg.currentReceiveRegenerate.Load() {
+						wg.currentReceiveRegenerate.Load() || wg.currentReceiveGetNew.Load() {
+						wg.currentReceiveGetNew.Store(false)
 						var qrc image.Image
 						wg.currentReceiveRegenerate.Store(false)
 						Debug("generating QR code")
@@ -139,7 +139,7 @@ func (wg *WalletGUI) Tickers() {
 							wg.inputs["receiveAmount"].GetText(),
 							wg.inputs["receiveMessage"].GetText(),
 						)
-						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelQ, 6); !Check(err) {
+						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 8); !Check(err) {
 							iop := paint.NewImageOp(qrc)
 							wg.currentReceiveQRCode = &iop
 							wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {
@@ -150,7 +150,7 @@ func (wg *WalletGUI) Tickers() {
 								CornerRadius(0.5).
 								Background("white").
 								Embed(
-									wg.Inset(0.5,
+									wg.Inset(0.25,
 										wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
 									).Fn,
 								).Fn
