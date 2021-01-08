@@ -52,7 +52,7 @@ func (m *MinerModel) Widget(gtx l.Context) l.Dimensions {
 						Rigid(m.VSpacer).
 						Rigid(m.H5("found blocks").Fn).
 						Rigid(
-							m.Fill("PanelBg", l.Center, 0, l.Center, m.FoundBlocks).Fn,
+							m.Fill("PanelBg", l.Center, 0, 0, m.FoundBlocks).Fn,
 						).Fn,
 				).Fn).Fn,
 			).Fn,

@@ -18,12 +18,19 @@ type Border struct {
 	cornerRadius unit.Value
 	width        unit.Value
 	w            layout.Widget
+	corners      int
 }
 
 // Border creates a border with configurable color, width and corner radius.
 func (w *Window) Border() *Border {
 	b := &Border{Window: w}
 	b.CornerRadius(0.25).Color("Primary").Width(0.125)
+	return b
+}
+
+// Corners sets the corners that are rounded
+func (b *Border) Corners(corners int) *Border {
+	b.corners = corners
 	return b
 }
 
@@ -58,10 +65,11 @@ func (b *Border) Fn(gtx layout.Context) layout.Dimensions {
 	st := op.Push(gtx.Ops)
 	width := gtx.Px(b.width)
 	clip.Border{
-		Rect: f32.Rectangle{
-			Max: layout.FPt(sz),
-		},
-		NE: rr, NW: rr, SE: rr, SW: rr,
+		Rect:  f32.Rectangle{Max: layout.FPt(sz)},
+		NE:    ifDir(rr, b.corners&NE),
+		NW:    ifDir(rr, b.corners&NW),
+		SE:    ifDir(rr, b.corners&SE),
+		SW:    ifDir(rr, b.corners&SW),
 		Width: float32(width),
 	}.Add(gtx.Ops)
 	paint.ColorOp{Color: b.color}.Add(gtx.Ops)

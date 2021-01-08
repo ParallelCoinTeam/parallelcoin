@@ -13,6 +13,7 @@ import (
 	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/coding/qrcode"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -148,6 +149,7 @@ func (wg *WalletGUI) Tickers() {
 								}
 							})).
 								CornerRadius(0.5).
+								Corners(gui.NW | gui.SW | gui.NE).
 								Background("white").
 								Embed(
 									wg.Inset(0.25,

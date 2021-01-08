@@ -63,7 +63,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 }
 
 func (wg *WalletGUI) HistoryPageView() l.Widget {
-	return wg.VFlex().Rigid(wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W, wg.Inset(0.25,
+	return wg.VFlex().Rigid(wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SW|gui.NE, wg.Inset(0.25,
 		wg.HistoryWidget).Fn).Fn).Fn
 }
 

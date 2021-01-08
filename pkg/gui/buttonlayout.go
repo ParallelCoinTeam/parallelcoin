@@ -17,7 +17,7 @@ type ButtonLayout struct {
 	cornerRadius unit.Value
 	button       *Clickable
 	w            l.Widget
-	width        int
+	corners      int
 }
 
 // ButtonLayout creates a button with a background and another widget over top
@@ -26,17 +26,15 @@ func (w *Window) ButtonLayout(button *Clickable) *ButtonLayout {
 		Window:       w,
 		button:       button,
 		background:   w.Colors.GetNRGBAFromName("ButtonBg"),
-		cornerRadius: w.TextSize.Scale(0.125),
+		cornerRadius: w.TextSize.Scale(0.25),
 	}
 }
 
-
-// Width sets the pixel width of the button
-func (b *ButtonLayout) Width(width int) *ButtonLayout {
-	b.width = width
+// Corners sets which corners have the radius of rounding
+func (b *ButtonLayout) Corners(corners int) *ButtonLayout {
+	b.corners = corners
 	return b
 }
-
 
 // Background sets the background color of the button
 func (b *ButtonLayout) Background(color string) *ButtonLayout {
@@ -83,7 +81,10 @@ func (b *ButtonLayout) Fn(gtx l.Context) l.Dimensions {
 						X: float32(gtx.Constraints.Min.X),
 						Y: float32(gtx.Constraints.Min.Y),
 					}},
-					NE: rr, NW: rr, SE: rr, SW: rr,
+					NW: ifDir(rr, b.corners&NW),
+					NE: ifDir(rr, b.corners&NE),
+					SW: ifDir(rr, b.corners&SW),
+					SE: ifDir(rr, b.corners&SE),
 				}.Add(gtx.Ops)
 				background := b.background
 				if gtx.Queue == nil {

@@ -48,6 +48,14 @@ func Main(cx *conte.Xt, c *cli.Context) (err error) {
 	return wg.Run()
 }
 
+type BoolMap map[string]*gui.Bool
+type ListMap map[string]*gui.List
+type CheckableMap map[string]*gui.Checkable
+type ClickableMap map[string]*gui.Clickable
+type InputMap map[string]*gui.Input
+type PasswordMap map[string]*gui.Password
+type IncDecMap map[string]*gui.IncDec
+
 type WalletGUI struct {
 	wg                        sync.WaitGroup
 	cx                        *conte.Xt
@@ -72,13 +80,13 @@ type WalletGUI struct {
 	buttonBarButtons             []*gui.Clickable
 	statusBarButtons             []*gui.Clickable
 	quitClickable                *gui.Clickable
-	bools                        map[string]*gui.Bool
-	lists                        map[string]*gui.List
-	checkables                   map[string]*gui.Checkable
-	clickables                   map[string]*gui.Clickable
-	inputs                       map[string]*gui.Input
-	passwords                    map[string]*gui.Password
-	incdecs                      map[string]*gui.IncDec
+	bools                        BoolMap
+	lists                        ListMap
+	checkables                   CheckableMap
+	clickables                   ClickableMap
+	inputs                       InputMap
+	passwords                    PasswordMap
+	incdecs                      IncDecMap
 	sendAddresses                []SendAddress
 	console                      *Console
 	RecentTransactionsWidget     l.Widget
@@ -94,6 +102,7 @@ type WalletGUI struct {
 	currentReceiveCopyClickable  *gui.Clickable
 	currentReceiveRegenerate     *uberatomic.Bool
 	currentReceiveGetNew         *uberatomic.Bool
+	sendClickable                *gui.Clickable
 	txReady                      *uberatomic.Bool
 	mainDirection                l.Direction
 	preRendering                 bool
@@ -116,8 +125,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.GetButtons()
 	wg.lists = wg.GetLists()
 	wg.clickables = wg.GetClickables()
-	wg.checkables = map[string]*gui.Checkable{
-	}
+	wg.checkables = wg.GetCheckables()
 	before := func() { Debug("running before") }
 	after := func() { Debug("running after") }
 	wg.node = wg.GetRunUnit(
@@ -133,13 +141,13 @@ func (wg *WalletGUI) Run() (err error) {
 		os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach",
 	)
 	wg.bools = wg.GetBools()
-	wg.GetInputs()
+	wg.inputs = wg.GetInputs()
 	wg.GetPasswords()
 	// wg.toasts = toast.New(wg.th)
 	// wg.dialog = dialog.New(wg.th)
 	wg.console = wg.ConsolePage()
 	wg.quitClickable = wg.Clickable()
-	wg.GetIncDecs()
+	wg.incdecs = wg.GetIncDecs()
 	wg.MainApp = wg.GetAppWidget()
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
@@ -192,12 +200,12 @@ func (wg *WalletGUI) Run() (err error) {
 		}
 	}()
 	if err := wg.Window.
-		Size(64, 32).
+		Size(32, 32).
 		Title("ParallelCoin Wallet").
 		Open().
 		Run(
 			func(gtx l.Context) l.Dimensions {
-				return wg.Fill("DocBg", l.Center, 0, l.Center+1, func(gtx l.Context) l.Dimensions {
+				return wg.Fill("DocBg", l.Center, 0, 0, func(gtx l.Context) l.Dimensions {
 					return gui.If(
 						*wg.noWallet,
 						wg.CreateWalletPage,
@@ -242,13 +250,18 @@ func (wg *WalletGUI) GetButtons() {
 	}
 }
 
-func (wg *WalletGUI) GetInputs() {
+func (wg *WalletGUI) GetInputs() InputMap {
 	seed := make([]byte, hdkeychain.MaxSeedBytes)
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
-	wg.inputs = map[string]*gui.Input{
+	return InputMap{
 		"receiveAmount":  wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
-		"receiveMessage": wg.Input("", "Message", "DocText", "DocBg", "DocBg", func(pass string) {}),
+		"receiveMessage": wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
+		
+		"sendAddress":    wg.Input("", "Parallelcoin Address", "DocText", "DocBg", "PanelBg", func(amt string) {}),
+		"sendAmount":     wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
+		"sendMessage":    wg.Input("", "Description", "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		
 		"console":        wg.Input("", "enter rpc command", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		"walletSeed":     wg.Input(seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 	}
@@ -257,15 +270,15 @@ func (wg *WalletGUI) GetInputs() {
 func (wg *WalletGUI) GetPasswords() {
 	pass := ""
 	passConfirm := ""
-	wg.passwords = map[string]*gui.Password{
+	wg.passwords = PasswordMap{
 		"passEditor":        wg.Password("password", &pass, "Primary", "DocText", "", func(pass string) {}),
 		"confirmPassEditor": wg.Password("confirm", &passConfirm, "Primary", "DocText", "", func(pass string) {}),
 		"publicPassEditor":  wg.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", "", func(pass string) {}),
 	}
 }
 
-func (wg *WalletGUI) GetIncDecs() {
-	wg.incdecs = map[string]*gui.IncDec{
+func (wg *WalletGUI) GetIncDecs() IncDecMap {
+	return IncDecMap{
 		"generatethreads": wg.IncDec().
 			NDigits(2).
 			Min(0).
@@ -319,8 +332,8 @@ func (wg *WalletGUI) GetRunUnit(name string, before, after func(), args ...strin
 	)
 }
 
-func (wg *WalletGUI) GetLists() (o map[string]*gui.List) {
-	return map[string]*gui.List{
+func (wg *WalletGUI) GetLists() (o ListMap) {
+	return ListMap{
 		"createWallet": wg.List(),
 		"overview":     wg.List(),
 		"balances":     wg.List(),
@@ -333,13 +346,12 @@ func (wg *WalletGUI) GetLists() (o map[string]*gui.List) {
 	}
 }
 
-func (wg *WalletGUI) GetClickables() map[string]*gui.Clickable {
-	return map[string]*gui.Clickable{
+func (wg *WalletGUI) GetClickables() ClickableMap {
+	return ClickableMap{
 		"createWallet":            wg.Clickable(),
 		"quit":                    wg.Clickable(),
 		"sendSend":                wg.Clickable(),
-		"sendClearAll":            wg.Clickable(),
-		"sendAddRecipient":        wg.Clickable(),
+		"sendSave":                wg.Clickable(),
 		"receiveCreateNewAddress": wg.Clickable(),
 		"receiveClear":            wg.Clickable(),
 		"receiveShow":             wg.Clickable(),
@@ -352,8 +364,12 @@ func (wg *WalletGUI) GetClickables() map[string]*gui.Clickable {
 	}
 }
 
-func (wg *WalletGUI) GetBools() map[string]*gui.Bool {
-	return map[string]*gui.Bool{
+func (wg *WalletGUI) GetCheckables() CheckableMap {
+	return CheckableMap{}
+}
+
+func (wg *WalletGUI) GetBools() BoolMap {
+	return BoolMap{
 		"runstate":     wg.Bool(wg.node.Running()),
 		"encryption":   wg.Bool(false),
 		"seed":         wg.Bool(false),

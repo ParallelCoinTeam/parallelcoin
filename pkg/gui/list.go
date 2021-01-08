@@ -295,7 +295,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
 		}
 		containerFlex.Rigid(
-			li.Fill(li.background, l.Center, li.TextSize.V/4, l.Center, li.Flex().
+			li.Fill(li.background, l.Center, li.TextSize.V/4, NW|SW|NE, li.Flex().
 				// Rigid(
 				// 	// If(!li.leftSide,
 				// 	// 	EmptySpace(li.scrollBarPad, 0),
@@ -333,7 +333,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth+int(li.TextSize.V)/2))
 		}
-		container = li.Fill(li.background, l.Center, 0, l.Center, containerFlex.Fn).Fn
+		container = li.Fill(li.background, l.Center, li.TextSize.V/4, NW|SW|NE, containerFlex.Fn).Fn
 	}
 	// clip.UniformRRect(f32.Rectangle{
 	// 	// Min: f32.Point{},
@@ -384,7 +384,7 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 			li.Flex().
 				Rigid(EmptySpace(x/4, y)).
 				Rigid(
-					li.Fill("scrim", l.Center, li.TextSize.V/4, 0, EmptySpace(x/2, y)).Fn,
+					li.Fill("scrim", l.Center, li.TextSize.V/4, ^0, EmptySpace(x/2, y)).Fn,
 				).
 				Rigid(EmptySpace(x/4, y)).
 				Fn,
@@ -440,7 +440,7 @@ func (li *List) grabber(dims DimensionList, x, y, viewAxis, viewCross int) func(
 		return li.Flex().
 			// Rigid(EmptySpace(x/4, y)).
 			Rigid(
-				li.Fill(li.currentColor, l.Center, li.TextSize.V/4, l.Center, EmptySpace(x, y)).
+				li.Fill(li.currentColor, l.Center, li.TextSize.V/2, NW|SW|NE, EmptySpace(x, y)).
 					Fn,
 			).
 			// Rigid(EmptySpace(x/4, y)).

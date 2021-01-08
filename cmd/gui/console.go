@@ -274,7 +274,7 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 	fn := c.Theme.VFlex().
 		Flexed(
 			0.1,
-			c.Fill("PanelBg", l.Center, c.TextSize.V, l.Center+1, func(gtx l.Context) l.Dimensions {
+			c.Fill("PanelBg", l.Center, c.TextSize.V, gui.NW|gui.SW|gui.NE, func(gtx l.Context) l.Dimensions {
 				return c.Inset(0.25,
 					c.outputList.
 						ScrollToEnd().
@@ -291,7 +291,7 @@ func (c *Console) Fn(gtx l.Context) l.Dimensions {
 			}).Fn,
 		).
 		Rigid(
-			c.Fill("DocBg", l.Center, c.TextSize.V, l.W, c.Inset(
+			c.Fill("DocBg", l.Center, c.TextSize.V, gui.NW|gui.SW|gui.NE, c.Inset(
 				0.25,
 				c.Theme.Flex().
 					Flexed(

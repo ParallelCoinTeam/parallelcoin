@@ -221,6 +221,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					wg.txReady.Store(false)
 				}, a, "green",
 			),
+			wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
 			// wg.PageTopBarButton(
 			// 	"quit", 3, &icons.ActionExitToApp, func(name string) {
 			// 		wg.MainApp.ActivePage(name)
@@ -312,7 +313,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 			scale = gui.Scales["H6"]
 			color = "DocText"
 			font = "plan9"
-			ins = 0.5
+			ins = 1
 			// hl = true
 		}
 		if title == " " {
@@ -325,8 +326,10 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 		}
 		// Debug("sideMAXXXXXX!!", max)
 		return wg.Direction().E().Embed(
-			wg.Fill(background, l.W, wg.TextSize.V, l.W,
-				wg.ButtonLayout(wg.sidebarButtons[index]).Background("Transparent").Embed(
+			wg.ButtonLayout(wg.sidebarButtons[index]).
+				CornerRadius(scale).Corners(gui.NW | gui.SW | gui.NE).
+				Background(background).
+				Embed(
 					wg.Inset(ins,
 						func(gtx l.Context) l.Dimensions {
 							return wg.Label().
@@ -338,17 +341,15 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 						},
 					).Fn,
 				).
-					SetClick(
-						func() {
-							if wg.MainApp.MenuOpen {
-								wg.MainApp.MenuOpen = false
-							}
-							wg.MainApp.ActivePage(page)
-						},
-					).
-					Width(max).
-					Fn,
-			).Fn,
+				SetClick(
+					func() {
+						if wg.MainApp.MenuOpen {
+							wg.MainApp.MenuOpen = false
+						}
+						wg.MainApp.ActivePage(page)
+					},
+				).
+				Fn,
 		).
 			Fn(gtx)
 	}
@@ -368,9 +369,9 @@ func (wg *WalletGUI) PageTopBarButton(
 			// background = "scrim"
 			background = "PanelBg"
 		}
-		if name == "home" {
-			background = "scrim"
-		}
+		// if name == "home" {
+		// 	background = "scrim"
+		// }
 		if highlightColor != "" {
 			color = highlightColor
 		}

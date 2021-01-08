@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"time"
 	
-	"gioui.org/f32"
-	"gioui.org/op/clip"
 	"gioui.org/text"
 	"github.com/urfave/cli"
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -253,16 +251,14 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		}
 		// put in the header
 		out = append(out,
-			ng.Fill("scrim", l.Center, ng.TextSize.V, l.W,
-				ng.Flex().Flexed(1,
-					ng.Inset(0.75,
-						ng.H3(g.name).
-							Color("DocText").
-							Alignment(text.Start).
-							Fn,
-					).Fn,
+			ng.Fill("scrim", l.Center, ng.TextSize.V, gui.NW|gui.SW|gui.NE, ng.Flex().Flexed(1,
+				ng.Inset(0.75,
+					ng.H3(g.name).
+						Color("DocText").
+						Alignment(text.Start).
+						Fn,
 				).Fn,
-			).Fn,
+			).Fn).Fn,
 		)
 		// out = append(out, func(gtx l.Context) l.Dimensions {
 		// 	return ng.th.Fill("PanelBg",
@@ -280,16 +276,15 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 				k := x
 				out = append(out, func(gtx l.Context) l.Dimensions {
 					if k < len(gi.widget()) {
-						return ng.Fill("DocBg", l.Center, ng.TextSize.V, 9,
-							ng.Flex().
-								// Rigid(
-								// 	ng.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
-								// ).
-								Rigid(
-									ng.Inset(0.25,
-										gi.widget()[k],
-									).Fn,
-								).Fn).Fn(gtx)
+						return ng.Fill("DocBg", l.Center, ng.TextSize.V, gui.NW|gui.SW|gui.NE, ng.Flex().
+							// Rigid(
+							// 	ng.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
+							// ).
+							Rigid(
+								ng.Inset(0.25,
+									gi.widget()[k],
+								).Fn,
+							).Fn).Fn(gtx)
 					}
 					return l.Dimensions{}
 				})
@@ -300,21 +295,19 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		return out[index](gtx)
 	}
 	return func(gtx l.Context) l.Dimensions {
-		clip.UniformRRect(f32.Rectangle{
-			Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
-		}, ng.TextSize.V/2).Add(gtx.Ops)
-		return ng.Fill("DocBg", l.Center, ng.TextSize.V, l.W,
-			ng.Inset(0.25,
-				ng.lists["settings"].
-					Vertical().
-					Length(len(out)).
-					// Background("PanelBg").
-					// Color("DocBg").
-					// Active("Primary").
-					ListElement(le).
-					Fn,
-			).Fn,
-		).Fn(gtx)
+		// clip.UniformRRect(f32.Rectangle{
+		// 	Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
+		// }, ng.TextSize.V/2).Add(gtx.Ops)
+		return ng.Fill("DocBg", l.Center, ng.TextSize.V, gui.NW|gui.SW|gui.NE, ng.Inset(0.25,
+			ng.lists["settings"].
+				Vertical().
+				Length(len(out)).
+				// Background("PanelBg").
+				// Color("DocBg").
+				// Active("Primary").
+				ListElement(le).
+				Fn,
+		).Fn).Fn(gtx)
 	}
 }
 
