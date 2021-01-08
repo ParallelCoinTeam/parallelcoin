@@ -164,128 +164,128 @@ func (wg *WalletGUI) SendPage() l.Widget {
 			{
 				Size: 0,
 				Widget:
-				wg.Fill("scrim", l.NE, wg.TextSize.V, gui.NW|gui.SW|gui.NE, gui.EmptyMaxWidth()).Fn,
+				// wg.Fill("scrim", l.NE, wg.TextSize.V, gui.NW|gui.SW|gui.NE,
+				// 	gui.EmptyMaxWidth(),
+				// ).Fn,
 				
 				// wg.Fill("PanelBg", l.NE, wg.TextSize.V, l.W,
-				// 	wg.VFlex().AlignMiddle().
-				// 		Rigid(
-				// 			wg.Fill("DocBg", l.NE, wg.TextSize.V, l.W,
-				// 				wg.VFlex().AlignMiddle().
-				// 					Rigid(
-				// 						wg.VFlex().AlignMiddle().
-				// 							Rigid(
-				// 								wg.getInput("sendAddress", 0),
-				// 							).
-				// 							Rigid(
-				// 								wg.getInput("sendAmount", 0),
-				// 							).
-				// 							Rigid(
-				// 								wg.getInput("sendMessage", 0),
-				// 							).
-				// 							Rigid(
-				// 								wg.Flex().
-				// 									Rigid(
-				// 										wg.Inset(0.25,
-				// 											func(gtx l.Context) l.Dimensions {
-				// 												return wg.ButtonLayout(wg.clickables["sendSend"].SetClick(func() {
-				// 													Debug("clicked regenerate button")
-				// 													wg.currentReceiveGetNew.Store(true)
-				// 												})).Background("Primary").
-				// 													Embed(
-				// 														wg.Inset(0.25,
-				// 															wg.Flex().AlignMiddle().
-				// 																Rigid(
-				// 																	wg.Icon().
-				// 																		Scale(gui.
-				// 																			Scales["H4"]).
-				// 																		Color("Light").
-				// 																		Src(
-				// 																			&icons.ContentSend,
-				// 																		).Fn,
-				// 																).
-				// 																Rigid(
-				// 																	wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-				// 																).
-				// 																Rigid(
-				// 																	wg.H6("send").Color("Light").Fn,
-				// 																).
-				// 																Rigid(
-				// 																	wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-				// 																).
-				// 																Fn,
-				// 														).Fn,
-				// 													).
-				// 													Fn(gtx)
-				// 											}).
-				// 											Fn,
-				// 									).
-				// 									Rigid(
-				// 										wg.Inset(0.25,
-				// 											func(gtx l.Context) l.Dimensions {
-				// 												q := gtx.Queue
-				// 												gtx.Queue = nil
-				// 												defer func() {
-				// 													gtx.Queue = q
-				// 												}()
-				// 												return wg.ButtonLayout(wg.clickables["sendSave"].SetClick(func() {
-				// 													Debug("clicked regenerate button")
-				// 													wg.currentReceiveGetNew.Store(true)
-				// 												})).Background("Primary").
-				// 													Embed(
-				// 														wg.Inset(0.25,
-				// 															wg.Flex().AlignMiddle().
-				// 																Rigid(
-				// 																	wg.Icon().
-				// 																		Scale(gui.
-				// 																			Scales["H4"]).
-				// 																		Color("Light").
-				// 																		Src(
-				// 																			&icons.ContentSave,
-				// 																		).Fn,
-				// 																).
-				// 																Rigid(
-				// 																	wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-				// 																).
-				// 																Rigid(
-				// 																	wg.H6("save").Color("Light").Fn,
-				// 																).
-				// 																Rigid(
-				// 																	wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-				// 																).
-				// 																Fn,
-				// 														).Fn,
-				// 													).
-				// 													Fn(gtx)
-				// 											}).
-				// 											Fn,
-				// 									).Fn,
-				// 							).
-				// 							Fn,
-				// 					).
-				// 					Fn,
-				// 			).Fn,
-				// 		).
-				// 		Rigid(
-				// 			wg.Inset(0.125, gui.EmptySpace(0, 0)).Fn,
-				// 		).
-				// 		Rigid(
-				// 			wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W,
-				// 				wg.Inset(0.25,
-				// 					wg.Flex().Flexed(1,
-				// 						wg.VFlex().
-				// 							Flexed(1,
-				// 								wg.H1("addressbook").Alignment(text.End).Fn,
-				// 							).
-				// 							Fn,
-				// 					).Fn,
-				// 				).
-				// 					Fn,
-				// 			).
-				// 				Fn,
-				// 		).
-				// 		Fn,
-				// ).
-				// 	Fn,
+				wg.VFlex().AlignMiddle().
+					Rigid(
+						wg.Fill("DocBg", l.NE, wg.TextSize.V, gui.NW|gui.SW,
+							wg.VFlex().AlignMiddle().
+								Rigid(
+									wg.VFlex().AlignMiddle().
+										Rigid(
+											wg.getInput("sendAddress", 0),
+										).
+										Rigid(
+											wg.getInput("sendAmount", 0),
+										).
+										Rigid(
+											wg.getInput("sendMessage", 0),
+										).
+										Rigid(
+											wg.Flex().
+												Rigid(
+													wg.Inset(0.25,
+														func(gtx l.Context) l.Dimensions {
+															return wg.ButtonLayout(wg.clickables["sendSend"].SetClick(func() {
+																Debug("clicked regenerate button")
+																wg.currentReceiveGetNew.Store(true)
+															})).Background("Primary").
+																Embed(
+																	wg.Inset(0.25,
+																		wg.Flex().AlignMiddle().
+																			Rigid(
+																				wg.Icon().
+																					Scale(gui.
+																						Scales["H4"]).
+																					Color("Light").
+																					Src(
+																						&icons.ContentSend,
+																					).Fn,
+																			).
+																			Rigid(
+																				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																			).
+																			Rigid(
+																				wg.H6("send").Color("Light").Fn,
+																			).
+																			Rigid(
+																				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																			).
+																			Fn,
+																	).Fn,
+																).
+																Fn(gtx)
+														}).
+														Fn,
+												).
+												Rigid(
+													wg.Inset(0.25,
+														func(gtx l.Context) l.Dimensions {
+															q := gtx.Queue
+															gtx.Queue = nil
+															defer func() {
+																gtx.Queue = q
+															}()
+															return wg.ButtonLayout(wg.clickables["sendSave"].SetClick(func() {
+																Debug("clicked regenerate button")
+																wg.currentReceiveGetNew.Store(true)
+															})).Background("Primary").
+																Embed(
+																	wg.Inset(0.25,
+																		wg.Flex().AlignMiddle().
+																			Rigid(
+																				wg.Icon().
+																					Scale(gui.
+																						Scales["H4"]).
+																					Color("Light").
+																					Src(
+																						&icons.ContentSave,
+																					).Fn,
+																			).
+																			Rigid(
+																				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																			).
+																			Rigid(
+																				wg.H6("save").Color("Light").Fn,
+																			).
+																			Rigid(
+																				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																			).
+																			Fn,
+																	).Fn,
+																).
+																Fn(gtx)
+														}).
+														Fn,
+												).Fn,
+										).
+										Fn,
+								).
+								Fn,
+						).Fn,
+					).
+					Rigid(
+						wg.Inset(0.125, gui.EmptySpace(0, 0)).Fn,
+					).
+					Rigid(
+						wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SW,
+							wg.Inset(0.25,
+								wg.Flex().Flexed(1,
+									wg.VFlex().
+										Flexed(1,
+											wg.H1("addressbook").Alignment(text.End).Fn,
+										).
+										Fn,
+								).Fn,
+							).
+								Fn,
+						).
+							Fn,
+					).
+					Fn,
 			},
 		}).
 			Fn(gtx)

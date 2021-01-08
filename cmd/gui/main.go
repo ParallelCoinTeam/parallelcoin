@@ -73,6 +73,7 @@ type WalletGUI struct {
 	MainApp                      *gui.App
 	invalidate                   qu.C
 	unlockPage                   *gui.App
+	loadingPage                  *gui.App
 	config                       *cfg.Config
 	configs                      cfg.GroupsMap
 	unlockPassword               *gui.Password
@@ -151,6 +152,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.MainApp = wg.GetAppWidget()
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
+	wg.loadingPage = wg.getLoadingPage()
 	wg.Tickers()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 	} else {
@@ -215,7 +217,7 @@ func (wg *WalletGUI) Run() (err error) {
 							gui.If(
 								!wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
 								wg.unlockPage.Fn(),
-								wg.MainApp.Placeholder("loading"),
+								wg.loadingPage.Fn(),
 							),
 							wg.MainApp.Fn(),
 						),
@@ -258,12 +260,12 @@ func (wg *WalletGUI) GetInputs() InputMap {
 		"receiveAmount":  wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
 		"receiveMessage": wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
 		
-		"sendAddress":    wg.Input("", "Parallelcoin Address", "DocText", "DocBg", "PanelBg", func(amt string) {}),
-		"sendAmount":     wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
-		"sendMessage":    wg.Input("", "Description", "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "DocBg", "PanelBg", func(amt string) {}),
+		"sendAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
+		"sendMessage": wg.Input("", "Description", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		
-		"console":        wg.Input("", "enter rpc command", "DocText", "DocBg", "PanelBg", func(pass string) {}),
-		"walletSeed":     wg.Input(seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"console":    wg.Input("", "enter rpc command", "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"walletSeed": wg.Input(seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 	}
 }
 
