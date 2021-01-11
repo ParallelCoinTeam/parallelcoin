@@ -112,7 +112,7 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	
 	return func(gtx l.Context) l.Dimensions {
 		a.Flex().Rigid(
-			a.Fill("Primary", l.Center, 0, l.Center, EmptySpace(gtx.Constraints.Max.X,
+			a.Fill("Primary", l.Center, a.TextSize.V, 0, EmptySpace(gtx.Constraints.Max.X,
 				int(a.TextSize.Scale(Scales["H1"]).V))).Fn,
 		).Fn(gtx)
 		return a.VFlex().
@@ -305,6 +305,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 									).
 									Background("Dark").Color("Light").
 									ButtonInset(0.25).
+									Corners(NW|SW|NE).
 									Fn,
 							).
 							Fn,
@@ -340,6 +341,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 									).
 									Background("Dark").Color("Light").
 									ButtonInset(0.25).
+									Corners(NW|SW|NE).
 									Fn,
 							).
 							Fn,
@@ -401,7 +403,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
-	return a.Fill(a.bodyBackground, l.Center, a.TextSize.V*1.5, a.mainDirection, a.Inset(0.25,
+	return a.Fill(a.bodyBackground, l.Center, a.TextSize.V*2, NW|SW|NE, a.Inset(0.25,
 		func(gtx l.Context) l.
 		Dimensions {
 			if page, ok := a.pages[a.activePage.Load()]; !ok {

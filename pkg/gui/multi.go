@@ -70,7 +70,7 @@ func (w *Window) Multiline(
 			Embed(
 				m.Theme.Flex().AlignStart().
 					Flexed(1,
-						m.Fill("Primary", l.Center, 0, 0, m.Inset(0.25,
+						m.Fill("Primary", l.Center, m.TextSize.V, NW|SW|NE, m.Inset(0.25,
 							m.Body2((*m.lines)[i]).Color("DocText").Fn,
 						).Fn).Fn,
 					).Fn,

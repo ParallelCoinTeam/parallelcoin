@@ -125,8 +125,9 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Min.X = 0
 	// width := int(in.Theme.TextSize.Scale(in.size).V)
 	// gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
-	return in.Fill(in.backgroundColor, l.Center, in.TextSize.V, l.Center,
-		in.Border().Width(0.25).CornerRadius(0.5).Color(in.borderColor).Embed(
+	return in.Fill(in.backgroundColor, l.Center, in.TextSize.V, NW|SW|NE,
+		in.Border().Width(0.25).CornerRadius(0.5).
+			Corners(NW+SW).Color(in.borderColor).Embed(
 			in.Inset(0.25,
 				in.Flex().
 					Flexed(

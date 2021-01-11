@@ -13,7 +13,7 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
+func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 	return wg.VFlex().AlignMiddle().
 		Rigid(
 			// wg.ButtonInset(0.25,
@@ -21,7 +21,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 			// ).Fn,
 		).
 		Rigid(
-			wg.Fill("Primary", l.Center, wg.TextSize.V, l.W, wg.Flex().AlignEnd().
+			wg.Fill("Primary", l.Center, wg.TextSize.V, corners, wg.Flex().AlignEnd().
 				Rigid(
 					wg.Inset(0.25,
 						wg.VFlex().AlignBaseline().
@@ -100,7 +100,7 @@ func (wg *WalletGUI) balanceCard(gtx l.Context) l.Dimensions {
 							Fn,
 					).Fn,
 				).Fn).Fn,
-		).Fn(gtx)
+		).Fn
 }
 
 func (wg *WalletGUI) OverviewPage() l.Widget {
@@ -120,7 +120,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						wg.VFlex().SpaceSides().
 							Rigid(
 								// wg.Inset(0.25,
-								wg.balanceCard,
+								wg.balanceCard(gui.NW|gui.SE|gui.NE),
 								// ).Fn,
 							).Fn,
 						// ).Fn,
@@ -133,7 +133,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 									wg.H5("recent transactions").Fn).Fn,
 							).
 							Flexed(1,
-								wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W, wg.Inset(0.5,
+								wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SW|gui.NE, wg.Inset(0.5,
 									wg.RecentTransactionsWidget,
 									// p9.EmptyMaxWidth(),
 								).Fn).Fn,
@@ -151,7 +151,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						wg.VFlex().SpaceSides().AlignMiddle().
 							Rigid(
 								// wg.Inset(0.25,
-								wg.balanceCard,
+								wg.balanceCard(gui.NW|gui.SW|gui.NE),
 								// ).Fn,
 							).Fn,
 						// ).Fn,
@@ -165,12 +165,10 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								).Fn,
 							).
 							Flexed(1,
-								wg.Fill("DocBg", l.Center, wg.TextSize.V, l.W,
-									wg.Inset(0.25,
+								wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SE|gui.NE, wg.Inset(0.25,
 									wg.RecentTransactionsWidget,
 									// p9.EmptyMaxWidth(),
-									).Fn,
-								).Fn,
+								).Fn).Fn,
 							).
 							Fn,
 						// ).
@@ -307,19 +305,19 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	// if listName == "recent" {
 	// 	wg.lists[listName].LeftSide(true)
 	// }
+	corners := gui.NW|gui.SW|gui.NE
+	// if listName == "" {
+	// 	corners = gui.NW|gui.SE|gui.NE
+	// }
 	wo := func(gtx l.Context) l.Dimensions {
 		// clip.UniformRRect(f32.Rectangle{
 		// 	Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
 		// }, wg.TextSize.V/4).Add(gtx.Ops)
-		return wg.Fill("DocBg", l.Center, wg.TextSize.V/4, l.W,
-			// wg.Inset(0.25,
-			wg.lists[listName].
-				Vertical().
-				Length(len(out)).
-				ListElement(le).
-				Fn,
-			// ).Fn,
-		).Fn(gtx)
+		return wg.Fill("DocBg", l.Center, wg.TextSize.V/2, corners, wg.lists[listName].
+			Vertical().
+			Length(len(out)).
+			ListElement(le).
+			Fn).Fn(gtx)
 	}
 	switch listName {
 	case "history":

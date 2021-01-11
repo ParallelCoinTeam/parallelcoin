@@ -114,147 +114,154 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 												SpaceEvenly().
 												AlignMiddle().
 												Rigid(
-													wg.Fill("DocBg", l.Center, wg.TextSize.V, l.Center, wg.Inset(0.5,
-														wg.Flex().
-															AlignMiddle().
-															Rigid(
-																wg.VFlex().
-																	AlignMiddle().
-																	Rigid(
-																		func(gtx l.Context) l.Dimensions {
-																			dims = wg.Flex().
-																				AlignBaseline().
-																				Rigid(
-																					wg.Fill("Fatal", l.Center, wg.TextSize.V/2,
-																						l.Center,
-																						wg.Inset(0.5,
-																							wg.Icon().
-																								Scale(gui.Scales["H3"]).
-																								Color("DocBg").
-																								Src(&icons.ActionLock).Fn,
+													wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SW|gui.NE,
+														wg.Inset(0.5,
+															wg.Flex().
+																AlignMiddle().
+																Rigid(
+																	wg.VFlex().
+																		AlignMiddle().
+																		Rigid(
+																			func(gtx l.Context) l.Dimensions {
+																				dims = wg.Flex().
+																					AlignBaseline().
+																					Rigid(
+																						wg.Fill("Fatal", l.Center, wg.TextSize.V/2, gui.NW|gui.SW|gui.NE,
+																							wg.Inset(0.5,
+																								wg.Icon().
+																									Scale(gui.Scales["H3"]).
+																									Color("DocBg").
+																									Src(&icons.ActionLock).Fn,
+																							).Fn,
 																						).Fn,
-																					).Fn,
-																				).
-																				Rigid(
-																					wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-																				).
-																				Rigid(
-																					wg.H2("locked").Color("DocText").Fn,
-																				).
-																				Fn(gtx)
-																			return dims
-																		}).
-																	Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
-																	Rigid(
-																		func(gtx l.Context) l.
-																		Dimensions {
-																			gtx.Constraints.Max.
-																				X = dims.Size.X
-																			return wg.
-																				unlockPassword.
-																				Fn(gtx)
-																		},
-																	).
-																	Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
-																	Rigid(
-																		wg.Body1(
-																			fmt.Sprintf(
-																				"%v idle timeout",
-																				time.Duration(wg.incdecs["idleTimeout"].GetCurrent())*time.Second,
-																			),
+																					).
+																					Rigid(
+																						wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																					).
+																					Rigid(
+																						wg.H2("locked").Color("DocText").Fn,
+																					).
+																					Fn(gtx)
+																				return dims
+																			}).
+																		Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
+																		Rigid(
+																			func(gtx l.Context) l.
+																			Dimensions {
+																				gtx.Constraints.Max.
+																					X = dims.Size.X
+																				return wg.
+																					unlockPassword.
+																					Fn(gtx)
+																			},
 																		).
-																			Color("DocText").
-																			Font("bariol bold").
-																			Fn,
-																	).
-																	Rigid(
-																		wg.Flex().
-																			Rigid(
-																				wg.Body1("Idle timeout in seconds:").Color(
-																					"DocText").Fn,
+																		Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
+																		Rigid(
+																			wg.Body1(
+																				fmt.Sprintf(
+																					"%v idle timeout",
+																					time.Duration(wg.incdecs["idleTimeout"].GetCurrent())*time.Second,
+																				),
 																			).
-																			Rigid(
-																				wg.incdecs["idleTimeout"].
-																					Color("DocText").
-																					Background("DocBg").
-																					Scale(gui.Scales["Caption"]).
-																					Fn,
-																			).
-																			Fn,
-																	).
-																	Rigid(
-																		wg.Flex().
-																			Rigid(
-																				wg.Inset(0.25,
-																					wg.ButtonLayout(exitButton.SetClick(func() {
-																						interrupt.Request()
-																					})).Background("DocText").Embed(
-																						// wg.Fill("DocText",
-																						wg.Inset(0.25,
-																							wg.Flex().AlignMiddle().
-																								Rigid(
-																									wg.Icon().
-																										Scale(gui.
-																											Scales["H4"]).
-																										Color("DocBg").
-																										Src(
-																											&icons.
-																												MapsDirectionsRun,
-																										).Fn,
-																								).
-																								Rigid(
-																									wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-																								).
-																								Rigid(
-																									wg.H6("exit").Color("DocBg").Fn,
-																								).
-																								Rigid(
-																									wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-																								).
-																								Fn,
-																						).Fn,
-																						// l.Center,
-																						// wg.TextSize.V/2).Fn,
+																				Color("DocText").
+																				Font("bariol bold").
+																				Fn,
+																		).
+																		Rigid(
+																			wg.Flex().
+																				Rigid(
+																					wg.Body1("Idle timeout in seconds:").Color(
+																						"DocText").Fn,
+																				).
+																				Rigid(
+																					wg.incdecs["idleTimeout"].
+																						Color("DocText").
+																						Background("DocBg").
+																						Scale(gui.Scales["Caption"]).
+																						Fn,
+																				).
+																				Fn,
+																		).
+																		Rigid(
+																			wg.Flex().
+																				Rigid(
+																					wg.Inset(0.25,
+																						wg.ButtonLayout(exitButton.SetClick(func() {
+																							interrupt.Request()
+																						})).
+																							CornerRadius(0.5).
+																							Corners(gui.NW|gui.SW|gui.NE).
+																							Background("PanelBg").
+																							Embed(
+																								// wg.Fill("DocText",
+																								wg.Inset(0.25,
+																									wg.Flex().AlignMiddle().
+																										Rigid(
+																											wg.Icon().
+																												Scale(gui.
+																													Scales["H4"]).
+																												Color("DocText").
+																												Src(
+																													&icons.
+																														MapsDirectionsRun,
+																												).Fn,
+																										).
+																										Rigid(
+																											wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																										).
+																										Rigid(
+																											wg.H6("exit").Color("DocText").Fn,
+																										).
+																										Rigid(
+																											wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																										).
+																										Fn,
+																								).Fn,
+																								// l.Center,
+																								// wg.TextSize.V/2).Fn,
+																							).Fn,
 																					).Fn,
-																				).Fn,
-																			).
-																			Rigid(
-																				wg.Inset(0.25,
-																					wg.ButtonLayout(unlockButton.SetClick(func() {
-																						// pass := wg.unlockPassword.Editor().Text()
-																						pass := wg.unlockPassword.GetPassword()
-																						Debug(">>>>>>>>>>> unlock password", pass)
-																						wg.unlockWallet(pass)
-																						
-																					})).Background("Success").Embed(
-																						wg.Inset(0.25,
-																							wg.Flex().AlignMiddle().
-																								Rigid(
-																									wg.Icon().
-																										Scale(gui.Scales["H4"]).
-																										Color("DocBg").
-																										Src(&icons.ActionLockOpen).Fn,
-																								).
-																								Rigid(
-																									wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-																								).
-																								Rigid(
-																									wg.H6("unlock").Color("DocBg").Fn,
-																								).
-																								Rigid(
-																									wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
-																								).
-																								Fn,
-																						).Fn,
+																				).
+																				Rigid(
+																					wg.Inset(0.25,
+																						wg.ButtonLayout(unlockButton.SetClick(func() {
+																							// pass := wg.unlockPassword.Editor().Text()
+																							pass := wg.unlockPassword.GetPassword()
+																							Debug(">>>>>>>>>>> unlock password", pass)
+																							wg.unlockWallet(pass)
+																							
+																						})).Background("Primary").
+																							CornerRadius(0.5).
+																							Corners(gui.NW|gui.SE|gui.NE).
+																							Embed(
+																								wg.Inset(0.25,
+																									wg.Flex().AlignMiddle().
+																										Rigid(
+																											wg.Icon().
+																												Scale(gui.Scales["H4"]).
+																												Color("Light").
+																												Src(&icons.ActionLockOpen).Fn,
+																										).
+																										Rigid(
+																											wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																										).
+																										Rigid(
+																											wg.H6("unlock").Color("Light").Fn,
+																										).
+																										Rigid(
+																											wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																										).
+																										Fn,
+																								).Fn,
+																							).Fn,
 																					).Fn,
-																				).Fn,
-																			).
-																			Fn,
-																	).
-																	Fn,
-															).
-															Fn,
-													).Fn).Fn,
+																				).
+																				Fn,
+																		).
+																		Fn,
+																).
+																Fn,
+														).Fn).Fn,
 												).
 												Fn,
 										).Flexed(0.5, gui.EmptyMaxHeight()).Fn,
@@ -400,6 +407,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage, "Danger",
 			),
+			wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
 			// wg.PageTopBarButton(
 			// 	"quit", 3, &icons.ActionExitToApp, func(name string) {
 			// 		wg.unlockPage.ActivePage(name)

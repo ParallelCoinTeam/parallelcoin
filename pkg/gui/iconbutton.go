@@ -20,12 +20,13 @@ type IconButton struct {
 	color string
 	icon  *Icon
 	// Size is the icon size.
-	size   unit.Value
-	inset  *Inset
-	button *Clickable
+	size    unit.Value
+	inset   *Inset
+	button  *Clickable
+	corners int
 }
 
-// IconButton creates an icon with a circular background and an icon placed in the centre
+// IconButton creates an icon with a circular *optional non-round corners* background and an icon placed in the centre
 func (w *Window) IconButton(button *Clickable) *IconButton {
 	return &IconButton{
 		Window:     w,
@@ -36,6 +37,12 @@ func (w *Window) IconButton(button *Clickable) *IconButton {
 		button:     button,
 		icon:       w.Icon().Src(&icons.AlertError),
 	}
+}
+
+// Corners sets the corners that will be circular
+func (b *IconButton) Corners(corners int) *IconButton {
+	b.corners = corners
+	return b
 }
 
 // Background sets the color of the circular background
@@ -96,7 +103,10 @@ func (b *IconButton) Fn(gtx l.Context) l.Dimensions {
 			rr := (sizexf + sizeyf) * .25
 			clip.RRect{
 				Rect: f32.Rectangle{Max: f32.Point{X: sizexf, Y: sizeyf}},
-				NE:   rr, NW: rr, SE: rr, SW: rr,
+				NE:   ifDir(rr, b.corners&NE),
+				NW:   ifDir(rr, b.corners&NW),
+				SE:   ifDir(rr, b.corners&SE),
+				SW:   ifDir(rr, b.corners&SW),
 			}.Add(gtx.Ops)
 			background := b.Theme.Colors.GetNRGBAFromName(b.background)
 			if gtx.Queue == nil {
