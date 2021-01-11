@@ -100,7 +100,7 @@ func newColors() (c *Colors) {
 		"dark-white":            "ffdddddd",
 		"yellow":                "ffcfcf30",
 		"halfdim":               "33000000",
-		"halfbright":            "33ffffff",
+		"halfbright":            "02ffffff",
 	}
 	
 	c.m["Black"] = c.m["black"]
@@ -211,7 +211,7 @@ func (c *Colors) SetTheme(dark bool) {
 		c.m["Success"] = c.m["green"]
 		c.m["Check"] = c.m["orange"]
 		c.m["DocBgHilite"] = c.m["light-black"]
-		c.m["scrim"] = c.m["halfdim"]
+		c.m["scrim"] = c.m["halfbright"]
 		c.m["Fatal"] = c.m["red"]
 		c.m["Info"] = c.m["blue"]
 	}
