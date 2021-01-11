@@ -139,7 +139,7 @@ func (wg *WalletGUI) Tickers() {
 							wg.inputs["receiveAmount"].GetText(),
 							wg.inputs["receiveMessage"].GetText(),
 						)
-						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 6); !Check(err) {
+						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
 							iop := paint.NewImageOp(qrc)
 							wg.currentReceiveQRCode = &iop
 							wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {

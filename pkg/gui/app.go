@@ -166,7 +166,7 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	if a.Width < 800 {
+	if float32(a.Width) < a.TextSize.Scale(48).V {
 		a.Flex().Flexed(1, a.Direction().Center().Embed(a.LogoAndTitle).Fn).Fn(gtx)
 	} else {
 		a.Flex().Flexed(1, a.Direction().W().Embed(a.LogoAndTitle).Fn).Fn(gtx)
