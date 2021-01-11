@@ -53,12 +53,12 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				c.output,
 				func(gtx l.Context) l.Dimensions {
 					return wg.VFlex().
-						Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
+						Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Rigid(
 							wg.Flex().
 								Flexed(
 									1,
-									wg.Body1(txt).Color("DocText").Font("bariol bold").Fn,
+									wg.Body2(txt).Color("DocText").Font("bariol bold").Fn,
 								).
 								Fn,
 						).Fn(gtx)
@@ -164,7 +164,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 							func(gtx l.Context) l.Dimensions {
 								return c.Theme.Flex().AlignStart().
 									Rigid(
-										wg.Body1(sri).
+										wg.Body2(sri).
 											Color(outputColor).
 											Font("go regular").MaxLines(4).
 											Fn,
@@ -185,7 +185,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						}
 						c.output = append(
 							c.output, c.Theme.Flex().AlignStart().
-								Rigid(wg.Body1(errR).Color("Danger").Fn).Fn,
+								Rigid(wg.Body2(errR).Color("Danger").Fn).Fn,
 						)
 						return
 					}
@@ -195,7 +195,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					c.output = append(
 						c.output, c.Theme.Flex().AlignStart().
 							Rigid(
-								wg.Body1(errR).Color("Danger").Fn,
+								wg.Body2(errR).Color("Danger").Fn,
 							).Fn,
 					)
 				}
@@ -364,7 +364,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if key != "" {
 			out = append(out, c.getIndent(depth, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.Body1(key).Font("bariol bold").Color(color).Fn(gtx)
+					return c.Body2(key).Font("bariol bold").Color(color).Fn(gtx)
 				},
 			))
 		}
@@ -373,7 +373,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if len(res) == 0 {
 			out = append(out, c.getIndent(depth+1, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.Body1("[]").Color(color).Fn(gtx)
+					return c.Body2("[]").Color(color).Fn(gtx)
 				},
 			))
 		} else {
@@ -386,7 +386,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if key != "" {
 			out = append(out, c.getIndent(depth, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.Body1(key).Font("bariol bold").Color(color).Fn(gtx)
+					return c.Body2(key).Font("bariol bold").Color(color).Fn(gtx)
 				},
 			))
 		}
@@ -397,7 +397,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		if len(res) == 0 {
 			out = append(out, c.getIndent(depth+1, 1,
 				func(gtx l.Context) l.Dimensions {
-					return c.Body1("{}").Color(color).Fn(gtx)
+					return c.Body2("{}").Color(color).Fn(gtx)
 				},
 			))
 		} else {
@@ -417,7 +417,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 					return c.Theme.Flex().
-						Rigid(c.Body1("\"" + res + "\"").Color(color).Fn).
+						Rigid(c.Body2("\"" + res + "\"").Color(color).Fn).
 						Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Rigid(c.IconButton(clk).
 							Background("").
@@ -440,7 +440,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 					return c.Theme.Flex().
-						Rigid(c.Body1(fmt.Sprint(res)).Color(color).Fn).
+						Rigid(c.Body2(fmt.Sprint(res)).Color(color).Fn).
 						Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Rigid(c.IconButton(clk).
 							Background("").
@@ -454,7 +454,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 								}()
 							}).Fn,
 						).Fn(gtx)
-					// return c.th.ButtonLayout(clk).Embed(c.th.Body1().Color(color).Fn).Fn(gtx)
+					// return c.th.ButtonLayout(clk).Embed(c.th.Body2().Color(color).Fn).Fn(gtx)
 				}),
 			)
 		case bool:
@@ -462,7 +462,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			res := res.value.(bool)
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-					return c.Body1(fmt.Sprint(res)).Color(color).Fn(gtx)
+					return c.Body2(fmt.Sprint(res)).Color(color).Fn(gtx)
 				}),
 			)
 		}
@@ -473,7 +473,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 				return c.Theme.Flex().
-					Rigid(c.Body1("\"" + res + "\"").Color(color).Fn).
+					Rigid(c.Body2("\"" + res + "\"").Color(color).Fn).
 					Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 					Rigid(c.IconButton(clk).
 						Background("").
@@ -496,7 +496,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
 				return c.Theme.Flex().
-					Rigid(c.Body1(fmt.Sprint(res)).Color(color).Fn).
+					Rigid(c.Body2(fmt.Sprint(res)).Color(color).Fn).
 					Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 					Rigid(c.IconButton(clk).
 						Background("").
@@ -510,7 +510,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 							}()
 						}).Fn,
 					).Fn(gtx)
-				// return c.th.ButtonLayout(clk).Embed(c.th.Body1(fmt.Sprint(res)).Color(color).Fn).Fn(gtx)
+				// return c.th.ButtonLayout(clk).Embed(c.th.Body2(fmt.Sprint(res)).Color(color).Fn).Fn(gtx)
 			}),
 		)
 	case bool:
@@ -518,7 +518,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		res := in.(bool)
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
-				return c.Body1(fmt.Sprint(res)).Color(color).Fn(gtx)
+				return c.Body2(fmt.Sprint(res)).Color(color).Fn(gtx)
 			}),
 		)
 	default:
@@ -531,8 +531,8 @@ func (c *Console) jsonElement(key, color string, depth int, w l.Widget) l.Widget
 	return func(gtx l.Context) l.Dimensions {
 		return c.Theme.Flex().
 			Rigid(c.getIndent(depth, 1,
-				c.Body1(key).Font("bariol bold").Color(color).Fn)).
-			Rigid(c.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
+				c.Body2(key).Font("bariol bold").Color(color).Fn)).
+			Rigid(c.Inset(0.125, gui.EmptySpace(0, 0)).Fn).
 			Rigid(w).
 			Fn(gtx)
 	}
