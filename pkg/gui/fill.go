@@ -41,7 +41,6 @@ func (f *Filler) Fn(gtx l.Context) l.Dimensions {
 	dL := GetDimensionList(gtx1, 1, func(gtx l.Context, index int) l.Dimensions {
 		return f.w(gtx)
 	})
-	gtx.Constraints.Min = dL[0].Size
 	fill(gtx, f.Colors.GetNRGBAFromName(f.col), dL[0].Size, f.cornerRadius, f.corners)
 	return f.dxn.Layout(gtx, f.w)
 }
