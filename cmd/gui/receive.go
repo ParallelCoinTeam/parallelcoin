@@ -24,63 +24,141 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 				// }
 			}
 		}
-		return wg.Fill("PanelBg", l.W, wg.TextSize.V, 0, wg.VFlex().AlignMiddle().
-			// Flexed(0, gui.EmptyMaxWidth()).
-			Rigid(
-				wg.H5("Receive").Alignment(text.Middle).Fn,
-			).
-			Rigid(
-				wg.Body1("Scan to send or click to copy").Alignment(text.Middle).Fn,
-			).
-			Rigid(
-				// wg.Fill("DocBg",
-				wg.Inset(0.25,
+		return wg.Responsive(*wg.Size, gui.Widgets{
+			{
+				Size: 1280,
+				Widget:
+				wg.Fill("PanelBg", l.W, wg.TextSize.V, l.Center,
 					wg.VFlex().AlignMiddle().
+						Flexed(1, gui.EmptyMaxWidth()).
 						Rigid(
-							wg.currentReceiveQR,
-						).
-						Rigid(
-							wg.Body1(wg.currentReceiveAddress).Fn,
-						).
-						Rigid(
-							wg.Inset(0.25,
-								func(gtx l.Context) l.
-								Dimensions {
-									gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
-									return wg.inputs["receiveAmount"].Fn(gtx)
-								},
-							).Fn,
-						).
-						Rigid(
-							wg.Inset(0.25,
-								func(gtx l.Context) l.Dimensions {
-									gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
-									return wg.inputs["receiveMessage"].Fn(gtx)
-								},
-							).Fn,
-						).
-						Rigid(
-							wg.Inset(0.25,
-								func(gtx l.Context) l.Dimensions {
-									gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
-									return wg.ButtonLayout(wg.currentReceiveRegenClickable.SetClick(func() {
-										Debug("clicked regenerate button")
-										wg.currentReceiveGetNew.Store(true)
-									})).Background("Primary").
-										Embed(
-											wg.Inset(0.5,
-												wg.H6("regenerate").Fn,
+							wg.Flex().AlignMiddle().
+								Rigid(
+									wg.VFlex().AlignMiddle().
+										Rigid(
+											wg.Inset(0.25,
+												wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
 											).Fn,
 										).
-										Fn(gtx)
-								}).
+										Rigid(
+											wg.currentReceiveQR,
+										).
+										Rigid(
+											wg.Inset(0.25,
+												wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
+											).Fn,
+										).Fn,
+								).
+								
+								Rigid(
+									wg.VFlex().AlignMiddle().
+										Rigid(
+											wg.Inset(0.25,
+												func(gtx l.Context) l.
+												Dimensions {
+													gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
+													return wg.inputs["receiveAmount"].Fn(gtx)
+												},
+											).Fn,
+										).
+										Rigid(
+											wg.Inset(0.25,
+												func(gtx l.Context) l.Dimensions {
+													gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
+													return wg.inputs["receiveMessage"].Fn(gtx)
+												},
+											).Fn,
+										).
+										Rigid(
+											wg.Inset(0.25,
+												func(gtx l.Context) l.Dimensions {
+													gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
+													return wg.ButtonLayout(wg.currentReceiveRegenClickable.SetClick(func() {
+														Debug("clicked regenerate button")
+														wg.currentReceiveGetNew.Store(true)
+													})).Background("Primary").
+														Embed(
+															wg.Inset(0.5,
+																wg.H6("regenerate").Color("Light").Fn,
+															).Fn,
+														).
+														Fn(gtx)
+												}).
+												Fn,
+										).Fn,
+								).
 								Fn,
 						).
+						Flexed(1, gui.EmptyMaxWidth()).
 						Fn,
-				).Fn,
-				// l.W, wg.TextSize.V).Fn,
-			).
-			Flexed(0, gui.EmptyMaxWidth()).
-			Fn).Fn(gtx)
+					// l.W, wg.TextSize.V).Fn,
+				).
+					Fn,
+			},
+			{
+				Size: 0,
+				Widget:
+				wg.Fill("PanelBg", l.W, wg.TextSize.V, l.Center,
+					wg.VFlex().AlignMiddle().
+						Flexed(1, gui.EmptyMaxWidth()).
+						Rigid(
+							wg.VFlex().AlignMiddle().
+								Rigid(
+									wg.Inset(0.25,
+										wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
+									).Fn,
+								).
+								Rigid(
+									wg.currentReceiveQR,
+								).
+								Rigid(
+									wg.Inset(0.25,
+										wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
+									).Fn,
+								).
+								Rigid(
+									wg.Inset(0.25,
+										func(gtx l.Context) l.
+										Dimensions {
+											gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
+											return wg.inputs["receiveAmount"].Fn(gtx)
+										},
+									).Fn,
+								).
+								Rigid(
+									wg.Inset(0.25,
+										func(gtx l.Context) l.Dimensions {
+											gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
+											return wg.inputs["receiveMessage"].Fn(gtx)
+										},
+									).Fn,
+								).
+								Rigid(
+									wg.Inset(0.25,
+										func(gtx l.Context) l.Dimensions {
+											gtx.Constraints.Max.X = int(wg.TextSize.V * 29)
+											return wg.ButtonLayout(wg.currentReceiveRegenClickable.SetClick(func() {
+												Debug("clicked regenerate button")
+												wg.currentReceiveGetNew.Store(true)
+											})).Background("Primary").
+												Embed(
+													wg.Inset(0.5,
+														wg.H6("regenerate").Color("Light").Fn,
+													).Fn,
+												).
+												Fn(gtx)
+										}).
+										Fn,
+								).
+								Fn,
+						).
+						Flexed(1, gui.EmptyMaxWidth()).
+						Fn,
+					// l.W, wg.TextSize.V).Fn,
+				).
+					Fn,
+			},
+		}).
+			Fn(gtx)
 	}
 }
