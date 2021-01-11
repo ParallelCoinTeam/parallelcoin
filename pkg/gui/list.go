@@ -91,8 +91,8 @@ func (w *Window) List() (li *List) {
 		color:          "PanelBg",
 		background:     "Transparent",
 		active:         "Primary",
-		scrollWidth:    int(w.TextSize.Scale(1.25).V),
-		setScrollWidth: int(w.TextSize.Scale(1.25).V),
+		scrollWidth:    int(w.TextSize.Scale(0.75).V),
+		setScrollWidth: int(w.TextSize.Scale(0.75).V),
 		// scrollBarPad:    int(w.TextSize.Scale(0.5).V),
 		// setScrollBarPad: int(w.TextSize.Scale(0.5).V),
 		recalculateTime: time.Now().Add(-time.Second),
@@ -295,7 +295,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
 		}
 		containerFlex.Rigid(
-			li.Fill(li.background, l.Center, li.TextSize.V/4, NW|SW|NE, li.Flex().
+			li.Fill(li.background, l.Center, li.TextSize.V/4, 0, li.Flex().
 				// Rigid(
 				// 	// If(!li.leftSide,
 				// 	// 	EmptySpace(li.scrollBarPad, 0),
@@ -333,7 +333,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth+int(li.TextSize.V)/2))
 		}
-		container = li.Fill(li.background, l.Center, li.TextSize.V/4, NW|SW|NE, containerFlex.Fn).Fn
+		container = li.Fill(li.background, l.Center, li.TextSize.V/4, 0, containerFlex.Fn).Fn
 	}
 	// clip.UniformRRect(f32.Rectangle{
 	// 	// Min: f32.Point{},
@@ -440,7 +440,7 @@ func (li *List) grabber(dims DimensionList, x, y, viewAxis, viewCross int) func(
 		return li.Flex().
 			// Rigid(EmptySpace(x/4, y)).
 			Rigid(
-				li.Fill(li.currentColor, l.Center, li.TextSize.V/2, NW|SW|NE, EmptySpace(x, y)).
+				li.Fill(li.currentColor, l.Center, 0, 0, EmptySpace(x, y)).
 					Fn,
 			).
 			// Rigid(EmptySpace(x/4, y)).

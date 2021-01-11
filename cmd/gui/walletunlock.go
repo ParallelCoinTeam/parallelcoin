@@ -114,7 +114,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 												SpaceEvenly().
 												AlignMiddle().
 												Rigid(
-													wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SW|gui.NE,
+													wg.Fill("DocBg", l.Center, wg.TextSize.V, 0,
 														wg.Inset(0.5,
 															wg.Flex().
 																AlignMiddle().
@@ -126,7 +126,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																				dims = wg.Flex().
 																					AlignBaseline().
 																					Rigid(
-																						wg.Fill("Fatal", l.Center, wg.TextSize.V/2, gui.NW|gui.SW|gui.NE,
+																						wg.Fill("Fatal", l.Center, wg.TextSize.V/2, 0,
 																							wg.Inset(0.5,
 																								wg.Icon().
 																									Scale(gui.Scales["H3"]).
@@ -190,7 +190,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																							interrupt.Request()
 																						})).
 																							CornerRadius(0.5).
-																							Corners(gui.NW|gui.SW|gui.NE).
+																							Corners(0).
 																							Background("PanelBg").
 																							Embed(
 																								// wg.Fill("DocText",
@@ -232,7 +232,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																							
 																						})).Background("Primary").
 																							CornerRadius(0.5).
-																							Corners(gui.NW|gui.SE|gui.NE).
+																							Corners(0).
 																							Embed(
 																								wg.Inset(0.25,
 																									wg.Flex().AlignMiddle().
@@ -407,7 +407,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage, "Danger",
 			),
-			wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
+			// wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
 			// wg.PageTopBarButton(
 			// 	"quit", 3, &icons.ActionExitToApp, func(name string) {
 			// 		wg.unlockPage.ActivePage(name)

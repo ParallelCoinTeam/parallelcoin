@@ -148,8 +148,8 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 			p.pass.Mask(0)
 		}
 		
-		return p.Fill(p.backgroundColor, l.Center, p.TextSize.V, NW|SW|NE,
-			p.Border().Width(0.25).Corners(NW|SW|NE).CornerRadius(0.575).Color(p.borderColor).Embed(
+		return p.Fill(p.backgroundColor, l.Center, p.TextSize.V, 0,
+			p.Border().Width(0.25).Corners(0).CornerRadius(0.575).Color(p.borderColor).Embed(
 			p.Inset(0.25,
 				p.Flex().
 					Flexed(

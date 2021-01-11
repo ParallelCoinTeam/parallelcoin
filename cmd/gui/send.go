@@ -37,22 +37,22 @@ func (wg *WalletGUI) SendPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.Responsive(*wg.Size, gui.Widgets{
 			{
-				Size: 1280,
+				Size: 1024,
 				Widget:
-				wg.Fill("PanelBg", l.NE, wg.TextSize.V, gui.NW|gui.SW|gui.NE, wg.Flex().AlignMiddle().
+				wg.Fill("PanelBg", l.NE, wg.TextSize.V, 0, wg.Flex().AlignMiddle().
 					Rigid(
-						wg.Fill("DocBg", l.NE, wg.TextSize.V, gui.NW|gui.SW|gui.NE,
+						wg.Fill("DocBg", l.NE, wg.TextSize.V, 0,
 							wg.VFlex().AlignMiddle().
 								Rigid(
 									wg.VFlex().AlignMiddle().
 										Rigid(
-											wg.getInput("sendAddress", 33),
+											wg.getInput("sendAddress", 26),
 										).
 										Rigid(
-											wg.getInput("sendAmount", 33),
+											wg.getInput("sendAmount", 26),
 										).
 										Rigid(
-											wg.getInput("sendMessage", 33),
+											wg.getInput("sendMessage", 26),
 										).
 										Rigid(
 											wg.Flex().
@@ -63,7 +63,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 																Debug("clicked regenerate button")
 																wg.currentReceiveGetNew.Store(true)
 															})).
-																CornerRadius(0.5).Corners(gui.NW | gui.SW | gui.NE).
+																// CornerRadius(0.5).Corners(0).
 																Background("Primary").
 																Embed(
 																	wg.Inset(0.25,
@@ -145,7 +145,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 						).Fn,
 					).
 					Rigid(
-						wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SE|gui.NE,
+						wg.Fill("DocBg", l.Center, wg.TextSize.V, 0,
 							wg.Inset(0.25,
 								wg.Flex().Flexed(1,
 									wg.VFlex().
@@ -164,14 +164,14 @@ func (wg *WalletGUI) SendPage() l.Widget {
 			{
 				Size: 0,
 				Widget:
-				// wg.Fill("scrim", l.NE, wg.TextSize.V, gui.NW|gui.SW|gui.NE,
+				// wg.Fill("scrim", l.NE, wg.TextSize.V, 0,
 				// 	gui.EmptyMaxWidth(),
 				// ).Fn,
 				
 				// wg.Fill("PanelBg", l.NE, wg.TextSize.V, l.W,
 				wg.VFlex().AlignMiddle().
 					Rigid(
-						wg.Fill("DocBg", l.NE, wg.TextSize.V, gui.NW|gui.SW,
+						wg.Fill("DocBg", l.NE, wg.TextSize.V, 0,
 							wg.VFlex().AlignMiddle().
 								Rigid(
 									wg.VFlex().AlignMiddle().
@@ -271,7 +271,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 						wg.Inset(0.125, gui.EmptySpace(0, 0)).Fn,
 					).
 					Rigid(
-						wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SW,
+						wg.Fill("DocBg", l.Center, wg.TextSize.V, 0,
 							wg.Inset(0.25,
 								wg.Flex().Flexed(1,
 									wg.VFlex().

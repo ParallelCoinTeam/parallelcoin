@@ -140,7 +140,7 @@ func (wg *WalletGUI) Tickers() {
 							wg.inputs["receiveAmount"].GetText(),
 							wg.inputs["receiveMessage"].GetText(),
 						)
-						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 8); !Check(err) {
+						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 6); !Check(err) {
 							iop := paint.NewImageOp(qrc)
 							wg.currentReceiveQRCode = &iop
 							wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {
@@ -152,7 +152,7 @@ func (wg *WalletGUI) Tickers() {
 								Corners(gui.NW | gui.SW | gui.NE).
 								Background("white").
 								Embed(
-									wg.Inset(0.25,
+									wg.Inset(0.125,
 										wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
 									).Fn,
 								).Fn

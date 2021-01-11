@@ -111,10 +111,10 @@ func (a *App) MainDirection() l.Direction {
 func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	
 	return func(gtx l.Context) l.Dimensions {
-		a.Flex().Rigid(
-			a.Fill("Primary", l.Center, a.TextSize.V, 0, EmptySpace(gtx.Constraints.Max.X,
-				int(a.TextSize.Scale(Scales["H1"]).V))).Fn,
-		).Fn(gtx)
+		// a.Flex().Rigid(
+		// 	a.Fill("Primary", l.Center, a.TextSize.V, 0, EmptySpace(gtx.Constraints.Max.X,
+		// 		int(a.TextSize.Scale(Scales["H1"]).V))).Fn,
+		// ).Fn(gtx)
 		return a.VFlex().
 			Rigid(
 				// EmptyMaxWidth(),
@@ -164,7 +164,7 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	a.Flex().Flexed(1, a.Direction().Center().Embed(a.LogoAndTitle).Fn).Fn(gtx)
+	a.Flex().Flexed(1, a.Direction().W().Embed(a.LogoAndTitle).Fn).Fn(gtx)
 	return a.Flex().AlignMiddle().
 		// Rigid(
 		// 	a.Inset(0.5, EmptySpace(0, 0)).Fn,
@@ -300,18 +300,18 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 									Icon(
 										a.Icon().
 											Scale(Scales["H6"]).
-											Color("Light").
+											Color("DocText").
 											Src(a.logo),
 									).
-									Background("Dark").Color("Light").
+									Background("Transparent").Color("DocText").
 									ButtonInset(0.25).
-									Corners(NW|SW|NE).
+									Corners(0).
 									Fn,
 							).
 							Fn,
 					).
 					Rigid(
-						a.H5(a.ActivePageGet()).Color("Light").Fn,
+						a.H5(a.ActivePageGet()).Color("DocText").Fn,
 					).
 					Fn,
 			},
@@ -336,18 +336,18 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 									Icon(
 										a.Icon().
 											Scale(Scales["H6"]).
-											Color("Light").
+											Color("DocText").
 											Src(a.logo),
 									).
-									Background("Dark").Color("Light").
+									Background("Transparent").Color("DocText").
 									ButtonInset(0.25).
-									Corners(NW|SW|NE).
+									Corners(0).
 									Fn,
 							).
 							Fn,
 					).
 					Rigid(
-						a.H5(a.title).Color("Light").Fn,
+						a.H5(a.title).Color("DocText").Fn,
 					).
 					Fn,
 			},
@@ -403,7 +403,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
-	return a.Fill(a.bodyBackground, l.Center, a.TextSize.V*2, NW|SW|NE, a.Inset(0.25,
+	return a.Fill(a.bodyBackground, l.Center, 0, 0, a.Inset(0.25,
 		func(gtx l.Context) l.
 		Dimensions {
 			if page, ok := a.pages[a.activePage.Load()]; !ok {

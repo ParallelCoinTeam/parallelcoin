@@ -251,7 +251,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		}
 		// put in the header
 		out = append(out,
-			ng.Fill("PanelBg", l.Center, ng.TextSize.V*2, gui.NW|gui.SE|gui.NE, ng.Flex().Flexed(1,
+			ng.Fill("PanelBg", l.Center, ng.TextSize.V*2, 0, ng.Flex().Flexed(1,
 				ng.Inset(0.75,
 					ng.H3(g.name).
 						Color("DocText").
@@ -276,7 +276,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 				k := x
 				out = append(out, func(gtx l.Context) l.Dimensions {
 					if k < len(gi.widget()) {
-						return ng.Fill("DocBg", l.Center, ng.TextSize.V, gui.NW|gui.SW|gui.NE, ng.Flex().
+						return ng.Fill("DocBg", l.Center, ng.TextSize.V, 0, ng.Flex().
 							// Rigid(
 							// 	ng.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
 							// ).
@@ -298,7 +298,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		// clip.UniformRRect(f32.Rectangle{
 		// 	Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
 		// }, ng.TextSize.V/2).Add(gtx.Ops)
-		return ng.Fill("DocBg", l.Center, ng.TextSize.V, gui.NW|gui.SW|gui.NE, ng.Inset(0.25,
+		return ng.Fill("DocBg", l.Center, ng.TextSize.V, 0, ng.Inset(0.25,
 			ng.lists["settings"].
 				Vertical().
 				Length(len(out)).

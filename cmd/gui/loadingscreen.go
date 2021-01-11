@@ -58,7 +58,7 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage, "Danger",
 			),
-			wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
+			// wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
 		},
 	)
 	a.StatusBar(

@@ -54,7 +54,7 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 		out = append(out, func(gtx l.Context) l.Dimensions {
 			return c.Flex(). // AlignEnd().SpaceStart().
 				Rigid(
-					c.Fill("red", l.Center, c.TextSize.V, NW|SW|NE, EmptySpace(max-dims[i].Size.X, dims[i].Size.Y)).Fn,
+					c.Fill("red", l.Center, c.TextSize.V, 0, EmptySpace(max-dims[i].Size.X, dims[i].Size.Y)).Fn,
 				).
 				Rigid(
 					c.Inset(0.5, func(gtx l.Context) l.Dimensions {

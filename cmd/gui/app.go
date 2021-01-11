@@ -181,18 +181,18 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 	)
 	a.SideBar(
 		[]l.Widget{
-			wg.SideBarButton(" ", " ", 11),
+			// wg.SideBarButton(" ", " ", 11),
 			wg.SideBarButton("home", "home", 0),
 			wg.SideBarButton("send", "send", 1),
 			wg.SideBarButton("receive", "receive", 2),
 			wg.SideBarButton("history", "history", 3),
-			wg.SideBarButton("explorer", "explorer", 6),
-			wg.SideBarButton("mining", "mining", 7),
+			// wg.SideBarButton("explorer", "explorer", 6),
+			// wg.SideBarButton("mining", "mining", 7),
 			wg.SideBarButton("console", "console", 9),
 			wg.SideBarButton("settings", "settings", 5),
-			wg.SideBarButton("log", "log", 10),
+			// wg.SideBarButton("log", "log", 10),
 			wg.SideBarButton("help", "help", 8),
-			wg.SideBarButton(" ", " ", 11),
+			// wg.SideBarButton(" ", " ", 11),
 			// wg.SideBarButton("quit", "quit", 11),
 		},
 	)
@@ -223,7 +223,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					wg.txReady.Store(false)
 				}, a, "green",
 			),
-			wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
+			// wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
 			// wg.PageTopBarButton(
 			// 	"quit", 3, &icons.ActionExitToApp, func(name string) {
 			// 		wg.MainApp.ActivePage(name)
@@ -315,7 +315,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 			scale = gui.Scales["H6"]
 			color = "DocText"
 			font = "plan9"
-			ins = 1
+			// ins = 0.5
 			// hl = true
 		}
 		if title == " " {
@@ -329,7 +329,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 		// Debug("sideMAXXXXXX!!", max)
 		return wg.Direction().E().Embed(
 			wg.ButtonLayout(wg.sidebarButtons[index]).
-				CornerRadius(scale).Corners(gui.NW | gui.SW | gui.NE).
+				CornerRadius(scale).Corners(0).
 				Background(background).
 				Embed(
 					wg.Inset(ins,

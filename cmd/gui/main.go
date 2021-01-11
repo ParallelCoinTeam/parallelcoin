@@ -202,7 +202,7 @@ func (wg *WalletGUI) Run() (err error) {
 		}
 	}()
 	if err := wg.Window.
-		Size(32, 32).
+		Size(56, 32).
 		Title("ParallelCoin Wallet").
 		Open().
 		Run(

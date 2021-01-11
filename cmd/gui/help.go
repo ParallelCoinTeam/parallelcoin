@@ -17,7 +17,7 @@ func (wg *WalletGUI) HelpPage() func(gtx l.Context) l.Dimensions {
 				wg.H5("ParallelCoin Pod Gio Wallet").Alignment(text.Middle).Fn,
 			).
 			Rigid(
-				wg.Fill("DocBg", l.Center, wg.TextSize.V, gui.NW|gui.SW|gui.NE, wg.Inset(0.5,
+				wg.Fill("DocBg", l.Center, wg.TextSize.V, 0, wg.Inset(0.5,
 					wg.VFlex().
 						AlignMiddle().
 						Rigid(

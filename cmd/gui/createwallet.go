@@ -19,7 +19,7 @@ import (
 const slash = string(os.PathSeparator)
 
 func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
-	return wg.Fill("PanelBg", l.Center, 0, gui.NW|gui.SW|gui.NE, wg.Inset(
+	return wg.Fill("PanelBg", l.Center, 0, 0, wg.Inset(
 		0.5,
 		wg.Flex().
 			SpaceAround().
