@@ -17,6 +17,7 @@ type ButtonLayout struct {
 	cornerRadius unit.Value
 	button       *Clickable
 	w            l.Widget
+	width        int
 }
 
 // ButtonLayout creates a button with a background and another widget over top
@@ -28,6 +29,14 @@ func (w *Window) ButtonLayout(button *Clickable) *ButtonLayout {
 		cornerRadius: w.TextSize.Scale(0.125),
 	}
 }
+
+
+// Width sets the pixel width of the button
+func (b *ButtonLayout) Width(width int) *ButtonLayout {
+	b.width = width
+	return b
+}
+
 
 // Background sets the background color of the button
 func (b *ButtonLayout) Background(color string) *ButtonLayout {
