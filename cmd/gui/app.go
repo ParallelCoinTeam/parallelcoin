@@ -19,7 +19,7 @@ import (
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
-	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"),		wg.invalidate).SetMainDirection(l.W)
+	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"), wg.invalidate).SetMainDirection(l.W)
 	wg.MainApp = a
 	wg.MainApp.ThemeHook(
 		func() {
@@ -70,7 +70,9 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 				"settings", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
 					gui.WidgetSize{
-						Widget: wg.configs.Widget(wg.config),
+						Widget: func(gtx l.Context) l.Dimensions {
+							return wg.configs.Widget(wg.config)(gtx)
+						},
 					},
 				},
 			),
@@ -179,6 +181,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 	)
 	a.SideBar(
 		[]l.Widget{
+			wg.SideBarButton(" ", " ", 11),
 			wg.SideBarButton("home", "home", 0),
 			wg.SideBarButton("send", "send", 1),
 			wg.SideBarButton("receive", "receive", 2),
@@ -189,6 +192,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			wg.SideBarButton("settings", "settings", 5),
 			wg.SideBarButton("log", "log", 10),
 			wg.SideBarButton("help", "help", 8),
+			wg.SideBarButton(" ", " ", 11),
 			// wg.SideBarButton("quit", "quit", 11),
 		},
 	)
@@ -295,31 +299,43 @@ func (wg *WalletGUI) Page(title string, widget gui.Widgets) func(gtx l.Context) 
 func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		var scale float32
-		scale = gui.Scales["Body1"]
+		scale = gui.Scales["H6"]
 		var color string
 		background := "Transparent"
 		color = "DocText"
 		var font string
-		font = "bariol regular"
+		font = "plan9"
 		var ins float32 = 0.5
-		if wg.MainApp.ActivePageGet() == page {
+		// var hl = false
+		if wg.MainApp.ActivePageGet() == page || wg.MainApp.PreRendering {
 			background = "PanelBg"
-			scale = gui.Scales["H4"]
+			scale = gui.Scales["H6"]
 			color = "DocText"
-			font = "bariol bold"
+			font = "plan9"
 			ins = 0.5
+			// hl = true
+		}
+		if title == " " {
+			scale = gui.Scales["H6"] / 2
 		}
 		max := int(wg.MainApp.SideBarSize.V)
-		gtx.Constraints.Max.X = max
-		gtx.Constraints.Min.X = max
+		if max > 0 {
+			gtx.Constraints.Max.X = max
+			gtx.Constraints.Min.X = max
+		}
 		// Debug("sideMAXXXXXX!!", max)
-		return wg.Flex().Rigid(
-			wg.Fill(background, l.Center, 0, l.Center,
+		return wg.Direction().E().Embed(
+			wg.Fill(background, l.W, wg.TextSize.V, l.W,
 				wg.ButtonLayout(wg.sidebarButtons[index]).Background("Transparent").Embed(
-					wg.Flex().Flexed(1,
-						wg.Inset(ins,
-							wg.Label().Font(font).Text(title).TextScale(scale).Color(color).Fn,
-						).Fn,
+					wg.Inset(ins,
+						func(gtx l.Context) l.Dimensions {
+							return wg.Label().
+								Font(font).
+								Text(title).
+								TextScale(scale).
+								Color(color).Alignment(text.End).
+								Fn(gtx)
+						},
 					).Fn,
 				).
 					SetClick(
@@ -329,9 +345,12 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 							}
 							wg.MainApp.ActivePage(page)
 						},
-					).Fn,
+					).
+					Width(max).
+					Fn,
 			).Fn,
-		).Fn(gtx)
+		).
+			Fn(gtx)
 	}
 }
 
@@ -350,7 +369,7 @@ func (wg *WalletGUI) PageTopBarButton(
 			background = "PanelBg"
 		}
 		if name == "home" {
-			background = "halfdim"
+			background = "scrim"
 		}
 		if highlightColor != "" {
 			color = highlightColor
