@@ -33,7 +33,7 @@ var findSpaceRegexp = regexp.MustCompile(`\s+`)
 func (w *Window) Input(txt, hint, borderColorFocused, borderColorUnfocused,
 	backgroundColor string, handle func(txt string), ) *Input {
 	editor := w.Editor().SingleLine().Submit(true)
-	input := w.TextInput(editor, hint)
+	input := w.TextInput(editor, hint).TextScale(1)
 	p := &Input{
 		Window:               w,
 		clearClickable:       w.Clickable(),
@@ -125,35 +125,36 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Min.X = 0
 	// width := int(in.Theme.TextSize.Scale(in.size).V)
 	// gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
-	return in.Fill(in.backgroundColor, l.Center, in.TextSize.V, 0, in.Border().Width(0.25).CornerRadius(0.575).Color(in.borderColor).Embed(
-		in.Inset(0.25,
-			in.Flex().
-				Flexed(
-					1,
-					in.Inset(0.25, in.input.Color("DocText").Fn).Fn,
-				).
-				Rigid(
-					in.copyButton.
-						Background("").
-						Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
-						ButtonInset(0.25).
-						Fn,
-				).
-				Rigid(
-					in.pasteButton.
-						Background("").
-						Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
-						ButtonInset(0.25).
-						Fn,
-				).
-				Rigid(
-					in.clearButton.
-						Background("").
-						Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentBackspace)).
-						ButtonInset(0.25).
-						Fn,
-				).
-				Fn,
-		).Fn,
-	).Fn).Fn(gtx)
+	return in.Fill(in.backgroundColor, l.Center, in.TextSize.V, l.Center,
+		in.Border().Width(0.25).CornerRadius(0.5).Color(in.borderColor).Embed(
+			in.Inset(0.25,
+				in.Flex().
+					Flexed(
+						1,
+						in.Inset(0.125, in.input.Color("DocText").Fn).Fn,
+					).
+					Rigid(
+						in.copyButton.
+							Background("").
+							Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
+							ButtonInset(0.25).
+							Fn,
+					).
+					Rigid(
+						in.pasteButton.
+							Background("").
+							Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
+							ButtonInset(0.25).
+							Fn,
+					).
+					Rigid(
+						in.clearButton.
+							Background("").
+							Icon(in.Icon().Color(in.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentBackspace)).
+							ButtonInset(0.25).
+							Fn,
+					).
+					Fn,
+			).Fn,
+		).Fn).Fn(gtx)
 }
