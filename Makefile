@@ -19,7 +19,7 @@ testkopach:
 
 testnode:
 	go install -v
-	pod -D test0 -n testnet -l debug --solo --lan node
+	pod -D test0 -n testnet -l debug node
 
 nodegui:
 	go install -v
