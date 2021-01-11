@@ -251,7 +251,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		}
 		// put in the header
 		out = append(out,
-			ng.Fill("scrim", l.Center, ng.TextSize.V, gui.NW|gui.SW|gui.NE, ng.Flex().Flexed(1,
+			ng.Fill("PanelBg", l.Center, ng.TextSize.V*2, gui.NW|gui.SE|gui.NE, ng.Flex().Flexed(1,
 				ng.Inset(0.75,
 					ng.H3(g.name).
 						Color("DocText").
