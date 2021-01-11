@@ -40,7 +40,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 								Fn,
 						},
 						{
-							Size: 1280,
+							Size: 64,
 							Widget: wg.VFlex().
 								Flexed(1, wg.HistoryPageView()).
 								// Rigid(

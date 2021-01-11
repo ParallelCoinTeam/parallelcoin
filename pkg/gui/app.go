@@ -58,8 +58,10 @@ type App struct {
 
 type WidgetMap map[string]l.Widget
 
-func (w *Window) App(size *int, activePage *uberatomic.String,
-	invalidate chan struct{}) *App {
+func (w *Window) App(
+	size *int, activePage *uberatomic.String,
+	invalidate chan struct{},
+) *App {
 	mc := w.Clickable()
 	a := &App{
 		Window:              w,
@@ -164,7 +166,11 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	a.Flex().Flexed(1, a.Direction().W().Embed(a.LogoAndTitle).Fn).Fn(gtx)
+	if a.Width < 800 {
+		a.Flex().Flexed(1, a.Direction().Center().Embed(a.LogoAndTitle).Fn).Fn(gtx)
+	} else {
+		a.Flex().Flexed(1, a.Direction().W().Embed(a.LogoAndTitle).Fn).Fn(gtx)
+	}
 	return a.Flex().AlignMiddle().
 		// Rigid(
 		// 	a.Inset(0.5, EmptySpace(0, 0)).Fn,
@@ -177,7 +183,7 @@ func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
 				*a.Size,
 				Widgets{
 					{Widget: If(len(a.sideBar) > 0, a.MenuButton, a.NoMenuButton)},
-					{Size: 800, Widget: a.NoMenuButton},
+					{Size: 48, Widget: a.NoMenuButton},
 				},
 			).
 				Fn,
@@ -211,7 +217,8 @@ func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 	return a.Flex().
 		Rigid(
 			a.VFlex().
-				Flexed(1,
+				Flexed(
+					1,
 					a.Responsive(
 						*a.Size, Widgets{
 							{
@@ -224,7 +231,7 @@ func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 								},
 							},
 							{
-								Size: 800,
+								Size: 48,
 								Widget:
 								a.renderSideBar(),
 							},
@@ -232,7 +239,8 @@ func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 					).Fn,
 				).Fn,
 		).
-		Flexed(1,
+		Flexed(
+			1,
 			a.RenderPage,
 		).
 		Fn(gtx)
@@ -316,8 +324,8 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 					Fn,
 			},
 			{
-				Size: 800,
-				Widget: a.Theme.Flex().AlignBaseline().
+				Size: 48,
+				Widget: a.Theme.Flex().AlignMiddle().
 					Rigid(
 						a.
 							Inset(
@@ -403,33 +411,36 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderPage(gtx l.Context) l.Dimensions {
-	return a.Fill(a.bodyBackground, l.Center, 0, 0, a.Inset(0.25,
-		func(gtx l.Context) l.
-		Dimensions {
-			if page, ok := a.pages[a.activePage.Load()]; !ok {
-				return a.Flex().
-					Flexed(
-						1,
-						a.VFlex().SpaceEvenly().
-							Rigid(
-								a.H1("404").
-									Alignment(text.Middle).
-									Fn,
-							).
-							Rigid(
-								a.Body1("page "+a.activePage.Load()+" not found").
-									Alignment(text.Middle).
-									Fn,
-							).
-							Fn,
-					).Fn(gtx)
-			} else {
-				// _ = page
-				// return EmptyMaxHeight()(gtx)
-				return page(gtx)
-			}
-		},
-	).Fn).Fn(gtx)
+	return a.Fill(
+		a.bodyBackground, l.Center, 0, 0, a.Inset(
+			0.25,
+			func(gtx l.Context) l.
+			Dimensions {
+				if page, ok := a.pages[a.activePage.Load()]; !ok {
+					return a.Flex().
+						Flexed(
+							1,
+							a.VFlex().SpaceEvenly().
+								Rigid(
+									a.H1("404").
+										Alignment(text.Middle).
+										Fn,
+								).
+								Rigid(
+									a.Body1("page "+a.activePage.Load()+" not found").
+										Alignment(text.Middle).
+										Fn,
+								).
+								Fn,
+						).Fn(gtx)
+				} else {
+					// _ = page
+					// return EmptyMaxHeight()(gtx)
+					return page(gtx)
+				}
+			},
+		).Fn,
+	).Fn(gtx)
 }
 
 func (a *App) DimensionCaption(gtx l.Context) l.Dimensions {
@@ -448,8 +459,10 @@ func (a *App) renderSideBar() l.Widget {
 		}
 		return func(gtx l.Context) l.Dimensions {
 			a.PreRendering = true
-			gtx1 := CopyContextDimensionsWithMaxAxis(gtx, gtx.Constraints.Max,
-				l.Horizontal)
+			gtx1 := CopyContextDimensionsWithMaxAxis(
+				gtx, gtx.Constraints.Max,
+				l.Horizontal,
+			)
 			// generate the dimensions for all the list elements
 			
 			allDims := GetDimensionList(gtx1, len(a.sideBar), le)

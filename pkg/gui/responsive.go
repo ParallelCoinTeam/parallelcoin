@@ -2,7 +2,7 @@ package gui
 
 import (
 	"sort"
-
+	
 	l "gioui.org/layout"
 )
 
@@ -11,7 +11,7 @@ import (
 // any parameters retrieved from the controlling state variable will be from initialization and not
 // at execution of the widget in the render process
 type WidgetSize struct {
-	Size   int
+	Size   float32
 	Widget l.Widget
 }
 
@@ -31,12 +31,13 @@ func (w Widgets) Swap(i, j int) {
 }
 
 type Responsive struct {
+	*Theme
 	Widgets
 	size int
 }
 
 func (th *Theme) Responsive(size int, widgets Widgets) *Responsive {
-	return &Responsive{size: size, Widgets: widgets}
+	return &Responsive{Theme: th, size: size, Widgets: widgets}
 }
 
 func (r *Responsive) Fn(gtx l.Context) l.Dimensions {
@@ -45,8 +46,9 @@ func (r *Responsive) Fn(gtx l.Context) l.Dimensions {
 	}
 	sort.Sort(r.Widgets)
 	for i := range r.Widgets {
-		if r.size >= r.Widgets[i].Size {
+		if float32(r.size)/r.TextSize.V >= r.Widgets[i].Size {
 			out = r.Widgets[i].Widget
+			// Debug("selected widget for responsive with scale", r.size, "width", r.Widgets[i].Size)
 			break
 		}
 	}

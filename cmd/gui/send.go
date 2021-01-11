@@ -37,7 +37,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.Responsive(*wg.Size, gui.Widgets{
 			{
-				Size: 1024,
+				Size: 64,
 				Widget:
 				wg.Fill("PanelBg", l.NE, wg.TextSize.V, 0, wg.Flex().AlignMiddle().
 					Rigid(

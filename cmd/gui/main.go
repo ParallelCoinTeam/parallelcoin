@@ -207,22 +207,24 @@ func (wg *WalletGUI) Run() (err error) {
 		Open().
 		Run(
 			func(gtx l.Context) l.Dimensions {
-				return wg.Fill("DocBg", l.Center, 0, 0, func(gtx l.Context) l.Dimensions {
-					return gui.If(
-						*wg.noWallet,
-						wg.CreateWalletPage,
-						gui.If(
-							!wg.txReady.Load(),
-							// && !wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
+				return wg.Fill(
+					"DocBg", l.Center, 0, 0, func(gtx l.Context) l.Dimensions {
+						return gui.If(
+							*wg.noWallet,
+							wg.CreateWalletPage,
 							gui.If(
-								!wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
-								wg.unlockPage.Fn(),
-								wg.loadingPage.Fn(),
+								!wg.txReady.Load(),
+								// && !wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
+								gui.If(
+									!wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
+									wg.unlockPage.Fn(),
+									wg.loadingPage.Fn(),
+								),
+								wg.MainApp.Fn(),
 							),
-							wg.MainApp.Fn(),
-						),
-					)(gtx)
-				}).Fn(gtx)
+						)(gtx)
+					},
+				).Fn(gtx)
 			},
 			wg.MainApp.Overlay,
 			// wg.InitWallet(),
@@ -259,6 +261,8 @@ func (wg *WalletGUI) GetInputs() InputMap {
 	return InputMap{
 		"receiveAmount":  wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
 		"receiveMessage": wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
+		"receiveSmallAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
+		"receiveSmallMessage": wg.Input("", "Description", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		
 		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "DocBg", "PanelBg", func(amt string) {}),
 		"sendAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
@@ -275,7 +279,14 @@ func (wg *WalletGUI) GetPasswords() {
 	wg.passwords = PasswordMap{
 		"passEditor":        wg.Password("password", &pass, "Primary", "DocText", "", func(pass string) {}),
 		"confirmPassEditor": wg.Password("confirm", &passConfirm, "Primary", "DocText", "", func(pass string) {}),
-		"publicPassEditor":  wg.Password("public password (optional)", wg.cx.Config.WalletPass, "Primary", "DocText", "", func(pass string) {}),
+		"publicPassEditor":  wg.Password(
+			"public password (optional)",
+			wg.cx.Config.WalletPass,
+			"Primary",
+			"DocText",
+			"",
+			func(pass string) {},
+		),
 	}
 }
 
@@ -341,6 +352,7 @@ func (wg *WalletGUI) GetLists() (o ListMap) {
 		"balances":     wg.List(),
 		"recent":       wg.List(),
 		"send":         wg.List(),
+		"receive":      wg.List(),
 		"transactions": wg.List(),
 		"settings":     wg.List(),
 		"received":     wg.List(),
