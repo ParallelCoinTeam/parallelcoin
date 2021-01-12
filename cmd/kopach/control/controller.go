@@ -465,7 +465,8 @@ out:
 			Debug("checking for new block")
 			// The current block is stale if the best block has changed.
 			best := c.blockTemplateGenerator.BestSnapshot()
-			if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
+			h, ok := c.prevHash.Load().(*chainhash.Hash)
+			if ok && !h.IsEqual(&best.Hash) {
 				Debug("new best block hash")
 				c.UpdateAndSendTemplate()
 				continue

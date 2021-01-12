@@ -209,7 +209,7 @@ func main() {
 
 `, i, os.Args[1],
 					split[0], split[1:])
-				// Infos(split)
+				Info(split)
 				var cmd *exec.Cmd
 				if runtime.GOOS == "windows" {
 					cmd = WindowsExec(split)
@@ -321,7 +321,7 @@ var commands = map[string][]string{
 	},
 	"testnode": {
 		"go install -v %ldflags",
-		"pod -D %datadir -n testnet -l debug --solo --lan node",
+		"pod -D %datadir -n testnet -l debug node",
 	},
 	"nodegui": {
 		"go install -v %ldflags",
