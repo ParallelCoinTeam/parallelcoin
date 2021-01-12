@@ -30,16 +30,11 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 				// }
 			}
 		}
-		addressBook := wg.Flex().Rigid(
-			wg.Inset(
-				0.25,
-				wg.VFlex().
-					Rigid(
-						wg.H1("addressbook").Alignment(text.End).Fn,
-					).Fn,
-			).Fn,
-		).
-			Fn
+		addressBook :=
+			wg.Inset(0.25,
+				wg.H1("addressbook").Alignment(text.End).Fn,
+			).
+				Fn
 		var widgets []l.Widget
 		if *wg.Size < int(wg.TextSize.Scale(Break1).V) {
 			// assemble the list for the small, scrolling list view
@@ -214,9 +209,10 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										"DocBg", l.Center, wg.TextSize.V, 0,
 										wg.Inset(
 											0.25,
-											wg.Flex().Flexed(
-												1,
-												addressBook,
+											wg.Flex().Flexed(1,
+												wg.VFlex().Flexed(1,
+													addressBook,
+												).Fn,
 											).Fn,
 										).Fn,
 									).Fn,
@@ -227,7 +223,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 					).
 						Fn,
 				},
-
+				
 				{
 					Size: 64,
 					Widget:
@@ -310,9 +306,11 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										"DocBg", l.Center, wg.TextSize.V, 0,
 										wg.Inset(
 											0.25,
-											wg.Flex().Flexed(
-												1,
-												addressBook,
+											wg.Flex().Flexed(1,
+												wg.VFlex().Flexed(
+													1,
+													addressBook,
+												).Fn,
 											).Fn,
 										).Fn,
 									).Fn,
@@ -410,9 +408,10 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										"DocBg", l.Center, wg.TextSize.V, 0,
 										wg.Inset(
 											0.25,
-											wg.Flex().Flexed(
-												1,
-												addressBook,
+											wg.Flex().Flexed(1,
+												wg.VFlex().Flexed(1,
+													addressBook,
+												).Fn,
 											).Fn,
 										).Fn,
 									).Fn,
