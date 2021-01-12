@@ -56,8 +56,9 @@ stroy stroy
 ```
 
 Note that the `go install` command will place the produced binaries into a 
-folder specified by the environment variable, set `GOBIN`, and add `GOBIN`  
-the `PATH` variable. Otherwise if you prefer to use build and address the binary
+folder specified by the environment variable, set `GOBIN`, and add `GOBIN` 
+to the `PATH` variable. Otherwise if you prefer to use build and address the 
+binary
 in the current working directory (at the root of the repository), at least 
 on windows, this is an easy option as it searches for executables first in 
 the CWD.
