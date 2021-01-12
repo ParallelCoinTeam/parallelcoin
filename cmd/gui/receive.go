@@ -30,7 +30,9 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 				// }
 			}
 		}
-		wg.ReceiveAddressbook = wg.Inset(0.25, wg.H1("addressbook").Alignment(text.End).Fn).Fn
+		if wg.ReceiveAddressbook == nil {
+			wg.ReceiveAddressbook = wg.Inset(0.25, wg.H1("addressbook").Alignment(text.End).Fn).Fn
+		}
 		var widgets []l.Widget
 		if *wg.Size < int(wg.TextSize.Scale(Break1).V) {
 			// assemble the list for the small, scrolling list view

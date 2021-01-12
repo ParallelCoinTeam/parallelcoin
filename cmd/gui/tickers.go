@@ -134,6 +134,7 @@ func (wg *WalletGUI) Tickers() {
 								ae.Created = time.Now()
 								wg.State.receiveAddresses = append(wg.State.receiveAddresses, ae)
 								Debugs(wg.State.receiveAddresses)
+								// TODO: update the receive addressbook widget
 								wg.State.SetReceivingAddress(addr)
 								wg.State.isAddress.Store(true)
 								filename := filepath.Join(wg.cx.DataDir, "state.json")
