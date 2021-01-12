@@ -2,12 +2,16 @@ package gui
 
 import (
 	"fmt"
+	
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
 	"github.com/p9c/pod/pkg/gui"
 )
+
+const inputWidth float32 = 20
+const Break1 = 48
 
 func (wg *WalletGUI) ReceivePage() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
@@ -37,7 +41,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 		).
 			Fn
 		var widgets []l.Widget
-		if *wg.Size < 800 {
+		if *wg.Size < int(wg.TextSize.Scale(Break1).V) {
 			// assemble the list for the small, scrolling list view
 			widgets = []l.Widget{
 				wg.Inset(
@@ -45,9 +49,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 					wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
 				).Fn,
 				wg.Flex().AlignMiddle().
-					Flexed(
-						0.5, gui.EmptyMaxWidth(),
-					).
+					Flexed(0.5, gui.EmptyMaxWidth()).
 					Rigid(
 						wg.ButtonLayout(
 							wg.currentReceiveCopyClickable.SetClick(
@@ -74,32 +76,19 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 								).Fn,
 							).Fn,
 					).
-					Flexed(
-						0.5, gui.EmptyMaxWidth(),
-					).
+					Flexed(0.5, gui.EmptyMaxWidth()).
 					Fn,
-				wg.Flex().AlignMiddle().
-					Flexed(
-						0.5, gui.EmptyMaxWidth(),
-					).
-					Rigid(
-						wg.Inset(
-							0.25,
-							wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
-						
-						).Fn,
-					).
-					Flexed(
-						0.5, gui.EmptyMaxWidth(),
-					).
-					Fn,
+				// wg.Inset(
+				// 	0.25,
+				// 	wg.Caption(wg.currentReceiveAddress).Alignment(text.Middle).Font("go regular").Fn,
+				// ).Fn,
 				func(gtx l.Context) l.
 				Dimensions {
-					// gtx.Constraints.Max.X = int(wg.TextSize.V * 17)
+					// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
 					return wg.inputs["receiveSmallAmount"].Fn(gtx)
 				},
 				func(gtx l.Context) l.Dimensions {
-					// gtx.Constraints.Max.X = int(wg.TextSize.V * 17)
+					// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
 					return wg.inputs["receiveSmallMessage"].Fn(gtx)
 				},
 				wg.ButtonLayout(
@@ -126,8 +115,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 		}
 		return wg.Responsive(
 			*wg.Size, gui.Widgets{
-				{
-					Size: 0,
+				{Size: 0,
 					Widget:
 					wg.Flex().Flexed(
 						1,
@@ -144,25 +132,8 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 					).
 						Fn,
 				},
-				// {
-				// 	Size: 40,
-				// 	Widget:
-				// 	wg.Flex().Flexed(
-				// 		1,
-				// 		wg.Fill(
-				// 			"Primary", l.W, 0, 0,
-				// 			wg.Inset(
-				// 				0.25,
-				// 				wg.lists["receive"].
-				// 					Vertical().
-				// 					Length(len(widgets)).
-				// 					ListElement(le).Fn,
-				// 			).Fn,
-				// 		).Fn,
-				// 	).Fn,
-				// },
 				{
-					Size: 48,
+					Size: Break1,
 					Widget:
 					wg.Fill(
 						"PanelBg", l.W, wg.TextSize.V, 0,
@@ -180,18 +151,18 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										Rigid(
 											wg.currentReceiveQR,
 										).
-										Rigid(
-											wg.Inset(
-												0.25,
-												wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
-											).Fn,
-										).
+										// Rigid(
+										// 	wg.Inset(
+										// 		0.25,
+										// 		wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
+										// 	).Fn,
+										// ).
 										Rigid(
 											wg.Inset(
 												0.25,
 												func(gtx l.Context) l.
 												Dimensions {
-													gtx.Constraints.Max.X = int(wg.TextSize.V * 17)
+													gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
 													return wg.inputs["receiveAmount"].Fn(gtx)
 												},
 											).Fn,
@@ -200,7 +171,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 											wg.Inset(
 												0.25,
 												func(gtx l.Context) l.Dimensions {
-													gtx.Constraints.Max.X = int(wg.TextSize.V * 17)
+													gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
 													return wg.inputs["receiveMessage"].Fn(gtx)
 												},
 											).Fn,
@@ -213,7 +184,103 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 									wg.Inset(
 										0.25,
 										func(gtx l.Context) l.Dimensions {
-											gtx.Constraints.Max.X = int(wg.TextSize.V * 17)
+											gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
+											return wg.ButtonLayout(
+												wg.currentReceiveRegenClickable.SetClick(
+													func() {
+														Debug("clicked regenerate button")
+														wg.currentReceiveGetNew.Store(true)
+													},
+												),
+											).
+												// CornerRadius(0.5).Corners(gui.NW | gui.SW | gui.NE).
+												Background("Primary").
+												Embed(
+													wg.Inset(
+														0.5,
+														wg.H6("regenerate").Color("Light").Fn,
+													).Fn,
+												).
+												Fn(gtx)
+										},
+									).
+										Fn,
+								).
+								Fn,
+						).
+							Flexed(
+								1, wg.Flex().Rigid(
+									wg.Fill(
+										"DocBg", l.Center, wg.TextSize.V, 0,
+										wg.Inset(
+											0.25,
+											wg.Flex().Flexed(
+												1,
+												addressBook,
+											).Fn,
+										).Fn,
+									).Fn,
+								).
+									Fn,
+							).
+							Fn,
+					).
+						Fn,
+				},
+
+				{
+					Size: 64,
+					Widget:
+					wg.Fill(
+						"PanelBg", l.W, wg.TextSize.V, 0,
+						wg.Flex().AlignMiddle().Rigid(
+							wg.VFlex().AlignMiddle().
+								// Flexed(1, gui.EmptyMaxWidth()).
+								Rigid(
+									wg.VFlex().AlignMiddle().
+										Rigid(
+											wg.Inset(
+												0.25,
+												wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
+											).Fn,
+										).
+										Rigid(
+											wg.currentReceiveQR,
+										).
+										// Rigid(
+										// 	wg.Inset(
+										// 		0.25,
+										// 		wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
+										// 	).Fn,
+										// ).
+										Rigid(
+											wg.Inset(
+												0.25,
+												func(gtx l.Context) l.
+												Dimensions {
+													gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
+													return wg.inputs["receiveAmount"].Fn(gtx)
+												},
+											).Fn,
+										).
+										Rigid(
+											wg.Inset(
+												0.25,
+												func(gtx l.Context) l.Dimensions {
+													gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
+													return wg.inputs["receiveMessage"].Fn(gtx)
+												},
+											).Fn,
+										).
+										Fn,
+								).
+								
+								
+								Rigid(
+									wg.Inset(
+										0.25,
+										func(gtx l.Context) l.Dimensions {
+											gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
 											return wg.ButtonLayout(
 												wg.currentReceiveRegenClickable.SetClick(
 													func() {
@@ -257,7 +324,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 						Fn,
 				},
 				{
-					Size: 64,
+					Size: 96,
 					Widget:
 					wg.Fill(
 						"PanelBg", l.W, wg.TextSize.V, 0,
@@ -277,14 +344,14 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 												Rigid(
 													wg.currentReceiveQR,
 												).
-												Rigid(
-													wg.Inset(
-														0.25,
-														wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
-													).Fn,
-												).Fn,
+												// Rigid(
+												// 	wg.Inset(
+												// 		0.25,
+												// 		wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
+												// 	).Fn,
+												// ).
+												Fn,
 										).
-										
 										Rigid(
 											wg.VFlex().AlignMiddle().
 												Rigid(
@@ -292,7 +359,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 														0.25,
 														func(gtx l.Context) l.
 														Dimensions {
-															gtx.Constraints.Max.X = int(wg.TextSize.V * 17)
+															gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
 															return wg.inputs["receiveAmount"].Fn(gtx)
 														},
 													).Fn,
@@ -301,7 +368,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 													wg.Inset(
 														0.25,
 														func(gtx l.Context) l.Dimensions {
-															gtx.Constraints.Max.X = int(wg.TextSize.V * 17)
+															gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
 															return wg.inputs["receiveMessage"].Fn(gtx)
 														},
 													).Fn,
@@ -310,7 +377,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 													wg.Inset(
 														0.25,
 														func(gtx l.Context) l.Dimensions {
-															gtx.Constraints.Max.X = int(wg.TextSize.V * 17)
+															gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*inputWidth), int(wg.TextSize.V*inputWidth)
 															return wg.ButtonLayout(
 																wg.currentReceiveRegenClickable.SetClick(
 																	func() {

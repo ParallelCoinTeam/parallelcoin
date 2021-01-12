@@ -74,7 +74,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 }
 
 func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
-	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate).SetMainDirection(l.Center + 1)
+	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate, Break1).SetMainDirection(l.Center + 1)
 	wg.unlockPage = a
 	password := ""
 	exitButton := wg.WidgetPool.GetClickable()

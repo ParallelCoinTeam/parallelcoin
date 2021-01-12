@@ -19,7 +19,7 @@ import (
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
-	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"), wg.invalidate).SetMainDirection(l.W)
+	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"), wg.invalidate, Break1).SetMainDirection(l.W)
 	wg.MainApp = a
 	wg.MainApp.ThemeHook(
 		func() {

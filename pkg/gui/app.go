@@ -54,14 +54,12 @@ type App struct {
 	titleFont           string
 	mainDirection       l.Direction
 	PreRendering        bool
+	Break1              float32
 }
 
 type WidgetMap map[string]l.Widget
 
-func (w *Window) App(
-	size *int, activePage *uberatomic.String,
-	invalidate chan struct{},
-) *App {
+func (w *Window) App(size *int, activePage *uberatomic.String, invalidate chan struct{}, Break1 float32, ) *App {
 	mc := w.Clickable()
 	a := &App{
 		Window:              w,
@@ -95,6 +93,7 @@ func (w *Window) App(
 		Size:                size,
 		invalidate:          invalidate,
 		mainDirection:       l.Center + 1,
+		Break1: Break1,
 	}
 	a.SideBarSize = &unit.Value{}
 	return a
@@ -166,11 +165,11 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	if float32(a.Width) < a.TextSize.Scale(48).V {
-		a.Flex().Flexed(1, a.Direction().Center().Embed(a.LogoAndTitle).Fn).Fn(gtx)
-	} else {
-		a.Flex().Flexed(1, a.Direction().W().Embed(a.LogoAndTitle).Fn).Fn(gtx)
-	}
+	// if float32(a.Width) < a.TextSize.Scale(48).V {
+	// 	a.Direction().Center().Embed(a.LogoAndTitle).Fn(gtx)
+	// } else {
+	// 	a.Direction().W().Embed(a.LogoAndTitle).Fn(gtx)
+	// }
 	return a.Flex().AlignMiddle().
 		// Rigid(
 		// 	a.Inset(0.5, EmptySpace(0, 0)).Fn,
@@ -183,12 +182,15 @@ func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
 				*a.Size,
 				Widgets{
 					{Widget: If(len(a.sideBar) > 0, a.MenuButton, a.NoMenuButton)},
-					{Size: 48, Widget: a.NoMenuButton},
+					{Size: a.Break1, Widget: a.NoMenuButton},
 				},
 			).
 				Fn,
 		).
-		Flexed(1, EmptyMaxWidth()).
+		Flexed(1, If(float32(a.Width) >= a.TextSize.Scale(a.Break1).V,
+			a.Direction().W().Embed(a.LogoAndTitle).Fn,
+			a.Direction().Center().Embed(a.LogoAndTitle).Fn,
+		)).
 		// Flexed(0.5,
 		// 	EmptyMinWidth(),
 		// ).
@@ -231,7 +233,7 @@ func (a *App) MainFrame(gtx l.Context) l.Dimensions {
 								},
 							},
 							{
-								Size: 48,
+								Size: a.Break1,
 								Widget:
 								a.renderSideBar(),
 							},
@@ -289,7 +291,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 	return a.Theme.Responsive(
 		*a.Size, Widgets{
 			{
-				Widget: a.Theme.Flex().AlignBaseline().
+				Widget: a.Theme.Flex().AlignMiddle().
 					Rigid(
 						a.
 							Inset(
@@ -324,7 +326,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 					Fn,
 			},
 			{
-				Size: 48,
+				Size: a.Break1,
 				Widget: a.Theme.Flex().AlignMiddle().
 					Rigid(
 						a.
