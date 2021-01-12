@@ -155,6 +155,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.loadingPage = wg.getLoadingPage()
 	wg.Tickers()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
+		Info("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {
 		*wg.noWallet = false
 		if !*wg.cx.Config.NodeOff {
