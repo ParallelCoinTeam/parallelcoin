@@ -2,10 +2,12 @@ package gui
 
 import (
 	"encoding/hex"
+	"fmt"
 	"os"
 	"time"
 	
 	l "gioui.org/layout"
+	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
@@ -13,6 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
@@ -82,12 +85,20 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														fork.IsTestnet = false
 													}
 													Info("activenet:", wg.cx.ActiveNet.Name)
+													Debug("setting ports to match network")
 													*wg.cx.Config.Network = wg.cx.ActiveNet.Name
-													if wg.cx.ActiveNet.Name == "testnet" {
-														// TODO: obviously when we get to starting testnets this should not be done
-														// *wg.cx.Config.LAN = true  // mines without peer outside lan
-														// *wg.cx.Config.Solo = true // mines without peers
-													}
+													_, adrs := routeable.GetInterface()
+													routeableAddress := adrs[0]
+													*wg.cx.Config.Listeners = cli.StringSlice{fmt.Sprintf(
+														routeableAddress + ":" + wg.cx.ActiveNet.DefaultPort)}
+													address := fmt.Sprintf("%s:%s", routeableAddress,
+														wg.cx.ActiveNet.RPCClientPort)
+													*wg.cx.Config.RPCListeners = cli.StringSlice{address}
+													*wg.cx.Config.RPCConnect = address
+													address = fmt.Sprintf(routeableAddress + ":" +
+														wg.cx.ActiveNet.WalletRPCServerPort)
+													*wg.cx.Config.WalletRPCListeners = cli.StringSlice{address}
+													*wg.cx.Config.WalletServer = address
 													save.Pod(wg.cx.Config)
 												}()
 											},
