@@ -5,13 +5,13 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-
+	
 	uberatomic "go.uber.org/atomic"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-
+	
 	l "gioui.org/layout"
 	"gioui.org/text"
-
+	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/cfg"
@@ -198,7 +198,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 	)
 	a.ButtonBar(
 		[]l.Widget{
-
+			
 			// gui.EmptyMaxWidth(),
 			// wg.PageTopBarButton(
 			// 	"goroutines", 0, &icons.ActionBugReport, func(name string) {
@@ -241,7 +241,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 		[]l.Widget{
 			// gui.EmptyMaxWidth(),
 			wg.StatusBarButton(
-				"console", 2, &p9icons.Terminal, func(name string) {
+				"console", 3, &p9icons.Terminal, func(name string) {
 					wg.MainApp.ActivePage(name)
 				}, a,
 			),
@@ -365,7 +365,7 @@ func (wg *WalletGUI) PageTopBarButton(
 		background := "Transparent"
 		// background := app.TitleBarBackgroundGet()
 		color := app.MenuColorGet()
-
+		
 		if app.ActivePageGet() == name {
 			color = "PanelText"
 			// background = "scrim"
@@ -491,9 +491,11 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								// wg.toggleNode()
 								if wg.node.Running() {
 									if wg.wallet.Running() {
+										if wg.WalletClient != nil {
+											wg.WalletClient.Disconnect()
+											wg.WalletClient = nil
+										}
 										wg.wallet.Stop()
-										wg.WalletClient.Disconnect()
-										wg.WalletClient = nil
 										wg.txReady.Store(false)
 										wg.stateLoaded.Store(false)
 									}

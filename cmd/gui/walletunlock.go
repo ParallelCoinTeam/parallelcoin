@@ -422,7 +422,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 		},
 		[]l.Widget{
 			wg.StatusBarButton(
-				"console", 2, &p9icons.Terminal, func(name string) {
+				"console", 3, &p9icons.Terminal, func(name string) {
 					wg.MainApp.ActivePage(name)
 				}, a,
 			),
