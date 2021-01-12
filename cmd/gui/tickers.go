@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"image"
 	"io/ioutil"
+	"path/filepath"
+	"strconv"
 	"time"
 	
 	"gioui.org/op/paint"
@@ -120,9 +122,23 @@ func (wg *WalletGUI) Tickers() {
 							if addr, err = wg.WalletClient.GetNewAddress("default"); !Check(err) {
 								Debug("getting new address new receiving address", addr.EncodeAddress(),
 									"as prior was empty", wg.State.currentReceivingAddress.String.Load())
+								// save to addressbook
+								var ae AddressEntry
+								ae.Address = addr.EncodeAddress()
+								var amt float64
+								if amt, err = strconv.ParseFloat(wg.inputs["receiveAmount"].GetText(), 64); Check(err) {
+									if ae.Amount, err = util.NewAmount(amt); Check(err) {
+									}
+								}
+								ae.Comment = wg.inputs["receiveMessage"].GetText()
+								ae.Created = time.Now()
+								wg.State.receiveAddresses = append(wg.State.receiveAddresses, ae)
+								Debugs(wg.State.receiveAddresses)
 								wg.State.SetReceivingAddress(addr)
 								wg.State.isAddress.Store(true)
-								Debugs(wg.State.Marshal())
+								filename := filepath.Join(wg.cx.DataDir, "state.json")
+								if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+								}
 								wg.invalidate <- struct{}{}
 							}
 						}

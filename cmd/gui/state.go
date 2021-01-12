@@ -52,6 +52,7 @@ func (c *CategoryFilter) Filter(s string) (include bool) {
 
 type AddressEntry struct {
 	Address, Comment  string
+	Amount            util.Amount
 	Created, Modified time.Time
 }
 
@@ -69,7 +70,8 @@ type State struct {
 	currentReceivingAddress *atom.Address
 	isAddress               *atom.Bool
 	activePage              *uberatomic.String
-	addressBook             []AddressEntry
+	sendAddresses           []AddressEntry
+	receiveAddresses        []AddressEntry
 }
 
 func GetNewState(params *netparams.Params,
@@ -186,7 +188,8 @@ type Marshalled struct {
 	Filter             CategoryFilter
 	ReceivingAddress   string
 	ActivePage         string
-	AddressBook        []AddressEntry
+	ReceiveAddressBook []AddressEntry
+	SendAddressBook    []AddressEntry
 }
 
 func (s *State) Marshal() (out *Marshalled) {
@@ -200,7 +203,8 @@ func (s *State) Marshal() (out *Marshalled) {
 		Filter:             s.filter,
 		ReceivingAddress:   s.currentReceivingAddress.Load().EncodeAddress(),
 		ActivePage:         s.activePage.Load(),
-		AddressBook:        s.addressBook,
+		ReceiveAddressBook: s.receiveAddresses,
+		SendAddressBook:    s.sendAddresses,
 	}
 	return
 }
@@ -214,6 +218,8 @@ func (m *Marshalled) Unmarshal(s *State) {
 	if len(s.allTxs.Load()) < len(m.AllTxs) {
 		s.allTxs.Store(m.AllTxs)
 	}
+	s.receiveAddresses = m.ReceiveAddressBook
+	s.sendAddresses = m.SendAddressBook
 	s.filter = m.Filter
 	
 	if m.ReceivingAddress != "1111111111111111111114oLvT2" {
@@ -224,7 +230,6 @@ func (m *Marshalled) Unmarshal(s *State) {
 		s.currentReceivingAddress.Store(ra)
 	}
 	s.SetActivePage(m.ActivePage)
-	s.addressBook = m.AddressBook
 	return
 }
 

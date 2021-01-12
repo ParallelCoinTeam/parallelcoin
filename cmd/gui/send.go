@@ -60,8 +60,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 													wg.Inset(0.25,
 														func(gtx l.Context) l.Dimensions {
 															return wg.ButtonLayout(wg.clickables["sendSend"].SetClick(func() {
-																Debug("clicked regenerate button")
-																wg.currentReceiveGetNew.Store(true)
+																Debug("clicked send button")
 															})).
 																// CornerRadius(0.5).Corners(0).
 																Background("Primary").
@@ -103,8 +102,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 																gtx.Queue = q
 															}()
 															return wg.ButtonLayout(wg.clickables["sendSave"].SetClick(func() {
-																Debug("clicked regenerate button")
-																wg.currentReceiveGetNew.Store(true)
+																Debug("clicked save button")
 															})).
 																CornerRadius(0.5).Corners(gui.NW | gui.SW | gui.NE).
 																Background("Primary").
@@ -190,8 +188,7 @@ func (wg *WalletGUI) SendPage() l.Widget {
 													wg.Inset(0.25,
 														func(gtx l.Context) l.Dimensions {
 															return wg.ButtonLayout(wg.clickables["sendSend"].SetClick(func() {
-																Debug("clicked regenerate button")
-																wg.currentReceiveGetNew.Store(true)
+																Debug("clicked send button")
 															})).Background("Primary").
 																Embed(
 																	wg.Inset(0.25,
@@ -231,7 +228,6 @@ func (wg *WalletGUI) SendPage() l.Widget {
 															}()
 															return wg.ButtonLayout(wg.clickables["sendSave"].SetClick(func() {
 																Debug("clicked regenerate button")
-																wg.currentReceiveGetNew.Store(true)
 															})).Background("Primary").
 																Embed(
 																	wg.Inset(0.25,
