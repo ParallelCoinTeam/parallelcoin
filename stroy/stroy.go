@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"syscall"
 	"time"
 	
 	"gopkg.in/src-d/go-git.v4"
@@ -213,9 +212,7 @@ func main() {
 				// Infos(split)
 				var cmd *exec.Cmd
 				if runtime.GOOS == "windows" {
-					cmd = exec.Command(split[0])
-					cmd.SysProcAttr = &syscall.SysProcAttr{}
-					cmd.SysProcAttr.CmdLine = strings.Join(split, " ")
+					cmd = WindowsExec(split)
 				} else {
 					cmd = exec.Command(split[0], split[1:]...)
 				}
@@ -388,6 +385,6 @@ var commands = map[string][]string{
 			" --solo --lan wallet",
 	},
 	"stroy": {
-		"go install -v %ldflags ./stroy/stroy.go",
+		"go install -v %ldflags github.com/p9c/pod/stroy",
 	},
 }

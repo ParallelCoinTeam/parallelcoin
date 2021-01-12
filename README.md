@@ -15,7 +15,8 @@ Fully integrated all-in-one cli client, full node, wallet server, miner and GUI 
 
 Straight to business, this is the part I am looking for, so it's here at the top.
 
-First, you need a working [Go 1.11+ installation for the platform you are using](https://golang.org).
+First, you need a working [Go 1.14+ installation for the platform you are 
+using](https://golang.org).
 
 Clone this repository where you like, here I show the SSH URL which is recommended
 for speed as well as if you want to add a branch to the repository as a member of the 
@@ -37,23 +38,42 @@ More detailed instructions will follow as we work through each
 platform build. For now we develop on FreeBSD and Ubuntu so for now,
 at this early stage with the GUI, please bear with us.
 
-Next, go to the repo root and get Go to build it.
+Next, go to the repo root and build it.
 
 ```
-cd pod
-go install -v
+make stroy
 ```
 
-Any version of Go from 1.11 should build, this is really the current
-minimal production version for Go anyway with the chaos that 
-modules have unleashed on Git repository branch keeping hygiene.
+`stroy` is a pure go replacement for `make`. Run it without any options to get
+a list of currently enabled build options. 
 
-**GO111MODULE should be set to "on".**
+If you don't have access to make (it can be tricky on windows), you can 
+build `stroy` with this command:
 
-If you want to build a version without any GUI, for servers or if support is
-lacking on the given platform:
+```bash
+go install -v github.com/p9c/pod/stroy
+stroy stroy
+```
 
-`go install -v -tags headless`
+Note that the `go install` command will place the produced binaries into a 
+folder specified by the environment variable, set `GOBIN`, and add `GOBIN`  
+the `PATH` variable. Otherwise if you prefer to use build and address the binary
+in the current working directory (at the root of the repository), at least 
+on windows, this is an easy option as it searches for executables first in 
+the CWD.
+
+The second invocation rebuilds stroy with stroy itself, which plants the 
+build information into the main package, which records the details of the source
+code that it was built with, eg:
+
+```
+app information: repo: github.com/p9c/pod branch: refs/heads/l0k1 commit: 8b98e47b8a61a7e68a945ce65129f4dd49c6c086 built: 2021-01-12T06:34:34+01:00 tag: v0.4.25-testnet+...
+```
+
+The purpose of this is to improve debugging as this info is printed at the 
+start of all components' startup, and allows the logs to inform developers 
+what the user's build came from, when dealing with a bug report, to 
+facilitate *exact* replication of the fault.
 
 ## Running
 
