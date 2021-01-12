@@ -107,6 +107,8 @@ type WalletGUI struct {
 	txReady                      *uberatomic.Bool
 	mainDirection                l.Direction
 	preRendering                 bool
+	ReceiveAddressbook           l.Widget
+	SendAddressbook              l.Widget
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
@@ -260,8 +262,8 @@ func (wg *WalletGUI) GetInputs() InputMap {
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
 	return InputMap{
-		"receiveAmount":  wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
-		"receiveMessage": wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
+		"receiveAmount":       wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
+		"receiveMessage":      wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
 		"receiveSmallAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
 		"receiveSmallMessage": wg.Input("", "Description", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		
@@ -280,7 +282,7 @@ func (wg *WalletGUI) GetPasswords() {
 	wg.passwords = PasswordMap{
 		"passEditor":        wg.Password("password", &pass, "Primary", "DocText", "", func(pass string) {}),
 		"confirmPassEditor": wg.Password("confirm", &passConfirm, "Primary", "DocText", "", func(pass string) {}),
-		"publicPassEditor":  wg.Password(
+		"publicPassEditor": wg.Password(
 			"public password (optional)",
 			wg.cx.Config.WalletPass,
 			"Primary",
