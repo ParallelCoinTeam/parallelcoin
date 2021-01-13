@@ -48,11 +48,20 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			Debug("loading previously saved state")
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
 			if logi.FileExists(filename) {
+				Debug("#### loading state data...")
 				if err = wg.State.Load(filename, wg.cx.Config.WalletPass); Check(err) {
 					interrupt.Request()
 				}
+				Debug("#### loaded state data")
 			}
 			wg.stateLoaded.Store(true)
+			wg.RecentTransactions(10, "recent")
+			if !wg.txReady.Load() {
+				wg.txReady.Store(true)
+			}
+			wg.Invalidate()
+			wg.RecentTransactions(-1, "history")
+			wg.Invalidate()
 			// the entered password matches the stored hash
 			Debug("now we can open the wallet")
 			if err = wg.writeWalletCookie(); Check(err) {
@@ -62,11 +71,16 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			save.Pod(wg.cx.Config)
 			if !wg.node.Running() {
 				wg.node.Start()
+			} else {
+				if wg.ChainClient != nil {
+					wg.ChainClient.Disconnect()
+					wg.ChainClient.Shutdown()
+				}
+				wg.node.Stop()
+				wg.node.Start()
 			}
 			wg.wallet.Start()
 			wg.unlockPassword.Wipe()
-			go wg.RecentTransactions(10, "recent")
-			go wg.RecentTransactions(-1, "history")
 		}
 	} else {
 		Debug("failed to unlock the wallet")
