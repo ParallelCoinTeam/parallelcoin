@@ -350,16 +350,17 @@ func (wg *WalletGUI) GetRunUnit(name string, before, after func(), args ...strin
 
 func (wg *WalletGUI) GetLists() (o ListMap) {
 	return ListMap{
-		"createWallet": wg.List(),
-		"overview":     wg.List(),
-		"balances":     wg.List(),
-		"recent":       wg.List(),
-		"send":         wg.List(),
-		"receive":      wg.List(),
-		"transactions": wg.List(),
-		"settings":     wg.List(),
-		"received":     wg.List(),
-		"history":      wg.List(),
+		"createWallet":     wg.List(),
+		"overview":         wg.List(),
+		"balances":         wg.List(),
+		"recent":           wg.List(),
+		"send":             wg.List(),
+		"receive":          wg.List(),
+		"receiveAddresses": wg.List(),
+		"transactions":     wg.List(),
+		"settings":         wg.List(),
+		"received":         wg.List(),
+		"history":          wg.List(),
 	}
 }
 

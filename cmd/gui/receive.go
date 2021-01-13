@@ -207,10 +207,8 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										"DocBg", l.Center, wg.TextSize.V, 0,
 										wg.Inset(
 											0.25,
-											wg.Flex().Flexed(1,
-												wg.VFlex().Flexed(1,
-													wg.ReceiveAddressbook,
-												).Fn,
+											wg.VFlex().Flexed(1,
+												wg.ReceiveAddressbook,
 											).Fn,
 										).Fn,
 									).Fn,
@@ -304,11 +302,9 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										"DocBg", l.Center, wg.TextSize.V, 0,
 										wg.Inset(
 											0.25,
-											wg.Flex().Flexed(1,
-												wg.VFlex().Flexed(
-													1,
-													wg.ReceiveAddressbook,
-												).Fn,
+											wg.VFlex().Flexed(
+												1,
+												wg.ReceiveAddressbook,
 											).Fn,
 										).Fn,
 									).Fn,
@@ -406,10 +402,8 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										"DocBg", l.Center, wg.TextSize.V, 0,
 										wg.Inset(
 											0.25,
-											wg.Flex().Flexed(1,
-												wg.VFlex().Flexed(1,
-													wg.ReceiveAddressbook,
-												).Fn,
+											wg.VFlex().Flexed(1,
+												wg.ReceiveAddressbook,
 											).Fn,
 										).Fn,
 									).Fn,
