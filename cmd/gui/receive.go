@@ -61,7 +61,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 						"parallelcoin:%s?amount=%s&message=%s",
 						wg.State.receiveAddresses[i].Address,
 						wg.State.receiveAddresses[i].Amount,
-						wg.State.receiveAddresses[i].Comment,
+						wg.State.receiveAddresses[i].Message,
 					)
 					Debug("clicked receive address list item", j)
 					if err := clipboard.WriteAll(qrText); Check(err) {
@@ -84,7 +84,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 											Fn,
 									).
 									Rigid(
-										wg.Body1(wg.State.receiveAddresses[i].Comment).Fn,
+										wg.Body1(wg.State.receiveAddresses[i].Message).Fn,
 									).
 									Fn,
 							).
