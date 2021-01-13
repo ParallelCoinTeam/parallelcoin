@@ -265,8 +265,6 @@ func (wg *WalletGUI) GetInputs() InputMap {
 	return InputMap{
 		"receiveAmount":       wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
 		"receiveMessage":      wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
-		"receiveSmallAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
-		"receiveSmallMessage": wg.Input("", "Description", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		
 		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "DocBg", "PanelBg", func(amt string) {}),
 		"sendAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
