@@ -51,10 +51,12 @@ func (c *CategoryFilter) Filter(s string) (include bool) {
 }
 
 type AddressEntry struct {
-	Address, Message  string
-	Label             string `json:"omitempty"`
-	Amount            util.Amount
-	Created, Modified time.Time
+	Address  string      `json:"address"`
+	Message  string      `json:"message,omitempty"`
+	Label    string      `json:"label,omitempty"`
+	Amount   util.Amount `json:"amount"`
+	Created  time.Time   `json:"created"`
+	Modified time.Time   `json:"modified"`
 }
 
 type State struct {
