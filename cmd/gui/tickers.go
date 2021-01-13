@@ -118,6 +118,42 @@ func (wg *WalletGUI) Tickers() {
 						if first {
 							wg.processWalletBlockNotification()
 						}
+						if wg.stateLoaded.Load() {
+							wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
+								var out []l.Widget
+								for x := range wg.State.receiveAddresses {
+									i := x
+									out = append(out, func(gtx l.Context) l.Dimensions {
+										return wg.Flex().Flexed(1,
+											wg.Flex().AlignBaseline().
+												Rigid(
+													wg.Inset(0.25,
+														wg.Caption(wg.State.receiveAddresses[i].Address).Font("go regular").Fn,
+													).Fn,
+												).
+												Rigid(
+													wg.Inset(0.25,
+														wg.Body1(wg.State.receiveAddresses[i].Amount.String()).Fn,
+													).Fn,
+												).
+												Rigid(
+													wg.Inset(0.25,
+														wg.Body1(wg.State.receiveAddresses[i].Comment).Fn,
+													).Fn,
+												).
+												Fn,
+										).Fn(gtx)
+									})
+								}
+								le := func(gtx l.Context, index int) l.Dimensions {
+									return out[index](gtx)
+								}
+								return wg.Flex().Rigid(
+									wg.lists["receiveAddresses"].Length(len(out)).Vertical().
+										ListElement(le).Fn,
+								).Fn(gtx)
+							}
+						}
 						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() || wg.currentReceiveGetNew.Load() {
 							var addr util.Address
 							if addr, err = wg.WalletClient.GetNewAddress("default"); !Check(err) {
@@ -136,37 +172,7 @@ func (wg *WalletGUI) Tickers() {
 								wg.State.receiveAddresses = append(wg.State.receiveAddresses, ae)
 								Debugs(wg.State.receiveAddresses)
 								// TODO: update the receive addressbook widget
-								wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
-									var out []l.Widget
-									for x := range wg.State.receiveAddresses {
-										i := x
-										out = append(out, func(gtx l.Context) l.Dimensions {
-											return wg.Flex().AlignBaseline().
-												Rigid(
-													wg.Inset(0.25,
-														wg.Caption(wg.State.receiveAddresses[i].Address).Font("go regular").Fn,
-													).Fn,
-												).
-												Rigid(
-													wg.Inset(0.25,
-														wg.Body1(wg.State.receiveAddresses[i].Amount.String()).Fn,
-													).Fn,
-												).
-												Rigid(
-													wg.Inset(0.25,
-														wg.Body1(wg.State.receiveAddresses[i].Comment).Fn,
-													).Fn,
-												).
-												Fn(gtx)
-										})
-									}
-									le := func(gtx l.Context, index int) l.Dimensions {
-										return out[index](gtx)
-									}
-									return wg.lists["receiveAddresses"].Length(len(out)).Vertical().
-										ListElement(le).Fn(gtx)
-									
-								}
+								
 								wg.State.SetReceivingAddress(addr)
 								wg.State.isAddress.Store(true)
 								filename := filepath.Join(wg.cx.DataDir, "state.json")

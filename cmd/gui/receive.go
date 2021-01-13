@@ -33,76 +33,106 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 		if wg.ReceiveAddressbook == nil {
 			wg.ReceiveAddressbook = wg.Inset(0.25, wg.H1("addressbook").Alignment(text.End).Fn).Fn
 		}
+		
 		var widgets []l.Widget
-		if *wg.Size < int(wg.TextSize.Scale(Break1).V) {
-			// assemble the list for the small, scrolling list view
-			widgets = []l.Widget{
-				wg.Inset(
-					0.25,
-					wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
-				).Fn,
-				wg.Flex().AlignMiddle().
-					Flexed(0.5, gui.EmptyMaxWidth()).
-					Rigid(
-						wg.ButtonLayout(
-							wg.currentReceiveCopyClickable.SetClick(
-								func() {
-									qrText := fmt.Sprintf(
-										"parallelcoin:%s?amount=%s&message=%s",
-										wg.State.currentReceivingAddress.Load().EncodeAddress(),
-										wg.inputs["receiveAmount"].GetText(),
-										wg.inputs["receiveMessage"].GetText(),
-									)
-									Debug("clicked qr code copy clicker")
-									if err := clipboard.WriteAll(qrText); Check(err) {
-									}
-								},
-							),
-						).
-							// CornerRadius(0.5).
-							// Corners(gui.NW | gui.SW | gui.NE).
-							Background("white").
-							Embed(
-								wg.Inset(
-									0.125,
-									wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
-								).Fn,
+		header := wg.Flex().Flexed(1,
+			wg.Inset(
+				0.25,
+				wg.H6("Receive Address History").Alignment(text.Middle).Fn,
+			).Fn,
+		).Fn
+		widgets = append(widgets,
+			wg.Flex().AlignMiddle().Flexed(1, wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
+			header)
+		for x := range wg.State.receiveAddresses {
+			i := x
+			widgets = append(widgets, func(gtx l.Context) l.Dimensions {
+				return wg.Flex().Flexed(1,
+					wg.Flex().AlignBaseline().
+						Rigid(
+							wg.Inset(0.25,
+								wg.Caption(wg.State.receiveAddresses[i].Address).Font("go regular").Fn,
 							).Fn,
-					).
-					Flexed(0.5, gui.EmptyMaxWidth()).
-					Fn,
-				// wg.Inset(
-				// 	0.25,
-				// 	wg.Caption(wg.currentReceiveAddress).Alignment(text.Middle).Font("go regular").Fn,
-				// ).Fn,
-				func(gtx l.Context) l.
-				Dimensions {
-					// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
-					return wg.inputs["receiveSmallAmount"].Fn(gtx)
-				},
-				func(gtx l.Context) l.Dimensions {
-					// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
-					return wg.inputs["receiveSmallMessage"].Fn(gtx)
-				},
-				wg.ButtonLayout(
-					wg.currentReceiveRegenClickable.SetClick(
-						func() {
-							Debug("clicked regenerate button")
-							wg.currentReceiveGetNew.Store(true)
-						},
-					),
-				).
-					Background("Primary").
-					Embed(
-						wg.Inset(
-							0.25,
-							wg.H6("regenerate").Color("Light").Fn,
-						).Fn,
-					).
-					Fn,
-				wg.ReceiveAddressbook,
-			}
+						).
+						Rigid(
+							wg.Inset(0.25,
+								wg.Body1(wg.State.receiveAddresses[i].Amount.String()).Fn,
+							).Fn,
+						).
+						Rigid(
+							wg.Inset(0.25,
+								wg.Body1(wg.State.receiveAddresses[i].Comment).Fn,
+							).Fn,
+						).
+						Fn,
+				).Fn(gtx)
+			})
 		}
+		// assemble the list for the small, scrolling list view
+		widgets = append([]l.Widget{
+			wg.Inset(
+				0.25,
+				wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
+			).Fn,
+			wg.Flex().SpaceSides().
+				Rigid(
+					wg.ButtonLayout(
+						wg.currentReceiveCopyClickable.SetClick(
+							func() {
+								qrText := fmt.Sprintf(
+									"parallelcoin:%s?amount=%s&message=%s",
+									wg.State.currentReceivingAddress.Load().EncodeAddress(),
+									wg.inputs["receiveAmount"].GetText(),
+									wg.inputs["receiveMessage"].GetText(),
+								)
+								Debug("clicked qr code copy clicker")
+								if err := clipboard.WriteAll(qrText); Check(err) {
+								}
+							},
+						),
+					).
+						// CornerRadius(0.5).
+						// Corners(gui.NW | gui.SW | gui.NE).
+						Background("white").
+						Embed(
+							wg.Inset(
+								0.125,
+								wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
+							).Fn,
+						).Fn,
+				).
+				Fn,
+			
+			// wg.Inset(
+			// 	0.25,
+			// 	wg.Caption(wg.currentReceiveAddress).Alignment(text.Middle).Font("go regular").Fn,
+			// ).Fn,
+			func(gtx l.Context) l.
+			Dimensions {
+				// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
+				return wg.inputs["receiveSmallAmount"].Fn(gtx)
+			},
+			func(gtx l.Context) l.Dimensions {
+				// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
+				return wg.inputs["receiveSmallMessage"].Fn(gtx)
+			},
+			wg.ButtonLayout(
+				wg.currentReceiveRegenClickable.SetClick(
+					func() {
+						Debug("clicked regenerate button")
+						wg.currentReceiveGetNew.Store(true)
+					},
+				),
+			).
+				Background("Primary").
+				Embed(
+					wg.Inset(
+						0.25,
+						wg.H6("regenerate").Color("Light").Fn,
+					).Fn,
+				).
+				Fn,
+		}, widgets...)
 		le := func(gtx l.Context, index int) l.Dimensions {
 			return widgets[index](gtx)
 		}
@@ -110,17 +140,14 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 			*wg.Size, gui.Widgets{
 				{Size: 0,
 					Widget:
-					wg.Flex().Flexed(
-						1,
-						wg.Fill(
-							"DocBg", l.W, 0, 0,
-							wg.Inset(
-								0.25,
-								wg.lists["receive"].
-									Vertical().
-									Length(len(widgets)).
-									ListElement(le).Fn,
-							).Fn,
+					wg.Fill(
+						"DocBg", l.W, 0, 0,
+						wg.Inset(
+							0.25,
+							wg.lists["receive"].
+								Vertical().
+								Length(len(widgets)).
+								ListElement(le).Fn,
 						).Fn,
 					).
 						Fn,
@@ -132,7 +159,6 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 						"PanelBg", l.W, wg.TextSize.V, 0,
 						wg.Flex().AlignMiddle().Rigid(
 							wg.VFlex().AlignMiddle().
-								// Flexed(1, gui.EmptyMaxWidth()).
 								Rigid(
 									wg.VFlex().AlignMiddle().
 										Rigid(
@@ -201,25 +227,24 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 								).
 								Fn,
 						).
-							Flexed(
-								1, wg.Flex().Rigid(
-									wg.Fill(
-										"DocBg", l.Center, wg.TextSize.V, 0,
-										wg.Inset(
-											0.25,
-											wg.VFlex().Flexed(1,
+							Rigid(
+								wg.VFlex().
+									Rigid(header).
+									Flexed(1,
+										wg.Fill(
+											"DocBg", l.Center, wg.TextSize.V, 0,
+											wg.Inset(
+												0.25,
 												wg.ReceiveAddressbook,
 											).Fn,
 										).Fn,
-									).Fn,
-								).
+									).
 									Fn,
 							).
 							Fn,
 					).
 						Fn,
 				},
-				
 				{
 					Size: 64,
 					Widget:
@@ -227,7 +252,6 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 						"PanelBg", l.W, wg.TextSize.V, 0,
 						wg.Flex().AlignMiddle().Rigid(
 							wg.VFlex().AlignMiddle().
-								// Flexed(1, gui.EmptyMaxWidth()).
 								Rigid(
 									wg.VFlex().AlignMiddle().
 										Rigid(
@@ -239,12 +263,6 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										Rigid(
 											wg.currentReceiveQR,
 										).
-										// Rigid(
-										// 	wg.Inset(
-										// 		0.25,
-										// 		wg.Caption(wg.currentReceiveAddress).Font("go regular").Fn,
-										// 	).Fn,
-										// ).
 										Rigid(
 											wg.Inset(
 												0.25,
@@ -266,8 +284,6 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 										).
 										Fn,
 								).
-								
-								
 								Rigid(
 									wg.Inset(
 										0.25,
@@ -296,19 +312,18 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 								).
 								Fn,
 						).
-							Flexed(
-								1, wg.Flex().Rigid(
-									wg.Fill(
-										"DocBg", l.Center, wg.TextSize.V, 0,
-										wg.Inset(
-											0.25,
-											wg.VFlex().Flexed(
-												1,
+							Rigid(
+								wg.VFlex().
+									Rigid(header).
+									Flexed(1,
+										wg.Fill(
+											"DocBg", l.Center, wg.TextSize.V, 0,
+											wg.Inset(
+												0.25,
 												wg.ReceiveAddressbook,
 											).Fn,
 										).Fn,
-									).Fn,
-								).
+									).
 									Fn,
 							).
 							Fn,
@@ -322,7 +337,6 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 						"PanelBg", l.W, wg.TextSize.V, 0,
 						wg.Flex().AlignMiddle().Rigid(
 							wg.VFlex().AlignMiddle().
-								// Flexed(1, gui.EmptyMaxWidth()).
 								Rigid(
 									wg.Flex().AlignMiddle().
 										Rigid(
@@ -396,18 +410,18 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 								).
 								Fn,
 						).
-							Flexed(
-								1, wg.Flex().Rigid(
-									wg.Fill(
-										"DocBg", l.Center, wg.TextSize.V, 0,
-										wg.Inset(
-											0.25,
-											wg.VFlex().Flexed(1,
+							Rigid(
+								wg.VFlex().
+									Rigid(header).
+									Flexed(1,
+										wg.Fill(
+											"DocBg", l.Center, wg.TextSize.V, 0,
+											wg.Inset(
+												0.25,
 												wg.ReceiveAddressbook,
 											).Fn,
 										).Fn,
-									).Fn,
-								).
+									).
 									Fn,
 							).
 							Fn,

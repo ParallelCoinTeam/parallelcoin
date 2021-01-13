@@ -93,7 +93,7 @@ func (w *Window) App(size *int, activePage *uberatomic.String, invalidate chan s
 		Size:                size,
 		invalidate:          invalidate,
 		mainDirection:       l.Center + 1,
-		Break1: Break1,
+		Break1:              Break1,
 	}
 	a.SideBarSize = &unit.Value{}
 	return a

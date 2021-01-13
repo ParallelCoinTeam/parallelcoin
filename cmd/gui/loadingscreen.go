@@ -31,24 +31,11 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 					gui.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
-							return a.VFlex().
-								AlignMiddle().
-								SpaceSides().
-								Rigid(
-									a.Flex().
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Rigid(
-											a.H1("loading").Fn,
-										).
-										Flexed(0.5, gui.EmptyMaxWidth()).
-										Fn,
-								).
-								Fn(gtx)
+							return a.Flex().Flexed(1, a.Direction().Center().Embed(a.H1("loading").Fn).Fn).Fn(gtx)
 						},
 					},
 				},
 			),
-		
 		},
 	)
 	a.ButtonBar(
