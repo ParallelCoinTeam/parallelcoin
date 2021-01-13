@@ -88,7 +88,7 @@ func (w *Window) List() (li *List) {
 		Window:         w,
 		pageUp:         w.Clickable(),
 		pageDown:       w.Clickable(),
-		color:          "PanelBg",
+		color:          "DocText",
 		background:     "Transparent",
 		active:         "Primary",
 		scrollWidth:    int(w.TextSize.Scale(0.75).V),
@@ -259,8 +259,8 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	if li.axis == l.Horizontal {
 		containerFlex := li.Theme.VFlex()
 		if !li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth + int(li.TextSize.V)/2)) // + li.scrollBarPad))
-			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth + int(li.TextSize.V)/4))
+			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/4, int(li.TextSize.V)/4))
 		}
 		containerFlex.Rigid(
 			li.VFlex().
@@ -284,7 +284,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 				Fn,
 		)
 		if li.leftSide {
-			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
+			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/4, int(li.TextSize.V)/4))
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth)) // li.scrollWidth)) // + li.scrollBarPad))
 		}
 		container = containerFlex.Fn
@@ -292,7 +292,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		containerFlex := li.Theme.Flex()
 		if !li.leftSide {
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth + int(li.TextSize.V)/2)) // + li.scrollBarPad))
-			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
+			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/4, int(li.TextSize.V)/4))
 		}
 		containerFlex.Rigid(
 			li.Fill(li.background, l.Center, li.TextSize.V/4, 0, li.Flex().
@@ -330,7 +330,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 				Fn).Fn,
 		)
 		if li.leftSide {
-			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/2))
+			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/2, int(li.TextSize.V)/4))
 			containerFlex.Rigid(li.embedWidget(li.scrollWidth+int(li.TextSize.V)/2))
 		}
 		container = li.Fill(li.background, l.Center, li.TextSize.V/4, 0, containerFlex.Fn).Fn
