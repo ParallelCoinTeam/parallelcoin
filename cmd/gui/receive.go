@@ -135,28 +135,30 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 			// ).Fn,
 			func(gtx l.Context) l.Dimensions {
 				// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
-				return wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveAmount"].Fn).Fn(gtx)
+				return wg.Inset(0.25, wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveAmount"].Fn).Fn).Fn(gtx)
 			},
 			func(gtx l.Context) l.Dimensions {
 				// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
-				return wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveMessage"].Fn).Fn(gtx)
+				return wg.Inset(0.25, wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveMessage"].Fn).Fn).Fn(gtx)
 			},
-			wg.ButtonLayout(
-				wg.currentReceiveRegenClickable.SetClick(
-					func() {
-						Debug("clicked regenerate button")
-						wg.currentReceiveGetNew.Store(true)
-					},
-				),
-			).
-				Background("Primary").
-				Embed(
-					wg.Inset(
-						0.25,
-						wg.H6("regenerate").Color("Light").Fn,
-					).Fn,
+			wg.Inset(0.25,
+				wg.ButtonLayout(
+					wg.currentReceiveRegenClickable.SetClick(
+						func() {
+							Debug("clicked regenerate button")
+							wg.currentReceiveGetNew.Store(true)
+						},
+					),
 				).
-				Fn,
+					Background("Primary").
+					Embed(
+						wg.Inset(
+							0.25,
+							wg.H6("regenerate").Color("Light").Fn,
+						).Fn,
+					).
+					Fn,
+			).Fn,
 		}, widgets...)
 		le := func(gtx l.Context, index int) l.Dimensions {
 			return smallWidgets[index](gtx)
