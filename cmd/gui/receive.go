@@ -44,28 +44,54 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 		widgets = append(widgets,
 			wg.Flex().AlignMiddle().Flexed(1, wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
 			header)
+		avail := len(wg.addressbookClickables)
+		req := len(wg.State.receiveAddresses)
+		if req > avail {
+			for i := 0; i < req-avail; i++ {
+				wg.addressbookClickables = append(wg.addressbookClickables, wg.WidgetPool.GetClickable())
+			}
+		}
 		for x := range wg.State.receiveAddresses {
-			i := x
+			j := x
+			i := len(wg.State.receiveAddresses) - 1 - x
 			widgets = append(widgets, func(gtx l.Context) l.Dimensions {
-				return wg.Flex().Flexed(1,
-					wg.Flex().AlignBaseline().
-						Rigid(
+				return wg.Inset(0.25,
+				wg.ButtonLayout(wg.addressbookClickables[i].SetClick(func() {
+					qrText := fmt.Sprintf(
+						"parallelcoin:%s?amount=%s&message=%s",
+						wg.State.receiveAddresses[i].Address,
+						wg.State.receiveAddresses[i].Amount,
+						wg.State.receiveAddresses[i].Comment,
+					)
+					Debug("clicked receive address list item", j)
+					if err := clipboard.WriteAll(qrText); Check(err) {
+					}
+				})).
+					Background("PanelBg").
+					Embed(
 							wg.Inset(0.25,
-								wg.Caption(wg.State.receiveAddresses[i].Address).Font("go regular").Fn,
-							).Fn,
+								wg.VFlex().
+									Rigid(
+										wg.Flex().AlignBaseline().
+											Rigid(
+												wg.Caption(wg.State.receiveAddresses[i].Address).
+													Font("go regular").Fn,
+											).
+											Flexed(1,
+												wg.Body1(wg.State.receiveAddresses[i].Amount.String()).
+													Alignment(text.End).Fn,
+											).
+											Fn,
+									).
+									Rigid(
+										wg.Body1(wg.State.receiveAddresses[i].Comment).Fn,
+									).
+									Fn,
+							).
+								Fn,
 						).
-						Rigid(
-							wg.Inset(0.25,
-								wg.Body1(wg.State.receiveAddresses[i].Amount.String()).Fn,
-							).Fn,
-						).
-						Rigid(
-							wg.Inset(0.25,
-								wg.Body1(wg.State.receiveAddresses[i].Comment).Fn,
-							).Fn,
-						).
-						Fn,
-				).Fn(gtx)
+							Fn,
+					).Fn(gtx)
 			})
 		}
 		// assemble the list for the small, scrolling list view

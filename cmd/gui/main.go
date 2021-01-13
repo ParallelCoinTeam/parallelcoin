@@ -70,26 +70,27 @@ type WalletGUI struct {
 	ChainClient, WalletClient *rpcclient.Client
 	*gui.Window
 	Size                         *int
-	MainApp                      *gui.App
-	invalidate                   qu.C
-	unlockPage                   *gui.App
-	loadingPage                  *gui.App
-	config                       *cfg.Config
-	configs                      cfg.GroupsMap
-	unlockPassword               *gui.Password
-	sidebarButtons               []*gui.Clickable
-	buttonBarButtons             []*gui.Clickable
-	statusBarButtons             []*gui.Clickable
-	quitClickable                *gui.Clickable
-	bools                        BoolMap
-	lists                        ListMap
-	checkables                   CheckableMap
-	clickables                   ClickableMap
-	inputs                       InputMap
-	passwords                    PasswordMap
-	incdecs                      IncDecMap
-	sendAddresses                []SendAddress
-	console                      *Console
+	MainApp               *gui.App
+	invalidate            qu.C
+	unlockPage            *gui.App
+	loadingPage           *gui.App
+	config                *cfg.Config
+	configs               cfg.GroupsMap
+	unlockPassword        *gui.Password
+	sidebarButtons        []*gui.Clickable
+	buttonBarButtons      []*gui.Clickable
+	statusBarButtons      []*gui.Clickable
+	addressbookClickables []*gui.Clickable
+	quitClickable         *gui.Clickable
+	bools                 BoolMap
+	lists                 ListMap
+	checkables            CheckableMap
+	clickables            ClickableMap
+	inputs                InputMap
+	passwords             PasswordMap
+	incdecs               IncDecMap
+	sendAddresses         []SendAddress
+	console               *Console
 	RecentTransactionsWidget     l.Widget
 	HistoryWidget                l.Widget
 	txRecentList, txHistoryList  []btcjson.ListTransactionsResult
