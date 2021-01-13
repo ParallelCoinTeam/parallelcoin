@@ -119,7 +119,7 @@ func (wg *WalletGUI) Tickers() {
 						if first {
 							wg.processWalletBlockNotification()
 						}
-						if wg.stateLoaded.Load() {
+						if wg.stateLoaded.Load() || wg.currentReceiveGetNew.Load() {
 							avail := len(wg.addressbookClickables)
 							req := len(wg.State.receiveAddresses)
 							if req > avail {
@@ -136,9 +136,9 @@ func (wg *WalletGUI) Tickers() {
 										return wg.Inset(0.25,
 											wg.ButtonLayout(wg.addressbookClickables[i].SetClick(func() {
 												qrText := fmt.Sprintf(
-													"parallelcoin:%s?amount=%s&message=%s",
+													"parallelcoin:%s?amount=%8.8f&message=%s",
 													wg.State.receiveAddresses[i].Address,
-													wg.State.receiveAddresses[i].Amount,
+													wg.State.receiveAddresses[i].Amount.ToDUO(),
 													wg.State.receiveAddresses[i].Message,
 												)
 												Debug("clicked receive address list item", j)
