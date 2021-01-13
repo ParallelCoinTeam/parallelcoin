@@ -193,6 +193,7 @@ func (wg *WalletGUI) Run() (err error) {
 			case <-wg.invalidate:
 				Trace("invalidating render queue")
 				wg.Window.Window.Invalidate()
+				// TODO: make a more appropriate trigger for this - ie, when state actually changes.
 				if wg.wallet.Running() && wg.stateLoaded.Load() {
 					filename := filepath.Join(wg.cx.DataDir, "state.json")
 					if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {

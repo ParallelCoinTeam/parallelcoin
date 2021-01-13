@@ -218,6 +218,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 			return l.Dimensions{Size: gtx.Constraints.Max}
 		}
 	}
+	Debug(">>>>>>>>>>>>>>>> iterating transactions", n, listName)
 	for x := range wga {
 		if x > n && n > 0 {
 			break
@@ -341,6 +342,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 			ListElement(le).
 			Fn(gtx)
 	}
+	Debug(">>>>>>>>>>>>>>>> history widget completed", n, listName)
 	switch listName {
 	case "history":
 		wg.HistoryWidget = wo
