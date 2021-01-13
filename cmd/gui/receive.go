@@ -56,19 +56,19 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 			i := len(wg.State.receiveAddresses) - 1 - x
 			widgets = append(widgets, func(gtx l.Context) l.Dimensions {
 				return wg.Inset(0.25,
-				wg.ButtonLayout(wg.addressbookClickables[i].SetClick(func() {
-					qrText := fmt.Sprintf(
-						"parallelcoin:%s?amount=%s&message=%s",
-						wg.State.receiveAddresses[i].Address,
-						wg.State.receiveAddresses[i].Amount,
-						wg.State.receiveAddresses[i].Message,
-					)
-					Debug("clicked receive address list item", j)
-					if err := clipboard.WriteAll(qrText); Check(err) {
-					}
-				})).
-					Background("PanelBg").
-					Embed(
+					wg.ButtonLayout(wg.addressbookClickables[i].SetClick(func() {
+						qrText := fmt.Sprintf(
+							"parallelcoin:%s?amount=%8.8f&message=%s",
+							wg.State.receiveAddresses[i].Address,
+							wg.State.receiveAddresses[i].Amount.ToDUO(),
+							wg.State.receiveAddresses[i].Message,
+						)
+						Debug("clicked receive address list item", j)
+						if err := clipboard.WriteAll(qrText); Check(err) {
+						}
+					})).
+						Background("PanelBg").
+						Embed(
 							wg.Inset(0.25,
 								wg.VFlex().
 									Rigid(
@@ -90,12 +90,12 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 							).
 								Fn,
 						).
-							Fn,
-					).Fn(gtx)
+						Fn,
+				).Fn(gtx)
 			})
 		}
 		// assemble the list for the small, scrolling list view
-		widgets = append([]l.Widget{
+		smallWidgets := append([]l.Widget{
 			wg.Inset(
 				0.25,
 				wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
@@ -133,14 +133,13 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 			// 	0.25,
 			// 	wg.Caption(wg.currentReceiveAddress).Alignment(text.Middle).Font("go regular").Fn,
 			// ).Fn,
-			func(gtx l.Context) l.
-			Dimensions {
+			func(gtx l.Context) l.Dimensions {
 				// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
-				return wg.inputs["receiveSmallAmount"].Fn(gtx)
+				return wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveAmount"].Fn).Fn(gtx)
 			},
 			func(gtx l.Context) l.Dimensions {
 				// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
-				return wg.inputs["receiveSmallMessage"].Fn(gtx)
+				return wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveMessage"].Fn).Fn(gtx)
 			},
 			wg.ButtonLayout(
 				wg.currentReceiveRegenClickable.SetClick(
@@ -160,19 +159,19 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 				Fn,
 		}, widgets...)
 		le := func(gtx l.Context, index int) l.Dimensions {
-			return widgets[index](gtx)
+			return smallWidgets[index](gtx)
 		}
 		return wg.Responsive(
 			*wg.Size, gui.Widgets{
 				{Size: 0,
 					Widget:
 					wg.Fill(
-						"DocBg", l.W, 0, 0,
+						"PanelBg", l.W, 0, 0,
 						wg.Inset(
 							0.25,
 							wg.lists["receive"].
 								Vertical().
-								Length(len(widgets)).
+								Length(len(smallWidgets)).
 								ListElement(le).Fn,
 						).Fn,
 					).
