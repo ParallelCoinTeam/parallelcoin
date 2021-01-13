@@ -39,6 +39,9 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
+					Debug("---------------------- txReady", wg.txReady.Load())
+					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
+					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
 					// Debug("preconnect loop")
 					// update goroutines data
 					// wg.goRoutines()
@@ -81,6 +84,9 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
+					Debug("---------------------- txReady", wg.txReady.Load())
+					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
+					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
 					// Debug("connected loop")
 					// wg.goRoutines()
 					// the remaining actions require a running shell, if it has been stopped we need to stop
