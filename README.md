@@ -11,6 +11,8 @@ Fully integrated all-in-one cli client, full node, wallet server, miner and GUI 
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![CodeScene general](https://codescene.io/images/analyzed-by-codescene-badge.svg)](https://codescene.io/projects/7291)
 
+##### If you are looking for the legacy 1.2.0 version, go here (https://github.com/marcetin/parallelcoin/tree/master/legacy)[https://github.com/marcetin/parallelcoin/tree/master/legacy]
+
 ## Installation
 
 Straight to business, this is the part I am looking for, so it's here at the top.
