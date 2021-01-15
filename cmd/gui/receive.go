@@ -30,7 +30,80 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 				// }
 			}
 		}
-		if wg.ReceiveAddressbook == nil {
+		if wg.ReceiveAddressbook == nil && wg.stateLoaded.Load() {
+			avail := len(wg.addressbookClickables)
+			req := len(wg.State.receiveAddresses)
+			if req > avail {
+				for i := 0; i < req-avail; i++ {
+					wg.addressbookClickables = append(
+						wg.addressbookClickables,
+						wg.WidgetPool.GetClickable(),
+					)
+				}
+			}
+			wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
+				var widgets []l.Widget
+				for x := range wg.State.receiveAddresses {
+					j := x
+					i := len(wg.State.receiveAddresses) - 1 - x
+					widgets = append(
+						widgets, func(gtx l.Context) l.Dimensions {
+							return wg.Inset(
+								0.25,
+								wg.ButtonLayout(
+									wg.addressbookClickables[i].SetClick(
+										func() {
+											qrText := fmt.Sprintf(
+												"parallelcoin:%s?amount=%8.8f&message=%s",
+												wg.State.receiveAddresses[i].Address,
+												wg.State.receiveAddresses[i].Amount.ToDUO(),
+												wg.State.receiveAddresses[i].Message,
+											)
+											Debug("clicked receive address list item", j)
+											if err := clipboard.WriteAll(qrText); Check(err) {
+											}
+										},
+									),
+								).
+									Background("PanelBg").
+									Embed(
+										wg.Inset(
+											0.25,
+											wg.VFlex().
+												Rigid(
+													wg.Flex().AlignBaseline().
+														Rigid(
+															wg.Caption(wg.State.receiveAddresses[i].Address).
+																Font("go regular").Fn,
+														).
+														Flexed(
+															1,
+															wg.Body1(wg.State.receiveAddresses[i].Amount.String()).
+																Alignment(text.End).Fn,
+														).
+														Fn,
+												).
+												Rigid(
+													wg.Body1(wg.State.receiveAddresses[i].Message).Fn,
+												).
+												Fn,
+										).
+											Fn,
+									).
+									Fn,
+							).Fn(gtx)
+						},
+					)
+				}
+				le := func(gtx l.Context, index int) l.Dimensions {
+					return widgets[index](gtx)
+				}
+				return wg.Flex().Rigid(
+					wg.lists["receiveAddresses"].Length(len(widgets)).Vertical().
+						ListElement(le).Fn,
+				).Fn(gtx)
+			}
+		} else if wg.ReceiveAddressbook == nil {
 			wg.ReceiveAddressbook = wg.Inset(0.25, wg.H1("addressbook").Alignment(text.End).Fn).Fn
 		}
 		
