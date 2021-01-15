@@ -28,7 +28,7 @@ using](https://golang.org).
 
 ```bash
 cd ~
-sudo apt get install -y wget git
+sudo apt get install -y wget git build-essential
 wget https://golang.org/dl/go1.14.13.linux-amd64.tar.gz
 tar zxvf https://golang.org/dl/go1.14.13.linux-amd64.tar.gz
 ```
@@ -49,9 +49,7 @@ then run
 source ~/.bashrc
 ```
 
-Clone this repository where you like, here I show the SSH URL which is recommended
-for speed as well as if you want to add a branch to the repository as a member of the 
-team (github account and a registered SSH public key on it is required):
+Clone this repository where you like:
 
 ```
 cd /where/you/keep/your/things
@@ -60,7 +58,7 @@ cd pod
 ```
 
 Before you can build it, though, see [gioui.org install instructions](https://gioui.org/doc/install) - note that on 
-linux xsel or other clipboard apps are required for clipboard functionality. 
+linux xsel or other clipboard apps are required for clipboard functionality. The instructions there cover Ubuntu.
 
 Several important libraries are required to build on each platform.
 Linux needs some input related X libraries, wayland and their GL
@@ -73,7 +71,7 @@ at this early stage with the GUI, please bear with us.
 Next, go to the repo root and build it.
 
 ```
-make stroy
+make -B stroy
 ```
 
 `stroy` is a pure go replacement for `make`. Run it without any options to get
