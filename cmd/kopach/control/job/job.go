@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"sort"
+	"sync"
 	"time"
 	
 	"github.com/p9c/pod/app/conte"
@@ -41,6 +42,7 @@ type Job struct {
 
 // CoinBases is a map of coinbases for a block
 type CoinBases struct {
+	sync.Mutex
 	CoinBaseMap
 }
 
@@ -54,12 +56,16 @@ func NewCoinBases() CoinBases {
 	}
 }
 
-func (cbs *CoinBases) Load() CoinBaseMap {
+func (cbs *CoinBases) Load() (out CoinBaseMap) {
+	cbs.Lock()
+	defer cbs.Unlock()
 	return cbs.CoinBaseMap
 }
 
 func (cbs *CoinBases) Store(cbm CoinBaseMap) {
+	cbs.Lock()
 	cbs.CoinBaseMap = cbm
+	cbs.Unlock()
 }
 
 // Get returns a message broadcast by a node and each field is decoded where possible avoiding memory allocation
@@ -68,8 +74,10 @@ func (cbs *CoinBases) Store(cbm CoinBaseMap) {
 // and a set of methods that extracts the individual requested field without copying memory, or deserialize their
 // contents which will be concurrent safe The varying coinbase payment values are in transaction 0 last output, the
 // individual varying transactions are stored separately and will be reassembled at the end
-func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers,
-	cbs CoinBases) (out Container, txr []*util.Tx) {
+func Get(
+	cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers,
+	cbs CoinBases,
+) (out Container, txr []*util.Tx) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
 	// if txr == nil {
 	txr = []*util.Tx{}
@@ -124,22 +132,23 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers,
 			nbH == fork.List[1].TestnetStart) {
 		nbH++
 	}
-	ti := cbs.Load()
+	cbm := make(CoinBaseMap)
 	for i := range bitsMap {
 		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
 		txc := txs.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
 		// Traces(txs)
-		ti[i] = txx
+		cbm[i] = txx
 		// Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].value)
 		mTree := blockchain.BuildMerkleTreeStore(
-			append([]*util.Tx{txx}, txr...), false)
+			append([]*util.Tx{txx}, txr...), false,
+		)
 		// Traces(mTree[len(mTree)-1].CloneBytes())
 		mTS[i] = &chainhash.Hash{}
 		_ = mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
-	cbs.Store(ti)
+	cbs.Store(cbm)
 	// Traces(mTS)
 	mHashes := Hashes.NewHashes()
 	mHashes.Put(mTS)
@@ -207,14 +216,18 @@ func (j *Container) String() (s string) {
 	s += "\n"
 	s += fmt.Sprint("3 RPCListenersPort: ", j.GetRPCListenersPort())
 	s += "\n"
-	s += fmt.Sprint("4 ControllerListenerPort: ",
-		j.GetControllerListenerPort())
+	s += fmt.Sprint(
+		"4 ControllerListenerPort: ",
+		j.GetControllerListenerPort(),
+	)
 	s += "\n"
 	h := j.GetNewHeight()
 	s += fmt.Sprint("5 Block height: ", h)
 	s += "\n"
-	s += fmt.Sprintf("6 Previous Block Hash (sha256d): %064x",
-		j.GetPrevBlockHash().CloneBytes())
+	s += fmt.Sprintf(
+		"6 Previous Block Hash (sha256d): %064x",
+		j.GetPrevBlockHash().CloneBytes(),
+	)
 	s += "\n"
 	bitses := j.GetBitses()
 	s += fmt.Sprint("7 Difficulty targets:\n")
@@ -224,18 +237,22 @@ func (j *Container) String() (s string) {
 	}
 	sort.Ints(sortedBitses)
 	for i := range sortedBitses {
-		s += fmt.Sprintf("  %2d %-10v %d %064x", sortedBitses[i],
+		s += fmt.Sprintf(
+			"  %2d %-10v %d %064x", sortedBitses[i],
 			fork.List[fork.GetCurrent(h)].
 				AlgoVers[int32(sortedBitses[i])],
 			bitses[int32(sortedBitses[i])],
-			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes())
+			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes(),
+		)
 		s += "\n"
 	}
 	s += "8 Merkles:\n"
 	hashes := j.GetHashes()
 	for i := range sortedBitses {
-		s += fmt.Sprintf("  %2d %s\n", sortedBitses[i],
-			hashes[int32(sortedBitses[i])].String())
+		s += fmt.Sprintf(
+			"  %2d %s\n", sortedBitses[i],
+			hashes[int32(sortedBitses[i])].String(),
+		)
 	}
 	
 	// s += spew.Sdump(j.GetHashes())
