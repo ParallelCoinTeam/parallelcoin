@@ -146,8 +146,15 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 		)
 	}
 	go func() {
-		<-legacyServer.RequestProcessShutdownChan()
-		interrupt.Request()
+	out:
+		for {
+			select {
+			case <-cx.KillAll:
+				break out
+			case <-legacyServer.RequestProcessShutdownChan():
+				interrupt.Request()
+			}
+		}
 	}()
 	return
 }
