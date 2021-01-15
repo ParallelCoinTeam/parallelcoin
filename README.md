@@ -13,6 +13,8 @@ Fully integrated all-in-one cli client, full node, wallet server, miner and GUI 
 
 ##### *If you are looking for the legacy 1.2.0 version, go here [https://github.com/marcetin/parallelcoin/tree/master/legacy](https://github.com/marcetin/parallelcoin/tree/master/legacy)
 
+# WARNING: work in progress, will probably break
+
 ## Installation
 
 Straight to business, this is the part I am looking for, so it's here at the top.
@@ -30,7 +32,7 @@ using](https://golang.org).
 cd ~
 sudo apt get install -y wget git build-essential
 wget https://golang.org/dl/go1.14.13.linux-amd64.tar.gz
-tar zxvf https://golang.org/dl/go1.14.13.linux-amd64.tar.gz
+tar zxvf go1.14.13.linux-amd64.tar.gz
 ```
 
 The build tools expect a working GOBIN which is also in PATH, so, open `~/.bashrc` in 
