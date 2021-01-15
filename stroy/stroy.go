@@ -16,6 +16,8 @@ import (
 	"github.com/p9c/pod/pkg/util/logi"
 )
 
+var WindowsExec = func(split []string) (out *exec.Cmd){ return nil}
+
 func populateVersionFlags() bool {
 	// `-X 'package_path.variable_name=new_value'`
 	BuildTime = time.Now().Format(time.RFC3339)
@@ -199,7 +201,7 @@ func main() {
 						fmt.Sprintf(`-ldflags=%s`, strings.Join(ldFlags,
 							" ")))
 				}
-				// Infos(split)
+				Infos(split)
 				// add ldflags to commands that have this
 				// for i := range split {
 				// 	split[i] =
