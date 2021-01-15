@@ -17,8 +17,28 @@ Fully integrated all-in-one cli client, full node, wallet server, miner and GUI 
 
 Straight to business, this is the part I am looking for, so it's here at the top.
 
+These instructions expect that you understand basic usage of the bash shell and terminal,
+and git usage. You should be able to edit a text file on the command line interface
+though you could use `gedit` or similar if you prefer.
+
 First, you need a working [Go 1.14+ installation for the platform you are 
 using](https://golang.org).
+
+The build tools expect a working GOBIN which is also in PATH, so, open `~/.bashrc` in 
+a text editor and put in it:
+
+```bash
+export GOBIN=$HOME/bin
+export GOPATH=$HOME
+export GOROOT=$HOME/go
+export PATH=$GOBIN:$PATH
+```
+
+then run
+
+```bash
+source ~/.bashrc
+```
 
 Clone this repository where you like, here I show the SSH URL which is recommended
 for speed as well as if you want to add a branch to the repository as a member of the 
