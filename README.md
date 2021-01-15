@@ -26,7 +26,8 @@ team (github account and a registered SSH public key on it is required):
 
 ```
 cd /where/you/keep/your/things
-git clone git@github.com:p9c/pod.git
+git clone https://github.com/p9c/pod.git
+cd pod
 ```
 
 Before you can build it, though, see [gioui.org install instructions](https://gioui.org/doc/install) - note that on 
