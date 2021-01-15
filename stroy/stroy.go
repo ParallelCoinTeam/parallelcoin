@@ -172,7 +172,7 @@ func populateVersionFlags() bool {
 	// 	}
 	// }
 	
-	Infos(ldFlags)
+	// Infos(ldFlags)
 	return true
 }
 
@@ -224,7 +224,7 @@ func main() {
 						),
 					)
 				}
-				Infos(split)
+				// Infos(split)
 				// add ldflags to commands that have this
 				// for i := range split {
 				// 	split[i] =
@@ -236,7 +236,7 @@ func main() {
 `, i, os.Args[1],
 					split[0], split[1:],
 				)
-				Info(split)
+				// Info(split)
 				var cmd *exec.Cmd
 				if runtime.GOOS == "windows" {
 					cmd = WindowsExec(split)
