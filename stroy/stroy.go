@@ -16,7 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/util/logi"
 )
 
-var WindowsExec = func(split []string) (out *exec.Cmd){ return nil}
+var WindowsExec = func(split []string) (out *exec.Cmd) { return nil }
 
 func populateVersionFlags() bool {
 	// `-X 'package_path.variable_name=new_value'`
@@ -118,28 +118,30 @@ func populateVersionFlags() bool {
 	var maxVersion int
 	var maxString string
 	var maxIs bool
-	if err = rt.ForEach(func(pr *plumbing.Reference) error {
-		// var rcoh *object.Commit
-		// if rcoh, err = repo.CommitObject(pr.Hash()); Check(err) {
-		// }
-		prs := strings.Split(pr.String(), "/")[2]
-		if strings.HasPrefix(prs, "v") {
-			var va [3]int
-			_, _ = fmt.Sscanf(prs, "v%d.%d.%d", &va[0], &va[1], &va[2])
-			vn := va[0]*1000000 + va[1]*1000 + va[2]
-			if maxVersion < vn {
-				maxVersion = vn
-				maxString = prs
+	if err = rt.ForEach(
+		func(pr *plumbing.Reference) error {
+			// var rcoh *object.Commit
+			// if rcoh, err = repo.CommitObject(pr.Hash()); Check(err) {
+			// }
+			prs := strings.Split(pr.String(), "/")[2]
+			if strings.HasPrefix(prs, "v") {
+				var va [3]int
+				_, _ = fmt.Sscanf(prs, "v%d.%d.%d", &va[0], &va[1], &va[2])
+				vn := va[0]*1000000 + va[1]*1000 + va[2]
+				if maxVersion < vn {
+					maxVersion = vn
+					maxString = prs
+				}
+				if pr.Hash() == rh.Hash() {
+					maxIs = true
+				}
+				// allTags = append(allTags, prs)
 			}
-			if pr.Hash() == rh.Hash() {
-				maxIs = true
-			}
-			// allTags = append(allTags, prs)
-		}
-		// fmt.Println(pr.String(), pr.Hash(), pr.Name(), pr.Strings(),
-		// 	pr.Target(), pr.Type())
-		return nil
-	}); Check(err) {
+			// fmt.Println(pr.String(), pr.Hash(), pr.Name(), pr.Strings(),
+			// 	pr.Target(), pr.Type())
+			return nil
+		},
+	); Check(err) {
 		return false
 	}
 	if !maxIs {
@@ -148,13 +150,25 @@ func populateVersionFlags() bool {
 	// fmt.Println(maxVersion, maxString)
 	Tag = maxString
 	// sort.Ints(versionsI)
-	ldFlags = []string{
-		`"-X main.URL=` + URL + ``,
-		`-X main.GitCommit=` + GitCommit + ``,
-		`-X main.BuildTime=` + BuildTime + ``,
-		`-X main.GitRef=` + GitRef + ``,
-		`-X main.Tag=` + Tag + `"`,
+	if runtime.GOOS == "windows" {
+		
+		ldFlags = []string{
+			`"-X main.URL=` + URL + ``,
+			`-X main.GitCommit=` + GitCommit + ``,
+			`-X main.BuildTime=` + BuildTime + ``,
+			`-X main.GitRef=` + GitRef + ``,
+			`-X main.Tag=` + Tag + `"`,
+		}
+	} else {
+		ldFlags = []string{
+			`"-X main.URL='` + URL + ``,
+			`-X main.GitCommit='` + GitCommit + `'`,
+			`-X main.BuildTime='` + BuildTime + `'`,
+			`-X main.GitRef='` + GitRef + `'`,
+			`-X main.Tag='` + Tag + `'"`,
+		}
 	}
+	
 	// Infos(ldFlags)
 	return true
 }
@@ -197,9 +211,15 @@ func main() {
 				out := strings.ReplaceAll(list[i], "%datadir", datadir)
 				split = strings.Split(out, " ")
 				for i := range split {
-					split[i] = strings.ReplaceAll(split[i], "%ldflags",
-						fmt.Sprintf(`-ldflags=%s`, strings.Join(ldFlags,
-							" ")))
+					split[i] = strings.ReplaceAll(
+						split[i], "%ldflags",
+						fmt.Sprintf(
+							`-ldflags=%s`, strings.Join(
+								ldFlags,
+								" ",
+							),
+						),
+					)
 				}
 				Infos(split)
 				// add ldflags to commands that have this
@@ -207,10 +227,12 @@ func main() {
 				// 	split[i] =
 				// 		Infof("'%s'", split[i])
 				// }
-				fmt.Printf(`executing item %d of list '%v' '%v' '%v'
+				fmt.Printf(
+					`executing item %d of list '%v' '%v' '%v'
 
 `, i, os.Args[1],
-					split[0], split[1:])
+					split[0], split[1:],
+				)
 				Info(split)
 				var cmd *exec.Cmd
 				if runtime.GOOS == "windows" {
@@ -242,8 +264,10 @@ func main() {
 			}
 		}
 		fmt.Println()
-		fmt.Println("adding a second string to the commandline changes the name" +
-			" of the home folder selected in the scripts")
+		fmt.Println(
+			"adding a second string to the commandline changes the name" +
+				" of the home folder selected in the scripts",
+		)
 	}
 }
 
@@ -256,8 +280,10 @@ var (
 )
 
 func GetVersion() string {
-	return fmt.Sprintf("app information: repo: %s branch: %s commit: %s built"+
-		": %s tag: %s...\n", URL, GitRef, GitCommit, BuildTime, Tag)
+	return fmt.Sprintf(
+		"app information: repo: %s branch: %s commit: %s built"+
+			": %s tag: %s...\n", URL, GitRef, GitCommit, BuildTime, Tag,
+	)
 }
 
 type command struct {
