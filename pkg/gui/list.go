@@ -384,7 +384,7 @@ func (li *List) pageUpDown(dims DimensionList, view, total, x, y int, down bool)
 			li.Flex().
 				Rigid(EmptySpace(x/4, y)).
 				Rigid(
-					li.Fill("scrim", l.Center, li.TextSize.V/4, ^0, EmptySpace(x/2, y)).Fn,
+					li.Fill("scrim", l.Center, li.TextSize.V/4, 0, EmptySpace(x/2, y)).Fn,
 				).
 				Rigid(EmptySpace(x/4, y)).
 				Fn,
