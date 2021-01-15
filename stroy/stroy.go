@@ -379,11 +379,8 @@ var commands = map[string][]string{
 		"go install -v %ldflags",
 		"pod -D %datadir --minerpass pa55word",
 	},
-	"resetwallet0": {
-		"pod -D %datadir -l trace --walletpass aoeuaoeu wallet drophistory",
-	},
-	"resetwallet1": {
-		"pod -D test1 -l trace --walletpass aoeuaoeu wallet drophistory",
+	"resetwallet": {
+		"pod -D %datadir -l debug --walletpass aoeuaoeu wallet drophistory",
 	},
 	"guihttpprof": {
 		"go install -v %ldflags",
