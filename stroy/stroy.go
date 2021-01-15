@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/app/apputil"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -150,26 +153,26 @@ func populateVersionFlags() bool {
 	// fmt.Println(maxVersion, maxString)
 	Tag = maxString
 	// sort.Ints(versionsI)
-	if runtime.GOOS != "windows" {
-		
-		ldFlags = []string{
+	// if runtime.GOOS == "windows" {
+	
+	ldFlags = []string{
 			`"-X main.URL=` + URL + ``,
 			`-X main.GitCommit=` + GitCommit + ``,
 			`-X main.BuildTime=` + BuildTime + ``,
 			`-X main.GitRef=` + GitRef + ``,
 			`-X main.Tag=` + Tag + `"`,
 		}
-	} else {
-		ldFlags = []string{
-			`"-X main.URL='` + URL + ``,
-			`-X main.GitCommit='` + GitCommit + `'`,
-			`-X main.BuildTime='` + BuildTime + `'`,
-			`-X main.GitRef='` + GitRef + `'`,
-			`-X main.Tag='` + Tag + `'"`,
-		}
-	}
+	// } else {
+	// 	ldFlags = []string{
+	// 		`"-X 'main.URL=` + URL + ``,
+	// 		`-X 'main.GitCommit=` + GitCommit + `'`,
+	// 		`-X 'main.BuildTime=` + BuildTime + `'`,
+	// 		`-X 'main.GitRef=` + GitRef + `'`,
+	// 		`-X 'main.Tag=` + Tag + `'"`,
+	// 	}
+	// }
 	
-	// Infos(ldFlags)
+	Infos(ldFlags)
 	return true
 }
 
@@ -238,7 +241,16 @@ func main() {
 				if runtime.GOOS == "windows" {
 					cmd = WindowsExec(split)
 				} else {
-					cmd = exec.Command(split[0], split[1:]...)
+					scriptPath := filepath.Join(appdata.Dir("stroy", false), "stroy.sh")
+					apputil.EnsureDir(scriptPath)
+					if err = ioutil.WriteFile(
+						scriptPath,
+						[]byte(strings.Join(split, " ")),
+						0700,
+					); Check(err) {
+					} else {
+						cmd = exec.Command("sh", scriptPath)
+					}
 				}
 				cmd.Stdout = os.Stdout
 				cmd.Stdin = os.Stdin
@@ -413,6 +425,6 @@ var commands = map[string][]string{
 			" --solo --lan wallet",
 	},
 	"stroy": {
-		"go install -v %ldflags github.com/p9c/pod/stroy",
+		"go install -v %ldflags ./stroy/.",
 	},
 }
