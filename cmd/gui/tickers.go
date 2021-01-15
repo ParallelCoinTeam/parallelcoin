@@ -130,7 +130,10 @@ func (wg *WalletGUI) Tickers() {
 							req := len(wg.State.receiveAddresses)
 							if req > avail {
 								for i := 0; i < req-avail; i++ {
-									wg.addressbookClickables = append(wg.addressbookClickables, wg.WidgetPool.GetClickable())
+									wg.addressbookClickables = append(
+										wg.addressbookClickables,
+										wg.WidgetPool.GetClickable(),
+									)
 								}
 							}
 							wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
@@ -138,45 +141,54 @@ func (wg *WalletGUI) Tickers() {
 								for x := range wg.State.receiveAddresses {
 									j := x
 									i := len(wg.State.receiveAddresses) - 1 - x
-									widgets = append(widgets, func(gtx l.Context) l.Dimensions {
-										return wg.Inset(0.25,
-											wg.ButtonLayout(wg.addressbookClickables[i].SetClick(func() {
-												qrText := fmt.Sprintf(
-													"parallelcoin:%s?amount=%8.8f&message=%s",
-													wg.State.receiveAddresses[i].Address,
-													wg.State.receiveAddresses[i].Amount.ToDUO(),
-													wg.State.receiveAddresses[i].Message,
-												)
-												Debug("clicked receive address list item", j)
-												if err := clipboard.WriteAll(qrText); Check(err) {
-												}
-											})).
-												Background("PanelBg").
-												Embed(
-													wg.Inset(0.25,
-														wg.VFlex().
-															Rigid(
-																wg.Flex().AlignBaseline().
-																	Rigid(
-																		wg.Caption(wg.State.receiveAddresses[i].Address).
-																			Font("go regular").Fn,
-																	).
-																	Flexed(1,
-																		wg.Body1(wg.State.receiveAddresses[i].Amount.String()).
-																			Alignment(text.End).Fn,
-																	).
-																	Fn,
-															).
-															Rigid(
-																wg.Body1(wg.State.receiveAddresses[i].Message).Fn,
-															).
+									widgets = append(
+										widgets, func(gtx l.Context) l.Dimensions {
+											return wg.Inset(
+												0.25,
+												wg.ButtonLayout(
+													wg.addressbookClickables[i].SetClick(
+														func() {
+															qrText := fmt.Sprintf(
+																"parallelcoin:%s?amount=%8.8f&message=%s",
+																wg.State.receiveAddresses[i].Address,
+																wg.State.receiveAddresses[i].Amount.ToDUO(),
+																wg.State.receiveAddresses[i].Message,
+															)
+															Debug("clicked receive address list item", j)
+															if err := clipboard.WriteAll(qrText); Check(err) {
+															}
+														},
+													),
+												).
+													Background("PanelBg").
+													Embed(
+														wg.Inset(
+															0.25,
+															wg.VFlex().
+																Rigid(
+																	wg.Flex().AlignBaseline().
+																		Rigid(
+																			wg.Caption(wg.State.receiveAddresses[i].Address).
+																				Font("go regular").Fn,
+																		).
+																		Flexed(
+																			1,
+																			wg.Body1(wg.State.receiveAddresses[i].Amount.String()).
+																				Alignment(text.End).Fn,
+																		).
+																		Fn,
+																).
+																Rigid(
+																	wg.Body1(wg.State.receiveAddresses[i].Message).Fn,
+																).
+																Fn,
+														).
 															Fn,
 													).
-														Fn,
-												).
-												Fn,
-										).Fn(gtx)
-									})
+													Fn,
+											).Fn(gtx)
+										},
+									)
 								}
 								le := func(gtx l.Context, index int) l.Dimensions {
 									return widgets[index](gtx)
@@ -196,7 +208,10 @@ func (wg *WalletGUI) Tickers() {
 								var ae AddressEntry
 								ae.Address = addr.EncodeAddress()
 								var amt float64
-								if amt, err = strconv.ParseFloat(wg.inputs["receiveAmount"].GetText(), 64); !Check(err) {
+								if amt, err = strconv.ParseFloat(
+									wg.inputs["receiveAmount"].GetText(),
+									64,
+								); !Check(err) {
 									if ae.Amount, err = util.NewAmount(amt); Check(err) {
 									}
 								}
@@ -215,14 +230,14 @@ func (wg *WalletGUI) Tickers() {
 							}
 						}
 					}
-					if (wg.currentReceiveQRCode == nil && wg.currentReceiveAddress != "" && wg.stateLoaded.Load()) ||
-						wg.currentReceiveRegenerate.Load() || wg.currentReceiveGetNew.Load() {
+					if wg.currentReceiveQRCode == nil || wg.currentReceiveRegenerate.Load() || wg.currentReceiveGetNew.Load() {
 						wg.currentReceiveGetNew.Store(false)
-						var qrc image.Image
 						wg.currentReceiveRegenerate.Store(false)
+						var qrc image.Image
 						Debug("generating QR code")
 						var err error
-						qrText := fmt.Sprintf("parallelcoin:%s?amount=%s&message=%s",
+						qrText := fmt.Sprintf(
+							"parallelcoin:%s?amount=%s&message=%s",
 							wg.State.currentReceivingAddress.Load().EncodeAddress(),
 							wg.inputs["receiveAmount"].GetText(),
 							wg.inputs["receiveMessage"].GetText(),
@@ -230,22 +245,26 @@ func (wg *WalletGUI) Tickers() {
 						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
 							iop := paint.NewImageOp(qrc)
 							wg.currentReceiveQRCode = &iop
-							wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {
-								Debug("clicked qr code copy clicker")
-								if err := clipboard.WriteAll(qrText); Check(err) {
-								}
-							})).
+							wg.currentReceiveQR = wg.ButtonLayout(
+								wg.currentReceiveCopyClickable.SetClick(
+									func() {
+										Debug("clicked qr code copy clicker")
+										if err := clipboard.WriteAll(qrText); Check(err) {
+										}
+									},
+								),
+							).
 								// CornerRadius(0.5).
 								// Corners(gui.NW | gui.SW | gui.NE).
 								Background("white").
 								Embed(
-									wg.Inset(0.125,
+									wg.Inset(
+										0.125,
 										wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
 									).Fn,
 								).Fn
 							// *wg.currentReceiveQRCode = iop
 						}
-						
 					}
 					wg.invalidate <- struct{}{}
 					first = false
