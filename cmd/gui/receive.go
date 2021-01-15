@@ -108,15 +108,18 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 		}
 		
 		var widgets []l.Widget
-		header := wg.Flex().Flexed(1,
+		header := wg.Flex().Flexed(
+			1,
 			wg.Inset(
 				0.25,
 				wg.H6("Receive Address History").Alignment(text.Middle).Fn,
 			).Fn,
 		).Fn
-		widgets = append(widgets,
+		widgets = append(
+			widgets,
 			wg.Flex().AlignMiddle().Flexed(1, wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
-			header)
+			header,
+		)
 		avail := len(wg.addressbookClickables)
 		req := len(wg.State.receiveAddresses)
 		if req > avail {
@@ -127,118 +130,134 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 		for x := range wg.State.receiveAddresses {
 			j := x
 			i := len(wg.State.receiveAddresses) - 1 - x
-			widgets = append(widgets, func(gtx l.Context) l.Dimensions {
-				return wg.Inset(0.25,
-					wg.ButtonLayout(wg.addressbookClickables[i].SetClick(func() {
-						qrText := fmt.Sprintf(
-							"parallelcoin:%s?amount=%8.8f&message=%s",
-							wg.State.receiveAddresses[i].Address,
-							wg.State.receiveAddresses[i].Amount.ToDUO(),
-							wg.State.receiveAddresses[i].Message,
-						)
-						Debug("clicked receive address list item", j)
-						if err := clipboard.WriteAll(qrText); Check(err) {
-						}
-					})).
-						Background("PanelBg").
-						Embed(
-							wg.Inset(0.25,
-								wg.VFlex().
-									Rigid(
-										wg.Flex().AlignBaseline().
+			widgets = append(
+				widgets, func(gtx l.Context) l.Dimensions {
+					return wg.Fill(
+						"DocBg", l.Center, 0, 0,
+						wg.Inset(
+							0.25,
+							wg.ButtonLayout(
+								wg.addressbookClickables[i].SetClick(
+									func() {
+										qrText := fmt.Sprintf(
+											"parallelcoin:%s?amount=%8.8f&message=%s",
+											wg.State.receiveAddresses[i].Address,
+											wg.State.receiveAddresses[i].Amount.ToDUO(),
+											wg.State.receiveAddresses[i].Message,
+										)
+										Debug("clicked receive address list item", j)
+										if err := clipboard.WriteAll(qrText); Check(err) {
+										}
+									},
+								),
+							).
+								Background("PanelBg").
+								Embed(
+									wg.Inset(
+										0.25,
+										wg.VFlex().
 											Rigid(
-												wg.Caption(wg.State.receiveAddresses[i].Address).
-													Font("go regular").Fn,
+												wg.Flex().AlignBaseline().
+													Rigid(
+														wg.Caption(wg.State.receiveAddresses[i].Address).
+															Font("go regular").Fn,
+													).
+													Flexed(
+														1,
+														wg.Body1(wg.State.receiveAddresses[i].Amount.String()).
+															Alignment(text.End).Fn,
+													).
+													Fn,
 											).
-											Flexed(1,
-												wg.Body1(wg.State.receiveAddresses[i].Amount.String()).
-													Alignment(text.End).Fn,
+											Rigid(
+												wg.Body1(wg.State.receiveAddresses[i].Message).Fn,
 											).
 											Fn,
 									).
-									Rigid(
-										wg.Body1(wg.State.receiveAddresses[i].Message).Fn,
-									).
-									Fn,
-							).
+										Fn,
+								).
 								Fn,
-						).
-						Fn,
-				).Fn(gtx)
-			})
+						).Fn,
+					).Fn(gtx)
+				},
+			)
 		}
 		// assemble the list for the small, scrolling list view
-		smallWidgets := append([]l.Widget{
-			wg.Inset(
-				0.25,
-				wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
-			).Fn,
-			wg.Flex().SpaceSides().
-				Rigid(
+		smallWidgets := append(
+			[]l.Widget{
+				wg.Inset(
+					0.25,
+					wg.Body2("Scan to send or click to copy").Alignment(text.Middle).Fn,
+				).Fn,
+				wg.Flex().SpaceSides().
+					Rigid(
+						wg.ButtonLayout(
+							wg.currentReceiveCopyClickable.SetClick(
+								func() {
+									qrText := fmt.Sprintf(
+										"parallelcoin:%s?amount=%s&message=%s",
+										wg.State.currentReceivingAddress.Load().EncodeAddress(),
+										wg.inputs["receiveAmount"].GetText(),
+										wg.inputs["receiveMessage"].GetText(),
+									)
+									Debug("clicked qr code copy clicker")
+									if err := clipboard.WriteAll(qrText); Check(err) {
+									}
+								},
+							),
+						).
+							// CornerRadius(0.5).
+							// Corners(gui.NW | gui.SW | gui.NE).
+							Background("white").
+							Embed(
+								wg.Inset(
+									0.125,
+									wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
+								).Fn,
+							).Fn,
+					).
+					Fn,
+				
+				// wg.Inset(
+				// 	0.25,
+				// 	wg.Caption(wg.currentReceiveAddress).Alignment(text.Middle).Font("go regular").Fn,
+				// ).Fn,
+				func(gtx l.Context) l.Dimensions {
+					// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
+					return wg.Inset(0.25, wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveAmount"].Fn).Fn).Fn(gtx)
+				},
+				func(gtx l.Context) l.Dimensions {
+					// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
+					return wg.Inset(0.25, wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveMessage"].Fn).Fn).Fn(gtx)
+				},
+				wg.Inset(
+					0.25,
 					wg.ButtonLayout(
-						wg.currentReceiveCopyClickable.SetClick(
+						wg.currentReceiveRegenClickable.SetClick(
 							func() {
-								qrText := fmt.Sprintf(
-									"parallelcoin:%s?amount=%s&message=%s",
-									wg.State.currentReceivingAddress.Load().EncodeAddress(),
-									wg.inputs["receiveAmount"].GetText(),
-									wg.inputs["receiveMessage"].GetText(),
-								)
-								Debug("clicked qr code copy clicker")
-								if err := clipboard.WriteAll(qrText); Check(err) {
-								}
+								Debug("clicked regenerate button")
+								wg.currentReceiveGetNew.Store(true)
 							},
 						),
 					).
-						// CornerRadius(0.5).
-						// Corners(gui.NW | gui.SW | gui.NE).
-						Background("white").
+						Background("Primary").
 						Embed(
 							wg.Inset(
-								0.125,
-								wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
+								0.25,
+								wg.H6("regenerate").Color("Light").Fn,
 							).Fn,
-						).Fn,
-				).
-				Fn,
-			
-			// wg.Inset(
-			// 	0.25,
-			// 	wg.Caption(wg.currentReceiveAddress).Alignment(text.Middle).Font("go regular").Fn,
-			// ).Fn,
-			func(gtx l.Context) l.Dimensions {
-				// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
-				return wg.Inset(0.25, wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveAmount"].Fn).Fn).Fn(gtx)
-			},
-			func(gtx l.Context) l.Dimensions {
-				// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V * 17),  int(wg.TextSize.V * 17)
-				return wg.Inset(0.25, wg.Fill("DocBg", l.Center, 0, 0, wg.inputs["receiveMessage"].Fn).Fn).Fn(gtx)
-			},
-			wg.Inset(0.25,
-				wg.ButtonLayout(
-					wg.currentReceiveRegenClickable.SetClick(
-						func() {
-							Debug("clicked regenerate button")
-							wg.currentReceiveGetNew.Store(true)
-						},
-					),
-				).
-					Background("Primary").
-					Embed(
-						wg.Inset(
-							0.25,
-							wg.H6("regenerate").Color("Light").Fn,
-						).Fn,
-					).
-					Fn,
-			).Fn,
-		}, widgets...)
+						).
+						Fn,
+				).Fn,
+			}, widgets...,
+		)
 		le := func(gtx l.Context, index int) l.Dimensions {
 			return smallWidgets[index](gtx)
 		}
 		return wg.Responsive(
 			*wg.Size, gui.Widgets{
-				{Size: 0,
+				{
+					Size: 0,
 					Widget:
 					wg.Fill(
 						"PanelBg", l.W, 0, 0,
@@ -330,7 +349,8 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 							Rigid(
 								wg.VFlex().
 									Rigid(header).
-									Flexed(1,
+									Flexed(
+										1,
 										wg.Fill(
 											"DocBg", l.Center, wg.TextSize.V, 0,
 											wg.Inset(
@@ -415,7 +435,8 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 							Rigid(
 								wg.VFlex().
 									Rigid(header).
-									Flexed(1,
+									Flexed(
+										1,
 										wg.Fill(
 											"DocBg", l.Center, wg.TextSize.V, 0,
 											wg.Inset(
@@ -513,7 +534,8 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 							Rigid(
 								wg.VFlex().
 									Rigid(header).
-									Flexed(1,
+									Flexed(
+										1,
 										wg.Fill(
 											"DocBg", l.Center, wg.TextSize.V, 0,
 											wg.Inset(

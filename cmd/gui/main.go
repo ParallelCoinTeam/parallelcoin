@@ -267,9 +267,9 @@ func (wg *WalletGUI) GetInputs() InputMap {
 		"receiveAmount":       wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
 		"receiveMessage":      wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
 		
-		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "DocBg", "PanelBg", func(amt string) {}),
-		"sendAmount":  wg.Input("", "Amount", "DocText", "DocBg", "PanelBg", func(amt string) {}),
-		"sendMessage": wg.Input("", "Description", "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "DocBg", "DocBg", func(amt string) {}),
+		"sendAmount":  wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
+		"sendMessage": wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
 		
 		"console":    wg.Input("", "enter rpc command", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		"walletSeed": wg.Input(seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(pass string) {}),
