@@ -85,13 +85,8 @@ go install -v github.com/p9c/pod/stroy
 stroy stroy
 ```
 
-Note that the `go install` command will place the produced binaries into a 
-folder specified by the environment variable, set `GOBIN`, and add `GOBIN` 
-to the `PATH` variable. Otherwise if you prefer to use build and address the 
-binary
-in the current working directory (at the root of the repository), at least 
-on windows, this is an easy option as it searches for executables first in 
-the CWD.
+`stroy` replaces make as it is written in Go, and is customised to put values
+into the binaries that show what the binary was built from.
 
 The second invocation rebuilds stroy with stroy itself, which plants the 
 build information into the main package, which records the details of the source
@@ -107,6 +102,10 @@ what the user's build came from, when dealing with a bug report, to
 facilitate *exact* replication of the fault.
 
 ## Running
+
+As you will find when you run `stroy` without a build command name, there
+is several commands that will launch wallet, node, the GUI, reset the 
+wallet, and so on.
 
 ### Initial configuration:
 
