@@ -17,12 +17,21 @@ Fully integrated all-in-one cli client, full node, wallet server, miner and GUI 
 
 Straight to business, this is the part I am looking for, so it's here at the top.
 
+### Ubuntu
+
 These instructions expect that you understand basic usage of the bash shell and terminal,
 and git usage. You should be able to edit a text file on the command line interface
 though you could use `gedit` or similar if you prefer.
 
 First, you need a working [Go 1.14+ installation for the platform you are 
 using](https://golang.org).
+
+```bash
+cd ~
+sudo apt get install -y wget git
+wget https://golang.org/dl/go1.14.13.linux-amd64.tar.gz
+tar zxvf https://golang.org/dl/go1.14.13.linux-amd64.tar.gz
+```
 
 The build tools expect a working GOBIN which is also in PATH, so, open `~/.bashrc` in 
 a text editor and put in it:
