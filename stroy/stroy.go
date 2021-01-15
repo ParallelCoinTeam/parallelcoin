@@ -150,7 +150,7 @@ func populateVersionFlags() bool {
 	// fmt.Println(maxVersion, maxString)
 	Tag = maxString
 	// sort.Ints(versionsI)
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS != "windows" {
 		
 		ldFlags = []string{
 			`"-X main.URL=` + URL + ``,
