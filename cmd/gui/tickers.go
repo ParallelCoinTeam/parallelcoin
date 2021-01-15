@@ -126,17 +126,18 @@ func (wg *WalletGUI) Tickers() {
 							wg.processWalletBlockNotification()
 						}
 						if wg.stateLoaded.Load() || wg.currentReceiveGetNew.Load() {
-							avail := len(wg.addressbookClickables)
-							req := len(wg.State.receiveAddresses)
-							if req > avail {
-								for i := 0; i < req-avail; i++ {
-									wg.addressbookClickables = append(
-										wg.addressbookClickables,
-										wg.WidgetPool.GetClickable(),
-									)
-								}
-							}
+
 							wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
+								avail := len(wg.addressbookClickables)
+								req := len(wg.State.receiveAddresses)
+								if req > avail {
+									for i := 0; i <= req-avail; i++ {
+										wg.addressbookClickables = append(
+											wg.addressbookClickables,
+											wg.WidgetPool.GetClickable(),
+										)
+									}
+								}
 								var widgets []l.Widget
 								for x := range wg.State.receiveAddresses {
 									j := x

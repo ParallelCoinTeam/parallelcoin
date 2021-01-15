@@ -262,7 +262,7 @@ func (wg *WalletGUI) ReceivePage() l.Widget {
 					wg.Fill(
 						"PanelBg", l.W, 0, 0,
 						wg.Inset(
-							0.25,
+							0.0,
 							wg.lists["receive"].
 								Vertical().
 								Length(len(smallWidgets)).
