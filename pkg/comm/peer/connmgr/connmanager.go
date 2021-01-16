@@ -3,6 +3,7 @@ package connmgr
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/util/logi"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -21,10 +22,10 @@ var ErrDialNil = errors.New("config: Dial cannot be nil")
 // maxRetryDuration is the max duration of time retrying of a persistent connection is allowed to grow to. This is
 // necessary since the retry logic uses a backoff mechanism which increases the interval base times the number of
 // retries that have been done.
-var maxRetryDuration = time.Minute * 1
+var maxRetryDuration = time.Hour
 
 // defaultRetryDuration is the default duration of time for retrying persistent connections.
-var defaultRetryDuration = time.Second * 9
+var defaultRetryDuration = time.Second * 60
 
 // defaultTargetOutbound is the default number of outbound connections to maintain.
 var defaultTargetOutbound = uint32(9)
@@ -183,11 +184,9 @@ func (cm *ConnManager) handleFailedConn(c *ConnReq) {
 	} else if cm.Cfg.GetNewAddress != nil {
 		cm.failedAttempts++
 		if cm.failedAttempts >= maxFailedAttempts {
-			// Tracef("max failed connection attempts reached: [%d" +
-			// 	"] -- retrying" +
-			// 	" connection in: %v",
-			// 	maxFailedAttempts,
-			// 	cm.Cfg.RetryDuration)
+			Tracef("max failed connection attempts reached: [%d] -- retrying connection in: %v",
+				maxFailedAttempts,
+				cm.Cfg.RetryDuration)
 			time.AfterFunc(cm.Cfg.RetryDuration, func() {
 				cm.NewConnReq()
 			})
@@ -296,6 +295,7 @@ out:
 
 // NewConnReq creates a new connection request and connects to the corresponding address.
 func (cm *ConnManager) NewConnReq() {
+	Debug("creating new connreq @", logi.Caller("thingy", 1))
 	if atomic.LoadInt32(&cm.stop) != 0 {
 		return
 	}
@@ -480,10 +480,10 @@ func New(cfg *Config) (*ConnManager, error) {
 		return nil, ErrDialNil
 	}
 	// Default to sane values
-	if cfg.RetryDuration <= 0 {
+	if cfg.RetryDuration <= 1 {
 		cfg.RetryDuration = defaultRetryDuration
 	}
-	if cfg.TargetOutbound == 0 {
+	if cfg.TargetOutbound < 1 {
 		cfg.TargetOutbound = defaultTargetOutbound
 	}
 	cm := ConnManager{

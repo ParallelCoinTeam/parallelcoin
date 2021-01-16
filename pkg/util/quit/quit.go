@@ -15,25 +15,25 @@ var mx sync.Mutex
 
 func T() C {
 	// PrintChanState()
-	occ := GetOpenChanCount()
+	// occ := GetOpenChanCount()
 	mx.Lock()
 	defer mx.Unlock()
-	createdList = append(createdList, logi.Caller("remaining quit channel from", 1))
+	createdList = append(createdList, logi.Caller("chan from", 1))
 	o := make(C)
 	createdChannels = append(createdChannels, o)
-	Trace("open channels:", len(createdList), len(createdChannels), occ)
+	// Trace("open channels:", len(createdList), len(createdChannels), occ)
 	return o
 }
 
 func Ts(n int) C {
 	// PrintChanState()
-	occ := GetOpenChanCount()
+	// occ := GetOpenChanCount()
 	mx.Lock()
 	defer mx.Unlock()
-	createdList = append(createdList, logi.Caller("remaining buffered quit channel at", 1))
+	createdList = append(createdList, logi.Caller("buffered chan at", 1))
 	o := make(C, n)
 	createdChannels = append(createdChannels, o)
-	Trace("open channels:", len(createdList), len(createdChannels), occ)
+	// Trace("open channels:", len(createdList), len(createdChannels), occ)
 	return o
 }
 
@@ -41,7 +41,7 @@ func (c C) Q() {
 	loc := GetLocForChan(c)
 	mx.Lock()
 	if !testChanIsClosed(c) {
-		Trace("closing channel from "+loc, logi.Caller("\nfrom", 1))
+		Trace("closing chan from "+loc, logi.Caller("from", 1))
 		close(c)
 	} else {
 		Trace("#### channel", loc, "was already closed")

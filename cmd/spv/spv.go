@@ -161,7 +161,7 @@ var (
 	BanThreshold = uint32(100)
 	// ConnectionRetryInterval is the base amount of time to wait in between retries when connecting to persistent
 	// peers. It is adjusted by the number of retries such that there is a retry backoff.
-	ConnectionRetryInterval = time.Second * 2
+	ConnectionRetryInterval = time.Second * 60
 	// DefaultBlockCacheSize is the size (in bytes) of blocks neutrino will keep in memory if no size is specified in
 	// the neutrino.Config.
 	DefaultBlockCacheSize uint64 = 4096 * 10 * 1000 // 40 MB

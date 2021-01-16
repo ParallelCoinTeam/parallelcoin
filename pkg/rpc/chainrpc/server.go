@@ -215,7 +215,7 @@ const (
 	DefaultTargetOutbound = 125
 	// ConnectionRetryInterval is the base amount of time to wait in between retries when connecting to persistent
 	// peers. It is adjusted by the number of retries such that there is a retry backoff.
-	ConnectionRetryInterval = time.Second
+	ConnectionRetryInterval = time.Minute
 )
 
 var (
