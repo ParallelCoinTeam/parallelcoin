@@ -19,7 +19,7 @@ import (
 	"github.com/p9c/pod/pkg/util/logi"
 )
 
-var WindowsExec = func(split []string) (out *exec.Cmd) { return nil }
+var windowsExec = func(split []string) (out *exec.Cmd) { return nil }
 
 func populateVersionFlags() bool {
 	// `-X 'package_path.variable_name=new_value'`
@@ -239,7 +239,7 @@ func main() {
 				// Info(split)
 				var cmd *exec.Cmd
 				if runtime.GOOS == "windows" {
-					cmd = WindowsExec(split)
+					cmd = windowsExec(split)
 				} else {
 					scriptPath := filepath.Join(appdata.Dir("stroy", false), "stroy.sh")
 					apputil.EnsureDir(scriptPath)
@@ -355,18 +355,6 @@ var commands = map[string][]string{
 		"go install -v %ldflags",
 		"pod -D %datadir -n testnet -l debug --lan --solo --kopachgui kopach",
 	},
-	"testkopach": {
-		"go install -v %ldflags",
-		"pod -D %datadir -n testnet -l trace -g -G 1 --lan kopach",
-	},
-	"testnode": {
-		"go install -v %ldflags",
-		"pod -D %datadir -n testnet -l debug node",
-	},
-	"nodegui": {
-		"go install -v %ldflags",
-		"pod -D %datadir -n testnet nodegui",
-	},
 	"gui": {
 		"go install -v %ldflags",
 		"pod -D %datadir -n testnet --lan",
@@ -378,9 +366,6 @@ var commands = map[string][]string{
 	"guass": {
 		"go install -v %ldflags",
 		"pod -D %datadir --minerpass pa55word",
-	},
-	"resetwallet": {
-		"pod -D %datadir -l debug --walletpass aoeuaoeu wallet drophistory",
 	},
 	"guihttpprof": {
 		"go install -v %ldflags",
@@ -394,10 +379,6 @@ var commands = map[string][]string{
 		"go install -v %ldflags",
 		"pod -D testmain -n mainnet -l info --connect seed3.parallelcoin." +
 			"io:11047 node",
-	},
-	"testwallet": {
-		"go install -v %ldflags",
-		"pod -D %datadir -n testnet -l trace --walletpass aoeuaoeu wallet",
 	},
 	"mainwallet": {
 		"go install -v %ldflags",
@@ -420,6 +401,25 @@ var commands = map[string][]string{
 		"go install -v ./pkg/util/logi/pipe",
 		"pipe pod -D %datadir --pipelog -l trace --walletpass aoeuaoeu -g -G 1" +
 			" --solo --lan wallet",
+	},
+	"nodegui": {
+		"go install -v %ldflags",
+		"pod -D %datadir -n testnet nodegui",
+	},
+	"testnode": {
+		"go install -v %ldflags",
+		"pod -D %datadir -n testnet -l trace --solo --lan --norpc node",
+	},
+	"testwallet": {
+		"go install -v %ldflags",
+		"pod -D %datadir -n testnet -l trace --walletpass aoeuaoeu --solo --lan wallet",
+	},
+	"testkopach": {
+		"go install -v %ldflags",
+		"pod -D %datadir -n testnet -l trace -g -G 1 --solo --lan kopach",
+	},
+	"resetwallet": {
+		"pod -D %datadir -l trace --walletpass aoeuaoeu wallet drophistory",
 	},
 	"stroy": {
 		"go install -v %ldflags ./stroy/.",
