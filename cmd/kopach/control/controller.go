@@ -467,7 +467,7 @@ out:
 			best := c.blockTemplateGenerator.BestSnapshot()
 			if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
 				Debug("new best block hash")
-				c.UpdateAndSendTemplate()
+				// c.UpdateAndSendTemplate()
 				continue
 			}
 			Debug("checking for new transactions")
