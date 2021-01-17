@@ -47,7 +47,7 @@ type Controller struct {
 	Ready                  atomic.Bool
 	height                 atomic.Uint64
 	blockTemplateGenerator *mining.BlkTmplGenerator
-	coinbases              job.CoinBases
+	coinbases              map[int32]*util.Tx
 	transactions           []*util.Tx
 	oldBlocks              atomic.Value
 	prevHash               atomic.Value
@@ -87,7 +87,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
-		coinbases:              job.NewCoinBases(), // make(map[int32]*util.Tx),
+		coinbases:              make(map[int32]*util.Tx),
 		buffer:                 ring.New(BufferSize),
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
@@ -230,7 +230,7 @@ var handlersMulticast = transport.Handlers{
 			return
 		}
 		// Warn(msgBlock.Header.Version)
-		cb, ok := c.coinbases.Load()[msgBlock.Header.Version]
+		cb, ok := c.coinbases[msgBlock.Header.Version]
 		if !ok {
 			Debug("coinbases not found", cb)
 			return
@@ -362,11 +362,11 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 		return
 	}
 	msgB := template.Block
-	c.coinbases = job.NewCoinBases()
+	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
 	adv := p2padvt.Get(c.cx)
 	// Traces(adv)
-	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, c.coinbases)
+	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, &c.coinbases)
 	jobShards := transport.GetShards(fMC.Data)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {
@@ -465,8 +465,7 @@ out:
 			Debug("checking for new block")
 			// The current block is stale if the best block has changed.
 			best := c.blockTemplateGenerator.BestSnapshot()
-			h, ok := c.prevHash.Load().(*chainhash.Hash)
-			if ok && !h.IsEqual(&best.Hash) {
+			if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
 				Debug("new best block hash")
 				c.UpdateAndSendTemplate()
 				continue
@@ -553,7 +552,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 }
 
 func (c *Controller) UpdateAndSendTemplate() {
-	c.coinbases = job.NewCoinBases()
+	c.coinbases = make(map[int32]*util.Tx)
 	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 	if template != nil {
 		c.transactions = []*util.Tx{}
@@ -564,7 +563,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 		var mC job.Container
 		mC, c.transactions = job.Get(
 			c.cx, util.NewBlock(msgB),
-			p2padvt.Get(c.cx), c.coinbases,
+			p2padvt.Get(c.cx), &c.coinbases,
 		)
 		nH := mC.GetNewHeight()
 		if c.height.Load() < uint64(nH) {
