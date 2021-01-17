@@ -1,9 +1,9 @@
+// +build !windows
+
 package main
 
 import (
 	"fmt"
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/app/apputil"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -12,14 +12,15 @@ import (
 	"strings"
 	"time"
 	
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/app/apputil"
+	
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/storer"
 	
 	"github.com/p9c/pod/pkg/util/logi"
 )
-
-var windowsExec = func(split []string) (out *exec.Cmd) { return nil }
 
 func populateVersionFlags() bool {
 	// `-X 'package_path.variable_name=new_value'`
@@ -156,12 +157,12 @@ func populateVersionFlags() bool {
 	// if runtime.GOOS == "windows" {
 	
 	ldFlags = []string{
-			`"-X main.URL=` + URL + ``,
-			`-X main.GitCommit=` + GitCommit + ``,
-			`-X main.BuildTime=` + BuildTime + ``,
-			`-X main.GitRef=` + GitRef + ``,
-			`-X main.Tag=` + Tag + `"`,
-		}
+		`"-X main.URL=` + URL + ``,
+		`-X main.GitCommit=` + GitCommit + ``,
+		`-X main.BuildTime=` + BuildTime + ``,
+		`-X main.GitRef=` + GitRef + ``,
+		`-X main.Tag=` + Tag + `"`,
+	}
 	// } else {
 	// 	ldFlags = []string{
 	// 		`"-X 'main.URL=` + URL + ``,
@@ -181,20 +182,8 @@ func main() {
 	var err error
 	var ok bool
 	var home string
-	if runtime.GOOS == "windows" {
-		var homedrive string
-		if homedrive, ok = os.LookupEnv("HOMEDRIVE"); !ok {
-			panic(err)
-		}
-		var homepath string
-		if homepath, ok = os.LookupEnv("HOMEPATH"); !ok {
-			panic(err)
-		}
-		home = homedrive + homepath
-	} else {
-		if home, ok = os.LookupEnv("HOME"); !ok {
-			panic(err)
-		}
+	if home, ok = os.LookupEnv("HOME"); !ok {
+		panic(err)
 	}
 	if len(os.Args) > 1 {
 		folderName := "test0"
@@ -238,24 +227,22 @@ func main() {
 				)
 				// Info(split)
 				var cmd *exec.Cmd
-				if runtime.GOOS == "windows" {
-					cmd = windowsExec(split)
+				scriptPath := filepath.Join(appdata.Dir("stroy", false), "stroy.sh")
+				apputil.EnsureDir(scriptPath)
+				if err = ioutil.WriteFile(
+					scriptPath,
+					[]byte(strings.Join(split, " ")),
+					0700,
+				); Check(err) {
 				} else {
-					scriptPath := filepath.Join(appdata.Dir("stroy", false), "stroy.sh")
-					apputil.EnsureDir(scriptPath)
-					if err = ioutil.WriteFile(
-						scriptPath,
-						[]byte(strings.Join(split, " ")),
-						0700,
-					); Check(err) {
-					} else {
-						cmd = exec.Command("sh", scriptPath)
-					}
+					cmd = exec.Command("sh", scriptPath)
+					cmd.Stdout = os.Stdout
+					cmd.Stdin = os.Stdin
+					cmd.Stderr = os.Stderr
 				}
-				cmd.Stdout = os.Stdout
-				cmd.Stdin = os.Stdin
-				cmd.Stderr = os.Stderr
-				
+				if cmd == nil {
+					panic("cmd is nil")
+				}
 				if err := cmd.Start(); Check(err) {
 					Infos(err)
 					os.Exit(1)
