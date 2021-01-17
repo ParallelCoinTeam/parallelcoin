@@ -408,7 +408,7 @@ var commands = map[string][]string{
 	},
 	"testnode": {
 		"go install -v %ldflags",
-		"pod -D %datadir -n testnet -l trace --solo --lan --norpc node",
+		"pod -D %datadir -n testnet -l trace --solo --lan --norpc=false node",
 	},
 	"testwallet": {
 		"go install -v %ldflags",
