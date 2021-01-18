@@ -57,7 +57,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			"receive": wg.Page(
 				"receive", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					gui.WidgetSize{Widget: wg.ReceivePage()},
+					gui.WidgetSize{Widget: wg.ReceivePage.Fn},
 				},
 			),
 			"history": wg.Page(
@@ -116,7 +116,8 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 													},
 												),
 											).Color("Light").TextScale(5).Text(
-												"yes!!!").Fn,
+												"yes!!!",
+											).Fn,
 										).
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,
@@ -332,7 +333,8 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 				CornerRadius(scale).Corners(0).
 				Background(background).
 				Embed(
-					wg.Inset(ins,
+					wg.Inset(
+						ins,
 						func(gtx l.Context) l.Dimensions {
 							return wg.Label().
 								Font(font).

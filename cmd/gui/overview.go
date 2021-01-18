@@ -359,7 +359,10 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 
 func leftPadTo(length, limit int, txt string) string {
 	if len(txt) > limit {
-		return txt[limit-len(txt):]
+		return txt[:limit]
+	}
+	if len(txt) == limit {
+		return txt
 	}
 	pad := length - len(txt)
 	return strings.Repeat(" ", pad) + txt

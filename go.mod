@@ -22,6 +22,7 @@ require (
 	github.com/kkdai/bstream v1.0.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
+	github.com/mibk/dupl v1.0.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.12.1 // indirect
 	github.com/onsi/gomega v1.9.0 // indirect

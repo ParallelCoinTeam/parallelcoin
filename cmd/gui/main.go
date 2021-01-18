@@ -70,27 +70,27 @@ type WalletGUI struct {
 	ChainClient, WalletClient *rpcclient.Client
 	*gui.Window
 	Size                         *int
-	MainApp               *gui.App
-	invalidate            qu.C
-	unlockPage            *gui.App
-	loadingPage           *gui.App
-	config                *cfg.Config
-	configs               cfg.GroupsMap
-	unlockPassword        *gui.Password
-	sidebarButtons        []*gui.Clickable
-	buttonBarButtons      []*gui.Clickable
-	statusBarButtons      []*gui.Clickable
-	addressbookClickables []*gui.Clickable
-	quitClickable         *gui.Clickable
-	bools                 BoolMap
-	lists                 ListMap
-	checkables            CheckableMap
-	clickables            ClickableMap
-	inputs                InputMap
-	passwords             PasswordMap
-	incdecs               IncDecMap
-	sendAddresses         []SendAddress
-	console               *Console
+	MainApp                      *gui.App
+	invalidate                   qu.C
+	unlockPage                   *gui.App
+	loadingPage                  *gui.App
+	config                       *cfg.Config
+	configs                      cfg.GroupsMap
+	unlockPassword               *gui.Password
+	sidebarButtons               []*gui.Clickable
+	buttonBarButtons             []*gui.Clickable
+	statusBarButtons             []*gui.Clickable
+	addressbookClickables        []*gui.Clickable
+	quitClickable                *gui.Clickable
+	bools                        BoolMap
+	lists                        ListMap
+	checkables                   CheckableMap
+	clickables                   ClickableMap
+	inputs                       InputMap
+	passwords                    PasswordMap
+	incdecs                      IncDecMap
+	sendAddresses                []SendAddress
+	console                      *Console
 	RecentTransactionsWidget     l.Widget
 	HistoryWidget                l.Widget
 	txRecentList, txHistoryList  []btcjson.ListTransactionsResult
@@ -103,13 +103,14 @@ type WalletGUI struct {
 	currentReceiveRegenClickable *gui.Clickable
 	currentReceiveCopyClickable  *gui.Clickable
 	currentReceiveRegenerate     *uberatomic.Bool
-	currentReceiveGetNew         *uberatomic.Bool
+	// currentReceiveGetNew         *uberatomic.Bool
 	sendClickable                *gui.Clickable
 	txReady                      *uberatomic.Bool
 	mainDirection                l.Direction
 	preRendering                 bool
 	ReceiveAddressbook           l.Widget
 	SendAddressbook              l.Widget
+	ReceivePage                  *ReceivePage
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
@@ -118,7 +119,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.Syncing = uberatomic.NewBool(false)
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
-	wg.currentReceiveGetNew = uberatomic.NewBool(false)
+	// wg.currentReceiveGetNew = uberatomic.NewBool(false)
 	wg.txReady = uberatomic.NewBool(false)
 	// wg.th = gui.NewTheme(p9fonts.Collection(), wg.quit)
 	// wg.Window = gui.NewWindow(wg.th)
@@ -152,6 +153,13 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.console = wg.ConsolePage()
 	wg.quitClickable = wg.Clickable()
 	wg.incdecs = wg.GetIncDecs()
+	wg.Size = &wg.Window.Width
+	wg.currentReceiveCopyClickable = wg.WidgetPool.GetClickable()
+	wg.currentReceiveRegenClickable = wg.WidgetPool.GetClickable()
+	wg.currentReceiveQR = func(gtx l.Context) l.Dimensions {
+		return l.Dimensions{}
+	}
+	wg.ReceivePage = wg.GetReceivePage()
 	wg.MainApp = wg.GetAppWidget()
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
@@ -170,12 +178,6 @@ func (wg *WalletGUI) Run() (err error) {
 			wg.miner.Start()
 		}
 		wg.unlockPassword.Focus()
-	}
-	wg.Size = &wg.Window.Width
-	wg.currentReceiveCopyClickable = wg.WidgetPool.GetClickable()
-	wg.currentReceiveRegenClickable = wg.WidgetPool.GetClickable()
-	wg.currentReceiveQR = func(gtx l.Context) l.Dimensions {
-		return l.Dimensions{}
 	}
 	interrupt.AddHandler(
 		func() {
@@ -264,15 +266,15 @@ func (wg *WalletGUI) GetInputs() InputMap {
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
 	return InputMap{
-		"receiveAmount":       wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
-		"receiveMessage":      wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
+		"receiveAmount":  wg.Input("", "Amount", "DocText", "Transparent", "DocBg", func(amt string) {}),
+		"receiveMessage": wg.Input("", "Description", "DocText", "Transparent", "DocBg", func(pass string) {}),
 		
-		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "DocBg", "DocBg", func(amt string) {}),
-		"sendAmount":  wg.Input("", "Amount", "DocText", "DocBg", "DocBg", func(amt string) {}),
-		"sendMessage": wg.Input("", "Description", "DocText", "DocBg", "DocBg", func(pass string) {}),
+		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "Transparent", "DocBg", func(amt string) {}),
+		"sendAmount":  wg.Input("", "Amount", "DocText", "Transparent", "DocBg", func(amt string) {}),
+		"sendMessage": wg.Input("", "Description", "DocText", "Transparent", "DocBg", func(pass string) {}),
 		
-		"console":    wg.Input("", "enter rpc command", "DocText", "DocBg", "PanelBg", func(pass string) {}),
-		"walletSeed": wg.Input(seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"console":    wg.Input("", "enter rpc command", "DocText", "Transparent", "PanelBg", func(pass string) {}),
+		"walletSeed": wg.Input(seedString, "wallet seed", "DocText", "Transparent", "PanelBg", func(pass string) {}),
 	}
 }
 
@@ -280,8 +282,8 @@ func (wg *WalletGUI) GetPasswords() {
 	pass := ""
 	passConfirm := ""
 	wg.passwords = PasswordMap{
-		"passEditor":        wg.Password("password", &pass, "Primary", "DocText", "", func(pass string) {}),
-		"confirmPassEditor": wg.Password("confirm", &passConfirm, "Primary", "DocText", "", func(pass string) {}),
+		"passEditor":        wg.Password("password", &pass, "Primary", "DocText", "DocBg", func(pass string) {}),
+		"confirmPassEditor": wg.Password("confirm", &passConfirm, "Primary", "DocText", "DocBg", func(pass string) {}),
 		"publicPassEditor": wg.Password(
 			"public password (optional)",
 			wg.cx.Config.WalletPass,

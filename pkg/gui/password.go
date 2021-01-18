@@ -29,8 +29,10 @@ type Password struct {
 	handle               func(pass string)
 }
 
-func (w *Window) Password(hint string, password *string, borderColorFocused,
-	borderColorUnfocused, backgroundColor string, handle func(pass string), ) *Password {
+func (w *Window) Password(
+	hint string, password *string, borderColorFocused,
+	borderColorUnfocused, backgroundColor string, handle func(pass string),
+) *Password {
 	pass := w.Editor().Mask('•').SingleLine().Submit(true)
 	passInput := w.TextInput(pass, hint).Color(borderColorUnfocused)
 	p := &Password{
@@ -148,9 +150,10 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 			p.pass.Mask(0)
 		}
 		
-		return p.Fill(p.backgroundColor, l.Center, p.TextSize.V, 0,
-			p.Border().Width(0.25).Corners(0).CornerRadius(0.575).Color(p.borderColor).Embed(
-			p.Inset(0.25,
+		return p.Fill(
+			p.backgroundColor, l.Center, 0, 0,
+			p.Inset(
+				0.25,
 				p.Flex().
 					Flexed(
 						1,
@@ -177,7 +180,7 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 					).
 					Fn,
 			).Fn,
-		).Fn).Fn(gtx)
+		).Fn(gtx)
 	}(gtx)
 }
 

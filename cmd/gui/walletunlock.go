@@ -4,10 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"gioui.org/op/paint"
-	"github.com/atotto/clipboard"
-	"github.com/p9c/pod/pkg/coding/qrcode"
-	"image"
 	"io/ioutil"
 	"path/filepath"
 	"time"
@@ -58,30 +54,31 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 				}
 				Debug("#### loaded state data")
 			}
-			qrText := fmt.Sprintf("parallelcoin:%s?amount=%s&message=%s",
-				wg.State.currentReceivingAddress.Load().EncodeAddress(),
-				wg.inputs["receiveAmount"].GetText(),
-				wg.inputs["receiveMessage"].GetText(),
-			)
-			var qrc image.Image
-			if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
-				iop := paint.NewImageOp(qrc)
-				wg.currentReceiveQRCode = &iop
-				wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {
-					Debug("clicked qr code copy clicker")
-					if err := clipboard.WriteAll(qrText); Check(err) {
-					}
-				})).
-					// CornerRadius(0.5).
-					// Corners(gui.NW | gui.SW | gui.NE).
-					Background("white").
-					Embed(
-						wg.Inset(0.125,
-							wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
-						).Fn,
-					).Fn
-				// *wg.currentReceiveQRCode = iop
-			}
+			//
+			// qrText := fmt.Sprintf("parallelcoin:%s?amount=%s&message=%s",
+			// 	wg.State.currentReceivingAddress.Load().EncodeAddress(),
+			// 	wg.inputs["receiveAmount"].GetText(),
+			// 	wg.inputs["receiveMessage"].GetText(),
+			// )
+			// var qrc image.Image
+			// if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
+			// 	iop := paint.NewImageOp(qrc)
+			// 	wg.currentReceiveQRCode = &iop
+			// 	wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {
+			// 		Debug("clicked qr code copy clicker")
+			// 		if err := clipboard.WriteAll(qrText); Check(err) {
+			// 		}
+			// 	})).
+			// 		// CornerRadius(0.5).
+			// 		// Corners(gui.NW | gui.SW | gui.NE).
+			// 		Background("white").
+			// 		Embed(
+			// 			wg.Inset(0.125,
+			// 				wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
+			// 			).Fn,
+			// 		).Fn
+			// 	// *wg.currentReceiveQRCode = iop
+			// }
 			wg.stateLoaded.Store(true)
 			
 			wg.RecentTransactions(10, "recent")

@@ -2,21 +2,13 @@ package gui
 
 import (
 	"encoding/json"
-	"fmt"
-	"image"
 	"io/ioutil"
-	"path/filepath"
-	"strconv"
 	"time"
 	
 	l "gioui.org/layout"
-	"gioui.org/op/paint"
-	"gioui.org/text"
-	"github.com/atotto/clipboard"
 	
 	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/coding/qrcode"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -125,72 +117,10 @@ func (wg *WalletGUI) Tickers() {
 						if first {
 							wg.processWalletBlockNotification()
 						}
-						if wg.stateLoaded.Load() || wg.currentReceiveGetNew.Load() {
-
+						if wg.stateLoaded.Load() { // || wg.currentReceiveGetNew.Load() {
 							wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
-								avail := len(wg.addressbookClickables)
-								req := len(wg.State.receiveAddresses)
-								if req > avail {
-									for i := 0; i <= req-avail; i++ {
-										wg.addressbookClickables = append(
-											wg.addressbookClickables,
-											wg.WidgetPool.GetClickable(),
-										)
-									}
-								}
 								var widgets []l.Widget
-								for x := range wg.State.receiveAddresses {
-									j := x
-									i := len(wg.State.receiveAddresses) - 1 - x
-									widgets = append(
-										widgets, func(gtx l.Context) l.Dimensions {
-											return wg.Inset(
-												0.25,
-												wg.ButtonLayout(
-													wg.addressbookClickables[i].SetClick(
-														func() {
-															qrText := fmt.Sprintf(
-																"parallelcoin:%s?amount=%8.8f&message=%s",
-																wg.State.receiveAddresses[i].Address,
-																wg.State.receiveAddresses[i].Amount.ToDUO(),
-																wg.State.receiveAddresses[i].Message,
-															)
-															Debug("clicked receive address list item", j)
-															if err := clipboard.WriteAll(qrText); Check(err) {
-															}
-														},
-													),
-												).
-													Background("PanelBg").
-													Embed(
-														wg.Inset(
-															0.25,
-															wg.VFlex().
-																Rigid(
-																	wg.Flex().AlignBaseline().
-																		Rigid(
-																			wg.Caption(wg.State.receiveAddresses[i].Address).
-																				Font("go regular").Fn,
-																		).
-																		Flexed(
-																			1,
-																			wg.Body1(wg.State.receiveAddresses[i].Amount.String()).
-																				Alignment(text.End).Fn,
-																		).
-																		Fn,
-																).
-																Rigid(
-																	wg.Body1(wg.State.receiveAddresses[i].Message).Fn,
-																).
-																Fn,
-														).
-															Fn,
-													).
-													Fn,
-											).Fn(gtx)
-										},
-									)
-								}
+								widgets = append(widgets, wg.ReceivePage.GetAddressbookHistoryCards("DocBg")...)
 								le := func(gtx l.Context, index int) l.Dimensions {
 									return widgets[index](gtx)
 								}
@@ -200,85 +130,21 @@ func (wg *WalletGUI) Tickers() {
 								).Fn(gtx)
 							}
 						}
-						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() || wg.currentReceiveGetNew.Load() {
-							var addr util.Address
-							if addr, err = wg.WalletClient.GetNewAddress("default"); !Check(err) {
-								// Debug("getting new address new receiving address", addr.EncodeAddress(),
-								// 	"as prior was empty", wg.State.currentReceivingAddress.String.Load())
-								// save to addressbook
-								var ae AddressEntry
-								ae.Address = addr.EncodeAddress()
-								var amt float64
-								if amt, err = strconv.ParseFloat(
-									wg.inputs["receiveAmount"].GetText(),
-									64,
-								); !Check(err) {
-									if ae.Amount, err = util.NewAmount(amt); Check(err) {
-									}
-								}
-								ae.Message = wg.inputs["receiveMessage"].GetText()
-								ae.Created = time.Now()
-								wg.State.receiveAddresses = append(wg.State.receiveAddresses, ae)
-								Debugs(wg.State.receiveAddresses)
-								// TODO: update the receive addressbook widget
-								
-								wg.State.SetReceivingAddress(addr)
-								wg.State.isAddress.Store(true)
-								filename := filepath.Join(wg.cx.DataDir, "state.json")
-								if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
-								}
-								wg.invalidate <- struct{}{}
-							}
+						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() { // || wg.currentReceiveGetNew.Load() {
+							wg.GetNewReceivingAddress()
 						}
-					}
-					if wg.currentReceiveQRCode == nil || wg.currentReceiveRegenerate.Load() || wg.currentReceiveGetNew.Load() {
-						wg.currentReceiveGetNew.Store(false)
-						wg.currentReceiveRegenerate.Store(false)
-						var qrc image.Image
-						Debug("generating QR code")
-						var err error
-						qrText := fmt.Sprintf(
-							"parallelcoin:%s?amount=%s&message=%s",
-							wg.State.currentReceivingAddress.Load().EncodeAddress(),
-							wg.inputs["receiveAmount"].GetText(),
-							wg.inputs["receiveMessage"].GetText(),
-						)
-						if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
-							iop := paint.NewImageOp(qrc)
-							wg.currentReceiveQRCode = &iop
-							wg.currentReceiveQR = wg.ButtonLayout(
-								wg.currentReceiveCopyClickable.SetClick(
-									func() {
-										Debug("clicked qr code copy clicker")
-										if err := clipboard.WriteAll(qrText); Check(err) {
-										}
-									},
-								),
-							).
-								// CornerRadius(0.5).
-								// Corners(gui.NW | gui.SW | gui.NE).
-								Background("white").
-								Embed(
-									wg.Inset(
-										0.125,
-										wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
-									).Fn,
-								).Fn
-							// *wg.currentReceiveQRCode = iop
+						if wg.currentReceiveQRCode == nil || wg.currentReceiveRegenerate.Load() { // || wg.currentReceiveGetNew.Load() {
+							wg.GetNewReceivingQRCode()
 						}
 					}
 					wg.invalidate <- struct{}{}
 					first = false
-				// }
 				case <-fiveSeconds:
 				case <-wg.quit:
 					break totalOut
 				}
 			}
-			// wg.runningNode.Store(false)
 		}
-		// Debug("*** Sending shutdown signal")
-		// close(wg.quit)
 	}()
 }
 
@@ -356,9 +222,6 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		OnClientConnected: func() {
 			// go func() {
 			Debug("CHAIN CLIENT CONNECTED!")
-			// var err error
-			// var height int32
-			// var h *chainhash.Hash
 			// if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
 			// }
 			// wg.State.SetBestBlockHeight(int(height))
@@ -373,8 +236,9 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			// pop up new block toast
 			
 			wg.invalidate <- struct{}{}
+			
 		},
-		// OnFilteredBlockConnected:    func(height int32, header *wire.BlockHeader, txs []*util.Tx) {},
+		// OnFilteredBlockConnected: func(height int32, header *wire.BlockHeader, txs []*util.Tx) {,		},
 		// OnBlockDisconnected:         func(hash *chainhash.Hash, height int32, t time.Time) {},
 		// OnFilteredBlockDisconnected: func(height int32, header *wire.BlockHeader) {},
 		// OnRecvTx:                    func(transaction *util.Tx, details *btcjson.BlockDetails) {},
