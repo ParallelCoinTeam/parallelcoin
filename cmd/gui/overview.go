@@ -150,10 +150,10 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 									wg.H5("recent transactions").Fn).Fn,
 							).
 							Flexed(1,
-								wg.Fill("DocBg", l.W, wg.TextSize.V, 0, wg.Inset(0.5,
+								// wg.Inset(0.5,
 									wg.RecentTransactionsWidget,
 									// p9.EmptyMaxWidth(),
-								).Fn).Fn,
+								// ).Fn,
 							).
 							Fn,
 						// ).Fn,
@@ -182,10 +182,10 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								).Fn,
 							).
 							Flexed(1,
-								wg.Fill("DocBg", l.W, wg.TextSize.V, 0, wg.Inset(0.25,
+								// wg.Fill("DocBg", l.W, wg.TextSize.V, 0, wg.Inset(0.25,
 									wg.RecentTransactionsWidget,
 									// p9.EmptyMaxWidth(),
-								).Fn).Fn,
+								// ).Fn).Fn,
 							).
 							Fn,
 						// ).
@@ -235,7 +235,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 			first = false
 		}
 		out = append(out,
-			wg.Fill("PanelBg", l.W, 0, 0,
+			wg.Fill("DocBg", l.W, 0, 0,
 				wg.Inset(0.25,
 					wg.Flex().
 						Rigid(
@@ -261,7 +261,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		// 		TextScale(0.5).Fn,
 		// )
 		out = append(out,
-			wg.Fill("PanelBg", l.W, 0, 0,
+			wg.Fill("DocBg", l.W, 0, 0,
 				wg.Inset(0.25,
 					wg.Flex().Flexed(1,
 						wg.Flex().

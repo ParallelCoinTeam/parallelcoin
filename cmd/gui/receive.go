@@ -2,9 +2,11 @@ package gui
 
 import (
 	"fmt"
+	
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
+	
 	"github.com/p9c/pod/pkg/gui"
 )
 
@@ -76,34 +78,37 @@ func (rp *ReceivePage) MediumList(gtx l.Context) l.Dimensions {
 	qrLE := func(gtx l.Context, index int) l.Dimensions {
 		return wg.Inset(0.25, qrWidget[index]).Fn(gtx)
 	}
-	historyWidget := []l.Widget{
-	}
+	var historyWidget []l.Widget
 	
 	historyWidget = append(historyWidget, rp.GetAddressbookHistoryCards("DocBg")...)
 	historyLE := func(gtx l.Context, index int) l.Dimensions {
-		return wg.Inset(0.25, historyWidget[index]).Fn(gtx)
+		return wg.Inset(0.25,
+			historyWidget[index],
+		).Fn(gtx)
 	}
-	return wg.Flex().Rigid(
-		func(gtx l.Context) l.Dimensions {
-			gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*rp.inputWidth),
-				int(wg.TextSize.V*rp.inputWidth)
-			return wg.lists["receive"].
-				Vertical().
-				Length(len(qrWidget)).
-				ListElement(qrLE).Fn(gtx)
-		},
-	).Flexed(
-		1,
-		wg.VFlex().Rigid(
-			rp.AddressbookHeader(),
-		).Flexed(
+	return wg.Flex().
+		Rigid(
+			func(gtx l.Context) l.Dimensions {
+				gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*rp.inputWidth),
+					int(wg.TextSize.V*rp.inputWidth)
+				return wg.lists["receive"].
+					Vertical().
+					Length(len(qrWidget)).
+					ListElement(qrLE).Fn(gtx)
+			},
+		).
+		Flexed(
 			1,
-			wg.lists["receiveAddresses"].
-				Vertical().
-				Length(len(historyWidget)).
-				ListElement(historyLE).Fn,
-		).Fn,
-	).Fn(gtx)
+			wg.VFlex().Rigid(
+				rp.AddressbookHeader(),
+			).Flexed(
+				1,
+				wg.lists["receiveAddresses"].
+					Vertical().
+					Length(len(historyWidget)).
+					ListElement(historyLE).Fn,
+			).Fn,
+		).Fn(gtx)
 }
 
 func (rp *ReceivePage) Spacer() l.Widget {
