@@ -2,12 +2,16 @@ package gui
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
 	
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
 	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/util"
 )
 
 type SendPage struct {
@@ -183,7 +187,27 @@ func (sp *SendPage) SaveButton() l.Widget {
 				SetClick(
 					func() {
 						Debug("clicked save button")
-						
+						amtS := wg.inputs["sendAmount"].GetText()
+						var err error
+						var amt float64
+						if amt, err = strconv.ParseFloat(amtS, 64); Check(err) {
+							return
+						}
+						var ua util.Amount
+						if ua, err = util.NewAmount(amt); Check(err) {
+							return
+						}
+						addr := wg.inputs["sendAddress"].GetText()
+						var ad util.Address
+						if ad, err = util.DecodeAddress(addr, wg.cx.ActiveNet); Check(err) {
+							return
+						}
+						wg.State.sendAddresses = append(wg.State.sendAddresses, AddressEntry{
+							Address: ad.EncodeAddress(),
+							Label:   wg.inputs["sendMessage"].GetText(),
+							Amount:  ua,
+							Created: time.Now(),
+						})
 					},
 				),
 		).
@@ -204,12 +228,7 @@ func (sp *SendPage) PasteButton() l.Widget {
 		wg := sp.wg
 		return wg.ButtonLayout(
 			wg.clickables["sendFromRequest"].
-				SetClick(
-					func() {
-						Debug("clicked paste button")
-						
-					},
-				),
+				SetClick(sp.pasteFunction),
 		).
 			Background("DocBg").
 			Embed(
@@ -220,6 +239,47 @@ func (sp *SendPage) PasteButton() l.Widget {
 					Fn,
 			).
 			Fn(gtx)
+	}
+}
+
+func (sp *SendPage) pasteFunction() {
+	wg := sp.wg
+	Debug("clicked paste button")
+	var urn string
+	var err error
+	if urn, err = clipboard.ReadAll(); Check(err) {
+		return
+	}
+	if !strings.HasPrefix(urn, "parallelcoin:") {
+		return
+	}
+	split1 := strings.Split(urn, "parallelcoin:")
+	split2 := strings.Split(split1[1], "?")
+	addr := split2[0]
+	var ua util.Address
+	if ua, err = util.DecodeAddress(addr, wg.cx.ActiveNet); Check(err) {
+		return
+	}
+	_ = ua
+	wg.inputs["sendAddress"].SetText(addr)
+	if len(split2) <= 1 {
+		return
+	}
+	split3 := strings.Split(split2[1], "&")
+	for i := range split3 {
+		var split4 []string
+		split4 = strings.Split(split3[i], "=")
+		Debug(split4)
+		if len(split4) > 1 {
+			switch split4[0] {
+			case "amount":
+				wg.inputs["sendAmount"].SetText(split4[1])
+				// Debug("############ amount", split4[1])
+			case "message", "label":
+				wg.inputs["sendMessage"].SetText(split4[1])
+				// Debug("############ message", split4[1])
+			}
+		}
 	}
 }
 
@@ -255,7 +315,7 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 								"parallelcoin:%s?amount=%8.8f&message=%s",
 								wg.State.sendAddresses[i].Address,
 								wg.State.sendAddresses[i].Amount.ToDUO(),
-								wg.State.sendAddresses[i].Message,
+								wg.State.sendAddresses[i].Label,
 							)
 							Debug("clicked send address list item", j)
 							if err := clipboard.WriteAll(sendText); Check(err) {
@@ -282,7 +342,7 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 										Fn,
 								).
 								Rigid(
-									wg.Caption(wg.State.sendAddresses[i].Message).Fn,
+									wg.Caption(wg.State.sendAddresses[i].Label).Fn,
 								).
 								Fn,
 						).
