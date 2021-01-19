@@ -21,6 +21,7 @@ type Input struct {
 	pasteClickable       *Clickable
 	pasteButton          *IconButton
 	GetText              func() string
+	SetText              func(string)
 	borderColor          string
 	borderColorUnfocused string
 	borderColorFocused   string
@@ -47,6 +48,9 @@ func (w *Window) Input(txt, hint, borderColorFocused, borderColorUnfocused,
 	}
 	p.GetText = func() string {
 		return p.editor.Text()
+	}
+	p.SetText = func(s string) {
+		p.editor.SetText(s)
 	}
 	p.clearButton = w.IconButton(p.clearClickable)
 	p.copyButton = w.IconButton(p.copyClickable)
