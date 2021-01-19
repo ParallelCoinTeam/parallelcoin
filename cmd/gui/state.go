@@ -77,8 +77,7 @@ type State struct {
 	receiveAddresses        []AddressEntry
 }
 
-func GetNewState(params *netparams.Params,
-	activePage *uberatomic.String) *State {
+func GetNewState(params *netparams.Params, activePage *uberatomic.String) *State {
 	fc := &atom.Bool{
 		Bool: uberatomic.NewBool(false),
 	}

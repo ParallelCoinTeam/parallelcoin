@@ -2,14 +2,16 @@ package gui
 
 import (
 	"fmt"
-	"gioui.org/op/paint"
-	"github.com/atotto/clipboard"
-	"github.com/p9c/pod/pkg/coding/qrcode"
-	"github.com/p9c/pod/pkg/util"
 	"image"
 	"path/filepath"
 	"strconv"
 	"time"
+	
+	"gioui.org/op/paint"
+	"github.com/atotto/clipboard"
+	
+	"github.com/p9c/pod/pkg/coding/qrcode"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func (wg *WalletGUI) GetNewReceivingAddress() {
@@ -29,12 +31,19 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 			if ae.Amount, err = util.NewAmount(amt); Check(err) {
 			}
 		}
-		ae.Message = wg.inputs["receiveMessage"].GetText()
+		msg := wg.inputs["receiveMessage"].GetText()
+		if len(msg) > 64 {
+			msg = msg[:64]
+		}
+		ae.Message = msg
 		ae.Created = time.Now()
-		wg.State.receiveAddresses = append(wg.State.receiveAddresses, ae)
+		if wg.State.IsReceivingAddress() {
+			wg.State.receiveAddresses = append(wg.State.receiveAddresses, ae)
+		} else {
+			wg.State.receiveAddresses = []AddressEntry{ae}
+			wg.State.isAddress.Store(true)
+		}
 		Debugs(wg.State.receiveAddresses)
-		// TODO: update the receive addressbook widget
-		
 		wg.State.SetReceivingAddress(addr)
 		wg.State.isAddress.Store(true)
 		filename := filepath.Join(wg.cx.DataDir, "state.json")
@@ -50,11 +59,15 @@ func (wg *WalletGUI) GetNewReceivingQRCode() {
 	var qrc image.Image
 	Debug("generating QR code")
 	var err error
+	msg := wg.inputs["receiveMessage"].GetText()
+	if len(msg) > 64 {
+		msg = msg[:64]
+	}
 	qrText := fmt.Sprintf(
 		"parallelcoin:%s?amount=%s&message=%s",
 		wg.State.currentReceivingAddress.Load().EncodeAddress(),
 		wg.inputs["receiveAmount"].GetText(),
-		wg.inputs["receiveMessage"].GetText(),
+		msg,
 	)
 	if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
 		iop := paint.NewImageOp(qrc)

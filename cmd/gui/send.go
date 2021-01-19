@@ -118,7 +118,7 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 			func(gtx l.Context) l.Dimensions {
 				gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*sp.inputWidth),
 					int(wg.TextSize.V*sp.inputWidth)
-				return wg.lists["send"].
+				return wg.lists["sendMedium"].
 					Vertical().
 					Length(len(sendFormWidget)).
 					ListElement(sendLE).Fn(gtx)
@@ -196,8 +196,15 @@ func (sp *SendPage) SaveButton() l.Widget {
 						if amt, err = strconv.ParseFloat(amtS, 64); Check(err) {
 							return
 						}
+						if amt == 0 {
+							return
+						}
 						var ua util.Amount
 						if ua, err = util.NewAmount(amt); Check(err) {
+							return
+						}
+						msg := wg.inputs["sendMessage"].GetText()
+						if msg == "" {
 							return
 						}
 						addr := wg.inputs["sendAddress"].GetText()
@@ -207,7 +214,7 @@ func (sp *SendPage) SaveButton() l.Widget {
 						}
 						wg.State.sendAddresses = append(wg.State.sendAddresses, AddressEntry{
 							Address: ad.EncodeAddress(),
-							Label:   wg.inputs["sendMessage"].GetText(),
+							Label:   msg,
 							Amount:  ua,
 							Created: time.Now(),
 						})
@@ -253,6 +260,8 @@ func (sp *SendPage) pasteFunction() (b bool) {
 		return
 	}
 	if !strings.HasPrefix(urn, "parallelcoin:") {
+		if err = clipboard.WriteAll(urn); Check(err) {
+		}
 		return
 	}
 	split1 := strings.Split(urn, "parallelcoin:")
@@ -279,7 +288,11 @@ func (sp *SendPage) pasteFunction() (b bool) {
 				wg.inputs["sendAmount"].SetText(split4[1])
 				// Debug("############ amount", split4[1])
 			case "message", "label":
-				wg.inputs["sendMessage"].SetText(split4[1])
+				msg := split4[i]
+				if len(msg) > 64 {
+					msg = msg[:64]
+				}
+				wg.inputs["sendMessage"].SetText(msg)
 				// Debug("############ message", split4[1])
 			}
 		}
@@ -346,7 +359,7 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 										Fn,
 								).
 								Rigid(
-									wg.Caption(wg.State.sendAddresses[i].Label).Fn,
+									wg.Caption(wg.State.sendAddresses[i].Label).MaxLines(1).Fn,
 								).
 								Fn,
 						).

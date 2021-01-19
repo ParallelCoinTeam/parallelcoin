@@ -2,20 +2,22 @@ package gui
 
 import (
 	"fmt"
+	"strconv"
 	
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
 	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const Break1 = 48
 
 type ReceivePage struct {
-	wg                                 *WalletGUI
+	wg                 *WalletGUI
 	inputWidth, break1 float32
-	sm, md, lg, xl                     l.Widget
+	sm, md, lg, xl     l.Widget
 }
 
 func (wg *WalletGUI) GetReceivePage() (rp *ReceivePage) {
@@ -89,7 +91,7 @@ func (rp *ReceivePage) MediumList(gtx l.Context) l.Dimensions {
 			func(gtx l.Context) l.Dimensions {
 				gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*rp.inputWidth),
 					int(wg.TextSize.V*rp.inputWidth)
-				return wg.lists["receive"].
+				return wg.lists["receiveMedium"].
 					Vertical().
 					Length(len(qrWidget)).
 					ListElement(qrLE).Fn(gtx)
@@ -130,11 +132,15 @@ func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget
 				return wg.ButtonLayout(
 					wg.receiveAddressbookClickables[i].SetClick(
 						func() {
+							msg := wg.State.receiveAddresses[i].Message
+							if len(msg) > 64 {
+								msg = msg[:64]
+							}
 							qrText := fmt.Sprintf(
 								"parallelcoin:%s?amount=%8.8f&message=%s",
 								wg.State.receiveAddresses[i].Address,
 								wg.State.receiveAddresses[i].Amount.ToDUO(),
-								wg.State.receiveAddresses[i].Message,
+								msg,
 							)
 							Debug("clicked receive address list item", j)
 							if err := clipboard.WriteAll(qrText); Check(err) {
@@ -161,7 +167,7 @@ func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget
 										Fn,
 								).
 								Rigid(
-									wg.Caption(wg.State.receiveAddresses[i].Message).Fn,
+									wg.Caption(wg.State.receiveAddresses[i].Message).MaxLines(1).Fn,
 								).
 								Fn,
 						).
@@ -179,11 +185,15 @@ func (rp *ReceivePage) QRMessage() l.Widget {
 
 func (rp *ReceivePage) GetQRText() string {
 	wg := rp.wg
+	msg := wg.inputs["receiveMessage"].GetText()
+	if len(msg) > 64 {
+		msg = msg[:64]
+	}
 	return fmt.Sprintf(
 		"parallelcoin:%s?amount=%s&message=%s",
 		wg.State.currentReceivingAddress.Load().EncodeAddress(),
 		wg.inputs["receiveAmount"].GetText(),
-		wg.inputs["receiveMessage"].GetText(),
+		msg,
 	)
 }
 
@@ -254,10 +264,33 @@ func (rp *ReceivePage) RegenerateButton() l.Widget {
 				SetClick(
 					func() {
 						Debug("clicked regenerate button")
-						go func() {
-							wg.GetNewReceivingAddress()
-							wg.GetNewReceivingQRCode()
-						}()
+						if wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Amount == 0 ||
+							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Message == "" {
+							// the first entry has neither of these, and newly generated items without them are assumed to
+							// not be intentional or used addresses so we don't generate a new entry for this case
+							var amt float64
+							var am util.Amount
+							var err error
+							if amt, err = strconv.ParseFloat(
+								wg.inputs["receiveAmount"].GetText(),
+								64,
+							); !Check(err) {
+								if am, err = util.NewAmount(amt); Check(err) {
+								}
+							}
+							msg := wg.inputs["receiveMessage"].GetText()
+							if am == 0 || msg == "" {
+								// never store an entry without both fields filled
+								return
+							}
+							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Amount = am
+							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Message = msg
+						} else {
+							go func() {
+								wg.GetNewReceivingAddress()
+								wg.GetNewReceivingQRCode()
+							}()
+						}
 						wg.invalidate <- struct{}{}
 					},
 				),
