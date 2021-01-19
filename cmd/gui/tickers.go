@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"time"
 	
-	l "gioui.org/layout"
-	
 	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -117,19 +115,19 @@ func (wg *WalletGUI) Tickers() {
 						if first {
 							wg.processWalletBlockNotification()
 						}
-						if wg.stateLoaded.Load() { // || wg.currentReceiveGetNew.Load() {
-							wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
-								var widgets []l.Widget
-								widgets = append(widgets, wg.ReceivePage.GetAddressbookHistoryCards("DocBg")...)
-								le := func(gtx l.Context, index int) l.Dimensions {
-									return widgets[index](gtx)
-								}
-								return wg.Flex().Rigid(
-									wg.lists["receiveAddresses"].Length(len(widgets)).Vertical().
-										ListElement(le).Fn,
-								).Fn(gtx)
-							}
-						}
+						// if wg.stateLoaded.Load() { // || wg.currentReceiveGetNew.Load() {
+						// 	wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
+						// 		var widgets []l.Widget
+						// 		widgets = append(widgets, wg.ReceivePage.GetAddressbookHistoryCards("DocBg")...)
+						// 		le := func(gtx l.Context, index int) l.Dimensions {
+						// 			return widgets[index](gtx)
+						// 		}
+						// 		return wg.Flex().Rigid(
+						// 			wg.lists["receiveAddresses"].Length(len(widgets)).Vertical().
+						// 				ListElement(le).Fn,
+						// 		).Fn(gtx)
+						// 	}
+						// }
 						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() { // || wg.currentReceiveGetNew.Load() {
 							wg.GetNewReceivingAddress()
 						}

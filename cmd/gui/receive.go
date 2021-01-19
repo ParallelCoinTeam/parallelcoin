@@ -14,7 +14,7 @@ const Break1 = 48
 
 type ReceivePage struct {
 	wg                                 *WalletGUI
-	inputWidth, break1, break2, break3 float32
+	inputWidth, break1 float32
 	sm, md, lg, xl                     l.Widget
 }
 
@@ -23,8 +23,6 @@ func (wg *WalletGUI) GetReceivePage() (rp *ReceivePage) {
 		wg:         wg,
 		inputWidth: 20,
 		break1:     48,
-		break2:     64,
-		break3:     96,
 	}
 	rp.sm = rp.SmallList
 	return
@@ -117,11 +115,11 @@ func (rp *ReceivePage) Spacer() l.Widget {
 
 func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 	wg := rp.wg
-	avail := len(wg.addressbookClickables)
+	avail := len(wg.receiveAddressbookClickables)
 	req := len(wg.State.receiveAddresses)
 	if req > avail {
 		for i := 0; i < req-avail; i++ {
-			wg.addressbookClickables = append(wg.addressbookClickables, wg.WidgetPool.GetClickable())
+			wg.receiveAddressbookClickables = append(wg.receiveAddressbookClickables, wg.WidgetPool.GetClickable())
 		}
 	}
 	for x := range wg.State.receiveAddresses {
@@ -130,7 +128,7 @@ func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget
 		widgets = append(
 			widgets, func(gtx l.Context) l.Dimensions {
 				return wg.ButtonLayout(
-					wg.addressbookClickables[i].SetClick(
+					wg.receiveAddressbookClickables[i].SetClick(
 						func() {
 							qrText := fmt.Sprintf(
 								"parallelcoin:%s?amount=%8.8f&message=%s",

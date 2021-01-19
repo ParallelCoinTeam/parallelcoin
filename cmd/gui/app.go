@@ -51,7 +51,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			"send": wg.Page(
 				"send", gui.Widgets{
 					// p9.WidgetSize{Widget: p9.EmptyMaxHeight()},
-					gui.WidgetSize{Widget: wg.SendPage()},
+					gui.WidgetSize{Widget: wg.SendPage.Fn},
 				},
 			),
 			"receive": wg.Page(

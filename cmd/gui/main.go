@@ -80,7 +80,8 @@ type WalletGUI struct {
 	sidebarButtons               []*gui.Clickable
 	buttonBarButtons             []*gui.Clickable
 	statusBarButtons             []*gui.Clickable
-	addressbookClickables        []*gui.Clickable
+	receiveAddressbookClickables []*gui.Clickable
+	sendAddressbookClickables    []*gui.Clickable
 	quitClickable                *gui.Clickable
 	bools                        BoolMap
 	lists                        ListMap
@@ -89,7 +90,6 @@ type WalletGUI struct {
 	inputs                       InputMap
 	passwords                    PasswordMap
 	incdecs                      IncDecMap
-	sendAddresses                []SendAddress
 	console                      *Console
 	RecentTransactionsWidget     l.Widget
 	HistoryWidget                l.Widget
@@ -104,13 +104,14 @@ type WalletGUI struct {
 	currentReceiveCopyClickable  *gui.Clickable
 	currentReceiveRegenerate     *uberatomic.Bool
 	// currentReceiveGetNew         *uberatomic.Bool
-	sendClickable                *gui.Clickable
-	txReady                      *uberatomic.Bool
-	mainDirection                l.Direction
-	preRendering                 bool
-	ReceiveAddressbook           l.Widget
-	SendAddressbook              l.Widget
-	ReceivePage                  *ReceivePage
+	sendClickable *gui.Clickable
+	txReady       *uberatomic.Bool
+	mainDirection l.Direction
+	preRendering  bool
+	// ReceiveAddressbook l.Widget
+	// SendAddressbook    l.Widget
+	ReceivePage *ReceivePage
+	SendPage    *SendPage
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
 }
@@ -160,6 +161,7 @@ func (wg *WalletGUI) Run() (err error) {
 		return l.Dimensions{}
 	}
 	wg.ReceivePage = wg.GetReceivePage()
+	wg.SendPage = wg.GetSendPage()
 	wg.MainApp = wg.GetAppWidget()
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
@@ -209,7 +211,7 @@ func (wg *WalletGUI) Run() (err error) {
 		}
 	}()
 	if err := wg.Window.
-		Size(56, 32).
+		Size(40, 32).
 		Title("ParallelCoin Wallet").
 		Open().
 		Run(
@@ -266,12 +268,12 @@ func (wg *WalletGUI) GetInputs() InputMap {
 	_, _ = rand.Read(seed)
 	seedString := hex.EncodeToString(seed)
 	return InputMap{
-		"receiveAmount":  wg.Input("", "Amount", "DocText", "Transparent", "DocBg", func(amt string) {}),
-		"receiveMessage": wg.Input("", "Description", "DocText", "Transparent", "DocBg", func(pass string) {}),
+		"receiveAmount":  wg.Input("", "Amount", "DocText", "PanelBg", "DocBg", func(amt string) {}),
+		"receiveMessage": wg.Input("", "Description", "DocText", "PanelBg", "DocBg", func(pass string) {}),
 		
-		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "Transparent", "DocBg", func(amt string) {}),
-		"sendAmount":  wg.Input("", "Amount", "DocText", "Transparent", "DocBg", func(amt string) {}),
-		"sendMessage": wg.Input("", "Description", "DocText", "Transparent", "DocBg", func(pass string) {}),
+		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "PanelBg", "DocBg", func(amt string) {}),
+		"sendAmount":  wg.Input("", "Amount", "DocText", "PanelBg", "DocBg", func(amt string) {}),
+		"sendMessage": wg.Input("", "Description", "DocText", "PanelBg", "DocBg", func(pass string) {}),
 		
 		"console":    wg.Input("", "enter rpc command", "DocText", "Transparent", "PanelBg", func(pass string) {}),
 		"walletSeed": wg.Input(seedString, "wallet seed", "DocText", "Transparent", "PanelBg", func(pass string) {}),
@@ -357,6 +359,7 @@ func (wg *WalletGUI) GetLists() (o ListMap) {
 		"balances":         wg.List(),
 		"recent":           wg.List(),
 		"send":             wg.List(),
+		"sendAddresses":    wg.List(),
 		"receive":          wg.List(),
 		"receiveAddresses": wg.List(),
 		"transactions":     wg.List(),
@@ -372,6 +375,7 @@ func (wg *WalletGUI) GetClickables() ClickableMap {
 		"quit":                    wg.Clickable(),
 		"sendSend":                wg.Clickable(),
 		"sendSave":                wg.Clickable(),
+		"sendFromRequest":         wg.Clickable(),
 		"receiveCreateNewAddress": wg.Clickable(),
 		"receiveClear":            wg.Clickable(),
 		"receiveShow":             wg.Clickable(),
