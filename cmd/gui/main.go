@@ -171,10 +171,10 @@ func (wg *WalletGUI) Run() (err error) {
 		Info("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {
 		*wg.noWallet = false
-		if !*wg.cx.Config.NodeOff {
-			// wg.startNode()
-			wg.node.Start()
-		}
+		// if !*wg.cx.Config.NodeOff {
+		// 	// wg.startNode()
+		// 	wg.node.Start()
+		// }
 		if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0 {
 			// wg.startMiner()
 			wg.miner.Start()
@@ -359,8 +359,10 @@ func (wg *WalletGUI) GetLists() (o ListMap) {
 		"balances":         wg.List(),
 		"recent":           wg.List(),
 		"send":             wg.List(),
+		"sendMedium":       wg.List(),
 		"sendAddresses":    wg.List(),
 		"receive":          wg.List(),
+		"receiveMedium":    wg.List(),
 		"receiveAddresses": wg.List(),
 		"transactions":     wg.List(),
 		"settings":         wg.List(),
