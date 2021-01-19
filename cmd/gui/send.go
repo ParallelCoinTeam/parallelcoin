@@ -25,6 +25,9 @@ func (wg *WalletGUI) GetSendPage() (sp *SendPage) {
 		inputWidth: 20,
 		break1:     48,
 	}
+	wg.inputs["sendAddress"].SetPasteFunc = sp.pasteFunction
+	wg.inputs["sendAmount"].SetPasteFunc = sp.pasteFunction
+	wg.inputs["sendMessage"].SetPasteFunc = sp.pasteFunction
 	return
 }
 
@@ -228,8 +231,7 @@ func (sp *SendPage) PasteButton() l.Widget {
 		wg := sp.wg
 		return wg.ButtonLayout(
 			wg.clickables["sendFromRequest"].
-				SetClick(sp.pasteFunction),
-		).
+				SetClick(func() { sp.pasteFunction() })).
 			Background("DocBg").
 			Embed(
 				wg.Inset(
@@ -242,7 +244,7 @@ func (sp *SendPage) PasteButton() l.Widget {
 	}
 }
 
-func (sp *SendPage) pasteFunction() {
+func (sp *SendPage) pasteFunction() (b bool) {
 	wg := sp.wg
 	Debug("clicked paste button")
 	var urn string
@@ -261,6 +263,7 @@ func (sp *SendPage) pasteFunction() {
 		return
 	}
 	_ = ua
+	b = true
 	wg.inputs["sendAddress"].SetText(addr)
 	if len(split2) <= 1 {
 		return
@@ -281,6 +284,7 @@ func (sp *SendPage) pasteFunction() {
 			}
 		}
 	}
+	return
 }
 
 func (sp *SendPage) AddressbookHeader() l.Widget {
