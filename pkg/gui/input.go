@@ -22,6 +22,7 @@ type Input struct {
 	pasteButton          *IconButton
 	GetText              func() string
 	SetText              func(string)
+	SetPasteFunc         func() bool
 	borderColor          string
 	borderColorUnfocused string
 	borderColorFocused   string
@@ -66,17 +67,24 @@ func (w *Window) Input(txt, hint, borderColorFocused, borderColorUnfocused,
 	}
 	pasteClickableFn := func() {
 		col := p.editor.Caret.Col
-		go func() {
-			txt := p.editor.Text()
-			var err error
-			var cb string
-			if cb, err = clipboard.ReadAll(); Check(err) {
+		if p.SetPasteFunc != nil {
+			if p.SetPasteFunc() {
+				return
 			}
-			cb = findSpaceRegexp.ReplaceAllString(cb, " ")
-			txt = txt[:col] + cb + txt[col:]
-			p.editor.SetText(txt)
-			p.editor.Move(col + len(cb))
-		}()
+		}
+		txt := p.editor.Text()
+		var err error
+		var cb string
+		if cb, err = clipboard.ReadAll(); Check(err) {
+		}
+		// the SetPasteFunc is a function that screens the clipboard input and
+		// does something other than directly paste into the field. If it returns
+		// true, this means it has captured input that is processed other than as
+		// a simple paste
+		cb = findSpaceRegexp.ReplaceAllString(cb, " ")
+		txt = txt[:col] + cb + txt[col:]
+		p.editor.SetText(txt)
+		p.editor.Move(col + len(cb))
 		p.editor.Focus()
 	}
 	p.clearButton.
