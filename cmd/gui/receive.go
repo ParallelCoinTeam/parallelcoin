@@ -264,25 +264,25 @@ func (rp *ReceivePage) RegenerateButton() l.Widget {
 				SetClick(
 					func() {
 						Debug("clicked regenerate button")
+						var amt float64
+						var am util.Amount
+						var err error
+						if amt, err = strconv.ParseFloat(
+							wg.inputs["receiveAmount"].GetText(),
+							64,
+						); !Check(err) {
+							if am, err = util.NewAmount(amt); Check(err) {
+							}
+						}
+						msg := wg.inputs["receiveMessage"].GetText()
+						if am == 0 || msg == "" {
+							// never store an entry without both fields filled
+							return
+						}
 						if wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Amount == 0 ||
 							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Message == "" {
 							// the first entry has neither of these, and newly generated items without them are assumed to
 							// not be intentional or used addresses so we don't generate a new entry for this case
-							var amt float64
-							var am util.Amount
-							var err error
-							if amt, err = strconv.ParseFloat(
-								wg.inputs["receiveAmount"].GetText(),
-								64,
-							); !Check(err) {
-								if am, err = util.NewAmount(amt); Check(err) {
-								}
-							}
-							msg := wg.inputs["receiveMessage"].GetText()
-							if am == 0 || msg == "" {
-								// never store an entry without both fields filled
-								return
-							}
 							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Amount = am
 							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Message = msg
 						} else {
