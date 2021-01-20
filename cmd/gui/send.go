@@ -162,11 +162,22 @@ func (sp *SendPage) MessageInput() l.Widget {
 func (sp *SendPage) SendButton() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		wg := sp.wg
+		if wg.inputs["sendAmount"].GetText() == "" || wg.inputs["sendMessage"].GetText() == "" ||
+			wg.inputs["sendAddress"].GetText() == "" {
+			gtx.Queue = nil
+		}
 		return wg.ButtonLayout(
 			wg.clickables["sendSend"].
 				SetClick(
 					func() {
 						Debug("clicked send button")
+						go func() {
+							// TODO: implement send
+							// prevent accidental double clicks recording the same entry again
+							wg.inputs["sendAmount"].SetText("")
+							wg.inputs["sendMessage"].SetText("")
+							wg.inputs["sendAddress"].SetText("")
+						}()
 					},
 				),
 		).
@@ -185,6 +196,10 @@ func (sp *SendPage) SendButton() l.Widget {
 func (sp *SendPage) SaveButton() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		wg := sp.wg
+		if wg.inputs["sendAmount"].GetText() == "" || wg.inputs["sendMessage"].GetText() == "" ||
+			wg.inputs["sendAddress"].GetText() == "" {
+			gtx.Queue = nil
+		}
 		return wg.ButtonLayout(
 			wg.clickables["sendSave"].
 				SetClick(
@@ -218,14 +233,18 @@ func (sp *SendPage) SaveButton() l.Widget {
 							Amount:  ua,
 							Created: time.Now(),
 						})
+						// prevent accidental double clicks recording the same entry again
+						wg.inputs["sendAmount"].SetText("")
+						wg.inputs["sendMessage"].SetText("")
+						wg.inputs["sendAddress"].SetText("")
 					},
 				),
 		).
-			Background("DocBg").
+			Background("Primary").
 			Embed(
 				wg.Inset(
 					0.5,
-					wg.H6("save").Color("DocText").Fn,
+					wg.H6("save").Color("Light").Fn,
 				).
 					Fn,
 			).
@@ -239,11 +258,11 @@ func (sp *SendPage) PasteButton() l.Widget {
 		return wg.ButtonLayout(
 			wg.clickables["sendFromRequest"].
 				SetClick(func() { sp.pasteFunction() })).
-			Background("DocBg").
+			Background("Primary").
 			Embed(
 				wg.Inset(
 					0.5,
-					wg.H6("paste").Color("DocText").Fn,
+					wg.H6("paste").Color("Light").Fn,
 				).
 					Fn,
 			).

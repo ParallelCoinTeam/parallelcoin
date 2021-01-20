@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"fmt"
 	"image"
 	"path/filepath"
 	"strconv"
@@ -54,21 +53,11 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 	
 }
 
-func (wg *WalletGUI) GetNewReceivingQRCode() {
+func (wg *WalletGUI) GetNewReceivingQRCode(qrText string) {
 	wg.currentReceiveRegenerate.Store(false)
 	var qrc image.Image
 	Debug("generating QR code")
 	var err error
-	msg := wg.inputs["receiveMessage"].GetText()
-	if len(msg) > 64 {
-		msg = msg[:64]
-	}
-	qrText := fmt.Sprintf(
-		"parallelcoin:%s?amount=%s&message=%s",
-		wg.State.currentReceivingAddress.Load().EncodeAddress(),
-		wg.inputs["receiveAmount"].GetText(),
-		msg,
-	)
 	if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
 		iop := paint.NewImageOp(qrc)
 		wg.currentReceiveQRCode = &iop

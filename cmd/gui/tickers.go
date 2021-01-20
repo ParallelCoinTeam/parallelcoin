@@ -132,7 +132,7 @@ func (wg *WalletGUI) Tickers() {
 							wg.GetNewReceivingAddress()
 						}
 						if wg.currentReceiveQRCode == nil || wg.currentReceiveRegenerate.Load() { // || wg.currentReceiveGetNew.Load() {
-							wg.GetNewReceivingQRCode()
+							wg.GetNewReceivingQRCode(wg.ReceivePage.urn)
 						}
 					}
 					wg.invalidate <- struct{}{}

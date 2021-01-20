@@ -26,7 +26,7 @@ func NewTheme(fontCollection []text.FontFace, quit qu.C) (th *Theme) {
 		quit:          quit,
 		shaper:        text.NewCache(fontCollection),
 		collection:    fontCollection,
-		TextSize:      unit.Sp(24),
+		TextSize:      unit.Sp(16),
 		Colors:        newColors(),
 		scrollBarSize: 0,
 		iconCache:     make(IconCache),

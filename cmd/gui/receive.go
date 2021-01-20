@@ -18,6 +18,7 @@ type ReceivePage struct {
 	wg                 *WalletGUI
 	inputWidth, break1 float32
 	sm, md, lg, xl     l.Widget
+	urn                string
 }
 
 func (wg *WalletGUI) GetReceivePage() (rp *ReceivePage) {
@@ -206,14 +207,14 @@ func (rp *ReceivePage) QRButton() l.Widget {
 	}
 	if wg.currentReceiveQRCode == nil {
 		wg.GetNewReceivingAddress()
-		wg.GetNewReceivingQRCode()
+		wg.GetNewReceivingQRCode(rp.urn)
 	}
 	return wg.Flex().Rigid(
 		wg.ButtonLayout(
 			wg.currentReceiveCopyClickable.SetClick(
 				func() {
 					Debug("clicked qr code copy clicker")
-					if err := clipboard.WriteAll(rp.GetQRText()); Check(err) {
+					if err := clipboard.WriteAll(rp.urn); Check(err) {
 					}
 				},
 			),
@@ -258,6 +259,9 @@ func (rp *ReceivePage) MessageInput() l.Widget {
 func (rp *ReceivePage) RegenerateButton() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		wg := rp.wg
+		if wg.inputs["receiveAmount"].GetText() == "" || wg.inputs["receiveMessage"].GetText() == "" {
+			gtx.Queue = nil
+		}
 		// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*rp.inputWidth), int(wg.TextSize.V*rp.inputWidth)
 		return wg.ButtonLayout(
 			wg.currentReceiveRegenClickable.
@@ -286,11 +290,28 @@ func (rp *ReceivePage) RegenerateButton() l.Widget {
 							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Amount = am
 							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Message = msg
 						} else {
-							go func() {
-								wg.GetNewReceivingAddress()
-								wg.GetNewReceivingQRCode()
-							}()
+							// go func() {
+							wg.GetNewReceivingAddress()
+							msg := wg.inputs["receiveMessage"].GetText()
+							if len(msg) > 64 {
+								msg = msg[:64]
+								// enforce the field length limit
+								wg.inputs["receiveMessage"].SetText(msg)
+							}
+							qrText := fmt.Sprintf(
+								"parallelcoin:%s?amount=%f&message=%s",
+								wg.State.currentReceivingAddress.Load().EncodeAddress(),
+								am.ToDUO(),
+								msg,
+							)
+							rp.urn = qrText
+							wg.GetNewReceivingQRCode(rp.urn)
+							// }()
 						}
+						// force user to fill fields again after regenerate to stop duplicate entries especially from
+						// accidental double clicks/taps
+						wg.inputs["receiveAmount"].SetText("")
+						wg.inputs["receiveMessage"].SetText("")
 						wg.invalidate <- struct{}{}
 					},
 				),
