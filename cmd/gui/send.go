@@ -10,6 +10,7 @@ import (
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -172,11 +173,43 @@ func (sp *SendPage) SendButton() l.Widget {
 					func() {
 						Debug("clicked send button")
 						go func() {
-							// TODO: implement send
-							// prevent accidental double clicks recording the same entry again
-							wg.inputs["sendAmount"].SetText("")
-							wg.inputs["sendMessage"].SetText("")
-							wg.inputs["sendAddress"].SetText("")
+							if wg.WalletAndClientRunning() {
+								var amt float64
+								var am util.Amount
+								var err error
+								if amt, err = strconv.ParseFloat(
+									wg.inputs["sendAmount"].GetText(),
+									64,
+								); !Check(err) {
+									if am, err = util.NewAmount(amt); Check(err) {
+										// todo: indicate this to the user somehow
+										return
+									}
+								} else {
+									// todo: indicate this to the user somehow
+									return
+								}
+								var addr util.Address
+								if addr, err = util.DecodeAddress(wg.inputs["sendAddress"].GetText(),
+									wg.cx.ActiveNet); Check(err) {
+									Debug("invalid address")
+									// TODO: indicate this to the user somehow
+									return
+								}
+								if err= wg.WalletClient.WalletPassphrase(*wg.cx.Config.WalletPass, 5); Check(err){
+									return
+								}
+								var txid *chainhash.Hash
+								if txid, err = wg.WalletClient.SendToAddress(addr, am); Check(err) {
+									// TODO: indicate send failure to user somehow
+									return
+								}
+								Debug("transaction successful", txid)
+								// prevent accidental double clicks recording the same entry again
+								wg.inputs["sendAmount"].SetText("")
+								wg.inputs["sendMessage"].SetText("")
+								wg.inputs["sendAddress"].SetText("")
+							}
 						}()
 					},
 				),
