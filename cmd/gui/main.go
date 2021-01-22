@@ -105,7 +105,7 @@ type WalletGUI struct {
 	currentReceiveRegenerate     *uberatomic.Bool
 	// currentReceiveGetNew         *uberatomic.Bool
 	sendClickable *gui.Clickable
-	txReady       *uberatomic.Bool
+	ready         *uberatomic.Bool
 	mainDirection l.Direction
 	preRendering  bool
 	// ReceiveAddressbook l.Widget
@@ -121,7 +121,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
 	// wg.currentReceiveGetNew = uberatomic.NewBool(false)
-	wg.txReady = uberatomic.NewBool(false)
+	wg.ready = uberatomic.NewBool(false)
 	// wg.th = gui.NewTheme(p9fonts.Collection(), wg.quit)
 	// wg.Window = gui.NewWindow(wg.th)
 	wg.Window = gui.NewWindowP9(wg.quit)
@@ -211,7 +211,7 @@ func (wg *WalletGUI) Run() (err error) {
 		}
 	}()
 	if err := wg.Window.
-		Size(40, 32).
+		Size(56, 32).
 		Title("ParallelCoin Wallet").
 		Open().
 		Run(
@@ -221,24 +221,39 @@ func (wg *WalletGUI) Run() (err error) {
 						return gui.If(
 							*wg.noWallet,
 							wg.CreateWalletPage,
-							gui.If(
-								!wg.txReady.Load(),
-								// && !wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
-								gui.If(
-									!wg.WalletAndClientRunning() && !wg.stateLoaded.Load(),
-									wg.unlockPage.Fn(),
-									wg.loadingPage.Fn(),
-								),
-								wg.MainApp.Fn(),
-							),
+							func(gtx l.Context) l.Dimensions {
+								switch {
+								case wg.ready.Load() && wg.stateLoaded.Load():
+									return wg.MainApp.Fn()(gtx)
+								case wg.ready.Load() || wg.stateLoaded.Load():
+									return wg.loadingPage.Fn()(gtx)
+								default:
+									return wg.unlockPage.Fn()(gtx)
+								}
+							},
+							// gui.If(
+							// 	wg.ready.Load(),
+							// 	gui.If(
+							// 		wg.WalletAndClientRunning(),
+							// 		gui.If(
+							// 			wg.stateLoaded.Load(),
+							// 			wg.MainApp.Fn(),
+							// 			wg.loadingPage.Fn(),
+							// 		),
+							// 		wg.loadingPage.Fn(),
+							// 	),
+							// 	gui.If(
+							// 		wg.WalletAndClientRunning(),
+							// 		wg.loadingPage.Fn(),
+							// 		wg.unlockPage.Fn(),
+							// 	),
+							// ),
 						)(gtx)
 					},
 				).Fn(gtx)
 			},
 			wg.MainApp.Overlay,
-			// wg.InitWallet(),
 			wg.gracefulShutdown,
-			// func() { interrupt.Request() },
 			wg.quit,
 		); Check(err) {
 	}
@@ -449,7 +464,7 @@ func (wg *WalletGUI) gracefulShutdown() {
 		wg.WalletClient = nil
 	}
 	// wg.WalletMutex.Unlock()
-	interrupt.Request()
-	time.Sleep(time.Second)
+	// interrupt.Request()
+	// time.Sleep(time.Second)
 	wg.quit.Q()
 }

@@ -82,12 +82,8 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			wg.stateLoaded.Store(true)
 			
 			wg.RecentTransactions(10, "recent")
-			if !wg.txReady.Load() {
-				wg.txReady.Store(true)
-			}
-			wg.Invalidate()
+			// wg.Invalidate()
 			wg.RecentTransactions(-1, "history")
-			wg.Invalidate()
 			// the entered password matches the stored hash
 			Debug("now we can open the wallet")
 			if err = wg.writeWalletCookie(); Check(err) {
@@ -107,6 +103,8 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			}
 			wg.wallet.Start()
 			wg.unlockPassword.Wipe()
+			// wg.ready.Store(true)
+			wg.Invalidate()
 		}
 	} else {
 		Debug("failed to unlock the wallet")
@@ -119,10 +117,12 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 	password := ""
 	exitButton := wg.WidgetPool.GetClickable()
 	unlockButton := wg.WidgetPool.GetClickable()
-	wg.unlockPassword = wg.Password("enter password", &password, "DocText",
+	wg.unlockPassword = wg.Password(
+		"enter password", &password, "DocText",
 		"DocBg", "PanelBg", func(pass string) {
 			go wg.unlockWallet(pass)
-		})
+		},
+	)
 	wg.unlockPage.ThemeHook(
 		func() {
 			Debug("theme hook")
@@ -146,7 +146,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 							var dims l.Dimensions
 							return wg.Flex().
 								AlignMiddle().
-								Flexed(1,
+								Flexed(
+									1,
 									wg.VFlex().
 										Flexed(0.5, gui.EmptyMaxHeight()).
 										Rigid(
@@ -154,8 +155,10 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 												SpaceEvenly().
 												AlignMiddle().
 												Rigid(
-													wg.Fill("DocBg", l.Center, wg.TextSize.V, 0,
-														wg.Inset(0.5,
+													wg.Fill(
+														"DocBg", l.Center, wg.TextSize.V, 0,
+														wg.Inset(
+															0.5,
 															wg.Flex().
 																AlignMiddle().
 																Rigid(
@@ -166,8 +169,13 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																				dims = wg.Flex().
 																					AlignBaseline().
 																					Rigid(
-																						wg.Fill("Fatal", l.Center, wg.TextSize.V/2, 0,
-																							wg.Inset(0.5,
+																						wg.Fill(
+																							"Fatal",
+																							l.Center,
+																							wg.TextSize.V/2,
+																							0,
+																							wg.Inset(
+																								0.5,
 																								wg.Icon().
 																									Scale(gui.Scales["H3"]).
 																									Color("DocBg").
@@ -176,14 +184,18 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																						).Fn,
 																					).
 																					Rigid(
-																						wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																						wg.Inset(
+																							0.5,
+																							gui.EmptySpace(0, 0),
+																						).Fn,
 																					).
 																					Rigid(
 																						wg.H2("locked").Color("DocText").Fn,
 																					).
 																					Fn(gtx)
 																				return dims
-																			}).
+																			},
+																	).
 																		Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 																		Rigid(
 																			func(gtx l.Context) l.
@@ -211,7 +223,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																			wg.Flex().
 																				Rigid(
 																					wg.Body1("Idle timeout in seconds:").Color(
-																						"DocText").Fn,
+																						"DocText",
+																					).Fn,
 																				).
 																				Rigid(
 																					wg.incdecs["idleTimeout"].
@@ -225,21 +238,29 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																		Rigid(
 																			wg.Flex().
 																				Rigid(
-																					wg.Inset(0.25,
-																						wg.ButtonLayout(exitButton.SetClick(func() {
-																							interrupt.Request()
-																						})).
+																					wg.Inset(
+																						0.25,
+																						wg.ButtonLayout(
+																							exitButton.SetClick(
+																								func() {
+																									interrupt.Request()
+																								},
+																							),
+																						).
 																							CornerRadius(0.5).
 																							Corners(0).
 																							Background("PanelBg").
 																							Embed(
 																								// wg.Fill("DocText",
-																								wg.Inset(0.25,
+																								wg.Inset(
+																									0.25,
 																									wg.Flex().AlignMiddle().
 																										Rigid(
 																											wg.Icon().
-																												Scale(gui.
-																													Scales["H4"]).
+																												Scale(
+																													gui.
+																														Scales["H4"],
+																											).
 																												Color("DocText").
 																												Src(
 																													&icons.
@@ -247,13 +268,25 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																												).Fn,
 																										).
 																										Rigid(
-																											wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																											wg.Inset(
+																												0.5,
+																												gui.EmptySpace(
+																													0,
+																													0,
+																												),
+																											).Fn,
 																										).
 																										Rigid(
 																											wg.H6("exit").Color("DocText").Fn,
 																										).
 																										Rigid(
-																											wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																											wg.Inset(
+																												0.5,
+																												gui.EmptySpace(
+																													0,
+																													0,
+																												),
+																											).Fn,
 																										).
 																										Fn,
 																								).Fn,
@@ -263,18 +296,27 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																					).Fn,
 																				).
 																				Rigid(
-																					wg.Inset(0.25,
-																						wg.ButtonLayout(unlockButton.SetClick(func() {
-																							// pass := wg.unlockPassword.Editor().Text()
-																							pass := wg.unlockPassword.GetPassword()
-																							Debug(">>>>>>>>>>> unlock password", pass)
-																							wg.unlockWallet(pass)
-																							
-																						})).Background("Primary").
+																					wg.Inset(
+																						0.25,
+																						wg.ButtonLayout(
+																							unlockButton.SetClick(
+																								func() {
+																									// pass := wg.unlockPassword.Editor().Text()
+																									pass := wg.unlockPassword.GetPassword()
+																									Debug(
+																										">>>>>>>>>>> unlock password",
+																										pass,
+																									)
+																									wg.unlockWallet(pass)
+																									
+																								},
+																							),
+																						).Background("Primary").
 																							CornerRadius(0.5).
 																							Corners(0).
 																							Embed(
-																								wg.Inset(0.25,
+																								wg.Inset(
+																									0.25,
 																									wg.Flex().AlignMiddle().
 																										Rigid(
 																											wg.Icon().
@@ -283,13 +325,25 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																												Src(&icons.ActionLockOpen).Fn,
 																										).
 																										Rigid(
-																											wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																											wg.Inset(
+																												0.5,
+																												gui.EmptySpace(
+																													0,
+																													0,
+																												),
+																											).Fn,
 																										).
 																										Rigid(
 																											wg.H6("unlock").Color("Light").Fn,
 																										).
 																										Rigid(
-																											wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+																											wg.Inset(
+																												0.5,
+																												gui.EmptySpace(
+																													0,
+																													0,
+																												),
+																											).Fn,
 																										).
 																										Fn,
 																								).Fn,
@@ -301,7 +355,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																		Fn,
 																).
 																Fn,
-														).Fn).Fn,
+														).Fn,
+													).Fn,
 												).
 												Fn,
 										).Flexed(0.5, gui.EmptyMaxHeight()).Fn,
@@ -358,7 +413,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 													},
 												),
 											).Color("Light").TextScale(5).Text(
-												"yes!!!").Fn,
+												"yes!!!",
+											).Fn,
 										).
 										Flexed(0.5, gui.EmptyMaxWidth()).
 										Fn,

@@ -215,13 +215,16 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 				"home", 4, &icons.ActionLockOpen, func(name string) {
 					wg.unlockPassword.Wipe()
 					wg.unlockPassword.Focus()
-					// wg.walletLocked.Store(true)
+					if wg.WalletClient != nil {
+						wg.WalletClient.Disconnect()
+						wg.WalletClient = nil
+					}
 					wg.wallet.Stop()
-					wg.WalletClient.Disconnect()
-					wg.WalletClient = nil
-					wg.unlockPage.ActivePage(name)
+					wg.node.Stop()
+					wg.State.SetActivePage("home")
+					wg.unlockPage.ActivePage("home")
 					wg.stateLoaded.Store(false)
-					wg.txReady.Store(false)
+					wg.ready.Store(false)
 				}, a, "green",
 			),
 			// wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
@@ -491,6 +494,8 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 							go func() {
 								Debug("clicked node run control button", wg.node.Running())
 								// wg.toggleNode()
+								wg.unlockPassword.Wipe()
+								wg.unlockPassword.Focus()
 								if wg.node.Running() {
 									if wg.wallet.Running() {
 										if wg.WalletClient != nil {
@@ -498,8 +503,9 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											wg.WalletClient = nil
 										}
 										wg.wallet.Stop()
-										wg.txReady.Store(false)
+										wg.ready.Store(false)
 										wg.stateLoaded.Store(false)
+										wg.State.SetActivePage("home")
 									}
 									wg.node.Stop()
 								} else {

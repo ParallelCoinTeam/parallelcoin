@@ -44,7 +44,8 @@ type Controller struct {
 	active                 atomic.Bool
 	quit                   qu.C
 	cx                     *conte.Xt
-	Ready                  atomic.Bool
+	// Ready                  atomic.Bool
+	isMining               atomic.Bool
 	height                 atomic.Uint64
 	blockTemplateGenerator *mining.BlkTmplGenerator
 	coinbases              map[int32]*util.Tx
@@ -66,12 +67,10 @@ type Controller struct {
 }
 
 func Run(cx *conte.Xt) (quit qu.C) {
-	isMining := true
+	im := true
 	cx.Controller.Store(true)
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
-		// Warn("no mining addresses, not starting controller")
-		// return
-		isMining = false
+		im = false
 	}
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		Warn("not running controller without RPC enabled")
@@ -94,6 +93,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
 		hashSampleBuf:          rav.NewBufferUint64(100),
 	}
+	ctrl.isMining.Store(im)
 	quit = ctrl.quit
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
@@ -117,7 +117,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	} else {
 		ctrl.active.Store(true)
 	}
-	// ctrl.oldBlocks.Store(pauseShards)
+	ctrl.oldBlocks.Store(pauseShards)
 	interrupt.AddHandler(
 		func() {
 			Debug("miner controller shutting down")
@@ -132,7 +132,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		},
 	)
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
-	if isMining {
+	if ctrl.isMining.Load() {
 		err = ctrl.sendNewBlockTemplate()
 		if err != nil {
 			Error(err)
@@ -153,10 +153,9 @@ func Run(cx *conte.Xt) (quit qu.C) {
 			case <-ticker.C:
 				// qu.PrintChanState()
 				Debug("controller ticker")
-				if !ctrl.Ready.Load() {
+				if !ctrl.active.Load() {
 					if cx.IsCurrent() {
 						Info("ready to send out jobs!")
-						ctrl.Ready.Store(true)
 						ctrl.active.Store(true)
 					}
 				}
@@ -532,10 +531,10 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 			Debug("not active")
 			return
 		}
-		if !c.Ready.Load() {
-			Debug("not ready")
-			return
-		}
+		// if !c.Ready.Load() {
+		// 	Debug("not ready")
+		// 	return
+		// }
 		// First to arrive locks out any others while processing
 		switch n.Type {
 		case blockchain.NTBlockConnected:

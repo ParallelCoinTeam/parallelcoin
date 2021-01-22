@@ -14,7 +14,9 @@ import (
 )
 
 func (wg *WalletGUI) WalletAndClientRunning() bool {
-	return wg.wallet.Running() && wg.WalletClient != nil && !wg.WalletClient.Disconnected()
+	running := wg.wallet.Running() && wg.WalletClient != nil && !wg.WalletClient.Disconnected()
+	// Debug("wallet and wallet rpc client are running?", running)
+	return running
 }
 
 func (wg *WalletGUI) Tickers() {
@@ -29,7 +31,7 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					Debug("---------------------- txReady", wg.txReady.Load())
+					Debug("---------------------- ready", wg.ready.Load())
 					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
 					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
 					// Debug("preconnect loop")
@@ -74,7 +76,7 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					Debug("---------------------- txReady", wg.txReady.Load())
+					Debug("---------------------- ready", wg.ready.Load())
 					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
 					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
 					// Debug("connected loop")

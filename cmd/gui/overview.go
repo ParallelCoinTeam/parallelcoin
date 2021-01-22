@@ -203,6 +203,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	wg.txMx.Lock()
 	defer wg.txMx.Unlock()
+	// wg.ready.Store(false)
 	var out []l.Widget
 	first := true
 	// out = append(out)
@@ -346,8 +347,8 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	switch listName {
 	case "history":
 		wg.HistoryWidget = wo
-		if !wg.txReady.Load() {
-			wg.txReady.Store(true)
+		if !wg.ready.Load() {
+			wg.ready.Store(true)
 		}
 	case "recent":
 		wg.RecentTransactionsWidget = wo

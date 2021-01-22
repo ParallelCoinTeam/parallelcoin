@@ -45,11 +45,12 @@ type Job struct {
 // and a set of methods that extracts the individual requested field without copying memory, or deserialize their
 // contents which will be concurrent safe The varying coinbase payment values are in transaction 0 last output, the
 // individual varying transactions are stored separately and will be reassembled at the end
-func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[int32]*util.Tx) (out Container, txr []*util.Tx) {
+func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[int32]*util.Tx) (
+	out Container,
+	txr []*util.Tx,
+) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
-	if txr == nil {
-		txr = []*util.Tx{}
-	}
+	txr = []*util.Tx{}
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
 	msg = append(msg, nBH)
@@ -84,8 +85,8 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	bitses := Bitses.NewBitses()
 	bitses.Put(bitsMap)
 	msg = append(msg, bitses)
-	// Now we need to get the values for coinbase for each algorithm then regenerate the merkle roots To mine this block
-	// a miner only needs the matching merkle roots for the version number but to get them first get the values
+	// Now we need to get the values for coinbase for each algorithm then regenerate the merkle roots
+	// To mine this block a miner only needs the matching merkle roots for the version number but to get them first get the values
 	var val int64
 	mTS := make(map[int32]*chainhash.Hash)
 	txs := mB.Transactions()[0]
@@ -109,7 +110,8 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		(*cbs)[i] = txx
 		// Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].value)
 		mTree := blockchain.BuildMerkleTreeStore(
-			append([]*util.Tx{txx}, txr...), false)
+			append([]*util.Tx{txx}, txr...), false,
+		)
 		// Traces(mTree[len(mTree)-1].CloneBytes())
 		mTS[i] = &chainhash.Hash{}
 		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
@@ -181,14 +183,18 @@ func (j *Container) String() (s string) {
 	s += "\n"
 	s += fmt.Sprint("3 RPCListenersPort: ", j.GetRPCListenersPort())
 	s += "\n"
-	s += fmt.Sprint("4 ControllerListenerPort: ",
-		j.GetControllerListenerPort())
+	s += fmt.Sprint(
+		"4 ControllerListenerPort: ",
+		j.GetControllerListenerPort(),
+	)
 	s += "\n"
 	h := j.GetNewHeight()
 	s += fmt.Sprint("5 Block height: ", h)
 	s += "\n"
-	s += fmt.Sprintf("6 Previous Block Hash (sha256d): %064x",
-		j.GetPrevBlockHash().CloneBytes())
+	s += fmt.Sprintf(
+		"6 Previous Block Hash (sha256d): %064x",
+		j.GetPrevBlockHash().CloneBytes(),
+	)
 	s += "\n"
 	bitses := j.GetBitses()
 	s += fmt.Sprint("7 Difficulty targets:\n")
@@ -198,20 +204,24 @@ func (j *Container) String() (s string) {
 	}
 	sort.Ints(sortedBitses)
 	for i := range sortedBitses {
-		s += fmt.Sprintf("  %2d %-10v %d %064x", sortedBitses[i],
+		s += fmt.Sprintf(
+			"  %2d %-10v %d %064x", sortedBitses[i],
 			fork.List[fork.GetCurrent(h)].
 				AlgoVers[int32(sortedBitses[i])],
 			bitses[int32(sortedBitses[i])],
-			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes())
+			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes(),
+		)
 		s += "\n"
 	}
 	s += "8 Merkles:\n"
 	hashes := j.GetHashes()
 	for i := range sortedBitses {
-		s += fmt.Sprintf("  %2d %s\n", sortedBitses[i],
-			hashes[int32(sortedBitses[i])].String())
+		s += fmt.Sprintf(
+			"  %2d %s\n", sortedBitses[i],
+			hashes[int32(sortedBitses[i])].String(),
+		)
 	}
-
+	
 	// s += spew.Sdump(j.GetHashes())
 	return
 }

@@ -201,19 +201,23 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						w.quit.Q()
 					}
 				case <-w.StartChan:
+					Debug("received signal on StartChan")
 					*cx.Config.Generate = true
 					save.Pod(cx.Config)
 					w.Start()
 				case <-w.StopChan:
+					Debug("received signal on StopChan")
 					*cx.Config.Generate = false
 					save.Pod(cx.Config)
 					w.Stop()
 				case s := <-w.PassChan:
+					Debug("received signal on PassChan", s)
 					*cx.Config.MinerPass = s
 					save.Pod(cx.Config)
 					w.Stop()
 					w.Start()
 				case n := <-w.SetThreads:
+					Debug("received signal on SetThreads", n)
 					*cx.Config.GenThreads = n
 					save.Pod(cx.Config)
 					if *cx.Config.Generate {
@@ -261,13 +265,16 @@ var handlers = transport.Handlers{
 			return
 		}
 		count := hp.GetCount()
-		c.hashCount.Store(c.hashCount.Load() + uint64(count))
+		hc := c.hashCount.Load() + uint64(count)
+		c.hashCount.Store(hc)
+		Debug("received message hashrate", count, hc)
 		return
 	},
 	string(job.Magic): func(
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (err error) {
+		Debug("received job")
 		w := ctx.(*Worker)
 		if !w.active.Load() {
 			Debug("not active")
@@ -285,6 +292,7 @@ var handlers = transport.Handlers{
 			// ignore other controllers while one is active and received first
 			return
 		}
+		Debug("now listening to controller at", addr)
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
@@ -302,6 +310,7 @@ var handlers = transport.Handlers{
 		ni := p.GetIPs()[0].String()
 		np := p.GetControllerListenerPort()
 		ns := net.JoinHostPort(ni, fmt.Sprint(np))
+		Debug("received pause from server at", ns)
 		if fs == ns {
 			for i := range w.clients {
 				Debug("sending pause to worker", i, fs, ns)
@@ -317,6 +326,7 @@ var handlers = transport.Handlers{
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (err error) {
+		Debug("solution detected from miner at", src)
 		w := ctx.(*Worker)
 		portSlice := strings.Split(w.FirstSender.Load(), ":")
 		if len(portSlice) < 2 {
@@ -358,12 +368,14 @@ var handlers = transport.Handlers{
 			// 	w.Update <- struct{}{}
 			// }
 		// }
+		Debug("no longer listening to", w.FirstSender.Load())
 		w.FirstSender.Store("")
 		return
 	},
 }
 
 func (w *Worker) HashReport() float64 {
+	Debug("generating hash report")
 	w.hashSampleBuf.Add(w.hashCount.Load())
 	av := ewma.NewMovingAverage()
 	var i int
@@ -382,5 +394,7 @@ func (w *Worker) HashReport() float64 {
 		},
 	); Check(err) {
 	}
-	return av.Value()
+	average := av.Value()
+	Debug("hashrate average", average)
+	return average
 }
