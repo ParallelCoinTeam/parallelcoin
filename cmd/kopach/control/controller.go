@@ -41,9 +41,9 @@ const (
 type Controller struct {
 	multiConn *transport.Channel
 	// uniConn                *transport.Channel
-	active                 atomic.Bool
-	quit                   qu.C
-	cx                     *conte.Xt
+	active atomic.Bool
+	quit   qu.C
+	cx     *conte.Xt
 	// Ready                  atomic.Bool
 	isMining               atomic.Bool
 	height                 atomic.Uint64
@@ -383,9 +383,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	return
 }
 
-func getNewBlockTemplate(
-	cx *conte.Xt, bTG *mining.BlkTmplGenerator,
-) (template *mining.BlockTemplate) {
+func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (template *mining.BlockTemplate) {
 	Trace("getting new block template")
 	if len(*cx.Config.MiningAddrs) < 1 {
 		Debug("no mining addresses")
@@ -400,10 +398,8 @@ func getNewBlockTemplate(
 		),
 	)]
 	Trace("calling new block template")
-	template, err := bTG.NewBlockTemplate(
-		0, payToAddr,
-		fork.SHA256d,
-	)
+	var err error
+	template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d)
 	if err != nil {
 		Error(err)
 	} else {
@@ -470,8 +466,8 @@ out:
 				continue
 			}
 			Debug("checking for new transactions")
-			// The current block is stale if the memory pool has been updated since the block template was generated and
-			// it has been at least one minute.
+			// The current block is stale if the memory pool has been updated since the
+			// block template was generated and it has been at least one minute.
 			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
 				LastUpdated() && time.Now().After(
 				time.Unix(
