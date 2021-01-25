@@ -5,7 +5,9 @@ import (
 	"container/heap"
 	"fmt"
 	"time"
-
+	
+	"github.com/davecgh/go-spew/spew"
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
@@ -242,14 +244,15 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 // handling is useful.
 func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte, nextBlockHeight int32,
 	addr util.Address, version int32) (*util.Tx, error) {
-	// if this is the hard fork activation height coming up, we create the special disbursement coinbase
+	// if this is the hard fork activation height coming up, we create the special
+	// disbursement coinbase
 	if nextBlockHeight == fork.List[1].ActivationHeight &&
 		params.Net == wire.MainNet ||
 		nextBlockHeight == fork.List[1].TestnetStart &&
 			params.Net == wire.TestNet3 {
 		return createHardForkSubsidyTx(params, coinbaseScript, nextBlockHeight, addr, version)
 	}
-
+	
 	// Create the script to pay to the provided payment address if one was
 	// specified. Otherwise create a script that allows the coinbase to be
 	// redeemable by anyone.
@@ -427,6 +430,7 @@ func (g *BlkTmplGenerator) NewBlockTemplate(workerNumber uint32, payToAddress ut
 	// Extend the most recently known best block.
 	best := g.Chain.BestSnapshot()
 	nextBlockHeight := best.Height + 1
+	// sanitise the version number
 	vers := fork.GetAlgoVer(algo, nextBlockHeight)
 	algo = fork.GetAlgoName(vers, nextBlockHeight)
 	// Create a standard coinbase transaction paying to the provided address.
@@ -438,14 +442,14 @@ func (g *BlkTmplGenerator) NewBlockTemplate(workerNumber uint32, payToAddress ut
 	// transaction (paying the same value to the same public key address would
 	// otherwise be an identical transaction for block version 1).
 	extraNonce := uint64(0)
-	coinbaseScript, err := standardCoinbaseScript(nextBlockHeight, extraNonce)
-	if err != nil {
-		Error(err)
+	var err error
+	var coinbaseScript []byte
+	if coinbaseScript, err = standardCoinbaseScript(nextBlockHeight, extraNonce); Check(err) {
 		return nil, err
 	}
-	coinbaseTx, err := createCoinbaseTx(g.ChainParams, coinbaseScript, nextBlockHeight, payToAddress, vers)
-	if err != nil {
-		Error(err)
+	var coinbaseTx *util.Tx
+	if coinbaseTx, err = createCoinbaseTx(g.ChainParams, coinbaseScript, nextBlockHeight, payToAddress,
+		vers); Check(err) {
 		return nil, err
 	}
 	coinbaseSigOpCost := int64(blockchain.CountSigOps(coinbaseTx)) * blockchain.WitnessScaleFactor
@@ -579,9 +583,8 @@ mempoolLoop:
 	// this means that we'll include any transactions with witness data in the
 	// mempool, and also add the witness commitment as an OP_RETURN output in the
 	// coinbase transaction.
-	segwitState, err := g.Chain.ThresholdState(chaincfg.DeploymentSegwit)
-	if err != nil {
-		Error(err)
+	var segwitState blockchain.ThresholdState
+	if segwitState, err = g.Chain.ThresholdState(chaincfg.DeploymentSegwit); Check(err) {
 		return nil, err
 	}
 	segwitActive := segwitState == blockchain.ThresholdActive
@@ -628,14 +631,12 @@ mempoolLoop:
 		blockPlusTxWeight := blockWeight + txWeight
 		if blockPlusTxWeight < blockWeight ||
 			blockPlusTxWeight >= g.Policy.BlockMaxWeight {
-			Tracef("skipping tx %s because it would exceed the max block"+
-				" weight", tx.Hash())
+			Tracef("skipping tx %s because it would exceed the max block weight", tx.Hash())
 			logSkippedDeps(tx, deps)
 			continue
 		}
 		// Enforce maximum signature operation cost per block. Also check for overflow.
-		sigOpCost, err := blockchain.GetSigOpCost(tx, false,
-			blockUtxos, true, segwitActive)
+		sigOpCost, err := blockchain.GetSigOpCost(tx, false, blockUtxos, true, segwitActive)
 		if err != nil {
 			Tracec(func() string {
 				return "skipping tx " + tx.Hash().String() +
@@ -658,12 +659,13 @@ mempoolLoop:
 			prioItem.feePerKB < int64(g.Policy.TxMinFreeFee) &&
 			blockPlusTxWeight >= g.Policy.BlockMinWeight {
 			Tracec(func() string {
-				return fmt.Sprint(
-					"skipping tx ", tx.Hash(),
-					" with feePerKB ", prioItem.feePerKB,
-					" < TxMinFreeFee ", g.Policy.TxMinFreeFee,
-					" and block weight ", blockPlusTxWeight,
-					" >= minBlockWeight ", g.Policy.BlockMinWeight,
+				return fmt.Sprintf(
+					"skipping tx %v with feePerKB %v < TxMinFreeFee %v and block weight %v >= minBlockWeight %v",
+					tx.Hash(),
+					prioItem.feePerKB,
+					g.Policy.TxMinFreeFee,
+					blockPlusTxWeight,
+					g.Policy.BlockMinWeight,
 				)
 			})
 			logSkippedDeps(tx, deps)
@@ -692,35 +694,30 @@ mempoolLoop:
 			heap.Push(priorityQueue, prioItem)
 			continue
 		}
-
+		
 		// Ensure the transaction inputs pass all of the necessary preconditions before
 		// allowing it to be added to the block.
 		_, err = blockchain.CheckTransactionInputs(tx, nextBlockHeight,
 			blockUtxos, g.ChainParams)
 		if err != nil {
-			Tracef("skipping tx %s due to error in CheckTransactionInputs"+
-				": %v",
+			Tracef("skipping tx %s due to error in CheckTransactionInputs: %v",
 				tx.Hash(), err)
 			logSkippedDeps(tx, deps)
 			continue
 		}
-		err = blockchain.ValidateTransactionScripts(g.Chain, tx, blockUtxos,
+		if err = blockchain.ValidateTransactionScripts(g.Chain, tx, blockUtxos,
 			txscript.StandardVerifyFlags, g.SigCache,
-			g.HashCache)
-		if err != nil {
-			Tracef("skipping tx %s due to error in"+
-				" ValidateTransactionScripts: %v",
+			g.HashCache); Check(err) {
+			Tracef("skipping tx %s due to error in ValidateTransactionScripts: %v",
 				tx.Hash(), err)
 			logSkippedDeps(tx, deps)
 			continue
 		}
-
+		
 		// Spend the transaction inputs in the block utxo view and add an entry for it
 		// to ensure any transactions which reference this one have it available as an
 		// input and can ensure they aren't double spending.
-		err = spendTransaction(blockUtxos, tx, nextBlockHeight)
-		if err != nil {
-			Error(err)
+		if err = spendTransaction(blockUtxos, tx, nextBlockHeight); Check(err) {
 		}
 		// Add the transaction to the block, increment counters, and save the fees and
 		// signature operation counts to the block template.
@@ -792,14 +789,11 @@ mempoolLoop:
 	// per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
 	// Trace("algo ", ts, " ", algo)
-	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(workerNumber, ts,
-		algo)
-	if err != nil {
-		Error(err)
+	var reqDifficulty uint32
+	if reqDifficulty, err = g.Chain.CalcNextRequiredDifficulty(workerNumber, ts, algo); Check(err) {
 		return nil, err
 	}
-	Tracef("reqDifficulty %d %08x %064x", vers, reqDifficulty,
-		fork.CompactToBig(reqDifficulty))
+	Tracef("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
 	var msgBlock wire.MsgBlock
@@ -842,7 +836,7 @@ mempoolLoop:
 			msgBlock.Transactions[0].TxOut[0].Value,
 		)
 	})
-	// Traces(msgBlock)
+	Tracec(func() string { return spew.Sdump(msgBlock) })
 	return &BlockTemplate{
 		Block:             &msgBlock,
 		Fees:              txFees,
@@ -869,11 +863,11 @@ MsgBlock) error {
 	msgBlock.Header.Timestamp = newTime
 	// Recalculate the difficulty if running on a network that requires it.
 	if g.ChainParams.ReduceMinDifficulty {
-		difficulty, err := g.Chain.CalcNextRequiredDifficulty(
-			workerNumber, newTime,
-			fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height))
-		if err != nil {
-			Error(err)
+		var difficulty uint32
+		var err error
+		if difficulty, err = g.Chain.CalcNextRequiredDifficulty(
+			workerNumber, newTime, fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height),
+		); Check(err) {
 			return err
 		}
 		msgBlock.Header.Bits = difficulty
@@ -888,10 +882,9 @@ MsgBlock) error {
 // It also recalculates and updates the new merkle root that results from
 // changing the coinbase script.
 func (g *BlkTmplGenerator) UpdateExtraNonce(msgBlock *wire.MsgBlock,
-	blockHeight int32, extraNonce uint64) error {
-	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
-	if err != nil {
-		Error(err)
+	blockHeight int32, extraNonce uint64) (err error) {
+	var coinbaseScript []byte
+	if coinbaseScript, err = standardCoinbaseScript(blockHeight, extraNonce);Check(err){
 		return err
 	}
 	if len(coinbaseScript) > blockchain.MaxCoinbaseScriptLen {

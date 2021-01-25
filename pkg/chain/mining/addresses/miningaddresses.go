@@ -8,12 +8,13 @@ import (
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
+// RefillMiningAddresses adds new addresses to the mining address pool for the miner
+// todo: make this remove ones that have been used or received a payment or mined
 func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Config) {
 	if w == nil {
 		Debug("trying to refill without a wallet")
 		return
 	}
-	// we make the list up to 1000 so the user does not have to attend to this too often
 	miningAddressLen := len(*cfg.MiningAddrs)
 	toMake := 99 - miningAddressLen
 	if miningAddressLen >= 99 {
@@ -43,9 +44,6 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	}
 	if save.Pod(cfg) {
 		Warn("saved config with new addresses")
-
-		// Info("you can now start up a node in the same config folder with fresh addresses ready to mine with")
-		// os.Exit(0)
 	} else {
 		Error("error adding new addresses", err)
 	}
