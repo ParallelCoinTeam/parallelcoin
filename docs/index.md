@@ -1,6 +1,6 @@
 # [![](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo_small.svg)](https://p9c.github.io/pod/) parallelcoin pod
 
-## all-in-one-everything for parallelcoin
+#### all-in-one-everything for parallelcoin
 
 [![](https://img.shields.io/badge/documentation-wiki-lightgray.svg)](https://github.com/p9c/pod/wiki)
 [![](https://img.shields.io/badge/chat-telegram-blue.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg)
