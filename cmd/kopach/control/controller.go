@@ -2,13 +2,16 @@ package control
 
 import (
 	"container/ring"
-	"errors"
 	"fmt"
 	"math/rand"
 	"net"
 	"strings"
+	"sync"
 	"time"
 	
+	"github.com/urfave/cli"
+	
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/VividCortex/ewma"
@@ -39,17 +42,16 @@ const (
 )
 
 type Controller struct {
-	multiConn *transport.Channel
-	// uniConn                *transport.Channel
-	active atomic.Bool
-	quit   qu.C
-	cx     *conte.Xt
-	// Ready                  atomic.Bool
+	multiConn              *transport.Channel
+	active                 atomic.Bool
+	quit                   qu.C
+	cx                     *conte.Xt
 	isMining               atomic.Bool
 	height                 atomic.Uint64
 	blockTemplateGenerator *mining.BlkTmplGenerator
-	coinbases              map[int32]*util.Tx
-	transactions           []*util.Tx
+	coinbases              atomic.Value
+	transactions           atomic.Value
+	txMx                   sync.Mutex
 	oldBlocks              atomic.Value
 	prevHash               atomic.Value
 	lastTxUpdate           atomic.Value
@@ -86,12 +88,12 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
-		coinbases:              make(map[int32]*util.Tx),
-		buffer:                 ring.New(BufferSize),
-		began:                  time.Now(),
-		otherNodes:             make(map[string]time.Time),
-		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
-		hashSampleBuf:          rav.NewBufferUint64(100),
+		// coinbases:              make(map[int32]*util.Tx),
+		buffer:        ring.New(BufferSize),
+		began:         time.Now(),
+		otherNodes:    make(map[string]time.Time),
+		listenPort:    int(Uint16.GetActualPort(*cx.Config.Controller)),
+		hashSampleBuf: rav.NewBufferUint64(100),
 	}
 	ctrl.isMining.Store(im)
 	quit = ctrl.quit
@@ -219,18 +221,19 @@ var handlersMulticast = transport.Handlers{
 				BestSnapshot().Hash,
 		) {
 			Debug("block submitted by kopach miner worker is stale")
-			// c.UpdateAndSendTemplate()
+			if err := c.sendNewBlockTemplate(); Check(err) {
+			}
 			return
 		}
 		// Warn(msgBlock.Header.Version)
-		cb, ok := c.coinbases[msgBlock.Header.Version]
+		cb, ok := c.coinbases.Load().(map[int32]*util.Tx)[msgBlock.Header.Version]
 		if !ok {
 			Debug("coinbases not found", cb)
 			return
 		}
 		cbs := []*util.Tx{cb}
 		msgBlock.Transactions = []*wire.MsgTx{}
-		txs := append(cbs, c.transactions...)
+		txs := append(cbs, c.transactions.Load().([]*util.Tx)...)
 		for i := range txs {
 			msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 		}
@@ -264,25 +267,28 @@ var handlersMulticast = transport.Handlers{
 			}
 		}
 		Trace("the block was accepted")
-		coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
-		prevHeight := block.Height() - 1
-		prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
-		prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
-		since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
-		bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
-		Warnf(
-			"new block height %d %08x %s%10d %08x %v %s %ds since prev",
-			block.Height(),
-			prevBlock.MsgBlock().Header.Bits,
-			bHash,
-			block.MsgBlock().Header.Timestamp.Unix(),
-			block.MsgBlock().Header.Bits,
-			util.Amount(coinbaseTx.Value),
-			fork.GetAlgoName(
-				block.MsgBlock().Header.Version,
+		Tracec(func() string {
+			bmb := block.MsgBlock()
+			coinbaseTx := bmb.Transactions[0].TxOut[0]
+			prevHeight := block.Height() - 1
+			prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
+			prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
+			since := bmb.Header.Timestamp.Unix() - prevTime
+			bHash := bmb.BlockHashWithAlgos(block.Height())
+			return fmt.Sprintf(
+				"new block height %d %08x %s%10d %08x %v %s %ds since prev",
 				block.Height(),
-			), since,
-		)
+				prevBlock.MsgBlock().Header.Bits,
+				bHash,
+				bmb.Header.Timestamp.Unix(),
+				bmb.Header.Bits,
+				util.Amount(coinbaseTx.Value),
+				fork.GetAlgoName(
+					bmb.Header.Version,
+					block.Height(),
+				), since,
+			)
+		})
 		return
 	},
 	string(p2padvt.Magic): func(
@@ -350,18 +356,19 @@ var handlersMulticast = transport.Handlers{
 }
 
 func (c *Controller) sendNewBlockTemplate() (err error) {
-	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
-	if template == nil {
-		err = errors.New("could not get template")
-		Error(err)
+	var template *mining.BlockTemplate
+	if template, err = getNewBlockTemplate(c.cx, c.blockTemplateGenerator); !Check(err) {
 		return
 	}
 	msgB := template.Block
-	c.coinbases = make(map[int32]*util.Tx)
+	// c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
 	adv := p2padvt.Get(c.cx)
 	// Traces(adv)
-	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, &c.coinbases)
+	var ctx []*util.Tx
+	ccb := make(map[int32]*util.Tx)
+	fMC, ctx = job.Get(c.cx, util.NewBlock(msgB), adv, &ccb)
+	c.coinbases.Store(ccb)
 	jobShards := transport.GetShards(fMC.Data)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {
@@ -373,13 +380,15 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 		Error(err)
 	}
 	c.prevHash.Store(&template.Block.Header.PrevBlock)
-	c.oldBlocks.Store(jobShards)
+	c.transactions.Store(ctx)
 	c.lastGenerated.Store(time.Now().UnixNano())
 	c.lastTxUpdate.Store(time.Now().UnixNano())
+	c.oldBlocks.Store(jobShards)
 	return
 }
 
-func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (template *mining.BlockTemplate) {
+func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
+	template *mining.BlockTemplate, err error) {
 	Trace("getting new block template")
 	if len(*cx.Config.MiningAddrs) < 1 {
 		Debug("no mining addresses")
@@ -387,10 +396,32 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (template *
 	}
 	// Choose a payment address at random.
 	rand.Seed(time.Now().UnixNano())
-	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.MiningAddrs))]
+	p2a := rand.Intn(len(*cx.Config.MiningAddrs))
+	payToAddr := cx.StateCfg.ActiveMiningAddrs[p2a]
+	// do this after returning, in the background
+	defer func() {
+		go func() {
+			// remove the address from the state
+			if p2a == 0 {
+				cx.StateCfg.ActiveMiningAddrs = cx.StateCfg.ActiveMiningAddrs[1:]
+			} else {
+				cx.StateCfg.ActiveMiningAddrs = append(cx.StateCfg.ActiveMiningAddrs[:p2a],
+					cx.StateCfg.ActiveMiningAddrs[p2a+1:]...)
+			}
+			// update the config
+			var ma []string
+			for i := range cx.StateCfg.ActiveMiningAddrs {
+				ma = append(ma, cx.StateCfg.ActiveMiningAddrs[i].String())
+			}
+			mma := cli.StringSlice(ma)
+			cx.Config.MiningAddrs = &mma
+			save.Pod(cx.Config)
+			// TODO: trigger wallet to generate new ones at some point, if one is connected, when a mined
+			// block uses a key and it is deleted here afterwards
+		}()
+	}()
 	Trace("calling new block template")
-	var err error
-	if template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d); Check(err){
+	if template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("got new block template")
 		Debugs(template)
@@ -423,9 +454,8 @@ out:
 	for {
 		select {
 		case <-advertismentTicker.C:
-			err := c.multiConn.SendMany(p2padvt.Magic, ad)
-			if err != nil {
-				Error(err)
+			var err error
+			if err = c.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
 			}
 		case <-c.quit:
 			break out
@@ -452,7 +482,8 @@ out:
 			best := c.blockTemplateGenerator.BestSnapshot()
 			if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
 				Debug("new best block hash")
-				// c.UpdateAndSendTemplate()
+				if err := c.sendNewBlockTemplate(); Check(err) {
+				}
 				continue
 			}
 			Debug("checking for new transactions")
@@ -466,7 +497,8 @@ out:
 				),
 			) {
 				Trace("block is stale, regenerating")
-				c.UpdateAndSendTemplate()
+				if err := c.sendNewBlockTemplate(); Check(err) {
+				}
 				continue
 			}
 			Debug("checking that block contains payload")
@@ -480,11 +512,9 @@ out:
 				continue
 			}
 			Debug("sending out job")
-			err := c.multiConn.SendMany(job.Magic, oB)
-			if err != nil {
-				Error(err)
+			var err error
+			if err = c.multiConn.SendMany(job.Magic, oB); Check(err) {
 			}
-			// c.oldBlocks.Store(oB)
 			break
 		case <-c.quit:
 			break out
@@ -531,39 +561,8 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 				Warn("chain accepted notification is not a block")
 				break
 			}
-			c.UpdateAndSendTemplate()
+			if err := c.sendNewBlockTemplate(); Check(err) {
+			}
 		}
-	}
-}
-
-func (c *Controller) UpdateAndSendTemplate() {
-	c.coinbases = make(map[int32]*util.Tx)
-	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
-	if template != nil {
-		Debugs(template)
-		c.transactions = []*util.Tx{}
-		for _, v := range template.Block.Transactions[1:] {
-			c.transactions = append(c.transactions, util.NewTx(v))
-		}
-		msgB := template.Block
-		var mC job.Container
-		mC, c.transactions = job.Get(
-			c.cx, util.NewBlock(msgB),
-			p2padvt.Get(c.cx), &c.coinbases,
-		)
-		nH := mC.GetNewHeight()
-		if c.height.Load() < uint64(nH) {
-			Trace("new height", nH)
-			c.height.Store(uint64(nH))
-		}
-		shards := transport.GetShards(mC.Data)
-		c.oldBlocks.Store(shards)
-		if err := c.multiConn.SendMany(job.Magic, shards); Check(err) {
-		}
-		c.prevHash.Store(&template.Block.Header.PrevBlock)
-		c.lastGenerated.Store(time.Now().UnixNano())
-		c.lastTxUpdate.Store(time.Now().UnixNano())
-	} else {
-		Debug("got nil template")
 	}
 }

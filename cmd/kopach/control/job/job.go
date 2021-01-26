@@ -53,7 +53,6 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	txr []*util.Tx,
 ) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
-	txr = []*util.Tx{}
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
 	msg = append(msg, nBH)
@@ -74,10 +73,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	df, ok := tip.Diffs.Load().(blockchain.TargetBits)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
-		bitsMap, err = cx.RealNode.Chain.
-			CalcNextRequiredDifficultyPlan9Controller(tip)
-		if err != nil {
-			Error(err)
+		if bitsMap, err = cx.RealNode.Chain.CalcNextRequiredDifficultyPlan9Controller(tip);Check(err){
 			return
 		}
 		tip.Diffs.Store(bitsMap)
@@ -112,15 +108,15 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		txx := util.NewTx(txc.Copy())
 		// Traces(txs)
 		(*cbs)[i] = txx
-		// Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].value)
+		Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, txr...), false,
 		)
-		// Traces(mTree[len(mTree)-1].CloneBytes())
-		mTS[i] = &chainhash.Hash{}
+		Traces(mTree[len(mTree)-1].CloneBytes())
+		// mTS[i] = &chainhash.Hash{}
 		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
-	// Traces(mTS)
+	Traces(mTS)
 	mHashes := Hashes.NewHashes()
 	mHashes.Put(mTS)
 	msg = append(msg, mHashes)

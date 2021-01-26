@@ -34,36 +34,23 @@ func (wg *WalletGUI) Tickers() {
 					Debug("---------------------- ready", wg.ready.Load())
 					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
 					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
-					// Debug("preconnect loop")
-					// update goroutines data
-					// wg.goRoutines()
-					// close clients if they are open
-					// wg.ChainMutex.Lock()
+					Debug("preconnect loop")
 					if wg.ChainClient != nil {
 						wg.ChainClient.Disconnect()
-						// if wg.ChainClient.Disconnected() {
 						wg.ChainClient.Shutdown()
 						wg.ChainClient = nil
-						// }
 					}
-					// wg.ChainMutex.Unlock()
-					// wg.WalletMutex.Lock()
 					if wg.WalletClient != nil {
 						wg.WalletClient.Disconnect()
 						wg.WalletClient.Shutdown()
 						wg.WalletClient = nil
 					}
-					// wg.WalletMutex.Unlock()
 					if !wg.node.Running() {
 						break
 					}
 					Debug("connecting to chain")
-					if err = wg.chainClient(); Check(err) {
+					if err = wg.chainClient(); err != nil {
 						break
-					}
-					Debug("connecting to wallet")
-					if err = wg.walletClient(); Check(err) {
-						// break
 					}
 					break preconnect
 				case <-fiveSeconds:
@@ -340,28 +327,33 @@ func (wg *WalletGUI) chainClient() (err error) {
 		Warn("node is disabled")
 		return nil
 	}
-	certs := walletmain.ReadCAFile(wg.cx.Config)
-	Debug(*wg.cx.Config.RPCConnect)
-	// wg.ChainMutex.Lock()
-	// defer wg.ChainMutex.Unlock()
-	if wg.ChainClient, err = rpcclient.New(
-		&rpcclient.ConnConfig{
-			Host:                 *wg.cx.Config.RPCConnect,
-			Endpoint:             "ws",
-			User:                 *wg.cx.Config.Username,
-			Pass:                 *wg.cx.Config.Password,
-			TLS:                  *wg.cx.Config.TLS,
-			Certificates:         certs,
-			DisableAutoReconnect: false,
-			DisableConnectOnNew:  false,
-		}, wg.ChainNotifications(), wg.cx.KillAll,
-	); Check(err) {
-		return
-	}
-	if err = wg.ChainClient.NotifyBlocks(); !Check(err) {
-		Debug("subscribed to new transactions")
-		// wg.WalletNotifications()
-		wg.invalidate <- struct{}{}
+	
+	if wg.ChainClient == nil || wg.ChainClient.Disconnected() {
+		certs := walletmain.ReadCAFile(wg.cx.Config)
+		Debug(*wg.cx.Config.RPCConnect)
+		// wg.ChainMutex.Lock()
+		// defer wg.ChainMutex.Unlock()
+		if wg.ChainClient, err = rpcclient.New(
+			&rpcclient.ConnConfig{
+				Host:                 *wg.cx.Config.RPCConnect,
+				Endpoint:             "ws",
+				User:                 *wg.cx.Config.Username,
+				Pass:                 *wg.cx.Config.Password,
+				TLS:                  *wg.cx.Config.TLS,
+				Certificates:         certs,
+				DisableAutoReconnect: false,
+				DisableConnectOnNew:  false,
+			}, wg.ChainNotifications(), wg.cx.KillAll,
+		); Check(err) {
+			return
+		}
+		if err = wg.ChainClient.NotifyBlocks(); !Check(err) {
+			Debug("subscribed to new transactions")
+			// wg.WalletNotifications()
+			wg.invalidate <- struct{}{}
+		}
+	} else {
+		Debug("trying to start chainclient when it's already started")
 	}
 	return
 }
