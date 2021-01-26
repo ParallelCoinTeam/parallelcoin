@@ -1,8 +1,12 @@
-# ![](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo_small.svg) parallelcoin pod
+# [![](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo_small.svg)](https://p9c.github.io/pod/) parallelcoin pod
 
 ## all-in-one-everything for parallelcoin
 
-The Plan 9 from Crypto Space hardfork is resuming development.
+![(https://github.com/p9c/pod/wiki)](https://img.shields.io/badge/github-wiki-white.svg)
+![(https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg)](https://img.shields.io/badge/chat-telegram-blue.svg)
+![(https://discord.gg/yB9sYmm3cZ)](https://img.shields.io/badge/chat-discord-purple.svg)
+
+# Plan 9 from Crypto Space Hard Fork
 
 The hard fork includes the following new features:
 
