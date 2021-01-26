@@ -16,16 +16,14 @@ wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg
 
 ---
 
-# Downloads
+# ParallelCoin Legacy
+
+## Downloads
 
 - [Windows GUI](https://download.parallelcoin.io/Parallelcoin-qt-v1.2.0.0-Win.zip)
 - [Linux GUI](https://github.com/p9c/pod/releases/download/v1.2.0/parallelcoin-qt-x86_64.AppImage)
-- [Linux CLI](https://github.com/p9c/pod/releases/download/1.2.0/parallelcoind-x86_64.AppImage) 
+- [Linux CLI](https://github.com/p9c/pod/releases/download/1.2.0/parallelcoind-x86_64.AppImage)
 - [github](https://github.com/p9c/pod)
-
----
-
-# ParallelCoin Legacy
 
 ## ParallelCoin specifications
 
