@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="36"
+   height="36"
+   viewBox="0 0 36 36"
+   version="1.1"
+   id="svg15"
+   sodipodi:docname="telegram.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata19">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     id="namedview17"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="3.28125"
+     inkscape:cx="25.145474"
+     inkscape:cy="37.2852"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg15"
+     inkscape:document-rotation="0" />
+  <defs
+     id="defs7">
+    <linearGradient
+       id="tlogo-a"
+       x1="64"
+       x2="64"
+       y1="0"
+       y2="127.05025"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0%"
+         stop-color="#2AABEE"
+         id="stop2" />
+      <stop
+         offset="100%"
+         stop-color="#229ED9"
+         id="stop4" />
+    </linearGradient>
+  </defs>
+  <g
+     fill="none"
+     fill-rule="evenodd"
+     id="g13"
+     transform="matrix(0.27857143,0,0,0.27857143,0.17142848,0.17142848)">
+    <circle
+       cx="64"
+       cy="64"
+       r="64"
+       fill="url(#tlogo-a)"
+       fill-rule="nonzero"
+       id="circle9"
+       style="fill:url(#tlogo-a)" />
+    <path
+       fill="#ffffff"
+       fill-rule="nonzero"
+       d="M 28.970038,63.324425 C 47.627337,55.195736 60.068459,49.836806 66.293404,47.247637 84.066884,39.855031 87.760062,38.570856 90.167223,38.528 c 0.529433,-0.0089 1.713204,0.122335 2.480002,0.744539 0.647469,0.525376 0.825614,1.235085 0.910862,1.733199 0.08525,0.498114 0.191401,1.632832 0.107017,2.519467 -0.963151,10.119913 -5.130691,34.678273 -7.250898,46.012749 -0.89714,4.796042 -2.663635,6.40413 -4.373807,6.561503 C 78.3238,96.441464 75.501583,93.643269 71.901874,91.283614 66.269041,87.591221 63.086849,85.292695 57.619209,81.689602 51.300406,77.525604 55.396623,75.236998 58.997691,71.496776 59.940108,70.517942 76.31553,55.623229 76.632477,54.272045 c 0.03964,-0.168988 0.07643,-0.798895 -0.29779,-1.13151 -0.374217,-0.332614 -0.92653,-0.218873 -1.325094,-0.128414 -0.564952,0.128224 -9.563476,6.075914 -26.99557,17.843071 -2.554201,1.753912 -4.867717,2.608476 -6.940548,2.563694 -2.28513,-0.04937 -6.680802,-1.292047 -9.948533,-2.354258 -4.008005,-1.302844 -7.193488,-1.991668 -6.916104,-4.2043 0.144479,-1.152477 1.731545,-2.331111 4.7612,-3.535903 z"
+       id="path11" />
+  </g>
+</svg>

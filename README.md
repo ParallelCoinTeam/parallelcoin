@@ -2,6 +2,12 @@
 
 Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for ParallelCoin
 
+[![](docs/wiki.svg)](https://github.com/p9c/pod/wiki)
+[![](docs/telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg)
+[![](docs/discord.svg)](https://discord.gg/yB9sYmm3cZ)
+[![](docs/fb.svg)](https://www.facebook.com/parallelcoin)
+[![](docs/twitter.svg)](https://twitter.com/parallelcoinduo)
+
 [![github](https://img.shields.io/badge/github-page-blue.svg)](https://p9c.github.io/pod)
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod)
 [![Go Report Card](https://goreportcard.com/badge/github.com/p9c/pod)](https://goreportcard.com/report/github.com/p9c/pod)
