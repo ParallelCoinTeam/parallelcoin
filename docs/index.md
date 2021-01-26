@@ -8,9 +8,13 @@
 ###### [Official Website](https://parallelcoin.info)
 wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](fb.svg)](https://www.facebook.com/parallelcoin) & [![](twitter.svg)](https://twitter.com/parallelcoinduo)
 
+---
+
 # Coming Soon
 
 [Plan 9 Spore Protocol](https://github.com/p9c/pod/wiki/phasetwo)
+
+---
 
 # Downloads
 
@@ -19,8 +23,9 @@ wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg
 - [Linux CLI](https://github.com/p9c/pod/releases/download/1.2.0/parallelcoind-x86_64.AppImage) 
 - [github](https://github.com/p9c/pod)
 
-# ParallelCoin Legacy
+---
 
+# ParallelCoin Legacy
 
 ## ParallelCoin specifications
 
@@ -37,6 +42,8 @@ wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg
 | **Halving Interval** | 250,000 blocks |
 | **P2P Port** | 11047 (21047 Testnet) |
 | **RPC Port** | 11048 (21048 Testnet) |
+
+---
 
 # Plan 9 from Crypto Space Hard Fork
 
@@ -75,6 +82,8 @@ The hard fork includes the following new features:
   simple user interface for making and viewing transactions
   as well as an inbuilt block explorer, configuration and mining
   controls, available on Windows, Mac, Linux, Android and iOS.
+
+---
 
 ## Where can I learn more?
 
