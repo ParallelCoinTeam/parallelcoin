@@ -8,13 +8,9 @@
 ###### [Official Website](https://parallelcoin.info)
 wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](fb.svg)](https://www.facebook.com/parallelcoin) & [![](twitter.svg)](https://twitter.com/parallelcoinduo)
 
----
-
 # Coming Soon
 
 [Plan 9 Spore Protocol](https://github.com/p9c/pod/wiki/phasetwo)
-
----
 
 # ParallelCoin Legacy
 
@@ -76,12 +72,10 @@ The hard fork includes the following new features:
   as well as an inbuilt block explorer, configuration and mining
   controls, available on Windows, Mac, Linux, Android and iOS.
 
----
-
 ## Where can I learn more?
 
 Best place to go is the wiki: [https://github.com/p9c/pod/wiki](https://github.com/p9c/pod/wiki)
 
 wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](fb.svg)](https://www.facebook.com/parallelcoin) & [![](twitter.svg)](https://twitter.com/parallelcoinduo) 
 
-## Downloads [Windows GUI](https://download.parallelcoin.io/Parallelcoin-qt-v1.2.0.0-Win.zip) [Linux GUI](https://github.com/p9c/pod/releases/download/v1.2.0/parallelcoin-qt-x86_64.AppImage) [Linux CLI](https://github.com/p9c/pod/releases/download/1.2.0/parallelcoind-x86_64.AppImage) 
+## Downloads [Windows GUI](https://download.parallelcoin.io/Parallelcoin-qt-v1.2.0.0-Win.zip), [Linux GUI](https://github.com/p9c/pod/releases/download/v1.2.0/parallelcoin-qt-x86_64.AppImage), [Linux CLI](https://github.com/p9c/pod/releases/download/1.2.0/parallelcoind-x86_64.AppImage) 
