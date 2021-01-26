@@ -31,7 +31,8 @@ wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg
 | **Algorithms** | SHA256D & SCRYPT |
 | **Abbreviation** | DUO |
 | **Total Coins** | 1,000,000 |
-| **Block Reward** | Blocks 1-998 = 0.02 DUO (Fair Release) | Blocks > 998 = 2 DUO |
+| **Block Reward** | Blocks 1-998 = 0.02 DUO (Fair Release) / Blocks > 998 = 
+2 DUO |
 | **Block Interval** | 5 minutes |
 | **Halving Interval** | 250,000 blocks |
 | **P2P Port** | 11047 (21047 Testnet) |
