@@ -2,9 +2,9 @@
 
 ## all-in-one-everything for parallelcoin
 
-![(https://github.com/p9c/pod/wiki)](https://img.shields.io/badge/github-wiki-white.svg)
-![(https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg)](https://img.shields.io/badge/chat-telegram-blue.svg)
-![(https://discord.gg/yB9sYmm3cZ)](https://img.shields.io/badge/chat-discord-purple.svg)
+[![](https://img.shields.io/badge/documentation-wiki-lightgray.svg)](https://github.com/p9c/pod/wiki)
+[![](https://img.shields.io/badge/chat-telegram-blue.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg)
+[![](https://img.shields.io/badge/chat-discord-purple.svg)](https://discord.gg/yB9sYmm3cZ)
 
 # Plan 9 from Crypto Space Hard Fork
 
