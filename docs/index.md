@@ -6,6 +6,10 @@
 [![](https://img.shields.io/badge/chat-telegram-blue.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg)
 [![](https://img.shields.io/badge/chat-discord-purple.svg)](https://discord.gg/yB9sYmm3cZ)
 
+# Coming Soon
+
+[Plan 9 Spore Protocol](https://github.com/p9c/pod/wiki/phasetwo)
+
 # Plan 9 from Crypto Space Hard Fork
 
 The hard fork includes the following new features:
@@ -22,6 +26,7 @@ The hard fork includes the following new features:
   parallel block schedules using the new hash function where each
   different block has a different but regular block time with a
   different difficulty target and proportional block reward. 
+ 
   This allows a broader scale dynamic between small and larger 
   miners, who have different needs for payment regularity.
   The average block time is 36 seconds, which is sufficient
@@ -32,7 +37,9 @@ The hard fork includes the following new features:
   and mining worker machines to a cluster. Simple redundancy by
   the use of multicast one can just run one or more controller
   nodes and the workers just listen to whoever is also using the
-  same key. A customised live linux USB will be available for 
+  same key. 
+  
+  A customised live linux USB will be available for 
   both functions with an easy configuration file readable by
   windows for setting the password and payment addresses.
 
