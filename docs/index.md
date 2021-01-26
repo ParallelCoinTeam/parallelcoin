@@ -1,6 +1,9 @@
-# [![](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo_small.svg)](https://p9c.github.io/pod/) parallelcoin pod
+[![](https://raw.githubusercontent.com/p9c/pod/master/pkg/gui/logo/logo_small.svg)](https://p9c.github.io/pod/) 
+# ParallelCoin pod
 
-#### all-in-one-everything for parallelcoin
+### all-in-one-everything for parallelcoin
+
+###### ParallelCoin's Omnibus Depositorie
 
 ###### [Official Website](https://parallelcoin.info)
 wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](fb.svg)](https://www.facebook.com/parallelcoin) & [![](twitter.svg)](https://twitter.com/parallelcoinduo)
