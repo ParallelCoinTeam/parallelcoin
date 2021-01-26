@@ -5,6 +5,8 @@
 [![](https://img.shields.io/badge/documentation-wiki-lightgray.svg)](https://github.com/p9c/pod/wiki)
 [![](https://img.shields.io/badge/chat-telegram-blue.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg)
 [![](https://img.shields.io/badge/chat-discord-purple.svg)](https://discord.gg/yB9sYmm3cZ)
+[![](https://img.shields.io/badge/social-facebook-darkblue.svg)](https://www.facebook.com/parallelcoin)
+[![](https://img.shields.io/badge/social-twitter-lightblue.svg)](https://twitter.com/parallelcoinduo)
 
 # Coming Soon
 
