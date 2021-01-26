@@ -16,7 +16,7 @@ wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg
 
 [Legacy on Github](https://github.com/p9c/pod/tree/master/legacy)
 
-## ParallelCoin specifications
+### ParallelCoin Legacy Specifications
 
 - Multi-algo proof of work crypto currency.
 - Fair release with no premine, no IPO and no ICO.
