@@ -32,11 +32,6 @@ wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg
 | **P2P Port** | 11047 (21047 Testnet) |
 | **RPC Port** | 11048 (21048 Testnet) |
 
-# Downloads
-[![Windows GUI Binary](https://raw.githubusercontent.com/thecreation/brand-icons/master/src/svg/windows.svg)](https://download.parallelcoin.io/Parallelcoin-qt-v1.2.0.0-Win.zip)
-[![Linux GUI](https://raw.githubusercontent.com/thecreation/brand-icons/master/src/svg/linux.svg)](https://github.com/p9c/pod/releases/download/v1.2.0/parallelcoin-qt-x86_64.AppImage)
-[![Linux CLI](https://raw.githubusercontent.com/cmedinam/scripts/033106979fc7e58a6d363efe52236ef07a55de08/linux/custom/focal-fossa/usr/share/icons/HighContrast/scalable/places/network-server.svg)](https://github.com/p9c/pod/releases/download/1.2.0/parallelcoind-x86_64.AppImage)
-
 # Plan 9 from Crypto Space Hard Fork
 
 The hard fork includes the following new features:
@@ -80,3 +75,8 @@ The hard fork includes the following new features:
 Best place to go is the wiki: [https://github.com/p9c/pod/wiki](https://github.com/p9c/pod/wiki)
 
 wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](fb.svg)](https://www.facebook.com/parallelcoin) & [![](twitter.svg)](https://twitter.com/parallelcoinduo) 
+
+# Downloads
+[![Windows GUI Binary](https://raw.githubusercontent.com/thecreation/brand-icons/master/src/svg/windows.svg)](https://download.parallelcoin.io/Parallelcoin-qt-v1.2.0.0-Win.zip)
+[![Linux GUI](https://raw.githubusercontent.com/thecreation/brand-icons/master/src/svg/linux.svg)](https://github.com/p9c/pod/releases/download/v1.2.0/parallelcoin-qt-x86_64.AppImage)
+[![Linux CLI](https://raw.githubusercontent.com/cmedinam/scripts/033106979fc7e58a6d363efe52236ef07a55de08/linux/custom/focal-fossa/usr/share/icons/HighContrast/scalable/places/network-server.svg)](https://github.com/p9c/pod/releases/download/1.2.0/parallelcoind-x86_64.AppImage)
