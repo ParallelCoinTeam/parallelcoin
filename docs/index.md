@@ -12,6 +12,31 @@ wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg
 
 [Plan 9 Spore Protocol](https://github.com/p9c/pod/wiki/phasetwo)
 
+# Downloads
+
+- [Windows GUI](https://download.parallelcoin.io/Parallelcoin-qt-v1.2.0.0-Win.zip)
+- [Linux GUI](https://github.com/p9c/pod/releases/download/v1.2.0/parallelcoin-qt-x86_64.AppImage)
+- [Linux CLI](https://github.com/p9c/pod/releases/download/1.2.0/parallelcoind-x86_64.AppImage) 
+- [github](https://github.com/p9c/pod)
+
+# ParallelCoin Legacy
+
+
+## ParallelCoin specifications
+
+- Multi-algo proof of work crypto currency.
+- Fair release with no premine, no IPO and no ICO.
+
+|---|---|
+| **Algorithms** | SHA256D & SCRYPT |
+| **Abbreviation** | DUO |
+| **Total Coins** | 1,000,000 |
+| **Block Reward** | Blocks 1-998 = 0.02 DUO (Fair Release) | Blocks > 998 = 2 DUO |
+| **Block Interval** | 5 minutes |
+| **Halving Interval** | 250,000 blocks |
+| **P2P Port** | 11047 (21047 Testnet) |
+| **RPC Port** | 11048 (21048 Testnet) |
+
 # Plan 9 from Crypto Space Hard Fork
 
 The hard fork includes the following new features:
