@@ -32,7 +32,8 @@ wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg
 | **RPC Port** | 11048 (21048 Testnet) |
 
 
-# Get Parallelcoin
+### Get Parallelcoin Legacy
+
 [![github](https://raw.githubusercontent.com/thecreation/brand-icons/master/src/svg/github.svg)](https://github.com/p9c/pod/tree/master/legacy)
 [![Windows GUI Binary](https://raw.githubusercontent.com/thecreation/brand-icons/master/src/svg/windows.svg)](https://download.parallelcoin.io/Parallelcoin-qt-v1.2.0.0-Win.zip)
 [![Linux GUI](https://raw.githubusercontent.com/thecreation/brand-icons/master/src/svg/linux.svg)](https://github.com/p9c/pod/releases/download/v1.2.0/parallelcoin-qt-x86_64.AppImage)
