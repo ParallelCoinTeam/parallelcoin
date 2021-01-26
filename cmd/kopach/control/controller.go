@@ -100,14 +100,12 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	ctrl.height.Store(0)
 	ctrl.active.Store(false)
 	var err error
-	ctrl.multiConn, err = transport.NewBroadcastChannel(
+	if ctrl.multiConn, err = transport.NewBroadcastChannel(
 		"controller",
 		ctrl, *cx.Config.MinerPass,
 		transport.DefaultPort, MaxDatagramSize, handlersMulticast,
 		quit,
-	)
-	if err != nil {
-		Error(err)
+	); Check(err) {
 		ctrl.quit.Q()
 		return
 	}
@@ -122,9 +120,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		func() {
 			Debug("miner controller shutting down")
 			ctrl.active.Store(false)
-			err := ctrl.multiConn.SendMany(pause.Magic, pauseShards)
-			if err != nil {
-				Error(err)
+			if err = ctrl.multiConn.SendMany(pause.Magic, pauseShards); Check(err) {
 			}
 			if err = ctrl.multiConn.Close(); Check(err) {
 			}
@@ -133,9 +129,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	)
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
 	if ctrl.isMining.Load() {
-		err = ctrl.sendNewBlockTemplate()
-		if err != nil {
-			Error(err)
+		if err = ctrl.sendNewBlockTemplate(); Check(err) {
 		} else {
 			ctrl.active.Store(true)
 		}
@@ -240,19 +234,21 @@ var handlersMulticast = transport.Handlers{
 		for i := range txs {
 			msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 		}
-		// set old blocks to pause and send pause directly as block is probably a solution
+		// set old blocks to pause and send pause directly as block is probably a
+		// solution
 		err = c.multiConn.SendMany(pause.Magic, c.pauseShards)
 		if err != nil {
 			Error(err)
 			return
 		}
 		block := util.NewBlock(msgBlock)
-		isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(
+		var isOrphan bool
+		if isOrphan, err = c.cx.RealNode.SyncManager.ProcessBlock(
 			block,
 			blockchain.BFNone,
-		)
-		if err != nil {
-			// Anything other than a rule violation is an unexpected error, so log that error as an internal error.
+		); Check(err) {
+			// Anything other than a rule violation is an unexpected error, so log that
+			// error as an internal error.
 			if _, ok := err.(blockchain.RuleError); !ok {
 				Warnf(
 					"Unexpected error while processing block submitted via kopach miner:", err,
@@ -290,8 +286,7 @@ var handlersMulticast = transport.Handlers{
 		return
 	},
 	string(p2padvt.Magic): func(
-		ctx interface{}, src net.Addr, dst string,
-		b []byte,
+		ctx interface{}, src net.Addr, dst string, b []byte,
 	) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
@@ -316,8 +311,9 @@ var handlersMulticast = transport.Handlers{
 						"ctrl", j.GetControllerListenerPort(), "P2P",
 						j.GetP2PListenersPort(), "rpc", j.GetRPCListenersPort(),
 					)
-					// because nodes can be set to change their port each launch this always reconnects (for lan,
-					// autoports is recommended).
+					// because nodes can be set to change their port each launch this always
+					// reconnects (for lan, autoports is recommended).
+					// TODO: readd autoports for GUI wallet
 					Info("connecting to lan peer with same PSK", o, otherIPs)
 					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
 					}
@@ -391,19 +387,13 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (template *
 	}
 	// Choose a payment address at random.
 	rand.Seed(time.Now().UnixNano())
-	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(
-		len(
-			*cx.Config.
-				MiningAddrs,
-		),
-	)]
+	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.MiningAddrs))]
 	Trace("calling new block template")
 	var err error
-	template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d)
-	if err != nil {
-		Error(err)
+	if template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d); Check(err){
 	} else {
-		// Debug("got new block template")
+		Debug("got new block template")
+		Debugs(template)
 	}
 	return
 }
@@ -550,6 +540,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 	c.coinbases = make(map[int32]*util.Tx)
 	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 	if template != nil {
+		Debugs(template)
 		c.transactions = []*util.Tx{}
 		for _, v := range template.Block.Transactions[1:] {
 			c.transactions = append(c.transactions, util.NewTx(v))
