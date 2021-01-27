@@ -80,7 +80,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				color = false
 			}
 			logi.L.SetLevel(*cx.Config.LogLevel, color, "pod")
-			Info(version.Get())
+			// Info(version.Get())
 		}
 		if !*cx.Config.PipeLog {
 			// if/when running further instances of the same version no reason

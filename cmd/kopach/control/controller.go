@@ -95,6 +95,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		listenPort:    int(Uint16.GetActualPort(*cx.Config.Controller)),
 		hashSampleBuf: rav.NewBufferUint64(100),
 	}
+	ctrl.prevHash.Store(&chainhash.Hash{})
 	ctrl.isMining.Store(im)
 	quit = ctrl.quit
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
@@ -424,7 +425,7 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
 	if template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("got new block template")
-		Debugs(template)
+		// Debugs(template)
 	}
 	return
 }
@@ -481,6 +482,7 @@ out:
 			// The current block is stale if the best block has changed.
 			best := c.blockTemplateGenerator.BestSnapshot()
 			if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
+				c.prevHash.Store(&best.Hash)
 				Debug("new best block hash")
 				if err := c.sendNewBlockTemplate(); Check(err) {
 				}

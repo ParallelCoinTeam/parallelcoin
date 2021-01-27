@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 	
-	"github.com/davecgh/go-spew/spew"
-	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
@@ -836,7 +834,7 @@ mempoolLoop:
 			msgBlock.Transactions[0].TxOut[0].Value,
 		)
 	})
-	Tracec(func() string { return spew.Sdump(msgBlock) })
+	// Tracec(func() string { return spew.Sdump(msgBlock) })
 	return &BlockTemplate{
 		Block:             &msgBlock,
 		Fees:              txFees,

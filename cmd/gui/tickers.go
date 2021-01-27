@@ -66,9 +66,6 @@ func (wg *WalletGUI) Tickers() {
 					Debug("---------------------- ready", wg.ready.Load())
 					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
 					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
-					// Debug("connected loop")
-					// wg.goRoutines()
-					// the remaining actions require a running shell, if it has been stopped we need to stop
 					if !wg.node.Running() {
 						Debug("breaking out node not running")
 						break out
@@ -165,7 +162,6 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 	Debug("processChainBlockNotification")
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(hash)
-	// wg.invalidate <- struct{}{}
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() {
@@ -219,7 +215,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
 			Trace("chain OnBlockConnected", hash, height, t)
 			wg.processChainBlockNotification(hash, height, t)
-			wg.processWalletBlockNotification()
+			// wg.processWalletBlockNotification()
 			// pop up new block toast
 			
 			wg.invalidate <- struct{}{}
@@ -313,6 +309,8 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			Debug("OnWalletLockState", locked)
 			// switch interface to unlock page
 			wg.wallet.Stop()
+			wg.WalletClient.Disconnect()
+			wg.WalletClient = nil
 			// TODO: lock when idle... how to get trigger for idleness in UI?
 			wg.invalidate <- struct{}{}
 		},

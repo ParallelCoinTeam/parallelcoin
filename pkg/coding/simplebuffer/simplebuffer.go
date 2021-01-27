@@ -2,6 +2,8 @@ package simplebuffer
 
 import (
 	"encoding/binary"
+	
+	"github.com/p9c/pod/pkg/util/logi"
 )
 
 type Serializer interface {
@@ -79,6 +81,7 @@ func (c *Container) GetMagic() (out []byte) {
 // for the output (we aren't going to go unsafe here, it isn't really necessary since already this library enables
 // avoiding the decoding of values not being used from a message (or not used yet)
 func (c *Container) Get(idx uint16) (out []byte) {
+	Debug("getting item", idx,logi.Caller("here", 2))
 	length := c.Count()
 	size := len(c.Data)
 	if length > idx {
