@@ -63,3 +63,19 @@ func GetInterface() (interfaces []net.Interface, addresses []string) {
 	// Traces(lanInterface)
 	return
 }
+
+
+func GetListenable() []net.Addr {
+	// first add the interface addresses
+	rI, _ := GetInterface()
+	var lA []net.Addr
+	for i := range rI {
+		l, err := rI[i].Addrs()
+		if err != nil {
+			Error(err)
+			return nil
+		}
+		lA = append(lA, l...)
+	}
+	return lA
+}

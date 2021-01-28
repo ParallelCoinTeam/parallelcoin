@@ -23,6 +23,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/niubaoshu/gotiny v0.0.3
 	github.com/onsi/ginkgo v1.12.1 // indirect
 	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2

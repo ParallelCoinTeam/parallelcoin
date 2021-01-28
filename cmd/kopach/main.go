@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 	
+	"github.com/niubaoshu/gotiny"
+	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/logi"
 	qu "github.com/p9c/pod/pkg/util/quit"
@@ -258,13 +260,19 @@ var handlers = transport.Handlers{
 			Debug("not active")
 			return
 		}
-		hp := hashrate.LoadContainer(b)
-		id := hp.GetID()
+		var hr hashrate.Hashrate
+		gotiny.Unmarshal(b, &hr)
+		// hp := hashrate.LoadContainer(b)
+		// count := hp.GetCount()
+		// nonce := hp.GetNonce()
+		
+		// hp := hashrate.LoadContainer(b)
+		// id := hp.GetID()
 		// if this is not one of our workers reports ignore it
-		if id != c.id {
+		if hr.ID != c.id {
 			return
 		}
-		count := hp.GetCount()
+		count := hr.Count
 		hc := c.hashCount.Load() + uint64(count)
 		c.hashCount.Store(hc)
 		Debug("received message hashrate", count, hc)

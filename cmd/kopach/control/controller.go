@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 	
+	"github.com/niubaoshu/gotiny"
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/save"
@@ -276,15 +277,17 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 		Debug("not active")
 		return
 	}
-	hp := hashrate.LoadContainer(b)
-	count := hp.GetCount()
-	nonce := hp.GetNonce()
-	if c.lastNonce == nonce {
+	var hr hashrate.Hashrate
+	gotiny.Unmarshal(b, &hr)
+	// hp := hashrate.LoadContainer(b)
+	// count := hp.GetCount()
+	// nonce := hp.GetNonce()
+	if c.lastNonce == hr.Nonce {
 		return
 	}
-	c.lastNonce = nonce
+	c.lastNonce = hr.Nonce
 	// add to total hash counts
-	c.hashCount.Store(c.hashCount.Load() + uint64(count))
+	c.hashCount.Store(c.hashCount.Load() + uint64(hr.Count))
 	return
 }
 
@@ -385,15 +388,21 @@ func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (er
 		Debug("not active")
 		return
 	}
-	hp := hashrate.LoadContainer(b)
-	count := hp.GetCount()
-	nonce := hp.GetNonce()
-	if c.lastNonce == nonce {
+	var hr hashrate.Hashrate
+	gotiny.Unmarshal(b, &hr)
+	// hp := hashrate.LoadContainer(b)
+	// count := hp.GetCount()
+	// nonce := hp.GetNonce()
+	
+	// hp := hashrate.LoadContainer(b)
+	// count := hp.GetCount()
+	// nonce := hp.GetNonce()
+	if c.lastNonce == hr.Nonce {
 		return
 	}
-	c.lastNonce = nonce
+	c.lastNonce = hr.Nonce
 	// add to total hash counts
-	c.hashCount.Store(c.hashCount.Load() + uint64(count))
+	c.hashCount.Store(c.hashCount.Load() + uint64(hr.Count))
 	return
 }
 

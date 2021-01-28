@@ -236,7 +236,7 @@ out:
 						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH, w.id)
 						err := w.dispatchConn.SendMany(
 							hashrate.Magic,
-							transport.GetShards(hashReport.Data),
+							transport.GetShards(hashReport),
 						)
 						if err != nil {
 							Error(err)
