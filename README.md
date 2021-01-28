@@ -4,7 +4,7 @@
 Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for ParallelCoin
 
 ###### [Official Website](https://parallelcoin.info) 
-wiki: [![](docs/wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](docs/telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](docs/discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](docs/fb.svg)](https://www.facebook.com/parallelcoin) & [![](docs/twitter.svg)](https://twitter.com/parallelcoinduo) 
+wiki: [![](docs/wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](docs/telegram.svg)](https://t.me/ParallelCoinPlan9) , [![](docs/discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](docs/fb.svg)](https://www.facebook.com/parallelcoin) & [![](docs/twitter.svg)](https://twitter.com/parallelcoinduo) 
 
 [![github](https://img.shields.io/badge/github-page-blue.svg)](https://p9c.github.io/pod)
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod)
@@ -290,4 +290,4 @@ code location references. Change goland launcher and package root path as requir
 The logger code locations start with a space and absolute paths with a forward
 slash and you have to set the repository path manually.
 
-wiki: [![](docs/wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](docs/telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](docs/discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](docs/fb.svg)](https://www.facebook.com/parallelcoin) & [![](docs/twitter.svg)](https://twitter.com/parallelcoinduo) 
+wiki: [![](docs/wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](docs/telegram.svg)](https://t.me/ParallelCoinPlan9) , [![](docs/discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](docs/fb.svg)](https://www.facebook.com/parallelcoin) & [![](docs/twitter.svg)](https://twitter.com/parallelcoinduo) 
