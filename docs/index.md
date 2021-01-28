@@ -7,7 +7,7 @@
 
 ###### [Official Website](https://parallelcoin.info)
 
-wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](fb.svg)](https://www.facebook.com/parallelcoin) & [![](twitter.svg)](https://twitter.com/parallelcoinduo)
+wiki: [![](docs/wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](docs/telegram.svg)](https://t.me/ParallelCoinPlan9) , [![](docs/discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](docs/fb.svg)](https://www.facebook.com/parallelcoin) & [![](docs/twitter.svg)](https://twitter.com/parallelcoinduo) 
 
 # Coming Soon
 
@@ -80,4 +80,4 @@ The hard fork includes the following new features:
 
 Best place to go is the wiki: [https://github.com/p9c/pod/wiki](https://github.com/p9c/pod/wiki)
 
-wiki: [![](wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](telegram.svg)](https://t.me/joinchat/HfF85EsLo7REf2GvuLYtkg) , [![](discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](fb.svg)](https://www.facebook.com/parallelcoin) & [![](twitter.svg)](https://twitter.com/parallelcoinduo) 
+wiki: [![](docs/wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](docs/telegram.svg)](https://t.me/ParallelCoinPlan9) , [![](docs/discord.svg)](https://discord.gg/yB9sYmm3cZ) , [![](docs/fb.svg)](https://www.facebook.com/parallelcoin) & [![](docs/twitter.svg)](https://twitter.com/parallelcoinduo) 
