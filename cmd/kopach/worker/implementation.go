@@ -246,10 +246,11 @@ out:
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
 						Debug("found solution")
-						srs := sol.GetSolContainer(w.senderPort.Load(), mb)
+						// srs := sol.GetSolContainer(w.senderPort.Load(), mb)
+						srs := sol.Get(int32(w.senderPort.Load()), mb)
 						err := w.dispatchConn.SendMany(
 							sol.SolutionMagic,
-							transport.GetShards(srs.Data),
+							transport.GetShards(srs),
 						)
 						if err != nil {
 							Error(err)

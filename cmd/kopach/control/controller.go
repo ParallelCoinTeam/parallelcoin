@@ -297,12 +297,14 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err e
 		Debug("not active yet")
 		return
 	}
-	j := sol.LoadSolContainer(b)
-	senderPort := j.GetSenderPort()
+	var s sol.Solution
+	gotiny.Unmarshal(b, &s)
+	// j := sol.LoadSolContainer(b)
+	senderPort := s.Port
 	if int(senderPort) != c.listenPort {
 		return
 	}
-	msgBlock := j.GetMsgBlock()
+	msgBlock := s.MsgBlock
 	if !msgBlock.Header.PrevBlock.IsEqual(
 		&c.cx.RPCServer.Cfg.Chain.
 			BestSnapshot().Hash,

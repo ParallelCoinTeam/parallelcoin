@@ -1,6 +1,7 @@
 package serve
 
 import (
+	"github.com/niubaoshu/gotiny"
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -8,7 +9,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
@@ -84,7 +84,7 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 				if !logOn.Load() {
 					break out
 				}
-				if n, err := p.Write(Entry.Get(&e).Data); !Check(err) {
+				if n, err := p.Write(gotiny.Marshal(e)); !Check(err) {
 					// Debug(interrupt.GoroutineDump())
 					if n < 1 {
 						Error("short write")

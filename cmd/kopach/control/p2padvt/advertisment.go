@@ -7,25 +7,21 @@ import (
 	"net"
 	
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
 )
 
 var Magic = []byte{'a', 'd', 'v', 1}
-
-type Container struct {
-	simplebuffer.Container
-}
 
 type Advertisment struct {
 	IPs                  []net.Addr
 	P2P, RPC, Controller uint16
 }
 
-// LoadContainer takes a message byte slice payload and loads it into a container ready to be decoded
-func LoadContainer(b []byte) (out Container) {
-	out.Data = b
-	return
-}
+//
+// // LoadContainer takes a message byte slice payload and loads it into a container ready to be decoded
+// func LoadContainer(b []byte) (out Container) {
+// 	out.Data = b
+// 	return
+// }
 
 // Get returns an advertisment serializer
 func Get(cx *conte.Xt) []byte {
@@ -60,6 +56,7 @@ func GetAdvt(cx *conte.Xt) Advertisment {
 	// 	Uint16.GetPort(*cx.Config.Controller),
 	// }
 }
+
 //
 // // GetIPs decodes the IPs from the advertisment
 // func (j *Container) GetIPs() []*net.IP {

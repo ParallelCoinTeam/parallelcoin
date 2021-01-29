@@ -128,7 +128,7 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 		CoinBases:       *cbs,
 	}
 	// return Container{*msg.CreateContainer(Magic)}, txr
-	return gotiny.Marshal(jrb), txr
+	return gotiny.Marshal(&jrb), txr
 }
 
 //

@@ -44,7 +44,7 @@ func Get(count int32, version int32, height int32, id string) []byte {
 		Nonce:   int32(binary.LittleEndian.Uint32(nonce)),
 		ID:      id,
 	}
-	return gotiny.Marshal(hr)
+	return gotiny.Marshal(&hr)
 	// return Container{*simplebuffer.Serializers{
 	// 	Time.New().Put(time.Now()),
 	// 	IPs.GetListenable(),

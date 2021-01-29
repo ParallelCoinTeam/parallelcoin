@@ -1,10 +1,10 @@
 package consume
 
 import (
+	"github.com/niubaoshu/gotiny"
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/Entry"
 	"github.com/p9c/pod/pkg/util/logi/Pkg"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 	"github.com/p9c/pod/pkg/util/quit"
@@ -43,7 +43,9 @@ func Log(
 				switch magic {
 				case "entr":
 					// Debug(b)
-					e := Entry.LoadContainer(b).Struct()
+					// e := Entry.LoadContainer(b).Struct()
+					var e logi.Entry
+					gotiny.Unmarshal(b[4:], &e)
 					if filter(e.Package) {
 						// if the worker filter is out of sync this stops it printing
 						return
@@ -61,7 +63,7 @@ func Log(
 						return
 					}
 					// Debugf("%s%s %s%s", color, e.Text, logi.ColorOff, e.CodeLocation)
-					if err := handler(e); Check(err) {
+					if err := handler(&e); Check(err) {
 					}
 				}
 			}
