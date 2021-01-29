@@ -43,7 +43,8 @@ func Log(
 					// Debug(b)
 					// e := Entry.LoadContainer(b).Struct()
 					var e logi.Entry
-					gotiny.Unmarshal(b[4:], &e)
+					n := gotiny.Unmarshal(b, &e)
+					Debug("consume", n)
 					if filter(e.Package) {
 						// if the worker filter is out of sync this stops it printing
 						return

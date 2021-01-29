@@ -249,7 +249,7 @@ out:
 						// srs := sol.GetSolContainer(w.senderPort.Load(), mb)
 						srs := sol.Get(int32(w.senderPort.Load()), mb)
 						err := w.dispatchConn.SendMany(
-							sol.SolutionMagic,
+							sol.Magic,
 							transport.GetShards(srs),
 						)
 						if err != nil {

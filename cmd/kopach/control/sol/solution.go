@@ -5,8 +5,8 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// SolutionMagic is the marker for packets containing a solution
-var SolutionMagic = []byte{'s', 'o', 'l', 'v'}
+// Magic is the marker for packets containing a solution
+var Magic = []byte{'s', 'o', 'l', 1}
 
 type Solution struct {
 	Port int32
@@ -24,7 +24,7 @@ func Get(port int32, mb *wire.MsgBlock) []byte {
 //
 // func GetSolContainer(port uint32, b *wire.MsgBlock) *Container {
 // 	mB := Block.New().Put(b)
-// 	srs := simplebuffer.Serializers{Int32.New().Put(int32(port)), mB}.CreateContainer(SolutionMagic)
+// 	srs := simplebuffer.Serializers{Int32.New().Put(int32(port)), mB}.CreateContainer(Magic)
 // 	return &Container{*srs}
 // }
 //

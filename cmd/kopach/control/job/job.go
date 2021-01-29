@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-var Magic = []byte{'w', 'o', 'r', 'k'}
+var Magic = []byte{'j', 'o', 'b', 1}
 
 type Job struct {
 	IPs             []net.Addr
@@ -77,6 +77,7 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	mTS := make(map[int32]*chainhash.Hash)
 	txs := mB.Transactions()[0]
 	rtx := mB.Transactions()[1:]
+	txr = make([]*util.Tx, len(rtx))
 	for i, v := range rtx {
 		txr[i] = v
 	}
@@ -127,8 +128,11 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 		Hashes:          mTS,
 		CoinBases:       *cbs,
 	}
+	jobber := gotiny.Marshal(&jrb)
+	Debugs(jrb)
+	Debugs(jobber)
 	// return Container{*msg.CreateContainer(Magic)}, txr
-	return gotiny.Marshal(&jrb), txr
+	return jobber, txr
 }
 
 //

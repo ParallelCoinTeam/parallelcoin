@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"strings"
 	"sync"
 	"time"
 	
@@ -111,17 +112,17 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		ctrl.quit.Q()
 		return
 	}
-	var pauseShards [][]byte
-	if pauseShards = transport.GetShards(append(p2padvt.Magic, p2padvt.Get(cx)...)); Check(err) {
+	// var pauseShards [][]byte
+	if ctrl.pauseShards = transport.GetShards(p2padvt.Get(cx)); Check(err) {
 	} else {
 		ctrl.active.Store(true)
 	}
-	ctrl.oldBlocks.Store(pauseShards)
+	// ctrl.oldBlocks.Store(pauseShards)
 	interrupt.AddHandler(
 		func() {
 			Debug("miner controller shutting down")
 			ctrl.active.Store(false)
-			if err = ctrl.multiConn.SendMany(pause.Magic, pauseShards); Check(err) {
+			if err = ctrl.multiConn.SendMany(pause.Magic, ctrl.pauseShards); Check(err) {
 			}
 			if err = ctrl.multiConn.Close(); Check(err) {
 			}
@@ -138,7 +139,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	}
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	advt := p2padvt.Get(cx)
-	ad := transport.GetShards(append(p2padvt.Magic, advt...))
+	ad := transport.GetShards(advt)
 	if ctrl.isMining.Load() {
 		cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	}
@@ -264,34 +265,56 @@ func (c *Controller) HashReport() float64 {
 }
 
 var handlersMulticast = transport.Handlers{
-	string(sol.SolutionMagic): processSolMsg,
-	string(p2padvt.Magic):     processAdvtMsg,
-	string(hashrate.Magic):    processHashrateMsg,
+	string(sol.Magic):      processSolMsg,
+	string(p2padvt.Magic):  processAdvtMsg,
+	string(hashrate.Magic): processHashrateMsg,
 }
 
 func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 	c := ctx.(*Controller)
 	if !c.active.Load() {
-		Debug("not active")
+		// Debug("not active")
 		return
 	}
-	var hr hashrate.Hashrate
-	gotiny.Unmarshal(b, &hr)
-	// hp := hashrate.LoadContainer(b)
-	// count := hp.GetCount()
-	// nonce := hp.GetNonce()
-	if c.lastNonce == hr.Nonce {
-		return
+	// Debug(src, dst)
+	// j := p2padvt.LoadContainer(b)
+	var j p2padvt.Advertisment
+	gotiny.Unmarshal(b, &j)
+	otherIPs := j.IPs
+	// Debug(otherIPs)
+	// Trace("otherIPs", otherIPs)
+	otherPort := fmt.Sprint(j.P2P)
+	// Debug(otherPort)
+	myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
+	// Debug(myPort)
+	// Trace("myPort", myPort,*c.cx.Config.Listeners)
+	for i := range otherIPs {
+		o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
+		if otherPort != myPort {
+			if _, ok := c.otherNodes[o]; !ok {
+				Debug("ctrl", j.Controller, "P2P", j.P2P, "rpc", j.RPC)
+				// because nodes can be set to change their port each launch this always
+				// reconnects (for lan, autoports is recommended).
+				// TODO: readd autoports for GUI wallet
+				Info("connecting to lan peer with same PSK", o, otherIPs)
+				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
+				}
+			}
+			c.otherNodes[o] = time.Now()
+		}
 	}
-	c.lastNonce = hr.Nonce
-	// add to total hash counts
-	c.hashCount.Store(c.hashCount.Load() + uint64(hr.Count))
+	for i := range c.otherNodes {
+		if time.Now().Sub(c.otherNodes[i]) > time.Second*9 {
+			delete(c.otherNodes, i)
+		}
+	}
+	c.cx.OtherNodes.Store(int32(len(c.otherNodes)))
 	return
 }
 
 // Solutions submitted by workers
-func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err error) {
-	Trace("received solution")
+func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err error) {
+	Trace("received solution", src, dst)
 	c := ctx.(*Controller)
 	if !c.active.Load() { // || !c.cx.Node.Load() {
 		Debug("not active yet")
@@ -356,28 +379,30 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err e
 		}
 	}
 	Trace("the block was accepted")
-	Tracec(func() string {
-		bmb := block.MsgBlock()
-		coinbaseTx := bmb.Transactions[0].TxOut[0]
-		prevHeight := block.Height() - 1
-		prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
-		prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
-		since := bmb.Header.Timestamp.Unix() - prevTime
-		bHash := bmb.BlockHashWithAlgos(block.Height())
-		return fmt.Sprintf(
-			"new block height %d %08x %s%10d %08x %v %s %ds since prev",
-			block.Height(),
-			prevBlock.MsgBlock().Header.Bits,
-			bHash,
-			bmb.Header.Timestamp.Unix(),
-			bmb.Header.Bits,
-			util.Amount(coinbaseTx.Value),
-			fork.GetAlgoName(
-				bmb.Header.Version,
+	Tracec(
+		func() string {
+			bmb := block.MsgBlock()
+			coinbaseTx := bmb.Transactions[0].TxOut[0]
+			prevHeight := block.Height() - 1
+			prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
+			prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
+			since := bmb.Header.Timestamp.Unix() - prevTime
+			bHash := bmb.BlockHashWithAlgos(block.Height())
+			return fmt.Sprintf(
+				"new block height %d %08x %s%10d %08x %v %s %ds since prev",
 				block.Height(),
-			), since,
-		)
-	})
+				prevBlock.MsgBlock().Header.Bits,
+				bHash,
+				bmb.Header.Timestamp.Unix(),
+				bmb.Header.Bits,
+				util.Amount(coinbaseTx.Value),
+				fork.GetAlgoName(
+					bmb.Header.Version,
+					block.Height(),
+				), since,
+			)
+		},
+	)
 	return
 }
 
@@ -437,7 +462,8 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 }
 
 func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
-	template *mining.BlockTemplate, err error) {
+	template *mining.BlockTemplate, err error,
+) {
 	Trace("getting new block template")
 	if len(*cx.Config.MiningAddrs) < 1 {
 		Debug("no mining addresses")
@@ -454,8 +480,10 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
 			if p2a == 0 {
 				cx.StateCfg.ActiveMiningAddrs = cx.StateCfg.ActiveMiningAddrs[1:]
 			} else {
-				cx.StateCfg.ActiveMiningAddrs = append(cx.StateCfg.ActiveMiningAddrs[:p2a],
-					cx.StateCfg.ActiveMiningAddrs[p2a+1:]...)
+				cx.StateCfg.ActiveMiningAddrs = append(
+					cx.StateCfg.ActiveMiningAddrs[:p2a],
+					cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
+				)
 			}
 			// update the config
 			var ma []string
@@ -473,7 +501,7 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
 	if template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("got new block template")
-		// Debugs(template)
+		Debugs(template)
 	}
 	return
 }

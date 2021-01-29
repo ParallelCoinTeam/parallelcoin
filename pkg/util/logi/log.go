@@ -472,6 +472,6 @@ func Composite(text, level string) (final string) {
 func Caller(comment string, skip int) string {
 	_, file, line, _ := runtime.Caller(skip + 1)
 	o := fmt.Sprintf("%s: %s:%d", comment, file, line)
-	L.Debug(o)
+	// L.Debug(o)
 	return o
 }

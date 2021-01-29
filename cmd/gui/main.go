@@ -166,7 +166,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.loadingPage = wg.getLoadingPage()
-	wg.Tickers()
+	// wg.Tickers()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 		Info("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {
@@ -186,7 +186,7 @@ func (wg *WalletGUI) Run() (err error) {
 			Debug("quitting wallet gui")
 			// consume.Kill(wg.Node)
 			// consume.Kill(wg.Miner)
-			wg.gracefulShutdown()
+			// wg.gracefulShutdown()
 			wg.quit.Q()
 		},
 	)

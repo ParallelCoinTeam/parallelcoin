@@ -220,7 +220,7 @@ func ListenBroadcast(
 	for i := range handlers {
 		magics = append(magics, i)
 	}
-	// DEBUG("magics", magics, PrevCallers())
+	Debug("magics", magics, PrevCallers())
 	Debug("starting broadcast listener", channel.Creator, address, magics)
 	if err = conn.SetReadBuffer(maxDatagramSize); Check(err) {
 	}
@@ -305,7 +305,7 @@ out:
 						}
 						bn.Decoded = true
 						// DEBUG(numBytes, src, err)
-						// Tracef("received packet with magic %s from %s", magic, src.String())
+						Tracef("received packet with magic %s from %s", magic, src.String())
 						if err = handler(channel.context, src, address, cipherText); Check(err) {
 							continue
 						}

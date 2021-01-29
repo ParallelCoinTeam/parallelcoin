@@ -289,8 +289,11 @@ var handlers = transport.Handlers{
 			Debug("not active")
 			return
 		}
+		Debugs(b)
 		var j job.Job
+		// var ifc interface{}
 		gotiny.Unmarshal(b, &j)
+		// Debugs(ifc)
 		// j := job.LoadContainer(b)
 		ips := j.IPs
 		w.height = j.Height
@@ -337,7 +340,7 @@ var handlers = transport.Handlers{
 		}
 		return
 	},
-	string(sol.SolutionMagic): func(
+	string(sol.Magic): func(
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (err error) {

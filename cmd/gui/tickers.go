@@ -48,10 +48,6 @@ func (wg *WalletGUI) Tickers() {
 					if !wg.node.Running() {
 						break
 					}
-					Debug("connecting to chain")
-					if err = wg.chainClient(); err != nil {
-						break
-					}
 					break preconnect
 				case <-fiveSeconds:
 					continue
@@ -66,6 +62,20 @@ func (wg *WalletGUI) Tickers() {
 					Debug("---------------------- ready", wg.ready.Load())
 					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
 					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
+					wg.node.Start()
+					if err = wg.writeWalletCookie(); Check(err) {
+					}
+					wg.wallet.Start()
+					Debug("connecting to chain")
+					if err = wg.chainClient(); err != nil {
+						break
+					}
+					if wg.wallet.Running() { // && wg.WalletClient == nil {
+						Debug("connecting to wallet")
+						if err = wg.walletClient(); Check(err) {
+							break
+						}
+					}
 					if !wg.node.Running() {
 						Debug("breaking out node not running")
 						break out
@@ -91,12 +101,7 @@ func (wg *WalletGUI) Tickers() {
 						wg.updateChainBlock()
 						wg.invalidate <- struct{}{}
 					}
-					if wg.wallet.Running() && wg.WalletClient == nil {
-						Debug("connecting to wallet")
-						if err = wg.walletClient(); Check(err) {
-							break
-						}
-					}
+					
 					if wg.WalletAndClientRunning() {
 						if first {
 							wg.processWalletBlockNotification()

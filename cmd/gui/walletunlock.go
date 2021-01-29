@@ -103,7 +103,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			}
 			wg.wallet.Start()
 			wg.unlockPassword.Wipe()
-			// wg.ready.Store(true)
+			wg.ready.Store(true)
 			wg.Invalidate()
 		}
 	} else {

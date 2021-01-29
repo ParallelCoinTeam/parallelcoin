@@ -15,7 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/util/routeable"
 )
 
-var Magic = []byte{'h', 'a', 's', 'h'}
+var Magic = []byte{'h', 'a', 's', 1}
 //
 // type Container struct {
 // 	simplebuffer.Container
@@ -44,7 +44,9 @@ func Get(count int32, version int32, height int32, id string) []byte {
 		Nonce:   int32(binary.LittleEndian.Uint32(nonce)),
 		ID:      id,
 	}
-	return gotiny.Marshal(&hr)
+	srlz := gotiny.Marshal(&hr)
+	Debugs(srlz)
+	return srlz
 	// return Container{*simplebuffer.Serializers{
 	// 	Time.New().Put(time.Now()),
 	// 	IPs.GetListenable(),
