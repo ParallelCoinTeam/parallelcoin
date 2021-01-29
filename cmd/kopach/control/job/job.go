@@ -17,7 +17,7 @@ import (
 var Magic = []byte{'j', 'o', 'b', 1}
 
 type Job struct {
-	IPs             []net.Addr
+	IPs             []net.TCPAddr
 	P2PListenerPort uint16
 	RPCListenerPort uint16
 	ControllerPort  uint16
@@ -25,7 +25,7 @@ type Job struct {
 	PrevBlockHash   *chainhash.Hash
 	Bitses          blockchain.TargetBits
 	Hashes          map[int32]*chainhash.Hash
-	CoinBases       map[int32]*util.Tx
+	// CoinBases       map[int32]*util.Tx
 }
 
 // Get returns a message broadcast by a node and each field is decoded where
@@ -135,16 +135,23 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 		Hashes:          mTS,
 		// CoinBases:       *cbs,
 	}
-	jrb.CoinBases= make(map[int32]*util.Tx)
-	for i := range *cbs {
-		jrb.CoinBases[i] = (*cbs)[i]
+	// jrb.CoinBases= make(map[int32]*util.Tx)
+	// for i := range *cbs {
+	// 	jrb.CoinBases[i] = (*cbs)[i]
+	// }
+	out = gotiny.Marshal(&jrb)
+	Debugs(jrb)
+	Debugs(out)
+	var testy []byte
+	for i := range out {
+		testy = append(testy, out[i])
 	}
-	jobber := gotiny.Marshal(&jrb)
-	// Debugs(jrb)
-	// Debugs(jobber)
-	Debug("job size", len(jobber))
+	var jr Job
+	Debug(gotiny.Unmarshal(testy, &jr))
+	Debugs(jr)
+	// Debug("job size", len(jobber))
 	// return Container{*msg.CreateContainer(Magic)}, txr
-	return jobber, txr
+	return out, txr
 }
 
 //

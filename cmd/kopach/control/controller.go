@@ -171,7 +171,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 				}
 				if ctrl.isMining.Load() {
 					Debug("rebroadcasting")
-					ctrl.rebroadcast()
+					// ctrl.rebroadcast()
 				}
 			case msg := <-ctrl.submitChan:
 				Traces(msg)
@@ -452,10 +452,14 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	}
 	msgB := template.Block
 	// c.coinbases = make(map[int32]*util.Tx)
-	var ctx []*util.Tx
+	var txs []*util.Tx
 	ccb := make(map[int32]*util.Tx)
 	var fMC []byte
-	fMC, ctx = job.Get(c.cx, util.NewBlock(msgB), &ccb)
+	fMC, txs = job.Get(c.cx, util.NewBlock(msgB), &ccb)
+	// Debugs(fMC)
+	// var jr job.Job
+	// gotiny.Unmarshal(fMC, &jr)
+	// Debugs(jr)
 	c.coinbases.Store(ccb)
 	jobShards := transport.GetShards(fMC)
 	shardsLen := len(jobShards)
@@ -469,7 +473,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 		Error(err)
 	}
 	c.prevHash.Store(&template.Block.Header.PrevBlock)
-	c.transactions.Store(ctx)
+	c.transactions.Store(txs)
 	c.lastGenerated.Store(time.Now().UnixNano())
 	c.lastTxUpdate.Store(time.Now().UnixNano())
 	return

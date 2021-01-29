@@ -106,7 +106,7 @@ func (w *Worker) Start() {
 	}
 	Debug("setting workers to active")
 	w.active.Store(true)
-
+	
 }
 
 func (w *Worker) Stop() {
@@ -289,15 +289,15 @@ var handlers = transport.Handlers{
 			Debug("not active")
 			return
 		}
+		
 		Debugs(b)
-		var j job.Job
-		// var ifc interface{}
-		gotiny.Unmarshal(b, &j)
-		// Debugs(ifc)
-		// j := job.LoadContainer(b)
-		ips := j.IPs
-		w.height = j.Height
-		cP := j.ControllerPort
+		var jr job.Job
+		gotiny.Unmarshal(b, &jr)
+		Debugs(jr)
+		
+		ips := jr.IPs
+		w.height = jr.Height
+		cP := jr.ControllerPort
 		addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
@@ -310,9 +310,7 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			err := w.clients[i].NewJob(&j)
-			if err != nil {
-				Error(err)
+			if err = w.clients[i].NewJob(&jr); Check(err) {
 			}
 		}
 		return
@@ -327,7 +325,7 @@ var handlers = transport.Handlers{
 		// ni := p.GetIPs()[0].String()
 		np := advt.Controller
 		// np := p.GetControllerListenerPort()
-		ns := net.JoinHostPort(strings.Split(ni[0].String(),":")[0], fmt.Sprint(np))
+		ns := net.JoinHostPort(strings.Split(ni[0].String(), ":")[0], fmt.Sprint(np))
 		Debug("received pause from server at", ns)
 		if fs == ns {
 			for i := range w.clients {
@@ -355,36 +353,36 @@ var handlers = transport.Handlers{
 		// j := sol.LoadSolContainer(b)
 		// senderPort := j.GetSenderPort()
 		// if fmt.Sprint(senderPort) == port {
-			// // Warn("we found a solution")
-			// // prepend to list of solutions for GUI display if enabled
-			// if *w.cx.Config.KopachGUI {
-			// 	// Debug("length solutions", len(w.solutions))
-			// 	blok := j.GetMsgBlock()
-			// 	w.solutions = append(
-			// 		w.solutions, []SolutionData{
-			// 			{
-			// 				time:   time.Now(),
-			// 				height: int(w.height),
-			// 				algo: fmt.Sprint(
-			// 					fork.GetAlgoName(blok.Header.Version, w.height),
-			// 				),
-			// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
-			// 				indexHash:  blok.Header.BlockHash().String(),
-			// 				version:    blok.Header.Version,
-			// 				prevBlock:  blok.Header.PrevBlock.String(),
-			// 				merkleRoot: blok.Header.MerkleRoot.String(),
-			// 				timestamp:  blok.Header.Timestamp,
-			// 				bits:       blok.Header.Bits,
-			// 				nonce:      blok.Header.Nonce,
-			// 			},
-			// 		}...,
-			// 	)
-			// 	if len(w.solutions) > 2047 {
-			// 		w.solutions = w.solutions[len(w.solutions)-2047:]
-			// 	}
-			// 	w.solutionCount = len(w.solutions)
-			// 	w.Update <- struct{}{}
-			// }
+		// // Warn("we found a solution")
+		// // prepend to list of solutions for GUI display if enabled
+		// if *w.cx.Config.KopachGUI {
+		// 	// Debug("length solutions", len(w.solutions))
+		// 	blok := j.GetMsgBlock()
+		// 	w.solutions = append(
+		// 		w.solutions, []SolutionData{
+		// 			{
+		// 				time:   time.Now(),
+		// 				height: int(w.height),
+		// 				algo: fmt.Sprint(
+		// 					fork.GetAlgoName(blok.Header.Version, w.height),
+		// 				),
+		// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
+		// 				indexHash:  blok.Header.BlockHash().String(),
+		// 				version:    blok.Header.Version,
+		// 				prevBlock:  blok.Header.PrevBlock.String(),
+		// 				merkleRoot: blok.Header.MerkleRoot.String(),
+		// 				timestamp:  blok.Header.Timestamp,
+		// 				bits:       blok.Header.Bits,
+		// 				nonce:      blok.Header.Nonce,
+		// 			},
+		// 		}...,
+		// 	)
+		// 	if len(w.solutions) > 2047 {
+		// 		w.solutions = w.solutions[len(w.solutions)-2047:]
+		// 	}
+		// 	w.solutionCount = len(w.solutions)
+		// 	w.Update <- struct{}{}
+		// }
 		// }
 		Debug("no longer listening to", w.FirstSender.Load())
 		w.FirstSender.Store("")

@@ -64,18 +64,23 @@ func GetInterface() (interfaces []net.Interface, addresses []string) {
 	return
 }
 
-
-func GetListenable() []net.Addr {
+func GetListenable() []net.TCPAddr {
 	// first add the interface addresses
 	rI, _ := GetInterface()
-	var lA []net.Addr
+	var lA []net.TCPAddr
 	for i := range rI {
 		l, err := rI[i].Addrs()
 		if err != nil {
 			Error(err)
 			return nil
 		}
-		lA = append(lA, l...)
+		for j := range l {
+			ljs := l[j].String()
+			ip := net.ParseIP(ljs)
+			lA = append(
+				lA, net.TCPAddr{IP: ip},
+			)
+		}
 	}
 	return lA
 }

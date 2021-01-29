@@ -23,7 +23,7 @@ var Magic = []byte{'h', 'a', 's', 1}
 
 type Hashrate struct {
 	Time    time.Time
-	IPs     []net.Addr
+	IPs     []net.TCPAddr
 	Count   int
 	Version int32
 	Height  int32

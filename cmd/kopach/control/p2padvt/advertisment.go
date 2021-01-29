@@ -12,7 +12,7 @@ import (
 var Magic = []byte{'a', 'd', 'v', 1}
 
 type Advertisment struct {
-	IPs                  []net.Addr
+	IPs                  []net.TCPAddr
 	P2P, RPC, Controller uint16
 }
 
