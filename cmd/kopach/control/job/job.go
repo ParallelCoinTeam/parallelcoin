@@ -1,11 +1,9 @@
 package job
 
 import (
-	"fmt"
 	"github.com/niubaoshu/gotiny"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"net"
-	"sort"
 	"time"
 	
 	"github.com/p9c/pod/app/conte"
@@ -13,21 +11,10 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Bitses"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Hash"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Hashes"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/IPs"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Int32"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Uint16"
 	"github.com/p9c/pod/pkg/util"
 )
 
 var Magic = []byte{'w', 'o', 'r', 'k'}
-
-type Container struct {
-	simplebuffer.Container
-}
 
 type Job struct {
 	IPs             []net.Addr
@@ -144,124 +131,125 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	return gotiny.Marshal(jrb), txr
 }
 
-// LoadContainer takes a message byte slice payload and loads it into a
-// container ready to be decoded
-func LoadContainer(b []byte) (out Container) {
-	out.Data = b
-	return
-}
-
-func (j *Container) GetIPs() []*net.IP {
-	return IPs.New().DecodeOne(j.Get(0)).Get()
-}
-
-func (j *Container) GetP2PListenersPort() uint16 {
-	return Uint16.New().DecodeOne(j.Get(1)).Get()
-}
-
-func (j *Container) GetRPCListenersPort() uint16 {
-	return Uint16.New().DecodeOne(j.Get(2)).Get()
-}
-
-func (j *Container) GetControllerListenerPort() uint16 {
-	return Uint16.New().DecodeOne(j.Get(3)).Get()
-}
-
-func (j *Container) GetNewHeight() (out int32) {
-	return Int32.New().DecodeOne(j.Get(4)).Get()
-}
-
-func (j *Container) GetPrevBlockHash() (out *chainhash.Hash) {
-	return Hash.New().DecodeOne(j.Get(5)).Get()
-}
-
-func (j *Container) GetBitses() blockchain.TargetBits {
-	return Bitses.NewBitses().DecodeOne(j.Get(6)).Get()
-}
-
-// GetHashes returns the merkle roots per version
-func (j *Container) GetHashes() (out map[int32]*chainhash.Hash) {
-	return Hashes.NewHashes().DecodeOne(j.Get(7)).Get()
-}
-
-func (j *Container) String() (s string) {
-	s += fmt.Sprint("\ntype '"+string(Magic)+"' elements:", j.Count())
-	s += "\n"
-	ips := j.GetIPs()
-	s += "1 IPs:"
-	for i := range ips {
-		s += fmt.Sprint(" ", ips[i].String())
-	}
-	s += "\n"
-	s += fmt.Sprint("2 P2PListenersPort: ", j.GetP2PListenersPort())
-	s += "\n"
-	s += fmt.Sprint("3 RPCListenersPort: ", j.GetRPCListenersPort())
-	s += "\n"
-	s += fmt.Sprint(
-		"4 ControllerListenerPort: ",
-		j.GetControllerListenerPort(),
-	)
-	s += "\n"
-	h := j.GetNewHeight()
-	s += fmt.Sprint("5 Block height: ", h)
-	s += "\n"
-	s += fmt.Sprintf(
-		"6 Previous Block Hash (sha256d): %064x",
-		j.GetPrevBlockHash().CloneBytes(),
-	)
-	s += "\n"
-	bitses := j.GetBitses()
-	s += fmt.Sprint("7 Difficulty targets:\n")
-	var sortedBitses []int
-	for i := range bitses {
-		sortedBitses = append(sortedBitses, int(i))
-	}
-	sort.Ints(sortedBitses)
-	for i := range sortedBitses {
-		s += fmt.Sprintf(
-			"  %2d %-10v %d %064x",
-			sortedBitses[i],
-			fork.List[fork.GetCurrent(h)].AlgoVers[int32(sortedBitses[i])],
-			bitses[int32(sortedBitses[i])],
-			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes(),
-		)
-		s += "\n"
-	}
-	s += "8 Merkles:\n"
-	hashes := j.GetHashes()
-	for i := range sortedBitses {
-		s += fmt.Sprintf(
-			"  %2d %s\n", sortedBitses[i],
-			hashes[int32(sortedBitses[i])].String(),
-		)
-	}
-	
-	// s += spew.Sdump(j.GetHashes())
-	return
-}
-
 //
-// // Struct returns a handy Go struct version This can be used at the start of a
-// // new block to get a handy struct, the first work received triggers startup and
-// // locks the worker into sending solutions there, until there is a new
-// // PrevBlockHash, the work controller (kopach) only responds to updates from
-// // this first one (or if it stops sending) - the controller keeps track of
-// // individual controller servers multicasting and when it deletes a newly gone
-// // dark controller when it comes to send if it isn't found it falls back to the
-// // next available to submit
-// func (j *Container) Struct() (out Job) {
-// 	out = Job{
-// 		IPs:             j.GetIPs(),
-// 		P2PListenerPort: j.GetP2PListenersPort(),
-// 		RPCListenerPort: j.GetRPCListenersPort(),
-// 		ControllerPort:      j.GetControllerListenerPort(),
-// 		Height:          j.GetNewHeight(),
-// 		PrevBlockHash:   j.GetPrevBlockHash(),
-// 		Bitses:          j.GetBitses(),
-// 		Hashes:          j.GetHashes(),
-// 	}
+// // LoadContainer takes a message byte slice payload and loads it into a
+// // container ready to be decoded
+// func LoadContainer(b []byte) (out Container) {
+// 	out.Data = b
 // 	return
 // }
+//
+// func (j *Container) GetIPs() []*net.IP {
+// 	return IPs.New().DecodeOne(j.Get(0)).Get()
+// }
+//
+// func (j *Container) GetP2PListenersPort() uint16 {
+// 	return Uint16.New().DecodeOne(j.Get(1)).Get()
+// }
+//
+// func (j *Container) GetRPCListenersPort() uint16 {
+// 	return Uint16.New().DecodeOne(j.Get(2)).Get()
+// }
+//
+// func (j *Container) GetControllerListenerPort() uint16 {
+// 	return Uint16.New().DecodeOne(j.Get(3)).Get()
+// }
+//
+// func (j *Container) GetNewHeight() (out int32) {
+// 	return Int32.New().DecodeOne(j.Get(4)).Get()
+// }
+//
+// func (j *Container) GetPrevBlockHash() (out *chainhash.Hash) {
+// 	return Hash.New().DecodeOne(j.Get(5)).Get()
+// }
+//
+// func (j *Container) GetBitses() blockchain.TargetBits {
+// 	return Bitses.NewBitses().DecodeOne(j.Get(6)).Get()
+// }
+//
+// // GetHashes returns the merkle roots per version
+// func (j *Container) GetHashes() (out map[int32]*chainhash.Hash) {
+// 	return Hashes.NewHashes().DecodeOne(j.Get(7)).Get()
+// }
+//
+// func (j *Container) String() (s string) {
+// 	s += fmt.Sprint("\ntype '"+string(Magic)+"' elements:", j.Count())
+// 	s += "\n"
+// 	ips := j.GetIPs()
+// 	s += "1 IPs:"
+// 	for i := range ips {
+// 		s += fmt.Sprint(" ", ips[i].String())
+// 	}
+// 	s += "\n"
+// 	s += fmt.Sprint("2 P2PListenersPort: ", j.GetP2PListenersPort())
+// 	s += "\n"
+// 	s += fmt.Sprint("3 RPCListenersPort: ", j.GetRPCListenersPort())
+// 	s += "\n"
+// 	s += fmt.Sprint(
+// 		"4 ControllerListenerPort: ",
+// 		j.GetControllerListenerPort(),
+// 	)
+// 	s += "\n"
+// 	h := j.GetNewHeight()
+// 	s += fmt.Sprint("5 Block height: ", h)
+// 	s += "\n"
+// 	s += fmt.Sprintf(
+// 		"6 Previous Block Hash (sha256d): %064x",
+// 		j.GetPrevBlockHash().CloneBytes(),
+// 	)
+// 	s += "\n"
+// 	bitses := j.GetBitses()
+// 	s += fmt.Sprint("7 Difficulty targets:\n")
+// 	var sortedBitses []int
+// 	for i := range bitses {
+// 		sortedBitses = append(sortedBitses, int(i))
+// 	}
+// 	sort.Ints(sortedBitses)
+// 	for i := range sortedBitses {
+// 		s += fmt.Sprintf(
+// 			"  %2d %-10v %d %064x",
+// 			sortedBitses[i],
+// 			fork.List[fork.GetCurrent(h)].AlgoVers[int32(sortedBitses[i])],
+// 			bitses[int32(sortedBitses[i])],
+// 			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes(),
+// 		)
+// 		s += "\n"
+// 	}
+// 	s += "8 Merkles:\n"
+// 	hashes := j.GetHashes()
+// 	for i := range sortedBitses {
+// 		s += fmt.Sprintf(
+// 			"  %2d %s\n", sortedBitses[i],
+// 			hashes[int32(sortedBitses[i])].String(),
+// 		)
+// 	}
+//
+// 	// s += spew.Sdump(j.GetHashes())
+// 	return
+// }
+//
+// //
+// // // Struct returns a handy Go struct version This can be used at the start of a
+// // // new block to get a handy struct, the first work received triggers startup and
+// // // locks the worker into sending solutions there, until there is a new
+// // // PrevBlockHash, the work controller (kopach) only responds to updates from
+// // // this first one (or if it stops sending) - the controller keeps track of
+// // // individual controller servers multicasting and when it deletes a newly gone
+// // // dark controller when it comes to send if it isn't found it falls back to the
+// // // next available to submit
+// // func (j *Container) Struct() (out Job) {
+// // 	out = Job{
+// // 		IPs:             j.GetIPs(),
+// // 		P2PListenerPort: j.GetP2PListenersPort(),
+// // 		RPCListenerPort: j.GetRPCListenersPort(),
+// // 		ControllerPort:      j.GetControllerListenerPort(),
+// // 		Height:          j.GetNewHeight(),
+// // 		PrevBlockHash:   j.GetPrevBlockHash(),
+// // 		Bitses:          j.GetBitses(),
+// // 		Hashes:          j.GetHashes(),
+// // 	}
+// // 	return
+// // }
 
 // GetMsgBlock takes the handy go struct version and returns a wire.MsgBlock
 // ready for giving nonce extranonce and computing the merkel root based on the

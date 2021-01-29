@@ -12,15 +12,14 @@ import (
 	
 	"github.com/niubaoshu/gotiny"
 	
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
 	"github.com/p9c/pod/pkg/util/routeable"
 )
 
 var Magic = []byte{'h', 'a', 's', 'h'}
-
-type Container struct {
-	simplebuffer.Container
-}
+//
+// type Container struct {
+// 	simplebuffer.Container
+// }
 
 type Hashrate struct {
 	Time    time.Time

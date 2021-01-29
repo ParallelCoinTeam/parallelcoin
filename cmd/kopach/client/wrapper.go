@@ -24,7 +24,7 @@ func New(conn io.ReadWriteCloser) *Client {
 // alternatively as with the Controller just spew messages over UDP
 
 // NewJob is a delivery of a new job for the worker, this starts a miner
-func (c *Client) NewJob(job *job.Container) (err error) {
+func (c *Client) NewJob(job *job.Job) (err error) {
 	// Debug("sending new job")
 	var reply bool
 	err = c.Call("Worker.NewJob", job, &reply)

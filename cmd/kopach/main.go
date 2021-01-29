@@ -289,10 +289,12 @@ var handlers = transport.Handlers{
 			Debug("not active")
 			return
 		}
-		j := job.LoadContainer(b)
-		ips := j.GetIPs()
-		w.height = j.GetNewHeight()
-		cP := j.GetControllerListenerPort()
+		var j job.Job
+		gotiny.Unmarshal(b, &j)
+		// j := job.LoadContainer(b)
+		ips := j.IPs
+		w.height = j.Height
+		cP := j.ControllerPort
 		addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
