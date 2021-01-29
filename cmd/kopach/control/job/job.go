@@ -99,11 +99,18 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, txr...), false,
 		)
-		Traces(mTree[len(mTree)-1].CloneBytes())
-		// mTS[i] = &chainhash.Hash{}
-		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
+		// Traces(mTree[len(mTree)-1].CloneBytes())
+		mTS[i] = &chainhash.Hash{}
+		if err = mTS[i].SetBytes(mTree[0].CloneBytes()); Check(err) {
+		}
+		// if err = mTS[i].
+		// 	SetBytes(
+		// 		mTree[len(mTree)-1].CloneBytes(),
+		// 	); Check(err) {
+		// }
 	}
-	Traces(mTS)
+	// Traces(mTS)
+	
 	// mHashes := Hashes.NewHashes()
 	// mHashes.Put(mTS)
 	// msg = append(msg, mHashes)
@@ -126,11 +133,16 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
 		Bitses:          bitsMap,
 		Hashes:          mTS,
-		CoinBases:       *cbs,
+		// CoinBases:       *cbs,
+	}
+	jrb.CoinBases= make(map[int32]*util.Tx)
+	for i := range *cbs {
+		jrb.CoinBases[i] = (*cbs)[i]
 	}
 	jobber := gotiny.Marshal(&jrb)
-	Debugs(jrb)
-	Debugs(jobber)
+	// Debugs(jrb)
+	// Debugs(jobber)
+	Debug("job size", len(jobber))
 	// return Container{*msg.CreateContainer(Magic)}, txr
 	return jobber, txr
 }

@@ -80,10 +80,12 @@ func initConfigFile(cfg *pod.Config) {
 func initLogDir(cfg *pod.Config) {
 	if *cfg.LogDir != "" {
 		logi.L.SetLogPaths(*cfg.LogDir, "pod")
-		interrupt.AddHandler(func() {
-			Debug("initLogDir interrupt")
-			_ = logi.L.LogFileHandle.Close()
-		})
+		interrupt.AddHandler(
+			func() {
+				Debug("initLogDir interrupt")
+				_ = logi.L.LogFileHandle.Close()
+			},
+		)
 	}
 }
 
@@ -154,8 +156,10 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		address := fmt.Sprintf(routeableAddress + ":" + cx.ActiveNet.WalletRPCServerPort)
 		*cfg.WalletRPCListeners = cli.StringSlice{address}
 		*cfg.WalletServer = address
-		Debug("setting save flag because wallet rpc listeners is empty and" +
-			" rpc is not disabled")
+		Debug(
+			"setting save flag because wallet rpc listeners is empty and" +
+				" rpc is not disabled",
+		)
 		cx.StateCfg.Save = true
 		Debug("WalletRPCListeners")
 	}
@@ -454,8 +458,10 @@ func validateBanDuration(cfg *pod.Config) {
 	// Don't allow ban durations that are too short.
 	Trace("validating ban duration")
 	if *cfg.BanDuration < time.Second {
-		err := fmt.Errorf("%s: The banduration option may not be less than 1s -- parsed [%v]",
-			funcName, *cfg.BanDuration)
+		err := fmt.Errorf(
+			"%s: The banduration option may not be less than 1s -- parsed [%v]",
+			funcName, *cfg.BanDuration,
+		)
 		Info(funcName, err)
 		*cfg.BanDuration = node.DefaultBanDuration
 	}
@@ -503,7 +509,8 @@ func validatePeerLists(cfg *pod.Config) {
 	if len(*cfg.AddPeers) > 0 && len(*cfg.ConnectPeers) > 0 {
 		err := fmt.Errorf(
 			"%s: the --addpeer and --connect options can not be mixed",
-			funcName)
+			funcName,
+		)
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
@@ -611,8 +618,10 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	if *cfg.BlockMaxSize < node.BlockMaxSizeMin ||
 		*cfg.BlockMaxSize > node.BlockMaxSizeMax {
 		str := "%s: The blockmaxsize option must be in between %d and %d -- parsed [%d]"
-		err := fmt.Errorf(str, funcName, node.BlockMaxSizeMin,
-			node.BlockMaxSizeMax, *cfg.BlockMaxSize)
+		err := fmt.Errorf(
+			str, funcName, node.BlockMaxSizeMin,
+			node.BlockMaxSizeMax, *cfg.BlockMaxSize,
+		)
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
@@ -621,8 +630,10 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	if *cfg.BlockMaxWeight < node.BlockMaxWeightMin ||
 		*cfg.BlockMaxWeight > node.BlockMaxWeightMax {
 		str := "%s: The blockmaxweight option must be in between %d and %d -- parsed [%d]"
-		err := fmt.Errorf(str, funcName, node.BlockMaxWeightMin,
-			node.BlockMaxWeightMax, *cfg.BlockMaxWeight)
+		err := fmt.Errorf(
+			str, funcName, node.BlockMaxWeightMin,
+			node.BlockMaxWeightMax, *cfg.BlockMaxWeight,
+		)
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 	}
@@ -636,15 +647,24 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	}
 	// Limit the block priority and minimum block sizes to max block size.
 	Trace("validating block priority and minimum size/weight")
-	*cfg.BlockPrioritySize = int(apputil.MinUint32(
-		uint32(*cfg.BlockPrioritySize),
-		uint32(*cfg.BlockMaxSize)))
-	*cfg.BlockMinSize = int(apputil.MinUint32(
-		uint32(*cfg.BlockMinSize),
-		uint32(*cfg.BlockMaxSize)))
-	*cfg.BlockMinWeight = int(apputil.MinUint32(
-		uint32(*cfg.BlockMinWeight),
-		uint32(*cfg.BlockMaxWeight)))
+	*cfg.BlockPrioritySize = int(
+		apputil.MinUint32(
+			uint32(*cfg.BlockPrioritySize),
+			uint32(*cfg.BlockMaxSize),
+		),
+	)
+	*cfg.BlockMinSize = int(
+		apputil.MinUint32(
+			uint32(*cfg.BlockMinSize),
+			uint32(*cfg.BlockMaxSize),
+		),
+	)
+	*cfg.BlockMinWeight = int(
+		apputil.MinUint32(
+			uint32(*cfg.BlockMinWeight),
+			uint32(*cfg.BlockMaxWeight),
+		),
+	)
 	switch {
 	// If the max block size isn't set, but the max weight is, then we'll set the limit for the max block size to a safe
 	// limit so weight takes precedence.
@@ -661,17 +681,21 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	Trace("checking user agent comments", cfg.UserAgentComments)
 	for _, uaComment := range *cfg.UserAgentComments {
 		if strings.ContainsAny(uaComment, "/:()") {
-			err := fmt.Errorf("%s: The following characters must not "+
-				"appear in user agent comments: '/', ':', '(', ')'",
-				funcName)
+			err := fmt.Errorf(
+				"%s: The following characters must not "+
+					"appear in user agent comments: '/', ':', '(', ')'",
+				funcName,
+			)
 			_, _ = fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
 		}
 	}
 	// Check the checkpoints for syntax errors.
 	Trace("checking the checkpoints")
-	stateConfig.AddedCheckpoints, err = node.ParseCheckpoints(*cfg.
-		AddCheckpoints)
+	stateConfig.AddedCheckpoints, err = node.ParseCheckpoints(
+		*cfg.
+			AddCheckpoints,
+	)
 	if err != nil {
 		Error(err)
 		str := "%s: Error parsing checkpoints: %v"
@@ -703,11 +727,23 @@ func validateOnions(cfg *pod.Config) {
 	
 }
 
-func validateMiningStuff(cfg *pod.Config, state *state.Config,
-	params *netparams.Params) {
+func validateMiningStuff(
+	cfg *pod.Config, state *state.Config,
+	params *netparams.Params,
+) {
+	if state == nil {
+		panic("state is nil")
+	}
 	// Check mining addresses are valid and saved parsed versions.
 	Trace("checking mining addresses")
-	state.ActiveMiningAddrs = make([]util.Address, 0, len(*cfg.MiningAddrs))
+	aml := 99
+	if cfg.MiningAddrs != nil {
+		aml = len(*cfg.MiningAddrs)
+	} else {
+		Debug("MiningAddrs is nil")
+		return
+	}
+	state.ActiveMiningAddrs = make([]util.Address, 0, aml)
 	for _, strAddr := range *cfg.MiningAddrs {
 		addr, err := util.DecodeAddress(strAddr, params)
 		if err != nil {
@@ -729,8 +765,10 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 	}
 	// Ensure there is at least one mining address when the generate flag is set.
 	if (*cfg.Generate) && len(state.ActiveMiningAddrs) == 0 {
-		Error("the generate flag is set, " +
-			"but there are no mining addresses specified ")
+		Error(
+			"the generate flag is set, " +
+				"but there are no mining addresses specified ",
+		)
 		// Traces(cfg)
 		*cfg.Generate = false
 		// os.Exit(1)
@@ -766,8 +804,10 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			(*cfg.ProxyUser != "" ||
 				*cfg.ProxyPass != "") {
 			torIsolation = true
-			Warn("Tor isolation set -- overriding specified" +
-				" proxy user credentials")
+			Warn(
+				"Tor isolation set -- overriding specified" +
+					" proxy user credentials",
+			)
 		}
 		proxy := &socks.Proxy{
 			Addr:         *cfg.Proxy,
@@ -802,8 +842,10 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 		// Tor isolation flag means onion proxy credentials will be overridden.
 		if *cfg.TorIsolation &&
 			(*cfg.OnionProxyUser != "" || *cfg.OnionProxyPass != "") {
-			Warn("Tor isolation set - overriding specified onionproxy user" +
-				" credentials")
+			Warn(
+				"Tor isolation set - overriding specified onionproxy user" +
+					" credentials",
+			)
 		}
 	}
 	Trace("setting onion dialer")

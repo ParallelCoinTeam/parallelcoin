@@ -2,6 +2,7 @@ package walletmain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"io/ioutil"
 	// This enables pprof
 	// _ "net/http/pprof"
@@ -11,7 +12,6 @@ import (
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -115,12 +115,12 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 		Error(err)
 		return
 	}
-	go func() {
-		Warn("refilling mining addresses")
+	// go func() {
+		Warn("refilling mining addresses", cx.Config, cx.StateCfg)
 		addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
 		Warn("done refilling mining addresses")
-		rpcClientConnectLoop(cx, legacyServer, loader)
-	}()
+		go rpcClientConnectLoop(cx, legacyServer, loader)
+	// }()
 	loader.Wallet = w
 	Trace("sending back wallet")
 	cx.WalletChan <- w

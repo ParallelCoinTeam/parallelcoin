@@ -133,16 +133,14 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	
 	// go advertiser(ctrl)
 	factor := 1
-	if err = ctrl.sendNewBlockTemplate(); Check(err) {
-	} else {
-		ctrl.active.Store(true)
-	}
+	// if err = ctrl.sendNewBlockTemplate(); Check(err) {
+	// } else {
+	// 	ctrl.active.Store(true)
+	// }
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	advt := p2padvt.Get(cx)
 	ad := transport.GetShards(advt)
-	if ctrl.isMining.Load() {
-		cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
-	}
+	once := false
 	go func() {
 	out:
 		for {
@@ -156,12 +154,23 @@ func Run(cx *conte.Xt) (quit qu.C) {
 						ctrl.active.Store(true)
 					}
 				}
+				if ctrl.isMining.Load() {
+					if !once {
+						cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
+						once = true
+					}
+					if err = ctrl.sendNewBlockTemplate(); Check(err) {
+					} else {
+						ctrl.active.Store(true)
+					}
+				}
 				// send out advertisment
 				// todo: big question: how to deal with change of IP address
 				var err error
 				if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
 				}
 				if ctrl.isMining.Load() {
+					Debug("rebroadcasting")
 					ctrl.rebroadcast()
 				}
 			case msg := <-ctrl.submitChan:
@@ -433,7 +442,12 @@ func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (er
 
 func (c *Controller) sendNewBlockTemplate() (err error) {
 	var template *mining.BlockTemplate
-	if template, err = getNewBlockTemplate(c.cx, c.blockTemplateGenerator); !Check(err) {
+	if template, err = getNewBlockTemplate(c.cx, c.blockTemplateGenerator); Check(err) {
+		return
+	}
+	// Debugs(template)
+	if template == nil {
+		Debug("template is nil")
 		return
 	}
 	msgB := template.Block
@@ -449,6 +463,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 		Warn("jobShards", shardsLen)
 		return fmt.Errorf("jobShards len %d", shardsLen)
 	}
+	c.oldBlocks.Store(jobShards)
 	err = c.multiConn.SendMany(job.Magic, jobShards)
 	if err != nil {
 		Error(err)
@@ -457,7 +472,6 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	c.transactions.Store(ctx)
 	c.lastGenerated.Store(time.Now().UnixNano())
 	c.lastTxUpdate.Store(time.Now().UnixNano())
-	c.oldBlocks.Store(jobShards)
 	return
 }
 
@@ -465,6 +479,10 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
 	template *mining.BlockTemplate, err error,
 ) {
 	Trace("getting new block template")
+	if cx.Config.MiningAddrs == nil {
+		Debug("mining addresses is nil")
+		return
+	}
 	if len(*cx.Config.MiningAddrs) < 1 {
 		Debug("no mining addresses")
 		return
@@ -500,8 +518,8 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
 	Trace("calling new block template")
 	if template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d); Check(err) {
 	} else {
-		Debug("got new block template")
-		Debugs(template)
+		Debug("********** got new block template")
+		// Debugs(template)
 	}
 	return
 }
