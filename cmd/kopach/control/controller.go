@@ -1,6 +1,7 @@
 package control
 
 import (
+	"bytes"
 	"container/ring"
 	"fmt"
 	"math/rand"
@@ -333,10 +334,14 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	gotiny.Unmarshal(b, &s)
 	// j := sol.LoadSolContainer(b)
 	senderPort := s.Port
+	br := bytes.NewBuffer(s.Bytes)
+	newBlock := wire.NewMsgBlock(&wire.BlockHeader{})
+	if err = newBlock.Deserialize(br); Check(err) {
+	}
 	if int(senderPort) != c.listenPort {
 		return
 	}
-	msgBlock := s.MsgBlock
+	msgBlock := newBlock
 	if !msgBlock.Header.PrevBlock.IsEqual(
 		&c.cx.RPCServer.Cfg.Chain.
 			BestSnapshot().Hash,

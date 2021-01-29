@@ -2,6 +2,7 @@ package walletmain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"io/ioutil"
 	// This enables pprof
@@ -116,10 +117,11 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 		return
 	}
 	// go func() {
-		Warn("refilling mining addresses", cx.Config, cx.StateCfg)
-		addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
-		Warn("done refilling mining addresses")
-		go rpcClientConnectLoop(cx, legacyServer, loader)
+	Warn("refilling mining addresses", cx.Config, cx.StateCfg)
+	addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
+	Warn("done refilling mining addresses")
+	save.Pod(cx.Config)
+	go rpcClientConnectLoop(cx, legacyServer, loader)
 	// }()
 	loader.Wallet = w
 	Trace("sending back wallet")

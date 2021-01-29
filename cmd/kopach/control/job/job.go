@@ -24,7 +24,7 @@ type Job struct {
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
 	Bitses          blockchain.TargetBits
-	Hashes          map[int32]*chainhash.Hash
+	MerkleRoots     map[int32]*chainhash.Hash
 	// CoinBases       map[int32]*util.Tx
 }
 
@@ -111,7 +111,7 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	}
 	// Traces(mTS)
 	
-	// mHashes := Hashes.NewHashes()
+	// mHashes := MerkleRoots.NewHashes()
 	// mHashes.Put(mTS)
 	// msg = append(msg, mHashes)
 	// previously were sending blocks, no need for that really miner only needs
@@ -132,7 +132,7 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 		Height:          bH,
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
 		Bitses:          bitsMap,
-		Hashes:          mTS,
+		MerkleRoots:     mTS,
 		// CoinBases:       *cbs,
 	}
 	// jrb.CoinBases= make(map[int32]*util.Tx)
@@ -192,7 +192,7 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 //
 // // GetHashes returns the merkle roots per version
 // func (j *Container) GetHashes() (out map[int32]*chainhash.Hash) {
-// 	return Hashes.NewHashes().DecodeOne(j.Get(7)).Get()
+// 	return MerkleRoots.NewHashes().DecodeOne(j.Get(7)).Get()
 // }
 //
 // func (j *Container) String() (s string) {
@@ -269,7 +269,7 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 // // 		Height:          j.GetNewHeight(),
 // // 		PrevBlockHash:   j.GetPrevBlockHash(),
 // // 		Bitses:          j.GetBitses(),
-// // 		Hashes:          j.GetHashes(),
+// // 		MerkleRoots:          j.GetHashes(),
 // // 	}
 // // 	return
 // // }
@@ -290,7 +290,7 @@ func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
 			Header: wire.BlockHeader{
 				Version:    version,
 				PrevBlock:  *j.PrevBlockHash,
-				MerkleRoot: *j.Hashes[version],
+				MerkleRoot: *j.MerkleRoots[version],
 				Timestamp:  time.Now(),
 			},
 			// Transactions: j.Txs,

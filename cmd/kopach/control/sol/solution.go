@@ -1,6 +1,7 @@
 package sol
 
 import (
+	"bytes"
 	"github.com/niubaoshu/gotiny"
 	"github.com/p9c/pod/pkg/chain/wire"
 )
@@ -10,13 +11,20 @@ var Magic = []byte{'s', 'o', 'l', 1}
 
 type Solution struct {
 	Port int32
-	*wire.MsgBlock
+	// *wire.MsgBlock
+	Bytes []byte
 }
 
 func Get(port int32, mb *wire.MsgBlock) []byte {
-	s := Solution{Port: port, MsgBlock: mb}
+	var buf []byte
+	wr := bytes.NewBuffer(buf)
+	var err error
+	if err = mb.Serialize(wr); Check(err) {
+	}
+	s := Solution{Port: port, Bytes: buf} // MsgBlock: mb}
 	return gotiny.Marshal(&s)
 }
+
 //
 // type Container struct {
 // 	simplebuffer.Container

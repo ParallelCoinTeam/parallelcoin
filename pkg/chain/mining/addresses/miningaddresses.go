@@ -6,6 +6,7 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/urfave/cli"
 )
 
 // RefillMiningAddresses adds new addresses to the mining address pool for the miner
@@ -15,23 +16,38 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 		Debug("trying to refill without a wallet")
 		return
 	}
-	miningAddressLen := len(*cfg.MiningAddrs)
+	if cfg == nil {
+		Debug("config is empty")
+		return
+	}
+	var miningAddressLen int
+	if cfg.MiningAddrs != nil {
+		Debug("miningaddrs slice is missing")
+		miningAddressLen = len(*cfg.MiningAddrs)
+	} else {
+		cfg.MiningAddrs = new(cli.StringSlice)
+	}
 	toMake := 99 - miningAddressLen
 	if miningAddressLen >= 99 {
 		toMake = 0
 	}
-	if toMake < 3 {
+	if toMake < 1 {
+		Debug("not making any new addresses")
 		return
 	}
 	Warn("refilling mining addresses")
-	account, err := w.AccountNumber(wm.KeyScopeBIP0044,
-		"default")
+	account, err := w.AccountNumber(
+		wm.KeyScopeBIP0044,
+		"default",
+	)
 	if err != nil {
 		Error("error getting account number ", err)
 	}
 	for i := 0; i < toMake; i++ {
-		addr, err := w.NewAddress(account, wm.KeyScopeBIP0044,
-			true)
+		addr, err := w.NewAddress(
+			account, wm.KeyScopeBIP0044,
+			true,
+		)
 		if err == nil {
 			// add them to the configuration to be saved
 			*cfg.MiningAddrs = append(*cfg.MiningAddrs, addr.EncodeAddress())

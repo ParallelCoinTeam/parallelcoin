@@ -1408,7 +1408,7 @@ func ListReceivedByAddress(icmd interface{}, w *wallet.Wallet,
 		amount util.Amount
 		// Number of confirmations of the last transaction.
 		confirmations int32
-		// Hashes of transactions which include an output paying to the address
+		// MerkleRoots of transactions which include an output paying to the address
 		tx []string
 		// Account which the address belongs to account string
 	}

@@ -44,7 +44,7 @@ type Worker struct {
 	senderPort    atomic.Uint32
 	msgBlock      atomic.Value // *wire.MsgBlock
 	bitses        atomic.Value
-	hashes        atomic.Value
+	merkles       atomic.Value
 	lastMerkle    *chainhash.Hash
 	roller        *Counter
 	startNonce    uint32
@@ -195,14 +195,14 @@ out:
 				break out
 			default:
 				if w.block.Load() == nil || w.bitses.Load() == nil ||
-					w.hashes.Load() == nil || !w.dispatchReady.Load() {
+					w.merkles.Load() == nil || !w.dispatchReady.Load() {
 					// Debug("not ready to work")
 				} else {
 					// Debug("working")
 					// work
 					nH := w.block.Load().(*util.Block).Height()
 					hv := w.roller.GetAlgoVer()
-					h := w.hashes.Load().(map[int32]*chainhash.Hash)
+					h := w.merkles.Load().(map[int32]*chainhash.Hash)
 					mmb := w.msgBlock.Load().(wire.MsgBlock)
 					mb := &mmb
 					mb.Header.Version = hv
@@ -289,8 +289,8 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 		return
 	}
 	w.bitses.Store(j.Bitses)
-	w.hashes.Store(j.Hashes)
-	if j.Hashes[5].IsEqual(w.lastMerkle) {
+	w.merkles.Store(j.MerkleRoots)
+	if j.MerkleRoots[5].IsEqual(w.lastMerkle) {
 		Debug("not a new job")
 		*reply = true
 		return
@@ -300,7 +300,7 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 		// we don't need to know net params if version numbers come with jobs
 		algos = append(algos, i)
 	}
-	w.lastMerkle = j.Hashes[5]
+	w.lastMerkle = j.MerkleRoots[5]
 	*reply = true
 	// halting current work
 	Debug("halting current work")
@@ -324,10 +324,10 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 	}
 	rand.Seed(time.Now().UnixNano())
 	mb.Header.Nonce = rand.Uint32()
-	if j.Hashes == nil {
+	if j.MerkleRoots == nil {
 		return errors.New("failed to decode merkle roots")
 	} else {
-		hh, ok := j.Hashes[hv]
+		hh, ok := j.MerkleRoots[hv]
 		if !ok {
 			return errors.New("could not get merkle root from job")
 		}
