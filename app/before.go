@@ -9,7 +9,6 @@ import (
 	"runtime"
 	"time"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/spv"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -45,8 +44,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("pipelog") {
 			Warn("pipe logger enabled")
 			*cx.Config.PipeLog = c.Bool("pipelog")
-			serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir),
-				fmt.Sprint(os.Args))
+			serve.Log(cx.KillAll, fmt.Sprint(os.Args))
 		}
 		if c.IsSet("walletfile") {
 			*cx.Config.WalletFile = c.String("walletfile")
@@ -313,8 +311,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.UserAgentComments = append(cli.StringSlice{nonce}, *cx.Config.UserAgentComments...)
 		}
 		if c.IsSet("uacomment") {
-			*cx.Config.UserAgentComments = append(*cx.Config.UserAgentComments,
-				c.StringSlice("uacomment")...)
+			*cx.Config.UserAgentComments = append(
+				*cx.Config.UserAgentComments,
+				c.StringSlice("uacomment")...,
+			)
 		}
 		if c.IsSet("nopeerbloomfilters") {
 			*cx.Config.NoPeerBloomFilters = c.Bool("nopeerbloomfilters")

@@ -1,7 +1,6 @@
 package logi
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -12,8 +11,6 @@ import (
 	
 	"github.com/davecgh/go-spew/spew"
 	uberatomic "go.uber.org/atomic"
-	
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
 
 const (
@@ -82,19 +79,19 @@ func PickNoun(n int, singular, plural string) string {
 }
 
 func (w *LogWriter) Print(a ...interface{}) {
-	if w.Write .Load() {
+	if w.Write.Load() {
 		_, _ = fmt.Fprint(w.Writer, a...)
 	}
 }
 
 func (w *LogWriter) Printf(format string, a ...interface{}) {
-	if w.Write .Load() {
+	if w.Write.Load() {
 		_, _ = fmt.Fprintf(w.Writer, format, a...)
 	}
 }
 
 func (w *LogWriter) Println(a ...interface{}) {
-	if w.Write .Load() {
+	if w.Write.Load() {
 		_, _ = fmt.Fprintln(w.Writer, a...)
 	}
 }
@@ -117,7 +114,7 @@ type (
 	
 	// Logger is a struct containing all the functions with nice handy names
 	Logger struct {
-		Packages        *Pk.Package
+		// Packages        *Pk.Package
 		Level           *uberatomic.String
 		Fatal           PrintlnFunc
 		Error           PrintlnFunc
@@ -158,7 +155,7 @@ var L = NewLogger()
 func init() {
 	L.SetLevel("info", true, "pod")
 	L.Writer.SetLogWriter(os.Stderr)
-	L.Writer.Write.Store( true)
+	L.Writer.Write.Store(true)
 	L.Trace("starting up logger")
 }
 
@@ -175,9 +172,9 @@ func (l *Logger) AddLogChan() (ch chan Entry) {
 }
 
 func NewLogger() (l *Logger) {
-	p := make(Pk.Package)
+	// p := make(Pk.Package)
 	l = &Logger{
-		Packages:        &p,
+		// Packages:        &p,
 		Level:           uberatomic.NewString("trace"),
 		LogFileHandle:   os.Stderr,
 		Color:           true,
@@ -287,15 +284,15 @@ func (l *Logger) Register(pkg string) string {
 	// 	pkg = strings.Replace(pkg, "/", string(os.PathSeparator), -1)
 	// }
 	pkg = l.LocToPkg(pkg)
-	(*l.Packages)[pkg] = true
+	// (*l.Packages)[pkg] = true
 	return pkg
 }
 
 func (l *Logger) LoadConfig(configFile []byte) {
-	var p Pk.Package
-	if err := json.Unmarshal(configFile, &p); !l.Check("internal", err) {
-		*l.Packages = p
-	}
+	// var p Pk.Package
+	// if err := json.Unmarshal(configFile, &p); !l.Check("internal", err) {
+	// 	*l.Packages = p
+	// }
 }
 
 func sanitizeLoglevel(level string) string {
@@ -340,10 +337,10 @@ func (l *Logger) GetLoc(loc string, line int) (out string) {
 func (l *Logger) printfFunc(level string) PrintfFunc {
 	f := func(pkg, format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
-		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
+		if !l.LevelIsActive(level) { // || !(*l.Packages)[pkg] {
 			return
 		}
-		if l.Writer.Write.Load() || (*l.Packages)[pkg] {
+		if l.Writer.Write.Load() { // || (*l.Packages)[pkg] {
 			l.Writer.Println(Composite(text, level))
 		}
 		if !l.LogChanDisabled.Load() && l.LogChan != nil {
@@ -362,7 +359,7 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 // printcFunc prints from a closure returning a string
 func (l *Logger) printcFunc(level string) PrintcFunc {
 	f := func(pkg string, fn func() string) {
-		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
+		if !l.LevelIsActive(level) { // || !(*l.Packages)[pkg] {
 			return
 		}
 		t := fn()
@@ -386,7 +383,7 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 // printlnFunc prints a log entry like Println
 func (l *Logger) printlnFunc(level string) PrintlnFunc {
 	f := func(pkg string, a ...interface{}) {
-		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
+		if !l.LevelIsActive(level) { // || !(*l.Packages)[pkg] {
 			return
 		}
 		text := trimReturn(fmt.Sprintln(a...))
@@ -408,7 +405,7 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 
 func (l *Logger) checkFunc(level string) CheckFunc {
 	f := func(pkg string, err error) (out bool) {
-		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
+		if !l.LevelIsActive(level) { // || !(*l.Packages)[pkg] {
 			return
 		}
 		n := err == nil
@@ -436,7 +433,7 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 // spewFunc spews a variable
 func (l *Logger) spewFunc(level string) SpewFunc {
 	f := func(pkg string, a interface{}) {
-		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
+		if !l.LevelIsActive(level) { // || !(*l.Packages)[pkg] {
 			return
 		}
 		text := trimReturn(spew.Sdump(a))

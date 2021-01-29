@@ -9,17 +9,15 @@ import (
 	
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/Pkg"
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
 
-func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) {
+func Log(quit qu.C, appName string) {
 	Debug("starting log server")
 	lc := logi.L.AddLogChan()
 	// interrupt.AddHandler(func(){
 	// 	// logi.L.RemoveLogChan(lc)
 	// })
-	pkgChan := make(chan Pk.Package)
+	// pkgChan := make(chan Pk.Package)
 	var logOn atomic.Bool
 	logOn.Store(false)
 	p := pipe.Serve(
@@ -37,15 +35,15 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 				case "slvl":
 					Debug("setting level", logi.Levels[b[4]])
 					logi.L.SetLevel(logi.Levels[b[4]], false, "pod")
-				case "pkgs":
-					pkgs := Pkg.LoadContainer(b).GetPackages()
-					for i := range pkgs {
-						(*logi.L.Packages)[i] = pkgs[i]
-					}
-					// save settings
-					if !saveFunc(pkgs) {
-						Error("failed to save log filter configuration")
-					}
+				// case "pkgs":
+				// 	pkgs := Pkg.LoadContainer(b).GetPackages()
+				// 	for i := range pkgs {
+				// 		(*logi.L.Packages)[i] = pkgs[i]
+				// 	}
+				// 	save settings
+				// if !saveFunc(pkgs) {
+				// 	Error("failed to save log filter configuration")
+				// }
 				case "kill":
 					Debug("received kill signal from pipe, shutting down", appName)
 					// time.Sleep(time.Second*5)
@@ -93,17 +91,17 @@ func Log(quit qu.C, saveFunc func(p Pk.Package) (success bool), appName string) 
 					break out
 					// 	quit.Q()
 				}
-			case pk := <-pkgChan:
-				if !logOn.Load() {
-					break out
-				}
-				if n, err := p.Write(Pkg.Get(pk).Data); !Check(err) {
-					if n < 1 {
-						Error("short write")
-					}
-				} else {
-					break out
-				}
+				// case pk := <-pkgChan:
+				// 	if !logOn.Load() {
+				// 		break out
+				// 	}
+				// 	if n, err := p.Write(Pkg.Get(pk).Data); !Check(err) {
+				// 		if n < 1 {
+				// 			Error("short write")
+				// 		}
+				// 	} else {
+				// 		break out
+				// 	}
 			}
 		}
 		
