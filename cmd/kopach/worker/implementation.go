@@ -280,14 +280,13 @@ func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
 
 // NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
 // work and restart
-func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
+func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 	Debug("received new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
 		Debug("dispatch not ready")
 		*reply = true
 		return
 	}
-	j := job.Struct()
 	w.bitses.Store(j.Bitses)
 	w.hashes.Store(j.Hashes)
 	if j.Hashes[5].IsEqual(w.lastMerkle) {
@@ -305,7 +304,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// halting current work
 	Debug("halting current work")
 	w.stopChan <- struct{}{}
-	newHeight := job.GetNewHeight()
+	newHeight := j.Height
 	
 	if len(algos) > 0 {
 		// if we didn't get them in the job don't update the old
@@ -313,7 +312,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	}
 	mbb := w.msgBlock.Load().(wire.MsgBlock)
 	mb := &mbb
-	mb.Header.PrevBlock = *job.GetPrevBlockHash()
+	mb.Header.PrevBlock = *j.PrevBlockHash
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	hv := w.roller.GetAlgoVer()
 	mb.Header.Version = hv
@@ -339,7 +338,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	bb.SetHeight(newHeight)
 	w.block.Store(bb)
 	w.msgBlock.Store(*mb)
-	w.senderPort.Store(uint32(job.GetControllerListenerPort()))
+	w.senderPort.Store(uint32(j.ControllerPort))
 	// halting current work
 	Debug("switching to new job")
 	// w.stopChan <- struct{}{}

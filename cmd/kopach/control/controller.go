@@ -28,7 +28,6 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Uint16"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rav "github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/util"
@@ -92,7 +91,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		buffer:        ring.New(BufferSize),
 		began:         time.Now(),
 		otherNodes:    make(map[string]time.Time),
-		listenPort:    int(Uint16.GetActualPort(*cx.Config.Controller)),
+		listenPort:    int(util.GetActualPort(*cx.Config.Controller)),
 		hashSampleBuf: rav.NewBufferUint64(100),
 	}
 	ctrl.prevHash.Store(&chainhash.Hash{})
@@ -112,9 +111,8 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		ctrl.quit.Q()
 		return
 	}
-	pM := pause.GetPauseContainer(cx)
 	var pauseShards [][]byte
-	if pauseShards = transport.GetShards(pM.Data); Check(err) {
+	if pauseShards = transport.GetShards(append(p2padvt.Magic, p2padvt.Get(cx)...)); Check(err) {
 	} else {
 		ctrl.active.Store(true)
 	}
@@ -140,7 +138,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	}
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	advt := p2padvt.Get(cx)
-	ad := transport.GetShards(advt.CreateContainer(p2padvt.Magic).Data)
+	ad := transport.GetShards(append(p2padvt.Magic, advt...))
 	if ctrl.isMining.Load() {
 		cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	}
@@ -413,14 +411,12 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	}
 	msgB := template.Block
 	// c.coinbases = make(map[int32]*util.Tx)
-	var fMC job.Container
-	adv := p2padvt.Get(c.cx)
-	// Traces(adv)
 	var ctx []*util.Tx
 	ccb := make(map[int32]*util.Tx)
-	fMC, ctx = job.Get(c.cx, util.NewBlock(msgB), adv, &ccb)
+	var fMC []byte
+	fMC, ctx = job.Get(c.cx, util.NewBlock(msgB), &ccb)
 	c.coinbases.Store(ccb)
-	jobShards := transport.GetShards(fMC.Data)
+	jobShards := transport.GetShards(fMC)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {
 		Warn("jobShards", shardsLen)

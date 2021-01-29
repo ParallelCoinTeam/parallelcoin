@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"net"
 	"os"
 	"strings"
@@ -313,11 +314,15 @@ var handlers = transport.Handlers{
 	},
 	string(pause.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		w := ctx.(*Worker)
-		p := pause.LoadPauseContainer(b)
+		var advt p2padvt.Advertisment
+		gotiny.Unmarshal(b, &advt)
+		// p := pause.LoadPauseContainer(b)
 		fs := w.FirstSender.Load()
-		ni := p.GetIPs()[0].String()
-		np := p.GetControllerListenerPort()
-		ns := net.JoinHostPort(ni, fmt.Sprint(np))
+		ni := advt.IPs
+		// ni := p.GetIPs()[0].String()
+		np := advt.Controller
+		// np := p.GetControllerListenerPort()
+		ns := net.JoinHostPort(strings.Split(ni[0].String(),":")[0], fmt.Sprint(np))
 		Debug("received pause from server at", ns)
 		if fs == ns {
 			for i := range w.clients {

@@ -2,6 +2,8 @@ package job
 
 import (
 	"fmt"
+	"github.com/niubaoshu/gotiny"
+	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"net"
 	"sort"
 	"time"
@@ -28,10 +30,10 @@ type Container struct {
 }
 
 type Job struct {
-	IPs             []*net.IP
+	IPs             []net.Addr
 	P2PListenerPort uint16
 	RPCListenerPort uint16
-	SubmitPort      uint16
+	ControllerPort  uint16
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
 	Bitses          blockchain.TargetBits
@@ -48,16 +50,13 @@ type Job struct {
 // deserialize their contents which will be concurrent safe The varying coinbase
 // payment values are in transaction 0 last output, the individual varying
 // transactions are stored separately and will be reassembled at the end
-func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[int32]*util.Tx) (
-	out Container,
-	txr []*util.Tx,
-) {
+func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr []*util.Tx,) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
-	nBH := Int32.New().Put(bH)
-	msg = append(msg, nBH)
-	mH := Hash.New().Put(mB.MsgBlock().Header.PrevBlock)
-	msg = append(msg, mH)
+	// nBH := Int32.New().Put(bH)
+	// msg = append(msg, nBH)
+	// mH := Hash.New().Put(mB.MsgBlock().Header.PrevBlock)
+	// msg = append(msg, mH)
 	tip := cx.RealNode.Chain.BestChain.Tip()
 	// // this should be the same as the block in the notification
 	// tth := tip.Header()
@@ -73,7 +72,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	df, ok := tip.Diffs.Load().(blockchain.TargetBits)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
-		if bitsMap, err = cx.RealNode.Chain.CalcNextRequiredDifficultyPlan9Controller(tip);Check(err){
+		if bitsMap, err = cx.RealNode.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); Check(err) {
 			return
 		}
 		tip.Diffs.Store(bitsMap)
@@ -81,9 +80,9 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		bitsMap = tip.Diffs.Load().(blockchain.TargetBits)
 	}
 	// Traces(*bitsMap)
-	bitses := Bitses.NewBitses()
-	bitses.Put(bitsMap)
-	msg = append(msg, bitses)
+	// bitses := Bitses.NewBitses()
+	// bitses.Put(bitsMap)
+	// msg = append(msg, bitses)
 	// Now we need to get the values for coinbase for each algorithm then regenerate
 	// the merkle roots To mine this block a miner only needs the matching merkle
 	// roots for the version number but to get them first get the values
@@ -117,9 +116,9 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
 	Traces(mTS)
-	mHashes := Hashes.NewHashes()
-	mHashes.Put(mTS)
-	msg = append(msg, mHashes)
+	// mHashes := Hashes.NewHashes()
+	// mHashes.Put(mTS)
+	// msg = append(msg, mHashes)
 	// previously were sending blocks, no need for that really miner only needs
 	// valid block headers
 	//
@@ -129,7 +128,20 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// 	msg = append(msg, t)
 	// }
 	// Traces(msg)
-	return Container{*msg.CreateContainer(Magic)}, txr
+	adv := p2padvt.GetAdvt(cx)
+	jrb := Job{
+		IPs:             adv.IPs,
+		P2PListenerPort: adv.P2P,
+		RPCListenerPort: adv.RPC,
+		ControllerPort:  adv.Controller,
+		Height:          bH,
+		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
+		Bitses:          bitsMap,
+		Hashes:          mTS,
+		CoinBases:       *cbs,
+	}
+	// return Container{*msg.CreateContainer(Magic)}, txr
+	return gotiny.Marshal(jrb), txr
 }
 
 // LoadContainer takes a message byte slice payload and loads it into a
@@ -206,7 +218,8 @@ func (j *Container) String() (s string) {
 	}
 	sort.Ints(sortedBitses)
 	for i := range sortedBitses {
-		s += fmt.Sprintf("  %2d %-10v %d %064x",
+		s += fmt.Sprintf(
+			"  %2d %-10v %d %064x",
 			sortedBitses[i],
 			fork.List[fork.GetCurrent(h)].AlgoVers[int32(sortedBitses[i])],
 			bitses[int32(sortedBitses[i])],
@@ -227,27 +240,28 @@ func (j *Container) String() (s string) {
 	return
 }
 
-// Struct returns a handy Go struct version This can be used at the start of a
-// new block to get a handy struct, the first work received triggers startup and
-// locks the worker into sending solutions there, until there is a new
-// PrevBlockHash, the work controller (kopach) only responds to updates from
-// this first one (or if it stops sending) - the controller keeps track of
-// individual controller servers multicasting and when it deletes a newly gone
-// dark controller when it comes to send if it isn't found it falls back to the
-// next available to submit
-func (j *Container) Struct() (out Job) {
-	out = Job{
-		IPs:             j.GetIPs(),
-		P2PListenerPort: j.GetP2PListenersPort(),
-		RPCListenerPort: j.GetRPCListenersPort(),
-		SubmitPort:      j.GetControllerListenerPort(),
-		Height:          j.GetNewHeight(),
-		PrevBlockHash:   j.GetPrevBlockHash(),
-		Bitses:          j.GetBitses(),
-		Hashes:          j.GetHashes(),
-	}
-	return
-}
+//
+// // Struct returns a handy Go struct version This can be used at the start of a
+// // new block to get a handy struct, the first work received triggers startup and
+// // locks the worker into sending solutions there, until there is a new
+// // PrevBlockHash, the work controller (kopach) only responds to updates from
+// // this first one (or if it stops sending) - the controller keeps track of
+// // individual controller servers multicasting and when it deletes a newly gone
+// // dark controller when it comes to send if it isn't found it falls back to the
+// // next available to submit
+// func (j *Container) Struct() (out Job) {
+// 	out = Job{
+// 		IPs:             j.GetIPs(),
+// 		P2PListenerPort: j.GetP2PListenersPort(),
+// 		RPCListenerPort: j.GetRPCListenersPort(),
+// 		ControllerPort:      j.GetControllerListenerPort(),
+// 		Height:          j.GetNewHeight(),
+// 		PrevBlockHash:   j.GetPrevBlockHash(),
+// 		Bitses:          j.GetBitses(),
+// 		Hashes:          j.GetHashes(),
+// 	}
+// 	return
+// }
 
 // GetMsgBlock takes the handy go struct version and returns a wire.MsgBlock
 // ready for giving nonce extranonce and computing the merkel root based on the
