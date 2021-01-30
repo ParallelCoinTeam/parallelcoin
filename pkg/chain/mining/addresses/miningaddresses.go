@@ -1,12 +1,13 @@
 package addresses
 
 import (
+	"github.com/urfave/cli"
+	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
-	"github.com/urfave/cli"
 )
 
 // RefillMiningAddresses adds new addresses to the mining address pool for the miner
@@ -22,9 +23,10 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	}
 	var miningAddressLen int
 	if cfg.MiningAddrs != nil {
-		Debug("miningaddrs slice is missing")
+		Debug("miningAddressLen", len(*cfg.MiningAddrs))
 		miningAddressLen = len(*cfg.MiningAddrs)
 	} else {
+		Debug("miningaddrs slice is missing")
 		cfg.MiningAddrs = new(cli.StringSlice)
 	}
 	toMake := 99 - miningAddressLen

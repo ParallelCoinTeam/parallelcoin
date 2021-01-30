@@ -611,9 +611,8 @@ func (s *ScopedKeyManager) nextAddresses(ns walletdb.ReadWriteBucket,
 		return nil, managerError(ErrTooManyAddresses, str, nil)
 	}
 	// Derive the appropriate branch key and ensure it is zeroed when done.
-	branchKey, err := acctKey.Child(branchNum)
-	if err != nil {
-		Error(err)
+	var branchKey *hdkeychain.ExtendedKey
+	if branchKey, err = acctKey.Child(branchNum); Check(err){
 		str := fmt.Sprintf("failed to derive extended key branch %d",
 			branchNum)
 		return nil, managerError(ErrKeyChain, str, err)

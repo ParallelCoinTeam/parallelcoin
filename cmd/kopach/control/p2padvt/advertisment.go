@@ -34,9 +34,9 @@ func Get(cx *conte.Xt) []byte {
 		RPC:        RPC,
 		Controller: Controller,
 	}
-	Debugs(adv)
+	// Debugs(adv)
 	ad := gotiny.Marshal(&adv)
-	Debugs(ad)
+	// Debugs(ad)
 	return ad
 	// return simplebuffer.Serializers{
 	// 	IPs.GetListenable(),

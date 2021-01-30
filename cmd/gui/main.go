@@ -1,8 +1,6 @@
 package gui
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -27,7 +25,6 @@ import (
 	"github.com/p9c/pod/pkg/util/rununit"
 	
 	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
@@ -279,9 +276,10 @@ func (wg *WalletGUI) GetButtons() {
 }
 
 func (wg *WalletGUI) GetInputs() InputMap {
-	seed := make([]byte, hdkeychain.MaxSeedBytes)
-	_, _ = rand.Read(seed)
-	seedString := hex.EncodeToString(seed)
+	// seed := make([]byte, hdkeychain.MaxSeedBytes)
+	// _, _ = rand.Read(seed)
+	// seedString := hex.EncodeToString(seed)
+	seedString := "f4d2c4c542bb52512ed9e6bbfa2d000e576a0c8b4ebd1acafd7efa37247366bc"
 	return InputMap{
 		"receiveAmount":  wg.Input("", "Amount", "DocText", "PanelBg", "DocBg", func(amt string) {}),
 		"receiveMessage": wg.Input("", "Description", "DocText", "PanelBg", "DocBg", func(pass string) {}),

@@ -323,15 +323,17 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 }
 
 // Solutions submitted by workers
-func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err error) {
-	Trace("received solution", src, dst)
+func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err error) {
+	Debug("received solution", src, dst)
 	c := ctx.(*Controller)
 	if !c.active.Load() { // || !c.cx.Node.Load() {
 		Debug("not active yet")
 		return
 	}
+	Debugs(b)
 	var s sol.Solution
 	gotiny.Unmarshal(b, &s)
+	Debugs(s)
 	// j := sol.LoadSolContainer(b)
 	senderPort := s.Port
 	br := bytes.NewBuffer(s.Bytes)
@@ -339,13 +341,11 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	if err = newBlock.Deserialize(br); Check(err) {
 	}
 	if int(senderPort) != c.listenPort {
+		Debug("solution not from current controller")
 		return
 	}
 	msgBlock := newBlock
-	if !msgBlock.Header.PrevBlock.IsEqual(
-		&c.cx.RPCServer.Cfg.Chain.
-			BestSnapshot().Hash,
-	) {
+	if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.BestSnapshot().Hash) {
 		Debug("block submitted by kopach miner worker is stale")
 		if err := c.sendNewBlockTemplate(); Check(err) {
 		}
@@ -357,6 +357,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 		Debug("coinbases not found", cb)
 		return
 	}
+	Debug("copying over transactions")
 	cbs := []*util.Tx{cb}
 	msgBlock.Transactions = []*wire.MsgTx{}
 	txs := append(cbs, c.transactions.Load().([]*util.Tx)...)
@@ -365,17 +366,14 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	}
 	// set old blocks to pause and send pause directly as block is probably a
 	// solution
-	err = c.multiConn.SendMany(pause.Magic, c.pauseShards)
-	if err != nil {
-		Error(err)
+	Debug("sending pause to workers")
+	if err = c.multiConn.SendMany(pause.Magic, c.pauseShards); Check(err) {
 		return
 	}
 	block := util.NewBlock(msgBlock)
 	var isOrphan bool
-	if isOrphan, err = c.cx.RealNode.SyncManager.ProcessBlock(
-		block,
-		blockchain.BFNone,
-	); Check(err) {
+	Debug("submitting block for processing")
+	if isOrphan, err = c.cx.RealNode.SyncManager.ProcessBlock(block, blockchain.BFNone); Check(err) {
 		// Anything other than a rule violation is an unexpected error, so log that
 		// error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
@@ -501,29 +499,29 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
 	p2a := rand.Intn(len(*cx.Config.MiningAddrs))
 	payToAddr := cx.StateCfg.ActiveMiningAddrs[p2a]
 	// do this after returning, in the background
-	defer func() {
-		go func() {
-			// remove the address from the state
-			if p2a == 0 {
-				cx.StateCfg.ActiveMiningAddrs = cx.StateCfg.ActiveMiningAddrs[1:]
-			} else {
-				cx.StateCfg.ActiveMiningAddrs = append(
-					cx.StateCfg.ActiveMiningAddrs[:p2a],
-					cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
-				)
-			}
-			// update the config
-			var ma []string
-			for i := range cx.StateCfg.ActiveMiningAddrs {
-				ma = append(ma, cx.StateCfg.ActiveMiningAddrs[i].String())
-			}
-			mma := cli.StringSlice(ma)
-			cx.Config.MiningAddrs = &mma
-			save.Pod(cx.Config)
-			// TODO: trigger wallet to generate new ones at some point, if one is connected, when a mined
-			// block uses a key and it is deleted here afterwards
-		}()
-	}()
+	// defer func() {
+	// 	go func() {
+	// remove the address from the state
+	if p2a == 0 {
+		cx.StateCfg.ActiveMiningAddrs = cx.StateCfg.ActiveMiningAddrs[1:]
+	} else {
+		cx.StateCfg.ActiveMiningAddrs = append(
+			cx.StateCfg.ActiveMiningAddrs[:p2a],
+			cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
+		)
+	}
+	// update the config
+	var ma cli.StringSlice
+	for i := range cx.StateCfg.ActiveMiningAddrs {
+		ma = append(ma, cx.StateCfg.ActiveMiningAddrs[i].String())
+	}
+	Debug(ma)
+	*cx.Config.MiningAddrs = ma
+	save.Pod(cx.Config)
+	// TODO: trigger wallet to generate new ones at some point, if one is connected, when a mined
+	// block uses a key and it is deleted here afterwards
+	// }()
+	// }()
 	Trace("calling new block template")
 	if template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d); Check(err) {
 	} else {

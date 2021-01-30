@@ -218,6 +218,9 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															wg.cx.StateCfg,
 														)
 														Warn("done refilling mining addresses")
+														w.Stop()
+														Debug("shutting down wallet",w.ShuttingDown())
+														w.WaitForShutdown()
 														Debug("starting main app")
 														*wg.cx.Config.Generate = true
 														*wg.cx.Config.GenThreads = 1

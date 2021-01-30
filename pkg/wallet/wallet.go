@@ -197,6 +197,7 @@ func (w *Wallet) quitChan() qu.C {
 
 // Stop signals all wallet goroutines to shutdown.
 func (w *Wallet) Stop() {
+	Debug("w", w, "w.quitMu", w.quitMu)
 	w.quitMu.Lock()
 	select {
 	case <-w.quit:
@@ -2765,14 +2766,12 @@ func (w *Wallet) newAddress(
 		return nil, nil, err
 	}
 	// Get next address from wallet.
-	addrs, err := manager.NextExternalAddresses(addrmgrNs, account, 1)
-	if err != nil {
-		Error(err)
+	var addrs []waddrmgr.ManagedAddress
+	if addrs, err = manager.NextExternalAddresses(addrmgrNs, account, 1); Check(err){
 		return nil, nil, err
 	}
-	props, err := manager.AccountProperties(addrmgrNs, account)
-	if err != nil {
-		Error(err)
+	var props *waddrmgr.AccountProperties
+	if props, err = manager.AccountProperties(addrmgrNs, account);Check(err){
 		Error(
 			"cannot fetch account properties for notification after deriving next external address:",
 			err,

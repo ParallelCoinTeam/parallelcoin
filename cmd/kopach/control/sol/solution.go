@@ -2,7 +2,9 @@ package sol
 
 import (
 	"bytes"
+	
 	"github.com/niubaoshu/gotiny"
+	
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
@@ -21,7 +23,7 @@ func Get(port int32, mb *wire.MsgBlock) []byte {
 	var err error
 	if err = mb.Serialize(wr); Check(err) {
 	}
-	s := Solution{Port: port, Bytes: buf} // MsgBlock: mb}
+	s := Solution{Port: port, Bytes: wr.Bytes()} // MsgBlock: mb}
 	return gotiny.Marshal(&s)
 }
 

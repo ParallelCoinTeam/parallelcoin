@@ -140,15 +140,15 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	// 	jrb.CoinBases[i] = (*cbs)[i]
 	// }
 	out = gotiny.Marshal(&jrb)
-	Debugs(jrb)
-	Debugs(out)
-	var testy []byte
-	for i := range out {
-		testy = append(testy, out[i])
-	}
-	var jr Job
-	Debug(gotiny.Unmarshal(testy, &jr))
-	Debugs(jr)
+	// Debugs(jrb)
+	// Debugs(out)
+	// var testy []byte
+	// for i := range out {
+	// 	testy = append(testy, out[i])
+	// }
+	// var jr Job
+	// Debug(gotiny.Unmarshal(testy, &jr))
+	// Debugs(jr)
 	// Debug("job size", len(jobber))
 	// return Container{*msg.CreateContainer(Magic)}, txr
 	return out, txr

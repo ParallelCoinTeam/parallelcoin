@@ -73,6 +73,7 @@ func Pod(c *pod.Config) (success bool) {
 	*c.PipeLog = false
 	if yp, e := json.MarshalIndent(c, "", "  "); e == nil {
 		apputil.EnsureDir(*c.ConfigFile)
+		Debug(string(yp))
 		if e := ioutil.WriteFile(*c.ConfigFile, yp, 0600); e != nil {
 			Error(e)
 			success = false
