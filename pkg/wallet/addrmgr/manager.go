@@ -529,21 +529,19 @@ func (m *Manager) NeuterRootKey(ns walletdb.ReadWriteBucket) (err error) {
 // transactions such as the associated private key for pay-to-pubkey and
 // pay-to-pubkey-hash addresses and the script associated with
 // pay-to-script-hash addresses.
-func (m *Manager) Address(ns walletdb.ReadBucket, address util.Address) (ManagedAddress, error) {
+func (m *Manager) Address(ns walletdb.ReadBucket,
+	address util.Address) (ManagedAddress, error) {
 	m.mtx.RLock()
 	defer m.mtx.RUnlock()
-	// We'll iterate through each of the known scoped managers, and see if any of
-	// them now of the target address.
-	var err error
+	// We'll iterate through each of the known scoped managers, and see if any of them now of the target address.
 	for _, scopedMgr := range m.scopedManagers {
-		var addr ManagedAddress
-		if addr, err = scopedMgr.Address(ns, address); Check(err) {
+		addr, err := scopedMgr.Address(ns, address)
+		if err != nil {
 			continue
 		}
 		return addr, nil
 	}
-	// If the address wasn't known to any of the scoped managers, then we'll return
-	// an error.
+	// If the address wasn't known to any of the scoped managers, then we'll return an error.
 	str := fmt.Sprintf("unable to find key for addr %v", address)
 	return nil, managerError(ErrAddressNotFound, str, nil)
 }

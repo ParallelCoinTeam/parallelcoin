@@ -508,17 +508,14 @@ func (s *ScopedKeyManager) rowInterfaceToManaged(ns walletdb.ReadBucket,
 	str := fmt.Sprintf("unsupported address type %T", rowInterface)
 	return nil, managerError(ErrDatabase, str, nil)
 }
-
-// loadAndCacheAddress attempts to load the passed address from the database and
-// caches the associated managed address.
+// loadAndCacheAddress attempts to load the passed address from the database and caches the associated managed address.
 //
 // This function MUST be called with the manager lock held for writes.
 func (s *ScopedKeyManager) loadAndCacheAddress(ns walletdb.ReadBucket,
 	address util.Address) (ManagedAddress, error) {
 	// Attempt to load the raw address information from the database.
-	var rowInterface interface{}
-	var err error
-	if rowInterface, err = fetchAddress(ns, &s.scope, address.ScriptAddress()); Check(err) {
+	rowInterface, err := fetchAddress(ns, &s.scope, address.ScriptAddress())
+	if err != nil {
 		if merr, ok := err.(*ManagerError); ok {
 			desc := fmt.Sprintf("failed to fetch address '%s': %v",
 				address.ScriptAddress(), merr.Description)
@@ -528,8 +525,9 @@ func (s *ScopedKeyManager) loadAndCacheAddress(ns walletdb.ReadBucket,
 		return nil, maybeConvertDbError(err)
 	}
 	// Create a new managed address for the specific type of address based on type.
-	var managedAddr ManagedAddress
-	if managedAddr, err = s.rowInterfaceToManaged(ns, rowInterface); Check(err) {
+	managedAddr, err := s.rowInterfaceToManaged(ns, rowInterface)
+	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Cache and return the new managed address.
