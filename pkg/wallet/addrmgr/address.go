@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sync"
-
+	
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	"github.com/p9c/pod/pkg/db/walletdb"
@@ -125,11 +125,10 @@ func (a *managedAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	a.privKeyMutex.Lock()
 	defer a.privKeyMutex.Unlock()
 	if len(a.privKeyCT) == 0 {
-		privKey, err := key.Decrypt(a.privKeyEncrypted)
-		if err != nil {
-			Error(err)
-			str := fmt.Sprintf("failed to decrypt private key for "+
-				"%s", a.address)
+		var err error
+		var privKey []byte
+		if privKey, err = key.Decrypt(a.privKeyEncrypted); Check(err) {
+			str := fmt.Sprintf("failed to decrypt private key for %s", a.address)
 			return nil, managerError(ErrCrypto, str, err)
 		}
 		a.privKeyCT = privKey
@@ -259,9 +258,9 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 	// Decrypt the key as needed. Also, make sure it's a copy since the private key
 	// stored in memory can be cleared at any time. Otherwise the returned private
 	// key could be invalidated from under the caller.
-	privKeyCopy, err := a.unlock(a.manager.rootManager.cryptoKeyPriv)
-	if err != nil {
-		Error(err)
+	var privKeyCopy []byte
+	var err error
+	if privKeyCopy, err = a.unlock(a.manager.rootManager.cryptoKeyPriv); Check(err) {
 		return nil, err
 	}
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), privKeyCopy)
@@ -274,9 +273,9 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 //
 // This is part of the ManagedPubKeyAddress interface implementation.
 func (a *managedAddress) ExportPrivKey() (*util.WIF, error) {
-	pk, err := a.PrivKey()
-	if err != nil {
-		Error(err)
+	var pk *ec.PrivateKey
+	var err error
+	if pk, err = a.PrivKey(); Check(err) {
 		return nil, err
 	}
 	return util.NewWIF(pk, a.manager.rootManager.chainParams, a.compressed)
@@ -323,44 +322,36 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 		// segwit's scripting improvements, and malleability fixes.
 		//
 		// First, we'll generate a normal p2wkh address from the pubkey hash.
-		witAddr, err := util.NewAddressWitnessPubKeyHash(
+		var witAddr *util.AddressWitnessPubKeyHash
+		if witAddr, err = util.NewAddressWitnessPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
-		)
-		if err != nil {
-			Error(err)
+		); Check(err) {
 			return nil, err
 		}
 		// Next we'll generate the witness program which can be used as a pkScript to
 		// pay to this generated address.
-		witnessProgram, err := txscript.PayToAddrScript(witAddr)
-		if err != nil {
-			Error(err)
+		var witnessProgram []byte
+		if witnessProgram, err = txscript.PayToAddrScript(witAddr); Check(err) {
 			return nil, err
 		}
 		// Finally, we'll use the witness program itself as the pre-image to a p2sh
 		// address. In order to spend, we first use the witnessProgram as the sigScript,
 		// then present the proper <sig, pubkey> pair as the witness.
-		address, err = util.NewAddressScriptHash(
+		if address, err = util.NewAddressScriptHash(
 			witnessProgram, m.rootManager.chainParams,
-		)
-		if err != nil {
-			Error(err)
+		); Check(err) {
 			return nil, err
 		}
 	case PubKeyHash:
-		address, err = util.NewAddressPubKeyHash(
+		if address, err = util.NewAddressPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
-		)
-		if err != nil {
-			Error(err)
+		); Check(err) {
 			return nil, err
 		}
 	case WitnessPubKey:
-		address, err = util.NewAddressWitnessPubKeyHash(
+		if address, err = util.NewAddressWitnessPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
-		)
-		if err != nil {
-			Error(err)
+		); Check(err) {
 			return nil, err
 		}
 	}
@@ -389,20 +380,17 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 	// NOTE: The privKeyBytes here are set into the managed address which are
 	// cleared when locked, so they aren't cleared here.
 	privKeyBytes := privKey.Serialize()
-	privKeyEncrypted, err := s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes)
-	if err != nil {
-		Error(err)
+	var privKeyEncrypted []byte
+	var err error
+	if privKeyEncrypted, err = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes); Check(err) {
 		str := "failed to encrypt private key"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	// Leverage the code to create a managed address without a private key and then
 	// add the private key to it.
 	ecPubKey := (*ec.PublicKey)(&privKey.PublicKey)
-	managedAddr, err := newManagedAddressWithoutPrivKey(
-		s, derivationPath, ecPubKey, compressed, addrType,
-	)
-	if err != nil {
-		Error(err)
+	var managedAddr *managedAddress
+	if managedAddr, err = newManagedAddressWithoutPrivKey(s, derivationPath, ecPubKey, compressed, addrType); Check(err) {
 		return nil, err
 	}
 	managedAddr.privKeyEncrypted = privKeyEncrypted
@@ -414,38 +402,30 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 // account and extended key. The managed address will have access to the private
 // and public keys if the provided extended key is private, otherwise it will
 // only have access to the public key.
-func newManagedAddressFromExtKey(s *ScopedKeyManager,
-	derivationPath DerivationPath, key *hdkeychain.ExtendedKey,
-	addrType AddressType) (*managedAddress, error) {
+func newManagedAddressFromExtKey(s *ScopedKeyManager, derivationPath DerivationPath, key *hdkeychain.ExtendedKey,
+	addrType AddressType) (managedAddr *managedAddress, err error) {
 	// Create a new managed address based on the public or private key depending on
 	// whether the generated key is private.
-	var managedAddr *managedAddress
 	if key.IsPrivate() {
-		privKey, err := key.ECPrivKey()
-		if err != nil {
-			Error(err)
+		var privKey *ec.PrivateKey
+		if privKey, err = key.ECPrivKey(); Check(err) {
 			return nil, err
 		}
 		// Ensure the temp private key big integer is cleared after use.
-		managedAddr, err = newManagedAddress(
+		if managedAddr, err = newManagedAddress(
 			s, derivationPath, privKey, true, addrType,
-		)
-		if err != nil {
-			Error(err)
+		); Check(err) {
 			return nil, err
 		}
 	} else {
-		pubKey, err := key.ECPubKey()
-		if err != nil {
-			Error(err)
+		var pubKey *ec.PublicKey
+		if pubKey, err = key.ECPubKey(); Check(err) {
 			return nil, err
 		}
-		managedAddr, err = newManagedAddressWithoutPrivKey(
+		if managedAddr, err = newManagedAddressWithoutPrivKey(
 			s, derivationPath, pubKey, true,
 			addrType,
-		)
-		if err != nil {
-			Error(err)
+		); Check(err) {
 			return nil, err
 		}
 	}
@@ -470,21 +450,19 @@ var _ ManagedScriptAddress = (*scriptAddress)(nil)
 // invalid or the encrypted script is not available. The returned clear text
 // script will always be a copy that may be safely used by the caller without
 // worrying about it being zeroed during an address lock.
-func (a *scriptAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
+func (a *scriptAddress) unlock(key EncryptorDecryptor) (scriptCopy []byte, err error) {
 	// Protect concurrent access to clear text script.
 	a.scriptMutex.Lock()
 	defer a.scriptMutex.Unlock()
 	if len(a.scriptCT) == 0 {
-		script, err := key.Decrypt(a.scriptEncrypted)
-		if err != nil {
-			Error(err)
-			str := fmt.Sprintf("failed to decrypt script for %s",
-				a.address)
+		var script []byte
+		if script, err = key.Decrypt(a.scriptEncrypted); Check(err) {
+			str := fmt.Sprintf("failed to decrypt script for %s", a.address)
 			return nil, managerError(ErrCrypto, str, err)
 		}
 		a.scriptCT = script
 	}
-	scriptCopy := make([]byte, len(a.scriptCT))
+	scriptCopy = make([]byte, len(a.scriptCT))
 	copy(scriptCopy, a.scriptCT)
 	return scriptCopy, nil
 }
@@ -582,11 +560,11 @@ func (a *scriptAddress) Script() ([]byte, error) {
 // newScriptAddress initializes and returns a new pay-to-script-hash address.
 func newScriptAddress(m *ScopedKeyManager, account uint32, scriptHash,
 	scriptEncrypted []byte) (*scriptAddress, error) {
-	address, err := util.NewAddressScriptHashFromHash(
+	var err error
+	var address *util.AddressScriptHash
+	if address, err = util.NewAddressScriptHashFromHash(
 		scriptHash, m.rootManager.chainParams,
-	)
-	if err != nil {
-		Error(err)
+	); Check(err){
 		return nil, err
 	}
 	return &scriptAddress{

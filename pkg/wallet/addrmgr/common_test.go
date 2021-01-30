@@ -224,13 +224,13 @@ func hexToBytes(origHex string) []byte {
 	return buf
 }
 func emptyDB(t *testing.T) (tearDownFunc func(), db walletdb.DB) {
-	dirName, err := ioutil.TempDir("", "mgrtest")
-	if err != nil {
+	var dirName string
+	var err error
+	if dirName, err = ioutil.TempDir("", "mgrtest"); addrmgr.Check(err) {
 		t.Fatalf("Failed to create db temp dir: %v", err)
 	}
 	dbPath := filepath.Join(dirName, "mgrtest.db")
-	db, err = walletdb.Create("bdb", dbPath)
-	if err != nil {
+	if db, err = walletdb.Create("bdb", dbPath); addrmgr.Check(err) {
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("createDbNamespace: unexpected error: %v", err)
 	}
