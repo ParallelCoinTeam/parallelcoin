@@ -464,9 +464,9 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 		}
 	}
 	// Write any block status changes to DB before updating best state.
-	err := b.Index.flushToDB()
-	if err != nil {
-		Error(err)
+	var err error
+	Debug("flushing block status changes to db before updating best state")
+	if err = b.Index.flushToDB(); Check(err){
 		return err
 	}
 	// Generate a new best state snapshot that will be used to update the database and later memory if all database
@@ -480,6 +480,7 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 	state := newBestState(node, blockSize, blockWeight, numTxns,
 		curTotalTxns+numTxns, node.CalcPastMedianTime())
 	// Atomically insert info into the database.
+	Debug("inserting block into database")
 	err = b.db.Update(func(dbTx database.Tx) error {
 		// update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
@@ -524,9 +525,11 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified now that the modifications have been
 	// committed to the database.
+	Debug("committing new view")
 	view.commit()
 
 	// This node is now the end of the best chain.
+	Debug("setting new chain tip")
 	b.BestChain.SetTip(node)
 	// Update the state for the best block. Notice how this replaces the entire struct instead of updating the existing
 	// one. This effectively allows the old version to act as a snapshot which callers can use freely without needing to
@@ -546,6 +549,7 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 	//
 	// Notify the caller that the block was connected to the main chain. The caller would typically want to react with
 	// actions such as updating wallets.
+	Debug("sending notifications for new block")
 	b.chainLock.Unlock()
 	b.sendNotification(NTBlockConnected, block)
 	b.chainLock.Lock()
@@ -904,8 +908,8 @@ func (b *BlockChain) reorganizeChain(detachNodes, attachNodes *list.List) error 
 //    This is useful when using checkpoints.
 //
 // This function MUST be called with the chain state lock held (for writes).
-func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,
-	flags BehaviorFlags) (bool, error) {
+func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,	flags BehaviorFlags) (bool, error) {
+	Debug("running connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB. If it fails to write, it's not the end of the
@@ -918,6 +922,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,
 	// We are extending the main (best) chain with a new block. This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.BestChain.Tip().hash) {
+		Debug("extending main chain")
 		// Skip checks if node has already been fully validated.
 		fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
 		// Perform several checks to verify the block can be connected to the main chain without violating any rules and
@@ -957,9 +962,10 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,
 			}
 		}
 		// Connect the block to the main chain.
-		err := b.connectBlock(node, block, view, stxos)
-		if err != nil {
-			Trace("connect block error: ", err)
+		Debug("connecting block to main chain")
+		var err error
+		if err = b.connectBlock(node, block, view, stxos); Check(err){
+			Debug("connect block error: ", err)
 			// If we got hit with a rule error, then we'll mark that status of the block as invalid and flush the index
 			// state to disk before returning with the error.
 			if _, ok := err.(RuleError); ok {
@@ -968,6 +974,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,
 			flushIndexState()
 			return false, err
 		}
+		Debug("block connected to main chain")
 		// If this is fast add, or this block node isn't yet marked as valid, then we'll update its status and flush the
 		// state to disk again.
 		if fastAdd || !b.Index.NodeStatus(node).KnownValid() {
@@ -979,6 +986,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,
 		}
 		return true, nil
 	}
+	Debug("calculating work sum at new node")
 	node.workSum = CalcWork(node.bits, node.height, node.version)
 	// We're extending (or creating) a side chain, but the cumulative work for this new side chain is not enough to make
 	// it the new chain.

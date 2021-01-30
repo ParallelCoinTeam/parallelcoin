@@ -102,6 +102,7 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	}
 	// Connect the passed block to the chain while respecting proper chain selection according to the chain with the
 	// most proof of work. This also handles validation of the transaction scripts.
+	Debug("connecting to best chain")
 	var isMainChain bool
 	if isMainChain, err = b.connectBestChain(newNode, block, flags); Check(err) {
 		return false, err

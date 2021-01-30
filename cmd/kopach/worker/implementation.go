@@ -245,7 +245,7 @@ out:
 					hash := mb.Header.BlockHashWithAlgos(nH)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
-						Debug("found solution")
+						Debug("found solution", nH)
 						// srs := sol.GetSolContainer(w.senderPort.Load(), mb)
 						srs := sol.Get(int32(w.senderPort.Load()), mb)
 						err := w.dispatchConn.SendMany(
