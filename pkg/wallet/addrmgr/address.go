@@ -13,9 +13,11 @@ import (
 	"github.com/p9c/pod/pkg/util/zero"
 )
 
-// AddressType represents the various address types waddrmgr is currently able to generate, and maintain.
+// AddressType represents the various address types waddrmgr is currently able
+// to generate, and maintain.
 //
-// NOTE: These MUST be stable as they're used for scope address schema recognition within the database.
+// NOTE: These MUST be stable as they're used for scope address schema
+// recognition within the database.
 type AddressType uint8
 
 const (
@@ -23,21 +25,24 @@ const (
 	PubKeyHash AddressType = iota
 	// Script reprints a raw script address.
 	Script
-	// RawPubKey is just raw public key to be used within scripts, This type indicates that a scoped manager with this
-	// address type shouldn't be consulted during historical rescans.
+	// RawPubKey is just raw public key to be used within scripts, This type
+	// indicates that a scoped manager with this address type shouldn't be consulted
+	// during historical rescans.
 	RawPubKey
-	// NestedWitnessPubKey represents a p2wkh output nested within a p2sh output. Using this address type, the wallet
-	// can receive funds from other wallet's which don't yet recognize the new segwit standard output types. Receiving
-	// funds to this address maintains the scalability, and malleability fixes due to segwit in a backwards compatible
-	// manner.
+	// NestedWitnessPubKey represents a p2wkh output nested within a p2sh output.
+	// Using this address type, the wallet can receive funds from other wallet's
+	// which don't yet recognize the new segwit standard output types. Receiving
+	// funds to this address maintains the scalability, and malleability fixes due
+	// to segwit in a backwards compatible manner.
 	NestedWitnessPubKey
 	// WitnessPubKey represents a p2wkh (pay-to-witness-key-hash) address type.
 	WitnessPubKey
 )
 
-// ManagedAddress is an interface that provides access to information regarding an address managed by an address manager.
-// Concrete implementations of this type may provide further fields to provide information specific to that type of
-// address.
+// ManagedAddress is an interface that provides access to information regarding
+// an address managed by an address manager. Concrete implementations of this
+// type may provide further fields to provide information specific to that type
+// of address.
 type ManagedAddress interface {
 	// Account returns the account the address is associated with.
 	Account() uint32
@@ -45,50 +50,54 @@ type ManagedAddress interface {
 	Address() util.Address
 	// AddrHash returns the key or script hash related to the address
 	AddrHash() []byte
-	// Imported returns true if the backing address was imported instead
-	// of being part of an address chain.
+	// Imported returns true if the backing address was imported instead of being
+	// part of an address chain.
 	Imported() bool
-	// Internal returns true if the backing address was created for internal
-	// use such as a change output of a transaction.
+	// Internal returns true if the backing address was created for internal use
+	// such as a change output of a transaction.
 	Internal() bool
 	// Compressed returns true if the backing address is compressed.
 	Compressed() bool
 	// Used returns true if the backing address has been used in a transaction.
 	Used(ns walletdb.ReadBucket) bool
-	// AddrType returns the address type of the managed address. This can be used to quickly discern the address type
-	// without further processing
+	// AddrType returns the address type of the managed address. This can be used to
+	// quickly discern the address type without further processing
 	AddrType() AddressType
 }
 
-// ManagedPubKeyAddress extends ManagedAddress and additionally provides the public and private keys for pubkey-based
-// addresses.
+// ManagedPubKeyAddress extends ManagedAddress and additionally provides the
+// public and private keys for pubkey-based addresses.
 type ManagedPubKeyAddress interface {
 	ManagedAddress
 	// PubKey returns the public key associated with the address.
 	PubKey() *ec.PublicKey
-	// ExportPubKey returns the public key associated with the address serialized as a hex encoded string.
+	// ExportPubKey returns the public key associated with the address serialized as
+	// a hex encoded string.
 	ExportPubKey() string
-	// PrivKey returns the private key for the address. It can fail if the address manager is watching-only or locked,
-	// or the address does not have any keys.
+	// PrivKey returns the private key for the address. It can fail if the address
+	// manager is watching-only or locked, or the address does not have any keys.
 	PrivKey() (*ec.PrivateKey, error)
-	// ExportPrivKey returns the private key associated with the address serialized as Wallet Import Format (WIF).
+	// ExportPrivKey returns the private key associated with the address serialized
+	// as Wallet Import Format (WIF).
 	ExportPrivKey() (*util.WIF, error)
-	// DerivationInfo contains the information required to derive the key that backs the address via traditional methods
-	// from the HD root. For imported keys, the first value will be set to false to indicate that we don't know exactly
-	// how the key was derived.
+	// DerivationInfo contains the information required to derive the key that backs
+	// the address via traditional methods from the HD root. For imported keys, the
+	// first value will be set to false to indicate that we don't know exactly how
+	// the key was derived.
 	DerivationInfo() (KeyScope, DerivationPath, bool)
 }
 
-// ManagedScriptAddress extends ManagedAddress and represents a pay-to-script-hash style of bitcoin addresses. It
-// additionally provides information about the script.
+// ManagedScriptAddress extends ManagedAddress and represents a
+// pay-to-script-hash style of bitcoin addresses. It additionally provides
+// information about the script.
 type ManagedScriptAddress interface {
 	ManagedAddress
 	// Script returns the script associated with the address.
 	Script() ([]byte, error)
 }
 
-// managedAddress represents a public key address. It also may or may not have the private key associated with the
-// public key.
+// managedAddress represents a public key address. It also may or may not have
+// the private key associated with the public key.
 type managedAddress struct {
 	manager          *ScopedKeyManager
 	address          util.Address
@@ -107,9 +116,10 @@ type managedAddress struct {
 // Enforce managedAddress satisfies the ManagedPubKeyAddress interface.
 var _ ManagedPubKeyAddress = (*managedAddress)(nil)
 
-// unlock decrypts and stores a pointer to the associated private key. It will fail if the key is invalid or the
-// encrypted private key is not available. The returned clear text private key will always be a copy that may be safely
-// used by the caller without worrying about it being zeroed during an address lock.
+// unlock decrypts and stores a pointer to the associated private key. It will
+// fail if the key is invalid or the encrypted private key is not available. The
+// returned clear text private key will always be a copy that may be safely used
+// by the caller without worrying about it being zeroed during an address lock.
 func (a *managedAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	// Protect concurrent access to clear text private key.
 	a.privKeyMutex.Lock()
@@ -145,15 +155,16 @@ func (a *managedAddress) Account() uint32 {
 	return a.derivationPath.Account
 }
 
-// AddrType returns the address type of the managed address. This can be used to quickly discern the address type
-// without further processing
+// AddrType returns the address type of the managed address. This can be used to
+// quickly discern the address type without further processing
 //
 // This is part of the ManagedAddress interface implementation.
 func (a *managedAddress) AddrType() AddressType {
 	return a.addrType
 }
 
-// Address returns the util.Address which represents the managed address. This will be a pay-to-pubkey-hash address.
+// Address returns the util.Address which represents the managed address. This
+// will be a pay-to-pubkey-hash address.
 //
 // This is part of the ManagedAddress interface implementation.
 func (a *managedAddress) Address() util.Address {
@@ -213,8 +224,8 @@ func (a *managedAddress) PubKey() *ec.PublicKey {
 	return a.pubKey
 }
 
-// pubKeyBytes returns the serialized public key bytes for the managed address based on whether or not the managed
-// address is marked as compressed.
+// pubKeyBytes returns the serialized public key bytes for the managed address
+// based on whether or not the managed address is marked as compressed.
 func (a *managedAddress) pubKeyBytes() []byte {
 	if a.compressed {
 		return a.pubKey.SerializeCompressed()
@@ -222,15 +233,16 @@ func (a *managedAddress) pubKeyBytes() []byte {
 	return a.pubKey.SerializeUncompressed()
 }
 
-// ExportPubKey returns the public key associated with the address serialized as a hex encoded string.
+// ExportPubKey returns the public key associated with the address serialized as
+// a hex encoded string.
 //
 // This is part of the ManagedPubKeyAddress interface implementation.
 func (a *managedAddress) ExportPubKey() string {
 	return hex.EncodeToString(a.pubKeyBytes())
 }
 
-// PrivKey returns the private key for the address. It can fail if the address manager is watching-only or locked, or
-// the address does not have any keys.
+// PrivKey returns the private key for the address. It can fail if the address
+// manager is watching-only or locked, or the address does not have any keys.
 //
 // This is part of the ManagedPubKeyAddress interface implementation.
 func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
@@ -244,8 +256,9 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 	if a.manager.rootManager.IsLocked() {
 		return nil, managerError(ErrLocked, errLocked, nil)
 	}
-	// Decrypt the key as needed. Also, make sure it's a copy since the private key stored in memory can be cleared at
-	// any time. Otherwise the returned private key could be invalidated from under the caller.
+	// Decrypt the key as needed. Also, make sure it's a copy since the private key
+	// stored in memory can be cleared at any time. Otherwise the returned private
+	// key could be invalidated from under the caller.
 	privKeyCopy, err := a.unlock(a.manager.rootManager.cryptoKeyPriv)
 	if err != nil {
 		Error(err)
@@ -256,7 +269,8 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 	return privKey, nil
 }
 
-// ExportPrivKey returns the private key associated with the address in Wallet Import Format (WIF).
+// ExportPrivKey returns the private key associated with the address in Wallet
+// Import Format (WIF).
 //
 // This is part of the ManagedPubKeyAddress interface implementation.
 func (a *managedAddress) ExportPrivKey() (*util.WIF, error) {
@@ -268,8 +282,9 @@ func (a *managedAddress) ExportPrivKey() (*util.WIF, error) {
 	return util.NewWIF(pk, a.manager.rootManager.chainParams, a.compressed)
 }
 
-// DerivationInfo contains the information required to derive the key that backs the address via traditional methods
-// from the HD root. For imported keys, the first value will be set to false to indicate that we don't know exactly how
+// DerivationInfo contains the information required to derive the key that backs
+// the address via traditional methods from the HD root. For imported keys, the
+// first value will be set to false to indicate that we don't know exactly how
 // the key was derived.
 //
 // This is part of the ManagedPubKeyAddress interface implementation.
@@ -278,15 +293,17 @@ func (a *managedAddress) DerivationInfo() (KeyScope, DerivationPath, bool) {
 		scope KeyScope
 		path  DerivationPath
 	)
-	// If this key is imported, then we can't return any information as we don't know precisely how the key was derived.
+	// If this key is imported, then we can't return any information as we don't
+	// know precisely how the key was derived.
 	if a.imported {
 		return scope, path, false
 	}
 	return a.manager.Scope(), a.derivationPath, true
 }
 
-// newManagedAddressWithoutPrivKey returns a new managed address based on the passed account, public key, and whether or
-// not the public key should be compressed.
+// newManagedAddressWithoutPrivKey returns a new managed address based on the
+// passed account, public key, and whether or not the public key should be
+// compressed.
 func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 	derivationPath DerivationPath, pubKey *ec.PublicKey, compressed bool,
 	addrType AddressType) (*managedAddress, error) {
@@ -301,8 +318,9 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 	var err error
 	switch addrType {
 	case NestedWitnessPubKey:
-		// For this address type we'l generate an address which is backwards compatible to Bitcoin nodes running 0.6.0
-		// onwards, but allows us to take advantage of segwit's scripting improvements, and malleability fixes.
+		// For this address type we'l generate an address which is backwards compatible
+		// to Bitcoin nodes running 0.6.0 onwards, but allows us to take advantage of
+		// segwit's scripting improvements, and malleability fixes.
 		//
 		// First, we'll generate a normal p2wkh address from the pubkey hash.
 		witAddr, err := util.NewAddressWitnessPubKeyHash(
@@ -312,14 +330,16 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 			Error(err)
 			return nil, err
 		}
-		// Next we'll generate the witness program which can be used as a pkScript to pay to this generated address.
+		// Next we'll generate the witness program which can be used as a pkScript to
+		// pay to this generated address.
 		witnessProgram, err := txscript.PayToAddrScript(witAddr)
 		if err != nil {
 			Error(err)
 			return nil, err
 		}
-		// Finally, we'll use the witness program itself as the pre-image to a p2sh address. In order to spend, we first
-		// use the witnessProgram as the sigScript, then present the proper <sig, pubkey> pair as the witness.
+		// Finally, we'll use the witness program itself as the pre-image to a p2sh
+		// address. In order to spend, we first use the witnessProgram as the sigScript,
+		// then present the proper <sig, pubkey> pair as the witness.
 		address, err = util.NewAddressScriptHash(
 			witnessProgram, m.rootManager.chainParams,
 		)
@@ -358,15 +378,16 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 	}, nil
 }
 
-// newManagedAddress returns a new managed address based on the passed account, private key, and whether or not the
-// public key is compressed. The managed address will have access to the private and public keys.
+// newManagedAddress returns a new managed address based on the passed account,
+// private key, and whether or not the public key is compressed. The managed
+// address will have access to the private and public keys.
 func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 	privKey *ec.PrivateKey, compressed bool,
 	addrType AddressType) (*managedAddress, error) {
 	// Encrypt the private key.
 	//
-	// NOTE: The privKeyBytes here are set into the managed address which are cleared when locked, so they aren't
-	// cleared here.
+	// NOTE: The privKeyBytes here are set into the managed address which are
+	// cleared when locked, so they aren't cleared here.
 	privKeyBytes := privKey.Serialize()
 	privKeyEncrypted, err := s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes)
 	if err != nil {
@@ -374,7 +395,8 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 		str := "failed to encrypt private key"
 		return nil, managerError(ErrCrypto, str, err)
 	}
-	// Leverage the code to create a managed address without a private key and then add the private key to it.
+	// Leverage the code to create a managed address without a private key and then
+	// add the private key to it.
 	ecPubKey := (*ec.PublicKey)(&privKey.PublicKey)
 	managedAddr, err := newManagedAddressWithoutPrivKey(
 		s, derivationPath, ecPubKey, compressed, addrType,
@@ -388,14 +410,15 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 	return managedAddr, nil
 }
 
-// newManagedAddressFromExtKey returns a new managed address based on the passed account and extended key. The managed
-// address will have access to the private and public keys if the provided extended key is private, otherwise it will
+// newManagedAddressFromExtKey returns a new managed address based on the passed
+// account and extended key. The managed address will have access to the private
+// and public keys if the provided extended key is private, otherwise it will
 // only have access to the public key.
 func newManagedAddressFromExtKey(s *ScopedKeyManager,
 	derivationPath DerivationPath, key *hdkeychain.ExtendedKey,
 	addrType AddressType) (*managedAddress, error) {
-	// Create a new managed address based on the public or private key depending on whether the generated key is
-	// private.
+	// Create a new managed address based on the public or private key depending on
+	// whether the generated key is private.
 	var managedAddr *managedAddress
 	if key.IsPrivate() {
 		privKey, err := key.ECPrivKey()
@@ -443,8 +466,9 @@ type scriptAddress struct {
 // Enforce scriptAddress satisfies the ManagedScriptAddress interface.
 var _ ManagedScriptAddress = (*scriptAddress)(nil)
 
-// unlock decrypts and stores the associated script. It will fail if the key is invalid or the encrypted script is not
-// available. The returned clear text script will always be a copy that may be safely used by the caller without
+// unlock decrypts and stores the associated script. It will fail if the key is
+// invalid or the encrypted script is not available. The returned clear text
+// script will always be a copy that may be safely used by the caller without
 // worrying about it being zeroed during an address lock.
 func (a *scriptAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	// Protect concurrent access to clear text script.
@@ -474,23 +498,24 @@ func (a *scriptAddress) lock() {
 	a.scriptMutex.Unlock()
 }
 
-// Account returns the account the address is associated with. This will always be the ImportedAddrAccount constant for
-// script addresses.
+// Account returns the account the address is associated with. This will always
+// be the ImportedAddrAccount constant for script addresses.
 //
 // This is part of the ManagedAddress interface implementation.
 func (a *scriptAddress) Account() uint32 {
 	return a.account
 }
 
-// AddrType returns the address type of the managed address. This can be used to quickly discern the address type
-// without further processing
+// AddrType returns the address type of the managed address. This can be used to
+// quickly discern the address type without further processing
 //
 // This is part of the ManagedAddress interface implementation.
 func (a *scriptAddress) AddrType() AddressType {
 	return Script
 }
 
-// Address returns the util.Address which represents the managed address. This will be a pay-to-script-hash address.
+// Address returns the util.Address which represents the managed address. This
+// will be a pay-to-script-hash address.
 //
 // This is part of the ManagedAddress interface implementation.
 func (a *scriptAddress) Address() util.Address {
@@ -504,15 +529,16 @@ func (a *scriptAddress) AddrHash() []byte {
 	return a.address.Hash160()[:]
 }
 
-// Imported always returns true since script addresses are always imported addresses and not part of any chain.
+// Imported always returns true since script addresses are always imported
+// addresses and not part of any chain.
 //
 // This is part of the ManagedAddress interface implementation.
 func (a *scriptAddress) Imported() bool {
 	return true
 }
 
-// Internal always returns false since script addresses are always imported addresses and not part of any chain in order
-// to be for internal use.
+// Internal always returns false since script addresses are always imported
+// addresses and not part of any chain in order to be for internal use.
 //
 // This is part of the ManagedAddress interface implementation.
 func (a *scriptAddress) Internal() bool {
@@ -547,8 +573,9 @@ func (a *scriptAddress) Script() ([]byte, error) {
 	if a.manager.rootManager.IsLocked() {
 		return nil, managerError(ErrLocked, errLocked, nil)
 	}
-	// Decrypt the script as needed. Also, make sure it's a copy since the script stored in memory can be cleared at any
-	// time. Otherwise, the returned script could be invalidated from under the caller.
+	// Decrypt the script as needed. Also, make sure it's a copy since the script
+	// stored in memory can be cleared at any time. Otherwise, the returned script
+	// could be invalidated from under the caller.
 	return a.unlock(a.manager.rootManager.cryptoKeyScript)
 }
 

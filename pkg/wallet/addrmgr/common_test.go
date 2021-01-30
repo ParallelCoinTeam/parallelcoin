@@ -189,13 +189,16 @@ var (
 			},
 		},
 	}
-	// expectedExternalAddrs is the list of expected external addresses generated from the seed
+	// expectedExternalAddrs is the list of expected external addresses generated
+	// from the seed
 	expectedExternalAddrs = expectedAddrs[:5]
-	// expectedInternalAddrs is the list of expected internal addresses generated from the seed
+	// expectedInternalAddrs is the list of expected internal addresses generated
+	// from the seed
 	expectedInternalAddrs = expectedAddrs[5:]
 )
 
-// checkManagerError ensures the passed error is a ManagerError with an error code that matches the passed error code.
+// checkManagerError ensures the passed error is a ManagerError with an error
+// code that matches the passed error code.
 func checkManagerError(t *testing.T, testName string, gotErr error, wantErrCode waddrmgr.ErrorCode) bool {
 	merr, ok := gotErr.(waddrmgr.ManagerError)
 	if !ok {
@@ -211,8 +214,8 @@ func checkManagerError(t *testing.T, testName string, gotErr error, wantErrCode 
 	return true
 }
 
-// hexToBytes is a wrapper around hex.DecodeString that panics if there is an error. It MUST only be used with hard
-// coded values in the tests.
+// hexToBytes is a wrapper around hex.DecodeString that panics if there is an
+// error. It MUST only be used with hard coded values in the tests.
 func hexToBytes(origHex string) []byte {
 	buf, err := hex.DecodeString(origHex)
 	if err != nil {
@@ -240,8 +243,8 @@ func emptyDB(t *testing.T) (tearDownFunc func(), db walletdb.DB) {
 	return
 }
 
-// setupManager creates a new address manager and returns a teardown function that should be invoked to ensure it is
-// closed and removed upon completion.
+// setupManager creates a new address manager and returns a teardown function
+// that should be invoked to ensure it is closed and removed upon completion.
 func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddrmgr.Manager) {
 	// Create a new manager in a temp directory.
 	dirName, err := ioutil.TempDir("", "mgrtest")
