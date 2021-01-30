@@ -515,7 +515,7 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
 	for i := range cx.StateCfg.ActiveMiningAddrs {
 		ma = append(ma, cx.StateCfg.ActiveMiningAddrs[i].String())
 	}
-	Debug(ma)
+	// Debug(ma)
 	*cx.Config.MiningAddrs = ma
 	save.Pod(cx.Config)
 	// TODO: trigger wallet to generate new ones at some point, if one is connected, when a mined

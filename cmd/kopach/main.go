@@ -290,10 +290,10 @@ var handlers = transport.Handlers{
 			return
 		}
 		
-		Debugs(b)
+		// Debugs(b)
 		var jr job.Job
 		gotiny.Unmarshal(b, &jr)
-		Debugs(jr)
+		// Debugs(jr)
 		
 		ips := jr.IPs
 		w.height = jr.Height

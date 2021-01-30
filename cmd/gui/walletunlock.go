@@ -50,7 +50,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			if logi.FileExists(filename) {
 				Debug("#### loading state data...")
 				if err = wg.State.Load(filename, wg.cx.Config.WalletPass); Check(err) {
-					interrupt.Request()
+					// interrupt.Request()
 				}
 				Debug("#### loaded state data")
 			}

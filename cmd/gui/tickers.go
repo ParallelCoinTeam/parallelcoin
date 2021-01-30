@@ -266,9 +266,9 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 }
 
 func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
-	if !wg.wallet.Running() || wg.WalletClient == nil || wg.WalletClient.Disconnected() {
-		return nil
-	}
+	// if !wg.wallet.Running() || wg.WalletClient == nil || wg.WalletClient.Disconnected() {
+	// 	return nil
+	// }
 	return &rpcclient.NotificationHandlers{
 		OnClientConnected: func() {
 			wg.processWalletBlockNotification()

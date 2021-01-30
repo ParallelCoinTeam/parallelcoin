@@ -117,6 +117,7 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	Warn("refilling mining addresses", cx.Config, cx.StateCfg)
 	addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
 	Warn("done refilling mining addresses")
+	Debugs(*cx.Config.MiningAddrs)
 	save.Pod(cx.Config)
 	go rpcClientConnectLoop(cx, legacyServer, loader)
 	// }()

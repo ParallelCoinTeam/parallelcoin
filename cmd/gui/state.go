@@ -167,7 +167,7 @@ func (s *State) Load(filename string, pass *string) (err error) {
 	data = data[ns:]
 	var b []byte
 	if b, err = ciph.Open(nil, nonce, data, nil); Check(err) {
-		interrupt.Request()
+		// interrupt.Request()
 		return
 	}
 	// yay, right password, now unmarshal
