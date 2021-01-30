@@ -102,6 +102,10 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 				wg.node.Start()
 			}
 			wg.wallet.Start()
+			if err = wg.chainClient(); Check(err) {
+			}
+			if err = wg.walletClient(); Check(err) {
+			}
 			wg.unlockPassword.Wipe()
 			wg.ready.Store(true)
 			wg.Invalidate()
@@ -195,7 +199,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																					Fn(gtx)
 																				return dims
 																			},
-																	).
+																		).
 																		Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
 																		Rigid(
 																			func(gtx l.Context) l.
@@ -260,7 +264,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																												Scale(
 																													gui.
 																														Scales["H4"],
-																											).
+																												).
 																												Color("DocText").
 																												Src(
 																													&icons.

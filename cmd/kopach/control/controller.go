@@ -330,10 +330,10 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err e
 		Debug("not active yet")
 		return
 	}
-	Debugs(b)
+	// Debugs(b)
 	var s sol.Solution
 	gotiny.Unmarshal(b, &s)
-	Debugs(s)
+	// Debugs(s)
 	// j := sol.LoadSolContainer(b)
 	senderPort := s.Port
 	br := bytes.NewBuffer(s.Bytes)
