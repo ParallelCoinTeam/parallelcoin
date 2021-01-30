@@ -293,32 +293,35 @@ out:
 				Debug("received processBlockMsg")
 				var heightUpdate int32
 				header := &msg.block.MsgBlock().Header
+				Debug("checking if have should have serialized block height")
 				if blockchain.ShouldHaveSerializedBlockHeight(header) {
+					Debug("reading coinbase transaction")
 					coinbaseTx := msg.block.Transactions()[0]
-					cbHeight, err := blockchain.ExtractCoinbaseHeight(coinbaseTx)
-					if err != nil {
-						Error(err)
-						Trace("unable to extract height from coinbase tx:",
-							err)
+					Debug("extracting coinbase height")
+					var err error
+					var cbHeight int32
+					if cbHeight, err = blockchain.ExtractCoinbaseHeight(coinbaseTx); Check(err) {
+						Trace("unable to extract height from coinbase tx:", err)
 					} else {
 						heightUpdate = cbHeight
 					}
 				}
-				Trace("passing to chain.ProcessBlock")
-				_, isOrphan, err := sm.chain.ProcessBlock(workerNumber, msg.
-					block, msg.flags, heightUpdate)
-				if err != nil {
+				Debug("passing to chain.ProcessBlock")
+				var isOrphan bool
+				var err error
+				if _, isOrphan, err = sm.chain.ProcessBlock(workerNumber, msg.block, msg.flags, heightUpdate); Check(err){
 					Error("error processing new block ", err)
 					msg.reply <- processBlockResponse{
 						isOrphan: false,
 						err:      err,
 					}
 				}
-				Trace("sending back message on reply channel")
+				Debug("sending back message on reply channel")
 				msg.reply <- processBlockResponse{
 					isOrphan: isOrphan,
 					err:      nil,
 				}
+				Debug("sent reply")
 			case isCurrentMsg:
 				msg.reply <- sm.current()
 			case pauseMsg:

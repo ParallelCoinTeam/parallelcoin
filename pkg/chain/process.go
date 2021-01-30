@@ -36,7 +36,7 @@ const (
 // This function is safe for concurrent access.
 func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
 	flags BehaviorFlags, height int32) (bool, bool, error) {
-	// Warn("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
+	Warn("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
 	blockHeight := height
 	bb, _ := b.BlockByHash(&block.MsgBlock().Header.PrevBlock)
 	if bb != nil {
@@ -71,15 +71,13 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
 	}
 	// The block must not already exist as an orphan.
 	if _, exists := b.orphans[*blockHash]; exists {
-		str := fmt.Sprintf(
-			"already have block (orphan)")
+		str := fmt.Sprintf("already have block (orphan)")
 		return false, false, ruleError(ErrDuplicateBlock, str)
 	}
 	// Perform preliminary sanity checks on the block and its transactions.
 	var DoNotCheckPow bool
 	pl := fork.GetMinDiff(fork.GetAlgoName(algo, blockHeight), blockHeight)
-	// Warnf("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo,
-	// 	blockHeight), blockHeight, pl)
+	Warnf("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	ph := &block.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	var pb *BlockNode
@@ -91,13 +89,13 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
 			DoNotCheckPow = true
 		}
 	}
-	// Warnf("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
+	Warnf("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	if err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow,
 		blockHeight); Check(err) {
 		Error("block processing error: ", err)
 		return false, false, err
 	}
-	// Warn("searching back to checkpoints")
+	Warn("searching back to checkpoints")
 	//
 	// Find the previous checkpoint and perform some additional checks based on the checkpoint. This provides a few nice
 	// properties such as preventing old side chain blocks before the last checkpoint, rejecting easy to mine, but
@@ -135,7 +133,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
 			}
 		}
 	}
-	// Warn("handling orphans")
+	Warn("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
 	prevHashExists, err := b.blockExists(prevHash)
@@ -144,19 +142,21 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
 		return false, false, err
 	}
 	if !prevHashExists {
-		// Warnc(func() string {
-		// 	return fmt.Sprintf(
-		// 		"adding orphan block %v with parent %v",
-		// 		bhwa(blockHeight).String(),
-		// 		prevHash,
-		// 	)
-		// })
+		Warnc(func() string {
+			return fmt.Sprintf(
+				"adding orphan block %v with parent %v",
+				bhwa(blockHeight).String(),
+				prevHash,
+			)
+		})
 		b.addOrphanBlock(block)
 		return false, true, nil
 	}
 	// The block has passed all context independent checks and appears sane enough to potentially accept it into the
-	// block chain. Warn("maybe accept block")
-	isMainChain, err := b.maybeAcceptBlock(workerNumber, block, flags)
+	// block chain.
+	Warn("maybe accept block")
+	var isMainChain bool
+	isMainChain, err = b.maybeAcceptBlock(workerNumber, block, flags)
 	if err != nil {
 		Error(err)
 		return false, false, err
@@ -175,7 +175,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
 	Tracef("accepted block %d %v %s",
 		blockHeight, bhwa(blockHeight).String(), fork.GetAlgoName(block.MsgBlock().
 			Header.Version, blockHeight))
-	// Warn("finished blockchain.ProcessBlock")
+	Warn("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }
 
