@@ -3,7 +3,7 @@ package ctl
 import (
 	"fmt"
 	"path/filepath"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -41,10 +41,10 @@ func ListCommands() {
 	// Get a list of registered commands and categorize and filter them.
 	cmdMethods := btcjson.RegisteredCmdMethods()
 	categorized := make([][]string, numCategories)
+	var err error
 	for _, method := range cmdMethods {
-		flags, err := btcjson.MethodUsageFlags(method)
-		if err != nil {
-			Error(err)
+		var flags btcjson.UsageFlag
+		if flags, err = btcjson.MethodUsageFlags(method); Check(err) {
 			// This should never happen since the method was just returned from the package, but be safe.
 			continue
 		}
@@ -52,9 +52,8 @@ func ListCommands() {
 		if flags&unusableFlags != 0 {
 			continue
 		}
-		usage, err := btcjson.MethodUsageText(method)
-		if err != nil {
-			Error(err)
+		var usage string
+		if usage, err = btcjson.MethodUsageText(method); Check(err){
 			// This should never happen since the method was just returned from the package, but be safe.
 			continue
 		}

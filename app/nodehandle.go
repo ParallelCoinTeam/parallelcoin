@@ -30,9 +30,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		// Perform service command and exit if specified. Invalid service commands show an appropriate error. Only runs
 		// on Windows since the runServiceCommand function will be nil when not on Windows.
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
-			err := runServiceCommand(serviceOpts.ServiceCommand)
-			if err != nil {
-				Error(err)
+			if err = runServiceCommand(serviceOpts.ServiceCommand); Check(err) {
 				return err
 			}
 			return nil
@@ -41,17 +39,17 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
-			if apputil.FileExists(*cx.Config.RPCCert) && apputil.FileExists(*cx.Config.RPCKey) &&
+			if apputil.FileExists(*cx.Config.RPCCert) &&
+				apputil.FileExists(*cx.Config.RPCKey) &&
 				apputil.FileExists(*cx.Config.CAFile) {
-				
 			} else {
-				_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
+				if _, err = walletmain.GenerateRPCKeyPair(cx.Config, true); Check(err) {
+				}
 			}
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				err := node.Main(cx)
-				if err != nil {
+				if err := node.Main(cx); Check(err) {
 					Error("error starting node ", err)
 				}
 			}()

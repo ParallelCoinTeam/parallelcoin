@@ -22,7 +22,7 @@ func ctlHandleList(c *cli.Context) error {
 	return nil
 }
 
-func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
+func ctlHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) error {
 		config.Configure(cx, c.Command.Name, true)
 		args := c.Args()
@@ -30,9 +30,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 			return cli.ShowSubcommandHelp(c)
 		}
 		ctl.HelpPrint = func() {
-			err := cli.ShowSubcommandHelp(c)
-			if err != nil {
-				Error(err)
+			if err := cli.ShowSubcommandHelp(c); Check(err){
 			}
 		}
 		ctl.Main(args, cx)
@@ -43,7 +41,6 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		config.Configure(cx, c.Command.Name, true)
-		
 		return nil
 	}
 }

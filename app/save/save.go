@@ -71,14 +71,13 @@ func Pod(c *pod.Config) (success bool) {
 	// don't save pipe log setting as we want it to only be active from a flag or environment variable
 	pipeLogOn := *c.PipeLog
 	*c.PipeLog = false
-	if yp, e := json.MarshalIndent(c, "", "  "); e == nil {
+	var yp []byte
+	if yp, err = json.MarshalIndent(c, "", "  "); !Check(err) {
 		apputil.EnsureDir(*c.ConfigFile)
 		// Debug(string(yp))
-		if e := ioutil.WriteFile(*c.ConfigFile, yp, 0600); e != nil {
-			Error(e)
-			success = false
+		if err = ioutil.WriteFile(*c.ConfigFile, yp, 0600); !Check(err) {
+			success = true
 		}
-		success = true
 	}
 	if c.UserAgentComments != nil {
 		*c.UserAgentComments = uac
