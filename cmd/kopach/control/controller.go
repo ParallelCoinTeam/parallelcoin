@@ -14,6 +14,7 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/save"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/VividCortex/ewma"
@@ -67,14 +68,16 @@ type Controller struct {
 	hashCount              atomic.Uint64
 	hashSampleBuf          *rav.BufferUint64
 	lastNonce              int32
+	walletClient           *rpcclient.Client
 }
 
 func Run(cx *conte.Xt) (quit qu.C) {
 	im := true
 	cx.Controller.Store(true)
-	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
-		im = false
-	}
+	
+	// if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
+	// 	im = false
+	// }
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		Warn("not running controller without RPC enabled")
 		return
