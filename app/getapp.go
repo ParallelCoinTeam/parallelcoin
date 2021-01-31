@@ -575,11 +575,13 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"set wallet server to connect to",
 				"127.0.0.1:11046",
 				cx.Config.WalletServer),
-			au.String(
-				"walletpass",
-				"The public wallet password -- Only required if the wallet was created with one",
-				"",
-				cx.Config.WalletPass),
+			cli.StringFlag{
+				Name:        "walletpass",
+				Value:       *cx.Config.WalletPass,
+				Usage:       "The public wallet password -- Only required if the wallet was created with one",
+				EnvVar:      "POD_WALLETPASS",
+				Destination: cx.Config.WalletPass,
+			},
 			au.Bool(
 				"onetimetlskey",
 				"Generate a new TLS certificate pair at startup, but only write the certificate to disk",
