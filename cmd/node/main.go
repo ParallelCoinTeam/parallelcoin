@@ -9,11 +9,9 @@ import (
 	"runtime/pprof"
 	
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/node/path"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	database "github.com/p9c/pod/pkg/db"
@@ -53,15 +51,15 @@ func Main(cx *conte.Xt) (err error) {
 			Error("unable to create cpu profile:", err)
 			return
 		}
-		e := pprof.StartCPUProfile(f)
-		if e != nil {
-			Warn("failed to start up cpu profiler:", e)
+		if err := pprof.StartCPUProfile(f); Check(err) {
+			Warn("failed to start up cpu profiler:", err)
 		} else {
 			defer func() {
-				if err := f.Close(); Check(err) {
-				}
+				// if err := f.Close(); Check(err) {
+				// }
+				interrupt.Request()
 			}()
-			defer pprof.StopCPUProfile()
+			// defer pprof.StopCPUProfile()
 			interrupt.AddHandler(
 				func() {
 					Warn("stopping CPU profiler")
@@ -129,8 +127,10 @@ func Main(cx *conte.Xt) (err error) {
 		return nil
 	}
 	// create server and start it
-	server, err := chainrpc.NewNode(*cx.Config.Listeners, db, interrupt.ShutdownRequestChan, conte.GetContext(cx))
-	if err != nil {
+	var server *chainrpc.Node
+	if server, err =
+		chainrpc.NewNode(
+			*cx.Config.Listeners, db, interrupt.ShutdownRequestChan, conte.GetContext(cx)); Check(err) {
 		Errorf("unable to start server on %v: %v", *cx.Config.Listeners, err)
 		return err
 	}
@@ -141,17 +141,17 @@ func Main(cx *conte.Xt) (err error) {
 		// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
 		// Debug("propagating rpc server handle (node has started)")
 	}
-	var controlQuit qu.C
+	// var controlQuit qu.C
 	if len(server.RPCServers) > 0 {
 		cx.RPCServer = server.RPCServers[0]
 		Debug("sending back node")
 		cx.NodeChan <- cx.RPCServer
 		// set up interrupt shutdown handlers to stop servers
-		// Debug("starting controller")
-		controlQuit = control.Run(cx)
+		// // Debug("starting controller")
+		// // controlQuit = control.Run(cx)
 	}
-	// Debug("controller started")
-	// cx.Controller.Store(true)
+	// // Debug("controller started")
+	// // cx.Controller.Store(true)
 	once := true
 	gracefulShutdown := func() {
 		if !once {
@@ -166,8 +166,8 @@ func Main(cx *conte.Xt) (err error) {
 		// 	debug.PrintStack()
 		// 	return
 		// }
-		Debug("stopping controller")
-		controlQuit.Q()
+		// // Debug("stopping controller")
+		// // controlQuit.Q()
 		Debug("stopping server")
 		e := server.Stop()
 		if e != nil {
