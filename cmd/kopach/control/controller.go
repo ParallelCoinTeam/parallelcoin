@@ -73,7 +73,6 @@ type Controller struct {
 }
 
 func Run(cx *conte.Xt) (quit qu.C) {
-	im := true
 	cx.Controller.Store(true)
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		Warn("not running controller without RPC enabled")
@@ -96,25 +95,57 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		listenPort:    int(util.GetActualPort(*cx.Config.Controller)),
 		hashSampleBuf: rav.NewBufferUint64(100),
 	}
+	ctrl.isMining.Store(true)
+	// maintain connection to wallet if it is available
 	var err error
 	certs := walletmain.ReadCAFile(cx.Config)
-	// If we can reach the wallet configured in the same datadir we can mine
-	if ctrl.walletClient, err = rpcclient.New(
-		&rpcclient.ConnConfig{
-			Host:                 *cx.Config.WalletServer,
-			Endpoint:             "ws",
-			User:                 *cx.Config.Username,
-			Pass:                 *cx.Config.Password,
-			TLS:                  *cx.Config.TLS,
-			Certificates:         certs,
-			DisableAutoReconnect: false,
-			DisableConnectOnNew:  false,
-		}, nil, cx.KillAll,
-	); Check(err) {
-		im = false
-	}
+	retryTicker := time.NewTicker(time.Second)
+	go func() {
+	totalOut:
+		for {
+		trying:
+			for {
+				select {
+				case <-retryTicker.C:
+					// If we can reach the wallet configured in the same datadir we can mine
+					if ctrl.walletClient, err = rpcclient.New(
+						&rpcclient.ConnConfig{
+							Host:         *cx.Config.WalletServer,
+							Endpoint:     "ws",
+							User:         *cx.Config.Username,
+							Pass:         *cx.Config.Password,
+							TLS:          *cx.Config.TLS,
+							Certificates: certs,
+						}, nil, cx.KillAll,
+					); Check(err) {
+						ctrl.isMining.Store(false)
+						continue
+					} else {
+						ctrl.isMining.Store(true)
+						break trying
+					}
+				case <-ctrl.cx.KillAll:
+					break totalOut
+				}
+			}
+			Debug("connected to wallet")
+		connected:
+			for {
+				select {
+				case <-retryTicker.C:
+					if ctrl.walletClient.Disconnected() {
+						ctrl.isMining.Store(false)
+						break connected
+					}
+				case <-ctrl.quit:
+					ctrl.isMining.Store(false)
+					break totalOut
+				}
+			}
+			Debug("disconnected from wallet")
+		}
+	}()
 	ctrl.prevHash.Store(&chainhash.Hash{})
-	ctrl.isMining.Store(im)
 	quit = ctrl.quit
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
@@ -175,11 +206,11 @@ func Run(cx *conte.Xt) (quit qu.C) {
 					if !once {
 						cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 						once = true
-					}
-					if err = ctrl.sendNewBlockTemplate(); Check(err) {
-					} else {
 						ctrl.active.Store(true)
 					}
+					// if err = ctrl.sendNewBlockTemplate(); Check(err) {
+					// } else {
+					// }
 				}
 				// send out advertisment
 				// todo: big question: how to deal with change of IP address
@@ -188,7 +219,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 				}
 				if ctrl.isMining.Load() {
 					Debug("rebroadcasting")
-					// ctrl.rebroadcast()
+					ctrl.rebroadcast()
 				}
 			case msg := <-ctrl.submitChan:
 				Traces(msg)
