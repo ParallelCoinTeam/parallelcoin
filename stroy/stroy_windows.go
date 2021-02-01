@@ -351,7 +351,7 @@ var commands = map[string][]string{
 		"pod -D test1 --minerpass pa55word",
 	},
 	"guass": {
-		"go install -v %ldflags",
+		"go install -race -v %ldflags",
 		"pod -D %datadir -l debug -g 1 -G --solo --lan --minerpass pa55word",
 	},
 	"guihttpprof": {

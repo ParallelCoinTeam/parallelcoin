@@ -197,7 +197,7 @@ func (w *Wallet) quitChan() qu.C {
 
 // Stop signals all wallet goroutines to shutdown.
 func (w *Wallet) Stop() {
-	Debug("w", w, "w.quitMu", w.quitMu)
+	// Debug("w", w, "w.quitMu", w.quitMu)
 	w.quitMu.Lock()
 	select {
 	case <-w.quit:
