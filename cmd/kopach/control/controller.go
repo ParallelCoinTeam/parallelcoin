@@ -14,6 +14,7 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/cmd/walletmain"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util/quit"
 	
@@ -74,10 +75,6 @@ type Controller struct {
 func Run(cx *conte.Xt) (quit qu.C) {
 	im := true
 	cx.Controller.Store(true)
-	
-	// if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
-	// 	im = false
-	// }
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		Warn("not running controller without RPC enabled")
 		return
@@ -99,6 +96,23 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		listenPort:    int(util.GetActualPort(*cx.Config.Controller)),
 		hashSampleBuf: rav.NewBufferUint64(100),
 	}
+	var err error
+	certs := walletmain.ReadCAFile(cx.Config)
+	// If we can reach the wallet configured in the same datadir we can mine
+	if ctrl.walletClient, err = rpcclient.New(
+		&rpcclient.ConnConfig{
+			Host:                 *cx.Config.WalletServer,
+			Endpoint:             "ws",
+			User:                 *cx.Config.Username,
+			Pass:                 *cx.Config.Password,
+			TLS:                  *cx.Config.TLS,
+			Certificates:         certs,
+			DisableAutoReconnect: false,
+			DisableConnectOnNew:  false,
+		}, nil, cx.KillAll,
+	); Check(err) {
+		im = false
+	}
 	ctrl.prevHash.Store(&chainhash.Hash{})
 	ctrl.isMining.Store(im)
 	quit = ctrl.quit
@@ -106,7 +120,6 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
 	ctrl.height.Store(0)
 	ctrl.active.Store(false)
-	var err error
 	if ctrl.multiConn, err = transport.NewBroadcastChannel(
 		"controller",
 		ctrl, *cx.Config.MinerPass,
@@ -448,7 +461,7 @@ func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (er
 
 func (c *Controller) sendNewBlockTemplate() (err error) {
 	var template *mining.BlockTemplate
-	if template, err = getNewBlockTemplate(c.cx, c.blockTemplateGenerator); Check(err) {
+	if template, err = c.getNewBlockTemplate(); Check(err) {
 		return
 	}
 	// Debugs(template)
@@ -485,48 +498,54 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	return
 }
 
-func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator) (
-	template *mining.BlockTemplate, err error,
-) {
+func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error, ) {
 	Trace("getting new block template")
-	if cx.Config.MiningAddrs == nil {
-		Debug("mining addresses is nil")
-		return
+	var addr util.Address
+	if c.walletClient != nil {
+		Debug("have access to a wallet, generating address")
+		if addr, err = c.walletClient.GetNewAddress("default"); Check(err) {
+		}
 	}
-	if len(*cx.Config.MiningAddrs) < 1 {
-		Debug("no mining addresses")
-		return
+	if addr == nil {
+		if c.cx.Config.MiningAddrs == nil {
+			Debug("mining addresses is nil")
+			return
+		}
+		if len(*c.cx.Config.MiningAddrs) < 1 {
+			Debug("no mining addresses")
+			return
+		}
+		// Choose a payment address at random.
+		rand.Seed(time.Now().UnixNano())
+		p2a := rand.Intn(len(*c.cx.Config.MiningAddrs))
+		addr = c.cx.StateCfg.ActiveMiningAddrs[p2a]
+		// do this after returning, in the background
+		// defer func() {
+		// 	go func() {
+		// remove the address from the state
+		if p2a == 0 {
+			c.cx.StateCfg.ActiveMiningAddrs = c.cx.StateCfg.ActiveMiningAddrs[1:]
+		} else {
+			c.cx.StateCfg.ActiveMiningAddrs = append(
+				c.cx.StateCfg.ActiveMiningAddrs[:p2a],
+				c.cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
+			)
+		}
+		// update the config
+		var ma cli.StringSlice
+		for i := range c.cx.StateCfg.ActiveMiningAddrs {
+			ma = append(ma, c.cx.StateCfg.ActiveMiningAddrs[i].String())
+		}
+		// Debug(ma)
+		*c.cx.Config.MiningAddrs = ma
+		save.Pod(c.cx.Config)
 	}
-	// Choose a payment address at random.
-	rand.Seed(time.Now().UnixNano())
-	p2a := rand.Intn(len(*cx.Config.MiningAddrs))
-	payToAddr := cx.StateCfg.ActiveMiningAddrs[p2a]
-	// do this after returning, in the background
-	// defer func() {
-	// 	go func() {
-	// remove the address from the state
-	if p2a == 0 {
-		cx.StateCfg.ActiveMiningAddrs = cx.StateCfg.ActiveMiningAddrs[1:]
-	} else {
-		cx.StateCfg.ActiveMiningAddrs = append(
-			cx.StateCfg.ActiveMiningAddrs[:p2a],
-			cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
-		)
-	}
-	// update the config
-	var ma cli.StringSlice
-	for i := range cx.StateCfg.ActiveMiningAddrs {
-		ma = append(ma, cx.StateCfg.ActiveMiningAddrs[i].String())
-	}
-	// Debug(ma)
-	*cx.Config.MiningAddrs = ma
-	save.Pod(cx.Config)
 	// TODO: trigger wallet to generate new ones at some point, if one is connected, when a mined
 	// block uses a key and it is deleted here afterwards
 	// }()
 	// }()
 	Trace("calling new block template")
-	if template, err = bTG.NewBlockTemplate(0, payToAddr, fork.SHA256d); Check(err) {
+	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("********** got new block template")
 		// Debugs(template)
