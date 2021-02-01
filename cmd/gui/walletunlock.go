@@ -101,13 +101,14 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 				wg.node.Stop()
 				wg.node.Start()
 			}
-			wg.wallet.Start()
+			// wg.wallet.Start()
 			if err = wg.chainClient(); Check(err) {
 			}
-			if err = wg.walletClient(); Check(err) {
-			}
+			// if err = wg.walletClient(); Check(err) {
+			// }
 			wg.unlockPassword.Wipe()
 			wg.ready.Store(true)
+			wg.WalletWatcher = wg.Watcher()
 			wg.Invalidate()
 		}
 	} else {

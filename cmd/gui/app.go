@@ -215,11 +215,12 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 				"home", 4, &icons.ActionLockOpen, func(name string) {
 					wg.unlockPassword.Wipe()
 					wg.unlockPassword.Focus()
-					if wg.WalletClient != nil {
-						wg.WalletClient.Disconnect()
-						wg.WalletClient = nil
-					}
-					wg.wallet.Stop()
+					wg.WalletWatcher.Q()
+					// if wg.WalletClient != nil {
+					// 	wg.WalletClient.Disconnect()
+					// 	wg.WalletClient = nil
+					// }
+					// wg.wallet.Stop()
 					wg.node.Stop()
 					wg.State.SetActivePage("home")
 					wg.unlockPage.ActivePage("home")
@@ -498,16 +499,12 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								wg.unlockPassword.Focus()
 								if wg.node.Running() {
 									if wg.wallet.Running() {
-										if wg.WalletClient != nil {
-											wg.WalletClient.Disconnect()
-											wg.WalletClient = nil
-										}
-										wg.wallet.Stop()
-										wg.ready.Store(false)
-										wg.stateLoaded.Store(false)
-										wg.State.SetActivePage("home")
+										wg.WalletWatcher.Q()
 									}
 									wg.node.Stop()
+									wg.ready.Store(false)
+									wg.stateLoaded.Store(false)
+									wg.State.SetActivePage("home")
 								} else {
 									wg.node.Start()
 								}

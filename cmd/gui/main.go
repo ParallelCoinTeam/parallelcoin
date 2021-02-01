@@ -65,6 +65,7 @@ type WalletGUI struct {
 	walletLockTime            int
 	ChainMutex, WalletMutex   sync.Mutex
 	ChainClient, WalletClient *rpcclient.Client
+	WalletWatcher             qu.C
 	*gui.Window
 	Size                         *int
 	MainApp                      *gui.App
@@ -163,7 +164,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.loadingPage = wg.getLoadingPage()
-	// wg.Tickers()
+	// wg.Watcher()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 		Info("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {

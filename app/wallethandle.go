@@ -51,11 +51,9 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}
 		}
 		cx.WalletKill = qu.T()
-		go func() {
-			if err = walletmain.Main(cx); Check(err) {
-				Error("failed to start up wallet", err)
-			}
-		}()
+		if err = walletmain.Main(cx); Check(err) {
+			Error("failed to start up wallet", err)
+		}
 		if !*cx.Config.DisableRPC {
 			cx.WalletServer = <-cx.WalletChan
 		}
