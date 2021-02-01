@@ -126,7 +126,7 @@ func (ld *Loader) OpenExistingWallet(
 ) (*Wallet, error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
-	// INFO("opening existing wallet", ld.DDDirPath}
+	Info("opening existing wallet", ld.DDDirPath)
 	if ld.Loaded {
 		Info("already loaded wallet")
 		return nil, ErrLoaded
@@ -136,7 +136,7 @@ func (ld *Loader) OpenExistingWallet(
 		Error("cannot create directory", ld.DDDirPath)
 		return nil, err
 	}
-	Info("directory exists")
+	Debug("directory exists")
 	// Open the database using the boltdb backend.
 	dbPath := ld.DDDirPath
 	Info("opening database", dbPath)
@@ -158,10 +158,11 @@ func (ld *Loader) OpenExistingWallet(
 			ObtainPrivatePass: noConsole,
 		}
 	}
-	Debug("opening wallet '" + string(pubPassphrase) + "'")
-	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig, quit)
+	// Debug("opening wallet '" + string(pubPassphrase) + "'")
+	var w *Wallet
+	w, err = Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig, quit)
 	if err != nil {
-		Info("failed to open wallet", err)
+		Error("failed to open wallet", err)
 		// If opening the wallet fails (e.g. because of wrong passphrase), we must close the backing database to allow
 		// future calls to walletdb.Open().
 		e := db.Close()
@@ -171,11 +172,11 @@ func (ld *Loader) OpenExistingWallet(
 		return nil, err
 	}
 	ld.Wallet = w
-	Trace("starting wallet", w != nil)
+	Debug("starting wallet", w != nil)
 	w.Start()
-	Trace("waiting for load", db != nil)
+	Debug("waiting for load", db != nil)
 	ld.onLoaded(db)
-	Trace("wallet opened successfully", w != nil)
+	Debug("wallet opened successfully", w != nil)
 	return w, nil
 }
 
@@ -235,11 +236,12 @@ func (ld *Loader) WalletExists() (bool, error) {
 // onLoaded executes each added callback and prevents loader from loading any additional wallets. Requires mutex to be
 // locked.
 func (ld *Loader) onLoaded(db walletdb.DB) {
-	Trace("wallet loader callbacks running ", ld.Wallet != nil)
-	for _, fn := range ld.Callbacks {
+	Debug("wallet loader callbacks running ", ld.Wallet != nil)
+	for i, fn := range ld.Callbacks {
+		Debug("running wallet loader callback", i)
 		fn(ld.Wallet)
 	}
-	Trace("wallet loader callbacks finished")
+	Debug("wallet loader callbacks finished")
 	ld.Loaded = true
 	ld.DB = db
 	ld.Callbacks = nil // not needed anymore

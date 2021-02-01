@@ -47,7 +47,12 @@ func (wg *WalletGUI) Watcher() qu.C {
 			for {
 				select {
 				case <-watchTick.C:
-					if !wg.wallet.Running() || wg.WalletClient.Disconnected() {
+					if !wg.wallet.Running() {
+						Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> wallet not running, breaking out")
+						break connected
+					}
+					if wg.WalletClient.Disconnected() {
+					Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> wallet client disconnected, breaking out")
 						break connected
 					}
 				case <-quit.Wait():

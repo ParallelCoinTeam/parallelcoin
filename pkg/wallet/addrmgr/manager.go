@@ -1194,46 +1194,56 @@ func checkBranchKeys(acctKey *hdkeychain.ExtendedKey) (err error) {
 // public keys.
 func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	chainParams *netparams.Params) (*Manager, error) {
+	Debug("loading address manager")
 	// Verify the version is neither too old or too new.
 	var version uint32
 	var err error
+	Debug("fetching manager version")
 	if version, err = fetchManagerVersion(ns); Check(err) {
 		str := "failed to fetch version for update"
 		return nil, managerError(ErrDatabase, str, err)
 	}
 	if version < latestMgrVersion {
 		str := "database upgrade required"
+		Debug(str)
 		return nil, managerError(ErrUpgrade, str, nil)
 	} else if version > latestMgrVersion {
 		str := "database version is greater than latest understood version"
+		Debug(str)
 		return nil, managerError(ErrUpgrade, str, nil)
 	}
 	// Load whether or not the manager is watching-only from the db.
 	var watchingOnly bool
+	Debug("loading watching only state from db")
 	if watchingOnly, err = fetchWatchingOnly(ns); Check(err) {
 		return nil, maybeConvertDbError(err)
 	}
 	// Load the master key netparams from the db.
 	var masterKeyPubParams []byte
 	var masterKeyPrivParams []byte
+	Debug("fetching master key params")
 	if masterKeyPubParams, masterKeyPrivParams, err = fetchMasterKeyParams(ns); Check(err) {
 		return nil, maybeConvertDbError(err)
 	}
 	// Load the crypto keys from the db.
 	var cryptoKeyPubEnc, cryptoKeyPrivEnc, cryptoKeyScriptEnc []byte
+	Debug("loading crypto keys from wallet db")
 	if cryptoKeyPubEnc, cryptoKeyPrivEnc, cryptoKeyScriptEnc, err = fetchCryptoKeys(ns); Check(err) {
 		return nil, maybeConvertDbError(err)
 	}
 	// Load the sync state from the db.
 	var syncedTo *BlockStamp
+	Debug("loading wallet sync state")
 	if syncedTo, err = fetchSyncedTo(ns); Check(err) {
 		return nil, maybeConvertDbError(err)
 	}
 	var startBlock *BlockStamp
+	Debug("fetching start block for wallet")
 	if startBlock, err = fetchStartBlock(ns); Check(err) {
 		return nil, maybeConvertDbError(err)
 	}
 	var birthday time.Time
+	Debug("fetching wallet birthday")
 	if birthday, err = fetchBirthday(ns); Check(err) {
 		return nil, maybeConvertDbError(err)
 	}
@@ -1241,6 +1251,7 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	// don't derive it now since the manager starts off locked.
 	var masterKeyPriv snacl.SecretKey
 	if !watchingOnly {
+		Debug("unmarshalling wallet master private key parameters")
 		if err = masterKeyPriv.Unmarshal(masterKeyPrivParams); Check(err) {
 			str := "failed to unmarshal master private key"
 			return nil, managerError(ErrCrypto, str, err)
@@ -1249,10 +1260,12 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	// Derive the master public key using the serialized netparams and provided
 	// passphrase.
 	var masterKeyPub snacl.SecretKey
+	Debug("unmarshalling wallet master public key")
 	if err = masterKeyPub.Unmarshal(masterKeyPubParams); Check(err) {
 		str := "failed to unmarshal master public key"
 		return nil, managerError(ErrCrypto, str, err)
 	}
+	Debug("deriving pub key passphrase key")
 	if err = masterKeyPub.DeriveKey(&pubPassphrase); Check(err) {
 		str := "invalid passphrase for master public key"
 		return nil, managerError(ErrWrongPassphrase, str, nil)
@@ -1260,6 +1273,7 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	// Use the master public key to decrypt the crypto public key.
 	cryptoKeyPub := &cryptoKey{snacl.CryptoKey{}}
 	var cryptoKeyPubCT []byte
+	Debug("decrypting master public key")
 	if cryptoKeyPubCT, err = masterKeyPub.Decrypt(cryptoKeyPubEnc); Check(err) {
 		str := "failed to decrypt crypto public key"
 		return nil, managerError(ErrCrypto, str, err)
@@ -1267,15 +1281,18 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	cryptoKeyPub.CopyBytes(cryptoKeyPubCT)
 	zero.Bytes(cryptoKeyPubCT)
 	// Create the sync state struct.
+	Debug("creating new sync state")
 	syncInfo := newSyncState(startBlock, syncedTo)
 	// Generate private passphrase salt.
 	var privPassphraseSalt [saltSize]byte
+	Debug("generating private passphrase salt")
 	if _, err = rand.Read(privPassphraseSalt[:]); Check(err) {
 		str := "failed to read random source for passphrase salt"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	// Next, we'll need to load all known manager scopes from disk. Each scope is on
 	// a distinct top-level path within our HD key chain.
+	Debug("loading all known wallet address manager scopes")
 	scopedManagers := make(map[KeyScope]*ScopedKeyManager)
 	if err = forEachKeyScope(ns, func(scope KeyScope) error {
 		scopeSchema, err := fetchScopeAddrSchema(ns, &scope)
@@ -1296,6 +1313,7 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	// Create new address manager with the given parameters. Also, override the
 	// defaults for the additional fields which are not specified in the call to new
 	// with the values loaded from the database.
+	Debug("creating new wallet address manager")
 	mgr := newManager(
 		chainParams, &masterKeyPub, &masterKeyPriv,
 		cryptoKeyPub, cryptoKeyPrivEnc, cryptoKeyScriptEnc, syncInfo,
@@ -1305,6 +1323,7 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	for _, scopedManager := range scopedManagers {
 		scopedManager.rootManager = mgr
 	}
+	Debug("successfully created new wallet address manager")
 	return mgr, nil
 }
 
@@ -1320,6 +1339,7 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 // passed manager does not exist in the specified namespace.
 func Open(ns walletdb.ReadBucket, pubPassphrase []byte,
 	chainParams *netparams.Params) (*Manager, error) {
+	Debug("opening address manager")
 	// Return an error if the manager has NOT already been created in the
 	// given database namespace.
 	exists := managerExists(ns)

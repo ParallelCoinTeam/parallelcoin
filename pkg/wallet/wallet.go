@@ -102,11 +102,12 @@ type Wallet struct {
 
 // Start starts the goroutines necessary to manage a wallet.
 func (w *Wallet) Start() {
-	Trace("starting wallet")
+	Debug("starting wallet")
 	w.quitMu.Lock()
+	Debug("locked wallet quit mutex")
 	select {
-	case <-w.quit:
-		Trace("waiting for wallet shutdown")
+	case <-w.quit.Wait():
+		Debug("waiting for wallet shutdown")
 		// Restart the wallet goroutines after shutdown finishes.
 		w.WaitForShutdown()
 		w.quit = qu.T()
@@ -120,6 +121,7 @@ func (w *Wallet) Start() {
 		w.started = true
 	}
 	w.quitMu.Unlock()
+	Debug("wallet quit mutex unlocked")
 	w.wg.Add(2)
 	go w.txCreator()
 	go w.walletLocker()
@@ -130,6 +132,7 @@ func (w *Wallet) Start() {
 //
 // This method is unstable and will be removed when all syncing logic is moved outside of the wallet package.
 func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
+	Debug("SynchronizeRPC")
 	w.quitMu.Lock()
 	select {
 	case <-w.quit:
@@ -138,10 +141,13 @@ func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 	default:
 	}
 	w.quitMu.Unlock()
+	Debug("SynchronizeRPC is not quitting")
 	// TODO: Ignoring the new client when one is already set breaks callers
-	// who are replacing the client, perhaps after a disconnect.
+	//  who are replacing the client, perhaps after a disconnect.
+	Debug("locking wallet chain client mutex")
 	w.chainClientLock.Lock()
 	if w.chainClient != nil {
+		Debug("chain client is nil, unlocking wallet chain client mutex")
 		w.chainClientLock.Unlock()
 		return
 	}
@@ -153,7 +159,9 @@ func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 	case *chain.BitcoindClient:
 		cc.SetBirthday(w.Manager.Birthday())
 	}
+	Debug("unlocking wallet chain client mutex")
 	w.chainClientLock.Unlock()
+	Debug("unlocked wallet chain client mutex")
 	// TODO: It would be preferable to either run these goroutines separately from the wallet (use wallet mutator
 	//  functions to make changes from the RPC client) and not have to stop and restart them each time the client
 	//  disconnects and reconnets.
@@ -168,11 +176,12 @@ func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 // function and all functions that call it are unstable and will need to be moved when the syncing code is moved out of
 // the wallet.
 func (w *Wallet) requireChainClient() (chain.Interface, error) {
+	Debug(">>>>>>>>> requireChainClient")
 	w.chainClientLock.Lock()
 	chainClient := w.chainClient
 	w.chainClientLock.Unlock()
 	if chainClient == nil {
-		return nil, errors.New("blockchain RPC is inactive")
+		return nil, errors.New(">>>>>>>>>>> blockchain RPC is inactive")
 	}
 	return chainClient, nil
 }
@@ -181,6 +190,7 @@ func (w *Wallet) requireChainClient() (chain.Interface, error) {
 //
 // This function is unstable and will be removed once sync logic is moved out of the wallet.
 func (w *Wallet) ChainClient() chain.Interface {
+	Debug(">>>>>>>>>>>>> wallet attempting to connect chain client to node")
 	w.chainClientLock.Lock()
 	chainClient := w.chainClient
 	w.chainClientLock.Unlock()
@@ -293,6 +303,7 @@ func (w *Wallet) activeData(dbtx walletdb.ReadTx) ([]util.Address, []wtxmgr.Cred
 // syncWithChain brings the wallet up to date with the current chain server connection. It creates a rescan request and
 // blocks until the rescan has finished.
 func (w *Wallet) syncWithChain() error {
+	Debug("syncWithChain")
 	chainClient, err := w.requireChainClient()
 	if err != nil {
 		Error(err)
@@ -3315,16 +3326,19 @@ func Open(
 		Error(err)
 		return nil, err
 	}
+	Debug("opened wallet")
 	// Perform upgrades as necessary. Each upgrade is done under its own transaction, which is managed by each package
 	// itself, so the entire DB is passed instead of passing already opened write transaction.
 	//
 	// This will need to change later when upgrades in one package depend on data in another (such as removing chain
 	// synchronization from address manager).
+	Debug("doing address manager upgrades")
 	err = waddrmgr.DoUpgrades(db, waddrmgrNamespaceKey, pubPass, params, cbs)
 	if err != nil {
 		Error(err)
 		return nil, err
 	}
+	Debug("doing txmanager upgrades")
 	err = wtxmgr.DoUpgrades(db, wtxmgrNamespaceKey)
 	if err != nil {
 		Error(err)
@@ -3335,17 +3349,23 @@ func Open(
 		addrMgr *waddrmgr.Manager
 		txMgr   *wtxmgr.Store
 	)
+	Debug("opening wallet database abstraction instances")
 	err = walletdb.View(
 		db, func(tx walletdb.ReadTx) error {
+			Debug("reading address bucket")
 			addrmgrNs := tx.ReadBucket(waddrmgrNamespaceKey)
+			Debug("reading tx bucket")
 			txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 			var err error
+			Debug("opening address manager")
 			addrMgr, err = waddrmgr.Open(addrmgrNs, pubPass, params)
 			if err != nil {
 				Error(err, "'"+string(pubPass)+"'")
 				return err
 			}
+			Debug("opening transaction manager")
 			txMgr, err = wtxmgr.Open(txmgrNs, params)
+			Debug("wallet database abstraction instances opened")
 			return err
 		},
 	)
@@ -3353,7 +3373,7 @@ func Open(
 		Error(err)
 		return nil, err
 	}
-	Trace("opened wallet") // TODO: log balance? last sync height?
+	Debug("creating wallet state") // TODO: log balance? last sync height?
 	w := &Wallet{
 		publicPassphrase:    pubPass,
 		db:                  db,
@@ -3381,5 +3401,6 @@ func Open(
 	w.TxStore.NotifyUnspent = func(hash *chainhash.Hash, index uint32) {
 		w.NtfnServer.notifyUnspentOutput(0, hash, index)
 	}
+	Debug("wallet state created")
 	return w, nil
 }

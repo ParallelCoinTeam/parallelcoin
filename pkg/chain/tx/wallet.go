@@ -3046,6 +3046,7 @@ func Create(db walletdb.DB, pubPass, privPass, seed []byte, params *netparams.Pa
 // Open loads an already-created wallet from the passed database and namespaces.
 func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *netparams.Params, recoveryWindow uint32) (*Wallet, error) {
 	err := walletdb.View(db, func(tx walletdb.ReadTx) error {
+		Debug("opening wallet")
 		waddrmgrBucket := tx.ReadBucket(waddrmgrNamespaceKey)
 		if waddrmgrBucket == nil {
 			return errors.New("missing address manager namespace")
@@ -3060,16 +3061,19 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 		Error(err)
 		return nil, err
 	}
+	Debug("loaded tx and address manager buckets")
 	// Perform upgrades as necessary. Each upgrade is done under its own transaction, which is managed by each package
 	// itself, so the entire DB is passed instead of passing already opened write transaction.
 	//
 	// This will need to change later when upgrades in one package depend on data in another (such as removing chain
 	// synchronization from address manager).
+	Debug("doing upgrades for addrmgr")
 	err = waddrmgr.DoUpgrades(db, waddrmgrNamespaceKey, pubPass, params, cbs)
 	if err != nil {
 		Error(err)
 		return nil, err
 	}
+	Debug("doing upgrades for txmgr")
 	err = wtxmgr.DoUpgrades(db, wtxmgrNamespaceKey)
 	if err != nil {
 		Error(err)
@@ -3080,6 +3084,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 		addrMgr *waddrmgr.Manager
 		txMgr   *wtxmgr.Store
 	)
+	Debug("reading the buckets")
 	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
 		addrmgrNs := tx.ReadBucket(waddrmgrNamespaceKey)
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)

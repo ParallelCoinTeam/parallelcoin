@@ -2,7 +2,6 @@ package gui
 
 import (
 	"os"
-	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
@@ -192,15 +191,15 @@ func (wg *WalletGUI) Run() (err error) {
 	out:
 		for {
 			select {
-			case <-wg.invalidate:
+			case <-wg.invalidate.Wait():
 				Trace("invalidating render queue")
 				wg.Window.Window.Invalidate()
 				// TODO: make a more appropriate trigger for this - ie, when state actually changes.
-				if wg.wallet.Running() && wg.stateLoaded.Load() {
-					filename := filepath.Join(wg.cx.DataDir, "state.json")
-					if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
-					}
-				}
+				// if wg.wallet.Running() && wg.stateLoaded.Load() {
+				// 	filename := filepath.Join(wg.cx.DataDir, "state.json")
+				// 	if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+				// 	}
+				// }
 			case <-wg.cx.KillAll:
 				break out
 			case <-wg.quit:
