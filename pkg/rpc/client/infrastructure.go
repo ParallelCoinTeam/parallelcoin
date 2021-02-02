@@ -154,7 +154,7 @@ func (c *Client) addRequest(jReq *jsonRequest) error {
 	// internal data structures if the client is in the process of shutting down (and has not yet grabbed the request
 	// lock), or has finished shutdown already (responding to each outstanding request with ErrClientShutdown).
 	select {
-	case <-c.shutdown:
+	case <-c.shutdown.Wait():
 		return ErrClientShutdown
 	default:
 	}
@@ -320,7 +320,7 @@ func (c *Client) handleMessage(msg []byte) {
 func (c *Client) shouldLogReadError(err error) bool {
 	// No logging when the connection is being forcibly disconnected.
 	select {
-	case <-c.shutdown:
+	case <-c.shutdown.Wait():
 		return false
 	default:
 	}
@@ -342,7 +342,7 @@ out:
 		// Break out of the loop once the shutdown channel has been closed. Use a non-blocking select here so we fall
 		// through otherwise.
 		select {
-		case <-c.shutdown:
+		case <-c.shutdown.Wait():
 			break out
 		default:
 		}
@@ -537,15 +537,15 @@ func (c *Client) wsReconnectHandler() {
 out:
 	for {
 		select {
-		case <-c.disconnect:
+		case <-c.disconnect.Wait():
 			// On disconnect, fallthrough to reestablish the connection.
-		case <-c.shutdown:
+		case <-c.shutdown.Wait():
 			break out
 		}
 	reconnect:
 		for {
 			select {
-			case <-c.shutdown:
+			case <-c.shutdown.Wait():
 				break out
 			default:
 			}
@@ -633,7 +633,7 @@ out:
 		select {
 		case details := <-c.sendPostChan:
 			c.handleSendPostMessage(details)
-		case <-c.shutdown:
+		case <-c.shutdown.Wait():
 			break out
 		}
 	}
@@ -660,7 +660,7 @@ cleanup:
 func (c *Client) sendPostRequest(httpReq *http.Request, jReq *jsonRequest) {
 	// Don't send the message if shutting down.
 	select {
-	case <-c.shutdown:
+	case <-c.shutdown.Wait():
 		jReq.responseChan <- &response{result: nil, err: ErrClientShutdown}
 	default:
 	}
@@ -730,7 +730,7 @@ func (c *Client) sendRequest(jReq *jsonRequest) {
 	// Check whether the websocket connection has never been established, in which case the handler goroutines are not
 	// running.
 	select {
-	case <-c.connEstablished:
+	case <-c.connEstablished.Wait():
 	default:
 		jReq.responseChan <- &response{err: ErrClientNotConnected}
 		return
@@ -792,7 +792,7 @@ func (c *Client) Disconnected() bool {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	select {
-	case <-c.connEstablished:
+	case <-c.connEstablished.Wait():
 		return c.disconnected
 	default:
 		return false
@@ -831,7 +831,7 @@ func (c *Client) doDisconnect() bool {
 func (c *Client) doShutdown() bool {
 	// Ignore the shutdown request if the client is already in the process of shutting down or already shutdown.
 	select {
-	case <-c.shutdown:
+	case <-c.shutdown.Wait():
 		return false
 	default:
 	}
@@ -1102,7 +1102,7 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers, quit qu.C) (*Cl
 	out:
 		for {
 			select {
-			case <-quit:
+			case <-quit.Wait():
 				client.disconnect.Q()
 				client.shutdown.Q()
 				break out

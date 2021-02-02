@@ -124,7 +124,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 						ctrl.isMining.Store(true)
 						break trying
 					}
-				case <-ctrl.cx.KillAll:
+				case <-ctrl.cx.KillAll.Wait():
 					break totalOut
 				}
 			}
@@ -137,7 +137,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 						ctrl.isMining.Store(false)
 						break connected
 					}
-				case <-ctrl.quit:
+				case <-ctrl.quit.Wait():
 					ctrl.isMining.Store(false)
 					break totalOut
 				}
@@ -229,14 +229,14 @@ func Run(cx *conte.Xt) (quit qu.C) {
 					break
 				}
 				Traces(decodedB)
-			case <-ctrl.quit:
+			case <-ctrl.quit.Wait():
 				Debug("quitting on close quit channel")
 				break out
-			case <-ctrl.cx.NodeKill:
+			case <-ctrl.cx.NodeKill.Wait():
 				Debug("quitting on NodeKill")
 				ctrl.quit.Q()
 				break out
-			case <-ctrl.cx.KillAll:
+			case <-ctrl.cx.KillAll.Wait():
 				Debug("quitting on KillAll")
 				ctrl.quit.Q()
 				break out

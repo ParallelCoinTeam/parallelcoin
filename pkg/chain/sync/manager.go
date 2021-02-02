@@ -330,7 +330,7 @@ out:
 			default:
 				Tracef("invalid message type in block handler: %Ter", msg)
 			}
-		case <-sm.quit:
+		case <-sm.quit.Wait():
 			break out
 		}
 	}

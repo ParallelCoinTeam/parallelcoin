@@ -153,7 +153,7 @@ func (s *ChainService) ConnectedCount() int32 {
 	select {
 	case s.query <- getConnCountMsg{reply: replyChan}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return 0
 	}
 }
@@ -164,7 +164,7 @@ func (s *ChainService) OutboundGroupCount(key string) int {
 	select {
 	case s.query <- getOutboundGroup{key: key, reply: replyChan}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return 0
 	}
 }
@@ -175,7 +175,7 @@ func (s *ChainService) AddedNodeInfo() []*ServerPeer {
 	select {
 	case s.query <- getAddedNodesMsg{reply: replyChan}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return nil
 	}
 }
@@ -186,7 +186,7 @@ func (s *ChainService) Peers() []*ServerPeer {
 	select {
 	case s.query <- getPeersMsg{reply: replyChan}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return nil
 	}
 }
@@ -201,7 +201,7 @@ func (s *ChainService) DisconnectNodeByAddr(addr string) error {
 		reply: replyChan,
 	}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return nil
 	}
 }
@@ -216,7 +216,7 @@ func (s *ChainService) DisconnectNodeByID(id int32) error {
 		reply: replyChan,
 	}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return nil
 	}
 }
@@ -231,7 +231,7 @@ func (s *ChainService) RemoveNodeByAddr(addr string) error {
 		reply: replyChan,
 	}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return nil
 	}
 }
@@ -246,7 +246,7 @@ func (s *ChainService) RemoveNodeByID(id int32) error {
 		reply: replyChan,
 	}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return nil
 	}
 }
@@ -262,7 +262,7 @@ func (s *ChainService) ConnectNode(addr string, permanent bool) error {
 		reply:     replyChan,
 	}:
 		return <-replyChan
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return nil
 	}
 }
@@ -273,6 +273,6 @@ func (s *ChainService) ConnectNode(addr string, permanent bool) error {
 func (s *ChainService) ForAllPeers(closure func(sp *ServerPeer)) {
 	select {
 	case s.query <- forAllPeersMsg{closure: closure}:
-	case <-s.quit:
+	case <-s.quit.Wait():
 	}
 }

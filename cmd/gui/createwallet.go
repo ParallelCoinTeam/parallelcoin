@@ -12,7 +12,6 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/routeable"
@@ -211,13 +210,13 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														if Check(err) {
 															// return
 														}
-														Debug("refilling mining addresses")
-														addresses.RefillMiningAddresses(
-															w,
-															wg.cx.Config,
-															wg.cx.StateCfg,
-														)
-														Warn("done refilling mining addresses")
+														// Debug("refilling mining addresses")
+														// addresses.RefillMiningAddresses(
+														// 	w,
+														// 	wg.cx.Config,
+														// 	wg.cx.StateCfg,
+														// )
+														// Warn("done refilling mining addresses")
 														w.Stop()
 														Debug("shutting down wallet",w.ShuttingDown())
 														w.WaitForShutdown()

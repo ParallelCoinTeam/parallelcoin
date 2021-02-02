@@ -763,16 +763,16 @@ func validateMiningStuff(
 		}
 		state.ActiveMiningAddrs = append(state.ActiveMiningAddrs, addr)
 	}
-	// Ensure there is at least one mining address when the generate flag is set.
-	if (*cfg.Generate) && len(state.ActiveMiningAddrs) == 0 {
-		Error(
-			"the generate flag is set, " +
-				"but there are no mining addresses specified ",
-		)
-		// Traces(cfg)
-		*cfg.Generate = false
-		// os.Exit(1)
-	}
+	// // Ensure there is at least one mining address when the generate flag is set.
+	// if (*cfg.Generate) && len(state.ActiveMiningAddrs) == 0 {
+	// 	Error(
+	// 		"the generate flag is set, " +
+	// 			"but there are no mining addresses specified ",
+	// 	)
+	// 	// Traces(cfg)
+	// 	*cfg.Generate = false
+	// 	// os.Exit(1)
+	// }
 	if *cfg.MinerPass != "" {
 		state.ActiveMinerKey = forkhash.Argon2i([]byte(*cfg.MinerPass))
 	}

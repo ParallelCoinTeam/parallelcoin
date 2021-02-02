@@ -85,9 +85,9 @@ func (r *GetUtxoRequest) Result(cancel qu.C) (*SpendReport, error) {
 			r.result = result
 		}
 		return r.result.report, r.result.err
-	case <-cancel:
+	case <-cancel.Wait():
 		return nil, ErrGetUtxoCancelled
-	case <-r.quit:
+	case <-r.quit.Wait():
 		return nil, ErrShuttingDown
 	}
 }
@@ -145,7 +145,7 @@ func (s *UtxoScanner) Enqueue(input *InputWithScript, birthHeight uint32) (*GetU
 	}
 	s.cv.L.Lock()
 	select {
-	case <-s.quit:
+	case <-s.quit.Wait():
 		s.cv.L.Unlock()
 		return nil, ErrShuttingDown
 	default:
@@ -177,7 +177,7 @@ func (s *UtxoScanner) Stop() error {
 batchShutdown:
 	for {
 		select {
-		case <-s.shutdown:
+		case <-s.shutdown.Wait():
 			break batchShutdown
 		case <-time.After(50 * time.Millisecond):
 			s.cv.Signal()
@@ -210,7 +210,7 @@ func (s *UtxoScanner) batchManager() {
 		for s.pq.IsEmpty() {
 			s.cv.Wait()
 			select {
-			case <-s.quit:
+			case <-s.quit.Wait():
 				s.cv.L.Unlock()
 				return
 			default:
@@ -220,7 +220,7 @@ func (s *UtxoScanner) batchManager() {
 		s.cv.L.Unlock()
 		// Break out now before starting a scan if a shutdown was requested.
 		select {
-		case <-s.quit:
+		case <-s.quit.Wait():
 			return
 		default:
 		}
@@ -281,7 +281,7 @@ scanToEnd:
 		// Before beginning to scan this height, check to see if the utxoscanner
 		// has been signaled to exit.
 		select {
-		case <-s.quit:
+		case <-s.quit.Wait():
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
@@ -319,7 +319,7 @@ scanToEnd:
 		// to exit so that we can exit the rescan before performing an expensive
 		// operation.
 		select {
-		case <-s.quit:
+		case <-s.quit.Wait():
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
@@ -331,7 +331,7 @@ scanToEnd:
 		}
 		// Check again to see if the utxoscanner has been signaled to exit.
 		select {
-		case <-s.quit:
+		case <-s.quit.Wait():
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}

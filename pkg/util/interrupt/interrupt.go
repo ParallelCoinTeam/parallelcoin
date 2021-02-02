@@ -102,7 +102,7 @@ out:
 			// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 			// }
 			break out
-		case <-ShutdownRequestChan:
+		case <-ShutdownRequestChan.Wait():
 			// if !requested {
 			Warn("received shutdown request - shutting down...")
 			requested.Store(true)
@@ -115,7 +115,7 @@ out:
 			interruptCallbacks = append(interruptCallbacks, handler.Fn)
 			interruptCallbackSources = append(interruptCallbackSources, handler.Source)
 			// }
-		case <-HandlersDone:
+		case <-HandlersDone.Wait():
 			break out
 		}
 	}

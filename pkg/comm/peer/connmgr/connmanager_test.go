@@ -290,7 +290,7 @@ func TestMaxRetryDuration(t *testing.T) {
 	})
 	timedDialer := func(addr net.Addr) (net.Conn, error) {
 		select {
-		case <-networkUp:
+		case <-networkUp.Wait():
 			return mockDialer(addr)
 		default:
 			return nil, errors.New("network down")
@@ -448,7 +448,7 @@ func TestCancelIgnoreDelayedConnection(t *testing.T) {
 	connect := qu.T()
 	failingDialer := func(addr net.Addr) (net.Conn, error) {
 		select {
-		case <-connect:
+		case <-connect.Wait():
 			return mockDialer(addr)
 		default:
 		}

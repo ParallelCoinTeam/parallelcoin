@@ -561,7 +561,7 @@ out:
 			s.handleBanPeerMsg(state, p)
 		case qmsg := <-s.query:
 			s.handleQuery(state, qmsg)
-		case <-s.quit:
+		case <-s.quit.Wait():
 			// Disconnect all peers on server shutdown.
 			state.forAllPeers(func(sp *ServerPeer) {
 				Trace("shutdown peer", sp)
@@ -774,7 +774,7 @@ func (sp *ServerPeer) OnRead(_ *peer.Peer, bytesRead int, msg wire.Message,
 	for subscription := range sp.recvSubscribers {
 		go func(subscription spMsgSubscription) {
 			select {
-			case <-subscription.quitChan:
+			case <-subscription.quitChan.Wait():
 			case subscription.msgChan <- spMsg{
 				msg: msg,
 				sp:  sp,

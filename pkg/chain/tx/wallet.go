@@ -100,7 +100,7 @@ type Wallet struct {
 func (w *Wallet) Start() {
 	w.quitMu.Lock()
 	select {
-	case <-w.quit:
+	case <-w.quit.Wait():
 		// Restart the wallet goroutines after shutdown finishes.
 		w.WaitForShutdown()
 		w.quit = qu.T()
@@ -125,7 +125,7 @@ func (w *Wallet) Start() {
 func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 	w.quitMu.Lock()
 	select {
-	case <-w.quit:
+	case <-w.quit.Wait():
 		w.quitMu.Unlock()
 		return
 	default:
@@ -194,7 +194,7 @@ func (w *Wallet) Stop() {
 	quit := w.quit
 	w.quitMu.Unlock()
 	select {
-	case <-quit:
+	case <-quit.Wait():
 	default:
 		quit.Q()
 		w.chainClientLock.Lock()
@@ -209,7 +209,7 @@ func (w *Wallet) Stop() {
 // ShuttingDown returns whether the wallet is currently in the process of shutting down or not.
 func (w *Wallet) ShuttingDown() bool {
 	select {
-	case <-w.quitChan():
+	case <-w.quitChan().Wait():
 		return true
 	default:
 		return false
@@ -973,7 +973,7 @@ out:
 				txr.minconf, txr.feeSatPerKB)
 			heldUnlock.release()
 			txr.resp <- createTxResponse{tx, err}
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}
@@ -1091,9 +1091,9 @@ out:
 			}
 		case w.lockState <- w.Manager.IsLocked():
 			continue
-		case <-quit:
+		case <-quit.Wait():
 			break out
-		case <-w.lockRequests:
+		case <-w.lockRequests.Wait():
 		case <-timeout:
 		}
 		// Select statement fell through by an explicit lock or the timer expiring. Lock the manager here.
@@ -1952,7 +1952,7 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel q
 				res.UnminedTransactions = txs
 			}
 			select {
-			case <-cancel:
+			case <-cancel.Wait():
 				return true, nil
 			default:
 				return false, nil

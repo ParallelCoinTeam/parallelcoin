@@ -127,7 +127,7 @@ func (c *RPCClient) Start() error {
 func (c *RPCClient) Stop() {
 	c.quitMtx.Lock()
 	select {
-	case <-c.quit:
+	case <-c.quit.Wait():
 	default:
 		c.quit.Q()
 		c.Client.Shutdown()
@@ -167,7 +167,7 @@ func (c *RPCClient) BlockStamp() (*wm.BlockStamp, error) {
 	select {
 	case bs := <-c.currentBlock:
 		return bs, nil
-	case <-c.quit:
+	case <-c.quit.Wait():
 		return nil, errors.New("disconnected")
 	}
 }
@@ -270,7 +270,7 @@ func parseBlock(block *btcjson.BlockDetails) (*tm.BlockMeta, error) {
 func (c *RPCClient) onClientConnect() {
 	select {
 	case c.enqueueNotification <- ClientConnected{}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 func (c *RPCClient) onBlockConnected(hash *chainhash.Hash, height int32, time time.Time) {
@@ -282,7 +282,7 @@ func (c *RPCClient) onBlockConnected(hash *chainhash.Hash, height int32, time ti
 		},
 		Time: time,
 	}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 func (c *RPCClient) onBlockDisconnected(hash *chainhash.Hash, height int32, time time.Time) {
@@ -294,7 +294,7 @@ func (c *RPCClient) onBlockDisconnected(hash *chainhash.Hash, height int32, time
 		},
 		Time: time,
 	}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 func (c *RPCClient) onRecvTx(tx *util.Tx, block *btcjson.BlockDetails) {
@@ -317,7 +317,7 @@ func (c *RPCClient) onRecvTx(tx *util.Tx, block *btcjson.BlockDetails) {
 	}
 	select {
 	case c.enqueueNotification <- RelevantTx{rec, blk}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 func (c *RPCClient) onRedeemingTx(tx *util.Tx, block *btcjson.BlockDetails) {
@@ -327,13 +327,13 @@ func (c *RPCClient) onRedeemingTx(tx *util.Tx, block *btcjson.BlockDetails) {
 func (c *RPCClient) onRescanProgress(hash *chainhash.Hash, height int32, blkTime time.Time) {
 	select {
 	case c.enqueueNotification <- &RescanProgress{hash, height, blkTime}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 func (c *RPCClient) onRescanFinished(hash *chainhash.Hash, height int32, blkTime time.Time) {
 	select {
 	case c.enqueueNotification <- &RescanFinished{hash, height, blkTime}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 
@@ -395,7 +395,7 @@ out:
 				dequeue = nil
 			}
 		case c.currentBlock <- bs:
-		case <-c.quit:
+		case <-c.quit.Wait():
 			break out
 		}
 	}

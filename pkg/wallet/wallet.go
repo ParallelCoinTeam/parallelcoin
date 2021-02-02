@@ -135,7 +135,7 @@ func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 	Debug("SynchronizeRPC")
 	w.quitMu.Lock()
 	select {
-	case <-w.quit:
+	case <-w.quit.Wait():
 		w.quitMu.Unlock()
 		return
 	default:
@@ -210,7 +210,7 @@ func (w *Wallet) Stop() {
 	// Debug("w", w, "w.quitMu", w.quitMu)
 	w.quitMu.Lock()
 	select {
-	case <-w.quit:
+	case <-w.quit.Wait():
 	default:
 		w.chainClientLock.Lock()
 		if w.chainClient != nil {
@@ -227,7 +227,7 @@ func (w *Wallet) Stop() {
 // ShuttingDown returns whether the wallet is currently in the process of shutting down or not.
 func (w *Wallet) ShuttingDown() bool {
 	select {
-	case <-w.quitChan():
+	case <-w.quitChan().Wait():
 		return true
 	default:
 		return false
@@ -1034,7 +1034,7 @@ out:
 			)
 			heldUnlock.release()
 			txr.resp <- createTxResponse{tx, err}
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}
@@ -1162,9 +1162,9 @@ out:
 			}
 		case w.lockState <- w.Manager.IsLocked():
 			continue
-		case <-quit:
+		case <-quit.Wait():
 			break out
-		case <-w.lockRequests:
+		case <-w.lockRequests.Wait():
 			// first = false
 		case <-timeout:
 			// first = false
@@ -2096,7 +2096,7 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel q
 					res.UnminedTransactions = txs
 				}
 				select {
-				case <-cancel:
+				case <-cancel.Wait():
 					return true, nil
 				default:
 					return false, nil

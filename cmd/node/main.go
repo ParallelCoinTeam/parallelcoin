@@ -192,14 +192,14 @@ func Main(cx *conte.Xt) (err error) {
 	// Wait until the interrupt signal is received from an OS signal or shutdown is requested through one of the
 	// subsystems such as the RPC server.
 	select {
-	case <-cx.NodeKill:
+	case <-cx.NodeKill.Wait():
 		// Debug("NodeKill", interrupt.GoroutineDump())
 		// gracefulShutdown()
 		if !interrupt.Requested() {
 			interrupt.Request()
 		}
 		break
-	case <-cx.KillAll:
+	case <-cx.KillAll.Wait():
 		// Debug("KillAll", interrupt.GoroutineDump())
 		if !interrupt.Requested() {
 			interrupt.Request()

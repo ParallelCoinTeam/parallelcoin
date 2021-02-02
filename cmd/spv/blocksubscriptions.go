@@ -147,7 +147,7 @@ func (s *blockSubscription) subscriptionHandler() {
 			select {
 			case <-s.quit:
 				return false
-			case <-s.intQuit:
+			case <-s.intQuit.Wait():
 				return false
 			default:
 				return true
@@ -162,7 +162,7 @@ func (s *blockSubscription) subscriptionHandler() {
 			return true
 		case <-s.quit:
 			return false
-		case <-s.intQuit:
+		case <-s.intQuit.Wait():
 			return false
 		}
 	}
@@ -192,7 +192,7 @@ func (s *blockSubscription) subscriptionHandler() {
 				case next = <-s.notifyBlock:
 				case <-s.quit:
 					return
-				case <-s.intQuit:
+				case <-s.intQuit.Wait():
 					return
 				}
 			}
@@ -220,7 +220,7 @@ func sendMsgToSubscriber(sub *blockSubscription, bm *blockMessage) {
 		select {
 		case sub.notifyBlock <- bm:
 		case <-sub.quit:
-		case <-sub.intQuit:
+		case <-sub.intQuit.Wait():
 		}
 	}
 }

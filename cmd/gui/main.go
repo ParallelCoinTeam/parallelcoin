@@ -200,9 +200,9 @@ func (wg *WalletGUI) Run() (err error) {
 				// 	if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
 				// 	}
 				// }
-			case <-wg.cx.KillAll:
+			case <-wg.cx.KillAll.Wait():
 				break out
-			case <-wg.quit:
+			case <-wg.quit.Wait():
 				break out
 			}
 		}

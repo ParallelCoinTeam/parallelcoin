@@ -200,7 +200,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 		harnessSynced <- struct{}{}
 	}()
 	select {
-	case <-harnessSynced:
+	case <-harnessSynced.Wait():
 	case <-time.After(time.Minute):
 		t.Fatalf("harness node never received transaction")
 	}
@@ -213,7 +213,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 		poolsSynced <- struct{}{}
 	}()
 	select {
-	case <-poolsSynced:
+	case <-poolsSynced.Wait():
 		t.Fatalf("mempools detected as synced yet harness has a new tx")
 	default:
 	}
@@ -232,7 +232,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	// sending into the unbuffered channel. The send should immediately succeed. In order to avoid the test hanging
 	// indefinitely, a 1 minute timeout is in place.
 	select {
-	case <-poolsSynced:
+	case <-poolsSynced.Wait():
 	case <-time.After(time.Minute):
 		t.Fatalf("mempools never detected as synced")
 	}
@@ -260,7 +260,7 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	}()
 	// This select case should fall through to the default as the goroutine should be blocked on the JoinNodes calls.
 	select {
-	case <-blocksSynced:
+	case <-blocksSynced.Wait():
 		t.Fatalf("blocks detected as synced yet local harness is behind")
 	default:
 	}
@@ -272,7 +272,7 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	// sending into the unbuffered channel. The send should immediately succeed. In order to avoid the test hanging
 	// indefinitely, a 1 minute timeout is in place.
 	select {
-	case <-blocksSynced:
+	case <-blocksSynced.Wait():
 	case <-time.After(time.Minute):
 		t.Fatalf("blocks never detected as synced")
 	}

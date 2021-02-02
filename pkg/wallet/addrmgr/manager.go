@@ -576,6 +576,7 @@ func (m *Manager) AddrAccount(ns walletdb.ReadBucket,
 	var err error
 	for _, scopedMgr := range m.scopedManagers {
 		if _, err = scopedMgr.Address(ns, address); Check(err) {
+			Debug(address)
 			continue
 		}
 		// We've found the manager that this address belongs to, so we can retrieve the

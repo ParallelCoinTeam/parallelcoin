@@ -263,7 +263,7 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 			s.blockManager.newFilterHeadersSignal.Wait()
 			// While we're awake, check to see if we need to exit.
 			select {
-			case <-ro.quit:
+			case <-ro.quit.Wait():
 				s.blockManager.newFilterHeadersMtx.Unlock()
 				return
 			default:
@@ -280,9 +280,9 @@ filterHeaderWaitLoop:
 		select {
 		case update := <-ro.update:
 			updates = append(updates, update)
-		case <-done:
+		case <-done.Wait():
 			break filterHeaderWaitLoop
-		case <-ro.quit:
+		case <-ro.quit.Wait():
 			// Broadcast the header signal such that the goroutine
 			// can wake up and exit.
 			s.blockManager.newFilterHeadersSignal.Broadcast()
@@ -339,7 +339,7 @@ filterHeaderWaitLoop:
 			)
 			select {
 			case blockConnected <- headerTip:
-			case <-ro.quit:
+			case <-ro.quit.Wait():
 			}
 		})
 	}
@@ -362,7 +362,7 @@ rescanLoop:
 			// Wait for a signal that we have a newly connected header and cfheader, or a newly disconnected header;
 			// alternatively, forward ourselves to the next block if possible.
 			select {
-			case <-ro.quit:
+			case <-ro.quit.Wait():
 				return ErrRescanExit
 			// An update mesage has just come across, if it points to a prior point in the chain, then we may need to
 			// rewind a bit in order to provide the client all its requested client.
@@ -935,9 +935,9 @@ func (r *Rescan) Update(options ...UpdateOption) error {
 	}
 	select {
 	case r.updateChan <- uo:
-	case <-ro.quit:
+	case <-ro.quit.Wait():
 		return ErrRescanExit
-	case <-r.running:
+	case <-r.running.Wait():
 		errStr := "Rescan is already done and cannot be updated."
 		r.errMtx.Lock()
 		if r.err != nil {

@@ -61,7 +61,7 @@ func StartAPI(server *chainrpc.Server, quit qu.C) {
 				msg.Ch.(chan chainrpc.EstimateFeeRes) <- chainrpc.EstimateFeeRes{
 					Res: res.(*float64), Err: err,
 				}
-			case <-quit:
+			case <-quit.Wait():
 				return
 			}
 		}

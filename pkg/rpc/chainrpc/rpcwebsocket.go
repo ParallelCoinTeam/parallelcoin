@@ -351,7 +351,7 @@ out:
 		// Break out of the loop once the quit channel has been closed. Use a non-blocking select here so we fall
 		// through otherwise.
 		select {
-		case <-c.Quit:
+		case <-c.Quit.Wait():
 			break out
 		default:
 		}
@@ -546,7 +546,7 @@ out:
 			// Notify the outHandler about the next item to asynchronously send.
 			msg := pendingNtfns.Remove(next).([]byte)
 			c.SendMessage(msg, ntfnSentChan)
-		case <-c.Quit:
+		case <-c.Quit.Wait():
 			break out
 		}
 	}
@@ -584,7 +584,7 @@ out:
 			if r.DoneChan != nil {
 				r.DoneChan <- true
 			}
-		case <-c.Quit:
+		case <-c.Quit.Wait():
 			break out
 		}
 	}
@@ -778,7 +778,7 @@ func (m *WSNtfnMgr) SendNotifyBlockConnected(block *util.Block) {
 	// select statement to unblock enqueuing the notification once the RPC server has begun shutting down.
 	select {
 	case m.QueueNotification <- (*NotificationBlockConnected)(block):
-	case <-m.Quit:
+	case <-m.Quit.Wait():
 	}
 }
 
@@ -789,7 +789,7 @@ func (m *WSNtfnMgr) SendNotifyBlockDisconnected(block *util.Block) {
 	// select statement to unblock enqueuing the notification once the RPC server has begun shutting down.
 	select {
 	case m.QueueNotification <- (*NotificationBlockDisconnected)(block):
-	case <-m.Quit:
+	case <-m.Quit.Wait():
 	}
 }
 
@@ -804,7 +804,7 @@ func (m *WSNtfnMgr) SendNotifyMempoolTx(tx *util.Tx, isNew bool) {
 	// to unblock enqueuing the notification once the RPC server has begun shutting down.
 	select {
 	case m.QueueNotification <- n:
-	case <-m.Quit:
+	case <-m.Quit.Wait():
 	}
 }
 
@@ -812,7 +812,7 @@ func (m *WSNtfnMgr) SendNotifyMempoolTx(tx *util.Tx, isNew bool) {
 func (m *WSNtfnMgr) GetNumClients() (n int) {
 	select {
 	case n = <-m.NumClients:
-	case <-m.Quit: // Use default n (0) if server has shut down.
+	case <-m.Quit.Wait(): // Use default n (0) if server has shut down.
 	}
 	return
 }
@@ -851,7 +851,7 @@ func (m *WSNtfnMgr) RegisterTxOutAddressRequests(wsc *WSClient, addrs []string) 
 func (m *WSNtfnMgr) RemoveClient(wsc *WSClient) {
 	select {
 	case m.QueueNotification <- (*NotificationUnregisterClient)(wsc):
-	case <-m.Quit:
+	case <-m.Quit.Wait():
 	}
 }
 
@@ -1058,7 +1058,7 @@ out:
 				Warn("unhandled notification type")
 			}
 		case m.NumClients <- len(clients):
-		case <-m.Quit:
+		case <-m.Quit.Wait():
 			// RPC server shutting down.
 			break out
 		}
@@ -1907,7 +1907,7 @@ fetchRange:
 			}
 			// A select statement is used to stop rescans if the client requesting the rescan has disconnected.
 			select {
-			case <-wsc.Quit:
+			case <-wsc.Quit.Wait():
 				Debugf("stopped rescan at height %v for disconnected client", blk.Height())
 				return nil, nil
 			default:
@@ -2260,7 +2260,7 @@ out:
 			} else {
 				next = q[0]
 			}
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}

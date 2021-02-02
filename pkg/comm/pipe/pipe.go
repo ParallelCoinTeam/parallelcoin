@@ -23,10 +23,10 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 		for {
 			// Debug("readloop")
 			select {
-			case <-interrupt.HandlersDone:
+			case <-interrupt.HandlersDone.Wait():
 				Debug("quitting log consumer")
 				break out
-			case <-quit:
+			case <-quit.Wait():
 				Debug("breaking on quit signal")
 				break out
 			default:
@@ -77,7 +77,7 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 	out:
 		for {
 			select {
-			case <-quit:
+			case <-quit.Wait():
 				// Debug(interrupt.GoroutineDump())
 				break out
 			default:

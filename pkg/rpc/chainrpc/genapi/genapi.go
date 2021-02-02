@@ -329,6 +329,8 @@ import (
 	"net/rpc"
 	"time"
 
+	qu "github.com/p9c/pod/pkg/util/quit"
+
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -405,7 +407,7 @@ var ` + RPCMapName + `BeforeInit = map[string]CommandHandler{
 {{range .}}
 // {{.Handler}} calls the method with the given parameters
 func (a API) {{.Handler}}(cmd {{.Cmd}}) (err error) {
-	` + RPCMapName + `["{{.Method}}"].Call <- API{a.Ch, cmd, nil}
+	` + RPCMapName + `["{{.Method}}"].Call <-API{a.Ch, cmd, nil}
 	return
 }
 
@@ -413,7 +415,7 @@ func (a API) {{.Handler}}(cmd {{.Cmd}}) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) {{.Handler}}Check() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan {{.Handler}}Res):
+	case o := <-a.Ch.(chan {{.Handler}}Res):
 		if o.Err != nil {
 			a.Result = o.Err
 		} else {
@@ -434,11 +436,11 @@ func (a API) {{.Handler}}GetRes() (out *{{.ResType}}, err error) {
 
 // {{.Handler}}Wait calls the method and blocks until it returns or 5 seconds passes
 func (a API) {{.Handler}}Wait(cmd {{.Cmd}}) (out *{{.ResType}}, err error) {
-	` + RPCMapName + `["{{.Method}}"].Call <- API{a.Ch, cmd, nil}
+	` + RPCMapName + `["{{.Method}}"].Call <-API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
-	case o := <- a.Ch.(chan {{.Handler}}Res):
+	case o := <-a.Ch.(chan {{.Handler}}Res):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -461,8 +463,8 @@ func RunAPI(server *Server, quit qu.C) {
 					Fn(server, msg.Params.({{.Cmd}}), nil); Check(err) {
 				}
 				if r, ok := res.({{.ResType}}); ok { 
-					msg.Ch.(chan {{.Handler}}Res) <- {{.Handler}}Res{&r, err} } {{end}}
-			case <-quit:
+					msg.Ch.(chan {{.Handler}}Res) <-{{.Handler}}Res{&r, err} } {{end}}
+			case <-quit.Wait():
 				Debug("stopping wallet cAPI")
 				return
 			}
@@ -480,7 +482,7 @@ func (c *CAPI) {{.Handler}}(req {{.Cmd}}, resp {{.ResType}}) (err error) {
 	select {
 	case resp = <-res.Ch.(chan {{.ResType}}):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
+	case <-c.quit.Wait():
 	} 
 	return 
 }

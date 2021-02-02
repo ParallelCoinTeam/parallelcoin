@@ -225,7 +225,7 @@ func (b *blockManager) Stop() error {
 		defer ticker.Stop()
 		for {
 			select {
-			case <-done:
+			case <-done.Wait():
 				return
 			case <-ticker.C:
 			}
@@ -248,7 +248,7 @@ func (b *blockManager) NewPeer(sp *ServerPeer) {
 	}
 	select {
 	case b.peerChan <- &newPeerMsg{peer: sp}:
-	case <-b.quit:
+	case <-b.quit.Wait():
 		return
 	}
 }
@@ -298,7 +298,7 @@ func (b *blockManager) DonePeer(sp *ServerPeer) {
 	}
 	select {
 	case b.peerChan <- &donePeerMsg{peer: sp}:
-	case <-b.quit:
+	case <-b.quit.Wait():
 		return
 	}
 }
@@ -372,7 +372,7 @@ waitForHeaders:
 		b.newHeadersSignal.Wait()
 		// While we're awake, we'll quickly check to see if we need to quit early.
 		select {
-		case <-b.quit:
+		case <-b.quit.Wait():
 			b.newHeadersSignal.L.Unlock()
 			return
 		default:
@@ -403,7 +403,7 @@ waitForHeaders:
 	for len(goodCheckpoints) == 0 && lastHeight >= wire.CFCheckptInterval {
 		// Quit if requested.
 		select {
-		case <-b.quit:
+		case <-b.quit.Wait():
 			return
 		default:
 		}
@@ -430,7 +430,7 @@ waitForHeaders:
 				)
 				select {
 				case <-time.After(QueryTimeout):
-				case <-b.quit:
+				case <-b.quit.Wait():
 					return
 				}
 				continue
@@ -462,7 +462,7 @@ waitForHeaders:
 		if len(goodCheckpoints) == 0 {
 			select {
 			case <-time.After(QueryTimeout):
-			case <-b.quit:
+			case <-b.quit.Wait():
 				return
 			}
 		}
@@ -502,7 +502,7 @@ waitForHeaders:
 			b.newHeadersSignal.Wait()
 			// Before we proceed, we'll check if we need to exit at all.
 			select {
-			case <-b.quit:
+			case <-b.quit.Wait():
 				b.newHeadersSignal.L.Unlock()
 				return
 			default:
@@ -516,13 +516,13 @@ waitForHeaders:
 			Debugf("couldn't get uncheckpointed headers for %v: %v", fType, err)
 			select {
 			case <-time.After(QueryTimeout):
-			case <-b.quit:
+			case <-b.quit.Wait():
 				return
 			}
 		}
 		// Quit if requested.
 		select {
-		case <-b.quit:
+		case <-b.quit.Wait():
 			return
 		default:
 		}
@@ -1340,7 +1340,7 @@ out:
 					"invalid message type in block handler: %Ter", msg,
 				)
 			}
-		case <-b.quit:
+		case <-b.quit.Wait():
 			break out
 		}
 	}
@@ -1560,7 +1560,7 @@ func (b *blockManager) QueueInv(inv *wire.MsgInv, sp *ServerPeer) {
 	}
 	select {
 	case b.peerChan <- &invMsg{inv: inv, peer: sp}:
-	case <-b.quit:
+	case <-b.quit.Wait():
 		return
 	}
 }
@@ -1640,7 +1640,7 @@ func (b *blockManager) QueueHeaders(headers *wire.MsgHeaders, sp *ServerPeer) {
 	}
 	select {
 	case b.peerChan <- &headersMsg{headers: headers, peer: sp}:
-	case <-b.quit:
+	case <-b.quit.Wait():
 		return
 	}
 }

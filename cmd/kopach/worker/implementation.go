@@ -162,14 +162,14 @@ out:
 			case <-sampleTicker.C:
 				w.hashReport()
 				break
-			case <-w.stopChan:
+			case <-w.stopChan.Wait():
 				Trace("received pause signal while paused")
 				// drain stop channel in pause
 				break
-			case <-w.startChan:
+			case <-w.startChan.Wait():
 				Trace("received start signal")
 				break pausing
-			case <-w.quit:
+			case <-w.quit.Wait():
 				Trace("quitting")
 				break out
 			}
@@ -183,14 +183,14 @@ out:
 				// Debug(interrupt.GoroutineDump())
 				w.hashReport()
 				break
-			case <-w.startChan:
+			case <-w.startChan.Wait():
 				Trace("received start signal while running")
 				// drain start channel in run mode
 				break
-			case <-w.stopChan:
+			case <-w.stopChan.Wait():
 				Trace("received pause signal while running")
 				break running
-			case <-w.quit:
+			case <-w.quit.Wait():
 				Trace("worker stopping while running")
 				break out
 			default:
@@ -225,7 +225,7 @@ out:
 					var nextAlgo int32
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 						select {
-						case <-w.quit:
+						case <-w.quit.Wait():
 							Trace("worker stopping on pausing message")
 							break out
 						default:

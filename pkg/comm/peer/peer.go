@@ -1125,13 +1125,13 @@ out:
 			}
 			// Reset the deadline offset for the next tick.
 			deadlineOffset = 0
-		case <-p.inQuit:
+		case <-p.inQuit.Wait():
 			// The stall handler can exit once both the input and output handler goroutines are done.
 			if ioStopped {
 				break out
 			}
 			ioStopped = true
-		case <-p.outQuit:
+		case <-p.outQuit.Wait():
 			// The stall handler can exit once both the input and output handler goroutines are done.
 			if ioStopped {
 				break out
@@ -1387,7 +1387,7 @@ out:
 		case msg := <-p.outputQueue:
 			waiting = queuePacket(msg, pendingMsgs, waiting)
 		// This channel is notified when a message has been sent across the network socket.
-		case <-p.sendDoneQueue:
+		case <-p.sendDoneQueue.Wait():
 			// No longer waiting if there are no more messages in the pending messages queue.
 			next := pendingMsgs.Front()
 			if next == nil {
@@ -1448,7 +1448,7 @@ out:
 				waiting = queuePacket(outMsg{msg: invMsg},
 					pendingMsgs, waiting)
 			}
-		case <-p.quit:
+		case <-p.quit.Wait():
 			break out
 		}
 	}
@@ -1535,7 +1535,7 @@ out:
 				msg.doneChan <- struct{}{}
 			}
 			p.sendDoneQueue <- struct{}{}
-		case <-p.quit:
+		case <-p.quit.Wait():
 			break out
 		}
 	}
@@ -1573,7 +1573,7 @@ out:
 				continue
 			}
 			p.QueueMessage(wire.NewMsgPing(nonce), nil)
-		case <-p.quit:
+		case <-p.quit.Wait():
 			break out
 		}
 	}

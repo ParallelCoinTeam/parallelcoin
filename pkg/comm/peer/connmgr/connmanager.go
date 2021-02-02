@@ -286,7 +286,7 @@ out:
 				// Tracef("failed to connect to %v: %v", connReq, msg.err)
 				cm.handleFailedConn(connReq)
 			}
-		case <-cm.quit:
+		case <-cm.quit.Wait():
 			break out
 		}
 	}
@@ -309,13 +309,13 @@ func (cm *ConnManager) NewConnReq() {
 	done := qu.T()
 	select {
 	case cm.requests <- registerPending{c, done}:
-	case <-cm.quit:
+	case <-cm.quit.Wait():
 		return
 	}
 	// Wait for the registration to successfully add the pending conn req to the conn manager's internal state.
 	select {
-	case <-done:
-	case <-cm.quit:
+	case <-done.Wait():
+	case <-cm.quit.Wait():
 		return
 	}
 	addr, err := cm.Cfg.GetNewAddress()
@@ -323,7 +323,7 @@ func (cm *ConnManager) NewConnReq() {
 		// Trace(err)
 		select {
 		case cm.requests <- handleFailed{c, err}:
-		case <-cm.quit:
+		case <-cm.quit.Wait():
 		}
 		return
 	}
@@ -350,14 +350,14 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 		done := qu.T()
 		select {
 		case cm.requests <- registerPending{c, done}:
-		case <-cm.quit:
+		case <-cm.quit.Wait():
 			return
 		}
 		Trace("waiting for response")
 		// Wait for the registration to successfully add the pending conn req to the conn manager's internal state.
 		select {
-		case <-done:
-		case <-cm.quit:
+		case <-done.Wait():
+		case <-cm.quit.Wait():
 			return
 		}
 	}
@@ -373,13 +373,13 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 		Trace(err)
 		select {
 		case cm.requests <- handleFailed{c, err}:
-		case <-cm.quit:
+		case <-cm.quit.Wait():
 		}
 		return
 	}
 	select {
 	case cm.requests <- handleConnected{c, conn}:
-	case <-cm.quit:
+	case <-cm.quit.Wait():
 	}
 }
 
@@ -391,7 +391,7 @@ func (cm *ConnManager) Disconnect(id uint64) {
 	}
 	select {
 	case cm.requests <- handleDisconnected{id, true}:
-	case <-cm.quit:
+	case <-cm.quit.Wait():
 	}
 }
 
@@ -404,7 +404,7 @@ func (cm *ConnManager) Remove(id uint64) {
 	}
 	select {
 	case cm.requests <- handleDisconnected{id, false}:
-	case <-cm.quit:
+	case <-cm.quit.Wait():
 	}
 }
 

@@ -64,7 +64,7 @@ func Main(cx *conte.Xt) (err error) {
 		},
 	)
 	select {
-	case <-cx.WalletKill:
+	case <-cx.WalletKill.Wait():
 		Warn("wallet killswitch activated")
 		if legacyServer != nil {
 			Warn("stopping wallet RPC server")
@@ -76,10 +76,10 @@ func Main(cx *conte.Xt) (err error) {
 		cx.WaitDone()
 		return
 		// <-legacyServer.RequestProcessShutdownChan()
-	case <-cx.KillAll:
+	case <-cx.KillAll.Wait():
 		Debug("killall")
 		cx.WalletKill.Q()
-	case <-interrupt.HandlersDone:
+	case <-interrupt.HandlersDone.Wait():
 	}
 	Info("wallet shutdown complete")
 	// cx.WaitGroup.Done()
@@ -152,9 +152,9 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	out:
 		for {
 			select {
-			case <-cx.KillAll:
+			case <-cx.KillAll.Wait():
 				break out
-			case <-legacyServer.RequestProcessShutdownChan():
+			case <-legacyServer.RequestProcessShutdownChan().Wait():
 				interrupt.Request()
 			}
 		}
