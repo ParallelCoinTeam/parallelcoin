@@ -48,7 +48,7 @@ func Main(cx *conte.Xt) (err error) {
 		func(w *wallet.Wallet) {
 			Warn("starting wallet RPC services", w != nil)
 			startWalletRPCServices(w, legacyServer)
-			cx.WalletChan <- w
+			// cx.WalletChan <- w
 		},
 	)
 	if !*cx.Config.NoInitialLoad {

@@ -60,7 +60,7 @@ func testChanIsClosed(ch C) (o bool) {
 		return true
 	}
 	select {
-	case <-ch.Wait():
+	case <-ch:
 		// Debug("chan is closed")
 		o = true
 	default:

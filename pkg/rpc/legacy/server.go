@@ -253,6 +253,7 @@ func (s *Server) HandlerClosure(request *btcjson.Request) LazyHandler {
 	if wllt != nil && chainClient == nil {
 		chainClient = wllt.ChainClient()
 		s.ChainClient = chainClient
+		Debug("HandlerClosure got the ChainClient")
 	}
 	s.HandlerMutex.Unlock()
 	return LazyApplyHandler(request, wllt, chainClient)
@@ -522,15 +523,11 @@ out:
 
 // WebsocketClientRPC starts the goroutines to serve JSON-RPC requests over a websocket connection for a single client.
 func (s *Server) WebsocketClientRPC(wsc *WebsocketClient) {
-	Infof(
-		"new websocket client %v %s", wsc.remoteAddr,
-	)
+	Infof("new websocket client %s", wsc.remoteAddr)
 	// Clear the read deadline set before the websocket hijacked
 	// the connection.
 	if err := wsc.conn.SetReadDeadline(time.Time{}); err != nil {
-		Warn(
-			"cannot remove read deadline:", err,
-		)
+		Warn("cannot remove read deadline:", err)
 	}
 	// WebsocketClientRead is intentionally not run with the waitgroup so it is ignored during shutdown. This is to
 	// prevent a hang during shutdown where the goroutine is blocked on a read of the websocket connection if the client

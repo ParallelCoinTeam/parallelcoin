@@ -65,7 +65,7 @@ var commands = map[string][]string{
 	},
 	"guass": {
 		"go install -v %ldflags",
-		"pod -D %datadir -l trace -g 1 -G --solo --lan --minerpass pa55word",
+		"pod -D %datadir -g 1 -G --solo --lan --minerpass pa55word",
 	},
 	"guihttpprof": {
 		"go install -v %ldflags",
@@ -125,4 +125,3 @@ var commands = map[string][]string{
 		"go install -v %ldflags ./stroy/.",
 	},
 }
-

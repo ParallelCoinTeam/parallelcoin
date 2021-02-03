@@ -178,6 +178,7 @@ func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 func (w *Wallet) requireChainClient() (chain.Interface, error) {
 	Debug(">>>>>>>>> requireChainClient")
 	w.chainClientLock.Lock()
+	Debug("chainclient is nil:", w.chainClient == nil)
 	chainClient := w.chainClient
 	w.chainClientLock.Unlock()
 	if chainClient == nil {
@@ -190,10 +191,12 @@ func (w *Wallet) requireChainClient() (chain.Interface, error) {
 //
 // This function is unstable and will be removed once sync logic is moved out of the wallet.
 func (w *Wallet) ChainClient() chain.Interface {
-	Debug(">>>>>>>>>>>>> wallet attempting to connect chain client to node")
+	Debug(">>>>>>>>>>>>> wallet acquiring connect to chain RPC")
 	w.chainClientLock.Lock()
+	Debug("chainClientLock locked", w.chainClient==nil)
 	chainClient := w.chainClient
 	w.chainClientLock.Unlock()
+	Debug("chainClientLock unlocked")
 	return chainClient
 }
 
@@ -3308,7 +3311,7 @@ func Open(
 	quit qu.C,
 ) (*Wallet, error) {
 	// debug.PrintStack()
-	Warn("opening wallet", string(pubPass))
+	Warn("opening wallet") // , string(pubPass))
 	err := walletdb.View(
 		db, func(tx walletdb.ReadTx) error {
 			waddrmgrBucket := tx.ReadBucket(waddrmgrNamespaceKey)

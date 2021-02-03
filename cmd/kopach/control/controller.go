@@ -286,6 +286,8 @@ func (c *Controller) rebroadcast() {
 	oB, ok := c.oldBlocks.Load().([][]byte)
 	if len(oB) == 0 {
 		Warn("template is zero length")
+		if err := c.sendNewBlockTemplate(); Check(err) {
+		}
 		return
 	}
 	if !ok {

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
@@ -329,7 +329,9 @@ type LazyHandler func() (interface{}, *btcjson.RPCError)
 // the returned handler performs RPC passthrough.
 func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient chain.Interface) LazyHandler {
 	handlerData, ok := RPCHandlers[request.Method]
+	Debug("LazyApplyHandler >>> >>> >>>", ok, handlerData.Handler != nil, w != nil, chainClient != nil)
 	if ok && handlerData.Handler != nil && w != nil && chainClient != nil {
+		Debug("found handler for call")
 		return func() (interface{}, *btcjson.RPCError) {
 			cmd, err := btcjson.UnmarshalCmd(request)
 			if err != nil {
@@ -338,13 +340,15 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			}
 			switch client := chainClient.(type) {
 			case *chain.RPCClient:
-				resp, err := handlerData.Handler(cmd, w, client)
-				if err != nil {
-					Error(err)
+				Debug("client is a chain.RPCClient")
+				var resp interface{}
+				if resp, err = handlerData.Handler(cmd, w, client); Check(err) {
 					return nil, JSONError(err)
 				}
+				Debug("handler call succeeded")
 				return resp, nil
 			default:
+				Debug("client is unknown")
 				return nil, &btcjson.RPCError{
 					Code:    -1,
 					Message: "Chain RPC is inactive",
@@ -352,18 +356,18 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			}
 		}
 	}
+	Debug("failed to find handler for call")
 	// Info("handler", handlerData.Handler, "wallet", w)
 	if ok && handlerData.Handler != nil && w != nil {
-		Info("handling", request.Method)
+		Debug("handling", request.Method)
 		return func() (interface{}, *btcjson.RPCError) {
 			cmd, err := btcjson.UnmarshalCmd(request)
 			if err != nil {
 				Error(err)
 				return nil, btcjson.ErrRPCInvalidRequest
 			}
-			resp, err := handlerData.Handler(cmd, w)
-			if err != nil {
-				Error(err)
+			var resp interface{}
+			if resp, err = handlerData.Handler(cmd, w); Check(err) {
 				return nil, JSONError(err)
 			}
 			return resp, nil

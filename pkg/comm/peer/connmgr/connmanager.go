@@ -295,7 +295,7 @@ out:
 
 // NewConnReq creates a new connection request and connects to the corresponding address.
 func (cm *ConnManager) NewConnReq() {
-	Debug("creating new connreq @", logi.Caller("thingy", 1))
+	Trace("creating new connreq @", logi.Caller("thingy", 1))
 	if atomic.LoadInt32(&cm.stop) != 0 {
 		return
 	}
