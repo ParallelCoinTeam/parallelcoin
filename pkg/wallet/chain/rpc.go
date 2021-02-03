@@ -141,8 +141,10 @@ func (c *RPCClient) Stop() {
 // Rescan wraps the normal Rescan command with an additional parameter that allows us to map an outpoint to the address
 // in the chain that it pays to. This is useful when using BIP 158 filters as they include the prev pkScript rather than
 // the full outpoint.
-func (c *RPCClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
-	outPoints map[wire.OutPoint]util.Address) error {
+func (c *RPCClient) Rescan(
+	startHash *chainhash.Hash, addrs []util.Address,
+	outPoints map[wire.OutPoint]util.Address,
+) error {
 	flatOutpoints := make([]*wire.OutPoint, 0, len(outPoints))
 	for ops := range outPoints {
 		flatOutpoints = append(flatOutpoints, &ops)
@@ -178,7 +180,8 @@ func (c *RPCClient) BlockStamp() (*wm.BlockStamp, error) {
 // FilterBlocksResponse for the first block containing a matching address. If no matches are found in the range of
 // blocks requested, the returned response will be nil.
 func (c *RPCClient) FilterBlocks(
-	req *FilterBlocksRequest) (*FilterBlocksResponse, error) {
+	req *FilterBlocksRequest,
+) (*FilterBlocksResponse, error) {
 	blockFilterer := NewBlockFilterer(c.chainParams, req)
 	// Construct the watchlist using the addresses and outpoints contained in the filter blocks request.
 	watchList, err := buildFilterBlocksWatchList(req)
@@ -341,10 +344,7 @@ func (c *RPCClient) onRescanFinished(hash *chainhash.Hash, height int32, blkTime
 func (c *RPCClient) handler() {
 	hash, height, err := c.GetBestBlock()
 	if err != nil {
-		Error(err)
-		Error(
-			"failed to receive best block from chain server:", err,
-		)
+		Error("failed to receive best block from chain server:", err)
 		c.Stop()
 		c.wg.Done()
 		return
@@ -395,7 +395,8 @@ out:
 				dequeue = nil
 			}
 		case c.currentBlock <- bs:
-		case <-c.quit:
+		case <-c.quit.Wait():
+			Debug("legacy rpc handler stopping on quit channel close")
 			break out
 		}
 	}

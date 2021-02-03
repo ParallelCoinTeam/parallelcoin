@@ -48,7 +48,7 @@ func Main(cx *conte.Xt) (err error) {
 		func(w *wallet.Wallet) {
 			Warn("starting wallet RPC services", w != nil)
 			startWalletRPCServices(w, legacyServer)
-			// cx.WalletChan <- w
+			cx.WalletChan <- w
 		},
 	)
 	if !*cx.Config.NoInitialLoad {
@@ -124,7 +124,7 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	// }()
 	loader.Wallet = w
 	// Debug("^^^^^^^^^^^ sending back wallet")
-	// cx.WalletChan <- w
+	cx.WalletChan <- w
 	Debug("starting rpcClientConnectLoop")
 	go rpcClientConnectLoop(cx, legacyServer, loader)
 	Debug("^^^^^^^^^^^^^ adding interrupt handler to unload wallet")

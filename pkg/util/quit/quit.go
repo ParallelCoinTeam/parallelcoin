@@ -2,7 +2,7 @@ package qu
 
 import (
 	"sync"
-
+	
 	"github.com/p9c/pod/pkg/util/logi"
 )
 
@@ -44,7 +44,7 @@ func (c C) Q() {
 		Trace("closing chan from "+loc, logi.Caller("from", 1))
 		close(c)
 	} else {
-		Trace("#### channel", loc, "was already closed")
+		Trace(logi.Caller("from", 1), "#### channel", loc, "was already closed")
 	}
 	mx.Unlock()
 	// PrintChanState()
@@ -84,7 +84,6 @@ func GetLocForChan(c C) (s string) {
 	return
 }
 
-
 func RemoveClosedChans() {
 	Debug("cleaning up closed channels (more than 50 now closed)")
 	var c []C
@@ -109,8 +108,7 @@ func RemoveClosedChans() {
 }
 
 func PrintChanState() {
-
-	// Debug(">>>>>>>>>>>")
+	Debug(">>>>>>>>>>>")
 	for i := range createdChannels {
 		if i >= len(createdList) {
 			break
@@ -121,8 +119,8 @@ func PrintChanState() {
 		} else {
 			Trace("<<< open", createdList[i])
 		}
-		// Debug(">>>>>>>>>>>")
 	}
+	Debug(">>>>>>>>>>>")
 }
 
 func GetOpenChanCount() (o int) {

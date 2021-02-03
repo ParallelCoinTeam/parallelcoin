@@ -367,6 +367,7 @@ func (wg *WalletGUI) chainClient() (err error) {
 		}
 	}
 	if wg.ChainClient.Disconnected() {
+		Debug("connecting chain client")
 		if err = wg.ChainClient.Connect(1); Check(err) {
 			return
 		}

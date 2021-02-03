@@ -102,6 +102,7 @@ func (cx *Xt) WaitDone() {
 	cx.waitCounter--
 	Debug("removed from waitgroup", record, cx.waitCounter)
 	Debug(cx.PrintWaitChangers())
+	qu.PrintChanState()
 	cx.WaitGroup.Done()
 }
 

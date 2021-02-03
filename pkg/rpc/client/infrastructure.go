@@ -1102,7 +1102,7 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers, quit qu.C) (*Cl
 	out:
 		for {
 			select {
-			case <-quit:
+			case <-quit.Wait():
 				client.disconnect.Q()
 				client.shutdown.Q()
 				break out
