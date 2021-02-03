@@ -20,7 +20,7 @@ func main() {
 	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> starting")
 	consume.Start(w)
 	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> started")
-	time.Sleep(time.Second * 15)
+	time.Sleep(time.Second * 4)
 	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> stopping")
 	consume.Kill(w)
 	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> stopped")

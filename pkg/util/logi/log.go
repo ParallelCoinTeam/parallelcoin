@@ -147,6 +147,7 @@ type (
 		Split           string
 		LogChan         chan Entry
 		LogChanDisabled *uberatomic.Bool
+		Quit            chan struct{}
 	}
 )
 
@@ -181,6 +182,7 @@ func NewLogger() (l *Logger) {
 		Split:           "pod",
 		LogChan:         nil,
 		LogChanDisabled: uberatomic.NewBool(true),
+		Quit:            make(chan struct{}),
 	}
 	l.Fatal = l.printlnFunc(Fatal)
 	l.Error = l.printlnFunc(Error)
@@ -233,8 +235,8 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 			return
 		}
 	}
-	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
+	var err error
+	if logFileHandle, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755); l.Check("pkg/util/log", err) {
 		if L.Writer.Write.Load() {
 			L.Writer.Println("error opening log file", logFileName)
 		}
@@ -350,7 +352,10 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 				time.Now(), level,
 				pkg, l.GetLoc(loc, line), text,
 			}
-			l.LogChan <- out
+			select {
+			case l.LogChan <- out:
+			default:
+			}
 		}
 	}
 	return f
@@ -374,7 +379,10 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 				time.Now(), level,
 				pkg, l.GetLoc(loc, line), text,
 			}
-			l.LogChan <- out
+			select {
+			case l.LogChan <- out:
+			default:
+			}
 		}
 	}
 	return f
@@ -397,7 +405,10 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 				time.Now(), level, pkg,
 				l.GetLoc(loc, line), text,
 			}
-			l.LogChan <- out
+			select {
+			case l.LogChan <- out:
+			default:
+			}
 		}
 	}
 	return f
@@ -423,7 +434,10 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 				time.Now(), level,
 				pkg, l.GetLoc(loc, line), text,
 			}
-			l.LogChan <- out
+			select {
+			case l.LogChan <- out:
+			default:
+			}
 		}
 		return true
 	}
@@ -449,8 +463,9 @@ func (l *Logger) spewFunc(level string) SpewFunc {
 				time.Now(), level, pkg,
 				l.GetLoc(loc, line), text,
 			}
-			if l.LogChan != nil {
-				l.LogChan <- out
+			select {
+			case l.LogChan <- out:
+			default:
 			}
 		}
 	}

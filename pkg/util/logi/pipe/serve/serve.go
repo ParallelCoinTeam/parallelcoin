@@ -39,10 +39,10 @@ func Log(quit qu.C, appName string) {
 					Debug("received kill signal from pipe, shutting down", appName)
 					// time.Sleep(time.Second*5)
 					// time.Sleep(time.Second * 3)
-					quit.Q()
 					// logi.L.LogChanDisabled = true
 					// logi.L.LogChan = nil
 					interrupt.Request()
+					quit.Q()
 					// <-interrupt.HandlersDone
 					
 					// quit.Q()
@@ -68,6 +68,16 @@ func Log(quit qu.C, appName string) {
 				interrupt.Request()
 				logOn.Store(false)
 				// <-interrupt.HandlersDone
+			out2:
+				// drain log channel
+				for {
+					select {
+					case <-lc:
+						break
+					default:
+						break out2
+					}
+				}
 				break out
 			case e := <-lc:
 				if !logOn.Load() {
