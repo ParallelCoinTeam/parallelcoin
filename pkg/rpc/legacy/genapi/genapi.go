@@ -327,6 +327,8 @@ import (
 	"net/rpc"
 	"time"
 
+	qu "github.com/p9c/pod/pkg/util/quit"
+
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/wallet"
 	"github.com/p9c/pod/pkg/wallet/chain"
@@ -356,13 +358,13 @@ func NewCAPI(quit qu.C, timeout ...time.Duration) (c *CAPI) {
 	return 
 }
 
-// Wrappers around RPC calls
+// CAPIClient is a wrapper around RPC calls
 type CAPIClient struct {
 	*rpc.Client
 }
 
-// New creates a new client for a kopach_worker. Note that any kind of connection can be used here, other than the 
-// StdConn
+// NewCAPIClient creates a new client for a kopach_worker. Note that any kind of connection can be used here,
+// other than the StdConn
 func NewCAPIClient(conn io.ReadWriteCloser) *CAPIClient {
 	return &CAPIClient{rpc.NewClient(conn)}
 }
@@ -480,7 +482,7 @@ func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet,
 				}
 				if r, ok := res.({{.ResType}}); ok { 
 					msg.Ch.(chan {{.Handler}}Res) <- {{.Handler}}Res{&r, err} } {{end}}
-			case <-quit:
+			case <-quit.Wait():
 				Debug("stopping wallet cAPI")
 				return
 			}
@@ -498,7 +500,7 @@ func (c *CAPI) {{.Handler}}(req {{.Cmd}}, resp {{.ResType}}) (err error) {
 	select {
 	case resp = <-res.Ch.(chan {{.ResType}}):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
+	case <-c.quit.Wait():
 	} 
 	return 
 }

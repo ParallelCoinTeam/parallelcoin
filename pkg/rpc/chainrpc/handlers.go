@@ -982,10 +982,10 @@ func HandleGetBlockTemplateLongPoll(
 	state.Unlock()
 	select {
 	// When the client closes before it's time to send a reply, just return now so the goroutine doesn't hang around.
-	case <-closeChan:
+	case <-closeChan.Wait():
 		return nil, ErrClientQuit
 	// Wait until signal received to send the reply.
-	case <-longPollChan:
+	case <-longPollChan.Wait():
 		// Fallthrough
 	}
 	// Get the lastest block template

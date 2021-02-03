@@ -123,7 +123,7 @@ func (w *Wallet) handleChainNotifications() {
 				notificationName = "rescanprogress"
 				select {
 				case w.rescanNotifications <- n:
-				case <-w.quitChan():
+				case <-w.quitChan().Wait():
 					return
 				}
 			case *chain.RescanFinished:
@@ -132,7 +132,7 @@ func (w *Wallet) handleChainNotifications() {
 				w.SetChainSynced(true)
 				select {
 				case w.rescanNotifications <- n:
-				case <-w.quitChan():
+				case <-w.quitChan().Wait():
 					return
 				}
 			}
@@ -150,7 +150,7 @@ func (w *Wallet) handleChainNotifications() {
 					Error(errStr, notificationName, err)
 				}
 			}
-		case <-w.quit:
+		case <-w.quit.Wait():
 			return
 		}
 	}

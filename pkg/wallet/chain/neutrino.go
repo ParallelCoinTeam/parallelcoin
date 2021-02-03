@@ -72,7 +72,7 @@ func (s *NeutrinoClient) Start() error {
 		go func() {
 			select {
 			case s.enqueueNotification <- ClientConnected{}:
-			case <-s.quit:
+			case <-s.quit.Wait():
 			}
 		}()
 		go s.notificationHandler()
@@ -131,7 +131,7 @@ func (s *NeutrinoClient) BlockStamp() (*waddrmgr.BlockStamp, error) {
 	select {
 	case bs := <-s.currentBlock:
 		return bs, nil
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return nil, errors.New("disconnected")
 	}
 }
@@ -331,9 +331,9 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 			Height: bestBlock.Height,
 			Time:   header.Timestamp,
 		}:
-		case <-s.quit:
+		case <-s.quit.Wait():
 			return nil
-		case <-s.rescanQuit:
+		case <-s.rescanQuit.Wait():
 			return nil
 		}
 	}
@@ -449,9 +449,9 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 	}
 	select {
 	case s.enqueueNotification <- ntfn:
-	case <-s.quit:
+	case <-s.quit.Wait():
 		return
-	case <-s.rescanQuit:
+	case <-s.rescanQuit.Wait():
 		return
 	}
 	// Handle RescanFinished notification if required.
@@ -481,9 +481,9 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 				Height: bs.Height,
 				Time:   header.Timestamp,
 			}:
-			case <-s.quit:
+			case <-s.quit.Wait():
 				return
-			case <-s.rescanQuit:
+			case <-s.rescanQuit.Wait():
 				return
 			}
 		}
@@ -501,8 +501,8 @@ func (s *NeutrinoClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
 		},
 		Time: t,
 	}:
-	case <-s.quit:
-	case <-s.rescanQuit:
+	case <-s.quit.Wait():
+	case <-s.rescanQuit.Wait():
 	}
 }
 func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
@@ -516,8 +516,8 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 			Height: height,
 			Time:   time,
 		}:
-		case <-s.quit:
-		case <-s.rescanQuit:
+		case <-s.quit.Wait():
+		case <-s.rescanQuit.Wait():
 		}
 	}
 	// Only send BlockConnected notification if we're processing blocks before the birthday. Otherwise, we can just
@@ -554,8 +554,8 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 			},
 			Time: time,
 		}:
-		case <-s.quit:
-		case <-s.rescanQuit:
+		case <-s.quit.Wait():
+		case <-s.rescanQuit.Wait():
 		}
 	}
 }
@@ -625,7 +625,7 @@ out:
 				Error("neutrino rescan ended with error:", err)
 			}
 		case s.currentBlock <- bs:
-		case <-s.quit:
+		case <-s.quit.Wait():
 			break out
 		}
 	}

@@ -52,12 +52,12 @@ func (cq *ConcurrentQueue) Start() {
 				case item := <-cq.chanIn:
 					select {
 					case cq.chanOut <- item:
-					case <-cq.quit:
+					case <-cq.quit.Wait():
 						return
 					default:
 						cq.overflow.PushBack(item)
 					}
-				case <-cq.quit:
+				case <-cq.quit.Wait():
 					return
 				}
 			} else {
@@ -67,7 +67,7 @@ func (cq *ConcurrentQueue) Start() {
 					cq.overflow.PushBack(item)
 				case cq.chanOut <- nextElement.Value:
 					cq.overflow.Remove(nextElement)
-				case <-cq.quit:
+				case <-cq.quit.Wait():
 					return
 				}
 			}

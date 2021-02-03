@@ -153,7 +153,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 	for {
 		// Before attempting to read from the ZMQ socket, we'll make sure to check if we've been requested to shut down.
 		select {
-		case <-c.quit:
+		case <-c.quit.Wait():
 			return
 		default:
 		}
@@ -189,8 +189,8 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			for _, client := range c.rescanClients {
 				select {
 				case client.zmqBlockNtfns <- block:
-				case <-client.quit:
-				case <-c.quit:
+				case <-client.quit.Wait():
+				case <-c.quit.Wait():
 					c.rescanClientsMtx.Unlock()
 					return
 				}
@@ -227,7 +227,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 	for {
 		// Before attempting to read from the ZMQ socket, we'll make sure to check if we've been requested to shut down.
 		select {
-		case <-c.quit:
+		case <-c.quit.Wait():
 			return
 		default:
 		}
@@ -263,8 +263,8 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			for _, client := range c.rescanClients {
 				select {
 				case client.zmqTxNtfns <- tx:
-				case <-client.quit:
-				case <-c.quit:
+				case <-client.quit.Wait():
+				case <-c.quit.Wait():
 					c.rescanClientsMtx.Unlock()
 					return
 				}

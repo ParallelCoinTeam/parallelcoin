@@ -180,7 +180,7 @@ func (c *BitcoindClient) NotifyReceived(addrs []util.Address) error {
 	}
 	select {
 	case c.rescanUpdate <- addrs:
-	case <-c.quit:
+	case <-c.quit.Wait():
 		return ErrBitcoindClientShuttingDown
 	}
 	return nil
@@ -194,7 +194,7 @@ func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) error {
 	}
 	select {
 	case c.rescanUpdate <- outPoints:
-	case <-c.quit:
+	case <-c.quit.Wait():
 		return ErrBitcoindClientShuttingDown
 	}
 	return nil
@@ -209,7 +209,7 @@ func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) error {
 	}
 	select {
 	case c.rescanUpdate <- txids:
-	case <-c.quit:
+	case <-c.quit.Wait():
 		return ErrBitcoindClientShuttingDown
 	}
 	return nil
@@ -242,14 +242,14 @@ func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) error 
 	if reset {
 		select {
 		case c.rescanUpdate <- struct{}{}:
-		case <-c.quit:
+		case <-c.quit.Wait():
 			return ErrBitcoindClientShuttingDown
 		}
 	}
 	updateFilter := func(filter interface{}) error {
 		select {
 		case c.rescanUpdate <- filter:
-		case <-c.quit:
+		case <-c.quit.Wait():
 			return ErrBitcoindClientShuttingDown
 		}
 		return nil
@@ -326,18 +326,18 @@ func (c *BitcoindClient) Rescan(blockHash *chainhash.Hash,
 	// We'll then update our filters with the given outpoints and addresses.
 	select {
 	case c.rescanUpdate <- addresses:
-	case <-c.quit:
+	case <-c.quit.Wait():
 		return ErrBitcoindClientShuttingDown
 	}
 	select {
 	case c.rescanUpdate <- outPoints:
-	case <-c.quit:
+	case <-c.quit.Wait():
 		return ErrBitcoindClientShuttingDown
 	}
 	// Once the filters have been updated, we can begin the rescan.
 	select {
 	case c.rescanUpdate <- *blockHash:
-	case <-c.quit:
+	case <-c.quit.Wait():
 		return ErrBitcoindClientShuttingDown
 	}
 	return nil
@@ -472,7 +472,7 @@ func (c *BitcoindClient) rescanHandler() {
 					"received unexpected filter type %Ter", update,
 				)
 			}
-		case <-c.quit:
+		case <-c.quit.Wait():
 			return
 		}
 	}
@@ -527,7 +527,7 @@ func (c *BitcoindClient) ntfnHandler() {
 					"unable to process chain reorg:", err,
 				)
 			}
-		case <-c.quit:
+		case <-c.quit.Wait():
 			return
 		}
 	}
@@ -561,7 +561,7 @@ func (c *BitcoindClient) onBlockConnected(hash *chainhash.Hash, height int32,
 			},
 			Time: timestamp,
 		}:
-		case <-c.quit:
+		case <-c.quit.Wait():
 		}
 	}
 }
@@ -583,7 +583,7 @@ func (c *BitcoindClient) onFilteredBlockConnected(height int32,
 			},
 			RelevantTxs: relevantTxs,
 		}:
-		case <-c.quit:
+		case <-c.quit.Wait():
 		}
 	}
 }
@@ -601,7 +601,7 @@ func (c *BitcoindClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
 			},
 			Time: timestamp,
 		}:
-		case <-c.quit:
+		case <-c.quit.Wait():
 		}
 	}
 }
@@ -625,7 +625,7 @@ func (c *BitcoindClient) onRelevantTx(tx *tm.TxRecord,
 		TxRecord: tx,
 		Block:    block,
 	}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 
@@ -639,7 +639,7 @@ func (c *BitcoindClient) onRescanProgress(hash *chainhash.Hash, height int32,
 		Height: height,
 		Time:   timestamp,
 	}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 
@@ -657,7 +657,7 @@ func (c *BitcoindClient) onRescanFinished(hash *chainhash.Hash, height int32,
 		Height: height,
 		Time:   timestamp,
 	}:
-	case <-c.quit:
+	case <-c.quit.Wait():
 	}
 }
 

@@ -52,7 +52,7 @@ func (wg *WalletGUI) Tickers() {
 					break preconnect
 				case <-fiveSeconds:
 					continue
-				case <-wg.quit:
+				case <-wg.quit.Wait():
 					break totalOut
 				}
 			}
@@ -130,7 +130,7 @@ func (wg *WalletGUI) Tickers() {
 					wg.invalidate <- struct{}{}
 					first = false
 				case <-fiveSeconds:
-				case <-wg.quit:
+				case <-wg.quit.Wait():
 					break totalOut
 				}
 			}

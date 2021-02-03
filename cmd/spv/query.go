@@ -267,7 +267,7 @@ func queryChainServiceBatch(
 				select {
 				case <-queryQuit:
 					return
-				case <-s.quit:
+				case <-s.quit.Wait():
 					return
 				case <-quit:
 					return
@@ -286,7 +286,7 @@ func queryChainServiceBatch(
 			select {
 			case <-queryQuit:
 				return
-			case <-s.quit:
+			case <-s.quit.Wait():
 				return
 			case <-quit:
 				return
@@ -353,7 +353,7 @@ func queryChainServiceBatch(
 				select {
 				case <-queryQuit:
 					return
-				case <-s.quit:
+				case <-s.quit.Wait():
 					return
 				case matchSignals[msg.sp.Addr()] <- struct{}{}:
 				}
@@ -372,7 +372,7 @@ func queryChainServiceBatch(
 			}
 		case <-queryQuit:
 			return
-		case <-s.quit:
+		case <-s.quit.Wait():
 			return
 		}
 	}
@@ -423,11 +423,11 @@ func (s *ChainService) queryAllPeers(
 				sp.QueueMessageWithEncoding(queryMsg,
 					nil, qo.encoding)
 				select {
-				case <-queryQuit:
+				case <-queryQuit.Wait():
 					return
-				case <-s.quit:
+				case <-s.quit.Wait():
 					return
-				case <-peerQuit:
+				case <-peerQuit.Wait():
 					return
 				case <-timeout:
 				}
@@ -451,11 +451,11 @@ func (s *ChainService) queryAllPeers(
 checkResponses:
 	for {
 		select {
-		case <-queryQuit:
+		case <-queryQuit.Wait():
 			break checkResponses
-		case <-s.quit:
+		case <-s.quit.Wait():
 			break checkResponses
-		case <-allQuit:
+		case <-allQuit.Wait():
 			break checkResponses
 		// A message has arrived over the subscription channel, so we execute the checkResponses callback to see if this
 		// ends our query session.
@@ -463,7 +463,7 @@ checkResponses:
 			// TODO: This will get stuck if checkResponse gets stuck. This is a caveat for callers that should be fixed
 			//  before exposing this function for public use.
 			select {
-			case <-peerQuits[sm.sp.Addr()]:
+			case <-peerQuits[sm.sp.Addr()].Wait():
 			default:
 				checkResponse(sm.sp, sm.msg, queryQuit,
 					peerQuits[sm.sp.Addr()])
@@ -522,13 +522,13 @@ checkResponses:
 				queryPeer.unsubscribeRecvMsgs(subscription)
 			}
 			break checkResponses
-		case <-queryQuit:
+		case <-queryQuit.Wait():
 			// Same when we get a quit signal.
 			if queryPeer != nil {
 				queryPeer.unsubscribeRecvMsgs(subscription)
 			}
 			break checkResponses
-		case <-s.quit:
+		case <-s.quit.Wait():
 			// Same when chain server's quit is signaled.
 			if queryPeer != nil {
 				queryPeer.unsubscribeRecvMsgs(subscription)

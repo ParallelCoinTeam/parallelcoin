@@ -127,7 +127,7 @@ func (w *Window) Run(frame func(ctx l.Context) l.Dimensions,
 			if err = fn(); Check(err) {
 				return
 			}
-		case <-quit:
+		case <-quit.Wait():
 			return nil
 			// by repeating selectors we decrease the chance of a runner delaying
 			// a frame event hitting the physical frame deadline

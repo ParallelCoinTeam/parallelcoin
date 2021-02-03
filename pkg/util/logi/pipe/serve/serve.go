@@ -58,7 +58,7 @@ func Log(quit qu.C, appName string) {
 	out:
 		for {
 			select {
-			case <-quit:
+			case <-quit.Wait():
 				// interrupt.Request()
 				if !logi.L.LogChanDisabled.Load() {
 					logi.L.LogChanDisabled.Store(true)

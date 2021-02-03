@@ -283,7 +283,7 @@ out:
 		case <-dumpAddressTicker.C:
 			Trace("saving peers data")
 			a.savePeers()
-		case <-a.quit:
+		case <-a.quit.Wait():
 			break out
 		}
 	}

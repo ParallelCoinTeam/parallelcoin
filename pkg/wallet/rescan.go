@@ -140,7 +140,7 @@ out:
 				// Unexpected message
 				panic(n)
 			}
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}
@@ -171,7 +171,7 @@ out:
 				len(addrs), noun, n.Hash, n.Height,
 			)
 			go w.resendUnminedTxs()
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}
@@ -208,7 +208,7 @@ out:
 					"rescan for %d %s failed: %v", numAddrs, noun, err)
 			}
 			batch.done(err)
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}

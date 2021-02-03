@@ -81,7 +81,7 @@ func Example_newOutboundPeer() {
 	p.AssociateConnection(conn)
 	// Wait for the verack message or timeout in case of failure.
 	select {
-	case <-verack:
+	case <-verack.Wait():
 	case <-time.After(time.Second * 1):
 		peer.Error("Example_peerConnection: verack timeout")
 	}

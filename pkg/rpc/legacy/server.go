@@ -48,7 +48,7 @@ func (c *WebsocketClient) Send(b []byte) error {
 	select {
 	case c.responses <- b:
 		return nil
-	case <-c.quit:
+	case <-c.quit.Wait():
 		return errors.New("websocket client disconnected")
 	}
 }
@@ -191,7 +191,7 @@ func (s *Server) RegisterWallet(w *wallet.Wallet) {
 func (s *Server) Stop() {
 	s.QuitMutex.Lock()
 	select {
-	case <-s.Quit:
+	case <-s.Quit.Wait():
 		s.QuitMutex.Unlock()
 		return
 	default:
@@ -475,7 +475,7 @@ out:
 					wsc.wg.Done()
 				}()
 			}
-		case <-s.Quit:
+		case <-s.Quit.Wait():
 			break out
 		}
 	}
@@ -511,7 +511,7 @@ out:
 				)
 				break out
 			}
-		case <-s.Quit:
+		case <-s.Quit.Wait():
 			break out
 		}
 	}

@@ -75,7 +75,7 @@ func New(
 					Debug(args, "after stop", r.running.Load())
 				}
 				break
-			case <-r.quit:
+			case <-r.quit.Wait():
 				Debug("runner stopped for", args)
 				break out
 			}

@@ -256,7 +256,7 @@ func Handle(address string, channel *Channel,
 out:
 	for {
 		select {
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		default:
 		}

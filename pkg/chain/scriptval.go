@@ -41,7 +41,7 @@ type txValidator struct {
 func (v *txValidator) sendResult(result error) {
 	select {
 	case v.resultChan <- result:
-	case <-v.quitChan:
+	case <-v.quitChan.Wait():
 	}
 }
 
@@ -101,7 +101,7 @@ out:
 			}
 			// Validation succeeded.
 			v.sendResult(nil)
-		case <-v.quitChan:
+		case <-v.quitChan.Wait():
 			break out
 		}
 	}

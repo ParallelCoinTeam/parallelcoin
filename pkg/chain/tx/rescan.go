@@ -138,7 +138,7 @@ out:
 				// Unexpected message
 				panic(n)
 			}
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}
@@ -171,7 +171,7 @@ out:
 				n.Hash,
 				n.Height)
 			go w.resendUnminedTxs()
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}
@@ -213,7 +213,7 @@ out:
 					err)
 			}
 			batch.done(err)
-		case <-quit:
+		case <-quit.Wait():
 			break out
 		}
 	}

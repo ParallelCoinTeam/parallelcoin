@@ -203,12 +203,12 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						w.StopChan <- struct{}{}
 						w.quit.Q()
 					}
-				case <-w.StartChan:
+				case <-w.StartChan.Wait():
 					Debug("received signal on StartChan")
 					*cx.Config.Generate = true
 					save.Pod(cx.Config)
 					w.Start()
-				case <-w.StopChan:
+				case <-w.StopChan.Wait():
 					Debug("received signal on StopChan")
 					*cx.Config.Generate = false
 					save.Pod(cx.Config)
@@ -234,7 +234,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						w.Stop()
 						w.Start()
 					}
-				case <-w.quit:
+				case <-w.quit.Wait():
 					Debug("stopping from quit")
 					interrupt.Request()
 					break out

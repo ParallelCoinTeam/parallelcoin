@@ -269,7 +269,7 @@ func TestPeerConnection(t *testing.T) {
 				outPeer.AssociateConnection(outConn)
 				for i := 0; i < 4; i++ {
 					select {
-					case <-verack:
+					case <-verack.Wait():
 					case <-time.After(time.Second):
 						return nil, nil, errors.New("verack timeout")
 					}
@@ -293,7 +293,7 @@ func TestPeerConnection(t *testing.T) {
 				outPeer.AssociateConnection(outConn)
 				for i := 0; i < 4; i++ {
 					select {
-					case <-verack:
+					case <-verack.Wait():
 					case <-time.After(time.Second):
 						return nil, nil, errors.New("verack timeout")
 					}
@@ -436,7 +436,7 @@ func TestPeerListeners(t *testing.T) {
 	outPeer.AssociateConnection(outConn)
 	for i := 0; i < 2; i++ {
 		select {
-		case <-verack:
+		case <-verack.Wait():
 		case <-time.After(time.Second * 1):
 			t.Errorf("TestPeerListeners: verack timeout\n")
 			return
@@ -593,14 +593,14 @@ func TestOutboundPeer(t *testing.T) {
 	// Test trying to connect twice.
 	p.AssociateConnection(c)
 	p.AssociateConnection(c)
-	disconnected := make(chan struct{})
+	disconnected := qu.T()
 	go func() {
 		p.WaitForDisconnect()
 		disconnected <- struct{}{}
 	}()
 	select {
-	case <-disconnected:
-		close(disconnected)
+	case <-disconnected.Wait():
+		disconnected.Q()
 	case <-time.After(time.Second):
 		t.Fatal("Peer did not automatically disconnect.")
 	}
@@ -818,7 +818,7 @@ func TestDuplicateVersionMsg(t *testing.T) {
 	// Wait for the veracks from the initial protocol version negotiation.
 	for i := 0; i < 2; i++ {
 		select {
-		case <-verack:
+		case <-verack.Wait():
 		case <-time.After(time.Second):
 			t.Fatal("verack timeout")
 		}
@@ -827,7 +827,7 @@ func TestDuplicateVersionMsg(t *testing.T) {
 	done := qu.T()
 	outPeer.QueueMessage(&wire.MsgVersion{}, done)
 	select {
-	case <-done:
+	case <-done.Wait():
 	case <-time.After(time.Second):
 		t.Fatal("send duplicate version timeout")
 	}
@@ -838,7 +838,7 @@ func TestDuplicateVersionMsg(t *testing.T) {
 		disconnected <- struct{}{}
 	}()
 	select {
-	case <-disconnected:
+	case <-disconnected.Wait():
 	case <-time.After(time.Second):
 		t.Fatal("peer did not disconnect")
 	}
