@@ -140,9 +140,9 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 									Debug("wallet started")
 								}
 							}()
-							Debug("waiting for walletChan")
-							cx.WalletServer = <-cx.WalletChan
-							Debug("walletChan sent")
+							// Debug("waiting for walletChan")
+							// cx.WalletServer = <-cx.WalletChan
+							// Debug("walletChan sent")
 							err = legacy.DropWalletHistory(cx.WalletServer)(c)
 							return
 						}, au.SubCommands(), nil),

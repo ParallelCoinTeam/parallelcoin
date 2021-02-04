@@ -79,11 +79,11 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 					fmt.Println("error running wallet:", err)
 				}
 			}()
-			Info("starting wallet")
-			if !*cx.Config.DisableRPC {
-				cx.WalletServer = <-cx.WalletChan
-			}
-			Info("wallet started")
+			// Info("starting wallet")
+			// if !*cx.Config.DisableRPC {
+			// 	cx.WalletServer = <-cx.WalletChan
+			// }
+			// Info("wallet started")
 		}
 		Debug("shell started")
 		// cx.WaitGroup.Wait()

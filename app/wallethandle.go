@@ -54,9 +54,9 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if err = walletmain.Main(cx); Check(err) {
 			Error("failed to start up wallet", err)
 		}
-		if !*cx.Config.DisableRPC {
-			cx.WalletServer = <-cx.WalletChan
-		}
+		// if !*cx.Config.DisableRPC {
+		// 	cx.WalletServer = <-cx.WalletChan
+		// }
 		// cx.WaitGroup.Wait()
 		cx.WaitWait()
 		return

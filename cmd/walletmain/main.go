@@ -124,7 +124,7 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	// }()
 	loader.Wallet = w
 	// Debug("^^^^^^^^^^^ sending back wallet")
-	cx.WalletChan <- w
+	// cx.WalletChan <- w
 	Debug("starting rpcClientConnectLoop")
 	go rpcClientConnectLoop(cx, legacyServer, loader)
 	Debug("^^^^^^^^^^^^^ adding interrupt handler to unload wallet")
@@ -149,15 +149,11 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 		)
 	}
 	go func() {
-	out:
-		for {
-			select {
-			case <-cx.KillAll.Wait():
-				break out
-			case <-legacyServer.RequestProcessShutdownChan().Wait():
-				interrupt.Request()
-			}
+		select {
+		case <-cx.KillAll.Wait():
+		case <-legacyServer.RequestProcessShutdownChan().Wait():
 		}
+		interrupt.Request()
 	}()
 	return
 }
@@ -278,7 +274,8 @@ func rpcClientConnectLoop(
 // options from the global config and there is no recovery in case the server is not available or if there is an
 // authentication error. Instead, all requests to the client will simply error.
 func StartChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte, quit qu.C) (*chain.RPCClient, error) {
-	Debug(">>>>>>>>>>>>>>> attempting RPC client connection to %v, TLS: %s", *config.RPCConnect, fmt.Sprint(*config.TLS),
+	Debug(
+		">>>>>>>>>>>>>>> attempting RPC client connection to %v, TLS: %s", *config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
 	rpcC, err := chain.NewRPCClient(
 		activeNet,

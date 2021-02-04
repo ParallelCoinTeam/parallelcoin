@@ -64,8 +64,8 @@ type Xt struct {
 	NodeChan chan *chainrpc.Server
 	// WalletServer is needed to query the wallet
 	WalletServer *wallet.Wallet
-	// WalletChan is a channel used to return the wallet server pointer when it starts
-	WalletChan chan *wallet.Wallet
+	// // WalletChan is a channel used to return the wallet server pointer when it starts
+	// WalletChan chan *wallet.Wallet
 	// ChainClientChan returns the chainclient
 	ChainClientReady qu.C
 	// ChainClient is the wallet's chain RPC client
@@ -136,7 +136,7 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		StateCfg:         new(state.Config),
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
-		WalletChan:       make(chan *wallet.Wallet),
+		// WalletChan:       make(chan *wallet.Wallet),
 		NodeChan:         make(chan *chainrpc.Server),
 	}
 	// interrupt.AddHandler(func(){
