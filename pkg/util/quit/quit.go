@@ -51,7 +51,7 @@ func (c C) Q() {
 }
 
 func (c C) Wait() <-chan struct{} {
-	Trace(logi.Caller(">>> waiting on quit channel at", 1))
+	// Trace(logi.Caller(">>> waiting on quit channel at", 1))
 	return c
 }
 

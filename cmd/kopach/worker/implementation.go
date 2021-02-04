@@ -163,14 +163,14 @@ out:
 				w.hashReport()
 				break
 			case <-w.stopChan.Wait():
-				Trace("received pause signal while paused")
+				Debug("received pause signal while paused")
 				// drain stop channel in pause
 				break
 			case <-w.startChan.Wait():
-				Trace("received start signal")
+				Debug("received start signal")
 				break pausing
 			case <-w.quit.Wait():
-				Trace("quitting")
+				Debug("quitting")
 				break out
 			}
 		}
@@ -184,19 +184,19 @@ out:
 				w.hashReport()
 				break
 			case <-w.startChan.Wait():
-				Trace("received start signal while running")
+				Debug("received start signal while running")
 				// drain start channel in run mode
 				break
 			case <-w.stopChan.Wait():
-				Trace("received pause signal while running")
+				Debug("received pause signal while running")
 				break running
 			case <-w.quit.Wait():
-				Trace("worker stopping while running")
+				Debug("worker stopping while running")
 				break out
 			default:
 				if w.block.Load() == nil || w.bitses.Load() == nil ||
 					w.merkles.Load() == nil || !w.dispatchReady.Load() {
-					// Debug("not ready to work")
+					Debug("not ready to work")
 				} else {
 					// Debug("working")
 					// work
@@ -226,7 +226,7 @@ out:
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 						select {
 						case <-w.quit.Wait():
-							Trace("worker stopping on pausing message")
+							Debug("worker stopping on pausing message")
 							break out
 						default:
 						}

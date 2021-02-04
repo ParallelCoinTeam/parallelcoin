@@ -28,7 +28,6 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
-	"github.com/p9c/pod/cmd/kopach/control/sol"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
@@ -338,56 +337,56 @@ var handlers = transport.Handlers{
 		}
 		return
 	},
-	string(sol.Magic): func(
-		ctx interface{}, src net.Addr, dst string,
-		b []byte,
-	) (err error) {
-		Debug("solution detected from miner at", src)
-		w := ctx.(*Worker)
-		portSlice := strings.Split(w.FirstSender.Load(), ":")
-		if len(portSlice) < 2 {
-			Debug("error with solution", w.FirstSender.Load(), portSlice)
-			return
-		}
-		// port := portSlice[1]
-		// j := sol.LoadSolContainer(b)
-		// senderPort := j.GetSenderPort()
-		// if fmt.Sprint(senderPort) == port {
-		// // Warn("we found a solution")
-		// // prepend to list of solutions for GUI display if enabled
-		// if *w.cx.Config.KopachGUI {
-		// 	// Debug("length solutions", len(w.solutions))
-		// 	blok := j.GetMsgBlock()
-		// 	w.solutions = append(
-		// 		w.solutions, []SolutionData{
-		// 			{
-		// 				time:   time.Now(),
-		// 				height: int(w.height),
-		// 				algo: fmt.Sprint(
-		// 					fork.GetAlgoName(blok.Header.Version, w.height),
-		// 				),
-		// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
-		// 				indexHash:  blok.Header.BlockHash().String(),
-		// 				version:    blok.Header.Version,
-		// 				prevBlock:  blok.Header.PrevBlock.String(),
-		// 				merkleRoot: blok.Header.MerkleRoot.String(),
-		// 				timestamp:  blok.Header.Timestamp,
-		// 				bits:       blok.Header.Bits,
-		// 				nonce:      blok.Header.Nonce,
-		// 			},
-		// 		}...,
-		// 	)
-		// 	if len(w.solutions) > 2047 {
-		// 		w.solutions = w.solutions[len(w.solutions)-2047:]
-		// 	}
-		// 	w.solutionCount = len(w.solutions)
-		// 	w.Update <- struct{}{}
-		// }
-		// }
-		Debug("no longer listening to", w.FirstSender.Load())
-		w.FirstSender.Store("")
-		return
-	},
+	// string(sol.Magic): func(
+	// 	ctx interface{}, src net.Addr, dst string,
+	// 	b []byte,
+	// ) (err error) {
+	// 	Debug("solution detected from miner at", src)
+	// 	w := ctx.(*Worker)
+	// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
+	// 	if len(portSlice) < 2 {
+	// 		Debug("error with solution", w.FirstSender.Load(), portSlice)
+	// 		return
+	// 	}
+	// 	// port := portSlice[1]
+	// 	// j := sol.LoadSolContainer(b)
+	// 	// senderPort := j.GetSenderPort()
+	// 	// if fmt.Sprint(senderPort) == port {
+	// 	// // Warn("we found a solution")
+	// 	// // prepend to list of solutions for GUI display if enabled
+	// 	// if *w.cx.Config.KopachGUI {
+	// 	// 	// Debug("length solutions", len(w.solutions))
+	// 	// 	blok := j.GetMsgBlock()
+	// 	// 	w.solutions = append(
+	// 	// 		w.solutions, []SolutionData{
+	// 	// 			{
+	// 	// 				time:   time.Now(),
+	// 	// 				height: int(w.height),
+	// 	// 				algo: fmt.Sprint(
+	// 	// 					fork.GetAlgoName(blok.Header.Version, w.height),
+	// 	// 				),
+	// 	// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
+	// 	// 				indexHash:  blok.Header.BlockHash().String(),
+	// 	// 				version:    blok.Header.Version,
+	// 	// 				prevBlock:  blok.Header.PrevBlock.String(),
+	// 	// 				merkleRoot: blok.Header.MerkleRoot.String(),
+	// 	// 				timestamp:  blok.Header.Timestamp,
+	// 	// 				bits:       blok.Header.Bits,
+	// 	// 				nonce:      blok.Header.Nonce,
+	// 	// 			},
+	// 	// 		}...,
+	// 	// 	)
+	// 	// 	if len(w.solutions) > 2047 {
+	// 	// 		w.solutions = w.solutions[len(w.solutions)-2047:]
+	// 	// 	}
+	// 	// 	w.solutionCount = len(w.solutions)
+	// 	// 	w.Update <- struct{}{}
+	// 	// }
+	// 	// }
+	// 	// Debug("no longer listening to", w.FirstSender.Load())
+	// 	// w.FirstSender.Store("")
+	// 	return
+	// },
 }
 
 func (w *Worker) HashReport() float64 {
