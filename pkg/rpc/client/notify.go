@@ -154,8 +154,11 @@ type NotificationHandlers struct {
 // handleNotification examines the passed notification type, performs conversions to get the raw notification types into
 // higher level types and delivers the notification to the appropriate On<X> handler registered with the client.
 func (c *Client) handleNotification(ntfn *rawNotification) {
+	Debug("<<<Handling Notification>>>")
+	Debugs(ntfn)
 	// Ignore the notification if the client is not interested in any notifications.
 	if c.ntfnHandlers == nil {
+		Debug("<<<no notification handlers registered>>>")
 		return
 	}
 	switch ntfn.Method {
@@ -163,6 +166,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.BlockConnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnBlockConnected == nil {
+			Debug("<<<no OnBlockConnected callback registered>>>")
 			return
 		}
 		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
@@ -175,6 +179,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.FilteredBlockConnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnFilteredBlockConnected == nil {
+			Debug("<<<no OnFilteredBlockConnected callback registered>>>")
 			return
 		}
 		blockHeight, blockHeader, transactions, err :=
@@ -191,6 +196,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.BlockDisconnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnBlockDisconnected == nil {
+			Debug("<<<no OnBlockDisconnected callback registered>>>")
 			return
 		}
 		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
@@ -203,6 +209,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.FilteredBlockDisconnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnFilteredBlockDisconnected == nil {
+			Debug("<<<no OnFilteredBlockDisconnected callback registered>>>")
 			return
 		}
 		blockHeight, blockHeader, err := parseFilteredBlockDisconnectedParams(ntfn.Params)
@@ -217,6 +224,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RecvTxNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRecvTx == nil {
+			Debug("<<<no OnRecvTx callback registered>>>")
 			return
 		}
 		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
@@ -229,6 +237,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RedeemingTxNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRedeemingTx == nil {
+			Debug("<<<no OnRedeemingTx callback registered>>>")
 			return
 		}
 		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
@@ -241,6 +250,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RelevantTxAcceptedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRelevantTxAccepted == nil {
+			Debug("<<<no OnRelevantTxAccepted callback registered>>>")
 			return
 		}
 		transaction, err := parseRelevantTxAcceptedParams(ntfn.Params)
@@ -253,6 +263,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RescanFinishedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRescanFinished == nil {
+			Debug("<<<no OnRescanFinished callback registered>>>")
 			return
 		}
 		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
@@ -265,6 +276,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RescanProgressNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRescanProgress == nil {
+			Debug("<<<no OnRescanProgress callback registered>>>")
 			return
 		}
 		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
@@ -277,6 +289,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.TxAcceptedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnTxAccepted == nil {
+			Debug("<<<no OnTxAccepted callback registered>>>")
 			return
 		}
 		hash, amt, err := parseTxAcceptedNtfnParams(ntfn.Params)
@@ -289,6 +302,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.TxAcceptedVerboseNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnTxAcceptedVerbose == nil {
+			Debug("<<<no OnTxAcceptedVerbose callback registered>>>")
 			return
 		}
 		rawTx, err := parseTxAcceptedVerboseNtfnParams(ntfn.Params)
@@ -302,6 +316,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.PodConnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnPodConnected == nil {
+			Debug("<<<no OnPodConnected callback registered>>>")
 			return
 		}
 		connected, err := parsePodConnectedNtfnParams(ntfn.Params)
@@ -314,6 +329,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.AccountBalanceNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnAccountBalance == nil {
+			Debug("<<<no OnAccountBalance callback registered>>>")
 			return
 		}
 		account, bal, conf, err := parseAccountBalanceNtfnParams(ntfn.Params)
@@ -327,6 +343,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.WalletLockStateNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnWalletLockState == nil {
+			Debug("<<<no OnWalletLockState callback registered>>>")
 			return
 		}
 		// The account name is not notified, so the return value is discarded.
@@ -340,6 +357,7 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	// OnUnknownNotification
 	default:
 		if c.ntfnHandlers.OnUnknownNotification == nil {
+			Debug("<<<no OnUnknownNotification callback registered>>>")
 			return
 		}
 		c.ntfnHandlers.OnUnknownNotification(ntfn.Method, ntfn.Params)
