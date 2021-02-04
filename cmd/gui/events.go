@@ -11,7 +11,6 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func (wg *WalletGUI) WalletAndClientRunning() bool {
@@ -150,16 +149,21 @@ func (wg *WalletGUI) updateThingies() (err error) {
 }
 func (wg *WalletGUI) updateChainBlock() {
 	Debug("processChainBlockNotification")
-	if wg.ChainClient.Disconnected() {
-		return
-	}
 	var err error
+	if wg.ChainClient.Disconnected() {
+		Debug("connecting ChainClient")
+		if err = wg.chainClient(); Check(err) {
+			return
+		}
+	}
 	var h *chainhash.Hash
 	var height int32
+	Debug("updating best block")
 	if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
-		interrupt.Request()
+		// interrupt.Request()
 		return
 	}
+	Debug(h, height)
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(h)
 }
@@ -168,6 +172,9 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 	Debug("processChainBlockNotification")
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(hash)
+	if wg.WalletAndClientRunning() {
+		wg.processWalletBlockNotification()
+	}
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() bool {
@@ -224,7 +231,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
 			Trace("chain OnBlockConnected", hash, height, t)
 			wg.processChainBlockNotification(hash, height, t)
-			// wg.processWalletBlockNotification()
+			wg.processWalletBlockNotification()
 			// pop up new block toast
 			
 			wg.invalidate <- struct{}{}
@@ -366,12 +373,12 @@ func (wg *WalletGUI) chainClient() (err error) {
 			return
 		}
 	}
-	if wg.ChainClient.Disconnected() {
-		Debug("connecting chain client")
-		if err = wg.ChainClient.Connect(1); Check(err) {
-			return
-		}
+	// if wg.ChainClient.Disconnected() {
+	Debug("connecting chain client")
+	if err = wg.ChainClient.Connect(1); Check(err) {
+		return
 	}
+	// }
 	if err = wg.ChainClient.NotifyBlocks(); !Check(err) {
 		Debug("subscribed to new blocks")
 		// wg.WalletNotifications()
@@ -401,7 +408,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 			TLS:                  *wg.cx.Config.TLS,
 			Certificates:         certs,
 			DisableAutoReconnect: false,
-			DisableConnectOnNew:  true,
+			DisableConnectOnNew:  false,
 		}, wg.WalletNotifications(), wg.cx.KillAll,
 	); Check(err) {
 		wg.WalletMutex.Unlock()
