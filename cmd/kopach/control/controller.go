@@ -152,9 +152,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	ctrl.height.Store(0)
 	ctrl.active.Store(false)
 	if ctrl.multiConn, err = transport.NewBroadcastChannel(
-		"controller",
-		ctrl, *cx.Config.MinerPass,
-		transport.DefaultPort, MaxDatagramSize, handlersMulticast,
+		"controller", ctrl, *cx.Config.MinerPass, transport.DefaultPort, MaxDatagramSize, handlersMulticast,
 		quit,
 	); Check(err) {
 		ctrl.quit.Q()
@@ -372,7 +370,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 }
 
 // Solutions submitted by workers
-func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err error) {
+func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err error) {
 	Debug("received solution", src, dst)
 	c := ctx.(*Controller)
 	if !c.active.Load() { // || !c.cx.Node.Load() {
@@ -385,26 +383,35 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err e
 	// Debugs(s)
 	// j := sol.LoadSolContainer(b)
 	senderPort := s.Port
-	br := bytes.NewBuffer(s.Bytes)
-	newBlock := wire.NewMsgBlock(&wire.BlockHeader{})
-	if err = newBlock.Deserialize(br); Check(err) {
-	}
 	if int(senderPort) != c.listenPort {
 		Debug("solution not from current controller")
 		return
 	}
+	br := bytes.NewBuffer(s.Bytes)
+	newBlock := wire.NewMsgBlock(&wire.BlockHeader{})
+	if err = newBlock.Deserialize(br); Check(err) {
+	}
 	msgBlock := newBlock
+	Debugs(msgBlock)
 	if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.BestSnapshot().Hash) {
 		Debug("block submitted by kopach miner worker is stale")
 		if err := c.sendNewBlockTemplate(); Check(err) {
 		}
 		return
 	}
-	// Warn(msgBlock.Header.Version)
-	cb, ok := c.coinbases.Load().(map[int32]*util.Tx)[msgBlock.Header.Version]
+	Warn(msgBlock.Header.Version)
+	// cb, ok := c.coinbases.Load().(map[int32]*util.Tx)[msgBlock.Header.Version]
+	cbRaw := c.coinbases.Load()
+	cbrs, ok := cbRaw.(*map[int32]*util.Tx)
 	if !ok {
-		Debug("coinbases not found", cb)
+		Debug("coinbases not correct type", cbrs)
 		return
+	}
+	Debugs(cbrs)
+	var cb *util.Tx
+	cb, ok = (*cbrs)[msgBlock.Header.Version]
+	if !ok {
+		Debug("coinbase not found")
 	}
 	Debug("copying over transactions")
 	cbs := []*util.Tx{cb}
@@ -413,6 +420,10 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err e
 	for i := range txs {
 		msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 	}
+	mTree := blockchain.BuildMerkleTreeStore(
+		txs, false,
+	)
+	Debugs(mTree)
 	// set old blocks to pause and send pause directly as block is probably a
 	// solution
 	Debug("sending pause to workers")
@@ -505,9 +516,9 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	msgB := template.Block
 	// c.coinbases = make(map[int32]*util.Tx)
 	var txs []*util.Tx
-	ccb := make(map[int32]*util.Tx)
+	var ccb *map[int32]*util.Tx
 	var fMC []byte
-	fMC, txs = job.Get(c.cx, util.NewBlock(msgB), &ccb)
+	ccb, fMC, txs = job.Get(c.cx, util.NewBlock(msgB))
 	// Debugs(fMC)
 	// var jr job.Job
 	// gotiny.Unmarshal(fMC, &jr)
@@ -531,7 +542,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	return
 }
 
-func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error, ) {
+func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error,) {
 	Trace("getting new block template")
 	var addr util.Address
 	if c.walletClient != nil {
@@ -581,7 +592,7 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("********** got new block template")
-		// Debugs(template)
+		Debugs(template)
 	}
 	return
 }

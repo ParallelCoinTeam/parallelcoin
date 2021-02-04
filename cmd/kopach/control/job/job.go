@@ -37,7 +37,9 @@ type Job struct {
 // deserialize their contents which will be concurrent safe The varying coinbase
 // payment values are in transaction 0 last output, the individual varying
 // transactions are stored separately and will be reassembled at the end
-func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr []*util.Tx,) {
+func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr []*util.Tx) {
+	_temp := make(map[int32]*util.Tx)
+	cbs = &_temp
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	// nBH := Int32.New().Put(bH)
@@ -66,7 +68,7 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	} else {
 		bitsMap = tip.Diffs.Load().(blockchain.TargetBits)
 	}
-	// Traces(*bitsMap)
+	Traces(bitsMap)
 	// bitses := Bitses.NewBitses()
 	// bitses.Put(bitsMap)
 	// msg = append(msg, bitses)
@@ -75,10 +77,10 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	// roots for the version number but to get them first get the values
 	var val int64
 	mTS := make(map[int32]*chainhash.Hash)
-	txs := mB.Transactions()[0]
-	rtx := mB.Transactions()[1:]
-	txr = make([]*util.Tx, len(rtx))
-	for i, v := range rtx {
+	coinbase := mB.Transactions()[0]
+	transactions := mB.Transactions()[1:]
+	txr = make([]*util.Tx, len(transactions))
+	for i, v := range transactions {
 		txr[i] = v
 	}
 	nbH := bH
@@ -90,16 +92,16 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	}
 	for i := range bitsMap {
 		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
-		txc := txs.MsgTx().Copy()
+		txc := coinbase.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
-		// Traces(txs)
+		Debugs(coinbase)
 		(*cbs)[i] = txx
-		Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
+		Debug("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, txr...), false,
 		)
-		// Traces(mTree[len(mTree)-1].CloneBytes())
+		Debugs(mTree)
 		mTS[i] = &chainhash.Hash{}
 		if err = mTS[i].SetBytes(mTree[0].CloneBytes()); Check(err) {
 		}
@@ -117,9 +119,9 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	// previously were sending blocks, no need for that really miner only needs
 	// valid block headers
 	//
-	// txs := mB.MsgBlock().Transactions
-	// for i := range txs {
-	// 	t := (&Transaction.Transaction{}).Put(txs[i])
+	// coinbase := mB.MsgBlock().Transactions
+	// for i := range coinbase {
+	// 	t := (&Transaction.Transaction{}).Put(coinbase[i])
 	// 	msg = append(msg, t)
 	// }
 	// Traces(msg)
@@ -151,7 +153,7 @@ func Get(cx *conte.Xt, mB *util.Block, cbs *map[int32]*util.Tx) (out []byte, txr
 	// Debugs(jr)
 	// Debug("job size", len(jobber))
 	// return Container{*msg.CreateContainer(Magic)}, txr
-	return out, txr
+	return cbs, out, txr
 }
 
 //
