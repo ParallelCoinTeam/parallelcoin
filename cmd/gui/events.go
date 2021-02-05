@@ -181,7 +181,7 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 func (wg *WalletGUI) processWalletBlockNotification() bool {
 	Debug("processWalletBlockNotification")
 	if !wg.WalletAndClientRunning() {
-		Debug("wallet and client not running", wg.wallet.Running(), wg.WalletClient.Disconnected())
+		Debug("wallet and client not running")
 		return false
 	}
 	// check account balance

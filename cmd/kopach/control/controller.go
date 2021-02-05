@@ -62,14 +62,14 @@ type Controller struct {
 	pauseShards            [][]byte
 	sendAddresses          []*net.UDPAddr
 	// submitChan             chan []byte
-	buffer                 *ring.Ring
-	began                  time.Time
-	otherNodes             map[string]time.Time
-	listenPort             int
-	hashCount              atomic.Uint64
-	hashSampleBuf          *rav.BufferUint64
-	lastNonce              int32
-	walletClient           *rpcclient.Client
+	buffer        *ring.Ring
+	began         time.Time
+	otherNodes    map[string]time.Time
+	listenPort    int
+	hashCount     atomic.Uint64
+	hashSampleBuf *rav.BufferUint64
+	lastNonce     int32
+	walletClient  *rpcclient.Client
 }
 
 func Run(cx *conte.Xt) (quit qu.C) {
@@ -83,9 +83,9 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		return
 	}
 	ctrl := &Controller{
-		quit:                   qu.T(),
-		cx:                     cx,
-		sendAddresses:          []*net.UDPAddr{},
+		quit:          qu.T(),
+		cx:            cx,
+		sendAddresses: []*net.UDPAddr{},
 		// submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
 		// coinbases:              make(map[int32]*util.Tx),
@@ -343,12 +343,11 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 	// Debug(otherIPs)
 	// Trace("otherIPs", otherIPs)
 	otherPort := fmt.Sprint(j.P2P)
-	// Debug(otherPort)
+	Debug()
 	myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
-	// Debug(myPort)
-	// Trace("myPort", myPort,*c.cx.Config.Listeners)
+	Debug("myPort", myPort, *c.cx.Config.Listeners, "otherPort", otherPort)
 	for i := range otherIPs {
-		o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
+		o := fmt.Sprintf("%s:%s", otherIPs[i].String(), otherPort)
 		if otherPort != myPort {
 			// if it has a different controller port it is probably a different instance
 			if _, ok := c.otherNodes[o]; !ok {
@@ -360,8 +359,8 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 				Info("connecting to lan peer with same PSK", o, otherIPs)
 				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
 				}
+				c.otherNodes[o] = time.Now()
 			}
-			c.otherNodes[o] = time.Now()
 		}
 	}
 	// If we lose connection for more than 9 seconds we delete and if the node reappears it can be reconnected
