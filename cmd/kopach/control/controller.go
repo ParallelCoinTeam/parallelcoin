@@ -422,7 +422,15 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	Debug("copying over transactions")
 	cbs := []*util.Tx{cb}
 	msgBlock.Transactions = []*wire.MsgTx{}
-	txs := append(cbs, c.transactions.Load().([]*util.Tx)...)
+	t := c.transactions.Load()
+	var rtx []*util.Tx
+	rtx, ok = t.([]*util.Tx)
+	var txs []*util.Tx
+	if ok {
+		txs = append(cbs, rtx...)
+	} else {
+		txs = cbs
+	}
 	for i := range txs {
 		msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 	}
