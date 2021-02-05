@@ -61,7 +61,7 @@ type Controller struct {
 	lastGenerated          atomic.Value
 	pauseShards            [][]byte
 	sendAddresses          []*net.UDPAddr
-	submitChan             chan []byte
+	// submitChan             chan []byte
 	buffer                 *ring.Ring
 	began                  time.Time
 	otherNodes             map[string]time.Time
@@ -86,7 +86,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		quit:                   qu.T(),
 		cx:                     cx,
 		sendAddresses:          []*net.UDPAddr{},
-		submitChan:             make(chan []byte),
+		// submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
 		// coinbases:              make(map[int32]*util.Tx),
 		buffer:        ring.New(BufferSize),
@@ -219,14 +219,14 @@ func Run(cx *conte.Xt) (quit qu.C) {
 					Debug("rebroadcasting")
 					ctrl.rebroadcast()
 				}
-			case msg := <-ctrl.submitChan:
-				Traces(msg)
-				decodedB, err := util.NewBlockFromBytes(msg)
-				if err != nil {
-					Error(err)
-					break
-				}
-				Traces(decodedB)
+			// case msg := <-ctrl.submitChan:
+			// 	Traces(msg)
+			// 	decodedB, err := util.NewBlockFromBytes(msg)
+			// 	if err != nil {
+			// 		Error(err)
+			// 		break
+			// 	}
+			// 	Traces(decodedB)
 			case <-ctrl.quit.Wait():
 				Debug("quitting on close quit channel")
 				break out
@@ -290,6 +290,8 @@ func (c *Controller) rebroadcast() {
 	}
 	if !ok {
 		Debug("template is nil")
+		if err := c.sendNewBlockTemplate(); Check(err) {
+		}
 		return
 	}
 	Debug("sending out job")
@@ -348,7 +350,9 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 	for i := range otherIPs {
 		o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
 		if otherPort != myPort {
+			// if it has a different controller port it is probably a different instance
 			if _, ok := c.otherNodes[o]; !ok {
+				// if we haven't already added it to the permanent peer list, we can add it now
 				Debug("ctrl", j.Controller, "P2P", j.P2P, "rpc", j.RPC)
 				// because nodes can be set to change their port each launch this always
 				// reconnects (for lan, autoports is recommended).
@@ -360,6 +364,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 			c.otherNodes[o] = time.Now()
 		}
 	}
+	// If we lose connection for more than 9 seconds we delete and if the node reappears it can be reconnected
 	for i := range c.otherNodes {
 		if time.Now().Sub(c.otherNodes[i]) > time.Second*9 {
 			delete(c.otherNodes, i)
@@ -392,6 +397,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	if err = newBlock.Deserialize(br); Check(err) {
 	}
 	msgBlock := newBlock
+	Debug("-------------------------------------------------------")
 	Debugs(msgBlock)
 	if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.BestSnapshot().Hash) {
 		Debug("block submitted by kopach miner worker is stale")
@@ -412,6 +418,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	cb, ok = (*cbrs)[msgBlock.Header.Version]
 	if !ok {
 		Debug("coinbase not found")
+		return
 	}
 	Debug("copying over transactions")
 	cbs := []*util.Tx{cb}
@@ -487,13 +494,6 @@ func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (er
 	}
 	var hr hashrate.Hashrate
 	gotiny.Unmarshal(b, &hr)
-	// hp := hashrate.LoadContainer(b)
-	// count := hp.GetCount()
-	// nonce := hp.GetNonce()
-	
-	// hp := hashrate.LoadContainer(b)
-	// count := hp.GetCount()
-	// nonce := hp.GetNonce()
 	if c.lastNonce == hr.Nonce {
 		return
 	}
@@ -519,10 +519,6 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	var ccb *map[int32]*util.Tx
 	var fMC []byte
 	ccb, fMC, txs = job.Get(c.cx, util.NewBlock(msgB))
-	// Debugs(fMC)
-	// var jr job.Job
-	// gotiny.Unmarshal(fMC, &jr)
-	// Debugs(jr)
 	c.coinbases.Store(ccb)
 	jobShards := transport.GetShards(fMC)
 	shardsLen := len(jobShards)
@@ -563,9 +559,6 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 		rand.Seed(time.Now().UnixNano())
 		p2a := rand.Intn(len(*c.cx.Config.MiningAddrs))
 		addr = c.cx.StateCfg.ActiveMiningAddrs[p2a]
-		// do this after returning, in the background
-		// defer func() {
-		// 	go func() {
 		// remove the address from the state
 		if p2a == 0 {
 			c.cx.StateCfg.ActiveMiningAddrs = c.cx.StateCfg.ActiveMiningAddrs[1:]
@@ -580,7 +573,6 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 		for i := range c.cx.StateCfg.ActiveMiningAddrs {
 			ma = append(ma, c.cx.StateCfg.ActiveMiningAddrs[i].String())
 		}
-		// Debug(ma)
 		*c.cx.Config.MiningAddrs = ma
 		save.Pod(c.cx.Config)
 	}

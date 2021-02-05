@@ -2,8 +2,10 @@ package config
 
 import (
 	"crypto/tls"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/chain/forkhash"
 	"io/ioutil"
 	"net"
 	"os"
@@ -16,7 +18,6 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/forkhash"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -773,8 +774,10 @@ func validateMiningStuff(
 	// 	*cfg.Generate = false
 	// 	// os.Exit(1)
 	// }
-	if *cfg.MinerPass != "" {
-		state.ActiveMinerKey = forkhash.Argon2i([]byte(*cfg.MinerPass))
+	if *cfg.MinerPass == "" {
+		Debug("--------------- generating new miner key")
+		*cfg.MinerPass = hex.EncodeToString(forkhash.Argon2i([]byte(*cfg.MinerPass)))
+		state.ActiveMinerKey = []byte(*cfg.MinerPass)
 	}
 }
 

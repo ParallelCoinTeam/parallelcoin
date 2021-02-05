@@ -287,6 +287,8 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("minerpass") {
 			*cx.Config.MinerPass = c.String("minerpass")
+			Debug("--------- set minerpass", *cx.Config.MinerPass)
+			cx.StateCfg.Save = true
 		}
 		if c.IsSet("blockminsize") {
 			*cx.Config.BlockMinSize = c.Int("blockminsize")
