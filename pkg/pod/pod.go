@@ -139,7 +139,7 @@ type Config struct {
 	DisableCheckpoints     *bool            `group:"debug" label:"Disable Checkpoints" description:"disables all checkpoints" type:"" widget:"toggle" json:"DisableCheckpoints" hook:"restart"`
 	DisableDNSSeed         *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"" widget:"toggle" json:"DisableDNSSeed" hook:"restart"`
 	DisableListen          *bool            `group:"node" label:"Disable Listen" description:"disables inbound connections for the peer to peer network" type:"" widget:"toggle" json:"DisableListen" hook:"restart"`
-	DisableRPC             *bool            `group:"" label:"Disable RPC" description:"disable rpc servers" type:"" widget:"toggle" json:"DisableRPC" hook:"restart"`
+	DisableRPC             *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers, as well as kopach controller" type:"" widget:"toggle" json:"DisableRPC" hook:"restart"`
 	ExternalIPs            *cli.StringSlice `group:"node" label:"External IP Addresses" description:"extra addresses to tell peers they can connect to" type:"address" widget:"multi" json:"ExternalIPs" hook:"restart"`
 	FreeTxRelayLimit       *float64         `group:"policy" label:"Free Tx Relay Limit" description:"limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"" widget:"float" json:"FreeTxRelayLimit" hook:"restart"`
 	Generate               *bool            `group:"mining" label:"Generate Blocks" description:"turn on Kopach CPU miner" type:"" widget:"toggle" json:"Generate" hook:"generate"`

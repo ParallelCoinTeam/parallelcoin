@@ -108,7 +108,9 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			// }
 			wg.unlockPassword.Wipe()
 			wg.ready.Store(true)
-			wg.WalletWatcher = wg.Watcher()
+			if !*wg.cx.Config.DisableRPC {
+				wg.WalletWatcher = wg.Watcher()
+			}
 			wg.Invalidate()
 		}
 	} else {
