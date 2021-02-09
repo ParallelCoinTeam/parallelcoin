@@ -5,6 +5,22 @@ import (
 	"strings"
 )
 
+// Address is a structure for storing a network address that is both routeable
+// to the internet and has a local area network with multicast available
+type Address struct {
+	Interface net.Interface
+	Address   string
+}
+
+// Addresses are the collection of address/interface combinations that have been
+// found to be routeable and have multicast
+var Addresses []Address
+
+// Discover scans the OS network configuration and populates the foregoing fields
+func Discover() {
+
+}
+
 // GetInterface returns the address and interface of multicast capable interfaces
 func GetInterface() (interfaces []net.Interface, addresses []string) {
 	var err error
