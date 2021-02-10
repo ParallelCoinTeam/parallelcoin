@@ -3,7 +3,7 @@ echo "Building and installing parallelcoind and parallelcoin-qt"
 echo "Building openssh 1.0.1..."
 wget https://github.com/openssl/openssl/archive/OpenSSL_1_0_1u.tar.gz
 tar zxvf OpenSSL_1_0_1u.tar.gz
-cd openssl-1.0.1u
+cd OpenSSL_1_0_1u
 ./config
 make -j$(nproc)
 sudo make install
