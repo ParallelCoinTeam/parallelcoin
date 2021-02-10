@@ -1,10 +1,12 @@
 package job
 
 import (
-	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"net"
 	"time"
+	
+	"github.com/niubaoshu/gotiny"
+	
+	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	
 	"github.com/p9c/pod/app/conte"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -17,7 +19,7 @@ import (
 var Magic = []byte{'j', 'o', 'b', 1}
 
 type Job struct {
-	IPs             []net.TCPAddr
+	IPs             net.IP
 	P2PListenerPort uint16
 	RPCListenerPort uint16
 	ControllerPort  uint16
@@ -127,7 +129,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	// Traces(msg)
 	adv := p2padvt.GetAdvt(cx)
 	jrb := Job{
-		IPs:             adv.IPs,
+		IPs:             adv.IP,
 		P2PListenerPort: adv.P2P,
 		RPCListenerPort: adv.RPC,
 		ControllerPort:  adv.Controller,

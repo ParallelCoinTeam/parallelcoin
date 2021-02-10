@@ -23,7 +23,7 @@ var Magic = []byte{'h', 'a', 's', 1}
 
 type Hashrate struct {
 	Time    time.Time
-	IPs     []net.TCPAddr
+	IP      net.IP
 	Count   int
 	Version int32
 	Height  int32
@@ -37,7 +37,7 @@ func Get(count int32, version int32, height int32, id string) []byte {
 	}
 	hr := Hashrate{
 		Time:    time.Now(),
-		IPs:     routeable.GetListenable(),
+		IP:      routeable.GetListenable(),
 		Count:   int(count),
 		Version: version,
 		Height:  height,

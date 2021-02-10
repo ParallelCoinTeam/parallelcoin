@@ -134,10 +134,10 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if fP, e = GetFreePort(); Check(e) {
 	}
 	// var routeableAddresses []net.Addr
-	_, addresses := routeable.GetInterface()
+	_, routeableAddress, _ := routeable.GetInterface()
 	// routeableAddresses, e = routeableInterface[0].Addrs()
 	// Debug(routeableAddresses)
-	routeableAddress := addresses[0]
+	// routeableAddress := addresses
 	// Debug("********************", routeableAddress)
 	*cfg.Controller = net.JoinHostPort(routeableAddress, fmt.Sprint(fP))
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {

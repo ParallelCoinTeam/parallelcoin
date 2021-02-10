@@ -1,10 +1,12 @@
 package p2padvt
 
 import (
+	"net"
+	
 	"github.com/niubaoshu/gotiny"
+	
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/routeable"
-	"net"
 	
 	"github.com/p9c/pod/app/conte"
 )
@@ -12,7 +14,7 @@ import (
 var Magic = []byte{'a', 'd', 'v', 1}
 
 type Advertisment struct {
-	IPs                  []net.TCPAddr
+	IP                   net.IP
 	P2P, RPC, Controller uint16
 }
 
@@ -29,7 +31,7 @@ func Get(cx *conte.Xt) []byte {
 	RPC:=        util.GetActualPort((*cx.Config.RPCListeners)[0])
 	Controller:= util.GetActualPort(*cx.Config.Controller)
 	adv := Advertisment{
-		IPs:        routeable.GetListenable(),
+		IP:         routeable.GetListenable(),
 		P2P:        P2P,
 		RPC:        RPC,
 		Controller: Controller,
@@ -49,7 +51,7 @@ func Get(cx *conte.Xt) []byte {
 // GetAdvt returns an advertisment serializer
 func GetAdvt(cx *conte.Xt) *Advertisment {
 	adv := &Advertisment{
-		IPs:        routeable.GetListenable(),
+		IP:         routeable.GetListenable(),
 		P2P:        util.GetActualPort((*cx.Config.Listeners)[0]),
 		RPC:        util.GetActualPort((*cx.Config.RPCListeners)[0]),
 		Controller: util.GetActualPort(*cx.Config.Controller),

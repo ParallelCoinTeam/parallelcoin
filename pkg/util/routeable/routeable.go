@@ -8,13 +8,19 @@ import (
 	"github.com/jackpal/gateway"
 )
 
+// TODO: android and ios need equivalent functions as gateway.DiscoverGateway
+
 // Gateway stores the current network default gateway as discovered by
 // github.com/jackpal/gateway
 var Gateway net.IP
 
-// DiscoveredAddresses is where the Discover function stores the results of its
+// DiscoveredAddress is where the Discover function stores the results of its
 // probe
-var DiscoveredAddresses net.Addr
+var DiscoveredAddress net.IP
+
+// Interface is the net.Interface that is registered to the discovered routeable
+// address
+var Interface *net.Interface
 
 // Discover enumerates and evaluates all known network interfaces and addresses
 // and filters it down to the ones that reach both a LAN and the internet
@@ -40,7 +46,7 @@ func Discover() (err error) {
 	Debug("default gateway:", Gateway)
 	gws := Gateway.String()
 	gw := net.ParseIP(gws)
-	out:
+out:
 	for i := range nif {
 		if nif[i].HardwareAddr != nil {
 			var addrs []net.Addr
@@ -49,16 +55,15 @@ func Discover() (err error) {
 			}
 			for j := range addrs {
 				var in *net.IPNet
-				// var ip net.IP
 				if _, in, err = net.ParseCIDR(addrs[j].String()); Check(err) {
 					continue
 				}
-				// Debugs(gw)
-				// Debugs(in)
-				// Debugs(ip)
 				if in.Contains(gw) {
-					Info("network connection reachable from internet:",nif[i].Name, addrs[j].String())
-					DiscoveredAddresses = addrs[j]
+					Info("network connection reachable from internet:", nif[i].Name, addrs[j].String())
+					DiscoveredAddress = net.ParseIP(strings.Split(addrs[j].String(),"/")[0])
+					Debugs(DiscoveredAddress)
+					Interface = &nif[i]
+					Debugs(Interface)
 					break out
 				}
 			}
@@ -68,81 +73,92 @@ func Discover() (err error) {
 }
 
 // GetInterface returns the address and interface of multicast capable interfaces
-func GetInterface() (interfaces []net.Interface, addresses []string) {
-	var err error
-	var nif []net.Interface
-	nif, err = net.Interfaces()
-	if err != nil {
-		Error("error:", err)
-	}
-	// // Traces(interfaces)
-	// for ifi := range interfaces {
-	// 	if interfaces[ifi].Flags&net.FlagLoopback == 0 && interfaces[ifi].
-	// 		HardwareAddr != nil {
-	// 		// iads, _ := interfaces[ifi].Addrs()
-	// 		// for i := range iads {
-	// 		//	//Traces(iads[i].Network())
-	// 		// }
-	// 		// Debug(interfaces[ifi].MulticastAddrs())
-	// 		lanInterface = append(lanInterface, &interfaces[ifi])
+func GetInterface() (ifc *net.Interface, address string, err error) {
+	// var err error
+	// var nif []net.Interface
+	// nif, err = net.Interfaces()
+	// if err != nil {
+	// 	Error("error:", err)
+	// }
+	// // // Traces(interfaces)
+	// // for ifi := range interfaces {
+	// // 	if interfaces[ifi].Flags&net.FlagLoopback == 0 && interfaces[ifi].
+	// // 		HardwareAddr != nil {
+	// // 		// iads, _ := interfaces[ifi].Addrs()
+	// // 		// for i := range iads {
+	// // 		//	//Traces(iads[i].Network())
+	// // 		// }
+	// // 		// Debug(interfaces[ifi].MulticastAddrs())
+	// // 		lanInterface = append(lanInterface, &interfaces[ifi])
+	// // 	}
+	// // }
+	// var routeableAddress string
+	// for i := range nif {
+	// 	// Debug(nif[i].Addrs())
+	// 	// Debug(nif[i].HardwareAddr)
+	// 	// filter out known virtual devices
+	// 	// microsoft hyper-v virtual interface
+	// 	if strings.HasPrefix(nif[i].HardwareAddr.String(), "00:15:5d") {
+	// 		continue
+	// 	}
+	// 	// todo: below here add discovered useful non-physical network interface tests like the one above
+	// 	addrs, _ := nif[i].Addrs()
+	// 	// Debug(addrs)
+	// 	for j := range addrs {
+	// 		// Debug(addresses[i].String())
+	// 		if !strings.ContainsAny(addrs[j].String(), ":") {
+	// 			routeableAddress = strings.Split(addrs[j].String(), "/")[0]
+	// 			// all addresses except localhost can exit potentially to the internet, on linux often these show first
+	// 			if strings.HasPrefix(routeableAddress, "127") {
+	// 				continue
+	// 			}
+	// 			if routeableAddress != "" {
+	// 				address = append(address, routeableAddress)
+	//
+	// 			}
+	// 			break
+	// 		}
+	// 	}
+	// 	// Debug(addresses)
+	// 	if len(address) > 0 {
+	// 		ifc = append(ifc, nif[i])
 	// 	}
 	// }
-	var routeableAddress string
-	for i := range nif {
-		// Debug(nif[i].Addrs())
-		// Debug(nif[i].HardwareAddr)
-		// filter out known virtual devices
-		// microsoft hyper-v virtual interface
-		if strings.HasPrefix(nif[i].HardwareAddr.String(), "00:15:5d") {
-			continue
-		}
-		// todo: below here add discovered useful non-physical network interface tests like the one above
-		addrs, _ := nif[i].Addrs()
-		// Debug(addrs)
-		for j := range addrs {
-			// Debug(addresses[i].String())
-			if !strings.ContainsAny(addrs[j].String(), ":") {
-				routeableAddress = strings.Split(addrs[j].String(), "/")[0]
-				// all addresses except localhost can exit potentially to the internet, on linux often these show first
-				if strings.HasPrefix(routeableAddress, "127") {
-					continue
-				}
-				if routeableAddress != "" {
-					addresses = append(addresses, routeableAddress)
-					
-				}
-				break
-			}
-		}
-		// Debug(addresses)
-		if len(addresses) > 0 {
-			interfaces = append(interfaces, nif[i])
+	// if routeableAddress == "" {
+	// 	panic("no network available")
+	// }
+	// // Traces(lanInterface)
+	if DiscoveredAddress == nil || Interface == nil {
+		if Discover() != nil {
+			err = errors.New("no routeable address found")
+			return
 		}
 	}
-	if routeableAddress == "" {
-		panic("no network available")
-	}
-	// Traces(lanInterface)
 	return
 }
 
-func GetListenable() []net.TCPAddr {
-	// first add the interface addresses
-	rI, _ := GetInterface()
-	var lA []net.TCPAddr
-	for i := range rI {
-		l, err := rI[i].Addrs()
-		if err != nil {
-			Error(err)
-			return nil
-		}
-		for j := range l {
-			ljs := l[j].String()
-			ip := net.ParseIP(ljs)
-			lA = append(
-				lA, net.TCPAddr{IP: ip},
-			)
+func GetListenable() net.IP {
+	// // first add the interface addresses
+	// rI, _ := GetInterface()
+	// var lA []net.TCPAddr
+	// for i := range rI {
+	// 	l, err := rI[i].Addrs()
+	// 	if err != nil {
+	// 		Error(err)
+	// 		return nil
+	// 	}
+	// 	for j := range l {
+	// 		ljs := l[j].String()
+	// 		ip := net.ParseIP(ljs)
+	// 		lA = append(
+	// 			lA, net.TCPAddr{IP: ip},
+	// 		)
+	// 	}
+	// }
+	if DiscoveredAddress == nil {
+		if Discover() != nil {
+			Error("no routeable address found")
 		}
 	}
-	return lA
+	return DiscoveredAddress
 }

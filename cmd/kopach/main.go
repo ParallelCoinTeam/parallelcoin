@@ -294,10 +294,10 @@ var handlers = transport.Handlers{
 		gotiny.Unmarshal(b, &jr)
 		// Debugs(jr)
 		
-		ips := jr.IPs
+		iP := jr.IPs
 		w.height = jr.Height
 		cP := jr.ControllerPort
-		addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
+		addr := net.JoinHostPort(iP.String(), fmt.Sprint(cP))
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
@@ -320,11 +320,11 @@ var handlers = transport.Handlers{
 		gotiny.Unmarshal(b, &advt)
 		// p := pause.LoadPauseContainer(b)
 		fs := w.FirstSender.Load()
-		ni := advt.IPs
+		ni := advt.IP
 		// ni := p.GetIPs()[0].String()
 		np := advt.Controller
 		// np := p.GetControllerListenerPort()
-		ns := net.JoinHostPort(strings.Split(ni[0].String(), ":")[0], fmt.Sprint(np))
+		ns := net.JoinHostPort(strings.Split(ni.String(), ":")[0], fmt.Sprint(np))
 		Debug("received pause from server at", ns)
 		if fs == ns {
 			for i := range w.clients {

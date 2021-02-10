@@ -86,8 +86,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 													Info("activenet:", wg.cx.ActiveNet.Name)
 													Debug("setting ports to match network")
 													*wg.cx.Config.Network = wg.cx.ActiveNet.Name
-													_, adrs := routeable.GetInterface()
-													routeableAddress := adrs[0]
+													_, routeableAddress, _ := routeable.GetInterface()
 													*wg.cx.Config.Listeners = cli.StringSlice{fmt.Sprintf(
 														routeableAddress + ":" + wg.cx.ActiveNet.DefaultPort)}
 													address := fmt.Sprintf("%s:%s", routeableAddress,

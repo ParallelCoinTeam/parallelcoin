@@ -12,9 +12,9 @@ package multicast
 
 import (
 	"net"
-
+	
 	"golang.org/x/net/ipv4"
-
+	
 	"github.com/p9c/pod/pkg/util/routeable"
 )
 
@@ -23,7 +23,7 @@ func Conn(port int) (conn *net.UDPConn, err error) {
 	if conn, err = net.ListenUDP("udp4", ipv4Addr); Check(err) {
 		return
 	}
-
+	Debug("listening on", conn.LocalAddr(), "to", conn.RemoteAddr())
 	pc := ipv4.NewPacketConn(conn)
 	// var ifaces []net.Interface
 	var iface *net.Interface
@@ -40,8 +40,8 @@ func Conn(port int) (conn *net.UDPConn, err error) {
 	// 		break
 	// 	}
 	// }
-	ifc, _ := routeable.GetInterface()
-	iface = &ifc[0]
+	ifc, _, _ := routeable.GetInterface()
+	iface = ifc
 	if err = pc.JoinGroup(iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); Check(err) {
 		return
 	}
@@ -54,6 +54,6 @@ func Conn(port int) (conn *net.UDPConn, err error) {
 			}
 		}
 	}
-
+	
 	return
 }

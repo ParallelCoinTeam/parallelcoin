@@ -2238,6 +2238,11 @@ func (a SimpleAddr) String() string {
 
 // AddLocalAddress adds an address that this node is listening on to the address manager so that it may be relayed to
 // peers.
+//
+// TODO: having just essentially rewritten this and only just finding it,
+//  this function needs to be split to separate the address manager from the
+//  listening address processing, and configuration of listening IP addresses is
+//  unnecessary (for the controller's unicast elements)
 func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.ServiceFlag) error {
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
