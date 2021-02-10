@@ -136,7 +136,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	// var routeableAddresses []net.Addr
 	_, routeableAddress, _ := routeable.GetInterface()
 	// routeableAddresses, e = routeableInterface[0].Addrs()
-	// Debug(routeableAddresses)
+	Debug("###################################",routeableAddress)
 	// routeableAddress := addresses
 	// Debug("********************", routeableAddress)
 	*cfg.Controller = net.JoinHostPort(routeableAddress, fmt.Sprint(fP))

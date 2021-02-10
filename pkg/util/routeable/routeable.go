@@ -134,6 +134,8 @@ func GetInterface() (ifc *net.Interface, address string, err error) {
 			return
 		}
 	}
+	address = DiscoveredAddress.String()
+	ifc = Interface
 	return
 }
 
