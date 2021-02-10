@@ -1,24 +1,70 @@
 package routeable
 
 import (
+	"errors"
 	"net"
 	"strings"
+	
+	"github.com/jackpal/gateway"
 )
 
-// Address is a structure for storing a network address that is both routeable
-// to the internet and has a local area network with multicast available
-type Address struct {
-	Interface net.Interface
-	Address   string
-}
+// Gateway stores the current network default gateway as discovered by
+// github.com/jackpal/gateway
+var Gateway net.IP
 
-// Addresses are the collection of address/interface combinations that have been
-// found to be routeable and have multicast
-var Addresses []Address
+// DiscoveredAddresses is where the Discover function stores the results of its
+// probe
+var DiscoveredAddresses net.Addr
 
-// Discover scans the OS network configuration and populates the foregoing fields
-func Discover() {
-
+// Discover enumerates and evaluates all known network interfaces and addresses
+// and filters it down to the ones that reach both a LAN and the internet
+//
+// We are only interested in IPv4 addresses because for the most part, domestic
+// ISPs do not issue their customers with IPv6 routing, it's still a pain in the
+// ass outside of large data centre connections
+func Discover() (err error) {
+	Info("discovering routeable interfaces and addresses...")
+	var nif []net.Interface
+	if nif, err = net.Interfaces(); Check(err) {
+		return
+	}
+	if Gateway, err = gateway.DiscoverGateway(); Check(err) {
+		return
+	}
+	if Gateway == nil {
+		// todo: this needs to have an appropriate response from the interface side, it
+		//  can be pretty safely assumed that it will not happen on a VPS or other
+		//  network service provider system
+		return errors.New("cannot find internet gateway for current connection")
+	}
+	Debug("default gateway:", Gateway)
+	gws := Gateway.String()
+	gw := net.ParseIP(gws)
+	out:
+	for i := range nif {
+		if nif[i].HardwareAddr != nil {
+			var addrs []net.Addr
+			if addrs, err = nif[i].Addrs(); Check(err) || addrs == nil {
+				continue
+			}
+			for j := range addrs {
+				var in *net.IPNet
+				// var ip net.IP
+				if _, in, err = net.ParseCIDR(addrs[j].String()); Check(err) {
+					continue
+				}
+				// Debugs(gw)
+				// Debugs(in)
+				// Debugs(ip)
+				if in.Contains(gw) {
+					Info("network connection reachable from internet:",nif[i].Name, addrs[j].String())
+					DiscoveredAddresses = addrs[j]
+					break out
+				}
+			}
+		}
+	}
+	return
 }
 
 // GetInterface returns the address and interface of multicast capable interfaces

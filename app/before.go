@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/util/routeable"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -27,6 +28,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
+		Debug("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
@@ -385,6 +387,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("save") {
 			Info("saving configuration")
 			cx.StateCfg.Save = true
+		}
+		var err error
+		if err = routeable.Discover(); Check(err) {
+			// TODO: this should trigger the display of this lack of internet
 		}
 		return nil
 	}
