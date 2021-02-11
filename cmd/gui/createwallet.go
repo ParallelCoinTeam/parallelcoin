@@ -14,7 +14,6 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
@@ -87,10 +86,10 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														Info("activenet:", wg.cx.ActiveNet.Name)
 														Debug("setting ports to match network")
 														*wg.cx.Config.Network = wg.cx.ActiveNet.Name
-														_, routeableAddress, _ := routeable.GetInterface()
+														// _, routeableAddress, _ := routeable.GetInterface()
 														*wg.cx.Config.Listeners = cli.StringSlice{
 															fmt.Sprintf(
-																routeableAddress + ":" + wg.cx.ActiveNet.DefaultPort,
+																 ":" + wg.cx.ActiveNet.DefaultPort,
 															),
 														}
 														address := fmt.Sprintf(

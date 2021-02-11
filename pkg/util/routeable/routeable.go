@@ -86,7 +86,7 @@ func Discover() (err error) {
 	return
 }
 
-// GetInterface returns the address and interface of multicast capable interfaces
+// GetInterface returns the address and interface of multicast-and-internet capable interfaces
 func GetInterface() (ifc *net.Interface, address string, err error) {
 	if Address == nil || Interface == nil {
 		if Discover() != nil {

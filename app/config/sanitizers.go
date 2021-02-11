@@ -137,7 +137,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	Debug("###################################", routeableAddress)
 	*cfg.Controller = ":" + fmt.Sprint(fP)
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
-		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(routeableAddress + ":" + cx.ActiveNet.DefaultPort)}
+		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
 		cx.StateCfg.Save = true
 		Debug("Listeners")
 	}
@@ -173,7 +173,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if *cx.Config.AutoPorts || !initial {
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.Listeners = cli.StringSlice{routeableAddress + ":" + fmt.Sprint(fP)}
+		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}
 		if fP, e = GetFreePort(); Check(e) {
 		}
 		*cfg.RPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
