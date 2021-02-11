@@ -374,6 +374,16 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 					" interfaces via --listen",
 				cx.Config.DisableListen,
 			),
+			au.BoolTrue(
+				"autolisten",
+				"disable automatically populating p2p and controller reachable addresses",
+				cx.Config.AutoListen,
+			),
+			au.StringSlice(
+				"p2pconnect",
+				"Addresses that are configured to receive inbound connections",
+				cx.Config.P2PConnect,
+			),
 			au.StringSlice(
 				"listen",
 				"Add an interface/port to listen for connections",

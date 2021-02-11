@@ -229,14 +229,14 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															*wg.cx.Config.NodeOff = false
 															*wg.cx.Config.WalletOff = false
 															save.Pod(wg.cx.Config)
-															if *wg.cx.Config.Generate {
-																wg.miner.Start()
-															}
+															// if *wg.cx.Config.Generate {
+															// 	wg.miner.Start()
+															// }
 															*wg.noWallet = false
-															wg.node.Start()
-															if err = wg.writeWalletCookie(); Check(err) {
-															}
-															wg.wallet.Start()
+															// wg.node.Start()
+															// if err = wg.writeWalletCookie(); Check(err) {
+															// }
+															// wg.wallet.Start()
 														}()
 													},
 												).

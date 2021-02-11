@@ -192,7 +192,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
-					(*l)[i] = routeableAddress + ":" + fmt.Sprint(fP)
+					(*l)[i] = ":" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
 					Debug("port not validate P2PListeners")
 				}
@@ -203,7 +203,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
-					(*r)[i] = routeableAddress + ":" + fmt.Sprint(fP)
+					(*r)[i] = "127.0.0.1:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
 					Debug("port not validate RPCListeners")
 				}
@@ -219,7 +219,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
-					(*w)[i] = routeableAddress + ":" + fmt.Sprint(fP)
+					(*w)[i] = "127.0.0.1:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
 					Debug("port not validate WalletRPCListeners")
 				}

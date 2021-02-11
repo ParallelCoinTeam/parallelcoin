@@ -27,9 +27,9 @@ type Advertisment struct {
 
 // Get returns an advertisment serializer
 func Get(cx *conte.Xt) []byte {
-	P2P:=        util.GetActualPort((*cx.Config.P2PListeners)[0])
-	RPC:=        util.GetActualPort((*cx.Config.RPCListeners)[0])
-	Controller:= util.GetActualPort(*cx.Config.Controller)
+	P2P := util.GetActualPort((*cx.Config.P2PListeners)[0])
+	RPC := util.GetActualPort((*cx.Config.RPCListeners)[0])
+	Controller := util.GetActualPort(*cx.Config.Controller)
 	adv := Advertisment{
 		IP:         routeable.GetListenable(),
 		P2P:        P2P,

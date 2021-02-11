@@ -89,7 +89,7 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	return keyPair, nil
 }
 
-// makeListeners splits the normalized listen addresses into IPv4 and IPv6 addresses and creates new net.P2PListeners for
+// makeListeners splits the normalized listen addresses into IPv4 and IPv6 addresses and creates new net.Listeners for
 // each with the passed listen func. Invalid addresses are logged and skipped.
 func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.Listener {
 	ipv4Addrs := make([]string, 0, len(normalizedListenAddrs)*2)

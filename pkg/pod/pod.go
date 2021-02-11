@@ -120,6 +120,7 @@ type Config struct {
 	AddPeers               *cli.StringSlice `group:"node" label:"Add Peers" description:"manually adds addresses to try to connect to" type:"address" widget:"multi" json:"AddPeers" hook:"addpeer"`
 	AddrIndex              *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"" widget:"toggle"  json:"AddrIndex" hook:"dropaddrindex"`
 	AutoPorts              *bool            `group:"" label:"AutomaticPorts" description:"RPC and controller ports are randomized, use with controller for automatic peer discovery" type:"" widget:"toggle" json:"AutoPorts" hook:"restart"`
+	AutoListen             *bool            `group:"node" label:"Automatic Listeners" description:"automatically update inbound addresses dynamically according to discovered network interfaces" type:"" widget:"toggle" json:"AutoListen" hook:"restart"`
 	BanDuration            *time.Duration   `group:"debug" label:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"" widget:"time" json:"BanDuration" hook:"restart"`
 	BanThreshold           *int             `group:"debug" label:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"" widget:"integer" json:"BanThreshold" hook:"restart"`
 	BlockMaxSize           *int             `group:"mining" label:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMaxSize" hook:"restart"`
@@ -180,7 +181,7 @@ type Config struct {
 	RPCCert                *string          `group:"rpc" label:"RPC Cert" description:"location of RPC TLS certificate" type:"path" widget:"string" json:"RPCCert" hook:"restart"`
 	RPCConnect             *string          `group:"wallet" label:"RPC Connect" description:"full node RPC for wallet" type:"address" widget:"string" json:"RPCConnect" hook:"restart"`
 	RPCKey                 *string          `group:"rpc" label:"RPC Key" description:"location of rpc TLS key" type:"path" widget:"string" json:"RPCKey" hook:"restart"`
-	RPCListeners           *cli.StringSlice `group:"rpc" label:"RPC P2PListeners" description:"addresses to listen for RPC connections" type:"address" widget:"multi" json:"RPCListeners" hook:"restart"`
+	RPCListeners           *cli.StringSlice `group:"rpc" label:"RPC Listeners" description:"addresses to listen for RPC connections" type:"address" widget:"multi" json:"RPCListeners" hook:"restart"`
 	RPCMaxClients          *int             `group:"rpc" label:"Maximum RPC Clients" description:"maximum number of clients for regular RPC" type:"" widget:"integer" json:"RPCMaxClients" hook:"restart"`
 	RPCMaxConcurrentReqs   *int             `group:"rpc" label:"Maximum RPC Concurrent Reqs" description:"maximum number of requests to process concurrently" type:"" widget:"integer" json:"RPCMaxConcurrentReqs" hook:"restart"`
 	RPCMaxWebsockets       *int             `group:"rpc" label:"Maximum RPC Websockets" description:"maximum number of websocket clients to allow" type:"" widget:"integer" json:"RPCMaxWebsockets" hook:"restart"`
@@ -205,7 +206,7 @@ type Config struct {
 	WalletFile             *string          `group:"config" label:"Wallet File" description:"wallet database file" type:"path" widget:"string" featured:"true" json:"WalletFile" hook:"restart"`
 	WalletOff              *bool            `group:"debug" label:"Wallet Off" description:"turn off the wallet backend" type:"" widget:"toggle" json:"WalletOff" hook:"wallet"`
 	WalletPass             *string          `group:"" label:"Wallet Pass" description:"password encrypting public data in wallet - hash is stored so give on command line" type:"" widget:"password" json:"WalletPass" hook:"restart"`
-	WalletRPCListeners     *cli.StringSlice `group:"wallet" label:"Legacy RPC P2PListeners" description:"addresses for wallet RPC server to listen on" type:"address" widget:"multi" json:"WalletRPCListeners" hook:"restart"`
+	WalletRPCListeners     *cli.StringSlice `group:"wallet" label:"Legacy RPC Listeners" description:"addresses for wallet RPC server to listen on" type:"address" widget:"multi" json:"WalletRPCListeners" hook:"restart"`
 	WalletRPCMaxClients    *int             `group:"wallet" label:"Legacy RPC Max Clients" description:"maximum number of RPC clients allowed for wallet RPC" type:"" widget:"integer" json:"WalletRPCMaxClients" hook:"restart"`
 	WalletRPCMaxWebsockets *int             `group:"wallet" label:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"" widget:"integer" json:"WalletRPCMaxWebsockets" hook:"restart"`
 	WalletServer           *string          `group:"wallet" label:"Wallet Server" description:"node address to connect wallet server to" type:"address" widget:"string" json:"WalletServer" hook:"restart"`
@@ -219,6 +220,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		AddPeers:               newStringSlice(),
 		AddrIndex:              newbool(),
 		AutoPorts:              newbool(),
+		AutoListen:             newbool(),
 		BanDuration:            newDuration(),
 		BanThreshold:           newint(),
 		BlockMaxSize:           newint(),
@@ -315,6 +317,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"AddPeers":               c.AddPeers,
 		"AddrIndex":              c.AddrIndex,
 		"AutoPorts":              c.AutoPorts,
+		"AutoListen":             c.AutoListen,
 		"BanDuration":            c.BanDuration,
 		"BanThreshold":           c.BanThreshold,
 		"BlockMaxSize":           c.BlockMaxSize,
