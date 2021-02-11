@@ -116,21 +116,21 @@ func GetConfigSchema(cfg *Config) Schema {
 // Config is
 type Config struct {
 	sync.Mutex
-	AddCheckpoints         *cli.StringSlice `group:"debug" label:"AddCheckpoints" description:"add custom checkpoints" type:"" widget:"multi" json:"AddCheckpoints" hook:"restart"`
-	AddPeers               *cli.StringSlice `group:"node" label:"Add Peers" description:"manually adds addresses to try to connect to" type:"address" widget:"multi" json:"AddPeers" hook:"addpeer"`
-	AddrIndex              *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"" widget:"toggle"  json:"AddrIndex" hook:"dropaddrindex"`
-	AutoPorts              *bool            `group:"" label:"AutomaticPorts" description:"RPC and controller ports are randomized, use with controller for automatic peer discovery" type:"" widget:"toggle" json:"AutoPorts" hook:"restart"`
-	AutoListen             *bool            `group:"node" label:"Automatic Listeners" description:"automatically update inbound addresses dynamically according to discovered network interfaces" type:"" widget:"toggle" json:"AutoListen" hook:"restart"`
-	BanDuration            *time.Duration   `group:"debug" label:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"" widget:"time" json:"BanDuration" hook:"restart"`
-	BanThreshold           *int             `group:"debug" label:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"" widget:"integer" json:"BanThreshold" hook:"restart"`
-	BlockMaxSize           *int             `group:"mining" label:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMaxSize" hook:"restart"`
-	BlockMaxWeight         *int             `group:"mining" label:"Block Max Weight" description:"maximum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMaxWeight" hook:"restart"`
-	BlockMinSize           *int             `group:"mining" label:"Block Min Size" description:"minimum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMinSize" hook:"restart"`
-	BlockMinWeight         *int             `group:"mining" label:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMinWeight" hook:"restart"`
-	BlockPrioritySize      *int             `group:"mining" label:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"" widget:"integer" json:"BlockPrioritySize" hook:"restart"`
-	BlocksOnly             *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"" widget:"toggle" json:"BlocksOnly" hook:"restart"`
-	CAFile                 *string          `group:"tls" label:"Certificate Authority File" description:"certificate authority file for TLS certificate validation" type:"path" widget:"string" json:"CAFile" hook:"restart"`
-	CAPI                   *bool            `group:"" label:"Enable cAPI" description:"disable cAPI rpc" type:"" widget:"toggle" json:"CAPI" hook:"restart"`
+	AddCheckpoints    *cli.StringSlice `group:"debug" label:"AddCheckpoints" description:"add custom checkpoints" type:"" widget:"multi" json:"AddCheckpoints" hook:"restart"`
+	AddPeers          *cli.StringSlice `group:"node" label:"Add Peers" description:"manually adds addresses to try to connect to" type:"address" widget:"multi" json:"AddPeers" hook:"addpeer"`
+	AddrIndex         *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"" widget:"toggle"  json:"AddrIndex" hook:"dropaddrindex"`
+	AutoPorts         *bool            `group:"" label:"AutomaticPorts" description:"RPC and controller ports are randomized, use with controller for automatic peer discovery" type:"" widget:"toggle" json:"AutoPorts" hook:"restart"`
+	AutoListen      *bool            `group:"node" label:"Manual Listeners" description:"automatically update inbound addresses dynamically according to discovered network interfaces" type:"" widget:"toggle" json:"AutoListen" hook:"restart"`
+	BanDuration       *time.Duration   `group:"debug" label:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"" widget:"time" json:"BanDuration" hook:"restart"`
+	BanThreshold      *int             `group:"debug" label:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"" widget:"integer" json:"BanThreshold" hook:"restart"`
+	BlockMaxSize      *int             `group:"mining" label:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMaxSize" hook:"restart"`
+	BlockMaxWeight    *int             `group:"mining" label:"Block Max Weight" description:"maximum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMaxWeight" hook:"restart"`
+	BlockMinSize      *int             `group:"mining" label:"Block Min Size" description:"minimum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMinSize" hook:"restart"`
+	BlockMinWeight    *int             `group:"mining" label:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"" widget:"integer" json:"BlockMinWeight" hook:"restart"`
+	BlockPrioritySize *int             `group:"mining" label:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"" widget:"integer" json:"BlockPrioritySize" hook:"restart"`
+	BlocksOnly        *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"" widget:"toggle" json:"BlocksOnly" hook:"restart"`
+	CAFile            *string          `group:"tls" label:"Certificate Authority File" description:"certificate authority file for TLS certificate validation" type:"path" widget:"string" json:"CAFile" hook:"restart"`
+	CAPI              *bool            `group:"" label:"Enable cAPI" description:"disable cAPI rpc" type:"" widget:"toggle" json:"CAPI" hook:"restart"`
 	CPUProfile             *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"path" widget:"string" json:"CPUProfile" hook:"restart"`
 	ConfigFile             *string          `group:"" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"path" widget:"string" json:"ConfigFile" hook:"restart"`
 	ConnectPeers           *cli.StringSlice `group:"node" label:"Connect Peers" description:"connect ONLY to these addresses (disables inbound connections)" type:"address" widget:"multi" json:"ConnectPeers" hook:"restart"`
@@ -216,21 +216,21 @@ type Config struct {
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
 	datadir := appdata.Dir(AppName, false)
 	c = &Config{
-		AddCheckpoints:         newStringSlice(),
-		AddPeers:               newStringSlice(),
-		AddrIndex:              newbool(),
-		AutoPorts:              newbool(),
-		AutoListen:             newbool(),
-		BanDuration:            newDuration(),
-		BanThreshold:           newint(),
-		BlockMaxSize:           newint(),
-		BlockMaxWeight:         newint(),
-		BlockMinSize:           newint(),
-		BlockMinWeight:         newint(),
-		BlockPrioritySize:      newint(),
-		BlocksOnly:             newbool(),
-		CAFile:                 newstring(),
-		CAPI:                   newbool(),
+		AddCheckpoints:    newStringSlice(),
+		AddPeers:          newStringSlice(),
+		AddrIndex:         newbool(),
+		AutoPorts:         newbool(),
+		AutoListen:      newbool(),
+		BanDuration:       newDuration(),
+		BanThreshold:      newint(),
+		BlockMaxSize:      newint(),
+		BlockMaxWeight:    newint(),
+		BlockMinSize:      newint(),
+		BlockMinWeight:    newint(),
+		BlockPrioritySize: newint(),
+		BlocksOnly:        newbool(),
+		CAFile:            newstring(),
+		CAPI:              newbool(),
 		ConfigFile:             newstring(),
 		ConnectPeers:           newStringSlice(),
 		Controller:             newstring(),

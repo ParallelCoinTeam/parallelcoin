@@ -29,6 +29,16 @@ var SecondaryAddresses []net.IP
 // corresponding slice index
 var SecondaryInterfaces []*net.Interface
 
+// GetAddressesAndInterfaces returns all of the addresses and interfaces that
+// would be resolved from an automatic addresses that can connect two processes at all
+func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses []net.IP) {
+	Interfaces = append(Interfaces, Interface)
+	Interfaces = append(Interfaces, SecondaryInterfaces...)
+	Addresses = append(Addresses, Address)
+	Addresses = append(Addresses, SecondaryAddresses...)
+	return
+}
+
 // Discover enumerates and evaluates all known network interfaces and addresses
 // and filters it down to the ones that reach both a LAN and the internet
 //
@@ -47,7 +57,7 @@ func Discover() (err error) {
 		// todo: this error condition always happens on iOS and Android
 		// return
 		for i := range nif {
-			Debugs(nif[i])
+			Infos(nif[i])
 		}
 	} else {
 		var gw net.IP
@@ -71,17 +81,20 @@ func Discover() (err error) {
 					continue
 				}
 				ip, _, _ := net.ParseCIDR(addrs[j].String())
+				if strings.HasPrefix(ip.String(), "169.") || strings.HasPrefix(ip.String(), "fe80:") {
+					continue
+				}
 				SecondaryAddresses = append(SecondaryAddresses, ip)
 				SecondaryInterfaces = append(SecondaryInterfaces, &nif[i])
 			}
 		}
 	}
-	Debug("Gateway", Gateway)
-	Debug("Address", Address)
-	Debug("Interface", Interface.Name)
-	Debug("SecondaryAddresses")
+	Info("Gateway", Gateway)
+	Info("Address", Address)
+	Info("Interface", Interface.Name)
+	Info("SecondaryAddresses")
 	for i := range SecondaryInterfaces {
-		Debug(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
+		Info(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
 	}
 	return
 }

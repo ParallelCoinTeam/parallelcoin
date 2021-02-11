@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/chain/forkhash"
 	"io/ioutil"
 	"net"
 	"os"
@@ -15,6 +14,9 @@ import (
 	"strings"
 	"time"
 	
+	"github.com/p9c/pod/pkg/chain/forkhash"
+	"github.com/p9c/pod/pkg/util/routeable"
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -22,7 +24,6 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/normalize"
-	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/p9c/pod/pkg/wallet"
 	
 	"github.com/btcsuite/go-socks/socks"
@@ -133,9 +134,19 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	var fP int
 	if fP, e = GetFreePort(); Check(e) {
 	}
-	_, routeableAddress, _ := routeable.GetInterface()
-	Debug("###################################", routeableAddress)
+	// _, routeableAddress, _ := routeable.GetInterface()
+	// Debug("###################################", routeableAddress)
 	*cfg.Controller = ":" + fmt.Sprint(fP)
+	if *cfg.AutoListen {
+		_, allAddresses := routeable.GetAddressesAndInterfaces()
+		var controllerAddresses, p2pAddresses cli.StringSlice
+		for i := range allAddresses {
+			controllerAddresses = append(controllerAddresses, net.JoinHostPort(allAddresses[i].String(), fmt.Sprint(fP)))
+			p2pAddresses = append(p2pAddresses, net.JoinHostPort(allAddresses[i].String(), cx.ActiveNet.DefaultPort))
+		}
+		*cfg.ControllerConnect = controllerAddresses
+		*cfg.P2PConnect = p2pAddresses
+	}
 	if len(*cfg.P2PListeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
 		cfg.P2PListeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
 		cx.StateCfg.Save = true

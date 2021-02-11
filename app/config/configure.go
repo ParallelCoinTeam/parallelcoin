@@ -11,13 +11,9 @@ import (
 
 // Configure loads and sanitises the configuration from urfave/cli
 func Configure(cx *conte.Xt, commandName string, initial bool) {
-	Debug("running Configure", commandName, *cx.Config.WalletPass)
-	// cx.WalletChan = make(chan *wallet.Wallet)
-	// cx.NodeChan = make(chan *chainrpc.Server)
-	// theoretically, the configuration should be accessed only when locked
-	// cfg := cx.Config
-	Debug("DATADIR", *cx.Config.DataDir)
 	initLogLevel(cx.Config)
+	Debug("running Configure", commandName, *cx.Config.WalletPass)
+	Debug("DATADIR", *cx.Config.DataDir)
 	Debug("set log level")
 	spv.DisableDNSSeed = *cx.Config.DisableDNSSeed
 	initDictionary(cx.Config)
