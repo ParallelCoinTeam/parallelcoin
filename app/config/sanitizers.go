@@ -133,30 +133,24 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	var fP int
 	if fP, e = GetFreePort(); Check(e) {
 	}
-	// var routeableAddresses []net.Addr
 	_, routeableAddress, _ := routeable.GetInterface()
-	// routeableAddresses, e = routeableInterface[0].Addrs()
-	Debug("###################################",routeableAddress)
-	// routeableAddress := addresses
-	// Debug("********************", routeableAddress)
-	// bind to all IPv4 addresses
-	// *cfg.Controller = net.JoinHostPort(/*routeableAddress*/"0.0.0.0", fmt.Sprint(fP))
-	*cfg.Controller = ":"+fmt.Sprint(fP)
+	Debug("###################################", routeableAddress)
+	*cfg.Controller = ":" + fmt.Sprint(fP)
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
-		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
+		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(routeableAddress + ":" + cx.ActiveNet.DefaultPort)}
 		cx.StateCfg.Save = true
 		Debug("Listeners")
 	}
 	if len(*cfg.RPCListeners) < 1 {
-		address := fmt.Sprintf(":%s", cx.ActiveNet.RPCClientPort)
+		address := fmt.Sprintf("127.0.0.1:%s", cx.ActiveNet.RPCClientPort)
 		*cfg.RPCListeners = cli.StringSlice{address}
-		*cfg.RPCConnect = fmt.Sprintf("%s:%s", routeableAddress, cx.ActiveNet.RPCClientPort)
+		*cfg.RPCConnect = fmt.Sprintf("127.0.0.1:%s", cx.ActiveNet.RPCClientPort)
 		Debug("setting save flag because rpc listeners is empty and rpc is not disabled")
 		cx.StateCfg.Save = true
 		Debug("RPCListeners")
 	}
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
-		address := fmt.Sprintf(":" + cx.ActiveNet.WalletRPCServerPort)
+		address := fmt.Sprintf("127.0.0.1:" + cx.ActiveNet.WalletRPCServerPort)
 		*cfg.WalletRPCListeners = cli.StringSlice{address}
 		*cfg.WalletServer = address
 		Debug(
@@ -182,10 +176,10 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		*cfg.Listeners = cli.StringSlice{routeableAddress + ":" + fmt.Sprint(fP)}
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.RPCListeners = cli.StringSlice{routeableAddress + ":" + fmt.Sprint(fP)}
+		*cfg.RPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.WalletRPCListeners = cli.StringSlice{routeableAddress + ":" + fmt.Sprint(fP)}
+		*cfg.WalletRPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
 		cx.StateCfg.Save = true
 		Debug("autoports")
 	} else {
@@ -272,8 +266,9 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	// 	*cfg.RPCConnect = net.JoinHostPort(routeableAddress, p)
 	// }
 	if len(*cfg.WalletRPCListeners) > 0 {
-		splitted := strings.Split((*cfg.WalletRPCListeners)[0], ":")
-		*cfg.WalletServer = routeableAddress + ":" + splitted[1]
+		*cfg.WalletServer = (*cfg.WalletRPCListeners)[0]
+		// splitted := strings.Split((*cfg.WalletRPCListeners)[0], ":")
+		// *cfg.WalletServer = routeableAddress + ":" + splitted[1]
 	}
 	// save.Pod(cfg)
 }
