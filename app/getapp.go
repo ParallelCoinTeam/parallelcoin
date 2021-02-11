@@ -40,16 +40,21 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			return nil
 		},
 		Commands: []cli.Command{
-			au.Command("version", "print version and exit",
+			au.Command(
+				"version", "print version and exit",
 				func(c *cli.Context) error {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
-				}, au.SubCommands(), nil, "v"),
+				}, au.SubCommands(), nil, "v",
+			),
 			// apputil.NewCommand("gui", "run GUI",
 			//	guiHandle(cx), apputil.SubCommands(), nil, "gui"),
-			au.Command("gui", "start wallet GUI", walletGUIHandle(cx),
-				au.SubCommands(), nil),
-			au.Command("ctl",
+			au.Command(
+				"gui", "start wallet GUI", walletGUIHandle(cx),
+				au.SubCommands(), nil,
+			),
+			au.Command(
+				"ctl",
 				"send RPC commands to a node or wallet and print the result",
 				ctlHandle(cx), au.SubCommands(
 					au.Command(
@@ -61,10 +66,13 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 						"list",
 						"l",
 					),
-				), nil, "c"),
-			au.Command("node", "start parallelcoin full node",
+				), nil, "c",
+			),
+			au.Command(
+				"node", "start parallelcoin full node",
 				nodeHandle(cx), au.SubCommands(
-					au.Command("dropaddrindex",
+					au.Command(
+						"dropaddrindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropAddrIndex = true
@@ -74,7 +82,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 						au.SubCommands(),
 						nil,
 					),
-					au.Command("droptxindex",
+					au.Command(
+						"droptxindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropTxIndex = true
@@ -84,7 +93,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 						au.SubCommands(),
 						nil,
 					),
-					au.Command("dropindexes",
+					au.Command(
+						"dropindexes",
 						"drop all of the indexes",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropAddrIndex = true
@@ -96,7 +106,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 						au.SubCommands(),
 						nil,
 					),
-					au.Command("dropcfindex",
+					au.Command(
+						"dropcfindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropCfIndex = true
@@ -106,7 +117,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 						au.SubCommands(),
 						nil,
 					),
-					au.Command("resetchain",
+					au.Command(
+						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (err error) {
 							config.Configure(cx, c.Command.Name, true)
@@ -114,8 +126,12 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"
 							}
-							dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
-								cx.ActiveNet.Name), dbName)
+							dbPath := filepath.Join(
+								filepath.Join(
+									*cx.Config.DataDir,
+									cx.ActiveNet.Name,
+								), dbName,
+							)
 							if err = os.RemoveAll(dbPath); Check(err) {
 							}
 							return nodeHandle(cx)(c)
@@ -124,11 +140,14 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 						au.SubCommands(),
 						nil,
 					),
-				), nil, "n"),
-			au.Command("wallet", "start parallelcoin wallet server",
+				), nil, "n",
+			),
+			au.Command(
+				"wallet", "start parallelcoin wallet server",
 				WalletHandle(cx), au.SubCommands(
-					au.Command("drophistory", "drop the transaction history in the wallet (for "+
-						"development and testing as well as clearing up transaction mess)",
+					au.Command(
+						"drophistory", "drop the transaction history in the wallet (for "+
+							"development and testing as well as clearing up transaction mess)",
 						func(c *cli.Context) (err error) {
 							config.Configure(cx, c.Command.Name, true)
 							Info("dropping wallet history")
@@ -145,12 +164,18 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							// Debug("walletChan sent")
 							err = legacy.DropWalletHistory(cx.WalletServer, cx.Config)(c)
 							return
-						}, au.SubCommands(), nil),
-				), nil, "w"),
-			au.Command("shell", "start combined wallet/node shell",
-				ShellHandle(cx), au.SubCommands(), nil, "s"),
-			au.Command("kopach", "standalone miner for clusters",
-				KopachHandle(cx), au.SubCommands(), nil, "k"),
+						}, au.SubCommands(), nil,
+					),
+				), nil, "w",
+			),
+			au.Command(
+				"shell", "start combined wallet/node shell",
+				ShellHandle(cx), au.SubCommands(), nil, "s",
+			),
+			au.Command(
+				"kopach", "standalone miner for clusters",
+				KopachHandle(cx), au.SubCommands(), nil, "k",
+			),
 			au.Command(
 				"worker",
 				"single thread parallelcoin miner controlled with binary IPC interface on stdin/stdout; "+
@@ -160,13 +185,15 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				au.SubCommands(),
 				nil,
 			),
-			au.Command("init",
+			au.Command(
+				"init",
 				"steps through creation of new wallet and initialization for a network with these specified "+
 					"in the main",
 				initHandle(cx),
 				au.SubCommands(),
 				nil,
-				"I"),
+				"I",
+			),
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -198,7 +225,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				EnvVar:      "POD_WALLETFILE",
 				Destination: cx.Config.WalletFile,
 			},
-			au.BoolTrue("save, i",
+			au.BoolTrue(
+				"save, i",
 				"save settings as effective from invocation",
 				&cx.StateCfg.Save,
 			),
@@ -213,344 +241,417 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"network, n",
 				"connect to mainnet/testnet/regtest/simnet",
 				"mainnet",
-				cx.Config.Network),
+				cx.Config.Network,
+			),
 			au.String(
 				"username",
 				"sets the username for services",
 				"server",
-				cx.Config.Username),
+				cx.Config.Username,
+			),
 			au.String(
 				"password",
 				"sets the password for services",
 				genPassword(),
-				cx.Config.Password),
+				cx.Config.Password,
+			),
 			au.String(
 				"serveruser",
 				"sets the username for clients of services",
 				"client",
-				cx.Config.ServerUser),
+				cx.Config.ServerUser,
+			),
 			au.String(
 				"serverpass",
 				"sets the password for clients of services",
 				genPassword(),
-				cx.Config.ServerPass),
+				cx.Config.ServerPass,
+			),
 			au.String(
 				"limituser",
 				"sets the limited rpc username",
 				"limit",
-				cx.Config.LimitUser),
+				cx.Config.LimitUser,
+			),
 			au.String(
 				"limitpass",
 				"sets the limited rpc password",
 				genPassword(),
-				cx.Config.LimitPass),
+				cx.Config.LimitPass,
+			),
 			au.String(
 				"rpccert",
 				"File containing the certificate file",
 				"",
-				cx.Config.RPCCert),
+				cx.Config.RPCCert,
+			),
 			au.String(
 				"rpckey",
 				"File containing the certificate key",
 				"",
-				cx.Config.RPCKey),
+				cx.Config.RPCKey,
+			),
 			au.String(
 				"cafile",
 				"File containing root certificates to authenticate a TLS"+
 					" connections with pod",
 				"",
-				cx.Config.CAFile),
+				cx.Config.CAFile,
+			),
 			au.BoolTrue(
 				"clienttls",
 				"Enable TLS for client connections",
-				cx.Config.TLS),
+				cx.Config.TLS,
+			),
 			au.BoolTrue(
 				"servertls",
 				"Enable TLS for server connections",
-				cx.Config.ServerTLS),
+				cx.Config.ServerTLS,
+			),
 			au.String(
 				"proxy",
 				"Connect via SOCKS5 proxy",
 				"",
-				cx.Config.Proxy),
+				cx.Config.Proxy,
+			),
 			au.String(
 				"proxyuser",
 				"Username for proxy server",
 				"user",
-				cx.Config.ProxyUser),
+				cx.Config.ProxyUser,
+			),
 			au.String(
 				"proxypass",
 				"Password for proxy server",
 				"pa55word",
-				cx.Config.ProxyPass),
+				cx.Config.ProxyPass,
+			),
 			au.Bool(
 				"onion",
 				"Enable connecting to tor hidden services",
-				cx.Config.Onion),
+				cx.Config.Onion,
+			),
 			au.String(
 				"onionproxy",
 				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0."+
 					"0.1:9050)",
 				"127.0.0.1:9050",
-				cx.Config.OnionProxy),
+				cx.Config.OnionProxy,
+			),
 			au.String(
 				"onionuser",
 				"Username for onion proxy server",
 				"user",
-				cx.Config.OnionProxyUser),
+				cx.Config.OnionProxyUser,
+			),
 			au.String(
 				"onionpass",
 				"Password for onion proxy server",
 				genPassword(),
-				cx.Config.OnionProxyPass),
+				cx.Config.OnionProxyPass,
+			),
 			au.Bool(
 				"torisolation",
 				"Enable Tor stream isolation by randomizing user credentials"+
 					" for each connection.",
-				cx.Config.TorIsolation),
+				cx.Config.TorIsolation,
+			),
 			au.StringSlice(
 				"addpeer",
 				"Add a peer to connect with at startup",
-				cx.Config.AddPeers),
+				cx.Config.AddPeers,
+			),
 			au.StringSlice(
 				"connect",
 				"Connect only to the specified peers at startup",
-				cx.Config.ConnectPeers),
+				cx.Config.ConnectPeers,
+			),
 			au.Bool(
 				"nolisten",
 				"Disable listening for incoming connections -- NOTE:"+
 					" Listening is automatically disabled if the --connect or"+
 					" --proxy options are used without also specifying listen"+
 					" interfaces via --listen",
-				cx.Config.DisableListen),
+				cx.Config.DisableListen,
+			),
 			au.StringSlice(
 				"listen",
 				"Add an interface/port to listen for connections",
-				cx.Config.Listeners),
+				cx.Config.Listeners,
+			),
 			au.Int(
 				"maxpeers",
 				"Max number of inbound and outbound peers",
 				node.DefaultMaxPeers,
-				cx.Config.MaxPeers),
+				cx.Config.MaxPeers,
+			),
 			au.Bool(
 				"nobanning",
 				"Disable banning of misbehaving peers",
-				cx.Config.DisableBanning),
+				cx.Config.DisableBanning,
+			),
 			au.Duration(
 				"banduration",
 				"How long to ban misbehaving peers",
 				time.Hour*24,
-				cx.Config.BanDuration),
+				cx.Config.BanDuration,
+			),
 			au.Int(
 				"banthreshold",
 				"Maximum allowed ban score before disconnecting and"+
 					" banning misbehaving peers.",
 				node.DefaultBanThreshold,
-				cx.Config.BanThreshold),
+				cx.Config.BanThreshold,
+			),
 			au.StringSlice(
 				"whitelist",
 				"Add an IP network or IP that will not be banned. (eg. 192."+
 					"168.1.0/24 or ::1)",
-				cx.Config.Whitelists),
+				cx.Config.Whitelists,
+			),
 			au.String(
 				"rpcconnect",
 				"Hostname/IP and port of pod RPC server to connect to",
 				"",
-				cx.Config.RPCConnect),
+				cx.Config.RPCConnect,
+			),
 			au.StringSlice(
 				"rpclisten",
 				"Add an interface/port to listen for RPC connections",
-				cx.Config.RPCListeners),
+				cx.Config.RPCListeners,
+			),
 			au.Int(
 				"rpcmaxclients",
 				"Max number of RPC clients for standard connections",
 				node.DefaultMaxRPCClients,
-				cx.Config.RPCMaxClients),
+				cx.Config.RPCMaxClients,
+			),
 			au.Int(
 				"rpcmaxwebsockets",
 				"Max number of RPC websocket connections",
 				node.DefaultMaxRPCWebsockets,
-				cx.Config.RPCMaxWebsockets),
+				cx.Config.RPCMaxWebsockets,
+			),
 			au.Int(
 				"rpcmaxconcurrentreqs",
 				"Max number of RPC requests that may be"+
 					" processed concurrently",
 				node.DefaultMaxRPCConcurrentReqs,
-				cx.Config.RPCMaxConcurrentReqs),
+				cx.Config.RPCMaxConcurrentReqs,
+			),
 			au.Bool(
 				"rpcquirks",
 				"Mirror some JSON-RPC quirks of Bitcoin Core -- NOTE:"+
 					" Discouraged unless interoperability issues need to be worked"+
 					" around",
-				cx.Config.RPCQuirks),
+				cx.Config.RPCQuirks,
+			),
 			au.Bool(
 				"norpc",
 				"Disable built-in RPC server -- NOTE: The RPC server"+
 					" is disabled by default if no rpcuser/rpcpass or"+
 					" rpclimituser/rpclimitpass is specified",
-				cx.Config.DisableRPC),
+				cx.Config.DisableRPC,
+			),
 			au.Bool(
 				"nodnsseed",
 				"Disable DNS seeding for peers",
-				cx.Config.DisableDNSSeed),
+				cx.Config.DisableDNSSeed,
+			),
 			au.StringSlice(
 				"externalip",
 				"Add an ip to the list of local addresses we claim to"+
 					" listen on to peers",
-				cx.Config.ExternalIPs),
+				cx.Config.ExternalIPs,
+			),
 			au.StringSlice(
 				"addcheckpoint",
 				"Add a custom checkpoint.  Format: '<height>:<hash>'",
-				cx.Config.AddCheckpoints),
+				cx.Config.AddCheckpoints,
+			),
 			au.Bool(
 				"nocheckpoints",
 				"Disable built-in checkpoints.  Don't do this unless"+
 					" you know what you're doing.",
-				cx.Config.DisableCheckpoints),
+				cx.Config.DisableCheckpoints,
+			),
 			au.String(
 				"dbtype",
 				"Database backend to use for the Block Chain",
 				node.DefaultDbType,
-				cx.Config.DbType),
+				cx.Config.DbType,
+			),
 			au.String(
 				"profile",
 				"Enable HTTP profiling on given port -- NOTE port"+
 					" must be between 1024 and 65536",
 				"",
-				cx.Config.Profile),
+				cx.Config.Profile,
+			),
 			au.String(
 				"cpuprofile",
 				"Write CPU profile to the specified file",
 				"",
-				cx.Config.CPUProfile),
+				cx.Config.CPUProfile,
+			),
 			au.Bool(
 				"upnp",
 				"Use UPnP to map our listening port outside of NAT",
-				cx.Config.UPNP),
+				cx.Config.UPNP,
+			),
 			au.Float64(
 				"minrelaytxfee",
 				"The minimum transaction fee in DUO/kB to be"+
 					" considered a non-zero fee.",
 				mempool.DefaultMinRelayTxFee.ToDUO(),
-				cx.Config.MinRelayTxFee),
+				cx.Config.MinRelayTxFee,
+			),
 			au.Float64(
 				"limitfreerelay",
 				"Limit relay of transactions with no transaction"+
 					" fee to the given amount in thousands of bytes per minute",
 				node.DefaultFreeTxRelayLimit,
-				cx.Config.FreeTxRelayLimit),
+				cx.Config.FreeTxRelayLimit,
+			),
 			au.Bool(
 				"norelaypriority",
 				"Do not require free or low-fee transactions to have"+
 					" high priority for relaying",
-				cx.Config.NoRelayPriority),
+				cx.Config.NoRelayPriority,
+			),
 			au.Duration(
 				"trickleinterval",
 				"Minimum time between attempts to send new"+
 					" inventory to a connected peer",
 				node.DefaultTrickleInterval,
-				cx.Config.TrickleInterval),
+				cx.Config.TrickleInterval,
+			),
 			au.Int(
 				"maxorphantx",
 				"Max number of orphan transactions to keep in memory",
 				node.DefaultMaxOrphanTransactions,
-				cx.Config.MaxOrphanTxs),
+				cx.Config.MaxOrphanTxs,
+			),
 			au.Bool(
 				"generate, g",
 				"Generate (mine) DUO using the CPU",
-				cx.Config.Generate),
+				cx.Config.Generate,
+			),
 			au.Int(
 				"genthreads, G",
 				"Number of CPU threads to use with CPU miner"+
 					" -1 = all cores",
 				1,
-				cx.Config.GenThreads),
+				cx.Config.GenThreads,
+			),
 			au.Bool(
 				"solo",
 				"mine DUO even if not connected to the network",
-				cx.Config.Solo),
+				cx.Config.Solo,
+			),
 			au.Bool(
 				"lan",
 				"mine duo if not connected to nodes on internet",
-				cx.Config.LAN),
+				cx.Config.LAN,
+			),
 			au.String(
 				"controller",
 				"port controller listens on for solutions from workers"+
 					" and other node peers",
 				":0",
-				cx.Config.Controller),
+				cx.Config.Controller,
+			),
+			au.StringSlice(
+				"controllerconnect",
+				"addresses that the controller can be reached on",
+				cx.Config.ControllerConnect,
+			),
 			au.Bool(
 				"autoports",
 				"uses random automatic ports for p2p, rpc and controller",
-				cx.Config.AutoPorts),
+				cx.Config.AutoPorts,
+			),
 			au.StringSlice(
 				"miningaddr",
 				"Add the specified payment address to the list of"+
 					" addresses to use for generated blocks, at least one is "+
 					"required if generate or minerlistener are set",
-				cx.Config.MiningAddrs),
+				cx.Config.MiningAddrs,
+			),
 			au.String(
 				"minerpass",
 				"password to authorise sending work to a miner",
 				genPassword(),
-				cx.Config.MinerPass),
+				cx.Config.MinerPass,
+			),
 			au.Int(
 				"blockminsize",
 				"Minimum block size in bytes to be used when"+
 					" creating a block",
 				node.BlockMaxSizeMin,
-				cx.Config.BlockMinSize),
+				cx.Config.BlockMinSize,
+			),
 			au.Int(
 				"blockmaxsize",
 				"Maximum block size in bytes to be used when"+
 					" creating a block",
 				node.BlockMaxSizeMax,
-				cx.Config.BlockMaxSize),
+				cx.Config.BlockMaxSize,
+			),
 			au.Int(
 				"blockminweight",
 				"Minimum block weight to be used when creating"+
 					" a block",
 				node.BlockMaxWeightMin,
-				cx.Config.BlockMinWeight),
+				cx.Config.BlockMinWeight,
+			),
 			au.Int(
 				"blockmaxweight",
 				"Maximum block weight to be used when creating"+
 					" a block",
 				node.BlockMaxWeightMax,
-				cx.Config.BlockMaxWeight),
+				cx.Config.BlockMaxWeight,
+			),
 			au.Int(
 				"blockprioritysize",
 				"Size in bytes for high-priority/low-fee"+
 					" transactions when creating a block",
 				mempool.DefaultBlockPrioritySize,
-				cx.Config.BlockPrioritySize),
+				cx.Config.BlockPrioritySize,
+			),
 			au.StringSlice(
 				"uacomment",
 				"Comment to add to the user agent -- See BIP 14 for"+
 					" more information.",
-				cx.Config.UserAgentComments),
+				cx.Config.UserAgentComments,
+			),
 			au.Bool(
 				"nopeerbloomfilters",
 				"Disable bloom filtering support",
-				cx.Config.NoPeerBloomFilters),
+				cx.Config.NoPeerBloomFilters,
+			),
 			au.Bool(
 				"nocfilters",
 				"Disable committed filtering (CF) support",
-				cx.Config.NoCFilters),
+				cx.Config.NoCFilters,
+			),
 			au.Int(
 				"sigcachemaxsize",
 				"The maximum number of entries in the"+
 					" signature verification cache",
 				node.DefaultSigCacheMaxSize,
-				cx.Config.SigCacheMaxSize),
+				cx.Config.SigCacheMaxSize,
+			),
 			au.Bool(
 				"blocksonly",
 				"Do not accept transactions from remote peers.",
-				cx.Config.BlocksOnly),
+				cx.Config.BlocksOnly,
+			),
 			au.BoolTrue(
 				"txindex",
 				"Disable the transaction index which makes all transactions available via the getrawtransaction RPC",
-				cx.Config.TxIndex),
+				cx.Config.TxIndex,
+			),
 			au.BoolTrue(
 				"addrindex",
 				"Disable address-based transaction index which makes the searchrawtransactions RPC available",
@@ -559,22 +660,28 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			au.Bool(
 				"relaynonstd",
 				"Relay non-standard transactions regardless of the default settings for the active network.",
-				cx.Config.RelayNonStd), au.Bool("rejectnonstd",
+				cx.Config.RelayNonStd,
+			), au.Bool(
+				"rejectnonstd",
 				"Reject non-standard transactions regardless of the default settings for the active network.",
-				cx.Config.RejectNonStd),
+				cx.Config.RejectNonStd,
+			),
 			au.Bool(
 				"noinitialload",
 				"Defer wallet creation/opening on startup and enable loading wallets over RPC (loading not yet implemented)",
-				cx.Config.NoInitialLoad),
+				cx.Config.NoInitialLoad,
+			),
 			au.Bool(
 				"walletconnect, wc",
 				"connect to wallet instead of full node",
-				cx.Config.Wallet),
+				cx.Config.Wallet,
+			),
 			au.String(
 				"walletserver, ws",
 				"set wallet server to connect to",
 				"127.0.0.1:11046",
-				cx.Config.WalletServer),
+				cx.Config.WalletServer,
+			),
 			cli.StringFlag{
 				Name:        "walletpass",
 				Value:       *cx.Config.WalletPass,
@@ -585,23 +692,27 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			au.Bool(
 				"onetimetlskey",
 				"Generate a new TLS certificate pair at startup, but only write the certificate to disk",
-				cx.Config.OneTimeTLSKey),
+				cx.Config.OneTimeTLSKey,
+			),
 			au.Bool(
 				"tlsskipverify",
 				"skip verifying tls certificates",
-				cx.Config.TLSSkipVerify),
+				cx.Config.TLSSkipVerify,
+			),
 			au.StringSlice(
 				"walletrpclisten",
 				"Listen for wallet RPC connections on this"+
 					" interface/port (default port: 11046, testnet: 21046,"+
 					" simnet: 41046)",
-				cx.Config.WalletRPCListeners),
+				cx.Config.WalletRPCListeners,
+			),
 			au.Int(
 				"walletrpcmaxclients",
 				"Max number of legacy RPC clients for"+
 					" standard connections",
 				8,
-				cx.Config.WalletRPCMaxClients),
+				cx.Config.WalletRPCMaxClients,
+			),
 			au.Int(
 				"walletrpcmaxwebsockets",
 				"Max number of legacy RPC websocket connections",
@@ -611,7 +722,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			au.Bool(
 				"nodeoff",
 				"Starts with node turned off",
-				cx.Config.NodeOff),
+				cx.Config.NodeOff,
+			),
 			au.Bool(
 				"walletoff",
 				"Starts with wallet turned off",

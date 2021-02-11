@@ -139,22 +139,24 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	Debug("###################################",routeableAddress)
 	// routeableAddress := addresses
 	// Debug("********************", routeableAddress)
-	*cfg.Controller = net.JoinHostPort(routeableAddress, fmt.Sprint(fP))
+	// bind to all IPv4 addresses
+	// *cfg.Controller = net.JoinHostPort(/*routeableAddress*/"0.0.0.0", fmt.Sprint(fP))
+	*cfg.Controller = ":"+fmt.Sprint(fP)
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
-		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(routeableAddress + ":" + cx.ActiveNet.DefaultPort)}
+		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
 		cx.StateCfg.Save = true
 		Debug("Listeners")
 	}
 	if len(*cfg.RPCListeners) < 1 {
-		address := fmt.Sprintf("%s:%s", routeableAddress, cx.ActiveNet.RPCClientPort)
+		address := fmt.Sprintf(":%s", cx.ActiveNet.RPCClientPort)
 		*cfg.RPCListeners = cli.StringSlice{address}
-		*cfg.RPCConnect = address
+		*cfg.RPCConnect = fmt.Sprintf("%s:%s", routeableAddress, cx.ActiveNet.RPCClientPort)
 		Debug("setting save flag because rpc listeners is empty and rpc is not disabled")
 		cx.StateCfg.Save = true
 		Debug("RPCListeners")
 	}
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
-		address := fmt.Sprintf(routeableAddress + ":" + cx.ActiveNet.WalletRPCServerPort)
+		address := fmt.Sprintf(":" + cx.ActiveNet.WalletRPCServerPort)
 		*cfg.WalletRPCListeners = cli.StringSlice{address}
 		*cfg.WalletServer = address
 		Debug(

@@ -132,6 +132,7 @@ type Config struct {
 	ConfigFile             *string          `group:"" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"path" widget:"string" json:"ConfigFile" hook:"restart"`
 	ConnectPeers           *cli.StringSlice `group:"node" label:"Connect Peers" description:"connect ONLY to these addresses (disables inbound connections)" type:"address" widget:"multi" json:"ConnectPeers" hook:"restart"`
 	Controller             *string          `group:"node" label:"Controller Listener" description:"address to bind miner controller to" type:"address" widget:"string" json:"Controller" hook:"controller"`
+	ControllerConnect      *cli.StringSlice `group:"node" label:"Controller Connect" description:"address miner controller can be reached through to" type:"address" widget:"multi" json:"ControllerListener" hook:"controller"`
 	CPUProfile             *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"path" widget:"string" json:"CPUProfile" hook:"restart"`
 	DataDir                *string          `group:"" label:"Data Directory" description:"root folder where application data is stored" type:"path" widget:"string" json:"DataDir" hook:"restart"`
 	DbType                 *string          `group:"" label:"Database Type" description:"type of database storage engine to use (only one right now)" type:"" widget:"string" json:"DbType" hook:"restart"`
@@ -230,6 +231,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		ConfigFile:             newstring(),
 		ConnectPeers:           newStringSlice(),
 		Controller:             newstring(),
+		ControllerConnect:      newStringSlice(),
 		CPUProfile:             newstring(),
 		DarkTheme:              newbool(),
 		DataDir:                &datadir,
@@ -324,6 +326,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"ConfigFile":             c.ConfigFile,
 		"ConnectPeers":           c.ConnectPeers,
 		"Controller":             c.Controller,
+		"ControllerConnect":      c.ControllerConnect,
 		"CPUProfile":             c.CPUProfile,
 		"DarkTheme":              c.DarkTheme,
 		"DataDir":                c.DataDir,
