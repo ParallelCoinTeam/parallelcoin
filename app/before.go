@@ -281,12 +281,12 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				*cx.Config.LAN = false
 			}
 		}
-		if c.IsSet("controller") {
-			*cx.Config.Controller = c.String("controller")
-		}
-		if c.IsSet("controllerconnect") {
-			*cx.Config.ControllerConnect = c.StringSlice("controllerconnect")
-		}
+		// if c.IsSet("controller") {
+		// 	*cx.Config.Controller = c.String("controller")
+		// }
+		// if c.IsSet("controllerconnect") {
+		// 	*cx.Config.ControllerConnect = c.StringSlice("controllerconnect")
+		// }
 		if c.IsSet("miningaddrs") {
 			*cx.Config.MiningAddrs = c.StringSlice("miningaddrs")
 		}

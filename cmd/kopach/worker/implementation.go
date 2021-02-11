@@ -41,7 +41,7 @@ type Worker struct {
 	ciph          cipher.AEAD
 	quit          qu.C
 	block         atomic.Value
-	senderPort    atomic.Uint32
+	senderPort    atomic.Uint64
 	msgBlock      atomic.Value // *wire.MsgBlock
 	bitses        atomic.Value
 	merkles       atomic.Value
@@ -247,7 +247,7 @@ out:
 					if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
 						Debug("found solution", nH)
 						// srs := sol.GetSolContainer(w.senderPort.Load(), mb)
-						srs := sol.Get(int32(w.senderPort.Load()), mb)
+						srs := sol.Get(w.senderPort.Load(), mb)
 						err := w.dispatchConn.SendMany(
 							sol.Magic,
 							transport.GetShards(srs),
@@ -339,7 +339,7 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 	bb.SetHeight(newHeight)
 	w.block.Store(bb)
 	w.msgBlock.Store(*mb)
-	w.senderPort.Store(uint32(j.ControllerPort))
+	w.senderPort.Store(j.ControllerPort)
 	// halting current work
 	Debug("switching to new job")
 	// w.stopChan <- struct{}{}

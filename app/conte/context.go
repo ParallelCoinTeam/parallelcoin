@@ -79,8 +79,8 @@ type Xt struct {
 	// OtherNodes is the count of nodes connected automatically on the LAN
 	OtherNodes atomic.Int32
 	// IsGUI indicates if we have the possibility of terminal input
-	IsGUI bool
-	
+	IsGUI        bool
+	UUID         uint64
 	waitChangers []string
 	waitCounter  int
 }
@@ -137,7 +137,8 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
 		// WalletChan:       make(chan *wallet.Wallet),
-		NodeChan:         make(chan *chainrpc.Server),
+		NodeChan: make(chan *chainrpc.Server),
+		UUID:     0,
 	}
 	// interrupt.AddHandler(func(){
 	// // 	chainClientReady.Q()

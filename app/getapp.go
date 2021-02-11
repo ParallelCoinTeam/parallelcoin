@@ -564,21 +564,21 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"mine duo if not connected to nodes on internet",
 				cx.Config.LAN,
 			),
-			au.String(
-				"controller",
-				"port controller listens on for solutions from workers"+
-					" and other node peers",
-				":0",
-				cx.Config.Controller,
-			),
-			au.StringSlice(
-				"controllerconnect",
-				"addresses that the controller can be reached on",
-				cx.Config.ControllerConnect,
-			),
+			// au.String(
+			// 	"controller",
+			// 	"port controller listens on for solutions from workers"+
+			// 		" and other node peers",
+			// 	":0",
+			// 	cx.Config.Controller,
+			// ),
+			// au.StringSlice(
+			// 	"controllerconnect",
+			// 	"addresses that the controller can be reached on",
+			// 	cx.Config.ControllerConnect,
+			// ),
 			au.Bool(
 				"autoports",
-				"uses random automatic ports for p2p, rpc and controller",
+				"uses random automatic ports for p2p & rpc",
 				cx.Config.AutoPorts,
 			),
 			au.StringSlice(

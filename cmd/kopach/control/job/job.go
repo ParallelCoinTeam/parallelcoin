@@ -22,7 +22,7 @@ type Job struct {
 	IPs             net.IP
 	P2PListenerPort uint16
 	RPCListenerPort uint16
-	ControllerPort  uint16
+	ControllerPort  uint64
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
 	Bitses          blockchain.TargetBits
@@ -132,7 +132,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		IPs:             adv.IP,
 		P2PListenerPort: adv.P2P,
 		RPCListenerPort: adv.RPC,
-		ControllerPort:  adv.Controller,
+		ControllerPort:  adv.UUID,
 		Height:          bH,
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
 		Bitses:          bitsMap,

@@ -65,7 +65,7 @@ type Controller struct {
 	buffer        *ring.Ring
 	began         time.Time
 	otherNodes    map[string]time.Time
-	listenPort    int
+	uuid          uint64
 	hashCount     atomic.Uint64
 	hashSampleBuf *rav.BufferUint64
 	lastNonce     int32
@@ -92,7 +92,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		buffer:        ring.New(BufferSize),
 		began:         time.Now(),
 		otherNodes:    make(map[string]time.Time),
-		listenPort:    int(util.GetActualPort(*cx.Config.Controller)),
+		uuid:          cx.UUID,
 		hashSampleBuf: rav.NewBufferUint64(100),
 	}
 	ctrl.isMining.Store(true)
@@ -351,7 +351,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 		// if it has a different controller port it is probably a different instance
 		if _, ok := c.otherNodes[o]; !ok {
 			// if we haven't already added it to the permanent peer list, we can add it now
-			Debug("ctrl", j.Controller, "P2P", j.P2P, "rpc", j.RPC)
+			Debug("ctrl", j.UUID, "P2P", j.P2P, "rpc", j.RPC)
 			// because nodes can be set to change their port each launch this always
 			// reconnects (for lan, autoports is recommended).
 			// TODO: readd autoports for GUI wallet
@@ -384,8 +384,8 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err e
 	gotiny.Unmarshal(b, &s)
 	// Debugs(s)
 	// j := sol.LoadSolContainer(b)
-	senderPort := s.Port
-	if int(senderPort) != c.listenPort {
+	uuid := s.UUID
+	if uuid != c.uuid {
 		Debug("solution not from current controller")
 		return
 	}

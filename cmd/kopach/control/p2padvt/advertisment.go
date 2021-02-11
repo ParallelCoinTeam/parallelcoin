@@ -14,8 +14,9 @@ import (
 var Magic = []byte{'a', 'd', 'v', 1}
 
 type Advertisment struct {
-	IP                   net.IP
-	P2P, RPC, Controller uint16
+	IP       net.IP
+	P2P, RPC uint16
+	UUID     uint64
 }
 
 //
@@ -29,12 +30,12 @@ type Advertisment struct {
 func Get(cx *conte.Xt) []byte {
 	P2P := util.GetActualPort((*cx.Config.P2PListeners)[0])
 	RPC := util.GetActualPort((*cx.Config.RPCListeners)[0])
-	Controller := util.GetActualPort(*cx.Config.Controller)
+	// Controller := util.GetActualPort(*cx.Config.Controller)
 	adv := Advertisment{
-		IP:         routeable.GetListenable(),
-		P2P:        P2P,
-		RPC:        RPC,
-		Controller: Controller,
+		IP:   routeable.GetListenable(),
+		P2P:  P2P,
+		RPC:  RPC,
+		UUID: cx.UUID,
 	}
 	// Debugs(adv)
 	ad := gotiny.Marshal(&adv)
@@ -51,10 +52,10 @@ func Get(cx *conte.Xt) []byte {
 // GetAdvt returns an advertisment serializer
 func GetAdvt(cx *conte.Xt) *Advertisment {
 	adv := &Advertisment{
-		IP:         routeable.GetListenable(),
-		P2P:        util.GetActualPort((*cx.Config.P2PListeners)[0]),
-		RPC:        util.GetActualPort((*cx.Config.RPCListeners)[0]),
-		Controller: util.GetActualPort(*cx.Config.Controller),
+		IP:   routeable.GetListenable(),
+		P2P:  util.GetActualPort((*cx.Config.P2PListeners)[0]),
+		RPC:  util.GetActualPort((*cx.Config.RPCListeners)[0]),
+		UUID: cx.UUID,
 	}
 	return adv
 	// return simplebuffer.Serializers{

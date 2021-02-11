@@ -322,7 +322,7 @@ var handlers = transport.Handlers{
 		fs := w.FirstSender.Load()
 		ni := advt.IP
 		// ni := p.GetIPs()[0].String()
-		np := advt.Controller
+		np := advt.UUID
 		// np := p.GetControllerListenerPort()
 		ns := net.JoinHostPort(strings.Split(ni.String(), ":")[0], fmt.Sprint(np))
 		Debug("received pause from server at", ns)

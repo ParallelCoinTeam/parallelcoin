@@ -12,18 +12,18 @@ import (
 var Magic = []byte{'s', 'o', 'l', 1}
 
 type Solution struct {
-	Port int32
+	UUID uint64
 	// *wire.MsgBlock
 	Bytes []byte
 }
 
-func Get(port int32, mb *wire.MsgBlock) []byte {
+func Get(uuid uint64, mb *wire.MsgBlock) []byte {
 	var buf []byte
 	wr := bytes.NewBuffer(buf)
 	var err error
 	if err = mb.Serialize(wr); Check(err) {
 	}
-	s := Solution{Port: port, Bytes: wr.Bytes()} // MsgBlock: mb}
+	s := Solution{UUID: uuid, Bytes: wr.Bytes()} // MsgBlock: mb}
 	return gotiny.Marshal(&s)
 }
 
