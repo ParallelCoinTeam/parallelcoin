@@ -19,10 +19,10 @@ import (
 var Magic = []byte{'j', 'o', 'b', 1}
 
 type Job struct {
-	IPs             net.IP
+	IPs             []net.IP
 	P2PListenerPort uint16
 	RPCListenerPort uint16
-	ControllerPort  uint64
+	ControllerNonce uint64
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
 	Bitses          blockchain.TargetBits
@@ -129,10 +129,10 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	// Traces(msg)
 	adv := p2padvt.GetAdvt(cx)
 	jrb := Job{
-		IPs:             adv.IP,
+		IPs:             adv.IPs,
 		P2PListenerPort: adv.P2P,
 		RPCListenerPort: adv.RPC,
-		ControllerPort:  adv.UUID,
+		ControllerNonce: adv.UUID,
 		Height:          bH,
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
 		Bitses:          bitsMap,

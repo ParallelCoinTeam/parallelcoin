@@ -339,26 +339,29 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 	// j := p2padvt.LoadContainer(b)
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
-	otherIP := j.IP
+	otherIPs := j.IPs
 	// Debug(otherIPs)
 	// Trace("otherIPs", otherIPs)
 	otherPort := fmt.Sprint(j.P2P)
 	Debug()
 	myPort := strings.Split((*c.cx.Config.P2PListeners)[0], ":")[1]
 	Debug("myPort", myPort, *c.cx.Config.P2PListeners, "otherPort", otherPort)
-	o := fmt.Sprintf("%s:%s", otherIP.String(), otherPort)
-	if otherPort != myPort {
-		// if it has a different controller port it is probably a different instance
-		if _, ok := c.otherNodes[o]; !ok {
-			// if we haven't already added it to the permanent peer list, we can add it now
-			Debug("ctrl", j.UUID, "P2P", j.P2P, "rpc", j.RPC)
-			// because nodes can be set to change their port each launch this always
-			// reconnects (for lan, autoports is recommended).
-			// TODO: readd autoports for GUI wallet
-			Info("connecting to lan peer with same PSK", o, otherIP)
-			if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
+	for _, otherIP := range otherIPs {
+		
+		o := fmt.Sprintf("%s:%s", otherIP.String(), otherPort)
+		if otherPort != myPort {
+			// if it has a different controller port it is probably a different instance
+			if _, ok := c.otherNodes[o]; !ok {
+				// if we haven't already added it to the permanent peer list, we can add it now
+				Debug("ctrl", j.UUID, "P2P", j.P2P, "rpc", j.RPC)
+				// because nodes can be set to change their port each launch this always
+				// reconnects (for lan, autoports is recommended).
+				// TODO: readd autoports for GUI wallet
+				Info("connecting to lan peer with same PSK", o, otherIP)
+				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
+				}
+				c.otherNodes[o] = time.Now()
 			}
-			c.otherNodes[o] = time.Now()
 		}
 	}
 	// If we lose connection for more than 9 seconds we delete and if the node reappears it can be reconnected

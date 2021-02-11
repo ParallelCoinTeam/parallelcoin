@@ -4,11 +4,11 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"net"
 	"os"
-	"strings"
 	"time"
+	
+	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	
 	"github.com/niubaoshu/gotiny"
 	
@@ -65,7 +65,7 @@ type Worker struct {
 	sendAddresses       []*net.UDPAddr
 	clients             []*client.Client
 	workers             []*worker.Worker
-	FirstSender         atomic.String
+	FirstSender         atomic.Uint64
 	lastSent            atomic.Int64
 	Status              atomic.String
 	HashTick            chan HashCount
@@ -183,11 +183,11 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
 					// so clear FirstSender
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
-					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
+					wasSending := since > time.Second*3 && w.FirstSender.Load() != 0
 					if wasSending {
 						Debug("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be listened to
-						w.FirstSender.Store("")
+						w.FirstSender.Store(0)
 						// pause the workers
 						for i := range w.clients {
 							Debug("sending pause to worker", i)
@@ -294,19 +294,19 @@ var handlers = transport.Handlers{
 		gotiny.Unmarshal(b, &jr)
 		// Debugs(jr)
 		
-		iP := jr.IPs
+		// iP := jr.IPs
 		w.height = jr.Height
-		cP := jr.ControllerPort
-		addr := net.JoinHostPort(iP.String(), fmt.Sprint(cP))
+		cN := jr.ControllerNonce
+		// addr := net.JoinHostPort(iP.String(), fmt.Sprint(cP))
 		firstSender := w.FirstSender.Load()
-		otherSent := firstSender != addr && firstSender != ""
+		otherSent := firstSender != cN && firstSender != 0
 		if otherSent {
 			Trace("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		}
-		Debug("now listening to controller at", addr)
-		w.FirstSender.Store(addr)
+		Debug("now listening to controller at", cN)
+		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
 			if err = w.clients[i].NewJob(&jr); Check(err) {
@@ -320,15 +320,15 @@ var handlers = transport.Handlers{
 		gotiny.Unmarshal(b, &advt)
 		// p := pause.LoadPauseContainer(b)
 		fs := w.FirstSender.Load()
-		ni := advt.IP
+		ni := advt.IPs
 		// ni := p.GetIPs()[0].String()
 		np := advt.UUID
 		// np := p.GetControllerListenerPort()
-		ns := net.JoinHostPort(strings.Split(ni.String(), ":")[0], fmt.Sprint(np))
-		Debug("received pause from server at", ns)
-		if fs == ns {
+		// ns := net.JoinHostPort(strings.Split(ni.String(), ":")[0], fmt.Sprint(np))
+		Debug("received pause from server at", ni, np)
+		if fs == np {
 			for i := range w.clients {
-				Debug("sending pause to worker", i, fs, ns)
+				Debug("sending pause to worker", i, fs, np)
 				err := w.clients[i].Pause()
 				if err != nil {
 					Error(err)

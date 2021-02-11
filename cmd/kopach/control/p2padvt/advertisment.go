@@ -14,7 +14,7 @@ import (
 var Magic = []byte{'a', 'd', 'v', 1}
 
 type Advertisment struct {
-	IP       net.IP
+	IPs      []net.IP
 	P2P, RPC uint16
 	UUID     uint64
 }
@@ -31,8 +31,9 @@ func Get(cx *conte.Xt) []byte {
 	P2P := util.GetActualPort((*cx.Config.P2PListeners)[0])
 	RPC := util.GetActualPort((*cx.Config.RPCListeners)[0])
 	// Controller := util.GetActualPort(*cx.Config.Controller)
+	_, ips := routeable.GetAddressesAndInterfaces()
 	adv := Advertisment{
-		IP:   routeable.GetListenable(),
+		IPs:  ips, // routeable.GetListenable(),
 		P2P:  P2P,
 		RPC:  RPC,
 		UUID: cx.UUID,
@@ -51,8 +52,9 @@ func Get(cx *conte.Xt) []byte {
 
 // GetAdvt returns an advertisment serializer
 func GetAdvt(cx *conte.Xt) *Advertisment {
+	_, ips := routeable.GetAddressesAndInterfaces()
 	adv := &Advertisment{
-		IP:   routeable.GetListenable(),
+		IPs:  ips,
 		P2P:  util.GetActualPort((*cx.Config.P2PListeners)[0]),
 		RPC:  util.GetActualPort((*cx.Config.RPCListeners)[0]),
 		UUID: cx.UUID,

@@ -339,7 +339,7 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 	bb.SetHeight(newHeight)
 	w.block.Store(bb)
 	w.msgBlock.Store(*mb)
-	w.senderPort.Store(j.ControllerPort)
+	w.senderPort.Store(j.ControllerNonce)
 	// halting current work
 	Debug("switching to new job")
 	// w.stopChan <- struct{}{}
