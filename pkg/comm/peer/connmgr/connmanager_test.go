@@ -502,7 +502,7 @@ func TestCancelIgnoreDelayedConnection(t *testing.T) {
 	}
 }
 
-// mockListener implements the net.Receiver interface and is used to test code that deals with net.Listeners without
+// mockListener implements the net.Receiver interface and is used to test code that deals with net.P2PListeners without
 // having to actually make any real connections.
 type mockListener struct {
 	localAddr   string

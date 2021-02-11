@@ -136,10 +136,10 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	_, routeableAddress, _ := routeable.GetInterface()
 	Debug("###################################", routeableAddress)
 	*cfg.Controller = ":" + fmt.Sprint(fP)
-	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
-		cfg.Listeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
+	if len(*cfg.P2PListeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
+		cfg.P2PListeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
 		cx.StateCfg.Save = true
-		Debug("Listeners")
+		Debug("P2PListeners")
 	}
 	if len(*cfg.RPCListeners) < 1 {
 		address := fmt.Sprintf("127.0.0.1:%s", cx.ActiveNet.RPCClientPort)
@@ -167,13 +167,13 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	// // only the wallet listener is important with shell as it proxies for
 	// // node, the rest better they are automatic
 	// case "shell":
-	// 	*cfg.Listeners = cli.StringSlice{listenHost}
+	// 	*cfg.P2PListeners = cli.StringSlice{listenHost}
 	// 	*cfg.RPCListeners = cli.StringSlice{listenHost}
 	// }
 	if *cx.Config.AutoPorts || !initial {
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}
+		*cfg.P2PListeners = cli.StringSlice{":" + fmt.Sprint(fP)}
 		if fP, e = GetFreePort(); Check(e) {
 		}
 		*cfg.RPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
@@ -184,7 +184,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		Debug("autoports")
 	} else {
 		// sanitize user input and set auto on any that fail
-		l := cfg.Listeners
+		l := cfg.P2PListeners
 		r := cfg.RPCListeners
 		w := cfg.WalletRPCListeners
 		for i := range *l {
@@ -194,7 +194,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 					}
 					(*l)[i] = routeableAddress + ":" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
-					Debug("port not validate Listeners")
+					Debug("port not validate P2PListeners")
 				}
 			}
 		}
@@ -230,7 +230,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	//
 	// listeners := []*cli.StringSlice{
 	//	cfg.WalletRPCListeners,
-	//	cfg.Listeners,
+	//	cfg.P2PListeners,
 	//	cfg.RPCListeners,
 	// }
 	// for i := range listeners {
@@ -248,7 +248,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	//	}
 	// }
 	// (*cfg.WalletRPCListeners)[0] = (*listeners[0])[0]
-	// (*cfg.Listeners)[0] = (*listeners[1])[0]
+	// (*cfg.P2PListeners)[0] = (*listeners[1])[0]
 	// (*cfg.RPCListeners)[0] = (*listeners[2])[0]
 	//
 	// if lan mode is set, remove the peers.json so no unwanted nodes are connected to
@@ -403,7 +403,7 @@ func normalizeAddresses(cfg *pod.Config) {
 	nrm := normalize.StringSliceAddresses
 	nrm(cfg.AddPeers, port)
 	nrm(cfg.ConnectPeers, port)
-	// nrm(cfg.Listeners, port)
+	// nrm(cfg.P2PListeners, port)
 	nrm(cfg.Whitelists, port)
 	// nrm(cfg.RPCListeners, port)
 }
@@ -518,14 +518,14 @@ func configListener(cfg *pod.Config, params *netparams.Params) {
 	Trace("checking proxy/connect for disabling listening")
 	if (*cfg.Proxy != "" ||
 		len(*cfg.ConnectPeers) > 0) &&
-		len(*cfg.Listeners) == 0 {
+		len(*cfg.P2PListeners) == 0 {
 		*cfg.DisableListen = true
 	}
 	// Add the default listener if none were specified. The default listener is all addresses on the listen port for the
 	// network we are to connect to.
 	Trace("checking if listener was set")
-	if len(*cfg.Listeners) == 0 {
-		*cfg.Listeners = []string{":" + params.DefaultPort}
+	if len(*cfg.P2PListeners) == 0 {
+		*cfg.P2PListeners = []string{":" + params.DefaultPort}
 	}
 }
 
@@ -591,7 +591,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 	//
 	// Add default port to all listener addresses if needed and remove duplicate addresses.
 	//
-	// *cfg.Listeners = nrms(*cfg.Listeners, cx.ActiveNet.DefaultPort)
+	// *cfg.P2PListeners = nrms(*cfg.P2PListeners, cx.ActiveNet.DefaultPort)
 	//
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
 	*cfg.AddPeers = nrms(*cfg.AddPeers, params.DefaultPort)

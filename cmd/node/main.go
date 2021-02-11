@@ -129,9 +129,9 @@ func Main(cx *conte.Xt) (err error) {
 		return nil
 	}
 	// create server and start it
-	server, err := chainrpc.NewNode(*cx.Config.Listeners, db, interrupt.ShutdownRequestChan, conte.GetContext(cx))
+	server, err := chainrpc.NewNode(*cx.Config.P2PListeners, db, interrupt.ShutdownRequestChan, conte.GetContext(cx))
 	if err != nil {
-		Errorf("unable to start server on %v: %v", *cx.Config.Listeners, err)
+		Errorf("unable to start server on %v: %v", *cx.Config.P2PListeners, err)
 		return err
 	}
 	server.Start()

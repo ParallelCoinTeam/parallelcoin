@@ -28,7 +28,7 @@ import (
 // 	AddPeers             *cli.StringSlice `short:"a" long:"addpeer" description:"Add a peer to connect with at startup"`
 // 	ConnectPeers         *cli.StringSlice `long:"connect" description:"Connect only to the specified peers at startup"`
 // 	DisableListen        *bool            `long:"nolisten" description:"Disable listening for incoming connections -- NOTE: Listening is automatically disabled if the --connect or --proxy options are used without also specifying listen interfaces via --listen"`
-// 	Listeners            *cli.StringSlice `long:"listen" description:"Add an interface/port to listen for connections (default all interfaces port: 11047, testnet: 21047)"`
+// 	P2PListeners            *cli.StringSlice `long:"listen" description:"Add an interface/port to listen for connections (default all interfaces port: 11047, testnet: 21047)"`
 // 	MaxPeers             *int             `long:"maxpeers" description:"Max number of inbound and outbound peers"`
 // 	DisableBanning       *bool            `long:"nobanning" description:"Disable banning of misbehaving peers"`
 // 	BanDuration          *time.Duration   `long:"banduration" description:"How long to ban misbehaving peers.  Valid time units are {s, m, h, d}.  Minimum 1 second"`
@@ -526,7 +526,7 @@ func loadConfig() (
 	}
 	// --proxy or --connect without --listen disables listening.
 	if (cfg.Proxy != "" || len(cfg.ConnectPeers) > 0) &&
-		len(cfg.Listeners) == 0 {
+		len(cfg.P2PListeners) == 0 {
 		cfg.DisableListen = true
 	}
 	// Connect means no DNS seeding.
@@ -534,8 +534,8 @@ func loadConfig() (
 		cfg.DisableDNSSeed = true
 	}
 	// Add the default listener if none were specified. The default listener is all addresses on the listen port for the network we are to connect to.
-	if len(cfg.Listeners) == 0 {
-		cfg.Listeners = []string{
+	if len(cfg.P2PListeners) == 0 {
+		cfg.P2PListeners = []string{
 			net.JoinHostPort("", ActiveNetParams.DefaultPort),
 		}
 	}
@@ -706,7 +706,7 @@ func loadConfig() (
 		StateCfg.ActiveMinerKey = fork.Argon2i([]byte(cfg.MinerPass))
 	}
 	// Add default port to all listener addresses if needed and remove duplicate addresses.
-	cfg.Listeners = NormalizeAddresses(cfg.Listeners,
+	cfg.P2PListeners = NormalizeAddresses(cfg.P2PListeners,
 		ActiveNetParams.DefaultPort)
 	// Add default port to all rpc listener addresses if needed and remove duplicate addresses.
 	cfg.RPCListeners = NormalizeAddresses(cfg.RPCListeners,

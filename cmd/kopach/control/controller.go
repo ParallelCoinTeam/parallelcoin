@@ -78,7 +78,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		Warn("not running controller without RPC enabled")
 		return
 	}
-	if len(*cx.Config.Listeners) < 1 || *cx.Config.DisableListen {
+	if len(*cx.Config.P2PListeners) < 1 || *cx.Config.DisableListen {
 		Warn("not running controller without p2p listener enabled")
 		return
 	}
@@ -344,8 +344,8 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 	// Trace("otherIPs", otherIPs)
 	otherPort := fmt.Sprint(j.P2P)
 	Debug()
-	myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
-	Debug("myPort", myPort, *c.cx.Config.Listeners, "otherPort", otherPort)
+	myPort := strings.Split((*c.cx.Config.P2PListeners)[0], ":")[1]
+	Debug("myPort", myPort, *c.cx.Config.P2PListeners, "otherPort", otherPort)
 	o := fmt.Sprintf("%s:%s", otherIP.String(), otherPort)
 	if otherPort != myPort {
 		// if it has a different controller port it is probably a different instance

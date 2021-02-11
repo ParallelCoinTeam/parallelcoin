@@ -27,7 +27,7 @@ type Advertisment struct {
 
 // Get returns an advertisment serializer
 func Get(cx *conte.Xt) []byte {
-	P2P:=        util.GetActualPort((*cx.Config.Listeners)[0])
+	P2P:=        util.GetActualPort((*cx.Config.P2PListeners)[0])
 	RPC:=        util.GetActualPort((*cx.Config.RPCListeners)[0])
 	Controller:= util.GetActualPort(*cx.Config.Controller)
 	adv := Advertisment{
@@ -42,7 +42,7 @@ func Get(cx *conte.Xt) []byte {
 	return ad
 	// return simplebuffer.Serializers{
 	// 	IPs.GetListenable(),
-	// 	Uint16.GetPort((*cx.Config.Listeners)[0]),
+	// 	Uint16.GetPort((*cx.Config.P2PListeners)[0]),
 	// 	Uint16.GetPort((*cx.Config.RPCListeners)[0]),
 	// 	Uint16.GetPort(*cx.Config.Controller),
 	// }
@@ -52,14 +52,14 @@ func Get(cx *conte.Xt) []byte {
 func GetAdvt(cx *conte.Xt) *Advertisment {
 	adv := &Advertisment{
 		IP:         routeable.GetListenable(),
-		P2P:        util.GetActualPort((*cx.Config.Listeners)[0]),
+		P2P:        util.GetActualPort((*cx.Config.P2PListeners)[0]),
 		RPC:        util.GetActualPort((*cx.Config.RPCListeners)[0]),
 		Controller: util.GetActualPort(*cx.Config.Controller),
 	}
 	return adv
 	// return simplebuffer.Serializers{
 	// 	IPs.GetListenable(),
-	// 	Uint16.GetPort((*cx.Config.Listeners)[0]),
+	// 	Uint16.GetPort((*cx.Config.P2PListeners)[0]),
 	// 	Uint16.GetPort((*cx.Config.RPCListeners)[0]),
 	// 	Uint16.GetPort(*cx.Config.Controller),
 	// }

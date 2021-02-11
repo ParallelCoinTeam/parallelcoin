@@ -77,7 +77,7 @@ WaitForDisconnect can be used to block until peer disconnection and resource cle
 Callbacks
 
 In order to do anything useful with a peer, it is necessary to react to bitcoin messages. This is accomplished by
-creating an instance of the MessageListeners struct with the callbacks to be invoke specified and setting the Listeners
+creating an instance of the MessageListeners struct with the callbacks to be invoke specified and setting the P2PListeners
 field of the Config struct specified when creating a peer to it.
 
 For convenience, a callback hook for all of the currently supported bitcoin messages is exposed which receives the peer

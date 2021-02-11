@@ -178,7 +178,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.DisableListen = c.Bool("nolisten")
 		}
 		if c.IsSet("listen") {
-			*cx.Config.Listeners = c.StringSlice("listen")
+			*cx.Config.P2PListeners = c.StringSlice("listen")
 		}
 		if c.IsSet("maxpeers") {
 			*cx.Config.MaxPeers = c.Int("maxpeers")

@@ -377,7 +377,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 			au.StringSlice(
 				"listen",
 				"Add an interface/port to listen for connections",
-				cx.Config.Listeners,
+				cx.Config.P2PListeners,
 			),
 			au.Int(
 				"maxpeers",
