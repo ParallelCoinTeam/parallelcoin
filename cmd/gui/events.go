@@ -151,7 +151,7 @@ func (wg *WalletGUI) updateThingies() (err error) {
 func (wg *WalletGUI) updateChainBlock() {
 	Debug("processChainBlockNotification")
 	var err error
-	if wg.ChainClient != nil && wg.ChainClient.Disconnected() {
+	if wg.ChainClient != nil && wg.ChainClient.Disconnected() || wg.ChainClient.Disconnected() {
 		Debug("connecting ChainClient")
 		if err = wg.chainClient(); Check(err) {
 			return
