@@ -2,6 +2,7 @@ package routeable
 
 import (
 	"errors"
+	"github.com/davecgh/go-spew/spew"
 	"net"
 	"strings"
 	
@@ -14,13 +15,20 @@ import (
 // github.com/jackpal/gateway
 var Gateway net.IP
 
-// DiscoveredAddress is where the Discover function stores the results of its
-// probe
-var DiscoveredAddress net.IP
+// Address is the network address that routes to the gateway and thus the
+// internet
+var Address net.IP
 
-// Interface is the net.Interface that is registered to the discovered routeable
-// address
+// Interface is the net.Interface of the Address above
 var Interface *net.Interface
+
+// SecondaryAddresses are all the other addresses that can be reached from
+// somewhere (including localhost) but not necessarily the internet
+var SecondaryAddresses []net.IP
+
+// SecondaryInterfaces is the interfaces of the SecondaryAddresses stored in the
+// corresponding slice index
+var SecondaryInterfaces []*net.Interface
 
 // Discover enumerates and evaluates all known network interfaces and addresses
 // and filters it down to the ones that reach both a LAN and the internet
@@ -34,41 +42,58 @@ func Discover() (err error) {
 	if nif, err = net.Interfaces(); Check(err) {
 		return
 	}
+	// Debug("number of available network interfaces:", len(nif))
+	// Debugs(nif)
 	if Gateway, err = gateway.DiscoverGateway(); Check(err) {
-		return
-	}
-	if Gateway == nil {
-		// todo: this needs to have an appropriate response from the interface side, it
-		//  can be pretty safely assumed that it will not happen on a VPS or other
-		//  network service provider system
-		return errors.New("cannot find internet gateway for current connection")
-	}
-	Debug("default gateway:", Gateway)
-	gws := Gateway.String()
-	gw := net.ParseIP(gws)
-out:
-	for i := range nif {
-		if nif[i].HardwareAddr != nil {
-			var addrs []net.Addr
-			if addrs, err = nif[i].Addrs(); Check(err) || addrs == nil {
-				continue
-			}
-			for j := range addrs {
-				var in *net.IPNet
-				if _, in, err = net.ParseCIDR(addrs[j].String()); Check(err) {
+		// todo: this error condition always happens on iOS and Android
+		// return
+		for i := range nif {
+			Debugs(nif[i])
+		}
+	} else {
+		if Gateway != nil {
+			// Debug("default gateway:", Gateway)
+			gws := Gateway.String()
+			gw := net.ParseIP(gws)
+			// out:
+			for i := range nif {
+				// Debugs(nif[i])
+				var addrs []net.Addr
+				if addrs, err = nif[i].Addrs(); Check(err) || addrs == nil {
 					continue
 				}
-				if in.Contains(gw) {
-					Info("network connection reachable from internet:", nif[i].Name, addrs[j].String())
-					DiscoveredAddress = net.ParseIP(strings.Split(addrs[j].String(),"/")[0])
-					Debugs(DiscoveredAddress)
-					Interface = &nif[i]
-					Debugs(Interface)
-					break out
+				for j := range addrs {
+					var in *net.IPNet
+					if _, in, err = net.ParseCIDR(addrs[j].String()); Check(err) {
+						continue
+					}
+					if in.Contains(gw) {
+						// Debug("network connection reachable from internet:", nif[i].Name, addrs[j].String())
+						Address = net.ParseIP(strings.Split(addrs[j].String(), "/")[0])
+						// Debugs(Address)
+						Interface = &nif[i]
+						// Debugs(Interface)
+						// break out
+					} else {
+						// add them to the other address/interface lists
+						// Debug(
+						// 	"network connection not reachable (directly) from the internet",
+						// 	nif[i].Name,
+						// 	addrs[j].String(),
+						// )
+						ip, _, _ := net.ParseCIDR(addrs[j].String())
+						SecondaryAddresses = append(SecondaryAddresses, ip)
+						SecondaryInterfaces = append(SecondaryInterfaces, &nif[i])
+					}
 				}
 			}
 		}
 	}
+	Debug("Gateway", Gateway)
+	Debug("Address", Address)
+	Debug("Interface", spew.Sdump(Interface))
+	Debug("SecondaryAddresses", spew.Sdump(SecondaryAddresses))
+	Debug("SecondaryInterfaces", spew.Sdump(SecondaryInterfaces))
 	return
 }
 
@@ -128,13 +153,13 @@ func GetInterface() (ifc *net.Interface, address string, err error) {
 	// 	panic("no network available")
 	// }
 	// // Traces(lanInterface)
-	if DiscoveredAddress == nil || Interface == nil {
+	if Address == nil || Interface == nil {
 		if Discover() != nil {
 			err = errors.New("no routeable address found")
 			return
 		}
 	}
-	address = DiscoveredAddress.String()
+	address = Address.String()
 	ifc = Interface
 	return
 }
@@ -157,10 +182,10 @@ func GetListenable() net.IP {
 	// 		)
 	// 	}
 	// }
-	if DiscoveredAddress == nil {
+	if Address == nil {
 		if Discover() != nil {
 			Error("no routeable address found")
 		}
 	}
-	return DiscoveredAddress
+	return Address
 }
