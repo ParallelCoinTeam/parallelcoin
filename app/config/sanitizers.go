@@ -171,16 +171,6 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		cx.StateCfg.Save = true
 		Debug("WalletRPCListeners")
 	}
-	// msgBase := pause.GetPauseContainer(cx)
-	// mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
-	// listenHost := msgBase.GetIPs()[0].String() + ":0"
-	// switch commandName {
-	// // only the wallet listener is important with shell as it proxies for
-	// // node, the rest better they are automatic
-	// case "shell":
-	// 	*cfg.P2PListeners = cli.StringSlice{listenHost}
-	// 	*cfg.RPCListeners = cli.StringSlice{listenHost}
-	// }
 	if *cx.Config.AutoPorts || !initial {
 		if fP, e = GetFreePort(); Check(e) {
 		}
@@ -220,11 +210,6 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 				}
 			}
 		}
-		// if *cfg.RPCConnect == "" {
-		// 	*cfg.RPCConnect = routeableAddress + ":" + fmt.Sprint(fP)
-		// 	Debug("setting save flag because rpcconnect was not configured")
-		// 	cx.StateCfg.Save = true
-		// }
 		for i := range *w {
 			if _, p, e := net.SplitHostPort((*w)[i]); !Check(e) {
 				if !validatePort(p) {
@@ -237,31 +222,6 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 			}
 		}
 	}
-	// all of these can be autodiscovered/set but to do that and know what they are we have to reserve them
-	//
-	// listeners := []*cli.StringSlice{
-	//	cfg.WalletRPCListeners,
-	//	cfg.P2PListeners,
-	//	cfg.RPCListeners,
-	// }
-	// for i := range listeners {
-	//	if h, p, err := net.SplitHostPort((*listeners[i])[0]); p == "0" {
-	//		if err != nil {
-	//			Error(err)
-	//		} else {
-	//			fP, err := GetFreePort()
-	//			if err != nil {
-	//				Error(err)
-	//			}
-	//			*listeners[i] = cli.
-	//				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
-	//		}
-	//	}
-	// }
-	// (*cfg.WalletRPCListeners)[0] = (*listeners[0])[0]
-	// (*cfg.P2PListeners)[0] = (*listeners[1])[0]
-	// (*cfg.RPCListeners)[0] = (*listeners[2])[0]
-	//
 	// if lan mode is set, remove the peers.json so no unwanted nodes are connected to
 	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
 		peersFile := filepath.Join(filepath.Join(*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
@@ -271,17 +231,9 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		}
 		Trace("removed", peersFile)
 	}
-	// *cfg.RPCConnect = (*cfg.RPCListeners)[0]
-	// h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
-	// if h == "" {
-	// 	*cfg.RPCConnect = net.JoinHostPort(routeableAddress, p)
-	// }
 	if len(*cfg.WalletRPCListeners) > 0 {
 		*cfg.WalletServer = (*cfg.WalletRPCListeners)[0]
-		// splitted := strings.Split((*cfg.WalletRPCListeners)[0], ":")
-		// *cfg.WalletServer = routeableAddress + ":" + splitted[1]
 	}
-	// save.Pod(cfg)
 }
 
 // GetFreePort asks the kernel for free open ports that are ready to use.
@@ -292,7 +244,8 @@ func GetFreePort() (int, error) {
 		return 0, err
 	}
 	
-	l, err := net.ListenTCP("tcp", addr)
+	var l *net.TCPListener
+	l, err = net.ListenTCP("tcp", addr)
 	if err != nil {
 		return 0, err
 	}
@@ -532,8 +485,8 @@ func configListener(cfg *pod.Config, params *netparams.Params) {
 		len(*cfg.P2PListeners) == 0 {
 		*cfg.DisableListen = true
 	}
-	// Add the default listener if none were specified. The default listener is all addresses on the listen port for the
-	// network we are to connect to.
+	// Add the default listener if none were specified. The default listener is all
+	// addresses on the listen port for the network we are to connect to.
 	Trace("checking if listener was set")
 	if len(*cfg.P2PListeners) == 0 {
 		*cfg.P2PListeners = []string{":" + params.DefaultPort}
@@ -548,7 +501,6 @@ func validateUsers(cfg *pod.Config) {
 		str := "%s: --username and --limituser must not specify the same username"
 		err := fmt.Errorf(str, funcName)
 		_, _ = fmt.Fprintln(os.Stderr, err)
-		// os.Exit(1)
 	}
 	// Check to make sure limited and admin users don't have the same password
 	Trace("checking limited and admin passwords are not the same")
@@ -596,14 +548,6 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 	}
 	Trace("checking rpc listener addresses")
 	nrms := normalize.Addresses
-	// Add default port to all rpc listener addresses if needed and remove duplicate addresses.
-	//
-	// *cfg.RPCListeners = nrms(*cfg.RPCListeners, cx.ActiveNet.RPCClientPort)
-	//
-	// Add default port to all listener addresses if needed and remove duplicate addresses.
-	//
-	// *cfg.P2PListeners = nrms(*cfg.P2PListeners, cx.ActiveNet.DefaultPort)
-	//
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
 	*cfg.AddPeers = nrms(*cfg.AddPeers, params.DefaultPort)
 	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers, params.DefaultPort)
@@ -611,7 +555,6 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 
 func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	var err error
-	
 	// Validate the the minrelaytxfee.
 	Trace("checking min relay tx fee")
 	stateConfig.ActiveMinRelayTxFee, err = util.NewAmount(*cfg.MinRelayTxFee)
@@ -620,7 +563,6 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: invalid minrelaytxfee: %v"
 		err := fmt.Errorf(str, funcName, err)
 		_, _ = fmt.Fprintln(os.Stderr, err)
-		// os.Exit(1)
 	}
 	// Limit the max block size to a sane value.
 	Trace("checking max block size")
@@ -632,7 +574,6 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 			node.BlockMaxSizeMax, *cfg.BlockMaxSize,
 		)
 		_, _ = fmt.Fprintln(os.Stderr, err)
-		// os.Exit(1)
 	}
 	// Limit the max block weight to a sane value.
 	Trace("checking max block weight")
@@ -644,7 +585,6 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 			node.BlockMaxWeightMax, *cfg.BlockMaxWeight,
 		)
 		_, _ = fmt.Fprintln(os.Stderr, err)
-		// os.Exit(1)
 	}
 	// Limit the max orphan count to a sane vlue.
 	Trace("checking max orphan limit")
@@ -652,7 +592,6 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
 		_, _ = fmt.Fprintln(os.Stderr, err)
-		// os.Exit(1)
 	}
 	// Limit the block priority and minimum block sizes to max block size.
 	Trace("validating block priority and minimum size/weight")
@@ -675,13 +614,13 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		),
 	)
 	switch {
-	// If the max block size isn't set, but the max weight is, then we'll set the limit for the max block size to a safe
-	// limit so weight takes precedence.
+	// If the max block size isn't set, but the max weight is, then we'll set the
+	// limit for the max block size to a safe limit so weight takes precedence.
 	case *cfg.BlockMaxSize == node.DefaultBlockMaxSize &&
 		*cfg.BlockMaxWeight != node.DefaultBlockMaxWeight:
 		*cfg.BlockMaxSize = blockchain.MaxBlockBaseSize - 1000
-		// If the max block weight isn't set, but the block size is, then we'll scale the set weight accordingly based
-		// on the max block size value.
+		// If the max block weight isn't set, but the block size is, then we'll scale
+		// the set weight accordingly based on the max block size value.
 	case *cfg.BlockMaxSize != node.DefaultBlockMaxSize &&
 		*cfg.BlockMaxWeight == node.DefaultBlockMaxWeight:
 		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
@@ -696,7 +635,6 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 				funcName,
 			)
 			_, _ = fmt.Fprintln(os.Stderr, err)
-			// os.Exit(1)
 		}
 	}
 	// Check the checkpoints for syntax errors.
@@ -710,7 +648,6 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: Error parsing checkpoints: %v"
 		err := fmt.Errorf(str, funcName, err)
 		_, _ = fmt.Fprintln(os.Stderr, err)
-		// os.Exit(1)
 	}
 }
 func validateOnions(cfg *pod.Config) {
@@ -719,7 +656,6 @@ func validateOnions(cfg *pod.Config) {
 	if *cfg.Onion && *cfg.OnionProxy != "" {
 		Error("onion enabled but no onionproxy has been configured")
 		Fatal("halting to avoid exposing IP address")
-		// os.Exit(1)
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if *cfg.TorIsolation &&
@@ -772,16 +708,6 @@ func validateMiningStuff(
 		}
 		state.ActiveMiningAddrs = append(state.ActiveMiningAddrs, addr)
 	}
-	// // Ensure there is at least one mining address when the generate flag is set.
-	// if (*cfg.Generate) && len(state.ActiveMiningAddrs) == 0 {
-	// 	Error(
-	// 		"the generate flag is set, " +
-	// 			"but there are no mining addresses specified ",
-	// 	)
-	// 	// Traces(cfg)
-	// 	*cfg.Generate = false
-	// 	// os.Exit(1)
-	// }
 	if *cfg.MinerPass == "" {
 		Debug("--------------- generating new miner key")
 		*cfg.MinerPass = hex.EncodeToString(forkhash.Argon2i([]byte(*cfg.MinerPass)))
@@ -790,10 +716,12 @@ func validateMiningStuff(
 }
 
 func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
-	// Setup dial and DNS resolution (lookup) functions depending on the specified options. The default is to use the
-	// standard net.DialTimeout function as well as the system DNS resolver. When a proxy is specified, the dial
-	// function is set to the proxy specific dial function and the lookup is set to use tor (unless --noonion is
-	// specified in which case the system DNS resolver is used).
+	// Setup dial and DNS resolution (lookup) functions depending on the specified
+	// options. The default is to use the standard net.DialTimeout function as well
+	// as the system DNS resolver. When a proxy is specified, the dial function is
+	// set to the proxy specific dial function and the lookup is set to use tor
+	// (unless --noonion is specified in which case the system DNS resolver is
+	// used).
 	Trace("setting network dialer and lookup")
 	stateConfig.Dial = net.DialTimeout
 	stateConfig.Lookup = net.LookupIP
@@ -807,8 +735,8 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			_, _ = fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
 		}
-		// Tor isolation flag means proxy credentials will be overridden unless there is also an onion proxy configured
-		// in which case that one will be overridden.
+		// Tor isolation flag means proxy credentials will be overridden unless there is
+		// also an onion proxy configured in which case that one will be overridden.
 		torIsolation := false
 		if *cfg.TorIsolation &&
 			*cfg.OnionProxy == "" &&
@@ -827,8 +755,8 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			TorIsolation: torIsolation,
 		}
 		stateConfig.Dial = proxy.DialTimeout
-		// Treat the proxy as tor and perform DNS resolution through it unless the --noonion flag is set or there is an
-		// onion-specific proxy configured.
+		// Treat the proxy as tor and perform DNS resolution through it unless the
+		// --noonion flag is set or there is an onion-specific proxy configured.
 		if *cfg.Onion &&
 			*cfg.OnionProxy == "" {
 			stateConfig.Lookup = func(host string) ([]net.IP, error) {
@@ -836,10 +764,12 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			}
 		}
 	}
-	// Setup onion address dial function depending on the specified options. The default is to use the same dial
-	// function selected above. However, when an onion-specific proxy is specified, the onion address dial function is
-	// set to use the onion-specific proxy while leaving the normal dial function as selected above. This allows .onion
-	// address traffic to be routed through a different proxy than normal traffic.
+	// Setup onion address dial function depending on the specified options. The
+	// default is to use the same dial function selected above. However, when an
+	// onion-specific proxy is specified, the onion address dial function is set to
+	// use the onion-specific proxy while leaving the normal dial function as
+	// selected above. This allows .onion address traffic to be routed through a
+	// different proxy than normal traffic.
 	Trace("setting up tor proxy if enabled")
 	if *cfg.OnionProxy != "" {
 		_, _, err := net.SplitHostPort(*cfg.OnionProxy)
@@ -848,7 +778,6 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			str := "%s: Onion proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.OnionProxy, err)
 			_, _ = fmt.Fprintln(os.Stderr, err)
-			// os.Exit(1)
 		}
 		// Tor isolation flag means onion proxy credentials will be overridden.
 		if *cfg.TorIsolation &&
@@ -871,8 +800,9 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			return proxy.DialTimeout(network, addr, timeout)
 		}
 	
-	// When configured in bridge mode (both --onion and --proxy are configured), it means that the proxy configured by
-	// --proxy is not a tor proxy, so override the DNS resolution to use the onion-specific proxy.
+	// When configured in bridge mode (both --onion and --proxy are configured), it
+	// means that the proxy configured by --proxy is not a tor proxy, so override
+	// the DNS resolution to use the onion-specific proxy.
 	Trace("setting proxy lookup")
 	if *cfg.Proxy != "" {
 		stateConfig.Lookup = func(host string) ([]net.IP, error) {

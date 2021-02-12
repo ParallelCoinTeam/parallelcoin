@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"strings"
 	"sync"
 	"time"
 	
@@ -64,7 +63,7 @@ type Controller struct {
 	// submitChan             chan []byte
 	buffer        *ring.Ring
 	began         time.Time
-	otherNodes    map[string]time.Time
+	otherNodes    map[uint64]time.Time
 	uuid          uint64
 	hashCount     atomic.Uint64
 	hashSampleBuf *rav.BufferUint64
@@ -91,7 +90,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		// coinbases:              make(map[int32]*util.Tx),
 		buffer:        ring.New(BufferSize),
 		began:         time.Now(),
-		otherNodes:    make(map[string]time.Time),
+		otherNodes:    make(map[uint64]time.Time),
 		uuid:          cx.UUID,
 		hashSampleBuf: rav.NewBufferUint64(100),
 	}
@@ -335,33 +334,16 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 		// Debug("not active")
 		return
 	}
-	// Debug(src, dst)
-	// j := p2padvt.LoadContainer(b)
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
-	otherIPs := j.IPs
-	// Debug(otherIPs)
-	// Trace("otherIPs", otherIPs)
-	otherPort := fmt.Sprint(j.P2P)
-	Debug()
-	myPort := strings.Split((*c.cx.Config.P2PListeners)[0], ":")[1]
-	Debug("myPort", myPort, *c.cx.Config.P2PListeners, "otherPort", otherPort)
-	for _, otherIP := range otherIPs {
-		
-		o := fmt.Sprintf("%s:%s", otherIP.String(), otherPort)
-		if otherPort != myPort {
-			// if it has a different controller port it is probably a different instance
-			if _, ok := c.otherNodes[o]; !ok {
-				// if we haven't already added it to the permanent peer list, we can add it now
-				Debug("ctrl", j.UUID, "P2P", j.P2P, "rpc", j.RPC)
-				// because nodes can be set to change their port each launch this always
-				// reconnects (for lan, autoports is recommended).
-				// TODO: readd autoports for GUI wallet
-				Info("connecting to lan peer with same PSK", o, otherIP)
-				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
-				}
-				c.otherNodes[o] = time.Now()
+	for uuid := range c.otherNodes {
+		if _, ok := c.otherNodes[uuid]; !ok {
+			// if we haven't already added it to the permanent peer list, we can add it now
+			Debug("uuid", j.UUID, "P2P", j.P2P, "rpc", j.RPC)
+			Info("connecting to lan peer with same PSK", j.IPs, j.UUID)
+			if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(j.IPs[0].String(), true); Check(err) {
 			}
+			c.otherNodes[uuid] = time.Now()
 		}
 	}
 	// If we lose connection for more than 9 seconds we delete and if the node reappears it can be reconnected
@@ -375,7 +357,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 }
 
 // Solutions submitted by workers
-func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte, ) (err error) {
+func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err error) {
 	Debug("received solution", src, dst)
 	c := ctx.(*Controller)
 	if !c.active.Load() { // || !c.cx.Node.Load() {
@@ -546,7 +528,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	return
 }
 
-func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error, ) {
+func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error,) {
 	Trace("getting new block template")
 	var addr util.Address
 	if c.walletClient != nil {

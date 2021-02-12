@@ -4,8 +4,10 @@ package conte
 
 import (
 	"fmt"
+	"math/rand"
 	"runtime"
 	"sync"
+	"time"
 	
 	"github.com/p9c/pod/pkg/util/quit"
 	
@@ -123,10 +125,10 @@ func (cx *Xt) PrintWaitChangers() string {
 
 // GetNewContext returns a fresh new context
 func GetNewContext(appName, appLang, subtext string) *Xt {
-	hr := &atomic.Value{}
-	hr.Store(0)
 	config, configMap := pod.EmptyConfig()
 	chainClientReady := qu.T()
+	rand.Seed(time.Now().UnixNano())
+	rand.Seed(rand.Int63())
 	cx := &Xt{
 		ChainClientReady: chainClientReady,
 		KillAll:          qu.T(),
@@ -136,16 +138,9 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		StateCfg:         new(state.Config),
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
-		// WalletChan:       make(chan *wallet.Wallet),
-		NodeChan: make(chan *chainrpc.Server),
-		UUID:     0,
+		NodeChan:         make(chan *chainrpc.Server),
+		UUID:             uint64(rand.Int63()),
 	}
-	// interrupt.AddHandler(func(){
-	// // 	chainClientReady.Q()
-	// // 	cx.PrintWaitChangers()
-	// 	cx.ChainClientReady.Q()
-	// 	cx.KillAll.Q()
-	// })
 	return cx
 }
 
