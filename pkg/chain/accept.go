@@ -60,14 +60,14 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 			}
 		}
 	}
-	Error("check for blacklisted addresses")
+	Debug("check for blacklisted addresses")
 	txs := block.Transactions()
 	for i := range txs {
 		if ContainsBlacklisted(b, txs[i], hardfork.Blacklist) {
 			return false, ruleError(ErrBlacklisted, "block contains a blacklisted address ")
 		}
 	}
-	Error("found no blacklisted addresses")
+	Debug("found no blacklisted addresses")
 	var err error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on the position
