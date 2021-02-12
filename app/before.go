@@ -61,11 +61,13 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
 					Error("error unmarshalling config", err)
-					os.Exit(1)
+					// os.Exit(1)
+					return err
 				}
 			} else {
 				Fatal("unexpected error reading configuration file:", err)
-				os.Exit(1)
+				// os.Exit(1)
+				return err
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
