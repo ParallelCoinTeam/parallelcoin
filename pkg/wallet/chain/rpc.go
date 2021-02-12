@@ -79,7 +79,7 @@ func NewRPCClient(
 		OnRescanProgress:    client.onRescanProgress,
 	}
 	// Warn("*actually* creating rpc client")
-	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks, client.quit)
+	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks)
 	if err != nil {
 		Error(err)
 		return nil, err
@@ -409,5 +409,5 @@ out:
 func (c *RPCClient) POSTClient() (*rpcclient.Client, error) {
 	configCopy := *c.connConfig
 	configCopy.HTTPPostMode = true
-	return rpcclient.New(&configCopy, nil, qu.T())
+	return rpcclient.New(&configCopy, nil)
 }

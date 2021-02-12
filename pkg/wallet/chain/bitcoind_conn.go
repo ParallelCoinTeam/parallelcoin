@@ -61,7 +61,7 @@ func NewBitcoindConn(chainParams *netparams.Params,
 		TLS:                  false,
 		HTTPPostMode:         true,
 	}
-	client, err := rpcclient.New(clientCfg, nil, qu.T())
+	client, err := rpcclient.New(clientCfg, nil)
 	if err != nil {
 		Error(err)
 		return nil, err

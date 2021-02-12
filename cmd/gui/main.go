@@ -430,6 +430,7 @@ func (wg *WalletGUI) gracefulShutdown() {
 	} else {
 		shuttingDown = true
 	}
+	Debug(interrupt.GoroutineDump())
 	Debug("\n\nquitting wallet gui")
 	if wg.miner.Running() {
 		Debug("stopping miner")

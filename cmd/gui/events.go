@@ -391,7 +391,7 @@ func (wg *WalletGUI) chainClient() (err error) {
 				Certificates:         certs,
 				DisableAutoReconnect: false,
 				DisableConnectOnNew:  false,
-			}, wg.ChainNotifications(), wg.cx.KillAll,
+			}, wg.ChainNotifications(),
 		); Check(err) {
 			return
 		}
@@ -430,7 +430,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 			Certificates:         certs,
 			DisableAutoReconnect: false,
 			DisableConnectOnNew:  false,
-		}, wg.WalletNotifications(), wg.cx.KillAll,
+		}, wg.WalletNotifications(),
 	); Check(err) {
 		wg.WalletMutex.Unlock()
 		return

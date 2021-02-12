@@ -119,7 +119,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 							Pass:         *cx.Config.Password,
 							TLS:          *cx.Config.TLS,
 							Certificates: certs,
-						}, nil, cx.KillAll,
+						}, nil,
 					); Check(err) {
 						ctrl.isMining.Store(false)
 						continue
