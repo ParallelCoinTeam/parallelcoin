@@ -14,8 +14,6 @@ import (
 	icons "github.com/p9c/pod/pkg/gui/ico/svg"
 )
 
-var maxThreads = float32(runtime.NumCPU())
-
 type MinerModel struct {
 	*gui.Window
 	Cx                     *conte.Xt

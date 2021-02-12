@@ -1,3 +1,5 @@
+// +build !headless
+
 package app
 
 import (

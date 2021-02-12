@@ -14,78 +14,31 @@ import (
 var Magic = []byte{'a', 'd', 'v', 1}
 
 type Advertisment struct {
-	IPs      []net.IP
-	P2P, RPC uint16
-	UUID     uint64
+	IPs  []net.IP
+	P2P  uint16
+	UUID uint64
 }
 
-//
-// // LoadContainer takes a message byte slice payload and loads it into a container ready to be decoded
-// func LoadContainer(b []byte) (out Container) {
-// 	out.Data = b
-// 	return
-// }
-
-// Get returns an advertisment serializer
+// Get returns an advertisment message
 func Get(cx *conte.Xt) []byte {
 	P2P := util.GetActualPort((*cx.Config.P2PListeners)[0])
-	RPC := util.GetActualPort((*cx.Config.RPCListeners)[0])
-	// Controller := util.GetActualPort(*cx.Config.Controller)
 	_, ips := routeable.GetAddressesAndInterfaces()
 	adv := Advertisment{
 		IPs:  ips, // routeable.GetListenable(),
 		P2P:  P2P,
-		RPC:  RPC,
 		UUID: cx.UUID,
 	}
-	// Debugs(adv)
 	ad := gotiny.Marshal(&adv)
-	// Debugs(ad)
 	return ad
-	// return simplebuffer.Serializers{
-	// 	IPs.GetListenable(),
-	// 	Uint16.GetPort((*cx.Config.P2PListeners)[0]),
-	// 	Uint16.GetPort((*cx.Config.RPCListeners)[0]),
-	// 	Uint16.GetPort(*cx.Config.Controller),
-	// }
 }
 
-// GetAdvt returns an advertisment serializer
+// GetAdvt returns an advertisment struct
 func GetAdvt(cx *conte.Xt) *Advertisment {
 	_, ips := routeable.GetAddressesAndInterfaces()
 	adv := &Advertisment{
 		IPs:  ips,
 		P2P:  util.GetActualPort((*cx.Config.P2PListeners)[0]),
-		RPC:  util.GetActualPort((*cx.Config.RPCListeners)[0]),
 		UUID: cx.UUID,
 	}
 	return adv
-	// return simplebuffer.Serializers{
-	// 	IPs.GetListenable(),
-	// 	Uint16.GetPort((*cx.Config.P2PListeners)[0]),
-	// 	Uint16.GetPort((*cx.Config.RPCListeners)[0]),
-	// 	Uint16.GetPort(*cx.Config.Controller),
-	// }
 }
-
-//
-// // GetIPs decodes the IPs from the advertisment
-// func (j *Container) GetIPs() []*net.IP {
-// 	return IPs.New().DecodeOne(j.Get(0)).Get()
-// }
-//
-// // GetP2PListenersPort returns the p2p listeners port from the advertisment
-// func (j *Container) GetP2PListenersPort() uint16 {
-// 	return Uint16.New().DecodeOne(j.Get(1)).Get()
-// }
-//
-// // GetRPCListenersPort returns the RPC listeners port from the advertisment
-// func (j *Container) GetRPCListenersPort() uint16 {
-// 	return Uint16.New().DecodeOne(j.Get(2)).Get()
-// }
-//
-// // GetControllerListenerPort returns the controller listener port from the
-// // advertisment
-// func (j *Container) GetControllerListenerPort() uint16 {
-// 	return Uint16.New().DecodeOne(j.Get(3)).Get()
-// }

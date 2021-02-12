@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"runtime"
 	"time"
 	
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
@@ -34,6 +35,8 @@ import (
 	rav "github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
+
+var maxThreads = float32(runtime.NumCPU())
 
 type HashCount struct {
 	uint64

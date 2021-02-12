@@ -21,7 +21,7 @@ var Magic = []byte{'j', 'o', 'b', 1}
 type Job struct {
 	IPs             []net.IP
 	P2PListenerPort uint16
-	RPCListenerPort uint16
+	// RPCListenerPort uint16
 	ControllerNonce uint64
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
@@ -131,7 +131,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	jrb := Job{
 		IPs:             adv.IPs,
 		P2PListenerPort: adv.P2P,
-		RPCListenerPort: adv.RPC,
+		// RPCListenerPort: adv.RPC,
 		ControllerNonce: adv.UUID,
 		Height:          bH,
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,

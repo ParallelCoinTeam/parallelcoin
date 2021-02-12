@@ -4,6 +4,9 @@ var commands = map[string][]string{
 	"build": {
 		"go build -v",
 	},
+	"headless": {
+		"go build -v -tags",
+	},
 	"windows": {
 		`go build -v -ldflags="-H windowsgui \"%ldflags"\"`,
 	},

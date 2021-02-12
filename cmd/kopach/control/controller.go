@@ -339,12 +339,20 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 	for uuid := range c.otherNodes {
 		if _, ok := c.otherNodes[uuid]; !ok {
 			// if we haven't already added it to the permanent peer list, we can add it now
-			Debug("uuid", j.UUID, "P2P", j.P2P, "rpc", j.RPC)
+			Debug("uuid", j.UUID, "P2P", j.P2P)
 			Info("connecting to lan peer with same PSK", j.IPs, j.UUID)
-			if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(j.IPs[0].String(), true); Check(err) {
+			// try all IPs
+			for i := range j.IPs {
+				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(
+					net.JoinHostPort(j.IPs[i].String(), fmt.Sprint(j.P2P)),
+					true,
+				); Check(err) {
+					continue
+				}
+				break
 			}
-			c.otherNodes[uuid] = time.Now()
 		}
+		c.otherNodes[uuid] = time.Now()
 	}
 	// If we lose connection for more than 9 seconds we delete and if the node reappears it can be reconnected
 	for i := range c.otherNodes {

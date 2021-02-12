@@ -1,17 +1,13 @@
+// +build headless
+
 package conte
 
 import (
-	"fmt"
-	"math/rand"
-	"runtime"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"sync"
-	"time"
-	
-	"github.com/p9c/pod/pkg/util/quit"
-	
-	"go.uber.org/atomic"
 	
 	"github.com/urfave/cli"
+	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/state"
@@ -20,7 +16,6 @@ import (
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/lang"
 	"github.com/p9c/pod/pkg/wallet"
-	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 type _dtype int
