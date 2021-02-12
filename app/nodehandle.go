@@ -12,6 +12,11 @@ import (
 	"github.com/p9c/pod/cmd/node"
 )
 
+func rpcNodeHandle(cx *conte.Xt) func(c *cli.Context) error {
+	*cx.Config.DisableController = true
+	return nodeHandle(cx)
+}
+
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		Trace("running node handler")

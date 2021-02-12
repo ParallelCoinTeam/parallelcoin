@@ -69,6 +69,81 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				), nil, "c",
 			),
 			au.Command(
+				"rpcnode", "start parallelcoin full node for vps/rpc services usage",
+				rpcNodeHandle(cx),
+				au.SubCommands(
+					au.Command(
+						"dropaddrindex",
+						"drop the address search index",
+						func(c *cli.Context) error {
+							cx.StateCfg.DropAddrIndex = true
+							return nodeHandle(cx)(c)
+							// return nil
+						},
+						au.SubCommands(),
+						nil,
+					),
+					au.Command(
+						"droptxindex",
+						"drop the address search index",
+						func(c *cli.Context) error {
+							cx.StateCfg.DropTxIndex = true
+							return nodeHandle(cx)(c)
+							// return nil
+						},
+						au.SubCommands(),
+						nil,
+					),
+					au.Command(
+						"dropindexes",
+						"drop all of the indexes",
+						func(c *cli.Context) error {
+							cx.StateCfg.DropAddrIndex = true
+							cx.StateCfg.DropTxIndex = true
+							cx.StateCfg.DropCfIndex = true
+							return nodeHandle(cx)(c)
+							// return nil
+						},
+						au.SubCommands(),
+						nil,
+					),
+					au.Command(
+						"dropcfindex",
+						"drop the address search index",
+						func(c *cli.Context) error {
+							cx.StateCfg.DropCfIndex = true
+							return nodeHandle(cx)(c)
+							// return nil
+						},
+						au.SubCommands(),
+						nil,
+					),
+					au.Command(
+						"resetchain",
+						"reset the chain",
+						func(c *cli.Context) (err error) {
+							config.Configure(cx, c.Command.Name, true)
+							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
+							if *cx.Config.DbType == "sqlite" {
+								dbName += ".db"
+							}
+							dbPath := filepath.Join(
+								filepath.Join(
+									*cx.Config.DataDir,
+									cx.ActiveNet.Name,
+								), dbName,
+							)
+							if err = os.RemoveAll(dbPath); Check(err) {
+							}
+							return nodeHandle(cx)(c)
+							// return nil
+						},
+						au.SubCommands(),
+						nil,
+					),
+				), nil, "n",
+			),
+			au.Command(
 				"node", "start parallelcoin full node",
 				nodeHandle(cx), au.SubCommands(
 					au.Command(

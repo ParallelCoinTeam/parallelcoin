@@ -147,6 +147,10 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		// *cfg.ControllerConnect = controllerAddresses
 		*cfg.P2PConnect = p2pAddresses
 	}
+	if cfg.DisableController == nil {
+		tf := false
+		cfg.DisableController = &tf
+	}
 	if len(*cfg.P2PListeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
 		cfg.P2PListeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
 		cx.StateCfg.Save = true
