@@ -72,6 +72,10 @@ type Controller struct {
 }
 
 func Run(cx *conte.Xt) (quit qu.C) {
+	if *cx.Config.DisableController {
+		Warn("controller is disabled")
+		return
+	}
 	cx.Controller.Store(true)
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		Warn("not running controller without RPC enabled")

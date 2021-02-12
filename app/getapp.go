@@ -564,6 +564,11 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				"mine duo if not connected to nodes on internet",
 				cx.Config.LAN,
 			),
+			au.Bool(
+				"disablecontroller",
+				"disables multicast (this is force default for node unless explicitly enabled)",
+				cx.Config.DisableController,
+			),
 			// au.String(
 			// 	"controller",
 			// 	"port controller listens on for solutions from workers"+

@@ -120,7 +120,7 @@ type Config struct {
 	AddPeers          *cli.StringSlice `group:"node" label:"Add Peers" description:"manually adds addresses to try to connect to" type:"address" widget:"multi" json:"AddPeers" hook:"addpeer"`
 	AddrIndex         *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"" widget:"toggle"  json:"AddrIndex" hook:"dropaddrindex"`
 	AutoPorts         *bool            `group:"" label:"AutomaticPorts" description:"RPC and controller ports are randomized, use with controller for automatic peer discovery" type:"" widget:"toggle" json:"AutoPorts" hook:"restart"`
-	AutoListen      *bool            `group:"node" label:"Manual Listeners" description:"automatically update inbound addresses dynamically according to discovered network interfaces" type:"" widget:"toggle" json:"AutoListen" hook:"restart"`
+	AutoListen        *bool            `group:"node" label:"Manual Listeners" description:"automatically update inbound addresses dynamically according to discovered network interfaces" type:"" widget:"toggle" json:"AutoListen" hook:"restart"`
 	BanDuration       *time.Duration   `group:"debug" label:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"" widget:"time" json:"BanDuration" hook:"restart"`
 	BanThreshold      *int             `group:"debug" label:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"" widget:"integer" json:"BanThreshold" hook:"restart"`
 	BlockMaxSize      *int             `group:"mining" label:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"" widget:"integer" json:"BlockMaxSize" hook:"restart"`
@@ -131,9 +131,9 @@ type Config struct {
 	BlocksOnly        *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"" widget:"toggle" json:"BlocksOnly" hook:"restart"`
 	CAFile            *string          `group:"tls" label:"Certificate Authority File" description:"certificate authority file for TLS certificate validation" type:"path" widget:"string" json:"CAFile" hook:"restart"`
 	CAPI              *bool            `group:"" label:"Enable cAPI" description:"disable cAPI rpc" type:"" widget:"toggle" json:"CAPI" hook:"restart"`
-	CPUProfile             *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"path" widget:"string" json:"CPUProfile" hook:"restart"`
-	ConfigFile             *string          `group:"" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"path" widget:"string" json:"ConfigFile" hook:"restart"`
-	ConnectPeers           *cli.StringSlice `group:"node" label:"Connect Peers" description:"connect ONLY to these addresses (disables inbound connections)" type:"address" widget:"multi" json:"ConnectPeers" hook:"restart"`
+	CPUProfile        *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"path" widget:"string" json:"CPUProfile" hook:"restart"`
+	ConfigFile        *string          `group:"" label:"Configuration File" description:"location of configuration file, cannot actually be changed" type:"path" widget:"string" json:"ConfigFile" hook:"restart"`
+	ConnectPeers      *cli.StringSlice `group:"node" label:"Connect Peers" description:"connect ONLY to these addresses (disables inbound connections)" type:"address" widget:"multi" json:"ConnectPeers" hook:"restart"`
 	// Controller             *string          `group:"node" label:"Controller Listener" description:"address to bind miner controller to" type:"address" widget:"string" json:"Controller" hook:"controller"`
 	// ControllerConnect      *cli.StringSlice `group:"node" label:"Controller Connect" description:"address miner controller can be reached through to" type:"address" widget:"multi" json:"ControllerConnect" hook:"controller"`
 	DarkTheme              *bool            `group:"config" label:"Dark Theme" description:"sets dark theme for GUI" type:"" widget:"toggle" json:"DarkTheme" hook:"restart"`
@@ -141,6 +141,7 @@ type Config struct {
 	DbType                 *string          `group:"" label:"Database Type" description:"type of database storage engine to use (only one right now)" type:"" widget:"string" json:"DbType" hook:"restart"`
 	DisableBanning         *bool            `group:"debug" label:"Disable Banning" description:"disables banning of misbehaving peers" type:"" widget:"toggle" json:"DisableBanning" hook:"restart"`
 	DisableCheckpoints     *bool            `group:"debug" label:"Disable Checkpoints" description:"disables all checkpoints" type:"" widget:"toggle" json:"DisableCheckpoints" hook:"restart"`
+	DisableController      *bool            `group:"debug" label:"Disable Controller" description:"disables all mining and discovery services" type:"" widget:"toggle" json:"DisableController" hook:"restart"`
 	DisableDNSSeed         *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"" widget:"toggle" json:"DisableDNSSeed" hook:"restart"`
 	DisableListen          *bool            `group:"node" label:"Disable Listen" description:"disables inbound connections for the peer to peer network" type:"" widget:"toggle" json:"DisableListen" hook:"restart"`
 	DisableRPC             *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers, as well as kopach controller" type:"" widget:"toggle" json:"DisableRPC" hook:"restart"`
@@ -220,7 +221,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		AddPeers:          newStringSlice(),
 		AddrIndex:         newbool(),
 		AutoPorts:         newbool(),
-		AutoListen:      newbool(),
+		AutoListen:        newbool(),
 		BanDuration:       newDuration(),
 		BanThreshold:      newint(),
 		BlockMaxSize:      newint(),
@@ -231,8 +232,8 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		BlocksOnly:        newbool(),
 		CAFile:            newstring(),
 		CAPI:              newbool(),
-		ConfigFile:             newstring(),
-		ConnectPeers:           newStringSlice(),
+		ConfigFile:        newstring(),
+		ConnectPeers:      newStringSlice(),
 		// Controller:             newstring(),
 		// ControllerConnect:      newStringSlice(),
 		CPUProfile:             newstring(),
@@ -241,6 +242,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		DbType:                 newstring(),
 		DisableBanning:         newbool(),
 		DisableCheckpoints:     newbool(),
+		DisableController:      newbool(),
 		DisableDNSSeed:         newbool(),
 		DisableListen:          newbool(),
 		DisableRPC:             newbool(),
@@ -313,23 +315,23 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		Whitelists:             newStringSlice(),
 	}
 	conf = map[string]interface{}{
-		"AddCheckpoints":         c.AddCheckpoints,
-		"AddPeers":               c.AddPeers,
-		"AddrIndex":              c.AddrIndex,
-		"AutoPorts":              c.AutoPorts,
-		"AutoListen":             c.AutoListen,
-		"BanDuration":            c.BanDuration,
-		"BanThreshold":           c.BanThreshold,
-		"BlockMaxSize":           c.BlockMaxSize,
-		"BlockMaxWeight":         c.BlockMaxWeight,
-		"BlockMinSize":           c.BlockMinSize,
-		"BlockMinWeight":         c.BlockMinWeight,
-		"BlockPrioritySize":      c.BlockPrioritySize,
-		"BlocksOnly":             c.BlocksOnly,
-		"CAFile":                 c.CAFile,
-		"CAPI":                   c.CAPI,
-		"ConfigFile":             c.ConfigFile,
-		"ConnectPeers":           c.ConnectPeers,
+		"AddCheckpoints":    c.AddCheckpoints,
+		"AddPeers":          c.AddPeers,
+		"AddrIndex":         c.AddrIndex,
+		"AutoPorts":         c.AutoPorts,
+		"AutoListen":        c.AutoListen,
+		"BanDuration":       c.BanDuration,
+		"BanThreshold":      c.BanThreshold,
+		"BlockMaxSize":      c.BlockMaxSize,
+		"BlockMaxWeight":    c.BlockMaxWeight,
+		"BlockMinSize":      c.BlockMinSize,
+		"BlockMinWeight":    c.BlockMinWeight,
+		"BlockPrioritySize": c.BlockPrioritySize,
+		"BlocksOnly":        c.BlocksOnly,
+		"CAFile":            c.CAFile,
+		"CAPI":              c.CAPI,
+		"ConfigFile":        c.ConfigFile,
+		"ConnectPeers":      c.ConnectPeers,
 		// "Controller":             c.Controller,
 		// "ControllerConnect":      c.ControllerConnect,
 		"CPUProfile":             c.CPUProfile,
@@ -338,6 +340,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"DbType":                 c.DbType,
 		"DisableBanning":         c.DisableBanning,
 		"DisableCheckpoints":     c.DisableCheckpoints,
+		"DisableController":      c.DisableController,
 		"DisableDNSSeed":         c.DisableDNSSeed,
 		"DisableListen":          c.DisableListen,
 		"DisableRPC":             c.DisableRPC,
