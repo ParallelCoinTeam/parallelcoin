@@ -46,7 +46,7 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses []net.I
 // ISPs do not issue their customers with IPv6 routing, it's still a pain in the
 // ass outside of large data centre connections
 func Discover() (err error) {
-	Info("discovering routeable interfaces and addresses...")
+	Debug("discovering routeable interfaces and addresses...")
 	var nif []net.Interface
 	if nif, err = net.Interfaces(); Check(err) {
 		return
@@ -57,7 +57,7 @@ func Discover() (err error) {
 		// todo: this error condition always happens on iOS and Android
 		// return
 		for i := range nif {
-			Infos(nif[i])
+			Trace(nif[i])
 		}
 	} else {
 		var gw net.IP
@@ -89,12 +89,12 @@ func Discover() (err error) {
 			}
 		}
 	}
-	Info("Gateway", Gateway)
-	Info("Address", Address)
-	Info("Interface", Interface.Name)
-	Info("SecondaryAddresses")
+	Trace("Gateway", Gateway)
+	Trace("Address", Address)
+	Trace("Interface", Interface.Name)
+	Trace("SecondaryAddresses")
 	for i := range SecondaryInterfaces {
-		Info(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
+		Trace(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
 	}
 	return
 }

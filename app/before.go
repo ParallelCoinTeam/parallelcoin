@@ -87,7 +87,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if !*cx.Config.PipeLog {
 			// if/when running further instances of the same version no reason
 			// to print the version message again
-			Infof("running %s\n%s", os.Args, version.Get())
+			Debugf("running %s\n%s", os.Args, version.Get())
 		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")
