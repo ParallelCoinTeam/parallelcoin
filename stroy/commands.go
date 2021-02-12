@@ -38,9 +38,8 @@ var commands = map[string][]string{
 		"pod -D %datadir -n testnet --lan --solo --kopachgui",
 	},
 	"mainnode": {
-		"go install -v %ldflags",
-		"pod -D testmain -n mainnet -l info --connect seed3.parallelcoin." +
-			"io:11047 node",
+		"go install -v %ldflags -tags headless",
+		"pod -D testmain -n mainnet -l debug --connect seed3.parallelcoin.io:11047 node",
 	},
 	"mainwallet": {
 		"go install -v %ldflags",
