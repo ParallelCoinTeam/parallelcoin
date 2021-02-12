@@ -82,7 +82,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		return
 	}
 	if len(*cx.Config.P2PListeners) < 1 || *cx.Config.DisableListen {
-		Warn("not running controller without p2p listener enabled")
+		Warn("not running controller without p2p listener enabled", *cx.Config.P2PListeners)
 		return
 	}
 	ctrl := &Controller{

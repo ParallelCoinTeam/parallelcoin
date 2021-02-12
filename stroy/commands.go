@@ -39,7 +39,7 @@ var commands = map[string][]string{
 	},
 	"mainnode": {
 		"go install -v %ldflags -tags headless",
-		"pod -D testmain -n mainnet -l debug --connect seed3.parallelcoin.io:11047 node",
+		"pod -D testmain -n mainnet -l debug --addpeer seed3.parallelcoin.io:11047 node",
 	},
 	"mainwallet": {
 		"go install -v %ldflags",
