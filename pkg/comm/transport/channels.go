@@ -132,7 +132,7 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 	if err != nil {
 		Error(err)
 	}
-	Warn("starting unicast multicast:", channel.Creator, sender, receiver, magics)
+	Debug("starting unicast multicast:", channel.Creator, sender, receiver, magics)
 	return
 }
 

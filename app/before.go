@@ -44,7 +44,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			time.Sleep(time.Second * 3)
 		}
 		if c.IsSet("pipelog") {
-			Warn("pipe logger enabled")
+			Debug("pipe logger enabled")
 			*cx.Config.PipeLog = c.Bool("pipelog")
 			serve.Log(cx.KillAll, fmt.Sprint(os.Args))
 		}
@@ -105,7 +105,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
-					Warn("using mainnet for node")
+					Debug("using mainnet for node")
 				}
 				cx.ActiveNet = &netparams.MainNetParams
 			}
@@ -276,7 +276,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			// if LAN is turned on it means by default we are on testnet
 			cx.ActiveNet = &netparams.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
-				Warn("set lan", c.Bool("lan"))
+				Debug("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")
 				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
 			} else {

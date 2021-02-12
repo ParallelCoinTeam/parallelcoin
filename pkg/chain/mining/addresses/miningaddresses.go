@@ -37,7 +37,7 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 		Debug("not making any new addresses")
 		return
 	}
-	Warn("refilling mining addresses")
+	Debug("refilling mining addresses")
 	account, err := w.AccountNumber(
 		wm.KeyScopeBIP0044,
 		"default",
@@ -61,7 +61,7 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 		}
 	}
 	if save.Pod(cfg) {
-		Warn("saved config with new addresses")
+		Debug("saved config with new addresses")
 	} else {
 		Error("error adding new addresses", err)
 	}

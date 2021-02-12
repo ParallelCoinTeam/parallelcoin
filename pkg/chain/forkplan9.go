@@ -111,7 +111,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	adjustment = 1
 	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, fork.P9Average
 	if lastNode == nil {
-		Warn("lastNode is nil")
+		Debug("lastNode is nil")
 	}
 	// algoInterval := fork.P9Algos[algoname].VersionInterval
 	startHeight := fork.List[1].ActivationHeight

@@ -109,7 +109,7 @@ func initParams(cx *conte.Xt) {
 		cx.ActiveNet = &netparams.SimNetParams
 	default:
 		if network != "mainnet" && network != "m" {
-			Warn("using mainnet for node")
+			Debug("using mainnet for node")
 		}
 		Trace("on mainnet")
 		cx.ActiveNet = &netparams.MainNetParams
@@ -288,7 +288,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 		// Now is the best time to make the certs
 		Info("generating TLS certificates")
 		// Create directories for cert and key files if they do not yet exist.
-		Warn("rpc tls ", *cfg.RPCCert, " ", *cfg.RPCKey)
+		Debug("rpc tls ", *cfg.RPCCert, " ", *cfg.RPCKey)
 		certDir, _ := filepath.Split(*cfg.RPCCert)
 		keyDir, _ := filepath.Split(*cfg.RPCKey)
 		err := os.MkdirAll(certDir, 0700)
@@ -319,7 +319,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 		if err != nil {
 			rmErr := os.Remove(*cfg.RPCCert)
 			if rmErr != nil {
-				Warn("cannot remove written certificates:", rmErr)
+				Error("cannot remove written certificates:", rmErr)
 			}
 			return
 		}
@@ -327,7 +327,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 		if err != nil {
 			rmErr := os.Remove(*cfg.RPCCert)
 			if rmErr != nil {
-				Warn("cannot remove written certificates:", rmErr)
+				Error("cannot remove written certificates:", rmErr)
 			}
 			return
 		}
@@ -336,11 +336,11 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 			Error(err)
 			rmErr := os.Remove(*cfg.RPCCert)
 			if rmErr != nil {
-				Warn("cannot remove written certificates:", rmErr)
+				Error("cannot remove written certificates:", rmErr)
 			}
 			rmErr = os.Remove(*cfg.CAFile)
 			if rmErr != nil {
-				Warn("cannot remove written certificates:", rmErr)
+				Error("cannot remove written certificates:", rmErr)
 			}
 			return
 		}

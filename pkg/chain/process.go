@@ -40,7 +40,7 @@ const (
 func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags BehaviorFlags, height int32,) (
 	bool, bool, error,
 ) {
-	Warn("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
+	Debug("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
 	blockHeight := height
 	bb, _ := b.BlockByHash(&block.MsgBlock().Header.PrevBlock)
 	if bb != nil {
@@ -99,7 +99,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 	if err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight); Check(err) {
 		return false, false, err
 	}
-	Warn("searching back to checkpoints")
+	Debug("searching back to checkpoints")
 	// Find the previous checkpoint and perform some additional checks based on the
 	// checkpoint. This provides a few nice properties such as preventing old side
 	// chain blocks before the last checkpoint, rejecting easy to mine, but
@@ -145,7 +145,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 			}
 		}
 	}
-	Warn("handling orphans")
+	Debug("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
 	var prevHashExists bool
@@ -167,7 +167,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 	}
 	// The block has passed all context independent checks and appears sane enough
 	// to potentially accept it into the block chain.
-	Warn("maybe accept block")
+	Debug("maybe accept block")
 	var isMainChain bool
 	if isMainChain, err = b.maybeAcceptBlock(workerNumber, block, flags); Check(err) {
 		return false, false, err
@@ -188,7 +188,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 				Header.Version, blockHeight,
 		),
 	)
-	Warn("finished blockchain.ProcessBlock")
+	Debug("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }
 

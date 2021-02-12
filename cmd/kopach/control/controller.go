@@ -73,7 +73,7 @@ type Controller struct {
 
 func Run(cx *conte.Xt) (quit qu.C) {
 	if *cx.Config.DisableController {
-		Warn("controller is disabled")
+		Info("controller is disabled")
 		return
 	}
 	cx.Controller.Store(true)
@@ -453,7 +453,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 		} else {
 			Warn("block submitted via kopach miner rejected:", err)
 			if isOrphan {
-				Warn("block is an orphan")
+				Debug("block is an orphan")
 				return
 			}
 			return
@@ -525,7 +525,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	jobShards := transport.GetShards(fMC)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {
-		Warn("jobShards", shardsLen)
+		Debug("jobShards", shardsLen)
 		return fmt.Errorf("jobShards len %d", shardsLen)
 	}
 	c.oldBlocks.Store(jobShards)

@@ -49,7 +49,7 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	// write cpu profile if requested
 	if *cx.Config.CPUProfile != "" && os.Getenv("POD_TRACE") != "on" {
-		Warn("cpu profiling enabled")
+		Debug("cpu profiling enabled")
 		var f *os.File
 		f, err = os.Create(*cx.Config.CPUProfile)
 		if err != nil {
@@ -58,7 +58,7 @@ func Main(cx *conte.Xt) (err error) {
 		}
 		e := pprof.StartCPUProfile(f)
 		if e != nil {
-			Warn("failed to start up cpu profiler:", e)
+			Debug("failed to start up cpu profiler:", e)
 		} else {
 			defer func() {
 				if err := f.Close(); Check(err) {
@@ -67,13 +67,13 @@ func Main(cx *conte.Xt) (err error) {
 			defer pprof.StopCPUProfile()
 			interrupt.AddHandler(
 				func() {
-					Warn("stopping CPU profiler")
+					Debug("stopping CPU profiler")
 					err := f.Close()
 					if err != nil {
 						Error(err)
 					}
 					pprof.StopCPUProfile()
-					Warn("finished cpu profiling", *cx.Config.CPUProfile)
+					Debug("finished cpu profiling", *cx.Config.CPUProfile)
 				},
 			)
 		}

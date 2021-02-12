@@ -583,7 +583,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		if err != nil {
 			Error(err)
 			wc.curFile.Unlock()
-			Warn("ROLLBACK:", err)
+			Debug("ROLLBACK:", err)
 			return
 		}
 		wc.curFile.file = obf

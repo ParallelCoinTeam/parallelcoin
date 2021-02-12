@@ -25,7 +25,7 @@ func (w *Wallet) handleChainNotifications() {
 		// marked synced and many methods will error early since the wallet is known to be out of date.
 		err := w.syncWithChain()
 		if err != nil && !w.ShuttingDown() {
-			Warn("unable to synchronize wallet to chain:", err)
+			Error("unable to synchronize wallet to chain:", err)
 		}
 	}
 	catchUpHashes := func(w *Wallet, client chain.Interface,

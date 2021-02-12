@@ -227,7 +227,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							config.Configure(cx, c.Command.Name, true)
 							Info("dropping wallet history")
 							go func() {
-								Warn("starting wallet")
+								Debug("starting wallet")
 								if err = walletmain.Main(cx); Check(err) {
 									// os.Exit(1)
 								} else {

@@ -243,7 +243,7 @@ func (sm *SyncManager) Start() {
 // Stop gracefully shuts down the sync manager by stopping all asynchronous handlers and waiting for them to finish.
 func (sm *SyncManager) Stop() error {
 	if atomic.AddInt32(&sm.shutdown, 1) != 1 {
-		Warn("sync manager is already in the process of shutting down")
+		Debug("sync manager is already in the process of shutting down")
 		return nil
 	}
 	// DEBUG{"sync manager shutting down"}
@@ -358,7 +358,7 @@ func (sm *SyncManager) current() bool {
 func (sm *SyncManager) fetchHeaderBlocks() {
 	// Nothing to do if there is no start header.
 	if sm.startHeader == nil {
-		Warn("fetchHeaderBlocks called with no start header")
+		Debug("fetchHeaderBlocks called with no start header")
 		return
 	}
 	// Build up a getdata request for the list of blocks the headers describe. The size hint will be limited to
@@ -368,7 +368,7 @@ func (sm *SyncManager) fetchHeaderBlocks() {
 	for e := sm.startHeader; e != nil; e = e.Next() {
 		node, ok := e.Value.(*headerNode)
 		if !ok {
-			Warn("header list node type is not a headerNode")
+			Debug("header list node type is not a headerNode")
 			continue
 		}
 		iv := wire.NewInvVect(wire.InvTypeBlock, node.hash)
@@ -641,7 +641,7 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 		}
 		block, ok := notification.Data.(*util.Block)
 		if !ok {
-			Warn("chain accepted notification is not a block")
+			Debug("chain accepted notification is not a block")
 			break
 		}
 		// Generate the inventory vector and relay it.
@@ -651,7 +651,7 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 	case blockchain.NTBlockConnected:
 		block, ok := notification.Data.(*util.Block)
 		if !ok {
-			Warn("chain connected notification is not a block")
+			Debug("chain connected notification is not a block")
 			break
 		}
 		// Remove all of the transactions (except the coinbase) in the connected block from the transaction pool.
@@ -682,7 +682,7 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 	case blockchain.NTBlockDisconnected:
 		block, ok := notification.Data.(*util.Block)
 		if !ok {
-			Warn("chain disconnected notification is not a block.")
+			Debug("chain disconnected notification is not a block.")
 			break
 		}
 		// Reinsert all of the transactions (except the coinbase) into the transaction pool.

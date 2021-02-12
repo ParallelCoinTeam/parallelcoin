@@ -462,7 +462,7 @@ func (cm *ConnManager) Wait() {
 // Stop gracefully shuts down the connection manager.
 func (cm *ConnManager) Stop() {
 	if atomic.AddInt32(&cm.stop, 1) != 1 {
-		Warn("connection manager already stopped")
+		Debug("connection manager already stopped")
 		return
 	}
 	// Stop all the listeners. There will not be any listeners if listening is disabled.

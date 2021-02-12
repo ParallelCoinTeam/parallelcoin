@@ -493,7 +493,7 @@ func (a *AddrManager) Start() {
 // Stop gracefully shuts down the address manager by stopping the main handler.
 func (a *AddrManager) Stop() error {
 	if atomic.AddInt32(&a.shutdown, 1) != 1 {
-		Warn("address manager is already in the process of shutting down")
+		Debug("address manager is already in the process of shutting down")
 		return nil
 	}
 	// Debug("address manager shutting down"}

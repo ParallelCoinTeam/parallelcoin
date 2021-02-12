@@ -111,7 +111,7 @@ out:
 			switch n := n.(type) {
 			case *chain.RescanProgress:
 				if curBatch == nil {
-					Warn("received rescan progress" +
+					Debug("received rescan progress" +
 						" notification but no rescan currently running")
 					continue
 				}
@@ -121,7 +121,7 @@ out:
 				}
 			case *chain.RescanFinished:
 				if curBatch == nil {
-					Warn("received rescan finished notification but no" +
+					Debug("received rescan finished notification but no" +
 						" rescan currently running",
 					)
 					continue

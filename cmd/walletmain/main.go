@@ -46,7 +46,7 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	loader.RunAfterLoad(
 		func(w *wallet.Wallet) {
-			Warn("starting wallet RPC services", w != nil)
+			Debug("starting wallet RPC services", w != nil)
 			startWalletRPCServices(w, legacyServer)
 			// cx.WalletChan <- w
 		},
@@ -65,9 +65,9 @@ func Main(cx *conte.Xt) (err error) {
 	)
 	select {
 	case <-cx.WalletKill.Wait():
-		Warn("wallet killswitch activated")
+		Debug("wallet killswitch activated")
 		if legacyServer != nil {
-			Warn("stopping wallet RPC server")
+			Debug("stopping wallet RPC server")
 			legacyServer.Stop()
 			Info("stopped wallet RPC server")
 		}
