@@ -1354,9 +1354,9 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		return
 	}
 	defer func() {
-		if err := conn.Close(); Check(err) {
-		}
 		if err := buf.Flush(); Check(err) {
+		}
+		if err := conn.Close(); Check(err) {
 		}
 	}()
 	err = conn.SetReadDeadline(TimeZeroVal)
