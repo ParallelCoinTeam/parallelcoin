@@ -1,5 +1,0 @@
-rpcuser=user
-rpcpassword=pa55word
-txindex=1
-listen=1
-server=1

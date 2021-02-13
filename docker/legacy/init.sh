@@ -19,7 +19,7 @@ alias    .stop="sudo docker stop $NAME"
          ### [ stop the container, start it again with '.start' ]
 alias   .enter="sudo docker exec -it $NAME bash"
          ### [ open a shell inside the container ]
-# alias     .log="sudo tail -f $DATADIR/data/steemd.log"
+alias     .log="sudo tail -f $DATADIR/data/debug.log"
          ### [ show the current output from the primary process in the container ]
 alias   .build="sudo docker build -t $NAME $DATADIR"
          ### [ build the container from the Dockerfile ]

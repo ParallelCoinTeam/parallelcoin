@@ -33,3 +33,4 @@ RUN cd /root/.parallelcoin/pod/legacy/src \
 #  && make
 EXPOSE 11048 11047 21048 21047
 CMD ["tail", "-f", "/dev/null"]
+#CMD /usr/local/bin/parallelcoind -txindex -debug -debugnet -rpcuser=user -rpcpassword=pa55word -connect=127.0.0.1:11047 -connect=seed1.parallelcoin.info -bind=127.0.0.1 -port=11147 -rpcport=11148
