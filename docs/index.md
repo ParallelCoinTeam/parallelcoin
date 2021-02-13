@@ -11,7 +11,7 @@ wiki: [![](docs/wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](docs/te
 
 # Coming Soon
 
-[Plan 9 Spore Protocol](https://github.com/p9c/pod/wiki/phasetwo)
+[Plan 9 Spore Protocol](https://github.com/p9c/pod/wiki/The-Spore-Protocol)
 
 # ParallelCoin Legacy
 
