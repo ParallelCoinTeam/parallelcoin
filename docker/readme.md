@@ -1,7 +1,7 @@
 # How to use these things
 
 Herein are tools that work using Docker and the legacy parallelcoin repository at 
-https://github.com/parallelcointeam/parallelcoin
+https://github.com/p9c/pod/legacy
 
 ## The Docker
 
