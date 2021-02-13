@@ -64,3 +64,5 @@ legacy/src/openssl-OpenSSL_1_0_1u
 legacy/src/OpenSSL_1_0_1u.tar.gz
 
 legacy/src/boost_1_58_0.tar.gz
+
+docker/legacy/data/
