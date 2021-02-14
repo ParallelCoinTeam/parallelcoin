@@ -96,8 +96,10 @@ func (w *Window) Title(title string) (out *Window) {
 
 // Size sets the dimensions of the window
 func (w *Window) Size(width, height float32) (out *Window) {
-	w.opts = append(w.opts,
-		app.Size(w.Theme.TextSize.Scale(width), w.Theme.TextSize.Scale(height)))
+	w.opts = append(
+		w.opts,
+		app.Size(w.Theme.TextSize.Scale(width), w.Theme.TextSize.Scale(height)),
+	)
 	return w
 }
 
@@ -119,8 +121,10 @@ func (w *Window) Open() (out *Window) {
 	return w
 }
 
-func (w *Window) Run(frame func(ctx l.Context) l.Dimensions,
-	overlay func(ctx l.Context), destroy func(), quit qu.C) (err error) {
+func (w *Window) Run(
+	frame func(ctx l.Context) l.Dimensions,
+	overlay func(ctx l.Context), destroy func(), quit qu.C,
+) (err error) {
 	for {
 		select {
 		case fn := <-w.Runner:
@@ -173,10 +177,15 @@ func (w *Window) Run(frame func(ctx l.Context) l.Dimensions,
 
 func (w *Window) processEvents(e event.Event, frame func(ctx l.Context) l.Dimensions, destroy func()) error {
 	switch e := e.(type) {
-	// case system.DestroyEvent:
-	// 	Debug("received destroy event")
-	// 	destroy()
-	// 	// return e.Err
+	case system.DestroyEvent:
+		Debug("received destroy event", e.Err)
+		// if e.Err != nil {
+		// 	if strings.Contains(e.Err.Error(), "eglCreateWindowSurface failed") {
+		// 		return nil
+		// 	}
+		// }
+		destroy()
+		return e.Err
 	case system.FrameEvent:
 		ops := op.Ops{}
 		c := l.NewContext(&ops, e)
