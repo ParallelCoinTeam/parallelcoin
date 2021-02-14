@@ -174,8 +174,9 @@ func (w *Window) Run(frame func(ctx l.Context) l.Dimensions,
 func (w *Window) processEvents(e event.Event, frame func(ctx l.Context) l.Dimensions, destroy func()) error {
 	switch e := e.(type) {
 	case system.DestroyEvent:
-		destroy()
-		return e.Err
+		// Debug("received destroy event")
+		// destroy()
+		// return e.Err
 	case system.FrameEvent:
 		ops := op.Ops{}
 		c := l.NewContext(&ops, e)
