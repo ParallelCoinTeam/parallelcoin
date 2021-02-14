@@ -17,6 +17,8 @@ wiki: [![](docs/wiki.svg)](https://github.com/p9c/pod/wiki) social: [![](docs/te
 
 ##### *If you are looking for the legacy 1.2.0 version, go here [https://github.com/p9c/pod/tree/master/legacy](https://github.com/p9c/pod/tree/master/legacy)* - see [https://github.com/p9c/pod/blob/master/legacy/src/linux-install.sh](https://github.com/p9c/pod/blob/master/legacy/src/linux-install.sh) for how to build it from the source on Linux
 
+##### For the legacy version in general, binary releases are [here](https://github.com/p9c/pod/releases/tag/1.2.0)
+
 # WARNING: work in progress, will probably break
 
 ## Installation
