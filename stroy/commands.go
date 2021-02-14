@@ -5,7 +5,10 @@ var commands = map[string][]string{
 		"go build -v",
 	},
 	"headless": {
-		"go build -v -tags",
+		"go build -v -tags headless",
+	},
+	"docker": {
+		"go install -v -tags headless",
 	},
 	"windows": {
 		`go build -v -ldflags="-H windowsgui \"%ldflags"\"`,
@@ -46,19 +49,19 @@ var commands = map[string][]string{
 		"pod -D testmain -n mainnet -l trace wallet",
 	},
 	"teststopkopach": {
-		"go install -v %ldflags",
+		"go install -v %ldflags -tags headless",
 		"go install -v ./pkg/util/logi/pipe",
 		"pipe pod -D %datadir --pipelog -l trace --walletpass aoeuaoeu -g -G 1" +
 			" --solo --lan kopach",
 	},
 	"teststopnode": {
-		"go install -v %ldflags",
+		"go install -v %ldflags -tags headless",
 		"go install -v ./pkg/util/logi/pipe",
 		"pipe pod -D %datadir --pipelog -l trace --walletpass aoeuaoeu -g -G 1" +
 			" --solo --lan node",
 	},
 	"teststopwallet": {
-		"go install -v %ldflags",
+		"go install -v %ldflags -tags headless",
 		"go install -v ./pkg/util/logi/pipe",
 		"pipe pod -D %datadir --pipelog -l trace --walletpass aoeuaoeu -g -G 1" +
 			" --solo --lan wallet",

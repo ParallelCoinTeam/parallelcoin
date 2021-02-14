@@ -1,6 +1,6 @@
 #!/bin/bash
 #!/bin/bash #NOPRINT
-export NAME="docker-parallelcoind" #NOPRINT
+export NAME="docker-pod" #NOPRINT
 export DATADIR="`pwd`" #NOPRINT
 # source $DATADIR/config #NOPRINT
 echo "Loading command aliases... Type 'halp' to see available commands" #NOPRINT

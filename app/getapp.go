@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/version"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,7 +27,7 @@ import (
 func GetApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
 		Name:        "pod",
-		Version:     "v0.0.1",
+		Version:     version.Get(),
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
 		Action:      walletGUIHandle(cx),
