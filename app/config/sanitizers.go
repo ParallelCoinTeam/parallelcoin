@@ -140,9 +140,9 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if *cfg.AutoListen {
 		_, allAddresses := routeable.GetAddressesAndInterfaces()
 		var p2pAddresses cli.StringSlice
-		for i := range allAddresses {
-			// controllerAddresses = append(controllerAddresses, net.JoinHostPort(allAddresses[i].String(), fmt.Sprint(fP)))
-			p2pAddresses = append(p2pAddresses, net.JoinHostPort(allAddresses[i].String(), cx.ActiveNet.DefaultPort))
+		for addr := range allAddresses {
+			// controllerAddresses = append(controllerAddresses, net.JoinHostPort(allAddresses[addr].String(), fmt.Sprint(fP)))
+			p2pAddresses = append(p2pAddresses, net.JoinHostPort(addr, cx.ActiveNet.DefaultPort))
 		}
 		// *cfg.ControllerConnect = controllerAddresses
 		*cfg.P2PConnect = p2pAddresses

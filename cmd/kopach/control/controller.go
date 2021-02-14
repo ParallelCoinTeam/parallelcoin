@@ -63,12 +63,17 @@ type Controller struct {
 	// submitChan             chan []byte
 	buffer        *ring.Ring
 	began         time.Time
-	otherNodes    map[uint64]time.Time
+	otherNodes    map[uint64]*nodeSpec
 	uuid          uint64
 	hashCount     atomic.Uint64
 	hashSampleBuf *rav.BufferUint64
 	lastNonce     int32
 	walletClient  *rpcclient.Client
+}
+
+type nodeSpec struct {
+	time.Time
+	addr string
 }
 
 func Run(cx *conte.Xt) (quit qu.C) {
@@ -85,6 +90,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		Warn("not running controller without p2p listener enabled", *cx.Config.P2PListeners)
 		return
 	}
+	nS := make(map[uint64]*nodeSpec)
 	ctrl := &Controller{
 		quit:          qu.T(),
 		cx:            cx,
@@ -94,7 +100,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		// coinbases:              make(map[int32]*util.Tx),
 		buffer:        ring.New(BufferSize),
 		began:         time.Now(),
-		otherNodes:    make(map[uint64]time.Time),
+		otherNodes:    nS,
 		uuid:          cx.UUID,
 		hashSampleBuf: rav.NewBufferUint64(100),
 	}
@@ -346,21 +352,31 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 			Debug("uuid", j.UUID, "P2P", j.P2P)
 			Info("connecting to lan peer with same PSK", j.IPs, j.UUID)
 			// try all IPs
-			for i := range j.IPs {
+			for addr := range j.IPs {
+				peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
 				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(
-					net.JoinHostPort(j.IPs[i].String(), fmt.Sprint(j.P2P)),
-					true,
+					peerIP,
+					false,
 				); Check(err) {
 					continue
 				}
+				Debug("connected to peer via address", peerIP)
+				c.otherNodes[uuid] = &nodeSpec{}
+				c.otherNodes[uuid].addr = addr
 				break
 			}
 		}
-		c.otherNodes[uuid] = time.Now()
+		// update last seen time for uuid for garbage collection of stale disconnected
+		// nodes
+		c.otherNodes[uuid].Time = time.Now()
 	}
-	// If we lose connection for more than 9 seconds we delete and if the node reappears it can be reconnected
+	// If we lose connection for more than 9 seconds we delete and if the node
+	// reappears it can be reconnected
 	for i := range c.otherNodes {
-		if time.Now().Sub(c.otherNodes[i]) > time.Second*9 {
+		if time.Now().Sub(c.otherNodes[i].Time) > time.Second*9 {
+			// also remove from connection manager
+			if err = c.cx.RPCServer.Cfg.ConnMgr.RemoveByAddr(c.otherNodes[i].addr); Check(err) {
+			}
 			delete(c.otherNodes, i)
 		}
 	}

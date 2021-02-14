@@ -1,7 +1,6 @@
 package job
 
 import (
-	"net"
 	"time"
 	
 	"github.com/niubaoshu/gotiny"
@@ -19,8 +18,8 @@ import (
 var Magic = []byte{'j', 'o', 'b', 1}
 
 type Job struct {
-	IPs             []net.IP
-	P2PListenerPort uint16
+	// IPs             map[string]struct{}
+	// P2PListenerPort uint16
 	// RPCListenerPort uint16
 	ControllerNonce uint64
 	Height          int32
@@ -129,8 +128,8 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	// Traces(msg)
 	adv := p2padvt.GetAdvt(cx)
 	jrb := Job{
-		IPs:             adv.IPs,
-		P2PListenerPort: adv.P2P,
+		// IPs:             adv.IPs,
+		// P2PListenerPort: adv.P2P,
 		// RPCListenerPort: adv.RPC,
 		ControllerNonce: adv.UUID,
 		Height:          bH,

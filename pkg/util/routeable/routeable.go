@@ -31,11 +31,14 @@ var SecondaryInterfaces []*net.Interface
 
 // GetAddressesAndInterfaces returns all of the addresses and interfaces that
 // would be resolved from an automatic addresses that can connect two processes at all
-func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses []net.IP) {
+func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[string]struct{}) {
 	Interfaces = append(Interfaces, Interface)
 	Interfaces = append(Interfaces, SecondaryInterfaces...)
-	Addresses = append(Addresses, Address)
-	Addresses = append(Addresses, SecondaryAddresses...)
+	Addresses = make(map[string]struct{})
+	Addresses[Address.String()] = struct{}{}
+	for i := range SecondaryAddresses {
+		Addresses[SecondaryAddresses[i].String()] = struct{}{}
+	}
 	return
 }
 
