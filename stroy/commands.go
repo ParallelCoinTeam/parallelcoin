@@ -35,6 +35,14 @@ var commands = map[string][]string{
 		"go install -v %ldflags",
 		"pod -D %datadir -g 1 -G=false --lan --minerpass pa55word",
 	},
+	"guw": {
+		"go install -v %ldflags -tags nox11",
+		"pod -D %datadir -g 1 -G=false --lan --minerpass pa55word",
+	},
+	"gux": {
+		"go install -v %ldflags -tags nowayland",
+		"pod -D %datadir -g 1 -G=false --lan --minerpass pa55word",
+	},
 	"guihttpprof": {
 		"go install -v %ldflags",
 		"pod -D %datadir -n testnet --lan --solo --kopachgui --profile 6969",
