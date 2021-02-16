@@ -2,13 +2,16 @@ package main
 
 var commands = map[string][]string{
 	"build": {
-		"go build -v",
+		"go build -v %ldflags",
+	},
+	"install": {
+		"go install -v %ldflags",
 	},
 	"headless": {
-		"go build -v -tags headless",
+		"go install -v %ldflags -tags headless",
 	},
 	"docker": {
-		"go install -v -tags headless",
+		"go install -v -tags headless %ldflags",
 	},
 	"windows": {
 		`go build -v -ldflags="-H windowsgui \"%ldflags"\"`,
