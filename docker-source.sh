@@ -1,5 +1,5 @@
 #!/bin/bash
-#!/bin/bash #NOPRINT
+#!/bin/bash [ HOW TO RUN: `source docker-source.sh` ] #NOPRINT
 export NAME="docker-pod" #NOPRINT
 export DATADIR="`pwd`" #NOPRINT
 # source $DATADIR/config #NOPRINT
