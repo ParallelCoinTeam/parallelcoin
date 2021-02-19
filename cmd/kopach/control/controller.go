@@ -108,36 +108,47 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	// maintain connection to wallet if it is available
 	var err error
 	certs := walletmain.ReadCAFile(cx.Config)
-	retryTicker := time.NewTicker(time.Second)
 	go func() {
+		backoffTime := time.Second
 	totalOut:
 		for {
 		trying:
 			for {
 				select {
-				case <-retryTicker.C:
-					// If we can reach the wallet configured in the same datadir we can mine
-					if ctrl.walletClient, err = rpcclient.New(
-						&rpcclient.ConnConfig{
-							Host:         *cx.Config.WalletServer,
-							Endpoint:     "ws",
-							User:         *cx.Config.Username,
-							Pass:         *cx.Config.Password,
-							TLS:          *cx.Config.TLS,
-							Certificates: certs,
-						}, nil, cx.KillAll,
-					); Check(err) {
-						ctrl.isMining.Store(false)
-						continue
-					} else {
-						ctrl.isMining.Store(true)
-						break trying
-					}
 				case <-ctrl.cx.KillAll.Wait():
 					break totalOut
+				default:
+				}
+				// If we can reach the wallet configured in the same datadir we can mine
+				if ctrl.walletClient, err = rpcclient.New(
+					&rpcclient.ConnConfig{
+						Host:         *cx.Config.WalletServer,
+						Endpoint:     "ws",
+						User:         *cx.Config.Username,
+						Pass:         *cx.Config.Password,
+						TLS:          *cx.Config.TLS,
+						Certificates: certs,
+					}, nil, cx.KillAll,
+				); Check(err) {
+					ctrl.isMining.Store(false)
+					select {
+					case <-time.After(backoffTime):
+					case <-ctrl.quit.Wait():
+						ctrl.isMining.Store(false)
+						break totalOut
+					}
+					if backoffTime <= time.Second*16 {
+						backoffTime *= 2
+					}
+					continue
+				} else {
+					ctrl.isMining.Store(true)
+					backoffTime = time.Second
+					break trying
 				}
 			}
 			Debug("connected to wallet")
+			retryTicker := time.NewTicker(time.Second)
 		connected:
 			for {
 				select {
@@ -201,8 +212,6 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		for {
 			select {
 			case <-ticker.C:
-				// qu.PrintChanState()
-				Debug("controller ticker")
 				if !ctrl.active.Load() {
 					if cx.IsCurrent() {
 						Info("ready to send out jobs!")
@@ -225,7 +234,6 @@ func Run(cx *conte.Xt) (quit qu.C) {
 				if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
 				}
 				if ctrl.isMining.Load() {
-					Debug("rebroadcasting")
 					ctrl.rebroadcast()
 				}
 			// case msg := <-ctrl.submitChan:
@@ -257,7 +265,20 @@ func Run(cx *conte.Xt) (quit qu.C) {
 }
 
 func (c *Controller) rebroadcast() {
-	Debug("rebroadcaster ticker")
+	// Debug("checking that block contains payload")
+	oB, ok := c.oldBlocks.Load().([][]byte)
+	if len(oB) == 0 {
+		Trace("template is zero length")
+		// if err := c.sendNewBlockTemplate(); Check(err) {
+		// }
+		return
+	}
+	if !ok {
+		Trace("template is nil")
+		// if err := c.sendNewBlockTemplate(); Check(err) {
+		// }
+		return
+	}
 	// if !c.cx.IsCurrent() {
 	// 	Debug("is not current")
 	// 	continue
@@ -285,20 +306,6 @@ func (c *Controller) rebroadcast() {
 		),
 	) {
 		Trace("block is stale, regenerating")
-		if err := c.sendNewBlockTemplate(); Check(err) {
-		}
-		return
-	}
-	Debug("checking that block contains payload")
-	oB, ok := c.oldBlocks.Load().([][]byte)
-	if len(oB) == 0 {
-		Warn("template is zero length")
-		if err := c.sendNewBlockTemplate(); Check(err) {
-		}
-		return
-	}
-	if !ok {
-		Debug("template is nil")
 		if err := c.sendNewBlockTemplate(); Check(err) {
 		}
 		return
