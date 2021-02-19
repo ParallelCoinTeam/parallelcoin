@@ -83,7 +83,7 @@ var commands = map[string][]string{
 	},
 	"testnode": {
 		"go install -v %ldflags",
-		"pod -D %datadir -n testnet -l trace --solo --lan --norpc=false node",
+		"pod -D %datadir -n testnet -l trace --minerpass pa55word --walletpass aoeuaoeu node",
 	},
 	"testwallet": {
 		"go install -v %ldflags",

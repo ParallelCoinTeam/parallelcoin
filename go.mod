@@ -36,6 +36,7 @@ require (
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.uber.org/atomic v1.6.0
+	go101.org/go101 v1.16.2 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/exp v0.0.0-20200924195034-c827fd4f18b9
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
