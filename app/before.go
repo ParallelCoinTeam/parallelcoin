@@ -400,6 +400,19 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if err = routeable.Discover(); Check(err) {
 			// TODO: this should trigger the display of this lack of internet
 		}
+		go func() {
+		out:
+			for {
+				select {
+				case <-time.After(time.Second * 10):
+					if err = routeable.Discover(); Check(err) {
+						// TODO: this should trigger the display of this lack of internet
+					}
+				case <-cx.KillAll:
+					break out
+				}
+			}
+		}()
 		return nil
 	}
 }

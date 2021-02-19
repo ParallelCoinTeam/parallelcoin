@@ -346,37 +346,38 @@ var handlersMulticast = transport.Handlers{
 }
 
 func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	Debug("processing advertisment message")
 	c := ctx.(*Controller)
 	if !c.active.Load() {
-		// Debug("not active")
+		Debug("not active")
 		return
 	}
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
-	for uuid := range c.otherNodes {
-		if _, ok := c.otherNodes[uuid]; !ok {
-			// if we haven't already added it to the permanent peer list, we can add it now
-			Debug("uuid", j.UUID, "P2P", j.P2P)
-			Info("connecting to lan peer with same PSK", j.IPs, j.UUID)
-			// try all IPs
-			for addr := range j.IPs {
-				peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
-				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(
-					peerIP,
-					false,
-				); Check(err) {
-					continue
-				}
-				Debug("connected to peer via address", peerIP)
-				c.otherNodes[uuid] = &nodeSpec{}
-				c.otherNodes[uuid].addr = addr
-				break
+	Debug(j.IPs)
+	uuid := j.UUID
+	if _, ok := c.otherNodes[uuid]; !ok {
+		// if we haven't already added it to the permanent peer list, we can add it now
+		Debug("uuid", j.UUID, "P2P", j.P2P)
+		Info("connecting to lan peer with same PSK", j.IPs, j.UUID)
+		// try all IPs
+		for addr := range j.IPs {
+			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
+			if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(
+				peerIP,
+				false,
+			); Check(err) {
+				continue
 			}
+			Debug("connected to peer via address", peerIP)
+			c.otherNodes[uuid] = &nodeSpec{}
+			c.otherNodes[uuid].addr = addr
+			break
 		}
-		// update last seen time for uuid for garbage collection of stale disconnected
-		// nodes
-		c.otherNodes[uuid].Time = time.Now()
 	}
+	// update last seen time for uuid for garbage collection of stale disconnected
+	// nodes
+	c.otherNodes[uuid].Time = time.Now()
 	// If we lose connection for more than 9 seconds we delete and if the node
 	// reappears it can be reconnected
 	for i := range c.otherNodes {
