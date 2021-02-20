@@ -23,8 +23,8 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-// GetApp defines the pod app
-func GetApp(cx *conte.Xt) (a *cli.App) {
+// getApp defines the pod app
+func getApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
 		Name:        "pod",
 		Version:     version.Get(),
