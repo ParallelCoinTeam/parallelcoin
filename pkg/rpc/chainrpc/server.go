@@ -560,14 +560,48 @@ func (n *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
 	
 	// Limit max number of total peers.
 	if state.Count() >= *n.Config.MaxPeers {
-		Infof("max peers reached [%d] - disconnecting peer %n",
-			n.Config.MaxPeers, sp.Addr())
+		Infof(
+			"max peers reached [%d] - disconnecting peer %n",
+			n.Config.MaxPeers, sp.Addr(),
+		)
 		sp.Disconnect()
 		// TODO: how to handle permanent peers here? they should be rescheduled.
 		return false
 	}
+	for i := range state.OutboundPeers {
+		for j := range state.InboundPeers {
+			Debug(
+				state.OutboundPeers[i].UserAgent(),
+				state.InboundPeers[j].UserAgent(),
+				sp.UserAgent(),
+				state.OutboundPeers[i].LocalAddr().String(),
+				state.InboundPeers[j].LocalAddr().String(),
+				sp.Addr(),
+				state.OutboundPeers[i].Addr(),
+				state.InboundPeers[j].Addr(),
+				sp.Addr(),
+			)
+			if strings.Contains(sp.UserAgent(), "nonce") &&
+				state.OutboundPeers[i].UserAgent() == sp.UserAgent() ||
+				state.InboundPeers[j].UserAgent() == sp.UserAgent() ||
+				state.OutboundPeers[i].LocalAddr().String() == sp.Addr() ||
+				state.InboundPeers[j].LocalAddr().String() == sp.Addr() ||
+				state.OutboundPeers[i].Addr() == sp.Addr() ||
+				state.InboundPeers[j].Addr() == sp.Addr() {
+				Debug("already have connection to peer with UAC", sp.UserAgent())
+				
+				sp.Disconnect()
+			}
+		}
+	}
+	// for i := range state.InboundPeers {
+	// 	Debug("inbound peer:", state.InboundPeers[i].LocalAddr(), state.InboundPeers[i].Addr())
+	// }
+	// for i := range state.OutboundPeers {
+	// 	Debug("outbound peer:", state.OutboundPeers[i].LocalAddr(), state.OutboundPeers[i].Addr())
+	// }
 	// Add the new peer and start it.
-	Trace("new peer ", sp)
+	Debug("new peer ", sp.UserAgent(), sp.Addr())
 	if sp.Inbound() {
 		state.InboundPeers[sp.ID()] = sp
 	} else {
@@ -2924,7 +2958,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 			s.RPCServers = append(s.RPCServers, rp)
 		}
 		// Signal process shutdown when the RPC server requests it.
-		go func(){
+		go func() {
 			s.Quit.Wait()
 			for i := range s.RPCServers {
 				s.RPCServers[i].Quit.Q()

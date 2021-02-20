@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/ring"
 	"fmt"
+	"github.com/p9c/pod/pkg/util/routeable"
 	"math/rand"
 	"net"
 	"sync"
@@ -204,8 +205,6 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	// 	ctrl.active.Store(true)
 	// }
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
-	advt := p2padvt.Get(cx)
-	ad := transport.GetShards(advt)
 	once := false
 	go func() {
 	out:
@@ -229,7 +228,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 					// }
 				}
 				// send out advertisment
-				// todo: big question: how to deal with change of IP address
+				ad := transport.GetShards(p2padvt.Get(cx))
 				var err error
 				if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
 				}
@@ -346,7 +345,7 @@ var handlersMulticast = transport.Handlers{
 }
 
 func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
-	Debug("processing advertisment message")
+	Debug("processing advertisment message", src, dst)
 	c := ctx.(*Controller)
 	if !c.active.Load() {
 		Debug("not active")
@@ -363,6 +362,17 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 		// try all IPs
 		for addr := range j.IPs {
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
+			_, addresses := routeable.GetAllInterfacesAndAddresses()
+			for i := range addresses {
+				if net.JoinHostPort(addresses[i].IP.String(), fmt.Sprint(j.P2P)) == peerIP {
+					Debug("not connecting to self")
+					continue
+				}
+			}
+			Debugs(c.cx.RealNode.AddrManager.AddressCache())
+			// if c.otherNodes[uuid].addr == peerIP {
+			// 	continue
+			// }
 			if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(
 				peerIP,
 				false,
@@ -372,7 +382,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 			Debug("connected to peer via address", peerIP)
 			c.otherNodes[uuid] = &nodeSpec{}
 			c.otherNodes[uuid].addr = addr
-			break
+			// break
 		}
 	}
 	// update last seen time for uuid for garbage collection of stale disconnected
