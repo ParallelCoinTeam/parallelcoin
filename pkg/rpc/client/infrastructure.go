@@ -404,12 +404,14 @@ out:
 		// Send any messages ready for send until the client is disconnected closed.
 		select {
 		case msg := <-c.sendChan:
-			err := c.wsConn.WriteMessage(websocket.TextMessage, msg)
-			if err != nil {
-				Error(err)
+			Debug("### sendChan received message to send")
+			var err error
+			if err = c.wsConn.WriteMessage(websocket.TextMessage, msg);Check(err){
+				Debug("### sendChan disconnecting client")
 				c.Disconnect()
 				break out
 			}
+			Debug("### message sent")
 		case <-c.disconnectChan():
 			break out
 		}
@@ -431,10 +433,13 @@ cleanup:
 // connection. It is backed by a buffered channel, so it will not block until
 // the send channel is full.
 func (c *Client) sendMessage(marshalledJSON []byte) {
+	Debug("### sendMessage")
 	// Don't send the message if disconnected.
 	select {
 	case c.sendChan <- marshalledJSON:
+		Debug("### message sent on channel")
 	case <-c.disconnectChan():
+		Debug("### client is disconnected")
 		return
 	}
 }
@@ -765,25 +770,30 @@ func (c *Client) sendRequest(jReq *jsonRequest) {
 	// When running in HTTP POST mode, the command is issued via an HTTP client.
 	// Otherwise, the command is issued via the asynchronous websocket channels.
 	if c.config.HTTPPostMode {
+		Debug("### sending via http post mode")
 		c.sendPost(jReq)
 		return
 	}
 	// Check whether the websocket connection has never been established, in which
 	// case the handler goroutines are not running.
+	Debug("### waiting for connection established")
 	select {
 	case <-c.connEstablished.Wait():
+		Debug("### connEstablished")
 	default:
+		Debug("### sending back error client not connected")
 		jReq.responseChan <- &response{err: ErrClientNotConnected}
 		return
 	}
 	// Add the request to the internal tracking map so the response from the remote
 	// server can be properly detected and routed to the response channel. Then send
 	// the marshalled request via the websocket connection.
-	if err := c.addRequest(jReq); err != nil {
+	if err := c.addRequest(jReq); Check(err) {
+		Debug("### error", err)
 		jReq.responseChan <- &response{err: err}
 		return
 	}
-	Tracef("sending command [%s] with id %d", jReq.method, jReq.id)
+	Debugf("### sending command [%s] with id %d", jReq.method, jReq.id)
 	c.sendMessage(jReq.marshalledJSON)
 }
 
@@ -794,17 +804,19 @@ func (c *Client) sendRequest(jReq *jsonRequest) {
 // It handles both websocket and HTTP POST mode depending on the configuration
 // of the client.
 func (c *Client) sendCmd(cmd interface{}) chan *response {
+	Debug("### sendCmd")
+	Debugs(cmd)
 	// Get the method associated with the command.
-	method, err := btcjson.CmdMethod(cmd)
-	if err != nil {
-		Error(err)
+	var err error
+	var method string
+	if method, err = btcjson.CmdMethod(cmd); Check(err) {
+		Debug("### error", err)
 		return newFutureError(err)
 	}
 	// Marshal the command.
 	id := c.NextID()
-	marshalledJSON, err := btcjson.MarshalCmd(id, cmd)
-	if err != nil {
-		Error(err)
+	var marshalledJSON []byte
+	if marshalledJSON, err = btcjson.MarshalCmd(id, cmd);Check(err){
 		return newFutureError(err)
 	}
 	// Generate the request and send it along with a channel to respond on.
@@ -816,6 +828,7 @@ func (c *Client) sendCmd(cmd interface{}) chan *response {
 		marshalledJSON: marshalledJSON,
 		responseChan:   responseChan,
 	}
+	Debug("### sending request")
 	c.sendRequest(jReq)
 	return responseChan
 }

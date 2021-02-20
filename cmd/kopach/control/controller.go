@@ -110,6 +110,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	var err error
 	certs := walletmain.ReadCAFile(cx.Config)
 	go func() {
+		Debug("starting wallet rpc connection watcher for mining addresses")
 		backoffTime := time.Second
 	totalOut:
 		for {
@@ -120,6 +121,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 					break totalOut
 				default:
 				}
+				Debug("trying to connect to wallet for mining addresses...")
 				// If we can reach the wallet configured in the same datadir we can mine
 				if ctrl.walletClient, err = rpcclient.New(
 					&rpcclient.ConnConfig{
@@ -131,6 +133,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 						Certificates: certs,
 					}, nil, cx.KillAll,
 				); Check(err) {
+					Debug("failed, will try again")
 					ctrl.isMining.Store(false)
 					select {
 					case <-time.After(backoffTime):
@@ -138,17 +141,18 @@ func Run(cx *conte.Xt) (quit qu.C) {
 						ctrl.isMining.Store(false)
 						break totalOut
 					}
-					if backoffTime <= time.Second*16 {
-						backoffTime *= 2
+					if backoffTime <= time.Second*5 {
+						// backoffTime+=time.Second
 					}
 					continue
 				} else {
+					Debug("<<<controller has wallet connection>>>")
 					ctrl.isMining.Store(true)
 					backoffTime = time.Second
 					break trying
 				}
 			}
-			Debug("connected to wallet")
+			Debug("<<<connected to wallet>>>")
 			retryTicker := time.NewTicker(time.Second)
 		connected:
 			for {
@@ -268,14 +272,14 @@ func (c *Controller) rebroadcast() {
 	oB, ok := c.oldBlocks.Load().([][]byte)
 	if len(oB) == 0 {
 		Trace("template is zero length")
-		// if err := c.sendNewBlockTemplate(); Check(err) {
-		// }
+		if err := c.sendNewBlockTemplate(); Check(err) {
+		}
 		return
 	}
 	if !ok {
 		Trace("template is nil")
-		// if err := c.sendNewBlockTemplate(); Check(err) {
-		// }
+		if err := c.sendNewBlockTemplate(); Check(err) {
+		}
 		return
 	}
 	// if !c.cx.IsCurrent() {
@@ -575,11 +579,14 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 }
 
 func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error,) {
-	Trace("getting new block template")
+	Debug("getting new block template")
 	var addr util.Address
 	if c.walletClient != nil {
-		Debug("have access to a wallet, generating address")
-		if addr, err = c.walletClient.GetNewAddress("default"); Check(err) {
+		if !c.walletClient.Disconnected() {
+			Debug("have access to a wallet, generating address")
+			if addr, err = c.walletClient.GetNewAddress("default"); Check(err) {
+			}
+			Debug("-------- found address", addr)
 		}
 	}
 	if addr == nil {
@@ -616,7 +623,7 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 	// block uses a key and it is deleted here afterwards
 	// }()
 	// }()
-	Trace("calling new block template")
+	Debug("---------- calling new block template")
 	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("********** got new block template")
