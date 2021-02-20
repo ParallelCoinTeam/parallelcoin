@@ -87,6 +87,9 @@ func Discover() (err error) {
 				if strings.HasPrefix(ip.String(), "169.") || strings.HasPrefix(ip.String(), "fe80:") {
 					continue
 				}
+				if strings.HasPrefix(ip.String(), "127.") || strings.HasPrefix(ip.String(), "::1") {
+					continue
+				}
 				SecondaryAddresses = append(SecondaryAddresses, ip)
 				SecondaryInterfaces = append(SecondaryInterfaces, &nif[i])
 			}
@@ -122,4 +125,21 @@ func GetListenable() net.IP {
 		}
 	}
 	return Address
+}
+
+func GetAllInterfacesAndAddresses() (interfaces []*net.Interface, udpAddrs []*net.UDPAddr) {
+	interfaces = append([]*net.Interface{Interface}, SecondaryInterfaces...)
+	naddrs := append([]net.IP{Address}, SecondaryAddresses...)
+	var addrs []*net.IP
+	for i := range naddrs {
+		addrs = append(addrs, &naddrs[i])
+	}
+	var err error
+	for i := range addrs {
+		var udpAddr *net.UDPAddr
+		if udpAddr, err = net.ResolveUDPAddr("udp", addrs[i].String()+":0"); !Check(err) {
+			udpAddrs = append(udpAddrs, udpAddr)
+		}
+	}
+	return
 }
