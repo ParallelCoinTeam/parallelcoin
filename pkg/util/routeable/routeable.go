@@ -56,6 +56,8 @@ func Discover() (err error) {
 	}
 	// Debug("number of available network interfaces:", len(nif))
 	// Debugs(nif)
+	var secondaryInterfaces []*net.Interface
+	var secondaryAddresses []net.IP
 	if Gateway, err = gateway.DiscoverGateway(); Check(err) {
 		// todo: this error condition always happens on iOS and Android
 		// return
@@ -90,11 +92,13 @@ func Discover() (err error) {
 				if strings.HasPrefix(ip.String(), "127.") || strings.HasPrefix(ip.String(), "::1") {
 					continue
 				}
-				SecondaryAddresses = append(SecondaryAddresses, ip)
-				SecondaryInterfaces = append(SecondaryInterfaces, &nif[i])
+				secondaryAddresses = append(secondaryAddresses, ip)
+				secondaryInterfaces = append(secondaryInterfaces, &nif[i])
 			}
 		}
 	}
+	SecondaryAddresses = secondaryAddresses
+	SecondaryInterfaces = secondaryInterfaces
 	Trace("Gateway", Gateway)
 	Trace("Address", Address)
 	Trace("Interface", Interface.Name)
