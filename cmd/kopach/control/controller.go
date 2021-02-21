@@ -288,7 +288,7 @@ func (c *Controller) rebroadcast() {
 	// } else {
 	// 	Debug("is current")
 	// }
-	Debug("checking for new block")
+	Trace("checking for new block")
 	// The current block is stale if the best block has changed.
 	best := c.blockTemplateGenerator.BestSnapshot()
 	if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
@@ -298,7 +298,7 @@ func (c *Controller) rebroadcast() {
 		}
 		return
 	}
-	Debug("checking for new transactions")
+	Trace("checking for new transactions")
 	// The current block is stale if the memory pool has been updated since the
 	// block template was generated and it has been at least one minute.
 	if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
@@ -313,7 +313,7 @@ func (c *Controller) rebroadcast() {
 		}
 		return
 	}
-	Debug("sending out job")
+	Trace("sending out job")
 	var err error
 	if err = c.multiConn.SendMany(job.Magic, oB); Check(err) {
 	}
@@ -349,7 +349,7 @@ var handlersMulticast = transport.Handlers{
 }
 
 func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
-	Debug("processing advertisment message", src, dst)
+	Trace("processing advertisment message", src, dst)
 	c := ctx.(*Controller)
 	if !c.active.Load() {
 		Debug("not active")
@@ -357,7 +357,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 	}
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
-	Debug(j.IPs)
+	Trace(j.IPs)
 	uuid := j.UUID
 	if _, ok := c.otherNodes[uuid]; !ok {
 		// if we haven't already added it to the permanent peer list, we can add it now

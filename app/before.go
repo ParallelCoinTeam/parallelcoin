@@ -397,9 +397,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			cx.StateCfg.Save = true
 		}
 		var err error
-		if err = routeable.Discover(); Check(err) {
-			// TODO: this should trigger the display of this lack of internet
-		}
+		// if err = routeable.Discover(); Check(err) {
+		// 	// TODO: this should trigger the display of this lack of internet
+		// }
 		go func() {
 		out:
 			for {
