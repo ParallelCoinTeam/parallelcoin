@@ -122,9 +122,9 @@ func (wg *WalletGUI) Tickers() {
 						// }
 						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() { // || wg.currentReceiveGetNew.Load() {
 							wg.GetNewReceivingAddress()
-						}
-						if wg.currentReceiveQRCode == nil || wg.currentReceiveRegenerate.Load() { // || wg.currentReceiveGetNew.Load() {
-							wg.GetNewReceivingQRCode(wg.ReceivePage.urn)
+							if wg.currentReceiveQRCode == nil || wg.currentReceiveRegenerate.Load() { // || wg.currentReceiveGetNew.Load() {
+								wg.GetNewReceivingQRCode(wg.ReceivePage.urn)
+							}
 						}
 					}
 					wg.invalidate <- struct{}{}

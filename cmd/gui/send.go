@@ -202,8 +202,11 @@ func (sp *SendPage) SendButton() l.Widget {
 								var txid *chainhash.Hash
 								if txid, err = wg.WalletClient.SendToAddress(addr, am); Check(err) {
 									// TODO: indicate send failure to user somehow
+									Debug("******")
 									return
 								}
+								wg.RecentTransactions(10, "recent")
+								wg.RecentTransactions(-1, "history")
 								Debug("transaction successful", txid)
 								// prevent accidental double clicks recording the same entry again
 								wg.inputs["sendAmount"].SetText("")
@@ -358,7 +361,7 @@ func (sp *SendPage) AddressbookHeader() l.Widget {
 		1,
 		wg.Inset(
 			0.25,
-			wg.H6("Send Address History").Alignment(text.Middle).Fn,
+			wg.H6("Address Book").Alignment(text.Middle).Fn,
 		).Fn,
 	).Fn
 }

@@ -14,11 +14,12 @@ import (
 )
 
 func (wg *WalletGUI) GetNewReceivingAddress() {
+	Debug("GetNewReceivingAddress")
 	var addr util.Address
 	var err error
 	if addr, err = wg.WalletClient.GetNewAddress("default"); !Check(err) {
-		// Debug("getting new address new receiving address", addr.EncodeAddress(),
-		// 	"as prior was empty", wg.State.currentReceivingAddress.String.Load())
+		Debug("getting new receiving address", addr.EncodeAddress(),
+			"previous:", wg.State.currentReceivingAddress.String.Load())
 		// save to addressbook
 		var ae AddressEntry
 		ae.Address = addr.EncodeAddress()
@@ -44,13 +45,11 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 		}
 		Debugs(wg.State.receiveAddresses)
 		wg.State.SetReceivingAddress(addr)
-		wg.State.isAddress.Store(true)
 		filename := filepath.Join(wg.cx.DataDir, "state.json")
 		if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
 		}
 		wg.invalidate <- struct{}{}
 	}
-	
 }
 
 func (wg *WalletGUI) GetNewReceivingQRCode(qrText string) {
