@@ -25,7 +25,7 @@ type AlgoParams struct {
 
 // HardForks is the details related to a hard fork, number, name and activation height
 type HardForks struct {
-	Number             uint32
+	Number             int
 	ActivationHeight   int32
 	Name               string
 	Algos              map[string]AlgoParams
@@ -45,17 +45,21 @@ func init() {
 	}
 	AlgoSlices = append(AlgoSlices, AlgoSpecs{})
 	for i := range Algos {
-		AlgoSlices[0] = append(AlgoSlices[0], AlgoSpec{
-			List[0].Algos[i].Version,
-			i,
-		})
+		AlgoSlices[0] = append(
+			AlgoSlices[0], AlgoSpec{
+				List[0].Algos[i].Version,
+				i,
+			},
+		)
 	}
 	AlgoSlices = append(AlgoSlices, AlgoSpecs{})
 	for i := range P9Algos {
-		AlgoSlices[1] = append(AlgoSlices[1], AlgoSpec{
-			List[1].Algos[i].Version,
-			i,
-		})
+		AlgoSlices[1] = append(
+			AlgoSlices[1], AlgoSpec{
+				List[1].Algos[i].Version,
+				i,
+			},
+		)
 	}
 	sort.Sort(AlgoSlices[0])
 	sort.Sort(AlgoSlices[1])
@@ -117,7 +121,8 @@ var (
 	// FirstPowLimit is
 	FirstPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
-			"0fffff0000000000000000000000000000000000000000000000000000000000")
+			"0fffff0000000000000000000000000000000000000000000000000000000000",
+		)
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	// FirstPowLimitBits is
@@ -173,13 +178,15 @@ var (
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
 			// "01f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1")
-			"0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+			"0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+		)
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)
 	MainPowLimit       = func() big.Int {
 		mplb, _ := hex.DecodeString(
-			"00000fffff000000000000000000000000000000000000000000000000000000")
+			"00000fffff000000000000000000000000000000000000000000000000000000",
+		)
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	MainPowLimitBits = BigToCompact(&MainPowLimit)
@@ -222,6 +229,52 @@ func GetAlgoVer(name string, height int32) (version int32) {
 		n = name
 	}
 	version = List[hf].Algos[n].Version
+	return
+}
+
+// AlgoVerIterator returns a next and more function to use in a for loop to
+// iterate over block versions at current height
+func AlgoVerIterator(height int32) (next func(), curr func() int32, more func() bool) {
+	current := GetCurrent(height)
+	for i := range List {
+		if List[i].Number == current {
+			var cursor int32
+			length := int32(GetNumAlgos(height))
+			
+			verNames := make([]string, length)
+			for _, x := range List[i].AlgoVers {
+				verNames[i] = x
+			}
+			var verNumbers []int32
+			for _, x := range verNames {
+				verNumbers = append(verNumbers, GetAlgoVer(x, height))
+			}
+			curr = func() int32 {
+				return verNumbers[cursor]
+			}
+			more = func() bool {
+				return cursor < length
+			}
+			next = func() {
+				if more() {
+					cursor++
+				}
+			}
+			break
+		}
+	}
+	return
+}
+
+// GetNumAlgos returns the number of algos at a given height
+func GetNumAlgos(height int32) (numAlgos int) {
+	current := GetCurrent(height)
+	for i := range List {
+		if List[i].Number == current {
+			numAlgos = len(List[i].Algos)
+			break
+		}
+	}
 	return
 }
 

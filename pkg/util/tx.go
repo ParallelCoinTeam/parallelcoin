@@ -42,30 +42,30 @@ func (t *Tx) Hash() *chainhash.Hash {
 	return &hash
 }
 
-// WitnessHash returns the witness hash (wtxid) of the transaction. This is equivalent to calling WitnessHash on the
-// underlying wire.MsgTx, however it caches the result so subsequent calls are more efficient.
-func (t *Tx) WitnessHash() *chainhash.Hash {
-	// Return the cached hash if it has already been generated.
-	if t.txHashWitness != nil {
-		return t.txHashWitness
-	}
-	// Cache the hash and return it.
-	hash := t.msgTx.WitnessHash()
-	t.txHashWitness = &hash
-	return &hash
-}
-
-// HasWitness returns false if none of the inputs within the transaction contain witness data, true false otherwise.
-// This equivalent to calling HasWitness on the underlying wire.MsgTx, however it caches the result so subsequent calls
-// are more efficient.
-func (t *Tx) HasWitness() bool {
-	if t.txHashWitness != nil {
-		return *t.txHasWitness
-	}
-	hasWitness := t.msgTx.HasWitness()
-	t.txHasWitness = &hasWitness
-	return hasWitness
-}
+// // WitnessHash returns the witness hash (wtxid) of the transaction. This is equivalent to calling WitnessHash on the
+// // underlying wire.MsgTx, however it caches the result so subsequent calls are more efficient.
+// func (t *Tx) WitnessHash() *chainhash.Hash {
+// 	// Return the cached hash if it has already been generated.
+// 	if t.txHashWitness != nil {
+// 		return t.txHashWitness
+// 	}
+// 	// Cache the hash and return it.
+// 	hash := t.msgTx.WitnessHash()
+// 	t.txHashWitness = &hash
+// 	return &hash
+// }
+//
+// // HasWitness returns false if none of the inputs within the transaction contain witness data, true false otherwise.
+// // This equivalent to calling HasWitness on the underlying wire.MsgTx, however it caches the result so subsequent calls
+// // are more efficient.
+// func (t *Tx) HasWitness() bool {
+// 	if t.txHashWitness != nil {
+// 		return *t.txHasWitness
+// 	}
+// 	hasWitness := t.msgTx.HasWitness()
+// 	t.txHasWitness = &hasWitness
+// 	return hasWitness
+// }
 
 // Index returns the saved index of the transaction within a block. This value will be TxIndexUnknown if it hasn't
 // already explicitly been set.

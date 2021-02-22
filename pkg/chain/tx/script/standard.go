@@ -32,7 +32,7 @@ const (
 		ScriptVerifyCheckSequenceVerify |
 		ScriptVerifyLowS |
 		ScriptStrictMultiSig |
-		ScriptVerifyWitness |
+		// ScriptVerifyWitness |
 		ScriptVerifyDiscourageUpgradeableWitnessProgram |
 		ScriptVerifyMinimalIf |
 		ScriptVerifyWitnessPubKeyType
@@ -139,12 +139,12 @@ func typeOfScript(pops []parsedOpcode) ScriptClass {
 		return PubKeyTy
 	} else if isPubkeyHash(pops) {
 		return PubKeyHashTy
-	} else if isWitnessPubKeyHash(pops) {
-		return WitnessV0PubKeyHashTy
+	// } else if isWitnessPubKeyHash(pops) {
+	// 	return WitnessV0PubKeyHashTy
 	} else if isScriptHash(pops) {
 		return ScriptHashTy
-	} else if isWitnessScriptHash(pops) {
-		return WitnessV0ScriptHashTy
+	// } else if isWitnessScriptHash(pops) {
+	// 	return WitnessV0ScriptHashTy
 	} else if isMultiSig(pops) {
 		return MultiSigTy
 	} else if isNullData(pops) {
@@ -209,8 +209,7 @@ type ScriptInfo struct {
 // CalcScriptInfo returns a structure providing data about the provided script pair. It will error if the pair is in
 // someway invalid such that they can not be analysed, i.e. if they do not parse or the pkScript is not a push-only
 // script
-func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
-	bip16, segwit bool) (*ScriptInfo, error) {
+func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness, bip16 bool) (*ScriptInfo, error) {
 	sigPops, err := parseScript(sigScript)
 	if err != nil {
 		Error(err)
@@ -232,7 +231,7 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 	si.ExpectedInputs = expectedInputs(pkPops, si.PkScriptClass)
 	switch {
 	// Count sigops taking into account pay-to-script-hash.
-	case si.PkScriptClass == ScriptHashTy && bip16 && !segwit:
+	case si.PkScriptClass == ScriptHashTy && bip16:
 		// The pay-to-hash-script is the final data push of the signature script.
 		script := sigPops[len(sigPops)-1].data
 		shPops, err := parseScript(script)
@@ -251,37 +250,37 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 		si.NumInputs = len(sigPops)
 	// If segwit is active, and this is a regular p2wkh output, then we'll treat the script as a p2pkh output in
 	// essence.
-	case si.PkScriptClass == WitnessV0PubKeyHashTy && segwit:
-		si.SigOps = GetWitnessSigOpCount(sigScript, pkScript, witness)
-		si.NumInputs = len(witness)
-	// We'll attempt to detect the nested p2sh case so we can accurately count the signature operations involved.
-	case si.PkScriptClass == ScriptHashTy &&
-		IsWitnessProgram(sigScript[1:]) && bip16 && segwit:
-		// Extract the pushed witness program from the sigScript so we can determine the number of expected inputs.
-		pkPops, _ := parseScript(sigScript[1:])
-		shInputs := expectedInputs(pkPops, typeOfScript(pkPops))
-		if shInputs == -1 {
-			si.ExpectedInputs = -1
-		} else {
-			si.ExpectedInputs += shInputs
-		}
-		si.SigOps = GetWitnessSigOpCount(sigScript, pkScript, witness)
-		si.NumInputs = len(witness)
-		si.NumInputs += len(sigPops)
-	// If segwit is active, and this is a p2wsh output, then we'll need to examine the witness script to generate
-	// accurate script info.
-	case si.PkScriptClass == WitnessV0ScriptHashTy && segwit:
-		// The witness script is the final element of the witness stack.
-		witnessScript := witness[len(witness)-1]
-		pops, _ := parseScript(witnessScript)
-		shInputs := expectedInputs(pops, typeOfScript(pops))
-		if shInputs == -1 {
-			si.ExpectedInputs = -1
-		} else {
-			si.ExpectedInputs += shInputs
-		}
-		si.SigOps = GetWitnessSigOpCount(sigScript, pkScript, witness)
-		si.NumInputs = len(witness)
+	// case si.PkScriptClass == WitnessV0PubKeyHashTy && segwit:
+	// 	si.SigOps = GetWitnessSigOpCount(sigScript, pkScript, witness)
+	// 	si.NumInputs = len(witness)
+	// // We'll attempt to detect the nested p2sh case so we can accurately count the signature operations involved.
+	// case si.PkScriptClass == ScriptHashTy &&
+	// 	IsWitnessProgram(sigScript[1:]) && bip16 && segwit:
+	// 	// Extract the pushed witness program from the sigScript so we can determine the number of expected inputs.
+	// 	pkPops, _ := parseScript(sigScript[1:])
+	// 	shInputs := expectedInputs(pkPops, typeOfScript(pkPops))
+	// 	if shInputs == -1 {
+	// 		si.ExpectedInputs = -1
+	// 	} else {
+	// 		si.ExpectedInputs += shInputs
+	// 	}
+	// 	si.SigOps = GetWitnessSigOpCount(sigScript, pkScript, witness)
+	// 	si.NumInputs = len(witness)
+	// 	si.NumInputs += len(sigPops)
+	// // If segwit is active, and this is a p2wsh output, then we'll need to examine the witness script to generate
+	// // accurate script info.
+	// case si.PkScriptClass == WitnessV0ScriptHashTy && segwit:
+	// 	// The witness script is the final element of the witness stack.
+	// 	witnessScript := witness[len(witness)-1]
+	// 	pops, _ := parseScript(witnessScript)
+	// 	shInputs := expectedInputs(pops, typeOfScript(pops))
+	// 	if shInputs == -1 {
+	// 		si.ExpectedInputs = -1
+	// 	} else {
+	// 		si.ExpectedInputs += shInputs
+	// 	}
+	// 	si.SigOps = GetWitnessSigOpCount(sigScript, pkScript, witness)
+	// 	si.NumInputs = len(witness)
 	default:
 		si.SigOps = getSigOpCount(pkPops, true)
 		// All entries pushed to stack (or are OP_RESERVED and exec will fail).
