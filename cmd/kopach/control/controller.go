@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/util/routeable"
 	"math/rand"
 	"net"
+	"sort"
 	"sync"
 	"time"
 	
@@ -544,23 +545,21 @@ func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (er
 }
 
 func (c *Controller) sendNewBlockTemplate() (err error) {
-	var template *mining.BlockTemplate
-	if template, err = c.getNewBlockTemplate(); Check(err) {
+	var templates []*mining.BlockTemplate
+	if templates, err = c.getNewBlockTemplates(); Check(err) {
 		return
 	}
 	// Debugs(template)
-	if template == nil {
+	if templates == nil {
 		Debug("template is nil")
 		return
 	}
-	msgB := template.Block
-	// c.coinbases = make(map[int32]*util.Tx)
 	var txs []*util.Tx
-	var ccb *map[int32]*util.Tx
-	var fMC []byte
-	ccb, fMC, txs = job.Get(c.cx, util.NewBlock(msgB))
-	c.coinbases.Store(ccb)
-	jobShards := transport.GetShards(fMC)
+	var coinbases *map[int32]*wire.MsgTx
+	var miningJob []byte
+	coinbases, miningJob, txs = job.Get(c.cx, templates)
+	c.coinbases.Store(coinbases)
+	jobShards := transport.GetShards(miningJob)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {
 		Debug("jobShards", shardsLen)
@@ -571,14 +570,28 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	if err != nil {
 		Error(err)
 	}
-	c.prevHash.Store(&template.Block.Header.PrevBlock)
+	c.prevHash.Store(&templates[0].Block.Header.PrevBlock)
 	c.transactions.Store(txs)
 	c.lastGenerated.Store(time.Now().UnixNano())
 	c.lastTxUpdate.Store(time.Now().UnixNano())
 	return
 }
 
-func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error,) {
+type blockTemplates []*mining.BlockTemplate
+
+func (b blockTemplates) Len() int {
+	return len(b)
+}
+
+func (b blockTemplates) Less(i, j int) bool {
+	return b[i].Block.Header.Version < b[j].Block.Header.Version
+}
+
+func (b blockTemplates) Swap(i, j int) {
+	b[i], b[j] = b[j], b[i]
+}
+
+func (c *Controller) getNewBlockTemplates() (templates blockTemplates, err error,) {
 	Debug("getting new block template")
 	var addr util.Address
 	if c.walletClient != nil {
@@ -620,15 +633,26 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 		save.Pod(c.cx.Config)
 	}
 	// TODO: trigger wallet to generate new ones at some point, if one is connected, when a mined
-	// block uses a key and it is deleted here afterwards
-	// }()
-	// }()
-	Debug("---------- calling new block template")
-	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.SHA256d); Check(err) {
-	} else {
-		Debug("********** got new block template")
-		Debugs(template)
+	//  block uses a key and it is deleted here afterwards
+	height := c.cx.RealNode.Chain.BestChain.Height()
+	forkNum := fork.GetCurrent(height)
+	forkAlgos := fork.List[forkNum].Algos
+	Debug("new height for block templates", height, forkNum)
+	// Debugs(forkAlgos)
+	templates = make([]*mining.BlockTemplate, len(forkAlgos))
+	var counter int
+	for i := range forkAlgos {
+		if templates[counter], err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, i); Check(err) {
+		} else {
+			Debug("********** got new block template")
+			Debugs(templates[counter].Block.Header.MerkleRoot)
+			Debugs(templates[counter].Block.Transactions)
+		}
+		counter++
 	}
+	// this will make them always in the same order of version
+	sort.Sort(templates)
+	// Debugs(templates)
 	return
 }
 

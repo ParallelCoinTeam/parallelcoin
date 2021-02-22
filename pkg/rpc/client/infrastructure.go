@@ -805,7 +805,7 @@ func (c *Client) sendRequest(jReq *jsonRequest) {
 // of the client.
 func (c *Client) sendCmd(cmd interface{}) chan *response {
 	Trace("### sendCmd")
-	Traces(cmd)
+	// Traces(cmd)
 	// Get the method associated with the command.
 	var err error
 	var method string
