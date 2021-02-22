@@ -266,6 +266,18 @@ func AlgoVerIterator(height int32) (next func(), curr func() int32, more func() 
 	return
 }
 
+// GetAlgos returns the map of names and algorithm parameters
+func GetAlgos(height int32) (o map[string]AlgoParams) {
+	current := GetCurrent(height)
+	for i := range List {
+		if List[i].Number == current {
+			o = List[i].Algos
+			break
+		}
+	}
+	return
+}
+
 // GetNumAlgos returns the number of algos at a given height
 func GetNumAlgos(height int32) (numAlgos int) {
 	current := GetCurrent(height)

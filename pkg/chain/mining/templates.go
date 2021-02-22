@@ -37,9 +37,9 @@ func (g *BlkTmplGenerator) NewBlockTemplates(
 	extraNonce := rand.Uint64()
 	var err error
 	numAlgos := fork.GetNumAlgos(height)
-	coinbaseScripts := make(map[int32][]byte, numAlgos)
-	coinbaseTxs := make(map[int32]*util.Tx, numAlgos)
-	coinbaseSigOpCosts := make(map[int32]int64, numAlgos)
+	// coinbaseScripts := make(map[int32][]byte, numAlgos)
+	// coinbaseTxs := make(map[int32]*util.Tx, numAlgos)
+	var coinbaseSigOpCost int64
 	blockTemplates := make(BlockTemplates, numAlgos)
 	var priorityQueues *txPriorityQueue
 	// Get the current source transactions and create a priority queue to hold the
@@ -50,284 +50,288 @@ func (g *BlkTmplGenerator) NewBlockTemplates(
 	// high-priority transactions.
 	sourceTxns := g.TxSource.MiningDescs()
 	sortedByFee := g.Policy.BlockPrioritySize == 0
-	for next, curr, more := fork.AlgoVerIterator(height); more(); next() {
-		priorityQueues = newTxPriorityQueue(len(sourceTxns), sortedByFee)
-		var coinbaseScript []byte
-		var coinbaseTx *util.Tx
-		if coinbaseScript, err = standardCoinbaseScript(height, extraNonce); Check(err) {
-			return nil, err
+	blockUtxos := blockchain.NewUtxoViewpoint()
+	// dependers is used to track transactions which depend on another transaction
+	// in the source pool. This, in conjunction with the dependsOn map kept with
+	// each dependent transaction helps quickly determine which dependent
+	// transactions are now eligible for inclusion in the block once each
+	// transaction has been included.
+	dependers := make(map[chainhash.Hash]map[chainhash.Hash]*txPrioItem)
+mempoolLoop:
+	for _, txDesc := range sourceTxns {
+		// A block can't have more than one coinbase or contain non-finalized
+		// transactions.
+		tx := txDesc.Tx
+		if blockchain.IsCoinBase(tx) {
+			Tracec(
+				func() string {
+					return fmt.Sprintf("skipping coinbase tx %s", tx.Hash())
+				},
+			)
+			continue
 		}
-		coinbaseScripts[curr()] = coinbaseScript
-		if coinbaseTx, err = createCoinbaseTx(
-			g.ChainParams, coinbaseScript, height, payToAddress, curr(),
-		); Check(err) {
-			return nil, err
+		if !blockchain.IsFinalizedTransaction(
+			tx, height,
+			g.TimeSource.AdjustedTime(),
+		) {
+			Tracec(
+				func() string {
+					return "skipping non-finalized tx " + tx.Hash().String()
+				},
+			)
+			continue
 		}
-		coinbaseTxs[curr()] = coinbaseTx
-		coinbaseSigOpCosts[curr()] = int64(blockchain.CountSigOps(coinbaseTx))
-		// Create a slice to hold the transactions to be included in the generated block
-		// with reserved space. Also create a utxo view to house all of the input
-		// transactions so multiple lookups can be avoided.
-		blockTxns := make([]*util.Tx, 0, len(sourceTxns))
-		blockTxns = append(blockTxns, coinbaseTx)
-		blockUtxos := blockchain.NewUtxoViewpoint()
-		// dependers is used to track transactions which depend on another transaction
-		// in the source pool. This, in conjunction with the dependsOn map kept with
-		// each dependent transaction helps quickly determine which dependent
-		// transactions are now eligible for inclusion in the block once each
-		// transaction has been included.
-		dependers := make(map[chainhash.Hash]map[chainhash.Hash]*txPrioItem)
-		// Create slices to hold the fees and number of signature operations for each of
-		// the selected transactions and add an entry for the coinbase. This allows the
-		// code below to simply append details about a transaction as it is selected for
-		// inclusion in the final block. However, since the total fees aren't known yet,
-		// use a dummy value for the coinbase fee which will be updated later.
-		txFees := make([]int64, 0, len(sourceTxns))
-		txSigOpCosts := make([]int64, 0, len(sourceTxns))
-		txFees = append(txFees, -1) // Updated once known
-		txSigOpCosts = append(txSigOpCosts, coinbaseSigOpCosts[curr()])
-		Tracef("considering %d transactions for inclusion to new block", len(sourceTxns))
-	mempoolLoop:
-		for _, txDesc := range sourceTxns {
-			// A block can't have more than one coinbase or contain non-finalized
-			// transactions.
-			tx := txDesc.Tx
-			if blockchain.IsCoinBase(tx) {
-				Tracec(
-					func() string {
-						return fmt.Sprintf("skipping coinbase tx %s", tx.Hash())
-					},
-				)
-				continue
-			}
-			if !blockchain.IsFinalizedTransaction(
-				tx, height,
-				g.TimeSource.AdjustedTime(),
-			) {
-				Tracec(
-					func() string {
-						return "skipping non-finalized tx " + tx.Hash().String()
-					},
-				)
-				continue
-			}
-			// Fetch all of the utxos referenced by the this transaction.
-			//
-			// NOTE: This intentionally does not fetch inputs from the mempool since a
-			// transaction which depends on other transactions in the mempool must come
-			// after those dependencies in the final generated block.
-			utxos, err := g.Chain.FetchUtxoView(tx)
-			if err != nil {
-				Warnc(
-					func() string {
-						return "unable to fetch utxo view for tx " + tx.Hash().String() + ": " + err.Error()
-					},
-				)
-				continue
-			}
-			// Setup dependencies for any transactions which reference other transactions in
-			// the mempool so they can be properly ordered below.
-			prioItem := &txPrioItem{tx: tx}
-			for _, txIn := range tx.MsgTx().TxIn {
-				originHash := &txIn.PreviousOutPoint.Hash
-				entry := utxos.LookupEntry(txIn.PreviousOutPoint)
-				if entry == nil || entry.IsSpent() {
-					if !g.TxSource.HaveTransaction(originHash) {
-						Tracec(
-							func() string {
-								return "skipping tx %s because it references unspent output %s which is not available" +
-									tx.Hash().String() +
-									txIn.PreviousOutPoint.String()
-							},
-						)
-						continue mempoolLoop
-					}
-					// The transaction is referencing another transaction in the source pool, so
-					// setup an ordering dependency.
-					deps, exists := dependers[*originHash]
-					if !exists {
-						deps = make(map[chainhash.Hash]*txPrioItem)
-						dependers[*originHash] = deps
-					}
-					deps[*prioItem.tx.Hash()] = prioItem
-					if prioItem.dependsOn == nil {
-						prioItem.dependsOn = make(
-							map[chainhash.Hash]struct{},
-						)
-					}
-					prioItem.dependsOn[*originHash] = struct{}{}
-					// Skip the check below. We already know the referenced transaction is
-					// available.
-					continue
+		// Fetch all of the utxos referenced by the this transaction.
+		//
+		// NOTE: This intentionally does not fetch inputs from the mempool since a
+		// transaction which depends on other transactions in the mempool must come
+		// after those dependencies in the final generated block.
+		utxos, err := g.Chain.FetchUtxoView(tx)
+		if err != nil {
+			Warnc(
+				func() string {
+					return "unable to fetch utxo view for tx " + tx.Hash().String() + ": " + err.Error()
+				},
+			)
+			continue
+		}
+		// Setup dependencies for any transactions which reference other transactions in
+		// the mempool so they can be properly ordered below.
+		prioItem := &txPrioItem{tx: tx}
+		for _, txIn := range tx.MsgTx().TxIn {
+			originHash := &txIn.PreviousOutPoint.Hash
+			entry := utxos.LookupEntry(txIn.PreviousOutPoint)
+			if entry == nil || entry.IsSpent() {
+				if !g.TxSource.HaveTransaction(originHash) {
+					Tracec(
+						func() string {
+							return "skipping tx %s because it references unspent output %s which is not available" +
+								tx.Hash().String() +
+								txIn.PreviousOutPoint.String()
+						},
+					)
+					continue mempoolLoop
 				}
+				// The transaction is referencing another transaction in the source pool, so
+				// setup an ordering dependency.
+				deps, exists := dependers[*originHash]
+				if !exists {
+					deps = make(map[chainhash.Hash]*txPrioItem)
+					dependers[*originHash] = deps
+				}
+				deps[*prioItem.tx.Hash()] = prioItem
+				if prioItem.dependsOn == nil {
+					prioItem.dependsOn = make(
+						map[chainhash.Hash]struct{},
+					)
+				}
+				prioItem.dependsOn[*originHash] = struct{}{}
+				// Skip the check below. We already know the referenced transaction is
+				// available.
+				continue
 			}
-			// Calculate the final transaction priority using the input value age sum as
-			// well as the adjusted transaction size. The formula is: sum (inputValue *
-			// inputAge) / adjustedTxSize
-			prioItem.priority = CalcPriority(
-				tx.MsgTx(), utxos,
-				height,
-			)
-			// Calculate the fee in Satoshi/kB.
-			prioItem.feePerKB = txDesc.FeePerKB
-			prioItem.fee = txDesc.Fee
-			// Add the transaction to the priority queue to mark it ready for inclusion in
-			// the block unless it has dependencies.
-			if prioItem.dependsOn == nil {
-				heap.Push(priorityQueues, prioItem)
-			}
-			// Merge the referenced outputs from the input transactions to this transaction
-			// into the block utxo view. This allows the code below to avoid a second
-			// lookup.
-			mergeUtxoView(blockUtxos, utxos)
 		}
-		// The starting block size is the size of the block header plus the max possible
-		// transaction count size, plus the size of the coinbase transaction.
-		blockWeight := uint32((blockHeaderOverhead) + blockchain.GetTransactionWeight(coinbaseTx))
-		blockSigOpCost := coinbaseSigOpCosts[curr()]
-		totalFees := int64(0)
-		// Choose which transactions make it into the block.
-		for priorityQueues.Len() > 0 {
-			// Grab the highest priority (or highest fee per kilobyte depending on the sort
-			// order) transaction.
-			prioItem := heap.Pop(priorityQueues).(*txPrioItem)
-			tx := prioItem.tx
-			// Grab any transactions which depend on this one.
-			deps := dependers[*tx.Hash()]
-			// Enforce maximum block size.  Also check for overflow.
-			txWeight := uint32(blockchain.GetTransactionWeight(tx))
-			blockPlusTxWeight := blockWeight + txWeight
-			if blockPlusTxWeight < blockWeight ||
-				blockPlusTxWeight >= g.Policy.BlockMaxWeight {
-				Tracef("skipping tx %s because it would exceed the max block weight", tx.Hash())
-				logSkippedDeps(tx, deps)
-				continue
-			}
-			// Enforce maximum signature operation cost per block. Also check for overflow.
-			sigOpCost, err := blockchain.GetSigOpCost(tx, false, blockUtxos, true)
-			if err != nil {
-				Tracec(
-					func() string {
-						return "skipping tx " + tx.Hash().String() +
-							"due to error in GetSigOpCost: " + err.Error()
-					},
-				)
-				logSkippedDeps(tx, deps)
-				continue
-			}
-			if blockSigOpCost+int64(sigOpCost) < blockSigOpCost ||
-				blockSigOpCost+int64(sigOpCost) > blockchain.MaxBlockSigOpsCost {
-				Tracec(
-					func() string {
-						return "skipping tx " + tx.Hash().String() +
-							" because it would exceed the maximum sigops per block"
-					},
-				)
-				logSkippedDeps(tx, deps)
-				continue
-			}
-			// Skip free transactions once the block is larger than the minimum block size.
-			if sortedByFee &&
-				prioItem.feePerKB < int64(g.Policy.TxMinFreeFee) &&
-				blockPlusTxWeight >= g.Policy.BlockMinWeight {
-				Tracec(
-					func() string {
-						return fmt.Sprintf(
-							"skipping tx %v with feePerKB %v < TxMinFreeFee %v and block weight %v >= minBlockWeight %v",
-							tx.Hash(),
-							prioItem.feePerKB,
-							g.Policy.TxMinFreeFee,
-							blockPlusTxWeight,
-							g.Policy.BlockMinWeight,
-						)
-					},
-				)
-				logSkippedDeps(tx, deps)
-				continue
-			}
-			// Prioritize by fee per kilobyte once the block is larger than the priority
-			// size or there are no more high-priority transactions.
-			if !sortedByFee && (blockPlusTxWeight >= g.Policy.BlockPrioritySize ||
-				prioItem.priority <= MinHighPriority.ToDUO()) {
-				Tracef(
-					"switching to sort by fees per kilobyte blockSize %d"+
-						" >= BlockPrioritySize %d || priority %.2f <= minHighPriority %.2f",
-					blockPlusTxWeight,
-					g.Policy.BlockPrioritySize,
-					prioItem.priority,
-					MinHighPriority,
-				)
-				sortedByFee = true
-				priorityQueues.SetLessFunc(txPQByFee)
-			}
-			// Put the transaction back into the priority queue and skip it so it is
-			// re-prioritized by fees if it won't fit into the high-priority section or the
-			// priority is too low. Otherwise this transaction will be the final one in the
-			// high-priority section, so just fall though to the code below so it is added
-			// now.
-			if blockPlusTxWeight > g.Policy.BlockPrioritySize ||
-				prioItem.priority < MinHighPriority.ToDUO() {
-				heap.Push(priorityQueues, prioItem)
-				continue
-			}
-			
-			// Ensure the transaction inputs pass all of the necessary preconditions before
-			// allowing it to be added to the block.
-			_, err = blockchain.CheckTransactionInputs(
-				tx, height,
-				blockUtxos, g.ChainParams,
+		// Calculate the final transaction priority using the input value age sum as
+		// well as the adjusted transaction size. The formula is: sum (inputValue *
+		// inputAge) / adjustedTxSize
+		prioItem.priority = CalcPriority(
+			tx.MsgTx(), utxos,
+			height,
+		)
+		// Calculate the fee in Satoshi/kB.
+		prioItem.feePerKB = txDesc.FeePerKB
+		prioItem.fee = txDesc.Fee
+		// Add the transaction to the priority queue to mark it ready for inclusion in
+		// the block unless it has dependencies.
+		if prioItem.dependsOn == nil {
+			heap.Push(priorityQueues, prioItem)
+		}
+		// Merge the referenced outputs from the input transactions to this transaction
+		// into the block utxo view. This allows the code below to avoid a second
+		// lookup.
+		mergeUtxoView(blockUtxos, utxos)
+	}
+	priorityQueues = newTxPriorityQueue(len(sourceTxns), sortedByFee)
+	var coinbaseScript []byte
+	if coinbaseScript, err = standardCoinbaseScript(height, extraNonce); Check(err) {
+		return nil, err
+	}
+	algos := fork.GetAlgos(height)
+	var alg int32
+	for i := range algos {
+		alg = algos[i].Version
+	}
+	var coinbaseTx *util.Tx
+	if coinbaseTx, err = createCoinbaseTx(
+		g.ChainParams, coinbaseScript, height, payToAddress, alg,
+	); Check(err) {
+		return nil, err
+	}
+	coinbaseSigOpCost = int64(blockchain.CountSigOps(coinbaseTx))
+	// with reserved space. Also create a utxo view to house all of the input
+	// transactions so multiple lookups can be avoided.
+	blockTxns := make([]*util.Tx, 0, len(sourceTxns))
+	blockTxns = append(blockTxns, coinbaseTx)
+	// Create slices to hold the fees and number of signature operations for each of
+	// the selected transactions and add an entry for the coinbase. This allows the
+	// code below to simply append details about a transaction as it is selected for
+	// inclusion in the final block. However, since the total fees aren't known yet,
+	// use a dummy value for the coinbase fee which will be updated later.
+	txFees := make([]int64, 0, len(sourceTxns))
+	txSigOpCosts := make([]int64, 0, len(sourceTxns))
+	txFees = append(txFees, -1) // Updated once known
+	txSigOpCosts = append(txSigOpCosts, coinbaseSigOpCost)
+	Tracef("considering %d transactions for inclusion to new block", len(sourceTxns))
+	// The starting block size is the size of the block header plus the max possible
+	// transaction count size, plus the size of the coinbase transaction.
+	blockWeight := uint32((blockHeaderOverhead) + blockchain.GetTransactionWeight(coinbaseTx))
+	blockSigOpCost := coinbaseSigOpCost
+	totalFees := int64(0)
+	// Choose which transactions make it into the block.
+	for priorityQueues.Len() > 0 {
+		// Grab the highest priority (or highest fee per kilobyte depending on the sort
+		// order) transaction.
+		prioItem := heap.Pop(priorityQueues).(*txPrioItem)
+		tx := prioItem.tx
+		// Grab any transactions which depend on this one.
+		deps := dependers[*tx.Hash()]
+		// Enforce maximum block size.  Also check for overflow.
+		txWeight := uint32(blockchain.GetTransactionWeight(tx))
+		blockPlusTxWeight := blockWeight + txWeight
+		if blockPlusTxWeight < blockWeight ||
+			blockPlusTxWeight >= g.Policy.BlockMaxWeight {
+			Tracef("skipping tx %s because it would exceed the max block weight", tx.Hash())
+			logSkippedDeps(tx, deps)
+			continue
+		}
+		// Enforce maximum signature operation cost per block. Also check for overflow.
+		sigOpCost, err := blockchain.GetSigOpCost(tx, false, blockUtxos, true)
+		if err != nil {
+			Tracec(
+				func() string {
+					return "skipping tx " + tx.Hash().String() +
+						"due to error in GetSigOpCost: " + err.Error()
+				},
 			)
-			if err != nil {
-				Tracef(
-					"skipping tx %s due to error in CheckTransactionInputs: %v",
-					tx.Hash(), err,
-				)
-				logSkippedDeps(tx, deps)
-				continue
-			}
-			if err = blockchain.ValidateTransactionScripts(
-				g.Chain, tx, blockUtxos,
-				txscript.StandardVerifyFlags, g.SigCache,
-				g.HashCache,
-			); Check(err) {
-				Tracef(
-					"skipping tx %s due to error in ValidateTransactionScripts: %v",
-					tx.Hash(), err,
-				)
-				logSkippedDeps(tx, deps)
-				continue
-			}
-			
-			// Spend the transaction inputs in the block utxo view and add an entry for it
-			// to ensure any transactions which reference this one have it available as an
-			// input and can ensure they aren't double spending.
-			if err = spendTransaction(blockUtxos, tx, height); Check(err) {
-			}
-			// Add the transaction to the block, increment counters, and save the fees and
-			// signature operation counts to the block template.
-			blockTxns = append(blockTxns, tx)
-			blockWeight += txWeight
-			blockSigOpCost += int64(sigOpCost)
-			totalFees += prioItem.fee
-			txFees = append(txFees, prioItem.fee)
-			txSigOpCosts = append(txSigOpCosts, int64(sigOpCost))
+			logSkippedDeps(tx, deps)
+			continue
+		}
+		if blockSigOpCost+int64(sigOpCost) < blockSigOpCost ||
+			blockSigOpCost+int64(sigOpCost) > blockchain.MaxBlockSigOpsCost {
+			Tracec(
+				func() string {
+					return "skipping tx " + tx.Hash().String() +
+						" because it would exceed the maximum sigops per block"
+				},
+			)
+			logSkippedDeps(tx, deps)
+			continue
+		}
+		// Skip free transactions once the block is larger than the minimum block size.
+		if sortedByFee &&
+			prioItem.feePerKB < int64(g.Policy.TxMinFreeFee) &&
+			blockPlusTxWeight >= g.Policy.BlockMinWeight {
+			Tracec(
+				func() string {
+					return fmt.Sprintf(
+						"skipping tx %v with feePerKB %v < TxMinFreeFee %v and block weight %v >= minBlockWeight %v",
+						tx.Hash(),
+						prioItem.feePerKB,
+						g.Policy.TxMinFreeFee,
+						blockPlusTxWeight,
+						g.Policy.BlockMinWeight,
+					)
+				},
+			)
+			logSkippedDeps(tx, deps)
+			continue
+		}
+		// Prioritize by fee per kilobyte once the block is larger than the priority
+		// size or there are no more high-priority transactions.
+		if !sortedByFee && (blockPlusTxWeight >= g.Policy.BlockPrioritySize ||
+			prioItem.priority <= MinHighPriority.ToDUO()) {
 			Tracef(
-				"adding tx %s (priority %.2f, feePerKB %.2f)",
-				prioItem.tx.Hash(),
+				"switching to sort by fees per kilobyte blockSize %d"+
+					" >= BlockPrioritySize %d || priority %.2f <= minHighPriority %.2f",
+				blockPlusTxWeight,
+				g.Policy.BlockPrioritySize,
 				prioItem.priority,
-				prioItem.feePerKB,
+				MinHighPriority,
 			)
-			// Add transactions which depend on this one (and also do not have any other
-			// unsatisfied dependencies) to the priority queue.
-			for _, item := range deps {
-				// Add the transaction to the priority queue if there are no more dependencies
-				// after this one.
-				delete(item.dependsOn, *tx.Hash())
-				if len(item.dependsOn) == 0 {
-					heap.Push(priorityQueues, item)
-				}
+			sortedByFee = true
+			priorityQueues.SetLessFunc(txPQByFee)
+		}
+		// Put the transaction back into the priority queue and skip it so it is
+		// re-prioritized by fees if it won't fit into the high-priority section or the
+		// priority is too low. Otherwise this transaction will be the final one in the
+		// high-priority section, so just fall though to the code below so it is added
+		// now.
+		if blockPlusTxWeight > g.Policy.BlockPrioritySize ||
+			prioItem.priority < MinHighPriority.ToDUO() {
+			heap.Push(priorityQueues, prioItem)
+			continue
+		}
+		
+		// Ensure the transaction inputs pass all of the necessary preconditions before
+		// allowing it to be added to the block.
+		_, err = blockchain.CheckTransactionInputs(
+			tx, height,
+			blockUtxos, g.ChainParams,
+		)
+		if err != nil {
+			Tracef(
+				"skipping tx %s due to error in CheckTransactionInputs: %v",
+				tx.Hash(), err,
+			)
+			logSkippedDeps(tx, deps)
+			continue
+		}
+		if err = blockchain.ValidateTransactionScripts(
+			g.Chain, tx, blockUtxos,
+			txscript.StandardVerifyFlags, g.SigCache,
+			g.HashCache,
+		); Check(err) {
+			Tracef(
+				"skipping tx %s due to error in ValidateTransactionScripts: %v",
+				tx.Hash(), err,
+			)
+			logSkippedDeps(tx, deps)
+			continue
+		}
+		
+		// Spend the transaction inputs in the block utxo view and add an entry for it
+		// to ensure any transactions which reference this one have it available as an
+		// input and can ensure they aren't double spending.
+		if err = spendTransaction(blockUtxos, tx, height); Check(err) {
+		}
+		// Add the transaction to the block, increment counters, and save the fees and
+		// signature operation counts to the block template.
+		blockTxns = append(blockTxns, tx)
+		blockWeight += txWeight
+		blockSigOpCost += int64(sigOpCost)
+		totalFees += prioItem.fee
+		txFees = append(txFees, prioItem.fee)
+		txSigOpCosts = append(txSigOpCosts, int64(sigOpCost))
+		Tracef(
+			"adding tx %s (priority %.2f, feePerKB %.2f)",
+			prioItem.tx.Hash(),
+			prioItem.priority,
+			prioItem.feePerKB,
+		)
+		// Add transactions which depend on this one (and also do not have any other
+		// unsatisfied dependencies) to the priority queue.
+		for _, item := range deps {
+			// Add the transaction to the priority queue if there are no more dependencies
+			// after this one.
+			delete(item.dependsOn, *tx.Hash())
+			if len(item.dependsOn) == 0 {
+				heap.Push(priorityQueues, item)
 			}
 		}
+	}
+	for next, curr, more := fork.AlgoVerIterator(height); more(); next() {
+		// Create a slice to hold the transactions to be included in the generated block
+
 		// Now that the actual transactions have been selected, update the block weight
 		// for the real transaction count and coinbase value with the total fees
 		// accordingly.
