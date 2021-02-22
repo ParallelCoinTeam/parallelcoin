@@ -16,15 +16,26 @@ import (
 // BlockTemplates is a collection of block templates indexed by their version number
 type BlockTemplates map[int32]*BlockTemplate
 
+type MsgBlockTemplate struct {
+	Height    int32
+	PrevBlock chainhash.Hash
+	Diffs     map[int32]uint32
+	Merkles   map[int32]chainhash.Hash
+	Txs       []*util.Tx
+	Timestamp time.Time
+}
+
 // NewBlockTemplates returns a data structure which has methods to construct
 // block version specific block headers and reconstruct their transactions
 func (g *BlkTmplGenerator) NewBlockTemplates(
 	workerNumber uint32,
 	payToAddress util.Address,
-) (BlockTemplates, error) {
+) (*MsgBlockTemplate, error) {
+	mbt := &MsgBlockTemplate{Diffs: make(map[int32]uint32), Merkles: make(map[int32]chainhash.Hash)}
 	// Extend the most recently known best block.
 	best := g.Chain.BestSnapshot()
-	height := best.Height + 1
+	mbt.PrevBlock = best.Hash
+	mbt.Height = best.Height + 1
 	// Create a standard coinbase transaction paying to the provided address.
 	//
 	// NOTE: The coinbase value will be updated to include the fees from the
@@ -36,11 +47,11 @@ func (g *BlkTmplGenerator) NewBlockTemplates(
 	rand.Seed(time.Now().UnixNano())
 	extraNonce := rand.Uint64()
 	var err error
-	numAlgos := fork.GetNumAlgos(height)
+	numAlgos := fork.GetNumAlgos(mbt.Height)
 	// coinbaseScripts := make(map[int32][]byte, numAlgos)
 	// coinbaseTxs := make(map[int32]*util.Tx, numAlgos)
 	var coinbaseSigOpCost int64
-	blockTemplates := make(BlockTemplates, numAlgos)
+	blockTemplates := make(map[int32]*BlockTemplate, numAlgos)
 	var priorityQueues *txPriorityQueue
 	// Get the current source transactions and create a priority queue to hold the
 	// transactions which are ready for inclusion into a block along with some
@@ -71,7 +82,7 @@ mempoolLoop:
 			continue
 		}
 		if !blockchain.IsFinalizedTransaction(
-			tx, height,
+			tx, mbt.Height,
 			g.TimeSource.AdjustedTime(),
 		) {
 			Tracec(
@@ -136,7 +147,7 @@ mempoolLoop:
 		// inputAge) / adjustedTxSize
 		prioItem.priority = CalcPriority(
 			tx.MsgTx(), utxos,
-			height,
+			mbt.Height,
 		)
 		// Calculate the fee in Satoshi/kB.
 		prioItem.feePerKB = txDesc.FeePerKB
@@ -153,25 +164,27 @@ mempoolLoop:
 	}
 	priorityQueues = newTxPriorityQueue(len(sourceTxns), sortedByFee)
 	var coinbaseScript []byte
-	if coinbaseScript, err = standardCoinbaseScript(height, extraNonce); Check(err) {
+	if coinbaseScript, err = standardCoinbaseScript(mbt.Height, extraNonce); Check(err) {
 		return nil, err
 	}
-	algos := fork.GetAlgos(height)
+	algos := fork.GetAlgos(mbt.Height)
 	var alg int32
+	coinbaseTxs := make(map[int32]*util.Tx)
+	mbt.Txs = make([]*util.Tx, 0, len(sourceTxns))
+	var coinbaseTx *util.Tx
 	for i := range algos {
 		alg = algos[i].Version
+		if coinbaseTx, err = createCoinbaseTx(
+			g.ChainParams, coinbaseScript, mbt.Height, payToAddress, alg,
+		); Check(err) {
+			return nil, err
+		}
+		coinbaseTxs[alg] = coinbaseTx
+		// this should be the same for all anyhow, as they are all the same format just
+		// diff amounts
+		coinbaseSigOpCost = int64(blockchain.CountSigOps(coinbaseTxs[alg]))
 	}
-	var coinbaseTx *util.Tx
-	if coinbaseTx, err = createCoinbaseTx(
-		g.ChainParams, coinbaseScript, height, payToAddress, alg,
-	); Check(err) {
-		return nil, err
-	}
-	coinbaseSigOpCost = int64(blockchain.CountSigOps(coinbaseTx))
-	// with reserved space. Also create a utxo view to house all of the input
-	// transactions so multiple lookups can be avoided.
-	blockTxns := make([]*util.Tx, 0, len(sourceTxns))
-	blockTxns = append(blockTxns, coinbaseTx)
+	mbt.Txs = append(mbt.Txs, coinbaseTxs[alg])
 	// Create slices to hold the fees and number of signature operations for each of
 	// the selected transactions and add an entry for the coinbase. This allows the
 	// code below to simply append details about a transaction as it is selected for
@@ -184,6 +197,8 @@ mempoolLoop:
 	Tracef("considering %d transactions for inclusion to new block", len(sourceTxns))
 	// The starting block size is the size of the block header plus the max possible
 	// transaction count size, plus the size of the coinbase transaction.
+	// with reserved space. Also create a utxo view to house all of the input
+	// transactions so multiple lookups can be avoided.
 	blockWeight := uint32((blockHeaderOverhead) + blockchain.GetTransactionWeight(coinbaseTx))
 	blockSigOpCost := coinbaseSigOpCost
 	totalFees := int64(0)
@@ -275,7 +290,7 @@ mempoolLoop:
 		// Ensure the transaction inputs pass all of the necessary preconditions before
 		// allowing it to be added to the block.
 		_, err = blockchain.CheckTransactionInputs(
-			tx, height,
+			tx, mbt.Height,
 			blockUtxos, g.ChainParams,
 		)
 		if err != nil {
@@ -302,11 +317,11 @@ mempoolLoop:
 		// Spend the transaction inputs in the block utxo view and add an entry for it
 		// to ensure any transactions which reference this one have it available as an
 		// input and can ensure they aren't double spending.
-		if err = spendTransaction(blockUtxos, tx, height); Check(err) {
+		if err = spendTransaction(blockUtxos, tx, mbt.Height); Check(err) {
 		}
 		// Add the transaction to the block, increment counters, and save the fees and
 		// signature operation counts to the block template.
-		blockTxns = append(blockTxns, tx)
+		mbt.Txs = append(mbt.Txs, tx)
 		blockWeight += txWeight
 		blockSigOpCost += int64(sigOpCost)
 		totalFees += prioItem.fee
@@ -329,42 +344,38 @@ mempoolLoop:
 			}
 		}
 	}
-	for next, curr, more := fork.AlgoVerIterator(height); more(); next() {
+	mbt.Timestamp = medianAdjustedTime(best, g.TimeSource)
+	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		// Create a slice to hold the transactions to be included in the generated block
-
+		
 		// Now that the actual transactions have been selected, update the block weight
 		// for the real transaction count and coinbase value with the total fees
 		// accordingly.
 		blockWeight -= wire.MaxVarIntPayload -
-			(uint32(wire.VarIntSerializeSize(uint64(len(blockTxns)))))
-		coinbaseTx.MsgTx().TxOut[0].Value += totalFees
+			(uint32(wire.VarIntSerializeSize(uint64(len(mbt.Txs)))))
+		coinbaseTxs[curr()].MsgTx().TxOut[0].Value += totalFees
 		txFees[0] = -totalFees
 		// Calculate the required difficulty for the block. The timestamp is potentially
 		// adjusted to ensure it comes after the median time of the last several blocks
 		// per the chain consensus rules.
-		ts := medianAdjustedTime(best, g.TimeSource)
-		// Trace("algo ", ts, " ", algo)
-		var reqDifficulty uint32
-		algo := fork.GetAlgoName(height, curr())
-		if reqDifficulty, err = g.Chain.CalcNextRequiredDifficulty(
-			workerNumber,
-			ts,
-			algo,
-		); Check(err) {
+		// Trace("algo ", Timestamp, " ", algo)
+		algo := fork.GetAlgoName(mbt.Height, curr())
+		if mbt.Diffs[curr()], err = g.Chain.CalcNextRequiredDifficulty(mbt.Timestamp, algo); Check(err) {
 			return nil, err
 		}
-		Tracef("reqDifficulty %d %08x %064x", curr(), reqDifficulty, fork.CompactToBig(reqDifficulty))
+		Tracef("reqDifficulty %d %08x %064x", curr(), mbt.Diffs[curr()], fork.CompactToBig(mbt.Diffs[curr()]))
 		// Create a new block ready to be solved.
-		merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
+		merkles := blockchain.BuildMerkleTreeStore(mbt.Txs, false)
+		mbt.Merkles[curr()]=*merkles[len(merkles)-1]
 		var msgBlock wire.MsgBlock
 		msgBlock.Header = wire.BlockHeader{
 			Version:    curr(),
-			PrevBlock:  best.Hash,
-			MerkleRoot: *merkles[len(merkles)-1],
-			Timestamp:  ts,
-			Bits:       reqDifficulty,
+			PrevBlock:  mbt.PrevBlock,
+			MerkleRoot: mbt.Merkles[curr()],
+			Timestamp:  mbt.Timestamp,
+			Bits:       mbt.Diffs[curr()],
 		}
-		for _, tx := range blockTxns {
+		for _, tx := range mbt.Txs {
 			if err := msgBlock.AddTransaction(tx.MsgTx()); err != nil {
 				return nil, err
 			}
@@ -373,7 +384,7 @@ mempoolLoop:
 		// consensus rules to ensure it properly connects to the current best chain with
 		// no issues.
 		block := util.NewBlock(&msgBlock)
-		block.SetHeight(height)
+		block.SetHeight(mbt.Height)
 		err = g.Chain.CheckConnectBlockTemplate(workerNumber, block)
 		if err != nil {
 			Debug("checkconnectblocktemplate err:", err)
@@ -403,10 +414,13 @@ mempoolLoop:
 			Block:           &msgBlock,
 			Fees:            txFees,
 			SigOpCosts:      txSigOpCosts,
-			Height:          height,
+			Height:          mbt.Height,
 			ValidPayAddress: payToAddress != nil,
 		}
 		blockTemplates[curr()] = blockTemplate
 	}
-	return blockTemplates, nil
+	return mbt, nil
 }
+
+// todo: need a separate function to generate a full block, and another to take
+//  a header and attach the txs
