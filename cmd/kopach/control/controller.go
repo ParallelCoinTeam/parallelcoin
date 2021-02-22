@@ -441,23 +441,24 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	Warn(msgBlock.Header.Version)
 	// cb, ok := c.coinbases.Load().(map[int32]*util.Tx)[msgBlock.Header.Version]
 	cbRaw := c.coinbases.Load()
-	cbrs, ok := cbRaw.(*map[int32]*util.Tx)
+	cbrs, ok := cbRaw.(map[int32]*wire.MsgTx)
 	if !ok {
-		Debug("coinbases not correct type", cbrs)
+		Debug("coinbases not correct type")
+		Debugs(cbRaw)
 		return
 	}
 	Debugs(cbrs)
-	var cb *util.Tx
-	cb, ok = (*cbrs)[msgBlock.Header.Version]
+	var cb *wire.MsgTx
+	cb, ok = cbrs[msgBlock.Header.Version]
 	if !ok {
 		Debug("coinbase not found")
 		return
 	}
 	Debug("copying over transactions")
-	cbs := []*util.Tx{cb}
+	cbs := []*util.Tx{util.NewTx(cb)}
 	msgBlock.Transactions = []*wire.MsgTx{}
 	t := c.transactions.Load()
-	var rtx []*util.Tx
+	var rtx []*wire.MsgTx
 	rtx, ok = t.([]*util.Tx)
 	var txs []*util.Tx
 	if ok {
@@ -555,7 +556,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 		return
 	}
 	var txs []*util.Tx
-	var coinbases *map[int32]*wire.MsgTx
+	var coinbases map[int32]*wire.MsgTx
 	var miningJob []byte
 	coinbases, miningJob, txs = job.Get(c.cx, templates)
 	c.coinbases.Store(coinbases)

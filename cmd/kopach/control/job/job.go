@@ -31,9 +31,8 @@ type Job struct {
 
 // Get returns a message broadcast by a controller containing all the necessary
 // data to construct blocks to mine
-func Get(cx *conte.Xt, templates []*mining.BlockTemplate) (cbs *map[int32]*wire.MsgTx, out []byte, txr []*util.Tx) {
-	_temp := make(map[int32]*wire.MsgTx)
-	cbs = &_temp
+func Get(cx *conte.Xt, templates []*mining.BlockTemplate) (cbs map[int32]*wire.MsgTx, out []byte, txr []*util.Tx) {
+	cbs = make(map[int32]*wire.MsgTx)
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	tip := cx.RealNode.Chain.BestChain.Tip()
 	bitsMap := make(blockchain.TargetBits)
@@ -52,7 +51,7 @@ func Get(cx *conte.Xt, templates []*mining.BlockTemplate) (cbs *map[int32]*wire.
 	mTS := make(map[int32]*chainhash.Hash)
 	for i := range templates {
 		mTS[templates[i].Block.Header.Version] = &templates[i].Block.Header.MerkleRoot
-		(*cbs)[templates[i].Block.Header.Version] = templates[i].Block.Transactions[0]
+		cbs[templates[i].Block.Header.Version] = templates[i].Block.Transactions[0]
 	}
 	for _, x := range templates[0].Block.Transactions[1:] {
 		txr = append(txr, util.NewTx(x))
