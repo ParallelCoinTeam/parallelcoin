@@ -83,7 +83,8 @@ func (rp *ReceivePage) MediumList(gtx l.Context) l.Dimensions {
 	
 	historyWidget = append(historyWidget, rp.GetAddressbookHistoryCards("DocBg")...)
 	historyLE := func(gtx l.Context, index int) l.Dimensions {
-		return wg.Inset(0.25,
+		return wg.Inset(
+			0.25,
 			historyWidget[index],
 		).Fn(gtx)
 	}
@@ -200,14 +201,10 @@ func (rp *ReceivePage) GetQRText() string {
 
 func (rp *ReceivePage) QRButton() l.Widget {
 	wg := rp.wg
-	if !wg.WalletAndClientRunning() {
+	if !wg.WalletAndClientRunning() || wg.currentReceiveQRCode == nil {
 		return func(gtx l.Context) l.Dimensions {
 			return l.Dimensions{}
 		}
-	}
-	if wg.currentReceiveQRCode == nil {
-		wg.GetNewReceivingAddress()
-		wg.GetNewReceivingQRCode(rp.urn)
 	}
 	return wg.Flex().Rigid(
 		wg.ButtonLayout(
@@ -283,8 +280,9 @@ func (rp *ReceivePage) RegenerateButton() l.Widget {
 							// never store an entry without both fields filled
 							return
 						}
-						if wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Amount == 0 ||
-							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Message == "" {
+						if len(wg.State.receiveAddresses) > 0 &&
+							(wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Amount == 0 ||
+								wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Message == "") {
 							// the first entry has neither of these, and newly generated items without them are assumed to
 							// not be intentional or used addresses so we don't generate a new entry for this case
 							wg.State.receiveAddresses[len(wg.State.receiveAddresses)-1].Amount = am

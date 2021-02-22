@@ -86,17 +86,22 @@ func GetNewState(params *netparams.Params, activePage *uberatomic.String) *State
 		bestBlockHeight: &atom.Int32{Int32: uberatomic.NewInt32(0)},
 		bestBlockHash:   atom.NewHash(chainhash.Hash{}),
 		balance:         &atom.Float64{Float64: uberatomic.NewFloat64(0)},
-		balanceUnconfirmed: &atom.Float64{Float64: uberatomic.NewFloat64(0),
+		balanceUnconfirmed: &atom.Float64{
+			Float64: uberatomic.NewFloat64(0),
 		},
 		goroutines: nil,
 		allTxs: atom.NewListTransactionsResult(
-			[]btcjson.ListTransactionsResult{}),
+			[]btcjson.ListTransactionsResult{},
+		),
 		filteredTxs: atom.NewListTransactionsResult(
-			[]btcjson.ListTransactionsResult{}),
+			[]btcjson.ListTransactionsResult{},
+		),
 		filter:        CategoryFilter{},
 		filterChanged: fc,
-		currentReceivingAddress: atom.NewAddress(&util.AddressPubKeyHash{},
-			params),
+		currentReceivingAddress: atom.NewAddress(
+			&util.AddressPubKeyHash{},
+			params,
+		),
 		isAddress:  &atom.Bool{Bool: uberatomic.NewBool(false)},
 		activePage: activePage,
 	}
@@ -112,7 +117,7 @@ func (s *State) SetReceivingAddress(addr util.Address) {
 
 func (s *State) IsReceivingAddress() bool {
 	addr := s.currentReceivingAddress.String.Load()
-	if addr == ZeroAddress {
+	if addr == ZeroAddress || addr == "" {
 		s.isAddress.Store(false)
 	} else {
 		s.isAddress.Store(true)

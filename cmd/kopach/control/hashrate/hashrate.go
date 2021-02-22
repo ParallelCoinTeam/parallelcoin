@@ -45,7 +45,7 @@ func Get(count int32, version int32, height int32, id string) []byte {
 		ID:      id,
 	}
 	srlz := gotiny.Marshal(&hr)
-	Debugs(srlz)
+	// Debugs(srlz)
 	return srlz
 	// return Container{*simplebuffer.Serializers{
 	// 	Time.New().Put(time.Now()),

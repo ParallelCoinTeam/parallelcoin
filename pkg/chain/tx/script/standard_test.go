@@ -507,8 +507,7 @@ func TestCalcScriptInfo(t *testing.T) {
 			}
 			witness = append(witness, wit)
 		}
-		si, err := CalcScriptInfo(sigScript, pkScript, witness,
-			test.bip16, test.segwit)
+		si, err := CalcScriptInfo(sigScript, pkScript, witness, test.bip16)
 		if e := tstCheckScriptError(err, test.scriptInfoErr); e != nil {
 			t.Errorf("scriptinfo test %q: %v", test.name, e)
 			continue

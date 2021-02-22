@@ -627,7 +627,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		// the set weight accordingly based on the max block size value.
 	case *cfg.BlockMaxSize != node.DefaultBlockMaxSize &&
 		*cfg.BlockMaxWeight == node.DefaultBlockMaxWeight:
-		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
+		*cfg.BlockMaxWeight = *cfg.BlockMaxSize
 	}
 	// Look for illegal characters in the user agent comments.
 	Trace("checking user agent comments", cfg.UserAgentComments)

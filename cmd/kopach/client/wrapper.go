@@ -25,7 +25,8 @@ func New(conn io.ReadWriteCloser) *Client {
 
 // NewJob is a delivery of a new job for the worker, this starts a miner
 func (c *Client) NewJob(job *job.Job) (err error) {
-	// Debug("sending new job")
+	Debug("sending new job")
+	// Debugs(job)
 	var reply bool
 	err = c.Call("Worker.NewJob", job, &reply)
 	if err != nil {

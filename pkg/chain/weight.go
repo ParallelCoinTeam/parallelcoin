@@ -1,12 +1,12 @@
 package blockchain
 
 import (
-	"fmt"
-
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
+
+// TODO: this might be wrong stuff for non-segwit, being changed to remove
+//  segwit as its complexity weighs the whole thing down when not in use
 
 const (
 	// MaxBlockWeight defines the maximum block weight, where "block weight" is interpreted as defined in BIP0141. A
@@ -19,11 +19,8 @@ const (
 	// MaxBlockSigOpsCost is the maximum number of signature operations allowed for a block. It is calculated via a
 	// weighted algorithm which weights segregated witness sig ops lower than regular sig ops.
 	MaxBlockSigOpsCost = 80000
-	// WitnessScaleFactor determines the level of "discount" witness data receives compared to "base" data. A scale
-	// factor of 4, denotes that witness data is 1/4 as cheap as regular non-witness data.
-	WitnessScaleFactor = 4
 	// MinTxOutputWeight is the minimum possible weight for a transaction output.
-	MinTxOutputWeight = WitnessScaleFactor * wire.MinTxOutPayload
+	MinTxOutputWeight = wire.MinTxOutPayload
 	// MaxOutputsPerBlock is the maximum number of transaction outputs there can be in a block of max weight size.
 	MaxOutputsPerBlock = MaxBlockWeight / MinTxOutputWeight
 )
@@ -36,7 +33,7 @@ func GetBlockWeight(blk *util.Block) int64 {
 	baseSize := msgBlock.SerializeSizeStripped()
 	totalSize := msgBlock.SerializeSize()
 	// (baseSize * 3) + totalSize
-	return int64((baseSize * (WitnessScaleFactor - 1)) + totalSize)
+	return int64(baseSize + totalSize)
 }
 
 // GetTransactionWeight computes the value of the weight metric for a given transaction. Currently the weight metric is
@@ -47,41 +44,19 @@ func GetTransactionWeight(tx *util.Tx) int64 {
 	baseSize := msgTx.SerializeSizeStripped()
 	totalSize := msgTx.SerializeSize()
 	// (baseSize * 3) + totalSize
-	return int64((baseSize * (WitnessScaleFactor - 1)) + totalSize)
+	return int64(baseSize + totalSize)
 }
 
-// GetSigOpCost returns the unified sig op cost for the passed transaction respecting current active soft-forks which
-// modified sig op cost counting. The unified sig op cost for a transaction is computed as the sum of: the legacy sig op
-// count scaled according to the WitnessScaleFactor, the sig op count for all p2sh inputs scaled by the
-// WitnessScaleFactor, and finally the unscaled sig op count for any inputs spending witness programs.
-func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16, segWit bool) (int, error) {
-	numSigOps := CountSigOps(tx) * WitnessScaleFactor
+// GetSigOpCost returns the unified sig op cost for the passed transaction
+func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16 bool) (int, error) {
+	numSigOps := CountSigOps(tx)
 	if bip16 {
 		numP2SHSigOps, err := CountP2SHSigOps(tx, isCoinBaseTx, utxoView)
 		if err != nil {
 			Error(err)
 			return 0, nil
 		}
-		numSigOps += numP2SHSigOps * WitnessScaleFactor
-	}
-	if segWit && !isCoinBaseTx {
-		msgTx := tx.MsgTx()
-		for txInIndex, txIn := range msgTx.TxIn {
-			// Ensure the referenced output is available and hasn't already been spent.
-			utxo := utxoView.LookupEntry(txIn.PreviousOutPoint)
-			if utxo == nil || utxo.IsSpent() {
-				str := fmt.Sprintf("output %v referenced from "+
-					"transaction %s:%d either does not "+
-					"exist or has already been spent",
-					txIn.PreviousOutPoint, tx.Hash(),
-					txInIndex)
-				return 0, ruleError(ErrMissingTxOut, str)
-			}
-			witness := txIn.Witness
-			sigScript := txIn.SignatureScript
-			pkScript := utxo.PkScript()
-			numSigOps += txscript.GetWitnessSigOpCount(sigScript, pkScript, witness)
-		}
+		numSigOps += numP2SHSigOps
 	}
 	return numSigOps, nil
 }
