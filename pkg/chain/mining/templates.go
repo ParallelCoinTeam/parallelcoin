@@ -16,13 +16,44 @@ import (
 // BlockTemplates is a collection of block templates indexed by their version number
 type BlockTemplates map[int32]*BlockTemplate
 
+// MsgBlockTemplate describes a message that a mining worker can use to
+// construct a block to mine on. Two methods are exported that allow a
+// controlling node to
 type MsgBlockTemplate struct {
 	Height    int32
 	PrevBlock chainhash.Hash
 	Diffs     map[int32]uint32
 	Merkles   map[int32]chainhash.Hash
-	Txs       []*util.Tx
+	coinbases map[int32]*util.Tx
+	txs       []*util.Tx
 	Timestamp time.Time
+}
+
+// GenBlockHeader generate a block given a version number to use for mining
+// (nonce is empty, date can be updated, version changes merkle and target bits.
+// All the data required for this is in the exported fields that are serialized
+// for over the wire
+func (m *MsgBlockTemplate) GenBlockHeader(vers int32) *wire.BlockHeader {
+	return &wire.BlockHeader{
+		Version:    vers,
+		PrevBlock:  m.PrevBlock,
+		MerkleRoot: m.Merkles[vers],
+		Timestamp:  m.Timestamp,
+		Bits:       m.Diffs[vers],
+	}
+}
+
+// Reconstruct takes a received block from the wire and reattaches the transactions
+func (m *MsgBlockTemplate) Reconstruct(hdr *wire.BlockHeader) *wire.MsgBlock {
+	msgBlock := &wire.MsgBlock{Header: *hdr}
+	// the coinbase is the last transaction
+	txs := append(m.txs, m.coinbases[msgBlock.Header.Version])
+	for _, tx := range txs {
+		if err := msgBlock.AddTransaction(tx.MsgTx()); err != nil {
+			return nil
+		}
+	}
+	return msgBlock
 }
 
 // NewBlockTemplates returns a data structure which has methods to construct
@@ -169,8 +200,8 @@ mempoolLoop:
 	}
 	algos := fork.GetAlgos(mbt.Height)
 	var alg int32
-	coinbaseTxs := make(map[int32]*util.Tx)
-	mbt.Txs = make([]*util.Tx, 0, len(sourceTxns))
+	mbt.coinbases = make(map[int32]*util.Tx)
+	mbt.txs = make([]*util.Tx, 0, len(sourceTxns))
 	var coinbaseTx *util.Tx
 	for i := range algos {
 		alg = algos[i].Version
@@ -179,12 +210,11 @@ mempoolLoop:
 		); Check(err) {
 			return nil, err
 		}
-		coinbaseTxs[alg] = coinbaseTx
+		mbt.coinbases[alg] = coinbaseTx
 		// this should be the same for all anyhow, as they are all the same format just
 		// diff amounts
-		coinbaseSigOpCost = int64(blockchain.CountSigOps(coinbaseTxs[alg]))
+		coinbaseSigOpCost = int64(blockchain.CountSigOps(mbt.coinbases[alg]))
 	}
-	mbt.Txs = append(mbt.Txs, coinbaseTxs[alg])
 	// Create slices to hold the fees and number of signature operations for each of
 	// the selected transactions and add an entry for the coinbase. This allows the
 	// code below to simply append details about a transaction as it is selected for
@@ -321,7 +351,7 @@ mempoolLoop:
 		}
 		// Add the transaction to the block, increment counters, and save the fees and
 		// signature operation counts to the block template.
-		mbt.Txs = append(mbt.Txs, tx)
+		mbt.txs = append(mbt.txs, tx)
 		blockWeight += txWeight
 		blockSigOpCost += int64(sigOpCost)
 		totalFees += prioItem.fee
@@ -352,8 +382,8 @@ mempoolLoop:
 		// for the real transaction count and coinbase value with the total fees
 		// accordingly.
 		blockWeight -= wire.MaxVarIntPayload -
-			(uint32(wire.VarIntSerializeSize(uint64(len(mbt.Txs)))))
-		coinbaseTxs[curr()].MsgTx().TxOut[0].Value += totalFees
+			(uint32(wire.VarIntSerializeSize(uint64(len(mbt.txs)))))
+		mbt.coinbases[curr()].MsgTx().TxOut[0].Value += totalFees
 		txFees[0] = -totalFees
 		// Calculate the required difficulty for the block. The timestamp is potentially
 		// adjusted to ensure it comes after the median time of the last several blocks
@@ -365,8 +395,8 @@ mempoolLoop:
 		}
 		Tracef("reqDifficulty %d %08x %064x", curr(), mbt.Diffs[curr()], fork.CompactToBig(mbt.Diffs[curr()]))
 		// Create a new block ready to be solved.
-		merkles := blockchain.BuildMerkleTreeStore(mbt.Txs, false)
-		mbt.Merkles[curr()]=*merkles[len(merkles)-1]
+		merkles := blockchain.BuildMerkleTreeStore(mbt.txs, false)
+		mbt.Merkles[curr()] = *merkles[len(merkles)-1]
 		var msgBlock wire.MsgBlock
 		msgBlock.Header = wire.BlockHeader{
 			Version:    curr(),
@@ -375,7 +405,7 @@ mempoolLoop:
 			Timestamp:  mbt.Timestamp,
 			Bits:       mbt.Diffs[curr()],
 		}
-		for _, tx := range mbt.Txs {
+		for _, tx := range mbt.txs {
 			if err := msgBlock.AddTransaction(tx.MsgTx()); err != nil {
 				return nil, err
 			}
@@ -421,6 +451,3 @@ mempoolLoop:
 	}
 	return mbt, nil
 }
-
-// todo: need a separate function to generate a full block, and another to take
-//  a header and attach the txs
