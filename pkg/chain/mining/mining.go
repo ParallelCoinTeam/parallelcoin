@@ -3,6 +3,7 @@ package mining
 import (
 	"container/heap"
 	"fmt"
+	"math/rand"
 	"time"
 	
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -225,7 +226,8 @@ func mergeUtxoView(viewA *blockchain.UtxoViewpoint, viewB *blockchain.UtxoViewpo
 // the extra nonce as well as additional coinbase flags.
 func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, error) {
 	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
-		AddInt64(int64(extraNonce)).AddData([]byte(CoinbaseFlags)).
+		AddInt64(int64(extraNonce)).
+		AddData([]byte(CoinbaseFlags)).
 		Script()
 }
 
@@ -449,7 +451,8 @@ func (g *BlkTmplGenerator) NewBlockTemplate(
 	// work below. The extra nonce helps ensure the transaction is not a duplicate
 	// transaction (paying the same value to the same public key address would
 	// otherwise be an identical transaction for block version 1).
-	extraNonce := uint64(0)
+	rand.Seed(time.Now().UnixNano())
+	extraNonce := rand.Uint64()
 	var err error
 	var coinbaseScript []byte
 	if coinbaseScript, err = standardCoinbaseScript(nextBlockHeight, extraNonce); Check(err) {
