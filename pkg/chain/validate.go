@@ -531,9 +531,11 @@ BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 		// Infof("algo %s %d %8x %d", a, header.Version, header.Bits,
 		// 	prevNode.height+1)
 		expectedDifficulty, err := b.calcNextRequiredDifficulty(
-			workerNumber, prevNode, header.Timestamp,
+			prevNode,
+			header.Timestamp,
 			fork.GetAlgoName(header.Version, prevNode.height+1),
-			true)
+			true,
+		)
 		if err != nil {
 			Error(err)
 			return err

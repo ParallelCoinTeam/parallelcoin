@@ -28,11 +28,12 @@ var (
 
 // CalcNextRequiredDifficulty calculates the required difficulty for the block after the end of the current best chain
 // based on the difficulty retarget rules. This function is safe for concurrent access.
-func (b *BlockChain) CalcNextRequiredDifficulty(workerNumber uint32, timestamp time.
-Time, algo string) (difficulty uint32, err error) {
+func (b *BlockChain) CalcNextRequiredDifficulty(timestamp time.Time, algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
-	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.BestChain.
-		Tip(), timestamp, algo, false)
+	difficulty, err = b.calcNextRequiredDifficulty(
+		b.BestChain.
+			Tip(), timestamp, algo, false,
+	)
 	// Trace("CalcNextRequiredDifficulty", difficulty)
 	b.chainLock.Unlock()
 	return
@@ -67,8 +68,11 @@ func (b *BlockChain) calcEasiestDifficulty(bits uint32, duration time.Duration) 
 // This function differs from the exported CalcNextRequiredDifficulty in that the exported version uses the current best
 // chain as the previous block node while this function accepts any block node.
 func (b *BlockChain) calcNextRequiredDifficulty(
-	workerNumber uint32, lastNode *BlockNode, newBlockTime time.Time,
-	algoname string, l bool) (newTargetBits uint32, err error) {
+	lastNode *BlockNode,
+	newBlockTime time.Time,
+	algoname string,
+	l bool,
+) (newTargetBits uint32, err error) {
 	nH := lastNode.height + 1
 	cF := fork.GetCurrent(nH)
 	newTargetBits = fork.GetMinBits(algoname, nH)
@@ -77,7 +81,7 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 	// Legacy difficulty adjustment
 	case 0:
 		// Trace("before hardfork")
-		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode, algoname, l)
+		return b.CalcNextRequiredDifficultyHalcyon(lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
 		bits, ok := lastNode.Diffs.Load().(TargetBits)

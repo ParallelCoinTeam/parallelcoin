@@ -754,7 +754,7 @@ mempoolLoop:
 	ts := medianAdjustedTime(best, g.TimeSource)
 	// Trace("algo ", ts, " ", algo)
 	var reqDifficulty uint32
-	if reqDifficulty, err = g.Chain.CalcNextRequiredDifficulty(workerNumber, ts, algo); Check(err) {
+	if reqDifficulty, err = g.Chain.CalcNextRequiredDifficulty(ts, algo); Check(err) {
 		return nil, err
 	}
 	Tracef("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
@@ -833,7 +833,8 @@ MsgBlock,
 		var difficulty uint32
 		var err error
 		if difficulty, err = g.Chain.CalcNextRequiredDifficulty(
-			workerNumber, newTime, fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height),
+			newTime,
+			fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height),
 		); Check(err) {
 			return err
 		}

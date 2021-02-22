@@ -39,7 +39,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(lastNode *BlockNo
 	case 0:
 		for i := range fork.List[0].Algos {
 			v := fork.List[0].Algos[i].Version
-			nTB[v], err = b.CalcNextRequiredDifficultyHalcyon(0, lastNode, i, true)
+			nTB[v], err = b.CalcNextRequiredDifficultyHalcyon(lastNode, i, true)
 		}
 		return nTB, nil
 	case 1:
