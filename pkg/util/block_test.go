@@ -43,7 +43,7 @@ func TestBlock(t *testing.T) {
 				i, hash, wantHash)
 		}
 	}
-	// MerkleRoots for the transactions in Block100000.
+	// Merkles for the transactions in Block100000.
 	wantTxHashes := []string{
 		"8c14f0db3df150123e6f3dbbf30f8b955a8249b62ac1d1ff16284aefa3d06d87",
 		"fff2525b8931402dd09222c50775608f75787bd2b87e56995a7bdd30f79702c4",

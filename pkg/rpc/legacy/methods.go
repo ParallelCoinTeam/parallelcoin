@@ -1440,7 +1440,7 @@ func ListReceivedByAddress(
 		amount util.Amount
 		// Number of confirmations of the last transaction.
 		confirmations int32
-		// MerkleRoots of transactions which include an output paying to the address
+		// Merkles of transactions which include an output paying to the address
 		tx []string
 		// Account which the address belongs to account string
 	}

@@ -1475,7 +1475,7 @@ func New(config *Config) (*BlockChain, error) {
 		deploymentCaches:      newThresholdCaches(chaincfg.DefinedDeployments),
 		DifficultyAdjustments: make(map[string]float64),
 	}
-	b.DifficultyBits.Store(make(TargetBits))
+	b.DifficultyBits.Store(make(Diffs))
 	// Initialize the chain state from the passed database. When the db does not yet contain any chain state, both it
 	// and the chain state will be initialized to contain only the genesis block.
 	if err := b.initChainState(); err != nil {
@@ -1498,7 +1498,7 @@ func New(config *Config) (*BlockChain, error) {
 		return nil, err
 	}
 	bestNode := b.BestChain.Tip()
-	df, ok := bestNode.Diffs.Load().(TargetBits)
+	df, ok := bestNode.Diffs.Load().(Diffs)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
 		bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(bestNode)

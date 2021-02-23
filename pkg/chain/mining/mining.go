@@ -759,7 +759,7 @@ mempoolLoop:
 	}
 	Tracef("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
-	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
+	merkles := blockchain.BuildMerkleTreeStore(blockTxns)
 	var msgBlock wire.MsgBlock
 	msgBlock.Header = wire.BlockHeader{
 		Version:    vers,
@@ -870,7 +870,7 @@ func (g *BlkTmplGenerator) UpdateExtraNonce(
 	// 	block.Transactions[0].InvalidateCache()
 	// Recalculate the merkle root with the updated extra nonce.
 	block := util.NewBlock(msgBlock)
-	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
+	merkles := blockchain.BuildMerkleTreeStore(block.Transactions())
 	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]
 	return nil
 }

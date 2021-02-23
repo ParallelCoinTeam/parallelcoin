@@ -1645,7 +1645,7 @@ func (rb *recentBlocks) ReadFrom(r io.Reader) (int64, error) {
 	}
 	// Set last seen height.
 	rb.lastHeight = height
-	// Read nBlocks block hashes. MerkleRoots are expected to be in order of oldest to newest, but there's no way to check
+	// Read nBlocks block hashes. Merkles are expected to be in order of oldest to newest, but there's no way to check
 	// that here.
 	rb.hashes = make([]*chainhash.Hash, 0, nBlocks)
 	for i := uint32(0); i < nBlocks; i++ {

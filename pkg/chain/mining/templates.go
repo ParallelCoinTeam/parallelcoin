@@ -2,7 +2,9 @@ package mining
 
 import (
 	"container/heap"
+	"errors"
 	"fmt"
+	"github.com/niubaoshu/gotiny"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -16,10 +18,10 @@ import (
 // BlockTemplates is a collection of block templates indexed by their version number
 type BlockTemplates map[int32]*BlockTemplate
 
-// MsgBlockTemplate describes a message that a mining worker can use to
-// construct a block to mine on. Two methods are exported that allow a
-// controlling node to
-type MsgBlockTemplate struct {
+// Templates describes a message that a mining worker can use to construct a
+// block to mine on. Two methods are exported that allow a controlling node to
+// reconstruct a block from a solution created by a solved block header
+type Templates struct {
 	Height    int32
 	PrevBlock chainhash.Hash
 	Diffs     map[int32]uint32
@@ -29,31 +31,70 @@ type MsgBlockTemplate struct {
 	Timestamp time.Time
 }
 
+// EncodeTemplates creates a wire format packet for a templates
+func (t *Templates) EncodeTemplates() (b []byte) {
+	return gotiny.Marshal(t)
+}
+
+// DecodeTemplates takes a wire encoded template and renders the template
+func DecodeTemplates(b []byte) (templates *Templates) {
+	templates = &Templates{}
+	gotiny.Unmarshal(b, templates)
+	return
+}
+
+// ChangeVersion changes the version of a block according to the template's data.
+// Note that this only requires what is intended to encode over the wire and is
+// for miners when rotating versions to mine on.
+func (t *Templates) ChangeVersion(block *wire.BlockHeader, version int32) {
+	block.Version = version
+	block.MerkleRoot = t.Merkles[version]
+	block.Bits = t.Diffs[version]
+	t.UpdateTimestamp(block)
+}
+
+// UpdateTimestamp changes the version of a block according to the template's data.
+// Note that this only requires what is intended to encode over the wire and is
+// for miners when rotating versions to mine on.
+func (t *Templates) UpdateTimestamp(block *wire.BlockHeader) {
+	block.Timestamp = time.Now()
+}
+
+
 // GenBlockHeader generate a block given a version number to use for mining
 // (nonce is empty, date can be updated, version changes merkle and target bits.
 // All the data required for this is in the exported fields that are serialized
 // for over the wire
-func (m *MsgBlockTemplate) GenBlockHeader(vers int32) *wire.BlockHeader {
+func (t *Templates) GenBlockHeader(vers int32) *wire.BlockHeader {
 	return &wire.BlockHeader{
 		Version:    vers,
-		PrevBlock:  m.PrevBlock,
-		MerkleRoot: m.Merkles[vers],
-		Timestamp:  m.Timestamp,
-		Bits:       m.Diffs[vers],
+		PrevBlock:  t.PrevBlock,
+		MerkleRoot: t.Merkles[vers],
+		Timestamp:  t.Timestamp,
+		Bits:       t.Diffs[vers],
 	}
 }
 
 // Reconstruct takes a received block from the wire and reattaches the transactions
-func (m *MsgBlockTemplate) Reconstruct(hdr *wire.BlockHeader) *wire.MsgBlock {
-	msgBlock := &wire.MsgBlock{Header: *hdr}
+func (t *Templates) Reconstruct(hdr *wire.BlockHeader) (msgBlock *wire.MsgBlock, err error) {
+	Debug("checking block for reconstruction")
+	switch {
+	case hdr.PrevBlock != t.PrevBlock:
+		return nil, errors.New("received block does not match current block")
+	case hdr.MerkleRoot != t.Merkles[hdr.Version]:
+		return nil, errors.New("received block does not have correct merkle root")
+	case hdr.Bits != t.Diffs[hdr.Version]:
+		return nil, errors.New("received block has incorrect difficulty")
+	}
+	msgBlock = &wire.MsgBlock{Header: *hdr}
 	// the coinbase is the last transaction
-	txs := append(m.txs, m.coinbases[msgBlock.Header.Version])
+	txs := append(t.txs, t.coinbases[msgBlock.Header.Version])
 	for _, tx := range txs {
-		if err := msgBlock.AddTransaction(tx.MsgTx()); err != nil {
-			return nil
+		if err = msgBlock.AddTransaction(tx.MsgTx()); err != nil {
+			return
 		}
 	}
-	return msgBlock
+	return
 }
 
 // NewBlockTemplates returns a data structure which has methods to construct
@@ -61,8 +102,8 @@ func (m *MsgBlockTemplate) Reconstruct(hdr *wire.BlockHeader) *wire.MsgBlock {
 func (g *BlkTmplGenerator) NewBlockTemplates(
 	workerNumber uint32,
 	payToAddress util.Address,
-) (*MsgBlockTemplate, error) {
-	mbt := &MsgBlockTemplate{Diffs: make(map[int32]uint32), Merkles: make(map[int32]chainhash.Hash)}
+) (*Templates, error) {
+	mbt := &Templates{Diffs: make(map[int32]uint32), Merkles: make(map[int32]chainhash.Hash)}
 	// Extend the most recently known best block.
 	best := g.Chain.BestSnapshot()
 	mbt.PrevBlock = best.Hash
@@ -395,7 +436,7 @@ mempoolLoop:
 		}
 		Tracef("reqDifficulty %d %08x %064x", curr(), mbt.Diffs[curr()], fork.CompactToBig(mbt.Diffs[curr()]))
 		// Create a new block ready to be solved.
-		merkles := blockchain.BuildMerkleTreeStore(mbt.txs, false)
+		merkles := blockchain.BuildMerkleTreeStore(mbt.txs)
 		mbt.Merkles[curr()] = *merkles[len(merkles)-1]
 		var msgBlock wire.MsgBlock
 		msgBlock.Header = wire.BlockHeader{

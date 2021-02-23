@@ -84,9 +84,9 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 		return b.CalcNextRequiredDifficultyHalcyon(lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
-		bits, ok := lastNode.Diffs.Load().(TargetBits)
+		bits, ok := lastNode.Diffs.Load().(Diffs)
 		if bits == nil || !ok {
-			lastNode.Diffs.Store(make(TargetBits))
+			lastNode.Diffs.Store(make(Diffs))
 		}
 		version := fork.GetAlgoVer(algoname, lastNode.height+1)
 		if bits[version] == 0 {

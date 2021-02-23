@@ -1042,7 +1042,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 			template.ValidPayAddress = true
 			// Update the merkle root.
 			block := util.NewBlock(template.Block)
-			merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
+			merkles := blockchain.BuildMerkleTreeStore(block.Transactions())
 			template.Block.Header.MerkleRoot = *merkles[len(merkles)-1]
 		}
 		// Set locals for convenience.

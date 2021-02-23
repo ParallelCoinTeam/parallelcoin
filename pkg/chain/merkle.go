@@ -81,7 +81,7 @@ func HashMerkleBranches(left *chainhash.Hash, right *chainhash.Hash) *chainhash.
 // The additional bool parameter indicates if we are generating the merkle tree using witness transaction id's rather
 // than regular transaction id's. This also presents an additional case wherein the wtxid of the coinbase transaction is
 // the zeroHash.
-func BuildMerkleTreeStore(transactions []*util.Tx, witness bool) []*chainhash.Hash {
+func BuildMerkleTreeStore(transactions []*util.Tx) []*chainhash.Hash {
 	// Calculate how many entries are required to hold the binary merkle tree as a linear array and create an array of
 	// that size.
 	nextPoT := nextPowerOfTwo(len(transactions))

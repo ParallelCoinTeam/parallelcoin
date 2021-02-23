@@ -467,9 +467,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	for i := range txs {
 		msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 	}
-	mTree := blockchain.BuildMerkleTreeStore(
-		txs, false,
-	)
+	mTree := blockchain.BuildMerkleTreeStore(txs)
 	Debugs(mTree)
 	// set old blocks to pause and send pause directly as block is probably a
 	// solution
@@ -627,7 +625,7 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("********** got new block template")
-		Debugs(template)
+		// Debugs(template)
 	}
 	return
 }
