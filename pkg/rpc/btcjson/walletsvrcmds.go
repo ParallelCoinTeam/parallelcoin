@@ -23,7 +23,8 @@ type AddWitnessAddressCmd struct {
 	Address string
 }
 
-// NewAddWitnessAddressCmd returns a new instance which can be used to issue a addwitnessaddress JSON-RPC command.
+// NewAddWitnessAddressCmd returns a new instance which can be used to issue a
+// addwitnessaddress JSON-RPC command.
 func NewAddWitnessAddressCmd(address string) *AddWitnessAddressCmd {
 	return &AddWitnessAddressCmd{
 		Address: address,

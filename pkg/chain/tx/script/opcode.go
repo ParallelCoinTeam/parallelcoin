@@ -874,18 +874,20 @@ func opcodeNop(op *parsedOpcode, vm *Engine) error {
 	return nil
 }
 
-// popIfBool enforces the "minimal if" policy during script execution if the particular flag is set. If so, in order to
-// eliminate an additional source of nuisance malleability, post-segwit for version 0 witness programs, we now require
-// the following: for OP_IF and OP_NOT_IF, the top stack item MUST either be an empty byte slice, or [0x01]. Otherwise,
-// the item at the top of the stack will be popped and interpreted as a boolean.
+// popIfBool enforces the "minimal if" policy during script execution if the
+// particular flag is set. If so, in order to eliminate an additional source of
+// nuisance malleability, post-segwit for version 0 witness programs, we now
+// require the following: for OP_IF and OP_NOT_IF, the top stack item MUST
+// either be an empty byte slice, or [0x01]. Otherwise, the item at the top of
+// the stack will be popped and interpreted as a boolean.
 func popIfBool(vm *Engine) (bool, error) {
-	// When not in witness execution mode, not executing a v0 witness program, or the minimal if flag isn't set pop the
-	// top stack item as a normal bool.
+	// When not in witness execution mode, not executing a v0 witness program, or
+	// the minimal if flag isn't set pop the top stack item as a normal bool.
 	if !vm.isWitnessVersionActive(0) || !vm.hasFlag(ScriptVerifyMinimalIf) {
 		return vm.dstack.PopBool()
 	}
-	// At this point, a v0 witness program is being executed and the minimal if flag is set, so enforce additional
-	// constraints on the top stack item.
+	// At this point, a v0 witness program is being executed and the minimal if flag
+	// is set, so enforce additional constraints on the top stack item.
 	so, err := vm.dstack.PopByteArray()
 	if err != nil {
 		Error(err)

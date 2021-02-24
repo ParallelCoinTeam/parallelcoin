@@ -459,7 +459,8 @@ type (
 	}
 )
 
-// HasWitness returns a bool to show if a Vin has any witness data associated with it or not.
+// HasWitness returns a bool to show if a Vin has any witness data associated
+// with it or not.
 func (v *Vin) HasWitness() bool {
 	return len(v.Witness) > 0
 }
@@ -513,7 +514,8 @@ func (v *Vin) MarshalJSON() ([]byte, error) {
 	return json.Marshal(txStruct)
 }
 
-// HasWitness returns a bool to show if a Vin has any witness data associated with it or not.
+// HasWitness returns a bool to show if a Vin has any witness data associated
+// with it or not.
 func (v *VinPrevOut) HasWitness() bool {
 	return len(v.Witness) > 0
 }

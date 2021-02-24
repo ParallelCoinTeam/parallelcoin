@@ -113,25 +113,30 @@ type ConsensusDeployment struct {
 	ExpireTime uint64
 }
 
-// Constants that define the deployment offset in the deployments field of the parameters for each deployment. This is
-// useful to be able to get the details of a specific deployment by name.
+// Constants that define the deployment offset in the deployments field of the
+// parameters for each deployment. This is useful to be able to get the details
+// of a specific deployment by name.
 const (
-	// DeploymentTestDummy defines the rule change deployment ID for testing purposes.
+	// DeploymentTestDummy defines the rule change deployment ID for testing
+	// purposes.
 	DeploymentTestDummy = iota
-	// DeploymentCSV defines the rule change deployment ID for the CSV soft-fork package. The CSV package includes the
-	// deployment of BIPS 68, 112, and 113.
+	// DeploymentCSV defines the rule change deployment ID for the CSV soft-fork
+	// package. The CSV package includes the deployment of BIPS 68, 112, and 113.
 	DeploymentCSV
-	// DeploymentSegwit defines the rule change deployment ID for the Segregated Witness (segwit) soft-fork package. The
-	// segwit package includes the deployment of BIPS 141, 142, 144, 145, 147 and 173.
+	// DeploymentSegwit defines the rule change deployment ID for the Segregated
+	// Witness (segwit) soft-fork package. The segwit package includes the
+	// deployment of BIPS 141, 142, 144, 145, 147 and 173.
 	DeploymentSegwit
 	// DefinedDeployments is the number of currently defined deployments.
-	// NOTE: DefinedDeployments must always come last since it is used to determine how many defined deployments there
-	// currently are.
+	//
+	// NOTE: DefinedDeployments must always come last since it is used to determine
+	// how many defined deployments there currently are.
 	DefinedDeployments
 )
 
-// Params defines a Bitcoin network by its parameters. These parameters may be used by Bitcoin applications to
-// differentiate networks as well as addresses and keys for one network from those intended for use on another network.
+// Params defines a Bitcoin network by its parameters. These parameters may be
+// used by Bitcoin applications to differentiate networks as well as addresses
+// and keys for one network from those intended for use on another network.
 type Params struct {
 	// Name defines a human-readable identifier for the network.
 	Name string

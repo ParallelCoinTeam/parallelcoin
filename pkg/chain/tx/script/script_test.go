@@ -3829,7 +3829,8 @@ func TestGetPreciseSigOps(t *testing.T) {
 	}
 }
 
-// TestGetWitnessSigOpCount tests that the sig op counting for p2wkh, p2wsh, nested p2sh, and invalid variants are counted properly.
+// TestGetWitnessSigOpCount tests that the sig op counting for p2wkh, p2wsh,
+// nested p2sh, and invalid variants are counted properly.
 func TestGetWitnessSigOpCount(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -3839,7 +3840,8 @@ func TestGetWitnessSigOpCount(t *testing.T) {
 		witness   wire.TxWitness
 		numSigOps int
 	}{
-		// A regualr p2wkh witness program. The output being spent should only have a single sig-op counted.
+		// A regualr p2wkh witness program. The output being spent should only have a
+		// single sig-op counted.
 		{
 			name: "p2wkh",
 			pkScript: mustParseShortForm("OP_0 DATA_20 " +
@@ -3854,7 +3856,8 @@ func TestGetWitnessSigOpCount(t *testing.T) {
 			},
 			numSigOps: 1,
 		},
-		// A p2wkh witness program nested within a p2sh output script. The pattern should be recognized properly and attribute only a single sig op.
+		// A p2wkh witness program nested within a p2sh output script. The pattern
+		// should be recognized properly and attribute only a single sig op.
 		{
 			name: "nested p2sh",
 			sigScript: hexToBytes("160014ad0ffa2e387f07" +
@@ -3884,8 +3887,9 @@ func TestGetWitnessSigOpCount(t *testing.T) {
 					"3ca481d4d4eeae1b7970f51c78231207e52ae"),
 			},
 		},
-		// A p2wsh witness program. However, the witness script fails to parse after the valid portion of the script. As
-		// a result, the valid portion of the script should still be counted.
+		// A p2wsh witness program. However, the witness script fails to parse after the
+		// valid portion of the script. As a result, the valid portion of the script
+		// should still be counted.
 		{
 			name:      "witness script doesn't parse",
 			numSigOps: 1,
@@ -4141,8 +4145,8 @@ func TestIsPayToScriptHash(t *testing.T) {
 	}
 }
 
-// TestIsPayToWitnessScriptHash ensures the IsPayToWitnessScriptHash function returns the expected results for all the
-// scripts in scriptClassTests.
+// TestIsPayToWitnessScriptHash ensures the IsPayToWitnessScriptHash function
+// returns the expected results for all the scripts in scriptClassTests.
 func TestIsPayToWitnessScriptHash(t *testing.T) {
 	t.Parallel()
 	for _, test := range scriptClassTests {
@@ -4156,8 +4160,8 @@ func TestIsPayToWitnessScriptHash(t *testing.T) {
 	}
 }
 
-// TestIsPayToWitnessPubKeyHash ensures the IsPayToWitnessPubKeyHash function returns the expected results for all the
-// scripts in scriptClassTests.
+// TestIsPayToWitnessPubKeyHash ensures the IsPayToWitnessPubKeyHash function
+// returns the expected results for all the scripts in scriptClassTests.
 func TestIsPayToWitnessPubKeyHash(t *testing.T) {
 	t.Parallel()
 	for _, test := range scriptClassTests {

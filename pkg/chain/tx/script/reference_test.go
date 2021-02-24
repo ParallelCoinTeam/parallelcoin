@@ -23,8 +23,9 @@ func scriptTestName(test []interface{}) (string, error) {
 	if _, ok := test[0].([]interface{}); ok {
 		witnessOffset++
 	}
-	// In addition to the optional leading witness data, the test must consist of at least a signature script, public
-	// key script, flags, and expected error. Finally, it may optionally contain a comment.
+	// In addition to the optional leading witness data, the test must consist of at
+	// least a signature script, public key script, flags, and expected error.
+	// Finally, it may optionally contain a comment.
 	if len(test) < witnessOffset+4 || len(test) > witnessOffset+5 {
 		return "", fmt.Errorf("invalid test length %d", len(test))
 	}
@@ -48,7 +49,8 @@ func parseHex(tok string) ([]byte, error) {
 	return hex.DecodeString(tok[2:])
 }
 
-// parseWitnessStack parses a json array of witness items encoded as hex into a slice of witness elements.
+// parseWitnessStack parses a json array of witness items encoded as hex into a
+// slice of witness elements.
 func parseWitnessStack(elements []interface{}) ([][]byte, error) {
 	witness := make([][]byte, len(elements))
 	for i, e := range elements {
@@ -182,27 +184,27 @@ func parseExpectedResult(expected string) ([]ErrorCode, error) {
 	case "OK":
 		return nil, nil
 	case "UNKNOWN_ERROR":
-		return []ErrorCode{errNumberTooBig, errMinimalData}, nil
+		return []ErrorCode{ErrNumberTooBig, ErrMinimalData}, nil
 	case "PUBKEYTYPE":
 		return []ErrorCode{ErrPubKeyType}, nil
 	case "SIG_DER":
-		return []ErrorCode{errSigTooShort, errSigTooLong,
-			errSigInvalidSeqID, ErrSigInvalidDataLen, ErrSigMissingSTypeID,
+		return []ErrorCode{ErrSigTooShort, ErrSigTooLong,
+			ErrSigInvalidSeqID, ErrSigInvalidDataLen, ErrSigMissingSTypeID,
 			ErrSigMissingSLen, ErrSigInvalidSLen,
 			ErrSigInvalidRIntID, ErrSigZeroRLen, ErrSigNegativeR,
 			ErrSigTooMuchRPadding, ErrSigInvalidSIntID,
 			ErrSigZeroSLen, ErrSigNegativeS, ErrSigTooMuchSPadding,
-			errInvalidSigHashType}, nil
+			ErrInvalidSigHashType}, nil
 	case "EVAL_FALSE":
-		return []ErrorCode{errEvalFalse, errEmptyStack}, nil
+		return []ErrorCode{ErrEvalFalse, ErrEmptyStack}, nil
 	case "EQUALVERIFY":
-		return []ErrorCode{errEqualVerify}, nil
+		return []ErrorCode{ErrEqualVerify}, nil
 	case "NULLFAIL":
 		return []ErrorCode{ErrNullFail}, nil
 	case "SIG_HIGH_S":
 		return []ErrorCode{ErrSigHighS}, nil
 	case "SIG_HASHTYPE":
-		return []ErrorCode{errInvalidSigHashType}, nil
+		return []ErrorCode{ErrInvalidSigHashType}, nil
 	case "SIG_NULLDUMMY":
 		return []ErrorCode{ErrSigNullDummy}, nil
 	case "SIG_PUSHONLY":
@@ -210,18 +212,18 @@ func parseExpectedResult(expected string) ([]ErrorCode, error) {
 	case "CLEANSTACK":
 		return []ErrorCode{ErrCleanStack}, nil
 	case "BAD_OPCODE":
-		return []ErrorCode{errReservedOpcode, errMalformedPush}, nil
+		return []ErrorCode{ErrReservedOpcode, ErrMalformedPush}, nil
 	case "UNBALANCED_CONDITIONAL":
-		return []ErrorCode{errUnbalancedConditional,
-			errInvalidStackOperation}, nil
+		return []ErrorCode{ErrUnbalancedConditional,
+			ErrInvalidStackOperation}, nil
 	case "OP_RETURN":
-		return []ErrorCode{errEarlyReturn}, nil
+		return []ErrorCode{ErrEarlyReturn}, nil
 	case "VERIFY":
-		return []ErrorCode{errVerify}, nil
+		return []ErrorCode{ErrVerify}, nil
 	case "INVALID_STACK_OPERATION", "INVALID_ALTSTACK_OPERATION":
-		return []ErrorCode{errInvalidStackOperation}, nil
+		return []ErrorCode{ErrInvalidStackOperation}, nil
 	case "DISABLED_OPCODE":
-		return []ErrorCode{errDisabledOpcode}, nil
+		return []ErrorCode{ErrDisabledOpcode}, nil
 	case "DISCOURAGE_UPGRADABLE_NOPS":
 		return []ErrorCode{ErrDiscourageUpgradableNOPs}, nil
 	case "PUSH_SIZE":
@@ -237,7 +239,7 @@ func parseExpectedResult(expected string) ([]ErrorCode, error) {
 	case "SIG_COUNT":
 		return []ErrorCode{ErrInvalidSignatureCount}, nil
 	case "MINIMALDATA":
-		return []ErrorCode{errMinimalData}, nil
+		return []ErrorCode{ErrMinimalData}, nil
 	case "NEGATIVE_LOCKTIME":
 		return []ErrorCode{ErrNegativeLockTime}, nil
 	case "UNSATISFIED_LOCKTIME":
@@ -265,7 +267,8 @@ func parseExpectedResult(expected string) ([]ErrorCode, error) {
 		expected)
 }
 
-// createSpendTx generates a basic spending transaction given the passed signature, witness and public key scripts.
+// createSpendTx generates a basic spending transaction given the passed
+// signature, witness and public key scripts.
 func createSpendingTx(witness [][]byte, sigScript, pkScript []byte,
 	outputValue int64) *wire.MsgTx {
 	coinbaseTx := wire.NewMsgTx(wire.TxVersion)
@@ -284,8 +287,9 @@ func createSpendingTx(witness [][]byte, sigScript, pkScript []byte,
 	return spendingTx
 }
 
-// scriptWithInputVal wraps a target pkScript with the value of the output in which it is contained. The inputVal is
-// necessary in order to properly validate inputs which spend nested, or native witness programs.
+// scriptWithInputVal wraps a target pkScript with the value of the output in
+// which it is contained. The inputVal is necessary in order to properly
+// validate inputs which spend nested, or native witness programs.
 type scriptWithInputVal struct {
 	inputVal int64
 	pkScript []byte
@@ -316,13 +320,14 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 			witness  wire.TxWitness
 			inputAmt util.Amount
 		)
-		// When the first field of the test data is a slice it contains witness data and everything else is offset by 1
-		// as a result.
+		// When the first field of the test data is a slice it contains witness data and
+		// everything else is offset by 1 as a result.
 		witnessOffset := 0
 		if witnessData, ok := test[0].([]interface{}); ok {
 			witnessOffset++
-			// If this is a witness test, then the final element within the slice is the input amount, so we ignore all
-			// but the last element in order to parse the witness stack.
+			// If this is a witness test, then the final element within the slice is the
+			// input amount, so we ignore all but the last element in order to parse the
+			// witness stack.
 			strWitnesses := witnessData[:len(witnessData)-1]
 			witness, err = parseWitnessStack(strWitnesses)
 			if err != nil {

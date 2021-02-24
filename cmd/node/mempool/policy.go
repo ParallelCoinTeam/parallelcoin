@@ -237,7 +237,7 @@ func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	if txscript.IsWitnessProgram(txOut.PkScript) {
 		totalSize += 107
 	} else {
-	totalSize += 107
+		totalSize += 107
 	}
 	// The output is considered dust if the cost to the network to spend the coins
 	// is more than 1/3 of the minimum free transaction relay fee. minFreeTxRelayFee
@@ -357,15 +357,15 @@ func checkTransactionStandard(
 	return nil
 }
 
-// GetTxVirtualSize computes the virtual size of a given transaction. A
-// transaction's virtual size is based off its weight, creating a discount for
-// any witness data it contains, proportional to the current
-// blockchain.WitnessScaleFactor value.
+// GetTxVirtualSize computes the virtual size of a given transaction.
+// A transaction's virtual size is based off its weight,
+// creating a discount for any witness data it contains,
+// proportional to the current blockchain.WitnessScaleFactor value.
 func GetTxVirtualSize(tx *util.Tx) int64 {
 	// vSize := (weight(tx) + 3) / 4
 	//       := (((baseSize * 3) + totalSize) + 3) / 4
-	//
-	// We add 3 here as a way to compute the ceiling of the prior arithmetic to 4.
-	// The division by 4 creates a discount for wit witness data.
-	return blockchain.GetTransactionWeight(tx)
+	// We add 3 here as a way to compute the ceiling of the prior arithmetic
+	// to 4. The division by 4 creates a discount for wit witness data.
+	return (blockchain.GetTransactionWeight(tx) + (blockchain.WitnessScaleFactor - 1)) /
+		blockchain.WitnessScaleFactor
 }

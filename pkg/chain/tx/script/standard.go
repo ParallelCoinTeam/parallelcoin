@@ -257,7 +257,8 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 	// We'll attempt to detect the nested p2sh case so we can accurately count the signature operations involved.
 	case si.PkScriptClass == ScriptHashTy &&
 		IsWitnessProgram(sigScript[1:]) && bip16 && segwit:
-		// Extract the pushed witness program from the sigScript so we can determine the number of expected inputs.
+		// Extract the pushed witness program from the sigScript so we can determine the
+		// number of expected inputs.
 		pkPops, _ := parseScript(sigScript[1:])
 		shInputs := expectedInputs(pkPops, typeOfScript(pkPops))
 		if shInputs == -1 {
@@ -268,8 +269,8 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 		si.SigOps = GetWitnessSigOpCount(sigScript, pkScript, witness)
 		si.NumInputs = len(witness)
 		si.NumInputs += len(sigPops)
-	// If segwit is active, and this is a p2wsh output, then we'll need to examine the witness script to generate
-	// accurate script info.
+	// If segwit is active, and this is a p2wsh output, then we'll need to examine
+	// the witness script to generate accurate script info.
 	case si.PkScriptClass == WitnessV0ScriptHashTy && segwit:
 		// The witness script is the final element of the witness stack.
 		witnessScript := witness[len(witness)-1]
@@ -324,8 +325,8 @@ func payToPubKeyHashScript(pubKeyHash []byte) ([]byte, error) {
 		Script()
 }
 
-// payToWitnessPubKeyHashScript creates a new script to pay to a version 0 pubkey hash witness program. The passed hash
-// is expected to be valid.
+// payToWitnessPubKeyHashScript creates a new script to pay to a version 0
+// pubkey hash witness program. The passed hash is expected to be valid.
 func payToWitnessPubKeyHashScript(pubKeyHash []byte) ([]byte, error) {
 	return NewScriptBuilder().AddOp(OP_0).AddData(pubKeyHash).Script()
 }
@@ -337,8 +338,8 @@ func payToScriptHashScript(scriptHash []byte) ([]byte, error) {
 		AddOp(OP_EQUAL).Script()
 }
 
-// payToWitnessPubKeyHashScript creates a new script to pay to a version 0 script hash witness program. The passed hash
-// is expected to be valid.
+// payToWitnessPubKeyHashScript creates a new script to pay to a version 0
+// script hash witness program. The passed hash is expected to be valid.
 func payToWitnessScriptHashScript(scriptHash []byte) ([]byte, error) {
 	return NewScriptBuilder().AddOp(OP_0).AddData(scriptHash).Script()
 }
@@ -463,8 +464,9 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 			addrs = append(addrs, addr)
 		}
 	case WitnessV0PubKeyHashTy:
-		// A pay-to-witness-pubkey-hash script is of the form: OP_0 <20-byte hash> Therefore, the pubkey hash is the
-		// second item on the stack. Skip the pubkey hash if it's invalid for some reason.
+		// A pay-to-witness-pubkey-hash script is of the form: OP_0 <20-byte hash>
+		// Therefore, the pubkey hash is the second item on the stack. Skip the pubkey
+		// hash if it's invalid for some reason.
 		requiredSigs = 1
 		addr, err := util.NewAddressWitnessPubKeyHash(pops[1].data,
 			chainParams)
@@ -489,8 +491,9 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 			addrs = append(addrs, addr)
 		}
 	case WitnessV0ScriptHashTy:
-		// A pay-to-witness-script-hash script is of the form: OP_0 <32-byte hash> Therefore, the script hash is the
-		// second item on the stack. Skip the script hash if it's invalid for some reason.
+		// A pay-to-witness-script-hash script is of the form: OP_0 <32-byte hash>
+		// Therefore, the script hash is the second item on the stack. Skip the script
+		// hash if it's invalid for some reason.
 		requiredSigs = 1
 		addr, err := util.NewAddressWitnessScriptHash(pops[1].data,
 			chainParams)

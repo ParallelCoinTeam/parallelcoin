@@ -485,18 +485,21 @@ func (b *BlockChain) checkBlockContext(workerNumber uint32, block *util.Block,
 			Error(err)
 			return err
 		}
-		// If segwit is active, then we'll need to fully validate the new witness commitment for adherence to the rules.
+		// If segwit is active, then we'll need to fully validate the new witness
+		// commitment for adherence to the rules.
 		if segwitState == ThresholdActive {
-			// Validate the witness commitment (if any) within the block. This involves asserting that if the coinbase
-			// contains the special commitment output, then this merkle root matches a computed merkle root of all the
-			// wtxid's of the transactions within the block. In addition, various other checks against the coinbase's
-			// witness stack.
+			// Validate the witness commitment (if any) within the block. This involves
+			// asserting that if the coinbase contains the special commitment output, then
+			// this merkle root matches a computed merkle root of all the wtxid's of the
+			// transactions within the block. In addition, various other checks against the
+			// coinbase's witness stack.
 			if err := ValidateWitnessCommitment(block); err != nil {
 				Error(err)
 				return err
 			}
-			// Once the witness commitment, witness nonce, and sig op cost have been validated, we can finally assert
-			// that the block's weight doesn't exceed the current consensus parameter.
+			// Once the witness commitment, witness nonce, and sig op cost have been
+			// validated, we can finally assert that the block's weight doesn't exceed the
+			// current consensus parameter.
 			blockWeight := GetBlockWeight(block)
 			if blockWeight > MaxBlockWeight {
 				str := fmt.Sprintf(
