@@ -103,6 +103,10 @@ type (
 		// for details on which this can be useful to generate templates without a
 		// coinbase payment address.
 		ValidPayAddress bool
+		// WitnessCommitment is a commitment to the witness data (if any) within the
+		// block. This field will only be populated once segregated witness has been
+		// activated, and the block contains a transaction which has witness data.
+		WitnessCommitment []byte
 	}
 	// BlkTmplGenerator provides a type that can be used to generate block templates
 	// based on a given mining policy and source of transactions to choose from. It
@@ -656,7 +660,7 @@ mempoolLoop:
 			continue
 		}
 		// Enforce maximum signature operation cost per block. Also check for overflow.
-		sigOpCost, err := blockchain.GetSigOpCost(tx, false, blockUtxos, true)
+		sigOpCost, err := blockchain.GetSigOpCost(tx, false, blockUtxos, true, segwitActive)
 		if err != nil {
 			Tracec(
 				func() string {
