@@ -297,7 +297,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = state.Template.Block.
 		Transactions[0].TxIn[0].SignatureScript
 	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
-	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]
+	msgBlock.Header.MerkleRoot = *merkles.GetRoot()
 	// Ensure the submitted block hash is less than the target difficulty.
 	pl := fork.GetMinDiff(s.Cfg.Algo, s.Cfg.Chain.BestSnapshot().Height)
 	err = blockchain.CheckProofOfWork(block, pl, s.Cfg.Chain.BestSnapshot().Height)

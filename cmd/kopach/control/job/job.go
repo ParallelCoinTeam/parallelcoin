@@ -78,8 +78,10 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	// roots for the version number but to get them first get the values
 	var val int64
 	mTS := make(map[int32]*chainhash.Hash)
-	coinbase := mB.Transactions()[0]
-	transactions := mB.Transactions()[1:]
+	mBtx := mB.Transactions()
+	root := len(mBtx) - 1
+	coinbase := mBtx[root]
+	transactions := mB.Transactions()[:root]
 	txr = make([]*util.Tx, len(transactions))
 	for i, v := range transactions {
 		txr[i] = v
@@ -92,6 +94,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		nbH++
 	}
 	for i := range bitsMap {
+		// set value according to version and block height
 		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
 		txc := coinbase.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
@@ -100,12 +103,10 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		(*cbs)[i] = txx
 		Debug("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
-			append([]*util.Tx{txx}, txr...), false,
+			append(txr, txx), false,
 		)
-		Debugs(mTree)
-		mTS[i] = &chainhash.Hash{}
-		if err = mTS[i].SetBytes(mTree[0].CloneBytes()); Check(err) {
-		}
+		// Debugs(mTree)
+		mTS[i] = mTree.GetRoot()
 		// if err = mTS[i].
 		// 	SetBytes(
 		// 		mTree[len(mTree)-1].CloneBytes(),

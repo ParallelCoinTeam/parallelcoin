@@ -56,6 +56,12 @@ func HashMerkleBranches(left *chainhash.Hash, right *chainhash.Hash) *chainhash.
 	return &newHash
 }
 
+type MerkleTree []*chainhash.Hash
+
+func (m MerkleTree) GetRoot() *chainhash.Hash {
+	return m[len(m)-1]
+}
+
 // BuildMerkleTreeStore creates a merkle tree from a slice of transactions, stores it using a linear array, and returns
 // a slice of the backing array. A linear array was chosen as opposed to an actual tree structure since it uses about
 // half as much memory. The following describes a merkle tree and how it is stored in a linear array.
@@ -83,12 +89,12 @@ func HashMerkleBranches(left *chainhash.Hash, right *chainhash.Hash) *chainhash.
 // The additional bool parameter indicates if we are generating the merkle tree using witness transaction id's rather
 // than regular transaction id's. This also presents an additional case wherein the wtxid of the coinbase transaction is
 // the zeroHash.
-func BuildMerkleTreeStore(transactions []*util.Tx, witness bool) []*chainhash.Hash {
+func BuildMerkleTreeStore(transactions []*util.Tx, witness bool) MerkleTree {
 	// Calculate how many entries are required to hold the binary merkle tree as a linear array and create an array of
 	// that size.
 	nextPoT := nextPowerOfTwo(len(transactions))
 	arraySize := nextPoT*2 - 1
-	merkles := make([]*chainhash.Hash, arraySize)
+	merkles := make(MerkleTree, arraySize)
 	// Create the base transaction hashes and populate the array with them.
 	for i, tx := range transactions {
 		// If we're computing a witness merkle root, instead of the regular txid, we use the modified wtxid which
@@ -200,7 +206,7 @@ func ValidateWitnessCommitment(blk *util.Block) error {
 	// Finally, with the preliminary checks out of the way, we can check if the extracted witnessCommitment is equal to:
 	// SHA256(witnessMerkleRoot || witnessNonce). Where witnessNonce is the coinbase transaction's only witness item.
 	witnessMerkleTree := BuildMerkleTreeStore(blk.Transactions(), true)
-	witnessMerkleRoot := witnessMerkleTree[len(witnessMerkleTree)-1]
+	witnessMerkleRoot := witnessMerkleTree.GetRoot()
 	var witnessPreimage [chainhash.HashSize * 2]byte
 	copy(witnessPreimage[:], witnessMerkleRoot[:])
 	copy(witnessPreimage[chainhash.HashSize:], witnessNonce)

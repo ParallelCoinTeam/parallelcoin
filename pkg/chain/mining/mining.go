@@ -762,7 +762,7 @@ mempoolLoop:
 		// of all zeroes.
 		witnessMerkleTree := blockchain.BuildMerkleTreeStore(blockTxns,
 			true)
-		witnessMerkleRoot := witnessMerkleTree[len(witnessMerkleTree)-1]
+		witnessMerkleRoot := witnessMerkleTree.GetRoot()
 		// The preimage to the witness commitment is: witnessRoot || coinbaseWitness
 		var witnessPreimage [64]byte
 		copy(witnessPreimage[:32], witnessMerkleRoot[:])
@@ -798,7 +798,7 @@ mempoolLoop:
 	msgBlock.Header = wire.BlockHeader{
 		Version:    vers,
 		PrevBlock:  best.Hash,
-		MerkleRoot: *merkles[len(merkles)-1],
+		MerkleRoot: *merkles.GetRoot(),
 		Timestamp:  ts,
 		Bits:       reqDifficulty,
 	}
@@ -898,7 +898,7 @@ func (g *BlkTmplGenerator) UpdateExtraNonce(msgBlock *wire.MsgBlock,
 	// Recalculate the merkle root with the updated extra nonce.
 	block := util.NewBlock(msgBlock)
 	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
-	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]
+	msgBlock.Header.MerkleRoot = *merkles.GetRoot()
 	return nil
 }
 

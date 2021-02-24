@@ -166,7 +166,7 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	block.Header = wire.BlockHeader{
 		Version:    blockVersion,
 		PrevBlock:  *prevHash,
-		MerkleRoot: *merkles[len(merkles)-1],
+		MerkleRoot: *merkles.GetRoot(),
 		Timestamp:  ts,
 		Bits:       net.PowLimitBits,
 	}

@@ -10,7 +10,7 @@ import (
 func TestMerkle(t *testing.T) {
 	block := util.NewBlock(&Block100000)
 	merkles := BuildMerkleTreeStore(block.Transactions(), false)
-	calculatedMerkleRoot := merkles[len(merkles)-1]
+	calculatedMerkleRoot := merkles.GetRoot()
 	wantMerkle := &Block100000.Header.MerkleRoot
 	if !wantMerkle.IsEqual(calculatedMerkleRoot) {
 		t.Errorf("BuildMerkleTreeStore: merkle root mismatch - got %v, want %v", calculatedMerkleRoot, wantMerkle)
