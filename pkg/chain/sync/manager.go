@@ -1208,7 +1208,9 @@ func (sm *SyncManager) startSync() {
 	// Once the segwit soft-fork package has activated, we only want to sync from
 	// peers which are witness enabled to ensure that we fully validate all
 	// blockchain data.
-	segwitActive, err := sm.chain.IsDeploymentActive(chaincfg.DeploymentSegwit)
+	var err error
+	var segwitActive bool
+	segwitActive, err = sm.chain.IsDeploymentActive(chaincfg.DeploymentSegwit)
 	if err != nil {
 		Error("unable to query for segwit soft-fork state:", err)
 		return

@@ -182,6 +182,7 @@ func (sp *SendPage) SendButton() l.Widget {
 									64,
 								); !Check(err) {
 									if am, err = util.NewAmount(amt); Check(err) {
+										Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
 										// todo: indicate this to the user somehow
 										return
 									}
@@ -192,17 +193,19 @@ func (sp *SendPage) SendButton() l.Widget {
 								var addr util.Address
 								if addr, err = util.DecodeAddress(wg.inputs["sendAddress"].GetText(),
 									wg.cx.ActiveNet); Check(err) {
+									Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
 									Debug("invalid address")
 									// TODO: indicate this to the user somehow
 									return
 								}
 								if err= wg.WalletClient.WalletPassphrase(*wg.cx.Config.WalletPass, 5); Check(err){
+									Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
 									return
 								}
 								var txid *chainhash.Hash
 								if txid, err = wg.WalletClient.SendToAddress(addr, am); Check(err) {
 									// TODO: indicate send failure to user somehow
-									Debug("******")
+									Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
 									return
 								}
 								wg.RecentTransactions(10, "recent")

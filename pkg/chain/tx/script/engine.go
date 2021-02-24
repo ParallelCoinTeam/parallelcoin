@@ -392,13 +392,17 @@ func (vm *Engine) CheckErrorCondition(finalScript bool) error {
 		return err
 	}
 	if !v {
-		// // Log interesting data.
-		// log <- cl.Tracec(func() string {
-		// 	dis0, _ := vm.DisasmScript(0)
-		// 	dis1, _ := vm.DisasmScript(1)
-		// 	return fmt.Sprintf("scripts failed: script0: %s\n"+
-		// 		"script1: %s", dis0, dis1)
-		// })
+		// Log interesting data.
+		Tracec(
+			func() string {
+				dis0, _ := vm.DisasmScript(0)
+				dis1, _ := vm.DisasmScript(1)
+				return fmt.Sprintf(
+					"scripts failed: script0: %s\n"+
+						"script1: %s", dis0, dis1,
+				)
+			},
+		)
 		return scriptError(
 			ErrEvalFalse,
 			"false stack entry at end of script execution",
@@ -512,24 +516,25 @@ func (vm *Engine) Execute() (err error) {
 			Error(err)
 			return err
 		}
-		// log <- cl.Tracec(func() string {
-		// 	var o string
-		// 	dis, err := vm.DisasmPC()
-		// 	if err != nil {
-		// L.ScriptError(err)
-		// 		o += "c stepping (" + err.ScriptError() + ")"
-		// 	}
-		// 	o += "oo stepping " + dis
-		// 	var dstr, astr string
-		// 	// if we're tracing, dump the stacks.
-		// 	if vm.dstack.Depth() != 0 {
-		// 		dstr = "\nStack:\n" + vm.dstack.String()
-		// 	}
-		// 	if vm.astack.Depth() != 0 {
-		// 		astr = "\nAltStack:\n" + vm.astack.String()
-		// 	}
-		// 	return o + dstr + astr
-		// })
+		Tracec(
+			func() string {
+					var o string
+					dis, err := vm.DisasmPC()
+					if err != nil {
+						o += "c stepping (" + err.Error() + ")"
+					}
+					o += "oo stepping " + dis
+					var dstr, astr string
+					// if we're tracing, dump the stacks.
+					if vm.dstack.Depth() != 0 {
+						dstr = "\nStack:\n" + vm.dstack.String()
+					}
+					if vm.astack.Depth() != 0 {
+						astr = "\nAltStack:\n" + vm.astack.String()
+					}
+					return o + dstr + astr
+			},
+		)
 	}
 	return vm.CheckErrorCondition(true)
 }
