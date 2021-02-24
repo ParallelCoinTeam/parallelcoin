@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"sort"
 	
 	"github.com/p9c/pod/pkg/chain/fork"
@@ -25,21 +26,23 @@ func (al AlgoList) Swap(i, j int) {
 	al[i], al[j] = al[j], al[i]
 }
 
-type TargetBits map[int32]uint32
+type Diffs map[int32]uint32
+
+type Merkles map[int32]*chainhash.Hash
 
 // CalcNextRequiredDifficultyPlan9Controller returns all of the algorithm difficulty targets for sending out with the
 // other pieces required to construct a block, as these numbers are generated from block timestamps
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(lastNode *BlockNode) (
-	newTargetBits TargetBits, err error,
+	diffs Diffs, err error,
 ) {
 	nH := lastNode.height + 1
 	currFork := fork.GetCurrent(nH)
-	nTB := make(TargetBits)
+	nTB := make(Diffs)
 	switch currFork {
 	case 0:
 		for i := range fork.List[0].Algos {
 			v := fork.List[0].Algos[i].Version
-			nTB[v], err = b.CalcNextRequiredDifficultyHalcyon(0, lastNode, i, true)
+			nTB[v], err = b.CalcNextRequiredDifficultyHalcyon(lastNode, i, true)
 		}
 		return nTB, nil
 	case 1:
@@ -59,10 +62,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(lastNode *BlockNo
 			for _, v := range algos {
 				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(lastNode, v.Name, true)
 			}
-			newTargetBits = nTB
-			// Traces(newTargetBits)
+			diffs = nTB
+			// Traces(diffs)
 		} else {
-			newTargetBits = b.DifficultyBits.Load().(TargetBits)
+			diffs = b.DifficultyBits.Load().(Diffs)
 		}
 		return
 	}

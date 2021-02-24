@@ -30,7 +30,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 69
+const RoundsPerAlgo = 10
 
 type Worker struct {
 	mx            sync.Mutex
@@ -62,8 +62,8 @@ type Counter struct {
 	RoundsPerAlgo atomic.Int32
 }
 
-// NewCounter returns an initialized algorithm rolling counter that ensures each miner does equal amounts of every
-// algorithm
+// NewCounter returns an initialized algorithm rolling counter that ensures each
+// miner does equal amounts of every algorithm
 func NewCounter(roundsPerAlgo int32) (c *Counter) {
 	// these will be populated when work arrives
 	var algos []int32
@@ -202,7 +202,7 @@ out:
 					// work
 					nH := w.block.Load().(*util.Block).Height()
 					hv := w.roller.GetAlgoVer()
-					h := w.merkles.Load().(map[int32]*chainhash.Hash)
+					h := w.merkles.Load().(blockchain.Merkles)
 					mmb := w.msgBlock.Load().(wire.MsgBlock)
 					mb := &mmb
 					mb.Header.Version = hv
@@ -215,7 +215,7 @@ out:
 					} else {
 						continue
 					}
-					b := w.bitses.Load().(blockchain.TargetBits)
+					b := w.bitses.Load().(blockchain.Diffs)
 					if bb, ok := b[mb.Header.Version]; ok {
 						mb.Header.Bits = bb
 					} else {
@@ -259,7 +259,7 @@ out:
 						break running
 					}
 					mb.Header.Version = nextAlgo
-					mb.Header.Bits = w.bitses.Load().(blockchain.TargetBits)[mb.Header.Version]
+					mb.Header.Bits = w.bitses.Load().(blockchain.Diffs)[mb.Header.Version]
 					mb.Header.Nonce++
 					w.msgBlock.Store(*mb)
 				}
@@ -288,19 +288,19 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 		*reply = true
 		return
 	}
-	w.bitses.Store(j.Bitses)
-	w.merkles.Store(j.MerkleRoots)
-	if j.MerkleRoots[5].IsEqual(w.lastMerkle) {
+	w.bitses.Store(j.Diffs)
+	w.merkles.Store(j.Merkles)
+	if j.Merkles[5].IsEqual(w.lastMerkle) {
 		Debug("not a new job")
 		*reply = true
 		return
 	}
 	var algos []int32
-	for i := range j.Bitses {
+	for i := range j.Diffs {
 		// we don't need to know net params if version numbers come with jobs
 		algos = append(algos, i)
 	}
-	w.lastMerkle = j.MerkleRoots[5]
+	w.lastMerkle = j.Merkles[5]
 	*reply = true
 	// halting current work
 	Debug("halting current work")
@@ -318,16 +318,16 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 	hv := w.roller.GetAlgoVer()
 	mb.Header.Version = hv
 	var ok bool
-	mb.Header.Bits, ok = j.Bitses[mb.Header.Version]
+	mb.Header.Bits, ok = j.Diffs[mb.Header.Version]
 	if !ok {
 		return errors.New("bits are empty")
 	}
 	rand.Seed(time.Now().UnixNano())
 	mb.Header.Nonce = rand.Uint32()
-	if j.MerkleRoots == nil {
+	if j.Merkles == nil {
 		return errors.New("failed to decode merkle roots")
 	} else {
-		hh, ok := j.MerkleRoots[hv]
+		hh, ok := j.Merkles[hv]
 		if !ok {
 			return errors.New("could not get merkle root from job")
 		}

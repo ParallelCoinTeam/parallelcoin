@@ -8,9 +8,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/hardfork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -19,7 +18,7 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util/logi"
-
+	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -578,20 +577,20 @@ func (mp *TxPool) limitNumOrphans() error {
 func (mp *TxPool) maybeAcceptTransaction(b *blockchain.BlockChain, tx *util.Tx, isNew, rateLimit, rejectDupOrphans bool,
 ) ([]*chainhash.Hash, *TxDesc, error) {
 	txHash := tx.Hash()
-	// If a transaction has witness data, and segwit isn't active yet, If segwit isn't active yet, then we won't accept
-	// it into the mempool as it can't be mined yet.
-	if tx.MsgTx().HasWitness() {
-		segwitActive, err := mp.cfg.IsDeploymentActive(chaincfg.DeploymentSegwit)
-		if err != nil {
-			Error(err)
-			return nil, nil, err
-		}
-		if !segwitActive {
-			str := fmt.Sprintf("transaction %v has witness data, "+
-				"but segwit isn't active yet", txHash)
-			return nil, nil, txRuleError(wire.RejectNonstandard, str)
-		}
-	}
+	// // If a transaction has witness data, and segwit isn't active yet, If segwit isn't active yet, then we won't accept
+	// // it into the mempool as it can't be mined yet.
+	// if tx.MsgTx().HasWitness() {
+	// 	segwitActive, err := mp.cfg.IsDeploymentActive(chaincfg.DeploymentSegwit)
+	// 	if err != nil {
+	// 		Error(err)
+	// 		return nil, nil, err
+	// 	}
+	// 	if !segwitActive {
+	// 		str := fmt.Sprintf("transaction %v has witness data, "+
+	// 			"but segwit isn't active yet", txHash)
+	// 		return nil, nil, txRuleError(wire.RejectNonstandard, str)
+	// 	}
+	// }
 	if blockchain.ContainsBlacklisted(b, tx, hardfork.Blacklist) {
 		return nil, nil, errors.New("transaction contains blacklisted address")
 	}
@@ -740,7 +739,7 @@ func (mp *TxPool) maybeAcceptTransaction(b *blockchain.BlockChain, tx *util.Tx, 
 	// itself can contain signature operations, the maximum allowed signature operations per transaction is less than
 	// the maximum allowed signature operations per block. TODO(roasbeef): last bool should be conditional on segwit
 	// activation
-	sigOpCost, err := blockchain.GetSigOpCost(tx, false, utxoView, true, true)
+	sigOpCost, err := blockchain.GetSigOpCost(tx, false, utxoView, true)
 	if err != nil {
 		Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {

@@ -244,11 +244,11 @@ func (msg *MsgTx) TxHash() (out chainhash.Hash) {
 // BIP0141 and BIP0144. The final output is used within the Segregated Witness commitment of all the witnesses within a
 // block. If a transaction has no witness data, then the witness hash, is the same as its txid.
 func (msg *MsgTx) WitnessHash() chainhash.Hash {
-	if msg.HasWitness() {
-		buf := bytes.NewBuffer(make([]byte, 0, msg.SerializeSize()))
-		_ = msg.Serialize(buf)
-		return chainhash.DoubleHashH(buf.Bytes())
-	}
+	// if msg.HasWitness() {
+	// 	buf := bytes.NewBuffer(make([]byte, 0, msg.SerializeSize()))
+	// 	_ = msg.Serialize(buf)
+	// 	return chainhash.DoubleHashH(buf.Bytes())
+	// }
 	return msg.TxHash()
 }
 
@@ -451,7 +451,7 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error
 				return messageError("MsgTx.BtcDecode", str)
 			}
 			// Then for witCount number of stack items, each item has a varint length prefix, followed by the witness item itself.
-			txin.Witness = make([][]byte, witCount)
+			// txin.Witness = make([][]byte, witCount)
 			for j := uint64(0); j < witCount; j++ {
 				txin.Witness[j], err = readScript(r, pver,
 					maxWitnessItemSize, "script witness item")

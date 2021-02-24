@@ -118,14 +118,14 @@ func (b *BlockChain) checkConnectBlock(node *BlockNode, block *util.Block, view 
 	//
 	// See https://en.bitcoin.it/wiki/BIP_0016 for more details.
 	enforceBIP0016 := node.timestamp >= txscript.Bip16Activation.Unix()
-	// Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over to
-	// enforcing all the new rules.
-	segwitState, err := b.deploymentState(node.parent, chaincfg.DeploymentSegwit)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	enforceSegWit := segwitState == ThresholdActive
+	// // Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over to
+	// // enforcing all the new rules.
+	// segwitState, err := b.deploymentState(node.parent, chaincfg.DeploymentSegwit)
+	// if err != nil {
+	// 	Error(err)
+	// 	return err
+	// }
+	// enforceSegWit := segwitState == ThresholdActive
 	// The number of signature operations must be less than the maximum allowed per block. Note that the preliminary
 	// sanity checks on a block also include a check similar to this one, but this check expands the count to include a
 	// precise count of pay-to -script-hash signature operations in each of the input transaction public key scripts.
@@ -135,8 +135,7 @@ func (b *BlockChain) checkConnectBlock(node *BlockNode, block *util.Block, view 
 		// Since the first (and only the first) transaction has already been verified to be a coinbase transaction, use
 		// i == 0 as an optimization for the flag to countP2SHSigOps for whether or not the transaction is a coinbase
 		// transaction rather than having to do a full coinbase check again.
-		sigOpCost, err := GetSigOpCost(tx, i == 0, view, enforceBIP0016,
-			enforceSegWit)
+		sigOpCost, err := GetSigOpCost(tx, i == 0, view, enforceBIP0016)
 		if err != nil {
 			Error(err)
 			return err
@@ -319,11 +318,11 @@ func (b *BlockChain) checkConnectBlock(node *BlockNode, block *util.Block, view 
 			}
 		}
 	}
-	// Enforce the segwit soft-fork package once the soft-fork has shifted into the "active" version bits state.
-	if enforceSegWit {
-		scriptFlags |= txscript.ScriptVerifyWitness
-		scriptFlags |= txscript.ScriptStrictMultiSig
-	}
+	// // Enforce the segwit soft-fork package once the soft-fork has shifted into the "active" version bits state.
+	// if enforceSegWit {
+	// 	scriptFlags |= txscript.ScriptVerifyWitness
+	// 	scriptFlags |= txscript.ScriptStrictMultiSig
+	// }
 	// Now that the inexpensive checks are done and have passed, verify the transactions are actually allowed to spend
 	// the coins by running the expensive ECDSA signature check scripts. Doing this last helps prevent CPU exhaustion
 	// attacks.
@@ -477,35 +476,35 @@ func (b *BlockChain) checkBlockContext(workerNumber uint32, block *util.Block,
 				return err
 			}
 		}
-		// Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over
-		// to enforcing all the new rules.
-		segwitState, err := b.deploymentState(prevNode,
-			chaincfg.DeploymentSegwit)
-		if err != nil {
-			Error(err)
-			return err
-		}
-		// If segwit is active, then we'll need to fully validate the new witness commitment for adherence to the rules.
-		if segwitState == ThresholdActive {
-			// Validate the witness commitment (if any) within the block. This involves asserting that if the coinbase
-			// contains the special commitment output, then this merkle root matches a computed merkle root of all the
-			// wtxid's of the transactions within the block. In addition, various other checks against the coinbase's
-			// witness stack.
-			if err := ValidateWitnessCommitment(block); err != nil {
-				Error(err)
-				return err
-			}
-			// Once the witness commitment, witness nonce, and sig op cost have been validated, we can finally assert
-			// that the block's weight doesn't exceed the current consensus parameter.
-			blockWeight := GetBlockWeight(block)
-			if blockWeight > MaxBlockWeight {
-				str := fmt.Sprintf(
-					"block's weight metric is too high - got %v, max %v",
-					blockWeight, MaxBlockWeight)
-				Error(err)
-				return ruleError(ErrBlockWeightTooHigh, str)
-			}
-		}
+		// // Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over
+		// // to enforcing all the new rules.
+		// segwitState, err := b.deploymentState(prevNode,
+		// 	chaincfg.DeploymentSegwit)
+		// if err != nil {
+		// 	Error(err)
+		// 	return err
+		// }
+		// // If segwit is active, then we'll need to fully validate the new witness commitment for adherence to the rules.
+		// if segwitState == ThresholdActive {
+		// 	// Validate the witness commitment (if any) within the block. This involves asserting that if the coinbase
+		// 	// contains the special commitment output, then this merkle root matches a computed merkle root of all the
+		// 	// wtxid's of the transactions within the block. In addition, various other checks against the coinbase's
+		// 	// witness stack.
+		// 	if err := ValidateWitnessCommitment(block); err != nil {
+		// 		Error(err)
+		// 		return err
+		// 	}
+		// 	// Once the witness commitment, witness nonce, and sig op cost have been validated, we can finally assert
+		// 	// that the block's weight doesn't exceed the current consensus parameter.
+		// 	blockWeight := GetBlockWeight(block)
+		// 	if blockWeight > MaxBlockWeight {
+		// 		str := fmt.Sprintf(
+		// 			"block's weight metric is too high - got %v, max %v",
+		// 			blockWeight, MaxBlockWeight)
+		// 		Error(err)
+		// 		return ruleError(ErrBlockWeightTooHigh, str)
+		// 	}
+		// }
 	}
 	return nil
 }
@@ -532,9 +531,11 @@ BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 		// Infof("algo %s %d %8x %d", a, header.Version, header.Bits,
 		// 	prevNode.height+1)
 		expectedDifficulty, err := b.calcNextRequiredDifficulty(
-			workerNumber, prevNode, header.Timestamp,
+			prevNode,
+			header.Timestamp,
 			fork.GetAlgoName(header.Version, prevNode.height+1),
-			true)
+			true,
+		)
 		if err != nil {
 			Error(err)
 			return err
@@ -1149,7 +1150,7 @@ func checkBlockSanity(block *util.Block, powLimit *big.Int, timeSource MedianTim
 	for _, tx := range transactions {
 		// We could potentially overflow the accumulator so check for overflow.
 		lastSigOps := totalSigOps
-		totalSigOps += CountSigOps(tx) * WitnessScaleFactor
+		totalSigOps += CountSigOps(tx)
 		if totalSigOps < lastSigOps || totalSigOps > MaxBlockSigOpsCost {
 			str := fmt.Sprintf("block contains too many signature "+
 				"operations - got %v, max %v", totalSigOps,

@@ -11,10 +11,11 @@ import (
 // node based on the difficulty retarget rules. This function differs from the exported CalcNextRequiredDifficulty in
 // that the exported version uses the current best chain as the previous block node while this function accepts any
 // block node.
-func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32, err error) {
-	if workerNumber != 0 {
-		l = false
-	}
+func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
+	lastNode *BlockNode,
+	algoname string,
+	l bool,
+) (newTargetBits uint32, err error) {
 	nH := lastNode.height + 1
 	if lastNode == nil {
 		if l {

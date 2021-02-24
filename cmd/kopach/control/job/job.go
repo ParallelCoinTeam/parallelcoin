@@ -24,8 +24,8 @@ type Job struct {
 	ControllerNonce uint64
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
-	Bitses          blockchain.TargetBits
-	MerkleRoots     map[int32]*chainhash.Hash
+	Diffs           blockchain.Diffs
+	Merkles         blockchain.Merkles
 	// CoinBases       map[int32]*util.Tx
 }
 
@@ -57,9 +57,9 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	// } else {
 	//	Debug("notification block is not tip block")
 	// }
-	bitsMap := make(blockchain.TargetBits)
+	bitsMap := make(blockchain.Diffs)
 	var err error
-	df, ok := tip.Diffs.Load().(blockchain.TargetBits)
+	df, ok := tip.Diffs.Load().(blockchain.Diffs)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
 		if bitsMap, err = cx.RealNode.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); Check(err) {
@@ -67,10 +67,10 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		}
 		tip.Diffs.Store(bitsMap)
 	} else {
-		bitsMap = tip.Diffs.Load().(blockchain.TargetBits)
+		bitsMap = tip.Diffs.Load().(blockchain.Diffs)
 	}
 	Traces(bitsMap)
-	// bitses := Bitses.NewBitses()
+	// bitses := Diffs.NewBitses()
 	// bitses.Put(bitsMap)
 	// msg = append(msg, bitses)
 	// Now we need to get the values for coinbase for each algorithm then regenerate
@@ -99,7 +99,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		txc := coinbase.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
-		Debugs(coinbase)
+		// Debugs(coinbase)
 		(*cbs)[i] = txx
 		Debug("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
@@ -115,7 +115,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	}
 	// Traces(mTS)
 	
-	// mHashes := MerkleRoots.NewHashes()
+	// mHashes := Merkles.NewHashes()
 	// mHashes.Put(mTS)
 	// msg = append(msg, mHashes)
 	// previously were sending blocks, no need for that really miner only needs
@@ -135,8 +135,8 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		ControllerNonce: adv.UUID,
 		Height:          bH,
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
-		Bitses:          bitsMap,
-		MerkleRoots:     mTS,
+		Diffs:           bitsMap,
+		Merkles:         mTS,
 		// CoinBases:       *cbs,
 	}
 	// jrb.CoinBases= make(map[int32]*util.Tx)
@@ -190,13 +190,13 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 // 	return Hash.New().DecodeOne(j.Get(5)).Get()
 // }
 //
-// func (j *Container) GetBitses() blockchain.TargetBits {
-// 	return Bitses.NewBitses().DecodeOne(j.Get(6)).Get()
+// func (j *Container) GetBitses() blockchain.Diffs {
+// 	return Diffs.NewBitses().DecodeOne(j.Get(6)).Get()
 // }
 //
 // // GetHashes returns the merkle roots per version
 // func (j *Container) GetHashes() (out map[int32]*chainhash.Hash) {
-// 	return MerkleRoots.NewHashes().DecodeOne(j.Get(7)).Get()
+// 	return Merkles.NewHashes().DecodeOne(j.Get(7)).Get()
 // }
 //
 // func (j *Container) String() (s string) {
@@ -272,8 +272,8 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 // // 		ControllerPort:      j.GetControllerListenerPort(),
 // // 		Height:          j.GetNewHeight(),
 // // 		PrevBlockHash:   j.GetPrevBlockHash(),
-// // 		Bitses:          j.GetBitses(),
-// // 		MerkleRoots:          j.GetHashes(),
+// // 		Diffs:          j.GetBitses(),
+// // 		Merkles:          j.GetHashes(),
 // // 	}
 // // 	return
 // // }
@@ -284,7 +284,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 // called for each round for each algorithm to start.
 func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
 	found := false
-	for i := range j.Bitses {
+	for i := range j.Diffs {
 		if i == version {
 			found = true
 		}
@@ -294,7 +294,7 @@ func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
 			Header: wire.BlockHeader{
 				Version:    version,
 				PrevBlock:  *j.PrevBlockHash,
-				MerkleRoot: *j.MerkleRoots[version],
+				MerkleRoot: *j.Merkles[version],
 				Timestamp:  time.Now(),
 			},
 			// Transactions: j.Txs,

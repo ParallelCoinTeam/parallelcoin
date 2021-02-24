@@ -819,11 +819,11 @@ func (state *GBTWorkState) BlockTemplateResult(useCoinbaseValue bool, submitOld 
 		NonceRange:   GBTNonceRange,
 		Capabilities: GBTCapabilities,
 	}
-	// If the generated block template includes transactions with witness data, then include the witness commitment in
-	// the GBT result.
-	if template.WitnessCommitment != nil {
-		reply.DefaultWitnessCommitment = hex.EncodeToString(template.WitnessCommitment)
-	}
+	// // If the generated block template includes transactions with witness data, then include the witness commitment in
+	// // the GBT result.
+	// if template.WitnessCommitment != nil {
+	// 	reply.DefaultWitnessCommitment = hex.EncodeToString(template.WitnessCommitment)
+	// }
 	if useCoinbaseValue {
 		reply.CoinbaseAux = GBTCoinbaseAux
 		reply.CoinbaseValue = &msgBlock.Transactions[0].TxOut[0].Value
@@ -1657,7 +1657,7 @@ func CreateTxRawResult(
 	txReply := &btcjson.TxRawResult{
 		Hex:      mtxHex,
 		Txid:     txHash,
-		Hash:     mtx.WitnessHash().String(),
+		Hash:     mtx.TxHash().String(),
 		Size:     int32(mtx.SerializeSize()),
 		Vsize:    int32(mempool.GetTxVirtualSize(util.NewTx(mtx))),
 		Vin:      CreateVinList(mtx),
@@ -1683,7 +1683,7 @@ func CreateVinList(mtx *wire.MsgTx) []btcjson.Vin {
 		txIn := mtx.TxIn[0]
 		vinList[0].Coinbase = hex.EncodeToString(txIn.SignatureScript)
 		vinList[0].Sequence = txIn.Sequence
-		vinList[0].Witness = WitnessToHex(txIn.Witness)
+		// vinList[0].Witness = WitnessToHex(txIn.Witness)
 		return vinList
 	}
 	for i, txIn := range mtx.TxIn {
@@ -1698,9 +1698,9 @@ func CreateVinList(mtx *wire.MsgTx) []btcjson.Vin {
 			Asm: disbuf,
 			Hex: hex.EncodeToString(txIn.SignatureScript),
 		}
-		if mtx.HasWitness() {
-			vinEntry.Witness = WitnessToHex(txIn.Witness)
-		}
+		// if mtx.HasWitness() {
+		// 	vinEntry.Witness = WitnessToHex(txIn.Witness)
+		// }
 	}
 	return vinList
 }
@@ -1752,9 +1752,9 @@ func CreateVinListPrevOut(
 				Hex: hex.EncodeToString(txIn.SignatureScript),
 			},
 		}
-		if len(txIn.Witness) != 0 {
-			vinEntry.Witness = WitnessToHex(txIn.Witness)
-		}
+		// if len(txIn.Witness) != 0 {
+		// 	vinEntry.Witness = WitnessToHex(txIn.Witness)
+		// }
 		// Add the entry to the list now if it already passed the filter since the previous output might not be
 		// available.
 		passesFilter := len(filterAddrMap) == 0
@@ -2247,17 +2247,17 @@ func handleDebugLevel(	s *RPCServer, cmd interface{}, closeChan <-qu.C) (interfa
 	return "Done.", nil
 }
 */
-
-// WitnessToHex formats the passed witness stack as a slice of hex-encoded strings to be used in a JSON response.
-func WitnessToHex(witness wire.TxWitness) []string {
-	// Ensure nil is returned when there are no entries versus an empty slice so it can properly be omitted as
-	// necessary.
-	if len(witness) == 0 {
-		return nil
-	}
-	result := make([]string, 0, len(witness))
-	for _, wit := range witness {
-		result = append(result, hex.EncodeToString(wit))
-	}
-	return result
-}
+//
+// // WitnessToHex formats the passed witness stack as a slice of hex-encoded strings to be used in a JSON response.
+// func WitnessToHex(witness wire.TxWitness) []string {
+// 	// Ensure nil is returned when there are no entries versus an empty slice so it can properly be omitted as
+// 	// necessary.
+// 	if len(witness) == 0 {
+// 		return nil
+// 	}
+// 	result := make([]string, 0, len(witness))
+// 	for _, wit := range witness {
+// 		result = append(result, hex.EncodeToString(wit))
+// 	}
+// 	return result
+// }

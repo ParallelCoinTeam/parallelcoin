@@ -3,7 +3,7 @@ package mempool
 import (
 	"fmt"
 	"time"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -42,7 +42,7 @@ func calcMinRequiredTxRelayFee(serializedSize int64, minRelayTxFee util.Amount) 
 	// which is the minimum free transaction relay fee). minTxRelayFee is in Satoshi/kB so multiply by serializedSize (
 	// which is in bytes) and divide by 1000 to get minimum Satoshis.
 	minFee := (serializedSize * int64(minRelayTxFee)) / 1000
-
+	
 	if minFee == 0 && minRelayTxFee > 0 {
 		minFee = int64(minRelayTxFee)
 	}
@@ -72,16 +72,21 @@ func checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) error 
 		switch txscript.GetScriptClass(originPkScript) {
 		case txscript.ScriptHashTy:
 			numSigOps := txscript.GetPreciseSigOpCount(
-				txIn.SignatureScript, originPkScript, true)
+				txIn.SignatureScript, originPkScript, true,
+			)
 			if numSigOps > maxStandardP2SHSigOps {
-				str := fmt.Sprintf("transaction input #%d has %d signature"+
-					" operations which is more than the allowed max amount of %d",
-					i, numSigOps, maxStandardP2SHSigOps)
+				str := fmt.Sprintf(
+					"transaction input #%d has %d signature"+
+						" operations which is more than the allowed max amount of %d",
+					i, numSigOps, maxStandardP2SHSigOps,
+				)
 				return txRuleError(wire.RejectNonstandard, str)
 			}
 		case txscript.NonStandardTy:
-			str := fmt.Sprintf("transaction input #%d has a non-standard"+
-				" script form", i)
+			str := fmt.Sprintf(
+				"transaction input #%d has a non-standard"+
+					" script form", i,
+			)
 			return txRuleError(wire.RejectNonstandard, str)
 		}
 	}
@@ -97,8 +102,10 @@ func checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) er
 		numPubKeys, numSigs, err := txscript.CalcMultiSigStats(pkScript)
 		if err != nil {
 			Error(err)
-			str := fmt.Sprintf("multi-signature script parse "+
-				"failure: %v", err)
+			str := fmt.Sprintf(
+				"multi-signature script parse "+
+					"failure: %v", err,
+			)
 			return txRuleError(wire.RejectNonstandard, str)
 		}
 		// A standard multi-signature public key script must contain from 1 to maxStandardMultiSigKeys public keys.
@@ -107,21 +114,27 @@ func checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) er
 			return txRuleError(wire.RejectNonstandard, str)
 		}
 		if numPubKeys > maxStandardMultiSigKeys {
-			str := fmt.Sprintf("multi-signature script with %d public keys"+
-				" which is more than the allowed max of %d", numPubKeys,
-				maxStandardMultiSigKeys)
+			str := fmt.Sprintf(
+				"multi-signature script with %d public keys"+
+					" which is more than the allowed max of %d", numPubKeys,
+				maxStandardMultiSigKeys,
+			)
 			return txRuleError(wire.RejectNonstandard, str)
 		}
 		// A standard multi-signature public key script must have at least 1 signature and no more signatures than
 		// available public keys.
 		if numSigs < 1 {
-			return txRuleError(wire.RejectNonstandard,
-				"multi-signature script with no signatures")
+			return txRuleError(
+				wire.RejectNonstandard,
+				"multi-signature script with no signatures",
+			)
 		}
 		if numSigs > numPubKeys {
-			str := fmt.Sprintf("multi-signature script with %d signatures"+
-				" which is more than the available %d public keys", numSigs,
-				numPubKeys)
+			str := fmt.Sprintf(
+				"multi-signature script with %d signatures"+
+					" which is more than the available %d public keys", numSigs,
+				numPubKeys,
+			)
 			return txRuleError(wire.RejectNonstandard, str)
 		}
 	case txscript.NonStandardTy:
@@ -190,11 +203,11 @@ func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	// Both cases share a 41 byte preamble required to reference the input being spent and the sequence number of the
 	// input.
 	totalSize := txOut.SerializeSize() + 41
-	if txscript.IsWitnessProgram(txOut.PkScript) {
-		totalSize += 107 / blockchain.WitnessScaleFactor
-	} else {
-		totalSize += 107
-	}
+	// if txscript.IsWitnessProgram(txOut.PkScript) {
+	// 	totalSize += 107
+	// } else {
+	totalSize += 107
+	// }
 	// The output is considered dust if the cost to the network to spend the coins is more than 1/3 of the minimum free
 	// transaction relay fee. minFreeTxRelayFee is in Satoshi/KB so multiply by 1000 to convert to bytes.
 	//
@@ -211,28 +224,36 @@ func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 // transaction such as having a version in the supported range, being finalized, conforming to more stringent size
 // constraints, having scripts of recognized forms, and not containing "dust" outputs (those that are so small it costs
 // more to process them than they are worth).
-func checkTransactionStandard(tx *util.Tx, height int32,
+func checkTransactionStandard(
+	tx *util.Tx, height int32,
 	medianTimePast time.Time, minRelayTxFee util.Amount,
-	maxTxVersion int32) error {
+	maxTxVersion int32,
+) error {
 	// The transaction must be a currently supported version.
 	msgTx := tx.MsgTx()
 	if msgTx.Version > maxTxVersion || msgTx.Version < 1 {
-		str := fmt.Sprintf("transaction version %d is not in the "+
-			"valid range of %d-%d", msgTx.Version, 1,
-			maxTxVersion)
+		str := fmt.Sprintf(
+			"transaction version %d is not in the "+
+				"valid range of %d-%d", msgTx.Version, 1,
+			maxTxVersion,
+		)
 		return txRuleError(wire.RejectNonstandard, str)
 	}
 	// The transaction must be finalized to be standard and therefore considered for inclusion in a block.
 	if !blockchain.IsFinalizedTransaction(tx, height, medianTimePast) {
-		return txRuleError(wire.RejectNonstandard,
-			"transaction is not finalized")
+		return txRuleError(
+			wire.RejectNonstandard,
+			"transaction is not finalized",
+		)
 	}
 	// Since extremely large transactions with a lot of inputs can cost almost as much to process as the sender fees,
 	// limit the maximum size of a transaction. This also helps mitigate CPU exhaustion attacks.
 	txWeight := blockchain.GetTransactionWeight(tx)
 	if txWeight > maxStandardTxWeight {
-		str := fmt.Sprintf("weight of transaction %v is larger than max "+
-			"allowed weight of %v", txWeight, maxStandardTxWeight)
+		str := fmt.Sprintf(
+			"weight of transaction %v is larger than max "+
+				"allowed weight of %v", txWeight, maxStandardTxWeight,
+		)
 		return txRuleError(wire.RejectNonstandard, str)
 	}
 	for i, txIn := range msgTx.TxIn {
@@ -240,16 +261,20 @@ func checkTransactionStandard(tx *util.Tx, height int32,
 		// See the comment on maxStandardSigScriptSize for more details.
 		sigScriptLen := len(txIn.SignatureScript)
 		if sigScriptLen > maxStandardSigScriptSize {
-			str := fmt.Sprintf("transaction input %d: signature "+
-				"script size of %d bytes is large than max "+
-				"allowed size of %d bytes", i, sigScriptLen,
-				maxStandardSigScriptSize)
+			str := fmt.Sprintf(
+				"transaction input %d: signature "+
+					"script size of %d bytes is large than max "+
+					"allowed size of %d bytes", i, sigScriptLen,
+				maxStandardSigScriptSize,
+			)
 			return txRuleError(wire.RejectNonstandard, str)
 		}
 		// Each transaction input signature script must only contain opcodes which push data onto the stack.
 		if !txscript.IsPushOnlyScript(txIn.SignatureScript) {
-			str := fmt.Sprintf("transaction input %d: signature "+
-				"script is not push only", i)
+			str := fmt.Sprintf(
+				"transaction input %d: signature "+
+					"script is not push only", i,
+			)
 			return txRuleError(wire.RejectNonstandard, str)
 		}
 	}
@@ -275,8 +300,10 @@ func checkTransactionStandard(tx *util.Tx, height int32,
 		if scriptClass == txscript.NullDataTy {
 			numNullDataOutputs++
 		} else if isDust(txOut, minRelayTxFee) {
-			str := fmt.Sprintf("transaction output %d: payment of %d is dust"+
-				"", i, txOut.Value)
+			str := fmt.Sprintf(
+				"transaction output %d: payment of %d is dust"+
+					"", i, txOut.Value,
+			)
 			return txRuleError(wire.RejectDust, str)
 		}
 	}
@@ -297,6 +324,5 @@ func GetTxVirtualSize(tx *util.Tx) int64 {
 	//
 	// We add 3 here as a way to compute the ceiling of the prior arithmetic to 4. The division by 4 creates a discount
 	// for wit witness data.
-	return (blockchain.GetTransactionWeight(tx) + (blockchain.WitnessScaleFactor - 1)) /
-		blockchain.WitnessScaleFactor
+	return blockchain.GetTransactionWeight(tx)
 }

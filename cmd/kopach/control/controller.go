@@ -622,7 +622,7 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("********** got new block template")
-		Debugs(template)
+		// Debugs(template)
 	}
 	return
 }

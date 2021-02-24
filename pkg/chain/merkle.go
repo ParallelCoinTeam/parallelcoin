@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/util"
@@ -100,12 +100,12 @@ func BuildMerkleTreeStore(transactions []*util.Tx, witness bool) MerkleTree {
 		// If we're computing a witness merkle root, instead of the regular txid, we use the modified wtxid which
 		// includes a transaction's witness data within the digest. Additionally, the coinbase's wtxid is all zeroes.
 		switch {
-		case witness && i == 0:
-			var zeroHash chainhash.Hash
-			merkles[i] = &zeroHash
-		case witness:
-			wSha := tx.MsgTx().WitnessHash()
-			merkles[i] = &wSha
+		// case witness && i == 0:
+		// 	var zeroHash chainhash.Hash
+		// 	merkles[i] = &zeroHash
+		// case witness:
+		// 	wSha := tx.MsgTx().WitnessHash()
+		// 	merkles[i] = &wSha
 		default:
 			merkles[i] = tx.Hash()
 		}
