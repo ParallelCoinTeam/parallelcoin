@@ -2728,7 +2728,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		return nil, err
 	}
 	s.Chain.DifficultyAdjustments = make(map[string]float64)
-	s.Chain.DifficultyBits.Store(make(blockchain.TargetBits))
+	s.Chain.DifficultyBits.Store(make(blockchain.Diffs))
 	// Search for a FeeEstimator state in the database. If none can be found or if it cannot be loaded, create a new
 	// one.
 	e := db.Update(

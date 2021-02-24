@@ -869,7 +869,7 @@ func (b *BlockChain) createChainState() error {
 	node := NewBlockNode(header, nil)
 	node.status = statusDataStored | statusValid
 	var err error
-	var df TargetBits
+	var df Diffs
 	df, err = b.CalcNextRequiredDifficultyPlan9Controller(node)
 	node.Diffs.Store(df)
 	if err != nil {

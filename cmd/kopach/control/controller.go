@@ -453,24 +453,19 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 		return
 	}
 	Debug("copying over transactions")
-	cbs := []*util.Tx{cb}
-	msgBlock.Transactions = []*wire.MsgTx{}
 	t := c.transactions.Load()
 	var rtx []*util.Tx
 	rtx, ok = t.([]*util.Tx)
 	var txs []*util.Tx
-	if ok {
-		txs = append(cbs, rtx...)
-	} else {
-		txs = cbs
-	}
+	// copy merkle root
+	txs = append(rtx, cb)
 	for i := range txs {
 		msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 	}
-	mTree := blockchain.BuildMerkleTreeStore(
-		txs, false,
-	)
-	Debugs(mTree)
+	// mTree := blockchain.BuildMerkleTreeStore(
+	// 	txs, false,
+	// )
+	// Debugs(mTree)
 	// set old blocks to pause and send pause directly as block is probably a
 	// solution
 	Debug("sending pause to workers")
@@ -627,7 +622,7 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.SHA256d); Check(err) {
 	} else {
 		Debug("********** got new block template")
-		Debugs(template)
+		// Debugs(template)
 	}
 	return
 }
