@@ -59,88 +59,88 @@ func IsPayToScriptHash(script []byte) bool {
 	return isScriptHash(pops)
 }
 
-// // isWitnessScriptHash returns true if the passed script is a pay-to -witness-script-hash transaction, false otherwise.
-// func isWitnessScriptHash(pops []parsedOpcode) bool {
-// 	return len(pops) == 2 &&
-// 		pops[0].opcode.value == OP_0 &&
-// 		pops[1].opcode.value == OP_DATA_32
-// }
-//
-// // IsPayToWitnessScriptHash returns true if the is in the standard pay -to-witness-script-hash (P2WSH) format, false
-// // otherwise.
-// func IsPayToWitnessScriptHash(script []byte) bool {
-// 	pops, err := parseScript(script)
-// 	if err != nil {
-// 		Error(err)
-// 		return false
-// 	}
-// 	return isWitnessScriptHash(pops)
-// }
+// isWitnessScriptHash returns true if the passed script is a pay-to -witness-script-hash transaction, false otherwise.
+func isWitnessScriptHash(pops []parsedOpcode) bool {
+	return len(pops) == 2 &&
+		pops[0].opcode.value == OP_0 &&
+		pops[1].opcode.value == OP_DATA_32
+}
 
-// // IsPayToWitnessPubKeyHash returns true if the is in the standard pay -to-witness-pubkey-hash (P2WKH) format, false
-// // otherwise.
-// func IsPayToWitnessPubKeyHash(script []byte) bool {
-// 	pops, err := parseScript(script)
-// 	if err != nil {
-// 		Error(err)
-// 		return false
-// 	}
-// 	return isWitnessPubKeyHash(pops)
-// }
-//
-// // isWitnessPubKeyHash returns true if the passed script is a pay-to -witness-pubkey-hash, and false otherwise.
-// func isWitnessPubKeyHash(pops []parsedOpcode) bool {
-// 	return len(pops) == 2 &&
-// 		pops[0].opcode.value == OP_0 &&
-// 		pops[1].opcode.value == OP_DATA_20
-// }
+// IsPayToWitnessScriptHash returns true if the is in the standard pay -to-witness-script-hash (P2WSH) format, false
+// otherwise.
+func IsPayToWitnessScriptHash(script []byte) bool {
+	pops, err := parseScript(script)
+	if err != nil {
+		Error(err)
+		return false
+	}
+	return isWitnessScriptHash(pops)
+}
 
-// // IsWitnessProgram returns true if the passed script is a valid witness program which is encoded according to the
-// // passed witness program version. A witness program must be a small integer (from 0-16), followed by 2-40 bytes of
-// // pushed data.
-// func IsWitnessProgram(script []byte) bool {
-// 	// The length of the script must be between 4 and 42 bytes. The smallest program is the witness version, followed by
-// 	// a data push of 2 bytes. The largest allowed witness program has a data push of 40-bytes.
-// 	if len(script) < 4 || len(script) > 42 {
-// 		return false
-// 	}
-// 	pops, err := parseScript(script)
-// 	if err != nil {
-// 		Error(err)
-// 		return false
-// 	}
-// 	return isWitnessProgram(pops)
-// }
-//
-// // isWitnessProgram returns true if the passed script is a witness program, and false otherwise. A witness program MUST
-// // adhere to the following constraints: there must be exactly two pops (program version and the program itself), the
-// // first opcode MUST be a small integer (0-16), the push data MUST be canonical, and finally the size of the push data
-// // must be between 2 and 40 bytes.
-// func isWitnessProgram(pops []parsedOpcode) bool {
-// 	return len(pops) == 2 &&
-// 		isSmallInt(pops[0].opcode) &&
-// 		canonicalPush(pops[1]) &&
-// 		(len(pops[1].data) >= 2 && len(pops[1].data) <= 40)
-// }
-//
-// // ExtractWitnessProgramInfo attempts to extract the witness program version, as well as the witness program itself from
-// // the passed script.
-// func ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
-// 	pops, err := parseScript(script)
-// 	if err != nil {
-// 		Error(err)
-// 		return 0, nil, err
-// 	}
-// 	// If at this point, the scripts doesn't resemble a witness program, then we'll exit early as there isn't a valid
-// 	// version or program to extract.
-// 	if !isWitnessProgram(pops) {
-// 		return 0, nil, fmt.Errorf("script is not a witness program, " +
-// 			"unable to extract version or witness program")
-// 	}
-// 	witnessVersion := asSmallInt(pops[0].opcode)
-// 	witnessProgram := pops[1].data
-// 	return witnessVersion, witnessProgram, nil
-// }
+// IsPayToWitnessPubKeyHash returns true if the is in the standard pay -to-witness-pubkey-hash (P2WKH) format, false
+// otherwise.
+func IsPayToWitnessPubKeyHash(script []byte) bool {
+	pops, err := parseScript(script)
+	if err != nil {
+		Error(err)
+		return false
+	}
+	return isWitnessPubKeyHash(pops)
+}
+
+// isWitnessPubKeyHash returns true if the passed script is a pay-to -witness-pubkey-hash, and false otherwise.
+func isWitnessPubKeyHash(pops []parsedOpcode) bool {
+	return len(pops) == 2 &&
+		pops[0].opcode.value == OP_0 &&
+		pops[1].opcode.value == OP_DATA_20
+}
+
+// IsWitnessProgram returns true if the passed script is a valid witness program which is encoded according to the
+// passed witness program version. A witness program must be a small integer (from 0-16), followed by 2-40 bytes of
+// pushed data.
+func IsWitnessProgram(script []byte) bool {
+	// The length of the script must be between 4 and 42 bytes. The smallest program is the witness version, followed by
+	// a data push of 2 bytes. The largest allowed witness program has a data push of 40-bytes.
+	if len(script) < 4 || len(script) > 42 {
+		return false
+	}
+	pops, err := parseScript(script)
+	if err != nil {
+		Error(err)
+		return false
+	}
+	return isWitnessProgram(pops)
+}
+
+// isWitnessProgram returns true if the passed script is a witness program, and false otherwise. A witness program MUST
+// adhere to the following constraints: there must be exactly two pops (program version and the program itself), the
+// first opcode MUST be a small integer (0-16), the push data MUST be canonical, and finally the size of the push data
+// must be between 2 and 40 bytes.
+func isWitnessProgram(pops []parsedOpcode) bool {
+	return len(pops) == 2 &&
+		isSmallInt(pops[0].opcode) &&
+		canonicalPush(pops[1]) &&
+		(len(pops[1].data) >= 2 && len(pops[1].data) <= 40)
+}
+
+// ExtractWitnessProgramInfo attempts to extract the witness program version, as well as the witness program itself from
+// the passed script.
+func ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
+	pops, err := parseScript(script)
+	if err != nil {
+		Error(err)
+		return 0, nil, err
+	}
+	// If at this point, the scripts doesn't resemble a witness program, then we'll exit early as there isn't a valid
+	// version or program to extract.
+	if !isWitnessProgram(pops) {
+		return 0, nil, fmt.Errorf("script is not a witness program, " +
+			"unable to extract version or witness program")
+	}
+	witnessVersion := asSmallInt(pops[0].opcode)
+	witnessProgram := pops[1].data
+	return witnessVersion, witnessProgram, nil
+}
 
 func isPushOnly(pops []parsedOpcode) bool {
 	// isPushOnly returns true if the script only pushes data, false otherwise. NOTE: This function does NOT verify
@@ -710,56 +710,56 @@ func GetPreciseSigOpCount(scriptSig, scriptPubKey []byte, bip16 bool) int {
 	return getSigOpCount(shPops, true)
 }
 
-// // GetWitnessSigOpCount returns the number of signature operations generated by spending the passed pkScript with the
-// // specified witness, or sigScript. Unlike GetPreciseSigOpCount, this function is able to accurately count the number of
-// // signature operations generated by spending witness programs, and nested p2sh witness programs. If the script fails to
-// // parse, then the count up to the point of failure is returned.
-// func GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) int {
-// 	// If this is a regular witness program, then we can proceed directly to counting its signature operations without
-// 	// any further processing.
-// 	if IsWitnessProgram(pkScript) {
-// 		return getWitnessSigOps(pkScript, witness)
-// 	}
-// 	// Next, we'll check the sigScript to see if this is a nested p2sh witness program. This is a case wherein the
-// 	// sigScript is actually a datapush of a p2wsh witness program.
-// 	sigPops, err := parseScript(sigScript)
-// 	if err != nil {
-// 		Error(err)
-// 		return 0
-// 	}
-// 	if IsPayToScriptHash(pkScript) && isPushOnly(sigPops) &&
-// 		IsWitnessProgram(sigScript[1:]) {
-// 		return getWitnessSigOps(sigScript[1:], witness)
-// 	}
-// 	return 0
-// }
-//
-// // getWitnessSigOps returns the number of signature operations generated by spending the passed witness program wit the
-// // passed witness. The exact signature counting heuristic is modified by the version of the passed witness program. If
-// // the version of the witness program is unable to be extracted, then 0 is returned for the sig op count.
-// func getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
-// 	// Attempt to extract the witness program version.
-// 	witnessVersion, witnessProgram, err := ExtractWitnessProgramInfo(
-// 		pkScript,
-// 	)
-// 	if err != nil {
-// 		Error(err)
-// 		return 0
-// 	}
-// 	switch witnessVersion {
-// 	case 0:
-// 		switch {
-// 		case len(witnessProgram) == payToWitnessPubKeyHashDataSize:
-// 			return 1
-// 		case len(witnessProgram) == payToWitnessScriptHashDataSize &&
-// 			len(witness) > 0:
-// 			witnessScript := witness[len(witness)-1]
-// 			pops, _ := parseScript(witnessScript)
-// 			return getSigOpCount(pops, true)
-// 		}
-// 	}
-// 	return 0
-// }
+// GetWitnessSigOpCount returns the number of signature operations generated by spending the passed pkScript with the
+// specified witness, or sigScript. Unlike GetPreciseSigOpCount, this function is able to accurately count the number of
+// signature operations generated by spending witness programs, and nested p2sh witness programs. If the script fails to
+// parse, then the count up to the point of failure is returned.
+func GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) int {
+	// If this is a regular witness program, then we can proceed directly to counting its signature operations without
+	// any further processing.
+	if IsWitnessProgram(pkScript) {
+		return getWitnessSigOps(pkScript, witness)
+	}
+	// Next, we'll check the sigScript to see if this is a nested p2sh witness program. This is a case wherein the
+	// sigScript is actually a datapush of a p2wsh witness program.
+	sigPops, err := parseScript(sigScript)
+	if err != nil {
+		Error(err)
+		return 0
+	}
+	if IsPayToScriptHash(pkScript) && isPushOnly(sigPops) &&
+		IsWitnessProgram(sigScript[1:]) {
+		return getWitnessSigOps(sigScript[1:], witness)
+	}
+	return 0
+}
+
+// getWitnessSigOps returns the number of signature operations generated by spending the passed witness program wit the
+// passed witness. The exact signature counting heuristic is modified by the version of the passed witness program. If
+// the version of the witness program is unable to be extracted, then 0 is returned for the sig op count.
+func getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
+	// Attempt to extract the witness program version.
+	witnessVersion, witnessProgram, err := ExtractWitnessProgramInfo(
+		pkScript,
+	)
+	if err != nil {
+		Error(err)
+		return 0
+	}
+	switch witnessVersion {
+	case 0:
+		switch {
+		case len(witnessProgram) == payToWitnessPubKeyHashDataSize:
+			return 1
+		case len(witnessProgram) == payToWitnessScriptHashDataSize &&
+			len(witness) > 0:
+			witnessScript := witness[len(witness)-1]
+			pops, _ := parseScript(witnessScript)
+			return getSigOpCount(pops, true)
+		}
+	}
+	return 0
+}
 
 // IsUnspendable returns whether the passed public key script is unspendable, or guaranteed to fail at execution. This
 // allows inputs to be pruned instantly when entering the UTXO set.

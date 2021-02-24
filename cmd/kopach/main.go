@@ -293,10 +293,15 @@ var handlers = transport.Handlers{
 		}
 		
 		// Debugs(b)
-		var jr job.Job
-		gotiny.Unmarshal(b, &jr)
-		// Debugs(jr)
-		
+		jr := &job.Job{}
+		gotiny.Unmarshal(b, jr)
+		Debugs(jr)
+		for _,x := range jr.Merkles {
+			if x==nil {
+				Debug("encountered nil merkle root, abort")
+				return
+			}
+		}
 		// iP := jr.IPs
 		w.height = jr.Height
 		cN := jr.ControllerNonce
@@ -312,7 +317,7 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			if err = w.clients[i].NewJob(&jr); Check(err) {
+			if err = w.clients[i].NewJob(jr); Check(err) {
 			}
 		}
 		return

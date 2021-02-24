@@ -231,7 +231,7 @@ func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server,
 // access. For the legacy JSON-RPC server it enables methods that require a loaded wallet.
 func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *legacy.Server) {
 	if legacyServer != nil {
-		Error("starting legacy wallet rpc server")
+		Debug("starting legacy wallet rpc server")
 		legacyServer.RegisterWallet(wallet)
 	}
 }
