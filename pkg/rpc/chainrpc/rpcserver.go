@@ -21,12 +21,12 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	
+
 	qu "github.com/p9c/pod/pkg/util/quit"
-	
+
 	"github.com/btcsuite/websocket"
 	uberatomic "go.uber.org/atomic"
-	
+
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -295,7 +295,7 @@ var (
 	GBTMutableFields = []string{
 		"time", "transactions/add", "prevblock", "coinbase/append",
 	}
-	
+
 	// RPCAskWallet is list of commands that we recognize, but for which pod has no support because it lacks support for
 	// wallet functionality. For these commands the user should ask a connected instance of the wallet.
 	RPCAskWallet = map[string]CommandHandler{
@@ -343,12 +343,12 @@ var (
 		"walletpassphrase":       {},
 		"walletpassphrasechange": {},
 	}
-	
+
 	// RPCHandlers maps RPC command strings to appropriate handler functions.
 	//
 	// This is set by init because help references RPCHandlers and thus causes a dependency loop.
 	RPCHandlers map[string]CommandHandler
-	
+
 	// RPCLimited RPCHandlersBeforeInit is
 	//
 	// RPCHandlersBeforeInit = map[string]CommandHandler{
@@ -632,7 +632,7 @@ var (
 	// 		},
 	// 	},
 	// }
-	
+
 	// RPCLimited isCommands that are available to a limited user
 	RPCLimited = map[string]CommandHandler{
 		// Websockets commands
@@ -819,11 +819,11 @@ func (state *GBTWorkState) BlockTemplateResult(useCoinbaseValue bool, submitOld 
 		NonceRange:   GBTNonceRange,
 		Capabilities: GBTCapabilities,
 	}
-	// // If the generated block template includes transactions with witness data, then include the witness commitment in
-	// // the GBT result.
-	// if template.WitnessCommitment != nil {
-	// 	reply.DefaultWitnessCommitment = hex.EncodeToString(template.WitnessCommitment)
-	// }
+	// If the generated block template includes transactions with witness data, then include the witness commitment in
+	// the GBT result.
+	if template.WitnessCommitment != nil {
+		reply.DefaultWitnessCommitment = hex.EncodeToString(template.WitnessCommitment)
+	}
 	if useCoinbaseValue {
 		reply.CoinbaseAux = GBTCoinbaseAux
 		reply.CoinbaseValue = &msgBlock.Transactions[0].TxOut[0].Value
@@ -1008,7 +1008,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 			targetDifficulty,
 			msgBlock.Header.MerkleRoot,
 		)
-		
+
 		// Notify any clients that are long polling about the new template.
 		state.NotifyLongPollers(latestHash, lastTxUpdate)
 	} else {
@@ -1057,7 +1057,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 		if err != nil {
 			Error(err)
 			Debug(err)
-			
+
 		}
 		msgBlock.Header.Nonce = 0
 		Debugf(
@@ -1065,7 +1065,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 			msgBlock.Header.Timestamp,
 			targetDifficulty,
 		)
-		
+
 	}
 	return nil
 }
@@ -1137,7 +1137,7 @@ func (s *Server) Start() {
 				Error(err)
 				if _, ok := err.(websocket.HandshakeError); !ok {
 					Error("unexpected websocket error:", err)
-					
+
 				}
 				http.Error(w, "400 Bad Request.", http.StatusBadRequest)
 				return
@@ -1200,7 +1200,7 @@ func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, error) {
 	if len(authhdr) == 0 {
 		if require {
 			Warn("RPC authentication failure from", r.RemoteAddr)
-			
+
 			return false, false, errors.New("auth failure")
 		}
 		return false, false, nil
@@ -1219,7 +1219,7 @@ func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, error) {
 	}
 	// Request's auth doesn't match either user
 	Warn("RPC authentication failure from", r.RemoteAddr)
-	
+
 	return false, false, errors.New("auth failure")
 }
 
@@ -1429,7 +1429,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	if err != nil {
 		Error(err)
 		Error("failed to marshal reply:", err)
-		
+
 		return
 	}
 	// Write the response.
@@ -1437,17 +1437,17 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	if err != nil {
 		Error(err)
 		Error(err.Error())
-		
+
 		return
 	}
 	if _, err := buf.Write(msg); err != nil {
 		Error("failed to write marshalled reply:", err)
-		
+
 	}
 	// Terminate with newline to maintain compatibility with Bitcoin Core.
 	if err := buf.WriteByte('\n'); err != nil {
 		Error("failed to append terminating newline to reply:", err)
-		
+
 	}
 }
 
@@ -1461,7 +1461,7 @@ func (s *Server) LimitConnections(w http.ResponseWriter, remoteAddr string) bool
 			"max RPC clients exceeded [%d] - disconnecting client %s",
 			s.Config.RPCMaxClients, remoteAddr,
 		)
-		
+
 		http.Error(
 			w, "503 Too busy.  Try again later.",
 			http.StatusServiceUnavailable,
@@ -1657,7 +1657,7 @@ func CreateTxRawResult(
 	txReply := &btcjson.TxRawResult{
 		Hex:      mtxHex,
 		Txid:     txHash,
-		Hash:     mtx.TxHash().String(),
+		Hash:     mtx.WitnessHash().String(),
 		Size:     int32(mtx.SerializeSize()),
 		Vsize:    int32(mempool.GetTxVirtualSize(util.NewTx(mtx))),
 		Vin:      CreateVinList(mtx),
@@ -1683,7 +1683,7 @@ func CreateVinList(mtx *wire.MsgTx) []btcjson.Vin {
 		txIn := mtx.TxIn[0]
 		vinList[0].Coinbase = hex.EncodeToString(txIn.SignatureScript)
 		vinList[0].Sequence = txIn.Sequence
-		// vinList[0].Witness = WitnessToHex(txIn.Witness)
+		vinList[0].Witness = WitnessToHex(txIn.Witness)
 		return vinList
 	}
 	for i, txIn := range mtx.TxIn {
@@ -1698,9 +1698,9 @@ func CreateVinList(mtx *wire.MsgTx) []btcjson.Vin {
 			Asm: disbuf,
 			Hex: hex.EncodeToString(txIn.SignatureScript),
 		}
-		// if mtx.HasWitness() {
-		// 	vinEntry.Witness = WitnessToHex(txIn.Witness)
-		// }
+		if mtx.HasWitness() {
+			vinEntry.Witness = WitnessToHex(txIn.Witness)
+		}
 	}
 	return vinList
 }
@@ -1752,9 +1752,9 @@ func CreateVinListPrevOut(
 				Hex: hex.EncodeToString(txIn.SignatureScript),
 			},
 		}
-		// if len(txIn.Witness) != 0 {
-		// 	vinEntry.Witness = WitnessToHex(txIn.Witness)
-		// }
+		if len(txIn.Witness) != 0 {
+			vinEntry.Witness = WitnessToHex(txIn.Witness)
+		}
 		// Add the entry to the list now if it already passed the filter since the previous output might not be
 		// available.
 		passesFilter := len(filterAddrMap) == 0
@@ -2000,7 +2000,7 @@ func GetDifficultyRatio(
 	if err != nil {
 		Error(err)
 		Error("cannot get difficulty:", err)
-		
+
 		return 0
 	}
 	return diff
@@ -2031,7 +2031,7 @@ func InternalRPCError(errStr, context string) *btcjson.RPCError {
 		logStr = context + ": " + errStr
 	}
 	Error(logStr)
-	
+
 	return btcjson.NewRPCError(btcjson.ErrRPCInternal.Code, errStr)
 }
 
@@ -2189,7 +2189,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 		best.Height-finishHeight,
 		level,
 	)
-	
+
 	for height := best.Height; height > finishHeight; height-- {
 		// Level 0 just looks up the block.
 		block, err := s.Cfg.Chain.BlockByHeight(height)
@@ -2199,7 +2199,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 				height,
 				err,
 			)
-			
+
 			return err
 		}
 		powLimit := fork.GetMinDiff(
@@ -2219,7 +2219,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 					"verify is unable to validate block at hash %v height %d: %v %s",
 					block.Hash(), height, err,
 				)
-				
+
 				return err
 			}
 		}
@@ -2247,17 +2247,17 @@ func handleDebugLevel(	s *RPCServer, cmd interface{}, closeChan <-qu.C) (interfa
 	return "Done.", nil
 }
 */
-//
-// // WitnessToHex formats the passed witness stack as a slice of hex-encoded strings to be used in a JSON response.
-// func WitnessToHex(witness wire.TxWitness) []string {
-// 	// Ensure nil is returned when there are no entries versus an empty slice so it can properly be omitted as
-// 	// necessary.
-// 	if len(witness) == 0 {
-// 		return nil
-// 	}
-// 	result := make([]string, 0, len(witness))
-// 	for _, wit := range witness {
-// 		result = append(result, hex.EncodeToString(wit))
-// 	}
-// 	return result
-// }
+
+// WitnessToHex formats the passed witness stack as a slice of hex-encoded strings to be used in a JSON response.
+func WitnessToHex(witness wire.TxWitness) []string {
+	// Ensure nil is returned when there are no entries versus an empty slice so it can properly be omitted as
+	// necessary.
+	if len(witness) == 0 {
+		return nil
+	}
+	result := make([]string, 0, len(witness))
+	for _, wit := range witness {
+		result = append(result, hex.EncodeToString(wit))
+	}
+	return result
+}

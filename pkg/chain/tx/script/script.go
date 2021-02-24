@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"time"
-	
+
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 )
@@ -15,7 +15,7 @@ import (
 var Bip16Activation = time.Unix(1333238400, 0)
 
 type // SigHashType represents hash type bits at the end of a signature.
-	SigHashType uint32
+SigHashType uint32
 
 const ( // Hash type bits from the end of a signature.
 	SigHashOld          SigHashType = 0x0
@@ -25,9 +25,9 @@ const ( // Hash type bits from the end of a signature.
 	SigHashAnyOneCanPay SigHashType = 0x80
 	// sigHashMask defines the number of bits of the hash type which is used to identify which outputs are signed.
 	sigHashMask = 0x1f
-	
+
 	// These are the constants specified for maximums in individual scripts.
-	
+
 	MaxOpsPerScript       = 201 // Max number of non-push operations.
 	MaxPubKeysPerMultiSig = 20  // Multisig can't have more sigs than this.
 	MaxScriptElementSize  = 520 // Max bytes pushable to the stack.
@@ -185,15 +185,11 @@ func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, e
 		// Data pushes of specific lengths -- OP_DATA_[1-75].
 		case op.length > 1:
 			if len(script[i:]) < op.length {
-				str := fmt.Sprintf(
-					"opcode %s requires %d "+
-						"bytes, but script only has %d remaining",
-					op.name, op.length, len(script[i:]),
-				)
-				return retScript, scriptError(
-					ErrMalformedPush,
-					str,
-				)
+				str := fmt.Sprintf("opcode %s requires %d "+
+					"bytes, but script only has %d remaining",
+					op.name, op.length, len(script[i:]))
+				return retScript, scriptError(ErrMalformedPush,
+					str)
 			}
 			// Slice out the data.
 			pop.data = script[i+1 : i+op.length]
@@ -203,15 +199,11 @@ func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, e
 			var l uint
 			off := i + 1
 			if len(script[off:]) < -op.length {
-				str := fmt.Sprintf(
-					"opcode %s requires %d "+
-						"bytes, but script only has %d remaining",
-					op.name, -op.length, len(script[off:]),
-				)
-				return retScript, scriptError(
-					ErrMalformedPush,
-					str,
-				)
+				str := fmt.Sprintf("opcode %s requires %d "+
+					"bytes, but script only has %d remaining",
+					op.name, -op.length, len(script[off:]))
+				return retScript, scriptError(ErrMalformedPush,
+					str)
 			}
 			// Next -length bytes are little endian length of data.
 			switch op.length {
@@ -226,28 +218,20 @@ func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, e
 					(uint(script[off+1]) << 8) |
 					uint(script[off])
 			default:
-				str := fmt.Sprintf(
-					"invalid opcode length %d",
-					op.length,
-				)
-				return retScript, scriptError(
-					ErrMalformedPush,
-					str,
-				)
+				str := fmt.Sprintf("invalid opcode length %d",
+					op.length)
+				return retScript, scriptError(ErrMalformedPush,
+					str)
 			}
 			// Move offset to beginning of the data.
 			off += -op.length
 			// Disallow entries that do not fit script or were sign extended.
 			if int(l) > len(script[off:]) || int(l) < 0 {
-				str := fmt.Sprintf(
-					"opcode %s pushes %d bytes, "+
-						"but script only has %d remaining",
-					op.name, int(l), len(script[off:]),
-				)
-				return retScript, scriptError(
-					ErrMalformedPush,
-					str,
-				)
+				str := fmt.Sprintf("opcode %s pushes %d bytes, "+
+					"but script only has %d remaining",
+					op.name, int(l), len(script[off:]))
+				return retScript, scriptError(ErrMalformedPush,
+					str)
 			}
 			pop.data = script[off : off+int(l)]
 			i += 1 - op.length + int(l)
@@ -397,14 +381,7 @@ func calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 // signatures now cover the input value of the referenced unspent output. This allows offline or hardware wallets to
 // compute the exact amount being spent in addition to the final transaction fee. In the case the wallet if fed an
 // invalid input amount, the real sighash will differ causing the produced signature to be invalid.
-func calcWitnessSignatureHash(
-	subScript []parsedOpcode,
-	sigHashes *TxSigHashes,
-	hashType SigHashType,
-	tx *wire.MsgTx,
-	idx int,
-	amt int64,
-) ([]byte, error) {
+func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
 	// As a sanity check,
 	// ensure the passed input index for the transaction is valid.
 	if idx > len(tx.TxIn)-1 {
@@ -441,25 +418,25 @@ func calcWitnessSignatureHash(
 	var bIndex [4]byte
 	binary.LittleEndian.PutUint32(bIndex[:], txIn.PreviousOutPoint.Index)
 	sigHash.Write(bIndex[:])
-	// if isWitnessPubKeyHash(subScript) {
-	// 	// The script code for a p2wkh is a length prefix varint for the next 25 bytes, followed by a re-creation of the
-	// 	// original p2pkh pk script.
-	// 	sigHash.Write([]byte{0x19})
-	// 	sigHash.Write([]byte{OP_DUP})
-	// 	sigHash.Write([]byte{OP_HASH160})
-	// 	sigHash.Write([]byte{OP_DATA_20})
-	// 	sigHash.Write(subScript[1].data)
-	// 	sigHash.Write([]byte{OP_EQUALVERIFY})
-	// 	sigHash.Write([]byte{OP_CHECKSIG})
-	// } else {
-	// For p2wsh outputs, and future outputs, the script code is the original script, with all code separators
-	// removed, serialized with a var int length prefix.
-	rawScript, _ := unparseScript(subScript)
-	err := wire.WriteVarBytes(&sigHash, 0, rawScript)
-	if err != nil {
-		Error(err)
+	if isWitnessPubKeyHash(subScript) {
+		// The script code for a p2wkh is a length prefix varint for the next 25 bytes, followed by a re-creation of the
+		// original p2pkh pk script.
+		sigHash.Write([]byte{0x19})
+		sigHash.Write([]byte{OP_DUP})
+		sigHash.Write([]byte{OP_HASH160})
+		sigHash.Write([]byte{OP_DATA_20})
+		sigHash.Write(subScript[1].data)
+		sigHash.Write([]byte{OP_EQUALVERIFY})
+		sigHash.Write([]byte{OP_CHECKSIG})
+	} else {
+		// For p2wsh outputs, and future outputs, the script code is the original script, with all code separators
+		// removed, serialized with a var int length prefix.
+		rawScript, _ := unparseScript(subScript)
+		err := wire.WriteVarBytes(&sigHash, 0, rawScript)
+		if err != nil {
+			Error(err)
+		}
 	}
-	// }
 	// Next, add the input amount, and sequence number of the input being signed.
 	var bAmount [8]byte
 	binary.LittleEndian.PutUint64(bAmount[:], uint64(amt))
@@ -494,23 +471,14 @@ func calcWitnessSignatureHash(
 
 // CalcWitnessSigHash computes the sighash digest for the specified input of the target transaction observing the
 // desired sig hash type.
-func CalcWitnessSigHash(
-	script []byte,
-	sigHashes *TxSigHashes,
-	hType SigHashType,
-	tx *wire.MsgTx,
-	idx int,
-	amt int64,
-) ([]byte, error) {
+func CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
 	parsedScript, err := parseScript(script)
 	if err != nil {
 		Error(err)
 		return nil, fmt.Errorf("cannot parse output script: %v", err)
 	}
-	return calcWitnessSignatureHash(
-		parsedScript, sigHashes, hType, tx, idx,
-		amt,
-	)
+	return calcWitnessSignatureHash(parsedScript, sigHashes, hType, tx, idx,
+		amt)
 }
 
 // shallowCopyTx creates a shallow copy of the transaction for use when calculating the signature hash. It is used over
