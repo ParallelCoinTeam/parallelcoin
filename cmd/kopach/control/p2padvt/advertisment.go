@@ -27,14 +27,7 @@ type Advertisment struct {
 
 // Get returns an advertisment message
 func Get(cx *conte.Xt) []byte {
-	P2P := util.GetActualPort((*cx.Config.P2PListeners)[0])
-	_, ips := routeable.GetAddressesAndInterfaces()
-	adv := Advertisment{
-		IPs:      ips, // routeable.GetListenable(),
-		P2P:      P2P,
-		UUID:     cx.UUID,
-		Services: cx.RealNode.Services,
-	}
+	adv := GetAdvt(cx)
 	ad := gotiny.Marshal(&adv)
 	return ad
 }

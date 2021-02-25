@@ -44,8 +44,8 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[str
 	for i := range SecondaryAddresses {
 		Addresses[SecondaryAddresses[i].String()] = struct{}{}
 	}
-	Debugs(Interfaces)
-	Debugs(Addresses)
+	// Debugs(Interfaces)
+	// Debugs(Addresses)
 	return
 }
 
