@@ -158,7 +158,8 @@ func (b *GCSBuilder) AddHash(hash *chainhash.Hash) *GCSBuilder {
 	return b.AddEntry(hash.CloneBytes())
 }
 
-// AddWitness adds each item of the passed filter stack to the filter, and then adds each item as a script.
+// AddWitness adds each item of the passed filter stack to the filter, and then
+// adds each item as a script.
 func (b *GCSBuilder) AddWitness(witness wire.TxWitness) *GCSBuilder {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {

@@ -293,10 +293,14 @@ var handlers = transport.Handlers{
 		}
 		
 		// Debugs(b)
-		var jr job.Job
-		gotiny.Unmarshal(b, &jr)
-		// Debugs(jr)
-		
+		jr := &job.Job{}
+		gotiny.Unmarshal(b, jr)
+		for _,x := range jr.Merkles {
+			if x==nil {
+				Debug("encountered nil merkle root, abort")
+				return
+			}
+		}
 		// iP := jr.IPs
 		w.height = jr.Height
 		cN := jr.ControllerNonce
@@ -308,11 +312,12 @@ var handlers = transport.Handlers{
 			// ignore other controllers while one is active and received first
 			return
 		}
+		Debugs(jr)
 		Debug("now listening to controller at", cN)
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			if err = w.clients[i].NewJob(&jr); Check(err) {
+			if err = w.clients[i].NewJob(jr); Check(err) {
 			}
 		}
 		return

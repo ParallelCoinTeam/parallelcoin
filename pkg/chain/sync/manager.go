@@ -916,9 +916,9 @@ func (sm *SyncManager) handleInvMsg(imsg *invMsg) {
 			}
 			// Ignore invs block invs from non-witness enabled peers, as after segwit activation we only want to
 			// download from peers that can provide us full witness data for blocks. PARALLELCOIN HAS NO WITNESS STUFF
-			// if !peer.IsWitnessEnabled() && iv.Type == wire.InvTypeBlock {
-			// 	continue
-			// }
+			if !peer.IsWitnessEnabled() && iv.Type == wire.InvTypeBlock {
+				continue
+			}
 			// Add it to the request queue.
 			state.requestQueue = append(state.requestQueue, iv)
 			continue
@@ -1205,9 +1205,12 @@ func (sm *SyncManager) startSync() {
 	if sm.syncPeer != nil {
 		return
 	}
-	// Once the segwit soft-fork package has activated, we only want to sync from peers which are witness enabled to
-	// ensure that we fully validate all blockchain data.
-	segwitActive, err := sm.chain.IsDeploymentActive(chaincfg.DeploymentSegwit)
+	// Once the segwit soft-fork package has activated, we only want to sync from
+	// peers which are witness enabled to ensure that we fully validate all
+	// blockchain data.
+	var err error
+	var segwitActive bool
+	segwitActive, err = sm.chain.IsDeploymentActive(chaincfg.DeploymentSegwit)
 	if err != nil {
 		Error("unable to query for segwit soft-fork state:", err)
 		return

@@ -2,6 +2,7 @@
 package txsizes
 
 import (
+	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/wire"
 	h "github.com/p9c/pod/pkg/util/helpers"
 )
@@ -41,8 +42,8 @@ const (
 	//   - 1 byte compact int encoding value 25
 	//   - 25 bytes P2PKH output script
 	P2PKHOutputSize = 8 + 1 + P2PKHPkScriptSize
-	// P2WPKHPkScriptSize is the size of a transaction output script that pays to a witness pubkey hash. It is
-	// calculated as:
+	// P2WPKHPkScriptSize is the size of a transaction output script that pays to a
+	// witness pubkey hash. It is calculated as:
 	//
 	//   - OP_0
 	//   - OP_DATA_20
@@ -54,8 +55,9 @@ const (
 	//   - 1 byte compact int encoding value 22
 	//   - 22 bytes P2PKH output script
 	P2WPKHOutputSize = 8 + 1 + P2WPKHPkScriptSize
-	// RedeemP2WPKHScriptSize is the size of a transaction input script that spends a pay-to-witness-public-key hash
-	// (P2WPKH). The redeem script for P2WPKH spends MUST be empty.
+	// RedeemP2WPKHScriptSize is the size of a transaction input script that spends
+	// a pay-to-witness-public-key hash (P2WPKH). The redeem script for P2WPKH
+	// spends MUST be empty.
 	RedeemP2WPKHScriptSize = 0
 	// RedeemP2WPKHInputSize is the worst case size of a transaction input redeeming a P2WPKH output. It is calculated
 	// as:
@@ -66,8 +68,9 @@ const (
 	//   - 0 bytes redeem script
 	//   - 4 bytes sequence
 	RedeemP2WPKHInputSize = 32 + 4 + 1 + RedeemP2WPKHScriptSize + 4
-	// RedeemNestedP2WPKHScriptSize is the worst case size of a transaction input script that redeems a
-	// pay-to-witness-key hash nested in P2SH (P2SH-P2WPKH). It is calculated as:
+	// RedeemNestedP2WPKHScriptSize is the worst case size of a transaction input
+	// script that redeems a pay-to-witness-key hash nested in P2SH (P2SH-P2WPKH).
+	// It is calculated as:
 	//
 	//   - 1 byte compact int encoding value 22
 	//   - OP_0
@@ -83,8 +86,8 @@ const (
 	//   - 23 bytes redeem script (scriptSig)
 	//   - 4 bytes sequence
 	RedeemNestedP2WPKHInputSize = 32 + 4 + 1 + RedeemNestedP2WPKHScriptSize + 4
-	// RedeemP2WPKHInputWitnessWeight is the worst case weight of a witness for spending P2WPKH and nested P2WPKH
-	// outputs. It is calculated as:
+	// RedeemP2WPKHInputWitnessWeight is the worst case weight of a witness for
+	// spending P2WPKH and nested P2WPKH outputs. It is calculated as:
 	//
 	//   - 1 wu compact int encoding value 2 (number of items)
 	//   - 1 wu compact int encoding value 73
@@ -115,10 +118,8 @@ func EstimateSerializeSize(inputCount int, txOuts []*wire.TxOut, addChangeOutput
 // EstimateVirtualSize returns a worst case virtual size estimate for a signed transaction that spends the given number
 // of P2PKH, P2WPKH and (nested) P2SH-P2WPKH outputs, and contains each transaction output from txOuts. The estimate is
 // incremented for an additional P2PKH change output if addChangeOutput is true.
-func EstimateVirtualSize(
-	numP2PKHIns, numP2WPKHIns, numNestedP2WPKHIns int,
-	txOuts []*wire.TxOut, addChangeOutput bool,
-) int {
+func EstimateVirtualSize(numP2PKHIns, numP2WPKHIns, numNestedP2WPKHIns int,
+	txOuts []*wire.TxOut, addChangeOutput bool) int {
 	changeSize := 0
 	// outputCount := len(txOuts)
 	if addChangeOutput {
@@ -130,13 +131,23 @@ func EstimateVirtualSize(
 	// size of redeem scripts + the size out the serialized outputs and change.
 	baseSize := 8 +
 		wire.VarIntSerializeSize(
-			uint64(numP2PKHIns+numP2WPKHIns+numNestedP2WPKHIns),
-		) +
+			uint64(numP2PKHIns+numP2WPKHIns+numNestedP2WPKHIns)) +
 		wire.VarIntSerializeSize(uint64(len(txOuts))) +
 		numP2PKHIns*RedeemP2PKHInputSize +
 		numP2WPKHIns*RedeemP2WPKHInputSize +
 		numNestedP2WPKHIns*RedeemNestedP2WPKHInputSize +
 		h.SumOutputSerializeSizes(txOuts) +
 		changeSize
-	return baseSize
+	// If this transaction has any witness inputs, we must count the witness data.
+	witnessWeight := 0
+	if numP2WPKHIns+numNestedP2WPKHIns > 0 {
+		// Additional 2 weight units for segwit marker + flag.
+		witnessWeight = 2 +
+			wire.VarIntSerializeSize(
+				uint64(numP2WPKHIns+numNestedP2WPKHIns)) +
+			numP2WPKHIns*RedeemP2WPKHInputWitnessWeight +
+			numNestedP2WPKHIns*RedeemP2WPKHInputWitnessWeight
+	}
+	// We add 3 to the witness weight to make sure the result is always rounded up.
+	return baseSize + (witnessWeight+3)/blockchain.WitnessScaleFactor
 }

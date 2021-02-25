@@ -645,18 +645,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				"disables multicast (this is force default for node unless explicitly enabled)",
 				cx.Config.DisableController,
 			),
-			// au.String(
-			// 	"controller",
-			// 	"port controller listens on for solutions from workers"+
-			// 		" and other node peers",
-			// 	":0",
-			// 	cx.Config.Controller,
-			// ),
-			// au.StringSlice(
-			// 	"controllerconnect",
-			// 	"addresses that the controller can be reached on",
-			// 	cx.Config.ControllerConnect,
-			// ),
 			au.Bool(
 				"autoports",
 				"uses random automatic ports for p2p & rpc",

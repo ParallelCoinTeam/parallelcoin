@@ -43,8 +43,8 @@ const (
 	SFNodeGetUTXO
 	// SFNodeBloom is a flag used to indicate a peer supports bloom filtering.
 	SFNodeBloom
-	// SFNodeWitness is a flag used to indicate a peer supports blocks and transactions including witness data
-	// (BIP0144).
+	// SFNodeWitness is a flag used to indicate a peer supports blocks and
+	// transactions including witness data (BIP0144).
 	SFNodeWitness
 	// SFNodeXthin is a flag used to indicate a peer supports xthin blocks.
 	SFNodeXthin

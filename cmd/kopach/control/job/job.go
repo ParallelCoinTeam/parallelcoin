@@ -1,6 +1,7 @@
 package job
 
 import (
+	"errors"
 	"time"
 	
 	"github.com/niubaoshu/gotiny"
@@ -106,7 +107,13 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 			append(txr, txx), false,
 		)
 		// Debugs(mTree)
-		mTS[i] = mTree.GetRoot()
+		mr :=  mTree.GetRoot()
+		if mr == nil {
+			err = errors.New("got a nil merkle root")
+			panic(err)
+			return
+		}
+		mTS[i] = mr
 		// if err = mTS[i].
 		// 	SetBytes(
 		// 		mTree[len(mTree)-1].CloneBytes(),

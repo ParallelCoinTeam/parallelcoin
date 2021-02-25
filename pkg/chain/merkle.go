@@ -100,12 +100,12 @@ func BuildMerkleTreeStore(transactions []*util.Tx, witness bool) MerkleTree {
 		// If we're computing a witness merkle root, instead of the regular txid, we use the modified wtxid which
 		// includes a transaction's witness data within the digest. Additionally, the coinbase's wtxid is all zeroes.
 		switch {
-		// case witness && i == 0:
-		// 	var zeroHash chainhash.Hash
-		// 	merkles[i] = &zeroHash
-		// case witness:
-		// 	wSha := tx.MsgTx().WitnessHash()
-		// 	merkles[i] = &wSha
+		case witness && i == 0:
+			var zeroHash chainhash.Hash
+			merkles[i] = &zeroHash
+		case witness:
+			wSha := tx.MsgTx().WitnessHash()
+			merkles[i] = &wSha
 		default:
 			merkles[i] = tx.Hash()
 		}
@@ -159,14 +159,14 @@ func ExtractWitnessCommitment(tx *util.Tx) ([]byte, bool) {
 	return nil, false
 }
 
-// ValidateWitnessCommitment validates the witness commitment (if any) found within the coinbase transaction of the
-// passed block.
+// ValidateWitnessCommitment validates the witness commitment (if any) found
+// within the coinbase transaction of the passed block.
 func ValidateWitnessCommitment(blk *util.Block) error {
-	// If the block doesn't have any transactions at all, then we won't be able to extract a commitment from the
-	// non-existent coinbase transaction. So we exit early here.
+	// If the block doesn't have any transactions at all, then we won't be able to
+	// extract a commitment from the non-existent coinbase transaction. So we exit
+	// early here.
 	if len(blk.Transactions()) == 0 {
-		str := "cannot validate witness commitment of block without " +
-			"transactions"
+		str := "cannot validate witness commitment of block without transactions"
 		return ruleError(ErrNoTransactions, str)
 	}
 	coinbaseTx := blk.Transactions()[0]
@@ -174,37 +174,44 @@ func ValidateWitnessCommitment(blk *util.Block) error {
 		return ruleError(ErrNoTxInputs, "transaction has no inputs")
 	}
 	witnessCommitment, witnessFound := ExtractWitnessCommitment(coinbaseTx)
-	// If we can't find a witness commitment in any of the coinbase's outputs, then the block MUST NOT contain any
-	// transactions with witness data.
+	// If we can't find a witness commitment in any of the coinbase's outputs, then
+	// the block MUST NOT contain any transactions with witness data.
 	if !witnessFound {
 		for _, tx := range blk.Transactions() {
 			msgTx := tx.MsgTx()
 			if msgTx.HasWitness() {
-				str := fmt.Sprintf("block contains transaction with witness" +
-					" data, yet no witness commitment present")
+				str := fmt.Sprintf(
+					"block contains transaction with witness data, yet no witness commitment present",
+				)
 				return ruleError(ErrUnexpectedWitness, str)
 			}
 		}
 		return nil
 	}
-	// At this point the block contains a witness commitment, so the coinbase transaction MUST have exactly one witness
-	// element within its witness data and that element must be exactly CoinbaseWitnessDataLen bytes.
+	// At this point the block contains a witness commitment, so the coinbase
+	// transaction MUST have exactly one witness element within its witness data and
+	// that element must be exactly CoinbaseWitnessDataLen bytes.
 	coinbaseWitness := coinbaseTx.MsgTx().TxIn[0].Witness
 	if len(coinbaseWitness) != 1 {
-		str := fmt.Sprintf("the coinbase transaction has %d items in "+
-			"its witness stack when only one is allowed",
-			len(coinbaseWitness))
+		str := fmt.Sprintf(
+			"the coinbase transaction has %d items in its witness stack when only one is allowed",
+			len(coinbaseWitness),
+		)
 		return ruleError(ErrInvalidWitnessCommitment, str)
 	}
 	witnessNonce := coinbaseWitness[0]
 	if len(witnessNonce) != CoinbaseWitnessDataLen {
-		str := fmt.Sprintf("the coinbase transaction witness nonce "+
-			"has %d bytes when it must be %d bytes",
-			len(witnessNonce), CoinbaseWitnessDataLen)
+		str := fmt.Sprintf(
+			"the coinbase transaction witness nonce "+
+				"has %d bytes when it must be %d bytes",
+			len(witnessNonce), CoinbaseWitnessDataLen,
+		)
 		return ruleError(ErrInvalidWitnessCommitment, str)
 	}
-	// Finally, with the preliminary checks out of the way, we can check if the extracted witnessCommitment is equal to:
-	// SHA256(witnessMerkleRoot || witnessNonce). Where witnessNonce is the coinbase transaction's only witness item.
+	// Finally, with the preliminary checks out of the way, we can check if the
+	// extracted witnessCommitment is equal to: SHA256(witnessMerkleRoot ||
+	// witnessNonce). Where witnessNonce is the coinbase transaction's only witness
+	// item.
 	witnessMerkleTree := BuildMerkleTreeStore(blk.Transactions(), true)
 	witnessMerkleRoot := witnessMerkleTree.GetRoot()
 	var witnessPreimage [chainhash.HashSize * 2]byte
@@ -212,9 +219,11 @@ func ValidateWitnessCommitment(blk *util.Block) error {
 	copy(witnessPreimage[chainhash.HashSize:], witnessNonce)
 	computedCommitment := chainhash.DoubleHashB(witnessPreimage[:])
 	if !bytes.Equal(computedCommitment, witnessCommitment) {
-		str := fmt.Sprintf("witness commitment does not match: "+
-			"computed %v, coinbase includes %v", computedCommitment,
-			witnessCommitment)
+		str := fmt.Sprintf(
+			"witness commitment does not match: "+
+				"computed %v, coinbase includes %v", computedCommitment,
+			witnessCommitment,
+		)
 		return ruleError(ErrWitnessCommitmentMismatch, str)
 	}
 	return nil

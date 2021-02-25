@@ -43,7 +43,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_FALSE],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_1 short",
@@ -51,7 +51,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_1],
 				data:   nil,
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_1",
@@ -67,7 +67,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_1],
 				data:   make([]byte, 2),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_2 short",
@@ -75,7 +75,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_2],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_2",
@@ -91,7 +91,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_2],
 				data:   make([]byte, 3),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_3 short",
@@ -99,7 +99,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_3],
 				data:   make([]byte, 2),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_3",
@@ -115,7 +115,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_3],
 				data:   make([]byte, 4),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_4 short",
@@ -123,7 +123,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_4],
 				data:   make([]byte, 3),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_4",
@@ -139,7 +139,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_4],
 				data:   make([]byte, 5),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_5 short",
@@ -147,7 +147,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_5],
 				data:   make([]byte, 4),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_5",
@@ -163,7 +163,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_5],
 				data:   make([]byte, 6),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_6 short",
@@ -171,7 +171,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_6],
 				data:   make([]byte, 5),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_6",
@@ -187,7 +187,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_6],
 				data:   make([]byte, 7),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_7 short",
@@ -195,7 +195,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_7],
 				data:   make([]byte, 6),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_7",
@@ -211,7 +211,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_7],
 				data:   make([]byte, 8),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_8 short",
@@ -219,7 +219,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_8],
 				data:   make([]byte, 7),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_8",
@@ -235,7 +235,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_8],
 				data:   make([]byte, 9),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_9 short",
@@ -243,7 +243,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_9],
 				data:   make([]byte, 8),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_9",
@@ -259,7 +259,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_9],
 				data:   make([]byte, 10),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_10 short",
@@ -267,7 +267,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_10],
 				data:   make([]byte, 9),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_10",
@@ -283,7 +283,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_10],
 				data:   make([]byte, 11),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_11 short",
@@ -291,7 +291,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_11],
 				data:   make([]byte, 10),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_11",
@@ -307,7 +307,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_11],
 				data:   make([]byte, 12),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_12 short",
@@ -315,7 +315,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_12],
 				data:   make([]byte, 11),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_12",
@@ -331,7 +331,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_12],
 				data:   make([]byte, 13),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_13 short",
@@ -339,7 +339,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_13],
 				data:   make([]byte, 12),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_13",
@@ -355,7 +355,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_13],
 				data:   make([]byte, 14),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_14 short",
@@ -363,7 +363,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_14],
 				data:   make([]byte, 13),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_14",
@@ -379,7 +379,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_14],
 				data:   make([]byte, 15),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_15 short",
@@ -387,7 +387,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_15],
 				data:   make([]byte, 14),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_15",
@@ -403,7 +403,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_15],
 				data:   make([]byte, 16),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_16 short",
@@ -411,7 +411,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_16],
 				data:   make([]byte, 15),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_16",
@@ -427,7 +427,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_16],
 				data:   make([]byte, 17),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_17 short",
@@ -435,7 +435,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_17],
 				data:   make([]byte, 16),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_17",
@@ -451,7 +451,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_17],
 				data:   make([]byte, 18),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_18 short",
@@ -459,7 +459,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_18],
 				data:   make([]byte, 17),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_18",
@@ -475,7 +475,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_18],
 				data:   make([]byte, 19),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_19 short",
@@ -483,7 +483,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_19],
 				data:   make([]byte, 18),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_19",
@@ -499,7 +499,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_19],
 				data:   make([]byte, 20),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_20 short",
@@ -507,7 +507,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_20],
 				data:   make([]byte, 19),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_20",
@@ -523,7 +523,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_20],
 				data:   make([]byte, 21),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_21 short",
@@ -531,7 +531,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_21],
 				data:   make([]byte, 20),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_21",
@@ -547,7 +547,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_21],
 				data:   make([]byte, 22),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_22 short",
@@ -555,7 +555,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_22],
 				data:   make([]byte, 21),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_22",
@@ -571,7 +571,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_22],
 				data:   make([]byte, 23),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_23 short",
@@ -579,7 +579,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_23],
 				data:   make([]byte, 22),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_23",
@@ -595,7 +595,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_23],
 				data:   make([]byte, 24),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_24 short",
@@ -603,7 +603,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_24],
 				data:   make([]byte, 23),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_24",
@@ -619,7 +619,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_24],
 				data:   make([]byte, 25),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_25 short",
@@ -627,7 +627,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_25],
 				data:   make([]byte, 24),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_25",
@@ -643,7 +643,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_25],
 				data:   make([]byte, 26),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_26 short",
@@ -651,7 +651,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_26],
 				data:   make([]byte, 25),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_26",
@@ -667,7 +667,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_26],
 				data:   make([]byte, 27),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_27 short",
@@ -675,7 +675,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_27],
 				data:   make([]byte, 26),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_27",
@@ -691,7 +691,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_27],
 				data:   make([]byte, 28),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_28 short",
@@ -699,7 +699,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_28],
 				data:   make([]byte, 27),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_28",
@@ -715,7 +715,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_28],
 				data:   make([]byte, 29),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_29 short",
@@ -723,7 +723,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_29],
 				data:   make([]byte, 28),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_29",
@@ -739,7 +739,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_29],
 				data:   make([]byte, 30),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_30 short",
@@ -747,7 +747,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_30],
 				data:   make([]byte, 29),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_30",
@@ -763,7 +763,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_30],
 				data:   make([]byte, 31),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_31 short",
@@ -771,7 +771,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_31],
 				data:   make([]byte, 30),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_31",
@@ -787,7 +787,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_31],
 				data:   make([]byte, 32),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_32 short",
@@ -795,7 +795,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_32],
 				data:   make([]byte, 31),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_32",
@@ -811,7 +811,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_32],
 				data:   make([]byte, 33),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_33 short",
@@ -819,7 +819,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_33],
 				data:   make([]byte, 32),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_33",
@@ -835,7 +835,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_33],
 				data:   make([]byte, 34),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_34 short",
@@ -843,7 +843,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_34],
 				data:   make([]byte, 33),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_34",
@@ -859,7 +859,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_34],
 				data:   make([]byte, 35),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_35 short",
@@ -867,7 +867,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_35],
 				data:   make([]byte, 34),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_35",
@@ -883,7 +883,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_35],
 				data:   make([]byte, 36),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_36 short",
@@ -891,7 +891,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_36],
 				data:   make([]byte, 35),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_36",
@@ -907,7 +907,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_36],
 				data:   make([]byte, 37),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_37 short",
@@ -915,7 +915,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_37],
 				data:   make([]byte, 36),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_37",
@@ -931,7 +931,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_37],
 				data:   make([]byte, 38),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_38 short",
@@ -939,7 +939,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_38],
 				data:   make([]byte, 37),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_38",
@@ -955,7 +955,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_38],
 				data:   make([]byte, 39),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_39 short",
@@ -963,7 +963,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_39],
 				data:   make([]byte, 38),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_39",
@@ -979,7 +979,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_39],
 				data:   make([]byte, 40),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_40 short",
@@ -987,7 +987,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_40],
 				data:   make([]byte, 39),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_40",
@@ -1003,7 +1003,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_40],
 				data:   make([]byte, 41),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_41 short",
@@ -1011,7 +1011,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_41],
 				data:   make([]byte, 40),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_41",
@@ -1027,7 +1027,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_41],
 				data:   make([]byte, 42),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_42 short",
@@ -1035,7 +1035,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_42],
 				data:   make([]byte, 41),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_42",
@@ -1051,7 +1051,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_42],
 				data:   make([]byte, 43),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_43 short",
@@ -1059,7 +1059,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_43],
 				data:   make([]byte, 42),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_43",
@@ -1075,7 +1075,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_43],
 				data:   make([]byte, 44),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_44 short",
@@ -1083,7 +1083,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_44],
 				data:   make([]byte, 43),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_44",
@@ -1099,7 +1099,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_44],
 				data:   make([]byte, 45),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_45 short",
@@ -1107,7 +1107,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_45],
 				data:   make([]byte, 44),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_45",
@@ -1123,7 +1123,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_45],
 				data:   make([]byte, 46),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_46 short",
@@ -1131,7 +1131,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_46],
 				data:   make([]byte, 45),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_46",
@@ -1147,7 +1147,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_46],
 				data:   make([]byte, 47),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_47 short",
@@ -1155,7 +1155,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_47],
 				data:   make([]byte, 46),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_47",
@@ -1171,7 +1171,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_47],
 				data:   make([]byte, 48),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_48 short",
@@ -1179,7 +1179,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_48],
 				data:   make([]byte, 47),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_48",
@@ -1195,7 +1195,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_48],
 				data:   make([]byte, 49),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_49 short",
@@ -1203,7 +1203,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_49],
 				data:   make([]byte, 48),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_49",
@@ -1219,7 +1219,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_49],
 				data:   make([]byte, 50),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_50 short",
@@ -1227,7 +1227,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_50],
 				data:   make([]byte, 49),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_50",
@@ -1243,7 +1243,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_50],
 				data:   make([]byte, 51),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_51 short",
@@ -1251,7 +1251,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_51],
 				data:   make([]byte, 50),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_51",
@@ -1267,7 +1267,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_51],
 				data:   make([]byte, 52),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_52 short",
@@ -1275,7 +1275,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_52],
 				data:   make([]byte, 51),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_52",
@@ -1291,7 +1291,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_52],
 				data:   make([]byte, 53),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_53 short",
@@ -1299,7 +1299,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_53],
 				data:   make([]byte, 52),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_53",
@@ -1315,7 +1315,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_53],
 				data:   make([]byte, 54),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_54 short",
@@ -1323,7 +1323,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_54],
 				data:   make([]byte, 53),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_54",
@@ -1339,7 +1339,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_54],
 				data:   make([]byte, 55),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_55 short",
@@ -1347,7 +1347,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_55],
 				data:   make([]byte, 54),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_55",
@@ -1363,7 +1363,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_55],
 				data:   make([]byte, 56),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_56 short",
@@ -1371,7 +1371,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_56],
 				data:   make([]byte, 55),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_56",
@@ -1387,7 +1387,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_56],
 				data:   make([]byte, 57),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_57 short",
@@ -1395,7 +1395,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_57],
 				data:   make([]byte, 56),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_57",
@@ -1411,7 +1411,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_57],
 				data:   make([]byte, 58),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_58 short",
@@ -1419,7 +1419,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_58],
 				data:   make([]byte, 57),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_58",
@@ -1435,7 +1435,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_58],
 				data:   make([]byte, 59),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_59 short",
@@ -1443,7 +1443,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_59],
 				data:   make([]byte, 58),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_59",
@@ -1459,7 +1459,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_59],
 				data:   make([]byte, 60),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_60 short",
@@ -1467,7 +1467,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_60],
 				data:   make([]byte, 59),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_60",
@@ -1483,7 +1483,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_60],
 				data:   make([]byte, 61),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_61 short",
@@ -1491,7 +1491,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_61],
 				data:   make([]byte, 60),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_61",
@@ -1507,7 +1507,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_61],
 				data:   make([]byte, 62),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_62 short",
@@ -1515,7 +1515,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_62],
 				data:   make([]byte, 61),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_62",
@@ -1531,7 +1531,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_62],
 				data:   make([]byte, 63),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_63 short",
@@ -1539,7 +1539,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_63],
 				data:   make([]byte, 62),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_63",
@@ -1555,7 +1555,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_63],
 				data:   make([]byte, 64),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_64 short",
@@ -1563,7 +1563,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_64],
 				data:   make([]byte, 63),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_64",
@@ -1579,7 +1579,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_64],
 				data:   make([]byte, 65),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_65 short",
@@ -1587,7 +1587,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_65],
 				data:   make([]byte, 64),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_65",
@@ -1603,7 +1603,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_65],
 				data:   make([]byte, 66),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_66 short",
@@ -1611,7 +1611,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_66],
 				data:   make([]byte, 65),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_66",
@@ -1627,7 +1627,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_66],
 				data:   make([]byte, 67),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_67 short",
@@ -1635,7 +1635,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_67],
 				data:   make([]byte, 66),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_67",
@@ -1651,7 +1651,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_67],
 				data:   make([]byte, 68),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_68 short",
@@ -1659,7 +1659,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_68],
 				data:   make([]byte, 67),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_68",
@@ -1675,7 +1675,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_68],
 				data:   make([]byte, 69),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_69 short",
@@ -1683,7 +1683,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_69],
 				data:   make([]byte, 68),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_69",
@@ -1699,7 +1699,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_69],
 				data:   make([]byte, 70),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_70 short",
@@ -1707,7 +1707,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_70],
 				data:   make([]byte, 69),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_70",
@@ -1723,7 +1723,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_70],
 				data:   make([]byte, 71),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_71 short",
@@ -1731,7 +1731,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_71],
 				data:   make([]byte, 70),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_71",
@@ -1747,7 +1747,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_71],
 				data:   make([]byte, 72),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_72 short",
@@ -1755,7 +1755,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_72],
 				data:   make([]byte, 71),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_72",
@@ -1771,7 +1771,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_72],
 				data:   make([]byte, 73),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_73 short",
@@ -1779,7 +1779,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_73],
 				data:   make([]byte, 72),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_73",
@@ -1795,7 +1795,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_73],
 				data:   make([]byte, 74),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_74 short",
@@ -1803,7 +1803,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_74],
 				data:   make([]byte, 73),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_74",
@@ -1819,7 +1819,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_74],
 				data:   make([]byte, 75),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_75 short",
@@ -1827,7 +1827,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_75],
 				data:   make([]byte, 74),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DATA_75",
@@ -1843,7 +1843,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DATA_75],
 				data:   make([]byte, 76),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_PUSHDATA1",
@@ -1883,7 +1883,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_1NEGATE],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_RESERVED",
@@ -1899,7 +1899,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_RESERVED],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_TRUE",
@@ -1915,7 +1915,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_TRUE],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2",
@@ -1931,7 +1931,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2",
@@ -1947,7 +1947,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_3",
@@ -1963,7 +1963,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_3],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_4",
@@ -1979,7 +1979,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_4],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_5",
@@ -1995,7 +1995,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_5],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_6",
@@ -2011,7 +2011,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_6],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_7",
@@ -2027,7 +2027,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_7],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_8",
@@ -2043,7 +2043,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_8],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_9",
@@ -2059,7 +2059,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_9],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_10",
@@ -2075,7 +2075,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_10],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_11",
@@ -2091,7 +2091,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_11],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_12",
@@ -2107,7 +2107,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_12],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_13",
@@ -2123,7 +2123,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_13],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_14",
@@ -2139,7 +2139,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_14],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_15",
@@ -2155,7 +2155,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_15],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_16",
@@ -2171,7 +2171,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_16],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP",
@@ -2187,7 +2187,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_VER",
@@ -2203,7 +2203,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_VER],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_IF",
@@ -2219,7 +2219,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_IF],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOTIF",
@@ -2235,7 +2235,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOTIF],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_VERIF",
@@ -2251,7 +2251,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_VERIF],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_VERNOTIF",
@@ -2267,7 +2267,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_VERNOTIF],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_ELSE",
@@ -2283,7 +2283,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_ELSE],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_ENDIF",
@@ -2299,7 +2299,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_ENDIF],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_VERIFY",
@@ -2315,7 +2315,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_VERIFY],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_RETURN",
@@ -2331,7 +2331,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_RETURN],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_TOALTSTACK",
@@ -2347,7 +2347,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_TOALTSTACK],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_FROMALTSTACK",
@@ -2363,7 +2363,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_FROMALTSTACK],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2DROP",
@@ -2379,7 +2379,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2DROP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2DUP",
@@ -2395,7 +2395,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2DUP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_3DUP",
@@ -2411,7 +2411,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_3DUP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2OVER",
@@ -2427,7 +2427,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2OVER],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2ROT",
@@ -2443,7 +2443,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2ROT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2SWAP",
@@ -2459,7 +2459,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2SWAP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_IFDUP",
@@ -2475,7 +2475,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_IFDUP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DEPTH",
@@ -2491,7 +2491,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DEPTH],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DROP",
@@ -2507,7 +2507,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DROP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DUP",
@@ -2523,7 +2523,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DUP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NIP",
@@ -2539,7 +2539,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NIP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_OVER",
@@ -2555,7 +2555,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_OVER],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_PICK",
@@ -2571,7 +2571,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_PICK],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_ROLL",
@@ -2587,7 +2587,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_ROLL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_ROT",
@@ -2603,7 +2603,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_ROT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_SWAP",
@@ -2619,7 +2619,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_SWAP],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_TUCK",
@@ -2635,7 +2635,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_TUCK],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_CAT",
@@ -2651,7 +2651,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_CAT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_SUBSTR",
@@ -2667,7 +2667,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_SUBSTR],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_LEFT",
@@ -2683,7 +2683,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_LEFT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_LEFT",
@@ -2699,7 +2699,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_LEFT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_RIGHT",
@@ -2715,7 +2715,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_RIGHT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_SIZE",
@@ -2731,7 +2731,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_SIZE],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_INVERT",
@@ -2747,7 +2747,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_INVERT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_AND",
@@ -2763,7 +2763,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_AND],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_OR",
@@ -2779,7 +2779,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_OR],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_XOR",
@@ -2795,7 +2795,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_XOR],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_EQUAL",
@@ -2811,7 +2811,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_EQUAL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_EQUALVERIFY",
@@ -2827,7 +2827,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_EQUALVERIFY],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_RESERVED1",
@@ -2843,7 +2843,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_RESERVED1],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_RESERVED2",
@@ -2859,7 +2859,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_RESERVED2],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_1ADD",
@@ -2875,7 +2875,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_1ADD],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_1SUB",
@@ -2891,7 +2891,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_1SUB],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2MUL",
@@ -2907,7 +2907,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2MUL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_2DIV",
@@ -2923,7 +2923,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_2DIV],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NEGATE",
@@ -2939,7 +2939,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NEGATE],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_ABS",
@@ -2955,7 +2955,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_ABS],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOT",
@@ -2971,7 +2971,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_0NOTEQUAL",
@@ -2987,7 +2987,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_0NOTEQUAL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_ADD",
@@ -3003,7 +3003,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_ADD],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_SUB",
@@ -3019,7 +3019,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_SUB],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_MUL",
@@ -3035,7 +3035,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_MUL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_DIV",
@@ -3051,7 +3051,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_DIV],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_MOD",
@@ -3067,7 +3067,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_MOD],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_LSHIFT",
@@ -3083,7 +3083,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_LSHIFT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_RSHIFT",
@@ -3099,7 +3099,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_RSHIFT],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_BOOLAND",
@@ -3115,7 +3115,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_BOOLAND],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_BOOLOR",
@@ -3131,7 +3131,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_BOOLOR],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NUMEQUAL",
@@ -3147,7 +3147,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NUMEQUAL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NUMEQUALVERIFY",
@@ -3163,7 +3163,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NUMEQUALVERIFY],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NUMNOTEQUAL",
@@ -3179,7 +3179,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NUMNOTEQUAL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_LESSTHAN",
@@ -3195,7 +3195,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_LESSTHAN],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_GREATERTHAN",
@@ -3211,7 +3211,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_GREATERTHAN],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_LESSTHANOREQUAL",
@@ -3227,7 +3227,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_LESSTHANOREQUAL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_GREATERTHANOREQUAL",
@@ -3243,7 +3243,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_GREATERTHANOREQUAL],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_MIN",
@@ -3259,7 +3259,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_MIN],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_MAX",
@@ -3275,7 +3275,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_MAX],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_WITHIN",
@@ -3291,7 +3291,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_WITHIN],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_RIPEMD160",
@@ -3307,7 +3307,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_RIPEMD160],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_SHA1",
@@ -3323,7 +3323,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_SHA1],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_SHA256",
@@ -3339,7 +3339,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_SHA256],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_HASH160",
@@ -3355,7 +3355,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_HASH160],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_HASH256",
@@ -3371,7 +3371,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_HASH256],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_CODESAPERATOR",
@@ -3387,7 +3387,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_CODESEPARATOR],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_CHECKSIG",
@@ -3403,7 +3403,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_CHECKSIG],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_CHECKSIGVERIFY",
@@ -3419,7 +3419,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_CHECKSIGVERIFY],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_CHECKMULTISIG",
@@ -3435,7 +3435,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_CHECKMULTISIG],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_CHECKMULTISIGVERIFY",
@@ -3451,7 +3451,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_CHECKMULTISIGVERIFY],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP1",
@@ -3467,7 +3467,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP1],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP2",
@@ -3483,7 +3483,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP2],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP3",
@@ -3499,7 +3499,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP3],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP4",
@@ -3515,7 +3515,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP4],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP5",
@@ -3531,7 +3531,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP5],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP6",
@@ -3547,7 +3547,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP6],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP7",
@@ -3563,7 +3563,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP7],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP8",
@@ -3579,7 +3579,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP8],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP9",
@@ -3595,7 +3595,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP9],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_NOP10",
@@ -3611,7 +3611,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_NOP10],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_PUBKEYHASH",
@@ -3627,7 +3627,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_PUBKEYHASH],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_PUBKEY",
@@ -3643,7 +3643,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_PUBKEY],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
 			name: "OP_INVALIDOPCODE",
@@ -3659,7 +3659,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 				opcode: &OpcodeArray[OP_INVALIDOPCODE],
 				data:   make([]byte, 1),
 			},
-			expectedErr: scriptError(errInternal, ""),
+			expectedErr: scriptError(ErrInternal, ""),
 		},
 	}
 	for _, test := range tests {
@@ -3829,7 +3829,8 @@ func TestGetPreciseSigOps(t *testing.T) {
 	}
 }
 
-// TestGetWitnessSigOpCount tests that the sig op counting for p2wkh, p2wsh, nested p2sh, and invalid variants are counted properly.
+// TestGetWitnessSigOpCount tests that the sig op counting for p2wkh, p2wsh,
+// nested p2sh, and invalid variants are counted properly.
 func TestGetWitnessSigOpCount(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -3839,7 +3840,8 @@ func TestGetWitnessSigOpCount(t *testing.T) {
 		witness   wire.TxWitness
 		numSigOps int
 	}{
-		// A regualr p2wkh witness program. The output being spent should only have a single sig-op counted.
+		// A regualr p2wkh witness program. The output being spent should only have a
+		// single sig-op counted.
 		{
 			name: "p2wkh",
 			pkScript: mustParseShortForm("OP_0 DATA_20 " +
@@ -3854,7 +3856,8 @@ func TestGetWitnessSigOpCount(t *testing.T) {
 			},
 			numSigOps: 1,
 		},
-		// A p2wkh witness program nested within a p2sh output script. The pattern should be recognized properly and attribute only a single sig op.
+		// A p2wkh witness program nested within a p2sh output script. The pattern
+		// should be recognized properly and attribute only a single sig op.
 		{
 			name: "nested p2sh",
 			sigScript: hexToBytes("160014ad0ffa2e387f07" +
@@ -3884,8 +3887,9 @@ func TestGetWitnessSigOpCount(t *testing.T) {
 					"3ca481d4d4eeae1b7970f51c78231207e52ae"),
 			},
 		},
-		// A p2wsh witness program. However, the witness script fails to parse after the valid portion of the script. As
-		// a result, the valid portion of the script should still be counted.
+		// A p2wsh witness program. However, the witness script fails to parse after the
+		// valid portion of the script. As a result, the valid portion of the script
+		// should still be counted.
 		{
 			name:      "witness script doesn't parse",
 			numSigOps: 1,
@@ -3949,13 +3953,13 @@ func TestRemoveOpcodes(t *testing.T) {
 			name:   "invalid length (instruction)",
 			before: "PUSHDATA1",
 			remove: OP_CODESEPARATOR,
-			err:    scriptError(errMalformedPush, ""),
+			err:    scriptError(ErrMalformedPush, ""),
 		},
 		{
 			name:   "invalid length (data)",
 			before: "PUSHDATA1 0xff 0xfe",
 			remove: OP_CODESEPARATOR,
-			err:    scriptError(errMalformedPush, ""),
+			err:    scriptError(ErrMalformedPush, ""),
 		},
 	}
 	// tstRemoveOpcode is a convenience function to parse the provided raw script, remove the passed opcode, then
@@ -4094,13 +4098,13 @@ func TestRemoveOpcodeByData(t *testing.T) {
 			name:   "invalid length (instruction)",
 			before: []byte{OP_PUSHDATA1},
 			remove: []byte{1, 2, 3, 4},
-			err:    scriptError(errMalformedPush, ""),
+			err:    scriptError(ErrMalformedPush, ""),
 		},
 		{
 			name:   "invalid length (data)",
 			before: []byte{OP_PUSHDATA1, 255, 254},
 			remove: []byte{1, 2, 3, 4},
-			err:    scriptError(errMalformedPush, ""),
+			err:    scriptError(ErrMalformedPush, ""),
 		},
 	}
 	// tstRemoveOpcodeByData is a convenience function to parse the provided raw script, remove the passed data, then
@@ -4141,8 +4145,8 @@ func TestIsPayToScriptHash(t *testing.T) {
 	}
 }
 
-// TestIsPayToWitnessScriptHash ensures the IsPayToWitnessScriptHash function returns the expected results for all the
-// scripts in scriptClassTests.
+// TestIsPayToWitnessScriptHash ensures the IsPayToWitnessScriptHash function
+// returns the expected results for all the scripts in scriptClassTests.
 func TestIsPayToWitnessScriptHash(t *testing.T) {
 	t.Parallel()
 	for _, test := range scriptClassTests {
@@ -4156,8 +4160,8 @@ func TestIsPayToWitnessScriptHash(t *testing.T) {
 	}
 }
 
-// TestIsPayToWitnessPubKeyHash ensures the IsPayToWitnessPubKeyHash function returns the expected results for all the
-// scripts in scriptClassTests.
+// TestIsPayToWitnessPubKeyHash ensures the IsPayToWitnessPubKeyHash function
+// returns the expected results for all the scripts in scriptClassTests.
 func TestIsPayToWitnessPubKeyHash(t *testing.T) {
 	t.Parallel()
 	for _, test := range scriptClassTests {

@@ -2,6 +2,7 @@ package transport
 
 import (
 	"crypto/cipher"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
@@ -85,7 +86,7 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		// Trace(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
+		Trace(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
 	}
 	return
 }
@@ -271,7 +272,6 @@ out:
 		// Filter messages by magic, if there is no match in the map the packet is ignored
 		magic := string(buffer[:4])
 		if handler, ok := handlers[magic]; ok {
-			// if caller needs to know the liveness status of the controller it is working on, the code below
 			if channel.lastSent != nil && channel.firstSender != nil {
 				*channel.lastSent = time.Now()
 			}
@@ -279,32 +279,22 @@ out:
 			nL := channel.receiveCiph.NonceSize()
 			nonceBytes := msg[4 : 4+nL]
 			nonce := string(nonceBytes)
-			// if nonce == seenNonce {
-			// 	DEBUG("seen this one")
-			// 	continue
-			// }
-			// seenNonce = nonce
-			// decipher
 			var shard []byte
 			if shard, err = channel.receiveCiph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); err != nil {
 				continue
 			}
-			// DEBUG("read", numBytes, "from", src, err, hex.EncodeToString(msg))
+			// Debug("read", numBytes, "from", src, err, hex.EncodeToString(msg))
 			if bn, ok := channel.buffers[nonce]; ok {
 				if !bn.Decoded {
 					bn.Buffers = append(bn.Buffers, shard)
 					if len(bn.Buffers) >= 3 {
-						// DEBUG(len(bn.Buffers))
 						// try to decode it
 						var cipherText []byte
-						cipherText, err = fec.Decode(bn.Buffers)
-						if err != nil {
-							Error(err)
+						if cipherText, err = fec.Decode(bn.Buffers); Check(err){
 							continue
 						}
 						bn.Decoded = true
-						// DEBUG(numBytes, src, err)
-						// Tracef("received packet with magic %s from %s", magic, src.String())
+						Debugf("received packet with magic %s from %s len %d bytes", magic, src.String(), len(cipherText))
 						if err = handler(channel.context, src, address, cipherText); Check(err) {
 							continue
 						}
@@ -312,13 +302,8 @@ out:
 						// buffer = buffer[:0]
 					}
 				} else {
-					// if nonce == seenNonce {
-					// 	continue
-					// }
-					// seenNonce = nonce
 					for i := range channel.buffers {
-						if i != nonce || (channel.buffers[i].Decoded &&
-							len(channel.buffers[i].Buffers) > 8) {
+						if i != nonce && channel.buffers[i].Decoded {
 							// superseded messages can be deleted from the buffers, we don't add more data for the
 							// already decoded.
 							// todo: this will be changed to track stats for the puncture rate and redundancy scaling
@@ -333,9 +318,6 @@ out:
 					Buffers, shard)
 			}
 		}
-		// for i := range buffer {
-		// 	buffer[i] = 0
-		// }
 	}
 }
 

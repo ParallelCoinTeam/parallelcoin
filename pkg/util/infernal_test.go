@@ -38,7 +38,8 @@ func TstAddressScriptHash(hash [ripemd160.Size]byte,
 	}
 }
 
-// TstAddressWitnessPubKeyHash creates an AddressWitnessPubKeyHash, initiating the fields as given.
+// TstAddressWitnessPubKeyHash creates an AddressWitnessPubKeyHash, initiating
+// the fields as given.
 func TstAddressWitnessPubKeyHash(version byte, program [20]byte,
 	hrp string) *AddressWitnessPubKeyHash {
 	return &AddressWitnessPubKeyHash{
@@ -48,7 +49,8 @@ func TstAddressWitnessPubKeyHash(version byte, program [20]byte,
 	}
 }
 
-// TstAddressWitnessScriptHash creates an AddressWitnessScriptHash, initiating the fields as given.
+// TstAddressWitnessScriptHash creates an AddressWitnessScriptHash, initiating
+// the fields as given.
 func TstAddressWitnessScriptHash(version byte, program [32]byte,
 	hrp string) *AddressWitnessScriptHash {
 	return &AddressWitnessScriptHash{
@@ -75,7 +77,8 @@ func TstAddressSAddr(addr string) []byte {
 	return decoded[1 : 1+ripemd160.Size]
 }
 
-// TstAddressSegwitSAddr returns the expected witness program bytes for bech32 encoded P2WPKH and P2WSH bitcoin addresses.
+// TstAddressSegwitSAddr returns the expected witness program bytes for bech32
+// encoded P2WPKH and P2WSH bitcoin addresses.
 func TstAddressSegwitSAddr(addr string) []byte {
 	_, data, err := bech32.Decode(addr)
 	if err != nil {

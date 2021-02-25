@@ -675,8 +675,8 @@ func (p *Peer) WantsHeaders() bool {
 	return sendHeadersPreferred
 }
 
-// IsWitnessEnabled returns true if the peer has signalled that it supports segregated witness. This function is safe
-// for concurrent access.
+// IsWitnessEnabled returns true if the peer has signalled that it supports
+// segregated witness. This function is safe for concurrent access.
 func (p *Peer) IsWitnessEnabled() bool {
 	p.flagsMtx.Lock()
 	witnessEnabled := p.witnessEnabled
@@ -1686,18 +1686,21 @@ func (p *Peer) readRemoteVersionMsg() error {
 	p.startingHeight = msg.LastBlock
 	p.timeOffset = msg.Timestamp.Unix() - time.Now().Unix()
 	p.statsMtx.Unlock()
-	// Set the peer's ID, user agent, and potentially the flag which specifies the witness support is enabled.
+	// Set the peer's ID, user agent, and potentially the flag which specifies the
+	// witness support is enabled.
 	p.flagsMtx.Lock()
 	p.id = atomic.AddInt32(&nodeCount, 1)
 	p.userAgent = msg.UserAgent
-	// Determine if the peer would like to receive witness data with transactions, or not.
+	// Determine if the peer would like to receive witness data with transactions,
+	// or not.
 	if p.services&wire.SFNodeWitness == wire.SFNodeWitness {
 		p.witnessEnabled = true
 	}
 	p.flagsMtx.Unlock()
-	// Once the version message has been exchanged, we're able to determine if this peer knows how to encode witness
-	// data over the wire protocol. If so, then we'll switch to a decoding mode which is prepared for the new
-	// transaction format introduced as part of BIP0144.
+	// Once the version message has been exchanged, we're able to determine if this
+	// peer knows how to encode witness data over the wire protocol. If so, then
+	// we'll switch to a decoding mode which is prepared for the new transaction
+	// format introduced as part of BIP0144.
 	if p.services&wire.SFNodeWitness == wire.SFNodeWitness {
 		p.wireEncoding = wire.WitnessEncoding
 	}

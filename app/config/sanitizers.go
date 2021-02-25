@@ -13,10 +13,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	
+
 	"github.com/p9c/pod/pkg/chain/forkhash"
 	"github.com/p9c/pod/pkg/util/routeable"
-	
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -25,10 +25,10 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/normalize"
 	"github.com/p9c/pod/pkg/wallet"
-	
+
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"
-	
+
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/state"
@@ -134,22 +134,16 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	var fP int
 	if fP, e = GetFreePort(); Check(e) {
 	}
-	// _, routeableAddress, _ := routeable.GetInterface()
-	// Debug("###################################", routeableAddress)
-	// *cfg.Controller = ":" + fmt.Sprint(fP)
 	if *cfg.AutoListen {
 		_, allAddresses := routeable.GetAddressesAndInterfaces()
-		var p2pAddresses cli.StringSlice
+		p2pAddresses:= cli.StringSlice{}
 		for addr := range allAddresses {
-			// controllerAddresses = append(controllerAddresses, net.JoinHostPort(allAddresses[addr].String(), fmt.Sprint(fP)))
 			p2pAddresses = append(p2pAddresses, net.JoinHostPort(addr, cx.ActiveNet.DefaultPort))
 		}
-		// *cfg.ControllerConnect = controllerAddresses
 		*cfg.P2PConnect = p2pAddresses
 	}
 	if cfg.DisableController == nil {
-		tf := false
-		cfg.DisableController = &tf
+		*cfg.DisableController = false
 	}
 	if len(*cfg.P2PListeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
 		cfg.P2PListeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
@@ -247,7 +241,7 @@ func GetFreePort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	
+
 	var l *net.TCPListener
 	l, err = net.ListenTCP("tcp", addr)
 	if err != nil {
@@ -627,7 +621,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		// the set weight accordingly based on the max block size value.
 	case *cfg.BlockMaxSize != node.DefaultBlockMaxSize &&
 		*cfg.BlockMaxWeight == node.DefaultBlockMaxWeight:
-		*cfg.BlockMaxWeight = *cfg.BlockMaxSize
+		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
 	}
 	// Look for illegal characters in the user agent comments.
 	Trace("checking user agent comments", cfg.UserAgentComments)
@@ -673,7 +667,7 @@ func validateOnions(cfg *pod.Config) {
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
 	}
-	
+
 }
 
 func validateMiningStuff(
@@ -803,7 +797,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			}
 			return proxy.DialTimeout(network, addr, timeout)
 		}
-	
+
 	// When configured in bridge mode (both --onion and --proxy are configured), it
 	// means that the proxy configured by --proxy is not a tor proxy, so override
 	// the DNS resolution to use the onion-specific proxy.

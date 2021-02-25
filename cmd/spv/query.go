@@ -789,10 +789,9 @@ func (s *ChainService) GetBlock(blockHash chainhash.Hash,
 					return
 				}
 				// TODO(roasbeef): modify CheckBlockSanity to also check witness commitment
-				// At this point, the block matches what we
-				// know about it and we declare it sane. We can
-				// kill the query and pass the response back to
-				// the caller.
+				//
+				// At this point, the block matches what we know about it and we declare it
+				// sane. We can kill the query and pass the response back to the caller.
 				foundBlock = block
 				close(quit)
 			default:
@@ -820,8 +819,9 @@ func (s *ChainService) GetBlock(blockHash chainhash.Hash,
 func (s *ChainService) SendTransaction(tx *wire.MsgTx,
 	options ...QueryOption) error {
 	var err error
-	// Starting with the set of default options, we'll apply any specified functional options to the query so that we
-	// can check what inv type to use. Broadcast the inv to all peers, responding to any getdata messages for the
+	// Starting with the set of default options, we'll apply any specified
+	// functional options to the query so that we can check what inv type to use.
+	// Broadcast the inv to all peers, responding to any getdata messages for the
 	// transaction.
 	qo := defaultQueryOptions()
 	qo.applyQueryOptions(options...)
