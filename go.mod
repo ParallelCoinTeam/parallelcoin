@@ -1,6 +1,6 @@
 module github.com/p9c/pod
 
-go 1.14
+go 1.16
 
 require (
 	gioui.org v0.0.0-20201229000053-33103593a1b4
@@ -17,6 +17,7 @@ require (
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
+	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/jackpal/gateway v1.0.7
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
@@ -36,12 +37,10 @@ require (
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.uber.org/atomic v1.6.0
-	go101.org/go101 v1.16.2 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/exp v0.0.0-20200924195034-c827fd4f18b9
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
-	google.golang.org/protobuf v1.23.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	lukechampine.com/blake3 v1.0.0
