@@ -2,6 +2,7 @@ package transport
 
 import (
 	"crypto/cipher"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
@@ -85,7 +86,7 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		// Trace(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
+		Trace(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
 	}
 	return
 }
@@ -293,7 +294,7 @@ out:
 							continue
 						}
 						bn.Decoded = true
-						Tracef("received packet with magic %s from %s len %d bytes", magic, src.String(), len(cipherText))
+						Debugf("received packet with magic %s from %s len %d bytes", magic, src.String(), len(cipherText))
 						if err = handler(channel.context, src, address, cipherText); Check(err) {
 							continue
 						}

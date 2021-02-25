@@ -40,20 +40,22 @@ func Conn(port int) (conn *net.UDPConn, err error) {
 	// 		break
 	// 	}
 	// }
-	ifc, _, _ := routeable.GetInterface()
-	iface = ifc
-	if err = pc.JoinGroup(iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); Check(err) {
-		return
-	}
-	// test
-	if loop, err := pc.MulticastLoopback(); err == nil {
-		Debugf("MulticastLoopback status:%v\n", loop)
-		if !loop {
-			if err := pc.SetMulticastLoopback(true); err != nil {
-				Errorf("SetMulticastLoopback error:%v\n", err)
+	ifcs, _ := routeable.GetAllInterfacesAndAddresses()
+	for _, ifc := range ifcs {
+		iface = ifc
+		if err = pc.JoinGroup(iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); Check(err) {
+			return
+		}
+		// test
+		if loop, err := pc.MulticastLoopback(); err == nil {
+			Debugf("MulticastLoopback status:%v\n", loop)
+			if !loop {
+				if err := pc.SetMulticastLoopback(true); err != nil {
+					Errorf("SetMulticastLoopback error:%v\n", err)
+				}
 			}
+			Debug("Multicast Loopback enabled on", ifc.Name)
 		}
 	}
-	
 	return
 }
