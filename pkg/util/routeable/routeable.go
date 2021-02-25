@@ -32,6 +32,11 @@ var SecondaryInterfaces []*net.Interface
 // GetAddressesAndInterfaces returns all of the addresses and interfaces that
 // would be resolved from an automatic addresses that can connect two processes at all
 func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[string]struct{}) {
+	if Address == nil || Interface == nil {
+		if Discover() != nil {
+			Error("no routeable address found")
+		}
+	}
 	Interfaces = append(Interfaces, Interface)
 	Interfaces = append(Interfaces, SecondaryInterfaces...)
 	Addresses = make(map[string]struct{})
@@ -39,6 +44,8 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[str
 	for i := range SecondaryAddresses {
 		Addresses[SecondaryAddresses[i].String()] = struct{}{}
 	}
+	Debugs(Interfaces)
+	Debugs(Addresses)
 	return
 }
 
@@ -132,6 +139,10 @@ func GetListenable() net.IP {
 }
 
 func GetAllInterfacesAndAddresses() (interfaces []*net.Interface, udpAddrs []*net.UDPAddr) {
+	if Discover() != nil {
+		Error("no routeable address found")
+		return
+	}
 	interfaces = append([]*net.Interface{Interface}, SecondaryInterfaces...)
 	naddrs := append([]net.IP{Address}, SecondaryAddresses...)
 	var addrs []*net.IP

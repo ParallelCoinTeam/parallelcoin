@@ -203,11 +203,13 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
 	
 	// go advertiser(ctrl)
-	factor := 1
+	factor := 2
 	// if err = ctrl.sendNewBlockTemplate(); Check(err) {
 	// } else {
 	// 	ctrl.active.Store(true)
 	// }
+	const countTick = 10
+	counter := countTick / 2
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	once := false
 	go func() {
@@ -215,30 +217,47 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		for {
 			select {
 			case <-ticker.C:
-				if !ctrl.active.Load() {
-					if cx.IsCurrent() {
+				if cx.IsCurrent() {
+					if !ctrl.active.Load() {
 						Info("ready to send out jobs!")
 						ctrl.active.Store(true)
 					}
-				}
-				if ctrl.isMining.Load() {
-					if !once {
-						cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
-						once = true
-						ctrl.active.Store(true)
+					if ctrl.isMining.Load() {
+						if !once {
+							cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
+							once = true
+							ctrl.active.Store(true)
+						}
+						// if err = ctrl.sendNewBlockTemplate(); Check(err) {
+						// } else {
+						// }
 					}
-					// if err = ctrl.sendNewBlockTemplate(); Check(err) {
-					// } else {
-					// }
+					// send out advertisment
+					ad := transport.GetShards(p2padvt.Get(cx))
+					var err error
+					if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
+					}
+					if ctrl.isMining.Load() {
+						ctrl.rebroadcast()
+					}
+				} else {
+					ctrl.active.Store(false)
+					once = false
 				}
-				// send out advertisment
-				ad := transport.GetShards(p2padvt.Get(cx))
-				var err error
-				if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
+				if counter%countTick == 0 {
+					j := p2padvt.GetAdvt(cx)
+					if *cx.Config.AutoListen {
+						*cx.Config.P2PConnect = cli.StringSlice{}
+						_, addresses := routeable.GetAllInterfacesAndAddresses()
+						Debugs(addresses)
+						for i := range addresses {
+							addrS := net.JoinHostPort(addresses[i].IP.String(), fmt.Sprint(j.P2P))
+							*cx.Config.P2PConnect = append(*cx.Config.P2PConnect, addrS)
+						}
+						save.Pod(cx.Config)
+					}
 				}
-				if ctrl.isMining.Load() {
-					ctrl.rebroadcast()
-				}
+				counter++
 			// case msg := <-ctrl.submitChan:
 			// 	Traces(msg)
 			// 	decodedB, err := util.NewBlockFromBytes(msg)
@@ -364,16 +383,26 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 		Debug("uuid", j.UUID, "P2P", j.P2P)
 		Info("connecting to lan peer with same PSK", j.IPs, j.UUID)
 		// try all IPs
+		if *c.cx.Config.AutoListen {
+			c.cx.Config.P2PConnect = &cli.StringSlice{}
+		}
 		for addr := range j.IPs {
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
 			_, addresses := routeable.GetAllInterfacesAndAddresses()
 			for i := range addresses {
-				if net.JoinHostPort(addresses[i].IP.String(), fmt.Sprint(j.P2P)) == peerIP {
+				addrS := net.JoinHostPort(addresses[i].IP.String(), fmt.Sprint(j.P2P))
+				if addrS == peerIP {
 					Debug("not connecting to self")
 					continue
 				}
+				if *c.cx.Config.AutoListen {
+					*c.cx.Config.P2PConnect = append(*c.cx.Config.P2PConnect, addrS)
+				}
 			}
-			Debugs(c.cx.RealNode.AddrManager.AddressCache())
+			if *c.cx.Config.AutoListen {
+				save.Pod(c.cx.Config)
+			}
+			// Debugs(c.cx.RealNode.AddrManager.AddressCache())
 			// if c.otherNodes[uuid].addr == peerIP {
 			// 	continue
 			// }
@@ -399,10 +428,13 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 			// also remove from connection manager
 			if err = c.cx.RPCServer.Cfg.ConnMgr.RemoveByAddr(c.otherNodes[i].addr); Check(err) {
 			}
+			Debug("deleting", c.otherNodes[i])
 			delete(c.otherNodes, i)
 		}
 	}
-	c.cx.OtherNodes.Store(int32(len(c.otherNodes)))
+	on := int32(len(c.otherNodes))
+	Debug("other nodes", on)
+	c.cx.OtherNodes.Store(on)
 	return
 }
 
@@ -620,9 +652,12 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 	// }()
 	Debug("---------- calling new block template")
 	_, curr, _ := fork.AlgoVerIterator(int32(c.height.Load()))
-	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.GetAlgoName(curr(),
-		int32(c.height.Load()),
-	)); Check(err) {
+	if template, err = c.blockTemplateGenerator.NewBlockTemplate(
+		0, addr, fork.GetAlgoName(
+			curr(),
+			int32(c.height.Load()),
+		),
+	); Check(err) {
 	} else {
 		Debug("********** got new block template")
 		Debugs(template)

@@ -134,22 +134,16 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	var fP int
 	if fP, e = GetFreePort(); Check(e) {
 	}
-	// _, routeableAddress, _ := routeable.GetInterface()
-	// Debug("###################################", routeableAddress)
-	// *cfg.Controller = ":" + fmt.Sprint(fP)
 	if *cfg.AutoListen {
 		_, allAddresses := routeable.GetAddressesAndInterfaces()
-		var p2pAddresses cli.StringSlice
+		p2pAddresses:= cli.StringSlice{}
 		for addr := range allAddresses {
-			// controllerAddresses = append(controllerAddresses, net.JoinHostPort(allAddresses[addr].String(), fmt.Sprint(fP)))
 			p2pAddresses = append(p2pAddresses, net.JoinHostPort(addr, cx.ActiveNet.DefaultPort))
 		}
-		// *cfg.ControllerConnect = controllerAddresses
 		*cfg.P2PConnect = p2pAddresses
 	}
 	if cfg.DisableController == nil {
-		tf := false
-		cfg.DisableController = &tf
+		*cfg.DisableController = false
 	}
 	if len(*cfg.P2PListeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
 		cfg.P2PListeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
