@@ -182,7 +182,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			for {
 				select {
 				case <-ticker.C:
-					Debug("kopach control ticker")
+					// Debug("kopach control ticker")
 					// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
 					// so clear FirstSender
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
@@ -278,17 +278,17 @@ var handlers = transport.Handlers{
 		count := hr.Count
 		hc := c.hashCount.Load() + uint64(count)
 		c.hashCount.Store(hc)
-		Debug("received message hashrate", count, hc)
+		Trace("received message hashrate", count, hc)
 		return
 	},
 	string(job.Magic): func(
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (err error) {
-		Debug("received job")
+		Trace("received job")
 		w := ctx.(*Worker)
 		if !w.active.Load() {
-			Debug("not active")
+			Trace("not active")
 			return
 		}
 		
@@ -297,7 +297,7 @@ var handlers = transport.Handlers{
 		gotiny.Unmarshal(b, jr)
 		for _,x := range jr.Merkles {
 			if x==nil {
-				Debug("encountered nil merkle root, abort")
+				Error("encountered nil merkle root, abort")
 				return
 			}
 		}
@@ -312,8 +312,7 @@ var handlers = transport.Handlers{
 			// ignore other controllers while one is active and received first
 			return
 		}
-		Debugs(jr)
-		Debug("now listening to controller at", cN)
+		Trace("now listening to controller at", cN)
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
@@ -398,7 +397,7 @@ var handlers = transport.Handlers{
 }
 
 func (w *Worker) HashReport() float64 {
-	Debug("generating hash report")
+	Trace("generating hash report")
 	w.hashSampleBuf.Add(w.hashCount.Load())
 	av := ewma.NewMovingAverage()
 	var i int

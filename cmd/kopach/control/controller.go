@@ -249,7 +249,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 					if *cx.Config.AutoListen {
 						*cx.Config.P2PConnect = cli.StringSlice{}
 						_, addresses := routeable.GetAllInterfacesAndAddresses()
-						Debugs(addresses)
+						Traces(addresses)
 						for i := range addresses {
 							addrS := net.JoinHostPort(addresses[i].IP.String(), fmt.Sprint(j.P2P))
 							*cx.Config.P2PConnect = append(*cx.Config.P2PConnect, addrS)
@@ -433,7 +433,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 		}
 	}
 	on := int32(len(c.otherNodes))
-	Debug("other nodes", on)
+	Trace("other nodes", on)
 	c.cx.OtherNodes.Store(on)
 	return
 }
