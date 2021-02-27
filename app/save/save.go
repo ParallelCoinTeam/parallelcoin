@@ -84,7 +84,7 @@ func Pod(c *pod.Config) (success bool) {
 	}
 	*c.WalletPass = wp
 	*c.PipeLog = pipeLogOn
-	Debug("walletpass", *c.WalletPass)
+	// Debug("walletpass", *c.WalletPass)
 	return
 }
 
