@@ -294,7 +294,7 @@ out:
 							continue
 						}
 						bn.Decoded = true
-						Debugf("received packet with magic %s from %s len %d bytes", magic, src.String(), len(cipherText))
+						Tracef("received packet with magic %s from %s len %d bytes", magic, src.String(), len(cipherText))
 						if err = handler(channel.context, src, address, cipherText); Check(err) {
 							continue
 						}

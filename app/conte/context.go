@@ -156,7 +156,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 	if !*cx.Config.LAN {
 		cc -= othernodes
 	}
-	Debug(cc, "nodes connected")
+	Trace(cc, "nodes connected")
 	connected := cc > 0
 	is = rn.Chain.IsCurrent() &&
 		rn.SyncManager.IsCurrent() &&

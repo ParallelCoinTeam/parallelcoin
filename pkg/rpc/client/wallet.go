@@ -807,7 +807,7 @@ func (r FutureGetNewAddressResult) Receive() (util.Address, error) {
 func (c *Client) GetNewAddressAsync(account string) FutureGetNewAddressResult {
 	Trace("### GetNewAddressAsync")
 	cmd := btcjson.NewGetNewAddressCmd(&account)
-	Debugs(cmd)
+	// Debugs(cmd)
 	return c.sendCmd(cmd)
 }
 
