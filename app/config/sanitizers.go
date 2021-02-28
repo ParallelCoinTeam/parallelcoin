@@ -146,7 +146,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		*cfg.DisableController = false
 	}
 	if len(*cfg.P2PListeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
-		cfg.P2PListeners = &cli.StringSlice{fmt.Sprintf(":" + cx.ActiveNet.DefaultPort)}
+		cfg.P2PListeners = &cli.StringSlice{fmt.Sprintf("0.0.0.0:" + cx.ActiveNet.DefaultPort)}
 		cx.StateCfg.Save = true
 		Debug("P2PListeners")
 	}
@@ -172,7 +172,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	if *cx.Config.AutoPorts || !initial {
 		if fP, e = GetFreePort(); Check(e) {
 		}
-		*cfg.P2PListeners = cli.StringSlice{":" + fmt.Sprint(fP)}
+		*cfg.P2PListeners = cli.StringSlice{"0.0.0.0:" + fmt.Sprint(fP)}
 		if fP, e = GetFreePort(); Check(e) {
 		}
 		*cfg.RPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
@@ -191,7 +191,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); Check(e) {
 					}
-					(*l)[i] = ":" + fmt.Sprint(fP)
+					(*l)[i] = "0.0.0.0:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
 					Debug("port not validate P2PListeners")
 				}
@@ -487,7 +487,7 @@ func configListener(cfg *pod.Config, params *netparams.Params) {
 	// addresses on the listen port for the network we are to connect to.
 	Trace("checking if listener was set")
 	if len(*cfg.P2PListeners) == 0 {
-		*cfg.P2PListeners = []string{":" + params.DefaultPort}
+		*cfg.P2PListeners = []string{"0.0.0.0:" + params.DefaultPort}
 	}
 }
 

@@ -1003,7 +1003,7 @@ out:
 			// Disconnect all peers on server shutdown.
 			peerState.ForAllPeers(
 				func(sp *NodePeer) {
-					Tracef("shutdown peer %n", sp)
+					// Tracef("shutdown peer %n", sp)
 					sp.Disconnect()
 				},
 			)
