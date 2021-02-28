@@ -12,8 +12,8 @@ const (
 	MaxInvPerMsg = 50000
 	// Maximum payload size for an inventory vector.
 	maxInvVectPayload = 4 + chainhash.HashSize
-	// InvWitnessFlag denotes that the inventory vector type is requesting, or sending a version which includes witness
-	// data.
+	// InvWitnessFlag denotes that the inventory vector type is requesting, or
+	// sending a version which includes witness data.
 	InvWitnessFlag = 1 << 30
 )
 

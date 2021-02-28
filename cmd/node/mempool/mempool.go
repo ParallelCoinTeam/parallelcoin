@@ -587,8 +587,7 @@ func (mp *TxPool) maybeAcceptTransaction(b *blockchain.BlockChain, tx *util.Tx, 
 			return nil, nil, err
 		}
 		if !segwitActive {
-			str := fmt.Sprintf("transaction %v has witness data, "+
-				"but segwit isn't active yet", txHash)
+			str := fmt.Sprintf("transaction %v has witness data, but segwit isn't active yet", txHash)
 			return nil, nil, txRuleError(wire.RejectNonstandard, str)
 		}
 	}

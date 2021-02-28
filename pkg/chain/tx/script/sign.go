@@ -10,8 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-// RawTxInWitnessSignature returns the serialized ECDSA signature for the input idx of the given transaction, with the
-// hashType appended to it. This function is identical to RawTxInSignature, however the signature generated signs a new
+// RawTxInWitnessSignature returns the serialized ECDSA signature for the input
+// idx of the given transaction, with the hashType appended to it. This function
+// is identical to RawTxInSignature, however the signature generated signs a new
 // sighash digest defined in BIP0143.
 func RawTxInWitnessSignature(tx *wire.MsgTx, sigHashes *TxSigHashes, idx int,
 	amt int64, subScript []byte, hashType SigHashType,
@@ -35,9 +36,11 @@ func RawTxInWitnessSignature(tx *wire.MsgTx, sigHashes *TxSigHashes, idx int,
 	return append(signature.Serialize(), byte(hashType)), nil
 }
 
-// WitnessSignature creates an input witness stack for tx to spend DUO sent from a previous output to the owner of
-// privKey using the p2wkh script template. The passed transaction must contain all the inputs and outputs as dictated
-// by the passed hashType. The signature generated observes the new transaction digest algorithm defined within BIP0143.
+// WitnessSignature creates an input witness stack for tx to spend DUO sent from
+// a previous output to the owner of privKey using the p2wkh script template.
+// The passed transaction must contain all the inputs and outputs as dictated by
+// the passed hashType. The signature generated observes the new transaction
+// digest algorithm defined within BIP0143.
 func WitnessSignature(tx *wire.MsgTx, sigHashes *TxSigHashes, idx int, amt int64,
 	subscript []byte, hashType SigHashType, privKey *ec.PrivateKey,
 	compress bool) (wire.TxWitness, error) {
@@ -54,7 +57,8 @@ func WitnessSignature(tx *wire.MsgTx, sigHashes *TxSigHashes, idx int, amt int64
 	} else {
 		pkData = pk.SerializeUncompressed()
 	}
-	// A witness script is actually a stack, so we return an array of byte slices here, rather than a single byte slice.
+	// A witness script is actually a stack, so we return an array of byte slices
+	// here, rather than a single byte slice.
 	return wire.TxWitness{sig, pkData}, nil
 }
 

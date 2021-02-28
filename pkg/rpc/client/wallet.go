@@ -855,8 +855,8 @@ func (c *Client) GetRawChangeAddress(account string) (util.Address, error) {
 	return c.GetRawChangeAddressAsync(account).Receive()
 }
 
-// FutureAddWitnessAddressResult is a future promise to deliver the result of a AddWitnessAddressAsync RPC invocation
-// (or an applicable error).
+// FutureAddWitnessAddressResult is a future promise to deliver the result of a
+// AddWitnessAddressAsync RPC invocation (or an applicable error).
 type FutureAddWitnessAddressResult chan *response
 
 // Receive waits for the response promised by the future and returns the new address.
@@ -876,8 +876,9 @@ func (r FutureAddWitnessAddressResult) Receive() (util.Address, error) {
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
 }
 
-// AddWitnessAddressAsync returns an instance of a type that can be used to get the result of the RPC at some future
-// time by invoking the Receive function on the returned instance.
+// AddWitnessAddressAsync returns an instance of a type that can be used to get
+// the result of the RPC at some future time by invoking the Receive function on
+// the returned instance.
 //
 // See AddWitnessAddress for the blocking version and more details.
 func (c *Client) AddWitnessAddressAsync(address string) FutureAddWitnessAddressResult {
@@ -885,7 +886,8 @@ func (c *Client) AddWitnessAddressAsync(address string) FutureAddWitnessAddressR
 	return c.sendCmd(cmd)
 }
 
-// AddWitnessAddress adds a witness address for a script and returns the new address (P2SH of the witness script).
+// AddWitnessAddress adds a witness address for a script and returns the new
+// address (P2SH of the witness script).
 func (c *Client) AddWitnessAddress(address string) (util.Address, error) {
 	return c.AddWitnessAddressAsync(address).Receive()
 }

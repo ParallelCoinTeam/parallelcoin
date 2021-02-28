@@ -819,8 +819,8 @@ func (state *GBTWorkState) BlockTemplateResult(useCoinbaseValue bool, submitOld 
 		NonceRange:   GBTNonceRange,
 		Capabilities: GBTCapabilities,
 	}
-	// If the generated block template includes transactions with witness data, then include the witness commitment in
-	// the GBT result.
+	// If the generated block template includes transactions with witness data, then
+	// include the witness commitment in the GBT result.
 	if template.WitnessCommitment != nil {
 		reply.DefaultWitnessCommitment = hex.EncodeToString(template.WitnessCommitment)
 	}
@@ -2248,10 +2248,11 @@ func handleDebugLevel(	s *RPCServer, cmd interface{}, closeChan <-qu.C) (interfa
 }
 */
 
-// WitnessToHex formats the passed witness stack as a slice of hex-encoded strings to be used in a JSON response.
+// WitnessToHex formats the passed witness stack as a slice of hex-encoded
+// strings to be used in a JSON response.
 func WitnessToHex(witness wire.TxWitness) []string {
-	// Ensure nil is returned when there are no entries versus an empty slice so it can properly be omitted as
-	// necessary.
+	// Ensure nil is returned when there are no entries versus an empty slice so it
+	// can properly be omitted as necessary.
 	if len(witness) == 0 {
 		return nil
 	}

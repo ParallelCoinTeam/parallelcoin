@@ -42,8 +42,8 @@ const (
 	//   - 1 byte compact int encoding value 25
 	//   - 25 bytes P2PKH output script
 	P2PKHOutputSize = 8 + 1 + P2PKHPkScriptSize
-	// P2WPKHPkScriptSize is the size of a transaction output script that pays to a witness pubkey hash. It is
-	// calculated as:
+	// P2WPKHPkScriptSize is the size of a transaction output script that pays to a
+	// witness pubkey hash. It is calculated as:
 	//
 	//   - OP_0
 	//   - OP_DATA_20
@@ -55,8 +55,9 @@ const (
 	//   - 1 byte compact int encoding value 22
 	//   - 22 bytes P2PKH output script
 	P2WPKHOutputSize = 8 + 1 + P2WPKHPkScriptSize
-	// RedeemP2WPKHScriptSize is the size of a transaction input script that spends a pay-to-witness-public-key hash
-	// (P2WPKH). The redeem script for P2WPKH spends MUST be empty.
+	// RedeemP2WPKHScriptSize is the size of a transaction input script that spends
+	// a pay-to-witness-public-key hash (P2WPKH). The redeem script for P2WPKH
+	// spends MUST be empty.
 	RedeemP2WPKHScriptSize = 0
 	// RedeemP2WPKHInputSize is the worst case size of a transaction input redeeming a P2WPKH output. It is calculated
 	// as:
@@ -67,8 +68,9 @@ const (
 	//   - 0 bytes redeem script
 	//   - 4 bytes sequence
 	RedeemP2WPKHInputSize = 32 + 4 + 1 + RedeemP2WPKHScriptSize + 4
-	// RedeemNestedP2WPKHScriptSize is the worst case size of a transaction input script that redeems a
-	// pay-to-witness-key hash nested in P2SH (P2SH-P2WPKH). It is calculated as:
+	// RedeemNestedP2WPKHScriptSize is the worst case size of a transaction input
+	// script that redeems a pay-to-witness-key hash nested in P2SH (P2SH-P2WPKH).
+	// It is calculated as:
 	//
 	//   - 1 byte compact int encoding value 22
 	//   - OP_0
@@ -84,8 +86,8 @@ const (
 	//   - 23 bytes redeem script (scriptSig)
 	//   - 4 bytes sequence
 	RedeemNestedP2WPKHInputSize = 32 + 4 + 1 + RedeemNestedP2WPKHScriptSize + 4
-	// RedeemP2WPKHInputWitnessWeight is the worst case weight of a witness for spending P2WPKH and nested P2WPKH
-	// outputs. It is calculated as:
+	// RedeemP2WPKHInputWitnessWeight is the worst case weight of a witness for
+	// spending P2WPKH and nested P2WPKH outputs. It is calculated as:
 	//
 	//   - 1 wu compact int encoding value 2 (number of items)
 	//   - 1 wu compact int encoding value 73

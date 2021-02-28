@@ -36,13 +36,15 @@ const (
 	// addrKeyTypeScriptHash is the address type in an address key which represents a pay-to-script-hash address. This
 	// is necessary because the hash of a pubkey address might be the same as that of a script hash.
 	addrKeyTypeScriptHash = 1
-	// addrKeyTypePubKeyHash is the address type in an address key which represents a pay-to-witness-pubkey-hash
-	// address. This is required as the 20-byte data push of a p2wkh witness program may be the same data push used a
-	// p2pkh address.
+	// addrKeyTypePubKeyHash is the address type in an address key which represents
+	// a pay-to-witness-pubkey-hash address. This is required as the 20-byte data
+	// push of a p2wkh witness program may be the same data push used a p2pkh
+	// address.
 	addrKeyTypeWitnessPubKeyHash = 2
-	// addrKeyTypeScriptHash is the address type in an address key which represents a pay-to-witness-script-hash
-	// address. This is required, as p2wsh are distinct from p2sh addresses since they use a new script template, as
-	// well as a 32-byte data push.
+	// addrKeyTypeScriptHash is the address type in an address key which represents
+	// a pay-to-witness-script-hash address. This is required, as p2wsh are distinct
+	// from p2sh addresses since they use a new script template, as well as a
+	// 32-byte data push.
 	addrKeyTypeWitnessScriptHash = 3
 	// Size of a transaction entry.  It consists of 4 bytes block id + 4 bytes offset + 4 bytes length.
 	txEntrySize = 4 + 4 + 4
