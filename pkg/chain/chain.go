@@ -525,11 +525,11 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified now that the modifications have been
 	// committed to the database.
-	Debug("committing new view")
+	Trace("committing new view")
 	view.commit()
 
 	// This node is now the end of the best chain.
-	Debug("setting new chain tip")
+	Trace("setting new chain tip")
 	b.BestChain.SetTip(node)
 	// Update the state for the best block. Notice how this replaces the entire struct instead of updating the existing
 	// one. This effectively allows the old version to act as a snapshot which callers can use freely without needing to
@@ -909,7 +909,7 @@ func (b *BlockChain) reorganizeChain(detachNodes, attachNodes *list.List) error 
 //
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,	flags BehaviorFlags) (bool, error) {
-	Debug("running connectBestChain")
+	Trace("running connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB. If it fails to write, it's not the end of the
@@ -922,7 +922,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,	flags 
 	// We are extending the main (best) chain with a new block. This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.BestChain.Tip().hash) {
-		Debug("extending main chain")
+		Trace("extending main chain")
 		// Skip checks if node has already been fully validated.
 		fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
 		// Perform several checks to verify the block can be connected to the main chain without violating any rules and
@@ -962,10 +962,10 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,	flags 
 			}
 		}
 		// Connect the block to the main chain.
-		Debug("connecting block to main chain")
+		Trace("connecting block to main chain")
 		var err error
 		if err = b.connectBlock(node, block, view, stxos); Check(err){
-			Debug("connect block error: ", err)
+			Error("connect block error: ", err)
 			// If we got hit with a rule error, then we'll mark that status of the block as invalid and flush the index
 			// state to disk before returning with the error.
 			if _, ok := err.(RuleError); ok {
@@ -974,7 +974,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,	flags 
 			flushIndexState()
 			return false, err
 		}
-		Debug("block connected to main chain")
+		Trace("block connected to main chain")
 		// If this is fast add, or this block node isn't yet marked as valid, then we'll update its status and flush the
 		// state to disk again.
 		if fastAdd || !b.Index.NodeStatus(node).KnownValid() {
@@ -986,7 +986,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,	flags 
 		}
 		return true, nil
 	}
-	Debug("calculating work sum at new node")
+	Trace("calculating work sum at new node")
 	node.workSum = CalcWork(node.bits, node.height, node.version)
 	// We're extending (or creating) a side chain, but the cumulative work for this new side chain is not enough to make
 	// it the new chain.
@@ -1012,7 +1012,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,	flags 
 	// chain forked).
 	detachNodes, attachNodes := b.getReorganizeNodes(node)
 	// Reorganize the chain.
-	Infof("REORGANIZE: block %v is causing a reorganize", node.hash)
+	Warnf("REORGANIZE: block %v is causing a reorganize", node.hash)
 	err := b.reorganizeChain(detachNodes, attachNodes)
 	// Either getReorganizeNodes or reorganizeChain could have made unsaved changes to the block index, so flush
 	// regardless of whether there was an error. The index would only be dirty if the block failed to connect, so we can

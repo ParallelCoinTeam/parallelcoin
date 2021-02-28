@@ -18,7 +18,7 @@ import (
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, flags BehaviorFlags) (bool, error) {
-	Debug("maybeAcceptBlock starting")
+	Trace("maybeAcceptBlock starting")
 	// The height of this block is one more than the referenced previous block.
 	prevHash := &block.MsgBlock().Header.PrevBlock
 	prevNode := b.Index.LookupNode(prevHash)
@@ -32,14 +32,14 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 		return false, ruleError(ErrInvalidAncestorBlock, str)
 	}
 	blockHeight := prevNode.height + 1
-	Debug("block not found, good, setting height", blockHeight)
+	Trace("block not found, good, setting height", blockHeight)
 	block.SetHeight(blockHeight)
 	// To deal with multiple mining algorithms, we must check first the block header version. Rather than pass the
 	// direct previous by height, we look for the previous of the same algorithm and pass that.
 	if blockHeight < b.params.BIP0034Height {
 	
 	}
-	Debug("sanitizing header versions for legacy")
+	Trace("sanitizing header versions for legacy")
 	var DoNotCheckPow bool
 	var pn *BlockNode
 	var a int32 = 2

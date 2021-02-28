@@ -157,7 +157,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		cc -= othernodes
 		// Debug("LAN disabled, non-lan node count:", cc)
 	}
-	// Debug("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
+	Trace(cc, "nodes connected")
 	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true

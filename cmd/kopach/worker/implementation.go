@@ -282,7 +282,7 @@ func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
 // NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
 // work and restart
 func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
-	Debug("received new job")
+	Trace("received new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
 		Debug("dispatch not ready")
 		*reply = true
@@ -291,7 +291,7 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 	w.bitses.Store(j.Diffs)
 	w.merkles.Store(j.Merkles)
 	if j.Merkles[5].IsEqual(w.lastMerkle) {
-		Debug("not a new job")
+		Trace("not a new job")
 		*reply = true
 		return
 	}

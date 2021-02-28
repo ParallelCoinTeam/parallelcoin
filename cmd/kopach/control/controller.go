@@ -221,6 +221,17 @@ func Run(cx *conte.Xt) (quit qu.C) {
 						ctrl.active.Store(true)
 					}
 				}
+				if counter%countTick == 0 {
+					j := p2padvt.GetAdvt(cx)
+					if *cx.Config.AutoListen {
+						*cx.Config.P2PConnect = cli.StringSlice{}
+						_, addresses := routeable.GetAllInterfacesAndAddresses()
+						Traces(addresses)
+						for i := range addresses {
+							addrS := net.JoinHostPort(addresses[i].IP.String(), fmt.Sprint(j.P2P))
+							*cx.Config.P2PConnect = append(*cx.Config.P2PConnect, addrS)
+						}
+						save.Pod(cx.Config)
 				if ctrl.isMining.Load() {
 					if !once {
 						cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
@@ -402,7 +413,9 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 			delete(c.otherNodes, i)
 		}
 	}
-	c.cx.OtherNodes.Store(int32(len(c.otherNodes)))
+	on := int32(len(c.otherNodes))
+	Trace("other nodes", on)
+	c.cx.OtherNodes.Store(on)
 	return
 }
 
