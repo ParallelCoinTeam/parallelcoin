@@ -70,7 +70,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	} else {
 		bitsMap = tip.Diffs.Load().(blockchain.Diffs)
 	}
-	Traces(bitsMap)
+	Debugs(bitsMap)
 	// bitses := Diffs.NewBitses()
 	// bitses.Put(bitsMap)
 	// msg = append(msg, bitses)

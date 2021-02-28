@@ -278,7 +278,7 @@ var handlers = transport.Handlers{
 		count := hr.Count
 		hc := c.hashCount.Load() + uint64(count)
 		c.hashCount.Store(hc)
-		Trace("received message hashrate", count, hc)
+		// Trace("received message hashrate", count, hc)
 		return
 	},
 	string(job.Magic): func(
@@ -292,9 +292,10 @@ var handlers = transport.Handlers{
 			return
 		}
 		
-		// Debugs(b)
-		jr := &job.Job{}
-		gotiny.Unmarshal(b, jr)
+		Debugs(b)
+		jr := job.Job{}
+		gotiny.Unmarshal(b, &jr)
+		Debugs(jr)
 		for _,x := range jr.Merkles {
 			if x==nil {
 				Error("encountered nil merkle root, abort")
@@ -316,7 +317,7 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			if err = w.clients[i].NewJob(jr); Check(err) {
+			if err = w.clients[i].NewJob(&jr); Check(err) {
 			}
 		}
 		return

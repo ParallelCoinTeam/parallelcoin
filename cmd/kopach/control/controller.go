@@ -571,11 +571,12 @@ func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (er
 }
 
 func (c *Controller) sendNewBlockTemplate() (err error) {
+	Debug("sending block template>>>")
 	var template *mining.BlockTemplate
 	if template, err = c.getNewBlockTemplate(); Check(err) {
 		return
 	}
-	// Debugs(template)
+	Debugs(template)
 	if template == nil {
 		Debug("template is nil")
 		return
@@ -586,6 +587,8 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	var ccb *map[int32]*util.Tx
 	var fMC []byte
 	ccb, fMC, txs = job.Get(c.cx, util.NewBlock(msgB))
+	Debug("coinbases>>>")
+	Debugs(ccb)
 	c.coinbases.Store(ccb)
 	jobShards := transport.GetShards(fMC)
 	shardsLen := len(jobShards)

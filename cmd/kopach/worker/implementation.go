@@ -30,7 +30,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 10
+const RoundsPerAlgo = 1000
 
 type Worker struct {
 	mx            sync.Mutex
@@ -45,7 +45,7 @@ type Worker struct {
 	msgBlock      atomic.Value // *wire.MsgBlock
 	bitses        atomic.Value
 	merkles       atomic.Value
-	lastMerkle    *chainhash.Hash
+	lastBlockHash *chainhash.Hash
 	roller        *Counter
 	startNonce    uint32
 	startChan     qu.C
@@ -290,7 +290,7 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 	}
 	w.bitses.Store(j.Diffs)
 	w.merkles.Store(j.Merkles)
-	if j.Merkles[5].IsEqual(w.lastMerkle) {
+	if j.PrevBlockHash.IsEqual(w.lastBlockHash) {
 		Trace("not a new job")
 		*reply = true
 		return
@@ -300,13 +300,16 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 		// we don't need to know net params if version numbers come with jobs
 		algos = append(algos, i)
 	}
-	w.lastMerkle = j.Merkles[5]
+	if w.lastBlockHash == nil {
+		w.lastBlockHash = j.PrevBlockHash
+	} else {
+		*w.lastBlockHash = *j.PrevBlockHash
+	}
 	*reply = true
 	// halting current work
 	Debug("halting current work")
 	w.stopChan <- struct{}{}
 	newHeight := j.Height
-	
 	if len(algos) > 0 {
 		// if we didn't get them in the job don't update the old
 		w.roller.Algos.Store(algos)
