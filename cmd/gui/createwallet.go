@@ -89,7 +89,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 														// _, routeableAddress, _ := routeable.GetInterface()
 														*wg.cx.Config.P2PListeners = cli.StringSlice{
 															fmt.Sprintf(
-																 ":" + wg.cx.ActiveNet.DefaultPort,
+																 "0.0.0.0:" + wg.cx.ActiveNet.DefaultPort,
 															),
 														}
 														address := fmt.Sprintf(
