@@ -36,7 +36,7 @@ func (wg *WalletGUI) Watcher() qu.C {
 		for {
 		disconnected:
 			for {
-				Debug("top of watcher loop")
+				// Debug("top of watcher loop")
 				select {
 				case <-watchTick.C:
 					if !wg.node.Running() {

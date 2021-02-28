@@ -37,54 +37,65 @@ const (
 // whether or not the block is an orphan.
 //
 // This function is safe for concurrent access.
-func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags BehaviorFlags, height int32,) (
+func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Block, flags BehaviorFlags, height int32,) (
 	bool, bool, error,
 ) {
 	Debug("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
 	blockHeight := height
-	bb, _ := b.BlockByHash(&block.MsgBlock().Header.PrevBlock)
-	if bb != nil {
-		blockHeight = bb.Height() + 1
+	prevBlock, _ := b.BlockByHash(&candidateBlock.MsgBlock().Header.PrevBlock)
+	if prevBlock != nil {
+		blockHeight = prevBlock.Height() + 1
+		// enforce minimum timestamp after hardfork
+		// TODO: make sure this is mentioned somewhere
+		if fork.GetCurrent(blockHeight) > 0 {
+			Trace("checking for plan 9 hard fork invariant of timestamp always progressing")
+			if candidateBlock.MsgBlock().Header.Timestamp.Sub(prevBlock.MsgBlock().Header.Timestamp) < time.Second {
+				return false, false, ruleError(
+					ErrTimeTooOld,
+					fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
+				)
+			}
+		}
 	}
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	fastAdd := flags&BFFastAdd == BFFastAdd
-	blockHash := block.Hash()
+	blockHash := candidateBlock.Hash()
 	hf := fork.GetCurrent(blockHeight)
-	bhwa := block.MsgBlock().BlockHashWithAlgos
+	bhwa := candidateBlock.MsgBlock().BlockHashWithAlgos
 	var algo int32
 	switch hf {
 	case 0:
-		if block.MsgBlock().Header.Version != 514 {
+		if candidateBlock.MsgBlock().Header.Version != 514 {
 			algo = 2
 		} else {
 			algo = 514
 		}
 	case 1:
-		algo = block.MsgBlock().Header.Version
+		algo = candidateBlock.MsgBlock().Header.Version
 	}
-	// The block must not already exist in the main chain or side chains.
+	// The candidateBlock must not already exist in the main chain or side chains.
 	var exists bool
 	var err error
 	if exists, err = b.blockExists(blockHash); Check(err) {
 		return false, false, err
 	}
 	if exists {
-		str := ruleError(ErrDuplicateBlock, fmt.Sprintf("already have block %v", bhwa(blockHeight).String()))
+		str := ruleError(ErrDuplicateBlock, fmt.Sprintf("already have candidateBlock %v", bhwa(blockHeight).String()))
 		Error(str)
 		return false, false, str
 	}
-	// The block must not already exist as an orphan.
+	// The candidateBlock must not already exist as an orphan.
 	if _, exists := b.orphans[*blockHash]; exists {
-		str := ruleError(ErrDuplicateBlock, fmt.Sprintf("already have block (orphan)"))
+		str := ruleError(ErrDuplicateBlock, fmt.Sprintf("already have candidateBlock (orphan)"))
 		Error(str)
 		return false, false, str
 	}
-	// Perform preliminary sanity checks on the block and its transactions.
+	// Perform preliminary sanity checks on the candidateBlock and its transactions.
 	var DoNotCheckPow bool
 	pl := fork.GetMinDiff(fork.GetAlgoName(algo, blockHeight), blockHeight)
 	Debugf("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
-	ph := &block.MsgBlock().Header.PrevBlock
+	ph := &candidateBlock.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	var pb *BlockNode
 	if pn == nil {
@@ -96,7 +107,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 		}
 	}
 	Debug("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
-	if err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight); Check(err) {
+	if err = checkBlockSanity(candidateBlock, pl, b.timeSource, flags, DoNotCheckPow, blockHeight); Check(err) {
 		return false, false, err
 	}
 	Debug("searching back to checkpoints")
@@ -106,17 +117,17 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 	// otherwise bogus, blocks that could be used to eat memory, and ensuring
 	// expected (versus claimed) proof of work requirements since the previous
 	// checkpoint are met.
-	blockHeader := &block.MsgBlock().Header
+	blockHeader := &candidateBlock.MsgBlock().Header
 	var checkpointNode *BlockNode
 	if checkpointNode, err = b.findPreviousCheckpoint(); Check(err) {
 		return false, false, err
 	}
 	if checkpointNode != nil {
-		// Ensure the block timestamp is after the checkpoint timestamp.
+		// Ensure the candidateBlock timestamp is after the checkpoint timestamp.
 		checkpointTime := time.Unix(checkpointNode.timestamp, 0)
 		if blockHeader.Timestamp.Before(checkpointTime) {
 			str := fmt.Sprintf(
-				"block %v has timestamp %v before last checkpoint timestamp %v",
+				"candidateBlock %v has timestamp %v before last checkpoint timestamp %v",
 				bhwa(blockHeight).String(), blockHeader.Timestamp, checkpointTime,
 			)
 			Debug(str)
@@ -124,7 +135,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 		}
 		if !fastAdd {
 			// Even though the checks prior to now have already ensured the proof of work
-			// exceeds the claimed amount, the claimed amount is a field in the block header
+			// exceeds the claimed amount, the claimed amount is a field in the candidateBlock header
 			// which could be forged. This check ensures the proof of work is at least the
 			// minimum expected based on elapsed time since the last checkpoint and maximum
 			// adjustment allowed by the retarget rules.
@@ -137,7 +148,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 			currentTarget := fork.CompactToBig(blockHeader.Bits)
 			if currentTarget.Cmp(requiredTarget) > 0 {
 				str := fmt.Sprintf(
-					"processing: block target difficulty of %064x is too low when compared to the"+
+					"processing: candidateBlock target difficulty of %064x is too low when compared to the"+
 						" previous checkpoint", currentTarget,
 				)
 				Error(str)
@@ -156,35 +167,35 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block, flags 
 		Debugc(
 			func() string {
 				return fmt.Sprintf(
-					"adding orphan block %v with parent %v",
+					"adding orphan candidateBlock %v with parent %v",
 					bhwa(blockHeight).String(),
 					prevHash,
 				)
 			},
 		)
-		b.addOrphanBlock(block)
+		b.addOrphanBlock(candidateBlock)
 		return false, true, nil
 	}
-	// The block has passed all context independent checks and appears sane enough
-	// to potentially accept it into the block chain.
-	Debug("maybe accept block")
+	// The candidateBlock has passed all context independent checks and appears sane enough
+	// to potentially accept it into the candidateBlock chain.
+	Debug("maybe accept candidateBlock")
 	var isMainChain bool
-	if isMainChain, err = b.maybeAcceptBlock(workerNumber, block, flags); Check(err) {
+	if isMainChain, err = b.maybeAcceptBlock(workerNumber, candidateBlock, flags); Check(err) {
 		return false, false, err
 	}
-	// Accept any orphan blocks that depend on this block (they are no longer
+	// Accept any orphan blocks that depend on this candidateBlock (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
-		Trace("new block on main chain")
-		// Traces(block)
+		Trace("new candidateBlock on main chain")
+		// Traces(candidateBlock)
 	}
 	if err = b.processOrphans(workerNumber, blockHash, flags); Check(err) {
 		return false, false, err
 	}
 	Tracef(
-		"accepted block %d %v %s",
+		"accepted candidateBlock %d %v %s",
 		blockHeight, bhwa(blockHeight).String(), fork.GetAlgoName(
-			block.MsgBlock().
+			candidateBlock.MsgBlock().
 				Header.Version, blockHeight,
 		),
 	)
@@ -271,7 +282,7 @@ func (b *BlockChain) processOrphans(
 			i--
 			// Potentially accept the block into the block chain.
 			var err error
-			if _, err = b.maybeAcceptBlock(workerNumber, orphan.block, flags); Check(err){
+			if _, err = b.maybeAcceptBlock(workerNumber, orphan.block, flags); Check(err) {
 				return err
 			}
 			// Add this block to the list of blocks to process so any orphan blocks that
