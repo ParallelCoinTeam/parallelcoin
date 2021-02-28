@@ -74,7 +74,9 @@ func encodeSegWitAddress(hrp string, witnessVersion byte, witnessProgram []byte)
 		return "", err
 	}
 	// Check validity by decoding the created address.
-	version, program, err := decodeSegWitAddress(bech)
+	var program []byte
+	var version byte
+	version, program, err = decodeSegWitAddress(bech)
 	if err != nil {
 		Error(err)
 		return "", fmt.Errorf("invalid segwit address: %v", err)

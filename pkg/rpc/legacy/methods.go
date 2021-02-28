@@ -1780,7 +1780,8 @@ func SendPairs(
 		Error(err)
 		return "", err
 	}
-	txHash, err := w.SendOutputs(outputs, account, minconf, feeSatPerKb)
+	var txHash *chainhash.Hash
+	txHash, err = w.SendOutputs(outputs, account, minconf, feeSatPerKb)
 	if err != nil {
 		Error(err)
 		if err == txrules.ErrAmountNegative {
@@ -1929,11 +1930,13 @@ func SendToAddress(
 	}
 	amt, err := util.NewAmount(cmd.Amount)
 	if err != nil {
+		Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
 		Error(err)
 		return nil, err
 	}
 	// Check that signed integer parameters are positive.
 	if amt < 0 {
+		Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> need positive amount")
 		return nil, ErrNeedPositiveAmount
 	}
 	// Mock up map of address and amount pairs.

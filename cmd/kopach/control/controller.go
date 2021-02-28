@@ -445,7 +445,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 		Debug("coinbases not correct type", cbrs)
 		return
 	}
-	Debugs(cbrs)
+	// Debugs(cbrs)
 	var cb *util.Tx
 	cb, ok = (*cbrs)[msgBlock.Header.Version]
 	if !ok {
@@ -619,10 +619,13 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 	// }()
 	// }()
 	Debug("---------- calling new block template")
-	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.SHA256d); Check(err) {
+	_, curr, _ := fork.AlgoVerIterator(int32(c.height.Load()))
+	if template, err = c.blockTemplateGenerator.NewBlockTemplate(0, addr, fork.GetAlgoName(curr(),
+		int32(c.height.Load()),
+	)); Check(err) {
 	} else {
 		Debug("********** got new block template")
-		// Debugs(template)
+		Debugs(template)
 	}
 	return
 }

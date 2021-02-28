@@ -739,7 +739,8 @@ func (mp *TxPool) maybeAcceptTransaction(b *blockchain.BlockChain, tx *util.Tx, 
 	// itself can contain signature operations, the maximum allowed signature operations per transaction is less than
 	// the maximum allowed signature operations per block. TODO(roasbeef): last bool should be conditional on segwit
 	// activation
-	sigOpCost, err := blockchain.GetSigOpCost(tx, false, utxoView, true, true)
+	var sigOpCost int
+	sigOpCost, err = blockchain.GetSigOpCost(tx, false, utxoView, true, true)
 	if err != nil {
 		Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {

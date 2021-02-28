@@ -120,7 +120,8 @@ func (b *BlockChain) checkConnectBlock(node *BlockNode, block *util.Block, view 
 	enforceBIP0016 := node.timestamp >= txscript.Bip16Activation.Unix()
 	// Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over to
 	// enforcing all the new rules.
-	segwitState, err := b.deploymentState(node.parent, chaincfg.DeploymentSegwit)
+	var segwitState ThresholdState
+	segwitState, err = b.deploymentState(node.parent, chaincfg.DeploymentSegwit)
 	if err != nil {
 		Error(err)
 		return err
@@ -479,7 +480,8 @@ func (b *BlockChain) checkBlockContext(workerNumber uint32, block *util.Block,
 		}
 		// Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over
 		// to enforcing all the new rules.
-		segwitState, err := b.deploymentState(prevNode,
+		var segwitState ThresholdState
+		segwitState, err = b.deploymentState(prevNode,
 			chaincfg.DeploymentSegwit)
 		if err != nil {
 			Error(err)
