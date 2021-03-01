@@ -465,7 +465,7 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 	}
 	// Write any block status changes to DB before updating best state.
 	var err error
-	Debug("flushing block status changes to db before updating best state")
+	Trace("flushing block status changes to db before updating best state")
 	if err = b.Index.flushToDB(); Check(err){
 		return err
 	}
@@ -480,7 +480,7 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 	state := newBestState(node, blockSize, blockWeight, numTxns,
 		curTotalTxns+numTxns, node.CalcPastMedianTime())
 	// Atomically insert info into the database.
-	Debug("inserting block into database")
+	Trace("inserting block into database")
 	err = b.db.Update(func(dbTx database.Tx) error {
 		// update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
@@ -549,7 +549,7 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 	//
 	// Notify the caller that the block was connected to the main chain. The caller would typically want to react with
 	// actions such as updating wallets.
-	Debug("sending notifications for new block")
+	Trace("sending notifications for new block")
 	b.chainLock.Unlock()
 	b.sendNotification(NTBlockConnected, block)
 	b.chainLock.Lock()

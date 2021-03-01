@@ -40,7 +40,7 @@ const (
 func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Block, flags BehaviorFlags, height int32,) (
 	bool, bool, error,
 ) {
-	Debug("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
+	Trace("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
 	blockHeight := height
 	prevBlock, _ := b.BlockByHash(&candidateBlock.MsgBlock().Header.PrevBlock)
 	if prevBlock != nil {
@@ -94,7 +94,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	// Perform preliminary sanity checks on the candidateBlock and its transactions.
 	var DoNotCheckPow bool
 	pl := fork.GetMinDiff(fork.GetAlgoName(algo, blockHeight), blockHeight)
-	Debugf("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
+	Tracef("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	ph := &candidateBlock.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	var pb *BlockNode
@@ -106,11 +106,11 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 			DoNotCheckPow = true
 		}
 	}
-	Debug("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
+	Trace("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	if err = checkBlockSanity(candidateBlock, pl, b.timeSource, flags, DoNotCheckPow, blockHeight); Check(err) {
 		return false, false, err
 	}
-	Debug("searching back to checkpoints")
+	Trace("searching back to checkpoints")
 	// Find the previous checkpoint and perform some additional checks based on the
 	// checkpoint. This provides a few nice properties such as preventing old side
 	// chain blocks before the last checkpoint, rejecting easy to mine, but
@@ -130,7 +130,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 				"candidateBlock %v has timestamp %v before last checkpoint timestamp %v",
 				bhwa(blockHeight).String(), blockHeader.Timestamp, checkpointTime,
 			)
-			Debug(str)
+			Trace(str)
 			return false, false, ruleError(ErrCheckpointTimeTooOld, str)
 		}
 		if !fastAdd {
@@ -156,7 +156,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 			}
 		}
 	}
-	Debug("handling orphans")
+	Trace("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
 	var prevHashExists bool
@@ -178,7 +178,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	}
 	// The candidateBlock has passed all context independent checks and appears sane enough
 	// to potentially accept it into the candidateBlock chain.
-	Debug("maybe accept candidateBlock")
+	Trace("maybe accept candidateBlock")
 	var isMainChain bool
 	if isMainChain, err = b.maybeAcceptBlock(workerNumber, candidateBlock, flags); Check(err) {
 		return false, false, err
@@ -199,7 +199,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 				Header.Version, blockHeight,
 		),
 	)
-	Debug("finished blockchain.ProcessBlock")
+	Trace("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }
 

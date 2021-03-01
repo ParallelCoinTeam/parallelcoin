@@ -93,7 +93,7 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 // each with the passed listen func. Invalid addresses are logged and skipped.
 func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.Listener {
 	ipv4Addrs := make([]string, 0, len(normalizedListenAddrs)*2)
-	ipv6Addrs := make([]string, 0, len(normalizedListenAddrs)*2)
+	// ipv6Addrs := make([]string, 0, len(normalizedListenAddrs)*2)
 	for _, addr := range normalizedListenAddrs {
 		host, _, err := net.SplitHostPort(addr)
 		if err != nil {
@@ -107,7 +107,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		// Empty host or host of * on plan9 is both IPv4 and IPv6.
 		if host == "" || (host == "*" && runtime.GOOS == "plan9") {
 			ipv4Addrs = append(ipv4Addrs, addr)
-			ipv6Addrs = append(ipv6Addrs, addr)
+			// ipv6Addrs = append(ipv6Addrs, addr)
 			continue
 		}
 		// Remove the IPv6 zone from the host, if present. The zone prevents ParseIP from correctly parsing the IP
@@ -122,12 +122,14 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		case ip == nil:
 			Warnf("`%s` is not a valid IP address", host)
 		case ip.To4() == nil:
-			ipv6Addrs = append(ipv6Addrs, addr)
+			// ipv6Addrs = append(ipv6Addrs, addr)
 		default:
 			ipv4Addrs = append(ipv4Addrs, addr)
 		}
 	}
-	listeners := make([]net.Listener, 0, len(ipv6Addrs)+len(ipv4Addrs))
+	listeners := make([]net.Listener, 0,
+		// len(ipv6Addrs)+
+		len(ipv4Addrs))
 	for _, addr := range ipv4Addrs {
 		listener, err := listen("tcp4", addr)
 		if err != nil {
@@ -139,16 +141,16 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		}
 		listeners = append(listeners, listener)
 	}
-	for _, addr := range ipv6Addrs {
-		listener, err := listen("tcp6", addr)
-		if err != nil {
-			Warnf(
-				"Can't listen on %s: %v", addr, err,
-			)
-			continue
-		}
-		listeners = append(listeners, listener)
-	}
+	// for _, addr := range ipv6Addrs {
+	// 	listener, err := listen("tcp6", addr)
+	// 	if err != nil {
+	// 		Warnf(
+	// 			"Can't listen on %s: %v", addr, err,
+	// 		)
+	// 		continue
+	// 	}
+	// 	listeners = append(listeners, listener)
+	// }
 	return listeners
 }
 

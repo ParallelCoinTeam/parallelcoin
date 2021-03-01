@@ -365,7 +365,7 @@ func normalizeAddresses(cfg *pod.Config) {
 	nrm := normalize.StringSliceAddresses
 	nrm(cfg.AddPeers, port)
 	nrm(cfg.ConnectPeers, port)
-	// nrm(cfg.P2PListeners, port)
+	nrm(cfg.P2PListeners, port)
 	nrm(cfg.Whitelists, port)
 	// nrm(cfg.RPCListeners, port)
 }

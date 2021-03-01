@@ -60,14 +60,14 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 			}
 		}
 	}
-	Debug("check for blacklisted addresses")
+	Trace("check for blacklisted addresses")
 	txs := block.Transactions()
 	for i := range txs {
 		if ContainsBlacklisted(b, txs[i], hardfork.Blacklist) {
 			return false, ruleError(ErrBlacklisted, "block contains a blacklisted address ")
 		}
 	}
-	Debug("found no blacklisted addresses")
+	Trace("found no blacklisted addresses")
 	var err error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on the position
@@ -84,7 +84,7 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	// decoupled from the much more expensive connection logic. It also has some
 	// other nice properties such as making blocks that never become part of the
 	// main chain or blocks that fail to connect available for further analysis.
-	Debug("inserting block into database")
+	Trace("inserting block into database")
 	if err = b.db.Update(func(dbTx database.Tx) error {
 		return dbStoreBlock(dbTx, block)
 	}); Check(err) {
@@ -96,20 +96,22 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	newNode := NewBlockNode(blockHeader, prevNode)
 	newNode.status = statusDataStored
 	b.Index.AddNode(newNode)
-	Debug("flushing db")
+	Trace("flushing db")
 	if err = b.Index.flushToDB(); Check(err) {
 		return false, err
 	}
-	// Connect the passed block to the chain while respecting proper chain selection according to the chain with the
-	// most proof of work. This also handles validation of the transaction scripts.
-	Debug("connecting to best chain")
+
+	// Connect the passed block to the chain while respecting proper chain selection
+	// according to the chain with the most proof of work. This also handles
+	// validation of the transaction scripts.
+	Trace("connecting to best chain")
 	var isMainChain bool
 	if isMainChain, err = b.connectBestChain(newNode, block, flags); Check(err) {
 		return false, err
 	}
 	// Notify the caller that the new block was accepted into the block chain. The caller would typically want to react
 	// by relaying the inventory to other peers.
-	Debug("sending out block notifications for block accepted")
+	Trace("sending out block notifications for block accepted")
 	b.chainLock.Unlock()
 	b.sendNotification(NTBlockAccepted, block)
 	b.chainLock.Lock()

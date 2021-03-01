@@ -292,10 +292,10 @@ var handlers = transport.Handlers{
 			return
 		}
 		
-		Debugs(b)
+		// Debugs(b)
 		jr := job.Job{}
 		gotiny.Unmarshal(b, &jr)
-		Debugs(jr)
+		// Debugs(jr)
 		for _,x := range jr.Merkles {
 			if x==nil {
 				Error("encountered nil merkle root, abort")

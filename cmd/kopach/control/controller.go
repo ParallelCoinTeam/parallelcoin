@@ -213,36 +213,36 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	once := false
 	go func() {
+		if !ctrl.active.Load() {
+			Info("ready to send out jobs!")
+			ctrl.active.Store(true)
+		}
 	out:
 		for {
 			select {
 			case <-ticker.C:
-				if cx.IsCurrent() {
-					if !ctrl.active.Load() {
-						Info("ready to send out jobs!")
+				if ctrl.isMining.Load() {
+					if !once {
+						cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
+						once = true
 						ctrl.active.Store(true)
 					}
-					if ctrl.isMining.Load() {
-						if !once {
-							cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
-							once = true
-							ctrl.active.Store(true)
-						}
-						// if err = ctrl.sendNewBlockTemplate(); Check(err) {
-						// } else {
-						// }
-					}
-					// send out advertisment
-					ad := transport.GetShards(p2padvt.Get(cx))
-					var err error
-					if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
-					}
-					if ctrl.isMining.Load() {
-						ctrl.rebroadcast()
-					}
-				} else {
-					ctrl.active.Store(false)
-					once = false
+					// if err = ctrl.sendNewBlockTemplate(); Check(err) {
+					// } else {
+					// }
+				}
+				// send out advertisment
+				ad := transport.GetShards(p2padvt.Get(cx))
+				var err error
+				if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
+				}
+				if cx.IsCurrent() {
+					// } else {
+					// ctrl.active.Store(false)
+					// once = false
+				}
+				if ctrl.isMining.Load() {
+					ctrl.rebroadcast()
 				}
 				if counter%countTick == 0 {
 					j := p2padvt.GetAdvt(cx)
@@ -368,12 +368,12 @@ var handlersMulticast = transport.Handlers{
 }
 
 func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
-	Trace("processing advertisment message", src, dst)
+	Debug("processing advertisment message", src, dst)
 	c := ctx.(*Controller)
-	if !c.active.Load() {
-		Debug("not active")
-		return
-	}
+	// if !c.active.Load() {
+	// 	Debug("not active")
+	// 	return
+	// }
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
 	Trace(j.IPs)
@@ -415,7 +415,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 			Debug("connected to peer via address", peerIP)
 			c.otherNodes[uuid] = &nodeSpec{}
 			c.otherNodes[uuid].addr = addr
-			// break
+			break
 		}
 	}
 	// update last seen time for uuid for garbage collection of stale disconnected
@@ -555,10 +555,10 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 // hashrate reports from workers
 func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 	c := ctx.(*Controller)
-	if !c.active.Load() {
-		Debug("not active")
-		return
-	}
+	// if !c.active.Load() {
+	// 	Debug("not active")
+	// 	return
+	// }
 	var hr hashrate.Hashrate
 	gotiny.Unmarshal(b, &hr)
 	if c.lastNonce == hr.Nonce {
@@ -588,7 +588,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	var fMC []byte
 	ccb, fMC, txs = job.Get(c.cx, util.NewBlock(msgB))
 	Debug("coinbases>>>")
-	Debugs(ccb)
+	// Debugs(ccb)
 	c.coinbases.Store(ccb)
 	jobShards := transport.GetShards(fMC)
 	shardsLen := len(jobShards)
@@ -687,10 +687,10 @@ func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
-		if !c.active.Load() {
-			Debug("not active")
-			return
-		}
+		// if !c.active.Load() {
+		// 	Debug("not active")
+		// 	return
+		// }
 		// if !c.Ready.Load() {
 		// 	Debug("not ready")
 		// 	return

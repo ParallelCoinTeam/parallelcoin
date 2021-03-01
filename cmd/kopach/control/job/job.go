@@ -25,6 +25,7 @@ type Job struct {
 	ControllerNonce uint64
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
+	MinTimestamp    time.Time
 	Diffs           blockchain.Diffs
 	Merkles         blockchain.Merkles
 	// CoinBases       map[int32]*util.Tx
@@ -94,6 +95,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 			nbH == fork.List[1].TestnetStart) {
 		nbH++
 	}
+	
 	for i := range bitsMap {
 		// set value according to version and block height
 		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
@@ -107,7 +109,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 			append(txr, txx), false,
 		)
 		// Debugs(mTree)
-		mr :=  mTree.GetRoot()
+		mr := mTree.GetRoot()
 		if mr == nil {
 			err = errors.New("got a nil merkle root")
 			panic(err)
@@ -144,6 +146,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
 		Diffs:           bitsMap,
 		Merkles:         mTS,
+		MinTimestamp:    tip.Header().Timestamp.Add(time.Second),
 		// CoinBases:       *cbs,
 	}
 	// jrb.CoinBases= make(map[int32]*util.Tx)
@@ -297,12 +300,16 @@ func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
 		}
 	}
 	if found {
+		tn := time.Now()
+		if tn.Sub(j.MinTimestamp) < 0 {
+			tn = j.MinTimestamp
+		}
 		out = &wire.MsgBlock{
 			Header: wire.BlockHeader{
 				Version:    version,
 				PrevBlock:  *j.PrevBlockHash,
 				MerkleRoot: *j.Merkles[version],
-				Timestamp:  time.Now(),
+				Timestamp:  tn,
 			},
 			// Transactions: j.Txs,
 		}

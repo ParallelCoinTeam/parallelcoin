@@ -156,13 +156,13 @@ func (cx *Xt) IsCurrent() (is bool) {
 	if !*cx.Config.LAN {
 		cc -= othernodes
 	}
-	Trace(cc, "nodes connected")
+	Debug(cc, "nodes connected")
 	connected := cc > 0
 	is = rn.Chain.IsCurrent() &&
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load() || *cx.Config.Solo
-	Trace(
+	Debug(
 		"is current:", is, "-", rn.Chain.IsCurrent(), rn.SyncManager.IsCurrent(),
 		*cx.Config.Solo, "connected", rn.HighestKnown.Load(), rn.Chain.BestChain.Height(),
 		othernodes,

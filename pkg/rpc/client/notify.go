@@ -155,7 +155,7 @@ type NotificationHandlers struct {
 // higher level types and delivers the notification to the appropriate On<X> handler registered with the client.
 func (c *Client) handleNotification(ntfn *rawNotification) {
 	Debug("<<<Handling Notification>>>")
-	Traces(ntfn)
+	Debugs(ntfn)
 	// Ignore the notification if the client is not interested in any notifications.
 	if c.ntfnHandlers == nil {
 		Debug("<<<no notification handlers registered>>>")
