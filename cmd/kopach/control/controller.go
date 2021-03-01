@@ -653,6 +653,9 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 	// block uses a key and it is deleted here afterwards
 	// }()
 	// }()
+	
+	// TODO: this needs to be switched to use mining.BlockTemplates
+	
 	Debug("---------- calling new block template")
 	_, curr, _ := fork.AlgoVerIterator(int32(c.height.Load()))
 	if template, err = c.blockTemplateGenerator.NewBlockTemplate(

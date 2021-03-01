@@ -66,6 +66,7 @@ func (g *BlkTmplGenerator) NewBlockTemplates(
 	// Extend the most recently known best block.
 	best := g.Chain.BestSnapshot()
 	mbt.PrevBlock = best.Hash
+	mbt.Timestamp = g.Chain.BestChain.Tip().Header().Timestamp.Add(time.Second)
 	mbt.Height = best.Height + 1
 	// Create a standard coinbase transaction paying to the provided address.
 	//
@@ -78,11 +79,11 @@ func (g *BlkTmplGenerator) NewBlockTemplates(
 	rand.Seed(time.Now().UnixNano())
 	extraNonce := rand.Uint64()
 	var err error
-	numAlgos := fork.GetNumAlgos(mbt.Height)
+	// numAlgos := fork.GetNumAlgos(mbt.Height)
 	// coinbaseScripts := make(map[int32][]byte, numAlgos)
 	// coinbaseTxs := make(map[int32]*util.Tx, numAlgos)
 	var coinbaseSigOpCost int64
-	blockTemplates := make(map[int32]*BlockTemplate, numAlgos)
+	// blockTemplates := make(map[int32]*BlockTemplate, numAlgos)
 	var priorityQueues *txPriorityQueue
 	// Get the current source transactions and create a priority queue to hold the
 	// transactions which are ready for inclusion into a block along with some
@@ -201,6 +202,7 @@ mempoolLoop:
 	algos := fork.GetAlgos(mbt.Height)
 	var alg int32
 	mbt.coinbases = make(map[int32]*util.Tx)
+	// Create a slice to hold the transactions to be included in the generated block
 	mbt.txs = make([]*util.Tx, 0, len(sourceTxns))
 	var coinbaseTx *util.Tx
 	for i := range algos {
@@ -212,7 +214,7 @@ mempoolLoop:
 		}
 		mbt.coinbases[alg] = coinbaseTx
 		// this should be the same for all anyhow, as they are all the same format just
-		// diff amounts
+		// diff amounts (note: this might be wrawwnnggrrr)
 		coinbaseSigOpCost = int64(blockchain.CountSigOps(mbt.coinbases[alg]))
 	}
 	// Create slices to hold the fees and number of signature operations for each of
@@ -343,7 +345,6 @@ mempoolLoop:
 			logSkippedDeps(tx, deps)
 			continue
 		}
-		
 		// Spend the transaction inputs in the block utxo view and add an entry for it
 		// to ensure any transactions which reference this one have it available as an
 		// input and can ensure they aren't double spending.
@@ -374,10 +375,13 @@ mempoolLoop:
 			}
 		}
 	}
-	mbt.Timestamp = medianAdjustedTime(best, g.TimeSource)
+	if fork.GetCurrent(mbt.Height) < 1 {
+		// for legacy chain this is the consensus timestamp to use, post hard fork there
+		// is no allowance for less than 1 second between block timestamps of
+		// sequential, linked blocks, which was filled earlier by default
+		mbt.Timestamp = medianAdjustedTime(best, g.TimeSource)
+	}
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
-		// Create a slice to hold the transactions to be included in the generated block
-		
 		// Now that the actual transactions have been selected, update the block weight
 		// for the real transaction count and coinbase value with the total fees
 		// accordingly.
@@ -390,13 +394,14 @@ mempoolLoop:
 		// per the chain consensus rules.
 		// Trace("algo ", Timestamp, " ", algo)
 		algo := fork.GetAlgoName(mbt.Height, curr())
-		if mbt.Diffs[curr()], err = g.Chain.CalcNextRequiredDifficulty(mbt.Timestamp, algo); Check(err) {
+		if mbt.Diffs[curr()], err = g.Chain.CalcNextRequiredDifficulty(algo); Check(err) {
 			return nil, err
 		}
 		Tracef("reqDifficulty %d %08x %064x", curr(), mbt.Diffs[curr()], fork.CompactToBig(mbt.Diffs[curr()]))
 		// Create a new block ready to be solved.
 		merkles := blockchain.BuildMerkleTreeStore(mbt.txs, false)
 		mbt.Merkles[curr()] = *merkles[len(merkles)-1]
+		// TODO: can we do this once instead of 9 times?
 		var msgBlock wire.MsgBlock
 		msgBlock.Header = wire.BlockHeader{
 			Version:    curr(),
@@ -420,9 +425,9 @@ mempoolLoop:
 			Debug("checkconnectblocktemplate err:", err)
 			return nil, err
 		}
-		bh := msgBlock.Header.BlockHash()
 		Tracec(
 			func() string {
+				bh := msgBlock.Header.BlockHash()
 				return fmt.Sprintf(
 					"created new block template (algo %s, %d transactions, "+
 						"%d in fees, %d signature operations cost, %d weight, "+
@@ -439,15 +444,15 @@ mempoolLoop:
 				)
 			},
 		)
-		// Tracec(func() string { return spew.Sdump(msgBlock) })
-		blockTemplate := &BlockTemplate{
-			Block:           &msgBlock,
-			Fees:            txFees,
-			SigOpCosts:      txSigOpCosts,
-			Height:          mbt.Height,
-			ValidPayAddress: payToAddress != nil,
-		}
-		blockTemplates[curr()] = blockTemplate
+		// // Tracec(func() string { return spew.Sdump(msgBlock) })
+		// blockTemplate := &BlockTemplate{
+		// 	Block:           &msgBlock,
+		// 	Fees:            txFees,
+		// 	SigOpCosts:      txSigOpCosts,
+		// 	Height:          mbt.Height,
+		// 	ValidPayAddress: payToAddress != nil,
+		// }
+		// blockTemplates[curr()] = blockTemplate
 	}
 	return mbt, nil
 }

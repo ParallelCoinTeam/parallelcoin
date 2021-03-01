@@ -538,7 +538,6 @@ func (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
 		// 	prevNode.height+1)
 		expectedDifficulty, err := b.calcNextRequiredDifficulty(
 			prevNode,
-			header.Timestamp,
 			fork.GetAlgoName(header.Version, prevNode.height+1),
 			true,
 		)
