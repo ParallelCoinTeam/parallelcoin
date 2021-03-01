@@ -30,7 +30,7 @@ var (
 // based on the difficulty retarget rules. This function is safe for concurrent access.
 func (b *BlockChain) CalcNextRequiredDifficulty(algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
-	difficulty, err = b.calcNextRequiredDifficulty(
+	difficulty, err = b.CalcNextRequiredDifficultyFromNode(
 		b.BestChain.
 			Tip(), algo, false,
 	)
@@ -62,19 +62,19 @@ func (b *BlockChain) calcEasiestDifficulty(bits uint32, duration time.Duration) 
 	return BigToCompact(newTarget)
 }
 
-// calcNextRequiredDifficulty calculates the required difficulty for the block after the passed previous block node
+// CalcNextRequiredDifficultyFromNode calculates the required difficulty for the block after the passed previous block node
 // based on the difficulty retarget rules.
 //
 // This function differs from the exported CalcNextRequiredDifficulty in that the exported version uses the current best
 // chain as the previous block node while this function accepts any block node.
-func (b *BlockChain) calcNextRequiredDifficulty(lastNode *BlockNode, algoname string, l bool,) (
+func (b *BlockChain) CalcNextRequiredDifficultyFromNode(lastNode *BlockNode, algoname string, l bool,) (
 	newTargetBits uint32,
 	err error,
 ) {
 	nH := lastNode.height + 1
 	cF := fork.GetCurrent(nH)
 	newTargetBits = fork.GetMinBits(algoname, nH)
-	// Tracef("calcNextRequiredDifficulty %08x", newTargetBits)
+	// Tracef("CalcNextRequiredDifficultyFromNode %08x", newTargetBits)
 	switch cF {
 	// Legacy difficulty adjustment
 	case 0:

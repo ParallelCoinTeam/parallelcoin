@@ -50,7 +50,7 @@ type Controller struct {
 	quit                   qu.C
 	cx                     *conte.Xt
 	isMining               atomic.Bool
-	height                 atomic.Uint64
+	height                 atomic.Int32
 	blockTemplateGenerator *mining.BlkTmplGenerator
 	coinbases              atomic.Value
 	transactions           atomic.Value
@@ -221,6 +221,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		for {
 			select {
 			case <-ticker.C:
+				ctrl.height.Store(cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
 				if ctrl.isMining.Load() {
 					if !once {
 						cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
@@ -525,6 +526,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 		}
 	}
 	Trace("the block was accepted")
+	c.height.Store(block.Height())
 	Tracec(
 		func() string {
 			bmb := block.MsgBlock()
@@ -649,26 +651,52 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 		*c.cx.Config.MiningAddrs = ma
 		save.Pod(c.cx.Config)
 	}
-	// TODO: trigger wallet to generate new ones at some point, if one is connected, when a mined
-	// block uses a key and it is deleted here afterwards
-	// }()
-	// }()
-	
-	// TODO: this needs to be switched to use mining.BlockTemplates
-	
-	Debug("---------- calling new block template")
-	_, curr, _ := fork.AlgoVerIterator(int32(c.height.Load()))
-	if template, err = c.blockTemplateGenerator.NewBlockTemplate(
-		0, addr, fork.GetAlgoName(
-			curr(),
-			int32(c.height.Load()),
-		),
-	); Check(err) {
-	} else {
-		Debug("********** got new block template")
-		Debugs(template)
+	mbt := &MsgBlockTemplate{
+		Height:    c.height.Load(),
+		Diffs:     make(map[int32]uint32),
+		Merkles:   make(map[int32]chainhash.Hash),
+		coinbases: make(map[int32]*util.Tx),
+	}
+	next, curr, more := fork.AlgoVerIterator(c.height.Load())
+	for ; more(); next() {
+		var templateX *mining.BlockTemplate
+		if templateX, err = c.blockTemplateGenerator.NewBlockTemplate(
+			0, addr, fork.GetAlgoName(
+				curr(), c.height.Load(),
+			),
+		); Check(err) {
+		} else {
+			Debug("********** got new block template", curr())
+			// Debugs(template)
+			mbt.coinbases[curr()] = util.NewTx(templateX.Block.Transactions[len(templateX.Block.Transactions)-1])
+			mbt.Diffs[curr()] = templateX.Block.Header.Bits
+			mbt.Merkles[curr()] = templateX.Block.Header.MerkleRoot
+			Debugf(
+				"))))))))))))))))))) %d %d %0.8f %08x %v",
+				mbt.Height,
+				curr(),
+				util.Amount(mbt.coinbases[curr()].MsgTx().TxOut[0].Value).ToDUO(),
+				mbt.Diffs[curr()],
+				mbt.Merkles[curr()],
+			)
+			// Debugs(template.Block.Transactions)
+		}
+		template = templateX
 	}
 	return
+}
+
+// MsgBlockTemplate describes a message that a mining worker can use to
+// construct a block to mine on. Two methods are exported that allow a
+// controlling node to
+type MsgBlockTemplate struct {
+	Height    int32
+	PrevBlock chainhash.Hash
+	Diffs     map[int32]uint32
+	Merkles   map[int32]chainhash.Hash
+	coinbases map[int32]*util.Tx
+	txs       []*util.Tx
+	Timestamp time.Time
 }
 
 func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
