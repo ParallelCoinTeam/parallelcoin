@@ -71,7 +71,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 	} else {
 		bitsMap = tip.Diffs.Load().(blockchain.Diffs)
 	}
-	Debugs(bitsMap)
+	// Debugs(bitsMap)
 	// bitses := Diffs.NewBitses()
 	// bitses.Put(bitsMap)
 	// msg = append(msg, bitses)
@@ -104,7 +104,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		txx := util.NewTx(txc.Copy())
 		// Debugs(coinbase)
 		(*cbs)[i] = txx
-		Debug("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
+		// Debug("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append(txr, txx), false,
 		)

@@ -578,7 +578,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	if template, err = c.getNewBlockTemplate(); Check(err) {
 		return
 	}
-	Debugs(template)
+	// Debugs(template)
 	if template == nil {
 		Debug("template is nil")
 		return
@@ -652,6 +652,7 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 		save.Pod(c.cx.Config)
 	}
 	mbt := &MsgBlockTemplate{
+		PrevBlock: c.cx.RealNode.Chain.BestSnapshot().Hash,
 		Height:    c.height.Load(),
 		Diffs:     make(map[int32]uint32),
 		Merkles:   make(map[int32]chainhash.Hash),
@@ -679,9 +680,88 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 				mbt.Diffs[curr()],
 				mbt.Merkles[curr()],
 			)
+			mbt.Timestamp = templateX.Block.Header.Timestamp.Add(time.Second)
 			// Debugs(template.Block.Transactions)
 		}
 		template = templateX
+	}
+	Debugs(mbt)
+	return
+}
+
+func (c *Controller) getNewMsgBlockTemplate() (mbt *MsgBlockTemplate, err error,) {
+	Debug("getting new block templates")
+	var addr util.Address
+	if c.walletClient != nil {
+		if !c.walletClient.Disconnected() {
+			Debug("have access to a wallet, generating address")
+			if addr, err = c.walletClient.GetNewAddress("default"); Check(err) {
+			}
+			Debug("-------- found address", addr)
+		}
+	}
+	if addr == nil {
+		if c.cx.Config.MiningAddrs == nil {
+			Debug("mining addresses is nil")
+			return
+		}
+		if len(*c.cx.Config.MiningAddrs) < 1 {
+			Debug("no mining addresses")
+			return
+		}
+		// Choose a payment address at random.
+		rand.Seed(time.Now().UnixNano())
+		p2a := rand.Intn(len(*c.cx.Config.MiningAddrs))
+		addr = c.cx.StateCfg.ActiveMiningAddrs[p2a]
+		// remove the address from the state
+		if p2a == 0 {
+			c.cx.StateCfg.ActiveMiningAddrs = c.cx.StateCfg.ActiveMiningAddrs[1:]
+		} else {
+			c.cx.StateCfg.ActiveMiningAddrs = append(
+				c.cx.StateCfg.ActiveMiningAddrs[:p2a],
+				c.cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
+			)
+		}
+		// update the config
+		var ma cli.StringSlice
+		for i := range c.cx.StateCfg.ActiveMiningAddrs {
+			ma = append(ma, c.cx.StateCfg.ActiveMiningAddrs[i].String())
+		}
+		*c.cx.Config.MiningAddrs = ma
+		save.Pod(c.cx.Config)
+	}
+	mbt = &MsgBlockTemplate{
+		PrevBlock: c.cx.RealNode.Chain.BestSnapshot().Hash,
+		Height:    c.height.Load(),
+		Diffs:     make(map[int32]uint32),
+		Merkles:   make(map[int32]chainhash.Hash),
+		coinbases: make(map[int32]*util.Tx),
+	}
+	next, curr, more := fork.AlgoVerIterator(c.height.Load())
+	for ; more(); next() {
+		var templateX *mining.BlockTemplate
+		if templateX, err = c.blockTemplateGenerator.NewBlockTemplate(
+			0, addr, fork.GetAlgoName(
+				curr(), c.height.Load(),
+			),
+		); Check(err) {
+		} else {
+			Debug("********** got new block template", curr())
+			// Debugs(template)
+			mbt.coinbases[curr()] = util.NewTx(templateX.Block.Transactions[len(templateX.Block.Transactions)-1])
+			mbt.Diffs[curr()] = templateX.Block.Header.Bits
+			mbt.Merkles[curr()] = templateX.Block.Header.MerkleRoot
+			Debugf(
+				"))))))))))))))))))) %d %d %0.8f %08x %v",
+				mbt.Height,
+				curr(),
+				util.Amount(mbt.coinbases[curr()].MsgTx().TxOut[0].Value).ToDUO(),
+				mbt.Diffs[curr()],
+				mbt.Merkles[curr()],
+			)
+			mbt.Timestamp = templateX.Block.Header.Timestamp.Add(time.Second)
+			// Debugs(template.Block.Transactions)
+		}
 	}
 	return
 }
