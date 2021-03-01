@@ -5,7 +5,6 @@ import (
 	"container/ring"
 	"fmt"
 	"github.com/p9c/pod/pkg/util/routeable"
-	"math/rand"
 	"net"
 	"sync"
 	"time"
@@ -589,7 +588,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	var ccb *map[int32]*util.Tx
 	var fMC []byte
 	ccb, fMC, txs = job.Get(c.cx, util.NewBlock(msgB))
-	Debug("coinbases>>>")
+	// Debug("coinbases>>>")
 	// Debugs(ccb)
 	c.coinbases.Store(ccb)
 	jobShards := transport.GetShards(fMC)
@@ -613,50 +612,17 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error,) {
 	Debug("getting new block template")
 	var addr util.Address
-	if c.walletClient != nil {
-		if !c.walletClient.Disconnected() {
-			Debug("have access to a wallet, generating address")
-			if addr, err = c.walletClient.GetNewAddress("default"); Check(err) {
-			}
-			Debug("-------- found address", addr)
-		}
-	}
-	if addr == nil {
-		if c.cx.Config.MiningAddrs == nil {
-			Debug("mining addresses is nil")
+	if addr, err = c.GetNewAddressFromMiningAddrs(); Check(err) {
+		if addr, err = c.GetNewAddressFromWallet(); Check(err) {
 			return
 		}
-		if len(*c.cx.Config.MiningAddrs) < 1 {
-			Debug("no mining addresses")
-			return
-		}
-		// Choose a payment address at random.
-		rand.Seed(time.Now().UnixNano())
-		p2a := rand.Intn(len(*c.cx.Config.MiningAddrs))
-		addr = c.cx.StateCfg.ActiveMiningAddrs[p2a]
-		// remove the address from the state
-		if p2a == 0 {
-			c.cx.StateCfg.ActiveMiningAddrs = c.cx.StateCfg.ActiveMiningAddrs[1:]
-		} else {
-			c.cx.StateCfg.ActiveMiningAddrs = append(
-				c.cx.StateCfg.ActiveMiningAddrs[:p2a],
-				c.cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
-			)
-		}
-		// update the config
-		var ma cli.StringSlice
-		for i := range c.cx.StateCfg.ActiveMiningAddrs {
-			ma = append(ma, c.cx.StateCfg.ActiveMiningAddrs[i].String())
-		}
-		*c.cx.Config.MiningAddrs = ma
-		save.Pod(c.cx.Config)
 	}
 	mbt := &MsgBlockTemplate{
 		PrevBlock: c.cx.RealNode.Chain.BestSnapshot().Hash,
 		Height:    c.height.Load(),
 		Diffs:     make(map[int32]uint32),
 		Merkles:   make(map[int32]chainhash.Hash),
-		coinbases: make(map[int32]*util.Tx),
+		coinbases: make(map[int32]*wire.MsgTx),
 	}
 	next, curr, more := fork.AlgoVerIterator(c.height.Load())
 	for ; more(); next() {
@@ -669,114 +635,39 @@ func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err 
 		} else {
 			Debug("********** got new block template", curr())
 			// Debugs(template)
-			mbt.coinbases[curr()] = util.NewTx(templateX.Block.Transactions[len(templateX.Block.Transactions)-1])
+			mbt.coinbases[curr()] = templateX.Block.Transactions[len(templateX.Block.Transactions)-1]
 			mbt.Diffs[curr()] = templateX.Block.Header.Bits
 			mbt.Merkles[curr()] = templateX.Block.Header.MerkleRoot
 			Debugf(
 				"))))))))))))))))))) %d %d %0.8f %08x %v",
 				mbt.Height,
 				curr(),
-				util.Amount(mbt.coinbases[curr()].MsgTx().TxOut[0].Value).ToDUO(),
+				util.Amount(mbt.coinbases[curr()].TxOut[0].Value).ToDUO(),
 				mbt.Diffs[curr()],
 				mbt.Merkles[curr()],
 			)
 			mbt.Timestamp = templateX.Block.Header.Timestamp.Add(time.Second)
+			mbt.txs = templateX.Block.Transactions[:len(templateX.Block.Transactions)-1]
+			Debugs(mbt.txs)
 			// Debugs(template.Block.Transactions)
 		}
 		template = templateX
 	}
-	Debugs(mbt)
+	// Debugs(mbt)
 	return
 }
 
 func (c *Controller) getNewMsgBlockTemplate() (mbt *MsgBlockTemplate, err error,) {
 	Debug("getting new block templates")
 	var addr util.Address
-	if c.walletClient != nil {
-		if !c.walletClient.Disconnected() {
-			Debug("have access to a wallet, generating address")
-			if addr, err = c.walletClient.GetNewAddress("default"); Check(err) {
-			}
-			Debug("-------- found address", addr)
-		}
-	}
-	if addr == nil {
-		if c.cx.Config.MiningAddrs == nil {
-			Debug("mining addresses is nil")
+	if addr, err = c.GetNewAddressFromMiningAddrs(); Check(err) {
+		if addr, err = c.GetNewAddressFromWallet(); Check(err) {
 			return
 		}
-		if len(*c.cx.Config.MiningAddrs) < 1 {
-			Debug("no mining addresses")
-			return
-		}
-		// Choose a payment address at random.
-		rand.Seed(time.Now().UnixNano())
-		p2a := rand.Intn(len(*c.cx.Config.MiningAddrs))
-		addr = c.cx.StateCfg.ActiveMiningAddrs[p2a]
-		// remove the address from the state
-		if p2a == 0 {
-			c.cx.StateCfg.ActiveMiningAddrs = c.cx.StateCfg.ActiveMiningAddrs[1:]
-		} else {
-			c.cx.StateCfg.ActiveMiningAddrs = append(
-				c.cx.StateCfg.ActiveMiningAddrs[:p2a],
-				c.cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
-			)
-		}
-		// update the config
-		var ma cli.StringSlice
-		for i := range c.cx.StateCfg.ActiveMiningAddrs {
-			ma = append(ma, c.cx.StateCfg.ActiveMiningAddrs[i].String())
-		}
-		*c.cx.Config.MiningAddrs = ma
-		save.Pod(c.cx.Config)
 	}
-	mbt = &MsgBlockTemplate{
-		PrevBlock: c.cx.RealNode.Chain.BestSnapshot().Hash,
-		Height:    c.height.Load(),
-		Diffs:     make(map[int32]uint32),
-		Merkles:   make(map[int32]chainhash.Hash),
-		coinbases: make(map[int32]*util.Tx),
-	}
-	next, curr, more := fork.AlgoVerIterator(c.height.Load())
-	for ; more(); next() {
-		var templateX *mining.BlockTemplate
-		if templateX, err = c.blockTemplateGenerator.NewBlockTemplate(
-			0, addr, fork.GetAlgoName(
-				curr(), c.height.Load(),
-			),
-		); Check(err) {
-		} else {
-			Debug("********** got new block template", curr())
-			// Debugs(template)
-			mbt.coinbases[curr()] = util.NewTx(templateX.Block.Transactions[len(templateX.Block.Transactions)-1])
-			mbt.Diffs[curr()] = templateX.Block.Header.Bits
-			mbt.Merkles[curr()] = templateX.Block.Header.MerkleRoot
-			Debugf(
-				"))))))))))))))))))) %d %d %0.8f %08x %v",
-				mbt.Height,
-				curr(),
-				util.Amount(mbt.coinbases[curr()].MsgTx().TxOut[0].Value).ToDUO(),
-				mbt.Diffs[curr()],
-				mbt.Merkles[curr()],
-			)
-			mbt.Timestamp = templateX.Block.Header.Timestamp.Add(time.Second)
-			// Debugs(template.Block.Transactions)
-		}
+	if mbt, err = c.GetMsgBlockTemplate(addr); Check(err){
 	}
 	return
-}
-
-// MsgBlockTemplate describes a message that a mining worker can use to
-// construct a block to mine on. Two methods are exported that allow a
-// controlling node to
-type MsgBlockTemplate struct {
-	Height    int32
-	PrevBlock chainhash.Hash
-	Diffs     map[int32]uint32
-	Merkles   map[int32]chainhash.Hash
-	coinbases map[int32]*util.Tx
-	txs       []*util.Tx
-	Timestamp time.Time
 }
 
 func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
@@ -798,14 +689,6 @@ func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
-		// if !c.active.Load() {
-		// 	Debug("not active")
-		// 	return
-		// }
-		// if !c.Ready.Load() {
-		// 	Debug("not ready")
-		// 	return
-		// }
 		// First to arrive locks out any others while processing
 		switch n.Type {
 		case blockchain.NTBlockConnected:
