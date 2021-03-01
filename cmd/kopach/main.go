@@ -186,7 +186,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
 					// so clear FirstSender
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
-					wasSending := since > time.Second*3 && w.FirstSender.Load() != 0
+					wasSending := since > time.Second*6 && w.FirstSender.Load() != 0
 					if wasSending {
 						Debug("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be listened to
