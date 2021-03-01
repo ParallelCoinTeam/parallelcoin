@@ -66,7 +66,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 	}
 	newTargetBits = BigToCompact(newTarget)
 	if l {
-		Debugf(
+		Tracef(
 			"difficulty retarget at block height %d, old %08x new %08x",
 			lastNode.height+1,
 			prevNode.bits,

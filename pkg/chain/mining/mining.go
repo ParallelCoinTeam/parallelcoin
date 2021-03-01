@@ -634,13 +634,19 @@ mempoolLoop:
 			// tx with a witness commitment.
 			coinbaseCopy := util.NewTx(coinbaseTx.MsgTx().Copy())
 			coinbaseCopy.MsgTx().TxIn[0].Witness = [][]byte{
-				bytes.Repeat([]byte("a"),
-					blockchain.CoinbaseWitnessDataLen),
+				bytes.Repeat(
+					[]byte("a"),
+					blockchain.CoinbaseWitnessDataLen,
+				),
 			}
-			coinbaseCopy.MsgTx().AddTxOut(&wire.TxOut{
-				PkScript: bytes.Repeat([]byte("a"),
-					blockchain.CoinbaseWitnessPkScriptLength),
-			})
+			coinbaseCopy.MsgTx().AddTxOut(
+				&wire.TxOut{
+					PkScript: bytes.Repeat(
+						[]byte("a"),
+						blockchain.CoinbaseWitnessPkScriptLength,
+					),
+				},
+			)
 			// In order to accurately account for the weight addition due to this coinbase
 			// transaction, we'll add the difference of the transaction before and after the
 			// addition of the commitment to the block weight.
@@ -804,8 +810,10 @@ mempoolLoop:
 		// Next, obtain the merkle root of a tree which consists of the wtxid of all
 		// transactions in the block. The coinbase transaction will have a special wtxid
 		// of all zeroes.
-		witnessMerkleTree := blockchain.BuildMerkleTreeStore(blockTxns,
-			true)
+		witnessMerkleTree := blockchain.BuildMerkleTreeStore(
+			blockTxns,
+			true,
+		)
 		witnessMerkleRoot := witnessMerkleTree.GetRoot()
 		// The preimage to the witness commitment is: witnessRoot || coinbaseWitness
 		var witnessPreimage [64]byte
@@ -823,16 +831,21 @@ mempoolLoop:
 			Value:    0,
 			PkScript: witnessScript,
 		}
-		coinbaseTx.MsgTx().TxOut = append(coinbaseTx.MsgTx().TxOut,
-			commitmentOutput)
+		coinbaseTx.MsgTx().TxOut = append(
+			coinbaseTx.MsgTx().TxOut,
+			commitmentOutput,
+		)
 	}
 	// Calculate the required difficulty for the block. The timestamp is potentially
 	// adjusted to ensure it comes after the median time of the last several blocks
 	// per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
+	if fork.GetCurrent(best.Height+1) > 0 {
+		ts = g.Chain.BestChain.Tip().Header().Timestamp.Add(time.Second)
+	}
 	// Trace("algo ", ts, " ", algo)
 	var reqDifficulty uint32
-	if reqDifficulty, err = g.Chain.CalcNextRequiredDifficulty(ts, algo); Check(err) {
+	if reqDifficulty, err = g.Chain.CalcNextRequiredDifficulty(algo); Check(err) {
 		return nil, err
 	}
 	Tracef("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
@@ -882,11 +895,11 @@ mempoolLoop:
 	)
 	// Tracec(func() string { return spew.Sdump(msgBlock) })
 	return &BlockTemplate{
-		Block:             &msgBlock,
-		Fees:              txFees,
-		SigOpCosts:        txSigOpCosts,
-		Height:            nextBlockHeight,
-		ValidPayAddress:   payToAddress != nil,
+		Block:           &msgBlock,
+		Fees:            txFees,
+		SigOpCosts:      txSigOpCosts,
+		Height:          nextBlockHeight,
+		ValidPayAddress: payToAddress != nil,
 	}, nil
 }
 
@@ -911,8 +924,10 @@ MsgBlock,
 		var difficulty uint32
 		var err error
 		if difficulty, err = g.Chain.CalcNextRequiredDifficulty(
-			newTime,
-			fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height),
+			fork.GetAlgoName(
+				msgBlock.Header.Version,
+				g.BestSnapshot().Height,
+			),
 		); Check(err) {
 			return err
 		}

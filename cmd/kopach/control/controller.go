@@ -5,7 +5,6 @@ import (
 	"container/ring"
 	"fmt"
 	"github.com/p9c/pod/pkg/util/routeable"
-	"math/rand"
 	"net"
 	"sync"
 	"time"
@@ -50,7 +49,7 @@ type Controller struct {
 	quit                   qu.C
 	cx                     *conte.Xt
 	isMining               atomic.Bool
-	height                 atomic.Uint64
+	height                 atomic.Int32
 	blockTemplateGenerator *mining.BlkTmplGenerator
 	coinbases              atomic.Value
 	transactions           atomic.Value
@@ -213,36 +212,37 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	ticker := time.NewTicker(time.Second * time.Duration(factor))
 	once := false
 	go func() {
+		if !ctrl.active.Load() {
+			Info("ready to send out jobs!")
+			ctrl.active.Store(true)
+		}
 	out:
 		for {
 			select {
 			case <-ticker.C:
-				if cx.IsCurrent() {
-					if !ctrl.active.Load() {
-						Info("ready to send out jobs!")
+				ctrl.height.Store(cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
+				if ctrl.isMining.Load() {
+					if !once {
+						cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
+						once = true
 						ctrl.active.Store(true)
 					}
-					if ctrl.isMining.Load() {
-						if !once {
-							cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
-							once = true
-							ctrl.active.Store(true)
-						}
-						// if err = ctrl.sendNewBlockTemplate(); Check(err) {
-						// } else {
-						// }
-					}
-					// send out advertisment
-					ad := transport.GetShards(p2padvt.Get(cx))
-					var err error
-					if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
-					}
-					if ctrl.isMining.Load() {
-						ctrl.rebroadcast()
-					}
-				} else {
-					ctrl.active.Store(false)
-					once = false
+					// if err = ctrl.sendNewBlockTemplate(); Check(err) {
+					// } else {
+					// }
+				}
+				// send out advertisment
+				ad := transport.GetShards(p2padvt.Get(cx))
+				var err error
+				if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
+				}
+				if cx.IsCurrent() {
+					// } else {
+					// ctrl.active.Store(false)
+					// once = false
+				}
+				if ctrl.isMining.Load() {
+					ctrl.rebroadcast()
 				}
 				if counter%countTick == 0 {
 					j := p2padvt.GetAdvt(cx)
@@ -368,12 +368,12 @@ var handlersMulticast = transport.Handlers{
 }
 
 func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
-	Trace("processing advertisment message", src, dst)
+	Debug("processing advertisment message", src, dst)
 	c := ctx.(*Controller)
-	if !c.active.Load() {
-		Debug("not active")
-		return
-	}
+	// if !c.active.Load() {
+	// 	Debug("not active")
+	// 	return
+	// }
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
 	Trace(j.IPs)
@@ -415,7 +415,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 			Debug("connected to peer via address", peerIP)
 			c.otherNodes[uuid] = &nodeSpec{}
 			c.otherNodes[uuid].addr = addr
-			// break
+			break
 		}
 	}
 	// update last seen time for uuid for garbage collection of stale disconnected
@@ -525,6 +525,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 		}
 	}
 	Trace("the block was accepted")
+	c.height.Store(block.Height())
 	Tracec(
 		func() string {
 			bmb := block.MsgBlock()
@@ -555,10 +556,10 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 // hashrate reports from workers
 func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 	c := ctx.(*Controller)
-	if !c.active.Load() {
-		Debug("not active")
-		return
-	}
+	// if !c.active.Load() {
+	// 	Debug("not active")
+	// 	return
+	// }
 	var hr hashrate.Hashrate
 	gotiny.Unmarshal(b, &hr)
 	if c.lastNonce == hr.Nonce {
@@ -576,7 +577,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	if template, err = c.getNewBlockTemplate(); Check(err) {
 		return
 	}
-	Debugs(template)
+	// Debugs(template)
 	if template == nil {
 		Debug("template is nil")
 		return
@@ -587,8 +588,8 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	var ccb *map[int32]*util.Tx
 	var fMC []byte
 	ccb, fMC, txs = job.Get(c.cx, util.NewBlock(msgB))
-	Debug("coinbases>>>")
-	Debugs(ccb)
+	// Debug("coinbases>>>")
+	// Debugs(ccb)
 	c.coinbases.Store(ccb)
 	jobShards := transport.GetShards(fMC)
 	shardsLen := len(jobShards)
@@ -611,59 +612,60 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error,) {
 	Debug("getting new block template")
 	var addr util.Address
-	if c.walletClient != nil {
-		if !c.walletClient.Disconnected() {
-			Debug("have access to a wallet, generating address")
-			if addr, err = c.walletClient.GetNewAddress("default"); Check(err) {
-			}
-			Debug("-------- found address", addr)
+	if addr, err = c.GetNewAddressFromMiningAddrs(); Check(err) {
+		if addr, err = c.GetNewAddressFromWallet(); Check(err) {
+			return
 		}
 	}
-	if addr == nil {
-		if c.cx.Config.MiningAddrs == nil {
-			Debug("mining addresses is nil")
-			return
-		}
-		if len(*c.cx.Config.MiningAddrs) < 1 {
-			Debug("no mining addresses")
-			return
-		}
-		// Choose a payment address at random.
-		rand.Seed(time.Now().UnixNano())
-		p2a := rand.Intn(len(*c.cx.Config.MiningAddrs))
-		addr = c.cx.StateCfg.ActiveMiningAddrs[p2a]
-		// remove the address from the state
-		if p2a == 0 {
-			c.cx.StateCfg.ActiveMiningAddrs = c.cx.StateCfg.ActiveMiningAddrs[1:]
+	mbt := &MsgBlockTemplate{
+		PrevBlock: c.cx.RealNode.Chain.BestSnapshot().Hash,
+		Height:    c.height.Load(),
+		Diffs:     make(map[int32]uint32),
+		Merkles:   make(map[int32]chainhash.Hash),
+		coinbases: make(map[int32]*wire.MsgTx),
+	}
+	next, curr, more := fork.AlgoVerIterator(c.height.Load())
+	for ; more(); next() {
+		var templateX *mining.BlockTemplate
+		if templateX, err = c.blockTemplateGenerator.NewBlockTemplate(
+			0, addr, fork.GetAlgoName(
+				curr(), c.height.Load(),
+			),
+		); Check(err) {
 		} else {
-			c.cx.StateCfg.ActiveMiningAddrs = append(
-				c.cx.StateCfg.ActiveMiningAddrs[:p2a],
-				c.cx.StateCfg.ActiveMiningAddrs[p2a+1:]...,
+			Debug("********** got new block template", curr())
+			// Debugs(template)
+			mbt.coinbases[curr()] = templateX.Block.Transactions[len(templateX.Block.Transactions)-1]
+			mbt.Diffs[curr()] = templateX.Block.Header.Bits
+			mbt.Merkles[curr()] = templateX.Block.Header.MerkleRoot
+			Debugf(
+				"))))))))))))))))))) %d %d %0.8f %08x %v",
+				mbt.Height,
+				curr(),
+				util.Amount(mbt.coinbases[curr()].TxOut[0].Value).ToDUO(),
+				mbt.Diffs[curr()],
+				mbt.Merkles[curr()],
 			)
+			mbt.Timestamp = templateX.Block.Header.Timestamp.Add(time.Second)
+			mbt.txs = templateX.Block.Transactions[:len(templateX.Block.Transactions)-1]
+			Debugs(mbt.txs)
+			// Debugs(template.Block.Transactions)
 		}
-		// update the config
-		var ma cli.StringSlice
-		for i := range c.cx.StateCfg.ActiveMiningAddrs {
-			ma = append(ma, c.cx.StateCfg.ActiveMiningAddrs[i].String())
-		}
-		*c.cx.Config.MiningAddrs = ma
-		save.Pod(c.cx.Config)
+		template = templateX
 	}
-	// TODO: trigger wallet to generate new ones at some point, if one is connected, when a mined
-	// block uses a key and it is deleted here afterwards
-	// }()
-	// }()
-	Debug("---------- calling new block template")
-	_, curr, _ := fork.AlgoVerIterator(int32(c.height.Load()))
-	if template, err = c.blockTemplateGenerator.NewBlockTemplate(
-		0, addr, fork.GetAlgoName(
-			curr(),
-			int32(c.height.Load()),
-		),
-	); Check(err) {
-	} else {
-		Debug("********** got new block template")
-		Debugs(template)
+	// Debugs(mbt)
+	return
+}
+
+func (c *Controller) getNewMsgBlockTemplate() (mbt *MsgBlockTemplate, err error,) {
+	Debug("getting new block templates")
+	var addr util.Address
+	if addr, err = c.GetNewAddressFromMiningAddrs(); Check(err) {
+		if addr, err = c.GetNewAddressFromWallet(); Check(err) {
+			return
+		}
+	}
+	if mbt, err = c.GetMsgBlockTemplate(addr); Check(err){
 	}
 	return
 }
@@ -687,14 +689,6 @@ func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
-		if !c.active.Load() {
-			Debug("not active")
-			return
-		}
-		// if !c.Ready.Load() {
-		// 	Debug("not ready")
-		// 	return
-		// }
 		// First to arrive locks out any others while processing
 		switch n.Type {
 		case blockchain.NTBlockConnected:

@@ -536,9 +536,8 @@ func (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
 		// a := fork.GetAlgoName(header.Version, prevNode.height+1)
 		// Infof("algo %s %d %8x %d", a, header.Version, header.Bits,
 		// 	prevNode.height+1)
-		expectedDifficulty, err := b.calcNextRequiredDifficulty(
+		expectedDifficulty, err := b.CalcNextRequiredDifficultyFromNode(
 			prevNode,
-			header.Timestamp,
 			fork.GetAlgoName(header.Version, prevNode.height+1),
 			true,
 		)
@@ -548,8 +547,8 @@ func (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
 		}
 		blockDifficulty := header.Bits
 		if blockDifficulty != expectedDifficulty {
-			str := "block difficulty of %08x %064x is not the expected value of %08x %064x"
-			str = fmt.Sprintf(str, blockDifficulty, CompactToBig(blockDifficulty), expectedDifficulty, CompactToBig(expectedDifficulty))
+			str := "%d block difficulty of %08x %064x is not the expected value of %08x %064x"
+			str = fmt.Sprintf(str, header.Version, blockDifficulty, CompactToBig(blockDifficulty), expectedDifficulty, CompactToBig(expectedDifficulty))
 			Error(str)
 			return ruleError(ErrUnexpectedDifficulty, str)
 		}

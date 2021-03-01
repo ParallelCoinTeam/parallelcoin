@@ -236,33 +236,24 @@ func GetAlgoVer(name string, height int32) (version int32) {
 // iterate over block versions at current height
 func AlgoVerIterator(height int32) (next func(), curr func() int32, more func() bool) {
 	current := GetCurrent(height)
-	for i := range List {
-		if List[i].Number == current {
-			var cursor int32
-			length := int32(GetNumAlgos(height))
-			
-			verNames := make([]string, length)
-			for _, x := range List[i].AlgoVers {
-				verNames[i] = x
-			}
-			var verNumbers []int32
-			for _, x := range verNames {
-				verNumbers = append(verNumbers, GetAlgoVer(x, height))
-			}
-			curr = func() int32 {
-				return verNumbers[cursor]
-			}
-			more = func() bool {
-				return cursor < length
-			}
-			next = func() {
-				if more() {
-					cursor++
-				}
-			}
-			break
+	var cursor int32
+	length := int32(GetNumAlgos(height))
+	var verNumbers []int32
+	for i := range List[current].AlgoVers {
+		verNumbers = append(verNumbers, List[current].Algos[List[current].AlgoVers[i]].Version)
+	}
+	curr = func() int32 {
+		return verNumbers[cursor]
+	}
+	more = func() bool {
+		return cursor < length
+	}
+	next = func() {
+		if more() {
+			cursor++
 		}
 	}
+	
 	return
 }
 

@@ -221,7 +221,10 @@ out:
 					} else {
 						continue
 					}
-					mb.Header.Timestamp = time.Now()
+					tn := time.Now()
+					if tn.After(mb.Header.Timestamp) {
+						mb.Header.Timestamp = tn
+					}
 					var nextAlgo int32
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 						select {
@@ -317,6 +320,7 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 	mbb := w.msgBlock.Load().(wire.MsgBlock)
 	mb := &mbb
 	mb.Header.PrevBlock = *j.PrevBlockHash
+	mb.Header.Timestamp = j.MinTimestamp
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	hv := w.roller.GetAlgoVer()
 	mb.Header.Version = hv
@@ -336,7 +340,10 @@ func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
 		}
 		mb.Header.MerkleRoot = *hh
 	}
-	mb.Header.Timestamp = time.Now()
+	tn := time.Now()
+	if tn.Sub(mb.Header.Timestamp) > 0 {
+		mb.Header.Timestamp = time.Now()
+	}
 	// make the work select block start running
 	bb := util.NewBlock(mb)
 	bb.SetHeight(newHeight)

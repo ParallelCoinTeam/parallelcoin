@@ -451,8 +451,8 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.DisableListen,
 			),
 			au.BoolTrue(
-				"manuallisten",
-				"disable automatically populating p2p and controller reachable addresses",
+				"autolisten",
+				"enable automatically populating p2p and controller reachable addresses",
 				cx.Config.AutoListen,
 			),
 			au.StringSlice(
