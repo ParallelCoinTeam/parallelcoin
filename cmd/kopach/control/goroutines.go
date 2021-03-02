@@ -8,7 +8,6 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"github.com/p9c/pod/cmd/walletmain"
 	blockchain "github.com/p9c/pod/pkg/chain"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -87,8 +86,7 @@ func (c *Controller) advertiserAndRebroadcaster() {
 		Info("ready to send out jobs!")
 		c.active.Store(true)
 	}
-	factor := 2
-	ticker := time.NewTicker(time.Second * time.Duration(factor))
+	ticker := time.NewTicker(time.Second)
 	const countTick = 10
 	counter := countTick / 2
 	once := false
@@ -123,6 +121,7 @@ out:
 			if err = c.multiConn.SendMany(p2padvt.Magic, transport.GetShards(p2padvt.Get(c.cx))); Check(err) {
 			}
 			if c.isMining.Load() {
+				Debug("updating and sending out new work")
 				if err = c.updateAndSendWork(); Check(err) {
 				}
 			}
@@ -166,31 +165,30 @@ func (c *Controller) updateAndSendWork() (err error) {
 	best := c.blockTemplateGenerator.BestSnapshot()
 	oB, ok := c.oldBlocks.Load().([][]byte)
 	switch {
-	case len(oB) == 0:
-		Trace("cached template is zero length")
-		getNew = true
-		fallthrough
 	case !ok:
 		Trace("cached template is nil")
 		getNew = true
-		fallthrough
-	case !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash):
+	case len(oB) == 0:
+		Trace("cached template is zero length")
+		getNew = true
+	case c.msgBlockTemplate.PrevBlock != best.Hash:
 		Debug("new best block hash")
 		getNew = true
-		fallthrough
-	case c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().LastUpdated() && time.Now().
-		After(time.Unix(0, c.lastGenerated.Load().(int64)+int64(time.Minute))):
+	case c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().LastUpdated() &&
+		time.Now().After(time.Unix(0, c.lastGenerated.Load().(int64)+int64(time.Minute))):
 		Trace("block is stale, regenerating")
 		getNew = true
+		c.lastTxUpdate.Store(time.Now().UnixNano())
+		c.lastGenerated.Store(time.Now().UnixNano())
 	}
 	if getNew {
 		if oB, err = c.GetTemplateMessageShards(); Check(err) {
 			return
 		}
-		c.oldBlocks.Store(oB)
 	}
 	if err = c.SendShards(job.Magic, oB); Check(err) {
 	}
+	c.oldBlocks.Store(oB)
 	return
 }
 
@@ -203,9 +201,13 @@ func (c *Controller) GetTemplateMessageShards() (o [][]byte, err error) {
 			return
 		}
 	}
-	if c.msgBlockTemplate, err = c.GetMsgBlockTemplate(addr); !Check(err) {
-		o = transport.GetShards(c.msgBlockTemplate.Serialize())
+	if c.msgBlockTemplate == nil {
+		Debug("getting msgblocktemplate")
+		if c.msgBlockTemplate, err = c.GetMsgBlockTemplate(addr); Check(err) {
+			return
+		}
 	}
+	o = transport.GetShards(c.msgBlockTemplate.Serialize())
 	return
 }
 

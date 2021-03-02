@@ -294,7 +294,7 @@ var handlers = transport.Handlers{
 		}
 		
 		// Debugs(b)
-		jr := &templates.Message{}
+		jr := templates.Message{}
 		gotiny.Unmarshal(b, &jr)
 		w.height = jr.Height
 		cN := jr.Nonce
@@ -310,7 +310,7 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			if err = w.clients[i].NewJob(jr); Check(err) {
+			if err = w.clients[i].NewJob(&jr); Check(err) {
 			}
 		}
 		return

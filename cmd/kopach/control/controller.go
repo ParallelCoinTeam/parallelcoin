@@ -121,6 +121,7 @@ func Run(cx *conte.Xt) (quit qu.C) {
 		},
 	)
 	Debug("sending broadcasts to:", UDP4MulticastAddress)
+	
 	go c.advertiserAndRebroadcaster()
 	return
 }

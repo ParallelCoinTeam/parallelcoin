@@ -41,8 +41,8 @@ func (c *Controller) GetMsgBlockTemplate(addr util.Address) (mbt *templates.Mess
 			)
 			mbt.Timestamp = templateX.Block.Header.Timestamp.Add(time.Second)
 			mbt.SetTxs(templateX.Block.Transactions[:len(templateX.Block.Transactions)-1])
-			Debugs(mbt.GetTxs())
-			Debugs(mbt.GetCoinbase(curr()))
+			// Debugs(mbt.GetTxs())
+			// Debugs(mbt.GetCoinbase(curr()))
 		}
 	}
 	return

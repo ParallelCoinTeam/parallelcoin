@@ -195,12 +195,6 @@ out:
 						w.msgBlockTemplate.Timestamp = tn
 					}
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
-						select {
-						case <-w.quit.Wait():
-							Debug("worker stopping on pausing message")
-							break out
-						default:
-						}
 						// send out broadcast containing worker nonce and algorithm and count of blocks
 						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
 						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), vers, newHeight, w.id)
@@ -214,6 +208,15 @@ out:
 						// reseed the nonce
 						rand.Seed(time.Now().UnixNano())
 						nonce = rand.Uint32()
+						select {
+						case <-w.quit.Wait():
+							Debug("breaking out of work loop")
+							break out
+						case <-w.stopChan.Wait():
+							Debug("received pause signal while running")
+							break running
+						default:
+						}
 					}
 					blockHeader := w.msgBlockTemplate.GenBlockHeader(vers)
 					blockHeader.Nonce = nonce
@@ -230,6 +233,13 @@ out:
 							Error(err)
 						}
 						Debug("sent solution")
+						w.msgBlockTemplate = nil
+						select {
+						case <-w.quit.Wait():
+							Debug("breaking out of work loop")
+							break out
+						default:
+						}
 						break running
 					}
 				}
@@ -258,17 +268,18 @@ func (w *Worker) NewJob(j *templates.Message, reply *bool) (err error) {
 		*reply = true
 		return
 	}
-	if j.PrevBlock.IsEqual(&w.msgBlockTemplate.PrevBlock) {
-		Trace("not a new job")
-		*reply = true
-		return
+	if w.msgBlockTemplate != nil {
+		if j.PrevBlock == w.msgBlockTemplate.PrevBlock {
+			Trace("not a new job")
+			*reply = true
+			return
+		}
 	}
-	
 	*reply = true
 	Debug("halting current work")
 	w.stopChan <- struct{}{}
 	// load the job into the template
-	*w.msgBlockTemplate = *j
+	w.msgBlockTemplate = j
 	Debug("switching to new job")
 	w.startChan <- struct{}{}
 	return
