@@ -36,7 +36,7 @@ type Worker struct {
 	dispatchReady    atomic.Bool
 	ciph             cipher.AEAD
 	quit             qu.C
-	msgBlockTemplate *templates.Message
+	templatesMessage *templates.Message
 	uuid             atomic.Uint64
 	roller           *Counter
 	startNonce       uint32
@@ -70,9 +70,9 @@ func NewCounter(roundsPerAlgo int32) (c *Counter) {
 }
 
 // GetAlgoVer returns the next algo version based on the current configuration
-func (c *Counter) GetAlgoVer() (ver int32) {
+func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 	// the formula below rolls through versions with blocks roundsPerAlgo long for each algorithm by its index
-	algs := c.Algos.Load().([]int32)
+	algs := fork.GetAlgoVerSlice(height)
 	// Debug(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
 		Debug("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
@@ -112,7 +112,7 @@ func (w *Worker) hashReport() {
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
 // allow a worker to be configured to run on a bare metal system with a different launcher main
-func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worker {
+func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid uint64) *Worker {
 	Debug("creating new worker")
 	// msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
@@ -124,6 +124,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worke
 		stopChan:      qu.T(),
 		hashSampleBuf: ring.NewBufferUint64(1000),
 	}
+	w.uuid.Store(uuid)
 	w.dispatchReady.Store(false)
 	// with this we can report cumulative hash counts as well as using it to distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C.Load())
@@ -184,17 +185,19 @@ out:
 				Debug("worker stopping while running")
 				break out
 			default:
-				if w.msgBlockTemplate == nil || !w.dispatchReady.Load() {
+				if w.templatesMessage == nil || !w.dispatchReady.Load() {
 					Debug("not ready to work")
 				} else {
-					newHeight := w.msgBlockTemplate.Height
-					vers := w.roller.GetAlgoVer()
+					// Debug("starting mining round")
+					newHeight := w.templatesMessage.Height
+					vers := w.roller.GetAlgoVer(newHeight)
 					nonce++
 					tn := time.Now()
-					if tn.After(w.msgBlockTemplate.Timestamp) {
-						w.msgBlockTemplate.Timestamp = tn
+					if tn.After(w.templatesMessage.Timestamp) {
+						w.templatesMessage.Timestamp = tn
 					}
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
+						// Debug("switching algorithms", w.roller.C.Load())
 						// send out broadcast containing worker nonce and algorithm and count of blocks
 						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
 						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), vers, newHeight, w.id)
@@ -218,8 +221,10 @@ out:
 						default:
 						}
 					}
-					blockHeader := w.msgBlockTemplate.GenBlockHeader(vers)
+					blockHeader := w.templatesMessage.GenBlockHeader(vers)
 					blockHeader.Nonce = nonce
+					// Debugs(w.templatesMessage)
+					// Debugs(blockHeader)
 					hash := blockHeader.BlockHashWithAlgos(newHeight)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(blockHeader.Bits)) <= 0 {
@@ -233,7 +238,7 @@ out:
 							Error(err)
 						}
 						Debug("sent solution")
-						w.msgBlockTemplate = nil
+						w.templatesMessage = nil
 						select {
 						case <-w.quit.Wait():
 							Debug("breaking out of work loop")
@@ -242,6 +247,7 @@ out:
 						}
 						break running
 					}
+					// Debug("completed mining round")
 				}
 			}
 		}
@@ -252,11 +258,11 @@ out:
 
 // New initialises the state for a worker, loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
-func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
+func New(id string, quit qu.C, uuid uint64) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
 	sc := stdconn.New(os.Stdin, os.Stdout, quit)
 	
-	return NewWithConnAndSemaphore(id, sc, quit), sc
+	return NewWithConnAndSemaphore(id, sc, quit, uuid), sc
 }
 
 // NewJob is a delivery of a new job for the worker, this makes the miner start
@@ -268,18 +274,23 @@ func (w *Worker) NewJob(j *templates.Message, reply *bool) (err error) {
 		*reply = true
 		return
 	}
-	if w.msgBlockTemplate != nil {
-		if j.PrevBlock == w.msgBlockTemplate.PrevBlock {
+	if w.templatesMessage != nil {
+		if j.PrevBlock == w.templatesMessage.PrevBlock {
 			Trace("not a new job")
 			*reply = true
 			return
 		}
 	}
+	Debugs(j)
 	*reply = true
 	Debug("halting current work")
 	w.stopChan <- struct{}{}
 	// load the job into the template
-	w.msgBlockTemplate = j
+	if w.templatesMessage == nil {
+		w.templatesMessage = j
+	} else {
+		*w.templatesMessage = *j
+	}
 	Debug("switching to new job")
 	w.startChan <- struct{}{}
 	return

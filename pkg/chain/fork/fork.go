@@ -232,6 +232,24 @@ func GetAlgoVer(name string, height int32) (version int32) {
 	return
 }
 
+var algoVerSlice [][]int32
+
+func GetAlgoVerSlice(height int32) (o []int32) {
+	hf := GetCurrent(height)
+	if algoVerSlice == nil {
+		algoVerSlice = make([][]int32,0, len(List))
+		for i := range List {
+			av := make ([]int32,0, len(List[i].AlgoVers))
+			for j := range List[i].AlgoVers {
+				av = append(av, j)
+			}
+			algoVerSlice = append(algoVerSlice, av)
+		}
+	}
+	// Debugs(algoVerSlice)
+	return algoVerSlice[hf]
+}
+
 // AlgoVerIterator returns a next and more function to use in a for loop to
 // iterate over block versions at current height
 func AlgoVerIterator(height int32) (next func(), curr func() int32, more func() bool) {

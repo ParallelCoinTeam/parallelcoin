@@ -137,7 +137,7 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
 		NodeChan:         make(chan *chainrpc.Server),
-		UUID:             uint64(rand.Int63()),
+		UUID:             rand.Uint64(),
 	}
 	return cx
 }
