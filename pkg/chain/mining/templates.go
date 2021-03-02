@@ -23,7 +23,7 @@ package mining
 // 		PrevBlock:  m.PrevBlock,
 // 		MerkleRoot: m.Merkles[vers],
 // 		Timestamp:  m.Timestamp,
-// 		Bits:       m.Diffs[vers],
+// 		Bits:       m.Bits[vers],
 // 	}
 // }
 //
@@ -46,7 +46,7 @@ package mining
 // 	workerNumber uint32,
 // 	payToAddress util.Address,
 // ) (*MsgBlockTemplate, error) {
-// 	mbt := &MsgBlockTemplate{Diffs: make(map[int32]uint32), Merkles: make(map[int32]chainhash.Hash)}
+// 	mbt := &MsgBlockTemplate{Bits: make(map[int32]uint32), Merkles: make(map[int32]chainhash.Hash)}
 // 	// Extend the most recently known best block.
 // 	best := g.Chain.BestSnapshot()
 // 	mbt.PrevBlock = best.Hash
@@ -380,12 +380,12 @@ package mining
 // 		// per the chain consensus rules.
 // 		algo := fork.GetAlgoName(mbt.Height, curr())
 // 		Debug("algo", algo)
-// 		if mbt.Diffs[curr()], err = g.Chain.CalcNextRequiredDifficulty(algo); Check(err) {
+// 		if mbt.Bits[curr()], err = g.Chain.CalcNextRequiredDifficulty(algo); Check(err) {
 // 			return nil, err
 // 		}
 // 		Debugf(
 // 			"%s %d reqDifficulty %08x %064x", algo, curr(),
-// 			mbt.Diffs[curr()], fork.CompactToBig(mbt.Diffs[curr()]),
+// 			mbt.Bits[curr()], fork.CompactToBig(mbt.Bits[curr()]),
 // 		)
 // 		// Create a new block ready to be solved.
 // 		Debugs(tX)
@@ -399,7 +399,7 @@ package mining
 // 			PrevBlock:  mbt.PrevBlock,
 // 			MerkleRoot: mbt.Merkles[curr()],
 // 			Timestamp:  mbt.Timestamp,
-// 			Bits:       mbt.Diffs[curr()],
+// 			Bits:       mbt.Bits[curr()],
 // 		}
 // 		for _, tx := range tX {
 // 			if err := msgBlock.AddTransaction(tx.MsgTx()); err != nil {

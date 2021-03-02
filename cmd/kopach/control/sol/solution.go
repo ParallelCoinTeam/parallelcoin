@@ -17,7 +17,8 @@ type Solution struct {
 	Bytes []byte
 }
 
-func Get(uuid uint64, mb *wire.MsgBlock) []byte {
+// Encode a message for a solution
+func Encode(uuid uint64, mb *wire.BlockHeader) []byte {
 	var buf []byte
 	wr := bytes.NewBuffer(buf)
 	var err error
@@ -25,6 +26,15 @@ func Get(uuid uint64, mb *wire.MsgBlock) []byte {
 	}
 	s := Solution{UUID: uuid, Bytes: wr.Bytes()} // MsgBlock: mb}
 	return gotiny.Marshal(&s)
+}
+
+// Decode an encoded solution message to a wire.BlockHeader
+func (s *Solution) Decode() (mb *wire.BlockHeader, err error) {
+	buf := bytes.NewBuffer(s.Bytes)
+	mb = &wire.BlockHeader{}
+	if err = mb.Deserialize(buf); Check(err) {
+	}
+	return
 }
 
 //
@@ -44,20 +54,22 @@ func Get(uuid uint64, mb *wire.MsgBlock) []byte {
 // 	return
 // }
 //
+//
 // func (sC *Container) GetMsgBlock() *wire.MsgBlock {
 // 	// Traces(sC.Data)
-// 	buff := sC.Get(1)
+// 	buff := sC.Encode(1)
 // 	// Traces(buff)
 // 	decoded := Block.New().DecodeOne(buff)
 // 	// Traces(decoded)
-// 	got := decoded.Get()
+// 	got := decoded.Encode()
 // 	// Traces(got)
 // 	return got
 // }
+
 //
 // func (sC *Container) GetSenderPort() int32 {
-// 	buff := sC.Get(0)
+// 	buff := sC.Encode(0)
 // 	decoded := Int32.New().DecodeOne(buff)
-// 	got := decoded.Get()
+// 	got := decoded.Encode()
 // 	return got
 // }

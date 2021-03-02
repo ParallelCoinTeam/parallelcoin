@@ -545,7 +545,7 @@ func (b *BlockChain) connectBlock(node *BlockNode, block *util.Block,
 	//	L.ScriptError(err)
 	// }
 	// Trace(time.Now().Sub(tN), "to compute all block difficulties")
-	// node.Diffs = tB
+	// node.Bits = tB
 	//
 	// Notify the caller that the block was connected to the main chain. The caller would typically want to react with
 	// actions such as updating wallets.

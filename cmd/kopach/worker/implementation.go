@@ -2,7 +2,7 @@ package worker
 
 import (
 	"crypto/cipher"
-	"errors"
+	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"math/rand"
 	"net"
 	"os"
@@ -20,39 +20,31 @@ import (
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/kopach/control"
-	"github.com/p9c/pod/cmd/kopach/control/job"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/data/ring"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 1000
+const RoundsPerAlgo = 100
 
 type Worker struct {
-	mx            sync.Mutex
-	id            string
-	pipeConn      *stdconn.StdConn
-	dispatchConn  *transport.Channel
-	dispatchReady atomic.Bool
-	ciph          cipher.AEAD
-	quit          qu.C
-	block         atomic.Value
-	senderPort    atomic.Uint64
-	msgBlock      atomic.Value // *wire.MsgBlock
-	bitses        atomic.Value
-	merkles       atomic.Value
-	lastBlockHash *chainhash.Hash
-	roller        *Counter
-	startNonce    uint32
-	startChan     qu.C
-	stopChan      qu.C
-	running       atomic.Bool
-	hashCount     atomic.Uint64
-	hashSampleBuf *ring.BufferUint64
+	mx               sync.Mutex
+	id               string
+	pipeConn         *stdconn.StdConn
+	dispatchConn     *transport.Channel
+	dispatchReady    atomic.Bool
+	ciph             cipher.AEAD
+	quit             qu.C
+	msgBlockTemplate *templates.Message
+	uuid             atomic.Uint64
+	roller           *Counter
+	startNonce       uint32
+	startChan        qu.C
+	stopChan         qu.C
+	running          atomic.Bool
+	hashCount        atomic.Uint64
+	hashSampleBuf    *ring.BufferUint64
 }
 
 type Counter struct {
@@ -122,7 +114,7 @@ func (w *Worker) hashReport() {
 // allow a worker to be configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worker {
 	Debug("creating new worker")
-	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
+	// msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		id:            id,
 		pipeConn:      conn,
@@ -132,8 +124,6 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worke
 		stopChan:      qu.T(),
 		hashSampleBuf: ring.NewBufferUint64(1000),
 	}
-	w.msgBlock.Store(msgBlock)
-	w.block.Store(util.NewBlock(&msgBlock))
 	w.dispatchReady.Store(false)
 	// with this we can report cumulative hash counts as well as using it to distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C.Load())
@@ -152,6 +142,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worke
 func worker(w *Worker) {
 	Debug("main work loop starting")
 	sampleTicker := time.NewTicker(time.Second)
+	var nonce uint32
 out:
 	for {
 		// Pause state
@@ -180,7 +171,6 @@ out:
 		for {
 			select {
 			case <-sampleTicker.C:
-				// Debug(interrupt.GoroutineDump())
 				w.hashReport()
 				break
 			case <-w.startChan.Wait():
@@ -194,38 +184,16 @@ out:
 				Debug("worker stopping while running")
 				break out
 			default:
-				if w.block.Load() == nil || w.bitses.Load() == nil ||
-					w.merkles.Load() == nil || !w.dispatchReady.Load() {
+				if w.msgBlockTemplate == nil || !w.dispatchReady.Load() {
 					Debug("not ready to work")
 				} else {
-					// Debug("working")
-					// work
-					nH := w.block.Load().(*util.Block).Height()
-					hv := w.roller.GetAlgoVer()
-					h := w.merkles.Load().(blockchain.Merkles)
-					mmb := w.msgBlock.Load().(wire.MsgBlock)
-					mb := &mmb
-					mb.Header.Version = hv
-					if h != nil {
-						mr, ok := h[hv]
-						if !ok {
-							continue
-						}
-						mb.Header.MerkleRoot = *mr
-					} else {
-						continue
-					}
-					b := w.bitses.Load().(blockchain.Diffs)
-					if bb, ok := b[mb.Header.Version]; ok {
-						mb.Header.Bits = bb
-					} else {
-						continue
-					}
+					newHeight := w.msgBlockTemplate.Height
+					vers := w.roller.GetAlgoVer()
+					nonce++
 					tn := time.Now()
-					if tn.After(mb.Header.Timestamp) {
-						mb.Header.Timestamp = tn
+					if tn.After(w.msgBlockTemplate.Timestamp) {
+						w.msgBlockTemplate.Timestamp = tn
 					}
-					var nextAlgo int32
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 						select {
 						case <-w.quit.Wait():
@@ -235,8 +203,7 @@ out:
 						}
 						// send out broadcast containing worker nonce and algorithm and count of blocks
 						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
-						nextAlgo = w.roller.C.Load() + 1
-						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH, w.id)
+						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), vers, newHeight, w.id)
 						err := w.dispatchConn.SendMany(
 							hashrate.Magic,
 							transport.GetShards(hashReport),
@@ -244,13 +211,17 @@ out:
 						if err != nil {
 							Error(err)
 						}
+						// reseed the nonce
+						rand.Seed(time.Now().UnixNano())
+						nonce = rand.Uint32()
 					}
-					hash := mb.Header.BlockHashWithAlgos(nH)
+					blockHeader := w.msgBlockTemplate.GenBlockHeader(vers)
+					blockHeader.Nonce = nonce
+					hash := blockHeader.BlockHashWithAlgos(newHeight)
 					bigHash := blockchain.HashToBig(&hash)
-					if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
-						Debug("found solution", nH)
-						// srs := sol.GetSolContainer(w.senderPort.Load(), mb)
-						srs := sol.Get(w.senderPort.Load(), mb)
+					if bigHash.Cmp(fork.CompactToBig(blockHeader.Bits)) <= 0 {
+						Debug("found solution", newHeight)
+						srs := sol.Encode(w.uuid.Load(), blockHeader)
 						err := w.dispatchConn.SendMany(
 							sol.Magic,
 							transport.GetShards(srs),
@@ -261,10 +232,6 @@ out:
 						Debug("sent solution")
 						break running
 					}
-					mb.Header.Version = nextAlgo
-					mb.Header.Bits = w.bitses.Load().(blockchain.Diffs)[mb.Header.Version]
-					mb.Header.Nonce++
-					w.msgBlock.Store(*mb)
 				}
 			}
 		}
@@ -282,77 +249,27 @@ func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
 	return NewWithConnAndSemaphore(id, sc, quit), sc
 }
 
-// NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
-// work and restart
-func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
+// NewJob is a delivery of a new job for the worker, this makes the miner start
+// mining from pause or pause, prepare the work and restart
+func (w *Worker) NewJob(j *templates.Message, reply *bool) (err error) {
 	Trace("received new job")
-	if !w.dispatchReady.Load() { // || !w.running.Load() {
+	if !w.dispatchReady.Load() {
 		Debug("dispatch not ready")
 		*reply = true
 		return
 	}
-	w.bitses.Store(j.Diffs)
-	w.merkles.Store(j.Merkles)
-	if j.PrevBlockHash.IsEqual(w.lastBlockHash) {
+	if j.PrevBlock.IsEqual(&w.msgBlockTemplate.PrevBlock) {
 		Trace("not a new job")
 		*reply = true
 		return
 	}
-	var algos []int32
-	for i := range j.Diffs {
-		// we don't need to know net params if version numbers come with jobs
-		algos = append(algos, i)
-	}
-	if w.lastBlockHash == nil {
-		w.lastBlockHash = j.PrevBlockHash
-	} else {
-		*w.lastBlockHash = *j.PrevBlockHash
-	}
+	
 	*reply = true
-	// halting current work
 	Debug("halting current work")
 	w.stopChan <- struct{}{}
-	newHeight := j.Height
-	if len(algos) > 0 {
-		// if we didn't get them in the job don't update the old
-		w.roller.Algos.Store(algos)
-	}
-	mbb := w.msgBlock.Load().(wire.MsgBlock)
-	mb := &mbb
-	mb.Header.PrevBlock = *j.PrevBlockHash
-	mb.Header.Timestamp = j.MinTimestamp
-	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
-	hv := w.roller.GetAlgoVer()
-	mb.Header.Version = hv
-	var ok bool
-	mb.Header.Bits, ok = j.Diffs[mb.Header.Version]
-	if !ok {
-		return errors.New("bits are empty")
-	}
-	rand.Seed(time.Now().UnixNano())
-	mb.Header.Nonce = rand.Uint32()
-	if j.Merkles == nil {
-		return errors.New("failed to decode merkle roots")
-	} else {
-		hh, ok := j.Merkles[hv]
-		if !ok {
-			return errors.New("could not get merkle root from job")
-		}
-		mb.Header.MerkleRoot = *hh
-	}
-	tn := time.Now()
-	if tn.Sub(mb.Header.Timestamp) > 0 {
-		mb.Header.Timestamp = time.Now()
-	}
-	// make the work select block start running
-	bb := util.NewBlock(mb)
-	bb.SetHeight(newHeight)
-	w.block.Store(bb)
-	w.msgBlock.Store(*mb)
-	w.senderPort.Store(j.ControllerNonce)
-	// halting current work
+	// load the job into the template
+	*w.msgBlockTemplate = *j
 	Debug("switching to new job")
-	// w.stopChan <- struct{}{}
 	w.startChan <- struct{}{}
 	return
 }

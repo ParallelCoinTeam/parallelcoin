@@ -72,7 +72,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		bitsMap = tip.Diffs.Load().(blockchain.Diffs)
 	}
 	// Debugs(bitsMap)
-	// bitses := Diffs.NewBitses()
+	// bitses := Bits.NewBitses()
 	// bitses.Put(bitsMap)
 	// msg = append(msg, bitses)
 	// Now we need to get the values for coinbase for each algorithm then regenerate
@@ -200,8 +200,8 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 // 	return Hash.New().DecodeOne(j.Get(5)).Get()
 // }
 //
-// func (j *Container) GetBitses() blockchain.Diffs {
-// 	return Diffs.NewBitses().DecodeOne(j.Get(6)).Get()
+// func (j *Container) GetBitses() blockchain.Bits {
+// 	return Bits.NewBitses().DecodeOne(j.Get(6)).Get()
 // }
 //
 // // GetHashes returns the merkle roots per version
@@ -282,7 +282,7 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 // // 		ControllerPort:      j.GetControllerListenerPort(),
 // // 		Height:          j.GetNewHeight(),
 // // 		PrevBlockHash:   j.GetPrevBlockHash(),
-// // 		Diffs:          j.GetBitses(),
+// // 		Bits:          j.GetBitses(),
 // // 		Merkles:          j.GetHashes(),
 // // 	}
 // // 	return

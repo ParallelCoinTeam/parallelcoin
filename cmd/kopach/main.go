@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"net"
 	"os"
 	"runtime"
@@ -293,18 +294,10 @@ var handlers = transport.Handlers{
 		}
 		
 		// Debugs(b)
-		jr := job.Job{}
+		jr := &templates.Message{}
 		gotiny.Unmarshal(b, &jr)
-		// Debugs(jr)
-		for _,x := range jr.Merkles {
-			if x==nil {
-				Error("encountered nil merkle root, abort")
-				return
-			}
-		}
-		// iP := jr.IPs
 		w.height = jr.Height
-		cN := jr.ControllerNonce
+		cN := jr.Nonce
 		// addr := net.JoinHostPort(iP.String(), fmt.Sprint(cP))
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != cN && firstSender != 0
@@ -317,7 +310,7 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			if err = w.clients[i].NewJob(&jr); Check(err) {
+			if err = w.clients[i].NewJob(jr); Check(err) {
 			}
 		}
 		return
