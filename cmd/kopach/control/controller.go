@@ -137,25 +137,6 @@ func Run(cx *conte.Xt) (quit qu.C) {
 	return
 }
 
-func (c *Controller) chainNotifier() func(n *blockchain.Notification) {
-	return func(n *blockchain.Notification) {
-		switch n.Type {
-		case blockchain.NTBlockConnected:
-			Trace("received new chain notification")
-			// construct work message
-			if b, ok := n.Data.(*util.Block); !ok {
-				Warn("chain accepted notification is not a block")
-				break
-			} else {
-				c.height.Store(b.Height())
-			}
-			
-			if err := c.updateAndSendWork(); Check(err) {
-			}
-		}
-	}
-}
-
 func (c *Controller) hashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
 	av := ewma.NewMovingAverage()
@@ -314,7 +295,7 @@ out:
 			c.height.Store(c.cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
 			if c.isMining.Load() {
 				if !once {
-					c.cx.RealNode.Chain.Subscribe(c.chainNotifier())
+					// c.cx.RealNode.Chain.Subscribe(c.chainNotifier())
 					once = true
 					c.active.Store(true)
 				}
