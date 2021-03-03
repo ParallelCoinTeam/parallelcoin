@@ -221,6 +221,8 @@ out:
 					break running
 				}
 				Debug("resending current templates...")
+				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
+				}
 			case <-s.start.Wait():
 				Debug("received start signal while running")
 			case <-s.stop.Wait():
