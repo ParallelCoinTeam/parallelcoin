@@ -37,12 +37,6 @@ const (
 	BufferSize           = 4096
 )
 
-type BlockUpdate struct {
-	prevBlock chainhash.Hash
-	height    int32
-	t         time.Time
-}
-
 // State stores the state of the controller
 type State struct {
 	cx                *conte.Xt
@@ -68,6 +62,10 @@ type nodeSpec struct {
 // New creates a new controller
 func New(cx *conte.Xt) (s *State) {
 	var err error
+	if *cx.Config.DisableController {
+		Warn("controller is disabled")
+		return
+	}
 	quit := qu.T()
 	var mc *transport.Channel
 	if mc, err = transport.NewBroadcastChannel(
@@ -287,7 +285,7 @@ func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 	)
 }
 
-// GetMsgBlockTemplate gets a Message for the given block paying to a given
+// GetMsgBlockTemplate gets a Message building on given block paying to a given
 // address
 func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *templates.Message, err error) {
 	mbt = &templates.Message{
