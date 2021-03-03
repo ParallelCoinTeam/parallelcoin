@@ -40,10 +40,10 @@ const (
 
 // State stores the state of the controller
 type State struct {
-	cfg               *pod.Config
-	node              *chainrpc.Node
-	rpcServer         *chainrpc.Server
-	stateCfg          *state.Config
+	cfg       *pod.Config
+	node      *chainrpc.Node
+	rpcServer *chainrpc.Server
+	stateCfg  *state.Config
 	// activeNet         *netparams.Params
 	uuid              uint64
 	start, stop, quit qu.C
@@ -73,7 +73,7 @@ func New(
 	node *chainrpc.Node,
 	rpcServer *chainrpc.Server,
 	otherNodeCount *atomic.Int32,
-	// activeNet *netparams.Params,
+// activeNet *netparams.Params,
 	killall qu.C,
 ) (s *State) {
 	var err error
@@ -90,7 +90,6 @@ func New(
 		stateCfg:       stateCfg,
 		otherNodes:     make(map[uint64]*nodeSpec),
 		otherNodeCount: otherNodeCount,
-		// activeNet:      activeNet,
 		quit:           quit,
 		uuid:           rand.Uint64(),
 		start:          qu.Ts(1),
@@ -235,6 +234,15 @@ out:
 				if s.walletClient.Disconnected() {
 					Debug("wallet client has disconnected, switching to pausing")
 					break running
+				}
+				if s.templateShards == nil || len(s.templateShards) < 1 {
+					Debug("getting current chain tip")
+					tipNode := s.node.Chain.BestSnapshot().Hash
+					var blk *util.Block
+					if blk, err = s.node.Chain.BlockByHash(&tipNode); Check(err) {
+					}
+					if err = s.doBlockUpdate(blk); Check(err) {
+					}
 				}
 				Debug("resending current templates...")
 				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
