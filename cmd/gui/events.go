@@ -3,11 +3,11 @@ package gui
 import (
 	"encoding/json"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/pod"
 	"io/ioutil"
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/cmd/walletmain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
@@ -494,7 +494,7 @@ func (wg *WalletGUI) chainClient() (err error) {
 	}
 	
 	if wg.ChainClient == nil { // || wg.ChainClient.Disconnected() {
-		certs := walletmain.ReadCAFile(wg.cx.Config)
+		certs := pod.ReadCAFile(wg.cx.Config)
 		Debug(*wg.cx.Config.RPCConnect)
 		// wg.ChainMutex.Lock()
 		// defer wg.ChainMutex.Unlock()
@@ -534,7 +534,7 @@ func (wg *WalletGUI) walletClient() (err error) {
 		return nil
 	}
 	// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
-	certs := walletmain.ReadCAFile(wg.cx.Config)
+	certs := pod.ReadCAFile(wg.cx.Config)
 	Info("config.tls", *wg.cx.Config.TLS)
 	wg.WalletMutex.Lock()
 	if wg.WalletClient, err = rpcclient.New(

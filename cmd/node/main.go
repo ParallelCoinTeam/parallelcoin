@@ -1,6 +1,7 @@
 package node
 
 import (
+	"github.com/p9c/pod/cmd/kopach/control"
 	"net"
 	"net/http"
 	// // This enables pprof
@@ -9,11 +10,9 @@ import (
 	"runtime/pprof"
 	
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
 	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/node/path"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	database "github.com/p9c/pod/pkg/db"
@@ -145,17 +144,26 @@ func Main(cx *conte.Xt) (err error) {
 		// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
 		// Debug("propagating rpc server handle (node has started)")
 	}
-	var controlQuit qu.C
 	if len(server.RPCServers) > 0 {
 		cx.RPCServer = server.RPCServers[0]
 		Debug("sending back node")
 		cx.NodeChan <- cx.RPCServer
-		// set up interrupt shutdown handlers to stop servers
-		// Debug("starting controller")
-		controlQuit = control.Run(cx)
 	}
-	// Debug("controller started")
-	// cx.Controller.Store(true)
+	if !*cx.Config.DisableController {
+		Debug("starting controller")
+		cx.Controller = control.New(
+			cx.Config,
+			cx.StateCfg,
+			cx.RealNode,
+			cx.RPCServer,
+			&cx.OtherNodesCounter,
+			// cx.ActiveNet,
+			cx.KillAll,
+		)
+		go cx.Controller.Run()
+		cx.Controller.Start()
+		Debug("controller started")
+	}
 	once := true
 	gracefulShutdown := func() {
 		if !once {
@@ -164,32 +172,21 @@ func Main(cx *conte.Xt) (err error) {
 		if once {
 			once = false
 		}
-		Info("gracefully shutting down the server...")
-		// if shutted {
-		// 	Debug("gracefulShutdown called twice")
-		// 	debug.PrintStack()
-		// 	return
-		// }
+		Debug("gracefully shutting down the server...")
 		Debug("stopping controller")
-		controlQuit.Q()
+		cx.Controller.Shutdown()
 		Debug("stopping server")
 		e := server.Stop()
 		if e != nil {
 			Warn("failed to stop server", e)
 		}
-		// Debug("stopping miner")
-		// consume.Kill(cx.StateCfg.Miner)
 		server.WaitForShutdown()
 		Info("server shutdown complete")
 		logi.L.LogChanDisabled.Store(true)
 		logi.L.Writer.Write.Store(true)
 		cx.WaitDone()
-		// <-cx.KillAll
-		// cx.WaitGroup.Done()
 		cx.KillAll.Q()
 		cx.NodeKill.Q()
-		// Debug(interrupt.GoroutineDump())
-		// <-interrupt.HandlersDone
 	}
 	Debug("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)
@@ -197,24 +194,18 @@ func Main(cx *conte.Xt) (err error) {
 	// subsystems such as the RPC server.
 	select {
 	case <-cx.NodeKill.Wait():
-		// Debug("NodeKill", interrupt.GoroutineDump())
-		// gracefulShutdown()
+		Debug("NodeKill")
 		if !interrupt.Requested() {
 			interrupt.Request()
 		}
 		break
 	case <-cx.KillAll.Wait():
-		// Debug("KillAll", interrupt.GoroutineDump())
+		Debug("KillAll")
 		if !interrupt.Requested() {
 			interrupt.Request()
 		}
-		// break
-		// case <-interrupt.ShutdownRequestChan:
-		// 	Debug("interrupt request")
-		// 	// gracefulShutdown()
 		break
 	}
-	// Debug(interrupt.GoroutineDump())
 	gracefulShutdown()
 	return nil
 }

@@ -2,13 +2,12 @@ package job
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"time"
 	
 	"github.com/niubaoshu/gotiny"
 	
-	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
-	
-	"github.com/p9c/pod/app/conte"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -40,41 +39,27 @@ type Job struct {
 // deserialize their contents which will be concurrent safe The varying coinbase
 // payment values are in transaction 0 last output, the individual varying
 // transactions are stored separately and will be reassembled at the end
-func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr []*util.Tx) {
+func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util.Block) (
+	cbs *map[int32]*util.Tx,
+	out []byte,
+	txr []*util.Tx,
+) {
 	_temp := make(map[int32]*util.Tx)
 	cbs = &_temp
-	// msg := append(Serializers{}, GetMessageBase(cx)...)
-	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
-	// nBH := Int32.New().Put(bH)
-	// msg = append(msg, nBH)
-	// mH := Hash.New().Put(mB.MsgBlock().Header.PrevBlock)
-	// msg = append(msg, mH)
-	tip := cx.RealNode.Chain.BestChain.Tip()
-	// // this should be the same as the block in the notification
-	// tth := tip.Header()
-	// tH := &tth
-	// tbh := tH.BlockHash()
-	// if tbh.IsEqual(mB.Hash()) {
-	//	Debug("notification block is tip block")
-	// } else {
-	//	Debug("notification block is not tip block")
-	// }
+	bH := node.Chain.BestSnapshot().Height + 1
+	tip := node.Chain.BestChain.Tip()
 	bitsMap := make(blockchain.Diffs)
 	var err error
 	df, ok := tip.Diffs.Load().(blockchain.Diffs)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
-		if bitsMap, err = cx.RealNode.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); Check(err) {
+		if bitsMap, err = node.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); Check(err) {
 			return
 		}
 		tip.Diffs.Store(bitsMap)
 	} else {
 		bitsMap = tip.Diffs.Load().(blockchain.Diffs)
 	}
-	// Debugs(bitsMap)
-	// bitses := Bits.NewBitses()
-	// bitses.Put(bitsMap)
-	// msg = append(msg, bitses)
 	// Now we need to get the values for coinbase for each algorithm then regenerate
 	// the merkle roots To mine this block a miner only needs the matching merkle
 	// roots for the version number but to get them first get the values
@@ -89,16 +74,16 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 		txr[i] = v
 	}
 	nbH := bH
-	if (cx.ActiveNet.Net == wire.MainNet &&
+	if (activeNet.Net == wire.MainNet &&
 		nbH == fork.List[1].ActivationHeight) ||
-		(cx.ActiveNet.Net == wire.TestNet3 &&
+		(activeNet.Net == wire.TestNet3 &&
 			nbH == fork.List[1].TestnetStart) {
 		nbH++
 	}
 	
 	for i := range bitsMap {
 		// set value according to version and block height
-		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
+		val = blockchain.CalcBlockSubsidy(nbH, activeNet, i)
 		txc := coinbase.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
@@ -116,38 +101,14 @@ func Get(cx *conte.Xt, mB *util.Block) (cbs *map[int32]*util.Tx, out []byte, txr
 			return
 		}
 		mTS[i] = mr
-		// if err = mTS[i].
-		// 	SetBytes(
-		// 		mTree[len(mTree)-1].CloneBytes(),
-		// 	); Check(err) {
-		// }
 	}
-	// Traces(mTS)
-	
-	// mHashes := Merkles.NewHashes()
-	// mHashes.Put(mTS)
-	// msg = append(msg, mHashes)
-	// previously were sending blocks, no need for that really miner only needs
-	// valid block headers
-	//
-	// coinbase := mB.MsgBlock().Transactions
-	// for i := range coinbase {
-	// 	t := (&Transaction.Transaction{}).Put(coinbase[i])
-	// 	msg = append(msg, t)
-	// }
-	// Traces(msg)
-	adv := p2padvt.GetAdvt(cx)
 	jrb := Job{
-		// IPs:             adv.IPs,
-		// P2PListenerPort: adv.P2P,
-		// RPCListenerPort: adv.RPC,
-		ControllerNonce: adv.UUID,
+		ControllerNonce: uuid,
 		Height:          bH,
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
 		Diffs:           bitsMap,
 		Merkles:         mTS,
 		MinTimestamp:    tip.Header().Timestamp.Add(time.Second),
-		// CoinBases:       *cbs,
 	}
 	// jrb.CoinBases= make(map[int32]*util.Tx)
 	// for i := range *cbs {
