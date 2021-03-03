@@ -393,7 +393,6 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 	s := ctx.(*State)
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
-	Trace(j.IPs)
 	uuid := j.UUID
 	if uuid == s.uuid {
 		Debug("ignoring own advertisment message")

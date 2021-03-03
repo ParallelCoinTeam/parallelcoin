@@ -16,7 +16,6 @@ import (
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	
-	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/kopach/control"
@@ -86,29 +85,29 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 	}
 	return
 }
-
-func (w *Worker) hashReport() {
-	w.hashSampleBuf.Add(w.hashCount.Load())
-	av := ewma.NewMovingAverage(15)
-	var i int
-	var prev uint64
-	if err := w.hashSampleBuf.ForEach(
-		func(v uint64) error {
-			if i < 1 {
-				prev = v
-			} else {
-				interval := v - prev
-				av.Add(float64(interval))
-				prev = v
-			}
-			i++
-			return nil
-		},
-	); Check(err) {
-	}
-	// Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
-	Tracef("average hashrate %.2f", av.Value())
-}
+//
+// func (w *Worker) hashReport() {
+// 	w.hashSampleBuf.Add(w.hashCount.Load())
+// 	av := ewma.NewMovingAverage(15)
+// 	var i int
+// 	var prev uint64
+// 	if err := w.hashSampleBuf.ForEach(
+// 		func(v uint64) error {
+// 			if i < 1 {
+// 				prev = v
+// 			} else {
+// 				interval := v - prev
+// 				av.Add(float64(interval))
+// 				prev = v
+// 			}
+// 			i++
+// 			return nil
+// 		},
+// 	); Check(err) {
+// 	}
+// 	// Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+// 	Tracef("average hashrate %.2f", av.Value())
+// }
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
 // allow a worker to be configured to run on a bare metal system with a different launcher main
@@ -142,7 +141,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid u
 
 func worker(w *Worker) {
 	Debug("main work loop starting")
-	sampleTicker := time.NewTicker(time.Second)
+	// sampleTicker := time.NewTicker(time.Second)
 	var nonce uint32
 out:
 	for {
@@ -151,9 +150,9 @@ out:
 	pausing:
 		for {
 			select {
-			case <-sampleTicker.C:
-				w.hashReport()
-				break
+			// case <-sampleTicker.C:
+			// 	// w.hashReport()
+			// 	break
 			case <-w.stopChan.Wait():
 				Debug("received pause signal while paused")
 				// drain stop channel in pause
@@ -171,9 +170,9 @@ out:
 	running:
 		for {
 			select {
-			case <-sampleTicker.C:
-				w.hashReport()
-				break
+			// case <-sampleTicker.C:
+			// 	// w.hashReport()
+			// 	break
 			case <-w.startChan.Wait():
 				Debug("received start signal while running")
 				// drain start channel in run mode
