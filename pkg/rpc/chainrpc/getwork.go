@@ -102,8 +102,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan qu.C) (interface{}, err
 	generator := s.Cfg.Generator
 	if state.Template == nil {
 		var err error
-		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
-			s.Cfg.Algo)
+		state.Template, err = generator.NewBlockTemplate(payToAddr, s.Cfg.Algo)
 		if err != nil {
 			Error(err)
 			return nil, err
@@ -125,8 +124,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan qu.C) (interface{}, err
 		//	invocation to try again.
 		state.prevHash = nil
 		var err error
-		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
-			s.Cfg.Algo)
+		state.Template, err = generator.NewBlockTemplate(payToAddr, s.Cfg.Algo)
 		if err != nil {
 			errStr := fmt.Sprintf("Failed to create new block template: %v", err)
 			Error(errStr)

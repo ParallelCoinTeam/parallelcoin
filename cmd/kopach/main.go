@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"net"
 	"os"
 	"runtime"
@@ -135,14 +136,12 @@ func (w *Worker) Stop() {
 func Handle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		Debug("miner controller starting")
-		// ctx, cancel := context.WithCancel(context.Background())
 		randomBytes := make([]byte, 4)
 		if _, err = rand.Read(randomBytes); Check(err) {
 		}
 		w := &Worker{
 			id: fmt.Sprintf("%x", randomBytes),
 			cx: cx,
-			// ctx:           ctx,
 			quit:          cx.KillAll,
 			sendAddresses: []*net.UDPAddr{},
 			StartChan:     qu.T(),
@@ -162,7 +161,6 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		)
 		if err != nil {
 			Error(err)
-			// cancel()
 			return
 		}
 		// start up the workers
@@ -182,7 +180,6 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			for {
 				select {
 				case <-ticker.C:
-					// Debug("kopach control ticker")
 					// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
 					// so clear FirstSender
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
@@ -265,12 +262,6 @@ var handlers = transport.Handlers{
 		}
 		var hr hashrate.Hashrate
 		gotiny.Unmarshal(b, &hr)
-		// hp := hashrate.LoadContainer(b)
-		// count := hp.GetCount()
-		// nonce := hp.GetNonce()
-		
-		// hp := hashrate.LoadContainer(b)
-		// id := hp.GetID()
 		// if this is not one of our workers reports ignore it
 		if hr.ID != c.id {
 			return
@@ -278,7 +269,6 @@ var handlers = transport.Handlers{
 		count := hr.Count
 		hc := c.hashCount.Load() + uint64(count)
 		c.hashCount.Store(hc)
-		// Trace("received message hashrate", count, hc)
 		return
 	},
 	string(job.Magic): func(
@@ -293,18 +283,10 @@ var handlers = transport.Handlers{
 		}
 		
 		// Debugs(b)
-		jr := job.Job{}
+		jr := templates.Message{}
 		gotiny.Unmarshal(b, &jr)
-		// Debugs(jr)
-		for _,x := range jr.Merkles {
-			if x==nil {
-				Error("encountered nil merkle root, abort")
-				return
-			}
-		}
-		// iP := jr.IPs
 		w.height = jr.Height
-		cN := jr.ControllerNonce
+		cN := jr.UUID
 		// addr := net.JoinHostPort(iP.String(), fmt.Sprint(cP))
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != cN && firstSender != 0

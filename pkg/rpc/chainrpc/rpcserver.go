@@ -978,7 +978,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 		//
 		// This is only acceptable because the returned block template doesn't include the coinbase, so the caller will
 		// ultimately create their own coinbase which pays to the appropriate address(es).
-		blkTemplate, err := generator.NewBlockTemplate(0, payAddr, state.Algo)
+		blkTemplate, err := generator.NewBlockTemplate(payAddr, state.Algo)
 		if err != nil {
 			Error(err)
 			return InternalRPCError(

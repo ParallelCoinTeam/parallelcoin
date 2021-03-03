@@ -2,6 +2,7 @@ package conte
 
 import (
 	"fmt"
+	"github.com/p9c/pod/cmd/kopach/control"
 	"math/rand"
 	"runtime"
 	"sync"
@@ -64,9 +65,7 @@ type Xt struct {
 	NodeChan chan *chainrpc.Server
 	// WalletServer is needed to query the wallet
 	WalletServer *wallet.Wallet
-	// // WalletChan is a channel used to return the wallet server pointer when it starts
-	// WalletChan chan *wallet.Wallet
-	// ChainClientChan returns the chainclient
+	// ChainClientReady signals when the chain client is ready
 	ChainClientReady qu.C
 	// ChainClient is the wallet's chain RPC client
 	ChainClient *chain.RPCClient
@@ -74,10 +73,10 @@ type Xt struct {
 	RealNode *chainrpc.Node
 	// Hashrate is the current total hashrate from kopach workers taking work from this node
 	Hashrate atomic.Uint64
-	// Controller is the run state indicator of the controller
-	Controller atomic.Bool
-	// OtherNodes is the count of nodes connected automatically on the LAN
-	OtherNodes atomic.Int32
+	// Controller is the state of the controller
+	Controller *control.State
+	// OtherNodesCounter is the count of nodes connected automatically on the LAN
+	OtherNodesCounter atomic.Int32
 	// IsGUI indicates if we have the possibility of terminal input
 	IsGUI        bool
 	UUID         uint64
@@ -137,7 +136,7 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
 		NodeChan:         make(chan *chainrpc.Server),
-		UUID:             uint64(rand.Int63()),
+		UUID:             rand.Uint64(),
 	}
 	return cx
 }
@@ -152,7 +151,7 @@ func GetContext(cx *Xt) *chainrpc.Context {
 func (cx *Xt) IsCurrent() (is bool) {
 	rn := cx.RealNode
 	cc := rn.ConnectedCount()
-	othernodes := cx.OtherNodes.Load()
+	othernodes := cx.OtherNodesCounter.Load()
 	if !*cx.Config.LAN {
 		cc -= othernodes
 	}

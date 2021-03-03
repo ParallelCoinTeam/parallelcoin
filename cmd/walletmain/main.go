@@ -2,7 +2,6 @@ package walletmain
 
 import (
 	"fmt"
-	"io/ioutil"
 	// This enables pprof
 	// _ "net/http/pprof"
 	"sync"
@@ -87,23 +86,6 @@ func Main(cx *conte.Xt) (err error) {
 	return
 }
 
-func ReadCAFile(config *pod.Config) []byte {
-	// Read certificate file if TLS is not disabled.
-	var certs []byte
-	if *config.TLS {
-		var err error
-		certs, err = ioutil.ReadFile(*config.CAFile)
-		if err != nil {
-			Error("cannot open CA file:", err)
-			// If there's an error reading the CA file, continue with nil certs and without the client connection.
-			certs = nil
-		}
-	} else {
-		Info("chain server RPC TLS is disabled")
-	}
-	return certs
-}
-
 func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server) (err error) {
 	Debug("starting rpc client connection handler", *cx.Config.WalletPass)
 	// Create and start chain RPC client so it's ready to connect to the wallet when loaded later.
@@ -170,7 +152,7 @@ func rpcClientConnectLoop(
 	Debug("^^^^^^^^^^^^^^^ rpcClientConnectLoop", logi.Caller("which was started at:", 2))
 	// var certs []byte
 	// if !cx.PodConfig.UseSPV {
-	certs := ReadCAFile(cx.Config)
+	certs := pod.ReadCAFile(cx.Config)
 	// }
 	for {
 		var (

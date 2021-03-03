@@ -846,6 +846,9 @@ func (c *Client) sendCmdAndWait(cmd interface{}) (interface{}, error) {
 // Disconnected returns whether or not the server is disconnected. If a
 // websocket client was created but never connected, this also returns false.
 func (c *Client) Disconnected() bool {
+	if c == nil {
+		return true
+	}
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	select {

@@ -1,31 +1,18 @@
 package control
 
 import (
-	"bytes"
-	"container/ring"
+	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/util/routeable"
-	"net"
-	"sync"
-	"time"
-	
-	"github.com/niubaoshu/gotiny"
-	"github.com/urfave/cli"
-	
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/cmd/walletmain"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
-	"github.com/p9c/pod/pkg/util/quit"
-	
 	"github.com/VividCortex/ewma"
-	"go.uber.org/atomic"
-	
-	"github.com/p9c/pod/app/conte"
+	"github.com/niubaoshu/gotiny"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
+	"github.com/p9c/pod/cmd/kopach/control/templates"
+	"github.com/p9c/pod/cmd/node/state"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -33,8 +20,16 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rav "github.com/p9c/pod/pkg/data/ring"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/interrupt"
+	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/urfave/cli"
+	"go.uber.org/atomic"
+	"math/rand"
+	"net"
+	"time"
 )
 
 const (
@@ -43,32 +38,27 @@ const (
 	BufferSize           = 4096
 )
 
-type Controller struct {
-	multiConn              *transport.Channel
-	active                 atomic.Bool
-	quit                   qu.C
-	cx                     *conte.Xt
-	isMining               atomic.Bool
-	height                 atomic.Int32
-	blockTemplateGenerator *mining.BlkTmplGenerator
-	coinbases              atomic.Value
-	transactions           atomic.Value
-	txMx                   sync.Mutex
-	oldBlocks              atomic.Value
-	prevHash               atomic.Value
-	lastTxUpdate           atomic.Value
-	lastGenerated          atomic.Value
-	pauseShards            [][]byte
-	sendAddresses          []*net.UDPAddr
-	// submitChan             chan []byte
-	buffer        *ring.Ring
-	began         time.Time
-	otherNodes    map[uint64]*nodeSpec
-	uuid          uint64
-	hashCount     atomic.Uint64
-	hashSampleBuf *rav.BufferUint64
-	lastNonce     int32
-	walletClient  *rpcclient.Client
+// State stores the state of the controller
+type State struct {
+	cfg       *pod.Config
+	node      *chainrpc.Node
+	rpcServer *chainrpc.Server
+	stateCfg  *state.Config
+	// activeNet         *netparams.Params
+	uuid              uint64
+	start, stop, quit qu.C
+	blockUpdate       chan *util.Block
+	generator         *mining.BlkTmplGenerator
+	nextAddress       util.Address
+	walletClient      *rpcclient.Client
+	msgBlockTemplate  *templates.Message
+	templateShards    [][]byte
+	multiConn         *transport.Channel
+	otherNodes        map[uint64]*nodeSpec
+	otherNodeCount    *atomic.Int32
+	hashSampleBuf     *rav.BufferUint64
+	hashCount         atomic.Uint64
+	lastNonce         int32
 }
 
 type nodeSpec struct {
@@ -76,289 +66,328 @@ type nodeSpec struct {
 	addr string
 }
 
-func Run(cx *conte.Xt) (quit qu.C) {
-	if *cx.Config.DisableController {
-		Info("controller is disabled")
-		return
-	}
-	cx.Controller.Store(true)
-	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
-		Warn("not running controller without RPC enabled")
-		return
-	}
-	if len(*cx.Config.P2PListeners) < 1 || *cx.Config.DisableListen {
-		Warn("not running controller without p2p listener enabled", *cx.Config.P2PListeners)
-		return
-	}
-	nS := make(map[uint64]*nodeSpec)
-	ctrl := &Controller{
-		quit:          qu.T(),
-		cx:            cx,
-		sendAddresses: []*net.UDPAddr{},
-		// submitChan:             make(chan []byte),
-		blockTemplateGenerator: getBlkTemplateGenerator(cx),
-		// coinbases:              make(map[int32]*util.Tx),
-		buffer:        ring.New(BufferSize),
-		began:         time.Now(),
-		otherNodes:    nS,
-		uuid:          cx.UUID,
-		hashSampleBuf: rav.NewBufferUint64(100),
-	}
-	ctrl.isMining.Store(true)
-	// maintain connection to wallet if it is available
+// New creates a new controller
+func New(
+	cfg *pod.Config,
+	stateCfg *state.Config,
+	node *chainrpc.Node,
+	rpcServer *chainrpc.Server,
+	otherNodeCount *atomic.Int32,
+// activeNet *netparams.Params,
+	killall qu.C,
+) (s *State) {
 	var err error
-	certs := walletmain.ReadCAFile(cx.Config)
-	go func() {
-		Debug("starting wallet rpc connection watcher for mining addresses")
-		backoffTime := time.Second
-	totalOut:
-		for {
-		trying:
-			for {
-				select {
-				case <-ctrl.cx.KillAll.Wait():
-					break totalOut
-				default:
-				}
-				Debug("trying to connect to wallet for mining addresses...")
-				// If we can reach the wallet configured in the same datadir we can mine
-				if ctrl.walletClient, err = rpcclient.New(
-					&rpcclient.ConnConfig{
-						Host:         *cx.Config.WalletServer,
-						Endpoint:     "ws",
-						User:         *cx.Config.Username,
-						Pass:         *cx.Config.Password,
-						TLS:          *cx.Config.TLS,
-						Certificates: certs,
-					}, nil, cx.KillAll,
-				); Check(err) {
-					Debug("failed, will try again")
-					ctrl.isMining.Store(false)
-					select {
-					case <-time.After(backoffTime):
-					case <-ctrl.quit.Wait():
-						ctrl.isMining.Store(false)
-						break totalOut
-					}
-					if backoffTime <= time.Second*5 {
-						// backoffTime+=time.Second
-					}
-					continue
-				} else {
-					Debug("<<<controller has wallet connection>>>")
-					ctrl.isMining.Store(true)
-					backoffTime = time.Second
-					break trying
-				}
-			}
-			Debug("<<<connected to wallet>>>")
-			retryTicker := time.NewTicker(time.Second)
-		connected:
-			for {
-				select {
-				case <-retryTicker.C:
-					if ctrl.walletClient.Disconnected() {
-						ctrl.isMining.Store(false)
-						break connected
-					}
-				case <-ctrl.quit.Wait():
-					ctrl.isMining.Store(false)
-					break totalOut
-				}
-			}
-			Debug("disconnected from wallet")
-		}
-	}()
-	ctrl.prevHash.Store(&chainhash.Hash{})
-	quit = ctrl.quit
-	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
-	ctrl.lastGenerated.Store(time.Now().UnixNano())
-	ctrl.height.Store(0)
-	ctrl.active.Store(false)
-	if ctrl.multiConn, err = transport.NewBroadcastChannel(
-		"controller", ctrl, *cx.Config.MinerPass, transport.DefaultPort, MaxDatagramSize, handlersMulticast,
+	if *cfg.DisableController {
+		Warn("controller is disabled")
+		return
+	}
+	quit := qu.T()
+	rand.Seed(time.Now().UnixNano())
+	s = &State{
+		cfg:            cfg,
+		node:           node,
+		rpcServer:      rpcServer,
+		stateCfg:       stateCfg,
+		otherNodes:     make(map[uint64]*nodeSpec),
+		otherNodeCount: otherNodeCount,
+		quit:           quit,
+		uuid:           rand.Uint64(),
+		start:          qu.Ts(1),
+		stop:           qu.Ts(1),
+		blockUpdate:    make(chan *util.Block, 1),
+		hashSampleBuf:  rav.NewBufferUint64(100),
+	}
+	s.generator = s.getBlkTemplateGenerator()
+	var mc *transport.Channel
+	if mc, err = transport.NewBroadcastChannel(
+		"controller",
+		s,
+		*cfg.MinerPass,
+		transport.DefaultPort,
+		MaxDatagramSize,
+		handlersMulticast,
 		quit,
 	); Check(err) {
-		ctrl.quit.Q()
 		return
 	}
-	// var pauseShards [][]byte
-	if ctrl.pauseShards = transport.GetShards(p2padvt.Get(cx)); Check(err) {
-	} else {
-		ctrl.active.Store(true)
-	}
-	// ctrl.oldBlocks.Store(pauseShards)
-	interrupt.AddHandler(
-		func() {
-			Debug("miner controller shutting down")
-			ctrl.active.Store(false)
-			if err = ctrl.multiConn.SendMany(pause.Magic, ctrl.pauseShards); Check(err) {
+	s.multiConn = mc
+	go func() {
+		Debug("starting shutdown signal watcher")
+		select {
+		case <-killall:
+			Debug("received killall signal, signalling to quit controller")
+			s.Shutdown()
+		case <-s.quit:
+			Debug("received quit signal, breaking out of shutdown signal watcher")
+		}
+	}()
+	node.Chain.Subscribe(
+		func(n *blockchain.Notification) {
+			switch n.Type {
+			case blockchain.NTBlockConnected:
+				Debug("received block connected notification")
+				if b, ok := n.Data.(*util.Block); !ok {
+					Warn("block notification is not a block")
+					break
+				} else {
+					s.blockUpdate <- b
+				}
 			}
-			if err = ctrl.multiConn.Close(); Check(err) {
-			}
-			ctrl.quit.Q()
 		},
 	)
-	Debug("sending broadcasts to:", UDP4MulticastAddress)
-	
-	// go advertiser(ctrl)
-	factor := 2
-	// if err = ctrl.sendNewBlockTemplate(); Check(err) {
-	// } else {
-	// 	ctrl.active.Store(true)
-	// }
-	const countTick = 10
-	counter := countTick / 2
-	ticker := time.NewTicker(time.Second * time.Duration(factor))
-	once := false
-	go func() {
-		if !ctrl.active.Load() {
-			Info("ready to send out jobs!")
-			ctrl.active.Store(true)
-		}
-	out:
-		for {
-			select {
-			case <-ticker.C:
-				ctrl.height.Store(cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
-				if ctrl.isMining.Load() {
-					if !once {
-						cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
-						once = true
-						ctrl.active.Store(true)
-					}
-					// if err = ctrl.sendNewBlockTemplate(); Check(err) {
-					// } else {
-					// }
-				}
-				// send out advertisment
-				ad := transport.GetShards(p2padvt.Get(cx))
-				var err error
-				if err = ctrl.multiConn.SendMany(p2padvt.Magic, ad); Check(err) {
-				}
-				if cx.IsCurrent() {
-					// } else {
-					// ctrl.active.Store(false)
-					// once = false
-				}
-				if ctrl.isMining.Load() {
-					ctrl.rebroadcast()
-				}
-				if counter%countTick == 0 {
-					j := p2padvt.GetAdvt(cx)
-					if *cx.Config.AutoListen {
-						*cx.Config.P2PConnect = cli.StringSlice{}
-						_, addresses := routeable.GetAllInterfacesAndAddresses()
-						Traces(addresses)
-						for i := range addresses {
-							addrS := net.JoinHostPort(addresses[i].IP.String(), fmt.Sprint(j.P2P))
-							*cx.Config.P2PConnect = append(*cx.Config.P2PConnect, addrS)
-						}
-						save.Pod(cx.Config)
-					}
-				}
-				counter++
-			// case msg := <-ctrl.submitChan:
-			// 	Traces(msg)
-			// 	decodedB, err := util.NewBlockFromBytes(msg)
-			// 	if err != nil {
-			// 		Error(err)
-			// 		break
-			// 	}
-			// 	Traces(decodedB)
-			case <-ctrl.quit.Wait():
-				Debug("quitting on close quit channel")
-				break out
-			case <-ctrl.cx.NodeKill.Wait():
-				Debug("quitting on NodeKill")
-				ctrl.quit.Q()
-				break out
-			case <-ctrl.cx.KillAll.Wait():
-				Debug("quitting on KillAll")
-				ctrl.quit.Q()
-				break out
-			}
-		}
-		ctrl.active.Store(false)
-		// panic("aren't we stopped???")
-		Debug("controller exiting")
-	}()
 	return
 }
 
-func (c *Controller) rebroadcast() {
-	// Debug("checking that block contains payload")
-	oB, ok := c.oldBlocks.Load().([][]byte)
-	if len(oB) == 0 {
-		Trace("template is zero length")
-		if err := c.sendNewBlockTemplate(); Check(err) {
-		}
-		return
-	}
-	if !ok {
-		Trace("template is nil")
-		if err := c.sendNewBlockTemplate(); Check(err) {
-		}
-		return
-	}
-	// if !c.cx.IsCurrent() {
-	// 	Debug("is not current")
-	// 	continue
-	// } else {
-	// 	Debug("is current")
-	// }
-	Trace("checking for new block")
-	// The current block is stale if the best block has changed.
-	best := c.blockTemplateGenerator.BestSnapshot()
-	if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
-		c.prevHash.Store(&best.Hash)
-		Debug("new best block hash")
-		if err := c.sendNewBlockTemplate(); Check(err) {
-		}
-		return
-	}
-	Trace("checking for new transactions")
-	// The current block is stale if the memory pool has been updated since the
-	// block template was generated and it has been at least one minute.
-	if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
-		LastUpdated() && time.Now().After(
-		time.Unix(
-			0,
-			c.lastGenerated.Load().(int64)+int64(time.Minute),
-		),
-	) {
-		Trace("block is stale, regenerating")
-		if err := c.sendNewBlockTemplate(); Check(err) {
-		}
-		return
-	}
-	Trace("sending out job")
-	var err error
-	if err = c.multiConn.SendMany(job.Magic, oB); Check(err) {
-	}
-	return
+// Start up the controller
+func (s *State) Start() {
+	Debug("calling start controller")
+	s.start.Signal()
 }
 
-func (c *Controller) HashReport() float64 {
-	c.hashSampleBuf.Add(c.hashCount.Load())
-	av := ewma.NewMovingAverage()
-	var i int
-	var prev uint64
-	if err := c.hashSampleBuf.ForEach(
-		func(v uint64) error {
-			if i < 1 {
-				prev = v
-			} else {
-				interval := v - prev
-				av.Add(float64(interval))
-				prev = v
-			}
-			i++
-			return nil
-		},
+// Stop the controller
+func (s *State) Stop() {
+	Debug("calling stop controller")
+	s.stop.Signal()
+}
+
+// Shutdown the controller
+func (s *State) Shutdown() {
+	Debug("sending shutdown signal to controller")
+	s.quit.Q()
+}
+
+func (s *State) startWallet() (err error) {
+	Debug("getting configured TLS certificates")
+	certs := pod.ReadCAFile(s.cfg)
+	Debug("establishing wallet connection")
+	if s.walletClient, err = rpcclient.New(
+		&rpcclient.ConnConfig{
+			Host:         *s.cfg.WalletServer,
+			Endpoint:     "ws",
+			User:         *s.cfg.Username,
+			Pass:         *s.cfg.Password,
+			TLS:          *s.cfg.TLS,
+			Certificates: certs,
+		}, nil, s.quit,
 	); Check(err) {
 	}
-	return av.Value()
+	return
+}
+
+// Run must be started as a goroutine, central routing for the business of the
+// controller
+//
+// For increased simplicity, every type of work runs in one thread, only signalling
+// from background goroutines to trigger state changes.
+func (s *State) Run() {
+	Debug("starting controller server")
+	var err error
+	if *s.cfg.DisableController {
+		Warn("controller is disabled")
+		return
+	}
+	ticker := time.NewTicker(time.Second)
+out:
+	for {
+		Debug("controller now pausing")
+	pausing:
+		for {
+			select {
+			case bu := <-s.blockUpdate:
+				Debug("received new block update while paused")
+				if err = s.doBlockUpdate(bu); Check(err) {
+				}
+			case <-ticker.C:
+				Debug("controller ticker running")
+				s.doTicker()
+			case <-s.start.Wait():
+				Debug("received start signal while paused")
+				if s.walletClient.Disconnected() {
+					Debug("wallet client is disconnected, retrying")
+					if err = s.startWallet(); !Check(err) {
+						Debug("wallet client is connected, switching to running")
+						break pausing
+					}
+				}
+			case <-s.stop.Wait():
+				Debug("received stop signal while paused")
+			case <-s.quit.Wait():
+				Debug("received quit signal while paused")
+				break out
+			}
+		}
+		Debug("controller now running")
+	running:
+		for {
+			select {
+			case bu := <-s.blockUpdate:
+				Debug("received new block update while running")
+				if err = s.doBlockUpdate(bu); Check(err) {
+				}
+				Debug("sending out templates...")
+				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
+				}
+			case <-ticker.C:
+				Debug("controller ticker running")
+				s.doTicker()
+				Debug("checking if wallet is connected")
+				if s.walletClient.Disconnected() {
+					Debug("wallet client has disconnected, switching to pausing")
+					break running
+				}
+				if s.templateShards == nil || len(s.templateShards) < 1 {
+					Debug("getting current chain tip")
+					tipNode := s.node.Chain.BestSnapshot().Hash
+					var blk *util.Block
+					if blk, err = s.node.Chain.BlockByHash(&tipNode); Check(err) {
+					}
+					if err = s.doBlockUpdate(blk); Check(err) {
+					}
+				}
+				Debug("resending current templates...")
+				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
+				}
+			case <-s.start.Wait():
+				Debug("received start signal while running")
+			case <-s.stop.Wait():
+				Debug("received stop signal while running")
+				break running
+			case <-s.quit.Wait():
+				Debug("received quit signal while running")
+				break out
+			}
+		}
+		Debug("disconnecting wallet client if it was connected")
+		if !s.walletClient.Disconnected() {
+			s.walletClient.Disconnect()
+		}
+	}
+}
+
+func (s *State) doTicker() {
+	Debug("sending out advertisment")
+	var err error
+	if err = s.multiConn.SendMany(p2padvt.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); Check(err) {
+	}
+}
+
+func (s *State) doBlockUpdate(prev *util.Block) (err error) {
+	if s.nextAddress == nil {
+		Debug("getting new address for templates")
+		if s.nextAddress, err = s.GetNewAddressFromMiningAddrs(); Check(err) {
+			if s.nextAddress, err = s.GetNewAddressFromWallet(); Check(err) {
+				return
+			}
+		}
+	}
+	Debug("getting templates...")
+	if s.msgBlockTemplate, err = s.GetMsgBlockTemplate(prev, s.nextAddress); Check(err) {
+		return
+	}
+	Debug("caching error corrected message shards...")
+	s.templateShards = transport.GetShards(s.msgBlockTemplate.Serialize())
+	return
+}
+
+func (s *State) getBlkTemplateGenerator() *mining.BlkTmplGenerator {
+	Debug("getting a block template generator")
+	return mining.NewBlkTmplGenerator(
+		&mining.Policy{
+			BlockMinWeight:    uint32(*s.cfg.BlockMinWeight),
+			BlockMaxWeight:    uint32(*s.cfg.BlockMaxWeight),
+			BlockMinSize:      uint32(*s.cfg.BlockMinSize),
+			BlockMaxSize:      uint32(*s.cfg.BlockMaxSize),
+			BlockPrioritySize: uint32(*s.cfg.BlockPrioritySize),
+			TxMinFreeFee:      s.stateCfg.ActiveMinRelayTxFee,
+		},
+		s.node.ChainParams,
+		s.node.TxMemPool,
+		s.node.Chain,
+		s.node.TimeSource,
+		s.node.SigCache,
+		s.node.HashCache,
+	)
+}
+
+// GetMsgBlockTemplate gets a Message building on given block paying to a given
+// address
+func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *templates.Message, err error) {
+	mbt = &templates.Message{
+		UUID:      s.uuid,
+		PrevBlock: prev.MsgBlock().BlockHash(),
+		Height:    prev.Height() + 1,
+		Bits:      make(map[int32]uint32),
+		Merkles:   make(map[int32]chainhash.Hash),
+	}
+	mbt.ResetCoinbases()
+	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
+		var templateX *mining.BlockTemplate
+		if templateX, err = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); Check(err) {
+		} else {
+			newB := templateX.Block
+			newH := newB.Header
+			mbt.SetCoinbase(curr(), newB.Transactions[len(newB.Transactions)-1])
+			mbt.Bits[curr()] = newH.Bits
+			mbt.Merkles[curr()] = newH.MerkleRoot
+			mbt.Timestamp = newH.Timestamp.Add(time.Second)
+			mbt.SetTxs(newB.Transactions[:len(newB.Transactions)-1])
+		}
+	}
+	return
+}
+
+// GetNewAddressFromWallet gets a new address from the wallet if it is
+// connected, or returns an error
+func (s *State) GetNewAddressFromWallet() (addr util.Address, err error) {
+	if s.walletClient != nil {
+		if !s.walletClient.Disconnected() {
+			Debug("have access to a wallet, generating address")
+			if addr, err = s.walletClient.GetNewAddress("default"); Check(err) {
+			} else {
+				Debug("-------- found address", addr)
+			}
+		}
+	} else {
+		err = errors.New("no wallet available for new address")
+		Debug(err)
+	}
+	return
+}
+
+// GetNewAddressFromMiningAddrs tries to get an address from the mining
+// addresses list in the configuration file
+func (s *State) GetNewAddressFromMiningAddrs() (addr util.Address, err error) {
+	if s.cfg.MiningAddrs == nil {
+		err = errors.New("mining addresses is nil")
+		Debug(err)
+		return
+	}
+	if len(*s.cfg.MiningAddrs) < 1 {
+		err = errors.New("no mining addresses")
+		Debug(err)
+		return
+	}
+	// Choose a payment address at random.
+	rand.Seed(time.Now().UnixNano())
+	p2a := rand.Intn(len(*s.cfg.MiningAddrs))
+	addr = s.stateCfg.ActiveMiningAddrs[p2a]
+	// remove the address from the state
+	if p2a == 0 {
+		s.stateCfg.ActiveMiningAddrs = s.stateCfg.ActiveMiningAddrs[1:]
+	} else {
+		s.stateCfg.ActiveMiningAddrs = append(
+			s.stateCfg.ActiveMiningAddrs[:p2a],
+			s.stateCfg.ActiveMiningAddrs[p2a+1:]...,
+		)
+	}
+	// update the config
+	var ma cli.StringSlice
+	for i := range s.stateCfg.ActiveMiningAddrs {
+		ma = append(ma, s.stateCfg.ActiveMiningAddrs[i].String())
+	}
+	*s.cfg.MiningAddrs = ma
+	save.Pod(s.cfg)
+	return
 }
 
 var handlersMulticast = transport.Handlers{
@@ -369,145 +398,84 @@ var handlersMulticast = transport.Handlers{
 
 func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 	Debug("processing advertisment message", src, dst)
-	c := ctx.(*Controller)
-	// if !c.active.Load() {
-	// 	Debug("not active")
-	// 	return
-	// }
+	s := ctx.(*State)
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
-	Trace(j.IPs)
 	uuid := j.UUID
-	if _, ok := c.otherNodes[uuid]; !ok {
+	if uuid == s.uuid {
+		Debug("ignoring own advertisment message")
+		return
+	}
+	if _, ok := s.otherNodes[uuid]; !ok {
 		// if we haven't already added it to the permanent peer list, we can add it now
-		Debug("uuid", j.UUID, "P2P", j.P2P)
 		Info("connecting to lan peer with same PSK", j.IPs, j.UUID)
 		// try all IPs
-		if *c.cx.Config.AutoListen {
-			c.cx.Config.P2PConnect = &cli.StringSlice{}
+		if *s.cfg.AutoListen {
+			s.cfg.P2PConnect = &cli.StringSlice{}
 		}
 		for addr := range j.IPs {
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
-			_, addresses := routeable.GetAllInterfacesAndAddresses()
-			for i := range addresses {
-				addrS := net.JoinHostPort(addresses[i].IP.String(), fmt.Sprint(j.P2P))
-				if addrS == peerIP {
-					Debug("not connecting to self")
-					continue
-				}
-				if *c.cx.Config.AutoListen {
-					*c.cx.Config.P2PConnect = append(*c.cx.Config.P2PConnect, addrS)
-				}
-			}
-			if *c.cx.Config.AutoListen {
-				save.Pod(c.cx.Config)
-			}
-			// Debugs(c.cx.RealNode.AddrManager.AddressCache())
-			// if c.otherNodes[uuid].addr == peerIP {
-			// 	continue
-			// }
-			if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(
+			if err = s.rpcServer.Cfg.ConnMgr.Connect(
 				peerIP,
 				false,
 			); Check(err) {
 				continue
 			}
 			Debug("connected to peer via address", peerIP)
-			c.otherNodes[uuid] = &nodeSpec{}
-			c.otherNodes[uuid].addr = addr
+			s.otherNodes[uuid] = &nodeSpec{}
+			s.otherNodes[uuid].addr = addr
 			break
 		}
 	}
 	// update last seen time for uuid for garbage collection of stale disconnected
 	// nodes
-	c.otherNodes[uuid].Time = time.Now()
+	s.otherNodes[uuid].Time = time.Now()
 	// If we lose connection for more than 9 seconds we delete and if the node
 	// reappears it can be reconnected
-	for i := range c.otherNodes {
-		if time.Now().Sub(c.otherNodes[i].Time) > time.Second*9 {
+	for i := range s.otherNodes {
+		if time.Now().Sub(s.otherNodes[i].Time) > time.Second*9 {
 			// also remove from connection manager
-			if err = c.cx.RPCServer.Cfg.ConnMgr.RemoveByAddr(c.otherNodes[i].addr); Check(err) {
+			if err = s.rpcServer.Cfg.ConnMgr.RemoveByAddr(s.otherNodes[i].addr); Check(err) {
 			}
-			Debug("deleting", c.otherNodes[i])
-			delete(c.otherNodes, i)
+			Debug("deleting", s.otherNodes[i])
+			delete(s.otherNodes, i)
 		}
 	}
-	on := int32(len(c.otherNodes))
-	Trace("other nodes", on)
-	c.cx.OtherNodes.Store(on)
+	on := int32(len(s.otherNodes))
+	s.otherNodeCount.Store(on)
 	return
 }
 
 // Solutions submitted by workers
 func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err error) {
 	Debug("received solution", src, dst)
-	c := ctx.(*Controller)
-	if !c.active.Load() { // || !c.cx.Node.Load() {
-		Debug("not active yet")
+	s := ctx.(*State)
+	var so sol.Solution
+	gotiny.Unmarshal(b, &so)
+	if s.uuid != s.msgBlockTemplate.UUID {
+		Debug("solution not from current controller", s.uuid, s.msgBlockTemplate.UUID)
 		return
 	}
-	// Debugs(b)
-	var s sol.Solution
-	gotiny.Unmarshal(b, &s)
-	// Debugs(s)
-	// j := sol.LoadSolContainer(b)
-	uuid := s.UUID
-	if uuid != c.uuid {
-		Debug("solution not from current controller")
+	var newHeader *wire.BlockHeader
+	if newHeader, err = so.Decode(); Check(err) {
 		return
 	}
-	br := bytes.NewBuffer(s.Bytes)
-	newBlock := wire.NewMsgBlock(&wire.BlockHeader{})
-	if err = newBlock.Deserialize(br); Check(err) {
-	}
-	msgBlock := newBlock
-	Debug("-------------------------------------------------------")
-	Debugs(msgBlock)
-	if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.BestSnapshot().Hash) {
+	if newHeader.PrevBlock != s.msgBlockTemplate.PrevBlock {
 		Debug("block submitted by kopach miner worker is stale")
-		if err := c.sendNewBlockTemplate(); Check(err) {
-		}
 		return
 	}
-	Warn(msgBlock.Header.Version)
-	// cb, ok := c.coinbases.Load().(map[int32]*util.Tx)[msgBlock.Header.Version]
-	cbRaw := c.coinbases.Load()
-	cbrs, ok := cbRaw.(*map[int32]*util.Tx)
-	if !ok {
-		Debug("coinbases not correct type", cbrs)
+	var msgBlock *wire.MsgBlock
+	if msgBlock, err = s.msgBlockTemplate.Reconstruct(newHeader); Check(err) {
 		return
 	}
-	// Debugs(cbrs)
-	var cb *util.Tx
-	cb, ok = (*cbrs)[msgBlock.Header.Version]
-	if !ok {
-		Debug("coinbase not found")
-		return
-	}
-	Debug("copying over transactions")
-	t := c.transactions.Load()
-	var rtx []*util.Tx
-	rtx, ok = t.([]*util.Tx)
-	var txs []*util.Tx
-	// copy merkle root
-	txs = append(rtx, cb)
-	for i := range txs {
-		msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
-	}
-	// mTree := blockchain.BuildMerkleTreeStore(
-	// 	txs, false,
-	// )
-	// Debugs(mTree)
-	// set old blocks to pause and send pause directly as block is probably a
-	// solution
 	Debug("sending pause to workers")
-	if err = c.multiConn.SendMany(pause.Magic, c.pauseShards); Check(err) {
+	if err = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); Check(err) {
 		return
 	}
 	block := util.NewBlock(msgBlock)
 	var isOrphan bool
 	Debug("submitting block for processing")
-	if isOrphan, err = c.cx.RealNode.SyncManager.ProcessBlock(block, blockchain.BFNone); Check(err) {
+	if isOrphan, err = s.node.SyncManager.ProcessBlock(block, blockchain.BFNone); Check(err) {
 		// Anything other than a rule violation is an unexpected error, so log that
 		// error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
@@ -524,14 +492,15 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 			return
 		}
 	}
-	Trace("the block was accepted")
-	c.height.Store(block.Height())
+	Debug("clearing address used for block")
+	s.nextAddress = nil
+	Debug("the block was accepted, new height", block.Height())
 	Tracec(
 		func() string {
 			bmb := block.MsgBlock()
 			coinbaseTx := bmb.Transactions[0].TxOut[0]
 			prevHeight := block.Height() - 1
-			prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
+			prevBlock, _ := s.node.Chain.BlockByHeight(prevHeight)
 			prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
 			since := bmb.Header.Timestamp.Unix() - prevTime
 			bHash := bmb.BlockHashWithAlgos(block.Height())
@@ -555,152 +524,37 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 
 // hashrate reports from workers
 func processHashrateMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
-	c := ctx.(*Controller)
-	// if !c.active.Load() {
-	// 	Debug("not active")
-	// 	return
-	// }
+	s := ctx.(*State)
 	var hr hashrate.Hashrate
 	gotiny.Unmarshal(b, &hr)
-	if c.lastNonce == hr.Nonce {
+	// only count each one once
+	if s.lastNonce == hr.Nonce {
 		return
 	}
-	c.lastNonce = hr.Nonce
+	s.lastNonce = hr.Nonce
 	// add to total hash counts
-	c.hashCount.Store(c.hashCount.Load() + uint64(hr.Count))
+	s.hashCount.Add(uint64(hr.Count))
 	return
 }
 
-func (c *Controller) sendNewBlockTemplate() (err error) {
-	Debug("sending block template>>>")
-	var template *mining.BlockTemplate
-	if template, err = c.getNewBlockTemplate(); Check(err) {
-		return
-	}
-	// Debugs(template)
-	if template == nil {
-		Debug("template is nil")
-		return
-	}
-	msgB := template.Block
-	// c.coinbases = make(map[int32]*util.Tx)
-	var txs []*util.Tx
-	var ccb *map[int32]*util.Tx
-	var fMC []byte
-	ccb, fMC, txs = job.Get(c.cx, util.NewBlock(msgB))
-	// Debug("coinbases>>>")
-	// Debugs(ccb)
-	c.coinbases.Store(ccb)
-	jobShards := transport.GetShards(fMC)
-	shardsLen := len(jobShards)
-	if shardsLen < 1 {
-		Debug("jobShards", shardsLen)
-		return fmt.Errorf("jobShards len %d", shardsLen)
-	}
-	c.oldBlocks.Store(jobShards)
-	err = c.multiConn.SendMany(job.Magic, jobShards)
-	if err != nil {
-		Error(err)
-	}
-	c.prevHash.Store(&template.Block.Header.PrevBlock)
-	c.transactions.Store(txs)
-	c.lastGenerated.Store(time.Now().UnixNano())
-	c.lastTxUpdate.Store(time.Now().UnixNano())
-	return
-}
-
-func (c *Controller) getNewBlockTemplate() (template *mining.BlockTemplate, err error,) {
-	Debug("getting new block template")
-	var addr util.Address
-	if addr, err = c.GetNewAddressFromMiningAddrs(); Check(err) {
-		if addr, err = c.GetNewAddressFromWallet(); Check(err) {
-			return
-		}
-	}
-	mbt := &MsgBlockTemplate{
-		PrevBlock: c.cx.RealNode.Chain.BestSnapshot().Hash,
-		Height:    c.height.Load(),
-		Diffs:     make(map[int32]uint32),
-		Merkles:   make(map[int32]chainhash.Hash),
-		coinbases: make(map[int32]*wire.MsgTx),
-	}
-	next, curr, more := fork.AlgoVerIterator(c.height.Load())
-	for ; more(); next() {
-		var templateX *mining.BlockTemplate
-		if templateX, err = c.blockTemplateGenerator.NewBlockTemplate(
-			0, addr, fork.GetAlgoName(
-				curr(), c.height.Load(),
-			),
-		); Check(err) {
-		} else {
-			Debug("********** got new block template", curr())
-			// Debugs(template)
-			mbt.coinbases[curr()] = templateX.Block.Transactions[len(templateX.Block.Transactions)-1]
-			mbt.Diffs[curr()] = templateX.Block.Header.Bits
-			mbt.Merkles[curr()] = templateX.Block.Header.MerkleRoot
-			Debugf(
-				"))))))))))))))))))) %d %d %0.8f %08x %v",
-				mbt.Height,
-				curr(),
-				util.Amount(mbt.coinbases[curr()].TxOut[0].Value).ToDUO(),
-				mbt.Diffs[curr()],
-				mbt.Merkles[curr()],
-			)
-			mbt.Timestamp = templateX.Block.Header.Timestamp.Add(time.Second)
-			mbt.txs = templateX.Block.Transactions[:len(templateX.Block.Transactions)-1]
-			Debugs(mbt.txs)
-			// Debugs(template.Block.Transactions)
-		}
-		template = templateX
-	}
-	// Debugs(mbt)
-	return
-}
-
-func (c *Controller) getNewMsgBlockTemplate() (mbt *MsgBlockTemplate, err error,) {
-	Debug("getting new block templates")
-	var addr util.Address
-	if addr, err = c.GetNewAddressFromMiningAddrs(); Check(err) {
-		if addr, err = c.GetNewAddressFromWallet(); Check(err) {
-			return
-		}
-	}
-	if mbt, err = c.GetMsgBlockTemplate(addr); Check(err){
-	}
-	return
-}
-
-func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
-	policy := mining.Policy{
-		BlockMinWeight:    uint32(*cx.Config.BlockMinWeight),
-		BlockMaxWeight:    uint32(*cx.Config.BlockMaxWeight),
-		BlockMinSize:      uint32(*cx.Config.BlockMinSize),
-		BlockMaxSize:      uint32(*cx.Config.BlockMaxSize),
-		BlockPrioritySize: uint32(*cx.Config.BlockPrioritySize),
-		TxMinFreeFee:      cx.StateCfg.ActiveMinRelayTxFee,
-	}
-	s := cx.RealNode
-	return mining.NewBlkTmplGenerator(
-		&policy,
-		s.ChainParams, s.TxMemPool, s.Chain, s.TimeSource,
-		s.SigCache, s.HashCache,
-	)
-}
-
-func (c *Controller) getNotifier() func(n *blockchain.Notification) {
-	return func(n *blockchain.Notification) {
-		// First to arrive locks out any others while processing
-		switch n.Type {
-		case blockchain.NTBlockConnected:
-			Trace("received new chain notification")
-			// construct work message
-			_, ok := n.Data.(*util.Block)
-			if !ok {
-				Warn("chain accepted notification is not a block")
-				break
+func (s *State) hashReport() float64 {
+	s.hashSampleBuf.Add(s.hashCount.Load())
+	av := ewma.NewMovingAverage()
+	var i int
+	var prev uint64
+	if err := s.hashSampleBuf.ForEach(
+		func(v uint64) error {
+			if i < 1 {
+				prev = v
+			} else {
+				interval := v - prev
+				av.Add(float64(interval))
+				prev = v
 			}
-			if err := c.sendNewBlockTemplate(); Check(err) {
-			}
-		}
+			i++
+			return nil
+		},
+	); Check(err) {
 	}
+	return av.Value()
 }

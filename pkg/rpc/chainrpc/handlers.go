@@ -1047,7 +1047,7 @@ func HandleGetBlockTemplateProposal(
 	if !expectedPrevHash.IsEqual(prevHash) {
 		return "bad-prevblk", nil
 	}
-	if err := s.Cfg.Chain.CheckConnectBlockTemplate(0, block); err != nil {
+	if err := s.Cfg.Chain.CheckConnectBlockTemplate(block); err != nil {
 		if _, ok := err.(blockchain.RuleError); !ok {
 			errStr := fmt.Sprintf("failed to process block proposal: %v", err)
 			Error(errStr)

@@ -1,6 +1,7 @@
 package pod
 
 import (
+	"io/ioutil"
 	"reflect"
 	"sort"
 	"sync"
@@ -439,3 +440,21 @@ func newDuration() *time.Duration {
 	o := time.Second - time.Second
 	return &o
 }
+
+func ReadCAFile(config *Config) []byte {
+	// Read certificate file if TLS is not disabled.
+	var certs []byte
+	if *config.TLS {
+		var err error
+		certs, err = ioutil.ReadFile(*config.CAFile)
+		if err != nil {
+			Error("cannot open CA file:", err)
+			// If there's an error reading the CA file, continue with nil certs and without the client connection.
+			certs = nil
+		}
+	} else {
+		Info("chain server RPC TLS is disabled")
+	}
+	return certs
+}
+

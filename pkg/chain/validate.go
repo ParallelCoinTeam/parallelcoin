@@ -345,8 +345,7 @@ func (b *BlockChain) checkConnectBlock(node *BlockNode, block *util.Block, view 
 // CheckConnectBlockTemplate fully validates that connecting the passed block to the main chain does not violate any
 // consensus rules, aside from the proof of work requirement. The block must connect to the current tip of the main
 // chain. This function is safe for concurrent access.
-func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
-	Block) error {
+func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) error {
 	algo := block.MsgBlock().Header.Version
 	height := block.Height()
 	algoname := fork.GetAlgoName(algo, height)
@@ -368,7 +367,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
 		Error("block processing error:", err)
 		return err
 	}
-	err = b.checkBlockContext(workerNumber, block, tip, flags, true)
+	err = b.checkBlockContext(block, tip, flags, true)
 	if err != nil {
 		Error("checkBlockContext error:", err)
 		return err
@@ -431,11 +430,15 @@ func (b *BlockChain) checkBIP0030(node *BlockNode, block *util.Block, view *Utxo
 // See its documentation for how the flags modify its behavior.
 //
 // This function MUST be called with the chain state lock held (for writes).
-func (b *BlockChain) checkBlockContext(workerNumber uint32, block *util.Block,
-	prevNode *BlockNode, flags BehaviorFlags, DoNotCheckPow bool) error {
+func (b *BlockChain) checkBlockContext(
+	block *util.Block,
+	prevNode *BlockNode,
+	flags BehaviorFlags,
+	DoNotCheckPow bool,
+) error {
 	// Perform all block header related validation checks.
 	header := &block.MsgBlock().Header
-	err := b.checkBlockHeaderContext(workerNumber, header, prevNode, flags)
+	err := b.checkBlockHeaderContext(header, prevNode, flags)
 	if err != nil {
 		Error(err)
 		return err
@@ -523,8 +526,7 @@ func (b *BlockChain) checkBlockContext(workerNumber uint32, block *util.Block,
 //  - BFFastAdd: All checks except those involving comparing the header against the checkpoints are not performed.
 //
 // This function MUST be called with the chain state lock held (for writes).
-func (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
-	BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
+func (b *BlockChain) checkBlockHeaderContext(header *wire.BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 	if prevNode == nil {
 		return nil
 	}

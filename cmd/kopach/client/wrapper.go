@@ -2,10 +2,9 @@ package client
 
 import (
 	"errors"
+	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"io"
 	"net/rpc"
-
-	"github.com/p9c/pod/cmd/kopach/control/job"
 )
 
 type Client struct {
@@ -18,31 +17,28 @@ func New(conn io.ReadWriteCloser) *Client {
 	return &Client{rpc.NewClient(conn)}
 }
 
-// The following are all blocking calls as they are all triggers rather than queries and should return immediately the
-// message is received. If deadlines are needed, set them on the connection, for StdConn this shouldn't be required as
-// usually if the server is running worker will be too, a deadline would be needed for a network connection, or
-// alternatively as with the Controller just spew messages over UDP
-
 // NewJob is a delivery of a new job for the worker, this starts a miner
-func (c *Client) NewJob(job *job.Job) (err error) {
-	Trace("sending new job")
-	// Debugs(job)
-	if job == nil {
-		err = errors.New("job is nil")
+// note that since this implements net/rpc by default this is gob encoded
+func (c *Client) NewJob(templates *templates.Message) (err error) {
+	Trace("sending new templates")
+	// Debugs(templates)
+	if templates == nil {
+		err = errors.New("templates is nil")
 		Error(err)
 		return
 	}
 	var reply bool
-	if err = c.Call("Worker.NewJob", job, &reply); Check(err){
+	if err = c.Call("Worker.NewJob", templates, &reply); Check(err){
 		return
 	}
 	if reply != true {
-		err = errors.New("new job command not acknowledged")
+		err = errors.New("new templates command not acknowledged")
 	}
 	return
 }
 
-// Pause tells the worker to stop working, this is for when the controlling node is not current
+// Pause tells the worker to stop working, this is for when the controlling node
+// is not current
 func (c *Client) Pause() (err error) {
 	// Debug("sending pause")
 	var reply bool
@@ -57,6 +53,7 @@ func (c *Client) Pause() (err error) {
 	return
 }
 
+// Stop the workers
 func (c *Client) Stop() (err error) {
 	Debug("stop working (exit)")
 	var reply bool
@@ -71,6 +68,8 @@ func (c *Client) Stop() (err error) {
 	return
 }
 
+// SendPass sends the multicast PSK to the workers so they can dispatch their
+// solutions
 func (c *Client) SendPass(pass string) (err error) {
 	Debug("sending dispatch password")
 	var reply bool

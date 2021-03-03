@@ -3,11 +3,11 @@ package p2padvt
 import (
 	"github.com/niubaoshu/gotiny"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/routeable"
-	
-	"github.com/p9c/pod/app/conte"
 )
 
 var Magic = []byte{'a', 'd', 'v', 1}
@@ -26,20 +26,14 @@ type Advertisment struct {
 }
 
 // Get returns an advertisment message
-func Get(cx *conte.Xt) []byte {
-	adv := GetAdvt(cx)
-	ad := gotiny.Marshal(&adv)
-	return ad
-}
-
-// GetAdvt returns an advertisment struct
-func GetAdvt(cx *conte.Xt) *Advertisment {
+func Get(uuid uint64, cfg *pod.Config, node *chainrpc.Node) []byte {
 	_, ips := routeable.GetAddressesAndInterfaces()
 	adv := &Advertisment{
 		IPs:      ips,
-		P2P:      util.GetActualPort((*cx.Config.P2PListeners)[0]),
-		UUID:     cx.UUID,
-		Services: cx.RealNode.Services,
+		P2P:      util.GetActualPort((*cfg.P2PListeners)[0]),
+		UUID:     uuid,
+		Services: node.Services,
 	}
-	return adv
+	ad := gotiny.Marshal(&adv)
+	return ad
 }

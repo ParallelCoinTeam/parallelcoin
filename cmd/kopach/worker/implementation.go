@@ -2,7 +2,7 @@ package worker
 
 import (
 	"crypto/cipher"
-	"errors"
+	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"math/rand"
 	"net"
 	"os"
@@ -16,43 +16,34 @@ import (
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	
-	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/kopach/control"
-	"github.com/p9c/pod/cmd/kopach/control/job"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/data/ring"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 1000
+const RoundsPerAlgo = 100
 
 type Worker struct {
-	mx            sync.Mutex
-	id            string
-	pipeConn      *stdconn.StdConn
-	dispatchConn  *transport.Channel
-	dispatchReady atomic.Bool
-	ciph          cipher.AEAD
-	quit          qu.C
-	block         atomic.Value
-	senderPort    atomic.Uint64
-	msgBlock      atomic.Value // *wire.MsgBlock
-	bitses        atomic.Value
-	merkles       atomic.Value
-	lastBlockHash *chainhash.Hash
-	roller        *Counter
-	startNonce    uint32
-	startChan     qu.C
-	stopChan      qu.C
-	running       atomic.Bool
-	hashCount     atomic.Uint64
-	hashSampleBuf *ring.BufferUint64
+	mx               sync.Mutex
+	id               string
+	pipeConn         *stdconn.StdConn
+	dispatchConn     *transport.Channel
+	dispatchReady    atomic.Bool
+	ciph             cipher.AEAD
+	quit             qu.C
+	templatesMessage *templates.Message
+	uuid             atomic.Uint64
+	roller           *Counter
+	startNonce       uint32
+	startChan        qu.C
+	stopChan         qu.C
+	running          atomic.Bool
+	hashCount        atomic.Uint64
+	hashSampleBuf    *ring.BufferUint64
 }
 
 type Counter struct {
@@ -78,9 +69,9 @@ func NewCounter(roundsPerAlgo int32) (c *Counter) {
 }
 
 // GetAlgoVer returns the next algo version based on the current configuration
-func (c *Counter) GetAlgoVer() (ver int32) {
+func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 	// the formula below rolls through versions with blocks roundsPerAlgo long for each algorithm by its index
-	algs := c.Algos.Load().([]int32)
+	algs := fork.GetAlgoVerSlice(height)
 	// Debug(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
 		Debug("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
@@ -94,35 +85,35 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 	}
 	return
 }
-
-func (w *Worker) hashReport() {
-	w.hashSampleBuf.Add(w.hashCount.Load())
-	av := ewma.NewMovingAverage(15)
-	var i int
-	var prev uint64
-	if err := w.hashSampleBuf.ForEach(
-		func(v uint64) error {
-			if i < 1 {
-				prev = v
-			} else {
-				interval := v - prev
-				av.Add(float64(interval))
-				prev = v
-			}
-			i++
-			return nil
-		},
-	); Check(err) {
-	}
-	// Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
-	Tracef("average hashrate %.2f", av.Value())
-}
+//
+// func (w *Worker) hashReport() {
+// 	w.hashSampleBuf.Add(w.hashCount.Load())
+// 	av := ewma.NewMovingAverage(15)
+// 	var i int
+// 	var prev uint64
+// 	if err := w.hashSampleBuf.ForEach(
+// 		func(v uint64) error {
+// 			if i < 1 {
+// 				prev = v
+// 			} else {
+// 				interval := v - prev
+// 				av.Add(float64(interval))
+// 				prev = v
+// 			}
+// 			i++
+// 			return nil
+// 		},
+// 	); Check(err) {
+// 	}
+// 	// Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+// 	Tracef("average hashrate %.2f", av.Value())
+// }
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
 // allow a worker to be configured to run on a bare metal system with a different launcher main
-func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worker {
+func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid uint64) *Worker {
 	Debug("creating new worker")
-	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
+	// msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		id:            id,
 		pipeConn:      conn,
@@ -132,8 +123,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worke
 		stopChan:      qu.T(),
 		hashSampleBuf: ring.NewBufferUint64(1000),
 	}
-	w.msgBlock.Store(msgBlock)
-	w.block.Store(util.NewBlock(&msgBlock))
+	w.uuid.Store(uuid)
 	w.dispatchReady.Store(false)
 	// with this we can report cumulative hash counts as well as using it to distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C.Load())
@@ -151,7 +141,8 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C) *Worke
 
 func worker(w *Worker) {
 	Debug("main work loop starting")
-	sampleTicker := time.NewTicker(time.Second)
+	// sampleTicker := time.NewTicker(time.Second)
+	var nonce uint32
 out:
 	for {
 		// Pause state
@@ -159,9 +150,9 @@ out:
 	pausing:
 		for {
 			select {
-			case <-sampleTicker.C:
-				w.hashReport()
-				break
+			// case <-sampleTicker.C:
+			// 	// w.hashReport()
+			// 	break
 			case <-w.stopChan.Wait():
 				Debug("received pause signal while paused")
 				// drain stop channel in pause
@@ -179,10 +170,9 @@ out:
 	running:
 		for {
 			select {
-			case <-sampleTicker.C:
-				// Debug(interrupt.GoroutineDump())
-				w.hashReport()
-				break
+			// case <-sampleTicker.C:
+			// 	// w.hashReport()
+			// 	break
 			case <-w.startChan.Wait():
 				Debug("received start signal while running")
 				// drain start channel in run mode
@@ -194,49 +184,22 @@ out:
 				Debug("worker stopping while running")
 				break out
 			default:
-				if w.block.Load() == nil || w.bitses.Load() == nil ||
-					w.merkles.Load() == nil || !w.dispatchReady.Load() {
+				if w.templatesMessage == nil || !w.dispatchReady.Load() {
 					Debug("not ready to work")
 				} else {
-					// Debug("working")
-					// work
-					nH := w.block.Load().(*util.Block).Height()
-					hv := w.roller.GetAlgoVer()
-					h := w.merkles.Load().(blockchain.Merkles)
-					mmb := w.msgBlock.Load().(wire.MsgBlock)
-					mb := &mmb
-					mb.Header.Version = hv
-					if h != nil {
-						mr, ok := h[hv]
-						if !ok {
-							continue
-						}
-						mb.Header.MerkleRoot = *mr
-					} else {
-						continue
-					}
-					b := w.bitses.Load().(blockchain.Diffs)
-					if bb, ok := b[mb.Header.Version]; ok {
-						mb.Header.Bits = bb
-					} else {
-						continue
-					}
+					// Debug("starting mining round")
+					newHeight := w.templatesMessage.Height
+					vers := w.roller.GetAlgoVer(newHeight)
+					nonce++
 					tn := time.Now()
-					if tn.After(mb.Header.Timestamp) {
-						mb.Header.Timestamp = tn
+					if tn.After(w.templatesMessage.Timestamp) {
+						w.templatesMessage.Timestamp = tn
 					}
-					var nextAlgo int32
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
-						select {
-						case <-w.quit.Wait():
-							Debug("worker stopping on pausing message")
-							break out
-						default:
-						}
+						// Debug("switching algorithms", w.roller.C.Load())
 						// send out broadcast containing worker nonce and algorithm and count of blocks
 						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
-						nextAlgo = w.roller.C.Load() + 1
-						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH, w.id)
+						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), vers, newHeight, w.id)
 						err := w.dispatchConn.SendMany(
 							hashrate.Magic,
 							transport.GetShards(hashReport),
@@ -244,13 +207,28 @@ out:
 						if err != nil {
 							Error(err)
 						}
+						// reseed the nonce
+						rand.Seed(time.Now().UnixNano())
+						nonce = rand.Uint32()
+						select {
+						case <-w.quit.Wait():
+							Debug("breaking out of work loop")
+							break out
+						case <-w.stopChan.Wait():
+							Debug("received pause signal while running")
+							break running
+						default:
+						}
 					}
-					hash := mb.Header.BlockHashWithAlgos(nH)
+					blockHeader := w.templatesMessage.GenBlockHeader(vers)
+					blockHeader.Nonce = nonce
+					// Debugs(w.templatesMessage)
+					// Debugs(blockHeader)
+					hash := blockHeader.BlockHashWithAlgos(newHeight)
 					bigHash := blockchain.HashToBig(&hash)
-					if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
-						Debug("found solution", nH)
-						// srs := sol.GetSolContainer(w.senderPort.Load(), mb)
-						srs := sol.Get(w.senderPort.Load(), mb)
+					if bigHash.Cmp(fork.CompactToBig(blockHeader.Bits)) <= 0 {
+						Debug("found solution", newHeight)
+						srs := sol.Encode(w.uuid.Load(), blockHeader)
 						err := w.dispatchConn.SendMany(
 							sol.Magic,
 							transport.GetShards(srs),
@@ -259,12 +237,16 @@ out:
 							Error(err)
 						}
 						Debug("sent solution")
+						w.templatesMessage = nil
+						select {
+						case <-w.quit.Wait():
+							Debug("breaking out of work loop")
+							break out
+						default:
+						}
 						break running
 					}
-					mb.Header.Version = nextAlgo
-					mb.Header.Bits = w.bitses.Load().(blockchain.Diffs)[mb.Header.Version]
-					mb.Header.Nonce++
-					w.msgBlock.Store(*mb)
+					// Debug("completed mining round")
 				}
 			}
 		}
@@ -275,84 +257,40 @@ out:
 
 // New initialises the state for a worker, loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
-func New(id string, quit qu.C) (w *Worker, conn net.Conn) {
+func New(id string, quit qu.C, uuid uint64) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
 	sc := stdconn.New(os.Stdin, os.Stdout, quit)
 	
-	return NewWithConnAndSemaphore(id, sc, quit), sc
+	return NewWithConnAndSemaphore(id, sc, quit, uuid), sc
 }
 
-// NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
-// work and restart
-func (w *Worker) NewJob(j *job.Job, reply *bool) (err error) {
+// NewJob is a delivery of a new job for the worker, this makes the miner start
+// mining from pause or pause, prepare the work and restart
+func (w *Worker) NewJob(j *templates.Message, reply *bool) (err error) {
 	Trace("received new job")
-	if !w.dispatchReady.Load() { // || !w.running.Load() {
+	if !w.dispatchReady.Load() {
 		Debug("dispatch not ready")
 		*reply = true
 		return
 	}
-	w.bitses.Store(j.Diffs)
-	w.merkles.Store(j.Merkles)
-	if j.PrevBlockHash.IsEqual(w.lastBlockHash) {
-		Trace("not a new job")
-		*reply = true
-		return
+	if w.templatesMessage != nil {
+		if j.PrevBlock == w.templatesMessage.PrevBlock {
+			Trace("not a new job")
+			*reply = true
+			return
+		}
 	}
-	var algos []int32
-	for i := range j.Diffs {
-		// we don't need to know net params if version numbers come with jobs
-		algos = append(algos, i)
-	}
-	if w.lastBlockHash == nil {
-		w.lastBlockHash = j.PrevBlockHash
-	} else {
-		*w.lastBlockHash = *j.PrevBlockHash
-	}
+	Debugs(j)
 	*reply = true
-	// halting current work
 	Debug("halting current work")
 	w.stopChan <- struct{}{}
-	newHeight := j.Height
-	if len(algos) > 0 {
-		// if we didn't get them in the job don't update the old
-		w.roller.Algos.Store(algos)
-	}
-	mbb := w.msgBlock.Load().(wire.MsgBlock)
-	mb := &mbb
-	mb.Header.PrevBlock = *j.PrevBlockHash
-	mb.Header.Timestamp = j.MinTimestamp
-	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
-	hv := w.roller.GetAlgoVer()
-	mb.Header.Version = hv
-	var ok bool
-	mb.Header.Bits, ok = j.Diffs[mb.Header.Version]
-	if !ok {
-		return errors.New("bits are empty")
-	}
-	rand.Seed(time.Now().UnixNano())
-	mb.Header.Nonce = rand.Uint32()
-	if j.Merkles == nil {
-		return errors.New("failed to decode merkle roots")
+	// load the job into the template
+	if w.templatesMessage == nil {
+		w.templatesMessage = j
 	} else {
-		hh, ok := j.Merkles[hv]
-		if !ok {
-			return errors.New("could not get merkle root from job")
-		}
-		mb.Header.MerkleRoot = *hh
+		*w.templatesMessage = *j
 	}
-	tn := time.Now()
-	if tn.Sub(mb.Header.Timestamp) > 0 {
-		mb.Header.Timestamp = time.Now()
-	}
-	// make the work select block start running
-	bb := util.NewBlock(mb)
-	bb.SetHeight(newHeight)
-	w.block.Store(bb)
-	w.msgBlock.Store(*mb)
-	w.senderPort.Store(j.ControllerNonce)
-	// halting current work
 	Debug("switching to new job")
-	// w.stopChan <- struct{}{}
 	w.startChan <- struct{}{}
 	return
 }

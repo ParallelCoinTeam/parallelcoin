@@ -329,9 +329,9 @@ type LazyHandler func() (interface{}, *btcjson.RPCError)
 // the returned handler performs RPC passthrough.
 func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient chain.Interface) LazyHandler {
 	handlerData, ok := RPCHandlers[request.Method]
-	Debug("LazyApplyHandler >>> >>> >>>", ok, handlerData.Handler != nil, w != nil, chainClient != nil)
+	// Debug("LazyApplyHandler >>> >>> >>>", ok, handlerData.Handler != nil, w != nil, chainClient != nil)
 	if ok && handlerData.Handler != nil && w != nil && chainClient != nil {
-		Debug("%%% found handler for call")
+		// Debug("%%% found handler for call")
 		// Debugs(request)
 		return func() (interface{}, *btcjson.RPCError) {
 			cmd, err := btcjson.UnmarshalCmd(request)
@@ -341,7 +341,7 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			}
 			switch client := chainClient.(type) {
 			case *chain.RPCClient:
-				Debug("client is a chain.RPCClient")
+				// Debug("client is a chain.RPCClient")
 				var resp interface{}
 				if resp, err = handlerData.Handler(cmd, w, client); Check(err) {
 					return nil, JSONError(err)

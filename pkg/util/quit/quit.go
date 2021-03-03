@@ -50,6 +50,10 @@ func (c C) Q() {
 	// PrintChanState()
 }
 
+func (c C) Signal() {
+	c <- struct{}{}
+}
+
 func (c C) Wait() <-chan struct{} {
 	// Trace(logi.Caller(">>> waiting on quit channel at", 1))
 	return c

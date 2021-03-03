@@ -1,8 +1,9 @@
 package pause
 
 import (
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 )
 
 var Magic = []byte{'p', 'a', 'u', 1}
@@ -12,8 +13,8 @@ var Magic = []byte{'p', 'a', 'u', 1}
 // 	simplebuffer.Container
 // }
 
-func GetPauseContainer(cx *conte.Xt) []byte {
-	return p2padvt.Get(cx)
+func GetPauseContainer(uuid uint64, cfg *pod.Config, node *chainrpc.Node) []byte {
+	return p2padvt.Get(uuid, cfg, node)
 	// mB := p2padvt.Get(cx).CreateContainer(Magic)
 	// return &Container{*mB}
 }
