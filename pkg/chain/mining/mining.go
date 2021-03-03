@@ -434,11 +434,7 @@ func NewBlkTmplGenerator(
 //  |  transactions (while block size   |   |
 //  |  <= policy.BlockMinSize)          |   |
 //   -----------------------------------  --
-func (g *BlkTmplGenerator) NewBlockTemplate(
-	workerNumber uint32,
-	payToAddress util.Address,
-	algo string,
-) (*BlockTemplate, error) {
+func (g *BlkTmplGenerator) NewBlockTemplate(payToAddress util.Address, algo string,) (*BlockTemplate, error) {
 	Trace("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
@@ -869,7 +865,7 @@ mempoolLoop:
 	// no issues.
 	block := util.NewBlock(&msgBlock)
 	block.SetHeight(nextBlockHeight)
-	err = g.Chain.CheckConnectBlockTemplate(workerNumber, block)
+	err = g.Chain.CheckConnectBlockTemplate(block)
 	if err != nil {
 		Debug("checkconnectblocktemplate err:", err)
 		return nil, err

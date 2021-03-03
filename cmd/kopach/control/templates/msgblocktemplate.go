@@ -22,7 +22,7 @@ type (
 // Message describes a message that a mining worker can use to
 // construct a block to mine on.
 type Message struct {
-	Nonce     uint64
+	UUID      uint64
 	Height    int32
 	PrevBlock chainhash.Hash
 	Bits      Diffs

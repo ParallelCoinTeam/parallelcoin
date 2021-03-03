@@ -297,7 +297,7 @@ var handlers = transport.Handlers{
 		jr := templates.Message{}
 		gotiny.Unmarshal(b, &jr)
 		w.height = jr.Height
-		cN := jr.Nonce
+		cN := jr.UUID
 		// addr := net.JoinHostPort(iP.String(), fmt.Sprint(cP))
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != cN && firstSender != 0

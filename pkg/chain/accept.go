@@ -72,7 +72,7 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on the position
 		// of the block within the block chain.
-		if err = b.checkBlockContext(workerNumber, block, prevNode, flags, DoNotCheckPow); Check(err) {
+		if err = b.checkBlockContext(block, prevNode, flags, DoNotCheckPow); Check(err) {
 			return false, err
 		}
 	}
