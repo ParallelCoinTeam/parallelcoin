@@ -28,12 +28,12 @@ import (
 const (
 	// maxTimeOffset is the maximum duration a block time is allowed to be ahead of
 	// the curent time. This is currently 2 hours.
-	maxTimeOffset   = 2 * time.Hour
+	maxTimeOffset = 2 * time.Hour
 	// this offset is much shorter with the 68 second average block time target,
 	// giving at most 9 minutes dilation with exponential cost to stretch it further
 	// and the monotonic timestamps invariant to ensure hash power can't be hidden
 	// by this
-	p9MaxTimeOffset = 19 * time.Minute
+	p9MaxTimeOffset = blockchain.MaxTimeOffsetSeconds*time.Second
 	// numMaxMemHeaders is the max number of headers to store in memory for a
 	// particular peer. By bounding this value, we're able to closely control our
 	// effective memory usage during initial sync and re-org handling. This value
@@ -1730,11 +1730,10 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 	bb, _ := b.server.BestBlock()
 	currFork := fork.GetCurrent(bb.Height)
 	if currFork > 0 {
-		// after the hard fork the maximum time offset is 19 minutes, containing
+		// after the hard fork the maximum time offset is 90 seconds, containing
 		// timestamp attacks extremely tightly against the 5 3600 sample averages, but
 		// not really inconveniencing any honest miners
-		maxTimestamp = b.server.timeSource.AdjustedTime().
-			Add(p9MaxTimeOffset)
+		maxTimestamp = b.server.timeSource.AdjustedTime().Add(p9MaxTimeOffset)
 	}
 	// We'll attempt to write the entire batch of validated headers atomically in order to improve performance.
 	headerWriteBatch := make([]headerfs.BlockHeader, 0, len(msg.Headers))
