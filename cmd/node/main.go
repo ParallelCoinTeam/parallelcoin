@@ -2,6 +2,7 @@ package node
 
 import (
 	"github.com/p9c/pod/cmd/kopach/control"
+	qu "github.com/p9c/pod/pkg/util/quit"
 	"net"
 	"net/http"
 	// // This enables pprof
@@ -130,9 +131,13 @@ func Main(cx *conte.Xt) (err error) {
 	if interrupt.Requested() {
 		return nil
 	}
+	mempoolUpdateChan := qu.Ts(1)
+	mempoolUpdateHook := func() {
+		mempoolUpdateChan.Signal()
+	}
 	// create server and start it
 	var server *chainrpc.Node
-	server, err = chainrpc.NewNode(*cx.Config.P2PListeners, db, interrupt.ShutdownRequestChan, conte.GetContext(cx))
+	server, err = chainrpc.NewNode(*cx.Config.P2PListeners, db, interrupt.ShutdownRequestChan, conte.GetContext(cx), mempoolUpdateHook)
 	if err != nil {
 		Errorf("unable to start server on %v: %v", *cx.Config.P2PListeners, err)
 		return err
@@ -157,7 +162,7 @@ func Main(cx *conte.Xt) (err error) {
 			cx.RealNode,
 			cx.RPCServer,
 			&cx.OtherNodesCounter,
-			// cx.ActiveNet,
+			mempoolUpdateChan,
 			cx.KillAll,
 		)
 		go cx.Controller.Run()

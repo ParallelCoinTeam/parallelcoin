@@ -2613,7 +2613,7 @@ type Context struct {
 // Use start to begin accepting connections from peers.
 //
 // TODO: simplify/modularise this
-func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Context) (*Node, error) {
+func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Context, mempoolUpdateHook func()) (*Node, error) {
 	Debug("listenAddrs ", listenAddrs)
 	services := DefaultServices
 	if *cx.Config.NoPeerBloomFilters {
@@ -2793,6 +2793,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		HashCache:          s.HashCache,
 		AddrIndex:          s.AddrIndex,
 		FeeEstimator:       s.FeeEstimator,
+		UpdateHook:         mempoolUpdateHook,
 	}
 	s.TxMemPool = mempool.New(&txC)
 	s.SyncManager, err =

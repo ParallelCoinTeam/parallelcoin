@@ -39,11 +39,11 @@ const (
 
 // State stores the state of the controller
 type State struct {
-	cfg       *pod.Config
-	node      *chainrpc.Node
-	rpcServer *chainrpc.Server
-	stateCfg  *state.Config
-	// activeNet         *netparams.Params
+	cfg               *pod.Config
+	node              *chainrpc.Node
+	rpcServer         *chainrpc.Server
+	stateCfg          *state.Config
+	mempoolUpdateChan qu.C
 	uuid              uint64
 	start, stop, quit qu.C
 	blockUpdate       chan *util.Block
@@ -72,7 +72,7 @@ func New(
 	node *chainrpc.Node,
 	rpcServer *chainrpc.Server,
 	otherNodeCount *atomic.Int32,
-// activeNet *netparams.Params,
+	mempoolUpdateChan qu.C,
 	killall qu.C,
 ) (s *State) {
 	var err error
@@ -83,18 +83,19 @@ func New(
 	quit := qu.T()
 	rand.Seed(time.Now().UnixNano())
 	s = &State{
-		cfg:            cfg,
-		node:           node,
-		rpcServer:      rpcServer,
-		stateCfg:       stateCfg,
-		otherNodes:     make(map[uint64]*nodeSpec),
-		otherNodeCount: otherNodeCount,
-		quit:           quit,
-		uuid:           rand.Uint64(),
-		start:          qu.Ts(1),
-		stop:           qu.Ts(1),
-		blockUpdate:    make(chan *util.Block, 1),
-		hashSampleBuf:  rav.NewBufferUint64(100),
+		cfg:               cfg,
+		node:              node,
+		rpcServer:         rpcServer,
+		stateCfg:          stateCfg,
+		mempoolUpdateChan: mempoolUpdateChan,
+		otherNodes:        make(map[uint64]*nodeSpec),
+		otherNodeCount:    otherNodeCount,
+		quit:              quit,
+		uuid:              rand.Uint64(),
+		start:             qu.Ts(1),
+		stop:              qu.Ts(1),
+		blockUpdate:       make(chan *util.Block, 1),
+		hashSampleBuf:     rav.NewBufferUint64(100),
 	}
 	s.generator = s.getBlkTemplateGenerator()
 	var mc *transport.Channel
@@ -173,6 +174,18 @@ func (s *State) startWallet() (err error) {
 	return
 }
 
+func (s *State) updateBlockTemplate() {
+	Debug("getting current chain tip")
+	var err error
+	tipNode := s.node.Chain.BestSnapshot().Hash
+	var blk *util.Block
+	if blk, err = s.node.Chain.BlockByHash(&tipNode); Check(err) {
+	}
+	Debug("updating block from chain tip")
+	if err = s.doBlockUpdate(blk); Check(err) {
+	}
+}
+
 // Run must be started as a goroutine, central routing for the business of the
 // controller
 //
@@ -192,6 +205,8 @@ out:
 	pausing:
 		for {
 			select {
+			case <-s.mempoolUpdateChan:
+				s.updateBlockTemplate()
 			case bu := <-s.blockUpdate:
 				Debug("received new block update while paused")
 				if err = s.doBlockUpdate(bu); Check(err) {
@@ -219,6 +234,10 @@ out:
 	running:
 		for {
 			select {
+			case <-s.mempoolUpdateChan:
+				s.updateBlockTemplate()
+				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
+				}
 			case bu := <-s.blockUpdate:
 				Debug("received new block update while running")
 				if err = s.doBlockUpdate(bu); Check(err) {
@@ -235,13 +254,7 @@ out:
 					break running
 				}
 				if s.templateShards == nil || len(s.templateShards) < 1 {
-					Debug("getting current chain tip")
-					tipNode := s.node.Chain.BestSnapshot().Hash
-					var blk *util.Block
-					if blk, err = s.node.Chain.BlockByHash(&tipNode); Check(err) {
-					}
-					if err = s.doBlockUpdate(blk); Check(err) {
-					}
+					s.updateBlockTemplate()
 				}
 				// Debug("resending current templates...")
 				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
