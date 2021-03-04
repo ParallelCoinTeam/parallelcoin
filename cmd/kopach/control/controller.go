@@ -15,7 +15,6 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/comm/transport"
@@ -316,21 +315,19 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		UUID:      s.uuid,
 		PrevBlock: prev.MsgBlock().BlockHash(),
 		Height:    prev.Height() + 1,
-		Bits:      make(map[int32]uint32),
-		Merkles:   make(map[int32]chainhash.Hash),
+		Bits:      make(templates.Diffs),
+		Merkles:   make(templates.Merkles),
 	}
-	mbt.ResetCoinbases()
+	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Round(time.Second).Add(time.Second)
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		var templateX *mining.BlockTemplate
 		if templateX, err = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); Check(err) {
 		} else {
 			newB := templateX.Block
 			newH := newB.Header
-			mbt.SetCoinbase(curr(), newB.Transactions[len(newB.Transactions)-1])
 			mbt.Bits[curr()] = newH.Bits
 			mbt.Merkles[curr()] = newH.MerkleRoot
-			mbt.Timestamp = newH.Timestamp.Add(time.Second)
-			mbt.SetTxs(newB.Transactions[:len(newB.Transactions)-1])
+			mbt.SetTxs(curr(), newB.Transactions)
 		}
 	}
 	return

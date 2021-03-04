@@ -42,19 +42,29 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 ) {
 	Trace("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
 	blockHeight := height
-	prevBlock, _ := b.BlockByHash(&candidateBlock.MsgBlock().Header.PrevBlock)
+	var prevBlock *util.Block
+	var err error
+	prevBlock, err = b.BlockByHash(&candidateBlock.MsgBlock().Header.PrevBlock)
 	if prevBlock != nil {
 		blockHeight = prevBlock.Height() + 1
-		// enforce minimum timestamp after hardfork
-		// TODO: make sure this is mentioned somewhere
-		if fork.GetCurrent(blockHeight) > 0 {
-			Trace("checking for plan 9 hard fork invariant of timestamp always progressing")
-			if candidateBlock.MsgBlock().Header.Timestamp.Sub(prevBlock.MsgBlock().Header.Timestamp) < time.Second {
-				return false, false, ruleError(
-					ErrTimeTooOld,
-					fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
-				)
-			}
+	} else {
+		return false, false, err
+	}
+	Debug(">> ", fork.GetCurrent(blockHeight) > 0)
+	if fork.GetCurrent(blockHeight) > 0 {
+		Debug("checking for plan 9 hard fork invariant of timestamp always progressing")
+		Debug(
+			candidateBlock.MsgBlock().Header.Timestamp,
+			candidateBlock.MsgBlock().Header.Timestamp.Round(time.Second),
+			prevBlock.MsgBlock().Header.Timestamp,
+			prevBlock.MsgBlock().Header.Timestamp.Round(time.Second),
+		)
+		Debug(candidateBlock.MsgBlock().Header.Timestamp.Round(time.Second).Sub(prevBlock.MsgBlock().Header.Timestamp.Round(time.Second)))
+		if candidateBlock.MsgBlock().Header.Timestamp.Round(time.Second).Sub(prevBlock.MsgBlock().Header.Timestamp.Round(time.Second)) < time.Second {
+			return false, false, ruleError(
+				ErrTimeTooOld,
+				fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
+			)
 		}
 	}
 	b.chainLock.Lock()
@@ -76,7 +86,6 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	}
 	// The candidateBlock must not already exist in the main chain or side chains.
 	var exists bool
-	var err error
 	if exists, err = b.blockExists(blockHash); Check(err) {
 		return false, false, err
 	}

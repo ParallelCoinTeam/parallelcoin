@@ -191,8 +191,8 @@ out:
 					newHeight := w.templatesMessage.Height
 					vers := w.roller.GetAlgoVer(newHeight)
 					nonce++
-					tn := time.Now()
-					if tn.After(w.templatesMessage.Timestamp) {
+					tn := time.Now().Round(time.Second)
+					if tn.After(w.templatesMessage.Timestamp.Round(time.Second)) {
 						w.templatesMessage.Timestamp = tn
 					}
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
@@ -280,7 +280,7 @@ func (w *Worker) NewJob(j *templates.Message, reply *bool) (err error) {
 			return
 		}
 	}
-	Debugs(j)
+	// Debugs(j)
 	*reply = true
 	Debug("halting current work")
 	w.stopChan <- struct{}{}

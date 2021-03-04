@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -18,8 +18,10 @@ var (
 	// ErrWebsocketsRequired is an error to describe the condition where the caller is trying to use a websocket-only
 	// feature, such as requesting notifications or other websocket requests when the client is configured to run in
 	// HTTP POST mode.
-	ErrWebsocketsRequired = errors.New("a websocket connection is required " +
-		"to use this feature")
+	ErrWebsocketsRequired = errors.New(
+		"a websocket connection is required " +
+			"to use this feature",
+	)
 )
 
 // notificationState is used to track the current state of successfully registered notification so the state can be
@@ -154,8 +156,7 @@ type NotificationHandlers struct {
 // handleNotification examines the passed notification type, performs conversions to get the raw notification types into
 // higher level types and delivers the notification to the appropriate On<X> handler registered with the client.
 func (c *Client) handleNotification(ntfn *rawNotification) {
-	Debug("<<<Handling Notification>>>")
-	Debugs(ntfn)
+	Debug("<<<Handling Notification>>>", ntfn.Method)
 	// Ignore the notification if the client is not interested in any notifications.
 	if c.ntfnHandlers == nil {
 		Debug("<<<no notification handlers registered>>>")
@@ -186,12 +187,16 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 			parseFilteredBlockConnectedParams(ntfn.Params)
 		if err != nil {
 			Error(err)
-			Warn("received invalid filtered block connected notification:",
-				err)
+			Warn(
+				"received invalid filtered block connected notification:",
+				err,
+			)
 			return
 		}
-		c.ntfnHandlers.OnFilteredBlockConnected(blockHeight,
-			blockHeader, transactions)
+		c.ntfnHandlers.OnFilteredBlockConnected(
+			blockHeight,
+			blockHeader, transactions,
+		)
 	// OnBlockDisconnected
 	case btcjson.BlockDisconnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
@@ -214,9 +219,11 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 		}
 		blockHeight, blockHeader, err := parseFilteredBlockDisconnectedParams(ntfn.Params)
 		if err != nil {
-			Warn("received invalid filtered block disconnected"+
-				" notification"+
-				":", err)
+			Warn(
+				"received invalid filtered block disconnected"+
+					" notification"+
+					":", err,
+			)
 			return
 		}
 		c.ntfnHandlers.OnFilteredBlockDisconnected(blockHeight, blockHeader)
@@ -377,8 +384,10 @@ func (e wrongNumParams) Error() string {
 
 // parseChainNtfnParams parses out the block hash and height from the parameters of blockconnected and blockdisconnected
 // notifications.
-func parseChainNtfnParams(params []js.RawMessage) (*chainhash.Hash,
-	int32, time.Time, error) {
+func parseChainNtfnParams(params []js.RawMessage) (
+	*chainhash.Hash,
+	int32, time.Time, error,
+) {
 	if len(params) != 3 {
 		return nil, 0, time.Time{}, wrongNumParams(len(params))
 	}
@@ -417,8 +426,10 @@ func parseChainNtfnParams(params []js.RawMessage) (*chainhash.Hash,
 // parseFilteredBlockConnectedParams parses out the parameters included in a filteredblockconnected notification.
 //
 // NOTE: This is a pod extension ported from github. com/decred/dcrrpcclient and requires a websocket connection.
-func parseFilteredBlockConnectedParams(params []js.RawMessage) (int32,
-	*wire.BlockHeader, []*util.Tx, error) {
+func parseFilteredBlockConnectedParams(params []js.RawMessage) (
+	int32,
+	*wire.BlockHeader, []*util.Tx, error,
+) {
 	if len(params) < 3 {
 		return 0, nil, nil, wrongNumParams(len(params))
 	}
@@ -469,8 +480,10 @@ func parseFilteredBlockConnectedParams(params []js.RawMessage) (int32,
 // parseFilteredBlockDisconnectedParams parses out the parameters included in a filteredblockdisconnected notification.
 //
 // NOTE: This is a pod extension ported from github. com/decred/dcrrpcclient and requires a websocket connection.
-func parseFilteredBlockDisconnectedParams(params []js.RawMessage) (int32,
-	*wire.BlockHeader, error) {
+func parseFilteredBlockDisconnectedParams(params []js.RawMessage) (
+	int32,
+	*wire.BlockHeader, error,
+) {
 	if len(params) < 2 {
 		return 0, nil, wrongNumParams(len(params))
 	}
@@ -517,8 +530,10 @@ func parseRelevantTxAcceptedParams(params []js.RawMessage) (transaction []byte, 
 
 // parseChainTxNtfnParams parses out the transaction and optional details about the block it's mined in from the
 // parameters of recvtx and redeemingtx notifications.
-func parseChainTxNtfnParams(params []js.RawMessage) (*util.Tx,
-	*btcjson.BlockDetails, error) {
+func parseChainTxNtfnParams(params []js.RawMessage) (
+	*util.Tx,
+	*btcjson.BlockDetails, error,
+) {
 	if len(params) == 0 || len(params) > 2 {
 		return nil, nil, wrongNumParams(len(params))
 	}
@@ -594,8 +609,10 @@ func parseRescanProgressParams(params []js.RawMessage) (*chainhash.Hash, int32, 
 
 // parseTxAcceptedNtfnParams parses out the transaction hash and total amount from the parameters of a txaccepted
 // notification.
-func parseTxAcceptedNtfnParams(params []js.RawMessage) (*chainhash.Hash,
-	util.Amount, error) {
+func parseTxAcceptedNtfnParams(params []js.RawMessage) (
+	*chainhash.Hash,
+	util.Amount, error,
+) {
 	if len(params) != 2 {
 		return nil, 0, wrongNumParams(len(params))
 	}
@@ -630,8 +647,10 @@ func parseTxAcceptedNtfnParams(params []js.RawMessage) (*chainhash.Hash,
 
 // parseTxAcceptedVerboseNtfnParams parses out details about a raw transaction from the parameters of a
 // txacceptedverbose notification.
-func parseTxAcceptedVerboseNtfnParams(params []js.RawMessage) (*btcjson.TxRawResult,
-	error) {
+func parseTxAcceptedVerboseNtfnParams(params []js.RawMessage) (
+	*btcjson.TxRawResult,
+	error,
+) {
 	if len(params) != 1 {
 		return nil, wrongNumParams(len(params))
 	}
@@ -666,8 +685,10 @@ func parsePodConnectedNtfnParams(params []js.RawMessage) (bool, error) {
 
 // parseAccountBalanceNtfnParams parses out the account name, total balance, and whether or not the balance is confirmed
 // or unconfirmed from the parameters of an accountbalance notification.
-func parseAccountBalanceNtfnParams(params []js.RawMessage) (account string,
-	balance util.Amount, confirmed bool, err error) {
+func parseAccountBalanceNtfnParams(params []js.RawMessage) (
+	account string,
+	balance util.Amount, confirmed bool, err error,
+) {
 	if len(params) != 3 {
 		return "", 0, false, wrongNumParams(len(params))
 	}
@@ -701,8 +722,10 @@ func parseAccountBalanceNtfnParams(params []js.RawMessage) (account string,
 
 // parseWalletLockStateNtfnParams parses out the account name and locked state of an account from the parameters of a
 // walletlockstate notification.
-func parseWalletLockStateNtfnParams(params []js.RawMessage) (account string,
-	locked bool, err error) {
+func parseWalletLockStateNtfnParams(params []js.RawMessage) (
+	account string,
+	locked bool, err error,
+) {
 	if len(params) != 2 {
 		return "", false, wrongNumParams(len(params))
 	}
@@ -984,9 +1007,11 @@ func (r FutureRescanResult) Receive() error {
 // NOTE: This is a pod extension and requires a websocket connection.
 //
 // NOTE: Deprecated. Use RescanBlocksAsync instead.
-func (c *Client) RescanAsync(startBlock *chainhash.Hash,
+func (c *Client) RescanAsync(
+	startBlock *chainhash.Hash,
 	addresses []util.Address,
-	outpoints []*wire.OutPoint) FutureRescanResult {
+	outpoints []*wire.OutPoint,
+) FutureRescanResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -1037,9 +1062,11 @@ func (c *Client) RescanAsync(startBlock *chainhash.Hash,
 // NOTE: This is a pod extension and requires a websocket connection.
 //
 // NOTE: Deprecated. Use RescanBlocks instead.
-func (c *Client) Rescan(startBlock *chainhash.Hash,
+func (c *Client) Rescan(
+	startBlock *chainhash.Hash,
 	addresses []util.Address,
-	outpoints []*wire.OutPoint) error {
+	outpoints []*wire.OutPoint,
+) error {
 	return c.RescanAsync(startBlock, addresses, outpoints).Receive()
 }
 
@@ -1051,9 +1078,11 @@ func (c *Client) Rescan(startBlock *chainhash.Hash,
 // NOTE: This is a pod extension and requires a websocket connection.
 //
 // NOTE: Deprecated. Use RescanBlocksAsync instead.
-func (c *Client) RescanEndBlockAsync(startBlock *chainhash.Hash,
+func (c *Client) RescanEndBlockAsync(
+	startBlock *chainhash.Hash,
 	addresses []util.Address, outpoints []*wire.OutPoint,
-	endBlock *chainhash.Hash) FutureRescanResult {
+	endBlock *chainhash.Hash,
+) FutureRescanResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -1080,8 +1109,10 @@ func (c *Client) RescanEndBlockAsync(startBlock *chainhash.Hash,
 	for _, op := range outpoints {
 		ops = append(ops, newOutPointFromWire(op))
 	}
-	cmd := btcjson.NewRescanCmd(startBlockHashStr, addrs, ops,
-		&endBlockHashStr)
+	cmd := btcjson.NewRescanCmd(
+		startBlockHashStr, addrs, ops,
+		&endBlockHashStr,
+	)
 	return c.sendCmd(cmd)
 }
 
@@ -1102,11 +1133,15 @@ func (c *Client) RescanEndBlockAsync(startBlock *chainhash.Hash,
 // chain. NOTE: This is a pod extension and requires a websocket connection.
 //
 // NOTE: Deprecated. Use RescanBlocks instead.
-func (c *Client) RescanEndHeight(startBlock *chainhash.Hash,
+func (c *Client) RescanEndHeight(
+	startBlock *chainhash.Hash,
 	addresses []util.Address, outpoints []*wire.OutPoint,
-	endBlock *chainhash.Hash) error {
-	return c.RescanEndBlockAsync(startBlock, addresses, outpoints,
-		endBlock).Receive()
+	endBlock *chainhash.Hash,
+) error {
+	return c.RescanEndBlockAsync(
+		startBlock, addresses, outpoints,
+		endBlock,
+	).Receive()
 }
 
 // FutureLoadTxFilterResult is a future promise to deliver the result of a LoadTxFilterAsync RPC invocation (or an
@@ -1129,8 +1164,10 @@ func (r FutureLoadTxFilterResult) Receive() error {
 // See LoadTxFilter for the blocking version and more details.
 //
 // NOTE: This is a pod extension ported from github. com/decred/dcrrpcclient and requires a websocket connection.
-func (c *Client) LoadTxFilterAsync(reload bool, addresses []util.Address,
-	outPoints []wire.OutPoint) FutureLoadTxFilterResult {
+func (c *Client) LoadTxFilterAsync(
+	reload bool, addresses []util.Address,
+	outPoints []wire.OutPoint,
+) FutureLoadTxFilterResult {
 	addrStrs := make([]string, len(addresses))
 	for i, a := range addresses {
 		addrStrs[i] = a.EncodeAddress()
