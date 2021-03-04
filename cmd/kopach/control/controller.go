@@ -227,9 +227,9 @@ out:
 				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
 				}
 			case <-ticker.C:
-				Debug("controller ticker running")
+				// Debug("controller ticker running")
 				s.doTicker()
-				Debug("checking if wallet is connected")
+				// Debug("checking if wallet is connected")
 				if s.walletClient.Disconnected() {
 					Debug("wallet client has disconnected, switching to pausing")
 					break running
@@ -243,7 +243,7 @@ out:
 					if err = s.doBlockUpdate(blk); Check(err) {
 					}
 				}
-				Debug("resending current templates...")
+				// Debug("resending current templates...")
 				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
 				}
 			case <-s.start.Wait():
@@ -400,7 +400,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (err er
 	gotiny.Unmarshal(b, &j)
 	uuid := j.UUID
 	if uuid == s.uuid {
-		Debug("ignoring own advertisment message")
+		// Debug("ignoring own advertisment message")
 		return
 	}
 	if _, ok := s.otherNodes[uuid]; !ok {

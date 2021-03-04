@@ -3014,6 +3014,7 @@ func (w *Wallet) SendOutputs(
 		Error(err)
 		return nil, err
 	}
+	Debugs(createdTx)
 	return w.publishTransaction(createdTx.Tx)
 }
 

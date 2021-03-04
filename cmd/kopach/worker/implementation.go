@@ -267,7 +267,7 @@ func New(id string, quit qu.C, uuid uint64) (w *Worker, conn net.Conn) {
 // NewJob is a delivery of a new job for the worker, this makes the miner start
 // mining from pause or pause, prepare the work and restart
 func (w *Worker) NewJob(j *templates.Message, reply *bool) (err error) {
-	Trace("received new job")
+	// Trace("received new job")
 	if !w.dispatchReady.Load() {
 		Debug("dispatch not ready")
 		*reply = true
@@ -275,7 +275,7 @@ func (w *Worker) NewJob(j *templates.Message, reply *bool) (err error) {
 	}
 	if w.templatesMessage != nil {
 		if j.PrevBlock == w.templatesMessage.PrevBlock {
-			Trace("not a new job")
+			// Trace("not a new job")
 			*reply = true
 			return
 		}

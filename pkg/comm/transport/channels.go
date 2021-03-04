@@ -293,7 +293,7 @@ out:
 						if cipherText, err = fec.Decode(bn.Buffers); Check(err){
 							continue
 						}
-						Debugf("received packet with magic %s from %s len %d bytes", magic, src.String(), len(cipherText))
+						// Debugf("received packet with magic %s from %s len %d bytes", magic, src.String(), len(cipherText))
 						bn.Decoded = true
 						if err = handler(channel.context, src, address, cipherText); Check(err) {
 							continue

@@ -60,7 +60,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 			prevBlock.MsgBlock().Header.Timestamp.Round(time.Second),
 		)
 		Debug(candidateBlock.MsgBlock().Header.Timestamp.Round(time.Second).Sub(prevBlock.MsgBlock().Header.Timestamp.Round(time.Second)))
-		if candidateBlock.MsgBlock().Header.Timestamp.Round(time.Second).Sub(prevBlock.MsgBlock().Header.Timestamp.Round(time.Second)) < time.Second {
+		if candidateBlock.MsgBlock().Header.Timestamp.Round(time.Second).Sub(prevBlock.MsgBlock().Header.Timestamp.Round(time.Second)) <= time.Second {
 			return false, false, ruleError(
 				ErrTimeTooOld,
 				fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
