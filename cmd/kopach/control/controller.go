@@ -301,7 +301,6 @@ func (s *State) doTicker() {
 		} else if *s.cfg.LAN {
 			// if there is no peers on lan and solo was not set, stop mining
 			if lanPeers == 0 {
-				// todo: make lan disable seeding
 				Debug("no lan peers while in lan mode, stopping mining")
 				s.Stop()
 			} else {
