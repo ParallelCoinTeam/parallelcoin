@@ -135,6 +135,7 @@ type (
 		NewPeers             chan *NodePeer
 		DonePeers            chan *NodePeer
 		BanPeers             chan *NodePeer
+		PeerState            chan chan PeerSummaries
 		Query                chan interface{}
 		RelayInv             chan RelayMsg
 		Broadcast            chan BroadcastMsg
@@ -166,6 +167,7 @@ type (
 		Shutdown           int32
 		ShutdownSched      int32
 		HighestKnown       uberatomic.Int32
+		peerState          *PeerState
 	}
 	// NodePeer extends the peer to maintain state shared by the server and the blockmanager.
 	NodePeer struct {
@@ -188,6 +190,12 @@ type (
 		Persistent     bool
 		DisableRelayTx bool
 	}
+	// PeerSummary stores the salient network location information about a peer
+	PeerSummary struct {
+		IP      net.IP
+		Inbound bool
+	}
+	PeerSummaries []PeerSummary
 	// SimpleAddr implements the net.Addr interface with two struct fields
 	SimpleAddr struct {
 		Net, Addr string
@@ -953,7 +961,7 @@ func (n *Node) PeerHandler() {
 	n.AddrManager.Start()
 	n.SyncManager.Start()
 	Trace("starting peer handler")
-	peerState := &PeerState{
+	n.peerState = &PeerState{
 		InboundPeers:    make(map[int32]*NodePeer),
 		PersistentPeers: make(map[int32]*NodePeer),
 		OutboundPeers:   make(map[int32]*NodePeer),
@@ -978,30 +986,59 @@ func (n *Node) PeerHandler() {
 out:
 	for {
 		select {
+		// queries for current peer summary list
+		case qc := <-n.PeerState:
+			Debug("handling peer summary query")
+			// flatten the list of
+			res := make(map[int32]*NodePeer)
+			for i := range n.peerState.InboundPeers {
+				res[i] = n.peerState.InboundPeers[i]
+			}
+			for i := range n.peerState.OutboundPeers {
+				res[i] = n.peerState.OutboundPeers[i]
+			}
+			for i := range n.peerState.PersistentPeers {
+				res[i] = n.peerState.PersistentPeers[i]
+			}
+			var ps PeerSummaries
+			for i := range res {
+				if res[i].Connected() {
+					ps = append(
+						ps, PeerSummary{
+							IP:      res[i].Peer.NA().IP,
+							Inbound: res[i].Inbound(),
+						},
+					)
+				}
+			}
+			// send back the answer
+			Debug("sending back peer summary")
+			// Debugs(ps)
+			qc <- ps
 		// New peers connected to the server.
 		case p := <-n.NewPeers:
-			n.HandleAddPeerMsg(peerState, p)
+			n.HandleAddPeerMsg(n.peerState, p)
 		// Disconnected peers.
 		case p := <-n.DonePeers:
-			n.HandleDonePeerMsg(peerState, p)
+			n.HandleDonePeerMsg(n.peerState, p)
 		// Block accepted in mainchain or orphan, update peer height.
 		case umsg := <-n.PeerHeightsUpdate:
-			n.HandleUpdatePeerHeights(peerState, umsg)
+			n.HandleUpdatePeerHeights(n.peerState, umsg)
 		// Peer to ban.
 		case p := <-n.BanPeers:
-			n.HandleBanPeerMsg(peerState, p)
+			n.HandleBanPeerMsg(n.peerState, p)
 		// New inventory to potentially be relayed to other peers.
 		case invMsg := <-n.RelayInv:
-			n.HandleRelayInvMsg(peerState, invMsg)
+			n.HandleRelayInvMsg(n.peerState, invMsg)
 		// Message to broadcast to all connected peers except those which are excluded by the message.
 		case bmsg := <-n.Broadcast:
-			n.HandleBroadcastMsg(peerState, &bmsg)
+			n.HandleBroadcastMsg(n.peerState, &bmsg)
 		case qmsg := <-n.Query:
-			n.HandleQuery(peerState, qmsg)
+			n.HandleQuery(n.peerState, qmsg)
 		case <-n.Quit.Wait():
 			Debug("chain peer server shutting down")
 			// Disconnect all peers on server shutdown.
-			peerState.ForAllPeers(
+			n.peerState.ForAllPeers(
 				func(sp *NodePeer) {
 					// Tracef("shutdown peer %n", sp)
 					sp.Disconnect()
@@ -2613,7 +2650,10 @@ type Context struct {
 // Use start to begin accepting connections from peers.
 //
 // TODO: simplify/modularise this
-func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Context, mempoolUpdateHook func()) (*Node, error) {
+func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Context, mempoolUpdateHook func()) (
+	*Node,
+	error,
+) {
 	Debug("listenAddrs ", listenAddrs)
 	services := DefaultServices
 	if *cx.Config.NoPeerBloomFilters {
@@ -2650,6 +2690,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		NewPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
 		DonePeers:            make(chan *NodePeer, *cx.Config.MaxPeers),
 		BanPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
+		PeerState:            make(chan chan PeerSummaries),
 		Query:                make(chan interface{}),
 		RelayInv:             make(chan RelayMsg, *cx.Config.MaxPeers),
 		Broadcast:            make(chan BroadcastMsg, *cx.Config.MaxPeers),

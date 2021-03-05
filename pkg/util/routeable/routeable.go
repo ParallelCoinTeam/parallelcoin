@@ -18,6 +18,9 @@ var Gateway net.IP
 // internet
 var Address net.IP
 
+// IPNet is the subnet of the Gateway's LAN
+var IPNet *net.IPNet
+
 // Interface is the net.Interface of the Address above
 var Interface *net.Interface
 
@@ -90,6 +93,7 @@ func Discover() (err error) {
 				if Gateway != nil && in.Contains(gw) {
 					Address = net.ParseIP(strings.Split(addrs[j].String(), "/")[0])
 					Interface = &nif[i]
+					IPNet = in
 					continue
 				}
 				ip, _, _ := net.ParseCIDR(addrs[j].String())

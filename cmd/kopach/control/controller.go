@@ -24,6 +24,7 @@ import (
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
 	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 	"math/rand"
@@ -281,6 +282,44 @@ func (s *State) doTicker() {
 	var err error
 	if err = s.multiConn.SendMany(p2padvt.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); Check(err) {
 	}
+	Debug("checking connectivity state")
+	ps := make(chan chainrpc.PeerSummaries, 1)
+	s.node.PeerState <- ps
+	var lanPeers int
+	var totalPeers int
+	select {
+	case connState := <-ps:
+		totalPeers = len(connState)
+		for i := range connState {
+			if routeable.IPNet.Contains(connState[i].IP) {
+				lanPeers++
+			}
+		}
+		if *s.cfg.Solo {
+			s.Start()
+			break
+		} else if *s.cfg.LAN {
+			// if there is no peers on lan and solo was not set, stop mining
+			if lanPeers == 0 {
+				// todo: make lan disable seeding
+				Debug("no lan peers while in lan mode, stopping mining")
+				s.Stop()
+			} else {
+				s.Start()
+			}
+		} else if !*s.cfg.Solo && !*s.cfg.LAN {
+			if totalPeers-lanPeers == 0 {
+				// we have no peers on the internet, stop mining
+				Debug("no internet peers, stopping mining")
+				s.Stop()
+			} else {
+				s.Start()
+			}
+		}
+		// quit waiting if we are shutting down
+	case <-s.quit:
+	}
+	Debug(totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
 }
 
 func (s *State) doBlockUpdate(prev *util.Block) (err error) {
@@ -331,7 +370,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		Bits:      make(templates.Diffs),
 		Merkles:   make(templates.Merkles),
 	}
-	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Round(time.Second).Add(time.Second)
+	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Round(time.Second).Add(time.Second * 2)
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		var templateX *mining.BlockTemplate
 		if templateX, err = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); Check(err) {

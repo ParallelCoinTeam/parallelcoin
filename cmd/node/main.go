@@ -166,7 +166,7 @@ func Main(cx *conte.Xt) (err error) {
 			cx.KillAll,
 		)
 		go cx.Controller.Run()
-		cx.Controller.Start()
+		// cx.Controller.Start()
 		Debug("controller started")
 	}
 	once := true
