@@ -988,33 +988,35 @@ out:
 		select {
 		// queries for current peer summary list
 		case qc := <-n.PeerState:
-			Debug("handling peer summary query")
-			// flatten the list of
-			res := make(map[int32]*NodePeer)
-			for i := range n.peerState.InboundPeers {
-				res[i] = n.peerState.InboundPeers[i]
-			}
-			for i := range n.peerState.OutboundPeers {
-				res[i] = n.peerState.OutboundPeers[i]
-			}
-			for i := range n.peerState.PersistentPeers {
-				res[i] = n.peerState.PersistentPeers[i]
-			}
-			var ps PeerSummaries
-			for i := range res {
-				if res[i].Connected() {
-					ps = append(
-						ps, PeerSummary{
-							IP:      res[i].Peer.NA().IP,
-							Inbound: res[i].Inbound(),
-						},
-					)
+			go func() {
+				Debug("@@@ handling peer summary query")
+				// flatten the list of
+				res := make(map[int32]*NodePeer)
+				for i := range n.peerState.InboundPeers {
+					res[i] = n.peerState.InboundPeers[i]
 				}
-			}
-			// send back the answer
-			Debug("sending back peer summary")
-			// Debugs(ps)
-			qc <- ps
+				for i := range n.peerState.OutboundPeers {
+					res[i] = n.peerState.OutboundPeers[i]
+				}
+				for i := range n.peerState.PersistentPeers {
+					res[i] = n.peerState.PersistentPeers[i]
+				}
+				var ps PeerSummaries
+				for i := range res {
+					if res[i].Connected() {
+						ps = append(
+							ps, PeerSummary{
+								IP:      res[i].Peer.NA().IP,
+								Inbound: res[i].Inbound(),
+							},
+						)
+					}
+				}
+				// send back the answer
+				Debug("@@@ sending back peer summary")
+				// Debugs(ps)
+				qc <- ps
+			}()
 		// New peers connected to the server.
 		case p := <-n.NewPeers:
 			n.HandleAddPeerMsg(n.peerState, p)
@@ -2690,7 +2692,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		NewPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
 		DonePeers:            make(chan *NodePeer, *cx.Config.MaxPeers),
 		BanPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
-		PeerState:            make(chan chan PeerSummaries),
+		PeerState:            make(chan chan PeerSummaries, 1),
 		Query:                make(chan interface{}),
 		RelayInv:             make(chan RelayMsg, *cx.Config.MaxPeers),
 		Broadcast:            make(chan BroadcastMsg, *cx.Config.MaxPeers),

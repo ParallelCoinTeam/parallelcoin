@@ -80,38 +80,11 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			// 	// *wg.currentReceiveQRCode = iop
 			// }
 			wg.stateLoaded.Store(true)
-			
-			wg.RecentTransactions(10, "recent")
-			// wg.Invalidate()
-			wg.RecentTransactions(-1, "history")
 			// the entered password matches the stored hash
-			Debug("now we can open the wallet")
-			if err = wg.writeWalletCookie(); Check(err) {
-			}
 			*wg.cx.Config.NodeOff = false
 			*wg.cx.Config.WalletOff = false
 			save.Pod(wg.cx.Config)
-			if !wg.node.Running() {
-				wg.node.Start()
-			} else {
-				if wg.ChainClient != nil {
-					wg.ChainClient.Disconnect()
-					wg.ChainClient.Shutdown()
-				}
-				wg.node.Stop()
-				wg.node.Start()
-			}
-			// wg.wallet.Start()
-			if err = wg.chainClient(); Check(err) {
-			}
-			// if err = wg.walletClient(); Check(err) {
-			// }
-			wg.unlockPassword.Wipe()
-			wg.ready.Store(true)
-			if !*wg.cx.Config.DisableRPC {
-				wg.WalletWatcher = wg.Watcher()
-			}
-			wg.Invalidate()
+			wg.WalletWatcher = wg.Watcher()
 		}
 	} else {
 		Debug("failed to unlock the wallet")

@@ -33,9 +33,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 		Action:      walletGUIHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			Debug("subcommand completed", os.Args) // , string(debug.Stack()), interrupt.GoroutineDump())
-			// debug.PrintStack()
-			// Debug(interrupt.GoroutineDump())
+			Debug("subcommand completed", os.Args)
 			if interrupt.Restart {
 			}
 			return nil
@@ -48,8 +46,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					return nil
 				}, au.SubCommands(), nil, "v",
 			),
-			// apputil.NewCommand("gui", "run GUI",
-			//	guiHandle(cx), apputil.SubCommands(), nil, "gui"),
 			au.Command(
 				"gui", "start wallet GUI", walletGUIHandle(cx),
 				au.SubCommands(), nil,
@@ -79,7 +75,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						func(c *cli.Context) error {
 							cx.StateCfg.DropAddrIndex = true
 							return nodeHandle(cx)(c)
-							// return nil
 						},
 						au.SubCommands(),
 						nil,
@@ -90,7 +85,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						func(c *cli.Context) error {
 							cx.StateCfg.DropTxIndex = true
 							return nodeHandle(cx)(c)
-							// return nil
 						},
 						au.SubCommands(),
 						nil,
@@ -103,7 +97,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 							cx.StateCfg.DropTxIndex = true
 							cx.StateCfg.DropCfIndex = true
 							return nodeHandle(cx)(c)
-							// return nil
 						},
 						au.SubCommands(),
 						nil,
@@ -114,7 +107,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						func(c *cli.Context) error {
 							cx.StateCfg.DropCfIndex = true
 							return nodeHandle(cx)(c)
-							// return nil
 						},
 						au.SubCommands(),
 						nil,
@@ -137,7 +129,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 							if err = os.RemoveAll(dbPath); Check(err) {
 							}
 							return nodeHandle(cx)(c)
-							// return nil
 						},
 						au.SubCommands(),
 						nil,

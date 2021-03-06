@@ -22,6 +22,18 @@ func (wg *WalletGUI) WalletAndClientRunning() bool {
 
 func (wg *WalletGUI) Tickers() {
 	first := true
+	Debug("updating best block")
+	var err error
+	var height int32
+	var h *chainhash.Hash
+	if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+		// interrupt.Request()
+		return
+	}
+	Debug(h, height)
+	wg.State.SetBestBlockHeight(height)
+	wg.State.SetBestBlockHash(h)
+	
 	go func() {
 		var err error
 		seconds := time.Tick(time.Second * 3)
