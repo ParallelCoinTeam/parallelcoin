@@ -1,8 +1,6 @@
 package chaincfg
 
 import (
-	"math"
-
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
@@ -19,9 +17,9 @@ var RegressionTestParams = Params{
 	PowLimit:                 regressionPowLimit,
 	PowLimitBits:             0x207fffff,
 	CoinbaseMaturity:         100,
-	BIP0034Height:            100000000, // Not active - Permit ver 1 blocks
-	BIP0065Height:            100000000, // Used by regression tests
-	BIP0066Height:            100000000, // Used by regression tests
+	// BIP0034Height:            100000000, // Not active - Permit ver 1 blocks
+	// BIP0065Height:            100000000, // Used by regression tests
+	// BIP0066Height:            100000000, // Used by regression tests
 	SubsidyReductionInterval: 150,
 	TargetTimespan:           30000, // 14 days
 	TargetTimePerBlock:       300,   // 5 minutes
@@ -37,28 +35,28 @@ var RegressionTestParams = Params{
 	//   target proof of work timespan / target proof of work spacing
 	RuleChangeActivationThreshold: 108, // 75%  of MinerConfirmationWindow
 	MinerConfirmationWindow:       144,
-	Deployments: [DefinedDeployments]ConsensusDeployment{
-		DeploymentTestDummy: {
-			BitNumber:  28,
-			StartTime:  0,             // Always available for vote
-			ExpireTime: math.MaxInt64, // Never expires
-		},
-		DeploymentCSV: {
-			BitNumber:  0,
-			StartTime:  0,             // Always available for vote
-			ExpireTime: math.MaxInt64, // Never expires
-		},
-		DeploymentSegwit: {
-			BitNumber:  1,
-			StartTime:  0,             // Always available for vote
-			ExpireTime: math.MaxInt64, // Never expires.
-		},
-	},
+	// Deployments: [DefinedDeployments]ConsensusDeployment{
+	// 	DeploymentTestDummy: {
+	// 		BitNumber:  28,
+	// 		StartTime:  0,             // Always available for vote
+	// 		ExpireTime: math.MaxInt64, // Never expires
+	// 	},
+	// 	DeploymentCSV: {
+	// 		BitNumber:  0,
+	// 		StartTime:  0,             // Always available for vote
+	// 		ExpireTime: math.MaxInt64, // Never expires
+	// 	},
+	// 	DeploymentSegwit: {
+	// 		BitNumber:  1,
+	// 		StartTime:  0,             // Always available for vote
+	// 		ExpireTime: math.MaxInt64, // Never expires.
+	// 	},
+	// },
 	// Mempool parameters
 	RelayNonStdTxs: true,
 	// Human-readable part for Bech32 encoded segwit addresses, as defined in
-	// BIP 173.
-	Bech32HRPSegwit: "bcrt", // always bcrt for reg test net
+	// // BIP 173.
+	// Bech32HRPSegwit: "bcrt", // always bcrt for reg test net
 	// Address encoding magics
 	PubKeyHashAddrID: 0x00,
 	ScriptHashAddrID: 0x05,

@@ -3,9 +3,8 @@ package chaincfg_test
 import (
 	"bytes"
 	"reflect"
-	"strings"
 	"testing"
-
+	
 	. "github.com/p9c/pod/pkg/chain/config"
 )
 
@@ -16,7 +15,7 @@ var mockNetParams = Params{
 	Net:              1<<32 - 1,
 	PubKeyHashAddrID: 0x9f,
 	ScriptHashAddrID: 0xf9,
-	Bech32HRPSegwit:  "tc",
+	// Bech32HRPSegwit:  "tc",
 	HDPrivateKeyID:   [4]byte{0x01, 0x02, 0x03, 0x04},
 	HDPublicKeyID:    [4]byte{0x05, 0x06, 0x07, 0x08},
 }
@@ -124,44 +123,44 @@ func TestRegister(t *testing.T) {
 					valid: false,
 				},
 			},
-			segwitPrefixes: []prefixTest{
-				{
-					prefix: MainNetParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: TestNet3Params.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: RegressionTestParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: SimNetParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: strings.ToUpper(MainNetParams.Bech32HRPSegwit + "1"),
-					valid:  true,
-				},
-				{
-					prefix: mockNetParams.Bech32HRPSegwit + "1",
-					valid:  false,
-				},
-				{
-					prefix: "abc1",
-					valid:  false,
-				},
-				{
-					prefix: "1",
-					valid:  false,
-				},
-				{
-					prefix: MainNetParams.Bech32HRPSegwit,
-					valid:  false,
-				},
-			},
+			// segwitPrefixes: []prefixTest{
+			// 	{
+			// 		prefix: MainNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: TestNet3Params.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: RegressionTestParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: SimNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: strings.ToUpper(MainNetParams.Bech32HRPSegwit + "1"),
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: mockNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  false,
+			// 	},
+			// 	{
+			// 		prefix: "abc1",
+			// 		valid:  false,
+			// 	},
+			// 	{
+			// 		prefix: "1",
+			// 		valid:  false,
+			// 	},
+			// 	{
+			// 		prefix: MainNetParams.Bech32HRPSegwit,
+			// 		valid:  false,
+			// 	},
+			// },
 			hdMagics: []hdTest{
 				{
 					priv: MainNetParams.HDPrivateKeyID[:],
@@ -258,44 +257,44 @@ func TestRegister(t *testing.T) {
 					valid: false,
 				},
 			},
-			segwitPrefixes: []prefixTest{
-				{
-					prefix: MainNetParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: TestNet3Params.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: RegressionTestParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: SimNetParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: strings.ToUpper(MainNetParams.Bech32HRPSegwit + "1"),
-					valid:  true,
-				},
-				{
-					prefix: mockNetParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: "abc1",
-					valid:  false,
-				},
-				{
-					prefix: "1",
-					valid:  false,
-				},
-				{
-					prefix: MainNetParams.Bech32HRPSegwit,
-					valid:  false,
-				},
-			},
+			// segwitPrefixes: []prefixTest{
+			// 	{
+			// 		prefix: MainNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: TestNet3Params.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: RegressionTestParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: SimNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: strings.ToUpper(MainNetParams.Bech32HRPSegwit + "1"),
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: mockNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: "abc1",
+			// 		valid:  false,
+			// 	},
+			// 	{
+			// 		prefix: "1",
+			// 		valid:  false,
+			// 	},
+			// 	{
+			// 		prefix: MainNetParams.Bech32HRPSegwit,
+			// 		valid:  false,
+			// 	},
+			// },
 			hdMagics: []hdTest{
 				{
 					priv: mockNetParams.HDPrivateKeyID[:],
@@ -385,44 +384,44 @@ func TestRegister(t *testing.T) {
 					valid: false,
 				},
 			},
-			segwitPrefixes: []prefixTest{
-				{
-					prefix: MainNetParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: TestNet3Params.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: RegressionTestParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: SimNetParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: strings.ToUpper(MainNetParams.Bech32HRPSegwit + "1"),
-					valid:  true,
-				},
-				{
-					prefix: mockNetParams.Bech32HRPSegwit + "1",
-					valid:  true,
-				},
-				{
-					prefix: "abc1",
-					valid:  false,
-				},
-				{
-					prefix: "1",
-					valid:  false,
-				},
-				{
-					prefix: MainNetParams.Bech32HRPSegwit,
-					valid:  false,
-				},
-			},
+			// segwitPrefixes: []prefixTest{
+			// 	{
+			// 		prefix: MainNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: TestNet3Params.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: RegressionTestParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: SimNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: strings.ToUpper(MainNetParams.Bech32HRPSegwit + "1"),
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: mockNetParams.Bech32HRPSegwit + "1",
+			// 		valid:  true,
+			// 	},
+			// 	{
+			// 		prefix: "abc1",
+			// 		valid:  false,
+			// 	},
+			// 	{
+			// 		prefix: "1",
+			// 		valid:  false,
+			// 	},
+			// 	{
+			// 		prefix: MainNetParams.Bech32HRPSegwit,
+			// 		valid:  false,
+			// 	},
+			// },
 			hdMagics: []hdTest{
 				{
 					priv: MainNetParams.HDPrivateKeyID[:],

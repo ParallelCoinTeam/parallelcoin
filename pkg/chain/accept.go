@@ -34,11 +34,11 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	blockHeight := prevNode.height + 1
 	Trace("block not found, good, setting height", blockHeight)
 	block.SetHeight(blockHeight)
-	// To deal with multiple mining algorithms, we must check first the block header version. Rather than pass the
-	// direct previous by height, we look for the previous of the same algorithm and pass that.
-	if blockHeight < b.params.BIP0034Height {
-	
-	}
+	// // To deal with multiple mining algorithms, we must check first the block header version. Rather than pass the
+	// // direct previous by height, we look for the previous of the same algorithm and pass that.
+	// if blockHeight < b.params.BIP0034Height {
+	//
+	// }
 	Trace("sanitizing header versions for legacy")
 	var DoNotCheckPow bool
 	var pn *BlockNode

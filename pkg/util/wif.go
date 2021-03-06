@@ -63,7 +63,7 @@ func (w *WIF) IsForNet(net *netparams.Params) bool {
 //
 // If the base58-decoded byte sequence does not match this, DecodeWIF will return a non-nil error.
 // ErrMalformedPrivateKey is returned when the WIF is of an impossible length or the expected compressed pubkey magic
-// number does not equal the expected value of 0x01. ErrChecksumMismatch is returned if the expected WIF checksum does
+// number does not equal the expected value of 0x01. errChecksumMismatch is returned if the expected WIF checksum does
 // not match the calculated checksum.
 func DecodeWIF(wif string) (*WIF, error) {
 	decoded := base58.Decode(wif)
@@ -92,7 +92,7 @@ func DecodeWIF(wif string) (*WIF, error) {
 	}
 	cksum := chainhash.DoubleHashB(tosum)[:4]
 	if !bytes.Equal(cksum, decoded[decodedLen-4:]) {
-		return nil, ErrChecksumMismatch
+		return nil, errChecksumMismatch
 	}
 	netID := decoded[0]
 	privKeyBytes := decoded[1 : 1+ec.PrivKeyBytesLen]

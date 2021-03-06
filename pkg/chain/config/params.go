@@ -24,9 +24,9 @@ func Register(params *Params) error {
 	pubKeyHashAddrIDs[params.PubKeyHashAddrID] = struct{}{}
 	scriptHashAddrIDs[params.ScriptHashAddrID] = struct{}{}
 	hdPrivToPubKeyIDs[params.HDPrivateKeyID] = params.HDPublicKeyID[:]
-	// A valid Bech32 encoded segwit address always has as prefix the human-readable part for the given net followed by
-	// '1'.
-	bech32SegwitPrefixes[params.Bech32HRPSegwit+"1"] = struct{}{}
+	// // A valid Bech32 encoded segwit address always has as prefix the human-readable part for the given net followed by
+	// // '1'.
+	// bech32SegwitPrefixes[params.Bech32HRPSegwit+"1"] = struct{}{}
 	return nil
 }
 
