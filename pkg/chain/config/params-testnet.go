@@ -14,16 +14,16 @@ var TestNet3Params = Params{
 	Net:         wire.TestNet3,
 	DefaultPort: "21047",
 	DNSSeeds: []DNSSeed{
-		{"seed3.parallelcoin.io", true},
+		// {"seed3.parallelcoin.io", true},
 	},
 	// Chain parameters
 	GenesisBlock:             &testNet3GenesisBlock,
 	GenesisHash:              &testNet3GenesisHash,
 	PowLimit:                 &fork.SecondPowLimit,    // fork&testNet3PowLimit,
 	PowLimitBits:             fork.SecondPowLimitBits, // testnetBits,
-	BIP0034Height:            0,                       // 0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8
-	BIP0065Height:            0,                       // 00000000007f6655f22f98e72ed80d8b06dc761d5da09df0fa1dc4be4f861eb6
-	BIP0066Height:            0,                       // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
+	BIP0034Height:            math.MaxInt32,                       // 0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8
+	BIP0065Height:            math.MaxInt32,                       // 00000000007f6655f22f98e72ed80d8b06dc761d5da09df0fa1dc4be4f861eb6
+	BIP0066Height:            math.MaxInt32,                       // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
 	CoinbaseMaturity:         9,
 	SubsidyReductionInterval: 250000,
 	TargetTimespan:           TestnetTargetTimespan,

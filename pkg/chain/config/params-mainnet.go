@@ -1,6 +1,9 @@
 package chaincfg
 
-import "github.com/p9c/pod/pkg/chain/wire"
+import (
+	"github.com/p9c/pod/pkg/chain/wire"
+	"math"
+)
 
 // MainNetParams defines the network parameters for the main Bitcoin network.
 var MainNetParams = Params{
@@ -33,9 +36,9 @@ var MainNetParams = Params{
 	GenesisHash:              &genesisHash,
 	PowLimit:                 &mainPowLimit,
 	PowLimitBits:             MainPowLimitBits, // 0x1e0fffff,
-	BIP0034Height:            100000000,        // Reserved for future change
-	BIP0065Height:            100000000,
-	BIP0066Height:            100000000,
+	BIP0034Height:            math.MaxInt32,        // Reserved for future change
+	BIP0065Height:            math.MaxInt32,
+	BIP0066Height:            math.MaxInt32,
 	CoinbaseMaturity:         100,
 	SubsidyReductionInterval: 250000,
 	TargetTimespan:           TargetTimespan,
@@ -58,18 +61,18 @@ var MainNetParams = Params{
 	Deployments: [DefinedDeployments]ConsensusDeployment{
 		DeploymentTestDummy: {
 			BitNumber:  28,
-			StartTime:  1199145601, // January 1, 2008 UTC
-			ExpireTime: 1230767999, // December 31, 2008 UTC
+			StartTime:  math.MaxUint64, // January 1, 2008 UTC
+			ExpireTime: math.MaxUint64, // December 31, 2008 UTC
 		},
 		DeploymentCSV: {
 			BitNumber:  0,
-			StartTime:  1462060800, // May 1st, 2016
-			ExpireTime: 1493596800, // May 1st, 2017
+			StartTime:  math.MaxUint64, // May 1st, 2016
+			ExpireTime: math.MaxUint64, // May 1st, 2017
 		},
 		DeploymentSegwit: {
 			BitNumber:  1,
-			StartTime:  1479168000, // November 15, 2016 UTC
-			ExpireTime: 1510704000, // November 15, 2017 UTC.
+			StartTime:  math.MaxUint64, // November 15, 2016 UTC
+			ExpireTime: math.MaxUint64, // November 15, 2017 UTC.
 		},
 	},
 	// Mempool parameters
