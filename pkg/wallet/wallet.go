@@ -2833,7 +2833,7 @@ func (w *Wallet) newChangeAddress(
 	// As we're making a change address, we'll fetch the type of manager that is able to make p2wkh output as they're
 	// the most efficient.
 	scopes := w.Manager.ScopesForExternalAddrType(
-		waddrmgr.WitnessPubKey,
+		waddrmgr.PubKeyHash,
 	)
 	manager, err := w.Manager.FetchScopedKeyManager(scopes[0])
 	if err != nil {

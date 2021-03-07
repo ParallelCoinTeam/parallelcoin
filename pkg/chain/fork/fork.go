@@ -149,7 +149,7 @@ var (
 			AlgoVers:           P9AlgoVers,
 			TargetTimePerBlock: 36,
 			AveragingInterval:  3600,
-			TestnetStart:       1,
+			TestnetStart:       0,
 		},
 	}
 	// P9AlgoVers is the lookup for after 1st hardfork

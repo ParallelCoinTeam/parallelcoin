@@ -179,9 +179,7 @@ func (c *RPCClient) BlockStamp() (*wm.BlockStamp, error) {
 // anything. If the filter returns a positive match, the full block will be fetched and filtered. This method returns a
 // FilterBlocksResponse for the first block containing a matching address. If no matches are found in the range of
 // blocks requested, the returned response will be nil.
-func (c *RPCClient) FilterBlocks(
-	req *FilterBlocksRequest,
-) (*FilterBlocksResponse, error) {
+func (c *RPCClient) FilterBlocks(req *FilterBlocksRequest,) (*FilterBlocksResponse, error) {
 	blockFilterer := NewBlockFilterer(c.chainParams, req)
 	// Construct the watchlist using the addresses and outpoints contained in the filter blocks request.
 	watchList, err := buildFilterBlocksWatchList(req)

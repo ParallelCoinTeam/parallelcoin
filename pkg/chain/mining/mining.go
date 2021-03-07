@@ -835,7 +835,7 @@ mempoolLoop:
 	// per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
 	if fork.GetCurrent(best.Height+1) > 0 {
-		ts = time.Unix(g.Chain.BestChain.Tip().Header().Timestamp.Unix()+1, 0)
+		ts = g.Chain.BestChain.Tip().Header().Timestamp.Truncate(time.Second).Add(time.Second)
 	}
 	// Trace("algo ", ts, " ", algo)
 	var reqDifficulty uint32

@@ -50,18 +50,6 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	} else {
 		return false, false, err
 	}
-	Debug(">> ", fork.GetCurrent(blockHeight) > 0)
-	if fork.GetCurrent(blockHeight) > 0 {
-		Debug("checking for plan 9 hard fork invariant of timestamp always progressing")
-		// prevTS := candidateBlock.MsgBlock().Header.Timestamp
-		Debug(candidateBlock.MsgBlock().Header.Timestamp.Round(time.Second).Sub(prevBlock.MsgBlock().Header.Timestamp.Round(time.Second)))
-		if candidateBlock.MsgBlock().Header.Timestamp.Round(time.Second).Sub(prevBlock.MsgBlock().Header.Timestamp.Round(time.Second)) <= time.Second {
-			return false, false, ruleError(
-				ErrTimeTooOld,
-				fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
-			)
-		}
-	}
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	fastAdd := flags&BFFastAdd == BFFastAdd
@@ -102,16 +90,20 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	ph := &candidateBlock.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	var pb *BlockNode
-	if pn == nil {
+	pb = pn.GetLastWithAlgo(algo)
+	if pb == nil {
 		DoNotCheckPow = true
-	} else {
-		pb = pn.GetLastWithAlgo(algo)
-		if pb == nil {
-			DoNotCheckPow = true
-		}
 	}
 	Trace("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
-	if err = checkBlockSanity(candidateBlock, pl, b.timeSource, flags, DoNotCheckPow, blockHeight); Check(err) {
+	if err = checkBlockSanity(
+		candidateBlock,
+		pl,
+		b.timeSource,
+		flags,
+		DoNotCheckPow,
+		blockHeight,
+		pn.Header().Timestamp,
+	); Check(err) {
 		return false, false, err
 	}
 	Trace("searching back to checkpoints")

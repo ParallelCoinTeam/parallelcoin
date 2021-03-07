@@ -397,9 +397,19 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) error {
 		)
 		return ruleError(ErrPrevBlockNotBest, str)
 	}
-	err := checkBlockSanity(block, powLimit, b.timeSource, flags, false, block.Height())
-	if err != nil {
-		Error("block processing error:", err)
+	var pb *util.Block
+	var err error
+	if pb, err = b.BlockByHash(&header.PrevBlock); Check(err) {
+	}
+	if err = checkBlockSanity(
+		block,
+		powLimit,
+		b.timeSource,
+		flags,
+		false,
+		block.Height(),
+		pb.MsgBlock().Header.Timestamp,
+	); Check(err) {
 		return err
 	}
 	err = b.checkBlockContext(block, tip, flags, true)
@@ -605,14 +615,20 @@ func (b *BlockChain) checkBlockHeaderContext(header *wire.BlockHeader, prevNode 
 			Error(str)
 			return ruleError(ErrUnexpectedDifficulty, str)
 		}
-		// Ensure the timestamp for the block header is after the median time of the last several blocks
-		// (medianTimeBlocks).
-		medianTime := prevNode.CalcPastMedianTime()
-		if !header.Timestamp.After(medianTime) {
-			str := "block timestamp of %v is not after expected %v"
-			str = fmt.Sprintf(str, header.Timestamp, medianTime)
-			Error(str)
-			return ruleError(ErrTimeTooOld, str)
+		if fork.GetCurrent(prevNode.height+1) > 0 {
+			if header.Timestamp.Truncate(time.Second).Sub(prevNode.Header().Timestamp.Truncate(time.Second)) < 1 {
+				return ruleError(ErrTimeTooOld, "timestamp is equal to or less than the chain tip")
+			}
+		} else {
+			// Ensure the timestamp for the block header is after the median time of the last several blocks
+			// (medianTimeBlocks).
+			medianTime := prevNode.CalcPastMedianTime()
+			if !header.Timestamp.After(medianTime) {
+				str := "block timestamp of %v is not after expected %v"
+				str = fmt.Sprintf(str, header.Timestamp, medianTime)
+				Error(str)
+				return ruleError(ErrTimeTooOld, str)
+			}
 		}
 	}
 	// The height of this block is one more than the referenced previous block.
@@ -712,9 +728,10 @@ func CheckBlockSanity(
 	timeSource MedianTimeSource,
 	DoNotCheckPow bool,
 	height int32,
+	prevBlockTimestamp time.Time,
 ) error {
 	Trace("CheckBlockSanity powlimit %64x", powLimit)
-	return checkBlockSanity(block, powLimit, timeSource, BFNone, DoNotCheckPow, height)
+	return checkBlockSanity(block, powLimit, timeSource, BFNone, DoNotCheckPow, height, prevBlockTimestamp)
 }
 
 // CheckProofOfWork ensures the block header bits which indicate the target difficulty is in min/max range and that the
@@ -1145,6 +1162,7 @@ func checkBlockHeaderSanity(
 	timeSource MedianTimeSource,
 	flags BehaviorFlags,
 	height int32,
+	prevBlockTimestamp time.Time,
 ) error {
 	// Ensure the proof of work bits in the block header is in min/max range and the
 	// block hash is less than the target value described by the bits.
@@ -1170,6 +1188,15 @@ func checkBlockHeaderSanity(
 		)
 		return ruleError(ErrTimeTooNew, str)
 	}
+	if fork.GetCurrent(height) > 0 {
+		cbts := header.Timestamp.Truncate(time.Second)
+		if cbts.Sub(prevBlockTimestamp.Truncate(time.Second)) < 1 {
+			return ruleError(
+				ErrTimeTooOld,
+				fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
+			)
+		}
+	}
 	return nil
 }
 
@@ -1187,13 +1214,13 @@ func checkBlockSanity(
 	flags BehaviorFlags,
 	DoNotCheckPow bool,
 	height int32,
+	prevBlockTimestamp time.Time,
 ) error {
 	Tracef("checkBlockSanity %08x %064x", block.MsgBlock().Header.Bits, powLimit)
 	msgBlock := block.MsgBlock()
 	header := &msgBlock.Header
-	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height)
+	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height, prevBlockTimestamp)
 	if err != nil {
-		Error(err)
 		Debug("block processing error: ", block.MsgBlock().Header.Version, err)
 		return err
 	}

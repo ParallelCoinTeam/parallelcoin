@@ -397,7 +397,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		Bits:      make(templates.Diffs),
 		Merkles:   make(templates.Merkles),
 	}
-	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Round(time.Second).Add(time.Second * 2)
+	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(time.Second)
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		var templateX *mining.BlockTemplate
 		if templateX, err = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); Check(err) {
