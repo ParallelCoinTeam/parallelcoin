@@ -75,6 +75,7 @@ func New(
 	rpcServer *chainrpc.Server,
 	otherNodeCount *atomic.Int32,
 	mempoolUpdateChan qu.C,
+	uuid uint64,
 	killall qu.C,
 ) (s *State) {
 	var err error
@@ -83,7 +84,6 @@ func New(
 		return
 	}
 	quit := qu.T()
-	rand.Seed(time.Now().UnixNano())
 	s = &State{
 		cfg:               cfg,
 		node:              node,
@@ -93,7 +93,7 @@ func New(
 		otherNodes:        make(map[uint64]*nodeSpec),
 		otherNodeCount:    otherNodeCount,
 		quit:              quit,
-		uuid:              rand.Uint64(),
+		uuid:              uuid,
 		start:             qu.Ts(1),
 		stop:              qu.Ts(1),
 		blockUpdate:       make(chan *util.Block, 1),
@@ -180,11 +180,11 @@ func (s *State) startWallet() (err error) {
 func (s *State) updateBlockTemplate() {
 	Debug("getting current chain tip")
 	var err error
-	tipNode := s.node.Chain.BestSnapshot().Hash
+	tN := s.node.Chain.BestChain.Tip().Header().BlockHash()
 	var blk *util.Block
-	if blk, err = s.node.Chain.BlockByHash(&tipNode); Check(err) {
+	if blk, err = s.node.Chain.BlockByHash(&tN); Check(err) {
 	}
-	Debug("updating block from chain tip")
+	Debug("updating block from chain tip", blk.MsgBlock().Header.Timestamp.Truncate(time.Second).Unix())
 	if err = s.doBlockUpdate(blk); Check(err) {
 	}
 }
@@ -219,10 +219,11 @@ out:
 			select {
 			case <-s.mempoolUpdateChan:
 				s.updateBlockTemplate()
-			case bu := <-s.blockUpdate:
+			case <-s.blockUpdate:
 				Debug("received new block update while paused")
-				if err = s.doBlockUpdate(bu); Check(err) {
-				}
+				// if err = s.doBlockUpdate(bu); Check(err) {
+				// }
+				s.updateBlockTemplate()
 			case <-ticker.C:
 				Debug("controller ticker running")
 				s.Advertise()
@@ -233,7 +234,7 @@ out:
 					Debug("wallet client is disconnected, retrying")
 					if err = s.startWallet(); !Check(err) {
 						Debug("wallet client is connected, switching to running")
-						
+						s.updateBlockTemplate()
 					}
 				}
 				break pausing
@@ -245,9 +246,9 @@ out:
 			}
 		}
 		Debug("controller now running")
-		if s.templateShards == nil || len(s.templateShards) < 1 {
-			s.updateBlockTemplate()
-		}
+		// if s.templateShards == nil || len(s.templateShards) < 1 {
+		s.updateBlockTemplate()
+		// }
 		s.mining.Store(true)
 	running:
 		for {
@@ -257,10 +258,9 @@ out:
 				Debug("sending out templates...")
 				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
 				}
-			case bu := <-s.blockUpdate:
+			case <-s.blockUpdate:
 				Debug("received new block update while running")
-				if err = s.doBlockUpdate(bu); Check(err) {
-				}
+				s.updateBlockTemplate()
 				Debug("sending out templates...")
 				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
 				}
@@ -290,10 +290,10 @@ out:
 }
 
 func (s *State) checkConnectivity() {
-	if !*s.cfg.Generate || *s.cfg.GenThreads == 0 {
-		Debug("no need to check connectivity if we aren't mining")
-		return
-	}
+	// if !*s.cfg.Generate || *s.cfg.GenThreads == 0 {
+	// 	Debug("no need to check connectivity if we aren't mining")
+	// 	return
+	// }
 	if *s.cfg.Solo {
 		Debug("in solo mode, mining anyway")
 		s.Start()
@@ -350,6 +350,7 @@ func (s *State) Advertise() {
 }
 
 func (s *State) doBlockUpdate(prev *util.Block) (err error) {
+	Info("\nmining on block", prev.MsgBlock().Header.Timestamp, "\n")
 	if s.nextAddress == nil {
 		Debug("getting new address for templates")
 		if s.nextAddress, err = s.GetNewAddressFromMiningAddrs(); Check(err) {
@@ -362,6 +363,7 @@ func (s *State) doBlockUpdate(prev *util.Block) (err error) {
 	if s.msgBlockTemplate, err = s.GetMsgBlockTemplate(prev, s.nextAddress); Check(err) {
 		return
 	}
+	Debug("\n", s.msgBlockTemplate.Timestamp, "\n")
 	Debug("caching error corrected message shards...")
 	s.templateShards = transport.GetShards(s.msgBlockTemplate.Serialize())
 	return
@@ -397,7 +399,11 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		Bits:      make(templates.Diffs),
 		Merkles:   make(templates.Merkles),
 	}
-	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(time.Second)
+	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Add(time.Second).Round(time.Second)
+	tn := time.Now().Truncate(time.Second).Add(time.Second)
+	if tn.After(mbt.Timestamp) {
+		mbt.Timestamp = tn
+	}
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		var templateX *mining.BlockTemplate
 		if templateX, err = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); Check(err) {
@@ -528,11 +534,12 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	s := ctx.(*State)
 	var so sol.Solution
 	gotiny.Unmarshal(b, &so)
+	// Debugs(so)
 	if s.msgBlockTemplate == nil {
 		Debug("template is nil, solution is not for this controller")
 		return
 	}
-	if s.uuid != s.msgBlockTemplate.UUID {
+	if s.uuid != so.UUID {
 		Debug("solution not from current controller", s.uuid, s.msgBlockTemplate.UUID)
 		return
 	}

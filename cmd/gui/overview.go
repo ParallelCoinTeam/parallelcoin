@@ -225,8 +225,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 			break
 		}
 		
-		i := x
-		txs := wga[i]
+		txs := wga[x]
 		// spacer
 		if !first {
 			out = append(out,
@@ -322,7 +321,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 									).
 									Rigid(
 										wg.Caption(
-											time.Unix(txs.Time,
+											time.Unix(wga[x].Time,
 												0).Format("02 Jan 06 15:04:05 MST"),
 										).Color("PanelText").Fn,
 									).

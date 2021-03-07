@@ -2,6 +2,7 @@ package pod
 
 import (
 	"io/ioutil"
+	"math/rand"
 	"reflect"
 	"sort"
 	"sync"
@@ -204,6 +205,7 @@ type Config struct {
 	UPNP                   *bool            `group:"node" label:"UPNP" description:"enable UPNP for NAT traversal" type:"" widget:"toggle" json:"UPNP" hook:"restart"`
 	UserAgentComments      *cli.StringSlice `group:"" label:"User Agent Comments" description:"comment to add to the user agent -- See BIP 14 for more information" type:"" widget:"multi" json:"UserAgentComments" hook:"restart"`
 	Username               *string          `group:"rpc" label:"Username" description:"password for client RPC connections" type:"" widget:"string" json:"Username" hook:"restart"`
+	UUID                   *int             `group:"node" label:"Instance UUID" description:"Random unique identifier created at initial setup" type:"" widget:"integer" json:"UUID" hook:"restart"`
 	Wallet                 *bool            `group:"debug" label:"Connect to Wallet" description:"set ctl to connect to wallet instead of chain server" type:"" widget:"toggle" json:"Wallet"`
 	WalletFile             *string          `group:"config" label:"Wallet File" description:"wallet database file" type:"path" widget:"string" featured:"true" json:"WalletFile" hook:"restart"`
 	WalletOff              *bool            `group:"debug" label:"Wallet Off" description:"turn off the wallet backend" type:"" widget:"toggle" json:"WalletOff" hook:"wallet"`
@@ -217,6 +219,7 @@ type Config struct {
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
 	datadir := appdata.Dir(AppName, false)
+	uuid := int(rand.Uint64())
 	c = &Config{
 		AddCheckpoints:    newStringSlice(),
 		AddPeers:          newStringSlice(),
@@ -305,6 +308,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		UPNP:                   newbool(),
 		UserAgentComments:      newStringSlice(),
 		Username:               newstring(),
+		UUID:                   &uuid,
 		Wallet:                 newbool(),
 		WalletFile:             newstring(),
 		WalletOff:              newbool(),
@@ -403,6 +407,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"UPNP":                   c.UPNP,
 		"UserAgentComments":      c.UserAgentComments,
 		"Username":               c.Username,
+		"UUID":                   c.UUID,
 		"Wallet":                 c.Wallet,
 		"WalletFile":             c.WalletFile,
 		"WalletOff":              c.WalletOff,
@@ -457,4 +462,3 @@ func ReadCAFile(config *Config) []byte {
 	}
 	return certs
 }
-

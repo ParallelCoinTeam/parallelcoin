@@ -261,8 +261,8 @@ func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
 		}
 	}
 	if found {
-		tn := time.Now()
-		if tn.Sub(j.MinTimestamp) < 0 {
+		tn := time.Now().Truncate(time.Second)
+		if tn.Sub(j.MinTimestamp) < time.Second {
 			tn = j.MinTimestamp
 		}
 		out = &wire.MsgBlock{

@@ -79,7 +79,6 @@ type Xt struct {
 	OtherNodesCounter atomic.Int32
 	// IsGUI indicates if we have the possibility of terminal input
 	IsGUI        bool
-	UUID         uint64
 	waitChangers []string
 	waitCounter  int
 }
@@ -136,7 +135,6 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
 		NodeChan:         make(chan *chainrpc.Server),
-		UUID:             rand.Uint64(),
 	}
 	return cx
 }

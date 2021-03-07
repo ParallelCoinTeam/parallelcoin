@@ -163,6 +163,7 @@ func Main(cx *conte.Xt) (err error) {
 			cx.RPCServer,
 			&cx.OtherNodesCounter,
 			mempoolUpdateChan,
+			uint64(*cx.Config.UUID),
 			cx.KillAll,
 		)
 		go cx.Controller.Run()
