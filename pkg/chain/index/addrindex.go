@@ -451,19 +451,19 @@ func addrToKey(addr util.Address) ([addrKeySize]byte, error) {
 		result[0] = addrKeyTypePubKeyHash
 		copy(result[1:], addr.AddressPubKeyHash().Hash160()[:])
 		return result, nil
-	case *util.AddressWitnessScriptHash:
-		var result [addrKeySize]byte
-		result[0] = addrKeyTypeWitnessScriptHash
-		// P2WSH outputs utilize a 32-byte data push created by hashing the script with sha256 instead of hash160. In
-		// order to keep all address entries within the database uniform and compact, we use a hash160 here to reduce
-		// the size of the salient data push to 20-bytes.
-		copy(result[1:], util.Hash160(addr.ScriptAddress()))
-		return result, nil
-	case *util.AddressWitnessPubKeyHash:
-		var result [addrKeySize]byte
-		result[0] = addrKeyTypeWitnessPubKeyHash
-		copy(result[1:], addr.Hash160()[:])
-		return result, nil
+	// case *util.AddressWitnessScriptHash:
+	// 	var result [addrKeySize]byte
+	// 	result[0] = addrKeyTypeWitnessScriptHash
+	// 	// P2WSH outputs utilize a 32-byte data push created by hashing the script with sha256 instead of hash160. In
+	// 	// order to keep all address entries within the database uniform and compact, we use a hash160 here to reduce
+	// 	// the size of the salient data push to 20-bytes.
+	// 	copy(result[1:], util.Hash160(addr.ScriptAddress()))
+	// 	return result, nil
+	// case *util.AddressWitnessPubKeyHash:
+	// 	var result [addrKeySize]byte
+	// 	result[0] = addrKeyTypeWitnessPubKeyHash
+	// 	copy(result[1:], addr.Hash160()[:])
+	// 	return result, nil
 	}
 	return [addrKeySize]byte{}, errUnsupportedAddressType
 }

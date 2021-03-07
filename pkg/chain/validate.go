@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"time"
 	
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/hardfork"
@@ -95,25 +94,25 @@ func (b *BlockChain) checkConnectBlock(
 		)
 		return AssertError(str)
 	}
-	// BIP0030 added a rule to prevent blocks which contain duplicate transactions that 'overwrite' older transactions
-	// which are not fully spent. See the documentation for checkBIP0030 for more details.
-	//
-	// There are two blocks in the chain which violate this rule, so the check must be skipped for those blocks.
-	//
-	// The isBIP0030Node function is used to determine if this block is one of the two blocks that must be skipped. In
-	// addition, as of BIP0034, duplicate coinbases are no longer possible due to its requirement for including the
-	// block height in the coinbase and thus it is no longer possible to create transactions that 'overwrite' older
-	// ones.
-	//
-	// Therefore, only enforce the rule if BIP0034 is not yet active. This is a useful optimization because the BIP0030
-	// check is expensive since it involves a ton of cache misses in the utxoset.
-	if !isBIP0030Node(node) && (node.height < b.params.BIP0034Height) {
-		err := b.checkBIP0030(node, block, view)
-		if err != nil {
-			Error(err)
-			return err
-		}
-	}
+	// // BIP0030 added a rule to prevent blocks which contain duplicate transactions that 'overwrite' older transactions
+	// // which are not fully spent. See the documentation for checkBIP0030 for more details.
+	// //
+	// // There are two blocks in the chain which violate this rule, so the check must be skipped for those blocks.
+	// //
+	// // The isBIP0030Node function is used to determine if this block is one of the two blocks that must be skipped. In
+	// // addition, as of BIP0034, duplicate coinbases are no longer possible due to its requirement for including the
+	// // block height in the coinbase and thus it is no longer possible to create transactions that 'overwrite' older
+	// // ones.
+	// //
+	// // Therefore, only enforce the rule if BIP0034 is not yet active. This is a useful optimization because the BIP0030
+	// // check is expensive since it involves a ton of cache misses in the utxoset.
+	// if !isBIP0030Node(node) && (node.height < b.params.BIP0034Height) {
+	// 	err := b.checkBIP0030(node, block, view)
+	// 	if err != nil {
+	// 		Error(err)
+	// 		return err
+	// 	}
+	// }
 	// Load all of the utxos referenced by the inputs for all transactions in the block don't already exist in the utxo
 	// view from the database.
 	//
@@ -129,15 +128,15 @@ func (b *BlockChain) checkConnectBlock(
 	//
 	// See https://en.bitcoin.it/wiki/BIP_0016 for more details.
 	enforceBIP0016 := node.timestamp >= txscript.Bip16Activation.Unix()
-	// Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over to
-	// enforcing all the new rules.
-	var segwitState ThresholdState
-	segwitState, err = b.deploymentState(node.parent, chaincfg.DeploymentSegwit)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	enforceSegWit := segwitState == ThresholdActive
+	// // Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over to
+	// // enforcing all the new rules.
+	// var segwitState ThresholdState
+	// segwitState, err = b.deploymentState(node.parent, chaincfg.DeploymentSegwit)
+	// if err != nil {
+	// 	Error(err)
+	// 	return err
+	// }
+	// enforceSegWit := segwitState == ThresholdActive
 	// The number of signature operations must be less than the maximum allowed per block. Note that the preliminary
 	// sanity checks on a block also include a check similar to this one, but this check expands the count to include a
 	// precise count of pay-to -script-hash signature operations in each of the input transaction public key scripts.
@@ -147,10 +146,7 @@ func (b *BlockChain) checkConnectBlock(
 		// Since the first (and only the first) transaction has already been verified to be a coinbase transaction, use
 		// i == 0 as an optimization for the flag to countP2SHSigOps for whether or not the transaction is a coinbase
 		// transaction rather than having to do a full coinbase check again.
-		sigOpCost, err := GetSigOpCost(
-			tx, i == 0, view, enforceBIP0016,
-			enforceSegWit,
-		)
+		sigOpCost, err := GetSigOpCost(tx, i == 0, view, enforceBIP0016)
 		if err != nil {
 			Error(err)
 			return err
@@ -307,60 +303,60 @@ func (b *BlockChain) checkConnectBlock(
 	if enforceBIP0016 {
 		scriptFlags |= txscript.ScriptBip16
 	}
-	// Enforce DER signatures for block versions 3+ once the historical activation threshold has been reached. This is
-	// part of BIP0066.
-	blockHeader := &block.MsgBlock().Header
-	if blockHeader.Version >= 3 && node.height >= b.params.BIP0066Height {
-		scriptFlags |= txscript.ScriptVerifyDERSignatures
-	}
-	// Enforce CHECKLOCKTIMEVERIFY for block versions 4+ once the historical activation threshold has been reached. This
-	// is part of BIP0065.
-	if blockHeader.Version >= 4 && node.height >= b.params.BIP0065Height {
-		scriptFlags |= txscript.ScriptVerifyCheckLockTimeVerify
-	}
-	// Enforce CHECKSEQUENCEVERIFY during all block validation checks once the soft-fork deployment is fully active.
-	csvState, err := b.deploymentState(node.parent, chaincfg.DeploymentCSV)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	if csvState == ThresholdActive {
-		// If the CSV soft-fork is now active, then modify the scriptFlags to ensure that the CSV op code is properly
-		// validated during the script checks bleow.
-		scriptFlags |= txscript.ScriptVerifyCheckSequenceVerify
-		// We obtain the MTP of the *previous* block in order to determine if transactions in the current block are
-		// final.
-		medianTime := node.parent.CalcPastMedianTime()
-		// Additionally, if the CSV soft-fork package is now active, then we also enforce the relative sequence number
-		// based lock-times within the inputs of all transactions in this candidate block.
-		for _, tx := range block.Transactions() {
-			// A transaction can only be included within a block once the sequence locks of *all* its inputs are active.
-			sequenceLock, err := b.calcSequenceLock(
-				node, tx, view,
-				false,
-			)
-			if err != nil {
-				Error(err)
-				return err
-			}
-			if !SequenceLockActive(
-				sequenceLock, node.height,
-				medianTime,
-			) {
-				str := fmt.Sprintf(
-					"block contains " +
-						"transaction whose input sequence " +
-						"locks are not met",
-				)
-				return ruleError(ErrUnfinalizedTx, str)
-			}
-		}
-	}
-	// Enforce the segwit soft-fork package once the soft-fork has shifted into the "active" version bits state.
-	if enforceSegWit {
-		scriptFlags |= txscript.ScriptVerifyWitness
-		scriptFlags |= txscript.ScriptStrictMultiSig
-	}
+	// // Enforce DER signatures for block versions 3+ once the historical activation threshold has been reached. This is
+	// // part of BIP0066.
+	// blockHeader := &block.MsgBlock().Header
+	// if blockHeader.Version >= 3 && node.height >= b.params.BIP0066Height {
+	// 	scriptFlags |= txscript.ScriptVerifyDERSignatures
+	// }
+	// // Enforce CHECKLOCKTIMEVERIFY for block versions 4+ once the historical activation threshold has been reached. This
+	// // is part of BIP0065.
+	// if blockHeader.Version >= 4 && node.height >= b.params.BIP0065Height {
+	// 	scriptFlags |= txscript.ScriptVerifyCheckLockTimeVerify
+	// }
+	// // Enforce CHECKSEQUENCEVERIFY during all block validation checks once the soft-fork deployment is fully active.
+	// csvState, err := b.deploymentState(node.parent, chaincfg.DeploymentCSV)
+	// if err != nil {
+	// 	Error(err)
+	// 	return err
+	// }
+	// if csvState == ThresholdActive {
+	// 	// If the CSV soft-fork is now active, then modify the scriptFlags to ensure that the CSV op code is properly
+	// 	// validated during the script checks bleow.
+	// 	scriptFlags |= txscript.ScriptVerifyCheckSequenceVerify
+	// 	// We obtain the MTP of the *previous* block in order to determine if transactions in the current block are
+	// 	// final.
+	// 	medianTime := node.parent.CalcPastMedianTime()
+	// 	// Additionally, if the CSV soft-fork package is now active, then we also enforce the relative sequence number
+	// 	// based lock-times within the inputs of all transactions in this candidate block.
+	// 	for _, tx := range block.Transactions() {
+	// 		// A transaction can only be included within a block once the sequence locks of *all* its inputs are active.
+	// 		sequenceLock, err := b.calcSequenceLock(
+	// 			node, tx, view,
+	// 			false,
+	// 		)
+	// 		if err != nil {
+	// 			Error(err)
+	// 			return err
+	// 		}
+	// 		if !SequenceLockActive(
+	// 			sequenceLock, node.height,
+	// 			medianTime,
+	// 		) {
+	// 			str := fmt.Sprintf(
+	// 				"block contains " +
+	// 					"transaction whose input sequence " +
+	// 					"locks are not met",
+	// 			)
+	// 			return ruleError(ErrUnfinalizedTx, str)
+	// 		}
+	// 	}
+	// }
+	// // Enforce the segwit soft-fork package once the soft-fork has shifted into the "active" version bits state.
+	// if enforceSegWit {
+	// 	scriptFlags |= txscript.ScriptVerifyWitness
+	// 	scriptFlags |= txscript.ScriptStrictMultiSig
+	// }
 	// Now that the inexpensive checks are done and have passed, verify the transactions are actually allowed to spend
 	// the coins by running the expensive ECDSA signature check scripts. Doing this last helps prevent CPU exhaustion
 	// attacks.
@@ -401,9 +397,19 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) error {
 		)
 		return ruleError(ErrPrevBlockNotBest, str)
 	}
-	err := checkBlockSanity(block, powLimit, b.timeSource, flags, false, block.Height())
-	if err != nil {
-		Error("block processing error:", err)
+	var pb *util.Block
+	var err error
+	if pb, err = b.BlockByHash(&header.PrevBlock); Check(err) {
+	}
+	if err = checkBlockSanity(
+		block,
+		powLimit,
+		b.timeSource,
+		flags,
+		false,
+		block.Height(),
+		pb.MsgBlock().Header.Timestamp,
+	); Check(err) {
 		return err
 	}
 	err = b.checkBlockContext(block, tip, flags, true)
@@ -486,19 +492,19 @@ func (b *BlockChain) checkBlockContext(
 	}
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	if !fastAdd {
-		// Obtain the latest state of the deployed CSV soft-fork in order to properly guard the new validation behavior
-		// based on the current BIP 9 version bits state.
-		csvState, err := b.deploymentState(prevNode, chaincfg.DeploymentCSV)
-		if err != nil {
-			Error(err)
-			return err
-		}
+		// // Obtain the latest state of the deployed CSV soft-fork in order to properly guard the new validation behavior
+		// // based on the current BIP 9 version bits state.
+		// csvState, err := b.deploymentState(prevNode, chaincfg.DeploymentCSV)
+		// if err != nil {
+		// 	Error(err)
+		// 	return err
+		// }
 		// Once the CSV soft-fork is fully active, we'll switch to using the current median time past of the past
 		// block's timestamps for all lock-time based checks.
 		blockTime := header.Timestamp
-		if csvState == ThresholdActive {
-			blockTime = prevNode.CalcPastMedianTime()
-		}
+		// if csvState == ThresholdActive {
+		// 	blockTime = prevNode.CalcPastMedianTime()
+		// }
 		// The height of this block is one more than the referenced previous block.
 		blockHeight := prevNode.height + 1
 		// Ensure all transactions in the block are finalized.
@@ -515,53 +521,53 @@ func (b *BlockChain) checkBlockContext(
 				return ruleError(ErrUnfinalizedTx, str)
 			}
 		}
-		// Ensure coinbase starts with serialized block heights for blocks whose version is the serializedHeightVersion
-		// or newer once a majority of the network has upgraded. This is part of BIP0034.
-		if ShouldHaveSerializedBlockHeight(header) &&
-			blockHeight >= b.params.BIP0034Height {
-			coinbaseTx := block.Transactions()[0]
-			err := checkSerializedHeight(coinbaseTx, blockHeight)
-			if err != nil {
-				Error(err)
-				return err
-			}
-		}
-		// Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over
-		// to enforcing all the new rules.
-		var segwitState ThresholdState
-		segwitState, err = b.deploymentState(
-			prevNode,
-			chaincfg.DeploymentSegwit,
-		)
-		if err != nil {
-			Error(err)
-			return err
-		}
-		// If segwit is active, then we'll need to fully validate the new witness
-		// commitment for adherence to the rules.
-		if segwitState == ThresholdActive {
-			// Validate the witness commitment (if any) within the block. This involves
-			// asserting that if the coinbase contains the special commitment output, then
-			// this merkle root matches a computed merkle root of all the wtxid's of the
-			// transactions within the block. In addition, various other checks against the
-			// coinbase's witness stack.
-			if err := ValidateWitnessCommitment(block); err != nil {
-				Error(err)
-				return err
-			}
-			// Once the witness commitment, witness nonce, and sig op cost have been
-			// validated, we can finally assert that the block's weight doesn't exceed the
-			// current consensus parameter.
-			blockWeight := GetBlockWeight(block)
-			if blockWeight > MaxBlockWeight {
-				str := fmt.Sprintf(
-					"block's weight metric is too high - got %v, max %v",
-					blockWeight, MaxBlockWeight,
-				)
-				Error(err)
-				return ruleError(ErrBlockWeightTooHigh, str)
-			}
-		}
+		// // Ensure coinbase starts with serialized block heights for blocks whose version is the serializedHeightVersion
+		// // or newer once a majority of the network has upgraded. This is part of BIP0034.
+		// if ShouldHaveSerializedBlockHeight(header) &&
+		// 	blockHeight >= b.params.BIP0034Height {
+		// 	coinbaseTx := block.Transactions()[0]
+		// 	err := checkSerializedHeight(coinbaseTx, blockHeight)
+		// 	if err != nil {
+		// 		Error(err)
+		// 		return err
+		// 	}
+		// }
+		// // Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over
+		// // to enforcing all the new rules.
+		// var segwitState ThresholdState
+		// segwitState, err = b.deploymentState(
+		// 	prevNode,
+		// 	chaincfg.DeploymentSegwit,
+		// )
+		// if err != nil {
+		// 	Error(err)
+		// 	return err
+		// }
+		// // If segwit is active, then we'll need to fully validate the new witness
+		// // commitment for adherence to the rules.
+		// if segwitState == ThresholdActive {
+		// 	// Validate the witness commitment (if any) within the block. This involves
+		// 	// asserting that if the coinbase contains the special commitment output, then
+		// 	// this merkle root matches a computed merkle root of all the wtxid's of the
+		// 	// transactions within the block. In addition, various other checks against the
+		// 	// coinbase's witness stack.
+		// 	if err := ValidateWitnessCommitment(block); err != nil {
+		// 		Error(err)
+		// 		return err
+		// 	}
+		// 	// Once the witness commitment, witness nonce, and sig op cost have been
+		// 	// validated, we can finally assert that the block's weight doesn't exceed the
+		// 	// current consensus parameter.
+		// 	blockWeight := GetBlockWeight(block)
+		// 	if blockWeight > MaxBlockWeight {
+		// 		str := fmt.Sprintf(
+		// 			"block's weight metric is too high - got %v, max %v",
+		// 			blockWeight, MaxBlockWeight,
+		// 		)
+		// 		Error(err)
+		// 		return ruleError(ErrBlockWeightTooHigh, str)
+		// 	}
+		// }
 	}
 	return nil
 }
@@ -609,14 +615,20 @@ func (b *BlockChain) checkBlockHeaderContext(header *wire.BlockHeader, prevNode 
 			Error(str)
 			return ruleError(ErrUnexpectedDifficulty, str)
 		}
-		// Ensure the timestamp for the block header is after the median time of the last several blocks
-		// (medianTimeBlocks).
-		medianTime := prevNode.CalcPastMedianTime()
-		if !header.Timestamp.After(medianTime) {
-			str := "block timestamp of %v is not after expected %v"
-			str = fmt.Sprintf(str, header.Timestamp, medianTime)
-			Error(str)
-			return ruleError(ErrTimeTooOld, str)
+		if fork.GetCurrent(prevNode.height+1) > 0 {
+			if header.Timestamp.Truncate(time.Second).Sub(prevNode.Header().Timestamp.Truncate(time.Second)) < 1 {
+				return ruleError(ErrTimeTooOld, "timestamp is equal to or less than the chain tip")
+			}
+		} else {
+			// Ensure the timestamp for the block header is after the median time of the last several blocks
+			// (medianTimeBlocks).
+			medianTime := prevNode.CalcPastMedianTime()
+			if !header.Timestamp.After(medianTime) {
+				str := "block timestamp of %v is not after expected %v"
+				str = fmt.Sprintf(str, header.Timestamp, medianTime)
+				Error(str)
+				return ruleError(ErrTimeTooOld, str)
+			}
 		}
 	}
 	// The height of this block is one more than the referenced previous block.
@@ -716,9 +728,10 @@ func CheckBlockSanity(
 	timeSource MedianTimeSource,
 	DoNotCheckPow bool,
 	height int32,
+	prevBlockTimestamp time.Time,
 ) error {
 	Trace("CheckBlockSanity powlimit %64x", powLimit)
-	return checkBlockSanity(block, powLimit, timeSource, BFNone, DoNotCheckPow, height)
+	return checkBlockSanity(block, powLimit, timeSource, BFNone, DoNotCheckPow, height, prevBlockTimestamp)
 }
 
 // CheckProofOfWork ensures the block header bits which indicate the target difficulty is in min/max range and that the
@@ -1114,17 +1127,17 @@ func IsFinalizedTransaction(tx *util.Tx, blockHeight int32, blockTime time.Time)
 	return true
 }
 
-// SequenceLockActive determines if a transaction's sequence locks have been met, meaning that all the inputs of a given
-// transaction have reached a height or time sufficient for their relative lock-time maturity.
-func SequenceLockActive(sequenceLock *SequenceLock, blockHeight int32, medianTimePast time.Time) bool {
-	// If either the seconds, or height relative-lock time has not yet reached, then the transaction is not yet mature
-	// according to its sequence locks.
-	if sequenceLock.Seconds >= medianTimePast.Unix() ||
-		sequenceLock.BlockHeight >= blockHeight {
-		return false
-	}
-	return true
-}
+// // SequenceLockActive determines if a transaction's sequence locks have been met, meaning that all the inputs of a given
+// // transaction have reached a height or time sufficient for their relative lock-time maturity.
+// func SequenceLockActive(sequenceLock *SequenceLock, blockHeight int32, medianTimePast time.Time) bool {
+// 	// If either the seconds, or height relative-lock time has not yet reached, then the transaction is not yet mature
+// 	// according to its sequence locks.
+// 	if sequenceLock.Seconds >= medianTimePast.Unix() ||
+// 		sequenceLock.BlockHeight >= blockHeight {
+// 		return false
+// 	}
+// 	return true
+// }
 
 // ShouldHaveSerializedBlockHeight determines if a block should have a serialized block height embedded within the
 // scriptSig of its coinbase transaction. Judgement is based on the block version in the block header.
@@ -1141,24 +1154,26 @@ func ShouldHaveSerializedBlockHeight(header *wire.BlockHeader) bool {
 //
 // These checks are context free.
 //
-// The flags do not modify the behavior of this function directly, however they are needed to pass along to
-// checkProofOfWork.
+// The flags do not modify the behavior of this function directly, however they
+// are needed to pass along to checkProofOfWork.
 func checkBlockHeaderSanity(
 	header *wire.BlockHeader,
 	powLimit *big.Int,
 	timeSource MedianTimeSource,
 	flags BehaviorFlags,
 	height int32,
+	prevBlockTimestamp time.Time,
 ) error {
-	// Ensure the proof of work bits in the block header is in min/max range and the block hash is less than the target
-	// value described by the bits.
+	// Ensure the proof of work bits in the block header is in min/max range and the
+	// block hash is less than the target value described by the bits.
 	err := checkProofOfWork(header, powLimit, flags, height)
 	if err != nil {
 		Errorf("%+v %v", header, err)
 		return err
 	}
-	// A block timestamp must not have a greater precision than one second. This check is necessary because Go time.Time
-	// values support nanosecond precision whereas the consensus rules only apply to seconds and it's much nicer to deal
+	// A block timestamp must not have a greater precision than one second. This
+	// check is necessary because Go time.Time values support nanosecond precision
+	// whereas the consensus rules only apply to seconds and it's much nicer to deal
 	// with standard Go time values instead of converting to seconds everywhere.
 	if !header.Timestamp.Equal(time.Unix(header.Timestamp.Unix(), 0)) {
 		str := fmt.Sprintf("block timestamp of %v has a higher precision than one second", header.Timestamp)
@@ -1173,16 +1188,25 @@ func checkBlockHeaderSanity(
 		)
 		return ruleError(ErrTimeTooNew, str)
 	}
+	if fork.GetCurrent(height) > 0 {
+		cbts := header.Timestamp.Truncate(time.Second)
+		if cbts.Sub(prevBlockTimestamp.Truncate(time.Second)) < 1 {
+			return ruleError(
+				ErrTimeTooOld,
+				fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
+			)
+		}
+	}
 	return nil
 }
 
-// checkBlockSanity performs some preliminary checks on a block to ensure it is sane before continuing with block
-// processing.
+// checkBlockSanity performs some preliminary checks on a block to ensure it is
+// sane before continuing with block processing.
 //
 // These checks are context free.
 //
-// The flags do not modify the behavior of this function directly, however they are needed to pass along to
-// checkBlockHeaderSanity.
+// The flags do not modify the behavior of this function directly, however they
+// are needed to pass along to checkBlockHeaderSanity.
 func checkBlockSanity(
 	block *util.Block,
 	powLimit *big.Int,
@@ -1190,13 +1214,13 @@ func checkBlockSanity(
 	flags BehaviorFlags,
 	DoNotCheckPow bool,
 	height int32,
+	prevBlockTimestamp time.Time,
 ) error {
 	Tracef("checkBlockSanity %08x %064x", block.MsgBlock().Header.Bits, powLimit)
 	msgBlock := block.MsgBlock()
 	header := &msgBlock.Header
-	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height)
+	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height, prevBlockTimestamp)
 	if err != nil {
-		Error(err)
 		Debug("block processing error: ", block.MsgBlock().Header.Version, err)
 		return err
 	}
@@ -1249,11 +1273,12 @@ func checkBlockSanity(
 			return err
 		}
 	}
-	// Build merkle tree and ensure the calculated merkle root matches the entry in the block header. This also has the
-	// effect of caching all of the transaction hashes in the block to speed up future hash checks.
+	// Build merkle tree and ensure the calculated merkle root matches the entry in
+	// the block header. This also has the effect of caching all of the transaction
+	// hashes in the block to speed up future hash checks.
 	//
-	// Bitcoind builds the tree here and checks the merkle root after the following checks, but there is no reason not
-	// to check the merkle root matches here.
+	// Bitcoind builds the tree here and checks the merkle root after the following
+	// checks, but there is no reason not to check the merkle root matches here.
 	merkles := BuildMerkleTreeStore(block.Transactions(), false)
 	calculatedMerkleRoot := merkles.GetRoot()
 	if !header.MerkleRoot.IsEqual(calculatedMerkleRoot) {
@@ -1264,8 +1289,8 @@ func checkBlockSanity(
 		)
 		return ruleError(ErrBadMerkleRoot, str)
 	}
-	// Check for duplicate transactions. This check will be fairly quick since the transaction hashes are already cached
-	// due to building the merkle tree above.
+	// Check for duplicate transactions. This check will be fairly quick since the
+	// transaction hashes are already cached due to building the merkle tree above.
 	existingTxHashes := make(map[chainhash.Hash]struct{})
 	for _, tx := range transactions {
 		hash := tx.Hash()
@@ -1296,12 +1321,14 @@ func checkBlockSanity(
 	return nil
 }
 
-// checkProofOfWork ensures the block header bits which indicate the target difficulty is in min/max range and that the
-// block hash is less than the target difficulty as claimed.
+// checkProofOfWork ensures the block header bits which indicate the target
+// difficulty is in min/max range and that the block hash is less than the
+// target difficulty as claimed.
 //
 // The flags modify the behavior of this function as follows:
 //
-//  - BFNoPoWCheck: The check to ensure the block hash is less than the target difficulty is not performed.
+//  - BFNoPoWCheck: The check to ensure the block hash is less than the target
+//  difficulty is not performed.
 func checkProofOfWork(
 	header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlags,
 	height int32,
@@ -1331,10 +1358,11 @@ func checkProofOfWork(
 		Warn(str)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}
-	// The block hash must be less than the claimed target unless the flag to avoid proof of work checks is set.
+	// The block hash must be less than the claimed target unless the flag to avoid
+	// proof of work checks is set.
 	if flags&BFNoPoWCheck == 0 {
-		// The block hash must be less than the claimed target. Unless there is less than 10 previous with the same
-		// version (algo)...
+		// The block hash must be less than the claimed target. Unless there is less
+		// than 10 previous with the same version (algo)...
 		hash := header.BlockHashWithAlgos(height)
 		bigHash := HashToBig(&hash)
 		if bigHash.Cmp(target) > 0 {
@@ -1349,8 +1377,8 @@ func checkProofOfWork(
 	return nil
 }
 
-// checkSerializedHeight checks if the signature script in the passed transaction starts with the serialized block
-// height of wantHeight.
+// checkSerializedHeight checks if the signature script in the passed
+// transaction starts with the serialized block height of wantHeight.
 func checkSerializedHeight(coinbaseTx *util.Tx, wantHeight int32) error {
 	serializedHeight, err := ExtractCoinbaseHeight(coinbaseTx)
 	if err != nil {
@@ -1367,19 +1395,21 @@ func checkSerializedHeight(coinbaseTx *util.Tx, wantHeight int32) error {
 	return nil
 }
 
-// isBIP0030Node returns whether or not the passed node represents one of the two blocks that violate the BIP0030 rule
-// which prevents transactions from overwriting old ones.
-func isBIP0030Node(node *BlockNode) bool {
-	if node.height == 91842 && node.hash.IsEqual(block91842Hash) {
-		return true
-	}
-	if node.height == 91880 && node.hash.IsEqual(block91880Hash) {
-		return true
-	}
-	return false
-}
+// // isBIP0030Node returns whether or not the passed node represents one of the
+// // two blocks that violate the BIP0030 rule which prevents transactions from
+// // overwriting old ones.
+// func isBIP0030Node(node *BlockNode) bool {
+// 	if node.height == 91842 && node.hash.IsEqual(block91842Hash) {
+// 		return true
+// 	}
+// 	if node.height == 91880 && node.hash.IsEqual(block91880Hash) {
+// 		return true
+// 	}
+// 	return false
+// }
 
-// isNullOutpoint determines whether or not a previous transaction output point is set.
+// isNullOutpoint determines whether or not a previous transaction output point
+// is set.
 func isNullOutpoint(outpoint *wire.OutPoint) bool {
 	if outpoint.Index == math.MaxUint32 && outpoint.Hash == zeroHash {
 		return true

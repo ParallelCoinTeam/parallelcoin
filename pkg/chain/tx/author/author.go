@@ -160,13 +160,15 @@ func (tx *AuthoredTx) RandomizeChangePosition() {
 	tx.ChangeIndex = RandomizeOutputPosition(tx.Tx.TxOut, tx.ChangeIndex)
 }
 
-// AddAllInputScripts modifies transaction a transaction by adding inputs scripts for each input. Previous output
-// scripts being redeemed by each input are passed in prevPkScripts and the slice length must match the number of
-// inputs. Private keys and redeem scripts are looked up using a SecretsSource based on the previous output script.
+// AddAllInputScripts modifies transaction a transaction by adding inputs
+// scripts for each input. Previous output scripts being redeemed by each input
+// are passed in prevPkScripts and the slice length must match the number of
+// inputs. Private keys and redeem scripts are looked up using a SecretsSource
+// based on the previous output script.
 func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []util.Amount,
 	secrets SecretsSource) error {
 	inputs := tx.TxIn
-	hashCache := txscript.NewTxSigHashes(tx)
+	// hashCache := txscript.NewTxSigHashes(tx)
 	chainParams := secrets.ChainParams()
 	if len(inputs) != len(prevPkScripts) {
 		return errors.New("tx.TxIn and prevPkScripts slices must " +
@@ -175,25 +177,25 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 	for i := range inputs {
 		pkScript := prevPkScripts[i]
 		switch {
-		// If this is a p2sh output, who's script hash pre-image is a witness program,
-		// then we'll need to use a modified signing function which generates both the
-		// sigScript, and the witness script.
-		case txscript.IsPayToScriptHash(pkScript):
-			err := spendNestedWitnessPubKeyHash(inputs[i], pkScript,
-				int64(inputValues[i]), chainParams, secrets,
-				tx, hashCache, i)
-			if err != nil {
-				Error(err)
-				return err
-			}
-		case txscript.IsPayToWitnessPubKeyHash(pkScript):
-			err := spendWitnessKeyHash(inputs[i], pkScript,
-				int64(inputValues[i]), chainParams, secrets,
-				tx, hashCache, i)
-			if err != nil {
-				Error(err)
-				return err
-			}
+		// // If this is a p2sh output, who's script hash pre-image is a witness program,
+		// // then we'll need to use a modified signing function which generates both the
+		// // sigScript, and the witness script.
+		// case txscript.IsPayToScriptHash(pkScript):
+		// 	err := spendNestedWitnessPubKeyHash(inputs[i], pkScript,
+		// 		int64(inputValues[i]), chainParams, secrets,
+		// 		tx, hashCache, i)
+		// 	if err != nil {
+		// 		Error(err)
+		// 		return err
+		// 	}
+		// case txscript.IsPayToWitnessPubKeyHash(pkScript):
+		// 	err := spendWitnessKeyHash(inputs[i], pkScript,
+		// 		int64(inputValues[i]), chainParams, secrets,
+		// 		tx, hashCache, i)
+		// 	if err != nil {
+		// 		Error(err)
+		// 		return err
+		// 	}
 		default:
 			sigScript := inputs[i].SignatureScript
 			script, err := txscript.SignTxOutput(chainParams, tx, i,
@@ -210,117 +212,117 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 }
 
 // spendWitnessKeyHash generates, and sets a valid witness for spending the
-// passed pkScript with the specified input amount. The input amount *must*
-// correspond to the output value of the previous pkScript, or else verification
-// will fail since the new sighash digest algorithm defined in BIP0143 includes
-// the input value in the sighash.
-func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
-	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
-	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) error {
-	// First obtain the key pair associated with this p2wkh address.
-	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
-		chainParams)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	privKey, compressed, err := secrets.GetKey(addrs[0])
-	if err != nil {
-		Error(err)
-		return err
-	}
-	pubKey := privKey.PubKey()
-	// Once we have the key pair, generate a p2wkh address type, respecting the compression type of the generated key.
-	var pubKeyHash []byte
-	if compressed {
-		pubKeyHash = util.Hash160(pubKey.SerializeCompressed())
-	} else {
-		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
-	}
-	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	// With the concrete address type, we can now generate the corresponding witness
-	// program to be used to generate a valid witness which will allow us to spend
-	// this output.
-	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
-		inputValue, witnessProgram, txscript.SigHashAll, privKey, true)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	txIn.Witness = witnessScript
-	return nil
-}
+// // passed pkScript with the specified input amount. The input amount *must*
+// // correspond to the output value of the previous pkScript, or else verification
+// // will fail since the new sighash digest algorithm defined in BIP0143 includes
+// // the input value in the sighash.
+// func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
+// 	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
+// 	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) error {
+// 	// First obtain the key pair associated with this p2wkh address.
+// 	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
+// 		chainParams)
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	privKey, compressed, err := secrets.GetKey(addrs[0])
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	pubKey := privKey.PubKey()
+// 	// Once we have the key pair, generate a p2wkh address type, respecting the compression type of the generated key.
+// 	var pubKeyHash []byte
+// 	if compressed {
+// 		pubKeyHash = util.Hash160(pubKey.SerializeCompressed())
+// 	} else {
+// 		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
+// 	}
+// 	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	// With the concrete address type, we can now generate the corresponding witness
+// 	// program to be used to generate a valid witness which will allow us to spend
+// 	// this output.
+// 	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
+// 		inputValue, witnessProgram, txscript.SigHashAll, privKey, true)
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	txIn.Witness = witnessScript
+// 	return nil
+// }
 
 // spendNestedWitnessPubKey generates both a sigScript, and valid witness for
-// spending the passed pkScript with the specified input amount. The generated
-// sigScript is the version 0 p2wkh witness program corresponding to the queried
-// key. The witness stack is identical to that of one which spends a regular
-// p2wkh output. The input amount *must* correspond to the output value of the
-// previous pkScript, or else verification will fail since the new sighash
-// digest algorithm defined in BIP0143 includes the input value in the sighash.
-func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
-	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
-	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) error {
-	// First we need to obtain the key pair related to this p2sh output.
-	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
-		chainParams)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	privKey, compressed, err := secrets.GetKey(addrs[0])
-	if err != nil {
-		Error(err)
-		return err
-	}
-	pubKey := privKey.PubKey()
-	var pubKeyHash []byte
-	if compressed {
-		pubKeyHash = util.Hash160(pubKey.SerializeCompressed())
-	} else {
-		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
-	}
-	// Next, we'll generate a valid sigScript that'll allow us to spend the p2sh
-	// output. The sigScript will contain only a single push of the p2wkh witness
-	// program corresponding to the matching public key of this address.
-	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	bldr := txscript.NewScriptBuilder()
-	bldr.AddData(witnessProgram)
-	sigScript, err := bldr.Script()
-	if err != nil {
-		Error(err)
-		return err
-	}
-	txIn.SignatureScript = sigScript
-	// With the sigScript in place, we'll next generate the proper witness that'll
-	// allow us to spend the p2wkh output.
-	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
-		inputValue, witnessProgram, txscript.SigHashAll, privKey, compressed)
-	if err != nil {
-		Error(err)
-		return err
-	}
-	txIn.Witness = witnessScript
-	return nil
-}
+// // spending the passed pkScript with the specified input amount. The generated
+// // sigScript is the version 0 p2wkh witness program corresponding to the queried
+// // key. The witness stack is identical to that of one which spends a regular
+// // p2wkh output. The input amount *must* correspond to the output value of the
+// // previous pkScript, or else verification will fail since the new sighash
+// // digest algorithm defined in BIP0143 includes the input value in the sighash.
+// func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
+// 	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
+// 	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) error {
+// 	// First we need to obtain the key pair related to this p2sh output.
+// 	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
+// 		chainParams)
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	privKey, compressed, err := secrets.GetKey(addrs[0])
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	pubKey := privKey.PubKey()
+// 	var pubKeyHash []byte
+// 	if compressed {
+// 		pubKeyHash = util.Hash160(pubKey.SerializeCompressed())
+// 	} else {
+// 		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
+// 	}
+// 	// Next, we'll generate a valid sigScript that'll allow us to spend the p2sh
+// 	// output. The sigScript will contain only a single push of the p2wkh witness
+// 	// program corresponding to the matching public key of this address.
+// 	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	bldr := txscript.NewScriptBuilder()
+// 	bldr.AddData(witnessProgram)
+// 	sigScript, err := bldr.Script()
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	txIn.SignatureScript = sigScript
+// 	// With the sigScript in place, we'll next generate the proper witness that'll
+// 	// allow us to spend the p2wkh output.
+// 	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
+// 		inputValue, witnessProgram, txscript.SigHashAll, privKey, compressed)
+// 	if err != nil {
+// 		Error(err)
+// 		return err
+// 	}
+// 	txIn.Witness = witnessScript
+// 	return nil
+// }
 
 // AddAllInputScripts modifies an authored transaction by adding inputs scripts for each input of an authored
 // transaction. Private keys and redeem scripts are looked up using a SecretsSource based on the previous output script.

@@ -1,11 +1,13 @@
 package gui
 
 import (
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"time"
 	
 	qu "github.com/p9c/pod/pkg/util/quit"
 )
 
+// Watcher keeps the chain and wallet and rpc clients connected
 func (wg *WalletGUI) Watcher() qu.C {
 	quit := qu.T()
 	// start things up first
@@ -19,14 +21,43 @@ func (wg *WalletGUI) Watcher() qu.C {
 		if err = wg.chainClient(); Check(err) {
 		}
 	}
+	var err error
 	if !wg.wallet.Running() {
 		Debug("watcher starting wallet")
 		wg.wallet.Start()
+		Debug("now we can open the wallet")
+		if err = wg.writeWalletCookie(); Check(err) {
+		}
 	}
-	if wg.WalletClient == nil {
-		Debug("wallet client is not initialized")
-		var err error
-		if err = wg.walletClient(); Check(err) {
+	if wg.WalletClient == nil || wg.WalletClient.Disconnected() {
+	allOut:
+		for {
+			if err = wg.walletClient(); !Check(err) {
+			out:
+				for {
+					// keep trying until shutdown or the wallet client connects
+					var bci *btcjson.GetBlockChainInfoResult
+					if bci, err = wg.WalletClient.GetBlockChainInfo(); Check(err) {
+						select {
+						case <-time.After(time.Second):
+							continue
+						case <-wg.quit:
+							return nil
+						}
+					}
+					Debugs(bci)
+					break out
+				}
+			}
+			wg.unlockPassword.Wipe()
+			wg.ready.Store(true)
+			wg.Invalidate()
+			select {
+			case <-time.After(time.Second):
+				break allOut
+			case <-wg.quit:
+				return nil
+			}
 		}
 	}
 	go func() {
@@ -43,15 +74,8 @@ func (wg *WalletGUI) Watcher() qu.C {
 						Debug("watcher starting node")
 						wg.node.Start()
 					}
-					if wg.ChainClient == nil {
-						Debug("chain client is not initialized")
-						var err error
-						if err = wg.chainClient(); Check(err) {
-							continue
-						}
-					}
 					if wg.ChainClient.Disconnected() {
-						if err = wg.ChainClient.Connect(1); Check(err) {
+						if err = wg.chainClient(); Check(err) {
 							continue
 						}
 					}

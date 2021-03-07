@@ -102,7 +102,7 @@ func NewBlockHeader(version int32, prevHash, merkleRootHash *chainhash.Hash,
 		Version:    version,
 		PrevBlock:  *prevHash,
 		MerkleRoot: *merkleRootHash,
-		Timestamp:  time.Unix(time.Now().Unix(), 0),
+		Timestamp:  time.Now().Truncate(time.Second),
 		Bits:       bits,
 		Nonce:      nonce,
 	}

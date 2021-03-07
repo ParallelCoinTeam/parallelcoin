@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sync"
 	
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/util"
@@ -29,14 +28,14 @@ const (
 	// indicates that a scoped manager with this address type shouldn't be consulted
 	// during historical rescans.
 	RawPubKey
-	// NestedWitnessPubKey represents a p2wkh output nested within a p2sh output.
-	// Using this address type, the wallet can receive funds from other wallet's
-	// which don't yet recognize the new segwit standard output types. Receiving
-	// funds to this address maintains the scalability, and malleability fixes due
-	// to segwit in a backwards compatible manner.
-	NestedWitnessPubKey
-	// WitnessPubKey represents a p2wkh (pay-to-witness-key-hash) address type.
-	WitnessPubKey
+	// // NestedWitnessPubKey represents a p2wkh output nested within a p2sh output.
+	// // Using this address type, the wallet can receive funds from other wallet's
+	// // which don't yet recognize the new segwit standard output types. Receiving
+	// // funds to this address maintains the scalability, and malleability fixes due
+	// // to segwit in a backwards compatible manner.
+	// NestedWitnessPubKey
+	// // WitnessPubKey represents a p2wkh (pay-to-witness-key-hash) address type.
+	// WitnessPubKey
 )
 
 // ManagedAddress is an interface that provides access to information regarding
@@ -180,8 +179,8 @@ func (a *managedAddress) AddrHash() []byte {
 		hash = n.Hash160()[:]
 	case *util.AddressScriptHash:
 		hash = n.Hash160()[:]
-	case *util.AddressWitnessPubKeyHash:
-		hash = n.Hash160()[:]
+		// case *util.AddressWitnessPubKeyHash:
+		// 	hash = n.Hash160()[:]
 	}
 	return hash
 }
@@ -303,9 +302,11 @@ func (a *managedAddress) DerivationInfo() (KeyScope, DerivationPath, bool) {
 // newManagedAddressWithoutPrivKey returns a new managed address based on the
 // passed account, public key, and whether or not the public key should be
 // compressed.
-func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
+func newManagedAddressWithoutPrivKey(
+	m *ScopedKeyManager,
 	derivationPath DerivationPath, pubKey *ec.PublicKey, compressed bool,
-	addrType AddressType) (*managedAddress, error) {
+	addrType AddressType,
+) (*managedAddress, error) {
 	// Create a pay-to-pubkey-hash address from the public key.
 	var pubKeyHash []byte
 	if compressed {
@@ -316,44 +317,44 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 	var address util.Address
 	var err error
 	switch addrType {
-	case NestedWitnessPubKey:
-		// For this address type we'l generate an address which is backwards compatible
-		// to Bitcoin nodes running 0.6.0 onwards, but allows us to take advantage of
-		// segwit's scripting improvements, and malleability fixes.
-		//
-		// First, we'll generate a normal p2wkh address from the pubkey hash.
-		var witAddr *util.AddressWitnessPubKeyHash
-		if witAddr, err = util.NewAddressWitnessPubKeyHash(
-			pubKeyHash, m.rootManager.chainParams,
-		); Check(err) {
-			return nil, err
-		}
-		// Next we'll generate the witness program which can be used as a pkScript to
-		// pay to this generated address.
-		var witnessProgram []byte
-		if witnessProgram, err = txscript.PayToAddrScript(witAddr); Check(err) {
-			return nil, err
-		}
-		// Finally, we'll use the witness program itself as the pre-image to a p2sh
-		// address. In order to spend, we first use the witnessProgram as the sigScript,
-		// then present the proper <sig, pubkey> pair as the witness.
-		if address, err = util.NewAddressScriptHash(
-			witnessProgram, m.rootManager.chainParams,
-		); Check(err) {
-			return nil, err
-		}
+	// case NestedWitnessPubKey:
+	// // For this address type we'l generate an address which is backwards compatible
+	// // to Bitcoin nodes running 0.6.0 onwards, but allows us to take advantage of
+	// // segwit's scripting improvements, and malleability fixes.
+	// //
+	// // First, we'll generate a normal p2wkh address from the pubkey hash.
+	// var witAddr *util.AddressWitnessPubKeyHash
+	// if witAddr, err = util.NewAddressWitnessPubKeyHash(
+	// 	pubKeyHash, m.rootManager.chainParams,
+	// ); Check(err) {
+	// 	return nil, err
+	// }
+	// // Next we'll generate the witness program which can be used as a pkScript to
+	// // pay to this generated address.
+	// var witnessProgram []byte
+	// if witnessProgram, err = txscript.PayToAddrScript(witAddr); Check(err) {
+	// 	return nil, err
+	// }
+	// // Finally, we'll use the witness program itself as the pre-image to a p2sh
+	// // address. In order to spend, we first use the witnessProgram as the sigScript,
+	// // then present the proper <sig, pubkey> pair as the witness.
+	// if address, err = util.NewAddressScriptHash(
+	// 	witnessProgram, m.rootManager.chainParams,
+	// ); Check(err) {
+	// 	return nil, err
+	// }
 	case PubKeyHash:
 		if address, err = util.NewAddressPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
 		); Check(err) {
 			return nil, err
 		}
-	case WitnessPubKey:
-		if address, err = util.NewAddressWitnessPubKeyHash(
-			pubKeyHash, m.rootManager.chainParams,
-		); Check(err) {
-			return nil, err
-		}
+	// case WitnessPubKey:
+	// 	if address, err = util.NewAddressWitnessPubKeyHash(
+	// 		pubKeyHash, m.rootManager.chainParams,
+	// 	); Check(err) {
+	// 		return nil, err
+	// 	}
 	}
 	return &managedAddress{
 		manager:          m,
@@ -372,9 +373,11 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 // newManagedAddress returns a new managed address based on the passed account,
 // private key, and whether or not the public key is compressed. The managed
 // address will have access to the private and public keys.
-func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
+func newManagedAddress(
+	s *ScopedKeyManager, derivationPath DerivationPath,
 	privKey *ec.PrivateKey, compressed bool,
-	addrType AddressType) (*managedAddress, error) {
+	addrType AddressType,
+) (*managedAddress, error) {
 	// Encrypt the private key.
 	//
 	// NOTE: The privKeyBytes here are set into the managed address which are
@@ -390,7 +393,13 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 	// add the private key to it.
 	ecPubKey := (*ec.PublicKey)(&privKey.PublicKey)
 	var managedAddr *managedAddress
-	if managedAddr, err = newManagedAddressWithoutPrivKey(s, derivationPath, ecPubKey, compressed, addrType); Check(err) {
+	if managedAddr, err = newManagedAddressWithoutPrivKey(
+		s,
+		derivationPath,
+		ecPubKey,
+		compressed,
+		addrType,
+	); Check(err) {
 		return nil, err
 	}
 	managedAddr.privKeyEncrypted = privKeyEncrypted
@@ -402,8 +411,10 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 // account and extended key. The managed address will have access to the private
 // and public keys if the provided extended key is private, otherwise it will
 // only have access to the public key.
-func newManagedAddressFromExtKey(s *ScopedKeyManager, derivationPath DerivationPath, key *hdkeychain.ExtendedKey,
-	addrType AddressType) (managedAddr *managedAddress, err error) {
+func newManagedAddressFromExtKey(
+	s *ScopedKeyManager, derivationPath DerivationPath, key *hdkeychain.ExtendedKey,
+	addrType AddressType,
+) (managedAddr *managedAddress, err error) {
 	// Create a new managed address based on the public or private key depending on
 	// whether the generated key is private.
 	if key.IsPrivate() {
@@ -558,13 +569,15 @@ func (a *scriptAddress) Script() ([]byte, error) {
 }
 
 // newScriptAddress initializes and returns a new pay-to-script-hash address.
-func newScriptAddress(m *ScopedKeyManager, account uint32, scriptHash,
-	scriptEncrypted []byte) (*scriptAddress, error) {
+func newScriptAddress(
+	m *ScopedKeyManager, account uint32, scriptHash,
+	scriptEncrypted []byte,
+) (*scriptAddress, error) {
 	var err error
 	var address *util.AddressScriptHash
 	if address, err = util.NewAddressScriptHashFromHash(
 		scriptHash, m.rootManager.chainParams,
-	); Check(err){
+	); Check(err) {
 		return nil, err
 	}
 	return &scriptAddress{

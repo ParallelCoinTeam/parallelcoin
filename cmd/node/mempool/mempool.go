@@ -10,7 +10,6 @@ import (
 	"time"
 	
 	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/hardfork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -37,9 +36,9 @@ type Config struct {
 	// MedianTimePast defines the function to use in order to access the median time past calculated from the
 	// point-of-view of the current chain tip within the best chain.
 	MedianTimePast func() time.Time
-	// CalcSequenceLock defines the function to use in order to generate the current sequence lock for the given
-	// transaction using the passed utxo view.
-	CalcSequenceLock func(*util.Tx, *blockchain.UtxoViewpoint) (*blockchain.SequenceLock, error)
+	// // CalcSequenceLock defines the function to use in order to generate the current sequence lock for the given
+	// // transaction using the passed utxo view.
+	// CalcSequenceLock func(*util.Tx, *blockchain.UtxoViewpoint) (*blockchain.SequenceLock, error)
 	// IsDeploymentActive returns true if the target deploymentID is active, and false otherwise. The mempool uses
 	// this function to gauge if transactions using new to be soft-forked rules should be allowed into the mempool
 	// or not.
@@ -604,19 +603,19 @@ func (mp *TxPool) maybeAcceptTransaction(
 	b *blockchain.BlockChain, tx *util.Tx, isNew, rateLimit, rejectDupOrphans bool,
 ) ([]*chainhash.Hash, *TxDesc, error) {
 	txHash := tx.Hash()
-	// If a transaction has witness data, and segwit isn't active yet, If segwit isn't active yet, then we won't accept
-	// it into the mempool as it can't be mined yet.
-	if tx.MsgTx().HasWitness() {
-		segwitActive, err := mp.cfg.IsDeploymentActive(chaincfg.DeploymentSegwit)
-		if err != nil {
-			Error(err)
-			return nil, nil, err
-		}
-		if !segwitActive {
-			str := fmt.Sprintf("transaction %v has witness data, but segwit isn't active yet", txHash)
-			return nil, nil, txRuleError(wire.RejectNonstandard, str)
-		}
-	}
+	// // If a transaction has witness data, and segwit isn't active yet, If segwit isn't active yet, then we won't accept
+	// // it into the mempool as it can't be mined yet.
+	// if tx.MsgTx().HasWitness() {
+	// 	segwitActive, err := mp.cfg.IsDeploymentActive(chaincfg.DeploymentSegwit)
+	// 	if err != nil {
+	// 		Error(err)
+	// 		return nil, nil, err
+	// 	}
+	// 	if !segwitActive {
+	// 		str := fmt.Sprintf("transaction %v has witness data, but segwit isn't active yet", txHash)
+	// 		return nil, nil, txRuleError(wire.RejectNonstandard, str)
+	// 	}
+	// }
 	if blockchain.ContainsBlacklisted(b, tx, hardfork.Blacklist) {
 		return nil, nil, errors.New("transaction contains blacklisted address")
 	}
@@ -723,25 +722,25 @@ func (mp *TxPool) maybeAcceptTransaction(
 	if len(missingParents) > 0 {
 		return missingParents, nil, nil
 	}
-	// Don't allow the transaction into the mempool unless its sequence lock is active, meaning that it'll be allowed
-	// into the next block with respect to its defined relative lock times.
-	sequenceLock, err := mp.cfg.CalcSequenceLock(tx, utxoView)
-	if err != nil {
-		Error(err)
-		if cErr, ok := err.(blockchain.RuleError); ok {
-			return nil, nil, chainRuleError(cErr)
-		}
-		return nil, nil, err
-	}
-	if !blockchain.SequenceLockActive(
-		sequenceLock, nextBlockHeight,
-		medianTimePast,
-	) {
-		return nil, nil, txRuleError(
-			wire.RejectNonstandard,
-			"transaction's sequence locks on inputs not met",
-		)
-	}
+	// // Don't allow the transaction into the mempool unless its sequence lock is active, meaning that it'll be allowed
+	// // into the next block with respect to its defined relative lock times.
+	// sequenceLock, err := mp.cfg.CalcSequenceLock(tx, utxoView)
+	// if err != nil {
+	// 	Error(err)
+	// 	if cErr, ok := err.(blockchain.RuleError); ok {
+	// 		return nil, nil, chainRuleError(cErr)
+	// 	}
+	// 	return nil, nil, err
+	// }
+	// if !blockchain.SequenceLockActive(
+	// 	sequenceLock, nextBlockHeight,
+	// 	medianTimePast,
+	// ) {
+	// 	return nil, nil, txRuleError(
+	// 		wire.RejectNonstandard,
+	// 		"transaction's sequence locks on inputs not met",
+	// 	)
+	// }
 	// Perform several checks on the transaction inputs using the invariant rules in blockchain for what transactions
 	// are allowed into blocks. Also returns the fees associated with the transaction which will be used later.
 	txFee, err := blockchain.CheckTransactionInputs(
@@ -780,7 +779,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 	// the maximum allowed signature operations per block. TODO(roasbeef): last bool should be conditional on segwit
 	// activation
 	var sigOpCost int
-	sigOpCost, err = blockchain.GetSigOpCost(tx, false, utxoView, true, true)
+	sigOpCost, err = blockchain.GetSigOpCost(tx, false, utxoView, true)
 	if err != nil {
 		Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {

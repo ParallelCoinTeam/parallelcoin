@@ -108,7 +108,7 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
 		Diffs:           bitsMap,
 		Merkles:         mTS,
-		MinTimestamp:    tip.Header().Timestamp.Add(time.Second),
+		MinTimestamp:    tip.Header().Timestamp.Truncate(time.Second).Add(time.Second),
 	}
 	// jrb.CoinBases= make(map[int32]*util.Tx)
 	// for i := range *cbs {

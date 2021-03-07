@@ -1,9 +1,8 @@
 package chaincfg
 
 import (
-	"math"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
@@ -22,9 +21,9 @@ var SimNetParams = Params{
 	GenesisHash:              &simNetGenesisHash,
 	PowLimit:                 simNetPowLimit,
 	PowLimitBits:             0x207fffff,
-	BIP0034Height:            0, // Always active on simnet
-	BIP0065Height:            0, // Always active on simnet
-	BIP0066Height:            0, // Always active on simnet
+	// BIP0034Height:            0, // Always active on simnet
+	// BIP0065Height:            0, // Always active on simnet
+	// BIP0066Height:            0, // Always active on simnet
 	CoinbaseMaturity:         100,
 	SubsidyReductionInterval: 210000,
 	TargetTimespan:           30000, // 14 days
@@ -41,34 +40,34 @@ var SimNetParams = Params{
 	//   target proof of work timespan / target proof of work spacing
 	RuleChangeActivationThreshold: 75, // 75% of MinerConfirmationWindow
 	MinerConfirmationWindow:       100,
-	Deployments: [DefinedDeployments]ConsensusDeployment{
-		DeploymentTestDummy: {
-			BitNumber:  28,
-			StartTime:  0,             // Always available for vote
-			ExpireTime: math.MaxInt64, // Never expires
-		},
-		DeploymentCSV: {
-			BitNumber:  0,
-			StartTime:  0,             // Always available for vote
-			ExpireTime: math.MaxInt64, // Never expires
-		},
-		DeploymentSegwit: {
-			BitNumber:  1,
-			StartTime:  0,             // Always available for vote
-			ExpireTime: math.MaxInt64, // Never expires.
-		},
-	},
+	// Deployments: [DefinedDeployments]ConsensusDeployment{
+	// 	DeploymentTestDummy: {
+	// 		BitNumber:  28,
+	// 		StartTime:  0,             // Always available for vote
+	// 		ExpireTime: math.MaxInt64, // Never expires
+	// 	},
+	// 	DeploymentCSV: {
+	// 		BitNumber:  0,
+	// 		StartTime:  0,             // Always available for vote
+	// 		ExpireTime: math.MaxInt64, // Never expires
+	// 	},
+	// 	DeploymentSegwit: {
+	// 		BitNumber:  1,
+	// 		StartTime:  0,             // Always available for vote
+	// 		ExpireTime: math.MaxInt64, // Never expires.
+	// 	},
+	// },
 	// Mempool parameters
 	RelayNonStdTxs: true,
-	// Human-readable part for Bech32 encoded segwit addresses, as defined in
-	// BIP 173.
-	Bech32HRPSegwit: "sb", // always sb for sim net
+	// // Human-readable part for Bech32 encoded segwit addresses, as defined in
+	// // BIP 173.
+	// Bech32HRPSegwit: "sb", // always sb for sim net
 	// Address encoding magics
 	PubKeyHashAddrID:        0x3f, // starts with S
 	ScriptHashAddrID:        0x7b, // starts with s
 	PrivateKeyID:            0x64, // starts with 4 (uncompressed) or F (compressed)
-	WitnessPubKeyHashAddrID: 0x19, // starts with Gg
-	WitnessScriptHashAddrID: 0x28, // starts with ?
+	// WitnessPubKeyHashAddrID: 0x19, // starts with Gg
+	// WitnessScriptHashAddrID: 0x28, // starts with ?
 	// BIP32 hierarchical deterministic extended key magics
 	HDPrivateKeyID: [4]byte{0x04, 0x20, 0xb9, 0x00}, // starts with sprv
 	HDPublicKeyID:  [4]byte{0x04, 0x20, 0xbd, 0x3a}, // starts with spub

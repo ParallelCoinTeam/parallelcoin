@@ -1,15 +1,11 @@
 package blockchain
 
 import (
-	"reflect"
-	"testing"
-	"time"
-
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
+	"reflect"
+	"testing"
 )
 
 // // TestHaveBlock tests the HaveBlock API to ensure proper functionality.
@@ -96,301 +92,301 @@ import (
 // 	}
 // }
 
-// TestCalcSequenceLock tests the LockTimeToSequence function, and the CalcSequenceLock method of a Chain instance.
-// The tests exercise several combinations of inputs to the CalcSequenceLock function in order to ensure the returned
-// SequenceLocks are correct for each test instance.
-func TestCalcSequenceLock(t *testing.T) {
-	netParams := &netparams.SimNetParams
-	// We need to activate CSV in order to test the processing logic, so manually craft the block version that's used to
-	// signal the soft-fork activation.
-	csvBit := netParams.Deployments[chaincfg.DeploymentCSV].BitNumber
-	blockVersion := int32(0x20000000 | (uint32(1) << csvBit))
-	// Generate enough synthetic blocks to activate CSV.
-	chain := newFakeChain(netParams)
-	node := chain.BestChain.Tip()
-	blockTime := node.Header().Timestamp
-	numBlocksToActivate := netParams.MinerConfirmationWindow * 3
-	for i := uint32(0); i < numBlocksToActivate; i++ {
-		blockTime = blockTime.Add(time.Second)
-		node = newFakeNode(node, blockVersion, 0, blockTime)
-		chain.Index.AddNode(node)
-		chain.BestChain.SetTip(node)
-	}
-	// Create a utxo view with a fake utxo for the inputs used in the transactions created below. This utxo is added
-	// such that it has an age of 4 blocks.
-	targetTx := util.NewTx(&wire.MsgTx{
-		TxOut: []*wire.TxOut{{
-			PkScript: nil,
-			Value:    10,
-		}},
-	})
-	utxoView := NewUtxoViewpoint()
-	utxoView.AddTxOuts(targetTx, int32(numBlocksToActivate)-4)
-	utxoView.SetBestHash(&node.hash)
-	// Create a utxo that spends the fake utxo created above for use in the transactions created in the tests. It has an
-	// age of 4 blocks. Note that the sequence lock heights are always calculated from the same point of view that they
-	// were originally calculated from for a given utxo. That is to say, the height prior to it.
-	utxo := wire.OutPoint{
-		Hash:  *targetTx.Hash(),
-		Index: 0,
-	}
-	prevUtxoHeight := int32(numBlocksToActivate) - 4
-	// Obtain the median time past from the PoV of the input created above. The MTP for the input is the MTP from the
-	// PoV of the block *prior* to the one that included it.
-	medianTime := node.RelativeAncestor(5).CalcPastMedianTime().Unix()
-	// The median time calculated from the PoV of the best block in the test chain. For unconfirmed inputs, this value
-	// will be used since the MTP will be calculated from the PoV of the yet-to-be-mined block.
-	nextMedianTime := node.CalcPastMedianTime().Unix()
-	nextBlockHeight := int32(numBlocksToActivate) + 1
-	// Add an additional transaction which will serve as our unconfirmed output.
-	unConfTx := &wire.MsgTx{
-		TxOut: []*wire.TxOut{{
-			PkScript: nil,
-			Value:    5,
-		}},
-	}
-	unConfUtxo := wire.OutPoint{
-		Hash:  unConfTx.TxHash(),
-		Index: 0,
-	}
-	// Adding a utxo with a height of 0x7fffffff indicates that the output is currently unmined.
-	utxoView.AddTxOuts(util.NewTx(unConfTx), 0x7fffffff)
-	tests := []struct {
-		tx      *wire.MsgTx
-		view    *UtxoViewpoint
-		mempool bool
-		want    *SequenceLock
-	}{
-		// A transaction of version one should disable sequence locks as the new sequence number semantics only apply to
-		// transactions version 2 or higher.
-		{
-			tx: &wire.MsgTx{
-				Version: 1,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         LockTimeToSequence(false, 3),
-				}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     -1,
-				BlockHeight: -1,
-			},
-		},
-		// A transaction with a single input with max sequence number. This sequence number has the high bit set, so
-		// sequence locks should be disabled.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         wire.MaxTxInSequenceNum,
-				}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     -1,
-				BlockHeight: -1,
-			},
-		},
-		// A transaction with a single input whose lock time is expressed in seconds. However, the specified lock time
-		// is below the required floor for time based lock times since they have time granularity of 512 seconds. As a
-		// result, the seconds lock-time should be just before the median time of the targeted block.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         LockTimeToSequence(true, 2),
-				}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     medianTime - 1,
-				BlockHeight: -1,
-			},
-		},
-		// A transaction with a single input whose lock time is expressed in seconds. The number of seconds should be
-		// 1023 seconds after the median past time of the last block in the chain.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         LockTimeToSequence(true, 1024),
-				}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     medianTime + 1023,
-				BlockHeight: -1,
-			},
-		},
-		// A transaction with multiple inputs. The first input has a lock time expressed in seconds. The second input
-		// has a sequence lock in blocks with a value of 4. The last input has a sequence number with a value of 5, but
-		// has the disable bit set. So the first lock should be selected as it's the latest lock that isn't disabled.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         LockTimeToSequence(true, 2560),
-				},
-					{
-						PreviousOutPoint: utxo,
-						Sequence:         LockTimeToSequence(false, 4),
-					},
-					{
-						PreviousOutPoint: utxo,
-						Sequence: LockTimeToSequence(false, 5) |
-							wire.SequenceLockTimeDisabled,
-					}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     medianTime + (5 << wire.SequenceLockTimeGranularity) - 1,
-				BlockHeight: prevUtxoHeight + 3,
-			},
-		},
-		// Transaction with a single input. The input's sequence number encodes a relative lock-time in blocks (3
-		// blocks). The sequence lock should have a value of -1 for seconds, but a height of 2 meaning it can be
-		// included at height 3.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         LockTimeToSequence(false, 3),
-				}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     -1,
-				BlockHeight: prevUtxoHeight + 2,
-			},
-		},
-		// A transaction with two inputs with lock times expressed in seconds. The selected sequence lock value for
-		// seconds should be the time further in the future.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         LockTimeToSequence(true, 5120),
-				},
-					{
-						PreviousOutPoint: utxo,
-						Sequence:         LockTimeToSequence(true, 2560),
-					}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     medianTime + (10 << wire.SequenceLockTimeGranularity) - 1,
-				BlockHeight: -1,
-			},
-		},
-		// A transaction with two inputs with lock times expressed in blocks. The selected sequence lock value for
-		// blocks should be the height further in the future, so a height of 10 indicating it can be included at height
-		// 11.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         LockTimeToSequence(false, 1),
-				},
-					{
-						PreviousOutPoint: utxo,
-						Sequence:         LockTimeToSequence(false, 11),
-					}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     -1,
-				BlockHeight: prevUtxoHeight + 10,
-			},
-		},
-		// A transaction with multiple inputs. Two inputs are time based, and the other two are block based. The lock
-		// lying further into the future for both inputs should be chosen.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: utxo,
-					Sequence:         LockTimeToSequence(true, 2560),
-				},
-					{
-						PreviousOutPoint: utxo,
-						Sequence:         LockTimeToSequence(true, 6656),
-					},
-					{
-						PreviousOutPoint: utxo,
-						Sequence:         LockTimeToSequence(false, 3),
-					},
-					{
-						PreviousOutPoint: utxo,
-						Sequence:         LockTimeToSequence(false, 9),
-					}},
-			},
-			view: utxoView,
-			want: &SequenceLock{
-				Seconds:     medianTime + (13 << wire.SequenceLockTimeGranularity) - 1,
-				BlockHeight: prevUtxoHeight + 8,
-			},
-		},
-		// A transaction with a single unconfirmed input. As the input is confirmed, the height of the input should be
-		// interpreted as the height of the *next* block. So, a 2 block relative lock means the sequence lock should be
-		// for 1 block after the *next* block height, indicating it can be included 2 blocks after that.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: unConfUtxo,
-					Sequence:         LockTimeToSequence(false, 2),
-				}},
-			},
-			view:    utxoView,
-			mempool: true,
-			want: &SequenceLock{
-				Seconds:     -1,
-				BlockHeight: nextBlockHeight + 1,
-			},
-		},
-		// A transaction with a single unconfirmed input. The input has a time based lock, so the lock time should be
-		// based off the MTP of the *next* block.
-		{
-			tx: &wire.MsgTx{
-				Version: 2,
-				TxIn: []*wire.TxIn{{
-					PreviousOutPoint: unConfUtxo,
-					Sequence:         LockTimeToSequence(true, 1024),
-				}},
-			},
-			view:    utxoView,
-			mempool: true,
-			want: &SequenceLock{
-				Seconds:     nextMedianTime + 1023,
-				BlockHeight: -1,
-			},
-		},
-	}
-	t.Logf("Running %v SequenceLock tests", len(tests))
-	for i, test := range tests {
-		utilTx := util.NewTx(test.tx)
-		seqLock, err := chain.CalcSequenceLock(utilTx, test.view, test.mempool)
-		if err != nil {
-			t.Fatalf("test #%d, unable to calc sequence lock: %v", i, err)
-		}
-		if seqLock.Seconds != test.want.Seconds {
-			t.Fatalf("test #%d got %v seconds want %v seconds",
-				i, seqLock.Seconds, test.want.Seconds)
-		}
-		if seqLock.BlockHeight != test.want.BlockHeight {
-			t.Fatalf("test #%d got height of %v want height of %v ",
-				i, seqLock.BlockHeight, test.want.BlockHeight)
-		}
-	}
-}
+// // TestCalcSequenceLock tests the LockTimeToSequence function, and the CalcSequenceLock method of a Chain instance.
+// // The tests exercise several combinations of inputs to the CalcSequenceLock function in order to ensure the returned
+// // SequenceLocks are correct for each test instance.
+// func TestCalcSequenceLock(t *testing.T) {
+// 	netParams := &netparams.SimNetParams
+// 	// We need to activate CSV in order to test the processing logic, so manually craft the block version that's used to
+// 	// signal the soft-fork activation.
+// 	csvBit := netParams.Deployments[chaincfg.DeploymentCSV].BitNumber
+// 	blockVersion := int32(0x20000000 | (uint32(1) << csvBit))
+// 	// Generate enough synthetic blocks to activate CSV.
+// 	chain := newFakeChain(netParams)
+// 	node := chain.BestChain.Tip()
+// 	blockTime := node.Header().Timestamp
+// 	numBlocksToActivate := netParams.MinerConfirmationWindow * 3
+// 	for i := uint32(0); i < numBlocksToActivate; i++ {
+// 		blockTime = blockTime.Add(time.Second)
+// 		node = newFakeNode(node, blockVersion, 0, blockTime)
+// 		chain.Index.AddNode(node)
+// 		chain.BestChain.SetTip(node)
+// 	}
+// 	// Create a utxo view with a fake utxo for the inputs used in the transactions created below. This utxo is added
+// 	// such that it has an age of 4 blocks.
+// 	targetTx := util.NewTx(&wire.MsgTx{
+// 		TxOut: []*wire.TxOut{{
+// 			PkScript: nil,
+// 			Value:    10,
+// 		}},
+// 	})
+// 	utxoView := NewUtxoViewpoint()
+// 	utxoView.AddTxOuts(targetTx, int32(numBlocksToActivate)-4)
+// 	utxoView.SetBestHash(&node.hash)
+// 	// Create a utxo that spends the fake utxo created above for use in the transactions created in the tests. It has an
+// 	// age of 4 blocks. Note that the sequence lock heights are always calculated from the same point of view that they
+// 	// were originally calculated from for a given utxo. That is to say, the height prior to it.
+// 	utxo := wire.OutPoint{
+// 		Hash:  *targetTx.Hash(),
+// 		Index: 0,
+// 	}
+// 	prevUtxoHeight := int32(numBlocksToActivate) - 4
+// 	// Obtain the median time past from the PoV of the input created above. The MTP for the input is the MTP from the
+// 	// PoV of the block *prior* to the one that included it.
+// 	medianTime := node.RelativeAncestor(5).CalcPastMedianTime().Unix()
+// 	// The median time calculated from the PoV of the best block in the test chain. For unconfirmed inputs, this value
+// 	// will be used since the MTP will be calculated from the PoV of the yet-to-be-mined block.
+// 	nextMedianTime := node.CalcPastMedianTime().Unix()
+// 	nextBlockHeight := int32(numBlocksToActivate) + 1
+// 	// Add an additional transaction which will serve as our unconfirmed output.
+// 	unConfTx := &wire.MsgTx{
+// 		TxOut: []*wire.TxOut{{
+// 			PkScript: nil,
+// 			Value:    5,
+// 		}},
+// 	}
+// 	unConfUtxo := wire.OutPoint{
+// 		Hash:  unConfTx.TxHash(),
+// 		Index: 0,
+// 	}
+// 	// Adding a utxo with a height of 0x7fffffff indicates that the output is currently unmined.
+// 	utxoView.AddTxOuts(util.NewTx(unConfTx), 0x7fffffff)
+// 	tests := []struct {
+// 		tx      *wire.MsgTx
+// 		view    *UtxoViewpoint
+// 		mempool bool
+// 		want    *SequenceLock
+// 	}{
+// 		// A transaction of version one should disable sequence locks as the new sequence number semantics only apply to
+// 		// transactions version 2 or higher.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 1,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         LockTimeToSequence(false, 3),
+// 				}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     -1,
+// 				BlockHeight: -1,
+// 			},
+// 		},
+// 		// A transaction with a single input with max sequence number. This sequence number has the high bit set, so
+// 		// sequence locks should be disabled.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         wire.MaxTxInSequenceNum,
+// 				}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     -1,
+// 				BlockHeight: -1,
+// 			},
+// 		},
+// 		// A transaction with a single input whose lock time is expressed in seconds. However, the specified lock time
+// 		// is below the required floor for time based lock times since they have time granularity of 512 seconds. As a
+// 		// result, the seconds lock-time should be just before the median time of the targeted block.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         LockTimeToSequence(true, 2),
+// 				}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     medianTime - 1,
+// 				BlockHeight: -1,
+// 			},
+// 		},
+// 		// A transaction with a single input whose lock time is expressed in seconds. The number of seconds should be
+// 		// 1023 seconds after the median past time of the last block in the chain.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         LockTimeToSequence(true, 1024),
+// 				}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     medianTime + 1023,
+// 				BlockHeight: -1,
+// 			},
+// 		},
+// 		// A transaction with multiple inputs. The first input has a lock time expressed in seconds. The second input
+// 		// has a sequence lock in blocks with a value of 4. The last input has a sequence number with a value of 5, but
+// 		// has the disable bit set. So the first lock should be selected as it's the latest lock that isn't disabled.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         LockTimeToSequence(true, 2560),
+// 				},
+// 					{
+// 						PreviousOutPoint: utxo,
+// 						Sequence:         LockTimeToSequence(false, 4),
+// 					},
+// 					{
+// 						PreviousOutPoint: utxo,
+// 						Sequence: LockTimeToSequence(false, 5) |
+// 							wire.SequenceLockTimeDisabled,
+// 					}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     medianTime + (5 << wire.SequenceLockTimeGranularity) - 1,
+// 				BlockHeight: prevUtxoHeight + 3,
+// 			},
+// 		},
+// 		// Transaction with a single input. The input's sequence number encodes a relative lock-time in blocks (3
+// 		// blocks). The sequence lock should have a value of -1 for seconds, but a height of 2 meaning it can be
+// 		// included at height 3.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         LockTimeToSequence(false, 3),
+// 				}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     -1,
+// 				BlockHeight: prevUtxoHeight + 2,
+// 			},
+// 		},
+// 		// A transaction with two inputs with lock times expressed in seconds. The selected sequence lock value for
+// 		// seconds should be the time further in the future.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         LockTimeToSequence(true, 5120),
+// 				},
+// 					{
+// 						PreviousOutPoint: utxo,
+// 						Sequence:         LockTimeToSequence(true, 2560),
+// 					}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     medianTime + (10 << wire.SequenceLockTimeGranularity) - 1,
+// 				BlockHeight: -1,
+// 			},
+// 		},
+// 		// A transaction with two inputs with lock times expressed in blocks. The selected sequence lock value for
+// 		// blocks should be the height further in the future, so a height of 10 indicating it can be included at height
+// 		// 11.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         LockTimeToSequence(false, 1),
+// 				},
+// 					{
+// 						PreviousOutPoint: utxo,
+// 						Sequence:         LockTimeToSequence(false, 11),
+// 					}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     -1,
+// 				BlockHeight: prevUtxoHeight + 10,
+// 			},
+// 		},
+// 		// A transaction with multiple inputs. Two inputs are time based, and the other two are block based. The lock
+// 		// lying further into the future for both inputs should be chosen.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: utxo,
+// 					Sequence:         LockTimeToSequence(true, 2560),
+// 				},
+// 					{
+// 						PreviousOutPoint: utxo,
+// 						Sequence:         LockTimeToSequence(true, 6656),
+// 					},
+// 					{
+// 						PreviousOutPoint: utxo,
+// 						Sequence:         LockTimeToSequence(false, 3),
+// 					},
+// 					{
+// 						PreviousOutPoint: utxo,
+// 						Sequence:         LockTimeToSequence(false, 9),
+// 					}},
+// 			},
+// 			view: utxoView,
+// 			want: &SequenceLock{
+// 				Seconds:     medianTime + (13 << wire.SequenceLockTimeGranularity) - 1,
+// 				BlockHeight: prevUtxoHeight + 8,
+// 			},
+// 		},
+// 		// A transaction with a single unconfirmed input. As the input is confirmed, the height of the input should be
+// 		// interpreted as the height of the *next* block. So, a 2 block relative lock means the sequence lock should be
+// 		// for 1 block after the *next* block height, indicating it can be included 2 blocks after that.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: unConfUtxo,
+// 					Sequence:         LockTimeToSequence(false, 2),
+// 				}},
+// 			},
+// 			view:    utxoView,
+// 			mempool: true,
+// 			want: &SequenceLock{
+// 				Seconds:     -1,
+// 				BlockHeight: nextBlockHeight + 1,
+// 			},
+// 		},
+// 		// A transaction with a single unconfirmed input. The input has a time based lock, so the lock time should be
+// 		// based off the MTP of the *next* block.
+// 		{
+// 			tx: &wire.MsgTx{
+// 				Version: 2,
+// 				TxIn: []*wire.TxIn{{
+// 					PreviousOutPoint: unConfUtxo,
+// 					Sequence:         LockTimeToSequence(true, 1024),
+// 				}},
+// 			},
+// 			view:    utxoView,
+// 			mempool: true,
+// 			want: &SequenceLock{
+// 				Seconds:     nextMedianTime + 1023,
+// 				BlockHeight: -1,
+// 			},
+// 		},
+// 	}
+// 	t.Logf("Running %v SequenceLock tests", len(tests))
+// 	for i, test := range tests {
+// 		utilTx := util.NewTx(test.tx)
+// 		seqLock, err := chain.CalcSequenceLock(utilTx, test.view, test.mempool)
+// 		if err != nil {
+// 			t.Fatalf("test #%d, unable to calc sequence lock: %v", i, err)
+// 		}
+// 		if seqLock.Seconds != test.want.Seconds {
+// 			t.Fatalf("test #%d got %v seconds want %v seconds",
+// 				i, seqLock.Seconds, test.want.Seconds)
+// 		}
+// 		if seqLock.BlockHeight != test.want.BlockHeight {
+// 			t.Fatalf("test #%d got height of %v want height of %v ",
+// 				i, seqLock.BlockHeight, test.want.BlockHeight)
+// 		}
+// 	}
+// }
 
 // nodeHashes is a convenience function that returns the hashes for all of the passed indexes of the provided nodes. It
 // is used to construct expected hash slices in the tests.

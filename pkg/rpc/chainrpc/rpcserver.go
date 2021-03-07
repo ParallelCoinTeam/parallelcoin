@@ -2208,12 +2208,12 @@ func VerifyChain(s *Server, level, depth int32) error {
 					Version, height,
 			), height,
 		)
+		var pb *util.Block
+		if pb, err = s.Cfg.Chain.BlockByHash(&block.MsgBlock().Header.PrevBlock); Check(err){
+		}
 		// Level 1 does basic chain sanity checks.
 		if level > 0 {
-			err := blockchain.CheckBlockSanity(
-				block, powLimit, s.Cfg.TimeSource,
-				true, block.Height(),
-			)
+			err := blockchain.CheckBlockSanity(block, powLimit, s.Cfg.TimeSource, true, block.Height(), pb.MsgBlock().Header.Timestamp)
 			if err != nil {
 				Errorf(
 					"verify is unable to validate block at hash %v height %d: %v %s",

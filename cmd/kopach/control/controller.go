@@ -24,6 +24,7 @@ import (
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
 	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 	"math/rand"
@@ -58,6 +59,7 @@ type State struct {
 	hashSampleBuf     *rav.BufferUint64
 	hashCount         atomic.Uint64
 	lastNonce         int32
+	mining            *atomic.Bool
 }
 
 type nodeSpec struct {
@@ -96,6 +98,7 @@ func New(
 		stop:              qu.Ts(1),
 		blockUpdate:       make(chan *util.Block, 1),
 		hashSampleBuf:     rav.NewBufferUint64(100),
+		mining:            atomic.NewBool(false),
 	}
 	s.generator = s.getBlkTemplateGenerator()
 	var mc *transport.Channel
@@ -202,6 +205,15 @@ func (s *State) Run() {
 out:
 	for {
 		Debug("controller now pausing")
+		s.mining.Store(false)
+		if s.walletClient.Disconnected() {
+			Debug("wallet client is disconnected, retrying")
+			if err = s.startWallet(); !Check(err) {
+				Debug("wallet client is connected, switching to running")
+				
+			}
+		}
+		s.updateBlockTemplate()
 	pausing:
 		for {
 			select {
@@ -213,16 +225,18 @@ out:
 				}
 			case <-ticker.C:
 				Debug("controller ticker running")
-				s.doTicker()
+				s.Advertise()
+				s.checkConnectivity()
 			case <-s.start.Wait():
 				Debug("received start signal while paused")
 				if s.walletClient.Disconnected() {
 					Debug("wallet client is disconnected, retrying")
 					if err = s.startWallet(); !Check(err) {
 						Debug("wallet client is connected, switching to running")
-						break pausing
+						
 					}
 				}
+				break pausing
 			case <-s.stop.Wait():
 				Debug("received stop signal while paused")
 			case <-s.quit.Wait():
@@ -231,11 +245,16 @@ out:
 			}
 		}
 		Debug("controller now running")
+		if s.templateShards == nil || len(s.templateShards) < 1 {
+			s.updateBlockTemplate()
+		}
+		s.mining.Store(true)
 	running:
 		for {
 			select {
 			case <-s.mempoolUpdateChan:
 				s.updateBlockTemplate()
+				Debug("sending out templates...")
 				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
 				}
 			case bu := <-s.blockUpdate:
@@ -247,17 +266,15 @@ out:
 				}
 			case <-ticker.C:
 				// Debug("controller ticker running")
-				s.doTicker()
 				// Debug("checking if wallet is connected")
+				s.Advertise()
+				s.checkConnectivity()
+				// Debug("resending current templates...")
+				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
+				}
 				if s.walletClient.Disconnected() {
 					Debug("wallet client has disconnected, switching to pausing")
 					break running
-				}
-				if s.templateShards == nil || len(s.templateShards) < 1 {
-					s.updateBlockTemplate()
-				}
-				// Debug("resending current templates...")
-				if err = s.multiConn.SendMany(job.Magic, s.templateShards); Check(err) {
 				}
 			case <-s.start.Wait():
 				Debug("received start signal while running")
@@ -269,17 +286,66 @@ out:
 				break out
 			}
 		}
-		Debug("disconnecting wallet client if it was connected")
-		if !s.walletClient.Disconnected() {
-			s.walletClient.Disconnect()
-		}
 	}
 }
 
-func (s *State) doTicker() {
-	Debug("sending out advertisment")
+func (s *State) checkConnectivity() {
+	if !*s.cfg.Generate || *s.cfg.GenThreads == 0 {
+		Debug("no need to check connectivity if we aren't mining")
+		return
+	}
+	if *s.cfg.Solo {
+		Debug("in solo mode, mining anyway")
+		s.Start()
+		return
+	}
+	Debug("@@@ checking connectivity state")
+	ps := make(chan chainrpc.PeerSummaries, 1)
+	s.node.PeerState <- ps
+	Debug("@@@ sent peer list query")
+	var lanPeers int
+	var totalPeers int
+	select {
+	case connState := <-ps:
+		Debug("@@@ received peer list query response")
+		totalPeers = len(connState)
+		for i := range connState {
+			if routeable.IPNet.Contains(connState[i].IP) {
+				lanPeers++
+			}
+		}
+		if *s.cfg.LAN {
+			// if there is no peers on lan and solo was not set, stop mining
+			if lanPeers == 0 {
+				Debug("@@@ no lan peers while in lan mode, stopping mining")
+				s.Stop()
+			} else {
+				s.Start()
+			}
+		} else {
+			if totalPeers-lanPeers == 0 {
+				// we have no peers on the internet, stop mining
+				Debug("@@@ no internet peers, stopping mining")
+				s.Stop()
+			} else {
+				s.Start()
+			}
+		}
+		break
+		// quit waiting if we are shutting down
+	case <-s.quit:
+		break
+	}
+	Debug("@@@", totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
+}
+
+func (s *State) Advertise() {
+	Debug("@@@ sending out advertisment")
 	var err error
-	if err = s.multiConn.SendMany(p2padvt.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); Check(err) {
+	if err = s.multiConn.SendMany(
+		p2padvt.Magic,
+		transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node)),
+	); Check(err) {
 	}
 }
 
@@ -331,7 +397,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		Bits:      make(templates.Diffs),
 		Merkles:   make(templates.Merkles),
 	}
-	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Round(time.Second).Add(time.Second)
+	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(time.Second)
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		var templateX *mining.BlockTemplate
 		if templateX, err = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); Check(err) {
@@ -462,6 +528,10 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (err er
 	s := ctx.(*State)
 	var so sol.Solution
 	gotiny.Unmarshal(b, &so)
+	if s.msgBlockTemplate == nil {
+		Debug("template is nil, solution is not for this controller")
+		return
+	}
 	if s.uuid != s.msgBlockTemplate.UUID {
 		Debug("solution not from current controller", s.uuid, s.msgBlockTemplate.UUID)
 		return

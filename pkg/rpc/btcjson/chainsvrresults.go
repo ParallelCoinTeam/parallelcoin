@@ -53,8 +53,8 @@ type GetBlockChainInfoResult struct {
 	Pruned               bool                                `json:"pruned"`
 	PruneHeight          int32                               `json:"pruneheight,omitempty"`
 	ChainWork            string                              `json:"chainwork,omitempty"`
-	SoftForks            []*SoftForkDescription              `json:"softforks"`
-	Bip9SoftForks        map[string]*Bip9SoftForkDescription `json:"bip9_softforks"`
+	// SoftForks            []*SoftForkDescription              `json:"softforks"`
+	// Bip9SoftForks        map[string]*Bip9SoftForkDescription `json:"bip9_softforks"`
 }
 
 // GetBlockHeaderVerboseResult models the data from the getblockheader command when the verbose flag is set. When the

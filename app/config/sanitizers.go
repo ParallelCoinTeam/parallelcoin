@@ -220,14 +220,8 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 			}
 		}
 	}
-	// if lan mode is set, remove the peers.json so no unwanted nodes are connected to
 	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
-		peersFile := filepath.Join(filepath.Join(*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
-		var err error
-		if err = os.Remove(peersFile); err != nil {
-			Trace("nothing to remove?", err)
-		}
-		Trace("removed", peersFile)
+		*cfg.DisableDNSSeed = true
 	}
 	if len(*cfg.WalletRPCListeners) > 0 {
 		*cfg.WalletServer = (*cfg.WalletRPCListeners)[0]

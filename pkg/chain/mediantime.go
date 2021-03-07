@@ -12,7 +12,7 @@ import (
 const (
 	// maxAllowedOffsetSeconds is the maximum number of seconds in either direction that local clock will be adjusted.
 	// When the median time of the network is outside of this range, no offset will be applied.
-	maxAllowedOffsetSecs = 70 * 60 // 1 hour 10 minutes
+	maxAllowedOffsetSecs = MaxTimeOffsetSeconds
 	// similarTimeSecs is the number of seconds in either direction from the local clock that is used to determine that
 	// it is likley wrong and hence to show a warning.
 	similarTimeSecs = 5 * 60 // 5 minutes

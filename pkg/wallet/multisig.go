@@ -76,7 +76,7 @@ func (w *Wallet) ImportP2SHRedeemScript(script []byte) (*util.AddressScriptHash,
 		}
 		// As this is a regular P2SH script, we'll import this into the BIP0044 scope.
 		bip44Mgr, err := w.Manager.FetchScopedKeyManager(
-			waddrmgr.KeyScopeBIP0084,
+			waddrmgr.KeyScopeBIP0044,
 		)
 		if err != nil {
 			Error(err)

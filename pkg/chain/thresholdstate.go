@@ -194,85 +194,85 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 	return state, nil
 }
 
-// ThresholdState returns the current rule change threshold state of the given deployment ID for the block AFTER the end
-// of the current best chain.
-//
-// This function is safe for concurrent access.
-func (b *BlockChain) ThresholdState(deploymentID uint32) (ThresholdState, error) {
-	b.chainLock.Lock()
-	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
-	b.chainLock.Unlock()
-	return state, err
-}
+// // ThresholdState returns the current rule change threshold state of the given deployment ID for the block AFTER the end
+// // of the current best chain.
+// //
+// // This function is safe for concurrent access.
+// func (b *BlockChain) ThresholdState(deploymentID uint32) (ThresholdState, error) {
+// 	b.chainLock.Lock()
+// 	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
+// 	b.chainLock.Unlock()
+// 	return state, err
+// }
 
-// IsDeploymentActive returns true if the target deploymentID is active, and false otherwise.
-//
-// This function is safe for concurrent access.
-func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
-	b.chainLock.Lock()
-	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
-	b.chainLock.Unlock()
-	if err != nil {
-		Error(err)
-		return false, err
-	}
-	return state == ThresholdActive, nil
-}
+// // IsDeploymentActive returns true if the target deploymentID is active, and false otherwise.
+// //
+// // This function is safe for concurrent access.
+// func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
+// 	b.chainLock.Lock()
+// 	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
+// 	b.chainLock.Unlock()
+// 	if err != nil {
+// 		Error(err)
+// 		return false, err
+// 	}
+// 	return state == ThresholdActive, nil
+// }
 
-// deploymentState returns the current rule change threshold for a given deploymentID. The threshold is evaluated from
-// the point of view of the block node passed in as the first argument to this method. It is important to note that, as
-// the variable name indicates, this function expects the block node prior to the block for which the deployment state
-// is desired. In other words, the returned deployment state is for the block AFTER the passed node.
-//
-// This function MUST be called with the chain state lock held (for writes).
-func (b *BlockChain) deploymentState(prevNode *BlockNode, deploymentID uint32) (ThresholdState, error) {
-	if deploymentID > uint32(len(b.params.Deployments)) {
-		return ThresholdFailed, DeploymentError(deploymentID)
-	}
-	deployment := &b.params.Deployments[deploymentID]
-	checker := deploymentChecker{deployment: deployment, chain: b}
-	cache := &b.deploymentCaches[deploymentID]
-	return b.thresholdState(prevNode, checker, cache)
-}
+// // deploymentState returns the current rule change threshold for a given deploymentID. The threshold is evaluated from
+// // the point of view of the block node passed in as the first argument to this method. It is important to note that, as
+// // the variable name indicates, this function expects the block node prior to the block for which the deployment state
+// // is desired. In other words, the returned deployment state is for the block AFTER the passed node.
+// //
+// // This function MUST be called with the chain state lock held (for writes).
+// func (b *BlockChain) deploymentState(prevNode *BlockNode, deploymentID uint32) (ThresholdState, error) {
+// 	if deploymentID > uint32(len(b.params.Deployments)) {
+// 		return ThresholdFailed, DeploymentError(deploymentID)
+// 	}
+// 	deployment := &b.params.Deployments[deploymentID]
+// 	checker := deploymentChecker{deployment: deployment, chain: b}
+// 	cache := &b.deploymentCaches[deploymentID]
+// 	return b.thresholdState(prevNode, checker, cache)
+// }
 
 // initThresholdCaches initializes the threshold state caches for each warning bit and defined deployment and provides
-// warnings if the chain is current per the warnUnknownVersions and warnUnknownRuleActivations functions.
-func (b *BlockChain) initThresholdCaches() error {
-	// Initialize the warning and deployment caches by calculating the threshold state for each of them. This will
-	// ensure the caches are populated and any states that needed to be recalculated due to definition changes is done
-	// now.
-	prevNode := b.BestChain.Tip().parent
-	for bit := uint32(0); bit < vbNumBits; bit++ {
-		checker := bitConditionChecker{bit: bit, chain: b}
-		cache := &b.warningCaches[bit]
-		_, err := b.thresholdState(prevNode, checker, cache)
-		if err != nil {
-			Error(err)
-			return err
-		}
-	}
-	for id := 0; id < len(b.params.Deployments); id++ {
-		deployment := &b.params.Deployments[id]
-		cache := &b.deploymentCaches[id]
-		checker := deploymentChecker{deployment: deployment, chain: b}
-		_, err := b.thresholdState(prevNode, checker, cache)
-		if err != nil {
-			Error(err)
-			return err
-		}
-	}
-	// No warnings about unknown rules or versions until the chain is current.
-	if b.isCurrent() {
-		// Warn if a high enough percentage of the last blocks have unexpected versions.
-		bestNode := b.BestChain.Tip()
-		// if err := b.warnUnknownVersions(bestNode); err != nil {
-		// 	return err
-		// }
-		//
-		// Warn if any unknown new rules are either about to activate or have already been activated.
-		if err := b.warnUnknownRuleActivations(bestNode); err != nil {
-			return err
-		}
-	}
-	return nil
-}
+// // warnings if the chain is current per the warnUnknownVersions and warnUnknownRuleActivations functions.
+// func (b *BlockChain) initThresholdCaches() error {
+// 	// Initialize the warning and deployment caches by calculating the threshold state for each of them. This will
+// 	// ensure the caches are populated and any states that needed to be recalculated due to definition changes is done
+// 	// now.
+// 	prevNode := b.BestChain.Tip().parent
+// 	for bit := uint32(0); bit < vbNumBits; bit++ {
+// 		checker := bitConditionChecker{bit: bit, chain: b}
+// 		cache := &b.warningCaches[bit]
+// 		_, err := b.thresholdState(prevNode, checker, cache)
+// 		if err != nil {
+// 			Error(err)
+// 			return err
+// 		}
+// 	}
+// 	for id := 0; id < len(b.params.Deployments); id++ {
+// 		deployment := &b.params.Deployments[id]
+// 		cache := &b.deploymentCaches[id]
+// 		checker := deploymentChecker{deployment: deployment, chain: b}
+// 		_, err := b.thresholdState(prevNode, checker, cache)
+// 		if err != nil {
+// 			Error(err)
+// 			return err
+// 		}
+// 	}
+// 	// No warnings about unknown rules or versions until the chain is current.
+// 	if b.isCurrent() {
+// 		// Warn if a high enough percentage of the last blocks have unexpected versions.
+// 		bestNode := b.BestChain.Tip()
+// 		// if err := b.warnUnknownVersions(bestNode); err != nil {
+// 		// 	return err
+// 		// }
+// 		//
+// 		// Warn if any unknown new rules are either about to activate or have already been activated.
+// 		if err := b.warnUnknownRuleActivations(bestNode); err != nil {
+// 			return err
+// 		}
+// 	}
+// 	return nil
+// }

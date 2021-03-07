@@ -101,38 +101,38 @@ type DNSSeed struct {
 	HasFiltering bool
 }
 
-// ConsensusDeployment defines details related to a specific consensus rule change that is voted in. This is part of
-// BIP0009.
-type ConsensusDeployment struct {
-	// BitNumber defines the specific bit number within the block version this particular soft-fork deployment refers
-	// to.
-	BitNumber uint8
-	// StartTime is the median block time after which voting on the deployment starts.
-	StartTime uint64
-	// ExpireTime is the median block time after which the attempted deployment expires.
-	ExpireTime uint64
-}
+// // ConsensusDeployment defines details related to a specific consensus rule change that is voted in. This is part of
+// // BIP0009.
+// type ConsensusDeployment struct {
+// 	// BitNumber defines the specific bit number within the block version this particular soft-fork deployment refers
+// 	// to.
+// 	BitNumber uint8
+// 	// StartTime is the median block time after which voting on the deployment starts.
+// 	StartTime uint64
+// 	// ExpireTime is the median block time after which the attempted deployment expires.
+// 	ExpireTime uint64
+// }
 
-// Constants that define the deployment offset in the deployments field of the
-// parameters for each deployment. This is useful to be able to get the details
-// of a specific deployment by name.
-const (
-	// DeploymentTestDummy defines the rule change deployment ID for testing
-	// purposes.
-	DeploymentTestDummy = iota
-	// DeploymentCSV defines the rule change deployment ID for the CSV soft-fork
-	// package. The CSV package includes the deployment of BIPS 68, 112, and 113.
-	DeploymentCSV
-	// DeploymentSegwit defines the rule change deployment ID for the Segregated
-	// Witness (segwit) soft-fork package. The segwit package includes the
-	// deployment of BIPS 141, 142, 144, 145, 147 and 173.
-	DeploymentSegwit
-	// DefinedDeployments is the number of currently defined deployments.
-	//
-	// NOTE: DefinedDeployments must always come last since it is used to determine
-	// how many defined deployments there currently are.
-	DefinedDeployments
-)
+// // Constants that define the deployment offset in the deployments field of the
+// // parameters for each deployment. This is useful to be able to get the details
+// // of a specific deployment by name.
+// const (
+// 	// DeploymentTestDummy defines the rule change deployment ID for testing
+// 	// purposes.
+// 	DeploymentTestDummy = iota
+// 	// DeploymentCSV defines the rule change deployment ID for the CSV soft-fork
+// 	// package. The CSV package includes the deployment of BIPS 68, 112, and 113.
+// 	DeploymentCSV
+// 	// DeploymentSegwit defines the rule change deployment ID for the Segregated
+// 	// Witness (segwit) soft-fork package. The segwit package includes the
+// 	// deployment of BIPS 141, 142, 144, 145, 147 and 173.
+// 	DeploymentSegwit
+// 	// DefinedDeployments is the number of currently defined deployments.
+// 	//
+// 	// NOTE: DefinedDeployments must always come last since it is used to determine
+// 	// how many defined deployments there currently are.
+// 	DefinedDeployments
+// )
 
 // Params defines a Bitcoin network by its parameters. These parameters may be
 // used by Bitcoin applications to differentiate networks as well as addresses
@@ -155,10 +155,10 @@ type Params struct {
 	PowLimit *big.Int
 	// PowLimitBits defines the highest allowed proof of work value for a block in compact form.
 	PowLimitBits uint32
-	// These fields define the block heights at which the specified softfork BIP became active.
-	BIP0034Height int32
-	BIP0065Height int32
-	BIP0066Height int32
+	// // These fields define the block heights at which the specified softfork BIP became active.
+	// BIP0034Height int32
+	// BIP0065Height int32
+	// BIP0066Height int32
 	// CoinbaseMaturity is the number of blocks required before newly mined coins (coinbase transactions) can be spent.
 	CoinbaseMaturity uint16
 	// SubsidyReductionInterval is the interval of blocks before the subsidy is reduced.
@@ -190,18 +190,18 @@ type Params struct {
 	RuleChangeActivationThreshold uint32
 	// MinerConfirmationWindow is the number of blocks in each threshold state retarget window.
 	MinerConfirmationWindow uint32
-	// Deployments define the specific consensus rule changes to be voted on.
-	Deployments [DefinedDeployments]ConsensusDeployment
+	// // Deployments define the specific consensus rule changes to be voted on.
+	// Deployments [DefinedDeployments]ConsensusDeployment
 	// Mempool parameters
 	RelayNonStdTxs bool
-	// Human-readable part for Bech32 encoded segwit addresses, as defined in BIP 173.
-	Bech32HRPSegwit string
+	// // Human-readable part for Bech32 encoded segwit addresses, as defined in BIP 173.
+	// Bech32HRPSegwit string
 	// Address encoding magics
 	PubKeyHashAddrID        byte // First byte of a P2PKH address
 	ScriptHashAddrID        byte // First byte of a P2SH address
 	PrivateKeyID            byte // First byte of a WIF private key
-	WitnessPubKeyHashAddrID byte // First byte of a P2WPKH address
-	WitnessScriptHashAddrID byte // First byte of a P2WSH address
+	// WitnessPubKeyHashAddrID byte // First byte of a P2WPKH address
+	// WitnessScriptHashAddrID byte // First byte of a P2WSH address
 	// BIP32 hierarchical deterministic extended key magics
 	HDPrivateKeyID [4]byte
 	HDPublicKeyID  [4]byte
