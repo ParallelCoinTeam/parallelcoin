@@ -40,15 +40,15 @@ const (
 func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Block, flags BehaviorFlags, height int32,) (
 	bool, bool, error,
 ) {
-	Trace("blockchain.ProcessBlock", height)
+	trc.Ln("blockchain.ProcessBlock", height)
 	blockHeight := height
 	var prevBlock *util.Block
-	var err error
-	prevBlock, err = b.BlockByHash(&candidateBlock.MsgBlock().Header.PrevBlock)
+	var e error
+	prevBlock, e = b.BlockByHash(&candidateBlock.MsgBlock().Header.PrevBlock)
 	if prevBlock != nil {
 		blockHeight = prevBlock.Height() + 1
 	} else {
-		return false, false, err
+		return false, false, e
 	}
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
@@ -69,24 +69,24 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	}
 	// The candidateBlock must not already exist in the main chain or side chains.
 	var exists bool
-	if exists, err = b.blockExists(blockHash); Check(err) {
-		return false, false, err
+	if exists, e = b.blockExists(blockHash); dbg.Chk(e) {
+		return false, false, e
 	}
 	if exists {
 		str := ruleError(ErrDuplicateBlock, fmt.Sprintf("already have candidateBlock %v", bhwa(blockHeight).String()))
-		Error(str)
+		err.Ln(str)
 		return false, false, str
 	}
 	// The candidateBlock must not already exist as an orphan.
 	if _, exists := b.orphans[*blockHash]; exists {
 		str := ruleError(ErrDuplicateBlock, fmt.Sprintf("already have candidateBlock (orphan)"))
-		Error(str)
+		err.Ln(str)
 		return false, false, str
 	}
 	// Perform preliminary sanity checks on the candidateBlock and its transactions.
 	var DoNotCheckPow bool
 	pl := fork.GetMinDiff(fork.GetAlgoName(algo, blockHeight), blockHeight)
-	Tracef("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
+	trc.F("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	ph := &candidateBlock.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	var pb *BlockNode
@@ -94,8 +94,8 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	if pb == nil {
 		DoNotCheckPow = true
 	}
-	Trace("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
-	if err = checkBlockSanity(
+	trc.Ln("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
+	if e = checkBlockSanity(
 		candidateBlock,
 		pl,
 		b.timeSource,
@@ -103,10 +103,10 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 		DoNotCheckPow,
 		blockHeight,
 		pn.Header().Timestamp,
-	); Check(err) {
-		return false, false, err
+	); dbg.Chk(e) {
+		return false, false, e
 	}
-	Trace("searching back to checkpoints")
+	trc.Ln("searching back to checkpoints")
 	// Find the previous checkpoint and perform some additional checks based on the
 	// checkpoint. This provides a few nice properties such as preventing old side
 	// chain blocks before the last checkpoint, rejecting easy to mine, but
@@ -115,8 +115,8 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	// checkpoint are met.
 	blockHeader := &candidateBlock.MsgBlock().Header
 	var checkpointNode *BlockNode
-	if checkpointNode, err = b.findPreviousCheckpoint(); Check(err) {
-		return false, false, err
+	if checkpointNode, e = b.findPreviousCheckpoint(); dbg.Chk(e) {
+		return false, false, e
 	}
 	if checkpointNode != nil {
 		// Ensure the candidateBlock timestamp is after the checkpoint timestamp.
@@ -126,7 +126,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 				"candidateBlock %v has timestamp %v before last checkpoint timestamp %v",
 				bhwa(blockHeight).String(), blockHeader.Timestamp, checkpointTime,
 			)
-			Trace(str)
+			trc.Ln(str)
 			return false, false, ruleError(ErrCheckpointTimeTooOld, str)
 		}
 		if !fastAdd {
@@ -147,20 +147,20 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 					"processing: candidateBlock target difficulty of %064x is too low when compared to the"+
 						" previous checkpoint", currentTarget,
 				)
-				Error(str)
+				err.Ln(str)
 				return false, false, ruleError(ErrDifficultyTooLow, str)
 			}
 		}
 	}
-	Trace("handling orphans")
+	trc.Ln("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
 	var prevHashExists bool
-	if prevHashExists, err = b.blockExists(prevHash); Check(err) {
-		return false, false, err
+	if prevHashExists, e = b.blockExists(prevHash); dbg.Chk(e) {
+		return false, false, e
 	}
 	if !prevHashExists {
-		Debugc(
+		dbg.C(
 			func() string {
 				return fmt.Sprintf(
 					"adding orphan candidateBlock %v with parent %v",
@@ -174,28 +174,28 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	}
 	// The candidateBlock has passed all context independent checks and appears sane enough
 	// to potentially accept it into the candidateBlock chain.
-	Trace("maybe accept candidateBlock")
+	trc.Ln("maybe accept candidateBlock")
 	var isMainChain bool
-	if isMainChain, err = b.maybeAcceptBlock(workerNumber, candidateBlock, flags); Check(err) {
-		return false, false, err
+	if isMainChain, e = b.maybeAcceptBlock(workerNumber, candidateBlock, flags); dbg.Chk(e) {
+		return false, false, e
 	}
 	// Accept any orphan blocks that depend on this candidateBlock (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
-		Trace("new candidateBlock on main chain")
+		trc.Ln("new candidateBlock on main chain")
 		// Traces(candidateBlock)
 	}
-	if err = b.processOrphans(workerNumber, blockHash, flags); Check(err) {
-		return false, false, err
+	if e = b.processOrphans(workerNumber, blockHash, flags); dbg.Chk(e) {
+		return false, false, e
 	}
-	Tracef(
+	trc.F(
 		"accepted candidateBlock %d %v %s",
 		blockHeight, bhwa(blockHeight).String(), fork.GetAlgoName(
 			candidateBlock.MsgBlock().
 				Header.Version, blockHeight,
 		),
 	)
-	Trace("finished blockchain.ProcessBlock")
+	trc.Ln("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }
 
@@ -203,19 +203,17 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 // the main chain or any side chains.
 //
 // This function is safe for concurrent access.
-func (b *BlockChain) blockExists(hash *chainhash.Hash) (bool, error) {
-	// Check block index first (could be main chain or side chain blocks).
+func (b *BlockChain) blockExists(hash *chainhash.Hash) (exists bool,e error) {
+	// Chk block index first (could be main chain or side chain blocks).
 	if b.Index.HaveBlock(hash) {
 		return true, nil
 	}
 	// Check in the database.
-	var exists bool
-	err := b.db.View(
-		func(dbTx database.Tx) error {
-			var err error
-			exists, err = dbTx.HasBlock(hash)
-			if err != nil || !exists {
-				return err
+	e = b.db.View(
+		func(dbTx database.Tx) (e error) {
+			exists, e = dbTx.HasBlock(hash)
+			if e != nil  || !exists {
+				return e
 			}
 			// Ignore side chain blocks in the database. This is necessary because there is
 			// not currently any record of the associated block index data such as its block
@@ -223,16 +221,16 @@ func (b *BlockChain) blockExists(hash *chainhash.Hash) (bool, error) {
 			// anything useful with it. Ultimately the entire block index should be
 			// serialized instead of only the current main chain so it can be consulted
 			// directly.
-			if _, err = dbFetchHeightByHash(dbTx, hash); Check(err) {
+			if _, e = dbFetchHeightByHash(dbTx, hash); dbg.Chk(e) {
 			}
-			if isNotInMainChainErr(err) {
+			if isNotInMainChainErr(e) {
 				exists = false
 				return nil
 			}
-			return err
+			return e
 		},
 	)
-	return exists, err
+	return exists, e
 }
 
 // processOrphans determines if there are any orphans which depend on the passed
@@ -246,7 +244,7 @@ func (b *BlockChain) blockExists(hash *chainhash.Hash) (bool, error) {
 func (b *BlockChain) processOrphans(
 	workerNumber uint32, hash *chainhash.Hash,
 	flags BehaviorFlags,
-) error {
+) (e error) {
 	// Start with processing at least the passed hash. Leave a little room for
 	// additional orphan blocks that need to be processed without needing to grow
 	// the array in the common case.
@@ -266,7 +264,7 @@ func (b *BlockChain) processOrphans(
 		for i := 0; i < len(b.prevOrphans[*processHash]); i++ {
 			orphan := b.prevOrphans[*processHash][i]
 			if orphan == nil {
-				Debugf(
+				dbg.F(
 					"found a nil entry at index %d in the orphan dependency list for block %v",
 					i, processHash,
 				)
@@ -277,9 +275,9 @@ func (b *BlockChain) processOrphans(
 			b.removeOrphanBlock(orphan)
 			i--
 			// Potentially accept the block into the block chain.
-			var err error
-			if _, err = b.maybeAcceptBlock(workerNumber, orphan.block, flags); Check(err) {
-				return err
+			var e error
+			if _, e = b.maybeAcceptBlock(workerNumber, orphan.block, flags); dbg.Chk(e) {
+				return e
 			}
 			// Add this block to the list of blocks to process so any orphan blocks that
 			// depend on this block are handled too.

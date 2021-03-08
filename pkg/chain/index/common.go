@@ -61,8 +61,8 @@ func (e errDeserialize) Error() string {
 }
 
 // isDeserializeErr returns whether or not the passed error is an errDeserialize error.
-func isDeserializeErr(err error) bool {
-	_, ok := err.(errDeserialize)
+func isDeserializeErr(e error) bool {
+	_, ok := e.(errDeserialize)
 	return ok
 }
 

@@ -2,8 +2,9 @@ package wallet
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/util"
 	"strings"
-
+	
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/db/walletdb"
@@ -16,65 +17,67 @@ func (w *Wallet) handleChainNotifications() {
 	if w == nil {
 		panic("w should not be nil")
 	}
-	chainClient, err := w.requireChainClient()
-	if err != nil {
-		Error("handleChainNotifications called without RPC client", err)
+	chainClient, e := w.requireChainClient()
+	if e != nil {
+		err.Ln("handleChainNotifications called without RPC client", err)
 		return
 	}
 	sync := func(w *Wallet) {
 		if w.db != nil {
 			// At the moment there is no recourse if the rescan fails for some reason, however, the wallet will not be
 			// marked synced and many methods will error early since the wallet is known to be out of date.
-			err := w.syncWithChain()
-			if err != nil && !w.ShuttingDown() {
-				Warn("unable to synchronize wallet to chain:", err)
+			e := w.syncWithChain()
+			if e != nil && !w.ShuttingDown() {
+				wrn.Ln("unable to synchronize wallet to chain:", err)
 			}
 		}
 	}
-	catchUpHashes := func(w *Wallet, client chain.Interface,
-		height int32) error {
+	catchUpHashes := func(
+		w *Wallet, client chain.Interface,
+		height int32,
+	) (e error) {
 		// TODO(aakselrod): There's a race condition here, which happens when a reorg occurs between the rescanProgress
 		//  notification and the last GetBlockHash call. The solution when using pod is to make pod send blockconnected
 		//  notifications with each block the way Neutrino does, and get rid of the loop. The other alternative is to
 		//  check the final hash and, if it doesn't match the original hash returned by the notification, to roll back
 		//  and restart the rescan.
-		Infof(
+		inf.F(
 			"handleChainNotifications: catching up block hashes to height %d, this might take a while", height,
 		)
-		err := walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
-			ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
-			startBlock := w.Manager.SyncedTo()
-			for i := startBlock.Height + 1; i <= height; i++ {
-				hash, err := client.GetBlockHash(int64(i))
-				if err != nil {
-					Error(err)
-					return err
+		e = walletdb.Update(
+			w.db, func(tx walletdb.ReadWriteTx) (e error) {
+				ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
+				startBlock := w.Manager.SyncedTo()
+				for i := startBlock.Height + 1; i <= height; i++ {
+					hash, e := client.GetBlockHash(int64(i))
+					if e != nil {
+						return e
+					}
+					header, e := chainClient.GetBlockHeader(hash)
+					if e != nil {
+						return e
+					}
+					bs := wm.BlockStamp{
+						Height:    i,
+						Hash:      *hash,
+						Timestamp: header.Timestamp,
+					}
+					e = w.Manager.SetSyncedTo(ns, &bs)
+					if e != nil {
+						return e
+					}
 				}
-				header, err := chainClient.GetBlockHeader(hash)
-				if err != nil {
-					Error(err)
-					return err
-				}
-				bs := wm.BlockStamp{
-					Height:    i,
-					Hash:      *hash,
-					Timestamp: header.Timestamp,
-				}
-				err = w.Manager.SetSyncedTo(ns, &bs)
-				if err != nil {
-					Error(err)
-					return err
-				}
-			}
-			return nil
-		})
-		if err != nil {
-			Errorf(
+				return nil
+			},
+		)
+		if e != nil {
+			err.F(
 				"failed to update address manager sync state for height %d: %v",
-				height, err)
+				height, e,
+			)
 		}
-		Info("done catching up block hashes")
-		return err
+		inf.Ln("done catching up block hashes")
+		return e
 	}
 	for {
 		select {
@@ -83,49 +86,58 @@ func (w *Wallet) handleChainNotifications() {
 				return
 			}
 			var notificationName string
-			var err error
+			var e error
 			switch n := n.(type) {
 			case chain.ClientConnected:
 				if w != nil {
 					go sync(w)
 				}
 			case chain.BlockConnected:
-				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
-					return w.connectBlock(tx, tm.BlockMeta(n))
-				})
+				e = walletdb.Update(
+					w.db, func(tx walletdb.ReadWriteTx) (e error) {
+						return w.connectBlock(tx, tm.BlockMeta(n))
+					},
+				)
 				notificationName = "blockconnected"
 			case chain.BlockDisconnected:
-				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
-					return w.disconnectBlock(tx, tm.BlockMeta(n))
-				})
+				e = walletdb.Update(
+					w.db, func(tx walletdb.ReadWriteTx) (e error) {
+						return w.disconnectBlock(tx, tm.BlockMeta(n))
+					},
+				)
 				notificationName = "blockdisconnected"
 			case chain.RelevantTx:
-				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
-					return w.addRelevantTx(tx, n.TxRecord, n.Block)
-				})
+				e = walletdb.Update(
+					w.db, func(tx walletdb.ReadWriteTx) (e error) {
+						return w.addRelevantTx(tx, n.TxRecord, n.Block)
+					},
+				)
 				notificationName = "recvtx/redeemingtx"
 			case chain.FilteredBlockConnected:
 				// Atomically update for the whole block.
 				if len(n.RelevantTxs) > 0 {
-					err = walletdb.Update(w.db, func(
-						tx walletdb.ReadWriteTx) error {
-						var err error
-						for _, rec := range n.RelevantTxs {
-							err = w.addRelevantTx(tx, rec,
-								n.Block)
-							if err != nil {
-								Error(err)
-								return err
+					e = walletdb.Update(
+						w.db, func(
+							tx walletdb.ReadWriteTx,
+						) (e error) {
+							for _, rec := range n.RelevantTxs {
+								e = w.addRelevantTx(
+									tx, rec,
+									n.Block,
+								)
+								if e != nil {
+									return e
+								}
 							}
-						}
-						return nil
-					})
+							return nil
+						},
+					)
 				}
 				notificationName = "filteredblockconnected"
 			// The following require some database maintenance, but also need to be reported to the wallet's rescan
 			// goroutine.
 			case *chain.RescanProgress:
-				err = catchUpHashes(w, chainClient, n.Height)
+				e = catchUpHashes(w, chainClient, n.Height)
 				notificationName = "rescanprogress"
 				select {
 				case w.rescanNotifications <- n:
@@ -133,7 +145,7 @@ func (w *Wallet) handleChainNotifications() {
 					return
 				}
 			case *chain.RescanFinished:
-				err = catchUpHashes(w, chainClient, n.Height)
+				e = catchUpHashes(w, chainClient, n.Height)
 				notificationName = "rescanprogress"
 				w.SetChainSynced(true)
 				select {
@@ -142,17 +154,18 @@ func (w *Wallet) handleChainNotifications() {
 					return
 				}
 			}
-			if err != nil {
-				Error(err)
+			if e != nil {
 				// On out-of-sync blockconnected notifications, only send a debug message.
 				errStr := "failed to process consensus server " +
 					"notification (name: `%s`, detail: `%v`)"
 				if notificationName == "blockconnected" &&
-					strings.Contains(err.Error(),
-						"couldn't get hash from database") {
-					Debugf(errStr, notificationName, err)
+					strings.Contains(
+						e.Error(),
+						"couldn't get hash from database",
+					) {
+					dbg.F(errStr, notificationName, err)
 				} else {
-					Errorf(errStr, notificationName, err)
+					err.F(errStr, notificationName, err)
 				}
 			}
 		case <-w.quit.Wait():
@@ -163,17 +176,16 @@ func (w *Wallet) handleChainNotifications() {
 
 // connectBlock handles a chain server notification by marking a wallet that's currently in-sync with the chain server
 // as being synced up to the passed block.
-func (w *Wallet) connectBlock(dbtx walletdb.ReadWriteTx, b tm.BlockMeta) error {
+func (w *Wallet) connectBlock(dbtx walletdb.ReadWriteTx, b tm.BlockMeta) (e error) {
 	addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 	bs := wm.BlockStamp{
 		Height:    b.Height,
 		Hash:      b.Hash,
 		Timestamp: b.Time,
 	}
-	err := w.Manager.SetSyncedTo(addrmgrNs, &bs)
-	if err != nil {
-		Error(err)
-		return err
+	e = w.Manager.SetSyncedTo(addrmgrNs, &bs)
+	if e != nil {
+		return e
 	}
 	// Notify interested clients of the connected block.
 	//
@@ -184,7 +196,7 @@ func (w *Wallet) connectBlock(dbtx walletdb.ReadWriteTx, b tm.BlockMeta) error {
 
 // disconnectBlock handles a chain server reorganize by rolling back all block history from the reorged block for a
 // wallet in-sync with the chain server.
-func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b tm.BlockMeta) error {
+func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b tm.BlockMeta) (e error) {
 	addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 	txmgrNs := dbtx.ReadWriteBucket(wtxmgrNamespaceKey)
 	if !w.ChainSynced() {
@@ -193,37 +205,32 @@ func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b tm.BlockMeta) erro
 	// Disconnect the removed block and all blocks after it if we know about the disconnected block. Otherwise, the
 	// block is in the future.
 	if b.Height <= w.Manager.SyncedTo().Height {
-		hash, err := w.Manager.BlockHash(addrmgrNs, b.Height)
-		if err != nil {
-			Error(err)
-			return err
+		hash, e := w.Manager.BlockHash(addrmgrNs, b.Height)
+		if e != nil {
+			return e
 		}
 		if bytes.Equal(hash[:], b.Hash[:]) {
 			bs := wm.BlockStamp{
 				Height: b.Height - 1,
 			}
-			hash, err = w.Manager.BlockHash(addrmgrNs, bs.Height)
-			if err != nil {
-				Error(err)
-				return err
+			hash, e = w.Manager.BlockHash(addrmgrNs, bs.Height)
+			if e != nil {
+				return e
 			}
 			b.Hash = *hash
 			client := w.ChainClient()
-			header, err := client.GetBlockHeader(hash)
-			if err != nil {
-				Error(err)
-				return err
+			header, e := client.GetBlockHeader(hash)
+			if e != nil {
+				return e
 			}
 			bs.Timestamp = header.Timestamp
-			err = w.Manager.SetSyncedTo(addrmgrNs, &bs)
-			if err != nil {
-				Error(err)
-				return err
+			e = w.Manager.SetSyncedTo(addrmgrNs, &bs)
+			if e != nil {
+				return e
 			}
-			err = w.TxStore.Rollback(txmgrNs, b.Height)
-			if err != nil {
-				Error(err)
-				return err
+			e = w.TxStore.Rollback(txmgrNs, b.Height)
+			if e != nil {
+				return e
 			}
 		}
 	}
@@ -231,48 +238,49 @@ func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b tm.BlockMeta) erro
 	w.NtfnServer.notifyDetachedBlock(&b.Hash)
 	return nil
 }
-func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, block *tm.BlockMeta) error {
+func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, block *tm.BlockMeta) (e error) {
 	addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 	txmgrNs := dbtx.ReadWriteBucket(wtxmgrNamespaceKey)
 	// At the moment all notified transactions are assumed to actually be relevant. This assumption will not hold true
 	// when SPV support is added, but until then, simply insert the transaction because there should either be one or
 	// more relevant inputs or outputs.
-	err := w.TxStore.InsertTx(txmgrNs, rec, block)
-	if err != nil {
-		Error(err)
-		return err
+	e = w.TxStore.InsertTx(txmgrNs, rec, block)
+	if e != nil {
+		return e
 	}
-	// Check every output to determine whether it is controlled by a wallet key. If so, mark the output as a credit.
+	// Chk every output to determine whether it is controlled by a wallet key. If so, mark the output as a credit.
 	for i, output := range rec.MsgTx.TxOut {
-		_, addrs, _, err := txscript.ExtractPkScriptAddrs(output.PkScript,
-			w.chainParams)
-		if err != nil {
-			Error(err)
+		var addrs []util.Address
+		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
+			output.PkScript,
+			w.chainParams,
+		)
+		if e != nil {
 			// Non-standard outputs are skipped.
 			continue
 		}
 		for _, addr := range addrs {
-			ma, err := w.Manager.Address(addrmgrNs, addr)
-			if err == nil {
+			ma, e := w.Manager.Address(addrmgrNs, addr)
+			if e == nil {
 				// TODO: Credits should be added with the account they belong to, so tm is able to track per-account
 				//  balances.
-				err = w.TxStore.AddCredit(txmgrNs, rec, block, uint32(i),
-					ma.Internal())
-				if err != nil {
-					Error(err)
-					return err
+				e = w.TxStore.AddCredit(
+					txmgrNs, rec, block, uint32(i),
+					ma.Internal(),
+				)
+				if e != nil {
+					return e
 				}
-				err = w.Manager.MarkUsed(addrmgrNs, addr)
-				if err != nil {
-					Error(err)
-					return err
+				e = w.Manager.MarkUsed(addrmgrNs, addr)
+				if e != nil {
+					return e
 				}
-				Trace("marked address used:", addr)
+				trc.Ln("marked address used:", addr)
 				continue
 			}
 			// Missing addresses are skipped. Other errors should be propagated.
-			if !wm.IsError(err, wm.ErrAddressNotFound) {
-				return err
+			if !wm.IsError(e, wm.ErrAddressNotFound) {
+				return e
 			}
 		}
 	}
@@ -280,10 +288,9 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 	//
 	// TODO: Avoid the extra db hits.
 	if block == nil {
-		details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, nil)
-		if err != nil {
-			Error(err)
-			Error("cannot query transaction details for notification:", err)
+		details, e := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, nil)
+		if e != nil {
+			err.Ln("cannot query transaction details for notification:", err)
 		}
 		// It's possible that the transaction was not found within the wallet's set of unconfirmed transactions due to
 		// it already being confirmed, so we'll avoid notifying it.
@@ -294,10 +301,9 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 			w.NtfnServer.notifyUnminedTransaction(dbtx, details)
 		}
 	} else {
-		details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
-		if err != nil {
-			Error(err)
-			Error("cannot query transaction details for notification:", err)
+		details, e := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
+		if e != nil {
+			err.Ln("cannot query transaction details for notification:", err)
 		}
 		// We'll only notify the transaction if it was found within the wallet's set of confirmed transactions.
 		if details != nil {

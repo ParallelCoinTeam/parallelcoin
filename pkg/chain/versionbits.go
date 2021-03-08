@@ -82,10 +82,9 @@ const (
 // 	if version&conditionMask == 0 {
 // 		return false, nil
 // 	}
-// 	expectedVersion, err := c.chain.calcNextBlockVersion(node.parent)
-// 	if err != nil {
-// 		Error(err)
-// 		return false, err
+// 	expectedVersion, e := c.chain.calcNextBlockVersion(node.parent)
+// 	if e != nil  {
+// 		// 		return false, err
 // 	}
 // 	return expectedVersion&conditionMask == 0, nil
 // }
@@ -163,10 +162,9 @@ const (
 // 		deployment := &b.params.Deployments[id]
 // 		cache := &b.deploymentCaches[id]
 // 		checker := deploymentChecker{deployment: deployment, chain: b}
-// 		state, err := b.thresholdState(prevNode, checker, cache)
-// 		if err != nil {
-// 			Error(err)
-// 			return 0, err
+// 		state, e := b.thresholdState(prevNode, checker, cache)
+// 		if e != nil  {
+// 			// 			return 0, err
 // 		}
 // 		if state == ThresholdStarted || state == ThresholdLockedIn {
 // 			expectedVersion |= uint32(1) << deployment.BitNumber
@@ -179,7 +177,7 @@ const (
 // // the state of started and locked in rule change deployments. This function is safe for concurrent access.
 // func (b *BlockChain) CalcNextBlockVersion() (uint32, error) {
 // 	b.chainLock.Lock()
-// 	version, err := b.calcNextBlockVersion(b.BestChain.Tip())
+// 	version, e := b.calcNextBlockVersion(b.BestChain.Tip())
 // 	b.chainLock.Unlock()
 // 	return version, err
 // }
@@ -190,15 +188,14 @@ const (
 // // This will only happen once when new rules have been activated and every block for those about to be activated.
 // //
 // // This function MUST be called with the chain state lock held (for writes)
-// func (b *BlockChain) warnUnknownRuleActivations(node *BlockNode) error {
+// func (b *BlockChain) warnUnknownRuleActivations(node *BlockNode) (e error) {
 // 	// Warn if any unknown new rules are either about to activate or have already been activated.
 // 	for bit := uint32(0); bit < vbNumBits; bit++ {
 // 		checker := bitConditionChecker{bit: bit, chain: b}
 // 		cache := &b.warningCaches[bit]
-// 		state, err := b.thresholdState(node.parent, checker, cache)
-// 		if err != nil {
-// 			Error(err)
-// 			return err
+// 		state, e := b.thresholdState(node.parent, checker, cache)
+// 		if e != nil  {
+// 			// 			return err
 // 		}
 // 		switch state {
 // 		case ThresholdActive:
@@ -219,7 +216,7 @@ const (
 // warnUnknownVersions logs a warning if a high enough percentage of the last
 // blocks have unexpected versions.
 // This function MUST be called with the chain state lock held (for writes)
-// func (b *BlockChain) warnUnknownVersions(node *BlockNode) error {
+// func (b *BlockChain) warnUnknownVersions(node *BlockNode) (e error) {
 // 	// Nothing to do if already warned.
 // 	if b.unknownVersionsWarned {
 // 		return nil
@@ -227,10 +224,9 @@ const (
 // 	// Warn if enough previous blocks have unexpected versions.
 // 	numUpgraded := uint32(0)
 // 	for i := uint32(0); i < unknownVerNumToCheck && node != nil; i++ {
-// 		expectedVersion, err := b.calcNextBlockVersion(node.parent)
-// 		if err != nil {
-// Error(err)
-// 			return err
+// 		expectedVersion, e := b.calcNextBlockVersion(node.parent)
+// 		if e != nil  {
+// // 			return err
 // 		}
 // 		if expectedVersion > vbLegacyBlockVersion &&
 // 			(node.version & ^expectedVersion) != 0 {

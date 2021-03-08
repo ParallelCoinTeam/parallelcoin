@@ -21,8 +21,8 @@ type signatureTest struct {
 // decodeHex decodes the passed hex string and returns the resulting bytes. It panics if an error occurs. This is only
 // used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
 func decodeHex(hexStr string) []byte {
-	b, err := hex.DecodeString(hexStr)
-	if err != nil {
+	b, e := hex.DecodeString(hexStr)
+	if e != nil  {
 		panic("invalid hex string in test source: err " + err.Error() +
 			", hex: " + hexStr)
 	}
@@ -322,13 +322,13 @@ var signatureTests = []signatureTest{
 
 func TestSignatures(t *testing.T) {
 	for _, test := range signatureTests {
-		var err error
+		var e error
 		if test.der {
-			_, err = ParseDERSignature(test.sig, S256())
+			_, e = ParseDERSignature(test.sig, S256())
 		} else {
-			_, err = ParseSignature(test.sig, S256())
+			_, e = ParseSignature(test.sig, S256())
 		}
-		if err != nil {
+		if e != nil  {
 			if test.isValid {
 				t.Errorf("%s signature failed when shouldn't %v",
 					test.name, err)
@@ -449,13 +449,13 @@ func testSignCompact(t *testing.T, tag string, curve *KoblitzCurve,
 	tmp, _ := NewPrivateKey(curve)
 	priv := tmp
 	hashed := []byte("testing")
-	sig, err := SignCompact(curve, priv, hashed, isCompressed)
-	if err != nil {
+	sig, e := SignCompact(curve, priv, hashed, isCompressed)
+	if e != nil  {
 		t.Errorf("%s: error signing: %s", tag, err)
 		return
 	}
-	pk, wasCompressed, err := RecoverCompact(curve, sig, hashed)
-	if err != nil {
+	pk, wasCompressed, e := RecoverCompact(curve, sig, hashed)
+	if e != nil  {
 		t.Errorf("%s: error recovering: %s", tag, err)
 		return
 	}
@@ -475,8 +475,8 @@ func testSignCompact(t *testing.T, tag string, curve *KoblitzCurve,
 	} else {
 		sig[0] += 4
 	}
-	pk, wasCompressed, err = RecoverCompact(curve, sig, hashed)
-	if err != nil {
+	pk, wasCompressed, e = RecoverCompact(curve, sig, hashed)
+	if e != nil  {
 		t.Errorf("%s: error recovering (2): %s", tag, err)
 		return
 	}
@@ -496,8 +496,8 @@ func TestSignCompact(t *testing.T) {
 	for i := 0; i < 256; i++ {
 		name := fmt.Sprintf("test %d", i)
 		data := make([]byte, 32)
-		_, err := rand.Read(data)
-		if err != nil {
+		_, e := rand.Read(data)
+		if e != nil  {
 			t.Errorf("failed to read random data for %s", name)
 			continue
 		}
@@ -512,7 +512,7 @@ var recoveryTests = []struct {
 	msg string
 	sig string
 	pub string
-	err error
+	e error
 }{
 	{
 		// Valid curve point recovered.
@@ -540,7 +540,7 @@ func TestRecoverCompact(t *testing.T) {
 		sig := decodeHex(test.sig)
 		// Magic DER constant.
 		sig[0] += 27
-		pub, _, err := RecoverCompact(S256(), sig, msg)
+		pub, _, e = RecoverCompact(S256(), sig, msg)
 		// Verify that returned error matches as expected.
 		if !reflect.DeepEqual(test.err, err) {
 			t.Errorf("unexpected error returned from pubkey "+
@@ -550,7 +550,7 @@ func TestRecoverCompact(t *testing.T) {
 		}
 		// If check succeeded because a proper error was returned, we
 		// ignore the returned pubkey.
-		if err != nil {
+		if e != nil  {
 			continue
 		}
 		// Otherwise, ensure the correct public key was recovered.
@@ -622,8 +622,8 @@ func TestRFC6979(t *testing.T) {
 			continue
 		}
 		// Ensure deterministically generated signature is the expected value.
-		gotSig, err := privKey.Sign(hash[:])
-		if err != nil {
+		gotSig, e := privKey.Sign(hash[:])
+		if e != nil  {
 			t.Errorf("Sign #%d (%s): unexpected error: %v", i,
 				test.msg, err)
 			continue

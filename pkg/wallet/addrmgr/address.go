@@ -124,11 +124,11 @@ func (a *managedAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	a.privKeyMutex.Lock()
 	defer a.privKeyMutex.Unlock()
 	if len(a.privKeyCT) == 0 {
-		var err error
+		var e error
 		var privKey []byte
-		if privKey, err = key.Decrypt(a.privKeyEncrypted); Check(err) {
+		if privKey, e = key.Decrypt(a.privKeyEncrypted); dbg.Chk(e) {
 			str := fmt.Sprintf("failed to decrypt private key for %s", a.address)
-			return nil, managerError(ErrCrypto, str, err)
+			return nil, managerError(ErrCrypto, str, e)
 		}
 		a.privKeyCT = privKey
 	}
@@ -258,9 +258,9 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 	// stored in memory can be cleared at any time. Otherwise the returned private
 	// key could be invalidated from under the caller.
 	var privKeyCopy []byte
-	var err error
-	if privKeyCopy, err = a.unlock(a.manager.rootManager.cryptoKeyPriv); Check(err) {
-		return nil, err
+	var e error
+	if privKeyCopy, e = a.unlock(a.manager.rootManager.cryptoKeyPriv); dbg.Chk(e) {
+		return nil, e
 	}
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), privKeyCopy)
 	zero.Bytes(privKeyCopy)
@@ -273,9 +273,9 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 // This is part of the ManagedPubKeyAddress interface implementation.
 func (a *managedAddress) ExportPrivKey() (*util.WIF, error) {
 	var pk *ec.PrivateKey
-	var err error
-	if pk, err = a.PrivKey(); Check(err) {
-		return nil, err
+	var e error
+	if pk, e = a.PrivKey(); dbg.Chk(e) {
+		return nil, e
 	}
 	return util.NewWIF(pk, a.manager.rootManager.chainParams, a.compressed)
 }
@@ -315,7 +315,7 @@ func newManagedAddressWithoutPrivKey(
 		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
 	}
 	var address util.Address
-	var err error
+	var e error
 	switch addrType {
 	// case NestedWitnessPubKey:
 	// // For this address type we'l generate an address which is backwards compatible
@@ -324,36 +324,36 @@ func newManagedAddressWithoutPrivKey(
 	// //
 	// // First, we'll generate a normal p2wkh address from the pubkey hash.
 	// var witAddr *util.AddressWitnessPubKeyHash
-	// if witAddr, err = util.NewAddressWitnessPubKeyHash(
+	// if witAddr, e = util.NewAddressWitnessPubKeyHash(
 	// 	pubKeyHash, m.rootManager.chainParams,
-	// ); Check(err) {
-	// 	return nil, err
+	// ); dbg.Chk(e) {
+	// 	return nil, e
 	// }
 	// // Next we'll generate the witness program which can be used as a pkScript to
 	// // pay to this generated address.
 	// var witnessProgram []byte
-	// if witnessProgram, err = txscript.PayToAddrScript(witAddr); Check(err) {
-	// 	return nil, err
+	// if witnessProgram, e = txscript.PayToAddrScript(witAddr); dbg.Chk(e) {
+	// 	return nil, e
 	// }
 	// // Finally, we'll use the witness program itself as the pre-image to a p2sh
 	// // address. In order to spend, we first use the witnessProgram as the sigScript,
 	// // then present the proper <sig, pubkey> pair as the witness.
-	// if address, err = util.NewAddressScriptHash(
+	// if address, e = util.NewAddressScriptHash(
 	// 	witnessProgram, m.rootManager.chainParams,
-	// ); Check(err) {
-	// 	return nil, err
+	// ); dbg.Chk(e) {
+	// 	return nil, e
 	// }
 	case PubKeyHash:
-		if address, err = util.NewAddressPubKeyHash(
+		if address, e = util.NewAddressPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
-		); Check(err) {
-			return nil, err
+		); dbg.Chk(e) {
+			return nil, e
 		}
 	// case WitnessPubKey:
-	// 	if address, err = util.NewAddressWitnessPubKeyHash(
+	// 	if address, e = util.NewAddressWitnessPubKeyHash(
 	// 		pubKeyHash, m.rootManager.chainParams,
-	// 	); Check(err) {
-	// 		return nil, err
+	// 	); dbg.Chk(e) {
+	// 		return nil, e
 	// 	}
 	}
 	return &managedAddress{
@@ -384,23 +384,23 @@ func newManagedAddress(
 	// cleared when locked, so they aren't cleared here.
 	privKeyBytes := privKey.Serialize()
 	var privKeyEncrypted []byte
-	var err error
-	if privKeyEncrypted, err = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes); Check(err) {
+	var e error
+	if privKeyEncrypted, e = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes); dbg.Chk(e) {
 		str := "failed to encrypt private key"
-		return nil, managerError(ErrCrypto, str, err)
+		return nil, managerError(ErrCrypto, str, e)
 	}
 	// Leverage the code to create a managed address without a private key and then
 	// add the private key to it.
 	ecPubKey := (*ec.PublicKey)(&privKey.PublicKey)
 	var managedAddr *managedAddress
-	if managedAddr, err = newManagedAddressWithoutPrivKey(
+	if managedAddr, e = newManagedAddressWithoutPrivKey(
 		s,
 		derivationPath,
 		ecPubKey,
 		compressed,
 		addrType,
-	); Check(err) {
-		return nil, err
+	); dbg.Chk(e) {
+		return nil, e
 	}
 	managedAddr.privKeyEncrypted = privKeyEncrypted
 	managedAddr.privKeyCT = privKeyBytes
@@ -414,30 +414,30 @@ func newManagedAddress(
 func newManagedAddressFromExtKey(
 	s *ScopedKeyManager, derivationPath DerivationPath, key *hdkeychain.ExtendedKey,
 	addrType AddressType,
-) (managedAddr *managedAddress, err error) {
+) (managedAddr *managedAddress, e error) {
 	// Create a new managed address based on the public or private key depending on
 	// whether the generated key is private.
 	if key.IsPrivate() {
 		var privKey *ec.PrivateKey
-		if privKey, err = key.ECPrivKey(); Check(err) {
-			return nil, err
+		if privKey, e = key.ECPrivKey(); dbg.Chk(e) {
+			return nil, e
 		}
 		// Ensure the temp private key big integer is cleared after use.
-		if managedAddr, err = newManagedAddress(
+		if managedAddr, e = newManagedAddress(
 			s, derivationPath, privKey, true, addrType,
-		); Check(err) {
-			return nil, err
+		); dbg.Chk(e) {
+			return nil, e
 		}
 	} else {
 		var pubKey *ec.PublicKey
-		if pubKey, err = key.ECPubKey(); Check(err) {
-			return nil, err
+		if pubKey, e = key.ECPubKey(); dbg.Chk(e) {
+			return nil, e
 		}
-		if managedAddr, err = newManagedAddressWithoutPrivKey(
+		if managedAddr, e = newManagedAddressWithoutPrivKey(
 			s, derivationPath, pubKey, true,
 			addrType,
-		); Check(err) {
-			return nil, err
+		); dbg.Chk(e) {
+			return nil, e
 		}
 	}
 	return managedAddr, nil
@@ -461,15 +461,15 @@ var _ ManagedScriptAddress = (*scriptAddress)(nil)
 // invalid or the encrypted script is not available. The returned clear text
 // script will always be a copy that may be safely used by the caller without
 // worrying about it being zeroed during an address lock.
-func (a *scriptAddress) unlock(key EncryptorDecryptor) (scriptCopy []byte, err error) {
+func (a *scriptAddress) unlock(key EncryptorDecryptor) (scriptCopy []byte, e error) {
 	// Protect concurrent access to clear text script.
 	a.scriptMutex.Lock()
 	defer a.scriptMutex.Unlock()
 	if len(a.scriptCT) == 0 {
 		var script []byte
-		if script, err = key.Decrypt(a.scriptEncrypted); Check(err) {
+		if script, e = key.Decrypt(a.scriptEncrypted); dbg.Chk(e) {
 			str := fmt.Sprintf("failed to decrypt script for %s", a.address)
-			return nil, managerError(ErrCrypto, str, err)
+			return nil, managerError(ErrCrypto, str, e)
 		}
 		a.scriptCT = script
 	}
@@ -573,12 +573,12 @@ func newScriptAddress(
 	m *ScopedKeyManager, account uint32, scriptHash,
 	scriptEncrypted []byte,
 ) (*scriptAddress, error) {
-	var err error
+	var e error
 	var address *util.AddressScriptHash
-	if address, err = util.NewAddressScriptHashFromHash(
+	if address, e = util.NewAddressScriptHashFromHash(
 		scriptHash, m.rootManager.chainParams,
-	); Check(err) {
-		return nil, err
+	); dbg.Chk(e) {
+		return nil, e
 	}
 	return &scriptAddress{
 		manager:         m,

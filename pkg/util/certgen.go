@@ -19,15 +19,14 @@ import (
 
 // NewTLSCertPair returns a new PEM-encoded x.509 certificate pair based on a 521-bit ECDSA private key. The machine's
 // local interface addresses and all variants of IPv4 and IPv6 localhost are included as valid IP addresses.
-func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []string) (cert, key []byte, err error) {
+func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []string) (cert, key []byte, e error) {
 	now := time.Now()
 	if validUntil.Before(now) {
 		return nil, nil, errors.New("validUntil would create an already-expired certificate")
 	}
-	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	priv, e := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	if e != nil {
+		return nil, nil, e
 	}
 	// end of ASN.1 time
 	endOfTime := time.Date(2049, 12, 31, 23, 59, 59, 0, time.UTC)
@@ -35,15 +34,13 @@ func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []stri
 		validUntil = endOfTime
 	}
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	if err != nil {
-		Error(err)
-		return nil, nil, fmt.Errorf("failed to generate serial number: %s", err)
+	serialNumber, e := rand.Int(rand.Reader, serialNumberLimit)
+	if e != nil {
+		return nil, nil, fmt.Errorf("failed to generate serial number: %s", e)
 	}
-	host, err := os.Hostname()
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	host, e := os.Hostname()
+	if e != nil {
+		return nil, nil, e
 	}
 	ipAddresses := []net.IP{net.ParseIP("127.0.0.1"), net.ParseIP("::1")}
 	dnsNames := []string{host}
@@ -66,21 +63,20 @@ func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []stri
 		}
 		dnsNames = append(dnsNames, host)
 	}
-	addrs, err := interfaceAddrs()
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	addrs, e := interfaceAddrs()
+	if e != nil {
+		return nil, nil, e
 	}
 	for _, a := range addrs {
-		ipAddr, _, err := net.ParseCIDR(a.String())
-		if err == nil {
+		var ipAddr net.IP
+		ipAddr, _, e = net.ParseCIDR(a.String())
+		if e == nil {
 			addIP(ipAddr)
 		}
 	}
 	for _, hostStr := range extraHosts {
-		host, _, err := net.SplitHostPort(hostStr)
-		if err != nil {
-			Error(err)
+		host, _, e = net.SplitHostPort(hostStr)
+		if e != nil {
 			host = hostStr
 		}
 		if ip := net.ParseIP(host); ip != nil {
@@ -104,27 +100,25 @@ func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []stri
 		DNSNames:              dnsNames,
 		IPAddresses:           ipAddresses,
 	}
-	derBytes, err := x509.CreateCertificate(rand.Reader, &template,
-		&template, &priv.PublicKey, priv)
-	if err != nil {
-		Error(err)
+	derBytes, e := x509.CreateCertificate(
+		rand.Reader, &template,
+		&template, &priv.PublicKey, priv,
+	)
+	if e != nil {
 		return nil, nil, fmt.Errorf("failed to create certificate: %v", err)
 	}
 	certBuf := &bytes.Buffer{}
-	err = pem.Encode(certBuf, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
-	if err != nil {
-		Error(err)
+	e = pem.Encode(certBuf, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	if e != nil {
 		return nil, nil, fmt.Errorf("failed to encode certificate: %v", err)
 	}
-	keybytes, err := x509.MarshalECPrivateKey(priv)
-	if err != nil {
-		Error(err)
+	keybytes, e := x509.MarshalECPrivateKey(priv)
+	if e != nil {
 		return nil, nil, fmt.Errorf("failed to marshal private key: %v", err)
 	}
 	keyBuf := &bytes.Buffer{}
-	err = pem.Encode(keyBuf, &pem.Block{Type: "EC PRIVATE KEY", Bytes: keybytes})
-	if err != nil {
-		Error(err)
+	e = pem.Encode(keyBuf, &pem.Block{Type: "EC PRIVATE KEY", Bytes: keybytes})
+	if e != nil {
 		return nil, nil, fmt.Errorf("failed to encode private key: %v", err)
 	}
 	return certBuf.Bytes(), keyBuf.Bytes(), nil

@@ -128,8 +128,8 @@ The third category of errors, that is errors returned by the server, can be dete
 
 For example, to detect if a command is unimplemented by the remote RPC server:
 
-  amount, err := client.GetBalance("")
-  if err != nil {
+  amount, e := client.GetBalance("")
+  if e != nil  {
 
   	if jerr, ok := err.(*btcjson.RPCError); ok {
 

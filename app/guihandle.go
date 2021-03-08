@@ -10,16 +10,16 @@ import (
 	"github.com/p9c/pod/cmd/gui"
 )
 
-func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
-	return func(c *cli.Context) (err error) {
-		// Debug(os.Args)
+func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
+		// dbg.Ln(os.Args)
 		config.Configure(cx, c.Command.Name, true)
 		// interrupt.AddHandler(func() {
-		// 	Debug("wallet gui is shut down")
+		// 	dbg.Ln("wallet gui is shut down")
 		// })
-		if err = gui.Main(cx, c); Check(err) {
+		if e = gui.Main(cx, c); dbg.Chk(e) {
 		}
-		Debug("pod gui finished")
+		dbg.Ln("pod gui finished")
 		return
 	}
 }

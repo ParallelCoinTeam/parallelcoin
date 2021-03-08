@@ -71,7 +71,7 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 	}
 	// At this point, we'll now check to see if we need to deliver any backlog notifications as its possible that while
 	// the caller is requesting right after a new set of blocks has been connected.
-	err := s.blockManager.SynchronizeFilterHeaders(func(filterHeaderTip uint32) error {
+	e := s.blockManager.SynchronizeFilterHeaders(func(filterHeaderTip uint32) (e error) {
 		s.mtxSubscribers.Lock()
 		defer s.mtxSubscribers.Unlock()
 		s.blockSubscribers[&subscription] = struct{}{}
@@ -80,7 +80,7 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 		if filterHeaderTip == bestHeight {
 			return nil
 		}
-		Debugf(
+		dbg.F(
 			"delivering backlog block notifications from height=%v, to height=%v",
 			bestHeight, filterHeaderTip,
 		)
@@ -90,11 +90,11 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 		// catching up the caller.
 		for currentHeight := bestHeight + 1; currentHeight <=
 			filterHeaderTip; currentHeight++ {
-			blockHeader, err := s.BlockHeaders.FetchHeaderByHeight(
+			blockHeader, e := s.BlockHeaders.FetchHeaderByHeight(
 				currentHeight,
 			)
-			if err != nil {
-				Error(err)
+			if e != nil  {
+				err.Ln(err)
 				return fmt.Errorf(
 					"unable to read header at height: %v: %v",
 					currentHeight, err,
@@ -107,9 +107,9 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 		}
 		return nil
 	})
-	if err != nil {
-		Error(err)
-		return nil, err
+	if e != nil  {
+		err.Ln(err)
+		return nil, e
 	}
 	return &subscription, nil
 }

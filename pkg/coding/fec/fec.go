@@ -5,7 +5,7 @@ package fec
 import (
 	"encoding/binary"
 	"errors"
-
+	
 	"github.com/vivint/infectious"
 )
 
@@ -13,9 +13,9 @@ var (
 	rsTotal    = 9
 	rsRequired = 3
 	rsFEC      = func() *infectious.FEC {
-		fec, err := infectious.NewFEC(rsRequired, rsTotal)
-		if err != nil {
-			Error(err)
+		fec, e := infectious.NewFEC(rsRequired, rsTotal)
+		if e != nil {
+			err.Ln(e)
 		}
 		return fec
 	}()
@@ -41,16 +41,16 @@ func padData(data []byte) (out []byte) {
 
 // Encode turns a byte slice into a set of shards with first byte containing the shard number. Previously this code
 // included a CRC32 but this is unnecessary since the shards will be sent wrapped in HMAC protected encryption
-func Encode(data []byte) (chunks [][]byte, err error) {
+func Encode(data []byte) (chunks [][]byte, e error) {
 	// First we must pad the data
 	data = padData(data)
 	shares := make([]infectious.Share, rsTotal)
 	output := func(s infectious.Share) {
 		shares[s.Number] = s.DeepCopy()
 	}
-	err = rsFEC.Encode(data, output)
-	if err != nil {
-		Error(err)
+	e = rsFEC.Encode(data, output)
+	if e != nil {
+		err.Ln(e)
 		return
 	}
 	for i := range shares {
@@ -68,10 +68,12 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 	return
 }
 
-func Decode(chunks [][]byte) (data []byte, err error) {
+// Decode takes a set of shards and if there is sufficient to reassemble,
+// returns the corrected data
+func Decode(chunks [][]byte) (data []byte, e error) {
 	var shares []infectious.Share
 	if len(chunks) < 1 {
-		Debug("nil chunks")
+		dbg.Ln("nil chunks")
 		return nil, errors.New("asked to decode nothing")
 	}
 	totalLen := 0
@@ -91,11 +93,13 @@ func Decode(chunks [][]byte) (data []byte, err error) {
 	}
 	data = make([]byte, totalLen)
 	dataLen := len(shares[0].Data)
-	if err = rsFEC.Rebuild(shares, func(s infectious.Share) {
-		copy(data[s.Number*dataLen:], s.Data)
-	}); Check(err) {
+	if e := rsFEC.Rebuild(
+		shares, func(s infectious.Share) {
+			copy(data[s.Number*dataLen:], s.Data)
+		},
+	); dbg.Chk(e) {
 	}
-	// data, err = rsFEC.Decode(nil, shares)
+	// data, e = rsFEC.Decode(nil, shares)
 	if len(data) > 4 {
 		prefix := data[:4]
 		data = data[4:]

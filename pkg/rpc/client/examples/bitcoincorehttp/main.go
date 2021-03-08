@@ -18,15 +18,15 @@ func main() {
 		TLS:          false, // Bitcoin core does not provide TLS by default
 	}
 	// Notice the notification parameter is nil since notifications are not supported in HTTP POST mode.
-	client, err := rpcclient.New(connCfg, nil, qu.T())
-	if err != nil {
-		Fatal(err)
+	client, e := rpcclient.New(connCfg, nil, qu.T())
+	if e != nil  {
+		ftl.Ln(err)
 	}
 	defer client.Shutdown()
 	// Get the current block count.
-	blockCount, err := client.GetBlockCount()
-	if err != nil {
-		Fatal(err)
+	blockCount, e := client.GetBlockCount()
+	if e != nil  {
+		ftl.Ln(err)
 	}
 	log.Printf("Block count: %d", blockCount)
 }

@@ -55,126 +55,99 @@ func (msg *MsgVersion) AddService(service ServiceFlag) {
 // protocol version hasn't been negotiated yet. As a result, the pver field is ignored and any fields which are added in
 // new versions are optional. This also mean that r must be a *bytes.Buffer so the number of remaining bytes can be
 // ascertained. This is part of the Message interface implementation.
-func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	buf, ok := r.(*bytes.Buffer)
 	if !ok {
-		return fmt.Errorf("MsgVersion.BtcDecode reader is not a " +
-			"*bytes.Buffer")
+		return fmt.Errorf("MsgVersion.BtcDecode reader is not a *bytes.Buffer")
 	}
-	err := readElements(buf, &msg.ProtocolVersion, &msg.Services,
-		(*int64Time)(&msg.Timestamp))
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElements(buf, &msg.ProtocolVersion, &msg.Services, (*int64Time)(&msg.Timestamp)); dbg.Chk(e) {
+		return
 	}
-	err = readNetAddress(buf, pver, &msg.AddrYou, false)
-	if err != nil {
-		Error(err)
-		return err
+	e = readNetAddress(buf, pver, &msg.AddrYou, false)
+	if e != nil {
+		return
 	}
 	// Protocol versions >= 106 added a from address, nonce, and user agent field and they are only considered present
 	// if there are bytes remaining in the message.
 	if buf.Len() > 0 {
-		err = readNetAddress(buf, pver, &msg.AddrMe, false)
-		if err != nil {
-			Error(err)
-			return err
+		e = readNetAddress(buf, pver, &msg.AddrMe, false)
+		if e != nil {
+			return
 		}
 	}
 	if buf.Len() > 0 {
-		err = readElement(buf, &msg.Nonce)
-		if err != nil {
-			Error(err)
-			return err
+		e = readElement(buf, &msg.Nonce)
+		if e != nil {
+			return
 		}
 	}
 	if buf.Len() > 0 {
-		userAgent, err := ReadVarString(buf, pver)
-		if err != nil {
-			Error(err)
-			return err
+		var userAgent string
+		if userAgent, e = ReadVarString(buf, pver); dbg.Chk(e) {
+			return
 		}
-		err = validateUserAgent(userAgent)
-		if err != nil {
-			Error(err)
-			return err
+		if e = validateUserAgent(userAgent); dbg.Chk(e) {
+			return
 		}
 		msg.UserAgent = userAgent
 	}
-	// Protocol versions >= 209 added a last known block field.  It is only considered present if there are bytes
-	// remaining in the message.
+	// Protocol versions >= 209 added a last known block field. It is only
+	// considered present if there are bytes remaining in the message.
 	if buf.Len() > 0 {
-		err = readElement(buf, &msg.LastBlock)
-		if err != nil {
-			Error(err)
-			return err
+		if e = readElement(buf, &msg.LastBlock);dbg.Chk(e){
+			return
 		}
 	}
-	// There was no relay transactions field before BIP0037Version, but the default behavior prior to the addition of
-	// the field was to always relay transactions.
+	// There was no relay transactions field before BIP0037Version, but the default
+	// behavior prior to the addition of the field was to always relay transactions.
 	if buf.Len() > 0 {
-		// It's safe to ignore the error here since the buffer has at least one byte and that byte will result in a
-		// boolean value regardless of its value.  Also, the wire encoding for the field is true when transactions
-		// should be relayed, so reverse it for the DisableRelayTx field.
+		// It's safe to ignore the error here since the buffer has at least one byte and
+		// that byte will result in a boolean value regardless of its value. Also, the
+		// wire encoding for the field is true when transactions should be relayed, so
+		// reverse it for the DisableRelayTx field.
 		var relayTx bool
-		err = readElement(r, &relayTx)
-		if err != nil {
-			Error(err)
+		if e = readElement(r, &relayTx); dbg.Chk(e) {
 		}
 		msg.DisableRelayTx = !relayTx
 	}
-	return nil
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgVersion) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
-	err := validateUserAgent(msg.UserAgent)
-	if err != nil {
-		Error(err)
-		return err
+func (msg *MsgVersion) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
+	if e = validateUserAgent(msg.UserAgent); dbg.Chk(e) {
+		return
 	}
-	err = writeElements(w, msg.ProtocolVersion, msg.Services,
-		msg.Timestamp.Unix())
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElements(
+		w, msg.ProtocolVersion, msg.Services,
+		msg.Timestamp.Unix(),
+	); dbg.Chk(e) {
+		return
 	}
-	err = writeNetAddress(w, pver, &msg.AddrYou, false)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeNetAddress(w, pver, &msg.AddrYou, false); dbg.Chk(e) {
+		return
 	}
-	err = writeNetAddress(w, pver, &msg.AddrMe, false)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeNetAddress(w, pver, &msg.AddrMe, false); dbg.Chk(e) {
+		return
 	}
-	err = writeElement(w, msg.Nonce)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElement(w, msg.Nonce); dbg.Chk(e) {
+		return
 	}
-	err = WriteVarString(w, pver, msg.UserAgent)
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarString(w, pver, msg.UserAgent); dbg.Chk(e) {
+		return
 	}
-	err = writeElement(w, msg.LastBlock)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElement(w, msg.LastBlock); dbg.Chk(e) {
+		return
 	}
 	// There was no relay transactions field before BIP0037Version.  Also, the wire encoding for the field is true when
 	// transactions should be relayed, so reverse it from the DisableRelayTx field.
 	if pver >= BIP0037Version {
-		err = writeElement(w, !msg.DisableRelayTx)
-		if err != nil {
-			Error(err)
-			return err
+		if e = writeElement(w, !msg.DisableRelayTx); dbg.Chk(e) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // Command returns the protocol command string for the message.  This is part of the Message interface implementation.
@@ -196,8 +169,10 @@ func (msg *MsgVersion) MaxPayloadLength(pver uint32) uint32 {
 
 // NewMsgVersion returns a new bitcoin version message that conforms to the Message interface using the passed
 // parameters and defaults for the remaining fields.
-func NewMsgVersion(me *NetAddress, you *NetAddress, nonce uint64,
-	lastBlock int32) *MsgVersion {
+func NewMsgVersion(
+	me *NetAddress, you *NetAddress, nonce uint64,
+	lastBlock int32,
+) *MsgVersion {
 	// Limit the timestamp to one second precision since the protocol doesn't support better.
 	return &MsgVersion{
 		ProtocolVersion: int32(ProtocolVersion),
@@ -213,10 +188,12 @@ func NewMsgVersion(me *NetAddress, you *NetAddress, nonce uint64,
 }
 
 // validateUserAgent checks userAgent length against MaxUserAgentLen
-func validateUserAgent(userAgent string) error {
+func validateUserAgent(userAgent string) (e error) {
 	if len(userAgent) > MaxUserAgentLen {
-		str := fmt.Sprintf("user agent too long [len %v, max %v]",
-			len(userAgent), MaxUserAgentLen)
+		str := fmt.Sprintf(
+			"user agent too long [len %v, max %v]",
+			len(userAgent), MaxUserAgentLen,
+		)
 		return messageError("MsgVersion", str)
 	}
 	return nil
@@ -224,19 +201,21 @@ func validateUserAgent(userAgent string) error {
 
 // AddUserAgent adds a user agent to the user agent string for the version message.  The version string is not defined
 // to any strict format, although it is recommended to use the form "major.minor.revision" e.g. "2.6.41".
-func (msg *MsgVersion) AddUserAgent(name string, version string,
-	comments ...string) error {
+func (msg *MsgVersion) AddUserAgent(
+	name string, version string,
+	comments ...string,
+) (e error) {
 	newUserAgent := fmt.Sprintf("%s:%s", name, version)
 	if len(comments) != 0 {
-		newUserAgent = fmt.Sprintf("%s(%s)", newUserAgent,
-			strings.Join(comments, "; "))
+		newUserAgent = fmt.Sprintf(
+			"%s(%s)", newUserAgent,
+			strings.Join(comments, "; "),
+		)
 	}
 	newUserAgent = fmt.Sprintf("%s%s/", msg.UserAgent, newUserAgent)
-	err := validateUserAgent(newUserAgent)
-	if err != nil {
-		Error(err)
-		return err
+	if e = validateUserAgent(newUserAgent); dbg.Chk(e) {
+		return
 	}
 	msg.UserAgent = newUserAgent
-	return nil
+	return
 }

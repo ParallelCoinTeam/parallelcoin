@@ -38,7 +38,7 @@ void MacNotificationHandler::sendAppleScript(const QString &script)
     NSString *scriptApple = [[NSString alloc] initWithUTF8String:cString];
 
     NSAppleScript *as = [[NSAppleScript alloc] initWithSource:scriptApple];
-    NSDictionary *err = nil;
+    NSDictionary *e = nil;
     [as executeAndReturnError:&err];
     [as release];
     [scriptApple release];

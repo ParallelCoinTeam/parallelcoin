@@ -12,10 +12,9 @@ import (
 	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
-func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
+func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
 		var (
-			err error
 			// Namespace keys.
 			syncBucketName    = []byte("sync")
 			waddrmgrNamespace = []byte("waddrmgr")
@@ -29,49 +28,49 @@ func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) e
 			*cfg.DataDir,
 			*cfg.Network, "wallet.db",
 		)
-		// Info("dbPath", dbPath)
+		// inf.Ln("dbPath", dbPath)
 		var db walletdb.DB
-		db, err = walletdb.Open("bdb", dbPath)
-		if Check(err) {
+		db, e = walletdb.Open("bdb", dbPath)
+		if dbg.Chk(e) {
 			// DBError("failed to open database:", err)
-			return err
+			return e
 		}
 		defer db.Close()
-		Debug("dropping wtxmgr namespace")
-		err = walletdb.Update(
-			db, func(tx walletdb.ReadWriteTx) error {
-				Debug("deleting top level bucket")
-				if err := tx.DeleteTopLevelBucket(wtxmgrNamespace); Check(err) {
+		dbg.Ln("dropping wtxmgr namespace")
+		e = walletdb.Update(
+			db, func(tx walletdb.ReadWriteTx) (e error) {
+				dbg.Ln("deleting top level bucket")
+				if e = tx.DeleteTopLevelBucket(wtxmgrNamespace); dbg.Chk(e) {
 				}
-				if err != nil && err != walletdb.ErrBucketNotFound {
-					return err
+				if e != nil  && e != walletdb.ErrBucketNotFound {
+					return e
 				}
 				var ns walletdb.ReadWriteBucket
-				Debug("creating new top level bucket")
-				if ns, err = tx.CreateTopLevelBucket(wtxmgrNamespace); Check(err) {
-					return err
+				dbg.Ln("creating new top level bucket")
+				if ns, e = tx.CreateTopLevelBucket(wtxmgrNamespace); dbg.Chk(e) {
+					return e
 				}
-				if err = wtxmgr.Create(ns); Check(err) {
-					return err
+				if e = wtxmgr.Create(ns); dbg.Chk(e) {
+					return e
 				}
 				ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 				startBlock := ns.Get(startBlockName)
-				Debug("putting start block", startBlock)
-				if err = ns.Put(syncedToName, startBlock); Check(err) {
-					return err
+				dbg.Ln("putting start block", startBlock)
+				if e = ns.Put(syncedToName, startBlock); dbg.Chk(e) {
+					return e
 				}
 				recentBlocks := make([]byte, 40)
 				copy(recentBlocks[0:4], startBlock[0:4])
 				copy(recentBlocks[8:], startBlock[4:])
 				binary.LittleEndian.PutUint32(recentBlocks[4:8], uint32(1))
-				defer Debug("put recent blocks")
+				defer dbg.Ln("put recent blocks")
 				return ns.Put(recentBlocksName, recentBlocks)
 			},
 		)
-		if Check(err) {
-			return err
+		if dbg.Chk(e) {
+			return e
 		}
-		Debug("updated wallet")
+		dbg.Ln("updated wallet")
 		// if w != nil {
 		// 	// Rescan chain to ensure balance is correctly regenerated
 		// 	job := &wallet.RescanJob{
@@ -83,12 +82,11 @@ func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) e
 		// 	// required to be read, so discard the return value.
 		// 	errC := w.SubmitRescan(job)
 		// 	select {
-		// 	case err := <-errC:
-		// 		DBError(err)
-		// 		// case <-time.After(time.Second * 5):
+		// 	case e := <-errC:
+		// 		DB		// 		// case <-time.After(time.Second * 5):
 		// 		// 	break
 		// 	}
 		// }
-		return err
+		return e
 	}
 }

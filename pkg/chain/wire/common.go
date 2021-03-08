@@ -7,31 +7,35 @@ import (
 	"io"
 	"math"
 	"time"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 const (
 	// MaxVarIntPayload is the maximum payload size for a variable length integer.
 	MaxVarIntPayload = 9
-	// binaryFreeListMaxItems is the number of buffers to keep in the free list to use for binary serialization and
-	// deserialization.
+	// binaryFreeListMaxItems is the number of buffers to keep in the free list to
+	// use for binary serialization and deserialization.
 	binaryFreeListMaxItems = 16384
 )
 
 var (
-	// littleEndian is a convenience variable since binary.LittleEndian is quite long.
+	// littleEndian is a convenience variable since binary.LittleEndian is quite
+	// long.
 	littleEndian = binary.LittleEndian
 	// bigEndian is a convenience variable since binary.BigEndian is quite long.
 	bigEndian = binary.BigEndian
 )
 
-// binaryFreeList defines a concurrent safe free list of byte slices (up to the maximum number defined by the
-// binaryFreeListMaxItems constant) that have a cap of 8 (thus it supports up to a uint64). It is used to provide
-// temporary buffers for deserializing primitive numbers to and from their binary encoding in order to greatly reduce
-// the number of allocations required. For convenience, functions are provided for each of the primitive unsigned
-// integers that automatically obtain a buffer from the free list, perform the necessary binary conversion, read from or
-// write to the given io.Reader or io.Writer, and return the buffer to the free list.
+// binaryFreeList defines a concurrent safe free list of byte slices (up to the
+// maximum number defined by the binaryFreeListMaxItems constant) that have a
+// cap of 8 (thus it supports up to a uint64). It is used to provide temporary
+// buffers for deserializing primitive numbers to and from their binary encoding
+// in order to greatly reduce the number of allocations required. For
+// convenience, functions are provided for each of the primitive unsigned
+// integers that automatically obtain a buffer from the free list, perform the
+// necessary binary conversion, read from or write to the given io.Reader or
+// io.Writer, and return the buffer to the free list.
 type binaryFreeList chan []byte
 
 // Borrow returns a byte slice from the free list with a length of 8.  A new buffer is allocated if there are not any available on the free list.
@@ -56,94 +60,97 @@ func (l binaryFreeList) Return(buf []byte) {
 }
 
 // Uint8 reads a single byte from the provided reader using a buffer from the free list and returns it as a uint8.
-func (l binaryFreeList) Uint8(r io.Reader) (uint8, error) {
+func (l binaryFreeList) Uint8(r io.Reader) (rv uint8, e error) {
 	buf := l.Borrow()[:1]
-	if _, err := io.ReadFull(r, buf); err != nil {
+	if _, e = io.ReadFull(r, buf); dbg.Chk(e) {
 		l.Return(buf)
-		return 0, err
+		return 0, e
 	}
-	rv := buf[0]
+	rv = buf[0]
 	l.Return(buf)
 	return rv, nil
 }
 
-// Uint16 reads two bytes from the provided reader using a buffer from the free list, converts it to a number using the
-// provided byte order, and returns the resulting uint16.
-func (l binaryFreeList) Uint16(r io.Reader, byteOrder binary.ByteOrder) (uint16, error) {
+// Uint16 reads two bytes from the provided reader using a buffer from the free
+// list, converts it to a number using the provided byte order, and returns the
+// resulting uint16.
+func (l binaryFreeList) Uint16(r io.Reader, byteOrder binary.ByteOrder) (rv uint16, e error) {
 	buf := l.Borrow()[:2]
-	if _, err := io.ReadFull(r, buf); err != nil {
+	if _, e = io.ReadFull(r, buf); dbg.Chk(e) {
 		l.Return(buf)
-		return 0, err
+		return
 	}
-	rv := byteOrder.Uint16(buf)
+	rv = byteOrder.Uint16(buf)
 	l.Return(buf)
 	return rv, nil
 }
 
-// Uint32 reads four bytes from the provided reader using a buffer from the free list, converts it to a number using the
-// provided byte order, and returns the resulting uint32.
-func (l binaryFreeList) Uint32(r io.Reader, byteOrder binary.ByteOrder) (uint32, error) {
+// Uint32 reads four bytes from the provided reader using a buffer from the free
+// list, converts it to a number using the provided byte order, and returns the
+// resulting uint32.
+func (l binaryFreeList) Uint32(r io.Reader, byteOrder binary.ByteOrder) (rv uint32,e error) {
 	buf := l.Borrow()[:4]
-	if _, err := io.ReadFull(r, buf); err != nil {
+	if _, e = io.ReadFull(r, buf); dbg.Chk(e) {
 		l.Return(buf)
-		return 0, err
+		return 0, e
 	}
-	rv := byteOrder.Uint32(buf)
+	rv = byteOrder.Uint32(buf)
 	l.Return(buf)
 	return rv, nil
 }
 
-// Uint64 reads eight bytes from the provided reader using a buffer from the free list, converts it to a number using
-// the provided byte order, and returns the resulting uint64.
-func (l binaryFreeList) Uint64(r io.Reader, byteOrder binary.ByteOrder) (uint64, error) {
+// Uint64 reads eight bytes from the provided reader using a buffer from the
+// free list, converts it to a number using the provided byte order, and returns
+// the resulting uint64.
+func (l binaryFreeList) Uint64(r io.Reader, byteOrder binary.ByteOrder) (rv uint64,e error) {
 	buf := l.Borrow()[:8]
-	if _, err := io.ReadFull(r, buf); err != nil {
+	if _, e = io.ReadFull(r, buf); dbg.Chk(e) {
 		l.Return(buf)
-		return 0, err
+		return
 	}
-	rv := byteOrder.Uint64(buf)
+	rv = byteOrder.Uint64(buf)
 	l.Return(buf)
 	return rv, nil
 }
 
 // PutUint8 copies the provided uint8 into a buffer from the free list and writes the resulting byte to the given
 // writer.
-func (l binaryFreeList) PutUint8(w io.Writer, val uint8) error {
+func (l binaryFreeList) PutUint8(w io.Writer, val uint8) (e error) {
 	buf := l.Borrow()[:1]
 	buf[0] = val
-	_, err := w.Write(buf)
+	_, e = w.Write(buf)
 	l.Return(buf)
-	return err
+	return e
 }
 
 // PutUint16 serializes the provided uint16 using the given byte order into a buffer from the free list and writes the
 // resulting two bytes to the given writer.
-func (l binaryFreeList) PutUint16(w io.Writer, byteOrder binary.ByteOrder, val uint16) error {
+func (l binaryFreeList) PutUint16(w io.Writer, byteOrder binary.ByteOrder, val uint16) (e error) {
 	buf := l.Borrow()[:2]
 	byteOrder.PutUint16(buf, val)
-	_, err := w.Write(buf)
+	_, e = w.Write(buf)
 	l.Return(buf)
-	return err
+	return
 }
 
 // PutUint32 serializes the provided uint32 using the given byte order into a buffer from the free list and writes the
 // resulting four bytes to the given writer.
-func (l binaryFreeList) PutUint32(w io.Writer, byteOrder binary.ByteOrder, val uint32) error {
+func (l binaryFreeList) PutUint32(w io.Writer, byteOrder binary.ByteOrder, val uint32) (e error) {
 	buf := l.Borrow()[:4]
 	byteOrder.PutUint32(buf, val)
-	_, err := w.Write(buf)
+	_, e = w.Write(buf)
 	l.Return(buf)
-	return err
+	return
 }
 
 // PutUint64 serializes the provided uint64 using the given byte order into a buffer from the free list and writes the
 // resulting eight bytes to the given writer.
-func (l binaryFreeList) PutUint64(w io.Writer, byteOrder binary.ByteOrder, val uint64) error {
+func (l binaryFreeList) PutUint64(w io.Writer, byteOrder binary.ByteOrder, val uint64) (e error) {
 	buf := l.Borrow()[:8]
 	byteOrder.PutUint64(buf, val)
-	_, err := w.Write(buf)
+	_, e = w.Write(buf)
 	l.Return(buf)
-	return err
+	return
 }
 
 // binarySerializer provides a free list of buffers to use for serializing and deserializing primitive integer values to
@@ -164,365 +171,298 @@ type int64Time time.Time
 
 // readElement reads the next sequence of bytes from r using little endian depending on the concrete type of element
 // pointed to.
-func readElement(r io.Reader, element interface{}) error {
+func readElement(r io.Reader, element interface{}) (e error) {
 	// Attempt to read the element based on the concrete type via fast type assertions first.
-	switch e := element.(type) {
+	switch l := element.(type) {
 	case *int32:
-		rv, err := binarySerializer.Uint32(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint32
+		if rv, e = binarySerializer.Uint32(r, littleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = int32(rv)
-		return nil
+		*l = int32(rv)
+		return
 	case *uint32:
-		rv, err := binarySerializer.Uint32(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint32
+		if rv, e = binarySerializer.Uint32(r, littleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = rv
-		return nil
+		*l = rv
+		return
 	case *int64:
-		rv, err := binarySerializer.Uint64(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint64
+		if rv, e = binarySerializer.Uint64(r, littleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = int64(rv)
-		return nil
+		*l = int64(rv)
+		return
 	case *uint64:
-		rv, err := binarySerializer.Uint64(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint64
+		if rv, e = binarySerializer.Uint64(r, littleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = rv
-		return nil
+		*l = rv
+		return
 	case *bool:
-		rv, err := binarySerializer.Uint8(r)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint8
+		if rv, e = binarySerializer.Uint8(r); dbg.Chk(e) {
+			return
 		}
 		if rv == 0x00 {
-			*e = false
+			*l = false
 		} else {
-			*e = true
+			*l = true
 		}
 		return nil
 	// Unix timestamp encoded as a uint32.
 	case *uint32Time:
-		rv, err := binarySerializer.Uint32(r, binary.LittleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint32
+		if rv, e = binarySerializer.Uint32(r, binary.LittleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = uint32Time(time.Unix(int64(rv), 0))
-		return nil
+		*l = uint32Time(time.Unix(int64(rv), 0))
+		return
 	// Unix timestamp encoded as an int64.
 	case *int64Time:
-		rv, err := binarySerializer.Uint64(r, binary.LittleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint64
+		if rv, e = binarySerializer.Uint64(r, binary.LittleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = int64Time(time.Unix(int64(rv), 0))
-		return nil
+		*l = int64Time(time.Unix(int64(rv), 0))
+		return
 	// Message header checksum.
 	case *[4]byte:
-		_, err := io.ReadFull(r, e[:])
-		if err != nil {
-			Error(err)
-			return err
+		if _, e = io.ReadFull(r, l[:]); dbg.Chk(e) {
 		}
-		return nil
+		return
 	// Message header command.
 	case *[CommandSize]uint8:
-		_, err := io.ReadFull(r, e[:])
-		if err != nil {
-			Error(err)
-			return err
+		if _, e = io.ReadFull(r, l[:]); dbg.Chk(e) {
 		}
-		return nil
+		return
 	// IP address.
 	case *[16]byte:
-		_, err := io.ReadFull(r, e[:])
-		if err != nil {
-			Error(err)
-			return err
+		if _, e = io.ReadFull(r, l[:]); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case *chainhash.Hash:
-		_, err := io.ReadFull(r, e[:])
-		if err != nil {
-			Error(err)
-			return err
+		if _, e = io.ReadFull(r, l[:]); dbg.Chk(e) {
+			return
 		}
 		return nil
 	case *ServiceFlag:
-		rv, err := binarySerializer.Uint64(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint64
+		if rv, e = binarySerializer.Uint64(r, littleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = ServiceFlag(rv)
-		return nil
+		*l = ServiceFlag(rv)
+		return
 	case *InvType:
-		rv, err := binarySerializer.Uint32(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint32
+		if rv, e = binarySerializer.Uint32(r, littleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = InvType(rv)
-		return nil
+		*l = InvType(rv)
+		return
 	case *BitcoinNet:
-		rv, err := binarySerializer.Uint32(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint32
+		if rv, e = binarySerializer.Uint32(r, littleEndian); dbg.Chk(e) {
+			return
 		}
-		*e = BitcoinNet(rv)
-		return nil
+		*l = BitcoinNet(rv)
+		return
 	case *BloomUpdateType:
-		rv, err := binarySerializer.Uint8(r)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint8
+		if rv, e = binarySerializer.Uint8(r); dbg.Chk(e) {
+			return
 		}
-		*e = BloomUpdateType(rv)
-		return nil
+		*l = BloomUpdateType(rv)
+		return
 	case *RejectCode:
-		rv, err := binarySerializer.Uint8(r)
-		if err != nil {
-			Error(err)
-			return err
+		var rv uint8
+		if rv, e = binarySerializer.Uint8(r); dbg.Chk(e) {
+			return
 		}
-		*e = RejectCode(rv)
-		return nil
+		*l = RejectCode(rv)
+		return
 	}
 	// Fall back to the slower binary.Read if a fast path was not available above.
 	return binary.Read(r, littleEndian, element)
 }
 
 // readElements reads multiple items from r.  It is equivalent to multiple calls to readElement.
-func readElements(r io.Reader, elements ...interface{}) error {
+func readElements(r io.Reader, elements ...interface{}) (e error) {
 	for _, element := range elements {
-		err := readElement(r, element)
-		if err != nil {
-			Error(err)
-			return err
+		if e = readElement(r, element); dbg.Chk(e) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // writeElement writes the little endian representation of element to w.
-func writeElement(w io.Writer, element interface{}) error {
+func writeElement(w io.Writer, element interface{}) (e error) {
 	// Attempt to write the element based on the concrete type via fast type assertions first.
-	switch e := element.(type) {
+	switch el := element.(type) {
 	case int32:
-		err := binarySerializer.PutUint32(w, littleEndian, uint32(e))
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); dbg.Chk(e) {
+			return
 		}
-		return nil
+		return
 	case uint32:
-		err := binarySerializer.PutUint32(w, littleEndian, e)
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint32(w, littleEndian, el); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case int64:
-		err := binarySerializer.PutUint64(w, littleEndian, uint64(e))
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint64(w, littleEndian, uint64(el)); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case uint64:
-		err := binarySerializer.PutUint64(w, littleEndian, e)
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint64(w, littleEndian, el); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case bool:
-		var err error
-		if e {
-			err = binarySerializer.PutUint8(w, 0x01)
+		if el {
+			e = binarySerializer.PutUint8(w, 0x01)
 		} else {
-			err = binarySerializer.PutUint8(w, 0x00)
+			e = binarySerializer.PutUint8(w, 0x00)
 		}
-		if err != nil {
-			Error(err)
-			return err
+		if dbg.Chk(e) {
+			return
 		}
 		return nil
 	// Message header checksum.
 	case [4]byte:
-		_, err := w.Write(e[:])
-		if err != nil {
-			Error(err)
-			return err
+		if _, e = w.Write(el[:]); dbg.Chk(e) {
+			return
 		}
-		return nil
+		return
 	// Message header command.
 	case [CommandSize]uint8:
-		_, err := w.Write(e[:])
-		if err != nil {
-			Error(err)
-			return err
+		if _, e = w.Write(el[:]); dbg.Chk(e) {
 		}
-		return nil
+		return
 	// IP address.
 	case [16]byte:
-		_, err := w.Write(e[:])
-		if err != nil {
-			Error(err)
-			return err
+		if _, e = w.Write(el[:]); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case *chainhash.Hash:
-		_, err := w.Write(e[:])
-		if err != nil {
-			Error(err)
-			return err
+		if _, e = w.Write(el[:]); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case ServiceFlag:
-		err := binarySerializer.PutUint64(w, littleEndian, uint64(e))
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint64(w, littleEndian, uint64(el)); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case InvType:
-		err := binarySerializer.PutUint32(w, littleEndian, uint32(e))
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case BitcoinNet:
-		err := binarySerializer.PutUint32(w, littleEndian, uint32(e))
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case BloomUpdateType:
-		err := binarySerializer.PutUint8(w, uint8(e))
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint8(w, uint8(el)); dbg.Chk(e) {
 		}
-		return nil
+		return
 	case RejectCode:
-		err := binarySerializer.PutUint8(w, uint8(e))
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint8(w, uint8(el)); dbg.Chk(e) {
+			return
 		}
-		return nil
+		return
 	}
 	// Fall back to the slower binary.Write if a fast path was not available above.
 	return binary.Write(w, littleEndian, element)
 }
 
 // writeElements writes multiple items to w.  It is equivalent to multiple calls to writeElement.
-func writeElements(w io.Writer, elements ...interface{}) error {
+func writeElements(w io.Writer, elements ...interface{}) (e error) {
 	for _, element := range elements {
-		err := writeElement(w, element)
-		if err != nil {
-			Error(err)
-			return err
+		if e = writeElement(w, element); dbg.Chk(e) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // ReadVarInt reads a variable length integer from r and returns it as a uint64.
-func ReadVarInt(r io.Reader, pver uint32) (uint64, error) {
-	discriminant, err := binarySerializer.Uint8(r)
-	if err != nil {
-		Error(err)
-		return 0, err
+func ReadVarInt(r io.Reader, pver uint32) (rv uint64, e error) {
+	var discriminant uint8
+	if discriminant, e = binarySerializer.Uint8(r); dbg.Chk(e) {
+		return
 	}
-	var rv uint64
 	switch discriminant {
 	case 0xff:
-		sv, err := binarySerializer.Uint64(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return 0, err
+		var sv uint64
+		if sv, e = binarySerializer.Uint64(r, littleEndian); dbg.Chk(e) {
+			return
 		}
 		rv = sv
 		// The encoding is not canonical if the value could have been encoded using fewer bytes.
 		min := uint64(0x100000000)
 		if rv < min {
-			return 0, messageError("ReadVarInt", fmt.Sprintf(
-				errNonCanonicalVarInt, rv, discriminant, min))
+			return 0, messageError(
+				"ReadVarInt", fmt.Sprintf(
+					errNonCanonicalVarInt, rv, discriminant, min,
+				),
+			)
 		}
 	case 0xfe:
-		sv, err := binarySerializer.Uint32(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return 0, err
+		var sv uint32
+		if sv, e = binarySerializer.Uint32(r, littleEndian); dbg.Chk(e) {
+			return
 		}
 		rv = uint64(sv)
 		// The encoding is not canonical if the value could have been encoded using fewer bytes.
 		min := uint64(0x10000)
 		if rv < min {
-			return 0, messageError("ReadVarInt", fmt.Sprintf(
-				errNonCanonicalVarInt, rv, discriminant, min))
+			return 0, messageError(
+				"ReadVarInt", fmt.Sprintf(
+					errNonCanonicalVarInt, rv, discriminant, min,
+				),
+			)
 		}
 	case 0xfd:
-		sv, err := binarySerializer.Uint16(r, littleEndian)
-		if err != nil {
-			Error(err)
-			return 0, err
+		var sv uint16
+		if sv, e = binarySerializer.Uint16(r, littleEndian); dbg.Chk(e) {
+			return
 		}
 		rv = uint64(sv)
 		// The encoding is not canonical if the value could have been encoded using fewer bytes.
 		min := uint64(0xfd)
 		if rv < min {
-			return 0, messageError("ReadVarInt", fmt.Sprintf(
-				errNonCanonicalVarInt, rv, discriminant, min))
+			return 0, messageError(
+				"ReadVarInt", fmt.Sprintf(
+					errNonCanonicalVarInt, rv, discriminant, min,
+				),
+			)
 		}
 	default:
 		rv = uint64(discriminant)
 	}
-	return rv, nil
+	return
 }
 
 // WriteVarInt serializes val to w using a variable number of bytes depending on its value.
-func WriteVarInt(w io.Writer, pver uint32, val uint64) error {
+func WriteVarInt(w io.Writer, pver uint32, val uint64) (e error) {
 	if val < 0xfd {
 		return binarySerializer.PutUint8(w, uint8(val))
 	}
 	if val <= math.MaxUint16 {
-		err := binarySerializer.PutUint8(w, 0xfd)
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint8(w, 0xfd); dbg.Chk(e) {
+			return
 		}
 		return binarySerializer.PutUint16(w, littleEndian, uint16(val))
 	}
 	if val <= math.MaxUint32 {
-		err := binarySerializer.PutUint8(w, 0xfe)
-		if err != nil {
-			Error(err)
-			return err
+		if e = binarySerializer.PutUint8(w, 0xfe); dbg.Chk(e) {
+			return
 		}
 		return binarySerializer.PutUint32(w, littleEndian, uint32(val))
 	}
-	err := binarySerializer.PutUint8(w, 0xff)
-	if err != nil {
-		Error(err)
-		return err
+	if e = binarySerializer.PutUint8(w, 0xff); dbg.Chk(e) {
+		return
 	}
 	return binarySerializer.PutUint64(w, littleEndian, val)
 }
@@ -549,92 +489,82 @@ func VarIntSerializeSize(val uint64) int {
 // encoded as a variable length integer containing the length of the string followed by the bytes that represent the
 // string itself. An error is returned if the length is greater than the maximum block payload size since it helps
 // protect against memory exhaustion attacks and forced panics through malformed messages.
-func ReadVarString(r io.Reader, pver uint32) (string, error) {
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		Error(err)
-		return "", err
+func ReadVarString(r io.Reader, pver uint32) (s string, e error) {
+	var count uint64
+	if count, e = ReadVarInt(r, pver); dbg.Chk(e) {
+		return
 	}
 	// Prevent variable length strings that are larger than the maximum message size. It would be possible to cause
 	// memory exhaustion and panics without a sane upper bound on this count.
 	if count > MaxMessagePayload {
-		str := fmt.Sprintf("variable length string is too long "+
-			"[count %d, max %d]", count, MaxMessagePayload)
+		str := fmt.Sprintf(
+			"variable length string is too long "+
+				"[count %d, max %d]", count, MaxMessagePayload,
+		)
 		return "", messageError("ReadVarString", str)
 	}
 	buf := make([]byte, count)
-	_, err = io.ReadFull(r, buf)
-	if err != nil {
-		Error(err)
-		return "", err
+	if _, e = io.ReadFull(r, buf); dbg.Chk(e) {
+		return
 	}
-	return string(buf), nil
+	return string(buf), e
 }
 
 // WriteVarString serializes str to w as a variable length integer containing the length of the string followed by the
 // bytes that represent the string itself.
-func WriteVarString(w io.Writer, pver uint32, str string) error {
-	err := WriteVarInt(w, pver, uint64(len(str)))
-	if err != nil {
-		Error(err)
-		return err
+func WriteVarString(w io.Writer, pver uint32, str string) (e error) {
+	if e = WriteVarInt(w, pver, uint64(len(str))); dbg.Chk(e) {
+		return
 	}
-	_, err = w.Write([]byte(str))
-	return err
+	_, e = w.Write([]byte(str))
+	return
 }
 
 // ReadVarBytes reads a variable length byte array. A byte array is encoded as a varInt containing the length of the
 // array followed by the bytes themselves. An error is returned if the length is greater than the passed maxAllowed
 // parameter which helps protect against memory exhaustion attacks and forced panics through malformed messages. The
 // fieldName parameter is only used for the error message so it provides more context in the error.
-func ReadVarBytes(r io.Reader, pver uint32, maxAllowed uint32,
-	fieldName string) ([]byte, error) {
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		Error(err)
-		return nil, err
+func ReadVarBytes(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) (b []byte, e error) {
+	var count uint64
+	if count, e = ReadVarInt(r, pver); dbg.Chk(e) {
+		return
 	}
 	// Prevent byte array larger than the max message size. It would be possible to cause memory exhaustion and panics
 	// without a sane upper bound on this count.
 	if count > uint64(maxAllowed) {
-		str := fmt.Sprintf("%s is larger than the max allowed size "+
-			"[count %d, max %d]", fieldName, count, maxAllowed)
-		return nil, messageError("ReadVarBytes", str)
+		str := fmt.Sprintf(
+			"%s is larger than the max allowed size "+
+				"[count %d, max %d]", fieldName, count, maxAllowed,
+		)
+		e = messageError("ReadVarBytes", str)
+		return
 	}
-	b := make([]byte, count)
-	_, err = io.ReadFull(r, b)
-	if err != nil {
-		Error(err)
-		return nil, err
+	b = make([]byte, count)
+	if _, e = io.ReadFull(r, b); dbg.Chk(e) {
 	}
-	return b, nil
+	return
 }
 
 // WriteVarBytes serializes a variable length byte array to w as a varInt containing the number of bytes, followed by
 // the bytes themselves.
-func WriteVarBytes(w io.Writer, pver uint32, bytes []byte) error {
+func WriteVarBytes(w io.Writer, pver uint32, bytes []byte) (e error) {
 	slen := uint64(len(bytes))
-	err := WriteVarInt(w, pver, slen)
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarInt(w, pver, slen); dbg.Chk(e) {
+		return
 	}
-	_, err = w.Write(bytes)
-	return err
+	_, e = w.Write(bytes)
+	return
 }
 
 // randomUint64 returns a cryptographically random uint64 value. This unexported version takes a reader primarily to
 // ensure the error paths can be properly tested by passing a fake reader in the tests.
-func randomUint64(r io.Reader) (uint64, error) {
-	rv, err := binarySerializer.Uint64(r, bigEndian)
-	if err != nil {
-		Error(err)
-		return 0, err
+func randomUint64(r io.Reader) (rv uint64, e error) {
+	if rv, e = binarySerializer.Uint64(r, bigEndian); dbg.Chk(e) {
 	}
-	return rv, nil
+	return
 }
 
 // RandomUint64 returns a cryptographically random uint64 value.
-func RandomUint64() (uint64, error) {
+func RandomUint64() (rv uint64,e error) {
 	return randomUint64(rand.Reader)
 }

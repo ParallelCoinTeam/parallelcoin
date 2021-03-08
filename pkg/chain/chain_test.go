@@ -19,17 +19,17 @@ import (
 // 	}
 // 	var blocks []*util.Block
 // 	for _, file := range testFiles {
-// 		blockTmp, err := loadBlocks(file)
-// 		if err != nil {
+// 		blockTmp, e := loadBlocks(file)
+// 		if e != nil  {
 // 			t.Errorf("Error loading file: %v\n", err)
 // 			return
 // 		}
 // 		blocks = append(blocks, blockTmp...)
 // 	}
 // 	// Create a new database and chain instance to run tests against.
-// 	chain, teardownFunc, err := chainSetup("haveblock",
+// 	chain, teardownFunc, e := chainSetup("haveblock",
 // 		&netparams.MainNetParams)
-// 	if err != nil {
+// 	if e != nil  {
 // 		t.Errorf("Failed to setup chain instance: %v", err)
 // 		return
 // 	}
@@ -37,8 +37,8 @@ import (
 // 	// Since we're not dealing with the real block chain, set the coinbase maturity to 1.
 // 	chain.TstSetCoinbaseMaturity(1)
 // 	for i := 1; i < len(blocks); i++ {
-// 		_, isOrphan, err := chain.ProcessBlock(blocks[i], BFNone, blocks[i].Height())
-// 		if err != nil {
+// 		_, isOrphan, e := chain.ProcessBlock(blocks[i], BFNone, blocks[i].Height())
+// 		if e != nil  {
 // 			t.Errorf("ProcessBlock fail on block %v: %v\n", i, err)
 // 			return
 // 		}
@@ -49,9 +49,9 @@ import (
 // 		}
 // 	}
 // 	// Insert an orphan block.
-// 	_, isOrphan, err := chain.ProcessBlock(util.NewBlock(&Block100000),
+// 	_, isOrphan, e := chain.ProcessBlock(util.NewBlock(&Block100000),
 // 		BFNone, 100000)
-// 	if err != nil {
+// 	if e != nil  {
 // 		t.Errorf("Unable to process block: %v", err)
 // 		return
 // 	}
@@ -74,13 +74,13 @@ import (
 // 		{hash: "123", want: false},
 // 	}
 // 	for i, test := range tests {
-// 		hash, err := chainhash.NewHashFromStr(test.hash)
-// 		if err != nil {
+// 		hash, e := chainhash.NewHashFromStr(test.hash)
+// 		if e != nil  {
 // 			t.Errorf("NewHashFromStr: %v", err)
 // 			continue
 // 		}
-// 		result, err := chain.HaveBlock(hash)
-// 		if err != nil {
+// 		result, e := chain.HaveBlock(hash)
+// 		if e != nil  {
 // 			t.Errorf("HaveBlock #%d unexpected error: %v", i, err)
 // 			return
 // 		}
@@ -373,8 +373,8 @@ import (
 // 	t.Logf("Running %v SequenceLock tests", len(tests))
 // 	for i, test := range tests {
 // 		utilTx := util.NewTx(test.tx)
-// 		seqLock, err := chain.CalcSequenceLock(utilTx, test.view, test.mempool)
-// 		if err != nil {
+// 		seqLock, e := chain.CalcSequenceLock(utilTx, test.view, test.mempool)
+// 		if e != nil  {
 // 			t.Fatalf("test #%d, unable to calc sequence lock: %v", i, err)
 // 		}
 // 		if seqLock.Seconds != test.want.Seconds {
@@ -774,9 +774,9 @@ func TestHeightToHashRange(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		hashes, err := chain.HeightToHashRange(test.startHeight, &test.endHash,
+		hashes, e := chain.HeightToHashRange(test.startHeight, &test.endHash,
 			test.maxResults)
-		if err != nil {
+		if e != nil  {
 			if !test.expectError {
 				t.Errorf("%s: unexpected error: %v", test.name, err)
 			}
@@ -844,8 +844,8 @@ func TestIntervalBlockHashes(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		hashes, err := chain.IntervalBlockHashes(&test.endHash, test.interval)
-		if err != nil {
+		hashes, e := chain.IntervalBlockHashes(&test.endHash, test.interval)
+		if e != nil  {
 			if !test.expectError {
 				t.Errorf("%s: unexpected error: %v", test.name, err)
 			}

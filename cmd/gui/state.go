@@ -125,62 +125,62 @@ func (s *State) IsReceivingAddress() bool {
 	return s.isAddress.Load()
 }
 
-func (s *State) Save(filename string, pass *string) (err error) {
-	Debug("saving state...")
+func (s *State) Save(filename string, pass *string) (e error) {
+	dbg.Ln("saving state...")
 	marshalled := s.Marshal()
 	var j []byte
-	if j, err = json.MarshalIndent(marshalled, "", "  "); Check(err) {
+	if j, e = json.MarshalIndent(marshalled, "", "  "); dbg.Chk(e) {
 		return
 	}
-	// Debug(string(j))
+	// dbg.Ln(string(j))
 	var ciph cipher.AEAD
-	if ciph, err = gcm.GetCipher(*pass); Check(err) {
+	if ciph, e = gcm.GetCipher(*pass); dbg.Chk(e) {
 		return
 	}
 	var nonce []byte
-	if nonce, err = transport.GetNonce(ciph); Check(err) {
+	if nonce, e = transport.GetNonce(ciph); dbg.Chk(e) {
 		return
 	}
 	crypted := append(nonce, ciph.Seal(nil, nonce, j, nil)...)
 	var b []byte
 	_ = b
-	if b, err = ciph.Open(nil, nonce, crypted[len(nonce):], nil); Check(err) {
+	if b, e = ciph.Open(nil, nonce, crypted[len(nonce):], nil); dbg.Chk(e) {
 		interrupt.Request()
 		return
 	}
-	if err = ioutil.WriteFile(filename, crypted, 0700); Check(err) {
+	if e = ioutil.WriteFile(filename, crypted, 0700); dbg.Chk(e) {
 	}
-	if err = ioutil.WriteFile(filename+".clear", j, 0700); Check(err) {
+	if e = ioutil.WriteFile(filename+".clear", j, 0700); dbg.Chk(e) {
 	}
 	return
 }
 
-func (s *State) Load(filename string, pass *string) (err error) {
-	Debug("loading state...")
+func (s *State) Load(filename string, pass *string) (e error) {
+	dbg.Ln("loading state...")
 	var data []byte
 	var ciph cipher.AEAD
-	if data, err = ioutil.ReadFile(filename); Check(err) {
+	if data, e = ioutil.ReadFile(filename); dbg.Chk(e) {
 		return
 	}
-	// Debug("cipher:", *pass)
-	if ciph, err = gcm.GetCipher(*pass); Check(err) {
+	// dbg.Ln("cipher:", *pass)
+	if ciph, e = gcm.GetCipher(*pass); dbg.Chk(e) {
 		return
 	}
 	ns := ciph.NonceSize()
-	// Debug("nonce size:", ns)
+	// dbg.Ln("nonce size:", ns)
 	nonce := data[:ns]
 	data = data[ns:]
 	var b []byte
-	if b, err = ciph.Open(nil, nonce, data, nil); Check(err) {
+	if b, e = ciph.Open(nil, nonce, data, nil); dbg.Chk(e) {
 		// interrupt.Request()
 		return
 	}
 	// yay, right password, now unmarshal
 	ss := &Marshalled{}
-	if err = json.Unmarshal(b, ss); Check(err) {
+	if e = json.Unmarshal(b, ss); dbg.Chk(e) {
 		return
 	}
-	// Debug(string(b))
+	// dbg.Ln(string(b))
 	ss.Unmarshal(s)
 	return
 }
@@ -230,9 +230,9 @@ func (m *Marshalled) Unmarshal(s *State) {
 	s.filter = m.Filter
 	
 	if m.ReceivingAddress != "1111111111111111111114oLvT2" {
-		var err error
+		var e error
 		var ra util.Address
-		if ra, err = util.DecodeAddress(m.ReceivingAddress, s.currentReceivingAddress.ForNet); Check(err) {
+		if ra, e = util.DecodeAddress(m.ReceivingAddress, s.currentReceivingAddress.ForNet); dbg.Chk(e) {
 		}
 		s.currentReceivingAddress.Store(ra)
 	}

@@ -33,7 +33,7 @@ package mining
 // 	// the coinbase is the last transaction
 // 	txs := append(m.txs, m.coinbases[msgBlock.Header.Version])
 // 	for _, tx := range txs {
-// 		if err := msgBlock.AddTransaction(tx.MsgTx()); err != nil {
+// 		if e := msgBlock.AddTransaction(tx.MsgTx()); dbg.Chk(e) {
 // 			return nil
 // 		}
 // 	}
@@ -62,7 +62,7 @@ package mining
 // 	// otherwise be an identical transaction for block version 1).
 // 	rand.Seed(time.Now().UnixNano())
 // 	extraNonce := rand.Uint64()
-// 	var err error
+// 	var e error
 // 	// numAlgos := fork.GetNumAlgos(mbt.Height)
 // 	// coinbaseScripts := make(map[int32][]byte, numAlgos)
 // 	// coinbaseTxs := make(map[int32]*util.Tx, numAlgos)
@@ -113,8 +113,8 @@ package mining
 // 		// NOTE: This intentionally does not fetch inputs from the mempool since a
 // 		// transaction which depends on other transactions in the mempool must come
 // 		// after those dependencies in the final generated block.
-// 		utxos, err := g.Chain.FetchUtxoView(tx)
-// 		if err != nil {
+// 		utxos, e := g.Chain.FetchUtxoView(tx)
+// 		if e != nil  {
 // 			Warnc(
 // 				func() string {
 // 					return "unable to fetch utxo view for tx " + tx.Hash().String() + ": " + err.Error()
@@ -180,8 +180,8 @@ package mining
 // 	}
 // 	priorityQueues = newTxPriorityQueue(len(sourceTxns), sortedByFee)
 // 	var coinbaseScript []byte
-// 	if coinbaseScript, err = standardCoinbaseScript(mbt.Height, extraNonce); Check(err) {
-// 		return nil, err
+// 	if coinbaseScript, e = standardCoinbaseScript(mbt.Height, extraNonce); dbg.Chk(e) {
+// 		return nil, e
 // 	}
 // 	algos := fork.GetAlgos(mbt.Height)
 // 	var alg int32
@@ -190,10 +190,10 @@ package mining
 // 	var coinbaseTx *util.Tx
 // 	for i := range algos {
 // 		alg = algos[i].Version
-// 		if coinbaseTx, err = createCoinbaseTx(
+// 		if coinbaseTx, e = createCoinbaseTx(
 // 			g.ChainParams, coinbaseScript, mbt.Height, payToAddress, alg,
-// 		); Check(err) {
-// 			return nil, err
+// 		); dbg.Chk(e) {
+// 			return nil, e
 // 		}
 // 		mbt.coinbases[alg] = coinbaseTx
 // 		// this should be the same for all anyhow, as they are all the same format just
@@ -236,8 +236,8 @@ package mining
 // 			continue
 // 		}
 // 		// Enforce maximum signature operation cost per block. Also check for overflow.
-// 		sigOpCost, err := blockchain.GetSigOpCost(tx, false, blockUtxos, true, false)
-// 		if err != nil {
+// 		sigOpCost, e := blockchain.GetSigOpCost(tx, false, blockUtxos, true, false)
+// 		if e != nil  {
 // 			Tracec(
 // 				func() string {
 // 					return "skipping tx " + tx.Hash().String() +
@@ -305,11 +305,11 @@ package mining
 //
 // 		// Ensure the transaction inputs pass all of the necessary preconditions before
 // 		// allowing it to be added to the block.
-// 		_, err = blockchain.CheckTransactionInputs(
+// 		_, e = blockchain.CheckTransactionInputs(
 // 			tx, mbt.Height,
 // 			blockUtxos, g.ChainParams,
 // 		)
-// 		if err != nil {
+// 		if e != nil  {
 // 			Tracef(
 // 				"skipping tx %s due to error in CheckTransactionInputs: %v",
 // 				tx.Hash(), err,
@@ -317,11 +317,11 @@ package mining
 // 			logSkippedDeps(tx, deps)
 // 			continue
 // 		}
-// 		if err = blockchain.ValidateTransactionScripts(
+// 		if e = blockchain.ValidateTransactionScripts(
 // 			g.Chain, tx, blockUtxos,
 // 			txscript.StandardVerifyFlags, g.SigCache,
 // 			g.HashCache,
-// 		); Check(err) {
+// 		); dbg.Chk(e) {
 // 			Tracef(
 // 				"skipping tx %s due to error in ValidateTransactionScripts: %v",
 // 				tx.Hash(), err,
@@ -332,7 +332,7 @@ package mining
 // 		// Spend the transaction inputs in the block utxo view and add an entry for it
 // 		// to ensure any transactions which reference this one have it available as an
 // 		// input and can ensure they aren't double spending.
-// 		if err = spendTransaction(blockUtxos, tx, mbt.Height); Check(err) {
+// 		if e = spendTransaction(blockUtxos, tx, mbt.Height); dbg.Chk(e) {
 // 		}
 // 		// Add the transaction to the block, increment counters, and save the fees and
 // 		// signature operation counts to the block template.
@@ -379,16 +379,16 @@ package mining
 // 		// adjusted to ensure it comes after the median time of the last several blocks
 // 		// per the chain consensus rules.
 // 		algo := fork.GetAlgoName(mbt.Height, curr())
-// 		Debug("algo", algo)
-// 		if mbt.Bits[curr()], err = g.Chain.CalcNextRequiredDifficulty(algo); Check(err) {
-// 			return nil, err
+// 		dbg.Ln("algo", algo)
+// 		if mbt.Bits[curr()], e = g.Chain.CalcNextRequiredDifficulty(algo); dbg.Chk(e) {
+// 			return nil, e
 // 		}
-// 		Debugf(
+// 		dbg.F(
 // 			"%s %d reqDifficulty %08x %064x", algo, curr(),
 // 			mbt.Bits[curr()], fork.CompactToBig(mbt.Bits[curr()]),
 // 		)
 // 		// Create a new block ready to be solved.
-// 		Debugs(tX)
+// 		dbg.S(tX)
 //
 // 		merkles := blockchain.BuildMerkleTreeStore(tX, false)
 // 		mbt.Merkles[curr()] = *merkles[len(merkles)-1]
@@ -402,8 +402,8 @@ package mining
 // 			Bits:       mbt.Bits[curr()],
 // 		}
 // 		for _, tx := range tX {
-// 			if err := msgBlock.AddTransaction(tx.MsgTx()); err != nil {
-// 				return nil, err
+// 			if e := msgBlock.AddTransaction(tx.MsgTx()); dbg.Chk(e) {
+// 				return nil, e
 // 			}
 // 		}
 // 		// Finally, perform a full check on the created block against the chain
@@ -411,10 +411,10 @@ package mining
 // 		// no issues.
 // 		block := util.NewBlock(&msgBlock)
 // 		block.SetHeight(mbt.Height)
-// 		err = g.Chain.CheckConnectBlockTemplate(workerNumber, block)
-// 		if err != nil {
-// 			Debug("checkconnectblocktemplate err:", err)
-// 			return nil, err
+// 		e = g.Chain.CheckConnectBlockTemplate(workerNumber, block)
+// 		if e != nil  {
+// 			dbg.Ln("checkconnectblocktemplate err:", err)
+// 			return nil, e
 // 		}
 // 		Tracec(
 // 			func() string {

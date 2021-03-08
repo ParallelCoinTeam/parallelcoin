@@ -65,10 +65,9 @@ func GetTransactionWeight(tx *util.Tx) int64 {
 func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16 bool) (int, error) {
 	numSigOps := CountSigOps(tx) * WitnessScaleFactor
 	if bip16 {
-		numP2SHSigOps, err := CountP2SHSigOps(tx, isCoinBaseTx, utxoView)
-		if err != nil {
-			Error(err)
-			return 0, nil
+		numP2SHSigOps, e := CountP2SHSigOps(tx, isCoinBaseTx, utxoView)
+		if e != nil  {
+						return 0, nil
 		}
 		numSigOps += numP2SHSigOps * WitnessScaleFactor
 	}

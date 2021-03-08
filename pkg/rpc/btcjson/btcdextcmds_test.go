@@ -188,8 +188,8 @@ func TestPodExtCmds(t *testing.T) {
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
 		// Marshal the command as created by the new static command creation function.
-		marshalled, err := btcjson.MarshalCmd(testID, test.staticCmd())
-		if err != nil {
+		marshalled, e := btcjson.MarshalCmd(testID, test.staticCmd())
+		if e != nil  {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,
 				test.name, err)
 			continue
@@ -201,14 +201,14 @@ func TestPodExtCmds(t *testing.T) {
 			continue
 		}
 		// Ensure the command is created without error via the generic new command creation function.
-		cmd, err := test.newCmd()
-		if err != nil {
+		cmd, e := test.newCmd()
+		if e != nil  {
 			t.Errorf("Test #%d (%s) unexpected NewCmd error: %v ",
 				i, test.name, err)
 		}
 		// Marshal the command as created by the generic new command creation function.
-		marshalled, err = btcjson.MarshalCmd(testID, cmd)
-		if err != nil {
+		marshalled, e = btcjson.MarshalCmd(testID, cmd)
+		if e != nil  {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,
 				test.name, err)
 			continue
@@ -220,14 +220,14 @@ func TestPodExtCmds(t *testing.T) {
 			continue
 		}
 		var request btcjson.Request
-		if err := json.Unmarshal(marshalled, &request); err != nil {
+		if e := json.Unmarshal(marshalled, &request); dbg.Chk(e) {
 			t.Errorf("Test #%d (%s) unexpected error while "+
 				"unmarshalling JSON-RPC request: %v", i,
 				test.name, err)
 			continue
 		}
-		cmd, err = btcjson.UnmarshalCmd(&request)
-		if err != nil {
+		cmd, e = btcjson.UnmarshalCmd(&request)
+		if e != nil  {
 			t.Errorf("UnmarshalCmd #%d (%s) unexpected error: %v", i,
 				test.name, err)
 			continue

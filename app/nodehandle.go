@@ -12,14 +12,14 @@ import (
 	"github.com/p9c/pod/cmd/node"
 )
 
-func rpcNodeHandle(cx *conte.Xt) func(c *cli.Context) error {
+func rpcNodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	*cx.Config.DisableController = true
 	return nodeHandle(cx)
 }
 
-func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) (err error) {
-		Trace("running node handler")
+func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
+		trc.Ln("running node handler")
 		config.Configure(cx, c.Command.Name, true)
 		cx.NodeReady = qu.T()
 		cx.Node.Store(false)
@@ -29,45 +29,45 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		// runServiceCommand is only set to a real function on Windows. It is used to parse and execute service commands
 		// specified via the -s flag.
-		runServiceCommand := func(string) error { return nil }
+		runServiceCommand := func(string) (e error) { return nil }
 		// Service options which are only added on Windows.
 		serviceOpts := serviceOptions{}
 		// Perform service command and exit if specified. Invalid service commands show an appropriate error. Only runs
 		// on Windows since the runServiceCommand function will be nil when not on Windows.
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
-			if err = runServiceCommand(serviceOpts.ServiceCommand); Check(err) {
-				return err
+			if e = runServiceCommand(serviceOpts.ServiceCommand); dbg.Chk(e) {
+				return e
 			}
 			return nil
 		}
 		config.Configure(cx, c.Command.Name, true)
-		Debug("starting shell")
+		dbg.Ln("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			if apputil.FileExists(*cx.Config.RPCCert) &&
 				apputil.FileExists(*cx.Config.RPCKey) &&
 				apputil.FileExists(*cx.Config.CAFile) {
 			} else {
-				if _, err = walletmain.GenerateRPCKeyPair(cx.Config, true); Check(err) {
+				if _, e = walletmain.GenerateRPCKeyPair(cx.Config, true); dbg.Chk(e) {
 				}
 			}
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				if err := node.Main(cx); Check(err) {
-					Error("error starting node ", err)
+				if e := node.Main(cx); dbg.Chk(e) {
+					err.Ln("error starting node ", e)
 				}
 			}()
-			Info("starting node")
+			inf.Ln("starting node")
 			if !*cx.Config.DisableRPC {
 				cx.RPCServer = <-cx.NodeChan
 				cx.NodeReady.Q()
 				cx.Node.Store(true)
-				Info("node started")
+				inf.Ln("node started")
 			}
 		}
 		cx.WaitWait()
-		Info("node is now fully shut down")
+		inf.Ln("node is now fully shut down")
 		cx.WaitGroup.Wait()
 		<-cx.KillAll
 		return nil

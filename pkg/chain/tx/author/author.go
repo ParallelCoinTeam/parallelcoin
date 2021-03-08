@@ -3,7 +3,7 @@ package txauthor
 
 import (
 	"errors"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -17,8 +17,10 @@ type (
 	// InputSource provides transaction inputs referencing spendable outputs to construct a transaction outputting some
 	// target amount. If the target amount can not be satisified, this can be signaled by returning a total amount less
 	// than the target or by returning a more detailed error implementing InputSourceError.
-	InputSource func(target util.Amount) (total util.Amount, inputs []*wire.TxIn,
-		inputValues []util.Amount, scripts [][]byte, err error)
+	InputSource func(target util.Amount) (
+		total util.Amount, inputs []*wire.TxIn,
+		inputValues []util.Amount, scripts [][]byte, e error,
+	)
 	// InputSourceError describes the failure to provide enough input value from unspent transaction outputs to meet a
 	// target amount. A typed error is used so input sources can provide their own implementations describing the reason
 	// for the error, for example, due to spendable policies or locked coins rather than the wallet not having enough
@@ -77,16 +79,17 @@ func (insufficientFundsError) Error() string {
 // is returned.
 //
 // BUGS: Fee estimation may be off when redeeming non-compressed P2PKH outputs.
-func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
-	fetchInputs InputSource, fetchChange ChangeSource) (*AuthoredTx, error) {
+func NewUnsignedTransaction(
+	outputs []*wire.TxOut, relayFeePerKb util.Amount,
+	fetchInputs InputSource, fetchChange ChangeSource,
+) (*AuthoredTx, error) {
 	targetAmount := h.SumOutputValues(outputs)
 	estimatedSize := txsizes.EstimateVirtualSize(0, 1, 0, outputs, true)
 	targetFee := txrules.FeeForSerializeSize(relayFeePerKb, estimatedSize)
 	for {
-		inputAmount, inputs, inputValues, scripts, err := fetchInputs(targetAmount + targetFee)
-		if err != nil {
-			Error(err)
-			return nil, err
+		inputAmount, inputs, inputValues, scripts, e := fetchInputs(targetAmount + targetFee)
+		if e != nil {
+			return nil, e
 		}
 		if inputAmount < targetAmount+targetFee {
 			return nil, insufficientFundsError{}
@@ -104,8 +107,10 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 				p2pkh++
 			}
 		}
-		maxSignedSize := txsizes.EstimateVirtualSize(p2pkh, p2wpkh,
-			nested, outputs, true)
+		maxSignedSize := txsizes.EstimateVirtualSize(
+			p2pkh, p2wpkh,
+			nested, outputs, true,
+		)
 		maxRequiredFee := txrules.FeeForSerializeSize(relayFeePerKb, maxSignedSize)
 		remainingAmount := inputAmount - targetAmount
 		if remainingAmount < maxRequiredFee {
@@ -120,16 +125,19 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 		}
 		changeIndex := -1
 		changeAmount := inputAmount - targetAmount - maxRequiredFee
-		if changeAmount != 0 && !txrules.IsDustAmount(changeAmount,
-			txsizes.P2WPKHPkScriptSize, relayFeePerKb) {
-			changeScript, err := fetchChange()
-			if err != nil {
-				Error(err)
-				return nil, err
+		if changeAmount != 0 && !txrules.IsDustAmount(
+			changeAmount,
+			txsizes.P2WPKHPkScriptSize, relayFeePerKb,
+		) {
+			changeScript, e := fetchChange()
+			if e != nil {
+				return nil, e
 			}
 			if len(changeScript) > txsizes.P2WPKHPkScriptSize {
-				return nil, errors.New("fee estimation requires change " +
-					"scripts no larger than P2WPKH output scripts")
+				return nil, errors.New(
+					"fee estimation requires change " +
+						"scripts no larger than P2WPKH output scripts",
+				)
 			}
 			change := wire.NewTxOut(int64(changeAmount), changeScript)
 			l := len(outputs)
@@ -165,14 +173,18 @@ func (tx *AuthoredTx) RandomizeChangePosition() {
 // are passed in prevPkScripts and the slice length must match the number of
 // inputs. Private keys and redeem scripts are looked up using a SecretsSource
 // based on the previous output script.
-func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []util.Amount,
-	secrets SecretsSource) error {
+func AddAllInputScripts(
+	tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []util.Amount,
+	secrets SecretsSource,
+) (e error) {
 	inputs := tx.TxIn
 	// hashCache := txscript.NewTxSigHashes(tx)
 	chainParams := secrets.ChainParams()
 	if len(inputs) != len(prevPkScripts) {
-		return errors.New("tx.TxIn and prevPkScripts slices must " +
-			"have equal length")
+		return errors.New(
+			"tx.TxIn and prevPkScripts slices must " +
+				"have equal length",
+		)
 	}
 	for i := range inputs {
 		pkScript := prevPkScripts[i]
@@ -181,29 +193,29 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 		// // then we'll need to use a modified signing function which generates both the
 		// // sigScript, and the witness script.
 		// case txscript.IsPayToScriptHash(pkScript):
-		// 	err := spendNestedWitnessPubKeyHash(inputs[i], pkScript,
+		// 	e := spendNestedWitnessPubKeyHash(inputs[i], pkScript,
 		// 		int64(inputValues[i]), chainParams, secrets,
 		// 		tx, hashCache, i)
-		// 	if err != nil {
-		// 		Error(err)
-		// 		return err
+		// 	if e != nil  {
+		// 				// 		return err
 		// 	}
 		// case txscript.IsPayToWitnessPubKeyHash(pkScript):
-		// 	err := spendWitnessKeyHash(inputs[i], pkScript,
+		// 	e := spendWitnessKeyHash(inputs[i], pkScript,
 		// 		int64(inputValues[i]), chainParams, secrets,
 		// 		tx, hashCache, i)
-		// 	if err != nil {
-		// 		Error(err)
-		// 		return err
+		// 	if e != nil  {
+		// 				// 		return err
 		// 	}
 		default:
 			sigScript := inputs[i].SignatureScript
-			script, err := txscript.SignTxOutput(chainParams, tx, i,
+			var script []byte
+			script, e = txscript.SignTxOutput(
+				chainParams, tx, i,
 				pkScript, txscript.SigHashAll, secrets, secrets,
-				sigScript)
-			if err != nil {
-				Error(err)
-				return err
+				sigScript,
+			)
+			if e != nil {
+				return e
 			}
 			inputs[i].SignatureScript = script
 		}
@@ -218,18 +230,16 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 // // the input value in the sighash.
 // func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
 // 	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
-// 	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) error {
+// 	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) (e error) {
 // 	// First obtain the key pair associated with this p2wkh address.
-// 	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
+// 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(pkScript,
 // 		chainParams)
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	if e != nil  {
+// 		// 		return err
 // 	}
-// 	privKey, compressed, err := secrets.GetKey(addrs[0])
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	privKey, compressed, e := secrets.GetKey(addrs[0])
+// 	if e != nil  {
+// 		// 		return err
 // 	}
 // 	pubKey := privKey.PubKey()
 // 	// Once we have the key pair, generate a p2wkh address type, respecting the compression type of the generated key.
@@ -239,24 +249,21 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 // 	} else {
 // 		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
 // 	}
-// 	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	p2wkhAddr, e := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
+// 	if e != nil  {
+// 		// 		return err
 // 	}
 // 	// With the concrete address type, we can now generate the corresponding witness
 // 	// program to be used to generate a valid witness which will allow us to spend
 // 	// this output.
-// 	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	witnessProgram, e := txscript.PayToAddrScript(p2wkhAddr)
+// 	if e != nil  {
+// 		// 		return err
 // 	}
-// 	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
+// 	witnessScript, e := txscript.WitnessSignature(tx, hashCache, idx,
 // 		inputValue, witnessProgram, txscript.SigHashAll, privKey, true)
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	if e != nil  {
+// 		// 		return err
 // 	}
 // 	txIn.Witness = witnessScript
 // 	return nil
@@ -271,18 +278,16 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 // // digest algorithm defined in BIP0143 includes the input value in the sighash.
 // func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
 // 	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
-// 	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) error {
+// 	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) (e error) {
 // 	// First we need to obtain the key pair related to this p2sh output.
-// 	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
+// 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(pkScript,
 // 		chainParams)
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	if e != nil  {
+// 		// 		return err
 // 	}
-// 	privKey, compressed, err := secrets.GetKey(addrs[0])
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	privKey, compressed, e := secrets.GetKey(addrs[0])
+// 	if e != nil  {
+// 		// 		return err
 // 	}
 // 	pubKey := privKey.PubKey()
 // 	var pubKeyHash []byte
@@ -294,31 +299,27 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 // 	// Next, we'll generate a valid sigScript that'll allow us to spend the p2sh
 // 	// output. The sigScript will contain only a single push of the p2wkh witness
 // 	// program corresponding to the matching public key of this address.
-// 	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	p2wkhAddr, e := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
+// 	if e != nil  {
+// 		// 		return err
 // 	}
-// 	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	witnessProgram, e := txscript.PayToAddrScript(p2wkhAddr)
+// 	if e != nil  {
+// 		// 		return err
 // 	}
 // 	bldr := txscript.NewScriptBuilder()
 // 	bldr.AddData(witnessProgram)
-// 	sigScript, err := bldr.Script()
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	sigScript, e := bldr.Script()
+// 	if e != nil  {
+// 		// 		return err
 // 	}
 // 	txIn.SignatureScript = sigScript
 // 	// With the sigScript in place, we'll next generate the proper witness that'll
 // 	// allow us to spend the p2wkh output.
-// 	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
+// 	witnessScript, e := txscript.WitnessSignature(tx, hashCache, idx,
 // 		inputValue, witnessProgram, txscript.SigHashAll, privKey, compressed)
-// 	if err != nil {
-// 		Error(err)
-// 		return err
+// 	if e != nil  {
+// 		// 		return err
 // 	}
 // 	txIn.Witness = witnessScript
 // 	return nil
@@ -326,6 +327,6 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 
 // AddAllInputScripts modifies an authored transaction by adding inputs scripts for each input of an authored
 // transaction. Private keys and redeem scripts are looked up using a SecretsSource based on the previous output script.
-func (tx *AuthoredTx) AddAllInputScripts(secrets SecretsSource) error {
+func (tx *AuthoredTx) AddAllInputScripts(secrets SecretsSource) (e error) {
 	return AddAllInputScripts(tx.Tx, tx.PrevScripts, tx.PrevInputValues, secrets)
 }

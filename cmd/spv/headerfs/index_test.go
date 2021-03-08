@@ -12,32 +12,32 @@ import (
 )
 
 func createTestIndex() (func(), *headerIndex, error) {
-	tempDir, err := ioutil.TempDir("", "neutrino")
-	if err != nil {
-		return nil, nil, err
+	tempDir, e := ioutil.TempDir("", "neutrino")
+	if e != nil  {
+		return nil, nil, e
 	}
-	db, err := walletdb.Create("bdb", tempDir+"/test.db")
-	if err != nil {
-		return nil, nil, err
+	db, e := walletdb.Create("bdb", tempDir+"/test.db")
+	if e != nil  {
+		return nil, nil, e
 	}
 	cleanUp := func() {
-		if err := os.RemoveAll(tempDir); Check(err) {
+		if e := os.RemoveAll(tempDir); dbg.Chk(e) {
 		}
-		if err := db.Close(); Check(err) {
+		if e := db.Close(); dbg.Chk(e) {
 		}
 	}
-	filterDB, err := newHeaderIndex(db, Block)
-	if err != nil {
-		return nil, nil, err
+	filterDB, e := newHeaderIndex(db, Block)
+	if e != nil  {
+		return nil, nil, e
 	}
 	return cleanUp, filterDB, nil
 }
 
 func TestAddHeadersIndexRetrieve(t *testing.T) {
-	var err error
+	var e error
 	var hIndex *headerIndex
 	var cleanUp func()
-	if cleanUp, hIndex, err = createTestIndex(); !Check(err) {
+	if cleanUp, hIndex, e = createTestIndex(); !dbg.Chk(e) {
 		defer cleanUp()
 	} else {
 		t.Fatalf("unable to create test db: %v", err)
@@ -48,7 +48,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	headerIndex := make(map[uint32]headerEntry)
 	for i := uint32(0); i < numHeaders; i++ {
 		var header headerEntry
-		if _, err := rand.Read(header.hash[:]); err != nil {
+		if _, e = rand.Read(header.hash[:]); dbg.Chk(e) {
 			t.Fatalf("unable to read header: %v", err)
 		}
 		header.height = i
@@ -56,12 +56,12 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 		headerIndex[i] = header
 	}
 	// With the headers constructed, we'll write them to disk in a single batch.
-	if err := hIndex.addHeaders(headerEntries); err != nil {
+	if e := hIndex.addHeaders(headerEntries); dbg.Chk(e) {
 		t.Fatalf("unable to add headers: %v", err)
 	}
 	// Next, verify that the database tip matches the _final_ header inserted.
-	dbTip, dbHeight, err := hIndex.chainTip()
-	if err != nil {
+	dbTip, dbHeight, e := hIndex.chainTip()
+	if e != nil  {
 		t.Fatalf("unable to obtain chain tip: %v", err)
 	}
 	lastEntry := headerIndex[numHeaders-1]
@@ -75,8 +75,8 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	}
 	// For each header written, check that we're able to retrieve the entry both by hash and height.
 	for i, headerEntry := range headerEntries {
-		height, err := hIndex.heightFromHash(&headerEntry.hash)
-		if err != nil {
+		height, e := hIndex.heightFromHash(&headerEntry.hash)
+		if e != nil  {
 			t.Fatalf("unable to retreive height(%v): %v", i, err)
 		}
 		if height != headerEntry.height {
@@ -86,12 +86,12 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	}
 	// Next if we truncate the index by one, then we should end up at the second to last entry for the tip.
 	newTip := headerIndex[numHeaders-2]
-	if err := hIndex.truncateIndex(&newTip.hash, true); err != nil {
+	if e := hIndex.truncateIndex(&newTip.hash, true); dbg.Chk(e) {
 		t.Fatalf("unable to truncate index: %v", err)
 	}
 	// This time the database tip should be the _second_ to last entry inserted.
-	dbTip, dbHeight, err = hIndex.chainTip()
-	if err != nil {
+	dbTip, dbHeight, e = hIndex.chainTip()
+	if e != nil  {
 		t.Fatalf("unable to obtain chain tip: %v", err)
 	}
 	lastEntry = headerIndex[numHeaders-2]

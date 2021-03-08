@@ -30,9 +30,9 @@ type FutureAddNodeResult chan *response
 
 // Receive waits for the response promised by the future and returns an error if any occurred when performing the
 // specified command.
-func (r FutureAddNodeResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureAddNodeResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // AddNodeAsync returns an instance of a type that can be used to get the result of the RPC at some future time by
@@ -45,7 +45,7 @@ func (c *Client) AddNodeAsync(host string, command AddNodeCommand) FutureAddNode
 // AddNode attempts to perform the passed command on the passed persistent peer. For example, it can be used to add or a
 // remove a persistent peer, or to do a one time connection to a peer. It may not be used to remove non-persistent
 // peers.
-func (c *Client) AddNode(host string, command AddNodeCommand) error {
+func (c *Client) AddNode(host string, command AddNodeCommand) (e error) {
 	return c.AddNodeAsync(host, command).Receive()
 }
 
@@ -54,9 +54,9 @@ type FutureNodeResult chan *response
 
 // Receive waits for the response promised by the future and returns an error if any occurred when performing the
 // specified command.
-func (r FutureNodeResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureNodeResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // NodeAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking
@@ -72,7 +72,7 @@ func (c *Client) NodeAsync(command btcjson.NodeSubCmd, host string,
 // "temp", depending on whether we are targetting a persistent or non-persistent peer. Passing nil will cause the
 // default value to be used, which currently is "temp".
 func (c *Client) Node(command btcjson.NodeSubCmd, host string,
-	connectSubCmd *string) error {
+	connectSubCmd *string) (e error) {
 	return c.NodeAsync(command, host, connectSubCmd).Receive()
 }
 
@@ -83,17 +83,15 @@ type FutureGetAddedNodeInfoResult chan *response
 // Receive waits for the response promised by the future and returns information about manually added (persistent)
 // peers.
 func (r FutureGetAddedNodeInfoResult) Receive() ([]btcjson.GetAddedNodeInfoResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil  {
+				return nil, e
 	}
 	// Unmarshal as an array of getaddednodeinfo result objects.
 	var nodeInfo []btcjson.GetAddedNodeInfoResult
-	err = js.Unmarshal(res, &nodeInfo)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &nodeInfo)
+	if e != nil  {
+				return nil, e
 	}
 	return nodeInfo, nil
 }
@@ -118,17 +116,15 @@ type FutureGetAddedNodeInfoNoDNSResult chan *response
 
 // Receive waits for the response promised by the future and returns a list of manually added (persistent) peers.
 func (r FutureGetAddedNodeInfoNoDNSResult) Receive() ([]string, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil  {
+				return nil, e
 	}
 	// Unmarshal result as an array of strings.
 	var nodes []string
-	err = js.Unmarshal(res, &nodes)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &nodes)
+	if e != nil  {
+				return nil, e
 	}
 	return nodes, nil
 }
@@ -153,17 +149,15 @@ type FutureGetConnectionCountResult chan *response
 
 // Receive waits for the response promised by the future and returns the number of active connections to other peers.
 func (r FutureGetConnectionCountResult) Receive() (int64, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return 0, err
+	res, e := receiveFuture(r)
+	if e != nil  {
+				return 0, e
 	}
 	// Unmarshal result as an int64.
 	var count int64
-	err = js.Unmarshal(res, &count)
-	if err != nil {
-		Error(err)
-		return 0, err
+	e = js.Unmarshal(res, &count)
+	if e != nil  {
+				return 0, e
 	}
 	return count, nil
 }
@@ -186,9 +180,9 @@ type FuturePingResult chan *response
 
 // Receive waits for the response promised by the future and returns the result of queueing a ping to be sent to each
 // connected peer.
-func (r FuturePingResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FuturePingResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // PingAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking
@@ -200,7 +194,7 @@ func (c *Client) PingAsync() FuturePingResult {
 
 // Ping queues a ping to be sent to each connected peer. Use the GetPeerInfo function and examine the PingTime and
 // PingWait fields to access the ping times.
-func (c *Client) Ping() error {
+func (c *Client) Ping() (e error) {
 	return c.PingAsync().Receive()
 }
 
@@ -210,17 +204,15 @@ type FutureGetPeerInfoResult chan *response
 
 // Receive waits for the response promised by the future and returns data about each connected network peer.
 func (r FutureGetPeerInfoResult) Receive() ([]btcjson.GetPeerInfoResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil  {
+				return nil, e
 	}
 	// Unmarshal result as an array of getpeerinfo result objects.
 	var peerInfo []btcjson.GetPeerInfoResult
-	err = js.Unmarshal(res, &peerInfo)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &peerInfo)
+	if e != nil  {
+				return nil, e
 	}
 	return peerInfo, nil
 }
@@ -245,17 +237,15 @@ type FutureGetNetTotalsResult chan *response
 
 // Receive waits for the response promised by the future and returns network statistics.
 func (r FutureGetNetTotalsResult) Receive() (*btcjson.GetNetTotalsResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil  {
+				return nil, e
 	}
 	// Unmarshal result as a getnettotals result object.
 	var totals btcjson.GetNetTotalsResult
-	err = js.Unmarshal(res, &totals)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &totals)
+	if e != nil  {
+				return nil, e
 	}
 	return &totals, nil
 }

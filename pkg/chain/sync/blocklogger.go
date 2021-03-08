@@ -56,7 +56,7 @@ func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 		txStr = "transaction "
 	}
 	tD := tDuration.Seconds()
-	Infof(
+	inf.F(
 		"%s %6d %s in the last %s (%6d %s, height %8d, %s) %0.2f tx/s",
 		b.progressAction,
 		b.receivedLogBlocks,

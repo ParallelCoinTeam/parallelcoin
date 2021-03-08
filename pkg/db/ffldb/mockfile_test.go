@@ -29,7 +29,7 @@ type mockFile struct {
 
 // Close closes the mock file without releasing any data associated with it. This allows it to be "reopened" without
 // losing the data. This is part of the jebote implementation.
-func (f *mockFile) Close() error {
+func (f *mockFile) Close() (e error) {
 	f.Lock()
 	defer f.Unlock()
 	if f.closed {
@@ -69,7 +69,7 @@ func (f *mockFile) ReadAt(b []byte, off int64) (int, error) {
 }
 
 // Truncate changes the size of the mock file. This is part of the filer implementation.
-func (f *mockFile) Truncate(size int64) error {
+func (f *mockFile) Truncate(size int64) (e error) {
 	f.Lock()
 	defer f.Unlock()
 	if f.closed {
@@ -124,7 +124,7 @@ func (f *mockFile) WriteAt(b []byte, off int64) (int, error) {
 // set.
 //
 // This is part of the filer implementation.
-func (f *mockFile) Sync() error {
+func (f *mockFile) Sync() (e error) {
 	if f.forceSyncErr {
 		return errSyncFail
 	}

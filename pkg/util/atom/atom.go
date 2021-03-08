@@ -124,8 +124,8 @@ func NewAddress(tt util.Address, forNet *netparams.Params) *Address {
 
 // Load atomically loads the wrapped value.
 func (at *Address) Load() util.Address {
-	addr, err := util.DecodeAddress(at.String.Load(), at.ForNet)
-	if err != nil {
+	addr, e := util.DecodeAddress(at.String.Load(), at.ForNet)
+	if e != nil  {
 		return nil
 	}
 	return addr

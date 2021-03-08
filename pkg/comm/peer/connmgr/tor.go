@@ -40,26 +40,23 @@ var (
 
 // TorLookupIP uses Tor to resolve DNS via the SOCKS extension they provide for resolution over the Tor network. Tor itself doesn't support ipv6 so this doesn't either.
 func TorLookupIP(host, proxy string) ([]net.IP, error) {
-	conn, err := net.Dial("tcp", proxy)
-	if err != nil {
-		Error(err)
-		return nil, err
+	conn, e := net.Dial("tcp", proxy)
+	if e != nil {
+		return nil, e
 	}
 	defer func() {
-		if err := conn.Close(); Check(err) {
+		if e := conn.Close(); dbg.Chk(e) {
 		}
 	}()
 	buf := []byte{'\x05', '\x01', '\x00'}
-	_, err = conn.Write(buf)
-	if err != nil {
-		Error(err)
-		return nil, err
+	_, e = conn.Write(buf)
+	if e != nil {
+		return nil, e
 	}
 	buf = make([]byte, 2)
-	_, err = conn.Read(buf)
-	if err != nil {
-		Error(err)
-		return nil, err
+	_, e = conn.Read(buf)
+	if e != nil {
+		return nil, e
 	}
 	if buf[0] != '\x05' {
 		return nil, ErrTorInvalidProxyResponse
@@ -75,16 +72,14 @@ func TorLookupIP(host, proxy string) ([]net.IP, error) {
 	buf[4] = byte(len(host))
 	copy(buf[5:], host)
 	buf[5+len(host)] = 0 // Port 0
-	_, err = conn.Write(buf)
-	if err != nil {
-		Error(err)
-		return nil, err
+	_, e = conn.Write(buf)
+	if e != nil {
+		return nil, e
 	}
 	buf = make([]byte, 4)
-	_, err = conn.Read(buf)
-	if err != nil {
-		Error(err)
-		return nil, err
+	_, e = conn.Read(buf)
+	if e != nil {
+		return nil, e
 	}
 	if buf[0] != 5 {
 		return nil, ErrTorInvalidProxyResponse
@@ -92,20 +87,19 @@ func TorLookupIP(host, proxy string) ([]net.IP, error) {
 	if buf[1] != 0 {
 		if int(buf[1]) >= len(torStatusErrors) {
 			return nil, ErrTorInvalidProxyResponse
-		} else if err := torStatusErrors[buf[1]]; err != nil {
-			return nil, err
+		} else if e := torStatusErrors[buf[1]]; dbg.Chk(e) {
+			return nil, e
 		}
 		return nil, ErrTorInvalidProxyResponse
 	}
 	if buf[3] != 1 {
-		err := torStatusErrors[torGeneralError]
-		return nil, err
+		e := torStatusErrors[torGeneralError]
+		return nil, e
 	}
 	buf = make([]byte, 4)
-	bytes, err := conn.Read(buf)
-	if err != nil {
-		Error(err)
-		return nil, err
+	bytes, e := conn.Read(buf)
+	if e != nil {
+		return nil, e
 	}
 	if bytes != 4 {
 		return nil, ErrTorInvalidAddressResponse

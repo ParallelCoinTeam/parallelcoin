@@ -32,8 +32,8 @@ func TestAddr(t *testing.T) {
 	// Ensure NetAddresses are added properly.
 	tcpAddr := &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 11047}
 	na := NewNetAddress(tcpAddr, SFNodeNetwork)
-	err := msg.AddAddress(na)
-	if err != nil {
+	e := msg.AddAddress(na)
+	if e != nil  {
 		t.Errorf("AddAddress: %v", err)
 	}
 	if msg.AddrList[0] != na {
@@ -49,14 +49,14 @@ func TestAddr(t *testing.T) {
 	}
 	// Ensure adding more than the max allowed addresses per message returns error.
 	for i := 0; i < MaxAddrPerMsg+1; i++ {
-		err = msg.AddAddress(na)
+		e = msg.AddAddress(na)
 	}
-	if err == nil {
+	if e ==  nil {
 		t.Errorf("AddAddress: expected error on too many addresses " +
 			"not received")
 	}
-	err = msg.AddAddresses(na)
-	if err == nil {
+	e = msg.AddAddresses(na)
+	if e ==  nil {
 		t.Errorf("AddAddresses: expected error on too many addresses " +
 			"not received")
 	}
@@ -154,8 +154,8 @@ func TestAddrWire(t *testing.T) {
 	for i, test := range tests {
 		// Encode the message to wire format.
 		var buf bytes.Buffer
-		err := test.in.BtcEncode(&buf, test.pver, test.enc)
-		if err != nil {
+		e := test.in.BtcEncode(&buf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcEncode #%d error %v", i, err)
 			continue
 		}
@@ -167,8 +167,8 @@ func TestAddrWire(t *testing.T) {
 		// Decode the message from wire format.
 		var msg MsgAddr
 		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
-		if err != nil {
+		e = msg.BtcDecode(rbuf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
 		}
@@ -200,8 +200,8 @@ func TestAddrWireErrors(t *testing.T) {
 	}
 	// Address message with multiple addresses.
 	baseAddr := NewMsgAddr()
-	err := baseAddr.AddAddresses(na, na2)
-	if err != nil {
+	e := baseAddr.AddAddresses(na, na2)
+	if e != nil  {
 		t.Log(err)
 	}
 	baseAddrEncoded := []byte{
@@ -220,8 +220,8 @@ func TestAddrWireErrors(t *testing.T) {
 	// Message that forces an error by having more than the max allowed addresses.
 	maxAddr := NewMsgAddr()
 	for i := 0; i < MaxAddrPerMsg; i++ {
-		err := maxAddr.AddAddress(na)
-		if err != nil {
+		e := maxAddr.AddAddress(na)
+		if e != nil  {
 			t.Log(err)
 		}
 	}
@@ -253,7 +253,7 @@ func TestAddrWireErrors(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
-		err := test.in.BtcEncode(w, test.pver, test.enc)
+		e := test.in.BtcEncode(w, test.pver, test.enc)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, err, test.writeErr)
@@ -270,7 +270,7 @@ func TestAddrWireErrors(t *testing.T) {
 		// Decode from wire format.
 		var msg MsgAddr
 		r := newFixedReader(test.max, test.buf)
-		err = msg.BtcDecode(r, test.pver, test.enc)
+		e = msg.BtcDecode(r, test.pver, test.enc)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, err, test.readErr)

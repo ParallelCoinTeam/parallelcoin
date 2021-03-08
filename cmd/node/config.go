@@ -145,20 +145,18 @@ func newCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 			"checkpoint %q -- use the syntax <height>:<hash>",
 			checkpoint)
 	}
-	height, err := strconv.ParseInt(parts[0], 10, 32)
-	if err != nil {
-		Error(err)
-		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
+	height, e := strconv.ParseInt(parts[0], 10, 32)
+	if e != nil  {
+				return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed height", checkpoint)
 	}
 	if len(parts[1]) == 0 {
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to missing hash", checkpoint)
 	}
-	hash, err := chainhash.NewHashFromStr(parts[1])
-	if err != nil {
-		Error(err)
-		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
+	hash, e := chainhash.NewHashFromStr(parts[1])
+	if e != nil  {
+				return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed hash", checkpoint)
 	}
 	return chaincfg.Checkpoint{
@@ -189,10 +187,9 @@ func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error)
 	}
 	checkpoints := make([]chaincfg.Checkpoint, len(checkpointStrings))
 	for i, cpString := range checkpointStrings {
-		checkpoint, err := newCheckpointFromStr(cpString)
-		if err != nil {
-			Error(err)
-			return nil, err
+		checkpoint, e := newCheckpointFromStr(cpString)
+		if e != nil  {
+						return nil, e
 		}
 		checkpoints[i] = checkpoint
 	}
@@ -230,41 +227,37 @@ func validLogLevel(logLevel string) bool {
 
 // // createDefaultConfig copies the file sample-pod.
 // conf to the given destination path, and populates it with some randomly generated RPC username and password.
-// func createDefaultConfigFile(destinationPath string) error {
+// func createDefaultConfigFile(destinationPath string) (e error) {
 // 	// Create the destination directory if it does not exists
-// 	err := os.MkdirAll(filepath.Dir(destinationPath), 0700)
-// 	if err != nil {
-//		DBError(err)
-// 		return err
+// 	e := os.MkdirAll(filepath.Dir(destinationPath), 0700)
+// 	if e != nil  {
+//		DB// 		return err
 // 	}
 // 	// We generate a random user and password
 // 	randomBytes := make([]byte, 20)
-// 	_, err = rand.Read(randomBytes)
-// 	if err != nil {
-//		DBError(err)
-// 		return err
+// 	_, e = rand.Read(randomBytes)
+// 	if e != nil  {
+//		DB// 		return err
 // 	}
 // 	generatedRPCUser := base64.StdEncoding.EncodeToString(randomBytes)
-// 	_, err = rand.Read(randomBytes)
-// 	if err != nil {
-//		DBError(err)
-// 		return err
+// 	_, e = rand.Read(randomBytes)
+// 	if e != nil  {
+//		DB// 		return err
 // 	}
 // 	generatedRPCPass := base64.StdEncoding.EncodeToString(randomBytes)
 // 	var bb bytes.Buffer
 // 	bb.Write(samplePodConf)
-// 	dest, err := os.OpenFile(destinationPath,
+// 	dest, e := os.OpenFile(destinationPath,
 // 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-// 	if err != nil {
-//		DBError(err)
-// 		return err
+// 	if e != nil  {
+//		DB// 		return err
 // 	}
 // 	defer dest.Close()
 // 	reader := bufio.NewReader(&bb)
-// 	for err != io.EOF {
+// 	for e != io.EOF {
 // 		var line string
-// 		line, err = reader.ReadString('\n')
-// 		if err != nil && err != io.EOF {
+// 		line, e = reader.ReadString('\n')
+// 		if e != nil  && e != io.EOF {
 // 			return err
 // 		}
 // 		if strings.Contains(line, "rpcuser=") {
@@ -272,7 +265,7 @@ func validLogLevel(logLevel string) bool {
 // 		} else if strings.Contains(line, "rpcpass=") {
 // 			line = "rpcpass=" + generatedRPCPass + "\n"
 // 		}
-// 		if _, err := dest.WriteString(line); err != nil {
+// 		if _, e = dest.WriteString(line); dbg.Chk(e) {
 // 			return err
 // 		}
 // 	}
@@ -325,11 +318,10 @@ func loadConfig() (
 	// Pre-parse the command line options to see if an alternative config file or the version flag was specified.  Any errors aside from the help message error can be ignored here since they will be caught by the final parse below.
 	preCfg := cfg
 	preParser := NewConfigParser(&preCfg, &serviceOpts, flags.HelpFlag)
-	_, err := preParser.Parse()
-	if err != nil {
+	_, e := preParser.Parse()
+	if e != nil  {
 		if e, ok := err.(*flags.DBError); ok && e.Type == flags.ErrHelp {
-			DBError(err)
-			return nil, nil, err
+			DB			return nil, nil, e
 		}
 	}
 	// Show the version and exit if the version flag was specified.
@@ -342,8 +334,8 @@ func loadConfig() (
 	}
 	// Perform service command and exit if specified.  Invalid service commands show an appropriate error.  Only runs on Windows since the runServiceCommand function will be nil when not on Windows.
 	if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
-		err := runServiceCommand(serviceOpts.ServiceCommand)
-		if err != nil {
+		e := runServiceCommand(serviceOpts.ServiceCommand)
+		if e != nil  {
 			fmt.Fprintln(os.Stderr, err)
 		}
 		os.Exit(0)
@@ -353,20 +345,20 @@ func loadConfig() (
 	parser := NewConfigParser(&cfg, &serviceOpts, flags.Default)
 	if !(preCfg.RegressionTest || preCfg.SimNet) || preCfg.ConfigFile !=
 		DefaultConfigFile {
-		if _, err := os.Stat(preCfg.ConfigFile); os.IsNotExist(err) {
-			err := createDefaultConfigFile(preCfg.ConfigFile)
-			if err != nil {
+		if _, e = os.Stat(preCfg.ConfigFile); os.IsNotExist(err) {
+			e := createDefaultConfigFile(preCfg.ConfigFile)
+			if e != nil  {
 				fmt.Fprintf(os.Stderr, "DBError creating a "+
 					"default config file: %v\n", err)
 			}
 		}
-		err := flags.NewIniParser(parser).ParseFile(preCfg.ConfigFile)
-		if err != nil {
+		e := flags.NewIniParser(parser).ParseFile(preCfg.ConfigFile)
+		if e != nil  {
 			if _, ok := err.(*os.PathError); !ok {
 				fmt.Fprintf(os.Stderr, "DBError parsing config "+
 					"file: %v\n", err)
 				fmt.Fprintln(os.Stderr, usageMessage)
-				return nil, nil, err
+				return nil, nil, e
 			}
 			configFileError = err
 		}
@@ -376,28 +368,28 @@ func loadConfig() (
 		cfg.AddPeers = nil
 	}
 	// Parse command line options again to ensure they take precedence.
-	remainingArgs, err := parser.Parse()
-	if err != nil {
+	remainingArgs, e := parser.Parse()
+	if e != nil  {
 		if e, ok := err.(*flags.DBError); !ok || e.Type != flags.ErrHelp {
 			fmt.Fprintln(os.Stderr, usageMessage)
 		}
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Create the home directory if it doesn't already exist.
 	funcName := "loadConfig"
-	err = os.MkdirAll(DefaultHomeDir, 0700)
-	if err != nil {
+	e = os.MkdirAll(DefaultHomeDir, 0700)
+	if e != nil  {
 		// Show a nicer error message if it's because a symlink is linked to a directory that does not exist (probably because it's not mounted).
 		if e, ok := err.(*os.PathError); ok && os.IsExist(err) {
 			if link, lerr := os.Readlink(e.Path); lerr == nil {
 				str := "is symlink %s -> %s mounted?"
-				err = fmt.Errorf(str, e.Path, link)
+				e = fmt.Errorf(str, e.Path, link)
 			}
 		}
 		str := "%s: Failed to create home directory: %v"
-		err := fmt.Errorf(str, funcName, err)
+		e := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Multiple networks can't be selected simultaneously.
 	numNets := 0
@@ -422,10 +414,10 @@ func loadConfig() (
 	if numNets > 1 {
 		str := "%s: The testnet, regtest, segnet, and simnet netparams " +
 			"can't be used together -- choose one of the four"
-		err := fmt.Errorf(str, funcName)
+		e := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Set the mining algorithm correctly, default to sha256d if unrecognised
 	switch cfg.Algo {
@@ -439,10 +431,10 @@ func loadConfig() (
 	case cfg.RelayNonStd && cfg.RejectNonStd:
 		str := "%s: rejectnonstd and relaynonstd cannot be used " +
 			"together -- choose only one"
-		err := fmt.Errorf(str, funcName)
+		e := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	case cfg.RejectNonStd:
 		relayNonStd = false
 	case cfg.RelayNonStd:
@@ -460,45 +452,45 @@ func loadConfig() (
 	// Validate database type.
 	if !ValidDbType(cfg.DbType) {
 		str := "%s: The specified database type [%v] is invalid -- supported types %v"
-		err := fmt.Errorf(str, funcName, cfg.DbType, KnownDbTypes)
+		e := fmt.Errorf(str, funcName, cfg.DbType, KnownDbTypes)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Validate profile port number
 	if cfg.Profile != "" {
-		log <- cl.Trace{"profiling to", cfg.Profile}
-		profilePort, err := strconv.Atoi(cfg.Profile)
-		if err != nil || profilePort < 1024 || profilePort > 65535 {
+		log <- cl.trace{"profiling to", cfg.Profile}
+		profilePort, e := strconv.Atoi(cfg.Profile)
+		if e != nil  || profilePort < 1024 || profilePort > 65535 {
 			str := "%s: The profile port must be between 1024 and 65535"
-			err := fmt.Errorf(str, funcName)
+			e := fmt.Errorf(str, funcName)
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, usageMessage)
-			return nil, nil, err
+			return nil, nil, e
 		}
 	}
 	// Don't allow ban durations that are too short.
 	if cfg.BanDuration < time.Second {
 		str := "%s: The banduration option may not be less than 1s -- parsed [%v]"
-		err := fmt.Errorf(str, funcName, cfg.BanDuration)
+		e := fmt.Errorf(str, funcName, cfg.BanDuration)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Validate any given whitelisted IP addresses and networks.
 	if len(StateCfg.ActiveWhitelists) > 0 {
 		var ip net.IP
 		StateCfg.ActiveWhitelists = make([]*net.IPNet, 0, len(StateCfg.ActiveWhitelists))
 		for _, addr := range cfg.Whitelists {
-			_, ipnet, err := net.ParseCIDR(addr)
-			if err != nil {
+			_, ipnet, e := net.ParseCIDR(addr)
+			if e != nil  {
 				ip = net.ParseIP(addr)
 				if ip == nil {
 					str := "%s: The whitelist value of '%s' is invalid"
-					err = fmt.Errorf(str, funcName, addr)
+					e = fmt.Errorf(str, funcName, addr)
 					fmt.Fprintln(os.Stderr, err)
 					fmt.Fprintln(os.Stderr, usageMessage)
-					return nil, nil, err
+					return nil, nil, e
 				}
 				var bits int
 				if ip.To4() == nil {
@@ -519,10 +511,10 @@ func loadConfig() (
 	if len(cfg.AddPeers) > 0 && len(cfg.ConnectPeers) > 0 {
 		str := "%s: the --addpeer and --connect options can not be " +
 			"mixed"
-		err := fmt.Errorf(str, funcName)
+		e := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// --proxy or --connect without --listen disables listening.
 	if (cfg.Proxy != "" || len(cfg.ConnectPeers) > 0) &&
@@ -539,23 +531,23 @@ func loadConfig() (
 			net.JoinHostPort("", ActiveNetParams.DefaultPort),
 		}
 	}
-	// Check to make sure limited and admin users don't have the same username
+	// Chk to make sure limited and admin users don't have the same username
 	if cfg.RPCUser == cfg.RPCLimitUser && cfg.RPCUser != "" {
 		str := "%s: --rpcuser and --rpclimituser must not specify the " +
 			"same username"
-		err := fmt.Errorf(str, funcName)
+		e := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
-	// Check to make sure limited and admin users don't have the same password
+	// Chk to make sure limited and admin users don't have the same password
 	if cfg.RPCPass == cfg.RPCLimitPass && cfg.RPCPass != "" {
 		str := "%s: --rpcpass and --rpclimitpass must not specify the " +
 			"same password"
-		err := fmt.Errorf(str, funcName)
+		e := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// The RPC server is disabled if no username or password is provided.
 	if (cfg.RPCUser == "" || cfg.RPCPass == "") &&
@@ -566,9 +558,9 @@ func loadConfig() (
 		log <- cl.Inf("RPC service is disabled")
 		// Default RPC to listen on localhost only.
 		if !cfg.DisableRPC && len(cfg.RPCListeners) == 0 {
-			addrs, err := net.LookupHost("127.0.0.1:11048")
-			if err != nil {
-				return nil, nil, err
+			addrs, e := net.LookupHost("127.0.0.1:11048")
+			if e != nil  {
+				return nil, nil, e
 			}
 			cfg.RPCListeners = make([]string, 0, len(addrs))
 			for _, addr := range addrs {
@@ -578,51 +570,51 @@ func loadConfig() (
 		}
 		if cfg.RPCMaxConcurrentReqs < 0 {
 			str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be less than 0 -- parsed [%d]"
-			err := fmt.Errorf(str, funcName, cfg.RPCMaxConcurrentReqs)
+			e := fmt.Errorf(str, funcName, cfg.RPCMaxConcurrentReqs)
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, usageMessage)
-			return nil, nil, err
+			return nil, nil, e
 		}
 	}
 	// Validate the the minrelaytxfee.
-	StateCfg.ActiveMinRelayTxFee, err = util.NewAmount(cfg.MinRelayTxFee)
-	if err != nil {
+	StateCfg.ActiveMinRelayTxFee, e = util.NewAmount(cfg.MinRelayTxFee)
+	if e != nil  {
 		str := "%s: invalid minrelaytxfee: %v"
-		err := fmt.Errorf(str, funcName, err)
+		e := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Limit the max block size to a sane value.
 	if cfg.BlockMaxSize < BlockMaxSizeMin || cfg.BlockMaxSize >
 		BlockMaxSizeMax {
 		str := "%s: The blockmaxsize option must be in between %d " +
 			"and %d -- parsed [%d]"
-		err := fmt.Errorf(str, funcName, BlockMaxSizeMin,
+		e := fmt.Errorf(str, funcName, BlockMaxSizeMin,
 			BlockMaxSizeMax, cfg.BlockMaxSize)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Limit the max block weight to a sane value.
 	if cfg.BlockMaxWeight < BlockMaxWeightMin ||
 		cfg.BlockMaxWeight > BlockMaxWeightMax {
 		str := "%s: The blockmaxweight option must be in between %d " +
 			"and %d -- parsed [%d]"
-		err := fmt.Errorf(str, funcName, BlockMaxWeightMin,
+		e := fmt.Errorf(str, funcName, BlockMaxWeightMin,
 			BlockMaxWeightMax, cfg.BlockMaxWeight)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Limit the max orphan count to a sane vlue.
 	if cfg.MaxOrphanTxs < 0 {
 		str := "%s: The maxorphantx option may not be less than 0 " +
 			"-- parsed [%d]"
-		err := fmt.Errorf(str, funcName, cfg.MaxOrphanTxs)
+		e := fmt.Errorf(str, funcName, cfg.MaxOrphanTxs)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Limit the block priority and minimum block sizes to max block size.
 	cfg.BlockPrioritySize = minUint32(cfg.BlockPrioritySize, cfg.BlockMaxSize)
@@ -641,66 +633,66 @@ func loadConfig() (
 	// Look for illegal characters in the user agent comments.
 	for _, uaComment := range cfg.UserAgentComments {
 		if strings.ContainsAny(uaComment, "/:()") {
-			err := fmt.Errorf("%s: The following characters must not "+
+			e := fmt.Errorf("%s: The following characters must not "+
 				"appear in user agent comments: '/', ':', '(', ')'",
 				funcName)
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, usageMessage)
-			return nil, nil, err
+			return nil, nil, e
 		}
 	}
 	// --txindex and --droptxindex do not mix.
 	if cfg.TxIndex && cfg.DropTxIndex {
-		err := fmt.Errorf("%s: the --txindex and --droptxindex "+
+		e := fmt.Errorf("%s: the --txindex and --droptxindex "+
 			"options may  not be activated at the same time",
 			funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// --addrindex and --dropaddrindex do not mix.
 	if cfg.AddrIndex && cfg.DropAddrIndex {
-		err := fmt.Errorf("%s: the --addrindex and --dropaddrindex "+
+		e := fmt.Errorf("%s: the --addrindex and --dropaddrindex "+
 			"options may not be activated at the same time",
 			funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// --addrindex and --droptxindex do not mix.
 	if cfg.AddrIndex && cfg.DropTxIndex {
-		err := fmt.Errorf("%s: the --addrindex and --droptxindex options may not be activated at the same time because the address index relies on the transaction index", funcName)
+		e := fmt.Errorf("%s: the --addrindex and --droptxindex options may not be activated at the same time because the address index relies on the transaction index", funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
-	// Check mining addresses are valid and saved parsed versions.
+	// Chk mining addresses are valid and saved parsed versions.
 	StateCfg.ActiveMiningAddrs = make([]util.Address, 0, len(cfg.MiningAddrs))
 	for _, strAddr := range cfg.MiningAddrs {
-		addr, err := util.DecodeAddress(strAddr, ActiveNetParams.Params)
-		if err != nil {
+		addr, e := util.DecodeAddress(strAddr, ActiveNetParams.Params)
+		if e != nil  {
 			str := "%s: mining address '%s' failed to decode: %v"
-			err := fmt.Errorf(str, funcName, strAddr, err)
+			e := fmt.Errorf(str, funcName, strAddr, err)
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, usageMessage)
-			return nil, nil, err
+			return nil, nil, e
 		}
 		if !addr.IsForNet(ActiveNetParams.Params) {
 			str := "%s: mining address '%s' is on the wrong network"
-			err := fmt.Errorf(str, funcName, strAddr)
+			e := fmt.Errorf(str, funcName, strAddr)
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, usageMessage)
-			return nil, nil, err
+			return nil, nil, e
 		}
 		StateCfg.ActiveMiningAddrs = append(StateCfg.ActiveMiningAddrs, addr)
 	}
 	// Ensure there is at least one mining address when the generate flag is set.
 	if (cfg.Generate || cfg.MinerListener != "") && len(cfg.MiningAddrs) == 0 {
 		str := "%s: the generate flag is set, but there are no mining addresses specified "
-		err := fmt.Errorf(str, funcName)
+		e := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	if cfg.MinerPass != "" {
 		StateCfg.ActiveMinerKey = fork.Argon2i([]byte(cfg.MinerPass))
@@ -713,12 +705,12 @@ func loadConfig() (
 		ActiveNetParams.RPCPort)
 	if !cfg.DisableRPC && !cfg.TLS {
 		for _, addr := range cfg.RPCListeners {
-			if err != nil {
+			if e != nil  {
 				str := "%s: RPC listen interface '%s' is invalid: %v"
-				err := fmt.Errorf(str, funcName, addr, err)
+				e := fmt.Errorf(str, funcName, addr, err)
 				fmt.Fprintln(os.Stderr, err)
 				fmt.Fprintln(os.Stderr, usageMessage)
-				return nil, nil, err
+				return nil, nil, e
 			}
 		}
 	}
@@ -729,39 +721,39 @@ func loadConfig() (
 		ActiveNetParams.DefaultPort)
 	// --noonion and --onion do not mix.
 	if cfg.NoOnion && cfg.OnionProxy != "" {
-		err := fmt.Errorf("%s: the --noonion and --onion options may not be activated at the same time", funcName)
+		e := fmt.Errorf("%s: the --noonion and --onion options may not be activated at the same time", funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
-	// Check the checkpoints for syntax errors.
-	StateCfg.AddedCheckpoints, err = ParseCheckpoints(cfg.AddCheckpoints)
-	if err != nil {
+	// Chk the checkpoints for syntax errors.
+	StateCfg.AddedCheckpoints, e = ParseCheckpoints(cfg.AddCheckpoints)
+	if e != nil  {
 		str := "%s: DBError parsing checkpoints: %v"
-		err := fmt.Errorf(str, funcName, err)
+		e := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if cfg.TorIsolation && cfg.Proxy == "" && cfg.OnionProxy == "" {
 		str := "%s: Tor stream isolation requires either proxy or onionproxy to be set"
-		err := fmt.Errorf(str, funcName)
+		e := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Setup dial and DNS resolution (lookup) functions depending on the specified options.  The default is to use the standard net.DialTimeout function as well as the system DNS resolver.  When a proxy is specified, the dial function is set to the proxy specific dial function and the lookup is set to use tor (unless --noonion is specified in which case the system DNS resolver is used).
 	StateCfg.Dial = net.DialTimeout
 	StateCfg.Lookup = net.LookupIP
 	if cfg.Proxy != "" {
-		_, _, err := net.SplitHostPort(cfg.Proxy)
-		if err != nil {
+		_, _, e = net.SplitHostPort(cfg.Proxy)
+		if e != nil  {
 			str := "%s: Proxy address '%s' is invalid: %v"
-			err := fmt.Errorf(str, funcName, cfg.Proxy, err)
+			e := fmt.Errorf(str, funcName, cfg.Proxy, err)
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, usageMessage)
-			return nil, nil, err
+			return nil, nil, e
 		}
 		// Tor isolation flag means proxy credentials will be overridden unless there is also an onion proxy configured in which case that one will be overridden.
 		torIsolation := false
@@ -786,13 +778,13 @@ func loadConfig() (
 	}
 	// Setup onion address dial function depending on the specified options. The default is to use the same dial function selected above.  However, when an onion-specific proxy is specified, the onion address dial function is set to use the onion-specific proxy while leaving the normal dial function as selected above.  This allows .onion address traffic to be routed through a different proxy than normal traffic.
 	if cfg.OnionProxy != "" {
-		_, _, err := net.SplitHostPort(cfg.OnionProxy)
-		if err != nil {
+		_, _, e = net.SplitHostPort(cfg.OnionProxy)
+		if e != nil  {
 			str := "%s: Onion proxy address '%s' is invalid: %v"
-			err := fmt.Errorf(str, funcName, cfg.OnionProxy, err)
+			e := fmt.Errorf(str, funcName, cfg.OnionProxy, err)
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, usageMessage)
-			return nil, nil, err
+			return nil, nil, e
 		}
 		// Tor isolation flag means onion proxy credentials will be overridden.
 		if cfg.TorIsolation &&
@@ -825,9 +817,9 @@ func loadConfig() (
 			return nil, errors.New("tor has been disabled")
 		}
 	}
-	// Warn about missing config file only after all other configuration is done.  This prevents the warning on help messages and invalid options.  Note this should go directly before the return.
+	// wrn about missing config file only after all other configuration is done.  This prevents the warning on help messages and invalid options.  Note this should go directly before the return.
 	if configFileError != nil {
-		log <- cl.Warn{configFileError}
+		log <- cl.wrn{configFileError}
 	}
 	return &cfg, remainingArgs, nil
 }

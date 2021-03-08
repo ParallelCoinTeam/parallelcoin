@@ -160,10 +160,10 @@ func (m *MinerModel) RunControl(gtx l.Context) l.Dimensions {
 				m.mineToggle.SetOnChange(
 					func(b bool) {
 						if b {
-							Debug("start mining")
+							dbg.Ln("start mining")
 							m.worker.StartChan <- struct{}{}
 						} else {
-							Debug("stop mining")
+							dbg.Ln("stop mining")
 							m.worker.StopChan <- struct{}{}
 						}
 					},
@@ -337,7 +337,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 							m.solButtons[i].SetClick(
 								func() {
 									currentBlock = m.worker.solutions[i]
-									Debug("clicked for block", currentBlock.height)
+									dbg.Ln("clicked for block", currentBlock.height)
 									m.modalWidget = m.BlockDetails
 									m.modalOn = true
 								},
@@ -387,7 +387,7 @@ func (m *MinerModel) FoundBlocks(gtx l.Context) l.Dimensions {
 		// m.Flex().Flexed(1,
 		func(gtx l.Context) l.Dimensions {
 			
-			// Debugs(widgets)
+			// dbg.S(widgets)
 			return m.lists["found"].
 				End().
 				// ScrollWidth(int(m.Theme.TextSize.V * 3)).

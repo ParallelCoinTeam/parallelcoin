@@ -10,9 +10,9 @@ import (
 	"github.com/p9c/pod/app/conte"
 )
 
-var walletGUIHandle = func(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
-		Warn("GUI was disabled for this build (server only version)")
+var walletGUIHandle = func(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
+		wrn.Ln("GUI was disabled for this build (server only version)")
 		os.Exit(1)
 		return nil
 	}

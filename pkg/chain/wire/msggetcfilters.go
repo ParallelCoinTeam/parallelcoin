@@ -2,7 +2,7 @@ package wire
 
 import (
 	"io"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
@@ -19,32 +19,24 @@ type MsgGetCFilters struct {
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
 // implementation.
-func (msg *MsgGetCFilters) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) error {
-	err := readElement(r, &msg.FilterType)
-	if err != nil {
-		Error(err)
-		return err
+func (msg *MsgGetCFilters) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) (e error) {
+	if e = readElement(r, &msg.FilterType); dbg.Chk(e) {
+		return
 	}
-	err = readElement(r, &msg.StartHeight)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElement(r, &msg.StartHeight); dbg.Chk(e) {
+		return
 	}
 	return readElement(r, &msg.StopHash)
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgGetCFilters) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) error {
-	err := writeElement(w, msg.FilterType)
-	if err != nil {
-		Error(err)
-		return err
+func (msg *MsgGetCFilters) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) (e error) {
+	if e = writeElement(w, msg.FilterType); dbg.Chk(e) {
+		return
 	}
-	err = writeElement(w, &msg.StartHeight)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElement(w, &msg.StartHeight); dbg.Chk(e) {
+		return
 	}
 	return writeElement(w, &msg.StopHash)
 }
@@ -63,8 +55,10 @@ func (msg *MsgGetCFilters) MaxPayloadLength(pver uint32) uint32 {
 
 // NewMsgGetCFilters returns a new bitcoin getcfilters message that conforms to the Message interface using the passed
 // parameters and defaults for the remaining fields.
-func NewMsgGetCFilters(filterType FilterType, startHeight uint32,
-	stopHash *chainhash.Hash) *MsgGetCFilters {
+func NewMsgGetCFilters(
+	filterType FilterType, startHeight uint32,
+	stopHash *chainhash.Hash,
+) *MsgGetCFilters {
 	return &MsgGetCFilters{
 		FilterType:  filterType,
 		StartHeight: startHeight,

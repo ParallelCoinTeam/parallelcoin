@@ -13,8 +13,8 @@ ensure data integrity.
 This package is a driver to the database package and provides the database type of "ffldb". The parameters the Open and Create functions take are the database path as a string and the block network.
 
 ```Go
-db, err := database.Open("ffldb", "path/to/database", wire.MainNet)
-if err != nil {
+db, e := database.Open("ffldb", "path/to/database", wire.MainNet)
+if e != nil  {
 
 
 	// Handle error
@@ -22,8 +22,8 @@ if err != nil {
 ```
 
 ```Go
-db, err := database.Create("ffldb", "path/to/database", wire.MainNet)
-if err != nil {
+db, e := database.Create("ffldb", "path/to/database", wire.MainNet)
+if e != nil  {
 
 
 	// Handle error

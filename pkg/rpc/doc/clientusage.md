@@ -66,15 +66,13 @@ var certificateFile = filepath.Join(btcutil.AppDataDir("mod", false), "rpc.cert"
 
 func main() {
 	
-	creds, err := credentials.NewClientTLSFromFile(certificateFile, "localhost")
-	if err != nil {
-		L.Error(err)
-		return
+	creds, e := credentials.NewClientTLSFromFile(certificateFile, "localhost")
+	if e != nil  {
+		L.		return
 	}
-	conn, err := grpc.Dial("localhost:18332", grpc.WithTransportCredentials(creds))
-	if err != nil {
-		L.Error(err)
-		return
+	conn, e := grpc.Dial("localhost:18332", grpc.WithTransportCredentials(creds))
+	if e != nil  {
+		L.		return
 	}
 	defer conn.Close()
 	c := pb.NewWalletServiceClient(conn)
@@ -83,10 +81,9 @@ func main() {
 		AccountNumber:         0,
 		RequiredConfirmations: 1,
 	}
-	balanceResponse, err := c.Balance(context.Background(), balanceRequest)
-	if err != nil {
-		L.Error(err)
-		return
+	balanceResponse, e := c.Balance(context.Background(), balanceRequest)
+	if e != nil  {
+		L.		return
 	}
 	
 	log.Println("Spendable balance: ", btcutil.Amount(balanceResponse
@@ -411,7 +408,7 @@ client.balance(request, function(err, response) {
     if (err) {
 
 
-        console.error(err);
+        console.err.Ln(;
     } else {
 
         console.log('Spendable balance:', response.spendable, 'Satoshis');

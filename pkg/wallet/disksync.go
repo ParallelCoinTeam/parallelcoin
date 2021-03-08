@@ -6,11 +6,12 @@ import (
 )
 
 // checkCreateDir checks that the path exists and is a directory. If path does not exist, it is created.
-func checkCreateDir(path string) error {
-	if fi, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
+func checkCreateDir(path string) (e error) {
+	var fi os.FileInfo
+	if fi, e = os.Stat(path); dbg.Chk(e) {
+		if os.IsNotExist(e) {
 			// Attempt data directory creation
-			if err = os.MkdirAll(path, 0700); err != nil {
+			if e = os.MkdirAll(path, 0700); dbg.Chk(e) {
 				return fmt.Errorf("cannot create directory: %s", err)
 			}
 		} else {

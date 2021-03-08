@@ -198,7 +198,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		err := btcjson.RegisterCmd(test.method, test.cmdFunc(),
+		e := btcjson.RegisterCmd(test.method, test.cmdFunc(),
 			test.flags)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T, "+
@@ -220,7 +220,7 @@ func TestMustRegisterCmdPanic(t *testing.T) {
 	t.Parallel()
 	// Setup a defer to catch the expected panic to ensure it actually panicked.
 	defer func() {
-		if err := recover(); err == nil {
+		if e := recover(); e ==  nil {
 			t.Error("MustRegisterCmd did not panic as expected")
 		}
 	}()
@@ -234,13 +234,13 @@ func TestRegisteredCmdMethods(t *testing.T) {
 	// Ensure the registered methods are returned.
 	methods := btcjson.RegisteredCmdMethods()
 	if len(methods) == 0 {
-		t.Fatal("RegisteredCmdMethods: no methods")
+		t.ftl.Ln("RegisteredCmdMethods: no methods")
 	}
 	// Ensure the returned methods are sorted.
 	sortedMethods := make([]string, len(methods))
 	copy(sortedMethods, methods)
 	sort.Strings(sortedMethods)
 	if !reflect.DeepEqual(sortedMethods, methods) {
-		t.Fatal("RegisteredCmdMethods: methods are not sorted")
+		t.ftl.Ln("RegisteredCmdMethods: methods are not sorted")
 	}
 }

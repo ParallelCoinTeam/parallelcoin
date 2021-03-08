@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"sort"
 	"sync"
-
+	
 	"github.com/btcsuite/goleveldb/leveldb"
 	"github.com/btcsuite/goleveldb/leveldb/comparer"
 	ldberrors "github.com/btcsuite/goleveldb/leveldb/errors"
@@ -17,7 +17,7 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/iterator"
 	"github.com/btcsuite/goleveldb/leveldb/opt"
 	"github.com/btcsuite/goleveldb/leveldb/util"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
@@ -112,8 +112,8 @@ func (s bulkFetchDataSorter) Less(i, j int) bool {
 }
 
 // makeDbErr creates a database.DBError given a set of arguments.
-func makeDbErr(c database.ErrorCode, desc string, err error) database.DBError {
-	return database.DBError{ErrorCode: c, Description: desc, Err: err}
+func makeDbErr(c database.ErrorCode, desc string, e error) database.DBError {
+	return database.DBError{ErrorCode: c, Description: desc, Err: e}
 }
 
 // convertErr converts the passed leveldb error into a database error with an equivalent error code and the passed
@@ -168,7 +168,7 @@ var _ database.Cursor = (*cursor)(nil)
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Bucket() database.Bucket {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
 		return nil
 	}
 	return c.bucket
@@ -185,10 +185,10 @@ func (c *cursor) Bucket() database.Bucket {
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Cursor interface implementation.
-func (c *cursor) Delete() error {
+func (c *cursor) Delete() (e error) {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
-		return err
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	// DBError if the cursor is exhausted.
 	if c.currentIter == nil {
@@ -270,7 +270,7 @@ func (c *cursor) chooseIterator(forwards bool) bool {
 // Cursor interface implementation.
 func (c *cursor) First() bool {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
 		return false
 	}
 	// Seek to the first key in both the database and pending iterators and choose the iterator that is both valid and
@@ -286,7 +286,7 @@ func (c *cursor) First() bool {
 // Cursor interface implementation.
 func (c *cursor) Last() bool {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
 		return false
 	}
 	// Seek to the last key in both the database and pending iterators and choose the iterator that is both valid and
@@ -302,7 +302,7 @@ func (c *cursor) Last() bool {
 // Cursor interface implementation.
 func (c *cursor) Next() bool {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
 		return false
 	}
 	// Nothing to return if cursor is exhausted.
@@ -320,7 +320,7 @@ func (c *cursor) Next() bool {
 // Cursor interface implementation.
 func (c *cursor) Prev() bool {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
 		return false
 	}
 	// Nothing to return if cursor is exhausted.
@@ -340,7 +340,7 @@ func (c *cursor) Prev() bool {
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Seek(seek []byte) bool {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
 		return false
 	}
 	// Seek to the provided key in both the database and pending iterators then choose the iterator that is both valid
@@ -366,7 +366,7 @@ func (c *cursor) rawKey() []byte {
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Key() []byte {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
 		return nil
 	}
 	// Nothing to return if cursor is exhausted.
@@ -402,7 +402,7 @@ func (c *cursor) rawValue() []byte {
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Value() []byte {
 	// Ensure transaction state is valid.
-	if err := c.bucket.tx.checkClosed(); err != nil {
+	if e := c.bucket.tx.checkClosed(); dbg.Chk(e) {
 		return nil
 	}
 	// Nothing to return if cursor is exhausted.
@@ -479,15 +479,19 @@ func newCursor(b *bucket, bucketID []byte, cursorTyp cursorType) *cursor {
 		dbKeyIter := b.tx.snapshot.NewIterator(keyRange)
 		dbBucketIter := b.tx.snapshot.NewIterator(bucketRange)
 		iters := []iterator.Iterator{dbKeyIter, dbBucketIter}
-		dbIter = iterator.NewMergedIterator(iters,
-			comparer.DefaultComparer, true)
+		dbIter = iterator.NewMergedIterator(
+			iters,
+			comparer.DefaultComparer, true,
+		)
 		// Since both keys and buckets are needed from the pending keys, create an individual iterator for each prefix
 		// and then create a merged iterator from them.
 		pendingKeyIter := newLdbTreapIter(b.tx, keyRange)
 		pendingBucketIter := newLdbTreapIter(b.tx, bucketRange)
 		iters = []iterator.Iterator{pendingKeyIter, pendingBucketIter}
-		pendingIter = iterator.NewMergedIterator(iters,
-			comparer.DefaultComparer, true)
+		pendingIter = iterator.NewMergedIterator(
+			iters,
+			comparer.DefaultComparer, true,
+		)
 	}
 	// Create the cursor using the iterators.
 	return &cursor{bucket: b, dbIter: dbIter, pendingIter: pendingIter}
@@ -536,7 +540,7 @@ func bucketizedKey(bucketID [4]byte, key []byte) []byte {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) Bucket(key []byte) database.Bucket {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
 		return nil
 	}
 	// Attempt to fetch the ID for the child bucket. The bucket does not exist if the bucket index entry does not exist.
@@ -566,8 +570,8 @@ func (b *bucket) Bucket(key []byte) database.Bucket {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) CreateBucket(key []byte) (database.Bucket, error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return nil, err
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
+		return nil, e
 	}
 	// Ensure the transaction is writable.
 	if !b.tx.writable {
@@ -591,17 +595,16 @@ func (b *bucket) CreateBucket(key []byte) (database.Bucket, error) {
 	if b.id == metadataBucketID && bytes.Equal(key, blockIdxBucketName) {
 		childID = blockIdxBucketID
 	} else {
-		var err error
-		childID, err = b.tx.nextBucketID()
-		if err != nil {
-			Error(err)
-			return nil, err
+		var e error
+		childID, e = b.tx.nextBucketID()
+		if e != nil {
+			return nil, e
 		}
 	}
 	// Add the new bucket to the bucket index.
-	if err := b.tx.putKey(bidxKey, childID[:]); err != nil {
+	if e := b.tx.putKey(bidxKey, childID[:]); dbg.Chk(e) {
 		str := fmt.Sprintf("failed to create bucket with key %q", key)
-		return nil, convertErr(str, err)
+		return nil, convertErr(str, e)
 	}
 	return &bucket{tx: b.tx, id: childID}, nil
 }
@@ -621,8 +624,8 @@ func (b *bucket) CreateBucket(key []byte) (database.Bucket, error) {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) CreateBucketIfNotExists(key []byte) (database.Bucket, error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return nil, err
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
+		return nil, e
 	}
 	// Ensure the transaction is writable.
 	if !b.tx.writable {
@@ -647,10 +650,10 @@ func (b *bucket) CreateBucketIfNotExists(key []byte) (database.Bucket, error) {
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Bucket interface implementation.
-func (b *bucket) DeleteBucket(key []byte) error {
+func (b *bucket) DeleteBucket(key []byte) (e error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return err
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	// Ensure the transaction is writable.
 	if !b.tx.writable {
@@ -706,7 +709,7 @@ func (b *bucket) DeleteBucket(key []byte) error {
 // Bucket interface implementation.
 func (b *bucket) Cursor() database.Cursor {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
 		return &cursor{bucket: b}
 	}
 	// Create the cursor and setup a runtime finalizer to ensure the iterators are released when the cursor is garbage
@@ -731,19 +734,18 @@ func (b *bucket) Cursor() database.Cursor {
 // NOTE: The values returned by this function are only valid during a transaction. Attempting to access them after a
 // transaction has ended will likely result in an access violation. This function is part of the database.Bucket
 // interface implementation.
-func (b *bucket) ForEach(fn func(k, v []byte) error) error {
+func (b *bucket) ForEach(fn func(k, v []byte) error) (e error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return err
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	// Invoke the callback for each cursor item.  Return the error returned from the callback when it is non-nil.
 	c := newCursor(b, b.id[:], ctKeys)
 	defer cursorFinalizer(c)
 	for ok := c.First(); ok; ok = c.Next() {
-		err := fn(c.Key(), c.Value())
-		if err != nil {
-			Error(err)
-			return err
+		e := fn(c.Key(), c.Value())
+		if e != nil {
+			return e
 		}
 	}
 	return nil
@@ -765,19 +767,18 @@ func (b *bucket) ForEach(fn func(k, v []byte) error) error {
 // transaction has ended will likely result in an access violation.
 //
 // This function is part of the database.Bucket interface implementation.
-func (b *bucket) ForEachBucket(fn func(k []byte) error) error {
+func (b *bucket) ForEachBucket(fn func(k []byte) error) (e error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return err
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	// Invoke the callback for each cursor item. Return the error returned from the callback when it is non-nil.
 	c := newCursor(b, b.id[:], ctBuckets)
 	defer cursorFinalizer(c)
 	for ok := c.First(); ok; ok = c.Next() {
-		err := fn(c.Key())
-		if err != nil {
-			Error(err)
-			return err
+		e := fn(c.Key())
+		if e != nil {
+			return e
 		}
 	}
 	return nil
@@ -802,10 +803,10 @@ func (b *bucket) Writable() bool {
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Bucket interface implementation.
-func (b *bucket) Put(key, value []byte) error {
+func (b *bucket) Put(key, value []byte) (e error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return err
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	// Ensure the transaction is writable.
 	if !b.tx.writable {
@@ -832,7 +833,7 @@ func (b *bucket) Put(key, value []byte) error {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) Get(key []byte) []byte {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
 		return nil
 	}
 	// Nothing to return if there is no key.
@@ -854,10 +855,10 @@ func (b *bucket) Get(key []byte) []byte {
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Bucket interface implementation.
-func (b *bucket) Delete(key []byte) error {
+func (b *bucket) Delete(key []byte) (e error) {
 	// Ensure transaction state is valid.
-	if err := b.tx.checkClosed(); err != nil {
-		return err
+	if e := b.tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	// Ensure the transaction is writable.
 	if !b.tx.writable {
@@ -940,7 +941,7 @@ func (tx *transaction) notifyActiveIters() {
 }
 
 // checkClosed returns an error if the the database or transaction is closed.
-func (tx *transaction) checkClosed() error {
+func (tx *transaction) checkClosed() (e error) {
 	// The transaction is no longer valid if it has been closed.
 	if tx.closed {
 		return makeDbErr(database.ErrTxClosed, errTxClosedStr, nil)
@@ -969,7 +970,7 @@ func (tx *transaction) hasKey(key []byte) bool {
 // NOTE: This function must only be called on a writable transaction.
 //
 // Since it is an internal helper function, it does not check.
-func (tx *transaction) putKey(key, value []byte) error {
+func (tx *transaction) putKey(key, value []byte) (e error) {
 	// Prevent the key from being deleted if it was previously scheduled to
 	// be deleted on transaction commit.
 	tx.pendingRemove.Delete(key)
@@ -1026,8 +1027,8 @@ func (tx *transaction) nextBucketID() ([4]byte, error) {
 	// Increment and update the current bucket ID and return it.
 	var nextBucketID [4]byte
 	binary.BigEndian.PutUint32(nextBucketID[:], curBucketNum+1)
-	if err := tx.putKey(curBucketIDKeyName, nextBucketID[:]); err != nil {
-		return [4]byte{}, err
+	if e := tx.putKey(curBucketIDKeyName, nextBucketID[:]); dbg.Chk(e) {
+		return [4]byte{}, e
 	}
 	return nextBucketID, nil
 }
@@ -1065,10 +1066,10 @@ func (tx *transaction) hasBlock(hash *chainhash.Hash) bool {
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Tx interface implementation.
-func (tx *transaction) StoreBlock(block *u.Block) error {
+func (tx *transaction) StoreBlock(block *u.Block) (e error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	// Ensure the transaction is writable.
 	if !tx.writable {
@@ -1081,12 +1082,13 @@ func (tx *transaction) StoreBlock(block *u.Block) error {
 		str := fmt.Sprintf("block %s already exists", blockHash)
 		return makeDbErr(database.ErrBlockExists, str, nil)
 	}
-	blockBytes, err := block.Bytes()
-	if err != nil {
-		Error(err)
-		str := fmt.Sprintf("failed to get serialized bytes for block %s",
-			blockHash)
-		return makeDbErr(database.ErrDriverSpecific, str, err)
+	blockBytes, e := block.Bytes()
+	if e != nil {
+		str := fmt.Sprintf(
+			"failed to get serialized bytes for block %s",
+			blockHash,
+		)
+		return makeDbErr(database.ErrDriverSpecific, str, e)
 	}
 	// Add the block to be stored to the list of pending blocks to store when the transaction is committed.
 	//
@@ -1095,10 +1097,12 @@ func (tx *transaction) StoreBlock(block *u.Block) error {
 		tx.pendingBlocks = make(map[chainhash.Hash]int)
 	}
 	tx.pendingBlocks[*blockHash] = len(tx.pendingBlockData)
-	tx.pendingBlockData = append(tx.pendingBlockData, pendingBlock{
-		hash:  blockHash,
-		bytes: blockBytes,
-	})
+	tx.pendingBlockData = append(
+		tx.pendingBlockData, pendingBlock{
+			hash:  blockHash,
+			bytes: blockBytes,
+		},
+	)
 	// Tracef("added block %s to pending blocks", blockHash)
 	return nil
 }
@@ -1112,8 +1116,8 @@ func (tx *transaction) StoreBlock(block *u.Block) error {
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) HasBlock(hash *chainhash.Hash) (bool, error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return false, err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return false, e
 	}
 	return tx.hasBlock(hash), nil
 }
@@ -1127,8 +1131,8 @@ func (tx *transaction) HasBlock(hash *chainhash.Hash) (bool, error) {
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) HasBlocks(hashes []chainhash.Hash) ([]bool, error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return nil, e
 	}
 	results := make([]bool, len(hashes))
 	for i := range hashes {
@@ -1167,11 +1171,13 @@ func (tx *transaction) fetchBlockRow(hash *chainhash.Hash) ([]byte, error) {
 //
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) FetchBlockHeader(hash *chainhash.Hash) ([]byte, error) {
-	return tx.FetchBlockRegion(&database.BlockRegion{
-		Hash:   hash,
-		Offset: 0,
-		Len:    blockHdrSize,
-	})
+	return tx.FetchBlockRegion(
+		&database.BlockRegion{
+			Hash:   hash,
+			Offset: 0,
+			Len:    blockHdrSize,
+		},
+	)
 }
 
 // FetchBlockHeaders returns the raw serialized bytes for the block headers identified by the given hashes.
@@ -1223,26 +1229,24 @@ func (tx *transaction) FetchBlockHeaders(hashes []chainhash.Hash) ([][]byte, err
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) FetchBlock(hash *chainhash.Hash) ([]byte, error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return nil, e
 	}
 	// When the block is pending to be written on commit return the bytes from there.
 	if idx, exists := tx.pendingBlocks[*hash]; exists {
 		return tx.pendingBlockData[idx].bytes, nil
 	}
 	// Lookup the location of the block in the files from the block index.
-	blockRow, err := tx.fetchBlockRow(hash)
-	if err != nil {
-		Error(err)
-		return nil, err
+	blockRow, e := tx.fetchBlockRow(hash)
+	if e != nil {
+		return nil, e
 	}
 	location := deserializeBlockLoc(blockRow)
 	// Read the block from the appropriate location. The function also performs a checksum over the data to detect data
 	// corruption.
-	blockBytes, err := tx.db.store.readBlock(hash, location)
-	if err != nil {
-		Error(err)
-		return nil, err
+	blockBytes, e := tx.db.store.readBlock(hash, location)
+	if e != nil {
+		return nil, e
 	}
 	return blockBytes, nil
 }
@@ -1269,19 +1273,18 @@ func (tx *transaction) FetchBlock(hash *chainhash.Hash) ([]byte, error) {
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) FetchBlocks(hashes []chainhash.Hash) ([][]byte, error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return nil, e
 	}
 	// NOTE: This could check for the existence of all blocks before loading any of them which would be faster in the
 	// failure case, however callers will not typically be calling this function with invalid values, so optimize for
 	// the common case. Load the blocks.
 	blocks := make([][]byte, len(hashes))
 	for i := range hashes {
-		var err error
-		blocks[i], err = tx.FetchBlock(&hashes[i])
-		if err != nil {
-			Error(err)
-			return nil, err
+		var e error
+		blocks[i], e = tx.FetchBlock(&hashes[i])
+		if e != nil {
+			return nil, e
 		}
 	}
 	return blocks, nil
@@ -1302,9 +1305,11 @@ func (tx *transaction) fetchPendingRegion(region *database.BlockRegion) ([]byte,
 	blockLen := uint32(len(blockBytes))
 	endOffset := region.Offset + region.Len
 	if endOffset < region.Offset || endOffset > blockLen {
-		str := fmt.Sprintf("block %s region offset %d, length %d "+
-			"exceeds block length of %d", region.Hash,
-			region.Offset, region.Len, blockLen)
+		str := fmt.Sprintf(
+			"block %s region offset %d, length %d "+
+				"exceeds block length of %d", region.Hash,
+			region.Offset, region.Len, blockLen,
+		)
 		return nil, makeDbErr(database.ErrBlockRegionInvalid, str, nil)
 	}
 	// Return the bytes from the pending block.
@@ -1338,41 +1343,42 @@ func (tx *transaction) fetchPendingRegion(region *database.BlockRegion) ([]byte,
 // implementation.
 func (tx *transaction) FetchBlockRegion(region *database.BlockRegion) ([]byte, error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return nil, e
 	}
 	// When the block is pending to be written on commit return the bytes from there.
 	if tx.pendingBlocks != nil {
-		regionBytes, err := tx.fetchPendingRegion(region)
-		if err != nil {
-			Error(err)
-			return nil, err
+		regionBytes, e := tx.fetchPendingRegion(region)
+		if e != nil {
+			return nil, e
 		}
 		if regionBytes != nil {
 			return regionBytes, nil
 		}
 	}
 	// Lookup the location of the block in the files from the block index.
-	blockRow, err := tx.fetchBlockRow(region.Hash)
-	if err != nil {
-		Error(err)
-		return nil, err
+	blockRow, e := tx.fetchBlockRow(region.Hash)
+	if e != nil {
+		return nil, e
 	}
 	location := deserializeBlockLoc(blockRow)
 	// Ensure the region is within the bounds of the block.
 	endOffset := region.Offset + region.Len
 	if endOffset < region.Offset || endOffset > location.blockLen {
-		str := fmt.Sprintf("block %s region offset %d, length %d "+
-			"exceeds block length of %d", region.Hash,
-			region.Offset, region.Len, location.blockLen)
+		str := fmt.Sprintf(
+			"block %s region offset %d, length %d "+
+				"exceeds block length of %d", region.Hash,
+			region.Offset, region.Len, location.blockLen,
+		)
 		return nil, makeDbErr(database.ErrBlockRegionInvalid, str, nil)
 	}
 	// Read the region from the appropriate disk block file.
-	regionBytes, err := tx.db.store.readBlockRegion(location, region.Offset,
-		region.Len)
-	if err != nil {
-		Error(err)
-		return nil, err
+	regionBytes, e := tx.db.store.readBlockRegion(
+		location, region.Offset,
+		region.Len,
+	)
+	if e != nil {
+		return nil, e
 	}
 	return regionBytes, nil
 }
@@ -1404,8 +1410,8 @@ func (tx *transaction) FetchBlockRegion(region *database.BlockRegion) ([]byte, e
 // implementation.
 func (tx *transaction) FetchBlockRegions(regions []database.BlockRegion) ([][]byte, error) {
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return nil, err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return nil, e
 	}
 	// NOTE: This could check for the existence of all blocks before deserializing the locations and building up the
 	// fetch list which would be faster in the failure case, however callers will not typically be calling this function
@@ -1428,10 +1434,9 @@ func (tx *transaction) FetchBlockRegions(regions []database.BlockRegion) ([][]by
 		region := &regions[i]
 		// When the block is pending to be written on commit grab the bytes from there.
 		if tx.pendingBlocks != nil {
-			regionBytes, err := tx.fetchPendingRegion(region)
-			if err != nil {
-				Error(err)
-				return nil, err
+			regionBytes, e := tx.fetchPendingRegion(region)
+			if e != nil {
+				return nil, e
 			}
 			if regionBytes != nil {
 				blockRegions[i] = regionBytes
@@ -1439,18 +1444,19 @@ func (tx *transaction) FetchBlockRegions(regions []database.BlockRegion) ([][]by
 			}
 		}
 		// Lookup the location of the block in the files from the block index.
-		blockRow, err := tx.fetchBlockRow(region.Hash)
-		if err != nil {
-			Error(err)
-			return nil, err
+		blockRow, e := tx.fetchBlockRow(region.Hash)
+		if e != nil {
+			return nil, e
 		}
 		location := deserializeBlockLoc(blockRow)
 		// Ensure the region is within the bounds of the block.
 		endOffset := region.Offset + region.Len
 		if endOffset < region.Offset || endOffset > location.blockLen {
-			str := fmt.Sprintf("block %s region offset %d, length "+
-				"%d exceeds block length of %d", region.Hash,
-				region.Offset, region.Len, location.blockLen)
+			str := fmt.Sprintf(
+				"block %s region offset %d, length "+
+					"%d exceeds block length of %d", region.Hash,
+				region.Offset, region.Len, location.blockLen,
+			)
 			return nil, makeDbErr(database.ErrBlockRegionInvalid, str, nil)
 		}
 		fetchList = append(fetchList, bulkFetchData{&location, i})
@@ -1462,11 +1468,12 @@ func (tx *transaction) FetchBlockRegions(regions []database.BlockRegion) ([][]by
 		ri := fetchData.replyIndex
 		region := &regions[ri]
 		location := fetchData.blockLocation
-		regionBytes, err := tx.db.store.readBlockRegion(*location,
-			region.Offset, region.Len)
-		if err != nil {
-			Error(err)
-			return nil, err
+		regionBytes, e := tx.db.store.readBlockRegion(
+			*location,
+			region.Offset, region.Len,
+		)
+		if e != nil {
+			return nil, e
 		}
 		blockRegions[ri] = regionBytes
 	}
@@ -1502,7 +1509,7 @@ func (tx *transaction) close() {
 // It also properly handles rollback in the case of failures.
 //
 // This function MUST only be called when there is pending data to be written.
-func (tx *transaction) writePendingAndCommit() error {
+func (tx *transaction) writePendingAndCommit() (e error) {
 	// Save the current block store write position for potential rollback.
 	//
 	// These variables are only updated here in this function and there can only be one write transaction active at a
@@ -1520,27 +1527,25 @@ func (tx *transaction) writePendingAndCommit() error {
 	// Loop through all of the pending blocks to store and write them.
 	for _, blockData := range tx.pendingBlockData {
 		// Tracef("storing block %s", blockData.hash)
-		location, err := tx.db.store.writeBlock(blockData.bytes)
-		if err != nil {
-			Error(err)
+		location, e := tx.db.store.writeBlock(blockData.bytes)
+		if e != nil {
 			rollback()
-			return err
+			return e
 		}
 		// Add a record in the block index for the block. The record includes the location information needed to locate
 		// the block on the filesystem as well as the block header since they are so commonly needed.
 		blockRow := serializeBlockLoc(location)
-		err = tx.blockIdxBucket.Put(blockData.hash[:], blockRow)
-		if err != nil {
-			Error(err)
+		e = tx.blockIdxBucket.Put(blockData.hash[:], blockRow)
+		if e != nil {
 			rollback()
-			return err
+			return e
 		}
 	}
 	// Update the metadata for the current write file and offset.
 	writeRow := serializeWriteRow(wc.curFileNum, wc.curOffset)
-	if err := tx.metaBucket.Put(writeLocKeyName, writeRow); err != nil {
+	if e := tx.metaBucket.Put(writeLocKeyName, writeRow); dbg.Chk(e) {
 		rollback()
-		return convertErr("failed to store write cursor", err)
+		return convertErr("failed to store write cursor", e)
 	}
 	// Atomically update the database cache.
 	//
@@ -1556,15 +1561,15 @@ func (tx *transaction) writePendingAndCommit() error {
 // since blocks are immutable.
 //
 // This function is part of the database.Tx interface implementation.
-func (tx *transaction) Commit() error {
+func (tx *transaction) Commit() (e error) {
 	// Prevent commits on managed transactions.
 	if tx.managed {
 		tx.close()
 		panic("managed transaction commit not allowed")
 	}
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	// Regardless of whether the commit succeeds, the transaction is closed on return.
 	defer tx.close()
@@ -1580,15 +1585,15 @@ func (tx *transaction) Commit() error {
 // Rollback undoes all changes that have been made to the root bucket and all of its sub-buckets.
 //
 // This function is part of the database.Tx interface implementation.
-func (tx *transaction) Rollback() error {
+func (tx *transaction) Rollback() (e error) {
 	// Prevent rollbacks on managed transactions.
 	if tx.managed {
 		tx.close()
 		panic("managed transaction rollback not allowed")
 	}
 	// Ensure transaction state is valid.
-	if err := tx.checkClosed(); err != nil {
-		return err
+	if e := tx.checkClosed(); dbg.Chk(e) {
+		return e
 	}
 	tx.close()
 	return nil
@@ -1637,18 +1642,19 @@ func (db *db) begin(writable bool) (*transaction, error) {
 		if writable {
 			db.writeLock.Unlock()
 		}
-		return nil, makeDbErr(database.ErrDbNotOpen, errDbNotOpenStr,
-			nil)
+		return nil, makeDbErr(
+			database.ErrDbNotOpen, errDbNotOpenStr,
+			nil,
+		)
 	}
 	// Grab a snapshot of the database cache (which in turn also handles the underlying database).
-	snapshot, err := db.cache.Snapshot()
-	if err != nil {
-		Error(err)
+	snapshot, e := db.cache.Snapshot()
+	if e != nil {
 		db.closeLock.RUnlock()
 		if writable {
 			db.writeLock.Unlock()
 		}
-		return nil, err
+		return nil, e
 	}
 	// The metadata and block index buckets are internal-only buckets, so they have defined IDs.
 	tx := &transaction{
@@ -1663,14 +1669,17 @@ func (db *db) begin(writable bool) (*transaction, error) {
 	return tx, nil
 }
 
-// Begin starts a transaction which is either read-only or read-write depending on the specified flag.
+// Begin starts a transaction which is either read-only or read-write depending
+// on the specified flag.
 //
-// Multiple read-only transactions can be started simultaneously while only a single read-write transaction can be
-// started at a time.
+// Multiple read-only transactions can be started simultaneously while only a
+// single read-write transaction can be started at a time.
 //
-// The call will block when starting a read-write transaction when one is already open.
+// The call will block when starting a read-write transaction when one is
+// already open.
 //
-// NOTE: The transaction must be closed by calling Rollback or Commit on it when it is no longer needed.
+// NOTE: The transaction must be closed by calling Rollback or Commit on it when
+// it is no longer needed.
 //
 // Failure to do so will result in unclaimed memory.
 //
@@ -1679,15 +1688,17 @@ func (db *db) Begin(writable bool) (database.Tx, error) {
 	return db.begin(writable)
 }
 
-// rollbackOnPanic rolls the passed transaction back if the code in the calling function panics. This is needed since
-// the mutex on a transaction must be released and a panic in called code would prevent that from happening.
+// rollbackOnPanic rolls the passed transaction back if the code in the calling
+// function panics. This is needed since the mutex on a transaction must be
+// released and a panic in called code would prevent that from happening.
 //
-// NOTE: This can only be handled manually for managed transactions since they control the life-cycle of the
-// transaction.
+// NOTE: This can only be handled manually for managed transactions since they
+// control the life-cycle of the transaction.
 //
-// As the documentation on Begin calls out, callers opting to use manual transactions will have to ensure the
-// transaction is rolled back on panic if it desires that functionality as well or the database will fail to close since
-// the read-lock will never be released.
+// As the documentation on Begin calls out, callers opting to use manual
+// transactions will have to ensure the transaction is rolled back on panic if
+// it desires that functionality as well or the database will fail to close
+// since the read-lock will never be released.
 func rollbackOnPanic(tx *transaction) {
 	if err := recover(); err != nil {
 		tx.managed = false
@@ -1696,33 +1707,33 @@ func rollbackOnPanic(tx *transaction) {
 	}
 }
 
-// View invokes the passed function in the context of a managed read-only transaction with the root bucket for the
-// namespace.
+// View invokes the passed function in the context of a managed read-only
+// transaction with the root bucket for the namespace.
 //
-// Any errors returned from the user-supplied function are returned from this function. This function is part of the
-// database.DB interface implementation.
-func (db *db) View(fn func(database.Tx) error) error {
+// Any errors returned from the user-supplied function are returned from this
+// function. This function is part of the database.DB interface implementation.
+func (db *db) View(fn func(database.Tx) error) (e error) {
 	// Start a read-only transaction.
-	tx, err := db.begin(false)
-	if err != nil {
-		Error(err)
-		return err
+	tx, e := db.begin(false)
+	if e != nil {
+		return e
 	}
-	// Since the user-provided function might panic, ensure the transaction releases all mutexes and resources.
+	// Since the user-provided function might panic, ensure the transaction releases
+	// all mutexes and resources.
 	//
 	// There is no guarantee the caller won't use recover and keep going.
 	//
-	// Thus, the database must still be in a usable state on panics due to caller issues.
+	// Thus, the database must still be in a usable state on panics due to caller
+	// issues.
 	defer rollbackOnPanic(tx)
 	tx.managed = true
-	err = fn(tx)
+	e = fn(tx)
 	tx.managed = false
-	if err != nil {
-		Error(err)
+	if e != nil {
 		// The error is ignored here because nothing was written yet and regardless of a rollback failure, the tx is
 		// closed now anyways.
 		_ = tx.Rollback()
-		return err
+		return e
 	}
 	return tx.Rollback()
 }
@@ -1735,12 +1746,11 @@ func (db *db) View(fn func(database.Tx) error) error {
 //
 // Otherwise, the transaction is committed when the user-supplied function returns a nil error. This function is part of
 // the database. DB interface implementation.
-func (db *db) Update(fn func(database.Tx) error) error {
+func (db *db) Update(fn func(database.Tx) error) (e error) {
 	// Start a read-write transaction.
-	tx, err := db.begin(true)
-	if err != nil {
-		Error(err)
-		return err
+	tx, e := db.begin(true)
+	if e != nil {
+		return e
 	}
 	// Since the user-provided function might panic, ensure the transaction releases all mutexes and resources.
 	//
@@ -1749,14 +1759,13 @@ func (db *db) Update(fn func(database.Tx) error) error {
 	// Thus, the database must still be in a usable state on panics due to caller issues.
 	defer rollbackOnPanic(tx)
 	tx.managed = true
-	err = fn(tx)
+	e = fn(tx)
 	tx.managed = false
-	if err != nil {
-		Error(err)
+	if e != nil {
 		// The error is ignored here because nothing was written yet and regardless of a rollback failure, the tx is
 		// closed now anyways.
 		_ = tx.Rollback()
-		return err
+		return e
 	}
 	return tx.Commit()
 }
@@ -1767,7 +1776,7 @@ func (db *db) Update(fn func(database.Tx) error) error {
 // of the database.
 //
 // DB interface implementation.
-func (db *db) Close() error {
+func (db *db) Close() (e error) {
 	// Since all transactions have a read lock on this mutex, this will cause Close to wait for all readers to complete.
 	db.closeLock.Lock()
 	defer db.closeLock.Unlock()
@@ -1799,8 +1808,9 @@ func (db *db) Close() error {
 
 func // fileExists reports whether the named file or directory exists.
 fileExists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
+	var e error
+	if _, e = os.Stat(name); dbg.Chk(e) {
+		if os.IsNotExist(e) {
 			return false
 		}
 	}
@@ -1810,24 +1820,30 @@ fileExists(name string) bool {
 // initDB creates the initial buckets and values used by the package.
 //
 // This is mainly in a separate function for testing purposes.
-func initDB(ldb *leveldb.DB) error {
+func initDB(ldb *leveldb.DB) (e error) {
 	// The starting block file write cursor location is file num 0, offset 0.
 	batch := new(leveldb.Batch)
-	batch.Put(bucketizedKey(metadataBucketID, writeLocKeyName),
-		serializeWriteRow(0, 0))
+	batch.Put(
+		bucketizedKey(metadataBucketID, writeLocKeyName),
+		serializeWriteRow(0, 0),
+	)
 	// Create block index bucket and set the current bucket id.
 	//
 	// NOTE: Since buckets are virtualized through the use of prefixes, there is no need to store the bucket index data
 	// for the metadata bucket in the database. However, the first bucket ID to use does need to account for it to
 	// ensure there are no key collisions.
-	batch.Put(bucketIndexKey(metadataBucketID, blockIdxBucketName),
-		blockIdxBucketID[:])
+	batch.Put(
+		bucketIndexKey(metadataBucketID, blockIdxBucketName),
+		blockIdxBucketID[:],
+	)
 	batch.Put(curBucketIDKeyName, blockIdxBucketID[:])
 	// Write everything as a single batch.
-	if err := ldb.Write(batch, nil); err != nil {
-		str := fmt.Sprintf("failed to initialize metadata database: %v",
-			err)
-		return convertErr(str, err)
+	if e := ldb.Write(batch, nil); dbg.Chk(e) {
+		str := fmt.Sprintf(
+			"failed to initialize metadata database: %v",
+			err,
+		)
+		return convertErr(str, e)
 	}
 	return nil
 }
@@ -1856,10 +1872,9 @@ func openDB(dbPath string, network wire.BitcoinNet, create bool) (database.DB, e
 		Compression:  opt.NoCompression,
 		Filter:       filter.NewBloomFilter(10),
 	}
-	ldb, err := leveldb.OpenFile(metadataDbPath, &opts)
-	if err != nil {
-		Error(err)
-		return nil, convertErr(err.Error(), err)
+	ldb, e := leveldb.OpenFile(metadataDbPath, &opts)
+	if e != nil {
+		return nil, convertErr(e.Error(), e)
 	}
 	// Create the block store which includes scanning the existing flat block files to find what the current write
 	// cursor position is according to the data that is actually on disk.

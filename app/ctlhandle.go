@@ -13,15 +13,15 @@ import (
 
 const slash = string(os.PathSeparator)
 
-func ctlHandleList(c *cli.Context) error {
+func ctlHandleList(c *cli.Context) (e error) {
 	// fmt.Println("Here are the available commands. Pausing a moment as it is a long list...")
 	// time.Sleep(2 * time.Second)
 	ctl.ListCommands()
 	return nil
 }
 
-func ctlHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
-	return func(c *cli.Context) error {
+func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
 		*cx.Config.LogLevel = "off"
 		config.Configure(cx, c.Command.Name, true)
 		args := c.Args()
@@ -29,7 +29,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			return cli.ShowSubcommandHelp(c)
 		}
 		ctl.HelpPrint = func() {
-			if err := cli.ShowSubcommandHelp(c); Check(err){
+			if e := cli.ShowSubcommandHelp(c); dbg.Chk(e){
 			}
 		}
 		ctl.Main(args, cx)
@@ -37,8 +37,8 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	}
 }
 
-func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
+func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
 		config.Configure(cx, c.Command.Name, true)
 		return nil
 	}

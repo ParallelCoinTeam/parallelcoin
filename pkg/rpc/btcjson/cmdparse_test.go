@@ -161,8 +161,8 @@ func TestAssignField(t *testing.T) {
 	for i, test := range tests {
 		dst := reflect.New(reflect.TypeOf(test.dest)).Elem()
 		src := reflect.ValueOf(test.src)
-		err := btcjson.TstAssignField(1, "testField", dst, src)
-		if err != nil {
+		e := btcjson.TstAssignField(1, "testField", dst, src)
+		if e != nil  {
 			t.Errorf("Test #%d (%s) unexpected error: %v", i,
 				test.name, err)
 			continue
@@ -320,7 +320,7 @@ func TestAssignFieldErrors(t *testing.T) {
 	for i, test := range tests {
 		dst := reflect.New(reflect.TypeOf(test.dest)).Elem()
 		src := reflect.ValueOf(test.src)
-		err := btcjson.TstAssignField(1, "testField", dst, src)
+		e := btcjson.TstAssignField(1, "testField", dst, src)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%[3]v), "+
 				"want %T", i, test.name, err, test.err)
@@ -372,7 +372,7 @@ func TestNewCmdErrors(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		_, err := btcjson.NewCmd(test.method, test.args...)
+		_, e := btcjson.NewCmd(test.method, test.args...)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)
@@ -418,7 +418,7 @@ func TestMarshalCmdErrors(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		_, err := btcjson.MarshalCmd(test.id, test.cmd)
+		_, e := btcjson.MarshalCmd(test.id, test.cmd)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)
@@ -485,7 +485,7 @@ func TestUnmarshalCmdErrors(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		_, err := btcjson.UnmarshalCmd(&test.request)
+		_, e := btcjson.UnmarshalCmd(&test.request)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)

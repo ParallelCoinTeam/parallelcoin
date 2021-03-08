@@ -19,8 +19,8 @@ func EnsureDir(fileName string) {
 
 // FileExists reports whether the named file or directory exists.
 func FileExists(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return err == nil
+	_, e := os.Stat(filePath)
+	return e ==  nil
 }
 
 // MinUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast
@@ -32,6 +32,7 @@ func MinUint32(a, b uint32) uint32 {
 	return b
 }
 
+// PrependForWindows runs a command with a terminal
 func PrependForWindows(args []string) []string {
 	if runtime.GOOS == "windows" {
 		args = append(
@@ -45,6 +46,7 @@ func PrependForWindows(args []string) []string {
 	return args
 }
 
+// PrependForWindowsWithStart runs a process independently
 func PrependForWindowsWithStart(args []string) []string {
 	if runtime.GOOS == "windows" {
 		args = append(

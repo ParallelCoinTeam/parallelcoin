@@ -36,7 +36,7 @@ func (b *addrIndexBucket) Get(key []byte) []byte {
 // Put stores the provided key/value pair to the mock address index bucket.
 //
 // This is part of the internalBucket interface.
-func (b *addrIndexBucket) Put(key []byte, value []byte) error {
+func (b *addrIndexBucket) Put(key []byte, value []byte) (e error) {
 	var levelKey [levelKeySize]byte
 	copy(levelKey[:], key)
 	b.levels[levelKey] = value
@@ -46,7 +46,7 @@ func (b *addrIndexBucket) Put(key []byte, value []byte) error {
 // Delete removes the provided key from the mock address index bucket.
 //
 // This is part of the internalBucket interface.
-func (b *addrIndexBucket) Delete(key []byte) error {
+func (b *addrIndexBucket) Delete(key []byte) (e error) {
 	var levelKey [levelKeySize]byte
 	copy(levelKey[:], key)
 	delete(b.levels, levelKey)
@@ -88,7 +88,7 @@ func (b *addrIndexBucket) printLevels(addrKey [addrKeySize]byte) string {
 
 // sanityCheck ensures that all data stored in the bucket for the given address adheres to the level-based rules
 // described by the address index documentation.
-func (b *addrIndexBucket) sanityCheck(addrKey [addrKeySize]byte, expectedTotal int) error {
+func (b *addrIndexBucket) sanityCheck(addrKey [addrKeySize]byte, expectedTotal int) (e error) {
 	// Find the highest level for the key.
 	highestLevel := uint8(0)
 	for k := range b.levels {
@@ -201,9 +201,9 @@ nextTest:
 		}
 		for i := 0; i < test.numInsert; i++ {
 			txLoc := wire.TxLoc{TxStart: i * 2}
-			err := dbPutAddrIndexEntry(populatedBucket, test.key,
+			e := dbPutAddrIndexEntry(populatedBucket, test.key,
 				uint32(i), txLoc)
-			if err != nil {
+			if e != nil  {
 				t.Errorf("dbPutAddrIndexEntry #%d (%s) - "+
 					"unexpected error: %v", testNum,
 					test.name, err)
@@ -220,9 +220,9 @@ nextTest:
 			// Clone populated bucket to run each delete against.
 			bucket := populatedBucket.Clone()
 			// Remove the number of entries for this iteration.
-			err := dbRemoveAddrIndexEntries(bucket, test.key,
+			e := dbRemoveAddrIndexEntries(bucket, test.key,
 				numDelete)
-			if err != nil {
+			if e != nil  {
 				if numDelete <= test.numInsert {
 					t.Errorf("dbRemoveAddrIndexEntries (%s) "+
 						" delete %d - unexpected error: "+
@@ -238,8 +238,8 @@ nextTest:
 			if numDelete <= test.numInsert {
 				numExpected -= numDelete
 			}
-			err = bucket.sanityCheck(test.key, numExpected)
-			if err != nil {
+			e = bucket.sanityCheck(test.key, numExpected)
+			if e != nil  {
 				t.Errorf("sanity check fail (%s) delete %d: %v",
 					test.name, numDelete, err)
 				continue nextTest

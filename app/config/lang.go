@@ -17,6 +17,4 @@ func appLang(lang string) string {
 	return lang
 }
 
-func Lang(lang string) string {
-	return appLang(lang)
-}
+func Lang(lang string) string { return appLang(lang) }

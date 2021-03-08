@@ -211,7 +211,7 @@ QString getSaveFileName(QWidget *parent, const QString &caption,
     }
 
     /* Add suffix if needed */
-    QFileInfo info(result);
+    QFileInfo inf.Ln(result);
     if(!result.isEmpty())
     {
         if(info.suffix().isEmpty() && !selectedSuffix.isEmpty())

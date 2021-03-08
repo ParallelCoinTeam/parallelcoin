@@ -20,9 +20,9 @@ func TestThrottle(t *testing.T) {
 	codes := make(chan int, 2)
 	for i := 0; i < cap(codes); i++ {
 		go func() {
-			res, err := http.Get(srv.URL)
-			if err != nil {
-				t.Fatal(err)
+			res, e := http.Get(srv.URL)
+			if e != nil  {
+				t.ftl.Ln(err)
 			}
 			codes <- res.StatusCode
 		}()

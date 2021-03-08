@@ -32,7 +32,7 @@ const (
 
 // filesExists returns whether or not the named file or directory exists.
 func fileExists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
+	if _, e = os.Stat(name); dbg.Chk(e) {
 		if os.IsNotExist(err) {
 			return false
 		}
@@ -53,13 +53,13 @@ func isSupportedDbType(dbType string) bool {
 
 // loadBlocks reads files containing bitcoin block data (gzipped but otherwise in the format bitcoind writes) from disk
 // and returns them as an array of util.Block. This is largely borrowed from the test code in pod.
-func loadBlocks(filename string) (blocks []*util.Block, err error) {
+func loadBlocks(filename string) (blocks []*util.Block, e error) {
 	filename = filepath.Join("testdata/", filename)
 	var network = wire.MainNet
 	var dr io.Reader
 	var fi io.ReadCloser
-	fi, err = os.Open(filename)
-	if err != nil {
+	fi, e = os.Open(filename)
+	if e != nil  {
 		return
 	}
 	if strings.HasSuffix(filename, ".bz2") {
@@ -68,32 +68,32 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 		dr = fi
 	}
 	defer func() {
-		if err := fi.Close(); Check(err) {
+		if e := fi.Close(); dbg.Chk(e) {
 		}
 	}()
 	var block *util.Block
 	height := int64(1)
 	for ;; height++ {
 		var rintbuf uint32
-		err = binary.Read(dr, binary.LittleEndian, &rintbuf)
-		if err == io.EOF {
+		e = binary.Read(dr, binary.LittleEndian, &rintbuf)
+		if e ==  io.EOF {
 			// hit end of file at expected offset: no warning
 			// height--
-			err = nil
+			e = nil
 		}
 		if rintbuf != uint32(network) {
 			break
 		}
-		err = binary.Read(dr, binary.LittleEndian, &rintbuf)
+		e = binary.Read(dr, binary.LittleEndian, &rintbuf)
 		blocklen := rintbuf
 		rbytes := make([]byte, blocklen)
 		// read block
-		_, err = dr.Read(rbytes)
-		if err != nil {
+		_, e = dr.Read(rbytes)
+		if e != nil  {
 			fmt.Println(err)
 		}
-		block, err = util.NewBlockFromBytes(rbytes)
-		if err != nil {
+		block, e = util.NewBlockFromBytes(rbytes)
+		if e != nil  {
 			return
 		}
 		blocks = append(blocks, block)
@@ -111,42 +111,42 @@ func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func()
 	var db database.DB
 	var teardown func()
 	if testDbType == "memdb" {
-		ndb, err := database.Create(testDbType)
-		if err != nil {
+		ndb, e := database.Create(testDbType)
+		if e != nil  {
 			return nil, nil, fmt.Errorf("error creating db: %v", err)
 		}
 		db = ndb
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
 		// done testing.
 		teardown = func() {
-			if err := db.Close(); Check(err) {
+			if e := db.Close(); dbg.Chk(e) {
 			}
 		}
 	} else {
 		// Create the root directory for test databases.
 		if !fileExists(testDbRoot) {
-			if err := os.MkdirAll(testDbRoot, 0700); err != nil {
-				err := fmt.Errorf("unable to create test db "+
+			if e := os.MkdirAll(testDbRoot, 0700); dbg.Chk(e) {
+				e := fmt.Errorf("unable to create test db "+
 					"root: %v", err)
-				return nil, nil, err
+				return nil, nil, e
 			}
 		}
 		// Create a new database to store the accepted blocks into.
 		dbPath := filepath.Join(testDbRoot, dbName)
 		_ = os.RemoveAll(dbPath)
-		ndb, err := database.Create(testDbType, dbPath, blockDataNet)
-		if err != nil {
+		ndb, e := database.Create(testDbType, dbPath, blockDataNet)
+		if e != nil  {
 			return nil, nil, fmt.Errorf("error creating db: %v", err)
 		}
 		db = ndb
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
 		// done testing.
 		teardown = func() {
-			if err := db.Close(); Check(err) {
+			if e := db.Close(); dbg.Chk(e) {
 			}
-			if err := os.RemoveAll(dbPath); Check(err) {
+			if e := os.RemoveAll(dbPath); dbg.Chk(e) {
 			}
-			if err := os.RemoveAll(testDbRoot); Check(err) {
+			if e := os.RemoveAll(testDbRoot); dbg.Chk(e) {
 			}
 		}
 	}
@@ -154,17 +154,17 @@ func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func()
 	// global instance.
 	paramsCopy := *netparams
 	// Create the main chain instance.
-	chain, err := New(&Config{
+	chain, e := New(&Config{
 		DB:          db,
 		ChainParams: &paramsCopy,
 		Checkpoints: nil,
 		TimeSource:  NewMedianTime(),
 		SigCache:    txscript.NewSigCache(1000),
 	})
-	if err != nil {
+	if e != nil  {
 		teardown()
-		err := fmt.Errorf("failed to create chain instance: %v", err)
-		return nil, nil, err
+		e := fmt.Errorf("failed to create chain instance: %v", err)
+		return nil, nil, e
 	}
 	return chain, teardown, nil
 }
@@ -178,9 +178,9 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 	// The output index and serialized utxo len are little endian uint32s and the serialized utxo uses the format
 	// described in chainio.go.
 	filename = filepath.Join("testdata", filename)
-	fi, err := os.Open(filename)
-	if err != nil {
-		return nil, err
+	fi, e := os.Open(filename)
+	if e != nil  {
+		return nil, e
 	}
 	// Choose read based on whether the file is compressed or not.
 	var r io.Reader
@@ -190,43 +190,43 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 		r = fi
 	}
 	defer func() {
-		if err := fi.Close(); Check(err) {
+		if e := fi.Close(); dbg.Chk(e) {
 		}
 	}()
 	view := NewUtxoViewpoint()
 	for {
 		// Hash of the utxo entry.
 		var hash chainhash.Hash
-		_, err := io.ReadAtLeast(r, hash[:], len(hash[:]))
-		if err != nil {
+		_, e := io.ReadAtLeast(r, hash[:], len(hash[:]))
+		if e != nil  {
 			// Expected EOF at the right offset.
-			if err == io.EOF {
+			if e ==  io.EOF {
 				break
 			}
-			return nil, err
+			return nil, e
 		}
 		// Output index of the utxo entry.
 		var index uint32
-		err = binary.Read(r, binary.LittleEndian, &index)
-		if err != nil {
-			return nil, err
+		e = binary.Read(r, binary.LittleEndian, &index)
+		if e != nil  {
+			return nil, e
 		}
 		// Num of serialized utxo entry bytes.
 		var numBytes uint32
-		err = binary.Read(r, binary.LittleEndian, &numBytes)
-		if err != nil {
-			return nil, err
+		e = binary.Read(r, binary.LittleEndian, &numBytes)
+		if e != nil  {
+			return nil, e
 		}
 		// Serialized utxo entry.
 		serialized := make([]byte, numBytes)
-		_, err = io.ReadAtLeast(r, serialized, int(numBytes))
-		if err != nil {
-			return nil, err
+		_, e = io.ReadAtLeast(r, serialized, int(numBytes))
+		if e != nil  {
+			return nil, e
 		}
 		// Deserialize it and add it to the view.
-		entry, err := deserializeUtxoEntry(serialized)
-		if err != nil {
-			return nil, err
+		entry, e := deserializeUtxoEntry(serialized)
+		if e != nil  {
+			return nil, e
 		}
 		view.Entries()[wire.OutPoint{Hash: hash, Index: index}] = entry
 	}
@@ -236,7 +236,7 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 // convertUtxoStore reads a utxostore from the legacy format and writes it back out using the latest format. It is only
 // useful for converting utxostore data used in the tests, which has already been done. However, the code is left
 // available for future reference.
-func convertUtxoStore(r io.Reader, w io.Writer) error {
+func convertUtxoStore(r io.Reader, w io.Writer) (e error) {
 	// The old utxostore file format was:
 	//
 	// <tx hash><serialized utxo len><serialized utxo>
@@ -247,56 +247,56 @@ func convertUtxoStore(r io.Reader, w io.Writer) error {
 	for {
 		// Hash of the utxo entry.
 		var hash chainhash.Hash
-		_, err := io.ReadAtLeast(r, hash[:], len(hash[:]))
-		if err != nil {
+		_, e := io.ReadAtLeast(r, hash[:], len(hash[:]))
+		if e != nil  {
 			// Expected EOF at the right offset.
-			if err == io.EOF {
+			if e ==  io.EOF {
 				break
 			}
 			return err
 		}
 		// Num of serialized utxo entry bytes.
 		var numBytes uint32
-		err = binary.Read(r, littleEndian, &numBytes)
-		if err != nil {
+		e = binary.Read(r, littleEndian, &numBytes)
+		if e != nil  {
 			return err
 		}
 		// Serialized utxo entry.
 		serialized := make([]byte, numBytes)
-		_, err = io.ReadAtLeast(r, serialized, int(numBytes))
-		if err != nil {
+		_, e = io.ReadAtLeast(r, serialized, int(numBytes))
+		if e != nil  {
 			return err
 		}
 		// Deserialize the entry.
-		entries, err := deserializeUtxoEntryV0(serialized)
-		if err != nil {
+		entries, e := deserializeUtxoEntryV0(serialized)
+		if e != nil  {
 			return err
 		}
 		// Loop through all of the utxos and write them out in the new format.
 		for outputIdx, entry := range entries {
 			// Reserialize the entries using the new format.
-			serialized, err := serializeUtxoEntry(entry)
-			if err != nil {
+			serialized, e := serializeUtxoEntry(entry)
+			if e != nil  {
 				return err
 			}
 			// Write the hash of the utxo entry.
-			_, err = w.Write(hash[:])
-			if err != nil {
+			_, e = w.Write(hash[:])
+			if e != nil  {
 				return err
 			}
 			// Write the output index of the utxo entry.
-			err = binary.Write(w, littleEndian, outputIdx)
-			if err != nil {
+			e = binary.Write(w, littleEndian, outputIdx)
+			if e != nil  {
 				return err
 			}
 			// Write num of serialized utxo entry bytes.
-			err = binary.Write(w, littleEndian, uint32(len(serialized)))
-			if err != nil {
+			e = binary.Write(w, littleEndian, uint32(len(serialized)))
+			if e != nil  {
 				return err
 			}
 			// Write the serialized utxo.
-			_, err = w.Write(serialized)
-			if err != nil {
+			_, e = w.Write(serialized)
+			if e != nil  {
 				return err
 			}
 		}

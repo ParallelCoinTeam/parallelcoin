@@ -6,7 +6,7 @@ import (
 
 // NormalizeAddress returns the normalized form of the address, adding a default port if necessary. An error is returned
 // if the address, even without a port, is not valid.
-func NormalizeAddress(addr string, defaultPort string) (hostport string, err error) {
+func NormalizeAddress(addr string, defaultPort string) (hostport string, e error) {
 	// If the first SplitHostPort errors because of a missing port and not for an invalid host, add the port. If the
 	// second SplitHostPort fails, then a port is not missing and the original error should be returned.
 	host, port, origErr := net.SplitHostPort(addr)
@@ -14,9 +14,9 @@ func NormalizeAddress(addr string, defaultPort string) (hostport string, err err
 		return net.JoinHostPort(host, port), nil
 	}
 	addr = net.JoinHostPort(addr, defaultPort)
-	_, _, err = net.SplitHostPort(addr)
-	if err != nil {
-		Error(err)
+	_, _, e = net.SplitHostPort(addr)
+	if e != nil  {
+		err.Ln(err)
 		return "", origErr
 	}
 	return addr, nil
@@ -30,10 +30,10 @@ func NormalizeAddresses(addrs []string, defaultPort string) ([]string, error) {
 		seenSet    = make(map[string]struct{})
 	)
 	for _, addr := range addrs {
-		normalizedAddr, err := NormalizeAddress(addr, defaultPort)
-		if err != nil {
-			Error(err)
-			return nil, err
+		normalizedAddr, e := NormalizeAddress(addr, defaultPort)
+		if e != nil  {
+			err.Ln(err)
+			return nil, e
 		}
 		_, seen := seenSet[normalizedAddr]
 		if !seen {

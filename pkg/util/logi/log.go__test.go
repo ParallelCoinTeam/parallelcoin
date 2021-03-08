@@ -8,13 +8,13 @@ import (
 
 func Test(t *testing.T) {
 	L.SetLevel("trace", true, "olt")
-	L.Trace("testing")
-	L.Debug("testing")
+	L.trc.Ln("testing")
+	L.dbg.Ln("testing")
 	fmt.Println("'", L.Check("'", errors.New("this is a test")))
 	L.Check("", nil)
-	L.Info("testing")
-	L.Warn("testing")
+	L.inf.Ln("testing")
+	L.wrn.Ln("testing")
 	L.Error("testing")
-	L.Fatal("testing")
+	L.ftl.Ln("testing")
 
 }

@@ -93,25 +93,22 @@ func (c *BitcoindClient) BackEnd() string {
 
 // GetBestBlock returns the highest block known to bitcoind.
 func (c *BitcoindClient) GetBestBlock() (*chainhash.Hash, int32, error) {
-	bcInfo, err := c.chainConn.client.GetBlockChainInfo()
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	bcInfo, e := c.chainConn.client.GetBlockChainInfo()
+	if e != nil {
+		return nil, 0, e
 	}
-	hash, err := chainhash.NewHashFromStr(bcInfo.BestBlockHash)
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	hash, e := chainhash.NewHashFromStr(bcInfo.BestBlockHash)
+	if e != nil {
+		return nil, 0, e
 	}
 	return hash, bcInfo.Blocks, nil
 }
 
 // GetBlockHeight returns the height for the hash, if known, or returns an error.
 func (c *BitcoindClient) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
-	header, err := c.chainConn.client.GetBlockHeaderVerbose(hash)
-	if err != nil {
-		Error(err)
-		return 0, err
+	header, e := c.chainConn.client.GetBlockHeaderVerbose(hash)
+	if e != nil {
+		return 0, e
 	}
 	return header.Height, nil
 }
@@ -123,7 +120,8 @@ func (c *BitcoindClient) GetBlock(hash *chainhash.Hash) (*wire.MsgBlock, error) 
 
 // GetBlockVerbose returns a verbose block from the hash.
 func (c *BitcoindClient) GetBlockVerbose(
-	hash *chainhash.Hash) (*btcjson.GetBlockVerboseResult, error) {
+	hash *chainhash.Hash,
+) (*btcjson.GetBlockVerboseResult, error) {
 	return c.chainConn.client.GetBlockVerbose(hash)
 }
 
@@ -134,31 +132,38 @@ func (c *BitcoindClient) GetBlockHash(height int64) (*chainhash.Hash, error) {
 
 // GetBlockHeader returns a block header from the hash.
 func (c *BitcoindClient) GetBlockHeader(
-	hash *chainhash.Hash) (*wire.BlockHeader, error) {
+	hash *chainhash.Hash,
+) (*wire.BlockHeader, error) {
 	return c.chainConn.client.GetBlockHeader(hash)
 }
 
 // GetBlockHeaderVerbose returns a block header from the hash.
 func (c *BitcoindClient) GetBlockHeaderVerbose(
-	hash *chainhash.Hash) (*btcjson.GetBlockHeaderVerboseResult, error) {
+	hash *chainhash.Hash,
+) (*btcjson.GetBlockHeaderVerboseResult, error) {
 	return c.chainConn.client.GetBlockHeaderVerbose(hash)
 }
 
 // GetRawTransactionVerbose returns a transaction from the tx hash.
 func (c *BitcoindClient) GetRawTransactionVerbose(
-	hash *chainhash.Hash) (*btcjson.TxRawResult, error) {
+	hash *chainhash.Hash,
+) (*btcjson.TxRawResult, error) {
 	return c.chainConn.client.GetRawTransactionVerbose(hash)
 }
 
 // GetTxOut returns a txout from the outpoint info provided.
-func (c *BitcoindClient) GetTxOut(txHash *chainhash.Hash, index uint32,
-	mempool bool) (*btcjson.GetTxOutResult, error) {
+func (c *BitcoindClient) GetTxOut(
+	txHash *chainhash.Hash, index uint32,
+	mempool bool,
+) (*btcjson.GetTxOutResult, error) {
 	return c.chainConn.client.GetTxOut(txHash, index, mempool)
 }
 
 // SendRawTransaction sends a raw transaction via bitcoind.
-func (c *BitcoindClient) SendRawTransaction(tx *wire.MsgTx,
-	allowHighFees bool) (*chainhash.Hash, error) {
+func (c *BitcoindClient) SendRawTransaction(
+	tx *wire.MsgTx,
+	allowHighFees bool,
+) (*chainhash.Hash, error) {
 	return c.chainConn.client.SendRawTransaction(tx, allowHighFees)
 }
 
@@ -173,10 +178,8 @@ func (c *BitcoindClient) Notifications() <-chan interface{} {
 // addresses.
 //
 // NOTE: This is part of the chain.Interface interface.
-func (c *BitcoindClient) NotifyReceived(addrs []util.Address) error {
-	err := c.NotifyBlocks()
-	if err != nil {
-		Error(err)
+func (c *BitcoindClient) NotifyReceived(addrs []util.Address) (e error) {
+	if e = c.NotifyBlocks(); dbg.Chk(e) {
 	}
 	select {
 	case c.rescanUpdate <- addrs:
@@ -187,11 +190,8 @@ func (c *BitcoindClient) NotifyReceived(addrs []util.Address) error {
 }
 
 // NotifySpent allows the chain backend to notify the caller whenever a transaction spends any of the given outpoints.
-func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) error {
-	err := c.NotifyBlocks()
-	if err != nil {
-		Error(err)
-	}
+func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) (e error) {
+	if e = c.NotifyBlocks();dbg.Chk(e){}
 	select {
 	case c.rescanUpdate <- outPoints:
 	case <-c.quit.Wait():
@@ -202,11 +202,8 @@ func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) error {
 
 // NotifyTx allows the chain backend to notify the caller whenever any of the given transactions confirm within the
 // chain.
-func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) error {
-	err := c.NotifyBlocks()
-	if err != nil {
-		Error(err)
-	}
+func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) (e error) {
+	if e = c.NotifyBlocks();dbg.Chk(e){}
 	select {
 	case c.rescanUpdate <- txids:
 	case <-c.quit.Wait():
@@ -218,7 +215,7 @@ func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) error {
 // NotifyBlocks allows the chain backend to notify the caller whenever a block is connected or disconnected.
 //
 // NOTE: This is part of the chain.Interface interface.
-func (c *BitcoindClient) NotifyBlocks() error {
+func (c *BitcoindClient) NotifyBlocks() (e error) {
 	atomic.StoreUint32(&c.notifyBlocks, 1)
 	return nil
 }
@@ -238,7 +235,7 @@ func (c *BitcoindClient) shouldNotifyBlocks() bool {
 //	map[wire.OutPoint]util.Address
 //	[]chainhash.Hash
 //	[]*chainhash.Hash
-func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) error {
+func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) (e error) {
 	if reset {
 		select {
 		case c.rescanUpdate <- struct{}{}:
@@ -246,7 +243,7 @@ func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) error 
 			return ErrBitcoindClientShuttingDown
 		}
 	}
-	updateFilter := func(filter interface{}) error {
+	updateFilter := func(filter interface{}) (e error) {
 		select {
 		case c.rescanUpdate <- filter:
 		case <-c.quit.Wait():
@@ -267,8 +264,8 @@ func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) error 
 		}
 	}
 	for _, filter := range filters {
-		if err := updateFilter(filter); err != nil {
-			return err
+		if e := updateFilter(filter); dbg.Chk(e) {
+			return e
 		}
 	}
 	return nil
@@ -276,28 +273,28 @@ func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) error 
 
 // RescanBlocks rescans any blocks passed, returning only the blocks that matched as []json.BlockDetails.
 func (c *BitcoindClient) RescanBlocks(
-	blockHashes []chainhash.Hash) ([]btcjson.RescannedBlock, error) {
+	blockHashes []chainhash.Hash,
+) ([]btcjson.RescannedBlock, error) {
 	rescannedBlocks := make([]btcjson.RescannedBlock, 0, len(blockHashes))
 	for _, hash := range blockHashes {
-		header, err := c.GetBlockHeaderVerbose(&hash)
-		if err != nil {
-			Errorf(
+		header, e := c.GetBlockHeaderVerbose(&hash)
+		if e != nil {
+			err.F(
 				"unable to get header %s from bitcoind: %s",
 				hash, err,
 			)
 			continue
 		}
-		block, err := c.GetBlock(&hash)
-		if err != nil {
-			Errorf(
+		block, e := c.GetBlock(&hash)
+		if e != nil {
+			err.F(
 				"unable to get block %s from bitcoind: %s",
 				hash, err,
 			)
 			continue
 		}
-		relevantTxs, err := c.filterBlock(block, header.Height, false)
-		if err != nil {
-			Error(err)
+		relevantTxs, e := c.filterBlock(block, header.Height, false)
+		if e != nil {
 		}
 		if len(relevantTxs) > 0 {
 			rescannedBlock := btcjson.RescannedBlock{
@@ -317,8 +314,10 @@ func (c *BitcoindClient) RescanBlocks(
 
 // Rescan rescans from the block with the given hash until the current block, after adding the passed addresses and
 // outpoints to the client's watch list.
-func (c *BitcoindClient) Rescan(blockHash *chainhash.Hash,
-	addresses []util.Address, outPoints map[wire.OutPoint]util.Address) error {
+func (c *BitcoindClient) Rescan(
+	blockHash *chainhash.Hash,
+	addresses []util.Address, outPoints map[wire.OutPoint]util.Address,
+) (e error) {
 	// A block hash is required to use as the starting point of the rescan.
 	if blockHash == nil {
 		return errors.New("rescan requires a starting block hash")
@@ -347,7 +346,7 @@ func (c *BitcoindClient) Rescan(blockHash *chainhash.Hash,
 // necessary in order to process rescans and ZMQ notifications.
 //
 // NOTE: This is part of the chain.Interface interface.
-func (c *BitcoindClient) Start() error {
+func (c *BitcoindClient) Start() (e error) {
 	if !atomic.CompareAndSwapInt32(&c.started, 0, 1) {
 		return nil
 	}
@@ -356,16 +355,16 @@ func (c *BitcoindClient) Start() error {
 	c.notificationQueue.Start()
 	c.notificationQueue.ChanIn() <- ClientConnected{}
 	// Retrieve the best block of the chain.
-	bestHash, bestHeight, err := c.GetBestBlock()
-	if err != nil {
-		Error(err)
+	bestHash, bestHeight, e := c.GetBestBlock()
+	if e != nil {
 		return fmt.Errorf("unable to retrieve best block: %v", err)
 	}
-	bestHeader, err := c.GetBlockHeaderVerbose(bestHash)
-	if err != nil {
-		Error(err)
-		return fmt.Errorf("unable to retrieve header for best block: "+
-			"%v", err)
+	bestHeader, e := c.GetBlockHeaderVerbose(bestHash)
+	if e != nil {
+		return fmt.Errorf(
+			"unable to retrieve header for best block: "+
+				"%v", err,
+		)
 	}
 	c.bestBlockMtx.Lock()
 	c.bestBlock = am.BlockStamp{
@@ -462,13 +461,13 @@ func (c *BitcoindClient) rescanHandler() {
 				c.watchMtx.Unlock()
 			// We're starting a rescan from the hash.
 			case chainhash.Hash:
-				if err := c.rescan(update); err != nil {
-					Error(
+				if e := c.rescan(update); dbg.Chk(e) {
+					err.Ln(
 						"unable to complete chain rescan:", err,
 					)
 				}
 			default:
-				Warnf(
+				wrn.F(
 					"received unexpected filter type %Ter", update,
 				)
 			}
@@ -486,8 +485,9 @@ func (c *BitcoindClient) ntfnHandler() {
 	for {
 		select {
 		case tx := <-c.zmqTxNtfns:
-			if _, _, err := c.filterTx(tx, nil, true); err != nil {
-				Errorf(
+			var e error
+			if _, _, e = c.filterTx(tx, nil, true); dbg.Chk(e) {
+				err.F(
 					"unable to filter transaction %v: %v %s",
 					tx.TxHash(), err,
 				)
@@ -501,12 +501,11 @@ func (c *BitcoindClient) ntfnHandler() {
 			c.bestBlockMtx.Unlock()
 			if newBlock.Header.PrevBlock == bestBlock.Hash {
 				newBlockHeight := bestBlock.Height + 1
-				_, err := c.filterBlock(
+				_, e := c.filterBlock(
 					newBlock, newBlockHeight, true,
 				)
-				if err != nil {
-					Error(err)
-					Errorf(
+				if e != nil {
+					err.F(
 						"unable to filter block %v: %v",
 						newBlock.BlockHash(), err,
 					)
@@ -522,8 +521,8 @@ func (c *BitcoindClient) ntfnHandler() {
 				continue
 			}
 			// Otherwise, we've encountered a reorg.
-			if err := c.reorg(bestBlock, newBlock); err != nil {
-				Error(
+			if e := c.reorg(bestBlock, newBlock); dbg.Chk(e) {
+				err.F(
 					"unable to process chain reorg:", err,
 				)
 			}
@@ -550,8 +549,10 @@ func (c *BitcoindClient) BlockStamp() (*am.BlockStamp, error) {
 
 // onBlockConnected is a callback that's executed whenever a new block has been detected. This will queue a
 // BlockConnected notification to the caller.
-func (c *BitcoindClient) onBlockConnected(hash *chainhash.Hash, height int32,
-	timestamp time.Time) {
+func (c *BitcoindClient) onBlockConnected(
+	hash *chainhash.Hash, height int32,
+	timestamp time.Time,
+) {
 	if c.shouldNotifyBlocks() {
 		select {
 		case c.notificationQueue.ChanIn() <- BlockConnected{
@@ -569,8 +570,10 @@ func (c *BitcoindClient) onBlockConnected(hash *chainhash.Hash, height int32,
 // onFilteredBlockConnected is an alternative callback that's executed whenever a new block has been detected. It serves
 // the same purpose as onBlockConnected, but it also includes a list of the relevant transactions found within the block
 // being connected. This will queue a FilteredBlockConnected notification to the caller.
-func (c *BitcoindClient) onFilteredBlockConnected(height int32,
-	header *wire.BlockHeader, relevantTxs []*tm.TxRecord) {
+func (c *BitcoindClient) onFilteredBlockConnected(
+	height int32,
+	header *wire.BlockHeader, relevantTxs []*tm.TxRecord,
+) {
 	if c.shouldNotifyBlocks() {
 		select {
 		case c.notificationQueue.ChanIn() <- FilteredBlockConnected{
@@ -590,8 +593,10 @@ func (c *BitcoindClient) onFilteredBlockConnected(height int32,
 
 // onBlockDisconnected is a callback that's executed whenever a block has been disconnected. This will queue a
 // BlockDisconnected notification to the caller with the details of the block being disconnected.
-func (c *BitcoindClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
-	timestamp time.Time) {
+func (c *BitcoindClient) onBlockDisconnected(
+	hash *chainhash.Hash, height int32,
+	timestamp time.Time,
+) {
 	if c.shouldNotifyBlocks() {
 		select {
 		case c.notificationQueue.ChanIn() <- BlockDisconnected{
@@ -609,12 +614,13 @@ func (c *BitcoindClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
 // onRelevantTx is a callback that's executed whenever a transaction is relevant to the caller. This means that the
 // transaction matched a specific item in the client's different filters. This will queue a RelevantTx notification to
 // the caller.
-func (c *BitcoindClient) onRelevantTx(tx *tm.TxRecord,
-	blockDetails *btcjson.BlockDetails) {
-	block, err := parseBlock(blockDetails)
-	if err != nil {
-		Error(err)
-		Error(
+func (c *BitcoindClient) onRelevantTx(
+	tx *tm.TxRecord,
+	blockDetails *btcjson.BlockDetails,
+) {
+	block, e := parseBlock(blockDetails)
+	if e != nil {
+		err.Ln(
 			"unable to send onRelevantTx notification, failed parse block:",
 			err,
 		)
@@ -631,8 +637,10 @@ func (c *BitcoindClient) onRelevantTx(tx *tm.TxRecord,
 
 // onRescanProgress is a callback that's executed whenever a rescan is in progress. This will queue a RescanProgress
 // notification to the caller with the current rescan progress details.
-func (c *BitcoindClient) onRescanProgress(hash *chainhash.Hash, height int32,
-	timestamp time.Time) {
+func (c *BitcoindClient) onRescanProgress(
+	hash *chainhash.Hash, height int32,
+	timestamp time.Time,
+) {
 	select {
 	case c.notificationQueue.ChanIn() <- &RescanProgress{
 		Hash:   hash,
@@ -645,9 +653,11 @@ func (c *BitcoindClient) onRescanProgress(hash *chainhash.Hash, height int32,
 
 // onRescanFinished is a callback that's executed whenever a rescan has finished. This will queue a RescanFinished
 // notification to the caller with the details of the last block in the range of the rescan.
-func (c *BitcoindClient) onRescanFinished(hash *chainhash.Hash, height int32,
-	timestamp time.Time) {
-	Infof(
+func (c *BitcoindClient) onRescanFinished(
+	hash *chainhash.Hash, height int32,
+	timestamp time.Time,
+) {
+	inf.F(
 		"rescan finished at %d (%s)",
 		height, hash,
 	)
@@ -663,19 +673,21 @@ func (c *BitcoindClient) onRescanFinished(hash *chainhash.Hash, height int32,
 
 // reorg processes a reorganization during chain synchronization. This is separate from a rescan's handling of a reorg.
 // This will rewind back until it finds a common ancestor and notify all the new blocks since then.
-func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
-	reorgBlock *wire.MsgBlock) error {
-	Debug("possible reorg at block", reorgBlock.BlockHash())
+func (c *BitcoindClient) reorg(
+	currentBlock am.BlockStamp,
+	reorgBlock *wire.MsgBlock,
+) (e error) {
+	dbg.Ln("possible reorg at block", reorgBlock.BlockHash())
 	// Retrieve the best known height based on the block which caused the reorg. This way, we can preserve the chain of
 	// blocks we need to retrieve.
 	bestHash := reorgBlock.BlockHash()
-	bestHeight, err := c.GetBlockHeight(&bestHash)
-	if err != nil {
-		Error(err)
-		return err
+	var bestHeight int32
+	bestHeight, e = c.GetBlockHeight(&bestHash)
+	if e != nil {
+		return e
 	}
 	if bestHeight < currentBlock.Height {
-		Debug("detected multiple reorgs")
+		dbg.Ln("detected multiple reorgs")
 		return nil
 	}
 	// We'll now keep track of all the blocks known to the *chain*, starting from the best block known to us until the
@@ -684,10 +696,9 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 	blocksToNotify.PushFront(reorgBlock)
 	previousBlock := reorgBlock.Header.PrevBlock
 	for i := bestHeight - 1; i >= currentBlock.Height; i-- {
-		block, err := c.GetBlock(&previousBlock)
-		if err != nil {
-			Error(err)
-			return err
+		block, e := c.GetBlock(&previousBlock)
+		if e != nil {
+			return e
 		}
 		blocksToNotify.PushFront(block)
 		previousBlock = block.Header.PrevBlock
@@ -696,16 +707,15 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 	// conditions. If we encounter more reorgs, they'll be queued and we'll repeat the cycle.
 	//
 	// We'll start by retrieving the header to the best block known to us.
-	currentHeader, err := c.GetBlockHeader(&currentBlock.Hash)
-	if err != nil {
-		Error(err)
-		return err
+	currentHeader, e := c.GetBlockHeader(&currentBlock.Hash)
+	if e != nil {
+		return e
 	}
 	// Then, we'll walk backwards in the chain until we find our common ancestor.
 	for previousBlock != currentHeader.PrevBlock {
 		// Since the previous hashes don't match, the current block has been reorged out of the chain, so we should send
 		// a BlockDisconnected notification for it.
-		Debugf(
+		dbg.F(
 			"disconnecting block %d (%v) %s",
 			currentBlock.Height,
 			currentBlock.Hash,
@@ -715,26 +725,24 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 			currentBlock.Timestamp,
 		)
 		// Our current block should now reflect the previous one to continue the common ancestor search.
-		currentHeader, err = c.GetBlockHeader(&currentHeader.PrevBlock)
-		if err != nil {
-			Error(err)
-			return err
+		currentHeader, e = c.GetBlockHeader(&currentHeader.PrevBlock)
+		if e != nil {
+			return e
 		}
 		currentBlock.Height--
 		currentBlock.Hash = currentHeader.PrevBlock
 		currentBlock.Timestamp = currentHeader.Timestamp
 		// Store the correct block in our list in order to notify it once we've found our common ancestor.
-		block, err := c.GetBlock(&previousBlock)
-		if err != nil {
-			Error(err)
-			return err
+		block, e := c.GetBlock(&previousBlock)
+		if e != nil {
+			return e
 		}
 		blocksToNotify.PushFront(block)
 		previousBlock = block.Header.PrevBlock
 	}
 	// Disconnect the last block from the old chain. Since the previous block remains the same between the old and new
 	// chains, the tip will now be the last common ancestor.
-	Debugf(
+	dbg.F(
 		"disconnecting block %d (%v) %s",
 		currentBlock.Height, currentBlock.Hash,
 	)
@@ -747,15 +755,13 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 		nextBlock := blocksToNotify.Front().Value.(*wire.MsgBlock)
 		nextHeight := currentBlock.Height + 1
 		nextHash := nextBlock.BlockHash()
-		nextHeader, err := c.GetBlockHeader(&nextHash)
-		if err != nil {
-			Error(err)
-			return err
+		nextHeader, e := c.GetBlockHeader(&nextHash)
+		if e != nil {
+			return e
 		}
-		_, err = c.filterBlock(nextBlock, nextHeight, true)
-		if err != nil {
-			Error(err)
-			return err
+		_, e = c.filterBlock(nextBlock, nextHeight, true)
+		if e != nil {
+			return e
 		}
 		currentBlock.Height = nextHeight
 		currentBlock.Hash = nextHash
@@ -774,17 +780,17 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 //
 // NOTE: This is part of the chain.Interface interface.
 func (c *BitcoindClient) FilterBlocks(
-	req *FilterBlocksRequest) (*FilterBlocksResponse, error) {
+	req *FilterBlocksRequest,
+) (*FilterBlocksResponse, error) {
 	blockFilterer := NewBlockFilterer(c.chainParams, req)
 	// Iterate over the requested blocks, fetching each from the rpc client. Each block will scanned using the reverse
 	// addresses indexes generated above, breaking out early if any addresses are found.
 	for i, block := range req.Blocks {
 		// TODO(conner): add prefetching, since we already know we'll be
 		// fetching *every* block
-		rawBlock, err := c.GetBlock(&block.Hash)
-		if err != nil {
-			Error(err)
-			return nil, err
+		rawBlock, e := c.GetBlock(&block.Hash)
+		if e != nil {
+			return nil, e
 		}
 		if !blockFilterer.FilterBlock(rawBlock) {
 			continue
@@ -809,19 +815,17 @@ func (c *BitcoindClient) FilterBlocks(
 // rescan performs a rescan of the chain using a bitcoind backend, from the specified hash to the best known hash, while
 // watching out for reorgs that happen during the rescan. It uses the addresses and outputs being tracked by the client
 // in the watch list. This is called only within a queue processing loop.
-func (c *BitcoindClient) rescan(start chainhash.Hash) error {
-	Info("starting rescan from block", start)
+func (c *BitcoindClient) rescan(start chainhash.Hash) (e error) {
+	inf.Ln("starting rescan from block", start)
 	// We start by getting the best already processed block. We only use the height, as the hash can change during a
 	// reorganization, which we catch by testing connectivity from known blocks to the previous block.
-	bestHash, bestHeight, err := c.GetBestBlock()
-	if err != nil {
-		Error(err)
-		return err
+	bestHash, bestHeight, e := c.GetBestBlock()
+	if e != nil {
+		return e
 	}
-	bestHeader, err := c.GetBlockHeaderVerbose(bestHash)
-	if err != nil {
-		Error(err)
-		return err
+	bestHeader, e := c.GetBlockHeaderVerbose(bestHash)
+	if e != nil {
+		return e
 	}
 	bestBlock := am.BlockStamp{
 		Hash:      *bestHash,
@@ -831,15 +835,13 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 	// Create a list of headers sorted in forward order. We'll use this in the event that we need to backtrack due to a
 	// chain reorg.
 	headers := list.New()
-	previousHeader, err := c.GetBlockHeaderVerbose(&start)
-	if err != nil {
-		Error(err)
-		return err
+	previousHeader, e := c.GetBlockHeaderVerbose(&start)
+	if e != nil {
+		return e
 	}
-	previousHash, err := chainhash.NewHashFromStr(previousHeader.Hash)
-	if err != nil {
-		Error(err)
-		return err
+	previousHash, e := chainhash.NewHashFromStr(previousHeader.Hash)
+	if e != nil {
+		return e
 	}
 	headers.PushBack(previousHeader)
 	// Queue a RescanFinished notification to the caller with the last block processed throughout the rescan once done.
@@ -849,10 +851,9 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 	)
 	// Cycle through all of the blocks known to bitcoind, being mindful of reorgs.
 	for i := previousHeader.Height + 1; i <= bestBlock.Height; i++ {
-		hash, err := c.GetBlockHash(int64(i))
-		if err != nil {
-			Error(err)
-			return err
+		hash, e := c.GetBlockHash(int64(i))
+		if e != nil {
+			return e
 		}
 		// If the previous header is before the wallet birthday, fetch the current header and construct a dummy block,
 		// rather than fetching the whole block itself. This speeds things up as we no longer have to fetch the whole
@@ -860,10 +861,9 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 		var block *wire.MsgBlock
 		afterBirthday := previousHeader.Time >= c.birthday.Unix()
 		if !afterBirthday {
-			header, err := c.GetBlockHeader(hash)
-			if err != nil {
-				Error(err)
-				return err
+			header, e := c.GetBlockHeader(hash)
+			if e != nil {
+				return e
 			}
 			block = &wire.MsgBlock{
 				Header: *header,
@@ -877,10 +877,9 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 			}
 		}
 		if afterBirthday {
-			block, err = c.GetBlock(hash)
-			if err != nil {
-				Error(err)
-				return err
+			block, e = c.GetBlock(hash)
+			if e != nil {
+				return e
 			}
 		}
 		for block.Header.PrevBlock.String() != previousHeader.Hash {
@@ -893,15 +892,13 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 				time.Unix(previousHeader.Time, 0),
 			)
 			// Get the previous block of the best chain.
-			hash, err := c.GetBlockHash(int64(i - 1))
-			if err != nil {
-				Error(err)
-				return err
+			hash, e := c.GetBlockHash(int64(i - 1))
+			if e != nil {
+				return e
 			}
-			block, err = c.GetBlock(hash)
-			if err != nil {
-				Error(err)
-				return err
+			block, e = c.GetBlock(hash)
+			if e != nil {
+				return e
 			}
 			// Then, we'll the get the header of this previous block.
 			if headers.Back() != nil {
@@ -910,29 +907,26 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 				if headers.Back() != nil {
 					previousHeader = headers.Back().
 						Value.(*btcjson.GetBlockHeaderVerboseResult)
-					previousHash, err = chainhash.NewHashFromStr(
+					previousHash, e = chainhash.NewHashFromStr(
 						previousHeader.Hash,
 					)
-					if err != nil {
-						Error(err)
-						return err
+					if e != nil {
+						return e
 					}
 				}
 			} else {
 				// Otherwise, we get it from bitcoind.
-				previousHash, err = chainhash.NewHashFromStr(
+				previousHash, e = chainhash.NewHashFromStr(
 					previousHeader.PreviousHash,
 				)
-				if err != nil {
-					Error(err)
-					return err
+				if e != nil {
+					return e
 				}
-				previousHeader, err = c.GetBlockHeaderVerbose(
+				previousHeader, e = c.GetBlockHeaderVerbose(
 					previousHash,
 				)
-				if err != nil {
-					Error(err)
-					return err
+				if e != nil {
+					return e
 				}
 			}
 		}
@@ -948,8 +942,8 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 		}
 		headers.PushBack(previousHeader)
 		// Notify the block and any of its relevant transactions.
-		if _, err = c.filterBlock(block, i, true); err != nil {
-			return err
+		if _, e = c.filterBlock(block, i, true); dbg.Chk(e) {
+			return e
 		}
 		if i%10000 == 0 {
 			c.onRescanProgress(
@@ -959,15 +953,13 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 		// If we've reached the previously best known block, check to make sure the underlying node hasn't synchronized
 		// additional blocks. If it has, update the best known block and continue to rescan to that point.
 		if i == bestBlock.Height {
-			bestHash, bestHeight, err = c.GetBestBlock()
-			if err != nil {
-				Error(err)
-				return err
+			bestHash, bestHeight, e = c.GetBestBlock()
+			if e != nil {
+				return e
 			}
-			bestHeader, err = c.GetBlockHeaderVerbose(bestHash)
-			if err != nil {
-				Error(err)
-				return err
+			bestHeader, e = c.GetBlockHeaderVerbose(bestHash)
+			if e != nil {
+				return e
 			}
 			bestBlock.Hash = *bestHash
 			bestBlock.Height = bestHeight
@@ -979,14 +971,16 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 
 // filterBlock filters a block for watched outpoints and addresses, and returns any matching transactions, sending
 // notifications along the way.
-func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
-	notify bool) ([]*tm.TxRecord, error) {
+func (c *BitcoindClient) filterBlock(
+	block *wire.MsgBlock, height int32,
+	notify bool,
+) ([]*tm.TxRecord, error) {
 	// If this block happened before the client's birthday, then we'll skip it entirely.
 	if block.Header.Timestamp.Before(c.birthday) {
 		return nil, nil
 	}
 	if c.shouldNotifyBlocks() {
-		Debugf(
+		dbg.F(
 			"filtering block %d (%s) with %d transactions %s",
 			height, block.BlockHash(), len(block.Transactions),
 		)
@@ -1005,10 +999,9 @@ func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
 		// Update the index in the block details with the index of this
 		// transaction.
 		blockDetails.Index = i
-		isRelevant, rec, err := c.filterTx(tx, blockDetails, notify)
-		if err != nil {
-			Error(err)
-			Warnf(
+		isRelevant, rec, e := c.filterTx(tx, blockDetails, notify)
+		if e != nil {
+			wrn.F(
 				"Unable to filter transaction %v: %v",
 				tx.TxHash(), err,
 			)
@@ -1038,20 +1031,21 @@ func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
 }
 
 // filterTx determines whether a transaction is relevant to the client by inspecting the client's different filters.
-func (c *BitcoindClient) filterTx(tx *wire.MsgTx,
+func (c *BitcoindClient) filterTx(
+	tx *wire.MsgTx,
 	blockDetails *btcjson.BlockDetails,
-	notify bool) (bool, *tm.TxRecord, error) {
+	notify bool,
+) (bool, *tm.TxRecord, error) {
 	txDetails := util.NewTx(tx)
 	if blockDetails != nil {
 		txDetails.SetIndex(blockDetails.Index)
 	}
-	rec, err := tm.NewTxRecordFromMsgTx(txDetails.MsgTx(), time.Now())
-	if err != nil {
-		Error(err)
-		Error(
+	rec, e := tm.NewTxRecordFromMsgTx(txDetails.MsgTx(), time.Now())
+	if e != nil {
+		err.Ln(
 			"Cannot create transaction record for relevant tx:", err,
 		)
-		return false, nil, err
+		return false, nil, e
 	}
 	if blockDetails != nil {
 		rec.Received = time.Unix(blockDetails.Time, 0)
@@ -1074,12 +1068,12 @@ func (c *BitcoindClient) filterTx(tx *wire.MsgTx,
 	// We'll start by cycling through its outputs to determine if it pays to any of the currently watched addresses. If
 	// an output matches, we'll add it to our watch list.
 	for i, out := range tx.TxOut {
-		_, addrs, _, err := txscript.ExtractPkScriptAddrs(
+		var addrs []util.Address
+		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			out.PkScript, c.chainParams,
 		)
-		if err != nil {
-			Error(err)
-			Debugf(
+		if e != nil {
+			dbg.F(
 				"Unable to parse output script in %s:%d: %v %s",
 				tx.TxHash(), i, err,
 			)

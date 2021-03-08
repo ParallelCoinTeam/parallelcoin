@@ -23,16 +23,16 @@ func populateVersionFlags() bool {
 	// `-X 'package_path.variable_name=new_value'`
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
-	var err error
-	if cwd, err = os.Getwd(); Check(err) {
+	var e error
+	if cwd, e = os.Getwd(); dbg.Chk(e) {
 		return false
 	}
 	var repo *git.Repository
-	if repo, err = git.PlainOpen(cwd); Check(err) {
+	if repo, e = git.PlainOpen(cwd); dbg.Chk(e) {
 		return false
 	}
 	var rr []*git.Remote
-	if rr, err = repo.Remotes(); Check(err) {
+	if rr, e = repo.Remotes(); dbg.Chk(e) {
 		return false
 	}
 	// spew.Dump(rr)
@@ -56,28 +56,28 @@ func populateVersionFlags() bool {
 	}
 	// var rl object.CommitIter
 	// var rbr *config.Branch
-	// if rbr, err = repo.Branch("l0k1"); Check(err) {
+	// if rbr, e = repo.Branch("l0k1"); dbg.Chk(e) {
 	// }
 	// var rbr storer.ReferenceIter
-	// if rbr, err = repo.Branches(); Check(err){
+	// if rbr, e = repo.Branches(); dbg.Chk(e){
 	// 	return false
 	// }
 	// spew.Dump(rbr)
-	// if rl, err = repo.Log(&git.LogOptions{
+	// if rl, e = repo.Log(&git.LogOptions{
 	// 	From:     plumbing.Hash{},
 	// 	Order:    0,
 	// 	FileName: nil,
 	// 	All:      false,
-	// }); Check(err) {
+	// }); dbg.Chk(e) {
 	// 	return false
 	// }
-	// if err = rl.ForEach(func(cmt *object.Commit) error {
+	// if e = rl.ForEach(func(cmt *object.Commit) (e error) {
 	// 	spew.Dump(cmt)
 	// 	return nil
-	// }); Check(err) {
+	// }); dbg.Chk(e) {
 	// }
 	var rh *plumbing.Reference
-	if rh, err = repo.Head(); Check(err) {
+	if rh, e = repo.Head(); dbg.Chk(e) {
 		return false
 	}
 	rhs := rh.Strings()
@@ -85,7 +85,7 @@ func populateVersionFlags() bool {
 	GitCommit = rhs[1]
 	// fmt.Println(rhs)
 	// var rhco *object.Commit
-	// if rhco, err = repo.CommitObject(rh.Hash()); Check(err) {
+	// if rhco, e = repo.CommitObject(rh.Hash()); dbg.Chk(e) {
 	// }
 	// // var dateS string
 	// rhcoS := rhco.String()
@@ -93,24 +93,24 @@ func populateVersionFlags() bool {
 	// sSs := strings.TrimSpace(strings.Split(sS[1], "\n")[0])
 	// fmt.Println(sSs)
 	// var ti time.Time
-	// if ti, err = time.Parse("Mon Jan 02 15:04:05 2006 -0700", sSs); Check(err) {
+	// if ti, e = time.Parse("Mon Jan 02 15:04:05 2006 -0700", sSs); dbg.Chk(e) {
 	// }
 	// fmt.Printf("time %v\n", ti)
 	// fmt.Println(sSs)
 	// fmt.Println(dateS)
-	// Info(rh.Type(), rh.Target(), rh.Strings(), rh.String(), rh.Name())
+	// inf(rh.Type(), rh.Target(), rh.Strings(), rh.String(), rh.Name())
 	// var rb storer.ReferenceIter
-	// if rb, err = repo.Branches(); Check(err) {
+	// if rb, e = repo.Branches(); dbg.Chk(e) {
 	// 	return false
 	// }
-	// if err = rb.ForEach(func(pr *plumbing.Reference) error {
-	// 	Info(pr.String(), pr.Hash(), pr.Name(), pr.Strings(), pr.Target(), pr.Type())
+	// if e = rb.ForEach(func(pr *plumbing.Reference) (e error) {
+	// 	inf(pr.String(), pr.Hash(), pr.Name(), pr.Strings(), pr.Target(), pr.Type())
 	// 	return nil
-	// }); Check(err) {
+	// }); dbg.Chk(e) {
 	// 	return false
 	// }
 	var rt storer.ReferenceIter
-	if rt, err = repo.Tags(); Check(err) {
+	if rt, e = repo.Tags(); dbg.Chk(e) {
 		return false
 	}
 	// latest := time.Time{}
@@ -119,10 +119,10 @@ func populateVersionFlags() bool {
 	var maxVersion int
 	var maxString string
 	var maxIs bool
-	if err = rt.ForEach(
-		func(pr *plumbing.Reference) error {
+	if e = rt.ForEach(
+		func(pr *plumbing.Reference) (e error) {
 			// var rcoh *object.Commit
-			// if rcoh, err = repo.CommitObject(pr.Hash()); Check(err) {
+			// if rcoh, e = repo.CommitObject(pr.Hash()); dbg.Chk(e) {
 			// }
 			prs := strings.Split(pr.String(), "/")[2]
 			if strings.HasPrefix(prs, "v") {
@@ -142,7 +142,7 @@ func populateVersionFlags() bool {
 			// 	pr.Target(), pr.Type())
 			return nil
 		},
-	); Check(err) {
+	); dbg.Chk(e) {
 		return false
 	}
 	if !maxIs {
@@ -176,7 +176,7 @@ func populateVersionFlags() bool {
 
 func main() {
 	fmt.Println(GetVersion())
-	var err error
+	var e error
 	var ok bool
 	var home string
 	if home, ok = os.LookupEnv("HOME"); !ok {
@@ -194,7 +194,7 @@ func main() {
 			populateVersionFlags()
 			// Infos(list)
 			for i := range list {
-				// Info(list[i])
+				// inf(list[i])
 				// inject the data directory
 				var split []string
 				out := strings.ReplaceAll(list[i], "%datadir", datadir)
@@ -214,7 +214,7 @@ func main() {
 				// add ldflags to commands that have this
 				// for i := range split {
 				// 	split[i] =
-				// 		Infof("'%s'", split[i])
+				// 		inf.F("'%s'", split[i])
 				// }
 				fmt.Printf(
 					`executing item %d of list '%v' '%v' '%v'
@@ -222,15 +222,15 @@ func main() {
 `, i, os.Args[1],
 					split[0], split[1:],
 				)
-				// Info(split)
+				// inf(split)
 				var cmd *exec.Cmd
 				scriptPath := filepath.Join(appdata.Dir("stroy", false), "stroy.sh")
 				apputil.EnsureDir(scriptPath)
-				if err = ioutil.WriteFile(
+				if e = ioutil.WriteFile(
 					scriptPath,
 					[]byte(strings.Join(split, " ")),
 					0700,
-				); Check(err) {
+				); dbg.Chk(e) {
 				} else {
 					cmd = exec.Command("sh", scriptPath)
 					cmd.Stdout = os.Stdout
@@ -240,11 +240,12 @@ func main() {
 				if cmd == nil {
 					panic("cmd is nil")
 				}
-				if err := cmd.Start(); Check(err) {
-					Infos(err)
+				var e error
+				if e = cmd.Start(); dbg.Chk(e) {
+					inf.S(e)
 					os.Exit(1)
 				}
-				if err := cmd.Wait(); Check(err) {
+				if e := cmd.Wait(); dbg.Chk(e) {
 					os.Exit(1)
 				}
 			}

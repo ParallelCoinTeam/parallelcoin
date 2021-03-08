@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	js "encoding/json"
 	"fmt"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -20,17 +20,15 @@ type FutureDebugLevelResult chan *response
 // Receive waits for the response promised by the future and returns the result of setting the debug logging level to
 // the passed level specification or the list of of the available subsystems for the special keyword 'show'.
 func (r FutureDebugLevelResult) Receive() (string, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return "", err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return "", e
 	}
 	// Unmashal the result as a string.
 	var result string
-	err = js.Unmarshal(res, &result)
-	if err != nil {
-		Error(err)
-		return "", err
+	e = js.Unmarshal(res, &result)
+	if e != nil {
+		return "", e
 	}
 	return result, nil
 }
@@ -60,9 +58,9 @@ func (c *Client) DebugLevel(levelSpec string) (string, error) {
 type FutureCreateEncryptedWalletResult chan *response
 
 // Receive waits for and returns the error response promised by the future.
-func (r FutureCreateEncryptedWalletResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureCreateEncryptedWalletResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // CreateEncryptedWalletAsync returns an instance of a type that can be used to get the result of the RPC at some future
@@ -79,7 +77,7 @@ func (c *Client) CreateEncryptedWalletAsync(passphrase string) FutureCreateEncry
 //
 // This RPC specifies the passphrase and instructs the wallet creation. This may error if a
 // wallet is already opened, or the new wallet cannot be written to disk. NOTE: This is a btcwallet extension.
-func (c *Client) CreateEncryptedWallet(passphrase string) error {
+func (c *Client) CreateEncryptedWallet(passphrase string) (e error) {
 	return c.CreateEncryptedWalletAsync(passphrase).Receive()
 }
 
@@ -90,17 +88,15 @@ type FutureListAddressTransactionsResult chan *response
 // Receive waits for the response promised by the future and returns information about all transactions associated with
 // the provided addresses.
 func (r FutureListAddressTransactionsResult) Receive() ([]btcjson.ListTransactionsResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal the result as an array of listtransactions objects.
 	var transactions []btcjson.ListTransactionsResult
-	err = js.Unmarshal(res, &transactions)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &transactions)
+	if e != nil {
+		return nil, e
 	}
 	return transactions, nil
 }
@@ -108,7 +104,10 @@ func (r FutureListAddressTransactionsResult) Receive() ([]btcjson.ListTransactio
 // ListAddressTransactionsAsync returns an instance of a type that can be used get the result of the RPC at some future
 // time by invoking the Receive function on the returned instance. See ListAddressTransactions for the blocking version
 // and more details. NOTE: This is a pod extension.
-func (c *Client) ListAddressTransactionsAsync(addresses []util.Address, account string) FutureListAddressTransactionsResult {
+func (c *Client) ListAddressTransactionsAsync(
+	addresses []util.Address,
+	account string,
+) FutureListAddressTransactionsResult {
 	// Convert addresses to strings.
 	addrs := make([]string, 0, len(addresses))
 	for _, addr := range addresses {
@@ -120,7 +119,10 @@ func (c *Client) ListAddressTransactionsAsync(addresses []util.Address, account 
 
 // ListAddressTransactions returns information about all transactions associated with the provided addresses. NOTE: This
 // is a btcwallet extension.
-func (c *Client) ListAddressTransactions(addresses []util.Address, account string) ([]btcjson.ListTransactionsResult, error) {
+func (c *Client) ListAddressTransactions(addresses []util.Address, account string) (
+	[]btcjson.ListTransactionsResult,
+	error,
+) {
 	return c.ListAddressTransactionsAsync(addresses, account).Receive()
 }
 
@@ -131,23 +133,20 @@ type FutureGetBestBlockResult chan *response
 // Receive waits for the response promised by the future and returns the hash and height of the block in the longest
 // (best) chain.
 func (r FutureGetBestBlockResult) Receive() (*chainhash.Hash, int32, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, 0, e
 	}
 	// Unmarshal result as a getbestblock result object.
 	var bestBlock btcjson.GetBestBlockResult
-	err = js.Unmarshal(res, &bestBlock)
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	e = js.Unmarshal(res, &bestBlock)
+	if e != nil {
+		return nil, 0, e
 	}
 	// Convert to hash from string.
-	hash, err := chainhash.NewHashFromStr(bestBlock.Hash)
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	hash, e := chainhash.NewHashFromStr(bestBlock.Hash)
+	if e != nil {
+		return nil, 0, e
 	}
 	return hash, bestBlock.Height, nil
 }
@@ -174,17 +173,15 @@ type FutureGetCurrentNetResult chan *response
 
 // Receive waits for the response promised by the future and returns the network the server is running on.
 func (r FutureGetCurrentNetResult) Receive() (wire.BitcoinNet, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return 0, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return 0, e
 	}
 	// Unmarshal result as an int64.
 	var net int64
-	err = js.Unmarshal(res, &net)
-	if err != nil {
-		Error(err)
-		return 0, err
+	e = js.Unmarshal(res, &net)
+	if e != nil {
+		return 0, e
 	}
 	return wire.BitcoinNet(net), nil
 }
@@ -215,30 +212,26 @@ type FutureGetHeadersResult chan *response
 //
 // NOTE: This is a btcsuite extension ported from github.com/decred/dcrrpcclient.
 func (r FutureGetHeadersResult) Receive() ([]wire.BlockHeader, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a slice of strings.
 	var result []string
-	err = js.Unmarshal(res, &result)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &result)
+	if e != nil {
+		return nil, e
 	}
 	// Deserialize the []string into []wire.BlockHeader.
 	headers := make([]wire.BlockHeader, len(result))
 	for i, headerHex := range result {
-		serialized, err := hex.DecodeString(headerHex)
-		if err != nil {
-			Error(err)
-			return nil, err
+		serialized, e := hex.DecodeString(headerHex)
+		if e != nil {
+			return nil, e
 		}
-		err = headers[i].Deserialize(bytes.NewReader(serialized))
-		if err != nil {
-			Error(err)
-			return nil, err
+		e = headers[i].Deserialize(bytes.NewReader(serialized))
+		if e != nil {
+			return nil, e
 		}
 	}
 	return headers, nil
@@ -275,38 +268,38 @@ type FutureExportWatchingWalletResult chan *response
 
 // Receive waits for the response promised by the future and returns the exported wallet.
 func (r FutureExportWatchingWalletResult) Receive() ([]byte, []byte, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, nil, e
 	}
 	// Unmarshal result as a JSON object.
 	var obj map[string]interface{}
-	err = js.Unmarshal(res, &obj)
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	e = js.Unmarshal(res, &obj)
+	if e != nil {
+		return nil, nil, e
 	}
-	// Check for the wallet and tx string fields in the object.
+	// Chk for the wallet and tx string fields in the object.
 	base64Wallet, ok := obj["wallet"].(string)
 	if !ok {
-		return nil, nil, fmt.Errorf("unexpected response type for exportwatchingwallet 'wallet' field: %T\n",
-			obj["wallet"])
+		return nil, nil, fmt.Errorf(
+			"unexpected response type for exportwatchingwallet 'wallet' field: %T\n",
+			obj["wallet"],
+		)
 	}
 	base64TxStore, ok := obj["tx"].(string)
 	if !ok {
-		return nil, nil, fmt.Errorf("unexpected response type for exportwatchingwallet 'tx' field: %T\n",
-			obj["tx"])
+		return nil, nil, fmt.Errorf(
+			"unexpected response type for exportwatchingwallet 'tx' field: %T\n",
+			obj["tx"],
+		)
 	}
-	walletBytes, err := base64.StdEncoding.DecodeString(base64Wallet)
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	walletBytes, e := base64.StdEncoding.DecodeString(base64Wallet)
+	if e != nil {
+		return nil, nil, e
 	}
-	txStoreBytes, err := base64.StdEncoding.DecodeString(base64TxStore)
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	txStoreBytes, e := base64.StdEncoding.DecodeString(base64TxStore)
+	if e != nil {
+		return nil, nil, e
 	}
 	return walletBytes, txStoreBytes, nil
 }
@@ -336,17 +329,15 @@ type FutureSessionResult chan *response
 
 // Receive waits for the response promised by the future and returns the session result.
 func (r FutureSessionResult) Receive() (*btcjson.SessionResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a session result object.
 	var session btcjson.SessionResult
-	err = js.Unmarshal(res, &session)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &session)
+	if e != nil {
+		return nil, e
 	}
 	return &session, nil
 }
@@ -380,19 +371,19 @@ type FutureVersionResult chan *response
 // Receive waits for the response promised by the future and returns the version result.
 //
 // NOTE: This is a btcsuite extension ported from github.com/decred/dcrrpcclient.
-func (r FutureVersionResult) Receive() (map[string]btcjson.VersionResult,
-	error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+func (r FutureVersionResult) Receive() (
+	map[string]btcjson.VersionResult,
+	error,
+) {
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a version result object.
 	var vr map[string]btcjson.VersionResult
-	err = js.Unmarshal(res, &vr)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &vr)
+	if e != nil {
+		return nil, e
 	}
 	return vr, nil
 }

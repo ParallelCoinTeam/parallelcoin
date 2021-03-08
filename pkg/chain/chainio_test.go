@@ -13,9 +13,9 @@ import (
 // TestErrNotInMainChain ensures the functions related to errNotInMainChain work as expected.
 func TestErrNotInMainChain(t *testing.T) {
 	errStr := "no block at height 1 exists"
-	err := error(errNotInMainChain(errStr))
+	e := error(errNotInMainChain(errStr))
 	// Ensure the stringized output for the error is as expected.
-	if err != nil && err.Error() != errStr {
+	if e != nil  && err.Error() != errStr {
 		t.Fatalf("errNotInMainChain retuned unexpected error string - "+
 			"got %q, want %q", err.Error(), errStr)
 	}
@@ -23,7 +23,7 @@ func TestErrNotInMainChain(t *testing.T) {
 	if !isNotInMainChainErr(err) {
 		t.Fatalf("isNotInMainChainErr did not detect as expected type")
 	}
-	err = errors.New("something else")
+	e = errors.New("something else")
 	if isNotInMainChainErr(err) {
 		t.Fatalf("isNotInMainChainErr detected incorrect type")
 	}
@@ -96,8 +96,8 @@ func TestStxoSerialization(t *testing.T) {
 		}
 		// Ensure the serialized bytes are decoded back to the expected stxo.
 		var gotStxo SpentTxOut
-		gotBytesRead, err := decodeSpentTxOut(test.serialized, &gotStxo)
-		if err != nil {
+		gotBytesRead, e := decodeSpentTxOut(test.serialized, &gotStxo)
+		if e != nil  {
 			t.Errorf("decodeSpentTxOut (%s): unexpected error: %v",
 				test.name, err)
 			continue
@@ -165,7 +165,7 @@ func TestStxoDecodeErrors(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Ensure the expected error type is returned.
-		gotBytesRead, err := decodeSpentTxOut(test.serialized,
+		gotBytesRead, e := decodeSpentTxOut(test.serialized,
 			&test.stxo)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("decodeSpentTxOut (%s): expected error type "+
@@ -298,9 +298,9 @@ func TestSpendJournalSerialization(t *testing.T) {
 			continue
 		}
 		// Deserialize to a spend journal entry.
-		gotEntry, err := deserializeSpendJournalEntry(test.serialized,
+		gotEntry, e := deserializeSpendJournalEntry(test.serialized,
 			test.blockTxns)
-		if err != nil {
+		if e != nil  {
 			t.Errorf("deserializeSpendJournalEntry #%d (%s) "+
 				"unexpected error: %v", i, test.name, err)
 			continue
@@ -364,7 +364,7 @@ func TestSpendJournalErrors(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Ensure the expected error type is returned and the returned slice is nil.
-		stxos, err := deserializeSpendJournalEntry(test.serialized,
+		stxos, e := deserializeSpendJournalEntry(test.serialized,
 			test.blockTxns)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("deserializeSpendJournalEntry (%s): expected "+
@@ -436,8 +436,8 @@ func TestUtxoSerialization(t *testing.T) {
 	}
 	for i, test := range tests {
 		// Ensure the utxo entry serializes to the expected value.
-		gotBytes, err := serializeUtxoEntry(test.entry)
-		if err != nil {
+		gotBytes, e := serializeUtxoEntry(test.entry)
+		if e != nil  {
 			t.Errorf("serializeUtxoEntry #%d (%s) unexpected "+
 				"error: %v", i, test.name, err)
 			continue
@@ -453,8 +453,8 @@ func TestUtxoSerialization(t *testing.T) {
 			continue
 		}
 		// Deserialize to a utxo entry.
-		utxoEntry, err := deserializeUtxoEntry(test.serialized)
-		if err != nil {
+		utxoEntry, e := deserializeUtxoEntry(test.serialized)
+		if e != nil  {
 			t.Errorf("deserializeUtxoEntry #%d (%s) unexpected "+
 				"error: %v", i, test.name, err)
 			continue
@@ -511,7 +511,7 @@ func TestUtxoEntryHeaderCodeErrors(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Ensure the expected error type is returned and the code is 0.
-		code, err := utxoEntryHeaderCode(test.entry)
+		code, e := utxoEntryHeaderCode(test.entry)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("utxoEntryHeaderCode (%s): expected error "+
 				"type does not match - got %T, want %T",
@@ -548,7 +548,7 @@ func TestUtxoEntryDeserializeErrors(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Ensure the expected error type is returned and the returned entry is nil.
-		entry, err := deserializeUtxoEntry(test.serialized)
+		entry, e := deserializeUtxoEntry(test.serialized)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("deserializeUtxoEntry (%s): expected error "+
 				"type does not match - got %T, want %T",
@@ -611,8 +611,8 @@ func TestUtxoEntryDeserializeErrors(t *testing.T) {
 // 			continue
 // 		}
 // 		// Ensure the serialized bytes are decoded back to the expected state.
-// 		state, err := deserializeBestChainState(test.serialized)
-// 		if err != nil {
+// 		state, e := deserializeBestChainState(test.serialized)
+// 		if e != nil  {
 // 			t.Errorf("deserializeBestChainState #%d (%s) "+
 // 				"unexpected error: %v", i, test.name, err)
 // 			continue
@@ -653,7 +653,7 @@ func TestBestChainStateDeserializeErrors(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Ensure the expected error type and code is returned.
-		_, err := deserializeBestChainState(test.serialized)
+		_, e := deserializeBestChainState(test.serialized)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("deserializeBestChainState (%s): expected "+
 				"error type does not match - got %T, want %T",

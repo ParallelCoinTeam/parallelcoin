@@ -67,28 +67,25 @@ var (
 )
 
 func Amt(f float64) (amt util.Amount) {
-	amt, err := util.NewAmount(f)
-	if err != nil {
-		Error(err)
-		panic(err)
+	amt, e := util.NewAmount(f)
+	if e != nil  {
+				panic(err)
 	}
 	return
 }
 
 func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
-	out, err := util.DecodeAddress(addr, defaultNet)
-	if err != nil {
-		Error(err)
-		panic(err)
+	out, e := util.DecodeAddress(addr, defaultNet)
+	if e != nil  {
+				panic(err)
 	}
 	return
 }
 
 func Key(key string) (out []byte) {
-	out, err := hex.DecodeString(key)
-	if err != nil {
-		Error(err)
-		panic(err)
+	out, e := hex.DecodeString(key)
+	if e != nil  {
+				panic(err)
 	}
 	return
 }

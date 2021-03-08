@@ -11,6 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 )
 
+// GetAlgStamps ...
 func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
 	found bool, algStamps []int64, version int32) {
 
@@ -26,13 +27,13 @@ func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last
 			}
 		}
 	}
-	// Debug(algStamps)
+	// dbg.Ln(algStamps)
 	// reverse order of stamps
 	for i := 0; i < len(algStamps)/2; i++ {
 		algStamps[i], algStamps[len(algStamps)-i-1] = algStamps[len(
 			algStamps)-i-1], algStamps[i]
 	}
-	// Debug(algStamps)
+	// dbg.Ln(algStamps)
 	return
 }
 
@@ -42,13 +43,13 @@ func GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []int64) {
 		len(allStamps) <= int(fork.List[1].AveragingInterval); ln = ln.RelativeAncestor(1) {
 		allStamps = append(allStamps, ln.timestamp)
 	}
-	// Debug(allStamps)
+	// dbg.Ln(allStamps)
 	// reverse order of stamps
 	for i := 0; i < len(allStamps)/2; i++ {
 		allStamps[i], allStamps[len(allStamps)-i-1] =
 			allStamps[len(allStamps)-i-1], allStamps[i]
 	}
-	// Debug(allStamps)
+	// dbg.Ln(allStamps)
 	return
 }
 
@@ -63,14 +64,14 @@ func GetAll(allStamps []int64) (allAv, allAdj float64) {
 			allIntervals[i-1] = float64(r)
 		}
 	}
-	// Debug(allStamps)
+	// dbg.Ln(allStamps)
 	// calculate exponential weighted moving average from intervals
 	aewma := ewma.NewMovingAverage()
 	for _, x := range allIntervals {
 		aewma.Add(x)
 	}
 	allAv = aewma.Value()
-	// Warn(allAv)
+	// wrn.Ln(allAv)
 	if allAv != 0 {
 		allAdj = allAv / fork.P9Average
 	}
@@ -86,7 +87,7 @@ func GetAlg(algStamps []int64, targetTimePerBlock float64) (algAv, algAdj float6
 			algIntervals[i-1] = r
 		}
 	}
-	// Debug(algStamps)
+	// dbg.Ln(algStamps)
 	// calculate exponential weighted moving average from intervals
 	gewma := ewma.NewMovingAverage()
 	for _, x := range algIntervals {
@@ -101,7 +102,7 @@ func GetAlg(algStamps []int64, targetTimePerBlock float64) (algAv, algAdj float6
 
 // CalcNextRequiredDifficultyPlan9 returns the consensus difficulty adjustment by processing recent past blocks
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoName string,
-	l bool) (newTargetBits uint32, adjustment float64, err error) {
+	l bool) (newTargetBits uint32, adjustment float64, e error) {
 	lastNode := lastNodeP
 
 	algoVer := fork.GetAlgoVer(algoName, lastNode.height+1)
@@ -111,7 +112,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	adjustment = 1
 	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, fork.P9Average
 	if lastNode == nil {
-		Debug("lastNode is nil")
+		dbg.Ln("lastNode is nil")
 	}
 	// algoInterval := fork.P9Algos[algoname].VersionInterval
 	startHeight := fork.List[1].ActivationHeight
@@ -130,7 +131,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	if last != nil {
 		bits = last.bits
 	}
-	// Debug(
+	// dbg.Ln(
 	//	"allAv", allAv,
 	//	"fork.P9Average", fork.P9Average,
 	//	"allAv/fork.P9Average", allAv/fork.P9Average,
@@ -154,7 +155,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
-		Info("newTarget is nil ")
+		inf.Ln("newTarget is nil ")
 		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
@@ -163,7 +164,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	}
 	if l {
 		// if lastNode.version == algoVer {
-		Debug(func() string {
+		dbg.Ln(func() string {
 			an := fork.List[1].AlgoVers[algoVer]
 			pad := 8 - len(an)
 			if pad > 0 {
@@ -204,7 +205,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 // the exported version uses the current best chain as the previous block node while this function accepts any block
 // node.
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, algoName string, l bool,
-) (newTargetBits uint32, adjustment float64, err error) {
+) (newTargetBits uint32, adjustment float64, e error) {
 
 	nH := lastNode.height + 1
 	newTargetBits = fork.SecondPowLimitBits
@@ -227,12 +228,12 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
-		Info("newTarget is nil ")
+		inf.Ln("newTarget is nil ")
 		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
-		Tracef("newTarget %064x %08x", newTarget, newTargetBits)
+		trc.F("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
 		an := fork.List[1].AlgoVers[algoVer]
@@ -240,7 +241,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
-		Debugc(func() string {
+		dbg.C(func() string {
 			return fmt.Sprintf("hght: %d %08x %s %s %s %s %s %s %s"+
 				" %s %s %08x",
 				lastNode.height+1,

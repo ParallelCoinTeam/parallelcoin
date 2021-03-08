@@ -13,15 +13,8 @@ import (
 	log "github.com/p9c/pod/pkg/util/logi"
 )
 
-func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
-		// we take one parameter, name of the network, as this does not change during the lifecycle of the miner worker
-		// and is required to get the correct hash functions due to differing hard fork heights. A misconfigured miner
-		// will use the wrong hash functions so the controller will log an error and this should be part of any miner
-		// control or GUI interface built with pod. Since mainnet is over 200k at writing, mining set to testnet will be
-		// correct for mainnet anyway, it is only the other way around that there could be problems with testnet
-		// probably never as high as this and hard fork activates early for testing as pre-hardfork doesn't need testing
-		// or CPU mining.
+func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
 		if len(os.Args) > 3 {
 			if os.Args[3] == netparams.TestNet3Params.Name {
 				fork.IsTestnet = true
@@ -30,28 +23,28 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 		if len(os.Args) > 4 {
 			log.L.SetLevel(os.Args[4], true, "pod")
 		}
-		Debug("miner worker starting")
+		dbg.Ln("miner worker starting")
 		w, conn := worker.New(os.Args[2], cx.KillAll, uint64(*cx.Config.UUID))
 		// interrupt.AddHandler(
 		// 	func() {
-		// 		Debug("KopachWorkerHandle interrupt")
-		// 		// if err := conn.Close(); Check(err) {
+		// 		dbg.Ln("KopachWorkerHandle interrupt")
+		// 		// if e := conn.Close(); dbg.Chk(e) {
 		// 		// }
 		// 		// quit.Q()
 		// 	},
 		// )
-		err := rpc.Register(w)
-		if err != nil {
-			Debug(err)
-			return err
+		e = rpc.Register(w)
+		if e != nil  {
+			dbg.Ln(err)
+			return e
 		}
-		Debug("starting up worker IPC")
+		dbg.Ln("starting up worker IPC")
 		rpc.ServeConn(conn)
-		Debug("stopping worker IPC")
-		// if err := conn.Close(); Check(err) {
+		dbg.Ln("stopping worker IPC")
+		// if e := conn.Close(); dbg.Chk(e) {
 		// }
 		// quit.Quit()
-		Debug("finished")
+		dbg.Ln("finished")
 		return nil
 	}
 }

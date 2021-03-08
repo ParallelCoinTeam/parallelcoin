@@ -12,20 +12,18 @@ import (
 
 // newHashFromStr converts the passed big-endian hex string into a chainhash.Hash.  It only differs from the one available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore known good, hashes.
 func newHashFromStr(	hexStr string) *chainhash.Hash {
-	hash, err := chainhash.NewHashFromStr(hexStr)
-	if err != nil {
-		L.Error(err)
-panic("invalid hash in source file: " + hexStr)
+	hash, e := chainhash.NewHashFromStr(hexStr)
+	if e != nil  {
+		L.panic("invalid hash in source file: " + hexStr)
 	}
 	return hash
 }
 
 // hexToBytes converts the passed hex string into bytes and will panic if there is an error.  This is only provided for the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called with hard-coded values.
 func hexToBytes(	s string) []byte {
-	b, err := hex.DecodeString(s)
-	if err != nil {
-		L.Error(err)
-panic("invalid hex in source file: " + s)
+	b, e := hex.DecodeString(s)
+	if e != nil  {
+		L.panic("invalid hex in source file: " + s)
 	}
 	return b
 }

@@ -7,8 +7,9 @@ import (
 	"sync"
 )
 
-// cprng is a cryptographically random-seeded math/rand prng. It is seeded during package init. Any initialization
-// errors result in panics. It is safe for concurrent access.
+// cprng is a cryptographically random-seeded math/rand prng. It is seeded
+// during package init. Any initialization errors result in panics. It is safe
+// for concurrent access.
 var cprng = cprngType{}
 
 type cprngType struct {
@@ -18,10 +19,9 @@ type cprngType struct {
 
 func init() {
 	buf := make([]byte, 8)
-	_, err := rand.Read(buf)
-	if err != nil {
-		Error(err)
-		panic("Failed to seed prng: " + err.Error())
+	_, e := rand.Read(buf)
+	if e != nil {
+		panic("Failed to seed prng: " + e.Error())
 	}
 	seed := int64(binary.LittleEndian.Uint64(buf))
 	cprng.r = mrand.New(mrand.NewSource(seed))

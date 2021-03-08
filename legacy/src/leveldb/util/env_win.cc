@@ -296,7 +296,7 @@ std::wstring GetLastErrSzW()
         0,
         NULL 
         );
-    std::wstring Err = (LPCWSTR)lpMsgBuf;
+    std::wstring e = (LPCWSTR)lpMsgBuf;
     LocalFree(lpMsgBuf);
     return Err;
 }
@@ -320,7 +320,7 @@ DWORD WINAPI WorkItemWrapperProc(LPVOID pContent)
 size_t GetPageSize()
 {
     SYSTEM_INFO si;
-    GetSystemInfo(&si);
+    GetSysteminf.Ln(&si);
     return std::max(si.dwPageSize,si.dwAllocationGranularity);
 }
 
@@ -840,8 +840,8 @@ Status Win32Env::RenameFile( const std::string& src, const std::string& target )
 	ToWidePath(ModifyPath(target_path), wtarget_path);
 
     if(!MoveFileW(wsrc_path.c_str(), wtarget_path.c_str() ) ){
-        DWORD err = GetLastError();
-        if(err == 0x000000b7){
+        DWORD e = GetLastError();
+        if(e ==  0x000000b7){
             if(!::DeleteFileW(wtarget_path.c_str() ) )
                 sRet = Status::IOError(src, "Could not rename file.");
 			else if(!::MoveFileW(wsrc_path.c_str(),

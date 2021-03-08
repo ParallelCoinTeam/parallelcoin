@@ -44,8 +44,10 @@ type NeutrinoClient struct {
 }
 
 // NewNeutrinoClient creates a new NeutrinoClient struct with a backing ChainService.
-func NewNeutrinoClient(chainParams *netparams.Params,
-	chainService *sac.ChainService) *NeutrinoClient {
+func NewNeutrinoClient(
+	chainParams *netparams.Params,
+	chainService *sac.ChainService,
+) *NeutrinoClient {
 	return &NeutrinoClient{
 		CS:          chainService,
 		chainParams: chainParams,
@@ -58,7 +60,7 @@ func (s *NeutrinoClient) BackEnd() string {
 }
 
 // Start replicates the RPC client's Start method.
-func (s *NeutrinoClient) Start() error {
+func (s *NeutrinoClient) Start() (e error) {
 	s.CS.Start()
 	s.clientMtx.Lock()
 	defer s.clientMtx.Unlock()
@@ -101,10 +103,9 @@ func (s *NeutrinoClient) GetBlock(hash *chainhash.Hash) (*wire.MsgBlock, error) 
 	// TODO(roasbeef): add a block cache?
 	//  * which evication strategy? depends on use case
 	//  Should the block cache be INSIDE neutrino instead of in btcwallet?
-	block, err := s.CS.GetBlock(*hash)
-	if err != nil {
-		Error(err)
-		return nil, err
+	block, e := s.CS.GetBlock(*hash)
+	if e != nil {
+		return nil, e
 	}
 	return block.MsgBlock(), nil
 }
@@ -117,11 +118,11 @@ func (s *NeutrinoClient) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
 }
 
 // GetBestBlock replicates the RPC client's GetBestBlock command.
-func (s *NeutrinoClient) GetBestBlock() (*chainhash.Hash, int32, error) {
-	chainTip, err := s.CS.BestBlock()
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+func (s *NeutrinoClient) GetBestBlock() (h *chainhash.Hash, height int32, e error) {
+	var chainTip *waddrmgr.BlockStamp
+	chainTip, e = s.CS.BestBlock()
+	if e != nil {
+		return nil, 0, e
 	}
 	return &chainTip.Hash, chainTip.Height, nil
 }
@@ -145,17 +146,18 @@ func (s *NeutrinoClient) GetBlockHash(height int64) (*chainhash.Hash, error) {
 // GetBlockHeader returns the block header for the given block hash, or an error if the client has been shut down or the
 // hash doesn't exist or is unknown.
 func (s *NeutrinoClient) GetBlockHeader(
-	blockHash *chainhash.Hash) (*wire.BlockHeader, error) {
+	blockHash *chainhash.Hash,
+) (*wire.BlockHeader, error) {
 	return s.CS.GetBlockHeader(blockHash)
 }
 
 // SendRawTransaction replicates the RPC client's SendRawTransaction command.
 func (s *NeutrinoClient) SendRawTransaction(tx *wire.MsgTx, allowHighFees bool) (
-	*chainhash.Hash, error) {
-	err := s.CS.SendTransaction(tx)
-	if err != nil {
-		Error(err)
-		return nil, err
+	*chainhash.Hash, error,
+) {
+	e := s.CS.SendTransaction(tx)
+	if e != nil {
+		return nil, e
 	}
 	hash := tx.TxHash()
 	return &hash, nil
@@ -167,45 +169,42 @@ func (s *NeutrinoClient) SendRawTransaction(tx *wire.MsgTx, allowHighFees bool) 
 // FilterBlocksResponse for the first block containing a matching address. If no matches are found in the range of
 // blocks requested, the returned response will be nil.
 func (s *NeutrinoClient) FilterBlocks(
-	req *FilterBlocksRequest) (*FilterBlocksResponse, error) {
+	req *FilterBlocksRequest,
+) (*FilterBlocksResponse, error) {
 	blockFilterer := NewBlockFilterer(s.chainParams, req)
 	// Construct the watchlist using the addresses and outpoints contained in the filter blocks request.
-	watchList, err := buildFilterBlocksWatchList(req)
-	if err != nil {
-		Error(err)
-		return nil, err
+	watchList, e := buildFilterBlocksWatchList(req)
+	if e != nil {
+		return nil, e
 	}
 	// Iterate over the requested blocks, fetching the compact filter for each one, and matching it against the
 	// watchlist generated above. If the filter returns a positive match, the full block is then requested and scanned
 	// for addresses using the block filterer.
 	for i, blk := range req.Blocks {
-		filter, err := s.pollCFilter(&blk.Hash)
-		if err != nil {
-			Error(err)
-			return nil, err
+		filter, e := s.pollCFilter(&blk.Hash)
+		if e != nil {
+			return nil, e
 		}
 		// Skip any empty filters.
 		if filter == nil || filter.N() == 0 {
 			continue
 		}
 		key := builder.DeriveKey(&blk.Hash)
-		matched, err := filter.MatchAny(key, watchList)
-		if err != nil {
-			Error(err)
-			return nil, err
+		matched, e := filter.MatchAny(key, watchList)
+		if e != nil {
+			return nil, e
 		} else if !matched {
 			continue
 		}
-		Tracef(
+		trc.F(
 			"fetching block height=%d hash=%v",
 			blk.Height, blk.Hash,
 		)
 		// TODO(conner): can optimize bandwidth by only fetching
 		// stripped blocks
-		rawBlock, err := s.GetBlock(&blk.Hash)
-		if err != nil {
-			Error(err)
-			return nil, err
+		rawBlock, e := s.GetBlock(&blk.Hash)
+		if e != nil {
+			return nil, e
 		}
 		if !blockFilterer.FilterBlock(rawBlock) {
 			continue
@@ -237,26 +236,23 @@ func buildFilterBlocksWatchList(req *FilterBlocksRequest) ([][]byte, error) {
 		len(req.WatchedOutPoints)
 	watchList := make([][]byte, 0, watchListSize)
 	for _, addr := range req.ExternalAddrs {
-		p2shAddr, err := txscript.PayToAddrScript(addr)
-		if err != nil {
-			Error(err)
-			return nil, err
+		p2shAddr, e := txscript.PayToAddrScript(addr)
+		if e != nil {
+			return nil, e
 		}
 		watchList = append(watchList, p2shAddr)
 	}
 	for _, addr := range req.InternalAddrs {
-		p2shAddr, err := txscript.PayToAddrScript(addr)
-		if err != nil {
-			Error(err)
-			return nil, err
+		p2shAddr, e := txscript.PayToAddrScript(addr)
+		if e != nil {
+			return nil, e
 		}
 		watchList = append(watchList, p2shAddr)
 	}
 	for _, addr := range req.WatchedOutPoints {
-		addr, err := txscript.PayToAddrScript(addr)
-		if err != nil {
-			Error(err)
-			return nil, err
+		addr, e := txscript.PayToAddrScript(addr)
+		if e != nil {
+			return nil, e
 		}
 		watchList = append(watchList, addr)
 	}
@@ -265,10 +261,8 @@ func buildFilterBlocksWatchList(req *FilterBlocksRequest) ([][]byte, error) {
 
 // pollCFilter attempts to fetch a CFilter from the neutrino client. This is used to get around the fact that the filter
 // headers may lag behind the highest known block header.
-func (s *NeutrinoClient) pollCFilter(hash *chainhash.Hash) (*gcs.Filter, error) {
+func (s *NeutrinoClient) pollCFilter(hash *chainhash.Hash) (filter *gcs.Filter,e error) {
 	var (
-		filter *gcs.Filter
-		err    error
 		count  int
 	)
 	const maxFilterRetries = 50
@@ -276,25 +270,28 @@ func (s *NeutrinoClient) pollCFilter(hash *chainhash.Hash) (*gcs.Filter, error) 
 		if count > 0 {
 			time.Sleep(100 * time.Millisecond)
 		}
-		filter, err = s.CS.GetCFilter(*hash, wire.GCSFilterRegular)
-		if err != nil {
-			Error(err)
+		filter, e = s.CS.GetCFilter(*hash, wire.GCSFilterRegular)
+		if e != nil {
 			count++
 			continue
 		}
 		return filter, nil
 	}
-	return nil, err
+	return nil, e
 }
 
 // Rescan replicates the RPC client's Rescan command.
-func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
-	outPoints map[wire.OutPoint]util.Address) error {
+func (s *NeutrinoClient) Rescan(
+	startHash *chainhash.Hash, addrs []util.Address,
+	outPoints map[wire.OutPoint]util.Address,
+) (e error) {
 	s.clientMtx.Lock()
 	defer s.clientMtx.Unlock()
 	if !s.started {
-		return fmt.Errorf("can't do a rescan when the chain client " +
-			"is not started")
+		return fmt.Errorf(
+			"can't do a rescan when the chain client " +
+				"is not started",
+		)
 	}
 	if s.scanning {
 		// Restart the rescan by killing the existing rescan.
@@ -310,16 +307,16 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	s.finished = false
 	s.lastProgressSent = false
 	s.isRescan = true
-	bestBlock, err := s.CS.BestBlock()
-	if err != nil {
-		Error(err)
+	bestBlock, e := s.CS.BestBlock()
+	if e != nil {
 		return fmt.Errorf("can't get chain service's best block: %s", err)
 	}
-	header, err := s.CS.GetBlockHeader(&bestBlock.Hash)
-	if err != nil {
-		Error(err)
-		return fmt.Errorf("can't get block header for hash %v: %s",
-			bestBlock.Hash, err)
+	header, e := s.CS.GetBlockHeader(&bestBlock.Hash)
+	if e != nil {
+		return fmt.Errorf(
+			"can't get block header for hash %v: %s",
+			bestBlock.Hash, err,
+		)
 	}
 	// If the wallet is already fully caught up, or the rescan has started with state that indicates a "fresh" wallet,
 	// we'll send a notification indicating the rescan has "finished".
@@ -339,21 +336,24 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	}
 	var inputsToWatch []sac.InputWithScript
 	for op, addr := range outPoints {
-		addrScript, err := txscript.PayToAddrScript(addr)
-		if err != nil {
-			Error(err)
+		addrScript, e := txscript.PayToAddrScript(addr)
+		if e != nil {
 		}
-		inputsToWatch = append(inputsToWatch, sac.InputWithScript{
-			OutPoint: op,
-			PkScript: addrScript,
-		})
+		inputsToWatch = append(
+			inputsToWatch, sac.InputWithScript{
+				OutPoint: op,
+				PkScript: addrScript,
+			},
+		)
 	}
 	newRescan := s.CS.NewRescan(
-		sac.NotificationHandlers(rpcclient.NotificationHandlers{
-			OnBlockConnected:         s.onBlockConnected,
-			OnFilteredBlockConnected: s.onFilteredBlockConnected,
-			OnBlockDisconnected:      s.onBlockDisconnected,
-		}),
+		sac.NotificationHandlers(
+			rpcclient.NotificationHandlers{
+				OnBlockConnected:         s.onBlockConnected,
+				OnFilteredBlockConnected: s.onFilteredBlockConnected,
+				OnBlockDisconnected:      s.onBlockDisconnected,
+			},
+		),
 		sac.StartBlock(&waddrmgr.BlockStamp{Hash: *startHash}),
 		sac.StartTime(s.startTime),
 		sac.QuitChan(s.rescanQuit),
@@ -366,7 +366,7 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 }
 
 // NotifyBlocks replicates the RPC client's NotifyBlocks command.
-func (s *NeutrinoClient) NotifyBlocks() error {
+func (s *NeutrinoClient) NotifyBlocks() (e error) {
 	s.clientMtx.Lock()
 	// If we're scanning, we're already notifying on blocks. Otherwise, start a rescan without watching any addresses.
 	if !s.scanning {
@@ -378,7 +378,7 @@ func (s *NeutrinoClient) NotifyBlocks() error {
 }
 
 // NotifyReceived replicates the RPC client's NotifyReceived command.
-func (s *NeutrinoClient) NotifyReceived(addrs []util.Address) error {
+func (s *NeutrinoClient) NotifyReceived(addrs []util.Address) (e error) {
 	s.clientMtx.Lock()
 	// If we have a rescan running, we just need to add the appropriate addresses to the watch list.
 	if s.scanning {
@@ -392,11 +392,13 @@ func (s *NeutrinoClient) NotifyReceived(addrs []util.Address) error {
 	s.lastProgressSent = true
 	// Rescan with just the specified addresses.
 	newRescan := s.CS.NewRescan(
-		sac.NotificationHandlers(rpcclient.NotificationHandlers{
-			OnBlockConnected:         s.onBlockConnected,
-			OnFilteredBlockConnected: s.onFilteredBlockConnected,
-			OnBlockDisconnected:      s.onBlockDisconnected,
-		}),
+		sac.NotificationHandlers(
+			rpcclient.NotificationHandlers{
+				OnBlockConnected:         s.onBlockConnected,
+				OnFilteredBlockConnected: s.onFilteredBlockConnected,
+				OnBlockDisconnected:      s.onBlockDisconnected,
+			},
+		),
 		sac.StartTime(s.startTime),
 		sac.QuitChan(s.rescanQuit),
 		sac.WatchAddrs(addrs...),
@@ -423,8 +425,10 @@ func (s *NeutrinoClient) SetStartTime(startTime time.Time) {
 }
 
 // onFilteredBlockConnected sends appropriate notifications to the notification channel.
-func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
-	header *wire.BlockHeader, relevantTxs []*util.Tx) {
+func (s *NeutrinoClient) onFilteredBlockConnected(
+	height int32,
+	header *wire.BlockHeader, relevantTxs []*util.Tx,
+) {
 	ntfn := FilteredBlockConnected{
 		Block: &wtxmgr.BlockMeta{
 			Block: wtxmgr.Block{
@@ -435,11 +439,12 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 		},
 	}
 	for _, tx := range relevantTxs {
-		rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx(),
-			header.Timestamp)
-		if err != nil {
-			Error(err)
-			Error(
+		rec, e := wtxmgr.NewTxRecordFromMsgTx(
+			tx.MsgTx(),
+			header.Timestamp,
+		)
+		if e != nil {
+			err.Ln(
 				"cannot create transaction record for relevant tx:", err,
 			)
 			// TODO(aakselrod): Return?
@@ -455,10 +460,9 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 		return
 	}
 	// Handle RescanFinished notification if required.
-	bs, err := s.CS.BestBlock()
-	if err != nil {
-		Error(err)
-		Error("can't get chain service's best block:", err)
+	bs, e := s.CS.BestBlock()
+	if e != nil {
+		err.Ln("can't get chain service's best block:", err)
 		return
 	}
 	if bs.Hash == header.BlockHash() {
@@ -491,8 +495,10 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 }
 
 // onBlockDisconnected sends appropriate notifications to the notification channel.
-func (s *NeutrinoClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
-	t time.Time) {
+func (s *NeutrinoClient) onBlockDisconnected(
+	hash *chainhash.Hash, height int32,
+	t time.Time,
+) {
 	select {
 	case s.enqueueNotification <- BlockDisconnected{
 		Block: wtxmgr.Block{
@@ -505,8 +511,10 @@ func (s *NeutrinoClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
 	case <-s.rescanQuit.Wait():
 	}
 }
-func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
-	time time.Time) {
+func (s *NeutrinoClient) onBlockConnected(
+	hash *chainhash.Hash, height int32,
+	time time.Time,
+) {
 	// TODO: Move this closure out and parameterize it? Is it useful
 	// outside here?
 	sendRescanProgress := func() {
@@ -563,10 +571,9 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 // notificationHandler queues and dequeues notifications. There are currently no bounds on the queue, so the dequeue
 // channel should be read continually to avoid running out of memory.
 func (s *NeutrinoClient) notificationHandler() {
-	hash, height, err := s.GetBestBlock()
-	if err != nil {
-		Error(err)
-		Errorf("failed to get best block from chain service:", err)
+	hash, height, e := s.GetBestBlock()
+	if e != nil {
+		err.F("failed to get best block from chain service:", err)
 		s.Stop()
 		s.wg.Done()
 		return
@@ -619,10 +626,9 @@ out:
 				}
 				dequeue = nil
 			}
-		case err := <-rescanErr:
-			if err != nil {
-				Error(err)
-				Error("neutrino rescan ended with error:", err)
+		case e := <-rescanErr:
+			if e != nil {
+				err.Ln("neutrino rescan ended with error:", err)
 			}
 		case s.currentBlock <- bs:
 		case <-s.quit.Wait():

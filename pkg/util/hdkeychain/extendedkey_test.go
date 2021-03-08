@@ -195,23 +195,23 @@ import (
 // 	}
 // tests:
 // 	for i, test := range tests {
-// 		masterSeed, err := hex.DecodeString(test.master)
-// 		if err != nil {
+// 		masterSeed, e := hex.DecodeString(test.master)
+// 		if e != nil  {
 // 			t.Errorf("DecodeString #%d (%s): unexpected error: %v",
 // 				i, test.name, err)
 // 			continue
 // 		}
-// 		extKey, err := NewMaster(masterSeed, test.net)
-// 		if err != nil {
+// 		extKey, e := NewMaster(masterSeed, test.net)
+// 		if e != nil  {
 // 			t.Errorf("NewMaster #%d (%s): unexpected error when "+
 // 				"creating new master key: %v", i, test.name,
 // 				err)
 // 			continue
 // 		}
 // 		for _, childNum := range test.path {
-// 			var err error
-// 			extKey, err = extKey.Child(childNum)
-// 			if err != nil {
+// 			var e error
+// 			extKey, e = extKey.Child(childNum)
+// 			if e != nil  {
 // 				t.Errorf("err: %v", err)
 // 				continue tests
 // 			}
@@ -228,15 +228,15 @@ import (
 // 				test.name, privStr, test.wantPriv)
 // 			continue
 // 		}
-// 		pubKey, err := extKey.Neuter()
-// 		if err != nil {
+// 		pubKey, e := extKey.Neuter()
+// 		if e != nil  {
 // 			t.Errorf("Neuter #%d (%s): unexpected error: %v ", i,
 // 				test.name, err)
 // 			continue
 // 		}
 // 		// Neutering a second time should have no effect.
-// 		pubKey, err = pubKey.Neuter()
-// 		if err != nil {
+// 		pubKey, e = pubKey.Neuter()
+// 		if e != nil  {
 // 			t.Errorf("Neuter #%d (%s): unexpected error: %v", i,
 // 				test.name, err)
 // 			return
@@ -347,17 +347,17 @@ func TestPrivateDerivation(t *testing.T) {
 	}
 tests:
 	for i, test := range tests {
-		extKey, err := NewKeyFromString(test.master)
-		if err != nil {
+		extKey, e := NewKeyFromString(test.master)
+		if e != nil  {
 			t.Errorf("NewKeyFromString #%d (%s): unexpected error "+
 				"creating extended key: %v", i, test.name,
 				err)
 			continue
 		}
 		for _, childNum := range test.path {
-			var err error
-			extKey, err = extKey.Child(childNum)
-			if err != nil {
+			var e error
+			extKey, e = extKey.Child(childNum)
+			if e != nil  {
 				t.Errorf("err: %v", err)
 				continue tests
 			}
@@ -460,17 +460,17 @@ func TestPublicDerivation(t *testing.T) {
 	}
 tests:
 	for i, test := range tests {
-		extKey, err := NewKeyFromString(test.master)
-		if err != nil {
+		extKey, e := NewKeyFromString(test.master)
+		if e != nil  {
 			t.Errorf("NewKeyFromString #%d (%s): unexpected error "+
 				"creating extended key: %v", i, test.name,
 				err)
 			continue
 		}
 		for _, childNum := range test.path {
-			var err error
-			extKey, err = extKey.Child(childNum)
-			if err != nil {
+			var e error
+			extKey, e = extKey.Child(childNum)
+			if e != nil  {
 				t.Errorf("err: %v", err)
 				continue tests
 			}
@@ -504,13 +504,13 @@ func TestGenenerateSeed(t *testing.T) {
 		{name: "65 bytes", length: 65, err: wantErr},
 	}
 	for i, test := range tests {
-		seed, err := GenerateSeed(test.length)
+		seed, e := GenerateSeed(test.length)
 		if !reflect.DeepEqual(err, test.err) {
 			t.Errorf("GenerateSeed #%d (%s): unexpected error -- "+
 				"want %v, got %v", i, test.name, test.err, err)
 			continue
 		}
-		if test.err == nil && len(seed) != int(test.length) {
+		if test.e ==  nil && len(seed) != int(test.length) {
 			t.Errorf("GenerateSeed #%d (%s): length mismatch -- "+
 				"got %d, want %d", i, test.name, len(seed),
 				test.length)
@@ -551,8 +551,8 @@ func TestGenenerateSeed(t *testing.T) {
 // 		},
 // 	}
 // 	for i, test := range tests {
-// 		key, err := NewKeyFromString(test.extKey)
-// 		if err != nil {
+// 		key, e := NewKeyFromString(test.extKey)
+// 		if e != nil  {
 // 			t.Errorf("NewKeyFromString #%d (%s): unexpected "+
 // 				"error: %v", i, test.name, err)
 // 			continue
@@ -577,7 +577,7 @@ func TestGenenerateSeed(t *testing.T) {
 // 				serializedKey)
 // 			continue
 // 		}
-// 		privKey, err := key.ECPrivKey()
+// 		privKey, e := key.ECPrivKey()
 // 		if !reflect.DeepEqual(err, test.privKeyErr) {
 // 			t.Errorf("ECPrivKey #%d (%s): mismatched error: want "+
 // 				"%v, got %v", i, test.name, test.privKeyErr, err)
@@ -592,8 +592,8 @@ func TestGenenerateSeed(t *testing.T) {
 // 				continue
 // 			}
 // 		}
-// 		pubKey, err := key.ECPubKey()
-// 		if err != nil {
+// 		pubKey, e := key.ECPubKey()
+// 		if e != nil  {
 // 			t.Errorf("ECPubKey #%d (%s): unexpected error: %v", i,
 // 				test.name, err)
 // 			continue
@@ -605,8 +605,8 @@ func TestGenenerateSeed(t *testing.T) {
 // 				pubKeyStr)
 // 			continue
 // 		}
-// 		addr, err := key.Address(&netparams.MainNetParams)
-// 		if err != nil {
+// 		addr, e := key.Address(&netparams.MainNetParams)
+// 		if e != nil  {
 // 			t.Errorf("Address #%d (%s): unexpected error: %v", i,
 // 				test.name, err)
 // 			continue
@@ -703,8 +703,8 @@ func TestNet(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		extKey, err := NewKeyFromString(test.key)
-		if err != nil {
+		extKey, e := NewKeyFromString(test.key)
+		if e != nil  {
 			t.Errorf("NewKeyFromString #%d (%s): unexpected error "+
 				"creating extended key: %v", i, test.name,
 				err)
@@ -730,8 +730,8 @@ func TestNet(t *testing.T) {
 					test.name, privStr, test.newPriv)
 				continue
 			}
-			extKey, err = extKey.Neuter()
-			if err != nil {
+			extKey, e = extKey.Neuter()
+			if e != nil  {
 				t.Errorf("Neuter #%d (%s): unexpected error: %v ", i,
 					test.name, err)
 				continue
@@ -751,32 +751,32 @@ func TestNet(t *testing.T) {
 func TestErrors(t *testing.T) {
 	// Should get an error when seed has too few bytes.
 	net := &netparams.MainNetParams
-	_, err := NewMaster(bytes.Repeat([]byte{0x00}, 15), net)
+	_, e := NewMaster(bytes.Repeat([]byte{0x00}, 15), net)
 	if err != ErrInvalidSeedLen {
 		t.Fatalf("NewMaster: mismatched error -- got: %v, want: %v",
 			err, ErrInvalidSeedLen)
 	}
 	// Should get an error when seed has too many bytes.
-	_, err = NewMaster(bytes.Repeat([]byte{0x00}, 65), net)
+	_, e = NewMaster(bytes.Repeat([]byte{0x00}, 65), net)
 	if err != ErrInvalidSeedLen {
 		t.Fatalf("NewMaster: mismatched error -- got: %v, want: %v",
 			err, ErrInvalidSeedLen)
 	}
 	// Generate a new key and neuter it to a public extended key.
-	seed, err := GenerateSeed(RecommendedSeedLen)
-	if err != nil {
+	seed, e := GenerateSeed(RecommendedSeedLen)
+	if e != nil  {
 		t.Fatalf("GenerateSeed: unexpected error: %v", err)
 	}
-	extKey, err := NewMaster(seed, net)
-	if err != nil {
+	extKey, e := NewMaster(seed, net)
+	if e != nil  {
 		t.Fatalf("NewMaster: unexpected error: %v", err)
 	}
-	pubKey, err := extKey.Neuter()
-	if err != nil {
+	pubKey, e := extKey.Neuter()
+	if e != nil  {
 		t.Fatalf("Neuter: unexpected error: %v", err)
 	}
 	// Deriving a hardened child extended key should fail from a public key.
-	_, err = pubKey.Child(HardenedKeyStart)
+	_, e = pubKey.Child(HardenedKeyStart)
 	if err != ErrDeriveHardFromPublic {
 		t.Fatalf("Child: mismatched error -- got: %v, want: %v",
 			err, ErrDeriveHardFromPublic)
@@ -813,7 +813,7 @@ func TestErrors(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		extKey, err := NewKeyFromString(test.key)
+		extKey, e := NewKeyFromString(test.key)
 		if !reflect.DeepEqual(err, test.err) {
 			t.Errorf("NewKeyFromString #%d (%s): mismatched error "+
 				"-- got: %v, want: %v", i, test.name, err,
@@ -821,7 +821,7 @@ func TestErrors(t *testing.T) {
 			continue
 		}
 		if test.neuter {
-			_, err := extKey.Neuter()
+			_, e := extKey.Neuter()
 			if !reflect.DeepEqual(err, test.neuterErr) {
 				t.Errorf("Neuter #%d (%s): mismatched error "+
 					"-- got: %v, want: %v", i, test.name,
@@ -882,22 +882,22 @@ func TestErrors(t *testing.T) {
 // 			return false
 // 		}
 // 		wantErr := ErrNotPrivExtKey
-// 		_, err := key.ECPrivKey()
+// 		_, e := key.ECPrivKey()
 // 		if !reflect.DeepEqual(err, wantErr) {
 // 			t.Errorf("ECPrivKey #%d (%s): mismatched error: want "+
 // 				"%v, got %v", i, testName, wantErr, err)
 // 			return false
 // 		}
 // 		wantErr = errors.New("pubkey string is empty")
-// 		_, err = key.ECPubKey()
+// 		_, e = key.ECPubKey()
 // 		if !reflect.DeepEqual(err, wantErr) {
 // 			t.Errorf("ECPubKey #%d (%s): mismatched error: want "+
 // 				"%v, got %v", i, testName, wantErr, err)
 // 			return false
 // 		}
 // 		wantAddr := "1HT7xU2Ngenf7D4yocz2SAcnNLW7rK8d4E"
-// 		addr, err := key.Address(&netparams.MainNetParams)
-// 		if err != nil {
+// 		addr, e := key.Address(&netparams.MainNetParams)
+// 		if e != nil  {
 // 			t.Errorf("Addres s #%d (%s): unexpected error: %v", i,
 // 				testName, err)
 // 			return false
@@ -912,21 +912,21 @@ func TestErrors(t *testing.T) {
 // 	}
 // 	for i, test := range tests {
 // 		// Create new key from seed and get the neutered version.
-// 		masterSeed, err := hex.DecodeString(test.master)
-// 		if err != nil {
+// 		masterSeed, e := hex.DecodeString(test.master)
+// 		if e != nil  {
 // 			t.Errorf("DecodeString #%d (%s): unexpected error: %v",
 // 				i, test.name, err)
 // 			continue
 // 		}
-// 		key, err := NewMaster(masterSeed, test.net)
-// 		if err != nil {
+// 		key, e := NewMaster(masterSeed, test.net)
+// 		if e != nil  {
 // 			t.Errorf("NewMaster #%d (%s): unexpected error when "+
 // 				"creating new master key: %v", i, test.name,
 // 				err)
 // 			continue
 // 		}
-// 		neuteredKey, err := key.Neuter()
-// 		if err != nil {
+// 		neuteredKey, e := key.Neuter()
+// 		if e != nil  {
 // 			t.Errorf("Neuter #%d (%s): unexpected error: %v", i,
 // 				test.name, err)
 // 			continue
@@ -941,14 +941,14 @@ func TestErrors(t *testing.T) {
 // 			continue
 // 		}
 // 		// Deserialize key and get the neutered version.
-// 		key, err = NewKeyFromString(test.extKey)
-// 		if err != nil {
+// 		key, e = NewKeyFromString(test.extKey)
+// 		if e != nil  {
 // 			t.Errorf("NewKeyFromString #%d (%s): unexpected "+
 // 				"error: %v", i, test.name, err)
 // 			continue
 // 		}
-// 		neuteredKey, err = key.Neuter()
-// 		if err != nil {
+// 		neuteredKey, e = key.Neuter()
+// 		if e != nil  {
 // 			t.Errorf("Neuter #%d (%s): unexpected error: %v", i,
 // 				test.name, err)
 // 			continue
@@ -968,8 +968,8 @@ func TestErrors(t *testing.T) {
 // TestMaximumDepth ensures that attempting to retrieve a child key when already at the maximum depth is not allowed.  The serialization of a BIP32 key uses uint8 to encode the depth.  This implicitly bounds the depth of the tree to 255 derivations.  Here we test that an error is returned after 'max uint8'.
 func TestMaximumDepth(t *testing.T) {
 	net := &netparams.MainNetParams
-	extKey, err := NewMaster([]byte(`abcd1234abcd1234abcd1234abcd1234`), net)
-	if err != nil {
+	extKey, e := NewMaster([]byte(`abcd1234abcd1234abcd1234abcd1234`), net)
+	if e != nil  {
 		t.Fatalf("NewMaster: unexpected error: %v", err)
 	}
 	for i := uint8(0); i < math.MaxUint8; i++ {
@@ -977,18 +977,18 @@ func TestMaximumDepth(t *testing.T) {
 			t.Fatalf("extendedkey depth %d should match expected value %d",
 				extKey.Depth(), i)
 		}
-		newKey, err := extKey.Child(1)
-		if err != nil {
+		newKey, e := extKey.Child(1)
+		if e != nil  {
 			t.Fatalf("Child: unexpected error: %v", err)
 		}
 		extKey = newKey
 	}
-	noKey, err := extKey.Child(1)
+	noKey, e := extKey.Child(1)
 	if err != ErrDeriveBeyondMaxDepth {
 		t.Fatalf("Child: mismatched error: want %v, got %v",
 			ErrDeriveBeyondMaxDepth, err)
 	}
 	if noKey != nil {
-		t.Fatal("Child: deriving 256th key should not succeed")
+		t.ftl.Ln("Child: deriving 256th key should not succeed")
 	}
 }

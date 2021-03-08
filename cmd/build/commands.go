@@ -96,7 +96,7 @@ var commands = map[string][]string{
 	"resetwallet": {
 		"pod -D %datadir -l trace --walletpass aoeuaoeu wallet drophistory",
 	},
-	"stroy": {
-		"go install -v %ldflags ./stroy/.",
+	"builder": {
+		"go install -v %ldflags ./cmd/build/.",
 	},
 }

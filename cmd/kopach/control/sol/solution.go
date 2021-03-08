@@ -21,18 +21,18 @@ type Solution struct {
 func Encode(uuid uint64, mb *wire.BlockHeader) []byte {
 	var buf []byte
 	wr := bytes.NewBuffer(buf)
-	var err error
-	if err = mb.Serialize(wr); Check(err) {
+	var e error
+	if e = mb.Serialize(wr); dbg.Chk(e) {
 	}
 	s := Solution{UUID: uuid, Bytes: wr.Bytes()} // MsgBlock: mb}
 	return gotiny.Marshal(&s)
 }
 
 // Decode an encoded solution message to a wire.BlockHeader
-func (s *Solution) Decode() (mb *wire.BlockHeader, err error) {
+func (s *Solution) Decode() (mb *wire.BlockHeader, e error) {
 	buf := bytes.NewBuffer(s.Bytes)
 	mb = &wire.BlockHeader{}
-	if err = mb.Deserialize(buf); Check(err) {
+	if e = mb.Deserialize(buf); dbg.Chk(e) {
 	}
 	return
 }

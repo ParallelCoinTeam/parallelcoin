@@ -28,18 +28,18 @@ import (
 const suffix = ".ttf"
 
 func main() {
-	ttfs, err := os.Open("ttfs")
-	if err != nil {
-		Fatal(err)
+	ttfs, e := os.Open("ttfs")
+	if e != nil  {
+		ftl.Ln(err)
 	}
 	defer func() {
-		if err := ttfs.Close(); Check(err) {
+		if e := ttfs.Close(); dbg.Chk(e) {
 		}
 	}()
 
-	infos, err := ttfs.Readdir(-1)
-	if err != nil {
-		Fatal(err)
+	infos, e := ttfs.Readdir(-1)
+	if e != nil  {
+		ftl.Ln(err)
 	}
 	for _, info := range infos {
 		ttfName := info.Name()
@@ -53,12 +53,12 @@ func main() {
 func do(ttfName string) {
 	fontName := fontName(ttfName)
 	pkgName := pkgName(ttfName)
-	if err := os.Mkdir(pkgName, 0777); err != nil && !os.IsExist(err) {
-		Fatal(err)
+	if e := os.Mkdir(pkgName, 0777); err != nil && !os.IsExist(err) {
+		ftl.Ln(err)
 	}
-	src, err := ioutil.ReadFile(filepath.Join("ttfs", ttfName))
-	if err != nil {
-		Fatal(err)
+	src, e := ioutil.ReadFile(filepath.Join("ttfs", ttfName))
+	if e != nil  {
+		ftl.Ln(err)
 	}
 
 	// desc := "a proportional-width, sans-serif"
@@ -79,12 +79,12 @@ func do(ttfName string) {
 	}
 	_, _ = fmt.Fprintf(b, "\n}\n")
 
-	dst, err := format.Source(b.Bytes())
-	if err != nil {
-		Fatal(err)
+	dst, e := format.Source(b.Bytes())
+	if e != nil  {
+		ftl.Ln(err)
 	}
-	if err := ioutil.WriteFile(filepath.Join(pkgName, "data.go"), dst, 0666); err != nil {
-		Fatal(err)
+	if e := ioutil.WriteFile(filepath.Join(pkgName, "data.go"), dst, 0666); dbg.Chk(e) {
+		ftl.Ln(err)
 	}
 }
 

@@ -84,8 +84,8 @@ func TestVerAckWire(t *testing.T) {
 	for i, test := range tests {
 		// Encode the message to wire format.
 		var buf bytes.Buffer
-		err := test.in.BtcEncode(&buf, test.pver, test.enc)
-		if err != nil {
+		e := test.in.BtcEncode(&buf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcEncode #%d error %v", i, err)
 			continue
 		}
@@ -97,8 +97,8 @@ func TestVerAckWire(t *testing.T) {
 		// Decode the message from wire format.
 		var msg MsgVerAck
 		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
-		if err != nil {
+		e = msg.BtcDecode(rbuf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
 		}

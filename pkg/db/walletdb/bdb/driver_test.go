@@ -18,7 +18,7 @@ const dbType = "bdb"
 func TestCreateOpenFail(t *testing.T) {
 	// Ensure that attempting to open a database that doesn't exist returns the expected error.
 	wantErr := walletdb.ErrDbDoesNotExist
-	if _, err := walletdb.Open(dbType, "noexist.db"); err != wantErr {
+	if _, e = walletdb.Open(dbType, "noexist.db"); err != wantErr {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -26,7 +26,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// Ensure that attempting to open a database with the wrong number of parameters returns the expected error.
 	wantErr = fmt.Errorf("invalid arguments to %s.Open -- expected "+
 		"database path", dbType)
-	if _, err := walletdb.Open(dbType, 1, 2, 3); err != nil && err.Error() != wantErr.Error() {
+	if _, e = walletdb.Open(dbType, 1, 2, 3); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -35,7 +35,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// error.
 	wantErr = fmt.Errorf("first argument to %s.Open is invalid -- "+
 		"expected database path string", dbType)
-	if _, err := walletdb.Open(dbType, 1); err != nil && err.Error() != wantErr.Error() {
+	if _, e = walletdb.Open(dbType, 1); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -43,7 +43,7 @@ func TestCreateOpenFail(t *testing.T) {
 	// Ensure that attempting to create a database with the wrong number of parameters returns the expected error.
 	wantErr = fmt.Errorf("invalid arguments to %s.Create -- expected "+
 		"database path", dbType)
-	if _, err := walletdb.Create(dbType, 1, 2, 3); err != nil && err.Error() != wantErr.Error() {
+	if _, e = walletdb.Create(dbType, 1, 2, 3); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -52,26 +52,26 @@ func TestCreateOpenFail(t *testing.T) {
 	// error.
 	wantErr = fmt.Errorf("first argument to %s.Create is invalid -- "+
 		"expected database path string", dbType)
-	if _, err := walletdb.Create(dbType, 1); err != nil && err.Error() != wantErr.Error() {
+	if _, e = walletdb.Create(dbType, 1); err != nil && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
 	}
 	// Ensure operations against a closed database return the expected error.
 	dbPath := "createfail.db"
-	db, err := walletdb.Create(dbType, dbPath)
-	if err != nil {
+	db, e := walletdb.Create(dbType, dbPath)
+	if e != nil  {
 		t.Errorf("Create: unexpected error: %v", err)
 		return
 	}
 	defer func() {
-		if err := os.Remove(dbPath); bdb.Check(err) {
+		if e := os.Remove(dbPath); bdb.dbg.Chk(e) {
 		}
 	}()
-	if err := db.Close(); bdb.Check(err) {
+	if e := db.Close(); bdb.dbg.Chk(e) {
 	}
 	wantErr = walletdb.ErrDbNotOpen
-	if _, err := db.BeginReadTx(); err != wantErr {
+	if _, e = db.BeginReadTx(); err != wantErr {
 		t.Errorf("Namespace: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -82,17 +82,17 @@ func TestCreateOpenFail(t *testing.T) {
 func TestPersistence(t *testing.T) {
 	// Create a new database to run tests against.
 	dbPath := "persistencetest.db"
-	db, err := walletdb.Create(dbType, dbPath)
-	if err != nil {
+	db, e := walletdb.Create(dbType, dbPath)
+	if e != nil  {
 		t.Errorf("Failed to create test database (%s) %v", dbType, err)
 		return
 	}
 	defer func() {
-		if err := os.Remove(dbPath); bdb.Check(err) {
+		if e := os.Remove(dbPath); bdb.dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); bdb.Check(err) {
+		if e := db.Close(); bdb.dbg.Chk(e) {
 		}
 	}()
 	// Create a namespace and put some values into it so they can be tested for existence on re-open.
@@ -102,36 +102,36 @@ func TestPersistence(t *testing.T) {
 		"ns1key3": "foo3",
 	}
 	ns1Key := []byte("ns1")
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
-		ns1, err := tx.CreateTopLevelBucket(ns1Key)
-		if err != nil {
+	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
+		ns1, e := tx.CreateTopLevelBucket(ns1Key)
+		if e != nil  {
 			return err
 		}
 		for k, v := range storeValues {
-			if err := ns1.Put([]byte(k), []byte(v)); err != nil {
+			if e := ns1.Put([]byte(k), []byte(v)); dbg.Chk(e) {
 				return fmt.Errorf("put: unexpected error: %v", err)
 			}
 		}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		t.Errorf("ns1 Update: unexpected error: %v", err)
 		return
 	}
 	// Close and reopen the database to ensure the values persist.
-	if err := db.Close(); bdb.Check(err) {
+	if e := db.Close(); bdb.dbg.Chk(e) {
 	}
-	db, err = walletdb.Open(dbType, dbPath)
-	if err != nil {
+	db, e = walletdb.Open(dbType, dbPath)
+	if e != nil  {
 		t.Errorf("failed to open test database (%s) %v", dbType, err)
 		return
 	}
 	defer func() {
-		if err := db.Close(); bdb.Check(err) {
+		if e := db.Close(); bdb.dbg.Chk(e) {
 		}
 	}()
 	// Ensure the values previously stored in the 3rd namespace still exist and are correct.
-	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
+	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 		ns1 := tx.ReadBucket(ns1Key)
 		if ns1 == nil {
 			return fmt.Errorf("ReadTx.ReadBucket: unexpected nil root bucket")
@@ -145,7 +145,7 @@ func TestPersistence(t *testing.T) {
 		}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		t.Errorf("ns1 View: unexpected error: %v", err)
 		return
 	}

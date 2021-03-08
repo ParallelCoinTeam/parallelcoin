@@ -10,8 +10,8 @@ import (
 // the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called with
 // hard-coded values.
 func hexToBytes(s string) []byte {
-	b, err := hex.DecodeString(s)
-	if err != nil {
+	b, e := hex.DecodeString(s)
+	if e != nil  {
 		panic("invalid hex in source file: " + s)
 	}
 	return b
@@ -174,7 +174,7 @@ func TestMakeScriptNum(t *testing.T) {
 	for _, test := range tests {
 		// Ensure the error code is of the expected type and the error code matches the value specified in the test
 		// instance.
-		gotNum, err := makeScriptNum(test.serialized, test.minimalEncoding,
+		gotNum, e := makeScriptNum(test.serialized, test.minimalEncoding,
 			test.numLen)
 		if e := tstCheckScriptError(err, test.err); e != nil {
 			t.Errorf("makeScriptNum(%#x): %v", test.serialized, e)

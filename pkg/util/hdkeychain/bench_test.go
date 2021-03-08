@@ -13,8 +13,8 @@ const bip0032MasterPriv1 = "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbP" +
 // BenchmarkDeriveHardened benchmarks how long it takes to derive a hardened child from a master private extended key.
 func BenchmarkDeriveHardened(b *testing.B) {
 	b.StopTimer()
-	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
-	if err != nil {
+	masterKey, e := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
+	if e != nil  {
 		b.Errorf("Failed to decode master seed: %v", err)
 	}
 	b.StartTimer()
@@ -27,8 +27,8 @@ func BenchmarkDeriveHardened(b *testing.B) {
 // extended key.
 func BenchmarkDeriveNormal(b *testing.B) {
 	b.StopTimer()
-	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
-	if err != nil {
+	masterKey, e := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
+	if e != nil  {
 		b.Errorf("Failed to decode master seed: %v", err)
 	}
 	b.StartTimer()
@@ -40,8 +40,8 @@ func BenchmarkDeriveNormal(b *testing.B) {
 // BenchmarkPrivToPub benchmarks how long it takes to convert a private extended key to a public extended key.
 func BenchmarkPrivToPub(b *testing.B) {
 	b.StopTimer()
-	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
-	if err != nil {
+	masterKey, e := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
+	if e != nil  {
 		b.Errorf("Failed to decode master seed: %v", err)
 	}
 	b.StartTimer()
@@ -61,8 +61,8 @@ func BenchmarkDeserialize(b *testing.B) {
 // BenchmarkSerialize benchmarks how long it takes to serialize a private extended key.
 func BenchmarkSerialize(b *testing.B) {
 	b.StopTimer()
-	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
-	if err != nil {
+	masterKey, e := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
+	if e != nil  {
 		b.Errorf("Failed to decode master seed: %v", err)
 	}
 	b.StartTimer()

@@ -16,7 +16,7 @@ func (d DNSSeed) String() string {
 // Network parameters should be registered into this package by a main package as early as possible. Then, library
 // packages may lookup networks or network parameters based on inputs and work regardless of the network being standard
 // or not.
-func Register(params *Params) error {
+func Register(params *Params) (e error) {
 	if _, ok := registeredNets[params.Net]; ok {
 		return ErrDuplicateNet
 	}
@@ -33,8 +33,8 @@ func Register(params *Params) error {
 // mustRegister performs the same function as Register except it panics if there is an error. This should only be called
 // from package init functions.
 func mustRegister(params *Params) {
-	if err := Register(params); err != nil {
-		panic("failed to register network: " + err.Error())
+	if e := Register(params); dbg.Chk(e) {
+		panic("failed to register network: " + e.Error())
 	}
 }
 
@@ -83,9 +83,8 @@ func HDPrivateKeyToPublicKeyID(id []byte) ([]byte, error) {
 // available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded,
 // and therefore known good, hashes.
 func newHashFromStr(hexStr string) *chainhash.Hash {
-	hash, err := chainhash.NewHashFromStr(hexStr)
-	if err != nil {
-		Error(err)
+	hash, e := chainhash.NewHashFromStr(hexStr)
+	if e != nil  {
 		// Ordinarily I don't like panics in library code since it can take applications down without them having a
 		// chance to recover which is extremely annoying, however an exception is being made in this case because the
 		// only way this can panic is if there is an error in the hard-coded hashes. Thus it will only ever potentially

@@ -12,8 +12,8 @@ func genRandFilterElements(numElements uint) ([][]byte, error) {
 	testContents := make([][]byte, numElements)
 	for i := range contents {
 		randElem := make([]byte, 32)
-		if _, err := rand.Read(randElem); err != nil {
-			return nil, err
+		if _, e = rand.Read(randElem); dbg.Chk(e) {
+			return nil, e
 		}
 		testContents[i] = randElem
 	}
@@ -33,16 +33,16 @@ func BenchmarkGCSFilterBuild50000(b *testing.B) {
 		binary.BigEndian.PutUint32(testKey[i:], rand.Uint32())
 	}
 	randFilterElems, genErr := genRandFilterElements(50000)
-	if err != nil {
+	if e != nil  {
 		b.Fatalf("unable to generate random item: %v", genErr)
 	}
 	b.StartTimer()
 	var localFilter *gcs.Filter
 	for i := 0; i < b.N; i++ {
-		localFilter, err = gcs.BuildGCSFilter(
+		localFilter, e = gcs.BuildGCSFilter(
 			P, M, key, randFilterElems,
 		)
-		if err != nil {
+		if e != nil  {
 			b.Fatalf("unable to generate filter: %v", err)
 		}
 	}
@@ -57,16 +57,16 @@ func BenchmarkGCSFilterBuild100000(b *testing.B) {
 		binary.BigEndian.PutUint32(testKey[i:], rand.Uint32())
 	}
 	randFilterElems, genErr := genRandFilterElements(100000)
-	if err != nil {
+	if e != nil  {
 		b.Fatalf("unable to generate random item: %v", genErr)
 	}
 	b.StartTimer()
 	var localFilter *gcs.Filter
 	for i := 0; i < b.N; i++ {
-		localFilter, err = gcs.BuildGCSFilter(
+		localFilter, e = gcs.BuildGCSFilter(
 			P, M, key, randFilterElems,
 		)
-		if err != nil {
+		if e != nil  {
 			b.Fatalf("unable to generate filter: %v", err)
 		}
 	}
@@ -80,8 +80,8 @@ var (
 // BenchmarkGCSFilterMatch benchmarks querying a filter for a single value.
 func BenchmarkGCSFilterMatch(b *testing.B) {
 	b.StopTimer()
-	filter, err := gcs.BuildGCSFilter(P, M, key, contents)
-	if err != nil {
+	filter, e := gcs.BuildGCSFilter(P, M, key, contents)
+	if e != nil  {
 		b.Fatalf("Failed to build filter")
 	}
 	b.StartTimer()
@@ -89,12 +89,12 @@ func BenchmarkGCSFilterMatch(b *testing.B) {
 		localMatch bool
 	)
 	for i := 0; i < b.N; i++ {
-		_, err = filter.Match(key, []byte("Nate"))
-		if err != nil {
+		_, e = filter.Match(key, []byte("Nate"))
+		if e != nil  {
 			b.Fatalf("unable to match filter: %v", err)
 		}
-		localMatch, err = filter.Match(key, []byte("Nates"))
-		if err != nil {
+		localMatch, e = filter.Match(key, []byte("Nates"))
+		if e != nil  {
 			b.Fatalf("unable to match filter: %v", err)
 		}
 	}
@@ -104,8 +104,8 @@ func BenchmarkGCSFilterMatch(b *testing.B) {
 // BenchmarkGCSFilterMatchAny benchmarks querying a filter for a list of values.
 func BenchmarkGCSFilterMatchAny(b *testing.B) {
 	b.StopTimer()
-	filter, err := gcs.BuildGCSFilter(P, M, key, contents)
-	if err != nil {
+	filter, e := gcs.BuildGCSFilter(P, M, key, contents)
+	if e != nil  {
 		b.Fatalf("Failed to build filter")
 	}
 	b.StartTimer()
@@ -113,8 +113,8 @@ func BenchmarkGCSFilterMatchAny(b *testing.B) {
 		localMatch bool
 	)
 	for i := 0; i < b.N; i++ {
-		localMatch, err = filter.MatchAny(key, contents2)
-		if err != nil {
+		localMatch, e = filter.MatchAny(key, contents2)
+		if e != nil  {
 			b.Fatalf("unable to match filter: %v", err)
 		}
 	}

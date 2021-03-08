@@ -24,7 +24,7 @@ type RunUnit struct {
 // receives log entries and processes them (such as logging them).
 func New(
 	run, stop func(),
-	logger func(ent *logi.Entry) (err error),
+	logger func(ent *logi.Entry) (e error),
 	pkgFilter func(pkg string) (out bool),
 	quit qu.C,
 	args ...string,
@@ -36,47 +36,48 @@ func New(
 	r.running.Store(false)
 	r.shuttingDown.Store(false)
 	go func() {
+		var e error
 	out:
 		for {
-			Debug("run unit command loop", args)
+			dbg.Ln("run unit command loop", args)
 			select {
 			case cmd := <-r.commandChan:
 				switch cmd {
 				case true:
-					Debug(r.running.Load(), "run called for", args)
+					dbg.Ln(r.running.Load(), "run called for", args)
 					if r.running.Load() {
-						Debug("already running", args)
+						dbg.Ln("already running", args)
 						continue
 					}
 					if r.worker != nil {
-						if err := r.worker.Kill(); Check(err) {
+						if e = r.worker.Kill(); dbg.Chk(e) {
 						}
 					}
 					// quit from rununit's quit, which closes after the main quit triggers stopping in the watcher loop
 					r.worker = consume.Log(r.quit, logger, pkgFilter, args...)
-					// Debug(r.worker)
+					// dbg.Ln(r.worker)
 					consume.Start(r.worker)
 					r.running.Store(true)
 					run()
-					Debug(r.running.Load())
+					dbg.Ln(r.running.Load())
 				case false:
 					running := r.running.Load()
-					Debug("stop called for", args, running)
+					dbg.Ln("stop called for", args, running)
 					if !running {
-						Debug("wasn't running", args)
+						dbg.Ln("wasn't running", args)
 						continue
 					}
 					consume.Kill(r.worker)
-					// var err error
-					// if err = r.worker.Wait(); Check(err) {
+					// var e error
+					// if e = r.worker.Wait(); dbg.Chk(e) {
 					// }
 					r.running.Store(false)
 					stop()
-					Debug(args, "after stop", r.running.Load())
+					dbg.Ln(args, "after stop", r.running.Load())
 				}
 				break
 			case <-r.quit.Wait():
-				Debug("runner stopped for", args)
+				dbg.Ln("runner stopped for", args)
 				break out
 			}
 		}
@@ -86,25 +87,27 @@ func New(
 	out:
 		select {
 		case <-quit.Wait():
-			Debug("runner quit trigger called", args)
+			dbg.Ln("runner quit trigger called", args)
 			running := r.running.Load()
 			if !running {
-				Debug("wasn't running", args)
+				dbg.Ln("wasn't running", args)
 				break out
 			}
 			// r.quit.Q()
 			consume.Kill(r.worker)
-			var err error
-			if err = r.worker.Wait(); Check(err) {
+			var e error
+			if e = r.worker.Wait(); dbg.Chk(e) {
 			}
 			r.running.Store(false)
 			stop()
-			Debug(args, "after stop", r.running.Load())
+			dbg.Ln(args, "after stop", r.running.Load())
 		}
 	}()
-	interrupt.AddHandler(func() {
-		quit.Q()
-	})
+	interrupt.AddHandler(
+		func() {
+			quit.Q()
+		},
+	)
 	return
 }
 
@@ -132,6 +135,7 @@ func (r *RunUnit) Shutdown() {
 	}
 }
 
+// ShuttingDown returns true if the server is shuting down
 func (r *RunUnit) ShuttingDown() bool {
 	return r.shuttingDown.Load()
 }

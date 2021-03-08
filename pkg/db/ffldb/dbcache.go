@@ -42,7 +42,7 @@ var _ iterator.Iterator = (*ldbCacheIter)(nil)
 // Error is only provided to satisfy the iterator interface as there are no errors for this memory-only structure.
 //
 // This is part of the leveldb iterator.Iterator interface implementation.
-func (iter *ldbCacheIter) Error() error {
+func (iter *ldbCacheIter) Error() (e error) {
 	return nil
 }
 
@@ -250,7 +250,7 @@ func (iter *dbCacheIterator) Release() {
 // Error is only provided to satisfy the iterator interface as there are no errors for this memory-only structure.
 //
 // This is part of the leveldb iterator.Iterator interface implementation.
-func (iter *dbCacheIterator) Error() error {
+func (iter *dbCacheIterator) Error() (e error) {
 	return nil
 }
 
@@ -263,7 +263,7 @@ type dbCacheSnapshot struct {
 
 // Has returns whether or not the passed key exists.
 func (snap *dbCacheSnapshot) Has(key []byte) bool {
-	// Check the cached entries first.
+	// Chk the cached entries first.
 	if snap.pendingRemove.Has(key) {
 		return false
 	}
@@ -277,7 +277,7 @@ func (snap *dbCacheSnapshot) Has(key []byte) bool {
 
 // Get returns the value for the passed key. The function will return nil when the key does not exist.
 func (snap *dbCacheSnapshot) Get(key []byte) []byte {
-	// Check the cached entries first.
+	// Chk the cached entries first.
 	if snap.pendingRemove.Has(key) {
 		return nil
 	}
@@ -285,9 +285,9 @@ func (snap *dbCacheSnapshot) Get(key []byte) []byte {
 		return value
 	}
 	// Consult the database.
-	value, err := snap.dbSnapshot.Get(key, nil)
-	if err != nil {
-		// Trace(err)
+	value, e := snap.dbSnapshot.Get(key, nil)
+	if e != nil  {
+		// trc.Ln(err)
 		return nil
 	}
 	return value
@@ -360,11 +360,10 @@ type dbCache struct {
 //
 // The snapshot must be released after use by calling Release.
 func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
-	dbSnapshot, err := c.ldb.GetSnapshot()
-	if err != nil {
-		Error(err)
-		str := "failed to open transaction"
-		return nil, convertErr(str, err)
+	dbSnapshot, e := c.ldb.GetSnapshot()
+	if e != nil  {
+				str := "failed to open transaction"
+		return nil, convertErr(str, e)
 	}
 	// Since the cached keys to be added and removed use an immutable treap, a snapshot is simply obtaining the root of
 	// the tree under the lock which is used to atomically swap the root.
@@ -381,20 +380,19 @@ func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
 // updateDB invokes the passed function in the context of a managed leveldb transaction. Any errors returned from the
 // user-supplied function will cause the transaction to be rolled back and are returned from this function. Otherwise,
 // the transaction is committed when the user-supplied function returns a nil error.
-func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) error {
+func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) (e error) {
 	// Start a leveldb transaction.
-	ldbTx, err := c.ldb.OpenTransaction()
-	if err != nil {
-		Error(err)
-		return convertErr("failed to open ldb transaction", err)
+	ldbTx, e := c.ldb.OpenTransaction()
+	if e != nil  {
+				return convertErr("failed to open ldb transaction", e)
 	}
-	if err := fn(ldbTx); err != nil {
+	if e := fn(ldbTx); dbg.Chk(e) {
 		ldbTx.Discard()
-		return err
+		return e
 	}
 	// Commit the leveldb transaction and convert any errors as needed.
-	if err := ldbTx.Commit(); err != nil {
-		return convertErr("failed to commit leveldb transaction", err)
+	if e := ldbTx.Commit(); dbg.Chk(e) {
+		return convertErr("failed to commit leveldb transaction", e)
 	}
 	return nil
 }
@@ -409,9 +407,9 @@ type TreapForEacher interface {
 }
 
 // commitTreaps atomically commits all of the passed pending add/update/remove updates to the underlying database.
-func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error {
+func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) (e error) {
 	// Perform all leveldb updates using an atomic transaction.
-	return c.updateDB(func(ldbTx *leveldb.Transaction) error {
+	return c.updateDB(func(ldbTx *leveldb.Transaction) (e error) {
 		var innerErr error
 		pendingKeys.ForEach(func(k, v []byte) bool {
 			if dbErr := ldbTx.Put(k, v, nil); dbErr != nil {
@@ -445,14 +443,14 @@ func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error 
 // underlying database.
 //
 // This function MUST be called with the database write lock held.
-func (c *dbCache) flush() error {
+func (c *dbCache) flush() (e error) {
 	c.lastFlush = time.Now()
 	// Sync the current write file associated with the block store.
 	//
 	// This is necessary before writing the metadata to prevent the case where the metadata contains information about a
 	// block which actually hasn't been written yet in unexpected shutdown scenarios.
-	if err := c.store.syncBlocks(); err != nil {
-		return err
+	if e := c.store.syncBlocks(); dbg.Chk(e) {
+		return e
 	}
 	// Since the cached keys to be added and removed use an immutable treap, a snapshot is simply obtaining the root of
 	// the tree under the lock which is used to atomically swap the root.
@@ -465,15 +463,15 @@ func (c *dbCache) flush() error {
 		return nil
 	}
 	// Perform all leveldb updates using an atomic transaction.
-	if err := c.commitTreaps(cachedKeys, cachedRemove); err != nil {
-		return err
+	if e := c.commitTreaps(cachedKeys, cachedRemove); dbg.Chk(e) {
+		return e
 	}
 	// Clear the cache since it has been flushed.
 	c.cacheLock.Lock()
 	c.cachedKeys = treap.NewImmutable()
 	c.cachedRemove = treap.NewImmutable()
 	c.cacheLock.Unlock()
-	Debug("synced database to disk")
+	dbg.Ln("synced database to disk")
 	return nil
 }
 
@@ -511,17 +509,16 @@ func (c *dbCache) needsFlush(tx *transaction) bool {
 //
 // This function MUST be called during a database write transaction which in turn implies the database write lock will
 // be held.
-func (c *dbCache) commitTx(tx *transaction) error {
+func (c *dbCache) commitTx(tx *transaction) (e error) {
 	// Flush the cache and write the current transaction directly to the database if a flush is needed.
 	if c.needsFlush(tx) {
-		if err := c.flush(); err != nil {
-			return err
+		if e := c.flush(); dbg.Chk(e) {
+			return e
 		}
 		// Perform all leveldb updates using an atomic transaction.
-		err := c.commitTreaps(tx.pendingKeys, tx.pendingRemove)
-		if err != nil {
-			Error(err)
-			return err
+		e := c.commitTreaps(tx.pendingKeys, tx.pendingRemove)
+		if e != nil  {
+						return e
 		}
 		// Clear the transaction entries since they have been committed.
 		tx.pendingKeys = nil
@@ -561,18 +558,18 @@ func (c *dbCache) commitTx(tx *transaction) error {
 // Close cleanly shuts down the database cache by syncing all data and closing the underlying leveldb database.
 //
 // This function MUST be called with the database write lock held.
-func (c *dbCache) Close() error {
+func (c *dbCache) Close() (e error) {
 	// Flush any outstanding cached entries to disk.
-	if err := c.flush(); err != nil {
+	if e := c.flush(); dbg.Chk(e) {
 		// Even if there is an error while flushing, attempt to close the underlying database. The error is ignored
 		// since it would mask the flush error.
 		_ = c.ldb.Close()
-		return err
+		return e
 	}
 	// Close the underlying leveldb database.
-	if err := c.ldb.Close(); err != nil {
+	if e := c.ldb.Close(); dbg.Chk(e) {
 		str := "failed to close underlying leveldb database"
-		return convertErr(str, err)
+		return convertErr(str, e)
 	}
 	return nil
 }

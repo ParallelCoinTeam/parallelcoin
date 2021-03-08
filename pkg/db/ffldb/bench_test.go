@@ -15,39 +15,39 @@ func BenchmarkBlockHeader(b *testing.B) {
 	// Start by creating a new database and populating it with the mainnet genesis block.
 	dbPath := filepath.Join(os.TempDir(), "ffldb-benchblkhdr")
 	_ = os.RemoveAll(dbPath)
-	db, err := database.Create("ffldb", dbPath, blockDataNet)
-	if err != nil {
-		b.Fatal(err)
+	db, e := database.Create("ffldb", dbPath, blockDataNet)
+	if e != nil  {
+		b.ftl.Ln(err)
 	}
 	defer func() {
-		if err := os.RemoveAll(dbPath); Check(err) {
+		if e := os.RemoveAll(dbPath); dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); Check(err) {
+		if e := db.Close(); dbg.Chk(e) {
 		}
 	}()
-	err = db.Update(func(tx database.Tx) error {
+	e = db.Update(func(tx database.Tx) (e error) {
 		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
 	})
-	if err != nil {
-		b.Fatal(err)
+	if e != nil  {
+		b.ftl.Ln(err)
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
-	err = db.View(func(tx database.Tx) error {
+	e = db.View(func(tx database.Tx) (e error) {
 		blockHash := chaincfg.MainNetParams.GenesisHash
 		for i := 0; i < b.N; i++ {
-			_, err := tx.FetchBlockHeader(blockHash)
-			if err != nil {
+			_, e := tx.FetchBlockHeader(blockHash)
+			if e != nil  {
 				return err
 			}
 		}
 		return nil
 	})
-	if err != nil {
-		b.Fatal(err)
+	if e != nil  {
+		b.ftl.Ln(err)
 	}
 	// Don't benchmark teardown.
 	b.StopTimer()
@@ -58,39 +58,39 @@ func BenchmarkBlock(b *testing.B) {
 	// Start by creating a new database and populating it with the mainnet genesis block.
 	dbPath := filepath.Join(os.TempDir(), "ffldb-benchblk")
 	_ = os.RemoveAll(dbPath)
-	db, err := database.Create("ffldb", dbPath, blockDataNet)
-	if err != nil {
-		b.Fatal(err)
+	db, e := database.Create("ffldb", dbPath, blockDataNet)
+	if e != nil  {
+		b.ftl.Ln(err)
 	}
 	defer func() {
-		if err := os.RemoveAll(dbPath); Check(err) {
+		if e := os.RemoveAll(dbPath); dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); Check(err) {
+		if e := db.Close(); dbg.Chk(e) {
 		}
 	}()
-	err = db.Update(func(tx database.Tx) error {
+	e = db.Update(func(tx database.Tx) (e error) {
 		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
 	})
-	if err != nil {
-		b.Fatal(err)
+	if e != nil  {
+		b.ftl.Ln(err)
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
-	err = db.View(func(tx database.Tx) error {
+	e = db.View(func(tx database.Tx) (e error) {
 		blockHash := chaincfg.MainNetParams.GenesisHash
 		for i := 0; i < b.N; i++ {
-			_, err := tx.FetchBlock(blockHash)
-			if err != nil {
+			_, e := tx.FetchBlock(blockHash)
+			if e != nil  {
 				return err
 			}
 		}
 		return nil
 	})
-	if err != nil {
-		b.Fatal(err)
+	if e != nil  {
+		b.ftl.Ln(err)
 	}
 	// Don't benchmark teardown.
 	b.StopTimer()

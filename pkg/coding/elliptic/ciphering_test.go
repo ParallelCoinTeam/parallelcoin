@@ -7,13 +7,13 @@ import (
 )
 
 func TestGenerateSharedSecret(t *testing.T) {
-	privKey1, err := NewPrivateKey(S256())
-	if err != nil {
+	privKey1, e := NewPrivateKey(S256())
+	if e != nil  {
 		t.Errorf("private key generation error: %s", err)
 		return
 	}
-	privKey2, err := NewPrivateKey(S256())
-	if err != nil {
+	privKey2, e := NewPrivateKey(S256())
+	if e != nil  {
 		t.Errorf("private key generation error: %s", err)
 		return
 	}
@@ -27,18 +27,18 @@ func TestGenerateSharedSecret(t *testing.T) {
 
 // Test 1: Encryption and decryption
 func TestCipheringBasic(t *testing.T) {
-	privkey, err := NewPrivateKey(S256())
-	if err != nil {
-		t.Fatal("failed to generate private key")
+	privkey, e := NewPrivateKey(S256())
+	if e != nil  {
+		t.ftl.Ln("failed to generate private key")
 	}
 	in := []byte("Hey there dude. How are you doing? This is a test.")
-	out, err := Encrypt(privkey.PubKey(), in)
-	if err != nil {
-		t.Fatal("failed to encrypt:", err)
+	out, e := Encrypt(privkey.PubKey(), in)
+	if e != nil  {
+		t.ftl.Ln("failed to encrypt:", err)
 	}
-	dec, err := Decrypt(privkey, out)
-	if err != nil {
-		t.Fatal("failed to decrypt:", err)
+	dec, e := Decrypt(privkey, out)
+	if e != nil  {
+		t.ftl.Ln("failed to decrypt:", err)
 	}
 	if !bytes.Equal(in, dec) {
 		t.Error("decrypted data doesn't match original")
@@ -56,18 +56,18 @@ func TestCiphering(t *testing.T) {
 		"df0f84608f8add82d7353af780fbb28868c713b7813eb4d4e61f7b75d7534dd9856" +
 		"9b0ba77cf14348fcff80fee10e11981f1b4be372d93923e9178972f69937ec850ed" +
 		"6c3f11ff572ddd5b2bedf9f9c0b327c54da02a28fcdce1f8369ffec")
-	dec, err := Decrypt(privkey, out)
-	if err != nil {
-		t.Fatal("failed to decrypt:", err)
+	dec, e := Decrypt(privkey, out)
+	if e != nil  {
+		t.ftl.Ln("failed to decrypt:", err)
 	}
 	if !bytes.Equal(in, dec) {
 		t.Error("decrypted data doesn't match original")
 	}
 }
 func TestCipheringErrors(t *testing.T) {
-	privkey, err := NewPrivateKey(S256())
-	if err != nil {
-		t.Fatal("failed to generate private key")
+	privkey, e := NewPrivateKey(S256())
+	if e != nil  {
+		t.ftl.Ln("failed to generate private key")
 	}
 	tests1 := []struct {
 		ciphertext []byte // input ciphertext
@@ -136,8 +136,8 @@ func TestCipheringErrors(t *testing.T) {
 		}}, // ErrInvalidMAC
 	}
 	for i, test := range tests1 {
-		_, err = Decrypt(privkey, test.ciphertext)
-		if err == nil {
+		_, e = Decrypt(privkey, test.ciphertext)
+		if e ==  nil {
 			t.Errorf("Decrypt #%d did not get error", i)
 		}
 	}
@@ -149,8 +149,8 @@ func TestCipheringErrors(t *testing.T) {
 		{bytes.Repeat([]byte{0x07}, 15)},
 	}
 	for i, test := range tests2 {
-		_, err = removePKCSPadding(test.in)
-		if err == nil {
+		_, e = removePKCSPadding(test.in)
+		if e ==  nil {
 			t.Errorf("removePKCSPadding #%d did not get error", i)
 		}
 	}

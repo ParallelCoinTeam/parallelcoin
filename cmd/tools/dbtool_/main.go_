@@ -27,34 +27,31 @@ func loadBlockDB(	) (database.DB, error) {
 	// The database name is based on the database type.
 	dbName := blockDbNamePrefix + "_" + cfg.DbType
 	dbPath := filepath.Join(cfg.DataDir, dbName)
-	l.Infof("Loading block database from '%s'", dbPath)
-	db, err := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
-	if err != nil {
-		L.Error(err)
-// Return the error if it's not because the database doesn't
+	l.inf.F("Loading block database from '%s'", dbPath)
+	db, e := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
+	if e != nil  {
+		L.// Return the error if it's not because the database doesn't
 		// exist.
 		if dbErr, ok := err.(database.Error); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
-			return nil, err
+			return nil, e
 		}
 		// Create the db if it does not exist.
-		err = os.MkdirAll(cfg.DataDir, 0700)
-		if err != nil {
-		L.Error(err)
-return nil, err
+		e = os.MkdirAll(cfg.DataDir, 0700)
+		if e != nil  {
+		L.return nil, e
 		}
-		db, err = database.Create(cfg.DbType, dbPath, activeNetParams.Net)
-		if err != nil {
-		L.Error(err)
-return nil, err
+		db, e = database.Create(cfg.DbType, dbPath, activeNetParams.Net)
+		if e != nil  {
+		L.return nil, e
 		}
 	}
-	l.Info("Block database loaded")
+	l.inf.Ln("Block database loaded")
 	return db, nil
 }
 
 // realMain is the real main function for the utility.  It is necessary to work around the fact that deferred functions do not run when os.Exit() is called.
-func realMain(	) error {
+func realMain(	) (e error) {
 	// Setup logging.
 	backendLogger := l.NewBackend(os.Stdout)
 	defer os.Stdout.Sync()
@@ -84,12 +81,11 @@ func realMain(	) error {
 		"Fetch the specified block region from the database", "",
 		&blockRegionCfg)
 	// Parse command line and invoke the Execute function for the specified command.
-	if _, err := parser.Parse(); err != nil {
+	if _, e = parser.Parse(); dbg.Chk(e) {
 		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		} else {
-			l.Error(err)
-		}
+			l.		}
 		return err
 	}
 	return nil
@@ -99,7 +95,7 @@ func main(	) {
 	// Use all processor cores.
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Work around defer not working after os.Exit()
-	if err := realMain(); err != nil {
+	if e := realMain(); dbg.Chk(e) {
 		os.Exit(1)
 	}
 }

@@ -87,8 +87,8 @@ func lookupFunc(host string) ([]net.IP, error) {
 func TestStartStop(t *testing.T) {
 	n := addrmgr.New("teststartstop", lookupFunc)
 	n.Start()
-	err := n.Stop()
-	if err != nil {
+	e := n.Stop()
+	if e != nil  {
 		t.Fatalf("Address Manager failed to stop: %v", err)
 	}
 }
@@ -117,12 +117,12 @@ func TestAddAddressByIP(t *testing.T) {
 	}
 	amgr := addrmgr.New("testaddressbyip", nil)
 	for i, test := range tests {
-		err := amgr.AddAddressByIP(test.addrIP)
-		if test.err != nil && err == nil {
+		e := amgr.AddAddressByIP(test.addrIP)
+		if test.err != nil && e ==  nil {
 			t.Errorf("TestGood test %d failed expected an error and got none", i)
 			continue
 		}
-		if test.err == nil && err != nil {
+		if test.e ==  nil && err != nil {
 			t.Errorf("TestGood test %d failed expected no error and got one", i)
 			continue
 		}
@@ -186,8 +186,8 @@ func TestAddLocalAddress(t *testing.T) {
 func TestAttempt(t *testing.T) {
 	n := addrmgr.New("testattempt", lookupFunc)
 	// Add a new address and get it
-	err := n.AddAddressByIP(someIP + ":11047")
-	if err != nil {
+	e := n.AddAddressByIP(someIP + ":11047")
+	if e != nil  {
 		t.Fatalf("Adding address failed: %v", err)
 	}
 	ka := n.GetAddress()
@@ -203,8 +203,8 @@ func TestAttempt(t *testing.T) {
 func TestConnected(t *testing.T) {
 	n := addrmgr.New("testconnected", lookupFunc)
 	// Add a new address and get it
-	err := n.AddAddressByIP(someIP + ":11047")
-	if err != nil {
+	e := n.AddAddressByIP(someIP + ":11047")
+	if e != nil  {
 		t.Fatalf("Adding address failed: %v", err)
 	}
 	ka := n.GetAddress()
@@ -224,11 +224,11 @@ func TestNeedMoreAddresses(t *testing.T) {
 		t.Errorf("Expected that we need more addresses")
 	}
 	addrs := make([]*wire.NetAddress, addrsToAdd)
-	var err error
+	var e error
 	for i := 0; i < addrsToAdd; i++ {
 		s := fmt.Sprintf("%d.%d.173.147:11047", i/128+60, i%128+60)
-		addrs[i], err = n.DeserializeNetAddress(s)
-		if err != nil {
+		addrs[i], e = n.DeserializeNetAddress(s)
+		if e != nil  {
 			t.Errorf("Failed to turn %s into an address: %v", s, err)
 		}
 	}
@@ -247,11 +247,11 @@ func TestGood(t *testing.T) {
 	n := addrmgr.New("testgood", lookupFunc)
 	addrsToAdd := 64 * 64
 	addrs := make([]*wire.NetAddress, addrsToAdd)
-	var err error
+	var e error
 	for i := 0; i < addrsToAdd; i++ {
 		s := fmt.Sprintf("%d.173.147.%d:11047", i/64+60, i%64+60)
-		addrs[i], err = n.DeserializeNetAddress(s)
-		if err != nil {
+		addrs[i], e = n.DeserializeNetAddress(s)
+		if e != nil  {
 			t.Errorf("Failed to turn %s into an address: %v", s, err)
 		}
 	}
@@ -276,8 +276,8 @@ func TestGetAddress(t *testing.T) {
 		t.Errorf("GetAddress failed: got: %v want: %v\n", rv, nil)
 	}
 	// Add a new address and get it
-	err := n.AddAddressByIP(someIP + ":11047")
-	if err != nil {
+	e := n.AddAddressByIP(someIP + ":11047")
+	if e != nil  {
 		t.Fatalf("Adding address failed: %v", err)
 	}
 	ka := n.GetAddress()
@@ -359,10 +359,10 @@ func TestGetBestLocalAddress(t *testing.T) {
 			continue
 		}
 	}
-	var err error
+	var e error
 	for _, localAddr := range localAddrs {
-		err = amgr.AddLocalAddress(&localAddr, addrmgr.InterfacePrio)
-		if err != nil {
+		e = amgr.AddLocalAddress(&localAddr, addrmgr.InterfacePrio)
+		if e != nil  {
 			t.Log(err)
 		}
 	}
@@ -377,8 +377,8 @@ func TestGetBestLocalAddress(t *testing.T) {
 	}
 	// Add a public IP to the list of local addresses.
 	localAddr := wire.NetAddress{IP: net.ParseIP("204.124.8.100")}
-	err = amgr.AddLocalAddress(&localAddr, addrmgr.InterfacePrio)
-	if err != nil {
+	e = amgr.AddLocalAddress(&localAddr, addrmgr.InterfacePrio)
+	if e != nil  {
 		t.Log(err)
 	}
 	// Test against want2

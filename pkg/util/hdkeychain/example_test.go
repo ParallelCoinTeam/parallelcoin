@@ -11,16 +11,14 @@ import (
 // (extended key).
 func ExampleNewMaster() {
 	// Generate a random seed at the recommended length.
-	seed, err := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	seed, e := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Generate a new master node using the seed.
-	key, err := hdkeychain.NewMaster(seed, &netparams.MainNetParams)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	key, e := hdkeychain.NewMaster(seed, &netparams.MainNetParams)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Show that the generated master node extended key is private.
 	fmt.Println("Private Extended Key?:", key.IsPrivate())
@@ -49,52 +47,44 @@ func Example_defaultWalletLayout() {
 	// coded here.
 	master := "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
 	// Start by getting an extended key instance for the master node. This gives the path: m
-	masterKey, err := hdkeychain.NewKeyFromString(master)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	masterKey, e := hdkeychain.NewKeyFromString(master)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Derive the extended key for account 0.  This gives the path: m/0H
-	acct0, err := masterKey.Child(hdkeychain.HardenedKeyStart + 0)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	acct0, e := masterKey.Child(hdkeychain.HardenedKeyStart + 0)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Derive the extended key for the account 0 external chain.  This gives the path:   m/0H/0
-	acct0Ext, err := acct0.Child(0)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	acct0Ext, e := acct0.Child(0)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Derive the extended key for the account 0 internal chain.  This gives the path: m/0H/1
-	acct0Int, err := acct0.Child(1)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	acct0Int, e := acct0.Child(1)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// At this point, acct0Ext and acct0Int are ready to derive the keys for the external and internal wallet chains.
 	// Derive the 10th extended key for the account 0 external chain. This gives the path: m/0H/0/10
-	acct0Ext10, err := acct0Ext.Child(10)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	acct0Ext10, e := acct0Ext.Child(10)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Derive the 1st extended key for the account 0 internal chain.  This gives the path:   m/0H/1/0
-	acct0Int0, err := acct0Int.Child(0)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	acct0Int0, e := acct0Int.Child(0)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Get and show the address associated with the extended keys for the main bitcoin	network.
-	acct0ExtAddr, err := acct0Ext10.Address(&netparams.MainNetParams)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	acct0ExtAddr, e := acct0Ext10.Address(&netparams.MainNetParams)
+	if e != nil  {
+		hdkeychain.		return
 	}
-	acct0IntAddr, err := acct0Int0.Address(&netparams.MainNetParams)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	acct0IntAddr, e := acct0Int0.Address(&netparams.MainNetParams)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	fmt.Println("Account 0 External Address 10:", acct0ExtAddr)
 	fmt.Println("Account 0 Internal Address 0:", acct0IntAddr)
@@ -120,16 +110,14 @@ func Example_audits() {
 	// Start by getting an extended key instance for the master node. This gives the path:
 	//
 	//   m
-	masterKey, err := hdkeychain.NewKeyFromString(master)
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	masterKey, e := hdkeychain.NewKeyFromString(master)
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Neuter the master key to generate a master public extended key.  This gives the path:   N(m/*)
-	masterPubKey, err := masterKey.Neuter()
-	if err != nil {
-		hdkeychain.Error(err)
-		return
+	masterPubKey, e := masterKey.Neuter()
+	if e != nil  {
+		hdkeychain.		return
 	}
 	// Share the master public extended key with the auditor.
 	fmt.Println("Audit key N(m/*):", masterPubKey)

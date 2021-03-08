@@ -21,7 +21,7 @@ var _ iterator.Iterator = (*ldbTreapIter)(nil)
 // Error is only provided to satisfy the iterator interface as there are no errors for this memory-only structure.
 //
 // This is part of the leveldb iterator.Iterator interface implementation.
-func (iter *ldbTreapIter) Error() error {
+func (iter *ldbTreapIter) Error() (e error) {
 	return nil
 }
 

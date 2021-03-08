@@ -19,7 +19,7 @@ type Fonts map[string]text.Typeface
 type Icons map[string]*Icon
 type Collection []text.FontFace
 
-func (c Collection) Font(font string) (out text.Font, err error) {
+func (c Collection) Font(font string) (out text.Font, e error) {
 	for i := range c {
 		if c[i].Font.Typeface == text.Typeface(font) {
 			out = c[i].Font

@@ -28,10 +28,9 @@ func (c *TestCoin) NumConfs() int64       { return c.TxNumConfs }
 func (c *TestCoin) ValueAge() int64       { return int64(c.TxValue) * c.TxNumConfs }
 func NewCoin(index int64, value util.Amount, numConfs int64) coinset.Coin {
 	h := sha256.New()
-	_, err := h.Write([]byte(fmt.Sprintf("%d", index)))
-	if err != nil {
-		coinset.Error(err)
-	}
+	_, e := h.Write([]byte(fmt.Sprintf("%d", index)))
+	if e != nil  {
+		coinset.	}
 	hash, _ := chainhash.NewHash(h.Sum(nil))
 	c := &TestCoin{
 		TxHash:     hash,
@@ -52,7 +51,7 @@ type coinSelectTest struct {
 
 func testCoinSelector(tests []coinSelectTest, t *testing.T) {
 	for testIndex, test := range tests {
-		cs, err := test.selector.CoinSelect(test.targetValue, test.inputCoins)
+		cs, e := test.selector.CoinSelect(test.targetValue, test.inputCoins)
 		if err != test.expectedError {
 			t.Errorf("[%d] expected a different error: got=%v, expected=%v", testIndex, err, test.expectedError)
 			continue

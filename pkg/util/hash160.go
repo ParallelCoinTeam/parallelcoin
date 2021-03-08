@@ -9,10 +9,9 @@ import (
 
 // Calculate the hash of hasher over buf.
 func calcHash(buf []byte, hasher hash.Hash) []byte {
-	_, err := hasher.Write(buf)
-	if err != nil {
-		Error(err)
-	}
+	_, e := hasher.Write(buf)
+	if e != nil  {
+			}
 	return hasher.Sum(nil)
 }
 

@@ -20,8 +20,8 @@ import (
 func (m *Manager) TstCheckPublicPassphrase(pubPassphrase []byte) bool {
 	secretKey := snacl.SecretKey{Key: &snacl.CryptoKey{}}
 	secretKey.Parameters = m.masterKeyPub.Parameters
-	err := secretKey.DeriveKey(&pubPassphrase)
-	return err == nil
+	e := secretKey.DeriveKey(&pubPassphrase)
+	return e ==  nil
 }
 
 // failingCryptoKey is an implementation of the EncryptorDecryptor interface

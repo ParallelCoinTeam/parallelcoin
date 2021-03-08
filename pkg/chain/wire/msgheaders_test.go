@@ -30,8 +30,8 @@ func TestHeaders(t *testing.T) {
 	}
 	// Ensure headers are added properly.
 	bh := &blockOne.Header
-	err := msg.AddBlockHeader(bh)
-	if err != nil {
+	e := msg.AddBlockHeader(bh)
+	if e != nil  {
 		t.Log(err)
 	}
 	if !reflect.DeepEqual(msg.Headers[0], bh) {
@@ -41,7 +41,7 @@ func TestHeaders(t *testing.T) {
 	}
 	// Ensure adding more than the max allowed headers per message returns error.
 	for i := 0; i < MaxBlockHeadersPerMsg+1; i++ {
-		err = msg.AddBlockHeader(bh)
+		e = msg.AddBlockHeader(bh)
 	}
 	if reflect.TypeOf(err) != reflect.TypeOf(&MessageError{}) {
 		t.Errorf("AddBlockHeader: expected error on too many headers " +
@@ -65,8 +65,8 @@ func TestHeadersWire(t *testing.T) {
 	}
 	// Headers message with one header.
 	oneHeader := NewMsgHeaders()
-	err := oneHeader.AddBlockHeader(bh)
-	if err != nil {
+	e := oneHeader.AddBlockHeader(bh)
+	if e != nil  {
 		t.Log(err)
 	}
 	oneHeaderEncoded := []byte{
@@ -177,8 +177,8 @@ func TestHeadersWire(t *testing.T) {
 	for i, test := range tests {
 		// Encode the message to wire format.
 		var buf bytes.Buffer
-		err := test.in.BtcEncode(&buf, test.pver, test.enc)
-		if err != nil {
+		e := test.in.BtcEncode(&buf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcEncode #%d error %v", i, err)
 			continue
 		}
@@ -190,8 +190,8 @@ func TestHeadersWire(t *testing.T) {
 		// Decode the message from wire format.
 		var msg MsgHeaders
 		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
-		if err != nil {
+		e = msg.BtcDecode(rbuf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
 		}
@@ -217,8 +217,8 @@ func TestHeadersWireErrors(t *testing.T) {
 	bh.Timestamp = blockOne.Header.Timestamp
 	// Headers message with one header.
 	oneHeader := NewMsgHeaders()
-	err := oneHeader.AddBlockHeader(bh)
-	if err != nil {
+	e := oneHeader.AddBlockHeader(bh)
+	if e != nil  {
 		t.Log(err)
 	}
 	oneHeaderEncoded := []byte{
@@ -240,8 +240,8 @@ func TestHeadersWireErrors(t *testing.T) {
 	// Message that forces an error by having more than the max allowed headers.
 	maxHeaders := NewMsgHeaders()
 	for i := 0; i < MaxBlockHeadersPerMsg; i++ {
-		err = maxHeaders.AddBlockHeader(bh)
-		if err != nil {
+		e = maxHeaders.AddBlockHeader(bh)
+		if e != nil  {
 			t.Log(err)
 		}
 	}
@@ -254,8 +254,8 @@ func TestHeadersWireErrors(t *testing.T) {
 	bhTrans.Version = blockOne.Header.Version
 	bhTrans.Timestamp = blockOne.Header.Timestamp
 	transHeader := NewMsgHeaders()
-	err = transHeader.AddBlockHeader(bhTrans)
-	if err != nil {
+	e = transHeader.AddBlockHeader(bhTrans)
+	if e != nil  {
 		t.Log(err)
 	}
 	transHeaderEncoded := []byte{
@@ -298,7 +298,7 @@ func TestHeadersWireErrors(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
-		err := test.in.BtcEncode(w, test.pver, test.enc)
+		e := test.in.BtcEncode(w, test.pver, test.enc)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, err, test.writeErr)
@@ -315,7 +315,7 @@ func TestHeadersWireErrors(t *testing.T) {
 		// Decode from wire format.
 		var msg MsgHeaders
 		r := newFixedReader(test.max, test.buf)
-		err = msg.BtcDecode(r, test.pver, test.enc)
+		e = msg.BtcDecode(r, test.pver, test.enc)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, err, test.readErr)

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -260,31 +260,30 @@ func (bi *blockIndex) UnsetStatusFlags(node *BlockNode, flags blockStatus) {
 }
 
 // flushToDB writes all dirty block nodes to the database. If all writes succeed, this clears the dirty set.
-func (bi *blockIndex) flushToDB() error {
+func (bi *blockIndex) flushToDB() (e error) {
 	bi.Lock()
 	if len(bi.dirty) == 0 {
 		bi.Unlock()
 		return nil
 	}
-	err :=
-		bi.db.Update(
-			func(dbTx database.Tx) error {
-				for node := range bi.dirty {
-					err := dbStoreBlockNode(dbTx, node)
-					if err != nil {
-						Error(err)
-						return err
-					}
+	e = bi.db.Update(
+		func(dbTx database.Tx) (e error) {
+			for node := range bi.dirty {
+				e := dbStoreBlockNode(dbTx, node)
+				if e != nil {
+					err.Ln(e)
+					return e
 				}
-				return nil
-			},
-		)
+			}
+			return nil
+		},
+	)
 	// If write was successful, clear the dirty set.
-	if err == nil {
+	if e == nil {
 		bi.dirty = make(map[*BlockNode]struct{})
 	}
 	bi.Unlock()
-	return err
+	return e
 }
 
 // GetAlgo returns the algorithm of a block node
@@ -298,10 +297,10 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		return
 	}
 	if fork.GetCurrent(node.height+1) == 0 {
-		// Trace("checking pre-hardfork algo versions")
+		// trc.Ln("checking pre-hardfork algo versions")
 		if algo != 514 &&
 			algo != 2 {
-			Debug("irregular version", algo, "block, assuming 2 (sha256d)")
+			dbg.Ln("irregular version", algo, "block, assuming 2 (sha256d)")
 			algo = 2
 		}
 	}
@@ -313,10 +312,10 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		// Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
 		prevversion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
-			// Trace("checking pre-hardfork algo versions")
+			// trc.Ln("checking pre-hardfork algo versions")
 			if prev.version != 514 &&
 				prev.version != 2 {
-				Debug("irregular version block", prev.version, ", assuming 2 (sha256d)")
+				dbg.Ln("irregular version block", prev.version, ", assuming 2 (sha256d)")
 				prevversion = 2
 			}
 		}
@@ -331,19 +330,19 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 }
 
 // if node == nil {
-// 	Trace("this node is nil")
+// 	trc.Ln("this node is nil")
 // 	return nil
 // }
 // prev = node.RelativeAncestor(1)
 // if prev == nil {
-// 	Trace("the previous node was nil")
+// 	trc.Ln("the previous node was nil")
 // 	return nil
 // }
 // prevFork := fork.GetCurrent(prev.height)
 // if prevFork == 0 {
 // 	if algo != 514 &&
 // 		algo != 2 {
-// 		Trace("bogus version halcyon", algo)
+// 		trc.Ln("bogus version halcyon", algo)
 // 		algo = 2
 // 	}
 // }
@@ -355,15 +354,15 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 // prev = prev.RelativeAncestor(1)
 // for {
 // 	if prev == nil {
-// 		Trace("passed through genesis")
+// 		trc.Ln("passed through genesis")
 // 		return nil
 // 	}
-// 	Trace(prev.height)
+// 	trc.Ln(prev.height)
 // 	prevVersion := prev.version
 // 	if fork.GetCurrent(prev.height) == 0 {
 // 		if prevVersion != 514 &&
 // 			prevVersion != 2 {
-// 			Trace("bogus version", prevVersion)
+// 			trc.Ln("bogus version", prevVersion)
 // 			prevVersion = 2
 // 		}
 // 	}
@@ -372,7 +371,7 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 // 			prev.bits)
 // 		return prev
 // 	} else {
-// 		Trace(prev.height)
+// 		trc.Ln(prev.height)
 // 		prev = prev.RelativeAncestor(1)
 // 	}
 // }

@@ -10,8 +10,8 @@ import (
 // This example demonstrates how to decode a bech32 encoded string.
 func ExampleDecode() {
 	encoded := "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx"
-	hrp, decoded, err := bech32.Decode(encoded)
-	if err != nil {
+	hrp, decoded, e := bech32.Decode(encoded)
+	if e != nil  {
 		bech32.Error("Error:", err)
 	}
 	// Show the decoded data.
@@ -26,12 +26,12 @@ func ExampleDecode() {
 func ExampleEncode() {
 	data := []byte("Test data")
 	// Convert test data to base32:
-	conv, err := bech32.ConvertBits(data, 8, 5, true)
-	if err != nil {
+	conv, e := bech32.ConvertBits(data, 8, 5, true)
+	if e != nil  {
 		bech32.Error("Error:", err)
 	}
-	encoded, err := bech32.Encode("customHrp!11111q", conv)
-	if err != nil {
+	encoded, e := bech32.Encode("customHrp!11111q", conv)
+	if e != nil  {
 		bech32.Error("Error:", err)
 	}
 	// Show the encoded data.

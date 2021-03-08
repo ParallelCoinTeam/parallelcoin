@@ -26,7 +26,7 @@ func (e *ExplicitString) MarshalFlag() (string, error) {
 }
 
 // UnmarshalFlag implements the flags.Unmarshaler interface.
-func (e *ExplicitString) UnmarshalFlag(value string) error {
+func (e *ExplicitString) UnmarshalFlag(value string) (e error) {
 	e.Value = value
 	e.explicitlySet = true
 	return nil

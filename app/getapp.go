@@ -32,8 +32,8 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
 		Action:      walletGUIHandle(cx),
 		Before:      beforeFunc(cx),
-		After: func(c *cli.Context) error {
-			Debug("subcommand completed", os.Args)
+		After: func(c *cli.Context) (e error) {
+			dbg.Ln("subcommand completed", os.Args)
 			if interrupt.Restart {
 			}
 			return nil
@@ -41,7 +41,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 		Commands: []cli.Command{
 			au.Command(
 				"version", "print version and exit",
-				func(c *cli.Context) error {
+				func(c *cli.Context) (e error) {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
 				}, au.SubCommands(), nil, "v",
@@ -72,7 +72,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"dropaddrindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (e error) {
 							cx.StateCfg.DropAddrIndex = true
 							return nodeHandle(cx)(c)
 						},
@@ -82,7 +82,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"droptxindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (e error) {
 							cx.StateCfg.DropTxIndex = true
 							return nodeHandle(cx)(c)
 						},
@@ -92,7 +92,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"dropindexes",
 						"drop all of the indexes",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (e error) {
 							cx.StateCfg.DropAddrIndex = true
 							cx.StateCfg.DropTxIndex = true
 							cx.StateCfg.DropCfIndex = true
@@ -104,7 +104,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"dropcfindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (e error) {
 							cx.StateCfg.DropCfIndex = true
 							return nodeHandle(cx)(c)
 						},
@@ -114,7 +114,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"resetchain",
 						"reset the chain",
-						func(c *cli.Context) (err error) {
+						func(c *cli.Context) (e error) {
 							config.Configure(cx, c.Command.Name, true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
@@ -126,7 +126,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 									cx.ActiveNet.Name,
 								), dbName,
 							)
-							if err = os.RemoveAll(dbPath); Check(err) {
+							if e = os.RemoveAll(dbPath); dbg.Chk(e) {
 							}
 							return nodeHandle(cx)(c)
 						},
@@ -141,7 +141,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"dropaddrindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (e error) {
 							cx.StateCfg.DropAddrIndex = true
 							return nodeHandle(cx)(c)
 							// return nil
@@ -152,7 +152,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"droptxindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (e error) {
 							cx.StateCfg.DropTxIndex = true
 							return nodeHandle(cx)(c)
 							// return nil
@@ -163,7 +163,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"dropindexes",
 						"drop all of the indexes",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (e error) {
 							cx.StateCfg.DropAddrIndex = true
 							cx.StateCfg.DropTxIndex = true
 							cx.StateCfg.DropCfIndex = true
@@ -176,7 +176,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"dropcfindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (e error) {
 							cx.StateCfg.DropCfIndex = true
 							return nodeHandle(cx)(c)
 							// return nil
@@ -187,7 +187,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"resetchain",
 						"reset the chain",
-						func(c *cli.Context) (err error) {
+						func(c *cli.Context) (e error) {
 							config.Configure(cx, c.Command.Name, true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
@@ -199,7 +199,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 									cx.ActiveNet.Name,
 								), dbName,
 							)
-							if err = os.RemoveAll(dbPath); Check(err) {
+							if e = os.RemoveAll(dbPath); dbg.Chk(e) {
 							}
 							return nodeHandle(cx)(c)
 							// return nil
@@ -215,21 +215,21 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					au.Command(
 						"drophistory", "drop the transaction history in the wallet (for "+
 							"development and testing as well as clearing up transaction mess)",
-						func(c *cli.Context) (err error) {
+						func(c *cli.Context) (e error) {
 							config.Configure(cx, c.Command.Name, true)
-							Info("dropping wallet history")
+							inf.Ln("dropping wallet history")
 							go func() {
-								Debug("starting wallet")
-								if err = walletmain.Main(cx); Check(err) {
+								dbg.Ln("starting wallet")
+								if e = walletmain.Main(cx); dbg.Chk(e) {
 									// os.Exit(1)
 								} else {
-									Debug("wallet started")
+									dbg.Ln("wallet started")
 								}
 							}()
-							// Debug("waiting for walletChan")
+							// dbg.Ln("waiting for walletChan")
 							// cx.WalletServer = <-cx.WalletChan
-							// Debug("walletChan sent")
-							err = legacy.DropWalletHistory(cx.WalletServer, cx.Config)(c)
+							// dbg.Ln("walletChan sent")
+							e = legacy.DropWalletHistory(cx.WalletServer, cx.Config)(c)
 							return
 						}, au.SubCommands(), nil,
 					),
@@ -834,9 +834,9 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 }
 
 func genPassword() string {
-	s, err := hdkeychain.GenerateSeed(16)
-	if err != nil {
-		panic("can't do nothing without entropy! " + err.Error())
+	s, e := hdkeychain.GenerateSeed(16)
+	if e != nil  {
+		panic("can't do nothing without entropy! " + e.Error())
 	}
 	return base58.Encode(s)
 }

@@ -33,8 +33,8 @@ func TestGetData(t *testing.T) {
 	// Ensure inventory vectors are added properly.
 	hash := chainhash.Hash{}
 	iv := NewInvVect(InvTypeBlock, &hash)
-	err := msg.AddInvVect(iv)
-	if err != nil {
+	e := msg.AddInvVect(iv)
+	if e != nil  {
 		t.Errorf("AddInvVect: %v", err)
 	}
 	if msg.InvList[0] != iv {
@@ -43,9 +43,9 @@ func TestGetData(t *testing.T) {
 	}
 	// Ensure adding more than the max allowed inventory vectors per message returns an error.
 	for i := 0; i < MaxInvPerMsg; i++ {
-		err = msg.AddInvVect(iv)
+		e = msg.AddInvVect(iv)
 	}
-	if err == nil {
+	if e ==  nil {
 		t.Errorf("AddInvVect: expected error on too many inventory " +
 			"vectors not received")
 	}
@@ -63,14 +63,14 @@ func TestGetData(t *testing.T) {
 func TestGetDataWire(t *testing.T) {
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
-	blockHash, err := chainhash.NewHashFromStr(hashStr)
-	if err != nil {
+	blockHash, e := chainhash.NewHashFromStr(hashStr)
+	if e != nil  {
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	// Transaction 1 of Block 203707 hash.
 	hashStr = "d28a3dc7392bf00a9855ee93dd9a81eff82a2c4fe57fbd42cfe71b487accfaf0"
-	txHash, err := chainhash.NewHashFromStr(hashStr)
-	if err != nil {
+	txHash, e := chainhash.NewHashFromStr(hashStr)
+	if e != nil  {
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	iv := NewInvVect(InvTypeBlock, blockHash)
@@ -82,12 +82,12 @@ func TestGetDataWire(t *testing.T) {
 	}
 	// MsgGetData message with multiple inventory vectors.
 	MultiInv := NewMsgGetData()
-	err = MultiInv.AddInvVect(iv)
-	if err != nil {
+	e = MultiInv.AddInvVect(iv)
+	if e != nil  {
 		t.Log(err)
 	}
-	err = MultiInv.AddInvVect(iv2)
-	if err != nil {
+	e = MultiInv.AddInvVect(iv2)
+	if e != nil  {
 		t.Log(err)
 	}
 	MultiInvEncoded := []byte{
@@ -195,8 +195,8 @@ func TestGetDataWire(t *testing.T) {
 	for i, test := range tests {
 		// Encode the message to wire format.
 		var buf bytes.Buffer
-		err := test.in.BtcEncode(&buf, test.pver, test.enc)
-		if err != nil {
+		e := test.in.BtcEncode(&buf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcEncode #%d error %v", i, err)
 			continue
 		}
@@ -208,8 +208,8 @@ func TestGetDataWire(t *testing.T) {
 		// Decode the message from wire format.
 		var msg MsgGetData
 		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
-		if err != nil {
+		e = msg.BtcDecode(rbuf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
 		}
@@ -228,15 +228,15 @@ func TestGetDataWireErrors(t *testing.T) {
 	wireErr := &MessageError{}
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
-	blockHash, err := chainhash.NewHashFromStr(hashStr)
-	if err != nil {
+	blockHash, e := chainhash.NewHashFromStr(hashStr)
+	if e != nil  {
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	iv := NewInvVect(InvTypeBlock, blockHash)
 	// Base message used to induce errors.
 	baseGetData := NewMsgGetData()
-	err = baseGetData.AddInvVect(iv)
-	if err != nil {
+	e = baseGetData.AddInvVect(iv)
+	if e != nil  {
 		t.Log(err)
 	}
 	baseGetDataEncoded := []byte{
@@ -251,8 +251,8 @@ func TestGetDataWireErrors(t *testing.T) {
 	// vectors.
 	maxGetData := NewMsgGetData()
 	for i := 0; i < MaxInvPerMsg; i++ {
-		err = maxGetData.AddInvVect(iv)
-		if err != nil {
+		e = maxGetData.AddInvVect(iv)
+		if e != nil  {
 			t.Log(err)
 		}
 	}
@@ -280,7 +280,7 @@ func TestGetDataWireErrors(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
-		err := test.in.BtcEncode(w, test.pver, test.enc)
+		e := test.in.BtcEncode(w, test.pver, test.enc)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, err, test.writeErr)
@@ -297,7 +297,7 @@ func TestGetDataWireErrors(t *testing.T) {
 		// Decode from wire format.
 		var msg MsgGetData
 		r := newFixedReader(test.max, test.buf)
-		err = msg.BtcDecode(r, test.pver, test.enc)
+		e = msg.BtcDecode(r, test.pver, test.enc)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, err, test.readErr)

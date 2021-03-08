@@ -56,7 +56,7 @@ func IsDustOutput(output *wire.TxOut, relayFeePerKb util.Amount) bool {
 }
 
 // CheckOutput performs simple consensus and policy tests on a transaction output.
-func CheckOutput(output *wire.TxOut, relayFeePerKb util.Amount) error {
+func CheckOutput(output *wire.TxOut, relayFeePerKb util.Amount) (e error) {
 	if output.Value < 0 {
 		return ErrAmountNegative
 	}

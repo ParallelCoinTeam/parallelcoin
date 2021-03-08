@@ -22,33 +22,33 @@ var (
 
 func main() {
 	log.L.SetLevel("trace", true, "pod")
-	Debug("starting test")
+	dbg.Ln("starting test")
 	quit := qu.T()
 	var c *transport.Channel
-	var err error
-	if c, err = transport.NewBroadcastChannel("test", nil, "cipher",
+	var e error
+	if c, e = transport.NewBroadcastChannel("test", nil, "cipher",
 		1234, 8192, transport.Handlers{
 			TestMagic: func(ctx interface{}, src net.Addr, dst string,
-				b []byte) (err error) {
-				Infof("%s <- %s [%d] '%s'", src.String(), dst, len(b), string(b))
+				b []byte) (e error) {
+				inf.F("%s <- %s [%d] '%s'", src.String(), dst, len(b), string(b))
 				return
 			},
 		},
 		quit,
-	); Check(err) {
+	); dbg.Chk(e) {
 		panic(err)
 	}
 	time.Sleep(time.Second)
 	var n int
 	loop.To(10, func(i int) {
 		text := []byte(fmt.Sprintf("this is a test %d", i))
-		Infof("%s -> %s [%d] '%s'", c.Sender.LocalAddr(), c.Sender.RemoteAddr(), n-4, text)
-		if err = c.SendMany(TestMagicB, transport.GetShards(text)); Check(err) {
+		inf.F("%s -> %s [%d] '%s'", c.Sender.LocalAddr(), c.Sender.RemoteAddr(), n-4, text)
+		if e = c.SendMany(TestMagicB, transport.GetShards(text)); dbg.Chk(e) {
 		} else {
 		}
 	})
 	time.Sleep(time.Second * 5)
-	if err = c.Close(); !Check(err) {
+	if e = c.Close(); !dbg.Chk(e) {
 		time.Sleep(time.Second * 1)
 	}
 	quit.Q()

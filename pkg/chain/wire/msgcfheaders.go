@@ -3,7 +3,7 @@ package wire
 import (
 	"fmt"
 	"io"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
@@ -25,10 +25,12 @@ type MsgCFHeaders struct {
 }
 
 // AddCFHash adds a new filter hash to the message.
-func (msg *MsgCFHeaders) AddCFHash(hash *chainhash.Hash) error {
+func (msg *MsgCFHeaders) AddCFHash(hash *chainhash.Hash) (e error) {
 	if len(msg.FilterHashes)+1 > MaxCFHeadersPerMsg {
-		str := fmt.Sprintf("too many block headers in message [max %v]",
-			MaxBlockHeadersPerMsg)
+		str := fmt.Sprintf(
+			"too many block headers in message [max %v]",
+			MaxBlockHeadersPerMsg,
+		)
 		return messageError("MsgCFHeaders.AddCFHash", str)
 	}
 	msg.FilterHashes = append(msg.FilterHashes, hash)
@@ -37,97 +39,80 @@ func (msg *MsgCFHeaders) AddCFHash(hash *chainhash.Hash) error {
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
 // implementation.
-func (msg *MsgCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) error {
+func (msg *MsgCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) (e error) {
 	// Read filter type
-	err := readElement(r, &msg.FilterType)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElement(r, &msg.FilterType); dbg.Chk(e) {
+		return
 	}
 	// Read stop hash
-	err = readElement(r, &msg.StopHash)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElement(r, &msg.StopHash); dbg.Chk(e) {
+		return
 	}
 	// Read prev filter header
-	err = readElement(r, &msg.PrevFilterHeader)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElement(r, &msg.PrevFilterHeader); dbg.Chk(e) {
+		return
 	}
 	// Read number of filter headers
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+	var count uint64
+	if count, e = ReadVarInt(r, pver); dbg.Chk(e) {
+		return
 	}
 	// Limit to max committed filter headers per message.
 	if count > MaxCFHeadersPerMsg {
-		str := fmt.Sprintf("too many committed filter headers for "+
-			"message [count %v, max %v]", count,
-			MaxBlockHeadersPerMsg)
+		str := fmt.Sprintf(
+			"too many committed filter headers for "+
+				"message [count %v, max %v]", count,
+			MaxBlockHeadersPerMsg,
+		)
 		return messageError("MsgCFHeaders.BtcDecode", str)
 	}
 	// Create a contiguous slice of hashes to deserialize into in order to reduce the number of allocations.
 	msg.FilterHashes = make([]*chainhash.Hash, 0, count)
 	for i := uint64(0); i < count; i++ {
 		var cfh chainhash.Hash
-		err := readElement(r, &cfh)
-		if err != nil {
-			Error(err)
-			return err
+		if e = readElement(r, &cfh); dbg.Chk(e) {
+			return
 		}
-		err = msg.AddCFHash(&cfh)
-		if err != nil {
-			Error(err)
+		if e = msg.AddCFHash(&cfh); dbg.Chk(e) {
 		}
 	}
-	return nil
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgCFHeaders) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) error {
+func (msg *MsgCFHeaders) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) (e error) {
 	// Write filter type
-	err := writeElement(w, msg.FilterType)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElement(w, msg.FilterType); dbg.Chk(e) {
+		return
 	}
 	// Write stop hash
-	err = writeElement(w, msg.StopHash)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElement(w, msg.StopHash); dbg.Chk(e) {
+		return
 	}
 	// Write prev filter header
-	err = writeElement(w, msg.PrevFilterHeader)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElement(w, msg.PrevFilterHeader); dbg.Chk(e) {
+		return
 	}
 	// Limit to max committed headers per message.
 	count := len(msg.FilterHashes)
 	if count > MaxCFHeadersPerMsg {
-		str := fmt.Sprintf("too many committed filter headers for "+
-			"message [count %v, max %v]", count,
-			MaxBlockHeadersPerMsg)
+		str := fmt.Sprintf(
+			"too many committed filter headers for "+
+				"message [count %v, max %v]", count,
+			MaxBlockHeadersPerMsg,
+		)
 		return messageError("MsgCFHeaders.BtcEncode", str)
 	}
-	err = WriteVarInt(w, pver, uint64(count))
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarInt(w, pver, uint64(count)); dbg.Chk(e) {
+		return
 	}
 	for _, cfh := range msg.FilterHashes {
-		err := writeElement(w, cfh)
-		if err != nil {
-			Error(err)
-			return err
+		if e = writeElement(w, cfh); dbg.Chk(e) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // Deserialize decodes a filter header from r into the receiver using a format that is suitable for long-term storage
@@ -136,7 +121,7 @@ func (msg *MsgCFHeaders) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) 
 // doesn't even really need to match the format of a stored filter header at all. As of the time this comment was
 // written, the encoded filter header is the same in both instances, but there is a distinct difference and separating
 // the two allows the API to be flexible enough to deal with changes.
-func (msg *MsgCFHeaders) Deserialize(r io.Reader) error {
+func (msg *MsgCFHeaders) Deserialize(r io.Reader) (e error) {
 	// At the current time, there is no difference between the wire encoding and the stable long-term storage format. As
 	// a result, make use of BtcDecode.
 	return msg.BtcDecode(r, 0, BaseEncoding)

@@ -46,20 +46,20 @@ func TestBadPC(t *testing.T) {
 	}
 	pkScript := mustParseShortForm("NOP")
 	for _, test := range tests {
-		vm, err := NewEngine(pkScript, tx, 0, 0, nil, nil, -1)
-		if err != nil {
+		vm, e := NewEngine(pkScript, tx, 0, 0, nil, nil, -1)
+		if e != nil  {
 			t.Errorf("Failed to create script: %v", err)
 		}
 		// set to after all scripts
 		vm.scriptIdx.Store(int64(test.script))
 		vm.scriptOff.Store(int64(test.off))
-		_, err = vm.Step()
-		if err == nil {
+		_, e = vm.Step()
+		if e ==  nil {
 			t.Errorf("Step with invalid pc (%v) succeeds!", test)
 			continue
 		}
-		_, err = vm.DisasmPC()
-		if err == nil {
+		_, e = vm.DisasmPC()
+		if e ==  nil {
 			t.Errorf("DisasmPC with invalid pc (%v) succeeds!",
 				test)
 		}
@@ -98,33 +98,33 @@ func TestCheckErrorCondition(t *testing.T) {
 	}
 	pkScript := mustParseShortForm("NOP NOP NOP NOP NOP NOP NOP NOP NOP" +
 		" NOP TRUE")
-	vm, err := NewEngine(pkScript, tx, 0, 0, nil, nil, 0)
-	if err != nil {
+	vm, e := NewEngine(pkScript, tx, 0, 0, nil, nil, 0)
+	if e != nil  {
 		t.Errorf("failed to create script: %v", err)
 	}
 	for i := 0; i < len(pkScript)-1; i++ {
-		done, err := vm.Step()
-		if err != nil {
+		done, e := vm.Step()
+		if e != nil  {
 			t.Fatalf("failed to step %dth time: %v", i, err)
 		}
 		if done {
 			t.Fatalf("finshed early on %dth time", i)
 		}
-		err = vm.CheckErrorCondition(false)
+		e = vm.CheckErrorCondition(false)
 		if !IsErrorCode(err, ErrScriptUnfinished) {
 			t.Fatalf("got unexepected error %v on %dth iteration",
 				err, i)
 		}
 	}
-	done, err := vm.Step()
-	if err != nil {
+	done, e := vm.Step()
+	if e != nil  {
 		t.Fatalf("final step failed %v", err)
 	}
 	if !done {
 		t.Fatalf("final step isn't done!")
 	}
-	err = vm.CheckErrorCondition(false)
-	if err != nil {
+	e = vm.CheckErrorCondition(false)
+	if e != nil  {
 		t.Errorf("unexpected error %v on final check", err)
 	}
 }
@@ -168,7 +168,7 @@ func TestInvalidFlagCombinations(t *testing.T) {
 	}
 	pkScript := []byte{OP_NOP}
 	for i, test := range tests {
-		_, err := NewEngine(pkScript, tx, 0, test, nil, nil, -1)
+		_, e := NewEngine(pkScript, tx, 0, test, nil, nil, -1)
 		if !IsErrorCode(err, errInvalidFlags) {
 			t.Fatalf("TestInvalidFlagCombinations #%d unexpected "+
 				"error: %v", i, err)
@@ -220,12 +220,12 @@ func TestCheckPubKeyEncoding(t *testing.T) {
 	}
 	vm := Engine{flags: ScriptVerifyStrictEncoding}
 	for _, test := range tests {
-		err := vm.checkPubKeyEncoding(test.key)
-		if err != nil && test.isValid {
+		e := vm.checkPubKeyEncoding(test.key)
+		if e != nil  && test.isValid {
 			t.Errorf("checkSignatureEncoding test '%s' failed "+
 				"when it should have succeeded: %v", test.name,
 				err)
-		} else if err == nil && !test.isValid {
+		} else if e ==  nil && !test.isValid {
 			t.Errorf("checkSignatureEncooding test '%s' succeeded "+
 				"when it should have failed", test.name)
 		}
@@ -388,12 +388,12 @@ func TestCheckSignatureEncoding(t *testing.T) {
 	}
 	vm := Engine{flags: ScriptVerifyStrictEncoding}
 	for _, test := range tests {
-		err := vm.checkSignatureEncoding(test.sig)
-		if err != nil && test.isValid {
+		e := vm.checkSignatureEncoding(test.sig)
+		if e != nil  && test.isValid {
 			t.Errorf("checkSignatureEncoding test '%s' failed "+
 				"when it should have succeeded: %v", test.name,
 				err)
-		} else if err == nil && !test.isValid {
+		} else if e ==  nil && !test.isValid {
 			t.Errorf("checkSignatureEncooding test '%s' succeeded "+
 				"when it should have failed", test.name)
 		}

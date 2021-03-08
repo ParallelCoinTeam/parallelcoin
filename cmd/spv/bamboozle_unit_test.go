@@ -16,8 +16,8 @@ import (
 )
 
 func decodeHashNoError(str string) *chainhash.Hash {
-	hash, err := chainhash.NewHashFromStr(str)
-	if err != nil {
+	hash, e := chainhash.NewHashFromStr(str)
+	if e != nil  {
 		panic("Got error decoding hash: " + err.Error())
 	}
 	return hash
@@ -403,32 +403,32 @@ func heightToHeader(height uint32) *wire.BlockHeader {
 	return header
 }
 func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) {
-	tempDir, err := ioutil.TempDir("", "neutrino")
-	if err != nil {
+	tempDir, e := ioutil.TempDir("", "neutrino")
+	if e != nil  {
 		t.Fatalf("Failed to create temporary directory: %s", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tempDir); Check(err) {
+		if e := os.RemoveAll(tempDir); dbg.Chk(e) {
 		}
 	}()
-	db, err := walletdb.Create("bdb", tempDir+"/weks.db")
-	if err != nil {
+	db, e := walletdb.Create("bdb", tempDir+"/weks.db")
+	if e != nil  {
 		t.Fatalf("DBError opening DB: %s", err)
 	}
 	defer func() {
-		if err := db.Close(); Check(err) {
+		if e := db.Close(); dbg.Chk(e) {
 		}
 	}()
-	hdrStore, err := headerfs.NewBlockHeaderStore(
+	hdrStore, e := headerfs.NewBlockHeaderStore(
 		tempDir, db, &netparams.SimNetParams,
 	)
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("DBError creating block header store: %s", err)
 	}
-	cfStore, err := headerfs.NewFilterHeaderStore(
+	cfStore, e := headerfs.NewFilterHeaderStore(
 		tempDir, db, headerfs.RegularFilter, &netparams.SimNetParams,
 	)
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("DBError creating filter header store: %s", err)
 	}
 	var (
@@ -462,10 +462,10 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 			HeaderHash: header.BlockHash(),
 			Height:     height,
 		})
-		if err = hdrStore.WriteHeaders(hdrBatch...); err != nil {
+		if e = hdrStore.WriteHeaders(hdrBatch...); dbg.Chk(e) {
 			t.Fatalf("DBError writing batch of headers: %s", err)
 		}
-		if err = cfStore.WriteHeaders(cfBatch...); err != nil {
+		if e = cfStore.WriteHeaders(cfBatch...); dbg.Chk(e) {
 			t.Fatalf("DBError writing batch of cfheaders: %s", err)
 		}
 	}
@@ -473,22 +473,22 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		height = uint32(len(testCase.storepoints)*
 			wire.CFCheckptInterval + i)
 		header = heightToHeader(height)
-		if err = hdrStore.WriteHeaders(headerfs.BlockHeader{
+		if e = hdrStore.WriteHeaders(headerfs.BlockHeader{
 			BlockHeader: header,
 			Height:      height,
-		}); err != nil {
+		}); dbg.Chk(e) {
 			t.Fatalf("DBError writing single block header: %s", err)
 		}
-		if err = cfStore.WriteHeaders(headerfs.FilterHeader{
+		if e = cfStore.WriteHeaders(headerfs.FilterHeader{
 			FilterHash: zeroHash,
 			HeaderHash: zeroHash,
 			Height:     height,
-		}); err != nil {
+		}); dbg.Chk(e) {
 			t.Fatalf("DBError writing single cfheader: %s", err)
 		}
 	}
-	heightDiff, err := checkCFCheckptSanity(testCase.checkpoints, cfStore)
-	if err != nil {
+	heightDiff, e := checkCFCheckptSanity(testCase.checkpoints, cfStore)
+	if e != nil  {
 		t.Fatalf("DBError from checkCFCheckptSanity: %s", err)
 	}
 	if heightDiff != testCase.heightDiff {
@@ -523,10 +523,10 @@ func TestResolveCFHeadersMismatch(t *testing.T) {
 	t.Parallel()
 	for _, testCase := range resolveCFHTestCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			badPeers, err := resolveCFHeaderMismatch(
+			badPeers, e := resolveCFHeaderMismatch(
 				block, wire.GCSFilterRegular, testCase.peerFilters,
 			)
-			if err != nil {
+			if e != nil  {
 				t.Fatalf("Couldn't resolve cfheader "+
 					"mismatch: %v", err)
 			}

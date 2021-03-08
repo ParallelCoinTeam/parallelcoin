@@ -54,9 +54,9 @@ func parseHex(tok string) ([]byte, error) {
 func parseWitnessStack(elements []interface{}) ([][]byte, error) {
 	witness := make([][]byte, len(elements))
 	for i, e := range elements {
-		witElement, err := hex.DecodeString(e.(string))
-		if err != nil {
-			return nil, err
+		witElement, e := hex.DecodeString(e.(string))
+		if e != nil  {
+			return nil, e
 		}
 		witness[i] = witElement
 	}
@@ -106,13 +106,13 @@ func parseShortForm(script string) ([]byte, error) {
 			continue
 		}
 		// if parses as a plain number
-		if num, err := strconv.ParseInt(tok, 10, 64); err == nil {
+		if num, e := strconv.ParseInt(tok, 10, 64); e ==  nil {
 			builder.AddInt64(num)
 			continue
-		} else if bts, err := parseHex(tok); err == nil {
+		} else if bts, e := parseHex(tok); e ==  nil {
 			// Concatenate the bytes manually since the test code intentionally creates scripts that are too large and
 			// would cause the builder to error otherwise.
-			if builder.err == nil {
+			if builder.e ==  nil {
 				builder.script = append(builder.script, bts...)
 			}
 		} else if len(tok) >= 2 &&
@@ -311,8 +311,8 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 			continue
 		}
 		// Construct a name for the test based on the comment and test data.
-		name, err := scriptTestName(test)
-		if err != nil {
+		name, e := scriptTestName(test)
+		if e != nil  {
 			t.Errorf("TestScripts: invalid test #%d: %v", i, err)
 			continue
 		}
@@ -329,13 +329,13 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 			// input amount, so we ignore all but the last element in order to parse the
 			// witness stack.
 			strWitnesses := witnessData[:len(witnessData)-1]
-			witness, err = parseWitnessStack(strWitnesses)
-			if err != nil {
+			witness, e = parseWitnessStack(strWitnesses)
+			if e != nil  {
 				t.Errorf("%s: can't parse witness; %v", name, err)
 				continue
 			}
-			inputAmt, err = util.NewAmount(witnessData[len(witnessData)-1].(float64))
-			if err != nil {
+			inputAmt, e = util.NewAmount(witnessData[len(witnessData)-1].(float64))
+			if e != nil  {
 				t.Errorf("%s: can't parse input amt: %v",
 					name, err)
 				continue
@@ -347,8 +347,8 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 			t.Errorf("%s: signature script is not a string", name)
 			continue
 		}
-		scriptSig, err := parseShortForm(scriptSigStr)
-		if err != nil {
+		scriptSig, e := parseShortForm(scriptSigStr)
+		if e != nil  {
 			t.Errorf("%s: can't parse signature script: %v", name,
 				err)
 			continue
@@ -359,8 +359,8 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 			t.Errorf("%s: public key script is not a string", name)
 			continue
 		}
-		scriptPubKey, err := parseShortForm(scriptPubKeyStr)
-		if err != nil {
+		scriptPubKey, e := parseShortForm(scriptPubKeyStr)
+		if e != nil  {
 			t.Errorf("%s: can't parse public key script: %v", name,
 				err)
 			continue
@@ -371,8 +371,8 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 			t.Errorf("%s: flags field is not a string", name)
 			continue
 		}
-		flags, err := parseScriptFlags(flagsStr)
-		if err != nil {
+		flags, e := parseScriptFlags(flagsStr)
+		if e != nil  {
 			t.Errorf("%s: %v", name, err)
 			continue
 		}
@@ -384,8 +384,8 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 			t.Errorf("%s: result field is not a string", name)
 			continue
 		}
-		allowedErrorCodes, err := parseExpectedResult(resultStr)
-		if err != nil {
+		allowedErrorCodes, e := parseExpectedResult(resultStr)
+		if e != nil  {
 			t.Errorf("%s: %v", name, err)
 			continue
 		}
@@ -393,14 +393,14 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 		// scripts are used, then create a new engine to execute the scripts.
 		tx := createSpendingTx(witness, scriptSig, scriptPubKey,
 			int64(inputAmt))
-		vm, err := NewEngine(scriptPubKey, tx, 0, flags, sigCache, nil,
+		vm, e := NewEngine(scriptPubKey, tx, 0, flags, sigCache, nil,
 			int64(inputAmt))
-		if err == nil {
-			err = vm.Execute()
+		if e ==  nil {
+			e = vm.Execute()
 		}
 		// Ensure there were no errors when the expected result is OK.
 		if resultStr == "OK" {
-			if err != nil {
+			if e != nil  {
 				t.Errorf("%s failed to execute: %v", name, err)
 			}
 			continue
@@ -429,13 +429,13 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 // TestScripts ensures all of the tests in script_tests.json execute with the expected results as defined in the test
 // data.
 func TestScripts(t *testing.T) {
-	file, err := ioutil.ReadFile("data/script_tests.json")
-	if err != nil {
+	file, e := ioutil.ReadFile("data/script_tests.json")
+	if e != nil  {
 		t.Fatalf("TestScripts: %v\n", err)
 	}
 	var tests [][]interface{}
-	err = json.Unmarshal(file, &tests)
-	if err != nil {
+	e = json.Unmarshal(file, &tests)
+	if e != nil  {
 		t.Fatalf("TestScripts couldn't Unmarshal: %v", err)
 	}
 	// Run all script tests with and without the signature cache.
@@ -454,13 +454,13 @@ func testVecF64ToUint32(f float64) uint32 {
 
 // TestTxInvalidTests ensures all of the tests in tx_invalid.json fail as expected.
 func TestTxInvalidTests(t *testing.T) {
-	file, err := ioutil.ReadFile("data/tx_invalid.json")
-	if err != nil {
+	file, e := ioutil.ReadFile("data/tx_invalid.json")
+	if e != nil  {
 		t.Fatalf("TestTxInvalidTests: %v\n", err)
 	}
 	var tests [][]interface{}
-	err = json.Unmarshal(file, &tests)
-	if err != nil {
+	e = json.Unmarshal(file, &tests)
+	if e != nil  {
 		t.Fatalf("TestTxInvalidTests couldn't Unmarshal: %v\n", err)
 	}
 	// form is either:
@@ -483,14 +483,14 @@ testloop:
 			t.Errorf("bad test (arg 2 not string) %d: %v", i, test)
 			continue
 		}
-		serializedTx, err := hex.DecodeString(serializedhex)
-		if err != nil {
+		serializedTx, e := hex.DecodeString(serializedhex)
+		if e != nil  {
 			t.Errorf("bad test (arg 2 not hex %v) %d: %v", err, i,
 				test)
 			continue
 		}
-		tx, err := util.NewTxFromBytes(serializedTx)
-		if err != nil {
+		tx, e := util.NewTxFromBytes(serializedTx)
+		if e != nil  {
 			t.Errorf("bad test (arg 2 not msgtx %v) %d: %v", err,
 				i, test)
 			continue
@@ -500,8 +500,8 @@ testloop:
 			t.Errorf("bad test (arg 3 not string) %d: %v", i, test)
 			continue
 		}
-		flags, err := parseScriptFlags(verifyFlags)
-		if err != nil {
+		flags, e := parseScriptFlags(verifyFlags)
+		if e != nil  {
 			t.Errorf("bad test %d: %v", i, err)
 			continue
 		}
@@ -524,8 +524,8 @@ testloop:
 					"%d: %v", j, i, test)
 				continue testloop
 			}
-			prevhash, err := chainhash.NewHashFromStr(previoustx)
-			if err != nil {
+			prevhash, e := chainhash.NewHashFromStr(previoustx)
+			if e != nil  {
 				t.Errorf("bad test (%dth input hash not hash %v)"+
 					"%d: %v", j, err, i, test)
 				continue testloop
@@ -543,8 +543,8 @@ testloop:
 					"string) %d: %v", j, i, test)
 				continue testloop
 			}
-			script, err := parseShortForm(oscript)
-			if err != nil {
+			script, e := parseShortForm(oscript)
+			if e != nil  {
 				t.Errorf("bad test (%dth input script doesn't "+
 					"parse %v) %d: %v", j, err, i, test)
 				continue testloop
@@ -573,13 +573,13 @@ testloop:
 			}
 			// These are meant to fail, so as soon as the first input fails the transaction has failed. (some of the
 			// test txns have good inputs, too..
-			vm, err := NewEngine(prevOut.pkScript, tx.MsgTx(), k,
+			vm, e := NewEngine(prevOut.pkScript, tx.MsgTx(), k,
 				flags, nil, nil, prevOut.inputVal)
-			if err != nil {
+			if e != nil  {
 				continue testloop
 			}
-			err = vm.Execute()
-			if err != nil {
+			e = vm.Execute()
+			if e != nil  {
 				continue testloop
 			}
 		}
@@ -590,13 +590,13 @@ testloop:
 
 // TestTxValidTests ensures all of the tests in tx_valid.json pass as expected.
 func TestTxValidTests(t *testing.T) {
-	file, err := ioutil.ReadFile("data/tx_valid.json")
-	if err != nil {
+	file, e := ioutil.ReadFile("data/tx_valid.json")
+	if e != nil  {
 		t.Fatalf("TestTxValidTests: %v\n", err)
 	}
 	var tests [][]interface{}
-	err = json.Unmarshal(file, &tests)
-	if err != nil {
+	e = json.Unmarshal(file, &tests)
+	if e != nil  {
 		t.Fatalf("TestTxValidTests couldn't Unmarshal: %v\n", err)
 	}
 	// form is either:
@@ -619,14 +619,14 @@ testloop:
 			t.Errorf("bad test (arg 2 not string) %d: %v", i, test)
 			continue
 		}
-		serializedTx, err := hex.DecodeString(serializedhex)
-		if err != nil {
+		serializedTx, e := hex.DecodeString(serializedhex)
+		if e != nil  {
 			t.Errorf("bad test (arg 2 not hex %v) %d: %v", err, i,
 				test)
 			continue
 		}
-		tx, err := util.NewTxFromBytes(serializedTx)
-		if err != nil {
+		tx, e := util.NewTxFromBytes(serializedTx)
+		if e != nil  {
 			t.Errorf("bad test (arg 2 not msgtx %v) %d: %v", err,
 				i, test)
 			continue
@@ -636,8 +636,8 @@ testloop:
 			t.Errorf("bad test (arg 3 not string) %d: %v", i, test)
 			continue
 		}
-		flags, err := parseScriptFlags(verifyFlags)
-		if err != nil {
+		flags, e := parseScriptFlags(verifyFlags)
+		if e != nil  {
 			t.Errorf("bad test %d: %v", i, err)
 			continue
 		}
@@ -660,8 +660,8 @@ testloop:
 					"%d: %v", j, i, test)
 				continue
 			}
-			prevhash, err := chainhash.NewHashFromStr(previoustx)
-			if err != nil {
+			prevhash, e := chainhash.NewHashFromStr(previoustx)
+			if e != nil  {
 				t.Errorf("bad test (%dth input hash not hash %v)"+
 					"%d: %v", j, err, i, test)
 				continue
@@ -679,8 +679,8 @@ testloop:
 					"string) %d: %v", j, i, test)
 				continue
 			}
-			script, err := parseShortForm(oscript)
-			if err != nil {
+			script, e := parseShortForm(oscript)
+			if e != nil  {
 				t.Errorf("bad test (%dth input script doesn't "+
 					"parse %v) %d: %v", j, err, i, test)
 				continue
@@ -707,15 +707,15 @@ testloop:
 					k, i, test)
 				continue testloop
 			}
-			vm, err := NewEngine(prevOut.pkScript, tx.MsgTx(), k,
+			vm, e := NewEngine(prevOut.pkScript, tx.MsgTx(), k,
 				flags, nil, nil, prevOut.inputVal)
-			if err != nil {
+			if e != nil  {
 				t.Errorf("test (%d:%v:%d) failed to create "+
 					"script: %v", i, test, k, err)
 				continue
 			}
-			err = vm.Execute()
-			if err != nil {
+			e = vm.Execute()
+			if e != nil  {
 				t.Errorf("test (%d:%v:%d) failed to execute: "+
 					"%v", i, test, k, err)
 				continue
@@ -727,13 +727,13 @@ testloop:
 // TestCalcSignatureHash runs the Bitcoin Core signature hash calculation tests in sighash.json.
 // https://github.com/bitcoin/bitcoin/blob/master/src/test/data/sighash.json
 func TestCalcSignatureHash(t *testing.T) {
-	file, err := ioutil.ReadFile("data/sighash.json")
-	if err != nil {
+	file, e := ioutil.ReadFile("data/sighash.json")
+	if e != nil  {
 		t.Fatalf("TestCalcSignatureHash: %v\n", err)
 	}
 	var tests [][]interface{}
-	err = json.Unmarshal(file, &tests)
-	if err != nil {
+	e = json.Unmarshal(file, &tests)
+	if e != nil  {
 		t.Fatalf("TestCalcSignatureHash couldn't Unmarshal: %v\n",
 			err)
 	}
@@ -748,15 +748,15 @@ func TestCalcSignatureHash(t *testing.T) {
 		}
 		var tx wire.MsgTx
 		rawTx, _ := hex.DecodeString(test[0].(string))
-		err := tx.Deserialize(bytes.NewReader(rawTx))
-		if err != nil {
+		e := tx.Deserialize(bytes.NewReader(rawTx))
+		if e != nil  {
 			t.Errorf("TestCalcSignatureHash failed test #%d: "+
 				"Failed to parse transaction: %v", i, err)
 			continue
 		}
 		subScript, _ := hex.DecodeString(test[1].(string))
-		parsedScript, err := parseScript(subScript)
-		if err != nil {
+		parsedScript, e := parseScript(subScript)
+		if e != nil  {
 			t.Errorf("TestCalcSignatureHash failed test #%d: "+
 				"Failed to parse sub-script: %v", i, err)
 			continue

@@ -32,8 +32,8 @@
 //          // later...
 //          // Create and print new payment address, specific to the active network.
 //          pubKeyHash := make([]byte, 20)
-//          addr, err := util.NewAddressPubKeyHash(pubKeyHash, chainParams)
-//          if err != nil {
+//          addr, e := util.NewAddressPubKeyHash(pubKeyHash, chainParams)
+//          if e != nil  {
 //                  Log.Fatal <- err.Error()
 //          }
 //          fmt.Println(addr)

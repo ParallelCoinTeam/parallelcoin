@@ -78,7 +78,7 @@ func (fl UsageFlag) String() string {
 // MustRegisterCmd performs the same function as RegisterCmd except it panics if there is an error. This should only be
 // called from package init functions.
 func MustRegisterCmd(method string, cmd interface{}, flags UsageFlag) {
-	if err := RegisterCmd(method, cmd, flags); err != nil {
+	if e := RegisterCmd(method, cmd, flags); dbg.Chk(e) {
 		panic(fmt.Sprintf("failed to register type %q: %v\n", method,
 			err))
 	}
@@ -122,7 +122,7 @@ NOTE: This function only needs to be able to examine the structure of the passed
 actual instance. Therefore, it is recommended to simply pass a nil pointer cast to the appropriate type. For example,
 (*FooCmd)(nil).
 */
-func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
+func RegisterCmd(method string, cmd interface{}, flags UsageFlag) (e error) {
 	registerLock.Lock()
 	defer registerLock.Unlock()
 	if _, ok := methodToConcreteType[method]; ok {
@@ -199,9 +199,9 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 				return makeError(ErrNonOptionalDefault, str)
 			}
 			rvf := reflect.New(rtf.Type.Elem())
-			err := json.Unmarshal([]byte(tag), rvf.Interface())
-			if err != nil {
-				Errorln(err)
+			e := json.Unmarshal([]byte(tag), rvf.Interface())
+			if e != nil  {
+				err.Ln(err)
 				str := fmt.Sprintf("default value of %q is "+
 					"the wrong type (field name %q)", tag,
 					rtf.Name)

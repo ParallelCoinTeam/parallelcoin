@@ -12,14 +12,14 @@ import (
 func main() {
 	quit := qu.T()
 	p := pipe.Consume(
-		quit, func(b []byte) (err error) {
+		quit, func(b []byte) (e error) {
 			fmt.Println("from child:", string(b))
 			return
 		}, "go", "run", "serve/main.go",
 	)
 	for {
-		_, err := p.StdConn.Write([]byte("ping"))
-		if err != nil {
+		_, e := p.StdConn.Write([]byte("ping"))
+		if e != nil  {
 			fmt.Println("err:", err)
 		}
 		time.Sleep(time.Second)

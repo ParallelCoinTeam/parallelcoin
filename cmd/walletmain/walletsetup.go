@@ -22,9 +22,9 @@ import (
 
 const slash = string(os.PathSeparator)
 
-// CreateSimulationWallet is intended to be called from the rpcclient and used to create a wallet for actors involved in
-// simulations.
-func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
+// CreateSimulationWallet is intended to be called from the rpcclient and used
+// to create a wallet for actors involved in simulations.
+func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) (e error) {
 	// Simulation wallet password is 'password'.
 	privPass := []byte("password")
 	// Public passphrase is the default.
@@ -32,129 +32,130 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	netDir := NetworkDir(*cfg.AppDataDir, activenet)
 	// Create the wallet.
 	dbPath := filepath.Join(netDir, WalletDbName)
-	Info("Creating the wallet...")
+	inf.Ln("Creating the wallet...")
 	// Create the wallet database backed by bolt db.
-	db, err := walletdb.Create("bdb", dbPath)
-	if err != nil {
-		Error(err)
-		return err
+	db, e := walletdb.Create("bdb", dbPath)
+	if e != nil {
+		return e
 	}
 	defer func() {
-		if err := db.Close(); Check(err) {
+		if e := db.Close(); dbg.Chk(e) {
 		}
 	}()
 	// Create the wallet.
-	err = wallet.Create(db, pubPass, privPass, nil, activenet, time.Now())
-	if err != nil {
-		Error(err)
-		return err
+	e = wallet.Create(db, pubPass, privPass, nil, activenet, time.Now())
+	if e != nil {
+		return e
 	}
-	Info("The wallet has been created successfully.")
+	inf.Ln("The wallet has been created successfully.")
 	return nil
 }
 
 // CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.
 // The new wallet will reside at the provided path.
-func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
+func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
-	Debug("WalletPage", loader.ChainParams.Name)
+	dbg.Ln("WalletPage", loader.ChainParams.Name)
 	// When there is a legacy keystore, open it now to ensure any errors don't end up exiting the process after the user
 	// has spent time entering a bunch of information.
 	netDir := NetworkDir(*config.DataDir, activenet)
 	keystorePath := filepath.Join(netDir, keystore.Filename)
 	var legacyKeyStore *keystore.Store
-	_, err := os.Stat(keystorePath)
-	if err != nil && !os.IsNotExist(err) {
+	_, e = os.Stat(keystorePath)
+	if e != nil && !os.IsNotExist(e) {
 		// A stat error not due to a non-existant file should be returned to the caller.
-		return err
-	} else if err == nil {
+		return e
+	} else if e == nil {
 		// Keystore file exists.
-		legacyKeyStore, err = keystore.OpenDir(netDir)
-		if err != nil {
-			Error(err)
-			return err
+		legacyKeyStore, e = keystore.OpenDir(netDir)
+		if e != nil {
+			return e
 		}
 	}
 	// Start by prompting for the private passphrase. When there is an existing keystore, the user will be promped for
 	// that passphrase, otherwise they will be prompted for a new one.
 	reader := bufio.NewReader(os.Stdin)
-	privPass, err := prompt.PrivatePass(reader, legacyKeyStore)
-	if err != nil {
-		Error(err)
-		Debug(err)
+	privPass, e := prompt.PrivatePass(reader, legacyKeyStore)
+	if e != nil {
+		dbg.Ln(err)
 		time.Sleep(time.Second * 3)
-		return err
+		return e
 	}
 	// When there exists a legacy keystore, unlock it now and set up a callback to import all keystore keys into the new
 	// walletdb wallet
 	if legacyKeyStore != nil {
-		err = legacyKeyStore.Unlock(privPass)
-		if err != nil {
-			Error(err)
-			return err
+		e = legacyKeyStore.Unlock(privPass)
+		if e != nil {
+			return e
 		}
 		// Import the addresses in the legacy keystore to the new wallet if any exist, locking each wallet again when
 		// finished.
-		loader.RunAfterLoad(func(w *wallet.Wallet) {
-			defer func() {
-				err := legacyKeyStore.Lock()
-				if err != nil {
-					Error(err)
-					Debug(err)
+		loader.RunAfterLoad(
+			func(w *wallet.Wallet) {
+				defer func() {
+					e := legacyKeyStore.Lock()
+					if e != nil {
+						dbg.Ln(err)
+					}
+				}()
+				inf.Ln("Importing addresses from existing wallet...")
+				lockChan := make(chan time.Time, 1)
+				defer func() {
+					lockChan <- time.Time{}
+				}()
+				e := w.Unlock(privPass, lockChan)
+				if e != nil {
+					err.F(
+						"ERR: Failed to unlock new wallet "+
+							"during old wallet key import: %v", e,
+					)
+					return
 				}
-			}()
-			Info("Importing addresses from existing wallet...")
-			lockChan := make(chan time.Time, 1)
-			defer func() {
-				lockChan <- time.Time{}
-			}()
-			err := w.Unlock(privPass, lockChan)
-			if err != nil {
-				Errorf("ERR: Failed to unlock new wallet "+
-					"during old wallet key import: %v", err)
-				return
-			}
-			err = convertLegacyKeystore(legacyKeyStore, w)
-			if err != nil {
-				Errorf("ERR: Failed to import keys from old "+
-					"wallet format: %v %s", err)
-				return
-			}
-			// Remove the legacy key store.
-			err = os.Remove(keystorePath)
-			if err != nil {
-				Error("WARN: Failed to remove legacy wallet "+
-					"from'%s'\n", keystorePath)
-			}
-		})
+				e = convertLegacyKeystore(legacyKeyStore, w)
+				if e != nil {
+					err.F(
+						"ERR: Failed to import keys from old "+
+							"wallet format: %v %s", e,
+					)
+					return
+				}
+				// Remove the legacy key store.
+				e = os.Remove(keystorePath)
+				if e != nil {
+					err.Ln(
+						"WARN: Failed to remove legacy wallet "+
+							"from'%s'\n", keystorePath,
+					)
+				}
+			},
+		)
 	}
 	// Ascertain the public passphrase. This will either be a value specified by the user or the default hard-coded
 	// public passphrase if the user does not want the additional public data encryption.
-	pubPass, err := prompt.PublicPass(reader, privPass, []byte(""), []byte(*config.WalletPass))
-	if err != nil {
-		Error(err)
-		Debug(err)
+	pubPass, e := prompt.PublicPass(reader, privPass, []byte(""), []byte(*config.WalletPass))
+	if e != nil {
+		dbg.Ln(err)
 		time.Sleep(time.Second * 5)
-		return err
+		return e
 	}
 	// Ascertain the wallet generation seed. This will either be an automatically generated value the user has already
 	// confirmed or a value the user has entered which has already been validated.
-	seed, err := prompt.Seed(reader)
-	if err != nil {
-		Debug(err)
+	seed, e := prompt.Seed(reader)
+	if e != nil {
+		dbg.Ln(err)
 		time.Sleep(time.Second * 5)
-		return err
+		return e
 	}
-	Debug("Creating the wallet")
-	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false, config, nil)
-	if err != nil {
-		Debug(err)
+	dbg.Ln("Creating the wallet")
+	w, e := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false, config, nil)
+	if e != nil {
+		dbg.Ln(err)
 		time.Sleep(time.Second * 5)
-		return err
+		return e
 	}
 	w.Manager.Close()
-	Debug("The wallet has been created successfully.")
+	dbg.Ln("The wallet has been created successfully.")
 	return nil
 }
 
@@ -172,15 +173,15 @@ func NetworkDir(dataDir string, chainParams *netparams.Params) string {
 
 // // checkCreateDir checks that the path exists and is a directory.
 // // If path does not exist, it is created.
-// func checkCreateDir(// 	path string) error {
-// 	if fi, err := os.Stat(path); err != nil {
+// func checkCreateDir(// 	path string) (e error) {
+// 	if fi, e := os.Stat(path); dbg.Chk(e) {
 // 		if os.IsNotExist(err) {
 // 			// Attempt data directory creation
-// 			if err = os.MkdirAll(path, 0700); err != nil {
-// 				return fmt.Errorf("cannot create directory: %s", err)
+// 			if e = os.MkdirAll(path, 0700); dbg.Chk(e) {
+// 				return fmt.Errorf("cannot create directory: %s", e)
 // 			}
 // 		} else {
-// 			return fmt.Errorf("error checking directory: %s", err)
+// 			return fmt.Errorf("error checking directory: %s", e)
 // 		}
 // 	} else {
 // 		if !fi.IsDir() {
@@ -192,7 +193,7 @@ func NetworkDir(dataDir string, chainParams *netparams.Params) string {
 
 // convertLegacyKeystore converts all of the addresses in the passed legacy key store to the new waddrmgr.Manager
 // format. Both the legacy keystore and the new manager must be unlocked.
-func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) error {
+func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) (e error) {
 	netParams := legacyKeyStore.Net()
 	blockStamp := waddrmgr.BlockStamp{
 		Height: 0,
@@ -201,40 +202,54 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) err
 	for _, walletAddr := range legacyKeyStore.ActiveAddresses() {
 		switch addr := walletAddr.(type) {
 		case keystore.PubKeyAddress:
-			privKey, err := addr.PrivKey()
-			if err != nil {
-				Warnf("Failed to obtain private key "+
-					"for address %v: %v", addr.Address(),
-					err)
+			privKey, e := addr.PrivKey()
+			if e != nil {
+				wrn.F(
+					"Failed to obtain private key "+
+						"for address %v: %v", addr.Address(),
+					err,
+				)
 				continue
 			}
-			wif, err := util.NewWIF(privKey,
-				netParams, addr.Compressed())
-			if err != nil {
-				Error("Failed to create wallet "+
-					"import format for address %v: %v",
-					addr.Address(), err)
+			wif, e := util.NewWIF(
+				privKey,
+				netParams, addr.Compressed(),
+			)
+			if e != nil {
+				err.Ln(
+					"Failed to create wallet "+
+						"import format for address %v: %v",
+					addr.Address(), e,
+				)
 				continue
 			}
-			_, err = w.ImportPrivateKey(waddrmgr.KeyScopeBIP0044,
-				wif, &blockStamp, false)
-			if err != nil {
-				Warnf("WARN: Failed to import private "+
-					"key for address %v: %v",
-					addr.Address(), err)
+			_, e = w.ImportPrivateKey(
+				waddrmgr.KeyScopeBIP0044,
+				wif, &blockStamp, false,
+			)
+			if e != nil {
+				wrn.F(
+					"WARN: Failed to import private "+
+						"key for address %v: %v",
+					addr.Address(), e,
+				)
 				continue
 			}
 		case keystore.ScriptAddress:
-			_, err := w.ImportP2SHRedeemScript(addr.Script())
-			if err != nil {
-				Warnf("WARN: Failed to import "+
-					"pay-to-script-hash script for "+
-					"address %v: %v\n", addr.Address(), err)
+			_, e := w.ImportP2SHRedeemScript(addr.Script())
+			if e != nil {
+				wrn.F(
+					"WARN: Failed to import "+
+						"pay-to-script-hash script for "+
+						"address %v: %v\n", addr.Address(), e,
+				)
 				continue
 			}
 		default:
-			Warnf("WARN: Skipping unrecognized legacy "+
-				"keystore type: %T\n", addr)
+			wrn.F(
+				"WARN: Skipping unrecognized legacy "+
+					"keystore type: %T\n", addr,
+			)
 			continue
 		}
 	}

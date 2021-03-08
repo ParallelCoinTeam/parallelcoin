@@ -1,4 +1,4 @@
-// +build ignore
+//+build ignore
 
 package main
 
@@ -6,7 +6,7 @@ import (
 	"os"
 	"sort"
 	"text/template"
-
+	
 	log "github.com/p9c/pod/pkg/util/logi"
 )
 
@@ -21,17 +21,9 @@ type handler struct {
 
 type handlersT []handler
 
-func (h handlersT) Len() int {
-	return len(h)
-}
-
-func (h handlersT) Less(i, j int) bool {
-	return h[i].Method < h[j].Method
-}
-
-func (h handlersT) Swap(i, j int) {
-	h[i], h[j] = h[j], h[i]
-}
+func (h handlersT) Len() int           { return len(h) }
+func (h handlersT) Less(i, j int) bool { return h[i].Method < h[j].Method }
+func (h handlersT) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
 var handlers = handlersT{
 	{
@@ -375,7 +367,7 @@ type (
 	// None means no parameters it is not checked so it can be nil
 	None struct{} {{range .}}
 	// {{.Handler}}Res is the result from a call to {{.Handler}}
-	{{.Handler}}Res struct { Res *{{.ResType}}; Err error }{{end}}
+	{{.Handler}}Res struct { Res *{{.ResType}}; e error }{{end}}
 )
 
 // ` + RPCMapName + `BeforeInit are created first and are added to the main list 
@@ -406,18 +398,18 @@ var ` + RPCMapName + `BeforeInit = map[string]CommandHandler{
 
 {{range .}}
 // {{.Handler}} calls the method with the given parameters
-func (a API) {{.Handler}}(cmd {{.Cmd}}) (err error) {
+func (a API) {{.Handler}}(cmd {{.Cmd}}) (e error) {
 	` + RPCMapName + `["{{.Method}}"].Call <-API{a.Ch, cmd, nil}
 	return
 }
 
-// {{.Handler}}Check checks if a new message arrived on the result channel and 
+// {{.Handler}}Chk checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
-func (a API) {{.Handler}}Check() (isNew bool) {
+func (a API) {{.Handler}}Chk() (isNew bool) {
 	select {
 	case o := <-a.Ch.(chan {{.Handler}}Res):
-		if o.Err != nil {
-			a.Result = o.Err
+		if o.e != nil {
+			a.Result = o.e
 		} else {
 			a.Result = o.Res
 		}
@@ -428,20 +420,20 @@ func (a API) {{.Handler}}Check() (isNew bool) {
 }
 
 // {{.Handler}}GetRes returns a pointer to the value in the Result field
-func (a API) {{.Handler}}GetRes() (out *{{.ResType}}, err error) {
+func (a API) {{.Handler}}GetRes() (out *{{.ResType}}, e error) {
 	out, _ = a.Result.(*{{.ResType}})
-	err, _ = a.Result.(error)
+	e, _ = a.Result.(error)
 	return 
 }
 
 // {{.Handler}}Wait calls the method and blocks until it returns or 5 seconds passes
-func (a API) {{.Handler}}Wait(cmd {{.Cmd}}) (out *{{.ResType}}, err error) {
+func (a API) {{.Handler}}Wait(cmd {{.Cmd}}) (out *{{.ResType}}, e error) {
 	` + RPCMapName + `["{{.Method}}"].Call <-API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
 	case o := <-a.Ch.(chan {{.Handler}}Res):
-		out, err = o.Res, o.Err
+		out, e = o.Res, o.e
 	}
 	return
 }
@@ -453,19 +445,19 @@ func (a API) {{.Handler}}Wait(cmd {{.Cmd}}) (out *{{.ResType}}, err error) {
 func RunAPI(server *Server, quit qu.C) {
 	nrh := ` + RPCMapName + `
 	go func() {
-		Debug("starting up node cAPI")
-		var err error
+		dbg.Ln("starting up node cAPI")
+		var e error
 		var res interface{}
 		for {
 			select { {{range .}}
 			case msg := <-nrh["{{.Method}}"].Call:
-				if res, err = nrh["{{.Method}}"].
-					Fn(server, msg.Params.({{.Cmd}}), nil); Check(err) {
+				if res, e = nrh["{{.Method}}"].
+					Fn(server, msg.Params.({{.Cmd}}), nil); dbg.Chk(e) {
 				}
 				if r, ok := res.({{.ResType}}); ok { 
-					msg.Ch.(chan {{.Handler}}Res) <-{{.Handler}}Res{&r, err} } {{end}}
+					msg.Ch.(chan {{.Handler}}Res) <-{{.Handler}}Res{&r, e} } {{end}}
 			case <-quit.Wait():
-				Debug("stopping wallet cAPI")
+				dbg.Ln("stopping wallet cAPI")
 				return
 			}
 		}
@@ -474,7 +466,7 @@ func RunAPI(server *Server, quit qu.C) {
 
 // RPC API functions to use with net/rpc
 {{range .}}
-func (c *CAPI) {{.Handler}}(req {{.Cmd}}, resp {{.ResType}}) (err error) {
+func (c *CAPI) {{.Handler}}(req {{.Cmd}}, resp {{.ResType}}) (e error) {
 	nrh := ` + RPCMapName + `
 	res := nrh["{{.Method}}"].Result()
 	res.Params = req
@@ -489,32 +481,32 @@ func (c *CAPI) {{.Handler}}(req {{.Cmd}}, resp {{.ResType}}) (err error) {
 {{end}}
 // Client call wrappers for a CAPI client with a given Conn
 {{range .}}
-func (r *CAPIClient) {{.Handler}}(cmd ...{{.Cmd}}) (res {{.ResType}}, err error) {
+func (r *CAPIClient) {{.Handler}}(cmd ...{{.Cmd}}) (res {{.ResType}}, e error) {
 	var c {{.Cmd}}
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("` + Worker + `.{{.Handler}}", c, &res); Check(err) {
+	if e = r.Call("` + Worker + `.{{.Handler}}", c, &res); dbg.Chk(e) {
 	}
 	return
 }
 {{end}}
 `
 	log.L.SetLevel("trace", true, "pod")
-	if fd, err := os.Create("rpchandlers.go"); Check(err) {
-		if fd, err := os.OpenFile("rpchandlers.go", os.O_RDWR|os.O_CREATE, 0755); Check(err) {
+	if fd, e := os.Create("rpchandlers.go"); dbg.Chk(e) {
+		if fd, e := os.OpenFile("rpchandlers.go", os.O_RDWR|os.O_CREATE, 0755); dbg.Chk(e) {
 		} else {
 			defer fd.Close()
 			t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 			sort.Sort(handlers)
-			if err = t.Execute(fd, handlers); Check(err) {
+			if e = t.Execute(fd, handlers); dbg.Chk(e) {
 			}
 		}
 	} else {
 		defer fd.Close()
 		t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 		sort.Sort(handlers)
-		if err = t.Execute(fd, handlers); Check(err) {
+		if e = t.Execute(fd, handlers); dbg.Chk(e) {
 		}
 	}
 }

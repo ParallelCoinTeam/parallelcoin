@@ -38,18 +38,18 @@ func TestAddDuplicateDriver(t *testing.T) {
 		Create: bogusCreateDB,
 		Open:   bogusCreateDB,
 	}
-	err := walletdb.RegisterDriver(driver)
+	e := walletdb.RegisterDriver(driver)
 	if err != walletdb.ErrDbTypeRegistered {
 		t.Errorf("unexpected duplicate driver registration error - "+
 			"got %v, want %v", err, walletdb.ErrDbTypeRegistered)
 	}
 	dbPath := "dupdrivertest.db"
-	db, err := walletdb.Create(dbType, dbPath)
-	if err != nil {
+	db, e := walletdb.Create(dbType, dbPath)
+	if e != nil  {
 		t.Errorf("failed to create database: %v", err)
 		return
 	}
-	if err := db.Close(); walletdb.Check(err) {
+	if e := db.Close(); walletdb.dbg.Chk(e) {
 	}
 	_ = os.Remove(dbPath)
 }
@@ -71,12 +71,11 @@ func TestCreateOpenFail(t *testing.T) {
 		Create: bogusCreateDB,
 		Open:   bogusCreateDB,
 	}
-	err := walletdb.RegisterDriver(driver)
-	if err != nil {
-		walletdb.Error(err)
-	}
+	e := walletdb.RegisterDriver(driver)
+	if e != nil  {
+		walletdb.	}
 	// Ensure creating a database with the new type fails with the expected error.
-	_, err = walletdb.Create(dbType)
+	_, e = walletdb.Create(dbType)
 	if err != openError {
 		t.Errorf("expected error not received - got: %v, want %v", err,
 			openError)
@@ -84,7 +83,7 @@ func TestCreateOpenFail(t *testing.T) {
 	}
 	// Ensure opening a database with the new type fails with the expected
 	// error.
-	_, err = walletdb.Open(dbType)
+	_, e = walletdb.Open(dbType)
 	if err != openError {
 		t.Errorf("expected error not received - got: %v, want %v", err,
 			openError)
@@ -96,14 +95,14 @@ func TestCreateOpenFail(t *testing.T) {
 func TestCreateOpenUnsupported(t *testing.T) {
 	// Ensure creating a database with an unsupported type fails with the expected error.
 	dbType := "unsupported"
-	_, err := walletdb.Create(dbType)
+	_, e := walletdb.Create(dbType)
 	if err != walletdb.ErrDbUnknownType {
 		t.Errorf("expected error not received - got: %v, want %v", err,
 			walletdb.ErrDbUnknownType)
 		return
 	}
 	// Ensure opening a database with the an unsupported type fails with the expected error.
-	_, err = walletdb.Open(dbType)
+	_, e = walletdb.Open(dbType)
 	if err != walletdb.ErrDbUnknownType {
 		t.Errorf("expected error not received - got: %v, want %v", err,
 			walletdb.ErrDbUnknownType)

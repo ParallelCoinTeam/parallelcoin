@@ -41,8 +41,8 @@ func TestMsgAlert(t *testing.T) {
 	}
 	// Test BtcEncode with Payload == nil
 	var buf bytes.Buffer
-	err := msg.BtcEncode(&buf, pver, encoding)
-	if err != nil {
+	e := msg.BtcEncode(&buf, pver, encoding)
+	if e != nil  {
 		t.Error(err.Error())
 	}
 	// expected = 0x0c + serializedpayload + 0x08 + signature
@@ -56,8 +56,8 @@ func TestMsgAlert(t *testing.T) {
 	// Test BtcEncode with Payload != nil note: Payload is an empty Alert but not nil
 	msg.Payload = new(Alert)
 	buf = *new(bytes.Buffer)
-	err = msg.BtcEncode(&buf, pver, encoding)
-	if err != nil {
+	e = msg.BtcEncode(&buf, pver, encoding)
+	if e != nil  {
 		t.Error(err.Error())
 	}
 	// empty Alert is 45 null bytes, see Alert comments for details expected = 0x2d + 45*0x00 + 0x08 + signature
@@ -132,8 +132,8 @@ func TestMsgAlertWire(t *testing.T) {
 	for i, test := range tests {
 		// Encode the message to wire format.
 		var buf bytes.Buffer
-		err := test.in.BtcEncode(&buf, test.pver, test.enc)
-		if err != nil {
+		e := test.in.BtcEncode(&buf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcEncode #%d error %v", i, err)
 			continue
 		}
@@ -145,8 +145,8 @@ func TestMsgAlertWire(t *testing.T) {
 		// Decode the message from wire format.
 		var msg MsgAlert
 		rbuf := bytes.NewReader(test.buf)
-		err = msg.BtcDecode(rbuf, test.pver, test.enc)
-		if err != nil {
+		e = msg.BtcDecode(rbuf, test.pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
 		}
@@ -193,7 +193,7 @@ func TestMsgAlertWireErrors(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
-		err := test.in.BtcEncode(w, test.pver, test.enc)
+		e := test.in.BtcEncode(w, test.pver, test.enc)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, err, test.writeErr)
@@ -210,7 +210,7 @@ func TestMsgAlertWireErrors(t *testing.T) {
 		// Decode from wire format.
 		var msg MsgAlert
 		r := newFixedReader(test.max, test.buf)
-		err = msg.BtcDecode(r, test.pver, test.enc)
+		e = msg.BtcDecode(r, test.pver, test.enc)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, err, test.readErr)
@@ -228,7 +228,7 @@ func TestMsgAlertWireErrors(t *testing.T) {
 	// Test Error on empty Payload
 	baseMsgAlert.SerializedPayload = []byte{}
 	w := new(bytes.Buffer)
-	err := baseMsgAlert.BtcEncode(w, pver, encoding)
+	e := baseMsgAlert.BtcEncode(w, pver, encoding)
 	if _, ok := err.(*MessageError); !ok {
 		t.Errorf("MsgAlert.BtcEncode wrong error got: %T, want: %T",
 			err, MessageError{})
@@ -237,7 +237,7 @@ func TestMsgAlertWireErrors(t *testing.T) {
 	baseMsgAlert.Payload = new(Alert)
 	baseMsgAlert.Payload.SetCancel = make([]int32, maxCountSetCancel+1)
 	buf := *new(bytes.Buffer)
-	err = baseMsgAlert.BtcEncode(&buf, pver, encoding)
+	e = baseMsgAlert.BtcEncode(&buf, pver, encoding)
 	if _, ok := err.(*MessageError); !ok {
 		t.Errorf("MsgAlert.BtcEncode wrong error got: %T, want: %T",
 			err, MessageError{})
@@ -246,7 +246,7 @@ func TestMsgAlertWireErrors(t *testing.T) {
 	baseMsgAlert.Payload = new(Alert)
 	baseMsgAlert.Payload.SetSubVer = make([]string, maxCountSetSubVer+1)
 	buf = *new(bytes.Buffer)
-	err = baseMsgAlert.BtcEncode(&buf, pver, encoding)
+	e = baseMsgAlert.BtcEncode(&buf, pver, encoding)
 	if _, ok := err.(*MessageError); !ok {
 		t.Errorf("MsgAlert.BtcEncode wrong error got: %T, want: %T",
 			err, MessageError{})
@@ -262,14 +262,14 @@ func TestAlert(t *testing.T) {
 		"URGENT: upgrade required, see http://bitcoin.org/dos for details",
 	)
 	w := new(bytes.Buffer)
-	err := alert.Serialize(w, pver)
-	if err != nil {
+	e := alert.Serialize(w, pver)
+	if e != nil  {
 		t.Error(err.Error())
 	}
 	serializedpayload := w.Bytes()
-	newAlert, err := NewAlertFromPayload(serializedpayload, pver)
-	if err != nil {
-		t.Fatal(err.Error())
+	newAlert, e := NewAlertFromPayload(serializedpayload, pver)
+	if e != nil  {
+		t.ftl.Ln(err.Error())
 	}
 	if alert.Version != newAlert.Version {
 		t.Errorf("NewAlertFromPayload: wrong Version - got %v, want %v ",
@@ -385,7 +385,7 @@ func TestAlertErrors(t *testing.T) {
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
 		w := newFixedWriter(test.max)
-		err := test.in.Serialize(w, test.pver)
+		e := test.in.Serialize(w, test.pver)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("Alert.Serialize #%d wrong error got: %v, want: %v",
 				i, err, test.writeErr)
@@ -393,7 +393,7 @@ func TestAlertErrors(t *testing.T) {
 		}
 		var alert Alert
 		r := newFixedReader(test.max, test.buf)
-		err = alert.Deserialize(r, test.pver)
+		e = alert.Deserialize(r, test.pver)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
 			t.Errorf("Alert.Deserialize #%d wrong error got: %v, want: %v",
 				i, err, test.readErr)
@@ -412,7 +412,7 @@ func TestAlertErrors(t *testing.T) {
 	}
 	var alert Alert
 	r := bytes.NewReader(badAlertEncoded)
-	err := alert.Deserialize(r, pver)
+	e := alert.Deserialize(r, pver)
 	if _, ok := err.(*MessageError); !ok {
 		t.Errorf("Alert.Deserialize wrong error got: %T, want: %T",
 			err, MessageError{})
@@ -427,7 +427,7 @@ func TestAlertErrors(t *testing.T) {
 		0x55, 0x52, 0x47, 0x45, 0x4e, 0x54, 0x00, // |URGENT.|
 	}
 	r = bytes.NewReader(badAlertEncoded)
-	err = alert.Deserialize(r, pver)
+	e = alert.Deserialize(r, pver)
 	if _, ok := err.(*MessageError); !ok {
 		t.Errorf("Alert.Deserialize wrong error got: %T, want: %T",
 			err, MessageError{})

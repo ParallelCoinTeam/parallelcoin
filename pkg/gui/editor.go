@@ -113,15 +113,15 @@ func (m *maskReader) Reset(r io.RuneReader, mr rune) {
 }
 
 // Read reads from the underlying reader and replaces every rune with the mask rune.
-func (m *maskReader) Read(b []byte) (n int, err error) {
+func (m *maskReader) Read(b []byte) (n int, e error) {
 	for len(b) > 0 {
 		var replacement []byte
 		if len(m.overflow) > 0 {
 			replacement = m.overflow
 		} else {
 			var r rune
-			r, _, err = m.rr.ReadRune()
-			if err != nil {
+			r, _, e = m.rr.ReadRune()
+			if e != nil  {
 				break
 			}
 			if r == '\n' {
@@ -135,7 +135,7 @@ func (m *maskReader) Read(b []byte) (n int, err error) {
 		n += nn
 		b = b[nn:]
 	}
-	return n, err
+	return n, e
 }
 
 type EditorEvent interface {
@@ -981,11 +981,11 @@ func nullLayout(r io.Reader) ([]text.Line, error) {
 	var n int
 	var buf bytes.Buffer
 	for {
-		r, s, err := rr.ReadRune()
+		r, s, e := rr.ReadRune()
 		n += s
 		buf.WriteRune(r)
-		if err != nil {
-			rerr = err
+		if e != nil  {
+			rerr = e
 			break
 		}
 	}

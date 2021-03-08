@@ -50,10 +50,9 @@ func (b *Block) Bytes() ([]byte, error) {
 	}
 	// Serialize the MsgBlock.
 	w := bytes.NewBuffer(make([]byte, 0, b.msgBlock.SerializeSize()))
-	err := b.msgBlock.Serialize(w)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e := b.msgBlock.Serialize(w)
+	if e != nil {
+		return nil, e
 	}
 	serializedBlock := w.Bytes()
 	// Cache the serialized bytes and return them.
@@ -70,10 +69,9 @@ func (b *Block) BytesNoWitness() ([]byte, error) {
 	}
 	// Serialize the MsgBlock.
 	var w bytes.Buffer
-	err := b.msgBlock.SerializeNoWitness(&w)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e := b.msgBlock.SerializeNoWitness(&w)
+	if e != nil {
+		return nil, e
 	}
 	serializedBlock := w.Bytes()
 	// Cache the serialized bytes and return them.
@@ -102,8 +100,10 @@ func (b *Block) Tx(txNum int) (*Tx, error) {
 	// Ensure the requested transaction is in range.
 	numTx := uint64(len(b.msgBlock.Transactions))
 	if txNum < 0 || uint64(txNum) > numTx {
-		str := fmt.Sprintf("transaction index %d is out of range - max %d",
-			txNum, numTx-1)
+		str := fmt.Sprintf(
+			"transaction index %d is out of range - max %d",
+			txNum, numTx-1,
+		)
 		return nil, OutOfRangeError(str)
 	}
 	// Generate slice to hold all of the wrapped transactions if needed.
@@ -152,10 +152,9 @@ func (b *Block) Transactions() []*Tx {
 func (b *Block) TxHash(txNum int) (*chainhash.Hash, error) {
 	// Attempt to get a wrapped transaction for the specified index. It will be created lazily if needed or simply
 	// return the cached version if it has already been generated.
-	tx, err := b.Tx(txNum)
-	if err != nil {
-		Error(err)
-		return nil, err
+	tx, e := b.Tx(txNum)
+	if e != nil {
+		return nil, e
 	}
 	// Defer to the wrapped transaction which will return the cached hash if it has already been generated.
 	return tx.Hash(), nil
@@ -164,19 +163,17 @@ func (b *Block) TxHash(txNum int) (*chainhash.Hash, error) {
 // TxLoc returns the offsets and lengths of each transaction in a raw block. It is used to allow fast indexing into
 // transactions within the raw byte stream.
 func (b *Block) TxLoc() ([]wire.TxLoc, error) {
-	rawMsg, err := b.Bytes()
-	if err != nil {
-		Error(err)
-		return nil, err
+	rawMsg, e := b.Bytes()
+	if e != nil {
+		return nil, e
 	}
 	rbuf := bytes.NewBuffer(rawMsg)
 	var mblock wire.MsgBlock
-	txLocs, err := mblock.DeserializeTxLoc(rbuf)
-	if err != nil {
-		Error(err)
-		return nil, err
+	txLocs, e := mblock.DeserializeTxLoc(rbuf)
+	if e != nil {
+		return nil, e
 	}
-	return txLocs, err
+	return txLocs, e
 }
 
 // Height returns the saved height of the block in the block chain. This value will be BlockHeightUnknown if it hasn't
@@ -201,10 +198,9 @@ func NewBlock(msgBlock *wire.MsgBlock) *Block {
 // NewBlockFromBytes returns a new instance of a bitcoin block given the serialized bytes.  See Block.
 func NewBlockFromBytes(serializedBlock []byte) (*Block, error) {
 	br := bytes.NewReader(serializedBlock)
-	b, err := NewBlockFromReader(br)
-	if err != nil {
-		Error(err)
-		return nil, err
+	b, e := NewBlockFromReader(br)
+	if e != nil {
+		return nil, e
 	}
 	b.serializedBlock = serializedBlock
 	return b, nil
@@ -214,10 +210,9 @@ func NewBlockFromBytes(serializedBlock []byte) (*Block, error) {
 func NewBlockFromReader(r io.Reader) (*Block, error) {
 	// Deserialize the bytes into a MsgBlock.
 	var msgBlock wire.MsgBlock
-	err := msgBlock.Deserialize(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e := msgBlock.Deserialize(r)
+	if e != nil {
+		return nil, e
 	}
 	b := Block{
 		msgBlock:    &msgBlock,

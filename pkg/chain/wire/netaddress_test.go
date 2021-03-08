@@ -144,8 +144,8 @@ func TestNetAddress(t *testing.T) {
 // 	for i, test := range tests {
 // 		// Encode to wire format.
 // 		var buf bytes.Buffer
-// 		err := writeNetAddress(&buf, test.pver, &test.in, test.ts)
-// 		if err != nil {
+// 		e := writeNetAddress(&buf, test.pver, &test.in, test.ts)
+// 		if e != nil  {
 // 			t.Errorf("writeNetAddress #%d error %v", i, err)
 // 			continue
 // 		}
@@ -157,8 +157,8 @@ func TestNetAddress(t *testing.T) {
 // 		// Decode the message from wire format.
 // 		var na NetAddress
 // 		rbuf := bytes.NewReader(test.buf)
-// 		err = readNetAddress(rbuf, test.pver, &na, test.ts)
-// 		if err != nil {
+// 		e = readNetAddress(rbuf, test.pver, &na, test.ts)
+// 		if e != nil  {
 // 			t.Errorf("readNetAddress #%d error %v", i, err)
 // 			continue
 // 		}
@@ -215,7 +215,7 @@ func TestNetAddress(t *testing.T) {
 // 	for i, test := range tests {
 // 		// Encode to wire format.
 // 		w := newFixedWriter(test.max)
-// 		err := writeNetAddress(w, test.pver, test.in, test.ts)
+// 		e := writeNetAddress(w, test.pver, test.in, test.ts)
 // 		if err != test.writeErr {
 // 			t.Errorf("writeNetAddress #%d wrong error got: %v, want: %v",
 // 				i, err, test.writeErr)
@@ -224,7 +224,7 @@ func TestNetAddress(t *testing.T) {
 // 		// Decode from wire format.
 // 		var na NetAddress
 // 		r := newFixedReader(test.max, test.buf)
-// 		err = readNetAddress(r, test.pver, &na, test.ts)
+// 		e = readNetAddress(r, test.pver, &na, test.ts)
 // 		if err != test.readErr {
 // 			t.Errorf("readNetAddress #%d wrong error got: %v, want: %v",
 // 				i, err, test.readErr)

@@ -12,14 +12,13 @@ import (
 
 func main() {
 	
-	fi, err := os.Create("secp256k1.go")
+	fi, e := os.Create("secp256k1.go")
 	
-	if err != nil {
-		Error(err)
-		Fatal(err)
+	if e != nil  {
+				ftl.Ln(err)
 	}
 	defer func() {
-		if err := fi.Close(); Check(err) {
+		if e := fi.Close(); dbg.Chk(e) {
 		}
 	}()
 	
@@ -28,11 +27,10 @@ func main() {
 	var compressed bytes.Buffer
 	w := zlib.NewWriter(&compressed)
 	
-	if _, err := w.Write(serialized); err != nil {
-		Error(err)
-		os.Exit(1)
+	if _, e = w.Write(serialized); dbg.Chk(e) {
+				os.Exit(1)
 	}
-	if err := w.Close(); Check(err) {
+	if e := w.Close(); dbg.Chk(e) {
 	}
 	
 	// Encode the compressed byte points with base64.

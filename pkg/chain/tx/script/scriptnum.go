@@ -28,11 +28,11 @@ const (
 type scriptNum int64
 
 // checkMinimalDataEncoding returns whether or not the passed byte array adheres to the minimal encoding requirements.
-func checkMinimalDataEncoding(v []byte) error {
+func checkMinimalDataEncoding(v []byte) (e error) {
 	if len(v) == 0 {
 		return nil
 	}
-	// Check that the number is encoded with the minimum possible number of bytes. If the most-significant-byte -
+	// Chk that the number is encoded with the minimum possible number of bytes. If the most-significant-byte -
 	// excluding the sign bit - is zero then we're not minimal. Note how this test also rejects the negative-zero
 	// encoding, [0x80].
 	if v[len(v)-1]&0x7f == 0 {
@@ -103,14 +103,14 @@ func (sn scriptNum) Bytes() []byte {
 // will have been created with makeScriptNum using the defaultScriptLen value, which rejects them. In case something in
 // the future ends up calling this function against the result of some arithmetic, which IS allowed to be out of range
 // before being reinterpreted as an integer, this will provide the correct behavior.
-func (n scriptNum) Int32() int32 {
-	if n > maxInt32 {
+func (sn scriptNum) Int32() int32 {
+	if sn > maxInt32 {
 		return maxInt32
 	}
-	if n < minInt32 {
+	if sn < minInt32 {
 		return minInt32
 	}
-	return int32(n)
+	return int32(sn)
 }
 
 // makeScriptNum interprets the passed serialized bytes as an encoded integer and returns the result as a script number.
@@ -135,8 +135,8 @@ func makeScriptNum(v []byte, requireMinimal bool, scriptNumLen int) (scriptNum, 
 	}
 	// Enforce minimal encoded if requested.
 	if requireMinimal {
-		if err := checkMinimalDataEncoding(v); err != nil {
-			return 0, err
+		if e := checkMinimalDataEncoding(v); dbg.Chk(e) {
+			return 0, e
 		}
 	}
 	// Zero is encoded as an empty byte slice.

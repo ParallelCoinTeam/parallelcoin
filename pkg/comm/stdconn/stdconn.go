@@ -20,30 +20,30 @@ func New(in io.ReadCloser, out io.WriteCloser, quit qu.C) (s *StdConn) {
 	s = &StdConn{in, out, quit}
 	_, file, line, _ := runtime.Caller(1)
 	o := fmt.Sprintf("%s:%d", file, line)
-	Debug("new StdConn at", o)
+	dbg.Ln("new StdConn at", o)
 	// go func() {
 	// 	<-quit.Wait()
-	// 	Debug("!!!! closing StdConn", o)
-	// 	Debug(string(debug.Stack()))
+	// 	dbg.Ln("!!!! closing StdConn", o)
+	// 	dbg.Ln(string(debug.Stack()))
 	// 	// time.Sleep(time.Second*2)
-	// 	if err := s.ReadCloser.Close(); Check(err) {
+	// 	if e := s.ReadCloser.Close(); dbg.Chk(e) {
 	// 	}
-	// 	if err := s.WriteCloser.Close(); Check(err) {
+	// 	if e := s.WriteCloser.Close(); dbg.Chk(e) {
 	// 	}
-	// 	// Debug(interrupt.GoroutineDump())
+	// 	// dbg.Ln(interrupt.GoroutineDump())
 	// }()
 	return
 }
 
-func (s *StdConn) Read(b []byte) (n int, err error) {
+func (s *StdConn) Read(b []byte) (n int, e error) {
 	return s.ReadCloser.Read(b)
 }
 
-func (s *StdConn) Write(b []byte) (n int, err error) {
+func (s *StdConn) Write(b []byte) (n int, e error) {
 	return s.WriteCloser.Write(b)
 }
 
-func (s *StdConn) Close() (err error) {
+func (s *StdConn) Close() (e error) {
 	s.Quit.Q()
 	return
 }
@@ -58,17 +58,17 @@ func (s *StdConn) RemoteAddr() (addr net.Addr) {
 	return
 }
 
-func (s *StdConn) SetDeadline(t time.Time) (err error) {
+func (s *StdConn) SetDeadline(t time.Time) (e error) {
 	// this is a no-op as it is not relevant to the type of connection
 	return
 }
 
-func (s *StdConn) SetReadDeadline(t time.Time) (err error) {
+func (s *StdConn) SetReadDeadline(t time.Time) (e error) {
 	// this is a no-op as it is not relevant to the type of connection
 	return
 }
 
-func (s *StdConn) SetWriteDeadline(t time.Time) (err error) {
+func (s *StdConn) SetWriteDeadline(t time.Time) (e error) {
 	// this is a no-op as it is not relevant to the type of connection
 	return
 }

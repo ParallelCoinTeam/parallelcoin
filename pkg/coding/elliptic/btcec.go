@@ -893,7 +893,7 @@ func initS256() {
 	secp256k1.byteSize = secp256k1.BitSize / 8
 	// Deserialize and set the pre-computed table used to accelerate scalar base multiplication. This is hard-coded
 	// data, so any errors are panics because it means something is wrong in the source code.
-	if err := loadS256BytePoints(); err != nil {
+	if e := loadS256BytePoints(); dbg.Chk(e) {
 		panic(err)
 	}
 	// Next 6 constants are from Hal Finney's bitcointalk.org post:

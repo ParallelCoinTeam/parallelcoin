@@ -30,8 +30,8 @@ func TestTx(t *testing.T) {
 	}
 	// Hash for block 100,000 transaction 0.
 	wantHashStr := "8c14f0db3df150123e6f3dbbf30f8b955a8249b62ac1d1ff16284aefa3d06d87"
-	wantHash, err := chainhash.NewHashFromStr(wantHashStr)
-	if err != nil {
+	wantHash, e := chainhash.NewHashFromStr(wantHashStr)
+	if e != nil  {
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	// Request the hash multiple times to test generation and caching.
@@ -49,14 +49,14 @@ func TestNewTxFromBytes(t *testing.T) {
 	// Serialize the test transaction.
 	testTx := Block100000.Transactions[0]
 	var testTxBuf bytes.Buffer
-	err := testTx.Serialize(&testTxBuf)
-	if err != nil {
+	e := testTx.Serialize(&testTxBuf)
+	if e != nil  {
 		t.Errorf("Serialize: %v", err)
 	}
 	testTxBytes := testTxBuf.Bytes()
 	// Create a new transaction from the serialized bytes.
-	tx, err := util.NewTxFromBytes(testTxBytes)
-	if err != nil {
+	tx, e := util.NewTxFromBytes(testTxBytes)
+	if e != nil  {
 		t.Errorf("NewTxFromBytes: %v", err)
 		return
 	}
@@ -72,15 +72,15 @@ func TestTxErrors(t *testing.T) {
 	// Serialize the test transaction.
 	testTx := Block100000.Transactions[0]
 	var testTxBuf bytes.Buffer
-	err := testTx.Serialize(&testTxBuf)
-	if err != nil {
+	e := testTx.Serialize(&testTxBuf)
+	if e != nil  {
 		t.Errorf("Serialize: %v", err)
 	}
 	testTxBytes := testTxBuf.Bytes()
 	// Truncate the transaction byte buffer to force errors.
 	shortBytes := testTxBytes[:4]
-	_, err = util.NewTxFromBytes(shortBytes)
-	if err != io.EOF {
+	_, e = util.NewTxFromBytes(shortBytes)
+	if e != io.EOF {
 		t.Errorf("NewTxFromBytes: did not get expected error - "+
 			"got %v, want %v", err, io.EOF)
 	}

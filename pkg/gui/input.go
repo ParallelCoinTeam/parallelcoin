@@ -61,7 +61,7 @@ func (w *Window) Input(txt, hint, borderColorFocused, borderColorUnfocused,
 		p.editor.Focus()
 	}
 	copyClickableFn := func() {
-		if err := clipboard.WriteAll(p.editor.Text()); Check(err) {
+		if e := clipboard.WriteAll(p.editor.Text()); dbg.Chk(e) {
 		}
 		p.editor.Focus()
 	}
@@ -73,9 +73,9 @@ func (w *Window) Input(txt, hint, borderColorFocused, borderColorUnfocused,
 			}
 		}
 		txt := p.editor.Text()
-		var err error
+		var e error
 		var cb string
-		if cb, err = clipboard.ReadAll(); Check(err) {
+		if cb, e = clipboard.ReadAll(); dbg.Chk(e) {
 		}
 		// the SetPasteFunc is a function that screens the clipboard input and
 		// does something other than directly paste into the field. If it returns

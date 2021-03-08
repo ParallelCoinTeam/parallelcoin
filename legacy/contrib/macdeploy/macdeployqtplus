@@ -24,7 +24,7 @@ from argparse import ArgumentParser
 
 # This is ported from the original macdeployqt with modifications
 
-class FrameworkInfo(object):
+class Frameworkinf.Ln(object):
     def __init__(self):
         self.frameworkDirectory = ""
         self.frameworkName = ""
@@ -146,7 +146,7 @@ class FrameworkInfo(object):
         
         return info
 
-class ApplicationBundleInfo(object):
+class ApplicationBundleinf.Ln(object):
     def __init__(self, path):
         self.path = path
         appName = os.path.splitext(os.path.basename(path))[0]
@@ -156,7 +156,7 @@ class ApplicationBundleInfo(object):
         self.resourcesPath = os.path.join(path, "Contents", "Resources")
         self.pluginPath = os.path.join(path, "Contents", "PlugIns")
 
-class DeploymentInfo(object):
+class Deploymentinf.Ln(object):
     def __init__(self):
         self.qtPath = None
         self.pluginPath = None
@@ -292,7 +292,7 @@ def copyFramework(framework, path, verbose):
 
 def deployFrameworks(frameworks, bundlePath, binaryPath, strip, verbose, deploymentInfo=None):
     if deploymentInfo is None:
-        deploymentInfo = DeploymentInfo()
+        deploymentInfo = Deploymentinf.Ln()
     
     while len(frameworks) > 0:
         framework = frameworks.pop(0)
@@ -340,7 +340,7 @@ def deployFrameworksForAppBundle(applicationBundle, strip, verbose):
     frameworks = getFrameworks(applicationBundle.binaryPath, verbose)
     if len(frameworks) == 0 and verbose >= 1:
         print "Warning: Could not find any external frameworks to deploy in %s." % (applicationBundle.path)
-        return DeploymentInfo()
+        return Deploymentinf.Ln()
     else:
         return deployFrameworks(frameworks, applicationBundle.path, applicationBundle.binaryPath, strip, verbose)
 
@@ -557,7 +557,7 @@ if verbose >= 3:
 os.mkdir("dist")
 shutil.copytree(app_bundle, target)
 
-applicationBundle = ApplicationBundleInfo(target)
+applicationBundle = ApplicationBundleinf.Ln(target)
 
 # ------------------------------------------------
 

@@ -6,9 +6,9 @@ import (
 
 // FileExists reports whether the named file or directory exists.
 func FileExists(filePath string) (bool, error) {
-	_, err := os.Stat(filePath)
-	if err != nil {
-		Error(err)
+	_, e := os.Stat(filePath)
+	if e != nil  {
+		err.Ln(err)
 		if os.IsNotExist(err) {
 			return false, nil
 		}

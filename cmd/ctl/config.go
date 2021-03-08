@@ -41,10 +41,10 @@ func ListCommands() {
 	// Get a list of registered commands and categorize and filter them.
 	cmdMethods := btcjson.RegisteredCmdMethods()
 	categorized := make([][]string, numCategories)
-	var err error
+	var e error
 	for _, method := range cmdMethods {
 		var flags btcjson.UsageFlag
-		if flags, err = btcjson.MethodUsageFlags(method); Check(err) {
+		if flags, e = btcjson.MethodUsageFlags(method); dbg.Chk(e) {
 			// This should never happen since the method was just returned from the package, but be safe.
 			continue
 		}
@@ -53,7 +53,7 @@ func ListCommands() {
 			continue
 		}
 		var usage string
-		if usage, err = btcjson.MethodUsageText(method); Check(err){
+		if usage, e = btcjson.MethodUsageText(method); dbg.Chk(e){
 			// This should never happen since the method was just returned from the package, but be safe.
 			continue
 		}

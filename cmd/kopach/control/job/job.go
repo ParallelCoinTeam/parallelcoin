@@ -49,11 +49,11 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 	bH := node.Chain.BestSnapshot().Height + 1
 	tip := node.Chain.BestChain.Tip()
 	bitsMap := make(blockchain.Diffs)
-	var err error
+	var e error
 	df, ok := tip.Diffs.Load().(blockchain.Diffs)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
-		if bitsMap, err = node.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); Check(err) {
+		if bitsMap, e = node.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); dbg.Chk(e) {
 			return
 		}
 		tip.Diffs.Store(bitsMap)
@@ -87,16 +87,16 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 		txc := coinbase.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
-		// Debugs(coinbase)
+		// dbg.S(coinbase)
 		(*cbs)[i] = txx
-		// Debug("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
+		// dbg.Ln("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append(txr, txx), false,
 		)
-		// Debugs(mTree)
+		// dbg.S(mTree)
 		mr := mTree.GetRoot()
 		if mr == nil {
-			err = errors.New("got a nil merkle root")
+			e = errors.New("got a nil merkle root")
 			panic(err)
 			return
 		}
@@ -115,16 +115,16 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 	// 	jrb.CoinBases[i] = (*cbs)[i]
 	// }
 	out = gotiny.Marshal(&jrb)
-	// Debugs(jrb)
-	// Debugs(out)
+	// dbg.S(jrb)
+	// dbg.S(out)
 	// var testy []byte
 	// for i := range out {
 	// 	testy = append(testy, out[i])
 	// }
 	// var jr Job
-	// Debug(gotiny.Unmarshal(testy, &jr))
-	// Debugs(jr)
-	// Debug("job size", len(jobber))
+	// dbg.Ln(gotiny.Unmarshal(testy, &jr))
+	// dbg.S(jr)
+	// dbg.Ln("job size", len(jobber))
 	// return Container{*msg.CreateContainer(Magic)}, txr
 	return cbs, out, txr
 }

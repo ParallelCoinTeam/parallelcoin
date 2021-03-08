@@ -34,7 +34,7 @@ func logServiceStartOfDay(srvr *server) {
 	message += fmt.Sprintf("Configuration directory: %s\n", defaultHomeDir)
 	message += fmt.Sprintf("Configuration file: %s\n", cfg.ConfigFile)
 	message += fmt.Sprintf("Data directory: %s\n", cfg.DataDir)
-	eL.Info(1, message)
+	eL.inf.Ln(1, message)
 }
 
 // podService houses the main service handler which handles all service
@@ -57,7 +57,7 @@ func (s *podService) Execute(args []string, r <-chan svc.ChangeRequest, changes 
 	doneChan := make(chan error)
 	serverChan := make(chan *server)
 	go func() {
-		err := podMain(serverChan)
+		e := podMain(serverChan)
 		doneChan <- err
 	}()
 	// Service is now started.
@@ -84,10 +84,9 @@ loop:
 		case srvr := <-serverChan:
 			mainServer = srvr
 			logServiceStartOfDay(mainServer)
-		case err := <-doneChan:
-			if err != nil {
-		L.Error(err)
-eL.Error(1, err.Error())
+		case e := <-doneChan:
+			if e != nil  {
+		L.eL.Error(1, err.Error())
 			}
 			break loop
 		}
@@ -100,41 +99,38 @@ eL.Error(1, err.Error())
 // installService attempts to install the pod service.
 // Typically this should be done by the msi installer,
 // but it is provided here since it can be useful for development.
-func installService() error {
+func installService() (e error) {
 	// Get the path of the current executable.  This is needed because os.
 	// Args[0] can vary depending on how the application was launched.
 	// For example, under cmd.exe it will only be the name of the app without
 	// the path or extension but under mingw it will be the full path
 	// including the extension.
-	exePath, err := filepath.Abs(os.Args[0])
-	if err != nil {
-		L.Error(err)
-return err
+	exePath, e := filepath.Abs(os.Args[0])
+	if e != nil  {
+		L.return err
 	}
 	if filepath.Ext(exePath) == "" {
 		exePath += ".exe"
 	}
 	// Connect to the windows service manager.
-	serviceManager, err := mgr.Connect()
-	if err != nil {
-		L.Error(err)
-return err
+	serviceManager, e := mgr.Connect()
+	if e != nil  {
+		L.return err
 	}
 	defer serviceManager.Disconnect()
 	// Ensure the service doesn't already exist.
-	service, err := serviceManager.OpenService(svcName)
-	if err == nil {
+	service, e := serviceManager.OpenService(svcName)
+	if e ==  nil {
 		service.Close()
 		return fmt.Errorf("service %s already exists", svcName)
 	}
 	// Install the service.
-	service, err = serviceManager.CreateService(svcName, exePath, mgr.Config{
+	service, e = serviceManager.CreateService(svcName, exePath, mgr.Config{
 		DisplayName: svcDisplayName,
 		Description: svcDesc,
 	})
-	if err != nil {
-		L.Error(err)
-return err
+	if e != nil  {
+		L.return err
 	}
 	defer service.Close()
 	// Support events to the event log using the standard "standard" Windows
@@ -151,19 +147,17 @@ return err
 // but it is provided here since it can be useful for development.
 // Not the eventlog entry is intentionally not removed since it would
 // invalidate any existing event log messages.
-func removeService() error {
+func removeService() (e error) {
 	// Connect to the windows service manager.
-	serviceManager, err := mgr.Connect()
-	if err != nil {
-		L.Error(err)
-return err
+	serviceManager, e := mgr.Connect()
+	if e != nil  {
+		L.return err
 	}
 	defer serviceManager.Disconnect()
 	// Ensure the service exists.
-	service, err := serviceManager.OpenService(svcName)
-	if err != nil {
-		L.Error(err)
-return fmt.Errorf("service %s is not installed", svcName)
+	service, e := serviceManager.OpenService(svcName)
+	if e != nil  {
+		L.return fmt.Errorf("service %s is not installed", svcName)
 	}
 	defer service.Close()
 	// Remove the service.
@@ -171,24 +165,21 @@ return fmt.Errorf("service %s is not installed", svcName)
 }
 
 // startService attempts to start the pod service.
-func startService() error {
+func startService() (e error) {
 	// Connect to the windows service manager.
-	serviceManager, err := mgr.Connect()
-	if err != nil {
-		L.Error(err)
-return err
+	serviceManager, e := mgr.Connect()
+	if e != nil  {
+		L.return err
 	}
 	defer serviceManager.Disconnect()
-	service, err := serviceManager.OpenService(svcName)
-	if err != nil {
-		L.Error(err)
-return fmt.Errorf("could not access service: %v", err)
+	service, e := serviceManager.OpenService(svcName)
+	if e != nil  {
+		L.return fmt.Errorf("could not access service: %v", err)
 	}
 	defer service.Close()
-	err = service.Start(os.Args)
-	if err != nil {
-		L.Error(err)
-return fmt.Errorf("could not start service: %v", err)
+	e = service.Start(os.Args)
+	if e != nil  {
+		L.return fmt.Errorf("could not start service: %v", err)
 	}
 	return nil
 }
@@ -196,24 +187,21 @@ return fmt.Errorf("could not start service: %v", err)
 // controlService allows commands which change the status of the service.
 // It also waits for up to 10 seconds for the service to change to the passed
 // state.
-func controlService(c svc.Cmd, to svc.State) error {
+func controlService(c svc.Cmd, to svc.State) (e error) {
 	// Connect to the windows service manager.
-	serviceManager, err := mgr.Connect()
-	if err != nil {
-		L.Error(err)
-return err
+	serviceManager, e := mgr.Connect()
+	if e != nil  {
+		L.return err
 	}
 	defer serviceManager.Disconnect()
-	service, err := serviceManager.OpenService(svcName)
-	if err != nil {
-		L.Error(err)
-return fmt.Errorf("could not access service: %v", err)
+	service, e := serviceManager.OpenService(svcName)
+	if e != nil  {
+		L.return fmt.Errorf("could not access service: %v", err)
 	}
 	defer service.Close()
-	status, err := service.Control(c)
-	if err != nil {
-		L.Error(err)
-return fmt.Errorf("could not send control=%d: %v", c, err)
+	status, e := service.Control(c)
+	if e != nil  {
+		L.return fmt.Errorf("could not send control=%d: %v", c, err)
 	}
 	// Send the control message.
 	timeout := time.Now().Add(10 * time.Second)
@@ -223,10 +211,9 @@ return fmt.Errorf("could not send control=%d: %v", c, err)
 				"to state=%d", to)
 		}
 		time.Sleep(300 * time.Millisecond)
-		status, err = service.Query()
-		if err != nil {
-		L.Error(err)
-return fmt.Errorf("could not retrieve service "+
+		status, e = service.Query()
+		if e != nil  {
+		L.return fmt.Errorf("could not retrieve service "+
 				"status: %v", err)
 		}
 	}
@@ -236,19 +223,19 @@ return fmt.Errorf("could not retrieve service "+
 // performServiceCommand attempts to run one of the supported service
 // commands provided on the command line via the service command flag.
 // An appropriate error is returned if an invalid command is specified.
-func performServiceCommand(command string) error {
-	var err error
+func performServiceCommand(command string) (e error) {
+	var e error
 	switch command {
 	case "install":
-		err = installService()
+		e = installService()
 	case "remove":
-		err = removeService()
+		e = removeService()
 	case "start":
-		err = startService()
+		e = startService()
 	case "stop":
-		err = controlService(svc.Stop, svc.Stopped)
+		e = controlService(svc.Stop, svc.Stopped)
 	default:
-		err = fmt.Errorf("invalid service command [%s]", command)
+		e = fmt.Errorf("invalid service command [%s]", command)
 	}
 	return err
 }
@@ -261,24 +248,21 @@ func performServiceCommand(command string) error {
 func serviceMain() (bool, error) {
 	// Don't run as a service if we're running interactively
 	// (or that can't be determined due to an error).
-	isInteractive, err := svc.IsAnInteractiveSession()
-	if err != nil {
-		L.Error(err)
-return false, err
+	isInteractive, e := svc.IsAnInteractiveSession()
+	if e != nil  {
+		L.return false, err
 	}
 	if isInteractive {
 		return false, nil
 	}
-	elog, err = eventlog.Open(svcName)
-	if err != nil {
-		L.Error(err)
-return false, err
+	elog, e = eventlog.Open(svcName)
+	if e != nil  {
+		L.return false, err
 	}
 	defer elog.Close()
-	err = svc.Run(svcName, &podService{})
-	if err != nil {
-		L.Error(err)
-eL.Error(1, fmt.Sprintf("Service start failed: %v", err))
+	e = svc.Run(svcName, &podService{})
+	if e != nil  {
+		L.eL.Error(1, fmt.Sprintf("Service start failed: %v", err))
 		return true, err
 	}
 	return true, nil

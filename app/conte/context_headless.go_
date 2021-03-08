@@ -86,8 +86,8 @@ func (cx *Xt) WaitAdd() {
 	record := fmt.Sprintf("+ %s:%d", file, line)
 	cx.waitChangers = append(cx.waitChangers, record)
 	cx.waitCounter++
-	Debug("added to waitgroup", record, cx.waitCounter)
-	Debug(cx.PrintWaitChangers())
+	dbg.Ln("added to waitgroup", record, cx.waitCounter)
+	dbg.Ln(cx.PrintWaitChangers())
 }
 
 func (cx *Xt) WaitDone() {
@@ -95,14 +95,14 @@ func (cx *Xt) WaitDone() {
 	record := fmt.Sprintf("- %s:%d", file, line)
 	cx.waitChangers = append(cx.waitChangers, record)
 	cx.waitCounter--
-	Debug("removed from waitgroup", record, cx.waitCounter)
-	Debug(cx.PrintWaitChangers())
+	dbg.Ln("removed from waitgroup", record, cx.waitCounter)
+	dbg.Ln(cx.PrintWaitChangers())
 	qu.PrintChanState()
 	cx.WaitGroup.Done()
 }
 
 func (cx *Xt) WaitWait() {
-	Debug(cx.PrintWaitChangers())
+	dbg.Ln(cx.PrintWaitChangers())
 	cx.WaitGroup.Wait()
 }
 
@@ -150,9 +150,9 @@ func (cx *Xt) IsCurrent() (is bool) {
 	othernodes := cx.OtherNodes.Load()
 	if !*cx.Config.LAN {
 		cc -= othernodes
-		// Debug("LAN disabled, non-lan node count:", cc)
+		// dbg.Ln("LAN disabled, non-lan node count:", cc)
 	}
-	// Debug("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
+	// dbg.Ln("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
 	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true
@@ -161,7 +161,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load() || *cx.Config.Solo
-	Trace(
+	trc.Ln(
 		"is current:", is, "-", rn.Chain.IsCurrent(), rn.SyncManager.IsCurrent(), !*cx.Config.Solo, "connected",
 		rn.HighestKnown.Load(), rn.Chain.BestChain.Height(),
 	)

@@ -28,9 +28,9 @@ func main() {
 	}
 	// Connect to local btcwallet RPC server using websockets.
 	certHomeDir := appdata.Dir("mod", false)
-	certs, err := ioutil.ReadFile(filepath.Join(certHomeDir, "rpc.cert"))
-	if err != nil {
-		Fatal(err)
+	certs, e := ioutil.ReadFile(filepath.Join(certHomeDir, "rpc.cert"))
+	if e != nil  {
+		ftl.Ln(err)
 	}
 	connCfg := &rpcclient.ConnConfig{
 		Host:         "localhost:11046",
@@ -39,14 +39,14 @@ func main() {
 		Pass:         "yourrpcpass",
 		Certificates: certs,
 	}
-	client, err := rpcclient.New(connCfg, &ntfnHandlers, qu.T())
-	if err != nil {
-		Fatal(err)
+	client, e := rpcclient.New(connCfg, &ntfnHandlers, qu.T())
+	if e != nil  {
+		ftl.Ln(err)
 	}
 	// Get the list of unspent transaction outputs (utxos) that the connected wallet has at least one private key for.
-	unspent, err := client.ListUnspent()
-	if err != nil {
-		Fatal(err)
+	unspent, e := client.ListUnspent()
+	if e != nil  {
+		ftl.Ln(err)
 	}
 	log.Printf("Num unspent outputs (utxos): %d", len(unspent))
 	if len(unspent) > 0 {

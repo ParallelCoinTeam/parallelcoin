@@ -8,11 +8,10 @@ import (
 	log "github.com/p9c/pod/pkg/logi"
 )
 
-func reusePort(network, address string, conn syscall.RawConn) error {
+func reusePort(network, address string, conn syscall.RawConn) (e error) {
 	return conn.Control(func(descriptor uintptr) {
-		err := syscall.SetsockoptInt(syscall.Handle(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
-		if err != nil {
-			L.Error(err)
-		}
+		e := syscall.SetsockoptInt(syscall.Handle(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
+		if e != nil  {
+			L.		}
 	})
 }

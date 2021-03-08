@@ -89,8 +89,8 @@ func (cx *Xt) WaitAdd() {
 	record := fmt.Sprintf("+ %s:%d", file, line)
 	cx.waitChangers = append(cx.waitChangers, record)
 	cx.waitCounter++
-	Debug("added to waitgroup", record, cx.waitCounter)
-	Debug(cx.PrintWaitChangers())
+	dbg.Ln("added to waitgroup", record, cx.waitCounter)
+	dbg.Ln(cx.PrintWaitChangers())
 }
 
 func (cx *Xt) WaitDone() {
@@ -98,14 +98,14 @@ func (cx *Xt) WaitDone() {
 	record := fmt.Sprintf("- %s:%d", file, line)
 	cx.waitChangers = append(cx.waitChangers, record)
 	cx.waitCounter--
-	Debug("removed from waitgroup", record, cx.waitCounter)
-	Debug(cx.PrintWaitChangers())
+	dbg.Ln("removed from waitgroup", record, cx.waitCounter)
+	dbg.Ln(cx.PrintWaitChangers())
 	qu.PrintChanState()
 	cx.WaitGroup.Done()
 }
 
 func (cx *Xt) WaitWait() {
-	Debug(cx.PrintWaitChangers())
+	dbg.Ln(cx.PrintWaitChangers())
 	cx.WaitGroup.Wait()
 }
 
@@ -153,13 +153,13 @@ func (cx *Xt) IsCurrent() (is bool) {
 	if !*cx.Config.LAN {
 		cc -= othernodes
 	}
-	Debug(cc, "nodes connected")
+	dbg.Ln(cc, "nodes connected")
 	connected := cc > 0
 	is = rn.Chain.IsCurrent() &&
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load() || *cx.Config.Solo
-	Debug(
+	dbg.Ln(
 		"is current:", is, "-", rn.Chain.IsCurrent(), rn.SyncManager.IsCurrent(),
 		*cx.Config.Solo, "connected", rn.HighestKnown.Load(), rn.Chain.BestChain.Height(),
 		othernodes,

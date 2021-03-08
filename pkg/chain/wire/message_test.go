@@ -105,8 +105,8 @@ func TestMessage(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		var buf bytes.Buffer
-		nw, err := WriteMessageN(&buf, test.in, test.pver, test.btcnet)
-		if err != nil {
+		nw, e := WriteMessageN(&buf, test.in, test.pver, test.btcnet)
+		if e != nil  {
 			t.Errorf("WriteMessage #%d error %v", i, err)
 			continue
 		}
@@ -117,8 +117,8 @@ func TestMessage(t *testing.T) {
 		}
 		// Decode from wire format.
 		rbuf := bytes.NewReader(buf.Bytes())
-		nr, msg, _, err := ReadMessageN(rbuf, test.pver, test.btcnet)
-		if err != nil {
+		nr, msg, _, e = ReadMessageN(rbuf, test.pver, test.btcnet)
+		if e != nil  {
 			t.Errorf("ReadMessage #%d error %v, msg %v", i, err,
 				spew.Sdump(msg))
 			continue
@@ -139,15 +139,15 @@ func TestMessage(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		var buf bytes.Buffer
-		err := WriteMessage(&buf, test.in, test.pver, test.btcnet)
-		if err != nil {
+		e := WriteMessage(&buf, test.in, test.pver, test.btcnet)
+		if e != nil  {
 			t.Errorf("WriteMessage #%d error %v", i, err)
 			continue
 		}
 		// Decode from wire format.
 		rbuf := bytes.NewReader(buf.Bytes())
-		msg, _, err := ReadMessage(rbuf, test.pver, test.btcnet)
-		if err != nil {
+		msg, _, e = ReadMessage(rbuf, test.pver, test.btcnet)
+		if e != nil  {
 			t.Errorf("ReadMessage #%d error %v, msg %v", i, err,
 				spew.Sdump(msg))
 			continue
@@ -307,7 +307,7 @@ func TestReadMessageWireErrors(t *testing.T) {
 	for i, test := range tests {
 		// Decode from wire format.
 		r := newFixedReader(test.max, test.buf)
-		nr, _, _, err := ReadMessageN(r, test.pver, test.btcnet)
+		nr, _, _, e = ReadMessageN(r, test.pver, test.btcnet)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
 			t.Errorf("ReadMessage #%d wrong error got: %v <%T>, "+
 				"want: %T", i, err, err, test.readErr)
@@ -374,7 +374,7 @@ func TestWriteMessageWireErrors(t *testing.T) {
 	for i, test := range tests {
 		// Encode wire format.
 		w := newFixedWriter(test.max)
-		nw, err := WriteMessageN(w, test.msg, test.pver, test.btcnet)
+		nw, e := WriteMessageN(w, test.msg, test.pver, test.btcnet)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("WriteMessage #%d wrong error got: %v <%T>, "+
 				"want: %T", i, err, err, test.err)

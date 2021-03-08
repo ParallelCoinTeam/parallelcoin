@@ -37,31 +37,31 @@ const (
 		// ScriptVerifyWitness |
 		// ScriptVerifyDiscourageUpgradeableWitnessProgram |
 		ScriptVerifyMinimalIf
-		// ScriptVerifyWitnessPubKeyType
-
+	// ScriptVerifyWitnessPubKeyType
+	
 	// Classes of script payment known about in the blockchain.
-
-	NonStandardTy         ScriptClass = iota // None of the recognized forms.
-	PubKeyTy                                 // Pay pubkey.
-	PubKeyHashTy                             // Pay pubkey hash.
+	
+	NonStandardTy ScriptClass = iota // None of the recognized forms.
+	PubKeyTy                         // Pay pubkey.
+	PubKeyHashTy                     // Pay pubkey hash.
 	// WitnessV0PubKeyHashTy                    // Pay witness pubkey hash.
-	ScriptHashTy                             // Pay to script hash.
+	ScriptHashTy // Pay to script hash.
 	// WitnessV0ScriptHashTy                    // Pay to witness script hash.
-	MultiSigTy                               // Multi signature.
-	NullDataTy                               // Empty data-only (provably prunable).
+	MultiSigTy // Multi signature.
+	NullDataTy // Empty data-only (provably prunable).
 )
 
 // scriptClassToName houses the human-readable strings which describe each
 // script class.
 var scriptClassToName = []string{
-	NonStandardTy:         "nonstandard",
-	PubKeyTy:              "pubkey",
-	PubKeyHashTy:          "pubkeyhash",
+	NonStandardTy: "nonstandard",
+	PubKeyTy:      "pubkey",
+	PubKeyHashTy:  "pubkeyhash",
 	// WitnessV0PubKeyHashTy: "witness_v0_keyhash",
-	ScriptHashTy:          "scripthash",
+	ScriptHashTy: "scripthash",
 	// WitnessV0ScriptHashTy: "witness_v0_scripthash",
-	MultiSigTy:            "multisig",
-	NullDataTy:            "nulldata",
+	MultiSigTy: "multisig",
+	NullDataTy: "nulldata",
 }
 
 // String implements the Stringer interface by returning the name of the enum
@@ -147,12 +147,12 @@ func typeOfScript(pops []parsedOpcode) ScriptClass {
 		return PubKeyTy
 	} else if isPubkeyHash(pops) {
 		return PubKeyHashTy
-	// } else if isWitnessPubKeyHash(pops) {
-	// 	return WitnessV0PubKeyHashTy
+		// } else if isWitnessPubKeyHash(pops) {
+		// 	return WitnessV0PubKeyHashTy
 	} else if isScriptHash(pops) {
 		return ScriptHashTy
-	// } else if isWitnessScriptHash(pops) {
-	// 	return WitnessV0ScriptHashTy
+		// } else if isWitnessScriptHash(pops) {
+		// 	return WitnessV0ScriptHashTy
 	} else if isMultiSig(pops) {
 		return MultiSigTy
 	} else if isNullData(pops) {
@@ -164,9 +164,8 @@ func typeOfScript(pops []parsedOpcode) ScriptClass {
 // GetScriptClass returns the class of the script passed. NonStandardTy will be
 // returned when the script does not parse.
 func GetScriptClass(script []byte) ScriptClass {
-	pops, err := parseScript(script)
-	if err != nil {
-		Error(err)
+	pops, e := parseScript(script)
+	if e != nil {
 		return NonStandardTy
 	}
 	return typeOfScript(pops)
@@ -193,7 +192,7 @@ func expectedInputs(pops []parsedOpcode, class ScriptClass) int {
 	// 	return 1
 	case MultiSigTy:
 		// Standard multisig has a push a small number for the number of sigs and number
-		// of keys. Check the first push instruction to see how many arguments are
+		// of keys. Chk the first push instruction to see how many arguments are
 		// expected. typeOfScript already checked this so we know it'll be a small int.
 		// Also, due to the original bitcoind bug where OP_CHECKMULTISIG pops an
 		// additional item from the stack, add an extra expected input for the extra
@@ -225,24 +224,24 @@ type ScriptInfo struct {
 // pair. It will error if the pair is in someway invalid such that they can not
 // be analysed, i.e. if they do not parse or the pkScript is not a push-only
 // script
-func CalcScriptInfo(sigScript, pkScript []byte, bip16 bool) (*ScriptInfo, error) {
-	sigPops, err := parseScript(sigScript)
-	if err != nil {
-		Error(err)
-		return nil, err
+func CalcScriptInfo(sigScript, pkScript []byte, bip16 bool) (si *ScriptInfo, e error) {
+	var sigPops []parsedOpcode
+	if sigPops, e = parseScript(sigScript); dbg.Chk(e) {
+		return
 	}
-	pkPops, err := parseScript(pkScript)
-	if err != nil {
-		Error(err)
-		return nil, err
+	var pkPops []parsedOpcode
+	if pkPops, e = parseScript(pkScript); dbg.Chk(e) {
+		return
 	}
 	// Push only sigScript makes little sense.
-	si := new(ScriptInfo)
+	si = new(ScriptInfo)
 	si.PkScriptClass = typeOfScript(pkPops)
 	// Can't have a signature script that doesn't just push data.
 	if !isPushOnly(sigPops) {
-		return nil, scriptError(ErrNotPushOnly,
-			"signature script is not push only")
+		return nil, scriptError(
+			ErrNotPushOnly,
+			"signature script is not push only",
+		)
 	}
 	si.ExpectedInputs = expectedInputs(pkPops, si.PkScriptClass)
 	switch {
@@ -250,10 +249,9 @@ func CalcScriptInfo(sigScript, pkScript []byte, bip16 bool) (*ScriptInfo, error)
 	case si.PkScriptClass == ScriptHashTy && bip16:
 		// The pay-to-hash-script is the final data push of the signature script.
 		script := sigPops[len(sigPops)-1].data
-		shPops, err := parseScript(script)
-		if err != nil {
-			Error(err)
-			return nil, err
+		shPops, e := parseScript(script)
+		if e != nil {
+			return nil, e
 		}
 		shInputs := expectedInputs(shPops, typeOfScript(shPops))
 		if shInputs == -1 {
@@ -310,10 +308,9 @@ func CalcScriptInfo(sigScript, pkScript []byte, bip16 bool) (*ScriptInfo, error)
 // multi-signature transaction script. The passed script MUST already be known
 // to be a multi-signature script.
 func CalcMultiSigStats(script []byte) (int, int, error) {
-	pops, err := parseScript(script)
-	if err != nil {
-		Error(err)
-		return 0, 0, err
+	pops, e := parseScript(script)
+	if e != nil {
+		return 0, 0, e
 	}
 	// A multi-signature script is of the pattern:
 	//
@@ -374,37 +371,45 @@ func PayToAddrScript(addr util.Address) ([]byte, error) {
 	switch addr := addr.(type) {
 	case *util.AddressPubKeyHash:
 		if addr == nil {
-			return nil, scriptError(ErrUnsupportedAddress,
-				nilAddrErrStr)
+			return nil, scriptError(
+				ErrUnsupportedAddress,
+				nilAddrErrStr,
+			)
 		}
 		return payToPubKeyHashScript(addr.ScriptAddress())
 	case *util.AddressScriptHash:
 		if addr == nil {
-			return nil, scriptError(ErrUnsupportedAddress,
-				nilAddrErrStr)
+			return nil, scriptError(
+				ErrUnsupportedAddress,
+				nilAddrErrStr,
+			)
 		}
 		return payToScriptHashScript(addr.ScriptAddress())
 	case *util.AddressPubKey:
 		if addr == nil {
-			return nil, scriptError(ErrUnsupportedAddress,
-				nilAddrErrStr)
+			return nil, scriptError(
+				ErrUnsupportedAddress,
+				nilAddrErrStr,
+			)
 		}
 		return payToPubKeyScript(addr.ScriptAddress())
-	// case *util.AddressWitnessPubKeyHash:
-	// 	if addr == nil {
-	// 		return nil, scriptError(ErrUnsupportedAddress,
-	// 			nilAddrErrStr)
-	// 	}
-	// 	return payToWitnessPubKeyHashScript(addr.ScriptAddress())
-	// case *util.AddressWitnessScriptHash:
-	// 	if addr == nil {
-	// 		return nil, scriptError(ErrUnsupportedAddress,
-	// 			nilAddrErrStr)
-	// 	}
-	// 	return payToWitnessScriptHashScript(addr.ScriptAddress())
+		// case *util.AddressWitnessPubKeyHash:
+		// 	if addr == nil {
+		// 		return nil, scriptError(ErrUnsupportedAddress,
+		// 			nilAddrErrStr)
+		// 	}
+		// 	return payToWitnessPubKeyHashScript(addr.ScriptAddress())
+		// case *util.AddressWitnessScriptHash:
+		// 	if addr == nil {
+		// 		return nil, scriptError(ErrUnsupportedAddress,
+		// 			nilAddrErrStr)
+		// 	}
+		// 	return payToWitnessScriptHashScript(addr.ScriptAddress())
 	}
-	str := fmt.Sprintf("unable to generate payment script for unsupported "+
-		"address type %T", addr)
+	str := fmt.Sprintf(
+		"unable to generate payment script for unsupported "+
+			"address type %T", addr,
+	)
 	return nil, scriptError(ErrUnsupportedAddress, str)
 }
 
@@ -414,8 +419,10 @@ func PayToAddrScript(addr util.Address) ([]byte, error) {
 // MaxDataCarrierSize.
 func NullDataScript(data []byte) ([]byte, error) {
 	if len(data) > MaxDataCarrierSize {
-		str := fmt.Sprintf("data size %d is larger than max "+
-			"allowed size %d", len(data), MaxDataCarrierSize)
+		str := fmt.Sprintf(
+			"data size %d is larger than max "+
+				"allowed size %d", len(data), MaxDataCarrierSize,
+		)
 		return nil, scriptError(ErrTooMuchNullData, str)
 	}
 	return NewScriptBuilder().AddOp(OP_RETURN).AddData(data).Script()
@@ -427,9 +434,11 @@ func NullDataScript(data []byte) ([]byte, error) {
 // be returned if nrequired is larger than the number of keys provided.
 func MultiSigScript(pubkeys []*util.AddressPubKey, nrequired int) ([]byte, error) {
 	if len(pubkeys) < nrequired {
-		str := fmt.Sprintf("unable to generate multisig script with "+
-			"%d required signatures when there are only %d public "+
-			"keys available", nrequired, len(pubkeys))
+		str := fmt.Sprintf(
+			"unable to generate multisig script with "+
+				"%d required signatures when there are only %d public "+
+				"keys available", nrequired, len(pubkeys),
+		)
 		return nil, scriptError(ErrTooManyRequiredSigs, str)
 	}
 	builder := NewScriptBuilder().AddInt64(int64(nrequired))
@@ -444,10 +453,9 @@ func MultiSigScript(pubkeys []*util.AddressPubKey, nrequired int) ([]byte, error
 // PushedData returns an array of byte slices containing any pushed data found
 // in the passed script. This includes OP_0, but not OP_1 - OP_16.
 func PushedData(script []byte) ([][]byte, error) {
-	pops, err := parseScript(script)
-	if err != nil {
-		Error(err)
-		return nil, err
+	pops, e := parseScript(script)
+	if e != nil {
+		return nil, e
 	}
 	var data [][]byte
 	for _, pop := range pops {
@@ -468,10 +476,9 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 	var addrs []util.Address
 	var requiredSigs int
 	// No valid addresses or required signatures if the script doesn't parse.
-	pops, err := parseScript(pkScript)
-	if err != nil {
-		Error(err)
-		return NonStandardTy, nil, 0, err
+	pops, e := parseScript(pkScript)
+	if e != nil {
+		return NonStandardTy, nil, 0, e
 	}
 	scriptClass := typeOfScript(pops)
 	switch scriptClass {
@@ -480,9 +487,11 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 		// OP_EQUALVERIFY OP_CHECKSIG Therefore the pubkey hash is the 3rd item on the
 		// stack. Skip the pubkey hash if it's invalid for some reason.
 		requiredSigs = 1
-		addr, err := util.NewAddressPubKeyHash(pops[2].data,
-			chainParams)
-		if err == nil {
+		addr, e := util.NewAddressPubKeyHash(
+			pops[2].data,
+			chainParams,
+		)
+		if e == nil {
 			addrs = append(addrs, addr)
 		}
 	// case WitnessV0PubKeyHashTy:
@@ -490,26 +499,28 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 	// 	// Therefore, the pubkey hash is the second item on the stack. Skip the pubkey
 	// 	// hash if it's invalid for some reason.
 	// 	requiredSigs = 1
-	// 	addr, err := util.NewAddressWitnessPubKeyHash(pops[1].data,
+	// 	addr, e := util.NewAddressWitnessPubKeyHash(pops[1].data,
 	// 		chainParams)
-	// 	if err == nil {
+	// 	if e ==  nil {
 	// 		addrs = append(addrs, addr)
 	// 	}
 	case PubKeyTy:
 		// A pay-to-pubkey script is of the form: <pubkey> OP_CHECKSIG Therefore the pubkey is the first item on the
 		// stack. Skip the pubkey if it's invalid for some reason.
 		requiredSigs = 1
-		addr, err := util.NewAddressPubKey(pops[0].data, chainParams)
-		if err == nil {
+		addr, e := util.NewAddressPubKey(pops[0].data, chainParams)
+		if e == nil {
 			addrs = append(addrs, addr)
 		}
 	case ScriptHashTy:
 		// A pay-to-script-hash script is of the form: OP_HASH160 <scripthash> OP_EQUAL Therefore the script hash is the
 		// 2nd item on the stack. Skip the script hash if it's invalid for some reason.
 		requiredSigs = 1
-		addr, err := util.NewAddressScriptHashFromHash(pops[1].data,
-			chainParams)
-		if err == nil {
+		addr, e := util.NewAddressScriptHashFromHash(
+			pops[1].data,
+			chainParams,
+		)
+		if e == nil {
 			addrs = append(addrs, addr)
 		}
 	// case WitnessV0ScriptHashTy:
@@ -517,9 +528,9 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 	// 	// Therefore, the script hash is the second item on the stack. Skip the script
 	// 	// hash if it's invalid for some reason.
 	// 	requiredSigs = 1
-	// 	addr, err := util.NewAddressWitnessScriptHash(pops[1].data,
+	// 	addr, e := util.NewAddressWitnessScriptHash(pops[1].data,
 	// 		chainParams)
-	// 	if err == nil {
+	// 	if e ==  nil {
 	// 		addrs = append(addrs, addr)
 	// 	}
 	case MultiSigTy:
@@ -532,9 +543,11 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 		// Extract the public keys while skipping any that are invalid.
 		addrs = make([]util.Address, 0, numPubKeys)
 		for i := 0; i < numPubKeys; i++ {
-			addr, err := util.NewAddressPubKey(pops[i+1].data,
-				chainParams)
-			if err == nil {
+			addr, e := util.NewAddressPubKey(
+				pops[i+1].data,
+				chainParams,
+			)
+			if e == nil {
 				addrs = append(addrs, addr)
 			}
 		}
@@ -567,10 +580,9 @@ type AtomicSwapDataPushes struct {
 // limitations which prevent callers using txscript to parse nonstandard
 // scripts.
 func ExtractAtomicSwapDataPushes(version uint16, pkScript []byte) (*AtomicSwapDataPushes, error) {
-	pops, err := parseScript(pkScript)
-	if err != nil {
-		Error(err)
-		return nil, err
+	pops, e := parseScript(pkScript)
+	if e != nil {
+		return nil, e
 	}
 	if len(pops) != 20 {
 		return nil, nil
@@ -603,9 +615,8 @@ func ExtractAtomicSwapDataPushes(version uint16, pkScript []byte) (*AtomicSwapDa
 	copy(pushes.RecipientHash160[:], pops[9].data)
 	copy(pushes.RefundHash160[:], pops[16].data)
 	if pops[2].data != nil {
-		locktime, err := makeScriptNum(pops[2].data, true, 5)
-		if err != nil {
-			Error(err)
+		locktime, e := makeScriptNum(pops[2].data, true, 5)
+		if e != nil {
 			return nil, nil
 		}
 		pushes.SecretSize = int64(locktime)
@@ -615,9 +626,8 @@ func ExtractAtomicSwapDataPushes(version uint16, pkScript []byte) (*AtomicSwapDa
 		return nil, nil
 	}
 	if pops[11].data != nil {
-		locktime, err := makeScriptNum(pops[11].data, true, 5)
-		if err != nil {
-			Error(err)
+		locktime, e := makeScriptNum(pops[11].data, true, 5)
+		if e != nil {
 			return nil, nil
 		}
 		pushes.LockTime = int64(locktime)

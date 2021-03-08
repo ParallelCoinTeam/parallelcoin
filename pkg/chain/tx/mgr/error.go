@@ -65,12 +65,12 @@ func (e TxMgrError) Error() string {
 	}
 	return e.Desc
 }
-func storeError(c ErrorCode, desc string, err error) TxMgrError {
-	return TxMgrError{Code: c, Desc: desc, Err: err}
+func storeError(c ErrorCode, desc string, e error) TxMgrError {
+	return TxMgrError{Code: c, Desc: desc, Err: e}
 }
 
 // IsNoExists returns whether an error is a TxMgrError with the ErrNoExists error code.
-func IsNoExists(err error) bool {
-	serr, ok := err.(TxMgrError)
+func IsNoExists(e error) bool {
+	serr, ok := e.(TxMgrError)
 	return ok && serr.Code == ErrNoExists
 }

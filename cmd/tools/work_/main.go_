@@ -64,18 +64,18 @@ func newNode(	nc nodeCfg) (n *node) {
 
 func (n *node) setupListener() {
 
-	addr, err := net.ResolveUDPAddr(uNet, n.cfg.Listener)
-	check(err)
-	n.connection, err = net.ListenUDP(uNet, addr)
-	check(err)
+	addr, e := net.ResolveUDPAddr(uNet, n.cfg.Listener)
+	dbg.Ok(err)
+	n.connection, e = net.ListenUDP(uNet, addr)
+	dbg.Ok(err)
 }
 
 func (n *node) readFromSocket() {
 
 	for {
 		var b = make([]byte, n.cfg.BufferSize)
-		count, addr, err := n.connection.ReadFromUDP(b[0:])
-		check(err)
+		count, addr, e := n.connection.ReadFromUDP(b[0:])
+		dbg.Ok(err)
 		b = b[:count]
 		if count > 0 {
 			*li <- fmt.Sprint("'", string(b), "' <- ", addr)
@@ -91,19 +91,19 @@ func (n *node) readFromSocket() {
 
 func (n *node) send(b []byte) {
 
-	addr, err := net.ResolveUDPAddr("udp4", n.cfg.Worker)
-	check(err)
-	conn, err := net.DialUDP(uNet, nil, addr)
-	check(err)
-	_, err = conn.Write(b)
-	check(err)
+	addr, e := net.ResolveUDPAddr("udp4", n.cfg.Worker)
+	dbg.Ok(err)
+	conn, e := net.DialUDP(uNet, nil, addr)
+	dbg.Ok(err)
+	_, e = conn.Write(b)
+	dbg.Ok(err)
 	*li <- "'" + string(b) + "' -> " + n.cfg.Worker
 }
 
-func check(	err error) {
+func check(	e error) {
 
-	if err != nil {
-		L.Error(err)
+	if e != nil  {
+		L.err.Ln(err)
 *le <- err.Error()
 	}
 }

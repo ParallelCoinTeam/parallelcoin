@@ -14,7 +14,7 @@ import (
 
 // mockRemotePeer creates a basic inbound peer listening on the simnet port for use with Example_peerConnection. It does
 // not return until the listner is active.
-func mockRemotePeer() error {
+func mockRemotePeer() (e error) {
 	// Configure peer to act as a simnet node that offers no services.
 	peerCfg := &peer.Config{
 		UserAgentName:    "peer",  // User agent name to advertise.
@@ -23,13 +23,13 @@ func mockRemotePeer() error {
 		TrickleInterval:  time.Second * 10,
 	}
 	// Accept connections on the simnet port.
-	listener, err := net.Listen("tcp", "127.0.0.1:18555")
-	if err != nil {
+	listener, e := net.Listen("tcp", "127.0.0.1:18555")
+	if e != nil  {
 		return err
 	}
 	go func() {
-		conn, err := listener.Accept()
-		if err != nil {
+		conn, e := listener.Accept()
+		if e != nil  {
 			peer.Errorf("Accept: error %v", err)
 			return
 		}
@@ -45,7 +45,7 @@ func mockRemotePeer() error {
 // peer.
 func Example_newOutboundPeer() {
 	// Ordinarily this will not be needed since the outbound peer will be connecting to a remote peer, however, since this example is executed and tested, a mock remote peer is needed to listen for the outbound peer.
-	if err := mockRemotePeer(); err != nil {
+	if e := mockRemotePeer(); dbg.Chk(e) {
 		peer.Errorf("mockRemotePeer: unexpected error %v", err)
 		return
 	}
@@ -67,14 +67,14 @@ func Example_newOutboundPeer() {
 			},
 		},
 	}
-	p, err := peer.NewOutboundPeer(peerCfg, "127.0.0.1:18555")
-	if err != nil {
+	p, e := peer.NewOutboundPeer(peerCfg, "127.0.0.1:18555")
+	if e != nil  {
 		peer.Errorf("NewOutboundPeer: error %v", err)
 		return
 	}
 	// Establish the connection to the peer address and mark it connected.
-	conn, err := net.Dial("tcp", p.Addr())
-	if err != nil {
+	conn, e := net.Dial("tcp", p.Addr())
+	if e != nil  {
 		peer.Errorf("net.Dial: error %v", err)
 		return
 	}

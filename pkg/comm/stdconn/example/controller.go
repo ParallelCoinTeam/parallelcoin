@@ -9,13 +9,13 @@ import (
 
 func main() {
 	log.L.SetLevel("trace", true, "pod")
-	Info("starting up example controller")
+	inf.Ln("starting up example controller")
 	cmd, _ := worker.Spawn(qu.T(), "go", "run", "hello/worker.go")
 	client := hello.NewClient(cmd.StdConn)
-	Info("calling Hello.Say with 'worker'")
-	Info("reply:", client.Say("worker"))
-	Info("calling Hello.Bye")
-	Info("reply:", client.Bye())
-	if err := cmd.Kill(); Check(err) {
+	inf.Ln("calling Hello.Say with 'worker'")
+	inf.Ln("reply:", client.Say("worker"))
+	inf.Ln("calling Hello.Bye")
+	inf.Ln("reply:", client.Bye())
+	if e := cmd.Kill(); dbg.Ok(err) {
 	}
 }

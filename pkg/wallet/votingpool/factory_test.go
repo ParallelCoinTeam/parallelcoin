@@ -71,8 +71,8 @@ func createMsgTx(pkScript []byte, amts []int64) *wire.MsgTx {
 	return msgtx
 }
 func TstNewDepositScript(t *testing.T, p *Pool, seriesID uint32, branch Branch, idx Index) []byte {
-	script, err := p.DepositScript(seriesID, branch, idx)
-	if err != nil {
+	script, e := p.DepositScript(seriesID, branch, idx)
+	if e != nil  {
 		t.Fatalf("Failed to create deposit script for series %d, branch %d, index %d: %v",
 			seriesID, branch, idx, err)
 	}
@@ -93,36 +93,36 @@ func TstRWNamespaces(tx walletdb.ReadWriteTx) (votingpoolNs, addrmgrNs walletdb.
 // of used addresses for the given Pool.
 func TstEnsureUsedAddr(t *testing.T, dbtx walletdb.ReadWriteTx, p *Pool, seriesID uint32, branch Branch, idx Index) []byte {
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
-	addr, err := p.getUsedAddr(ns, addrmgrNs, seriesID, branch, idx)
-	if err != nil {
-		t.Fatal(err)
+	addr, e := p.getUsedAddr(ns, addrmgrNs, seriesID, branch, idx)
+	if e != nil  {
+		t.ftl.Ln(err)
 	} else if addr != nil {
 		var script []byte
 		TstRunWithManagerUnlocked(t, p.Manager(), addrmgrNs, func() {
-			script, err = addr.Script()
+			script, e = addr.Script()
 		})
-		if err != nil {
-			t.Fatal(err)
+		if e != nil  {
+			t.ftl.Ln(err)
 		}
 		return script
 	}
 	TstRunWithManagerUnlocked(t, p.Manager(), addrmgrNs, func() {
-		err = p.EnsureUsedAddr(ns, addrmgrNs, seriesID, branch, idx)
+		e = p.EnsureUsedAddr(ns, addrmgrNs, seriesID, branch, idx)
 	})
-	if err != nil {
-		t.Fatal(err)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	return TstNewDepositScript(t, p, seriesID, branch, idx)
 }
 func TstCreatePkScript(t *testing.T, dbtx walletdb.ReadWriteTx, p *Pool, seriesID uint32, branch Branch, idx Index) []byte {
 	script := TstEnsureUsedAddr(t, dbtx, p, seriesID, branch, idx)
-	addr, err := p.addressFor(script)
-	if err != nil {
-		t.Fatal(err)
+	addr, e := p.addressFor(script)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
-	pkScript, err := txscript.PayToAddrScript(addr)
-	if err != nil {
-		t.Fatal(err)
+	pkScript, e := txscript.PayToAddrScript(addr)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	return pkScript
 }
@@ -140,14 +140,14 @@ type TstSeriesDef struct {
 func TstCreateSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, definitions []TstSeriesDef) {
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
 	for _, def := range definitions {
-		err := pool.CreateSeries(ns, CurrentVersion, def.SeriesID, def.ReqSigs, def.PubKeys)
-		if err != nil {
+		e := pool.CreateSeries(ns, CurrentVersion, def.SeriesID, def.ReqSigs, def.PubKeys)
+		if e != nil  {
 			t.Fatalf("Cannot creates series %d: %v", def.SeriesID, err)
 		}
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			for _, key := range def.PrivKeys {
-				if err := pool.EmpowerSeries(ns, def.SeriesID, key); err != nil {
-					t.Fatal(err)
+				if e := pool.EmpowerSeries(ns, def.SeriesID, key); dbg.Chk(e) {
+					t.ftl.Ln(err)
 				}
 			}
 		})
@@ -155,9 +155,9 @@ func TstCreateSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, defini
 	}
 }
 func TstCreateMasterKey(t *testing.T, seed []byte) *hdkeychain.ExtendedKey {
-	key, err := hdkeychain.NewMaster(seed, &netparams.MainNetParams)
-	if err != nil {
-		t.Fatal(err)
+	key, e := hdkeychain.NewMaster(seed, &netparams.MainNetParams)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	return key
 }
@@ -209,9 +209,9 @@ func TstCreateCreditsOnNewSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *
 // with branch==1 and index==0.
 func TstCreateSeriesCredits(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, seriesID uint32, amounts []int64) []Credit {
 	addr := TstNewWithdrawalAddress(t, dbtx, pool, seriesID, Branch(1), Index(0))
-	pkScript, err := txscript.PayToAddrScript(addr.addr)
-	if err != nil {
-		t.Fatal(err)
+	pkScript, e := txscript.PayToAddrScript(addr.addr)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	msgTx := createMsgTx(pkScript, amounts)
 	txHash := msgTx.TxHash()
@@ -253,18 +253,18 @@ func TstCreateCreditsOnStore(t *testing.T, dbtx walletdb.ReadWriteTx, s *wtxmgr.
 	meta := &wtxmgr.BlockMeta{
 		Block: wtxmgr.Block{Height: TstInputsBlock},
 	}
-	rec, err := wtxmgr.NewTxRecordFromMsgTx(msgTx, time.Now())
-	if err != nil {
-		t.Fatal(err)
+	rec, e := wtxmgr.NewTxRecordFromMsgTx(msgTx, time.Now())
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	txmgrNs := dbtx.ReadWriteBucket(txmgrNamespaceKey)
-	if err := s.InsertTx(txmgrNs, rec, meta); err != nil {
-		t.Fatal("Failed to create inputs: ", err)
+	if e := s.InsertTx(txmgrNs, rec, meta); dbg.Chk(e) {
+		t.ftl.Ln("Failed to create inputs: ", err)
 	}
 	credits := make([]wtxmgr.Credit, len(msgTx.TxOut))
 	for i := range msgTx.TxOut {
-		if err := s.AddCredit(txmgrNs, rec, meta, uint32(i), false); err != nil {
-			t.Fatal("Failed to create inputs: ", err)
+		if e := s.AddCredit(txmgrNs, rec, meta, uint32(i), false); dbg.Chk(e) {
+			t.ftl.Ln("Failed to create inputs: ", err)
 		}
 		credits[i] = wtxmgr.Credit{
 			OutPoint: wire.OutPoint{
@@ -292,76 +292,76 @@ func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Poo
 	// option would be to have the t.Parallel() call in each of our tests.
 	t.Parallel()
 	// Create a new wallet DB and addr manager.
-	dir, err := ioutil.TempDir("", "pool_test")
-	if err != nil {
+	dir, e := ioutil.TempDir("", "pool_test")
+	if e != nil  {
 		t.Fatalf("Failed to create db dir: %v", err)
 	}
-	db, err = walletdb.Create("bdb", filepath.Join(dir, "wallet.db"))
-	if err != nil {
+	db, e = walletdb.Create("bdb", filepath.Join(dir, "wallet.db"))
+	if e != nil  {
 		t.Fatalf("Failed to create wallet DB: %v", err)
 	}
 	var addrMgr *waddrmgr.Manager
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
-		addrmgrNs, err := tx.CreateTopLevelBucket(addrmgrNamespaceKey)
-		if err != nil {
+	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
+		addrmgrNs, e := tx.CreateTopLevelBucket(addrmgrNamespaceKey)
+		if e != nil  {
 			return err
 		}
-		votingpoolNs, err := tx.CreateTopLevelBucket(votingpoolNamespaceKey)
-		if err != nil {
+		votingpoolNs, e := tx.CreateTopLevelBucket(votingpoolNamespaceKey)
+		if e != nil  {
 			return err
 		}
 		fastScrypt := &waddrmgr.ScryptOptions{N: 16, R: 8, P: 1}
-		err = waddrmgr.Create(addrmgrNs, seed, pubPassphrase, privPassphrase,
+		e = waddrmgr.Create(addrmgrNs, seed, pubPassphrase, privPassphrase,
 			&netparams.MainNetParams, fastScrypt, time.Now())
-		if err != nil {
+		if e != nil  {
 			return err
 		}
-		addrMgr, err = waddrmgr.Open(addrmgrNs, pubPassphrase, &netparams.MainNetParams)
-		if err != nil {
+		addrMgr, e = waddrmgr.Open(addrmgrNs, pubPassphrase, &netparams.MainNetParams)
+		if e != nil  {
 			return err
 		}
-		pool, err = Create(votingpoolNs, addrMgr, []byte{0x00})
+		pool, e = Create(votingpoolNs, addrMgr, []byte{0x00})
 		return err
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("Could not set up DB: %v", err)
 	}
 	tearDownFunc = func() {
 		addrMgr.Close()
-		if err := db.Close(); Check(err) {
+		if e := db.Close(); dbg.Chk(e) {
 		}
-		if err := os.RemoveAll(dir); Check(err) {
+		if e := os.RemoveAll(dir); dbg.Chk(e) {
 		}
 	}
 	return tearDownFunc, db, pool
 }
 func TstCreateTxStore(t *testing.T, db walletdb.DB) *wtxmgr.Store {
 	var store *wtxmgr.Store
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
-		txmgrNs, err := tx.CreateTopLevelBucket(txmgrNamespaceKey)
-		if err != nil {
+	e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
+		txmgrNs, e := tx.CreateTopLevelBucket(txmgrNamespaceKey)
+		if e != nil  {
 			return err
 		}
-		err = wtxmgr.Create(txmgrNs)
-		if err != nil {
+		e = wtxmgr.Create(txmgrNs)
+		if e != nil  {
 			return err
 		}
-		store, err = wtxmgr.Open(txmgrNs, &netparams.MainNetParams)
+		store, e = wtxmgr.Open(txmgrNs, &netparams.MainNetParams)
 		return err
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("Failed to create txmgr: %v", err)
 	}
 	return store
 }
 func TstNewOutputRequest(t *testing.T, transaction uint32, address string, amount util.Amount,
 	net *netparams.Params) OutputRequest {
-	addr, err := util.DecodeAddress(address, net)
-	if err != nil {
+	addr, e := util.DecodeAddress(address, net)
+	if e != nil  {
 		t.Fatalf("Unable to decode address %s", address)
 	}
-	pkScript, err := txscript.PayToAddrScript(addr)
-	if err != nil {
+	pkScript, e := txscript.PayToAddrScript(addr)
+	if e != nil  {
 		t.Fatalf("Unable to generate pkScript for %v", addr)
 	}
 	return OutputRequest{
@@ -386,18 +386,18 @@ func TstNewWithdrawalAddress(t *testing.T, dbtx walletdb.ReadWriteTx, p *Pool, s
 	index Index) (addr *WithdrawalAddress) {
 	TstEnsureUsedAddr(t, dbtx, p, seriesID, branch, index)
 	ns, addrmgrNs := TstRNamespaces(dbtx)
-	var err error
+	var e error
 	TstRunWithManagerUnlocked(t, p.Manager(), addrmgrNs, func() {
-		addr, err = p.WithdrawalAddress(ns, addrmgrNs, seriesID, branch, index)
+		addr, e = p.WithdrawalAddress(ns, addrmgrNs, seriesID, branch, index)
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("Failed to get WithdrawalAddress: %v", err)
 	}
 	return addr
 }
 func TstNewChangeAddress(t *testing.T, p *Pool, seriesID uint32, idx Index) (addr *ChangeAddress) {
-	addr, err := p.ChangeAddress(seriesID, idx)
-	if err != nil {
+	addr, e := p.ChangeAddress(seriesID, idx)
+	if e != nil  {
 		t.Fatalf("Failed to get ChangeAddress: %v", err)
 	}
 	return addr
@@ -417,8 +417,8 @@ func createAndFulfillWithdrawalRequests(t *testing.T, dbtx walletdb.ReadWriteTx,
 	startAddr := TstNewWithdrawalAddress(t, dbtx, pool, seriesID, 1, 0)
 	lastSeriesID := seriesID
 	w := newWithdrawal(roundID, requests, eligible, *changeStart)
-	if err := w.fulfillRequests(); err != nil {
-		t.Fatal(err)
+	if e := w.fulfillRequests(); dbg.Chk(e) {
+		t.ftl.Ln(err)
 	}
 	return withdrawalInfo{
 		requests:      requests,

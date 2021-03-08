@@ -122,10 +122,9 @@ func BenchmarkMruInventoryList(b *testing.B) {
 	invVects := make([]*wire.InvVect, 0, numInvVects)
 	for i := 0; i < numInvVects; i++ {
 		hashBytes := make([]byte, chainhash.HashSize)
-		_, err := rand.Read(hashBytes)
-		if err != nil {
-			Error(err)
-		}
+		_, e := rand.Read(hashBytes)
+		if e != nil  {
+					}
 		hash, _ := chainhash.NewHash(hashBytes)
 		iv := wire.NewInvVect(wire.InvTypeBlock, hash)
 		invVects = append(invVects, iv)

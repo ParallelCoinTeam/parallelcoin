@@ -29,25 +29,25 @@ type batchSpendReporter struct {
 // error is threaded through to allow the syntax:
 //
 //     return reporter.FailRemaining(err)
-func (b *batchSpendReporter) FailRemaining(err error) error {
+func (b *batchSpendReporter) FailRemaining(er error) (e error) {
 	for outpoint, requests := range b.requests {
-		b.notifyRequests(&outpoint, requests, nil, err)
+		b.notifyRequests(&outpoint, requests, nil, er)
 	}
-	return err
+	return er
 }
 
 // NotifyUnspentAndUnfound iterates through any requests for which no spends were detected. If we were able to find the
 // initial output, this will be delivered signaling that no spend was detected. If the original output could not be
 // found, a nil spend report is returned.
 func (b *batchSpendReporter) NotifyUnspentAndUnfound() {
-	Debugf(
+	dbg.F(
 		"finished batch, %d unspent outpoints", len(b.requests),
 	)
 	for outpoint, requests := range b.requests {
 		// A nil SpendReport indicates the output was not found.
 		tx, ok := b.initialTxns[outpoint]
 		if !ok {
-			Warnf(
+			wrn.F(
 				"unknown initial txn for getuxo request %v", outpoint,
 			)
 		}
@@ -86,7 +86,7 @@ func (b *batchSpendReporter) ProcessBlock(blk *wire.MsgBlock,
 func (b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
 	for _, req := range reqs {
 		outpoint := req.Input.OutPoint
-		Debugf(
+		dbg.F(
 			"adding outpoint=%s height=%d to watchlist", outpoint,
 			req.BirthHeight,
 		)
@@ -134,7 +134,7 @@ func (b *batchSpendReporter) findInitialTransactions(block *wire.MsgBlock,
 			// Ensure that the outpoint's index references an actual output on the transaction. If not, we will be
 			// unable to find the initial output.
 			if op.Index >= uint32(len(txOuts)) {
-				Errorf(
+				err.F(
 					"failed to find outpoint %s -- invalid output index", op,
 				)
 				initialTxns[op] = nil
@@ -152,12 +152,12 @@ func (b *batchSpendReporter) findInitialTransactions(block *wire.MsgBlock,
 		tx, ok := initialTxns[req.Input.OutPoint]
 		switch {
 		case !ok:
-			Errorf(
+			err.F(
 				"failed to find outpoint %s -- txid not found in block",
 				req.Input.OutPoint)
 			initialTxns[req.Input.OutPoint] = nil
 		case tx != nil:
-			Tracef(
+			trc.F(
 				"block %d creates output %s", height, req.Input.OutPoint,
 			)
 		default:
@@ -175,12 +175,12 @@ func (b *batchSpendReporter) notifyRequests(
 	outpoint *wire.OutPoint,
 	requests []*GetUtxoRequest,
 	report *SpendReport,
-	err error) {
+	e error) {
 	delete(b.requests, *outpoint)
 	delete(b.initialTxns, *outpoint)
 	delete(b.outpoints, *outpoint)
 	for _, request := range requests {
-		request.deliver(report, err)
+		request.deliver(report, e)
 	}
 }
 
@@ -190,7 +190,7 @@ func (b *batchSpendReporter) notifySpends(block *wire.MsgBlock,
 	height uint32) map[wire.OutPoint]*SpendReport {
 	spends := make(map[wire.OutPoint]*SpendReport)
 	for _, tx := range block.Transactions {
-		// Check each input to see if this transaction spends one of our watched outpoints.
+		// Chk each input to see if this transaction spends one of our watched outpoints.
 		for i, ti := range tx.TxIn {
 			outpoint := ti.PreviousOutPoint
 			// Find the requests this spend relates to.
@@ -198,7 +198,7 @@ func (b *batchSpendReporter) notifySpends(block *wire.MsgBlock,
 			if !ok {
 				continue
 			}
-			Debugf(
+			dbg.F(
 				"UTXO %v spent by txn %v", outpoint, tx.TxHash(),
 			)
 			spend := &SpendReport{

@@ -23,8 +23,8 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 	wg.MainApp = a
 	wg.MainApp.ThemeHook(
 		func() {
-			Debug("theme hook")
-			// Debug(wg.bools)
+			dbg.Ln("theme hook")
+			// dbg.Ln(wg.bools)
 			// wg.Colors.Lock()
 			*wg.cx.Config.DarkTheme = *wg.Dark
 			// a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
@@ -252,7 +252,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			),
 			wg.StatusBarButton(
 				"log", 4, &icons.ActionList, func(name string) {
-					Debug("click on button", name)
+					dbg.Ln("click on button", name)
 					if wg.MainApp.MenuOpen {
 						wg.MainApp.MenuOpen = false
 					}
@@ -261,7 +261,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			),
 			wg.StatusBarButton(
 				"settings", 5, &icons.ActionSettings, func(name string) {
-					Debug("click on button", name)
+					dbg.Ln("click on button", name)
 					if wg.MainApp.MenuOpen {
 						wg.MainApp.MenuOpen = false
 					}
@@ -331,7 +331,7 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 			gtx.Constraints.Max.X = max
 			gtx.Constraints.Min.X = max
 		}
-		// Debug("sideMAXXXXXX!!", max)
+		// dbg.Ln("sideMAXXXXXX!!", max)
 		return wg.Direction().E().Embed(
 			wg.ButtonLayout(wg.sidebarButtons[index]).
 				CornerRadius(scale).Corners(0).
@@ -442,7 +442,7 @@ func (wg *WalletGUI) StatusBarButton(
 
 func (wg *WalletGUI) SetNodeRunState(b bool) {
 	go func() {
-		Debug("node run state is now", b)
+		dbg.Ln("node run state is now", b)
 		if b {
 			wg.node.Start()
 		} else {
@@ -453,7 +453,7 @@ func (wg *WalletGUI) SetNodeRunState(b bool) {
 
 func (wg *WalletGUI) SetWalletRunState(b bool) {
 	go func() {
-		Debug("node run state is now", b)
+		dbg.Ln("node run state is now", b)
 		if b {
 			wg.wallet.Start()
 		} else {
@@ -493,7 +493,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							go func() {
-								Debug("clicked node run control button", wg.node.Running())
+								dbg.Ln("clicked node run control button", wg.node.Running())
 								// wg.toggleNode()
 								wg.unlockPassword.Wipe()
 								wg.unlockPassword.Focus()
@@ -587,11 +587,11 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 								Background(wg.MainApp.StatusBarBackgroundGet()).
 								SetClick(
 									func() {
-										Debug("clicked reset wallet button")
+										dbg.Ln("clicked reset wallet button")
 										go func() {
-											var err error
+											var e error
 											wasRunning := wg.wallet.Running()
-											Debug("was running", wasRunning)
+											dbg.Ln("was running", wasRunning)
 											if wasRunning {
 												wg.wallet.Stop()
 											}
@@ -608,9 +608,9 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											runner := exec.Command(args[0], args[1:]...)
 											runner.Stderr = os.Stderr
 											runner.Stdout = os.Stderr
-											if err = wg.writeWalletCookie(); Check(err) {
+											if e = wg.writeWalletCookie(); dbg.Chk(e) {
 											}
-											if err = runner.Run(); Check(err) {
+											if e = runner.Run(); dbg.Chk(e) {
 											}
 											if wasRunning {
 												wg.wallet.Start()
@@ -626,15 +626,15 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 	}(gtx)
 }
 
-func (wg *WalletGUI) writeWalletCookie() (err error) {
+func (wg *WalletGUI) writeWalletCookie() (e error) {
 	// for security with apps launching the wallet, the public password can be set with a file that is deleted after
 	walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
-	Debug("runner", walletPassPath)
+	dbg.Ln("runner", walletPassPath)
 	wp := *wg.cx.Config.WalletPass
 	b := []byte(wp)
-	if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+	if e = ioutil.WriteFile(walletPassPath, b, 0700); dbg.Chk(e) {
 	}
-	Debug("created password cookie")
+	dbg.Ln("created password cookie")
 	return
 }
 
@@ -654,7 +654,7 @@ func (wg *WalletGUI) writeWalletCookie() (err error) {
 // 	if !wg.node.Running() {
 // 		wg.node.Start()
 // 	}
-// 	Debug("startNode")
+// 	dbg.Ln("startNode")
 // }
 //
 // func (wg *WalletGUI) stopNode() {
@@ -666,7 +666,7 @@ func (wg *WalletGUI) writeWalletCookie() (err error) {
 // 	if wg.node.Running() {
 // 		wg.node.Stop()
 // 	}
-// 	Debug("stopNode")
+// 	dbg.Ln("stopNode")
 // }
 //
 // func (wg *WalletGUI) toggleMiner() {
@@ -684,10 +684,10 @@ func (wg *WalletGUI) writeWalletCookie() (err error) {
 // func (wg *WalletGUI) startMiner() {
 // 	if *wg.cx.Config.GenThreads == 0 && wg.miner.Running() {
 // 		wg.stopMiner()
-// 		Debug("was zero threads")
+// 		dbg.Ln("was zero threads")
 // 	} else {
 // 		wg.miner.Start()
-// 		Debug("startMiner")
+// 		dbg.Ln("startMiner")
 // 	}
 // }
 //
@@ -695,7 +695,7 @@ func (wg *WalletGUI) writeWalletCookie() (err error) {
 // 	if wg.miner.Running() {
 // 		wg.miner.Stop()
 // 	}
-// 	Debug("stopMiner")
+// 	dbg.Ln("stopMiner")
 // }
 //
 // func (wg *WalletGUI) toggleWallet() {
@@ -718,7 +718,7 @@ func (wg *WalletGUI) writeWalletCookie() (err error) {
 // 		wg.unlockPassword.Wipe()
 // 		// wg.walletLocked.Store(false)
 // 	}
-// 	Debug("startWallet")
+// 	dbg.Ln("startWallet")
 // }
 //
 // func (wg *WalletGUI) stopWallet() {
@@ -728,5 +728,5 @@ func (wg *WalletGUI) writeWalletCookie() (err error) {
 // 		// wg.walletLocked.Store(true)
 // 	}
 // 	wg.unlockPassword.Wipe()
-// 	Debug("stopWallet")
+// 	dbg.Ln("stopWallet")
 // }

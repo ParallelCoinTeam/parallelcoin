@@ -125,17 +125,16 @@ func (s outputStatus) String() string {
 	}
 	return strings[s]
 }
-func (tx *changeAwareTx) addSelfToStore(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket) error {
-	rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx, time.Now())
-	if err != nil {
-		Error(err)
-		return newError(ErrWithdrawalTxStorage, "error constructing TxRecord for storing", err)
+func (tx *changeAwareTx) addSelfToStore(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket) (e error) {
+	rec, e := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx, time.Now())
+	if e != nil  {
+				return newError(ErrWithdrawalTxStorage, "error constructing TxRecord for storing", err)
 	}
-	if err := store.InsertTx(txmgrNs, rec, nil); err != nil {
+	if e := store.InsertTx(txmgrNs, rec, nil); dbg.Chk(e) {
 		return newError(ErrWithdrawalTxStorage, "error adding tx to store", err)
 	}
 	if tx.changeIdx != -1 {
-		if err = store.AddCredit(txmgrNs, rec, nil, uint32(tx.changeIdx), true); err != nil {
+		if e = store.AddCredit(txmgrNs, rec, nil, uint32(tx.changeIdx), true); dbg.Chk(e) {
 			return newError(ErrWithdrawalTxStorage, "error adding tx credits to store", err)
 		}
 	}
@@ -329,7 +328,7 @@ func (tx *withdrawalTx) toMsgTx() *wire.MsgTx {
 
 // addOutput adds a new output to this transaction.
 func (tx *withdrawalTx) addOutput(request OutputRequest) {
-	Debugf("added tx output sending %s to %s %s",
+	dbg.F("added tx output sending %s to %s %s",
 		request.Amount, request.Address)
 	tx.outputs = append(tx.outputs, &withdrawalTxOut{request: request, amount: request.Amount})
 }
@@ -338,14 +337,14 @@ func (tx *withdrawalTx) addOutput(request OutputRequest) {
 func (tx *withdrawalTx) removeOutput() *withdrawalTxOut {
 	removed := tx.outputs[len(tx.outputs)-1]
 	tx.outputs = tx.outputs[:len(tx.outputs)-1]
-	Debugf("removed tx output sending %s to %s %s",
+	dbg.F("removed tx output sending %s to %s %s",
 		removed.amount, removed.request.Address)
 	return removed
 }
 
 // addInput adds a new input to this transaction.
 func (tx *withdrawalTx) addInput(input Credit) {
-	Debug("added tx input with amount", input.Amount)
+	dbg.Ln("added tx input with amount", input.Amount)
 	tx.inputs = append(tx.inputs, input)
 }
 
@@ -353,7 +352,7 @@ func (tx *withdrawalTx) addInput(input Credit) {
 func (tx *withdrawalTx) removeInput() Credit {
 	removed := tx.inputs[len(tx.inputs)-1]
 	tx.inputs = tx.inputs[:len(tx.inputs)-1]
-	Debug("removed tx input with amount", removed.Amount)
+	dbg.Ln("removed tx input with amount", removed.Amount)
 	return removed
 }
 
@@ -365,11 +364,11 @@ func (tx *withdrawalTx) removeInput() Credit {
 func (tx *withdrawalTx) addChange(pkScript []byte) bool {
 	tx.fee = tx.calculateFee()
 	change := tx.inputTotal() - tx.outputTotal() - tx.fee
-	Debugf("addChange: input total %v, output total %v, fee %v %s",
+	dbg.F("addChange: input total %v, output total %v, fee %v %s",
 		tx.inputTotal(), tx.outputTotal(), tx.fee)
 	if change > 0 {
 		tx.changeOutput = wire.NewTxOut(int64(change), pkScript)
-		Debug("added change output with amount", change)
+		dbg.Ln("added change output with amount", change)
 	}
 	return tx.hasChange()
 }
@@ -381,7 +380,7 @@ func (tx *withdrawalTx) addChange(pkScript []byte) bool {
 // The tx needs to have two or more outputs. The case with only one output must be handled separately (by the split
 // output procedure).
 func (tx *withdrawalTx) rollBackLastOutput() ([]Credit, *withdrawalTxOut, error) {
-	// Check precondition: At least two outputs are required in the transaction.
+	// Chk precondition: At least two outputs are required in the transaction.
 	if len(tx.outputs) < 2 {
 		str := fmt.Sprintf("at least two outputs expected; got %d", len(tx.outputs))
 		return nil, nil, newError(ErrPreconditionNotMet, str, nil)
@@ -431,40 +430,35 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 	startAddress WithdrawalAddress, lastSeriesID uint32, changeStart ChangeAddress,
 	txStore *wtxmgr.Store, txmgrNs walletdb.ReadBucket, chainHeight int32, dustThreshold util.Amount) (
 	*WithdrawalStatus, error) {
-	status, err := getWithdrawalStatus(p, ns, addrmgrNs, roundID, requests, startAddress, lastSeriesID,
+	status, e := getWithdrawalStatus(p, ns, addrmgrNs, roundID, requests, startAddress, lastSeriesID,
 		changeStart, dustThreshold)
-	if err != nil {
-		Error(err)
-		return nil, err
+	if e != nil  {
+				return nil, e
 	}
 	if status != nil {
 		return status, nil
 	}
-	eligible, err := p.getEligibleInputs(ns, addrmgrNs, txStore, txmgrNs, startAddress, lastSeriesID, dustThreshold,
+	eligible, e := p.getEligibleInputs(ns, addrmgrNs, txStore, txmgrNs, startAddress, lastSeriesID, dustThreshold,
 		chainHeight, eligibleInputMinConfirmations)
-	if err != nil {
-		Error(err)
-		return nil, err
+	if e != nil  {
+				return nil, e
 	}
 	w := newWithdrawal(roundID, requests, eligible, changeStart)
-	if err := w.fulfillRequests(); err != nil {
-		return nil, err
+	if e := w.fulfillRequests(); dbg.Chk(e) {
+		return nil, e
 	}
-	w.status.sigs, err = getRawSigs(w.transactions)
-	if err != nil {
-		Error(err)
-		return nil, err
+	w.status.sigs, e = getRawSigs(w.transactions)
+	if e != nil  {
+				return nil, e
 	}
-	serialized, err := serializeWithdrawal(requests, startAddress, lastSeriesID, changeStart,
+	serialized, e := serializeWithdrawal(requests, startAddress, lastSeriesID, changeStart,
 		dustThreshold, *w.status)
-	if err != nil {
-		Error(err)
-		return nil, err
+	if e != nil  {
+				return nil, e
 	}
-	err = putWithdrawal(ns, p.ID, roundID, serialized)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = putWithdrawal(ns, p.ID, roundID, serialized)
+	if e != nil  {
+				return nil, e
 	}
 	return w.status, nil
 }
@@ -495,7 +489,7 @@ func (w *withdrawal) pushInput(input Credit) {
 
 // If this returns it means we have added an output and the necessary inputs to fulfil that output plus the required
 // fees. It also means the tx won't reach the size limit even after we add a change output and sign all inputs.
-func (w *withdrawal) fulfillNextRequest() error {
+func (w *withdrawal) fulfillNextRequest() (e error) {
 	request := w.popRequest()
 	output := w.status.outputs[request.outBailmentID()]
 	// We start with an output status of success and let the methods that deal with special cases change it when
@@ -508,9 +502,9 @@ func (w *withdrawal) fulfillNextRequest() error {
 	fee := w.current.calculateFee()
 	for w.current.inputTotal() < w.current.outputTotal()+fee {
 		if len(w.eligibleInputs) == 0 {
-			Debug("splitting last output because we don't have enough" +
+			dbg.Ln("splitting last output because we don't have enough" +
 				" inputs")
-			if err := w.splitLastOutput(); err != nil {
+			if e := w.splitLastOutput(); dbg.Chk(e) {
 				return err
 			}
 			break
@@ -526,22 +520,21 @@ func (w *withdrawal) fulfillNextRequest() error {
 
 // handleOversizeTx handles the case when a transaction has become too big by either rolling back an output or splitting
 // it.
-func (w *withdrawal) handleOversizeTx() error {
+func (w *withdrawal) handleOversizeTx() (e error) {
 	if len(w.current.outputs) > 1 {
-		Debug("rolling back last output because tx got too big")
-		inputs, output, err := w.current.rollBackLastOutput()
-		if err != nil {
-			Error(err)
-			return newError(ErrWithdrawalProcessing, "failed to rollback last output", err)
+		dbg.Ln("rolling back last output because tx got too big")
+		inputs, output, e := w.current.rollBackLastOutput()
+		if e != nil  {
+						return newError(ErrWithdrawalProcessing, "failed to rollback last output", err)
 		}
 		for _, input := range inputs {
 			w.pushInput(input)
 		}
 		w.pushRequest(output.request)
 	} else if len(w.current.outputs) == 1 {
-		Debug("splitting last output because tx got too big...")
+		dbg.Ln("splitting last output because tx got too big...")
 		w.pushInput(w.current.removeInput())
-		if err := w.splitLastOutput(); err != nil {
+		if e := w.splitLastOutput(); dbg.Chk(e) {
 			return err
 		}
 	} else {
@@ -552,24 +545,22 @@ func (w *withdrawal) handleOversizeTx() error {
 
 // finalizeCurrentTx finalizes the transaction in w.current, moves it to the list of finalized transactions and replaces
 // w.current with a new empty transaction.
-func (w *withdrawal) finalizeCurrentTx() error {
-	Debug("finalizing current transaction")
+func (w *withdrawal) finalizeCurrentTx() (e error) {
+	dbg.Ln("finalizing current transaction")
 	tx := w.current
 	if len(tx.outputs) == 0 {
-		Debug("current transaction has no outputs, doing nothing")
+		dbg.Ln("current transaction has no outputs, doing nothing")
 		return nil
 	}
-	pkScript, err := txscript.PayToAddrScript(w.status.nextChangeAddr.addr)
-	if err != nil {
-		Error(err)
-		return newError(ErrWithdrawalProcessing, "failed to generate pkScript for change address", err)
+	pkScript, e := txscript.PayToAddrScript(w.status.nextChangeAddr.addr)
+	if e != nil  {
+				return newError(ErrWithdrawalProcessing, "failed to generate pkScript for change address", err)
 	}
 	if tx.addChange(pkScript) {
-		var err error
-		w.status.nextChangeAddr, err = nextChangeAddress(w.status.nextChangeAddr)
-		if err != nil {
-			Error(err)
-			return newError(ErrWithdrawalProcessing, "failed to get next change address", err)
+		var e error
+		w.status.nextChangeAddr, e = nextChangeAddress(w.status.nextChangeAddr)
+		if e != nil  {
+						return newError(ErrWithdrawalProcessing, "failed to get next change address", err)
 		}
 	}
 	ntxid := tx.ntxid()
@@ -578,7 +569,7 @@ func (w *withdrawal) finalizeCurrentTx() error {
 		outputStatus.addOutpoint(
 			OutBailmentOutpoint{ntxid: ntxid, index: uint32(i), amount: txOut.amount})
 	}
-	// Check that WithdrawalOutput entries with status==success have the sum of their outpoint amounts matching the
+	// Chk that WithdrawalOutput entries with status==success have the sum of their outpoint amounts matching the
 	// requested amount.
 	for _, txOut := range tx.outputs {
 		// Look up the original request we received because txOut.request may represent a split request and thus have a
@@ -615,13 +606,13 @@ func (w *withdrawal) maybeDropRequests() {
 	sort.Sort(sort.Reverse(byAmount(w.pendingRequests)))
 	for inputAmount < outputAmount {
 		request := w.popRequest()
-		Infof("not fulfilling request to send %v to %v; not enough credits.",
+		inf.F("not fulfilling request to send %v to %v; not enough credits.",
 			request.Amount, request.Address)
 		outputAmount -= request.Amount
 		w.status.outputs[request.outBailmentID()].status = statusPartial
 	}
 }
-func (w *withdrawal) fulfillRequests() error {
+func (w *withdrawal) fulfillRequests() (e error) {
 	w.maybeDropRequests()
 	if len(w.pendingRequests) == 0 {
 		return nil
@@ -630,7 +621,7 @@ func (w *withdrawal) fulfillRequests() error {
 	sort.Sort(byOutBailmentID(w.pendingRequests))
 	w.current = newWithdrawalTx(w.txOptions)
 	for len(w.pendingRequests) > 0 {
-		if err := w.fulfillNextRequest(); err != nil {
+		if e := w.fulfillNextRequest(); dbg.Chk(e) {
 			return err
 		}
 		tx := w.current
@@ -639,7 +630,7 @@ func (w *withdrawal) fulfillRequests() error {
 			break
 		}
 	}
-	if err := w.finalizeCurrentTx(); err != nil {
+	if e := w.finalizeCurrentTx(); dbg.Chk(e) {
 		return err
 	}
 	// TODO: Update w.status.nextInputAddr. Not yet implemented as in some
@@ -661,21 +652,21 @@ func (w *withdrawal) fulfillRequests() error {
 	}
 	return nil
 }
-func (w *withdrawal) splitLastOutput() error {
+func (w *withdrawal) splitLastOutput() (e error) {
 	if len(w.current.outputs) == 0 {
 		return newError(ErrPreconditionNotMet,
 			"splitLastOutput requires current tx to have at least 1 output", nil)
 	}
 	tx := w.current
 	output := tx.outputs[len(tx.outputs)-1]
-	Debug("splitting tx output for", output.request)
+	dbg.Ln("splitting tx output for", output.request)
 	origAmount := output.amount
 	spentAmount := tx.outputTotal() + tx.calculateFee() - output.amount
 	// This is how much we have left after satisfying all outputs except the last one. IOW, all we have left for the
 	// last output, so we set that as the amount of the tx's last output.
 	unspentAmount := tx.inputTotal() - spentAmount
 	output.amount = unspentAmount
-	Debug("updated output amount to", output.amount)
+	dbg.Ln("updated output amount to", output.amount)
 	
 	// Create a new OutputRequest with the amount being the difference between the original amount and what was left in
 	// the tx output above.
@@ -687,7 +678,7 @@ func (w *withdrawal) splitLastOutput() error {
 		PkScript:    request.PkScript,
 		Amount:      origAmount - output.amount}
 	w.pushRequest(newRequest)
-	Debug("created a new pending output request with amount",
+	dbg.Ln("created a new pending output request with amount",
 		newRequest.Amount)
 	w.status.outputs[request.outBailmentID()].status = statusPartial
 	return nil
@@ -709,22 +700,22 @@ func (wi *withdrawalInfo) match(requests []OutputRequest, startAddress Withdrawa
 	// Use reflect.DeepEqual to compare changeStart and startAddress as they're structs that contain pointers and we
 	// want to compare their content and not their address.
 	if !reflect.DeepEqual(changeStart, wi.changeStart) {
-		Debugf("withdrawal changeStart does not match: %v != %v %s",
+		dbg.F("withdrawal changeStart does not match: %v != %v %s",
 			changeStart, wi.changeStart)
 		return false
 	}
 	if !reflect.DeepEqual(startAddress, wi.startAddress) {
-		Debugf("withdrawal startAddr does not match: %v != %v %s",
+		dbg.F("withdrawal startAddr does not match: %v != %v %s",
 			startAddress, wi.startAddress)
 		return false
 	}
 	if lastSeriesID != wi.lastSeriesID {
-		Debugf("withdrawal lastSeriesID does not match: %v != %v %s",
+		dbg.F("withdrawal lastSeriesID does not match: %v != %v %s",
 			lastSeriesID, wi.lastSeriesID)
 		return false
 	}
 	if dustThreshold != wi.dustThreshold {
-		Debugf("withdrawal dustThreshold does not match: %v != %v %s",
+		dbg.F("withdrawal dustThreshold does not match: %v != %v %s",
 			dustThreshold, wi.dustThreshold)
 		return false
 	}
@@ -735,7 +726,7 @@ func (wi *withdrawalInfo) match(requests []OutputRequest, startAddress Withdrawa
 	sort.Sort(byOutBailmentID(r1))
 	sort.Sort(byOutBailmentID(r2))
 	if !reflect.DeepEqual(r1, r2) {
-		Debugf("withdrawal requests does not match: %v != %v %s", requests,
+		dbg.F("withdrawal requests does not match: %v != %v %s", requests,
 			wi.requests)
 		return false
 	}
@@ -751,10 +742,9 @@ func getWithdrawalStatus(p *Pool, ns, addrmgrNs walletdb.ReadBucket, roundID uin
 	if bytes.Equal(serialized, []byte{}) {
 		return nil, nil
 	}
-	wInfo, err := deserializeWithdrawal(p, ns, addrmgrNs, serialized)
-	if err != nil {
-		Error(err)
-		return nil, err
+	wInfo, e := deserializeWithdrawal(p, ns, addrmgrNs, serialized)
+	if e != nil  {
+				return nil, e
 	}
 	if wInfo.match(requests, startAddress, lastSeriesID, changeStart, dustThreshold) {
 		return &wInfo.status, nil
@@ -777,41 +767,36 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 			// The order of the raw signatures in the signature script must match the order of the public keys in the
 			// redeem script, so we sort the public keys here using the same API used to sort them in the redeem script
 			// and use series.getPrivKeyFor() to lookup the corresponding private keys.
-			pubKeys, err := branchOrder(series.publicKeys, creditAddr.Branch())
-			if err != nil {
-				Error(err)
-				return nil, err
+			pubKeys, e := branchOrder(series.publicKeys, creditAddr.Branch())
+			if e != nil  {
+								return nil, e
 			}
 			txInSigs := make([]RawSig, len(pubKeys))
 			for i, pubKey := range pubKeys {
 				var sig RawSig
-				privKey, err := series.getPrivKeyFor(pubKey)
-				if err != nil {
-					Error(err)
-					return nil, err
+				privKey, e := series.getPrivKeyFor(pubKey)
+				if e != nil  {
+										return nil, e
 				}
 				if privKey != nil {
-					childKey, err := privKey.Child(uint32(creditAddr.Index()))
-					if err != nil {
-						Error(err)
-						return nil, newError(ErrKeyChain, "failed to derive private key", err)
+					childKey, e := privKey.Child(uint32(creditAddr.Index()))
+					if e != nil  {
+												return nil, newError(ErrKeyChain, "failed to derive private key", err)
 					}
-					ecPrivKey, err := childKey.ECPrivKey()
-					if err != nil {
-						Error(err)
-						return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", err)
+					ecPrivKey, e := childKey.ECPrivKey()
+					if e != nil  {
+												return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", err)
 					}
-					Debugf("generating raw sig for input %d of tx %s with privkey of %s",
+					dbg.F("generating raw sig for input %d of tx %s with privkey of %s",
 						inputIdx, ntxid,
 						pubKey.String())
-					sig, err = txscript.RawTxInSignature(
+					sig, e = txscript.RawTxInSignature(
 						msgtx, inputIdx, redeemScript, txscript.SigHashAll, ecPrivKey)
-					if err != nil {
-						Error(err)
-						return nil, newError(ErrRawSigning, "failed to generate raw signature", err)
+					if e != nil  {
+												return nil, newError(ErrRawSigning, "failed to generate raw signature", err)
 					}
 				} else {
-					Debugf("not generating raw sig for input %d of %s because private"+
+					dbg.F("not generating raw sig for input %d of %s because private"+
 						" key for %s is not available: %v %s",
 						inputIdx, ntxid,
 						pubKey.String(), err)
@@ -829,21 +814,19 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 // SignTx signs every input of the given MsgTx by looking up (on the addr manager) the redeem script for each of them
 // and constructing the signature script using that and the given raw signatures. This function must be called with the
 // manager unlocked.
-func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, store *wtxmgr.Store, txmgrNs walletdb.ReadBucket) error {
+func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, store *wtxmgr.Store, txmgrNs walletdb.ReadBucket) (e error) {
 	// We use time.Now() here as we're not going to store the new TxRecord anywhere -- we just need it to pass to
 	// store.PreviousPkScripts().
-	rec, err := wtxmgr.NewTxRecordFromMsgTx(msgtx, time.Now())
-	if err != nil {
-		Error(err)
-		return newError(ErrTxSigning, "failed to construct TxRecord for signing", err)
+	rec, e := wtxmgr.NewTxRecordFromMsgTx(msgtx, time.Now())
+	if e != nil  {
+				return newError(ErrTxSigning, "failed to construct TxRecord for signing", err)
 	}
-	pkScripts, err := store.PreviousPkScripts(txmgrNs, rec, nil)
-	if err != nil {
-		Error(err)
-		return newError(ErrTxSigning, "failed to obtain pkScripts for signing", err)
+	pkScripts, e := store.PreviousPkScripts(txmgrNs, rec, nil)
+	if e != nil  {
+				return newError(ErrTxSigning, "failed to obtain pkScripts for signing", err)
 	}
 	for i, pkScript := range pkScripts {
-		if err = signMultiSigUTXO(mgr, addrmgrNs, msgtx, i, pkScript, sigs[i]); err != nil {
+		if e = signMultiSigUTXO(mgr, addrmgrNs, msgtx, i, pkScript, sigs[i]); dbg.Chk(e) {
 			return err
 		}
 	}
@@ -852,10 +835,9 @@ func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs wal
 
 // getRedeemScript returns the redeem script for the given P2SH address. It must be called with the manager unlocked.
 func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr *util.AddressScriptHash) ([]byte, error) {
-	address, err := mgr.Address(addrmgrNs, addr)
-	if err != nil {
-		Error(err)
-		return nil, err
+	address, e := mgr.Address(addrmgrNs, addr)
+	if e != nil  {
+				return nil, e
 	}
 	return address.(waddrmgr.ManagedScriptAddress).Script()
 }
@@ -866,24 +848,21 @@ func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr 
 //
 // The order of the signatures must match that of the public keys in the multi-sig script as OP_CHECKMULTISIG expects
 // that. This function must be called with the manager unlocked.
-func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, idx int, pkScript []byte, sigs []RawSig) error {
-	class, addresses, _, err := txscript.ExtractPkScriptAddrs(pkScript, mgr.ChainParams())
-	if err != nil {
-		Error(err)
-		return newError(ErrTxSigning, "unparseable pkScript", err)
+func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, idx int, pkScript []byte, sigs []RawSig) (e error) {
+	class, addresses, _, e = txscript.ExtractPkScriptAddrs(pkScript, mgr.ChainParams())
+	if e != nil  {
+				return newError(ErrTxSigning, "unparseable pkScript", err)
 	}
 	if class != txscript.ScriptHashTy {
 		return newError(ErrTxSigning, fmt.Sprintf("pkScript is not P2SH: %s", class), nil)
 	}
-	redeemScript, err := getRedeemScript(mgr, addrmgrNs, addresses[0].(*util.AddressScriptHash))
-	if err != nil {
-		Error(err)
-		return newError(ErrTxSigning, "unable to retrieve redeem script", err)
+	redeemScript, e := getRedeemScript(mgr, addrmgrNs, addresses[0].(*util.AddressScriptHash))
+	if e != nil  {
+				return newError(ErrTxSigning, "unable to retrieve redeem script", err)
 	}
-	class, _, nRequired, err := txscript.ExtractPkScriptAddrs(redeemScript, mgr.ChainParams())
-	if err != nil {
-		Error(err)
-		return newError(ErrTxSigning, "unparseable redeem script", err)
+	class, _, nRequired, e := txscript.ExtractPkScriptAddrs(redeemScript, mgr.ChainParams())
+	if e != nil  {
+				return newError(ErrTxSigning, "unparseable redeem script", err)
 	}
 	if class != txscript.MultiSigTy {
 		return newError(ErrTxSigning, fmt.Sprintf("redeem script is not multi-sig: %v", class), nil)
@@ -900,13 +879,12 @@ func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *
 	}
 	// Combine the redeem script and the unlocking script to get the actual signature script.
 	sigScript := unlockingScript.AddData(redeemScript)
-	script, err := sigScript.Script()
-	if err != nil {
-		Error(err)
-		return newError(ErrTxSigning, "error building sigscript", err)
+	script, e := sigScript.Script()
+	if e != nil  {
+				return newError(ErrTxSigning, "error building sigscript", err)
 	}
 	tx.TxIn[idx].SignatureScript = script
-	if err := validateSigScript(tx, idx, pkScript); err != nil {
+	if e := validateSigScript(tx, idx, pkScript); dbg.Chk(e) {
 		return err
 	}
 	return nil
@@ -914,14 +892,13 @@ func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *
 
 // validateSigScripts executes the signature script of the tx input with the given index, returning an error if it
 // fails.
-func validateSigScript(msgtx *wire.MsgTx, idx int, pkScript []byte) error {
-	vm, err := txscript.NewEngine(pkScript, msgtx, idx,
+func validateSigScript(msgtx *wire.MsgTx, idx int, pkScript []byte) (e error) {
+	vm, e := txscript.NewEngine(pkScript, msgtx, idx,
 		txscript.StandardVerifyFlags, nil, nil, 0)
-	if err != nil {
-		Error(err)
-		return newError(ErrTxSigning, "cannot create script engine", err)
+	if e != nil  {
+				return newError(ErrTxSigning, "cannot create script engine", err)
 	}
-	if err = vm.Execute(); err != nil {
+	if e = vm.Execute(); dbg.Chk(e) {
 		return newError(ErrTxSigning, "cannot validate tx signature", err)
 	}
 	return nil
@@ -963,15 +940,15 @@ func nextChangeAddress(a ChangeAddress) (ChangeAddress, error) {
 		index++
 	}
 	var addr *ChangeAddress
-	var err error
-	if addr, err = a.pool.ChangeAddress(seriesID, index); Check(err) {
+	var e error
+	if addr, e = a.pool.ChangeAddress(seriesID, index); dbg.Chk(e) {
 		return ChangeAddress{}, err
 	}
 	return *addr, err
 }
-func storeTransactions(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket, transactions []*changeAwareTx) error {
+func storeTransactions(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket, transactions []*changeAwareTx) (e error) {
 	for _, tx := range transactions {
-		if err := tx.addSelfToStore(store, txmgrNs); err != nil {
+		if e := tx.addSelfToStore(store, txmgrNs); dbg.Chk(e) {
 			return err
 		}
 	}

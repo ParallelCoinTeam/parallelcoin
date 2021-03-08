@@ -28,13 +28,13 @@ var (
 
 // CalcNextRequiredDifficulty calculates the required difficulty for the block after the end of the current best chain
 // based on the difficulty retarget rules. This function is safe for concurrent access.
-func (b *BlockChain) CalcNextRequiredDifficulty(algo string) (difficulty uint32, err error) {
+func (b *BlockChain) CalcNextRequiredDifficulty(algo string) (difficulty uint32, e error) {
 	b.chainLock.Lock()
-	difficulty, err = b.CalcNextRequiredDifficultyFromNode(
+	difficulty, e = b.CalcNextRequiredDifficultyFromNode(
 		b.BestChain.
 			Tip(), algo, false,
 	)
-	// Trace("CalcNextRequiredDifficulty", difficulty)
+	// trc.Ln("CalcNextRequiredDifficulty", difficulty)
 	b.chainLock.Unlock()
 	return
 }
@@ -69,7 +69,7 @@ func (b *BlockChain) calcEasiestDifficulty(bits uint32, duration time.Duration) 
 // chain as the previous block node while this function accepts any block node.
 func (b *BlockChain) CalcNextRequiredDifficultyFromNode(lastNode *BlockNode, algoname string, l bool,) (
 	newTargetBits uint32,
-	err error,
+	e error,
 ) {
 	nH := lastNode.height + 1
 	cF := fork.GetCurrent(nH)
@@ -78,7 +78,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyFromNode(lastNode *BlockNode, alg
 	switch cF {
 	// Legacy difficulty adjustment
 	case 0:
-		// Trace("before hardfork")
+		// trc.Ln("before hardfork")
 		return b.CalcNextRequiredDifficultyHalcyon(lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
@@ -88,14 +88,14 @@ func (b *BlockChain) CalcNextRequiredDifficultyFromNode(lastNode *BlockNode, alg
 		}
 		version := fork.GetAlgoVer(algoname, lastNode.height+1)
 		if bits[version] == 0 {
-			bits, err = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
-			if err != nil {
-				Error(err)
+			bits, e = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
+			if e != nil  {
+				err.Ln(err)
 				return
 			}
-			// Debug(bits, reflect.TypeOf(bits))
+			// dbg.Ln(bits, reflect.TypeOf(bits))
 			b.DifficultyBits.Store(bits)
-			// Debugf("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
+			// dbg.F("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
 		}
 		newTargetBits = bits[version]
 		return

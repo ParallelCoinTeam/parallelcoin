@@ -167,12 +167,12 @@ func (e ManagerError) Error() string {
 
 // IsError returns whether the error is a ManagerError with a matching error
 // code.
-func IsError(err error, code ErrorCode) bool {
-	e, ok := err.(ManagerError)
-	return ok && e.ErrorCode == code
+func IsError(e error, code ErrorCode) bool {
+	er, ok := e.(ManagerError)
+	return ok && er.ErrorCode == code
 }
 
 // managerError creates a ManagerError given a set of arguments.
-func managerError(c ErrorCode, desc string, err error) ManagerError {
-	return ManagerError{ErrorCode: c, Description: desc, Err: err}
+func managerError(c ErrorCode, desc string, e error) ManagerError {
+	return ManagerError{ErrorCode: c, Description: desc, Err: e}
 }

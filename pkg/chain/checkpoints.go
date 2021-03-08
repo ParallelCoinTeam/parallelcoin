@@ -63,7 +63,7 @@ func (b *BlockChain) verifyCheckpoint(height int32, hash *chainhash.Hash) bool {
 	if !checkpoint.Hash.IsEqual(hash) {
 		return false
 	}
-	Infof("Verified checkpoint at height %d/block %s", checkpoint.Height,
+	inf.F("Verified checkpoint at height %d/block %s", checkpoint.Height,
 		checkpoint.Hash)
 	return true
 }
@@ -146,7 +146,7 @@ func (b *BlockChain) findPreviousCheckpoint() (*BlockNode, error) {
 // isNonstandardTransaction determines whether a transaction contains any scripts which are not one of the standard
 // types.
 func isNonstandardTransaction(tx *util.Tx) bool {
-	// Check all of the output public key scripts for non-standard scripts.
+	// Chk all of the output public key scripts for non-standard scripts.
 	for _, txOut := range tx.MsgTx().TxOut {
 		scriptClass := txscript.GetScriptClass(txOut.PkScript)
 		if scriptClass == txscript.NonStandardTy {

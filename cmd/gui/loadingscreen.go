@@ -13,8 +13,8 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate, Break1).SetMainDirection(l.Center + 1)
 	a.ThemeHook(
 		func() {
-			Debug("theme hook")
-			// Debug(wg.bools)
+			dbg.Ln("theme hook")
+			// dbg.Ln(wg.bools)
 			*wg.cx.Config.DarkTheme = *wg.Dark
 			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
 			*a = *wg.Dark
@@ -60,7 +60,7 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 			),
 			wg.StatusBarButton(
 				"log", 4, &icons.ActionList, func(name string) {
-					Debug("click on button", name)
+					dbg.Ln("click on button", name)
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage,
 			),

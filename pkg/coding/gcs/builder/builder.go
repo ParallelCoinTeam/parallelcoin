@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -30,15 +30,13 @@ type GCSBuilder struct {
 
 // RandomKey is a utility function that returns a cryptographically random [gcs.KeySize]byte usable as a key for a GCS
 // filter.
-func RandomKey() ([gcs.KeySize]byte, error) {
-	var key [gcs.KeySize]byte
+func RandomKey() (key [gcs.KeySize]byte, e error) {
 	// Read a byte slice from rand.Reader.
 	randKey := make([]byte, gcs.KeySize)
-	_, err := rand.Read(randKey)
+	_, e = rand.Read(randKey)
 	// This shouldn't happen unless the user is on a system that doesn't have a system CSPRNG. OK to panic in this case.
-	if err != nil {
-		Error(err)
-		return key, err
+	if e != nil {
+		return key, e
 	}
 	// Copy the byte slice to a [gcs.KeySize]byte array and return it.
 	copy(key[:], randKey[:])
@@ -208,8 +206,10 @@ func WithKey(key [gcs.KeySize]byte) *GCSBuilder {
 
 // WithKeyHashPNM creates a GCSBuilder with key derived from the specified chainhash.Hash and the passed probability and
 // estimated filter size.
-func WithKeyHashPNM(keyHash *chainhash.Hash, p uint8, n uint32,
-	m uint64) *GCSBuilder {
+func WithKeyHashPNM(
+	keyHash *chainhash.Hash, p uint8, n uint32,
+	m uint64,
+) *GCSBuilder {
 	return WithKeyPNM(DeriveKey(keyHash), p, n, m)
 }
 
@@ -229,10 +229,9 @@ func WithKeyHash(keyHash *chainhash.Hash) *GCSBuilder {
 // WithRandomKeyPNM creates a GCSBuilder with a cryptographically random key and the passed probability and estimated
 // filter size.
 func WithRandomKeyPNM(p uint8, n uint32, m uint64) *GCSBuilder {
-	key, err := RandomKey()
-	if err != nil {
-		Error(err)
-		b := GCSBuilder{err: err}
+	key, e := RandomKey()
+	if e != nil {
+		b := GCSBuilder{err: e}
 		return &b
 	}
 	return WithKeyPNM(key, p, n, m)
@@ -257,10 +256,9 @@ func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filte
 	b := WithKeyHash(&blockHash)
 	// If the filter had an issue with the specified key, then we force it to bubble up here by calling the Key()
 	// function.
-	_, err := b.Key()
-	if err != nil {
-		Error(err)
-		return nil, err
+	_, e := b.Key()
+	if e != nil {
+		return nil, e
 	}
 	// In order to build a basic filter, we'll range over the entire block, adding each whole script itself.
 	for _, tx := range block.Transactions {
@@ -290,10 +288,9 @@ func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filte
 
 // GetFilterHash returns the double-SHA256 of the filter.
 func GetFilterHash(filter *gcs.Filter) (chainhash.Hash, error) {
-	filterData, err := filter.NBytes()
-	if err != nil {
-		Error(err)
-		return chainhash.Hash{}, err
+	filterData, e := filter.NBytes()
+	if e != nil {
+		return chainhash.Hash{}, e
 	}
 	return chainhash.DoubleHashH(filterData), nil
 }
@@ -301,10 +298,9 @@ func GetFilterHash(filter *gcs.Filter) (chainhash.Hash, error) {
 // MakeHeaderForFilter makes a filter chain header for a filter, given the filter and the previous filter chain header.
 func MakeHeaderForFilter(filter *gcs.Filter, prevHeader chainhash.Hash) (chainhash.Hash, error) {
 	filterTip := make([]byte, 2*chainhash.HashSize)
-	filterHash, err := GetFilterHash(filter)
-	if err != nil {
-		Error(err)
-		return chainhash.Hash{}, err
+	filterHash, e := GetFilterHash(filter)
+	if e != nil {
+		return chainhash.Hash{}, e
 	}
 	// In the buffer we created above we'll compute hash || prevHash as an intermediate value.
 	copy(filterTip, filterHash[:])

@@ -11,8 +11,9 @@ import (
 	"github.com/p9c/pod/pkg/util/logi"
 )
 
+// Log starts up a handler to listen to logs from the child process worker
 func Log(quit qu.C, appName string) {
-	Debug("starting log server")
+	dbg.Ln("starting log server")
 	lc := logi.L.AddLogChan()
 	// interrupt.AddHandler(func(){
 	// 	// logi.L.RemoveLogChan(lc)
@@ -21,22 +22,22 @@ func Log(quit qu.C, appName string) {
 	var logOn atomic.Bool
 	logOn.Store(false)
 	p := pipe.Serve(
-		quit, func(b []byte) (err error) {
+		quit, func(b []byte) (e error) {
 			// listen for commands to enable/disable logging
 			if len(b) >= 4 {
 				magic := string(b[:4])
 				switch magic {
 				case "run ":
-					Debug("setting to run")
+					dbg.Ln("setting to run")
 					logOn.Store(true)
 				case "stop":
-					Debug("stopping")
+					dbg.Ln("stopping")
 					logOn.Store(false)
 				case "slvl":
-					Debug("setting level", logi.Levels[b[4]])
+					dbg.Ln("setting level", logi.Levels[b[4]])
 					logi.L.SetLevel(logi.Levels[b[4]], false, "pod")
 				case "kill":
-					Debug("received kill signal from pipe, shutting down", appName)
+					dbg.Ln("received kill signal from pipe, shutting down", appName)
 					// time.Sleep(time.Second*5)
 					// time.Sleep(time.Second * 3)
 					// logi.L.LogChanDisabled = true
@@ -47,7 +48,7 @@ func Log(quit qu.C, appName string) {
 					
 					// quit.Q()
 					// goroutineDump()
-					// Debug(interrupt.GoroutineDump())
+					// dbg.Ln(interrupt.GoroutineDump())
 					// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 				}
 			}
@@ -64,7 +65,7 @@ func Log(quit qu.C, appName string) {
 					logi.L.LogChanDisabled.Store(true)
 				}
 				logi.L.Writer.Write.Store(true)
-				Debug("quitting pipe logger") // , interrupt.GoroutineDump())
+				dbg.Ln("quitting pipe logger") // , interrupt.GoroutineDump())
 				interrupt.Request()
 				logOn.Store(false)
 				// <-interrupt.HandlersDone
@@ -79,14 +80,16 @@ func Log(quit qu.C, appName string) {
 					}
 				}
 				break out
-			case e := <-lc:
+			case ent := <-lc:
 				if !logOn.Load() {
 					break out
 				}
-				if n, err := p.Write(gotiny.Marshal(&e)); !Check(err) {
-					// Debug(interrupt.GoroutineDump())
+				var n int
+				var e error
+				if n, e = p.Write(gotiny.Marshal(&ent)); !dbg.Chk(e) {
+					// dbg.Ln(interrupt.GoroutineDump())
 					if n < 1 {
-						Error("short write")
+						err.Ln("short write")
 					}
 				} else {
 					break out
@@ -95,6 +98,6 @@ func Log(quit qu.C, appName string) {
 			}
 		}
 		<-interrupt.HandlersDone
-		Debug("finished pipe logger")
+		dbg.Ln("finished pipe logger")
 	}()
 }

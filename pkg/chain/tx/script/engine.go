@@ -118,7 +118,7 @@ func (vm *Engine) isBranchExecuting() bool {
 
 // executeOpcode peforms execution on the passed opcode. It takes into account whether or not it is hidden by
 // conditionals, but some rules still must be tested in this case.
-func (vm *Engine) executeOpcode(pop *parsedOpcode) error {
+func (vm *Engine) executeOpcode(pop *parsedOpcode) (e error) {
 	// Disabled opcodes are fail on program counter.
 	if pop.isDisabled() {
 		str := fmt.Sprintf(
@@ -160,8 +160,8 @@ func (vm *Engine) executeOpcode(pop *parsedOpcode) error {
 	if vm.dstack.verifyMinimalData && vm.isBranchExecuting() &&
 		// pop.opcode.value >= 0 &&
 		pop.opcode.value <= OP_PUSHDATA4 {
-		if err := pop.checkMinimalDataPush(); err != nil {
-			return err
+		if e = pop.checkMinimalDataPush(); dbg.Chk(e) {
+			return e
 		}
 	}
 	return pop.opcode.opfunc(pop, vm)
@@ -207,11 +207,10 @@ func (vm *Engine) validPC() (E error) {
 }
 
 // curPC returns either the current script and offset, or an error if the position isn't valid.
-func (vm *Engine) curPC() (script int, off int, err error) {
-	err = vm.validPC()
-	if err != nil {
-		Error(err)
-		return 0, 0, err
+func (vm *Engine) curPC() (script int, off int, e error) {
+	e = vm.validPC()
+	if e != nil {
+		return 0, 0, e
 	}
 	return int(vm.scriptIdx.Load()), int(vm.scriptOff.Load()), nil
 }
@@ -225,28 +224,26 @@ func (vm *Engine) isWitnessVersionActive(version uint) bool {
 
 // verifyWitnessProgram validates the stored witness program using the passed
 // witness as input.
-func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
+func (vm *Engine) verifyWitnessProgram(witness [][]byte) (e error) {
 	if vm.isWitnessVersionActive(0) {
 		switch len(vm.witnessProgram) {
 		case payToWitnessPubKeyHashDataSize: // P2WKH
 			// The witness stack should consist of exactly two items: the signature, and the
 			// pubkey.
 			if len(witness) != 2 {
-				err := fmt.Sprintf(
+				e := fmt.Sprintf(
 					"should have exactly two items in witness, instead have %v", len(witness),
 				)
-				return scriptError(ErrWitnessProgramMismatch, err)
+				return scriptError(ErrWitnessProgramMismatch, e)
 			}
 			// Now we'll resume execution as if it were a regular p2pkh transaction.
-			pkScript, err := payToPubKeyHashScript(vm.witnessProgram)
-			if err != nil {
-				Error(err)
-				return err
+			pkScript, e := payToPubKeyHashScript(vm.witnessProgram)
+			if e != nil {
+				return e
 			}
-			pops, err := parseScript(pkScript)
-			if err != nil {
-				Error(err)
-				return err
+			pops, e := parseScript(pkScript)
+			if e != nil {
+				return e
 			}
 			// Set the stack to the provided witness stack, then append the pkScript
 			// generated above as the next script to execute.
@@ -281,10 +278,9 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 			}
 			// With all the validity checks passed, parse the script into individual op-codes so w can execute it as the
 			// next script.
-			pops, err := parseScript(witnessScript)
-			if err != nil {
-				Error(err)
-				return err
+			pops, e := parseScript(witnessScript)
+			if e != nil {
+				return e
 			}
 			// The hash matched successfully, so use the witness as the stack, and set the
 			// witnessScript to be the next script executed.
@@ -330,10 +326,9 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 
 // DisasmPC returns the string for the disassembly of the opcode that will be next to execute when Step() is called.
 func (vm *Engine) DisasmPC() (string, error) {
-	scriptIdx, scriptOff, err := vm.curPC()
-	if err != nil {
-		Error(err)
-		return "", err
+	scriptIdx, scriptOff, e := vm.curPC()
+	if e != nil {
+		return "", e
 	}
 	return vm.disasm(scriptIdx, scriptOff), nil
 }
@@ -357,8 +352,8 @@ func (vm *Engine) DisasmScript(idx int) (string, error) {
 
 // CheckErrorCondition returns nil if the running script has ended and was successful, leaving a a true boolean on the
 // stack. An error otherwise, including if the script has not finished.
-func (vm *Engine) CheckErrorCondition(finalScript bool) error {
-	// Check execution is actually done.  When pc is past the end of script array there are no more scripts to run.
+func (vm *Engine) CheckErrorCondition(finalScript bool) (e error) {
+	// Chk execution is actually done.  When pc is past the end of script array there are no more scripts to run.
 	if int(vm.scriptIdx.Load()) < len(vm.scripts) {
 		return scriptError(
 			ErrScriptUnfinished,
@@ -386,14 +381,13 @@ func (vm *Engine) CheckErrorCondition(finalScript bool) error {
 			"stack empty at end of script execution",
 		)
 	}
-	v, err := vm.dstack.PopBool()
-	if err != nil {
-		Error(err)
-		return err
+	v, e := vm.dstack.PopBool()
+	if e != nil {
+		return e
 	}
 	if !v {
 		// Log interesting data.
-		Tracec(
+		trc.C(
 			func() string {
 				dis0, _ := vm.DisasmScript(0)
 				dis1, _ := vm.DisasmScript(1)
@@ -464,31 +458,31 @@ func (vm *Engine) Step() (done bool, e error) {
 			// Put us past the end for CheckErrorCondition()
 			vm.scriptIdx.Inc()
 			// Check script ran successfully and pull the script out of the first stack and execute that.
-			err := vm.CheckErrorCondition(false)
-			if err != nil {
-				Error(err)
-				done, e = false, err
+			ee := vm.CheckErrorCondition(false)
+			if ee != nil {
+				err.Ln(e)
+				done, e = false, ee
 				return
 			}
 			script := vm.savedFirstStack[len(vm.savedFirstStack)-1]
-			pops, err := parseScript(script)
-			if err != nil {
-				Error(err)
-				done, e = false, err
+			pops, er := parseScript(script)
+			if er != nil {
+				err.Ln(e)
+				done, e = false, er
 				return
 			}
 			vm.scripts = append(vm.scripts, pops)
 			// Set stack to be the stack from first script minus the script itself
 			vm.SetStack(vm.savedFirstStack[:len(vm.savedFirstStack)-1])
-		} else if (vm.scriptIdx.Load() == 1 && vm.witnessProgram != nil) ||
-			(vm.scriptIdx.Load() == 2 && vm.witnessProgram != nil && vm.bip16) {
-			// Nested P2SH.
-			vm.scriptIdx.Inc()
-			witness := vm.tx.TxIn[vm.txIdx].Witness
-			if err := vm.verifyWitnessProgram(witness); err != nil {
-				done, e = false, err
-				return
-			}
+		// } else if (vm.scriptIdx.Load() == 1 && vm.witnessProgram != nil) ||
+		// 	(vm.scriptIdx.Load() == 2 && vm.witnessProgram != nil && vm.bip16) {
+		// 	// Nested P2SH.
+		// 	vm.scriptIdx.Inc()
+		// 	witness := vm.tx.TxIn[vm.txIdx].Witness
+		// 	if er := vm.verifyWitnessProgram(witness); dbg.Chk(e) {
+		// 		done, e = false, er
+		// 		return
+		// 	}
 		} else {
 			vm.scriptIdx.Inc()
 		}
@@ -508,31 +502,30 @@ func (vm *Engine) Step() (done bool, e error) {
 
 // Execute will execute all scripts in the script engine and return either nil for successful validation or an error if
 // one occurred.
-func (vm *Engine) Execute() (err error) {
+func (vm *Engine) Execute() (e error) {
 	done := false
 	for !done {
-		done, err = vm.Step()
-		if err != nil {
-			Error(err)
-			return err
+		done, e = vm.Step()
+		if e != nil {
+			return e
 		}
-		Tracec(
+		trc.C(
 			func() string {
-					var o string
-					dis, err := vm.DisasmPC()
-					if err != nil {
-						o += "c stepping (" + err.Error() + ")"
-					}
-					o += "oo stepping " + dis
-					var dstr, astr string
-					// if we're tracing, dump the stacks.
-					if vm.dstack.Depth() != 0 {
-						dstr = "\nStack:\n" + vm.dstack.String()
-					}
-					if vm.astack.Depth() != 0 {
-						astr = "\nAltStack:\n" + vm.astack.String()
-					}
-					return o + dstr + astr
+				var o string
+				dis, e := vm.DisasmPC()
+				if e != nil {
+					o += "c stepping (" + e.Error() + ")"
+				}
+				o += "oo stepping " + dis
+				var dstr, astr string
+				// if we're tracing, dump the stacks.
+				if vm.dstack.Depth() != 0 {
+					dstr = "\nStack:\n" + vm.dstack.String()
+				}
+				if vm.astack.Depth() != 0 {
+					astr = "\nAltStack:\n" + vm.astack.String()
+				}
+				return o + dstr + astr
 			},
 		)
 	}
@@ -546,7 +539,7 @@ func (vm *Engine) subScript() []parsedOpcode {
 
 // checkHashTypeEncoding returns whether or not the passed hashtype adheres to the strict encoding requirements if
 // enabled.
-func (vm *Engine) checkHashTypeEncoding(hashType SigHashType) error {
+func (vm *Engine) checkHashTypeEncoding(hashType SigHashType) (e error) {
 	if !vm.hasFlag(ScriptVerifyStrictEncoding) {
 		return nil
 	}
@@ -560,7 +553,7 @@ func (vm *Engine) checkHashTypeEncoding(hashType SigHashType) error {
 
 // checkPubKeyEncoding returns whether or not the passed public key adheres to the strict encoding requirements if
 // enabled.
-func (vm *Engine) checkPubKeyEncoding(pubKey []byte) error {
+func (vm *Engine) checkPubKeyEncoding(pubKey []byte) (e error) {
 	if vm.hasFlag(ScriptVerifyWitnessPubKeyType) &&
 		vm.isWitnessVersionActive(0) && !ec.IsCompressedPubKey(pubKey) {
 		str := "only uncompressed keys are accepted post-segwit"
@@ -582,7 +575,7 @@ func (vm *Engine) checkPubKeyEncoding(pubKey []byte) error {
 
 // checkSignatureEncoding returns whether or not the passed signature adheres to the strict encoding requirements if
 // enabled.
-func (vm *Engine) checkSignatureEncoding(sig []byte) error {
+func (vm *Engine) checkSignatureEncoding(sig []byte) (e error) {
 	if !vm.hasFlag(ScriptVerifyDERSignatures) &&
 		!vm.hasFlag(ScriptVerifyLowS) &&
 		!vm.hasFlag(ScriptVerifyStrictEncoding) {
@@ -852,11 +845,10 @@ func NewEngine(
 			)
 			return nil, scriptError(ErrScriptTooBig, str)
 		}
-		var err error
-		vm.scripts[i], err = parseScript(scr)
-		if err != nil {
-			Error(err)
-			return nil, err
+		var e error
+		vm.scripts[i], e = parseScript(scr)
+		if e != nil {
+			return nil, e
 		}
 	}
 	// Advance the program counter to the public key script if the signature script is empty since there is nothing to
@@ -878,56 +870,55 @@ func NewEngine(
 		vm.dstack.verifyMinimalData = true
 		vm.astack.verifyMinimalData = true
 	}
-	// Check to see if we should execute in witness verification mode according to
-	// the set flags. We check both the pkScript, and sigScript here since in the
-	// case of nested p2sh, the scriptSig will be a valid witness program. For
-	// nested p2sh, all the bytes after the first data push should *exactly* match
-	// the witness program template.
-	if vm.hasFlag(ScriptVerifyWitness) {
-		// If witness evaluation is enabled, then P2SH MUST also be active.
-		if !vm.hasFlag(ScriptBip16) {
-			errStr := "P2SH must be enabled to do witness verification"
-			return nil, scriptError(ErrInvalidFlags, errStr)
-		}
-		var witProgram []byte
-		switch {
-		case isWitnessProgram(vm.scripts[1]):
-			// The scriptSig must be *empty* for all native witness programs, otherwise we
-			// introduce malleability.
-			if len(scriptSig) != 0 {
-				errStr := "native witness program cannot also have a signature script"
-				return nil, scriptError(ErrWitnessMalleated, errStr)
-			}
-			witProgram = scriptPubKey
-		case len(tx.TxIn[txIdx].Witness) != 0 && vm.bip16:
-			// The sigScript MUST be *exactly* a single canonical data push of the witness
-			// program, otherwise we reintroduce malleability.
-			sigPops := vm.scripts[0]
-			if len(sigPops) == 1 && canonicalPush(sigPops[0]) &&
-				IsWitnessProgram(sigPops[0].data) {
-				witProgram = sigPops[0].data
-			} else {
-				errStr := "signature script for witness nested p2sh is not canonical"
-				return nil, scriptError(ErrWitnessMalleatedP2SH, errStr)
-			}
-		}
-		if witProgram != nil {
-			var err error
-			vm.witnessVersion, vm.witnessProgram, err = ExtractWitnessProgramInfo(witProgram)
-			if err != nil {
-				Error(err)
-				return nil, err
-			}
-		} else {
-			// If we didn't find a witness program in either the pkScript or as a datapush
-			// within the sigScript, then there MUST NOT be any witness data associated with
-			// the input being validated.
-			if vm.witnessProgram == nil && len(tx.TxIn[txIdx].Witness) != 0 {
-				errStr := "non-witness inputs cannot have a witness"
-				return nil, scriptError(ErrWitnessUnexpected, errStr)
-			}
-		}
-	}
+	// // Chk to see if we should execute in witness verification mode according to
+	// // the set flags. We check both the pkScript, and sigScript here since in the
+	// // case of nested p2sh, the scriptSig will be a valid witness program. For
+	// // nested p2sh, all the bytes after the first data push should *exactly* match
+	// // the witness program template.
+	// if vm.hasFlag(ScriptVerifyWitness) {
+	// 	// If witness evaluation is enabled, then P2SH MUST also be active.
+	// 	if !vm.hasFlag(ScriptBip16) {
+	// 		errStr := "P2SH must be enabled to do witness verification"
+	// 		return nil, scriptError(ErrInvalidFlags, errStr)
+	// 	}
+	// 	var witProgram []byte
+	// 	switch {
+	// 	case isWitnessProgram(vm.scripts[1]):
+	// 		// The scriptSig must be *empty* for all native witness programs, otherwise we
+	// 		// introduce malleability.
+	// 		if len(scriptSig) != 0 {
+	// 			errStr := "native witness program cannot also have a signature script"
+	// 			return nil, scriptError(ErrWitnessMalleated, errStr)
+	// 		}
+	// 		witProgram = scriptPubKey
+	// 	case len(tx.TxIn[txIdx].Witness) != 0 && vm.bip16:
+	// 		// The sigScript MUST be *exactly* a single canonical data push of the witness
+	// 		// program, otherwise we reintroduce malleability.
+	// 		sigPops := vm.scripts[0]
+	// 		if len(sigPops) == 1 && canonicalPush(sigPops[0]) &&
+	// 			IsWitnessProgram(sigPops[0].data) {
+	// 			witProgram = sigPops[0].data
+	// 		} else {
+	// 			errStr := "signature script for witness nested p2sh is not canonical"
+	// 			return nil, scriptError(ErrWitnessMalleatedP2SH, errStr)
+	// 		}
+	// 	}
+		// if witProgram != nil {
+		// 	var e error
+		// 	vm.witnessVersion, vm.witnessProgram, e = ExtractWitnessPrograminf.Ln(witProgram)
+		// 	if e != nil {
+		// 		return nil, e
+		// 	}
+		// } else {
+		// 	// If we didn't find a witness program in either the pkScript or as a datapush
+		// 	// within the sigScript, then there MUST NOT be any witness data associated with
+		// 	// the input being validated.
+		// 	if vm.witnessProgram == nil && len(tx.TxIn[txIdx].Witness) != 0 {
+		// 		errStr := "non-witness inputs cannot have a witness"
+		// 		return nil, scriptError(ErrWitnessUnexpected, errStr)
+		// 	}
+		// }
+	// }
 	vm.tx = *tx
 	vm.txIdx = txIdx
 	return &vm, nil

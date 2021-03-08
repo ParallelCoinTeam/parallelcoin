@@ -85,15 +85,13 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 		str := fmt.Sprintf("lastSeriesID (%d) does not exist", lastSeriesID)
 		return nil, newError(ErrSeriesNotExists, str, nil)
 	}
-	unspents, err := store.UnspentOutputs(txmgrNs)
-	if err != nil {
-		Error(err)
-		return nil, newError(ErrInputSelection, "failed to get unspent outputs", err)
+	unspents, e := store.UnspentOutputs(txmgrNs)
+	if e != nil  {
+				return nil, newError(ErrInputSelection, "failed to get unspent outputs", err)
 	}
-	addrMap, err := groupCreditsByAddr(unspents, p.manager.ChainParams())
-	if err != nil {
-		Error(err)
-		return nil, err
+	addrMap, e := groupCreditsByAddr(unspents, p.manager.ChainParams())
+	if e != nil  {
+				return nil, e
 	}
 	var inputs []Credit
 	address := startAddress
@@ -111,12 +109,11 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 			}
 			inputs = append(inputs, eligibles...)
 		}
-		nAddr, err := nextAddr(p, ns, addrmgrNs, address.seriesID, address.branch, address.index, lastSeriesID+1)
-		if err != nil {
-			Error(err)
-			return nil, newError(ErrInputSelection, "failed to get next withdrawal address", err)
+		nAddr, e := nextAddr(p, ns, addrmgrNs, address.seriesID, address.branch, address.index, lastSeriesID+1)
+		if e != nil  {
+						return nil, newError(ErrInputSelection, "failed to get next withdrawal address", err)
 		} else if nAddr == nil {
-			Debug("getEligibleInputs: reached last addr, stopping")
+			dbg.Ln("getEligibleInputs: reached last addr, stopping")
 			break
 		}
 		address = *nAddr
@@ -136,14 +133,13 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 	}
 	branch++
 	if int(branch) > len(series.publicKeys) {
-		highestIdx, err := p.highestUsedSeriesIndex(ns, seriesID)
-		if err != nil {
-			Error(err)
-			return nil, err
+		highestIdx, e := p.highestUsedSeriesIndex(ns, seriesID)
+		if e != nil  {
+						return nil, e
 		}
 		if index > highestIdx {
 			seriesID++
-			Debugf("nextAddr(): reached last branch (%d) and highest used index (%d), "+"moving on to next series (%d) %s",
+			dbg.F("nextAddr(): reached last branch (%d) and highest used index (%d), "+"moving on to next series (%d) %s",
 				branch, index, seriesID)
 			index = 0
 		} else {
@@ -154,11 +150,11 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 	if seriesID >= stopSeriesID {
 		return nil, nil
 	}
-	addr, err := p.WithdrawalAddress(ns, addrmgrNs, seriesID, branch, index)
-	if err != nil && err.(VPError).ErrorCode == ErrWithdrawFromUnusedAddr {
+	addr, e := p.WithdrawalAddress(ns, addrmgrNs, seriesID, branch, index)
+	if e != nil  && err.(VPError).ErrorCode == ErrWithdrawFromUnusedAddr {
 		// The used indices will vary between branches so sometimes we'll try to get a WithdrawalAddress that hasn't
 		// been used before, and in such cases we just need to move on to the next one.
-		Debugf("nextAddr(): skipping addr (series #%d, branch #%d, index #%d) "+
+		dbg.F("nextAddr(): skipping addr (series #%d, branch #%d, index #%d) "+
 			"as it hasn't been used before %s", seriesID, branch, index)
 		return nextAddr(p, ns, addrmgrNs, seriesID, branch, index, stopSeriesID)
 	}
@@ -175,10 +171,9 @@ func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (
 			newError(ErrSeriesNotExists, fmt.Sprintf("unknown seriesID: %d", seriesID), nil)
 	}
 	for i := range series.publicKeys {
-		idx, err := p.highestUsedIndexFor(ns, seriesID, Branch(i))
-		if err != nil {
-			Error(err)
-			return Index(0), err
+		idx, e := p.highestUsedIndexFor(ns, seriesID, Branch(i))
+		if e != nil  {
+						return Index(0), err
 		}
 		if idx > maxIdx {
 			maxIdx = idx
@@ -193,10 +188,9 @@ func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *netparams.Params) 
 	map[string][]wtxmgr.Credit, error) {
 	addrMap := make(map[string][]wtxmgr.Credit)
 	for _, c := range credits {
-		_, addrs, _, err := txscript.ExtractPkScriptAddrs(c.PkScript, chainParams)
-		if err != nil {
-			Error(err)
-			return nil, newError(ErrInputSelection, "failed to obtain input address", err)
+		_, addrs, _, e = txscript.ExtractPkScriptAddrs(c.PkScript, chainParams)
+		if e != nil  {
+						return nil, newError(ErrInputSelection, "failed to obtain input address", err)
 		}
 		// As our credits are all P2SH we should never have more than one address per credit, so let's error out if that
 		// assumption is violated.

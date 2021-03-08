@@ -26,7 +26,7 @@ static const char* GetTempDir(void) {
     return ret;
 }
 
-#define CheckNoError(err)                                               \
+#define CheckNoerr.Ln(                                               \
   if ((err) != NULL) {                                                  \
     fprintf(stderr, "%s:%d: %s: %s\n", __FILE__, __LINE__, phase, (err)); \
     abort();                                                            \
@@ -66,11 +66,11 @@ static void CheckGet(
     const leveldb_readoptions_t* options,
     const char* key,
     const char* expected) {
-  char* err = NULL;
+  char* e = NULL;
   size_t val_len;
   char* val;
   val = leveldb_get(db, options, key, strlen(key), &val_len, &err);
-  CheckNoError(err);
+  CheckNoerr.Ln(;
   CheckEqual(expected, val, val_len);
   Free(&val);
 }
@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
   leveldb_options_t* options;
   leveldb_readoptions_t* roptions;
   leveldb_writeoptions_t* woptions;
-  char* err = NULL;
+  char* e = NULL;
   int run = -1;
 
   CheckCondition(leveldb_major_version() >= 1);
@@ -211,17 +211,17 @@ int main(int argc, char** argv) {
   db = leveldb_open(options, dbname, &err);
   CheckCondition(err != NULL);
   leveldb_free(err);
-  err = NULL;
+  e = NULL;
 
   StartPhase("open");
   leveldb_options_set_create_if_missing(options, 1);
   db = leveldb_open(options, dbname, &err);
-  CheckNoError(err);
+  CheckNoerr.Ln(;
   CheckGet(db, roptions, "foo", NULL);
 
   StartPhase("put");
   leveldb_put(db, woptions, "foo", 3, "hello", 5, &err);
-  CheckNoError(err);
+  CheckNoerr.Ln(;
   CheckGet(db, roptions, "foo", "hello");
 
   StartPhase("compactall");
@@ -241,7 +241,7 @@ int main(int argc, char** argv) {
     leveldb_writebatch_put(wb, "box", 3, "c", 1);
     leveldb_writebatch_delete(wb, "bar", 3);
     leveldb_write(db, woptions, wb, &err);
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     CheckGet(db, roptions, "foo", "hello");
     CheckGet(db, roptions, "bar", NULL);
     CheckGet(db, roptions, "box", "c");
@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
     leveldb_iter_seek(iter, "b", 1);
     CheckIter(iter, "box", "c");
     leveldb_iter_get_error(iter, &err);
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     leveldb_iter_destroy(iter);
   }
 
@@ -290,7 +290,7 @@ int main(int argc, char** argv) {
       snprintf(valbuf, sizeof(valbuf), "v%020d", i);
       leveldb_put(db, woptions, keybuf, strlen(keybuf), valbuf, strlen(valbuf),
                   &err);
-      CheckNoError(err);
+      CheckNoerr.Ln(;
     }
     leveldb_approximate_sizes(db, 2, start, start_len, limit, limit_len, sizes);
     CheckCondition(sizes[0] > 0);
@@ -311,7 +311,7 @@ int main(int argc, char** argv) {
     const leveldb_snapshot_t* snap;
     snap = leveldb_create_snapshot(db);
     leveldb_delete(db, woptions, "foo", 3, &err);
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     leveldb_readoptions_set_snapshot(roptions, snap);
     CheckGet(db, roptions, "foo", "hello");
     leveldb_readoptions_set_snapshot(roptions, NULL);
@@ -325,9 +325,9 @@ int main(int argc, char** argv) {
     leveldb_options_set_create_if_missing(options, 0);
     leveldb_options_set_error_if_exists(options, 0);
     leveldb_repair_db(options, dbname, &err);
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     db = leveldb_open(options, dbname, &err);
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     CheckGet(db, roptions, "foo", NULL);
     CheckGet(db, roptions, "bar", NULL);
     CheckGet(db, roptions, "box", "c");
@@ -338,7 +338,7 @@ int main(int argc, char** argv) {
   StartPhase("filter");
   for (run = 0; run < 2; run++) {
     // First run uses custom filter, second run uses bloom filter
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     leveldb_filterpolicy_t* policy;
     if (run == 0) {
       policy = leveldb_filterpolicy_create(
@@ -352,11 +352,11 @@ int main(int argc, char** argv) {
     leveldb_destroy_db(options, dbname, &err);
     leveldb_options_set_filter_policy(options, policy);
     db = leveldb_open(options, dbname, &err);
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     leveldb_put(db, woptions, "foo", 3, "foovalue", 8, &err);
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     leveldb_put(db, woptions, "bar", 3, "barvalue", 8, &err);
-    CheckNoError(err);
+    CheckNoerr.Ln(;
     leveldb_compact_range(db, NULL, 0, NULL, 0);
 
     fake_filter_result = 1;

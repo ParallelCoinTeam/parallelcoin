@@ -18,8 +18,8 @@ var mainNetGenesisHash = Hash([HashSize]byte{ // Make go vet happy.
 func TestHash(t *testing.T) {
 	// Hash of block 234439.
 	blockHashStr := "14a0810ac680a3eb3f82edc878cea25ec41d6b790744e5daeef"
-	blockHash, err := NewHashFromStr(blockHashStr)
-	if err != nil {
+	blockHash, e := NewHashFromStr(blockHashStr)
+	if e != nil  {
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	// Hash of block 234440 as byte slice.
@@ -29,8 +29,8 @@ func TestHash(t *testing.T) {
 		0x75, 0x63, 0x2e, 0x75, 0xf1, 0xdf, 0x9c, 0x3f,
 		0xa6, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	}
-	hash, err := NewHash(buf)
-	if err != nil {
+	hash, e := NewHash(buf)
+	if e != nil  {
 		t.Errorf("NewHash: unexpected error %v", err)
 	}
 	// Ensure proper size.
@@ -49,8 +49,8 @@ func TestHash(t *testing.T) {
 			hash, blockHash)
 	}
 	// Set hash from byte slice and ensure contents match.
-	err = hash.SetBytes(blockHash.CloneBytes())
-	if err != nil {
+	e = hash.SetBytes(blockHash.CloneBytes())
+	if e != nil  {
 		t.Errorf("SetBytes: %v", err)
 	}
 	if !hash.IsEqual(blockHash) {
@@ -65,14 +65,14 @@ func TestHash(t *testing.T) {
 		t.Error("IsEqual: non-nil hash matches nil hash")
 	}
 	// Invalid size for SetBytes.
-	err = hash.SetBytes([]byte{0x00})
-	if err == nil {
+	e = hash.SetBytes([]byte{0x00})
+	if e ==  nil {
 		t.Errorf("SetBytes: failed to received expected err - got: nil")
 	}
 	// Invalid size for NewHash.
 	invalidHash := make([]byte, HashSize+1)
-	_, err = NewHash(invalidHash)
-	if err == nil {
+	_, e = NewHash(invalidHash)
+	if e ==  nil {
 		t.Errorf("NewHash: failed to received expected err - got: nil")
 	}
 }
@@ -158,11 +158,11 @@ func TestNewHashFromStr(t *testing.T) {
 	unexpectedResultStr := "NewHashFromStr #%d got: %v want: %v"
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		result, err := NewHashFromStr(test.in)
+		result, e := NewHashFromStr(test.in)
 		if err != test.err {
 			t.Errorf(unexpectedErrStr, i, err, test.err)
 			continue
-		} else if err != nil {
+		} else if e != nil  {
 
 			// Got expected error. Move on to the next test.
 			continue

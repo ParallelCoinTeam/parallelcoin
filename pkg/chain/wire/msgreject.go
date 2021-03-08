@@ -3,7 +3,7 @@ package wire
 import (
 	"fmt"
 	"io"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
@@ -60,77 +60,70 @@ type MsgReject struct {
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
 // implementation.
-func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	if pver < RejectVersion {
-		str := fmt.Sprintf("reject message invalid for protocol "+
-			"version %d", pver)
+		str := fmt.Sprintf(
+			"reject message invalid for protocol "+
+				"version %d", pver,
+		)
 		return messageError("MsgReject.BtcDecode", str)
 	}
 	// Command that was rejected.
-	cmd, err := ReadVarString(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+	var cmd string
+	if cmd, e = ReadVarString(r, pver); dbg.Chk(e) {
+		return
 	}
 	msg.Cmd = cmd
 	// Code indicating why the command was rejected.
-	err = readElement(r, &msg.Code)
-	if err != nil {
-		Error(err)
-		return err
+	e = readElement(r, &msg.Code)
+	if e != nil {
+		return
 	}
 	// Human readable string with specific details (over and above the reject code above) about why the command was
 	// rejected.
-	reason, err := ReadVarString(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+	var reason string
+	if reason, e = ReadVarString(r, pver);dbg.Chk(e){
+		return
 	}
 	msg.Reason = reason
 	// CmdBlock and CmdTx messages have an additional hash field that identifies the specific block or transaction.
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
-		err := readElement(r, &msg.Hash)
-		if err != nil {
-			Error(err)
-			return err
+		if e = readElement(r, &msg.Hash); dbg.Chk(e) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgReject) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
+func (msg *MsgReject) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
 	if pver < RejectVersion {
-		str := fmt.Sprintf("reject message invalid for protocol "+
-			"version %d", pver)
+		str := fmt.Sprintf(
+			"reject message invalid for protocol "+
+				"version %d", pver,
+		)
 		return messageError("MsgReject.BtcEncode", str)
 	}
 	// Command that was rejected.
-	err := WriteVarString(w, pver, msg.Cmd)
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarString(w, pver, msg.Cmd); dbg.Chk(e) {
+		return
 	}
 	// Code indicating why the command was rejected.
-	err = writeElement(w, msg.Code)
-	if err != nil {
-		Error(err)
-		return err
+	e = writeElement(w, msg.Code)
+	if e != nil {
+		return
 	}
 	// Human readable string with specific details (over and above the reject code above) about why the command was
 	// rejected.
-	err = WriteVarString(w, pver, msg.Reason)
-	if err != nil {
-		Error(err)
-		return err
+	e = WriteVarString(w, pver, msg.Reason)
+	if e != nil {
+		return
 	}
 	// CmdBlock and CmdTx messages have an additional hash field that identifies the specific block or transaction.
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
-		err := writeElement(w, &msg.Hash)
-		if err != nil {
-			Error(err)
-			return err
+		if e = writeElement(w, &msg.Hash);dbg.Chk(e){
+			return
 		}
 	}
 	return nil

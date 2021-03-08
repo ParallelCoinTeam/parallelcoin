@@ -8,8 +8,8 @@ import (
 
 // insertMemPoolTx inserts the unmined transaction record. It also marks previous outputs referenced by the inputs as
 // spent.
-func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
-	// Check whether the transaction has already been added to the unconfirmed bucket.
+func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) (e error) {
+	// Chk whether the transaction has already been added to the unconfirmed bucket.
 	if existsRawUnmined(ns, rec.Hash[:]) != nil {
 		// TODO: compare serialized txs to ensure this isn't a hash
 		// collision?
@@ -24,24 +24,21 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 			return nil
 		}
 	}
-	Info("inserting unconfirmed transaction", rec.Hash)
-	v, err := valueTxRecord(rec)
-	if err != nil {
-		Error(err)
-		return err
+	inf.Ln("inserting unconfirmed transaction", rec.Hash)
+	v, e := valueTxRecord(rec)
+	if e != nil {
+		return e
 	}
-	err = putRawUnmined(ns, rec.Hash[:], v)
-	if err != nil {
-		Error(err)
-		return err
+	e = putRawUnmined(ns, rec.Hash[:], v)
+	if e != nil {
+		return e
 	}
 	for _, input := range rec.MsgTx.TxIn {
 		prevOut := &input.PreviousOutPoint
 		k := canonicalOutPoint(&prevOut.Hash, prevOut.Index)
-		err = putRawUnminedInput(ns, k, rec.Hash[:])
-		if err != nil {
-			Error(err)
-			return err
+		e = putRawUnminedInput(ns, k, rec.Hash[:])
+		if e != nil {
+			return e
 		}
 	}
 	// TODO: increment credit amount for each credit (but those are unknown here currently).
@@ -51,7 +48,7 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 // removeDoubleSpends checks for any unmined transactions which would introduce a double spend if tx was added to the
 // store (either as a confirmed or unmined transaction). Each conflicting transaction and all transactions which spend
 // it are recursively removed.
-func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
+func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) (e error) {
 	for _, input := range rec.MsgTx.TxIn {
 		prevOut := &input.PreviousOutPoint
 		prevOutKey := canonicalOutPoint(&prevOut.Hash, prevOut.Index)
@@ -66,17 +63,17 @@ func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) e
 			}
 			var doubleSpend TxRecord
 			doubleSpend.Hash = doubleSpendHash
-			err := readRawTxRecord(
+			e := readRawTxRecord(
 				&doubleSpend.Hash, doubleSpendVal, &doubleSpend,
 			)
-			if err != nil {
-				Error(err)
-				return err
+			if e != nil {
+				return e
 			}
-			Debug(
-				"removing double spending transaction", doubleSpend.Hash)
-			if err := RemoveConflict(ns, &doubleSpend); err != nil {
-				return err
+			dbg.Ln(
+				"removing double spending transaction", doubleSpend.Hash,
+			)
+			if e := RemoveConflict(ns, &doubleSpend); dbg.Chk(e) {
+				return e
 			}
 		}
 	}
@@ -87,7 +84,7 @@ func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) e
 //
 // This is designed to remove transactions that would otherwise result in double spend conflicts if left in the store,
 // and to remove transactions that spend coinbase transactions on reorgs.
-func RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
+func RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) (e error) {
 	// For each potential credit for this record, each spender (if any) must be recursively removed as well. Once the
 	// spenders are removed, the credit is deleted.
 	for i := range rec.MsgTx.TxOut {
@@ -103,20 +100,20 @@ func RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 			}
 			var spender TxRecord
 			spender.Hash = spenderHash
-			err := readRawTxRecord(&spender.Hash, spenderVal, &spender)
-			if err != nil {
-				Error(err)
-				return err
+			e := readRawTxRecord(&spender.Hash, spenderVal, &spender)
+			if e != nil {
+				return e
 			}
-			Debugf(
+			dbg.F(
 				"transaction %v is part of a removed conflict chain -- removing as well %s",
-				spender.Hash)
-			if err := RemoveConflict(ns, &spender); err != nil {
-				return err
+				spender.Hash,
+			)
+			if e := RemoveConflict(ns, &spender); dbg.Chk(e) {
+				return e
 			}
 		}
-		if err := deleteRawUnminedCredit(ns, k); err != nil {
-			return err
+		if e := deleteRawUnminedCredit(ns, k); dbg.Chk(e) {
+			return e
 		}
 	}
 	// If this tx spends any previous credits (either mined or unmined), set each unspent. Mined transactions are only
@@ -124,8 +121,8 @@ func RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 	for _, input := range rec.MsgTx.TxIn {
 		prevOut := &input.PreviousOutPoint
 		k := canonicalOutPoint(&prevOut.Hash, prevOut.Index)
-		if err := deleteRawUnminedInput(ns, k); err != nil {
-			return err
+		if e := deleteRawUnminedInput(ns, k); dbg.Chk(e) {
+			return e
 		}
 	}
 	return deleteRawUnmined(ns, rec.Hash[:])
@@ -134,10 +131,9 @@ func RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 // UnminedTxs returns the underlying transactions for all unmined transactions which are not known to have been mined in
 // a block. Transactions are guaranteed to be sorted by their dependency order.
 func (s *Store) UnminedTxs(ns walletdb.ReadBucket) ([]*wire.MsgTx, error) {
-	recSet, err := s.unminedTxRecords(ns)
-	if err != nil {
-		Error(err)
-		return nil, err
+	recSet, e := s.unminedTxRecords(ns)
+	if e != nil {
+		return nil, e
 	}
 	recs := dependencySort(recSet)
 	txs := make([]*wire.MsgTx, 0, len(recs))
@@ -149,23 +145,23 @@ func (s *Store) UnminedTxs(ns walletdb.ReadBucket) ([]*wire.MsgTx, error) {
 
 func (s *Store) unminedTxRecords(ns walletdb.ReadBucket) (map[chainhash.Hash]*TxRecord, error) {
 	unmined := make(map[chainhash.Hash]*TxRecord)
-	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
-		var txHash chainhash.Hash
-		err := readRawUnminedHash(k, &txHash)
-		if err != nil {
-			Error(err)
-			return err
-		}
-		rec := new(TxRecord)
-		err = readRawTxRecord(&txHash, v, rec)
-		if err != nil {
-			Error(err)
-			return err
-		}
-		unmined[rec.Hash] = rec
-		return nil
-	})
-	return unmined, err
+	e := ns.NestedReadBucket(bucketUnmined).ForEach(
+		func(k, v []byte) (e error) {
+			var txHash chainhash.Hash
+			e = readRawUnminedHash(k, &txHash)
+			if e != nil {
+				return e
+			}
+			rec := new(TxRecord)
+			e = readRawTxRecord(&txHash, v, rec)
+			if e != nil {
+				return e
+			}
+			unmined[rec.Hash] = rec
+			return nil
+		},
+	)
+	return unmined, e
 }
 
 // UnminedTxHashes returns the hashes of all transactions not known to have been mined in a block.
@@ -173,15 +169,16 @@ func (s *Store) UnminedTxHashes(ns walletdb.ReadBucket) ([]*chainhash.Hash, erro
 	return s.unminedTxHashes(ns)
 }
 
-func (s *Store) unminedTxHashes(ns walletdb.ReadBucket) ([]*chainhash.Hash, error) {
-	var hashes []*chainhash.Hash
-	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
-		hash := new(chainhash.Hash)
-		err := readRawUnminedHash(k, hash)
-		if err == nil {
-			hashes = append(hashes, hash)
-		}
-		return err
-	})
-	return hashes, err
+func (s *Store) unminedTxHashes(ns walletdb.ReadBucket) (hashes []*chainhash.Hash,e error) {
+	e = ns.NestedReadBucket(bucketUnmined).ForEach(
+		func(k, v []byte) (e error) {
+			hash := new(chainhash.Hash)
+			e = readRawUnminedHash(k, hash)
+			if e == nil {
+				hashes = append(hashes, hash)
+			}
+			return e
+		},
+	)
+	return hashes, e
 }

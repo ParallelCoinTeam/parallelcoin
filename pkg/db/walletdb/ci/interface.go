@@ -57,7 +57,7 @@ func testPutValues(
 		if v != "" {
 			vBytes = []byte(v)
 		}
-		if err := bucket.Put([]byte(k), vBytes); err != nil {
+		if e := bucket.Put([]byte(k), vBytes); dbg.Chk(e) {
 			tc.t.Errorf("Put: unexpected error: %v", err)
 			return false
 		}
@@ -69,7 +69,7 @@ func testPutValues(
 func testDeleteValues(
 	tc *testContext, bucket walletdb.ReadWriteBucket, values map[string]string) bool {
 	for k := range values {
-		if err := bucket.Delete([]byte(k)); err != nil {
+		if e := bucket.Delete([]byte(k)); dbg.Chk(e) {
 			tc.t.Errorf("Delete: unexpected error: %v", err)
 			return false
 		}
@@ -109,7 +109,7 @@ func testReadWriteBucketInterface(
 	}
 	// Iterate all of the keys using ForEach while making sure the stored values are the expected values.
 	keysFound := make(map[string]struct{}, len(keyValues))
-	err := bucket.ForEach(func(k, v []byte) error {
+	e := bucket.ForEach(func(k, v []byte) (e error) {
 		ks := string(k)
 		wantV, ok := keyValues[ks]
 		if !ok {
@@ -124,7 +124,7 @@ func testReadWriteBucketInterface(
 		keysFound[ks] = struct{}{}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		tc.t.Errorf("%v", err)
 		return false
 	}
@@ -145,8 +145,8 @@ func testReadWriteBucketInterface(
 	}
 	// Ensure creating a new bucket works as expected.
 	testBucketName := []byte("testbucket")
-	testBucket, err := bucket.CreateBucket(testBucketName)
-	if err != nil {
+	testBucket, e := bucket.CreateBucket(testBucketName)
+	if e != nil  {
 		tc.t.Errorf("CreateBucket: unexpected error: %v", err)
 		return false
 	}
@@ -155,14 +155,14 @@ func testReadWriteBucketInterface(
 	}
 	// Ensure creating a bucket that already exists fails with the expected error.
 	wantErr := walletdb.ErrBucketExists
-	if _, err := bucket.CreateBucket(testBucketName); err != wantErr {
+	if _, e = bucket.CreateBucket(testBucketName); err != wantErr {
 		tc.t.Errorf("CreateBucket: unexpected error - got %v, "+
 			"want %v", err, wantErr)
 		return false
 	}
 	// Ensure CreateBucketIfNotExists returns an existing bucket.
-	testBucket, err = bucket.CreateBucketIfNotExists(testBucketName)
-	if err != nil {
+	testBucket, e = bucket.CreateBucketIfNotExists(testBucketName)
+	if e != nil  {
 		tc.t.Errorf("CreateBucketIfNotExists: unexpected "+
 			"error: %v", err)
 		return false
@@ -176,7 +176,7 @@ func testReadWriteBucketInterface(
 		return false
 	}
 	// Ensure deleting a bucket works as intended.
-	if err := bucket.DeleteNestedBucket(testBucketName); err != nil {
+	if e := bucket.DeleteNestedBucket(testBucketName); dbg.Chk(e) {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error: %v", err)
 		return false
 	}
@@ -187,14 +187,14 @@ func testReadWriteBucketInterface(
 	}
 	// Ensure deleting a bucket that doesn't exist returns the expected error.
 	wantErr = walletdb.ErrBucketNotFound
-	if err := bucket.DeleteNestedBucket(testBucketName); err != wantErr {
+	if e := bucket.DeleteNestedBucket(testBucketName); err != wantErr {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error - got %v, "+
 			"want %v", err, wantErr)
 		return false
 	}
 	// Ensure CreateBucketIfNotExists creates a new bucket when it doesn't already exist.
-	testBucket, err = bucket.CreateBucketIfNotExists(testBucketName)
-	if err != nil {
+	testBucket, e = bucket.CreateBucketIfNotExists(testBucketName)
+	if e != nil  {
 		tc.t.Errorf("CreateBucketIfNotExists: unexpected "+
 			"error: %v", err)
 		return false
@@ -203,7 +203,7 @@ func testReadWriteBucketInterface(
 		return false
 	}
 	// Delete the test bucket to avoid leaving it around for future calls.
-	if err := bucket.DeleteNestedBucket(testBucketName); err != nil {
+	if e := bucket.DeleteNestedBucket(testBucketName); dbg.Chk(e) {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error: %v", err)
 		return false
 	}
@@ -229,17 +229,17 @@ func testManualTxInterface(
 	populateValues := func(writable, rollback bool, putValues map[string]string) bool {
 		var dbtx walletdb.ReadTx
 		var rootBucket walletdb.ReadBucket
-		var err error
+		var e error
 		if writable {
-			dbtx, err = db.BeginReadWriteTx()
-			if err != nil {
+			dbtx, e = db.BeginReadWriteTx()
+			if e != nil  {
 				tc.t.Errorf("BeginReadWriteTx: unexpected error %v", err)
 				return false
 			}
 			rootBucket = dbtx.(walletdb.ReadWriteTx).ReadWriteBucket(bucketKey)
 		} else {
-			dbtx, err = db.BeginReadTx()
-			if err != nil {
+			dbtx, e = db.BeginReadTx()
+			if e != nil  {
 				tc.t.Errorf("BeginReadTx: unexpected error %v", err)
 				return false
 			}
@@ -259,7 +259,7 @@ func testManualTxInterface(
 		}
 		if !writable {
 			// Rollback the transaction.
-			if err := dbtx.Rollback(); err != nil {
+			if e := dbtx.Rollback(); dbg.Chk(e) {
 				tc.t.Errorf("Commit: unexpected error %v", err)
 				return false
 			}
@@ -270,14 +270,14 @@ func testManualTxInterface(
 			}
 			if rollback {
 				// Rollback the transaction.
-				if err := dbtx.Rollback(); err != nil {
+				if e := dbtx.Rollback(); dbg.Chk(e) {
 					tc.t.Errorf("Rollback: unexpected "+
 						"error %v", err)
 					return false
 				}
 			} else {
 				// The commit should succeed.
-				if err := dbtx.(walletdb.ReadWriteTx).Commit(); err != nil {
+				if e := dbtx.(walletdb.ReadWriteTx).Commit(); dbg.Chk(e) {
 					tc.t.Errorf("Commit: unexpected error "+
 						"%v", err)
 					return false
@@ -290,8 +290,8 @@ func testManualTxInterface(
 	// expectedValues parameter match what's in the database.
 	checkValues := func(expectedValues map[string]string) bool {
 		// Begin another read-only transaction to ensure...
-		dbtx, err := db.BeginReadTx()
-		if err != nil {
+		dbtx, e := db.BeginReadTx()
+		if e != nil  {
 			tc.t.Errorf("BeginReadTx: unexpected error %v", err)
 			return false
 		}
@@ -306,7 +306,7 @@ func testManualTxInterface(
 			return false
 		}
 		// Rollback the read-only transaction.
-		if err := dbtx.Rollback(); err != nil {
+		if e := dbtx.Rollback(); dbg.Chk(e) {
 			tc.t.Errorf("Commit: unexpected error %v", err)
 			return false
 		}
@@ -314,8 +314,8 @@ func testManualTxInterface(
 	}
 	// deleteValues starts a read-write transaction and deletes the keys in the passed key/value pairs.
 	deleteValues := func(values map[string]string) bool {
-		dbtx, err := db.BeginReadWriteTx()
-		if err != nil {
+		dbtx, e := db.BeginReadWriteTx()
+		if e != nil  {
 			tc.t.Errorf("BeginReadWriteTx: unexpected error %v", err)
 			_ = dbtx.Rollback()
 			return false
@@ -336,7 +336,7 @@ func testManualTxInterface(
 			return false
 		}
 		// Commit the changes and ensure it was successful.
-		if err := dbtx.Commit(); err != nil {
+		if e := dbtx.Commit(); dbg.Chk(e) {
 			tc.t.Errorf("Commit: unexpected error %v", err)
 			return false
 		}
@@ -383,20 +383,20 @@ func testManualTxInterface(
 func testNamespaceAndTxInterfaces(
 	tc *testContext, namespaceKey string) bool {
 	namespaceKeyBytes := []byte(namespaceKey)
-	err := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
-		_, err := tx.CreateTopLevelBucket(namespaceKeyBytes)
+	e := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
+		_, e := tx.CreateTopLevelBucket(namespaceKeyBytes)
 		return err
 	})
-	if err != nil {
+	if e != nil  {
 		tc.t.Errorf("CreateTopLevelBucket: unexpected error: %v", err)
 		return false
 	}
 	defer func() {
 		// Remove the namespace now that the tests are done for it.
-		err := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+		e := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 			return tx.DeleteTopLevelBucket(namespaceKeyBytes)
 		})
-		if err != nil {
+		if e != nil  {
 			tc.t.Errorf("DeleteTopLevelBucket: unexpected error: %v", err)
 			return
 		}
@@ -411,14 +411,14 @@ func testNamespaceAndTxInterfaces(
 		"mtxkey3": "foo3",
 	}
 	// Test the bucket interface via a managed read-only transaction.
-	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) error {
+	e = walletdb.View(tc.db, func(tx walletdb.ReadTx) (e error) {
 		rootBucket := tx.ReadBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadBucket: unexpected nil root bucket")
 		}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
@@ -427,7 +427,7 @@ func testNamespaceAndTxInterfaces(
 	// Test the bucket interface via a managed read-write transaction. Also, put a series of values and force a rollback
 	// so the following code can ensure the values were not stored.
 	forceRollbackError := fmt.Errorf("force rollback")
-	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+	e = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 		rootBucket := tx.ReadWriteBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadWriteBucket: unexpected nil root bucket")
@@ -443,7 +443,7 @@ func testNamespaceAndTxInterfaces(
 		return forceRollbackError
 	})
 	if err != forceRollbackError {
-		if err == errSubTestFail {
+		if e ==  errSubTestFail {
 			return false
 		}
 		tc.t.Errorf("Update: inner function error not returned - got "+
@@ -451,7 +451,7 @@ func testNamespaceAndTxInterfaces(
 		return false
 	}
 	// Ensure the values that should have not been stored due to the forced rollback above were not actually stored.
-	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) error {
+	e = walletdb.View(tc.db, func(tx walletdb.ReadTx) (e error) {
 		rootBucket := tx.ReadBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadBucket: unexpected nil root bucket")
@@ -461,14 +461,14 @@ func testNamespaceAndTxInterfaces(
 		}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
 	}
 	// Store a series of values via a managed read-write transaction.
-	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+	e = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 		rootBucket := tx.ReadWriteBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadWriteBucket: unexpected nil root bucket")
@@ -478,14 +478,14 @@ func testNamespaceAndTxInterfaces(
 		}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
 	}
 	// Ensure the values stored above were committed as expected.
-	err = walletdb.View(tc.db, func(tx walletdb.ReadTx) error {
+	e = walletdb.View(tc.db, func(tx walletdb.ReadTx) (e error) {
 		rootBucket := tx.ReadBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadBucket: unexpected nil root bucket")
@@ -495,15 +495,15 @@ func testNamespaceAndTxInterfaces(
 		}
 		return nil
 	})
-	if err != nil {
-		Error(err)
+	if e != nil  {
+		err.Ln(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
 	}
 	// Clean up the values stored above in a managed read-write transaction.
-	err = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+	e = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 		rootBucket := tx.ReadWriteBucket(namespaceKeyBytes)
 		if rootBucket == nil {
 			return fmt.Errorf("ReadWriteBucket: unexpected nil root bucket")
@@ -513,8 +513,8 @@ func testNamespaceAndTxInterfaces(
 		}
 		return nil
 	})
-	if err != nil {
-		Error(err)
+	if e != nil  {
+		err.Ln(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
@@ -528,54 +528,54 @@ func testNamespaceAndTxInterfaces(
 func testAdditionalErrors(
 	tc *testContext) bool {
 	ns3Key := []byte("ns3")
-	err := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) error {
+	e := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 		// Create a new namespace
-		rootBucket, err := tx.CreateTopLevelBucket(ns3Key)
-		if err != nil {
+		rootBucket, e := tx.CreateTopLevelBucket(ns3Key)
+		if e != nil  {
 			return fmt.Errorf("CreateTopLevelBucket: unexpected error: %v", err)
 		}
 		// Ensure CreateBucket returns the expected error when no bucket key is specified.
 		wantErr := walletdb.ErrBucketNameRequired
-		if _, err := rootBucket.CreateBucket(nil); err != wantErr {
+		if _, e = rootBucket.CreateBucket(nil); err != wantErr {
 			return fmt.Errorf("CreateBucket: unexpected error - "+
 				"got %v, want %v", err, wantErr)
 		}
 		// Ensure DeleteNestedBucket returns the expected error when no bucket key is specified.
 		wantErr = walletdb.ErrIncompatibleValue
-		if err := rootBucket.DeleteNestedBucket(nil); err != wantErr {
+		if e := rootBucket.DeleteNestedBucket(nil); err != wantErr {
 			return fmt.Errorf("DeleteNestedBucket: unexpected error - "+
 				"got %v, want %v", err, wantErr)
 		}
 		// Ensure Put returns the expected error when no key is specified.
 		wantErr = walletdb.ErrKeyRequired
-		if err := rootBucket.Put(nil, nil); err != wantErr {
+		if e := rootBucket.Put(nil, nil); err != wantErr {
 			return fmt.Errorf("put: unexpected error - got %v, want %v", err, wantErr)
 		}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
 	}
 	// Ensure that attempting to rollback or commit a transaction that is already closed returns the expected error.
-	tx, err := tc.db.BeginReadWriteTx()
-	if err != nil {
+	tx, e := tc.db.BeginReadWriteTx()
+	if e != nil  {
 		tc.t.Errorf("Begin: unexpected error: %v", err)
 		return false
 	}
-	if err := tx.Rollback(); err != nil {
+	if e := tx.Rollback(); dbg.Chk(e) {
 		tc.t.Errorf("Rollback: unexpected error: %v", err)
 		return false
 	}
 	wantErr := walletdb.ErrTxClosed
-	if err := tx.Rollback(); err != wantErr {
+	if e := tx.Rollback(); err != wantErr {
 		tc.t.Errorf("Rollback: unexpected error - got %v, want %v", err,
 			wantErr)
 		return false
 	}
-	if err := tx.Commit(); err != wantErr {
+	if e := tx.Commit(); err != wantErr {
 		tc.t.Errorf("Commit: unexpected error - got %v, want %v", err,
 			wantErr)
 		return false
@@ -586,17 +586,17 @@ func testAdditionalErrors(
 // TestInterface performs all interfaces tests for this database driver.
 func TestInterface(
 	t Tester, dbType, dbPath string) {
-	db, err := walletdb.Create(dbType, dbPath)
-	if err != nil {
+	db, e := walletdb.Create(dbType, dbPath)
+	if e != nil  {
 		t.Errorf("Failed to create test database (%s) %v", dbType, err)
 		return
 	}
 	defer func() {
-		if err := os.Remove(dbPath); Check(err) {
+		if e := os.Remove(dbPath); dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); Check(err) {
+		if e := db.Close(); dbg.Chk(e) {
 		}
 	}()
 	// Run all of the interface tests against the database. Create a test context to pass around.
@@ -609,7 +609,7 @@ func TestInterface(
 	if !testNamespaceAndTxInterfaces(&context, "ns2") {
 		return
 	}
-	// Check a few more error conditions not covered elsewhere.
+	// Chk a few more error conditions not covered elsewhere.
 	if !testAdditionalErrors(&context) {
 		return
 	}

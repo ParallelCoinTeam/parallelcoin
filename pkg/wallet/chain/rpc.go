@@ -47,7 +47,7 @@ func NewRPCClient(
 	reconnectAttempts int,
 	quit qu.C,
 ) (*RPCClient, error) {
-	Warn("creating new RPC client")
+	wrn.Ln("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
 	}
@@ -78,13 +78,12 @@ func NewRPCClient(
 		OnRescanFinished:    client.onRescanFinished,
 		OnRescanProgress:    client.onRescanProgress,
 	}
-	// Warn("*actually* creating rpc client")
-	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks, client.quit)
-	if err != nil {
-		Error(err)
-		return nil, err
+	wrn.Ln("*actually* creating rpc client")
+	rpcClient, e := rpcclient.New(client.connConfig, ntfnCallbacks, client.quit)
+	if e != nil {
+		return nil, e
 	}
-	// defer Warn("*succeeded* in making rpc client")
+	// defer wrn.Ln("*succeeded* in making rpc client")
 	client.Client = rpcClient
 	return client, nil
 }
@@ -97,19 +96,17 @@ func (c *RPCClient) BackEnd() string {
 // Start attempts to establish a client connection with the remote server. If successful, handler goroutines are started
 // to process notifications sent by the server. After a limited number of connection attempts, this function gives up,
 // and therefore will not block forever waiting for the connection to be established to a server that may not exist.
-func (c *RPCClient) Start() error {
-	// Debug(c.connConfig)
-	err := c.Connect(c.reconnectAttempts)
-	if err != nil {
-		Error(err)
-		return err
+func (c *RPCClient) Start() (e error) {
+	// dbg.Ln(c.connConfig)
+	e = c.Connect(c.reconnectAttempts)
+	if e != nil {
+		return e
 	}
 	// Verify that the server is running on the expected network.
-	net, err := c.GetCurrentNet()
-	if err != nil {
-		Error(err)
+	net, e := c.GetCurrentNet()
+	if e != nil {
 		c.Disconnect()
-		return err
+		return e
 	}
 	if net != c.chainParams.Net {
 		c.Disconnect()
@@ -144,7 +141,7 @@ func (c *RPCClient) Stop() {
 func (c *RPCClient) Rescan(
 	startHash *chainhash.Hash, addrs []util.Address,
 	outPoints map[wire.OutPoint]util.Address,
-) error {
+) (e error) {
 	flatOutpoints := make([]*wire.OutPoint, 0, len(outPoints))
 	for ops := range outPoints {
 		flatOutpoints = append(flatOutpoints, &ops)
@@ -182,51 +179,46 @@ func (c *RPCClient) BlockStamp() (*wm.BlockStamp, error) {
 func (c *RPCClient) FilterBlocks(req *FilterBlocksRequest,) (*FilterBlocksResponse, error) {
 	blockFilterer := NewBlockFilterer(c.chainParams, req)
 	// Construct the watchlist using the addresses and outpoints contained in the filter blocks request.
-	watchList, err := buildFilterBlocksWatchList(req)
-	if err != nil {
-		Error(err)
-		return nil, err
+	watchList, e := buildFilterBlocksWatchList(req)
+	if e != nil {
+		return nil, e
 	}
 	// Iterate over the requested blocks, fetching the compact filter for each one, and matching it against the
 	// watchlist generated above. If the filter returns a positive match, the full block is then requested and scanned
 	// for addresses using the block filterer.
 	for i, blk := range req.Blocks {
-		rawFilter, err := c.GetCFilter(&blk.Hash, wire.GCSFilterRegular)
-		if err != nil {
-			Error(err)
-			return nil, err
+		rawFilter, e := c.GetCFilter(&blk.Hash, wire.GCSFilterRegular)
+		if e != nil {
+			return nil, e
 		}
 		// Ensure the filter is large enough to be deserialized.
 		if len(rawFilter.Data) < 4 {
 			continue
 		}
-		filter, err := gcs.FromNBytes(
+		filter, e := gcs.FromNBytes(
 			builder.DefaultP, builder.DefaultM, rawFilter.Data,
 		)
-		if err != nil {
-			Error(err)
-			return nil, err
+		if e != nil {
+			return nil, e
 		}
 		// Skip any empty filters.
 		if filter.N() == 0 {
 			continue
 		}
 		key := builder.DeriveKey(&blk.Hash)
-		matched, err := filter.MatchAny(key, watchList)
-		if err != nil {
-			Error(err)
-			return nil, err
+		matched, e := filter.MatchAny(key, watchList)
+		if e != nil {
+			return nil, e
 		} else if !matched {
 			continue
 		}
-		Tracef(
+		trc.F(
 			"fetching block height=%d hash=%v",
 			blk.Height, blk.Hash,
 		)
-		rawBlock, err := c.GetBlock(&blk.Hash)
-		if err != nil {
-			Error(err)
-			return nil, err
+		rawBlock, e := c.GetBlock(&blk.Hash)
+		if e != nil {
+			return nil, e
 		}
 		if !blockFilterer.FilterBlock(rawBlock) {
 			continue
@@ -254,10 +246,9 @@ func parseBlock(block *btcjson.BlockDetails) (*tm.BlockMeta, error) {
 	if block == nil {
 		return nil, nil
 	}
-	blkHash, err := chainhash.NewHashFromStr(block.Hash)
-	if err != nil {
-		Error(err)
-		return nil, err
+	blkHash, e := chainhash.NewHashFromStr(block.Hash)
+	if e != nil {
+		return nil, e
 	}
 	blk := &tm.BlockMeta{
 		Block: tm.Block{
@@ -299,21 +290,17 @@ func (c *RPCClient) onBlockDisconnected(hash *chainhash.Hash, height int32, time
 	}
 }
 func (c *RPCClient) onRecvTx(tx *util.Tx, block *btcjson.BlockDetails) {
-	blk, err := parseBlock(block)
-	if err != nil {
-		Error(err)
+	blk, e := parseBlock(block)
+	if e != nil {
 		// Log and drop improper notification.
-		Error(
+		err.Ln(
 			"recvtx notification bad block:", err,
 		)
 		return
 	}
-	rec, err := tm.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now())
-	if err != nil {
-		Error(err)
-		Error(
-			"cannot create transaction record for relevant tx:", err,
-		)
+	rec, e := tm.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now())
+	if e != nil {
+		err.Ln("cannot create transaction record for relevant tx:", e)
 		return
 	}
 	select {
@@ -340,9 +327,9 @@ func (c *RPCClient) onRescanFinished(hash *chainhash.Hash, height int32, blkTime
 
 // handler maintains a queue of notifications and the current state (best block) of the chain.
 func (c *RPCClient) handler() {
-	hash, height, err := c.GetBestBlock()
-	if err != nil {
-		Error("failed to receive best block from chain server:", err)
+	hash, height, e := c.GetBestBlock()
+	if e != nil {
+		err.Ln("failed to receive best block from chain server:", err)
 		c.Stop()
 		c.wg.Done()
 		return
@@ -394,7 +381,7 @@ out:
 			}
 		case c.currentBlock <- bs:
 		case <-c.quit.Wait():
-			Debug("legacy rpc handler stopping on quit channel close")
+			dbg.Ln("legacy rpc handler stopping on quit channel close")
 			break out
 		}
 	}

@@ -44,18 +44,17 @@ func Decode(bech string) (string, []byte, error) {
 	hrp := bech[:one]
 	data := bech[one+1:]
 	// Each character corresponds to the byte with value of the index in 'charset'.
-	decoded, err := toBytes(data)
-	if err != nil {
-		Error(err)
-		return "", nil, fmt.Errorf("failed converting data to bytes: "+
+	decoded, e := toBytes(data)
+	if e != nil  {
+				return "", nil, fmt.Errorf("failed converting data to bytes: "+
 			"%v", err)
 	}
 	if !bech32VerifyChecksum(hrp, decoded) {
 		moreInfo := ""
 		checksum := bech[len(bech)-6:]
-		expected, err := toChars(bech32Checksum(hrp,
+		expected, e := toChars(bech32Checksum(hrp,
 			decoded[:len(decoded)-6]))
-		if err == nil {
+		if e ==  nil {
 			moreInfo = fmt.Sprintf("Expected %v, got %v.",
 				expected, checksum)
 		}
@@ -73,10 +72,9 @@ func Encode(hrp string, data []byte) (string, error) {
 	combined := append(data, checksum...)
 	// The resulting bech32 string is the concatenation of the hrp, the separator 1, data and checksum. Everything after
 	// the separator is represented using the specified charset.
-	dataChars, err := toChars(combined)
-	if err != nil {
-		Error(err)
-		return "", fmt.Errorf("unable to convert data bytes to chars: "+
+	dataChars, e := toChars(combined)
+	if e != nil  {
+				return "", fmt.Errorf("unable to convert data bytes to chars: "+
 			"%v", err)
 	}
 	return hrp + "1" + dataChars, nil

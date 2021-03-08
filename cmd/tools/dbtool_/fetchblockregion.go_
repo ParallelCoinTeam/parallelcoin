@@ -19,9 +19,9 @@ var (
 )
 
 // Execute is the main entry point for the command.  It's invoked by the parser.
-func (cmd *blockRegionCmd) Execute(args []string) error {
+func (cmd *blockRegionCmd) Execute(args []string) (e error) {
 	// Setup the global config options and ensure they are valid.
-	if err := setupGlobalConfig(); err != nil {
+	if e := setupGlobalConfig(); dbg.Chk(e) {
 		return err
 	}
 	// Ensure expected arguments.
@@ -37,30 +37,26 @@ func (cmd *blockRegionCmd) Execute(args []string) error {
 			"specified")
 	}
 	// Parse arguments.
-	blockHash, err := chainhash.NewHashFromStr(args[0])
-	if err != nil {
-		L.Error(err)
-return err
+	blockHash, e := chainhash.NewHashFromStr(args[0])
+	if e != nil  {
+		L.return err
 	}
-	startOffset, err := strconv.ParseUint(args[1], 10, 32)
-	if err != nil {
-		L.Error(err)
-return err
+	startOffset, e := strconv.ParseUint(args[1], 10, 32)
+	if e != nil  {
+		L.return err
 	}
-	regionLen, err := strconv.ParseUint(args[2], 10, 32)
-	if err != nil {
-		L.Error(err)
-return err
+	regionLen, e := strconv.ParseUint(args[2], 10, 32)
+	if e != nil  {
+		L.return err
 	}
 	// Load the block database.
-	db, err := loadBlockDB()
-	if err != nil {
-		L.Error(err)
-return err
+	db, e := loadBlockDB()
+	if e != nil  {
+		L.return err
 	}
 	defer db.Close()
-	return db.View(func(tx database.Tx) error {
-		L.Infof("Fetching block region %s<%d:%d>", blockHash,
+	return db.View(func(tx database.Tx) (e error) {
+		L.inf.F("Fetching block region %s<%d:%d>", blockHash,
 			startOffset, startOffset+regionLen-1)
 		region := database.BlockRegion{
 			Hash:   blockHash,
@@ -68,14 +64,13 @@ return err
 			Len:    uint32(regionLen),
 		}
 		startTime := time.Now()
-		regionBytes, err := tx.FetchBlockRegion(&region)
-		if err != nil {
-		L.Error(err)
-return err
+		regionBytes, e := tx.FetchBlockRegion(&region)
+		if e != nil  {
+		L.return err
 		}
-		L.Infof("Loaded block region in %v", time.Since(startTime))
-		L.Infof("Double Hash: %s", chainhash.DoubleHashH(regionBytes))
-		L.Infof("Region Hex: %s", hex.EncodeToString(regionBytes))
+		L.inf.F("Loaded block region in %v", time.Since(startTime))
+		L.inf.F("Double Hash: %s", chainhash.DoubleHashH(regionBytes))
+		L.inf.F("Region Hex: %s", hex.EncodeToString(regionBytes))
 		return nil
 	})
 }

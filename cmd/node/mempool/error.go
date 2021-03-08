@@ -15,7 +15,7 @@ type RuleError struct {
 
 // Error satisfies the error interface and prints human-readable errors.
 func (e RuleError) Error() string {
-	if e.Err == nil {
+	if e.Err ==  nil {
 		return "<nil>"
 	}
 	return e.Err.Error()
@@ -51,16 +51,16 @@ func chainRuleError(chainErr blockchain.RuleError) RuleError {
 
 // extractRejectCode attempts to return a relevant reject code for a given error by examining the error for known types.
 // It will return true if a code was successfully extracted.
-func extractRejectCode(err error) (wire.RejectCode, bool) {
+func extractRejectCode(e error) (wire.RejectCode, bool) {
 	// Pull the underlying error out of a RuleError.
-	if rerr, ok := err.(RuleError); ok {
-		err = rerr.Err
+	if rerr, ok := e.(RuleError); ok {
+		e = rerr.Err
 	}
-	switch err := err.(type) {
+	switch er := e.(type) {
 	case blockchain.RuleError:
 		// Convert the chain error to a reject code.
 		var code wire.RejectCode
-		switch err.ErrorCode {
+		switch er.ErrorCode {
 		// Rejected due to duplicate.
 		case blockchain.ErrDuplicateBlock:
 			code = wire.RejectDuplicate
@@ -82,7 +82,7 @@ func extractRejectCode(err error) (wire.RejectCode, bool) {
 		}
 		return code, true
 	case TxRuleError:
-		return err.RejectCode, true
+		return er.RejectCode, true
 	case nil:
 		return wire.RejectInvalid, false
 	}
@@ -91,20 +91,20 @@ func extractRejectCode(err error) (wire.RejectCode, bool) {
 
 // ErrToRejectErr examines the underlying type of the error and returns a reject code and string appropriate to be sent
 // in a wire.MsgReject message.
-func ErrToRejectErr(err error) (wire.RejectCode, string) {
+func ErrToRejectErr(e error) (wire.RejectCode, string) {
 	// Return the reject code along with the error text if it can be
 	// extracted from the error.
-	rejectCode, found := extractRejectCode(err)
+	rejectCode, found := extractRejectCode(e)
 	if found {
-		return rejectCode, err.Error()
+		return rejectCode, e.Error()
 	}
 	// Return a generic rejected string if there is no error. This really should not happen unless the code elsewhere is
 	// not setting an error as it should be but it's best to be safe and simply return a generic string rather than
 	// allowing the following code that dereferences the err to panic.
-	if err == nil {
+	if e ==  nil {
 		return wire.RejectInvalid, "rejected"
 	}
 	// When the underlying error is not one of the above cases, just return wire.RejectInvalid with a generic rejected
 	// string plus the error text.
-	return wire.RejectInvalid, "rejected: " + err.Error()
+	return wire.RejectInvalid, "rejected: " + e.Error()
 }

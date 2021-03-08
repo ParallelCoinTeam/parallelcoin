@@ -22,17 +22,16 @@ func ExampleCreate() {
 	// Create a database and schedule it to be closed and removed on exit. Typically you wouldn't want to remove the
 	// database right away like this, but it's done here in the example to ensure the example cleans up after itself.
 	dbPath := filepath.Join(os.TempDir(), "examplecreate.db")
-	db, err := walletdb.Create("bdb", dbPath)
-	if err != nil {
-		walletdb.Error(err)
-		return
+	db, e := walletdb.Create("bdb", dbPath)
+	if e != nil  {
+		walletdb.		return
 	}
 	defer func() {
-		if err := os.Remove(dbPath); walletdb.Check(err) {
+		if e := os.Remove(dbPath); walletdb.dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); walletdb.Check(err) {
+		if e := db.Close(); walletdb.dbg.Chk(e) {
 		}
 	}()
 	// Output:
@@ -45,14 +44,14 @@ var exampleNum = 0
 func exampleLoadDB() (walletdb.DB, func(), error) {
 	dbName := fmt.Sprintf("exampleload%d.db", exampleNum)
 	dbPath := filepath.Join(os.TempDir(), dbName)
-	db, err := walletdb.Create("bdb", dbPath)
-	if err != nil {
-		return nil, nil, err
+	db, e := walletdb.Create("bdb", dbPath)
+	if e != nil  {
+		return nil, nil, e
 	}
 	teardownFunc := func() {
-		if err := db.Close(); walletdb.Check(err) {
+		if e := db.Close(); walletdb.dbg.Chk(e) {
 		}
-		if err := os.Remove(dbPath); walletdb.Check(err) {
+		if e := os.Remove(dbPath); walletdb.dbg.Chk(e) {
 		}
 	}
 	exampleNum++
@@ -63,30 +62,26 @@ func exampleLoadDB() (walletdb.DB, func(), error) {
 func ExampleDB_createTopLevelBucket() {
 	// Load a database for the purposes of this example and schedule it to be closed and removed on exit. See the Create
 	// example for more details on what this step is doing.
-	db, teardownFunc, err := exampleLoadDB()
-	if err != nil {
-		walletdb.Error(err)
-		return
+	db, teardownFunc, e := exampleLoadDB()
+	if e != nil  {
+		walletdb.		return
 	}
 	defer teardownFunc()
-	dbtx, err := db.BeginReadWriteTx()
-	if err != nil {
-		walletdb.Error(err)
-		return
+	dbtx, e := db.BeginReadWriteTx()
+	if e != nil  {
+		walletdb.		return
 	}
 	defer func() {
-		err := dbtx.Commit()
-		if err != nil {
-			walletdb.Error(err)
-		}
+		e := dbtx.Commit()
+		if e != nil  {
+			walletdb.		}
 	}()
 	// Get or create a bucket in the database as needed. This bucket is what is typically passed to specific
 	// sub-packages so they have their own area to work in without worrying about conflicting keys.
 	bucketKey := []byte("walletsubpackage")
-	bucket, err := dbtx.CreateTopLevelBucket(bucketKey)
-	if err != nil {
-		walletdb.Error(err)
-		return
+	bucket, e := dbtx.CreateTopLevelBucket(bucketKey)
+	if e != nil  {
+		walletdb.		return
 	}
 	// Prevent unused error.
 	_ = bucket
@@ -106,39 +101,37 @@ func Example_basicUsage() {
 	// Create a database and schedule it to be closed and removed on exit. Typically you wouldn't want to remove the
 	// database right away like this, but it's done here in the example to ensure the example cleans up after itself.
 	dbPath := filepath.Join(os.TempDir(), "exampleusage.db")
-	db, err := walletdb.Create("bdb", dbPath)
-	if err != nil {
-		walletdb.Error(err)
-		return
+	db, e := walletdb.Create("bdb", dbPath)
+	if e != nil  {
+		walletdb.		return
 	}
 	defer func() {
-		if err := os.Remove(dbPath); walletdb.Check(err) {
+		if e := os.Remove(dbPath); walletdb.dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); walletdb.Check(err) {
+		if e := db.Close(); walletdb.dbg.Chk(e) {
 		}
 	}()
 	// Get or create a bucket in the database as needed. This bucket is what is typically passed to specific
 	// sub-packages so they have their own area to work in without worrying about conflicting keys.
 	bucketKey := []byte("walletsubpackage")
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		bucket := tx.ReadWriteBucket(bucketKey)
 		if bucket == nil {
-			_, err = tx.CreateTopLevelBucket(bucketKey)
-			if err != nil {
+			_, e = tx.CreateTopLevelBucket(bucketKey)
+			if e != nil  {
 				return err
 			}
 		}
 		return nil
 	})
-	if err != nil {
-		walletdb.Error(err)
-		return
+	if e != nil  {
+		walletdb.		return
 	}
 	// Use the Update function of the namespace to perform a managed read-write transaction. The transaction will
 	// automatically be rolled back if the supplied inner function returns a non-nil error.
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		// All data is stored against the root bucket of the namespace, or nested buckets of the root bucket. It's not
 		// really necessary to store it in a separate variable like this, but it has been done here for the purposes of
 		// the example to illustrate.
@@ -146,7 +139,7 @@ func Example_basicUsage() {
 		// Store a key/value pair directly in the root bucket.
 		key := []byte("mykey")
 		value := []byte("myvalue")
-		if err := rootBucket.Put(key, value); err != nil {
+		if e := rootBucket.Put(key, value); dbg.Chk(e) {
 			return err
 		}
 		// Read the key back and ensure it matches.
@@ -155,8 +148,8 @@ func Example_basicUsage() {
 		}
 		// Create a new nested bucket under the root bucket.
 		nestedBucketKey := []byte("mybucket")
-		nestedBucket, err := rootBucket.CreateBucket(nestedBucketKey)
-		if err != nil {
+		nestedBucket, e := rootBucket.CreateBucket(nestedBucketKey)
+		if e != nil  {
 			return err
 		}
 		// The key from above that was set in the root bucket does not exist in this new nested bucket.
@@ -165,9 +158,8 @@ func Example_basicUsage() {
 		}
 		return nil
 	})
-	if err != nil {
-		walletdb.Error(err)
-		return
+	if e != nil  {
+		walletdb.		return
 	}
 	// Output:
 }

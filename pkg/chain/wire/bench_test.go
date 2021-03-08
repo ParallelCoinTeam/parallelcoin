@@ -289,16 +289,16 @@ func BenchmarkDeserializeTxSmall(b *testing.B) {
 // BenchmarkDeserializeTxLarge performs a benchmark on how long it takes to deserialize a very large transaction.
 func BenchmarkDeserializeTxLarge(b *testing.B) {
 	// tx bb41a757f405890fb0f5856228e23b715702d714d59bf2b1feb70d8b2b4e3e08 from the main block chain.
-	fi, err := os.Open("testdata/megatx.bin.bz2")
-	if err != nil {
+	fi, e := os.Open("testdata/megatx.bin.bz2")
+	if e != nil  {
 		b.Fatalf("Failed to read transaction data: %v", err)
 	}
 	defer func() {
-		if err := fi.Close(); Check(err) {
+		if e := fi.Close(); dbg.Chk(e) {
 		}
 	}()
-	buf, err := ioutil.ReadAll(bzip2.NewReader(fi))
-	if err != nil {
+	buf, e := ioutil.ReadAll(bzip2.NewReader(fi))
+	if e != nil  {
 		b.Fatalf("Failed to read transaction data: %v", err)
 	}
 	r := bytes.NewReader(buf)
@@ -357,15 +357,15 @@ func BenchmarkDecodeGetHeaders(b *testing.B) {
 	pver := ProtocolVersion
 	var m MsgGetHeaders
 	for i := 0; i < MaxBlockLocatorsPerMsg; i++ {
-		hash, err := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
-		if err != nil {
+		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
+		if e != nil  {
 			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
 		}
 		_ = m.AddBlockLocatorHash(hash)
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if err := m.BtcEncode(&bb, pver, LatestEncoding); err != nil {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); dbg.Chk(e) {
 		b.Fatalf("MsgGetHeaders.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -385,15 +385,15 @@ func BenchmarkDecodeHeaders(b *testing.B) {
 	pver := ProtocolVersion
 	var m MsgHeaders
 	for i := 0; i < MaxBlockHeadersPerMsg; i++ {
-		hash, err := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
-		if err != nil {
+		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
+		if e != nil  {
 			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
 		}
 		_ = m.AddBlockHeader(NewBlockHeader(1, hash, hash, 0, uint32(i)))
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if err := m.BtcEncode(&bb, pver, LatestEncoding); err != nil {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); dbg.Chk(e) {
 		b.Fatalf("MsgHeaders.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -413,15 +413,15 @@ func BenchmarkDecodeGetBlocks(b *testing.B) {
 	pver := ProtocolVersion
 	var m MsgGetBlocks
 	for i := 0; i < MaxBlockLocatorsPerMsg; i++ {
-		hash, err := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
-		if err != nil {
+		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
+		if e != nil  {
 			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
 		}
 		_ = m.AddBlockLocatorHash(hash)
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if err := m.BtcEncode(&bb, pver, LatestEncoding); err != nil {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); dbg.Chk(e) {
 		b.Fatalf("MsgGetBlocks.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -446,7 +446,7 @@ func BenchmarkDecodeAddr(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if err := ma.BtcEncode(&bb, pver, LatestEncoding); err != nil {
+	if e := ma.BtcEncode(&bb, pver, LatestEncoding); dbg.Chk(e) {
 		b.Fatalf("MsgAddr.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -466,15 +466,15 @@ func BenchmarkDecodeInv(b *testing.B) {
 	pver := ProtocolVersion
 	var m MsgInv
 	for i := 0; i < MaxInvPerMsg; i++ {
-		hash, err := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
-		if err != nil {
+		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
+		if e != nil  {
 			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
 		}
 		_ = m.AddInvVect(NewInvVect(InvTypeBlock, hash))
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if err := m.BtcEncode(&bb, pver, LatestEncoding); err != nil {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); dbg.Chk(e) {
 		b.Fatalf("MsgInv.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -494,15 +494,15 @@ func BenchmarkDecodeNotFound(b *testing.B) {
 	pver := ProtocolVersion
 	var m MsgNotFound
 	for i := 0; i < MaxInvPerMsg; i++ {
-		hash, err := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
-		if err != nil {
+		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
+		if e != nil  {
 			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
 		}
 		_ = m.AddInvVect(NewInvVect(InvTypeBlock, hash))
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if err := m.BtcEncode(&bb, pver, LatestEncoding); err != nil {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); dbg.Chk(e) {
 		b.Fatalf("MsgNotFound.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -521,14 +521,14 @@ func BenchmarkDecodeMerkleBlock(b *testing.B) {
 	// Create a message with random data.
 	pver := ProtocolVersion
 	var m MsgMerkleBlock
-	hash, err := chainhash.NewHashFromStr(fmt.Sprintf("%x", 10000))
-	if err != nil {
+	hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", 10000))
+	if e != nil  {
 		b.Fatalf("NewHashFromStr: unexpected error: %v", err)
 	}
 	m.Header = *NewBlockHeader(1, hash, hash, 0, uint32(10000))
 	for i := 0; i < 105; i++ {
-		hash, err := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
-		if err != nil {
+		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
+		if e != nil  {
 			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
 		}
 		_ = m.AddTxHash(hash)
@@ -538,7 +538,7 @@ func BenchmarkDecodeMerkleBlock(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if err := m.BtcEncode(&bb, pver, LatestEncoding); err != nil {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); dbg.Chk(e) {
 		b.Fatalf("MsgMerkleBlock.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -561,7 +561,7 @@ func BenchmarkTxHash(b *testing.B) {
 // BenchmarkDoubleHashB performs a benchmark on how long it takes to perform a double hash returning a byte slice.
 func BenchmarkDoubleHashB(b *testing.B) {
 	var buf bytes.Buffer
-	if err := genesisCoinbaseTx.Serialize(&buf); err != nil {
+	if e := genesisCoinbaseTx.Serialize(&buf); dbg.Chk(e) {
 		b.Errorf("Serialize: unexpected error: %v", err)
 		return
 	}
@@ -575,7 +575,7 @@ func BenchmarkDoubleHashB(b *testing.B) {
 // BenchmarkDoubleHashH performs a benchmark on how long it takes to perform a double hash returning a chainhash.Hash.
 func BenchmarkDoubleHashH(b *testing.B) {
 	var buf bytes.Buffer
-	if err := genesisCoinbaseTx.Serialize(&buf); err != nil {
+	if e := genesisCoinbaseTx.Serialize(&buf); dbg.Chk(e) {
 		b.Errorf("Serialize: unexpected error: %v", err)
 		return
 	}

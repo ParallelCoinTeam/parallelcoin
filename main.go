@@ -9,35 +9,34 @@ import (
 	"github.com/p9c/pod/pkg/logg"
 	_ "net/http/pprof"
 	
-	_ "github.com/p9c/pod/pkg"
 	"github.com/p9c/pod/version"
 	
 	"github.com/p9c/pod/cmd"
 )
 
 func main() {
-	version.URL = URL
-	version.GitRef = GitRef
-	version.GitCommit = GitCommit
-	version.BuildTime = BuildTime
-	version.Tag = Tag
+	version.URL = url
+	version.GitRef = gitRef
+	version.GitCommit = gitCommit
+	version.BuildTime = buildTime
+	version.Tag = tag
 	version.Get = GetVersion
-	logg.SortAllSubsystems()
+	logg.SortSubsystemsList()
 	cmd.Main()
 }
 
 var (
-	// URL is the git URL for the repository
-	URL       string
-	// GitRef is the gitref, as in refs/heads/branchname
-	GitRef    string
-	// GitCommit is the commit hash of the current HEAD
-	GitCommit string
-	// BuildTime stores the time when the current binary was built
-	BuildTime string
-	// Tag lists the tag on the build, if it lacks a tag, it adds a + to the end of
-	// the newest one
-	Tag       string
+	// url is the git url for the repository
+	url string
+	// gitRef is the gitref, as in refs/heads/branchname
+	gitRef string
+	// gitCommit is the commit hash of the current HEAD
+	gitCommit string
+	// buildTime stores the time when the current binary was built
+	buildTime string
+	// tag lists the tag on the build, adding a + to the newest tag if the commit is
+	// not that commit
+	tag string
 )
 
 func GetVersion() string {
@@ -49,6 +48,6 @@ func GetVersion() string {
 	built: %s
 	tag: %s
 `,
-		URL, GitRef, GitCommit, BuildTime, Tag,
+		url, gitRef, gitCommit, buildTime, tag,
 	)
 }

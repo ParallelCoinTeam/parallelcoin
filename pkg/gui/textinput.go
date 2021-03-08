@@ -12,6 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
+// TextInput is a simple text input widget
 type TextInput struct {
 	*Window
 	// Theme    *Theme
@@ -29,12 +30,12 @@ type TextInput struct {
 
 // TextInput creates a simple text input widget
 func (w *Window) TextInput(editor *Editor, hint string) *TextInput {
-	var err error
 	var fon text.Font
-	if fon, err = w.collection.Font("bariol regular"); Check(err) {
+	var e error
+	if fon, e = w.collection.Font("bariol regular"); dbg.Chk(e) {
 		panic(err)
 	}
-	e := &TextInput{
+	ti := &TextInput{
 		Window:    w,
 		editor:    editor,
 		textSize:  w.TextSize,
@@ -44,49 +45,51 @@ func (w *Window) TextInput(editor *Editor, hint string) *TextInput {
 		hint:      hint,
 		hintColor: w.Colors.GetNRGBAFromName("Hint"),
 	}
-	e.Font("bariol regular")
-	return e
+	ti.Font("bariol regular")
+	return ti
 }
 
 // Font sets the font for the text input widget
-func (e *TextInput) Font(font string) *TextInput {
-	if fon, err := e.Theme.collection.Font(font); !Check(err) {
-		e.editor.font = fon
+func (ti *TextInput) Font(font string) *TextInput {
+	var fon text.Font
+	var e error
+	if fon, e = ti.Theme.collection.Font(font); !dbg.Chk(e) {
+		ti.editor.font = fon
 	}
-	return e
+	return ti
 }
 
 // TextScale sets the size of the text relative to the base font size
-func (e *TextInput) TextScale(scale float32) *TextInput {
-	e.textSize = e.Theme.TextSize.Scale(scale)
-	return e
+func (ti *TextInput) TextScale(scale float32) *TextInput {
+	ti.textSize = ti.Theme.TextSize.Scale(scale)
+	return ti
 }
 
 // Color sets the color to render the text
-func (e *TextInput) Color(color string) *TextInput {
-	e.color = e.Theme.Colors.GetNRGBAFromName(color)
-	return e
+func (ti *TextInput) Color(color string) *TextInput {
+	ti.color = ti.Theme.Colors.GetNRGBAFromName(color)
+	return ti
 }
 
 // Hint sets the text to show when the box is empty
-func (e *TextInput) Hint(hint string) *TextInput {
-	e.hint = hint
-	return e
+func (ti *TextInput) Hint(hint string) *TextInput {
+	ti.hint = hint
+	return ti
 }
 
 // HintColor sets the color of the hint text
-func (e *TextInput) HintColor(color string) *TextInput {
-	e.hintColor = e.Theme.Colors.GetNRGBAFromName(color)
-	return e
+func (ti *TextInput) HintColor(color string) *TextInput {
+	ti.hintColor = ti.Theme.Colors.GetNRGBAFromName(color)
+	return ti
 }
 
 // Fn renders the text input widget
-func (e *TextInput) Fn(c l.Context) l.Dimensions {
+func (ti *TextInput) Fn(c l.Context) l.Dimensions {
 	defer op.Push(c.Ops).Pop()
 	macro := op.Record(c.Ops)
-	paint.ColorOp{Color: e.hintColor}.Add(c.Ops)
-	tl := Text{alignment: e.editor.alignment}
-	dims := tl.Fn(c, e.shaper, e.font, e.textSize, e.hint)
+	paint.ColorOp{Color: ti.hintColor}.Add(c.Ops)
+	tl := Text{alignment: ti.editor.alignment}
+	dims := tl.Fn(c, ti.shaper, ti.font, ti.textSize, ti.hint)
 	call := macro.Stop()
 	if w := dims.Size.X; c.Constraints.Min.X < w {
 		c.Constraints.Min.X = w
@@ -94,21 +97,21 @@ func (e *TextInput) Fn(c l.Context) l.Dimensions {
 	if h := dims.Size.Y; c.Constraints.Min.Y < h {
 		c.Constraints.Min.Y = h
 	}
-	dims = e.editor.Layout(c, e.shaper, e.font, e.textSize)
+	dims = ti.editor.Layout(c, ti.shaper, ti.font, ti.textSize)
 	disabled := c.Queue == nil
-	if e.editor.Len() > 0 {
-		textColor := e.color
+	if ti.editor.Len() > 0 {
+		textColor := ti.color
 		if disabled {
 			textColor = f32color.MulAlpha(textColor, 150)
 		}
 		paint.ColorOp{Color: textColor}.Add(c.Ops)
-		e.editor.PaintText(c)
+		ti.editor.PaintText(c)
 	} else {
 		call.Add(c.Ops)
 	}
 	if !disabled {
-		paint.ColorOp{Color: e.color}.Add(c.Ops)
-		e.editor.PaintCaret(c)
+		paint.ColorOp{Color: ti.color}.Add(c.Ops)
+		ti.editor.PaintCaret(c)
 	}
 	return dims
 }

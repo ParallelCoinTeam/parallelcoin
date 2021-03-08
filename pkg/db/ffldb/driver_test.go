@@ -21,15 +21,15 @@ func TestCreateOpenFail(t *testing.T) {
 	t.Parallel()
 	// Ensure that attempting to open a database that doesn't exist returns the expected error.
 	wantErrCode := database.ErrDbDoesNotExist
-	_, err := database.Open(dbType, "noexist", blockDataNet)
+	_, e := database.Open(dbType, "noexist", blockDataNet)
 	if !checkDbError(t, "Open", err, wantErrCode) {
 		return
 	}
 	// Ensure that attempting to open a database with the wrong number of parameters returns the expected error.
 	wantErr := fmt.Errorf("invalid arguments to %s.Open -- expected "+
 		"database path and block network", dbType)
-	_, err = database.Open(dbType, 1, 2, 3)
-	if err != nil && err.Error() != wantErr.Error() {
+	_, e = database.Open(dbType, 1, 2, 3)
+	if e != nil  && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -38,8 +38,8 @@ func TestCreateOpenFail(t *testing.T) {
 	// error.
 	wantErr = fmt.Errorf("first argument to %s.Open is invalid -- "+
 		"expected database path string", dbType)
-	_, err = database.Open(dbType, 1, blockDataNet)
-	if err != nil && err.Error() != wantErr.Error() {
+	_, e = database.Open(dbType, 1, blockDataNet)
+	if e != nil  && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -48,8 +48,8 @@ func TestCreateOpenFail(t *testing.T) {
 	// error.
 	wantErr = fmt.Errorf("second argument to %s.Open is invalid -- "+
 		"expected block network", dbType)
-	_, err = database.Open(dbType, "noexist", "invalid")
-	if err != nil && err.Error() != wantErr.Error() {
+	_, e = database.Open(dbType, "noexist", "invalid")
+	if e != nil  && err.Error() != wantErr.Error() {
 		t.Errorf("Open: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -57,8 +57,8 @@ func TestCreateOpenFail(t *testing.T) {
 	// Ensure that attempting to create a database with the wrong number of parameters returns the expected error.
 	wantErr = fmt.Errorf("invalid arguments to %s.Create -- expected "+
 		"database path and block network", dbType)
-	_, err = database.Create(dbType, 1, 2, 3)
-	if err != nil && err.Error() != wantErr.Error() {
+	_, e = database.Create(dbType, 1, 2, 3)
+	if e != nil  && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -67,8 +67,8 @@ func TestCreateOpenFail(t *testing.T) {
 	// error.
 	wantErr = fmt.Errorf("first argument to %s.Create is invalid -- "+
 		"expected database path string", dbType)
-	_, err = database.Create(dbType, 1, blockDataNet)
-	if err != nil && err.Error() != wantErr.Error() {
+	_, e = database.Create(dbType, 1, blockDataNet)
+	if e != nil  && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -77,8 +77,8 @@ func TestCreateOpenFail(t *testing.T) {
 	// error.
 	wantErr = fmt.Errorf("second argument to %s.Create is invalid -- "+
 		"expected block network", dbType)
-	_, err = database.Create(dbType, "noexist", "invalid")
-	if err != nil && err.Error() != wantErr.Error() {
+	_, e = database.Create(dbType, "noexist", "invalid")
+	if e != nil  && err.Error() != wantErr.Error() {
 		t.Errorf("Create: did not receive expected error - got %v, "+
 			"want %v", err, wantErr)
 		return
@@ -86,45 +86,45 @@ func TestCreateOpenFail(t *testing.T) {
 	// Ensure operations against a closed database return the expected error.
 	dbPath := filepath.Join(os.TempDir(), "ffldb-createfail")
 	_ = os.RemoveAll(dbPath)
-	db, err := database.Create(dbType, dbPath, blockDataNet)
-	if err != nil {
+	db, e := database.Create(dbType, dbPath, blockDataNet)
+	if e != nil  {
 		t.Errorf("Create: unexpected error: %v", err)
 		return
 	}
 	defer func() {
-		if err := os.RemoveAll(dbPath); ffldb.Check(err) {
+		if e := os.RemoveAll(dbPath); ffldb.dbg.Chk(e) {
 		}
 	}()
 	func() {
-		if err := db.Close(); ffldb.Check(err) {
+		if e := db.Close(); ffldb.dbg.Chk(e) {
 		}
 	}()
 	wantErrCode = database.ErrDbNotOpen
-	err = db.View(func(tx database.Tx) error {
+	e = db.View(func(tx database.Tx) (e error) {
 		return nil
 	})
 	if !checkDbError(t, "View", err, wantErrCode) {
 		return
 	}
 	wantErrCode = database.ErrDbNotOpen
-	err = db.Update(func(tx database.Tx) error {
+	e = db.Update(func(tx database.Tx) (e error) {
 		return nil
 	})
 	if !checkDbError(t, "Update", err, wantErrCode) {
 		return
 	}
 	wantErrCode = database.ErrDbNotOpen
-	_, err = db.Begin(false)
+	_, e = db.Begin(false)
 	if !checkDbError(t, "Begin(false)", err, wantErrCode) {
 		return
 	}
 	wantErrCode = database.ErrDbNotOpen
-	_, err = db.Begin(true)
+	_, e = db.Begin(true)
 	if !checkDbError(t, "Begin(true)", err, wantErrCode) {
 		return
 	}
 	wantErrCode = database.ErrDbNotOpen
-	err = db.Close()
+	e = db.Close()
 	if !checkDbError(t, "Close", err, wantErrCode) {
 		return
 	}
@@ -136,17 +136,17 @@ func TestPersistence(t *testing.T) {
 	// Create a new database to run tests against.
 	dbPath := filepath.Join(os.TempDir(), "ffldb-persistencetest")
 	_ = os.RemoveAll(dbPath)
-	db, err := database.Create(dbType, dbPath, blockDataNet)
-	if err != nil {
+	db, e := database.Create(dbType, dbPath, blockDataNet)
+	if e != nil  {
 		t.Errorf("Failed to create test database (%s) %v", dbType, err)
 		return
 	}
 	defer func() {
-		if err := os.RemoveAll(dbPath); ffldb.Check(err) {
+		if e := os.RemoveAll(dbPath); ffldb.dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); ffldb.Check(err) {
+		if e := db.Close(); ffldb.dbg.Chk(e) {
 		}
 	}()
 	// Create a bucket, put some values into it, and store a block so they can be tested for existence on re-open.
@@ -158,47 +158,47 @@ func TestPersistence(t *testing.T) {
 	}
 	genesisBlock := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 	genesisHash := chaincfg.MainNetParams.GenesisHash
-	err = db.Update(func(tx database.Tx) error {
+	e = db.Update(func(tx database.Tx) (e error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("metadata: unexpected nil bucket")
 		}
-		bucket1, err := metadataBucket.CreateBucket(bucket1Key)
-		if err != nil {
+		bucket1, e := metadataBucket.CreateBucket(bucket1Key)
+		if e != nil  {
 			return fmt.Errorf("createBucket: unexpected error: %v",
 				err)
 		}
 		for k, v := range storeValues {
-			err := bucket1.Put([]byte(k), []byte(v))
-			if err != nil {
+			e := bucket1.Put([]byte(k), []byte(v))
+			if e != nil  {
 				return fmt.Errorf("put: unexpected error: %v",
 					err)
 			}
 		}
-		if err := tx.StoreBlock(genesisBlock); err != nil {
+		if e := tx.StoreBlock(genesisBlock); dbg.Chk(e) {
 			return fmt.Errorf("StoreBlock: unexpected error: %v",
 				err)
 		}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		t.Errorf("Update: unexpected error: %v", err)
 		return
 	}
 	// Close and reopen the database to ensure the values persist.
-	if err := db.Close(); ffldb.Check(err) {
+	if e := db.Close(); ffldb.dbg.Chk(e) {
 	}
-	db, err = database.Open(dbType, dbPath, blockDataNet)
-	if err != nil {
+	db, e = database.Open(dbType, dbPath, blockDataNet)
+	if e != nil  {
 		t.Errorf("Failed to open test database (%s) %v", dbType, err)
 		return
 	}
 	defer func() {
-		if err := db.Close(); ffldb.Check(err) {
+		if e := db.Close(); ffldb.dbg.Chk(e) {
 		}
 	}()
 	// Ensure the values previously stored in the 3rd namespace still exist and are correct.
-	err = db.View(func(tx database.Tx) error {
+	e = db.View(func(tx database.Tx) (e error) {
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
 			return fmt.Errorf("metadata: unexpected nil bucket")
@@ -215,8 +215,8 @@ func TestPersistence(t *testing.T) {
 			}
 		}
 		genesisBlockBytes, _ := genesisBlock.Bytes()
-		gotBytes, err := tx.FetchBlock(genesisHash)
-		if err != nil {
+		gotBytes, e := tx.FetchBlock(genesisHash)
+		if e != nil  {
 			return fmt.Errorf("fetchBlock: unexpected error: %v",
 				err)
 		}
@@ -225,7 +225,7 @@ func TestPersistence(t *testing.T) {
 		}
 		return nil
 	})
-	if err != nil {
+	if e != nil  {
 		t.Errorf("view: unexpected error: %v", err)
 		return
 	}
@@ -237,8 +237,8 @@ func TestPersistence(t *testing.T) {
 // 	// Create a new database to run tests against.
 // 	dbPath := filepath.Join(os.TempDir(), "ffldb-interfacetest")
 // 	_ = os.RemoveAll(dbPath)
-// 	db, err := database.Create(dbType, dbPath, blockDataNet)
-// 	if err != nil {
+// 	db, e := database.Create(dbType, dbPath, blockDataNet)
+// 	if e != nil  {
 // 		t.Errorf("Failed to create test database (%s) %v", dbType, err)
 // 		return
 // 	}

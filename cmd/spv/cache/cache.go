@@ -21,5 +21,5 @@ type Cache interface {
 type Value interface {
 	// Size determines how big this entry would be in the cache. For example, for a filter, it could be the size of the
 	// filter in bytes.
-	Size() (uint64, error)
+	Size() (rv uint64,e error)
 }

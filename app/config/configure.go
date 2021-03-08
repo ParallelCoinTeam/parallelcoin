@@ -12,9 +12,9 @@ import (
 // Configure loads and sanitises the configuration from urfave/cli
 func Configure(cx *conte.Xt, commandName string, initial bool) {
 	initLogLevel(cx.Config)
-	Debug("running Configure", commandName, *cx.Config.WalletPass)
-	Debug("DATADIR", *cx.Config.DataDir)
-	Debug("set log level")
+	dbg.Ln("running Configure", commandName, *cx.Config.WalletPass)
+	dbg.Ln("DATADIR", *cx.Config.DataDir)
+	dbg.Ln("set log level")
 	spv.DisableDNSSeed = *cx.Config.DisableDNSSeed
 	initDictionary(cx.Config)
 	initParams(cx)
@@ -48,7 +48,7 @@ func Configure(cx *conte.Xt, commandName string, initial bool) {
 		if commandName == "kopach" {
 			return
 		}
-		Debug("saving configuration")
+		dbg.Ln("saving configuration")
 		save.Pod(cx.Config)
 	}
 	if cx.ActiveNet.Name == netparams.TestNet3Params.Name {

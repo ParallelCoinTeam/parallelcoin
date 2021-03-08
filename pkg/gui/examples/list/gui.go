@@ -20,7 +20,7 @@ func main() {
 		th: th,
 	}
 	go func() {
-		if err := gui.NewWindow(th).
+		if e := gui.NewWindow(th).
 			Size(64, 32).
 			Title("example").
 			Open().
@@ -30,7 +30,7 @@ func main() {
 				func() {
 					quit.Q()
 				}, quit,
-			); Check(err) {
+			); dbg.Chk(e) {
 		}
 	}()
 	<-quit

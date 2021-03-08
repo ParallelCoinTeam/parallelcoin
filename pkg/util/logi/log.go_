@@ -156,7 +156,7 @@ func (l *Logger) AddLogChan() (ch chan Entry) {
 func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
 	// if this is called on the top level logger and there is other loggers
 	// set their levels as well
-	L.Warn("set log level", level)
+	L.wrn.Ln("set log level", level)
 	//if l.Pkg == "root" && len(Loggers) > 0 {
 	//	for _, v := range Loggers {
 	//		v.SetLevel(level, color, split)
@@ -251,17 +251,17 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	path := filepath.Join(logFileName, logPath)
 	var logFileHandle *os.File
 	if FileExists(path) {
-		err := os.Rename(path, filepath.Join(logPath,
+		e := os.Rename(path, filepath.Join(logPath,
 			time.Now().Format(timeFormat)+".json"))
-		if err != nil {
+		if e != nil  {
 			if write {
 				wr.Println("error rotating log", err)
 			}
 			return
 		}
 	}
-	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
+	logFileHandle, e := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
+	if e != nil  {
 		if write {
 			wr.Println("error opening log file", logFileName)
 		}
@@ -295,7 +295,7 @@ func (w *LogWriter) Println(a ...interface{}) {
 type PrintcFunc func(func() string)
 type PrintfFunc func(format string, a ...interface{})
 type PrintlnFunc func(a ...interface{})
-type CheckFunc func(err error) bool
+type CheckFunc func(e error) bool
 type SpewFunc func(interface{})
 
 var TermWidth = func() int { return 80 }
@@ -529,14 +529,14 @@ func Empty(pkg string) *Logger {
 // sanitizeLoglevel accepts a string and returns a
 // default if the input is not in the Levels slice
 func FileExists(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return err == nil
+	_, e := os.Stat(filePath)
+	return e ==  nil
 }
 
 func init() {
 	SetLogWriter(os.Stderr)
 	L.SetLevel("trace", true, "pod")
-	L.Trace("starting up logger")
+	L.trc.Ln("starting up logger")
 }
 
 func PickNoun(n int, singular, plural string) string {
@@ -568,8 +568,8 @@ func printcFunc(level string, color bool, fh *os.File, ch []chan Entry,
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
 				text}
 			if fh != nil {
-				j, err := json.Marshal(out)
-				if err != nil {
+				j, e := json.Marshal(out)
+				if e != nil  {
 					if write {
 						wr.Println("logging error:", err)
 					}
@@ -608,8 +608,8 @@ func printfFunc(level string, color bool, fh *os.File, ch []chan Entry,
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
 				text}
 			if fh != nil {
-				j, err := json.Marshal(out)
-				if err != nil {
+				j, e := json.Marshal(out)
+				if e != nil  {
 					if write {
 						wr.Println("logging error:", err)
 					}
@@ -648,8 +648,8 @@ func printlnFunc(level string, color bool, fh *os.File,
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
 				text}
 			if fh != nil {
-				j, err := json.Marshal(out)
-				if err != nil {
+				j, e := json.Marshal(out)
+				if e != nil  {
 					if write {
 						wr.Println("logging error:", err)
 					}
@@ -668,8 +668,8 @@ func printlnFunc(level string, color bool, fh *os.File,
 
 func checkFunc(color bool, fh *os.File, ch []chan Entry,
 	split string) CheckFunc {
-	f := func(err error) bool {
-		n := err == nil
+	f := func(e error) bool {
+		n := e ==  nil
 		if n {
 			return false
 		}
@@ -685,8 +685,8 @@ func checkFunc(color bool, fh *os.File, ch []chan Entry,
 			out := Entry{time.Now(), "CHK", fmt.Sprint(loc, ":", line), pkg,
 				text}
 			if fh != nil {
-				j, err := json.Marshal(out)
-				if err != nil {
+				j, e := json.Marshal(out)
+				if e != nil  {
 					if write {
 						wr.Println("logging error:", err)
 					}
@@ -720,8 +720,8 @@ func ps(level string, color bool, fh *os.File, split string) SpewFunc {
 				string(os.PathSeparator))
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
 				text}
-			j, err := json.Marshal(out)
-			if err != nil {
+			j, e := json.Marshal(out)
+			if e != nil  {
 				if write {
 					wr.Println("logging error:", err)
 				}

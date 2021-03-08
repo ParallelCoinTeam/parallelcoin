@@ -11,22 +11,25 @@ type BloomUpdateType uint8
 const (
 	// BloomUpdateNone indicates the filter is not adjusted when a match is found.
 	BloomUpdateNone BloomUpdateType = 0
-	// BloomUpdateAll indicates if the filter matches any data element in a public key script, the outpoint is
-	// serialized and inserted into the filter.
+	// BloomUpdateAll indicates if the filter matches any data element in a public
+	// key script, the outpoint is serialized and inserted into the filter.
 	BloomUpdateAll BloomUpdateType = 1
-	// BloomUpdateP2PubkeyOnly indicates if the filter matches a data element in a public key script and the script is
-	// of the standard pay-to-pubkey or multisig, the outpoint is serialized and inserted into the filter.
+	// BloomUpdateP2PubkeyOnly indicates if the filter matches a data element in a
+	// public key script and the script is of the standard pay-to-pubkey or
+	// multisig, the outpoint is serialized and inserted into the filter.
 	BloomUpdateP2PubkeyOnly BloomUpdateType = 2
 )
 const (
-	// MaxFilterLoadHashFuncs is the maximum number of hash functions to load into the Bloom filter.
+	// MaxFilterLoadHashFuncs is the maximum number of hash functions to load into
+	// the Bloom filter.
 	MaxFilterLoadHashFuncs = 50
 	// MaxFilterLoadFilterSize is the maximum size in bytes a filter may be.
 	MaxFilterLoadFilterSize = 36000
 )
 
-// MsgFilterLoad implements the Message interface and represents a bitcoin filterload message which is used to reset a
-// Bloom filter. This message was not added until protocol version BIP0037Version.
+// MsgFilterLoad implements the Message interface and represents a bitcoin
+// filterload message which is used to reset a Bloom filter. This message was
+// not added until protocol version BIP0037Version.
 type MsgFilterLoad struct {
 	Filter    []byte
 	HashFuncs uint32
@@ -34,57 +37,56 @@ type MsgFilterLoad struct {
 	Flags     BloomUpdateType
 }
 
-// BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
-// implementation.
-func (msg *MsgFilterLoad) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+// BtcDecode decodes r using the bitcoin protocol encoding into the receiver.
+// This is part of the Message interface implementation.
+func (msg *MsgFilterLoad) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	if pver < BIP0037Version {
-		str := fmt.Sprintf("filterload message invalid for protocol "+
-			"version %d", pver)
+		str := fmt.Sprintf("filterload message invalid for protocol version %d", pver)
 		return messageError("MsgFilterLoad.BtcDecode", str)
 	}
-	var err error
-	msg.Filter, err = ReadVarBytes(r, pver, MaxFilterLoadFilterSize,
-		"filterload filter size")
-	if err != nil {
-		Error(err)
-		return err
+	if msg.Filter, e = ReadVarBytes(r, pver, MaxFilterLoadFilterSize, "filterload filter size"); dbg.Chk(e) {
+		return
 	}
-	err = readElements(r, &msg.HashFuncs, &msg.Tweak, &msg.Flags)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElements(r, &msg.HashFuncs, &msg.Tweak, &msg.Flags); dbg.Chk(e) {
+		return
 	}
 	if msg.HashFuncs > MaxFilterLoadHashFuncs {
-		str := fmt.Sprintf("too many filter hash functions for message "+
-			"[count %v, max %v]", msg.HashFuncs, MaxFilterLoadHashFuncs)
+		str := fmt.Sprintf(
+			"too many filter hash functions for message [count %v, max %v]",
+			msg.HashFuncs, MaxFilterLoadHashFuncs,
+		)
 		return messageError("MsgFilterLoad.BtcDecode", str)
 	}
-	return nil
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgFilterLoad) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
+func (msg *MsgFilterLoad) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
 	if pver < BIP0037Version {
-		str := fmt.Sprintf("filterload message invalid for protocol "+
-			"version %d", pver)
+		str := fmt.Sprintf(
+			"filterload message invalid for protocol "+
+				"version %d", pver,
+		)
 		return messageError("MsgFilterLoad.BtcEncode", str)
 	}
 	size := len(msg.Filter)
 	if size > MaxFilterLoadFilterSize {
-		str := fmt.Sprintf("filterload filter size too large for message "+
-			"[size %v, max %v]", size, MaxFilterLoadFilterSize)
+		str := fmt.Sprintf(
+			"filterload filter size too large for message "+
+				"[size %v, max %v]", size, MaxFilterLoadFilterSize,
+		)
 		return messageError("MsgFilterLoad.BtcEncode", str)
 	}
 	if msg.HashFuncs > MaxFilterLoadHashFuncs {
-		str := fmt.Sprintf("too many filter hash functions for message "+
-			"[count %v, max %v]", msg.HashFuncs, MaxFilterLoadHashFuncs)
+		str := fmt.Sprintf(
+			"too many filter hash functions for message "+
+				"[count %v, max %v]", msg.HashFuncs, MaxFilterLoadHashFuncs,
+		)
 		return messageError("MsgFilterLoad.BtcEncode", str)
 	}
-	err := WriteVarBytes(w, pver, msg.Filter)
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarBytes(w, pver, msg.Filter); dbg.Chk(e) {
+		return
 	}
 	return writeElements(w, msg.HashFuncs, msg.Tweak, msg.Flags)
 }

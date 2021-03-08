@@ -36,7 +36,7 @@ static void CopyNodeStats(std::vector<CNodeStats>& vstats)
     }
 }
 
-Value getpeerinfo(const Array& params, bool fHelp)
+Value getpeerinf.Ln(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(
@@ -114,7 +114,7 @@ Value addnode(const Array& params, bool fHelp)
     return Value::null;
 }
 
-Value getaddednodeinfo(const Array& params, bool fHelp)
+Value getaddednodeinf.Ln(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 2)
         throw runtime_error(

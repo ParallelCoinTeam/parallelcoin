@@ -30,7 +30,7 @@ func CheckEncode(input []byte, version byte) string {
 }
 
 // CheckDecode decodes a string that was encoded with CheckEncode and verifies the checksum.
-func CheckDecode(input string) (result []byte, version byte, err error) {
+func CheckDecode(input string) (result []byte, version byte, e error) {
 	decoded := Decode(input)
 	if len(decoded) < 5 {
 		return nil, 0, ErrInvalidFormat

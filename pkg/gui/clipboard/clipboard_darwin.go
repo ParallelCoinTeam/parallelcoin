@@ -28,28 +28,28 @@ func getCopyCommand() *exec.Cmd {
 
 func readAll() (string, error) {
 	pasteCmd := getPasteCommand()
-	out, err := pasteCmd.Output()
-	if err != nil {
-		return "", err
+	out, e := pasteCmd.Output()
+	if e != nil  {
+		return "", e
 	}
 	return string(out), nil
 }
 
-func writeAll(text string) error {
+func writeAll(text string) (e error) {
 	copyCmd := getCopyCommand()
-	in, err := copyCmd.StdinPipe()
-	if err != nil {
-		return err
+	in, e := copyCmd.StdinPipe()
+	if e != nil  {
+		return e
 	}
 
-	if err := copyCmd.Start(); err != nil {
-		return err
+	if e := copyCmd.Start(); e != nil {
+		return e
 	}
-	if _, err := in.Write([]byte(text)); err != nil {
-		return err
+	if _, e = in.Write([]byte(text)); e != nil {
+		return e
 	}
-	if err := in.Close(); err != nil {
-		return err
+	if e := in.Close(); e != nil {
+		return e
 	}
 	return copyCmd.Wait()
 }
@@ -58,9 +58,9 @@ func Start() {
 }
 
 func Get() string {
-	str, err := readAll()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	str, e := readAll()
+	if e != nil  {
+		fmt.Fprintln(os.Stderr, e)
 		return ""
 	}
 	return str
@@ -71,8 +71,8 @@ func GetPrimary() string {
 }
 
 func Set(text string) {
-	err := writeAll(text)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	e := writeAll(text)
+	if e != nil  {
+		fmt.Fprintln(os.Stderr, e)
 	}
 }

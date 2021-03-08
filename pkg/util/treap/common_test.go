@@ -12,8 +12,8 @@ import (
 // initialization purposes.
 //
 // func fromHex(// 	s string) []byte {
-// 	r, err := hex.DecodeString(s)
-// 	if err != nil {
+// 	r, e := hex.DecodeString(s)
+// 	if e != nil  {
 // 		panic("invalid hex in source file: " + s)
 // 	}
 // 	return r

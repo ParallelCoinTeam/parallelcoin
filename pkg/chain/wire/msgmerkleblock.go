@@ -3,7 +3,7 @@ package wire
 import (
 	"fmt"
 	"io"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
@@ -22,10 +22,12 @@ type MsgMerkleBlock struct {
 }
 
 // AddTxHash adds a new transaction hash to the message.
-func (msg *MsgMerkleBlock) AddTxHash(hash *chainhash.Hash) error {
+func (msg *MsgMerkleBlock) AddTxHash(hash *chainhash.Hash) (e error) {
 	if len(msg.Hashes)+1 > maxTxPerBlock {
-		str := fmt.Sprintf("too many tx hashes for message [max %v]",
-			maxTxPerBlock)
+		str := fmt.Sprintf(
+			"too many tx hashes for message [max %v]",
+			maxTxPerBlock,
+		)
 		return messageError("MsgMerkleBlock.AddTxHash", str)
 	}
 	msg.Hashes = append(msg.Hashes, hash)
@@ -34,31 +36,30 @@ func (msg *MsgMerkleBlock) AddTxHash(hash *chainhash.Hash) error {
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
 // implementation.
-func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	if pver < BIP0037Version {
-		str := fmt.Sprintf("merkleblock message invalid for protocol "+
-			"version %d", pver)
+		str := fmt.Sprintf(
+			"merkleblock message invalid for protocol "+
+				"version %d", pver,
+		)
 		return messageError("MsgMerkleBlock.BtcDecode", str)
 	}
-	err := readBlockHeader(r, pver, &msg.Header)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readBlockHeader(r, pver, &msg.Header); dbg.Chk(e) {
+		return
 	}
-	err = readElement(r, &msg.Transactions)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElement(r, &msg.Transactions); dbg.Chk(e) {
+		return
 	}
 	// Read num block locator hashes and limit to max.
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+	var count uint64
+	if count, e = ReadVarInt(r, pver); dbg.Chk(e) {
+		return
 	}
 	if count > maxTxPerBlock {
-		str := fmt.Sprintf("too many transaction hashes for message "+
-			"[count %v, max %v]", count, maxTxPerBlock)
+		str := fmt.Sprintf(
+			"too many transaction hashes for message "+
+				"[count %v, max %v]", count, maxTxPerBlock,
+		)
 		return messageError("MsgMerkleBlock.BtcDecode", str)
 	}
 	// Create a contiguous slice of hashes to deserialize into in order to reduce the number of allocations.
@@ -66,62 +67,61 @@ func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncodi
 	msg.Hashes = make([]*chainhash.Hash, 0, count)
 	for i := uint64(0); i < count; i++ {
 		hash := &hashes[i]
-		err := readElement(r, hash)
-		if err != nil {
-			Error(err)
-			return err
+		if e = readElement(r, hash); dbg.Chk(e) {
+			return
 		}
-		err = msg.AddTxHash(hash)
-		if err != nil {
-			Error(err)
+		if e = msg.AddTxHash(hash); dbg.Chk(e) {
 		}
 	}
-	msg.Flags, err = ReadVarBytes(r, pver, maxFlagsPerMerkleBlock,
-		"merkle block flags size")
-	return err
+	msg.Flags, e = ReadVarBytes(
+		r, pver, maxFlagsPerMerkleBlock,
+		"merkle block flags size",
+	)
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgMerkleBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
+func (msg *MsgMerkleBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
 	if pver < BIP0037Version {
-		str := fmt.Sprintf("merkleblock message invalid for protocol "+
-			"version %d", pver)
+		str := fmt.Sprintf(
+			"merkleblock message invalid for protocol "+
+				"version %d", pver,
+		)
 		return messageError("MsgMerkleBlock.BtcEncode", str)
 	}
 	// Read num transaction hashes and limit to max.
 	numHashes := len(msg.Hashes)
 	if numHashes > maxTxPerBlock {
-		str := fmt.Sprintf("too many transaction hashes for message "+
-			"[count %v, max %v]", numHashes, maxTxPerBlock)
+		str := fmt.Sprintf(
+			"too many transaction hashes for message "+
+				"[count %v, max %v]", numHashes, maxTxPerBlock,
+		)
 		return messageError("MsgMerkleBlock.BtcDecode", str)
 	}
 	numFlagBytes := len(msg.Flags)
 	if numFlagBytes > maxFlagsPerMerkleBlock {
-		str := fmt.Sprintf("too many flag bytes for message [count %v, "+
-			"max %v]", numFlagBytes, maxFlagsPerMerkleBlock)
+		str := fmt.Sprintf(
+			"too many flag bytes for message [count %v, "+
+				"max %v]", numFlagBytes, maxFlagsPerMerkleBlock,
+		)
 		return messageError("MsgMerkleBlock.BtcDecode", str)
 	}
-	err := writeBlockHeader(w, pver, &msg.Header)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeBlockHeader(w, pver, &msg.Header); dbg.Chk(e) {
+		return
 	}
-	err = writeElement(w, msg.Transactions)
-	if err != nil {
-		Error(err)
-		return err
+	e = writeElement(w, msg.Transactions)
+	if e != nil {
+		return
 	}
-	err = WriteVarInt(w, pver, uint64(numHashes))
-	if err != nil {
-		Error(err)
-		return err
+	e = WriteVarInt(w, pver, uint64(numHashes))
+	if e != nil {
+		return
 	}
 	for _, hash := range msg.Hashes {
-		err = writeElement(w, hash)
-		if err != nil {
-			Error(err)
-			return err
+		e = writeElement(w, hash)
+		if e != nil {
+			return
 		}
 	}
 	return WriteVarBytes(w, pver, msg.Flags)

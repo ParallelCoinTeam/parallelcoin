@@ -21,23 +21,24 @@ type MsgInv struct {
 }
 
 // AddInvVect adds an inventory vector to the message.
-func (msg *MsgInv) AddInvVect(iv *InvVect) error {
+func (msg *MsgInv) AddInvVect(iv *InvVect) (e error) {
 	if len(msg.InvList)+1 > MaxInvPerMsg {
-		str := fmt.Sprintf("too many invvect in message [max %v]",
-			MaxInvPerMsg)
+		str := fmt.Sprintf(
+			"too many invvect in message [max %v]",
+			MaxInvPerMsg,
+		)
 		return messageError("MsgInv.AddInvVect", str)
 	}
 	msg.InvList = append(msg.InvList, iv)
-	return nil
+	return
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
 // implementation.
-func (msg *MsgInv) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+func (msg *MsgInv) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
+	var count uint64
+	if count, e = ReadVarInt(r, pver); dbg.Chk(e) {
+		return
 	}
 	// Limit to max inventory vectors per message.
 	if count > MaxInvPerMsg {
@@ -49,41 +50,33 @@ func (msg *MsgInv) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) erro
 	msg.InvList = make([]*InvVect, 0, count)
 	for i := uint64(0); i < count; i++ {
 		iv := &invList[i]
-		err := readInvVect(r, pver, iv)
-		if err != nil {
-			Error(err)
-			return err
+		if e = readInvVect(r, pver, iv); dbg.Chk(e) {
+			return
 		}
-		err = msg.AddInvVect(iv)
-		if err != nil {
-			Error(err)
+		if e = msg.AddInvVect(iv); dbg.Chk(e) {
 		}
 	}
-	return nil
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgInv) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
+func (msg *MsgInv) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
 	// Limit to max inventory vectors per message.
 	count := len(msg.InvList)
 	if count > MaxInvPerMsg {
 		str := fmt.Sprintf("too many invvect in message [%v]", count)
 		return messageError("MsgInv.BtcEncode", str)
 	}
-	err := WriteVarInt(w, pver, uint64(count))
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarInt(w, pver, uint64(count)); dbg.Chk(e) {
+		return
 	}
 	for _, iv := range msg.InvList {
-		err := writeInvVect(w, pver, iv)
-		if err != nil {
-			Error(err)
-			return err
+		if e = writeInvVect(w, pver, iv); dbg.Chk(e) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // Command returns the protocol command string for the message. This is part of the Message interface implementation.

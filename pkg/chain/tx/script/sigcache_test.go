@@ -11,17 +11,17 @@ import (
 // genRandomSig returns a random message, a signature of the message under the public key and the public key. This
 // function is used to generate randomized test data.
 func genRandomSig() (*chainhash.Hash, *ec.Signature, *ec.PublicKey, error) {
-	privKey, err := ec.NewPrivateKey(ec.S256())
-	if err != nil {
-		return nil, nil, nil, err
+	privKey, e := ec.NewPrivateKey(ec.S256())
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	var msgHash chainhash.Hash
-	if _, err := rand.Read(msgHash[:]); err != nil {
-		return nil, nil, nil, err
+	if _, e = rand.Read(msgHash[:]); dbg.Chk(e) {
+		return nil, nil, nil, e
 	}
-	sig, err := privKey.Sign(msgHash[:])
-	if err != nil {
-		return nil, nil, nil, err
+	sig, e := privKey.Sign(msgHash[:])
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	return &msgHash, sig, privKey.PubKey(), nil
 }
@@ -31,8 +31,8 @@ func genRandomSig() (*chainhash.Hash, *ec.Signature, *ec.PublicKey, error) {
 func TestSigCacheAddExists(t *testing.T) {
 	sigCache := NewSigCache(200)
 	// Generate a random sigCache entry triplet.
-	msg1, sig1, key1, err := genRandomSig()
-	if err != nil {
+	msg1, sig1, key1, e := genRandomSig()
+	if e != nil  {
 		t.Fatalf("unable to generate random signature test data")
 	}
 	// Add the triplet to the signature cache.
@@ -53,8 +53,8 @@ func TestSigCacheAddEvictEntry(t *testing.T) {
 	sigCache := NewSigCache(sigCacheSize)
 	// Fill the sigcache up with some random sig triplets.
 	for i := uint(0); i < sigCacheSize; i++ {
-		msg, sig, key, err := genRandomSig()
-		if err != nil {
+		msg, sig, key, e := genRandomSig()
+		if e != nil  {
 			t.Fatalf("unable to generate random signature test data")
 		}
 		sigCache.Add(*msg, sig, key)
@@ -71,8 +71,8 @@ func TestSigCacheAddEvictEntry(t *testing.T) {
 			sigCacheSize, len(sigCache.validSigs))
 	}
 	// Add a new entry, this should cause eviction of a randomly chosen previous entry.
-	msgNew, sigNew, keyNew, err := genRandomSig()
-	if err != nil {
+	msgNew, sigNew, keyNew, e := genRandomSig()
+	if e != nil  {
 		t.Fatalf("unable to generate random signature test data")
 	}
 	sigCache.Add(*msgNew, sigNew, keyNew)
@@ -95,8 +95,8 @@ func TestSigCacheAddMaxEntriesZeroOrNegative(t *testing.T) {
 	// Create a sigcache that can hold up to 0 entries.
 	sigCache := NewSigCache(0)
 	// Generate a random sigCache entry triplet.
-	msg1, sig1, key1, err := genRandomSig()
-	if err != nil {
+	msg1, sig1, key1, e := genRandomSig()
+	if e != nil  {
 		t.Fatalf("unable to generate random signature test data")
 	}
 	// Add the triplet to the signature cache.

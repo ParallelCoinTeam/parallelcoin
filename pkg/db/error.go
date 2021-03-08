@@ -142,6 +142,6 @@ func (e DBError) Error() string {
 
 // makeError creates an DBError given a set of arguments. The error code must be
 // one of the error codes provided by this package.
-func makeError(c ErrorCode, desc string, err error) DBError {
-	return DBError{ErrorCode: c, Description: desc, Err: err}
+func makeError(c ErrorCode, desc string, e error) DBError {
+	return DBError{ErrorCode: c, Description: desc, Err: e}
 }

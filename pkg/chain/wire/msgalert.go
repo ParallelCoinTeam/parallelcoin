@@ -91,20 +91,25 @@ type Alert struct {
 	Version int32
 	// Timestamp beyond which nodes should stop relaying this alert
 	RelayUntil int64
-	// Timestamp beyond which this alert is no longer in effect and should be ignored
+	// Timestamp beyond which this alert is no longer in effect and should be
+	// ignored
 	Expiration int64
 	// A unique ID number for this alert
 	ID int32
-	// All alerts with an ID less than or equal to this number should cancelled, deleted and not accepted in the future
+	// All alerts with an ID less than or equal to this number should cancelled,
+	// deleted and not accepted in the future
 	Cancel int32
 	// All alert IDs contained in this set should be cancelled as above
 	SetCancel []int32
-	// This alert only applies to versions greater than or equal to this version. Other versions should still relay it.
+	// This alert only applies to versions greater than or equal to this version.
+	// Other versions should still relay it.
 	MinVer int32
-	// This alert only applies to versions less than or equal to this version. Other versions should still relay it.
+	// This alert only applies to versions less than or equal to this version. Other
+	// versions should still relay it.
 	MaxVer int32
-	// If this set contains any elements, then only nodes that have their subVer contained in this set are affected by
-	// the alert. Other versions should still relay it.
+	// If this set contains any elements, then only nodes that have their subVer
+	// contained in this set are affected by the alert. Other versions should still
+	// relay it.
 	SetSubVer []string
 	// Relative priority compared to other alerts
 	Priority int32
@@ -117,148 +122,121 @@ type Alert struct {
 }
 
 // Serialize encodes the alert to w using the alert protocol encoding format.
-func (alert *Alert) Serialize(w io.Writer, pver uint32) error {
-	err := writeElements(w, alert.Version, alert.RelayUntil,
-		alert.Expiration, alert.ID, alert.Cancel)
-	if err != nil {
-		Error(err)
-		return err
+func (alert *Alert) Serialize(w io.Writer, pver uint32) (e error) {
+	if e = writeElements(w, alert.Version, alert.RelayUntil, alert.Expiration, alert.ID, alert.Cancel); dbg.Chk(e) {
+		return
 	}
 	count := len(alert.SetCancel)
 	if count > maxCountSetCancel {
-		str := fmt.Sprintf("too many cancel alert IDs for alert "+
-			"[count %v, max %v]", count, maxCountSetCancel)
+		str := fmt.Sprintf(
+			"too many cancel alert IDs for alert [count %v, max %v]", count, maxCountSetCancel,
+		)
 		return messageError("Alert.Serialize", str)
 	}
-	err = WriteVarInt(w, pver, uint64(count))
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarInt(w, pver, uint64(count)); dbg.Chk(e) {
+		return
 	}
 	for i := 0; i < count; i++ {
-		err = writeElement(w, alert.SetCancel[i])
-		if err != nil {
-			Error(err)
-			return err
+		if e = writeElement(w, alert.SetCancel[i]); dbg.Chk(e) {
+			return
 		}
 	}
-	err = writeElements(w, alert.MinVer, alert.MaxVer)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElements(w, alert.MinVer, alert.MaxVer); dbg.Chk(e) {
+		return
 	}
 	count = len(alert.SetSubVer)
 	if count > maxCountSetSubVer {
-		str := fmt.Sprintf("too many sub versions for alert "+
-			"[count %v, max %v]", count, maxCountSetSubVer)
+		str := fmt.Sprintf(
+			"too many sub versions for alert [count %v, max %v]", count, maxCountSetSubVer,
+		)
 		return messageError("Alert.Serialize", str)
 	}
-	err = WriteVarInt(w, pver, uint64(count))
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarInt(w, pver, uint64(count)); dbg.Chk(e) {
+		return
 	}
 	for i := 0; i < count; i++ {
-		err = WriteVarString(w, pver, alert.SetSubVer[i])
-		if err != nil {
-			Error(err)
-			return err
+		if e = WriteVarString(w, pver, alert.SetSubVer[i]); dbg.Chk(e) {
+			return
 		}
 	}
-	err = writeElement(w, alert.Priority)
-	if err != nil {
-		Error(err)
-		return err
+	if e = writeElement(w, alert.Priority); dbg.Chk(e) {
+		return
 	}
-	err = WriteVarString(w, pver, alert.Comment)
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarString(w, pver, alert.Comment); dbg.Chk(e) {
+		return
 	}
-	err = WriteVarString(w, pver, alert.StatusBar)
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarString(w, pver, alert.StatusBar); dbg.Chk(e) {
+		return
 	}
 	return WriteVarString(w, pver, alert.Reserved)
 }
 
 // Deserialize decodes from r into the receiver using the alert protocol encoding format.
-func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
-	err := readElements(r, &alert.Version, &alert.RelayUntil,
-		&alert.Expiration, &alert.ID, &alert.Cancel)
-	if err != nil {
-		Error(err)
-		return err
+func (alert *Alert) Deserialize(r io.Reader, pver uint32) (e error) {
+	if e = readElements(
+		r, &alert.Version, &alert.RelayUntil,
+		&alert.Expiration, &alert.ID, &alert.Cancel,
+	); dbg.Chk(e) {
+		return
 	}
-	// SetCancel: first read a VarInt that contains count - the number of Cancel IDs, then iterate count times and read
-	// them
-	count, err := ReadVarInt(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+	// SetCancel: first read a VarInt that contains count - the number of Cancel
+	// IDs, then iterate count times and read them
+	var count uint64
+	if count, e = ReadVarInt(r, pver); dbg.Chk(e) {
+		return
 	}
 	if count > maxCountSetCancel {
-		str := fmt.Sprintf("too many cancel alert IDs for alert "+
-			"[count %v, max %v]", count, maxCountSetCancel)
+		str := fmt.Sprintf(
+			"too many cancel alert IDs for alert "+
+				"[count %v, max %v]", count, maxCountSetCancel,
+		)
 		return messageError("Alert.Deserialize", str)
 	}
 	alert.SetCancel = make([]int32, count)
 	for i := 0; i < int(count); i++ {
-		err := readElement(r, &alert.SetCancel[i])
-		if err != nil {
-			Error(err)
-			return err
+		if e = readElement(r, &alert.SetCancel[i]); dbg.Chk(e) {
+			return
 		}
 	}
-	err = readElements(r, &alert.MinVer, &alert.MaxVer)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElements(r, &alert.MinVer, &alert.MaxVer); dbg.Chk(e) {
+		return
 	}
 	// SetSubVer: similar to SetCancel but read count number of sub-version strings
-	count, err = ReadVarInt(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+	if count, e = ReadVarInt(r, pver); dbg.Chk(e) {
+		return
 	}
 	if count > maxCountSetSubVer {
-		str := fmt.Sprintf("too many sub versions for alert "+
-			"[count %v, max %v]", count, maxCountSetSubVer)
+		str := fmt.Sprintf(
+			"too many sub versions for alert [count %v, max %v]", count, maxCountSetSubVer,
+		)
 		return messageError("Alert.Deserialize", str)
 	}
 	alert.SetSubVer = make([]string, count)
 	for i := 0; i < int(count); i++ {
-		alert.SetSubVer[i], err = ReadVarString(r, pver)
-		if err != nil {
-			Error(err)
-			return err
+		if alert.SetSubVer[i], e = ReadVarString(r, pver); dbg.Chk(e) {
+			return
 		}
 	}
-	err = readElement(r, &alert.Priority)
-	if err != nil {
-		Error(err)
-		return err
+	if e = readElement(r, &alert.Priority); dbg.Chk(e) {
+		return
 	}
-	alert.Comment, err = ReadVarString(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+	if alert.Comment, e = ReadVarString(r, pver); dbg.Chk(e) {
+		return
 	}
-	alert.StatusBar, err = ReadVarString(r, pver)
-	if err != nil {
-		Error(err)
-		return err
+	if alert.StatusBar, e = ReadVarString(r, pver); dbg.Chk(e) {
+		return
 	}
-	alert.Reserved, err = ReadVarString(r, pver)
-	return err
+	alert.Reserved, e = ReadVarString(r, pver)
+	return
 }
 
 // NewAlert returns an new Alert with values provided.
-func NewAlert(version int32, relayUntil int64, expiration int64,
+func NewAlert(
+	version int32, relayUntil int64, expiration int64,
 	id int32, cancel int32, setCancel []int32, minVer int32,
 	maxVer int32, setSubVer []string, priority int32, comment string,
-	statusBar string) *Alert {
+	statusBar string,
+) *Alert {
 	return &Alert{
 		Version:    version,
 		RelayUntil: relayUntil,
@@ -277,13 +255,11 @@ func NewAlert(version int32, relayUntil int64, expiration int64,
 }
 
 // NewAlertFromPayload returns an Alert with values deserialized from the serialized payload.
-func NewAlertFromPayload(serializedPayload []byte, pver uint32) (*Alert, error) {
+func NewAlertFromPayload(serializedPayload []byte, pver uint32) (a *Alert, e error) {
 	var alert Alert
 	r := bytes.NewReader(serializedPayload)
-	err := alert.Deserialize(r, pver)
-	if err != nil {
-		Error(err)
-		return nil, err
+	if e = alert.Deserialize(r, pver); dbg.Chk(e) {
+		return
 	}
 	return &alert, nil
 }
@@ -302,35 +278,28 @@ type MsgAlert struct {
 }
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation.
-func (msg *MsgAlert) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
-	var err error
-	msg.SerializedPayload, err = ReadVarBytes(r, pver, MaxMessagePayload,
-		"alert serialized payload")
-	if err != nil {
-		Error(err)
-		return err
+func (msg *MsgAlert) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
+	if msg.SerializedPayload, e = ReadVarBytes(r, pver, MaxMessagePayload, "alert serialized payload"); dbg.Chk(e) {
+		return
 	}
-	msg.Payload, err = NewAlertFromPayload(msg.SerializedPayload, pver)
-	if err != nil {
-		Error(err)
+	if msg.Payload, e = NewAlertFromPayload(msg.SerializedPayload, pver); dbg.Chk(e) {
 		msg.Payload = nil
 	}
-	msg.Signature, err = ReadVarBytes(r, pver, MaxMessagePayload,
-		"alert signature")
-	return err
+	msg.Signature, e = ReadVarBytes(
+		r, pver, MaxMessagePayload, "alert signature",
+	)
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
-	var err error
+func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
 	var serializedpayload []byte
 	if msg.Payload != nil {
 		// try to Serialize Payload if possible
 		r := new(bytes.Buffer)
-		err = msg.Payload.Serialize(r, pver)
-		if err != nil {
-			Error(err)
+		if e = msg.Payload.Serialize(r, pver); dbg.Chk(e) {
+			
 			// Serialize failed - ignore & fallback to SerializedPayload
 			serializedpayload = msg.SerializedPayload
 		} else {
@@ -343,10 +312,9 @@ func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) er
 	if slen == 0 {
 		return messageError("MsgAlert.BtcEncode", "empty serialized payload")
 	}
-	err = WriteVarBytes(w, pver, serializedpayload)
-	if err != nil {
-		Error(err)
-		return err
+	if e = WriteVarBytes(w, pver, serializedpayload); dbg.Chk(e) {
+		
+		return
 	}
 	return WriteVarBytes(w, pver, msg.Signature)
 }

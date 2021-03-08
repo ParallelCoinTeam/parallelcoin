@@ -11,8 +11,8 @@ import (
 
 // TestBlockHeader tests the BlockHeader API.
 func TestBlockHeader(t *testing.T) {
-	nonce64, err := RandomUint64()
-	if err != nil {
+	nonce64, e := RandomUint64()
+	if e != nil  {
 		t.Errorf("RandomUint64: Error generating nonce: %v", err)
 	}
 	nonce := uint32(nonce64)
@@ -120,8 +120,8 @@ func TestBlockHeaderWire(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		var buf bytes.Buffer
-		err := writeBlockHeader(&buf, test.pver, test.in)
-		if err != nil {
+		e := writeBlockHeader(&buf, test.pver, test.in)
+		if e != nil  {
 			t.Errorf("writeBlockHeader #%d error %v", i, err)
 			continue
 		}
@@ -131,8 +131,8 @@ func TestBlockHeaderWire(t *testing.T) {
 			continue
 		}
 		buf.Reset()
-		err = test.in.BtcEncode(&buf, pver, 0)
-		if err != nil {
+		e = test.in.BtcEncode(&buf, pver, 0)
+		if e != nil  {
 			t.Errorf("BtcEncode #%d error %v", i, err)
 			continue
 		}
@@ -144,8 +144,8 @@ func TestBlockHeaderWire(t *testing.T) {
 		// Decode the block header from wire format.
 		var bh BlockHeader
 		rbuf := bytes.NewReader(test.buf)
-		err = readBlockHeader(rbuf, test.pver, &bh)
-		if err != nil {
+		e = readBlockHeader(rbuf, test.pver, &bh)
+		if e != nil  {
 			t.Errorf("readBlockHeader #%d error %v", i, err)
 			continue
 		}
@@ -155,8 +155,8 @@ func TestBlockHeaderWire(t *testing.T) {
 			continue
 		}
 		rbuf = bytes.NewReader(test.buf)
-		err = bh.BtcDecode(rbuf, pver, test.enc)
-		if err != nil {
+		e = bh.BtcDecode(rbuf, pver, test.enc)
+		if e != nil  {
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
 		}
@@ -211,8 +211,8 @@ func TestBlockHeaderSerialize(t *testing.T) {
 	for i, test := range tests {
 		// Serialize the block header.
 		var buf bytes.Buffer
-		err := test.in.Serialize(&buf)
-		if err != nil {
+		e := test.in.Serialize(&buf)
+		if e != nil  {
 			t.Errorf("Serialize #%d error %v", i, err)
 			continue
 		}
@@ -224,8 +224,8 @@ func TestBlockHeaderSerialize(t *testing.T) {
 		// Deserialize the block header.
 		var bh BlockHeader
 		rbuf := bytes.NewReader(test.buf)
-		err = bh.Deserialize(rbuf)
-		if err != nil {
+		e = bh.Deserialize(rbuf)
+		if e != nil  {
 			t.Errorf("Deserialize #%d error %v", i, err)
 			continue
 		}

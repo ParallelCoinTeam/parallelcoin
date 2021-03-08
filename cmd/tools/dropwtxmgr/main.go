@@ -30,8 +30,8 @@ var opts = struct {
 }
 
 func init() {
-	_, err := flags.Parse(&opts)
-	if err != nil {
+	_, e := flags.Parse(&opts)
+	if e != nil  {
 		os.Exit(1)
 	}
 }
@@ -70,7 +70,7 @@ func main() {
 }
 func mainInt() int {
 	fmt.Println("Database path:", opts.DbPath)
-	_, err := os.Stat(opts.DbPath)
+	_, e := os.Stat(opts.DbPath)
 	if os.IsNotExist(err) {
 		fmt.Println("Database file does not exist")
 		return 1
@@ -82,8 +82,8 @@ func mainInt() int {
 			// Exit on EOF.
 			return 0
 		}
-		err := scanner.Err()
-		if err != nil {
+		e := scanner.Err()
+		if e != nil  {
 			return 1
 		}
 		resp := scanner.Text()
@@ -95,34 +95,34 @@ func mainInt() int {
 		}
 		fmt.Println("Enter yes or no.")
 	}
-	db, err := walletdb.Open("bdb", opts.DbPath)
-	if err != nil {
+	db, e := walletdb.Open("bdb", opts.DbPath)
+	if e != nil  {
 		fmt.Println("failed to open database:", err)
 		return 1
 	}
 	defer func() {
-		if err := db.Close(); err != nil {
+		if e := db.Close(); dbg.Chk(e) {
 			fmt.Println(err)
 		}
 	}()
 	fmt.Println("dropping wtxmgr namespace")
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
-		err := tx.DeleteTopLevelBucket(wtxmgrNamespace)
-		if err != nil && err != walletdb.ErrBucketNotFound {
+	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
+		e := tx.DeleteTopLevelBucket(wtxmgrNamespace)
+		if e != nil  && err != walletdb.ErrBucketNotFound {
 			return err
 		}
-		ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
-		if err != nil {
+		ns, e := tx.CreateTopLevelBucket(wtxmgrNamespace)
+		if e != nil  {
 			return err
 		}
-		err = wtxmgr.Create(ns)
-		if err != nil {
+		e = wtxmgr.Create(ns)
+		if e != nil  {
 			return err
 		}
 		ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 		startBlock := ns.Get(startBlockName)
-		err = ns.Put(syncedToName, startBlock)
-		if err != nil {
+		e = ns.Put(syncedToName, startBlock)
+		if e != nil  {
 			return err
 		}
 		recentBlocks := make([]byte, 40)
@@ -131,7 +131,7 @@ func mainInt() int {
 		binary.LittleEndian.PutUint32(recentBlocks[4:8], uint32(1))
 		return ns.Put(recentBlocksName, recentBlocks)
 	})
-	if err != nil {
+	if e != nil  {
 		fmt.Println("Failed to drop and re-create namespace:", err)
 		return 1
 	}

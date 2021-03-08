@@ -109,7 +109,7 @@ type (
 	PrintcFunc  func(pkg string, fn func() string)
 	PrintfFunc  func(pkg string, format string, a ...interface{})
 	PrintlnFunc func(pkg string, a ...interface{})
-	CheckFunc   func(pkg string, err error) bool
+	CheckFunc   func(pkg string, e error) bool
 	SpewFunc    func(pkg string, a interface{})
 	
 	// Logger is a struct containing all the functions with nice handy names
@@ -221,22 +221,22 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	const timeFormat = "2006-01-02_15-04-05"
 	path := filepath.Join(logFileName, logPath)
 	var logFileHandle *os.File
+	var e error
 	if FileExists(path) {
-		err := os.Rename(
+		e = os.Rename(
 			path, filepath.Join(
 				logPath,
 				time.Now().Format(timeFormat)+".json",
 			),
 		)
-		if err != nil {
+		if e != nil {
 			if L.Writer.Write.Load() {
-				L.Writer.Println("error rotating log", err)
+				L.Writer.Println("error rotating log", e)
 			}
 			return
 		}
 	}
-	var err error
-	if logFileHandle, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755); l.Check("pkg/util/log", err) {
+	if logFileHandle, e = os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755); l.Check("pkg/util/log", e) {
 		if L.Writer.Write.Load() {
 			L.Writer.Println("error opening log file", logFileName)
 		}
@@ -246,8 +246,8 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 }
 
 func FileExists(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return err == nil
+	_, e := os.Stat(filePath)
+	return e == nil
 }
 
 func (l *Logger) SetLevel(level string, color bool, split string) {
@@ -290,9 +290,10 @@ func (l *Logger) Register(pkg string) string {
 	return pkg
 }
 
+// LoadConfig loads the config?
 func (l *Logger) LoadConfig(configFile []byte) {
 	// var p Pk.Package
-	// if err := json.Unmarshal(configFile, &p); !l.Check("internal", err) {
+	// if e := json.Unmarshal(configFile, &p); !l.Chk("internal", err) {
 	// 	*l.Packages = p
 	// }
 }
@@ -415,15 +416,15 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 }
 
 func (l *Logger) checkFunc(level string) CheckFunc {
-	f := func(pkg string, err error) (out bool) {
+	f := func(pkg string, e error) (out bool) {
 		if !l.LevelIsActive(level) { // || !(*l.Packages)[pkg] {
 			return
 		}
-		n := err == nil
+		n := e == nil
 		if n {
 			return false
 		}
-		text := err.Error()
+		text := e.Error()
 		if l.Writer.Write.Load() {
 			l.Writer.Println(Composite(text, "CHK"))
 		}

@@ -30,7 +30,7 @@ import (
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
-func Main(cx *conte.Xt, c *cli.Context) (err error) {
+func Main(cx *conte.Xt, c *cli.Context) (e error) {
 	var size int
 	noWallet := true
 	wg := &WalletGUI{
@@ -113,7 +113,7 @@ type WalletGUI struct {
 	// dialog                    *dialog.Dialog
 }
 
-func (wg *WalletGUI) Run() (err error) {
+func (wg *WalletGUI) Run() (e error) {
 	wg.Syncing = uberatomic.NewBool(false)
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
@@ -129,8 +129,8 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.lists = wg.GetLists()
 	wg.clickables = wg.GetClickables()
 	wg.checkables = wg.GetCheckables()
-	before := func() { Debug("running before") }
-	after := func() { Debug("running after") }
+	before := func() { dbg.Ln("running before") }
+	after := func() { dbg.Ln("running after") }
 	wg.node = wg.GetRunUnit(
 		"NODE", before, after,
 		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "node",
@@ -165,7 +165,7 @@ func (wg *WalletGUI) Run() (err error) {
 	wg.loadingPage = wg.getLoadingPage()
 	// wg.Watcher()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
-		Info("wallet file does not exist", *wg.cx.Config.WalletFile)
+		inf.Ln("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {
 		*wg.noWallet = false
 		// if !*wg.cx.Config.NodeOff {
@@ -180,7 +180,7 @@ func (wg *WalletGUI) Run() (err error) {
 	}
 	interrupt.AddHandler(
 		func() {
-			Debug("quitting wallet gui")
+			dbg.Ln("quitting wallet gui")
 			// consume.Kill(wg.Node)
 			// consume.Kill(wg.Miner)
 			// wg.gracefulShutdown()
@@ -192,12 +192,12 @@ func (wg *WalletGUI) Run() (err error) {
 		for {
 			select {
 			case <-wg.invalidate.Wait():
-				Trace("invalidating render queue")
+				trc.Ln("invalidating render queue")
 				wg.Window.Window.Invalidate()
 				// TODO: make a more appropriate trigger for this - ie, when state actually changes.
 				// if wg.wallet.Running() && wg.stateLoaded.Load() {
 				// 	filename := filepath.Join(wg.cx.DataDir, "state.json")
-				// 	if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+				// 	if e := wg.State.Save(filename, wg.cx.Config.WalletPass); dbg.Chk(e) {
 				// 	}
 				// }
 			case <-wg.cx.KillAll.Wait():
@@ -207,7 +207,7 @@ func (wg *WalletGUI) Run() (err error) {
 			}
 		}
 	}()
-	if err := wg.Window.
+	if e := wg.Window.
 		Size(56, 32).
 		Title("ParallelCoin Wallet").
 		Open().
@@ -252,7 +252,7 @@ func (wg *WalletGUI) Run() (err error) {
 			wg.MainApp.Overlay,
 			wg.gracefulShutdown,
 			wg.quit,
-		); Check(err) {
+		); dbg.Chk(e) {
 	}
 	wg.gracefulShutdown()
 	wg.quit.Q()
@@ -319,9 +319,9 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 			SetCurrent(*wg.cx.Config.GenThreads).
 			ChangeHook(
 				func(n int) {
-					Debug("threads value now", n)
+					dbg.Ln("threads value now", n)
 					go func() {
-						Debug("setting thread count")
+						dbg.Ln("setting thread count")
 						if wg.miner.Running() && n != 0 {
 							wg.miner.Stop()
 							wg.miner.Start()
@@ -332,7 +332,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 						*wg.cx.Config.GenThreads = n
 						save.Pod(wg.cx.Config)
 						// if wg.miner.Running() {
-						// 	Debug("restarting miner")
+						// 	dbg.Ln("restarting miner")
 						// 	wg.miner.Stop()
 						// 	wg.miner.Start()
 						// }
@@ -348,7 +348,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 			SetCurrent(300).
 			ChangeHook(
 				func(n int) {
-					Debug("idle timeout", time.Duration(n)*time.Second)
+					dbg.Ln("idle timeout", time.Duration(n)*time.Second)
 				},
 			),
 	}
@@ -425,39 +425,39 @@ var shuttingDown = false
 
 func (wg *WalletGUI) gracefulShutdown() {
 	if shuttingDown {
-		Debug(log.Caller("already called gracefulShutdown", 1))
+		dbg.Ln(log.Caller("already called gracefulShutdown", 1))
 		return
 	} else {
 		shuttingDown = true
 	}
-	Debug("\n\nquitting wallet gui")
+	dbg.Ln("\n\nquitting wallet gui")
 	if wg.miner.Running() {
-		Debug("stopping miner")
+		dbg.Ln("stopping miner")
 		wg.miner.Stop()
 		wg.miner.Shutdown()
 	}
 	if wg.wallet.Running() {
-		Debug("stopping wallet")
+		dbg.Ln("stopping wallet")
 		wg.wallet.Stop()
 		wg.wallet.Shutdown()
 		wg.unlockPassword.Wipe()
 		// wg.walletLocked.Store(true)
 	}
 	if wg.node.Running() {
-		Debug("stopping node")
+		dbg.Ln("stopping node")
 		wg.node.Stop()
 		wg.node.Shutdown()
 	}
 	// wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
-		Debug("stopping chain client")
+		dbg.Ln("stopping chain client")
 		wg.ChainClient.Shutdown()
 		wg.ChainClient = nil
 	}
 	// wg.ChainMutex.Unlock()
 	// wg.WalletMutex.Lock()
 	if wg.WalletClient != nil {
-		Debug("stopping wallet client")
+		dbg.Ln("stopping wallet client")
 		wg.WalletClient.Shutdown()
 		wg.WalletClient = nil
 	}

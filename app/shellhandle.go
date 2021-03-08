@@ -16,10 +16,10 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
-	return func(c *cli.Context) (err error) {
+func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
 		config.Configure(cx, c.Command.Name, true)
-		Debug("starting shell")
+		dbg.Ln("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			if apputil.FileExists(*cx.Config.RPCCert) && apputil.FileExists(*cx.Config.RPCKey) &&
@@ -35,57 +35,57 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				wallet.DbName
 		if !apputil.FileExists(dbFilename) && !cx.IsGUI {
 			// log.SetLevel("off", false)
-			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				Error("failed to create wallet", err)
+			if e := walletmain.CreateWallet(cx.ActiveNet, cx.Config); dbg.Chk(e) {
+				err.Ln("failed to create wallet", err)
 			}
 			fmt.Println("restart to complete initial setup")
 			os.Exit(1)
 		}
 		// for security with apps launching the wallet, the public password can be set with a file that is deleted after
 		walletPassPath := *cx.Config.DataDir + slash + cx.ActiveNet.Params.Name + slash + "wp.txt"
-		Debug("reading password from", walletPassPath)
+		dbg.Ln("reading password from", walletPassPath)
 		if apputil.FileExists(walletPassPath) {
 			var b []byte
-			if b, err = ioutil.ReadFile(walletPassPath); !Check(err) {
+			if b, e = ioutil.ReadFile(walletPassPath); !dbg.Chk(e) {
 				*cx.Config.WalletPass = string(b)
-				Debug("read password '" + string(b) + "'")
+				dbg.Ln("read password '" + string(b) + "'")
 				for i := range b {
 					b[i] = 0
 				}
-				if err = ioutil.WriteFile(walletPassPath, b, 0700); Check(err) {
+				if e = ioutil.WriteFile(walletPassPath, b, 0700); dbg.Chk(e) {
 				}
-				if err = os.Remove(walletPassPath); Check(err) {
+				if e = os.Remove(walletPassPath); dbg.Chk(e) {
 				}
-				Debug("wallet cookie deleted", *cx.Config.WalletPass)
+				dbg.Ln("wallet cookie deleted", *cx.Config.WalletPass)
 			}
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				err = node.Main(cx)
-				if err != nil {
-					Error("error starting node ", err)
+				e = node.Main(cx)
+				if e != nil  {
+					err.Ln("error starting node ", err)
 				}
 			}()
-			Info("starting node")
+			inf.Ln("starting node")
 			if !*cx.Config.DisableRPC {
 				cx.RPCServer = <-cx.NodeChan
 			}
-			Info("node started")
+			inf.Ln("node started")
 		}
 		if !*cx.Config.WalletOff {
 			go func() {
-				err = walletmain.Main(cx)
-				if err != nil {
+				e = walletmain.Main(cx)
+				if e != nil  {
 					fmt.Println("error running wallet:", err)
 				}
 			}()
-			// Info("starting wallet")
+			// inf.Ln("starting wallet")
 			// if !*cx.Config.DisableRPC {
 			// 	cx.WalletServer = <-cx.WalletChan
 			// }
-			// Info("wallet started")
+			// inf.Ln("wallet started")
 		}
-		Debug("shell started")
+		dbg.Ln("shell started")
 		// cx.WaitGroup.Wait()
 		cx.WaitWait()
 		return nil

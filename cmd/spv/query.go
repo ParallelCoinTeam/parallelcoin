@@ -30,7 +30,7 @@ var (
 	// giving up on a query in case we don't have any peers.
 	QueryPeerConnectTimeout = time.Second * 30
 	// QueryEncoding specifies the default encoding (witness or not) for `getdata` and other similar messages.
-	QueryEncoding = wire.WitnessEncoding
+	QueryEncoding = wire.BaseEncoding
 )
 
 // queryOptions are a set of options that can be modified per-query, unlike global options.
@@ -234,22 +234,19 @@ func queryChainServiceBatch(
 			for i := firstUnfinished; i < len(queryMsgs); i++ {
 				// If this query is finished and we're at firstUnfinished, update firstUnfinished.
 				if i == firstUnfinished &&
-					atomic.LoadUint32(&queryStates[i]) ==
-						uint32(queryAnswered) {
+					atomic.LoadUint32(&queryStates[i]) == uint32(queryAnswered) {
 					firstUnfinished++
-					Tracef(
-						"query #%v already answered, skipping", i,
-					)
+					trc.F("query #%v already answered, skipping", i)
 					continue
 				}
-				// We check to see if the query is waiting to be handled. If so, we mark it as being handled. If not, we
-				// move to the next one.
+				// We check to see if the query is waiting to be handled. If so, we mark it as
+				// being handled. If not, we move to the next one.
 				if !atomic.CompareAndSwapUint32(
 					&queryStates[i],
 					uint32(queryWaitSubmit),
 					uint32(queryWaitResponse),
 				) {
-					Tracef(
+					trc.F(
 						"query #%v already being queried for, skipping", i,
 					)
 					continue
@@ -306,7 +303,7 @@ func queryChainServiceBatch(
 				if !sp.Connected() {
 					return
 				}
-				Tracec(
+				trc.C(
 					func() string {
 						return fmt.Sprintf(
 							"query for #%v failed, moving on: %v",
@@ -316,13 +313,8 @@ func queryChainServiceBatch(
 				)
 			case <-matchSignal:
 				// We got a match signal so we can mark this query a success.
-				atomic.StoreUint32(
-					&queryStates[handleQuery],
-					uint32(queryAnswered),
-				)
-				Tracef(
-					"query #%v answered, updating state", handleQuery,
-				)
+				atomic.StoreUint32(&queryStates[handleQuery], uint32(queryAnswered))
+				trc.F("query #%v answered, updating state", handleQuery)
 			}
 		}
 	}
@@ -373,7 +365,7 @@ func queryChainServiceBatch(
 				}
 			}
 		case <-time.After(qo.timeout):
-			// Check if we're done; if so, quit.
+			// Chk if we're done; if so, quit.
 			allDone := true
 			for i := 0; i < len(queryStates); i++ {
 				if atomic.LoadUint32(&queryStates[i]) !=
@@ -600,17 +592,16 @@ checkResponses:
 	}
 }
 
-// getFilterFromCache returns a filter from ChainService's FilterCache if it exists, returning nil and error if it
-// doesn't.
+// getFilterFromCache returns a filter from ChainService's FilterCache if it
+// exists, returning nil and error if it doesn't.
 func (s *ChainService) getFilterFromCache(
 	blockHash *chainhash.Hash,
 	filterType filterdb.FilterType,
-) (*gcs.Filter, error) {
+) (flt *gcs.Filter, e error) {
 	cacheKey := filterCacheKey{blockHash: blockHash, filterType: filterType}
-	filterValue, err := s.FilterCache.Get(cacheKey)
-	if err != nil {
-		Error(err)
-		return nil, err
+	var filterValue cache.Value
+	if filterValue, e = s.FilterCache.Get(cacheKey); dbg.Chk(e) {
+		return
 	}
 	return filterValue.(*cache.CacheableFilter).Filter, nil
 }
@@ -619,7 +610,7 @@ func (s *ChainService) getFilterFromCache(
 func (s *ChainService) putFilterToCache(
 	blockHash *chainhash.Hash,
 	filterType filterdb.FilterType, filter *gcs.Filter,
-) error {
+) (e error) {
 	cacheKey := filterCacheKey{blockHash: blockHash, filterType: filterType}
 	return s.FilterCache.Put(cacheKey, &cache.CacheableFilter{Filter: filter})
 }
@@ -629,7 +620,7 @@ func (s *ChainService) putFilterToCache(
 func (s *ChainService) GetCFilter(
 	blockHash chainhash.Hash,
 	filterType wire.FilterType, options ...QueryOption,
-) (*gcs.Filter, error) {
+) (flt *gcs.Filter, e error) {
 	// The only supported filter atm is the regular filter, so we'll reject all other filters.
 	if filterType != wire.GCSFilterRegular {
 		return nil, fmt.Errorf("unknown filter type: %v", filterType)
@@ -641,59 +632,53 @@ func (s *ChainService) GetCFilter(
 	getHeader := s.RegFilterHeaders.FetchHeader
 	dbFilterType := filterdb.RegularFilter
 	// First check the cache to see if we already have this filter. If so, then we can return it an exit early.
-	filter, err := s.getFilterFromCache(&blockHash, dbFilterType)
-	if err == nil && filter != nil {
+	filter, e := s.getFilterFromCache(&blockHash, dbFilterType)
+	if e == nil && filter != nil {
 		return filter, nil
 	}
-	if err != nil && err != cache.ErrElementNotFound {
-		return nil, err
+	if e != nil && e != cache.ErrElementNotFound {
+		return nil, e
 	}
 	// If not in cache, check if it's in database, returning early if yes.
-	filter, err = s.FilterDB.FetchFilter(&blockHash, dbFilterType)
-	if err == nil && filter != nil {
+	if filter, e = s.FilterDB.FetchFilter(&blockHash, dbFilterType); !dbg.Chk(e) && filter != nil {
 		return filter, nil
 	}
-	if err != nil && err != filterdb.ErrFilterNotFound {
-		return nil, err
+	if e != nil && e != filterdb.ErrFilterNotFound {
+		return nil, e
 	}
 	// We didn't get the filter from the DB, so we'll set it to nil and try to get it from the network.
 	filter = nil
 	// In order to verify the authenticity of the filter, we'll fetch the target block header so we can retrieve the
 	// hash of the prior block, which is required to fetch the filter header for that block.
-	block, height, err := s.BlockHeaders.FetchHeader(&blockHash)
-	if err != nil {
-		Error(err)
-		return nil, err
+	block, height, e := s.BlockHeaders.FetchHeader(&blockHash)
+	if e != nil {
+		return
 	}
 	if block.BlockHash() != blockHash {
 		str := "couldn't get header for block %s from database"
-		Debug(str, blockHash)
+		dbg.Ln(str, blockHash)
 		return nil, fmt.Errorf(str, blockHash)
 	}
-	Debugf("fetching filter for height=%v, hash=%v %s", height, blockHash)
+	dbg.F("fetching filter for height=%v, hash=%v %s", height, blockHash)
 	// In addition to fetching the block header, we'll fetch the filter headers (for this particular filter type) from
 	// the database. These are required in order to verify the authenticity of the filter.
-	curHeader, err := getHeader(&blockHash)
-	if err != nil {
-		Error(err)
+	var curHeader *chainhash.Hash
+	if curHeader, e = getHeader(&blockHash); dbg.Chk(e) {
 		return nil, fmt.Errorf(
-			"couldn't get cfheader for block %s from"+
-				" database", blockHash,
+			"couldn't get cfheader for block %s from database", blockHash,
 		)
 	}
-	prevHeader, err := getHeader(&block.PrevBlock)
-	if err != nil {
-		Error(err)
+	var prevHeader *chainhash.Hash
+	if prevHeader, e = getHeader(&block.PrevBlock); dbg.Chk(e) {
 		return nil, fmt.Errorf(
-			"couldn't get cfheader for block %s "+
-				"from database", blockHash,
+			"couldn't get cfheader for block %s from database", blockHash,
 		)
 	}
 	// With all the necessary items retrieved, we'll launch our concurrent query to the set of connected peers.
 	s.queryPeers(
 		// Send a wire.MsgGetCFilters
 		wire.NewMsgGetCFilters(filterType, height, &blockHash),
-		// Check responses and if we get one that matches, end the query early.
+		// Chk responses and if we get one that matches, end the query early.
 		func(sp *ServerPeer, resp wire.Message, quit chan<- struct{}) {
 			switch response := resp.(type) {
 			// We're only interested in "cfilter" messages.
@@ -708,15 +693,15 @@ func (s *ChainService) GetCFilter(
 					filterType != response.FilterType {
 					return
 				}
-				gotFilter, err := gcs.FromNBytes(builder.DefaultP, builder.DefaultM, response.Data)
-				if err != nil {
-					Error(err)
+				var gotFilter *gcs.Filter
+				if gotFilter, e = gcs.FromNBytes(builder.DefaultP, builder.DefaultM, response.Data); dbg.Chk(e) {
 					// Malformed filter data. We can ignore this message.
 					return
 				}
 				// Now that we have a proper filter, ensure that re-calculating the filter header hash for the header
 				// _after_ the filter in the chain checks out. If not, we can ignore this response.
-				if gotHeader, err := builder.MakeHeaderForFilter(gotFilter, *prevHeader); err != nil ||
+				var gotHeader chainhash.Hash
+				if gotHeader, e = builder.MakeHeaderForFilter(gotFilter, *prevHeader); dbg.Chk(e) ||
 					gotHeader != *curHeader {
 					return
 				}
@@ -731,19 +716,17 @@ func (s *ChainService) GetCFilter(
 	)
 	if filter != nil {
 		// If we found a filter, put it in the cache and persistToDisk if the caller requested it.
-		err := s.putFilterToCache(&blockHash, dbFilterType, filter)
-		if err != nil {
-			Warn("couldn't write filter to cache:", err)
+		e = s.putFilterToCache(&blockHash, dbFilterType, filter)
+		if e != nil {
+			wrn.Ln("couldn't write filter to cache:", err)
 		}
 		qo := defaultQueryOptions()
 		qo.applyQueryOptions(options...)
 		if qo.persistToDisk {
-			err := s.FilterDB.PutFilter(&blockHash, filter, dbFilterType)
-			if err != nil {
-				Error(err)
-				return nil, err
+			if e = s.FilterDB.PutFilter(&blockHash, filter, dbFilterType); dbg.Chk(e) {
+				return
 			}
-			Tracef("Wrote filter for block %s, type %d", blockHash, filterType)
+			trc.F("Wrote filter for block %s, type %d", blockHash, filterType)
 		}
 	}
 	return filter, nil
@@ -754,11 +737,11 @@ func (s *ChainService) GetCFilter(
 func (s *ChainService) GetBlock(
 	blockHash chainhash.Hash,
 	options ...QueryOption,
-) (*util.Block, error) {
+) (foundBlock *util.Block, e error) {
 	// Fetch the corresponding block header from the database. If this isn't found then we don't have the header for
 	// this so we can't request it.
-	blockHeader, height, err := s.BlockHeaders.FetchHeader(&blockHash)
-	if err != nil || blockHeader.BlockHash() != blockHash {
+	blockHeader, height, e := s.BlockHeaders.FetchHeader(&blockHash)
+	if e != nil || blockHeader.BlockHash() != blockHash {
 		return nil, fmt.Errorf(
 			"couldn't get header for block %s from database"+
 				"", blockHash,
@@ -775,32 +758,30 @@ func (s *ChainService) GetBlock(
 	// Create an inv vector for getting this block.
 	inv := wire.NewInvVect(invType, &blockHash)
 	// If the block is already in the cache, we can return it immediately.
-	blockValue, err := s.BlockCache.Get(*inv)
-	if err == nil && blockValue != nil {
-		return blockValue.(*cache.CacheableBlock).Block, err
+	var blockValue cache.Value
+	if blockValue, e = s.BlockCache.Get(*inv); !dbg.Chk(e) && blockValue != nil {
+		return blockValue.(*cache.CacheableBlock).Block, e
 	}
-	if err != nil && err != cache.ErrElementNotFound {
-		return nil, err
+	if e != nil && e != cache.ErrElementNotFound {
+		return
 	}
 	// Construct the appropriate getdata message to fetch the target block.
 	getData := wire.NewMsgGetData()
-	err = getData.AddInvVect(inv)
-	if err != nil {
-		Error(err)
+	if e = getData.AddInvVect(inv); dbg.Chk(e) {
 	}
-	// The block is only updated from the checkResponse function argument, which is always called single-threadedly. We
-	// don't check the block until after the query is finished, so we can just write to it naively.
-	var foundBlock *util.Block
+	// The block is only updated from the checkResponse function argument, which is
+	// always called single-threadedly. We don't check the block until after the
+	// query is finished, so we can just write to it naively.
 	s.queryPeers(
 		// Send a wire.GetDataMsg
 		getData,
-		// Check responses and if we get one that matches, end the query early.
+		// Chk responses and if we get one that matches, end the query early.
 		func(sp *ServerPeer, resp wire.Message, quit chan<- struct{}) {
 			switch response := resp.(type) {
 			// We're only interested in "block" messages.
 			case *wire.MsgBlock:
-				// Only keep this going if we haven't already found a block, or we risk closing an already closed
-				// channel.
+				// Only keep this going if we haven't already found a block, or we risk closing
+				// an already closed channel.
 				if foundBlock != nil {
 					return
 				}
@@ -814,20 +795,20 @@ func (s *ChainService) GetBlock(
 					block.SetHeight(int32(height))
 				}
 				var pb *util.Block
-				if pb, err = sp.server.GetBlock(block.MsgBlock().Header.PrevBlock); Check(err) {
+				if pb, e = sp.server.GetBlock(block.MsgBlock().Header.PrevBlock); dbg.Chk(e) {
 				}
 				pbt := pb.MsgBlock().Header.Timestamp
 				// If this claims our block but doesn't pass the sanity check, the peer is trying to bamboozle us.
 				// Disconnect it.
-				if err := blockchain.CheckBlockSanity(
+				if e := blockchain.CheckBlockSanity(
 					block,
 					s.chainParams.PowLimit,
 					s.timeSource,
 					false,
 					block.Height(),
 					pbt,
-				); err != nil {
-					Warnf("Invalid block for %s received from %s -- disconnecting peer", blockHash, sp.Addr())
+				); dbg.Chk(e) {
+					wrn.F("Invalid block for %s received from %s -- disconnecting peer", blockHash, sp.Addr())
 					sp.Disconnect()
 					return
 				}
@@ -849,9 +830,9 @@ func (s *ChainService) GetBlock(
 		)
 	}
 	// Add block to the cache before returning it.
-	err = s.BlockCache.Put(*inv, &cache.CacheableBlock{Block: foundBlock})
-	if err != nil {
-		Error("couldn't write block to cache:", err)
+	e = s.BlockCache.Put(*inv, &cache.CacheableBlock{Block: foundBlock})
+	if e != nil {
+		err.Ln("couldn't write block to cache:", err)
 	}
 	return foundBlock, nil
 }
@@ -864,8 +845,7 @@ func (s *ChainService) GetBlock(
 func (s *ChainService) SendTransaction(
 	tx *wire.MsgTx,
 	options ...QueryOption,
-) error {
-	var err error
+) (e error) {
 	// Starting with the set of default options, we'll apply any specified
 	// functional options to the query so that we can check what inv type to use.
 	// Broadcast the inv to all peers, responding to any getdata messages for the
@@ -879,9 +859,7 @@ func (s *ChainService) SendTransaction(
 	// Create an inv.
 	txHash := tx.TxHash()
 	inv := wire.NewMsgInv()
-	err = inv.AddInvVect(wire.NewInvVect(invType, &txHash))
-	if err != nil {
-		Error(err)
+	if e = inv.AddInvVect(wire.NewInvVect(invType, &txHash)); dbg.Chk(e) {
 	}
 	// Send the peer query and listen for getdata.
 	s.queryAllPeers(
@@ -901,8 +879,7 @@ func (s *ChainService) SendTransaction(
 				}
 			case *wire.MsgReject:
 				if response.Hash == txHash {
-					err = fmt.Errorf("transaction %s rejected by %s: %s", tx.TxHash(), sp.Addr(), response.Reason)
-					Error(err)
+					e = fmt.Errorf("transaction %s rejected by %s: %s", tx.TxHash(), sp.Addr(), response.Reason)
 					close(quit)
 				}
 			}
@@ -913,5 +890,5 @@ func (s *ChainService) SendTransaction(
 			options...,
 		)...,
 	)
-	return err
+	return e
 }

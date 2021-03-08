@@ -20,26 +20,26 @@ func ExampleAmount() {
 	// 100,000 Satoshis: 0.001 DUO
 }
 func ExampleNewAmount() {
-	amountOne, err := util.NewAmount(1)
-	if err != nil {
+	amountOne, e := util.NewAmount(1)
+	if e != nil  {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(amountOne) // Output 1
-	amountFraction, err := util.NewAmount(0.01234567)
-	if err != nil {
+	amountFraction, e := util.NewAmount(0.01234567)
+	if e != nil  {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(amountFraction) // Output 2
-	amountZero, err := util.NewAmount(0)
-	if err != nil {
+	amountZero, e := util.NewAmount(0)
+	if e != nil  {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(amountZero) // Output 3
-	amountNaN, err := util.NewAmount(math.NaN())
-	if err != nil {
+	amountNaN, e := util.NewAmount(math.NaN())
+	if e != nil  {
 		fmt.Println(err)
 		return
 	}

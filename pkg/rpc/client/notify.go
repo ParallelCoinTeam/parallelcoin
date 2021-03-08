@@ -156,10 +156,10 @@ type NotificationHandlers struct {
 // handleNotification examines the passed notification type, performs conversions to get the raw notification types into
 // higher level types and delivers the notification to the appropriate On<X> handler registered with the client.
 func (c *Client) handleNotification(ntfn *rawNotification) {
-	Debug("<<<Handling Notification>>>", ntfn.Method)
+	dbg.Ln("<<<Handling Notification>>>", ntfn.Method)
 	// Ignore the notification if the client is not interested in any notifications.
 	if c.ntfnHandlers == nil {
-		Debug("<<<no notification handlers registered>>>")
+		dbg.Ln("<<<no notification handlers registered>>>")
 		return
 	}
 	switch ntfn.Method {
@@ -167,12 +167,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.BlockConnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnBlockConnected == nil {
-			Debug("<<<no OnBlockConnected callback registered>>>")
+			dbg.Ln("<<<no OnBlockConnected callback registered>>>")
 			return
 		}
-		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid block connected notification:", err)
+		blockHash, blockHeight, blockTime, e := parseChainNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid block connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnBlockConnected(blockHash, blockHeight, blockTime)
@@ -180,16 +180,15 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.FilteredBlockConnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnFilteredBlockConnected == nil {
-			Debug("<<<no OnFilteredBlockConnected callback registered>>>")
+			dbg.Ln("<<<no OnFilteredBlockConnected callback registered>>>")
 			return
 		}
-		blockHeight, blockHeader, transactions, err :=
+		blockHeight, blockHeader, transactions, e :=
 			parseFilteredBlockConnectedParams(ntfn.Params)
-		if err != nil {
-			Error(err)
-			Warn(
+		if e != nil {
+			wrn.Ln(
 				"received invalid filtered block connected notification:",
-				err,
+				e,
 			)
 			return
 		}
@@ -201,12 +200,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.BlockDisconnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnBlockDisconnected == nil {
-			Debug("<<<no OnBlockDisconnected callback registered>>>")
+			dbg.Ln("<<<no OnBlockDisconnected callback registered>>>")
 			return
 		}
-		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid block connected notification:", err)
+		blockHash, blockHeight, blockTime, e := parseChainNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid block connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnBlockDisconnected(blockHash, blockHeight, blockTime)
@@ -214,12 +213,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.FilteredBlockDisconnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnFilteredBlockDisconnected == nil {
-			Debug("<<<no OnFilteredBlockDisconnected callback registered>>>")
+			dbg.Ln("<<<no OnFilteredBlockDisconnected callback registered>>>")
 			return
 		}
-		blockHeight, blockHeader, err := parseFilteredBlockDisconnectedParams(ntfn.Params)
-		if err != nil {
-			Warn(
+		blockHeight, blockHeader, e := parseFilteredBlockDisconnectedParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln(
 				"received invalid filtered block disconnected"+
 					" notification"+
 					":", err,
@@ -231,12 +230,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RecvTxNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRecvTx == nil {
-			Debug("<<<no OnRecvTx callback registered>>>")
+			dbg.Ln("<<<no OnRecvTx callback registered>>>")
 			return
 		}
-		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid recvtx notification:", err)
+		tx, block, e := parseChainTxNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid recvtx notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRecvTx(tx, block)
@@ -244,12 +243,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RedeemingTxNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRedeemingTx == nil {
-			Debug("<<<no OnRedeemingTx callback registered>>>")
+			dbg.Ln("<<<no OnRedeemingTx callback registered>>>")
 			return
 		}
-		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid redeemingtx notification:", err)
+		tx, block, e := parseChainTxNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid redeemingtx notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRedeemingTx(tx, block)
@@ -257,12 +256,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RelevantTxAcceptedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRelevantTxAccepted == nil {
-			Debug("<<<no OnRelevantTxAccepted callback registered>>>")
+			dbg.Ln("<<<no OnRelevantTxAccepted callback registered>>>")
 			return
 		}
-		transaction, err := parseRelevantTxAcceptedParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid relevanttxaccepted notification:", err)
+		transaction, e := parseRelevantTxAcceptedParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid relevanttxaccepted notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRelevantTxAccepted(transaction)
@@ -270,12 +269,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RescanFinishedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRescanFinished == nil {
-			Debug("<<<no OnRescanFinished callback registered>>>")
+			dbg.Ln("<<<no OnRescanFinished callback registered>>>")
 			return
 		}
-		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid rescanfinished notification:", err)
+		hash, height, blkTime, e := parseRescanProgressParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid rescanfinished notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRescanFinished(hash, height, blkTime)
@@ -283,12 +282,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.RescanProgressNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnRescanProgress == nil {
-			Debug("<<<no OnRescanProgress callback registered>>>")
+			dbg.Ln("<<<no OnRescanProgress callback registered>>>")
 			return
 		}
-		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid rescanprogress notification:", err)
+		hash, height, blkTime, e := parseRescanProgressParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid rescanprogress notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRescanProgress(hash, height, blkTime)
@@ -296,12 +295,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.TxAcceptedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnTxAccepted == nil {
-			Debug("<<<no OnTxAccepted callback registered>>>")
+			dbg.Ln("<<<no OnTxAccepted callback registered>>>")
 			return
 		}
-		hash, amt, err := parseTxAcceptedNtfnParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid tx accepted notification:", err)
+		hash, amt, e := parseTxAcceptedNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid tx accepted notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnTxAccepted(hash, amt)
@@ -309,13 +308,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.TxAcceptedVerboseNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnTxAcceptedVerbose == nil {
-			Debug("<<<no OnTxAcceptedVerbose callback registered>>>")
+			dbg.Ln("<<<no OnTxAcceptedVerbose callback registered>>>")
 			return
 		}
-		rawTx, err := parseTxAcceptedVerboseNtfnParams(ntfn.Params)
-		if err != nil {
-			Error(err)
-			Warn("received invalid tx accepted verbose notification:", err)
+		rawTx, e := parseTxAcceptedVerboseNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid tx accepted verbose notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnTxAcceptedVerbose(rawTx)
@@ -323,12 +321,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.PodConnectedNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnPodConnected == nil {
-			Debug("<<<no OnPodConnected callback registered>>>")
+			dbg.Ln("<<<no OnPodConnected callback registered>>>")
 			return
 		}
-		connected, err := parsePodConnectedNtfnParams(ntfn.Params)
-		if err != nil {
-			Warn("received invalid pod connected notification:", err)
+		connected, e := parsePodConnectedNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid pod connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnPodConnected(connected)
@@ -336,13 +334,12 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.AccountBalanceNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnAccountBalance == nil {
-			Debug("<<<no OnAccountBalance callback registered>>>")
+			dbg.Ln("<<<no OnAccountBalance callback registered>>>")
 			return
 		}
-		account, bal, conf, err := parseAccountBalanceNtfnParams(ntfn.Params)
-		if err != nil {
-			Error(err)
-			Warn("received invalid account balance notification:", err)
+		account, bal, conf, e := parseAccountBalanceNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid account balance notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnAccountBalance(account, bal, conf)
@@ -350,21 +347,20 @@ func (c *Client) handleNotification(ntfn *rawNotification) {
 	case btcjson.WalletLockStateNtfnMethod:
 		// Ignore the notification if the client is not interested in it.
 		if c.ntfnHandlers.OnWalletLockState == nil {
-			Debug("<<<no OnWalletLockState callback registered>>>")
+			dbg.Ln("<<<no OnWalletLockState callback registered>>>")
 			return
 		}
 		// The account name is not notified, so the return value is discarded.
-		_, locked, err := parseWalletLockStateNtfnParams(ntfn.Params)
-		if err != nil {
-			Error(err)
-			Warn("received invalid wallet lock state notification:", err)
+		_, locked, e := parseWalletLockStateNtfnParams(ntfn.Params)
+		if e != nil {
+			wrn.Ln("received invalid wallet lock state notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnWalletLockState(locked)
 	// OnUnknownNotification
 	default:
 		if c.ntfnHandlers.OnUnknownNotification == nil {
-			Debug("<<<no OnUnknownNotification callback registered>>>")
+			dbg.Ln("<<<no OnUnknownNotification callback registered>>>")
 			return
 		}
 		c.ntfnHandlers.OnUnknownNotification(ntfn.Method, ntfn.Params)
@@ -393,30 +389,26 @@ func parseChainNtfnParams(params []js.RawMessage) (
 	}
 	// Unmarshal first parameter as a string.
 	var blockHashStr string
-	err := js.Unmarshal(params[0], &blockHashStr)
-	if err != nil {
-		Error(err)
-		return nil, 0, time.Time{}, err
+	e := js.Unmarshal(params[0], &blockHashStr)
+	if e != nil {
+		return nil, 0, time.Time{}, e
 	}
 	// Unmarshal second parameter as an integer.
 	var blockHeight int32
-	err = js.Unmarshal(params[1], &blockHeight)
-	if err != nil {
-		Error(err)
-		return nil, 0, time.Time{}, err
+	e = js.Unmarshal(params[1], &blockHeight)
+	if e != nil {
+		return nil, 0, time.Time{}, e
 	}
 	// Unmarshal third parameter as unix time.
 	var blockTimeUnix int64
-	err = js.Unmarshal(params[2], &blockTimeUnix)
-	if err != nil {
-		Error(err)
-		return nil, 0, time.Time{}, err
+	e = js.Unmarshal(params[2], &blockTimeUnix)
+	if e != nil {
+		return nil, 0, time.Time{}, e
 	}
 	// Create hash from block hash string.
-	blockHash, err := chainhash.NewHashFromStr(blockHashStr)
-	if err != nil {
-		Error(err)
-		return nil, 0, time.Time{}, err
+	blockHash, e := chainhash.NewHashFromStr(blockHashStr)
+	if e != nil {
+		return nil, 0, time.Time{}, e
 	}
 	// Create time.Time from unix time.
 	blockTime := time.Unix(blockTimeUnix, 0)
@@ -435,43 +427,37 @@ func parseFilteredBlockConnectedParams(params []js.RawMessage) (
 	}
 	// Unmarshal first parameter as an integer.
 	var blockHeight int32
-	err := js.Unmarshal(params[0], &blockHeight)
-	if err != nil {
-		Error(err)
-		return 0, nil, nil, err
+	e := js.Unmarshal(params[0], &blockHeight)
+	if e != nil {
+		return 0, nil, nil, e
 	}
 	// Unmarshal second parameter as a slice of bytes.
-	blockHeaderBytes, err := parseHexParam(params[1])
-	if err != nil {
-		Error(err)
-		return 0, nil, nil, err
+	blockHeaderBytes, e := parseHexParam(params[1])
+	if e != nil {
+		return 0, nil, nil, e
 	}
 	// Deserialize block header from slice of bytes.
 	var blockHeader wire.BlockHeader
-	err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
-	if err != nil {
-		Error(err)
-		return 0, nil, nil, err
+	e = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
+	if e != nil {
+		return 0, nil, nil, e
 	}
 	// Unmarshal third parameter as a slice of hex-encoded strings.
 	var hexTransactions []string
-	err = js.Unmarshal(params[2], &hexTransactions)
-	if err != nil {
-		Error(err)
-		return 0, nil, nil, err
+	e = js.Unmarshal(params[2], &hexTransactions)
+	if e != nil {
+		return 0, nil, nil, e
 	}
 	// Create slice of transactions from slice of strings by hex-decoding.
 	transactions := make([]*util.Tx, len(hexTransactions))
 	for i, hexTx := range hexTransactions {
-		transaction, err := hex.DecodeString(hexTx)
-		if err != nil {
-			Error(err)
-			return 0, nil, nil, err
+		transaction, e := hex.DecodeString(hexTx)
+		if e != nil {
+			return 0, nil, nil, e
 		}
-		transactions[i], err = util.NewTxFromBytes(transaction)
-		if err != nil {
-			Error(err)
-			return 0, nil, nil, err
+		transactions[i], e = util.NewTxFromBytes(transaction)
+		if e != nil {
+			return 0, nil, nil, e
 		}
 	}
 	return blockHeight, &blockHeader, transactions, nil
@@ -489,39 +475,35 @@ func parseFilteredBlockDisconnectedParams(params []js.RawMessage) (
 	}
 	// Unmarshal first parameter as an integer.
 	var blockHeight int32
-	err := js.Unmarshal(params[0], &blockHeight)
-	if err != nil {
-		Error(err)
-		return 0, nil, err
+	e := js.Unmarshal(params[0], &blockHeight)
+	if e != nil {
+		return 0, nil, e
 	}
 	// Unmarshal second parameter as a slice of bytes.
-	blockHeaderBytes, err := parseHexParam(params[1])
-	if err != nil {
-		Error(err)
-		return 0, nil, err
+	blockHeaderBytes, e := parseHexParam(params[1])
+	if e != nil {
+		return 0, nil, e
 	}
 	// Deserialize block header from slice of bytes.
 	var blockHeader wire.BlockHeader
-	err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
-	if err != nil {
-		Error(err)
-		return 0, nil, err
+	e = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
+	if e != nil {
+		return 0, nil, e
 	}
 	return blockHeight, &blockHeader, nil
 }
 
 func parseHexParam(param js.RawMessage) ([]byte, error) {
 	var s string
-	err := js.Unmarshal(param, &s)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e := js.Unmarshal(param, &s)
+	if e != nil {
+		return nil, e
 	}
 	return hex.DecodeString(s)
 }
 
 // parseRelevantTxAcceptedParams parses out the parameter included in a relevanttxaccepted notification.
-func parseRelevantTxAcceptedParams(params []js.RawMessage) (transaction []byte, err error) {
+func parseRelevantTxAcceptedParams(params []js.RawMessage) (transaction []byte, e error) {
 	if len(params) < 1 {
 		return nil, wrongNumParams(len(params))
 	}
@@ -539,31 +521,27 @@ func parseChainTxNtfnParams(params []js.RawMessage) (
 	}
 	// Unmarshal first parameter as a string.
 	var txHex string
-	err := js.Unmarshal(params[0], &txHex)
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	e := js.Unmarshal(params[0], &txHex)
+	if e != nil {
+		return nil, nil, e
 	}
 	// If present, unmarshal second optional parameter as the block details JSON object.
 	var block *btcjson.BlockDetails
 	if len(params) > 1 {
-		err = js.Unmarshal(params[1], &block)
-		if err != nil {
-			Error(err)
-			return nil, nil, err
+		e = js.Unmarshal(params[1], &block)
+		if e != nil {
+			return nil, nil, e
 		}
 	}
 	// Hex decode and deserialize the transaction.
-	serializedTx, err := hex.DecodeString(txHex)
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	serializedTx, e := hex.DecodeString(txHex)
+	if e != nil {
+		return nil, nil, e
 	}
 	var msgTx wire.MsgTx
-	err = msgTx.Deserialize(bytes.NewReader(serializedTx))
-	if err != nil {
-		Error(err)
-		return nil, nil, err
+	e = msgTx.Deserialize(bytes.NewReader(serializedTx))
+	if e != nil {
+		return nil, nil, e
 	}
 	// TODO: Change recvtx and redeemingtx callback signatures to use nicer
 	//  types for details about the block (block hash as a chainhash.Hash,
@@ -579,30 +557,26 @@ func parseRescanProgressParams(params []js.RawMessage) (*chainhash.Hash, int32, 
 	}
 	// Unmarshal first parameter as an string.
 	var hashStr string
-	err := js.Unmarshal(params[0], &hashStr)
-	if err != nil {
-		Error(err)
-		return nil, 0, time.Time{}, err
+	e := js.Unmarshal(params[0], &hashStr)
+	if e != nil {
+		return nil, 0, time.Time{}, e
 	}
 	// Unmarshal second parameter as an integer.
 	var height int32
-	err = js.Unmarshal(params[1], &height)
-	if err != nil {
-		Error(err)
-		return nil, 0, time.Time{}, err
+	e = js.Unmarshal(params[1], &height)
+	if e != nil {
+		return nil, 0, time.Time{}, e
 	}
 	// Unmarshal third parameter as an integer.
 	var blkTime int64
-	err = js.Unmarshal(params[2], &blkTime)
-	if err != nil {
-		Error(err)
-		return nil, 0, time.Time{}, err
+	e = js.Unmarshal(params[2], &blkTime)
+	if e != nil {
+		return nil, 0, time.Time{}, e
 	}
 	// Decode string encoding of block hash.
-	hash, err := chainhash.NewHashFromStr(hashStr)
-	if err != nil {
-		Error(err)
-		return nil, 0, time.Time{}, err
+	hash, e := chainhash.NewHashFromStr(hashStr)
+	if e != nil {
+		return nil, 0, time.Time{}, e
 	}
 	return hash, height, time.Unix(blkTime, 0), nil
 }
@@ -618,29 +592,25 @@ func parseTxAcceptedNtfnParams(params []js.RawMessage) (
 	}
 	// Unmarshal first parameter as a string.
 	var txHashStr string
-	err := js.Unmarshal(params[0], &txHashStr)
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	e := js.Unmarshal(params[0], &txHashStr)
+	if e != nil {
+		return nil, 0, e
 	}
 	// Unmarshal second parameter as a floating point number.
 	var fAmt float64
-	err = js.Unmarshal(params[1], &fAmt)
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	e = js.Unmarshal(params[1], &fAmt)
+	if e != nil {
+		return nil, 0, e
 	}
 	// Bounds check amount.
-	amt, err := util.NewAmount(fAmt)
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	amt, e := util.NewAmount(fAmt)
+	if e != nil {
+		return nil, 0, e
 	}
 	// Decode string encoding of transaction sha.
-	txHash, err := chainhash.NewHashFromStr(txHashStr)
-	if err != nil {
-		Error(err)
-		return nil, 0, err
+	txHash, e := chainhash.NewHashFromStr(txHashStr)
+	if e != nil {
+		return nil, 0, e
 	}
 	return txHash, amt, nil
 }
@@ -656,10 +626,9 @@ func parseTxAcceptedVerboseNtfnParams(params []js.RawMessage) (
 	}
 	// Unmarshal first parameter as a raw transaction result object.
 	var rawTx btcjson.TxRawResult
-	err := js.Unmarshal(params[0], &rawTx)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e := js.Unmarshal(params[0], &rawTx)
+	if e != nil {
+		return nil, e
 	}
 	// TODO: change txacceptedverbose notification callbacks to use nicer
 	//  types for all details about the transaction (i.e.
@@ -675,10 +644,9 @@ func parsePodConnectedNtfnParams(params []js.RawMessage) (bool, error) {
 	}
 	// Unmarshal first parameter as a boolean.
 	var connected bool
-	err := js.Unmarshal(params[0], &connected)
-	if err != nil {
-		Error(err)
-		return false, err
+	e := js.Unmarshal(params[0], &connected)
+	if e != nil {
+		return false, e
 	}
 	return connected, nil
 }
@@ -687,35 +655,31 @@ func parsePodConnectedNtfnParams(params []js.RawMessage) (bool, error) {
 // or unconfirmed from the parameters of an accountbalance notification.
 func parseAccountBalanceNtfnParams(params []js.RawMessage) (
 	account string,
-	balance util.Amount, confirmed bool, err error,
+	balance util.Amount, confirmed bool, e error,
 ) {
 	if len(params) != 3 {
 		return "", 0, false, wrongNumParams(len(params))
 	}
 	// Unmarshal first parameter as a string.
-	err = js.Unmarshal(params[0], &account)
-	if err != nil {
-		Error(err)
-		return "", 0, false, err
+	e = js.Unmarshal(params[0], &account)
+	if e != nil {
+		return "", 0, false, e
 	}
 	// Unmarshal second parameter as a floating point number.
 	var fBal float64
-	err = js.Unmarshal(params[1], &fBal)
-	if err != nil {
-		Error(err)
-		return "", 0, false, err
+	e = js.Unmarshal(params[1], &fBal)
+	if e != nil {
+		return "", 0, false, e
 	}
 	// Unmarshal third parameter as a boolean.
-	err = js.Unmarshal(params[2], &confirmed)
-	if err != nil {
-		Error(err)
-		return "", 0, false, err
+	e = js.Unmarshal(params[2], &confirmed)
+	if e != nil {
+		return "", 0, false, e
 	}
 	// Bounds check amount.
-	bal, err := util.NewAmount(fBal)
-	if err != nil {
-		Error(err)
-		return "", 0, false, err
+	bal, e := util.NewAmount(fBal)
+	if e != nil {
+		return "", 0, false, e
 	}
 	return account, bal, confirmed, nil
 }
@@ -724,22 +688,20 @@ func parseAccountBalanceNtfnParams(params []js.RawMessage) (
 // walletlockstate notification.
 func parseWalletLockStateNtfnParams(params []js.RawMessage) (
 	account string,
-	locked bool, err error,
+	locked bool, e error,
 ) {
 	if len(params) != 2 {
 		return "", false, wrongNumParams(len(params))
 	}
 	// Unmarshal first parameter as a string.
-	err = js.Unmarshal(params[0], &account)
-	if err != nil {
-		Error(err)
-		return "", false, err
+	e = js.Unmarshal(params[0], &account)
+	if e != nil {
+		return "", false, e
 	}
 	// Unmarshal second parameter as a boolean.
-	err = js.Unmarshal(params[1], &locked)
-	if err != nil {
-		Error(err)
-		return "", false, err
+	e = js.Unmarshal(params[1], &locked)
+	if e != nil {
+		return "", false, e
 	}
 	return account, locked, nil
 }
@@ -750,9 +712,9 @@ type FutureNotifyBlocksResult chan *response
 
 // Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
-func (r FutureNotifyBlocksResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureNotifyBlocksResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // NotifyBlocksAsync returns an instance of a type that can be used to get the result of the RPC at some future time by
@@ -783,7 +745,7 @@ func (c *Client) NotifyBlocksAsync() FutureNotifyBlocksResult {
 //
 // The notifications delivered as a result of this call will be via one of or OnBlockDisconnected. NOTE: This is a pod
 // extension and requires a websocket connection.
-func (c *Client) NotifyBlocks() error {
+func (c *Client) NotifyBlocks() (e error) {
 	return c.NotifyBlocksAsync().Receive()
 }
 
@@ -795,9 +757,9 @@ type FutureNotifySpentResult chan *response
 
 // Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
-func (r FutureNotifySpentResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureNotifySpentResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // notifySpentInternal is the same as notifySpentAsync except it accepts the converted outpoints as a parameter so the
@@ -859,7 +821,7 @@ func (c *Client) NotifySpentAsync(outpoints []*wire.OutPoint) FutureNotifySpentR
 // NOTE: This is a pod extension and requires a websocket connection.
 //
 // NOTE: Deprecated. Use LoadTxFilter instead.
-func (c *Client) NotifySpent(outpoints []*wire.OutPoint) error {
+func (c *Client) NotifySpent(outpoints []*wire.OutPoint) (e error) {
 	return c.NotifySpentAsync(outpoints).Receive()
 }
 
@@ -868,9 +830,9 @@ func (c *Client) NotifySpent(outpoints []*wire.OutPoint) error {
 type FutureNotifyNewTransactionsResult chan *response
 
 // Receive waits for the response promised by the future and returns an error if the registration was not successful.
-func (r FutureNotifyNewTransactionsResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureNotifyNewTransactionsResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // NotifyNewTransactionsAsync returns an instance of a type that can be used to get the result of the RPC at some future
@@ -901,7 +863,7 @@ func (c *Client) NotifyNewTransactionsAsync(verbose bool) FutureNotifyNewTransac
 //
 // The notifications delivered as a result of this call will be via one of OnTxAccepted (when verbose is false) or
 // OnTxAcceptedVerbose ( when verbose is true). NOTE: This is a pod extension and requires a websocket connection.
-func (c *Client) NotifyNewTransactions(verbose bool) error {
+func (c *Client) NotifyNewTransactions(verbose bool) (e error) {
 	return c.NotifyNewTransactionsAsync(verbose).Receive()
 }
 
@@ -912,9 +874,9 @@ func (c *Client) NotifyNewTransactions(verbose bool) error {
 type FutureNotifyReceivedResult chan *response
 
 // Receive waits for the response promised by the future and returns an error if the registration was not successful.
-func (r FutureNotifyReceivedResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureNotifyReceivedResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // notifyReceivedInternal is the same as notifyReceivedAsync except it accepts the converted addresses as a parameter so
@@ -977,7 +939,7 @@ func (c *Client) NotifyReceivedAsync(addresses []util.Address) FutureNotifyRecei
 // NOTE: This is a pod extension and requires a websocket connection.
 //
 // NOTE: Deprecated. Use LoadTxFilter instead.
-func (c *Client) NotifyReceived(addresses []util.Address) error {
+func (c *Client) NotifyReceived(addresses []util.Address) (e error) {
 	return c.NotifyReceivedAsync(addresses).Receive()
 }
 
@@ -988,9 +950,9 @@ func (c *Client) NotifyReceived(addresses []util.Address) error {
 type FutureRescanResult chan *response
 
 // Receive waits for the response promised by the future and returns an error if the rescan was not successful.
-func (r FutureRescanResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureRescanResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // RescanAsync returns an instance of a type that can be used to get the result of the RPC at some future time by
@@ -1066,7 +1028,7 @@ func (c *Client) Rescan(
 	startBlock *chainhash.Hash,
 	addresses []util.Address,
 	outpoints []*wire.OutPoint,
-) error {
+) (e error) {
 	return c.RescanAsync(startBlock, addresses, outpoints).Receive()
 }
 
@@ -1137,7 +1099,7 @@ func (c *Client) RescanEndHeight(
 	startBlock *chainhash.Hash,
 	addresses []util.Address, outpoints []*wire.OutPoint,
 	endBlock *chainhash.Hash,
-) error {
+) (e error) {
 	return c.RescanEndBlockAsync(
 		startBlock, addresses, outpoints,
 		endBlock,
@@ -1153,9 +1115,9 @@ type FutureLoadTxFilterResult chan *response
 // Receive waits for the response promised by the future and returns an error if the registration was not successful.
 //
 // NOTE: This is a pod extension ported from github.com/decred/dcrrpcclient and requires a websocket connection.
-func (r FutureLoadTxFilterResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureLoadTxFilterResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // LoadTxFilterAsync returns an instance of a type that can be used to get the result of the RPC at some future time by
@@ -1189,6 +1151,6 @@ func (c *Client) LoadTxFilterAsync(
 // for all rescanned blocks.
 //
 // NOTE: This is a pod extension ported from github. com/decred/dcrrpcclient and requires a websocket connection.
-func (c *Client) LoadTxFilter(reload bool, addresses []util.Address, outPoints []wire.OutPoint) error {
+func (c *Client) LoadTxFilter(reload bool, addresses []util.Address, outPoints []wire.OutPoint) (e error) {
 	return c.LoadTxFilterAsync(reload, addresses, outPoints).Receive()
 }

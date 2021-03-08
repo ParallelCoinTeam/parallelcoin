@@ -172,12 +172,12 @@ func TestDequeueAtHeight(t *testing.T) {
 		BlockFilterMatches: mockChainClient.blockFilterMatches,
 	})
 	// Add the requests in order of their block heights.
-	req100000, err := scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if err != nil {
+	req100000, e := scanner.Enqueue(makeTestInputWithScript(), 100000)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	req100001, err := scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if err != nil {
+	req100001, e := scanner.Enqueue(makeTestInputWithScript(), 100001)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
 	// Dequeue the heights in the same order, this should return both requests without failure.
@@ -201,12 +201,12 @@ func TestDequeueAtHeight(t *testing.T) {
 			"want %v, got %v", reqs[0], req100001)
 	}
 	// Now, add the requests in order of their block heights.
-	_, err = scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if err != nil {
+	_, e = scanner.Enqueue(makeTestInputWithScript(), 100000)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	req100001, err = scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if err != nil {
+	req100001, e = scanner.Enqueue(makeTestInputWithScript(), 100001)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
 	// We've missed block 100000 by this point so only return 100001.
@@ -226,12 +226,12 @@ func TestDequeueAtHeight(t *testing.T) {
 			"want %v, got %v", 0, len(reqs))
 	}
 	// Now, add the requests out of order wrt. their block heights.
-	req100001, err = scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if err != nil {
+	req100001, e = scanner.Enqueue(makeTestInputWithScript(), 100001)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	req100000, err = scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if err != nil {
+	req100000, e = scanner.Enqueue(makeTestInputWithScript(), 100000)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
 	// Dequeue the heights in the correct order, this should return both requests without failure.
@@ -254,12 +254,12 @@ func TestDequeueAtHeight(t *testing.T) {
 			"want %v, got %v", reqs[0], req100001)
 	}
 	// Again, add the requests out of order wrt. their block heights.
-	req100001, err = scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if err != nil {
+	req100001, e = scanner.Enqueue(makeTestInputWithScript(), 100001)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	_, err = scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if err != nil {
+	_, e = scanner.Enqueue(makeTestInputWithScript(), 100000)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
 	// We've missed block 100000 by this point so only return 100001.
@@ -294,20 +294,20 @@ func TestUtxoScannerScanBasic(t *testing.T) {
 		BestSnapshot:       mockChainClient.BestSnapshot,
 		BlockFilterMatches: mockChainClient.blockFilterMatches,
 	})
-	err := scanner.Start()
-	if err != nil {
+	e := scanner.Start()
+	if e != nil  {
 		t.Log(err)
 	}
 	defer func() {
-		err := scanner.Stop()
+		e := scanner.Stop()
 		t.Log(err)
 	}()
 	var (
 		spendReport *SpendReport
 		scanErr     error
 	)
-	req, err := scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if err != nil {
+	req, e := scanner.Enqueue(makeTestInputWithScript(), 100000)
+	if e != nil  {
 		t.Fatalf("unable to enqueue utxo scan request: %v", err)
 	}
 	spendReport, scanErr = req.Result(nil)
@@ -345,20 +345,20 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 		},
 		BlockFilterMatches: mockChainClient.blockFilterMatches,
 	})
-	err := scanner.Start()
-	if err != nil {
+	e := scanner.Start()
+	if e != nil  {
 		t.Log(err)
 	}
 	defer func() {
-		err := scanner.Stop()
+		e := scanner.Stop()
 		t.Log(err)
 	}()
 	var (
 		spendReport *SpendReport
 		scanErr     error
 	)
-	req, err := scanner.Enqueue(makeTestInputWithScript(), 99999)
-	if err != nil {
+	req, e := scanner.Enqueue(makeTestInputWithScript(), 99999)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
 	// The utxoscanner should currently be waiting for the block stamp at height 99999. Signaling will cause the initial
@@ -404,37 +404,37 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 		BestSnapshot:       mockChainClient.BestSnapshot,
 		BlockFilterMatches: mockChainClient.blockFilterMatches,
 	})
-	err := scanner.Start()
-	if err != nil {
+	e := scanner.Start()
+	if e != nil  {
 		t.Log(err)
 	}
 	defer func() {
-		err := scanner.Stop()
+		e := scanner.Stop()
 		t.Log(err)
 	}()
 	// Add the requests in order of their block heights.
-	req100000, err := scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if err != nil {
+	req100000, e := scanner.Enqueue(makeTestInputWithScript(), 100000)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
-	req100001, err := scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if err != nil {
+	req100001, e := scanner.Enqueue(makeTestInputWithScript(), 100001)
+	if e != nil  {
 		t.Fatalf("unable to enqueue scan request: %v", err)
 	}
 	// Spawn our first task with a cancel chan, which we'll test to make sure it can break away early.
 	cancel100000 := qu.T()
 	err100000 := make(chan error, 1)
 	go func() {
-		_, err := req100000.Result(cancel100000)
+		_, e := req100000.Result(cancel100000)
 		err100000 <- err
 	}()
 	// Spawn our second task without a cancel chan, we'll be testing it's ability to break if the scanner is stopped.
 	err100001 := make(chan error, 1)
 	go func() {
-		_, err := req100001.Result(nil)
+		_, e := req100001.Result(nil)
 		err100001 <- err
 	}()
-	// Check that neither succeed without any further action.
+	// Chk that neither succeed without any further action.
 	select {
 	case <-err100000:
 		t.Fatalf("getutxo should not have been cancelled yet")
@@ -448,7 +448,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	// Cancel the first request, which should cause it to return ErrGetUtxoCancelled.
 	cancel100000.Q()
 	select {
-	case err := <-err100000:
+	case e := <-err100000:
 		if err != ErrGetUtxoCancelled {
 			t.Fatalf("unexpected error returned from Result, want: %v, got %v", ErrGetUtxoCancelled, err)
 		}
@@ -467,14 +467,14 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := scanner.Stop()
-		if err != nil {
+		e := scanner.Stop()
+		if e != nil  {
 			t.Log(err)
 		}
 	}()
 	// The second request should be cancelled as soon as the utxoscanner begins shut down, returning ErrShuttingDown.
 	select {
-	case err := <-err100001:
+	case e := <-err100001:
 		if err != ErrShuttingDown {
 			t.Fatalf("unexpected error returned "+
 				"from Result, want: %v, got %v",

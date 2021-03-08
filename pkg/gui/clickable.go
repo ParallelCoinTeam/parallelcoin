@@ -37,13 +37,13 @@ func (w *Window) Clickable() (c *Clickable) {
 		history:    nil,
 		Events: clickEvents{
 			Click: func() {
-				Debug("click event")
+				dbg.Ln("click event")
 			},
 			Cancel: func() {
-				Debug("cancel event")
+				dbg.Ln("cancel event")
 			},
 			Press: func() {
-				Debug("press event")
+				dbg.Ln("press event")
 			},
 		},
 	}
@@ -134,18 +134,18 @@ func (c *Clickable) update(gtx l.Context) {
 	n := copy(c.clicks, c.clicks[c.prevClicks:])
 	c.clicks = c.clicks[:n]
 	c.prevClicks = n
-	for _, e := range c.click.Events(gtx) {
-		switch e.Type {
+	for _, ev := range c.click.Events(gtx) {
+		switch ev.Type {
 		case gesture.TypeClick:
 			click := click{
-				Modifiers: e.Modifiers,
-				NumClicks: e.NumClicks,
+				Modifiers: ev.Modifiers,
+				NumClicks: ev.NumClicks,
 			}
 			c.clicks = append(c.clicks, click)
 			if ll := len(c.history); ll > 0 {
 				c.history[ll-1].End = gtx.Now
 			}
-			c.Window.Runner <- func() error { c.Events.Click(); return nil }
+			c.Window.Runner <- func() (e error) { c.Events.Click(); return nil }
 		case gesture.TypeCancel:
 			for i := range c.history {
 				c.history[i].Cancelled = true
@@ -153,15 +153,15 @@ func (c *Clickable) update(gtx l.Context) {
 					c.history[i].End = gtx.Now
 				}
 			}
-			c.Window.Runner <- func() error { c.Events.Cancel(); return nil }
+			c.Window.Runner <- func() (e error) { c.Events.Cancel(); return nil }
 		case gesture.TypePress:
 			c.history = append(c.history, press{
-				Position: e.Position,
+				Position: ev.Position,
 				Start:    gtx.Now,
 			})
 			c.
 				Window.
-				Runner <- func() error {
+				Runner <- func() (e error) {
 				c.
 					Events.
 					Press()

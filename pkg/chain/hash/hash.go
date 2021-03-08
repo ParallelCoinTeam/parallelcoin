@@ -36,11 +36,13 @@ func (hash *Hash) CloneBytes() []byte {
 
 // SetBytes sets the bytes which represent the hash. An error is returned if the number of bytes passed in is not
 // HashSize.
-func (hash *Hash) SetBytes(newHash []byte) error {
+func (hash *Hash) SetBytes(newHash []byte) (e error) {
 	nhlen := len(newHash)
 	if nhlen != HashSize {
-		return fmt.Errorf("invalid hash length of %v, want %v", nhlen,
-			HashSize)
+		return fmt.Errorf(
+			"invalid hash length of %v, want %v", nhlen,
+			HashSize,
+		)
 	}
 	copy(hash[:], newHash)
 	return nil
@@ -60,28 +62,26 @@ func (hash *Hash) IsEqual(target *Hash) bool {
 // NewHash returns a new Hash from a byte slice. An error is returned if the number of bytes passed in is not HashSize.
 func NewHash(newHash []byte) (*Hash, error) {
 	var sh Hash
-	err := sh.SetBytes(newHash)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e := sh.SetBytes(newHash)
+	if e != nil {
+		err.Ln(e)
+		return nil, e
 	}
-	return &sh, err
+	return &sh, e
 }
 
 // NewHashFromStr creates a Hash from a hash string. The string should be the hexadecimal string of a byte-reversed
 // hash, but any missing characters result in zero padding at the end of the Hash.
-func NewHashFromStr(hash string) (*Hash, error) {
-	ret := new(Hash)
-	err := Decode(ret, hash)
-	if err != nil {
-		Error(err)
-		return nil, err
+func NewHashFromStr(hash string) (ret *Hash, e error) {
+	ret = new(Hash)
+	if e = Decode(ret, hash); dbg.Chk(e) {
+		return
 	}
-	return ret, nil
+	return
 }
 
 // Decode decodes the byte-reversed hexadecimal string encoding of a Hash to a destination.
-func Decode(dst *Hash, src string) error {
+func Decode(dst *Hash, src string) (e error) {
 	// Return error if hash string is too long.
 	if len(src) > MaxHashStringSize {
 		return ErrHashStrSize
@@ -97,15 +97,13 @@ func Decode(dst *Hash, src string) error {
 	}
 	// Hex decode the source bytes to a temporary destination.
 	var reversedHash Hash
-	_, err := hex.Decode(reversedHash[HashSize-hex.DecodedLen(len(srcBytes)):], srcBytes)
-	if err != nil {
-		Error(err)
-		return err
+	if _, e = hex.Decode(reversedHash[HashSize-hex.DecodedLen(len(srcBytes)):], srcBytes); dbg.Chk(e) {
+		return e
 	}
 	// Reverse copy from the temporary hash to destination. Because the temporary was zeroed, the written result will be
 	// correctly padded.
 	for i, b := range reversedHash[:HashSize/2] {
 		dst[i], dst[HashSize-1-i] = reversedHash[HashSize-1-i], b
 	}
-	return nil
+	return
 }

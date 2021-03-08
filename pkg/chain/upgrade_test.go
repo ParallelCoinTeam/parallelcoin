@@ -92,8 +92,8 @@ func TestDeserializeUtxoEntryV0(t *testing.T) {
 	}
 	for i, test := range tests {
 		// Deserialize to map of utxos keyed by the output index.
-		entries, err := deserializeUtxoEntryV0(test.serialized)
-		if err != nil {
+		entries, e := deserializeUtxoEntryV0(test.serialized)
+		if e != nil  {
 			t.Errorf("deserializeUtxoEntryV0 #%d (%s) unexpected "+
 				"error: %v", i, test.name, err)
 			continue

@@ -16,32 +16,28 @@ type MsgPing struct {
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
 // implementation.
-func (msg *MsgPing) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
+func (msg *MsgPing) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	// There was no nonce for BIP0031Version and earlier. NOTE: > is not a mistake here. The BIP0031 was defined as
 	// AFTER the version unlike most others.
 	if pver > BIP0031Version {
-		err := readElement(r, &msg.Nonce)
-		if err != nil {
-			Error(err)
-			return err
+		if e = readElement(r, &msg.Nonce); dbg.Chk(e) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
-func (msg *MsgPing) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
+func (msg *MsgPing) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
 	// There was no nonce for BIP0031Version and earlier. NOTE: > is not a mistake here. The BIP0031 was defined as
 	// AFTER the version unlike most others.
 	if pver > BIP0031Version {
-		err := writeElement(w, msg.Nonce)
-		if err != nil {
-			Error(err)
-			return err
+		if e = writeElement(w, msg.Nonce); dbg.Chk(e) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // Command returns the protocol command string for the message. This is part of the Message interface implementation.

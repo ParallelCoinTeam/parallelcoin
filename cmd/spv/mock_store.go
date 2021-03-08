@@ -55,7 +55,7 @@ func (m *mockBlockHeaderStore) FetchHeader(h *chainhash.Hash) (
 	}
 	return nil, 0, fmt.Errorf("not found")
 }
-func (m *mockBlockHeaderStore) WriteHeaders(headers ...headerfs.BlockHeader) error {
+func (m *mockBlockHeaderStore) WriteHeaders(headers ...headerfs.BlockHeader) (e error) {
 	for _, h := range headers {
 		m.headers[h.BlockHash()] = *h.BlockHeader
 	}

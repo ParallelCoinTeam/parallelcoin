@@ -16,18 +16,18 @@ import (
 	"github.com/p9c/pod/app/conte"
 )
 
-func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
-	return func(c *cli.Context) (err error) {
-		Info("starting up kopach standalone miner for parallelcoin")
-		Debug(os.Args)
+func KopachHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
+		inf.Ln("starting up kopach standalone miner for parallelcoin")
+		dbg.Ln(os.Args)
 		config.Configure(cx, c.Command.Name, true)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
 		}
 		defer cx.KillAll.Q()
-		err = kopach.Handle(cx)(c)
+		e = kopach.Handle(cx)(c)
 		<-interrupt.HandlersDone
-		Debug("kopach main finished")
+		dbg.Ln("kopach main finished")
 		return
 	}
 }

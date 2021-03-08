@@ -31,55 +31,54 @@ var winServiceMain func() (bool, error)
 // optional serverChan parameter is mainly used by the service code to be
 // notified with the server once it is setup so it can gracefully stop it when
 // requested from the service control manager.
-func Main(cx *conte.Xt) (err error) {
-	Trace("starting up node main")
+func Main(cx *conte.Xt) (e error) {
+	trc.Ln("starting up node main")
 	// cx.WaitGroup.Add(1)
 	cx.WaitAdd()
 	// show version at startup
 	// enable http profiling server if requested
 	if *cx.Config.Profile != "" {
-		Debug("profiling requested")
+		dbg.Ln("profiling requested")
 		go func() {
 			listenAddr := net.JoinHostPort("", *cx.Config.Profile)
-			Info("profile server listening on", listenAddr)
+			inf.Ln("profile server listening on", listenAddr)
 			profileRedirect := http.RedirectHandler("/debug/pprof", http.StatusSeeOther)
 			http.Handle("/", profileRedirect)
-			Debug("profile server", http.ListenAndServe(listenAddr, nil))
+			dbg.Ln("profile server", http.ListenAndServe(listenAddr, nil))
 		}()
 	}
 	// write cpu profile if requested
 	if *cx.Config.CPUProfile != "" && os.Getenv("POD_TRACE") != "on" {
-		Debug("cpu profiling enabled")
+		dbg.Ln("cpu profiling enabled")
 		var f *os.File
-		f, err = os.Create(*cx.Config.CPUProfile)
-		if err != nil {
-			Error("unable to create cpu profile:", err)
+		f, e = os.Create(*cx.Config.CPUProfile)
+		if e != nil {
+			err.Ln("unable to create cpu profile:", err)
 			return
 		}
 		e := pprof.StartCPUProfile(f)
 		if e != nil {
-			Debug("failed to start up cpu profiler:", e)
+			dbg.Ln("failed to start up cpu profiler:", e)
 		} else {
 			defer func() {
-				if err := f.Close(); Check(err) {
+				if e := f.Close(); dbg.Chk(e) {
 				}
 			}()
 			defer pprof.StopCPUProfile()
 			interrupt.AddHandler(
 				func() {
-					Debug("stopping CPU profiler")
-					err := f.Close()
-					if err != nil {
-						Error(err)
+					dbg.Ln("stopping CPU profiler")
+					e := f.Close()
+					if e != nil {
 					}
 					pprof.StopCPUProfile()
-					Debug("finished cpu profiling", *cx.Config.CPUProfile)
+					dbg.Ln("finished cpu profiling", *cx.Config.CPUProfile)
 				},
 			)
 		}
 	}
 	// perform upgrades to pod as new versions require it
-	if err = doUpgrades(cx); Check(err) {
+	if e = doUpgrades(cx); dbg.Chk(e) {
 		return
 	}
 	// return now if an interrupt signal was triggered
@@ -88,16 +87,15 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	// load the block database
 	var db database.DB
-	db, err = loadBlockDB(cx)
-	if err != nil {
-		Error(err)
+	db, e = loadBlockDB(cx)
+	if e != nil {
 		return
 	}
 	closeDb := func() {
 		// ensure the database is synced and closed on shutdown
-		Trace("gracefully shutting down the database")
+		trc.Ln("gracefully shutting down the database")
 		func() {
-			if err := db.Close(); Check(err) {
+			if e := db.Close(); dbg.Chk(e) {
 			}
 		}()
 	}
@@ -110,20 +108,20 @@ func Main(cx *conte.Xt) (err error) {
 	// drop indexes and exit if requested. NOTE: The order is important here because
 	// dropping the tx index also drops the address index since it relies on it
 	if cx.StateCfg.DropAddrIndex {
-		Warn("dropping address index")
-		if err = indexers.DropAddrIndex(db, interrupt.ShutdownRequestChan); Check(err) {
+		wrn.Ln("dropping address index")
+		if e = indexers.DropAddrIndex(db, interrupt.ShutdownRequestChan); dbg.Chk(e) {
 			return
 		}
 	}
 	if cx.StateCfg.DropTxIndex {
-		Warn("dropping transaction index")
-		if err = indexers.DropTxIndex(db, interrupt.ShutdownRequestChan); Check(err) {
+		wrn.Ln("dropping transaction index")
+		if e = indexers.DropTxIndex(db, interrupt.ShutdownRequestChan); dbg.Chk(e) {
 			return
 		}
 	}
 	if cx.StateCfg.DropCfIndex {
-		Warn("dropping cfilter index")
-		if err = indexers.DropCfIndex(db, interrupt.ShutdownRequestChan); Check(err) {
+		wrn.Ln("dropping cfilter index")
+		if e = indexers.DropCfIndex(db, interrupt.ShutdownRequestChan); dbg.Chk(e) {
 			return
 		}
 	}
@@ -137,25 +135,31 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	// create server and start it
 	var server *chainrpc.Node
-	server, err = chainrpc.NewNode(*cx.Config.P2PListeners, db, interrupt.ShutdownRequestChan, conte.GetContext(cx), mempoolUpdateHook)
-	if err != nil {
-		Errorf("unable to start server on %v: %v", *cx.Config.P2PListeners, err)
-		return err
+	server, e = chainrpc.NewNode(
+		*cx.Config.P2PListeners,
+		db,
+		interrupt.ShutdownRequestChan,
+		conte.GetContext(cx),
+		mempoolUpdateHook,
+	)
+	if e != nil {
+		err.F("unable to start server on %v: %v", *cx.Config.P2PListeners, e)
+		return e
 	}
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 && *cx.Config.CAPI {
-		Debug("starting cAPI.....")
+		dbg.Ln("starting cAPI.....")
 		// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
-		// Debug("propagating rpc server handle (node has started)")
+		// dbg.Ln("propagating rpc server handle (node has started)")
 	}
 	if len(server.RPCServers) > 0 {
 		cx.RPCServer = server.RPCServers[0]
-		Debug("sending back node")
+		dbg.Ln("sending back node")
 		cx.NodeChan <- cx.RPCServer
 	}
 	if !*cx.Config.DisableController {
-		Debug("starting controller")
+		dbg.Ln("starting controller")
 		cx.Controller = control.New(
 			cx.Config,
 			cx.StateCfg,
@@ -168,7 +172,7 @@ func Main(cx *conte.Xt) (err error) {
 		)
 		go cx.Controller.Run()
 		// cx.Controller.Start()
-		Debug("controller started")
+		dbg.Ln("controller started")
 	}
 	once := true
 	gracefulShutdown := func() {
@@ -178,35 +182,35 @@ func Main(cx *conte.Xt) (err error) {
 		if once {
 			once = false
 		}
-		Debug("gracefully shutting down the server...")
-		Debug("stopping controller")
+		dbg.Ln("gracefully shutting down the server...")
+		dbg.Ln("stopping controller")
 		cx.Controller.Shutdown()
-		Debug("stopping server")
+		dbg.Ln("stopping server")
 		e := server.Stop()
 		if e != nil {
-			Warn("failed to stop server", e)
+			wrn.Ln("failed to stop server", e)
 		}
 		server.WaitForShutdown()
-		Info("server shutdown complete")
+		inf.Ln("server shutdown complete")
 		logi.L.LogChanDisabled.Store(true)
 		logi.L.Writer.Write.Store(true)
 		cx.WaitDone()
 		cx.KillAll.Q()
 		cx.NodeKill.Q()
 	}
-	Debug("adding interrupt handler for node")
+	dbg.Ln("adding interrupt handler for node")
 	interrupt.AddHandler(gracefulShutdown)
 	// Wait until the interrupt signal is received from an OS signal or shutdown is requested through one of the
 	// subsystems such as the RPC server.
 	select {
 	case <-cx.NodeKill.Wait():
-		Debug("NodeKill")
+		dbg.Ln("NodeKill")
 		if !interrupt.Requested() {
 			interrupt.Request()
 		}
 		break
 	case <-cx.KillAll.Wait():
-		Debug("KillAll")
+		dbg.Ln("KillAll")
 		if !interrupt.Requested() {
 			interrupt.Request()
 		}
@@ -221,16 +225,14 @@ func Main(cx *conte.Xt) (err error) {
 // additional logic such warning the user if there are multiple databases which
 // consume space on the file system and ensuring the regression test database is
 // clean when in regression test mode.
-func loadBlockDB(cx *conte.Xt) (database.DB, error) {
+func loadBlockDB(cx *conte.Xt) (db database.DB, e error) {
 	// The memdb backend does not have a file path associated with it, so handle it
 	// uniquely. We also don't want to worry about the multiple database type
 	// warnings when running with the memory database.
 	if *cx.Config.DbType == "memdb" {
-		Info("creating block database in memory")
-		db, err := database.Create(*cx.Config.DbType)
-		if err != nil {
-			Error(err)
-			return nil, err
+		inf.Ln("creating block database in memory")
+		if db, e = database.Create(*cx.Config.DbType); dbg.Chk(e) {
+			return nil, e
 		}
 		return db, nil
 	}
@@ -239,52 +241,49 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 	dbPath := path.BlockDb(cx, *cx.Config.DbType, blockdb.NamePrefix)
 	// The regression test is special in that it needs a clean database for each
 	// run, so remove it now if it already exists.
-	e := removeRegressionDB(cx, dbPath)
+	e = removeRegressionDB(cx, dbPath)
 	if e != nil {
-		Debug("failed to remove regression db:", e)
+		dbg.Ln("failed to remove regression db:", e)
 	}
-	Infof("loading block database from '%s'", dbPath)
-	db, err := database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
-	if err != nil {
-		Trace(err) // return the error if it's not because the database doesn't exist
-		if dbErr, ok := err.(database.DBError); !ok || dbErr.ErrorCode !=
+	inf.F("loading block database from '%s'", dbPath)
+	if db, e = database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net); dbg.Chk(e) {
+		trc.Ln(err) // return the error if it's not because the database doesn't exist
+		if dbErr, ok := e.(database.DBError); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
-			return nil, err
+			return nil, e
 		}
 		// create the db if it does not exist
-		err = os.MkdirAll(*cx.Config.DataDir, 0700)
-		if err != nil {
-			Error(err)
-			return nil, err
+		e = os.MkdirAll(*cx.Config.DataDir, 0700)
+		if e != nil {
+			return nil, e
 		}
-		db, err = database.Create(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
-		if err != nil {
-			Error(err)
-			return nil, err
+		db, e = database.Create(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
+		if e != nil {
+			return nil, e
 		}
 	}
-	Trace("block database loaded")
+	trc.Ln("block database loaded")
 	return db, nil
 }
 
 // removeRegressionDB removes the existing regression test database if running
 // in regression test mode and it already exists.
-func removeRegressionDB(cx *conte.Xt, dbPath string) error {
+func removeRegressionDB(cx *conte.Xt, dbPath string) (e error) {
 	// don't do anything if not in regression test mode
 	if !((*cx.Config.Network)[0] == 'r') {
 		return nil
 	}
 	// remove the old regression test database if it already exists
-	fi, err := os.Stat(dbPath)
-	if err == nil {
-		Infof("removing regression test database from '%s' %s", dbPath)
+	fi, e := os.Stat(dbPath)
+	if e == nil {
+		inf.F("removing regression test database from '%s' %s", dbPath)
 		if fi.IsDir() {
-			if err = os.RemoveAll(dbPath); err != nil {
-				return err
+			if e = os.RemoveAll(dbPath); dbg.Chk(e) {
+				return e
 			}
 		} else {
-			if err = os.Remove(dbPath); err != nil {
-				return err
+			if e = os.Remove(dbPath); dbg.Chk(e) {
+				return e
 			}
 		}
 	}
@@ -313,7 +312,7 @@ func warnMultipleDBs(cx *conte.Xt) {
 	// warn if there are extra databases
 	if len(duplicateDbPaths) > 0 {
 		selectedDbPath := path.BlockDb(cx, *cx.Config.DbType, blockdb.NamePrefix)
-		Warnf(
+		wrn.F(
 			"\nThere are multiple block chain databases using different"+
 				" database types.\nYou probably don't want to waste disk"+
 				" space by having more than one."+

@@ -21,11 +21,10 @@ func loadBlockDB() (database.DB, error) {
 	// The database name is based on the database type.
 	dbName := blockDbNamePrefix + "_" + cfg.DbType
 	dbPath := filepath.Join(cfg.DataDir, dbName)
-	Infof("Loading block database from '%s'\n", dbPath)
-	db, err := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
-	if err != nil {
-		Error(err)
-		return nil, err
+	inf.F("Loading block database from '%s'\n", dbPath)
+	db, e := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
+	if e != nil  {
+				return nil, e
 	}
 	return db, nil
 }
@@ -38,10 +37,9 @@ func loadBlockDB() (database.DB, error) {
 func findCandidates(
 	chain *blockchain.BlockChain, latestHash *chainhash.Hash) ([]*chaincfg.Checkpoint, error) {
 	// Start with the latest block of the main chain.
-	block, err := chain.BlockByHash(latestHash)
-	if err != nil {
-		Error(err)
-		return nil, err
+	block, e := chain.BlockByHash(latestHash)
+	if e != nil  {
+				return nil, e
 	}
 	// Get the latest known checkpoint.
 	latestCheckpoint := chain.LatestCheckpoint()
@@ -85,10 +83,9 @@ func findCandidates(
 			fmt.Print(".")
 		}
 		// Determine if this block is a checkpoint candidate.
-		isCandidate, err := chain.IsCheckpointCandidate(block)
-		if err != nil {
-			Error(err)
-			return nil, err
+		isCandidate, e := chain.IsCheckpointCandidate(block)
+		if e != nil  {
+						return nil, e
 		}
 		// All checks passed, so this node seems like a reasonable checkpoint candidate.
 		if isCandidate {
@@ -99,10 +96,9 @@ func findCandidates(
 			candidates = append(candidates, &checkpoint)
 		}
 		prevHash := &block.MsgBlock().Header.PrevBlock
-		block, err = chain.BlockByHash(prevHash)
-		if err != nil {
-			Error(err)
-			return nil, err
+		block, e = chain.BlockByHash(prevHash)
+		if e != nil  {
+						return nil, e
 		}
 		numTested++
 	}
@@ -113,47 +109,46 @@ func findCandidates(
 func showCandidate(
 	candidateNum int, checkpoint *chaincfg.Checkpoint) {
 	if cfg.UseGoOutput {
-		Infof("Candidate %d -- {%d, newShaHashFromStr(\"%v\")},\n",
+		inf.F("Candidate %d -- {%d, newShaHashFromStr(\"%v\")},\n",
 			candidateNum, checkpoint.Height, checkpoint.Hash)
 		return
 	}
-	Infof("Candidate %d -- Height: %d, Hash: %v\n", candidateNum,
+	inf.F("Candidate %d -- Height: %d, Hash: %v\n", candidateNum,
 		checkpoint.Height, checkpoint.Hash)
 }
 func main() {
 	// Load configuration and parse command line.
-	tcfg, _, err := loadConfig()
-	if err != nil {
-		Error(err)
-		return
+	tcfg, _, e = loadConfig()
+	if e != nil  {
+				return
 	}
 	cfg = tcfg
 	// Load the block database.
-	db, err := loadBlockDB()
-	if err != nil {
+	db, e := loadBlockDB()
+	if e != nil  {
 		Error("failed to load database:", err)
 		return
 	}
 	defer func() {
-		if err := db.Close(); Check(err) {
+		if e := db.Close(); dbg.Chk(e) {
 		}
 	}()
 	// Setup chain.  Ignore notifications since they aren't needed for this util.
-	chain, err := blockchain.New(&blockchain.Config{
+	chain, e := blockchain.New(&blockchain.Config{
 		DB:          db,
 		ChainParams: activeNetParams,
 		TimeSource:  blockchain.NewMedianTime(),
 	})
-	if err != nil {
+	if e != nil  {
 		Error("failed to initialize chain: %v\n", err)
 		return
 	}
 	// Get the latest block hash and height from the database and report status.
 	best := chain.BestSnapshot()
-	Infof("Block database loaded with block height %d\n", best.Height)
+	inf.F("Block database loaded with block height %d\n", best.Height)
 	// Find checkpoint candidates.
-	candidates, err := findCandidates(chain, &best.Hash)
-	if err != nil {
+	candidates, e := findCandidates(chain, &best.Hash)
+	if e != nil  {
 		Error("Unable to identify candidates:", err)
 		return
 	}

@@ -18,16 +18,19 @@ import (
 var (
 	prng = rand.Reader
 	
+	// ErrInvalidPassword ...
 	ErrInvalidPassword = errors.New("invalid password")
-	ErrMalformed       = errors.New("malformed data")
-	ErrDecryptFailed   = errors.New("unable to decrypt")
+	// ErrMalformed ...
+	ErrMalformed     = errors.New("malformed data")
+	// ErrDecryptFailed ...
+	ErrDecryptFailed = errors.New("unable to decrypt")
 )
 
 // Various constants needed for encryption scheme.
 const (
 	// Overhead const here expose secretbox's for convenience.
 	Overhead  = secretbox.Overhead
-	KeySize   = 32
+	keySize   = 32
 	NonceSize = 24
 	DefaultN  = 16384 // 2^14
 	DefaultR  = 8
@@ -35,17 +38,17 @@ const (
 )
 
 // CryptoKey represents a secret key which can be used to encrypt and decrypt data.
-type CryptoKey [KeySize]byte
+type CryptoKey [keySize]byte
 
 // Encrypt encrypts the passed data.
 func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
 	var nonce [NonceSize]byte
-	_, err := io.ReadFull(prng, nonce[:])
-	if err != nil {
-		Error(err)
-		return nil, err
+	_, e := io.ReadFull(prng, nonce[:])
+	if e != nil {
+		err.Ln(e)
+		return nil, e
 	}
-	blob := secretbox.Seal(nil, in, &nonce, (*[KeySize]byte)(ck))
+	blob := secretbox.Seal(nil, in, &nonce, (*[keySize]byte)(ck))
 	return append(nonce[:], blob...), nil
 }
 
@@ -57,7 +60,7 @@ func (ck *CryptoKey) Decrypt(in []byte) ([]byte, error) {
 	var nonce [NonceSize]byte
 	copy(nonce[:], in[:NonceSize])
 	blob := in[NonceSize:]
-	opened, ok := secretbox.Open(nil, blob, &nonce, (*[KeySize]byte)(ck))
+	opened, ok := secretbox.Open(nil, blob, &nonce, (*[keySize]byte)(ck))
 	if !ok {
 		return nil, ErrDecryptFailed
 	}
@@ -68,23 +71,23 @@ func (ck *CryptoKey) Decrypt(in []byte) ([]byte, error) {
 // the memory after they've used it rather than waiting until it's reclaimed by the garbage collector. The key is no
 // longer usable after this call.
 func (ck *CryptoKey) Zero() {
-	zero.Bytea32((*[KeySize]byte)(ck))
+	zero.Bytea32((*[keySize]byte)(ck))
 }
 
 // GenerateCryptoKey generates a new crypotgraphically random key.
 func GenerateCryptoKey() (*CryptoKey, error) {
 	var key CryptoKey
-	_, err := io.ReadFull(prng, key[:])
-	if err != nil {
-		Error(err)
-		return nil, err
+	_, e := io.ReadFull(prng, key[:])
+	if e != nil {
+		err.Ln(e)
+		return nil, e
 	}
 	return &key, nil
 }
 
 // Parameters are not secret and can be stored in plain text.
 type Parameters struct {
-	Salt   [KeySize]byte
+	Salt   [keySize]byte
 	Digest [sha256.Size]byte
 	N      int
 	R      int
@@ -99,15 +102,15 @@ type SecretKey struct {
 }
 
 // deriveKey fills out the Key field.
-func (sk *SecretKey) deriveKey(password *[]byte) error {
-	key, err := scrypt.Key(*password, sk.Parameters.Salt[:],
+func (sk *SecretKey) deriveKey(password *[]byte) (e error) {
+	key, e := scrypt.Key(*password, sk.Parameters.Salt[:],
 		sk.Parameters.N,
 		sk.Parameters.R,
 		sk.Parameters.P,
 		len(sk.Key))
-	if err != nil {
-		Error(err)
-		return err
+	if e != nil {
+		err.Ln(e)
+		return e
 	}
 	copy(sk.Key[:], key)
 	zero.Bytes(key)
@@ -130,10 +133,10 @@ func (sk *SecretKey) Marshal() []byte {
 	//   <salt><digest><N><R><P>
 	//
 	// KeySize + sha256.Size + N (8 bytes) + R (8 bytes) + P (8 bytes)
-	marshalled := make([]byte, KeySize+sha256.Size+24)
+	marshalled := make([]byte, keySize+sha256.Size+24)
 	b := marshalled
-	copy(b[:KeySize], params.Salt[:])
-	b = b[KeySize:]
+	copy(b[:keySize], params.Salt[:])
+	b = b[keySize:]
 	copy(b[:sha256.Size], params.Digest[:])
 	b = b[sha256.Size:]
 	binary.LittleEndian.PutUint64(b[:8], uint64(params.N))
@@ -145,21 +148,21 @@ func (sk *SecretKey) Marshal() []byte {
 }
 
 // Unmarshal unmarshalls the parameters needed to derive the secret key from a passphrase into sk.
-func (sk *SecretKey) Unmarshal(marshalled []byte) error {
+func (sk *SecretKey) Unmarshal(marshalled []byte) (e error) {
 	if sk.Key == nil {
-		sk.Key = (*CryptoKey)(&[KeySize]byte{})
+		sk.Key = (*CryptoKey)(&[keySize]byte{})
 	}
 	// The marshalled format for the the netparams is as follows:
 	//
 	//   <salt><digest><N><R><P>
 	//
 	// KeySize + sha256.Size + N (8 bytes) + R (8 bytes) + P (8 bytes)
-	if len(marshalled) != KeySize+sha256.Size+24 {
+	if len(marshalled) != keySize+sha256.Size+24 {
 		return ErrMalformed
 	}
 	params := &sk.Parameters
-	copy(params.Salt[:], marshalled[:KeySize])
-	marshalled = marshalled[KeySize:]
+	copy(params.Salt[:], marshalled[:keySize])
+	marshalled = marshalled[keySize:]
 	copy(params.Digest[:], marshalled[:sha256.Size])
 	marshalled = marshalled[sha256.Size:]
 	params.N = int(binary.LittleEndian.Uint64(marshalled[:8]))
@@ -180,9 +183,9 @@ func (sk *SecretKey) Zero() {
 // DeriveKey derives the underlying secret key and ensures it matches the expected digest.
 //
 // This should only be called after previously calling the Zero function or on an initial Unmarshal.
-func (sk *SecretKey) DeriveKey(password *[]byte) error {
-	if err := sk.deriveKey(password); err != nil {
-		return err
+func (sk *SecretKey) DeriveKey(password *[]byte) (e error) {
+	if e = sk.deriveKey(password); dbg.Chk(e) {
+		return
 	}
 	// verify password
 	digest := sha256.Sum256(sk.Key[:])
@@ -203,26 +206,26 @@ func (sk *SecretKey) Decrypt(in []byte) ([]byte, error) {
 }
 
 // NewSecretKey returns a SecretKey structure based on the passed parameters.
-func NewSecretKey(password *[]byte, N, r, p int) (*SecretKey, error) {
-	sk := SecretKey{
-		Key: (*CryptoKey)(&[KeySize]byte{}),
+func NewSecretKey(password *[]byte, N, r, p int) (sk *SecretKey, e error) {
+	sk = &SecretKey{
+		Key: (*CryptoKey)(&[keySize]byte{}),
 	}
 	// setup parameters
 	sk.Parameters.N = N
 	sk.Parameters.R = r
 	sk.Parameters.P = p
-	_, err := io.ReadFull(prng, sk.Parameters.Salt[:])
-	if err != nil {
-		Error(err)
-		return nil, err
+	_, e = io.ReadFull(prng, sk.Parameters.Salt[:])
+	if e != nil {
+		err.Ln(e)
+		return nil, e
 	}
 	// derive key
-	err = sk.deriveKey(password)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = sk.deriveKey(password)
+	if e != nil {
+		err.Ln(e)
+		return nil, e
 	}
 	// store digest
 	sk.Parameters.Digest = sha256.Sum256(sk.Key[:])
-	return &sk, nil
+	return sk, nil
 }

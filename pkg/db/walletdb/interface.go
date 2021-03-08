@@ -134,17 +134,18 @@ type DB interface {
 
 // View opens a database read transaction and executes the function f with the transaction passed as a parameter. After
 // f exits, the transaction is rolled back. If f errors, its error is returned, not a rollback error (if any occur).
-func View(db DB, f func(tx ReadTx) error) error {
-	tx, err := db.BeginReadTx()
-	if err != nil {
-		Error(err)
-		return err
+func View(db DB, f func(tx ReadTx) error) (e error) {
+	var tx ReadTx
+	tx, e = db.BeginReadTx()
+	if e != nil {
+		err.Ln(e)
+		return e
 	}
-	err = f(tx)
+	e = f(tx)
 	rollbackErr := tx.Rollback()
-	if err != nil {
-		Error(err)
-		return err
+	if e != nil {
+		err.Ln(e)
+		return e
 	}
 	if rollbackErr != nil {
 		return rollbackErr
@@ -162,18 +163,19 @@ func View(db DB, f func(tx ReadTx) error) error {
 // If the rollback fails, the original error returned by f is still returned.
 //
 // If the commit fails, the commit error is returned.
-func Update(db DB, f func(tx ReadWriteTx) error) error {
-	tx, err := db.BeginReadWriteTx()
-	if err != nil {
-		Error(err)
-		return err
+func Update(db DB, f func(tx ReadWriteTx) error) (e error) {
+	var tx ReadWriteTx
+	tx, e = db.BeginReadWriteTx()
+	if e != nil {
+		err.Ln(e)
+		return e
 	}
-	err = f(tx)
-	if err != nil {
-		Error(err)
+	e = f(tx)
+	if e != nil {
+		err.Ln(e)
 		// Want to return the original error, not a rollback error if any occur.
 		_ = tx.Rollback()
-		return err
+		return e
 	}
 	return tx.Commit()
 }
@@ -197,7 +199,7 @@ var drivers = make(map[string]*Driver)
 
 // RegisterDriver adds a backend database driver to available interfaces. ErrDbTypeRegistered will be retruned if the
 // database type for the driver has already been registered.
-func RegisterDriver(driver Driver) error {
+func RegisterDriver(driver Driver) (e error) {
 	if _, exists := drivers[driver.DbType]; exists {
 		return ErrDbTypeRegistered
 	}

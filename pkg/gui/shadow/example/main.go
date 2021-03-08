@@ -23,15 +23,15 @@ var (
 func main() {
 	go func() {
 		w := app.NewWindow(app.Size(unit.Px(150*6+50), unit.Px(150*6-50)))
-		if err := loop(w); err != nil {
-			log.Fatal(err)
+		if e := loop(w); dbg.Chk(e) {
+			log.ftl.Ln(err)
 		}
 		os.Exit(0)
 	}()
 	app.Main()
 }
 
-func loop(w *app.Window) error {
+func loop(w *app.Window) (e error) {
 	var ops op.Ops
 	for {
 		e := <-w.Events()

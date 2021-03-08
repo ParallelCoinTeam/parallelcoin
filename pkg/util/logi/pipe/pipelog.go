@@ -10,23 +10,23 @@ import (
 )
 
 func main() {
-	// var err error
+	// var e error
 	logi.L.SetLevel("trace", false, "pod")
 	// command := "pod -D test0 -n testnet -l trace --solo --lan --pipelog node"
 	quit := qu.T()
 	// splitted := strings.Split(command, " ")
 	splitted := os.Args[1:]
 	w := consume.Log(quit, consume.SimpleLog(splitted[len(splitted)-1]), consume.FilterNone, splitted...)
-	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> starting")
+	dbg.Ln("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> starting")
 	consume.Start(w)
-	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> started")
+	dbg.Ln("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> started")
 	time.Sleep(time.Second * 4)
-	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> stopping")
+	dbg.Ln("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> stopping")
 	consume.Kill(w)
-	Debug("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> stopped")
+	dbg.Ln("\n\n>>> >>> >>> >>> >>> >>> >>> >>> >>> stopped")
 	// time.Sleep(time.Second * 5)
-	// Debug(interrupt.GoroutineDump())
-	// if err = w.Wait(); Check(err) {
+	// dbg.Ln(interrupt.GoroutineDump())
+	// if e = w.Wait(); dbg.Chk(e) {
 	// }
 	// time.Sleep(time.Second * 3)
 }

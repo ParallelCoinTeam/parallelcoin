@@ -15,9 +15,9 @@ func TestParseOpcode(t *testing.T) {
 	fakeArray[OP_PUSHDATA4] = opcode{value: OP_PUSHDATA4,
 		name: "OP_PUSHDATA4", length: -8, opfunc: opcodePushData}
 	// This script would be fine if -8 was a valid length.
-	_, err := ParseScriptTemplate([]byte{OP_PUSHDATA4, 0x1, 0x00, 0x00,
+	_, e := ParseScriptTemplate([]byte{OP_PUSHDATA4, 0x1, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00}, &fakeArray)
-	if err == nil {
+	if e ==  nil {
 		t.Errorf("no error with dodgy opcode array!")
 	}
 }
@@ -3663,7 +3663,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		_, err := test.pop.bytes()
+		_, e := test.pop.bytes()
 		if e := tstCheckScriptError(err, test.expectedErr); e != nil {
 			t.Errorf("Parsed opcode test '%s': %v", test.name, e)
 			continue
@@ -3713,11 +3713,11 @@ func TestPushedData(t *testing.T) {
 	}
 	for i, test := range tests {
 		script := mustParseShortForm(test.script)
-		data, err := PushedData(script)
+		data, e := PushedData(script)
 		if test.valid && err != nil {
 			t.Errorf("TestPushedData failed test #%d: %v\n", i, err)
 			continue
-		} else if !test.valid && err == nil {
+		} else if !test.valid && e ==  nil {
 			t.Errorf("TestPushedData failed test #%d: test should "+
 				"be invalid\n", i)
 			continue
@@ -3733,8 +3733,8 @@ func TestPushedData(t *testing.T) {
 func TestHasCanonicalPush(t *testing.T) {
 	t.Parallel()
 	for i := 0; i < 65535; i++ {
-		script, err := NewScriptBuilder().AddInt64(int64(i)).Script()
-		if err != nil {
+		script, e := NewScriptBuilder().AddInt64(int64(i)).Script()
+		if e != nil  {
 			t.Errorf("Script: test #%d unexpected error: %v\n", i,
 				err)
 			continue
@@ -3744,8 +3744,8 @@ func TestHasCanonicalPush(t *testing.T) {
 				script)
 			continue
 		}
-		pops, err := parseScript(script)
-		if err != nil {
+		pops, e := parseScript(script)
+		if e != nil  {
 			t.Errorf("parseScript: #%d failed: %v", i, err)
 			continue
 		}
@@ -3760,8 +3760,8 @@ func TestHasCanonicalPush(t *testing.T) {
 	for i := 0; i <= MaxScriptElementSize; i++ {
 		builder := NewScriptBuilder()
 		builder.AddData(bytes.Repeat([]byte{0x49}, i))
-		script, err := builder.Script()
-		if err != nil {
+		script, e := builder.Script()
+		if e != nil  {
 			t.Errorf("StandardPushesTests test #%d unexpected error: %v\n", i, err)
 			continue
 		}
@@ -3769,8 +3769,8 @@ func TestHasCanonicalPush(t *testing.T) {
 			t.Errorf("StandardPushesTests IsPushOnlyScript test #%d failed: %x\n", i, script)
 			continue
 		}
-		pops, err := parseScript(script)
-		if err != nil {
+		pops, e := parseScript(script)
+		if e != nil  {
 			t.Errorf("StandardPushesTests #%d failed to TstParseScript: %v", i, err)
 			continue
 		}
@@ -3965,9 +3965,9 @@ func TestRemoveOpcodes(t *testing.T) {
 	// tstRemoveOpcode is a convenience function to parse the provided raw script, remove the passed opcode, then
 	// unparse the result back into a raw script.
 	tstRemoveOpcode := func(script []byte, opcode byte) ([]byte, error) {
-		pops, err := parseScript(script)
-		if err != nil {
-			return nil, err
+		pops, e := parseScript(script)
+		if e != nil  {
+			return nil, e
 		}
 		pops = removeOpcode(pops, opcode)
 		return unparseScript(pops)
@@ -3975,7 +3975,7 @@ func TestRemoveOpcodes(t *testing.T) {
 	for _, test := range tests {
 		before := mustParseShortForm(test.before)
 		after := mustParseShortForm(test.after)
-		result, err := tstRemoveOpcode(before, test.remove)
+		result, e := tstRemoveOpcode(before, test.remove)
 		if e := tstCheckScriptError(err, test.err); e != nil {
 			t.Errorf("%s: %v", test.name, e)
 			continue
@@ -4110,15 +4110,15 @@ func TestRemoveOpcodeByData(t *testing.T) {
 	// tstRemoveOpcodeByData is a convenience function to parse the provided raw script, remove the passed data, then
 	// unparse the result back into a raw script.
 	tstRemoveOpcodeByData := func(script []byte, data []byte) ([]byte, error) {
-		pops, err := parseScript(script)
-		if err != nil {
-			return nil, err
+		pops, e := parseScript(script)
+		if e != nil  {
+			return nil, e
 		}
 		pops = removeOpcodeByData(pops, data)
 		return unparseScript(pops)
 	}
 	for _, test := range tests {
-		result, err := tstRemoveOpcodeByData(test.before, test.remove)
+		result, e := tstRemoveOpcodeByData(test.before, test.remove)
 		if e := tstCheckScriptError(err, test.err); e != nil {
 			t.Errorf("%s: %v", test.name, e)
 			continue
@@ -4198,8 +4198,8 @@ func TestHasCanonicalPushes(t *testing.T) {
 	}
 	for i, test := range tests {
 		script := mustParseShortForm(test.script)
-		pops, err := parseScript(script)
-		if err != nil {
+		pops, e := parseScript(script)
+		if e != nil  {
 			if test.expected {
 				t.Errorf("TstParseScript #%d failed: %v", i, err)
 			}

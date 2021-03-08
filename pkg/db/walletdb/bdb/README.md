@@ -14,8 +14,8 @@ type of "bdb".  The only parameter the Open and Create functions take is the
 database path as a string:
 
 ```Go
-db, err := walletdb.Open("bdb", "path/to/database.db")
-if err != nil {
+db, e := walletdb.Open("bdb", "path/to/database.db")
+if e != nil  {
 
 
 	// Handle error
@@ -23,8 +23,8 @@ if err != nil {
 ```
 
 ```Go
-db, err := walletdb.Create("bdb", "path/to/database.db")
-if err != nil {
+db, e := walletdb.Create("bdb", "path/to/database.db")
+if e != nil  {
 
 
 	// Handle error

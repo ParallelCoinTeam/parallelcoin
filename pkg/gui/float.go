@@ -43,11 +43,11 @@ func (f *Float) Fn(gtx layout.Context, pointerMargin int, min, max float32) layo
 	size := gtx.Constraints.Min
 	f.length = float32(size.X)
 	var de *pointer.Event
-	for _, e := range f.drag.Events(gtx.Metric, gtx, gesture.Horizontal) {
-		if e.Type == pointer.Press || e.Type == pointer.Drag {
-			de = &e
+	for _, ev := range f.drag.Events(gtx.Metric, gtx, gesture.Horizontal) {
+		if ev.Type == pointer.Press || ev.Type == pointer.Drag {
+			de = &ev
 		}
-		if e.Type == pointer.Release {
+		if ev.Type == pointer.Release {
 			f.changeHook(f.value)
 		}
 	}

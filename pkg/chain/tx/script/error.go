@@ -361,7 +361,7 @@ func scriptError(c ErrorCode, desc string) ScriptError {
 
 // IsErrorCode returns whether or not the provided error is a script error with
 // the provided error code.
-func IsErrorCode(err error, c ErrorCode) bool {
-	serr, ok := err.(ScriptError)
+func IsErrorCode(e error, c ErrorCode) bool {
+	serr, ok := e.(ScriptError)
 	return ok && serr.ErrorCode == c
 }

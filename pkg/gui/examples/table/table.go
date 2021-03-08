@@ -23,7 +23,7 @@ func main() {
 		th: th,
 	}
 	go func() {
-		if err := gui.NewWindow(th).
+		if e := gui.NewWindow(th).
 			Size(64, 32).
 			Title("table example").
 			Open().
@@ -31,7 +31,7 @@ func main() {
 				model.mainWidget, func(l.Context) {}, func() {
 					quit.Q()
 				}, quit,
-		); Check(err) {
+		); dbg.Chk(e) {
 		}
 	}()
 	<-quit

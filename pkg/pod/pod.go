@@ -456,15 +456,13 @@ func ReadCAFile(config *Config) []byte {
 	// Read certificate file if TLS is not disabled.
 	var certs []byte
 	if *config.TLS {
-		var err error
-		certs, err = ioutil.ReadFile(*config.CAFile)
-		if err != nil {
-			Error("cannot open CA file:", err)
+		var e error
+		if certs, e = ioutil.ReadFile(*config.CAFile); dbg.Chk(e) {
 			// If there's an error reading the CA file, continue with nil certs and without the client connection.
 			certs = nil
 		}
 	} else {
-		Info("chain server RPC TLS is disabled")
+		inf.Ln("chain server RPC TLS is disabled")
 	}
 	return certs
 }

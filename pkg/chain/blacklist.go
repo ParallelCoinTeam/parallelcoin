@@ -27,8 +27,8 @@ func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (
 	// next get the addresses from the input transactions outpoints
 	txi := tx.MsgTx().TxIn
 	for i := range txi {
-		bb, err := b.BlockByHash(&txi[i].PreviousOutPoint.Hash)
-		if err == nil {
+		bb, e := b.BlockByHash(&txi[i].PreviousOutPoint.Hash)
+		if e ==  nil {
 			txs := bb.MsgBlock().Transactions
 			for j := range txs {
 				txitxo := txs[j].TxOut

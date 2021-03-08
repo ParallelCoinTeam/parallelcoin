@@ -16,7 +16,7 @@ func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	if len(message) == 0 {
 		message = fmt.Sprintf("%v != %v", a, b)
 	}
-	t.Fatal(message)
+	t.ftl.Ln(message)
 }
 
 // sizeable is a simple struct that represents an element of arbitrary size
@@ -28,7 +28,7 @@ type sizeable struct {
 }
 
 // Size implements the CacheEntry interface on sizeable struct.
-func (s *sizeable) Size() (uint64, error) {
+func (s *sizeable) Size() (rv uint64,e error) {
 
 	return s.size, nil
 }
@@ -52,19 +52,19 @@ func TestEmptyCacheSizeZero(t *testing.T) {
 func TestCacheNeverExceedsSize(t *testing.T) {
 	t.Parallel()
 	c := NewCache(2)
-	err := c.Put(1, &sizeable{value: 1, size: 1})
-	if err != nil {
+	e := c.Put(1, &sizeable{value: 1, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(2, &sizeable{value: 2, size: 1})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 	assertEqual(t, c.Len(), 2, "")
 
 	for i := 0; i < 10; i++ {
-		err := c.Put(i, &sizeable{value: i, size: 1})
-		if err != nil {
+		e := c.Put(i, &sizeable{value: i, size: 1})
+		if e != nil  {
 			t.Log(err)
 		}
 		assertEqual(t, c.Len(), 2, "")
@@ -77,12 +77,12 @@ func TestCacheNeverExceedsSize(t *testing.T) {
 func TestCacheAlwaysHasLastAccessedItems(t *testing.T) {
 	t.Parallel()
 	c := NewCache(2)
-	err := c.Put(1, &sizeable{value: 1, size: 1})
-	if err != nil {
+	e := c.Put(1, &sizeable{value: 1, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(2, &sizeable{value: 2, size: 1})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 	two := getSizeableValue(c.Get(2))
@@ -91,16 +91,16 @@ func TestCacheAlwaysHasLastAccessedItems(t *testing.T) {
 	assertEqual(t, one, 1, "")
 
 	c = NewCache(2)
-	err = c.Put(1, &sizeable{value: 1, size: 1})
-	if err != nil {
+	e = c.Put(1, &sizeable{value: 1, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(2, &sizeable{value: 2, size: 1})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(3, &sizeable{value: 3, size: 1})
-	if err != nil {
+	e = c.Put(3, &sizeable{value: 3, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 	oneEntry, _ := c.Get(1)
@@ -111,20 +111,20 @@ func TestCacheAlwaysHasLastAccessedItems(t *testing.T) {
 	assertEqual(t, three, 3, "")
 
 	c = NewCache(2)
-	err = c.Put(1, &sizeable{value: 1, size: 1})
-	if err != nil {
+	e = c.Put(1, &sizeable{value: 1, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(2, &sizeable{value: 2, size: 1})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	_, err = c.Get(1)
-	if err != nil {
+	_, e = c.Get(1)
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(3, &sizeable{value: 3, size: 1})
-	if err != nil {
+	e = c.Put(3, &sizeable{value: 3, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 	one = getSizeableValue(c.Get(1))
@@ -142,22 +142,22 @@ func TestElementSizeCapacityEvictsEverything(t *testing.T) {
 	t.Parallel()
 	c := NewCache(3)
 
-	err := c.Put(1, &sizeable{value: 1, size: 1})
-	if err != nil {
+	e := c.Put(1, &sizeable{value: 1, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(2, &sizeable{value: 2, size: 1})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(3, &sizeable{value: 3, size: 1})
-	if err != nil {
+	e = c.Put(3, &sizeable{value: 3, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 
 	// Insert element with size=capacity of cache, should evict everything.
-	err = c.Put(4, &sizeable{value: 4, size: 3})
-	if err != nil {
+	e = c.Put(4, &sizeable{value: 4, size: 3})
+	if e != nil  {
 		t.Log(err)
 	}
 	assertEqual(t, c.Len(), 1, "")
@@ -166,23 +166,23 @@ func TestElementSizeCapacityEvictsEverything(t *testing.T) {
 	assertEqual(t, four, 4, "")
 
 	c = NewCache(6)
-	err = c.Put(1, &sizeable{value: 1, size: 1})
-	if err != nil {
+	e = c.Put(1, &sizeable{value: 1, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(2, &sizeable{value: 2, size: 2})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 2})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(3, &sizeable{value: 3, size: 3})
-	if err != nil {
+	e = c.Put(3, &sizeable{value: 3, size: 3})
+	if e != nil  {
 		t.Log(err)
 	}
 	assertEqual(t, c.size, uint64(6), "")
 
 	// Insert element with size=capacity of cache.
-	err = c.Put(4, &sizeable{value: 4, size: 6})
-	if err != nil {
+	e = c.Put(4, &sizeable{value: 4, size: 6})
+	if e != nil  {
 		t.Log(err)
 	}
 	assertEqual(t, c.Len(), 1, "")
@@ -198,9 +198,9 @@ func TestCacheFailsInsertionSizeBiggerCapacity(t *testing.T) {
 	t.Parallel()
 	c := NewCache(2)
 
-	err := c.Put(1, &sizeable{value: 1, size: 3})
-	if err == nil {
-		t.Fatal("shouldn't be able to put elements larger than cache")
+	e := c.Put(1, &sizeable{value: 1, size: 3})
+	if e ==  nil {
+		t.ftl.Ln("shouldn't be able to put elements larger than cache")
 	}
 	assertEqual(t, c.Len(), 0, "")
 }
@@ -213,15 +213,15 @@ func TestManySmallElementCanInsertAfterBigEviction(t *testing.T) {
 	t.Parallel()
 	c := NewCache(3)
 
-	err := c.Put(1, &sizeable{value: 1, size: 3})
-	if err != nil {
-		t.Fatal("couldn't insert element")
+	e := c.Put(1, &sizeable{value: 1, size: 3})
+	if e != nil  {
+		t.ftl.Ln("couldn't insert element")
 	}
 
 	assertEqual(t, c.Len(), 1, "")
 
-	err = c.Put(2, &sizeable{value: 2, size: 1})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 	two := getSizeableValue(c.Get(2))
@@ -230,14 +230,14 @@ func TestManySmallElementCanInsertAfterBigEviction(t *testing.T) {
 	assertEqual(t, two, 2, "")
 	assertEqual(t, oneEntry, nil, "")
 
-	err = c.Put(3, &sizeable{value: 3, size: 1})
-	if err != nil {
+	e = c.Put(3, &sizeable{value: 3, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 	assertEqual(t, c.Len(), 2, "")
 
-	err = c.Put(4, &sizeable{value: 4, size: 1})
-	if err != nil {
+	e = c.Put(4, &sizeable{value: 4, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 	assertEqual(t, c.Len(), 3, "")
@@ -258,17 +258,17 @@ func TestReplacingElementValueSmallerSize(t *testing.T) {
 	t.Parallel()
 	c := NewCache(2)
 
-	err := c.Put(1, &sizeable{value: 1, size: 2})
-	if err != nil {
+	e := c.Put(1, &sizeable{value: 1, size: 2})
+	if e != nil  {
 		t.Log(err)
 	}
 
-	err = c.Put(1, &sizeable{value: 1, size: 1})
-	if err != nil {
+	e = c.Put(1, &sizeable{value: 1, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(2, &sizeable{value: 2, size: 1})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 	one := getSizeableValue(c.Get(1))
@@ -285,17 +285,17 @@ func TestReplacingElementValueBiggerSize(t *testing.T) {
 	t.Parallel()
 	c := NewCache(2)
 
-	err := c.Put(1, &sizeable{value: 1, size: 1})
-	if err != nil {
+	e := c.Put(1, &sizeable{value: 1, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
-	err = c.Put(2, &sizeable{value: 2, size: 1})
-	if err != nil {
+	e = c.Put(2, &sizeable{value: 2, size: 1})
+	if e != nil  {
 		t.Log(err)
 	}
 
-	err = c.Put(1, &sizeable{value: 3, size: 2})
-	if err != nil {
+	e = c.Put(1, &sizeable{value: 3, size: 2})
+	if e != nil  {
 		t.Log(err)
 	}
 	assertEqual(t, c.Len(), 1, "")
@@ -317,11 +317,11 @@ func TestConcurrencySimple(t *testing.T) {
 		go func(i int) {
 
 			defer wg.Done()
-			err := c.Put(i, &sizeable{value: i, size: 1})
+			e := c.Put(i, &sizeable{value: i, size: 1})
 
-			if err != nil {
+			if e != nil  {
 
-				t.Fatal(err)
+				t.ftl.Ln(err)
 			}
 		}(i)
 	}
@@ -331,11 +331,11 @@ func TestConcurrencySimple(t *testing.T) {
 		go func(i int) {
 
 			defer wg.Done()
-			_, err := c.Get(i)
+			_, e := c.Get(i)
 
-			if err != nil && err != cache.ErrElementNotFound {
+			if e != nil  && err != cache.ErrElementNotFound {
 
-				t.Fatal(err)
+				t.ftl.Ln(err)
 			}
 		}(i)
 	}
@@ -358,11 +358,11 @@ func TestConcurrencySmallCache(t *testing.T) {
 		go func(i int) {
 
 			defer wg.Done()
-			err := c.Put(i, &sizeable{value: i, size: 1})
+			e := c.Put(i, &sizeable{value: i, size: 1})
 
-			if err != nil {
+			if e != nil  {
 
-				t.Fatal(err)
+				t.ftl.Ln(err)
 			}
 		}(i)
 	}
@@ -372,11 +372,11 @@ func TestConcurrencySmallCache(t *testing.T) {
 		go func(i int) {
 
 			defer wg.Done()
-			_, err := c.Get(i)
+			_, e := c.Get(i)
 
-			if err != nil && err != cache.ErrElementNotFound {
+			if e != nil  && err != cache.ErrElementNotFound {
 
-				t.Fatal(err)
+				t.ftl.Ln(err)
 			}
 		}(i)
 	}
@@ -399,11 +399,11 @@ func TestConcurrencyBigCache(t *testing.T) {
 		go func(i int) {
 
 			defer wg.Done()
-			err := c.Put(i, &sizeable{value: i, size: 1})
+			e := c.Put(i, &sizeable{value: i, size: 1})
 
-			if err != nil {
+			if e != nil  {
 
-				t.Fatal(err)
+				t.ftl.Ln(err)
 			}
 		}(i)
 	}
@@ -413,11 +413,11 @@ func TestConcurrencyBigCache(t *testing.T) {
 		go func(i int) {
 
 			defer wg.Done()
-			_, err := c.Get(i)
+			_, e := c.Get(i)
 
-			if err != nil && err != cache.ErrElementNotFound {
+			if e != nil  && err != cache.ErrElementNotFound {
 
-				t.Fatal(err)
+				t.ftl.Ln(err)
 			}
 		}(i)
 	}

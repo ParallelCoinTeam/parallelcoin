@@ -24,17 +24,16 @@ func ExampleCreate() {
 	// database right away like this, nor put it in the temp directory, but it's done here to ensure the example cleans
 	// up after itself.
 	dbPath := filepath.Join(os.TempDir(), "examplecreate")
-	db, err := database.Create("ffldb", dbPath, wire.MainNet)
-	if err != nil {
-		database.Error(err)
-		return
+	db, e := database.Create("ffldb", dbPath, wire.MainNet)
+	if e != nil  {
+		database.		return
 	}
 	defer func() {
-		if err := os.RemoveAll(dbPath); database.Check(err) {
+		if e := os.RemoveAll(dbPath); database.dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); database.Check(err) {
+		if e := db.Close(); database.dbg.Chk(e) {
 		}
 	}()
 	// Output:
@@ -54,27 +53,26 @@ func Example_basicUsage() {
 	// database right away like this, nor put it in the temp directory, but it's done here to ensure the example cleans
 	// up after itself.
 	dbPath := filepath.Join(os.TempDir(), "exampleusage")
-	db, err := database.Create("ffldb", dbPath, wire.MainNet)
-	if err != nil {
-		database.Error(err)
-		return
+	db, e := database.Create("ffldb", dbPath, wire.MainNet)
+	if e != nil  {
+		database.		return
 	}
 	defer func() {
-		if err := os.RemoveAll(dbPath); database.Check(err) {
+		if e := os.RemoveAll(dbPath); database.dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); database.Check(err) {
+		if e := db.Close(); database.dbg.Chk(e) {
 		}
 	}()
 	// Use the Update function of the database to perform a managed read-write transaction. The transaction will
 	// automatically be rolled back if the supplied inner function returns a non-nil error.
-	err = db.Update(func(tx database.Tx) error {
+	e = db.Update(func(tx database.Tx) (e error) {
 		// Store a key/value pair directly in the metadata bucket. Typically a nested bucket would be used for a given
 		// feature, but this example is using the metadata bucket directly for simplicity.
 		key := []byte("mykey")
 		value := []byte("myvalue")
-		if err := tx.Metadata().Put(key, value); err != nil {
+		if e := tx.Metadata().Put(key, value); dbg.Chk(e) {
 			return err
 		}
 		// Read the key back and ensure it matches.
@@ -83,8 +81,8 @@ func Example_basicUsage() {
 		}
 		// Create a new nested bucket under the metadata bucket.
 		nestedBucketKey := []byte("mybucket")
-		nestedBucket, err := tx.Metadata().CreateBucket(nestedBucketKey)
-		if err != nil {
+		nestedBucket, e := tx.Metadata().CreateBucket(nestedBucketKey)
+		if e != nil  {
 			return err
 		}
 		// The key from above that was set in the metadata bucket does not exist in this new nested bucket.
@@ -93,9 +91,8 @@ func Example_basicUsage() {
 		}
 		return nil
 	})
-	if err != nil {
-		database.Error(err)
-		return
+	if e != nil  {
+		database.		return
 	}
 	// Output:
 }
@@ -115,31 +112,29 @@ func Example_basicUsage() {
 // 	// this, nor put it in the temp directory, but it's done here to ensure
 // 	// the example cleans up after itself.
 // 	dbPath := filepath.Join(os.TempDir(), "exampleblkstorage")
-// 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
-// 	if err != nil {
-// 		DBError(err)
-// 		return
+// 	db, e := database.Create("ffldb", dbPath, wire.MainNet)
+// 	if e != nil  {
+// 		DB// 		return
 // 	}
 // 	defer os.RemoveAll(dbPath)
 // 	defer db.Close()
 // 	// Use the Update function of the database to perform a managed
 // 	// read-write transaction and store a genesis block in the database as
 // 	// and example.
-// 	err = db.Update(func(tx database.Tx) error {
+// 	e = db.Update(func(tx database.Tx) (e error) {
 // 		genesisBlock := chaincfg.MainNetParams.GenesisBlock
 // 		return tx.StoreBlock(util.NewBlock(genesisBlock))
 // 	})
-// 	if err != nil {
-// 		DBError(err)
-// 		return
+// 	if e != nil  {
+// 		DB// 		return
 // 	}
 // 	// Use the View function of the database to perform a managed read-only
 // 	// transaction and fetch the block stored above.
 // 	var loadedBlockBytes []byte
-// 	err = db.Update(func(tx database.Tx) error {
+// 	e = db.Update(func(tx database.Tx) (e error) {
 // 		genesisHash := chaincfg.MainNetParams.GenesisHash
-// 		blockBytes, err := tx.FetchBlock(genesisHash)
-// 		if err != nil {
+// 		blockBytes, e := tx.FetchBlock(genesisHash)
+// 		if e != nil  {
 // 			return err
 // 		}
 // 		// As documented, all data fetched from the database is only
@@ -150,9 +145,8 @@ func Example_basicUsage() {
 // 		copy(loadedBlockBytes, blockBytes)
 // 		return nil
 // 	})
-// 	if err != nil {
-// 		DBError(err)
-// 		return
+// 	if e != nil  {
+// 		DB// 		return
 // 	}
 // 	// Typically at this point, the block could be deserialized via the
 // 	// wire.MsgBlock.Deserialize function or used in its serialized form

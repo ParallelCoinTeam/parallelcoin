@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	js "encoding/json"
-
+	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -17,17 +17,15 @@ type FutureGetBestBlockHashResult chan *response
 // Receive waits for the response promised by the future and returns the hash of the best block in the longest block
 // chain.
 func (r FutureGetBestBlockHashResult) Receive() (*chainhash.Hash, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a string.
 	var txHashStr string
-	err = js.Unmarshal(res, &txHashStr)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &txHashStr)
+	if e != nil {
+		return nil, e
 	}
 	return chainhash.NewHashFromStr(txHashStr)
 }
@@ -52,30 +50,26 @@ type FutureGetBlockResult chan *response
 // Receive waits for the response promised by the future and returns the raw block requested from the server given its
 // hash.
 func (r FutureGetBlockResult) Receive() (*wire.MsgBlock, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a string.
 	var blockHex string
-	err = js.Unmarshal(res, &blockHex)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &blockHex)
+	if e != nil {
+		return nil, e
 	}
 	// Decode the serialized block hex to raw bytes.
-	serializedBlock, err := hex.DecodeString(blockHex)
-	if err != nil {
-		Error(err)
-		return nil, err
+	serializedBlock, e := hex.DecodeString(blockHex)
+	if e != nil {
+		return nil, e
 	}
 	// Deserialize the block and return it.
 	var msgBlock wire.MsgBlock
-	err = msgBlock.Deserialize(bytes.NewReader(serializedBlock))
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = msgBlock.Deserialize(bytes.NewReader(serializedBlock))
+	if e != nil {
+		return nil, e
 	}
 	return &msgBlock, nil
 }
@@ -103,17 +97,15 @@ type FutureGetBlockVerboseResult chan *response
 
 // Receive waits for the response promised by the future and returns the data structure from the server with information about the requested block.
 func (r FutureGetBlockVerboseResult) Receive() (*btcjson.GetBlockVerboseResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal the raw result into a BlockResult.
 	var blockResult btcjson.GetBlockVerboseResult
-	err = js.Unmarshal(res, &blockResult)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &blockResult)
+	if e != nil {
+		return nil, e
 	}
 	return &blockResult, nil
 }
@@ -160,17 +152,15 @@ type FutureGetBlockCountResult chan *response
 
 // Receive waits for the response promised by the future and returns the number of blocks in the longest block chain.
 func (r FutureGetBlockCountResult) Receive() (int64, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return 0, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return 0, e
 	}
 	// Unmarshal the result as an int64.
 	var count int64
-	err = js.Unmarshal(res, &count)
-	if err != nil {
-		Error(err)
-		return 0, err
+	e = js.Unmarshal(res, &count)
+	if e != nil {
+		return 0, e
 	}
 	return count, nil
 }
@@ -194,17 +184,15 @@ type FutureGetDifficultyResult chan *response
 // Receive waits for the response promised by the future and returns the proof-of-work difficulty as a multiple of the
 // minimum difficulty.
 func (r FutureGetDifficultyResult) Receive() (float64, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return 0, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return 0, e
 	}
 	// Unmarshal the result as a float64.
 	var difficulty float64
-	err = js.Unmarshal(res, &difficulty)
-	if err != nil {
-		Error(err)
-		return 0, err
+	e = js.Unmarshal(res, &difficulty)
+	if e != nil {
+		return 0, e
 	}
 	return difficulty, nil
 }
@@ -227,14 +215,13 @@ type FutureGetBlockChainInfoResult chan *response
 
 // Receive waits for the response promised by the future and returns chain info result provided by the server.
 func (r FutureGetBlockChainInfoResult) Receive() (*btcjson.GetBlockChainInfoResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	var chainInfo btcjson.GetBlockChainInfoResult
-	if err := js.Unmarshal(res, &chainInfo); err != nil {
-		return nil, err
+	if e := js.Unmarshal(res, &chainInfo); dbg.Chk(e) {
+		return nil, e
 	}
 	return &chainInfo, nil
 }
@@ -260,17 +247,15 @@ type FutureGetBlockHashResult chan *response
 // Receive waits for the response promised by the future and returns the hash of the block in the best block chain at
 // the given height.
 func (r FutureGetBlockHashResult) Receive() (*chainhash.Hash, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal the result as a string-encoded sha.
 	var txHashStr string
-	err = js.Unmarshal(res, &txHashStr)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &txHashStr)
+	if e != nil {
+		return nil, e
 	}
 	return chainhash.NewHashFromStr(txHashStr)
 }
@@ -294,31 +279,27 @@ type FutureGetBlockHeaderResult chan *response
 // Receive waits for the response promised by the future and returns the blockheader requested from the server given its
 // hash.
 func (r FutureGetBlockHeaderResult) Receive() (*wire.BlockHeader, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a string.
 	var bhHex string
-	err = js.Unmarshal(res, &bhHex)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &bhHex)
+	if e != nil {
+		return nil, e
 	}
-	serializedBH, err := hex.DecodeString(bhHex)
-	if err != nil {
-		Error(err)
-		return nil, err
+	serializedBH, e := hex.DecodeString(bhHex)
+	if e != nil {
+		return nil, e
 	}
 	// Deserialize the blockheader and return it.
 	var bh wire.BlockHeader
-	err = bh.Deserialize(bytes.NewReader(serializedBH))
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = bh.Deserialize(bytes.NewReader(serializedBH))
+	if e != nil {
+		return nil, e
 	}
-	return &bh, err
+	return &bh, e
 }
 
 // GetBlockHeaderAsync returns an instance of a type that can be used to get the result of the RPC at some future time
@@ -346,17 +327,15 @@ type FutureGetBlockHeaderVerboseResult chan *response
 // Receive waits for the response promised by the future and returns the data structure of the blockheader requested
 // from the server given its hash.
 func (r FutureGetBlockHeaderVerboseResult) Receive() (*btcjson.GetBlockHeaderVerboseResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a string.
 	var bh btcjson.GetBlockHeaderVerboseResult
-	err = js.Unmarshal(res, &bh)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &bh)
+	if e != nil {
+		return nil, e
 	}
 	return &bh, nil
 }
@@ -386,17 +365,15 @@ type FutureGetMempoolEntryResult chan *response
 // Receive waits for the response promised by the future and returns a data structure with information about the
 // transaction in the memory pool given its hash.
 func (r FutureGetMempoolEntryResult) Receive() (*btcjson.GetMempoolEntryResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal the result as an array of strings.
 	var mempoolEntryResult btcjson.GetMempoolEntryResult
-	err = js.Unmarshal(res, &mempoolEntryResult)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &mempoolEntryResult)
+	if e != nil {
+		return nil, e
 	}
 	return &mempoolEntryResult, nil
 }
@@ -420,25 +397,22 @@ type FutureGetRawMempoolResult chan *response
 
 // Receive waits for the response promised by the future and returns the hashes of all transactions in the memory pool.
 func (r FutureGetRawMempoolResult) Receive() ([]*chainhash.Hash, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal the result as an array of strings.
 	var txHashStrs []string
-	err = js.Unmarshal(res, &txHashStrs)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &txHashStrs)
+	if e != nil {
+		return nil, e
 	}
 	// Create a slice of ShaHash arrays from the string slice.
 	txHashes := make([]*chainhash.Hash, 0, len(txHashStrs))
 	for _, hashStr := range txHashStrs {
-		txHash, err := chainhash.NewHashFromStr(hashStr)
-		if err != nil {
-			Error(err)
-			return nil, err
+		txHash, e := chainhash.NewHashFromStr(hashStr)
+		if e != nil {
+			return nil, e
 		}
 		txHashes = append(txHashes, txHash)
 	}
@@ -465,17 +439,15 @@ type FutureGetRawMempoolVerboseResult chan *response
 // Receive waits for the response promised by the future and returns a map of transaction hashes to an associated data
 // structure with information about the transaction for all transactions in the memory pool.
 func (r FutureGetRawMempoolVerboseResult) Receive() (map[string]btcjson.GetRawMempoolVerboseResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal the result as a map of strings (tx shas) to their detailed results.
 	var mempoolItems map[string]btcjson.GetRawMempoolVerboseResult
-	err = js.Unmarshal(res, &mempoolItems)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &mempoolItems)
+	if e != nil {
+		return nil, e
 	}
 	return mempoolItems, nil
 }
@@ -501,17 +473,15 @@ type FutureEstimateFeeResult chan *response
 
 // Receive waits for the response promised by the future and returns the info provided by the server.
 func (r FutureEstimateFeeResult) Receive() (float64, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return -1, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return -1, e
 	}
 	// Unmarshal result as a getinfo result object.
 	var fee float64
-	err = js.Unmarshal(res, &fee)
-	if err != nil {
-		Error(err)
-		return -1, err
+	e = js.Unmarshal(res, &fee)
+	if e != nil {
+		return -1, e
 	}
 	return fee, nil
 }
@@ -535,17 +505,15 @@ type FutureVerifyChainResult chan *response
 // Receive waits for the response promised by the future and returns whether or not the chain verified based on the
 // check level and number of blocks to verify specified in the original call.
 func (r FutureVerifyChainResult) Receive() (bool, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return false, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return false, e
 	}
 	// Unmarshal the result as a boolean.
 	var verified bool
-	err = js.Unmarshal(res, &verified)
-	if err != nil {
-		Error(err)
-		return false, err
+	e = js.Unmarshal(res, &verified)
+	if e != nil {
+		return false, e
 	}
 	return verified, nil
 }
@@ -601,10 +569,9 @@ type FutureGetTxOutResult chan *response
 
 // Receive waits for the response promised by the future and returns a transaction given its hash.
 func (r FutureGetTxOutResult) Receive() (*btcjson.GetTxOutResult, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// take care of the special case where the output has been spent already it should return the string "null"
 	if string(res) == "null" {
@@ -612,10 +579,9 @@ func (r FutureGetTxOutResult) Receive() (*btcjson.GetTxOutResult, error) {
 	}
 	// Unmarshal result as an gettxout result object.
 	var txOutInfo *btcjson.GetTxOutResult
-	err = js.Unmarshal(res, &txOutInfo)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &txOutInfo)
+	if e != nil {
+		return nil, e
 	}
 	return txOutInfo, nil
 }
@@ -645,16 +611,14 @@ type FutureRescanBlocksResult chan *response
 // Receive waits for the response promised by the future and returns the discovered rescanblocks data. NOTE: This is a
 // btcsuite extension ported from github.com/decred/dcrrpcclient.
 func (r FutureRescanBlocksResult) Receive() ([]btcjson.RescannedBlock, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	var rescanBlocksResult []btcjson.RescannedBlock
-	err = js.Unmarshal(res, &rescanBlocksResult)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &rescanBlocksResult)
+	if e != nil {
+		return nil, e
 	}
 	return rescanBlocksResult, nil
 }
@@ -686,9 +650,9 @@ type FutureInvalidateBlockResult chan *response
 
 // Receive waits for the response promised by the future and returns the raw block requested from the server given its
 // hash.
-func (r FutureInvalidateBlockResult) Receive() error {
-	_, err := receiveFuture(r)
-	return err
+func (r FutureInvalidateBlockResult) Receive() (e error) {
+	_, e = receiveFuture(r)
+	return e
 }
 
 // InvalidateBlockAsync returns an instance of a type that can be used to get the result of the RPC at some future time
@@ -704,7 +668,7 @@ func (c *Client) InvalidateBlockAsync(blockHash *chainhash.Hash) FutureInvalidat
 }
 
 // InvalidateBlock invalidates a specific block.
-func (c *Client) InvalidateBlock(blockHash *chainhash.Hash) error {
+func (c *Client) InvalidateBlock(blockHash *chainhash.Hash) (e error) {
 	return c.InvalidateBlockAsync(blockHash).Receive()
 }
 
@@ -715,23 +679,20 @@ type FutureGetCFilterResult chan *response
 // Receive waits for the response promised by the future and returns the raw filter requested from the server given its
 // block hash.
 func (r FutureGetCFilterResult) Receive() (*wire.MsgCFilter, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a string.
 	var filterHex string
-	err = js.Unmarshal(res, &filterHex)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &filterHex)
+	if e != nil {
+		return nil, e
 	}
 	// Decode the serialized cf hex to raw bytes.
-	serializedFilter, err := hex.DecodeString(filterHex)
-	if err != nil {
-		Error(err)
-		return nil, err
+	serializedFilter, e := hex.DecodeString(filterHex)
+	if e != nil {
+		return nil, e
 	}
 	// Assign the filter bytes to the correct field of the wire message. We aren't going to set the block hash or
 	// extended flag, since we don't actually get that back in the RPC response.
@@ -742,8 +703,10 @@ func (r FutureGetCFilterResult) Receive() (*wire.MsgCFilter, error) {
 
 // GetCFilterAsync returns an instance of a type that can be used to get the result of the RPC at some future time by
 // invoking the Receive function on the returned instance. See GetCFilter for the blocking version and more details.
-func (c *Client) GetCFilterAsync(blockHash *chainhash.Hash,
-	filterType wire.FilterType) FutureGetCFilterResult {
+func (c *Client) GetCFilterAsync(
+	blockHash *chainhash.Hash,
+	filterType wire.FilterType,
+) FutureGetCFilterResult {
 	hash := ""
 	if blockHash != nil {
 		hash = blockHash.String()
@@ -753,8 +716,10 @@ func (c *Client) GetCFilterAsync(blockHash *chainhash.Hash,
 }
 
 // GetCFilter returns a raw filter from the server given its block hash.
-func (c *Client) GetCFilter(blockHash *chainhash.Hash,
-	filterType wire.FilterType) (*wire.MsgCFilter, error) {
+func (c *Client) GetCFilter(
+	blockHash *chainhash.Hash,
+	filterType wire.FilterType,
+) (*wire.MsgCFilter, error) {
 	return c.GetCFilterAsync(blockHash, filterType).Receive()
 }
 
@@ -765,23 +730,20 @@ type FutureGetCFilterHeaderResult chan *response
 // Receive waits for the response promised by the future and returns the raw filter header requested from the server
 // given its block hash.
 func (r FutureGetCFilterHeaderResult) Receive() (*wire.MsgCFHeaders, error) {
-	res, err := receiveFuture(r)
-	if err != nil {
-		Error(err)
-		return nil, err
+	res, e := receiveFuture(r)
+	if e != nil {
+		return nil, e
 	}
 	// Unmarshal result as a string.
 	var headerHex string
-	err = js.Unmarshal(res, &headerHex)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = js.Unmarshal(res, &headerHex)
+	if e != nil {
+		return nil, e
 	}
 	// Assign the decoded header into a hash
-	headerHash, err := chainhash.NewHashFromStr(headerHex)
-	if err != nil {
-		Error(err)
-		return nil, err
+	headerHash, e := chainhash.NewHashFromStr(headerHex)
+	if e != nil {
+		return nil, e
 	}
 	// Assign the hash to a headers message and return it.
 	msgCFHeaders := wire.MsgCFHeaders{PrevFilterHeader: *headerHash}
@@ -791,8 +753,10 @@ func (r FutureGetCFilterHeaderResult) Receive() (*wire.MsgCFHeaders, error) {
 // GetCFilterHeaderAsync returns an instance of a type that can be used to get the result of the RPC at some future time
 // by invoking the Receive function on the returned instance. See GetCFilterHeader for the blocking version and more
 // details.
-func (c *Client) GetCFilterHeaderAsync(blockHash *chainhash.Hash,
-	filterType wire.FilterType) FutureGetCFilterHeaderResult {
+func (c *Client) GetCFilterHeaderAsync(
+	blockHash *chainhash.Hash,
+	filterType wire.FilterType,
+) FutureGetCFilterHeaderResult {
 	hash := ""
 	if blockHash != nil {
 		hash = blockHash.String()
@@ -802,7 +766,9 @@ func (c *Client) GetCFilterHeaderAsync(blockHash *chainhash.Hash,
 }
 
 // GetCFilterHeader returns a raw filter header from the server given its block hash.
-func (c *Client) GetCFilterHeader(blockHash *chainhash.Hash,
-	filterType wire.FilterType) (*wire.MsgCFHeaders, error) {
+func (c *Client) GetCFilterHeader(
+	blockHash *chainhash.Hash,
+	filterType wire.FilterType,
+) (*wire.MsgCFHeaders, error) {
 	return c.GetCFilterHeaderAsync(blockHash, filterType).Receive()
 }

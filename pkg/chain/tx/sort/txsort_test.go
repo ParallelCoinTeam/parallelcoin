@@ -59,21 +59,21 @@ func TestSort(t *testing.T) {
 	for _, test := range tests {
 		// Load and deserialize the test transaction.
 		filePath := filepath.Join("testdata", test.hexFile)
-		txHexBytes, err := ioutil.ReadFile(filePath)
-		if err != nil {
+		txHexBytes, e := ioutil.ReadFile(filePath)
+		if e != nil  {
 			t.Errorf("ReadFile (%s): failed to read test file: %v",
 				test.name, err)
 			continue
 		}
-		txBytes, err := hex.DecodeString(string(txHexBytes))
-		if err != nil {
+		txBytes, e := hex.DecodeString(string(txHexBytes))
+		if e != nil  {
 			t.Errorf("DecodeString (%s): failed to decode tx: %v",
 				test.name, err)
 			continue
 		}
 		var tx wire.MsgTx
-		err = tx.Deserialize(bytes.NewReader(txBytes))
-		if err != nil {
+		e = tx.Deserialize(bytes.NewReader(txBytes))
+		if e != nil  {
 			t.Errorf("Deserialize (%s): unexpected error %v",
 				test.name, err)
 			continue

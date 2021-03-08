@@ -12,33 +12,33 @@ import (
 func StartAPI(server *chainrpc.Server, quit qu.C) {
 	nrh := chainrpc.RPCHandlers
 	go func() {
-		var err error
+		var e error
 		var res interface{}
 		for {
 			select {
 			case msg := <-nrh["addnode"].Call:
-				if _, err = nrh["addnode"].
+				if _, e = nrh["addnode"].
 					Fn(
 						server, msg.Params.(btcjson.AddNodeCmd),
 						nil,
-				); Check(err) {
+				); dbg.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.AddNodeRes) <- chainrpc.AddNodeRes{
 					Res: nil, Err: err,
 				}
 			case msg := <-nrh["createrawtransaction"].Call:
-				if res, err = nrh["createrawtransaction"].
-					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd), nil); Check(err) {
+				if res, e = nrh["createrawtransaction"].
+					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd), nil); dbg.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.CreateRawTransactionRes) <- chainrpc.CreateRawTransactionRes{
 					Res: res.(*string), Err: err,
 				}
 			case msg := <-nrh["decoderawtransaction"].Call:
 				var ret btcjson.TxRawDecodeResult
-				if res, err = nrh["decoderawtransaction"].Fn(
+				if res, e = nrh["decoderawtransaction"].Fn(
 					server, msg.Params.(btcjson.DecodeRawTransactionCmd),
 					nil,
-				); Check(err) {
+				); dbg.Chk(e) {
 				} else {
 					ret = res.(btcjson.TxRawDecodeResult)
 				}
@@ -46,17 +46,17 @@ func StartAPI(server *chainrpc.Server, quit qu.C) {
 					Res: &ret, Err: err,
 				}
 			case msg := <-nrh["decodescript"].Call:
-				if res, err = nrh["decodescript"].Fn(server, msg.Params.(btcjson.DecodeScriptCmd), nil); Check(err) {
+				if res, e = nrh["decodescript"].Fn(server, msg.Params.(btcjson.DecodeScriptCmd), nil); dbg.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.DecodeScriptRes) <- chainrpc.DecodeScriptRes{
 					Res: res.(*btcjson.DecodeScriptResult), Err: err,
 				}
 			case msg := <-nrh["estimatefee"].Call:
-				if res, err = nrh["estimatefee"].
+				if res, e = nrh["estimatefee"].
 					Fn(
 						server, msg.Params.(btcjson.EstimateFeeCmd),
 						nil,
-				); Check(err) {
+				); dbg.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.EstimateFeeRes) <- chainrpc.EstimateFeeRes{
 					Res: res.(*float64), Err: err,

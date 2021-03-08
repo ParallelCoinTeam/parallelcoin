@@ -31,18 +31,17 @@ func (eft *estimateFeeTester) checkSaveAndRestore(
 	// Get the save state.
 	save := eft.ef.Save()
 	// Save and restore database.
-	var err error
-	eft.ef, err = RestoreFeeEstimator(save)
-	if err != nil {
-		Error(err)
-		eft.t.Fatalf("Could not restore database: %s", err)
+	var e error
+	eft.ef, e = RestoreFeeEstimator(save)
+	if e != nil  {
+				eft.t.Fatalf("Could not restore database: %s", err)
 	}
 	// Save again and check that it matches the previous one.
 	redo := eft.ef.Save()
 	if !bytes.Equal(save, redo) {
 		eft.t.Fatalf("Restored states do not match: %v %v", save, redo)
 	}
-	// Check that the results match.
+	// Chk that the results match.
 	newEstimates := eft.estimates()
 	for i, prev := range previousEstimates {
 		if prev != newEstimates[i] {
@@ -58,7 +57,7 @@ func (eft *estimateFeeTester) estimates() [estimateFeeDepth]DUOPerKilobyte {
 	for i := 0; i < estimateFeeDepth; i++ {
 		estimates[i], _ = eft.ef.EstimateFee(uint32(i + 1))
 	}
-	// Check that all estimated fee results go in descending order.
+	// Chk that all estimated fee results go in descending order.
 	for i := 1; i < estimateFeeDepth; i++ {
 		if estimates[i] > estimates[i-1] {
 			eft.t.Error("Estimates not in descending order; got ",
@@ -77,7 +76,7 @@ func (eft *estimateFeeTester) newBlock(txs []*wire.MsgTx) {
 	eft.last = &lastBlock{block.Hash(), eft.last}
 	e := eft.ef.RegisterBlock(block)
 	if e != nil {
-		Warn("failed to register block:", e)
+		wrn.Ln("failed to register block:", e)
 	}
 }
 
@@ -85,10 +84,9 @@ func (eft *estimateFeeTester) rollback() {
 	if eft.last == nil {
 		return
 	}
-	err := eft.ef.Rollback(eft.last.hash)
-	if err != nil {
-		Error(err)
-		eft.t.Errorf("Could not rollback: %v", err)
+	e := eft.ef.Rollback(eft.last.hash)
+	if e != nil  {
+				eft.t.Errorf("Could not rollback: %v", err)
 	}
 	eft.height--
 	eft.last = eft.last.prev

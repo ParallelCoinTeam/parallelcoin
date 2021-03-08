@@ -10,8 +10,8 @@ import (
 // the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called with
 // hard-coded values.
 func hexToBytes(s string) []byte {
-	b, err := hex.DecodeString(s)
-	if err != nil {
+	b, e := hex.DecodeString(s)
+	if e != nil  {
 		panic("invalid hex in source file: " + s)
 	}
 	return b
@@ -364,9 +364,9 @@ func TestCompressedTxOut(t *testing.T) {
 			continue
 		}
 		// Ensure the serialized bytes are decoded back to the expected uncompressed values.
-		gotAmount, gotScript, gotBytesRead, err := decodeCompressedTxOut(
+		gotAmount, gotScript, gotBytesRead, e := decodeCompressedTxOut(
 			test.compressed)
-		if err != nil {
+		if e != nil  {
 			t.Errorf("decodeCompressedTxOut (%s): unexpected "+
 				"error: %v", test.name, err)
 			continue
@@ -398,7 +398,7 @@ func TestTxOutCompressionErrors(t *testing.T) {
 	t.Parallel()
 	// A compressed txout with missing compressed script must error.
 	compressedTxOut := hexToBytes("00")
-	_, _, _, err := decodeCompressedTxOut(compressedTxOut)
+	_, _, _, e = decodeCompressedTxOut(compressedTxOut)
 	if !isDeserializeErr(err) {
 		t.Fatalf("decodeCompressedTxOut with missing compressed script "+
 			"did not return expected error type - got %T, want "+
@@ -406,7 +406,7 @@ func TestTxOutCompressionErrors(t *testing.T) {
 	}
 	// A compressed txout with short compressed script must error.
 	compressedTxOut = hexToBytes("0010")
-	_, _, _, err = decodeCompressedTxOut(compressedTxOut)
+	_, _, _, e = decodeCompressedTxOut(compressedTxOut)
 	if !isDeserializeErr(err) {
 		t.Fatalf("decodeCompressedTxOut with short compressed script "+
 			"did not return expected error type - got %T, want "+

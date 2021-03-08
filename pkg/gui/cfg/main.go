@@ -39,7 +39,7 @@ func (c *Config) Init() *Config {
 	}
 	c.Bools = map[string]*gui.Bool{
 		// "runstate": ng.th.Bool(false).SetOnChange(func(b bool) {
-		// 	Debug("run state is now", b)
+		// 	dbg.Ln("run state is now", b)
 		// }),
 	}
 	c.lists = map[string]*gui.List{

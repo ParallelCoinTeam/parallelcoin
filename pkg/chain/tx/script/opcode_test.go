@@ -18,7 +18,7 @@ func TestOpcodeDisabled(t *testing.T) {
 	}
 	for _, opcodeVal := range tests {
 		pop := parsedOpcode{opcode: &OpcodeArray[opcodeVal], data: nil}
-		err := opcodeDisabled(&pop, nil)
+		e := opcodeDisabled(&pop, nil)
 		if !IsErrorCode(err, ErrDisabledOpcode) {
 			t.Errorf("opcodeDisabled: unexpected error - got %v, "+
 				"want %v", err, ErrDisabledOpcode)

@@ -35,7 +35,7 @@ func decompressPoint(curve *KoblitzCurve, x *big.Int, ybit bool) (*big.Int, erro
 	if ybit != isOdd(y) {
 		y.Sub(curve.Params().P, y)
 	}
-	// Check that y is a square root of x^3 + B.
+	// Chk that y is a square root of x^3 + B.
 	y2 := new(big.Int).Mul(y, y)
 	y2.Mod(y2, curve.Params().P)
 	if y2.Cmp(x3) != 0 {
@@ -65,7 +65,7 @@ func IsCompressedPubKey(pubKey []byte) bool {
 
 // ParsePubKey parses a public key for a koblitz curve from a bytestring into a ecdsa.Publickey, verifying that it is
 // valid. It supports compressed, uncompressed and hybrid signature formats.
-func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err error) {
+func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, e error) {
 	pubkey := PublicKey{}
 	pubkey.Curve = curve
 	if len(pubKeyStr) == 0 {
@@ -97,10 +97,8 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 				"pubkey string: %d", pubKeyStr[0])
 		}
 		pubkey.X = new(big.Int).SetBytes(pubKeyStr[1:33])
-		pubkey.Y, err = decompressPoint(curve, pubkey.X, ybit)
-		if err != nil {
-			Error(err)
-			return nil, err
+		if pubkey.Y, e = decompressPoint(curve, pubkey.X, ybit); dbg.Chk(e) {
+			return
 		}
 	default: // wrong!
 		return nil, fmt.Errorf("invalid pub key length %d",

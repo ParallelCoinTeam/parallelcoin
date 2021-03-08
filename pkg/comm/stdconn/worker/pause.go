@@ -6,15 +6,18 @@ import (
 	"syscall"
 )
 
-func (w *Worker) Pause() (err error) {
-	if err = w.Cmd.Process.Signal(syscall.SIGSTOP); !Check(err) {
-		Debug("paused")
+// Pause sends a signal to the worker process to stop
+func (w *Worker) Pause() (e error) {
+	if e = w.Cmd.Process.Signal(syscall.SIGSTOP); !dbg.Chk(e) {
+		dbg.Ln("paused")
 	}
 	return
 }
-func (w *Worker) Resume() (err error) {
-	if err = w.Cmd.Process.Signal(syscall.SIGCONT); !Check(err) {
-		Debug("resumed")
+
+// Continue sends a signal to a worker process to resume work
+func (w *Worker) Continue() (e error) {
+	if e = w.Cmd.Process.Signal(syscall.SIGCONT); !dbg.Chk(e) {
+		dbg.Ln("resumed")
 	}
 	return
 }

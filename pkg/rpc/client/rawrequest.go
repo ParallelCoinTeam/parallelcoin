@@ -3,7 +3,7 @@ package rpcclient
 import (
 	js "encoding/json"
 	"errors"
-
+	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -37,10 +37,9 @@ func (c *Client) RawRequestAsync(method string, params []js.RawMessage) FutureRa
 		Method:  method,
 		Params:  params,
 	}
-	marshalledJSON, err := js.Marshal(rawRequest)
-	if err != nil {
-		Error(err)
-		return newFutureError(err)
+	marshalledJSON, e := js.Marshal(rawRequest)
+	if e != nil {
+		return newFutureError(e)
 	}
 	// Generate the request and send it along with a channel to respond on.
 	responseChan := make(chan *response, 1)

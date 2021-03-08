@@ -13,8 +13,8 @@ func TestCheckBlockScripts(t *testing.T) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	testBlockNum := 277647
 	blockDataFile := fmt.Sprintf("%d.dat.bz2", testBlockNum)
-	blocks, err := loadBlocks(blockDataFile)
-	if err != nil {
+	blocks, e := loadBlocks(blockDataFile)
+	if e != nil  {
 		t.Errorf("ScriptError loading file: %v\n", err)
 		return
 	}
@@ -27,14 +27,14 @@ func TestCheckBlockScripts(t *testing.T) {
 		return
 	}
 	storeDataFile := fmt.Sprintf("%d.utxostore.bz2", testBlockNum)
-	view, err := loadUtxoView(storeDataFile)
-	if err != nil {
+	view, e := loadUtxoView(storeDataFile)
+	if e != nil  {
 		t.Errorf("ScriptError loading txstore: %v\n", err)
 		return
 	}
 	scriptFlags := txscript.ScriptBip16
-	err = checkBlockScripts(blocks[0], view, scriptFlags, nil, nil)
-	if err != nil {
+	e = checkBlockScripts(blocks[0], view, scriptFlags, nil, nil)
+	if e != nil  {
 		t.Errorf("Transaction script validation failed: %v\n", err)
 		return
 	}

@@ -54,7 +54,7 @@ func TestAddDuplicateDriver(t *testing.T) {
 		Open:   bogusCreateDB,
 	}
 	testName := "duplicate driver registration"
-	err := database.RegisterDriver(driver)
+	e := database.RegisterDriver(driver)
 	if !checkDbError(t, testName, err, database.ErrDbTypeRegistered) {
 		return
 	}
@@ -77,19 +77,19 @@ func TestCreateOpenFail(t *testing.T) {
 		Create: bogusCreateDB,
 		Open:   bogusCreateDB,
 	}
-	err := database.RegisterDriver(driver)
-	if err != nil {
+	e := database.RegisterDriver(driver)
+	if e != nil  {
 		t.Log(err)
 	}
 	// Ensure creating a database with the new type fails with the expected error.
-	_, err = database.Create(dbType)
+	_, e = database.Create(dbType)
 	if err != openError {
 		t.Errorf("expected error not received - got: %v, want %v", err,
 			openError)
 		return
 	}
 	// Ensure opening a database with the new type fails with the expected error.
-	_, err = database.Open(dbType)
+	_, e = database.Open(dbType)
 	if err != openError {
 		t.Errorf("expected error not received - got: %v, want %v", err,
 			openError)
@@ -102,13 +102,13 @@ func TestCreateOpenUnsupported(t *testing.T) {
 	// Ensure creating a database with an unsupported type fails with the expected error.
 	testName := "create with unsupported database type"
 	dbType := "unsupported"
-	_, err := database.Create(dbType)
+	_, e := database.Create(dbType)
 	if !checkDbError(t, testName, err, database.ErrDbUnknownType) {
 		return
 	}
 	// Ensure opening a database with the an unsupported type fails with the expected error.
 	testName = "open with unsupported database type"
-	_, err = database.Open(dbType)
+	_, e = database.Open(dbType)
 	if !checkDbError(t, testName, err, database.ErrDbUnknownType) {
 		return
 	}

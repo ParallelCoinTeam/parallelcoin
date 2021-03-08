@@ -12,7 +12,7 @@ var TstLastErr = lastErr
 // const TstEligibleInputMinConfirmations = eligibleInputMinConfirmations
 
 // TstPutSeries transparently wraps the voting pool putSeries method.
-func (p *Pool) TstPutSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs uint32, inRawPubKeys []string) error {
+func (p *Pool) TstPutSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs uint32, inRawPubKeys []string) (e error) {
 	return p.putSeries(ns, version, seriesID, reqSigs, inRawPubKeys)
 }
 

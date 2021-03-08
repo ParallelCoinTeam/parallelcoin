@@ -217,27 +217,27 @@ func checkManagerError(t *testing.T, testName string, gotErr error, wantErrCode 
 // hexToBytes is a wrapper around hex.DecodeString that panics if there is an
 // error. It MUST only be used with hard coded values in the tests.
 func hexToBytes(origHex string) []byte {
-	buf, err := hex.DecodeString(origHex)
-	if err != nil {
+	buf, e := hex.DecodeString(origHex)
+	if e != nil  {
 		panic(err)
 	}
 	return buf
 }
 func emptyDB(t *testing.T) (tearDownFunc func(), db walletdb.DB) {
 	var dirName string
-	var err error
-	if dirName, err = ioutil.TempDir("", "mgrtest"); addrmgr.Check(err) {
+	var e error
+	if dirName, e = ioutil.TempDir("", "mgrtest"); addrmgr.dbg.Chk(e) {
 		t.Fatalf("Failed to create db temp dir: %v", err)
 	}
 	dbPath := filepath.Join(dirName, "mgrtest.db")
-	if db, err = walletdb.Create("bdb", dbPath); addrmgr.Check(err) {
+	if db, e = walletdb.Create("bdb", dbPath); addrmgr.dbg.Chk(e) {
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("createDbNamespace: unexpected error: %v", err)
 	}
 	tearDownFunc = func() {
-		if err := db.Close(); addrmgr.Check(err) {
+		if e := db.Close(); addrmgr.dbg.Chk(e) {
 		}
-		if err := os.RemoveAll(dirName); addrmgr.Check(err) {
+		if e := os.RemoveAll(dirName); addrmgr.dbg.Chk(e) {
 		}
 	}
 	return
@@ -247,34 +247,34 @@ func emptyDB(t *testing.T) (tearDownFunc func(), db walletdb.DB) {
 // that should be invoked to ensure it is closed and removed upon completion.
 func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddrmgr.Manager) {
 	// Create a new manager in a temp directory.
-	dirName, err := ioutil.TempDir("", "mgrtest")
-	if err != nil {
+	dirName, e := ioutil.TempDir("", "mgrtest")
+	if e != nil  {
 		t.Fatalf("Failed to create db temp dir: %v", err)
 	}
 	dbPath := filepath.Join(dirName, "mgrtest.db")
-	db, err = walletdb.Create("bdb", dbPath)
-	if err != nil {
+	db, e = walletdb.Create("bdb", dbPath)
+	if e != nil  {
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("createDbNamespace: unexpected error: %v", err)
 	}
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
-		ns, err := tx.CreateTopLevelBucket(waddrmgrNamespaceKey)
-		if err != nil {
+	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
+		ns, e := tx.CreateTopLevelBucket(waddrmgrNamespaceKey)
+		if e != nil  {
 			return err
 		}
-		err = waddrmgr.Create(
+		e = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
 			&netparams.MainNetParams, fastScrypt, time.Time{},
 		)
-		if err != nil {
+		if e != nil  {
 			return err
 		}
-		mgr, err = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+		mgr, e = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
 		return err
 	})
-	if err != nil {
+	if e != nil  {
 		func() {
-			if err := db.Close(); addrmgr.Check(err) {
+			if e := db.Close(); addrmgr.dbg.Chk(e) {
 			}
 		}()
 		_ = os.RemoveAll(dirName)
@@ -282,7 +282,7 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 	}
 	tearDownFunc = func() {
 		mgr.Close()
-		if err := db.Close(); addrmgr.Check(err) {
+		if e := db.Close(); addrmgr.dbg.Chk(e) {
 		}
 		_ = os.RemoveAll(dirName)
 	}

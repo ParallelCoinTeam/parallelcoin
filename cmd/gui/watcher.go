@@ -12,32 +12,32 @@ func (wg *WalletGUI) Watcher() qu.C {
 	quit := qu.T()
 	// start things up first
 	if !wg.node.Running() {
-		Debug("watcher starting node")
+		dbg.Ln("watcher starting node")
 		wg.node.Start()
 	}
 	if wg.ChainClient == nil {
-		Debug("chain client is not initialized")
-		var err error
-		if err = wg.chainClient(); Check(err) {
+		dbg.Ln("chain client is not initialized")
+		var e error
+		if e = wg.chainClient(); dbg.Chk(e) {
 		}
 	}
-	var err error
+	var e error
 	if !wg.wallet.Running() {
-		Debug("watcher starting wallet")
+		dbg.Ln("watcher starting wallet")
 		wg.wallet.Start()
-		Debug("now we can open the wallet")
-		if err = wg.writeWalletCookie(); Check(err) {
+		dbg.Ln("now we can open the wallet")
+		if e = wg.writeWalletCookie(); dbg.Chk(e) {
 		}
 	}
 	if wg.WalletClient == nil || wg.WalletClient.Disconnected() {
 	allOut:
 		for {
-			if err = wg.walletClient(); !Check(err) {
+			if e = wg.walletClient(); !dbg.Chk(e) {
 			out:
 				for {
 					// keep trying until shutdown or the wallet client connects
 					var bci *btcjson.GetBlockChainInfoResult
-					if bci, err = wg.WalletClient.GetBlockChainInfo(); Check(err) {
+					if bci, e = wg.WalletClient.GetBlockChainInfo(); dbg.Chk(e) {
 						select {
 						case <-time.After(time.Second):
 							continue
@@ -45,7 +45,7 @@ func (wg *WalletGUI) Watcher() qu.C {
 							return nil
 						}
 					}
-					Debugs(bci)
+					dbg.S(bci)
 					break out
 				}
 			}
@@ -62,43 +62,43 @@ func (wg *WalletGUI) Watcher() qu.C {
 	}
 	go func() {
 		watchTick := time.NewTicker(time.Second)
-		var err error
+		var e error
 	totalOut:
 		for {
 		disconnected:
 			for {
-				// Debug("top of watcher loop")
+				// dbg.Ln("top of watcher loop")
 				select {
 				case <-watchTick.C:
 					if !wg.node.Running() {
-						Debug("watcher starting node")
+						dbg.Ln("watcher starting node")
 						wg.node.Start()
 					}
 					if wg.ChainClient.Disconnected() {
-						if err = wg.chainClient(); Check(err) {
+						if e = wg.chainClient(); dbg.Chk(e) {
 							continue
 						}
 					}
 					if !wg.wallet.Running() {
-						Debug("watcher starting wallet")
+						dbg.Ln("watcher starting wallet")
 						wg.wallet.Start()
 					}
 					if wg.WalletClient == nil {
-						Debug("wallet client is not initialized")
-						if err = wg.walletClient(); Check(err) {
+						dbg.Ln("wallet client is not initialized")
+						if e = wg.walletClient(); dbg.Chk(e) {
 							continue
 							// } else {
 							// 	break disconnected
 						}
 					}
 					if wg.WalletClient.Disconnected() {
-						if err = wg.WalletClient.Connect(1); Check(err) {
+						if e = wg.WalletClient.Connect(1); dbg.Chk(e) {
 							continue
 							// } else {
 							// 	break disconnected
 						}
 					} else {
-						Debug(
+						dbg.Ln(
 							"chain, chainclient, wallet and client are now connected",
 							wg.node.Running(),
 							!wg.ChainClient.Disconnected(),
@@ -120,11 +120,11 @@ func (wg *WalletGUI) Watcher() qu.C {
 				select {
 				case <-watchTick.C:
 					if !wg.wallet.Running() {
-						Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> wallet not running, breaking out")
+						dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> wallet not running, breaking out")
 						break connected
 					}
 					if wg.WalletClient == nil || wg.WalletClient.Disconnected() {
-						Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> wallet client disconnected, breaking out")
+						dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> wallet client disconnected, breaking out")
 						break connected
 					}
 				case <-quit.Wait():
@@ -134,7 +134,7 @@ func (wg *WalletGUI) Watcher() qu.C {
 				}
 			}
 		}
-		Debug("shutting down watcher")
+		dbg.Ln("shutting down watcher")
 		if wg.WalletClient != nil {
 			wg.WalletClient.Disconnect()
 			wg.WalletClient.Shutdown()

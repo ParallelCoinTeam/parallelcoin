@@ -52,8 +52,8 @@ func TestInvVect(t *testing.T) {
 func TestInvVectWire(t *testing.T) {
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
-	baseHash, err := chainhash.NewHashFromStr(hashStr)
-	if err != nil {
+	baseHash, e := chainhash.NewHashFromStr(hashStr)
+	if e != nil  {
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	// errInvVect is an inventory vector with an error.
@@ -211,8 +211,8 @@ func TestInvVectWire(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		var buf bytes.Buffer
-		err := writeInvVect(&buf, test.pver, &test.in)
-		if err != nil {
+		e := writeInvVect(&buf, test.pver, &test.in)
+		if e != nil  {
 			t.Errorf("writeInvVect #%d error %v", i, err)
 			continue
 		}
@@ -224,8 +224,8 @@ func TestInvVectWire(t *testing.T) {
 		// Decode the message from wire format.
 		var iv InvVect
 		rbuf := bytes.NewReader(test.buf)
-		err = readInvVect(rbuf, test.pver, &iv)
-		if err != nil {
+		e = readInvVect(rbuf, test.pver, &iv)
+		if e != nil  {
 			t.Errorf("readInvVect #%d error %v", i, err)
 			continue
 		}

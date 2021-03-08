@@ -32,8 +32,8 @@ func TestBase58Check(t *testing.T) {
 			t.Errorf("CheckEncode test #%d failed: got %s, want: %s", x, res, test.out)
 		}
 		// test decoding
-		res, version, err := base58.CheckDecode(test.out)
-		if err != nil {
+		res, version, e := base58.CheckDecode(test.out)
+		if e != nil  {
 			t.Errorf("CheckDecode test #%d failed with err: %v", x, err)
 		} else if version != test.version {
 			t.Errorf("CheckDecode test #%d failed: got version: %d want: %d", x, version, test.version)
@@ -43,7 +43,7 @@ func TestBase58Check(t *testing.T) {
 	}
 	// test the two decoding failure cases
 	// case 1: checksum error
-	_, _, err := base58.CheckDecode("3MNQE1Y")
+	_, _, e = base58.CheckDecode("3MNQE1Y")
 	if err != base58.ErrChecksum {
 		t.Error("Checkdecode test failed, expected ErrChecksum")
 	}
@@ -51,7 +51,7 @@ func TestBase58Check(t *testing.T) {
 	testString := ""
 	for length := 0; length < 4; length++ {
 		// make a string of length `len`
-		_, _, err = base58.CheckDecode(testString)
+		_, _, e = base58.CheckDecode(testString)
 		if err != base58.ErrInvalidFormat {
 			t.Error("Checkdecode test failed, expected ErrInvalidFormat")
 		}

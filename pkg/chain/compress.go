@@ -248,9 +248,9 @@ func decompressScript(compressedPkScript []byte) []byte {
 		compressedKey := make([]byte, 33)
 		compressedKey[0] = byte(encodedScriptSize - 2)
 		copy(compressedKey[1:], compressedPkScript[1:])
-		key, err := ec.ParsePubKey(compressedKey, ec.S256())
-		if err != nil {
-			Error(err)
+		key, e := ec.ParsePubKey(compressedKey, ec.S256())
+		if e != nil  {
+			err.Ln(err)
 			return nil
 		}
 		pkScript := make([]byte, 67)
@@ -336,8 +336,8 @@ func isPubKey(script []byte) (bool, []byte) {
 		script[1] == 0x03) {
 		// Ensure the public key is valid.
 		serializedPubKey := script[1:34]
-		_, err := ec.ParsePubKey(serializedPubKey, ec.S256())
-		if err == nil {
+		_, e := ec.ParsePubKey(serializedPubKey, ec.S256())
+		if e ==  nil {
 			return true, serializedPubKey
 		}
 	}
@@ -346,8 +346,8 @@ func isPubKey(script []byte) (bool, []byte) {
 		script[66] == txscript.OP_CHECKSIG && script[1] == 0x04 {
 		// Ensure the public key is valid.
 		serializedPubKey := script[1:66]
-		_, err := ec.ParsePubKey(serializedPubKey, ec.S256())
-		if err == nil {
+		_, e := ec.ParsePubKey(serializedPubKey, ec.S256())
+		if e ==  nil {
 			return true, serializedPubKey
 		}
 	}

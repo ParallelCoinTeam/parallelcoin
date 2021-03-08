@@ -24,38 +24,38 @@ func ExampleBlockChain_ProcessBlock() {
 	// example and does not leave temporary files laying around.
 	dbPath := filepath.Join(os.TempDir(), "exampleprocessblock")
 	_ = os.RemoveAll(dbPath)
-	db, err := database.Create("ffldb", dbPath, chaincfg.MainNetParams.Net)
-	if err != nil {
+	db, e := database.Create("ffldb", dbPath, chaincfg.MainNetParams.Net)
+	if e != nil  {
 		log.Printf("Failed to create database: %v\n", err)
 		return
 	}
 	defer func() {
-		if err := os.RemoveAll(dbPath); blockchain.Check(err) {
+		if e := os.RemoveAll(dbPath); blockchain.dbg.Chk(e) {
 		}
 	}()
 	defer func() {
-		if err := db.Close(); blockchain.Check(err) {
+		if e := db.Close(); blockchain.dbg.Chk(e) {
 		}
 	}()
 	// Create a new BlockChain instance using the underlying database for the main bitcoin network. This example does
 	// not demonstrate some of the other available configuration options such as specifying a notification callback and
 	// signature cache. Also, the caller would ordinarily keep a reference to the median time source and add time values
 	// obtained from other peers on the network so the local time is adjusted to be in agreement with other peers.
-	chain, err := blockchain.New(&blockchain.Config{
+	chain, e := blockchain.New(&blockchain.Config{
 		DB:          db,
 		ChainParams: &netparams.MainNetParams,
 		TimeSource:  blockchain.NewMedianTime(),
 	})
-	if err != nil {
+	if e != nil  {
 		log.Printf("Failed to create chain instance: %v\n", err)
 		return
 	}
 	// Process a block. For this example, we are going to intentionally cause an error by trying to process the genesis
 	// block which already exists.
 	genesisBlock := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
-	isMainChain, isOrphan, err := chain.ProcessBlock(0, genesisBlock,
+	isMainChain, isOrphan, e := chain.ProcessBlock(0, genesisBlock,
 		blockchain.BFNone, 0)
-	if err != nil {
+	if e != nil  {
 		log.Printf("Failed to process block: %v\n", err)
 		return
 	}

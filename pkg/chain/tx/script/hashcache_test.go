@@ -22,9 +22,9 @@ func genTestTx() (*wire.MsgTx, error) {
 			},
 			Sequence: uint32(rand.Int31()),
 		}
-		_, err := rand.Read(randTxIn.PreviousOutPoint.Hash[:])
-		if err != nil {
-			return nil, err
+		_, e := rand.Read(randTxIn.PreviousOutPoint.Hash[:])
+		if e != nil  {
+			return nil, e
 		}
 		tx.TxIn = append(tx.TxIn, &randTxIn)
 	}
@@ -34,8 +34,8 @@ func genTestTx() (*wire.MsgTx, error) {
 			Value:    rand.Int63(),
 			PkScript: make([]byte, rand.Intn(30)),
 		}
-		if _, err := rand.Read(randTxOut.PkScript); err != nil {
-			return nil, err
+		if _, e = rand.Read(randTxOut.PkScript); dbg.Chk(e) {
+			return nil, e
 		}
 		tx.TxOut = append(tx.TxOut, &randTxOut)
 	}
@@ -49,13 +49,13 @@ func TestHashCacheAddContainsHashes(t *testing.T) {
 	t.Parallel()
 	rand.Seed(time.Now().Unix())
 	cache := NewHashCache(10)
-	var err error
+	var e error
 	// First, we'll generate 10 random transactions for use within our tests.
 	const numTxns = 10
 	txns := make([]*wire.MsgTx, numTxns)
 	for i := 0; i < numTxns; i++ {
-		txns[i], err = genTestTx()
-		if err != nil {
+		txns[i], e = genTestTx()
+		if e != nil  {
 			t.Fatalf("unable to generate test tx: %v", err)
 		}
 	}
@@ -72,8 +72,8 @@ func TestHashCacheAddContainsHashes(t *testing.T) {
 				txid)
 		}
 	}
-	randTx, err := genTestTx()
-	if err != nil {
+	randTx, e := genTestTx()
+	if e != nil  {
 		t.Fatalf("unable to generate tx: %v", err)
 	}
 	// Finally, we'll assert that a transaction that wasn't added to the cache won't be reported as being present by the
@@ -92,8 +92,8 @@ func TestHashCacheAddGet(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 	cache := NewHashCache(10)
 	// To start, we'll generate a random transaction and compute the set of sighashes for the transaction.
-	randTx, err := genTestTx()
-	if err != nil {
+	randTx, e := genTestTx()
+	if e != nil  {
 		t.Fatalf("unable to generate tx: %v", err)
 	}
 	sigHashes := NewTxSigHashes(randTx)
@@ -117,13 +117,13 @@ func TestHashCachePurge(t *testing.T) {
 	t.Parallel()
 	rand.Seed(time.Now().Unix())
 	cache := NewHashCache(10)
-	var err error
+	var e error
 	// First we'll start by inserting numTxns transactions into the hash cache.
 	const numTxns = 10
 	txns := make([]*wire.MsgTx, numTxns)
 	for i := 0; i < numTxns; i++ {
-		txns[i], err = genTestTx()
-		if err != nil {
+		txns[i], e = genTestTx()
+		if e != nil  {
 			t.Fatalf("unable to generate test tx: %v", err)
 		}
 	}

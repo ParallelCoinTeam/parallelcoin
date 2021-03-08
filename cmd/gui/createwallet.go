@@ -66,7 +66,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 											wg.bools["testnet"].SetOnChange(
 												func(b bool) {
 													go func() {
-														Debug("testnet on?", b)
+														dbg.Ln("testnet on?", b)
 														// if the password has been entered, we need to copy it to the variable
 														if wg.passwords["passEditor"].GetPassword() != "" ||
 															wg.passwords["confirmPassEditor"].GetPassword() != "" ||
@@ -74,7 +74,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															wg.passwords["passEditor"].GetPassword() ==
 																wg.passwords["confirmPassEditor"].GetPassword() {
 															*wg.cx.Config.WalletPass = wg.passwords["confirmPassEditor"].GetPassword()
-															Debug("wallet pass", *wg.cx.Config.WalletPass)
+															dbg.Ln("wallet pass", *wg.cx.Config.WalletPass)
 														}
 														if b {
 															wg.cx.ActiveNet = &netparams.TestNet3Params
@@ -83,8 +83,8 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															wg.cx.ActiveNet = &netparams.MainNetParams
 															fork.IsTestnet = false
 														}
-														Info("activenet:", wg.cx.ActiveNet.Name)
-														Debug("setting ports to match network")
+														inf.Ln("activenet:", wg.cx.ActiveNet.Name)
+														dbg.Ln("setting ports to match network")
 														*wg.cx.Config.Network = wg.cx.ActiveNet.Name
 														// _, routeableAddress, _ := routeable.GetInterface()
 														*wg.cx.Config.P2PListeners = cli.StringSlice{
@@ -137,7 +137,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 										return wg.CheckBox(
 											wg.bools["ihaveread"].SetOnChange(
 												func(b bool) {
-													Debug("confirmed read", b)
+													dbg.Ln("confirmed read", b)
 													// if the password has been entered, we need to copy it to the variable
 													if wg.passwords["passEditor"].GetPassword() != "" ||
 														wg.passwords["confirmPassEditor"].GetPassword() != "" ||
@@ -164,9 +164,9 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 							Rigid(
 								func(gtx l.Context) l.Dimensions {
 									var b []byte
-									var err error
+									var e error
 									seedValid := true
-									if b, err = hex.DecodeString(wg.inputs["walletSeed"].GetText()); Check(err) {
+									if b, e = hex.DecodeString(wg.inputs["walletSeed"].GetText()); dbg.Chk(e) {
 										seedValid = false
 									} else if len(b) != 0 && len(b) < hdkeychain.MinSeedBytes ||
 										len(b) > hdkeychain.MaxSeedBytes {
@@ -190,7 +190,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 													func() {
 														go func() {
 															// wg.NodeRunCommandChan <- "stop"
-															Debug("clicked submit wallet")
+															dbg.Ln("clicked submit wallet")
 															*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
 																string(os.PathSeparator) + wg.cx.ActiveNet.Name +
 																string(os.PathSeparator) + wallet.DbName
@@ -199,9 +199,9 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())
 															pass := []byte(wg.passwords["passEditor"].GetPassword())
 															*wg.cx.Config.WalletPass = string(pass)
-															Debug("password", string(pass))
+															dbg.Ln("password", string(pass))
 															save.Pod(wg.cx.Config)
-															w, err := loader.CreateNewWallet(
+															w, e := loader.CreateNewWallet(
 																pass,
 																pass,
 																seed,
@@ -210,21 +210,21 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 																wg.cx.Config,
 																nil,
 															)
-															Debug("*** created wallet")
-															if Check(err) {
+															dbg.Ln("*** created wallet")
+															if dbg.Chk(e) {
 																// return
 															}
-															// Debug("refilling mining addresses")
+															// dbg.Ln("refilling mining addresses")
 															// addresses.RefillMiningAddresses(
 															// 	w,
 															// 	wg.cx.Config,
 															// 	wg.cx.StateCfg,
 															// )
-															// Warn("done refilling mining addresses")
+															// wrn.Ln("done refilling mining addresses")
 															w.Stop()
-															Debug("shutting down wallet", w.ShuttingDown())
+															dbg.Ln("shutting down wallet", w.ShuttingDown())
 															w.WaitForShutdown()
-															Debug("starting main app")
+															dbg.Ln("starting main app")
 															*wg.cx.Config.Generate = true
 															*wg.cx.Config.GenThreads = 1
 															*wg.cx.Config.NodeOff = false
@@ -235,7 +235,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															// }
 															*wg.noWallet = false
 															// wg.node.Start()
-															// if err = wg.writeWalletCookie(); Check(err) {
+															// if e = wg.writeWalletCookie(); dbg.Chk(e) {
 															// }
 															// wg.wallet.Start()
 														}()

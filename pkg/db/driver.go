@@ -50,7 +50,7 @@ func Open(dbType string, args ...interface{}) (DB, error) {
 
 // RegisterDriver adds a backend database driver to available interfaces. ErrDbTypeRegistered will be returned if the
 // database type for the driver has already been registered.
-func RegisterDriver(driver Driver) error {
+func RegisterDriver(driver Driver) (e error) {
 	if _, exists := drivers[driver.DbType]; exists {
 		str := fmt.Sprintf("driver %q is already registered",
 			driver.DbType)

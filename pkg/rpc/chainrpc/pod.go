@@ -21,11 +21,11 @@ var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
 			return stateCfg.Oniondial(addr.Network(), addr.String(),
 				DefaultConnectTimeout)
 		}
-		Trace("StateCfg.Dial", addr.Network(), addr.String(),
+		trc.Ln("StateCfg.Dial", addr.Network(), addr.String(),
 			DefaultConnectTimeout)
 		conn, er := stateCfg.Dial(addr.Network(), addr.String(), DefaultConnectTimeout)
 		if er != nil {
-			Trace("connection error:", conn, er)
+			trc.Ln("connection error:", conn, er)
 		}
 		return conn, er
 	}

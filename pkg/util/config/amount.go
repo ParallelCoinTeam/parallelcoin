@@ -24,16 +24,16 @@ func (a *AmountFlag) MarshalFlag() (string, error) {
 }
 
 // UnmarshalFlag satisifes the flags.Unmarshaler interface.
-func (a *AmountFlag) UnmarshalFlag(value string) error {
+func (a *AmountFlag) UnmarshalFlag(value string) (e error) {
 	value = strings.TrimSuffix(value, " DUO")
-	valueF64, err := strconv.ParseFloat(value, 64)
-	if err != nil {
-		Error(err)
+	valueF64, e := strconv.ParseFloat(value, 64)
+	if e != nil  {
+		err.Ln(err)
 		return err
 	}
-	amount, err := util.NewAmount(valueF64)
-	if err != nil {
-		Error(err)
+	amount, e := util.NewAmount(valueF64)
+	if e != nil  {
+		err.Ln(err)
 		return err
 	}
 	a.Amount = amount

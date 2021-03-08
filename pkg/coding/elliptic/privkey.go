@@ -28,11 +28,10 @@ func PrivKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey,
 }
 
 // NewPrivateKey is a wrapper for ecdsa.GenerateKey that returns a PrivateKey instead of the normal ecdsa.PrivateKey.
-func NewPrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
-	key, err := ecdsa.GenerateKey(curve, rand.Reader)
-	if err != nil {
-		Error(err)
-		return nil, err
+func NewPrivateKey(curve elliptic.Curve) (pk *PrivateKey,e error) {
+	var key *ecdsa.PrivateKey
+	if key, e = ecdsa.GenerateKey(curve, rand.Reader);dbg.Chk(e){
+		return nil, e
 	}
 	return (*PrivateKey)(key), nil
 }

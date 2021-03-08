@@ -33,7 +33,7 @@ type Merkles map[int32]*chainhash.Hash
 // CalcNextRequiredDifficultyPlan9Controller returns all of the algorithm difficulty targets for sending out with the
 // other pieces required to construct a block, as these numbers are generated from block timestamps
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(lastNode *BlockNode) (
-	diffs Diffs, err error,
+	diffs Diffs, e error,
 ) {
 	nH := lastNode.height + 1
 	currFork := fork.GetCurrent(nH)
@@ -42,7 +42,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(lastNode *BlockNo
 	case 0:
 		for i := range fork.List[0].Algos {
 			v := fork.List[currFork].Algos[i].Version
-			nTB[v], err = b.CalcNextRequiredDifficultyHalcyon(lastNode, i, true)
+			nTB[v], e = b.CalcNextRequiredDifficultyHalcyon(lastNode, i, true)
 		}
 		return nTB, nil
 	case 1:
@@ -60,7 +60,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(lastNode *BlockNo
 			}
 			sort.Sort(algos)
 			for _, v := range algos {
-				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(lastNode, v.Name, true)
+				nTB[v.Params.Version], _, e = b.CalcNextRequiredDifficultyPlan9(lastNode, v.Name, true)
 			}
 			diffs = nTB
 			// Traces(diffs)
@@ -69,6 +69,6 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(lastNode *BlockNo
 		}
 		return
 	}
-	Trace("should not fall through here")
+	trc.Ln("should not fall through here")
 	return
 }

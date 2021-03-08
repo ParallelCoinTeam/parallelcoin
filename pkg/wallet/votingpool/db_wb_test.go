@@ -12,21 +12,21 @@ func TestPutUsedAddrHash(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dummyHash := bytes.Repeat([]byte{0x09}, 10)
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		ns, _ := TstRWNamespaces(tx)
 		return putUsedAddrHash(ns, pool.ID, 0, 0, 0, dummyHash)
 	})
-	if err != nil {
-		t.Fatal(err)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	var storedHash []byte
-	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
+	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 		ns, _ := TstRNamespaces(tx)
 		storedHash = getUsedAddrHash(ns, pool.ID, 0, 0, 0)
 		return nil
 	})
-	if err != nil {
-		t.Fatal(err)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	if !bytes.Equal(storedHash, dummyHash) {
 		t.Fatalf("Wrong stored hash; got %x, want %x", storedHash, dummyHash)
@@ -35,29 +35,29 @@ func TestPutUsedAddrHash(t *testing.T) {
 func TestGetMaxUsedIdx(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		ns, _ := TstRWNamespaces(tx)
 		for i, idx := range []int{0, 7, 9, 3001, 41, 500, 6} {
 			dummyHash := bytes.Repeat([]byte{byte(i)}, 10)
-			err := putUsedAddrHash(ns, pool.ID, 0, 0, Index(idx), dummyHash)
-			if err != nil {
+			e := putUsedAddrHash(ns, pool.ID, 0, 0, Index(idx), dummyHash)
+			if e != nil  {
 				return err
 			}
 		}
 		return nil
 	})
-	if err != nil {
-		t.Fatal(err)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	var maxIdx Index
-	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
+	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 		ns, _ := TstRNamespaces(tx)
-		var err error
-		maxIdx, err = getMaxUsedIdx(ns, pool.ID, 0, 0)
+		var e error
+		maxIdx, e = getMaxUsedIdx(ns, pool.ID, 0, 0)
 		return err
 	})
-	if err != nil {
-		t.Fatal(err)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	if maxIdx != Index(3001) {
 		t.Fatalf("Wrong max idx; got %d, want %d", maxIdx, Index(3001))
@@ -66,29 +66,29 @@ func TestGetMaxUsedIdx(t *testing.T) {
 func TestWithdrawalSerialization(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
-	dbtx, err := db.BeginReadWriteTx()
-	if err != nil {
-		t.Fatal(err)
+	dbtx, e := db.BeginReadWriteTx()
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	defer func() {
-		err := dbtx.Commit()
-		if err != nil {
+		e := dbtx.Commit()
+		if e != nil  {
 			t.Log(err)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
 	roundID := uint32(0)
 	wi := createAndFulfillWithdrawalRequests(t, dbtx, pool, roundID)
-	serialized, err := serializeWithdrawal(wi.requests, wi.startAddress, wi.lastSeriesID,
+	serialized, e := serializeWithdrawal(wi.requests, wi.startAddress, wi.lastSeriesID,
 		wi.changeStart, wi.dustThreshold, wi.status)
-	if err != nil {
-		t.Fatal(err)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	var wInfo *withdrawalInfo
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-		wInfo, err = deserializeWithdrawal(pool, ns, addrmgrNs, serialized)
-		if err != nil {
-			t.Fatal(err)
+		wInfo, e = deserializeWithdrawal(pool, ns, addrmgrNs, serialized)
+		if e != nil  {
+			t.ftl.Ln(err)
 		}
 	})
 	if !reflect.DeepEqual(wInfo.startAddress, wi.startAddress) {
@@ -114,21 +114,21 @@ func TestPutAndGetWithdrawal(t *testing.T) {
 	serialized := bytes.Repeat([]byte{1}, 10)
 	poolID := []byte{0x00}
 	roundID := uint32(0)
-	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+	e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		ns, _ := TstRWNamespaces(tx)
 		return putWithdrawal(ns, poolID, roundID, serialized)
 	})
-	if err != nil {
-		t.Fatal(err)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	var retrieved []byte
-	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
+	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 		ns, _ := TstRNamespaces(tx)
 		retrieved = getWithdrawal(ns, poolID, roundID)
 		return nil
 	})
-	if err != nil {
-		t.Fatal(err)
+	if e != nil  {
+		t.ftl.Ln(err)
 	}
 	if !bytes.Equal(retrieved, serialized) {
 		t.Fatalf("Wrong value retrieved from DB; got %x, want %x", retrieved, serialized)

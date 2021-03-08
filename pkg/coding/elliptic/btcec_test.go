@@ -548,8 +548,8 @@ func TestBaseMultVerify(t *testing.T) {
 	for bytes := 1; bytes < 40; bytes++ {
 		for i := 0; i < 30; i++ {
 			data := make([]byte, bytes)
-			_, err := rand.Read(data)
-			if err != nil {
+			_, e := rand.Read(data)
+			if e != nil  {
 				t.Errorf("failed to read random data for %d", i)
 				continue
 			}
@@ -613,8 +613,8 @@ func TestScalarMultRand(t *testing.T) {
 	exponent := big.NewInt(1)
 	for i := 0; i < 1024; i++ {
 		data := make([]byte, 32)
-		_, err := rand.Read(data)
-		if err != nil {
+		_, e := rand.Read(data)
+		if e != nil  {
 			t.Fatalf("failed to read random data at %d", i)
 		}
 		x, y = s256.ScalarMult(x, y, data)
@@ -713,8 +713,8 @@ func TestSplitKRand(t *testing.T) {
 	s256 := S256()
 	for i := 0; i < 1024; i++ {
 		bytesK := make([]byte, 32)
-		_, err := rand.Read(bytesK)
-		if err != nil {
+		_, e := rand.Read(bytesK)
+		if e != nil  {
 			t.Fatalf("failed to read random data at %d", i)
 		}
 		k := new(big.Int).SetBytes(bytesK)
@@ -736,8 +736,8 @@ func TestSplitKRand(t *testing.T) {
 
 // Test this curve's usage with the ecdsa package.
 func testKeyGeneration(t *testing.T, c *KoblitzCurve, tag string) {
-	priv, err := NewPrivateKey(c)
-	if err != nil {
+	priv, e := NewPrivateKey(c)
+	if e != nil  {
 		t.Errorf("%s: error: %s", tag, err)
 		return
 	}
@@ -752,8 +752,8 @@ func testSignAndVerify(t *testing.T, c *KoblitzCurve, tag string) {
 	priv, _ := NewPrivateKey(c)
 	pub := priv.PubKey()
 	hashed := []byte("testing")
-	sig, err := priv.Sign(hashed)
-	if err != nil {
+	sig, e := priv.Sign(hashed)
+	if e != nil  {
 		t.Errorf("%s: error signing: %s", tag, err)
 		return
 	}
@@ -783,7 +783,7 @@ func TestNAF(t *testing.T) {
 		want, _ := new(big.Int).SetString(test, 16)
 		nafPos, nafNeg := NAF(want.Bytes())
 		got := big.NewInt(0)
-		// Check that the NAF representation comes up with the right number
+		// Chk that the NAF representation comes up with the right number
 		for i := 0; i < len(nafPos); i++ {
 			bytePos := nafPos[i]
 			byteNeg := nafNeg[i]
@@ -809,14 +809,14 @@ func TestNAFRand(t *testing.T) {
 	two := big.NewInt(2)
 	for i := 0; i < 1024; i++ {
 		data := make([]byte, 32)
-		_, err := rand.Read(data)
-		if err != nil {
+		_, e := rand.Read(data)
+		if e != nil  {
 			t.Fatalf("failed to read random data at %d", i)
 		}
 		nafPos, nafNeg := NAF(data)
 		want := new(big.Int).SetBytes(data)
 		got := big.NewInt(0)
-		// Check that the NAF representation comes up with the right number
+		// Chk that the NAF representation comes up with the right number
 		for i := 0; i < len(nafPos); i++ {
 			bytePos := nafPos[i]
 			byteNeg := nafNeg[i]

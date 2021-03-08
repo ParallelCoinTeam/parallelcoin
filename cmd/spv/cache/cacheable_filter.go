@@ -11,11 +11,11 @@ type CacheableFilter struct {
 }
 
 // Size returns size of this filter in bytes.
-func (c *CacheableFilter) Size() (uint64, error) {
-	f, err := c.Filter.NBytes()
-	if err != nil {
-		Error(err)
-		return 0, err
+func (c *CacheableFilter) Size() (rv uint64, e error) {
+	var f []byte
+	f, e = c.Filter.NBytes()
+	if e != nil {
+		return 0, e
 	}
 	return uint64(len(f)), nil
 }

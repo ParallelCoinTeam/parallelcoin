@@ -102,8 +102,8 @@ typically this will be a net.Conn to a remote node running a bitcoin peer. Examp
 	// protocol version pver and the bitcoin network btcnet.  The returns
 	// are a wire.Message, a []byte which contains the unmarshalled
 	// raw payload, and a possible error.
-	msg, rawPayload, err := wire.ReadMessage(conn, pver, btcnet)
-	if err != nil {
+	msg, rawPayload, e := wire.ReadMessage(conn, pver, btcnet)
+	if e != nil  {
 		// Log and handle the error
 	}
 
@@ -118,8 +118,8 @@ remote peer is:
 	// Writes a bitcoin message msg to conn using the protocol version
 	// pver, and the bitcoin network btcnet.  The return is a possible
 	// error.
-	err := wire.WriteMessage(conn, msg, pver, btcnet)
-	if err != nil {
+	e := wire.WriteMessage(conn, msg, pver, btcnet)
+	if e != nil  {
 		// Log and handle the error
 	}
 
