@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	_ "net/http/pprof"
 	
 	_ "github.com/p9c/pod/pkg"
@@ -21,14 +22,21 @@ func main() {
 	version.BuildTime = BuildTime
 	version.Tag = Tag
 	version.Get = GetVersion
+	logg.SortAllSubsystems()
 	cmd.Main()
 }
 
 var (
+	// URL is the git URL for the repository
 	URL       string
+	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef    string
+	// GitCommit is the commit hash of the current HEAD
 	GitCommit string
+	// BuildTime stores the time when the current binary was built
 	BuildTime string
+	// Tag lists the tag on the build, if it lacks a tag, it adds a + to the end of
+	// the newest one
 	Tag       string
 )
 
@@ -41,5 +49,6 @@ func GetVersion() string {
 	built: %s
 	tag: %s
 `,
-		URL, GitRef, GitCommit, BuildTime, Tag)
+		URL, GitRef, GitCommit, BuildTime, Tag,
+	)
 }

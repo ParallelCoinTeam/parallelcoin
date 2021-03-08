@@ -215,6 +215,8 @@ type Config struct {
 	WalletRPCMaxWebsockets *int             `group:"wallet" label:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"" widget:"integer" json:"WalletRPCMaxWebsockets" hook:"restart"`
 	WalletServer           *string          `group:"wallet" label:"Wallet Server" description:"node address to connect wallet server to" type:"address" widget:"string" json:"WalletServer" hook:"restart"`
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"address" widget:"multi" json:"Whitelists" hook:"restart"`
+	Hilite                 *cli.StringSlice `group:"debug" label:"Hilite" description:"comma-separated list of packages that will print at trace log level" type:"string" widget:"multi" json:"Hilite" hook:"restart"`
+	LogFilter              *cli.StringSlice `group:"debug" label:"Log Filter" description:"comma-separated list of packages that will not print logs" type:"string" widget:"multi" json:"LogFilter" hook:"restart"`
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
@@ -254,11 +256,13 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		FreeTxRelayLimit:       newfloat64(),
 		Generate:               newbool(),
 		GenThreads:             newint(),
+		Hilite:                 newStringSlice(),
 		LAN:                    newbool(),
 		Language:               newstring(),
 		LimitPass:              newstring(),
 		LimitUser:              newstring(),
 		LogDir:                 newstring(),
+		LogFilter:              newStringSlice(),
 		LogLevel:               newstring(),
 		MaxOrphanTxs:           newint(),
 		MaxPeers:               newint(),
@@ -353,11 +357,13 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"FreeTxRelayLimit":       c.FreeTxRelayLimit,
 		"Generate":               c.Generate,
 		"GenThreads":             c.GenThreads,
+		"Hilite":                 c.Hilite,
 		"LAN":                    c.LAN,
 		"Language":               c.Language,
 		"LimitPass":              c.LimitPass,
 		"LimitUser":              c.LimitUser,
 		"LogDir":                 c.LogDir,
+		"LogFilter":              c.LogFilter,
 		"LogLevel":               c.LogLevel,
 		"MaxOrphanTxs":           c.MaxOrphanTxs,
 		"MaxPeers":               c.MaxPeers,

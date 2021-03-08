@@ -17,6 +17,7 @@ require (
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
+	github.com/fatih/color v1.10.0
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/jackpal/gateway v1.0.7
 	github.com/jessevdk/go-flags v1.4.0

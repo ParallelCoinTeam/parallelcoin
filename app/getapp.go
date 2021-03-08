@@ -304,6 +304,16 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				EnvVar:      "POD_LOGLEVEL",
 				Destination: cx.Config.LogLevel,
 			},
+			au.StringSlice(
+				"highlight",
+				"define the set of packages whose logs will have attention-grabbing keywords to aid scanning logs",
+				cx.Config.Hilite,
+			),
+			au.StringSlice(
+				"logfilter",
+				"define the set of packages whose logs will not print",
+				cx.Config.LogFilter,
+			),
 			au.String(
 				"network, n",
 				"connect to mainnet/testnet/regtest/simnet",
