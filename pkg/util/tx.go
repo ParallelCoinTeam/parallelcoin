@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"io"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // TxIndexUnknown is the value returned for a transaction index that is unknown.

@@ -5,18 +5,18 @@ import (
 	"sync"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
-	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // RPCClient represents a persistent client connection to a bitcoin RPC server for information regarding the current

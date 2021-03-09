@@ -1,12 +1,12 @@
 package wallet
 
 import (
-	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txs "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	txs "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 	log "github.com/p9c/pod/pkg/util/logi"
-	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
 )
 

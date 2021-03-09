@@ -11,9 +11,9 @@ import (
 	"sort"
 	"strings"
 	"sync"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/mining"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/mining"
 	"github.com/p9c/pod/pkg/util"
 )
 

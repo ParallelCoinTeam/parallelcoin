@@ -3,9 +3,9 @@ package spv
 import (
 	"fmt"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 type (
@@ -94,7 +94,7 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 				currentHeight,
 			)
 			if e != nil  {
-				err.Ln(err)
+				err.Ln(e)
 				return fmt.Errorf(
 					"unable to read header at height: %v: %v",
 					currentHeight, err,
@@ -108,7 +108,7 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 		return nil
 	})
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, e
 	}
 	return &subscription, nil

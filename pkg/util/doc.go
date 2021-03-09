@@ -27,7 +27,7 @@ for the pay-to-pubkey, pay-to-pubkey-hash, and pay-to-script-hash address types.
 	defaultNet := &netparams.MainNetParams
 	addr, e := util.DecodeAddress(addrString, defaultNet)
 	if e != nil  {
-		fmt.Println(err)
+		fmt.Println(e)
 		return
 	}
 	fmt.Println(addr.EncodeAddress())

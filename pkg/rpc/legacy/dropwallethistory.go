@@ -8,8 +8,8 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/database/walletdb"
 )
 
 func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) (e error) {
@@ -31,7 +31,7 @@ func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) (
 		// inf.Ln("dbPath", dbPath)
 		var db walletdb.DB
 		db, e = walletdb.Open("bdb", dbPath)
-		if dbg.Chk(e) {
+		if err.Chk(e) {
 			// DBError("failed to open database:", err)
 			return e
 		}
@@ -40,23 +40,23 @@ func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) (
 		e = walletdb.Update(
 			db, func(tx walletdb.ReadWriteTx) (e error) {
 				dbg.Ln("deleting top level bucket")
-				if e = tx.DeleteTopLevelBucket(wtxmgrNamespace); dbg.Chk(e) {
+				if e = tx.DeleteTopLevelBucket(wtxmgrNamespace); err.Chk(e) {
 				}
 				if e != nil  && e != walletdb.ErrBucketNotFound {
 					return e
 				}
 				var ns walletdb.ReadWriteBucket
 				dbg.Ln("creating new top level bucket")
-				if ns, e = tx.CreateTopLevelBucket(wtxmgrNamespace); dbg.Chk(e) {
+				if ns, e = tx.CreateTopLevelBucket(wtxmgrNamespace); err.Chk(e) {
 					return e
 				}
-				if e = wtxmgr.Create(ns); dbg.Chk(e) {
+				if e = wtxmgr.Create(ns); err.Chk(e) {
 					return e
 				}
 				ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 				startBlock := ns.Get(startBlockName)
 				dbg.Ln("putting start block", startBlock)
-				if e = ns.Put(syncedToName, startBlock); dbg.Chk(e) {
+				if e = ns.Put(syncedToName, startBlock); err.Chk(e) {
 					return e
 				}
 				recentBlocks := make([]byte, 40)
@@ -67,7 +67,7 @@ func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) (
 				return ns.Put(recentBlocksName, recentBlocks)
 			},
 		)
-		if dbg.Chk(e) {
+		if err.Chk(e) {
 			return e
 		}
 		dbg.Ln("updated wallet")

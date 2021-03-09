@@ -61,14 +61,14 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[str
 func Discover() (e error) {
 	dbg.Ln("discovering routeable interfaces and addresses...")
 	var nif []net.Interface
-	if nif, e = net.Interfaces(); dbg.Chk(e) {
+	if nif, e = net.Interfaces(); err.Chk(e) {
 		return
 	}
 	// dbg.Ln("number of available network interfaces:", len(nif))
 	// dbg.S(nif)
 	var secondaryInterfaces []*net.Interface
 	var secondaryAddresses []net.IP
-	if Gateway, e = gateway.DiscoverGateway(); dbg.Chk(e) {
+	if Gateway, e = gateway.DiscoverGateway(); err.Chk(e) {
 		// todo: this error condition always happens on iOS and Android
 		// return
 		for i := range nif {
@@ -82,12 +82,12 @@ func Discover() (e error) {
 		}
 		for i := range nif {
 			var addrs []net.Addr
-			if addrs, e = nif[i].Addrs(); dbg.Chk(e) || addrs == nil {
+			if addrs, e = nif[i].Addrs(); err.Chk(e) || addrs == nil {
 				continue
 			}
 			for j := range addrs {
 				var in *net.IPNet
-				if _, in, e = net.ParseCIDR(addrs[j].String()); dbg.Chk(e) {
+				if _, in, e = net.ParseCIDR(addrs[j].String()); err.Chk(e) {
 					continue
 				}
 				if Gateway != nil && in.Contains(gw) {
@@ -156,7 +156,7 @@ func GetAllInterfacesAndAddresses() (interfaces []*net.Interface, udpAddrs []*ne
 	var e error
 	for i := range addrs {
 		var udpAddr *net.UDPAddr
-		if udpAddr, e = net.ResolveUDPAddr("udp", addrs[i].String()+":0"); !dbg.Chk(e) {
+		if udpAddr, e = net.ResolveUDPAddr("udp", addrs[i].String()+":0"); !err.Chk(e) {
 			udpAddrs = append(udpAddrs, udpAddr)
 		}
 	}

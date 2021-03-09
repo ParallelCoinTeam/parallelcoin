@@ -59,7 +59,7 @@ func TestNewTLSCertPair(t *testing.T) {
 	}
 	// Ensure the specified extra hosts are present.
 	for _, host := range extraHosts {
-		if e := x509Cert.VerifyHostname(host); dbg.Chk(e) {
+		if e := x509Cert.VerifyHostname(host); err.Chk(e) {
 			t.Fatalf("failed to verify extra host '%s'", host)
 		}
 	}

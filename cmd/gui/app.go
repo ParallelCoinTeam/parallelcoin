@@ -608,9 +608,9 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											runner := exec.Command(args[0], args[1:]...)
 											runner.Stderr = os.Stderr
 											runner.Stdout = os.Stderr
-											if e = wg.writeWalletCookie(); dbg.Chk(e) {
+											if e = wg.writeWalletCookie(); err.Chk(e) {
 											}
-											if e = runner.Run(); dbg.Chk(e) {
+											if e = runner.Run(); err.Chk(e) {
 											}
 											if wasRunning {
 												wg.wallet.Start()
@@ -632,7 +632,7 @@ func (wg *WalletGUI) writeWalletCookie() (e error) {
 	dbg.Ln("runner", walletPassPath)
 	wp := *wg.cx.Config.WalletPass
 	b := []byte(wp)
-	if e = ioutil.WriteFile(walletPassPath, b, 0700); dbg.Chk(e) {
+	if e = ioutil.WriteFile(walletPassPath, b, 0700); err.Chk(e) {
 	}
 	dbg.Ln("created password cookie")
 	return

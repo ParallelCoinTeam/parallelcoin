@@ -30,7 +30,7 @@ func newHTTPClient(cfg *pod.Config) (client *http.Client, e error) {
 			Password: *cfg.ProxyPass,
 		}
 		dial = func(network, addr string) (c net.Conn, e error) {
-			if c, e = proxy.Dial(network, addr); dbg.Chk(e) {
+			if c, e = proxy.Dial(network, addr); err.Chk(e) {
 				return nil, e
 			}
 			return c, nil
@@ -40,7 +40,7 @@ func newHTTPClient(cfg *pod.Config) (client *http.Client, e error) {
 	var tlsConfig *tls.Config
 	if *cfg.TLS && *cfg.RPCCert != "" {
 		var pem []byte
-		if pem, e = ioutil.ReadFile(*cfg.RPCCert); dbg.Chk(e) {
+		if pem, e = ioutil.ReadFile(*cfg.RPCCert); err.Chk(e) {
 			return nil, e
 		}
 		pool := x509.NewCertPool()
@@ -78,7 +78,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	bodyReader := bytes.NewReader(marshalledJSON)
 	var httpRequest *http.Request
 	var e error
-	if httpRequest, e = http.NewRequest("POST", url, bodyReader); dbg.Chk(e) {
+	if httpRequest, e = http.NewRequest("POST", url, bodyReader); err.Chk(e) {
 		return nil, e
 	}
 	httpRequest.Close = true
@@ -87,18 +87,18 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	httpRequest.SetBasicAuth(*cx.Config.Username, *cx.Config.Password)
 	// Create the new HTTP client that is configured according to the user - specified options and submit the request.
 	var httpClient *http.Client
-	if httpClient, e = newHTTPClient(cx.Config); dbg.Chk(e) {
+	if httpClient, e = newHTTPClient(cx.Config); err.Chk(e) {
 		return nil, e
 	}
 	var httpResponse *http.Response
-	if httpResponse, e = httpClient.Do(httpRequest); dbg.Chk(e) {
+	if httpResponse, e = httpClient.Do(httpRequest); err.Chk(e) {
 		return nil, e
 	}
 	// Read the raw bytes and close the response.
 	var respBytes []byte
-	if respBytes, e = ioutil.ReadAll(httpResponse.Body); dbg.Chk(e) {
+	if respBytes, e = ioutil.ReadAll(httpResponse.Body); err.Chk(e) {
 	}
-	if e = httpResponse.Body.Close(); dbg.Chk(e) {
+	if e = httpResponse.Body.Close(); err.Chk(e) {
 		e = fmt.Errorf("error reading json reply: %v", err)
 		return nil, e
 	}
@@ -114,7 +114,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	}
 	// Unmarshal the response.
 	var resp btcjson.Response
-	if e := js.Unmarshal(respBytes, &resp); dbg.Chk(e) {
+	if e := js.Unmarshal(respBytes, &resp); err.Chk(e) {
 		return nil, e
 	}
 	if resp.Error != nil {

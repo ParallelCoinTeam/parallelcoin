@@ -3,25 +3,24 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/util/routeable"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
-	"runtime"
 	"time"
 	
 	"github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/pipe/serve"
+	"github.com/p9c/pod/pkg/pipe/serve"
 	"github.com/p9c/pod/version"
 	
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -76,17 +75,12 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 		if c.IsSet("loglevel") {
 			trc.Ln("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
-			color := true
-			if runtime.GOOS == "windows" {
-				color = false
-			}
-			logi.L.SetLevel(*cx.Config.LogLevel, color, "pod")
-			// inf.Ln(version.Get())
 		}
+		logg.SetLogLevel(*cx.Config.LogLevel)
 		if !*cx.Config.PipeLog {
 			// if/when running further instances of the same version no reason
 			// to print the version message again
-			dbg.F("running %s\n%s", os.Args, version.Get())
+			dbg.Ln("\nrunning", os.Args, version.Get())
 		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")
@@ -395,7 +389,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			inf.Ln("saving configuration")
 			cx.StateCfg.Save = true
 		}
-		// if e = routeable.Discover(); dbg.Chk(e) {
+		// if e = routeable.Discover(); err.Chk(e) {
 		// 	// TODO: this should trigger the display of this lack of internet
 		// }
 		go func() {
@@ -403,7 +397,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			for {
 				select {
 				case <-time.After(time.Second * 10):
-					if e = routeable.Discover(); dbg.Chk(e) {
+					if e = routeable.Discover(); err.Chk(e) {
 						// TODO: this should trigger the display of this lack of internet
 					}
 				case <-cx.KillAll:

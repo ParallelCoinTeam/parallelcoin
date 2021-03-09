@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"sync"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/database/walletdb"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // BlockHeaderStore is an interface that provides an abstraction for a generic store for block headers.
@@ -135,7 +135,7 @@ func NewBlockHeaderStore(
 			BlockHeader: &netParams.GenesisBlock.Header,
 			Height:      0,
 		}
-		if e := bhs.WriteHeaders(genesisHeader); dbg.Chk(e) {
+		if e := bhs.WriteHeaders(genesisHeader); err.Chk(e) {
 			return nil, e
 		}
 		return bhs, nil
@@ -164,7 +164,7 @@ func NewBlockHeaderStore(
 	//
 	// Otherwise, we'll need to truncate the file until it matches the current index tip.
 	for fileHeight > tipHeight {
-		if e := bhs.singleTruncate(); dbg.Chk(e) {
+		if e := bhs.singleTruncate(); err.Chk(e) {
 			return nil, e
 		}
 		fileHeight--
@@ -264,10 +264,10 @@ func (h *blockHeaderStore) RollbackLastBlock() (*waddrmgr.BlockStamp, error) {
 	prevHeaderHash := bestHeader.PrevBlock
 	// Now that we have the information we need to return from this function, we can now truncate the header file, and
 	// then use the hash of the prevHeader to set the proper index chain tip.
-	if e := h.singleTruncate(); dbg.Chk(e) {
+	if e := h.singleTruncate(); err.Chk(e) {
 		return nil, e
 	}
-	if e := h.truncateIndex(&prevHeaderHash, true); dbg.Chk(e) {
+	if e := h.truncateIndex(&prevHeaderHash, true); err.Chk(e) {
 		return nil, e
 	}
 	return &waddrmgr.BlockStamp{
@@ -307,12 +307,12 @@ func (h *blockHeaderStore) WriteHeaders(hdrs ...BlockHeader) (e error) {
 	defer headerBufPool.Put(headerBuf)
 	// Next, we'll write out all the passed headers in series into the buffer we just extracted from the pool.
 	for _, header := range hdrs {
-		if e := header.Serialize(headerBuf); dbg.Chk(e) {
+		if e := header.Serialize(headerBuf); err.Chk(e) {
 			return e
 		}
 	}
 	// With all the headers written to the buffer, we'll now write out the entire batch in a single write call.
-	if e := h.appendRaw(headerBuf.Bytes()); dbg.Chk(e) {
+	if e := h.appendRaw(headerBuf.Bytes()); err.Chk(e) {
 		return e
 	}
 	// Once those are written, we'll then collate all the headers into headerEntry instances so we can write them all
@@ -530,7 +530,7 @@ func NewFilterHeaderStore(
 			FilterHash: genesisFilterHash,
 			Height:     0,
 		}
-		if e := fhs.WriteHeaders(genesisHeader); dbg.Chk(e) {
+		if e := fhs.WriteHeaders(genesisHeader); err.Chk(e) {
 			return nil, e
 		}
 		return fhs, nil
@@ -554,7 +554,7 @@ func NewFilterHeaderStore(
 	}
 	// Otherwise, we'll need to truncate the file until it matches the current index tip.
 	for fileHeight > tipHeight {
-		if e := fhs.singleTruncate(); dbg.Chk(e) {
+		if e := fhs.singleTruncate(); err.Chk(e) {
 			return nil, e
 		}
 		fileHeight--
@@ -626,12 +626,12 @@ func (f *FilterHeaderStore) WriteHeaders(hdrs ...FilterHeader) (e error) {
 	defer headerBufPool.Put(headerBuf)
 	// Next, we'll write out all the passed headers in series into the buffer we just extracted from the pool.
 	for _, header := range hdrs {
-		if _, e = headerBuf.Write(header.FilterHash[:]); dbg.Chk(e) {
+		if _, e = headerBuf.Write(header.FilterHash[:]); err.Chk(e) {
 			return e
 		}
 	}
 	// With all the headers written to the buffer, we'll now write out the entire batch in a single write call.
-	if e := f.appendRaw(headerBuf.Bytes()); dbg.Chk(e) {
+	if e := f.appendRaw(headerBuf.Bytes()); err.Chk(e) {
 		return e
 	}
 	// As the block headers should already be written, we only need to update the tip pointer for this particular header
@@ -678,10 +678,10 @@ func (f *FilterHeaderStore) RollbackLastBlock(newTip *chainhash.Hash) (
 	}
 	// Now that we have the information we need to return from this function, we can now truncate both the header file
 	// and the index.
-	if e := f.singleTruncate(); dbg.Chk(e) {
+	if e := f.singleTruncate(); err.Chk(e) {
 		return nil, e
 	}
-	if e := f.truncateIndex(newTip, false); dbg.Chk(e) {
+	if e := f.truncateIndex(newTip, false); err.Chk(e) {
 		return nil, e
 	}
 	// TODO(roasbeef): return chain hash also?

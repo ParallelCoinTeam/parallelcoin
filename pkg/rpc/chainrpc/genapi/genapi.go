@@ -6,8 +6,6 @@ import (
 	"os"
 	"sort"
 	"text/template"
-	
-	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 const (
@@ -321,7 +319,7 @@ import (
 	"net/rpc"
 	"time"
 
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -452,7 +450,7 @@ func RunAPI(server *Server, quit qu.C) {
 			select { {{range .}}
 			case msg := <-nrh["{{.Method}}"].Call:
 				if res, e = nrh["{{.Method}}"].
-					Fn(server, msg.Params.({{.Cmd}}), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.({{.Cmd}}), nil); err.Chk(e) {
 				}
 				if r, ok := res.({{.ResType}}); ok { 
 					msg.Ch.(chan {{.Handler}}Res) <-{{.Handler}}Res{&r, e} } {{end}}
@@ -486,27 +484,27 @@ func (r *CAPIClient) {{.Handler}}(cmd ...{{.Cmd}}) (res {{.ResType}}, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("` + Worker + `.{{.Handler}}", c, &res); dbg.Chk(e) {
+	if e = r.Call("` + Worker + `.{{.Handler}}", c, &res); err.Chk(e) {
 	}
 	return
 }
 {{end}}
 `
-	log.L.SetLevel("trace", true, "pod")
-	if fd, e := os.Create("rpchandlers.go"); dbg.Chk(e) {
-		if fd, e := os.OpenFile("rpchandlers.go", os.O_RDWR|os.O_CREATE, 0755); dbg.Chk(e) {
+	logg.SetLogLevel("trace")
+	if fd, e := os.Create("rpchandlers.go"); err.Chk(e) {
+		if fd, e := os.OpenFile("rpchandlers.go", os.O_RDWR|os.O_CREATE, 0755); err.Chk(e) {
 		} else {
 			defer fd.Close()
 			t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 			sort.Sort(handlers)
-			if e = t.Execute(fd, handlers); dbg.Chk(e) {
+			if e = t.Execute(fd, handlers); err.Chk(e) {
 			}
 		}
 	} else {
 		defer fd.Close()
 		t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 		sort.Sort(handlers)
-		if e = t.Execute(fd, handlers); dbg.Chk(e) {
+		if e = t.Execute(fd, handlers); err.Chk(e) {
 		}
 	}
 }

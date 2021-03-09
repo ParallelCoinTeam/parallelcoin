@@ -8,15 +8,15 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/tstranex/gozmq"
 	
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 )
 
 // BitcoindConn represents a persistent client connection to a bitcoind node that listens for events read from a ZMQ
@@ -150,7 +150,7 @@ func (c *BitcoindConn) Stop() {
 func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
 	defer func() {
-		if e := conn.Close(); dbg.Chk(e) {
+		if e := conn.Close(); err.Chk(e) {
 		}
 	}()
 	inf.Ln(
@@ -184,7 +184,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 		case "rawblock":
 			block := &wire.MsgBlock{}
 			r := bytes.NewReader(msgBytes[1])
-			if e := block.Deserialize(r); dbg.Chk(e) {
+			if e := block.Deserialize(r); err.Chk(e) {
 				err.Ln(
 					"unable to deserialize block:", err,
 				)
@@ -222,7 +222,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
 	defer func() {
-		if e := conn.Close(); dbg.Chk(e) {
+		if e := conn.Close(); err.Chk(e) {
 		}
 	}()
 	inf.Ln(
@@ -257,7 +257,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 		case "rawtx":
 			tx := &wire.MsgTx{}
 			r := bytes.NewReader(msgBytes[1])
-			if e := tx.Deserialize(r); dbg.Chk(e) {
+			if e := tx.Deserialize(r); err.Chk(e) {
 				err.Ln(
 					"unable to deserialize transaction:", err,
 				)

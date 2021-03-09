@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/bloom"
 )
 
@@ -23,7 +23,7 @@ func ExampleNewFilter() {
 	txHashStr := "fd611c56ca0d378cdcd16244b45c2ba9588da3adac367c4ef43e808b280b8a45"
 	txHash, e := chainhash.NewHashFromStr(txHashStr)
 	if e != nil  {
-		fmt.Println(err)
+		fmt.Println(e)
 		return
 	}
 	filter.AddHash(txHash)

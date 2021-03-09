@@ -25,11 +25,11 @@ func TestMarshalSecretKey(t *testing.T) {
 }
 func TestUnmarshalSecretKey(t *testing.T) {
 	var sk SecretKey
-	if e := sk.Unmarshal(params); dbg.Chk(e) {
+	if e := sk.Unmarshal(params); err.Chk(e) {
 		t.Errorf("unexpected unmarshal error: %v", err)
 		return
 	}
-	if e := sk.DeriveKey(&password); dbg.Chk(e) {
+	if e := sk.DeriveKey(&password); err.Chk(e) {
 		t.Errorf("unexpected DeriveKey error: %v", err)
 		return
 	}
@@ -39,7 +39,7 @@ func TestUnmarshalSecretKey(t *testing.T) {
 }
 func TestUnmarshalSecretKeyInvalid(t *testing.T) {
 	var sk SecretKey
-	if e := sk.Unmarshal(params); dbg.Chk(e) {
+	if e := sk.Unmarshal(params); err.Chk(e) {
 		t.Errorf("unexpected unmarshal error: %v", err)
 		return
 	}
@@ -82,7 +82,7 @@ func TestZero(t *testing.T) {
 	}
 }
 func TestDeriveKey(t *testing.T) {
-	if e := key.DeriveKey(&password); dbg.Chk(e) {
+	if e := key.DeriveKey(&password); err.Chk(e) {
 		t.Errorf("unexpected DeriveKey key failure: %v", err)
 	}
 }

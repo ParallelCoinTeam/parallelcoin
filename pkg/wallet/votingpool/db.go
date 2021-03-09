@@ -5,11 +5,11 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"fmt"
-
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/snacl"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -400,7 +400,7 @@ func serializeWithdrawal(requests []OutputRequest, startAddress WithdrawalAddres
 	for ntxid, tx := range status.transactions {
 		var buf bytes.Buffer
 		buf.Grow(tx.SerializeSize())
-		if e := tx.Serialize(&buf); dbg.Chk(e) {
+		if e := tx.Serialize(&buf); err.Chk(e) {
 			return nil, e
 		}
 		dbTransactions[ntxid] = dbChangeAwareTx{
@@ -428,7 +428,7 @@ func serializeWithdrawal(requests []OutputRequest, startAddress WithdrawalAddres
 		Status:        dbStatus,
 	}
 	var buf bytes.Buffer
-	if e := gob.NewEncoder(&buf).Encode(row); dbg.Chk(e) {
+	if e := gob.NewEncoder(&buf).Encode(row); err.Chk(e) {
 		return nil, e
 	}
 	return buf.Bytes(), nil
@@ -438,7 +438,7 @@ func serializeWithdrawal(requests []OutputRequest, startAddress WithdrawalAddres
 // and returns it. This function must run with the address manager unlocked.
 func deserializeWithdrawal(p *Pool, ns, addrmgrNs walletdb.ReadBucket, serialized []byte) (*withdrawalInfo, error) {
 	var row dbWithdrawalRow
-	if e := gob.NewDecoder(bytes.NewReader(serialized)).Decode(&row); dbg.Chk(e) {
+	if e := gob.NewDecoder(bytes.NewReader(serialized)).Decode(&row); err.Chk(e) {
 		return nil, newError(ErrWithdrawalStorage, "cannot deserialize withdrawal information",
 			err)
 	}
@@ -513,7 +513,7 @@ func deserializeWithdrawal(p *Pool, ns, addrmgrNs walletdb.ReadBucket, serialize
 	}
 	for ntxid, tx := range row.Status.Transactions {
 		var msgtx wire.MsgTx
-		if e := msgtx.Deserialize(bytes.NewBuffer(tx.SerializedMsgTx)); dbg.Chk(e) {
+		if e := msgtx.Deserialize(bytes.NewBuffer(tx.SerializedMsgTx)); err.Chk(e) {
 			return nil, newError(ErrWithdrawalStorage, "cannot deserialize transaction", err)
 		}
 		wInfo.status.transactions[ntxid] = changeAwareTx{

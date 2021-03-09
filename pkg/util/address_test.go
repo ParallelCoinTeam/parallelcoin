@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/btcsuite/golangcrypto/ripemd160"
-
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/util"
 )
 

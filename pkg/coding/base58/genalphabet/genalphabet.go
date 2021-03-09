@@ -35,13 +35,13 @@ var b58 = [256]byte{`)
 func write(w io.Writer, b []byte) {
 	_, e := w.Write(b)
 	if e != nil  {
-				ftl.Ln(err)
+				ftl.Ln(e)
 	}
 }
 func main() {
 	fi, e := os.Create("alphabet.go")
 	if e != nil  {
-				ftl.Ln(err)
+				ftl.Ln(e)
 	}
 	defer fi.Close()
 	write(fi, start)

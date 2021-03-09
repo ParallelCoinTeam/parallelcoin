@@ -5,7 +5,7 @@ import (
 	
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 )
@@ -31,7 +31,7 @@ func main() {
 				model.mainWidget, func(l.Context) {}, func() {
 					quit.Q()
 				}, quit,
-		); dbg.Chk(e) {
+		); err.Chk(e) {
 		}
 	}()
 	<-quit

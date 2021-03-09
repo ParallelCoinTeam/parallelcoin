@@ -117,7 +117,7 @@ func (c *Config) Config() GroupsMap {
 					sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
 						dbg.Ln(sgf.Slug, "submitted", txt)
 						i := c.cx.ConfigMap[sgf.Slug].(*int)
-						if n, e := strconv.Atoi(txt); !dbg.Chk(e) {
+						if n, e := strconv.Atoi(txt); !err.Chk(e) {
 							*i = n
 						}
 						save.Pod(c.cx.Config)
@@ -128,7 +128,7 @@ func (c *Config) Config() GroupsMap {
 					func(txt string) {
 						dbg.Ln(sgf.Slug, "submitted", txt)
 						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
-						if d, e := time.ParseDuration(txt); !dbg.Chk(e) {
+						if d, e := time.ParseDuration(txt); !err.Chk(e) {
 							*tt = d
 						}
 						save.Pod(c.cx.Config)
@@ -139,7 +139,7 @@ func (c *Config) Config() GroupsMap {
 					func(txt string) {
 						dbg.Ln(sgf.Slug, "submitted", txt)
 						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
-						if f, e := strconv.ParseFloat(txt, 64); !dbg.Chk(e) {
+						if f, e := strconv.ParseFloat(txt, 64); !err.Chk(e) {
 							*ff = f
 						}
 						save.Pod(c.cx.Config)

@@ -4,11 +4,11 @@ import (
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/pipe/consume"
 	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
 )
 
 // RunUnit handles correctly starting and stopping child processes that have StdConn pipe logging enabled, allowing
@@ -50,7 +50,7 @@ func New(
 						continue
 					}
 					if r.worker != nil {
-						if e = r.worker.Kill(); dbg.Chk(e) {
+						if e = r.worker.Kill(); err.Chk(e) {
 						}
 					}
 					// quit from rununit's quit, which closes after the main quit triggers stopping in the watcher loop
@@ -69,7 +69,7 @@ func New(
 					}
 					consume.Kill(r.worker)
 					// var e error
-					// if e = r.worker.Wait(); dbg.Chk(e) {
+					// if e = r.worker.Wait(); err.Chk(e) {
 					// }
 					r.running.Store(false)
 					stop()
@@ -96,7 +96,7 @@ func New(
 			// r.quit.Q()
 			consume.Kill(r.worker)
 			var e error
-			if e = r.worker.Wait(); dbg.Chk(e) {
+			if e = r.worker.Wait(); err.Chk(e) {
 			}
 			r.running.Store(false)
 			stop()

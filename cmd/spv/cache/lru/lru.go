@@ -122,7 +122,7 @@ func (c *Cache) Put(key interface{}, value cache.Value) (e error) {
 	}
 	// Then we need to make sure we have enough space for the element, evict
 	// elements if we need more space.
-	if e = c.evict(vs); dbg.Chk(e) {
+	if e = c.evict(vs); err.Chk(e) {
 		return e
 	}
 	// We have made enough space in the cache, so just insert it.

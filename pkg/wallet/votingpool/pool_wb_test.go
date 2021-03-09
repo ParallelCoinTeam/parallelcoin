@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 func TestPoolEnsureUsedAddr(t *testing.T) {
@@ -14,12 +14,12 @@ func TestPoolEnsureUsedAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -76,12 +76,12 @@ func TestPoolGetUsedAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -123,12 +123,12 @@ func TestSerializationErrors(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -190,12 +190,12 @@ func TestSerialization(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -339,12 +339,12 @@ func TestValidateAndDecryptKeys(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -392,12 +392,12 @@ func TestValidateAndDecryptKeysErrors(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)

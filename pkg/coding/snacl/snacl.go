@@ -184,7 +184,7 @@ func (sk *SecretKey) Zero() {
 //
 // This should only be called after previously calling the Zero function or on an initial Unmarshal.
 func (sk *SecretKey) DeriveKey(password *[]byte) (e error) {
-	if e = sk.deriveKey(password); dbg.Chk(e) {
+	if e = sk.deriveKey(password); err.Chk(e) {
 		return
 	}
 	// verify password

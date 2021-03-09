@@ -16,19 +16,19 @@ import (
 
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
 	"github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txauthor "github.com/p9c/pod/pkg/blockchain/tx/txauthor"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	log "github.com/p9c/pod/pkg/util/logi"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 var (
@@ -404,7 +404,7 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 	// up.
 	_, e = harness.h1.Node.Generate(124)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	e = waitForSync(t, harness.svc, harness.h1)
 	if e != nil  {

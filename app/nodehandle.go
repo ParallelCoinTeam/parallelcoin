@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/cmd/walletmain"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node"
@@ -35,7 +35,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		// Perform service command and exit if specified. Invalid service commands show an appropriate error. Only runs
 		// on Windows since the runServiceCommand function will be nil when not on Windows.
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
-			if e = runServiceCommand(serviceOpts.ServiceCommand); dbg.Chk(e) {
+			if e = runServiceCommand(serviceOpts.ServiceCommand); err.Chk(e) {
 				return e
 			}
 			return nil
@@ -48,13 +48,13 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 				apputil.FileExists(*cx.Config.RPCKey) &&
 				apputil.FileExists(*cx.Config.CAFile) {
 			} else {
-				if _, e = walletmain.GenerateRPCKeyPair(cx.Config, true); dbg.Chk(e) {
+				if _, e = walletmain.GenerateRPCKeyPair(cx.Config, true); err.Chk(e) {
 				}
 			}
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				if e := node.Main(cx); dbg.Chk(e) {
+				if e := node.Main(cx); err.Chk(e) {
 					err.Ln("error starting node ", e)
 				}
 			}()

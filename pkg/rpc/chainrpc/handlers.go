@@ -13,18 +13,18 @@ import (
 	"strings"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/util/logi"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	database "github.com/p9c/pod/pkg/db"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/fork"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
+	database "github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -62,7 +62,7 @@ func HandleAddNode(s *Server, cmd interface{}, closeChan qu.C) (ifc interface{},
 		}
 	}
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidParameter,
 			Message: e.Error(),
@@ -117,7 +117,7 @@ func HandleCreateRawTransaction(
 	for _, input := range c.Inputs {
 		txHash, e := chainhash.NewHashFromStr(input.Txid)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			return nil, DecodeHexError(input.Txid)
 		}
 		prevOut := wire.NewOutPoint(txHash, input.Vout)
@@ -140,7 +140,7 @@ func HandleCreateRawTransaction(
 		// Decode the provided address.
 		addr, e := util.DecodeAddress(encodedAddr, params)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCInvalidAddressOrKey,
 				Message: "Invalid address or key: " + e.Error(),
@@ -167,14 +167,14 @@ func HandleCreateRawTransaction(
 		// Create a new script which pays to the provided address.
 		pkScript, e := txscript.PayToAddrScript(addr)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			context := "Failed to generate pay-to-address script"
 			return nil, InternalRPCError(e.Error(), context)
 		}
 		// Convert the amount to satoshi.
 		satoshi, e := util.NewAmount(amount)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			context := "Failed to convert amount"
 			return nil, InternalRPCError(e.Error(), context)
 		}
@@ -190,7 +190,7 @@ func HandleCreateRawTransaction(
 	// nothing (nil) in the case of an error.
 	mtxHex, e := MessageToHex(mtx)
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, e
 	}
 	return mtxHex, nil
@@ -225,13 +225,13 @@ func HandleDecodeRawTransaction(
 	}
 	serializedTx, e := hex.DecodeString(hexStr)
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, DecodeHexError(hexStr)
 	}
 	var mtx wire.MsgTx
 	e = mtx.Deserialize(bytes.NewReader(serializedTx))
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
 			Message: "TX decode failed: " + e.Error(),
@@ -277,7 +277,7 @@ func HandleDecodeScript(
 	}
 	script, e := hex.DecodeString(hexStr)
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, DecodeHexError(hexStr)
 	}
 	// The disassembled string will contain [error] inline if the script doesn't fully parse, so ignore the error here.
@@ -295,7 +295,7 @@ func HandleDecodeScript(
 	// Convert the script itself to a pay-to-script-hash address.
 	p2sh, e := util.NewAddressScriptHash(script, s.Cfg.ChainParams)
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		context := "Failed to convert script to pay-to-script-hash"
 		return nil, InternalRPCError(e.Error(), context)
 	}
@@ -342,7 +342,7 @@ func HandleEstimateFee(
 	}
 	feeRate, e := s.Cfg.FeeEstimator.EstimateFee(uint32(c.NumBlocks))
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return -1.0, e
 	}
 	// Convert to satoshis per kb.
@@ -921,7 +921,7 @@ func HandleGetBlockTemplateLongPoll(
 	state.Lock()
 	// The state unlock is intentionally not deferred here since it needs to be manually unlocked before waiting for a
 	// notification about block template changes.
-	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); dbg.Chk(e) {
+	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); err.Chk(e) {
 		state.Unlock()
 		return nil, e
 	}
@@ -970,7 +970,7 @@ func HandleGetBlockTemplateLongPoll(
 	// Get the lastest block template
 	state.Lock()
 	defer state.Unlock()
-	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); dbg.Chk(e) {
+	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); err.Chk(e) {
 		return nil, e
 	}
 	// Include whether or not it is valid to submit work against the old block template depending on whether or not a
@@ -1011,7 +1011,7 @@ func HandleGetBlockTemplateProposal(
 		}
 	}
 	var msgBlock wire.MsgBlock
-	if e := msgBlock.Deserialize(bytes.NewReader(dataBytes)); dbg.Chk(e) {
+	if e := msgBlock.Deserialize(bytes.NewReader(dataBytes)); err.Chk(e) {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
 			Message: "block decode failed: " + e.Error(),
@@ -1024,7 +1024,7 @@ func HandleGetBlockTemplateProposal(
 	if !expectedPrevHash.IsEqual(prevHash) {
 		return "bad-prevblk", nil
 	}
-	if e := s.Cfg.Chain.CheckConnectBlockTemplate(block); dbg.Chk(e) {
+	if e := s.Cfg.Chain.CheckConnectBlockTemplate(block); err.Chk(e) {
 		if _, ok := e.(blockchain.RuleError); !ok {
 			errStr := fmt.Sprintf("failed to process block proposal: %v", err)
 			err.Ln(errStr)
@@ -1115,7 +1115,7 @@ func HandleGetBlockTemplateRequest(
 	//
 	// Otherwise, the timestamp for the existing block template is updated (and possibly the difficulty on testnet per
 	// the consesus rules).
-	if e := workState.UpdateBlockTemplate(s, useCoinbaseValue); dbg.Chk(e) {
+	if e := workState.UpdateBlockTemplate(s, useCoinbaseValue); err.Chk(e) {
 		return nil, e
 	}
 	return workState.BlockTemplateResult(useCoinbaseValue, nil)
@@ -1209,7 +1209,7 @@ func HandleGetCFilterHeader(s *Server, cmd interface{}, closeChan qu.C) (interfa
 	
 	e = hash.SetBytes(headerBytes)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 		
 	}
 	return hash.String(), nil
@@ -2824,12 +2824,12 @@ func HandleVerifyMessage(s *Server, cmd interface{}, closeChan qu.C) (interface{
 	var buf bytes.Buffer
 	e = wire.WriteVarString(&buf, 0, "Bitcoin Signed Message:\n")
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 		
 	}
 	e = wire.WriteVarString(&buf, 0, c.Message)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 		
 	}
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())

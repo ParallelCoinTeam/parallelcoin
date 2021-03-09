@@ -6,12 +6,12 @@ import (
 	"math/big"
 	"runtime"
 	"time"
-
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -168,7 +168,7 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 		Bits:       net.PowLimitBits,
 	}
 	for _, tx := range blockTxns {
-		if e := block.AddTransaction(tx.MsgTx()); dbg.Chk(e) {
+		if e := block.AddTransaction(tx.MsgTx()); err.Chk(e) {
 			return nil, e
 		}
 	}

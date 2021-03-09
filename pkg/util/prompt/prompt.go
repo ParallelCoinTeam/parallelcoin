@@ -162,7 +162,7 @@ func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, 
 			return nil, e
 		}
 		// Keep prompting the user until the passphrase is correct.
-		if e := legacyKeyStore.Unlock(privPass); dbg.Chk(e) {
+		if e := legacyKeyStore.Unlock(privPass); err.Chk(e) {
 			if e == keystore.ErrWrongPassphrase {
 				continue
 			}

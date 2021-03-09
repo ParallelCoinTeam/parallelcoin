@@ -2,8 +2,8 @@ package spv
 
 import (
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // headers wraps the different headers and filters used throughout the tests.
@@ -59,11 +59,11 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// is created, we query it to add to the slices.
 // 		genesisBlockHeader, _, e = hdrStore.ChainTip()
 // 		if e != nil  {
-// 			t.ftl.Ln(err)
+// 			t.ftl.Ln(e)
 // 		}
 // 		genesisFilterHeader, _, e = cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.ftl.Ln(err)
+// 			t.ftl.Ln(e)
 // 		}
 // 		headers, e := generateHeaders(genesisBlockHeader,
 // 			genesisFilterHeader, nil)
@@ -72,7 +72,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		}
 // 		// Write all block headers but the genesis, since it is already
 // 		// in the store.
-// 		if e = hdrStore.WriteHeaders(headers.blockHeaders[1:]...); dbg.Chk(e) {
+// 		if e = hdrStore.WriteHeaders(headers.blockHeaders[1:]...); err.Chk(e) {
 // 			t.Fatalf("Error writing batch of headers: %s", err)
 // 		}
 // 		// We emulate the case where a few filter headers are already
@@ -136,7 +136,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// Finally make sure the filter header tip is what we expect.
 // 		tip, tipHeight, e := cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.ftl.Ln(err)
+// 			t.ftl.Ln(e)
 // 		}
 // 		if tipHeight != maxHeight {
 // 			t.Fatalf("expected tip height to be %v, was %v",
@@ -219,11 +219,11 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// is created, we query it to add to the slices.
 // 		genesisBlockHeader, _, e = hdrStore.ChainTip()
 // 		if e != nil  {
-// 			t.ftl.Ln(err)
+// 			t.ftl.Ln(e)
 // 		}
 // 		genesisFilterHeader, _, e = cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.ftl.Ln(err)
+// 			t.ftl.Ln(e)
 // 		}
 // 		// To emulate a full node serving us filter headers derived
 // 		// from different genesis than what we have, we flip a bit in
@@ -247,7 +247,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		}
 // 		// Write all block headers but the genesis, since it is already
 // 		// in the store.
-// 		if e = hdrStore.WriteHeaders(headers.blockHeaders[1:]...); dbg.Chk(e) {
+// 		if e = hdrStore.WriteHeaders(headers.blockHeaders[1:]...); err.Chk(e) {
 // 			t.Fatalf("Error writing batch of headers: %s", err)
 // 		}
 // 		// We emulate the case where a few filter headers are already

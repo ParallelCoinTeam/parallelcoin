@@ -14,20 +14,20 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/urfave/cli"
 	
 	l "gioui.org/layout"
 	
-	"github.com/p9c/pod/pkg/util/logi/pipe/consume"
+	"github.com/p9c/pod/pkg/pipe/consume"
 	"github.com/p9c/pod/pkg/util/rununit"
 	
 	"github.com/p9c/pod/app/apputil"
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (e error) {
@@ -197,7 +197,7 @@ func (wg *WalletGUI) Run() (e error) {
 				// TODO: make a more appropriate trigger for this - ie, when state actually changes.
 				// if wg.wallet.Running() && wg.stateLoaded.Load() {
 				// 	filename := filepath.Join(wg.cx.DataDir, "state.json")
-				// 	if e := wg.State.Save(filename, wg.cx.Config.WalletPass); dbg.Chk(e) {
+				// 	if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 				// 	}
 				// }
 			case <-wg.cx.KillAll.Wait():
@@ -252,7 +252,7 @@ func (wg *WalletGUI) Run() (e error) {
 			wg.MainApp.Overlay,
 			wg.gracefulShutdown,
 			wg.quit,
-		); dbg.Chk(e) {
+		); err.Chk(e) {
 	}
 	wg.gracefulShutdown()
 	wg.quit.Q()
@@ -430,7 +430,7 @@ func (wg *WalletGUI) gracefulShutdown() {
 	} else {
 		shuttingDown = true
 	}
-	dbg.Ln("\n\nquitting wallet gui")
+	dbg.Ln("\nquitting wallet gui\n")
 	if wg.miner.Running() {
 		dbg.Ln("stopping miner")
 		wg.miner.Stop()

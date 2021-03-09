@@ -22,25 +22,25 @@ func ExampleAmount() {
 func ExampleNewAmount() {
 	amountOne, e := util.NewAmount(1)
 	if e != nil  {
-		fmt.Println(err)
+		fmt.Println(e)
 		return
 	}
 	fmt.Println(amountOne) // Output 1
 	amountFraction, e := util.NewAmount(0.01234567)
 	if e != nil  {
-		fmt.Println(err)
+		fmt.Println(e)
 		return
 	}
 	fmt.Println(amountFraction) // Output 2
 	amountZero, e := util.NewAmount(0)
 	if e != nil  {
-		fmt.Println(err)
+		fmt.Println(e)
 		return
 	}
 	fmt.Println(amountZero) // Output 3
 	amountNaN, e := util.NewAmount(math.NaN())
 	if e != nil  {
-		fmt.Println(err)
+		fmt.Println(e)
 		return
 	}
 	fmt.Println(amountNaN) // Output 4

@@ -5,8 +5,8 @@ import (
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/fork"
 )
 
 // Configure loads and sanitises the configuration from urfave/cli

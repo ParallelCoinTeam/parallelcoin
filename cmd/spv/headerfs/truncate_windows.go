@@ -33,10 +33,10 @@ func (h *headerStore) singleTruncate() (e error) {
 	// On Windows, a file can't be truncated while open, even if using a file handle to truncate it. This means we have
 	// to close, truncate, and reopen it.
 	fileName := h.file.Name()
-	if e = h.file.Close(); dbg.Chk(e) {
+	if e = h.file.Close(); err.Chk(e) {
 		return err
 	}
-	if e = os.Truncate(fileName, newSize); dbg.Chk(e) {
+	if e = os.Truncate(fileName, newSize); err.Chk(e) {
 		return err
 	}
 	fileFlags := os.O_RDWR | os.O_APPEND | os.O_CREATE

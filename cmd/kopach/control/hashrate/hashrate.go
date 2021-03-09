@@ -34,7 +34,7 @@ type Hashrate struct {
 func Get(count int32, version int32, height int32, id string) []byte {
 	nonce := make([]byte, 4)
 	var e error
-	if _, e = io.ReadFull(rand.Reader, nonce); dbg.Chk(e) {
+	if _, e = io.ReadFull(rand.Reader, nonce); err.Chk(e) {
 	}
 	hr := Hashrate{
 		Time:    time.Now(),

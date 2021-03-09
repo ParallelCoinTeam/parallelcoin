@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 	
-	rpc "github.com/p9c/pod/pkg/rpc/client"
+	rpc "github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -51,7 +51,7 @@ func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, e
 		certFile:  certFile,
 		keyFile:   keyFile,
 	}
-	if e := a.setDefaults(); dbg.Chk(e) {
+	if e := a.setDefaults(); err.Chk(e) {
 		return nil, e
 	}
 	return a, nil
@@ -156,7 +156,7 @@ func (n *nodeConfig) cleanup() (e error) {
 	}
 	var e error
 	for _, dir := range dirs {
-		if e = os.RemoveAll(dir); dbg.Chk(e) {
+		if e = os.RemoveAll(dir); err.Chk(e) {
 			Errorf("Cannot remove dir %s: %v", dir, err)
 		}
 	}
@@ -185,7 +185,7 @@ func newNode(config *nodeConfig, dataDir string) (*node, error) {
 // This file can be used to terminate the process in case of a hang or panic. In the case of a failing test case, or
 // panic, it is important that the process be stopped via stop( ) otherwise it will persist unless explicitly killed.
 func (n *node) start() (e error) {
-	if e := n.cmd.Start(); dbg.Chk(e) {
+	if e := n.cmd.Start(); err.Chk(e) {
 		return err
 	}
 	pid, e := os.Create(filepath.Join(n.dataDir,
@@ -194,10 +194,10 @@ func (n *node) start() (e error) {
 				return err
 	}
 	n.pidFile = pid.Name()
-	if _, e = fmt.Fprintf(pid, "%d\n", n.cmd.Process.Pid); dbg.Chk(e) {
+	if _, e = fmt.Fprintf(pid, "%d\n", n.cmd.Process.Pid); err.Chk(e) {
 		return err
 	}
-	if e := pid.Close(); dbg.Chk(e) {
+	if e := pid.Close(); err.Chk(e) {
 		return err
 	}
 	return nil
@@ -225,7 +225,7 @@ func (n *node) stop() (e error) {
 // any directories created by the process.
 func (n *node) cleanup() (e error) {
 	if n.pidFile != "" {
-		if e := os.Remove(n.pidFile); dbg.Chk(e) {
+		if e := os.Remove(n.pidFile); err.Chk(e) {
 			Errorf("unable to remove file %s: %v", n.pidFile, err)
 		}
 	}
@@ -234,10 +234,10 @@ func (n *node) cleanup() (e error) {
 
 // shutdown terminates the running pod process and cleans up all file/directories created by node.
 func (n *node) shutdown() (e error) {
-	if e := n.stop(); dbg.Chk(e) {
+	if e := n.stop(); err.Chk(e) {
 		return err
 	}
-	if e := n.cleanup(); dbg.Chk(e) {
+	if e := n.cleanup(); err.Chk(e) {
 		return err
 	}
 	return nil
@@ -252,12 +252,12 @@ func genCertPair(certFile, keyFile string) (e error) {
 				return err
 	}
 	// Write cert and key files.
-	if e = ioutil.WriteFile(certFile, cert, 0666); dbg.Chk(e) {
+	if e = ioutil.WriteFile(certFile, cert, 0666); err.Chk(e) {
 		return err
 	}
-	if e = ioutil.WriteFile(keyFile, key, 0600); dbg.Chk(e) {
+	if e = ioutil.WriteFile(keyFile, key, 0600); err.Chk(e) {
 		defer func() {
-			if e := os.Remove(certFile); dbg.Chk(e) {
+			if e := os.Remove(certFile); err.Chk(e) {
 			}
 		}()
 		return err

@@ -13,17 +13,17 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/util/logi"
 	
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/davecgh/go-spew/spew"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 const (
@@ -874,7 +874,7 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 		p.cfg.Listeners.OnRead(p, n, msg, e)
 	}
 	if e != nil {
-		trc.Ln(err)
+		trc.Ln(e)
 		return nil, nil, e
 	}
 	// Use closures to log expensive operations so they are only run when the logging level requires it.
@@ -1183,7 +1183,7 @@ out:
 		rMsg, buf, e := p.readMessage(p.wireEncoding)
 		idleTimer.Stop()
 		if e != nil {
-			trc.Ln(err)
+			trc.Ln(e)
 			// In order to allow regression tests with malformed messages, don't disconnect the peer when we're in
 			// regression test mode and the error is one of the allowed errors.
 			if p.isAllowedReadError(e) {
@@ -1424,7 +1424,7 @@ out:
 					invMsg := wire.NewMsgInvSizeHint(1)
 					e := invMsg.AddInvVect(iv)
 					if e != nil {
-						dbg.Ln(err)
+						dbg.Ln(e)
 					}
 					waiting = queuePacket(
 						outMsg{msg: invMsg},
@@ -1451,7 +1451,7 @@ out:
 				}
 				e := invMsg.AddInvVect(iv)
 				if e != nil {
-					dbg.Ln(err)
+					dbg.Ln(e)
 				}
 				if len(invMsg.InvList) >= maxInvTrickleSize {
 					waiting = queuePacket(
@@ -1826,7 +1826,7 @@ func (p *Peer) writeLocalVersionMsg() (e error) {
 //
 // If the events do not occur in that order then it returns an error.
 func (p *Peer) negotiateInboundProtocol() (e error) {
-	if e := p.readRemoteVersionMsg(); dbg.Chk(e) {
+	if e := p.readRemoteVersionMsg(); err.Chk(e) {
 		return e
 	}
 	return p.writeLocalVersionMsg()
@@ -1836,7 +1836,7 @@ func (p *Peer) negotiateInboundProtocol() (e error) {
 //
 // If the events do not occur in that order then it returns an error.
 func (p *Peer) negotiateOutboundProtocol() (e error) {
-	if e := p.writeLocalVersionMsg(); dbg.Chk(e) {
+	if e := p.writeLocalVersionMsg(); err.Chk(e) {
 		return e
 	}
 	return p.readRemoteVersionMsg()
@@ -1901,7 +1901,7 @@ func (p *Peer) AssociateConnection(conn net.Conn) {
 		p.na = na
 	}
 	go func() {
-		if e := p.start(); dbg.Chk(e) {
+		if e := p.start(); err.Chk(e) {
 			dbg.F("cannot start peer %v: %v", p, err)
 			p.Disconnect()
 		}
@@ -1980,5 +1980,6 @@ func NewOutboundPeer(cfg *Config, addr string) (*Peer, error) {
 }
 
 func init() {
+
 	rand.Seed(time.Now().UnixNano())
 }

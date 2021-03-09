@@ -6,7 +6,7 @@ import (
 	"fmt"
 	
 	"github.com/p9c/pod/pkg/gui"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	l "gioui.org/layout"
 	"gioui.org/text"
@@ -68,7 +68,7 @@ func main() {
 					quit.Q()
 					// os.Exit(0)
 				}, quit,
-		); dbg.Ok(err) {
+		); dbg.Ok(e) {
 		}
 	}()
 	<-quit

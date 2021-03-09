@@ -5,10 +5,10 @@ import (
 	"errors"
 	"golang.org/x/crypto/ripemd160"
 	
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/coding/base58"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
 )
 
 // //

@@ -15,17 +15,17 @@ import (
 	"sync"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/btcsuite/websocket"
 	"golang.org/x/crypto/ripemd160"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	database "github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -241,7 +241,7 @@ func (s *Server) WebsocketHandler(
 	// Clear the read deadline that was set before the websocket hijacked the connection.
 	e := conn.SetReadDeadline(TimeZeroVal)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	// Limit max number of websocket clients.
 	trc.Ln("new websocket client", remoteAddr)
@@ -252,7 +252,7 @@ func (s *Server) WebsocketHandler(
 			s.Config.RPCMaxWebsockets,
 			remoteAddr,
 		)
-		if e := conn.Close(); dbg.Chk(e) {
+		if e := conn.Close(); err.Chk(e) {
 		}
 		return
 	}
@@ -262,7 +262,7 @@ func (s *Server) WebsocketHandler(
 	client, e := NewWebsocketClient(s, conn, remoteAddr, authenticated, isAdmin)
 	if e != nil {
 		err.F("failed to serve client %s: %v %s", remoteAddr, err)
-		if e := conn.Close(); dbg.Chk(e) {
+		if e := conn.Close(); err.Chk(e) {
 		}
 		return
 	}
@@ -283,7 +283,7 @@ func (c *WSClient) Disconnect() {
 	}
 	trc.Ln("disconnecting websocket client", c.Addr)
 	c.Quit.Q()
-	if e := c.Conn.Close(); dbg.Chk(e) {
+	if e := c.Conn.Close(); err.Chk(e) {
 	}
 	c.Disconnected = true
 }
@@ -1150,7 +1150,7 @@ func (m *WSNtfnMgr) NotifyFilteredBlockConnected(
 		}
 		e = wsc.QueueNotification(marshalledJSON)
 		if e != nil {
-			dbg.Ln(err)
+			dbg.Ln(e)
 		}
 	}
 }
@@ -1180,7 +1180,7 @@ func (*WSNtfnMgr) NotifyFilteredBlockDisconnected(
 	for _, wsc := range clients {
 		e := wsc.QueueNotification(marshalledJSON)
 		if e != nil {
-			dbg.Ln(err)
+			dbg.Ln(e)
 		}
 	}
 }
@@ -1226,7 +1226,7 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 			if marshalledJSONVerbose != nil {
 				e := wsc.QueueNotification(marshalledJSONVerbose)
 				if e != nil {
-					dbg.Ln(err)
+					dbg.Ln(e)
 				}
 				continue
 			}
@@ -1289,7 +1289,7 @@ OutPoint]map[qu.C]*WSClient, tx *util.Tx, block *util.Block,
 					wscNotified[wscQuit] = struct{}{}
 					e := wsc.QueueNotification(marshalledJSON)
 					if e != nil {
-						dbg.Ln(err)
+						dbg.Ln(e)
 					}
 				}
 			}
@@ -1925,7 +1925,7 @@ fetchRange:
 		lastBlock.Height(),
 		lastBlock.MsgBlock().Header.Timestamp.Unix(),
 	)
-	if mn, e := btcjson.MarshalCmd(nil, n); dbg.Chk(e) {
+	if mn, e := btcjson.MarshalCmd(nil, n); err.Chk(e) {
 		err.F(
 			"failed to marshal rescan finished notification: %v", err,
 		)
@@ -2100,6 +2100,7 @@ func HandleWebsocketHelp(wsc *WSClient, icmd interface{}) (interface{}, error) {
 }
 
 func init() {
+
 	WSHandlers = WSHandlersBeforeInit
 }
 func MakeSemaphore(n int) Semaphore {

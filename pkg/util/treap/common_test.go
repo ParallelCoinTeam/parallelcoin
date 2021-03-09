@@ -98,6 +98,7 @@ testLoop:
 	}
 }
 func init() {
+
 	// Force the same pseudo random numbers for each test run.
 	rand.Seed(0)
 }

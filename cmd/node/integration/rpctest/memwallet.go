@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"sync"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
@@ -404,7 +404,7 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 		tx.AddTxOut(output)
 	}
 	// Attempt to fund the transaction with spendable utxos.
-	if e := m.fundTx(tx, outputAmt, feeRate, change); dbg.Chk(e) {
+	if e := m.fundTx(tx, outputAmt, feeRate, change); err.Chk(e) {
 		return nil, e
 	}
 	// Populate all the selected inputs with valid sigScript for spending. Along the way record all outputs being spent

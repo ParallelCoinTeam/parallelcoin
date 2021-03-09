@@ -256,7 +256,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 			continue
 		}
 		var request btcjson.Request
-		if e := json.Unmarshal(marshalled, &request); dbg.Chk(e) {
+		if e := json.Unmarshal(marshalled, &request); err.Chk(e) {
 			t.Errorf("Test #%d (%s) unexpected error while "+
 				"unmarshalling JSON-RPC request: %v", i,
 				test.name, err)

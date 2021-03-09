@@ -5,7 +5,7 @@ import (
 	"net/rpc"
 	"os"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/comm/stdconn"
 )
@@ -37,7 +37,7 @@ func main() {
 	stdConn := stdconn.New(os.Stdin, os.Stdout, hello.Quit)
 	e := rpc.Register(hello)
 	if e != nil  {
-		printlnE(err)
+		printlnE(e)
 		return
 	}
 	go rpc.ServeConn(stdConn)

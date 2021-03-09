@@ -2,15 +2,15 @@ package gui
 
 import (
 	"encoding/json"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/pod"
 	"io/ioutil"
 	"path/filepath"
 	"time"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -26,7 +26,7 @@ func (wg *WalletGUI) Tickers() {
 	var e error
 	var height int32
 	var h *chainhash.Hash
-	if h, height, e = wg.ChainClient.GetBestBlock(); dbg.Chk(e) {
+	if h, height, e = wg.ChainClient.GetBestBlock(); err.Chk(e) {
 		// interrupt.Request()
 		return
 	}
@@ -76,16 +76,16 @@ func (wg *WalletGUI) Tickers() {
 					dbg.Ln("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
 					dbg.Ln("---------------------- stateLoaded", wg.stateLoaded.Load())
 					wg.node.Start()
-					if e = wg.writeWalletCookie(); dbg.Chk(e) {
+					if e = wg.writeWalletCookie(); err.Chk(e) {
 					}
 					wg.wallet.Start()
 					dbg.Ln("connecting to chain")
-					if e = wg.chainClient(); dbg.Chk(e) {
+					if e = wg.chainClient(); err.Chk(e) {
 						break
 					}
 					if wg.wallet.Running() { // && wg.WalletClient == nil {
 						dbg.Ln("connecting to wallet")
-						if e = wg.walletClient(); dbg.Chk(e) {
+						if e = wg.walletClient(); err.Chk(e) {
 							break
 						}
 					}
@@ -153,8 +153,8 @@ func (wg *WalletGUI) Tickers() {
 func (wg *WalletGUI) updateThingies() (e error) {
 	// update the configuration
 	var b []byte
-	if b, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); !dbg.Chk(e) {
-		if e = json.Unmarshal(b, wg.cx.Config); !dbg.Chk(e) {
+	if b, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); !err.Chk(e) {
+		if e = json.Unmarshal(b, wg.cx.Config); !err.Chk(e) {
 			return
 		}
 	}
@@ -165,14 +165,14 @@ func (wg *WalletGUI) updateChainBlock() {
 	var e error
 	if wg.ChainClient != nil && wg.ChainClient.Disconnected() || wg.ChainClient.Disconnected() {
 		dbg.Ln("connecting ChainClient")
-		if e = wg.chainClient(); dbg.Chk(e) {
+		if e = wg.chainClient(); err.Chk(e) {
 			return
 		}
 	}
 	var h *chainhash.Hash
 	var height int32
 	dbg.Ln("updating best block")
-	if h, height, e = wg.ChainClient.GetBestBlock(); dbg.Chk(e) {
+	if h, height, e = wg.ChainClient.GetBestBlock(); err.Chk(e) {
 		// interrupt.Request()
 		return
 	}
@@ -199,18 +199,18 @@ func (wg *WalletGUI) processWalletBlockNotification() bool {
 	// check account balance
 	var unconfirmed util.Amount
 	var e error
-	if unconfirmed, e = wg.WalletClient.GetUnconfirmedBalance("default"); dbg.Chk(e) {
+	if unconfirmed, e = wg.WalletClient.GetUnconfirmedBalance("default"); err.Chk(e) {
 		return false
 	}
 	wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
 	var confirmed util.Amount
-	if confirmed, e = wg.WalletClient.GetBalance("default"); dbg.Chk(e) {
+	if confirmed, e = wg.WalletClient.GetBalance("default"); err.Chk(e) {
 		return false
 	}
 	wg.State.SetBalance(confirmed.ToDUO())
 	var atr []btcjson.ListTransactionsResult
 	// TODO: for some reason this function returns half as many as requested
-	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); dbg.Chk(e) {
+	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); err.Chk(e) {
 		return false
 	}
 	// dbg.Ln(len(atr))
@@ -233,11 +233,11 @@ func (wg *WalletGUI) forceUpdateChain() {
 	var e error
 	var height int32
 	var tip *chainhash.Hash
-	if tip, height, e = wg.ChainClient.GetBestBlock(); dbg.Chk(e) {
+	if tip, height, e = wg.ChainClient.GetBestBlock(); err.Chk(e) {
 		return
 	}
 	var block *wire.MsgBlock
-	if block, e = wg.ChainClient.GetBlock(tip); dbg.Chk(e) {
+	if block, e = wg.ChainClient.GetBlock(tip); err.Chk(e) {
 	}
 	t := block.Header.Timestamp
 	wg.processChainBlockNotification(tip, height, t)
@@ -271,7 +271,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			if wg.processWalletBlockNotification() {
 			}
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); dbg.Chk(e) {
+			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
 			wg.invalidate <- struct{}{}
 		},
@@ -379,7 +379,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 				dbg.Ln("(((NOTIFICATION))) retry attempting to update wallet transactions")
 			}
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); dbg.Chk(e) {
+			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
 			wg.invalidate <- struct{}{}
 		},
@@ -387,7 +387,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			dbg.Ln("(((NOTIFICATION))) wallet OnBlockConnected", hash, height, t)
 			wg.processWalletBlockNotification()
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); dbg.Chk(e) {
+			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
 			wg.invalidate <- struct{}{}
 		},
@@ -402,7 +402,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			if wg.processWalletBlockNotification() {
 			}
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); dbg.Chk(e) {
+			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
 			wg.invalidate <- struct{}{}
 		},
@@ -521,17 +521,17 @@ func (wg *WalletGUI) chainClient() (e error) {
 				DisableAutoReconnect: false,
 				DisableConnectOnNew:  false,
 			}, wg.ChainNotifications(), wg.cx.KillAll,
-		); dbg.Chk(e) {
+		); err.Chk(e) {
 			return
 		}
 	}
 	if wg.ChainClient.Disconnected() {
 		dbg.Ln("connecting chain client")
-		if e = wg.ChainClient.Connect(1); dbg.Chk(e) {
+		if e = wg.ChainClient.Connect(1); err.Chk(e) {
 			return
 		}
 	}
-	if e = wg.ChainClient.NotifyBlocks(); !dbg.Chk(e) {
+	if e = wg.ChainClient.NotifyBlocks(); !err.Chk(e) {
 		dbg.Ln("subscribed to new blocks")
 		// wg.WalletNotifications()
 		wg.invalidate <- struct{}{}
@@ -560,20 +560,20 @@ func (wg *WalletGUI) walletClient() (e error) {
 			DisableAutoReconnect: false,
 			DisableConnectOnNew:  false,
 		}, wg.WalletNotifications(), wg.cx.KillAll,
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 		wg.WalletMutex.Unlock()
 		return
 	}
 	wg.WalletMutex.Unlock()
-	// if e = wg.WalletClient.Connect(1); dbg.Chk(e) {
+	// if e = wg.WalletClient.Connect(1); err.Chk(e) {
 	// 	return
 	// }
-	if e = wg.WalletClient.NotifyNewTransactions(true); !dbg.Chk(e) {
+	if e = wg.WalletClient.NotifyNewTransactions(true); !err.Chk(e) {
 		dbg.Ln("subscribed to new transactions")
 	} else {
 		// return
 	}
-	if e = wg.WalletClient.NotifyBlocks(); dbg.Chk(e) {
+	if e = wg.WalletClient.NotifyBlocks(); err.Chk(e) {
 		// return
 	} else {
 		dbg.Ln("subscribed to wallet client notify blocks")

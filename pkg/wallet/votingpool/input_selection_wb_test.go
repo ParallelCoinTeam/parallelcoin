@@ -5,11 +5,11 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -23,7 +23,7 @@ var (
 // 	defer tearDown()
 // 	dbtx, e := db.BeginReadWriteTx()
 // 	if e != nil  {
-// 		t.ftl.Ln(err)
+// 		t.ftl.Ln(e)
 // 	}
 // 	defer func() {
 // 	e := dbtx.Commit()
@@ -78,12 +78,12 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -130,12 +130,12 @@ func TestNextAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -205,12 +205,12 @@ func TestEligibleInputsAreEligible(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	var chainHeight int32 = 1000
@@ -227,12 +227,12 @@ func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	var chainHeight int32 = 1000
@@ -259,12 +259,12 @@ func TestCreditSortingByAddress(t *testing.T) {
 	defer teardown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	series := []TstSeriesDef{
@@ -309,8 +309,8 @@ func TestCreditSortingByAddress(t *testing.T) {
 func newDummyCredit(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series uint32, index Index, branch Branch,
 	txHash []byte, outpointIdx uint32) Credit {
 	var hash chainhash.Hash
-	if e := hash.SetBytes(txHash); dbg.Chk(e) {
-		t.ftl.Ln(err)
+	if e := hash.SetBytes(txHash); err.Chk(e) {
+		t.ftl.Ln(e)
 	}
 	// Ensure the address defined by the given series/branch/index is present on the set of used addresses as that's a
 	// requirement of WithdrawalAddress.

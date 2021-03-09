@@ -8,11 +8,11 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -32,13 +32,13 @@ func TestBtcAddressSerializer(t *testing.T) {
 		mem:   1024,
 		nIter: 5,
 	}
-	if _, e = rand.Read(kdfp.salt[:]); dbg.Chk(e) {
+	if _, e = rand.Read(kdfp.salt[:]); err.Chk(e) {
 		t.Error(err.Error())
 		return
 	}
 	key := kdf([]byte("banana"), kdfp)
 	privKey := make([]byte, 32)
-	if _, e = rand.Read(privKey); dbg.Chk(e) {
+	if _, e = rand.Read(privKey); err.Chk(e) {
 		t.Error(err.Error())
 		return
 	}
@@ -54,7 +54,7 @@ func TestBtcAddressSerializer(t *testing.T) {
 		return
 	}
 	buf := new(bytes.Buffer)
-	if _, e = addr.WriteTo(buf); dbg.Chk(e) {
+	if _, e = addr.WriteTo(buf); err.Chk(e) {
 		t.Error(err.Error())
 		return
 	}
@@ -65,7 +65,7 @@ func TestBtcAddressSerializer(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
-	if _, e = readAddr.unlock(key); dbg.Chk(e) {
+	if _, e = readAddr.unlock(key); err.Chk(e) {
 		t.Error(err.Error())
 		return
 	}
@@ -83,7 +83,7 @@ func TestScriptAddressSerializer(t *testing.T) {
 		return
 	}
 	buf := new(bytes.Buffer)
-	if _, e = addr.WriteTo(buf); dbg.Chk(e) {
+	if _, e = addr.WriteTo(buf); err.Chk(e) {
 		t.Error(err.Error())
 		return
 	}
@@ -107,7 +107,7 @@ func TestWalletCreationSerialization(t *testing.T) {
 		return
 	}
 	buf := new(bytes.Buffer)
-	if _, e = w1.WriteTo(buf); dbg.Chk(e) {
+	if _, e = w1.WriteTo(buf); err.Chk(e) {
 		t.Error("ScriptError writing new wallet: " + err.Error())
 		return
 	}
@@ -119,17 +119,17 @@ func TestWalletCreationSerialization(t *testing.T) {
 	}
 	e = w1.Lock()
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	e = w2.Lock()
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
-	if e = w1.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e = w1.Unlock([]byte("banana")); err.Chk(e) {
 		t.Error("Decrypting original wallet failed: " + err.Error())
 		return
 	}
-	if e = w2.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e = w2.Unlock([]byte("banana")); err.Chk(e) {
 		t.Error("Decrypting newly read wallet failed: " + err.Error())
 		return
 	}
@@ -355,11 +355,11 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	}
 	// Unlock wallet.  This should trigger creating the private key for
 	// the address.
-	if e = w.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e = w.Unlock([]byte("banana")); err.Chk(e) {
 		t.Errorf("Can't unlock original wallet: %v", err)
 		return
 	}
-	if e = w2.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e = w2.Unlock([]byte("banana")); err.Chk(e) {
 		t.Errorf("Can't unlock re-read wallet: %v", err)
 		return
 	}
@@ -433,11 +433,11 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	buf := new(bytes.Buffer)
 	_, e = w2.WriteTo(buf)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	_, e = w2.ReadFrom(buf)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	e = w2.Unlock([]byte("banana"))
 	if e != nil  {
@@ -527,7 +527,7 @@ func TestWatchingWalletExport(t *testing.T) {
 	}
 	// Chk that the new addresses created by each wallet match.  The
 	// original wallet is unlocked so addresses are chained with privkeys.
-	if e := w.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e := w.Unlock([]byte("banana")); err.Chk(e) {
 		t.Errorf("Unlocking original wallet failed: %v", err)
 	}
 	// Test that ExtendActiveAddresses for the watching wallet match
@@ -617,7 +617,7 @@ func TestWatchingWalletExport(t *testing.T) {
 	pk, _ := ec.PrivKeyFromBytes(ec.S256(), make([]byte, 32))
 	wif, e := util.NewWIF(pk, tstNetParams, true)
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	if _, e = ww.ImportPrivateKey(wif, createdAt); err != ErrWatchingOnly {
 		t.Errorf("Nonsensical func ImportPrivateKey returned no or incorrect error: %v", err)
@@ -633,7 +633,7 @@ func TestImportPrivateKey(t *testing.T) {
 		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
-	if e = w.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e = w.Unlock([]byte("banana")); err.Chk(e) {
 		t.Errorf("Can't unlock original wallet: %v", err)
 		return
 	}
@@ -651,7 +651,7 @@ func TestImportPrivateKey(t *testing.T) {
 	// import priv key
 	wif, e := util.NewWIF(pk, tstNetParams, false)
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	importHeight := int32(50)
 	importedAt := makeBS(importHeight)
@@ -702,7 +702,7 @@ func TestImportPrivateKey(t *testing.T) {
 	// Mark imported address as partially synced with a block somewhere inbetween
 	// the import height and the chain height.
 	partialHeight := (createHeight-importHeight)/2 + importHeight
-	if e := w2.SetSyncStatus(address, PartialSync(partialHeight)); dbg.Chk(e) {
+	if e := w2.SetSyncStatus(address, PartialSync(partialHeight)); err.Chk(e) {
 		t.Errorf("Cannot mark address partially synced: %v", err)
 		return
 	}
@@ -731,7 +731,7 @@ func TestImportPrivateKey(t *testing.T) {
 	}
 	// Mark imported address as not synced at all, and verify sync height is now
 	// the import height.
-	if e := w3.SetSyncStatus(address, Unsynced(0)); dbg.Chk(e) {
+	if e := w3.SetSyncStatus(address, Unsynced(0)); err.Chk(e) {
 		t.Errorf("Cannot mark address synced: %v", err)
 		return
 	}
@@ -742,7 +742,7 @@ func TestImportPrivateKey(t *testing.T) {
 	// Mark imported address as synced with the recently-seen blocks, and verify
 	// that the sync height now equals the most recent block (the one at wallet
 	// creation).
-	if e := w3.SetSyncStatus(address, FullSync{}); dbg.Chk(e) {
+	if e := w3.SetSyncStatus(address, FullSync{}); err.Chk(e) {
 		t.Errorf("Cannot mark address synced: %v", err)
 		return
 	}
@@ -750,7 +750,7 @@ func TestImportPrivateKey(t *testing.T) {
 		t.Errorf("After address sync, sync height %v does not match expected %v.", h, createHeight)
 		return
 	}
-	if e = w3.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e = w3.Unlock([]byte("banana")); err.Chk(e) {
 		t.Errorf("Can't unlock deserialised wallet: %v", err)
 		return
 	}
@@ -780,7 +780,7 @@ func TestImportScript(t *testing.T) {
 		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
-	if e = w.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e = w.Unlock([]byte("banana")); err.Chk(e) {
 		t.Errorf("Can't unlock original wallet: %v", err)
 		return
 	}
@@ -961,7 +961,7 @@ func TestImportScript(t *testing.T) {
 	// Mark imported address as partially synced with a block somewhere inbetween
 	// the import height and the chain height.
 	partialHeight := (createHeight-importHeight)/2 + importHeight
-	if e := w2.SetSyncStatus(address, PartialSync(partialHeight)); dbg.Chk(e) {
+	if e := w2.SetSyncStatus(address, PartialSync(partialHeight)); err.Chk(e) {
 		t.Errorf("Cannot mark address partially synced: %v", err)
 		return
 	}
@@ -990,7 +990,7 @@ func TestImportScript(t *testing.T) {
 	}
 	// Mark imported address as not synced at all, and verify sync height is now
 	// the import height.
-	if e := w3.SetSyncStatus(address, Unsynced(0)); dbg.Chk(e) {
+	if e := w3.SetSyncStatus(address, Unsynced(0)); err.Chk(e) {
 		t.Errorf("Cannot mark address synced: %v", err)
 		return
 	}
@@ -1001,7 +1001,7 @@ func TestImportScript(t *testing.T) {
 	// Mark imported address as synced with the recently-seen blocks, and verify
 	// that the sync height now equals the most recent block (the one at wallet
 	// creation).
-	if e := w3.SetSyncStatus(address, FullSync{}); dbg.Chk(e) {
+	if e := w3.SetSyncStatus(address, FullSync{}); err.Chk(e) {
 		t.Errorf("Cannot mark address synced: %v", err)
 		return
 	}
@@ -1009,7 +1009,7 @@ func TestImportScript(t *testing.T) {
 		t.Errorf("After address sync, sync height %v does not match expected %v.", h, createHeight)
 		return
 	}
-	if e = w3.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e = w3.Unlock([]byte("banana")); err.Chk(e) {
 		t.Errorf("Can't unlock deserialised wallet: %v", err)
 		return
 	}
@@ -1028,7 +1028,7 @@ func TestChangePassphrase(t *testing.T) {
 		return
 	}
 	// Unlock wallet so the passphrase can be changed.
-	if e := w.Unlock([]byte("banana")); dbg.Chk(e) {
+	if e := w.Unlock([]byte("banana")); err.Chk(e) {
 		t.Errorf("Cannot unlock: %v", err)
 		return
 	}
@@ -1047,7 +1047,7 @@ func TestChangePassphrase(t *testing.T) {
 		return
 	}
 	// Change passphrase.
-	if e := w.ChangePassphrase([]byte("potato")); dbg.Chk(e) {
+	if e := w.ChangePassphrase([]byte("potato")); err.Chk(e) {
 		t.Errorf("Changing passphrase failed: %v", err)
 		return
 	}
@@ -1057,7 +1057,7 @@ func TestChangePassphrase(t *testing.T) {
 		return
 	}
 	// Lock it.
-	if e := w.Lock(); dbg.Chk(e) {
+	if e := w.Lock(); err.Chk(e) {
 		t.Errorf("Cannot lock wallet after passphrase change: %v", err)
 		return
 	}
@@ -1067,7 +1067,7 @@ func TestChangePassphrase(t *testing.T) {
 		return
 	}
 	// Unlock with new passphrase.  This must succeed.
-	if e := w.Unlock([]byte("potato")); dbg.Chk(e) {
+	if e := w.Unlock([]byte("potato")); err.Chk(e) {
 		t.Errorf("Unlocking with new passphrase failed: %v", err)
 		return
 	}

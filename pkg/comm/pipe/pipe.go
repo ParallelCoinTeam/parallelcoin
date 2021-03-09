@@ -8,7 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
 // Consume listens for messages from a child process over a stdio pipe.
@@ -39,16 +39,16 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 				logi.L.LogChanDisabled.Store(true)
 				break out
 			}
-			if dbg.Chk(e) && e != io.EOF {
+			if err.Chk(e) && e != io.EOF {
 				// Probably the child process has died, so quit
 				err.Ln("err:", e)
 				onBackup = true
 				break out
 			} else if n > 0 {
-				if e = handler(data[:n]); dbg.Chk(e) {
+				if e = handler(data[:n]); err.Chk(e) {
 				}
 			}
-			// if n, e = w.StdPipe.Read(data); dbg.Chk(e) {
+			// if n, e = w.StdPipe.Read(data); err.Chk(e) {
 			// }
 			// // when the child stops sending over RPC, fall back to the also working but not printing stderr
 			// if n > 0 {
@@ -86,11 +86,11 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 			default:
 			}
 			n, e = os.Stdin.Read(data)
-			if dbg.Chk(e) && e != io.EOF {
+			if e != nil && e != io.EOF {
 				break out
 			}
 			if n > 0 {
-				if e = handler(data[:n]); dbg.Chk(e) {
+				if e = handler(data[:n]); err.Chk(e) {
 					break out
 				}
 			}

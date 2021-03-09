@@ -5,10 +5,10 @@ import (
 	"net"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 )
 
@@ -45,7 +45,7 @@ func mockRemotePeer() (e error) {
 // peer.
 func Example_newOutboundPeer() {
 	// Ordinarily this will not be needed since the outbound peer will be connecting to a remote peer, however, since this example is executed and tested, a mock remote peer is needed to listen for the outbound peer.
-	if e := mockRemotePeer(); dbg.Chk(e) {
+	if e := mockRemotePeer(); err.Chk(e) {
 		peer.Errorf("mockRemotePeer: unexpected error %v", err)
 		return
 	}

@@ -54,7 +54,7 @@ func normalizeVerString(str string) string {
 			_, e := result.WriteRune(r)
 			// Writing to a bytes.Buffer panics on OOM, and all errors are unexpected.
 			if e != nil  {
-								panic(err)
+								panic(e)
 			}
 		}
 	}

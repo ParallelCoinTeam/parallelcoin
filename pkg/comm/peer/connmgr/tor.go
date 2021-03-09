@@ -45,7 +45,7 @@ func TorLookupIP(host, proxy string) ([]net.IP, error) {
 		return nil, e
 	}
 	defer func() {
-		if e := conn.Close(); dbg.Chk(e) {
+		if e := conn.Close(); err.Chk(e) {
 		}
 	}()
 	buf := []byte{'\x05', '\x01', '\x00'}
@@ -87,7 +87,7 @@ func TorLookupIP(host, proxy string) ([]net.IP, error) {
 	if buf[1] != 0 {
 		if int(buf[1]) >= len(torStatusErrors) {
 			return nil, ErrTorInvalidProxyResponse
-		} else if e := torStatusErrors[buf[1]]; dbg.Chk(e) {
+		} else if e := torStatusErrors[buf[1]]; err.Chk(e) {
 			return nil, e
 		}
 		return nil, ErrTorInvalidProxyResponse

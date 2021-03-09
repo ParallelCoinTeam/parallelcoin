@@ -11,9 +11,9 @@ import (
 	"github.com/jessevdk/go-flags"
 	
 	"github.com/p9c/pod/app/appdata"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/database/walletdb"
+	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
 )
 
 const defaultNet = "mainnet"
@@ -30,6 +30,7 @@ var opts = struct {
 }
 
 func init() {
+
 	_, e := flags.Parse(&opts)
 	if e != nil  {
 		os.Exit(1)
@@ -71,7 +72,7 @@ func main() {
 func mainInt() int {
 	fmt.Println("Database path:", opts.DbPath)
 	_, e := os.Stat(opts.DbPath)
-	if os.IsNotExist(err) {
+	if os.IsNotExist(e) {
 		fmt.Println("Database file does not exist")
 		return 1
 	}
@@ -101,8 +102,8 @@ func mainInt() int {
 		return 1
 	}
 	defer func() {
-		if e := db.Close(); dbg.Chk(e) {
-			fmt.Println(err)
+		if e := db.Close(); err.Chk(e) {
+			fmt.Println(e)
 		}
 	}()
 	fmt.Println("dropping wtxmgr namespace")

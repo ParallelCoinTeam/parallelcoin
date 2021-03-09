@@ -35,7 +35,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 				wallet.DbName
 		if !apputil.FileExists(dbFilename) && !cx.IsGUI {
 			// log.SetLevel("off", false)
-			if e := walletmain.CreateWallet(cx.ActiveNet, cx.Config); dbg.Chk(e) {
+			if e := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err.Chk(e) {
 				err.Ln("failed to create wallet", err)
 			}
 			fmt.Println("restart to complete initial setup")
@@ -46,15 +46,15 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		dbg.Ln("reading password from", walletPassPath)
 		if apputil.FileExists(walletPassPath) {
 			var b []byte
-			if b, e = ioutil.ReadFile(walletPassPath); !dbg.Chk(e) {
+			if b, e = ioutil.ReadFile(walletPassPath); !err.Chk(e) {
 				*cx.Config.WalletPass = string(b)
 				dbg.Ln("read password '" + string(b) + "'")
 				for i := range b {
 					b[i] = 0
 				}
-				if e = ioutil.WriteFile(walletPassPath, b, 0700); dbg.Chk(e) {
+				if e = ioutil.WriteFile(walletPassPath, b, 0700); err.Chk(e) {
 				}
-				if e = os.Remove(walletPassPath); dbg.Chk(e) {
+				if e = os.Remove(walletPassPath); err.Chk(e) {
 				}
 				dbg.Ln("wallet cookie deleted", *cx.Config.WalletPass)
 			}

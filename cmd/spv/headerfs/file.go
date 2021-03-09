@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // appendRaw appends a new raw header to the end of the flat file.
 func (h *headerStore) appendRaw(header []byte) (e error) {
-	if _, e = h.file.Write(header); dbg.Chk(e) {
+	if _, e = h.file.Write(header); err.Chk(e) {
 		return e
 	}
 	return nil
@@ -34,7 +34,7 @@ func (h *headerStore) readRaw(seekDist uint64) (rh []byte, e error) {
 	// With the number of bytes to read determined, we'll create a slice for that number of bytes, and read directly
 	// from the file into the buffer.
 	rawHeader := make([]byte, headerSize)
-	if _, e = h.file.ReadAt(rawHeader[:], int64(seekDist)); dbg.Chk(e) {
+	if _, e = h.file.ReadAt(rawHeader[:], int64(seekDist)); err.Chk(e) {
 		return nil, e
 	}
 	return rawHeader[:], nil
@@ -77,7 +77,7 @@ func (h *blockHeaderStore) readHeaderRange(
 	headers := make([]wire.BlockHeader, 0, numHeaders)
 	for headerReader.Len() != 0 {
 		var nextHeader wire.BlockHeader
-		if e := nextHeader.Deserialize(headerReader); dbg.Chk(e) {
+		if e := nextHeader.Deserialize(headerReader); err.Chk(e) {
 			return nil, e
 		}
 		headers = append(headers, nextHeader)
@@ -98,7 +98,7 @@ func (h *blockHeaderStore) readHeader(height uint32) (wire.BlockHeader, error) {
 	}
 	headerReader := bytes.NewReader(rawHeader)
 	// Finally, decode the raw bytes into a proper bitcoin header.
-	if e := header.Deserialize(headerReader); dbg.Chk(e) {
+	if e := header.Deserialize(headerReader); err.Chk(e) {
 		return header, e
 	}
 	return header, nil

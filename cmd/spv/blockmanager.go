@@ -10,16 +10,16 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/cmd/spv/headerlist"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/fork"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
 	"github.com/p9c/pod/pkg/util"
@@ -388,7 +388,7 @@ waitForHeaders:
 	// can base our filter header sync off of that.
 	lastHeader, lastHeight, e := b.server.BlockHeaders.ChainTip()
 	if e != nil {
-		ftl.Ln(err)
+		ftl.Ln(e)
 		return
 	}
 	lastHash := lastHeader.BlockHash()
@@ -517,7 +517,7 @@ waitForHeaders:
 		// At this point, we know that there're a set of new filter headers to fetch, so we'll grab them now.
 		if e = b.getUncheckpointedCFHeaders(
 			store, fType,
-		); dbg.Chk(e) {
+		); err.Chk(e) {
 			dbg.F("couldn't get uncheckpointed headers for %v: %v", fType, err)
 			select {
 			case <-time.After(QueryTimeout):
@@ -1182,7 +1182,7 @@ func (b *blockManager) getCFHeadersForAllPeers(
 	// message, whichever is larger.
 	stopHeader, stopHeight, e := b.server.BlockHeaders.ChainTip()
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	if stopHeight-height >= wire.MaxCFHeadersPerMsg {
 		stopHeader, e = b.server.BlockHeaders.FetchHeaderByHeight(
@@ -1517,7 +1517,7 @@ func (b *blockManager) startSync(peers *list.List) {
 		// With our stop hash selected, we'll kick off the sync from this peer with an initial GetHeaders message.
 		e = b.SyncPeer().PushGetHeadersMsg(locator, stopHash)
 		if e != nil {
-			dbg.Ln(err)
+			dbg.Ln(e)
 		}
 	} else {
 		wrn.Ln("no sync peer candidates available")
@@ -1857,7 +1857,7 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 							)
 							// Should we panic here?
 						} else {
-							panic(err)
+							panic(e)
 						}
 					}
 				}

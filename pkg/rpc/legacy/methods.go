@@ -10,19 +10,19 @@ import (
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	txrules "github.com/p9c/pod/pkg/blockchain/tx/txrules"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
@@ -342,7 +342,7 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			case *chain.RPCClient:
 				// dbg.Ln("client is a chain.RPCClient")
 				var resp interface{}
-				if resp, e = handlerData.Handler(cmd, w, client); dbg.Chk(e) {
+				if resp, e = handlerData.Handler(cmd, w, client); err.Chk(e) {
 					return nil, JSONError(e)
 				}
 				dbg.Ln("handler call succeeded")
@@ -366,7 +366,7 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 				return nil, btcjson.ErrRPCInvalidRequest
 			}
 			var resp interface{}
-			if resp, e = handlerData.Handler(cmd, w); dbg.Chk(e) {
+			if resp, e = handlerData.Handler(cmd, w); err.Chk(e) {
 				return nil, JSONError(e)
 			}
 			return resp, nil
@@ -1172,7 +1172,7 @@ func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet, chainClient ...
 	out interface{}, e error,
 ) {
 	dbg.Ln("dropping wallet history")
-	if e = DropWalletHistory(w, w.PodConfig)(nil); dbg.Chk(e) {
+	if e = DropWalletHistory(w, w.PodConfig)(nil); err.Chk(e) {
 	}
 	dbg.Ln("dropped wallet history")
 	// go func() {
@@ -1181,7 +1181,7 @@ func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet, chainClient ...
 	// 		L.Script	// 	}
 	// 	ns := rwt.ReadWriteBucket([]byte("waddrmgr"))
 	// 	w.Manager.SetSyncedTo(ns, nil)
-	// 	if e = rwt.Commit(); dbg.Chk(e) {
+	// 	if e = rwt.Commit(); err.Chk(e) {
 	// 	}
 	// }()
 	defer interrupt.RequestRestart()
@@ -1945,11 +1945,11 @@ func SignMessage(
 	var buf bytes.Buffer
 	e = wire.WriteVarString(&buf, 0, "Bitcoin Signed Message:\n")
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	e = wire.WriteVarString(&buf, 0, cmd.Message)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	messageHash := chainhash.DoubleHashB(buf.Bytes())
 	sigbytes, e := ec.SignCompact(
@@ -2113,8 +2113,8 @@ func SignRawTransaction(
 	var buf bytes.Buffer
 	buf.Grow(tx.SerializeSize())
 	// All returned errors (not OOM, which panics) encountered during bytes.Buffer writes are unexpected.
-	if e = tx.Serialize(&buf); dbg.Chk(e) {
-		panic(err)
+	if e = tx.Serialize(&buf); err.Chk(e) {
+		panic(e)
 	}
 	signErrors := make([]btcjson.SignRawTransactionError, 0, len(signErrs))
 	for _, ee := range signErrs {
@@ -2236,11 +2236,11 @@ func VerifyMessage(
 	var buf bytes.Buffer
 	e = wire.WriteVarString(&buf, 0, "Parallelcoin Signed Message:\n")
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	e = wire.WriteVarString(&buf, 0, cmd.Message)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())
 	pk, wasCompressed, e := ec.RecoverCompact(

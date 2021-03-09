@@ -6,18 +6,18 @@ import (
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/legacy/keystore"
 	"github.com/p9c/pod/pkg/util/prompt"
 	"github.com/p9c/pod/pkg/wallet"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	
 	// This initializes the bdb driver
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
 )
 
 const slash = string(os.PathSeparator)
@@ -39,7 +39,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) (e error) 
 		return e
 	}
 	defer func() {
-		if e := db.Close(); dbg.Chk(e) {
+		if e := db.Close(); err.Chk(e) {
 		}
 	}()
 	// Create the wallet.
@@ -78,7 +78,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 	reader := bufio.NewReader(os.Stdin)
 	privPass, e := prompt.PrivatePass(reader, legacyKeyStore)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 		time.Sleep(time.Second * 3)
 		return e
 	}
@@ -96,7 +96,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 				defer func() {
 					e := legacyKeyStore.Lock()
 					if e != nil {
-						dbg.Ln(err)
+						dbg.Ln(e)
 					}
 				}()
 				inf.Ln("Importing addresses from existing wallet...")
@@ -135,7 +135,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 	// public passphrase if the user does not want the additional public data encryption.
 	pubPass, e := prompt.PublicPass(reader, privPass, []byte(""), []byte(*config.WalletPass))
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 		time.Sleep(time.Second * 5)
 		return e
 	}
@@ -143,14 +143,14 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 	// confirmed or a value the user has entered which has already been validated.
 	seed, e := prompt.Seed(reader)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 		time.Sleep(time.Second * 5)
 		return e
 	}
 	dbg.Ln("Creating the wallet")
 	w, e := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false, config, nil)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 		time.Sleep(time.Second * 5)
 		return e
 	}
@@ -174,10 +174,10 @@ func NetworkDir(dataDir string, chainParams *netparams.Params) string {
 // // checkCreateDir checks that the path exists and is a directory.
 // // If path does not exist, it is created.
 // func checkCreateDir(// 	path string) (e error) {
-// 	if fi, e := os.Stat(path); dbg.Chk(e) {
-// 		if os.IsNotExist(err) {
+// 	if fi, e := os.Stat(path); err.Chk(e) {
+// 		if os.IsNotExist(e) {
 // 			// Attempt data directory creation
-// 			if e = os.MkdirAll(path, 0700); dbg.Chk(e) {
+// 			if e = os.MkdirAll(path, 0700); err.Chk(e) {
 // 				return fmt.Errorf("cannot create directory: %s", e)
 // 			}
 // 		} else {

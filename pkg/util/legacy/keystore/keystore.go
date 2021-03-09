@@ -20,11 +20,11 @@ import (
 	
 	"golang.org/x/crypto/ripemd160"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/legacy/rename"
 )
@@ -69,7 +69,7 @@ const (
 func binaryRead(r io.Reader, order binary.ByteOrder, data interface{}) (n int64, e error) {
 	var read int
 	buf := make([]byte, binary.Size(data))
-	if read, e = io.ReadFull(r, buf); dbg.Chk(e) {
+	if read, e = io.ReadFull(r, buf); err.Chk(e) {
 		return int64(read), e
 	}
 	return int64(read), binary.Read(bytes.NewBuffer(buf), order, data)
@@ -78,7 +78,7 @@ func binaryRead(r io.Reader, order binary.ByteOrder, data interface{}) (n int64,
 // See comment for binaryRead().
 func binaryWrite(w io.Writer, order binary.ByteOrder, data interface{}) (n int64, e error) {
 	buf := bytes.Buffer{}
-	if e = binary.Write(&buf, order, data); dbg.Chk(e) {
+	if e = binary.Write(&buf, order, data); err.Chk(e) {
 		return 0, e
 	}
 	written, e := w.Write(buf.Bytes())
@@ -202,7 +202,7 @@ func chainedPubKey(pubkey, chaincode []byte) ([]byte, error) {
 	}
 	oldPk, e := ec.ParsePubKey(pubkey, ec.S256())
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, e
 	}
 	newX, newY := ec.S256().ScalarMult(oldPk.X, oldPk.Y, xorbytes)
@@ -256,7 +256,7 @@ func (v *version) ReadFrom(r io.Reader) (int64, error) {
 	var versBytes [4]byte
 	n, e := io.ReadFull(r, versBytes[:])
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return int64(n), e
 	}
 	v.major = versBytes[0]
@@ -353,7 +353,7 @@ func (v *varEntries) WriteTo(w io.Writer) (n int64, e error) {
 	var written int64
 	for _, s := range ss {
 		var e error
-		if written, e = s.WriteTo(w); dbg.Chk(e) {
+		if written, e = s.WriteTo(w); err.Chk(e) {
 			return n + written, e
 		}
 		n += written
@@ -368,7 +368,7 @@ func (v *varEntries) ReadFrom(r io.Reader) (n int64, e error) {
 	// Keep reading entries until an EOF is reached.
 	for {
 		var header entryHeader
-		if read, e = binaryRead(r, binary.LittleEndian, &header); dbg.Chk(e) {
+		if read, e = binaryRead(r, binary.LittleEndian, &header); err.Chk(e) {
 			// EOF here is not an error.
 			if e == io.EOF {
 				return n + read, nil
@@ -381,7 +381,7 @@ func (v *varEntries) ReadFrom(r io.Reader) (n int64, e error) {
 		case addrHeader:
 			var entry addrEntry
 			entry.addr.store = v.store
-			if read, e = entry.ReadFrom(r); dbg.Chk(e) {
+			if read, e = entry.ReadFrom(r); err.Chk(e) {
 				return n + read, e
 			}
 			n += read
@@ -389,7 +389,7 @@ func (v *varEntries) ReadFrom(r io.Reader) (n int64, e error) {
 		case scriptHeader:
 			var entry scriptEntry
 			entry.script.store = v.store
-			if read, e = entry.ReadFrom(r); dbg.Chk(e) {
+			if read, e = entry.ReadFrom(r); err.Chk(e) {
 				return n + read, e
 			}
 			n += read
@@ -419,7 +419,7 @@ func (net *netParams) ReadFrom(r io.Reader) (int64, error) {
 	n, e := io.ReadFull(r, uint32Bytes)
 	n64 := int64(n)
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return n64, e
 	}
 	switch wire.BitcoinNet(binary.LittleEndian.Uint32(uint32Bytes)) {
@@ -495,17 +495,17 @@ func New(
 	}
 	// Randomly-generate rootkey and chaincode.
 	rootkey := make([]byte, 32)
-	if _, e = rand.Read(rootkey); dbg.Chk(e) {
+	if _, e = rand.Read(rootkey); err.Chk(e) {
 		return nil, e
 	}
 	chaincode := make([]byte, 32)
-	if _, e = rand.Read(chaincode); dbg.Chk(e) {
+	if _, e = rand.Read(chaincode); err.Chk(e) {
 		return nil, e
 	}
 	// Compute AES key and encrypt root address.
 	kdfp, e := computeKdfParameters(defaultKdfComputeTime, defaultKdfMaxMem)
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, e
 	}
 	aeskey := kdf(passphrase, kdfp)
@@ -545,10 +545,10 @@ func New(
 		return nil, e
 	}
 	// Verify root address keypairs.
-	if e := root.verifyKeypairs(); dbg.Chk(e) {
+	if e := root.verifyKeypairs(); err.Chk(e) {
 		return nil, e
 	}
-	if e := root.encrypt(aeskey); dbg.Chk(e) {
+	if e := root.encrypt(aeskey); err.Chk(e) {
 		return nil, e
 	}
 	s.keyGenerator = *root
@@ -557,7 +557,7 @@ func New(
 	s.addrMap[getAddressKey(rootAddr)] = &s.keyGenerator
 	s.chainIdxMap[rootKeyChainIdx] = rootAddr
 	// key store must be returned locked.
-	if e := s.Lock(); dbg.Chk(e) {
+	if e := s.Lock(); err.Chk(e) {
 		return nil, e
 	}
 	return s, nil
@@ -749,18 +749,18 @@ func (s *Store) WriteIfDirty() (e error) {
 	_, e = s.writeTo(fi)
 	if e != nil {
 		s.mtx.RUnlock()
-		if e := fi.Close(); dbg.Chk(e) {
+		if e := fi.Close(); err.Chk(e) {
 		}
 		return e
 	}
 	e = fi.Sync()
 	if e != nil {
 		s.mtx.RUnlock()
-		if e := fi.Close(); dbg.Chk(e) {
+		if e := fi.Close(); err.Chk(e) {
 		}
 		return e
 	}
-	if e := fi.Close(); dbg.Chk(e) {
+	if e := fi.Close(); err.Chk(e) {
 	}
 	e = rename.Atomic(fiPath, s.path)
 	s.mtx.RUnlock()
@@ -783,7 +783,7 @@ func OpenDir(dir string) (*Store, error) {
 		return nil, e
 	}
 	defer func() {
-		if e := fi.Close(); dbg.Chk(e) {
+		if e := fi.Close(); err.Chk(e) {
 		}
 	}()
 	store := new(Store)
@@ -809,7 +809,7 @@ func (s *Store) Unlock(passphrase []byte) (e error) {
 	// Derive key from KDF parameters and passphrase.
 	key := kdf(passphrase, &s.kdfParams)
 	// Unlock root address with derived key.
-	if _, e = s.keyGenerator.unlock(key); dbg.Chk(e) {
+	if _, e = s.keyGenerator.unlock(key); err.Chk(e) {
 		return e
 	}
 	// If unlock was successful, save the passphrase and aes key.
@@ -862,7 +862,7 @@ func (s *Store) ChangePassphrase(new []byte) (e error) {
 		if !ok {
 			continue
 		}
-		if e := a.changeEncryptionKey(oldkey, newkey); dbg.Chk(e) {
+		if e := a.changeEncryptionKey(oldkey, newkey); err.Chk(e) {
 			return e
 		}
 	}
@@ -926,12 +926,12 @@ func (s *Store) nextChainedBtcAddress(bs *BlockStamp) (*btcAddress, error) {
 	if !ok {
 		if s.isLocked() {
 			// Chain pubkeys.
-			if e := s.extendLocked(bs); dbg.Chk(e) {
+			if e := s.extendLocked(bs); err.Chk(e) {
 				return nil, e
 			}
 		} else {
 			// Chain private and pubkeys.
-			if e := s.extendUnlocked(bs); dbg.Chk(e) {
+			if e := s.extendUnlocked(bs); err.Chk(e) {
 				return nil, e
 			}
 		}
@@ -990,10 +990,10 @@ func (s *Store) extendUnlocked(bs *BlockStamp) (e error) {
 	if e != nil {
 		return e
 	}
-	if e := newAddr.verifyKeypairs(); dbg.Chk(e) {
+	if e := newAddr.verifyKeypairs(); err.Chk(e) {
 		return e
 	}
-	if e = newAddr.encrypt(s.secret); dbg.Chk(e) {
+	if e = newAddr.encrypt(s.secret); err.Chk(e) {
 		return e
 	}
 	a = newAddr.Address()
@@ -1081,7 +1081,7 @@ func (s *Store) createMissingPrivateKeys() (e error) {
 			return errors.New("found non-pubkey chained address")
 		}
 		addr.privKeyCT = ithPrivKey
-		if e := addr.encrypt(s.secret); dbg.Chk(e) {
+		if e := addr.encrypt(s.secret); err.Chk(e) {
 			// Avoid bug: see comment for VersUnsetNeedsPrivkeyFlag.
 			if e != ErrAlreadyEncrypted || s.vers.LT(VersUnsetNeedsPrivkeyFlag) {
 				return e
@@ -1254,7 +1254,7 @@ func (s *Store) ImportPrivateKey(wif *util.WIF, bs *BlockStamp) (util.Address, e
 		btcaddr.flags.unsynced = true
 	}
 	// Encrypt imported address with the derived AES key.
-	if e = btcaddr.encrypt(s.secret); dbg.Chk(e) {
+	if e = btcaddr.encrypt(s.secret); err.Chk(e) {
 		return nil, e
 	}
 	addr := btcaddr.Address()
@@ -1905,7 +1905,7 @@ func newBtcAddressWithoutPrivkey(s *Store, pubkey, iv []byte, bs *BlockStamp) (a
 	}
 	if len(iv) == 0 {
 		iv = make([]byte, 16)
-		if _, e = rand.Read(iv); dbg.Chk(e) {
+		if _, e = rand.Read(iv); err.Chk(e) {
 			return nil, e
 		}
 	} else if len(iv) != 16 {
@@ -2036,7 +2036,7 @@ func (a *btcAddress) ReadFrom(r io.Reader) (n int64, e error) {
 		{pubKey, chkPubKey},
 	}
 	for i := range checks {
-		if e = verifyAndFix(checks[i].data, checks[i].chk); dbg.Chk(e) {
+		if e = verifyAndFix(checks[i].data, checks[i].chk); err.Chk(e) {
 			return n, e
 		}
 	}
@@ -2179,7 +2179,7 @@ func (a *btcAddress) changeEncryptionKey(oldkey, newkey []byte) (e error) {
 		return e
 	}
 	newIV := make([]byte, len(a.initVector))
-	if _, e = rand.Read(newIV); dbg.Chk(e) {
+	if _, e = rand.Read(newIV); err.Chk(e) {
 		return e
 	}
 	copy(a.initVector[:], newIV)
@@ -2286,7 +2286,7 @@ func (a *btcAddress) ExportPrivKey() (*util.WIF, error) {
 		a.Compressed(),
 	)
 	if e != nil {
-		panic(err)
+		panic(e)
 	}
 	return wif, nil
 }
@@ -2518,7 +2518,7 @@ func (sa *scriptAddress) ReadFrom(r io.Reader) (n int64, e error) {
 		{sa.script, chkScript},
 	}
 	for i := range checks {
-		if e = verifyAndFix(checks[i].data, checks[i].chk); dbg.Chk(e) {
+		if e = verifyAndFix(checks[i].data, checks[i].chk); err.Chk(e) {
 			return n, e
 		}
 	}
@@ -2702,7 +2702,7 @@ type kdfParameters struct {
 // last targetSec seconds, while using no more than maxMem bytes of memory.
 func computeKdfParameters(targetSec float64, maxMem uint64) (params *kdfParameters,e error) {
 	params = &kdfParameters{}
-	if _, e = rand.Read(params.salt[:]); dbg.Chk(e) {
+	if _, e = rand.Read(params.salt[:]); err.Chk(e) {
 		return nil, e
 	}
 	testKey := []byte("This is an example key to test KDF iteration speed")
@@ -2744,7 +2744,7 @@ func (params *kdfParameters) WriteTo(w io.Writer) (n int64, e error) {
 		make([]byte, 256-(binary.Size(params)+4)), // padding
 	}
 	for _, data := range datas {
-		if written, e = binaryWrite(w, binary.LittleEndian, data); dbg.Chk(e) {
+		if written, e = binaryWrite(w, binary.LittleEndian, data); err.Chk(e) {
 			return n + written, e
 		}
 		n += written
@@ -2763,13 +2763,13 @@ func (params *kdfParameters) ReadFrom(r io.Reader) (n int64, e error) {
 		padding,
 	}
 	for _, data := range datas {
-		if read, e = binaryRead(r, binary.LittleEndian, data); dbg.Chk(e) {
+		if read, e = binaryRead(r, binary.LittleEndian, data); err.Chk(e) {
 			return n + read, e
 		}
 		n += read
 	}
 	// Verify checksum
-	if e = verifyAndFix(chkedBytes, chk); dbg.Chk(e) {
+	if e = verifyAndFix(chkedBytes, chk); err.Chk(e) {
 		return n, e
 	}
 	// Read netparams
@@ -2780,7 +2780,7 @@ func (params *kdfParameters) ReadFrom(r io.Reader) (n int64, e error) {
 		&params.salt,
 	}
 	for _, data := range datas {
-		if e = binary.Read(buf, binary.LittleEndian, data); dbg.Chk(e) {
+		if e = binary.Read(buf, binary.LittleEndian, data); err.Chk(e) {
 			return n, e
 		}
 	}
@@ -2795,12 +2795,12 @@ type addrEntry struct {
 func (ae *addrEntry) WriteTo(w io.Writer) (n int64, e error) {
 	var written int64
 	// Write header
-	if written, e = binaryWrite(w, binary.LittleEndian, addrHeader); dbg.Chk(e) {
+	if written, e = binaryWrite(w, binary.LittleEndian, addrHeader); err.Chk(e) {
 		return n + written, e
 	}
 	n += written
 	// Write hash
-	if written, e = binaryWrite(w, binary.LittleEndian, &ae.pubKeyHash160); dbg.Chk(e) {
+	if written, e = binaryWrite(w, binary.LittleEndian, &ae.pubKeyHash160); err.Chk(e) {
 		return n + written, e
 	}
 	n += written
@@ -2811,7 +2811,7 @@ func (ae *addrEntry) WriteTo(w io.Writer) (n int64, e error) {
 }
 func (ae *addrEntry) ReadFrom(r io.Reader) (n int64, e error) {
 	var read int64
-	if read, e = binaryRead(r, binary.LittleEndian, &ae.pubKeyHash160); dbg.Chk(e) {
+	if read, e = binaryRead(r, binary.LittleEndian, &ae.pubKeyHash160); err.Chk(e) {
 		return n + read, e
 	}
 	n += read
@@ -2829,12 +2829,12 @@ type scriptEntry struct {
 func (se *scriptEntry) WriteTo(w io.Writer) (n int64, e error) {
 	var written int64
 	// Write header
-	if written, e = binaryWrite(w, binary.LittleEndian, scriptHeader); dbg.Chk(e) {
+	if written, e = binaryWrite(w, binary.LittleEndian, scriptHeader); err.Chk(e) {
 		return n + written, e
 	}
 	n += written
 	// Write hash
-	if written, e = binaryWrite(w, binary.LittleEndian, &se.scriptHash160); dbg.Chk(e) {
+	if written, e = binaryWrite(w, binary.LittleEndian, &se.scriptHash160); err.Chk(e) {
 		return n + written, e
 	}
 	n += written
@@ -2847,7 +2847,7 @@ func (se *scriptEntry) WriteTo(w io.Writer) (n int64, e error) {
 // ReadFrom implements io.ReaderFrom by reading the entry from e.
 func (se *scriptEntry) ReadFrom(r io.Reader) (n int64, e error) {
 	var read int64
-	if read, e = binaryRead(r, binary.LittleEndian, &se.scriptHash160); dbg.Chk(e) {
+	if read, e = binaryRead(r, binary.LittleEndian, &se.scriptHash160); err.Chk(e) {
 		return n + read, e
 	}
 	n += read

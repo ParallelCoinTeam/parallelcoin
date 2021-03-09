@@ -95,6 +95,7 @@ func NewWalletIsLockedCmd() *WalletIsLockedCmd {
 	return &WalletIsLockedCmd{}
 }
 func init() {
+
 	// The commands in this file are only usable with a wallet server via websockets.
 	flags := UFWalletOnly | UFWebsocketOnly
 	MustRegisterCmd("createencryptedwallet", (*CreateEncryptedWalletCmd)(nil), flags)

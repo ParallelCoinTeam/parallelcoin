@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	database "github.com/p9c/pod/pkg/db"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	database "github.com/p9c/pod/pkg/database"
 )
 
 const blockDbNamePrefix = "blocks"
@@ -130,7 +130,7 @@ func main() {
 		return
 	}
 	defer func() {
-		if e := db.Close(); dbg.Chk(e) {
+		if e := db.Close(); err.Chk(e) {
 		}
 	}()
 	// Setup chain.  Ignore notifications since they aren't needed for this util.

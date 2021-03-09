@@ -667,7 +667,7 @@ func TestGenerateHelpErrors(t *testing.T) {
 	for i, test := range tests {
 		_, e := btcjson.GenerateHelp(test.method, nil,
 			test.resultTypes...)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)
 			continue

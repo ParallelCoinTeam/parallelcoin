@@ -13,17 +13,17 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/cmd/node/state"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/chain/mining"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/blockchain/mining"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rav "github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/qu"
 	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
@@ -110,7 +110,7 @@ func New(
 		MaxDatagramSize,
 		handlersMulticast,
 		quit,
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 		return
 	}
 	s.multiConn = mc
@@ -172,7 +172,7 @@ func (s *State) startWallet() (e error) {
 			TLS:          *s.cfg.TLS,
 			Certificates: certs,
 		}, nil, s.quit,
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 	}
 	return
 }
@@ -182,10 +182,10 @@ func (s *State) updateBlockTemplate() {
 	var e error
 	tN := s.node.Chain.BestChain.Tip().Header().BlockHash()
 	var blk *util.Block
-	if blk, e = s.node.Chain.BlockByHash(&tN); dbg.Chk(e) {
+	if blk, e = s.node.Chain.BlockByHash(&tN); err.Chk(e) {
 	}
 	dbg.Ln("updating block from chain tip", blk.MsgBlock().Header.Timestamp.Truncate(time.Second).Unix())
-	if e = s.doBlockUpdate(blk); dbg.Chk(e) {
+	if e = s.doBlockUpdate(blk); err.Chk(e) {
 	}
 }
 
@@ -208,7 +208,7 @@ out:
 		s.mining.Store(false)
 		if s.walletClient.Disconnected() {
 			dbg.Ln("wallet client is disconnected, retrying")
-			if e = s.startWallet(); !dbg.Chk(e) {
+			if e = s.startWallet(); !err.Chk(e) {
 				dbg.Ln("wallet client is connected, switching to running")
 				
 			}
@@ -221,7 +221,7 @@ out:
 				s.updateBlockTemplate()
 			case <-s.blockUpdate:
 				dbg.Ln("received new block update while paused")
-				// if e = s.doBlockUpdate(bu); dbg.Chk(e) {
+				// if e = s.doBlockUpdate(bu); err.Chk(e) {
 				// }
 				s.updateBlockTemplate()
 			case <-ticker.C:
@@ -232,7 +232,7 @@ out:
 				dbg.Ln("received start signal while paused")
 				if s.walletClient.Disconnected() {
 					dbg.Ln("wallet client is disconnected, retrying")
-					if e = s.startWallet(); !dbg.Chk(e) {
+					if e = s.startWallet(); !err.Chk(e) {
 						dbg.Ln("wallet client is connected, switching to running")
 						s.updateBlockTemplate()
 					}
@@ -256,13 +256,13 @@ out:
 			case <-s.mempoolUpdateChan:
 				s.updateBlockTemplate()
 				dbg.Ln("sending out templates...")
-				if e = s.multiConn.SendMany(job.Magic, s.templateShards); dbg.Chk(e) {
+				if e = s.multiConn.SendMany(job.Magic, s.templateShards); err.Chk(e) {
 				}
 			case <-s.blockUpdate:
 				dbg.Ln("received new block update while running")
 				s.updateBlockTemplate()
 				dbg.Ln("sending out templates...")
-				if e = s.multiConn.SendMany(job.Magic, s.templateShards); dbg.Chk(e) {
+				if e = s.multiConn.SendMany(job.Magic, s.templateShards); err.Chk(e) {
 				}
 			case <-ticker.C:
 				// dbg.Ln("controller ticker running")
@@ -270,7 +270,7 @@ out:
 				s.Advertise()
 				s.checkConnectivity()
 				// dbg.Ln("resending current templates...")
-				if e = s.multiConn.SendMany(job.Magic, s.templateShards); dbg.Chk(e) {
+				if e = s.multiConn.SendMany(job.Magic, s.templateShards); err.Chk(e) {
 				}
 				if s.walletClient.Disconnected() {
 					dbg.Ln("wallet client has disconnected, switching to pausing")
@@ -345,22 +345,22 @@ func (s *State) Advertise() {
 	if e = s.multiConn.SendMany(
 		p2padvt.Magic,
 		transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node)),
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 	}
 }
 
 func (s *State) doBlockUpdate(prev *util.Block) (e error) {
-	inf.Ln("\nmining on block", prev.MsgBlock().Header.Timestamp, "\n")
+	inf.Ln("mining on block", prev.MsgBlock().Header.Timestamp)
 	if s.nextAddress == nil {
 		dbg.Ln("getting new address for templates")
-		if s.nextAddress, e = s.GetNewAddressFromMiningAddrs(); dbg.Chk(e) {
-			if s.nextAddress, e = s.GetNewAddressFromWallet(); dbg.Chk(e) {
+		if s.nextAddress, e = s.GetNewAddressFromMiningAddrs(); err.Chk(e) {
+			if s.nextAddress, e = s.GetNewAddressFromWallet(); err.Chk(e) {
 				return
 			}
 		}
 	}
 	dbg.Ln("getting templates...")
-	if s.msgBlockTemplate, e = s.GetMsgBlockTemplate(prev, s.nextAddress); dbg.Chk(e) {
+	if s.msgBlockTemplate, e = s.GetMsgBlockTemplate(prev, s.nextAddress); err.Chk(e) {
 		return
 	}
 	dbg.Ln("\n", s.msgBlockTemplate.Timestamp, "\n")
@@ -406,7 +406,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 	}
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		var templateX *mining.BlockTemplate
-		if templateX, e = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); dbg.Chk(e) {
+		if templateX, e = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); err.Chk(e) {
 		} else {
 			newB := templateX.Block
 			newH := newB.Header
@@ -424,14 +424,14 @@ func (s *State) GetNewAddressFromWallet() (addr util.Address, e error) {
 	if s.walletClient != nil {
 		if !s.walletClient.Disconnected() {
 			dbg.Ln("have access to a wallet, generating address")
-			if addr, e = s.walletClient.GetNewAddress("default"); dbg.Chk(e) {
+			if addr, e = s.walletClient.GetNewAddress("default"); err.Chk(e) {
 			} else {
 				dbg.Ln("-------- found address", addr)
 			}
 		}
 	} else {
 		e = errors.New("no wallet available for new address")
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	return
 }
@@ -441,12 +441,12 @@ func (s *State) GetNewAddressFromWallet() (addr util.Address, e error) {
 func (s *State) GetNewAddressFromMiningAddrs() (addr util.Address, e error) {
 	if s.cfg.MiningAddrs == nil {
 		e = errors.New("mining addresses is nil")
-		dbg.Ln(err)
+		dbg.Ln(e)
 		return
 	}
 	if len(*s.cfg.MiningAddrs) < 1 {
 		e = errors.New("no mining addresses")
-		dbg.Ln(err)
+		dbg.Ln(e)
 		return
 	}
 	// Choose a payment address at random.
@@ -500,7 +500,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 			if e = s.rpcServer.Cfg.ConnMgr.Connect(
 				peerIP,
 				false,
-			); dbg.Chk(e) {
+			); err.Chk(e) {
 				continue
 			}
 			dbg.Ln("connected to peer via address", peerIP)
@@ -517,7 +517,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	for i := range s.otherNodes {
 		if time.Now().Sub(s.otherNodes[i].Time) > time.Second*9 {
 			// also remove from connection manager
-			if e = s.rpcServer.Cfg.ConnMgr.RemoveByAddr(s.otherNodes[i].addr); dbg.Chk(e) {
+			if e = s.rpcServer.Cfg.ConnMgr.RemoveByAddr(s.otherNodes[i].addr); err.Chk(e) {
 			}
 			dbg.Ln("deleting", s.otherNodes[i])
 			delete(s.otherNodes, i)
@@ -544,7 +544,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 		return
 	}
 	var newHeader *wire.BlockHeader
-	if newHeader, e = so.Decode(); dbg.Chk(e) {
+	if newHeader, e = so.Decode(); err.Chk(e) {
 		return
 	}
 	if newHeader.PrevBlock != s.msgBlockTemplate.PrevBlock {
@@ -552,17 +552,17 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 		return
 	}
 	var msgBlock *wire.MsgBlock
-	if msgBlock, e = s.msgBlockTemplate.Reconstruct(newHeader); dbg.Chk(e) {
+	if msgBlock, e = s.msgBlockTemplate.Reconstruct(newHeader); err.Chk(e) {
 		return
 	}
 	dbg.Ln("sending pause to workers")
-	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); dbg.Chk(e) {
+	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); err.Chk(e) {
 		return
 	}
 	block := util.NewBlock(msgBlock)
 	var isOrphan bool
 	dbg.Ln("submitting block for processing")
-	if isOrphan, e = s.node.SyncManager.ProcessBlock(block, blockchain.BFNone); dbg.Chk(e) {
+	if isOrphan, e = s.node.SyncManager.ProcessBlock(block, blockchain.BFNone); err.Chk(e) {
 		// Anything other than a rule violation is an unexpected error, so log that
 		// error as an internal error.
 		if _, ok := e.(blockchain.RuleError); !ok {
@@ -641,7 +641,7 @@ func (s *State) hashReport() float64 {
 			i++
 			return nil
 		},
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 	}
 	return av.Value()
 }

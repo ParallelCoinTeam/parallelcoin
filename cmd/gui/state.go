@@ -9,8 +9,8 @@ import (
 	l "gioui.org/layout"
 	uberatomic "go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcm"
 	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -129,28 +129,28 @@ func (s *State) Save(filename string, pass *string) (e error) {
 	dbg.Ln("saving state...")
 	marshalled := s.Marshal()
 	var j []byte
-	if j, e = json.MarshalIndent(marshalled, "", "  "); dbg.Chk(e) {
+	if j, e = json.MarshalIndent(marshalled, "", "  "); err.Chk(e) {
 		return
 	}
 	// dbg.Ln(string(j))
 	var ciph cipher.AEAD
-	if ciph, e = gcm.GetCipher(*pass); dbg.Chk(e) {
+	if ciph, e = gcm.GetCipher(*pass); err.Chk(e) {
 		return
 	}
 	var nonce []byte
-	if nonce, e = transport.GetNonce(ciph); dbg.Chk(e) {
+	if nonce, e = transport.GetNonce(ciph); err.Chk(e) {
 		return
 	}
 	crypted := append(nonce, ciph.Seal(nil, nonce, j, nil)...)
 	var b []byte
 	_ = b
-	if b, e = ciph.Open(nil, nonce, crypted[len(nonce):], nil); dbg.Chk(e) {
+	if b, e = ciph.Open(nil, nonce, crypted[len(nonce):], nil); err.Chk(e) {
 		interrupt.Request()
 		return
 	}
-	if e = ioutil.WriteFile(filename, crypted, 0700); dbg.Chk(e) {
+	if e = ioutil.WriteFile(filename, crypted, 0700); err.Chk(e) {
 	}
-	if e = ioutil.WriteFile(filename+".clear", j, 0700); dbg.Chk(e) {
+	if e = ioutil.WriteFile(filename+".clear", j, 0700); err.Chk(e) {
 	}
 	return
 }
@@ -159,11 +159,11 @@ func (s *State) Load(filename string, pass *string) (e error) {
 	dbg.Ln("loading state...")
 	var data []byte
 	var ciph cipher.AEAD
-	if data, e = ioutil.ReadFile(filename); dbg.Chk(e) {
+	if data, e = ioutil.ReadFile(filename); err.Chk(e) {
 		return
 	}
 	// dbg.Ln("cipher:", *pass)
-	if ciph, e = gcm.GetCipher(*pass); dbg.Chk(e) {
+	if ciph, e = gcm.GetCipher(*pass); err.Chk(e) {
 		return
 	}
 	ns := ciph.NonceSize()
@@ -171,13 +171,13 @@ func (s *State) Load(filename string, pass *string) (e error) {
 	nonce := data[:ns]
 	data = data[ns:]
 	var b []byte
-	if b, e = ciph.Open(nil, nonce, data, nil); dbg.Chk(e) {
+	if b, e = ciph.Open(nil, nonce, data, nil); err.Chk(e) {
 		// interrupt.Request()
 		return
 	}
 	// yay, right password, now unmarshal
 	ss := &Marshalled{}
-	if e = json.Unmarshal(b, ss); dbg.Chk(e) {
+	if e = json.Unmarshal(b, ss); err.Chk(e) {
 		return
 	}
 	// dbg.Ln(string(b))
@@ -232,7 +232,7 @@ func (m *Marshalled) Unmarshal(s *State) {
 	if m.ReceivingAddress != "1111111111111111111114oLvT2" {
 		var e error
 		var ra util.Address
-		if ra, e = util.DecodeAddress(m.ReceivingAddress, s.currentReceivingAddress.ForNet); dbg.Chk(e) {
+		if ra, e = util.DecodeAddress(m.ReceivingAddress, s.currentReceivingAddress.ForNet); err.Chk(e) {
 		}
 		s.currentReceivingAddress.Store(ra)
 	}

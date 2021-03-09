@@ -34,7 +34,7 @@ func ExampleCheckDecode() {
 	encoded := "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
 	decoded, version, e := base58.CheckDecode(encoded)
 	if e != nil  {
-		fmt.Println(err)
+		fmt.Println(e)
 		return
 	}
 	// Show the decoded data.

@@ -1,6 +1,7 @@
 package pod
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"math/rand"
 	"reflect"
@@ -9,7 +10,6 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/app/appdata"
-	log "github.com/p9c/pod/pkg/util/logi"
 	
 	"github.com/urfave/cli"
 )
@@ -60,8 +60,8 @@ func GetConfigSchema(cfg *Config) Schema {
 	t := reflect.TypeOf(cfg)
 	t = t.Elem()
 	var levelOptions, network []string
-	for _, i := range log.Levels {
-		levelOptions = append(levelOptions, i)
+	for i := range logg.LevelSpecs {
+		levelOptions = append(levelOptions, logg.LevelSpecs[i].Name)
 	}
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
 	rawFields := make(map[string]Fields)
@@ -457,7 +457,7 @@ func ReadCAFile(config *Config) []byte {
 	var certs []byte
 	if *config.TLS {
 		var e error
-		if certs, e = ioutil.ReadFile(*config.CAFile); dbg.Chk(e) {
+		if certs, e = ioutil.ReadFile(*config.CAFile); err.Chk(e) {
 			// If there's an error reading the CA file, continue with nil certs and without the client connection.
 			certs = nil
 		}

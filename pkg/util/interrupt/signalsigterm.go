@@ -8,5 +8,6 @@ import (
 )
 
 func init() {
+
 	signals = []os.Signal{os.Interrupt, syscall.SIGTERM}
 }

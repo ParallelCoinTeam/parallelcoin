@@ -9,12 +9,12 @@ import (
 	"sync"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/fork"
 	
 	"go.uber.org/atomic"
 	
@@ -103,7 +103,7 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 // 			i++
 // 			return nil
 // 		},
-// 	); dbg.Chk(e) {
+// 	); err.Chk(e) {
 // 	}
 // 	// inf.Ln("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
 // 	Tracef("average hashrate %.2f", av.Value())

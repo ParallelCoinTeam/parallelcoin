@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -90,17 +90,17 @@ func testConnectNode(r *Harness, t *testing.T) {
 	// Create a fresh test harness.
 	harness, e := New(&netparams.SimNetParams, nil, nil)
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
-	if e := harness.SetUp(false, 0); dbg.Chk(e) {
+	if e := harness.SetUp(false, 0); err.Chk(e) {
 		t.Fatalf("unable to complete rpctest setup: %v", err)
 	}
 	defer func() {
-		if e := harness.TearDown(); dbg.Chk(e) {
+		if e := harness.TearDown(); err.Chk(e) {
 		}
 	}()
 	// Establish a p2p connection from our new local harness to the main harness.
-	if e := ConnectNode(harness, r); dbg.Chk(e) {
+	if e := ConnectNode(harness, r); err.Chk(e) {
 		t.Fatalf("unable to connect local to main harness: %v", err)
 	}
 	// The main harness should show up in our local harness' peer's list, and vice verse.
@@ -111,7 +111,7 @@ func testTearDownAll(t *testing.T) {
 	// Grab a local copy of the currently active harnesses before attempting to tear them all down.
 	initialActiveHarnesses := ActiveHarnesses()
 	// Tear down all currently active harnesses.
-	if e := TearDownAll(); dbg.Chk(e) {
+	if e := TearDownAll(); err.Chk(e) {
 		t.Fatalf("unable to teardown all harnesses: %v", err)
 	}
 	// The global testInstances map should now be fully purged with no active test harnesses remaining.
@@ -130,10 +130,10 @@ func testActiveHarnesses(r *Harness, t *testing.T) {
 	// Create a single test harness.
 	harness1, e := New(&netparams.SimNetParams, nil, nil)
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	defer func() {
-		if e := harness1.TearDown(); dbg.Chk(e) {
+		if e := harness1.TearDown(); err.Chk(e) {
 		}
 	}()
 	// With the harness created above, a single harness should be detected as active.
@@ -156,18 +156,18 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	// can be sent to both nodes without it being an orphan.
 	harness, e := New(&netparams.SimNetParams, nil, nil)
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
-	if e := harness.SetUp(false, 0); dbg.Chk(e) {
+	if e := harness.SetUp(false, 0); err.Chk(e) {
 		t.Fatalf("unable to complete rpctest setup: %v", err)
 	}
 	defer func() {
-		if e := harness.TearDown(); dbg.Chk(e) {
+		if e := harness.TearDown(); err.Chk(e) {
 		}
 	}()
 	nodeSlice := []*Harness{r, harness}
 	// Both mempools should be considered synced as they are empty. Therefore, this should return instantly.
-	if e := JoinNodes(nodeSlice, Mempools); dbg.Chk(e) {
+	if e := JoinNodes(nodeSlice, Mempools); err.Chk(e) {
 		t.Fatalf("unable to join node on mempools: %v", err)
 	}
 	// Generate a coinbase spend to a new address within the main harness' mempool.
@@ -181,7 +181,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	if e != nil  {
 		t.Fatalf("coinbase spend failed: %v", err)
 	}
-	if _, e = r.Node.SendRawTransaction(testTx, true); dbg.Chk(e) {
+	if _, e = r.Node.SendRawTransaction(testTx, true); err.Chk(e) {
 		t.Fatalf("send transaction failed: %v", err)
 	}
 	// Wait until the transaction shows up to ensure the two mempools are not the same.
@@ -207,7 +207,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	// This select case should fall through to the default as the goroutine should be blocked on the JoinNodes call.
 	poolsSynced := qu.T()
 	go func() {
-		if e := JoinNodes(nodeSlice, Mempools); dbg.Chk(e) {
+		if e := JoinNodes(nodeSlice, Mempools); err.Chk(e) {
 			t.Fatalf("unable to join node on mempools: %v", err)
 		}
 		poolsSynced <- struct{}{}
@@ -218,14 +218,14 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	default:
 	}
 	// Establish an outbound connection from the local harness to the main harness and wait for the chains to be synced.
-	if e := ConnectNode(harness, r); dbg.Chk(e) {
+	if e := ConnectNode(harness, r); err.Chk(e) {
 		t.Fatalf("unable to connect harnesses: %v", err)
 	}
-	if e := JoinNodes(nodeSlice, Blocks); dbg.Chk(e) {
+	if e := JoinNodes(nodeSlice, Blocks); err.Chk(e) {
 		t.Fatalf("unable to join node on blocks: %v", err)
 	}
 	// Send the transaction to the local harness which will result in synced mempools.
-	if _, e = harness.Node.SendRawTransaction(testTx, true); dbg.Chk(e) {
+	if _, e = harness.Node.SendRawTransaction(testTx, true); err.Chk(e) {
 		t.Fatalf("send transaction failed: %v", err)
 	}
 	// Select once again with a special timeout case after 1 minute. The goroutine above should now be blocked on
@@ -241,19 +241,19 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	// Create a second harness with only the genesis block so it is behind the main harness.
 	harness, e := New(&netparams.SimNetParams, nil, nil)
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
-	if e := harness.SetUp(false, 0); dbg.Chk(e) {
+	if e := harness.SetUp(false, 0); err.Chk(e) {
 		t.Fatalf("unable to complete rpctest setup: %v", err)
 	}
 	defer func() {
-		if e := harness.TearDown(); dbg.Chk(e) {
+		if e := harness.TearDown(); err.Chk(e) {
 		}
 	}()
 	nodeSlice := []*Harness{r, harness}
 	blocksSynced := qu.T()
 	go func() {
-		if e := JoinNodes(nodeSlice, Blocks); dbg.Chk(e) {
+		if e := JoinNodes(nodeSlice, Blocks); err.Chk(e) {
 			t.Fatalf("unable to join node on blocks: %v", err)
 		}
 		blocksSynced <- struct{}{}
@@ -265,7 +265,7 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	default:
 	}
 	// Connect the local harness to the main harness which will sync the chains.
-	if e := ConnectNode(harness, r); dbg.Chk(e) {
+	if e := ConnectNode(harness, r); err.Chk(e) {
 		t.Fatalf("unable to connect harnesses: %v", err)
 	}
 	// Select once again with a special timeout case after 1 minute. The goroutine above should now be blocked on
@@ -402,13 +402,13 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 	// Create a fresh harness, we'll be using the main harness to force a re-org on this local harness.
 	harness, e := New(&netparams.SimNetParams, nil, nil)
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
-	if e := harness.SetUp(true, 5); dbg.Chk(e) {
+	if e := harness.SetUp(true, 5); err.Chk(e) {
 		t.Fatalf("unable to complete rpctest setup: %v", err)
 	}
 	defer func() {
-		if e := harness.TearDown(); dbg.Chk(e) {
+		if e := harness.TearDown(); err.Chk(e) {
 		}
 	}()
 	// The internal wallet of this harness should now have 250 DUO.
@@ -419,11 +419,11 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 			expectedBalance, walletBalance)
 	}
 	// Now connect this local harness to the main harness then wait for their chains to synchronize.
-	if e := ConnectNode(harness, r); dbg.Chk(e) {
+	if e := ConnectNode(harness, r); err.Chk(e) {
 		t.Fatalf("unable to connect harnesses: %v", err)
 	}
 	nodeSlice := []*Harness{r, harness}
-	if e := JoinNodes(nodeSlice, Blocks); dbg.Chk(e) {
+	if e := JoinNodes(nodeSlice, Blocks); err.Chk(e) {
 		t.Fatalf("unable to join node on blocks: %v", err)
 	}
 	// The original wallet should now have a balance of 0 DUO as its entire chain should have been decimated in favor of
@@ -496,7 +496,7 @@ func TestMain(m *testing.M) {
 	}
 	// Initialize the main mining node with a chain of length 125, providing 25 mature coinbases to allow spending from
 	// for testing purposes.
-	if e = mainHarness.SetUp(true, numMatureOutputs); dbg.Chk(e) {
+	if e = mainHarness.SetUp(true, numMatureOutputs); err.Chk(e) {
 		fmt.Println("unable to setup test chain: ", err)
 		// Even though the harness was not fully setup, it still needs to be torn down to ensure all resources such as
 		// temp directories are cleaned up. The error is intentionally ignored since this is already an error path and
@@ -507,7 +507,7 @@ func TestMain(m *testing.M) {
 	exitCode := m.Run()
 	// Clean up any active harnesses that are still currently running.
 	if len(ActiveHarnesses()) > 0 {
-		if e := TearDownAll(); dbg.Chk(e) {
+		if e := TearDownAll(); err.Chk(e) {
 			fmt.Println("unable to tear down chain: ", err)
 			os.Exit(1)
 		}

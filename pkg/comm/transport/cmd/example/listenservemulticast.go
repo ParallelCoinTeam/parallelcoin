@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"net"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/comm/transport"
-	log "github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/loop"
 )
 
@@ -21,7 +21,7 @@ var (
 )
 
 func main() {
-	log.L.SetLevel("trace", true, "pod")
+	logg.SetLogLevel("trace")
 	dbg.Ln("starting test")
 	quit := qu.T()
 	var c *transport.Channel
@@ -35,20 +35,20 @@ func main() {
 			},
 		},
 		quit,
-	); dbg.Chk(e) {
-		panic(err)
+	); err.Chk(e) {
+		panic(e)
 	}
 	time.Sleep(time.Second)
 	var n int
 	loop.To(10, func(i int) {
 		text := []byte(fmt.Sprintf("this is a test %d", i))
 		inf.F("%s -> %s [%d] '%s'", c.Sender.LocalAddr(), c.Sender.RemoteAddr(), n-4, text)
-		if e = c.SendMany(TestMagicB, transport.GetShards(text)); dbg.Chk(e) {
+		if e = c.SendMany(TestMagicB, transport.GetShards(text)); err.Chk(e) {
 		} else {
 		}
 	})
 	time.Sleep(time.Second * 5)
-	if e = c.Close(); !dbg.Chk(e) {
+	if e = c.Close(); !err.Chk(e) {
 		time.Sleep(time.Second * 1)
 	}
 	quit.Q()

@@ -19,7 +19,7 @@ func ListCommands() (s string) {
 	for _, method := range cmdMethods {
 		var e error
 		var flags btcjson.UsageFlag
-		if flags, e = btcjson.MethodUsageFlags(method); dbg.Chk(e) {
+		if flags, e = btcjson.MethodUsageFlags(method); err.Chk(e) {
 			continue
 		}
 		// Skip the commands that aren't usable from this utility.
@@ -27,7 +27,7 @@ func ListCommands() (s string) {
 			continue
 		}
 		var usage string
-		if usage, e = btcjson.MethodUsageText(method); dbg.Chk(e) {
+		if usage, e = btcjson.MethodUsageText(method); err.Chk(e) {
 			continue
 		}
 		// Categorize the command based on the usage flags.

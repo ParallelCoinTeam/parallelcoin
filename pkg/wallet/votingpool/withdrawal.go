@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"time"
 	
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // Maximum tx size (in bytes). This should be the same as bitcoind's MAX_STANDARD_TX_SIZE.
@@ -130,11 +130,11 @@ func (tx *changeAwareTx) addSelfToStore(store *wtxmgr.Store, txmgrNs walletdb.Re
 	if e != nil  {
 				return newError(ErrWithdrawalTxStorage, "error constructing TxRecord for storing", err)
 	}
-	if e := store.InsertTx(txmgrNs, rec, nil); dbg.Chk(e) {
+	if e := store.InsertTx(txmgrNs, rec, nil); err.Chk(e) {
 		return newError(ErrWithdrawalTxStorage, "error adding tx to store", err)
 	}
 	if tx.changeIdx != -1 {
-		if e = store.AddCredit(txmgrNs, rec, nil, uint32(tx.changeIdx), true); dbg.Chk(e) {
+		if e = store.AddCredit(txmgrNs, rec, nil, uint32(tx.changeIdx), true); err.Chk(e) {
 			return newError(ErrWithdrawalTxStorage, "error adding tx credits to store", err)
 		}
 	}
@@ -444,7 +444,7 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 				return nil, e
 	}
 	w := newWithdrawal(roundID, requests, eligible, changeStart)
-	if e := w.fulfillRequests(); dbg.Chk(e) {
+	if e := w.fulfillRequests(); err.Chk(e) {
 		return nil, e
 	}
 	w.status.sigs, e = getRawSigs(w.transactions)
@@ -504,7 +504,7 @@ func (w *withdrawal) fulfillNextRequest() (e error) {
 		if len(w.eligibleInputs) == 0 {
 			dbg.Ln("splitting last output because we don't have enough" +
 				" inputs")
-			if e := w.splitLastOutput(); dbg.Chk(e) {
+			if e := w.splitLastOutput(); err.Chk(e) {
 				return err
 			}
 			break
@@ -534,7 +534,7 @@ func (w *withdrawal) handleOversizeTx() (e error) {
 	} else if len(w.current.outputs) == 1 {
 		dbg.Ln("splitting last output because tx got too big...")
 		w.pushInput(w.current.removeInput())
-		if e := w.splitLastOutput(); dbg.Chk(e) {
+		if e := w.splitLastOutput(); err.Chk(e) {
 			return err
 		}
 	} else {
@@ -621,7 +621,7 @@ func (w *withdrawal) fulfillRequests() (e error) {
 	sort.Sort(byOutBailmentID(w.pendingRequests))
 	w.current = newWithdrawalTx(w.txOptions)
 	for len(w.pendingRequests) > 0 {
-		if e := w.fulfillNextRequest(); dbg.Chk(e) {
+		if e := w.fulfillNextRequest(); err.Chk(e) {
 			return err
 		}
 		tx := w.current
@@ -630,7 +630,7 @@ func (w *withdrawal) fulfillRequests() (e error) {
 			break
 		}
 	}
-	if e := w.finalizeCurrentTx(); dbg.Chk(e) {
+	if e := w.finalizeCurrentTx(); err.Chk(e) {
 		return err
 	}
 	// TODO: Update w.status.nextInputAddr. Not yet implemented as in some
@@ -826,7 +826,7 @@ func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs wal
 				return newError(ErrTxSigning, "failed to obtain pkScripts for signing", err)
 	}
 	for i, pkScript := range pkScripts {
-		if e = signMultiSigUTXO(mgr, addrmgrNs, msgtx, i, pkScript, sigs[i]); dbg.Chk(e) {
+		if e = signMultiSigUTXO(mgr, addrmgrNs, msgtx, i, pkScript, sigs[i]); err.Chk(e) {
 			return err
 		}
 	}
@@ -884,7 +884,7 @@ func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *
 				return newError(ErrTxSigning, "error building sigscript", err)
 	}
 	tx.TxIn[idx].SignatureScript = script
-	if e := validateSigScript(tx, idx, pkScript); dbg.Chk(e) {
+	if e := validateSigScript(tx, idx, pkScript); err.Chk(e) {
 		return err
 	}
 	return nil
@@ -898,7 +898,7 @@ func validateSigScript(msgtx *wire.MsgTx, idx int, pkScript []byte) (e error) {
 	if e != nil  {
 				return newError(ErrTxSigning, "cannot create script engine", err)
 	}
-	if e = vm.Execute(); dbg.Chk(e) {
+	if e = vm.Execute(); err.Chk(e) {
 		return newError(ErrTxSigning, "cannot validate tx signature", err)
 	}
 	return nil
@@ -941,14 +941,14 @@ func nextChangeAddress(a ChangeAddress) (ChangeAddress, error) {
 	}
 	var addr *ChangeAddress
 	var e error
-	if addr, e = a.pool.ChangeAddress(seriesID, index); dbg.Chk(e) {
+	if addr, e = a.pool.ChangeAddress(seriesID, index); err.Chk(e) {
 		return ChangeAddress{}, err
 	}
 	return *addr, err
 }
 func storeTransactions(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket, transactions []*changeAwareTx) (e error) {
 	for _, tx := range transactions {
-		if e := tx.addSelfToStore(store, txmgrNs); dbg.Chk(e) {
+		if e := tx.addSelfToStore(store, txmgrNs); err.Chk(e) {
 			return err
 		}
 	}

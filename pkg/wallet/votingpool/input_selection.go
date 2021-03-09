@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
-
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 )
 

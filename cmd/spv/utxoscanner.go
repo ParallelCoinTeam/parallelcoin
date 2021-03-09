@@ -6,11 +6,11 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/addrmgr"
+	am "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 type (
@@ -286,7 +286,7 @@ scanToEnd:
 		}
 		hash, e := s.cfg.GetBlockHash(int64(height))
 		if e != nil  {
-			err.Ln(err)
+			err.Ln(e)
 			return reporter.FailRemaining(e)
 		}
 		// If there are any new requests that can safely be added to this batch,
@@ -302,7 +302,7 @@ scanToEnd:
 			}
 			match, e := s.cfg.BlockFilterMatches(&options, hash)
 			if e != nil  {
-				err.Ln(err)
+				err.Ln(e)
 				return reporter.FailRemaining(e)
 			}
 			// If still no match is found, we have no reason to fetch this block,
@@ -325,7 +325,7 @@ scanToEnd:
 		trc.F("fetching block height=%d hash=%s %s", height, hash)
 		block, e := s.cfg.GetBlock(*hash)
 		if e != nil  {
-			err.Ln(err)
+			err.Ln(e)
 			return reporter.FailRemaining(e)
 		}
 		// Chk again to see if the utxoscanner has been signaled to exit.
@@ -342,7 +342,7 @@ scanToEnd:
 	// might have a few blocks that were added since the scan started.
 	currStamp, e := s.cfg.BestSnapshot()
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 		return reporter.FailRemaining(e)
 	}
 	// If the returned height is higher, we still have more blocks to go. Shift

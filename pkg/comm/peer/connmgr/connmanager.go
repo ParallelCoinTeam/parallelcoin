@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
 // maxFailedAttempts is the maximum number of successive failed connection
@@ -240,7 +240,7 @@ out:
 				connReq := msg.c
 				if _, ok := pending[connReq.id]; !ok {
 					if msg.conn != nil {
-						if e := msg.conn.Close(); dbg.Chk(e) {
+						if e := msg.conn.Close(); err.Chk(e) {
 						}
 					}
 					dbg.Ln("ignoring connection for canceled connreq", connReq)
@@ -275,7 +275,7 @@ out:
 				trc.Ln("disconnected from", connReq)
 				delete(conns, msg.id)
 				if connReq.conn != nil {
-					if e := connReq.conn.Close(); dbg.Chk(e) {
+					if e := connReq.conn.Close(); err.Chk(e) {
 					}
 				}
 				if cm.Cfg.OnDisconnection != nil {
@@ -341,7 +341,7 @@ func (cm *ConnManager) NewConnReq() {
 	}
 	addr, e := cm.Cfg.GetNewAddress()
 	if e != nil {
-		// trc.Ln(err)
+		// trc.Ln(e)
 		select {
 		case cm.requests <- handleFailed{c, e}:
 		case <-cm.quit.Wait():
@@ -390,7 +390,7 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 	conn, e := cm.Cfg.Dial(c.Addr)
 	// err.Ln(err, c.Addr)
 	if e != nil {
-		trc.Ln(err)
+		trc.Ln(e)
 		select {
 		case cm.requests <- handleFailed{c, e}:
 		case <-cm.quit.Wait():
@@ -440,7 +440,7 @@ func (cm *ConnManager) listenHandler(listener net.Listener) {
 	for atomic.LoadInt32(&cm.stop) == 0 {
 		conn, e := listener.Accept()
 		if e != nil {
-			trc.Ln(err)
+			trc.Ln(e)
 			// Only log the error if not forcibly shutting down.
 			if atomic.LoadInt32(&cm.stop) == 0 {
 				err.Ln("can't accept connection:", err)
@@ -450,7 +450,7 @@ func (cm *ConnManager) listenHandler(listener net.Listener) {
 		go cm.Cfg.OnAccept(conn)
 	}
 	cm.wg.Done()
-	if e := listener.Close(); dbg.Chk(e) {
+	if e := listener.Close(); err.Chk(e) {
 	}
 	trc.Ln(fmt.Sprint("listener handler done for ", listener.Addr()))
 }

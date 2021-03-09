@@ -9,10 +9,11 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
 func init() {
+
 	// Override the max retry duration when running tests.
 	maxRetryDuration = 2 * time.Millisecond
 }

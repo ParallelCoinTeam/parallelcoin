@@ -33,13 +33,13 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	cfg, _ := pod.EmptyConfig()
 	var cfgFile []byte
 	var e error
-	if cfgFile, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); dbg.Chk(e) {
+	if cfgFile, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); err.Chk(e) {
 		// this should not happen
 		// TODO: panic-type conditions - for gui should have a notification maybe?
 		panic("config file does not exist")
 	}
 	dbg.Ln("loaded config")
-	if e = json.Unmarshal(cfgFile, &cfg); !dbg.Chk(e) {
+	if e = json.Unmarshal(cfgFile, &cfg); !err.Chk(e) {
 		dbg.Ln("unmarshaled config")
 		bhb := blake3.Sum256([]byte(pass))
 		bh := hex.EncodeToString(bhb[:])
@@ -49,7 +49,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
 			if logi.FileExists(filename) {
 				dbg.Ln("#### loading state data...")
-				if e = wg.State.Load(filename, wg.cx.Config.WalletPass); dbg.Chk(e) {
+				if e = wg.State.Load(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 					// interrupt.Request()
 				}
 				dbg.Ln("#### loaded state data")
@@ -61,12 +61,12 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			// 	wg.inputs["receiveMessage"].GetText(),
 			// )
 			// var qrc image.Image
-			// if qrc, e = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !dbg.Chk(e) {
+			// if qrc, e = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !err.Chk(e) {
 			// 	iop := paint.NewImageOp(qrc)
 			// 	wg.currentReceiveQRCode = &iop
 			// 	wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {
 			// 		dbg.Ln("clicked qr code copy clicker")
-			// 		if e := clipboard.WriteAll(qrText); dbg.Chk(e) {
+			// 		if e := clipboard.WriteAll(qrText); err.Chk(e) {
 			// 		}
 			// 	})).
 			// 		// CornerRadius(0.5).

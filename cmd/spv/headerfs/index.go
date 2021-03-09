@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sort"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/database/walletdb"
 )
 
 var (
@@ -240,7 +240,7 @@ func (h *headerIndex) truncateIndex(newTip *chainhash.Hash, delete bool) (e erro
 			// headers) is being rolled back.
 			if delete {
 				prevTipHash := rootBucket.Get(tipKey)
-				if e := rootBucket.Delete(prevTipHash); dbg.Chk(e) {
+				if e := rootBucket.Delete(prevTipHash); err.Chk(e) {
 					return e
 				}
 			}

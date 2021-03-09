@@ -17,7 +17,7 @@ func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		// interrupt.AddHandler(func() {
 		// 	dbg.Ln("wallet gui is shut down")
 		// })
-		if e = gui.Main(cx, c); dbg.Chk(e) {
+		if e = gui.Main(cx, c); err.Chk(e) {
 		}
 		dbg.Ln("pod gui finished")
 		return

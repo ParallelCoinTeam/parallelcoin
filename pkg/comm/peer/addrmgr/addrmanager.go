@@ -18,10 +18,10 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // AddrManager provides a concurrency safe address manager for caching potential peers on the bitcoin network.
@@ -339,10 +339,10 @@ func (a *AddrManager) savePeers() {
 	}
 	enc := json.NewEncoder(w)
 	defer func() {
-		if e := w.Close(); dbg.Chk(e) {
+		if e := w.Close(); err.Chk(e) {
 		}
 	}()
-	if e := enc.Encode(&sam); dbg.Chk(e) {
+	if e := enc.Encode(&sam); err.Chk(e) {
 		err.F("failed to encode file %s: %v", a.PeersFile, err)
 		return
 	}
@@ -380,18 +380,18 @@ func (a *AddrManager) deserializePeers(filePath string) (e error) {
 	}
 	r, e := os.Open(filePath)
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 		return fmt.Errorf("%s error opening file: %v", filePath, err)
 	}
 	defer func() {
-		if e := r.Close(); dbg.Chk(e) {
+		if e := r.Close(); err.Chk(e) {
 		}
 	}()
 	var sam serializedAddrManager
 	dec := json.NewDecoder(r)
 	e = dec.Decode(&sam)
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 		return fmt.Errorf("error reading %s: %v", filePath, err)
 	}
 	if sam.Version != serialisationVersion {
@@ -405,13 +405,13 @@ func (a *AddrManager) deserializePeers(filePath string) (e error) {
 		ka := new(KnownAddress)
 		ka.na, e = a.DeserializeNetAddress(v.Addr)
 		if e != nil  {
-			err.Ln(err)
+			err.Ln(e)
 			return fmt.Errorf("failed to deserialize netaddress "+
 				"%s: %v", v.Addr, err)
 		}
 		ka.srcAddr, e = a.DeserializeNetAddress(v.Src)
 		if e != nil  {
-			err.Ln(err)
+			err.Ln(e)
 			return fmt.Errorf("failed to deserialize netaddress "+
 				"%s: %v", v.Src, err)
 		}
@@ -464,12 +464,12 @@ func (a *AddrManager) deserializePeers(filePath string) (e error) {
 func (a *AddrManager) DeserializeNetAddress(addr string) (*wire.NetAddress, error) {
 	host, portStr, e := net.SplitHostPort(addr)
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, e
 	}
 	port, e := strconv.ParseUint(portStr, 10, 16)
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, e
 	}
 	return a.HostToNetAddress(host, uint16(port), wire.SFNodeNetwork)
@@ -531,7 +531,7 @@ func (a *AddrManager) AddAddressByIP(addrIP string) (e error) {
 	// Split IP and port
 	addr, portStr, e := net.SplitHostPort(addrIP)
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 		return e
 	}
 	// Put it in wire.Netaddress
@@ -541,7 +541,7 @@ func (a *AddrManager) AddAddressByIP(addrIP string) (e error) {
 	}
 	port, e := strconv.ParseUint(portStr, 10, 0)
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 		return fmt.Errorf("invalid port %s: %v", portStr, err)
 	}
 	na := wire.NewNetAddressIPPort(ip, uint16(port), 0)
@@ -602,7 +602,7 @@ func (a *AddrManager) reset() {
 	// fill key with bytes from a good random source.
 	_, e := io.ReadFull(crand.Reader, a.key[:])
 	if e != nil  {
-		err.Ln(err)
+		err.Ln(e)
 	}
 	for i := range a.addrNew {
 		a.addrNew[i] = make(map[string]*KnownAddress)
@@ -626,7 +626,7 @@ func (a *AddrManager) HostToNetAddress(host string, port uint16, services wire.S
 		data, e := base32.StdEncoding.DecodeString(
 			strings.ToUpper(host[:16]))
 		if e != nil  {
-			err.Ln(err)
+			err.Ln(e)
 			return nil, e
 		}
 		prefix := []byte{0xfd, 0x87, 0xd8, 0x7e, 0xeb, 0x43}
@@ -634,7 +634,7 @@ func (a *AddrManager) HostToNetAddress(host string, port uint16, services wire.S
 	} else if ip = net.ParseIP(host); ip == nil {
 		ips, e := a.lookupFunc(host)
 		if e != nil  {
-			err.Ln(err)
+			err.Ln(e)
 			return nil, e
 		}
 		if len(ips) == 0 {

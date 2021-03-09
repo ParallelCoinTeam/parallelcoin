@@ -7,7 +7,7 @@ import (
 	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/db/blockdb"
+	"github.com/p9c/pod/pkg/database/blockdb"
 )
 
 // dirEmpty returns whether or not the specified directory path is empty
@@ -17,7 +17,7 @@ func dirEmpty(dirPath string) (bool, error) {
 		return false, e
 	}
 	defer func() {
-		if e := f.Close(); dbg.Chk(e) {
+		if e := f.Close(); err.Chk(e) {
 		}
 	}()
 	// Read the names of a max of one entry from the directory. When the directory is empty, an io.EOF error will be
@@ -98,21 +98,21 @@ func upgradeDBPaths(cx *conte.Xt) (e error) {
 	oldDbRoot := filepath.Join(oldPodHomeDir(), "db")
 	e = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet")
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	e = upgradeDBPathNet(
 		cx, filepath.Join(oldDbRoot, "pod_testnet.db"),
 		"testnet",
 	)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	e = upgradeDBPathNet(
 		cx, filepath.Join(oldDbRoot, "pod_regtest.db"),
 		"regtest",
 	)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	// Remove the old db directory
 	return os.RemoveAll(oldDbRoot)

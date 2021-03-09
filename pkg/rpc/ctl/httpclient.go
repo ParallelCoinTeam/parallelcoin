@@ -41,7 +41,7 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, func(), error) {
 				for {
 					select {
 					case <-ctx.Done():
-						if e := c.Close(); dbg.Chk(e) {
+						if e := c.Close(); err.Chk(e) {
 						}
 						break out
 					}
@@ -130,7 +130,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, 
 	cancel()
 	// Read the raw bytes and close the response.
 	respBytes, e := ioutil.ReadAll(httpResponse.Body)
-	if e := httpResponse.Body.Close(); dbg.Chk(e) {
+	if e := httpResponse.Body.Close(); err.Chk(e) {
 		e = fmt.Errorf("error reading json reply: %v", err)
 				return nil, e
 	}
@@ -146,7 +146,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, 
 	}
 	// Unmarshal the response.
 	var resp btcjson.Response
-	if e := js.Unmarshal(respBytes, &resp); dbg.Chk(e) {
+	if e := js.Unmarshal(respBytes, &resp); err.Chk(e) {
 		return nil, e
 	}
 	if resp.Error != nil {

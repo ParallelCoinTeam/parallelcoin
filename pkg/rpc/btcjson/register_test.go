@@ -200,7 +200,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 	for i, test := range tests {
 		e := btcjson.RegisterCmd(test.method, test.cmdFunc(),
 			test.flags)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T, "+
 				"want %T", i, test.name, err, test.err)
 			continue

@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/database/walletdb"
 )
 
 func decodeHashNoError(str string) *chainhash.Hash {
@@ -408,7 +408,7 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		t.Fatalf("Failed to create temporary directory: %s", err)
 	}
 	defer func() {
-		if e := os.RemoveAll(tempDir); dbg.Chk(e) {
+		if e := os.RemoveAll(tempDir); err.Chk(e) {
 		}
 	}()
 	db, e := walletdb.Create("bdb", tempDir+"/weks.db")
@@ -416,7 +416,7 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		t.Fatalf("DBError opening DB: %s", err)
 	}
 	defer func() {
-		if e := db.Close(); dbg.Chk(e) {
+		if e := db.Close(); err.Chk(e) {
 		}
 	}()
 	hdrStore, e := headerfs.NewBlockHeaderStore(
@@ -462,10 +462,10 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 			HeaderHash: header.BlockHash(),
 			Height:     height,
 		})
-		if e = hdrStore.WriteHeaders(hdrBatch...); dbg.Chk(e) {
+		if e = hdrStore.WriteHeaders(hdrBatch...); err.Chk(e) {
 			t.Fatalf("DBError writing batch of headers: %s", err)
 		}
-		if e = cfStore.WriteHeaders(cfBatch...); dbg.Chk(e) {
+		if e = cfStore.WriteHeaders(cfBatch...); err.Chk(e) {
 			t.Fatalf("DBError writing batch of cfheaders: %s", err)
 		}
 	}
@@ -476,14 +476,14 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		if e = hdrStore.WriteHeaders(headerfs.BlockHeader{
 			BlockHeader: header,
 			Height:      height,
-		}); dbg.Chk(e) {
+		}); err.Chk(e) {
 			t.Fatalf("DBError writing single block header: %s", err)
 		}
 		if e = cfStore.WriteHeaders(headerfs.FilterHeader{
 			FilterHash: zeroHash,
 			HeaderHash: zeroHash,
 			Height:     height,
-		}); dbg.Chk(e) {
+		}); err.Chk(e) {
 			t.Fatalf("DBError writing single cfheader: %s", err)
 		}
 	}

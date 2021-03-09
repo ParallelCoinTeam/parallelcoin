@@ -7,7 +7,7 @@ package gui
 // 		dbg.Ln("updating goroutines data")
 // 		var b []byte
 // 		buf := bytes.NewBuffer(b)
-// 		if e = pprof.Lookup("goroutine").WriteTo(buf, 2); dbg.Chk(e) {
+// 		if e = pprof.Lookup("goroutine").WriteTo(buf, 2); err.Chk(e) {
 // 		}
 // 		lines := strings.Split(buf.String(), "\n")
 // 		var out []l.Widget
@@ -46,7 +46,7 @@ package gui
 // 										goland = "goland"
 // 									}
 // 									launch := exec.Command(goland, "--line", out[1], out[0])
-// 									if e = launch.Start(); dbg.Chk(e) {
+// 									if e = launch.Start(); err.Chk(e) {
 // 									}
 // 								}()
 // 							},

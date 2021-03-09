@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -1128,7 +1128,7 @@ func TestChainSvrCmds(t *testing.T) {
 			continue
 		}
 		var request btcjson.Request
-		if e := json.Unmarshal(marshalled, &request); dbg.Chk(e) {
+		if e := json.Unmarshal(marshalled, &request); err.Chk(e) {
 			t.Errorf("Test #%d (%s) unexpected error while "+
 				"unmarshalling JSON-RPC request: %v", i,
 				test.name, e)

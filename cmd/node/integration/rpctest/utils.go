@@ -3,9 +3,9 @@ package rpctest
 import (
 	"reflect"
 	"time"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 )
 
 // JoinType is an enum representing a particular type of "node join". A node
@@ -99,7 +99,7 @@ func ConnectNode(from *Harness, to *Harness) (e error) {
 	}
 	numPeers := len(peerInfo)
 	targetAddr := to.node.config.listen
-	if e := from.Node.AddNode(targetAddr, rpcclient.ANAdd); dbg.Chk(e) {
+	if e := from.Node.AddNode(targetAddr, rpcclient.ANAdd); err.Chk(e) {
 		return err
 	}
 	// Block until a new connection has been established.
@@ -121,7 +121,7 @@ func TearDownAll() (e error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
 	for _, harness := range testInstances {
-		if e := harness.tearDown(); dbg.Chk(e) {
+		if e := harness.tearDown(); err.Chk(e) {
 			return err
 		}
 	}

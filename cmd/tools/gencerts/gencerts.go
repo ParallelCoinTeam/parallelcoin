@@ -61,17 +61,17 @@ func main() {
 		os.Exit(1)
 	}
 	// Write cert and key files.
-	if e = ioutil.WriteFile(certFile, cert, 0666); dbg.Chk(e) {
+	if e = ioutil.WriteFile(certFile, cert, 0666); err.Chk(e) {
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.
-	if e = ioutil.WriteFile(caFile, cert, 0666); dbg.Chk(e) {
+	if e = ioutil.WriteFile(caFile, cert, 0666); err.Chk(e) {
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", err)
 		os.Exit(1)
 	}
-	if e = ioutil.WriteFile(keyFile, key, 0600); dbg.Chk(e) {
-		if e := os.Remove(certFile); dbg.Chk(e) {
+	if e = ioutil.WriteFile(keyFile, key, 0600); err.Chk(e) {
+		if e := os.Remove(certFile); err.Chk(e) {
 		}
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write key: %v\n", err)
 		os.Exit(1)
@@ -96,8 +96,8 @@ func cleanAndExpandPath(
 // filesExists reports whether the named file or directory exists.
 func fileExists(
 	name string) bool {
-	if _, e = os.Stat(name); dbg.Chk(e) {
-		if os.IsNotExist(err) {
+	if _, e = os.Stat(name); err.Chk(e) {
+		if os.IsNotExist(e) {
 			return false
 		}
 	}

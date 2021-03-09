@@ -7,10 +7,10 @@ import (
 	"sync"
 	
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -41,7 +41,7 @@ func Main(cx *conte.Xt) (e error) {
 	// server RPC client created below after each is created.
 	dbg.Ln("starting RPC servers")
 	var legacyServer *legacy.Server
-	if legacyServer, e = startRPCServers(cx, loader); dbg.Chk(e) {
+	if legacyServer, e = startRPCServers(cx, loader); err.Chk(e) {
 		err.Ln("unable to create RPC servers:", e)
 		return
 	}
@@ -55,7 +55,7 @@ func Main(cx *conte.Xt) (e error) {
 	if !*cx.Config.NoInitialLoad {
 		go func() {
 			dbg.Ln("loading wallet", *cx.Config.WalletPass)
-			if e = LoadWallet(loader, cx, legacyServer); dbg.Chk(e) {
+			if e = LoadWallet(loader, cx, legacyServer); err.Chk(e) {
 			}
 		}()
 	}
@@ -96,7 +96,7 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	// this will return an appropriate error.
 	var w *wallet.Wallet
 	dbg.Ln("^^^^^^^^^^^^^ opening existing wallet")
-	if w, e = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass), true, cx.Config, nil); dbg.Chk(e) {
+	if w, e = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass), true, cx.Config, nil); err.Chk(e) {
 		dbg.Ln("^^^^^^^^^^^^^ failed to open existing wallet")
 		return
 	}

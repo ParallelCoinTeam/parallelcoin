@@ -8,10 +8,10 @@ import (
 	"github.com/jessevdk/go-flags"
 
 	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	_ "github.com/p9c/pod/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	database "github.com/p9c/pod/pkg/database"
+	_ "github.com/p9c/pod/pkg/database/ffldb"
 )
 
 const (

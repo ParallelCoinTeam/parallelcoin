@@ -27,7 +27,7 @@ func (c *Client) NewJob(templates *templates.Message) (e error) {
 				return
 	}
 	var reply bool
-	if e = c.Call("Worker.NewJob", templates, &reply); dbg.Chk(e){
+	if e = c.Call("Worker.NewJob", templates, &reply); err.Chk(e){
 		return
 	}
 	if reply != true {

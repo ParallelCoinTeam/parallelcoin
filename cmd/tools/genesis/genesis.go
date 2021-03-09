@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"strconv"
 	"time"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 )
 
 type transaction struct {

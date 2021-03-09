@@ -2,7 +2,8 @@ package logg
 
 import (
 	"fmt"
-	"github.com/fatih/color"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gookit/color"
 	uberatomic "go.uber.org/atomic"
 	"io"
 	"os"
@@ -27,8 +28,8 @@ const (
 )
 
 type (
-	// LevelPrinter defines a set of terminal printing primitives that output with extra
-	// data, time, log logLevelList, and code location
+	// LevelPrinter defines a set of terminal printing primitives that output with
+	// extra data, time, log logLevelList, and code location
 	LevelPrinter struct {
 		// Ln prints lists of interfaces with spaces in between
 		Ln func(a ...interface{})
@@ -45,28 +46,18 @@ type (
 	logLevelList struct {
 		Off, Fatal, Error, Check, Warn, Info, Debug, Trace int32
 	}
-	levelSpec struct {
-		id        int32
-		name      string
-		colorizer func(format string, a ...interface{}) string
+	LevelSpec struct {
+		ID        int32
+		Name      string
+		Colorizer func(format string, a ...interface{}) string
 	}
 )
 
 var (
 	logger_started = time.Now()
-	levelSpecs     = []levelSpec{
-		{logLevels.Off, "off", nil},
-		{logLevels.Fatal, "fatal", color.RedString},
-		{logLevels.Error, "error", color.YellowString},
-		{logLevels.Check, "check", color.GreenString},
-		{logLevels.Warn, "warn", color.HiWhiteString},
-		{logLevels.Info, "info", color.WhiteString},
-		{logLevels.Debug, "debug", color.BlueString},
-		{logLevels.Trace, "trace", color.MagentaString},
-	}
 	// repositoryPath is the part of the filesystem path that contains the application
 	// repository.
-	// todo: can be injected using stroy - and is kinda crap but fix it llater
+	// todo: can be injected using stroy - and is kinda crap but fix it later
 	repositoryPath = "/home/loki/src/github.com/p9c/pod/"
 	// sep is just a convenient shortcut for this very longwinded expression
 	sep          = string(os.PathSeparator)
@@ -83,7 +74,7 @@ var (
 	logFilter = make(map[string]struct{})
 	// mutexes to prevent concurrent map accesses
 	highlightMx, _logFilterMx sync.Mutex
-	// logLevels is a shorthand access that minimises possible name collisions in the
+	// logLevels is a shorthand access that minimises possible Name collisions in the
 	// dot import
 	logLevels = logLevelList{
 		Off:   _Off,
@@ -94,6 +85,17 @@ var (
 		Info:  _Info,
 		Debug: _Debug,
 		Trace: _Trace,
+	}
+	// LevelSpecs specifies the id, string name and color-printing function
+	LevelSpecs = []LevelSpec{
+		{logLevels.Off, "off  ", color.Gray.Sprintf},
+		{logLevels.Fatal, "fatal", color.Magenta.Sprintf},
+		{logLevels.Error, "error", color.Red.Sprintf},
+		{logLevels.Check, "check", color.Yellow.Sprintf},
+		{logLevels.Warn, "warn ", color.Green.Sprintf},
+		{logLevels.Info, "info ", color.Cyan.Sprintf},
+		{logLevels.Debug, "debug", color.FgLightBlue.Sprintf},
+		{logLevels.Trace, "trace", color.Blue.Sprintf},
 	}
 )
 
@@ -113,7 +115,7 @@ func _getOnePrinter(level int32, subsystem string) LevelPrinter {
 		F:   _f(level, subsystem),
 		S:   _s(level, subsystem),
 		C:   _c(level, subsystem),
-		Chk: _ok(level, subsystem),
+		Chk: _chk(level, subsystem),
 	}
 }
 
@@ -121,10 +123,11 @@ func _getOnePrinter(level int32, subsystem string) LevelPrinter {
 // one character, similar to nmcli's argument processor, as the first letter is
 // unique. This could be used with a linter to make larger command sets.
 func SetLogLevel(l string) {
+	fmt.Fprintln(os.Stderr, "\nsetting\nlog\nlevel\n", l)
 	lvl := logLevels.Info
-	for i := range levelSpecs {
-		if levelSpecs[i].name[:len(l)] == l {
-			lvl = levelSpecs[i].id
+	for i := range LevelSpecs {
+		if LevelSpecs[i].Name[:1] == l[:1] {
+			lvl = LevelSpecs[i].ID
 		}
 	}
 	currentLevel.Store(lvl)
@@ -142,6 +145,12 @@ func SetLogWriter(wr *io.Writer) {
 // declarations and main/init. Really this is just here to alert the reader.
 func SortSubsystemsList() {
 	sort.Strings(allSubsystems)
+	fmt.Fprintln(
+		os.Stderr,
+		spew.Sdump(allSubsystems),
+		spew.Sdump(highlighted),
+		spew.Sdump(logFilter),
+	)
 }
 
 // AddLoggerSubsystem adds a subsystem to the list of known subsystems and returns the
@@ -152,10 +161,10 @@ func AddLoggerSubsystem() (subsystem string) {
 	var ok bool
 	_, pkgPath, _, ok = runtime.Caller(1)
 	_ = ok
-	fmt.Println(pkgPath, repositoryPath)
 	fromRoot := strings.Split(pkgPath, repositoryPath)[1]
 	split = strings.Split(fromRoot, sep)
 	subsystem = strings.Join(split[:len(split)-1], "/")
+	// fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
 	allSubsystems = append(allSubsystems, subsystem)
 	return
 }
@@ -218,11 +227,12 @@ func _isHighlighted(subsystem string) (found bool) {
 	return
 }
 
-// _addHighlightedSubsystem adds a new subsystem name to the highlighted list
-func _addHighlightedSubsystem(hl string) {
+// AddHighlightedSubsystem adds a new subsystem Name to the highlighted list
+func AddHighlightedSubsystem(hl string) struct{} {
 	highlightMx.Lock()
 	highlighted[hl] = struct{}{}
 	highlightMx.Unlock()
+	return struct{}{}
 }
 
 // _isSubsystemFiltered returns true if the subsystem should not pr logs
@@ -233,29 +243,28 @@ func _isSubsystemFiltered(subsystem string) (found bool) {
 	return
 }
 
+// AddFilteredSubsystem adds a new subsystem Name to the highlighted list
+func AddFilteredSubsystem(hl string) struct{} {
+	_logFilterMx.Lock()
+	logFilter[hl] = struct{}{}
+	_logFilterMx.Unlock()
+	return struct{}{}
+}
+
+func getTimeText() string {
+	return time.Now().Sub(logger_started).Round(time.Millisecond).String()
+}
+
 func _ln(level int32, subsystem string) func(a ...interface{}) {
 	return func(a ...interface{}) {
-		if level >= currentLevel.Load() || !_isSubsystemFiltered(subsystem) {
-			if _isHighlighted(subsystem) {
-				subsystem = " (((" + strings.ToUpper(subsystem) + ")))"
-			} else {
-				subsystem = ""
-			}
-			// set the runtime.Caller depth to appropriate for the caller
-			depth := 3
-			if level == logLevels.Check {
-				depth = 4
-			}
-			fmt.Fprintln(
+		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
+			fmt.Fprintf(
 				*writer,
-				levelSpecs[level].colorizer(
-					"%v %s%s [%s] %s",
-					time.Now().Truncate(time.Millisecond).Sub(logger_started),
-					levelSpecs[level].name,
-					subsystem,
-					color.WhiteString(joinStrings(" ", a)),
-					getLoc(depth),
-				),
+				"%-58v %-6v %s %s L\n",
+				getLoc(2, level, subsystem),
+				LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
+				color.White.Sprint(joinStrings(" ", a...)),
+				getTimeText(),
 			)
 		}
 	}
@@ -263,20 +272,20 @@ func _ln(level int32, subsystem string) func(a ...interface{}) {
 
 func _f(level int32, subsystem string) func(format string, a ...interface{}) {
 	return func(format string, a ...interface{}) {
-		if level >= currentLevel.Load() || !_isSubsystemFiltered(subsystem) {
-			if _isHighlighted(subsystem) {
-				subsystem = " (((" + strings.ToUpper(subsystem) + ")))"
-			}
+		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
+			// if _isHighlighted(subsystem) {
+			// 	subsystem =
+			// 		color.Yellow.Sprint(
+			// 			color.Bold.Sprint("(" + strings.ToUpper(subsystem) + ")"),
+			// 		)
+			// }
 			fmt.Fprintf(
-				*writer, format,
-				levelSpecs[level].colorizer(
-					"%v %s%s [%s] %s",
-					time.Now().Truncate(time.Millisecond).Sub(logger_started),
-					levelSpecs[level].name,
-					subsystem,
-					color.WhiteString(joinStrings(" ", a)),
-					getLoc(3),
-				),
+				*writer,
+				"%-58v %-6v %s %s F\n",
+				getLoc(2, level, subsystem),
+				LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
+				color.White.Sprintf(format, a...),
+				getTimeText(),
 			)
 		}
 	}
@@ -284,20 +293,20 @@ func _f(level int32, subsystem string) func(format string, a ...interface{}) {
 
 func _s(level int32, subsystem string) func(a ...interface{}) {
 	return func(a ...interface{}) {
-		if level >= currentLevel.Load() || !_isSubsystemFiltered(subsystem) {
-			if _isHighlighted(subsystem) {
-				subsystem = " (((" + strings.ToUpper(subsystem) + ")))"
-			}
-			fmt.Fprintln(
+		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
+			// if _isHighlighted(subsystem) {
+			// 	subsystem =
+			// 		color.Yellow.Sprint(
+			// 			color.Bold.Sprint("(" + strings.ToUpper(subsystem) + ")"),
+			// 		)
+			// }
+			fmt.Fprintf(
 				*writer,
-				levelSpecs[level].colorizer(
-					"%v %s%s\n%s\n%s",
-					time.Now().Truncate(time.Millisecond).Sub(logger_started),
-					levelSpecs[level].name,
-					subsystem,
-					color.WhiteString(joinStrings("\n", a)),
-					getLoc(3),
-				),
+				"%-58v %-6v\n%s\n%s S\n",
+				getLoc(2, level, subsystem),
+				LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
+				color.White.Sprint(" ", spew.Sdump(a)),
+				getTimeText(),
 			)
 		}
 	}
@@ -305,26 +314,43 @@ func _s(level int32, subsystem string) func(a ...interface{}) {
 
 func _c(level int32, subsystem string) func(closure func() string) {
 	return func(closure func() string) {
-		if level >= currentLevel.Load() || !_isSubsystemFiltered(subsystem) {
-			if _isHighlighted(subsystem) {
-				subsystem = " (((" + strings.ToUpper(subsystem) + ")))"
-			} else {
-				subsystem = ""
-			}
-			_ln(level, subsystem)(closure())
+		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
+			// if _isHighlighted(subsystem) {
+			// 	subsystem =
+			// 		color.Yellow.Sprint(
+			// 			color.Bold.Sprint("(" + strings.ToUpper(subsystem) + ")"),
+			// 		)
+			// }
+			fmt.Fprintf(
+				*writer,
+				"%-58v %-6v %s %s C\n",
+				getLoc(2, level, subsystem),
+				LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
+				color.White.Sprint(closure()),
+				getTimeText(),
+			)
 		}
 	}
 }
 
-func _ok(level int32, subsystem string) func(e error) bool {
+func _chk(level int32, subsystem string) func(e error) bool {
 	return func(e error) bool {
-		if level >= currentLevel.Load() || !_isSubsystemFiltered(subsystem) {
-			if e != nil  {
-				if _isHighlighted(subsystem) {
-					subsystem = " (((" + strings.ToUpper(subsystem) + ")))"
-				} else {
-					subsystem = ""
-				}
+		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
+			if e != nil {
+				// if _isHighlighted(subsystem) {
+				// 	subsystem =
+				// 		color.Yellow.Sprint(
+				// 			color.Bold.Sprint("(" + strings.ToUpper(subsystem) + ")"),
+				// 		)
+				// }
+				fmt.Fprintf(
+					*writer,
+					"%-58v %-6v %s %s Chk\n",
+					getLoc(2, level, subsystem),
+					LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
+					color.White.Sprint(joinStrings(" ", e.Error())),
+					getTimeText(),
+				)
 				return true
 			}
 		}
@@ -346,7 +372,58 @@ func joinStrings(sep string, a ...interface{}) (o string) {
 
 // getLoc calls runtime.Caller and formats as expected by source code editors
 // for terminal hyperlinks
-func getLoc(skip int) string {
+func getLoc(skip int, level int32, subsystem string) (output string) {
 	_, file, line, _ := runtime.Caller(skip)
-	return fmt.Sprintf("%s:%d", file, line)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintln(os.Stderr, "getloc panic on subsystem", subsystem, file)
+		}
+	}()
+	if _isHighlighted(subsystem) {
+		split := strings.Split(file, subsystem)
+		output = fmt.Sprint(
+			// color.Black.Sprint(split[0]),
+			LevelSpecs[level].Colorizer(color.Bold.Sprint(subsystem)),
+			color.Gray.Sprint(
+				split[1], ":", line,
+			),
+		)
+	} else {
+		split := strings.Split(file, subsystem)
+		output = fmt.Sprint(
+			// color.Black.Sprint(split[0]),
+			color.White.Sprint(subsystem),
+			color.Gray.Sprint(
+				split[1], ":", line,
+			),
+		)
+	}
+	return
+}
+
+// DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
+func DirectionString(inbound bool) string {
+	if inbound {
+		return "inbound"
+	}
+	return "outbound"
+}
+
+func PickNoun(n int, singular, plural string) string {
+	if n == 1 {
+		return singular
+	}
+	return plural
+}
+
+func FileExists(filePath string) bool {
+	_, e := os.Stat(filePath)
+	return e == nil
+}
+
+func Caller(comment string, skip int) string {
+	_, file, line, _ := runtime.Caller(skip + 1)
+	o := fmt.Sprintf("%s: %s:%d", comment, file, line)
+	// L.Debug(o)
+	return o
 }

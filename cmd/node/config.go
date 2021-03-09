@@ -7,14 +7,14 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/app/appdata"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	database "github.com/p9c/pod/pkg/db"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	database "github.com/p9c/pod/pkg/database"
 	
 	"github.com/p9c/pod/pkg/comm/peer"
 	// This ensures the database drivers get registered
-	_ "github.com/p9c/pod/pkg/db/ffldb"
+	_ "github.com/p9c/pod/pkg/database/ffldb"
 )
 
 //
@@ -265,7 +265,7 @@ func validLogLevel(logLevel string) bool {
 // 		} else if strings.Contains(line, "rpcpass=") {
 // 			line = "rpcpass=" + generatedRPCPass + "\n"
 // 		}
-// 		if _, e = dest.WriteString(line); dbg.Chk(e) {
+// 		if _, e = dest.WriteString(line); err.Chk(e) {
 // 			return err
 // 		}
 // 	}
@@ -345,7 +345,7 @@ func loadConfig() (
 	parser := NewConfigParser(&cfg, &serviceOpts, flags.Default)
 	if !(preCfg.RegressionTest || preCfg.SimNet) || preCfg.ConfigFile !=
 		DefaultConfigFile {
-		if _, e = os.Stat(preCfg.ConfigFile); os.IsNotExist(err) {
+		if _, e = os.Stat(preCfg.ConfigFile); os.IsNotExist(e) {
 			e := createDefaultConfigFile(preCfg.ConfigFile)
 			if e != nil  {
 				fmt.Fprintf(os.Stderr, "DBError creating a "+
@@ -380,7 +380,7 @@ func loadConfig() (
 	e = os.MkdirAll(DefaultHomeDir, 0700)
 	if e != nil  {
 		// Show a nicer error message if it's because a symlink is linked to a directory that does not exist (probably because it's not mounted).
-		if e, ok := err.(*os.PathError); ok && os.IsExist(err) {
+		if e, ok := err.(*os.PathError); ok && os.IsExist(e) {
 			if link, lerr := os.Readlink(e.Path); lerr == nil {
 				str := "is symlink %s -> %s mounted?"
 				e = fmt.Errorf(str, e.Path, link)

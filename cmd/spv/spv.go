@@ -9,22 +9,22 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 type (
@@ -531,7 +531,7 @@ func (s *ChainService) peerHandler() {
 	s.blockManager.Start()
 	e := s.utxoScanner.Start()
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	state := &peerState{
 		persistentPeers: make(map[int32]*ServerPeer),
@@ -583,15 +583,15 @@ out:
 	s.connManager.Stop()
 	e = s.utxoScanner.Stop()
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	e = s.blockManager.Stop()
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	e = s.addrManager.Stop()
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	// Drain channels before exiting so nothing is left waiting around to send.
 cleanup:
@@ -800,7 +800,7 @@ func (sp *ServerPeer) OnReject(_ *peer.Peer, msg *wire.MsgReject) {
 func (sp *ServerPeer) OnVerAck(_ *peer.Peer, msg *wire.MsgVerAck) {
 	e := sp.pushSendHeadersMsg()
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 }
 

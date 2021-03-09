@@ -52,7 +52,7 @@ func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
 	// Generate and marshal the final JSON-RPC request.
 	rawCmd, e := NewRequest(id, method, params)
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		return nil, e
 	}
 	return json.Marshal(rawCmd)
@@ -139,7 +139,7 @@ func UnmarshalCmd(r *Request) (ii interface{}, e error) {
 	rv := rvp.Elem()
 	// Ensure the number of parameters are correct.
 	numParams := len(r.Params)
-	if e = checkNumParams(numParams, &info); dbg.Chk(e) {
+	if e = checkNumParams(numParams, &info); err.Chk(e) {
 		return nil, e
 	}
 	// Loop through each of the struct fields and unmarshal the associated parameter into them.
@@ -147,7 +147,7 @@ func UnmarshalCmd(r *Request) (ii interface{}, e error) {
 		rvf := rv.Field(i)
 		// Unmarshal the parameter into the struct field.
 		concreteVal := rvf.Addr().Interface()
-		if e = json.Unmarshal(r.Params[i], &concreteVal); dbg.Chk(e) {
+		if e = json.Unmarshal(r.Params[i], &concreteVal); err.Chk(e) {
 			// The most common error is the wrong type, so explicitly detect that error and make it nicer.
 			fieldName := strings.ToLower(rt.Field(i).Name)
 			if jerr, ok := e.(*json.UnmarshalTypeError); ok {
@@ -454,7 +454,7 @@ func assignField(
 		case reflect.Float32, reflect.Float64:
 			srcFloat, e := strconv.ParseFloat(src.String(), 0)
 			if e != nil {
-				err.Ln(err)
+				err.Ln(e)
 				str := fmt.Sprintf(
 					"parameter #%d '%s' must "+
 						"parse to a %v", paramNum, fieldName,
@@ -480,7 +480,7 @@ func assignField(
 			concreteVal := dest.Addr().Interface()
 			e := json.Unmarshal([]byte(src.String()), &concreteVal)
 			if e != nil {
-				err.Ln(err)
+				err.Ln(e)
 				str := fmt.Sprintf(
 					"parameter #%d '%s' must "+
 						"be valid JSON which unsmarshals to a %v",
@@ -529,12 +529,12 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 	if !ok {
 		str := fmt.Sprintf("%q is not registered", method)
 		e := makeError(ErrUnregisteredMethod, str)
-		dbg.Chk(e)
+		err.Chk(e)
 		return nil, e
 	}
 	// Ensure the number of parameters are correct.
 	numParams := len(args)
-	if e := checkNumParams(numParams, &info); dbg.Chk(e) {
+	if e := checkNumParams(numParams, &info); err.Chk(e) {
 		return nil, e
 	}
 	// Create the appropriate command type for the method. Since all types are enforced to be a pointer to a struct at
@@ -550,7 +550,7 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 		fieldName := strings.ToLower(rt.Field(i).Name)
 		e := assignField(i+1, fieldName, rvf, reflect.ValueOf(args[i]))
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			return nil, e
 		}
 	}

@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 type MockChainClient struct {
@@ -296,11 +296,11 @@ func TestUtxoScannerScanBasic(t *testing.T) {
 	})
 	e := scanner.Start()
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	defer func() {
 		e := scanner.Stop()
-		t.Log(err)
+		t.Log(e)
 	}()
 	var (
 		spendReport *SpendReport
@@ -347,11 +347,11 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	})
 	e := scanner.Start()
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	defer func() {
 		e := scanner.Stop()
-		t.Log(err)
+		t.Log(e)
 	}()
 	var (
 		spendReport *SpendReport
@@ -406,11 +406,11 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	})
 	e := scanner.Start()
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	defer func() {
 		e := scanner.Stop()
-		t.Log(err)
+		t.Log(e)
 	}()
 	// Add the requests in order of their block heights.
 	req100000, e := scanner.Enqueue(makeTestInputWithScript(), 100000)
@@ -469,7 +469,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 		defer wg.Done()
 		e := scanner.Stop()
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}()
 	// The second request should be cancelled as soon as the utxoscanner begins shut down, returning ErrShuttingDown.

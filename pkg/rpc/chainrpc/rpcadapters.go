@@ -4,10 +4,10 @@ import (
 	"sync/atomic"
 
 	"github.com/p9c/pod/cmd/node/mempool"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	netsync "github.com/p9c/pod/pkg/chain/sync"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	netsync "github.com/p9c/pod/pkg/blockchain/netsync"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/util"
 )

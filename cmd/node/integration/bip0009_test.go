@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 )
 
 const (
@@ -112,11 +112,11 @@ func testBIP0009(t *testing.T, forkKey string, deploymentID uint32) {
 	if e != nil  {
 		t.Fatalf("unable to create primary harness: %v", err)
 	}
-	if e := r.SetUp(false, 0); dbg.Chk(e) {
+	if e := r.SetUp(false, 0); err.Chk(e) {
 		t.Fatalf("unable to setup test chain: %v", err)
 	}
 	defer func() {
-		if e := r.TearDown(); dbg.Chk(e) {
+		if e := r.TearDown(); err.Chk(e) {
 		}
 	}()
 	// *** ThresholdDefined *** Assert the chain height is the expected value and the soft fork status starts out as
@@ -262,11 +262,11 @@ func TestBIP0009Mining(t *testing.T) {
 	if e != nil  {
 		t.Fatalf("unable to create primary harness: %v", err)
 	}
-	if e := r.SetUp(true, 0); dbg.Chk(e) {
+	if e := r.SetUp(true, 0); err.Chk(e) {
 		t.Fatalf("unable to setup test chain: %v", err)
 	}
 	defer func() {
-		if e := r.TearDown(); dbg.Chk(e) {
+		if e := r.TearDown(); err.Chk(e) {
 		}
 	}()
 	// Assert the chain only consists of the gensis block.

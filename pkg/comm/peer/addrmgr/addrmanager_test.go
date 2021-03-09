@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 )
 
@@ -126,9 +126,9 @@ func TestAddAddressByIP(t *testing.T) {
 			t.Errorf("TestGood test %d failed expected no error and got one", i)
 			continue
 		}
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("TestGood test %d failed got %v, want %v", i,
-				reflect.TypeOf(err), reflect.TypeOf(test.err))
+				reflect.TypeOf(e), reflect.TypeOf(test.err))
 			continue
 		}
 	}
@@ -363,7 +363,7 @@ func TestGetBestLocalAddress(t *testing.T) {
 	for _, localAddr := range localAddrs {
 		e = amgr.AddLocalAddress(&localAddr, addrmgr.InterfacePrio)
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}
 	// Test against want1
@@ -379,7 +379,7 @@ func TestGetBestLocalAddress(t *testing.T) {
 	localAddr := wire.NetAddress{IP: net.ParseIP("204.124.8.100")}
 	e = amgr.AddLocalAddress(&localAddr, addrmgr.InterfacePrio)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	// Test against want2
 	for x, test := range tests {

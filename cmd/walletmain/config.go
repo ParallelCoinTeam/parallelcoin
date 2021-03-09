@@ -360,7 +360,7 @@ cfg.RPCKey.value = filepath.Join(cfg.AppDataDir.value, "rpc.key")
 cfg.RPCCert.value = filepath.Join(cfg.AppDataDir.value, "rpc.cert")
 								}
 							}
-							if _, e = os.Stat(cfg.DataDir.value); os.IsNotExist(err) {
+							if _, e = os.Stat(cfg.DataDir.value); os.IsNotExist(e) {
 // Create the destination directory if it does not exists
 									e = os.MkdirAll(cfg.DataDir.value, 0700)
 									if e != nil  {
@@ -369,13 +369,13 @@ fmt.Println("ERROR", e)
 										}
 									}
 									var generatedRPCPass, generatedRPCUser string
-		if _, e = os.Stat(cfg.ConfigFile.value); os.IsNotExist(err) {
+		if _, e = os.Stat(cfg.ConfigFile.value); os.IsNotExist(e) {
 // If we can find a pod.conf in the standard location, copy
 				// copy the rpcuser and rpcpassword and TLS setting
 				c := cleanAndExpandPath("~/.pod/pod.conf")
 				// fmt.Println("server config path:", c)
 			// _, e = os.Stat(c)
-			// fmt.Println(err)
+			// fmt.Println(e)
 			// fmt.Println(os.IsNotExist(err))
 			if _, e = os.Stat(c); e ==  nil {
 fmt.Println("Creating config from pod config")
@@ -422,7 +422,7 @@ line = "password=" + generatedRPCPass + "\n"
 											}
 										}
 										_, _ = generatedRPCPass, generatedRPCUser
-										if _, e = dest.WriteString(line); dbg.Chk(e) {
+										if _, e = dest.WriteString(line); err.Chk(e) {
 return nil, nil, e
 											}
 										}
@@ -460,7 +460,7 @@ fmt.Println("Supported subsystems", supportedSubsystems())
 			// logger variables may be used.
 			initLogRotator(filepath.Join(cfg.LogDir, DefaultLogFilename))
 			// Parse, validate, and set debug log level(s).
-			if e := parseAndSetDebugLevels(cfg.DebugLevel); dbg.Chk(e) {
+			if e := parseAndSetDebugLevels(cfg.DebugLevel); err.Chk(e) {
 e := fmt.Errorf("%s: %v", "loadConfig", e.Error())
 			fmt.Fprintln(os.Stderr, e)
 			parser.WriteHelp(os.Stderr)
@@ -503,13 +503,13 @@ str := fmt.Sprintf("The wallet already exists. Loading this " +
 								tempWalletExists = true
 							}
 							// Ensure the data directory for the network exists.
-							if e := checkCreateDir(netDir); dbg.Chk(e) {
+							if e := checkCreateDir(netDir); err.Chk(e) {
 fmt.Fprintln(os.Stderr, e)
 									return nil, nil, e
 								}
 								if !tempWalletExists {
 // Perform the initial wallet creation wizard.
-										if e := createSimulationWallet(&cfg); dbg.Chk(e) {
+										if e := createSimulationWallet(&cfg); err.Chk(e) {
 fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
 												return nil, nil, e
 											}
@@ -524,12 +524,12 @@ e := fmt.Errorf("The wallet database file `%v` "+
 					return nil, nil, e
 			}
 			// Ensure the data directory for the network exists.
-			if e := checkCreateDir(netDir); dbg.Chk(e) {
+			if e := checkCreateDir(netDir); err.Chk(e) {
 fmt.Fprintln(os.Stderr, e)
 				return nil, nil, e
 			}
 			// Perform the initial wallet creation wizard.
-			if e := createWallet(&cfg); dbg.Chk(e) {
+			if e := createWallet(&cfg); err.Chk(e) {
 fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
 					return nil, nil, e
 				}
@@ -547,12 +547,12 @@ fmt.Fprintln(os.Stderr, e)
 				// "--create option to initialize and create it...")
 				// Ensure the data directory for the network exists.
 				fmt.Println("Existing wallet not found in", cfg.ConfigFile.value)
-				if e := checkCreateDir(netDir); dbg.Chk(e) {
+				if e := checkCreateDir(netDir); err.Chk(e) {
 fmt.Fprintln(os.Stderr, e)
 						return nil, nil, e
 					}
 					// Perform the initial wallet creation wizard.
-					if e := createWallet(&cfg); dbg.Chk(e) {
+					if e := createWallet(&cfg); err.Chk(e) {
 fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
 					return nil, nil, e
 				}

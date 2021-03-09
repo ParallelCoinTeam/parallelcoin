@@ -13,13 +13,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/p9c/pod/pkg/chain/forkhash"
+	
+	"github.com/p9c/pod/pkg/blockchain/forkhash"
 	"github.com/p9c/pod/pkg/util/routeable"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
-	blockchain "github.com/p9c/pod/pkg/chain"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -32,8 +32,8 @@ import (
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/logi"
 )
@@ -119,7 +119,7 @@ func initParams(cx *conte.Xt) {
 func validatePort(port string) bool {
 	var e error
 	var p int64
-	if p, e = strconv.ParseInt(port, 10, 32); dbg.Chk(e) {
+	if p, e = strconv.ParseInt(port, 10, 32); err.Chk(e) {
 		return false
 	}
 	if p < 1024 || p > 65535 {
@@ -132,7 +132,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	cfg := cx.Config
 	var e error
 	var fP int
-	if fP, e = GetFreePort(); dbg.Chk(e) {
+	if fP, e = GetFreePort(); err.Chk(e) {
 	}
 	if *cfg.AutoListen {
 		_, allAddresses := routeable.GetAddressesAndInterfaces()
@@ -170,13 +170,13 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		dbg.Ln("WalletRPCListeners")
 	}
 	if *cx.Config.AutoPorts || !initial {
-		if fP, e = GetFreePort(); dbg.Chk(e) {
+		if fP, e = GetFreePort(); err.Chk(e) {
 		}
 		*cfg.P2PListeners = cli.StringSlice{"0.0.0.0:" + fmt.Sprint(fP)}
-		if fP, e = GetFreePort(); dbg.Chk(e) {
+		if fP, e = GetFreePort(); err.Chk(e) {
 		}
 		*cfg.RPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
-		if fP, e = GetFreePort(); dbg.Chk(e) {
+		if fP, e = GetFreePort(); err.Chk(e) {
 		}
 		*cfg.WalletRPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
 		cx.StateCfg.Save = true
@@ -187,9 +187,9 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		r := cfg.RPCListeners
 		w := cfg.WalletRPCListeners
 		for i := range *l {
-			if _, p, e := net.SplitHostPort((*l)[i]); !dbg.Chk(e) {
+			if _, p, e := net.SplitHostPort((*l)[i]); !err.Chk(e) {
 				if !validatePort(p) {
-					if fP, e = GetFreePort(); dbg.Chk(e) {
+					if fP, e = GetFreePort(); err.Chk(e) {
 					}
 					(*l)[i] = "0.0.0.0:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
@@ -198,9 +198,9 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 			}
 		}
 		for i := range *r {
-			if _, p, e := net.SplitHostPort((*r)[i]); !dbg.Chk(e) {
+			if _, p, e := net.SplitHostPort((*r)[i]); !err.Chk(e) {
 				if !validatePort(p) {
-					if fP, e = GetFreePort(); dbg.Chk(e) {
+					if fP, e = GetFreePort(); err.Chk(e) {
 					}
 					(*r)[i] = "127.0.0.1:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
@@ -209,9 +209,9 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 			}
 		}
 		for i := range *w {
-			if _, p, e := net.SplitHostPort((*w)[i]); !dbg.Chk(e) {
+			if _, p, e := net.SplitHostPort((*w)[i]); !err.Chk(e) {
 				if !validatePort(p) {
-					if fP, e = GetFreePort(); dbg.Chk(e) {
+					if fP, e = GetFreePort(); err.Chk(e) {
 					}
 					(*w)[i] = "127.0.0.1:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
@@ -241,7 +241,7 @@ func GetFreePort() (int, error) {
 		return 0, e
 	}
 	defer func() {
-		if e := l.Close(); dbg.Chk(e) {
+		if e := l.Close(); err.Chk(e) {
 		}
 	}()
 	port = l.Addr().(*net.TCPAddr).Port
@@ -286,7 +286,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 		}
 		e = os.MkdirAll(keyDir, 0700)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			return
 		}
 		// Generate cert pair.
@@ -294,12 +294,12 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 		validUntil := time.Now().Add(time.Hour * 24 * 365 * 10)
 		cert, key, e := util.NewTLSCertPair(org, validUntil, nil)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			return
 		}
 		_, e = tls.X509KeyPair(cert, key)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			return
 		}
 		// Write cert and (potentially) the key files.
@@ -321,7 +321,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 		}
 		e = ioutil.WriteFile(*cfg.RPCKey, key, 0600)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			rmErr := os.Remove(*cfg.RPCCert)
 			if rmErr != nil {
 				err.Ln("cannot remove written certificates:", rmErr)
@@ -520,7 +520,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		dbg.Ln("looking up default listener")
 		addrs, e := net.LookupHost(node.DefaultRPCListener)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			// os.Exit(1)
 		}
 		*cfg.RPCListeners = make([]string, 0, len(addrs))
@@ -551,7 +551,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	trc.Ln("checking min relay tx fee")
 	stateConfig.ActiveMinRelayTxFee, e = util.NewAmount(*cfg.MinRelayTxFee)
 	if e != nil {
-		err.Ln(err)
+		err.Ln(e)
 		str := "%s: invalid minrelaytxfee: %v"
 		e := fmt.Errorf(str, funcName, e)
 		_, _ = fmt.Fprintln(os.Stderr, e)
@@ -684,7 +684,7 @@ func validateMiningStuff(
 	for _, strAddr := range *cfg.MiningAddrs {
 		addr, e := util.DecodeAddress(strAddr, params)
 		if e != nil {
-			err.Ln(err)
+			err.Ln(e)
 			str := "%s: mining address '%s' failed to decode: %v"
 			e := fmt.Errorf(str, funcName, strAddr, err)
 			_, _ = fmt.Fprintln(os.Stderr, e)

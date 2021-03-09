@@ -7,7 +7,7 @@ import (
 	"gioui.org/io/event"
 	
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"gioui.org/app"
 	"gioui.org/io/system"
@@ -128,7 +128,7 @@ func (w *Window) Run(
 	for {
 		select {
 		case fn := <-w.Runner:
-			if e = fn(); dbg.Chk(e) {
+			if e = fn(); err.Chk(e) {
 				return
 			}
 		case <-quit.Wait():
@@ -136,39 +136,39 @@ func (w *Window) Run(
 			// by repeating selectors we decrease the chance of a runner delaying
 			// a frame event hitting the physical frame deadline
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); dbg.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		}

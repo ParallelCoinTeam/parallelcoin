@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
 func TestThrottle(t *testing.T) {
@@ -22,7 +22,7 @@ func TestThrottle(t *testing.T) {
 		go func() {
 			res, e := http.Get(srv.URL)
 			if e != nil  {
-				t.ftl.Ln(err)
+				t.ftl.Ln(e)
 			}
 			codes <- res.StatusCode
 		}()

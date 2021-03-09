@@ -5,10 +5,10 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"strings"
 	
-	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/database/walletdb"
+	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
 )
 

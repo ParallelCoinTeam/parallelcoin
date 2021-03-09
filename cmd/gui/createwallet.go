@@ -10,8 +10,8 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
@@ -166,7 +166,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 									var b []byte
 									var e error
 									seedValid := true
-									if b, e = hex.DecodeString(wg.inputs["walletSeed"].GetText()); dbg.Chk(e) {
+									if b, e = hex.DecodeString(wg.inputs["walletSeed"].GetText()); err.Chk(e) {
 										seedValid = false
 									} else if len(b) != 0 && len(b) < hdkeychain.MinSeedBytes ||
 										len(b) > hdkeychain.MaxSeedBytes {
@@ -211,7 +211,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 																nil,
 															)
 															dbg.Ln("*** created wallet")
-															if dbg.Chk(e) {
+															if err.Chk(e) {
 																// return
 															}
 															// dbg.Ln("refilling mining addresses")
@@ -235,7 +235,7 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 															// }
 															*wg.noWallet = false
 															// wg.node.Start()
-															// if e = wg.writeWalletCookie(); dbg.Chk(e) {
+															// if e = wg.writeWalletCookie(); err.Chk(e) {
 															// }
 															// wg.wallet.Start()
 														}()

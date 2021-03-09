@@ -9,16 +9,16 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/addrmgr"
+	am "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 var (
@@ -179,7 +179,7 @@ func (c *BitcoindClient) Notifications() <-chan interface{} {
 //
 // NOTE: This is part of the chain.Interface interface.
 func (c *BitcoindClient) NotifyReceived(addrs []util.Address) (e error) {
-	if e = c.NotifyBlocks(); dbg.Chk(e) {
+	if e = c.NotifyBlocks(); err.Chk(e) {
 	}
 	select {
 	case c.rescanUpdate <- addrs:
@@ -191,7 +191,7 @@ func (c *BitcoindClient) NotifyReceived(addrs []util.Address) (e error) {
 
 // NotifySpent allows the chain backend to notify the caller whenever a transaction spends any of the given outpoints.
 func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) (e error) {
-	if e = c.NotifyBlocks();dbg.Chk(e){}
+	if e = c.NotifyBlocks();err.Chk(e){}
 	select {
 	case c.rescanUpdate <- outPoints:
 	case <-c.quit.Wait():
@@ -203,7 +203,7 @@ func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) (e error) {
 // NotifyTx allows the chain backend to notify the caller whenever any of the given transactions confirm within the
 // chain.
 func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) (e error) {
-	if e = c.NotifyBlocks();dbg.Chk(e){}
+	if e = c.NotifyBlocks();err.Chk(e){}
 	select {
 	case c.rescanUpdate <- txids:
 	case <-c.quit.Wait():
@@ -264,7 +264,7 @@ func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) (e err
 		}
 	}
 	for _, filter := range filters {
-		if e := updateFilter(filter); dbg.Chk(e) {
+		if e := updateFilter(filter); err.Chk(e) {
 			return e
 		}
 	}
@@ -461,7 +461,7 @@ func (c *BitcoindClient) rescanHandler() {
 				c.watchMtx.Unlock()
 			// We're starting a rescan from the hash.
 			case chainhash.Hash:
-				if e := c.rescan(update); dbg.Chk(e) {
+				if e := c.rescan(update); err.Chk(e) {
 					err.Ln(
 						"unable to complete chain rescan:", err,
 					)
@@ -486,7 +486,7 @@ func (c *BitcoindClient) ntfnHandler() {
 		select {
 		case tx := <-c.zmqTxNtfns:
 			var e error
-			if _, _, e = c.filterTx(tx, nil, true); dbg.Chk(e) {
+			if _, _, e = c.filterTx(tx, nil, true); err.Chk(e) {
 				err.F(
 					"unable to filter transaction %v: %v %s",
 					tx.TxHash(), err,
@@ -521,7 +521,7 @@ func (c *BitcoindClient) ntfnHandler() {
 				continue
 			}
 			// Otherwise, we've encountered a reorg.
-			if e := c.reorg(bestBlock, newBlock); dbg.Chk(e) {
+			if e := c.reorg(bestBlock, newBlock); err.Chk(e) {
 				err.F(
 					"unable to process chain reorg:", err,
 				)
@@ -942,7 +942,7 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) (e error) {
 		}
 		headers.PushBack(previousHeader)
 		// Notify the block and any of its relevant transactions.
-		if _, e = c.filterBlock(block, i, true); dbg.Chk(e) {
+		if _, e = c.filterBlock(block, i, true); err.Chk(e) {
 			return e
 		}
 		if i%10000 == 0 {

@@ -8,7 +8,7 @@ import (
 	"net/rpc"
 	"time"
 
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -2255,283 +2255,283 @@ func RunAPI(server *Server, quit qu.C) {
 			select { 
 			case msg := <-nrh["addnode"].Call:
 				if res, e = nrh["addnode"].
-					Fn(server, msg.Params.(*btcjson.AddNodeCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.AddNodeCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(None); ok { 
 					msg.Ch.(chan AddNodeRes) <-AddNodeRes{&r, e} } 
 			case msg := <-nrh["createrawtransaction"].Call:
 				if res, e = nrh["createrawtransaction"].
-					Fn(server, msg.Params.(*btcjson.CreateRawTransactionCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.CreateRawTransactionCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan CreateRawTransactionRes) <-CreateRawTransactionRes{&r, e} } 
 			case msg := <-nrh["decoderawtransaction"].Call:
 				if res, e = nrh["decoderawtransaction"].
-					Fn(server, msg.Params.(*btcjson.DecodeRawTransactionCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.DecodeRawTransactionCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.TxRawDecodeResult); ok { 
 					msg.Ch.(chan DecodeRawTransactionRes) <-DecodeRawTransactionRes{&r, e} } 
 			case msg := <-nrh["decodescript"].Call:
 				if res, e = nrh["decodescript"].
-					Fn(server, msg.Params.(*btcjson.DecodeScriptCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.DecodeScriptCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.DecodeScriptResult); ok { 
 					msg.Ch.(chan DecodeScriptRes) <-DecodeScriptRes{&r, e} } 
 			case msg := <-nrh["estimatefee"].Call:
 				if res, e = nrh["estimatefee"].
-					Fn(server, msg.Params.(*btcjson.EstimateFeeCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.EstimateFeeCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(float64); ok { 
 					msg.Ch.(chan EstimateFeeRes) <-EstimateFeeRes{&r, e} } 
 			case msg := <-nrh["generate"].Call:
 				if res, e = nrh["generate"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.([]string); ok { 
 					msg.Ch.(chan GenerateRes) <-GenerateRes{&r, e} } 
 			case msg := <-nrh["getaddednodeinfo"].Call:
 				if res, e = nrh["getaddednodeinfo"].
-					Fn(server, msg.Params.(*btcjson.GetAddedNodeInfoCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetAddedNodeInfoCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.([]btcjson.GetAddedNodeInfoResultAddr); ok { 
 					msg.Ch.(chan GetAddedNodeInfoRes) <-GetAddedNodeInfoRes{&r, e} } 
 			case msg := <-nrh["getbestblock"].Call:
 				if res, e = nrh["getbestblock"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.GetBestBlockResult); ok { 
 					msg.Ch.(chan GetBestBlockRes) <-GetBestBlockRes{&r, e} } 
 			case msg := <-nrh["getbestblockhash"].Call:
 				if res, e = nrh["getbestblockhash"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan GetBestBlockHashRes) <-GetBestBlockHashRes{&r, e} } 
 			case msg := <-nrh["getblock"].Call:
 				if res, e = nrh["getblock"].
-					Fn(server, msg.Params.(*btcjson.GetBlockCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetBlockCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.GetBlockVerboseResult); ok { 
 					msg.Ch.(chan GetBlockRes) <-GetBlockRes{&r, e} } 
 			case msg := <-nrh["getblockchaininfo"].Call:
 				if res, e = nrh["getblockchaininfo"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.GetBlockChainInfoResult); ok { 
 					msg.Ch.(chan GetBlockChainInfoRes) <-GetBlockChainInfoRes{&r, e} } 
 			case msg := <-nrh["getblockcount"].Call:
 				if res, e = nrh["getblockcount"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(int64); ok { 
 					msg.Ch.(chan GetBlockCountRes) <-GetBlockCountRes{&r, e} } 
 			case msg := <-nrh["getblockhash"].Call:
 				if res, e = nrh["getblockhash"].
-					Fn(server, msg.Params.(*btcjson.GetBlockHashCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetBlockHashCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan GetBlockHashRes) <-GetBlockHashRes{&r, e} } 
 			case msg := <-nrh["getblockheader"].Call:
 				if res, e = nrh["getblockheader"].
-					Fn(server, msg.Params.(*btcjson.GetBlockHeaderCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetBlockHeaderCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.GetBlockHeaderVerboseResult); ok { 
 					msg.Ch.(chan GetBlockHeaderRes) <-GetBlockHeaderRes{&r, e} } 
 			case msg := <-nrh["getblocktemplate"].Call:
 				if res, e = nrh["getblocktemplate"].
-					Fn(server, msg.Params.(*btcjson.GetBlockTemplateCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetBlockTemplateCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan GetBlockTemplateRes) <-GetBlockTemplateRes{&r, e} } 
 			case msg := <-nrh["getcfilter"].Call:
 				if res, e = nrh["getcfilter"].
-					Fn(server, msg.Params.(*btcjson.GetCFilterCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetCFilterCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan GetCFilterRes) <-GetCFilterRes{&r, e} } 
 			case msg := <-nrh["getcfilterheader"].Call:
 				if res, e = nrh["getcfilterheader"].
-					Fn(server, msg.Params.(*btcjson.GetCFilterHeaderCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetCFilterHeaderCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan GetCFilterHeaderRes) <-GetCFilterHeaderRes{&r, e} } 
 			case msg := <-nrh["getconnectioncount"].Call:
 				if res, e = nrh["getconnectioncount"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(int32); ok { 
 					msg.Ch.(chan GetConnectionCountRes) <-GetConnectionCountRes{&r, e} } 
 			case msg := <-nrh["getcurrentnet"].Call:
 				if res, e = nrh["getcurrentnet"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan GetCurrentNetRes) <-GetCurrentNetRes{&r, e} } 
 			case msg := <-nrh["getdifficulty"].Call:
 				if res, e = nrh["getdifficulty"].
-					Fn(server, msg.Params.(*btcjson.GetDifficultyCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetDifficultyCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(float64); ok { 
 					msg.Ch.(chan GetDifficultyRes) <-GetDifficultyRes{&r, e} } 
 			case msg := <-nrh["getgenerate"].Call:
 				if res, e = nrh["getgenerate"].
-					Fn(server, msg.Params.(*btcjson.GetHeadersCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetHeadersCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(bool); ok { 
 					msg.Ch.(chan GetGenerateRes) <-GetGenerateRes{&r, e} } 
 			case msg := <-nrh["gethashespersec"].Call:
 				if res, e = nrh["gethashespersec"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(float64); ok { 
 					msg.Ch.(chan GetHashesPerSecRes) <-GetHashesPerSecRes{&r, e} } 
 			case msg := <-nrh["getheaders"].Call:
 				if res, e = nrh["getheaders"].
-					Fn(server, msg.Params.(*btcjson.GetHeadersCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetHeadersCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.([]string); ok { 
 					msg.Ch.(chan GetHeadersRes) <-GetHeadersRes{&r, e} } 
 			case msg := <-nrh["getinfo"].Call:
 				if res, e = nrh["getinfo"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.InfoChainResult0); ok { 
 					msg.Ch.(chan GetInfoRes) <-GetInfoRes{&r, e} } 
 			case msg := <-nrh["getmempoolinfo"].Call:
 				if res, e = nrh["getmempoolinfo"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.GetMempoolInfoResult); ok { 
 					msg.Ch.(chan GetMempoolInfoRes) <-GetMempoolInfoRes{&r, e} } 
 			case msg := <-nrh["getmininginfo"].Call:
 				if res, e = nrh["getmininginfo"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.GetMiningInfoResult); ok { 
 					msg.Ch.(chan GetMiningInfoRes) <-GetMiningInfoRes{&r, e} } 
 			case msg := <-nrh["getnettotals"].Call:
 				if res, e = nrh["getnettotals"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.GetNetTotalsResult); ok { 
 					msg.Ch.(chan GetNetTotalsRes) <-GetNetTotalsRes{&r, e} } 
 			case msg := <-nrh["getnetworkhashps"].Call:
 				if res, e = nrh["getnetworkhashps"].
-					Fn(server, msg.Params.(*btcjson.GetNetworkHashPSCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetNetworkHashPSCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.([]btcjson.GetPeerInfoResult); ok { 
 					msg.Ch.(chan GetNetworkHashPSRes) <-GetNetworkHashPSRes{&r, e} } 
 			case msg := <-nrh["getpeerinfo"].Call:
 				if res, e = nrh["getpeerinfo"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.([]btcjson.GetPeerInfoResult); ok { 
 					msg.Ch.(chan GetPeerInfoRes) <-GetPeerInfoRes{&r, e} } 
 			case msg := <-nrh["getrawmempool"].Call:
 				if res, e = nrh["getrawmempool"].
-					Fn(server, msg.Params.(*btcjson.GetRawMempoolCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetRawMempoolCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.([]string); ok { 
 					msg.Ch.(chan GetRawMempoolRes) <-GetRawMempoolRes{&r, e} } 
 			case msg := <-nrh["getrawtransaction"].Call:
 				if res, e = nrh["getrawtransaction"].
-					Fn(server, msg.Params.(*btcjson.GetRawTransactionCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetRawTransactionCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan GetRawTransactionRes) <-GetRawTransactionRes{&r, e} } 
 			case msg := <-nrh["gettxout"].Call:
 				if res, e = nrh["gettxout"].
-					Fn(server, msg.Params.(*btcjson.GetTxOutCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.GetTxOutCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan GetTxOutRes) <-GetTxOutRes{&r, e} } 
 			case msg := <-nrh["help"].Call:
 				if res, e = nrh["help"].
-					Fn(server, msg.Params.(*btcjson.HelpCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.HelpCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan HelpRes) <-HelpRes{&r, e} } 
 			case msg := <-nrh["node"].Call:
 				if res, e = nrh["node"].
-					Fn(server, msg.Params.(*btcjson.NodeCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.NodeCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(None); ok { 
 					msg.Ch.(chan NodeRes) <-NodeRes{&r, e} } 
 			case msg := <-nrh["ping"].Call:
 				if res, e = nrh["ping"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(None); ok { 
 					msg.Ch.(chan PingRes) <-PingRes{&r, e} } 
 			case msg := <-nrh["resetchain"].Call:
 				if res, e = nrh["resetchain"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(None); ok { 
 					msg.Ch.(chan ResetChainRes) <-ResetChainRes{&r, e} } 
 			case msg := <-nrh["restart"].Call:
 				if res, e = nrh["restart"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(None); ok { 
 					msg.Ch.(chan RestartRes) <-RestartRes{&r, e} } 
 			case msg := <-nrh["searchrawtransactions"].Call:
 				if res, e = nrh["searchrawtransactions"].
-					Fn(server, msg.Params.(*btcjson.SearchRawTransactionsCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.SearchRawTransactionsCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.([]btcjson.SearchRawTransactionsResult); ok { 
 					msg.Ch.(chan SearchRawTransactionsRes) <-SearchRawTransactionsRes{&r, e} } 
 			case msg := <-nrh["sendrawtransaction"].Call:
 				if res, e = nrh["sendrawtransaction"].
-					Fn(server, msg.Params.(*btcjson.SendRawTransactionCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.SendRawTransactionCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(None); ok { 
 					msg.Ch.(chan SendRawTransactionRes) <-SendRawTransactionRes{&r, e} } 
 			case msg := <-nrh["setgenerate"].Call:
 				if res, e = nrh["setgenerate"].
-					Fn(server, msg.Params.(*btcjson.SetGenerateCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.SetGenerateCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(None); ok { 
 					msg.Ch.(chan SetGenerateRes) <-SetGenerateRes{&r, e} } 
 			case msg := <-nrh["stop"].Call:
 				if res, e = nrh["stop"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(None); ok { 
 					msg.Ch.(chan StopRes) <-StopRes{&r, e} } 
 			case msg := <-nrh["submitblock"].Call:
 				if res, e = nrh["submitblock"].
-					Fn(server, msg.Params.(*btcjson.SubmitBlockCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.SubmitBlockCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(string); ok { 
 					msg.Ch.(chan SubmitBlockRes) <-SubmitBlockRes{&r, e} } 
 			case msg := <-nrh["uptime"].Call:
 				if res, e = nrh["uptime"].
-					Fn(server, msg.Params.(*None), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*None), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.GetMempoolInfoResult); ok { 
 					msg.Ch.(chan UptimeRes) <-UptimeRes{&r, e} } 
 			case msg := <-nrh["validateaddress"].Call:
 				if res, e = nrh["validateaddress"].
-					Fn(server, msg.Params.(*btcjson.ValidateAddressCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.ValidateAddressCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(btcjson.ValidateAddressChainResult); ok { 
 					msg.Ch.(chan ValidateAddressRes) <-ValidateAddressRes{&r, e} } 
 			case msg := <-nrh["verifychain"].Call:
 				if res, e = nrh["verifychain"].
-					Fn(server, msg.Params.(*btcjson.VerifyChainCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.VerifyChainCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(bool); ok { 
 					msg.Ch.(chan VerifyChainRes) <-VerifyChainRes{&r, e} } 
 			case msg := <-nrh["verifymessage"].Call:
 				if res, e = nrh["verifymessage"].
-					Fn(server, msg.Params.(*btcjson.VerifyMessageCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.VerifyMessageCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(bool); ok { 
 					msg.Ch.(chan VerifyMessageRes) <-VerifyMessageRes{&r, e} } 
 			case msg := <-nrh["version"].Call:
 				if res, e = nrh["version"].
-					Fn(server, msg.Params.(*btcjson.VersionCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(*btcjson.VersionCmd), nil); err.Chk(e) {
 				}
 				if r, ok := res.(map[string]btcjson.VersionResult); ok { 
 					msg.Ch.(chan VersionRes) <-VersionRes{&r, e} } 
@@ -3163,7 +3163,7 @@ func (r *CAPIClient) AddNode(cmd ...*btcjson.AddNodeCmd) (res None, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.AddNode", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.AddNode", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3173,7 +3173,7 @@ func (r *CAPIClient) CreateRawTransaction(cmd ...*btcjson.CreateRawTransactionCm
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.CreateRawTransaction", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.CreateRawTransaction", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3183,7 +3183,7 @@ func (r *CAPIClient) DecodeRawTransaction(cmd ...*btcjson.DecodeRawTransactionCm
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.DecodeRawTransaction", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.DecodeRawTransaction", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3193,7 +3193,7 @@ func (r *CAPIClient) DecodeScript(cmd ...*btcjson.DecodeScriptCmd) (res btcjson.
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.DecodeScript", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.DecodeScript", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3203,7 +3203,7 @@ func (r *CAPIClient) EstimateFee(cmd ...*btcjson.EstimateFeeCmd) (res float64, e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.EstimateFee", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.EstimateFee", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3213,7 +3213,7 @@ func (r *CAPIClient) Generate(cmd ...*None) (res []string, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.Generate", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.Generate", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3223,7 +3223,7 @@ func (r *CAPIClient) GetAddedNodeInfo(cmd ...*btcjson.GetAddedNodeInfoCmd) (res 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetAddedNodeInfo", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetAddedNodeInfo", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3233,7 +3233,7 @@ func (r *CAPIClient) GetBestBlock(cmd ...*None) (res btcjson.GetBestBlockResult,
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetBestBlock", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetBestBlock", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3243,7 +3243,7 @@ func (r *CAPIClient) GetBestBlockHash(cmd ...*None) (res string, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetBestBlockHash", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetBestBlockHash", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3253,7 +3253,7 @@ func (r *CAPIClient) GetBlock(cmd ...*btcjson.GetBlockCmd) (res btcjson.GetBlock
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetBlock", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetBlock", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3263,7 +3263,7 @@ func (r *CAPIClient) GetBlockChainInfo(cmd ...*None) (res btcjson.GetBlockChainI
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetBlockChainInfo", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetBlockChainInfo", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3273,7 +3273,7 @@ func (r *CAPIClient) GetBlockCount(cmd ...*None) (res int64, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetBlockCount", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetBlockCount", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3283,7 +3283,7 @@ func (r *CAPIClient) GetBlockHash(cmd ...*btcjson.GetBlockHashCmd) (res string, 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetBlockHash", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetBlockHash", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3293,7 +3293,7 @@ func (r *CAPIClient) GetBlockHeader(cmd ...*btcjson.GetBlockHeaderCmd) (res btcj
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetBlockHeader", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetBlockHeader", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3303,7 +3303,7 @@ func (r *CAPIClient) GetBlockTemplate(cmd ...*btcjson.GetBlockTemplateCmd) (res 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetBlockTemplate", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetBlockTemplate", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3313,7 +3313,7 @@ func (r *CAPIClient) GetCFilter(cmd ...*btcjson.GetCFilterCmd) (res string, e er
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetCFilter", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetCFilter", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3323,7 +3323,7 @@ func (r *CAPIClient) GetCFilterHeader(cmd ...*btcjson.GetCFilterHeaderCmd) (res 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetCFilterHeader", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetCFilterHeader", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3333,7 +3333,7 @@ func (r *CAPIClient) GetConnectionCount(cmd ...*None) (res int32, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetConnectionCount", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetConnectionCount", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3343,7 +3343,7 @@ func (r *CAPIClient) GetCurrentNet(cmd ...*None) (res string, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetCurrentNet", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetCurrentNet", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3353,7 +3353,7 @@ func (r *CAPIClient) GetDifficulty(cmd ...*btcjson.GetDifficultyCmd) (res float6
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetDifficulty", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetDifficulty", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3363,7 +3363,7 @@ func (r *CAPIClient) GetGenerate(cmd ...*btcjson.GetHeadersCmd) (res bool, e err
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetGenerate", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetGenerate", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3373,7 +3373,7 @@ func (r *CAPIClient) GetHashesPerSec(cmd ...*None) (res float64, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetHashesPerSec", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetHashesPerSec", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3383,7 +3383,7 @@ func (r *CAPIClient) GetHeaders(cmd ...*btcjson.GetHeadersCmd) (res []string, e 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetHeaders", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetHeaders", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3393,7 +3393,7 @@ func (r *CAPIClient) GetInfo(cmd ...*None) (res btcjson.InfoChainResult0, e erro
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetInfo", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetInfo", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3403,7 +3403,7 @@ func (r *CAPIClient) GetMempoolInfo(cmd ...*None) (res btcjson.GetMempoolInfoRes
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetMempoolInfo", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetMempoolInfo", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3413,7 +3413,7 @@ func (r *CAPIClient) GetMiningInfo(cmd ...*None) (res btcjson.GetMiningInfoResul
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetMiningInfo", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetMiningInfo", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3423,7 +3423,7 @@ func (r *CAPIClient) GetNetTotals(cmd ...*None) (res btcjson.GetNetTotalsResult,
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetNetTotals", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetNetTotals", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3433,7 +3433,7 @@ func (r *CAPIClient) GetNetworkHashPS(cmd ...*btcjson.GetNetworkHashPSCmd) (res 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetNetworkHashPS", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetNetworkHashPS", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3443,7 +3443,7 @@ func (r *CAPIClient) GetPeerInfo(cmd ...*None) (res []btcjson.GetPeerInfoResult,
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetPeerInfo", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetPeerInfo", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3453,7 +3453,7 @@ func (r *CAPIClient) GetRawMempool(cmd ...*btcjson.GetRawMempoolCmd) (res []stri
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetRawMempool", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetRawMempool", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3463,7 +3463,7 @@ func (r *CAPIClient) GetRawTransaction(cmd ...*btcjson.GetRawTransactionCmd) (re
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetRawTransaction", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetRawTransaction", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3473,7 +3473,7 @@ func (r *CAPIClient) GetTxOut(cmd ...*btcjson.GetTxOutCmd) (res string, e error)
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.GetTxOut", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.GetTxOut", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3483,7 +3483,7 @@ func (r *CAPIClient) Help(cmd ...*btcjson.HelpCmd) (res string, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.Help", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.Help", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3493,7 +3493,7 @@ func (r *CAPIClient) Node(cmd ...*btcjson.NodeCmd) (res None, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.Node", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.Node", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3503,7 +3503,7 @@ func (r *CAPIClient) Ping(cmd ...*None) (res None, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.Ping", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.Ping", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3513,7 +3513,7 @@ func (r *CAPIClient) ResetChain(cmd ...*None) (res None, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.ResetChain", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.ResetChain", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3523,7 +3523,7 @@ func (r *CAPIClient) Restart(cmd ...*None) (res None, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.Restart", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.Restart", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3533,7 +3533,7 @@ func (r *CAPIClient) SearchRawTransactions(cmd ...*btcjson.SearchRawTransactions
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.SearchRawTransactions", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.SearchRawTransactions", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3543,7 +3543,7 @@ func (r *CAPIClient) SendRawTransaction(cmd ...*btcjson.SendRawTransactionCmd) (
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.SendRawTransaction", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.SendRawTransaction", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3553,7 +3553,7 @@ func (r *CAPIClient) SetGenerate(cmd ...*btcjson.SetGenerateCmd) (res None, e er
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.SetGenerate", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.SetGenerate", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3563,7 +3563,7 @@ func (r *CAPIClient) Stop(cmd ...*None) (res None, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.Stop", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.Stop", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3573,7 +3573,7 @@ func (r *CAPIClient) SubmitBlock(cmd ...*btcjson.SubmitBlockCmd) (res string, e 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.SubmitBlock", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.SubmitBlock", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3583,7 +3583,7 @@ func (r *CAPIClient) Uptime(cmd ...*None) (res btcjson.GetMempoolInfoResult, e e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.Uptime", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.Uptime", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3593,7 +3593,7 @@ func (r *CAPIClient) ValidateAddress(cmd ...*btcjson.ValidateAddressCmd) (res bt
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.ValidateAddress", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.ValidateAddress", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3603,7 +3603,7 @@ func (r *CAPIClient) VerifyChain(cmd ...*btcjson.VerifyChainCmd) (res bool, e er
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.VerifyChain", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.VerifyChain", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3613,7 +3613,7 @@ func (r *CAPIClient) VerifyMessage(cmd ...*btcjson.VerifyMessageCmd) (res bool, 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.VerifyMessage", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.VerifyMessage", c, &res); err.Chk(e) {
 	}
 	return
 }
@@ -3623,7 +3623,7 @@ func (r *CAPIClient) Version(cmd ...*btcjson.VersionCmd) (res map[string]btcjson
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("CAPI.Version", c, &res); dbg.Chk(e) {
+	if e = r.Call("CAPI.Version", c, &res); err.Chk(e) {
 	}
 	return
 }

@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/btcsuite/go-socks/socks"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 )
 
@@ -671,15 +671,15 @@ func TestOutboundPeer(t *testing.T) {
 		na := wire.NetAddress{}
 		addrs = append(addrs, &na)
 	}
-	if _, e = p2.PushAddrMsg(addrs); dbg.Chk(e) {
+	if _, e = p2.PushAddrMsg(addrs); err.Chk(e) {
 		t.Errorf("PushAddrMsg: unexpected err %v\n", err)
 		return
 	}
-	if e := p2.PushGetBlocksMsg(nil, &chainhash.Hash{}); dbg.Chk(e) {
+	if e := p2.PushGetBlocksMsg(nil, &chainhash.Hash{}); err.Chk(e) {
 		t.Errorf("PushGetBlocksMsg: unexpected err %v\n", err)
 		return
 	}
-	if e := p2.PushGetHeadersMsg(nil, &chainhash.Hash{}); dbg.Chk(e) {
+	if e := p2.PushGetHeadersMsg(nil, &chainhash.Hash{}); err.Chk(e) {
 		t.Errorf("PushGetHeadersMsg: unexpected err %v\n", err)
 		return
 	}
@@ -844,6 +844,7 @@ func TestDuplicateVersionMsg(t *testing.T) {
 	}
 }
 func init() {
+
 	// Allow self connection when running the tests.
 	peer.TstAllowSelfConns()
 }

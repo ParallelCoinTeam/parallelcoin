@@ -8,8 +8,8 @@ import (
 
 	"github.com/aead/siphash"
 	"github.com/kkdai/bstream"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // Inspired by https://github.com/rasky/gcs
@@ -250,7 +250,7 @@ func (f *Filter) N() uint32 {
 func (f *Filter) Match(key [KeySize]byte, data []byte) (yn bool,e error) {
 	// Create a filter bitstream.
 	var filterData []byte
-	if filterData, e = f.Bytes();dbg.Chk(e){
+	if filterData, e = f.Bytes();err.Chk(e){
 		return false, e
 	}
 	b := bstream.NewBStreamReader(filterData)
@@ -357,14 +357,14 @@ func (f *Filter) readFullUint64(b *bstream.BStream) (rv uint64,e error) {
 		quotient++
 		c, e = b.ReadBit()
 		if e != nil  {
-			dbg.Ln(err)
+			dbg.Ln(e)
 			return 0, e
 		}
 	}
 	// Read P bits.
 	var remainder uint64
-	if remainder, e = b.ReadBits(int(f.p));dbg.Chk(e){
-		dbg.Ln(err)
+	if remainder, e = b.ReadBits(int(f.p));err.Chk(e){
+		dbg.Ln(e)
 		return 0, e
 	}
 	// Add the multiple and the remainder.

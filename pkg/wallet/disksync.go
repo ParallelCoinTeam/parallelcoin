@@ -8,10 +8,10 @@ import (
 // checkCreateDir checks that the path exists and is a directory. If path does not exist, it is created.
 func checkCreateDir(path string) (e error) {
 	var fi os.FileInfo
-	if fi, e = os.Stat(path); dbg.Chk(e) {
+	if fi, e = os.Stat(path); err.Chk(e) {
 		if os.IsNotExist(e) {
 			// Attempt data directory creation
-			if e = os.MkdirAll(path, 0700); dbg.Chk(e) {
+			if e = os.MkdirAll(path, 0700); err.Chk(e) {
 				return fmt.Errorf("cannot create directory: %s", err)
 			}
 		} else {

@@ -41,9 +41,9 @@ func (i *Icon) Color(color string) *Icon {
 // Src sets the icon source to draw from
 func (i *Icon) Src(data *[]byte) *Icon {
 	_, e := iconvg.DecodeMetadata(*data)
-	if dbg.Chk(e) {
+	if err.Chk(e) {
 		dbg.Ln("no image data, crashing")
-		panic(err)
+		panic(e)
 		// return nil
 	}
 	i.src = data
@@ -97,7 +97,7 @@ func (i *Icon) image(sz int) paint.ImageOp {
 	m.Palette[0] = color.RGBA(i.Theme.Colors.GetNRGBAFromName(i.color))
 	if e := iconvg.Decode(&ico, *i.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
-	}); dbg.Chk(e) {
+	}); err.Chk(e) {
 	}
 	operation := paint.NewImageOp(img)
 	// create the maps if they don't exist

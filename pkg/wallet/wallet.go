@@ -10,27 +10,27 @@ import (
 	"sync"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/davecgh/go-spew/spew"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	txrules "github.com/p9c/pod/pkg/blockchain/tx/txrules"
+	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 const (
@@ -1815,7 +1815,7 @@ func (w *Wallet) ListTransactions(from, count int) (txList []btcjson.ListTransac
 			// Return newer results first by starting at mempool height and working down to the genesis block.
 			return w.TxStore.RangeTransactions(txmgrNs, -1, 0, rangeFn)
 		},
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 	}
 	return
 }
@@ -2679,11 +2679,11 @@ func (w *Wallet) newAddress(
 	}
 	// Get next address from wallet.
 	var addrs []waddrmgr.ManagedAddress
-	if addrs, e = manager.NextExternalAddresses(addrmgrNs, account, 1); dbg.Chk(e) {
+	if addrs, e = manager.NextExternalAddresses(addrmgrNs, account, 1); err.Chk(e) {
 		return nil, nil, e
 	}
 	var props *waddrmgr.AccountProperties
-	if props, e = manager.AccountProperties(addrmgrNs, account); dbg.Chk(e) {
+	if props, e = manager.AccountProperties(addrmgrNs, account); err.Chk(e) {
 		err.Ln(
 			"cannot fetch account properties for notification after deriving next external address:",
 			err,
@@ -2892,7 +2892,7 @@ func (w *Wallet) SendOutputs(
 ) (*chainhash.Hash, error) {
 	// Ensure the outputs to be created adhere to the network's consensus rules.
 	for _, output := range outputs {
-		if e := txrules.CheckOutput(output, satPerKb); dbg.Chk(e) {
+		if e := txrules.CheckOutput(output, satPerKb); err.Chk(e) {
 			return nil, e
 		}
 	}

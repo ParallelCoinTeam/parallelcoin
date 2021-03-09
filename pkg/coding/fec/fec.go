@@ -97,7 +97,7 @@ func Decode(chunks [][]byte) (data []byte, e error) {
 		shares, func(s infectious.Share) {
 			copy(data[s.Number*dataLen:], s.Data)
 		},
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 	}
 	// data, e = rsFEC.Decode(nil, shares)
 	if len(data) > 4 {

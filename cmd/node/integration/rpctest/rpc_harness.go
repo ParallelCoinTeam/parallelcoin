@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -100,7 +100,7 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 	}
 	certFile := filepath.Join(nodeTestData, "rpc.cert")
 	keyFile := filepath.Join(nodeTestData, "rpc.key")
-	if e := genCertPair(certFile, keyFile); dbg.Chk(e) {
+	if e := genCertPair(certFile, keyFile); err.Chk(e) {
 		return nil, e
 	}
 	wallet, e := newMemWallet(activeNet, uint32(numTestInstances))
@@ -166,21 +166,21 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 // called from the same goroutine as they are not concurrent safe.
 func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) (e error) {
 	// Start the pod node itself. This spawns a new process which will be managed
-	if e := h.node.start(); dbg.Chk(e) {
+	if e := h.node.start(); err.Chk(e) {
 		return err
 	}
-	if e := h.connectRPCClient(); dbg.Chk(e) {
+	if e := h.connectRPCClient(); err.Chk(e) {
 		return err
 	}
 	h.wallet.Start()
 	// Filter transactions that pay to the coinbase associated with the wallet.
 	filterAddrs := []util.Address{h.wallet.coinbaseAddr}
-	if e := h.Node.LoadTxFilter(true, filterAddrs, nil); dbg.Chk(e) {
+	if e := h.Node.LoadTxFilter(true, filterAddrs, nil); err.Chk(e) {
 		return err
 	}
 	// Ensure pod properly dispatches our registered call-back for each new block. Otherwise, the memWallet won't
 	// function properly.
-	if e := h.Node.NotifyBlocks(); dbg.Chk(e) {
+	if e := h.Node.NotifyBlocks(); err.Chk(e) {
 		return err
 	}
 	// Create a test chain with the desired number of mature coinbase outputs.
@@ -214,10 +214,10 @@ func (h *Harness) tearDown() (e error) {
 	if h.Node != nil {
 		h.Node.Shutdown()
 	}
-	if e := h.node.shutdown(); dbg.Chk(e) {
+	if e := h.node.shutdown(); err.Chk(e) {
 		return err
 	}
-	if e := os.RemoveAll(h.testNodeDir); dbg.Chk(e) {
+	if e := os.RemoveAll(h.testNodeDir); err.Chk(e) {
 		return err
 	}
 	delete(testInstances, h.testNodeDir)
@@ -241,7 +241,7 @@ func (h *Harness) connectRPCClient() (e error) {
 	var e error
 	rpcConf := h.node.config.rpcConnConfig()
 	for i := 0; i < h.maxConnRetries; i++ {
-		if client, e = rpcclient.New(&rpcConf, h.handlers, qu.T()); dbg.Chk(e) {
+		if client, e = rpcclient.New(&rpcConf, h.handlers, qu.T()); err.Chk(e) {
 			time.Sleep(time.Duration(i) * 50 * time.Millisecond)
 			continue
 		}
@@ -356,7 +356,7 @@ func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 				return nil, e
 	}
 	// Submit the block to the simnet node.
-	if e := h.Node.SubmitBlock(newBlock, nil); dbg.Chk(e) {
+	if e := h.Node.SubmitBlock(newBlock, nil); err.Chk(e) {
 		return nil, e
 	}
 	return newBlock, nil

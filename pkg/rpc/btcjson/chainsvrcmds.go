@@ -3,8 +3,8 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // AddNodeSubCmd defines the type used in the addnode JSON-RPC command for the sub command field.
@@ -204,7 +204,7 @@ func convertTemplateRequestField(fieldName string, iface interface{}) (interface
 func (t *TemplateRequest) UnmarshalJSON(data []byte) (e error) {
 	type templateRequest TemplateRequest
 	request := (*templateRequest)(t)
-	if e := json.Unmarshal(data, &request); dbg.Chk(e) {
+	if e := json.Unmarshal(data, &request); err.Chk(e) {
 		return e
 	}
 	// The SigOpLimit field can only be nil, bool, or int64.
@@ -680,6 +680,7 @@ func NewVerifyTxOutProofCmd(proof string) *VerifyTxOutProofCmd {
 	}
 }
 func init() {
+
 	// No special flags for commands in this file.
 	flags := UsageFlag(0)
 	MustRegisterCmd("addnode", (*AddNodeCmd)(nil), flags)

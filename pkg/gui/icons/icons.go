@@ -4,7 +4,7 @@ import (
 	"sort"
 	
 	"github.com/p9c/pod/pkg/gui"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"gioui.org/app"
 	l "gioui.org/layout"
@@ -51,7 +51,7 @@ func main() {
 					quit.Q()
 					// os.Exit(0)
 				}, quit,
-			); dbg.Chk(e) {
+			); err.Chk(e) {
 		}
 	}()
 	app.Main()

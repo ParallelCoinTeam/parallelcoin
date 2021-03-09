@@ -26,12 +26,12 @@ func GetDataDir(goos, appName string, roaming bool) string {
 	var homeDir string
 	var usr *user.User
 	var e error
-	if usr, e = user.Current(); !dbg.Chk(e){
+	if usr, e = user.Current(); !err.Chk(e){
 		homeDir = usr.HomeDir
 	}
 	// Fall back to standard HOME environment variable that works for most POSIX OSes if the directory from the Go
 	// standard lib failed.
-	if dbg.Chk(e) || homeDir == "" {
+	if err.Chk(e) || homeDir == "" {
 		homeDir = os.Getenv("HOME")
 	}
 	switch goos {

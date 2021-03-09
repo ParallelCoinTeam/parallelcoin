@@ -30,7 +30,7 @@ func (w *Window) Label() (l *Label) {
 	var f text.Font
 	var e error
 	var fon text.Font
-	if fon, e = w.Theme.collection.Font("plan9"); !dbg.Chk(e) {
+	if fon, e = w.Theme.collection.Font("plan9"); !err.Chk(e) {
 		f = fon
 	}
 	return &Label{
@@ -77,7 +77,7 @@ func (l *Label) Color(color string) *Label {
 func (l *Label) Font(font string) *Label {
 	var e error
 	var fon text.Font
-	if fon, e = l.Theme.collection.Font(font); !dbg.Chk(e) {
+	if fon, e = l.Theme.collection.Font(font); !err.Chk(e) {
 		l.font = fon
 	}
 	return l

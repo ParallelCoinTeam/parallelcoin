@@ -16,7 +16,7 @@ import (
 	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
@@ -30,7 +30,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rav "github.com/p9c/pod/pkg/data/ring"
@@ -103,8 +103,8 @@ func (w *Worker) Start() {
 	for i := range w.clients {
 		dbg.Ln("sending pass to worker", i)
 		e := w.clients[i].SendPass(*w.cx.Config.MinerPass)
-		if e != nil  {
-					}
+		if e != nil {
+		}
 	}
 	dbg.Ln("setting workers to active")
 	w.active.Store(true)
@@ -114,17 +114,17 @@ func (w *Worker) Start() {
 func (w *Worker) Stop() {
 	var e error
 	for i := range w.clients {
-		if e = w.clients[i].Pause(); dbg.Chk(e) {
+		if e = w.clients[i].Pause(); err.Chk(e) {
 		}
-		if e = w.clients[i].Stop(); dbg.Chk(e) {
+		if e = w.clients[i].Stop(); err.Chk(e) {
 		}
-		if e = w.clients[i].Close(); dbg.Chk(e) {
+		if e = w.clients[i].Close(); err.Chk(e) {
 		}
 	}
 	for i := range w.workers {
-		// if e = w.workers[i].Interrupt(); !dbg.Chk(e) {
+		// if e = w.workers[i].Interrupt(); !err.Chk(e) {
 		// }
-		if e = w.workers[i].Kill(); !dbg.Chk(e) {
+		if e = w.workers[i].Kill(); !err.Chk(e) {
 		}
 		dbg.Ln("stopped worker", i)
 	}
@@ -136,11 +136,11 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		dbg.Ln("miner controller starting")
 		randomBytes := make([]byte, 4)
-		if _, e = rand.Read(randomBytes); dbg.Chk(e) {
+		if _, e = rand.Read(randomBytes); err.Chk(e) {
 		}
 		w := &Worker{
-			id: fmt.Sprintf("%x", randomBytes),
-			cx: cx,
+			id:            fmt.Sprintf("%x", randomBytes),
+			cx:            cx,
 			quit:          cx.KillAll,
 			sendAddresses: []*net.UDPAddr{},
 			StartChan:     qu.T(),
@@ -158,8 +158,8 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			transport.DefaultPort, control.MaxDatagramSize, handlers,
 			w.quit,
 		)
-		if e != nil  {
-						return
+		if e != nil {
+			return
 		}
 		// start up the workers
 		if *cx.Config.Generate {
@@ -174,6 +174,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		go func() {
 			dbg.Ln("starting controller watcher")
 			ticker := time.NewTicker(time.Second)
+			logger := time.NewTicker(time.Second * 5)
 		out:
 			for {
 				select {
@@ -190,10 +191,15 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 						for i := range w.clients {
 							dbg.Ln("sending pause to worker", i)
 							e := w.clients[i].Pause()
-							if e != nil  {
-															}
+							if e != nil {
+							}
 						}
 					}
+					if interrupt.Requested() {
+						w.StopChan <- struct{}{}
+						w.quit.Q()
+					}
+				case <-logger.C:
 					w.hashrate = w.HashReport()
 					if interrupt.Requested() {
 						w.StopChan <- struct{}{}
@@ -296,7 +302,7 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			if e = w.clients[i].NewJob(&jr); dbg.Chk(e) {
+			if e = w.clients[i].NewJob(&jr); err.Chk(e) {
 			}
 		}
 		return
@@ -317,8 +323,8 @@ var handlers = transport.Handlers{
 			for i := range w.clients {
 				dbg.Ln("sending pause to worker", i, fs, np)
 				e := w.clients[i].Pause()
-				if e != nil  {
-									}
+				if e != nil {
+				}
 			}
 		}
 		return
@@ -393,7 +399,7 @@ func (w *Worker) HashReport() float64 {
 			i++
 			return nil
 		},
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 	}
 	average := av.Value()
 	dbg.Ln("hashrate average", average)

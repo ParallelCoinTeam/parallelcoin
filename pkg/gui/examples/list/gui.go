@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/p9c/pod/pkg/gui"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	l "gioui.org/layout"
 	
@@ -30,7 +30,7 @@ func main() {
 				func() {
 					quit.Q()
 				}, quit,
-			); dbg.Chk(e) {
+			); err.Chk(e) {
 		}
 	}()
 	<-quit

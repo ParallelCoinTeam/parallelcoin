@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
 // StartAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
@@ -21,14 +21,14 @@ func StartAPI(server *chainrpc.Server, quit qu.C) {
 					Fn(
 						server, msg.Params.(btcjson.AddNodeCmd),
 						nil,
-				); dbg.Chk(e) {
+				); err.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.AddNodeRes) <- chainrpc.AddNodeRes{
 					Res: nil, Err: err,
 				}
 			case msg := <-nrh["createrawtransaction"].Call:
 				if res, e = nrh["createrawtransaction"].
-					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd), nil); dbg.Chk(e) {
+					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd), nil); err.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.CreateRawTransactionRes) <- chainrpc.CreateRawTransactionRes{
 					Res: res.(*string), Err: err,
@@ -38,7 +38,7 @@ func StartAPI(server *chainrpc.Server, quit qu.C) {
 				if res, e = nrh["decoderawtransaction"].Fn(
 					server, msg.Params.(btcjson.DecodeRawTransactionCmd),
 					nil,
-				); dbg.Chk(e) {
+				); err.Chk(e) {
 				} else {
 					ret = res.(btcjson.TxRawDecodeResult)
 				}
@@ -46,7 +46,7 @@ func StartAPI(server *chainrpc.Server, quit qu.C) {
 					Res: &ret, Err: err,
 				}
 			case msg := <-nrh["decodescript"].Call:
-				if res, e = nrh["decodescript"].Fn(server, msg.Params.(btcjson.DecodeScriptCmd), nil); dbg.Chk(e) {
+				if res, e = nrh["decodescript"].Fn(server, msg.Params.(btcjson.DecodeScriptCmd), nil); err.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.DecodeScriptRes) <- chainrpc.DecodeScriptRes{
 					Res: res.(*btcjson.DecodeScriptResult), Err: err,
@@ -56,7 +56,7 @@ func StartAPI(server *chainrpc.Server, quit qu.C) {
 					Fn(
 						server, msg.Params.(btcjson.EstimateFeeCmd),
 						nil,
-				); dbg.Chk(e) {
+				); err.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.EstimateFeeRes) <- chainrpc.EstimateFeeRes{
 					Res: res.(*float64), Err: err,

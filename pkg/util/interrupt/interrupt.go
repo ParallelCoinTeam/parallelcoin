@@ -10,7 +10,7 @@ import (
 	
 	uberatomic "go.uber.org/atomic"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/kardianos/osext"
 )
@@ -81,7 +81,7 @@ func Listener() {
 				s = append(s, os.Args[1:]...)
 				cmd := exec.Command(s[0], s[1:]...)
 				dbg.Ln("windows restart done")
-				if e = cmd.Start(); dbg.Chk(e) {
+				if e = cmd.Start(); err.Chk(e) {
 				}
 				// // select{}
 				// os.Exit(0)
@@ -142,7 +142,7 @@ func AddHandler(handler func()) {
 // Request programmatically requests a shutdown
 func Request() {
 	_, f, l, _ := runtime.Caller(1)
-	dbg.F("interrupt requested %s:%d %v", f, l, requested)
+	dbg.Ln("interrupt requested", f, l, requested.Load())
 	if requested.Load() {
 		dbg.Ln("requested again")
 		return

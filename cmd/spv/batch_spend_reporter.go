@@ -1,8 +1,8 @@
 package spv
 
 import (
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // batchSpendReporter orchestrates the delivery of spend reports to GetUtxoRequests processed by the UtxoScanner. The
@@ -28,7 +28,7 @@ type batchSpendReporter struct {
 // FailRemaining will return an error to all remaining requests in the event we experience a critical rescan error. The
 // error is threaded through to allow the syntax:
 //
-//     return reporter.FailRemaining(err)
+//     return reporter.FailRemaining(e)
 func (b *batchSpendReporter) FailRemaining(er error) (e error) {
 	for outpoint, requests := range b.requests {
 		b.notifyRequests(&outpoint, requests, nil, er)

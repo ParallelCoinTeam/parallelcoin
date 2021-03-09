@@ -12,7 +12,7 @@ func genRandFilterElements(numElements uint) ([][]byte, error) {
 	testContents := make([][]byte, numElements)
 	for i := range contents {
 		randElem := make([]byte, 32)
-		if _, e = rand.Read(randElem); dbg.Chk(e) {
+		if _, e = rand.Read(randElem); err.Chk(e) {
 			return nil, e
 		}
 		testContents[i] = randElem

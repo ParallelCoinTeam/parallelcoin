@@ -5,7 +5,7 @@ import (
 	
 	"github.com/niubaoshu/gotiny"
 	
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // Magic is the marker for packets containing a solution
@@ -22,7 +22,7 @@ func Encode(uuid uint64, mb *wire.BlockHeader) []byte {
 	var buf []byte
 	wr := bytes.NewBuffer(buf)
 	var e error
-	if e = mb.Serialize(wr); dbg.Chk(e) {
+	if e = mb.Serialize(wr); err.Chk(e) {
 	}
 	s := Solution{UUID: uuid, Bytes: wr.Bytes()} // MsgBlock: mb}
 	return gotiny.Marshal(&s)
@@ -32,7 +32,7 @@ func Encode(uuid uint64, mb *wire.BlockHeader) []byte {
 func (s *Solution) Decode() (mb *wire.BlockHeader, e error) {
 	buf := bytes.NewBuffer(s.Bytes)
 	mb = &wire.BlockHeader{}
-	if e = mb.Deserialize(buf); dbg.Chk(e) {
+	if e = mb.Deserialize(buf); err.Chk(e) {
 	}
 	return
 }

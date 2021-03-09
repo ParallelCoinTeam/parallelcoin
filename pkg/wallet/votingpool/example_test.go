@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/database/walletdb"
+	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	"github.com/p9c/pod/pkg/wallet/votingpool"
 )
 
@@ -225,9 +225,9 @@ func createWalletDB() (walletdb.DB, func(), error) {
 		return nil, nil, e
 	}
 	dbTearDown := func() {
-		if e := db.Close(); votingpool.dbg.Chk(e) {
+		if e := db.Close(); votingpool.err.Chk(e) {
 		}
-		if e := os.RemoveAll(dir); votingpool.dbg.Chk(e) {
+		if e := os.RemoveAll(dir); votingpool.err.Chk(e) {
 		}
 	}
 	return db, dbTearDown, nil
@@ -251,9 +251,9 @@ func votingpoolNamespace(dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
 func exampleCreateDBAndMgr() (teardown func(), db walletdb.DB, mgr *waddrmgr.Manager) {
 	var dbTearDown func()
 	var e error
-	if db, dbTearDown, e = createWalletDB(); votingpool.dbg.Chk(e){
+	if db, dbTearDown, e = createWalletDB(); votingpool.err.Chk(e){
 		dbTearDown()
-		panic(err)
+		panic(e)
 	}
 	// Create a new walletdb namespace for the address manager.
 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
@@ -275,7 +275,7 @@ func exampleCreateDBAndMgr() (teardown func(), db walletdb.DB, mgr *waddrmgr.Man
 	})
 	if e != nil  {
 		dbTearDown()
-		panic(err)
+		panic(e)
 	}
 	teardown = func() {
 		mgr.Close()
@@ -306,18 +306,18 @@ func exampleCreatePoolAndSeries(db walletdb.DB, mgr *waddrmgr.Manager) (pool *vo
 		return pool.ActivateSeries(ns, seriesID)
 	})
 	if e != nil  {
-		panic(err)
+		panic(e)
 	}
 	return pool, seriesID
 }
 func exampleCreateTxStore(ns walletdb.ReadWriteBucket) *wtxmgr.Store {
 	e := wtxmgr.Create(ns)
 	if e != nil  {
-		panic(err)
+		panic(e)
 	}
 	s, e := wtxmgr.Open(ns, &netparams.MainNetParams)
 	if e != nil  {
-		panic(err)
+		panic(e)
 	}
 	return s
 }

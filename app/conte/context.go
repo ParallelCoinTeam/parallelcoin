@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"go.uber.org/atomic"
 	
@@ -16,7 +16,7 @@ import (
 	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/lang"

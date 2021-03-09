@@ -2,16 +2,16 @@ package job
 
 import (
 	"errors"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"time"
 	
 	"github.com/niubaoshu/gotiny"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/fork"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -53,7 +53,7 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 	df, ok := tip.Diffs.Load().(blockchain.Diffs)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
-		if bitsMap, e = node.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); dbg.Chk(e) {
+		if bitsMap, e = node.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); err.Chk(e) {
 			return
 		}
 		tip.Diffs.Store(bitsMap)
@@ -97,7 +97,7 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 		mr := mTree.GetRoot()
 		if mr == nil {
 			e = errors.New("got a nil merkle root")
-			panic(err)
+			panic(e)
 			return
 		}
 		mTS[i] = mr

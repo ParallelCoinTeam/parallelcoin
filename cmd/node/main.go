@@ -2,7 +2,7 @@ package node
 
 import (
 	"github.com/p9c/pod/cmd/kopach/control"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	"net"
 	"net/http"
 	// // This enables pprof
@@ -15,9 +15,9 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/path"
-	indexers "github.com/p9c/pod/pkg/chain/index"
-	database "github.com/p9c/pod/pkg/db"
-	"github.com/p9c/pod/pkg/db/blockdb"
+	indexers "github.com/p9c/pod/pkg/blockchain/indexers"
+	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database/blockdb"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -61,7 +61,7 @@ func Main(cx *conte.Xt) (e error) {
 			dbg.Ln("failed to start up cpu profiler:", e)
 		} else {
 			defer func() {
-				if e := f.Close(); dbg.Chk(e) {
+				if e := f.Close(); err.Chk(e) {
 				}
 			}()
 			defer pprof.StopCPUProfile()
@@ -78,7 +78,7 @@ func Main(cx *conte.Xt) (e error) {
 		}
 	}
 	// perform upgrades to pod as new versions require it
-	if e = doUpgrades(cx); dbg.Chk(e) {
+	if e = doUpgrades(cx); err.Chk(e) {
 		return
 	}
 	// return now if an interrupt signal was triggered
@@ -95,7 +95,7 @@ func Main(cx *conte.Xt) (e error) {
 		// ensure the database is synced and closed on shutdown
 		trc.Ln("gracefully shutting down the database")
 		func() {
-			if e := db.Close(); dbg.Chk(e) {
+			if e := db.Close(); err.Chk(e) {
 			}
 		}()
 	}
@@ -109,19 +109,19 @@ func Main(cx *conte.Xt) (e error) {
 	// dropping the tx index also drops the address index since it relies on it
 	if cx.StateCfg.DropAddrIndex {
 		wrn.Ln("dropping address index")
-		if e = indexers.DropAddrIndex(db, interrupt.ShutdownRequestChan); dbg.Chk(e) {
+		if e = indexers.DropAddrIndex(db, interrupt.ShutdownRequestChan); err.Chk(e) {
 			return
 		}
 	}
 	if cx.StateCfg.DropTxIndex {
 		wrn.Ln("dropping transaction index")
-		if e = indexers.DropTxIndex(db, interrupt.ShutdownRequestChan); dbg.Chk(e) {
+		if e = indexers.DropTxIndex(db, interrupt.ShutdownRequestChan); err.Chk(e) {
 			return
 		}
 	}
 	if cx.StateCfg.DropCfIndex {
 		wrn.Ln("dropping cfilter index")
-		if e = indexers.DropCfIndex(db, interrupt.ShutdownRequestChan); dbg.Chk(e) {
+		if e = indexers.DropCfIndex(db, interrupt.ShutdownRequestChan); err.Chk(e) {
 			return
 		}
 	}
@@ -231,7 +231,7 @@ func loadBlockDB(cx *conte.Xt) (db database.DB, e error) {
 	// warnings when running with the memory database.
 	if *cx.Config.DbType == "memdb" {
 		inf.Ln("creating block database in memory")
-		if db, e = database.Create(*cx.Config.DbType); dbg.Chk(e) {
+		if db, e = database.Create(*cx.Config.DbType); err.Chk(e) {
 			return nil, e
 		}
 		return db, nil
@@ -246,8 +246,8 @@ func loadBlockDB(cx *conte.Xt) (db database.DB, e error) {
 		dbg.Ln("failed to remove regression db:", e)
 	}
 	inf.F("loading block database from '%s'", dbPath)
-	if db, e = database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net); dbg.Chk(e) {
-		trc.Ln(err) // return the error if it's not because the database doesn't exist
+	if db, e = database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net); err.Chk(e) {
+		trc.Ln(e) // return the error if it's not because the database doesn't exist
 		if dbErr, ok := e.(database.DBError); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
 			return nil, e
@@ -278,11 +278,11 @@ func removeRegressionDB(cx *conte.Xt, dbPath string) (e error) {
 	if e == nil {
 		inf.F("removing regression test database from '%s' %s", dbPath)
 		if fi.IsDir() {
-			if e = os.RemoveAll(dbPath); dbg.Chk(e) {
+			if e = os.RemoveAll(dbPath); err.Chk(e) {
 				return e
 			}
 		} else {
-			if e = os.Remove(dbPath); dbg.Chk(e) {
+			if e = os.Remove(dbPath); err.Chk(e) {
 				return e
 			}
 		}

@@ -14,7 +14,7 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/btcsuite/websocket"
 	
@@ -110,7 +110,7 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 				w.Header().Set("Connection", "close")
 				w.Header().Set("Content-Type", "application/json")
 				r.Close = true
-				if e := server.CheckAuthHeader(r); dbg.Chk(e) {
+				if e := server.CheckAuthHeader(r); err.Chk(e) {
 					wrn.Ln("unauthorized client connection attempt")
 					JSONAuthFail(w)
 					return
@@ -181,7 +181,7 @@ func (s *Server) Serve(lis net.Listener) {
 	go func() {
 		inf.Ln("wallet RPC server listening on ", lis.Addr())
 		var e error
-		if e = s.HTTPServer.Serve(lis); dbg.Chk(e) {
+		if e = s.HTTPServer.Serve(lis); err.Chk(e) {
 		}
 		trc.Ln("finished serving wallet RPC:", err)
 		s.WG.Done()
@@ -408,7 +408,7 @@ out:
 				// We expect the marshal to succeed. If it doesn't, it indicates some non-marshalable type in the
 				// response.
 				if e != nil {
-					panic(err)
+					panic(e)
 				}
 				e = wsc.Send(mResp)
 				if e != nil {
@@ -426,7 +426,7 @@ out:
 				// Expected to never fail.
 				mResp, e := js.Marshal(resp)
 				if e != nil {
-					panic(err)
+					panic(e)
 				}
 				e = wsc.Send(mResp)
 				if e != nil {
@@ -447,7 +447,7 @@ out:
 				mResp, e := js.Marshal(resp)
 				// Expected to never fail.
 				if e != nil {
-					panic(err)
+					panic(e)
 				}
 				e = wsc.Send(mResp)
 				if e != nil {
@@ -463,7 +463,7 @@ out:
 				mResp, e := js.Marshal(resp)
 				// Expected to never fail.
 				if e != nil {
-					panic(err)
+					panic(e)
 				}
 				e = wsc.Send(mResp)
 				if e != nil {
@@ -539,7 +539,7 @@ func (s *Server) WebsocketClientRPC(wsc *WebsocketClient) {
 	inf.F("new websocket client %s", wsc.remoteAddr)
 	// Clear the read deadline set before the websocket hijacked
 	// the connection.
-	if e := wsc.conn.SetReadDeadline(time.Time{}); dbg.Chk(e) {
+	if e := wsc.conn.SetReadDeadline(time.Time{}); err.Chk(e) {
 		wrn.Ln("cannot remove read deadline:", err)
 	}
 	// WebsocketClientRead is intentionally not run with the waitgroup so it is ignored during shutdown. This is to

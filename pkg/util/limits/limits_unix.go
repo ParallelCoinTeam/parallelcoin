@@ -15,7 +15,7 @@ const (
 // SetLimits raises some process limits to values which allow pod and associated utilities to run.
 func SetLimits() (e error) {
 	var rLimit syscall.Rlimit
-	if e = syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit); dbg.Chk(e){
+	if e = syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit); err.Chk(e){
 		return
 	}
 	if rLimit.Cur > fileLimitWant {
@@ -38,7 +38,7 @@ func SetLimits() (e error) {
 		err.Ln(e)
 			// try min value
 			rLimit.Cur = fileLimitMin
-		if e = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit); dbg.Chk(e){
+		if e = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit); err.Chk(e){
 			return
 		}
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/coding/base58"
 	"github.com/p9c/pod/pkg/coding/bech32"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
 )
 
 // SetBlockBytes sets the internal serialized block byte buffer to the passed buffer. It is used to inject errors and is

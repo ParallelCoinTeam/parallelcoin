@@ -138,6 +138,7 @@
         <function importPath="fmt" name="Print" />
         <function importPath="fmt" name="Fprintln" />
         <function importPath="fmt" name="Fprintf" />
+        <function importPath="fmt" name="Fprint" />
       </functions>
     </inspection_tool>
     <inspection_tool class="GoUnnecessarilyExportedIdentifiers" enabled="true" level="WEAK WARNING" enabled_by_default="true" />

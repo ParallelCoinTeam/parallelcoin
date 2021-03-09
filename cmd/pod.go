@@ -20,7 +20,7 @@ func Main() {
 	debug.SetGCPercent(10)
 	var e error
 	if runtime.GOOS != "darwin" {
-		if e = limits.SetLimits(); dbg.Chk(e) { // todo: doesn't work on non-linux
+		if e = limits.SetLimits(); err.Chk(e) { // todo: doesn't work on non-linux
 			_, _ = fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
 			os.Exit(1)
 		}
@@ -28,7 +28,7 @@ func Main() {
 	var f *os.File
 	if os.Getenv("POD_TRACE") == "on" {
 		dbg.Ln("starting trace")
-		if f, e = os.Create(fmt.Sprintf("%v.trace", fmt.Sprint(os.Args))); dbg.Chk(e) {
+		if f, e = os.Create(fmt.Sprintf("%v.trace", fmt.Sprint(os.Args))); err.Chk(e) {
 			err.Ln(
 				"tracing env POD_TRACE=on but we can't write to it",
 				e,
@@ -41,7 +41,7 @@ func Main() {
 				dbg.Ln("tracing started")
 				defer trace.Stop()
 				defer func() {
-					if e := f.Close(); dbg.Chk(e) {
+					if e := f.Close(); err.Chk(e) {
 					}
 				}()
 				interrupt.AddHandler(
@@ -62,7 +62,7 @@ func Main() {
 		dbg.Ln("stopping trace")
 		trace.Stop()
 		defer func() {
-			if e := f.Close(); dbg.Chk(e) {
+			if e := f.Close(); err.Chk(e) {
 			}
 		}()
 	}

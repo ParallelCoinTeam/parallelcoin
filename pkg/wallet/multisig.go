@@ -3,10 +3,10 @@ package wallet
 import (
 	"errors"
 	
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // MakeMultiSigScript creates a multi-signature script that can be redeemed with nRequired signatures of the passed keys

@@ -20,28 +20,28 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/version"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	indexers "github.com/p9c/pod/pkg/chain/index"
-	netsync "github.com/p9c/pod/pkg/chain/sync"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/fork"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	indexers "github.com/p9c/pod/pkg/blockchain/indexers"
+	netsync "github.com/p9c/pod/pkg/blockchain/netsync"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/bloom"
 	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
 	"github.com/p9c/pod/pkg/comm/upnp"
-	database "github.com/p9c/pod/pkg/db"
+	database "github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
 	log "github.com/p9c/pod/pkg/util/logi"
@@ -487,11 +487,11 @@ func (n *Node) Stop() (e error) {
 	if e = n.DB.Update(
 		func(tx database.Tx) (e error) {
 			metadata := tx.Metadata()
-			if e = metadata.Put(mempool.EstimateFeeDatabaseKey, n.FeeEstimator.Save()); dbg.Chk(e) {
+			if e = metadata.Put(mempool.EstimateFeeDatabaseKey, n.FeeEstimator.Save()); err.Chk(e) {
 			}
 			return nil
 		},
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 	}
 	// Stop the CPU miner if needed
 	// consume.Kill(n.StateCfg.Miner)
@@ -842,7 +842,7 @@ func (n *Node) HandleRelayInvMsg(state *PeerState, msg RelayMsg) {
 					return
 				}
 				msgHeaders := wire.NewMsgHeaders()
-				if e := msgHeaders.AddBlockHeader(&blockHeader); dbg.Chk(e) {
+				if e := msgHeaders.AddBlockHeader(&blockHeader); err.Chk(e) {
 					err.Ln("failed to add block header:", err)
 					return
 				}
@@ -1331,7 +1331,7 @@ out:
 	if e := n.NAT.DeletePortMapping(
 		"tcp", int(lport),
 		int(lport),
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 		dbg.F("unable to remove UPnP port mapping: %v %n", err)
 	} else {
 		dbg.Ln("successfully cleared UPnP port mapping")
@@ -2338,7 +2338,7 @@ func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Se
 			netAddr := wire.NewNetAddressIPPort(ifaceIP, uint16(port), services)
 			e = addrMgr.AddLocalAddress(netAddr, addrmgr.BoundPrio)
 			if e != nil {
-				trc.Ln(err)
+				trc.Ln(e)
 			}
 		}
 	} else {
@@ -3115,7 +3115,7 @@ func SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error
 
 // FileExists reports whether the named file or directory exists.
 func FileExists(name string) bool {
-	if _, e := os.Stat(name); dbg.Chk(e) {
+	if _, e := os.Stat(name); err.Chk(e) {
 		if os.IsNotExist(e) {
 			return false
 		}

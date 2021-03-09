@@ -34,7 +34,7 @@ type Button struct {
 func (w *Window) Button(btn *Clickable) *Button {
 	var font text.Font
 	var e error
-	if font, e = w.collection.Font("plan9"); dbg.Chk(e) {
+	if font, e = w.collection.Font("plan9"); err.Chk(e) {
 	}
 	return &Button{
 		Window: w,
@@ -78,10 +78,10 @@ func (b *Button) CornerRadius(cornerRadius float32) *Button {
 func (b *Button) Font(font string) *Button {
 	var fon text.Font
 	var e error
-	if fon, e = b.collection.Font(font); !dbg.Chk(e) {
+	if fon, e = b.collection.Font(font); !err.Chk(e) {
 		b.font = fon
 	} else {
-		panic(err)
+		panic(e)
 	}
 	return b
 }

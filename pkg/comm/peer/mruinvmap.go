@@ -5,8 +5,8 @@ import (
 	"container/list"
 	"fmt"
 	"sync"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // mruInventoryMap provides a concurrency safe map that is limited to a maximum number of items with eviction for the

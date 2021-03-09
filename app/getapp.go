@@ -17,7 +17,7 @@ import (
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/coding/base58"
-	"github.com/p9c/pod/pkg/db/blockdb"
+	"github.com/p9c/pod/pkg/database/blockdb"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -126,7 +126,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 									cx.ActiveNet.Name,
 								), dbName,
 							)
-							if e = os.RemoveAll(dbPath); dbg.Chk(e) {
+							if e = os.RemoveAll(dbPath); err.Chk(e) {
 							}
 							return nodeHandle(cx)(c)
 						},
@@ -199,7 +199,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 									cx.ActiveNet.Name,
 								), dbName,
 							)
-							if e = os.RemoveAll(dbPath); dbg.Chk(e) {
+							if e = os.RemoveAll(dbPath); err.Chk(e) {
 							}
 							return nodeHandle(cx)(c)
 							// return nil
@@ -220,7 +220,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 							inf.Ln("dropping wallet history")
 							go func() {
 								dbg.Ln("starting wallet")
-								if e = walletmain.Main(cx); dbg.Chk(e) {
+								if e = walletmain.Main(cx); err.Chk(e) {
 									// os.Exit(1)
 								} else {
 									dbg.Ln("wallet started")

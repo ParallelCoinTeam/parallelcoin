@@ -54,9 +54,9 @@ func Pod(c *pod.Config) (success bool) {
 	wp := *c.WalletPass
 	// dbg.Ln("wp", wp)
 	if *c.WalletPass == "" {
-		if cfgFile, e = ioutil.ReadFile(*c.ConfigFile); !dbg.Chk(e) {
+		if cfgFile, e = ioutil.ReadFile(*c.ConfigFile); !err.Chk(e) {
 			dbg.Ln("loaded config")
-			if e = json.Unmarshal(cfgFile, &cfg); !dbg.Chk(e) {
+			if e = json.Unmarshal(cfgFile, &cfg); !err.Chk(e) {
 				*c.WalletPass = *cfg.WalletPass
 				// dbg.Ln("unmarshaled config", wp, *c.WalletPass)
 			}
@@ -72,10 +72,10 @@ func Pod(c *pod.Config) (success bool) {
 	pipeLogOn := *c.PipeLog
 	*c.PipeLog = false
 	var yp []byte
-	if yp, e = json.MarshalIndent(c, "", "  "); !dbg.Chk(e) {
+	if yp, e = json.MarshalIndent(c, "", "  "); !err.Chk(e) {
 		apputil.EnsureDir(*c.ConfigFile)
 		// dbg.Ln(string(yp))
-		if e = ioutil.WriteFile(*c.ConfigFile, yp, 0600); !dbg.Chk(e) {
+		if e = ioutil.WriteFile(*c.ConfigFile, yp, 0600); !err.Chk(e) {
 			success = true
 		}
 	}
@@ -96,7 +96,7 @@ func Pod(c *pod.Config) (success bool) {
 // 			trc.Ln("Saving log filter:\n```", string(filterJSON), "\n```")
 // 			apputil.EnsureDir(dataDir)
 // 			if e := ioutil.WriteFile(filepath.Join(dataDir, "log-filter.json"), filterJSON,
-// 				0600); dbg.Chk(e) {
+// 				0600); err.Chk(e) {
 // 				success = false
 // 			}
 // 			success = true

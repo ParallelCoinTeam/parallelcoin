@@ -3,8 +3,8 @@ package addrmgr_test
 import (
 	"net"
 	"testing"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 )
 

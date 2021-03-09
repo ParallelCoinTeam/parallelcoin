@@ -22,23 +22,23 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/btcsuite/websocket"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	indexers "github.com/p9c/pod/pkg/chain/index"
-	"github.com/p9c/pod/pkg/chain/mining"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/fork"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	indexers "github.com/p9c/pod/pkg/blockchain/indexers"
+	"github.com/p9c/pod/pkg/blockchain/mining"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	p "github.com/p9c/pod/pkg/comm/peer"
-	database "github.com/p9c/pod/pkg/db"
+	database "github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -776,7 +776,7 @@ func (state *GBTWorkState) BlockTemplateResult(useCoinbaseValue bool, submitOld 
 		}
 		// Serialize the transaction for later conversion to hex.
 		txBuf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(txBuf); dbg.Chk(e) {
+		if e := tx.Serialize(txBuf); err.Chk(e) {
 			context := "Failed to serialize transaction"
 			return nil, InternalRPCError(e.Error(), context)
 		}
@@ -841,7 +841,7 @@ func (state *GBTWorkState) BlockTemplateResult(useCoinbaseValue bool, submitOld 
 		// Serialize the transaction for conversion to hex.
 		tx := msgBlock.Transactions[0]
 		txBuf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(txBuf); dbg.Chk(e) {
+		if e := tx.Serialize(txBuf); err.Chk(e) {
 			context := "Failed to serialize transaction"
 			return nil, InternalRPCError(e.Error(), context)
 		}
@@ -1053,7 +1053,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 		// several blocks per the chain consensus rules.
 		e := generator.UpdateBlockTime(0, msgBlock)
 		if e != nil {
-			dbg.Ln(err)
+			dbg.Ln(e)
 			
 		}
 		msgBlock.Header.Nonce = 0
@@ -1145,10 +1145,10 @@ func (s *Server) Start() {
 			inf.Ln("chain RPC server listening on ", listener.Addr())
 			e := httpServer.Serve(listener)
 			if e != nil {
-				dbg.Ln(err)
+				dbg.Ln(e)
 			}
 			dbg.Ln("chain RPC listener done for", listener.Addr())
-			if e := listener.Close(); dbg.Chk(e) {
+			if e := listener.Close(); err.Chk(e) {
 			}
 			s.WG.Done()
 		}(listener)
@@ -1309,9 +1309,9 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	// Read and close the JSON-RPC request body from the caller.
 	var e error
 	var body []byte
-	if body, e = ioutil.ReadAll(r.Body); dbg.Chk(e) {
+	if body, e = ioutil.ReadAll(r.Body); err.Chk(e) {
 	}
-	if e = r.Body.Close(); dbg.Chk(e) {
+	if e = r.Body.Close(); err.Chk(e) {
 	}
 	if e != nil {
 		errCode := http.StatusBadRequest
@@ -1346,21 +1346,21 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		return
 	}
 	defer func() {
-		if e := buf.Flush(); dbg.Chk(e) {
+		if e := buf.Flush(); err.Chk(e) {
 		}
-		if e := conn.Close(); dbg.Chk(e) {
+		if e := conn.Close(); err.Chk(e) {
 		}
 	}()
 	e = conn.SetReadDeadline(TimeZeroVal)
 	if e != nil {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	// Attempt to parse the raw body into a JSON-RPC request.
 	var responseID interface{}
 	var jsonErr error
 	var result interface{}
 	var request btcjson.Request
-	if e := js.Unmarshal(body, &request); dbg.Chk(e) {
+	if e := js.Unmarshal(body, &request); err.Chk(e) {
 		jsonErr = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCParse.Code,
 			Message: "Failed to parse request: " + e.Error(),
@@ -1428,11 +1428,11 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		err.Ln(e)
 		return
 	}
-	if _, e = buf.Write(msg); dbg.Chk(e) {
+	if _, e = buf.Write(msg); err.Chk(e) {
 		err.Ln("failed to write marshalled reply:", e)
 	}
 	// Terminate with newline to maintain compatibility with Bitcoin Core.
-	if e := buf.WriteByte('\n'); dbg.Chk(e) {
+	if e := buf.WriteByte('\n'); err.Chk(e) {
 		err.Ln("failed to append terminating newline to reply:", e)
 		
 	}
@@ -1509,7 +1509,7 @@ func (s *Server) WriteHTTPResponseHeaders(
 func BuilderScript(builder *txscript.ScriptBuilder) []byte {
 	script, e := builder.Script()
 	if e != nil {
-		panic(err)
+		panic(e)
 	}
 	return script
 }
@@ -1947,11 +1947,11 @@ func GenCertPair(certFile, keyFile string) (e error) {
 		return e
 	}
 	// Write cert and key files.
-	if e = ioutil.WriteFile(certFile, cert, 0666); dbg.Chk(e) {
+	if e = ioutil.WriteFile(certFile, cert, 0666); err.Chk(e) {
 		return e
 	}
-	if e = ioutil.WriteFile(keyFile, key, 0600); dbg.Chk(e) {
-		if e := os.Remove(certFile); dbg.Chk(e) {
+	if e = ioutil.WriteFile(keyFile, key, 0600); err.Chk(e) {
+		if e := os.Remove(certFile); err.Chk(e) {
 		}
 		return e
 	}
@@ -1994,6 +1994,7 @@ func NormalizeAddress(addr, defaultPort string) string {
 }
 
 func init() {
+
 	RPCHandlers = RPCHandlersBeforeInit
 	rand.Seed(time.Now().UnixNano())
 }
@@ -2026,7 +2027,7 @@ func MessageToHex(msg wire.Message) (string, error) {
 	if e := msg.BtcEncode(
 		&buf, MaxProtocolVersion,
 		wire.BaseEncoding,
-	); dbg.Chk(e) {
+	); err.Chk(e) {
 		context := fmt.Sprintf("Failed to encode msg of type %Ter", msg)
 		return "", InternalRPCError(e.Error(), context)
 	}
@@ -2187,7 +2188,7 @@ func VerifyChain(s *Server, level, depth int32) (e error) {
 			), height,
 		)
 		var pb *util.Block
-		if pb, e = s.Cfg.Chain.BlockByHash(&block.MsgBlock().Header.PrevBlock); dbg.Chk(e) {
+		if pb, e = s.Cfg.Chain.BlockByHash(&block.MsgBlock().Header.PrevBlock); err.Chk(e) {
 		}
 		// Level 1 does basic chain sanity checks.
 		if level > 0 {

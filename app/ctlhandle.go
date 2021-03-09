@@ -29,7 +29,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			return cli.ShowSubcommandHelp(c)
 		}
 		ctl.HelpPrint = func() {
-			if e := cli.ShowSubcommandHelp(c); dbg.Chk(e){
+			if e := cli.ShowSubcommandHelp(c); err.Chk(e){
 			}
 		}
 		ctl.Main(args, cx)

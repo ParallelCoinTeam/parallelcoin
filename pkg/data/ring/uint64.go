@@ -59,7 +59,7 @@ func (b *BufferUint64) ForEach(fn func(v uint64) error) (e error) {
 			break
 		}
 		// dbg.Ln(i, b.Cursor)
-		if e = fn(b.Buf[i]); dbg.Chk(e) {
+		if e = fn(b.Buf[i]); err.Chk(e) {
 			break
 		}
 	}

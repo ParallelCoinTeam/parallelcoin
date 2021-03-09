@@ -7,13 +7,13 @@ import (
 	"sync"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/prompt"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // Loader implements the creating of new and opening of existing wallets, while providing a callback system for other
@@ -65,8 +65,8 @@ func (ld *Loader) CreateNewWallet(
 	}
 	// dbPath := filepath.Join(ld.DDDirPath, WalletDbName)
 	exists, e := fileExists(ld.DDDirPath)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	if exists {
 		return nil, errors.New("Wallet ERROR: " + ld.DDDirPath + " already exists")
@@ -74,28 +74,28 @@ func (ld *Loader) CreateNewWallet(
 	// Create the wallet database backed by bolt db.
 	p := filepath.Dir(ld.DDDirPath)
 	e = os.MkdirAll(p, 0700)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	db, e := walletdb.Create("bdb", ld.DDDirPath)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	// Initialize the newly created database for the wallet before opening.
 	e = Create(db, pubPassphrase, privPassphrase, seed, ld.ChainParams, bday)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	// Open the newly-created wallet.
 	w, e := Open(db, pubPassphrase, nil, ld.ChainParams, ld.RecoveryWindow, podConfig, quit)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	if !noStart {
 		w.Start()
 		ld.onLoaded(db)
 	} else {
-		if e := w.db.Close(); dbg.Chk(e) {
+		if e := w.db.Close(); err.Chk(e) {
 		}
 	}
 	return w, nil
@@ -127,7 +127,7 @@ func (ld *Loader) OpenExistingWallet(
 		return nil, ErrLoaded
 	}
 	// Ensure that the network directory exists.
-	if e := checkCreateDir(filepath.Dir(ld.DDDirPath)); dbg.Chk(e) {
+	if e := checkCreateDir(filepath.Dir(ld.DDDirPath)); err.Chk(e) {
 		err.Ln("cannot create directory", ld.DDDirPath)
 		return nil, e
 	}
@@ -136,7 +136,7 @@ func (ld *Loader) OpenExistingWallet(
 	dbPath := ld.DDDirPath
 	inf.Ln("opening database", dbPath)
 	db, e := walletdb.Open("bdb", dbPath)
-	if e != nil  {
+	if e != nil {
 		err.Ln("failed to open database '", ld.DDDirPath, "':", err)
 		return nil, e
 	}
@@ -156,7 +156,7 @@ func (ld *Loader) OpenExistingWallet(
 	dbg.Ln("opening wallet '" + string(pubPassphrase) + "'")
 	var w *Wallet
 	w, e = Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig, quit)
-	if e != nil  {
+	if e != nil {
 		err.Ln("failed to open wallet", err)
 		// If opening the wallet fails (e.g. because of wrong passphrase), we must close the backing database to allow
 		// future calls to walletdb.Open().
@@ -210,8 +210,8 @@ func (ld *Loader) UnloadWallet() (e error) {
 	}
 	trc.Ln("wallet stopped")
 	e = ld.DB.Close()
-	if e != nil  {
-				dbg.Ln("error closing database", err)
+	if e != nil {
+		dbg.Ln("error closing database", err)
 		return e
 	}
 	trc.Ln("database closed")
@@ -253,8 +253,8 @@ func NewLoader(chainParams *netparams.Params, dbDirPath string, recoveryWindow u
 }
 func fileExists(filePath string) (bool, error) {
 	_, e := os.Stat(filePath)
-	if e != nil  {
-				if os.IsNotExist(e) {
+	if e != nil {
+		if os.IsNotExist(e) {
 			return false, nil
 		}
 		return false, e

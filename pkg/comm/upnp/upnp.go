@@ -76,7 +76,7 @@ func Discover() (nat NAT, e error) {
 	}
 	socket := conn.(*net.UDPConn)
 	defer func() {
-		if e := socket.Close(); dbg.Chk(e) {
+		if e := socket.Close(); err.Chk(e) {
 		}
 	}()
 	e = socket.SetDeadline(time.Now().Add(3 * time.Second))
@@ -230,7 +230,7 @@ func getServiceURL(rootURL string) (url string, e error) {
 		return
 	}
 	defer func() {
-		if e = r.Body.Close(); dbg.Chk(e) {
+		if e = r.Body.Close(); err.Chk(e) {
 		}
 	}()
 	if r.StatusCode >= 400 {
@@ -317,7 +317,7 @@ func soapRequest(url, function, message string) (replyXML []byte, e error) {
 	}
 	if r.Body != nil {
 		defer func() {
-			if e = r.Body.Close(); dbg.Chk(e) {
+			if e = r.Body.Close(); err.Chk(e) {
 			}
 		}()
 	}

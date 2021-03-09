@@ -6,19 +6,19 @@ import (
 	"sync"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	sac "github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // NeutrinoClient is an implementation of the btcwallet chain.Interface interface.
@@ -261,9 +261,9 @@ func buildFilterBlocksWatchList(req *FilterBlocksRequest) ([][]byte, error) {
 
 // pollCFilter attempts to fetch a CFilter from the neutrino client. This is used to get around the fact that the filter
 // headers may lag behind the highest known block header.
-func (s *NeutrinoClient) pollCFilter(hash *chainhash.Hash) (filter *gcs.Filter,e error) {
+func (s *NeutrinoClient) pollCFilter(hash *chainhash.Hash) (filter *gcs.Filter, e error) {
 	var (
-		count  int
+		count int
 	)
 	const maxFilterRetries = 50
 	for count < maxFilterRetries {

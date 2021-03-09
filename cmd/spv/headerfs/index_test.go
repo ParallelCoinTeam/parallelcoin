@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/db/walletdb"
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	"github.com/p9c/pod/pkg/database/walletdb"
+	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
 )
 
 func createTestIndex() (func(), *headerIndex, error) {
@@ -21,9 +21,9 @@ func createTestIndex() (func(), *headerIndex, error) {
 		return nil, nil, e
 	}
 	cleanUp := func() {
-		if e := os.RemoveAll(tempDir); dbg.Chk(e) {
+		if e := os.RemoveAll(tempDir); err.Chk(e) {
 		}
-		if e := db.Close(); dbg.Chk(e) {
+		if e := db.Close(); err.Chk(e) {
 		}
 	}
 	filterDB, e := newHeaderIndex(db, Block)
@@ -37,7 +37,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	var e error
 	var hIndex *headerIndex
 	var cleanUp func()
-	if cleanUp, hIndex, e = createTestIndex(); !dbg.Chk(e) {
+	if cleanUp, hIndex, e = createTestIndex(); !err.Chk(e) {
 		defer cleanUp()
 	} else {
 		t.Fatalf("unable to create test db: %v", err)
@@ -48,7 +48,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	headerIndex := make(map[uint32]headerEntry)
 	for i := uint32(0); i < numHeaders; i++ {
 		var header headerEntry
-		if _, e = rand.Read(header.hash[:]); dbg.Chk(e) {
+		if _, e = rand.Read(header.hash[:]); err.Chk(e) {
 			t.Fatalf("unable to read header: %v", err)
 		}
 		header.height = i
@@ -56,7 +56,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 		headerIndex[i] = header
 	}
 	// With the headers constructed, we'll write them to disk in a single batch.
-	if e := hIndex.addHeaders(headerEntries); dbg.Chk(e) {
+	if e := hIndex.addHeaders(headerEntries); err.Chk(e) {
 		t.Fatalf("unable to add headers: %v", err)
 	}
 	// Next, verify that the database tip matches the _final_ header inserted.
@@ -86,7 +86,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	}
 	// Next if we truncate the index by one, then we should end up at the second to last entry for the tip.
 	newTip := headerIndex[numHeaders-2]
-	if e := hIndex.truncateIndex(&newTip.hash, true); dbg.Chk(e) {
+	if e := hIndex.truncateIndex(&newTip.hash, true); err.Chk(e) {
 		t.Fatalf("unable to truncate index: %v", err)
 	}
 	// This time the database tip should be the _second_ to last entry inserted.

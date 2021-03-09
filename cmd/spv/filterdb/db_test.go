@@ -7,13 +7,13 @@ import (
 	"reflect"
 	"testing"
 	
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	"github.com/p9c/pod/pkg/database/walletdb"
+	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
 )
 
 func createTestDatabase() (func(), FilterDatabase, error) {
@@ -26,9 +26,9 @@ func createTestDatabase() (func(), FilterDatabase, error) {
 		return nil, nil, e
 	}
 	cleanUp := func() {
-		if e := os.RemoveAll(tempDir); dbg.Chk(e) {
+		if e := os.RemoveAll(tempDir); err.Chk(e) {
 		}
-		if e := db.Close(); dbg.Chk(e) {
+		if e := db.Close(); err.Chk(e) {
 		}
 	}
 	filterDB, e := New(db, netparams.SimNetParams)
@@ -42,7 +42,7 @@ func TestGenesisFilterCreation(t *testing.T) {
 	var e error
 	var cleanUp func()
 	var dB FilterDatabase
-	if cleanUp, dB, e = createTestDatabase(); !dbg.Chk(e) {
+	if cleanUp, dB, e = createTestDatabase(); !err.Chk(e) {
 		defer cleanUp()
 	} else {
 		t.Fatalf("unable to create test db: %v", err)
@@ -64,13 +64,13 @@ func genRandFilter(numElements uint32) (*gcs.Filter, error) {
 	elements := make([][]byte, numElements)
 	for i := uint32(0); i < numElements; i++ {
 		var elem [20]byte
-		if _, e = rand.Read(elem[:]); dbg.Chk(e) {
+		if _, e = rand.Read(elem[:]); err.Chk(e) {
 			return nil, e
 		}
 		elements[i] = elem[:]
 	}
 	var key [16]byte
-	if _, e = rand.Read(key[:]); dbg.Chk(e) {
+	if _, e = rand.Read(key[:]); err.Chk(e) {
 		return nil, e
 	}
 	filter, e := gcs.BuildGCSFilter(
@@ -87,14 +87,14 @@ func TestFilterStorage(t *testing.T) {
 	var cleanUp func()
 	var dB FilterDatabase
 	var e error
-	if cleanUp, dB, e = createTestDatabase(); !dbg.Chk(e) {
+	if cleanUp, dB, e = createTestDatabase(); !err.Chk(e) {
 		defer cleanUp()
 	} else {
 		t.Fatalf("unable to create test db: %v", err)
 	}
 	// We'll generate a random block hash to create our test filters against.
 	var randHash chainhash.Hash
-	if _, e = rand.Read(randHash[:]); dbg.Chk(e) {
+	if _, e = rand.Read(randHash[:]); err.Chk(e) {
 		t.Fatalf("unable to generate random hash: %v", err)
 	}
 	// First, we'll create and store a random fitler for the regular filter type for the block hash generate above.

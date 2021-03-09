@@ -9,7 +9,7 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache"
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
 )
@@ -41,18 +41,18 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
 	e := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
 	if e != nil  {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	e = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
 	if e != nil  {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	// Insert the big filter and check all previous filters are evicted.
 	e = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
 	if e != nil  {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	assertEqual(t, getFilter(cs, b3, t), f3, "")
@@ -211,17 +211,17 @@ func TestCacheBigEnoughHoldsAllFilter(t *testing.T) {
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
 	e := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
 	if e != nil  {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	e = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
 	if e != nil  {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	e = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
 	if e != nil  {
-		dbg.Ln(err)
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 3, "")
 	// Chk that we can get those filters back independent of Get order.
@@ -253,14 +253,14 @@ func genRandFilter(numElements uint32, t *testing.T) (
 	elements := make([][]byte, numElements)
 	for i := uint32(0); i < numElements; i++ {
 		var elem [20]byte
-		if _, e = rand.Read(elem[:]); dbg.Chk(e) {
+		if _, e = rand.Read(elem[:]); err.Chk(e) {
 			t.Fatalf("unable to create random filter: %v", err)
 			return nil, nil, 0
 		}
 		elements[i] = elem[:]
 	}
 	var key [16]byte
-	if _, e = rand.Read(key[:]); dbg.Chk(e) {
+	if _, e = rand.Read(key[:]); err.Chk(e) {
 		t.Fatalf("unable to create random filter: %v", err)
 		return nil, nil, 0
 	}
@@ -293,7 +293,7 @@ func genRandomBlockHash() *chainhash.Hash {
 func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 	val, e := cs.getFilterFromCache(b, filterdb.RegularFilter)
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.ftl.Ln(e)
 	}
 	return val
 }
@@ -311,7 +311,7 @@ func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 // 		return nil, e
 // 	}
 // 	defer func() {
-// 		if e := fi.Close(); dbg.Chk(e) {
+// 		if e := fi.Close(); err.Chk(e) {
 // 			t.Errorf("failed to close file %v %v", dataFile,
 // 				err)
 // 		}

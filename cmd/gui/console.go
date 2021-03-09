@@ -89,16 +89,16 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				if len(args) == 0 {
 					dbg.Ln("rpc called help")
 					var result1, result2 []byte
-					if result1, e = ctl.Call(wg.cx, false, method, params...); dbg.Chk(e) {
+					if result1, e = ctl.Call(wg.cx, false, method, params...); err.Chk(e) {
 					}
 					r1 := string(result1)
-					if r1, e = strconv.Unquote(r1); dbg.Chk(e) {
+					if r1, e = strconv.Unquote(r1); err.Chk(e) {
 					}
 					o = r1 + "\n"
-					if result2, e = ctl.Call(wg.cx, true, method, params...); dbg.Chk(e) {
+					if result2, e = ctl.Call(wg.cx, true, method, params...); err.Chk(e) {
 					}
 					r2 := string(result2)
-					if r2, e = strconv.Unquote(r2); dbg.Chk(e) {
+					if r2, e = strconv.Unquote(r2); err.Chk(e) {
 					}
 					o += r2 + "\n"
 					splitted := strings.Split(o, "\n")
@@ -140,14 +140,14 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				} else {
 					var out string
 					var isErr bool
-					if result, e = ctl.Call(wg.cx, false, method, params...); dbg.Chk(e) {
+					if result, e = ctl.Call(wg.cx, false, method, params...); err.Chk(e) {
 						isErr = true
 						out = e.Error()
 						inf.Ln(out)
-						// if out, e = strconv.Unquote(); dbg.Chk(e) {
+						// if out, e = strconv.Unquote(); err.Chk(e) {
 						// }
 					} else {
-						if out, e = strconv.Unquote(string(result)); dbg.Chk(e) {
+						if out, e = strconv.Unquote(string(result)); err.Chk(e) {
 						}
 					}
 					strings.ReplaceAll(out, "\t", "  ")
@@ -177,9 +177,9 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				}
 			} else {
 				dbg.Ln("method", method, "args", args)
-				if result, e = ctl.Call(wg.cx, false, method, params...); dbg.Chk(e) {
+				if result, e = ctl.Call(wg.cx, false, method, params...); err.Chk(e) {
 					var errR string
-					if result, e = ctl.Call(wg.cx, true, method, params...); dbg.Chk(e) {
+					if result, e = ctl.Call(wg.cx, true, method, params...); err.Chk(e) {
 						if e != nil  {
 							errR = e.Error()
 						}
@@ -210,7 +210,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 	}
 	copyClickableFn := func() {
 		go func() {
-			if e := clipboard.WriteAll(c.editor.Text()); dbg.Chk(e) {
+			if e := clipboard.WriteAll(c.editor.Text()); err.Chk(e) {
 			}
 		}()
 		c.editor.Focus()
@@ -221,7 +221,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 			txt := c.editor.Text()
 			var e error
 			var cb string
-			if cb, e = clipboard.ReadAll(); dbg.Chk(e) {
+			if cb, e = clipboard.ReadAll(); err.Chk(e) {
 			}
 			cb = findSpaceRegexp.ReplaceAllString(cb, " ")
 			txt = txt[:col] + cb + txt[col:]
@@ -353,7 +353,7 @@ func (c *Console) getIndent(n int, size float32, widget l.Widget) (out l.Widget)
 func (c *Console) JSONWidget(color string, j []byte) (out []l.Widget) {
 	var ifc interface{}
 	var e error
-	if e = json.Unmarshal(j, &ifc); dbg.Chk(e) {
+	if e = json.Unmarshal(j, &ifc); err.Chk(e) {
 	}
 	return c.jsonWidget(color, 0, "", ifc)
 }
@@ -426,7 +426,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 							Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 							SetClick(func() {
 								go func() {
-									if e := clipboard.WriteAll(res); dbg.Chk(e) {
+									if e := clipboard.WriteAll(res); err.Chk(e) {
 									}
 								}()
 							}).Fn,
@@ -449,7 +449,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 							Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 							SetClick(func() {
 								go func() {
-									if e := clipboard.WriteAll(fmt.Sprint(res)); dbg.Chk(e) {
+									if e := clipboard.WriteAll(fmt.Sprint(res)); err.Chk(e) {
 									}
 								}()
 							}).Fn,
@@ -482,7 +482,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 						Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 						SetClick(func() {
 							go func() {
-								if e := clipboard.WriteAll(res); dbg.Chk(e) {
+								if e := clipboard.WriteAll(res); err.Chk(e) {
 								}
 							}()
 						}).Fn,
@@ -505,7 +505,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 						Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 						SetClick(func() {
 							go func() {
-								if e := clipboard.WriteAll(fmt.Sprint(res)); dbg.Chk(e) {
+								if e := clipboard.WriteAll(fmt.Sprint(res)); err.Chk(e) {
 								}
 							}()
 						}).Fn,
