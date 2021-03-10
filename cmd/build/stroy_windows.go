@@ -27,15 +27,15 @@ func populateVersionFlags() bool {
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
 	var e error
-	if cwd, e = os.Getwd(); err.Chk(e) {
+	if cwd, e = os.Getwd(); e != nil {
 		return false
 	}
 	var repo *git.Repository
-	if repo, e = git.PlainOpen(cwd); err.Chk(e) {
+	if repo, e = git.PlainOpen(cwd); e != nil {
 		return false
 	}
 	var rr []*git.Remote
-	if rr, e = repo.Remotes(); err.Chk(e) {
+	if rr, e = repo.Remotes(); e != nil {
 		return false
 	}
 	// spew.Dump(rr)
@@ -59,10 +59,10 @@ func populateVersionFlags() bool {
 	}
 	// var rl object.CommitIter
 	// var rbr *config.Branch
-	// if rbr, e = repo.Branch("l0k1"); err.Chk(e) {
+	// if rbr, e = repo.Branch("l0k1"); e != nil {
 	// }
 	// var rbr storer.ReferenceIter
-	// if rbr, e = repo.Branches(); err.Chk(e){
+	// if rbr, e = repo.Branches(); e != nil{
 	// 	return false
 	// }
 	// spew.Dump(rbr)
@@ -71,16 +71,16 @@ func populateVersionFlags() bool {
 	// 	Order:    0,
 	// 	FileName: nil,
 	// 	All:      false,
-	// }); err.Chk(e) {
+	// }); e != nil {
 	// 	return false
 	// }
 	// if e = rl.ForEach(func(cmt *object.Commit) (e error) {
 	// 	spew.Dump(cmt)
 	// 	return nil
-	// }); err.Chk(e) {
+	// }); e != nil {
 	// }
 	var rh *plumbing.Reference
-	if rh, e = repo.Head(); err.Chk(e) {
+	if rh, e = repo.Head(); e != nil {
 		return false
 	}
 	rhs := rh.Strings()
@@ -88,7 +88,7 @@ func populateVersionFlags() bool {
 	GitCommit = rhs[1]
 	// fmt.Println(rhs)
 	// var rhco *object.Commit
-	// if rhco, e = repo.CommitObject(rh.Hash()); err.Chk(e) {
+	// if rhco, e = repo.CommitObject(rh.Hash()); e != nil {
 	// }
 	// // var dateS string
 	// rhcoS := rhco.String()
@@ -96,24 +96,24 @@ func populateVersionFlags() bool {
 	// sSs := strings.TrimSpace(strings.Split(sS[1], "\n")[0])
 	// fmt.Println(sSs)
 	// var ti time.Time
-	// if ti, e = time.Parse("Mon Jan 02 15:04:05 2006 -0700", sSs); err.Chk(e) {
+	// if ti, e = time.Parse("Mon Jan 02 15:04:05 2006 -0700", sSs); e != nil {
 	// }
 	// fmt.Printf("time %v\n", ti)
 	// fmt.Println(sSs)
 	// fmt.Println(dateS)
-	// inf.Ln(rh.Type(), rh.Target(), rh.Strings(), rh.String(), rh.Name())
+	// fmt.Fprintln(os.Stderr,rh.Type(), rh.Target(), rh.Strings(), rh.String(), rh.Name())
 	// var rb storer.ReferenceIter
-	// if rb, e = repo.Branches(); err.Chk(e) {
+	// if rb, e = repo.Branches(); e != nil {
 	// 	return false
 	// }
 	// if e = rb.ForEach(func(pr *plumbing.Reference) (e error) {
-	// 	inf.Ln(pr.String(), pr.Hash(), pr.Name(), pr.Strings(), pr.Target(), pr.Type())
+	// 	fmt.Fprintln(os.Stderr,pr.String(), pr.Hash(), pr.Name(), pr.Strings(), pr.Target(), pr.Type())
 	// 	return nil
-	// }); err.Chk(e) {
+	// }); e != nil {
 	// 	return false
 	// }
 	var rt storer.ReferenceIter
-	if rt, e = repo.Tags(); err.Chk(e) {
+	if rt, e = repo.Tags(); e != nil {
 		return false
 	}
 	// latest := time.Time{}
@@ -125,7 +125,7 @@ func populateVersionFlags() bool {
 	if e = rt.ForEach(
 		func(pr *plumbing.Reference) (e error) {
 			// var rcoh *object.Commit
-			// if rcoh, e = repo.CommitObject(pr.Hash()); err.Chk(e) {
+			// if rcoh, e = repo.CommitObject(pr.Hash()); e != nil {
 			// }
 			prs := strings.Split(pr.String(), "/")[2]
 			if strings.HasPrefix(prs, "v") {
@@ -145,7 +145,7 @@ func populateVersionFlags() bool {
 			// 	pr.Target(), pr.Type())
 			return nil
 		},
-	); err.Chk(e) {
+	); e != nil {
 		return false
 	}
 	if !maxIs {
@@ -209,7 +209,7 @@ func main() {
 			populateVersionFlags()
 			// Infos(list)
 			for i := range list {
-				// inf.Ln(list[i])
+				// fmt.Fprintln(os.Stderr,list[i])
 				// inject the data directory
 				var split []string
 				out := strings.ReplaceAll(list[i], "%datadir", datadir)
@@ -229,7 +229,7 @@ func main() {
 				// add ldflags to commands that have this
 				// for i := range split {
 				// 	split[i] =
-				// 		inf.F("'%s'", split[i])
+				// 		fmt.Fprintf(os.Stderr,"'%s'", split[i])
 				// }
 				fmt.Printf(
 					`executing item %d of list '%v' '%v' '%v'
@@ -241,11 +241,11 @@ func main() {
 				cmd.Stdout = os.Stdout
 				cmd.Stdin = os.Stdin
 				cmd.Stderr = os.Stderr
-				if e := cmd.Start(); err.Chk(e) {
-					inf.S(e)
+				if e := cmd.Start(); e != nil {
+					spew.Fdump(os.Stderr,e)
 					os.Exit(1)
 				}
-				if e := cmd.Wait(); err.Chk(e) {
+				if e := cmd.Wait(); e != nil {
 					os.Exit(1)
 				}
 			}

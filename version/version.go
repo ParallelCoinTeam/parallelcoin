@@ -1,12 +1,32 @@
 package version
 
+import "fmt"
+
 var (
-	URL       string
-	GitRef    string
-	GitCommit string
-	BuildTime string
-	Tag       string
-	
-	Get func() string
-	App string
+
+	// URL is the git URL for the repository
+	URL = "github.com/p9c/pod"
+	// GitRef is the gitref, as in refs/heads/branchname
+	GitRef = "refs/heads/l0k1"
+	// GitCommit is the commit hash of the current HEAD
+	GitCommit = "8b5041a6a25823381ac34f411a7d279d791a5dba"
+	// BuildTime stores the time when the current binary was built
+	BuildTime = "2021-03-10T23:53:42+01:00"
+	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
+	// not that commit
+	Tag = "v1.9.16+"
+	// PathBase is the path base returned from runtime caller
+	PathBase = "/home/loki/src/github.com/p9c/pod/"
 )
+
+// Get returns a pretty printed version information string
+func Get() string {
+	return fmt.Sprintf(
+		"ParallelCoin Pod\n"+
+		"	PathBase: "+URL+"\n",
+		"	branch: "+GitRef+"\n"+
+		"	commit: "+GitCommit+"\n"+
+		"	built: "+BuildTime+"\n"+
+		"	Tag: "+Tag+"\n",
+	)
+}

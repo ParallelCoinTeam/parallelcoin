@@ -2,6 +2,7 @@ package logg
 
 import (
 	"fmt"
+	"github.com/p9c/pod/version"
 	"io"
 	"os"
 	"runtime"
@@ -58,11 +59,6 @@ var (
 	logger_started = time.Now()
 	App            = "<not set>"
 	AppColorizer   = color.White.Sprint
-	// repositoryPath is the part of the filesystem path that contains the application
-	// repository.
-	// todo: can be injected using stroy - and is kinda crap but fix it later
-	repositoryPath = `C:/Users/loki/GolandProjects/pod/`
-	// repositoryPath = "/home/loki/src/github.com/p9c/pod/"
 	// sep is just a convenient shortcut for this very longwinded expression
 	sep          = string(os.PathSeparator)
 	currentLevel = uberatomic.NewInt32(logLevels.Info)
@@ -160,16 +156,15 @@ func SortSubsystemsList() {
 // AddLoggerSubsystem adds a subsystem to the list of known subsystems and returns the
 // string so it is nice and neat in the package logg.go file
 func AddLoggerSubsystem() (subsystem string) {
-	var pkgPath string
 	var split []string
 	var ok bool
-	_, pkgPath, _, ok = runtime.Caller(1)
-	fmt.Fprintln(os.Stderr, pkgPath, repositoryPath)
+	var file string
+	_, file, _, ok = runtime.Caller(1)
 	if ok {
-		fromRoot := strings.Split(pkgPath, repositoryPath)[1]
+		fromRoot := strings.Split(file, version.PathBase)[1]
 		split = strings.Split(fromRoot, sep)
 		subsystem = strings.Join(split[:len(split)-1], "/")
-		// fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
+		fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
 		allSubsystems = append(allSubsystems, subsystem)
 	}
 	return
@@ -259,7 +254,10 @@ func AddFilteredSubsystem(hl string) struct{} {
 
 func getTimeText(level int32) string {
 	since := time.Now().Sub(logger_started).Round(time.Millisecond).String()
-	since = strings.Repeat(" ", 15-len(since)) + since + " "
+	diff := 9 - len(since)
+	if diff > 0 {
+		since = strings.Repeat(" ", diff) + since + " "
+	}
 	return color.Bit24(40, 40, 40, false).Sprint(since)
 }
 
