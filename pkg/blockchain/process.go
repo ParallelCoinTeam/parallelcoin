@@ -1,12 +1,13 @@
 package blockchain
 
 import (
+	"errors"
 	"fmt"
 	"time"
 	
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -37,9 +38,10 @@ const (
 // whether or not the block is an orphan.
 //
 // This function is safe for concurrent access.
-func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Block, flags BehaviorFlags, height int32,) (
-	bool, bool, error,
-) {
+func (b *BlockChain) ProcessBlock(
+	workerNumber uint32, candidateBlock *util.Block,
+	flags BehaviorFlags, height int32,
+) (bool, bool, error,) {
 	trc.Ln("blockchain.ProcessBlock", height)
 	blockHeight := height
 	var prevBlock *util.Block
@@ -50,6 +52,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	} else {
 		return false, false, e
 	}
+	trc.S(prevBlock)
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	fastAdd := flags&BFFastAdd == BFFastAdd
@@ -89,6 +92,9 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 	trc.F("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	ph := &candidateBlock.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
+	if pn == nil {
+		return false, false, errors.New("could not find parent block of candidate block")
+	}
 	var pb *BlockNode
 	pb = pn.GetLastWithAlgo(algo)
 	if pb == nil {
@@ -203,7 +209,7 @@ func (b *BlockChain) ProcessBlock(workerNumber uint32, candidateBlock *util.Bloc
 // the main chain or any side chains.
 //
 // This function is safe for concurrent access.
-func (b *BlockChain) blockExists(hash *chainhash.Hash) (exists bool,e error) {
+func (b *BlockChain) blockExists(hash *chainhash.Hash) (exists bool, e error) {
 	// Chk block index first (could be main chain or side chain blocks).
 	if b.Index.HaveBlock(hash) {
 		return true, nil
@@ -212,7 +218,7 @@ func (b *BlockChain) blockExists(hash *chainhash.Hash) (exists bool,e error) {
 	e = b.db.View(
 		func(dbTx database.Tx) (e error) {
 			exists, e = dbTx.HasBlock(hash)
-			if e != nil  || !exists {
+			if e != nil || !exists {
 				return e
 			}
 			// Ignore side chain blocks in the database. This is necessary because there is

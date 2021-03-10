@@ -181,9 +181,9 @@ var (
 	// MaxPeers is the maximum number of connections the client maintains.
 	MaxPeers = 125
 	// RequiredServices describes the services that are required to be supported by outbound peers.
-	RequiredServices = wire.SFNodeNetwork | wire.SFNodeWitness | wire.SFNodeCF
+	RequiredServices = wire.SFNodeNetwork |/* wire.SFNodeWitness |*/ wire.SFNodeCF
 	// Services describes the services that are supported by the server.
-	Services = wire.SFNodeWitness | wire.SFNodeCF
+	Services = /*wire.SFNodeWitness |*/ wire.SFNodeCF
 	// TargetOutbound is the number of outbound peers to target.
 	TargetOutbound = 16
 	// UserAgentName is the user agent name and is used to help identify ourselves to other bitcoin peers.
@@ -813,8 +813,8 @@ func (sp *ServerPeer) OnVersion(_ *peer.Peer, msg *wire.MsgVersion) *wire.MsgRej
 	// Chk to see if the peer supports the latest protocol version and service bits required to service us. If not,
 	// then we'll disconnect so we can find compatible peers.
 	peerServices := sp.Services()
-	if peerServices&wire.SFNodeWitness != wire.SFNodeWitness ||
-		peerServices&wire.SFNodeCF != wire.SFNodeCF {
+	// if peerServices&wire.SFNodeWitness != wire.SFNodeWitness ||
+	if	peerServices&wire.SFNodeCF != wire.SFNodeCF {
 		inf.F(
 			"disconnecting peer %v, cannot serve compact filters", sp,
 		)

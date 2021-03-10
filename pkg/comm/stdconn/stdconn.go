@@ -20,7 +20,7 @@ func New(in io.ReadCloser, out io.WriteCloser, quit qu.C) (s *StdConn) {
 	s = &StdConn{in, out, quit}
 	_, file, line, _ := runtime.Caller(1)
 	o := fmt.Sprintf("%s:%d", file, line)
-	dbg.Ln("new StdConn at", o)
+	trc.Ln("new StdConn at", o)
 	// go func() {
 	// 	<-quit.Wait()
 	// 	dbg.Ln("!!!! closing StdConn", o)

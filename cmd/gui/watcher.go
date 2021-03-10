@@ -92,7 +92,7 @@ func (wg *WalletGUI) Watcher() qu.C {
 						}
 					}
 					if wg.WalletClient.Disconnected() {
-						if e = wg.WalletClient.Connect(1); err.Chk(e) {
+						if e = wg.WalletClient.Connect(1); dbg.Chk(e) {
 							continue
 							// } else {
 							// 	break disconnected

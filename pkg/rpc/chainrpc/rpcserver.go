@@ -2189,6 +2189,7 @@ func VerifyChain(s *Server, level, depth int32) (e error) {
 		)
 		var pb *util.Block
 		if pb, e = s.Cfg.Chain.BlockByHash(&block.MsgBlock().Header.PrevBlock); err.Chk(e) {
+			return
 		}
 		// Level 1 does basic chain sanity checks.
 		if level > 0 {

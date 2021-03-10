@@ -3,6 +3,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/config"
@@ -12,8 +13,9 @@ import (
 
 func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		// dbg.Ln(os.Args)
+		logg.App = c.Command.Name
 		config.Configure(cx, c.Command.Name, true)
+		// dbg.Ln(os.Args)
 		// interrupt.AddHandler(func() {
 		// 	dbg.Ln("wallet gui is shut down")
 		// })

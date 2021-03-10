@@ -831,7 +831,7 @@ mempoolLoop:
 	// adjusted to ensure it comes after the median time of the last several blocks
 	// per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
-	if fork.GetCurrent(best.Height+1) > 0 {
+	if fork.GetCurrent(best.Height) > 0 {
 		ts = g.Chain.BestChain.Tip().Header().Timestamp.Truncate(time.Second).Add(time.Second)
 	}
 	// trc.Ln("algo ", ts, " ", algo)
@@ -862,11 +862,11 @@ mempoolLoop:
 	block.SetHeight(nextBlockHeight)
 	e = g.Chain.CheckConnectBlockTemplate(block)
 	if e != nil  {
-		dbg.Ln("checkconnectblocktemplate err:", err)
+		dbg.Ln("checkconnectblocktemplate err:", e)
 		return nil, e
 	}
 	bh := msgBlock.Header.BlockHash()
-	trc.C(
+	dbg.C(
 		func() string {
 			return fmt.Sprintf(
 				"created new block template (algo %s, %d transactions, "+

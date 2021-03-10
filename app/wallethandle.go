@@ -2,10 +2,11 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"os"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/urfave/cli"
 	
@@ -18,6 +19,7 @@ import (
 
 func WalletHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
+		logg.App=c.Command.Name
 		config.Configure(cx, c.Command.Name, true)
 		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
 			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.DbName

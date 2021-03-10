@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	"os"
 	"os/exec"
 	
@@ -13,6 +14,7 @@ import (
 
 var initHandle = func(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
+		logg.App = c.Command.Name
 		inf.Ln("running configuration and wallet initialiser")
 		config.Configure(cx, c.Command.Name, true)
 		args := append(os.Args[1:len(os.Args)-1], "wallet")

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	"os"
 	
 	"github.com/p9c/pod/app/config"
@@ -22,6 +23,7 @@ func ctlHandleList(c *cli.Context) (e error) {
 
 func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
+		logg.App = c.Command.Name
 		*cx.Config.LogLevel = "off"
 		config.Configure(cx, c.Command.Name, true)
 		args := c.Args()
@@ -29,7 +31,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			return cli.ShowSubcommandHelp(c)
 		}
 		ctl.HelpPrint = func() {
-			if e := cli.ShowSubcommandHelp(c); err.Chk(e){
+			if e := cli.ShowSubcommandHelp(c); err.Chk(e) {
 			}
 		}
 		ctl.Main(args, cx)

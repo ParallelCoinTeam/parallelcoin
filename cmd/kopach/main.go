@@ -101,7 +101,7 @@ func (w *Worker) Start() {
 		w.clients = append(w.clients, client.New(cmd.StdConn))
 	}
 	for i := range w.clients {
-		dbg.Ln("sending pass to worker", i)
+		trc.Ln("sending pass to worker", i)
 		e := w.clients[i].SendPass(*w.cx.Config.MinerPass)
 		if e != nil {
 		}

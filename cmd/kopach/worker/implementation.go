@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	
 	"go.uber.org/atomic"
@@ -85,6 +85,7 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 	}
 	return
 }
+
 //
 // func (w *Worker) hashReport() {
 // 	w.hashSampleBuf.Add(w.hashCount.Load())
@@ -112,7 +113,7 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 // NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
 // allow a worker to be configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid uint64) *Worker {
-	dbg.Ln("creating new worker")
+	trc.Ln("creating new worker")
 	// msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		id:            id,
@@ -129,7 +130,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid u
 	w.startNonce = uint32(w.roller.C.Load())
 	interrupt.AddHandler(
 		func() {
-			dbg.Ln("worker quitting")
+			dbg.Ln("worker", id, "quitting")
 			w.stopChan <- struct{}{}
 			// _ = w.pipeConn.Close()
 			w.dispatchReady.Store(false)
@@ -204,8 +205,8 @@ out:
 							hashrate.Magic,
 							transport.GetShards(hashReport),
 						)
-						if e != nil  {
-													}
+						if e != nil {
+						}
 						// reseed the nonce
 						rand.Seed(time.Now().UnixNano())
 						nonce = rand.Uint32()
@@ -232,8 +233,8 @@ out:
 							sol.Magic,
 							transport.GetShards(srs),
 						)
-						if e != nil  {
-													}
+						if e != nil {
+						}
 						dbg.Ln("sent solution")
 						w.templatesMessage = nil
 						select {
@@ -330,8 +331,8 @@ func (w *Worker) SendPass(pass string, reply *bool) (e error) {
 		transport.Handlers{},
 		w.quit,
 	)
-	if e != nil  {
-			}
+	if e != nil {
+	}
 	w.dispatchConn = conn
 	w.dispatchReady.Store(true)
 	*reply = true

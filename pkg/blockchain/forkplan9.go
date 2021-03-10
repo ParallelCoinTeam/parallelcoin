@@ -164,7 +164,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	}
 	if l {
 		// if lastNode.version == algoVer {
-		dbg.Ln(func() string {
+		trc.Ln(func() string {
 			an := fork.List[1].AlgoVers[algoVer]
 			pad := 8 - len(an)
 			if pad > 0 {

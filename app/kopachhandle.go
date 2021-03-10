@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	"os"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -18,6 +19,7 @@ import (
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
+		logg.App = c.Command.Name
 		inf.Ln("starting up kopach standalone miner for parallelcoin")
 		dbg.Ln(os.Args)
 		config.Configure(cx, c.Command.Name, true)

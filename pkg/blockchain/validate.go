@@ -9,10 +9,10 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/hardfork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -387,9 +387,9 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 		)
 		return ruleError(ErrPrevBlockNotBest, str)
 	}
-	var pb *util.Block
-	if pb, e = b.BlockByHash(&header.PrevBlock); err.Chk(e) {
-	}
+	// var pb *util.Block
+	// if pb, e = b.BlockByHash(&header.PrevBlock); err.Chk(e) {
+	// }
 	if e = checkBlockSanity(
 		block,
 		powLimit,
@@ -397,7 +397,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 		flags,
 		false,
 		block.Height(),
-		pb.MsgBlock().Header.Timestamp,
+		block.MsgBlock().Header.Timestamp,
 	); err.Chk(e) {
 		return e
 	}
@@ -1161,7 +1161,9 @@ func checkBlockHeaderSanity(
 	// with standard Go time values instead of converting to seconds everywhere.
 	if !header.Timestamp.Equal(time.Unix(header.Timestamp.Unix(), 0)) {
 		str := fmt.Sprintf("block timestamp of %v has a higher precision than one second", header.Timestamp)
-		return ruleError(ErrInvalidTime, str)
+		e = ruleError(ErrInvalidTime, str)
+		err.Ln(e)
+		return
 	}
 	// Ensure the block time is not too far in the future.
 	maxTimestamp := timeSource.AdjustedTime().Add(time.Second * MaxTimeOffsetSeconds)
@@ -1174,11 +1176,16 @@ func checkBlockHeaderSanity(
 	}
 	if fork.GetCurrent(height) > 0 {
 		cbts := header.Timestamp.Truncate(time.Second)
-		if cbts.Sub(prevBlockTimestamp.Truncate(time.Second)) < 1 {
-			return ruleError(
+		pbts := prevBlockTimestamp.Truncate(time.Second)
+		dbg.Ln("prev", pbts, "candidate", cbts)
+		trc.S(pbts, cbts)
+		if cbts.Sub(pbts) < time.Second {
+			e = ruleError(
 				ErrTimeTooOld,
 				fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
 			)
+			err.Ln(e)
+			return
 		}
 	}
 	return nil
@@ -1205,7 +1212,7 @@ func checkBlockSanity(
 	header := &msgBlock.Header
 	e = checkBlockHeaderSanity(header, powLimit, timeSource, flags, height, prevBlockTimestamp)
 	if e != nil {
-		dbg.Ln("block processing error: ", block.MsgBlock().Header.Version, err)
+		dbg.Ln("block processing error:", block.MsgBlock().Header.Version, e)
 		return e
 	}
 	// A block must have at least one transaction.

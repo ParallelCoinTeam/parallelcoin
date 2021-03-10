@@ -216,7 +216,7 @@ type (
 const (
 	// DefaultServices describes the default services that are supported by the server.
 	DefaultServices = wire.SFNodeNetwork | wire.SFNodeBloom |
-		wire.SFNodeWitness | wire.SFNodeCF
+		/*wire.SFNodeWitness |*/ wire.SFNodeCF
 	// DefaultRequiredServices describes the default services that are required to be supported by outbound peers.
 	DefaultRequiredServices = wire.SFNodeNetwork
 	// DefaultTargetOutbound is the default number of outbound peers to target.

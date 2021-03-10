@@ -66,7 +66,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				), nil, "c",
 			),
 			au.Command(
-				"rpcnode", "start parallelcoin full node for vps/rpc services usage",
+				"rpc", "start parallelcoin full node for vps/rpc services usage",
 				rpcNodeHandle(cx),
 				au.SubCommands(
 					au.Command(

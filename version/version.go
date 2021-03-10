@@ -8,4 +8,5 @@ var (
 	Tag       string
 	
 	Get func() string
+	App string
 )

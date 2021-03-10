@@ -249,7 +249,7 @@ func handleNetworkError(address string, e error) (result int) {
 func Handle(address string, channel *Channel,
 	handlers Handlers, maxDatagramSize int, quit qu.C) {
 	buffer := make([]byte, maxDatagramSize)
-	dbg.Ln("starting handler for", channel.Creator, "listener")
+	trc.Ln("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed
 	// seenNonce := ""
 	var e error

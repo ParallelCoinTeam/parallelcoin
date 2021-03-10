@@ -796,6 +796,7 @@ func (s *ChainService) GetBlock(
 				}
 				var pb *util.Block
 				if pb, e = sp.server.GetBlock(block.MsgBlock().Header.PrevBlock); err.Chk(e) {
+					return
 				}
 				pbt := pb.MsgBlock().Header.Timestamp
 				// If this claims our block but doesn't pass the sanity check, the peer is trying to bamboozle us.

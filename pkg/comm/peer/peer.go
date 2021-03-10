@@ -1718,19 +1718,19 @@ func (p *Peer) readRemoteVersionMsg() (e error) {
 	p.flagsMtx.Lock()
 	p.id = atomic.AddInt32(&nodeCount, 1)
 	p.userAgent = msg.UserAgent
-	// Determine if the peer would like to receive witness data with transactions,
-	// or not.
-	if p.services&wire.SFNodeWitness == wire.SFNodeWitness {
-		p.witnessEnabled = true
-	}
+	// // Determine if the peer would like to receive witness data with transactions,
+	// // or not.
+	// if p.services&wire.SFNodeWitness == wire.SFNodeWitness {
+	// 	p.witnessEnabled = true
+	// }
 	p.flagsMtx.Unlock()
-	// Once the version message has been exchanged, we're able to determine if this
-	// peer knows how to encode witness data over the wire protocol. If so, then
-	// we'll switch to a decoding mode which is prepared for the new transaction
-	// format introduced as part of BIP0144.
-	if p.services&wire.SFNodeWitness == wire.SFNodeWitness {
-		p.wireEncoding = wire.BaseEncoding
-	}
+	// // Once the version message has been exchanged, we're able to determine if this
+	// // peer knows how to encode witness data over the wire protocol. If so, then
+	// // we'll switch to a decoding mode which is prepared for the new transaction
+	// // format introduced as part of BIP0144.
+	// if p.services&wire.SFNodeWitness == wire.SFNodeWitness {
+	// 	p.wireEncoding = wire.BaseEncoding
+	// }
 	// Invoke the callback if specified.
 	if p.cfg.Listeners.OnVersion != nil {
 		rejectMsg := p.cfg.Listeners.OnVersion(p, msg)

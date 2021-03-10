@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"os"
 	
@@ -18,6 +19,7 @@ import (
 
 func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
+		logg.App=c.Command.Name
 		config.Configure(cx, c.Command.Name, true)
 		dbg.Ln("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {

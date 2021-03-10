@@ -55,6 +55,7 @@ type (
 
 var (
 	logger_started = time.Now()
+	App            = "<not set>"
 	// repositoryPath is the part of the filesystem path that contains the application
 	// repository.
 	// todo: can be injected using stroy - and is kinda crap but fix it later
@@ -260,13 +261,14 @@ func _ln(level int32, subsystem string) func(a ...interface{}) {
 		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
 			fmt.Fprintf(
 				*writer,
-				"%-58v%-6v %s %s\n",
+				"%-58v%-6v %s|%s %s\n",
 				getLoc(2, level, subsystem),
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
-				LevelSpecs[level].Colorizer(joinStrings(" ", a...)),
+				App,
+				joinStrings(" ", a...),
 				getTimeText(level),
 			)
 		}
@@ -290,7 +292,7 @@ func _f(level int32, subsystem string) func(format string, a ...interface{}) {
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
-				LevelSpecs[level].Colorizer(format, a...),
+				fmt.Sprintf(format, a...),
 				getTimeText(level),
 			)
 		}
@@ -314,7 +316,10 @@ func _s(level int32, subsystem string) func(a ...interface{}) {
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
-				LevelSpecs[level].Colorizer(" ", spew.Sdump(a)),
+				fmt.Sprint(
+					color.Bit24(20, 20, 20, true).Sprint(spew.Sdump(a)),
+					"\n",
+				),
 				getTimeText(level),
 			)
 		}
@@ -338,7 +343,7 @@ func _c(level int32, subsystem string) func(closure func() string) {
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
-				LevelSpecs[level].Colorizer(closure()),
+				color.Bit24(20, 20, 20, true).Sprint(closure()),
 				getTimeText(level),
 			)
 		}

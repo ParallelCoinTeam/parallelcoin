@@ -12,6 +12,7 @@ import (
 
 var walletGUIHandle = func(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
+		logg.App = c.Command.Name
 		wrn.Ln("GUI was disabled for this build (server only version)")
 		os.Exit(1)
 		return nil

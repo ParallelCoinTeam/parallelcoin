@@ -309,23 +309,23 @@ out:
 				}
 				msg.reply <- peerID
 			case processBlockMsg:
-				dbg.Ln("received processBlockMsg")
+				trc.Ln("received processBlockMsg")
 				var heightUpdate int32
 				header := &msg.block.MsgBlock().Header
-				dbg.Ln("checking if have should have serialized block height")
+				trc.Ln("checking if have should have serialized block height")
 				if blockchain.ShouldHaveSerializedBlockHeight(header) {
-					dbg.Ln("reading coinbase transaction")
+					trc.Ln("reading coinbase transaction")
 					coinbaseTx := msg.block.Transactions()[0]
-					dbg.Ln("extracting coinbase height")
+					trc.Ln("extracting coinbase height")
 					var e error
 					var cbHeight int32
 					if cbHeight, e = blockchain.ExtractCoinbaseHeight(coinbaseTx); err.Chk(e) {
-						trc.Ln("unable to extract height from coinbase tx:", err)
+						wrn.Ln("unable to extract height from coinbase tx:", err)
 					} else {
 						heightUpdate = cbHeight
 					}
 				}
-				dbg.Ln("passing to chain.ProcessBlock")
+				trc.Ln("passing to chain.ProcessBlock")
 				var isOrphan bool
 				var e error
 				if _, isOrphan, e = sm.chain.ProcessBlock(
@@ -340,12 +340,12 @@ out:
 						err:      e,
 					}
 				}
-				dbg.Ln("sending back message on reply channel")
+				trc.Ln("sending back message on reply channel")
 				msg.reply <- processBlockResponse{
 					isOrphan: isOrphan,
 					err:      nil,
 				}
-				dbg.Ln("sent reply")
+				trc.Ln("sent reply")
 			case isCurrentMsg:
 				msg.reply <- sm.current()
 			case pauseMsg:
@@ -549,7 +549,7 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 			)
 			// inf.F("height %d", bmsg.block.Height())
 		} else {
-			err.F("failed to process block %v: %v", blockHash, err)
+			err.F("failed to process block %v: %v", blockHash, e)
 		}
 		if dbErr, ok := e.(database.DBError); ok && dbErr.ErrorCode ==
 			database.ErrCorruption {

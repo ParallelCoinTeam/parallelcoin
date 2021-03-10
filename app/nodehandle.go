@@ -1,12 +1,13 @@
 package app
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/cmd/walletmain"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node"
@@ -19,6 +20,7 @@ func rpcNodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
+		logg.App=c.Command.Name
 		trc.Ln("running node handler")
 		config.Configure(cx, c.Command.Name, true)
 		cx.NodeReady = qu.T()

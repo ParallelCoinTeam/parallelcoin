@@ -184,7 +184,7 @@ func (s *State) updateBlockTemplate() {
 	var blk *util.Block
 	if blk, e = s.node.Chain.BlockByHash(&tN); err.Chk(e) {
 	}
-	dbg.Ln("updating block from chain tip", blk.MsgBlock().Header.Timestamp.Truncate(time.Second).Unix())
+	dbg.Ln("updating block from chain tip")
 	if e = s.doBlockUpdate(blk); err.Chk(e) {
 	}
 }
@@ -350,7 +350,6 @@ func (s *State) Advertise() {
 }
 
 func (s *State) doBlockUpdate(prev *util.Block) (e error) {
-	inf.Ln("mining on block", prev.MsgBlock().Header.Timestamp)
 	if s.nextAddress == nil {
 		dbg.Ln("getting new address for templates")
 		if s.nextAddress, e = s.GetNewAddressFromMiningAddrs(); err.Chk(e) {
@@ -399,7 +398,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		Bits:      make(templates.Diffs),
 		Merkles:   make(templates.Merkles),
 	}
-	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Add(time.Second).Round(time.Second)
+	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(time.Second*2)
 	tn := time.Now().Truncate(time.Second).Add(time.Second)
 	if tn.After(mbt.Timestamp) {
 		mbt.Timestamp = tn
@@ -499,7 +498,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
 			if e = s.rpcServer.Cfg.ConnMgr.Connect(
 				peerIP,
-				false,
+				true,
 			); err.Chk(e) {
 				continue
 			}
@@ -559,6 +558,10 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); err.Chk(e) {
 		return
 	}
+	dbg.Ln("clearing current block template")
+	s.msgBlockTemplate = nil
+	dbg.Ln("signalling controller to enter pause mode")
+	s.Stop()
 	block := util.NewBlock(msgBlock)
 	var isOrphan bool
 	dbg.Ln("submitting block for processing")

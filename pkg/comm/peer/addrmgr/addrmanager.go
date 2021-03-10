@@ -967,7 +967,7 @@ func (a *AddrManager) GetBestLocalAddress(remoteAddr *wire.NetAddress) *wire.Net
 		} else {
 			ip = net.IPv4zero
 		}
-		services := wire.SFNodeNetwork | wire.SFNodeWitness | wire.SFNodeBloom
+		services := wire.SFNodeNetwork | /*wire.SFNodeWitness |*/ wire.SFNodeBloom
 		bestAddress = wire.NewNetAddressIPPort(ip, 0, services)
 	}
 	return bestAddress
