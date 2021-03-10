@@ -98,8 +98,8 @@ type BlockChain struct {
 	minRetargetTimespan int64 // target timespan / adjustment factor
 	maxRetargetTimespan int64 // target timespan * adjustment factor
 	blocksPerRetarget   int32 // target timespan / target time per block
-	// chainLock protects concurrent access to the vast majority of the fields in this struct below this point.
-	chainLock sync.RWMutex
+	// ChainLock protects concurrent access to the vast majority of the fields in this struct below this point.
+	ChainLock sync.RWMutex
 	// These fields are related to the memory block index. They both have their own
 	// locks, however they are often also protected by the chain lock to help
 	// prevent logic races when blocks are being processed. index houses the entire
@@ -585,9 +585,9 @@ func (b *BlockChain) connectBlock(
 	// Notify the caller that the block was connected to the main chain. The caller would typically want to react with
 	// actions such as updating wallets.
 	trc.Ln("sending notifications for new block")
-	b.chainLock.Unlock()
+	b.ChainLock.Unlock()
 	b.sendNotification(NTBlockConnected, block)
-	b.chainLock.Lock()
+	b.ChainLock.Lock()
 	return nil
 }
 
@@ -690,9 +690,9 @@ func (b *BlockChain) disconnectBlock(
 	b.stateLock.Unlock()
 	// Notify the caller that the block was disconnected from the main chain. The caller would typically want to react
 	// with actions such as updating wallets.
-	b.chainLock.Unlock()
+	b.ChainLock.Unlock()
 	b.sendNotification(NTBlockDisconnected, block)
-	b.chainLock.Lock()
+	b.ChainLock.Lock()
 	return nil
 }
 
@@ -1091,8 +1091,8 @@ func (b *BlockChain) isCurrent() bool {
 //
 // This function is safe for concurrent access.
 func (b *BlockChain) IsCurrent() bool {
-	b.chainLock.RLock()
-	defer b.chainLock.RUnlock()
+	b.ChainLock.RLock()
+	defer b.ChainLock.RUnlock()
 	return b.isCurrent()
 }
 
@@ -1131,19 +1131,19 @@ func (b *BlockChain) MainChainHasBlock(hash *chainhash.Hash) bool {
 //
 // This function is safe for concurrent access.
 func (b *BlockChain) BlockLocatorFromHash(hash *chainhash.Hash) BlockLocator {
-	b.chainLock.RLock()
+	b.ChainLock.RLock()
 	node := b.Index.LookupNode(hash)
 	locator := b.BestChain.blockLocator(node)
-	b.chainLock.RUnlock()
+	b.ChainLock.RUnlock()
 	return locator
 }
 
 // LatestBlockLocator returns a block locator for the latest known tip of the main (best) chain. This function is safe
 // for concurrent access.
 func (b *BlockChain) LatestBlockLocator() (BlockLocator, error) {
-	b.chainLock.RLock()
+	b.ChainLock.RLock()
 	locator := b.BestChain.BlockLocator(nil)
-	b.chainLock.RUnlock()
+	b.ChainLock.RUnlock()
 	return locator, nil
 }
 
@@ -1389,9 +1389,9 @@ func (b *BlockChain) locateBlocks(
 //
 // This function is safe for concurrent access.
 func (b *BlockChain) LocateBlocks(locator BlockLocator, hashStop *chainhash.Hash, maxHashes uint32) []chainhash.Hash {
-	b.chainLock.RLock()
+	b.ChainLock.RLock()
 	hashes := b.locateBlocks(locator, hashStop, maxHashes)
-	b.chainLock.RUnlock()
+	b.ChainLock.RUnlock()
 	return hashes
 }
 
@@ -1433,9 +1433,9 @@ func (b *BlockChain) locateHeaders(
 //
 // This function is safe for concurrent access.
 func (b *BlockChain) LocateHeaders(locator BlockLocator, hashStop *chainhash.Hash) []wire.BlockHeader {
-	b.chainLock.RLock()
+	b.ChainLock.RLock()
 	headers := b.locateHeaders(locator, hashStop, wire.MaxBlockHeadersPerMsg)
-	b.chainLock.RUnlock()
+	b.ChainLock.RUnlock()
 	return headers
 }
 

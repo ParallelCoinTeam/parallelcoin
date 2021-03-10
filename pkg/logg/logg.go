@@ -261,13 +261,13 @@ func _ln(level int32, subsystem string) func(a ...interface{}) {
 		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
 			fmt.Fprintf(
 				*writer,
-				"%-58v%-6v %s|%s %s\n",
+				"%-58v%s %-6v%s %s\n",
 				getLoc(2, level, subsystem),
+				App,
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
-				App,
 				joinStrings(" ", a...),
 				getTimeText(level),
 			)
@@ -286,8 +286,9 @@ func _f(level int32, subsystem string) func(format string, a ...interface{}) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v%-6v %s %s\n",
+				"%-58v%s %-6v%s %s\n",
 				getLoc(2, level, subsystem),
+				App,
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
@@ -310,8 +311,9 @@ func _s(level int32, subsystem string) func(a ...interface{}) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v%-6v \n%s\n%s\n",
+				"%-58v%s %-6v%s\n%s\n",
 				getLoc(2, level, subsystem),
+				App,
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
@@ -337,8 +339,9 @@ func _c(level int32, subsystem string) func(closure func() string) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v%-6v %s %s\n",
+				"%-58v%s %-6v%s %s\n",
 				getLoc(2, level, subsystem),
+				App,
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
@@ -362,8 +365,9 @@ func _chk(level int32, subsystem string) func(e error) bool {
 				// }
 				fmt.Fprintf(
 					*writer,
-					"%-58v%-6v %s %s\n",
+					"%-58v%s %-6v%s %s\n",
 					getLoc(2, level, subsystem),
+					App,
 					LevelSpecs[level].Colorizer(
 						color.Bit24(20, 20, 20, true).
 							Sprint(" "+LevelSpecs[level].Name+" "),

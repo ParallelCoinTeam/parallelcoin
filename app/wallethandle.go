@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"os"
@@ -19,7 +20,7 @@ import (
 
 func WalletHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App=c.Command.Name
+		logg.App=color.Bit24(255,255,0,false).Sprint("wallet")
 		config.Configure(cx, c.Command.Name, true)
 		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
 			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.DbName

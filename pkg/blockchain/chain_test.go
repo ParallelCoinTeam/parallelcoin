@@ -668,10 +668,10 @@ func TestLocateInventory(t *testing.T) {
 		var headers []wire.BlockHeader
 		if test.maxAllowed != 0 {
 			// Need to use the unexported function to override the max allowed for headers.
-			chain.chainLock.RLock()
+			chain.ChainLock.RLock()
 			headers = chain.locateHeaders(test.locator,
 				&test.hashStop, test.maxAllowed)
-			chain.chainLock.RUnlock()
+			chain.ChainLock.RUnlock()
 		} else {
 			headers = chain.LocateHeaders(test.locator,
 				&test.hashStop)

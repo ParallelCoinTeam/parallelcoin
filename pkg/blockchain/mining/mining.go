@@ -6,11 +6,11 @@ import (
 	"math/rand"
 	"time"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -260,15 +260,15 @@ func createCoinbaseTx(
 	if addr != nil {
 		var e error
 		pkScript, e = txscript.PayToAddrScript(addr)
-		if e != nil  {
-						return nil, e
+		if e != nil {
+			return nil, e
 		}
 	} else {
 		var e error
 		scriptBuilder := txscript.NewScriptBuilder()
 		pkScript, e = scriptBuilder.AddOp(txscript.OP_TRUE).Script()
-		if e != nil  {
-						return nil, e
+		if e != nil {
+			return nil, e
 		}
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -525,7 +525,7 @@ mempoolLoop:
 		// transaction which depends on other transactions in the mempool must come
 		// after those dependencies in the final generated block.
 		utxos, e := g.Chain.FetchUtxoView(tx)
-		if e != nil  {
+		if e != nil {
 			wrn.C(
 				func() string {
 					return "unable to fetch utxo view for tx " + tx.Hash().String() + ": " + e.Error()
@@ -659,7 +659,7 @@ mempoolLoop:
 		}
 		// Enforce maximum signature operation cost per block. Also check for overflow.
 		sigOpCost, e := blockchain.GetSigOpCost(tx, false, blockUtxos, true)
-		if e != nil  {
+		if e != nil {
 			trc.C(
 				func() string {
 					return "skipping tx " + tx.Hash().String() +
@@ -731,7 +731,7 @@ mempoolLoop:
 			tx, nextBlockHeight,
 			blockUtxos, g.ChainParams,
 		)
-		if e != nil  {
+		if e != nil {
 			trc.F(
 				"skipping tx %s due to error in CheckTransactionInputs: %v",
 				tx.Hash(), err,
@@ -831,8 +831,16 @@ mempoolLoop:
 	// adjusted to ensure it comes after the median time of the last several blocks
 	// per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
+	trc.Ln("legacy ts", ts)
 	if fork.GetCurrent(best.Height) > 0 {
-		ts = g.Chain.BestChain.Tip().Header().Timestamp.Truncate(time.Second).Add(time.Second)
+		ots := g.Chain.BestChain.NodeByHeight(best.Height).Header().Timestamp.Truncate(time.Second)
+		tn := time.Now().Truncate(time.Second)
+		if util.GetSecondsAhead(tn, ots) < 1 {
+			ts = tn
+		} else {
+			ts = ots.Add(time.Second)
+		}
+		trc.Ln("plan9 ts", ts)
 	}
 	// trc.Ln("algo ", ts, " ", algo)
 	var reqDifficulty uint32
@@ -861,7 +869,7 @@ mempoolLoop:
 	block := util.NewBlock(&msgBlock)
 	block.SetHeight(nextBlockHeight)
 	e = g.Chain.CheckConnectBlockTemplate(block)
-	if e != nil  {
+	if e != nil {
 		dbg.Ln("checkconnectblocktemplate err:", e)
 		return nil, e
 	}

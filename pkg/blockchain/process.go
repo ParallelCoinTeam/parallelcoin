@@ -53,8 +53,8 @@ func (b *BlockChain) ProcessBlock(
 		return false, false, e
 	}
 	trc.S(prevBlock)
-	b.chainLock.Lock()
-	defer b.chainLock.Unlock()
+	b.ChainLock.Lock()
+	defer b.ChainLock.Unlock()
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	blockHash := candidateBlock.Hash()
 	hf := fork.GetCurrent(blockHeight)
@@ -100,7 +100,7 @@ func (b *BlockChain) ProcessBlock(
 	if pb == nil {
 		DoNotCheckPow = true
 	}
-	trc.Ln("checkBlockSanity powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
+	dbg.Ln("checkBlockSanity powLimit %d %s %d %064x ts %v", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl,pn.Header().Timestamp)
 	if e = checkBlockSanity(
 		candidateBlock,
 		pl,

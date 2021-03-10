@@ -16,7 +16,7 @@ import (
 	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
@@ -30,7 +30,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rav "github.com/p9c/pod/pkg/data/ring"

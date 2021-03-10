@@ -112,8 +112,8 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	// Notify the caller that the new block was accepted into the block chain. The caller would typically want to react
 	// by relaying the inventory to other peers.
 	trc.Ln("sending out block notifications for block accepted")
-	b.chainLock.Unlock()
+	b.ChainLock.Unlock()
 	b.sendNotification(NTBlockAccepted, block)
-	b.chainLock.Lock()
+	b.ChainLock.Lock()
 	return isMainChain, nil
 }

@@ -377,8 +377,8 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 	// Skip the proof of work check as this is just a block template.
 	flags := BFNoPoWCheck
 	// This only checks whether the block can be connected to the tip of the current chain.
-	b.chainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
-	defer b.chainLock.Unlock()
+	b.ChainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
+	defer b.ChainLock.Unlock()
 	tip := b.BestChain.Tip()
 	header := block.MsgBlock().Header
 	if tip.hash != header.PrevBlock {
@@ -397,7 +397,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 		flags,
 		false,
 		block.Height(),
-		block.MsgBlock().Header.Timestamp,
+		tip.Header().Timestamp,
 	); err.Chk(e) {
 		return e
 	}
@@ -601,7 +601,9 @@ func (b *BlockChain) checkBlockHeaderContext(
 			return ruleError(ErrUnexpectedDifficulty, str)
 		}
 		if fork.GetCurrent(prevNode.height+1) > 0 {
-			if header.Timestamp.Truncate(time.Second).Sub(prevNode.Header().Timestamp.Truncate(time.Second)) < 1 {
+			ct := header.Timestamp.Truncate(time.Second)
+			pt := prevNode.Header().Timestamp.Truncate(time.Second)
+			if ct.Sub(pt) < time.Second {
 				return ruleError(ErrTimeTooOld, "timestamp is equal to or less than the chain tip")
 			}
 		} else {
@@ -1179,7 +1181,7 @@ func checkBlockHeaderSanity(
 		pbts := prevBlockTimestamp.Truncate(time.Second)
 		dbg.Ln("prev", pbts, "candidate", cbts)
 		trc.S(pbts, cbts)
-		if cbts.Sub(pbts) < time.Second {
+		if pbts.Sub(cbts) > time.Second {
 			e = ruleError(
 				ErrTimeTooOld,
 				fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),

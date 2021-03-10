@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
 	"os"
 	
@@ -19,7 +20,7 @@ import (
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App = c.Command.Name
+		logg.App = color.Bit24(255,128,0,false).Sprint("kopach")
 		inf.Ln("starting up kopach standalone miner for parallelcoin")
 		dbg.Ln(os.Args)
 		config.Configure(cx, c.Command.Name, true)

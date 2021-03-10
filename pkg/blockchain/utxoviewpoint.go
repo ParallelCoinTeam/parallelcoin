@@ -513,9 +513,9 @@ func (b *BlockChain) FetchUtxoView(tx *util.Tx) (view *UtxoViewpoint, e error) {
 	// Request the utxos from the point of view of the end of the main
 	// chain.
 	view = NewUtxoViewpoint()
-	b.chainLock.RLock()
+	b.ChainLock.RLock()
 	e = view.fetchUtxosMain(b.db, neededSet)
-	b.chainLock.RUnlock()
+	b.ChainLock.RUnlock()
 	return view, e
 }
 
@@ -529,8 +529,8 @@ func (b *BlockChain) FetchUtxoView(tx *util.Tx) (view *UtxoViewpoint, e error) {
 // This function is safe for concurrent access however the returned entry (if any) is NOT.
 // TODO: concurrent unsafe and copy creation should be universal and able to be expected
 func (b *BlockChain) FetchUtxoEntry(outpoint wire.OutPoint) (*UtxoEntry, error) {
-	b.chainLock.RLock()
-	defer b.chainLock.RUnlock()
+	b.ChainLock.RLock()
+	defer b.ChainLock.RUnlock()
 	var entry *UtxoEntry
 	e := b.db.View(
 		func(dbTx database.Tx) (e error) {

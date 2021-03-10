@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/urfave/cli"
 	
@@ -20,7 +21,7 @@ func rpcNodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App=c.Command.Name
+		logg.App=color.Bit24(0,0,255,false).Sprint("  node")
 		trc.Ln("running node handler")
 		config.Configure(cx, c.Command.Name, true)
 		cx.NodeReady = qu.T()

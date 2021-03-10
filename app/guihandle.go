@@ -3,6 +3,7 @@
 package app
 
 import (
+	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/urfave/cli"
 	
@@ -13,7 +14,7 @@ import (
 
 func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App = c.Command.Name
+		logg.App = color.Bit24(0,255,255,false).Sprint("   gui")
 		config.Configure(cx, c.Command.Name, true)
 		// dbg.Ln(os.Args)
 		// interrupt.AddHandler(func() {

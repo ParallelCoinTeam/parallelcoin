@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
 	"os"
 	
@@ -23,7 +24,7 @@ func ctlHandleList(c *cli.Context) (e error) {
 
 func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App = c.Command.Name
+		logg.App = color.Bit24(0,128,255,false).Sprint("   ctl")
 		*cx.Config.LogLevel = "off"
 		config.Configure(cx, c.Command.Name, true)
 		args := c.Args()

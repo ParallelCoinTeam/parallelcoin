@@ -172,8 +172,8 @@ func isNonstandardTransaction(tx *util.Tx) bool {
 // The intent is that candidates are reviewed by a developer to make the final decision and then manually added to the
 // list of checkpoints for a network. This function is safe for concurrent access.
 func (b *BlockChain) IsCheckpointCandidate(block *util.Block) (bool, error) {
-	b.chainLock.RLock()
-	defer b.chainLock.RUnlock()
+	b.ChainLock.RLock()
+	defer b.ChainLock.RUnlock()
 	// A checkpoint must be in the main chain.
 	node := b.Index.LookupNode(block.Hash())
 	if node == nil || !b.BestChain.Contains(node) {

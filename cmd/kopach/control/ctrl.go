@@ -180,11 +180,16 @@ func (s *State) startWallet() (e error) {
 func (s *State) updateBlockTemplate() {
 	dbg.Ln("getting current chain tip")
 	var e error
-	tN := s.node.Chain.BestChain.Tip().Header().BlockHash()
+	s.node.Chain.ChainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
+	h := s.node.Chain.BestChain.Tip().Header().BlockHash()
 	var blk *util.Block
-	if blk, e = s.node.Chain.BlockByHash(&tN); err.Chk(e) {
+	if blk, e = s.node.Chain.BlockByHash(&h); err.Chk(e) {
+		s.node.Chain.ChainLock.Unlock()
+		return
 	}
+	s.node.Chain.ChainLock.Unlock()
 	dbg.Ln("updating block from chain tip")
+	dbg.S(blk)
 	if e = s.doBlockUpdate(blk); err.Chk(e) {
 	}
 }
@@ -358,9 +363,9 @@ func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 			}
 		}
 	}
-	dbg.Ln("getting templates...")
+	dbg.Ln("getting templates...", prev.MsgBlock().Header.Timestamp)
 	if s.msgBlockTemplate, e = s.GetMsgBlockTemplate(prev, s.nextAddress); err.Chk(e) {
-		return
+		// return
 	}
 	dbg.Ln("\n", s.msgBlockTemplate.Timestamp, "\n")
 	dbg.Ln("caching error corrected message shards...")
@@ -391,6 +396,7 @@ func (s *State) getBlkTemplateGenerator() *mining.BlkTmplGenerator {
 // GetMsgBlockTemplate gets a Message building on given block paying to a given
 // address
 func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *templates.Message, e error) {
+	trc.Ln("GetMsgBlockTemplate")
 	mbt = &templates.Message{
 		UUID:      s.uuid,
 		PrevBlock: prev.MsgBlock().BlockHash(),
@@ -398,17 +404,26 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		Bits:      make(templates.Diffs),
 		Merkles:   make(templates.Merkles),
 	}
-	mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(time.Second*2)
-	tn := time.Now().Truncate(time.Second).Add(time.Second)
-	if tn.After(mbt.Timestamp) {
-		mbt.Timestamp = tn
-	}
+	//
+	// mbt.Timestamp = prev.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(time.Second)
+	// dbg.Ln("initial timestamp", mbt.Timestamp)
+	// tn := time.Now().Truncate(time.Second)
+	// if fork.GetCurrent(mbt.Height) < 1 {
+	// 	dbg.Ln("on legacy consensus")
+	// 	mbt.Timestamp = s.generator.BestSnapshot().MedianTime.Add(time.Second)
+	// } else {
+	// 	if tn.After(mbt.Timestamp.Add(time.Second)) {
+	// 		dbg.Ln("adjusted timestamp", tn)
+	// 		mbt.Timestamp = tn
+	// 	}
+	// }
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		var templateX *mining.BlockTemplate
 		if templateX, e = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); err.Chk(e) {
 		} else {
 			newB := templateX.Block
 			newH := newB.Header
+			mbt.Timestamp = newH.Timestamp
 			mbt.Bits[curr()] = newH.Bits
 			mbt.Merkles[curr()] = newH.MerkleRoot
 			mbt.SetTxs(curr(), newB.Transactions)
@@ -539,7 +554,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 		return
 	}
 	if s.uuid != so.UUID {
-		dbg.Ln("solution not from current controller", s.uuid, s.msgBlockTemplate.UUID)
+		dbg.Ln("solution not from current controller", s.uuid, s.msgBlockTemplate.UUID, so.UUID)
 		return
 	}
 	var newHeader *wire.BlockHeader

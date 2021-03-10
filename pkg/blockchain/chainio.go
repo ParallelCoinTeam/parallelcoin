@@ -204,8 +204,8 @@ type SpentTxOut struct {
 //
 // This function is safe for concurrent access.
 func (b *BlockChain) FetchSpendJournal(targetBlock *util.Block) ([]SpentTxOut, error) {
-	b.chainLock.RLock()
-	defer b.chainLock.RUnlock()
+	b.ChainLock.RLock()
+	defer b.ChainLock.RUnlock()
 	var spendEntries []SpentTxOut
 	e := b.db.View(
 		func(dbTx database.Tx) (e error) {
