@@ -20,7 +20,8 @@ import (
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App = color.Bit24(255,128,0,false).Sprint("kopach")
+		logg.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
+		logg.App = "kopach"
 		inf.Ln("starting up kopach standalone miner for parallelcoin")
 		dbg.Ln(os.Args)
 		config.Configure(cx, c.Command.Name, true)

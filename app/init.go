@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
 	"os"
 	"os/exec"
@@ -14,6 +15,7 @@ import (
 
 var initHandle = func(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
+		logg.AppColorizer = color.Bit24(255,255,255,false).Sprint
 		logg.App = "  init"
 		inf.Ln("running configuration and wallet initialiser")
 		config.Configure(cx, c.Command.Name, true)

@@ -17,7 +17,8 @@ import (
 
 func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App=color.Bit24(255,128,128,false).Sprint("worker")
+		logg.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
+		logg.App = "worker"
 		if len(os.Args) > 3 {
 			if os.Args[3] == netparams.TestNet3Params.Name {
 				fork.IsTestnet = true
@@ -37,7 +38,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		// 	},
 		// )
 		e = rpc.Register(w)
-		if e != nil  {
+		if e != nil {
 			dbg.Ln(e)
 			return e
 		}

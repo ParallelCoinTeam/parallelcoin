@@ -20,7 +20,8 @@ import (
 
 func WalletHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App=color.Bit24(255,255,0,false).Sprint("wallet")
+		logg.AppColorizer = color.Bit24(255, 255, 128, false).Sprint
+		logg.App = "wallet"
 		config.Configure(cx, c.Command.Name, true)
 		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
 			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.DbName

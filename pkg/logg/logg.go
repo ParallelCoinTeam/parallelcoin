@@ -56,6 +56,7 @@ type (
 var (
 	logger_started = time.Now()
 	App            = "<not set>"
+	AppColorizer   = color.White.Sprint
 	// repositoryPath is the part of the filesystem path that contains the application
 	// repository.
 	// todo: can be injected using stroy - and is kinda crap but fix it later
@@ -94,7 +95,7 @@ var (
 		{logLevels.Error, "error", color.Bit24(255, 0, 0, false).Sprintf},
 		{logLevels.Check, "check", color.Bit24(255, 255, 0, false).Sprintf},
 		{logLevels.Warn, "warn ", color.Bit24(0, 255, 0, false).Sprintf},
-		{logLevels.Info, "info ", color.Bit24(0, 255, 128, false).Sprintf},
+		{logLevels.Info, "info ", color.Bit24(255, 255, 0, false).Sprintf},
 		{logLevels.Debug, "debug", color.Bit24(0, 128, 255, false).Sprintf},
 		{logLevels.Trace, "trace", color.Bit24(128, 0, 255, false).Sprintf},
 	}
@@ -253,7 +254,9 @@ func AddFilteredSubsystem(hl string) struct{} {
 }
 
 func getTimeText(level int32) string {
-	return LevelSpecs[level].Colorizer(time.Now().Sub(logger_started).Round(time.Millisecond).String())
+	since := time.Now().Sub(logger_started).Round(time.Millisecond).String()
+	since = strings.Repeat(" ", 15-len(since)) + since + " "
+	return color.Bit24(40, 40, 40, false).Sprint(since)
 }
 
 func _ln(level int32, subsystem string) func(a ...interface{}) {
@@ -261,15 +264,16 @@ func _ln(level int32, subsystem string) func(a ...interface{}) {
 		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
 			fmt.Fprintf(
 				*writer,
-				"%-58v%s %-6v%s %s\n",
+				"%-58v%s%s%-6v %s\n",
 				getLoc(2, level, subsystem),
-				App,
+				getTimeText(level),
+				color.Bit24(20, 20, 20, true).
+					Sprint(AppColorizer(" "+App)),
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
-				joinStrings(" ", a...),
-				getTimeText(level),
+				AppColorizer(joinStrings(" ", a...)),
 			)
 		}
 	}
@@ -286,15 +290,16 @@ func _f(level int32, subsystem string) func(format string, a ...interface{}) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v%s %-6v%s %s\n",
+				"%-58v%s%s%-6v %s\n",
 				getLoc(2, level, subsystem),
-				App,
+				getTimeText(level),
+				color.Bit24(20, 20, 20, true).
+					Sprint(AppColorizer(" "+App)),
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
-				fmt.Sprintf(format, a...),
-				getTimeText(level),
+				AppColorizer(fmt.Sprintf(format, a...)),
 			)
 		}
 	}
@@ -311,18 +316,22 @@ func _s(level int32, subsystem string) func(a ...interface{}) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v%s %-6v%s\n%s\n",
+				"%-58v%s%s%s%s%s\n",
 				getLoc(2, level, subsystem),
-				App,
+				getTimeText(level),
+				color.Bit24(20, 20, 20, true).
+					Sprint(AppColorizer(" "+App)),
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
+				AppColorizer(
+					" spew:",
+				),
 				fmt.Sprint(
-					color.Bit24(20, 20, 20, true).Sprint(spew.Sdump(a)),
+					color.Bit24(20, 20, 20, true).Sprint("\n\n"+spew.Sdump(a)),
 					"\n",
 				),
-				getTimeText(level),
 			)
 		}
 	}
@@ -339,15 +348,16 @@ func _c(level int32, subsystem string) func(closure func() string) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v%s %-6v%s %s\n",
+				"%-58v%s%s%-6v %s\n",
 				getLoc(2, level, subsystem),
-				App,
+				getTimeText(level),
+				color.Bit24(20, 20, 20, true).
+					Sprint(AppColorizer(" "+App)),
 				LevelSpecs[level].Colorizer(
 					color.Bit24(20, 20, 20, true).
 						Sprint(" "+LevelSpecs[level].Name+" "),
 				),
-				color.Bit24(20, 20, 20, true).Sprint(closure()),
-				getTimeText(level),
+				AppColorizer(closure()),
 			)
 		}
 	}
@@ -365,15 +375,16 @@ func _chk(level int32, subsystem string) func(e error) bool {
 				// }
 				fmt.Fprintf(
 					*writer,
-					"%-58v%s %-6v%s %s\n",
+					"%-58v%s%s%-6v %s\n",
 					getLoc(2, level, subsystem),
-					App,
+					getTimeText(level),
+					color.Bit24(20, 20, 20, true).
+						Sprint(AppColorizer(" "+App)),
 					LevelSpecs[level].Colorizer(
 						color.Bit24(20, 20, 20, true).
 							Sprint(" "+LevelSpecs[level].Name+" "),
 					),
 					LevelSpecs[level].Colorizer(joinStrings(" ", e.Error())),
-					getTimeText(level),
 				)
 				return true
 			}

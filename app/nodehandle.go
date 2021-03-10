@@ -21,7 +21,8 @@ func rpcNodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App=color.Bit24(0,0,255,false).Sprint("  node")
+		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
+		logg.App = "  node"
 		trc.Ln("running node handler")
 		config.Configure(cx, c.Command.Name, true)
 		cx.NodeReady = qu.T()

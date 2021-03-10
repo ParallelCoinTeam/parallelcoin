@@ -14,7 +14,8 @@ import (
 
 func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App = color.Bit24(0,255,255,false).Sprint("   gui")
+		logg.AppColorizer = color.Bit24(128,255,255,false).Sprint
+		logg.App = "   gui"
 		config.Configure(cx, c.Command.Name, true)
 		// dbg.Ln(os.Args)
 		// interrupt.AddHandler(func() {

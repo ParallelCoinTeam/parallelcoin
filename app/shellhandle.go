@@ -20,7 +20,8 @@ import (
 
 func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App=color.Bit24(255,128,0,false).Sprint(" shell")
+		logg.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
+		logg.App = " shell"
 		config.Configure(cx, c.Command.Name, true)
 		dbg.Ln("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
@@ -65,7 +66,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		if !*cx.Config.NodeOff {
 			go func() {
 				e = node.Main(cx)
-				if e != nil  {
+				if e != nil {
 					err.Ln("error starting node ", err)
 				}
 			}()
@@ -78,7 +79,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		if !*cx.Config.WalletOff {
 			go func() {
 				e = walletmain.Main(cx)
-				if e != nil  {
+				if e != nil {
 					fmt.Println("error running wallet:", err)
 				}
 			}()

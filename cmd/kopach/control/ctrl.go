@@ -367,7 +367,7 @@ func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 	if s.msgBlockTemplate, e = s.GetMsgBlockTemplate(prev, s.nextAddress); err.Chk(e) {
 		// return
 	}
-	dbg.Ln("\n", s.msgBlockTemplate.Timestamp, "\n")
+	dbg.Ln(s.msgBlockTemplate.Timestamp)
 	dbg.Ln("caching error corrected message shards...")
 	s.templateShards = transport.GetShards(s.msgBlockTemplate.Serialize())
 	return

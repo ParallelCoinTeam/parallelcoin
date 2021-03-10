@@ -402,8 +402,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 		return e
 	}
 	e = b.checkBlockContext(block, tip, flags, true)
-	if e != nil {
-		err.Ln("checkBlockContext error:", e)
+	if err.Chk(e) {
 		return e
 	}
 	// Leave the spent txouts entry nil in the state since the information is not needed and thus extra work can be

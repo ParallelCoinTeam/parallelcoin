@@ -24,7 +24,8 @@ func ctlHandleList(c *cli.Context) (e error) {
 
 func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App = color.Bit24(0,128,255,false).Sprint("   ctl")
+		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
+		logg.App = "   ctl"
 		*cx.Config.LogLevel = "off"
 		config.Configure(cx, c.Command.Name, true)
 		args := c.Args()
