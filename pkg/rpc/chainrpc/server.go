@@ -992,7 +992,7 @@ out:
 		// queries for current peer summary list
 		case qc := <-n.PeerState:
 			go func() {
-				dbg.Ln("@@@ handling peer summary query")
+				trc.Ln("handling peer summary query")
 				// flatten the list of
 				res := make(map[int32]*NodePeer)
 				for i := range n.peerState.InboundPeers {
@@ -1016,7 +1016,7 @@ out:
 					}
 				}
 				// send back the answer
-				dbg.Ln("@@@ sending back peer summary")
+				trc.Ln("sending back peer summary")
 				// dbg.S(ps)
 				qc <- ps
 			}()

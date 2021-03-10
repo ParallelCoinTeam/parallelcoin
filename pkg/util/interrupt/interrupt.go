@@ -6,11 +6,12 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 	
 	uberatomic "go.uber.org/atomic"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/kardianos/osext"
 )
@@ -21,7 +22,7 @@ type HandlerWithSource struct {
 }
 
 var (
-	Restart   bool // = true
+	Restart bool // = true
 	requested uberatomic.Bool
 	// ch is used to receive SIGINT (Ctrl+C) signals.
 	ch chan os.Signal
@@ -44,7 +45,12 @@ var interruptCallbackSources []string
 // and responds to custom shutdown signals as required
 func Listener() {
 	invokeCallbacks := func() {
-		dbg.Ln("running interrupt callbacks", len(interruptCallbacks), interruptCallbackSources)
+		dbg.Ln(
+			"running interrupt callbacks",
+			len(interruptCallbacks),
+			strings.Repeat(" ", 48),
+			interruptCallbackSources,
+		)
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i

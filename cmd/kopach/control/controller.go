@@ -299,15 +299,15 @@ func (s *State) checkConnectivity() {
 		s.Start()
 		return
 	}
-	dbg.Ln("@@@ checking connectivity state")
+	trc.Ln("checking connectivity state")
 	ps := make(chan chainrpc.PeerSummaries, 1)
 	s.node.PeerState <- ps
-	dbg.Ln("@@@ sent peer list query")
+	trc.Ln("sent peer list query")
 	var lanPeers int
 	var totalPeers int
 	select {
 	case connState := <-ps:
-		dbg.Ln("@@@ received peer list query response")
+		trc.Ln("received peer list query response")
 		totalPeers = len(connState)
 		for i := range connState {
 			if routeable.IPNet.Contains(connState[i].IP) {
@@ -317,7 +317,7 @@ func (s *State) checkConnectivity() {
 		if *s.cfg.LAN {
 			// if there is no peers on lan and solo was not set, stop mining
 			if lanPeers == 0 {
-				dbg.Ln("@@@ no lan peers while in lan mode, stopping mining")
+				trc.Ln("no lan peers while in lan mode, stopping mining")
 				s.Stop()
 			} else {
 				s.Start()
@@ -325,7 +325,7 @@ func (s *State) checkConnectivity() {
 		} else {
 			if totalPeers-lanPeers == 0 {
 				// we have no peers on the internet, stop mining
-				dbg.Ln("@@@ no internet peers, stopping mining")
+				trc.Ln("no internet peers, stopping mining")
 				s.Stop()
 			} else {
 				s.Start()
@@ -336,11 +336,11 @@ func (s *State) checkConnectivity() {
 	case <-s.quit:
 		break
 	}
-	dbg.Ln("@@@", totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
+	trc.Ln(totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
 }
 
 func (s *State) Advertise() {
-	dbg.Ln("@@@ sending out advertisment")
+	trc.Ln("sending out advertisment")
 	var e error
 	if e = s.multiConn.SendMany(
 		p2padvt.Magic,

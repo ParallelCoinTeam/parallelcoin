@@ -1,4 +1,4 @@
-package build
+package main
 
 import (
 	"github.com/p9c/pod/pkg/logg"

@@ -88,14 +88,14 @@ var (
 	}
 	// LevelSpecs specifies the id, string name and color-printing function
 	LevelSpecs = []LevelSpec{
-		{logLevels.Off, "off  ", color.Gray.Sprintf},
-		{logLevels.Fatal, "fatal", color.Magenta.Sprintf},
-		{logLevels.Error, "error", color.Red.Sprintf},
-		{logLevels.Check, "check", color.Yellow.Sprintf},
-		{logLevels.Warn, "warn ", color.Green.Sprintf},
-		{logLevels.Info, "info ", color.Cyan.Sprintf},
-		{logLevels.Debug, "debug", color.FgLightBlue.Sprintf},
-		{logLevels.Trace, "trace", color.Blue.Sprintf},
+		{logLevels.Off, "off  ", color.Bit24(0, 0, 0, false).Sprintf},
+		{logLevels.Fatal, "fatal", color.Bit24(128, 0, 0, false).Sprintf},
+		{logLevels.Error, "error", color.Bit24(255, 0, 0, false).Sprintf},
+		{logLevels.Check, "check", color.Bit24(255, 255, 0, false).Sprintf},
+		{logLevels.Warn, "warn ", color.Bit24(0, 255, 0, false).Sprintf},
+		{logLevels.Info, "info ", color.Bit24(0, 255, 128, false).Sprintf},
+		{logLevels.Debug, "debug", color.Bit24(0, 128, 255, false).Sprintf},
+		{logLevels.Trace, "trace", color.Bit24(128, 0, 255, false).Sprintf},
 	}
 )
 
@@ -123,7 +123,7 @@ func _getOnePrinter(level int32, subsystem string) LevelPrinter {
 // one character, similar to nmcli's argument processor, as the first letter is
 // unique. This could be used with a linter to make larger command sets.
 func SetLogLevel(l string) {
-	fmt.Fprintln(os.Stderr, "\nsetting\nlog\nlevel\n", l)
+	fmt.Fprintln(os.Stderr, "setting log level", l)
 	lvl := logLevels.Info
 	for i := range LevelSpecs {
 		if LevelSpecs[i].Name[:1] == l[:1] {
@@ -145,12 +145,12 @@ func SetLogWriter(wr *io.Writer) {
 // declarations and main/init. Really this is just here to alert the reader.
 func SortSubsystemsList() {
 	sort.Strings(allSubsystems)
-	fmt.Fprintln(
-		os.Stderr,
-		spew.Sdump(allSubsystems),
-		spew.Sdump(highlighted),
-		spew.Sdump(logFilter),
-	)
+	// fmt.Fprintln(
+	// 	os.Stderr,
+	// 	spew.Sdump(allSubsystems),
+	// 	spew.Sdump(highlighted),
+	// 	spew.Sdump(logFilter),
+	// )
 }
 
 // AddLoggerSubsystem adds a subsystem to the list of known subsystems and returns the
@@ -251,8 +251,8 @@ func AddFilteredSubsystem(hl string) struct{} {
 	return struct{}{}
 }
 
-func getTimeText() string {
-	return time.Now().Sub(logger_started).Round(time.Millisecond).String()
+func getTimeText(level int32) string {
+	return LevelSpecs[level].Colorizer(time.Now().Sub(logger_started).Round(time.Millisecond).String())
 }
 
 func _ln(level int32, subsystem string) func(a ...interface{}) {
@@ -260,11 +260,14 @@ func _ln(level int32, subsystem string) func(a ...interface{}) {
 		if level <= currentLevel.Load() && !_isSubsystemFiltered(subsystem) {
 			fmt.Fprintf(
 				*writer,
-				"%-58v %-6v %s %s L\n",
+				"%-58v%-6v %s %s\n",
 				getLoc(2, level, subsystem),
-				LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
-				color.White.Sprint(joinStrings(" ", a...)),
-				getTimeText(),
+				LevelSpecs[level].Colorizer(
+					color.Bit24(20, 20, 20, true).
+						Sprint(" "+LevelSpecs[level].Name+" "),
+				),
+				LevelSpecs[level].Colorizer(joinStrings(" ", a...)),
+				getTimeText(level),
 			)
 		}
 	}
@@ -281,11 +284,14 @@ func _f(level int32, subsystem string) func(format string, a ...interface{}) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v %-6v %s %s F\n",
+				"%-58v%-6v %s %s\n",
 				getLoc(2, level, subsystem),
-				LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
-				color.White.Sprintf(format, a...),
-				getTimeText(),
+				LevelSpecs[level].Colorizer(
+					color.Bit24(20, 20, 20, true).
+						Sprint(" "+LevelSpecs[level].Name+" "),
+				),
+				LevelSpecs[level].Colorizer(format, a...),
+				getTimeText(level),
 			)
 		}
 	}
@@ -302,11 +308,14 @@ func _s(level int32, subsystem string) func(a ...interface{}) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v %-6v\n%s\n%s S\n",
+				"%-58v%-6v \n%s\n%s\n",
 				getLoc(2, level, subsystem),
-				LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
-				color.White.Sprint(" ", spew.Sdump(a)),
-				getTimeText(),
+				LevelSpecs[level].Colorizer(
+					color.Bit24(20, 20, 20, true).
+						Sprint(" "+LevelSpecs[level].Name+" "),
+				),
+				LevelSpecs[level].Colorizer(" ", spew.Sdump(a)),
+				getTimeText(level),
 			)
 		}
 	}
@@ -323,11 +332,14 @@ func _c(level int32, subsystem string) func(closure func() string) {
 			// }
 			fmt.Fprintf(
 				*writer,
-				"%-58v %-6v %s %s C\n",
+				"%-58v%-6v %s %s\n",
 				getLoc(2, level, subsystem),
-				LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
-				color.White.Sprint(closure()),
-				getTimeText(),
+				LevelSpecs[level].Colorizer(
+					color.Bit24(20, 20, 20, true).
+						Sprint(" "+LevelSpecs[level].Name+" "),
+				),
+				LevelSpecs[level].Colorizer(closure()),
+				getTimeText(level),
 			)
 		}
 	}
@@ -345,11 +357,14 @@ func _chk(level int32, subsystem string) func(e error) bool {
 				// }
 				fmt.Fprintf(
 					*writer,
-					"%-58v %-6v %s %s Chk\n",
+					"%-58v%-6v %s %s\n",
 					getLoc(2, level, subsystem),
-					LevelSpecs[level].Colorizer(LevelSpecs[level].Name),
-					color.White.Sprint(joinStrings(" ", e.Error())),
-					getTimeText(),
+					LevelSpecs[level].Colorizer(
+						color.Bit24(20, 20, 20, true).
+							Sprint(" "+LevelSpecs[level].Name+" "),
+					),
+					LevelSpecs[level].Colorizer(joinStrings(" ", e.Error())),
+					getTimeText(level),
 				)
 				return true
 			}

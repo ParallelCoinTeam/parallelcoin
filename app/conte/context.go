@@ -5,6 +5,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control"
 	"math/rand"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 	
@@ -112,8 +113,10 @@ func (cx *Xt) WaitWait() {
 func (cx *Xt) PrintWaitChangers() string {
 	o := "Calls that change context waitgroup values:\n"
 	for i := range cx.waitChangers {
+		o += strings.Repeat(" ", 48)
 		o += cx.waitChangers[i] + "\n"
 	}
+	o += strings.Repeat(" ", 48)
 	o += "current total:"
 	o += fmt.Sprint(cx.waitCounter)
 	return o

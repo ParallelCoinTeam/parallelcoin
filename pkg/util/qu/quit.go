@@ -2,6 +2,7 @@ package qu
 
 import (
 	"github.com/p9c/pod/pkg/logg"
+	"strings"
 	"sync"
 )
 
@@ -40,10 +41,13 @@ func (c C) Q() {
 	loc := GetLocForChan(c)
 	mx.Lock()
 	if !testChanIsClosed(c) {
-		trc.Ln("closing chan from "+loc, logg.Caller("\nfrom", 1))
+		trc.Ln("closing chan from "+loc, logg.Caller("\n"+strings.Repeat(" ", 48)+"from", 1))
 		close(c)
 	} else {
-		trc.Ln("from"+logg.Caller("", 1), "\nchannel", loc, "was already closed")
+		trc.Ln(
+			"from"+logg.Caller("", 1), "\n"+strings.Repeat(" ", 48)+
+				"channel", loc, "was already closed",
+		)
 	}
 	mx.Unlock()
 	// PrintChanState()
