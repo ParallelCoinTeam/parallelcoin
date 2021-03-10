@@ -2,7 +2,6 @@ package logg
 
 import (
 	"fmt"
-	"github.com/p9c/pod/version"
 	"io"
 	"os"
 	"runtime"
@@ -12,6 +11,8 @@ import (
 	"sync/atomic"
 	"time"
 	"unsafe"
+	
+	"github.com/p9c/pod/version"
 	
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gookit/color"
@@ -156,14 +157,17 @@ func SortSubsystemsList() {
 // AddLoggerSubsystem adds a subsystem to the list of known subsystems and returns the
 // string so it is nice and neat in the package logg.go file
 func AddLoggerSubsystem() (subsystem string) {
-	var split []string
+	// var split []string
 	var ok bool
 	var file string
 	_, file, _, ok = runtime.Caller(1)
 	if ok {
-		fromRoot := strings.Split(file, version.PathBase)[1]
-		split = strings.Split(fromRoot, sep)
+		r := strings.Split(file, version.PathBase)
+		fromRoot := r[1]
+		split := strings.Split(fromRoot, "/")
+		// fmt.Fprintln(os.Stderr, version.PathBase, "file", file, r, fromRoot, split)
 		subsystem = strings.Join(split[:len(split)-1], "/")
+		// subsystem = fromRoot
 		fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
 		allSubsystems = append(allSubsystems, subsystem)
 	}

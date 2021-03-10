@@ -9,21 +9,21 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/l0k1"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "8b5041a6a25823381ac34f411a7d279d791a5dba"
+	GitCommit = "b09f236b11c3ba65a73860d0aff5614f56592c5e"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-03-10T23:53:42+01:00"
+	BuildTime = "2021-03-11T00:16:58+01:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
 	Tag = "v1.9.16+"
 	// PathBase is the path base returned from runtime caller
-	PathBase = "/home/loki/src/github.com/p9c/pod/"
+	PathBase = "C:/Users/loki/GolandProjects/pod/"
 )
 
 // Get returns a pretty printed version information string
 func Get() string {
-	return fmt.Sprintf(
+	return fmt.Sprint(
 		"ParallelCoin Pod\n"+
-		"	PathBase: "+URL+"\n",
+		"	URL: "+URL+"\n",
 		"	branch: "+GitRef+"\n"+
 		"	commit: "+GitCommit+"\n"+
 		"	built: "+BuildTime+"\n"+

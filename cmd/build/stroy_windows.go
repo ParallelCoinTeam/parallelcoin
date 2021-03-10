@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"syscall"
 	"time"
 	
+	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/storer"
@@ -155,13 +157,61 @@ func populateVersionFlags() bool {
 	Tag = maxString
 	// sort.Ints(versionsI)
 	// if runtime.GOOS == "windows" {
-	
-	ldFlags = []string{
-		`"-X main.URL=` + URL + ``,
-		`-X main.GitCommit=` + GitCommit + ``,
-		`-X main.BuildTime=` + BuildTime + ``,
-		`-X main.GitRef=` + GitRef + ``,
-		`-X main.Tag=` + Tag + `"`,
+	_, file, _, _ := runtime.Caller(0)
+	fmt.Fprintln(os.Stderr, "file", file)
+	urlSplit := strings.Split(URL, "/")
+	fmt.Fprintln(os.Stderr, "urlSplit", urlSplit)
+	baseFolder := urlSplit[len(urlSplit)-1]
+	fmt.Fprintln(os.Stderr, "baseFolder", baseFolder)
+	splitPath := strings.Split(file, baseFolder)
+	fmt.Fprintln(os.Stderr, "splitPath", splitPath)
+	PathBase := filepath.Join(splitPath[0], baseFolder) + string(filepath.Separator)
+	PathBase = strings.ReplaceAll(PathBase, "\\", "/")
+	fmt.Fprintln(os.Stderr, "PathBase", PathBase)
+	versionFile := `package version
+
+import "fmt"
+
+var (
+
+	// URL is the git URL for the repository
+	URL = "%s"
+	// GitRef is the gitref, as in refs/heads/branchname
+	GitRef = "%s"
+	// GitCommit is the commit hash of the current HEAD
+	GitCommit = "%s"
+	// BuildTime stores the time when the current binary was built
+	BuildTime = "%s"
+	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
+	// not that commit
+	Tag = "%s"
+	// PathBase is the path base returned from runtime caller
+	PathBase = "%s"
+)
+
+// Get returns a pretty printed version information string
+func Get() string {
+	return fmt.Sprint(
+		"ParallelCoin Pod\n"+
+		"	URL: "+URL+"\n",
+		"	branch: "+GitRef+"\n"+
+		"	commit: "+GitCommit+"\n"+
+		"	built: "+BuildTime+"\n"+
+		"	Tag: "+Tag+"\n",
+	)
+}
+`
+	versionFileOut := fmt.Sprintf(
+		versionFile,
+		URL,
+		GitRef,
+		GitCommit,
+		BuildTime,
+		Tag,
+		PathBase,
+	)
+	if e = ioutil.WriteFile("version/version.go", []byte(versionFileOut), 0666);e!=nil{
+		fmt.Fprintln(os.Stderr,e)
 	}
 	// } else {
 	// 	ldFlags = []string{

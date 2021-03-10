@@ -271,6 +271,7 @@ func writeVersionFile() bool {
 	splitPath := strings.Split(file, baseFolder)
 	fmt.Fprintln(os.Stderr, "splitPath", splitPath)
 	PathBase := filepath.Join(splitPath[0], baseFolder) + string(filepath.Separator)
+	PathBase = strings.ReplaceAll(PathBase, "\\", "\\\\")
 	fmt.Fprintln(os.Stderr, "PathBase", PathBase)
 	versionFile := `package version
 
@@ -314,8 +315,8 @@ func Get() string {
 		Tag,
 		PathBase,
 	)
-	if e = ioutil.WriteFile("version/version.go", []byte(versionFileOut), 0666);e!=nil{
-		fmt.Fprintln(os.Stderr,e)
+	if e = ioutil.WriteFile("version/version.go", []byte(versionFileOut), 0666); e != nil {
+		fmt.Fprintln(os.Stderr, e)
 	}
 	// ldFlags = []string{
 	// 	`"-X main.URL=` + URL + ``,
