@@ -247,7 +247,7 @@ func TestFilterHeaderStoreOperations(t *testing.T) {
 			binary.BigEndian.PutUint32(heightBytes[:], header.Height)
 			e := rootBucket.Put(header.HeaderHash[:], heightBytes[:])
 			if e != nil  {
-				return err
+				return e
 			}
 		}
 		return nil
@@ -343,7 +343,7 @@ func TestFilterHeaderStoreRecovery(t *testing.T) {
 			binary.BigEndian.PutUint32(heightBytes[:], header.Height)
 			e := rootBucket.Put(header.HeaderHash[:], heightBytes[:])
 			if e != nil  {
-				return err
+				return e
 			}
 		}
 		return nil

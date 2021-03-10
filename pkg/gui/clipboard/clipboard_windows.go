@@ -32,6 +32,8 @@ var (
 )
 
 func readAll() (string, error) {
+	var e error
+	var r uintptr
 	r, _, e = openClipboard.Call(0)
 	if r == 0 {
 		return "", e
@@ -64,6 +66,7 @@ func readAll() (string, error) {
 }
 
 func writeAll(text string) (e error) {
+	var r uintptr
 	r, _, e = openClipboard.Call(0)
 	if r == 0 {
 		return e
@@ -80,11 +83,13 @@ func writeAll(text string) (e error) {
 	
 	data := syscall.StringToUTF16(text)
 	
+	var h uintptr
 	h, _, e = globalAlloc.Call(gmemFixed, uintptr(len(data)*int(unsafe.Sizeof(data[0]))))
 	if h == 0 {
 		return e
 	}
 	
+	var l uintptr
 	l, _, e = globalLock.Call(h)
 	if l == 0 {
 		return e
@@ -107,6 +112,7 @@ func writeAll(text string) (e error) {
 	return nil
 }
 
+// Start ...
 func Start() {
 }
 

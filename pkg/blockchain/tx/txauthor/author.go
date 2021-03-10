@@ -197,14 +197,14 @@ func AddAllInputScripts(
 		// 		int64(inputValues[i]), chainParams, secrets,
 		// 		tx, hashCache, i)
 		// 	if e != nil  {
-		// 				// 		return err
+		// 				// 		return e
 		// 	}
 		// case txscript.IsPayToWitnessPubKeyHash(pkScript):
 		// 	e := spendWitnessKeyHash(inputs[i], pkScript,
 		// 		int64(inputValues[i]), chainParams, secrets,
 		// 		tx, hashCache, i)
 		// 	if e != nil  {
-		// 				// 		return err
+		// 				// 		return e
 		// 	}
 		default:
 			sigScript := inputs[i].SignatureScript
@@ -235,11 +235,11 @@ func AddAllInputScripts(
 // 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(pkScript,
 // 		chainParams)
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	privKey, compressed, e := secrets.GetKey(addrs[0])
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	pubKey := privKey.PubKey()
 // 	// Once we have the key pair, generate a p2wkh address type, respecting the compression type of the generated key.
@@ -251,19 +251,19 @@ func AddAllInputScripts(
 // 	}
 // 	p2wkhAddr, e := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	// With the concrete address type, we can now generate the corresponding witness
 // 	// program to be used to generate a valid witness which will allow us to spend
 // 	// this output.
 // 	witnessProgram, e := txscript.PayToAddrScript(p2wkhAddr)
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	witnessScript, e := txscript.WitnessSignature(tx, hashCache, idx,
 // 		inputValue, witnessProgram, txscript.SigHashAll, privKey, true)
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	txIn.Witness = witnessScript
 // 	return nil
@@ -283,11 +283,11 @@ func AddAllInputScripts(
 // 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(pkScript,
 // 		chainParams)
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	privKey, compressed, e := secrets.GetKey(addrs[0])
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	pubKey := privKey.PubKey()
 // 	var pubKeyHash []byte
@@ -301,17 +301,17 @@ func AddAllInputScripts(
 // 	// program corresponding to the matching public key of this address.
 // 	p2wkhAddr, e := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	witnessProgram, e := txscript.PayToAddrScript(p2wkhAddr)
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	bldr := txscript.NewScriptBuilder()
 // 	bldr.AddData(witnessProgram)
 // 	sigScript, e := bldr.Script()
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	txIn.SignatureScript = sigScript
 // 	// With the sigScript in place, we'll next generate the proper witness that'll
@@ -319,7 +319,7 @@ func AddAllInputScripts(
 // 	witnessScript, e := txscript.WitnessSignature(tx, hashCache, idx,
 // 		inputValue, witnessProgram, txscript.SigHashAll, privKey, compressed)
 // 	if e != nil  {
-// 		// 		return err
+// 		// 		return e
 // 	}
 // 	txIn.Witness = witnessScript
 // 	return nil

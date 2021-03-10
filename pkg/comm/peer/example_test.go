@@ -25,7 +25,7 @@ func mockRemotePeer() (e error) {
 	// Accept connections on the simnet port.
 	listener, e := net.Listen("tcp", "127.0.0.1:18555")
 	if e != nil  {
-		return err
+		return e
 	}
 	go func() {
 		conn, e := listener.Accept()

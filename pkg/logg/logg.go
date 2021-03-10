@@ -2,9 +2,6 @@ package logg
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/gookit/color"
-	uberatomic "go.uber.org/atomic"
 	"io"
 	"os"
 	"runtime"
@@ -14,6 +11,10 @@ import (
 	"sync/atomic"
 	"time"
 	"unsafe"
+	
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gookit/color"
+	uberatomic "go.uber.org/atomic"
 )
 
 const (
@@ -60,7 +61,8 @@ var (
 	// repositoryPath is the part of the filesystem path that contains the application
 	// repository.
 	// todo: can be injected using stroy - and is kinda crap but fix it later
-	repositoryPath = "/home/loki/src/github.com/p9c/pod/"
+	repositoryPath = `C:/Users/loki/GolandProjects/pod/`
+	// repositoryPath = "/home/loki/src/github.com/p9c/pod/"
 	// sep is just a convenient shortcut for this very longwinded expression
 	sep          = string(os.PathSeparator)
 	currentLevel = uberatomic.NewInt32(logLevels.Info)
@@ -162,12 +164,14 @@ func AddLoggerSubsystem() (subsystem string) {
 	var split []string
 	var ok bool
 	_, pkgPath, _, ok = runtime.Caller(1)
-	_ = ok
-	fromRoot := strings.Split(pkgPath, repositoryPath)[1]
-	split = strings.Split(fromRoot, sep)
-	subsystem = strings.Join(split[:len(split)-1], "/")
-	// fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
-	allSubsystems = append(allSubsystems, subsystem)
+	fmt.Fprintln(os.Stderr, pkgPath, repositoryPath)
+	if ok {
+		fromRoot := strings.Split(pkgPath, repositoryPath)[1]
+		split = strings.Split(fromRoot, sep)
+		subsystem = strings.Join(split[:len(split)-1], "/")
+		// fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
+		allSubsystems = append(allSubsystems, subsystem)
+	}
 	return
 }
 
@@ -425,13 +429,23 @@ func getLoc(skip int, level int32, subsystem string) (output string) {
 		)
 	} else {
 		split := strings.Split(file, subsystem)
-		output = fmt.Sprint(
-			// color.Black.Sprint(split[0]),
-			color.White.Sprint(subsystem),
-			color.Gray.Sprint(
-				split[1], ":", line,
-			),
-		)
+		if len(split) < 2 {
+			output = fmt.Sprint(
+				// color.Black.Sprint(split[0]),
+				color.White.Sprint(subsystem),
+				color.Gray.Sprint(
+					file, ":", line,
+				),
+			)
+		} else {
+			output = fmt.Sprint(
+				// color.Black.Sprint(split[0]),
+				color.White.Sprint(subsystem),
+				color.Gray.Sprint(
+					split[1], ":", line,
+				),
+			)
+		}
 	}
 	return
 }

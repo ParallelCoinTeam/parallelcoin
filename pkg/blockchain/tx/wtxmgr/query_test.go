@@ -109,7 +109,7 @@ func (q *queryState) compare(s *Store, ns walletdb.ReadBucket,
 			}
 			d, e := s.UniqueTxDetails(ns, &txHash, blk)
 			if e != nil  {
-				return err
+				return e
 			}
 			if d == nil {
 				return fmt.Errorf("found no matching "+
@@ -127,7 +127,7 @@ func (q *queryState) compare(s *Store, ns walletdb.ReadBucket,
 		detail := &details[len(details)-1]
 		d, e := s.TxDetails(ns, &txHash)
 		if e != nil  {
-			return err
+			return e
 		}
 		if e := equalTxDetails(d, detail); err.Chk(e) {
 			return fmt.Errorf("%s: failed querying latest details "+
@@ -140,7 +140,7 @@ func equalTxDetails(got, exp *TxDetails) (e error) {
 	// Need to avoid using reflect.DeepEqual against slices, since it returns false for nil vs non-nil zero length
 	// slices.
 	if e := equalTxs(&got.MsgTx, &exp.MsgTx); err.Chk(e) {
-		return err
+		return e
 	}
 	if got.Hash != exp.Hash {
 		return fmt.Errorf("found mismatched hashes: got %v, expected %v",
@@ -184,11 +184,11 @@ func equalTxs(got, exp *wire.MsgTx) (e error) {
 	var bufGot, bufExp bytes.Buffer
 	e := got.Serialize(&bufGot)
 	if e != nil  {
-		return err
+		return e
 	}
 	e = exp.Serialize(&bufExp)
 	if e != nil  {
-		return err
+		return e
 	}
 	if !bytes.Equal(bufGot.Bytes(), bufExp.Bytes()) {
 		return fmt.Errorf("found unexpected wire.MsgTx: got: %v, "+
@@ -368,7 +368,7 @@ func TestStoreQueries(t *testing.T) {
 		e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 			ns := tx.ReadWriteBucket(namespaceKey)
 			if e := tst.updates(ns); err.Chk(e) {
-				return err
+				return e
 			}
 			return tst.state.compare(s, ns, tst.desc)
 		})
@@ -386,12 +386,12 @@ func TestStoreQueries(t *testing.T) {
 		missingTx := spendOutput(&recB.Hash, 0, 40e8)
 		missingRec, e := NewTxRecordFromMsgTx(missingTx, timeNow())
 		if e != nil  {
-			return err
+			return e
 		}
 		missingBlock := makeBlockMeta(102)
 		missingDetails, e := s.TxDetails(ns, &missingRec.Hash)
 		if e != nil  {
-			return err
+			return e
 		}
 		if missingDetails != nil {
 			return fmt.Errorf("expected no details, found details for tx %v", missingDetails.Hash)
@@ -440,7 +440,7 @@ func TestStoreQueries(t *testing.T) {
 		}
 		// Make sure it also breaks early after one iteration through unmined transactions.
 		if e := s.Rollback(ns, b101.Height); err.Chk(e) {
-			return err
+			return e
 		}
 		iterations = 0
 		e = s.RangeTransactions(ns, -1, 0, func([]TxDetails) (bool, error) {
@@ -490,7 +490,7 @@ func TestStoreQueries(t *testing.T) {
 		e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 			ns := tx.ReadWriteBucket(namespaceKey)
 			if e := tst.updates(ns); err.Chk(e) {
-				return err
+				return e
 			}
 			return tst.state.compare(s, ns, tst.desc)
 		})

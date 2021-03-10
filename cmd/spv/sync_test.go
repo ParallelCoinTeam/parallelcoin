@@ -1053,18 +1053,18 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 func csd(harnesses []*rpctest.Harness) (e error) {
 	hTemp, e := rpctest.New(&netparams.SimNetParams, nil, nil)
 	if e != nil  {
-		return err
+		return e
 	}
 	// Tear down node at the end of the function.
 	defer hTemp.TearDown()
 	e = hTemp.SetUp(false, 0)
 	if e != nil  {
-		return err
+		return e
 	}
 	for _, harness := range harnesses {
 		e = rpctest.ConnectNode(hTemp, harness)
 		if e != nil  {
-			return err
+			return e
 		}
 	}
 	return rpctest.JoinNodes(harnesses, rpctest.Blocks)
@@ -1086,7 +1086,7 @@ func waitForSync(t *testing.T, svc *spv.ChainService,
 	knownBestHash, knownBestHeight, err :=
 		correctSyncNode.Node.GetBestBlock()
 	if e != nil  {
-		return err
+		return e
 	}
 	if logLevel != log.LevelOff {
 		t.Logf("Syncing to %d (%s)", knownBestHeight, knownBestHash)

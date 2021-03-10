@@ -167,21 +167,21 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) (e error) {
 	// Start the pod node itself. This spawns a new process which will be managed
 	if e := h.node.start(); err.Chk(e) {
-		return err
+		return e
 	}
 	if e := h.connectRPCClient(); err.Chk(e) {
-		return err
+		return e
 	}
 	h.wallet.Start()
 	// Filter transactions that pay to the coinbase associated with the wallet.
 	filterAddrs := []util.Address{h.wallet.coinbaseAddr}
 	if e := h.Node.LoadTxFilter(true, filterAddrs, nil); err.Chk(e) {
-		return err
+		return e
 	}
 	// Ensure pod properly dispatches our registered call-back for each new block. Otherwise, the memWallet won't
 	// function properly.
 	if e := h.Node.NotifyBlocks(); err.Chk(e) {
-		return err
+		return e
 	}
 	// Create a test chain with the desired number of mature coinbase outputs.
 	if createTestChain && numMatureOutputs != 0 {
@@ -189,13 +189,13 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) (e error)
 			numMatureOutputs
 		_, e := h.Node.Generate(numToGenerate)
 		if e != nil  {
-						return err
+						return e
 		}
 	}
 	// Block until the wallet has fully synced up to the tip of the main chain.
 	_, height, e := h.Node.GetBestBlock()
 	if e != nil  {
-				return err
+				return e
 	}
 	ticker := time.NewTicker(time.Millisecond * 100)
 	for range ticker.C {
@@ -215,10 +215,10 @@ func (h *Harness) tearDown() (e error) {
 		h.Node.Shutdown()
 	}
 	if e := h.node.shutdown(); err.Chk(e) {
-		return err
+		return e
 	}
 	if e := os.RemoveAll(h.testNodeDir); err.Chk(e) {
-		return err
+		return e
 	}
 	delete(testInstances, h.testNodeDir)
 	return nil

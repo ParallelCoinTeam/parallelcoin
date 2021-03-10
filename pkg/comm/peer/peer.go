@@ -940,7 +940,7 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (e error
 				// var buf bytes.Buffer
 				// _, e = wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
 				// if e != nil  {
-				// 				// 	return err.Error()
+				// 				// 	return e.Error()
 				// }
 				return o // + spew.Sdump(buf.Bytes())
 			},

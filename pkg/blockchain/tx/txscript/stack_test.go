@@ -59,7 +59,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{1}, {2}, {3}, {4}, {5}},
 			func(s *stack) (e error) {
 				_, e := s.PeekByteArray(5)
-				return err
+				return e
 			},
 			scriptError(errInvalidStackOperation, ""),
 			nil,
@@ -69,7 +69,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{1}, {2}, {3}, {4}, {5}},
 			func(s *stack) (e error) {
 				_, e := s.PeekInt(5)
-				return err
+				return e
 			},
 			scriptError(errInvalidStackOperation, ""),
 			nil,
@@ -79,7 +79,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{1}, {2}, {3}, {4}, {5}},
 			func(s *stack) (e error) {
 				_, e := s.PeekBool(5)
-				return err
+				return e
 			},
 			scriptError(errInvalidStackOperation, ""),
 			nil,
@@ -90,12 +90,12 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				val, e := s.PopByteArray()
 				if e != nil  {
-					return err
+					return e
 				}
 				if !bytes.Equal(val, []byte{5}) {
 					return errors.New("not equal")
 				}
-				return err
+				return e
 			},
 			nil,
 			[][]byte{{1}, {2}, {3}, {4}},
@@ -107,7 +107,7 @@ func TestStack(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, e := s.PopByteArray()
 					if e != nil  {
-						return err
+						return e
 					}
 				}
 				return nil
@@ -122,7 +122,7 @@ func TestStack(t *testing.T) {
 				for i := 0; i < 6; i++ {
 					_, e := s.PopByteArray()
 					if e != nil  {
-						return err
+						return e
 					}
 				}
 				return nil
@@ -136,7 +136,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				val, e := s.PopBool()
 				if e != nil  {
-					return err
+					return e
 				}
 				if val {
 					return errors.New("unexpected value")
@@ -152,7 +152,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				val, e := s.PopBool()
 				if e != nil  {
-					return err
+					return e
 				}
 				if !val {
 					return errors.New("unexpected value")
@@ -167,7 +167,7 @@ func TestStack(t *testing.T) {
 			nil,
 			func(s *stack) (e error) {
 				_, e := s.PopBool()
-				return err
+				return e
 			},
 			scriptError(errInvalidStackOperation, ""),
 			nil,
@@ -178,7 +178,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
 				if e != nil  {
-					return err
+					return e
 				}
 				if v != 0 {
 					return errors.New("0 != 0 on popInt")
@@ -194,7 +194,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
 				if e != nil  {
-					return err
+					return e
 				}
 				if v != 0 {
 					return errors.New("-0 != 0 on popInt")
@@ -210,7 +210,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
 				if e != nil  {
-					return err
+					return e
 				}
 				if v != 1 {
 					return errors.New("1 != 1 on popInt")
@@ -226,7 +226,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
 				if e != nil  {
-					return err
+					return e
 				}
 				if v != 1 {
 					fmt.Printf("%v != %v\n", v, 1)
@@ -243,7 +243,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
 				if e != nil  {
-					return err
+					return e
 				}
 				if v != -1 {
 					return errors.New("-1 != -1 on popInt")
@@ -259,7 +259,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
 				if e != nil  {
-					return err
+					return e
 				}
 				if v != -1 {
 					fmt.Printf("%v != %v\n", v, -1)
@@ -277,7 +277,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
 				if e != nil  {
-					return err
+					return e
 				}
 				if v != -513 {
 					fmt.Printf("%v != %v\n", v, -513)
@@ -295,7 +295,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				v, e := s.PeekInt(0)
 				if e != nil  {
-					return err
+					return e
 				}
 				if v != -1 {
 					fmt.Printf("%v != %v\n", v, -1)
@@ -439,7 +439,7 @@ func TestStack(t *testing.T) {
 				s.PushBool(true)
 				val, e := s.PopBool()
 				if e != nil  {
-					return err
+					return e
 				}
 				if !val {
 					return errors.New("unexpected value")
@@ -456,7 +456,7 @@ func TestStack(t *testing.T) {
 				s.PushBool(false)
 				val, e := s.PopBool()
 				if e != nil  {
-					return err
+					return e
 				}
 				if val {
 					return errors.New("unexpected value")
@@ -473,7 +473,7 @@ func TestStack(t *testing.T) {
 				s.PushInt(scriptNum(1))
 				val, e := s.PopBool()
 				if e != nil  {
-					return err
+					return e
 				}
 				if !val {
 					return errors.New("unexpected value")
@@ -490,7 +490,7 @@ func TestStack(t *testing.T) {
 				s.PushInt(scriptNum(0))
 				val, e := s.PopBool()
 				if e != nil  {
-					return err
+					return e
 				}
 				if val {
 					return errors.New("unexpected value")
@@ -787,7 +787,7 @@ func TestStack(t *testing.T) {
 				// Peek bool is otherwise pretty well tested, just check it works.
 				val, e := s.PeekBool(0)
 				if e != nil  {
-					return err
+					return e
 				}
 				if !val {
 					return errors.New("invalid result")
@@ -804,7 +804,7 @@ func TestStack(t *testing.T) {
 				// Peek bool is otherwise pretty well tested, just check it works.
 				val, e := s.PeekBool(0)
 				if e != nil  {
-					return err
+					return e
 				}
 				if val {
 					return errors.New("invalid result")
@@ -821,7 +821,7 @@ func TestStack(t *testing.T) {
 				// Peek int is otherwise pretty well tested, just check it works.
 				val, e := s.PeekInt(0)
 				if e != nil  {
-					return err
+					return e
 				}
 				if val != 1 {
 					return errors.New("invalid result")
@@ -838,7 +838,7 @@ func TestStack(t *testing.T) {
 				// Peek int is otherwise pretty well tested, just check it works.
 				val, e := s.PeekInt(0)
 				if e != nil  {
-					return err
+					return e
 				}
 				if val != 0 {
 					return errors.New("invalid result")
@@ -856,7 +856,7 @@ func TestStack(t *testing.T) {
 				// Peek int is otherwise pretty well tested, just check it works.
 				val, e := s.PopInt()
 				if e != nil  {
-					return err
+					return e
 				}
 				if val != 1 {
 					return errors.New("invalid result")
@@ -872,7 +872,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				// Peek int is otherwise pretty well tested, just check it works.
 				_, e := s.PopInt()
-				return err
+				return e
 			},
 			scriptError(errInvalidStackOperation, ""),
 			nil,

@@ -73,7 +73,7 @@ func Example_basicUsage() {
 		key := []byte("mykey")
 		value := []byte("myvalue")
 		if e := tx.Metadata().Put(key, value); err.Chk(e) {
-			return err
+			return e
 		}
 		// Read the key back and ensure it matches.
 		if !bytes.Equal(tx.Metadata().Get(key), value) {
@@ -83,7 +83,7 @@ func Example_basicUsage() {
 		nestedBucketKey := []byte("mybucket")
 		nestedBucket, e := tx.Metadata().CreateBucket(nestedBucketKey)
 		if e != nil  {
-			return err
+			return e
 		}
 		// The key from above that was set in the metadata bucket does not exist in this new nested bucket.
 		if nestedBucket.Get(key) != nil {
@@ -135,7 +135,7 @@ func Example_basicUsage() {
 // 		genesisHash := chaincfg.MainNetParams.GenesisHash
 // 		blockBytes, e := tx.FetchBlock(genesisHash)
 // 		if e != nil  {
-// 			return err
+// 			return e
 // 		}
 // 		// As documented, all data fetched from the database is only
 // 		// valid during a database transaction in order to support

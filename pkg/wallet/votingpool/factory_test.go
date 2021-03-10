@@ -304,24 +304,24 @@ func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Poo
 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		addrmgrNs, e := tx.CreateTopLevelBucket(addrmgrNamespaceKey)
 		if e != nil  {
-			return err
+			return e
 		}
 		votingpoolNs, e := tx.CreateTopLevelBucket(votingpoolNamespaceKey)
 		if e != nil  {
-			return err
+			return e
 		}
 		fastScrypt := &waddrmgr.ScryptOptions{N: 16, R: 8, P: 1}
 		e = waddrmgr.Create(addrmgrNs, seed, pubPassphrase, privPassphrase,
 			&netparams.MainNetParams, fastScrypt, time.Now())
 		if e != nil  {
-			return err
+			return e
 		}
 		addrMgr, e = waddrmgr.Open(addrmgrNs, pubPassphrase, &netparams.MainNetParams)
 		if e != nil  {
-			return err
+			return e
 		}
 		pool, e = Create(votingpoolNs, addrMgr, []byte{0x00})
-		return err
+		return e
 	})
 	if e != nil  {
 		t.Fatalf("Could not set up DB: %v", err)
@@ -340,14 +340,14 @@ func TstCreateTxStore(t *testing.T, db walletdb.DB) *wtxmgr.Store {
 	e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		txmgrNs, e := tx.CreateTopLevelBucket(txmgrNamespaceKey)
 		if e != nil  {
-			return err
+			return e
 		}
 		e = wtxmgr.Create(txmgrNs)
 		if e != nil  {
-			return err
+			return e
 		}
 		store, e = wtxmgr.Open(txmgrNs, &netparams.MainNetParams)
-		return err
+		return e
 	})
 	if e != nil  {
 		t.Fatalf("Failed to create txmgr: %v", err)

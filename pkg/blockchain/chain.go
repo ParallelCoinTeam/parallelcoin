@@ -493,7 +493,7 @@ func (b *BlockChain) connectBlock(
 	// 	// // been activated.
 	// 	// if e := b.warnUnknownRuleActivations(node); err.Chk(e) {
 	// 	// 	trc.Ln("warnUnknownRuleActivations ", err)
-	// 	// 	return err
+	// 	// 	return e
 	// 	// }
 	// }
 	// Write any block status changes to DB before updating best state.

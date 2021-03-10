@@ -300,7 +300,7 @@ func (s *ChainService) PeerByAddr(addr string) *ServerPeer {
 func (s *ChainService) PublishTransaction(tx *wire.MsgTx) (e error) {
 	// TODO(roasbeef): pipe through querying interface
 	/*_, e := s.rpcClient.SendRawTransaction(tx, false)
-	return err*/
+	return e*/
 	return nil
 }
 

@@ -1331,7 +1331,7 @@ func createStore(ns walletdb.ReadWriteBucket) (e error) {
 // 			serr.Desc = desc + ": " + serr.Desc
 // 			return serr
 // 		}
-// 		return err
+// 		return e
 // 	}
 // 	e = tx.Commit()
 // 	if e != nil  {
@@ -1349,7 +1349,7 @@ func createStore(ns walletdb.ReadWriteBucket) (e error) {
 // 	e = f(tx.ReadBucket(namespaceKey))
 // 	rollbackErr := tx.Rollback()
 // 	if e != nil  {
-//		DB// 		return err
+//		DB// 		return e
 // 	}
 // 	if rollbackErr != nil {
 // 		str := "cannot close view"

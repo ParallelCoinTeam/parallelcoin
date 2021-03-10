@@ -109,7 +109,7 @@ func (b *BlockChain) checkConnectBlock(
 	// if !isBIP0030Node(node) && (node.height < b.params.BIP0034Height) {
 	// 	e := b.checkBIP0030(node, block, view)
 	// 	if e != nil  {
-	// 			// 		return err
+	// 			// 		return e
 	// 	}
 	// }
 	// Load all of the utxos referenced by the inputs for all transactions in the block don't already exist in the utxo
@@ -131,7 +131,7 @@ func (b *BlockChain) checkConnectBlock(
 	// var segwitState ThresholdState
 	// segwitState, e = b.deploymentState(node.parent, chaincfg.DeploymentSegwit)
 	// if e != nil  {
-	// 		// 	return err
+	// 		// 	return e
 	// }
 	// enforceSegWit := segwitState == ThresholdActive
 	// The number of signature operations must be less than the maximum allowed per block. Note that the preliminary
@@ -310,7 +310,7 @@ func (b *BlockChain) checkConnectBlock(
 	// // Enforce CHECKSEQUENCEVERIFY during all block validation checks once the soft-fork deployment is fully active.
 	// csvState, e := b.deploymentState(node.parent, chaincfg.DeploymentCSV)
 	// if e != nil  {
-	// 		// 	return err
+	// 		// 	return e
 	// }
 	// if csvState == ThresholdActive {
 	// 	// If the CSV soft-fork is now active, then modify the scriptFlags to ensure that the CSV op code is properly
@@ -328,7 +328,7 @@ func (b *BlockChain) checkConnectBlock(
 	// 			false,
 	// 		)
 	// 		if e != nil  {
-	// 				// 			return err
+	// 				// 			return e
 	// 		}
 	// 		if !SequenceLockActive(
 	// 			sequenceLock, node.height,
@@ -482,7 +482,7 @@ func (b *BlockChain) checkBlockContext(
 		// // based on the current BIP 9 version bits state.
 		// csvState, e := b.deploymentState(prevNode, chaincfg.DeploymentCSV)
 		// if e != nil  {
-		// 			// 	return err
+		// 			// 	return e
 		// }
 		// Once the CSV soft-fork is fully active, we'll switch to using the current median time past of the past
 		// block's timestamps for all lock-time based checks.
@@ -513,7 +513,7 @@ func (b *BlockChain) checkBlockContext(
 		// 	coinbaseTx := block.Transactions()[0]
 		// 	e := checkSerializedHeight(coinbaseTx, blockHeight)
 		// 	if e != nil  {
-		// 				// 		return err
+		// 				// 		return e
 		// 	}
 		// }
 		// // Query for the Version Bits state for the segwit soft-fork deployment. If segwit is active, we'll switch over
@@ -524,7 +524,7 @@ func (b *BlockChain) checkBlockContext(
 		// 	chaincfg.DeploymentSegwit,
 		// )
 		// if e != nil  {
-		// 			// 	return err
+		// 			// 	return e
 		// }
 		// // If segwit is active, then we'll need to fully validate the new witness
 		// // commitment for adherence to the rules.
@@ -535,7 +535,7 @@ func (b *BlockChain) checkBlockContext(
 		// 	// transactions within the block. In addition, various other checks against the
 		// 	// coinbase's witness stack.
 		// 	if e := ValidateWitnessCommitment(block); err.Chk(e) {
-		// 				// 		return err
+		// 				// 		return e
 		// 	}
 		// 	// Once the witness commitment, witness nonce, and sig op cost have been
 		// 	// validated, we can finally assert that the block's weight doesn't exceed the

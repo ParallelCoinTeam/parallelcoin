@@ -557,7 +557,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 		// Avoid cursor deletion until bolt issue #620 is resolved.
 		//
 		// e = it.delete() if e != nil  {
-		// 	return err
+		// 	return e
 		// }
 	}
 	if it.err != nil {

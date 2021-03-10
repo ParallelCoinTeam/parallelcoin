@@ -253,51 +253,51 @@ func convertUtxoStore(r io.Reader, w io.Writer) (e error) {
 			if e ==  io.EOF {
 				break
 			}
-			return err
+			return e
 		}
 		// Num of serialized utxo entry bytes.
 		var numBytes uint32
 		e = binary.Read(r, littleEndian, &numBytes)
 		if e != nil  {
-			return err
+			return e
 		}
 		// Serialized utxo entry.
 		serialized := make([]byte, numBytes)
 		_, e = io.ReadAtLeast(r, serialized, int(numBytes))
 		if e != nil  {
-			return err
+			return e
 		}
 		// Deserialize the entry.
 		entries, e := deserializeUtxoEntryV0(serialized)
 		if e != nil  {
-			return err
+			return e
 		}
 		// Loop through all of the utxos and write them out in the new format.
 		for outputIdx, entry := range entries {
 			// Reserialize the entries using the new format.
 			serialized, e := serializeUtxoEntry(entry)
 			if e != nil  {
-				return err
+				return e
 			}
 			// Write the hash of the utxo entry.
 			_, e = w.Write(hash[:])
 			if e != nil  {
-				return err
+				return e
 			}
 			// Write the output index of the utxo entry.
 			e = binary.Write(w, littleEndian, outputIdx)
 			if e != nil  {
-				return err
+				return e
 			}
 			// Write num of serialized utxo entry bytes.
 			e = binary.Write(w, littleEndian, uint32(len(serialized)))
 			if e != nil  {
-				return err
+				return e
 			}
 			// Write the serialized utxo.
 			_, e = w.Write(serialized)
 			if e != nil  {
-				return err
+				return e
 			}
 		}
 	}

@@ -256,7 +256,7 @@ func newThresholdCaches(numCaches uint32) []thresholdStateCache {
 // 		cache := &b.warningCaches[bit]
 // 		_, e := b.thresholdState(prevNode, checker, cache)
 // 		if e != nil  {
-// 			// 			return err
+// 			// 			return e
 // 		}
 // 	}
 // 	for id := 0; id < len(b.params.Deployments); id++ {
@@ -265,7 +265,7 @@ func newThresholdCaches(numCaches uint32) []thresholdStateCache {
 // 		checker := deploymentChecker{deployment: deployment, chain: b}
 // 		_, e := b.thresholdState(prevNode, checker, cache)
 // 		if e != nil  {
-// 			// 			return err
+// 			// 			return e
 // 		}
 // 	}
 // 	// No warnings about unknown rules or versions until the chain is current.
@@ -273,12 +273,12 @@ func newThresholdCaches(numCaches uint32) []thresholdStateCache {
 // 		// Warn if a high enough percentage of the last blocks have unexpected versions.
 // 		bestNode := b.BestChain.Tip()
 // 		// if e := b.warnUnknownVersions(bestNode); err.Chk(e) {
-// 		// 	return err
+// 		// 	return e
 // 		// }
 // 		//
 // 		// Warn if any unknown new rules are either about to activate or have already been activated.
 // 		if e := b.warnUnknownRuleActivations(bestNode); err.Chk(e) {
-// 			return err
+// 			return e
 // 		}
 // 	}
 // 	return nil

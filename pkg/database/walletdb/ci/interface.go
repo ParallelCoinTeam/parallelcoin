@@ -385,7 +385,7 @@ func testNamespaceAndTxInterfaces(
 	namespaceKeyBytes := []byte(namespaceKey)
 	e := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 		_, e := tx.CreateTopLevelBucket(namespaceKeyBytes)
-		return err
+		return e
 	})
 	if e != nil  {
 		tc.t.Errorf("CreateTopLevelBucket: unexpected error: %v", err)

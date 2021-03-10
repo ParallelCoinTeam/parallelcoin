@@ -44,7 +44,7 @@ retry:
 	for !poolsMatch {
 		firstPool, e := nodes[0].Node.GetRawMempool()
 		if e != nil  {
-						return err
+						return e
 		}
 		// If all nodes have an identical mempool with respect to the first node,
 		// then we're done. Otherwise drop back to the top of the loop and retry
@@ -52,7 +52,7 @@ retry:
 		for _, node := range nodes[1:] {
 			nodePool, e := node.Node.GetRawMempool()
 			if e != nil  {
-								return err
+								return e
 			}
 			if !reflect.DeepEqual(firstPool, nodePool) {
 				time.Sleep(time.Millisecond * 100)
@@ -75,7 +75,7 @@ retry:
 		for _, node := range nodes {
 			blockHash, blockHeight, e := node.Node.GetBestBlock()
 			if e != nil  {
-								return err
+								return e
 			}
 			if prevHash != nil && (*blockHash != *prevHash ||
 				blockHeight != prevHeight) {
@@ -95,22 +95,22 @@ retry:
 func ConnectNode(from *Harness, to *Harness) (e error) {
 	peerInfo, e := from.Node.GetPeerinf.Ln()
 	if e != nil  {
-				return err
+				return e
 	}
 	numPeers := len(peerInfo)
 	targetAddr := to.node.config.listen
 	if e := from.Node.AddNode(targetAddr, rpcclient.ANAdd); err.Chk(e) {
-		return err
+		return e
 	}
 	// Block until a new connection has been established.
 	peerInfo, e = from.Node.GetPeerinf.Ln()
 	if e != nil  {
-				return err
+				return e
 	}
 	for len(peerInfo) <= numPeers {
 		peerInfo, e = from.Node.GetPeerinf.Ln()
 		if e != nil  {
-						return err
+						return e
 		}
 	}
 	return nil
@@ -122,7 +122,7 @@ func TearDownAll() (e error) {
 	defer harnessStateMtx.Unlock()
 	for _, harness := range testInstances {
 		if e := harness.tearDown(); err.Chk(e) {
-			return err
+			return e
 		}
 	}
 	return nil

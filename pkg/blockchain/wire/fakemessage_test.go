@@ -23,10 +23,10 @@ func (msg *fakeMessage) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding)
 			Func:        "fakeMessage.BtcEncode",
 			Description: "intentional error",
 		}
-		return err
+		return e
 	}
 	_, e := w.Write(msg.payload)
-	return err
+	return e
 }
 
 // Command returns the command field of the fake message and satisfies the Message interface.

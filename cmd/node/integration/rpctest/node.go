@@ -62,17 +62,17 @@ func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, e
 func (n *nodeConfig) setDefaults() (e error) {
 	datadir, e := ioutil.TempDir("", n.prefix+"-data")
 	if e != nil  {
-				return err
+				return e
 	}
 	n.dataDir = datadir
 	logdir, e := ioutil.TempDir("", n.prefix+"-logs")
 	if e != nil  {
-				return err
+				return e
 	}
 	n.logDir = logdir
 	cert, e := ioutil.ReadFile(n.certFile)
 	if e != nil  {
-				return err
+				return e
 	}
 	n.certificates = cert
 	return nil
@@ -160,7 +160,7 @@ func (n *nodeConfig) cleanup() (e error) {
 			Errorf("Cannot remove dir %s: %v", dir, err)
 		}
 	}
-	return err
+	return e
 }
 
 // node houses the necessary state required to configure, launch, and manage a pod process.
@@ -186,19 +186,19 @@ func newNode(config *nodeConfig, dataDir string) (*node, error) {
 // panic, it is important that the process be stopped via stop( ) otherwise it will persist unless explicitly killed.
 func (n *node) start() (e error) {
 	if e := n.cmd.Start(); err.Chk(e) {
-		return err
+		return e
 	}
 	pid, e := os.Create(filepath.Join(n.dataDir,
 		fmt.Sprintf("%s.pid", n.config)))
 	if e != nil  {
-				return err
+				return e
 	}
 	n.pidFile = pid.Name()
 	if _, e = fmt.Fprintf(pid, "%d\n", n.cmd.Process.Pid); err.Chk(e) {
-		return err
+		return e
 	}
 	if e := pid.Close(); err.Chk(e) {
-		return err
+		return e
 	}
 	return nil
 }
@@ -235,10 +235,10 @@ func (n *node) cleanup() (e error) {
 // shutdown terminates the running pod process and cleans up all file/directories created by node.
 func (n *node) shutdown() (e error) {
 	if e := n.stop(); err.Chk(e) {
-		return err
+		return e
 	}
 	if e := n.cleanup(); err.Chk(e) {
-		return err
+		return e
 	}
 	return nil
 }
@@ -249,18 +249,18 @@ func genCertPair(certFile, keyFile string) (e error) {
 	validUntil := time.Now().Add(10 * 365 * 24 * time.Hour)
 	cert, key, e := util.NewTLSCertPair(org, validUntil, nil)
 	if e != nil  {
-				return err
+				return e
 	}
 	// Write cert and key files.
 	if e = ioutil.WriteFile(certFile, cert, 0666); err.Chk(e) {
-		return err
+		return e
 	}
 	if e = ioutil.WriteFile(keyFile, key, 0600); err.Chk(e) {
 		defer func() {
 			if e := os.Remove(certFile); err.Chk(e) {
 			}
 		}()
-		return err
+		return e
 	}
 	return nil
 }

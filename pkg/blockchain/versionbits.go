@@ -195,7 +195,7 @@ const (
 // 		cache := &b.warningCaches[bit]
 // 		state, e := b.thresholdState(node.parent, checker, cache)
 // 		if e != nil  {
-// 			// 			return err
+// 			// 			return e
 // 		}
 // 		switch state {
 // 		case ThresholdActive:
@@ -226,7 +226,7 @@ const (
 // 	for i := uint32(0); i < unknownVerNumToCheck && node != nil; i++ {
 // 		expectedVersion, e := b.calcNextBlockVersion(node.parent)
 // 		if e != nil  {
-// // 			return err
+// // 			return e
 // 		}
 // 		if expectedVersion > vbLegacyBlockVersion &&
 // 			(node.version & ^expectedVersion) != 0 {

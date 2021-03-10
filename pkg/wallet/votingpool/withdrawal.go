@@ -505,7 +505,7 @@ func (w *withdrawal) fulfillNextRequest() (e error) {
 			dbg.Ln("splitting last output because we don't have enough" +
 				" inputs")
 			if e := w.splitLastOutput(); err.Chk(e) {
-				return err
+				return e
 			}
 			break
 		}
@@ -535,7 +535,7 @@ func (w *withdrawal) handleOversizeTx() (e error) {
 		dbg.Ln("splitting last output because tx got too big...")
 		w.pushInput(w.current.removeInput())
 		if e := w.splitLastOutput(); err.Chk(e) {
-			return err
+			return e
 		}
 	} else {
 		return newError(ErrPreconditionNotMet, "Oversize tx must have at least one output", nil)
@@ -622,7 +622,7 @@ func (w *withdrawal) fulfillRequests() (e error) {
 	w.current = newWithdrawalTx(w.txOptions)
 	for len(w.pendingRequests) > 0 {
 		if e := w.fulfillNextRequest(); err.Chk(e) {
-			return err
+			return e
 		}
 		tx := w.current
 		if len(w.eligibleInputs) == 0 && tx.inputTotal() <= tx.outputTotal()+tx.calculateFee() {
@@ -631,7 +631,7 @@ func (w *withdrawal) fulfillRequests() (e error) {
 		}
 	}
 	if e := w.finalizeCurrentTx(); err.Chk(e) {
-		return err
+		return e
 	}
 	// TODO: Update w.status.nextInputAddr. Not yet implemented as in some
 	// conditions we need to know about un-thawed series.
@@ -827,7 +827,7 @@ func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs wal
 	}
 	for i, pkScript := range pkScripts {
 		if e = signMultiSigUTXO(mgr, addrmgrNs, msgtx, i, pkScript, sigs[i]); err.Chk(e) {
-			return err
+			return e
 		}
 	}
 	return nil
@@ -885,7 +885,7 @@ func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *
 	}
 	tx.TxIn[idx].SignatureScript = script
 	if e := validateSigScript(tx, idx, pkScript); err.Chk(e) {
-		return err
+		return e
 	}
 	return nil
 }
@@ -949,7 +949,7 @@ func nextChangeAddress(a ChangeAddress) (ChangeAddress, error) {
 func storeTransactions(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket, transactions []*changeAwareTx) (e error) {
 	for _, tx := range transactions {
 		if e := tx.addSelfToStore(store, txmgrNs); err.Chk(e) {
-			return err
+			return e
 		}
 	}
 	return nil

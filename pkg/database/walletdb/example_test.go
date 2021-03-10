@@ -121,7 +121,7 @@ func Example_basicUsage() {
 		if bucket == nil {
 			_, e = tx.CreateTopLevelBucket(bucketKey)
 			if e != nil  {
-				return err
+				return e
 			}
 		}
 		return nil
@@ -140,7 +140,7 @@ func Example_basicUsage() {
 		key := []byte("mykey")
 		value := []byte("myvalue")
 		if e := rootBucket.Put(key, value); err.Chk(e) {
-			return err
+			return e
 		}
 		// Read the key back and ensure it matches.
 		if !bytes.Equal(rootBucket.Get(key), value) {
@@ -150,7 +150,7 @@ func Example_basicUsage() {
 		nestedBucketKey := []byte("mybucket")
 		nestedBucket, e := rootBucket.CreateBucket(nestedBucketKey)
 		if e != nil  {
-			return err
+			return e
 		}
 		// The key from above that was set in the root bucket does not exist in this new nested bucket.
 		if nestedBucket.Get(key) != nil {

@@ -80,14 +80,14 @@ func testStore() (*Store, walletdb.DB, func(), error) {
 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		ns, e := tx.CreateTopLevelBucket(namespaceKey)
 		if e != nil  {
-			return err
+			return e
 		}
 		e = Create(ns)
 		if e != nil  {
-			return err
+			return e
 		}
 		s, e = Open(ns, &netparams.TestNet3Params)
-		return err
+		return e
 	})
 	return s, db, teardown, err
 }

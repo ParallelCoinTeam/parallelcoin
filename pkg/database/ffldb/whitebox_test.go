@@ -230,7 +230,7 @@ func resetDatabase(tc *testContext) bool {
 		for ok := cursor.First(); ok; ok = cursor.Next() {
 			if cursor.Value() != nil {
 				if e := cursor.Delete(); err.Chk(e) {
-					return err
+					return e
 				}
 			} else {
 				bucketNames = append(bucketNames, cursor.Key())
@@ -239,11 +239,11 @@ func resetDatabase(tc *testContext) bool {
 		// Remove the buckets.
 		for _, k := range bucketNames {
 			if e := tx.Metadata().DeleteBucket(k); err.Chk(e) {
-				return err
+				return e
 			}
 		}
 		_, e := tx.Metadata().CreateBucket(blockIdxBucketName)
-		return err
+		return e
 	})
 	if e != nil  {
 		tc.t.Errorf("Update: unexpected error: %v", err)

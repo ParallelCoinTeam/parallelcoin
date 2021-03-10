@@ -802,7 +802,7 @@ func testMetadataTxInterface(tc *testContext) bool {
 	bucket1Name := []byte("bucket1")
 	e := tc.db.Update(func(tx database.Tx) (e error) {
 		_, e := tx.Metadata().CreateBucket(bucket1Name)
-		return err
+		return e
 	})
 	if e != nil  {
 		tc.t.Errorf("Update: unexpected error creating bucket: %v", err)
@@ -1719,7 +1719,7 @@ func testConcurrency(tc *testContext) bool {
 	startTime := time.Now()
 	e := tc.db.View(func(tx database.Tx) (e error) {
 		_, e := tx.FetchBlock(tc.blocks[0].Hash())
-		return err
+		return e
 	})
 	if e != nil  {
 		tc.t.Errorf("Unexpected error in view: %v", err)
@@ -1739,7 +1739,7 @@ func testConcurrency(tc *testContext) bool {
 		e := tc.db.View(func(tx database.Tx) (e error) {
 			time.Sleep(sleepTime)
 			_, e := tx.FetchBlock(tc.blocks[blockNum].Hash())
-			return err
+			return e
 		})
 		if e != nil  {
 			tc.t.Errorf("Unexpected error in concurrent view: %v",

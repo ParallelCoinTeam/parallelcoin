@@ -349,11 +349,11 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 		if changeVal > 0 && change {
 			addr, e := m.newAddress()
 			if e != nil  {
-								return err
+								return e
 			}
 			pkScript, e := txscript.PayToAddrScript(addr)
 			if e != nil  {
-								return err
+								return e
 			}
 			changeOutput := &wire.TxOut{
 				Value:    int64(changeVal),

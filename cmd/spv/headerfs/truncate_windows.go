@@ -15,7 +15,7 @@ func (h *headerStore) singleTruncate() (e error) {
 	// In order to truncate the file, we'll need to grab the absolute size of the file as it stands currently.
 	fileInfo, e := h.file.Stat()
 	if e != nil  {
-				return err
+				return e
 	}
 	fileSize := fileInfo.Size()
 	// Next, we'll determine the number of bytes we need to truncate from the end of the file.
@@ -34,12 +34,12 @@ func (h *headerStore) singleTruncate() (e error) {
 	// to close, truncate, and reopen it.
 	fileName := h.file.Name()
 	if e = h.file.Close(); err.Chk(e) {
-		return err
+		return e
 	}
 	if e = os.Truncate(fileName, newSize); err.Chk(e) {
-		return err
+		return e
 	}
 	fileFlags := os.O_RDWR | os.O_APPEND | os.O_CREATE
 	h.file, e = os.OpenFile(fileName, fileFlags, 0644)
-	return err
+	return e
 }

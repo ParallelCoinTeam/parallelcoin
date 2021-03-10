@@ -41,7 +41,7 @@ func TestGetMaxUsedIdx(t *testing.T) {
 			dummyHash := bytes.Repeat([]byte{byte(i)}, 10)
 			e := putUsedAddrHash(ns, pool.ID, 0, 0, Index(idx), dummyHash)
 			if e != nil  {
-				return err
+				return e
 			}
 		}
 		return nil
@@ -54,7 +54,7 @@ func TestGetMaxUsedIdx(t *testing.T) {
 		ns, _ := TstRNamespaces(tx)
 		var e error
 		maxIdx, e = getMaxUsedIdx(ns, pool.ID, 0, 0)
-		return err
+		return e
 	})
 	if e != nil  {
 		t.ftl.Ln(e)

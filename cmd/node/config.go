@@ -231,18 +231,18 @@ func validLogLevel(logLevel string) bool {
 // 	// Create the destination directory if it does not exists
 // 	e := os.MkdirAll(filepath.Dir(destinationPath), 0700)
 // 	if e != nil  {
-//		DB// 		return err
+//		DB// 		return e
 // 	}
 // 	// We generate a random user and password
 // 	randomBytes := make([]byte, 20)
 // 	_, e = rand.Read(randomBytes)
 // 	if e != nil  {
-//		DB// 		return err
+//		DB// 		return e
 // 	}
 // 	generatedRPCUser := base64.StdEncoding.EncodeToString(randomBytes)
 // 	_, e = rand.Read(randomBytes)
 // 	if e != nil  {
-//		DB// 		return err
+//		DB// 		return e
 // 	}
 // 	generatedRPCPass := base64.StdEncoding.EncodeToString(randomBytes)
 // 	var bb bytes.Buffer
@@ -250,7 +250,7 @@ func validLogLevel(logLevel string) bool {
 // 	dest, e := os.OpenFile(destinationPath,
 // 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 // 	if e != nil  {
-//		DB// 		return err
+//		DB// 		return e
 // 	}
 // 	defer dest.Close()
 // 	reader := bufio.NewReader(&bb)
@@ -258,7 +258,7 @@ func validLogLevel(logLevel string) bool {
 // 		var line string
 // 		line, e = reader.ReadString('\n')
 // 		if e != nil  && e != io.EOF {
-// 			return err
+// 			return e
 // 		}
 // 		if strings.Contains(line, "rpcuser=") {
 // 			line = "rpcuser=" + generatedRPCUser + "\n"
@@ -266,7 +266,7 @@ func validLogLevel(logLevel string) bool {
 // 			line = "rpcpass=" + generatedRPCPass + "\n"
 // 		}
 // 		if _, e = dest.WriteString(line); err.Chk(e) {
-// 			return err
+// 			return e
 // 		}
 // 	}
 // 	return nil

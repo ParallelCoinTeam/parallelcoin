@@ -185,7 +185,7 @@ func loadAllSeries(ns walletdb.ReadBucket, poolID []byte) (map[uint32]*dbSeriesR
 			seriesID := bytesToUint32(k)
 			series, e := deserializeSeriesRow(v)
 			if e != nil  {
-								return err
+								return e
 			}
 			allSeries[seriesID] = series
 			return nil
@@ -225,11 +225,11 @@ func putSeriesRow(ns walletdb.ReadWriteBucket, poolID []byte, ID uint32, row *db
 	}
 	bucket, e = bucket.CreateBucketIfNotExists(seriesBucketName)
 	if e != nil  {
-				return err
+				return e
 	}
 	serialized, e := serializeSeriesRow(row)
 	if e != nil  {
-				return err
+				return e
 	}
 	e = bucket.Put(uint32ToBytes(ID), serialized)
 	if e != nil  {

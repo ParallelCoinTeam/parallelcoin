@@ -260,17 +260,17 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		ns, e := tx.CreateTopLevelBucket(waddrmgrNamespaceKey)
 		if e != nil  {
-			return err
+			return e
 		}
 		e = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
 			&netparams.MainNetParams, fastScrypt, time.Time{},
 		)
 		if e != nil  {
-			return err
+			return e
 		}
 		mgr, e = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
-		return err
+		return e
 	})
 	if e != nil  {
 		func() {

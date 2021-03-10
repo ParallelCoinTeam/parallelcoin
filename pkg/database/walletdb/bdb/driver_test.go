@@ -105,7 +105,7 @@ func TestPersistence(t *testing.T) {
 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		ns1, e := tx.CreateTopLevelBucket(ns1Key)
 		if e != nil  {
-			return err
+			return e
 		}
 		for k, v := range storeValues {
 			if e := ns1.Put([]byte(k), []byte(v)); err.Chk(e) {

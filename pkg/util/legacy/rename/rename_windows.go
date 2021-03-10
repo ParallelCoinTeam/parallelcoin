@@ -54,12 +54,12 @@ func Atomic(oldpath, newpath string) (e error) {
 	from, e := syscall.UTF16PtrFromString(oldpath)
 	if e != nil  {
 		err.Ln(e)
-		return err
+		return e
 	}
 	to, e := syscall.UTF16PtrFromString(newpath)
 	if e != nil  {
 		err.Ln(e)
-		return err
+		return e
 	}
 	return moveFileEx(from, to, _MOVEFILE_REPLACE_EXISTING)
 }

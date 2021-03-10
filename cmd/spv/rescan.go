@@ -379,7 +379,7 @@ rescanLoop:
 			case update := <-ro.update:
 				rewound, e := ro.updateFilter(update, &curStamp, &curHeader)
 				if e != nil {
-					return err
+					return e
 				}
 				// If we have to rewind our state, then we'll mark ourselves as not current so we can walk forward in
 				// the chain again until we we are current. This is our way of doing a manual rescan.
@@ -445,7 +445,7 @@ rescanLoop:
 				}
 				e := s.notifyBlockWithFilter(ro, &curHeader, &curStamp, blockFilter)
 				if e != nil {
-					return err
+					return e
 				}
 				// We'll successfully fetched this current block, so we'll reset the retry timer back to nil.
 				blockReFetchTimer = nil
@@ -484,7 +484,7 @@ rescanLoop:
 						update, &curStamp, &curHeader,
 					)
 					if e != nil {
-						return err
+						return e
 					}
 				default:
 					break updateFilterLoop
@@ -492,7 +492,7 @@ rescanLoop:
 			}
 			bestBlock, e := s.BestBlock()
 			if e != nil {
-				return err
+				return e
 			}
 			// Since we're not current, we try to manually advance the block. If the next height is above the best
 			// height known to the chain service, then we mark ourselves as current and follow notifications.
@@ -531,7 +531,7 @@ rescanLoop:
 				uint32(nextHeight),
 			)
 			if e != nil {
-				return err
+				return e
 			}
 			curHeader = *header
 			curStamp.Height++
@@ -541,7 +541,7 @@ rescanLoop:
 			}
 			e = s.notifyBlock(ro, curHeader, curStamp, scanning)
 			if e != nil {
-				return err
+				return e
 			}
 		}
 	}

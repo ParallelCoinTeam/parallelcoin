@@ -41,7 +41,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_, e := tx.FetchBlockHeader(blockHash)
 			if e != nil  {
-				return err
+				return e
 			}
 		}
 		return nil
@@ -84,7 +84,7 @@ func BenchmarkBlock(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_, e := tx.FetchBlock(blockHash)
 			if e != nil  {
-				return err
+				return e
 			}
 		}
 		return nil

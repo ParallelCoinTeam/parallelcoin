@@ -242,7 +242,7 @@ func main() {
 				cmd.Stdin = os.Stdin
 				cmd.Stderr = os.Stderr
 				if e := cmd.Start(); err.Chk(e) {
-					Infos(e)
+					inf.S(e)
 					os.Exit(1)
 				}
 				if e := cmd.Wait(); err.Chk(e) {

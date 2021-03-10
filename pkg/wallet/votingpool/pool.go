@@ -126,10 +126,10 @@ func LoadAndCreateSeries(ns walletdb.ReadWriteBucket, m *waddrmgr.Manager, versi
 		if vpErr.ErrorCode == ErrPoolNotExists {
 			p, e = Create(ns, m, pid)
 			if e != nil  {
-								return err
+								return e
 			}
 		} else {
-			return err
+			return e
 		}
 	}
 	return p.CreateSeries(ns, version, seriesID, reqSigs, rawPubKeys)
@@ -141,7 +141,7 @@ func LoadAndReplaceSeries(ns walletdb.ReadWriteBucket, m *waddrmgr.Manager, vers
 	pid := []byte(poolID)
 	p, e := Load(ns, m, pid)
 	if e != nil  {
-				return err
+				return e
 	}
 	return p.ReplaceSeries(ns, version, seriesID, reqSigs, rawPubKeys)
 }
@@ -152,7 +152,7 @@ func LoadAndEmpowerSeries(ns walletdb.ReadWriteBucket, m *waddrmgr.Manager, pool
 	pid := []byte(poolID)
 	pool, e := Load(ns, m, pid)
 	if e != nil  {
-				return err
+				return e
 	}
 	return pool.EmpowerSeries(ns, seriesID, rawPrivKey)
 }
@@ -260,7 +260,7 @@ func (p *Pool) putSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs
 	rawPubKeys := CanonicalKeyOrder(inRawPubKeys)
 	keys, e := convertAndValidatePubKeys(rawPubKeys)
 	if e != nil  {
-				return err
+				return e
 	}
 	data := &SeriesData{
 		version:     version,
@@ -271,7 +271,7 @@ func (p *Pool) putSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs
 	}
 	e = p.saveSeriesToDisk(ns, seriesID, data)
 	if e != nil  {
-				return err
+				return e
 	}
 	p.seriesLookup[seriesID] = data
 	return nil
@@ -312,7 +312,7 @@ func (p *Pool) ActivateSeries(ns walletdb.ReadWriteBucket, seriesID uint32) (e e
 	series.active = true
 	e := p.saveSeriesToDisk(ns, seriesID, series)
 	if e != nil  {
-				return err
+				return e
 	}
 	p.seriesLookup[seriesID] = series
 	return nil
@@ -410,13 +410,13 @@ func validateAndDecryptKeys(rawPubKeys, rawPrivKeys [][]byte, p *Pool) (pubKeys,
 func (p *Pool) LoadAllSeries(ns walletdb.ReadBucket) (e error) {
 	series, e := loadAllSeries(ns, p.ID)
 	if e != nil  {
-				return err
+				return e
 	}
 	for id, series := range series {
 		pubKeys, privKeys, e := validateAndDecryptKeys(
 			series.pubKeysEncrypted, series.privKeysEncrypted, p)
 		if e != nil  {
-						return err
+						return e
 		}
 		p.seriesLookup[id] = &SeriesData{
 			publicKeys:  pubKeys,
@@ -635,7 +635,7 @@ func (p *Pool) EmpowerSeries(ns walletdb.ReadWriteBucket, seriesID uint32, rawPr
 		return newError(ErrKeysPrivatePublicMismatch, str, nil)
 	}
 	if e = p.saveSeriesToDisk(ns, seriesID, series); err.Chk(e) {
-		return err
+		return e
 	}
 	return nil
 }
@@ -645,19 +645,19 @@ func (p *Pool) EmpowerSeries(ns walletdb.ReadWriteBucket, seriesID uint32, rawPr
 func (p *Pool) EnsureUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID uint32, branch Branch, index Index) (e error) {
 	lastIdx, e := p.highestUsedIndexFor(ns, seriesID, branch)
 	if e != nil  {
-				return err
+				return e
 	}
 	if lastIdx == 0 {
 		// highestUsedIndexFor() returns 0 when there are no used addresses for a given seriesID/branch, so we do this
 		// to ensure there is an entry with index==0.
 		if e := p.addUsedAddr(ns, addrmgrNs, seriesID, branch, lastIdx); err.Chk(e) {
-			return err
+			return e
 		}
 	}
 	lastIdx++
 	for lastIdx <= index {
 		if e := p.addUsedAddr(ns, addrmgrNs, seriesID, branch, lastIdx); err.Chk(e) {
-			return err
+			return e
 		}
 		lastIdx++
 	}
@@ -669,7 +669,7 @@ func (p *Pool) EnsureUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID u
 func (p *Pool) addUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID uint32, branch Branch, index Index) (e error) {
 	script, e := p.DepositScript(seriesID, branch, index)
 	if e != nil  {
-				return err
+				return e
 	}
 	// First ensure the address manager has our script. That way there's no way to have it in the used addresses DB but
 	// not in the address manager.
@@ -677,11 +677,11 @@ func (p *Pool) addUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID uint
 	// TODO: Decide how far back we want the addr manager to rescan and set the BlockStamp height according to that.
 	manager, e := p.manager.FetchScopedKeyManager(waddrmgr.KeyScopeBIP0044)
 	if e != nil  {
-				return err
+				return e
 	}
 	_, e = manager.ImportScript(addrmgrNs, script, &waddrmgr.BlockStamp{})
 	if e != nil  && err.(waddrmgr.ManagerError).ErrorCode != waddrmgr.ErrDuplicateAddress {
-		return err
+		return e
 	}
 	encryptedHash, e := p.manager.Encrypt(waddrmgr.CKTPublic, util.Hash160(script))
 	if e != nil  {

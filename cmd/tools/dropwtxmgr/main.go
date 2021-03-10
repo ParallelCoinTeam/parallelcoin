@@ -110,21 +110,21 @@ func mainInt() int {
 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		e := tx.DeleteTopLevelBucket(wtxmgrNamespace)
 		if e != nil  && err != walletdb.ErrBucketNotFound {
-			return err
+			return e
 		}
 		ns, e := tx.CreateTopLevelBucket(wtxmgrNamespace)
 		if e != nil  {
-			return err
+			return e
 		}
 		e = wtxmgr.Create(ns)
 		if e != nil  {
-			return err
+			return e
 		}
 		ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 		startBlock := ns.Get(startBlockName)
 		e = ns.Put(syncedToName, startBlock)
 		if e != nil  {
-			return err
+			return e
 		}
 		recentBlocks := make([]byte, 40)
 		copy(recentBlocks[0:4], startBlock[0:4])

@@ -108,7 +108,7 @@ func genDir(dirName string) (e error) {
 	fqSVGDirName := filepath.FromSlash(dirName)
 	f, e := os.Open(fqSVGDirName)
 	if e != nil  {
-		return err
+		return e
 	}
 	defer func() {
 		if e := f.Close(); err.Chk(e) {
@@ -205,7 +205,7 @@ func genFile(svgData []byte, baseName string, outSize float32) (e error) {
 	
 	g := &SVG{}
 	if e := xml.Unmarshal(svgData, g); err.Chk(e) {
-		return err
+		return e
 	}
 	
 	var vbx, vby, vbx2, vby2 float32
@@ -243,7 +243,7 @@ func genFile(svgData []byte, baseName string, outSize float32) (e error) {
 		}
 		c, e := parseColor(p.Fill)
 		if e != nil  {
-			return err
+			return e
 		}
 		var ok bool
 		if p.creg, ok = pmap[c]; !ok {
@@ -274,14 +274,14 @@ func genFile(svgData []byte, baseName string, outSize float32) (e error) {
 	
 	for _, p := range g.Paths {
 		if e := genPath(&enc, p, adjs, outSize, size, offset, g.Circles); err.Chk(e) {
-			return err
+			return e
 		}
 		g.Circles = nil
 	}
 	
 	if len(g.Circles) != 0 {
 		if e := genPath(&enc, &Path{}, adjs, outSize, size, offset, g.Circles); err.Chk(e) {
-			return err
+			return e
 		}
 		g.Circles = nil
 	}
@@ -353,7 +353,7 @@ func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, outSize, size
 	if p.D != "" {
 		needStartPath = false
 		if e := genPathData(enc, adj, p.D, outSize, size, offset); err.Chk(e) {
-			return err
+			return e
 		}
 	}
 	
@@ -398,7 +398,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 			break
 		}
 		if e != nil  {
-			return err
+			return e
 		}
 		count++
 		

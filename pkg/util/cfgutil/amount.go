@@ -29,12 +29,12 @@ func (a *AmountFlag) UnmarshalFlag(value string) (e error) {
 	valueF64, e := strconv.ParseFloat(value, 64)
 	if e != nil  {
 		err.Ln(e)
-		return err
+		return e
 	}
 	amount, e := util.NewAmount(valueF64)
 	if e != nil  {
 		err.Ln(e)
-		return err
+		return e
 	}
 	a.Amount = amount
 	return nil
