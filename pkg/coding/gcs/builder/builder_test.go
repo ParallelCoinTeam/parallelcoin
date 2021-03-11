@@ -3,11 +3,11 @@ package builder_test
 import (
 	"encoding/hex"
 	"testing"
-
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
 	"github.com/p9c/pod/pkg/util"
@@ -15,7 +15,7 @@ import (
 
 var (
 	// // No need to allocate an err variable in every test
-	// err error
+	// e error
 	// List of values for building a filter
 	contents = [][]byte{
 		[]byte("Alex"),
@@ -57,8 +57,8 @@ var (
 // TestUseBlockHash tests using a block hash as a filter key.
 func TestUseBlockHash(t *testing.T) {
 	// Block hash #448710, pretty high difficulty.
-	hash, err := chainhash.NewHashFromStr(testHash)
-	if err != nil {
+	hash, e := chainhash.NewHashFromStr(testHash)
+	if e != nil  {
 		t.Fatalf("Hash from string failed: %s", err.Error())
 	}
 	// wire.OutPoint
@@ -67,18 +67,18 @@ func TestUseBlockHash(t *testing.T) {
 		Index: 4321,
 	}
 	// util.Address
-	addr, err := util.DecodeAddress(testAddr, &netparams.MainNetParams)
-	if err != nil {
+	addr, e := util.DecodeAddress(testAddr, &netparams.MainNetParams)
+	if e != nil  {
 		t.Fatalf("Address decode failed: %s", err.Error())
 	}
-	addrBytes, err := txscript.PayToAddrScript(addr)
-	if err != nil {
+	addrBytes, e := txscript.PayToAddrScript(addr)
+	if e != nil  {
 		t.Fatalf("Address script build failed: %s", err.Error())
 	}
 	// Create a GCSBuilder with a key hash and check that the key is derived correctly, then test it.
 	b := builder.WithKeyHash(hash)
-	key, err := b.Key()
-	if err != nil {
+	key, e := b.Key()
+	if e != nil  {
 		t.Fatalf("Builder instantiation with key hash failed: %s",
 			err.Error())
 	}
@@ -94,8 +94,8 @@ func TestUseBlockHash(t *testing.T) {
 	// Create a GCSBuilder with a random key, set the key from a hash manually, check that the key is correct, and test it.
 	b = builder.WithRandomKey()
 	b.SetKeyFromHash(hash)
-	key, err = b.Key()
-	if err != nil {
+	key, e = b.Key()
+	if e != nil  {
 		t.Fatalf("Builder instantiation with known key failed: %s",
 			err.Error())
 	}
@@ -107,8 +107,8 @@ func TestUseBlockHash(t *testing.T) {
 	BuilderTest(b, hash, builder.DefaultP, outPoint, addrBytes, witness, t)
 	// Create a GCSBuilder with a random key and test it.
 	b = builder.WithRandomKey()
-	key1, err := b.Key()
-	if err != nil {
+	key1, e := b.Key()
+	if e != nil  {
 		t.Fatalf("Builder instantiation with random key failed: %s",
 			err.Error())
 	}
@@ -116,8 +116,8 @@ func TestUseBlockHash(t *testing.T) {
 	BuilderTest(b, hash, builder.DefaultP, outPoint, addrBytes, witness, t)
 	// Create a GCSBuilder with a random key and non-default P and test it.
 	b = builder.WithRandomKeyPM(30, 90)
-	key2, err := b.Key()
-	if err != nil {
+	key2, e := b.Key()
+	if e != nil  {
 		t.Fatalf("Builder instantiation with random key failed: %s",
 			err.Error())
 	}
@@ -128,8 +128,8 @@ func TestUseBlockHash(t *testing.T) {
 	BuilderTest(b, hash, 30, outPoint, addrBytes, witness, t)
 	// Create a GCSBuilder with a known key and test it.
 	b = builder.WithKey(testKey)
-	key, err = b.Key()
-	if err != nil {
+	key, e = b.Key()
+	if e != nil  {
 		t.Fatalf("Builder instantiation with known key failed: %s",
 			err.Error())
 	}
@@ -141,8 +141,8 @@ func TestUseBlockHash(t *testing.T) {
 	BuilderTest(b, hash, builder.DefaultP, outPoint, addrBytes, witness, t)
 	// Create a GCSBuilder with a known key and non-default P and test it.
 	b = builder.WithKeyPM(testKey, 30, 90)
-	key, err = b.Key()
-	if err != nil {
+	key, e = b.Key()
+	if e != nil  {
 		t.Fatalf("Builder instantiation with known key failed: %s",
 			err.Error())
 	}
@@ -156,11 +156,11 @@ func TestUseBlockHash(t *testing.T) {
 	b = builder.WithRandomKeyPM(33, 99).SetKeyFromHash(hash).SetKey(testKey)
 	b.SetP(30).AddEntry(hash.CloneBytes()).AddEntries(contents).
 		AddHash(hash).AddEntry(addrBytes)
-	_, err = b.Key()
+	_, e = b.Key()
 	if err != gcs.ErrPTooBig {
 		t.Fatalf("No error on P too big!")
 	}
-	_, err = b.Build()
+	_, e = b.Build()
 	if err != gcs.ErrPTooBig {
 		t.Fatalf("No error on P too big!")
 	}
@@ -168,29 +168,29 @@ func TestUseBlockHash(t *testing.T) {
 func BuilderTest(b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
 	outPoint wire.OutPoint, addrBytes []byte, witness wire.TxWitness,
 	t *testing.T) {
-	key, err := b.Key()
-	if err != nil {
+	key, e := b.Key()
+	if e != nil  {
 		t.Fatalf("Builder instantiation with key hash failed: %s",
 			err.Error())
 	}
 	// Build a filter and test matches.
 	b.AddEntries(contents)
-	f, err := b.Build()
-	if err != nil {
+	f, e := b.Build()
+	if e != nil  {
 		t.Fatalf("Filter build failed: %s", err.Error())
 	}
 	if f.P() != p {
 		t.Fatalf("Filter built with wrong probability")
 	}
-	match, err := f.Match(key, []byte("Nate"))
-	if err != nil {
+	match, e := f.Match(key, []byte("Nate"))
+	if e != nil  {
 		t.Fatalf("Filter match failed: %s", err)
 	}
 	if !match {
-		t.Fatal("Filter didn't match when it should have!")
+		t.ftl.Ln("Filter didn't match when it should have!")
 	}
-	match, err = f.Match(key, []byte("weks"))
-	if err != nil {
+	match, e = f.Match(key, []byte("weks"))
+	if e != nil  {
 		t.Fatalf("Filter match failed: %s", err)
 	}
 	if match {
@@ -199,52 +199,52 @@ func BuilderTest(b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
 	}
 	// Add a hash, build a filter, and test matches
 	b.AddHash(hash)
-	f, err = b.Build()
-	if err != nil {
+	f, e = b.Build()
+	if e != nil  {
 		t.Fatalf("Filter build failed: %s", err.Error())
 	}
-	match, err = f.Match(key, hash.CloneBytes())
-	if err != nil {
+	match, e = f.Match(key, hash.CloneBytes())
+	if e != nil  {
 		t.Fatalf("Filter match failed: %s", err)
 	}
 	if !match {
-		t.Fatal("Filter didn't match when it should have!")
+		t.ftl.Ln("Filter didn't match when it should have!")
 	}
 	// Add a script, build a filter, and test matches
 	b.AddEntry(addrBytes)
-	f, err = b.Build()
-	if err != nil {
+	f, e = b.Build()
+	if e != nil  {
 		t.Fatalf("Filter build failed: %s", err.Error())
 	}
-	match, err = f.MatchAny(key, [][]byte{addrBytes})
-	if err != nil {
+	match, e = f.MatchAny(key, [][]byte{addrBytes})
+	if e != nil  {
 		t.Fatalf("Filter match any failed: %s", err)
 	}
 	if !match {
-		t.Fatal("Filter didn't match when it should have!")
+		t.ftl.Ln("Filter didn't match when it should have!")
 	}
 	// Add a routine witness stack, build a filter, and test that it matches.
 	b.AddWitness(witness)
-	f, err = b.Build()
-	if err != nil {
+	f, e = b.Build()
+	if e != nil  {
 		t.Fatalf("Filter build failed: %s", err.Error())
 	}
-	match, err = f.MatchAny(key, witness)
-	if err != nil {
+	match, e = f.MatchAny(key, witness)
+	if e != nil  {
 		t.Fatalf("Filter match any failed: %s", err)
 	}
 	if !match {
-		t.Fatal("Filter didn't match when it should have!")
+		t.ftl.Ln("Filter didn't match when it should have!")
 	}
-	// Check that adding duplicate items does not increase filter size.
+	// Chk that adding duplicate items does not increase filter size.
 	originalSize := f.N()
 	b.AddEntry(addrBytes)
 	b.AddWitness(witness)
-	f, err = b.Build()
-	if err != nil {
+	f, e = b.Build()
+	if e != nil  {
 		t.Fatalf("Filter build failed: %s", err.Error())
 	}
 	if f.N() != originalSize {
-		t.Fatal("Filter size increased with duplicate items")
+		t.ftl.Ln("Filter size increased with duplicate items")
 	}
 }

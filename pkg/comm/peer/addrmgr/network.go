@@ -3,8 +3,8 @@ package addrmgr
 import (
 	"fmt"
 	"net"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 var (

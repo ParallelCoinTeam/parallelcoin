@@ -4,9 +4,9 @@ import (
 	"container/list"
 	"errors"
 	"sort"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -232,13 +232,12 @@ func (s MinPriorityCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 	for i := cutoffIndex; i < len(possibleCoins); i++ {
 		possibleHighCoins := possibleCoins[cutoffIndex : i+1]
 		// choose a set of high-enough valueAge coins
-		highSelect, err := (&MinNumberCoinSelector{
+		highSelect, e := (&MinNumberCoinSelector{
 			MaxInputs:       s.MaxInputs,
 			MinChangeAmount: s.MinChangeAmount,
 		}).CoinSelect(targetValue, possibleHighCoins)
-		if err != nil {
-			Error(err)
-			// attempt to add available low priority to make a solution
+		if e != nil  {
+						// attempt to add available low priority to make a solution
 			for numLow := 1; numLow <= cutoffIndex && numLow+(i-cutoffIndex) <= s.MaxInputs; numLow++ {
 				allHigh := NewCoinSet(possibleCoins[cutoffIndex : i+1])
 				newTargetValue := targetValue - allHigh.TotalValue()
@@ -248,14 +247,13 @@ func (s MinPriorityCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 				}
 				newMinAvgValueAge := ((s.MinAvgValueAgePerInput * int64(allHigh.Num()+numLow)) - allHigh.TotalValueAge()) / int64(numLow)
 				// find the minimum priority that can be added to set
-				lowSelect, err := (&MinPriorityCoinSelector{
+				lowSelect, e := (&MinPriorityCoinSelector{
 					MaxInputs:              newMaxInputs,
 					MinChangeAmount:        s.MinChangeAmount,
 					MinAvgValueAgePerInput: newMinAvgValueAge,
 				}).CoinSelect(newTargetValue, possibleCoins[0:cutoffIndex])
-				if err != nil {
-					Error(err)
-					continue
+				if e != nil  {
+										continue
 				}
 				for _, coin := range lowSelect.Coins() {
 					allHigh.PushCoin(coin)

@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"fmt"
 	"sync"
-
+	
 	"github.com/p9c/pod/cmd/spv/cache"
 )
 
@@ -48,29 +48,34 @@ func NewCache(capacity uint64) *Cache {
 
 // evict will evict as many elements as necessary to make enough space for a new
 // element with size needed to be inserted.
-func (c *Cache) evict(needed uint64) error {
+func (c *Cache) evict(needed uint64) (e error) {
 	if needed > c.capacity {
-		return fmt.Errorf("can't evict %v elements in size, since"+
-			"capacity is %v", needed, c.capacity)
+		return fmt.Errorf(
+			"can't evict %v elements in size, since"+
+				"capacity is %v", needed, c.capacity,
+		)
 	}
 	for c.capacity-c.size < needed {
 		// We still need to evict some more elements.
 		if c.ll.Len() == 0 {
 			// We should never reach here.
-			return fmt.Errorf("all elements got evicted, yet "+
-				"still need to evict %v, likelihood of error "+
-				"during size calculation",
-				needed-(c.capacity-c.size))
+			return fmt.Errorf(
+				"all elements got evicted, yet "+
+					"still need to evict %v, likelihood of error "+
+					"during size calculation",
+				needed-(c.capacity-c.size),
+			)
 		}
 		// Find the least recently used item.
 		if elr := c.ll.Back(); elr != nil {
 			// Determine lru item's size.
 			ce := elr.Value.(*entry)
-			es, err := ce.value.Size()
-			if err != nil {
-				Error(err)
-				return fmt.Errorf("couldn't determine size of "+
-					"existing cache value %v", err)
+			es, e := ce.value.Size()
+			if e != nil {
+				return fmt.Errorf(
+					"couldn't determine size of "+
+						"existing cache value %v", err,
+				)
 			}
 			// Account for that element's removal in evicted and
 			// cache size.
@@ -85,35 +90,40 @@ func (c *Cache) evict(needed uint64) error {
 
 // Put inserts a given (key,value) pair into the cache, if the key already
 // exists, it will replace value and update it to be most recent item in cache.
-func (c *Cache) Put(key interface{}, value cache.Value) error {
-	vs, err := value.Size()
-	if err != nil {
-		Error(err)
-		return fmt.Errorf("couldn't determine size of cache value: %v",
-			err)
+func (c *Cache) Put(key interface{}, value cache.Value) (e error) {
+	vs, e := value.Size()
+	if e != nil {
+		return fmt.Errorf(
+			"couldn't determine size of cache value: %v",
+			err,
+		)
 	}
 	if vs > c.capacity {
-		return fmt.Errorf("can't insert entry of size %v into cache "+
-			"with capacity %v", vs, c.capacity)
+		return fmt.Errorf(
+			"can't insert entry of size %v into cache "+
+				"with capacity %v", vs, c.capacity,
+		)
 	}
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	// If the element already exists, remove it and decrease cache's size.
 	el, ok := c.cache[key]
 	if ok {
-		es, err := el.Value.(*entry).value.Size()
-		if err != nil {
-			Error(err)
-			return fmt.Errorf("couldn't determine size of existing"+
-				"cache value %v", err)
+		var es uint64
+		es, e = el.Value.(*entry).value.Size()
+		if e != nil {
+			return fmt.Errorf(
+				"couldn't determine size of existing"+
+					"cache value %v", err,
+			)
 		}
 		c.ll.Remove(el)
 		c.size -= es
 	}
 	// Then we need to make sure we have enough space for the element, evict
 	// elements if we need more space.
-	if err := c.evict(vs); err != nil {
-		return err
+	if e = c.evict(vs); err.Chk(e) {
+		return e
 	}
 	// We have made enough space in the cache, so just insert it.
 	el = c.ll.PushFront(&entry{key, value})

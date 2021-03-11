@@ -32,88 +32,94 @@ var (
 )
 
 func readAll() (string, error) {
-	r, _, err := openClipboard.Call(0)
+	var e error
+	var r uintptr
+	r, _, e = openClipboard.Call(0)
 	if r == 0 {
-		return "", err
+		return "", e
 	}
 	defer func() {
-		if _, _, err := closeClipboard.Call(); Check(err) {
+		if _, _, e = closeClipboard.Call(); err.Chk(e) {
 		}
 	}()
 	
 	var h uintptr
-	h, _, err = getClipboardData.Call(cfUnicodetext)
+	h, _, e = getClipboardData.Call(cfUnicodetext)
 	if r == 0 {
-		return "", err
+		return "", e
 	}
 	
 	var l uintptr
-	l, _, err = globalLock.Call(h)
+	l, _, e = globalLock.Call(h)
 	if l == 0 {
-		return "", err
+		return "", e
 	}
 	
 	text := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(l))[:])
 	
-	r, _, err = globalUnlock.Call(h)
+	r, _, e = globalUnlock.Call(h)
 	if r == 0 {
-		return "", err
+		return "", e
 	}
 	
 	return text, nil
 }
 
-func writeAll(text string) error {
-	r, _, err := openClipboard.Call(0)
+func writeAll(text string) (e error) {
+	var r uintptr
+	r, _, e = openClipboard.Call(0)
 	if r == 0 {
-		return err
+		return e
 	}
 	defer func() {
-		if _, _, err := closeClipboard.Call(); Check(err) {
+		if _, _, e = closeClipboard.Call(); err.Chk(e) {
 		}
 	}()
 	
-	r, _, err = emptyClipboard.Call(0)
+	r, _, e = emptyClipboard.Call(0)
 	if r == 0 {
-		return err
+		return e
 	}
 	
 	data := syscall.StringToUTF16(text)
 	
-	h, _, err := globalAlloc.Call(gmemFixed, uintptr(len(data)*int(unsafe.Sizeof(data[0]))))
+	var h uintptr
+	h, _, e = globalAlloc.Call(gmemFixed, uintptr(len(data)*int(unsafe.Sizeof(data[0]))))
 	if h == 0 {
-		return err
+		return e
 	}
 	
-	l, _, err := globalLock.Call(h)
+	var l uintptr
+	l, _, e = globalLock.Call(h)
 	if l == 0 {
-		return err
+		return e
 	}
 	
-	r, _, err = lstrcpy.Call(l, uintptr(unsafe.Pointer(&data[0])))
+	r, _, e = lstrcpy.Call(l, uintptr(unsafe.Pointer(&data[0])))
 	if r == 0 {
-		return err
+		return e
 	}
 	
-	r, _, err = globalUnlock.Call(h)
+	r, _, e = globalUnlock.Call(h)
 	if r == 0 {
-		return err
+		return e
 	}
 	
-	r, _, err = setClipboardData.Call(cfUnicodetext, h)
+	r, _, e = setClipboardData.Call(cfUnicodetext, h)
 	if r == 0 {
-		return err
+		return e
 	}
 	return nil
 }
 
+// Start ...
 func Start() {
 }
 
 func Get() string {
-	str, err := readAll()
-	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
+	str, e := readAll()
+	if e != nil  {
+		_, _ = fmt.Fprintln(os.Stderr, e)
 		return ""
 	}
 	return str
@@ -124,8 +130,8 @@ func GetPrimary() string {
 }
 
 func Set(text string) {
-	err := writeAll(text)
-	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
+	e := writeAll(text)
+	if e != nil  {
+		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 }

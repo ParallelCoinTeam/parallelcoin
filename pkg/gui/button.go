@@ -16,6 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/f32color"
 )
 
+// Button is a material text label icon with options to change all features
 type Button struct {
 	*Window
 	background   color.NRGBA
@@ -32,8 +33,8 @@ type Button struct {
 // Button is a regular material text button where all the dimensions, colors, corners and font can be changed
 func (w *Window) Button(btn *Clickable) *Button {
 	var font text.Font
-	var err error
-	if font, err = w.collection.Font("plan9"); Check(err) {
+	var e error
+	if font, e = w.collection.Font("plan9"); err.Chk(e) {
 	}
 	return &Button{
 		Window: w,
@@ -75,10 +76,12 @@ func (b *Button) CornerRadius(cornerRadius float32) *Button {
 
 // Font sets the font style
 func (b *Button) Font(font string) *Button {
-	if fon, err := b.collection.Font(font); !Check(err) {
+	var fon text.Font
+	var e error
+	if fon, e = b.collection.Font(font); !err.Chk(e) {
 		b.font = fon
 	} else {
-		panic(err)
+		panic(e)
 	}
 	return b
 }
@@ -106,11 +109,14 @@ func (b *Button) TextScale(scale float32) *Button {
 	return b
 }
 
+// SetClick defines the callback to run on a click (mouse up) event
 func (b *Button) SetClick(fn func()) *Button {
 	b.button.SetClick(fn)
 	return b
 }
 
+// SetCancel sets the callback to run when the user presses down over the button
+// but then moves out of its hitbox before release (click)
 func (b *Button) SetCancel(fn func()) *Button {
 	b.button.SetCancel(fn)
 	return b
@@ -129,20 +135,23 @@ func (b *Button) Fn(gtx l.Context) l.Dimensions {
 		button:       b.button,
 	}
 	fn := func(gtx l.Context) l.Dimensions {
-		return b.inset.Layout(gtx, func(gtx l.Context) l.Dimensions {
-			// paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-			return b.Flex().Flexed(1, b.Label().Text(b.text).TextScale(b.textSize.V/b.TextSize.V).Fn).Fn(gtx)
-			// b.Window.Text().
-			// Alignment(text.Middle).
-			// Fn(gtx, b.shaper, b.font, b.textSize, b.text)
-		})
+		return b.inset.Layout(
+			gtx, func(gtx l.Context) l.Dimensions {
+				// paint.ColorOp{Color: b.color}.Add(gtx.Ops)
+				return b.Flex().Flexed(1, b.Label().Text(b.text).TextScale(b.textSize.V/b.TextSize.V).Fn).Fn(gtx)
+				// b.Window.Text().
+				// Alignment(text.Middle).
+				// Fn(gtx, b.shaper, b.font, b.textSize, b.text)
+			},
+		)
 	}
 	bl.Embed(fn)
 	return bl.Fn(gtx)
 }
 
 func drawInk(c l.Context, p press) {
-	// duration is the number of seconds for the completed animation: expand while fading in, then out.
+	// duration is the number of seconds for the completed animation: expand while
+	// fading in, then out.
 	const (
 		expandDuration = float32(0.5)
 		fadeDuration   = float32(0.9)
@@ -160,8 +169,8 @@ func drawInk(c l.Context, p press) {
 	{
 		var haste float32
 		if p.Cancelled {
-			// If the press was cancelled before the inkwell was fully faded in, fast forward the animation to match the
-			// fade-out.
+			// If the press was cancelled before the inkwell was fully faded in, fast
+			// forward the animation to match the fade-out.
 			if h := 0.5 - endt/fadeDuration; h > 0 {
 				haste = h
 			}
@@ -221,15 +230,21 @@ func drawInk(c l.Context, p press) {
 	ink := paint.ColorOp{Color: rgba}
 	ink.Add(c.Ops)
 	rr := size * .5
-	op.Offset(p.Position.Add(f32.Point{
-		X: -rr,
-		Y: -rr,
-	})).Add(c.Ops)
+	op.Offset(
+		p.Position.Add(
+			f32.Point{
+				X: -rr,
+				Y: -rr,
+			},
+		),
+	).Add(c.Ops)
 	clip.RRect{
-		Rect: f32.Rectangle{Max: f32.Point{
-			X: size,
-			Y: size,
-		}},
+		Rect: f32.Rectangle{
+			Max: f32.Point{
+				X: size,
+				Y: size,
+			},
+		},
 		NE: rr, NW: rr, SE: rr, SW: rr,
 	}.Add(c.Ops)
 	paint.PaintOp{}.Add(c.Ops)

@@ -12,8 +12,8 @@ COPY ./*.go /pod/
 RUN ls
 ENV GOBIN "/bin"
 ENV PATH "$GOBIN:$PATH"
-RUN cd /pod && go install ./stroy/.
-RUN cd /pod && stroy stroy
+RUN cd /pod && go install ./cmd/build/.
+RUN cd /pod && build build
 RUN cd /pod && stroy docker
 RUN stroy teststopnode
 FROM ubuntu:20.04

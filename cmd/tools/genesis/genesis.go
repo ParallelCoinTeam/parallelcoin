@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"strconv"
 	"time"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 )
 
 type transaction struct {
@@ -77,10 +77,9 @@ func main() {
 	var pubkey []byte
 	if args[1] == "" {
 		pubkey = make([]byte, 65)
-		n, err := rand.Read(pubkey)
-		if err != nil {
-			Error(err)
-			os.Exit(1)
+		n, e := rand.Read(pubkey)
+		if e != nil  {
+						os.Exit(1)
 		}
 		if n != 65 {
 			Error("For some reason did not get 65 random bytes")
@@ -92,11 +91,10 @@ func main() {
 			Error("Invalid public key length. Should be 130 hex digits,")
 			os.Exit(1)
 		}
-		var err error
-		pubkey, err = hex.DecodeString(args[1])
-		if err != nil {
-			Error(err)
-			fmt.Println("Public key had invalid characters")
+		var e error
+		pubkey, e = hex.DecodeString(args[1])
+		if e != nil  {
+						fmt.Println("Public key had invalid characters")
 		}
 	}
 	timestamp := args[2]
@@ -106,8 +104,8 @@ func main() {
 		os.Exit(1)
 	}
 	tx := initTransaction()
-	nbits, err := strconv.ParseInt(args[3], 10, 32)
-	if err != nil {
+	nbits, e := strconv.ParseInt(args[3], 10, 32)
+	if e != nil  {
 		Error("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
@@ -176,7 +174,7 @@ func main() {
 		bytes = bytes - bits/8
 		bits = bits % 8
 	}
-	Info("\nSearching for nonce/unixtime combination that satisfies "+
+	inf.Ln("\nSearching for nonce/unixtime combination that satisfies "+
 		"minimum target %d with %d threads on %d cores...\nPlease wait... ",
 		nBits, runtime.GOMAXPROCS(-1), runtime.NumCPU())
 	start := time.Now()

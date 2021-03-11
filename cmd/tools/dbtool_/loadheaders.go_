@@ -20,66 +20,63 @@ var (
 )
 
 // Execute is the main entry point for the command.  It's invoked by the parser.
-func (cmd *headersCmd) Execute(args []string) error {
+func (cmd *headersCmd) Execute(args []string) (e error) {
 	// Setup the global config options and ensure they are valid.
-	if err := setupGlobalConfig(); err != nil {
+	if e := setupGlobalConfig(); dbg.Chk(e) {
 		return err
 	}
 	// Load the block database.
-	db, err := loadBlockDB()
-	if err != nil {
-		L.Error(err)
-return err
+	db, e := loadBlockDB()
+	if e != nil  {
+		L.return err
 	}
 	defer db.Close()
 	// NOTE: This code will only work for ffldb.  Ideally the package using the database would keep a metadata index of its own.
 	blockIdxName := []byte("ffldb-blockidx")
 	if !headersCfg.Bulk {
-		err = db.View(func(tx database.Tx) error {
+		e = db.View(func(tx database.Tx) (e error) {
 			totalHdrs := 0
 			blockIdxBucket := tx.Metadata().Bucket(blockIdxName)
-			blockIdxBucket.ForEach(func(k, v []byte) error {
+			blockIdxBucket.ForEach(func(k, v []byte) (e error) {
 				totalHdrs++
 				return nil
 			})
-			L.Infof("Loading headers for %d blocks...", totalHdrs)
+			L.inf.F("Loading headers for %d blocks...", totalHdrs)
 			numLoaded := 0
 			startTime := time.Now()
-			blockIdxBucket.ForEach(func(k, v []byte) error {
+			blockIdxBucket.ForEach(func(k, v []byte) (e error) {
 				var hash chainhash.Hash
 				copy(hash[:], k)
-				_, err := tx.FetchBlockHeader(&hash)
-				if err != nil {
-		L.Error(err)
-return err
+				_, e := tx.FetchBlockHeader(&hash)
+				if e != nil  {
+		L.return err
 				}
 				numLoaded++
 				return nil
 			})
-			L.Infof("Loaded %d headers in %v", numLoaded,
+			L.inf.F("Loaded %d headers in %v", numLoaded,
 				time.Since(startTime))
 			return nil
 		})
 		return err
 	}
 	// Bulk load headers.
-	err = db.View(func(tx database.Tx) error {
+	e = db.View(func(tx database.Tx) (e error) {
 		blockIdxBucket := tx.Metadata().Bucket(blockIdxName)
 		hashes := make([]chainhash.Hash, 0, 500000)
-		blockIdxBucket.ForEach(func(k, v []byte) error {
+		blockIdxBucket.ForEach(func(k, v []byte) (e error) {
 			var hash chainhash.Hash
 			copy(hash[:], k)
 			hashes = append(hashes, hash)
 			return nil
 		})
-		L.Infof("Loading headers for %d blocks...", len(hashes))
+		L.inf.F("Loading headers for %d blocks...", len(hashes))
 		startTime := time.Now()
-		hdrs, err := tx.FetchBlockHeaders(hashes)
-		if err != nil {
-		L.Error(err)
-return err
+		hdrs, e := tx.FetchBlockHeaders(hashes)
+		if e != nil  {
+		L.return err
 		}
-		L.Infof("Loaded %d headers in %v", len(hdrs),
+		L.inf.F("Loaded %d headers in %v", len(hdrs),
 			time.Since(startTime))
 		return nil
 	})

@@ -23,7 +23,7 @@ import (
 )
 
 func (wg *WalletGUI) unlockWallet(pass string) {
-	Debug("entered password", pass)
+	dbg.Ln("entered password", pass)
 	// unlock wallet
 	wg.cx.Config.Lock()
 	*wg.cx.Config.WalletPass = pass
@@ -32,27 +32,27 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	// load config into a fresh variable
 	cfg, _ := pod.EmptyConfig()
 	var cfgFile []byte
-	var err error
-	if cfgFile, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); Check(err) {
+	var e error
+	if cfgFile, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); err.Chk(e) {
 		// this should not happen
 		// TODO: panic-type conditions - for gui should have a notification maybe?
 		panic("config file does not exist")
 	}
-	Debug("loaded config")
-	if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
-		Debug("unmarshaled config")
+	dbg.Ln("loaded config")
+	if e = json.Unmarshal(cfgFile, &cfg); !err.Chk(e) {
+		dbg.Ln("unmarshaled config")
 		bhb := blake3.Sum256([]byte(pass))
 		bh := hex.EncodeToString(bhb[:])
-		Debug(pass, bh, *cfg.WalletPass)
+		dbg.Ln(pass, bh, *cfg.WalletPass)
 		if *cfg.WalletPass == bh {
-			Debug("loading previously saved state")
+			dbg.Ln("loading previously saved state")
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
 			if logi.FileExists(filename) {
-				Debug("#### loading state data...")
-				if err = wg.State.Load(filename, wg.cx.Config.WalletPass); Check(err) {
+				dbg.Ln("#### loading state data...")
+				if e = wg.State.Load(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 					// interrupt.Request()
 				}
-				Debug("#### loaded state data")
+				dbg.Ln("#### loaded state data")
 			}
 			//
 			// qrText := fmt.Sprintf("parallelcoin:%s?amount=%s&message=%s",
@@ -61,12 +61,12 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			// 	wg.inputs["receiveMessage"].GetText(),
 			// )
 			// var qrc image.Image
-			// if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
+			// if qrc, e = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !err.Chk(e) {
 			// 	iop := paint.NewImageOp(qrc)
 			// 	wg.currentReceiveQRCode = &iop
 			// 	wg.currentReceiveQR = wg.ButtonLayout(wg.currentReceiveCopyClickable.SetClick(func() {
-			// 		Debug("clicked qr code copy clicker")
-			// 		if err := clipboard.WriteAll(qrText); Check(err) {
+			// 		dbg.Ln("clicked qr code copy clicker")
+			// 		if e := clipboard.WriteAll(qrText); err.Chk(e) {
 			// 		}
 			// 	})).
 			// 		// CornerRadius(0.5).
@@ -87,7 +87,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			wg.WalletWatcher = wg.Watcher()
 		}
 	} else {
-		Debug("failed to unlock the wallet")
+		dbg.Ln("failed to unlock the wallet")
 	}
 }
 
@@ -105,8 +105,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 	)
 	wg.unlockPage.ThemeHook(
 		func() {
-			Debug("theme hook")
-			// Debug(wg.bools)
+			dbg.Ln("theme hook")
+			// dbg.Ln(wg.bools)
 			*wg.cx.Config.DarkTheme = *wg.Dark
 			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
 			*a = *wg.Dark
@@ -283,7 +283,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																								func() {
 																									// pass := wg.unlockPassword.Editor().Text()
 																									pass := wg.unlockPassword.GetPassword()
-																									Debug(
+																									dbg.Ln(
 																										">>>>>>>>>>> unlock password",
 																										pass,
 																									)
@@ -504,7 +504,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 			),
 			wg.StatusBarButton(
 				"log", 4, &icons.ActionList, func(name string) {
-					Debug("click on button", name)
+					dbg.Ln("click on button", name)
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage,
 			),

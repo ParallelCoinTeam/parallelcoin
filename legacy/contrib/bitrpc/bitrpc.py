@@ -99,7 +99,7 @@ elif cmd == "gethashespersec":
 
 elif cmd == "getinfo":
 	try:
-		print access.getinfo()
+		print access.getinf.Ln()
 	except:
 		print "\n---An error occurred---\n"
 

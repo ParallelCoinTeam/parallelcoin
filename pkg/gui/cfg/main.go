@@ -3,7 +3,7 @@ package cfg
 import (
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
 func New(cx *conte.Xt, w *gui.Window) *Config {
@@ -39,7 +39,7 @@ func (c *Config) Init() *Config {
 	}
 	c.Bools = map[string]*gui.Bool{
 		// "runstate": ng.th.Bool(false).SetOnChange(func(b bool) {
-		// 	Debug("run state is now", b)
+		// 	dbg.Ln("run state is now", b)
 		// }),
 	}
 	c.lists = map[string]*gui.List{

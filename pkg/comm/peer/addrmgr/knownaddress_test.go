@@ -4,8 +4,8 @@ import (
 	"math"
 	"testing"
 	"time"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 )
 
@@ -42,7 +42,7 @@ func TestChance(t *testing.T) {
 			1 / 1.5 / 1.5,
 		},
 	}
-	err := .0001
+	e := .0001
 	for i, test := range tests {
 		chance := addrmgr.TstKnownAddressChance(test.addr)
 		if math.Abs(test.expected-chance) >= err {

@@ -4,7 +4,7 @@ import (
 	l "gioui.org/layout"
 	
 	"github.com/p9c/pod/pkg/gui"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
 )
@@ -21,7 +21,7 @@ func main() {
 		th: th,
 	}
 	go func() {
-		if err := gui.NewWindow(th).
+		if e := gui.NewWindow(th).
 			Size(64, 32).
 			Title("nothing to see here").
 			Open().
@@ -29,7 +29,7 @@ func main() {
 				minerModel.mainWidget, func(l.Context) {}, func() {
 					quit.Q()
 				}, quit,
-			); Check(err) {
+			); err.Chk(e) {
 		}
 	}()
 	<-quit

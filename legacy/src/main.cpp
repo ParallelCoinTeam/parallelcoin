@@ -2186,7 +2186,7 @@ bool FindBlockPos(CValidationState &state, CDiskBlockPos &pos, unsigned int nAdd
         if (nLastBlockFile != pos.nFile) {
             nLastBlockFile = pos.nFile;
             infoLastBlockFile.SetNull();
-            pblocktree->ReadBlockFileInfo(nLastBlockFile, infoLastBlockFile);
+            pblocktree->ReadBlockFileinf.Ln(nLastBlockFile, infoLastBlockFile);
             fUpdatedLast = true;
         }
     } else {
@@ -2195,7 +2195,7 @@ bool FindBlockPos(CValidationState &state, CDiskBlockPos &pos, unsigned int nAdd
             FlushBlockFile(true);
             nLastBlockFile++;
             infoLastBlockFile.SetNull();
-            pblocktree->ReadBlockFileInfo(nLastBlockFile, infoLastBlockFile); // check whether data for the new file somehow already exist; can fail just fine
+            pblocktree->ReadBlockFileinf.Ln(nLastBlockFile, infoLastBlockFile); // check whether data for the new file somehow already exist; can fail just fine
             fUpdatedLast = true;
         }
         pos.nFile = nLastBlockFile;
@@ -2222,7 +2222,7 @@ bool FindBlockPos(CValidationState &state, CDiskBlockPos &pos, unsigned int nAdd
         }
     }
 
-    if (!pblocktree->WriteBlockFileInfo(nLastBlockFile, infoLastBlockFile))
+    if (!pblocktree->WriteBlockFileinf.Ln(nLastBlockFile, infoLastBlockFile))
         return state.Abort(_("Failed to write file info"));
     if (fUpdatedLast)
         pblocktree->WriteLastBlockFile(nLastBlockFile);
@@ -2240,15 +2240,15 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
     if (nFile == nLastBlockFile) {
         pos.nPos = infoLastBlockFile.nUndoSize;
         nNewSize = (infoLastBlockFile.nUndoSize += nAddSize);
-        if (!pblocktree->WriteBlockFileInfo(nLastBlockFile, infoLastBlockFile))
+        if (!pblocktree->WriteBlockFileinf.Ln(nLastBlockFile, infoLastBlockFile))
             return state.Abort(_("Failed to write block info"));
     } else {
         CBlockFileInfo info;
-        if (!pblocktree->ReadBlockFileInfo(nFile, info))
+        if (!pblocktree->ReadBlockFileinf.Ln(nFile, info))
             return state.Abort(_("Failed to read block info"));
         pos.nPos = info.nUndoSize;
         nNewSize = (info.nUndoSize += nAddSize);
-        if (!pblocktree->WriteBlockFileInfo(nFile, info))
+        if (!pblocktree->WriteBlockFileinf.Ln(nFile, info))
             return state.Abort(_("Failed to write block info"));
     }
 
@@ -2784,7 +2784,7 @@ bool static LoadBlockIndexDB()
     // Load block file info
     pblocktree->ReadLastBlockFile(nLastBlockFile);
     printf("LoadBlockIndexDB(): last block file = %i\n", nLastBlockFile);
-    if (pblocktree->ReadBlockFileInfo(nLastBlockFile, infoLastBlockFile))
+    if (pblocktree->ReadBlockFileinf.Ln(nLastBlockFile, infoLastBlockFile))
         printf("LoadBlockIndexDB(): last block file info: %s\n", infoLastBlockFile.ToString().c_str());
 
     // Load nBestInvalidWork, OK if it doesn't exist
@@ -3032,7 +3032,7 @@ bool LoadExternalBlockFile(FILE* fileIn, CDiskBlockPos *dbp)
         if (dbp) {
             // (try to) skip already indexed part
             CBlockFileInfo info;
-            if (pblocktree->ReadBlockFileInfo(dbp->nFile, info)) {
+            if (pblocktree->ReadBlockFileinf.Ln(dbp->nFile, info)) {
                 nStartByte = info.nSize;
                 blkdat.Seek(info.nSize);
             }

@@ -6,6 +6,7 @@ type BufferFloat64 struct {
 	Full   bool
 }
 
+// NewBufferFloat64 creates a new ring buffer of float64 values
 func NewBufferFloat64(size int) *BufferFloat64 {
 	return &BufferFloat64{
 		Buf:    make([]float64, size),
@@ -25,6 +26,9 @@ func (b *BufferFloat64) Get(index int) (out *float64) {
 	}
 	return
 }
+
+// Len returns the length of the buffer, which grows until it fills, after which
+// this will always return the size of the buffer
 func (b *BufferFloat64) Len() (length int) {
 	if b.Full {
 		return len(b.Buf)
@@ -32,6 +36,7 @@ func (b *BufferFloat64) Len() (length int) {
 	return b.Cursor
 }
 
+// Add a new value to the cursor position of the ring buffer
 func (b *BufferFloat64) Add(value float64) {
 	b.Cursor++
 	if b.Cursor == len(b.Buf) {
@@ -43,29 +48,31 @@ func (b *BufferFloat64) Add(value float64) {
 	b.Buf[b.Cursor] = value
 }
 
-func (b *BufferFloat64) ForEach(fn func(v float64) error) (err error) {
+// ForEach is an iterator that can be used to process every element in the
+// buffer
+func (b *BufferFloat64) ForEach(fn func(v float64) error) (e error) {
 	c := b.Cursor
 	i := c + 1
 	if i == len(b.Buf) {
-		// Debug("hit the end")
+		// dbg.Ln("hit the end")
 		i = 0
 	}
 	if !b.Full {
-		// Debug("buffer not yet full")
+		// dbg.Ln("buffer not yet full")
 		i = 0
 	}
-	// Debug(b.Buf)
+	// dbg.Ln(b.Buf)
 	for ; ; i++ {
 		if i == len(b.Buf) {
-			// Debug("passed the end")
+			// dbg.Ln("passed the end")
 			i = 0
 		}
 		if i == c {
-			// Debug("reached cursor again")
+			// dbg.Ln("reached cursor again")
 			break
 		}
-		// Debug(i, b.Cursor)
-		if err = fn(b.Buf[i]); err != nil {
+		// dbg.Ln(i, b.Cursor)
+		if e = fn(b.Buf[i]); e != nil {
 			break
 		}
 	}

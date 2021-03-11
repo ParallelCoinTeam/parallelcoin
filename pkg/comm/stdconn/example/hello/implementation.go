@@ -5,7 +5,7 @@ import (
 	"net/rpc"
 	"os"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/comm/stdconn"
 )
@@ -18,13 +18,13 @@ func NewHello() *Hello {
 	return &Hello{qu.T()}
 }
 
-func (h *Hello) Say(name string, reply *string) (err error) {
+func (h *Hello) Say(name string, reply *string) (e error) {
 	r := "hello " + name
 	*reply = r
 	return
 }
 
-func (h *Hello) Bye(_ int, reply *string) (err error) {
+func (h *Hello) Bye(_ int, reply *string) (e error) {
 	r := "i hear and obey *dies*"
 	*reply = r
 	h.Quit.Q()
@@ -35,9 +35,9 @@ func main() {
 	printlnE("starting up example worker")
 	hello := NewHello()
 	stdConn := stdconn.New(os.Stdin, os.Stdout, hello.Quit)
-	err := rpc.Register(hello)
-	if err != nil {
-		printlnE(err)
+	e := rpc.Register(hello)
+	if e != nil  {
+		printlnE(e)
 		return
 	}
 	go rpc.ServeConn(stdConn)

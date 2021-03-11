@@ -2,40 +2,40 @@ package gui
 
 import (
 	"encoding/json"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/pod"
 	"io/ioutil"
 	"path/filepath"
 	"time"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
 
 func (wg *WalletGUI) WalletAndClientRunning() bool {
 	running := wg.wallet.Running() && wg.WalletClient != nil && !wg.WalletClient.Disconnected()
-	// Debug("wallet and wallet rpc client are running?", running)
+	// dbg.Ln("wallet and wallet rpc client are running?", running)
 	return running
 }
 
 func (wg *WalletGUI) Tickers() {
 	first := true
-	Debug("updating best block")
-	var err error
+	dbg.Ln("updating best block")
+	var e error
 	var height int32
 	var h *chainhash.Hash
-	if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+	if h, height, e = wg.ChainClient.GetBestBlock(); err.Chk(e) {
 		// interrupt.Request()
 		return
 	}
-	Debug(h, height)
+	dbg.Ln(h, height)
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(h)
 	
 	go func() {
-		var err error
+		var e error
 		seconds := time.Tick(time.Second * 3)
 		fiveSeconds := time.Tick(time.Second * 5)
 	totalOut:
@@ -44,10 +44,10 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					Debug("---------------------- ready", wg.ready.Load())
-					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
-					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
-					Debug("preconnect loop")
+					dbg.Ln("---------------------- ready", wg.ready.Load())
+					dbg.Ln("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
+					dbg.Ln("---------------------- stateLoaded", wg.stateLoaded.Load())
+					dbg.Ln("preconnect loop")
 					if wg.ChainClient != nil {
 						wg.ChainClient.Disconnect()
 						wg.ChainClient.Shutdown()
@@ -72,44 +72,44 @@ func (wg *WalletGUI) Tickers() {
 			for {
 				select {
 				case <-seconds:
-					Debug("---------------------- ready", wg.ready.Load())
-					Debug("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
-					Debug("---------------------- stateLoaded", wg.stateLoaded.Load())
+					dbg.Ln("---------------------- ready", wg.ready.Load())
+					dbg.Ln("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
+					dbg.Ln("---------------------- stateLoaded", wg.stateLoaded.Load())
 					wg.node.Start()
-					if err = wg.writeWalletCookie(); Check(err) {
+					if e = wg.writeWalletCookie(); err.Chk(e) {
 					}
 					wg.wallet.Start()
-					Debug("connecting to chain")
-					if err = wg.chainClient(); err != nil {
+					dbg.Ln("connecting to chain")
+					if e = wg.chainClient(); err.Chk(e) {
 						break
 					}
 					if wg.wallet.Running() { // && wg.WalletClient == nil {
-						Debug("connecting to wallet")
-						if err = wg.walletClient(); Check(err) {
+						dbg.Ln("connecting to wallet")
+						if e = wg.walletClient(); err.Chk(e) {
 							break
 						}
 					}
 					if !wg.node.Running() {
-						Debug("breaking out node not running")
+						dbg.Ln("breaking out node not running")
 						break out
 					}
 					if wg.ChainClient == nil {
-						Debug("breaking out chainclient is nil")
+						dbg.Ln("breaking out chainclient is nil")
 						break out
 					}
 					// if  wg.WalletClient == nil {
-					// 	Debug("breaking out walletclient is nil")
+					// 	dbg.Ln("breaking out walletclient is nil")
 					// 	break out
 					// }
 					if wg.ChainClient.Disconnected() {
-						Debug("breaking out chainclient disconnected")
+						dbg.Ln("breaking out chainclient disconnected")
 						break out
 					}
 					// if wg.WalletClient.Disconnected() {
-					// 	Debug("breaking out walletclient disconnected")
+					// 	dbg.Ln("breaking out walletclient disconnected")
 					// 	break out
 					// }
-					// var err error
+					// var e error
 					if first {
 						wg.updateChainBlock()
 						wg.invalidate <- struct{}{}
@@ -150,39 +150,39 @@ func (wg *WalletGUI) Tickers() {
 	}()
 }
 
-func (wg *WalletGUI) updateThingies() (err error) {
+func (wg *WalletGUI) updateThingies() (e error) {
 	// update the configuration
 	var b []byte
-	if b, err = ioutil.ReadFile(*wg.cx.Config.ConfigFile); !Check(err) {
-		if err = json.Unmarshal(b, wg.cx.Config); !Check(err) {
+	if b, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); !err.Chk(e) {
+		if e = json.Unmarshal(b, wg.cx.Config); !err.Chk(e) {
 			return
 		}
 	}
 	return
 }
 func (wg *WalletGUI) updateChainBlock() {
-	Debug("processChainBlockNotification")
-	var err error
+	dbg.Ln("processChainBlockNotification")
+	var e error
 	if wg.ChainClient != nil && wg.ChainClient.Disconnected() || wg.ChainClient.Disconnected() {
-		Debug("connecting ChainClient")
-		if err = wg.chainClient(); Check(err) {
+		dbg.Ln("connecting ChainClient")
+		if e = wg.chainClient(); err.Chk(e) {
 			return
 		}
 	}
 	var h *chainhash.Hash
 	var height int32
-	Debug("updating best block")
-	if h, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+	dbg.Ln("updating best block")
+	if h, height, e = wg.ChainClient.GetBestBlock(); err.Chk(e) {
 		// interrupt.Request()
 		return
 	}
-	Debug(h, height)
+	dbg.Ln(h, height)
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(h)
 }
 
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
-	Debug("processChainBlockNotification")
+	dbg.Ln("processChainBlockNotification")
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(hash)
 	if wg.WalletAndClientRunning() {
@@ -191,29 +191,29 @@ func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height 
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() bool {
-	Debug("processWalletBlockNotification")
+	dbg.Ln("processWalletBlockNotification")
 	if !wg.WalletAndClientRunning() {
-		Debug("wallet and client not running")
+		dbg.Ln("wallet and client not running")
 		return false
 	}
 	// check account balance
 	var unconfirmed util.Amount
-	var err error
-	if unconfirmed, err = wg.WalletClient.GetUnconfirmedBalance("default"); Check(err) {
+	var e error
+	if unconfirmed, e = wg.WalletClient.GetUnconfirmedBalance("default"); err.Chk(e) {
 		return false
 	}
 	wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
 	var confirmed util.Amount
-	if confirmed, err = wg.WalletClient.GetBalance("default"); Check(err) {
+	if confirmed, e = wg.WalletClient.GetBalance("default"); err.Chk(e) {
 		return false
 	}
 	wg.State.SetBalance(confirmed.ToDUO())
 	var atr []btcjson.ListTransactionsResult
 	// TODO: for some reason this function returns half as many as requested
-	if atr, err = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); Check(err) {
+	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); err.Chk(e) {
 		return false
 	}
-	// Debug(len(atr))
+	// dbg.Ln(len(atr))
 	wg.State.SetAllTxs(atr)
 	wg.txMx.Lock()
 	wg.txHistoryList = wg.State.filteredTxs.Load()
@@ -230,14 +230,14 @@ func (wg *WalletGUI) processWalletBlockNotification() bool {
 
 func (wg *WalletGUI) forceUpdateChain() {
 	wg.updateChainBlock()
-	var err error
+	var e error
 	var height int32
 	var tip *chainhash.Hash
-	if tip, height, err = wg.ChainClient.GetBestBlock(); Check(err) {
+	if tip, height, e = wg.ChainClient.GetBestBlock(); err.Chk(e) {
 		return
 	}
 	var block *wire.MsgBlock
-	if block, err = wg.ChainClient.GetBlock(tip); Check(err) {
+	if block, e = wg.ChainClient.GetBlock(tip); err.Chk(e) {
 	}
 	t := block.Header.Timestamp
 	wg.processChainBlockNotification(tip, height, t)
@@ -247,13 +247,13 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 	return &rpcclient.NotificationHandlers{
 		OnClientConnected: func() {
 			// go func() {
-			Debug("(((NOTIFICATION))) CHAIN CLIENT CONNECTED!")
+			dbg.Ln("(((NOTIFICATION))) CHAIN CLIENT CONNECTED!")
 			wg.forceUpdateChain()
 			wg.processWalletBlockNotification()
 			wg.invalidate <- struct{}{}
 		},
 		OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
-			Debug("(((NOTIFICATION))) chain OnBlockConnected", hash, height, t)
+			dbg.Ln("(((NOTIFICATION))) chain OnBlockConnected", hash, height, t)
 			wg.processChainBlockNotification(hash, height, t)
 			wg.processWalletBlockNotification()
 			// todo: send system notification of new block, set configuration to disable also
@@ -261,52 +261,52 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			
 		},
 		OnFilteredBlockConnected: func(height int32, header *wire.BlockHeader, txs []*util.Tx) {
-			Debug(
+			dbg.Ln(
 				"(((NOTIFICATION))) wallet OnFilteredBlockConnected hash", header.BlockHash(), "POW hash:",
 				header.BlockHashWithAlgos(height), "height", height,
 			)
-			// Debugs(txs)
+			// dbg.S(txs)
 			nbh := header.BlockHash()
 			wg.processChainBlockNotification(&nbh, height, header.Timestamp)
 			if wg.processWalletBlockNotification() {
 			}
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
 			wg.invalidate <- struct{}{}
 		},
 		OnBlockDisconnected: func(hash *chainhash.Hash, height int32, t time.Time) {
-			Debug("(((NOTIFICATION))) OnBlockDisconnected", hash, height, t)
+			dbg.Ln("(((NOTIFICATION))) OnBlockDisconnected", hash, height, t)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnFilteredBlockDisconnected: func(height int32, header *wire.BlockHeader) {
-			Debug("(((NOTIFICATION))) OnFilteredBlockDisconnected", height, header)
+			dbg.Ln("(((NOTIFICATION))) OnFilteredBlockDisconnected", height, header)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnRecvTx: func(transaction *util.Tx, details *btcjson.BlockDetails) {
-			Debug("(((NOTIFICATION))) OnRecvTx", transaction, details)
+			dbg.Ln("(((NOTIFICATION))) OnRecvTx", transaction, details)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnRedeemingTx: func(transaction *util.Tx, details *btcjson.BlockDetails) {
-			Debug("(((NOTIFICATION))) OnRedeemingTx", transaction, details)
+			dbg.Ln("(((NOTIFICATION))) OnRedeemingTx", transaction, details)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnRelevantTxAccepted: func(transaction []byte) {
-			Debug("(((NOTIFICATION))) OnRelevantTxAccepted", transaction)
+			dbg.Ln("(((NOTIFICATION))) OnRelevantTxAccepted", transaction)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnRescanFinished: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
-			Debug("(((NOTIFICATION))) OnRescanFinished", hash, height, blkTime)
+			dbg.Ln("(((NOTIFICATION))) OnRescanFinished", hash, height, blkTime)
 			wg.processChainBlockNotification(hash, height, blkTime)
 			// update best block height
 			// wg.processWalletBlockNotification()
@@ -317,7 +317,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			wg.invalidate <- struct{}{}
 		},
 		OnRescanProgress: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
-			Debug("(((NOTIFICATION))) OnRescanProgress", hash, height, blkTime)
+			dbg.Ln("(((NOTIFICATION))) OnRescanProgress", hash, height, blkTime)
 			// update best block height
 			// wg.processWalletBlockNotification()
 			// set to show syncing indicator
@@ -327,30 +327,30 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			wg.invalidate <- struct{}{}
 		},
 		OnTxAccepted: func(hash *chainhash.Hash, amount util.Amount) {
-			Debug("(((NOTIFICATION))) OnTxAccepted")
-			Debug(hash, amount)
+			dbg.Ln("(((NOTIFICATION))) OnTxAccepted")
+			dbg.Ln(hash, amount)
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnTxAcceptedVerbose: func(txDetails *btcjson.TxRawResult) {
-			Debug("(((NOTIFICATION))) OnTxAcceptedVerbose")
-			Debugs(txDetails)
+			dbg.Ln("(((NOTIFICATION))) OnTxAcceptedVerbose")
+			dbg.S(txDetails)
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnPodConnected: func(connected bool) {
-			Debug("(((NOTIFICATION))) OnPodConnected", connected)
+			dbg.Ln("(((NOTIFICATION))) OnPodConnected", connected)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnAccountBalance: func(account string, balance util.Amount, confirmed bool) {
-			Debug("OnAccountBalance")
+			dbg.Ln("OnAccountBalance")
 			// what does this actually do
-			Debug(account, balance, confirmed)
+			dbg.Ln(account, balance, confirmed)
 		},
 		OnWalletLockState: func(locked bool) {
-			Debug("OnWalletLockState", locked)
+			dbg.Ln("OnWalletLockState", locked)
 			// switch interface to unlock page
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
@@ -358,7 +358,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			// TODO: lock when idle... how to get trigger for idleness in UI?
 		},
 		OnUnknownNotification: func(method string, params []json.RawMessage) {
-			Debug("(((NOTIFICATION))) OnUnknownNotification", method, params)
+			dbg.Ln("(((NOTIFICATION))) OnUnknownNotification", method, params)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
@@ -373,71 +373,71 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 	// }
 	return &rpcclient.NotificationHandlers{
 		OnClientConnected: func() {
-			Debug("(((NOTIFICATION))) wallet client connected, running initial processes")
+			dbg.Ln("(((NOTIFICATION))) wallet client connected, running initial processes")
 			for !wg.processWalletBlockNotification() {
 				time.Sleep(time.Second)
-				Debug("(((NOTIFICATION))) retry attempting to update wallet transactions")
+				dbg.Ln("(((NOTIFICATION))) retry attempting to update wallet transactions")
 			}
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
 			wg.invalidate <- struct{}{}
 		},
 		OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
-			Debug("(((NOTIFICATION))) wallet OnBlockConnected", hash, height, t)
+			dbg.Ln("(((NOTIFICATION))) wallet OnBlockConnected", hash, height, t)
 			wg.processWalletBlockNotification()
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
 			wg.invalidate <- struct{}{}
 		},
 		OnFilteredBlockConnected: func(height int32, header *wire.BlockHeader, txs []*util.Tx) {
-			Debug(
+			dbg.Ln(
 				"(((NOTIFICATION))) wallet OnFilteredBlockConnected hash", header.BlockHash(), "POW hash:",
 				header.BlockHashWithAlgos(height), "height", height,
 			)
-			// Debugs(txs)
+			// dbg.S(txs)
 			nbh := header.BlockHash()
 			wg.processChainBlockNotification(&nbh, height, header.Timestamp)
 			if wg.processWalletBlockNotification() {
 			}
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
 			wg.invalidate <- struct{}{}
 		},
 		OnBlockDisconnected: func(hash *chainhash.Hash, height int32, t time.Time) {
-			Debug("(((NOTIFICATION))) OnBlockDisconnected", hash, height, t)
+			dbg.Ln("(((NOTIFICATION))) OnBlockDisconnected", hash, height, t)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnFilteredBlockDisconnected: func(height int32, header *wire.BlockHeader) {
-			Debug("(((NOTIFICATION))) OnFilteredBlockDisconnected", height, header)
+			dbg.Ln("(((NOTIFICATION))) OnFilteredBlockDisconnected", height, header)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnRecvTx: func(transaction *util.Tx, details *btcjson.BlockDetails) {
-			Debug("(((NOTIFICATION))) OnRecvTx", transaction, details)
+			dbg.Ln("(((NOTIFICATION))) OnRecvTx", transaction, details)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnRedeemingTx: func(transaction *util.Tx, details *btcjson.BlockDetails) {
-			Debug("(((NOTIFICATION))) OnRedeemingTx", transaction, details)
+			dbg.Ln("(((NOTIFICATION))) OnRedeemingTx", transaction, details)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnRelevantTxAccepted: func(transaction []byte) {
-			Debug("(((NOTIFICATION))) OnRelevantTxAccepted", transaction)
+			dbg.Ln("(((NOTIFICATION))) OnRelevantTxAccepted", transaction)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnRescanFinished: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
-			Debug("(((NOTIFICATION))) OnRescanFinished", hash, height, blkTime)
+			dbg.Ln("(((NOTIFICATION))) OnRescanFinished", hash, height, blkTime)
 			wg.processChainBlockNotification(hash, height, blkTime)
 			// update best block height
 			// wg.processWalletBlockNotification()
@@ -448,7 +448,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			wg.invalidate <- struct{}{}
 		},
 		OnRescanProgress: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
-			Debug("(((NOTIFICATION))) OnRescanProgress", hash, height, blkTime)
+			dbg.Ln("(((NOTIFICATION))) OnRescanProgress", hash, height, blkTime)
 			// update best block height
 			// wg.processWalletBlockNotification()
 			// set to show syncing indicator
@@ -458,30 +458,30 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			wg.invalidate <- struct{}{}
 		},
 		OnTxAccepted: func(hash *chainhash.Hash, amount util.Amount) {
-			Debug("(((NOTIFICATION))) OnTxAccepted")
-			Debug(hash, amount)
+			dbg.Ln("(((NOTIFICATION))) OnTxAccepted")
+			dbg.Ln(hash, amount)
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnTxAcceptedVerbose: func(txDetails *btcjson.TxRawResult) {
-			Debug("(((NOTIFICATION))) OnTxAcceptedVerbose")
-			Debugs(txDetails)
+			dbg.Ln("(((NOTIFICATION))) OnTxAcceptedVerbose")
+			dbg.S(txDetails)
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnPodConnected: func(connected bool) {
-			Debug("(((NOTIFICATION))) OnPodConnected", connected)
+			dbg.Ln("(((NOTIFICATION))) OnPodConnected", connected)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
 		},
 		OnAccountBalance: func(account string, balance util.Amount, confirmed bool) {
-			Debug("OnAccountBalance")
+			dbg.Ln("OnAccountBalance")
 			// what does this actually do
-			Debug(account, balance, confirmed)
+			dbg.Ln(account, balance, confirmed)
 		},
 		OnWalletLockState: func(locked bool) {
-			Debug("OnWalletLockState", locked)
+			dbg.Ln("OnWalletLockState", locked)
 			// switch interface to unlock page
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
@@ -489,7 +489,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 			// TODO: lock when idle... how to get trigger for idleness in UI?
 		},
 		OnUnknownNotification: func(method string, params []json.RawMessage) {
-			Debug("(((NOTIFICATION))) OnUnknownNotification", method, params)
+			dbg.Ln("(((NOTIFICATION))) OnUnknownNotification", method, params)
 			wg.forceUpdateChain()
 			if wg.processWalletBlockNotification() {
 			}
@@ -498,19 +498,19 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 	
 }
 
-func (wg *WalletGUI) chainClient() (err error) {
-	Debug("starting up chain client")
+func (wg *WalletGUI) chainClient() (e error) {
+	dbg.Ln("starting up chain client")
 	if *wg.cx.Config.NodeOff {
-		Warn("node is disabled")
+		wrn.Ln("node is disabled")
 		return nil
 	}
 	
 	if wg.ChainClient == nil { // || wg.ChainClient.Disconnected() {
 		certs := pod.ReadCAFile(wg.cx.Config)
-		Debug(*wg.cx.Config.RPCConnect)
+		dbg.Ln(*wg.cx.Config.RPCConnect)
 		// wg.ChainMutex.Lock()
 		// defer wg.ChainMutex.Unlock()
-		if wg.ChainClient, err = rpcclient.New(
+		if wg.ChainClient, e = rpcclient.New(
 			&rpcclient.ConnConfig{
 				Host:                 *wg.cx.Config.RPCConnect,
 				Endpoint:             "ws",
@@ -521,35 +521,35 @@ func (wg *WalletGUI) chainClient() (err error) {
 				DisableAutoReconnect: false,
 				DisableConnectOnNew:  false,
 			}, wg.ChainNotifications(), wg.cx.KillAll,
-		); Check(err) {
+		); err.Chk(e) {
 			return
 		}
 	}
 	if wg.ChainClient.Disconnected() {
-		Debug("connecting chain client")
-		if err = wg.ChainClient.Connect(1); Check(err) {
+		dbg.Ln("connecting chain client")
+		if e = wg.ChainClient.Connect(1); err.Chk(e) {
 			return
 		}
 	}
-	if err = wg.ChainClient.NotifyBlocks(); !Check(err) {
-		Debug("subscribed to new blocks")
+	if e = wg.ChainClient.NotifyBlocks(); !err.Chk(e) {
+		dbg.Ln("subscribed to new blocks")
 		// wg.WalletNotifications()
 		wg.invalidate <- struct{}{}
 	}
 	return
 }
 
-func (wg *WalletGUI) walletClient() (err error) {
-	Debug("connecting to wallet")
+func (wg *WalletGUI) walletClient() (e error) {
+	dbg.Ln("connecting to wallet")
 	if *wg.cx.Config.WalletOff {
-		Warn("wallet is disabled")
+		wrn.Ln("wallet is disabled")
 		return nil
 	}
 	// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
 	certs := pod.ReadCAFile(wg.cx.Config)
-	Info("config.tls", *wg.cx.Config.TLS)
+	inf.Ln("config.tls", *wg.cx.Config.TLS)
 	wg.WalletMutex.Lock()
-	if wg.WalletClient, err = rpcclient.New(
+	if wg.WalletClient, e = rpcclient.New(
 		&rpcclient.ConnConfig{
 			Host:                 *wg.cx.Config.WalletServer,
 			Endpoint:             "ws",
@@ -560,24 +560,24 @@ func (wg *WalletGUI) walletClient() (err error) {
 			DisableAutoReconnect: false,
 			DisableConnectOnNew:  false,
 		}, wg.WalletNotifications(), wg.cx.KillAll,
-	); Check(err) {
+	); err.Chk(e) {
 		wg.WalletMutex.Unlock()
 		return
 	}
 	wg.WalletMutex.Unlock()
-	// if err = wg.WalletClient.Connect(1); Check(err) {
+	// if e = wg.WalletClient.Connect(1); err.Chk(e) {
 	// 	return
 	// }
-	if err = wg.WalletClient.NotifyNewTransactions(true); !Check(err) {
-		Debug("subscribed to new transactions")
+	if e = wg.WalletClient.NotifyNewTransactions(true); !err.Chk(e) {
+		dbg.Ln("subscribed to new transactions")
 	} else {
 		// return
 	}
-	if err = wg.WalletClient.NotifyBlocks(); Check(err) {
+	if e = wg.WalletClient.NotifyBlocks(); err.Chk(e) {
 		// return
 	} else {
-		Debug("subscribed to wallet client notify blocks")
+		dbg.Ln("subscribed to wallet client notify blocks")
 	}
-	Debug("wallet connected")
+	dbg.Ln("wallet connected")
 	return
 }

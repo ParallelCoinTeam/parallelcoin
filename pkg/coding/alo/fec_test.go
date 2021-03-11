@@ -2,6 +2,7 @@ package alo_test
 
 import (
 	"crypto/rand"
+	"github.com/p9c/pod/pkg/logg"
 	"testing"
 
 	"github.com/p9c/pod/pkg/coding/alo"
@@ -10,8 +11,8 @@ import (
 
 func MakeRandomBytes(size int, t *testing.T) (p []byte) {
 	p = make([]byte, size)
-	var err error
-	if _, err = rand.Read(p); alo.Check(err) {
+	var e error
+	if _, e = rand.Read(p); alo.err.Chk(e) {
 		t.Fail()
 	}
 	return
@@ -23,29 +24,29 @@ func TestSegmentBytes(t *testing.T) {
 		for size := 32; size < 65536; size *= 2 {
 			s := alo.SegmentBytes(b, size)
 			if len(s) != alo.Pieces(dataLen, size) {
-				t.Fatal(dataLen, size, len(s), "segments were not correctly split")
+				t.ftl.Ln(dataLen, size, len(s), "segments were not correctly split")
 			}
 		}
 	}
 }
 
 func TestGetShards(t *testing.T) {
-	logi.L.SetLevel("trace", false, "pod")
+	logg.SetLogLevel("trace")
 	for dataLen := 256; dataLen < 1025; dataLen += 16 {
 		red := 300
 		b := MakeRandomBytes(dataLen, t)
 		segs := alo.GetShards(b, red)
-		alo.Debugs(segs)
-		var err error
+		alo.dbg.S(segs)
+		var e error
 		var p *alo.Partials
 		for i := range segs {
 			for j := range segs[i] {
 				if i == 0 && j == 0 {
-					if p, err = alo.NewPacket(segs[i][j]); alo.Check(err) {
+					if p, e = alo.NewPacket(segs[i][j]); alo.err.Chk(e) {
 						t.Fail()
 					}
 				} else {
-					if err = p.AddShard(segs[i][j]); alo.Check(err) {
+					if e = p.AddShard(segs[i][j]); alo.err.Chk(e) {
 						t.Fail()
 					}
 				}
@@ -53,14 +54,13 @@ func TestGetShards(t *testing.T) {
 		}
 		// if we got to here we should be able to decode it
 		var ob []byte
-		if ob, err = p.Decode(); alo.Check(err) {
+		if ob, e = p.Decode(); alo.err.Chk(e) {
 			t.Fail()
 		}
 		if string(ob) != string(b) {
-			// alo.Error(err)
-			alo.Debugs(b)
-			alo.Debugs(ob)
-			t.Fatal("codec failed to decode encoded content")
+			// alo.			alo.dbg.S(b)
+			alo.dbg.S(ob)
+			t.ftl.Ln("codec failed to decode encoded content")
 		}
 	}
 }

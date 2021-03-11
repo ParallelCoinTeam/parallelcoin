@@ -68,8 +68,8 @@ func TestBase58(t *testing.T) {
 	}
 	// Decode tests
 	for x, test := range hexTests {
-		b, err := hex.DecodeString(test.in)
-		if err != nil {
+		b, e := hex.DecodeString(test.in)
+		if e != nil  {
 			t.Errorf("hex.DecodeString failed failed #%d: got: %s", x, test.in)
 			continue
 		}

@@ -101,13 +101,13 @@ userName = path[:i]
 	}
 	homeDir := ""
 	var u *user.User
-	var err error
+	var e error
 	if userName == "" {
-u, err = user.Current()
+u, e = user.Current()
 	} else {
-u, err = user.Lookup(userName)
+u, e = user.Lookup(userName)
 	}
-	if err == nil {
+	if e ==  nil {
 homeDir = u.HomeDir
 	}
 	// Fallback to CWD if user lookup fails or user has no home directory.
@@ -120,23 +120,23 @@ homeDir = "."
 // For this it tries to read the config file for the RPC server (either pod or
 // sac), and extract the RPC user and password from it.
 func createDefaultConfigFile(destinationPath, serverConfigPath,
-	serverDataDir, walletDataDir string) error {
+	serverDataDir, walletDataDir string) (e error) {
 // fmt.Println("server config path", serverConfigPath)
 	// Read the RPC server config
-	serverConfigFile, err := os.Open(serverConfigPath)
-	if err != nil {
-return err
+	serverConfigFile, e := os.Open(serverConfigPath)
+	if e != nil  {
+return e
 	}
 	defer serverConfigFile.Close()
-	content, err := ioutil.ReadAll(serverConfigFile)
-	if err != nil {
-return err
+	content, e := ioutil.ReadAll(serverConfigFile)
+	if e != nil  {
+return e
 	}
 	// content := []byte(samplePodCtlConf)
 	// Extract the rpcuser
-	rpcUserRegexp, err := regexp.Compile(`(?m)^\s*rpcuser=([^\s]+)`)
-	if err != nil {
-return err
+	rpcUserRegexp, e := regexp.Compile(`(?m)^\s*rpcuser=([^\s]+)`)
+	if e != nil  {
+return e
 	}
 	userSubmatches := rpcUserRegexp.FindSubmatch(content)
 	if userSubmatches == nil {
@@ -144,9 +144,9 @@ return err
 		return nil
 	}
 	// Extract the rpcpass
-	rpcPassRegexp, err := regexp.Compile(`(?m)^\s*rpcpass=([^\s]+)`)
-	if err != nil {
-return err
+	rpcPassRegexp, e := regexp.Compile(`(?m)^\s*rpcpass=([^\s]+)`)
+	if e != nil  {
+return e
 	}
 	passSubmatches := rpcPassRegexp.FindSubmatch(content)
 	if passSubmatches == nil {
@@ -154,23 +154,22 @@ return err
 		return nil
 	}
 	// Extract the TLS
-	TLSRegexp, err := regexp.Compile(`(?m)^\s*tls=(0|1)(?:\s|$)`)
-	if err != nil {
-return err
+	TLSRegexp, e := regexp.Compile(`(?m)^\s*tls=(0|1)(?:\s|$)`)
+	if e != nil  {
+return e
 	}
 	TLSSubmatches := TLSRegexp.FindSubmatch(content)
 	// Create the destination directory if it does not exists
-	err = os.MkdirAll(filepath.Dir(destinationPath), 0700)
-	if err != nil {
-return err
+	e = os.MkdirAll(filepath.Dir(destinationPath), 0700)
+	if e != nil  {
+return e
 	}
 	// fmt.Println("config path", destinationPath)
 	// Create the destination file and write the rpcuser and rpcpass to it
-	dest, err := os.OpenFile(destinationPath,
+	dest, e := os.OpenFile(destinationPath,
 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-Error(err)
-		return err
+	if e != nil  {
+		return e
 	}
 	defer dest.Close()
 	destString := fmt.Sprintf("username=%s\npassword=%s\n",
@@ -187,25 +186,25 @@ Currently there is no adequate tool for this, but will be soon.")
 }
 func copy(src, dst string) (int64, error) {
 // fmt.Println(src, dst)
-	sourceFileStat, err := os.Stat(src)
-	if err != nil {
-return 0, err
+	sourceFileStat, e := os.Stat(src)
+	if e != nil  {
+return 0, e
 	}
 	if !sourceFileStat.Mode().IsRegular() {
 return 0, fmt.Errorf("%s is not a regular file", src)
 	}
-	source, err := os.Open(src)
-	if err != nil {
-return 0, err
+	source, e := os.Open(src)
+	if e != nil  {
+return 0, e
 	}
 	defer source.Close()
-	destination, err := os.Create(dst)
-	if err != nil {
-return 0, err
+	destination, e := os.Create(dst)
+	if e != nil  {
+return 0, e
 	}
 	defer destination.Close()
-	nBytes, err := io.Copy(destination, source)
-	return nBytes, err
+	nBytes, e := io.Copy(destination, source)
+	return nBytes, e
 }
 // supportedSubsystems returns a sorted slice of the supported subsystems for
 // logging purposes.
@@ -222,7 +221,7 @@ subsystems = append(subsystems, subsysID)
 // parseAndSetDebugLevels attempts to parse the specified debug level and set
 // the levels accordingly.  An appropriate error is returned if anything is
 // invalid.
-func parseAndSetDebugLevels(debugLevel string) error {
+func parseAndSetDebugLevels(debugLevel string) (e error) {
 // When the specified string doesn't have any delimters, treat it as
 	// the log level for all subsystems.
 	if !strings.Contains(debugLevel, ",") && !strings.Contains(debugLevel, "=") {
@@ -292,12 +291,12 @@ cfg = Config{
 		// file or the version flag was specified.
 		preCfg := cfg
 		preParser := flags.NewParser(&preCfg, flags.Default)
-		_, err := preParser.Parse()
-		if err != nil {
-if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		_, e := preParser.Parse()
+		if e != nil  {
+if e, ok := e.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 preParser.WriteHelp(os.Stderr)
 					}
-			return nil, nil, err
+			return nil, nil, e
 		}
 		// Show the version and exit if the version flag was specified.
 		funcName := "loadConfig"
@@ -323,24 +322,24 @@ appDataDir = cleanAndExpandPath(preCfg.DataDir.value)
 configFilePath = filepath.Join(appDataDir, DefaultConfigFilename)
 							}
 						}
-		err = flags.NewIniParser(parser).ParseFile(configFilePath)
-		if err != nil {
-if _, ok := err.(*os.PathError); !ok {
-fmt.Fprintln(os.Stderr, err)
+		e = flags.NewIniParser(parser).ParseFile(configFilePath)
+		if e != nil  {
+if _, ok := e.(*os.PathError); !ok {
+fmt.Fprintln(os.Stderr, e)
 				parser.WriteHelp(os.Stderr)
-				return nil, nil, err
+				return nil, nil, e
 			}
-			configFileError = err
+			configFileError = e
 		}
 		// Parse command line options again to ensure they take precedence.
-		remainingArgs, err := parser.Parse()
-		if err != nil {
-if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		remainingArgs, e := parser.Parse()
+		if e != nil  {
+if e, ok := e.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 parser.WriteHelp(os.Stderr)
 			}
-		return nil, nil, err
+		return nil, nil, e
 		}
-		// Check deprecated aliases.  The new options receive priority when both
+		// Chk deprecated aliases.  The new options receive priority when both
 		// are changed from the default.
 		if cfg.DataDir.ExplicitlySet() {
 fmt.Fprintln(os.Stderr, "datadir option has been replaced by "+
@@ -361,24 +360,24 @@ cfg.RPCKey.value = filepath.Join(cfg.AppDataDir.value, "rpc.key")
 cfg.RPCCert.value = filepath.Join(cfg.AppDataDir.value, "rpc.cert")
 								}
 							}
-							if _, err := os.Stat(cfg.DataDir.value); os.IsNotExist(err) {
+							if _, e = os.Stat(cfg.DataDir.value); os.IsNotExist(e) {
 // Create the destination directory if it does not exists
-									err = os.MkdirAll(cfg.DataDir.value, 0700)
-									if err != nil {
-fmt.Println("ERROR", err)
-											return nil, nil, err
+									e = os.MkdirAll(cfg.DataDir.value, 0700)
+									if e != nil  {
+fmt.Println("ERROR", e)
+											return nil, nil, e
 										}
 									}
 									var generatedRPCPass, generatedRPCUser string
-		if _, err := os.Stat(cfg.ConfigFile.value); os.IsNotExist(err) {
+		if _, e = os.Stat(cfg.ConfigFile.value); os.IsNotExist(e) {
 // If we can find a pod.conf in the standard location, copy
 				// copy the rpcuser and rpcpassword and TLS setting
 				c := cleanAndExpandPath("~/.pod/pod.conf")
 				// fmt.Println("server config path:", c)
-			// _, err := os.Stat(c)
-			// fmt.Println(err)
+			// _, e = os.Stat(c)
+			// fmt.Println(e)
 			// fmt.Println(os.IsNotExist(err))
-			if _, err := os.Stat(c); err == nil {
+			if _, e = os.Stat(c); e ==  nil {
 fmt.Println("Creating config from pod config")
 					createDefaultConfigFile(cfg.ConfigFile.value, c, cleanAndExpandPath("~/.pod"),
 						cfg.AppDataDir.value)
@@ -386,23 +385,23 @@ fmt.Println("Creating config from pod config")
 var bb bytes.Buffer
 						bb.Write(sampleModConf)
 				fmt.Println("Writing config file:", cfg.ConfigFile.value)
-				dest, err := os.OpenFile(cfg.ConfigFile.value,
+				dest, e := os.OpenFile(cfg.ConfigFile.value,
 						os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-					if err != nil {
-fmt.Println("ERROR", err)
-							return nil, nil, err
+					if e != nil  {
+fmt.Println("ERROR", e)
+							return nil, nil, e
 						}
 						defer dest.Close()
 						// We generate a random user and password
 						randomBytes := make([]byte, 20)
-				_, err = rand.Read(randomBytes)
-				if err != nil {
-return nil, nil, err
+				_, e = rand.Read(randomBytes)
+				if e != nil  {
+return nil, nil, e
 					}
 					generatedRPCUser = base64.StdEncoding.EncodeToString(randomBytes)
-					_, err = rand.Read(randomBytes)
-				if err != nil {
-return nil, nil, err
+					_, e = rand.Read(randomBytes)
+				if e != nil  {
+return nil, nil, e
 					}
 				generatedRPCPass = base64.StdEncoding.EncodeToString(randomBytes)
 				// We copy every line from the sample config file to the destination,
@@ -410,10 +409,10 @@ return nil, nil, err
 				//
 				var line string
 				reader := bufio.NewReader(&bb)
-				for err != io.EOF {
-line, err = reader.ReadString('\n')
-						if err != nil && err != io.EOF {
-return nil, nil, err
+				for e != io.EOF {
+line, e = reader.ReadString('\n')
+						if e != nil  && e != io.EOF {
+return nil, nil, e
 							}
 							if !strings.Contains(line, "podusername=") && !strings.Contains(line, "podpassword=") {
 if strings.Contains(line, "username=") {
@@ -423,8 +422,8 @@ line = "password=" + generatedRPCPass + "\n"
 											}
 										}
 										_, _ = generatedRPCPass, generatedRPCUser
-										if _, err := dest.WriteString(line); err != nil {
-return nil, nil, err
+										if _, e = dest.WriteString(line); err.Chk(e) {
+return nil, nil, e
 											}
 										}
 									}
@@ -443,10 +442,10 @@ activeNet = &netparams.SimNetParams
 		if numNets > 1 {
 str := "%s: The testnet and simnet netparams can't be used " +
 				"together -- choose one"
-			err := fmt.Errorf(str, "loadConfig")
-			fmt.Fprintln(os.Stderr, err)
+			e := fmt.Errorf(str, "loadConfig")
+			fmt.Fprintln(os.Stderr, e)
 			parser.WriteHelp(os.Stderr)
-			return nil, nil, err
+			return nil, nil, e
 		}
 		// Append the network type to the log directory so it is "namespaced"
 		// per network.
@@ -461,11 +460,11 @@ fmt.Println("Supported subsystems", supportedSubsystems())
 			// logger variables may be used.
 			initLogRotator(filepath.Join(cfg.LogDir, DefaultLogFilename))
 			// Parse, validate, and set debug log level(s).
-			if err := parseAndSetDebugLevels(cfg.DebugLevel); err != nil {
-err := fmt.Errorf("%s: %v", "loadConfig", err.Error())
-			fmt.Fprintln(os.Stderr, err)
+			if e := parseAndSetDebugLevels(cfg.DebugLevel); err.Chk(e) {
+e := fmt.Errorf("%s: %v", "loadConfig", e.Error())
+			fmt.Fprintln(os.Stderr, e)
 			parser.WriteHelp(os.Stderr)
-			return nil, nil, err
+			return nil, nil, e
 		}
 		// Exit if you try to use a simulation wallet with a standard
 		// data directory.
@@ -485,15 +484,15 @@ fmt.Fprintln(os.Stderr, "Tried to create a temporary simulation "+
 		netDir := NetworkDir(cfg.AppDataDir, ActiveNet.Params)
 		dbPath := filepath.Join(netDir, WalletDbName)
 		if cfg.CreateTemp && cfg.Create {
-err := fmt.Errorf("The flags --create and --createtemp can not " +
+e := fmt.Errorf("The flags --create and --createtemp can not " +
 					"be specified together. Use --help for more information.")
-				fmt.Fprintln(os.Stderr, err)
-				return nil, nil, err
+				fmt.Fprintln(os.Stderr, e)
+				return nil, nil, e
 			}
-			dbFileExists, err := cfgutil.FileExists(dbPath)
-			if err != nil {
+			dbFileExists, e := cfgutil.FileExists(dbPath)
+			if e != nil  {
 log <- cl.Error{err}
-					return nil, nil, err
+					return nil, nil, e
 				}
 				if cfg.CreateTemp {
 tempWalletExists := false
@@ -504,67 +503,67 @@ str := fmt.Sprintf("The wallet already exists. Loading this " +
 								tempWalletExists = true
 							}
 							// Ensure the data directory for the network exists.
-							if err := checkCreateDir(netDir); err != nil {
-fmt.Fprintln(os.Stderr, err)
-									return nil, nil, err
+							if e := checkCreateDir(netDir); err.Chk(e) {
+fmt.Fprintln(os.Stderr, e)
+									return nil, nil, e
 								}
 								if !tempWalletExists {
 // Perform the initial wallet creation wizard.
-										if err := createSimulationWallet(&cfg); err != nil {
-fmt.Fprintln(os.Stderr, "Unable to create wallet:", err)
-												return nil, nil, err
+										if e := createSimulationWallet(&cfg); err.Chk(e) {
+fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
+												return nil, nil, e
 											}
 										}
 		} else if cfg.Create {
 // Error if the create flag is set and the wallet already
 			// exists.
 			if dbFileExists {
-err := fmt.Errorf("The wallet database file `%v` "+
+e := fmt.Errorf("The wallet database file `%v` "+
 						"already exists.", dbPath)
-					fmt.Fprintln(os.Stderr, err)
-					return nil, nil, err
+					fmt.Fprintln(os.Stderr, e)
+					return nil, nil, e
 			}
 			// Ensure the data directory for the network exists.
-			if err := checkCreateDir(netDir); err != nil {
-fmt.Fprintln(os.Stderr, err)
-				return nil, nil, err
+			if e := checkCreateDir(netDir); err.Chk(e) {
+fmt.Fprintln(os.Stderr, e)
+				return nil, nil, e
 			}
 			// Perform the initial wallet creation wizard.
-			if err := createWallet(&cfg); err != nil {
-fmt.Fprintln(os.Stderr, "Unable to create wallet:", err)
-					return nil, nil, err
+			if e := createWallet(&cfg); err.Chk(e) {
+fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
+					return nil, nil, e
 				}
 				// Created successfully, so exit now with success.
 				os.Exit(0)
 			} else if !dbFileExists && !cfg.NoInitialLoad {
 keystorePath := filepath.Join(netDir, keystore.Filename)
-					keystoreExists, err := cfgutil.FileExists(keystorePath)
-					if err != nil {
-fmt.Fprintln(os.Stderr, err)
-							return nil, nil, err
+					keystoreExists, e := cfgutil.FileExists(keystorePath)
+					if e != nil  {
+fmt.Fprintln(os.Stderr, e)
+							return nil, nil, e
 			}
 			if !keystoreExists {
-// err = fmt.Errorf("The wallet does not exist.  Run with the " +
+// e = fmt.Errorf("The wallet does not exist.  Run with the " +
 				// "--create option to initialize and create it...")
 				// Ensure the data directory for the network exists.
 				fmt.Println("Existing wallet not found in", cfg.ConfigFile.value)
-				if err := checkCreateDir(netDir); err != nil {
-fmt.Fprintln(os.Stderr, err)
-						return nil, nil, err
+				if e := checkCreateDir(netDir); err.Chk(e) {
+fmt.Fprintln(os.Stderr, e)
+						return nil, nil, e
 					}
 					// Perform the initial wallet creation wizard.
-					if err := createWallet(&cfg); err != nil {
-fmt.Fprintln(os.Stderr, "Unable to create wallet:", err)
-					return nil, nil, err
+					if e := createWallet(&cfg); err.Chk(e) {
+fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
+					return nil, nil, e
 				}
 				// Created successfully, so exit now with success.
 				os.Exit(0)
 			} else {
-err = fmt.Errorf("The wallet is in legacy format.  Run with the " +
+e = fmt.Errorf("The wallet is in legacy format.  Run with the " +
 						"--create option to import it.")
 				}
-				fmt.Fprintln(os.Stderr, err)
-				return nil, nil, err
+				fmt.Fprintln(os.Stderr, e)
+				return nil, nil, e
 			}
 			// localhostListeners := map[string]struct{}{
 				// 	"localhost": {},
@@ -580,26 +579,26 @@ if cfg.RPCConnect == "" {
 cfg.RPCConnect = net.JoinHostPort("localhost", activeNet.RPCClientPort)
 					}
 					// Add default port to connect flag if missing.
-					cfg.RPCConnect, err = cfgutil.NormalizeAddress(cfg.RPCConnect,
+					cfg.RPCConnect, e = cfgutil.NormalizeAddress(cfg.RPCConnect,
 							activeNet.RPCClientPort)
-						if err != nil {
+						if e != nil  {
 fmt.Fprintf(os.Stderr,
-										"Invalid rpcconnect network address: %v\n", err)
-									return nil, nil, err
+										"Invalid rpcconnect network address: %v\n", e)
+									return nil, nil, e
 								}
-		// RPCHost, _, err := net.SplitHostPort(cfg.RPCConnect)
-		// if err != nil {
-// 	return nil, nil, err
+		// RPCHost, _, e = net.SplitHostPort(cfg.RPCConnect)
+		// if e != nil  {
+// 	return nil, nil, e
 		// }
 		if cfg.EnableClientTLS {
 // if _, ok := localhostListeners[RPCHost]; !ok {
 // 	str := "%s: the --noclienttls option may not be used " +
 					// 		"when connecting RPC to non localhost " +
 					// 		"addresses: %s"
-					// 	err := fmt.Errorf(str, funcName, cfg.RPCConnect)
-					// 	fmt.Fprintln(os.Stderr, err)
+					// 	e := fmt.Errorf(str, funcName, cfg.RPCConnect)
+					// 	fmt.Fprintln(os.Stderr, e)
 					// 	fmt.Fprintln(os.Stderr, usageMessage)
-					// 	return nil, nil, err
+					// 	return nil, nil, e
 					// }
 					// } else {
 // If CAFile is unset, choose either the copy or local pod cert.
@@ -607,18 +606,18 @@ fmt.Fprintf(os.Stderr,
 cfg.CAFile.value = filepath.Join(cfg.AppDataDir.value, DefaultCAFilename)
 				// If the CA copy does not exist, check if we're connecting to
 				// a local pod and switch to its RPC cert if it exists.
-				certExists, err := cfgutil.FileExists(cfg.CAFile.value)
-				if err != nil {
-fmt.Fprintln(os.Stderr, err)
-						return nil, nil, err
+				certExists, e := cfgutil.FileExists(cfg.CAFile.value)
+				if e != nil  {
+fmt.Fprintln(os.Stderr, e)
+						return nil, nil, e
 				}
 				if !certExists {
 // if _, ok := localhostListeners[RPCHost]; ok {
-podCertExists, err := cfgutil.FileExists(
+podCertExists, e := cfgutil.FileExists(
 									DefaultCAFile)
-								if err != nil {
-fmt.Fprintln(os.Stderr, err)
-										return nil, nil, err
+								if e != nil  {
+fmt.Fprintln(os.Stderr, e)
+										return nil, nil, e
 					}
 					if podCertExists {
 cfg.CAFile.value = DefaultCAFile
@@ -634,9 +633,9 @@ cfg.CAFile.value = DefaultCAFile
 			// remove defaults from go-flags slice options without assigning
 			// specific behavior to a particular string.
 			if len(cfg.ExperimentalRPCListeners) == 0 && len(cfg.WalletRPCListeners) == 0 {
-addrs, err := net.LookupHost("localhost")
-			if err != nil {
-return nil, nil, err
+addrs, e := net.LookupHost("localhost")
+			if e != nil  {
+return nil, nil, e
 				}
 				cfg.WalletRPCListeners = make([]string, 0, len(addrs))
 				for _, addr := range addrs {
@@ -646,19 +645,19 @@ addr = net.JoinHostPort(addr, activeNet.WalletRPCServerPort)
 				}
 				// Add default port to all rpc listener addresses if needed and remove
 				// duplicate addresses.
-		cfg.WalletRPCListeners, err = cfgutil.NormalizeAddresses(
+		cfg.WalletRPCListeners, e = cfgutil.NormalizeAddresses(
 				cfg.WalletRPCListeners, activeNet.WalletRPCServerPort)
-			if err != nil {
+			if e != nil  {
 fmt.Fprintf(os.Stderr,
-							"Invalid network address in legacy RPC listeners: %v\n", err)
-						return nil, nil, err
+							"Invalid network address in legacy RPC listeners: %v\n", e)
+						return nil, nil, e
 					}
-					cfg.ExperimentalRPCListeners, err = cfgutil.NormalizeAddresses(
+					cfg.ExperimentalRPCListeners, e = cfgutil.NormalizeAddresses(
 			cfg.ExperimentalRPCListeners, activeNet.WalletRPCServerPort)
-		if err != nil {
+		if e != nil  {
 fmt.Fprintf(os.Stderr,
-						"Invalid network address in RPC listeners: %v\n", err)
-					return nil, nil, err
+						"Invalid network address in RPC listeners: %v\n", e)
+					return nil, nil, e
 				}
 				// Both RPC servers may not listen on the same interface/port.
 				if len(cfg.WalletRPCListeners) > 0 && len(cfg.ExperimentalRPCListeners) > 0 {
@@ -669,11 +668,11 @@ seenAddresses[addr] = struct{}{}
 			for _, addr := range cfg.ExperimentalRPCListeners {
 _, seen := seenAddresses[addr]
 					if seen {
-err := fmt.Errorf("Address `%s` may not be "+
+e := fmt.Errorf("Address `%s` may not be "+
 						"used as a listener address for both "+
 						"RPC servers", addr)
-					fmt.Fprintln(os.Stderr, err)
-					return nil, nil, err
+					fmt.Fprintln(os.Stderr, e)
+					return nil, nil, e
 				}
 			}
 		}
@@ -683,23 +682,23 @@ err := fmt.Errorf("Address `%s` may not be "+
 allListeners := append(cfg.WalletRPCListeners,
 						cfg.ExperimentalRPCListeners...)
 					for _, addr := range allListeners {
-if err != nil {
+if e != nil  {
 str := "%s: RPC listen interface '%s' is " +
 										"invalid: %v"
-									err := fmt.Errorf(str, funcName, addr, err)
-									fmt.Fprintln(os.Stderr, err)
+									e := fmt.Errorf(str, funcName, addr, e)
+									fmt.Fprintln(os.Stderr, e)
 									fmt.Fprintln(os.Stderr, usageMessage)
-									return nil, nil, err
+									return nil, nil, e
 								}
-				// host, _, err := net.SplitHostPort(addr)
+				// host, _, e = net.SplitHostPort(addr)
 				// if _, ok := localhostListeners[host]; !ok {
 // 	str := "%s: the --noservertls option may not be used " +
 					// 		"when binding RPC to non localhost " +
 				// 		"addresses: %s"
-				// 	err := fmt.Errorf(str, funcName, addr)
-				// 	fmt.Fprintln(os.Stderr, err)
+				// 	e := fmt.Errorf(str, funcName, addr)
+				// 	fmt.Fprintln(os.Stderr, e)
 				// 	fmt.Fprintln(os.Stderr, usageMessage)
-				// 	return nil, nil, err
+				// 	return nil, nil, e
 				// }
 			}
 		}

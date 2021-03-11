@@ -37,29 +37,29 @@ func (b *BufferUint64) Add(value uint64) {
 	b.Buf[b.Cursor] = value
 }
 
-func (b *BufferUint64) ForEach(fn func(v uint64) error) (err error) {
+func (b *BufferUint64) ForEach(fn func(v uint64) error) (e error) {
 	c := b.Cursor
 	i := c + 1
 	if i == len(b.Buf) {
-		// Debug("hit the end")
+		// dbg.Ln("hit the end")
 		i = 0
 	}
 	if !b.Full {
-		// Debug("buffer not yet full")
+		// dbg.Ln("buffer not yet full")
 		i = 0
 	}
-	// Debug(b.Buf)
+	// dbg.Ln(b.Buf)
 	for ; ; i++ {
 		if i == len(b.Buf) {
-			// Debug("passed the end")
+			// dbg.Ln("passed the end")
 			i = 0
 		}
 		if i == c {
-			// Debug("reached cursor again")
+			// dbg.Ln("reached cursor again")
 			break
 		}
-		// Debug(i, b.Cursor)
-		if err = fn(b.Buf[i]); err != nil {
+		// dbg.Ln(i, b.Cursor)
+		if e = fn(b.Buf[i]); err.Chk(e) {
 			break
 		}
 	}

@@ -6,22 +6,22 @@ import (
 	"github.com/p9c/pod/pkg/wallet/chain"
 	"sort"
 	
-	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // byAmount defines the methods needed to satisify sort.Interface to sort credits by their output amount.
 type byAmount []wtxmgr.Credit
 
-func (s byAmount) Len() int { return len(s) }
+func (s byAmount) Len() int           { return len(s) }
 func (s byAmount) Less(i, j int) bool { return s[i].Amount < s[j].Amount }
-func (s byAmount) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s byAmount) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 func makeInputSource(eligible []wtxmgr.Credit) txauthor.InputSource {
 	// Pick largest outputs first. This is only done for compatibility with previous
@@ -57,13 +57,15 @@ type secretSource struct {
 }
 
 // GetKey gets the private key for an address if it is available
-func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
-	ma, err := s.Address(s.addrmgrNs, addr)
-	if err != nil {
-		Error(err)
-		return nil, false, err
+func (s secretSource) GetKey(addr util.Address) (privKey *ec.PrivateKey, cmpr bool, e error) {
+	var ma waddrmgr.ManagedAddress
+	ma, e = s.Address(s.addrmgrNs, addr)
+	if e != nil {
+		return nil, false, e
 	}
-	mpka, ok := ma.(waddrmgr.ManagedPubKeyAddress)
+	var ok bool
+	var mpka waddrmgr.ManagedPubKeyAddress
+	mpka, ok = ma.(waddrmgr.ManagedPubKeyAddress)
 	if !ok {
 		e := fmt.Errorf(
 			"managed address type for %v is `%T` but "+
@@ -71,19 +73,17 @@ func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 		)
 		return nil, false, e
 	}
-	var privKey *ec.PrivateKey
-	if privKey, err = mpka.PrivKey(); Check(err) {
-		return nil, false, err
+	if privKey, e = mpka.PrivKey(); err.Chk(e) {
+		return nil, false, e
 	}
 	return privKey, ma.Compressed(), nil
 }
 
 // GetScript returns pay to script transaction
 func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
-	ma, err := s.Address(s.addrmgrNs, addr)
-	if err != nil {
-		Error(err)
-		return nil, err
+	ma, e := s.Address(s.addrmgrNs, addr)
+	if e != nil {
+		return nil, e
 	}
 	msa, ok := ma.(waddrmgr.ManagedScriptAddress)
 	if !ok {
@@ -104,39 +104,39 @@ func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
 func (w *Wallet) txToOutputs(
 	outputs []*wire.TxOut, account uint32,
 	minconf int32, feeSatPerKb util.Amount,
-) (tx *txauthor.AuthoredTx, err error) {
+) (tx *txauthor.AuthoredTx, e error) {
 	var chainClient chain.Interface
-	if chainClient, err = w.requireChainClient(); Check(err) {
-		return nil, err
+	if chainClient, e = w.requireChainClient(); err.Chk(e) {
+		return nil, e
 	}
-	err = walletdb.Update(
-		w.db, func(dbtx walletdb.ReadWriteTx) (err error) {
+	e = walletdb.Update(
+		w.db, func(dbtx walletdb.ReadWriteTx) (e error) {
 			addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 			// Get current block's height and hash.
 			var bs *waddrmgr.BlockStamp
-			if bs, err = chainClient.BlockStamp(); Check(err) {
+			if bs, e = chainClient.BlockStamp(); err.Chk(e) {
 				return
 			}
 			var eligible []wtxmgr.Credit
-			if eligible, err = w.findEligibleOutputs(dbtx, account, minconf, bs); Check(err) {
+			if eligible, e = w.findEligibleOutputs(dbtx, account, minconf, bs); err.Chk(e) {
 				return
 			}
 			inputSource := makeInputSource(eligible)
-			changeSource := func() (b []byte, err error) {
+			changeSource := func() (b []byte, e error) {
 				// Derive the change output script. As a hack to allow spending from the
 				// imported account, change addresses are created from account 0.
 				var changeAddr util.Address
 				if account == waddrmgr.ImportedAddrAccount {
-					changeAddr, err = w.newChangeAddress(addrmgrNs, 0)
+					changeAddr, e = w.newChangeAddress(addrmgrNs, 0)
 				} else {
-					changeAddr, err = w.newChangeAddress(addrmgrNs, account)
+					changeAddr, e = w.newChangeAddress(addrmgrNs, account)
 				}
-				if Check(err) {
+				if err.Chk(e) {
 					return
 				}
 				return txscript.PayToAddrScript(changeAddr)
 			}
-			if tx, err = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb, inputSource, changeSource); Check(err){
+			if tx, e = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb, inputSource, changeSource); err.Chk(e) {
 				return
 			}
 			// Randomize change position, if change exists, before signing. This doesn't
@@ -147,15 +147,15 @@ func (w *Wallet) txToOutputs(
 			return tx.AddAllInputScripts(secretSource{w.Manager, addrmgrNs})
 		},
 	)
-	if Check(err) {
+	if err.Chk(e) {
 		return
 	}
-	if err = validateMsgTx(tx.Tx, tx.PrevScripts, tx.PrevInputValues); Check(err){
+	if e = validateMsgTx(tx.Tx, tx.PrevScripts, tx.PrevInputValues); err.Chk(e) {
 		return
 	}
 	if tx.ChangeIndex >= 0 && account == waddrmgr.ImportedAddrAccount {
 		changeAmount := util.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
-		Warnf(
+		wrn.F(
 			"spend from imported account produced change: moving %v from imported account into default account.",
 			changeAmount,
 		)
@@ -170,10 +170,9 @@ func (w *Wallet) findEligibleOutputs(
 ) ([]wtxmgr.Credit, error) {
 	addrmgrNs := dbtx.ReadBucket(waddrmgrNamespaceKey)
 	txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
-	unspent, err := w.TxStore.UnspentOutputs(txmgrNs)
-	if err != nil {
-		Error(err)
-		return nil, err
+	unspent, e := w.TxStore.UnspentOutputs(txmgrNs)
+	if e != nil {
+		return nil, e
 	}
 	// TODO: Eventually all of these filters (except perhaps output locking) should
 	//  be handled by the call to UnspentOutputs (or similar). Because one of these
@@ -204,13 +203,13 @@ func (w *Wallet) findEligibleOutputs(
 		// TODO: Handle multisig outputs by determining if enough of the addresses are
 		//  controlled.
 		var addrs []util.Address
-		if _, addrs, _, err = txscript.ExtractPkScriptAddrs(
+		if _, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			output.PkScript, w.chainParams,
-		); Check(err) || len(addrs) != 1 {
+		); err.Chk(e) || len(addrs) != 1 {
 			continue
 		}
 		var addrAcct uint32
-		if _, addrAcct, err = w.Manager.AddrAccount(addrmgrNs, addrs[0]); Check(err) ||
+		if _, addrAcct, e = w.Manager.AddrAccount(addrmgrNs, addrs[0]); err.Chk(e) ||
 			addrAcct != account {
 			continue
 		}
@@ -222,19 +221,20 @@ func (w *Wallet) findEligibleOutputs(
 // validateMsgTx verifies transaction input scripts for tx. All previous output
 // scripts from outputs redeemed by the transaction, in the same order they are
 // spent, must be passed in the prevScripts slice.
-func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amount) error {
+func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amount) (e error) {
 	hashCache := txscript.NewTxSigHashes(tx)
 	for i, prevScript := range prevScripts {
-		vm, err := txscript.NewEngine(
+		var vm *txscript.Engine
+		vm, e = txscript.NewEngine(
 			prevScript, tx, i,
 			txscript.StandardVerifyFlags, nil, hashCache, int64(inputValues[i]),
 		)
-		if Check(err) {
-			return fmt.Errorf("cannot create script engine: %s", err)
+		if err.Chk(e) {
+			return fmt.Errorf("cannot create script engine: %s", e)
 		}
-		err = vm.Execute()
-		if Check(err) {
-			return fmt.Errorf("cannot validate transaction: %s", err)
+		e = vm.Execute()
+		if err.Chk(e) {
+			return fmt.Errorf("cannot validate transaction: %s", e)
 		}
 	}
 	return nil

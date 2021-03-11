@@ -3,48 +3,46 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/util/routeable"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
-	"runtime"
 	"time"
 	
 	"github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/pipe/serve"
+	"github.com/p9c/pod/pkg/pipe/serve"
 	"github.com/p9c/pod/version"
 	
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/pod"
 )
 
-func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
-		Debug("running beforeFunc")
+func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
+		dbg.Ln("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
 			cx.DataDir = c.String("datadir")
-			Debug("datadir", *cx.Config.DataDir)
+			dbg.Ln("datadir", *cx.Config.DataDir)
 		}
-		Debug(c.IsSet("D"), c.IsSet("datadir"))
-		// propagate datadir path to interrupt for restart handling
-		interrupt.DataDir = cx.DataDir
+		dbg.Ln(c.IsSet("D"), c.IsSet("datadir"))
+		// // propagate datadir path to interrupt for restart handling
+		// interrupt.DataDir = cx.DataDir
 		// if there is a delaystart requested, pause for 3 seconds
 		if c.IsSet("delaystart") {
 			time.Sleep(time.Second * 3)
 		}
 		if c.IsSet("pipelog") {
-			Debug("pipe logger enabled")
+			dbg.Ln("pipe logger enabled")
 			*cx.Config.PipeLog = c.Bool("pipelog")
 			serve.Log(cx.KillAll, fmt.Sprint(os.Args))
 		}
@@ -55,39 +53,34 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.DataDir + string(os.PathSeparator) + podConfigFilename
 		// we are going to assume the config is not manually misedited
 		if apputil.FileExists(*cx.Config.ConfigFile) {
-			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
-			if err == nil {
+			b, e := ioutil.ReadFile(*cx.Config.ConfigFile)
+			if e == nil {
 				cx.Config, cx.ConfigMap = pod.EmptyConfig()
-				err = json.Unmarshal(b, cx.Config)
-				if err != nil {
-					Error("error unmarshalling config", err)
+				e = json.Unmarshal(b, cx.Config)
+				if e != nil {
+					err.Ln("error unmarshalling config", e)
 					// os.Exit(1)
-					return err
+					return e
 				}
 			} else {
-				Fatal("unexpected error reading configuration file:", err)
+				ftl.Ln("unexpected error reading configuration file:", e)
 				// os.Exit(1)
-				return err
+				return e
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
-			Debug("will save config after configuration")
+			dbg.Ln("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("loglevel") {
-			Trace("set loglevel", c.String("loglevel"))
+			trc.Ln("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
-			color := true
-			if runtime.GOOS == "windows" {
-				color = false
-			}
-			logi.L.SetLevel(*cx.Config.LogLevel, color, "pod")
-			// Info(version.Get())
 		}
+		logg.SetLogLevel(*cx.Config.LogLevel)
 		if !*cx.Config.PipeLog {
 			// if/when running further instances of the same version no reason
 			// to print the version message again
-			Debugf("running %s\n%s", os.Args, version.Get())
+			dbg.Ln("\nrunning", os.Args, version.Get())
 		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")
@@ -105,7 +98,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
-					Debug("using mainnet for node")
+					dbg.Ln("using mainnet for node")
 				}
 				cx.ActiveNet = &netparams.MainNetParams
 			}
@@ -276,7 +269,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			// if LAN is turned on it means by default we are on testnet
 			cx.ActiveNet = &netparams.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
-				Debug("set lan", c.Bool("lan"))
+				dbg.Ln("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")
 				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
 			} else {
@@ -294,7 +287,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("minerpass") {
 			*cx.Config.MinerPass = c.String("minerpass")
-			Debug("--------- set minerpass", *cx.Config.MinerPass)
+			dbg.Ln("--------- set minerpass", *cx.Config.MinerPass)
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("blockminsize") {
@@ -393,11 +386,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.DisableController = c.Bool("disablecontroller")
 		}
 		if c.IsSet("save") {
-			Info("saving configuration")
+			inf.Ln("saving configuration")
 			cx.StateCfg.Save = true
 		}
-		var err error
-		// if err = routeable.Discover(); Check(err) {
+		// if e = routeable.Discover(); err.Chk(e) {
 		// 	// TODO: this should trigger the display of this lack of internet
 		// }
 		go func() {
@@ -405,7 +397,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			for {
 				select {
 				case <-time.After(time.Second * 10):
-					if err = routeable.Discover(); Check(err) {
+					if e = routeable.Discover(); err.Chk(e) {
 						// TODO: this should trigger the display of this lack of internet
 					}
 				case <-cx.KillAll:

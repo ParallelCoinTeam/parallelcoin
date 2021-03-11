@@ -2,8 +2,8 @@ package spv
 
 import (
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // headers wraps the different headers and filters used throughout the tests.
@@ -49,39 +49,39 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 	for _, test := range testCases {
 // 		testDesc := fmt.Sprintf("permute=%v, partial=%v, repeat=%v",
 // 			test.permute, test.partialInterval, test.repeat)
-// 		bm, hdrStore, cfStore, cleanUp, err := setupBlockManager()
-// 		if err != nil {
+// 		bm, hdrStore, cfStore, cleanUp, e := setupBlockManager()
+// 		if e != nil  {
 // 			t.Fatalf("unable to set up ChainService: %v", err)
 // 		}
 // 		defer cleanUp()
 // 		// Keep track of the filter headers and block headers. Since
 // 		// the genesis headers are written automatically when the store
 // 		// is created, we query it to add to the slices.
-// 		genesisBlockHeader, _, err := hdrStore.ChainTip()
-// 		if err != nil {
-// 			t.Fatal(err)
+// 		genesisBlockHeader, _, e = hdrStore.ChainTip()
+// 		if e != nil  {
+// 			t.ftl.Ln(e)
 // 		}
-// 		genesisFilterHeader, _, err := cfStore.ChainTip()
-// 		if err != nil {
-// 			t.Fatal(err)
+// 		genesisFilterHeader, _, e = cfStore.ChainTip()
+// 		if e != nil  {
+// 			t.ftl.Ln(e)
 // 		}
-// 		headers, err := generateHeaders(genesisBlockHeader,
+// 		headers, e := generateHeaders(genesisBlockHeader,
 // 			genesisFilterHeader, nil)
-// 		if err != nil {
+// 		if e != nil  {
 // 			t.Fatalf("unable to generate headers: %v", err)
 // 		}
 // 		// Write all block headers but the genesis, since it is already
 // 		// in the store.
-// 		if err = hdrStore.WriteHeaders(headers.blockHeaders[1:]...); err != nil {
+// 		if e = hdrStore.WriteHeaders(headers.blockHeaders[1:]...); err.Chk(e) {
 // 			t.Fatalf("Error writing batch of headers: %s", err)
 // 		}
 // 		// We emulate the case where a few filter headers are already
 // 		// written to the store by writing 1/3 of the first interval.
 // 		if test.partialInterval {
-// 			err = cfStore.WriteHeaders(
+// 			e = cfStore.WriteHeaders(
 // 				headers.cfHeaders[1 : wire.CFCheckptInterval/3]...,
 // 			)
-// 			if err != nil {
+// 			if e != nil  {
 // 				t.Fatalf("Error writing batch of headers: %s",
 // 					err)
 // 			}
@@ -92,8 +92,8 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		bm.server.queryBatch = func(msgs []wire.Message,
 // 			f func(*ServerPeer, wire.Message, wire.Message) bool,
 // 			q <-qu.C, qo ...QueryOption) {
-// 			responses, err := generateResponses(msgs, headers)
-// 			if err != nil {
+// 			responses, e := generateResponses(msgs, headers)
+// 			if e != nil  {
 // 				t.Fatalf("unable to generate responses: %v",
 // 					err)
 // 			}
@@ -134,9 +134,9 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 			headers.checkpoints, cfStore, wire.GCSFilterRegular,
 // 		)
 // 		// Finally make sure the filter header tip is what we expect.
-// 		tip, tipHeight, err := cfStore.ChainTip()
-// 		if err != nil {
-// 			t.Fatal(err)
+// 		tip, tipHeight, e := cfStore.ChainTip()
+// 		if e != nil  {
+// 			t.ftl.Ln(e)
 // 		}
 // 		if tipHeight != maxHeight {
 // 			t.Fatalf("expected tip height to be %v, was %v",
@@ -209,21 +209,21 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		},
 // 	}
 // 	for _, test := range testCases {
-// 		bm, hdrStore, cfStore, cleanUp, err := setupBlockManager()
-// 		if err != nil {
+// 		bm, hdrStore, cfStore, cleanUp, e := setupBlockManager()
+// 		if e != nil  {
 // 			t.Fatalf("unable to set up ChainService: %v", err)
 // 		}
 // 		defer cleanUp()
 // 		// Keep track of the filter headers and block headers. Since
 // 		// the genesis headers are written automatically when the store
 // 		// is created, we query it to add to the slices.
-// 		genesisBlockHeader, _, err := hdrStore.ChainTip()
-// 		if err != nil {
-// 			t.Fatal(err)
+// 		genesisBlockHeader, _, e = hdrStore.ChainTip()
+// 		if e != nil  {
+// 			t.ftl.Ln(e)
 // 		}
-// 		genesisFilterHeader, _, err := cfStore.ChainTip()
-// 		if err != nil {
-// 			t.Fatal(err)
+// 		genesisFilterHeader, _, e = cfStore.ChainTip()
+// 		if e != nil  {
+// 			t.ftl.Ln(e)
 // 		}
 // 		// To emulate a full node serving us filter headers derived
 // 		// from different genesis than what we have, we flip a bit in
@@ -231,7 +231,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		if test.wrongGenesis {
 // 			genesisFilterHeader[0] ^= 1
 // 		}
-// 		headers, err := generateHeaders(genesisBlockHeader,
+// 		headers, e := generateHeaders(genesisBlockHeader,
 // 			genesisFilterHeader,
 // 			func(currentCFHeader *chainhash.Hash) {
 // 				// If we are testing that each interval doesn't
@@ -242,21 +242,21 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 					currentCFHeader[0] ^= 1
 // 				}
 // 			})
-// 		if err != nil {
+// 		if e != nil  {
 // 			t.Fatalf("unable to generate headers: %v", err)
 // 		}
 // 		// Write all block headers but the genesis, since it is already
 // 		// in the store.
-// 		if err = hdrStore.WriteHeaders(headers.blockHeaders[1:]...); err != nil {
+// 		if e = hdrStore.WriteHeaders(headers.blockHeaders[1:]...); err.Chk(e) {
 // 			t.Fatalf("Error writing batch of headers: %s", err)
 // 		}
 // 		// We emulate the case where a few filter headers are already
 // 		// written to the store by writing 1/3 of the first interval.
 // 		if test.partialInterval {
-// 			err = cfStore.WriteHeaders(
+// 			e = cfStore.WriteHeaders(
 // 				headers.cfHeaders[1 : wire.CFCheckptInterval/3]...,
 // 			)
-// 			if err != nil {
+// 			if e != nil  {
 // 				t.Fatalf("Error writing batch of headers: %s",
 // 					err)
 // 			}
@@ -264,8 +264,8 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		bm.server.queryBatch = func(msgs []wire.Message,
 // 			f func(*ServerPeer, wire.Message, wire.Message) bool,
 // 			q <-qu.C, qo ...QueryOption) {
-// 			responses, err := generateResponses(msgs, headers)
-// 			if err != nil {
+// 			responses, e := generateResponses(msgs, headers)
+// 			if e != nil  {
 // 				t.Fatalf("unable to generate responses: %v",
 // 					err)
 // 			}
@@ -293,7 +293,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 					responses[i].PrevFilterHeader[1] ^= 1
 // 				}
 // 			}
-// 			// Check that the success of the callback match what we
+// 			// Chk that the success of the callback match what we
 // 			// expect.
 // 			for i := range responses {
 // 				success := f(nil, msgs[i], responses[i])
@@ -339,15 +339,15 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 	// The filter hashes (not the filter headers!) will be sent as
 // 	// part of the CFHeaders response, so we also keep track of
 // 	// them.
-// 	genesisFilter, err := builder.BuildBasicFilter(
+// 	genesisFilter, e := builder.BuildBasicFilter(
 // 		chaincfg.SimNetParams.GenesisBlock, nil,
 // 	)
-// 	if err != nil {
+// 	if e != nil  {
 // 		return nil, fmt.Errorf("unable to build genesis filter: %v",
 // 			err)
 // 	}
-// 	genesisFilterHash, err := builder.GetFilterHash(genesisFilter)
-// 	if err != nil {
+// 	genesisFilterHash, e := builder.GetFilterHash(genesisFilter)
+// 	if e != nil  {
 // 		return nil, fmt.Errorf("unable to get genesis filter hash: %v",
 // 			err)
 // 	}
@@ -457,21 +457,21 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // func setupBlockManager() (*blockManager, headerfs.BlockHeaderStore,
 // 	*headerfs.FilterHeaderStore, func(), error) {
 // 	// Set up the block and filter header stores.
-// 	tempDir, err := ioutil.TempDir("", "neutrino")
-// 	if err != nil {
+// 	tempDir, e := ioutil.TempDir("", "neutrino")
+// 	if e != nil  {
 // 		return nil, nil, nil, nil, fmt.Errorf("Failed to create "+
 // 			"temporary directory: %s", err)
 // 	}
-// 	db, err := walletdb.Create("bdb", tempDir+"/weks.db")
-// 	if err != nil {
+// 	db, e := walletdb.Create("bdb", tempDir+"/weks.db")
+// 	if e != nil  {
 // 		os.RemoveAll(tempDir)
 // 		return nil, nil, nil, nil, fmt.Errorf("Error opening DB: %s",
 // 			err)
 // 	}
-// 	hdrStore, err := headerfs.NewBlockHeaderStore(
+// 	hdrStore, e := headerfs.NewBlockHeaderStore(
 // 		tempDir, db, &netparams.SimNetParams,
 // 	)
-// 	if err != nil {
+// 	if e != nil  {
 // 		db.Close()
 // 		return nil, nil, nil, nil, fmt.Errorf("Error creating block "+
 // 			"header store: %s", err)
@@ -480,11 +480,11 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		defer os.RemoveAll(tempDir)
 // 		defer db.Close()
 // 	}
-// 	cfStore, err := headerfs.NewFilterHeaderStore(
+// 	cfStore, e := headerfs.NewFilterHeaderStore(
 // 		tempDir, db, headerfs.RegularFilter,
 // 		&netparams.SimNetParams,
 // 	)
-// 	if err != nil {
+// 	if e != nil  {
 // 		cleanUp()
 // 		return nil, nil, nil, nil, fmt.Errorf("Error creating filter "+
 // 			"header store: %s", err)
@@ -497,8 +497,8 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		RegFilterHeaders: cfStore,
 // 	}
 // 	// Set up a blockManager with the chain service we defined.
-// 	bm, err := newBlockManager(cs)
-// 	if err != nil {
+// 	bm, e := newBlockManager(cs)
+// 	if e != nil  {
 // 		return nil, nil, nil, nil, fmt.Errorf("unable to create "+
 // 			"blockmanager: %v", err)
 // 	}

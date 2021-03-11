@@ -87,12 +87,12 @@ func TestAmountCreation(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		a, err := NewAmount(test.amount)
+		a, e := NewAmount(test.amount)
 		switch {
 		case test.valid && err != nil:
 			t.Errorf("%v: Positive test Amount creation failed with: %v", test.name, err)
 			continue
-		case !test.valid && err == nil:
+		case !test.valid && e ==  nil:
 			t.Errorf("%v: Negative test Amount creation succeeded (value %v) when should fail", test.name, a)
 			continue
 		}

@@ -112,5 +112,6 @@ func (s *parentStack) Push(node *treapNode) {
 	s.index++
 }
 func init() {
+
 	rand.Seed(time.Now().UnixNano())
 }

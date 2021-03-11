@@ -121,7 +121,7 @@ static inline size_t GetSystemPageSize()
     size_t page_size;
 #if defined(WIN32)
     SYSTEM_INFO sSysInfo;
-    GetSystemInfo(&sSysInfo);
+    GetSysteminf.Ln(&sSysInfo);
     page_size = sSysInfo.dwPageSize;
 #elif defined(PAGESIZE) // defined in limits.h
     page_size = PAGESIZE;

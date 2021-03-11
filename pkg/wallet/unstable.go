@@ -1,9 +1,9 @@
 package wallet
 
 import (
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/database/walletdb"
 )
 
 // UnstableAPI exposes unstable api in the wallet
@@ -20,20 +20,18 @@ func ExposeUnstableAPI(w *Wallet) UnstableAPI {
 }
 
 // TxDetails calls wtxmgr.Store.TxDetails under a single database view transaction.
-func (u UnstableAPI) TxDetails(txHash *chainhash.Hash) (*wtxmgr.TxDetails, error) {
-	var details *wtxmgr.TxDetails
-	err := walletdb.View(u.w.db, func(dbtx walletdb.ReadTx) error {
+func (u UnstableAPI) TxDetails(txHash *chainhash.Hash) (details *wtxmgr.TxDetails,e error) {
+	e = walletdb.View(u.w.db, func(dbtx walletdb.ReadTx) (e error) {
 		txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
-		var err error
-		details, err = u.w.TxStore.TxDetails(txmgrNs, txHash)
-		return err
+		details, e = u.w.TxStore.TxDetails(txmgrNs, txHash)
+		return e
 	})
-	return details, err
+	return
 }
 
 // RangeTransactions calls wtxmgr.Store.RangeTransactions under a single database view transaction.
 func (u UnstableAPI) RangeTransactions(begin, end int32, f func([]wtxmgr.TxDetails) (bool, error)) error {
-	return walletdb.View(u.w.db, func(dbtx walletdb.ReadTx) error {
+	return walletdb.View(u.w.db, func(dbtx walletdb.ReadTx) (e error) {
 		txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
 		return u.w.TxStore.RangeTransactions(txmgrNs, begin, end, f)
 	})

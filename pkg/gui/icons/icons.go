@@ -4,7 +4,7 @@ import (
 	"sort"
 	
 	"github.com/p9c/pod/pkg/gui"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"gioui.org/app"
 	l "gioui.org/layout"
@@ -30,7 +30,7 @@ func main() {
 	}
 	ic.listWidgets = ic.icons()
 	go func() {
-		if err := gui.NewWindow(th).
+		if e := gui.NewWindow(th).
 			Size(64, 32).
 			Title("example").
 			Open().
@@ -39,7 +39,7 @@ func main() {
 					le := func(gtx l.Context, index int) l.Dimensions {
 						return ic.listWidgets[index](gtx)
 					}
-					// Debug(len(ic.listWidgets))
+					// dbg.Ln(len(ic.listWidgets))
 					return func(gtx l.Context) l.Dimensions {
 						return ic.th.Fill("PanelBg", ic.th.Inset(0.25, ic.lists["icons"].Vertical().Length(len(ic.listWidgets)).ListElement(le).Fn).Fn, l.Center).Fn(gtx)
 					}(gtx)
@@ -51,7 +51,7 @@ func main() {
 					quit.Q()
 					// os.Exit(0)
 				}, quit,
-			); Check(err) {
+			); err.Chk(e) {
 		}
 	}()
 	app.Main()

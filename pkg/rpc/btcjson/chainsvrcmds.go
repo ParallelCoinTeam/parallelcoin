@@ -3,8 +3,8 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // AddNodeSubCmd defines the type used in the addnode JSON-RPC command for the sub command field.
@@ -201,24 +201,25 @@ func convertTemplateRequestField(fieldName string, iface interface{}) (interface
 
 // UnmarshalJSON provides a custom Unmarshal method for TemplateRequest. This is necessary because the SigOpLimit and
 // SizeLimit fields can only be specific types.
-func (t *TemplateRequest) UnmarshalJSON(data []byte) error {
+func (t *TemplateRequest) UnmarshalJSON(data []byte) (e error) {
 	type templateRequest TemplateRequest
 	request := (*templateRequest)(t)
-	if err := json.Unmarshal(data, &request); err != nil {
-		return err
+	if e := json.Unmarshal(data, &request); err.Chk(e) {
+		return e
 	}
 	// The SigOpLimit field can only be nil, bool, or int64.
-	val, err := convertTemplateRequestField("sigoplimit", request.SigOpLimit)
-	if err != nil {
-		Errorln(err)
-		return err
+	var val interface{}
+	val, e = convertTemplateRequestField("sigoplimit", request.SigOpLimit)
+	if e != nil  {
+		err.Ln(e)
+		return e
 	}
 	request.SigOpLimit = val
 	// The SizeLimit field can only be nil, bool, or int64.
-	val, err = convertTemplateRequestField("sizelimit", request.SizeLimit)
-	if err != nil {
-		Errorln(err)
-		return err
+	val, e = convertTemplateRequestField("sizelimit", request.SizeLimit)
+	if e != nil  {
+		err.Ln(e)
+		return e
 	}
 	request.SizeLimit = val
 	return nil
@@ -679,6 +680,7 @@ func NewVerifyTxOutProofCmd(proof string) *VerifyTxOutProofCmd {
 	}
 }
 func init() {
+
 	// No special flags for commands in this file.
 	flags := UsageFlag(0)
 	MustRegisterCmd("addnode", (*AddNodeCmd)(nil), flags)

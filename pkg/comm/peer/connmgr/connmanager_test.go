@@ -9,10 +9,11 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
 func init() {
+
 	// Override the max retry duration when running tests.
 	maxRetryDuration = 2 * time.Millisecond
 }
@@ -47,12 +48,12 @@ func (c mockConn) RemoteAddr() net.Addr {
 }
 
 // Close handles closing the connection.
-func (c mockConn) Close() error {
+func (c mockConn) Close() (e error) {
 	return nil
 }
 func (c mockConn) SetDeadline(t time.Time) error      { return nil }
 func (c mockConn) SetReadDeadline(t time.Time) error  { return nil }
-func (c mockConn) SetWriteDeadline(t time.Time) error { return nil }
+func (c mockConn) SetWriteDeadline(t time.Time) (e error) { return nil }
 
 // mockDialer mocks the net.Dial interface by returning a mock connection to the given address.
 func mockDialer(addr net.Addr) (net.Conn, error) {
@@ -65,14 +66,14 @@ func mockDialer(addr net.Addr) (net.Conn, error) {
 
 // TestNewConfig tests that new ConnManager config is validated as expected.
 func TestNewConfig(t *testing.T) {
-	_, err := New(&Config{})
-	if err == nil {
+	_, e := New(&Config{})
+	if e ==  nil {
 		t.Fatalf("New expected error: 'Dial can't be nil', got nil")
 	}
-	_, err = New(&Config{
+	_, e = New(&Config{
 		Dial: mockDialer,
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New unexpected error: %v", err)
 	}
 }
@@ -81,7 +82,7 @@ func TestNewConfig(t *testing.T) {
 func TestStartStop(t *testing.T) {
 	connected := make(chan *ConnReq)
 	disconnected := make(chan *ConnReq)
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		TargetOutbound: 1,
 		GetNewAddress: func() (net.Addr, error) {
 			return &net.TCPAddr{
@@ -97,7 +98,7 @@ func TestStartStop(t *testing.T) {
 			disconnected <- c
 		},
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cmgr.Start()
@@ -131,14 +132,14 @@ func TestStartStop(t *testing.T) {
 // are disabled, so we test that requests using Connect are handled and that no other connections are made.
 func TestConnectMode(t *testing.T) {
 	connected := make(chan *ConnReq)
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		TargetOutbound: 2,
 		Dial:           mockDialer,
 		OnConnection: func(c *ConnReq, conn net.Conn) {
 			connected <- c
 		},
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cr := &ConnReq{
@@ -175,7 +176,7 @@ func TestConnectMode(t *testing.T) {
 func TestTargetOutbound(t *testing.T) {
 	targetOutbound := uint32(10)
 	connected := make(chan *ConnReq)
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		TargetOutbound: targetOutbound,
 		Dial:           mockDialer,
 		GetNewAddress: func() (net.Addr, error) {
@@ -188,7 +189,7 @@ func TestTargetOutbound(t *testing.T) {
 			connected <- c
 		},
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cmgr.Start()
@@ -209,7 +210,7 @@ func TestTargetOutbound(t *testing.T) {
 func TestRetryPermanent(t *testing.T) {
 	connected := make(chan *ConnReq)
 	disconnected := make(chan *ConnReq)
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		RetryDuration:  time.Millisecond,
 		TargetOutbound: 1,
 		Dial:           mockDialer,
@@ -220,7 +221,7 @@ func TestRetryPermanent(t *testing.T) {
 			disconnected <- c
 		},
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cr := &ConnReq{
@@ -297,7 +298,7 @@ func TestMaxRetryDuration(t *testing.T) {
 		}
 	}
 	connected := make(chan *ConnReq)
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		RetryDuration:  time.Millisecond,
 		TargetOutbound: 1,
 		Dial:           timedDialer,
@@ -305,7 +306,7 @@ func TestMaxRetryDuration(t *testing.T) {
 			connected <- c
 		},
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cr := &ConnReq{
@@ -334,7 +335,7 @@ func TestNetworkFailure(t *testing.T) {
 		atomic.AddUint32(&dials, 1)
 		return nil, errors.New("network down")
 	}
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		TargetOutbound: 5,
 		RetryDuration:  5 * time.Millisecond,
 		Dial:           errDialer,
@@ -348,7 +349,7 @@ func TestNetworkFailure(t *testing.T) {
 			t.Fatalf("network failure: got unexpected connection - %v", c.Addr)
 		},
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cmgr.Start()
@@ -371,10 +372,10 @@ func TestStopFailed(t *testing.T) {
 		time.Sleep(time.Millisecond)
 		return nil, errors.New("network down")
 	}
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		Dial: waitDialer,
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cmgr.Start()
@@ -405,10 +406,10 @@ func TestRemovePendingConnection(t *testing.T) {
 		<-wait
 		return nil, fmt.Errorf("error")
 	}
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		Dial: indefiniteDialer,
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cmgr.Start()
@@ -455,14 +456,14 @@ func TestCancelIgnoreDelayedConnection(t *testing.T) {
 		return nil, fmt.Errorf("error")
 	}
 	connected := make(chan *ConnReq)
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		Dial:          failingDialer,
 		RetryDuration: retryTimeout,
 		OnConnection: func(c *ConnReq, conn net.Conn) {
 			connected <- c
 		},
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cmgr.Start()
@@ -520,7 +521,7 @@ func (m *mockListener) Accept() (net.Conn, error) {
 
 // Close closes the mock listener which will cause any blocked Accept operations to be unblocked and return errors. This
 // is part of the net.Receiver interface.
-func (m *mockListener) Close() error {
+func (m *mockListener) Close() (e error) {
 	close(m.provideConn)
 	return nil
 }
@@ -559,14 +560,14 @@ func TestListeners(t *testing.T) {
 	listener1 := newMockListener("127.0.0.1:11047")
 	listener2 := newMockListener("127.0.0.1:9333")
 	listeners := []net.Listener{listener1, listener2}
-	cmgr, err := New(&Config{
+	cmgr, e := New(&Config{
 		Listeners: listeners,
 		OnAccept: func(conn net.Conn) {
 			receivedConns <- conn
 		},
 		Dial: mockDialer,
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("New error: %v", err)
 	}
 	cmgr.Start()

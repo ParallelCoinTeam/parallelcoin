@@ -9,7 +9,7 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache"
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
 )
@@ -39,20 +39,20 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 	}
 	// Insert the smaller filters.
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
-	err := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
-	if err != nil {
-		Debug(err)
+	e := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
+	if e != nil  {
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
-	err = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
-	if err != nil {
-		Debug(err)
+	e = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
+	if e != nil  {
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	// Insert the big filter and check all previous filters are evicted.
-	err = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
-	if err != nil {
-		Debug(err)
+	e = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
+	if e != nil  {
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	assertEqual(t, getFilter(cs, b3, t), f3, "")
@@ -63,8 +63,8 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // func TestBlockCache(// 	t *testing.T) {
 // 	t.Parallel()
 // 	// Load the first 255 blocks from disk.
-// 	blocks, err := loadBlocks(t, blockDataFile, blockDataNet)
-// 	if err != nil {
+// 	blocks, e := loadBlocks(t, blockDataFile, blockDataNet)
+// 	if e != nil  {
 // 		t.Fatalf("loadBlocks: Unexpected error: %v", err)
 // 	}
 // 	// We'll use a simple mock header store since the GetBlocks method
@@ -138,8 +138,8 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 	// fetchAndAssertPeersQueried calls GetBlock and makes sure the block
 // 	// is fetched from the peers.
 // 	fetchAndAssertPeersQueried := func(hash chainhash.Hash) {
-// 		found, err := cs.GetBlock(hash)
-// 		if err != nil {
+// 		found, e := cs.GetBlock(hash)
+// 		if e != nil  {
 // 			t.Fatalf("error getting block: %v", err)
 // 		}
 // 		if *found.Hash() != hash {
@@ -159,8 +159,8 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 	// fetchAndAssertInCache calls GetBlock and makes sure the block is not
 // 	// fetched from the peers.
 // 	fetchAndAssertInCache := func(hash chainhash.Hash) {
-// 		found, err := cs.GetBlock(hash)
-// 		if err != nil {
+// 		found, e := cs.GetBlock(hash)
+// 		if e != nil  {
 // 			t.Fatalf("error getting block: %v", err)
 // 		}
 // 		if *found.Hash() != hash {
@@ -209,22 +209,22 @@ func TestCacheBigEnoughHoldsAllFilter(t *testing.T) {
 	}
 	// Insert those filters into the cache making sure nothing gets evicted.
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
-	err := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
-	if err != nil {
-		Debug(err)
+	e := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
+	if e != nil  {
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
-	err = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
-	if err != nil {
-		Debug(err)
+	e = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
+	if e != nil  {
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
-	err = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
-	if err != nil {
-		Debug(err)
+	e = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
+	if e != nil  {
+		dbg.Ln(e)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 3, "")
-	// Check that we can get those filters back independent of Get order.
+	// Chk that we can get those filters back independent of Get order.
 	assertEqual(t, getFilter(cs, b1, t), f1, "")
 	assertEqual(t, getFilter(cs, b2, t), f2, "")
 	assertEqual(t, getFilter(cs, b3, t), f3, "")
@@ -241,7 +241,7 @@ func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	if len(message) == 0 {
 		message = fmt.Sprintf("%v != %v", a, b)
 	}
-	t.Fatal(message)
+	t.ftl.Ln(message)
 }
 
 // getRandFilter generates a random GCS filter that contains numElements. It will then convert that filter into
@@ -253,27 +253,27 @@ func genRandFilter(numElements uint32, t *testing.T) (
 	elements := make([][]byte, numElements)
 	for i := uint32(0); i < numElements; i++ {
 		var elem [20]byte
-		if _, err := rand.Read(elem[:]); err != nil {
+		if _, e = rand.Read(elem[:]); err.Chk(e) {
 			t.Fatalf("unable to create random filter: %v", err)
 			return nil, nil, 0
 		}
 		elements[i] = elem[:]
 	}
 	var key [16]byte
-	if _, err := rand.Read(key[:]); err != nil {
+	if _, e = rand.Read(key[:]); err.Chk(e) {
 		t.Fatalf("unable to create random filter: %v", err)
 		return nil, nil, 0
 	}
-	filter, err := gcs.BuildGCSFilter(
+	filter, e := gcs.BuildGCSFilter(
 		builder.DefaultP, builder.DefaultM, key, elements)
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("unable to create random filter: %v", err)
 		return nil, nil, 0
 	}
 	// Convert into CacheableFilter and compute Size.
 	c := &cache.CacheableFilter{Filter: filter}
-	s, err := c.Size()
-	if err != nil {
+	s, e := c.Size()
+	if e != nil  {
 		t.Fatalf("unable to create random filter: %v", err)
 		return nil, nil, 0
 	}
@@ -291,9 +291,9 @@ func genRandomBlockHash() *chainhash.Hash {
 // getFilter is a convenience method which will extract a value from the cache and handle errors, it makes the test code
 // easier to follow.
 func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
-	val, err := cs.getFilterFromCache(b, filterdb.RegularFilter)
-	if err != nil {
-		t.Fatal(err)
+	val, e := cs.getFilterFromCache(b, filterdb.RegularFilter)
+	if e != nil  {
+		t.ftl.Ln(e)
 	}
 	return val
 }
@@ -305,13 +305,13 @@ func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 // func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) (
 // 	[]*util.Block, error) {
 // 	// Open the file that contains the blocks for reading.
-// 	fi, err := os.Open(dataFile)
-// 	if err != nil {
+// 	fi, e := os.Open(dataFile)
+// 	if e != nil  {
 // 		t.Errorf("failed to open file %v, err %v", dataFile, err)
-// 		return nil, err
+// 		return nil, e
 // 	}
 // 	defer func() {
-// 		if err := fi.Close(); err != nil {
+// 		if e := fi.Close(); err.Chk(e) {
 // 			t.Errorf("failed to close file %v %v", dataFile,
 // 				err)
 // 		}
@@ -324,40 +324,40 @@ func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 // 	// Load the remaining blocks.
 // 	for height := 1; ; height++ {
 // 		var net uint32
-// 		err := binary.Read(dr, binary.LittleEndian, &net)
-// 		if err == io.EOF {
+// 		e := binary.Read(dr, binary.LittleEndian, &net)
+// 		if e ==  io.EOF {
 // 			// Hit end of file at the expected offset.  No error.
 // 			break
 // 		}
-// 		if err != nil {
+// 		if e != nil  {
 // 			t.Errorf("Failed to load network type for block %d: %v",
 // 				height, err)
-// 			return nil, err
+// 			return nil, e
 // 		}
 // 		if net != uint32(network) {
 // 			t.Errorf("Block doesn't match network: %v expects %v",
 // 				net, network)
-// 			return nil, err
+// 			return nil, e
 // 		}
 // 		var blockLen uint32
-// 		err = binary.Read(dr, binary.LittleEndian, &blockLen)
-// 		if err != nil {
+// 		e = binary.Read(dr, binary.LittleEndian, &blockLen)
+// 		if e != nil  {
 // 			t.Errorf("Failed to load block size for block %d: %v",
 // 				height, err)
-// 			return nil, err
+// 			return nil, e
 // 		}
 // 		// Read the block.
 // 		blockBytes := make([]byte, blockLen)
-// 		_, err = io.ReadFull(dr, blockBytes)
-// 		if err != nil {
+// 		_, e = io.ReadFull(dr, blockBytes)
+// 		if e != nil  {
 // 			t.Errorf("Failed to load block %d: %v", height, err)
-// 			return nil, err
+// 			return nil, e
 // 		}
 // 		// Deserialize and store the block.
-// 		block, err := util.NewBlockFromBytes(blockBytes)
-// 		if err != nil {
+// 		block, e := util.NewBlockFromBytes(blockBytes)
+// 		if e != nil  {
 // 			t.Errorf("Failed to parse block %v: %v", height, err)
-// 			return nil, err
+// 			return nil, e
 // 		}
 // 		blocks = append(blocks, block)
 // 	}

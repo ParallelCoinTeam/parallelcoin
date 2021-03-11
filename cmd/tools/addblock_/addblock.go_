@@ -28,38 +28,34 @@ func loadBlockDB(	) (database.DB, error) {
 	// The database name is based on the database type.
 	dbName := blockDbNamePrefix + "_" + cfg.DbType
 	dbPath := filepath.Join(cfg.DataDir, dbName)
-	L.Infof("Loading block database from '%s'", dbPath)
-	db, err := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
-	if err != nil {
-		L.Error(err)
-// Return the error if it's not because the database doesn't exist.
+	L.inf.F("Loading block database from '%s'", dbPath)
+	db, e := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
+	if e != nil  {
+		L.// Return the error if it's not because the database doesn't exist.
 		if dbErr, ok := err.(database.Error); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
-			return nil, err
+			return nil, e
 		}
 		// Create the db if it does not exist.
-		err = os.MkdirAll(cfg.DataDir, 0700)
-		if err != nil {
-		L.Error(err)
-return nil, err
+		e = os.MkdirAll(cfg.DataDir, 0700)
+		if e != nil  {
+		L.return nil, e
 		}
-		db, err = database.Create(cfg.DbType, dbPath, activeNetParams.Net)
-		if err != nil {
-		L.Error(err)
-return nil, err
+		db, e = database.Create(cfg.DbType, dbPath, activeNetParams.Net)
+		if e != nil  {
+		L.return nil, e
 		}
 	}
-	L.Info("Block database loaded")
+	L.inf.Ln("Block database loaded")
 	return db, nil
 }
 
 // realMain is the real main function for the utility.  It is necessary to work around the fact that deferred functions do not run when os.Exit() is called.
-func realMain(	) error {
+func realMain(	) (e error) {
 	// Load configuration and parse command line.
-	tcfg, _, err := loadConfig()
-	if err != nil {
-		L.Error(err)
-return err
+	tcfg, _, e = loadConfig()
+	if e != nil  {
+		L.return err
 	}
 	cfg = tcfg
 	// Setup logging.
@@ -70,36 +66,33 @@ return err
 	blockchain.UseLogger(backendLogger.Logger("CHAN"))
 	indexers.UseLogger(backendLogger.Logger("INDX"))
 	// Load the block database.
-	db, err := loadBlockDB()
-	if err != nil {
-		L.Error(err)
-L.Errorf("Failed to load database: %v", err)
+	db, e := loadBlockDB()
+	if e != nil  {
+		L.L.Errorf("Failed to load database: %v", err)
 		return err
 	}
 	defer db.Close()
-	fi, err := os.Open(cfg.InFile)
-	if err != nil {
-		L.Error(err)
-L.Errorf("Failed to open file %v: %v", cfg.InFile, err)
+	fi, e := os.Open(cfg.InFile)
+	if e != nil  {
+		L.L.Errorf("Failed to open file %v: %v", cfg.InFile, err)
 		return err
 	}
 	defer fi.Close()
 	// Create a block importer for the database and input file and start it. The done channel returned from start will contain an error if anything went wrong.
-	importer, err := newBlockImporter(db, fi)
-	if err != nil {
-		L.Error(err)
-L.Errorf("Failed create block importer: %v", err)
+	importer, e := newBlockImporter(db, fi)
+	if e != nil  {
+		L.L.Errorf("Failed create block importer: %v", err)
 		return err
 	}
 	// Perform the import asynchronously.  This allows blocks to be processed and read in parallel.  The results channel returned from Import contains the statistics about the import including an error if something went wrong.
-	L.Info("Starting import")
+	L.inf.Ln("Starting import")
 	resultsChan := importer.Import()
 	results := <-resultsChan
 	if results.err != nil {
 		L.Errorf("%v", results.err)
 		return results.err
 	}
-	L.Infof("Processed a total of %d blocks (%d imported, %d already "+
+	L.inf.F("Processed a total of %d blocks (%d imported, %d already "+
 		"known)", results.blocksProcessed, results.blocksImported,
 		results.blocksProcessed-results.blocksImported)
 	return nil
@@ -108,11 +101,11 @@ func main(	) {
 
 	// Use all processor cores and up some limits.
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	if err := limits.SetLimits(); err != nil {
+	if e := limits.SetLimits(); dbg.Chk(e) {
 		os.Exit(1)
 	}
 	// Work around defer not working after os.Exit()
-	if err := realMain(); err != nil {
+	if e := realMain(); dbg.Chk(e) {
 		os.Exit(1)
 	}
 }

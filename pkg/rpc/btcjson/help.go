@@ -214,7 +214,7 @@ func resultTypeHelp(xT descLookupFunc, rt reflect.Type, fieldDescKey string) str
 			_, _ = fmt.Fprintln(w, text)
 		}
 	}
-	if err := w.Flush(); Check(err) {
+	if e := w.Flush(); err.Chk(e) {
 	}
 	return formatted.String()
 }
@@ -311,7 +311,7 @@ func argHelp(xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.Value
 	for _, text := range args {
 		_, _ = fmt.Fprintln(w, text)
 	}
-	if err := w.Flush(); Check(err) {
+	if e := w.Flush(); err.Chk(e) {
 	}
 	return formatted.String()
 }

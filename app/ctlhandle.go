@@ -1,6 +1,8 @@
 package app
 
 import (
+	"github.com/gookit/color"
+	"github.com/p9c/pod/pkg/logg"
 	"os"
 	
 	"github.com/p9c/pod/app/config"
@@ -13,33 +15,28 @@ import (
 
 const slash = string(os.PathSeparator)
 
-func ctlHandleList(c *cli.Context) error {
+func ctlHandleList(c *cli.Context) (e error) {
 	// fmt.Println("Here are the available commands. Pausing a moment as it is a long list...")
 	// time.Sleep(2 * time.Second)
 	ctl.ListCommands()
 	return nil
 }
 
-func ctlHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
-	return func(c *cli.Context) error {
+func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
+		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
+		logg.App = "   ctl"
 		*cx.Config.LogLevel = "off"
-		config.Configure(cx, c.Command.Name, true)
+		config.Configure(cx, "ctl", true)
 		args := c.Args()
 		if len(args) < 1 {
 			return cli.ShowSubcommandHelp(c)
 		}
 		ctl.HelpPrint = func() {
-			if err := cli.ShowSubcommandHelp(c); Check(err){
+			if e := cli.ShowSubcommandHelp(c); err.Chk(e) {
 			}
 		}
 		ctl.Main(args, cx)
-		return nil
-	}
-}
-
-func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
-		config.Configure(cx, c.Command.Name, true)
 		return nil
 	}
 }

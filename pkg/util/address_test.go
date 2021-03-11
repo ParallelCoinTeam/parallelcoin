@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/btcsuite/golangcrypto/ripemd160"
-
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -643,12 +643,12 @@ func TestAddresses(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Decode addr and compare error against valid.
-		decoded, err := util.DecodeAddress(test.addr, test.net)
-		if (err == nil) != test.valid {
+		decoded, e := util.DecodeAddress(test.addr, test.net)
+		if (e ==  nil) != test.valid {
 			t.Errorf("%v: decoding test failed: %v", test.name, err)
 			return
 		}
-		if err == nil {
+		if e ==  nil {
 			// Ensure the stringer returns the same address as the
 			// original.
 			if decodedStringer, ok := decoded.(fmt.Stringer); ok {
@@ -688,7 +688,7 @@ func TestAddresses(t *testing.T) {
 			case *util.AddressWitnessScriptHash:
 				saddr = util.TstAddressSegwitSAddr(encoded)
 			}
-			// Check script address, as well as the Hash160 method for P2PKH and
+			// Chk script address, as well as the Hash160 method for P2PKH and
 			// P2SH addresses.
 			if !bytes.Equal(saddr, decoded.ScriptAddress()) {
 				t.Errorf("%v: script addresses do not match:\n%x != \n%x",
@@ -754,8 +754,8 @@ func TestAddresses(t *testing.T) {
 			// If address is invalid, but a creation function exists,
 			// verify that it returns a nil addr and non-nil error.
 			if test.f != nil {
-				_, err := test.f()
-				if err == nil {
+				_, e := test.f()
+				if e ==  nil {
 					t.Errorf("%v: address is invalid but creating new address succeeded",
 						test.name)
 					return
@@ -764,8 +764,8 @@ func TestAddresses(t *testing.T) {
 			continue
 		}
 		// Valid test, compare address created with f against expected result.
-		addr, err := test.f()
-		if err != nil {
+		addr, e := test.f()
+		if e != nil  {
 			t.Errorf("%v: address is valid but creating new address failed with error %v",
 				test.name, err)
 			return

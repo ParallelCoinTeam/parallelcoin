@@ -2,9 +2,9 @@ package util_test
 
 import (
 	"testing"
-
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
 	. "github.com/p9c/pod/pkg/util"
 )
 
@@ -19,13 +19,13 @@ func TestEncodeDecodeWIF(t *testing.T) {
 		0xeb, 0x3f, 0xe6, 0xe9, 0xef, 0x2a, 0x25, 0x81,
 		0x4e, 0x39, 0x6f, 0xb5, 0xdc, 0x29, 0x5f, 0xe9,
 		0x94, 0xb9, 0x67, 0x89, 0xb2, 0x1a, 0x03, 0x98})
-	wif1, err := NewWIF(priv1, &netparams.MainNetParams, false)
-	if err != nil {
-		t.Fatal(err)
+	wif1, e := NewWIF(priv1, &netparams.MainNetParams, false)
+	if e != nil  {
+		t.ftl.Ln(e)
 	}
-	wif2, err := NewWIF(priv2, &netparams.TestNet3Params, true)
-	if err != nil {
-		t.Fatal(err)
+	wif2, e := NewWIF(priv2, &netparams.TestNet3Params, true)
+	if e != nil  {
+		t.ftl.Ln(e)
 	}
 	tests := []struct {
 		wif     *WIF
@@ -49,10 +49,9 @@ func TestEncodeDecodeWIF(t *testing.T) {
 			continue
 		}
 		// Test that decoding the expected string results in the original WIF structure.
-		w, err := DecodeWIF(test.encoded)
-		if err != nil {
-			t.Error(err)
-			continue
+		w, e := DecodeWIF(test.encoded)
+		if e != nil  {
+			t.			continue
 		}
 		if got := w.String(); got != test.encoded {
 			t.Errorf("NewWIF failed: want '%v', got '%v'", test.wif, got)

@@ -26,33 +26,33 @@ func makeTestOutput(r *rpctest.Harness, t *testing.T,
 	amt util.Amount) (*ec.PrivateKey, *wire.OutPoint, []byte, error) {
 	// Create a fresh key then send some coins to an address spendable by
 	// that key.
-	key, err := ec.NewPrivateKey(ec.S256())
-	if err != nil {
-		return nil, nil, nil, err
+	key, e := ec.NewPrivateKey(ec.S256())
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	// Using the key created above generate a pkScript which it's able to spend.
-	a, err := util.NewAddressPubKey(key.PubKey().SerializeCompressed(), r.ActiveNet)
-	if err != nil {
-		return nil, nil, nil, err
+	a, e := util.NewAddressPubKey(key.PubKey().SerializeCompressed(), r.ActiveNet)
+	if e != nil  {
+		return nil, nil, nil, e
 	}
-	selfAddrScript, err := txscript.PayToAddrScript(a.AddressPubKeyHash())
-	if err != nil {
-		return nil, nil, nil, err
+	selfAddrScript, e := txscript.PayToAddrScript(a.AddressPubKeyHash())
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	output := &wire.TxOut{PkScript: selfAddrScript, Value: 1e8}
 	// create and broadcast a transaction paying to the output.
-	fundTx, err := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
-	if err != nil {
-		return nil, nil, nil, err
+	fundTx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
+	if e != nil  {
+		return nil, nil, nil, e
 	}
-	txHash, err := r.Node.SendRawTransaction(fundTx, true)
-	if err != nil {
-		return nil, nil, nil, err
+	txHash, e := r.Node.SendRawTransaction(fundTx, true)
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	// The transaction created above should be included within the next generated block.
-	blockHash, err := r.Node.Generate(1)
-	if err != nil {
-		return nil, nil, nil, err
+	blockHash, e := r.Node.Generate(1)
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	assertTxInBlock(r, t, blockHash[0], txHash)
 	// Locate the output index of the coins spendable by the key we generated above, this is needed in order to create a
@@ -84,31 +84,31 @@ func makeTestOutput(r *rpctest.Harness, t *testing.T,
 func TestBIP0113Activation(t *testing.T) {
 	t.Parallel()
 	podCfg := []string{"--rejectnonstd"}
-	r, err := rpctest.New(&netparams.SimNetParams, nil, podCfg)
-	if err != nil {
-		t.Fatal("unable to create primary harness: ", err)
+	r, e := rpctest.New(&netparams.SimNetParams, nil, podCfg)
+	if e != nil  {
+		t.ftl.Ln("unable to create primary harness: ", err)
 	}
-	if err := r.SetUp(true, 1); err != nil {
+	if e := r.SetUp(true, 1); dbg.Chk(e) {
 		t.Fatalf("unable to setup test chain: %v", err)
 	}
 	defer func() {
-		if err := r.TearDown(); Check(err) {
+		if e := r.TearDown(); dbg.Ok(err) {
 		}
 	}()
 	// Create a fresh output for usage within the test below.
 	const outputValue = util.SatoshiPerBitcoin
-	outputKey, testOutput, testPkScript, err := makeTestOutput(r, t,
+	outputKey, testOutput, testPkScript, e := makeTestOutput(r, t,
 		outputValue)
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("unable to create test output: %v", err)
 	}
 	// Fetch a fresh address from the harness, we'll use this address to send funds back into the Harness.
-	addr, err := r.NewAddress()
-	if err != nil {
+	addr, e := r.NewAddress()
+	if e != nil  {
 		t.Fatalf("unable to generate address: %v", err)
 	}
-	addrScript, err := txscript.PayToAddrScript(addr)
-	if err != nil {
+	addrScript, e := txscript.PayToAddrScript(addr)
+	if e != nil  {
 		t.Fatalf("unable to generate addr script: %v", err)
 	}
 	// Now create a transaction with a lock time which is "final" according to the latest block, but not according to
@@ -122,21 +122,21 @@ func TestBIP0113Activation(t *testing.T) {
 		Value:    int64(outputValue) - 1000,
 	})
 	// We set the lock-time of the transaction to just one minute after the current MTP of the chain.
-	chainInfo, err := r.Node.GetBlockChainInfo()
-	if err != nil {
+	chainInfo, e := r.Node.GetBlockChaininf.Ln()
+	if e != nil  {
 		t.Fatalf("unable to query for chain info: %v", err)
 	}
 	tx.LockTime = uint32(chainInfo.MedianTime) + 1
-	sigScript, err := txscript.SignatureScript(tx, 0, testPkScript,
+	sigScript, e := txscript.SignatureScript(tx, 0, testPkScript,
 		txscript.SigHashAll, outputKey, true)
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("unable to generate sig: %v", err)
 	}
 	tx.TxIn[0].SignatureScript = sigScript
 	// This transaction should be rejected from the mempool as using MTP for transactions finality is now a policy rule.
 	// Additionally the exact error should be the rejection of a non-final transaction.
-	_, err = r.Node.SendRawTransaction(tx, true)
-	if err == nil {
+	_, e = r.Node.SendRawTransaction(tx, true)
+	if e ==  nil {
 		t.Fatalf("transaction accepted, but should be non-final")
 	} else if !strings.Contains(err.Error(), "not finalized") {
 		t.Fatalf("transaction should be rejected due to being "+
@@ -145,8 +145,8 @@ func TestBIP0113Activation(t *testing.T) {
 	// However since the block validation consensus rules haven't yet activated, a block including the transaction
 	// should be accepted.
 	txns := []*util.Tx{util.NewTx(tx)}
-	block, err := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
-	if err != nil {
+	block, e := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
+	if e != nil  {
 		t.Fatalf("unable to submit block: %v", err)
 	}
 	txid := tx.TxHash()
@@ -160,7 +160,7 @@ func TestBIP0113Activation(t *testing.T) {
 	// blocks. This'll put us at height 299. The getblockchaininfo call checks the state for the block AFTER the current
 	// height.
 	numBlocks := (r.ActiveNet.MinerConfirmationWindow * 2) - 4
-	if _, err := r.Node.Generate(numBlocks); err != nil {
+	if _, e = r.Node.Generate(numBlocks); dbg.Chk(e) {
 		t.Fatalf("unable to generate blocks: %v", err)
 	}
 	assertChainHeight(r, t, 299)
@@ -172,15 +172,15 @@ func TestBIP0113Activation(t *testing.T) {
 	// current MTP should be rejected.
 	timeLockDeltas := []int64{-1, 0, 1}
 	for _, timeLockDelta := range timeLockDeltas {
-		chainInfo, err = r.Node.GetBlockChainInfo()
-		if err != nil {
+		chainInfo, e = r.Node.GetBlockChaininf.Ln()
+		if e != nil  {
 			t.Fatalf("unable to query for chain info: %v", err)
 		}
 		medianTimePast := chainInfo.MedianTime
 		// Create another test output to be spent shortly below.
-		outputKey, testOutput, testPkScript, err = makeTestOutput(r, t,
+		outputKey, testOutput, testPkScript, e = makeTestOutput(r, t,
 			outputValue)
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("unable to create test output: %v", err)
 		}
 		// Create a new transaction with a lock-time past the current known MTP.
@@ -193,29 +193,29 @@ func TestBIP0113Activation(t *testing.T) {
 			Value:    int64(outputValue) - 1000,
 		})
 		tx.LockTime = uint32(medianTimePast + timeLockDelta)
-		sigScript, err = txscript.SignatureScript(tx, 0, testPkScript,
+		sigScript, e = txscript.SignatureScript(tx, 0, testPkScript,
 			txscript.SigHashAll, outputKey, true)
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("unable to generate sig: %v", err)
 		}
 		tx.TxIn[0].SignatureScript = sigScript
 		// If the time-lock delta is greater than -1, then the transaction should be rejected from the mempool and when
 		// included within a block. A time-lock delta of -1 should be accepted as it has a lock-time of one second
 		// _before_ the current MTP.
-		_, err = r.Node.SendRawTransaction(tx, true)
-		if err == nil && timeLockDelta >= 0 {
-			t.Fatal("transaction was accepted into the mempool " +
+		_, e = r.Node.SendRawTransaction(tx, true)
+		if e ==  nil && timeLockDelta >= 0 {
+			t.ftl.Ln("transaction was accepted into the mempool " +
 				"but should be rejected!")
-		} else if err != nil && !strings.Contains(err.Error(), "not finalized") {
+		} else if e != nil  && !strings.Contains(err.Error(), "not finalized") {
 			t.Fatalf("transaction should be rejected from mempool "+
 				"due to being  non-final, instead: %v", err)
 		}
 		txns = []*util.Tx{util.NewTx(tx)}
-		_, err := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
-		if err == nil && timeLockDelta >= 0 {
-			t.Fatal("block should be rejected due to non-final " +
+		_, e := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
+		if e ==  nil && timeLockDelta >= 0 {
+			t.ftl.Ln("block should be rejected due to non-final " +
 				"txn, but was accepted")
-		} else if err != nil && !strings.Contains(err.Error(), "unfinalized") {
+		} else if e != nil  && !strings.Contains(err.Error(), "unfinalized") {
 			t.Fatalf("block should be rejected due to non-final "+
 				"tx, instead: %v", err)
 		}
@@ -234,27 +234,27 @@ func createCSVOutput(r *rpctest.Harness, t *testing.T,
 		AddInt64(int64(sequenceLock)).
 		AddOp(txscript.OP_CHECKSEQUENCEVERIFY).
 		AddOp(txscript.OP_DROP)
-	csvScript, err := b.Script()
-	if err != nil {
-		return nil, nil, nil, err
+	csvScript, e := b.Script()
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	// Using the script generated above, create a P2SH output which will be accepted into the mempool.
-	p2shAddr, err := util.NewAddressScriptHash(csvScript, r.ActiveNet)
-	if err != nil {
-		return nil, nil, nil, err
+	p2shAddr, e := util.NewAddressScriptHash(csvScript, r.ActiveNet)
+	if e != nil  {
+		return nil, nil, nil, e
 	}
-	p2shScript, err := txscript.PayToAddrScript(p2shAddr)
-	if err != nil {
-		return nil, nil, nil, err
+	p2shScript, e := txscript.PayToAddrScript(p2shAddr)
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	output := &wire.TxOut{
 		PkScript: p2shScript,
 		Value:    int64(numSatoshis),
 	}
 	// Finally create a valid transaction which creates the output crafted above.
-	tx, err := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
-	if err != nil {
-		return nil, nil, nil, err
+	tx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
+	if e != nil  {
+		return nil, nil, nil, e
 	}
 	var outputIndex uint32
 	if !bytes.Equal(tx.TxOut[0].PkScript, p2shScript) {
@@ -281,9 +281,9 @@ func spendCSVOutput(redeemScript []byte, csvUTXO *wire.OutPoint,
 	b := txscript.NewScriptBuilder().
 		AddOp(txscript.OP_TRUE).
 		AddData(redeemScript)
-	sigScript, err := b.Script()
-	if err != nil {
-		return nil, err
+	sigScript, e := b.Script()
+	if e != nil  {
+		return nil, e
 	}
 	tx.TxIn[0].SignatureScript = sigScript
 	return tx, nil
@@ -292,12 +292,12 @@ func spendCSVOutput(redeemScript []byte, csvUTXO *wire.OutPoint,
 // assertTxInBlock asserts a transaction with the specified txid is found within the block with the passed block hash.
 func assertTxInBlock(r *rpctest.Harness, t *testing.T, blockHash *chainhash.Hash,
 	txid *chainhash.Hash) {
-	block, err := r.Node.GetBlock(blockHash)
-	if err != nil {
+	block, e := r.Node.GetBlock(blockHash)
+	if e != nil  {
 		t.Fatalf("unable to get block: %v", err)
 	}
 	if len(block.Transactions) < 2 {
-		t.Fatal("target transaction was not mined")
+		t.ftl.Ln("target transaction was not mined")
 	}
 	for _, txn := range block.Transactions {
 		txHash := txn.TxHash()
@@ -327,24 +327,24 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 	// We'd like the test proper evaluation and validation of the BIP 68 ( sequence locks) and BIP 112 rule-sets which
 	// add input-age based relative lock times.
 	podCfg := []string{"--rejectnonstd"}
-	r, err := rpctest.New(&netparams.SimNetParams, nil, podCfg)
-	if err != nil {
-		t.Fatal("unable to create primary harness: ", err)
+	r, e := rpctest.New(&netparams.SimNetParams, nil, podCfg)
+	if e != nil  {
+		t.ftl.Ln("unable to create primary harness: ", err)
 	}
-	if err := r.SetUp(true, 1); err != nil {
+	if e := r.SetUp(true, 1); dbg.Chk(e) {
 		t.Fatalf("unable to setup test chain: %v", err)
 	}
 	defer func() {
-		if err := r.TearDown(); Check(err) {
+		if e := r.TearDown(); dbg.Ok(err) {
 		}
 	}()
 	assertSoftForkStatus(r, t, csvKey, blockchain.ThresholdStarted)
-	harnessAddr, err := r.NewAddress()
-	if err != nil {
+	harnessAddr, e := r.NewAddress()
+	if e != nil  {
 		t.Fatalf("unable to obtain harness address: %v", err)
 	}
-	harnessScript, err := txscript.PayToAddrScript(harnessAddr)
-	if err != nil {
+	harnessScript, e := txscript.PayToAddrScript(harnessAddr)
+	if e != nil  {
 		t.Fatalf("unable to generate pkScript: %v", err)
 	}
 	const (
@@ -359,39 +359,39 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 	// Since at this point CSV doesn't actually exist, it's just a NOP.
 	for txVersion := int32(0); txVersion < 3; txVersion++ {
 		// Create a trivially spendable output with a CSV lock-time of 10 relative blocks.
-		redeemScript, testUTXO, tx, err := createCSVOutput(r, t, outputAmt,
+		redeemScript, testUTXO, tx, e := createCSVOutput(r, t, outputAmt,
 			relativeBlockLock, false)
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("unable to create CSV encumbered output: %v", err)
 		}
 		// As the transaction is p2sh it should be accepted into the mempool and found within the next generated block.
-		if _, err := r.Node.SendRawTransaction(tx, true); err != nil {
+		if _, e = r.Node.SendRawTransaction(tx, true); dbg.Chk(e) {
 			t.Fatalf("unable to broadcast tx: %v", err)
 		}
-		blocks, err := r.Node.Generate(1)
-		if err != nil {
+		blocks, e := r.Node.Generate(1)
+		if e != nil  {
 			t.Fatalf("unable to generate blocks: %v", err)
 		}
 		txid := tx.TxHash()
 		assertTxInBlock(r, t, blocks[0], &txid)
 		// Generate a custom transaction which spends the CSV output.
 		sequenceNum := blockchain.LockTimeToSequence(false, 10)
-		spendingTx, err := spendCSVOutput(redeemScript, testUTXO,
+		spendingTx, e := spendCSVOutput(redeemScript, testUTXO,
 			sequenceNum, sweepOutput, txVersion)
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("unable to spend csv output: %v", err)
 		}
 		// This transaction should be rejected from the mempool since CSV validation is already mempool policy pre-fork.
-		_, err = r.Node.SendRawTransaction(spendingTx, true)
-		if err == nil {
+		_, e = r.Node.SendRawTransaction(spendingTx, true)
+		if e ==  nil {
 			t.Fatalf("transaction should have been rejected, but was " +
 				"instead accepted")
 		}
 		// However, this transaction should be accepted in a custom generated block as CSV validation for scripts within
 		// blocks shouldn't yet be active.
 		txns := []*util.Tx{util.NewTx(spendingTx)}
-		block, err := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
-		if err != nil {
+		block, e := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
+		if e != nil  {
 			t.Fatalf("unable to submit block: %v", err)
 		}
 		txid = spendingTx.TxHash()
@@ -403,7 +403,7 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 	// With the height at 107 we need 200 blocks to be mined after the genesis target period, so we mine 192 blocks.
 	// This'll put us at height 299. The getblockchaininfo call checks the state for the block AFTER the current height.
 	numBlocks := (r.ActiveNet.MinerConfirmationWindow * 2) - 8
-	if _, err := r.Node.Generate(numBlocks); err != nil {
+	if _, e = r.Node.Generate(numBlocks); dbg.Chk(e) {
 		t.Fatalf("unable to generate blocks: %v", err)
 	}
 	assertChainHeight(r, t, 299)
@@ -427,12 +427,12 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 			timeLock = relativeBlockLock
 			isSeconds = false
 		}
-		redeemScript, utxo, tx, err := createCSVOutput(r, t, outputAmt,
+		redeemScript, utxo, tx, e := createCSVOutput(r, t, outputAmt,
 			int32(timeLock), isSeconds)
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("unable to create CSV output: %v", err)
 		}
-		if _, err := r.Node.SendRawTransaction(tx, true); err != nil {
+		if _, e = r.Node.SendRawTransaction(tx, true); dbg.Chk(e) {
 			t.Fatalf("unable to broadcast transaction: %v", err)
 		}
 		spendableInputs[i] = csvOutput{
@@ -442,23 +442,23 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 		}
 	}
 	// Mine a single block including all the transactions generated above.
-	if _, err := r.Node.Generate(1); err != nil {
+	if _, e = r.Node.Generate(1); dbg.Chk(e) {
 		t.Fatalf("unable to generate block: %v", err)
 	}
 	// Now mine 10 additional blocks giving the inputs generated above a age of 11. Space out each block 10 minutes
 	// after the previous block.
-	prevBlockHash, err := r.Node.GetBestBlockHash()
-	if err != nil {
+	prevBlockHash, e := r.Node.GetBestBlockHash()
+	if e != nil  {
 		t.Fatalf("unable to get prior block hash: %v", err)
 	}
-	prevBlock, err := r.Node.GetBlock(prevBlockHash)
-	if err != nil {
+	prevBlock, e := r.Node.GetBlock(prevBlockHash)
+	if e != nil  {
 		t.Fatalf("unable to get block: %v", err)
 	}
 	for i := 0; i < relativeBlockLock; i++ {
 		timeStamp := prevBlock.Header.Timestamp.Add(time.Minute * 10)
-		b, err := r.GenerateAndSubmitBlock(nil, ^uint32(0), timeStamp)
-		if err != nil {
+		b, e := r.GenerateAndSubmitBlock(nil, ^uint32(0), timeStamp)
+		if e != nil  {
 			t.Fatalf("unable to generate block: %v", err)
 		}
 		prevBlock = b.MsgBlock()
@@ -467,9 +467,9 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 	var inputIndex uint32
 	makeTxCase := func(sequenceNum uint32, txVersion int32) *wire.MsgTx {
 		csvInput := spendableInputs[inputIndex]
-		tx, err := spendCSVOutput(csvInput.RedeemScript, csvInput.Utxo,
+		tx, e := spendCSVOutput(csvInput.RedeemScript, csvInput.Utxo,
 			sequenceNum, sweepOutput, txVersion)
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("unable to spend CSV output: %v", err)
 		}
 		inputIndex++
@@ -534,15 +534,15 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		txid, err := r.Node.SendRawTransaction(test.tx, true)
+		txid, e := r.Node.SendRawTransaction(test.tx, true)
 		switch {
 		// Test case passes, nothing further to report.
-		case test.accept && err == nil:
+		case test.accept && e ==  nil:
 		// Transaction should have been accepted but we have a non-nil error.
 		case test.accept && err != nil:
 			t.Fatalf("test #%d, transaction should be accepted, but was rejected: %v", i, err)
 		// Transaction should have been rejected, but it was accepted.
-		case !test.accept && err == nil:
+		case !test.accept && e ==  nil:
 			t.Fatalf("test #%d, transaction should be rejected, but was accepted", i)
 		// Transaction was rejected as wanted, nothing more to do.
 		case !test.accept && err != nil:
@@ -551,15 +551,15 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 		// rejected.
 		if !test.accept {
 			txns := []*util.Tx{util.NewTx(test.tx)}
-			_, err := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
-			if err == nil {
+			_, e := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
+			if e ==  nil {
 				t.Fatalf("test #%d, invalid block accepted", i)
 			}
 			continue
 		}
 		// Generate a block the transaction should be included within the newly mined block.
-		blockHashes, err := r.Node.Generate(1)
-		if err != nil {
+		blockHashes, e := r.Node.Generate(1)
+		if e != nil  {
 			t.Fatalf("unable to mine block: %v", err)
 		}
 		assertTxInBlock(r, t, blockHashes[0], txid)

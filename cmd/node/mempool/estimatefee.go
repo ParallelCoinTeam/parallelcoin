@@ -11,9 +11,9 @@ import (
 	"sort"
 	"strings"
 	"sync"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/mining"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/mining"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -162,7 +162,7 @@ func (ef *FeeEstimator) ObserveTransaction(
 
 // RegisterBlock informs the fee estimator of a new block to take into account.
 func (ef *FeeEstimator) RegisterBlock(
-	block *util.Block) error {
+	block *util.Block) (e error) {
 	ef.mtx.Lock()
 	defer ef.mtx.Unlock()
 	// The previous sorted list is invalid, so delete it.
@@ -199,7 +199,7 @@ func (ef *FeeEstimator) RegisterBlock(
 		blocksToConfirm := height - o.observed - 1
 		// This shouldn't happen if the fee estimator works correctly, but return an error if it does.
 		if o.mined != mining.UnminedHeight {
-			Error("Estimate fee: transaction ", hash, " has already been mined")
+			err.Ln("Estimate fee: transaction ", hash, " has already been mined")
 			return errors.New("transaction has already been mined")
 		}
 		// This shouldn't happen but check just in case to avoid an out-of -bounds array index later.
@@ -249,7 +249,7 @@ func (ef *FeeEstimator) RegisterBlock(
 // everything can be rolled back because some transactions are deleted if they have been observed too long ago. That
 // means the result of Rollback won't always be exactly the same as if the last block had not happened, but it should be
 // close enough.
-func (ef *FeeEstimator) Rollback(hash *chainhash.Hash) error {
+func (ef *FeeEstimator) Rollback(hash *chainhash.Hash) (e error) {
 	ef.mtx.Lock()
 	defer ef.mtx.Unlock()
 	// Find this block in the stack of recent registered blocks.
@@ -277,32 +277,32 @@ func (ef *FeeEstimator) Save() FeeEstimatorState {
 	e := binary.Write(
 		w, binary.BigEndian, uint32(estimateFeeSaveVersion))
 	if e != nil {
-		Trace("failed to write fee estimates", e)
+		trc.Ln("failed to write fee estimates", e)
 	}
 	// Insert basic parameters.
 	e = binary.Write(w, binary.BigEndian, &ef.maxRollback)
 	if e != nil {
-		Trace("failed to write fee estimates", e)
+		trc.Ln("failed to write fee estimates", e)
 	}
 	e = binary.Write(w, binary.BigEndian, &ef.binSize)
 	if e != nil {
-		Trace("failed to write fee estimates", e)
+		trc.Ln("failed to write fee estimates", e)
 	}
 	e = binary.Write(w, binary.BigEndian, &ef.maxReplacements)
 	if e != nil {
-		Trace("failed to write fee estimates", e)
+		trc.Ln("failed to write fee estimates", e)
 	}
 	e = binary.Write(w, binary.BigEndian, &ef.minRegisteredBlocks)
 	if e != nil {
-		Trace("failed to write fee estimates", e)
+		trc.Ln("failed to write fee estimates", e)
 	}
 	e = binary.Write(w, binary.BigEndian, &ef.lastKnownHeight)
 	if e != nil {
-		Trace("failed to write fee estimates", e)
+		trc.Ln("failed to write fee estimates", e)
 	}
 	e = binary.Write(w, binary.BigEndian, &ef.numBlocksRegistered)
 	if e != nil {
-		Trace("failed to write fee estimates", e)
+		trc.Ln("failed to write fee estimates", e)
 	}
 	// Put all the observed transactions in a sorted list.
 	var txCount uint32
@@ -316,7 +316,7 @@ func (ef *FeeEstimator) Save() FeeEstimatorState {
 	observed := make(map[*observedTransaction]uint32)
 	e = binary.Write(w, binary.BigEndian, uint32(len(ef.observed)))
 	if e != nil {
-		Trace("failed to write:", e)
+		trc.Ln("failed to write:", e)
 	}
 	for _, ot := range ots {
 		ot.Serialize(w)
@@ -327,19 +327,19 @@ func (ef *FeeEstimator) Save() FeeEstimatorState {
 	for _, list := range ef.bin {
 		e = binary.Write(w, binary.BigEndian, uint32(len(list)))
 		if e != nil {
-			Trace("failed to write:", e)
+			trc.Ln("failed to write:", e)
 		}
 		for _, o := range list {
 			e = binary.Write(w, binary.BigEndian, observed[o])
 			if e != nil {
-				Trace("failed to write:", e)
+				trc.Ln("failed to write:", e)
 			}
 		}
 	}
 	// Dropped transactions.
 	e = binary.Write(w, binary.BigEndian, uint32(len(ef.dropped)))
 	if e != nil {
-		Trace("failed to write:", e)
+		trc.Ln("failed to write:", e)
 	}
 	for _, registered := range ef.dropped {
 		registered.serialize(w, observed)
@@ -478,19 +478,19 @@ func (b *estimateFeeSet) estimateFee(confirmations int) SatoshiPerByte {
 func (o *observedTransaction) Serialize(w io.Writer) {
 	e := binary.Write(w, binary.BigEndian, o.hash)
 	if e != nil {
-		Trace("failed to serialize observed transaction:", e)
+		trc.Ln("failed to serialize observed transaction:", e)
 	}
 	e = binary.Write(w, binary.BigEndian, o.feeRate)
 	if e != nil {
-		Trace("failed to serialize observed transaction:", e)
+		trc.Ln("failed to serialize observed transaction:", e)
 	}
 	e = binary.Write(w, binary.BigEndian, o.observed)
 	if e != nil {
-		Trace("failed to serialize observed transaction:", e)
+		trc.Ln("failed to serialize observed transaction:", e)
 	}
 	e = binary.Write(w, binary.BigEndian, o.mined)
 	if e != nil {
-		Trace("failed to serialize observed transaction:", e)
+		trc.Ln("failed to serialize observed transaction:", e)
 	}
 }
 
@@ -498,16 +498,16 @@ func (rb *registeredBlock) serialize(w io.Writer,
 	txs map[*observedTransaction]uint32) {
 	e := binary.Write(w, binary.BigEndian, rb.hash)
 	if e != nil {
-		Trace("failed to write:", e)
+		trc.Ln("failed to write:", e)
 	}
 	e = binary.Write(w, binary.BigEndian, uint32(len(rb.transactions)))
 	if e != nil {
-		Trace("failed to write:", e)
+		trc.Ln("failed to write:", e)
 	}
 	for _, o := range rb.transactions {
 		e = binary.Write(w, binary.BigEndian, txs[o])
 		if e != nil {
-			Trace("failed to write:", e)
+			trc.Ln("failed to write:", e)
 		}
 	}
 }
@@ -558,12 +558,11 @@ func NewSatoshiPerByte(fee util.Amount, size uint32) SatoshiPerByte {
 // RestoreFeeEstimator takes a FeeEstimatorState that was previously returned by Save and restores it to a FeeEstimator
 func RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 	r := bytes.NewReader(data)
-	// Check version
+	// Chk version
 	var version uint32
-	err := binary.Read(r, binary.BigEndian, &version)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e := binary.Read(r, binary.BigEndian, &version)
+	if e != nil  {
+				return nil, e
 	}
 	if version != estimateFeeSaveVersion {
 		return nil, fmt.Errorf("incorrect version: expected %d found %d",
@@ -573,42 +572,41 @@ func RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 		observed: make(map[chainhash.Hash]*observedTransaction),
 	}
 	// Read basic parameters.
-	e := binary.Read(r, binary.BigEndian, &ef.maxRollback)
+	e = binary.Read(r, binary.BigEndian, &ef.maxRollback)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	e = binary.Read(r, binary.BigEndian, &ef.binSize)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	e = binary.Read(r, binary.BigEndian, &ef.maxReplacements)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	e = binary.Read(r, binary.BigEndian, &ef.minRegisteredBlocks)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	e = binary.Read(r, binary.BigEndian, &ef.lastKnownHeight)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	e = binary.Read(r, binary.BigEndian, &ef.numBlocksRegistered)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	// Read transactions.
 	var numObserved uint32
 	observed := make(map[uint32]*observedTransaction)
 	e = binary.Read(r, binary.BigEndian, &numObserved)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	for i := uint32(0); i < numObserved; i++ {
-		ot, err := deserializeObservedTransaction(r)
-		if err != nil {
-			Error(err)
-			return nil, err
+		ot, e := deserializeObservedTransaction(r)
+		if e != nil  {
+						return nil, e
 		}
 		observed[i] = ot
 		ef.observed[ot.hash] = ot
@@ -618,14 +616,14 @@ func RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 		var numTransactions uint32
 		e = binary.Read(r, binary.BigEndian, &numTransactions)
 		if e != nil {
-			Trace("failed to read", e)
+			trc.Ln("failed to read", e)
 		}
 		bin := make([]*observedTransaction, numTransactions)
 		for j := uint32(0); j < numTransactions; j++ {
 			var index uint32
 			e = binary.Read(r, binary.BigEndian, &index)
 			if e != nil {
-				Trace("failed to read", e)
+				trc.Ln("failed to read", e)
 			}
 			var exists bool
 			bin[j], exists = observed[index]
@@ -640,15 +638,14 @@ func RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 	var numDropped uint32
 	e = binary.Read(r, binary.BigEndian, &numDropped)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	ef.dropped = make([]*registeredBlock, numDropped)
 	for i := uint32(0); i < numDropped; i++ {
-		var err error
-		ef.dropped[int(i)], err = deserializeRegisteredBlock(r, observed)
-		if err != nil {
-			Error(err)
-			return nil, err
+		var e error
+		ef.dropped[int(i)], e = deserializeRegisteredBlock(r, observed)
+		if e != nil  {
+						return nil, e
 		}
 	}
 	return ef, nil
@@ -658,21 +655,21 @@ func deserializeObservedTransaction(r io.Reader) (*observedTransaction, error) {
 	// The first 32 bytes should be a hash.
 	e := binary.Read(r, binary.BigEndian, &ot.hash)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	// The next 8 are SatoshiPerByte
 	e = binary.Read(r, binary.BigEndian, &ot.feeRate)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	// And next there are two uint32's.
 	e = binary.Read(r, binary.BigEndian, &ot.observed)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	e = binary.Read(r, binary.BigEndian, &ot.mined)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	return &ot, nil
 }
@@ -682,18 +679,18 @@ func deserializeRegisteredBlock(r io.Reader,
 	rb := &registeredBlock{}
 	e := binary.Read(r, binary.BigEndian, &rb.hash)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	e = binary.Read(r, binary.BigEndian, &lenTransactions)
 	if e != nil {
-		Trace("failed to read", e)
+		trc.Ln("failed to read", e)
 	}
 	rb.transactions = make([]*observedTransaction, lenTransactions)
 	for i := uint32(0); i < lenTransactions; i++ {
 		var index uint32
 		e = binary.Read(r, binary.BigEndian, &index)
 		if e != nil {
-			Trace("failed to read", e)
+			trc.Ln("failed to read", e)
 		}
 		rb.transactions[i] = txs[index]
 	}

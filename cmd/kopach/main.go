@@ -16,7 +16,7 @@ import (
 	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
@@ -30,7 +30,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rav "github.com/p9c/pod/pkg/data/ring"
@@ -88,60 +88,59 @@ type Worker struct {
 
 func (w *Worker) Start() {
 	// if !*cx.Config.Generate {
-	// 	Debug("called start but not running generate")
+	// 	dbg.Ln("called start but not running generate")
 	// 	return
 	// }
-	Debug("starting up kopach workers")
+	dbg.Ln("starting up kopach workers")
 	w.workers = []*worker.Worker{}
 	w.clients = []*client.Client{}
 	for i := 0; i < *w.cx.Config.GenThreads; i++ {
-		Debug("starting worker", i)
+		dbg.Ln("starting worker", i)
 		cmd, _ := worker.Spawn(w.quit, os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, *w.cx.Config.LogLevel)
 		w.workers = append(w.workers, cmd)
 		w.clients = append(w.clients, client.New(cmd.StdConn))
 	}
 	for i := range w.clients {
-		Debug("sending pass to worker", i)
-		err := w.clients[i].SendPass(*w.cx.Config.MinerPass)
-		if err != nil {
-			Error(err)
+		trc.Ln("sending pass to worker", i)
+		e := w.clients[i].SendPass(*w.cx.Config.MinerPass)
+		if e != nil {
 		}
 	}
-	Debug("setting workers to active")
+	dbg.Ln("setting workers to active")
 	w.active.Store(true)
 	
 }
 
 func (w *Worker) Stop() {
-	var err error
+	var e error
 	for i := range w.clients {
-		if err = w.clients[i].Pause(); Check(err) {
+		if e = w.clients[i].Pause(); err.Chk(e) {
 		}
-		if err = w.clients[i].Stop(); Check(err) {
+		if e = w.clients[i].Stop(); err.Chk(e) {
 		}
-		if err = w.clients[i].Close(); Check(err) {
+		if e = w.clients[i].Close(); err.Chk(e) {
 		}
 	}
 	for i := range w.workers {
-		// if err = w.workers[i].Interrupt(); !Check(err) {
+		// if e = w.workers[i].Interrupt(); !err.Chk(e) {
 		// }
-		if err = w.workers[i].Kill(); !Check(err) {
+		if e = w.workers[i].Kill(); !err.Chk(e) {
 		}
-		Debug("stopped worker", i)
+		dbg.Ln("stopped worker", i)
 	}
 	w.active.Store(false)
 	w.quit.Q()
 }
 
-func Handle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) (err error) {
-		Debug("miner controller starting")
+func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
+	return func(c *cli.Context) (e error) {
+		dbg.Ln("miner controller starting")
 		randomBytes := make([]byte, 4)
-		if _, err = rand.Read(randomBytes); Check(err) {
+		if _, e = rand.Read(randomBytes); err.Chk(e) {
 		}
 		w := &Worker{
-			id: fmt.Sprintf("%x", randomBytes),
-			cx: cx,
+			id:            fmt.Sprintf("%x", randomBytes),
+			cx:            cx,
 			quit:          cx.KillAll,
 			sendAddresses: []*net.UDPAddr{},
 			StartChan:     qu.T(),
@@ -153,14 +152,13 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
-		Debug("opening broadcast channel listener")
-		w.conn, err = transport.NewBroadcastChannel(
+		dbg.Ln("opening broadcast channel listener")
+		w.conn, e = transport.NewBroadcastChannel(
 			"kopachmain", w, *cx.Config.MinerPass,
 			transport.DefaultPort, control.MaxDatagramSize, handlers,
 			w.quit,
 		)
-		if err != nil {
-			Error(err)
+		if e != nil {
 			return
 		}
 		// start up the workers
@@ -174,8 +172,9 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		// controller watcher thread
 		go func() {
-			Debug("starting controller watcher")
+			dbg.Ln("starting controller watcher")
 			ticker := time.NewTicker(time.Second)
+			logger := time.NewTicker(time.Second * 5)
 		out:
 			for {
 				select {
@@ -185,41 +184,45 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*6 && w.FirstSender.Load() != 0
 					if wasSending {
-						Debug("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
+						dbg.Ln("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be listened to
 						w.FirstSender.Store(0)
 						// pause the workers
 						for i := range w.clients {
-							Debug("sending pause to worker", i)
-							err := w.clients[i].Pause()
-							if err != nil {
-								Error(err)
+							dbg.Ln("sending pause to worker", i)
+							e := w.clients[i].Pause()
+							if e != nil {
 							}
 						}
 					}
+					if interrupt.Requested() {
+						w.StopChan <- struct{}{}
+						w.quit.Q()
+					}
+				case <-logger.C:
 					w.hashrate = w.HashReport()
 					if interrupt.Requested() {
 						w.StopChan <- struct{}{}
 						w.quit.Q()
 					}
 				case <-w.StartChan.Wait():
-					Debug("received signal on StartChan")
+					dbg.Ln("received signal on StartChan")
 					*cx.Config.Generate = true
 					save.Pod(cx.Config)
 					w.Start()
 				case <-w.StopChan.Wait():
-					Debug("received signal on StopChan")
+					dbg.Ln("received signal on StopChan")
 					*cx.Config.Generate = false
 					save.Pod(cx.Config)
 					w.Stop()
 				case s := <-w.PassChan:
-					Debug("received signal on PassChan", s)
+					dbg.Ln("received signal on PassChan", s)
 					*cx.Config.MinerPass = s
 					save.Pod(cx.Config)
 					w.Stop()
 					w.Start()
 				case n := <-w.SetThreads:
-					Debug("received signal on SetThreads", n)
+					dbg.Ln("received signal on SetThreads", n)
 					*cx.Config.GenThreads = n
 					save.Pod(cx.Config)
 					if *cx.Config.Generate {
@@ -234,30 +237,30 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						w.Start()
 					}
 				case <-w.quit.Wait():
-					Debug("stopping from quit")
+					dbg.Ln("stopping from quit")
 					interrupt.Request()
 					break out
 				}
 			}
-			Debug("finished kopach miner work loop")
+			dbg.Ln("finished kopach miner work loop")
 			logi.L.LogChanDisabled.Store(true)
 			logi.L.Writer.Write.Store(true)
 		}()
-		Debug("listening on", control.UDP4MulticastAddress)
+		dbg.Ln("listening on", control.UDP4MulticastAddress)
 		<-w.quit
-		Info("kopach shutting down") // , interrupt.GoroutineDump())
+		inf.Ln("kopach shutting down") // , interrupt.GoroutineDump())
 		// <-interrupt.HandlersDone
-		Info("kopach finished shutdown")
+		inf.Ln("kopach finished shutdown")
 		return
 	}
 }
 
 // these are the handlers for specific message types.
 var handlers = transport.Handlers{
-	string(hashrate.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(hashrate.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (e error) {
 		c := ctx.(*Worker)
 		if !c.active.Load() {
-			Debug("not active")
+			dbg.Ln("not active")
 			return
 		}
 		var hr hashrate.Hashrate
@@ -274,15 +277,15 @@ var handlers = transport.Handlers{
 	string(job.Magic): func(
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
-	) (err error) {
-		Trace("received job")
+	) (e error) {
+		trc.Ln("received job")
 		w := ctx.(*Worker)
 		if !w.active.Load() {
-			Trace("not active")
+			trc.Ln("not active")
 			return
 		}
 		
-		// Debugs(b)
+		// dbg.S(b)
 		jr := templates.Message{}
 		gotiny.Unmarshal(b, &jr)
 		w.height = jr.Height
@@ -291,20 +294,20 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != cN && firstSender != 0
 		if otherSent {
-			Trace("ignoring other controller job")
+			trc.Ln("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		}
-		Trace("now listening to controller at", cN)
+		trc.Ln("now listening to controller at", cN)
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			if err = w.clients[i].NewJob(&jr); Check(err) {
+			if e = w.clients[i].NewJob(&jr); err.Chk(e) {
 			}
 		}
 		return
 	},
-	string(pause.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(pause.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (e error) {
 		w := ctx.(*Worker)
 		var advt p2padvt.Advertisment
 		gotiny.Unmarshal(b, &advt)
@@ -315,13 +318,12 @@ var handlers = transport.Handlers{
 		np := advt.UUID
 		// np := p.GetControllerListenerPort()
 		// ns := net.JoinHostPort(strings.Split(ni.String(), ":")[0], fmt.Sprint(np))
-		Debug("received pause from server at", ni, np)
+		dbg.Ln("received pause from server at", ni, np)
 		if fs == np {
 			for i := range w.clients {
-				Debug("sending pause to worker", i, fs, np)
-				err := w.clients[i].Pause()
-				if err != nil {
-					Error(err)
+				dbg.Ln("sending pause to worker", i, fs, np)
+				e := w.clients[i].Pause()
+				if e != nil {
 				}
 			}
 		}
@@ -330,22 +332,22 @@ var handlers = transport.Handlers{
 	// string(sol.Magic): func(
 	// 	ctx interface{}, src net.Addr, dst string,
 	// 	b []byte,
-	// ) (err error) {
-	// 	Debug("solution detected from miner at", src)
+	// ) (e error) {
+	// 	dbg.Ln("solution detected from miner at", src)
 	// 	w := ctx.(*Worker)
 	// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
 	// 	if len(portSlice) < 2 {
-	// 		Debug("error with solution", w.FirstSender.Load(), portSlice)
+	// 		dbg.Ln("error with solution", w.FirstSender.Load(), portSlice)
 	// 		return
 	// 	}
 	// 	// port := portSlice[1]
 	// 	// j := sol.LoadSolContainer(b)
 	// 	// senderPort := j.GetSenderPort()
 	// 	// if fmt.Sprint(senderPort) == port {
-	// 	// // Warn("we found a solution")
+	// 	// // wrn.Ln("we found a solution")
 	// 	// // prepend to list of solutions for GUI display if enabled
 	// 	// if *w.cx.Config.KopachGUI {
-	// 	// 	// Debug("length solutions", len(w.solutions))
+	// 	// 	// dbg.Ln("length solutions", len(w.solutions))
 	// 	// 	blok := j.GetMsgBlock()
 	// 	// 	w.solutions = append(
 	// 	// 		w.solutions, []SolutionData{
@@ -373,20 +375,20 @@ var handlers = transport.Handlers{
 	// 	// 	w.Update <- struct{}{}
 	// 	// }
 	// 	// }
-	// 	// Debug("no longer listening to", w.FirstSender.Load())
+	// 	// dbg.Ln("no longer listening to", w.FirstSender.Load())
 	// 	// w.FirstSender.Store("")
 	// 	return
 	// },
 }
 
 func (w *Worker) HashReport() float64 {
-	Trace("generating hash report")
+	trc.Ln("generating hash report")
 	w.hashSampleBuf.Add(w.hashCount.Load())
 	av := ewma.NewMovingAverage()
 	var i int
 	var prev uint64
-	if err := w.hashSampleBuf.ForEach(
-		func(v uint64) error {
+	if e := w.hashSampleBuf.ForEach(
+		func(v uint64) (e error) {
 			if i < 1 {
 				prev = v
 			} else {
@@ -397,9 +399,9 @@ func (w *Worker) HashReport() float64 {
 			i++
 			return nil
 		},
-	); Check(err) {
+	); err.Chk(e) {
 	}
 	average := av.Value()
-	Debug("hashrate average", average)
+	dbg.Ln("hashrate average", average)
 	return average
 }

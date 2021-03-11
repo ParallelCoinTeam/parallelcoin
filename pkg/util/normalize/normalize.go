@@ -2,32 +2,33 @@ package normalize
 
 import (
 	"net"
-
+	
 	"github.com/urfave/cli"
 )
 
-// Address returns addr with the passed default port appended if there is not already a port specified.
-func Address(addr, defaultPort string) string {
-	_, _, err := net.SplitHostPort(addr)
-	if err != nil {
-		Error(err)
+// address returns addr with the passed default port appended if there is not
+// already a port specified.
+func address(addr, defaultPort string) string {
+	var e error
+	if _, _, e = net.SplitHostPort(addr); err.Chk(e) {
 		return net.JoinHostPort(addr, defaultPort)
 	}
 	return addr
 }
 
-// Addresses returns a new slice with all the passed peer addresses normalized with the given default port, and all
-// duplicates removed.
+// Addresses returns a new slice with all the passed peer addresses normalized
+// with the given default port, and all duplicates removed.
 func Addresses(addrs []string, defaultPort string) []string {
 	for i := range addrs {
-		addrs[i] = Address(addrs[i], defaultPort)
+		addrs[i] = address(addrs[i], defaultPort)
 	}
 	return removeDuplicateAddresses(addrs)
 }
 
-// RemoveDuplicateAddresses returns a new slice with all duplicate entries in addrs removed.
-func removeDuplicateAddresses(addrs []string) []string {
-	result := make([]string, 0, len(addrs))
+// removeDuplicateAddresses returns a new slice with all duplicate entries in
+// addrs removed.
+func removeDuplicateAddresses(addrs []string) (result []string) {
+	result = make([]string, 0, len(addrs))
 	seen := map[string]struct{}{}
 	for _, val := range addrs {
 		if _, ok := seen[val]; !ok {

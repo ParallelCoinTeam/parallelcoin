@@ -32,9 +32,9 @@ func ExampleEncode() {
 func ExampleCheckDecode() {
 	// Decode an example Base58Check encoded data.
 	encoded := "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
-	decoded, version, err := base58.CheckDecode(encoded)
-	if err != nil {
-		fmt.Println(err)
+	decoded, version, e := base58.CheckDecode(encoded)
+	if e != nil  {
+		fmt.Println(e)
 		return
 	}
 	// Show the decoded data.

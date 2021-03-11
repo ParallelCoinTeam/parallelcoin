@@ -11,9 +11,9 @@ import (
 	"github.com/jessevdk/go-flags"
 	
 	"github.com/p9c/pod/app/appdata"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/database/walletdb"
+	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
 )
 
 const defaultNet = "mainnet"
@@ -30,8 +30,9 @@ var opts = struct {
 }
 
 func init() {
-	_, err := flags.Parse(&opts)
-	if err != nil {
+
+	_, e := flags.Parse(&opts)
+	if e != nil  {
 		os.Exit(1)
 	}
 }
@@ -70,8 +71,8 @@ func main() {
 }
 func mainInt() int {
 	fmt.Println("Database path:", opts.DbPath)
-	_, err := os.Stat(opts.DbPath)
-	if os.IsNotExist(err) {
+	_, e := os.Stat(opts.DbPath)
+	if os.IsNotExist(e) {
 		fmt.Println("Database file does not exist")
 		return 1
 	}
@@ -82,8 +83,8 @@ func mainInt() int {
 			// Exit on EOF.
 			return 0
 		}
-		err := scanner.Err()
-		if err != nil {
+		e := scanner.Err()
+		if e != nil  {
 			return 1
 		}
 		resp := scanner.Text()
@@ -95,35 +96,35 @@ func mainInt() int {
 		}
 		fmt.Println("Enter yes or no.")
 	}
-	db, err := walletdb.Open("bdb", opts.DbPath)
-	if err != nil {
+	db, e := walletdb.Open("bdb", opts.DbPath)
+	if e != nil  {
 		fmt.Println("failed to open database:", err)
 		return 1
 	}
 	defer func() {
-		if err := db.Close(); err != nil {
-			fmt.Println(err)
+		if e := db.Close(); err.Chk(e) {
+			fmt.Println(e)
 		}
 	}()
 	fmt.Println("dropping wtxmgr namespace")
-	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
-		err := tx.DeleteTopLevelBucket(wtxmgrNamespace)
-		if err != nil && err != walletdb.ErrBucketNotFound {
-			return err
+	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
+		e := tx.DeleteTopLevelBucket(wtxmgrNamespace)
+		if e != nil  && err != walletdb.ErrBucketNotFound {
+			return e
 		}
-		ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
-		if err != nil {
-			return err
+		ns, e := tx.CreateTopLevelBucket(wtxmgrNamespace)
+		if e != nil  {
+			return e
 		}
-		err = wtxmgr.Create(ns)
-		if err != nil {
-			return err
+		e = wtxmgr.Create(ns)
+		if e != nil  {
+			return e
 		}
 		ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 		startBlock := ns.Get(startBlockName)
-		err = ns.Put(syncedToName, startBlock)
-		if err != nil {
-			return err
+		e = ns.Put(syncedToName, startBlock)
+		if e != nil  {
+			return e
 		}
 		recentBlocks := make([]byte, 40)
 		copy(recentBlocks[0:4], startBlock[0:4])
@@ -131,7 +132,7 @@ func mainInt() int {
 		binary.LittleEndian.PutUint32(recentBlocks[4:8], uint32(1))
 		return ns.Put(recentBlocksName, recentBlocks)
 	})
-	if err != nil {
+	if e != nil  {
 		fmt.Println("Failed to drop and re-create namespace:", err)
 		return 1
 	}

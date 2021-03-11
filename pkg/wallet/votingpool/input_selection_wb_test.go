@@ -5,11 +5,11 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -21,13 +21,13 @@ var (
 // func TestGetEligibleInputs(// 	t *testing.T) {
 // 	tearDown, db, pool, store := TstCreatePoolAndTxStore(t)
 // 	defer tearDown()
-// 	dbtx, err := db.BeginReadWriteTx()
-// 	if err != nil {
-// 		t.Fatal(err)
+// 	dbtx, e := db.BeginReadWriteTx()
+// 	if e != nil  {
+// 		t.ftl.Ln(e)
 // 	}
 // 	defer func() {
-// 	err := dbtx.Commit()
-// 	if err != nil {
+// 	e := dbtx.Commit()
+// 	if e != nil  {
 // 		t.Log( err)
 // 	}
 // }()
@@ -54,36 +54,36 @@ var (
 // 	var eligibles []Credit
 // 	txmgrNs := dbtx.ReadBucket(txmgrNamespaceKey)
 // 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-// 		eligibles, err = pool.getEligibleInputs(ns, addrmgrNs,
+// 		eligibles, e = pool.getEligibleInputs(ns, addrmgrNs,
 // 			store, txmgrNs, *startAddr, lastSeriesID, dustThreshold, int32(currentBlock),
 // 			eligibleInputMinConfirmations)
 // 	})
-// 	if err != nil {
-// 		t.Fatal("InputSelection failed:", err)
+// 	if e != nil  {
+// 		t.ftl.Ln("InputSelection failed:", err)
 // 	}
-// 	// Check we got the expected number of eligible inputs.
+// 	// Chk we got the expected number of eligible inputs.
 // 	if len(eligibles) != expNoEligibleInputs {
 // 		t.Fatalf("Wrong number of eligible inputs returned. Got: %d, want: %d.",
 // 			len(eligibles), expNoEligibleInputs)
 // 	}
-// 	// Check that the returned eligibles are reverse sorted by address.
+// 	// Chk that the returned eligibles are reverse sorted by address.
 // 	if !sort.IsSorted(sort.Reverse(byAddress(eligibles))) {
-// 		t.Fatal("Eligible inputs are not sorted.")
+// 		t.ftl.Ln("Eligible inputs are not sorted.")
 // 	}
-// 	// Check that all credits are unique
+// 	// Chk that all credits are unique
 // 	checkUniqueness(t, eligibles)
 // }
 func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
-	dbtx, err := db.BeginReadWriteTx()
-	if err != nil {
-		t.Fatal(err)
+	dbtx, e := db.BeginReadWriteTx()
+	if e != nil  {
+		t.ftl.Ln(e)
 	}
 	defer func() {
-		err := dbtx.Commit()
-		if err != nil {
-			t.Log(err)
+		e := dbtx.Commit()
+		if e != nil  {
+			t.Log(e)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -100,25 +100,25 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 	addr := TstNewWithdrawalAddress(t, dbtx, pool, 1, 0, 1)
 	// The first call to nextAddr() should give us the address for branch==1 and index==1.
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-		addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
+		addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("Failed to get next address: %v", err)
 	}
 	checkWithdrawalAddressMatches(t, addr, 1, Branch(1), 1)
 	// The next call should give us the address for branch==0, index==2 since there are no used addresses for branch==2.
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-		addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
+		addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("Failed to get next address: %v", err)
 	}
 	checkWithdrawalAddressMatches(t, addr, 1, Branch(0), 2)
 	// Since the last addr for branch==1 was the one with index==1, a subsequent call will return nil.
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-		addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
+		addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("Failed to get next address: %v", err)
 	}
 	if addr != nil {
@@ -128,14 +128,14 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 func TestNextAddr(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
-	dbtx, err := db.BeginReadWriteTx()
-	if err != nil {
-		t.Fatal(err)
+	dbtx, e := db.BeginReadWriteTx()
+	if e != nil  {
+		t.ftl.Ln(e)
 	}
 	defer func() {
-		err := dbtx.Commit()
-		if err != nil {
-			t.Log(err)
+		e := dbtx.Commit()
+		if e != nil  {
+			t.Log(e)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -155,9 +155,9 @@ func TestNextAddr(t *testing.T) {
 	// keys).
 	for _, i := range []int{1, 2, 3} {
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-			addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
+			addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 		})
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("Failed to get next address: %v", err)
 		}
 		checkWithdrawalAddressMatches(t, addr, 1, Branch(i), lastIdx-1)
@@ -166,9 +166,9 @@ func TestNextAddr(t *testing.T) {
 	// addresses with branch=[0-3] and idx=lastIdx.
 	for _, i := range []int{0, 1, 2, 3} {
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-			addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
+			addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 		})
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("Failed to get next address: %v", err)
 		}
 		checkWithdrawalAddressMatches(t, addr, 1, Branch(i), lastIdx)
@@ -181,9 +181,9 @@ func TestNextAddr(t *testing.T) {
 	// again with branch=0, idx=0.
 	for _, i := range []int{0, 1, 2, 3} {
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-			addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
+			addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 		})
-		if err != nil {
+		if e != nil  {
 			t.Fatalf("Failed to get next address: %v", err)
 		}
 		checkWithdrawalAddressMatches(t, addr, 2, Branch(i), 0)
@@ -191,9 +191,9 @@ func TestNextAddr(t *testing.T) {
 	// Finally check that nextAddr() returns nil when we've reached the last available address before stopSeriesID.
 	addr = TstNewWithdrawalAddress(t, dbtx, pool, 2, 3, lastIdx)
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
-		addr, err = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
+		addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
-	if err != nil {
+	if e != nil  {
 		t.Fatalf("Failed to get next address: %v", err)
 	}
 	if addr != nil {
@@ -203,14 +203,14 @@ func TestNextAddr(t *testing.T) {
 func TestEligibleInputsAreEligible(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
-	dbtx, err := db.BeginReadWriteTx()
-	if err != nil {
-		t.Fatal(err)
+	dbtx, e := db.BeginReadWriteTx()
+	if e != nil  {
+		t.ftl.Ln(e)
 	}
 	defer func() {
-		err := dbtx.Commit()
-		if err != nil {
-			t.Log(err)
+		e := dbtx.Commit()
+		if e != nil  {
+			t.Log(e)
 		}
 	}()
 	var chainHeight int32 = 1000
@@ -225,14 +225,14 @@ func TestEligibleInputsAreEligible(t *testing.T) {
 func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
-	dbtx, err := db.BeginReadWriteTx()
-	if err != nil {
-		t.Fatal(err)
+	dbtx, e := db.BeginReadWriteTx()
+	if e != nil  {
+		t.ftl.Ln(e)
 	}
 	defer func() {
-		err := dbtx.Commit()
-		if err != nil {
-			t.Log(err)
+		e := dbtx.Commit()
+		if e != nil  {
+			t.Log(e)
 		}
 	}()
 	var chainHeight int32 = 1000
@@ -240,11 +240,11 @@ func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	c := credits[0]
 	// Make sure credit is old enough to pass the minConf check.
 	c.BlockMeta.Height = int32(eligibleInputMinConfirmations)
-	// Check that credit below dustThreshold is rejected.
+	// Chk that credit below dustThreshold is rejected.
 	if pool.isCreditEligible(c, eligibleInputMinConfirmations, chainHeight, dustThreshold) {
 		t.Errorf("Input is eligible and it should not be.")
 	}
-	// Check that a credit with not enough confirmations is rejected.
+	// Chk that a credit with not enough confirmations is rejected.
 	_, credits = TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{int64(dustThreshold)})
 	c = credits[0]
 	// The calculation of if it has been confirmed does this: chainheigt - bh + 1 >= target, which is quite weird, but
@@ -257,14 +257,14 @@ func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 func TestCreditSortingByAddress(t *testing.T) {
 	teardown, db, pool := TstCreatePool(t)
 	defer teardown()
-	dbtx, err := db.BeginReadWriteTx()
-	if err != nil {
-		t.Fatal(err)
+	dbtx, e := db.BeginReadWriteTx()
+	if e != nil  {
+		t.ftl.Ln(e)
 	}
 	defer func() {
-		err := dbtx.Commit()
-		if err != nil {
-			t.Log(err)
+		e := dbtx.Commit()
+		if e != nil  {
+			t.Log(e)
 		}
 	}()
 	series := []TstSeriesDef{
@@ -309,8 +309,8 @@ func TestCreditSortingByAddress(t *testing.T) {
 func newDummyCredit(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series uint32, index Index, branch Branch,
 	txHash []byte, outpointIdx uint32) Credit {
 	var hash chainhash.Hash
-	if err := hash.SetBytes(txHash); err != nil {
-		t.Fatal(err)
+	if e := hash.SetBytes(txHash); err.Chk(e) {
+		t.ftl.Ln(e)
 	}
 	// Ensure the address defined by the given series/branch/index is present on the set of used addresses as that's a
 	// requirement of WithdrawalAddress.

@@ -61,11 +61,10 @@ func (bi *blockImporter) readBlock() ([]byte, error) {
 	// The block file format is:
 	//  <network> <block length> <serialized block>
 	var net uint32
-	err := binary.Read(bi.r, binary.LittleEndian, &net)
-	if err != nil {
-		L.Error(err)
-if err != io.EOF {
-			return nil, err
+	e := binary.Read(bi.r, binary.LittleEndian, &net)
+	if e != nil  {
+		L.if e != io.EOF {
+			return nil, e
 		}
 		// No block and no error means there are no more blocks to read.
 		return nil, nil
@@ -77,8 +76,8 @@ if err != io.EOF {
 	}
 	// Read the block length and ensure it is sane.
 	var blockLen uint32
-	if err := binary.Read(bi.r, binary.LittleEndian, &blockLen); err != nil {
-		return nil, err
+	if e := binary.Read(bi.r, binary.LittleEndian, &blockLen); dbg.Chk(e) {
+		return nil, e
 	}
 	if blockLen > wire.MaxBlockPayload {
 		return nil, fmt.Errorf("block payload of %d bytes is larger "+
@@ -86,8 +85,8 @@ if err != io.EOF {
 			wire.MaxBlockPayload)
 	}
 	serializedBlock := make([]byte, blockLen)
-	if _, err := io.ReadFull(bi.r, serializedBlock); err != nil {
-		return nil, err
+	if _, e = io.ReadFull(bi.r, serializedBlock); dbg.Chk(e) {
+		return nil, e
 	}
 	return serializedBlock, nil
 }
@@ -96,23 +95,21 @@ if err != io.EOF {
 func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 
 	// Deserialize the block which includes checks for malformed blocks.
-	block, err := util.NewBlockFromBytes(serializedBlock)
-	if err != nil {
-		L.Error(err)
-return false, err
+	block, e := util.NewBlockFromBytes(serializedBlock)
+	if e != nil  {
+		L.return false, err
 	}
 	// update progress statistics
 	bi.lastBlockTime = block.MsgBlock().Header.Timestamp
 	bi.receivedLogTx += int64(len(block.MsgBlock().Transactions))
 	// Skip blocks that already exist.
 	var exists bool
-	err = bi.db.View(func(tx database.Tx) error {
-		exists, err = tx.HasBlock(block.Hash())
+	e = bi.db.View(func(tx database.Tx) (e error) {
+		exists, e = tx.HasBlock(block.Hash())
 		return err
 	})
-	if err != nil {
-		L.Error(err)
-return false, err
+	if e != nil  {
+		L.return false, err
 	}
 	if exists {
 		return false, nil
@@ -122,13 +119,12 @@ return false, err
 	if !prevHash.IsEqual(&zeroHash) {
 
 		var exists bool
-		err := bi.db.View(func(tx database.Tx) error {
-			exists, err = tx.HasBlock(prevHash)
+		e := bi.db.View(func(tx database.Tx) (e error) {
+			exists, e = tx.HasBlock(prevHash)
 			return err
 		})
-		if err != nil {
-		L.Error(err)
-return false, err
+		if e != nil  {
+		L.return false, err
 		}
 		if !exists {
 			return false, fmt.Errorf("import file contains block "+
@@ -137,12 +133,11 @@ return false, err
 		}
 	}
 	// Put the blocks into the database with no checking of chain rules.
-	err = bi.db.Update(func(tx database.Tx) error {
+	e = bi.db.Update(func(tx database.Tx) (e error) {
 		return tx.StoreBlock(block)
 	})
-	if err != nil {
-		L.Error(err)
-return false, err
+	if e != nil  {
+		L.return false, err
 	}
 	return true, nil
 }
@@ -153,10 +148,9 @@ func (bi *blockImporter) readHandler() {
 out:
 	for {
 		// Read the next block from the file and if anything goes wrong notify the status handler with the error and bail.
-		serializedBlock, err := bi.readBlock()
-		if err != nil {
-		L.Error(err)
-bi.errChan <- fmt.Errorf("Error reading from input "+
+		serializedBlock, e := bi.readBlock()
+		if e != nil  {
+		L.bi.errChan <- fmt.Errorf("Error reading from input "+
 				"file: %v", err.Error())
 			break out
 		}
@@ -198,7 +192,7 @@ func (bi *blockImporter) logProgress() {
 	if bi.receivedLogTx == 1 {
 		txStr = "transaction"
 	}
-	L.Infof("Processed %d %s in the last %s (%d %s, height %d, %s)",
+	L.inf.F("Processed %d %s in the last %s (%d %s, height %d, %s)",
 		bi.receivedLogBlocks, blockStr, tDuration, bi.receivedLogTx,
 		txStr, bi.lastHeight, bi.lastBlockTime)
 	bi.receivedLogBlocks = 0
@@ -219,10 +213,9 @@ out:
 			}
 			bi.blocksProcessed++
 			bi.lastHeight++
-			imported, err := bi.processBlock(serializedBlock)
-			if err != nil {
-		L.Error(err)
-bi.errChan <- err
+			imported, e := bi.processBlock(serializedBlock)
+			if e != nil  {
+		L.bi.errChan <- err
 				break out
 			}
 			if imported {
@@ -241,7 +234,7 @@ func (bi *blockImporter) statusHandler(resultsChan chan *importResults) {
 
 	select {
 	// An error from either of the goroutines means we're done so signal caller with the error and signal all goroutines to quit.
-	case err := <-bi.errChan:
+	case e := <-bi.errChan:
 		resultsChan <- &importResults{
 			blocksProcessed: bi.blocksProcessed,
 			blocksImported:  bi.blocksImported,
@@ -290,9 +283,9 @@ func newBlockImporter(	db database.DB, r io.ReadSeeker) *blockImporter {
 }
 
 // Execute is the main entry point for the command.  It's invoked by the parser.
-func (cmd *importCmd) Execute(args []string) error {
+func (cmd *importCmd) Execute(args []string) (e error) {
 	// Setup the global config options and ensure they are valid.
-	if err := setupGlobalConfig(); err != nil {
+	if e := setupGlobalConfig(); dbg.Chk(e) {
 		return err
 	}
 	// Ensure the specified block file exists.
@@ -302,22 +295,20 @@ func (cmd *importCmd) Execute(args []string) error {
 		return fmt.Errorf(str, cmd.InFile)
 	}
 	// Load the block database.
-	db, err := loadBlockDB()
-	if err != nil {
-		L.Error(err)
-return err
+	db, e := loadBlockDB()
+	if e != nil  {
+		L.return err
 	}
 	defer db.Close()
 	// Ensure the database is sync'd and closed on Ctrl+C.
 	addInterruptHandler(func() {
 
-		L.Infof("Gracefully shutting down the database...")
+		L.inf.F("Gracefully shutting down the database...")
 		db.Close()
 	})
-	fi, err := os.Open(importCfg.InFile)
-	if err != nil {
-		L.Error(err)
-return err
+	fi, e := os.Open(importCfg.InFile)
+	if e != nil  {
+		L.return err
 	}
 	defer fi.Close()
 	// Create a block importer for the database and input file and start it. The results channel returned from start will contain an error if anything went wrong.
@@ -325,7 +316,7 @@ return err
 	// Perform the import asynchronously and signal the main goroutine when done.  This allows blocks to be processed and read in parallel.  The results channel returned from Import contains the statistics about the import including an error if something went wrong.  This is done in a separate goroutine rather than waiting directly so the main goroutine can be signaled for shutdown by either completion, error, or from the main interrupt handler.  This is necessary since the main goroutine must be kept running long enough for the interrupt handler goroutine to finish.
 	go func() {
 
-		L.Info("Starting import")
+		L.inf.Ln("Starting import")
 		resultsChan := importer.Import()
 		results := <-resultsChan
 		if results.err != nil {
@@ -335,13 +326,13 @@ return err
 				return
 			}
 		}
-		L.Infof("Processed a total of %d blocks (%d imported, %d "+
+		L.inf.F("Processed a total of %d blocks (%d imported, %d "+
 			"already known)", results.blocksProcessed,
 			results.blocksImported,
 			results.blocksProcessed-results.blocksImported)
 		shutdownChannel <- nil
 	}()
 	// Wait for shutdown signal from either a normal completion or from the interrupt handler.
-	err = <-shutdownChannel
+	e = <-shutdownChannel
 	return err
 }

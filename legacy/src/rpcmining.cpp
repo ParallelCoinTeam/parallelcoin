@@ -126,7 +126,7 @@ Value gethashespersec(const Array& params, bool fHelp)
 }
 
 
-Value getmininginfo(const Array& params, bool fHelp)
+Value getmininginf.Ln(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(

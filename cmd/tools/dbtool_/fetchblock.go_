@@ -19,36 +19,33 @@ var (
 )
 
 // Execute is the main entry point for the command.  It's invoked by the parser.
-func (cmd *fetchBlockCmd) Execute(args []string) error {
+func (cmd *fetchBlockCmd) Execute(args []string) (e error) {
 	// Setup the global config options and ensure they are valid.
-	if err := setupGlobalConfig(); err != nil {
+	if e := setupGlobalConfig(); dbg.Chk(e) {
 		return err
 	}
 	if len(args) < 1 {
 		return errors.New("required block hash parameter not specified")
 	}
-	blockHash, err := chainhash.NewHashFromStr(args[0])
-	if err != nil {
-		L.Error(err)
-return err
+	blockHash, e := chainhash.NewHashFromStr(args[0])
+	if e != nil  {
+		L.return err
 	}
 	// Load the block database.
-	db, err := loadBlockDB()
-	if err != nil {
-		L.Error(err)
-return err
+	db, e := loadBlockDB()
+	if e != nil  {
+		L.return err
 	}
 	defer db.Close()
-	return db.View(func(tx database.Tx) error {
-		L.Infof("Fetching block %s", blockHash)
+	return db.View(func(tx database.Tx) (e error) {
+		L.inf.F("Fetching block %s", blockHash)
 		startTime := time.Now()
-		blockBytes, err := tx.FetchBlock(blockHash)
-		if err != nil {
-		L.Error(err)
-return err
+		blockBytes, e := tx.FetchBlock(blockHash)
+		if e != nil  {
+		L.return err
 		}
-		L.Infof("Loaded block in %v", time.Since(startTime))
-		L.Infof("Block Hex: %s", hex.EncodeToString(blockBytes))
+		L.inf.F("Loaded block in %v", time.Since(startTime))
+		L.inf.F("Block Hex: %s", hex.EncodeToString(blockBytes))
 		return nil
 	})
 }

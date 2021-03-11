@@ -6,12 +6,12 @@ import (
 	"math/big"
 	"runtime"
 	"time"
-
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -86,10 +86,9 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 // provided address.
 func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Address, mineTo []wire.TxOut, net *netparams.Params, version int32) (*util.Tx, error) {
 	// Create the script to pay to the provided payment address.
-	pkScript, err := txscript.PayToAddrScript(addr)
-	if err != nil {
-		Error(err)
-		return nil, err
+	pkScript, e := txscript.PayToAddrScript(addr)
+	if e != nil  {
+				return nil, e
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
 	tx.AddTxIn(&wire.TxIn{
@@ -145,16 +144,14 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 		ts = prevBlockTime.Add(time.Second)
 	}
 	extraNonce := uint64(0)
-	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
-	if err != nil {
-		Error(err)
-		return nil, err
+	coinbaseScript, e := standardCoinbaseScript(blockHeight, extraNonce)
+	if e != nil  {
+				return nil, e
 	}
-	coinbaseTx, err := createCoinbaseTx(coinbaseScript, blockHeight, miningAddr,
+	coinbaseTx, e := createCoinbaseTx(coinbaseScript, blockHeight, miningAddr,
 		mineTo, net, blockVersion)
-	if err != nil {
-		Error(err)
-		return nil, err
+	if e != nil  {
+				return nil, e
 	}
 	// Create a new block ready to be solved.
 	blockTxns := []*util.Tx{coinbaseTx}
@@ -171,8 +168,8 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 		Bits:       net.PowLimitBits,
 	}
 	for _, tx := range blockTxns {
-		if err := block.AddTransaction(tx.MsgTx()); err != nil {
-			return nil, err
+		if e := block.AddTransaction(tx.MsgTx()); err.Chk(e) {
+			return nil, e
 		}
 	}
 	found := solveBlock(&block.Header, net.PowLimit)

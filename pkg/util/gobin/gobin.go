@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Get() (gobinary string, err error) {
+func Get() (gobinary string, e error) {
 	// search the environment variables for a GOROOT, if it exists we know we can run Go
 	env := os.Environ()
 	envMap := make(map[string]string)
@@ -22,7 +22,7 @@ func Get() (gobinary string, err error) {
 	if ok {
 		gobinary = filepath.Join(goroot, "bin", "go")
 	} else {
-		err = errors.New("no GOROOT found, no Go binary available")
+		e = errors.New("no GOROOT found, no Go binary available")
 	}
 	return
 }

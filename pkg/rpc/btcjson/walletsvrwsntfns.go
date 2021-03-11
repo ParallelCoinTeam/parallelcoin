@@ -66,6 +66,7 @@ func NewNewTxNtfn(account string, details ListTransactionsResult) *NewTxNtfn {
 	}
 }
 func init() {
+
 	// The commands in this file are only usable with a wallet server via websockets and are notifications.
 	flags := UFWalletOnly | UFWebsocketOnly | UFNotification
 	MustRegisterCmd(AccountBalanceNtfnMethod, (*AccountBalanceNtfn)(nil), flags)

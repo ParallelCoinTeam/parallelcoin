@@ -2,7 +2,7 @@ package p2padvt
 
 import (
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	

@@ -6,12 +6,12 @@ import (
 )
 
 func GetActualPort(listener string) uint16 {
-	var err error
+	var e error
 	var p string
-	if _, p, err = net.SplitHostPort(listener); Check(err) {
+	if _, p, e = net.SplitHostPort(listener); err.Chk(e) {
 	}
 	var oI uint64
-	if oI, err = strconv.ParseUint(p, 10, 16); Check(err) {
+	if oI, e = strconv.ParseUint(p, 10, 16); err.Chk(e) {
 	}
 	return uint16(oI)
 }

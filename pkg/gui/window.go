@@ -7,7 +7,7 @@ import (
 	"gioui.org/io/event"
 	
 	"github.com/p9c/pod/pkg/gui/fonts/p9fonts"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	"gioui.org/app"
 	"gioui.org/io/system"
@@ -124,51 +124,51 @@ func (w *Window) Open() (out *Window) {
 func (w *Window) Run(
 	frame func(ctx l.Context) l.Dimensions,
 	overlay func(ctx l.Context), destroy func(), quit qu.C,
-) (err error) {
+) (e error) {
 	for {
 		select {
 		case fn := <-w.Runner:
-			if err = fn(); Check(err) {
+			if e = fn(); err.Chk(e) {
 				return
 			}
 		case <-quit.Wait():
-			return nil
+			return
 			// by repeating selectors we decrease the chance of a runner delaying
 			// a frame event hitting the physical frame deadline
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
-		case e := <-w.Window.Events():
-			if err = w.processEvents(e, frame, destroy); Check(err) {
+		case ev := <-w.Window.Events():
+			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
 				return
 			}
 		}
@@ -178,7 +178,7 @@ func (w *Window) Run(
 func (w *Window) processEvents(e event.Event, frame func(ctx l.Context) l.Dimensions, destroy func()) error {
 	switch e := e.(type) {
 	case system.DestroyEvent:
-		Debug("received destroy event", e.Err)
+		dbg.Ln("received destroy event", e.Err)
 		// if e.Err != nil {
 		// 	if strings.Contains(e.Err.Error(), "eglCreateWindowSurface failed") {
 		// 		return nil

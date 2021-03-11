@@ -8,46 +8,47 @@ import (
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
+// Consume listens for messages from a child process over a stdio pipe.
 func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Worker {
 	var n int
-	var err error
-	Debug("spawning worker process", args)
+	var e error
+	dbg.Ln("spawning worker process", args)
 	w, _ := worker.Spawn(quit, args...)
 	data := make([]byte, 8192)
 	onBackup := false
 	go func() {
 	out:
 		for {
-			// Debug("readloop")
+			// dbg.Ln("readloop")
 			select {
 			case <-interrupt.HandlersDone.Wait():
-				Debug("quitting log consumer")
+				dbg.Ln("quitting log consumer")
 				break out
 			case <-quit.Wait():
-				Debug("breaking on quit signal")
+				dbg.Ln("breaking on quit signal")
 				break out
 			default:
 			}
-			n, err = w.StdConn.Read(data)
+			n, e = w.StdConn.Read(data)
 			if n == 0 {
-				Trace("read zero from stdconn", args)
+				trc.Ln("read zero from stdconn", args)
 				onBackup = true
 				logi.L.LogChanDisabled.Store(true)
 				break out
 			}
-			if err != nil && err != io.EOF {
+			if err.Chk(e) && e != io.EOF {
 				// Probably the child process has died, so quit
-				Error("err:", err)
+				err.Ln("err:", e)
 				onBackup = true
 				break out
 			} else if n > 0 {
-				if err := handler(data[:n]); Check(err) {
+				if e = handler(data[:n]); err.Chk(e) {
 				}
 			}
-			// if n, err = w.StdPipe.Read(data); Check(err) {
+			// if n, e = w.StdPipe.Read(data); err.Chk(e) {
 			// }
 			// // when the child stops sending over RPC, fall back to the also working but not printing stderr
 			// if n > 0 {
@@ -68,33 +69,34 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 	return w
 }
 
+// Serve runs a goroutine processing the FEC encoded packets, gathering them and
+// decoding them to be delivered to a handler function
 func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 	var n int
-	var err error
+	var e error
 	data := make([]byte, 8192)
 	go func() {
-		Debug("starting pipe server")
+		dbg.Ln("starting pipe server")
 	out:
 		for {
 			select {
 			case <-quit.Wait():
-				// Debug(interrupt.GoroutineDump())
+				// dbg.Ln(interrupt.GoroutineDump())
 				break out
 			default:
 			}
-			n, err = os.Stdin.Read(data)
-			if err != nil && err != io.EOF {
-				Debug("err: ", err)
+			n, e = os.Stdin.Read(data)
+			if e != nil && e != io.EOF {
 				break out
 			}
 			if n > 0 {
-				if err := handler(data[:n]); Check(err) {
+				if e = handler(data[:n]); err.Chk(e) {
 					break out
 				}
 			}
 		}
-		// Debug(interrupt.GoroutineDump())
-		Debug("pipe server shut down")
+		// dbg.Ln(interrupt.GoroutineDump())
+		dbg.Ln("pipe server shut down")
 	}()
 	return stdconn.New(os.Stdin, os.Stdout, quit)
 }

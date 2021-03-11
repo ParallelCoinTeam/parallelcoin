@@ -25,9 +25,9 @@ for the pay-to-pubkey, pay-to-pubkey-hash, and pay-to-script-hash address types.
 		"e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d57" +
 		"8a4c702b6bf11d5f"
 	defaultNet := &netparams.MainNetParams
-	addr, err := util.DecodeAddress(addrString, defaultNet)
-	if err != nil {
-		fmt.Println(err)
+	addr, e := util.DecodeAddress(addrString, defaultNet)
+	if e != nil  {
+		fmt.Println(e)
 		return
 	}
 	fmt.Println(addr.EncodeAddress())

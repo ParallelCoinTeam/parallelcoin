@@ -4,10 +4,10 @@ import (
 	"encoding/binary"
 	"math"
 	"sync"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -231,14 +231,13 @@ func (bf *Filter) maybeAddOutpoint(pkScript []byte, outHash *chainhash.Hash, out
 
 // matchTxAndUpdate returns true if the bloom filter matches data within the passed transaction, otherwise false is returned.  If the filter does match the passed transaction, it will also update the filter depending on the bloom update flags set via the loaded filter if needed. This function MUST be called with the filter lock held.
 func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
-	// Check if the filter matches the hash of the transaction. This is useful for finding transactions when they appear in a block.
+	// Chk if the filter matches the hash of the transaction. This is useful for finding transactions when they appear in a block.
 	matched := bf.matches(tx.Hash()[:])
-	// Check if the filter matches any data elements in the public key scripts of any of the outputs.  When it does, add the outpoint that matched so transactions which spend from the matched transaction are also included in the filter.  This removes the burden of updating the filter for this scenario from the client. It is also more efficient on the network since it avoids the need for another filteradd message from the client and avoids some potential races that could otherwise occur.
+	// Chk if the filter matches any data elements in the public key scripts of any of the outputs.  When it does, add the outpoint that matched so transactions which spend from the matched transaction are also included in the filter.  This removes the burden of updating the filter for this scenario from the client. It is also more efficient on the network since it avoids the need for another filteradd message from the client and avoids some potential races that could otherwise occur.
 	for i, txOut := range tx.MsgTx().TxOut {
-		pushedData, err := txscript.PushedData(txOut.PkScript)
-		if err != nil {
-			Error(err)
-			continue
+		pushedData, e := txscript.PushedData(txOut.PkScript)
+		if e != nil  {
+						continue
 		}
 		for _, data := range pushedData {
 			if !bf.matches(data) {
@@ -253,15 +252,14 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 	if matched {
 		return true
 	}
-	// At this point, the transaction and none of the data elements in the public key scripts of its outputs matched. Check if the filter matches any outpoints this transaction spends or any any data elements in the signature scripts of any of the inputs.
+	// At this point, the transaction and none of the data elements in the public key scripts of its outputs matched. Chk if the filter matches any outpoints this transaction spends or any any data elements in the signature scripts of any of the inputs.
 	for _, txin := range tx.MsgTx().TxIn {
 		if bf.matchesOutPoint(&txin.PreviousOutPoint) {
 			return true
 		}
-		pushedData, err := txscript.PushedData(txin.SignatureScript)
-		if err != nil {
-			Error(err)
-			continue
+		pushedData, e := txscript.PushedData(txin.SignatureScript)
+		if e != nil  {
+						continue
 		}
 		for _, data := range pushedData {
 			if bf.matches(data) {

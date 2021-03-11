@@ -665,9 +665,9 @@ func TestGenerateHelpErrors(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		_, err := btcjson.GenerateHelp(test.method, nil,
+		_, e := btcjson.GenerateHelp(test.method, nil,
 			test.resultTypes...)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)
 			continue
@@ -689,8 +689,8 @@ func TestGenerateHelp(t *testing.T) {
 		"help--synopsis": "test",
 		"help-command":   "test",
 	}
-	help, err := btcjson.GenerateHelp("help", descs)
-	if err != nil {
+	help, e := btcjson.GenerateHelp("help", descs)
+	if e != nil  {
 		t.Fatalf("GenerateHelp: unexpected error: %v", err)
 	}
 	wantHelp := "help (\"command\")\n" +

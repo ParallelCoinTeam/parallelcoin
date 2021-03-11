@@ -26,6 +26,7 @@ var precomputedFactor [precomputedLen]float64
 
 // init precomputes decay factors.
 func init() {
+
 	for i := range precomputedFactor {
 		precomputedFactor[i] = math.Exp(-1.0 * float64(i) * lambda)
 	}

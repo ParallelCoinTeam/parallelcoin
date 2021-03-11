@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -89,41 +89,36 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 		return nil, fmt.Errorf("rpctest.New must be called with one " +
 			"of the supported chain networks")
 	}
-	testDir, err := baseDir()
-	if err != nil {
-		Error(err)
-		return nil, err
+	testDir, e := baseDir()
+	if e != nil  {
+				return nil, e
 	}
 	harnessID := strconv.Itoa(numTestInstances)
-	nodeTestData, err := ioutil.TempDir(testDir, "harness-"+harnessID)
-	if err != nil {
-		Error(err)
-		return nil, err
+	nodeTestData, e := ioutil.TempDir(testDir, "harness-"+harnessID)
+	if e != nil  {
+				return nil, e
 	}
 	certFile := filepath.Join(nodeTestData, "rpc.cert")
 	keyFile := filepath.Join(nodeTestData, "rpc.key")
-	if err := genCertPair(certFile, keyFile); err != nil {
-		return nil, err
+	if e := genCertPair(certFile, keyFile); err.Chk(e) {
+		return nil, e
 	}
-	wallet, err := newMemWallet(activeNet, uint32(numTestInstances))
-	if err != nil {
-		Error(err)
-		return nil, err
+	wallet, e := newMemWallet(activeNet, uint32(numTestInstances))
+	if e != nil  {
+				return nil, e
 	}
 	miningAddr := fmt.Sprintf("--miningaddr=%s", wallet.coinbaseAddr)
 	extraArgs = append(extraArgs, miningAddr)
-	config, err := newConfig("rpctest", certFile, keyFile, extraArgs)
-	if err != nil {
-		Error(err)
-		return nil, err
+	config, e := newConfig("rpctest", certFile, keyFile, extraArgs)
+	if e != nil  {
+				return nil, e
 	}
 	// Generate p2p+rpc listening addresses.
 	config.listen, config.rpcListen = generateListeningAddresses()
 	// Create the testing node bounded to the simnet.
-	node, err := newNode(config, nodeTestData)
-	if err != nil {
-		Error(err)
-		return nil, err
+	node, e := newNode(config, nodeTestData)
+	if e != nil  {
+				return nil, e
 	}
 	nodeNum := numTestInstances
 	numTestInstances++
@@ -169,40 +164,38 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 // client and connecting to the started node, and finally: optionally generating and submitting a testchain with a
 // configurable number of mature coinbase outputs coinbase outputs. NOTE: This method and TearDown should always be
 // called from the same goroutine as they are not concurrent safe.
-func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
+func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) (e error) {
 	// Start the pod node itself. This spawns a new process which will be managed
-	if err := h.node.start(); err != nil {
-		return err
+	if e := h.node.start(); err.Chk(e) {
+		return e
 	}
-	if err := h.connectRPCClient(); err != nil {
-		return err
+	if e := h.connectRPCClient(); err.Chk(e) {
+		return e
 	}
 	h.wallet.Start()
 	// Filter transactions that pay to the coinbase associated with the wallet.
 	filterAddrs := []util.Address{h.wallet.coinbaseAddr}
-	if err := h.Node.LoadTxFilter(true, filterAddrs, nil); err != nil {
-		return err
+	if e := h.Node.LoadTxFilter(true, filterAddrs, nil); err.Chk(e) {
+		return e
 	}
 	// Ensure pod properly dispatches our registered call-back for each new block. Otherwise, the memWallet won't
 	// function properly.
-	if err := h.Node.NotifyBlocks(); err != nil {
-		return err
+	if e := h.Node.NotifyBlocks(); err.Chk(e) {
+		return e
 	}
 	// Create a test chain with the desired number of mature coinbase outputs.
 	if createTestChain && numMatureOutputs != 0 {
 		numToGenerate := uint32(h.ActiveNet.CoinbaseMaturity) +
 			numMatureOutputs
-		_, err := h.Node.Generate(numToGenerate)
-		if err != nil {
-			Error(err)
-			return err
+		_, e := h.Node.Generate(numToGenerate)
+		if e != nil  {
+						return e
 		}
 	}
 	// Block until the wallet has fully synced up to the tip of the main chain.
-	_, height, err := h.Node.GetBestBlock()
-	if err != nil {
-		Error(err)
-		return err
+	_, height, e := h.Node.GetBestBlock()
+	if e != nil  {
+				return e
 	}
 	ticker := time.NewTicker(time.Millisecond * 100)
 	for range ticker.C {
@@ -217,15 +210,15 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 
 // tearDown stops the running rpc test instance. All created processes are killed, and temporary directories removed.
 // This function MUST be called with the harness state mutex held (for writes).
-func (h *Harness) tearDown() error {
+func (h *Harness) tearDown() (e error) {
 	if h.Node != nil {
 		h.Node.Shutdown()
 	}
-	if err := h.node.shutdown(); err != nil {
-		return err
+	if e := h.node.shutdown(); err.Chk(e) {
+		return e
 	}
-	if err := os.RemoveAll(h.testNodeDir); err != nil {
-		return err
+	if e := os.RemoveAll(h.testNodeDir); err.Chk(e) {
+		return e
 	}
 	delete(testInstances, h.testNodeDir)
 	return nil
@@ -233,7 +226,7 @@ func (h *Harness) tearDown() error {
 
 // TearDown stops the running rpc test instance. All created processes are killed, and temporary directories removed.
 // NOTE: This method and SetUp should always be called from the same goroutine as they are not concurrent safe.
-func (h *Harness) TearDown() error {
+func (h *Harness) TearDown() (e error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
 	return h.tearDown()
@@ -243,12 +236,12 @@ func (h *Harness) TearDown() error {
 // instance. If the initial connection attempt fails, this function will retry h. maxConnRetries times, backing off the
 // time between subsequent attempts. If after h.maxConnRetries attempts we're not able to establish a connection, this
 // function returns with an error.
-func (h *Harness) connectRPCClient() error {
+func (h *Harness) connectRPCClient() (e error) {
 	var client *rpcclient.Client
-	var err error
+	var e error
 	rpcConf := h.node.config.rpcConnConfig()
 	for i := 0; i < h.maxConnRetries; i++ {
-		if client, err = rpcclient.New(&rpcConf, h.handlers, qu.T()); err != nil {
+		if client, e = rpcclient.New(&rpcConf, h.handlers, qu.T()); err.Chk(e) {
 			time.Sleep(time.Duration(i) * 50 * time.Millisecond)
 			continue
 		}
@@ -346,28 +339,25 @@ func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	if blockVersion == ^uint32(0) {
 		blockVersion = BlockVersion
 	}
-	prevBlockHash, prevBlockHeight, err := h.Node.GetBestBlock()
-	if err != nil {
-		Error(err)
-		return nil, err
+	prevBlockHash, prevBlockHeight, e := h.Node.GetBestBlock()
+	if e != nil  {
+				return nil, e
 	}
-	mBlock, err := h.Node.GetBlock(prevBlockHash)
-	if err != nil {
-		Error(err)
-		return nil, err
+	mBlock, e := h.Node.GetBlock(prevBlockHash)
+	if e != nil  {
+				return nil, e
 	}
 	prevBlock := util.NewBlock(mBlock)
 	prevBlock.SetHeight(prevBlockHeight)
 	// Create a new block including the specified transactions
-	newBlock, err := CreateBlock(prevBlock, txns, int32(blockVersion),
+	newBlock, e := CreateBlock(prevBlock, txns, int32(blockVersion),
 		blockTime, h.wallet.coinbaseAddr, mineTo, h.ActiveNet)
-	if err != nil {
-		Error(err)
-		return nil, err
+	if e != nil  {
+				return nil, e
 	}
 	// Submit the block to the simnet node.
-	if err := h.Node.SubmitBlock(newBlock, nil); err != nil {
-		return nil, err
+	if e := h.Node.SubmitBlock(newBlock, nil); err.Chk(e) {
+		return nil, e
 	}
 	return newBlock, nil
 }
@@ -390,6 +380,6 @@ func generateListeningAddresses() (string, string) {
 // baseDir is the directory path of the temp directory for all rpctest files.
 func baseDir() (string, error) {
 	dirPath := filepath.Join(os.TempDir(), "pod", "rpctest")
-	err := os.MkdirAll(dirPath, 0755)
+	e := os.MkdirAll(dirPath, 0755)
 	return dirPath, err
 }

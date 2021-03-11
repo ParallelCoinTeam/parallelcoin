@@ -37,7 +37,7 @@ var SecondaryInterfaces []*net.Interface
 func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[string]struct{}) {
 	if Address == nil || Interface == nil {
 		if Discover() != nil {
-			Error("no routeable address found")
+			err.Ln("no routeable address found")
 		}
 	}
 	Interfaces = append(Interfaces, Interface)
@@ -47,8 +47,8 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[str
 	for i := range SecondaryAddresses {
 		Addresses[SecondaryAddresses[i].String()] = struct{}{}
 	}
-	// Debugs(Interfaces)
-	// Debugs(Addresses)
+	// dbg.S(Interfaces)
+	// dbg.S(Addresses)
 	return
 }
 
@@ -58,21 +58,21 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[str
 // We are only interested in IPv4 addresses because for the most part, domestic
 // ISPs do not issue their customers with IPv6 routing, it's still a pain in the
 // ass outside of large data centre connections
-func Discover() (err error) {
-	Debug("discovering routeable interfaces and addresses...")
+func Discover() (e error) {
+	dbg.Ln("discovering routeable interfaces and addresses...")
 	var nif []net.Interface
-	if nif, err = net.Interfaces(); Check(err) {
+	if nif, e = net.Interfaces(); err.Chk(e) {
 		return
 	}
-	// Debug("number of available network interfaces:", len(nif))
-	// Debugs(nif)
+	// dbg.Ln("number of available network interfaces:", len(nif))
+	// dbg.S(nif)
 	var secondaryInterfaces []*net.Interface
 	var secondaryAddresses []net.IP
-	if Gateway, err = gateway.DiscoverGateway(); Check(err) {
+	if Gateway, e = gateway.DiscoverGateway(); err.Chk(e) {
 		// todo: this error condition always happens on iOS and Android
 		// return
 		for i := range nif {
-			Trace(nif[i])
+			trc.Ln(nif[i])
 		}
 	} else {
 		var gw net.IP
@@ -82,12 +82,12 @@ func Discover() (err error) {
 		}
 		for i := range nif {
 			var addrs []net.Addr
-			if addrs, err = nif[i].Addrs(); Check(err) || addrs == nil {
+			if addrs, e = nif[i].Addrs(); err.Chk(e) || addrs == nil {
 				continue
 			}
 			for j := range addrs {
 				var in *net.IPNet
-				if _, in, err = net.ParseCIDR(addrs[j].String()); Check(err) {
+				if _, in, e = net.ParseCIDR(addrs[j].String()); err.Chk(e) {
 					continue
 				}
 				if Gateway != nil && in.Contains(gw) {
@@ -110,21 +110,21 @@ func Discover() (err error) {
 	}
 	SecondaryAddresses = secondaryAddresses
 	SecondaryInterfaces = secondaryInterfaces
-	Trace("Gateway", Gateway)
-	Trace("Address", Address)
-	Trace("Interface", Interface.Name)
-	Trace("SecondaryAddresses")
+	trc.Ln("Gateway", Gateway)
+	trc.Ln("Address", Address)
+	trc.Ln("Interface", Interface.Name)
+	trc.Ln("SecondaryAddresses")
 	for i := range SecondaryInterfaces {
-		Trace(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
+		trc.Ln(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
 	}
 	return
 }
 
 // GetInterface returns the address and interface of multicast-and-internet capable interfaces
-func GetInterface() (ifc *net.Interface, address string, err error) {
+func GetInterface() (ifc *net.Interface, address string, e error) {
 	if Address == nil || Interface == nil {
 		if Discover() != nil {
-			err = errors.New("no routeable address found")
+			e = errors.New("no routeable address found")
 			return
 		}
 	}
@@ -136,7 +136,7 @@ func GetInterface() (ifc *net.Interface, address string, err error) {
 func GetListenable() net.IP {
 	if Address == nil {
 		if Discover() != nil {
-			Error("no routeable address found")
+			err.Ln("no routeable address found")
 		}
 	}
 	return Address
@@ -144,7 +144,7 @@ func GetListenable() net.IP {
 
 func GetAllInterfacesAndAddresses() (interfaces []*net.Interface, udpAddrs []*net.UDPAddr) {
 	if Discover() != nil {
-		Error("no routeable address found")
+		err.Ln("no routeable address found")
 		return
 	}
 	interfaces = append([]*net.Interface{Interface}, SecondaryInterfaces...)
@@ -153,10 +153,10 @@ func GetAllInterfacesAndAddresses() (interfaces []*net.Interface, udpAddrs []*ne
 	for i := range naddrs {
 		addrs = append(addrs, &naddrs[i])
 	}
-	var err error
+	var e error
 	for i := range addrs {
 		var udpAddr *net.UDPAddr
-		if udpAddr, err = net.ResolveUDPAddr("udp", addrs[i].String()+":0"); !Check(err) {
+		if udpAddr, e = net.ResolveUDPAddr("udp", addrs[i].String()+":0"); !err.Chk(e) {
 			udpAddrs = append(udpAddrs, udpAddr)
 		}
 	}

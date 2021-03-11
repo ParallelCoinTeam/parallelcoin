@@ -9,6 +9,7 @@ import (
 	"gioui.org/unit"
 )
 
+// Label is text drawn inside an empty box
 type Label struct {
 	*Window
 	// Face defines the text style.
@@ -27,7 +28,9 @@ type Label struct {
 // Label creates a label that prints a block of text
 func (w *Window) Label() (l *Label) {
 	var f text.Font
-	if fon, err := w.Theme.collection.Font("plan9"); !Check(err) {
+	var e error
+	var fon text.Font
+	if fon, e = w.Theme.collection.Font("plan9"); !err.Chk(e) {
 		f = fon
 	}
 	return &Label{
@@ -72,68 +75,81 @@ func (l *Label) Color(color string) *Label {
 
 // Font sets the font out of the available font collection
 func (l *Label) Font(font string) *Label {
-	if fon, err := l.Theme.collection.Font(font); !Check(err) {
+	var e error
+	var fon text.Font
+	if fon, e = l.Theme.collection.Font(font); !err.Chk(e) {
 		l.font = fon
 	}
 	return l
 }
 
+// ScaleType is a map of the set of label sizes
 type ScaleType map[string]float32
 
-var (
-	Scales = ScaleType{
-		"H1":      96.0 / 16.0,
-		"H2":      60.0 / 16.0,
-		"H3":      48.0 / 16.0,
-		"H4":      34.0 / 16.0,
-		"H5":      24.0 / 16.0,
-		"H6":      20.0 / 16.0,
-		"Body1":   1,
-		"Body2":   14.0 / 16.0,
-		"Caption": 12.0 / 16.0,
-	}
-)
+// Scales is the ratios against
+//
+// TODO: shouldn't that 16.0 be the text size in the theme?
+var Scales = ScaleType{
+	"H1":      96.0 / 16.0,
+	"H2":      60.0 / 16.0,
+	"H3":      48.0 / 16.0,
+	"H4":      34.0 / 16.0,
+	"H5":      24.0 / 16.0,
+	"H6":      20.0 / 16.0,
+	"Body1":   1,
+	"Body2":   14.0 / 16.0,
+	"Caption": 12.0 / 16.0,
+}
 
+// H1 header 1
 func (w *Window) H1(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["H1"]).Font("plan9").Text(txt)
 	return
 }
 
+// H2 header 2
 func (w *Window) H2(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["H2"]).Font("plan9").Text(txt)
 	return
 }
 
+// H3 header 3
 func (w *Window) H3(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["H3"]).Font("plan9").Text(txt)
 	return
 }
 
+// H4 header 4
 func (w *Window) H4(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["H4"]).Font("plan9").Text(txt)
 	return
 }
 
+// H5 header 5
 func (w *Window) H5(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["H5"]).Font("plan9").Text(txt)
 	return
 }
 
+// H6 header 6
 func (w *Window) H6(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["H6"]).Font("plan9").Text(txt)
 	return
 }
 
+// Body1 normal body text 1
 func (w *Window) Body1(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["Body1"]).Font("bariol regular").Text(txt)
 	return
 }
 
+// Body2 normal body text 2
 func (w *Window) Body2(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["Body2"]).Font("bariol regular").Text(txt)
 	return
 }
 
+// Caption caption text
 func (w *Window) Caption(txt string) (l *Label) {
 	l = w.Label().TextScale(Scales["Caption"]).Font("bariol regular").Text(txt)
 	return

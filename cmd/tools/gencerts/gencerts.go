@@ -28,20 +28,18 @@ func main() {
 		Organization: "gencerts",
 	}
 	parser := flags.NewParser(&cfg, flags.Default)
-	_, err := parser.Parse()
-	if err != nil {
-		Error(err)
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+	_, e := parser.Parse()
+	if e != nil  {
+				if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
 		return
 	}
 	if cfg.Directory == "" {
-		var err error
-		cfg.Directory, err = os.Getwd()
-		if err != nil {
-			Error(err)
-			_, _ = fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
+		var e error
+		cfg.Directory, e = os.Getwd()
+		if e != nil  {
+						_, _ = fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
 			os.Exit(1)
 		}
 	}
@@ -57,24 +55,23 @@ func main() {
 	}
 	validUntil := time.Now().Add(time.Duration(cfg.Years) * 365 * 24 * time.Hour)
 	var cert, key []byte
-	cert, key, err = util.NewTLSCertPair(cfg.Organization, validUntil, cfg.ExtraHosts)
-	if err != nil {
-		Error(err)
-		_, _ = fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
+	cert, key, e = util.NewTLSCertPair(cfg.Organization, validUntil, cfg.ExtraHosts)
+	if e != nil  {
+				_, _ = fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.
-	if err = ioutil.WriteFile(certFile, cert, 0666); err != nil {
+	if e = ioutil.WriteFile(certFile, cert, 0666); err.Chk(e) {
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.
-	if err = ioutil.WriteFile(caFile, cert, 0666); err != nil {
+	if e = ioutil.WriteFile(caFile, cert, 0666); err.Chk(e) {
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", err)
 		os.Exit(1)
 	}
-	if err = ioutil.WriteFile(keyFile, key, 0600); err != nil {
-		if err := os.Remove(certFile); Check(err) {
+	if e = ioutil.WriteFile(keyFile, key, 0600); err.Chk(e) {
+		if e := os.Remove(certFile); err.Chk(e) {
 		}
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write key: %v\n", err)
 		os.Exit(1)
@@ -99,8 +96,8 @@ func cleanAndExpandPath(
 // filesExists reports whether the named file or directory exists.
 func fileExists(
 	name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
+	if _, e = os.Stat(name); err.Chk(e) {
+		if os.IsNotExist(e) {
 			return false
 		}
 	}

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -1093,10 +1093,10 @@ func TestChainSvrCmds(t *testing.T) {
 	for i, test := range tests {
 		// Marshal the command as created by the new static command
 		// creation function.
-		marshalled, err := btcjson.MarshalCmd(testID, test.staticCmd())
-		if err != nil {
+		marshalled, e := btcjson.MarshalCmd(testID, test.staticCmd())
+		if e != nil  {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		if !bytes.Equal(marshalled, []byte(test.marshalled)) {
@@ -1108,17 +1108,17 @@ func TestChainSvrCmds(t *testing.T) {
 		}
 		// Ensure the command is created without error via the generic
 		// new command creation function.
-		cmd, err := test.newCmd()
-		if err != nil {
+		cmd, e := test.newCmd()
+		if e != nil  {
 			t.Errorf("Test #%d (%s) unexpected NewCmd error: %v ",
-				i, test.name, err)
+				i, test.name, e)
 		}
 		// Marshal the command as created by the generic new command
 		// creation function.
-		marshalled, err = btcjson.MarshalCmd(testID, cmd)
-		if err != nil {
+		marshalled, e = btcjson.MarshalCmd(testID, cmd)
+		if e != nil  {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		if !bytes.Equal(marshalled, []byte(test.marshalled)) {
@@ -1128,16 +1128,16 @@ func TestChainSvrCmds(t *testing.T) {
 			continue
 		}
 		var request btcjson.Request
-		if err := json.Unmarshal(marshalled, &request); err != nil {
+		if e := json.Unmarshal(marshalled, &request); err.Chk(e) {
 			t.Errorf("Test #%d (%s) unexpected error while "+
 				"unmarshalling JSON-RPC request: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
-		cmd, err = btcjson.UnmarshalCmd(&request)
-		if err != nil {
+		cmd, e = btcjson.UnmarshalCmd(&request)
+		if e != nil  {
 			t.Errorf("UnmarshalCmd #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		if !reflect.DeepEqual(cmd, test.unmarshalled) {
@@ -1169,25 +1169,25 @@ func TestChainSvrCmdErrors(t *testing.T) {
 			name:       "invalid template request sigoplimit field",
 			result:     &btcjson.TemplateRequest{},
 			marshalled: `{"sigoplimit":"invalid"}`,
-			err:        btcjson.Error{ErrorCode: btcjson.ErrInvalidType},
+			err:        btcjson.GeneralError{ErrorCode: btcjson.ErrInvalidType},
 		},
 		{
 			name:       "invalid template request sizelimit field",
 			result:     &btcjson.TemplateRequest{},
 			marshalled: `{"sizelimit":"invalid"}`,
-			err:        btcjson.Error{ErrorCode: btcjson.ErrInvalidType},
+			err:        btcjson.GeneralError{ErrorCode: btcjson.ErrInvalidType},
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		err := json.Unmarshal([]byte(test.marshalled), &test.result)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		e := json.Unmarshal([]byte(test.marshalled), &test.result)
+		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
-				"want %T", i, test.name, err, err, test.err)
+				"want %T", i, test.name, e, e, test.err)
 			continue
 		}
-		if terr, ok := test.err.(btcjson.Error); ok {
-			gotErrorCode := err.(btcjson.Error).ErrorCode
+		if terr, ok := test.err.(btcjson.GeneralError); ok {
+			gotErrorCode := e.(btcjson.GeneralError).ErrorCode
 			if gotErrorCode != terr.ErrorCode {
 				t.Errorf("Test #%d (%s) mismatched error code "+
 					"- got %v (%v), want %v", i, test.name,

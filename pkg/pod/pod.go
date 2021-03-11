@@ -1,14 +1,15 @@
 package pod
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
+	"math/rand"
 	"reflect"
 	"sort"
 	"sync"
 	"time"
 	
 	"github.com/p9c/pod/app/appdata"
-	log "github.com/p9c/pod/pkg/util/logi"
 	
 	"github.com/urfave/cli"
 )
@@ -59,8 +60,8 @@ func GetConfigSchema(cfg *Config) Schema {
 	t := reflect.TypeOf(cfg)
 	t = t.Elem()
 	var levelOptions, network []string
-	for _, i := range log.Levels {
-		levelOptions = append(levelOptions, i)
+	for i := range logg.LevelSpecs {
+		levelOptions = append(levelOptions, logg.LevelSpecs[i].Name)
 	}
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
 	rawFields := make(map[string]Fields)
@@ -204,6 +205,7 @@ type Config struct {
 	UPNP                   *bool            `group:"node" label:"UPNP" description:"enable UPNP for NAT traversal" type:"" widget:"toggle" json:"UPNP" hook:"restart"`
 	UserAgentComments      *cli.StringSlice `group:"" label:"User Agent Comments" description:"comment to add to the user agent -- See BIP 14 for more information" type:"" widget:"multi" json:"UserAgentComments" hook:"restart"`
 	Username               *string          `group:"rpc" label:"Username" description:"password for client RPC connections" type:"" widget:"string" json:"Username" hook:"restart"`
+	UUID                   *int             `group:"node" label:"Instance UUID" description:"Random unique identifier created at initial setup" type:"" widget:"integer" json:"UUID" hook:"restart"`
 	Wallet                 *bool            `group:"debug" label:"Connect to Wallet" description:"set ctl to connect to wallet instead of chain server" type:"" widget:"toggle" json:"Wallet"`
 	WalletFile             *string          `group:"config" label:"Wallet File" description:"wallet database file" type:"path" widget:"string" featured:"true" json:"WalletFile" hook:"restart"`
 	WalletOff              *bool            `group:"debug" label:"Wallet Off" description:"turn off the wallet backend" type:"" widget:"toggle" json:"WalletOff" hook:"wallet"`
@@ -213,10 +215,13 @@ type Config struct {
 	WalletRPCMaxWebsockets *int             `group:"wallet" label:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"" widget:"integer" json:"WalletRPCMaxWebsockets" hook:"restart"`
 	WalletServer           *string          `group:"wallet" label:"Wallet Server" description:"node address to connect wallet server to" type:"address" widget:"string" json:"WalletServer" hook:"restart"`
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"address" widget:"multi" json:"Whitelists" hook:"restart"`
+	Hilite                 *cli.StringSlice `group:"debug" label:"Hilite" description:"comma-separated list of packages that will print at trace log level" type:"string" widget:"multi" json:"Hilite" hook:"restart"`
+	LogFilter              *cli.StringSlice `group:"debug" label:"Log Filter" description:"comma-separated list of packages that will not print logs" type:"string" widget:"multi" json:"LogFilter" hook:"restart"`
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
 	datadir := appdata.Dir(AppName, false)
+	uuid := int(rand.Uint64())
 	c = &Config{
 		AddCheckpoints:    newStringSlice(),
 		AddPeers:          newStringSlice(),
@@ -251,11 +256,13 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		FreeTxRelayLimit:       newfloat64(),
 		Generate:               newbool(),
 		GenThreads:             newint(),
+		Hilite:                 newStringSlice(),
 		LAN:                    newbool(),
 		Language:               newstring(),
 		LimitPass:              newstring(),
 		LimitUser:              newstring(),
 		LogDir:                 newstring(),
+		LogFilter:              newStringSlice(),
 		LogLevel:               newstring(),
 		MaxOrphanTxs:           newint(),
 		MaxPeers:               newint(),
@@ -305,6 +312,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		UPNP:                   newbool(),
 		UserAgentComments:      newStringSlice(),
 		Username:               newstring(),
+		UUID:                   &uuid,
 		Wallet:                 newbool(),
 		WalletFile:             newstring(),
 		WalletOff:              newbool(),
@@ -349,11 +357,13 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"FreeTxRelayLimit":       c.FreeTxRelayLimit,
 		"Generate":               c.Generate,
 		"GenThreads":             c.GenThreads,
+		"Hilite":                 c.Hilite,
 		"LAN":                    c.LAN,
 		"Language":               c.Language,
 		"LimitPass":              c.LimitPass,
 		"LimitUser":              c.LimitUser,
 		"LogDir":                 c.LogDir,
+		"LogFilter":              c.LogFilter,
 		"LogLevel":               c.LogLevel,
 		"MaxOrphanTxs":           c.MaxOrphanTxs,
 		"MaxPeers":               c.MaxPeers,
@@ -403,6 +413,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"UPNP":                   c.UPNP,
 		"UserAgentComments":      c.UserAgentComments,
 		"Username":               c.Username,
+		"UUID":                   c.UUID,
 		"Wallet":                 c.Wallet,
 		"WalletFile":             c.WalletFile,
 		"WalletOff":              c.WalletOff,
@@ -445,16 +456,13 @@ func ReadCAFile(config *Config) []byte {
 	// Read certificate file if TLS is not disabled.
 	var certs []byte
 	if *config.TLS {
-		var err error
-		certs, err = ioutil.ReadFile(*config.CAFile)
-		if err != nil {
-			Error("cannot open CA file:", err)
+		var e error
+		if certs, e = ioutil.ReadFile(*config.CAFile); err.Chk(e) {
 			// If there's an error reading the CA file, continue with nil certs and without the client connection.
 			certs = nil
 		}
 	} else {
-		Info("chain server RPC TLS is disabled")
+		inf.Ln("chain server RPC TLS is disabled")
 	}
 	return certs
 }
-

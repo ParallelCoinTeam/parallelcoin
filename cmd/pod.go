@@ -18,58 +18,57 @@ import (
 func Main() {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 3)
 	debug.SetGCPercent(10)
-	var err error
+	var e error
 	if runtime.GOOS != "darwin" {
-		if err = limits.SetLimits(); err != nil { // todo: doesn't work on non-linux
+		if e = limits.SetLimits(); err.Chk(e) { // todo: doesn't work on non-linux
 			_, _ = fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
 			os.Exit(1)
 		}
 	}
 	var f *os.File
 	if os.Getenv("POD_TRACE") == "on" {
-		Debug("starting trace")
-		if f, err = os.Create(fmt.Sprintf("%v.trace", fmt.Sprint(os.Args))); err != nil {
-			Error(
+		dbg.Ln("starting trace")
+		if f, e = os.Create(fmt.Sprintf("%v.trace", fmt.Sprint(os.Args))); err.Chk(e) {
+			err.Ln(
 				"tracing env POD_TRACE=on but we can't write to it",
-				err,
+				e,
 			)
 		} else {
-			err = trace.Start(f)
-			if err != nil {
-				Error("could not start tracing", err)
+			e = trace.Start(f)
+			if e != nil  {
+				err.Ln("could not start tracing", err)
 			} else {
-				Debug("tracing started")
+				dbg.Ln("tracing started")
 				defer trace.Stop()
 				defer func() {
-					if err := f.Close(); Check(err) {
+					if e := f.Close(); err.Chk(e) {
 					}
 				}()
 				interrupt.AddHandler(
 					func() {
-						Debug("stopping trace")
+						dbg.Ln("stopping trace")
 						trace.Stop()
-						err := f.Close()
-						if err != nil {
-							Error(err)
-						}
+						e := f.Close()
+						if e != nil  {
+													}
 					},
 				)
 			}
 		}
 	}
 	res := app.Main()
-	Debug("returning value", res, os.Args)
+	dbg.Ln("returning value", res, os.Args)
 	if os.Getenv("POD_TRACE") == "on" {
-		Debug("stopping trace")
+		dbg.Ln("stopping trace")
 		trace.Stop()
 		defer func() {
-			if err := f.Close(); Check(err) {
+			if e := f.Close(); err.Chk(e) {
 			}
 		}()
 	}
 	if res != 0 {
-		Error("quitting with error")
-		// Debug(interrupt.GoroutineDump())
+		err.Ln("quitting with error")
+		// dbg.Ln(interrupt.GoroutineDump())
 		os.Exit(res)
 	}
 }

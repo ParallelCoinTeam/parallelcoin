@@ -1,8 +1,8 @@
 package worker
 
-func (w *Worker) Pause() (err error) {
+func (w *Worker) Pause() (e error) {
 	return
 }
-func (w *Worker) Resume() (err error) {
+func (w *Worker) Resume() (e error) {
 	return
 }

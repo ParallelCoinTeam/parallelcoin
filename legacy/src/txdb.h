@@ -37,8 +37,8 @@ public:
     bool WriteBlockIndex(const CDiskBlockIndex& blockindex);
     bool ReadBestInvalidWork(CBigNum& bnBestInvalidWork);
     bool WriteBestInvalidWork(const CBigNum& bnBestInvalidWork);
-    bool ReadBlockFileInfo(int nFile, CBlockFileInfo &fileinfo);
-    bool WriteBlockFileInfo(int nFile, const CBlockFileInfo &fileinfo);
+    bool ReadBlockFileinf.Ln(int nFile, CBlockFileInfo &fileinfo);
+    bool WriteBlockFileinf.Ln(int nFile, const CBlockFileInfo &fileinfo);
     bool ReadLastBlockFile(int &nFile);
     bool WriteLastBlockFile(int nFile);
     bool WriteReindexing(bool fReindex);

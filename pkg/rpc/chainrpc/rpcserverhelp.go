@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
-
+	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -355,39 +355,39 @@ var HelpDescsEnUS = map[string]string{
 	"getblocktemplate--condition1": "mode=proposal, rejected",
 	"getblocktemplate--condition2": "mode=proposal, accepted",
 	"getblocktemplate--result1":    "An error string which represents why the proposal was rejected or nothing if accepted",
-
+	
 	// GetCFilterCmd help.
 	"getcfilter--synopsis":  "Returns a block's committed filter given its hash.",
 	"getcfilter-filtertype": "The type of filter to return (0=regular)",
 	"getcfilter-hash":       "The hash of the block",
 	"getcfilter--result0":   "The block's committed filter",
-
+	
 	// GetCFilterHeaderCmd help.
 	"getcfilterheader--synopsis":  "Returns a block's compact filter header given its hash.",
 	"getcfilterheader-filtertype": "The type of filter header to return (0=regular)",
 	"getcfilterheader-hash":       "The hash of the block",
 	"getcfilterheader--result0":   "The block's gcs filter header",
-
+	
 	// GetConnectionCountCmd help.
 	"getconnectioncount--synopsis": "Returns the number of active connections to other peers.",
 	"getconnectioncount--result0":  "The number of connections",
-
+	
 	// GetCurrentNetCmd help.
 	"getcurrentnet--synopsis": "Get bitcoin network the server is running on.",
 	"getcurrentnet--result0":  "The network identifer",
-
+	
 	// GetDifficultyCmd help.
 	"getdifficulty--synopsis": "Returns the proof-of-work difficulty as a multiple of the minimum difficulty.",
 	"getdifficulty--result0":  "The difficulty",
-
+	
 	// GetGenerateCmd help.
 	"getgenerate--synopsis": "Returns if the server is set to generate coins (mine) or not.",
 	"getgenerate--result0":  "True if mining, false if not",
-
+	
 	// GetHashesPerSecCmd help.
 	"gethashespersec--synopsis": "Returns a recent hashes per second performance measurement while generating coins (mining).",
 	"gethashespersec--result0":  "The number of hashes per second",
-
+	
 	// InfoChainResult help.
 	"infochainresult-version":         "The version of the server",
 	"infochainresult-protocolversion": "The latest supported protocol version",
@@ -399,7 +399,7 @@ var HelpDescsEnUS = map[string]string{
 	"infochainresult-testnet":         "Whether or not server is using testnet",
 	"infochainresult-relayfee":        "The minimum relay fee for non-free transactions in BTC/KB",
 	"infochainresult-errors":          "Any current errors",
-
+	
 	// InfoWalletResult help.
 	"infowalletresult-version":         "The version of the server",
 	"infowalletresult-protocolversion": "The latest supported protocol version",
@@ -417,23 +417,23 @@ var HelpDescsEnUS = map[string]string{
 	"infowalletresult-paytxfee":        "The transaction fee set in BTC/KB",
 	"infowalletresult-relayfee":        "The minimum relay fee for non-free transactions in BTC/KB",
 	"infowalletresult-errors":          "Any current errors",
-
+	
 	// GetHeadersCmd help.
 	"getheaders--synopsis":     "Returns block headers starting with the first known block hash from the request",
 	"getheaders-blocklocators": "JSON array of hex-encoded hashes of blocks.  Headers are returned starting from the first known hash in this list",
 	"getheaders-hashstop":      "Block hash to stop including block headers for; if not found, all headers to the latest known block are returned.",
 	"getheaders--result0":      "Serialized block headers of all located blocks, limited to some arbitrary maximum number of hashes (currently 2000, which matches the wire protocol headers message, but this is not guaranteed)",
-
+	
 	// GetInfoCmd help.
 	"getinfo--synopsis": "Returns a JSON object containing various state info.",
-
+	
 	// GetMempoolInfoCmd help.
 	"getmempoolinfo--synopsis": "Returns memory pool information",
-
+	
 	// GetMempoolInfoResult help.
 	"getmempoolinforesult-bytes": "Size in bytes of the mempool",
 	"getmempoolinforesult-size":  "Number of transactions in the mempool",
-
+	
 	// GetMiningInfoResult help.
 	"getmininginforesult-blocks":             "Height of the latest best block",
 	"getmininginforesult-currentblocksize":   "Size of the latest best block",
@@ -447,24 +447,24 @@ var HelpDescsEnUS = map[string]string{
 	"getmininginforesult-networkhashps":      "Estimated network hashes per second for the most recent blocks",
 	"getmininginforesult-pooledtx":           "Number of transactions in the memory pool",
 	"getmininginforesult-testnet":            "Whether or not server is using testnet",
-
+	
 	// GetMiningInfoCmd help.
 	"getmininginfo--synopsis": "Returns a JSON object containing mining-related information.",
-
+	
 	// GetNetworkHashPSCmd help.
 	"getnetworkhashps--synopsis": "Returns the estimated network hashes per second for the block heights provided by the parameters.",
 	"getnetworkhashps-blocks":    "The number of blocks, or -1 for blocks since last difficulty change",
 	"getnetworkhashps-height":    "Perform estimate ending with this height or -1 for current best chain block height",
 	"getnetworkhashps--result0":  "Estimated hashes per second",
-
+	
 	// GetNetTotalsCmd help.
 	"getnettotals--synopsis": "Returns a JSON object containing network traffic statistics.",
-
+	
 	// GetNetTotalsResult help.
 	"getnettotalsresult-totalbytesrecv": "Total bytes received",
 	"getnettotalsresult-totalbytessent": "Total bytes sent",
 	"getnettotalsresult-timemillis":     "Number of milliseconds since 1 Jan 1970 GMT",
-
+	
 	// GetPeerInfoResult help.
 	"getpeerinforesult-id":             "A unique node ID",
 	"getpeerinforesult-addr":           "The ip address and port of the peer",
@@ -487,10 +487,10 @@ var HelpDescsEnUS = map[string]string{
 	"getpeerinforesult-banscore":       "The ban score",
 	"getpeerinforesult-feefilter":      "The requested minimum fee a transaction must have to be announced to the peer",
 	"getpeerinforesult-syncnode":       "Whether or not the peer is the sync peer",
-
+	
 	// GetPeerInfoCmd help.
 	"getpeerinfo--synopsis": "Returns data about each connected network peer as an array of json objects.",
-
+	
 	// GetRawMempoolVerboseResult help.
 	"getrawmempoolverboseresult-size":             "Transaction size in bytes",
 	"getrawmempoolverboseresult-fee":              "Transaction fee in bitcoins",
@@ -501,14 +501,14 @@ var HelpDescsEnUS = map[string]string{
 	"getrawmempoolverboseresult-depends":          "Unconfirmed transactions used as inputs for this transaction",
 	"getrawmempoolverboseresult-vsize":            "The virtual size of a transaction",
 	"getrawmempoolverboseresult-weight":           "The transaction's weight (between vsize*4-3 and vsize*4)",
-
+	
 	// GetRawMempoolCmd help.
 	"getrawmempool--synopsis":   "Returns information about all of the transactions currently in the memory pool.",
 	"getrawmempool-verbose":     "Returns JSON object when true or an array of transaction hashes when false",
 	"getrawmempool--condition0": "verbose=false",
 	"getrawmempool--condition1": "verbose=true",
 	"getrawmempool--result0":    "Array of transaction hashes",
-
+	
 	// GetRawTransactionCmd help.
 	"getrawtransaction--synopsis":   "Returns information about a transaction given its hash.",
 	"getrawtransaction-txid":        "The hash of the transaction",
@@ -516,7 +516,7 @@ var HelpDescsEnUS = map[string]string{
 	"getrawtransaction--condition0": "verbose=false",
 	"getrawtransaction--condition1": "verbose=true",
 	"getrawtransaction--result0":    "Hex-encoded bytes of the serialized transaction",
-
+	
 	// GetTxOutResult help.
 	"gettxoutresult-bestblock":     "The block hash that contains the transaction output",
 	"gettxoutresult-confirmations": "The number of confirmations",
@@ -524,13 +524,13 @@ var HelpDescsEnUS = map[string]string{
 	"gettxoutresult-scriptPubKey":  "The public key script used to pay coins as a JSON object",
 	"gettxoutresult-version":       "The transaction version",
 	"gettxoutresult-coinbase":      "Whether or not the transaction is a coinbase",
-
+	
 	// GetTxOutCmd help.
 	"gettxout--synopsis":      "Returns information about an unspent transaction output..",
 	"gettxout-txid":           "The hash of the transaction",
 	"gettxout-vout":           "The index of the output",
 	"gettxout-includemempool": "Include the mempool when true",
-
+	
 	// HelpCmd help.
 	"help--synopsis":   "Returns a list of all commands or help for a specified command.",
 	"help-command":     "The command to retrieve help for",
@@ -538,11 +538,11 @@ var HelpDescsEnUS = map[string]string{
 	"help--condition1": "command specified",
 	"help--result0":    "List of commands",
 	"help--result1":    "Help for specified command",
-
+	
 	// PingCmd help.
 	"ping--synopsis": "Queues a ping to be sent to each connected peer.\n" +
 		"Ping times are provided by getpeerinfo via the pingtime and pingwait fields.",
-
+	
 	// SearchRawTransactionsCmd help.
 	"searchrawtransactions--synopsis": "Returns raw data for transactions involving the passed address.\n" +
 		"Returned transactions are pulled from both the database, and transactions currently in the mempool.\n" +
@@ -559,26 +559,26 @@ var HelpDescsEnUS = map[string]string{
 	"searchrawtransactions-reverse":     "Specifies that the transactions should be returned in reverse chronological order",
 	"searchrawtransactions-filteraddrs": "Address list.  Only inputs or outputs with matching address will be returned",
 	"searchrawtransactions--result0":    "Hex-encoded serialized transaction",
-
+	
 	// SendRawTransactionCmd help.
 	"sendrawtransaction--synopsis":     "Submits the serialized, hex-encoded transaction to the local peer and relays it to the network.",
 	"sendrawtransaction-hextx":         "Serialized, hex-encoded signed transaction",
 	"sendrawtransaction-allowhighfees": "Whether or not to allow insanely high fees (btcd does not yet implement this parameter, so it has no effect)",
 	"sendrawtransaction-maxfeerate":    "Used by bitcoind on or after v0.19.0",
 	"sendrawtransaction--result0":      "The hash of the transaction",
-
+	
 	// SetGenerateCmd help.
 	"setgenerate--synopsis":    "Set the server to generate coins (mine) or not.",
 	"setgenerate-generate":     "Use true to enable generation, false to disable it",
 	"setgenerate-genproclimit": "The number of processors (cores) to limit generation to or -1 for default",
-
+	
 	// StopCmd help.
 	"stop--synopsis": "Shutdown btcd.",
 	"stop--result0":  "The string 'btcd stopping.'",
-
+	
 	// SubmitBlockOptions help.
 	"submitblockoptions-workid": "This parameter is currently ignored",
-
+	
 	// SubmitBlockCmd help.
 	"submitblock--synopsis":   "Attempts to submit a new serialized, hex-encoded block to the network.",
 	"submitblock-hexblock":    "Serialized, hex-encoded block",
@@ -586,15 +586,15 @@ var HelpDescsEnUS = map[string]string{
 	"submitblock--condition0": "Block successfully submitted",
 	"submitblock--condition1": "Block rejected",
 	"submitblock--result1":    "The reason the block was rejected",
-
+	
 	// ValidateAddressResult help.
 	"validateaddresschainresult-isvalid": "Whether or not the address is valid",
 	"validateaddresschainresult-address": "The bitcoin address (only when isvalid is true)",
-
+	
 	// ValidateAddressCmd help.
 	"validateaddress--synopsis": "Verify an address is valid.",
 	"validateaddress-address":   "Bitcoin address to validate",
-
+	
 	// VerifyChainCmd help.
 	"verifychain--synopsis": "Verifies the block chain database.\n" +
 		"The actual checks performed by the checklevel parameter are implementation specific.\n" +
@@ -604,60 +604,60 @@ var HelpDescsEnUS = map[string]string{
 	"verifychain-checklevel": "How thorough the block verification is",
 	"verifychain-checkdepth": "The number of blocks to check",
 	"verifychain--result0":   "Whether or not the chain verified",
-
+	
 	// VerifyMessageCmd help.
 	"verifymessage--synopsis": "Verify a signed message.",
 	"verifymessage-address":   "The bitcoin address to use for the signature",
 	"verifymessage-signature": "The base-64 encoded signature provided by the signer",
 	"verifymessage-message":   "The signed message",
 	"verifymessage--result0":  "Whether or not the signature verified",
-
+	
 	// -------- Websocket-specific help --------
-
+	
 	// Session help.
 	"session--synopsis":       "Return details regarding a websocket client's current connection session.",
 	"sessionresult-sessionid": "The unique session ID for a client's websocket connection.",
-
+	
 	// NotifyBlocksCmd help.
 	"notifyblocks--synopsis": "Request notifications for whenever a block is connected or disconnected from the main (best) chain.",
-
+	
 	// StopNotifyBlocksCmd help.
 	"stopnotifyblocks--synopsis": "Cancel registered notifications for whenever a block is connected or disconnected from the main (best) chain.",
-
+	
 	// NotifyNewTransactionsCmd help.
 	"notifynewtransactions--synopsis": "Send either a txaccepted or a txacceptedverbose notification when a new transaction is accepted into the mempool.",
 	"notifynewtransactions-verbose":   "Specifies which type of notification to receive. If verbose is true, then the caller receives txacceptedverbose, otherwise the caller receives txaccepted",
-
+	
 	// StopNotifyNewTransactionsCmd help.
 	"stopnotifynewtransactions--synopsis": "Stop sending either a txaccepted or a txacceptedverbose notification when a new transaction is accepted into the mempool.",
-
+	
 	// NotifyReceivedCmd help.
 	"notifyreceived--synopsis": "Send a recvtx notification when a transaction added to mempool or appears in a newly-attached block contains a txout pkScript sending to any of the passed addresses.\n" +
 		"Matching outpoints are automatically registered for redeemingtx notifications.",
 	"notifyreceived-addresses": "List of address to receive notifications about",
-
+	
 	// StopNotifyReceivedCmd help.
 	"stopnotifyreceived--synopsis": "Cancel registered receive notifications for each passed address.",
 	"stopnotifyreceived-addresses": "List of address to cancel receive notifications for",
-
+	
 	// OutPoint help.
 	"outpoint-hash":  "The hex-encoded bytes of the outpoint hash",
 	"outpoint-index": "The index of the outpoint",
-
+	
 	// NotifySpentCmd help.
 	"notifyspent--synopsis": "Send a redeemingtx notification when a transaction spending an outpoint appears in mempool (if relayed to this btcd instance) and when such a transaction first appears in a newly-attached block.",
 	"notifyspent-outpoints": "List of transaction outpoints to monitor.",
-
+	
 	// StopNotifySpentCmd help.
 	"stopnotifyspent--synopsis": "Cancel registered spending notifications for each passed outpoint.",
 	"stopnotifyspent-outpoints": "List of transaction outpoints to stop monitoring.",
-
+	
 	// LoadTxFilterCmd help.
 	"loadtxfilter--synopsis": "Load, add to, or reload a websocket client's transaction filter for mempool transactions, new blocks and rescanblocks.",
 	"loadtxfilter-reload":    "Load a new filter instead of adding data to an existing one",
 	"loadtxfilter-addresses": "Array of addresses to add to the transaction filter",
 	"loadtxfilter-outpoints": "Array of outpoints to add to the transaction filter",
-
+	
 	// Rescan help.
 	"rescan--synopsis": "Rescan block chain for transactions to addresses.\n" +
 		"When the endblock parameter is omitted, the rescan continues through the best block in the main chain.\n" +
@@ -667,26 +667,26 @@ var HelpDescsEnUS = map[string]string{
 	"rescan-addresses":  "List of addresses to include in the rescan",
 	"rescan-outpoints":  "List of transaction outpoints to include in the rescan",
 	"rescan-endblock":   "Hash of final block to rescan",
-
+	
 	// RescanBlocks help.
 	"rescanblocks--synopsis":   "Rescan blocks for transactions matching the loaded transaction filter.",
 	"rescanblocks-blockhashes": "List of hashes to rescan.  Each next block must be a child of the previous.",
 	"rescanblocks--result0":    "List of matching blocks.",
-
+	
 	// RescannedBlock help.
 	"rescannedblock-hash":         "Hash of the matching block.",
 	"rescannedblock-transactions": "List of matching transactions, serialized and hex-encoded.",
-
+	
 	// Uptime help.
 	"uptime--synopsis": "Returns the total uptime of the server.",
 	"uptime--result0":  "The number of seconds that the server has been running",
-
+	
 	// Version help.
 	"version--synopsis":       "Returns the JSON-RPC API version (semver)",
 	"version--result0--desc":  "Version objects keyed by the program or API name",
 	"version--result0--key":   "Program or API name",
 	"version--result0--value": "Object containing the semantic version",
-
+	
 	// VersionResult help.
 	"versionresult-versionstring": "The JSON-RPC API version (semver)",
 	"versionresult-major":         "The major component of the JSON-RPC API version",
@@ -783,14 +783,15 @@ func (c *HelpCacher) RPCMethodHelp(method string) (string, error) {
 	// Look up the result types for the method.
 	resultTypes, ok := ResultTypes[method]
 	if !ok {
-		return "", errors.New("no result types specified for method " +
-			method)
+		return "", errors.New(
+			"no result types specified for method " +
+				method,
+		)
 	}
 	// Generate, cache, and return the help.
-	help, err := btcjson.GenerateHelp(method, HelpDescsEnUS, resultTypes...)
-	if err != nil {
-		Error(err)
-		return "", err
+	help, e := btcjson.GenerateHelp(method, HelpDescsEnUS, resultTypes...)
+	if e != nil {
+		return "", e
 	}
 	c.methodHelp[method] = help
 	return help, nil
@@ -807,20 +808,18 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 	// Generate a list of one-line usage for every command.
 	usageTexts := make([]string, 0, len(RPCHandlers))
 	for k := range RPCHandlers {
-		usage, err := btcjson.MethodUsageText(k)
-		if err != nil {
-			Error(err)
-			return "", err
+		usage, e := btcjson.MethodUsageText(k)
+		if e != nil {
+			return "", e
 		}
 		usageTexts = append(usageTexts, usage)
 	}
 	// Include websockets commands if requested.
 	if includeWebsockets {
 		for k := range WSHandlers {
-			usage, err := btcjson.MethodUsageText(k)
-			if err != nil {
-				Error(err)
-				return "", err
+			usage, e := btcjson.MethodUsageText(k)
+			if e != nil {
+				return "", e
 			}
 			usageTexts = append(usageTexts, usage)
 		}

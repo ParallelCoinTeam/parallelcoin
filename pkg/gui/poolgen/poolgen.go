@@ -55,14 +55,14 @@ func (p *Pool) Free` + types[i].name + `(b *` + types[i].name + `) {
 
 `
 	}
-	if fd, err := os.Create("pooltypes.go"); Check(err) {
+	if fd, e := os.Create("pooltypes.go"); err.Chk(e) {
 	} else {
 		defer func() {
-			if err := fd.Close(); Check(err) {
+			if e := fd.Close(); err.Chk(e) {
 			}
 		}()
 		
-		if _, err = fd.Write([]byte(out)); Check(err) {
+		if _, e = fd.Write([]byte(out)); err.Chk(e) {
 		}
 	}
 }

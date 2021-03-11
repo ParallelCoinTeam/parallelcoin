@@ -17,7 +17,7 @@ func makeOneBytes(n int) []byte {
 	}
 	return b
 }
-func checkZeroBytes(b []byte) error {
+func checkZeroBytes(b []byte) (e error) {
 	for i, v := range b {
 		if v != 0 {
 			return fmt.Errorf("b[%d] = %d", i, v)
@@ -48,14 +48,14 @@ func TestBytes(t *testing.T) {
 	for i, n := range tests {
 		b := makeOneBytes(n)
 		Bytes(b)
-		err := checkZeroBytes(b)
-		if err != nil {
+		e := checkZeroBytes(b)
+		if e != nil  {
 			t.Errorf("Test %d (n=%d) failed: %v", i, n, err)
 			continue
 		}
 	}
 }
-func checkZeroWords(b []big.Word) error {
+func checkZeroWords(b []big.Word) (e error) {
 	for i, v := range b {
 		if v != 0 {
 			return fmt.Errorf("b[%d] = %d", i, v)
@@ -92,8 +92,8 @@ func TestBigInt(t *testing.T) {
 			continue
 		}
 		BigInt(v)
-		err := checkZeroWords(v.Bits())
-		if err != nil {
+		e := checkZeroWords(v.Bits())
+		if e != nil  {
 			t.Errorf("Test %d (s=%s) failed: %v", i, s, err)
 			continue
 		}
@@ -108,18 +108,16 @@ func TestBytea32(t *testing.T) {
 	var b [sz]byte
 	copy(b[:], makeOneBytes(sz))
 	Bytea32(&b)
-	err := checkZeroBytes(b[:])
-	if err != nil {
-		t.Error(err)
-	}
+	e := checkZeroBytes(b[:])
+	if e != nil  {
+		t.	}
 }
 func TestBytea64(t *testing.T) {
 	const sz = 64
 	var b [sz]byte
 	copy(b[:], makeOneBytes(sz))
 	Bytea64(&b)
-	err := checkZeroBytes(b[:])
-	if err != nil {
-		t.Error(err)
-	}
+	e := checkZeroBytes(b[:])
+	if e != nil  {
+		t.	}
 }

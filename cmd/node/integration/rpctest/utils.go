@@ -3,9 +3,9 @@ package rpctest
 import (
 	"reflect"
 	"time"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 )
 
 // JoinType is an enum representing a particular type of "node join". A node
@@ -27,7 +27,7 @@ const (
 // passed JoinType. This function be used to to ensure all active test harnesses
 // are at a consistent state before proceeding to an assertion or check within
 // rpc tests.
-func JoinNodes(nodes []*Harness, joinType JoinType) error {
+func JoinNodes(nodes []*Harness, joinType JoinType) (e error) {
 	switch joinType {
 	case Blocks:
 		return syncBlocks(nodes)
@@ -38,23 +38,21 @@ func JoinNodes(nodes []*Harness, joinType JoinType) error {
 }
 
 // syncMempools blocks until all nodes have identical mempools.
-func syncMempools(nodes []*Harness) error {
+func syncMempools(nodes []*Harness) (e error) {
 	poolsMatch := false
 retry:
 	for !poolsMatch {
-		firstPool, err := nodes[0].Node.GetRawMempool()
-		if err != nil {
-			Error(err)
-			return err
+		firstPool, e := nodes[0].Node.GetRawMempool()
+		if e != nil  {
+						return e
 		}
 		// If all nodes have an identical mempool with respect to the first node,
 		// then we're done. Otherwise drop back to the top of the loop and retry
 		// after a short wait period.
 		for _, node := range nodes[1:] {
-			nodePool, err := node.Node.GetRawMempool()
-			if err != nil {
-				Error(err)
-				return err
+			nodePool, e := node.Node.GetRawMempool()
+			if e != nil  {
+								return e
 			}
 			if !reflect.DeepEqual(firstPool, nodePool) {
 				time.Sleep(time.Millisecond * 100)
@@ -67,7 +65,7 @@ retry:
 }
 
 // syncBlocks blocks until all nodes report the same best chain.
-func syncBlocks(nodes []*Harness) error {
+func syncBlocks(nodes []*Harness) (e error) {
 	blocksMatch := false
 retry:
 	for !blocksMatch {
@@ -75,10 +73,9 @@ retry:
 		var prevHeight int32
 
 		for _, node := range nodes {
-			blockHash, blockHeight, err := node.Node.GetBestBlock()
-			if err != nil {
-				Error(err)
-				return err
+			blockHash, blockHeight, e := node.Node.GetBestBlock()
+			if e != nil  {
+								return e
 			}
 			if prevHash != nil && (*blockHash != *prevHash ||
 				blockHeight != prevHeight) {
@@ -95,40 +92,37 @@ retry:
 // ConnectNode establishes a new peer-to-peer connection between the "from" harness and the "to" harness. The connection
 // made is flagged as persistent therefore in the case of disconnects, "from" will attempt to reestablish a connection
 // to the "to" harness.
-func ConnectNode(from *Harness, to *Harness) error {
-	peerInfo, err := from.Node.GetPeerInfo()
-	if err != nil {
-		Error(err)
-		return err
+func ConnectNode(from *Harness, to *Harness) (e error) {
+	peerInfo, e := from.Node.GetPeerinf.Ln()
+	if e != nil  {
+				return e
 	}
 	numPeers := len(peerInfo)
 	targetAddr := to.node.config.listen
-	if err := from.Node.AddNode(targetAddr, rpcclient.ANAdd); err != nil {
-		return err
+	if e := from.Node.AddNode(targetAddr, rpcclient.ANAdd); err.Chk(e) {
+		return e
 	}
 	// Block until a new connection has been established.
-	peerInfo, err = from.Node.GetPeerInfo()
-	if err != nil {
-		Error(err)
-		return err
+	peerInfo, e = from.Node.GetPeerinf.Ln()
+	if e != nil  {
+				return e
 	}
 	for len(peerInfo) <= numPeers {
-		peerInfo, err = from.Node.GetPeerInfo()
-		if err != nil {
-			Error(err)
-			return err
+		peerInfo, e = from.Node.GetPeerinf.Ln()
+		if e != nil  {
+						return e
 		}
 	}
 	return nil
 }
 
 // TearDownAll tears down all active test harnesses.
-func TearDownAll() error {
+func TearDownAll() (e error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
 	for _, harness := range testInstances {
-		if err := harness.tearDown(); err != nil {
-			return err
+		if e := harness.tearDown(); err.Chk(e) {
+			return e
 		}
 	}
 	return nil

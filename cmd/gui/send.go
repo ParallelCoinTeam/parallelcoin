@@ -10,7 +10,7 @@ import (
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -54,7 +54,8 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 		sp.AmountInput(),
 		sp.MessageInput(),
 		wg.Flex().
-			Flexed(1,
+			Flexed(
+				1,
 				sp.SendButton(),
 			).
 			Rigid(
@@ -88,7 +89,8 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 		sp.AmountInput(),
 		sp.MessageInput(),
 		wg.Flex().
-			Flexed(1,
+			Flexed(
+				1,
 				sp.SendButton(),
 			).
 			Rigid(
@@ -110,7 +112,8 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 	var historyWidget []l.Widget
 	historyWidget = append(historyWidget, sp.GetAddressbookHistoryCards("DocBg")...)
 	historyLE := func(gtx l.Context, index int) l.Dimensions {
-		return wg.Inset(0.25,
+		return wg.Inset(
+			0.25,
 			historyWidget[index],
 		).Fn(gtx)
 	}
@@ -171,18 +174,18 @@ func (sp *SendPage) SendButton() l.Widget {
 			wg.clickables["sendSend"].
 				SetClick(
 					func() {
-						Debug("clicked send button")
+						dbg.Ln("clicked send button")
 						go func() {
 							if wg.WalletAndClientRunning() {
 								var amt float64
 								var am util.Amount
-								var err error
-								if amt, err = strconv.ParseFloat(
+								var e error
+								if amt, e = strconv.ParseFloat(
 									wg.inputs["sendAmount"].GetText(),
 									64,
-								); !Check(err) {
-									if am, err = util.NewAmount(amt); Check(err) {
-										Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
+								); !err.Chk(e) {
+									if am, e = util.NewAmount(amt); err.Chk(e) {
+										dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
 										// todo: indicate this to the user somehow
 										return
 									}
@@ -191,26 +194,28 @@ func (sp *SendPage) SendButton() l.Widget {
 									return
 								}
 								var addr util.Address
-								if addr, err = util.DecodeAddress(wg.inputs["sendAddress"].GetText(),
-									wg.cx.ActiveNet); Check(err) {
-									Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
-									Debug("invalid address")
+								if addr, e = util.DecodeAddress(
+									wg.inputs["sendAddress"].GetText(),
+									wg.cx.ActiveNet,
+								); err.Chk(e) {
+									dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
+									dbg.Ln("invalid address")
 									// TODO: indicate this to the user somehow
 									return
 								}
-								if err= wg.WalletClient.WalletPassphrase(*wg.cx.Config.WalletPass, 5); Check(err){
-									Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
+								if e = wg.WalletClient.WalletPassphrase(*wg.cx.Config.WalletPass, 5); err.Chk(e) {
+									dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
 									return
 								}
 								var txid *chainhash.Hash
-								if txid, err = wg.WalletClient.SendToAddress(addr, am); Check(err) {
+								if txid, e = wg.WalletClient.SendToAddress(addr, am); err.Chk(e) {
 									// TODO: indicate send failure to user somehow
-									Debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
+									dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
 									return
 								}
 								wg.RecentTransactions(10, "recent")
 								wg.RecentTransactions(-1, "history")
-								Debug("transaction successful", txid)
+								dbg.Ln("transaction successful", txid)
 								// prevent accidental double clicks recording the same entry again
 								wg.inputs["sendAmount"].SetText("")
 								wg.inputs["sendMessage"].SetText("")
@@ -243,18 +248,18 @@ func (sp *SendPage) SaveButton() l.Widget {
 			wg.clickables["sendSave"].
 				SetClick(
 					func() {
-						Debug("clicked save button")
+						dbg.Ln("clicked save button")
 						amtS := wg.inputs["sendAmount"].GetText()
-						var err error
+						var e error
 						var amt float64
-						if amt, err = strconv.ParseFloat(amtS, 64); Check(err) {
+						if amt, e = strconv.ParseFloat(amtS, 64); err.Chk(e) {
 							return
 						}
 						if amt == 0 {
 							return
 						}
 						var ua util.Amount
-						if ua, err = util.NewAmount(amt); Check(err) {
+						if ua, e = util.NewAmount(amt); err.Chk(e) {
 							return
 						}
 						msg := wg.inputs["sendMessage"].GetText()
@@ -263,15 +268,17 @@ func (sp *SendPage) SaveButton() l.Widget {
 						}
 						addr := wg.inputs["sendAddress"].GetText()
 						var ad util.Address
-						if ad, err = util.DecodeAddress(addr, wg.cx.ActiveNet); Check(err) {
+						if ad, e = util.DecodeAddress(addr, wg.cx.ActiveNet); err.Chk(e) {
 							return
 						}
-						wg.State.sendAddresses = append(wg.State.sendAddresses, AddressEntry{
-							Address: ad.EncodeAddress(),
-							Label:   msg,
-							Amount:  ua,
-							Created: time.Now(),
-						})
+						wg.State.sendAddresses = append(
+							wg.State.sendAddresses, AddressEntry{
+								Address: ad.EncodeAddress(),
+								Label:   msg,
+								Amount:  ua,
+								Created: time.Now(),
+							},
+						)
 						// prevent accidental double clicks recording the same entry again
 						wg.inputs["sendAmount"].SetText("")
 						wg.inputs["sendMessage"].SetText("")
@@ -296,7 +303,8 @@ func (sp *SendPage) PasteButton() l.Widget {
 		wg := sp.wg
 		return wg.ButtonLayout(
 			wg.clickables["sendFromRequest"].
-				SetClick(func() { sp.pasteFunction() })).
+				SetClick(func() { sp.pasteFunction() }),
+		).
 			Background("Primary").
 			Embed(
 				wg.Inset(
@@ -311,14 +319,14 @@ func (sp *SendPage) PasteButton() l.Widget {
 
 func (sp *SendPage) pasteFunction() (b bool) {
 	wg := sp.wg
-	Debug("clicked paste button")
+	dbg.Ln("clicked paste button")
 	var urn string
-	var err error
-	if urn, err = clipboard.ReadAll(); Check(err) {
+	var e error
+	if urn, e = clipboard.ReadAll(); err.Chk(e) {
 		return
 	}
 	if !strings.HasPrefix(urn, "parallelcoin:") {
-		if err = clipboard.WriteAll(urn); Check(err) {
+		if e = clipboard.WriteAll(urn); err.Chk(e) {
 		}
 		return
 	}
@@ -326,7 +334,7 @@ func (sp *SendPage) pasteFunction() (b bool) {
 	split2 := strings.Split(split1[1], "?")
 	addr := split2[0]
 	var ua util.Address
-	if ua, err = util.DecodeAddress(addr, wg.cx.ActiveNet); Check(err) {
+	if ua, e = util.DecodeAddress(addr, wg.cx.ActiveNet); err.Chk(e) {
 		return
 	}
 	_ = ua
@@ -339,19 +347,19 @@ func (sp *SendPage) pasteFunction() (b bool) {
 	for i := range split3 {
 		var split4 []string
 		split4 = strings.Split(split3[i], "=")
-		Debug(split4)
+		dbg.Ln(split4)
 		if len(split4) > 1 {
 			switch split4[0] {
 			case "amount":
 				wg.inputs["sendAmount"].SetText(split4[1])
-				// Debug("############ amount", split4[1])
+				// dbg.Ln("############ amount", split4[1])
 			case "message", "label":
 				msg := split4[i]
 				if len(msg) > 64 {
 					msg = msg[:64]
 				}
 				wg.inputs["sendMessage"].SetText(msg)
-				// Debug("############ message", split4[1])
+				// dbg.Ln("############ message", split4[1])
 			}
 		}
 	}
@@ -392,8 +400,8 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 								wg.State.sendAddresses[i].Amount.ToDUO(),
 								wg.State.sendAddresses[i].Label,
 							)
-							Debug("clicked send address list item", j)
-							if err := clipboard.WriteAll(sendText); Check(err) {
+							dbg.Ln("clicked send address list item", j)
+							if e := clipboard.WriteAll(sendText); err.Chk(e) {
 							}
 						},
 					),

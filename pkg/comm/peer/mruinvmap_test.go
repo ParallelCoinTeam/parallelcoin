@@ -4,9 +4,9 @@ import (
 	"crypto/rand"
 	"fmt"
 	"testing"
-
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
 // TestMruInventoryMap ensures the MruInventoryMap behaves as expected including limiting, eviction of least-recently
@@ -122,10 +122,9 @@ func BenchmarkMruInventoryList(b *testing.B) {
 	invVects := make([]*wire.InvVect, 0, numInvVects)
 	for i := 0; i < numInvVects; i++ {
 		hashBytes := make([]byte, chainhash.HashSize)
-		_, err := rand.Read(hashBytes)
-		if err != nil {
-			Error(err)
-		}
+		_, e := rand.Read(hashBytes)
+		if e != nil  {
+					}
 		hash, _ := chainhash.NewHash(hashBytes)
 		iv := wire.NewInvVect(wire.InvTypeBlock, hash)
 		invVects = append(invVects, iv)

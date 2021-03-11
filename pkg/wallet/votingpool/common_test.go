@@ -4,12 +4,13 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
-
-	"github.com/p9c/pod/pkg/db/walletdb"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	
+	"github.com/p9c/pod/pkg/database/walletdb"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 func init() {
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Enable logging (Debug level) to aid debugging failing tests.
 	// Log.SetLevel("debug")
@@ -30,19 +31,19 @@ func TstCheckError(t *testing.T, testName string, gotErr error, wantErrCode Erro
 
 // TstRunWithManagerUnlocked calls the given callback with the manager unlocked, and locks it again before returning.
 func TstRunWithManagerUnlocked(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, callback func()) {
-	if err := mgr.Unlock(addrmgrNs, privPassphrase); err != nil {
-		t.Fatal(err)
+	if e := mgr.Unlock(addrmgrNs, privPassphrase); err.Chk(e) {
+		t.ftl.Ln(e)
 	}
 	defer func() {
-		err := mgr.Lock()
-		if err != nil {
-			t.Log(err)
+		e := mgr.Lock()
+		if e != nil  {
+			t.Log(e)
 		}
 	}()
 	callback()
 }
 
-// TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual and calls t.Fatal() if they're not
+// TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual and calls t.ftl.Ln() if they're not
 // identical.
 func TstCheckWithdrawalStatusMatches(t *testing.T, s1, s2 WithdrawalStatus) {
 	if s1.Fees() != s2.Fees() {

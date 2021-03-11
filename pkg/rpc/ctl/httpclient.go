@@ -32,17 +32,16 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, func(), error) {
 			Password: *cfg.ProxyPass,
 		}
 		dial = func(_ context.Context, network string, addr string) (net.Conn, error) {
-			c, err := proxy.Dial(network, addr)
-			if err != nil {
-				Error(err)
-				return nil, err
+			c, e := proxy.Dial(network, addr)
+			if e != nil  {
+								return nil, e
 			}
 			go func() {
 			out:
 				for {
 					select {
 					case <-ctx.Done():
-						if err := c.Close(); Check(err) {
+						if e := c.Close(); err.Chk(e) {
 						}
 						break out
 					}
@@ -54,11 +53,10 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, func(), error) {
 	// Configure TLS if needed.
 	var tlsConfig *tls.Config
 	if *cfg.TLS && *cfg.RPCCert != "" {
-		pem, err := ioutil.ReadFile(*cfg.RPCCert)
-		if err != nil {
-			Error(err)
-			cancel()
-			return nil, nil, err
+		pem, e := ioutil.ReadFile(*cfg.RPCCert)
+		if e != nil  {
+						cancel()
+			return nil, nil, e
 		}
 		pool := x509.NewCertPool()
 		pool.AppendCertsFromPEM(pem)
@@ -109,10 +107,9 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, 
 	}
 	url := protocol + "://" + serverAddr
 	bodyReader := bytes.NewReader(marshalledJSON)
-	httpRequest, err := http.NewRequest("POST", url, bodyReader)
-	if err != nil {
-		Error(err)
-		return nil, err
+	httpRequest, e := http.NewRequest("POST", url, bodyReader)
+	if e != nil  {
+				return nil, e
 	}
 	httpRequest.Close = true
 	httpRequest.Header.Set("Content-Type", "application/json")
@@ -121,24 +118,21 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, 
 	// Create the new HTTP client that is configured according to the user - specified options and submit the request.
 	var httpClient *http.Client
 	var cancel func()
-	httpClient, cancel, err = newHTTPClient(cx.Config)
-	if err != nil {
-		Error(err)
-		return nil, err
+	httpClient, cancel, e = newHTTPClient(cx.Config)
+	if e != nil  {
+				return nil, e
 	}
-	httpResponse, err := httpClient.Do(httpRequest)
-	if err != nil {
-		Error(err)
-		return nil, err
+	httpResponse, e := httpClient.Do(httpRequest)
+	if e != nil  {
+				return nil, e
 	}
 	// close connection
 	cancel()
 	// Read the raw bytes and close the response.
-	respBytes, err := ioutil.ReadAll(httpResponse.Body)
-	if err := httpResponse.Body.Close(); Check(err) {
-		err = fmt.Errorf("error reading json reply: %v", err)
-		Error(err)
-		return nil, err
+	respBytes, e := ioutil.ReadAll(httpResponse.Body)
+	if e := httpResponse.Body.Close(); err.Chk(e) {
+		e = fmt.Errorf("error reading json reply: %v", err)
+				return nil, e
 	}
 	// Handle unsuccessful HTTP responses
 	if httpResponse.StatusCode < 200 || httpResponse.StatusCode >= 300 {
@@ -152,8 +146,8 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, 
 	}
 	// Unmarshal the response.
 	var resp btcjson.Response
-	if err := js.Unmarshal(respBytes, &resp); err != nil {
-		return nil, err
+	if e := js.Unmarshal(respBytes, &resp); err.Chk(e) {
+		return nil, e
 	}
 	if resp.Error != nil {
 		return nil, resp.Error

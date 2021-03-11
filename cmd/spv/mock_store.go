@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // mockBlockHeaderStore is an implementation of the BlockHeaderStore backed by a simple map.
@@ -55,7 +55,7 @@ func (m *mockBlockHeaderStore) FetchHeader(h *chainhash.Hash) (
 	}
 	return nil, 0, fmt.Errorf("not found")
 }
-func (m *mockBlockHeaderStore) WriteHeaders(headers ...headerfs.BlockHeader) error {
+func (m *mockBlockHeaderStore) WriteHeaders(headers ...headerfs.BlockHeader) (e error) {
 	for _, h := range headers {
 		m.headers[h.BlockHash()] = *h.BlockHeader
 	}

@@ -84,11 +84,11 @@ bool CBlockTreeDB::WriteBestInvalidWork(const CBigNum& bnBestInvalidWork)
     return Write('I', bnBestInvalidWork);
 }
 
-bool CBlockTreeDB::WriteBlockFileInfo(int nFile, const CBlockFileInfo &info) {
+bool CBlockTreeDB::WriteBlockFileinf.Ln(int nFile, const CBlockFileInfo &info) {
     return Write(make_pair('f', nFile), info);
 }
 
-bool CBlockTreeDB::ReadBlockFileInfo(int nFile, CBlockFileInfo &info) {
+bool CBlockTreeDB::ReadBlockFileinf.Ln(int nFile, CBlockFileInfo &info) {
     return Read(make_pair('f', nFile), info);
 }
 

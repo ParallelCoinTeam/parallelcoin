@@ -73,7 +73,7 @@ def connect_JSON(config):
         result = ServiceProxy(connect)
         # ServiceProxy is lazy-connect, so send an RPC command mostly to catch connection errors,
         # but also make sure the bitcoind we're talking to is/isn't testnet:
-        if result.getmininginfo()['testnet'] != testnet:
+        if result.getmininginf.Ln()['testnet'] != testnet:
             sys.stderr.write("RPC server at "+connect+" testnet setting mismatch\n")
             sys.exit(1)
         return result
@@ -82,7 +82,7 @@ def connect_JSON(config):
         sys.exit(1)
 
 def unlock_wallet(bitcoind):
-    info = bitcoind.getinfo()
+    info = bitcoind.getinf.Ln()
     if 'unlocked_until' not in info:
         return True # wallet is not encrypted
     t = int(info['unlocked_until'])
@@ -93,7 +93,7 @@ def unlock_wallet(bitcoind):
         except:
             sys.stderr.write("Wrong passphrase\n")
 
-    info = bitcoind.getinfo()
+    info = bitcoind.getinf.Ln()
     return int(info['unlocked_until']) > time.time()
 
 def list_available(bitcoind):

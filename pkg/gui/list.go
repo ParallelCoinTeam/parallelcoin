@@ -216,7 +216,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 		// return li.embedWidget(li.scrollWidth)(gtx)
 		// } else {
 		// if li.recalculate && !li.changing {
-		// Debug("recalculating")
+		// dbg.Ln("recalculating")
 		// get the size of the scrollbar
 		li.scrollBarSize = li.scrollWidth // + li.scrollBarPad
 		// render the widgets onto a second context to get their dimensions
@@ -229,14 +229,14 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	}
 	_, li.view = axisMainConstraint(li.axis, gtx.Constraints)
 	_, li.cross = axisCrossConstraint(li.axis, gtx.Constraints)
-	// Debugs(li.dims)
+	// dbg.S(li.dims)
 	li.total, li.before = li.dims.GetSizes(li.position, li.axis)
 	if li.total == 0 {
 		// if there is no children just return a big empty box
 		return EmptyFromSize(gtx.Constraints.Max)(gtx)
 	}
 	if li.total < li.view {
-		// Debug("not showing scrollbar", li.total, li.view)
+		// dbg.Ln("not showing scrollbar", li.total, li.view)
 		// if the contents fit the view, don't show the scrollbar
 		li.top, li.middle, li.bottom = 0, 0, 0
 		li.scrollWidth = 0
@@ -412,7 +412,7 @@ func (li *List) grabber(dims DimensionList, x, y, viewAxis, viewCross int) func(
 			if de.Type == pointer.Release {
 			}
 			if de.Type == pointer.Drag {
-				// Debug("drag position", de.Position)
+				// dbg.Ln("drag position", de.Position)
 				if time.Now().Sub(li.recentPageClick) > time.Second/2 {
 					total := dims.GetTotal(li.axis)
 					var d int

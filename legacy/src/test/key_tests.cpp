@@ -24,7 +24,7 @@ static const string strAddressBad("1HV9Lc3sNHZxwj4Zk6fB38tEmBryq2cBiF");
 
 
 #ifdef KEY_TESTS_DUMPINFO
-void dumpKeyInfo(uint256 privkey)
+void dumpKeyinf.Ln(uint256 privkey)
 {
     CKey key;
     key.resize(32);

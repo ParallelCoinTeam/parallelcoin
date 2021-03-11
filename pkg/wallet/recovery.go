@@ -3,15 +3,15 @@ package wallet
 import (
 	"time"
 	
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // RecoveryManager maintains the state required to recover previously used addresses, and coordinates batched processing
@@ -31,8 +31,10 @@ type RecoveryManager struct {
 
 // NewRecoveryManager initializes a new RecoveryManager with a derivation look-ahead of `recoveryWindow` child indexes,
 // and pre-allocates a backing array for `batchSize` blocks to scan at once.
-func NewRecoveryManager(recoveryWindow, batchSize uint32,
-	chainParams *netparams.Params) *RecoveryManager {
+func NewRecoveryManager(
+	recoveryWindow, batchSize uint32,
+	chainParams *netparams.Params,
+) *RecoveryManager {
 	return &RecoveryManager{
 		recoveryWindow: recoveryWindow,
 		blockBatch:     make([]wtxmgr.BlockMeta, 0, batchSize),
@@ -44,9 +46,11 @@ func NewRecoveryManager(recoveryWindow, batchSize uint32,
 // Resurrect restores all known addresses for the provided scopes that can be found in the walletdb namespace, in
 // addition to restoring all outpoints that have been previously found. This method ensures that the recovery state's
 // horizons properly start from the last found address of a prior recovery attempt.
-func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
+func (rm *RecoveryManager) Resurrect(
+	ns walletdb.ReadBucket,
 	scopedMgrs map[waddrmgr.KeyScope]*waddrmgr.ScopedKeyManager,
-	credits []wtxmgr.Credit) error {
+	credits []wtxmgr.Credit,
+) (e error) {
 	// First, for each scope that we are recovering, rederive all of the addresses up to the last found address known to
 	// each branch.
 	for keyScope, scopedMgr := range scopedMgrs {
@@ -54,12 +58,12 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 		//
 		// TODO(conner): rescan for all created accounts if we allow users to use non-default address
 		scopeState := rm.state.StateForScope(keyScope)
-		acctProperties, err := scopedMgr.AccountProperties(
+		var acctProperties *waddrmgr.AccountProperties
+		acctProperties, e = scopedMgr.AccountProperties(
 			ns, waddrmgr.DefaultAccountNum,
 		)
-		if err != nil {
-			Error(err)
-			return err
+		if e != nil {
+			return e
 		}
 		// Fetch the external key count, which bounds the indexes we will need to rederive.
 		externalCount := acctProperties.ExternalKeyCount
@@ -67,10 +71,11 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 		// branch recovery state's set of addresses to look for.
 		for i := uint32(0); i < externalCount; i++ {
 			keyPath := externalKeyPath(i)
-			addr, err := scopedMgr.DeriveFromKeyPath(ns, keyPath)
-			if err != nil && err != hdkeychain.ErrInvalidChild || addr == nil {
-				return err
-			} else if err == hdkeychain.ErrInvalidChild {
+			var addr waddrmgr.ManagedAddress
+			addr, e = scopedMgr.DeriveFromKeyPath(ns, keyPath)
+			if e != nil && e != hdkeychain.ErrInvalidChild || addr == nil {
+				return e
+			} else if e == hdkeychain.ErrInvalidChild {
 				scopeState.ExternalBranch.MarkInvalidChild(i)
 				continue
 			}
@@ -82,10 +87,11 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 		// branch recovery state's set of addresses to look for.
 		for i := uint32(0); i < internalCount; i++ {
 			keyPath := internalKeyPath(i)
-			addr, err := scopedMgr.DeriveFromKeyPath(ns, keyPath)
-			if err != nil && err != hdkeychain.ErrInvalidChild || addr == nil {
-				return err
-			} else if err == hdkeychain.ErrInvalidChild {
+			var addr waddrmgr.ManagedAddress
+			addr, e = scopedMgr.DeriveFromKeyPath(ns, keyPath)
+			if e != nil && e != hdkeychain.ErrInvalidChild || addr == nil {
+				return e
+			} else if e == hdkeychain.ErrInvalidChild {
 				scopeState.InternalBranch.MarkInvalidChild(i)
 				continue
 			}
@@ -103,12 +109,12 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 	// In addition, we will re-add any outpoints that are known the wallet to our global set of watched outpoints, so
 	// that we can watch them for spends.
 	for _, credit := range credits {
-		_, addrs, _, err := txscript.ExtractPkScriptAddrs(
+		var addrs []util.Address
+		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			credit.PkScript, rm.chainParams,
 		)
-		if err != nil {
-			Error(err)
-			return err
+		if e != nil {
+			return e
 		}
 		rm.state.AddWatchedOutPoint(&credit.OutPoint, addrs[0])
 	}
@@ -116,10 +122,12 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 }
 
 // AddToBlockBatch appends the block information, consisting of hash and height, to the batch of blocks to be searched.
-func (rm *RecoveryManager) AddToBlockBatch(hash *chainhash.Hash, height int32,
-	timestamp time.Time) {
+func (rm *RecoveryManager) AddToBlockBatch(
+	hash *chainhash.Hash, height int32,
+	timestamp time.Time,
+) {
 	if !rm.started {
-		Tracef(
+		trc.F(
 			"Seed birthday surpassed, starting recovery of wallet from height=%d hash=%v with recovery-window=%d",
 			height, *hash, rm.recoveryWindow,
 		)
@@ -187,7 +195,8 @@ func NewRecoveryState(recoveryWindow uint32) *RecoveryState {
 // StateForScope returns a ScopeRecoveryState for the provided key scope. If one does not already exist, a new one will
 // be generated with the RecoveryState's recoveryWindow.
 func (rs *RecoveryState) StateForScope(
-	keyScope waddrmgr.KeyScope) *ScopeRecoveryState {
+	keyScope waddrmgr.KeyScope,
+) *ScopeRecoveryState {
 	// If the account recovery state already exists, return it.
 	if scopeState, ok := rs.scopes[keyScope]; ok {
 		return scopeState
@@ -204,8 +213,10 @@ func (rs *RecoveryState) WatchedOutPoints() map[wire.OutPoint]util.Address {
 
 // AddWatchedOutPoint updates the recovery state's set of known outpoints that we will monitor for spends during
 // recovery.
-func (rs *RecoveryState) AddWatchedOutPoint(outPoint *wire.OutPoint,
-	addr util.Address) {
+func (rs *RecoveryState) AddWatchedOutPoint(
+	outPoint *wire.OutPoint,
+	addr util.Address,
+) {
 	rs.watchedOutPoints[*outPoint] = addr
 }
 

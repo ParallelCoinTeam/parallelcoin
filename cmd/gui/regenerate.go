@@ -14,21 +14,21 @@ import (
 )
 
 func (wg *WalletGUI) GetNewReceivingAddress() {
-	Debug("GetNewReceivingAddress")
+	dbg.Ln("GetNewReceivingAddress")
 	var addr util.Address
-	var err error
-	if addr, err = wg.WalletClient.GetNewAddress("default"); !Check(err) {
-		Debug("getting new receiving address", addr.EncodeAddress(),
+	var e error
+	if addr, e = wg.WalletClient.GetNewAddress("default"); !err.Chk(e) {
+		dbg.Ln("getting new receiving address", addr.EncodeAddress(),
 			"previous:", wg.State.currentReceivingAddress.String.Load())
 		// save to addressbook
 		var ae AddressEntry
 		ae.Address = addr.EncodeAddress()
 		var amt float64
-		if amt, err = strconv.ParseFloat(
+		if amt, e = strconv.ParseFloat(
 			wg.inputs["receiveAmount"].GetText(),
 			64,
-		); !Check(err) {
-			if ae.Amount, err = util.NewAmount(amt); Check(err) {
+		); !err.Chk(e) {
+			if ae.Amount, e = util.NewAmount(amt); err.Chk(e) {
 			}
 		}
 		msg := wg.inputs["receiveMessage"].GetText()
@@ -43,10 +43,10 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 			wg.State.receiveAddresses = []AddressEntry{ae}
 			wg.State.isAddress.Store(true)
 		}
-		Debugs(wg.State.receiveAddresses)
+		dbg.S(wg.State.receiveAddresses)
 		wg.State.SetReceivingAddress(addr)
 		filename := filepath.Join(wg.cx.DataDir, "state.json")
-		if err := wg.State.Save(filename, wg.cx.Config.WalletPass); Check(err) {
+		if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 		}
 		wg.invalidate <- struct{}{}
 	}
@@ -55,16 +55,16 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 func (wg *WalletGUI) GetNewReceivingQRCode(qrText string) {
 	wg.currentReceiveRegenerate.Store(false)
 	var qrc image.Image
-	Debug("generating QR code")
-	var err error
-	if qrc, err = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !Check(err) {
+	dbg.Ln("generating QR code")
+	var e error
+	if qrc, e = qrcode.Encode(qrText, 0, qrcode.ECLevelL, 4); !err.Chk(e) {
 		iop := paint.NewImageOp(qrc)
 		wg.currentReceiveQRCode = &iop
 		wg.currentReceiveQR = wg.ButtonLayout(
 			wg.currentReceiveCopyClickable.SetClick(
 				func() {
-					Debug("clicked qr code copy clicker")
-					if err := clipboard.WriteAll(qrText); Check(err) {
+					dbg.Ln("clicked qr code copy clicker")
+					if e := clipboard.WriteAll(qrText); err.Chk(e) {
 					}
 				},
 			),

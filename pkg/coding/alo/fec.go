@@ -58,8 +58,8 @@ func GetShards(buf []byte, redundancy int, ) (out ShardedSegments) {
 	for i := range out {
 		dataLen := len(sharded[i])
 		parityLen := len(out[i]) - dataLen
-		if rs, err := reedsolomon.New(dataLen, parityLen); !Check(err) {
-			if err = rs.Encode(out[i]); Check(err) {
+		if rs, e := reedsolomon.New(dataLen, parityLen); !err.Chk(e) {
+			if e = rs.Encode(out[i]); err.Chk(e) {
 			}
 		}
 	}
@@ -97,7 +97,7 @@ func ShardsPerRedundancy(nShards, redundancy int) int {
 //		st += fmt.Sprintln(i, j, len(out[i][j]))
 //	}
 // }
-// Debug(st)
+// dbg.Ln(st)
 
 // SegmentBytes breaks a chunk of data into requested sized limit chunks
 func SegmentBytes(buf []byte, lim int) (out [][]byte) {
@@ -125,10 +125,10 @@ func Pieces(dLen, size int) (s int) {
 // GetParams reads the shard's prefix to provide the correct parameters for the RS codec the packet requires
 // based on the prefix on a shard (presumably to create the codec when a new packet/group of shards arrives)
 func GetParams(data []byte) (
-	p ShardPrefix, err error,
+	p ShardPrefix, e error,
 ) {
 	if len(data) <= 3 {
-		err = errors.New("provided data is not long enough to be a shard")
+		e = errors.New("provided data is not long enough to be a shard")
 		return
 	}
 	p.segment, p.totalSegments, p.shard, p.totalShards = int(data[0]), int(data[1]), int(data[2]), int(data[3])
@@ -171,10 +171,10 @@ type ShardPrefix struct {
 }
 
 // NewPacket creates a new structure to store a collection of incoming shards when the first of a new packet arrives
-func NewPacket(firstShard []byte) (o *Partials, err error) {
+func NewPacket(firstShard []byte) (o *Partials, e error) {
 	o = &Partials{}
 	var p ShardPrefix
-	if p, err = GetParams(firstShard); Check(err) {
+	if p, e = GetParams(firstShard); err.Chk(e) {
 	}
 	o.totalSegments = p.totalSegments
 	o.length = p.length
@@ -193,9 +193,9 @@ func NewPacket(firstShard []byte) (o *Partials, err error) {
 
 // AddShard adds a newly received shard to a Partials, ensuring that it has matching parameters (if the HMAC on the
 // packet's wrapper passes it should be unless someone is playing silly buggers)
-func (p *Partials) AddShard(newShard []byte) (err error) {
+func (p *Partials) AddShard(newShard []byte) (e error) {
 	var params ShardPrefix
-	if params, err = GetParams(newShard); Check(err) {
+	if params, e = GetParams(newShard); err.Chk(e) {
 	}
 	if p.totalSegments != params.totalSegments {
 		return errors.New("shard has incorrect segment count for bundle")
@@ -296,7 +296,7 @@ func (p *Partials) GetRatio() (out float64) {
 }
 
 // Decode the received message if we have sufficient pieces
-func (p *Partials) Decode() (final []byte, err error) {
+func (p *Partials) Decode() (final []byte, e error) {
 	final = make([]byte, p.length)
 	if p.HasAllDataShards() {
 		var parts [][]byte
@@ -333,7 +333,7 @@ func (p *Partials) Decode() (final []byte, err error) {
 	var needReconst, dpHas []int
 	var rs *reedsolomon.RS
 	for i := range p.segments {
-		if rs, err = reedsolomon.New(p.segments[i].data, p.segments[i].parity); !Check(err) {
+		if rs, e = reedsolomon.New(p.segments[i].data, p.segments[i].parity); !err.Chk(e) {
 			for j := range p.segments[i].segment {
 				// if the segment is empty it wasn't received or deciphered but we only need reconstruction on the
 				// data shards, append to the list for the reconstruction
@@ -343,8 +343,8 @@ func (p *Partials) Decode() (final []byte, err error) {
 					dpHas = append(dpHas, j)
 				}
 			}
-			Info(dpHas, needReconst)
-			if err = rs.Reconst(p.segments[i].segment, dpHas, needReconst); Check(err) {
+			inf.Ln(dpHas, needReconst)
+			if e = rs.Reconst(p.segments[i].segment, dpHas, needReconst); err.Chk(e) {
 				return
 			}
 		}

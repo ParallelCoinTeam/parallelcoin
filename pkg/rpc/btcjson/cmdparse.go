@@ -50,16 +50,16 @@ func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
 	// netparams and only adding them if they are non-nil.
 	params := makeParams(rt.Elem(), rv.Elem())
 	// Generate and marshal the final JSON-RPC request.
-	rawCmd, err := NewRequest(id, method, params)
-	if err != nil {
-		Errorln(err)
-		return nil, err
+	rawCmd, e := NewRequest(id, method, params)
+	if e != nil {
+		err.Ln(e)
+		return nil, e
 	}
 	return json.Marshal(rawCmd)
 }
 
 // MarshalRequest marshals the passed command to a btcjson.Request
-func MarshalRequest(id interface{}, cmd interface{}) (rawCmd *Request, err error) {
+func MarshalRequest(id interface{}, cmd interface{}) (rawCmd *Request, e error) {
 	// Look up the cmd type and error out if not registered.
 	rt := reflect.TypeOf(cmd)
 	registerLock.RLock()
@@ -79,27 +79,31 @@ func MarshalRequest(id interface{}, cmd interface{}) (rawCmd *Request, err error
 	// netparams and only adding them if they are non-nil.
 	params := makeParams(rt.Elem(), rv.Elem())
 	// Generate and marshal the final JSON-RPC request.
-	rawCmd, err = NewRequest(id, method, params)
-	if err != nil {
-		Errorln(err)
-		return nil, err
+	rawCmd, e = NewRequest(id, method, params)
+	if e != nil {
+		err.Ln(e)
+		return nil, e
 	}
 	return
 }
 
 // checkNumParams ensures the supplied number of netparams is at least the minimum required number for the command and
 // less than the maximum allowed.
-func checkNumParams(numParams int, info *MethodInfo) error {
+func checkNumParams(numParams int, info *MethodInfo) (e error) {
 	if numParams < info.NumReqParams || numParams > info.MaxParams {
 		if info.NumReqParams == info.MaxParams {
-			str := fmt.Sprintf("wrong number of netparams (expected "+
-				"%d, received %d)", info.NumReqParams,
-				numParams)
+			str := fmt.Sprintf(
+				"wrong number of netparams (expected "+
+					"%d, received %d)", info.NumReqParams,
+				numParams,
+			)
 			return makeError(ErrNumParams, str)
 		}
-		str := fmt.Sprintf("wrong number of netparams (expected "+
-			"between %d and %d, received %d)", info.NumReqParams,
-			info.MaxParams, numParams)
+		str := fmt.Sprintf(
+			"wrong number of netparams (expected "+
+				"between %d and %d, received %d)", info.NumReqParams,
+			info.MaxParams, numParams,
+		)
 		return makeError(ErrNumParams, str)
 	}
 	return nil
@@ -121,7 +125,7 @@ func populateDefaults(numParams int, info *MethodInfo, rv reflect.Value) {
 }
 
 // UnmarshalCmd unmarshalls a JSON-RPC request into a suitable concrete command so long as the method type contained within the marshalled request is registered.
-func UnmarshalCmd(r *Request) (interface{}, error) {
+func UnmarshalCmd(r *Request) (ii interface{}, e error) {
 	registerLock.RLock()
 	rtp, ok := methodToConcreteType[r.Method]
 	info := methodToInfo[r.Method]
@@ -135,26 +139,30 @@ func UnmarshalCmd(r *Request) (interface{}, error) {
 	rv := rvp.Elem()
 	// Ensure the number of parameters are correct.
 	numParams := len(r.Params)
-	if err := checkNumParams(numParams, &info); err != nil {
-		return nil, err
+	if e = checkNumParams(numParams, &info); err.Chk(e) {
+		return nil, e
 	}
 	// Loop through each of the struct fields and unmarshal the associated parameter into them.
 	for i := 0; i < numParams; i++ {
 		rvf := rv.Field(i)
 		// Unmarshal the parameter into the struct field.
 		concreteVal := rvf.Addr().Interface()
-		if err := json.Unmarshal(r.Params[i], &concreteVal); err != nil {
+		if e = json.Unmarshal(r.Params[i], &concreteVal); err.Chk(e) {
 			// The most common error is the wrong type, so explicitly detect that error and make it nicer.
 			fieldName := strings.ToLower(rt.Field(i).Name)
-			if jerr, ok := err.(*json.UnmarshalTypeError); ok {
-				str := fmt.Sprintf("parameter #%d '%s' must "+
-					"be type %v (got %v)", i+1, fieldName,
-					jerr.Type, jerr.Value)
+			if jerr, ok := e.(*json.UnmarshalTypeError); ok {
+				str := fmt.Sprintf(
+					"parameter #%d '%s' must "+
+						"be type %v (got %v)", i+1, fieldName,
+					jerr.Type, jerr.Value,
+				)
 				return nil, makeError(ErrInvalidType, str)
 			}
 			// Fallback to showing the underlying error.
-			str := fmt.Sprintf("parameter #%d '%s' failed to "+
-				"unmarshal: %v", i+1, fieldName, err)
+			str := fmt.Sprintf(
+				"parameter #%d '%s' failed to "+
+					"unmarshal: %v", i+1, fieldName, err,
+			)
 			return nil, makeError(ErrInvalidType, str)
 		}
 	}
@@ -225,17 +233,21 @@ func baseType(arg reflect.Type) (reflect.Type, int) {
 // assignField is the main workhorse for the NewCmd function which handles assigning the provided source value to the
 // destination field. It supports direct type assignments, indirection, conversion of numeric types, and unmarshaling of
 // strings into arrays, slices, structs, and maps via json.Unmarshal.
-func assignField(paramNum int, fieldName string, dest reflect.Value,
-	src reflect.Value) error {
+func assignField(
+	paramNum int, fieldName string, dest reflect.Value,
+	src reflect.Value,
+) (e error) {
 	// Just error now when the types have no chance of being compatible.
 	destBaseType, destIndirects := baseType(dest.Type())
 	srcBaseType, srcIndirects := baseType(src.Type())
 	if !typesMaybeCompatible(destBaseType, srcBaseType) {
-		str := fmt.Sprintf("parameter #%d '%s' must be type %v (got "+
-			"%v)", paramNum, fieldName, destBaseType, srcBaseType)
+		str := fmt.Sprintf(
+			"parameter #%d '%s' must be type %v (got "+
+				"%v)", paramNum, fieldName, destBaseType, srcBaseType,
+		)
 		return makeError(ErrInvalidType, str)
 	}
-	// Check if it's possible to simply set the dest to the provided source. This is the case when the base types are
+	// Chk if it's possible to simply set the dest to the provided source. This is the case when the base types are
 	// the same or they are both pointers that can be indirected to be the same without needing to create pointers for
 	// the destination field.
 	if destBaseType == srcBaseType && srcIndirects >= destIndirects {
@@ -282,9 +294,11 @@ func assignField(paramNum int, fieldName string, dest reflect.Value,
 			reflect.Int64:
 			srcInt := src.Int()
 			if dest.OverflowInt(srcInt) {
-				str := fmt.Sprintf("parameter #%d '%s' "+
-					"overflows destination type %v",
-					paramNum, fieldName, destBaseType)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' "+
+						"overflows destination type %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.SetInt(srcInt)
@@ -293,16 +307,20 @@ func assignField(paramNum int, fieldName string, dest reflect.Value,
 			reflect.Uint64:
 			srcInt := src.Int()
 			if srcInt < 0 || dest.OverflowUint(uint64(srcInt)) {
-				str := fmt.Sprintf("parameter #%d '%s' "+
-					"overflows destination type %v",
-					paramNum, fieldName, destBaseType)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' "+
+						"overflows destination type %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.SetUint(uint64(srcInt))
 		default:
-			str := fmt.Sprintf("parameter #%d '%s' must be type "+
-				"%v (got %v)", paramNum, fieldName, destBaseType,
-				srcBaseType)
+			str := fmt.Sprintf(
+				"parameter #%d '%s' must be type "+
+					"%v (got %v)", paramNum, fieldName, destBaseType,
+				srcBaseType,
+			)
 			return makeError(ErrInvalidType, str)
 		}
 	// Source value is an unsigned integer of various magnitude.
@@ -314,15 +332,19 @@ func assignField(paramNum int, fieldName string, dest reflect.Value,
 			reflect.Int64:
 			srcUint := src.Uint()
 			if srcUint > uint64(1<<63)-1 {
-				str := fmt.Sprintf("parameter #%d '%s' "+
-					"overflows destination type %v",
-					paramNum, fieldName, destBaseType)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' "+
+						"overflows destination type %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			if dest.OverflowInt(int64(srcUint)) {
-				str := fmt.Sprintf("parameter #%d '%s' "+
-					"overflows destination type %v",
-					paramNum, fieldName, destBaseType)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' "+
+						"overflows destination type %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.SetInt(int64(srcUint))
@@ -331,32 +353,40 @@ func assignField(paramNum int, fieldName string, dest reflect.Value,
 			reflect.Uint64:
 			srcUint := src.Uint()
 			if dest.OverflowUint(srcUint) {
-				str := fmt.Sprintf("parameter #%d '%s' "+
-					"overflows destination type %v",
-					paramNum, fieldName, destBaseType)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' "+
+						"overflows destination type %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.SetUint(srcUint)
 		default:
-			str := fmt.Sprintf("parameter #%d '%s' must be type "+
-				"%v (got %v)", paramNum, fieldName, destBaseType,
-				srcBaseType)
+			str := fmt.Sprintf(
+				"parameter #%d '%s' must be type "+
+					"%v (got %v)", paramNum, fieldName, destBaseType,
+				srcBaseType,
+			)
 			return makeError(ErrInvalidType, str)
 		}
 	// Source value is a float.
 	case reflect.Float32, reflect.Float64:
 		destKind := dest.Kind()
 		if destKind != reflect.Float32 && destKind != reflect.Float64 {
-			str := fmt.Sprintf("parameter #%d '%s' must be type "+
-				"%v (got %v)", paramNum, fieldName, destBaseType,
-				srcBaseType)
+			str := fmt.Sprintf(
+				"parameter #%d '%s' must be type "+
+					"%v (got %v)", paramNum, fieldName, destBaseType,
+				srcBaseType,
+			)
 			return makeError(ErrInvalidType, str)
 		}
 		srcFloat := src.Float()
 		if dest.OverflowFloat(srcFloat) {
-			str := fmt.Sprintf("parameter #%d '%s' overflows "+
-				"destination type %v", paramNum, fieldName,
-				destBaseType)
+			str := fmt.Sprintf(
+				"parameter #%d '%s' overflows "+
+					"destination type %v", paramNum, fieldName,
+				destBaseType,
+			)
 			return makeError(ErrInvalidType, str)
 		}
 		dest.SetFloat(srcFloat)
@@ -365,65 +395,79 @@ func assignField(paramNum int, fieldName string, dest reflect.Value,
 		switch dest.Kind() {
 		// String -> bool
 		case reflect.Bool:
-			b, err := strconv.ParseBool(src.String())
-			if err != nil {
-				Errorln(err)
-				str := fmt.Sprintf("parameter #%d '%s' must "+
-					"parse to a %v", paramNum, fieldName,
-					destBaseType)
+			b, e := strconv.ParseBool(src.String())
+			if e != nil {
+				err.Ln(e)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' must "+
+						"parse to a %v", paramNum, fieldName,
+					destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.SetBool(b)
 		// String -> signed integer of varying size.
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32,
 			reflect.Int64:
-			srcInt, err := strconv.ParseInt(src.String(), 0, 0)
-			if err != nil {
-				Errorln(err)
-				str := fmt.Sprintf("parameter #%d '%s' must "+
-					"parse to a %v", paramNum, fieldName,
-					destBaseType)
+			srcInt, e := strconv.ParseInt(src.String(), 0, 0)
+			if e != nil {
+				err.Ln(e)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' must "+
+						"parse to a %v", paramNum, fieldName,
+					destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			if dest.OverflowInt(srcInt) {
-				str := fmt.Sprintf("parameter #%d '%s' "+
-					"overflows destination type %v",
-					paramNum, fieldName, destBaseType)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' "+
+						"overflows destination type %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.SetInt(srcInt)
 		// String -> unsigned integer of varying size.
 		case reflect.Uint, reflect.Uint8, reflect.Uint16,
 			reflect.Uint32, reflect.Uint64:
-			srcUint, err := strconv.ParseUint(src.String(), 0, 0)
-			if err != nil {
-				Errorln(err)
-				str := fmt.Sprintf("parameter #%d '%s' must "+
-					"parse to a %v", paramNum, fieldName,
-					destBaseType)
+			srcUint, e := strconv.ParseUint(src.String(), 0, 0)
+			if e != nil {
+				err.Ln(e)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' must "+
+						"parse to a %v", paramNum, fieldName,
+					destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			if dest.OverflowUint(srcUint) {
-				str := fmt.Sprintf("parameter #%d '%s' "+
-					"overflows destination type %v",
-					paramNum, fieldName, destBaseType)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' "+
+						"overflows destination type %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.SetUint(srcUint)
 		// String -> float of varying size.
 		case reflect.Float32, reflect.Float64:
-			srcFloat, err := strconv.ParseFloat(src.String(), 0)
-			if err != nil {
-				Errorln(err)
-				str := fmt.Sprintf("parameter #%d '%s' must "+
-					"parse to a %v", paramNum, fieldName,
-					destBaseType)
+			srcFloat, e := strconv.ParseFloat(src.String(), 0)
+			if e != nil {
+				err.Ln(e)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' must "+
+						"parse to a %v", paramNum, fieldName,
+					destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			if dest.OverflowFloat(srcFloat) {
-				str := fmt.Sprintf("parameter #%d '%s' "+
-					"overflows destination type %v",
-					paramNum, fieldName, destBaseType)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' "+
+						"overflows destination type %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.SetFloat(srcFloat)
@@ -434,12 +478,14 @@ func assignField(paramNum int, fieldName string, dest reflect.Value,
 		// json.Unmarshal.
 		case reflect.Array, reflect.Slice, reflect.Struct, reflect.Map:
 			concreteVal := dest.Addr().Interface()
-			err := json.Unmarshal([]byte(src.String()), &concreteVal)
-			if err != nil {
-				Errorln(err)
-				str := fmt.Sprintf("parameter #%d '%s' must "+
-					"be valid JSON which unsmarshals to a %v",
-					paramNum, fieldName, destBaseType)
+			e := json.Unmarshal([]byte(src.String()), &concreteVal)
+			if e != nil {
+				err.Ln(e)
+				str := fmt.Sprintf(
+					"parameter #%d '%s' must "+
+						"be valid JSON which unsmarshals to a %v",
+					paramNum, fieldName, destBaseType,
+				)
 				return makeError(ErrInvalidType, str)
 			}
 			dest.Set(reflect.ValueOf(concreteVal).Elem())
@@ -482,14 +528,14 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 	registerLock.RUnlock()
 	if !ok {
 		str := fmt.Sprintf("%q is not registered", method)
-		err := makeError(ErrUnregisteredMethod, str)
-		Check(err)
-		return nil, err
+		e := makeError(ErrUnregisteredMethod, str)
+		err.Chk(e)
+		return nil, e
 	}
 	// Ensure the number of parameters are correct.
 	numParams := len(args)
-	if err := checkNumParams(numParams, &info); err != nil {
-		return nil, err
+	if e := checkNumParams(numParams, &info); err.Chk(e) {
+		return nil, e
 	}
 	// Create the appropriate command type for the method. Since all types are enforced to be a pointer to a struct at
 	// registration time, it's safe to indirect to the struct now.
@@ -502,24 +548,26 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 		// Attempt to assign each of the arguments to the according struct field.
 		rvf := rv.Field(i)
 		fieldName := strings.ToLower(rt.Field(i).Name)
-		err := assignField(i+1, fieldName, rvf, reflect.ValueOf(args[i]))
-		if err != nil {
-			Errorln(err)
-			return nil, err
+		e := assignField(i+1, fieldName, rvf, reflect.ValueOf(args[i]))
+		if e != nil {
+			err.Ln(e)
+			return nil, e
 		}
 	}
 	return rvp.Interface(), nil
 }
 
+// MethodToInfo gets the information about a method
 func MethodToInfo(method string) *MethodInfo {
-	Trace(method)
-	Traces(methodToInfo[method])
+	trc.Ln(method)
+	trc.S(methodToInfo[method])
 	if v, ok := methodToInfo[method]; ok {
 		return &v
 	}
 	return nil
 }
 
+// GetMethods returns the list of methods available
 func GetMethods() (out []string) {
 	out = make([]string, len(methodToInfo))
 	var i int

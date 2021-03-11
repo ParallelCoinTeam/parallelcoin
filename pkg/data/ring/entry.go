@@ -2,9 +2,9 @@ package ring
 
 import (
 	"context"
-
+	
 	"github.com/marusama/semaphore"
-
+	
 	"github.com/p9c/pod/pkg/util/logi"
 )
 
@@ -18,6 +18,7 @@ type Entry struct {
 	// Hiders  []gel.Button
 }
 
+// NewEntry creates a new entry ring buffer
 func NewEntry(size int) *Entry {
 	return &Entry{
 		Sem:     semaphore.New(1),
@@ -31,7 +32,8 @@ func NewEntry(size int) *Entry {
 
 // Clear sets the buffer back to initial state
 func (b *Entry) Clear() {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	var e error
+	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 		defer b.Sem.Release(1)
 		b.Cursor = 0
 		b.Clicked = -1
@@ -41,7 +43,8 @@ func (b *Entry) Clear() {
 
 // Len returns the length of the buffer
 func (b *Entry) Len() (out int) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	var e error
+	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 		defer b.Sem.Release(1)
 		if b.Full {
 			out = len(b.Buf)
@@ -54,7 +57,8 @@ func (b *Entry) Len() (out int) {
 
 // Get returns the value at the given index or nil if nothing
 func (b *Entry) Get(i int) (out *logi.Entry) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	var e error
+	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 		defer b.Sem.Release(1)
 		bl := len(b.Buf)
 		cursor := i
@@ -65,7 +69,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 					cursor -= bl
 				}
 			}
-			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			// dbg.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = b.Buf[cursor]
 		}
@@ -76,7 +80,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 //
 // // GetButton returns the gel.Button of the entry
 // func (b *Entry) GetButton(i int) (out *gel.Button) {
-// 	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+// 	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 // 		defer b.Sem.Release(1)
 // 		bl := len(b.Buf)
 // 		cursor := i
@@ -87,7 +91,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 // 					cursor -= bl
 // 				}
 // 			}
-// 			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+// 			// dbg.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 // 			//	cursor)
 // 			out = &b.Buttons[cursor]
 // 		}
@@ -97,7 +101,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 //
 // // GetHider returns the gel.Button of the entry
 // func (b *Entry) GetHider(i int) (out *gel.Button) {
-// 	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+// 	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 // 		defer b.Sem.Release(1)
 // 		bl := len(b.Buf)
 // 		cursor := i
@@ -108,7 +112,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 // 					cursor -= bl
 // 				}
 // 			}
-// 			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+// 			// dbg.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 // 			//	cursor)
 // 			out = &b.Hiders[cursor]
 // 		}
@@ -117,7 +121,8 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 // }
 
 func (b *Entry) Add(value *logi.Entry) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	var e error
+	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 		defer b.Sem.Release(1)
 		if b.Cursor == len(b.Buf) {
 			b.Cursor = 0
@@ -130,30 +135,30 @@ func (b *Entry) Add(value *logi.Entry) {
 	}
 }
 
-func (b *Entry) ForEach(fn func(v *logi.Entry) error) (err error) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+func (b *Entry) ForEach(fn func(v *logi.Entry) error) (e error) {
+	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 		c := b.Cursor
 		i := c + 1
 		if i == len(b.Buf) {
-			// Debug("hit the end")
+			// dbg.Ln("hit the end")
 			i = 0
 		}
 		if !b.Full {
-			// Debug("buffer not yet full")
+			// dbg.Ln("buffer not yet full")
 			i = 0
 		}
-		// Debug(b.Buf)
+		// dbg.Ln(b.Buf)
 		for ; ; i++ {
 			if i == len(b.Buf) {
-				// Debug("passed the end")
+				// dbg.Ln("passed the end")
 				i = 0
 			}
 			if i == c {
-				// Debug("reached cursor again")
+				// dbg.Ln("reached cursor again")
 				break
 			}
-			// Debug(i, b.Cursor)
-			if err = fn(b.Buf[i]); err != nil {
+			// dbg.Ln(i, b.Cursor)
+			if e = fn(b.Buf[i]); err.Chk(e) {
 				break
 			}
 		}

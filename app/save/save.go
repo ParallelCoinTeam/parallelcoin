@@ -20,8 +20,8 @@ var emptyhash = hex.EncodeToString(eh[:])
 func Pod(c *pod.Config) (success bool) {
 	c.Lock()
 	defer c.Unlock()
-	// Debugs(c)
-	Debug("saving configuration to", *c.ConfigFile)
+	// dbg.S(c)
+	dbg.Ln("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice
 	// need to remove this before saving
 	if c.UserAgentComments != nil && len(*c.UserAgentComments) > 0 {
@@ -50,15 +50,15 @@ func Pod(c *pod.Config) (success bool) {
 	// load config into a fresh variable
 	cfg, _ := pod.EmptyConfig()
 	var cfgFile []byte
-	var err error
+	var e error
 	wp := *c.WalletPass
-	// Debug("wp", wp)
+	// dbg.Ln("wp", wp)
 	if *c.WalletPass == "" {
-		if cfgFile, err = ioutil.ReadFile(*c.ConfigFile); !Check(err) {
-			Debug("loaded config")
-			if err = json.Unmarshal(cfgFile, &cfg); !Check(err) {
+		if cfgFile, e = ioutil.ReadFile(*c.ConfigFile); !err.Chk(e) {
+			dbg.Ln("loaded config")
+			if e = json.Unmarshal(cfgFile, &cfg); !err.Chk(e) {
 				*c.WalletPass = *cfg.WalletPass
-				// Debug("unmarshaled config", wp, *c.WalletPass)
+				// dbg.Ln("unmarshaled config", wp, *c.WalletPass)
 			}
 		} else {
 			*c.WalletPass = emptyhash
@@ -67,15 +67,15 @@ func Pod(c *pod.Config) (success bool) {
 		bh := blake3.Sum256([]byte(*c.WalletPass))
 		*c.WalletPass = hex.EncodeToString(bh[:])
 	}
-	// Debug("'"+wp+"'", *c.WalletPass)
+	// dbg.Ln("'"+wp+"'", *c.WalletPass)
 	// don't save pipe log setting as we want it to only be active from a flag or environment variable
 	pipeLogOn := *c.PipeLog
 	*c.PipeLog = false
 	var yp []byte
-	if yp, err = json.MarshalIndent(c, "", "  "); !Check(err) {
+	if yp, e = json.MarshalIndent(c, "", "  "); !err.Chk(e) {
 		apputil.EnsureDir(*c.ConfigFile)
-		// Debug(string(yp))
-		if err = ioutil.WriteFile(*c.ConfigFile, yp, 0600); !Check(err) {
+		// dbg.Ln(string(yp))
+		if e = ioutil.WriteFile(*c.ConfigFile, yp, 0600); !err.Chk(e) {
 			success = true
 		}
 	}
@@ -84,7 +84,7 @@ func Pod(c *pod.Config) (success bool) {
 	}
 	*c.WalletPass = wp
 	*c.PipeLog = pipeLogOn
-	// Debug("walletpass", *c.WalletPass)
+	// dbg.Ln("walletpass", *c.WalletPass)
 	return
 }
 
@@ -93,10 +93,10 @@ func Pod(c *pod.Config) (success bool) {
 // func Filters(dataDir string) func(pkgs Pk.Package) (success bool) {
 // 	return func(pkgs Pk.Package) (success bool) {
 // 		if filterJSON, e := json.MarshalIndent(pkgs, "", "  "); e == nil {
-// 			Trace("Saving log filter:\n```", string(filterJSON), "\n```")
+// 			trc.Ln("Saving log filter:\n```", string(filterJSON), "\n```")
 // 			apputil.EnsureDir(dataDir)
 // 			if e := ioutil.WriteFile(filepath.Join(dataDir, "log-filter.json"), filterJSON,
-// 				0600); Check(e) {
+// 				0600); err.Chk(e) {
 // 				success = false
 // 			}
 // 			success = true

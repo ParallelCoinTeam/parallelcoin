@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -79,7 +79,7 @@ func calcMinRequiredTxRelayFee(serializedSize int64, minRelayTxFee util.Amount) 
 // not perform those checks because the script engine already does this more
 // accurately and concisely via the txscript. ScriptVerifyCleanStack and
 // txscript.ScriptVerifySigPushOnly flags.
-func checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) error {
+func checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) (e error) {
 	// NOTE: The reference implementation also does a coinbase check here, but
 	// coinbases have already been rejected prior to calling this function so no
 	// need to recheck.
@@ -117,13 +117,12 @@ func checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) error 
 // standard public key script is one that is a recognized form, and for
 // multi-signature scripts only contains from 1 to maxStandardMultiSigKeys
 // public keys.
-func checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) error {
+func checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) (e error) {
 	switch scriptClass {
 	case txscript.MultiSigTy:
-		numPubKeys, numSigs, err := txscript.CalcMultiSigStats(pkScript)
-		if err != nil {
-			Error(err)
-			str := fmt.Sprintf(
+		numPubKeys, numSigs, e := txscript.CalcMultiSigStats(pkScript)
+		if e != nil  {
+						str := fmt.Sprintf(
 				"multi-signature script parse failure: %v", err,
 			)
 			return txRuleError(wire.RejectNonstandard, str)
@@ -265,7 +264,7 @@ func checkTransactionStandard(
 	tx *util.Tx, height int32,
 	medianTimePast time.Time, minRelayTxFee util.Amount,
 	maxTxVersion int32,
-) error {
+) (e error) {
 	// The transaction must be a currently supported version.
 	msgTx := tx.MsgTx()
 	if msgTx.Version > maxTxVersion || msgTx.Version < 1 {
@@ -324,16 +323,15 @@ func checkTransactionStandard(
 	numNullDataOutputs := 0
 	for i, txOut := range msgTx.TxOut {
 		scriptClass := txscript.GetScriptClass(txOut.PkScript)
-		err := checkPkScriptStandard(txOut.PkScript, scriptClass)
-		if err != nil {
-			Error(err)
-			// Attempt to extract a reject code from the error so it can be retained. When
+		e := checkPkScriptStandard(txOut.PkScript, scriptClass)
+		if e != nil  {
+						// Attempt to extract a reject code from the error so it can be retained. When
 			// not possible, fall back to a non standard error.
 			rejectCode := wire.RejectNonstandard
-			if rejCode, found := extractRejectCode(err); found {
+			if rejCode, found := extractRejectCode(e); found {
 				rejectCode = rejCode
 			}
-			str := fmt.Sprintf("transaction output %d: %v", i, err)
+			str := fmt.Sprintf("transaction output %d: %v", i, e)
 			return txRuleError(rejectCode, str)
 		}
 		// Accumulate the number of outputs which only carry data. For all other script

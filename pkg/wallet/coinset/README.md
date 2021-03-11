@@ -34,8 +34,8 @@ selector := &coinset.MaxValueAgeCoinSelector{
     MaxInputs: 10,
     MinAmountChange: 10000,
 }
-selectedCoins, err := selector.CoinSelect(targetAmount + bigFee, unspentCoins)
-if err != nil {
+selectedCoins, e := selector.CoinSelect(targetAmount + bigFee, unspentCoins)
+if e != nil  {
 	
 return err
 }

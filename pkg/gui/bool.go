@@ -59,7 +59,7 @@ func (b *Bool) Fn(gtx layout.Context) layout.Dimensions {
 	for b.clk.Clicked() {
 		b.value = !b.value
 		b.changed = true
-		b.Window.Runner <- func() error { b.changeState(b.value); return nil }
+		b.Window.Runner <- func() (e error) { b.changeState(b.value); return nil }
 	}
 	return dims
 }

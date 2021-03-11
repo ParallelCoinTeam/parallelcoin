@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 	
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/util"
 )
 

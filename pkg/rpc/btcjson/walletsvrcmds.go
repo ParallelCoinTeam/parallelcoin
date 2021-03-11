@@ -592,6 +592,7 @@ func NewWalletPassphraseChangeCmd(oldPassphrase, newPassphrase string) *WalletPa
 	}
 }
 func init() {
+
 	// The commands in this file are only usable with a wallet server.
 	flags := UFWalletOnly
 	MustRegisterCmd("addmultisigaddress", (*AddMultisigAddressCmd)(nil), flags)

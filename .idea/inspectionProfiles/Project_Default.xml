@@ -129,6 +129,18 @@
     <inspection_tool class="GoTestSignatures" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="GoTypesCompatibility" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="GoUnderscoreUsedAsValue" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoUnhandledErrorResult" enabled="true" level="WARNING" enabled_by_default="true">
+      <functions>
+        <function importPath="fmt" name="Printf" />
+        <function importPath="fmt" name="Errorf" />
+        <function importPath="math/rand" name="Read" />
+        <function importPath="fmt" name="Println" />
+        <function importPath="fmt" name="Print" />
+        <function importPath="fmt" name="Fprintln" />
+        <function importPath="fmt" name="Fprintf" />
+        <function importPath="fmt" name="Fprint" />
+      </functions>
+    </inspection_tool>
     <inspection_tool class="GoUnnecessarilyExportedIdentifiers" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
     <inspection_tool class="GoUnresolvedReference" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="GoUnusedImport" enabled="false" level="ERROR" enabled_by_default="false" />

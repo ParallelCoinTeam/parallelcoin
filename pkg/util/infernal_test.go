@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/coding/base58"
 	"github.com/p9c/pod/pkg/coding/bech32"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
 )
 
 // SetBlockBytes sets the internal serialized block byte buffer to the passed buffer. It is used to inject errors and is
@@ -80,13 +80,13 @@ func TstAddressSAddr(addr string) []byte {
 // TstAddressSegwitSAddr returns the expected witness program bytes for bech32
 // encoded P2WPKH and P2WSH bitcoin addresses.
 func TstAddressSegwitSAddr(addr string) []byte {
-	_, data, err := bech32.Decode(addr)
-	if err != nil {
+	_, data, e := bech32.Decode(addr)
+	if e != nil  {
 		return []byte{}
 	}
 	// First byte is version, rest is base 32 encoded data.
-	data, err = bech32.ConvertBits(data[1:], 5, 8, false)
-	if err != nil {
+	data, e = bech32.ConvertBits(data[1:], 5, 8, false)
+	if e != nil  {
 		return []byte{}
 	}
 	return data

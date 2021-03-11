@@ -8,10 +8,10 @@ import (
 	"github.com/jessevdk/go-flags"
 
 	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	_ "github.com/p9c/pod/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	database "github.com/p9c/pod/pkg/database"
+	_ "github.com/p9c/pod/pkg/database/ffldb"
 )
 
 const (
@@ -76,13 +76,12 @@ func loadConfig() (*config, []string, error) {
 	}
 	// Parse command line options.
 	parser := flags.NewParser(&cfg, flags.Default)
-	remainingArgs, err := parser.Parse()
-	if err != nil {
-		Error(err)
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+	remainingArgs, e := parser.Parse()
+	if e != nil  {
+				if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Multiple networks can't be selected simultaneously.
 	funcName := "loadConfig"
@@ -103,19 +102,19 @@ func loadConfig() (*config, []string, error) {
 	if numNets > 1 {
 		str := "%s: The testnet, regtest, and simnet netparams can't be " +
 			"used together -- choose one of the three"
-		err := fmt.Errorf(str, funcName)
+		e := fmt.Errorf(str, funcName)
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		parser.WriteHelp(os.Stderr)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Validate database type.
 	if !validDbType(cfg.DbType) {
 		str := "%s: The specified database type [%v] is invalid -- " +
 			"supported types %v"
-		err := fmt.Errorf(str, "loadConfig", cfg.DbType, knownDbTypes)
+		e := fmt.Errorf(str, "loadConfig", cfg.DbType, knownDbTypes)
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		parser.WriteHelp(os.Stderr)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	// Append the network type to the data directory so it is "namespaced" per network. In addition to the block
 	// database, there are other pieces of data that are saved to disk such as address manager state. All data is
@@ -126,10 +125,10 @@ func loadConfig() (*config, []string, error) {
 	if cfg.NumCandidates < minCandidates || cfg.NumCandidates > maxCandidates {
 		str := "%s: The specified number of candidates is out of " +
 			"range -- parsed [%v]"
-		err = fmt.Errorf(str, "loadConfig", cfg.NumCandidates)
+		e = fmt.Errorf(str, "loadConfig", cfg.NumCandidates)
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		parser.WriteHelp(os.Stderr)
-		return nil, nil, err
+		return nil, nil, e
 	}
 	return &cfg, remainingArgs, nil
 }

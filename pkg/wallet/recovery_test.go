@@ -137,7 +137,7 @@ func TestBranchRecoveryState(t *testing.T) {
 		MarkInvalid{17},
 		CheckNumInvalid{1},
 		CheckDelta{0},
-		// Expected horizon: 22. Check that deriving a second invalid key shows both invalid indexes currently within
+		// Expected horizon: 22. Chk that deriving a second invalid key shows both invalid indexes currently within
 		// the horizon.
 		MarkInvalid{18},
 		CheckNumInvalid{2},

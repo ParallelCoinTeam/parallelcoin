@@ -95,6 +95,7 @@ func NewVersionCmd() *VersionCmd {
 	return new(VersionCmd)
 }
 func init() {
+
 	// No special flags for commands in this file.
 	flags := UsageFlag(0)
 	MustRegisterCmd("debuglevel", (*DebugLevelCmd)(nil), flags)

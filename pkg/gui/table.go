@@ -113,7 +113,7 @@ func (t *Table) Body(g CellGrid) *Table {
 }
 
 func (t *Table) Fn(gtx l.Context) l.Dimensions {
-	// Debug(len(t.body), len(t.header))
+	// dbg.Ln(len(t.body), len(t.header))
 	if len(t.header) == 0 {
 		return l.Dimensions{}
 	}
@@ -133,13 +133,13 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	for i := range t.header {
 		t.header[i].getWidgetDimensions(gtx1)
 	}
-	// Debugs(t.header)
+	// dbg.S(t.header)
 	for i := range t.body {
 		for j := range t.body[i] {
 			t.body[i][j].getWidgetDimensions(gtx1)
 		}
 	}
-	// Debugs(t.body)
+	// dbg.S(t.body)
 	
 	// find the max of each row and column
 	var table CellGrid
@@ -159,49 +159,49 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 			}
 		}
 	}
-	// // Debugs(t.Y)
-	// Debugs(t.X)
+	// // dbg.S(t.Y)
+	// dbg.S(t.X)
 	var total int
 	for i := range t.X {
 		total += t.X[i]
 	}
-	// Debugs(t.X)
-	// Debug(total)
+	// dbg.S(t.X)
+	// dbg.Ln(total)
 	maxWidth := gtx.Constraints.Max.X
 	for i := range t.X {
 		t.X[i] = int(float32(t.X[i]) * float32(maxWidth) / float32(total))
 	}
-	// Debugs(t.X)
-	// Debug(maxWidth)
+	// dbg.S(t.X)
+	// dbg.Ln(maxWidth)
 	// // find the columns that will be rendered into the existing width
-	// // Debugs(t.header)
+	// // dbg.S(t.header)
 	// priorities := t.header.GetPriority()
-	// // Debugs(priorities)
+	// // dbg.S(priorities)
 	// var runningTotal, prev int
 	// columnsToRender := make([]int, 0)
 	// for i := range priorities {
 	// 	prev = runningTotal
 	// 	x := t.header[priorities[i].Column].dims.Size.X
-	// 	// Debug(priorities[i], x)
+	// 	// dbg.Ln(priorities[i], x)
 	// 	runningTotal += x
 	//
 	// 	if runningTotal > maxWidth {
-	// 		// Debug(runningTotal, prev, maxWidth)
+	// 		// dbg.Ln(runningTotal, prev, maxWidth)
 	// 		break
 	// 	}
 	// 	columnsToRender = append(columnsToRender, priorities[i].Column)
 	// }
 	// // sort the columns to render into their original order
 	// sort.Ints(columnsToRender)
-	// // Debugs(columnsToRender)
-	// // Debug(len(columnsToRender))
+	// // dbg.S(columnsToRender)
+	// // dbg.Ln(len(columnsToRender))
 	// // All fields will be expanded by the following ratio to reach the target width
 	// expansionFactor := float32(maxWidth) / float32(prev)
 	// outColWidths := make([]int, len(columnsToRender))
 	// for i := range columnsToRender {
 	// 	outColWidths[i] = int(float32(t.X[columnsToRender[i]]) * expansionFactor)
 	// }
-	// // Debug(outColWidths)
+	// // dbg.Ln(outColWidths)
 	// // assemble the grid to be rendered as a two dimensional slice
 	// grid := make([][]l.Widget, len(t.body)+1)
 	// for i := 0; i < len(columnsToRender); i++ {
@@ -212,7 +212,7 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	// // 		grid[i+1] = append(grid[i+1], t.body[i][j].Widget)
 	// // 	}
 	// // }
-	// // Debugs(grid)
+	// // dbg.S(grid)
 	// // assemble each row into a flex
 	// out := make([]l.Widget, len(grid))
 	// for i := range grid {

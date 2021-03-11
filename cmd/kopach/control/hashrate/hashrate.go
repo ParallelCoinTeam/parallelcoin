@@ -33,7 +33,8 @@ type Hashrate struct {
 
 func Get(count int32, version int32, height int32, id string) []byte {
 	nonce := make([]byte, 4)
-	if _, err := io.ReadFull(rand.Reader, nonce); Check(err) {
+	var e error
+	if _, e = io.ReadFull(rand.Reader, nonce); err.Chk(e) {
 	}
 	hr := Hashrate{
 		Time:    time.Now(),
@@ -45,7 +46,7 @@ func Get(count int32, version int32, height int32, id string) []byte {
 		ID:      id,
 	}
 	srlz := gotiny.Marshal(&hr)
-	// Debugs(srlz)
+	// dbg.S(srlz)
 	return srlz
 	// return Container{*simplebuffer.Serializers{
 	// 	Time.New().Put(time.Now()),

@@ -23,12 +23,12 @@ type Conn struct {
 	Name string
 }
 
-func NewConn(name string, in io.Reader, out io.Writer) (c Conn, err error) {
+func NewConn(name string, in io.Reader, out io.Writer) (c Conn, e error) {
 	c.Name = name
 	c.Writer = out
 	c.Reader = in
-	c.Hash, err = highwayhash.New64(hwhKey)
-	if err != nil {
+	c.Hash, e = highwayhash.New64(hwhKey)
+	if e != nil  {
 		panic(err)
 	}
 	return
@@ -43,9 +43,9 @@ type Worker struct {
 	Conn
 }
 
-func NewWorker() (w *Worker, err error) {
-	nC, err := NewConn("worker", os.Stdin, os.Stdout)
-	if err != nil {
+func NewWorker() (w *Worker, e error) {
+	nC, e := NewConn("worker", os.Stdin, os.Stdout)
+	if e != nil  {
 		panic(err)
 	}
 	w = &Worker{nC}
@@ -53,7 +53,7 @@ func NewWorker() (w *Worker, err error) {
 }
 
 // A controller runs a child process and attaches to its stdin/out
-func NewController(args []string) (c *Controller, err error) {
+func NewController(args []string) (c *Controller, e error) {
 	// if runtime.GOOS == "windows" {
 	// 	args = append([]string{"cmd.exe", "/C", "start"}, args...)
 	// }
@@ -62,28 +62,28 @@ func NewController(args []string) (c *Controller, err error) {
 		Cmd: exec.Command(args[0], args[1:]...),
 	}
 	var w io.WriteCloser
-	if w, err = c.StdinPipe(); Check(err) {
+	if w, e = c.StdinPipe(); dbg.Ok(err) {
 		panic(err)
 	}
 	// child process can print to parent's stderr for debugging
 	c.Cmd.Stderr = os.Stderr
 	c.Stderr = os.Stderr
 	var r io.ReadCloser
-	if r, err = c.StdoutPipe(); Check(err) {
+	if r, e = c.StdoutPipe(); dbg.Ok(err) {
 		panic(err)
 	}
-	if c.Conn, err = NewConn("controller", r, w); Check(err) {
+	if c.Conn, e = NewConn("controller", r, w); dbg.Ok(err) {
 		return
 	}
 	return
 }
 
 // Write sends a message over the IPC pipe containing 32 bit length, 64 bit highway hash and the payload
-func (c *Conn) Write(p []byte) (n int, err error) {
+func (c *Conn) Write(p []byte) (n int, e error) {
 	Error("write", spew.Sdump(p))
 	pLen := len(p)
-	n, err = c.Hash.Write(p)
-	if err != nil {
+	n, e = c.Hash.Write(p)
+	if e != nil  {
 		return
 	}
 	sum := c.Hash.Sum(nil)
@@ -105,15 +105,14 @@ func (c *Conn) Write(p []byte) (n int, err error) {
 // In the return the decoded length from the header of the incoming bytes which matches the hash, expected message
 // length, or errors are returned. the input byte slice must be truncated to the given n or it isn't guaranteed to be
 // correct data
-func (c *Conn) Read(p []byte) (n int, err error) {
+func (c *Conn) Read(p []byte) (n int, e error) {
 	Error("read buffer length", len(p))
 	r := c.Reader.Read
 	u64 := binary.LittleEndian.Uint64
 	u32 := binary.LittleEndian.Uint32
-	n, err = r(p[:4])
-	if err != nil || n != 4 {
-		Error(err)
-	}
+	n, e = r(p[:4])
+	if e != nil  || n != 4 {
+			}
 	Error("read", p[:4])
 	bLen := u32(p[:4])
 	Error("read", bLen)
@@ -121,22 +120,22 @@ func (c *Conn) Read(p []byte) (n int, err error) {
 		return 0, errors.New("quit")
 	}
 	mHash := p[:8]
-	n, err = r(mHash)
-	if err != nil || n != 8 {
+	n, e = r(mHash)
+	if e != nil  || n != 8 {
 		return
 	}
 	Error("read", p[:8])
 	hash64 := u64(mHash)
 	Error("read", hash64)
-	n, err = r(p[:bLen])
-	if err != nil {
+	n, e = r(p[:bLen])
+	if e != nil  {
 		return
 	}
 	if n != int(bLen) {
 		return 0, errors.New("short message")
 	}
-	n, err = c.Hash.Write(p[:bLen])
-	if err != nil {
+	n, e = c.Hash.Write(p[:bLen])
+	if e != nil  {
 		return
 	}
 	h := c.Hash.Sum64()
@@ -148,10 +147,10 @@ func (c *Conn) Read(p []byte) (n int, err error) {
 }
 
 // Close signals the worker process to shut down and closes its tty connection
-func (c *Conn) Close() (err error) {
+func (c *Conn) Close() (e error) {
 	// ciao!
-	_, err = c.Write(QuitCommand)
-	if err != nil {
+	_, e = c.Write(QuitCommand)
+	if e != nil  {
 		return err
 	}
 	// hang up

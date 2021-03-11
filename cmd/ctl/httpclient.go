@@ -20,7 +20,7 @@ import (
 
 // newHTTPClient returns a new HTTP client that is configured according to the proxy and TLS settings in the associated
 // connection configuration.
-func newHTTPClient(cfg *pod.Config) (client *http.Client, err error) {
+func newHTTPClient(cfg *pod.Config) (client *http.Client, e error) {
 	// Configure proxy if needed.
 	var dial func(network, addr string) (net.Conn, error)
 	if *cfg.Proxy != "" {
@@ -29,9 +29,9 @@ func newHTTPClient(cfg *pod.Config) (client *http.Client, err error) {
 			Username: *cfg.ProxyUser,
 			Password: *cfg.ProxyPass,
 		}
-		dial = func(network, addr string) (c net.Conn, err error) {
-			if c, err = proxy.Dial(network, addr); Check(err) {
-				return nil, err
+		dial = func(network, addr string) (c net.Conn, e error) {
+			if c, e = proxy.Dial(network, addr); err.Chk(e) {
+				return nil, e
 			}
 			return c, nil
 		}
@@ -40,8 +40,8 @@ func newHTTPClient(cfg *pod.Config) (client *http.Client, err error) {
 	var tlsConfig *tls.Config
 	if *cfg.TLS && *cfg.RPCCert != "" {
 		var pem []byte
-		if pem, err = ioutil.ReadFile(*cfg.RPCCert); Check(err) {
-			return nil, err
+		if pem, e = ioutil.ReadFile(*cfg.RPCCert); err.Chk(e) {
+			return nil, e
 		}
 		pool := x509.NewCertPool()
 		pool.AppendCertsFromPEM(pem)
@@ -77,9 +77,9 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	url := protocol + "://" + serverAddr
 	bodyReader := bytes.NewReader(marshalledJSON)
 	var httpRequest *http.Request
-	var err error
-	if httpRequest, err = http.NewRequest("POST", url, bodyReader); Check(err) {
-		return nil, err
+	var e error
+	if httpRequest, e = http.NewRequest("POST", url, bodyReader); err.Chk(e) {
+		return nil, e
 	}
 	httpRequest.Close = true
 	httpRequest.Header.Set("Content-Type", "application/json")
@@ -87,20 +87,20 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	httpRequest.SetBasicAuth(*cx.Config.Username, *cx.Config.Password)
 	// Create the new HTTP client that is configured according to the user - specified options and submit the request.
 	var httpClient *http.Client
-	if httpClient, err = newHTTPClient(cx.Config); Check(err) {
-		return nil, err
+	if httpClient, e = newHTTPClient(cx.Config); err.Chk(e) {
+		return nil, e
 	}
 	var httpResponse *http.Response
-	if httpResponse, err = httpClient.Do(httpRequest); Check(err) {
-		return nil, err
+	if httpResponse, e = httpClient.Do(httpRequest); err.Chk(e) {
+		return nil, e
 	}
 	// Read the raw bytes and close the response.
 	var respBytes []byte
-	if respBytes, err = ioutil.ReadAll(httpResponse.Body); Check(err) {
+	if respBytes, e = ioutil.ReadAll(httpResponse.Body); err.Chk(e) {
 	}
-	if err = httpResponse.Body.Close(); Check(err) {
-		err = fmt.Errorf("error reading json reply: %v", err)
-		return nil, err
+	if e = httpResponse.Body.Close(); err.Chk(e) {
+		e = fmt.Errorf("error reading json reply: %v", err)
+		return nil, e
 	}
 	// Handle unsuccessful HTTP responses
 	if httpResponse.StatusCode < 200 || httpResponse.StatusCode >= 300 {
@@ -114,8 +114,8 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	}
 	// Unmarshal the response.
 	var resp btcjson.Response
-	if err := js.Unmarshal(respBytes, &resp); err != nil {
-		return nil, err
+	if e := js.Unmarshal(respBytes, &resp); err.Chk(e) {
+		return nil, e
 	}
 	if resp.Error != nil {
 		return nil, resp.Error

@@ -9,33 +9,38 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 )
 
-// maxFailedAttempts is the maximum number of successive failed connection attempts after which network failure is
-// assumed and new connections will be delayed by the configured retry duration.
+// maxFailedAttempts is the maximum number of successive failed connection
+// attempts after which network failure is assumed and new connections will be
+// delayed by the configured retry duration.
 const maxFailedAttempts = 3
 
 // ErrDialNil is used to indicate that Dial cannot be nil in the configuration.
 var ErrDialNil = errors.New("config: Dial cannot be nil")
 
-// maxRetryDuration is the max duration of time retrying of a persistent connection is allowed to grow to. This is
-// necessary since the retry logic uses a backoff mechanism which increases the interval base times the number of
-// retries that have been done.
+// maxRetryDuration is the max duration of time retrying of a persistent
+// connection is allowed to grow to. This is necessary since the retry logic
+// uses a backoff mechanism which increases the interval base times the number
+// of retries that have been done.
 var maxRetryDuration = time.Hour
 
-// defaultRetryDuration is the default duration of time for retrying persistent connections.
+// defaultRetryDuration is the default duration of time for retrying persistent
+// connections.
 var defaultRetryDuration = time.Second * 60
 
-// defaultTargetOutbound is the default number of outbound connections to maintain.
+// defaultTargetOutbound is the default number of outbound connections to
+// maintain.
 var defaultTargetOutbound = uint32(9)
 
 // ConnState represents the state of the requested connection.
 type ConnState uint8
 
-// ConnState can be either pending, established, disconnected or failed. When a new connection is requested, it is
-// attempted and categorized as established or failed depending on the connection result. An established connection
-// which was disconnected is categorized as disconnected.
+// ConnState can be either pending, established, disconnected or failed. When a
+// new connection is requested, it is attempted and categorized as established
+// or failed depending on the connection result. An established connection which
+// was disconnected is categorized as disconnected.
 const (
 	ConnPending ConnState = iota
 	ConnFailing
@@ -44,8 +49,8 @@ const (
 	ConnDisconnected
 )
 
-// ConnReq is the connection request to a network address. If permanent, the connection will be retried on
-// disconnection.
+// ConnReq is the connection request to a network address. If permanent, the
+// connection will be retried on disconnection.
 type ConnReq struct {
 	// The following variables must only be used atomically.
 	id         uint64
@@ -87,43 +92,52 @@ func (c *ConnReq) String() string {
 
 // Config holds the configuration options related to the connection manager.
 type Config struct {
-	// Listeners defines a slice of listeners for which the connection manager will take ownership of and accept
-	// connections.
+	// Listeners defines a slice of listeners for which the connection manager will
+	// take ownership of and accept connections.
 	//
-	// When a connection is accepted, the OnAccept handler will be invoked with the connection.
+	// When a connection is accepted, the OnAccept handler will be invoked with the
+	// connection.
 	//
-	// Since the connection manager takes ownership of these listeners, they will be closed when the connection manager
-	// is stopped.
+	// Since the connection manager takes ownership of these listeners, they will be
+	// closed when the connection manager is stopped.
 	//
-	// This field will not have any effect if the OnAccept field is not specified. It may be nil if the caller does not
-	// wish to listen for incoming connections.
+	// This field will not have any effect if the OnAccept field is not specified.
+	// It may be nil if the caller does not wish to listen for incoming connections.
 	Listeners []net.Listener
-	// OnAccept is a callback that is fired when an inbound connection is accepted. It is the caller's responsibility to
-	// close the connection.
+	// OnAccept is a callback that is fired when an inbound connection is accepted.
+	// It is the caller's responsibility to close the connection.
 	//
-	// Failure to close the connection will result in the connection manager believing the connection is still active
-	// and thus have undesirable side effects such as still counting toward maximum connection limits.
+	// Failure to close the connection will result in the connection manager
+	// believing the connection is still active and thus have undesirable side
+	// effects such as still counting toward maximum connection limits.
 	//
-	// This field will not have any effect if the Listeners field is not also specified since there couldn't possibly be
-	// any accepted connections in that case.
+	// This field will not have any effect if the Listeners field is not also
+	// specified since there couldn't possibly be any accepted connections in that
+	// case.
 	OnAccept func(net.Conn)
-	// TargetOutbound is the number of outbound network connections to maintain. Defaults to 8.
+	// TargetOutbound is the number of outbound network connections to maintain.
+	// Defaults to 8.
 	TargetOutbound uint32
-	// RetryDuration is the duration to wait before retrying connection requests. Defaults to 5s.
+	// RetryDuration is the duration to wait before retrying connection requests.
+	// Defaults to 5s.
 	RetryDuration time.Duration
-	// OnConnection is a callback that is fired when a new outbound connection is established.
+	// OnConnection is a callback that is fired when a new outbound connection is
+	// established.
 	OnConnection func(*ConnReq, net.Conn)
-	// OnDisconnection is a callback that is fired when an outbound connection is disconnected.
+	// OnDisconnection is a callback that is fired when an outbound connection is
+	// disconnected.
 	OnDisconnection func(*ConnReq)
-	// GetNewAddress is a way to get an address to make a network connection to. If nil, no new connections will be made
-	// automatically.
+	// GetNewAddress is a way to get an address to make a network connection to. If
+	// nil, no new connections will be made automatically.
 	GetNewAddress func() (net.Addr, error)
 	// Dial connects to the address on the named network. It cannot be nil.
 	Dial func(net.Addr) (net.Conn, error)
 }
 
-// registerPending is used to register a pending connection attempt. By registering pending connection attempts we allow
-// callers to cancel pending connection attempts before their successful or in the case they're not longer wanted.
+// registerPending is used to register a pending connection attempt. By
+// registering pending connection attempts we allow callers to cancel pending
+// connection attempts before their successful or in the case they're not longer
+// wanted.
 type registerPending struct {
 	c    *ConnReq
 	done qu.C
@@ -143,8 +157,8 @@ type handleDisconnected struct {
 
 // handleFailed is used to remove a pending connection.
 type handleFailed struct {
-	c   *ConnReq
-	err error
+	c *ConnReq
+	e error
 }
 
 // ConnManager provides a manager to handle network connections.
@@ -177,19 +191,25 @@ func (cm *ConnManager) handleFailedConn(c *ConnReq) {
 		if d > maxRetryDuration {
 			d = maxRetryDuration
 		}
-		Tracef("retrying connection to %v in %v", c, d)
-		time.AfterFunc(d, func() {
-			cm.Connect(c)
-		})
+		trc.F("retrying connection to %v in %v", c, d)
+		time.AfterFunc(
+			d, func() {
+				cm.Connect(c)
+			},
+		)
 	} else if cm.Cfg.GetNewAddress != nil {
 		cm.failedAttempts++
 		if cm.failedAttempts >= maxFailedAttempts {
-			Tracef("max failed connection attempts reached: [%d] -- retrying connection in: %v",
+			trc.F(
+				"max failed connection attempts reached: [%d] -- retrying connection in: %v",
 				maxFailedAttempts,
-				cm.Cfg.RetryDuration)
-			time.AfterFunc(cm.Cfg.RetryDuration, func() {
-				cm.NewConnReq()
-			})
+				cm.Cfg.RetryDuration,
+			)
+			time.AfterFunc(
+				cm.Cfg.RetryDuration, func() {
+					cm.NewConnReq()
+				},
+			)
 		} else {
 			go cm.NewConnReq()
 		}
@@ -220,16 +240,16 @@ out:
 				connReq := msg.c
 				if _, ok := pending[connReq.id]; !ok {
 					if msg.conn != nil {
-						if err := msg.conn.Close(); Check(err) {
+						if e := msg.conn.Close(); err.Chk(e) {
 						}
 					}
-					Debug("ignoring connection for canceled connreq", connReq)
+					dbg.Ln("ignoring connection for canceled connreq", connReq)
 					continue
 				}
 				connReq.updateState(ConnEstablished)
 				connReq.conn = msg.conn
 				conns[connReq.id] = connReq
-				Trace("connected to ", connReq)
+				trc.Ln("connected to ", connReq)
 				connReq.retryCount = 0
 				cm.failedAttempts = 0
 				delete(pending, connReq.id)
@@ -241,21 +261,21 @@ out:
 				if !ok {
 					connReq, ok = pending[msg.id]
 					if !ok {
-						Error("unknown connid", msg.id)
+						err.Ln("unknown connid", msg.id)
 						continue
 					}
 					// Pending connection was found, remove it from pending map if we should ignore a later, successful
 					// connection.
 					connReq.updateState(ConnCanceled)
-					Debug("canceling:", connReq)
+					dbg.Ln("canceling:", connReq)
 					delete(pending, msg.id)
 					continue
 				}
 				// An existing connection was located, mark as disconnected and execute disconnection callback.
-				Trace("disconnected from", connReq)
+				trc.Ln("disconnected from", connReq)
 				delete(conns, msg.id)
 				if connReq.conn != nil {
-					if err := connReq.conn.Close(); Check(err) {
+					if e := connReq.conn.Close(); err.Chk(e) {
 					}
 				}
 				if cm.Cfg.OnDisconnection != nil {
@@ -279,11 +299,12 @@ out:
 			case handleFailed:
 				connReq := msg.c
 				if _, ok := pending[connReq.id]; !ok {
-					Debug("ignoring connection for canceled conn req:", connReq)
+					dbg.Ln("ignoring connection for canceled conn req:", connReq)
 					continue
 				}
 				connReq.updateState(ConnFailing)
-				// Tracef("failed to connect to %v: %v", connReq, msg.err)
+				// trc.F
+				// ("failed to connect to %v: %v", connReq, msg.err)
 				cm.handleFailedConn(connReq)
 			}
 		case <-cm.quit.Wait():
@@ -295,7 +316,7 @@ out:
 
 // NewConnReq creates a new connection request and connects to the corresponding address.
 func (cm *ConnManager) NewConnReq() {
-	Trace("creating new connreq @", logi.Caller("thingy", 1))
+	trc.Ln("creating new connreq @", logi.Caller("thingy", 1))
 	if atomic.LoadInt32(&cm.stop) != 0 {
 		return
 	}
@@ -318,11 +339,11 @@ func (cm *ConnManager) NewConnReq() {
 	case <-cm.quit.Wait():
 		return
 	}
-	addr, err := cm.Cfg.GetNewAddress()
-	if err != nil {
-		// Trace(err)
+	addr, e := cm.Cfg.GetNewAddress()
+	if e != nil {
+		// trc.Ln(e)
 		select {
-		case cm.requests <- handleFailed{c, err}:
+		case cm.requests <- handleFailed{c, e}:
 		case <-cm.quit.Wait():
 		}
 		return
@@ -338,7 +359,7 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 	}
 	for i := range cm.Cfg.Listeners {
 		if cm.Cfg.Listeners[i].Addr().String() == c.Addr.String() {
-			Debug("not making outbound connection to our own listener address")
+			dbg.Ln("not making outbound connection to our own listener address")
 			return
 		}
 	}
@@ -346,14 +367,14 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 		atomic.StoreUint64(&c.id, atomic.AddUint64(&cm.connReqCount, 1))
 		// Submit a request of a pending connection attempt to the connection manager. By registering the id before the
 		// connection is even established, we'll be able to later cancel the connection via the Remove method.
-		Trace("sending request to register connection")
+		trc.Ln("sending request to register connection")
 		done := qu.T()
 		select {
 		case cm.requests <- registerPending{c, done}:
 		case <-cm.quit.Wait():
 			return
 		}
-		Trace("waiting for response")
+		trc.Ln("waiting for response")
 		// Wait for the registration to successfully add the pending conn req to the conn manager's internal state.
 		select {
 		case <-done.Wait():
@@ -361,18 +382,17 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 			return
 		}
 	}
-	Trace("response received", cm.Cfg.Listeners)
+	trc.Ln("response received", cm.Cfg.Listeners)
 	if len(cm.Cfg.Listeners) > 0 {
-		Tracef("%s attempting to connect to '%s'",
-			cm.Cfg.Listeners[0].Addr(), c.Addr)
+		trc.F("%s attempting to connect to '%s'", cm.Cfg.Listeners[0].Addr(), c.Addr)
 	}
 	// Traces(cm.Cfg.Dial)
-	conn, err := cm.Cfg.Dial(c.Addr)
-	// Error(err, c.Addr)
-	if err != nil {
-		Trace(err)
+	conn, e := cm.Cfg.Dial(c.Addr)
+	// err.Ln(err, c.Addr)
+	if e != nil {
+		trc.Ln(e)
 		select {
-		case cm.requests <- handleFailed{c, err}:
+		case cm.requests <- handleFailed{c, e}:
 		case <-cm.quit.Wait():
 		}
 		return
@@ -412,25 +432,27 @@ func (cm *ConnManager) Remove(id uint64) {
 //
 // It must be run as a goroutine.
 func (cm *ConnManager) listenHandler(listener net.Listener) {
-	Infoc(func() string {
-		return fmt.Sprint("node listening on ", listener.Addr())
-	})
+	inf.C(
+		func() string {
+			return fmt.Sprint("node listening on ", listener.Addr())
+		},
+	)
 	for atomic.LoadInt32(&cm.stop) == 0 {
-		conn, err := listener.Accept()
-		if err != nil {
-			Trace(err)
+		conn, e := listener.Accept()
+		if e != nil {
+			trc.Ln(e)
 			// Only log the error if not forcibly shutting down.
 			if atomic.LoadInt32(&cm.stop) == 0 {
-				Error("can't accept connection:", err)
+				err.Ln("can't accept connection:", err)
 			}
 			continue
 		}
 		go cm.Cfg.OnAccept(conn)
 	}
 	cm.wg.Done()
-	if err := listener.Close(); Check(err) {
+	if e := listener.Close(); err.Chk(e) {
 	}
-	Trace(fmt.Sprint("listener handler done for ", listener.Addr()))
+	trc.Ln(fmt.Sprint("listener handler done for ", listener.Addr()))
 }
 
 // Start launches the connection manager and begins connecting to the network.
@@ -462,7 +484,7 @@ func (cm *ConnManager) Wait() {
 // Stop gracefully shuts down the connection manager.
 func (cm *ConnManager) Stop() {
 	if atomic.AddInt32(&cm.stop, 1) != 1 {
-		Debug("connection manager already stopped")
+		dbg.Ln("connection manager already stopped")
 		return
 	}
 	// Stop all the listeners. There will not be any listeners if listening is disabled.
@@ -476,7 +498,7 @@ func (cm *ConnManager) Stop() {
 // New returns a new connection manager. Use Start to start connecting to the network.
 func New(cfg *Config) (*ConnManager, error) {
 	if cfg.Dial == nil {
-		Error("Cfg.Dial is nil")
+		err.Ln("Cfg.Dial is nil")
 		return nil, ErrDialNil
 	}
 	// Default to sane values

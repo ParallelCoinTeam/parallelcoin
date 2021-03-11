@@ -186,6 +186,7 @@ func NewRescanBlocksCmd(blockHashes []string) *RescanBlocksCmd {
 	return &RescanBlocksCmd{BlockHashes: blockHashes}
 }
 func init() {
+
 	// The commands in this file are only usable by websockets.
 	flags := UFWebsocketOnly
 	MustRegisterCmd("authenticate", (*AuthenticateCmd)(nil), flags)

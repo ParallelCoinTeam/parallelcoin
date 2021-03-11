@@ -3,9 +3,9 @@ package votingpool_test
 // func TestStartWithdrawal(// 	t *testing.T) {
 // 	tearDown, db, pool, store := vp.TstCreatePoolAndTxStore(t)
 // 	defer tearDown()
-// 	dbtx, err := db.BeginReadWriteTx()
-// 	if err != nil {
-// 		t.Fatal(err)
+// 	dbtx, e := db.BeginReadWriteTx()
+// 	if e != nil  {
+// 		t.ftl.Ln(e)
 // 	}
 // 	defer dbtx.Commit()
 // 	ns, addrmgrNs := vp.TstRWNamespaces(dbtx)
@@ -32,13 +32,13 @@ package votingpool_test
 // 	currentBlock := int32(vp.TstInputsBlock + vp.TstEligibleInputMinConfirmations + 1)
 // 	var status *vp.WithdrawalStatus
 // 	vp.TstRunWithManagerUnlocked(t, mgr, addrmgrNs, func() {
-// 		status, err = pool.StartWithdrawal(ns, addrmgrNs, 0, requests, *startAddr, lastSeriesID, *changeStart,
+// 		status, e = pool.StartWithdrawal(ns, addrmgrNs, 0, requests, *startAddr, lastSeriesID, *changeStart,
 // 			store, txmgrNs, currentBlock, dustThreshold)
 // 	})
-// 	if err != nil {
-// 		t.Fatal(err)
+// 	if e != nil  {
+// 		t.ftl.Ln(e)
 // 	}
-// 	// Check that all outputs were successfully fulfilled.
+// 	// Chk that all outputs were successfully fulfilled.
 // 	checkWithdrawalOutputs(t, status, map[string]util.Amount{address1: 4e6, address2: 1e6})
 // 	if status.Fees() != util.Amount(1e3) {
 // 		t.Fatalf("Wrong amount for fees; got %v, want %v", status.Fees(), util.Amount(1e3))
@@ -66,19 +66,19 @@ package votingpool_test
 // 	// redeem script, which is stored encrypted.
 // 	msgtx := status.TstGetMsgTx(ntxid)
 // 	vp.TstRunWithManagerUnlocked(t, mgr, addrmgrNs, func() {
-// 		if err = vp.SignTx(msgtx, txSigs, mgr, addrmgrNs, store, txmgrNs); err != nil {
-// 			t.Fatal(err)
+// 		if e = vp.SignTx(msgtx, txSigs, mgr, addrmgrNs, store, txmgrNs); err.Chk(e) {
+// 			t.ftl.Ln(e)
 // 		}
 // 	})
 // 	// Any subsequent StartWithdrawal() calls with the same parameters will
 // 	// return the previously stored WithdrawalStatus.
 // 	var status2 *vp.WithdrawalStatus
 // 	vp.TstRunWithManagerUnlocked(t, mgr, addrmgrNs, func() {
-// 		status2, err = pool.StartWithdrawal(ns, addrmgrNs, 0, requests, *startAddr, lastSeriesID, *changeStart,
+// 		status2, e = pool.StartWithdrawal(ns, addrmgrNs, 0, requests, *startAddr, lastSeriesID, *changeStart,
 // 			store, txmgrNs, currentBlock, dustThreshold)
 // 	})
-// 	if err != nil {
-// 		t.Fatal(err)
+// 	if e != nil  {
+// 		t.ftl.Ln(e)
 // 	}
 // 	vp.TstCheckWithdrawalStatusMatches(t, *status, *status2)
 // }

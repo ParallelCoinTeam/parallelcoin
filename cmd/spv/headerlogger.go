@@ -38,7 +38,7 @@ func (b *headerProgressLogger) LogBlockHeight(timestamp time.Time, height int32)
 	if b.receivedLogBlocks > 1 {
 		entityStr += "s"
 	}
-	Infof("%s %d %s in the last %s (height %d, %s)",
+	inf.F("%s %d %s in the last %s (height %d, %s)",
 		b.progressAction, b.receivedLogBlocks, entityStr, tDuration, height, timestamp)
 	b.receivedLogBlocks = 0
 	b.lastBlockLogTime = now

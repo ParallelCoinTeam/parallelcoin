@@ -63,12 +63,12 @@ public:
         nRandomPos = -1;
     }
 
-    CAddrInfo(const CAddress &addrIn, const CNetAddr &addrSource) : CAddress(addrIn), source(addrSource)
+    CAddrinf.Ln(const CAddress &addrIn, const CNetAddr &addrSource) : CAddress(addrIn), source(addrSource)
     {
         Init();
     }
 
-    CAddrInfo() : CAddress(), source()
+    CAddrinf.Ln() : CAddress(), source()
     {
         Init();
     }

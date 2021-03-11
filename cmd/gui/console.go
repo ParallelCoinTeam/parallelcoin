@@ -37,7 +37,7 @@ type Console struct {
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
 func (wg *WalletGUI) ConsolePage() *Console {
-	Debug("running ConsolePage")
+	dbg.Ln("running ConsolePage")
 	c := &Console{
 		Window:         wg.Window,
 		editor:         wg.Editor().SingleLine().Submit(true),
@@ -48,7 +48,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 	}
 	c.submitFunc = func(txt string) {
 		go func() {
-			Debug("submit", txt)
+			dbg.Ln("submit", txt)
 			c.output = append(
 				c.output,
 				func(gtx l.Context) l.Dimensions {
@@ -68,7 +68,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 			split := strings.Split(txt, " ")
 			method, args := split[0], split[1:]
 			var params []interface{}
-			var err error
+			var e error
 			var result []byte
 			var o string
 			var errString, prev string
@@ -87,18 +87,18 @@ func (wg *WalletGUI) ConsolePage() *Console {
 			}
 			if method == "help" {
 				if len(args) == 0 {
-					Debug("rpc called help")
+					dbg.Ln("rpc called help")
 					var result1, result2 []byte
-					if result1, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
+					if result1, e = ctl.Call(wg.cx, false, method, params...); err.Chk(e) {
 					}
 					r1 := string(result1)
-					if r1, err = strconv.Unquote(r1); Check(err) {
+					if r1, e = strconv.Unquote(r1); err.Chk(e) {
 					}
 					o = r1 + "\n"
-					if result2, err = ctl.Call(wg.cx, true, method, params...); Check(err) {
+					if result2, e = ctl.Call(wg.cx, true, method, params...); err.Chk(e) {
 					}
 					r2 := string(result2)
-					if r2, err = strconv.Unquote(r2); Check(err) {
+					if r2, e = strconv.Unquote(r2); err.Chk(e) {
 					}
 					o += r2 + "\n"
 					splitted := strings.Split(o, "\n")
@@ -140,18 +140,18 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				} else {
 					var out string
 					var isErr bool
-					if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
+					if result, e = ctl.Call(wg.cx, false, method, params...); err.Chk(e) {
 						isErr = true
-						out = err.Error()
-						Info(out)
-						// if out, err = strconv.Unquote(); Check(err) {
+						out = e.Error()
+						inf.Ln(out)
+						// if out, e = strconv.Unquote(); err.Chk(e) {
 						// }
 					} else {
-						if out, err = strconv.Unquote(string(result)); Check(err) {
+						if out, e = strconv.Unquote(string(result)); err.Chk(e) {
 						}
 					}
 					strings.ReplaceAll(out, "\t", "  ")
-					Debug(out)
+					dbg.Ln(out)
 					splitResult := strings.Split(out, "\n")
 					outputColor := "DocText"
 					if isErr {
@@ -176,12 +176,12 @@ func (wg *WalletGUI) ConsolePage() *Console {
 					return
 				}
 			} else {
-				Debug("method", method, "args", args)
-				if result, err = ctl.Call(wg.cx, false, method, params...); Check(err) {
+				dbg.Ln("method", method, "args", args)
+				if result, e = ctl.Call(wg.cx, false, method, params...); err.Chk(e) {
 					var errR string
-					if result, err = ctl.Call(wg.cx, true, method, params...); Check(err) {
-						if err != nil {
-							errR = err.Error()
+					if result, e = ctl.Call(wg.cx, true, method, params...); err.Chk(e) {
+						if e != nil  {
+							errR = e.Error()
 						}
 						c.output = append(
 							c.output, c.Theme.Flex().AlignStart().
@@ -189,8 +189,8 @@ func (wg *WalletGUI) ConsolePage() *Console {
 						)
 						return
 					}
-					if err != nil {
-						errR = err.Error()
+					if e != nil  {
+						errR = e.Error()
 					}
 					c.output = append(
 						c.output, c.Theme.Flex().AlignStart().
@@ -210,7 +210,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 	}
 	copyClickableFn := func() {
 		go func() {
-			if err := clipboard.WriteAll(c.editor.Text()); Check(err) {
+			if e := clipboard.WriteAll(c.editor.Text()); err.Chk(e) {
 			}
 		}()
 		c.editor.Focus()
@@ -219,9 +219,9 @@ func (wg *WalletGUI) ConsolePage() *Console {
 		col := c.editor.Caret.Col
 		go func() {
 			txt := c.editor.Text()
-			var err error
+			var e error
 			var cb string
-			if cb, err = clipboard.ReadAll(); Check(err) {
+			if cb, e = clipboard.ReadAll(); err.Chk(e) {
 			}
 			cb = findSpaceRegexp.ReplaceAllString(cb, " ")
 			txt = txt[:col] + cb + txt[col:]
@@ -352,8 +352,8 @@ func (c *Console) getIndent(n int, size float32, widget l.Widget) (out l.Widget)
 
 func (c *Console) JSONWidget(color string, j []byte) (out []l.Widget) {
 	var ifc interface{}
-	var err error
-	if err = json.Unmarshal(j, &ifc); Check(err) {
+	var e error
+	if e = json.Unmarshal(j, &ifc); err.Chk(e) {
 	}
 	return c.jsonWidget(color, 0, "", ifc)
 }
@@ -368,7 +368,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 				},
 			))
 		}
-		Debug("got type []interface{}")
+		dbg.Ln("got type []interface{}")
 		res := in.([]interface{})
 		if len(res) == 0 {
 			out = append(out, c.getIndent(depth+1, 1,
@@ -378,7 +378,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			))
 		} else {
 			for i := range res {
-				// Debugs(res[i])
+				// dbg.S(res[i])
 				out = append(out, c.jsonWidget(color, depth+1, fmt.Sprint(i), res[i])...)
 			}
 		}
@@ -390,10 +390,10 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 				},
 			))
 		}
-		Debug("got type map[string]interface{}")
+		dbg.Ln("got type map[string]interface{}")
 		res := in.(map[string]interface{})
 		je := GetJSONElements(res)
-		// Debugs(je)
+		// dbg.S(je)
 		if len(res) == 0 {
 			out = append(out, c.getIndent(depth+1, 1,
 				func(gtx l.Context) l.Dimensions {
@@ -402,7 +402,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			))
 		} else {
 			for i := range je {
-				Debugs(je[i])
+				dbg.S(je[i])
 				out = append(out, c.jsonWidget(color, depth+1, je[i].key, je[i].value)...)
 			}
 		}
@@ -411,7 +411,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 		key = res.key
 		switch res.value.(type) {
 		case string:
-			Debug("got type string")
+			dbg.Ln("got type string")
 			res := res.value.(string)
 			clk := c.Theme.WidgetPool.GetClickable()
 			out = append(out,
@@ -426,7 +426,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 							Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 							SetClick(func() {
 								go func() {
-									if err := clipboard.WriteAll(res); Check(err) {
+									if e := clipboard.WriteAll(res); err.Chk(e) {
 									}
 								}()
 							}).Fn,
@@ -434,7 +434,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 				}),
 			)
 		case float64:
-			Debug("got type float64")
+			dbg.Ln("got type float64")
 			res := res.value.(float64)
 			clk := c.Theme.WidgetPool.GetClickable()
 			out = append(out,
@@ -449,7 +449,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 							Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 							SetClick(func() {
 								go func() {
-									if err := clipboard.WriteAll(fmt.Sprint(res)); Check(err) {
+									if e := clipboard.WriteAll(fmt.Sprint(res)); err.Chk(e) {
 									}
 								}()
 							}).Fn,
@@ -458,7 +458,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 				}),
 			)
 		case bool:
-			Debug("got type bool")
+			dbg.Ln("got type bool")
 			res := res.value.(bool)
 			out = append(out,
 				c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
@@ -467,7 +467,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			)
 		}
 	case string:
-		Debug("got type string")
+		dbg.Ln("got type string")
 		res := in.(string)
 		clk := c.Theme.WidgetPool.GetClickable()
 		out = append(out,
@@ -482,7 +482,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 						Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 						SetClick(func() {
 							go func() {
-								if err := clipboard.WriteAll(res); Check(err) {
+								if e := clipboard.WriteAll(res); err.Chk(e) {
 								}
 							}()
 						}).Fn,
@@ -490,7 +490,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			}),
 		)
 	case float64:
-		Debug("got type float64")
+		dbg.Ln("got type float64")
 		res := in.(float64)
 		clk := c.Theme.WidgetPool.GetClickable()
 		out = append(out,
@@ -505,7 +505,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 						Icon(c.Icon().Color("DocBg").Scale(1).Src(&icons.ContentContentCopy)).
 						SetClick(func() {
 							go func() {
-								if err := clipboard.WriteAll(fmt.Sprint(res)); Check(err) {
+								if e := clipboard.WriteAll(fmt.Sprint(res)); err.Chk(e) {
 								}
 							}()
 						}).Fn,
@@ -514,7 +514,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			}),
 		)
 	case bool:
-		Debug("got type bool")
+		dbg.Ln("got type bool")
 		res := in.(bool)
 		out = append(out,
 			c.jsonElement(key, color, depth, func(gtx l.Context) l.Dimensions {
@@ -522,7 +522,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 			}),
 		)
 	default:
-		Debugs(in)
+		dbg.S(in)
 	}
 	return
 }

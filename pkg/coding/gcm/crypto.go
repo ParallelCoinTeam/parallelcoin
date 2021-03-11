@@ -9,12 +9,12 @@ import (
 
 // GetCipher returns a GCM cipher given a password string. Note that this cipher must be renewed every 4gb of encrypted
 // data
-func GetCipher(password string) (gcm cipher.AEAD, err error) {
+func GetCipher(password string) (gcm cipher.AEAD, e error) {
 	bytes := []byte(password)
 	var c cipher.Block
-	if c, err = aes.NewCipher(argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 4, 32)); Check(err) {
+	if c, e = aes.NewCipher(argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 4, 32)); err.Chk(e) {
 	}
-	if gcm, err = cipher.NewGCM(c); Check(err) {
+	if gcm, e = cipher.NewGCM(c); err.Chk(e) {
 	}
 	return
 }

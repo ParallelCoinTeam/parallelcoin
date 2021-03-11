@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"sync"
 	
-	qu "github.com/p9c/pod/pkg/util/quit"
+	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	ec "github.com/p9c/pod/pkg/coding/ecc"
+	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
@@ -97,26 +97,22 @@ func newMemWallet(net *netparams.Params, harnessID uint32) (*memWallet, error) {
 	var harnessHDSeed [chainhash.HashSize + 4]byte
 	copy(harnessHDSeed[:], hdSeed[:])
 	binary.BigEndian.PutUint32(harnessHDSeed[:chainhash.HashSize], harnessID)
-	hdRoot, err := hdkeychain.NewMaster(harnessHDSeed[:], net)
-	if err != nil {
-		Error(err)
-		return nil, nil
+	hdRoot, e := hdkeychain.NewMaster(harnessHDSeed[:], net)
+	if e != nil  {
+				return nil, nil
 	}
 	// The first child key from the hd root is reserved as the coinbase generation address.
-	coinbaseChild, err := hdRoot.Child(0)
-	if err != nil {
-		Error(err)
-		return nil, err
+	coinbaseChild, e := hdRoot.Child(0)
+	if e != nil  {
+				return nil, e
 	}
-	coinbaseKey, err := coinbaseChild.ECPrivKey()
-	if err != nil {
-		Error(err)
-		return nil, err
+	coinbaseKey, e := coinbaseChild.ECPrivKey()
+	if e != nil  {
+				return nil, e
 	}
-	coinbaseAddr, err := keyToAddr(coinbaseKey, net)
-	if err != nil {
-		Error(err)
-		return nil, err
+	coinbaseAddr, e := keyToAddr(coinbaseKey, net)
+	if e != nil  {
+				return nil, e
 	}
 	// Track the coinbase generation address to ensure we properly track newly generated DUO we can spend.
 	addrs := make(map[uint32]util.Address)
@@ -287,25 +283,21 @@ func (m *memWallet) unwindBlock(update *chainUpdate) {
 // transaction filter to ensure any transactions that involve it are delivered via the notifications.
 func (m *memWallet) newAddress() (util.Address, error) {
 	index := m.hdIndex
-	childKey, err := m.hdRoot.Child(index)
-	if err != nil {
-		Error(err)
-		return nil, err
+	childKey, e := m.hdRoot.Child(index)
+	if e != nil  {
+				return nil, e
 	}
-	privKey, err := childKey.ECPrivKey()
-	if err != nil {
-		Error(err)
-		return nil, err
+	privKey, e := childKey.ECPrivKey()
+	if e != nil  {
+				return nil, e
 	}
-	addr, err := keyToAddr(privKey, m.net)
-	if err != nil {
-		Error(err)
-		return nil, err
+	addr, e := keyToAddr(privKey, m.net)
+	if e != nil  {
+				return nil, e
 	}
-	err = m.rpc.LoadTxFilter(false, []util.Address{addr}, nil)
-	if err != nil {
-		Error(err)
-		return nil, err
+	e = m.rpc.LoadTxFilter(false, []util.Address{addr}, nil)
+	if e != nil  {
+				return nil, e
 	}
 	m.addrs[index] = addr
 	m.hdIndex++
@@ -324,7 +316,7 @@ func (m *memWallet) NewAddress() (util.Address, error) {
 // The transaction being funded can optionally include a change output indicated by the change boolean. NOTE: The
 // memWallet's mutex must be held when this function is called.
 func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
-	feeRate util.Amount, change bool) error {
+	feeRate util.Amount, change bool) (e error) {
 	const (
 		// spendSize is the largest number of bytes of a sigScript which spends a p2pkh output: OP_DATA_73 <sig>
 		// OP_DATA_33 <pubkey>
@@ -355,15 +347,13 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 		// transaction reserved for it.
 		changeVal := amtSelected - amt - reqFee
 		if changeVal > 0 && change {
-			addr, err := m.newAddress()
-			if err != nil {
-				Error(err)
-				return err
+			addr, e := m.newAddress()
+			if e != nil  {
+								return e
 			}
-			pkScript, err := txscript.PayToAddrScript(addr)
-			if err != nil {
-				Error(err)
-				return err
+			pkScript, e := txscript.PayToAddrScript(addr)
+			if e != nil  {
+								return e
 			}
 			changeOutput := &wire.TxOut{
 				Value:    int64(changeVal),
@@ -381,10 +371,9 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 // passed fee rate should be expressed in satoshis-per-byte.
 func (m *memWallet) SendOutputs(outputs []*wire.TxOut,
 	feeRate util.Amount) (*chainhash.Hash, error) {
-	tx, err := m.CreateTransaction(outputs, feeRate, true)
-	if err != nil {
-		Error(err)
-		return nil, err
+	tx, e := m.CreateTransaction(outputs, feeRate, true)
+	if e != nil  {
+				return nil, e
 	}
 	return m.rpc.SendRawTransaction(tx, true)
 }
@@ -393,10 +382,9 @@ func (m *memWallet) SendOutputs(outputs []*wire.TxOut,
 // passed fee rate and ignoring a change output. The passed fee rate should be expressed in sat/b.
 func (m *memWallet) SendOutputsWithoutChange(outputs []*wire.TxOut,
 	feeRate util.Amount) (*chainhash.Hash, error) {
-	tx, err := m.CreateTransaction(outputs, feeRate, false)
-	if err != nil {
-		Error(err)
-		return nil, err
+	tx, e := m.CreateTransaction(outputs, feeRate, false)
+	if e != nil  {
+				return nil, e
 	}
 	return m.rpc.SendRawTransaction(tx, true)
 }
@@ -416,8 +404,8 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 		tx.AddTxOut(output)
 	}
 	// Attempt to fund the transaction with spendable utxos.
-	if err := m.fundTx(tx, outputAmt, feeRate, change); err != nil {
-		return nil, err
+	if e := m.fundTx(tx, outputAmt, feeRate, change); err.Chk(e) {
+		return nil, e
 	}
 	// Populate all the selected inputs with valid sigScript for spending. Along the way record all outputs being spent
 	// in order to avoid a potential double spend.
@@ -425,21 +413,18 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 	for i, txIn := range tx.TxIn {
 		outPoint := txIn.PreviousOutPoint
 		utxo := m.utxos[outPoint]
-		extendedKey, err := m.hdRoot.Child(utxo.keyIndex)
-		if err != nil {
-			Error(err)
-			return nil, err
+		extendedKey, e := m.hdRoot.Child(utxo.keyIndex)
+		if e != nil  {
+						return nil, e
 		}
-		privKey, err := extendedKey.ECPrivKey()
-		if err != nil {
-			Error(err)
-			return nil, err
+		privKey, e := extendedKey.ECPrivKey()
+		if e != nil  {
+						return nil, e
 		}
-		sigScript, err := txscript.SignatureScript(tx, i, utxo.pkScript,
+		sigScript, e := txscript.SignatureScript(tx, i, utxo.pkScript,
 			txscript.SigHashAll, privKey, true)
-		if err != nil {
-			Error(err)
-			return nil, err
+		if e != nil  {
+						return nil, e
 		}
 		txIn.SignatureScript = sigScript
 		spentOutputs = append(spentOutputs, utxo)
@@ -485,10 +470,9 @@ func (m *memWallet) ConfirmedBalance() util.Amount {
 // keyToAddr maps the passed private to corresponding p2pkh address.
 func keyToAddr(key *ec.PrivateKey, net *netparams.Params) (util.Address, error) {
 	serializedKey := key.PubKey().SerializeCompressed()
-	pubKeyAddr, err := util.NewAddressPubKey(serializedKey, net)
-	if err != nil {
-		Error(err)
-		return nil, err
+	pubKeyAddr, e := util.NewAddressPubKey(serializedKey, net)
+	if e != nil  {
+				return nil, e
 	}
 	return pubKeyAddr.AddressPubKeyHash(), nil
 }

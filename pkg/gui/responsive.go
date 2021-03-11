@@ -48,7 +48,7 @@ func (r *Responsive) Fn(gtx l.Context) l.Dimensions {
 	for i := range r.Widgets {
 		if float32(r.size)/r.TextSize.V >= r.Widgets[i].Size {
 			out = r.Widgets[i].Widget
-			// Debug("selected widget for responsive with scale", r.size, "width", r.Widgets[i].Size)
+			// dbg.Ln("selected widget for responsive with scale", r.size, "width", r.Widgets[i].Size)
 			break
 		}
 	}

@@ -2,7 +2,7 @@ package spv
 
 import (
 	"errors"
-
+	
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
 )
@@ -46,20 +46,24 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 	switch msg := querymsg.(type) {
 	case getConnCountMsg:
 		nconnected := int32(0)
-		state.forAllPeers(func(sp *ServerPeer) {
-			if sp.Connected() {
-				nconnected++
-			}
-		})
+		state.forAllPeers(
+			func(sp *ServerPeer) {
+				if sp.Connected() {
+					nconnected++
+				}
+			},
+		)
 		msg.reply <- nconnected
 	case getPeersMsg:
 		peers := make([]*ServerPeer, 0, state.Count())
-		state.forAllPeers(func(sp *ServerPeer) {
-			if !sp.Connected() {
-				return
-			}
-			peers = append(peers, sp)
-		})
+		state.forAllPeers(
+			func(sp *ServerPeer) {
+				if !sp.Connected() {
+					return
+				}
+				peers = append(peers, sp)
+			},
+		)
 		msg.reply <- peers
 	case connectNodeMsg:
 		// TODO: duplicate oneshots?
@@ -78,24 +82,27 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 				return
 			}
 		}
-		netAddr, err := s.addrStringToNetAddr(msg.addr)
-		if err != nil {
-			Error(err)
-			msg.reply <- err
+		netAddr, e := s.addrStringToNetAddr(msg.addr)
+		if e != nil {
+			msg.reply <- e
 			return
 		}
 		// TODO: if too many, nuke a non-perm peer.
-		go s.connManager.Connect(&connmgr.ConnReq{
-			Addr:      netAddr,
-			Permanent: msg.permanent,
-		})
+		go s.connManager.Connect(
+			&connmgr.ConnReq{
+				Addr:      netAddr,
+				Permanent: msg.permanent,
+			},
+		)
 		msg.reply <- nil
 	case removeNodeMsg:
-		found := disconnectPeer(state.persistentPeers, msg.cmp, func(sp *ServerPeer) {
-			// Keep group counts ok since we remove from
-			// the list now.
-			state.outboundGroups[addrmgr.GroupKey(sp.NA())]--
-		})
+		found := disconnectPeer(
+			state.persistentPeers, msg.cmp, func(sp *ServerPeer) {
+				// Keep group counts ok since we remove from
+				// the list now.
+				state.outboundGroups[addrmgr.GroupKey(sp.NA())]--
+			},
+		)
 		if found {
 			msg.reply <- nil
 		} else {
@@ -117,20 +124,24 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 		}
 		msg.reply <- peers
 	case disconnectNodeMsg:
-		// Check outbound peers.
-		found := disconnectPeer(state.outboundPeers, msg.cmp, func(sp *ServerPeer) {
-			// Keep group counts ok since we remove from
-			// the list now.
-			state.outboundGroups[addrmgr.GroupKey(sp.NA())]--
-		})
+		// Chk outbound peers.
+		found := disconnectPeer(
+			state.outboundPeers, msg.cmp, func(sp *ServerPeer) {
+				// Keep group counts ok since we remove from
+				// the list now.
+				state.outboundGroups[addrmgr.GroupKey(sp.NA())]--
+			},
+		)
 		if found {
 			// If there are multiple outbound connections to the same
 			// ip:port, continue disconnecting them all until no such
 			// peers are found.
 			for found {
-				found = disconnectPeer(state.outboundPeers, msg.cmp, func(sp *ServerPeer) {
-					state.outboundGroups[addrmgr.GroupKey(sp.NA())]--
-				})
+				found = disconnectPeer(
+					state.outboundPeers, msg.cmp, func(sp *ServerPeer) {
+						state.outboundGroups[addrmgr.GroupKey(sp.NA())]--
+					},
+				)
 			}
 			msg.reply <- nil
 			return
@@ -193,7 +204,7 @@ func (s *ChainService) Peers() []*ServerPeer {
 
 // DisconnectNodeByAddr disconnects a peer by target address. Both outbound and inbound nodes will be searched for the
 // target node. An error message will be returned if the peer was not found.
-func (s *ChainService) DisconnectNodeByAddr(addr string) error {
+func (s *ChainService) DisconnectNodeByAddr(addr string) (e error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- disconnectNodeMsg{
@@ -208,7 +219,7 @@ func (s *ChainService) DisconnectNodeByAddr(addr string) error {
 
 // DisconnectNodeByID disconnects a peer by target node id. Both outbound and inbound nodes will be searched for the
 // target node. An error message will be returned if the peer was not found.
-func (s *ChainService) DisconnectNodeByID(id int32) error {
+func (s *ChainService) DisconnectNodeByID(id int32) (e error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- disconnectNodeMsg{
@@ -221,9 +232,9 @@ func (s *ChainService) DisconnectNodeByID(id int32) error {
 	}
 }
 
-// RemoveNodeByAddr removes a peer from the list of persistent peers if present. An error will be returned if the peer
-// was not found.
-func (s *ChainService) RemoveNodeByAddr(addr string) error {
+// RemoveNodeByAddr removes a peer from the list of persistent peers if present.
+// An error will be returned if the peer was not found.
+func (s *ChainService) RemoveNodeByAddr(addr string) (e error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- removeNodeMsg{
@@ -238,7 +249,7 @@ func (s *ChainService) RemoveNodeByAddr(addr string) error {
 
 // RemoveNodeByID removes a peer by node ID from the list of persistent peers if present. An error will be returned if
 // the peer was not found.
-func (s *ChainService) RemoveNodeByID(id int32) error {
+func (s *ChainService) RemoveNodeByID(id int32) (e error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- removeNodeMsg{
@@ -253,7 +264,7 @@ func (s *ChainService) RemoveNodeByID(id int32) error {
 
 // ConnectNode adds `addr' as a new outbound peer. If permanent is true then the peer will be persistent and reconnect
 // if the connection is lost. It is an error to call this with an already existing peer.
-func (s *ChainService) ConnectNode(addr string, permanent bool) error {
+func (s *ChainService) ConnectNode(addr string, permanent bool) (e error) {
 	replyChan := make(chan error)
 	select {
 	case s.query <- connectNodeMsg{

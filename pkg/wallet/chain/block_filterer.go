@@ -1,11 +1,11 @@
 package chain
 
 import (
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/addrmgr"
+	am "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // BlockFilterer is used to iteratively scan blocks for a set of addresses of interest. This is done by constructing
@@ -46,8 +46,10 @@ type BlockFilterer struct {
 // NewBlockFilterer constructs the reverse indexes for the current set of external and internal addresses that we are
 // searching for, and is used to scan successive blocks for addresses of interest. A particular block filter can be
 // reused until the first call from `FilterBlock` returns true.
-func NewBlockFilterer(params *netparams.Params,
-	req *FilterBlocksRequest) *BlockFilterer {
+func NewBlockFilterer(
+	params *netparams.Params,
+	req *FilterBlocksRequest,
+) *BlockFilterer {
 	// Construct a reverse index by address string for the requested external addresses.
 	nExAddrs := len(req.ExternalAddrs)
 	exReverseFilter := make(map[string]am.ScopedIndex, nExAddrs)
@@ -107,13 +109,14 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 	// Now, parse all of the outputs created by this transactions, and see if they contain any addresses known the
 	// wallet using our reverse indexes for both external and internal addresses. If a new output is found, we will add
 	// the outpoint to our set of FoundOutPoints.
+	var e error
 	for i, out := range tx.TxOut {
-		_, addrs, _, err := txscript.ExtractPkScriptAddrs(
+		var addrs []util.Address
+		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			out.PkScript, bf.Params,
 		)
-		if err != nil {
-			Error(err)
-			Warnf(
+		if e != nil {
+			wrn.F(
 				"could not parse output script in %s:%d: %v",
 				tx.TxHash(), i, err,
 			)
