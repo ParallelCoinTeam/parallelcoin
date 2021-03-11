@@ -147,6 +147,8 @@ func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget
 							dbg.Ln("clicked receive address list item", j)
 							if e := clipboard.WriteAll(qrText); err.Chk(e) {
 							}
+							wg.GetNewReceivingQRCode(qrText)
+							rp.urn = qrText
 						},
 					),
 				).

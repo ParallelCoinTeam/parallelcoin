@@ -10,7 +10,7 @@ import (
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -213,13 +213,14 @@ func (sp *SendPage) SendButton() l.Widget {
 									dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
 									return
 								}
+								dbg.Ln("transaction successful", txid)
+								sp.saveForm(txid.String())
+								select {
+								case <-time.After(time.Second * 5):
+								case <-wg.quit:
+								}
 								wg.RecentTransactions(10, "recent")
 								wg.RecentTransactions(-1, "history")
-								dbg.Ln("transaction successful", txid)
-								// prevent accidental double clicks recording the same entry again
-								wg.inputs["sendAmount"].SetText("")
-								wg.inputs["sendMessage"].SetText("")
-								wg.inputs["sendAddress"].SetText("")
 							}
 						}()
 					},
@@ -236,6 +237,45 @@ func (sp *SendPage) SendButton() l.Widget {
 			Fn(gtx)
 	}
 }
+func (sp *SendPage) saveForm(txid string) {
+	wg := sp.wg
+	dbg.Ln("processing form data to save")
+	amtS := wg.inputs["sendAmount"].GetText()
+	var e error
+	var amt float64
+	if amt, e = strconv.ParseFloat(amtS, 64); err.Chk(e) {
+		return
+	}
+	if amt == 0 {
+		return
+	}
+	var ua util.Amount
+	if ua, e = util.NewAmount(amt); err.Chk(e) {
+		return
+	}
+	msg := wg.inputs["sendMessage"].GetText()
+	if msg == "" {
+		return
+	}
+	addr := wg.inputs["sendAddress"].GetText()
+	var ad util.Address
+	if ad, e = util.DecodeAddress(addr, wg.cx.ActiveNet); err.Chk(e) {
+		return
+	}
+	wg.State.sendAddresses = append(
+		wg.State.sendAddresses, AddressEntry{
+			Address: ad.EncodeAddress(),
+			Label:   msg,
+			Amount:  ua,
+			Created: time.Now(),
+			TxID:    txid,
+		},
+	)
+	// prevent accidental double clicks recording the same entry again
+	wg.inputs["sendAmount"].SetText("")
+	wg.inputs["sendMessage"].SetText("")
+	wg.inputs["sendAddress"].SetText("")
+}
 
 func (sp *SendPage) SaveButton() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
@@ -247,43 +287,7 @@ func (sp *SendPage) SaveButton() l.Widget {
 		return wg.ButtonLayout(
 			wg.clickables["sendSave"].
 				SetClick(
-					func() {
-						dbg.Ln("clicked save button")
-						amtS := wg.inputs["sendAmount"].GetText()
-						var e error
-						var amt float64
-						if amt, e = strconv.ParseFloat(amtS, 64); err.Chk(e) {
-							return
-						}
-						if amt == 0 {
-							return
-						}
-						var ua util.Amount
-						if ua, e = util.NewAmount(amt); err.Chk(e) {
-							return
-						}
-						msg := wg.inputs["sendMessage"].GetText()
-						if msg == "" {
-							return
-						}
-						addr := wg.inputs["sendAddress"].GetText()
-						var ad util.Address
-						if ad, e = util.DecodeAddress(addr, wg.cx.ActiveNet); err.Chk(e) {
-							return
-						}
-						wg.State.sendAddresses = append(
-							wg.State.sendAddresses, AddressEntry{
-								Address: ad.EncodeAddress(),
-								Label:   msg,
-								Amount:  ua,
-								Created: time.Now(),
-							},
-						)
-						// prevent accidental double clicks recording the same entry again
-						wg.inputs["sendAmount"].SetText("")
-						wg.inputs["sendMessage"].SetText("")
-						wg.inputs["sendAddress"].SetText("")
-					},
+					func() { sp.saveForm("") },
 				),
 		).
 			Background("Primary").
@@ -426,6 +430,13 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 								).
 								Rigid(
 									wg.Caption(wg.State.sendAddresses[i].Label).MaxLines(1).Fn,
+								).
+								Rigid(
+									gui.If(
+										wg.State.sendAddresses[i].TxID != "",
+										wg.Caption(wg.State.sendAddresses[i].TxID).MaxLines(1).Fn,
+										func(ctx l.Context) l.Dimensions { return l.Dimensions{} },
+									),
 								).
 								Fn,
 						).

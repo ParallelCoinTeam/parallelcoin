@@ -10,7 +10,7 @@ import (
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcm"
 	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -57,6 +57,7 @@ type AddressEntry struct {
 	Amount   util.Amount `json:"amount"`
 	Created  time.Time   `json:"created"`
 	Modified time.Time   `json:"modified"`
+	TxID     string      `json:txid,omitempty'`
 }
 
 type State struct {
