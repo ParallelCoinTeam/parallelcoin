@@ -1178,8 +1178,8 @@ func checkBlockHeaderSanity(
 	if fork.GetCurrent(height) > 0 {
 		cbts := header.Timestamp.Truncate(time.Second)
 		pbts := prevBlockTimestamp.Truncate(time.Second)
-		dbg.Ln("prev", pbts, "candidate", cbts)
-		trc.S(pbts, cbts)
+		dbg.Ln("TIMESTAMP PREV", pbts, "CANDIDATE", cbts)
+		// trc.S(pbts, cbts)
 		if pbts.Sub(cbts) > time.Second {
 			e = ruleError(
 				ErrTimeTooOld,

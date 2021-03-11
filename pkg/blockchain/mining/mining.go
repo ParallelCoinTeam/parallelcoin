@@ -833,12 +833,13 @@ mempoolLoop:
 	ts := medianAdjustedTime(best, g.TimeSource)
 	trc.Ln("legacy ts", ts)
 	if fork.GetCurrent(best.Height) > 0 {
-		ots := g.Chain.BestChain.NodeByHeight(best.Height).Header().Timestamp.Truncate(time.Second)
+		ots := g.Chain.BestChain.NodeByHeight(best.Height).Header().Timestamp.Truncate(time.Second).Add(time.Second)
+		dbg.Ln("prev timestamp+1", ots)
 		tn := time.Now().Truncate(time.Second)
-		if util.GetSecondsAhead(tn, ots) < 1 {
+		if tn.After(ots) {
 			ts = tn
 		} else {
-			ts = ots.Add(time.Second)
+			ts = ots
 		}
 		trc.Ln("plan9 ts", ts)
 	}
