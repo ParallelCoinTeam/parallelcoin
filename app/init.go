@@ -18,7 +18,7 @@ var initHandle = func(cx *conte.Xt) func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(255,255,255,false).Sprint
 		logg.App = "  init"
 		inf.Ln("running configuration and wallet initialiser")
-		config.Configure(cx, c.Command.Name, true)
+		config.Configure(cx, "init", true)
 		args := append(os.Args[1:len(os.Args)-1], "wallet")
 		dbg.Ln(args)
 		var command []string

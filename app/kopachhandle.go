@@ -24,7 +24,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		logg.App = "kopach"
 		inf.Ln("starting up kopach standalone miner for parallelcoin")
 		dbg.Ln(os.Args)
-		config.Configure(cx, c.Command.Name, true)
+		config.Configure(cx, "kopach", true)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
 		}

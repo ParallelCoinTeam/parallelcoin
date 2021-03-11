@@ -27,7 +27,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
 		logg.App = "   ctl"
 		*cx.Config.LogLevel = "off"
-		config.Configure(cx, c.Command.Name, true)
+		config.Configure(cx, "ctl", true)
 		args := c.Args()
 		if len(args) < 1 {
 			return cli.ShowSubcommandHelp(c)
@@ -37,13 +37,6 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			}
 		}
 		ctl.Main(args, cx)
-		return nil
-	}
-}
-
-func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
-	return func(c *cli.Context) (e error) {
-		config.Configure(cx, c.Command.Name, true)
 		return nil
 	}
 }

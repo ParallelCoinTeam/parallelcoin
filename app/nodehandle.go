@@ -24,7 +24,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
 		logg.App = "  node"
 		trc.Ln("running node handler")
-		config.Configure(cx, c.Command.Name, true)
+		config.Configure(cx, "node", true)
 		cx.NodeReady = qu.T()
 		cx.Node.Store(false)
 		// serviceOptions defines the configuration options for the daemon as a service on Windows.
@@ -44,8 +44,8 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			}
 			return nil
 		}
-		config.Configure(cx, c.Command.Name, true)
-		dbg.Ln("starting shell")
+		// config.Configure(cx, c.Command.Name, true)
+		// dbg.Ln("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			if apputil.FileExists(*cx.Config.RPCCert) &&

@@ -115,7 +115,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, c.Command.Name, true)
+							config.Configure(cx, "resetchain", true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"
@@ -188,7 +188,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, c.Command.Name, true)
+							config.Configure(cx, "resetchain", true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"
@@ -216,7 +216,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"drophistory", "drop the transaction history in the wallet (for "+
 							"development and testing as well as clearing up transaction mess)",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, c.Command.Name, true)
+							config.Configure(cx, "wallet", true)
 							inf.Ln("dropping wallet history")
 							go func() {
 								dbg.Ln("starting wallet")
