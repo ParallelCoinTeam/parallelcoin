@@ -11,7 +11,7 @@ var (
 	// GitCommit is the commit hash of the current HEAD
 	GitCommit = "b09f236b11c3ba65a73860d0aff5614f56592c5e"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-03-11T00:16:58+01:00"
+	BuildTime = "2021-03-11T21:06:24+01:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
 	Tag = "v1.9.16+"
@@ -23,7 +23,7 @@ var (
 func Get() string {
 	return fmt.Sprint(
 		"ParallelCoin Pod\n"+
-		"	URL: "+URL+"\n",
+		"	git repository: "+URL+"\n",
 		"	branch: "+GitRef+"\n"+
 		"	commit: "+GitCommit+"\n"+
 		"	built: "+BuildTime+"\n"+

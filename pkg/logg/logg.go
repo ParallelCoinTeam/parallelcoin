@@ -58,7 +58,7 @@ type (
 
 var (
 	logger_started = time.Now()
-	App            = "<not set>"
+	App            = "   pod"
 	AppColorizer   = color.White.Sprint
 	// sep is just a convenient shortcut for this very longwinded expression
 	sep          = string(os.PathSeparator)
@@ -167,8 +167,7 @@ func AddLoggerSubsystem() (subsystem string) {
 		split := strings.Split(fromRoot, "/")
 		// fmt.Fprintln(os.Stderr, version.PathBase, "file", file, r, fromRoot, split)
 		subsystem = strings.Join(split[:len(split)-1], "/")
-		// subsystem = fromRoot
-		fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
+		// fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
 		allSubsystems = append(allSubsystems, subsystem)
 	}
 	return

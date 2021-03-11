@@ -296,9 +296,9 @@ var (
 
 // Get returns a pretty printed version information string
 func Get() string {
-	return fmt.Sprintf(
+	return fmt.Sprint(
 		"ParallelCoin Pod\n"+
-		"	PathBase: "+URL+"\n",
+		"	git repository: "+URL+"\n",
 		"	branch: "+GitRef+"\n"+
 		"	commit: "+GitCommit+"\n"+
 		"	built: "+BuildTime+"\n"+
