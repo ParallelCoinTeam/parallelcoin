@@ -150,7 +150,7 @@ func TestEstimateVirtualSize(t *testing.T) {
 	for _, test := range tests {
 		tx, e := test.tx()
 		if e != nil  {
-			t.Fatalf("unable to get test tx: %v", err)
+			t.Fatalf("unable to get test tx: %v", e)
 		}
 		est := EstimateVirtualSize(test.p2pkhIns, test.p2wpkhIns,
 			test.nestedp2wpkhIns, tx.TxOut, test.change)

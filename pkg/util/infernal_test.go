@@ -38,27 +38,27 @@ func TstAddressScriptHash(hash [ripemd160.Size]byte,
 	}
 }
 
-// TstAddressWitnessPubKeyHash creates an AddressWitnessPubKeyHash, initiating
-// the fields as given.
-func TstAddressWitnessPubKeyHash(version byte, program [20]byte,
-	hrp string) *AddressWitnessPubKeyHash {
-	return &AddressWitnessPubKeyHash{
-		hrp:            hrp,
-		witnessVersion: version,
-		witnessProgram: program,
-	}
-}
-
-// TstAddressWitnessScriptHash creates an AddressWitnessScriptHash, initiating
-// the fields as given.
-func TstAddressWitnessScriptHash(version byte, program [32]byte,
-	hrp string) *AddressWitnessScriptHash {
-	return &AddressWitnessScriptHash{
-		hrp:            hrp,
-		witnessVersion: version,
-		witnessProgram: program,
-	}
-}
+// // TstAddressWitnessPubKeyHash creates an AddressWitnessPubKeyHash, initiating
+// // the fields as given.
+// func TstAddressWitnessPubKeyHash(version byte, program [20]byte,
+// 	hrp string) *AddressWitnessPubKeyHash {
+// 	return &AddressWitnessPubKeyHash{
+// 		hrp:            hrp,
+// 		witnessVersion: version,
+// 		witnessProgram: program,
+// 	}
+// }
+//
+// // TstAddressWitnessScriptHash creates an AddressWitnessScriptHash, initiating
+// // the fields as given.
+// func TstAddressWitnessScriptHash(version byte, program [32]byte,
+// 	hrp string) *AddressWitnessScriptHash {
+// 	return &AddressWitnessScriptHash{
+// 		hrp:            hrp,
+// 		witnessVersion: version,
+// 		witnessProgram: program,
+// 	}
+// }
 
 // TstAddressPubKey makes an AddressPubKey, setting the unexported fields with the parameters.
 func TstAddressPubKey(serializedPubKey []byte, pubKeyFormat PubKeyFormat,
