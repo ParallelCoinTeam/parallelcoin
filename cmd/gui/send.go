@@ -23,7 +23,7 @@ type SendPage struct {
 func (wg *WalletGUI) GetSendPage() (sp *SendPage) {
 	sp = &SendPage{
 		wg:         wg,
-		inputWidth: 20,
+		inputWidth: 32,
 		break1:     48,
 	}
 	wg.inputs["sendAddress"].SetPasteFunc = sp.pasteFunction
@@ -50,6 +50,7 @@ func (sp *SendPage) Fn(gtx l.Context) l.Dimensions {
 func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 	wg := sp.wg
 	smallWidgets := []l.Widget{
+		sp.InputMessage(),
 		sp.AddressInput(),
 		sp.AmountInput(),
 		sp.MessageInput(),
@@ -82,9 +83,14 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 		ListElement(le).Fn(gtx)
 }
 
+func (sp *SendPage) InputMessage() l.Widget {
+	return sp.wg.Body2("Enter or paste the details for a payment").Alignment(text.Middle).Fn
+}
+
 func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 	wg := sp.wg
 	sendFormWidget := []l.Widget{
+		sp.InputMessage(),
 		sp.AddressInput(),
 		sp.AmountInput(),
 		sp.MessageInput(),
@@ -117,28 +123,32 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 			historyWidget[index],
 		).Fn(gtx)
 	}
-	return wg.Flex().
+	return wg.Flex().AlignStart().
 		Rigid(
 			func(gtx l.Context) l.Dimensions {
 				gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*sp.inputWidth),
 					int(wg.TextSize.V*sp.inputWidth)
-				return wg.lists["sendMedium"].
-					Vertical().
-					Length(len(sendFormWidget)).
-					ListElement(sendLE).Fn(gtx)
+				return wg.VFlex().AlignStart().
+					Rigid(
+						wg.lists["sendMedium"].
+							Vertical().
+							Length(len(sendFormWidget)).
+							ListElement(sendLE).Fn,
+					).Fn(gtx)
 			},
 		).
-		Flexed(
-			1,
-			wg.VFlex().Rigid(
-				sp.AddressbookHeader(),
-			).Flexed(
-				1,
-				wg.lists["sendAddresses"].
-					Vertical().
-					Length(len(historyWidget)).
-					ListElement(historyLE).Fn,
-			).Fn,
+		Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+		Rigid(
+			wg.VFlex().AlignStart().
+				Rigid(
+					sp.AddressbookHeader(),
+				).
+				Rigid(
+					wg.lists["sendAddresses"].
+						Vertical().
+						Length(len(historyWidget)).
+						ListElement(historyLE).Fn,
+				).Fn,
 		).Fn(gtx)
 }
 
@@ -372,13 +382,13 @@ func (sp *SendPage) pasteFunction() (b bool) {
 
 func (sp *SendPage) AddressbookHeader() l.Widget {
 	wg := sp.wg
-	return wg.Flex().Flexed(
-		1,
-		wg.Inset(
-			0.25,
-			wg.H6("Address Book").Alignment(text.Middle).Fn,
-		).Fn,
-	).Fn
+	return wg.Flex().AlignStart().
+		Rigid(
+			wg.Inset(
+				0.25,
+				wg.H6("Address Book").Alignment(text.Middle).Fn,
+			).Fn,
+		).Fn
 }
 
 func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
@@ -414,7 +424,7 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 					Embed(
 						wg.Inset(
 							0.25,
-							wg.VFlex().
+							wg.VFlex().AlignStart().
 								Rigid(
 									wg.Flex().AlignBaseline().
 										Rigid(
@@ -429,12 +439,44 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 										Fn,
 								).
 								Rigid(
-									wg.Caption(wg.State.sendAddresses[i].Label).MaxLines(1).Fn,
+									wg.Inset(
+										0.25,
+										wg.Body1(wg.State.sendAddresses[i].Label).MaxLines(1).Fn,
+									).Fn,
 								).
 								Rigid(
 									gui.If(
 										wg.State.sendAddresses[i].TxID != "",
-										wg.Caption(wg.State.sendAddresses[i].TxID).MaxLines(1).Fn,
+										func(ctx l.Context) l.Dimensions {
+											for j := range wg.txHistoryList {
+												if wg.txHistoryList[j].TxID == wg.State.sendAddresses[i].TxID {
+													return wg.Flex().Flexed(
+														1, wg.Fill(
+															"DocBgDim", l.W, wg.TextSize.V, 0,
+															wg.Inset(
+																0.25,
+																wg.VFlex().
+																	Rigid(
+																		wg.Flex().Flexed(
+																			1,
+																			wg.Caption(wg.State.sendAddresses[i].TxID).MaxLines(1).Fn,
+																		).Fn,
+																	).
+																	Rigid(
+																		wg.Body1(
+																			fmt.Sprint(
+																				"Confirmations: ",
+																				wg.txHistoryList[j].Confirmations,
+																			),
+																		).Fn,
+																	).Fn,
+															).Fn,
+														).Fn,
+													).Fn(gtx)
+												}
+											}
+											return func(ctx l.Context) l.Dimensions { return l.Dimensions{} }(gtx)
+										},
 										func(ctx l.Context) l.Dimensions { return l.Dimensions{} },
 									),
 								).

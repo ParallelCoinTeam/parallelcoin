@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	l "gioui.org/layout"
+	"time"
 	
 	"github.com/p9c/pod/pkg/gui"
 )
@@ -21,35 +22,35 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 					// instead return detail view
 					var out []l.Widget
 					out = []l.Widget{
-						wg.txDetailEntry("Abandoned", fmt.Sprint(txs.Abandoned), "DocBg"),
-						wg.txDetailEntry("Account", fmt.Sprint(txs.Account), "DocBgDim"),
-						wg.txDetailEntry("Address", txs.Address, "DocBg"),
-						wg.txDetailEntry("Block Hash", txs.BlockHash, "DocBgDim"),
-						wg.txDetailEntry("Block Index", fmt.Sprint(txs.BlockIndex), "DocBg"),
-						wg.txDetailEntry("Block Time", fmt.Sprint(txs.BlockTime), "DocBgDim"),
-						wg.txDetailEntry("Category", txs.Category, "DocBg"),
-						wg.txDetailEntry("Confirmations", fmt.Sprint(txs.Confirmations), "DocBgDim"),
-						wg.txDetailEntry("Fee", fmt.Sprintf("%0.8f", txs.Fee), "DocBg"),
-						wg.txDetailEntry("Generated", fmt.Sprint(txs.Generated), "DocBgDim"),
-						wg.txDetailEntry("Involves Watch Only", fmt.Sprint(txs.InvolvesWatchOnly), "DocBg"),
-						wg.txDetailEntry("Time", fmt.Sprint(txs.Time), "DocBgDim"),
-						wg.txDetailEntry("Time Received", fmt.Sprint(txs.TimeReceived), "DocBg"),
-						wg.txDetailEntry("Trusted", fmt.Sprint(txs.Trusted), "DocBgDim"),
-						wg.txDetailEntry("TxID", txs.TxID, "DocBg"),
+						wg.txDetailEntry("Abandoned", fmt.Sprint(txs.Abandoned), "DocBg", false),
+						wg.txDetailEntry("Account", fmt.Sprint(txs.Account), "DocBgDim", false),
+						wg.txDetailEntry("Address", txs.Address, "DocBg", false),
+						wg.txDetailEntry("Block Hash", txs.BlockHash, "DocBgDim", true),
+						wg.txDetailEntry("Block Index", fmt.Sprint(txs.BlockIndex), "DocBg", false),
+						wg.txDetailEntry("Block Time", fmt.Sprint(time.Unix(txs.BlockTime, 0)), "DocBgDim", false),
+						wg.txDetailEntry("Category", txs.Category, "DocBg", false),
+						wg.txDetailEntry("Confirmations", fmt.Sprint(txs.Confirmations), "DocBgDim", false),
+						wg.txDetailEntry("Fee", fmt.Sprintf("%0.8f", txs.Fee), "DocBg", false),
+						wg.txDetailEntry("Generated", fmt.Sprint(txs.Generated), "DocBgDim", false),
+						wg.txDetailEntry("Involves Watch Only", fmt.Sprint(txs.InvolvesWatchOnly), "DocBg", false),
+						wg.txDetailEntry("Time", fmt.Sprint(time.Unix(txs.Time, 0)), "DocBgDim", false),
+						wg.txDetailEntry("Time Received", fmt.Sprint(time.Unix(txs.TimeReceived, 0)), "DocBg", false),
+						wg.txDetailEntry("Trusted", fmt.Sprint(txs.Trusted), "DocBgDim", false),
+						wg.txDetailEntry("TxID", txs.TxID, "DocBg", true),
 						// todo: add WalletConflicts here
-						wg.txDetailEntry("Comment", fmt.Sprintf("%0.8f", txs.Amount), "DocBgDim"),
-						wg.txDetailEntry("OtherAccount", fmt.Sprint(txs.BlockTime), "DocBg"),
+						wg.txDetailEntry("Comment", fmt.Sprintf("%0.8f", txs.Amount), "DocBgDim", false),
+						wg.txDetailEntry("OtherAccount", fmt.Sprint(txs.OtherAccount), "DocBg", false),
 					}
 					le := func(gtx l.Context, index int) l.Dimensions {
 						return out[index](gtx)
 					}
-					return wg.VFlex().
+					return wg.VFlex().AlignStart().
 						Rigid(
 							wg.recentTxCardSummaryButton(&txs, wg.clickables["txPageBack"], "Primary", true),
 							// wg.H6(wg.openTxID.Load()).Fn,
 						).
-						Flexed(
-							1, wg.lists["txdetail"].
+						Rigid(
+							 wg.lists["txdetail"].
 								Vertical().
 								Length(len(out)).
 								ListElement(le).

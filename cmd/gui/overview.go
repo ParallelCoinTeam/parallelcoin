@@ -38,7 +38,7 @@ func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 										wg.Flex().AlignBaseline().
 											Rigid(
 												wg.Body1("confirmed").
-													Color("Light").Fn,
+													Color("DocText").Fn,
 											).
 											Rigid(
 												wg.H6(" ").Fn,
@@ -53,7 +53,7 @@ func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 										wg.Flex().AlignBaseline().
 											Rigid(
 												wg.Body1("unconfirmed").
-													Color("Light").Fn,
+													Color("DocText").Fn,
 											).
 											Rigid(
 												wg.H6(" ").Fn,
@@ -67,7 +67,7 @@ func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 										wg.Flex().AlignBaseline().
 											Rigid(
 												wg.H6("total").
-													Color("Light").Fn,
+													Color("DocText").Fn,
 											).
 											Rigid(
 												wg.H6(" ").Fn,
@@ -98,7 +98,7 @@ func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 															wg.State.balance.Load(),
 														),
 													),
-												).Color("Light").Font("go regular").Fn,
+												).Color("DocText").Font("go regular").Fn,
 											).Fn,
 									).Fn,
 								).
@@ -118,7 +118,7 @@ func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 															wg.State.balanceUnconfirmed.Load(),
 														),
 													),
-												).Color("Light").Font("go regular").Fn,
+												).Color("DocText").Font("go regular").Fn,
 											).Fn,
 									).Fn,
 								).
@@ -137,7 +137,7 @@ func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 																State.balanceUnconfirmed.Load(),
 														),
 													),
-												).Color("Light").Fn,
+												).Color("DocText").Fn,
 											).Fn,
 									).Fn,
 								).
@@ -173,7 +173,8 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 							// ).Fn,
 						).
 						// Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
-						Rigid(
+						Flexed(
+							1,
 							// wg.Inset(0.25,
 							wg.VFlex().AlignStart().
 								Rigid(
@@ -196,7 +197,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 				},
 				{
 					Size: 64,
-					Widget: wg.Flex(). // SpaceAround().AlignStart(). // SpaceSides().AlignMiddle().
+					Widget: wg.Flex().AlignStart().
 						Rigid(
 							// wg.ButtonInset(0.25,
 							wg.VFlex(). // SpaceSides().AlignStart().
@@ -210,7 +211,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 						Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Rigid(
 							// wg.Inset(0.25,
-							wg.VFlex(). // SpaceSides().AlignStart().
+							wg.VFlex().AlignStart().
 								Rigid(
 									wg.Inset(
 										0.25,
@@ -458,7 +459,11 @@ func (wg *WalletGUI) recentTxCardDetail(txs *btcjson.ListTransactionsResult, cli
 		).Fn
 }
 
-func (wg *WalletGUI) txDetailEntry(name, detail string, bgColor string) l.Widget {
+func (wg *WalletGUI) txDetailEntry(name, detail string, bgColor string, small bool) l.Widget {
+	content := wg.Body1
+	if small {
+		content = wg.Caption
+	}
 	return wg.Fill(
 		bgColor, l.Center, wg.TextSize.V, 0,
 		wg.Flex().AlignBaseline().
@@ -477,7 +482,7 @@ func (wg *WalletGUI) txDetailEntry(name, detail string, bgColor string) l.Widget
 				wg.Flex().SpaceStart().Rigid(
 					wg.Inset(
 						0.25,
-						wg.Body1(detail).
+						content(detail).Font("go regular").
 							Color("PanelText").
 							Fn,
 					).Fn,
@@ -564,11 +569,14 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		return out[index](gtx)
 	}
 	wo := func(gtx l.Context) l.Dimensions {
-		return wg.lists[listName].
-			Vertical().
-			Length(len(out)).
-			ListElement(le).
-			Fn(gtx)
+		return wg.VFlex().AlignStart().
+			Rigid(
+				wg.lists[listName].
+					Vertical().
+					Length(len(out)).
+					ListElement(le).
+					Fn,
+			).Fn(gtx)
 	}
 	dbg.Ln(">>>>>>>>>>>>>>>> history widget completed", n, listName)
 	switch listName {

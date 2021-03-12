@@ -24,7 +24,7 @@ type ReceivePage struct {
 func (wg *WalletGUI) GetReceivePage() (rp *ReceivePage) {
 	rp = &ReceivePage{
 		wg:         wg,
-		inputWidth: 20,
+		inputWidth: 32,
 		break1:     48,
 	}
 	rp.sm = rp.SmallList
@@ -49,8 +49,8 @@ func (rp *ReceivePage) Fn(gtx l.Context) l.Dimensions {
 func (rp *ReceivePage) SmallList(gtx l.Context) l.Dimensions {
 	wg := rp.wg
 	smallWidgets := []l.Widget{
-		rp.QRMessage(),
 		wg.Direction().Center().Embed(rp.QRButton()).Fn,
+		rp.InputMessage(),
 		rp.AmountInput(),
 		rp.MessageInput(),
 		rp.RegenerateButton(),
@@ -60,17 +60,25 @@ func (rp *ReceivePage) SmallList(gtx l.Context) l.Dimensions {
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return wg.Inset(0.25, smallWidgets[index]).Fn(gtx)
 	}
-	return wg.lists["receive"].
-		Vertical().
-		Length(len(smallWidgets)).
-		ListElement(le).Fn(gtx)
+	return wg.VFlex().AlignStart().
+		Flexed(
+			1,
+			wg.lists["receive"].
+				Vertical().Start().
+				Length(len(smallWidgets)).
+				ListElement(le).Fn,
+		).Fn(gtx)
+}
+
+func (rp *ReceivePage) InputMessage() l.Widget {
+	return rp.wg.Body2("Input details to request a payment").Alignment(text.Middle).Fn
 }
 
 func (rp *ReceivePage) MediumList(gtx l.Context) l.Dimensions {
 	wg := rp.wg
 	qrWidget := []l.Widget{
-		rp.QRMessage(),
 		wg.Direction().Center().Embed(rp.QRButton()).Fn,
+		rp.InputMessage(),
 		rp.AmountInput(),
 		rp.MessageInput(),
 		rp.RegenerateButton(),
@@ -88,33 +96,37 @@ func (rp *ReceivePage) MediumList(gtx l.Context) l.Dimensions {
 			historyWidget[index],
 		).Fn(gtx)
 	}
-	return wg.Flex().
+	return wg.Flex().AlignStart().
 		Rigid(
 			func(gtx l.Context) l.Dimensions {
 				gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*rp.inputWidth),
 					int(wg.TextSize.V*rp.inputWidth)
-				return wg.lists["receiveMedium"].
-					Vertical().
-					Length(len(qrWidget)).
-					ListElement(qrLE).Fn(gtx)
+				return wg.VFlex().
+					Rigid(
+						wg.lists["receiveMedium"].
+							Vertical().
+							Length(len(qrWidget)).
+							ListElement(qrLE).Fn,
+					).Fn(gtx)
 			},
 		).
-		Flexed(
-			1,
-			wg.VFlex().Rigid(
-				rp.AddressbookHeader(),
-			).Flexed(
-				1,
-				wg.lists["receiveAddresses"].
-					Vertical().
-					Length(len(historyWidget)).
-					ListElement(historyLE).Fn,
-			).Fn,
+		Rigid(
+			wg.VFlex().AlignStart().
+				Rigid(
+					rp.AddressbookHeader(),
+				).
+				Rigid(
+					wg.lists["receiveAddresses"].
+						Vertical().
+						Length(len(historyWidget)).
+						ListElement(historyLE).Fn,
+				).
+				Fn,
 		).Fn(gtx)
 }
 
 func (rp *ReceivePage) Spacer() l.Widget {
-	return rp.wg.Flex().AlignMiddle().Flexed(1, rp.wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn
+	return rp.wg.Flex().AlignMiddle().Flexed(1, rp.wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).Fn
 }
 
 func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
@@ -156,7 +168,7 @@ func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget
 					Embed(
 						wg.Inset(
 							0.25,
-							wg.VFlex().
+							wg.VFlex().AlignStart().
 								Rigid(
 									wg.Flex().AlignBaseline().
 										Rigid(
@@ -208,35 +220,38 @@ func (rp *ReceivePage) QRButton() l.Widget {
 			return l.Dimensions{}
 		}
 	}
-	return wg.Flex().Rigid(
-		wg.ButtonLayout(
-			wg.currentReceiveCopyClickable.SetClick(
-				func() {
-					dbg.Ln("clicked qr code copy clicker")
-					if e := clipboard.WriteAll(rp.urn); err.Chk(e) {
-					}
-				},
-			),
-		).
-			Background("white").
-			Embed(
-				wg.Inset(
-					0.125,
-					wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
+	return wg.VFlex().
+		Rigid(
+			wg.ButtonLayout(
+				wg.currentReceiveCopyClickable.SetClick(
+					func() {
+						dbg.Ln("clicked qr code copy clicker")
+						if e := clipboard.WriteAll(rp.urn); err.Chk(e) {
+						}
+					},
+				),
+			).
+				Background("white").
+				Embed(
+					wg.Inset(
+						0.125,
+						wg.Image().Src(*wg.currentReceiveQRCode).Scale(1).Fn,
+					).Fn,
 				).Fn,
-			).Fn,
+		).Rigid(
+		rp.QRMessage(),
 	).Fn
 }
 
 func (rp *ReceivePage) AddressbookHeader() l.Widget {
 	wg := rp.wg
-	return wg.Flex().Flexed(
-		1,
-		wg.Inset(
-			0.25,
-			wg.H6("Receive Address History").Alignment(text.Middle).Fn,
-		).Fn,
-	).Fn
+	return wg.Flex().
+		Rigid(
+			wg.Inset(
+				0.25,
+				wg.H6("Receive Address History").Alignment(text.Middle).Fn,
+			).Fn,
+		).Fn
 }
 
 func (rp *ReceivePage) AmountInput() l.Widget {

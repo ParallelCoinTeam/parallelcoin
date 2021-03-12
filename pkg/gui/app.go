@@ -59,7 +59,7 @@ type App struct {
 
 type WidgetMap map[string]l.Widget
 
-func (w *Window) App(size *int, activePage *uberatomic.String, invalidate chan struct{}, Break1 float32, ) *App {
+func (w *Window) App(size *int, activePage *uberatomic.String, invalidate chan struct{}, Break1 float32,) *App {
 	mc := w.Clickable()
 	a := &App{
 		Window:              w,
@@ -187,10 +187,13 @@ func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
 			).
 				Fn,
 		).
-		Flexed(1, If(float32(a.Width) >= a.TextSize.Scale(a.Break1).V,
-			a.Direction().W().Embed(a.LogoAndTitle).Fn,
-			a.Direction().Center().Embed(a.LogoAndTitle).Fn,
-		)).
+		Flexed(
+			1, If(
+				float32(a.Width) >= a.TextSize.Scale(a.Break1).V,
+				a.Direction().W().Embed(a.LogoAndTitle).Fn,
+				a.Direction().Center().Embed(a.LogoAndTitle).Fn,
+			),
+		).
 		// Flexed(0.5,
 		// 	EmptyMinWidth(),
 		// ).
@@ -481,16 +484,19 @@ func (a *App) renderSideBar() l.Widget {
 			a.SideBarSize.V = float32(max)
 			gtx.Constraints.Max.X = max
 			gtx.Constraints.Min.X = max
-			out := a.sideBarList.
-				Length(len(a.sideBar)).
-				LeftSide(true).
-				
-				Vertical().
-				// Background("PanelBg").
-				// ScrollWidth(20).
-				// Color("DocText").
-				// Active("Primary").
-				ListElement(le)
+			out := a.VFlex().
+				Rigid(
+					a.sideBarList.
+						Length(len(a.sideBar)).
+						LeftSide(true).
+						Vertical().
+						// Background("PanelBg").
+						// ScrollWidth(20).
+						// Color("DocText").
+						// Active("Primary").
+						ListElement(le).
+						Fn,
+				)
 			// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
 			return out.Fn(gtx)
 		}
