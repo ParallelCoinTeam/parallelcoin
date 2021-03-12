@@ -209,11 +209,12 @@ func (wg *WalletGUI) processWalletBlockNotification() bool {
 	}
 	wg.State.SetBalance(confirmed.ToDUO())
 	var atr []btcjson.ListTransactionsResult
-	// TODO: for some reason this function returns half as many as requested
-	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, 0); err.Chk(e) {
+	// str := wg.State.allTxs.Load()
+	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, /*len(str)*/0); err.Chk(e) {
 		return false
 	}
 	// dbg.Ln(len(atr))
+	// wg.State.SetAllTxs(append(str, atr...))
 	wg.State.SetAllTxs(atr)
 	wg.txMx.Lock()
 	wg.txHistoryList = wg.State.filteredTxs.Load()

@@ -7,8 +7,8 @@ import (
 )
 
 func (wg *WalletGUI) HistoryPage() l.Widget {
-	if wg.HistoryWidget == nil {
-		wg.HistoryWidget = func(gtx l.Context) l.Dimensions {
+	if wg.TxHistoryWidget == nil {
+		wg.TxHistoryWidget = func(gtx l.Context) l.Dimensions {
 			return l.Dimensions{Size: gtx.Constraints.Max}
 		}
 	}
@@ -69,7 +69,7 @@ func (wg *WalletGUI) HistoryPageView() l.Widget {
 		Rigid(
 			// wg.Fill("DocBg", l.Center, wg.TextSize.V, 0,
 			// 	wg.Inset(0.25,
-			wg.HistoryWidget,
+			wg.TxHistoryWidget,
 			// ).Fn,
 			// ).Fn,
 		).Fn
