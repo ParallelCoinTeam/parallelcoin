@@ -91,7 +91,8 @@ type WalletGUI struct {
 	RecentTxsWidget, TxHistoryWidget         l.Widget
 	recentTxsClickables, txHistoryClickables []*gui.Clickable
 	txRecentList, txHistoryList              []btcjson.ListTransactionsResult
-	openTxID                                 *uberatomic.String
+	openTxID, prevOpenTxID                   *uberatomic.String
+	originTxDetail                           string
 	txMx                                     sync.Mutex
 	Syncing                                  *uberatomic.Bool
 	stateLoaded                              *uberatomic.Bool
@@ -117,6 +118,7 @@ type WalletGUI struct {
 func (wg *WalletGUI) Run() (e error) {
 	wg.Syncing = uberatomic.NewBool(false)
 	wg.openTxID = uberatomic.NewString("")
+	wg.prevOpenTxID = uberatomic.NewString("")
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
 	// wg.currentReceiveGetNew = uberatomic.NewBool(false)
@@ -252,7 +254,7 @@ func (wg *WalletGUI) Run() (e error) {
 				).Fn(gtx)
 			},
 			wg.MainApp.Overlay,
-			wg.gracefulShutdown,
+			interrupt.Request,
 			wg.quit,
 		); err.Chk(e) {
 	}
@@ -383,6 +385,7 @@ func (wg *WalletGUI) GetLists() (o ListMap) {
 		"settings":         wg.List(),
 		"received":         wg.List(),
 		"history":          wg.List(),
+		"txdetail":         wg.List(),
 	}
 }
 
