@@ -88,9 +88,10 @@ type WalletGUI struct {
 	passwords                                PasswordMap
 	incdecs                                  IncDecMap
 	console                                  *Console
-	recentTxsClickables, txHistoryClickables []*gui.Clickable
 	RecentTxsWidget, TxHistoryWidget         l.Widget
+	recentTxsClickables, txHistoryClickables []*gui.Clickable
 	txRecentList, txHistoryList              []btcjson.ListTransactionsResult
+	openTxID                                 *uberatomic.String
 	txMx                                     sync.Mutex
 	Syncing                                  *uberatomic.Bool
 	stateLoaded                              *uberatomic.Bool
@@ -115,6 +116,7 @@ type WalletGUI struct {
 
 func (wg *WalletGUI) Run() (e error) {
 	wg.Syncing = uberatomic.NewBool(false)
+	wg.openTxID = uberatomic.NewString("")
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
 	// wg.currentReceiveGetNew = uberatomic.NewBool(false)
