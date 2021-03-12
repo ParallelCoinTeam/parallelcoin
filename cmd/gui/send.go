@@ -10,7 +10,7 @@ import (
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -23,7 +23,7 @@ type SendPage struct {
 func (wg *WalletGUI) GetSendPage() (sp *SendPage) {
 	sp = &SendPage{
 		wg:         wg,
-		inputWidth: 20,
+		inputWidth: 32,
 		break1:     48,
 	}
 	wg.inputs["sendAddress"].SetPasteFunc = sp.pasteFunction
@@ -50,6 +50,7 @@ func (sp *SendPage) Fn(gtx l.Context) l.Dimensions {
 func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 	wg := sp.wg
 	smallWidgets := []l.Widget{
+		sp.InputMessage(),
 		sp.AddressInput(),
 		sp.AmountInput(),
 		sp.MessageInput(),
@@ -82,9 +83,14 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 		ListElement(le).Fn(gtx)
 }
 
+func (sp *SendPage) InputMessage() l.Widget {
+	return sp.wg.Body2("Enter or paste the details for a payment").Alignment(text.Middle).Fn
+}
+
 func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 	wg := sp.wg
 	sendFormWidget := []l.Widget{
+		sp.InputMessage(),
 		sp.AddressInput(),
 		sp.AmountInput(),
 		sp.MessageInput(),
@@ -117,28 +123,32 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 			historyWidget[index],
 		).Fn(gtx)
 	}
-	return wg.Flex().
+	return wg.Flex().AlignStart().
 		Rigid(
 			func(gtx l.Context) l.Dimensions {
 				gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*sp.inputWidth),
 					int(wg.TextSize.V*sp.inputWidth)
-				return wg.lists["sendMedium"].
-					Vertical().
-					Length(len(sendFormWidget)).
-					ListElement(sendLE).Fn(gtx)
+				return wg.VFlex().AlignStart().
+					Rigid(
+						wg.lists["sendMedium"].
+							Vertical().
+							Length(len(sendFormWidget)).
+							ListElement(sendLE).Fn,
+					).Fn(gtx)
 			},
 		).
-		Flexed(
-			1,
-			wg.VFlex().Rigid(
-				sp.AddressbookHeader(),
-			).Flexed(
-				1,
-				wg.lists["sendAddresses"].
-					Vertical().
-					Length(len(historyWidget)).
-					ListElement(historyLE).Fn,
-			).Fn,
+		Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+		Rigid(
+			wg.VFlex().AlignStart().
+				Rigid(
+					sp.AddressbookHeader(),
+				).
+				Rigid(
+					wg.lists["sendAddresses"].
+						Vertical().
+						Length(len(historyWidget)).
+						ListElement(historyLE).Fn,
+				).Fn,
 		).Fn(gtx)
 }
 
@@ -213,13 +223,14 @@ func (sp *SendPage) SendButton() l.Widget {
 									dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
 									return
 								}
+								dbg.Ln("transaction successful", txid)
+								sp.saveForm(txid.String())
+								select {
+								case <-time.After(time.Second * 5):
+								case <-wg.quit:
+								}
 								wg.RecentTransactions(10, "recent")
 								wg.RecentTransactions(-1, "history")
-								dbg.Ln("transaction successful", txid)
-								// prevent accidental double clicks recording the same entry again
-								wg.inputs["sendAmount"].SetText("")
-								wg.inputs["sendMessage"].SetText("")
-								wg.inputs["sendAddress"].SetText("")
 							}
 						}()
 					},
@@ -236,6 +247,45 @@ func (sp *SendPage) SendButton() l.Widget {
 			Fn(gtx)
 	}
 }
+func (sp *SendPage) saveForm(txid string) {
+	wg := sp.wg
+	dbg.Ln("processing form data to save")
+	amtS := wg.inputs["sendAmount"].GetText()
+	var e error
+	var amt float64
+	if amt, e = strconv.ParseFloat(amtS, 64); err.Chk(e) {
+		return
+	}
+	if amt == 0 {
+		return
+	}
+	var ua util.Amount
+	if ua, e = util.NewAmount(amt); err.Chk(e) {
+		return
+	}
+	msg := wg.inputs["sendMessage"].GetText()
+	if msg == "" {
+		return
+	}
+	addr := wg.inputs["sendAddress"].GetText()
+	var ad util.Address
+	if ad, e = util.DecodeAddress(addr, wg.cx.ActiveNet); err.Chk(e) {
+		return
+	}
+	wg.State.sendAddresses = append(
+		wg.State.sendAddresses, AddressEntry{
+			Address: ad.EncodeAddress(),
+			Label:   msg,
+			Amount:  ua,
+			Created: time.Now(),
+			TxID:    txid,
+		},
+	)
+	// prevent accidental double clicks recording the same entry again
+	wg.inputs["sendAmount"].SetText("")
+	wg.inputs["sendMessage"].SetText("")
+	wg.inputs["sendAddress"].SetText("")
+}
 
 func (sp *SendPage) SaveButton() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
@@ -247,43 +297,7 @@ func (sp *SendPage) SaveButton() l.Widget {
 		return wg.ButtonLayout(
 			wg.clickables["sendSave"].
 				SetClick(
-					func() {
-						dbg.Ln("clicked save button")
-						amtS := wg.inputs["sendAmount"].GetText()
-						var e error
-						var amt float64
-						if amt, e = strconv.ParseFloat(amtS, 64); err.Chk(e) {
-							return
-						}
-						if amt == 0 {
-							return
-						}
-						var ua util.Amount
-						if ua, e = util.NewAmount(amt); err.Chk(e) {
-							return
-						}
-						msg := wg.inputs["sendMessage"].GetText()
-						if msg == "" {
-							return
-						}
-						addr := wg.inputs["sendAddress"].GetText()
-						var ad util.Address
-						if ad, e = util.DecodeAddress(addr, wg.cx.ActiveNet); err.Chk(e) {
-							return
-						}
-						wg.State.sendAddresses = append(
-							wg.State.sendAddresses, AddressEntry{
-								Address: ad.EncodeAddress(),
-								Label:   msg,
-								Amount:  ua,
-								Created: time.Now(),
-							},
-						)
-						// prevent accidental double clicks recording the same entry again
-						wg.inputs["sendAmount"].SetText("")
-						wg.inputs["sendMessage"].SetText("")
-						wg.inputs["sendAddress"].SetText("")
-					},
+					func() { sp.saveForm("") },
 				),
 		).
 			Background("Primary").
@@ -368,13 +382,13 @@ func (sp *SendPage) pasteFunction() (b bool) {
 
 func (sp *SendPage) AddressbookHeader() l.Widget {
 	wg := sp.wg
-	return wg.Flex().Flexed(
-		1,
-		wg.Inset(
-			0.25,
-			wg.H6("Address Book").Alignment(text.Middle).Fn,
-		).Fn,
-	).Fn
+	return wg.Flex().AlignStart().
+		Rigid(
+			wg.Inset(
+				0.25,
+				wg.H6("Address Book").Alignment(text.Middle).Fn,
+			).Fn,
+		).Fn
 }
 
 func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
@@ -410,7 +424,7 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 					Embed(
 						wg.Inset(
 							0.25,
-							wg.VFlex().
+							wg.VFlex().AlignStart().
 								Rigid(
 									wg.Flex().AlignBaseline().
 										Rigid(
@@ -425,7 +439,46 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 										Fn,
 								).
 								Rigid(
-									wg.Caption(wg.State.sendAddresses[i].Label).MaxLines(1).Fn,
+									wg.Inset(
+										0.25,
+										wg.Body1(wg.State.sendAddresses[i].Label).MaxLines(1).Fn,
+									).Fn,
+								).
+								Rigid(
+									gui.If(
+										wg.State.sendAddresses[i].TxID != "",
+										func(ctx l.Context) l.Dimensions {
+											for j := range wg.txHistoryList {
+												if wg.txHistoryList[j].TxID == wg.State.sendAddresses[i].TxID {
+													return wg.Flex().Flexed(
+														1, wg.Fill(
+															"DocBgDim", l.W, wg.TextSize.V, 0,
+															wg.Inset(
+																0.25,
+																wg.VFlex().
+																	Rigid(
+																		wg.Flex().Flexed(
+																			1,
+																			wg.Caption(wg.State.sendAddresses[i].TxID).MaxLines(1).Fn,
+																		).Fn,
+																	).
+																	Rigid(
+																		wg.Body1(
+																			fmt.Sprint(
+																				"Confirmations: ",
+																				wg.txHistoryList[j].Confirmations,
+																			),
+																		).Fn,
+																	).Fn,
+															).Fn,
+														).Fn,
+													).Fn(gtx)
+												}
+											}
+											return func(ctx l.Context) l.Dimensions { return l.Dimensions{} }(gtx)
+										},
+										func(ctx l.Context) l.Dimensions { return l.Dimensions{} },
+									),
 								).
 								Fn,
 						).

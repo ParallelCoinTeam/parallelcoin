@@ -257,7 +257,7 @@ func AddFilteredSubsystem(hl string) struct{} {
 
 func getTimeText(level int32) string {
 	since := time.Now().Sub(logger_started).Round(time.Millisecond).String()
-	diff := 9 - len(since)
+	diff := 12 - len(since)
 	if diff > 0 {
 		since = strings.Repeat(" ", diff) + since + " "
 	}

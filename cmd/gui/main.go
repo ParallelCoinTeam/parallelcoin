@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	log "github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/urfave/cli"
 	
@@ -27,7 +27,7 @@ import (
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 )
 
 func Main(cx *conte.Xt, c *cli.Context) (e error) {
@@ -66,40 +66,42 @@ type WalletGUI struct {
 	ChainClient, WalletClient *rpcclient.Client
 	WalletWatcher             qu.C
 	*gui.Window
-	Size                         *int
-	MainApp                      *gui.App
-	invalidate                   qu.C
-	unlockPage                   *gui.App
-	loadingPage                  *gui.App
-	config                       *cfg.Config
-	configs                      cfg.GroupsMap
-	unlockPassword               *gui.Password
-	sidebarButtons               []*gui.Clickable
-	buttonBarButtons             []*gui.Clickable
-	statusBarButtons             []*gui.Clickable
-	receiveAddressbookClickables []*gui.Clickable
-	sendAddressbookClickables    []*gui.Clickable
-	quitClickable                *gui.Clickable
-	bools                        BoolMap
-	lists                        ListMap
-	checkables                   CheckableMap
-	clickables                   ClickableMap
-	inputs                       InputMap
-	passwords                    PasswordMap
-	incdecs                      IncDecMap
-	console                      *Console
-	RecentTransactionsWidget     l.Widget
-	HistoryWidget                l.Widget
-	txRecentList, txHistoryList  []btcjson.ListTransactionsResult
-	txMx                         sync.Mutex
-	Syncing                      *uberatomic.Bool
-	stateLoaded                  *uberatomic.Bool
-	currentReceiveQRCode         *paint.ImageOp
-	currentReceiveAddress        string
-	currentReceiveQR             l.Widget
-	currentReceiveRegenClickable *gui.Clickable
-	currentReceiveCopyClickable  *gui.Clickable
-	currentReceiveRegenerate     *uberatomic.Bool
+	Size                                     *int
+	MainApp                                  *gui.App
+	invalidate                               qu.C
+	unlockPage                               *gui.App
+	loadingPage                              *gui.App
+	config                                   *cfg.Config
+	configs                                  cfg.GroupsMap
+	unlockPassword                           *gui.Password
+	sidebarButtons                           []*gui.Clickable
+	buttonBarButtons                         []*gui.Clickable
+	statusBarButtons                         []*gui.Clickable
+	receiveAddressbookClickables             []*gui.Clickable
+	sendAddressbookClickables                []*gui.Clickable
+	quitClickable                            *gui.Clickable
+	bools                                    BoolMap
+	lists                                    ListMap
+	checkables                               CheckableMap
+	clickables                               ClickableMap
+	inputs                                   InputMap
+	passwords                                PasswordMap
+	incdecs                                  IncDecMap
+	console                                  *Console
+	RecentTxsWidget, TxHistoryWidget         l.Widget
+	recentTxsClickables, txHistoryClickables []*gui.Clickable
+	txRecentList, txHistoryList              []btcjson.ListTransactionsResult
+	openTxID, prevOpenTxID                   *uberatomic.String
+	originTxDetail                           string
+	txMx                                     sync.Mutex
+	Syncing                                  *uberatomic.Bool
+	stateLoaded                              *uberatomic.Bool
+	currentReceiveQRCode                     *paint.ImageOp
+	currentReceiveAddress                    string
+	currentReceiveQR                         l.Widget
+	currentReceiveRegenClickable             *gui.Clickable
+	currentReceiveCopyClickable              *gui.Clickable
+	currentReceiveRegenerate                 *uberatomic.Bool
 	// currentReceiveGetNew         *uberatomic.Bool
 	sendClickable *gui.Clickable
 	ready         *uberatomic.Bool
@@ -115,6 +117,8 @@ type WalletGUI struct {
 
 func (wg *WalletGUI) Run() (e error) {
 	wg.Syncing = uberatomic.NewBool(false)
+	wg.openTxID = uberatomic.NewString("")
+	wg.prevOpenTxID = uberatomic.NewString("")
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
 	// wg.currentReceiveGetNew = uberatomic.NewBool(false)
@@ -250,7 +254,7 @@ func (wg *WalletGUI) Run() (e error) {
 				).Fn(gtx)
 			},
 			wg.MainApp.Overlay,
-			wg.gracefulShutdown,
+			interrupt.Request,
 			wg.quit,
 		); err.Chk(e) {
 	}
@@ -381,6 +385,7 @@ func (wg *WalletGUI) GetLists() (o ListMap) {
 		"settings":         wg.List(),
 		"received":         wg.List(),
 		"history":          wg.List(),
+		"txdetail":         wg.List(),
 	}
 }
 

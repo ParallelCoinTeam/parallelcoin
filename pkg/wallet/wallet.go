@@ -1775,23 +1775,26 @@ func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) (txList []btcjson.
 	return
 }
 
-// ListTransactions returns a slice of objects with details about a recorded transaction. This is intended to be used
-// for listtransactions RPC replies.
+// ListTransactions returns a slice of objects with details about a recorded
+// transaction. This is intended to be used for listtransactions RPC replies.
 func (w *Wallet) ListTransactions(from, count int) (txList []btcjson.ListTransactionsResult, e error) {
 	// txList := []btcjson.ListTransactionsResult{}
 	// trc.Ln("ListTransactions", from, count)
 	if e = walletdb.View(
 		w.db, func(tx walletdb.ReadTx) (e error) {
 			txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
-			// Get current block. The block height used for calculating the number of tx confirmations.
+			// Get current block. The block height used for calculating the number of tx
+			// confirmations.
 			syncBlock := w.Manager.SyncedTo()
 			dbg.Ln("synced to", syncBlock)
-			// Need to skip the first from transactions, and after those, only include the next count transactions.
+			// Need to skip the first from transactions, and after those, only include the
+			// next count transactions.
 			skipped := 0
 			n := 0
 			rangeFn := func(details []wtxmgr.TxDetails) (bool, error) {
-				// Iterate over transactions at this height in reverse order. This does nothing for unmined transactions,
-				// which are unsorted, but it will process mined transactions in the reverse order they were marked mined.
+				// Iterate over transactions at this height in reverse order. This does nothing
+				// for unmined transactions, which are unsorted, but it will process mined
+				// transactions in the reverse order they were marked mined.
 				for i := len(details) - 1; i >= 0; i-- {
 					if from > skipped {
 						skipped++
@@ -1812,7 +1815,8 @@ func (w *Wallet) ListTransactions(from, count int) (txList []btcjson.ListTransac
 				}
 				return false, nil
 			}
-			// Return newer results first by starting at mempool height and working down to the genesis block.
+			// Return newer results first by starting at mempool height and working down to
+			// the genesis block.
 			return w.TxStore.RangeTransactions(txmgrNs, -1, 0, rangeFn)
 		},
 	); err.Chk(e) {

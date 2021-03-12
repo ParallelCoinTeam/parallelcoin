@@ -84,7 +84,7 @@ func NewUnsignedTransaction(
 	fetchInputs InputSource, fetchChange ChangeSource,
 ) (*AuthoredTx, error) {
 	targetAmount := h.SumOutputValues(outputs)
-	estimatedSize := txsizes.EstimateVirtualSize(0, 1, 0, outputs, true)
+	estimatedSize := txsizes.EstimateVirtualSize(1, 0, 0, outputs, true)
 	targetFee := txrules.FeeForSerializeSize(relayFeePerKb, estimatedSize)
 	for {
 		inputAmount, inputs, inputValues, scripts, e := fetchInputs(targetAmount + targetFee)
@@ -96,13 +96,13 @@ func NewUnsignedTransaction(
 		}
 		// We count the types of inputs, which we'll use to estimate the vsize of the transaction.
 		var nested, p2wpkh, p2pkh int
-		for _, pkScript := range scripts {
+		for _, /*pkScript*/_ = range scripts {
 			switch {
-			// If this is a p2sh output, we assume this is a nested P2WKH.
-			case txscript.IsPayToScriptHash(pkScript):
-				nested++
-			case txscript.IsPayToWitnessPubKeyHash(pkScript):
-				p2wpkh++
+			// // If this is a p2sh output, we assume this is a nested P2WKH.
+			// case txscript.IsPayToScriptHash(pkScript):
+			// 	nested++
+			// case txscript.IsPayToWitnessPubKeyHash(pkScript):
+			// 	p2wpkh++
 			default:
 				p2pkh++
 			}
@@ -127,13 +127,13 @@ func NewUnsignedTransaction(
 		changeAmount := inputAmount - targetAmount - maxRequiredFee
 		if changeAmount != 0 && !txrules.IsDustAmount(
 			changeAmount,
-			txsizes.P2WPKHPkScriptSize, relayFeePerKb,
+			txsizes.P2PKHPkScriptSize, relayFeePerKb,
 		) {
 			changeScript, e := fetchChange()
 			if e != nil {
 				return nil, e
 			}
-			if len(changeScript) > txsizes.P2WPKHPkScriptSize {
+			if len(changeScript) > txsizes.P2PKHPkScriptSize {
 				return nil, errors.New(
 					"fee estimation requires change " +
 						"scripts no larger than P2WPKH output scripts",
