@@ -151,7 +151,7 @@ func newColors() (c *Colors) {
 	c.m["Secondary"] = c.m["SecondaryLight"]
 	
 	c.m["DocText"] = c.m["dark"]
-	c.m["DocBg"] = c.m["white"]
+	c.m["DocBg"] = c.m["light"]
 	
 	c.m["PanelText"] = c.m["dark"]
 	c.m["PanelBg"] = c.m["light"]

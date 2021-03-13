@@ -17,12 +17,12 @@
    inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
    width="1024"
    height="1024"
-   inkscape:export-filename="/go/src/gitlab.com/parallelcoin/parallelcoin/src/qt/res/icons/bitcoin.png"
-   inkscape:export-xdpi="18.75"
-   inkscape:export-ydpi="18.75"><metadata
+   inkscape:export-filename="/home/loki/src/github.com/p9c/pod/pkg/gui/logo/logo_nobg1024x1024.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"><metadata
    id="metadata3783"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata>
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata>
     <defs
    id="defs3781">
 	
@@ -61,7 +61,7 @@
 </style>
     
     <path
-   style="fill:#ffffff;stroke-width:12.8;fill-opacity:1"
+   style="fill:#cfcfcf;stroke-width:12.8;fill-opacity:1"
    d="m 577.285,190.72 c -37.11999,0 -71.67999,7.68 -102.4,25.6 -30.71999,19.2 -53.775,42.25997 -72.975,71.69997 -10.24,15.36 -17.90499,32 -23.02499,51.2 -5.12,17.92 -7.67501,37.10003 -7.67501,56.30003 v 224 134.4 c 29.44,29.44 53.74,52.49024 69.1,67.85024 V 695.04499 542.72 464.64499 395.52 c 0,-38.4 12.82,-70.39501 39.7,-97.27501 25.6,-26.88 58.87501,-39.67501 97.275,-39.67501 38.4,0 70.395,12.79501 97.275,39.67501 26.88,26.88 39.675,58.87501 39.675,97.27501 0,38.4 -14.065,70.41997 -42.225,97.29997 -28.16,26.88 -60.165,38.39501 -94.725,39.67501 v 17.92499 53.75001 c 19.2,0 38.4,-2.555 57.6,-7.675 16.64,-5.12 34.56,-14.085 51.2,-24.325 29.44,-17.92 52.48,-42.24998 70.4,-74.24998 17.92,-30.72 26.875,-65.26003 26.875,-101.10003 0,-37.12 -7.675,-71.68 -26.875,-102.4 -17.92,-30.72 -40.96,-53.77498 -70.4,-72.97498 -16.64,-10.24 -32,-17.90502 -51.2,-23.02502 -17.92,-5.12 -38.4,-7.69997 -57.6,-7.69997 z m -1.275,139.52499 c -35.84,0 -65.3,29.43501 -65.3,65.27501 0,37.12 28.18,66.57997 65.3,65.29997 35.84,0 65.275,-29.45997 65.275,-65.29997 0,-35.84 -29.435,-65.27501 -65.275,-65.27501 z M 250.885,369.92 v 102.4 172.8 c 14.08,15.36 38.405,38.40499 69.125,69.12499 V 369.92 h -55.05 z"
    id="rect3819-7"
    inkscape:connector-curvature="0"
