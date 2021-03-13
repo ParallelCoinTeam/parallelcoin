@@ -466,3 +466,6 @@ func ReadCAFile(config *Config) []byte {
 	}
 	return certs
 }
+
+var subsystem = logg.AddLoggerSubsystem()
+var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
