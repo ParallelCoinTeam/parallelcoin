@@ -124,6 +124,9 @@ func _getOnePrinter(level int32, subsystem string) LevelPrinter {
 // one character, similar to nmcli's argument processor, as the first letter is
 // unique. This could be used with a linter to make larger command sets.
 func SetLogLevel(l string) {
+	if l == "" {
+		l = "info"
+	}
 	fmt.Fprintln(os.Stderr, "setting log level", l)
 	lvl := logLevels.Info
 	for i := range LevelSpecs {
