@@ -163,6 +163,7 @@ func AddLoggerSubsystem() (subsystem string) {
 	_, file, _, ok = runtime.Caller(1)
 	if ok {
 		r := strings.Split(file, version.PathBase)
+		fmt.Fprintln(os.Stderr, spew.Sdump(r))
 		fromRoot := r[1]
 		split := strings.Split(fromRoot, "/")
 		// fmt.Fprintln(os.Stderr, version.PathBase, "file", file, r, fromRoot, split)
