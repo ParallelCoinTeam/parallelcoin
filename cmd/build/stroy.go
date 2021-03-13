@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -146,7 +145,7 @@ func writeVersionFile() bool {
 	if rr, e = repo.Remotes(); e != nil {
 		return false
 	}
-	spew.Dump(rr)
+	// spew.Dump(rr)
 	for i := range rr {
 		rs := rr[i].String()
 		if strings.HasPrefix(rs, "origin") {

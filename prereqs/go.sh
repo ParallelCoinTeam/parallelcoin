@@ -1,6 +1,7 @@
 #!/bin/bash
 cd $HOME
 wget -c https://golang.org/dl/go1.16.2.linux-amd64.tar.gz
+sudo rm -rf go
 tar xvf go1.16.2.linux-amd64.tar.gz
 cat >> $HOME/.bashrc <<- EOM
 export GOPATH=\$HOME
