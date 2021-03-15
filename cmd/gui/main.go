@@ -293,7 +293,7 @@ func (wg *WalletGUI) GetInputs() InputMap {
 		"sendMessage": wg.Input("", "Description", "DocText", "PanelBg", "DocBg", func(pass string) {}),
 		
 		"console":    wg.Input("", "enter rpc command", "DocText", "Transparent", "PanelBg", func(pass string) {}),
-		"walletSeed": wg.Input(seedString, "wallet seed", "DocText", "Transparent", "PanelBg", func(pass string) {}),
+		"walletSeed": wg.Input(seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(pass string) {}),
 	}
 }
 
@@ -301,14 +301,14 @@ func (wg *WalletGUI) GetPasswords() {
 	pass := ""
 	passConfirm := ""
 	wg.passwords = PasswordMap{
-		"passEditor":        wg.Password("password", &pass, "Primary", "DocText", "DocBg", func(pass string) {}),
-		"confirmPassEditor": wg.Password("confirm", &passConfirm, "Primary", "DocText", "DocBg", func(pass string) {}),
+		"passEditor":        wg.Password("password (minimum 8 characters length)", &pass, "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"confirmPassEditor": wg.Password("confirm", &passConfirm, "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		"publicPassEditor": wg.Password(
 			"public password (optional)",
 			wg.cx.Config.WalletPass,
 			"Primary",
 			"DocText",
-			"",
+			"PanelBg",
 			func(pass string) {},
 		),
 	}
@@ -405,6 +405,7 @@ func (wg *WalletGUI) GetClickables() ClickableMap {
 		"transactions50":          wg.Clickable(),
 		"txPageForward":           wg.Clickable(),
 		"txPageBack":              wg.Clickable(),
+		"theme":                   wg.Clickable(),
 	}
 }
 
@@ -418,6 +419,8 @@ func (wg *WalletGUI) GetBools() BoolMap {
 		"encryption":   wg.Bool(false),
 		"seed":         wg.Bool(false),
 		"testnet":      wg.Bool(false),
+		"lan":          wg.Bool(false),
+		"solo":         wg.Bool(false),
 		"ihaveread":    wg.Bool(false),
 		"showGenerate": wg.Bool(true),
 		"showSent":     wg.Bool(true),

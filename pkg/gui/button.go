@@ -43,7 +43,7 @@ func (w *Window) Button(btn *Clickable) *Button {
 		font:         font,
 		color:        w.Colors.GetNRGBAFromName("DocBg"),
 		cornerRadius: w.TextSize.Scale(0.25),
-		background:   w.Colors.GetNRGBAFromName("DocText"),
+		background:   w.Colors.GetNRGBAFromName("Primary"),
 		textSize:     w.TextSize,
 		inset: &l.Inset{
 			Top:    w.TextSize.Scale(0.5),
@@ -138,7 +138,7 @@ func (b *Button) Fn(gtx l.Context) l.Dimensions {
 		return b.inset.Layout(
 			gtx, func(gtx l.Context) l.Dimensions {
 				// paint.ColorOp{Color: b.color}.Add(gtx.Ops)
-				return b.Flex().Flexed(1, b.Label().Text(b.text).TextScale(b.textSize.V/b.TextSize.V).Fn).Fn(gtx)
+				return b.Flex().Rigid(b.Label().Text(b.text).TextScale(b.textSize.V / b.TextSize.V).Fn).Fn(gtx)
 				// b.Window.Text().
 				// Alignment(text.Middle).
 				// Fn(gtx, b.shaper, b.font, b.textSize, b.text)

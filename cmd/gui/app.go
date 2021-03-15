@@ -21,7 +21,7 @@ import (
 func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"), wg.invalidate, Break1).SetMainDirection(l.W)
 	wg.MainApp = a
-	wg.MainApp.ThemeHook(
+	wg.MainApp.SetThemeHook(
 		func() {
 			dbg.Ln("theme hook")
 			// dbg.Ln(wg.bools)

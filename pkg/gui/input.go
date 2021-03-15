@@ -32,8 +32,10 @@ type Input struct {
 
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
-func (w *Window) Input(txt, hint, borderColorFocused, borderColorUnfocused,
-	backgroundColor string, handle func(txt string), ) *Input {
+func (w *Window) Input(
+	txt, hint, borderColorFocused, borderColorUnfocused,
+	backgroundColor string, handle func(txt string),
+) *Input {
 	editor := w.Editor().SingleLine().Submit(true)
 	input := w.TextInput(editor, hint).TextScale(1)
 	p := &Input{
@@ -140,10 +142,13 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 	// gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
 	return in.Border().Width(0.125).CornerRadius(0.0).
 		Corners(0).Color(in.borderColor).Embed(
-		in.Fill(in.backgroundColor, l.Center, in.TextSize.V, 0,
-			in.Inset(0.25,
+		in.Fill(
+			in.backgroundColor, l.Center, in.TextSize.V, 0,
+			in.Inset(
+				0.25,
 				in.Flex().
-					Flexed(1,
+					Flexed(
+						1,
 						in.Inset(0.125, in.input.Color("DocText").Fn).Fn,
 					).
 					Rigid(
@@ -169,5 +174,6 @@ func (in *Input) Fn(gtx l.Context) l.Dimensions {
 					).
 					Fn,
 			).Fn,
-		).Fn).Fn(gtx)
+		).Fn,
+	).Fn(gtx)
 }

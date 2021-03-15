@@ -4,7 +4,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 )
 
 type Theme struct {
@@ -22,6 +22,7 @@ type Theme struct {
 
 // NewTheme creates a new theme to use for rendering a user interface
 func NewTheme(fontCollection []text.FontFace, quit qu.C) (th *Theme) {
+	dark := false
 	th = &Theme{
 		quit:          quit,
 		shaper:        text.NewCache(fontCollection),
@@ -30,6 +31,7 @@ func NewTheme(fontCollection []text.FontFace, quit qu.C) (th *Theme) {
 		Colors:        newColors(),
 		scrollBarSize: 0,
 		iconCache:     make(IconCache),
+		Dark:          &dark,
 	}
 	return
 }

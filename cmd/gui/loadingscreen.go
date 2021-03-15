@@ -11,7 +11,7 @@ import (
 
 func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate, Break1).SetMainDirection(l.Center + 1)
-	a.ThemeHook(
+	a.SetThemeHook(
 		func() {
 			dbg.Ln("theme hook")
 			// dbg.Ln(wg.bools)

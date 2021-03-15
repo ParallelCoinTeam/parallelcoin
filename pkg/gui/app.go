@@ -17,29 +17,29 @@ import (
 // pop-over layers
 type App struct {
 	*Window
-	activePage          *uberatomic.String
-	invalidate          chan struct{}
-	bodyBackground      string
-	bodyColor           string
-	cardBackground      string
-	cardColor           string
-	buttonBar           []l.Widget
-	hideSideBar         bool
-	hideTitleBar        bool
-	layers              []l.Widget
-	logo                *[]byte
-	logoClickable       *Clickable
-	themeHook           func()
-	menuBackground      string
-	menuButton          *IconButton
-	menuClickable       *Clickable
-	menuColor           string
-	menuIcon            *[]byte
-	MenuOpen            bool
-	pages               WidgetMap
-	root                *Stack
-	sideBar             []l.Widget
-	sideBarBackground   string
+	activePage     *uberatomic.String
+	invalidate     chan struct{}
+	bodyBackground string
+	bodyColor      string
+	cardBackground string
+	cardColor      string
+	buttonBar      []l.Widget
+	hideSideBar    bool
+	hideTitleBar   bool
+	layers         []l.Widget
+	Logo           *[]byte
+	LogoClickable  *Clickable
+	ThemeHook      func()
+	menuBackground string
+	menuButton     *IconButton
+	menuClickable  *Clickable
+	menuColor      string
+	menuIcon       *[]byte
+	MenuOpen       bool
+	pages          WidgetMap
+	root           *Stack
+	sideBar        []l.Widget
+	sideBarBackground string
 	sideBarColor        string
 	SideBarSize         *unit.Value
 	sideBarList         *List
@@ -79,8 +79,8 @@ func (w *Window) App(size *int, activePage *uberatomic.String, invalidate chan s
 		statusBarBackground: "DocBg",
 		statusBarColor:      "DocText",
 		sideBarList:         w.List(),
-		logo:                &p9icons.ParallelCoin,
-		logoClickable:       w.Clickable(),
+		Logo:                &p9icons.ParallelCoin,
+		LogoClickable:       w.Clickable(),
 		title:               "parallelcoin",
 		titleBarBackground:  "Primary",
 		titleBarColor:       "DocBg",
@@ -300,13 +300,13 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 							Inset(
 								0.25, a.
 									IconButton(
-										a.logoClickable.
+										a.LogoClickable.
 											SetClick(
 												func() {
 													dbg.Ln("clicked logo")
 													*a.Theme.Dark = !*a.Theme.Dark
 													a.Theme.Colors.SetTheme(*a.Theme.Dark)
-													a.themeHook()
+													a.ThemeHook()
 												},
 											),
 									).
@@ -314,7 +314,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 										a.Icon().
 											Scale(Scales["H6"]).
 											Color("DocText").
-											Src(a.logo),
+											Src(a.Logo),
 									).
 									Background("Transparent").Color("DocText").
 									ButtonInset(0.25).
@@ -336,13 +336,13 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 							Inset(
 								0.25, a.
 									IconButton(
-										a.logoClickable.
+										a.LogoClickable.
 											SetClick(
 												func() {
 													dbg.Ln("clicked logo")
 													*a.Theme.Dark = !*a.Theme.Dark
 													a.Theme.Colors.SetTheme(*a.Theme.Dark)
-													a.themeHook()
+													a.ThemeHook()
 												},
 											),
 									).
@@ -350,7 +350,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 										a.Icon().
 											Scale(Scales["H6"]).
 											Color("DocText").
-											Src(a.logo),
+											Src(a.Logo),
 									).
 									Background("Transparent").Color("DocText").
 									ButtonInset(0.25).
@@ -700,8 +700,8 @@ func (a *App) TitleGet() string {
 	return a.title
 }
 
-func (a *App) ThemeHook(f func()) *App {
-	a.themeHook = f
+func (a *App) SetThemeHook(f func()) *App {
+	a.ThemeHook = f
 	return a
 }
 
