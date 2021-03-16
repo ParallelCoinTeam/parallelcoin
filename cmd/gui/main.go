@@ -484,6 +484,7 @@ func (wg *WalletGUI) GetClickables() ClickableMap {
 		"createWallet":            wg.Clickable(),
 		"createVerify":            wg.Clickable(),
 		"createShuffle":           wg.Clickable(),
+		"createRestore":           wg.Clickable(),
 		"genesis":                 wg.Clickable(),
 		"autofill":                wg.Clickable(),
 		"quit":                    wg.Clickable(),
