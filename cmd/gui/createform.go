@@ -201,6 +201,7 @@ func (wg *WalletGUI) createWalletFormWidgets() (out []l.Widget) {
 								*wg.cx.Config.LAN = b
 								if *wg.cx.Config.Solo {
 									*wg.cx.Config.Solo = false
+									*wg.cx.Config.MinerPass = "pa55word"
 									wg.bools["solo"].Value(false)
 									wg.Invalidate()
 								}
