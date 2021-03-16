@@ -360,10 +360,12 @@ func (wg *WalletGUI) GetInputs() Inputs {
 		"walletRestore": wg.Input(
 			/*wg.createWords*/ "", "enter seed to restore", "DocText", "DocBg", "PanelBg", func(string) {},
 			func(seedWords string) {
+				var e error
 				wg.createMatch = seedWords
-				if bip39.IsMnemonicValid(seedWords) {
-					wg.createWords = seedWords
+				if wg.createSeed, e = bip39.EntropyFromMnemonic(seedWords); err.Chk(e) {
+					return
 				}
+				wg.createWords = seedWords
 				wg.Invalidate()
 			},
 		),

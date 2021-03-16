@@ -1,10 +1,10 @@
 package gui
 
 import (
-	"encoding/hex"
 	"fmt"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/util/qu"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"os"
 	"time"
@@ -202,7 +202,8 @@ func (wg *WalletGUI) createWalletAction() {
 		string(os.PathSeparator) + wallet.DbName
 	dbDir := *wg.cx.Config.WalletFile
 	loader := wallet.NewLoader(wg.cx.ActiveNet, dbDir, 250)
-	seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())
+	// seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())
+	seed := wg.createSeed
 	pass := []byte(wg.passwords["passEditor"].GetPassword())
 	*wg.cx.Config.WalletPass = string(pass)
 	dbg.Ln("password", string(pass))
@@ -214,7 +215,7 @@ func (wg *WalletGUI) createWalletAction() {
 		time.Now(),
 		false,
 		wg.cx.Config,
-		nil,
+		qu.T(),
 	)
 	dbg.Ln("*** created wallet")
 	if err.Chk(e) {
@@ -229,7 +230,33 @@ func (wg *WalletGUI) createWalletAction() {
 	*wg.cx.Config.NodeOff = false
 	*wg.cx.Config.WalletOff = false
 	save.Pod(wg.cx.Config)
+	// // we are going to assume the config is not manually misedited
+	// if apputil.FileExists(*wg.cx.Config.ConfigFile) {
+	// 	b, e := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
+	// 	if e == nil {
+	// 		wg.cx.Config, wg.cx.ConfigMap = pod.EmptyConfig()
+	// 		e = json.Unmarshal(b, wg.cx.Config)
+	// 		if e != nil {
+	// 			err.Ln("error unmarshalling config", e)
+	// 			// os.Exit(1)
+	// 			panic(e)
+	// 		}
+	// 	} else {
+	// 		ftl.Ln("unexpected error reading configuration file:", e)
+	// 		// os.Exit(1)
+	// 		// return e
+	// 		panic(e)
+	// 	}
+	// }
 	*wg.noWallet = false
+	// interrupt.Request()
+	// wg.wallet.Stop()
+	// wg.wallet.Start()
+	// wg.node.Start()
+	// wg.miner.Start()
+	wg.unlockPassword.Editor().SetText(string(pass))
+	wg.unlockWallet(string(pass))
+	interrupt.RequestRestart()
 }
 
 func (wg *WalletGUI) createWalletTestnetToggle(b bool) {

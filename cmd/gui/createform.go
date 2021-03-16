@@ -235,19 +235,6 @@ func (wg *WalletGUI) cwfSetAutofill() l.Widget {
 	}
 }
 
-// func (wg *WalletGUI) cwf() l.Widget {
-// 	return
-// }
-// func (wg *WalletGUI) cwf() l.Widget {
-// 	return
-// }
-// func (wg *WalletGUI) cwf() l.Widget {
-// 	return
-// }
-// func (wg *WalletGUI) cwf() l.Widget {
-// 	return
-// }
-
 func (wg *WalletGUI) cwfSeedHeader() l.Widget {
 	return wg.Flex(). //AlignMiddle().
 		Rigid(
@@ -399,7 +386,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 								*wg.cx.Config.Solo = false
 								*wg.cx.Config.MinerPass = "pa55word"
 								*wg.cx.Config.DisableDNSSeed = true
-								*wg.cx.Config.AutoListen = true
+								*wg.cx.Config.AutoListen = false
 								wg.bools["solo"].Value(false)
 								wg.Invalidate()
 							} else {
@@ -432,7 +419,8 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 							if b && *wg.cx.Config.LAN {
 								*wg.cx.Config.LAN = false
 								*wg.cx.Config.DisableDNSSeed = true
-								*wg.cx.Config.AutoListen = true
+								*wg.cx.Config.AutoListen = false
+								*wg.cx.Config.MinerPass = "pa55word"
 								wg.bools["lan"].Value(false)
 								wg.Invalidate()
 							} else {
