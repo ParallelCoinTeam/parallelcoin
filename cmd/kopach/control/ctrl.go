@@ -397,7 +397,9 @@ func (s *State) getBlkTemplateGenerator() *mining.BlkTmplGenerator {
 // address
 func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *templates.Message, e error) {
 	trc.Ln("GetMsgBlockTemplate")
+	rand.Seed(time.Now().Unix())
 	mbt = &templates.Message{
+		Nonce:     rand.Uint64(),
 		UUID:      s.uuid,
 		PrevBlock: prev.MsgBlock().BlockHash(),
 		Height:    prev.Height() + 1,
@@ -556,6 +558,11 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 	if s.uuid != so.UUID {
 		dbg.Ln("solution not from current controller", s.uuid, s.msgBlockTemplate.UUID, so.UUID)
 		return
+	}
+	// todo: s.msgBlockTemplate needs to be changed into an array of 3 to keep the
+	//  last 3, then search them here
+	if so.Nonce != s.msgBlockTemplate.Nonce {
+		dbg.Ln("sollution nonce is not known by this controller")
 	}
 	var newHeader *wire.BlockHeader
 	if newHeader, e = so.Decode(); err.Chk(e) {

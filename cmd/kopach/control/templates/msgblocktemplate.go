@@ -3,7 +3,7 @@ package templates
 import (
 	"errors"
 	"github.com/niubaoshu/gotiny"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"time"
 )
@@ -17,9 +17,11 @@ type (
 	Txs map[int32][]*wire.MsgTx
 )
 
-// Message describes a message that a mining worker can use to
-// construct a block to mine on.
+// Message describes a message that a mining worker can use to construct a block
+// to mine on, as well the extra data required to reconstruct any version block
+// mined by the miner
 type Message struct {
+	Nonce     uint64
 	UUID      uint64
 	Height    int32
 	PrevBlock chainhash.Hash

@@ -284,13 +284,10 @@ var handlers = transport.Handlers{
 			trc.Ln("not active")
 			return
 		}
-		
-		// dbg.S(b)
 		jr := templates.Message{}
 		gotiny.Unmarshal(b, &jr)
 		w.height = jr.Height
 		cN := jr.UUID
-		// addr := net.JoinHostPort(iP.String(), fmt.Sprint(cP))
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != cN && firstSender != 0
 		if otherSent {
