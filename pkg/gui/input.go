@@ -33,8 +33,8 @@ type Input struct {
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
 
 func (w *Window) Input(
-	txt, hint, borderColorFocused, borderColorUnfocused,
-	backgroundColor string, handle func(txt string),
+	txt, hint, borderColorFocused, borderColorUnfocused, backgroundColor string,
+	submit, change func(txt string),
 ) *Input {
 	editor := w.Editor().SingleLine().Submit(true)
 	input := w.TextInput(editor, hint).TextScale(1)
@@ -114,13 +114,11 @@ func (w *Window) Input(
 	p.editor.SetText(txt).SetSubmit(
 		func(txt string) {
 			go func() {
-				handle(txt)
+				submit(txt)
 			}()
 		},
 	).SetChange(
-		func(txt string) {
-			// send keystrokes to the NSA
-		},
+		change,
 	)
 	p.editor.SetFocus(
 		func(is bool) {

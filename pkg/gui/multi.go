@@ -45,8 +45,7 @@ func (w *Window) Multiline(
 		m.inputLocation = -1
 		m.handle(*m.lines)
 	}
-	m.input = w.Input("", "", borderColorFocused, borderColorUnfocused,
-		backgroundColor, handleChange)
+	m.input = w.Input("", "", borderColorFocused, borderColorUnfocused, backgroundColor, handleChange, nil)
 	m.clickables = append(m.clickables, (*Clickable)(nil))
 	// m.buttons = append(m.buttons, (*ButtonLayout)(nil))
 	m.removeClickables = append(m.removeClickables, (*Clickable)(nil))

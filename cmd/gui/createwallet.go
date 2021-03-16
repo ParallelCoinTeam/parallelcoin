@@ -15,7 +15,6 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
@@ -118,32 +117,7 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 					).
 					Flexed(
 						1,
-						gui.EmptyMinWidth(),
-						// wg.Inset(
-						// 	0.5,
-						// 	func(gtx l.Context) l.Dimensions {
-						// 		return wg.CheckBox(
-						// 			wg.bools["ihaveread"].SetOnChange(
-						// 				func(b bool) {
-						// 					dbg.Ln("confirmed read", b)
-						// 					// if the password has been entered, we need to copy it to the variable
-						// 					if wg.createWalletPasswordsMatch() {
-						// 						wg.cx.Config.Lock()
-						// 						*wg.cx.Config.WalletPass = wg.passwords["confirmPassEditor"].GetPassword()
-						// 						wg.cx.Config.Unlock()
-						// 					}
-						// 				},
-						// 			),
-						// 		).
-						// 			IconColor("Primary").
-						// 			TextColor("DocText").
-						// 			Text(
-						// 				"I have stored the seed and password safely " +
-						// 					"and understand it cannot be recovered",
-						// 			).
-						// 			Fn(gtx)
-						// 	},
-						// ).Fn,
+						gui.EmptyMaxWidth(),
 					).
 					Rigid(
 						func(gtx l.Context) l.Dimensions {
@@ -218,16 +192,7 @@ func (wg *WalletGUI) createWalletPasswordsMatch() bool {
 }
 
 func (wg *WalletGUI) createWalletInputsAreValid() bool {
-	var b []byte
-	var e error
-	seedValid := true
-	if b, e = hex.DecodeString(wg.inputs["walletSeed"].GetText()); err.Chk(e) {
-		seedValid = false
-	} else if len(b) != 0 && len(b) < hdkeychain.MinSeedBytes ||
-		len(b) > hdkeychain.MaxSeedBytes {
-		seedValid = false
-	}
-	return wg.createWalletPasswordsMatch() && seedValid && wg.bools["ihaveread"].GetValue()
+	return wg.createWalletPasswordsMatch() && wg.bools["ihaveread"].GetValue() && wg.createWords == wg.createMatch
 }
 
 func (wg *WalletGUI) createWalletAction() {

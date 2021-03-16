@@ -1,8 +1,11 @@
 package gui
 
 import (
+	"crypto/rand"
+	"github.com/tyler-smith/go-bip39"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 	
@@ -48,8 +51,8 @@ type BoolMap map[string]*gui.Bool
 type ListMap map[string]*gui.List
 type CheckableMap map[string]*gui.Checkable
 type ClickableMap map[string]*gui.Clickable
-type InputMap map[string]*gui.Input
-type PasswordMap map[string]*gui.Password
+type Inputs map[string]*gui.Input
+type Passwords map[string]*gui.Password
 type IncDecMap map[string]*gui.IncDec
 
 type WalletGUI struct {
@@ -84,8 +87,8 @@ type WalletGUI struct {
 	lists                                    ListMap
 	checkables                               CheckableMap
 	clickables                               ClickableMap
-	inputs                                   InputMap
-	passwords                                PasswordMap
+	inputs                                   Inputs
+	passwords                                Passwords
 	incdecs                                  IncDecMap
 	console                                  *Console
 	RecentTxsWidget, TxHistoryWidget         l.Widget
@@ -113,6 +116,9 @@ type WalletGUI struct {
 	SendPage    *SendPage
 	// toasts                    *toast.Toasts
 	// dialog                    *dialog.Dialog
+	createSeed                          []byte
+	createWords, showWords, createMatch string
+	createVerifying                     bool
 }
 
 func (wg *WalletGUI) Run() (e error) {
@@ -149,7 +155,7 @@ func (wg *WalletGUI) Run() (e error) {
 	)
 	wg.bools = wg.GetBools()
 	wg.inputs = wg.GetInputs()
-	wg.GetPasswords()
+	wg.passwords = wg.GetPasswords()
 	// wg.toasts = toast.New(wg.th)
 	// wg.dialog = dialog.New(wg.th)
 	wg.console = wg.ConsolePage()
@@ -279,29 +285,112 @@ func (wg *WalletGUI) GetButtons() {
 	}
 }
 
-func (wg *WalletGUI) GetInputs() InputMap {
-	// seed := make([]byte, hdkeychain.MaxSeedBytes)
-	// _, _ = rand.Read(seed)
-	// seedString := hex.EncodeToString(seed)
-	seedString := "f4d2c4c542bb52512ed9e6bbfa2d000e576a0c8b4ebd1acafd7efa37247366bc"
-	return InputMap{
-		"receiveAmount":  wg.Input("", "Amount", "DocText", "PanelBg", "DocBg", func(amt string) {}),
-		"receiveMessage": wg.Input("", "Description", "DocText", "PanelBg", "DocBg", func(pass string) {}),
+func (wg *WalletGUI) ShuffleSeed() {
+	wg.createSeed = make([]byte, 32)
+	_, _ = rand.Read(wg.createSeed)
+	var e error
+	var wk string
+	if wk, e = bip39.NewMnemonic(wg.createSeed); err.Chk(e) {
+		panic(e)
+	}
+	wg.createWords = wk
+	// wg.createMatch = wk
+	wks := strings.Split(wk, " ")
+	var out string
+	for i := 0; i < 24; i += 4 {
+		out += strings.Join(wks[i:i+4], " ")
+		if i+4 < 24 {
+			out += "\n"
+		}
+	}
+	wg.showWords = out
+}
+
+func (wg *WalletGUI) GetInputs() Inputs {
+	wg.ShuffleSeed()
+	return Inputs{
+		"receiveAmount": wg.Input("", "Amount", "DocText", "PanelBg", "DocBg", func(amt string) {}, func(string) {}),
+		"receiveMessage": wg.Input(
+			"",
+			"Description",
+			"DocText",
+			"PanelBg",
+			"DocBg",
+			func(pass string) {},
+			func(string) {},
+		),
 		
-		"sendAddress": wg.Input("", "Parallelcoin Address", "DocText", "PanelBg", "DocBg", func(amt string) {}),
-		"sendAmount":  wg.Input("", "Amount", "DocText", "PanelBg", "DocBg", func(amt string) {}),
-		"sendMessage": wg.Input("", "Description", "DocText", "PanelBg", "DocBg", func(pass string) {}),
+		"sendAddress": wg.Input(
+			"",
+			"Parallelcoin Address",
+			"DocText",
+			"PanelBg",
+			"DocBg",
+			func(amt string) {},
+			func(string) {},
+		),
+		"sendAmount": wg.Input("", "Amount", "DocText", "PanelBg", "DocBg", func(amt string) {}, func(string) {}),
+		"sendMessage": wg.Input(
+			"",
+			"Description",
+			"DocText",
+			"PanelBg",
+			"DocBg",
+			func(pass string) {},
+			func(string) {},
+		),
 		
-		"console":    wg.Input("", "enter rpc command", "DocText", "Transparent", "PanelBg", func(pass string) {}),
-		"walletSeed": wg.Input(seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"console": wg.Input(
+			"",
+			"enter rpc command",
+			"DocText",
+			"Transparent",
+			"PanelBg",
+			func(pass string) {},
+			func(string) {},
+		),
+		"walletWords": wg.Input(
+			/*wg.createWords*/ "", "wallet word seed", "DocText", "DocBg", "PanelBg", func(string) {},
+			func(seedWords string) {
+				wg.createMatch = seedWords
+				wg.Invalidate()
+			},
+		),
+		// "walletSeed": wg.Input(
+		// 	seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(seedHex string) {
+		// 		var e error
+		// 		if wg.createSeed, e = hex.DecodeString(seedHex); err.Chk(e) {
+		// 			return
+		// 		}
+		// 		var wk string
+		// 		if wk, e = bip39.NewMnemonic(wg.createSeed); err.Chk(e) {
+		// 			panic(e)
+		// 		}
+		// 		wg.createWords=wk
+		// 		wks := strings.Split(wk, " ")
+		// 		var out string
+		// 		for i := 0; i < 24; i += 4 {
+		// 			out += strings.Join(wks[i:i+4], " ") + "\n"
+		// 		}
+		// 		wg.showWords = out
+		// 	}, nil,
+		// ),
 	}
 }
 
-func (wg *WalletGUI) GetPasswords() {
+// GetPasswords returns the passwords used in the wallet GUI
+func (wg *WalletGUI) GetPasswords() (passwords Passwords) {
 	pass := ""
 	passConfirm := ""
-	wg.passwords = PasswordMap{
-		"passEditor":        wg.Password("password (minimum 8 characters length)", &pass, "DocText", "DocBg", "PanelBg", func(pass string) {}),
+	passwords = Passwords{
+		"passEditor": wg.Password(
+			"password (minimum 8 characters length)",
+			&pass,
+			"DocText",
+			"DocBg",
+			"PanelBg",
+			func(pass string) {},
+		),
 		"confirmPassEditor": wg.Password("confirm", &passConfirm, "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		"publicPassEditor": wg.Password(
 			"public password (optional)",
@@ -312,6 +401,7 @@ func (wg *WalletGUI) GetPasswords() {
 			func(pass string) {},
 		),
 	}
+	return
 }
 
 func (wg *WalletGUI) GetIncDecs() IncDecMap {
@@ -392,6 +482,10 @@ func (wg *WalletGUI) GetLists() (o ListMap) {
 func (wg *WalletGUI) GetClickables() ClickableMap {
 	return ClickableMap{
 		"createWallet":            wg.Clickable(),
+		"createVerify":            wg.Clickable(),
+		"createShuffle":           wg.Clickable(),
+		"genesis":                 wg.Clickable(),
+		"autofill":                wg.Clickable(),
 		"quit":                    wg.Clickable(),
 		"sendSend":                wg.Clickable(),
 		"sendSave":                wg.Clickable(),
