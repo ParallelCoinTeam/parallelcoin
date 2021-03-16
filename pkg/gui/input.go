@@ -61,6 +61,7 @@ func (w *Window) Input(
 	clearClickableFn := func() {
 		p.editor.SetText("")
 		p.editor.Focus()
+		p.editor.changeHook("")
 	}
 	copyClickableFn := func() {
 		if e := clipboard.WriteAll(p.editor.Text()); err.Chk(e) {
@@ -88,6 +89,7 @@ func (w *Window) Input(
 		p.editor.SetText(txt)
 		p.editor.Move(col + len(cb))
 		p.editor.Focus()
+		p.editor.changeHook(txt)
 	}
 	p.clearButton.
 		Icon(
