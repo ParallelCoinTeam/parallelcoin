@@ -119,6 +119,7 @@ type WalletGUI struct {
 	createSeed                          []byte
 	createWords, showWords, createMatch string
 	createVerifying                     bool
+	restoring                           bool
 }
 
 func (wg *WalletGUI) Run() (e error) {
@@ -353,6 +354,16 @@ func (wg *WalletGUI) GetInputs() Inputs {
 			/*wg.createWords*/ "", "wallet word seed", "DocText", "DocBg", "PanelBg", func(string) {},
 			func(seedWords string) {
 				wg.createMatch = seedWords
+				wg.Invalidate()
+			},
+		),
+		"walletRestore": wg.Input(
+			/*wg.createWords*/ "", "enter seed to restore", "DocText", "DocBg", "PanelBg", func(string) {},
+			func(seedWords string) {
+				wg.createMatch = seedWords
+				if bip39.IsMnemonicValid(seedWords) {
+					wg.createWords = seedWords
+				}
 				wg.Invalidate()
 			},
 		),

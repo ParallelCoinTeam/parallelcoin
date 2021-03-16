@@ -25,20 +25,22 @@ func (wg *WalletGUI) CreateWalletPage(gtx l.Context) l.Dimensions {
 	le := func(gtx l.Context, index int) l.Dimensions {
 		return wg.Inset(0.25, walletForm[index]).Fn(gtx)
 	}
-	return wg.Fill(
-		"DocBg", l.Center, 0, 0,
-		// wg.Inset(
-		// 	0.5,
-		wg.VFlex().
-			Flexed(
-				1,
-				wg.lists["createWallet"].Vertical().Start().Length(len(walletForm)).ListElement(le).Fn,
-			).
-			Rigid(
-				wg.createConfirmExitBar(),
-			).Fn,
-		// ).Fn,
-	).Fn(gtx)
+	return func(gtx l.Context) l.Dimensions {
+		return wg.Fill(
+			"DocBg", l.Center, 0, 0,
+			// wg.Inset(
+			// 	0.5,
+			wg.VFlex().
+				Flexed(
+					1,
+					wg.lists["createWallet"].Vertical().Start().Length(len(walletForm)).ListElement(le).Fn,
+				).
+				Rigid(
+					wg.createConfirmExitBar(),
+				).Fn,
+			// ).Fn,
+		).Fn(gtx)
+	}(gtx)
 }
 
 func (wg *WalletGUI) createConfirmExitBar() l.Widget {
@@ -49,136 +51,133 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 		// 			).Fn,
 		// 		).
 		Rigid(
-			wg.Inset(
-				0.25,
-				
-				wg.Flex().
-					Rigid(
-						func(gtx l.Context) l.Dimensions {
-							if !wg.createWalletInputsAreValid() {
-								gtx = gtx.Disabled()
-							}
-							return wg.Flex().
-								Rigid(
-									wg.ButtonLayout(
-										wg.clickables["createWallet"].SetClick(
-											func() {
-												go wg.createWalletAction()
-											},
-										),
-									).
-										CornerRadius(0).
-										Corners(0).
-										Background("Primary").
-										Embed(
-											// wg.Fill("DocText",
-											wg.Inset(
-												0.25,
-												wg.Flex().AlignMiddle().
-													Rigid(
-														wg.Icon().
-															Scale(
-																gui.
-																	Scales["H4"],
-															).
-															Color("DocText").
-															Src(
-																&icons.
-																	ContentCreate,
-															).Fn,
-													).
-													Rigid(
-														wg.Inset(
-															0.5,
-															gui.EmptySpace(
-																0,
-																0,
-															),
-														).Fn,
-													).
-													Rigid(
-														wg.H6("create").Color("DocText").Fn,
-													).
-													Rigid(
-														wg.Inset(
-															0.5,
-															gui.EmptySpace(
-																0,
-																0,
-															),
-														).Fn,
-													).
-													Fn,
-											).Fn,
-										).Fn,
+			
+			wg.Flex().
+				Rigid(
+					func(gtx l.Context) l.Dimensions {
+						if !wg.createWalletInputsAreValid() {
+							gtx = gtx.Disabled()
+						}
+						return wg.Flex().
+							Rigid(
+								wg.ButtonLayout(
+									wg.clickables["createWallet"].SetClick(
+										func() {
+											go wg.createWalletAction()
+										},
+									),
 								).
-								Fn(gtx)
-						},
-					).
-					Flexed(
-						1,
-						gui.EmptyMaxWidth(),
-					).
-					Rigid(
-						func(gtx l.Context) l.Dimensions {
-							return wg.Flex().
-								Rigid(
-									wg.ButtonLayout(
-										wg.clickables["quit"].SetClick(
-											func() {
-												interrupt.Request()
-											},
-										),
-									).
-										CornerRadius(0.5).
-										Corners(0).
-										Background("PanelBg").
-										Embed(
-											wg.Inset(
-												0.25,
-												wg.Flex().AlignMiddle().
-													Rigid(
-														wg.Icon().
-															Scale(
-																gui.
-																	Scales["H4"],
-															).
-															Color("DocText").
-															Src(
-																&icons.
-																	MapsDirectionsRun,
-															).Fn,
-													).
-													Rigid(
-														wg.Inset(
-															0.5,
-															gui.EmptySpace(
-																0,
-																0,
-															),
+									CornerRadius(0).
+									Corners(0).
+									Background("Primary").
+									Embed(
+										// wg.Fill("DocText",
+										wg.Inset(
+											0.25,
+											wg.Flex().AlignMiddle().
+												Rigid(
+													wg.Icon().
+														Scale(
+															gui.
+																Scales["H4"],
+														).
+														Color("DocText").
+														Src(
+															&icons.
+																ContentCreate,
 														).Fn,
-													).
-													Rigid(
-														wg.H6("exit").Color("DocText").Fn,
-													).
-													Rigid(
-														wg.Inset(
-															0.5,
-															gui.EmptySpace(
-																0,
-																0,
-															),
-														).Fn,
-													).
-													Fn,
-											).Fn,
+												).
+												Rigid(
+													wg.Inset(
+														0.5,
+														gui.EmptySpace(
+															0,
+															0,
+														),
+													).Fn,
+												).
+												Rigid(
+													wg.H6("create").Color("DocText").Fn,
+												).
+												Rigid(
+													wg.Inset(
+														0.5,
+														gui.EmptySpace(
+															0,
+															0,
+														),
+													).Fn,
+												).
+												Fn,
 										).Fn,
+									).Fn,
+							).
+							Fn(gtx)
+					},
+				).
+				Flexed(
+					1,
+					gui.EmptyMaxWidth(),
+				).
+				Rigid(
+					func(gtx l.Context) l.Dimensions {
+						return wg.Flex().
+							Rigid(
+								wg.ButtonLayout(
+									wg.clickables["quit"].SetClick(
+										func() {
+											interrupt.Request()
+										},
+									),
 								).
-								Fn(gtx)
-						},
-					).
-					Fn,
-			).Fn,
+									CornerRadius(0.5).
+									Corners(0).
+									Background("PanelBg").
+									Embed(
+										wg.Inset(
+											0.25,
+											wg.Flex().AlignMiddle().
+												Rigid(
+													wg.Icon().
+														Scale(
+															gui.
+																Scales["H4"],
+														).
+														Color("DocText").
+														Src(
+															&icons.
+																MapsDirectionsRun,
+														).Fn,
+												).
+												Rigid(
+													wg.Inset(
+														0.5,
+														gui.EmptySpace(
+															0,
+															0,
+														),
+													).Fn,
+												).
+												Rigid(
+													wg.H6("exit").Color("DocText").Fn,
+												).
+												Rigid(
+													wg.Inset(
+														0.5,
+														gui.EmptySpace(
+															0,
+															0,
+														),
+													).Fn,
+												).
+												Fn,
+										).Fn,
+									).Fn,
+							).
+							Fn(gtx)
+					},
+				).
+				Fn,
 		).
 		Fn
 }
