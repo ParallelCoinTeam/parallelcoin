@@ -354,6 +354,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 							if !b {
 								wg.bools["solo"].Value(false)
 								wg.bools["lan"].Value(false)
+								*wg.cx.Config.MinerPass = "pa55word"
 								*wg.cx.Config.Solo, *wg.cx.Config.LAN = false, false
 								wg.ShuffleSeed()
 								wg.createVerifying = false
@@ -384,14 +385,15 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 							*wg.cx.Config.LAN = b
 							if b && *wg.cx.Config.Solo {
 								*wg.cx.Config.Solo = false
-								*wg.cx.Config.MinerPass = "pa55word"
 								*wg.cx.Config.DisableDNSSeed = true
 								*wg.cx.Config.AutoListen = false
 								wg.bools["solo"].Value(false)
+								*wg.cx.Config.MinerPass = "pa55word"
 								wg.Invalidate()
 							} else {
 								*wg.cx.Config.Solo = false
 								*wg.cx.Config.DisableDNSSeed = false
+								*wg.cx.Config.MinerPass = "pa55word"
 								*wg.cx.Config.AutoListen = true
 							}
 							save.Pod(wg.cx.Config)
@@ -426,6 +428,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 							} else {
 								*wg.cx.Config.LAN = false
 								*wg.cx.Config.DisableDNSSeed = false
+								*wg.cx.Config.MinerPass = "pa55word"
 								*wg.cx.Config.AutoListen = true
 							}
 							save.Pod(wg.cx.Config)

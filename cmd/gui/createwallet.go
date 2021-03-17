@@ -55,6 +55,68 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 			wg.Flex().
 				Rigid(
 					func(gtx l.Context) l.Dimensions {
+						return wg.Flex().
+							Rigid(
+								wg.ButtonLayout(
+									wg.clickables["quit"].SetClick(
+										func() {
+											interrupt.Request()
+										},
+									),
+								).
+									CornerRadius(0.5).
+									Corners(0).
+									Background("PanelBg").
+									Embed(
+										wg.Inset(
+											0.25,
+											wg.Flex().AlignMiddle().
+												Rigid(
+													wg.Icon().
+														Scale(
+															gui.
+																Scales["H4"],
+														).
+														Color("DocText").
+														Src(
+															&icons.
+																MapsDirectionsRun,
+														).Fn,
+												).
+												Rigid(
+													wg.Inset(
+														0.5,
+														gui.EmptySpace(
+															0,
+															0,
+														),
+													).Fn,
+												).
+												Rigid(
+													wg.H6("exit").Color("DocText").Fn,
+												).
+												Rigid(
+													wg.Inset(
+														0.5,
+														gui.EmptySpace(
+															0,
+															0,
+														),
+													).Fn,
+												).
+												Fn,
+										).Fn,
+									).Fn,
+							).
+							Fn(gtx)
+					},
+				).
+				Flexed(
+					1,
+					gui.EmptyMaxWidth(),
+				).
+				Rigid(
+					func(gtx l.Context) l.Dimensions {
 						if !wg.createWalletInputsAreValid() {
 							gtx = gtx.Disabled()
 						}
@@ -98,68 +160,6 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 												).
 												Rigid(
 													wg.H6("create").Color("DocText").Fn,
-												).
-												Rigid(
-													wg.Inset(
-														0.5,
-														gui.EmptySpace(
-															0,
-															0,
-														),
-													).Fn,
-												).
-												Fn,
-										).Fn,
-									).Fn,
-							).
-							Fn(gtx)
-					},
-				).
-				Flexed(
-					1,
-					gui.EmptyMaxWidth(),
-				).
-				Rigid(
-					func(gtx l.Context) l.Dimensions {
-						return wg.Flex().
-							Rigid(
-								wg.ButtonLayout(
-									wg.clickables["quit"].SetClick(
-										func() {
-											interrupt.Request()
-										},
-									),
-								).
-									CornerRadius(0.5).
-									Corners(0).
-									Background("PanelBg").
-									Embed(
-										wg.Inset(
-											0.25,
-											wg.Flex().AlignMiddle().
-												Rigid(
-													wg.Icon().
-														Scale(
-															gui.
-																Scales["H4"],
-														).
-														Color("DocText").
-														Src(
-															&icons.
-																MapsDirectionsRun,
-														).Fn,
-												).
-												Rigid(
-													wg.Inset(
-														0.5,
-														gui.EmptySpace(
-															0,
-															0,
-														),
-													).Fn,
-												).
-												Rigid(
-													wg.H6("exit").Color("DocText").Fn,
 												).
 												Rigid(
 													wg.Inset(
