@@ -29,6 +29,7 @@ import (
 	"go.uber.org/atomic"
 	"math/rand"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -40,6 +41,7 @@ const (
 
 // State stores the state of the controller
 type State struct {
+	sync.Mutex
 	cfg               *pod.Config
 	node              *chainrpc.Node
 	rpcServer         *chainrpc.Server
@@ -214,22 +216,21 @@ out:
 		s.mining.Store(false)
 		if s.walletClient.Disconnected() {
 			dbg.Ln("wallet client is disconnected, retrying")
-			if e = s.startWallet(); !err.Chk(e) {
-				dbg.Ln("wallet client is connected, switching to running")
-				
+			if e = s.startWallet(); err.Chk(e) {
 			}
 		}
-		s.updateBlockTemplate()
+		dbg.Ln("wallet client is connected, switching to running")
+		// s.updateBlockTemplate()
 	pausing:
 		for {
 			select {
 			case <-s.mempoolUpdateChan:
-				s.updateBlockTemplate()
-			case <-s.blockUpdate:
+				// s.updateBlockTemplate()
+			case bu := <-s.blockUpdate:
 				dbg.Ln("received new block update while paused")
-				// if e = s.doBlockUpdate(bu); err.Chk(e) {
-				// }
-				s.updateBlockTemplate()
+				if e = s.doBlockUpdate(bu); err.Chk(e) {
+				}
+				// s.updateBlockTemplate()
 			case <-ticker.C:
 				dbg.Ln("controller ticker running")
 				s.Advertise()
@@ -264,9 +265,11 @@ out:
 				dbg.Ln("sending out templates...")
 				if e = s.multiConn.SendMany(job.Magic, s.templateShards); err.Chk(e) {
 				}
-			case <-s.blockUpdate:
-				dbg.Ln("received new block update while running")
-				s.updateBlockTemplate()
+			case bu := <-s.blockUpdate:
+				// _ = bu
+				// dbg.Ln("received new block update while running")
+				if e = s.doBlockUpdate(bu); err.Chk(e) {
+				}
 				dbg.Ln("sending out templates...")
 				if e = s.multiConn.SendMany(job.Magic, s.templateShards); err.Chk(e) {
 				}
@@ -518,19 +521,21 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
 			if e = s.rpcServer.Cfg.ConnMgr.Connect(
 				peerIP,
-				true,
+				false,
 			); err.Chk(e) {
 				continue
 			}
 			dbg.Ln("connected to peer via address", peerIP)
 			s.otherNodes[uuid] = &nodeSpec{}
 			s.otherNodes[uuid].addr = addr
+			s.otherNodes[uuid].Time = time.Now()
 			break
 		}
+	} else {
+		// update last seen time for uuid for garbage collection of stale disconnected
+		// nodes
+		s.otherNodes[uuid].Time = time.Now()
 	}
-	// update last seen time for uuid for garbage collection of stale disconnected
-	// nodes
-	s.otherNodes[uuid].Time = time.Now()
 	// If we lose connection for more than 9 seconds we delete and if the node
 	// reappears it can be reconnected
 	for i := range s.otherNodes {

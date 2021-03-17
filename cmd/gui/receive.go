@@ -24,7 +24,7 @@ type ReceivePage struct {
 func (wg *WalletGUI) GetReceivePage() (rp *ReceivePage) {
 	rp = &ReceivePage{
 		wg:         wg,
-		inputWidth: 32,
+		inputWidth: 24,
 		break1:     48,
 	}
 	rp.sm = rp.SmallList

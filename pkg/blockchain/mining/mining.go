@@ -878,9 +878,10 @@ mempoolLoop:
 	dbg.C(
 		func() string {
 			return fmt.Sprintf(
-				"created new block template (algo %s, %d transactions, "+
+				"created new block template (height %d algo %s, %d transactions, "+
 					"%d in fees, %d signature operations cost, %d weight, "+
 					"target difficulty %064x prevblockhash %064x %064x subsidy %d)",
+				nextBlockHeight,
 				algo,
 				len(msgBlock.Transactions),
 				totalFees,
@@ -893,6 +894,7 @@ mempoolLoop:
 			)
 		},
 	)
+	dbg.S(msgBlock.Header)
 	// Tracec(func() string { return spew.Sdump(msgBlock) })
 	return &BlockTemplate{
 		Block:           &msgBlock,

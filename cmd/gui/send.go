@@ -23,7 +23,7 @@ type SendPage struct {
 func (wg *WalletGUI) GetSendPage() (sp *SendPage) {
 	sp = &SendPage{
 		wg:         wg,
-		inputWidth: 32,
+		inputWidth: 24,
 		break1:     48,
 	}
 	wg.inputs["sendAddress"].SetPasteFunc = sp.pasteFunction
@@ -223,14 +223,14 @@ func (sp *SendPage) SendButton() l.Widget {
 									dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
 									return
 								}
+								wg.RecentTransactions(10, "recent")
+								wg.RecentTransactions(-1, "history")
 								dbg.Ln("transaction successful", txid)
 								sp.saveForm(txid.String())
 								select {
 								case <-time.After(time.Second * 5):
 								case <-wg.quit:
 								}
-								wg.RecentTransactions(10, "recent")
-								wg.RecentTransactions(-1, "history")
 							}
 						}()
 					},
