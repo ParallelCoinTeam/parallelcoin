@@ -50,6 +50,7 @@ func (sp *SendPage) Fn(gtx l.Context) l.Dimensions {
 func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 	wg := sp.wg
 	smallWidgets := []l.Widget{
+		wg.balanceCard(),
 		sp.InputMessage(),
 		sp.AddressInput(),
 		sp.AmountInput(),
@@ -75,7 +76,7 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 	}
 	smallWidgets = append(smallWidgets, sp.GetAddressbookHistoryCards("DocBg")...)
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return wg.Inset(0.25, smallWidgets[index]).Fn(gtx)
+		return smallWidgets[index](gtx)
 	}
 	return wg.lists["send"].
 		Vertical().
@@ -84,12 +85,13 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 }
 
 func (sp *SendPage) InputMessage() l.Widget {
-	return sp.wg.Body2("Enter or paste the details for a payment").Alignment(text.Middle).Fn
+	return sp.wg.Body2("Enter or paste the details for a payment").Alignment(text.Start).Fn
 }
 
 func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 	wg := sp.wg
 	sendFormWidget := []l.Widget{
+		wg.balanceCard(),
 		sp.InputMessage(),
 		sp.AddressInput(),
 		sp.AmountInput(),
@@ -225,6 +227,7 @@ func (sp *SendPage) SendButton() l.Widget {
 								}
 								wg.RecentTransactions(10, "recent")
 								wg.RecentTransactions(-1, "history")
+								wg.Invalidate()
 								dbg.Ln("transaction successful", txid)
 								sp.saveForm(txid.String())
 								select {
@@ -386,7 +389,7 @@ func (sp *SendPage) AddressbookHeader() l.Widget {
 		Rigid(
 			wg.Inset(
 				0.25,
-				wg.H6("Address Book").Alignment(text.Middle).Fn,
+				wg.H5("Address Book").Alignment(text.Middle).Fn,
 			).Fn,
 		).Fn
 }

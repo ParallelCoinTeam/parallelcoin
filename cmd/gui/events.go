@@ -210,7 +210,7 @@ func (wg *WalletGUI) processWalletBlockNotification() bool {
 	wg.State.SetBalance(confirmed.ToDUO())
 	var atr []btcjson.ListTransactionsResult
 	// str := wg.State.allTxs.Load()
-	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, /*len(str)*/0); err.Chk(e) {
+	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, /*len(str)*/ 0); err.Chk(e) {
 		return false
 	}
 	// dbg.Ln(len(atr))
@@ -251,6 +251,8 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			dbg.Ln("(((NOTIFICATION))) CHAIN CLIENT CONNECTED!")
 			wg.forceUpdateChain()
 			wg.processWalletBlockNotification()
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
 			wg.invalidate <- struct{}{}
 		},
 		OnBlockConnected: func(hash *chainhash.Hash, height int32, t time.Time) {
@@ -258,12 +260,19 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			wg.processChainBlockNotification(hash, height, t)
 			// wg.processWalletBlockNotification()
 			// todo: send system notification of new block, set configuration to disable also
+			if wg.WalletAndClientRunning() {
+				var e error
+				if _, e = wg.WalletClient.RescanBlocks([]chainhash.Hash{*hash}); err.Chk(e) {
+				}
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
 			wg.invalidate <- struct{}{}
-			
 		},
 		OnFilteredBlockConnected: func(height int32, header *wire.BlockHeader, txs []*util.Tx) {
+			hash := header.BlockHash()
 			dbg.Ln(
-				"(((NOTIFICATION))) wallet OnFilteredBlockConnected hash", header.BlockHash(), "POW hash:",
+				"(((NOTIFICATION))) wallet OnFilteredBlockConnected hash", hash, "POW hash:",
 				header.BlockHashWithAlgos(height), "height", height,
 			)
 			// dbg.S(txs)
@@ -274,96 +283,132 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
 			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
+			if wg.WalletAndClientRunning() {
+				var e error
+				if _, e = wg.WalletClient.RescanBlocks([]chainhash.Hash{hash}); err.Chk(e) {
+				}
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
 			wg.invalidate <- struct{}{}
 		},
-		// OnBlockDisconnected: func(hash *chainhash.Hash, height int32, t time.Time) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnBlockDisconnected", hash, height, t)
-		// 	wg.forceUpdateChain()
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
-		// OnFilteredBlockDisconnected: func(height int32, header *wire.BlockHeader) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnFilteredBlockDisconnected", height, header)
-		// 	wg.forceUpdateChain()
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
-		// OnRecvTx: func(transaction *util.Tx, details *btcjson.BlockDetails) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnRecvTx", transaction, details)
-		// 	wg.forceUpdateChain()
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
-		// OnRedeemingTx: func(transaction *util.Tx, details *btcjson.BlockDetails) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnRedeemingTx", transaction, details)
-		// 	wg.forceUpdateChain()
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
-		// OnRelevantTxAccepted: func(transaction []byte) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnRelevantTxAccepted", transaction)
-		// 	wg.forceUpdateChain()
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
-		// OnRescanFinished: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnRescanFinished", hash, height, blkTime)
-		// 	wg.processChainBlockNotification(hash, height, blkTime)
-		// 	// update best block height
-		// 	// wg.processWalletBlockNotification()
-		// 	// stop showing syncing indicator
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// 	wg.Syncing.Store(false)
-		// 	wg.invalidate <- struct{}{}
-		// },
-		// OnRescanProgress: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnRescanProgress", hash, height, blkTime)
-		// 	// update best block height
-		// 	// wg.processWalletBlockNotification()
-		// 	// set to show syncing indicator
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// 	wg.Syncing.Store(true)
-		// 	wg.invalidate <- struct{}{}
-		// },
-		// OnTxAccepted: func(hash *chainhash.Hash, amount util.Amount) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnTxAccepted")
-		// 	dbg.Ln(hash, amount)
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
-		// OnTxAcceptedVerbose: func(txDetails *btcjson.TxRawResult) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnTxAcceptedVerbose")
-		// 	dbg.S(txDetails)
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
-		// OnPodConnected: func(connected bool) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnPodConnected", connected)
-		// 	wg.forceUpdateChain()
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
-		// OnAccountBalance: func(account string, balance util.Amount, confirmed bool) {
-		// 	dbg.Ln("OnAccountBalance")
-		// 	// what does this actually do
-		// 	dbg.Ln(account, balance, confirmed)
-		// },
-		// OnWalletLockState: func(locked bool) {
-		// 	dbg.Ln("OnWalletLockState", locked)
-		// 	// switch interface to unlock page
-		// 	wg.forceUpdateChain()
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// 	// TODO: lock when idle... how to get trigger for idleness in UI?
-		// },
-		// OnUnknownNotification: func(method string, params []json.RawMessage) {
-		// 	dbg.Ln("(((NOTIFICATION))) OnUnknownNotification", method, params)
-		// 	wg.forceUpdateChain()
-		// 	if wg.processWalletBlockNotification() {
-		// 	}
-		// },
+		OnBlockDisconnected: func(hash *chainhash.Hash, height int32, t time.Time) {
+			dbg.Ln("(((NOTIFICATION))) OnBlockDisconnected", hash, height, t)
+			wg.forceUpdateChain()
+			if wg.processWalletBlockNotification() {
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnFilteredBlockDisconnected: func(height int32, header *wire.BlockHeader) {
+			dbg.Ln("(((NOTIFICATION))) OnFilteredBlockDisconnected", height, header)
+			wg.forceUpdateChain()
+			if wg.processWalletBlockNotification() {
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnRecvTx: func(transaction *util.Tx, details *btcjson.BlockDetails) {
+			dbg.Ln("(((NOTIFICATION))) OnRecvTx", transaction, details)
+			wg.forceUpdateChain()
+			if wg.processWalletBlockNotification() {
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnRedeemingTx: func(transaction *util.Tx, details *btcjson.BlockDetails) {
+			dbg.Ln("(((NOTIFICATION))) OnRedeemingTx", transaction, details)
+			wg.forceUpdateChain()
+			if wg.processWalletBlockNotification() {
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnRelevantTxAccepted: func(transaction []byte) {
+			dbg.Ln("(((NOTIFICATION))) OnRelevantTxAccepted", transaction)
+			wg.forceUpdateChain()
+			if wg.processWalletBlockNotification() {
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnRescanFinished: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
+			dbg.Ln("(((NOTIFICATION))) OnRescanFinished", hash, height, blkTime)
+			wg.processChainBlockNotification(hash, height, blkTime)
+			// update best block height
+			// wg.processWalletBlockNotification()
+			// stop showing syncing indicator
+			if wg.processWalletBlockNotification() {
+			}
+			wg.Syncing.Store(false)
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnRescanProgress: func(hash *chainhash.Hash, height int32, blkTime time.Time) {
+			dbg.Ln("(((NOTIFICATION))) OnRescanProgress", hash, height, blkTime)
+			// update best block height
+			// wg.processWalletBlockNotification()
+			// set to show syncing indicator
+			if wg.processWalletBlockNotification() {
+			}
+			wg.Syncing.Store(true)
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnTxAccepted: func(hash *chainhash.Hash, amount util.Amount) {
+			dbg.Ln("(((NOTIFICATION))) OnTxAccepted")
+			dbg.Ln(hash, amount)
+			if wg.processWalletBlockNotification() {
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnTxAcceptedVerbose: func(txDetails *btcjson.TxRawResult) {
+			dbg.Ln("(((NOTIFICATION))) OnTxAcceptedVerbose")
+			dbg.S(txDetails)
+			if wg.processWalletBlockNotification() {
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnPodConnected: func(connected bool) {
+			dbg.Ln("(((NOTIFICATION))) OnPodConnected", connected)
+			wg.forceUpdateChain()
+			if wg.processWalletBlockNotification() {
+			}
+			wg.RecentTransactions(10, "recent")
+			wg.RecentTransactions(-1, "history")
+			wg.invalidate <- struct{}{}
+		},
+		OnAccountBalance: func(account string, balance util.Amount, confirmed bool) {
+			dbg.Ln("OnAccountBalance")
+			// what does this actually do
+			dbg.Ln(account, balance, confirmed)
+		},
+		OnWalletLockState: func(locked bool) {
+			dbg.Ln("OnWalletLockState", locked)
+			// switch interface to unlock page
+			wg.forceUpdateChain()
+			if wg.processWalletBlockNotification() {
+			}
+			// TODO: lock when idle... how to get trigger for idleness in UI?
+		},
+		OnUnknownNotification: func(method string, params []json.RawMessage) {
+			dbg.Ln("(((NOTIFICATION))) OnUnknownNotification", method, params)
+			wg.forceUpdateChain()
+			if wg.processWalletBlockNotification() {
+			}
+		},
 	}
 	
 }

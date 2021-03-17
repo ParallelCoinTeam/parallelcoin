@@ -14,9 +14,10 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
-	return wg.VFlex(). // AlignMiddle().
+func (wg *WalletGUI) balanceCard() func(gtx l.Context) l.Dimensions {
+	return wg.VFlex().AlignStart().
 		Rigid(
+			
 			// wg.ButtonInset(0.25,
 			wg.H5("balances").
 				// Alignment(text.Start).
@@ -25,126 +26,63 @@ func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 		).
 		Rigid(
 			wg.Fill(
-				"Primary", l.W, wg.TextSize.V, corners,
-				// wg.Flex().Flexed(1,
-				wg.Flex(). // SpaceEvenly().
-					Rigid(
-						wg.Inset(
-							0.25,
-							wg.VFlex().AlignBaseline().
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.Body1("confirmed").
-													Color("DocText").Fn,
-											).
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Fn,
-									).Fn,
+				"Primary", l.W, 0, 0,
+				wg.Inset(
+					0.25,
+					wg.VFlex().AlignEnd().
+						Rigid(
+							wg.Inset(
+								0.5,
+								wg.Caption(
+									"confirmed"+leftPadTo(
+										14, 14,
+										fmt.Sprintf(
+											"%6.8f",
+											wg.State.balance.Load(),
+										),
+									),
 								).
-								Rigid(
-									wg.Inset(
-										0.25,
-										
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.Body1("unconfirmed").
-													Color("DocText").Fn,
-											).
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Fn,
-									).Fn,
+									Font("go regular").
+									Alignment(text.End).
+									Color("DocText").Fn,
+							).Fn,
+						).
+						Rigid(
+							wg.Inset(
+								0.5,
+								wg.Caption(
+									"unconfirmed"+leftPadTo(
+										14, 14,
+										fmt.Sprintf(
+											"%6.8f",
+											wg.State.balanceUnconfirmed.Load(),
+										),
+									),
 								).
-								Rigid(
-									wg.Inset(
-										0.5,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.H6("total").
-													Color("DocText").Fn,
-											).
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Fn,
-									).Fn,
+									Font("go regular").
+									Alignment(text.End).
+									Color("DocText").Fn,
+							
+							).Fn,
+						).
+						Rigid(
+							wg.Inset(
+								0.5,
+								
+								wg.H5(
+									"total"+leftPadTo(
+										14, 14, fmt.Sprintf(
+											"%6.8f", wg.State.balance.Load()+wg.
+												State.balanceUnconfirmed.Load(),
+										),
+									),
 								).
+									Alignment(text.End).
+									Color("DocText").Fn,
+							).
 								Fn,
 						).Fn,
-					).
-					Rigid(
-						wg.Inset(
-							0.25,
-							wg.VFlex().AlignBaseline().AlignEnd().
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Rigid(
-												wg.Caption(
-													leftPadTo(
-														14, 14,
-														fmt.Sprintf(
-															"%6.8f",
-															wg.State.balance.Load(),
-														),
-													),
-												).Color("DocText").Font("go regular").Fn,
-											).Fn,
-									).Fn,
-								).
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Rigid(
-												wg.Caption(
-													leftPadTo(
-														14, 14,
-														fmt.Sprintf(
-															"%6.8f",
-															wg.State.balanceUnconfirmed.Load(),
-														),
-													),
-												).Color("DocText").Font("go regular").Fn,
-											).Fn,
-									).Fn,
-								).
-								Rigid(
-									wg.Inset(
-										0.5,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Rigid(
-												wg.H6(
-													leftPadTo(
-														14, 14, fmt.Sprintf(
-															"%6.8f", wg.State.balance.Load()+wg.
-																State.balanceUnconfirmed.Load(),
-														),
-													),
-												).Color("DocText").Fn,
-											).Fn,
-									).Fn,
-								).
-								Fn,
-						).Fn,
-					).Fn,
-				// ).Fn,
+				).Fn,
 			).Fn,
 		).Fn
 }
@@ -166,32 +104,34 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 							// wg.ButtonInset(0.25,
 							wg.VFlex().
 								Rigid(
-									// wg.Inset(0.25,
-									wg.balanceCard(0),
-									// ).Fn,
+									wg.Inset(
+										0.25,
+										wg.balanceCard(),
+									).Fn,
 								).Fn,
 							// ).Fn,
 						).
 						// Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Flexed(
 							1,
-							// wg.Inset(0.25,
-							wg.VFlex().AlignStart().
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.H5("Recent Transactions").Fn,
-									).Fn,
-								).
-								Flexed(
-									1,
-									// wg.Inset(0.5,
-									wg.RecentTxsWidget,
-									// p9.EmptyMaxWidth(),
-									// ).Fn,
-								).
-								Fn,
-							// ).Fn,
+							wg.Inset(
+								0.25,
+								wg.VFlex().AlignStart().
+									Rigid(
+										wg.Inset(
+											0.25,
+											wg.H5("Recent Transactions").Fn,
+										).Fn,
+									).
+									Flexed(
+										1,
+										// wg.Inset(0.5,
+										wg.RecentTxsWidget,
+										// p9.EmptyMaxWidth(),
+										// ).Fn,
+									).
+									Fn,
+							).Fn,
 						).
 						Fn,
 				},
@@ -202,32 +142,34 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 							// wg.ButtonInset(0.25,
 							wg.VFlex(). // SpaceSides().AlignStart().
 								Rigid(
-									// wg.Inset(0.25,
-									wg.balanceCard(0),
-									// ).Fn,
+									wg.Inset(
+										0.25,
+										wg.balanceCard(),
+									).Fn,
 								).Fn,
 							// ).Fn,
 						).
 						Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Rigid(
-							// wg.Inset(0.25,
-							wg.VFlex().AlignStart().
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.H5("recent transactions").Fn,
-									).Fn,
-								).
-								Flexed(
-									1,
-									// wg.Fill("DocBg", l.W, wg.TextSize.V, 0, wg.Inset(0.25,
-									wg.RecentTxsWidget,
-									// p9.EmptyMaxWidth(),
-									// ).Fn).Fn,
-								).
+							wg.Inset(
+								0.25,
+								wg.VFlex().AlignStart().
+									Rigid(
+										wg.Inset(
+											0.25,
+											wg.H5("recent transactions").Fn,
+										).Fn,
+									).
+									Flexed(
+										1,
+										// wg.Fill("DocBg", l.W, wg.TextSize.V, 0, wg.Inset(0.25,
+										wg.RecentTxsWidget,
+										// p9.EmptyMaxWidth(),
+										// ).Fn).Fn,
+									).
+									Fn,
+							).
 								Fn,
-							// ).
-							// Fn,
 						).
 						Fn,
 				},
