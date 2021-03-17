@@ -1,7 +1,6 @@
 package peer
 
 import (
-	"bytes"
 	"container/list"
 	"errors"
 	"fmt"
@@ -13,16 +12,15 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/util/logi"
 	
 	"github.com/btcsuite/go-socks/socks"
-	"github.com/davecgh/go-spew/spew"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
@@ -877,22 +875,22 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 		trc.Ln(e)
 		return nil, nil, e
 	}
-	// Use closures to log expensive operations so they are only run when the logging level requires it.
-	trc.C(
-		func() string {
-			// Debug summary of message.
-			summary := messageSummary(msg)
-			if len(summary) > 0 {
-				summary = " (" + summary + ")"
-			}
-			o := fmt.Sprintf(
-				"Received %v%s from %s\n",
-				msg.Command(), summary, p,
-			)
-			o += spew.Sdump(msg)
-			return o + spew.Sdump(buf)
-		},
-	)
+	// // Use closures to log expensive operations so they are only run when the logging level requires it.
+	// trc.C(
+	// 	func() string {
+	// 		// Debug summary of message.
+	// 		summary := messageSummary(msg)
+	// 		if len(summary) > 0 {
+	// 			summary = " (" + summary + ")"
+	// 		}
+	// 		o := fmt.Sprintf(
+	// 			"Received %v%s from %s\n",
+	// 			msg.Command(), summary, p,
+	// 		)
+	// 		o += spew.Sdump(msg)
+	// 		return o + spew.Sdump(buf)
+	// 	},
+	// )
 	return msg, buf, nil
 }
 
@@ -902,30 +900,30 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (e error
 	if atomic.LoadInt32(&p.disconnect) != 0 {
 		return nil
 	}
-	// Use closures to log expensive operations so they are only run when the logging level requires it.
-	trc.C(
-		func() string {
-			// Debug summary of message.
-			summary := messageSummary(msg)
-			if len(summary) > 0 {
-				summary = " (" + summary + ")"
-			}
-			o := fmt.Sprintf(
-				"Sending %v%s to %s\n", msg.Command(),
-				summary, p,
-			)
-			o += spew.Sdump(msg)
-			var buf bytes.Buffer
-			_, e := wire.WriteMessageWithEncodingN(
-				&buf, msg, p.ProtocolVersion(),
-				p.cfg.ChainParams.Net, enc,
-			)
-			if e != nil {
-				return e.Error()
-			}
-			return o + spew.Sdump(buf.Bytes())
-		},
-	)
+	// // Use closures to log expensive operations so they are only run when the logging level requires it.
+	// trc.C(
+	// 	func() string {
+	// 		// Debug summary of message.
+	// 		summary := messageSummary(msg)
+	// 		if len(summary) > 0 {
+	// 			summary = " (" + summary + ")"
+	// 		}
+	// 		o := fmt.Sprintf(
+	// 			"Sending %v%s to %s\n", msg.Command(),
+	// 			summary, p,
+	// 		)
+	// 		o += spew.Sdump(msg)
+	// 		var buf bytes.Buffer
+	// 		_, e := wire.WriteMessageWithEncodingN(
+	// 			&buf, msg, p.ProtocolVersion(),
+	// 			p.cfg.ChainParams.Net, enc,
+	// 		)
+	// 		if e != nil {
+	// 			return e.Error()
+	// 		}
+	// 		return o + spew.Sdump(buf.Bytes())
+	// 	},
+	// )
 	cmd := msg.Command()
 	if cmd != "ping" && cmd != "pong" && cmd != "inv" {
 		dbg.C(
