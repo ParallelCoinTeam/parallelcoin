@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
+	"github.com/p9c/pod/pkg/blockchain/fork"
 	"net"
 	"os"
 	"runtime"
@@ -288,14 +289,19 @@ var handlers = transport.Handlers{
 		gotiny.Unmarshal(b, &jr)
 		w.height = jr.Height
 		cN := jr.UUID
-		firstSender := w.FirstSender.Load()
-		otherSent := firstSender != cN && firstSender != 0
-		if otherSent {
-			trc.Ln("ignoring other controller job")
-			// ignore other controllers while one is active and received first
-			return
+		if int(cN) != *w.cx.Config.UUID {
+			firstSender := w.FirstSender.Load()
+			otherSent := firstSender != cN && firstSender != 0
+			if otherSent {
+				trc.Ln("ignoring other controller job")
+				// ignore other controllers while one is active and received first
+				return
+			}
+		} else {
+			inf.Ln("working on job of local controller")
+			inf.Ln("p9 average",fork.P9Average)
+			trc.Ln("now listening to controller at", cN)
 		}
-		trc.Ln("now listening to controller at", cN)
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {

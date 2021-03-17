@@ -283,11 +283,11 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
 			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 			}
-			if wg.WalletAndClientRunning() {
-				var e error
-				if _, e = wg.WalletClient.RescanBlocks([]chainhash.Hash{hash}); err.Chk(e) {
-				}
-			}
+			// if wg.WalletAndClientRunning() {
+			// 	var e error
+			// 	if _, e = wg.WalletClient.RescanBlocks([]chainhash.Hash{hash}); err.Chk(e) {
+			// 	}
+			// }
 			wg.RecentTransactions(10, "recent")
 			wg.RecentTransactions(-1, "history")
 			wg.invalidate <- struct{}{}

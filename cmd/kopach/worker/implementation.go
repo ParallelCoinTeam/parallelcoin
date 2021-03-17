@@ -25,7 +25,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 100
+const RoundsPerAlgo = 1024
 
 type Worker struct {
 	mx               sync.Mutex
@@ -78,9 +78,10 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 		return 0
 	}
 	if len(algs) > 0 {
-		ver = algs[(c.C.Load()/
-			c.RoundsPerAlgo.Load())%
-			int32(len(algs))]
+		ver = algs[c.C.Load()%int32(len(algs))]
+		// ver = algs[(c.C.Load()/
+		// 	c.RoundsPerAlgo.Load())%
+		// 	int32(len(algs))]
 		c.C.Add(1)
 	}
 	return

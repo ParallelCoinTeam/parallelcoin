@@ -221,7 +221,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 					// 	wg.WalletClient = nil
 					// }
 					// wg.wallet.Stop()
-					wg.node.Stop()
+					// wg.node.Stop()
 					wg.State.SetActivePage("home")
 					wg.unlockPage.ActivePage("home")
 					wg.stateLoaded.Store(false)

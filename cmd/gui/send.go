@@ -76,7 +76,9 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 	}
 	smallWidgets = append(smallWidgets, sp.GetAddressbookHistoryCards("DocBg")...)
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return smallWidgets[index](gtx)
+		return wg.Inset(
+			0.25, smallWidgets[index],
+		).Fn(gtx)
 	}
 	return wg.lists["send"].
 		Vertical().
