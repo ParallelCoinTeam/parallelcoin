@@ -103,64 +103,76 @@ func (c *Config) Config() GroupsMap {
 			tgs := tabNames[sgf.Group][sgf.Slug]
 			switch sgf.Widget {
 			case "toggle":
-				c.Bools[sgf.Slug] = c.Bool(*tgs.Slot.(*bool)).SetOnChange(func(b bool) {
-					dbg.Ln(sgf.Slug, "submitted", b)
-					bb := c.cx.ConfigMap[sgf.Slug].(*bool)
-					*bb = b
-					save.Pod(c.cx.Config)
-					if sgf.Slug == "DarkTheme" {
-						c.Theme.Colors.SetTheme(b)
-					}
-				})
+				c.Bools[sgf.Slug] = c.Bool(*tgs.Slot.(*bool)).SetOnChange(
+					func(b bool) {
+						dbg.Ln(sgf.Slug, "submitted", b)
+						bb := c.cx.ConfigMap[sgf.Slug].(*bool)
+						*bb = b
+						save.Pod(c.cx.Config)
+						if sgf.Slug == "DarkTheme" {
+							c.Theme.Colors.SetTheme(b)
+						}
+					},
+				)
 			case "integer":
-				c.inputs[sgf.Slug] = c.Input(fmt.Sprint(*tgs.Slot.(*int)),
-					sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
+				c.inputs[sgf.Slug] = c.Input(
+					fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
 						dbg.Ln(sgf.Slug, "submitted", txt)
 						i := c.cx.ConfigMap[sgf.Slug].(*int)
 						if n, e := strconv.Atoi(txt); !err.Chk(e) {
 							*i = n
 						}
 						save.Pod(c.cx.Config)
-					})
+					}, nil,
+				)
 			case "time":
-				c.inputs[sgf.Slug] = c.Input(fmt.Sprint(*tgs.Slot.(*time.
-				Duration)), sgf.Slug, "DocText", "DocBg", "PanelBg",
-					func(txt string) {
+				c.inputs[sgf.Slug] = c.Input(
+					fmt.Sprint(
+						*tgs.Slot.(*time.
+						Duration),
+					), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
 						dbg.Ln(sgf.Slug, "submitted", txt)
 						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
 						if d, e := time.ParseDuration(txt); !err.Chk(e) {
 							*tt = d
 						}
 						save.Pod(c.cx.Config)
-					})
+					}, nil,
+				)
 			case "float":
-				c.inputs[sgf.Slug] = c.Input(strconv.FormatFloat(*tgs.Slot.(
-				*float64), 'f', -1, 64), sgf.Slug, "DocText", "DocBg", "PanelBg",
-					func(txt string) {
+				c.inputs[sgf.Slug] = c.Input(
+					strconv.FormatFloat(
+						*tgs.Slot.(
+						*float64), 'f', -1, 64,
+					), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
 						dbg.Ln(sgf.Slug, "submitted", txt)
 						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
 						if f, e := strconv.ParseFloat(txt, 64); !err.Chk(e) {
 							*ff = f
 						}
 						save.Pod(c.cx.Config)
-					})
+					}, nil,
+				)
 			case "string":
-				c.inputs[sgf.Slug] = c.Input(*tgs.Slot.(*string), sgf.Slug,
-					"DocText", "DocBg", "PanelBg", func(txt string) {
+				c.inputs[sgf.Slug] = c.Input(
+					*tgs.Slot.(*string), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
 						dbg.Ln(sgf.Slug, "submitted", txt)
 						ss := c.cx.ConfigMap[sgf.Slug].(*string)
 						*ss = txt
 						save.Pod(c.cx.Config)
-					})
+					}, nil,
+				)
 			case "password":
-				c.passwords[sgf.Slug] = c.Password("password",
+				c.passwords[sgf.Slug] = c.Password(
+					"password",
 					tgs.Slot.(*string), "DocText", "DocBg", "PanelBg",
 					func(txt string) {
 						dbg.Ln(sgf.Slug, "submitted", txt)
 						pp := c.cx.ConfigMap[sgf.Slug].(*string)
 						*pp = txt
 						save.Pod(c.cx.Config)
-					})
+					},
+				)
 			case "multi":
 				c.multis[sgf.Slug] = c.Multiline(
 					tgs.Slot.(*cli.StringSlice), "DocText", "DocBg", "PanelBg", 30, func(txt []string) {
@@ -177,11 +189,13 @@ func (c *Config) Config() GroupsMap {
 					c.checkables[sgf.Slug+sgf.Options[i]] = c.Checkable()
 				}
 				txt := *tabNames[sgf.Group][sgf.Slug].Slot.(*string)
-				c.enums[sgf.Slug] = c.Enum().SetValue(txt).SetOnChange(func(value string) {
-					rr := c.cx.ConfigMap[sgf.Slug].(*string)
-					*rr = value
-					save.Pod(c.cx.Config)
-				})
+				c.enums[sgf.Slug] = c.Enum().SetValue(txt).SetOnChange(
+					func(value string) {
+						rr := c.cx.ConfigMap[sgf.Slug].(*string)
+						*rr = value
+						save.Pod(c.cx.Config)
+					},
+				)
 				c.lists[sgf.Slug] = c.List()
 			}
 		}
@@ -203,13 +217,15 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		gmi := gm[i]
 		for j := range gmi {
 			gmij := gmi[j]
-			li = append(li, ListItem{
-				name: j,
-				widget: func() []l.Widget {
-					return ng.RenderConfigItem(gmij, len(li))
+			li = append(
+				li, ListItem{
+					name: j,
+					widget: func() []l.Widget {
+						return ng.RenderConfigItem(gmij, len(li))
+					},
+					// },
 				},
-				// },
-			})
+			)
 		}
 		sort.Sort(li)
 		groups = append(groups, List{name: i, items: li})
@@ -222,27 +238,29 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		g := groups[i]
 		if !first {
 			// put a space between the sections
-			out = append(out, func(gtx l.Context) l.Dimensions {
-				dims := ng.VFlex().
-					// Rigid(
-					// 	// ng.Inset(0.25,
-					// 	ng.Fill("DocBg", l.Center, ng.TextSize.V, l.S, ng.Inset(0.25,
-					// 		gui.EmptyMaxWidth()).Fn,
-					// 	).Fn,
-					// 	// ).Fn,
-					// ).
-					Rigid(ng.Inset(0.25, gui.EmptyMaxWidth()).Fn).
-					// Rigid(
-					// 	// ng.Inset(0.25,
-					// 	ng.Fill("DocBg", l.Center, ng.TextSize.V, l.N, ng.Inset(0.25,
-					// 		gui.EmptyMaxWidth()).Fn,
-					// 	).Fn,
-					// 	// ).Fn,
-					// ).
-					Fn(gtx)
-				// ng.Fill("PanelBg", gui.EmptySpace(gtx.Constraints.Max.X, gtx.Constraints.Max.Y), l.Center, 0).Fn(gtx)
-				return dims
-			})
+			out = append(
+				out, func(gtx l.Context) l.Dimensions {
+					dims := ng.VFlex().
+						// Rigid(
+						// 	// ng.Inset(0.25,
+						// 	ng.Fill("DocBg", l.Center, ng.TextSize.V, l.S, ng.Inset(0.25,
+						// 		gui.EmptyMaxWidth()).Fn,
+						// 	).Fn,
+						// 	// ).Fn,
+						// ).
+						Rigid(ng.Inset(0.25, gui.EmptyMaxWidth()).Fn).
+						// Rigid(
+						// 	// ng.Inset(0.25,
+						// 	ng.Fill("DocBg", l.Center, ng.TextSize.V, l.N, ng.Inset(0.25,
+						// 		gui.EmptyMaxWidth()).Fn,
+						// 	).Fn,
+						// 	// ).Fn,
+						// ).
+						Fn(gtx)
+					// ng.Fill("PanelBg", gui.EmptySpace(gtx.Constraints.Max.X, gtx.Constraints.Max.Y), l.Center, 0).Fn(gtx)
+					return dims
+				},
+			)
 			// out = append(out, func(gtx l.Context) l.Dimensions {
 			// 	return ng.th.ButtonInset(0.25, p9.EmptySpace(0, 0)).Fn(gtx)
 			// })
@@ -250,15 +268,20 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 			first = false
 		}
 		// put in the header
-		out = append(out,
-			ng.Fill("PanelBg", l.Center, ng.TextSize.V*2, 0, ng.Flex().Flexed(1,
-				ng.Inset(0.75,
-					ng.H3(g.name).
-						Color("DocText").
-						Alignment(text.Start).
-						Fn,
+		out = append(
+			out,
+			ng.Fill(
+				"PanelBg", l.Center, ng.TextSize.V*2, 0, ng.Flex().Flexed(
+					1,
+					ng.Inset(
+						0.75,
+						ng.H3(g.name).
+							Color("DocText").
+							Alignment(text.Start).
+							Fn,
+					).Fn,
 				).Fn,
-			).Fn).Fn,
+			).Fn,
 		)
 		// out = append(out, func(gtx l.Context) l.Dimensions {
 		// 	return ng.th.Fill("PanelBg",
@@ -274,20 +297,25 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 			gi := groups[i].items[j]
 			for x := range gi.widget() {
 				k := x
-				out = append(out, func(gtx l.Context) l.Dimensions {
-					if k < len(gi.widget()) {
-						return ng.Fill("DocBg", l.Center, ng.TextSize.V, 0, ng.Flex().
-							// Rigid(
-							// 	ng.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
-							// ).
-							Rigid(
-								ng.Inset(0.25,
-									gi.widget()[k],
-								).Fn,
-							).Fn).Fn(gtx)
-					}
-					return l.Dimensions{}
-				})
+				out = append(
+					out, func(gtx l.Context) l.Dimensions {
+						if k < len(gi.widget()) {
+							return ng.Fill(
+								"DocBg", l.Center, ng.TextSize.V, 0, ng.Flex().
+									// Rigid(
+									// 	ng.Inset(0.25, gui.EmptySpace(0, 0)).Fn,
+									// ).
+									Rigid(
+										ng.Inset(
+											0.25,
+											gi.widget()[k],
+										).Fn,
+									).Fn,
+							).Fn(gtx)
+						}
+						return l.Dimensions{}
+					},
+				)
 			}
 		}
 	}
@@ -298,16 +326,19 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		// clip.UniformRRect(f32.Rectangle{
 		// 	Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
 		// }, ng.TextSize.V/2).Add(gtx.Ops)
-		return ng.Fill("DocBg", l.Center, ng.TextSize.V, 0, ng.Inset(0.25,
-			ng.lists["settings"].
-				Vertical().
-				Length(len(out)).
-				// Background("PanelBg").
-				// Color("DocBg").
-				// Active("Primary").
-				ListElement(le).
-				Fn,
-		).Fn).Fn(gtx)
+		return ng.Fill(
+			"DocBg", l.Center, ng.TextSize.V, 0, ng.Inset(
+				0.25,
+				ng.lists["settings"].
+					Vertical().
+					Length(len(out)).
+					// Background("PanelBg").
+					// Color("DocBg").
+					// Active("Primary").
+					ListElement(le).
+					Fn,
+			).Fn,
+		).Fn(gtx)
 	}
 }
 
@@ -340,12 +371,14 @@ func (c *Config) RenderConfigItem(item *Item, position int) []l.Widget {
 func (c *Config) RenderToggle(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.25,
+			return c.Inset(
+				0.25,
 				c.Flex().
 					Rigid(
 						c.Switch(c.Bools[item.slug]).DisabledColor("Light").Fn,
 					).
-					Flexed(1,
+					Flexed(
+						1,
 						c.VFlex().
 							Rigid(
 								c.Body1(item.label).Fn,
@@ -363,8 +396,10 @@ func (c *Config) RenderToggle(item *Item) []l.Widget {
 func (c *Config) RenderInteger(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.25,
-				c.Flex().Flexed(1,
+			return c.Inset(
+				0.25,
+				c.Flex().Flexed(
+					1,
 					c.VFlex().
 						Rigid(
 							c.Body1(item.label).Fn,
@@ -385,8 +420,10 @@ func (c *Config) RenderInteger(item *Item) []l.Widget {
 func (c *Config) RenderTime(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.25,
-				c.Flex().Flexed(1,
+			return c.Inset(
+				0.25,
+				c.Flex().Flexed(
+					1,
 					c.VFlex().
 						Rigid(
 							c.Body1(item.label).Fn,
@@ -408,8 +445,10 @@ func (c *Config) RenderTime(item *Item) []l.Widget {
 func (c *Config) RenderFloat(item *Item) []l.Widget {
 	return []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.25,
-				c.Flex().Flexed(1,
+			return c.Inset(
+				0.25,
+				c.Flex().Flexed(
+					1,
 					c.VFlex().
 						Rigid(
 							c.Body1(item.label).Fn,
@@ -430,8 +469,10 @@ func (c *Config) RenderFloat(item *Item) []l.Widget {
 
 func (c *Config) RenderString(item *Item) []l.Widget {
 	return []l.Widget{
-		c.Inset(0.25,
-			c.Flex().Flexed(1,
+		c.Inset(
+			0.25,
+			c.Flex().Flexed(
+				1,
 				c.VFlex().
 					Rigid(
 						c.Body1(item.label).Fn,
@@ -451,8 +492,10 @@ func (c *Config) RenderString(item *Item) []l.Widget {
 
 func (c *Config) RenderPassword(item *Item) []l.Widget {
 	return []l.Widget{
-		c.Inset(0.25,
-			c.Flex().Flexed(1,
+		c.Inset(
+			0.25,
+			c.Flex().Flexed(
+				1,
 				c.VFlex().
 					Rigid(
 						c.Body1(item.label).Fn,
@@ -475,8 +518,10 @@ func (c *Config) RenderMulti(item *Item, position int) []l.Widget {
 	// c.multis[item.slug].
 	w := []l.Widget{
 		func(gtx l.Context) l.Dimensions {
-			return c.Inset(0.25,
-				c.Flex().Flexed(1,
+			return c.Inset(
+				0.25,
+				c.Flex().Flexed(
+					1,
 					c.VFlex().
 						Rigid(
 							c.Body1(item.label).Fn,
@@ -504,16 +549,20 @@ func (c *Config) RenderRadio(item *Item) []l.Widget {
 			if c.enums[item.slug].Value() == item.options[i] {
 				color = "Primary"
 			}
-			options = append(options,
+			options = append(
+				options,
 				c.RadioButton(
 					c.checkables[item.slug+item.options[i]].
 						Color("DocText").
 						IconColor(color).
 						CheckedStateIcon(&icons.ToggleRadioButtonChecked).
 						UncheckedStateIcon(&icons.ToggleRadioButtonUnchecked),
-					c.enums[item.slug], item.options[i], item.options[i]).Fn)
+					c.enums[item.slug], item.options[i], item.options[i],
+				).Fn,
+			)
 		}
-		return c.Inset(0.25,
+		return c.Inset(
+			0.25,
 			c.VFlex().
 				Rigid(
 					c.Body1(item.label).Fn,
@@ -531,7 +580,8 @@ func (c *Config) RenderRadio(item *Item) []l.Widget {
 								// 	// return l.Dimensions{}
 							},
 						).
-						Flexed(1,
+						Flexed(
+							1,
 							c.Caption(item.description).Fn,
 						).
 						Fn,

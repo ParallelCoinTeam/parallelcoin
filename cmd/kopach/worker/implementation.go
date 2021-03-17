@@ -228,7 +228,7 @@ out:
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(blockHeader.Bits)) <= 0 {
 						dbg.Ln("found solution", newHeight)
-						srs := sol.Encode(w.uuid.Load(), blockHeader)
+						srs := sol.Encode(w.templatesMessage.Nonce, w.templatesMessage.UUID, blockHeader)
 						e := w.dispatchConn.SendMany(
 							sol.Magic,
 							transport.GetShards(srs),

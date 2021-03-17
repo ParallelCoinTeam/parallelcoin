@@ -34,6 +34,7 @@ require (
 	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/templexxx/reedsolomon v1.1.3
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
+	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/urfave/cli v1.22.4
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
 	go.etcd.io/bbolt v1.3.3 // indirect

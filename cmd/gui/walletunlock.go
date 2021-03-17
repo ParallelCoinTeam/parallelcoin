@@ -103,7 +103,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 			go wg.unlockWallet(pass)
 		},
 	)
-	wg.unlockPage.ThemeHook(
+	wg.unlockPage.SetThemeHook(
 		func() {
 			dbg.Ln("theme hook")
 			// dbg.Ln(wg.bools)

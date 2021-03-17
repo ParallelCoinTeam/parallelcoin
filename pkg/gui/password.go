@@ -150,35 +150,38 @@ func (p *Password) Fn(gtx l.Context) l.Dimensions {
 			p.pass.Mask(0)
 		}
 		
-		return p.Fill(
-			p.backgroundColor, l.Center, 0, 0,
-			p.Inset(
-				0.25,
-				p.Flex().
-					Flexed(
-						1,
-						p.Inset(0.25, p.passInput.Color(p.borderColor).HintColor(p.borderColorUnfocused).Fn).Fn,
-					).
-					Rigid(
-						p.copyButton.
-							Background("").
-							Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
-							ButtonInset(0.25).
-							Fn,
-					).
-					Rigid(
-						p.pasteButton.
-							Background("").
-							Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
-							ButtonInset(0.25).
-							Fn,
-					).
-					Rigid(
-						p.unhideButton.
-							Background("").
-							Icon(p.Icon().Color(p.borderColor).Src(visIcon)).Fn,
-					).
-					Fn,
+		return p.Border().Width(0.125).CornerRadius(0.0).
+			Corners(0).Color(p.borderColor).Embed(
+			p.Fill(
+				p.backgroundColor, l.Center, 0, 0,
+				p.Inset(
+					0.25,
+					p.Flex().
+						Flexed(
+							1,
+							p.Inset(0.25, p.passInput.Color(p.borderColor).HintColor(p.borderColorUnfocused).Fn).Fn,
+						).
+						Rigid(
+							p.copyButton.
+								Background("").
+								Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentCopy)).
+								ButtonInset(0.25).
+								Fn,
+						).
+						Rigid(
+							p.pasteButton.
+								Background("").
+								Icon(p.Icon().Color(p.borderColor).Scale(Scales["H6"]).Src(&icons2.ContentContentPaste)).
+								ButtonInset(0.25).
+								Fn,
+						).
+						Rigid(
+							p.unhideButton.
+								Background("").
+								Icon(p.Icon().Color(p.borderColor).Src(visIcon)).Fn,
+						).
+						Fn,
+				).Fn,
 			).Fn,
 		).Fn(gtx)
 	}(gtx)

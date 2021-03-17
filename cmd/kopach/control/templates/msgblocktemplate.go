@@ -3,7 +3,7 @@ package templates
 import (
 	"errors"
 	"github.com/niubaoshu/gotiny"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"time"
 )
@@ -17,9 +17,11 @@ type (
 	Txs map[int32][]*wire.MsgTx
 )
 
-// Message describes a message that a mining worker can use to
-// construct a block to mine on.
+// Message describes a message that a mining worker can use to construct a block
+// to mine on, as well the extra data required to reconstruct any version block
+// mined by the miner
 type Message struct {
+	Nonce     uint64
 	UUID      uint64
 	Height    int32
 	PrevBlock chainhash.Hash
@@ -77,4 +79,54 @@ func (m *Message) Reconstruct(hdr *wire.BlockHeader) (mb *wire.MsgBlock, e error
 	}
 	mb = &wire.MsgBlock{Header: *hdr, Transactions: m.txs[hdr.Version]}
 	return
+}
+
+// RecentMessages keeps a buffer of four previously created messages so that
+// solutions found after a new template is created can be submitted
+type RecentMessages struct {
+	msgs   [4]*Message
+	cursor int
+}
+
+func NewRecentMessages() *RecentMessages {
+	return &RecentMessages{
+		msgs:   [4]*Message{},
+		cursor: 0,
+	}
+}
+
+// Add a message to the RecentMessages, we just write to the current cursor
+// position, and then advance it, back to zero if it exceeds the buffer length,
+// overwriting the first, and so on
+func (rm *RecentMessages) Add(msg *Message) {
+	dbg.Ln("adding template with cursor", rm.cursor)
+	rm.msgs[rm.cursor] = msg
+	rm.cursor++
+	if rm.cursor >= 4 {
+		rm.cursor = 0
+	}
+}
+
+// Len returns the number of elements in the buffer
+func (rm *RecentMessages) Len() (o int) {
+	for i := range rm.msgs {
+		if rm.msgs[i] != nil {
+			o++
+		}
+	}
+	return
+}
+
+// Find checks whether the given nonce matches any of the cached Message's
+func (rm *RecentMessages) Find(nonce uint64) *Message {
+	for i := range rm.msgs {
+		if rm.msgs[i] != nil {
+			dbg.Ln("recent message", i,  rm.msgs[i].Nonce, nonce )
+			if rm.msgs[i].Nonce == nonce {
+				dbg.Ln("found message", nonce)
+				return rm.msgs[i]
+			}
+		}
+	}
+	return nil
 }

@@ -51,7 +51,7 @@ type State struct {
 	generator         *mining.BlkTmplGenerator
 	nextAddress       util.Address
 	walletClient      *rpcclient.Client
-	msgBlockTemplate  *templates.Message
+	msgBlockTemplates *templates.RecentMessages
 	templateShards    [][]byte
 	multiConn         *transport.Channel
 	otherNodes        map[uint64]*nodeSpec
@@ -99,6 +99,7 @@ func New(
 		blockUpdate:       make(chan *util.Block, 1),
 		hashSampleBuf:     rav.NewBufferUint64(100),
 		mining:            atomic.NewBool(false),
+		msgBlockTemplates: templates.NewRecentMessages(),
 	}
 	s.generator = s.getBlkTemplateGenerator()
 	var mc *transport.Channel
@@ -364,12 +365,14 @@ func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 		}
 	}
 	dbg.Ln("getting templates...", prev.MsgBlock().Header.Timestamp)
-	if s.msgBlockTemplate, e = s.GetMsgBlockTemplate(prev, s.nextAddress); err.Chk(e) {
+	var tpl *templates.Message
+	if tpl, e = s.GetMsgBlockTemplate(prev, s.nextAddress); err.Chk(e) {
 		// return
 	}
-	dbg.Ln(s.msgBlockTemplate.Timestamp)
+	s.msgBlockTemplates.Add(tpl)
+	dbg.Ln(tpl.Timestamp)
 	dbg.Ln("caching error corrected message shards...")
-	s.templateShards = transport.GetShards(s.msgBlockTemplate.Serialize())
+	s.templateShards = transport.GetShards(tpl.Serialize())
 	return
 }
 
@@ -397,7 +400,9 @@ func (s *State) getBlkTemplateGenerator() *mining.BlkTmplGenerator {
 // address
 func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *templates.Message, e error) {
 	trc.Ln("GetMsgBlockTemplate")
+	rand.Seed(time.Now().Unix())
 	mbt = &templates.Message{
+		Nonce:     rand.Uint64(),
 		UUID:      s.uuid,
 		PrevBlock: prev.MsgBlock().BlockHash(),
 		Height:    prev.Height() + 1,
@@ -549,32 +554,37 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 	var so sol.Solution
 	gotiny.Unmarshal(b, &so)
 	// dbg.S(so)
-	if s.msgBlockTemplate == nil {
-		dbg.Ln("template is nil, solution is not for this controller")
-		return
-	}
-	if s.uuid != so.UUID {
-		dbg.Ln("solution not from current controller", s.uuid, s.msgBlockTemplate.UUID, so.UUID)
+	// if s.msgBlockTemplate == nil {
+	// 	dbg.Ln("template is nil, solution is not for this controller")
+	// 	return
+	// }
+	// if s.uuid != so.UUID {
+	// 	dbg.Ln("solution not from current controller", s.uuid, so.UUID)
+	// 	return
+	// }
+	tpl := s.msgBlockTemplates.Find(so.Nonce)
+	if tpl == nil {
+		dbg.Ln("solution nonce", so.Nonce, "is not known by this controller")
 		return
 	}
 	var newHeader *wire.BlockHeader
 	if newHeader, e = so.Decode(); err.Chk(e) {
 		return
 	}
-	if newHeader.PrevBlock != s.msgBlockTemplate.PrevBlock {
+	if newHeader.PrevBlock != tpl.PrevBlock {
 		dbg.Ln("block submitted by kopach miner worker is stale")
 		return
 	}
 	var msgBlock *wire.MsgBlock
-	if msgBlock, e = s.msgBlockTemplate.Reconstruct(newHeader); err.Chk(e) {
+	if msgBlock, e = tpl.Reconstruct(newHeader); err.Chk(e) {
 		return
 	}
 	dbg.Ln("sending pause to workers")
 	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); err.Chk(e) {
 		return
 	}
-	dbg.Ln("clearing current block template")
-	s.msgBlockTemplate = nil
+	// dbg.Ln("clearing current block template")
+	// s.msgBlockTemplate = nil
 	dbg.Ln("signalling controller to enter pause mode")
 	s.Stop()
 	block := util.NewBlock(msgBlock)

@@ -12,7 +12,6 @@ type Payee struct {
 	Address util.Address
 	Amount  util.Amount
 }
-
 var (
 	// The following prepares hard fork disbursement payout transactions
 	tn = &netparams.TestNet3Params

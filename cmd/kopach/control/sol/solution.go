@@ -12,19 +12,20 @@ import (
 var Magic = []byte{'s', 'o', 'l', 1}
 
 type Solution struct {
-	UUID uint64
+	Nonce uint64
+	UUID  uint64
 	// *wire.MsgBlock
 	Bytes []byte
 }
 
 // Encode a message for a solution
-func Encode(uuid uint64, mb *wire.BlockHeader) []byte {
+func Encode(nonce uint64, uuid uint64, mb *wire.BlockHeader) []byte {
 	var buf []byte
 	wr := bytes.NewBuffer(buf)
 	var e error
 	if e = mb.Serialize(wr); err.Chk(e) {
 	}
-	s := Solution{UUID: uuid, Bytes: wr.Bytes()} // MsgBlock: mb}
+	s := Solution{Nonce: nonce, UUID: uuid, Bytes: wr.Bytes()} // MsgBlock: mb}
 	return gotiny.Marshal(&s)
 }
 

@@ -212,6 +212,7 @@ func (w *Wallet) quitChan() qu.C {
 func (w *Wallet) Stop() {
 	// trc.Ln("w", w, "w.quitMu", w.quitMu)
 	w.quitMu.Lock()
+	defer w.quitMu.Unlock()
 	select {
 	case <-w.quit.Wait():
 	default:
@@ -221,10 +222,9 @@ func (w *Wallet) Stop() {
 			w.chainClient = nil
 		}
 		w.chainClientLock.Unlock()
-		// w.quit.Q()
+		w.quit.Q()
 		// return
 	}
-	w.quitMu.Unlock()
 }
 
 // ShuttingDown returns whether the wallet is currently in the process of shutting down or not.
