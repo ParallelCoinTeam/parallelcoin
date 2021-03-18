@@ -161,6 +161,7 @@ func Main(cx *conte.Xt) (e error) {
 	if !*cx.Config.DisableController {
 		dbg.Ln("starting controller")
 		cx.Controller = control.New(
+			cx.Syncing,
 			cx.Config,
 			cx.StateCfg,
 			cx.RealNode,

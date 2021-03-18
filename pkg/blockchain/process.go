@@ -52,7 +52,7 @@ func (b *BlockChain) ProcessBlock(
 	} else {
 		return false, false, e
 	}
-	trc.S(prevBlock)
+	// trc.S(prevBlock)
 	b.ChainLock.Lock()
 	defer b.ChainLock.Unlock()
 	fastAdd := flags&BFFastAdd == BFFastAdd

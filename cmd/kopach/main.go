@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"net"
@@ -298,9 +299,11 @@ var handlers = transport.Handlers{
 				return
 			}
 		} else {
-			inf.Ln("working on job of local controller")
+			inf.Ln("no tworking on job of local controller")
 			inf.Ln("p9 average",fork.P9Average)
-			trc.Ln("now listening to controller at", cN)
+			// trc.Ln("now listening to controller at", cN)
+			w.FirstSender.Store(0)
+			return
 		}
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
@@ -330,14 +333,17 @@ var handlers = transport.Handlers{
 				}
 			}
 		}
+		w.FirstSender.Store(0)
 		return
 	},
-	// string(sol.Magic): func(
-	// 	ctx interface{}, src net.Addr, dst string,
-	// 	b []byte,
-	// ) (e error) {
+	string(sol.Magic): func(
+		ctx interface{}, src net.Addr, dst string,
+		b []byte,
+	) (e error) {
+		// w := ctx.(*Worker)
+		// dbg.Ln("shuffling work due to solution on network")
+		// w.FirstSender.Store(0)
 	// 	dbg.Ln("solution detected from miner at", src)
-	// 	w := ctx.(*Worker)
 	// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
 	// 	if len(portSlice) < 2 {
 	// 		dbg.Ln("error with solution", w.FirstSender.Load(), portSlice)
@@ -380,8 +386,8 @@ var handlers = transport.Handlers{
 	// 	// }
 	// 	// dbg.Ln("no longer listening to", w.FirstSender.Load())
 	// 	// w.FirstSender.Store("")
-	// 	return
-	// },
+		return
+	},
 }
 
 func (w *Worker) HashReport() float64 {

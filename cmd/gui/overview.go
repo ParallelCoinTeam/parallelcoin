@@ -31,56 +31,88 @@ func (wg *WalletGUI) balanceCard() func(gtx l.Context) l.Dimensions {
 					0.25,
 					wg.VFlex().AlignEnd().
 						Rigid(
-							wg.Inset(
-								0.5,
-								wg.Caption(
-									"confirmed"+leftPadTo(
-										14, 14,
+							wg.ButtonLayout(wg.clickables["balanceConfirmed"]).SetClick(
+								func() {
+									go wg.WriteClipboard(
 										fmt.Sprintf(
 											"%6.8f",
 											wg.State.balance.Load(),
 										),
-									),
-								).
-									Font("go regular").
-									Alignment(text.End).
-									Color("DocText").Fn,
+									)
+								},
+							).Background("Transparent").Embed(
+								wg.Inset(
+									0.5,
+									wg.Caption(
+										"confirmed"+leftPadTo(
+											14, 14,
+											fmt.Sprintf(
+												"%6.8f",
+												wg.State.balance.Load(),
+											),
+										),
+									).
+										Font("go regular").
+										Alignment(text.End).
+										Color("DocText").Fn,
+								).Fn,
 							).Fn,
 						).
 						Rigid(
-							wg.Inset(
-								0.5,
-								wg.Caption(
-									"unconfirmed"+leftPadTo(
-										14, 14,
+							wg.ButtonLayout(wg.clickables["balanceUnconfirmed"]).SetClick(
+								func() {
+									go wg.WriteClipboard(
 										fmt.Sprintf(
 											"%6.8f",
 											wg.State.balanceUnconfirmed.Load(),
 										),
-									),
-								).
-									Font("go regular").
-									Alignment(text.End).
-									Color("DocText").Fn,
-							
+									)
+								},
+							).Background("Transparent").Embed(
+								wg.Inset(
+									0.5,
+									wg.Caption(
+										"unconfirmed"+leftPadTo(
+											14, 14,
+											fmt.Sprintf(
+												"%6.8f",
+												wg.State.balanceUnconfirmed.Load(),
+											),
+										),
+									).
+										Font("go regular").
+										Alignment(text.End).
+										Color("DocText").Fn,
+								
+								).Fn,
 							).Fn,
 						).
 						Rigid(
-							wg.Inset(
-								0.5,
-								
-								wg.H5(
-									"total"+leftPadTo(
-										14, 14, fmt.Sprintf(
-											"%6.8f", wg.State.balance.Load()+wg.
-												State.balanceUnconfirmed.Load(),
+							wg.ButtonLayout(wg.clickables["balanceTotal"]).SetClick(
+								func() {
+									go wg.WriteClipboard(
+										fmt.Sprintf(
+											"%6.8f",
+											wg.State.balance.Load()+wg.State.balanceUnconfirmed.Load(),
 										),
-									),
+									)
+								},
+							).Background("Transparent").Embed(
+								wg.Inset(
+									0.5,
+									wg.H5(
+										"total"+leftPadTo(
+											14, 14, fmt.Sprintf(
+												"%6.8f", wg.State.balance.Load()+wg.
+													State.balanceUnconfirmed.Load(),
+											),
+										),
+									).
+										Alignment(text.End).
+										Color("DocText").Fn,
 								).
-									Alignment(text.End).
-									Color("DocText").Fn,
-							).
-								Fn,
+									Fn,
+							).Fn,
 						).Fn,
 				).Fn,
 			).Fn,

@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	MaxDatagramSize      = 8192
+	MaxDatagramSize      = 8192 * 3
 	UDP4MulticastAddress = "224.0.0.1:11049"
 	BufferSize           = 4096
 )
@@ -42,6 +42,7 @@ const (
 // State stores the state of the controller
 type State struct {
 	sync.Mutex
+	Syncing           *atomic.Bool
 	cfg               *pod.Config
 	node              *chainrpc.Node
 	rpcServer         *chainrpc.Server
@@ -71,6 +72,7 @@ type nodeSpec struct {
 
 // New creates a new controller
 func New(
+	syncing *atomic.Bool,
 	cfg *pod.Config,
 	stateCfg *state.Config,
 	node *chainrpc.Node,
@@ -87,6 +89,7 @@ func New(
 	}
 	quit := qu.T()
 	s = &State{
+		Syncing:           syncing,
 		cfg:               cfg,
 		node:              node,
 		rpcServer:         rpcServer,
@@ -131,6 +134,9 @@ func New(
 		func(n *blockchain.Notification) {
 			switch n.Type {
 			case blockchain.NTBlockConnected:
+				if s.Syncing.Load() {
+					return
+				}
 				dbg.Ln("received block connected notification")
 				if b, ok := n.Data.(*util.Block); !ok {
 					wrn.Ln("block notification is not a block")
@@ -180,9 +186,8 @@ func (s *State) startWallet() (e error) {
 	return
 }
 
-func (s *State) updateBlockTemplate() {
+func (s *State) updateBlockTemplate() (e error) {
 	dbg.Ln("getting current chain tip")
-	var e error
 	s.node.Chain.ChainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
 	h := s.node.Chain.BestChain.Tip().Header().BlockHash()
 	var blk *util.Block
@@ -192,9 +197,10 @@ func (s *State) updateBlockTemplate() {
 	}
 	s.node.Chain.ChainLock.Unlock()
 	dbg.Ln("updating block from chain tip")
-	dbg.S(blk)
+	// dbg.S(blk)
 	if e = s.doBlockUpdate(blk); err.Chk(e) {
 	}
+	return
 }
 
 // Run must be started as a goroutine, central routing for the business of the
@@ -214,23 +220,42 @@ out:
 	for {
 		dbg.Ln("controller now pausing")
 		s.mining.Store(false)
-		if s.walletClient.Disconnected() {
-			dbg.Ln("wallet client is disconnected, retrying")
-			if e = s.startWallet(); err.Chk(e) {
+		if !s.Syncing.Load() {
+			if s.walletClient.Disconnected() {
+				dbg.Ln("wallet client is disconnected, retrying")
+				if e = s.startWallet(); !err.Chk(e) {
+					continue
+				}
+				select {
+				case <-time.After(time.Second):
+					continue
+				case <-s.quit:
+					break out
+				}
+			}
+		} else {
+			select {
+			case <-time.After(time.Second):
+				continue
+			case <-s.quit:
+				break out
 			}
 		}
 		dbg.Ln("wallet client is connected, switching to running")
-		// s.updateBlockTemplate()
+		if e = s.updateBlockTemplate(); err.Chk(e) {
+		}
 	pausing:
 		for {
 			select {
 			case <-s.mempoolUpdateChan:
-				// s.updateBlockTemplate()
-			case bu := <-s.blockUpdate:
-				dbg.Ln("received new block update while paused")
-				if e = s.doBlockUpdate(bu); err.Chk(e) {
-				}
-				// s.updateBlockTemplate()
+				// dbg.Ln("mempool update chan signal")
+				// if e = s.updateBlockTemplate(); err.Chk(e) {
+				// }
+			case /* bu :=*/ <-s.blockUpdate:
+				// dbg.Ln("received new block update while paused")
+				// if e = s.doBlockUpdate(bu); err.Chk(e) {
+				// }
+				// // s.updateBlockTemplate()
 			case <-ticker.C:
 				dbg.Ln("controller ticker running")
 				s.Advertise()
@@ -239,11 +264,12 @@ out:
 				dbg.Ln("received start signal while paused")
 				if s.walletClient.Disconnected() {
 					dbg.Ln("wallet client is disconnected, retrying")
-					if e = s.startWallet(); !err.Chk(e) {
-						dbg.Ln("wallet client is connected, switching to running")
-						s.updateBlockTemplate()
+					if e = s.startWallet(); err.Chk(e) {
+						// s.updateBlockTemplate()
+						break
 					}
 				}
+				dbg.Ln("wallet client is connected, switching to running")
 				break pausing
 			case <-s.stop.Wait():
 				dbg.Ln("received stop signal while paused")
@@ -254,32 +280,39 @@ out:
 		}
 		dbg.Ln("controller now running")
 		// if s.templateShards == nil || len(s.templateShards) < 1 {
-		s.updateBlockTemplate()
+		if e = s.updateBlockTemplate(); err.Chk(e) {
+		}
 		// }
 		s.mining.Store(true)
 	running:
 		for {
 			select {
 			case <-s.mempoolUpdateChan:
-				s.updateBlockTemplate()
+				dbg.Ln("mempoolUpdateChan updating block templates")
+				if e = s.updateBlockTemplate(); err.Chk(e) {
+					break
+				}
 				dbg.Ln("sending out templates...")
 				if e = s.multiConn.SendMany(job.Magic, s.templateShards); err.Chk(e) {
 				}
 			case bu := <-s.blockUpdate:
 				// _ = bu
-				// dbg.Ln("received new block update while running")
+				dbg.Ln("received new block update while running")
 				if e = s.doBlockUpdate(bu); err.Chk(e) {
+					break
 				}
 				dbg.Ln("sending out templates...")
 				if e = s.multiConn.SendMany(job.Magic, s.templateShards); err.Chk(e) {
+					break
 				}
 			case <-ticker.C:
-				// dbg.Ln("controller ticker running")
-				// dbg.Ln("checking if wallet is connected")
+				dbg.Ln("advertising peer details")
 				s.Advertise()
+				dbg.Ln("checking if wallet is connected")
 				s.checkConnectivity()
-				// dbg.Ln("resending current templates...")
+				dbg.Ln("resending current templates...")
 				if e = s.multiConn.SendMany(job.Magic, s.templateShards); err.Chk(e) {
+					break
 				}
 				if s.walletClient.Disconnected() {
 					dbg.Ln("wallet client has disconnected, switching to pausing")
@@ -359,10 +392,15 @@ func (s *State) Advertise() {
 }
 
 func (s *State) doBlockUpdate(prev *util.Block) (e error) {
+	if s.Syncing.Load() {
+		return nil
+	}
+	dbg.Ln("do block update")
 	if s.nextAddress == nil {
 		dbg.Ln("getting new address for templates")
 		if s.nextAddress, e = s.GetNewAddressFromMiningAddrs(); err.Chk(e) {
 			if s.nextAddress, e = s.GetNewAddressFromWallet(); err.Chk(e) {
+				s.Stop()
 				return
 			}
 		}
@@ -370,7 +408,8 @@ func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 	dbg.Ln("getting templates...", prev.MsgBlock().Header.Timestamp)
 	var tpl *templates.Message
 	if tpl, e = s.GetMsgBlockTemplate(prev, s.nextAddress); err.Chk(e) {
-		// return
+		s.Stop()
+		return
 	}
 	s.msgBlockTemplates.Add(tpl)
 	dbg.Ln(tpl.Timestamp)
@@ -570,6 +609,10 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 	tpl := s.msgBlockTemplates.Find(so.Nonce)
 	if tpl == nil {
 		dbg.Ln("solution nonce", so.Nonce, "is not known by this controller")
+		return
+	}
+	if so.UUID != s.uuid {
+		dbg.Ln("solution is for another controller")
 		return
 	}
 	var newHeader *wire.BlockHeader

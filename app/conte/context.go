@@ -82,6 +82,7 @@ type Xt struct {
 	IsGUI        bool
 	waitChangers []string
 	waitCounter  int
+	Syncing      *atomic.Bool
 }
 
 func (cx *Xt) WaitAdd() {
@@ -138,6 +139,7 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
 		NodeChan:         make(chan *chainrpc.Server),
+		Syncing:          atomic.NewBool(false),
 	}
 	return cx
 }

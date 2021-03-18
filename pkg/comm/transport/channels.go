@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"net"
 	"runtime"
 	"strings"
@@ -79,11 +80,13 @@ func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, e error)
 
 // SendMany sends a BufIter of shards as produced by GetShards
 func (c *Channel) SendMany(magic []byte, b [][]byte) (e error) {
+	dbg.Ln(logg.Caller("sending from", 1))
 	var nonce []byte
 	if nonce, e = GetNonce(c.sendCiph); err.Chk(e) {
 	} else {
 		for i := 0; i < len(b); i++ {
 			// dbg.Ln(i)
+			// dbg.Ln("segment length", len(b[i]))
 			if _, e = c.Send(magic, nonce, b[i]); err.Chk(e) {
 				// debug.PrintStack()
 			}

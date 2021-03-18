@@ -97,7 +97,6 @@ type WalletGUI struct {
 	openTxID, prevOpenTxID                   *uberatomic.String
 	originTxDetail                           string
 	txMx                                     sync.Mutex
-	Syncing                                  *uberatomic.Bool
 	stateLoaded                              *uberatomic.Bool
 	currentReceiveQRCode                     *paint.ImageOp
 	currentReceiveAddress                    string
@@ -123,7 +122,6 @@ type WalletGUI struct {
 }
 
 func (wg *WalletGUI) Run() (e error) {
-	wg.Syncing = uberatomic.NewBool(false)
 	wg.openTxID = uberatomic.NewString("")
 	wg.prevOpenTxID = uberatomic.NewString("")
 	wg.stateLoaded = uberatomic.NewBool(false)
@@ -494,6 +492,9 @@ func (wg *WalletGUI) GetLists() (o ListMap) {
 
 func (wg *WalletGUI) GetClickables() ClickableMap {
 	return ClickableMap{
+		"balanceConfirmed":        wg.Clickable(),
+		"balanceUnconfirmed":      wg.Clickable(),
+		"balanceTotal":            wg.Clickable(),
 		"createWallet":            wg.Clickable(),
 		"createVerify":            wg.Clickable(),
 		"createShuffle":           wg.Clickable(),

@@ -894,7 +894,7 @@ mempoolLoop:
 			)
 		},
 	)
-	dbg.S(msgBlock.Header)
+	// dbg.S(msgBlock.Header)
 	// Tracec(func() string { return spew.Sdump(msgBlock) })
 	return &BlockTemplate{
 		Block:           &msgBlock,
