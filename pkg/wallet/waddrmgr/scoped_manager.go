@@ -607,7 +607,7 @@ func (s *ScopedKeyManager) AddrAccount(
 	ns walletdb.ReadBucket,
 	address util.Address,
 ) (account uint32, e error) {
-	if account, e = fetchAddrAccount(ns, &s.scope, address.ScriptAddress()); err.Chk(e) {
+	if account, e = fetchAddrAccount(ns, &s.scope, address.ScriptAddress()); trc.Chk(e) {
 		return 0, maybeConvertDbError(e)
 	}
 	return account, nil

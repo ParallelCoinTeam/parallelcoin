@@ -591,7 +591,7 @@ func (m *Manager) AddrAccount(
 		// We've found the manager that this address belongs to, so we can retrieve the
 		// address' account along with the manager that the addr belongs to.
 		var accNo uint32
-		if accNo, e = scopedMgr.AddrAccount(ns, address); err.Chk(e) {
+		if accNo, e = scopedMgr.AddrAccount(ns, address); trc.Chk(e) {
 			return nil, 0, e
 		}
 		return scopedMgr, accNo, e
