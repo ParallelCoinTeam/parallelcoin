@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"math"
 	"net"
 	"os"
@@ -20,31 +21,30 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/version"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	indexers "github.com/p9c/pod/pkg/blockchain/indexers"
-	netsync "github.com/p9c/pod/pkg/blockchain/netsync"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/indexers"
+	"github.com/p9c/pod/pkg/blockchain/netsync"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/bloom"
 	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
 	"github.com/p9c/pod/pkg/comm/upnp"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
-	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 const DefaultMaxOrphanTxSize = 100000
@@ -449,7 +449,7 @@ func (n *Node) Start() {
 	// 	}
 	// 	args = append(args, "kopach")
 	// 	// args = apputil.PrependForWindows(args)
-	// 	n.StateCfg.Miner = consume.Log(n.Quit, func(ent *logi.Entry) (e error) {
+	// 	n.StateCfg.Miner = consume.Log(n.Quit, func(ent *logg.Entry) (e error) {
 	// 		dbg.Ln(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 	// 		return
 	// 	}, func(pkg string) (out bool) {
@@ -634,7 +634,7 @@ func (n *Node) HandleBanPeerMsg(state *PeerState, sp *NodePeer) {
 		err.F("can't split ban peer %n %v %n", sp.Addr(), err)
 		return
 	}
-	direction := log.DirectionString(sp.Inbound())
+	direction := logg.DirectionString(sp.Inbound())
 	inf.F("banned peer %n (%n) for %v", host, direction, *n.Config.BanDuration)
 	state.Banned[host] = time.Now().Add(*n.Config.BanDuration)
 }
@@ -947,7 +947,7 @@ func (n *Node) PeerDoneHandler(sp *NodePeer) {
 		if numEvicted > 0 {
 			dbg.F(
 				"Evicted %d %n from peer %v (id %d)",
-				numEvicted, log.PickNoun(int(numEvicted), "orphan", "orphans"),
+				numEvicted, logg.PickNoun(int(numEvicted), "orphan", "orphans"),
 				sp, sp.ID(),
 			)
 		}

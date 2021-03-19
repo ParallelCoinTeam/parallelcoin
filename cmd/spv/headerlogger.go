@@ -3,8 +3,6 @@ package spv
 import (
 	"sync"
 	"time"
-
-	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 // headerProgressLogger provides periodic logging for other services in order to show users progress of certain
@@ -13,7 +11,6 @@ type headerProgressLogger struct {
 	receivedLogBlocks int64
 	lastBlockLogTime  time.Time
 	entityType        string
-	subsystemLogger   *log.Logger
 	progressAction    string
 	sync.Mutex
 }
@@ -38,8 +35,10 @@ func (b *headerProgressLogger) LogBlockHeight(timestamp time.Time, height int32)
 	if b.receivedLogBlocks > 1 {
 		entityStr += "s"
 	}
-	inf.F("%s %d %s in the last %s (height %d, %s)",
-		b.progressAction, b.receivedLogBlocks, entityStr, tDuration, height, timestamp)
+	inf.F(
+		"%s %d %s in the last %s (height %d, %s)",
+		b.progressAction, b.receivedLogBlocks, entityStr, tDuration, height, timestamp,
+	)
 	b.receivedLogBlocks = 0
 	b.lastBlockLogTime = now
 }

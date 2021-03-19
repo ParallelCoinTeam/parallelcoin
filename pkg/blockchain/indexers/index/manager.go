@@ -7,7 +7,6 @@ import (
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
-	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 var (
@@ -361,7 +360,6 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	// Create a progress logger for the indexing process below.
 	progressLogger := newBlockProgressLogger(
 		"Indexed",
-		log.L,
 	)
 	// At this point, one or more indexes are behind the current best chain tip and need to be caught up, so log the
 	// details and loop through each block that needs to be indexed.

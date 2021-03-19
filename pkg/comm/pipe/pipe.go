@@ -1,14 +1,14 @@
 package pipe
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	"io"
 	"os"
 	
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 )
 
 // Consume listens for messages from a child process over a stdio pipe.
@@ -36,7 +36,7 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 			if n == 0 {
 				trc.Ln("read zero from stdconn", args)
 				onBackup = true
-				logi.L.LogChanDisabled.Store(true)
+				logg.LogChanDisabled.Store(true)
 				break out
 			}
 			if err.Chk(e) && e != io.EOF {

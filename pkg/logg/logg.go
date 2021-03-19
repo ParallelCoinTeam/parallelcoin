@@ -54,6 +54,15 @@ type (
 		Name      string
 		Colorizer func(format string, a ...interface{}) string
 	}
+	
+	// Entry is a log entry to be printed as json to the log file
+	Entry struct {
+		Time         time.Time
+		Level        string
+		Package      string
+		CodeLocation string
+		Text         string
+	}
 )
 
 var (
@@ -98,7 +107,41 @@ var (
 		{logLevels.Debug, "debug", color.Bit24(0, 128, 255, false).Sprintf},
 		{logLevels.Trace, "trace", color.Bit24(128, 0, 255, false).Sprintf},
 	}
+	Levels = []string{
+		Off,
+		Fatal,
+		Error,
+		Check,
+		Warn,
+		Info,
+		Debug,
+		Trace,
+	}
+	LogChanDisabled = uberatomic.NewBool(true)
+	LogChan         chan Entry
 )
+
+const (
+	Off   = "off"
+	Fatal = "fatal"
+	Error = "error"
+	Warn  = "warn"
+	Info  = "info"
+	Check = "check"
+	Debug = "debug"
+	Trace = "trace"
+)
+
+// AddLogChan adds a channel that log entries are sent to
+func AddLogChan() (ch chan Entry) {
+	LogChanDisabled.Store(false)
+	if LogChan != nil {
+		panic("warning warning")
+	}
+	// L.Writer.Write.Store( false
+	LogChan = make(chan Entry)
+	return LogChan
+}
 
 // GetLogPrinterSet returns a set of LevelPrinter with their subsystem preloaded
 func GetLogPrinterSet(subsystem string) (Fatal, Error, Warn, Info, Debug, Trace LevelPrinter) {

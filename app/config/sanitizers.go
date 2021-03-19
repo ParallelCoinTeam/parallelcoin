@@ -5,37 +5,36 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain/forkhash"
 	"github.com/p9c/pod/pkg/util/routeable"
-
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/normalize"
 	"github.com/p9c/pod/pkg/wallet"
-
+	
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/util/logi"
 )
 
 const (
@@ -81,11 +80,11 @@ func initConfigFile(cfg *pod.Config) {
 
 func initLogDir(cfg *pod.Config) {
 	if *cfg.LogDir != "" {
-		logi.L.SetLogPaths(*cfg.LogDir, "pod")
+		// logi.L.SetLogPaths(*cfg.LogDir, "pod")
 		interrupt.AddHandler(
 			func() {
 				dbg.Ln("initLogDir interrupt")
-				_ = logi.L.LogFileHandle.Close()
+				// _ = logi.L.LogFileHandle.Close()
 			},
 		)
 	}
@@ -136,7 +135,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	}
 	if *cfg.AutoListen {
 		_, allAddresses := routeable.GetAddressesAndInterfaces()
-		p2pAddresses:= cli.StringSlice{}
+		p2pAddresses := cli.StringSlice{}
 		for addr := range allAddresses {
 			p2pAddresses = append(p2pAddresses, net.JoinHostPort(addr, cx.ActiveNet.DefaultPort))
 		}
@@ -346,11 +345,7 @@ func initLogLevel(cfg *pod.Config) {
 		err.Ln("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
 	}
-	color := true
-	if runtime.GOOS == "windows" {
-		color = false
-	}
-	logi.L.SetLevel(*cfg.LogLevel, color, "pod")
+	logg.SetLogLevel(*cfg.LogLevel)
 }
 
 func normalizeAddresses(cfg *pod.Config) {
@@ -661,7 +656,7 @@ func validateOnions(cfg *pod.Config) {
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
 	}
-
+	
 }
 
 func validateMiningStuff(
@@ -792,7 +787,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			}
 			return proxy.DialTimeout(network, addr, timeout)
 		}
-
+	
 	// When configured in bridge mode (both --onion and --proxy are configured), it
 	// means that the proxy configured by --proxy is not a tor proxy, so override
 	// the DNS resolution to use the onion-specific proxy.

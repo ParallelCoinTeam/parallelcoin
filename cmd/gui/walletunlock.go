@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"path/filepath"
 	"time"
@@ -19,7 +20,6 @@ import (
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/logi"
 )
 
 func (wg *WalletGUI) unlockWallet(pass string) {
@@ -47,7 +47,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 		if *cfg.WalletPass == bh {
 			dbg.Ln("loading previously saved state")
 			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if logi.FileExists(filename) {
+			if logg.FileExists(filename) {
 				dbg.Ln("#### loading state data...")
 				if e = wg.State.Load(filename, wg.cx.Config.WalletPass); err.Chk(e) {
 					// interrupt.Request()

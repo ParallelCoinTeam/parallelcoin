@@ -2,19 +2,19 @@ package serve
 
 import (
 	"github.com/niubaoshu/gotiny"
+	"github.com/p9c/pod/pkg/logg"
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/comm/pipe"
-	"github.com/p9c/pod/pkg/util/logi"
 )
 
 // Log starts up a handler to listen to logs from the child process worker
 func Log(quit qu.C, appName string) {
 	dbg.Ln("starting log server")
-	lc := logi.L.AddLogChan()
+	lc := logg.AddLogChan()
 	// interrupt.AddHandler(func(){
 	// 	// logi.L.RemoveLogChan(lc)
 	// })
@@ -34,22 +34,12 @@ func Log(quit qu.C, appName string) {
 					dbg.Ln("stopping")
 					logOn.Store(false)
 				case "slvl":
-					dbg.Ln("setting level", logi.Levels[b[4]])
-					logi.L.SetLevel(logi.Levels[b[4]], false, "pod")
+					dbg.Ln("setting level", logg.Levels[b[4]])
+					logg.SetLogLevel(logg.Levels[b[4]])
 				case "kill":
 					dbg.Ln("received kill signal from pipe, shutting down", appName)
-					// time.Sleep(time.Second*5)
-					// time.Sleep(time.Second * 3)
-					// logi.L.LogChanDisabled = true
-					// logi.L.LogChan = nil
 					interrupt.Request()
 					quit.Q()
-					// <-interrupt.HandlersDone
-					
-					// quit.Q()
-					// goroutineDump()
-					// dbg.Ln(interrupt.GoroutineDump())
-					// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
 				}
 			}
 			return
@@ -61,10 +51,9 @@ func Log(quit qu.C, appName string) {
 			select {
 			case <-quit.Wait():
 				// interrupt.Request()
-				if !logi.L.LogChanDisabled.Load() {
-					logi.L.LogChanDisabled.Store(true)
+				if !logg.LogChanDisabled.Load() {
+					logg.LogChanDisabled.Store(true)
 				}
-				logi.L.Writer.Write.Store(true)
 				dbg.Ln("quitting pipe logger") // , interrupt.GoroutineDump())
 				interrupt.Request()
 				logOn.Store(false)

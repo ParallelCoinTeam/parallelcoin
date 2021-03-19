@@ -1,13 +1,13 @@
 package wallet
 
 import (
-	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	txs "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/util"
-	log "github.com/p9c/pod/pkg/util/logi"
-	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
+	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // RescanProgressMsg reports the current progress made by a rescan for a set of
@@ -172,7 +172,7 @@ out:
 		case msg := <-w.rescanFinished:
 			n := msg.Notification
 			addrs := msg.Addresses
-			noun := log.PickNoun(len(addrs), "address", "addresses")
+			noun := logg.PickNoun(len(addrs), "address", "addresses")
 			inf.F(
 				"finished rescan for %d %s (synced to block %s, height %d)",
 				len(addrs), noun, n.Hash, n.Height,
@@ -202,7 +202,7 @@ out:
 		case batch := <-w.rescanBatch:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
-			noun := log.PickNoun(numAddrs, "address", "addresses")
+			noun := logg.PickNoun(numAddrs, "address", "addresses")
 			inf.F(
 				"started rescan from block %v (height %d) for %d %s",
 				batch.bs.Hash, batch.bs.Height, numAddrs, noun,

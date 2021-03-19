@@ -2,7 +2,8 @@ package node
 
 import (
 	"github.com/p9c/pod/cmd/kopach/control"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/util/qu"
 	"net"
 	"net/http"
 	// // This enables pprof
@@ -10,13 +11,11 @@ import (
 	"os"
 	"runtime/pprof"
 	
-	"github.com/p9c/pod/pkg/util/logi"
-	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/path"
-	indexers "github.com/p9c/pod/pkg/blockchain/indexers"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/blockchain/indexers"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/database/blockdb"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -193,8 +192,7 @@ func Main(cx *conte.Xt) (e error) {
 		}
 		server.WaitForShutdown()
 		inf.Ln("server shutdown complete")
-		logi.L.LogChanDisabled.Store(true)
-		logi.L.Writer.Write.Store(true)
+		logg.LogChanDisabled.Store(true)
 		cx.WaitDone()
 		cx.KillAll.Q()
 		cx.NodeKill.Q()

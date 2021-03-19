@@ -2,15 +2,14 @@ package ring
 
 import (
 	"context"
+	"github.com/p9c/pod/pkg/logg"
 	
 	"github.com/marusama/semaphore"
-	
-	"github.com/p9c/pod/pkg/util/logi"
 )
 
 type Entry struct {
 	Sem     semaphore.Semaphore
-	Buf     []*logi.Entry
+	Buf     []*logg.Entry
 	Cursor  int
 	Full    bool
 	Clicked int
@@ -22,7 +21,7 @@ type Entry struct {
 func NewEntry(size int) *Entry {
 	return &Entry{
 		Sem:     semaphore.New(1),
-		Buf:     make([]*logi.Entry, size),
+		Buf:     make([]*logg.Entry, size),
 		Cursor:  0,
 		Clicked: -1,
 		// Buttons: make([]gel.Button, size),
@@ -56,7 +55,7 @@ func (b *Entry) Len() (out int) {
 }
 
 // Get returns the value at the given index or nil if nothing
-func (b *Entry) Get(i int) (out *logi.Entry) {
+func (b *Entry) Get(i int) (out *logg.Entry) {
 	var e error
 	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 		defer b.Sem.Release(1)
@@ -120,7 +119,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 // 	return
 // }
 
-func (b *Entry) Add(value *logi.Entry) {
+func (b *Entry) Add(value *logg.Entry) {
 	var e error
 	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 		defer b.Sem.Release(1)
@@ -135,7 +134,7 @@ func (b *Entry) Add(value *logi.Entry) {
 	}
 }
 
-func (b *Entry) ForEach(fn func(v *logi.Entry) error) (e error) {
+func (b *Entry) ForEach(fn func(v *logg.Entry) error) (e error) {
 	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
 		c := b.Cursor
 		i := c + 1

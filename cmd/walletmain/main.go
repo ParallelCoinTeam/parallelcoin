@@ -2,12 +2,13 @@ package walletmain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
+	
 	// This enables pprof
 	// _ "net/http/pprof"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/util/logi"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
@@ -156,7 +157,7 @@ func rpcClientConnectLoop(
 	cx *conte.Xt, legacyServer *legacy.Server,
 	loader *wallet.Loader,
 ) {
-	dbg.Ln("^^^^^^^^^^^^^^^ rpcClientConnectLoop", logi.Caller("which was started at:", 2))
+	dbg.Ln("^^^^^^^^^^^^^^^ rpcClientConnectLoop", logg.Caller("which was started at:", 2))
 	// var certs []byte
 	// if !cx.PodConfig.UseSPV {
 	certs := pod.ReadCAFile(cx.Config)

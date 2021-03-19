@@ -3,6 +3,7 @@ package gui
 import (
 	"crypto/rand"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/tyler-smith/go-bip39"
 	"os"
@@ -18,7 +19,6 @@ import (
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	log "github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/urfave/cli"
@@ -552,7 +552,7 @@ var shuttingDown = false
 
 func (wg *WalletGUI) gracefulShutdown() {
 	if shuttingDown {
-		dbg.Ln(log.Caller("already called gracefulShutdown", 1))
+		dbg.Ln(logg.Caller("already called gracefulShutdown", 1))
 		return
 	} else {
 		shuttingDown = true

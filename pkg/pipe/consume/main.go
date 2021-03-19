@@ -4,7 +4,7 @@ import (
 	"github.com/niubaoshu/gotiny"
 	"github.com/p9c/pod/pkg/comm/pipe"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
-	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/util/qu"
 )
 
@@ -14,8 +14,8 @@ func FilterNone(string) bool {
 }
 
 // SimpleLog is a very simple log printer
-func SimpleLog(name string) func(ent *logi.Entry) (e error) {
-	return func(ent *logi.Entry) (e error) {
+func SimpleLog(name string) func(ent *logg.Entry) (e error) {
+	return func(ent *logg.Entry) (e error) {
 		dbg.F(
 			"%s[%s] %s %s",
 			name,
@@ -29,10 +29,7 @@ func SimpleLog(name string) func(ent *logi.Entry) (e error) {
 }
 
 func Log(
-	quit qu.C, handler func(ent *logi.Entry) (
-	e error,
-), filter func(pkg string) (out bool),
-	args ...string,
+	quit qu.C, handler func(ent *logg.Entry) (e error,), filter func(pkg string) (out bool), args ...string,
 ) *worker.Worker {
 	dbg.Ln("starting log consumer")
 	return pipe.Consume(
@@ -42,9 +39,7 @@ func Log(
 				magic := string(b[:4])
 				switch magic {
 				case "entr":
-					// dbg.Ln(b)
-					// e := Entry.LoadContainer(b).Struct()
-					var ent logi.Entry
+					var ent logg.Entry
 					n := gotiny.Unmarshal(b, &ent)
 					dbg.Ln("consume", n)
 					if filter(ent.Package) {
@@ -52,18 +47,17 @@ func Log(
 						return
 					}
 					switch ent.Level {
-					case logi.Fatal:
-					case logi.Error:
-					case logi.Warn:
-					case logi.Info:
-					case logi.Check:
-					case logi.Debug:
-					case logi.Trace:
+					case logg.Fatal:
+					case logg.Error:
+					case logg.Warn:
+					case logg.Info:
+					case logg.Check:
+					case logg.Debug:
+					case logg.Trace:
 					default:
 						dbg.Ln("got an empty log entry")
 						return
 					}
-					// dbg.F("%s%s %s%s", color, e.Text, logi.ColorOff, e.CodeLocation)
 					if e = handler(&ent); err.Chk(e) {
 					}
 				}
@@ -119,8 +113,8 @@ func SetLevel(w *worker.Worker, level string) {
 	}
 	dbg.Ln("sending set level", level)
 	lvl := 0
-	for i := range logi.Levels {
-		if level == logi.Levels[i] {
+	for i := range logg.Levels {
+		if level == logg.Levels[i] {
 			lvl = i
 		}
 	}

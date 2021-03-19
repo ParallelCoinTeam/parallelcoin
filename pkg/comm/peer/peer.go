@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"io"
 	"math/rand"
 	"net"
@@ -13,8 +14,6 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/util/qu"
-	
-	"github.com/p9c/pod/pkg/util/logi"
 	
 	"github.com/btcsuite/go-socks/socks"
 	
@@ -390,7 +389,7 @@ type Peer struct {
 //
 // This function is safe for concurrent access.
 func (p *Peer) String() string {
-	return fmt.Sprintf("%s (%s)", p.addr, logi.DirectionString(p.inbound))
+	return fmt.Sprintf("%s (%s)", p.addr, logg.DirectionString(p.inbound))
 }
 
 // UpdateLastBlockHeight updates the last known block for the peer.
@@ -1759,7 +1758,7 @@ func (p *Peer) readRemoteVersionMsg() (e error) {
 }
 
 // localVersionMsg creates a version message that can be used to send to the remote peer.
-func (p *Peer) localVersionMsg() (mv *wire.MsgVersion,e error) {
+func (p *Peer) localVersionMsg() (mv *wire.MsgVersion, e error) {
 	var blockNum int32
 	if p.cfg.NewestBlock != nil {
 		_, blockNum, e = p.cfg.NewestBlock()
@@ -1978,6 +1977,6 @@ func NewOutboundPeer(cfg *Config, addr string) (*Peer, error) {
 }
 
 func init() {
-
+	
 	rand.Seed(time.Now().UnixNano())
 }

@@ -7,13 +7,12 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/pipe/consume"
-	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/qu"
 )
 
 func main() {
 	// var e error
-	logi.L.SetLevel("trace", false, "pod")
+	logg.SetLogLevel("trace")
 	// command := "pod -D test0 -n testnet -l trace --solo --lan --pipelog node"
 	quit := qu.T()
 	// splitted := strings.Split(command, " ")

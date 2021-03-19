@@ -12,7 +12,6 @@ import (
 	"github.com/p9c/pod/cmd/kopach/worker"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
@@ -25,7 +24,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			}
 		}
 		if len(os.Args) > 4 {
-			log.L.SetLevel(os.Args[4], true, "pod")
+			logg.SetLogLevel(os.Args[4])
 		}
 		dbg.Ln("miner worker starting")
 		w, conn := worker.New(os.Args[2], cx.KillAll, uint64(*cx.Config.UUID))

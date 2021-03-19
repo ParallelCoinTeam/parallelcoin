@@ -7,24 +7,23 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/cmd/node/version"
+	"github.com/p9c/pod/pkg/logg"
 	"math/big"
 	"net"
 	"strconv"
 	"strings"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
-	
-	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -493,7 +492,7 @@ func HandleGetAddedNodeInfo(
 			addr.Address = ip
 			addr.Connected = "false"
 			if ip == host && peer.Connected() {
-				addr.Connected = logi.DirectionString(peer.Inbound())
+				addr.Connected = logg.DirectionString(peer.Inbound())
 			}
 			addrs = append(addrs, addr)
 		}
@@ -2608,7 +2607,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	// //	}
 	// //	args = append(args, "kopach")
 	// //	// args = apputil.PrependForWindows(args)
-	// //	s.StateCfg.Miner = consume.Log(s.Quit, func(ent *logi.Entry) (e error) {
+	// //	s.StateCfg.Miner = consume.Log(s.Quit, func(ent *logg.Entry) (e error) {
 	// //		dbg.Ln(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 	// //		return
 	// //	}, func(pkg string) (out bool) {

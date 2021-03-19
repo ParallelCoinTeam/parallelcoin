@@ -1,6 +1,7 @@
 package rununit
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -8,7 +9,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/pipe/consume"
-	"github.com/p9c/pod/pkg/util/logi"
 )
 
 // RunUnit handles correctly starting and stopping child processes that have StdConn pipe logging enabled, allowing
@@ -24,7 +24,7 @@ type RunUnit struct {
 // receives log entries and processes them (such as logging them).
 func New(
 	run, stop func(),
-	logger func(ent *logi.Entry) (e error),
+	logger func(ent *logg.Entry) (e error),
 	pkgFilter func(pkg string) (out bool),
 	quit qu.C,
 	args ...string,

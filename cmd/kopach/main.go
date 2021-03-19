@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
+	"github.com/p9c/pod/pkg/logg"
 	"net"
 	"os"
 	"runtime"
@@ -16,7 +17,6 @@ import (
 	"github.com/niubaoshu/gotiny"
 	
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/VividCortex/ewma"
@@ -244,8 +244,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 				}
 			}
 			dbg.Ln("finished kopach miner work loop")
-			logi.L.LogChanDisabled.Store(true)
-			logi.L.Writer.Write.Store(true)
+			logg.LogChanDisabled.Store(true)
 		}()
 		dbg.Ln("listening on", control.UDP4MulticastAddress)
 		<-w.quit
@@ -342,49 +341,49 @@ var handlers = transport.Handlers{
 		// w := ctx.(*Worker)
 		// dbg.Ln("shuffling work due to solution on network")
 		// w.FirstSender.Store(0)
-	// 	dbg.Ln("solution detected from miner at", src)
-	// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
-	// 	if len(portSlice) < 2 {
-	// 		dbg.Ln("error with solution", w.FirstSender.Load(), portSlice)
-	// 		return
-	// 	}
-	// 	// port := portSlice[1]
-	// 	// j := sol.LoadSolContainer(b)
-	// 	// senderPort := j.GetSenderPort()
-	// 	// if fmt.Sprint(senderPort) == port {
-	// 	// // wrn.Ln("we found a solution")
-	// 	// // prepend to list of solutions for GUI display if enabled
-	// 	// if *w.cx.Config.KopachGUI {
-	// 	// 	// dbg.Ln("length solutions", len(w.solutions))
-	// 	// 	blok := j.GetMsgBlock()
-	// 	// 	w.solutions = append(
-	// 	// 		w.solutions, []SolutionData{
-	// 	// 			{
-	// 	// 				time:   time.Now(),
-	// 	// 				height: int(w.height),
-	// 	// 				algo: fmt.Sprint(
-	// 	// 					fork.GetAlgoName(blok.Header.Version, w.height),
-	// 	// 				),
-	// 	// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
-	// 	// 				indexHash:  blok.Header.BlockHash().String(),
-	// 	// 				version:    blok.Header.Version,
-	// 	// 				prevBlock:  blok.Header.PrevBlock.String(),
-	// 	// 				merkleRoot: blok.Header.MerkleRoot.String(),
-	// 	// 				timestamp:  blok.Header.Timestamp,
-	// 	// 				bits:       blok.Header.Bits,
-	// 	// 				nonce:      blok.Header.Nonce,
-	// 	// 			},
-	// 	// 		}...,
-	// 	// 	)
-	// 	// 	if len(w.solutions) > 2047 {
-	// 	// 		w.solutions = w.solutions[len(w.solutions)-2047:]
-	// 	// 	}
-	// 	// 	w.solutionCount = len(w.solutions)
-	// 	// 	w.Update <- struct{}{}
-	// 	// }
-	// 	// }
-	// 	// dbg.Ln("no longer listening to", w.FirstSender.Load())
-	// 	// w.FirstSender.Store("")
+		// 	dbg.Ln("solution detected from miner at", src)
+		// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
+		// 	if len(portSlice) < 2 {
+		// 		dbg.Ln("error with solution", w.FirstSender.Load(), portSlice)
+		// 		return
+		// 	}
+		// 	// port := portSlice[1]
+		// 	// j := sol.LoadSolContainer(b)
+		// 	// senderPort := j.GetSenderPort()
+		// 	// if fmt.Sprint(senderPort) == port {
+		// 	// // wrn.Ln("we found a solution")
+		// 	// // prepend to list of solutions for GUI display if enabled
+		// 	// if *w.cx.Config.KopachGUI {
+		// 	// 	// dbg.Ln("length solutions", len(w.solutions))
+		// 	// 	blok := j.GetMsgBlock()
+		// 	// 	w.solutions = append(
+		// 	// 		w.solutions, []SolutionData{
+		// 	// 			{
+		// 	// 				time:   time.Now(),
+		// 	// 				height: int(w.height),
+		// 	// 				algo: fmt.Sprint(
+		// 	// 					fork.GetAlgoName(blok.Header.Version, w.height),
+		// 	// 				),
+		// 	// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
+		// 	// 				indexHash:  blok.Header.BlockHash().String(),
+		// 	// 				version:    blok.Header.Version,
+		// 	// 				prevBlock:  blok.Header.PrevBlock.String(),
+		// 	// 				merkleRoot: blok.Header.MerkleRoot.String(),
+		// 	// 				timestamp:  blok.Header.Timestamp,
+		// 	// 				bits:       blok.Header.Bits,
+		// 	// 				nonce:      blok.Header.Nonce,
+		// 	// 			},
+		// 	// 		}...,
+		// 	// 	)
+		// 	// 	if len(w.solutions) > 2047 {
+		// 	// 		w.solutions = w.solutions[len(w.solutions)-2047:]
+		// 	// 	}
+		// 	// 	w.solutionCount = len(w.solutions)
+		// 	// 	w.Update <- struct{}{}
+		// 	// }
+		// 	// }
+		// 	// dbg.Ln("no longer listening to", w.FirstSender.Load())
+		// 	// w.FirstSender.Store("")
 		return
 	},
 }
