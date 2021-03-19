@@ -3,9 +3,9 @@ package indexers
 import (
 	"fmt"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 	log "github.com/p9c/pod/pkg/util/logi"
 )
@@ -225,7 +225,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 		func(dbTx database.Tx) (e error) {
 			// Create the bucket for the current tips as needed.
 			meta := dbTx.Metadata()
-			if _, e = meta.CreateBucketIfNotExists(indexTipsBucketName);err.Chk(e){
+			if _, e = meta.CreateBucketIfNotExists(indexTipsBucketName); err.Chk(e) {
 				return e
 			}
 			return m.maybeCreateIndexes(dbTx)

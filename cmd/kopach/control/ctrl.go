@@ -188,14 +188,13 @@ func (s *State) startWallet() (e error) {
 
 func (s *State) updateBlockTemplate() (e error) {
 	dbg.Ln("getting current chain tip")
-	s.node.Chain.ChainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
-	h := s.node.Chain.BestChain.Tip().Header().BlockHash()
+	// s.node.Chain.ChainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
+	h := s.node.Chain.BestSnapshot().Hash
 	var blk *util.Block
 	if blk, e = s.node.Chain.BlockByHash(&h); err.Chk(e) {
-		s.node.Chain.ChainLock.Unlock()
 		return
 	}
-	s.node.Chain.ChainLock.Unlock()
+	// s.node.Chain.ChainLock.Unlock()
 	dbg.Ln("updating block from chain tip")
 	// dbg.S(blk)
 	if e = s.doBlockUpdate(blk); err.Chk(e) {
@@ -398,12 +397,12 @@ func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 	dbg.Ln("do block update")
 	if s.nextAddress == nil {
 		dbg.Ln("getting new address for templates")
-		if s.nextAddress, e = s.GetNewAddressFromMiningAddrs(); err.Chk(e) {
-			if s.nextAddress, e = s.GetNewAddressFromWallet(); err.Chk(e) {
-				s.Stop()
-				return
-			}
+		// if s.nextAddress, e = s.GetNewAddressFromMiningAddrs(); trc.Chk(e) {
+		if s.nextAddress, e = s.GetNewAddressFromWallet(); trc.Chk(e) {
+			s.Stop()
+			return
 		}
+		// }
 	}
 	dbg.Ln("getting templates...", prev.MsgBlock().Header.Timestamp)
 	var tpl *templates.Message
@@ -466,8 +465,9 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 	// }
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
 		var templateX *mining.BlockTemplate
-		if templateX, e = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); err.Chk(e) {
+		if templateX, e = s.generator.NewBlockTemplate(addr, fork.GetAlgoName(curr(), mbt.Height)); dbg.Chk(e) || templateX == nil {
 		} else {
+			// inf.S(templateX)
 			newB := templateX.Block
 			newH := newB.Header
 			mbt.Timestamp = newH.Timestamp

@@ -1,4 +1,4 @@
-package index
+package indexers
 
 import (
 	"github.com/p9c/pod/pkg/logg"

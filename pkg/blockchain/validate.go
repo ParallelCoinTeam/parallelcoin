@@ -380,6 +380,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 	b.ChainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
 	defer b.ChainLock.Unlock()
 	tip := b.BestChain.Tip()
+	// tip := b.BestChain.NodeByHeight(height)
 	header := block.MsgBlock().Header
 	if tip.hash != header.PrevBlock {
 		str := fmt.Sprintf(

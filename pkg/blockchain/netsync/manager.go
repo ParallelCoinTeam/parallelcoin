@@ -8,16 +8,16 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	peerpkg "github.com/p9c/pod/pkg/comm/peer"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -315,7 +315,8 @@ out:
 				trc.Ln("checking if have should have serialized block height")
 				if blockchain.ShouldHaveSerializedBlockHeight(header) {
 					trc.Ln("reading coinbase transaction")
-					coinbaseTx := msg.block.Transactions()[0]
+					mbt := msg.block.Transactions()
+					coinbaseTx := mbt[len(mbt)-1]
 					trc.Ln("extracting coinbase height")
 					var e error
 					var cbHeight int32
@@ -333,8 +334,8 @@ out:
 					msg.block,
 					msg.flags,
 					heightUpdate,
-				); err.Chk(e) {
-					err.Ln("error processing new block ", err)
+				); dbg.Chk(e) {
+					dbg.Ln("error processing new block ", err)
 					msg.reply <- processBlockResponse{
 						isOrphan: false,
 						err:      e,
@@ -1321,7 +1322,7 @@ func (sm *SyncManager) startSync() {
 		// it is a reasonable choice. It also allows the case where both are at 0 such
 		// as during regression test.
 		if peer.LastBlock() < best.Height {
-			state.syncCandidate = false
+			// state.syncCandidate = false
 			continue
 		}
 		// TODO(davec): Use a better algorithm to choose the best peer. For now, just pick the first available candidate.

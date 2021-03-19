@@ -3,15 +3,15 @@ package indexers
 import (
 	"errors"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -227,7 +227,7 @@ func (idx *CFIndex) DisconnectBlock(
 func (idx *CFIndex) entryByBlockHash(
 	filterTypeKeys [][]byte,
 	filterType wire.FilterType, h *chainhash.Hash,
-) (entry []byte,e error) {
+) (entry []byte, e error) {
 	if uint8(filterType) > maxFilterType {
 		return nil, errors.New("unsupported filter type")
 	}
@@ -246,7 +246,7 @@ func (idx *CFIndex) entryByBlockHash(
 func (idx *CFIndex) entriesByBlockHashes(
 	filterTypeKeys [][]byte,
 	filterType wire.FilterType, blockHashes []*chainhash.Hash,
-) (entries [][]byte,e error) {
+) (entries [][]byte, e error) {
 	if uint8(filterType) > maxFilterType {
 		return nil, errors.New("unsupported filter type")
 	}

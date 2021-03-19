@@ -584,7 +584,7 @@ func (m *Manager) AddrAccount(
 	defer m.mtx.RUnlock()
 	var e error
 	for _, scopedMgr := range m.scopedManagers {
-		if _, e = scopedMgr.Address(ns, address); trc.Chk(e) {
+		if _, e = scopedMgr.Address(ns, address); e!=nil/*trc.Chk(e)*/ {
 			// dbg.Ln(address)
 			continue
 		}

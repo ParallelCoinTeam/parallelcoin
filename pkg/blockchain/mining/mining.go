@@ -437,7 +437,7 @@ func (g *BlkTmplGenerator) NewBlockTemplate(payToAddress util.Address, algo stri
 	}
 	// Extend the most recently known best block.
 	best := g.Chain.BestSnapshot()
-	nextBlockHeight := best.Height + 1
+	nextBlockHeight := best.Height+1
 	// sanitise the version number
 	vers := fork.GetAlgoVer(algo, nextBlockHeight)
 	algo = fork.GetAlgoName(vers, nextBlockHeight)
@@ -832,7 +832,7 @@ mempoolLoop:
 	// per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
 	trc.Ln("legacy ts", ts)
-	if fork.GetCurrent(best.Height) > 0 {
+	if fork.GetCurrent(nextBlockHeight) > 0 {
 		ots := g.Chain.BestChain.NodeByHeight(best.Height).Header().Timestamp.Truncate(time.Second).Add(time.Second)
 		dbg.Ln("prev timestamp+1", ots)
 		tn := time.Now().Truncate(time.Second)

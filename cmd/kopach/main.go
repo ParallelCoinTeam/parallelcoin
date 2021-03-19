@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
-	"github.com/p9c/pod/pkg/blockchain/fork"
 	"net"
 	"os"
 	"runtime"
@@ -299,8 +298,8 @@ var handlers = transport.Handlers{
 				return
 			}
 		} else {
-			inf.Ln("no tworking on job of local controller")
-			inf.Ln("p9 average",fork.P9Average)
+			// inf.Ln("no tworking on job of local controller")
+			// inf.Ln("p9 average",fork.P9Average)
 			// trc.Ln("now listening to controller at", cN)
 			w.FirstSender.Store(0)
 			return
