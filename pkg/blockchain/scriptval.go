@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math"
 	"runtime"
-	
-	qu "github.com/p9c/pod/pkg/util/qu"
-	
+
+	"github.com/p9c/pod/pkg/util/qu"
+
 	"github.com/p9c/pod/pkg/blockchain/hardfork"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -85,7 +85,7 @@ out:
 						"%v (input witness x, input script "+
 						"bytes %x, prev output script bytes %x)",
 					txVI.tx.Hash(), txVI.txInIndex,
-					txIn.PreviousOutPoint, err, // witness,
+					txIn.PreviousOutPoint, e, // witness,
 					sigScript, pkScript,
 				)
 				e = ruleError(ErrScriptMalformed, str)
@@ -93,14 +93,14 @@ out:
 				break out
 			}
 			// Execute the script pair.
-			if e := vm.Execute(); err.Chk(e) {
+			if e := vm.Execute(); E.Chk(e) {
 				str := fmt.Sprintf(
 					"failed to validate input "+
 						"%s:%d which references output %v - "+
 						"%v (input witness x, input script "+
 						"bytes %x, prev output script bytes %x)",
 					txVI.tx.Hash(), txVI.txInIndex,
-					txIn.PreviousOutPoint, err, // witness,
+					txIn.PreviousOutPoint, e, // witness,
 					sigScript, pkScript,
 				)
 				e = ruleError(ErrScriptValidation, str)
@@ -281,7 +281,7 @@ func checkBlockScripts(
 	// Validate all of the inputs.
 	validator := newTxValidator(utxoView, scriptFlags, sigCache, hashCache)
 	// start := time.Now()
-	if e = validator.Validate(txValItems); err.Chk(e) {
+	if e = validator.Validate(txValItems); E.Chk(e) {
 		return e
 	}
 	// elapsed := time.Since(start)

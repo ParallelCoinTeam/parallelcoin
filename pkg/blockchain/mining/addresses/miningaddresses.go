@@ -14,19 +14,19 @@ import (
 // todo: make this remove ones that have been used or received a payment or mined
 func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Config) {
 	if w == nil {
-		dbg.Ln("trying to refill without a wallet")
+		D.Ln("trying to refill without a wallet")
 		return
 	}
 	if cfg == nil {
-		dbg.Ln("config is empty")
+		D.Ln("config is empty")
 		return
 	}
 	var miningAddressLen int
 	if cfg.MiningAddrs != nil {
-		dbg.Ln("miningAddressLen", len(*cfg.MiningAddrs))
+		D.Ln("miningAddressLen", len(*cfg.MiningAddrs))
 		miningAddressLen = len(*cfg.MiningAddrs)
 	} else {
-		dbg.Ln("miningaddrs slice is missing")
+		D.Ln("miningaddrs slice is missing")
 		cfg.MiningAddrs = new(cli.StringSlice)
 	}
 	toMake := 99 - miningAddressLen
@@ -34,16 +34,16 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 		toMake = 0
 	}
 	if toMake < 1 {
-		dbg.Ln("not making any new addresses")
+		D.Ln("not making any new addresses")
 		return
 	}
-	dbg.Ln("refilling mining addresses")
+	D.Ln("refilling mining addresses")
 	account, e := w.AccountNumber(
 		wm.KeyScopeBIP0044,
 		"default",
 	)
 	if e != nil  {
-		Error("error getting account number ", err)
+		Error("error getting account number ", e)
 	}
 	for i := 0; i < toMake; i++ {
 		addr, e := w.NewAddress(
@@ -57,12 +57,12 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 			// are ready to use
 			stateCfg.ActiveMiningAddrs = append(stateCfg.ActiveMiningAddrs, addr)
 		} else {
-			Error("error adding new address ", err)
+			Error("error adding new address ", e)
 		}
 	}
 	if save.Pod(cfg) {
-		dbg.Ln("saved config with new addresses")
+		D.Ln("saved config with new addresses")
 	} else {
-		Error("error adding new addresses", err)
+		Error("error adding new addresses", e)
 	}
 }

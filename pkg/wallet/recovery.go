@@ -127,7 +127,7 @@ func (rm *RecoveryManager) AddToBlockBatch(
 	timestamp time.Time,
 ) {
 	if !rm.started {
-		trc.F(
+		T.F(
 			"Seed birthday surpassed, starting recovery of wallet from height=%d hash=%v with recovery-window=%d",
 			height, *hash, rm.recoveryWindow,
 		)

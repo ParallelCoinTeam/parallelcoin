@@ -443,19 +443,19 @@ func (a API) {{.Handler}}Wait(cmd {{.Cmd}}) (out *{{.ResType}}, e error) {
 func RunAPI(server *Server, quit qu.C) {
 	nrh := ` + RPCMapName + `
 	go func() {
-		dbg.Ln("starting up node cAPI")
+		D.Ln("starting up node cAPI")
 		var e error
 		var res interface{}
 		for {
 			select { {{range .}}
 			case msg := <-nrh["{{.Method}}"].Call:
 				if res, e = nrh["{{.Method}}"].
-					Fn(server, msg.Params.({{.Cmd}}), nil); err.Chk(e) {
+					Fn(server, msg.Params.({{.Cmd}}), nil); E.Chk(e) {
 				}
 				if r, ok := res.({{.ResType}}); ok { 
 					msg.Ch.(chan {{.Handler}}Res) <-{{.Handler}}Res{&r, e} } {{end}}
 			case <-quit.Wait():
-				dbg.Ln("stopping wallet cAPI")
+				D.Ln("stopping wallet cAPI")
 				return
 			}
 		}
@@ -484,27 +484,27 @@ func (r *CAPIClient) {{.Handler}}(cmd ...{{.Cmd}}) (res {{.ResType}}, e error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if e = r.Call("` + Worker + `.{{.Handler}}", c, &res); err.Chk(e) {
+	if e = r.Call("` + Worker + `.{{.Handler}}", c, &res); E.Chk(e) {
 	}
 	return
 }
 {{end}}
 `
 	logg.SetLogLevel("trace")
-	if fd, e := os.Create("rpchandlers.go"); err.Chk(e) {
-		if fd, e := os.OpenFile("rpchandlers.go", os.O_RDWR|os.O_CREATE, 0755); err.Chk(e) {
+	if fd, e := os.Create("rpchandlers.go"); E.Chk(e) {
+		if fd, e := os.OpenFile("rpchandlers.go", os.O_RDWR|os.O_CREATE, 0755); E.Chk(e) {
 		} else {
 			defer fd.Close()
 			t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 			sort.Sort(handlers)
-			if e = t.Execute(fd, handlers); err.Chk(e) {
+			if e = t.Execute(fd, handlers); E.Chk(e) {
 			}
 		}
 	} else {
 		defer fd.Close()
 		t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 		sort.Sort(handlers)
-		if e = t.Execute(fd, handlers); err.Chk(e) {
+		if e = t.Execute(fd, handlers); E.Chk(e) {
 		}
 	}
 }

@@ -39,7 +39,7 @@ func readAll() (string, error) {
 		return "", e
 	}
 	defer func() {
-		if _, _, e = closeClipboard.Call(); err.Chk(e) {
+		if _, _, e = closeClipboard.Call(); E.Chk(e) {
 		}
 	}()
 	
@@ -72,7 +72,7 @@ func writeAll(text string) (e error) {
 		return e
 	}
 	defer func() {
-		if _, _, e = closeClipboard.Call(); err.Chk(e) {
+		if _, _, e = closeClipboard.Call(); E.Chk(e) {
 		}
 	}()
 	

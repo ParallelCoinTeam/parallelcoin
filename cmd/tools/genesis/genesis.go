@@ -11,22 +11,22 @@ import (
 	"strconv"
 	"time"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 )
 
 type transaction struct {
-	merkleHash     []byte // 32 bytes long
+	merkleHash []byte // 32 bytes long
 	serializedData []byte
-	version        uint32
-	numInputs      byte
-	prevOutput     []byte // 32 bytes long
-	prevoutIndex   uint32
-	scriptSig      []byte
-	sequence       uint32
-	numOutputs     byte
-	outValue       uint64
-	pubkeyScript   []byte
-	locktime       uint32
+	version uint32
+	numInputs byte
+	prevOutput []byte // 32 bytes long
+	prevoutIndex uint32
+	scriptSig []byte
+	sequence uint32
+	numOutputs byte
+	outValue uint64
+	pubkeyScript []byte
+	locktime uint32
 }
 
 const coin uint64 = 10000000
@@ -63,10 +63,15 @@ func main() {
 		fmt.Println("Usage:")
 		fmt.Println("    ", args[0], "<pubkey> <timestamp> <nBits>")
 		fmt.Println("Example:")
-		fmt.Println("    ", args[0],
-			"04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f \"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks\" 486604799")
-		fmt.Println("\nIf you execute this without parameters another one in" +
-			" the source code will be generated, using a random public key")
+		fmt.Println(
+			"    ",
+			args[0],
+			"04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f \"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks\" 486604799",
+		)
+		fmt.Println(
+			"\nIf you execute this without parameters another one in" +
+				" the source code will be generated, using a random public key",
+		)
 		args = []string{
 			os.Args[0],
 			"04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f",
@@ -78,8 +83,8 @@ func main() {
 	if args[1] == "" {
 		pubkey = make([]byte, 65)
 		n, e := rand.Read(pubkey)
-		if e != nil  {
-						os.Exit(1)
+		if e != nil {
+			os.Exit(1)
 		}
 		if n != 65 {
 			Error("For some reason did not get 65 random bytes")
@@ -93,19 +98,21 @@ func main() {
 		}
 		var e error
 		pubkey, e = hex.DecodeString(args[1])
-		if e != nil  {
-						fmt.Println("Public key had invalid characters")
+		if e != nil {
+			fmt.Println("Public key had invalid characters")
 		}
 	}
 	timestamp := args[2]
 	if len(timestamp) > 254 || len(timestamp) < 1 {
-		Error("Timestamp was either longer than 254 characters or zero" +
-			" length")
+		Error(
+			"Timestamp was either longer than 254 characters or zero" +
+				" length",
+		)
 		os.Exit(1)
 	}
 	tx := initTransaction()
 	nbits, e := strconv.ParseInt(args[3], 10, 32)
-	if e != nil  {
+	if e != nil {
 		Error("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
@@ -140,7 +147,8 @@ func main() {
 		uint64tobytes(tx.outValue),
 		[]byte{byte(len(tx.pubkeyScript))},
 		tx.pubkeyScript,
-		uint32tobytes(tx.locktime))
+		uint32tobytes(tx.locktime),
+	)
 	// hash1 := sha256.Sum256(tx.serializedData)
 	// hash2 := sha256.Sum256(hash1[:])
 	hash1 := chainhash.HashB(tx.serializedData)
@@ -152,13 +160,21 @@ func main() {
 	byteswap(tx.merkleHash)
 	txScriptSig := hex.EncodeToString(tx.scriptSig)
 	pubScriptSig := hex.EncodeToString(tx.pubkeyScript)
-	fmt.Printf("\nCoinbase:\n0x%s\n\nPubKeyScript:\n0x%s\n\nMerkle Hash:\n0x%s\n\nByteswapped:\n0x%s\n", txScriptSig, pubScriptSig, merkleHash, merkleHashSwapped)
+	fmt.Printf(
+		"\nCoinbase:\n0x%s\n\nPubKeyScript:\n0x%s\n\nMerkle Hash:\n0x%s\n\nByteswapped:\n0x%s\n",
+		txScriptSig,
+		pubScriptSig,
+		merkleHash,
+		merkleHashSwapped,
+	)
 	unixtime := uint32(time.Now().Unix())
 	var blockversion uint32 = 4
-	blockHeader := joinBytes(uint32tobytes(blockversion), make([]byte, 32), tx.merkleHash,
+	blockHeader := joinBytes(
+		uint32tobytes(blockversion), make([]byte, 32), tx.merkleHash,
 		uint32tobytes(unixtime), // byte 68 - 71
 		uint32tobytes(nBits),
-		uint32tobytes(startNonce)) // byte 76 - 79
+		uint32tobytes(startNonce),
+	) // byte 76 - 79
 	bytes := nBits >> 24
 	// bytes := 31
 	body := nBits << 8 >> 8
@@ -174,9 +190,11 @@ func main() {
 		bytes = bytes - bits/8
 		bits = bits % 8
 	}
-	inf.Ln("\nSearching for nonce/unixtime combination that satisfies "+
-		"minimum target %d with %d threads on %d cores...\nPlease wait... ",
-		nBits, runtime.GOMAXPROCS(-1), runtime.NumCPU())
+	I.Ln(
+		"\nSearching for nonce/unixtime combination that satisfies "+
+			"minimum target %d with %d threads on %d cores...\nPlease wait... ",
+		nBits, runtime.GOMAXPROCS(-1), runtime.NumCPU(),
+	)
 	start := time.Now()
 	for i := 0; i < runtime.NumCPU(); i++ {
 		go findNonce(blockHeader, bytes, bits, start)
@@ -196,7 +214,12 @@ func findNonce(b []byte, bytes, bits uint32, start time.Time) []byte {
 		blockhash2 := sha256.Sum256(blockhash1[:])
 		if undertarget(blockhash2[bytes:], bits) {
 			byteswap(blockhash2[:])
-			fmt.Printf("Block found!\n\nHash:\n0x%x\n\nNonce:\n%d\n\nUnix time:\n%d\n", blockhash2, startNonce, unixtime)
+			fmt.Printf(
+				"Block found!\n\nHash:\n0x%x\n\nNonce:\n%d\n\nUnix time:\n%d\n",
+				blockhash2,
+				startNonce,
+				unixtime,
+			)
 			fmt.Printf("\nBlock header encoded in hex:\n0x%x\n", blockHeader)
 			fmt.Println("\nTime for nonce search:", time.Since(start))
 			os.Exit(1)

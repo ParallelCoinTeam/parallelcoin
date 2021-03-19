@@ -135,7 +135,7 @@ func makeScriptNum(v []byte, requireMinimal bool, scriptNumLen int) (scriptNum, 
 	}
 	// Enforce minimal encoded if requested.
 	if requireMinimal {
-		if e := checkMinimalDataEncoding(v); err.Chk(e) {
+		if e := checkMinimalDataEncoding(v); E.Chk(e) {
 			return 0, e
 		}
 	}

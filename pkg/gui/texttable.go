@@ -65,12 +65,12 @@ func (tt *TextTable) Regenerate(fully bool) {
 	// tt.Table.body = tt.Table.body[:0]
 	// }
 	// startIndex = len(tt.Table.body)
-	// dbg.Ln("startIndex", startIndex, len(tt.Body))
+	// D.Ln("startIndex", startIndex, len(tt.Body))
 	// if startIndex < len(tt.Body) {
 	
 	// bd := tt.Body // [startIndex:]
 	diff := len(tt.Body) - len(tt.Table.body)
-	// dbg.Ln(len(tt.Table.body), len(tt.Body), diff)
+	// D.Ln(len(tt.Table.body), len(tt.Body), diff)
 	if diff > 0 {
 		cg := make(CellGrid, diff)
 		for i := range cg {
@@ -78,7 +78,7 @@ func (tt *TextTable) Regenerate(fully bool) {
 		}
 		tt.Table.body = append(tt.Table.body, cg...)
 	}
-	// dbg.Ln(len(tt.Table.body), len(tt.Body))
+	// D.Ln(len(tt.Table.body), len(tt.Body))
 	var body CellGrid
 	for i := range tt.Body {
 		var row CellRow

@@ -13,7 +13,7 @@ import (
 
 // Log starts up a handler to listen to logs from the child process worker
 func Log(quit qu.C, appName string) {
-	dbg.Ln("starting log server")
+	D.Ln("starting log server")
 	lc := logg.AddLogChan()
 	// interrupt.AddHandler(func(){
 	// 	// logi.L.RemoveLogChan(lc)
@@ -28,16 +28,16 @@ func Log(quit qu.C, appName string) {
 				magic := string(b[:4])
 				switch magic {
 				case "run ":
-					dbg.Ln("setting to run")
+					D.Ln("setting to run")
 					logOn.Store(true)
 				case "stop":
-					dbg.Ln("stopping")
+					D.Ln("stopping")
 					logOn.Store(false)
 				case "slvl":
-					dbg.Ln("setting level", logg.Levels[b[4]])
+					D.Ln("setting level", logg.Levels[b[4]])
 					logg.SetLogLevel(logg.Levels[b[4]])
 				case "kill":
-					dbg.Ln("received kill signal from pipe, shutting down", appName)
+					D.Ln("received kill signal from pipe, shutting down", appName)
 					interrupt.Request()
 					quit.Q()
 				}
@@ -54,7 +54,7 @@ func Log(quit qu.C, appName string) {
 				if !logg.LogChanDisabled.Load() {
 					logg.LogChanDisabled.Store(true)
 				}
-				dbg.Ln("quitting pipe logger") // , interrupt.GoroutineDump())
+				D.Ln("quitting pipe logger") // , interrupt.GoroutineDump())
 				interrupt.Request()
 				logOn.Store(false)
 				// <-interrupt.HandlersDone
@@ -75,10 +75,10 @@ func Log(quit qu.C, appName string) {
 				}
 				var n int
 				var e error
-				if n, e = p.Write(gotiny.Marshal(&ent)); !err.Chk(e) {
-					// dbg.Ln(interrupt.GoroutineDump())
+				if n, e = p.Write(gotiny.Marshal(&ent)); !E.Chk(e) {
+					// D.Ln(interrupt.GoroutineDump())
 					if n < 1 {
-						err.Ln("short write")
+						E.Ln("short write")
 					}
 				} else {
 					break out
@@ -87,6 +87,6 @@ func Log(quit qu.C, appName string) {
 			}
 		}
 		<-interrupt.HandlersDone
-		dbg.Ln("finished pipe logger")
+		D.Ln("finished pipe logger")
 	}()
 }

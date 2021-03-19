@@ -7,10 +7,10 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/app/appdata"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/database"
 	
 	"github.com/p9c/pod/pkg/comm/peer"
 	// This ensures the database drivers get registered
@@ -103,27 +103,27 @@ type serviceOptions struct {
 
 // A lotta constants that probably aren't being used
 const (
-	defaultConfigFilename = "conf.json"
-	defaultDataDirname    = "node"
-	DefaultPort = "11047"
-	DefaultRPCListener  = "127.0.0.1"
-	DefaultMaxPeers     = 23
-	DefaultBanDuration  = time.Hour * 24
-	DefaultBanThreshold = 100
-	DefaultMaxRPCClients        = 10
-	DefaultMaxRPCWebsockets     = 25
-	DefaultMaxRPCConcurrentReqs = 20
-	DefaultDbType               = "ffldb"
-	DefaultFreeTxRelayLimit     = 15.0
-	DefaultTrickleInterval      = peer.DefaultTrickleInterval
-	DefaultBlockMaxSize = 200000
-	DefaultBlockMaxWeight = 3000000
-	BlockMaxSizeMin       = 1000
-	BlockMaxSizeMax       = blockchain.MaxBlockBaseSize - 1000
-	BlockMaxWeightMin     = 4000
-	BlockMaxWeightMax     = blockchain.MaxBlockWeight - 4000
+	defaultConfigFilename        = "conf.json"
+	defaultDataDirname           = "node"
+	DefaultPort                  = "11047"
+	DefaultRPCListener           = "127.0.0.1"
+	DefaultMaxPeers              = 23
+	DefaultBanDuration           = time.Hour * 24
+	DefaultBanThreshold          = 100
+	DefaultMaxRPCClients         = 10
+	DefaultMaxRPCWebsockets      = 25
+	DefaultMaxRPCConcurrentReqs  = 20
+	DefaultDbType                = "ffldb"
+	DefaultFreeTxRelayLimit      = 15.0
+	DefaultTrickleInterval       = peer.DefaultTrickleInterval
+	DefaultBlockMaxSize          = 200000
+	DefaultBlockMaxWeight        = 3000000
+	BlockMaxSizeMin              = 1000
+	BlockMaxSizeMax              = blockchain.MaxBlockBaseSize - 1000
+	BlockMaxWeightMin            = 4000
+	BlockMaxWeightMax            = blockchain.MaxBlockWeight - 4000
 	DefaultMaxOrphanTransactions = 100
-	DefaultSigCacheMaxSize = 100000
+	DefaultSigCacheMaxSize       = 100000
 )
 
 var (
@@ -131,7 +131,7 @@ var (
 	// this should be centralised)
 	defaultHomeDir = appdata.Dir("pod", false)
 	// KnownDbTypes stores the currently supported database drivers
-	KnownDbTypes   = database.SupportedDrivers()
+	KnownDbTypes = database.SupportedDrivers()
 	// runServiceCommand is only set to a real function on Windows.
 	// It is used to parse and execute service commands specified via the -s flag.
 	runServiceCommand func(string) error
@@ -141,23 +141,31 @@ var (
 func newCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	parts := strings.Split(checkpoint, ":")
 	if len(parts) != 2 {
-		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
-			"checkpoint %q -- use the syntax <height>:<hash>",
-			checkpoint)
+		return chaincfg.Checkpoint{}, fmt.Errorf(
+			"unable to parse "+
+				"checkpoint %q -- use the syntax <height>:<hash>",
+			checkpoint,
+		)
 	}
 	height, e := strconv.ParseInt(parts[0], 10, 32)
-	if e != nil  {
-				return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
-			"checkpoint %q due to malformed height", checkpoint)
+	if e != nil {
+		return chaincfg.Checkpoint{}, fmt.Errorf(
+			"unable to parse "+
+				"checkpoint %q due to malformed height", checkpoint,
+		)
 	}
 	if len(parts[1]) == 0 {
-		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
-			"checkpoint %q due to missing hash", checkpoint)
+		return chaincfg.Checkpoint{}, fmt.Errorf(
+			"unable to parse "+
+				"checkpoint %q due to missing hash", checkpoint,
+		)
 	}
 	hash, e := chainhash.NewHashFromStr(parts[1])
-	if e != nil  {
-				return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
-			"checkpoint %q due to malformed hash", checkpoint)
+	if e != nil {
+		return chaincfg.Checkpoint{}, fmt.Errorf(
+			"unable to parse "+
+				"checkpoint %q due to malformed hash", checkpoint,
+		)
 	}
 	return chaincfg.Checkpoint{
 			Height: int32(height),
@@ -188,8 +196,8 @@ func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error)
 	checkpoints := make([]chaincfg.Checkpoint, len(checkpointStrings))
 	for i, cpString := range checkpointStrings {
 		checkpoint, e := newCheckpointFromStr(cpString)
-		if e != nil  {
-						return nil, e
+		if e != nil {
+			return nil, e
 		}
 		checkpoints[i] = checkpoint
 	}
@@ -265,7 +273,7 @@ func validLogLevel(logLevel string) bool {
 // 		} else if strings.Contains(line, "rpcpass=") {
 // 			line = "rpcpass=" + generatedRPCPass + "\n"
 // 		}
-// 		if _, e = dest.WriteString(line); err.Chk(e) {
+// 		if _, e = dest.WriteString(line); E.Chk(e) {
 // 			return e
 // 		}
 // 	}
@@ -336,7 +344,7 @@ func loadConfig() (
 	if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
 		e := runServiceCommand(serviceOpts.ServiceCommand)
 		if e != nil  {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, e)
 		}
 		os.Exit(0)
 	}
@@ -349,14 +357,14 @@ func loadConfig() (
 			e := createDefaultConfigFile(preCfg.ConfigFile)
 			if e != nil  {
 				fmt.Fprintf(os.Stderr, "DBError creating a "+
-					"default config file: %v\n", err)
+					"default config file: %v\n", e)
 			}
 		}
 		e := flags.NewIniParser(parser).ParseFile(preCfg.ConfigFile)
 		if e != nil  {
 			if _, ok := err.(*os.PathError); !ok {
 				fmt.Fprintf(os.Stderr, "DBError parsing config "+
-					"file: %v\n", err)
+					"file: %v\n", e)
 				fmt.Fprintln(os.Stderr, usageMessage)
 				return nil, nil, e
 			}
@@ -387,8 +395,8 @@ func loadConfig() (
 			}
 		}
 		str := "%s: Failed to create home directory: %v"
-		e := fmt.Errorf(str, funcName, err)
-		fmt.Fprintln(os.Stderr, err)
+		e := fmt.Errorf(str, funcName, e)
+		fmt.Fprintln(os.Stderr, e)
 		return nil, nil, e
 	}
 	// Multiple networks can't be selected simultaneously.
@@ -415,7 +423,7 @@ func loadConfig() (
 		str := "%s: The testnet, regtest, segnet, and simnet netparams " +
 			"can't be used together -- choose one of the four"
 		e := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -432,7 +440,7 @@ func loadConfig() (
 		str := "%s: rejectnonstd and relaynonstd cannot be used " +
 			"together -- choose only one"
 		e := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	case cfg.RejectNonStd:
@@ -453,7 +461,7 @@ func loadConfig() (
 	if !ValidDbType(cfg.DbType) {
 		str := "%s: The specified database type [%v] is invalid -- supported types %v"
 		e := fmt.Errorf(str, funcName, cfg.DbType, KnownDbTypes)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -464,7 +472,7 @@ func loadConfig() (
 		if e != nil  || profilePort < 1024 || profilePort > 65535 {
 			str := "%s: The profile port must be between 1024 and 65535"
 			e := fmt.Errorf(str, funcName)
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, e)
 			fmt.Fprintln(os.Stderr, usageMessage)
 			return nil, nil, e
 		}
@@ -473,7 +481,7 @@ func loadConfig() (
 	if cfg.BanDuration < time.Second {
 		str := "%s: The banduration option may not be less than 1s -- parsed [%v]"
 		e := fmt.Errorf(str, funcName, cfg.BanDuration)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -488,7 +496,7 @@ func loadConfig() (
 				if ip == nil {
 					str := "%s: The whitelist value of '%s' is invalid"
 					e = fmt.Errorf(str, funcName, addr)
-					fmt.Fprintln(os.Stderr, err)
+					fmt.Fprintln(os.Stderr, e)
 					fmt.Fprintln(os.Stderr, usageMessage)
 					return nil, nil, e
 				}
@@ -512,7 +520,7 @@ func loadConfig() (
 		str := "%s: the --addpeer and --connect options can not be " +
 			"mixed"
 		e := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -536,7 +544,7 @@ func loadConfig() (
 		str := "%s: --rpcuser and --rpclimituser must not specify the " +
 			"same username"
 		e := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -545,7 +553,7 @@ func loadConfig() (
 		str := "%s: --rpcpass and --rpclimitpass must not specify the " +
 			"same password"
 		e := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -571,7 +579,7 @@ func loadConfig() (
 		if cfg.RPCMaxConcurrentReqs < 0 {
 			str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be less than 0 -- parsed [%d]"
 			e := fmt.Errorf(str, funcName, cfg.RPCMaxConcurrentReqs)
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, e)
 			fmt.Fprintln(os.Stderr, usageMessage)
 			return nil, nil, e
 		}
@@ -580,8 +588,8 @@ func loadConfig() (
 	StateCfg.ActiveMinRelayTxFee, e = util.NewAmount(cfg.MinRelayTxFee)
 	if e != nil  {
 		str := "%s: invalid minrelaytxfee: %v"
-		e := fmt.Errorf(str, funcName, err)
-		fmt.Fprintln(os.Stderr, err)
+		e := fmt.Errorf(str, funcName, e)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -592,7 +600,7 @@ func loadConfig() (
 			"and %d -- parsed [%d]"
 		e := fmt.Errorf(str, funcName, BlockMaxSizeMin,
 			BlockMaxSizeMax, cfg.BlockMaxSize)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -603,7 +611,7 @@ func loadConfig() (
 			"and %d -- parsed [%d]"
 		e := fmt.Errorf(str, funcName, BlockMaxWeightMin,
 			BlockMaxWeightMax, cfg.BlockMaxWeight)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -612,7 +620,7 @@ func loadConfig() (
 		str := "%s: The maxorphantx option may not be less than 0 " +
 			"-- parsed [%d]"
 		e := fmt.Errorf(str, funcName, cfg.MaxOrphanTxs)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -636,7 +644,7 @@ func loadConfig() (
 			e := fmt.Errorf("%s: The following characters must not "+
 				"appear in user agent comments: '/', ':', '(', ')'",
 				funcName)
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, e)
 			fmt.Fprintln(os.Stderr, usageMessage)
 			return nil, nil, e
 		}
@@ -646,7 +654,7 @@ func loadConfig() (
 		e := fmt.Errorf("%s: the --txindex and --droptxindex "+
 			"options may  not be activated at the same time",
 			funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -655,14 +663,14 @@ func loadConfig() (
 		e := fmt.Errorf("%s: the --addrindex and --dropaddrindex "+
 			"options may not be activated at the same time",
 			funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
 	// --addrindex and --droptxindex do not mix.
 	if cfg.AddrIndex && cfg.DropTxIndex {
 		e := fmt.Errorf("%s: the --addrindex and --droptxindex options may not be activated at the same time because the address index relies on the transaction index", funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -672,15 +680,15 @@ func loadConfig() (
 		addr, e := util.DecodeAddress(strAddr, ActiveNetParams.Params)
 		if e != nil  {
 			str := "%s: mining address '%s' failed to decode: %v"
-			e := fmt.Errorf(str, funcName, strAddr, err)
-			fmt.Fprintln(os.Stderr, err)
+			e := fmt.Errorf(str, funcName, strAddr, e)
+			fmt.Fprintln(os.Stderr, e)
 			fmt.Fprintln(os.Stderr, usageMessage)
 			return nil, nil, e
 		}
 		if !addr.IsForNet(ActiveNetParams.Params) {
 			str := "%s: mining address '%s' is on the wrong network"
 			e := fmt.Errorf(str, funcName, strAddr)
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, e)
 			fmt.Fprintln(os.Stderr, usageMessage)
 			return nil, nil, e
 		}
@@ -690,7 +698,7 @@ func loadConfig() (
 	if (cfg.Generate || cfg.MinerListener != "") && len(cfg.MiningAddrs) == 0 {
 		str := "%s: the generate flag is set, but there are no mining addresses specified "
 		e := fmt.Errorf(str, funcName)
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
@@ -707,7 +715,7 @@ func loadConfig() (
 		for _, addr := range cfg.RPCListeners {
 			if e != nil  {
 				str := "%s: RPC listen interface '%s' is invalid: %v"
-				e := fmt.Errorf(str, funcName, addr, err)
+				e := fmt.Errorf(str, funcName, addr, e)
 				fmt.Fprintln(os.Stderr, err)
 				fmt.Fprintln(os.Stderr, usageMessage)
 				return nil, nil, e

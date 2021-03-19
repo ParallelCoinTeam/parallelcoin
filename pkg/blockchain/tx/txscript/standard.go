@@ -226,11 +226,11 @@ type ScriptInfo struct {
 // script
 func CalcScriptInfo(sigScript, pkScript []byte, bip16 bool) (si *ScriptInfo, e error) {
 	var sigPops []parsedOpcode
-	if sigPops, e = parseScript(sigScript); err.Chk(e) {
+	if sigPops, e = parseScript(sigScript); E.Chk(e) {
 		return
 	}
 	var pkPops []parsedOpcode
-	if pkPops, e = parseScript(pkScript); err.Chk(e) {
+	if pkPops, e = parseScript(pkScript); E.Chk(e) {
 		return
 	}
 	// Push only sigScript makes little sense.

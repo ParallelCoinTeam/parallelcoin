@@ -8,7 +8,7 @@ type Tester interface {
 	Fail()
 	FailNow()
 	Failed() bool
-	ftl.Ln(...interface{})
+	F.Ln(...interface{})
 	Fatalf(string, ...interface{})
 	Log(...interface{})
 	Logf(string, ...interface{})

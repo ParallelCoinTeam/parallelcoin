@@ -53,7 +53,7 @@ func testCoinSelector(tests []coinSelectTest, t *testing.T) {
 	for testIndex, test := range tests {
 		cs, e := test.selector.CoinSelect(test.targetValue, test.inputCoins)
 		if err != test.expectedError {
-			t.Errorf("[%d] expected a different error: got=%v, expected=%v", testIndex, err, test.expectedError)
+			t.Errorf("[%d] expected a different error: got=%v, expected=%v", testIndex, e, test.expectedError)
 			continue
 		}
 		if test.expectedCoins != nil {

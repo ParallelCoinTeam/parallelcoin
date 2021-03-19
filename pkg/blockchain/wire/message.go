@@ -160,9 +160,9 @@ func readMessageHeader(r io.Reader) (n int, mh *messageHeader, e error) {
 	// in case there is a short read so the proper amount of read bytes are known. This works since the header is a
 	// fixed size.
 	var headerBytes [MessageHeaderSize]byte
-	if n, e = io.ReadFull(r, headerBytes[:]); err.Chk(e) {
+	if n, e = io.ReadFull(r, headerBytes[:]); E.Chk(e) {
 		if e != io.EOF {
-			trc.Ln(err)
+			F.Ln(e)
 		}
 		return n, nil, e
 	}
@@ -170,7 +170,7 @@ func readMessageHeader(r io.Reader) (n int, mh *messageHeader, e error) {
 	// Create and populate a messageHeader struct from the raw header bytes.
 	hdr := messageHeader{}
 	var command [CommandSize]byte
-	if e = readElements(hr, &hdr.magic, &command, &hdr.length, &hdr.checksum); err.Chk(e) {
+	if e = readElements(hr, &hdr.magic, &command, &hdr.length, &hdr.checksum); E.Chk(e) {
 	}
 	// Strip trailing zeros from command string.
 	hdr.command = string(bytes.TrimRight(command[:], string(rune(0))))
@@ -188,13 +188,13 @@ func discardInput(r io.Reader, n uint32) {
 	if n > 0 {
 		buf := make([]byte, maxSize)
 		for i := uint32(0); i < numReads; i++ {
-			if _, e = io.ReadFull(r, buf); err.Chk(e) {
+			if _, e = io.ReadFull(r, buf); E.Chk(e) {
 			}
 		}
 	}
 	if bytesRemaining > 0 {
 		buf := make([]byte, bytesRemaining)
-		if _, e = io.ReadFull(r, buf); err.Chk(e) {
+		if _, e = io.ReadFull(r, buf); E.Chk(e) {
 		}
 	}
 }
@@ -233,7 +233,7 @@ func WriteMessageWithEncodingN(
 	copy(command[:], cmd)
 	// Encode the message payload.
 	var bw bytes.Buffer
-	if e = msg.BtcEncode(&bw, pver, encoding); err.Chk(e) {
+	if e = msg.BtcEncode(&bw, pver, encoding); E.Chk(e) {
 		return totalBytes, e
 	}
 	payload := bw.Bytes()
@@ -266,13 +266,13 @@ func WriteMessageWithEncodingN(
 	// Encode the header for the message. This is done to a buffer rather than directly to the writer since
 	// writeElements doesn't return the number of bytes written.
 	hw := bytes.NewBuffer(make([]byte, 0, MessageHeaderSize))
-	if e = writeElements(hw, hdr.magic, command, hdr.length, hdr.checksum); err.Chk(e) {
+	if e = writeElements(hw, hdr.magic, command, hdr.length, hdr.checksum); E.Chk(e) {
 	}
 	// Write header.
 	var n int
 	n, e = w.Write(hw.Bytes())
 	totalBytes += n
-	if err.Chk(e) {
+	if E.Chk(e) {
 		return
 	}
 	// Write payload.
@@ -292,9 +292,9 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 	var n int
 	n, hdr, e = readMessageHeader(r)
 	totalBytes += n
-	if err.Chk(e) {
+	if E.Chk(e) {
 		if e != io.EOF {
-			err.Ln(e)
+			E.Ln(e)
 		}
 		return
 	}
@@ -321,7 +321,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 		return totalBytes, nil, nil, messageError("ReadMessage", str)
 	}
 	// Create struct of appropriate message type based on the command.
-	if msg, e = makeEmptyMessage(command); err.Chk(e) {
+	if msg, e = makeEmptyMessage(command); E.Chk(e) {
 		discardInput(r, hdr.length)
 		return totalBytes, nil, nil, messageError(
 			"ReadMessage",
@@ -344,7 +344,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 	payload = make([]byte, hdr.length)
 	n, e = io.ReadFull(r, payload)
 	totalBytes += n
-	if err.Chk(e) {
+	if E.Chk(e) {
 		return totalBytes, nil, nil, e
 	}
 	// Test checksum.
@@ -359,7 +359,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 	}
 	// Unmarshal message. NOTE: This must be a *bytes.Buffer since the MsgVersion BtcDecode function requires it.
 	pr := bytes.NewBuffer(payload)
-	if e = msg.BtcDecode(pr, pver, enc); err.Chk(e) {
+	if e = msg.BtcDecode(pr, pver, enc); E.Chk(e) {
 		return totalBytes, nil, nil, e
 	}
 	return

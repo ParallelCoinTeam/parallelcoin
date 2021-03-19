@@ -287,7 +287,7 @@ func (snap *dbCacheSnapshot) Get(key []byte) []byte {
 	// Consult the database.
 	value, e := snap.dbSnapshot.Get(key, nil)
 	if e != nil  {
-		// trc.Ln(err)
+		// F.Ln(err)
 		return nil
 	}
 	return value
@@ -386,12 +386,12 @@ func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) (e error) 
 	if e != nil  {
 				return convertErr("failed to open ldb transaction", e)
 	}
-	if e := fn(ldbTx); err.Chk(e) {
+	if e := fn(ldbTx); E.Chk(e) {
 		ldbTx.Discard()
 		return e
 	}
 	// Commit the leveldb transaction and convert any errors as needed.
-	if e := ldbTx.Commit(); err.Chk(e) {
+	if e := ldbTx.Commit(); E.Chk(e) {
 		return convertErr("failed to commit leveldb transaction", e)
 	}
 	return nil
@@ -449,7 +449,7 @@ func (c *dbCache) flush() (e error) {
 	//
 	// This is necessary before writing the metadata to prevent the case where the metadata contains information about a
 	// block which actually hasn't been written yet in unexpected shutdown scenarios.
-	if e := c.store.syncBlocks(); err.Chk(e) {
+	if e := c.store.syncBlocks(); E.Chk(e) {
 		return e
 	}
 	// Since the cached keys to be added and removed use an immutable treap, a snapshot is simply obtaining the root of
@@ -463,7 +463,7 @@ func (c *dbCache) flush() (e error) {
 		return nil
 	}
 	// Perform all leveldb updates using an atomic transaction.
-	if e := c.commitTreaps(cachedKeys, cachedRemove); err.Chk(e) {
+	if e := c.commitTreaps(cachedKeys, cachedRemove); E.Chk(e) {
 		return e
 	}
 	// Clear the cache since it has been flushed.
@@ -471,7 +471,7 @@ func (c *dbCache) flush() (e error) {
 	c.cachedKeys = treap.NewImmutable()
 	c.cachedRemove = treap.NewImmutable()
 	c.cacheLock.Unlock()
-	dbg.Ln("synced database to disk")
+	D.Ln("synced database to disk")
 	return nil
 }
 
@@ -512,7 +512,7 @@ func (c *dbCache) needsFlush(tx *transaction) bool {
 func (c *dbCache) commitTx(tx *transaction) (e error) {
 	// Flush the cache and write the current transaction directly to the database if a flush is needed.
 	if c.needsFlush(tx) {
-		if e := c.flush(); err.Chk(e) {
+		if e := c.flush(); E.Chk(e) {
 			return e
 		}
 		// Perform all leveldb updates using an atomic transaction.
@@ -560,14 +560,14 @@ func (c *dbCache) commitTx(tx *transaction) (e error) {
 // This function MUST be called with the database write lock held.
 func (c *dbCache) Close() (e error) {
 	// Flush any outstanding cached entries to disk.
-	if e := c.flush(); err.Chk(e) {
+	if e := c.flush(); E.Chk(e) {
 		// Even if there is an error while flushing, attempt to close the underlying database. The error is ignored
 		// since it would mask the flush error.
 		_ = c.ldb.Close()
 		return e
 	}
 	// Close the underlying leveldb database.
-	if e := c.ldb.Close(); err.Chk(e) {
+	if e := c.ldb.Close(); E.Chk(e) {
 		str := "failed to close underlying leveldb database"
 		return convertErr(str, e)
 	}

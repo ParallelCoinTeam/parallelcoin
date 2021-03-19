@@ -23,7 +23,7 @@ func Encode(nonce uint64, uuid uint64, mb *wire.BlockHeader) []byte {
 	var buf []byte
 	wr := bytes.NewBuffer(buf)
 	var e error
-	if e = mb.Serialize(wr); err.Chk(e) {
+	if e = mb.Serialize(wr); E.Chk(e) {
 	}
 	s := Solution{Nonce: nonce, UUID: uuid, Bytes: wr.Bytes()} // MsgBlock: mb}
 	return gotiny.Marshal(&s)
@@ -33,7 +33,7 @@ func Encode(nonce uint64, uuid uint64, mb *wire.BlockHeader) []byte {
 func (s *Solution) Decode() (mb *wire.BlockHeader, e error) {
 	buf := bytes.NewBuffer(s.Bytes)
 	mb = &wire.BlockHeader{}
-	if e = mb.Deserialize(buf); err.Chk(e) {
+	if e = mb.Deserialize(buf); E.Chk(e) {
 	}
 	return
 }

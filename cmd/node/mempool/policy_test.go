@@ -6,8 +6,8 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/util"
@@ -97,7 +97,7 @@ func TestCheckPkScriptStandard(t *testing.T) {
 	for i := 0; i < 4; i++ {
 		pk, e := ec.NewPrivateKey(ec.S256())
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			t.Fatalf("TestCheckPkScriptStandard NewPrivateKey failed: %v", e)
 			return
 		}
@@ -188,7 +188,7 @@ func TestCheckPkScriptStandard(t *testing.T) {
 			
 			t.Fatalf(
 				"TestCheckPkScriptStandard test '%s' "+
-					"failed: %v", test.name, err,
+					"failed: %v", test.name, e,
 			)
 			// continue
 		}
@@ -293,7 +293,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 	prevOutHash, err := chainhash.NewHashFromStr("01")
 	
 	if err != nil {
-		t.Fatalf("NewShaHashFromStr: unexpected error: %v", err)
+		t.Fatalf("NewShaHashFromStr: unexpected error: %v", e)
 	}
 	dummyPrevOut := wire.OutPoint{Hash: *prevOutHash, Index: 1}
 	dummySigScript := bytes.Repeat([]byte{0x00}, 65)
@@ -309,12 +309,12 @@ func TestCheckTransactionStandard(t *testing.T) {
 	)
 	
 	if err != nil {
-		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", err)
+		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", e)
 	}
 	dummyPkScript, err := txscript.PayToAddrScript(addr)
 	
 	if err != nil {
-		t.Fatalf("PayToAddrScript: unexpected error: %v", err)
+		t.Fatalf("PayToAddrScript: unexpected error: %v", e)
 	}
 	dummyTxOut := wire.TxOut{
 		Value:    100000000, // 1 DUO
@@ -523,7 +523,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 		if err != nil && test.isStandard {
 			t.Errorf(
 				"checkTransactionStandard (%s): nonstandard "+
-					"when it should not be: %v", test.name, err,
+					"when it should not be: %v", test.name, e,
 			)
 			continue
 		}
@@ -532,7 +532,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 		if !ok {
 			t.Errorf(
 				"checkTransactionStandard (%s): unexpected "+
-					"error type - got %T", test.name, err,
+					"error type - got %T", test.name, e,
 			)
 			continue
 		}

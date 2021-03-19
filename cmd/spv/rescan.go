@@ -8,18 +8,18 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // ErrRescanExit is an error returned to the caller in case the ongoing rescan exits.
@@ -258,7 +258,7 @@ func (s *ChainService) rescan(options ...RescanOption) (e error) {
 	s.blockManager.newFilterHeadersMtx.RLock()
 	filterHeaderHeight := s.blockManager.filterHeaderTip
 	s.blockManager.newFilterHeadersMtx.RUnlock()
-	dbg.F(
+	D.F(
 		"waiting for filter headers ("+
 			"height=%v) to catch up the rescan start (height=%v) %s",
 		filterHeaderHeight, curStamp.Height,
@@ -305,7 +305,7 @@ filterHeaderWaitLoop:
 			return e
 		}
 	}
-	dbg.F(
+	D.F(
 		"starting rescan from known block %d (%s) %s",
 		curStamp.Height, curStamp.Hash,
 	)
@@ -334,7 +334,7 @@ filterHeaderWaitLoop:
 		if blockReFetchTimer != nil {
 			blockReFetchTimer.Stop()
 		}
-		inf.F(
+		I.F(
 			"setting timer to attempt to re-fetch filter for hash=%v, height=%v",
 			headerTip.BlockHash(), height,
 		)
@@ -342,7 +342,7 @@ filterHeaderWaitLoop:
 		// afterwards.
 		blockReFetchTimer = time.AfterFunc(
 			blockRetryInterval, func() {
-				inf.F(
+				I.F(
 					"resending rescan header for block hash=%v, height=%v",
 					headerTip.BlockHash(), height,
 				)
@@ -384,7 +384,7 @@ rescanLoop:
 				// If we have to rewind our state, then we'll mark ourselves as not current so we can walk forward in
 				// the chain again until we we are current. This is our way of doing a manual rescan.
 				if rewound {
-					trc.F("rewound to block %d (%s), no longer current", curStamp.Height, curStamp.Hash)
+					T.F("rewound to block %d (%s), no longer current", curStamp.Height, curStamp.Hash)
 					current = false
 					s.unsubscribeBlockMsgs(subscription)
 					subscription = nil
@@ -398,7 +398,7 @@ rescanLoop:
 				// state.
 				if header.PrevBlock != curStamp.Hash &&
 					header.BlockHash() != curStamp.Hash {
-					dbg.F(
+					D.F(
 						"rescan got out of order block %s with previous block"+
 							" %s, curHeader: %s %s", header.BlockHash(), header.PrevBlock, curStamp.Hash,
 					)
@@ -410,7 +410,7 @@ rescanLoop:
 				// can re-process it without any issues.
 				if header.BlockHash() != curStamp.Hash &&
 					!s.hasFilterHeadersByHeight(uint32(curStamp.Height+1)) {
-					wrn.F("missing filter header for height=%v, skipping", curStamp.Height+1)
+					W.F("missing filter header for height=%v, skipping", curStamp.Height+1)
 					continue rescanLoop
 				}
 				// As this could be a re-try, we'll ensure that we don't incorrectly increment our current time stamp.
@@ -419,7 +419,7 @@ rescanLoop:
 					curStamp.Hash = header.BlockHash()
 					curStamp.Height++
 				}
-				trc.F("rescan got block %d (%s)", curStamp.Height, curStamp.Hash)
+				T.F("rescan got block %d (%s)", curStamp.Height, curStamp.Hash)
 				// We're only scanning if the header is beyond the horizon of our start time.
 				if !scanning {
 					scanning = ro.startTime.Before(curHeader.Timestamp)
@@ -434,7 +434,7 @@ rescanLoop:
 				// this as we account for it below.
 				case e == headerfs.ErrHashNotFound:
 				case err != nil:
-					return fmt.Errorf("unable to get filter for hash=%v: %v", curStamp.Hash, err)
+					return fmt.Errorf("unable to get filter for hash=%v: %v", curStamp.Hash, e)
 				}
 				// If the filter is nil then this either means that we don't have any peers to fetch this filter from or
 				// the peer( s) that we're trying to fetch from are in the progress of a re-org.
@@ -450,7 +450,7 @@ rescanLoop:
 				// We'll successfully fetched this current block, so we'll reset the retry timer back to nil.
 				blockReFetchTimer = nil
 			case header := <-blockDisconnected:
-				dbg.F("rescan disconnect block %d (%s) %s", curStamp.Height, curStamp.Hash)
+				D.F("rescan disconnect block %d (%s) %s", curStamp.Height, curStamp.Hash)
 				// Only deal with it if it's the current block we know about. Otherwise, it's in the future.
 				if header.BlockHash() == curStamp.Hash {
 					// Run through notifications. This is all single-threaded. We include deprecated calls as they're
@@ -498,7 +498,7 @@ rescanLoop:
 			// height known to the chain service, then we mark ourselves as current and follow notifications.
 			nextHeight := curStamp.Height + 1
 			if nextHeight > bestBlock.Height {
-				dbg.F(
+				D.F(
 					"rescan became current at %d (%s), "+
 						"subscribing to block notifications %s", curStamp.Height, curStamp.Hash,
 				)
@@ -514,7 +514,7 @@ rescanLoop:
 				)
 				if e != nil {
 					return fmt.Errorf(
-						"unable to register block subscription: %v", err,
+						"unable to register block subscription: %v", e,
 					)
 				}
 				if subscription != nil {
@@ -1024,10 +1024,10 @@ func (s *ChainService) GetUtxo(options ...RescanOption) (*SpendReport, error) {
 	// Wait for the result to be delivered by the rescan or until a shutdown is signaled.
 	report, e := req.Result(ro.quit)
 	if e != nil {
-		dbg.F(
+		D.F(
 			"error finding spends for %s: %v %s",
 			ro.watchInputs[0].OutPoint.String(),
-			err,
+			e,
 		)
 		return nil, e
 	}

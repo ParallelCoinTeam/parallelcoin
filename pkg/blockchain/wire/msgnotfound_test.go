@@ -38,7 +38,7 @@ func TestNotFound(t *testing.T) {
 	hash := chainhash.Hash{}
 	iv := NewInvVect(InvTypeBlock, &hash)
 	var e error
-	if e = msg.AddInvVect(iv); err.Chk(e) {
+	if e = msg.AddInvVect(iv); E.Chk(e) {
 		t.Errorf("AddInvVect: %v", err)
 	}
 	if msg.InvList[0] != iv {
@@ -284,7 +284,7 @@ func TestNotFoundWireErrors(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
-		if e = test.in.BtcEncode(w, test.pver, test.enc); err.Chk(e) {
+		if e = test.in.BtcEncode(w, test.pver, test.enc); E.Chk(e) {
 		}
 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
 			t.Errorf(

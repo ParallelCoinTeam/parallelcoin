@@ -18,28 +18,28 @@ import (
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, flags BehaviorFlags) (bool, error) {
-	trc.Ln("maybeAcceptBlock starting")
+	F.Ln("maybeAcceptBlock starting")
 	// The height of this block is one more than the referenced previous block.
 	prevHash := &block.MsgBlock().Header.PrevBlock
 	prevNode := b.Index.LookupNode(prevHash)
 	if prevNode == nil {
 		str := fmt.Sprintf("previous block %s is unknown", prevHash)
-		err.Ln(str)
+		E.Ln(str)
 		return false, ruleError(ErrPreviousBlockUnknown, str)
 	} else if b.Index.NodeStatus(prevNode).KnownInvalid() {
 		str := fmt.Sprintf("previous block %s is known to be invalid", prevHash)
-		err.Ln(str)
+		E.Ln(str)
 		return false, ruleError(ErrInvalidAncestorBlock, str)
 	}
 	blockHeight := prevNode.height + 1
-	trc.Ln("block not found, good, setting height", blockHeight)
+	F.Ln("block not found, good, setting height", blockHeight)
 	block.SetHeight(blockHeight)
 	// // To deal with multiple mining algorithms, we must check first the block header version. Rather than pass the
 	// // direct previous by height, we look for the previous of the same algorithm and pass that.
 	// if blockHeight < b.params.BIP0034Height {
 	//
 	// }
-	trc.Ln("sanitizing header versions for legacy")
+	F.Ln("sanitizing header versions for legacy")
 	var DoNotCheckPow bool
 	var pn *BlockNode
 	var a int32 = 2
@@ -60,19 +60,19 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 			}
 		}
 	}
-	trc.Ln("check for blacklisted addresses")
+	F.Ln("check for blacklisted addresses")
 	txs := block.Transactions()
 	for i := range txs {
 		if ContainsBlacklisted(b, txs[i], hardfork.Blacklist) {
 			return false, ruleError(ErrBlacklisted, "block contains a blacklisted address ")
 		}
 	}
-	trc.Ln("found no blacklisted addresses")
+	F.Ln("found no blacklisted addresses")
 	var e error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on the position
 		// of the block within the block chain.
-		if e = b.checkBlockContext(block, prevNode, flags, DoNotCheckPow); err.Chk(e) {
+		if e = b.checkBlockContext(block, prevNode, flags, DoNotCheckPow); E.Chk(e) {
 			return false, e
 		}
 	}
@@ -84,10 +84,10 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	// decoupled from the much more expensive connection logic. It also has some
 	// other nice properties such as making blocks that never become part of the
 	// main chain or blocks that fail to connect available for further analysis.
-	trc.Ln("inserting block into database")
+	F.Ln("inserting block into database")
 	if e = b.db.Update(func(dbTx database.Tx) (e error) {
 		return dbStoreBlock(dbTx, block)
-	}); err.Chk(e) {
+	}); E.Chk(e) {
 		return false, e
 	}
 	// Create a new block node for the block and add it to the node index. Even if the block ultimately gets connected
@@ -96,22 +96,22 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	newNode := NewBlockNode(blockHeader, prevNode)
 	newNode.status = statusDataStored
 	b.Index.AddNode(newNode)
-	trc.Ln("flushing db")
-	if e = b.Index.flushToDB(); err.Chk(e) {
+	F.Ln("flushing db")
+	if e = b.Index.flushToDB(); E.Chk(e) {
 		return false, e
 	}
 
 	// Connect the passed block to the chain while respecting proper chain selection
 	// according to the chain with the most proof of work. This also handles
 	// validation of the transaction scripts.
-	trc.Ln("connecting to best chain")
+	F.Ln("connecting to best chain")
 	var isMainChain bool
-	if isMainChain, e = b.connectBestChain(newNode, block, flags); err.Chk(e) {
+	if isMainChain, e = b.connectBestChain(newNode, block, flags); E.Chk(e) {
 		return false, e
 	}
 	// Notify the caller that the new block was accepted into the block chain. The caller would typically want to react
 	// by relaying the inventory to other peers.
-	trc.Ln("sending out block notifications for block accepted")
+	F.Ln("sending out block notifications for block accepted")
 	b.ChainLock.Unlock()
 	b.sendNotification(NTBlockAccepted, block)
 	b.ChainLock.Lock()

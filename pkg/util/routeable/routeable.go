@@ -37,7 +37,7 @@ var SecondaryInterfaces []*net.Interface
 func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[string]struct{}) {
 	if Address == nil || Interface == nil {
 		if Discover() != nil {
-			err.Ln("no routeable address found")
+			E.Ln("no routeable address found")
 		}
 	}
 	Interfaces = append(Interfaces, Interface)
@@ -47,8 +47,8 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[str
 	for i := range SecondaryAddresses {
 		Addresses[SecondaryAddresses[i].String()] = struct{}{}
 	}
-	// dbg.S(Interfaces)
-	// dbg.S(Addresses)
+	// D.S(Interfaces)
+	// D.S(Addresses)
 	return
 }
 
@@ -59,20 +59,20 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[str
 // ISPs do not issue their customers with IPv6 routing, it's still a pain in the
 // ass outside of large data centre connections
 func Discover() (e error) {
-	dbg.Ln("discovering routeable interfaces and addresses...")
+	D.Ln("discovering routeable interfaces and addresses...")
 	var nif []net.Interface
-	if nif, e = net.Interfaces(); err.Chk(e) {
+	if nif, e = net.Interfaces(); E.Chk(e) {
 		return
 	}
-	// dbg.Ln("number of available network interfaces:", len(nif))
-	// dbg.S(nif)
+	// D.Ln("number of available network interfaces:", len(nif))
+	// D.S(nif)
 	var secondaryInterfaces []*net.Interface
 	var secondaryAddresses []net.IP
-	if Gateway, e = gateway.DiscoverGateway(); err.Chk(e) {
+	if Gateway, e = gateway.DiscoverGateway(); E.Chk(e) {
 		// todo: this error condition always happens on iOS and Android
 		// return
 		for i := range nif {
-			trc.Ln(nif[i])
+			F.Ln(nif[i])
 		}
 	} else {
 		var gw net.IP
@@ -82,12 +82,12 @@ func Discover() (e error) {
 		}
 		for i := range nif {
 			var addrs []net.Addr
-			if addrs, e = nif[i].Addrs(); err.Chk(e) || addrs == nil {
+			if addrs, e = nif[i].Addrs(); E.Chk(e) || addrs == nil {
 				continue
 			}
 			for j := range addrs {
 				var in *net.IPNet
-				if _, in, e = net.ParseCIDR(addrs[j].String()); err.Chk(e) {
+				if _, in, e = net.ParseCIDR(addrs[j].String()); E.Chk(e) {
 					continue
 				}
 				if Gateway != nil && in.Contains(gw) {
@@ -110,12 +110,12 @@ func Discover() (e error) {
 	}
 	SecondaryAddresses = secondaryAddresses
 	SecondaryInterfaces = secondaryInterfaces
-	trc.Ln("Gateway", Gateway)
-	trc.Ln("Address", Address)
-	trc.Ln("Interface", Interface.Name)
-	trc.Ln("SecondaryAddresses")
+	F.Ln("Gateway", Gateway)
+	F.Ln("Address", Address)
+	F.Ln("Interface", Interface.Name)
+	F.Ln("SecondaryAddresses")
 	for i := range SecondaryInterfaces {
-		trc.Ln(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
+		F.Ln(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
 	}
 	return
 }
@@ -136,7 +136,7 @@ func GetInterface() (ifc *net.Interface, address string, e error) {
 func GetListenable() net.IP {
 	if Address == nil {
 		if Discover() != nil {
-			err.Ln("no routeable address found")
+			E.Ln("no routeable address found")
 		}
 	}
 	return Address
@@ -144,7 +144,7 @@ func GetListenable() net.IP {
 
 func GetAllInterfacesAndAddresses() (interfaces []*net.Interface, udpAddrs []*net.UDPAddr) {
 	if Discover() != nil {
-		err.Ln("no routeable address found")
+		E.Ln("no routeable address found")
 		return
 	}
 	interfaces = append([]*net.Interface{Interface}, SecondaryInterfaces...)
@@ -156,7 +156,7 @@ func GetAllInterfacesAndAddresses() (interfaces []*net.Interface, udpAddrs []*ne
 	var e error
 	for i := range addrs {
 		var udpAddr *net.UDPAddr
-		if udpAddr, e = net.ResolveUDPAddr("udp", addrs[i].String()+":0"); !err.Chk(e) {
+		if udpAddr, e = net.ResolveUDPAddr("udp", addrs[i].String()+":0"); !E.Chk(e) {
 			udpAddrs = append(udpAddrs, udpAddr)
 		}
 	}

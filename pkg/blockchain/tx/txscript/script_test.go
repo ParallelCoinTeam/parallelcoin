@@ -3715,7 +3715,7 @@ func TestPushedData(t *testing.T) {
 		script := mustParseShortForm(test.script)
 		data, e := PushedData(script)
 		if test.valid && err != nil {
-			t.Errorf("TestPushedData failed test #%d: %v\n", i, err)
+			t.Errorf("TestPushedData failed test #%d: %v\n", i, e)
 			continue
 		} else if !test.valid && e ==  nil {
 			t.Errorf("TestPushedData failed test #%d: test should "+
@@ -3746,7 +3746,7 @@ func TestHasCanonicalPush(t *testing.T) {
 		}
 		pops, e := parseScript(script)
 		if e != nil  {
-			t.Errorf("parseScript: #%d failed: %v", i, err)
+			t.Errorf("parseScript: #%d failed: %v", i, e)
 			continue
 		}
 		for _, pop := range pops {
@@ -3762,7 +3762,7 @@ func TestHasCanonicalPush(t *testing.T) {
 		builder.AddData(bytes.Repeat([]byte{0x49}, i))
 		script, e := builder.Script()
 		if e != nil  {
-			t.Errorf("StandardPushesTests test #%d unexpected error: %v\n", i, err)
+			t.Errorf("StandardPushesTests test #%d unexpected error: %v\n", i, e)
 			continue
 		}
 		if result := IsPushOnlyScript(script); !result {
@@ -3771,7 +3771,7 @@ func TestHasCanonicalPush(t *testing.T) {
 		}
 		pops, e := parseScript(script)
 		if e != nil  {
-			t.Errorf("StandardPushesTests #%d failed to TstParseScript: %v", i, err)
+			t.Errorf("StandardPushesTests #%d failed to TstParseScript: %v", i, e)
 			continue
 		}
 		for _, pop := range pops {

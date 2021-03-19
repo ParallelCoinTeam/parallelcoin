@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -121,9 +121,9 @@ func checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) (e
 	switch scriptClass {
 	case txscript.MultiSigTy:
 		numPubKeys, numSigs, e := txscript.CalcMultiSigStats(pkScript)
-		if e != nil  {
-						str := fmt.Sprintf(
-				"multi-signature script parse failure: %v", err,
+		if e != nil {
+			str := fmt.Sprintf(
+				"multi-signature script parse failure: %v", e,
 			)
 			return txRuleError(wire.RejectNonstandard, str)
 		}
@@ -324,8 +324,8 @@ func checkTransactionStandard(
 	for i, txOut := range msgTx.TxOut {
 		scriptClass := txscript.GetScriptClass(txOut.PkScript)
 		e := checkPkScriptStandard(txOut.PkScript, scriptClass)
-		if e != nil  {
-						// Attempt to extract a reject code from the error so it can be retained. When
+		if e != nil {
+			// Attempt to extract a reject code from the error so it can be retained. When
 			// not possible, fall back to a non standard error.
 			rejectCode := wire.RejectNonstandard
 			if rejCode, found := extractRejectCode(e); found {

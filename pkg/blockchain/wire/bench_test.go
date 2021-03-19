@@ -294,7 +294,7 @@ func BenchmarkDeserializeTxLarge(b *testing.B) {
 		b.Fatalf("Failed to read transaction data: %v", err)
 	}
 	defer func() {
-		if e := fi.Close(); err.Chk(e) {
+		if e := fi.Close(); E.Chk(e) {
 		}
 	}()
 	buf, e := ioutil.ReadAll(bzip2.NewReader(fi))
@@ -365,7 +365,7 @@ func BenchmarkDecodeGetHeaders(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if e := m.BtcEncode(&bb, pver, LatestEncoding); err.Chk(e) {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
 		b.Fatalf("MsgGetHeaders.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -393,7 +393,7 @@ func BenchmarkDecodeHeaders(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if e := m.BtcEncode(&bb, pver, LatestEncoding); err.Chk(e) {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
 		b.Fatalf("MsgHeaders.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -421,7 +421,7 @@ func BenchmarkDecodeGetBlocks(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if e := m.BtcEncode(&bb, pver, LatestEncoding); err.Chk(e) {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
 		b.Fatalf("MsgGetBlocks.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -446,7 +446,7 @@ func BenchmarkDecodeAddr(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if e := ma.BtcEncode(&bb, pver, LatestEncoding); err.Chk(e) {
+	if e := ma.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
 		b.Fatalf("MsgAddr.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -474,7 +474,7 @@ func BenchmarkDecodeInv(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if e := m.BtcEncode(&bb, pver, LatestEncoding); err.Chk(e) {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
 		b.Fatalf("MsgInv.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -502,7 +502,7 @@ func BenchmarkDecodeNotFound(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if e := m.BtcEncode(&bb, pver, LatestEncoding); err.Chk(e) {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
 		b.Fatalf("MsgNotFound.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -538,7 +538,7 @@ func BenchmarkDecodeMerkleBlock(b *testing.B) {
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
-	if e := m.BtcEncode(&bb, pver, LatestEncoding); err.Chk(e) {
+	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
 		b.Fatalf("MsgMerkleBlock.BtcEncode: unexpected error: %v", err)
 	}
 	buf := bb.Bytes()
@@ -561,7 +561,7 @@ func BenchmarkTxHash(b *testing.B) {
 // BenchmarkDoubleHashB performs a benchmark on how long it takes to perform a double hash returning a byte slice.
 func BenchmarkDoubleHashB(b *testing.B) {
 	var buf bytes.Buffer
-	if e := genesisCoinbaseTx.Serialize(&buf); err.Chk(e) {
+	if e := genesisCoinbaseTx.Serialize(&buf); E.Chk(e) {
 		b.Errorf("Serialize: unexpected error: %v", err)
 		return
 	}
@@ -575,7 +575,7 @@ func BenchmarkDoubleHashB(b *testing.B) {
 // BenchmarkDoubleHashH performs a benchmark on how long it takes to perform a double hash returning a chainhash.Hash.
 func BenchmarkDoubleHashH(b *testing.B) {
 	var buf bytes.Buffer
-	if e := genesisCoinbaseTx.Serialize(&buf); err.Chk(e) {
+	if e := genesisCoinbaseTx.Serialize(&buf); E.Chk(e) {
 		b.Errorf("Serialize: unexpected error: %v", err)
 		return
 	}

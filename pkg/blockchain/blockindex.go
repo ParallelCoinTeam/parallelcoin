@@ -271,7 +271,7 @@ func (bi *blockIndex) flushToDB() (e error) {
 			for node := range bi.dirty {
 				e := dbStoreBlockNode(dbTx, node)
 				if e != nil {
-					err.Ln(e)
+					E.Ln(e)
 					return e
 				}
 			}
@@ -297,10 +297,10 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		return
 	}
 	if fork.GetCurrent(node.height+1) == 0 {
-		// trc.Ln("checking pre-hardfork algo versions")
+		// F.Ln("checking pre-hardfork algo versions")
 		if algo != 514 &&
 			algo != 2 {
-			dbg.Ln("irregular version", algo, "block, assuming 2 (sha256d)")
+			D.Ln("irregular version", algo, "block, assuming 2 (sha256d)")
 			algo = 2
 		}
 	}
@@ -312,10 +312,10 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		// Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
 		prevversion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
-			// trc.Ln("checking pre-hardfork algo versions")
+			// F.Ln("checking pre-hardfork algo versions")
 			if prev.version != 514 &&
 				prev.version != 2 {
-				dbg.Ln("irregular version block", prev.version, ", assuming 2 (sha256d)")
+				D.Ln("irregular version block", prev.version, ", assuming 2 (sha256d)")
 				prevversion = 2
 			}
 		}
@@ -330,19 +330,19 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 }
 
 // if node == nil {
-// 	trc.Ln("this node is nil")
+// 	F.Ln("this node is nil")
 // 	return nil
 // }
 // prev = node.RelativeAncestor(1)
 // if prev == nil {
-// 	trc.Ln("the previous node was nil")
+// 	F.Ln("the previous node was nil")
 // 	return nil
 // }
 // prevFork := fork.GetCurrent(prev.height)
 // if prevFork == 0 {
 // 	if algo != 514 &&
 // 		algo != 2 {
-// 		trc.Ln("bogus version halcyon", algo)
+// 		F.Ln("bogus version halcyon", algo)
 // 		algo = 2
 // 	}
 // }
@@ -354,15 +354,15 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 // prev = prev.RelativeAncestor(1)
 // for {
 // 	if prev == nil {
-// 		trc.Ln("passed through genesis")
+// 		F.Ln("passed through genesis")
 // 		return nil
 // 	}
-// 	trc.Ln(prev.height)
+// 	F.Ln(prev.height)
 // 	prevVersion := prev.version
 // 	if fork.GetCurrent(prev.height) == 0 {
 // 		if prevVersion != 514 &&
 // 			prevVersion != 2 {
-// 			trc.Ln("bogus version", prevVersion)
+// 			F.Ln("bogus version", prevVersion)
 // 			prevVersion = 2
 // 		}
 // 	}
@@ -371,7 +371,7 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 // 			prev.bits)
 // 		return prev
 // 	} else {
-// 		trc.Ln(prev.height)
+// 		F.Ln(prev.height)
 // 		prev = prev.RelativeAncestor(1)
 // 	}
 // }

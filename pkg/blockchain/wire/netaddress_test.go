@@ -218,7 +218,7 @@ func TestNetAddress(t *testing.T) {
 // 		e := writeNetAddress(w, test.pver, test.in, test.ts)
 // 		if err != test.writeErr {
 // 			t.Errorf("writeNetAddress #%d wrong error got: %v, want: %v",
-// 				i, err, test.writeErr)
+// 				i, e, test.writeErr)
 // 			continue
 // 		}
 // 		// Decode from wire format.
@@ -227,7 +227,7 @@ func TestNetAddress(t *testing.T) {
 // 		e = readNetAddress(r, test.pver, &na, test.ts)
 // 		if err != test.readErr {
 // 			t.Errorf("readNetAddress #%d wrong error got: %v, want: %v",
-// 				i, err, test.readErr)
+// 				i, e, test.readErr)
 // 			continue
 // 		}
 // 	}

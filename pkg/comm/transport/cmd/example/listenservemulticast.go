@@ -22,7 +22,7 @@ var (
 
 func main() {
 	logg.SetLogLevel("trace")
-	dbg.Ln("starting test")
+	D.Ln("starting test")
 	quit := qu.T()
 	var c *transport.Channel
 	var e error
@@ -30,25 +30,25 @@ func main() {
 		1234, 8192, transport.Handlers{
 			TestMagic: func(ctx interface{}, src net.Addr, dst string,
 				b []byte) (e error) {
-				inf.F("%s <- %s [%d] '%s'", src.String(), dst, len(b), string(b))
+				I.F("%s <- %s [%d] '%s'", src.String(), dst, len(b), string(b))
 				return
 			},
 		},
 		quit,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		panic(e)
 	}
 	time.Sleep(time.Second)
 	var n int
 	loop.To(10, func(i int) {
 		text := []byte(fmt.Sprintf("this is a test %d", i))
-		inf.F("%s -> %s [%d] '%s'", c.Sender.LocalAddr(), c.Sender.RemoteAddr(), n-4, text)
-		if e = c.SendMany(TestMagicB, transport.GetShards(text)); err.Chk(e) {
+		I.F("%s -> %s [%d] '%s'", c.Sender.LocalAddr(), c.Sender.RemoteAddr(), n-4, text)
+		if e = c.SendMany(TestMagicB, transport.GetShards(text)); E.Chk(e) {
 		} else {
 		}
 	})
 	time.Sleep(time.Second * 5)
-	if e = c.Close(); !err.Chk(e) {
+	if e = c.Close(); !E.Chk(e) {
 		time.Sleep(time.Second * 1)
 	}
 	quit.Q()

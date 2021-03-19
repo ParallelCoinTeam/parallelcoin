@@ -259,7 +259,7 @@ func (mp *TxPool) ProcessTransaction(
 	b *blockchain.BlockChain, tx *util.Tx,
 	allowOrphan, rateLimit bool, tag Tag,
 ) ([]*TxDesc, error) {
-	trc.Ln("processing transaction", tx.Hash())
+	F.Ln("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	defer mp.mtx.Unlock()
@@ -432,7 +432,7 @@ func (mp *TxPool) addOrphan(tx *util.Tx, tag Tag) {
 	// orphans and evict a random orphan if space is still needed.
 	e := mp.limitNumOrphans()
 	if e != nil {
-		wrn.Ln("failed to set orphan limit", e)
+		W.Ln("failed to set orphan limit", e)
 	}
 	mp.orphans[*tx.Hash()] = &orphanTx{
 		tx:         tx,
@@ -446,7 +446,7 @@ func (mp *TxPool) addOrphan(tx *util.Tx, tag Tag) {
 		}
 		mp.orphansByPrev[txIn.PreviousOutPoint][*tx.Hash()] = tx
 	}
-	dbg.Ln("stored orphan transaction", tx.Hash(), "(total:", len(mp.orphans), ")")
+	D.Ln("stored orphan transaction", tx.Hash(), "(total:", len(mp.orphans), ")")
 }
 
 // addTransaction adds the passed transaction to the memory pool. It should not be called directly as it doesn't perform
@@ -571,7 +571,7 @@ func (mp *TxPool) limitNumOrphans() (e error) {
 		mp.nextExpireScan = now.Add(orphanExpireScanInterval)
 		numOrphans := len(mp.orphans)
 		if numExpired := origNumOrphans - numOrphans; numExpired > 0 {
-			dbg.F(
+			D.F(
 				"Expired %d %s (remaining: %d)",
 				numExpired, logg.PickNoun(numExpired, "orphan", "orphans"),
 				numOrphans,
@@ -663,7 +663,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 			}
 			str := fmt.Sprintf(
 				"transaction %v is not standard: %v",
-				txHash, err,
+				txHash, e,
 			)
 			return nil, nil, txRuleError(rejectCode, str)
 		}
@@ -757,7 +757,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 			}
 			str := fmt.Sprintf(
 				"transaction %v has a non-standard "+
-					"input: %v", txHash, err,
+					"input: %v", txHash, e,
 			)
 			return nil, nil, txRuleError(rejectCode, str)
 		}
@@ -837,7 +837,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 		}
 		oldTotal := mp.pennyTotal
 		mp.pennyTotal += float64(serializedSize)
-		trc.F(
+		T.F(
 			"rate limit: curTotal %v, nextTotal: %v, limit %v",
 			oldTotal,
 			mp.pennyTotal,
@@ -858,7 +858,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 	}
 	// Add to transaction pool.
 	txD := mp.addTransaction(utxoView, tx, bestHeight, txFee)
-	dbg.F(
+	D.F(
 		"accepted transaction %v (pool size: %v) %s",
 		txHash,
 		len(mp.pool),

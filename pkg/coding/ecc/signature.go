@@ -272,7 +272,7 @@ func recoverKeyFromSignature(
 	// then 1.6 will be done with -R, so we calculate the other term when
 	// decompressing the point.
 	var Ry *big.Int
-	if Ry, e = decompressPoint(curve, Rx, iter%2 == 1); err.Chk(e) {
+	if Ry, e = decompressPoint(curve, Rx, iter%2 == 1); E.Chk(e) {
 		return
 	}
 	// 1.4 Chk n*R is point at infinity
@@ -324,7 +324,7 @@ func SignCompact(
 	hash []byte, isCompressedKey bool,
 ) (sh []byte, e error) {
 	var sig *Signature
-	if sig, e = key.Sign(hash); err.Chk(e) {
+	if sig, e = key.Sign(hash); E.Chk(e) {
 		return
 	}
 	// bitcoind checks the bit length of R and S here. The ecdsa signature algorithm
@@ -382,7 +382,7 @@ func RecoverCompact(
 		S: new(big.Int).SetBytes(signature[bitlen+1:]),
 	}
 	// The iteration used here was encoded
-	if key, e = recoverKeyFromSignature(curve, sig, hash, iteration, false);err.Chk(e){
+	if key, e = recoverKeyFromSignature(curve, sig, hash, iteration, false);E.Chk(e){
 		return nil, false, e
 	}
 	return key, ((signature[0] - 27) & 4) == 4, nil
@@ -463,7 +463,7 @@ func nonceRFC6979(privkey *big.Int, hash []byte) *big.Int {
 // mac returns an HMAC of the given key and message.
 func mac(alg func() hash.Hash, k, m []byte) []byte {
 	h := hmac.New(alg, k)
-	if _, e := h.Write(m);err.Chk(e) {
+	if _, e := h.Write(m);E.Chk(e) {
 		return nil
 	}
 	return h.Sum(nil)

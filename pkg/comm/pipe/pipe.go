@@ -15,40 +15,40 @@ import (
 func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Worker {
 	var n int
 	var e error
-	dbg.Ln("spawning worker process", args)
+	D.Ln("spawning worker process", args)
 	w, _ := worker.Spawn(quit, args...)
 	data := make([]byte, 8192)
 	onBackup := false
 	go func() {
 	out:
 		for {
-			// dbg.Ln("readloop")
+			// D.Ln("readloop")
 			select {
 			case <-interrupt.HandlersDone.Wait():
-				dbg.Ln("quitting log consumer")
+				D.Ln("quitting log consumer")
 				break out
 			case <-quit.Wait():
-				dbg.Ln("breaking on quit signal")
+				D.Ln("breaking on quit signal")
 				break out
 			default:
 			}
 			n, e = w.StdConn.Read(data)
 			if n == 0 {
-				trc.Ln("read zero from stdconn", args)
+				F.Ln("read zero from stdconn", args)
 				onBackup = true
 				logg.LogChanDisabled.Store(true)
 				break out
 			}
-			if err.Chk(e) && e != io.EOF {
+			if E.Chk(e) && e != io.EOF {
 				// Probably the child process has died, so quit
-				err.Ln("err:", e)
+				E.Ln("err:", e)
 				onBackup = true
 				break out
 			} else if n > 0 {
-				if e = handler(data[:n]); err.Chk(e) {
+				if e = handler(data[:n]); E.Chk(e) {
 				}
 			}
-			// if n, e = w.StdPipe.Read(data); err.Chk(e) {
+			// if n, e = w.StdPipe.Read(data); E.Chk(e) {
 			// }
 			// // when the child stops sending over RPC, fall back to the also working but not printing stderr
 			// if n > 0 {
@@ -76,12 +76,12 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 	var e error
 	data := make([]byte, 8192)
 	go func() {
-		dbg.Ln("starting pipe server")
+		D.Ln("starting pipe server")
 	out:
 		for {
 			select {
 			case <-quit.Wait():
-				// dbg.Ln(interrupt.GoroutineDump())
+				// D.Ln(interrupt.GoroutineDump())
 				break out
 			default:
 			}
@@ -90,13 +90,13 @@ func Serve(quit qu.C, handler func([]byte) error) *stdconn.StdConn {
 				break out
 			}
 			if n > 0 {
-				if e = handler(data[:n]); err.Chk(e) {
+				if e = handler(data[:n]); E.Chk(e) {
 					break out
 				}
 			}
 		}
-		// dbg.Ln(interrupt.GoroutineDump())
-		dbg.Ln("pipe server shut down")
+		// D.Ln(interrupt.GoroutineDump())
+		D.Ln("pipe server shut down")
 	}()
 	return stdconn.New(os.Stdin, os.Stdout, quit)
 }

@@ -41,8 +41,8 @@ func (i *Icon) Color(color string) *Icon {
 // Src sets the icon source to draw from
 func (i *Icon) Src(data *[]byte) *Icon {
 	_, e := iconvg.DecodeMetadata(*data)
-	if err.Chk(e) {
-		dbg.Ln("no image data, crashing")
+	if E.Chk(e) {
+		D.Ln("no image data, crashing")
 		panic(e)
 		// return nil
 	}
@@ -78,7 +78,7 @@ func (i *Icon) Fn(gtx l.Context) l.Dimensions {
 
 func (i *Icon) image(sz int) paint.ImageOp {
 	// if sz == i.imgSize && i.color == i.imgColor {
-	// 	// dbg.Ln("reusing old icon")
+	// 	// D.Ln("reusing old icon")
 	// 	return i.op
 	// }
 	if ico, ok := i.Theme.iconCache[i.src]; ok {
@@ -97,7 +97,7 @@ func (i *Icon) image(sz int) paint.ImageOp {
 	m.Palette[0] = color.RGBA(i.Theme.Colors.GetNRGBAFromName(i.color))
 	if e := iconvg.Decode(&ico, *i.src, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
-	}); err.Chk(e) {
+	}); E.Chk(e) {
 	}
 	operation := paint.NewImageOp(img)
 	// create the maps if they don't exist

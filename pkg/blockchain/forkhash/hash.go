@@ -40,7 +40,7 @@ func X11(bytes []byte) (out []byte) {
 	hf := x11.New()
 	out = make([]byte, 32)
 	hf.Hash(bytes, out)
-	// dbg.F("x11 %x", out)
+	// D.F("x11 %x", out)
 	return
 	// return cryptonight.Sum(bytes, 2)
 }
@@ -171,7 +171,7 @@ func Scrypt(bytes []byte) []byte {
 	var dk []byte
 	dk, e = scrypt.Key(c, c, 1024, 1, 1, 32)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
+	
 	"github.com/jessevdk/go-flags"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 )
 
@@ -42,7 +42,8 @@ type config struct {
 
 // validDbType returns whether or not dbType is a supported database type.
 func validDbType(
-	dbType string) bool {
+	dbType string,
+) bool {
 	for _, knownType := range knownDbTypes {
 		if dbType == knownType {
 			return true
@@ -57,7 +58,8 @@ func validDbType(
 // network matches wire.TestNet3. A proper upgrade to move the data and log directories for this network to "testnet3"
 // is planned for the future, at which point this function can be removed and the network parameter's name used instead.
 func netName(
-	chainParams *netparams.Params) string {
+	chainParams *netparams.Params,
+) string {
 	switch chainParams.Net {
 	case wire.TestNet3:
 		return "testnet"
@@ -77,8 +79,8 @@ func loadConfig() (*config, []string, error) {
 	// Parse command line options.
 	parser := flags.NewParser(&cfg, flags.Default)
 	remainingArgs, e := parser.Parse()
-	if e != nil  {
-				if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+	if e != nil {
+		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
 		return nil, nil, e

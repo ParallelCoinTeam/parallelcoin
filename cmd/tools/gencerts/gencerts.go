@@ -29,8 +29,8 @@ func main() {
 	}
 	parser := flags.NewParser(&cfg, flags.Default)
 	_, e := parser.Parse()
-	if e != nil  {
-				if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+	if e != nil {
+		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
 		return
@@ -38,8 +38,8 @@ func main() {
 	if cfg.Directory == "" {
 		var e error
 		cfg.Directory, e = os.Getwd()
-		if e != nil  {
-						_, _ = fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
+		if e != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
 			os.Exit(1)
 		}
 	}
@@ -56,22 +56,22 @@ func main() {
 	validUntil := time.Now().Add(time.Duration(cfg.Years) * 365 * 24 * time.Hour)
 	var cert, key []byte
 	cert, key, e = util.NewTLSCertPair(cfg.Organization, validUntil, cfg.ExtraHosts)
-	if e != nil  {
-				_, _ = fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
+	if e != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.
-	if e = ioutil.WriteFile(certFile, cert, 0666); err.Chk(e) {
+	if e = ioutil.WriteFile(certFile, cert, 0666); E.Chk(e) {
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.
-	if e = ioutil.WriteFile(caFile, cert, 0666); err.Chk(e) {
+	if e = ioutil.WriteFile(caFile, cert, 0666); E.Chk(e) {
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", err)
 		os.Exit(1)
 	}
-	if e = ioutil.WriteFile(keyFile, key, 0600); err.Chk(e) {
-		if e := os.Remove(certFile); err.Chk(e) {
+	if e = ioutil.WriteFile(keyFile, key, 0600); E.Chk(e) {
+		if e := os.Remove(certFile); E.Chk(e) {
 		}
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write key: %v\n", err)
 		os.Exit(1)
@@ -81,7 +81,8 @@ func main() {
 // cleanAndExpandPath expands environement variables and leading ~ in the passed path, cleans the result, and returns
 // it.
 func cleanAndExpandPath(
-	path string) string {
+	path string,
+) string {
 	// Expand initial ~ to OS specific home directory.
 	if strings.HasPrefix(path, "~") {
 		appHomeDir := appdata.Dir("gencerts", false)
@@ -95,8 +96,9 @@ func cleanAndExpandPath(
 
 // filesExists reports whether the named file or directory exists.
 func fileExists(
-	name string) bool {
-	if _, e = os.Stat(name); err.Chk(e) {
+	name string,
+) bool {
+	if _, e = os.Stat(name); E.Chk(e) {
 		if os.IsNotExist(e) {
 			return false
 		}

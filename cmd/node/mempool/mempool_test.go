@@ -365,14 +365,14 @@ func TestSimpleOrphanChain(t *testing.T) {
 	t.Parallel()
 	harness, spendableOuts, e := newPoolHarness(&netparams.MainNetParams)
 	if e != nil {
-		t.Fatalf("unable to create test pool: %v", err)
+		t.Fatalf("unable to create test pool: %v", e)
 	}
 	tc := &testContext{t, harness}
 	// Create a chain of transactions rooted with the first spendable output provided by the harness.
 	maxOrphans := uint32(harness.txPool.cfg.Policy.MaxOrphanTxs)
 	chainedTxns, e := harness.CreateTxChain(spendableOuts[0], maxOrphans+1)
 	if e != nil {
-		t.Fatalf("unable to create transaction chain: %v", err)
+		t.Fatalf("unable to create transaction chain: %v", e)
 	}
 	// Ensure the orphans are accepted (only up to the maximum allowed so none are evicted).
 	for _, tx := range chainedTxns[1 : maxOrphans+1] {
@@ -383,7 +383,7 @@ func TestSimpleOrphanChain(t *testing.T) {
 		if e != nil {
 			t.Fatalf(
 				"ProcessTransaction: failed to accept valid "+
-					"orphan %v", err,
+					"orphan %v", e,
 			)
 		}
 		// Ensure no transactions were reported as accepted.
@@ -407,7 +407,7 @@ func TestSimpleOrphanChain(t *testing.T) {
 	if e != nil {
 		t.Fatalf(
 			"ProcessTransaction: failed to accept valid "+
-				"orphan %v", err,
+				"orphan %v", e,
 		)
 	}
 	if len(acceptedTxns) != len(chainedTxns) {
@@ -430,14 +430,14 @@ func TestOrphanReject(t *testing.T) {
 	t.Parallel()
 	harness, outputs, e := newPoolHarness(&netparams.MainNetParams)
 	if e != nil {
-		t.Fatalf("unable to create test pool: %v", err)
+		t.Fatalf("unable to create test pool: %v", e)
 	}
 	tc := &testContext{t, harness}
 	// Create a chain of transactions rooted with the first spendable output provided by the harness.
 	maxOrphans := uint32(harness.txPool.cfg.Policy.MaxOrphanTxs)
 	chainedTxns, e := harness.CreateTxChain(outputs[0], maxOrphans+1)
 	if e != nil {
-		t.Fatalf("unable to create transaction chain: %v", err)
+		t.Fatalf("unable to create transaction chain: %v", e)
 	}
 	// Ensure orphans are rejected when the allow orphans flag is not set.
 	for _, tx := range chainedTxns[1:] {
@@ -455,7 +455,7 @@ func TestOrphanReject(t *testing.T) {
 		if reflect.TypeOf(e) != reflect.TypeOf(expectedErr) {
 			t.Fatalf(
 				"ProcessTransaction: wrong error got: <%T> %v, "+
-					"want: <%T>", err, err, expectedErr,
+					"want: <%T>", e, err, expectedErr,
 			)
 		}
 		code, extracted := extractRejectCode(e)
@@ -489,7 +489,7 @@ func TestOrphanEviction(t *testing.T) {
 	t.Parallel()
 	harness, outputs, e := newPoolHarness(&netparams.MainNetParams)
 	if e != nil {
-		t.Fatalf("unable to create test pool: %v", err)
+		t.Fatalf("unable to create test pool: %v", e)
 	}
 	tc := &testContext{t, harness}
 	// Create a chain of transactions rooted with the first spendable output provided by the harness that is long enough
@@ -497,7 +497,7 @@ func TestOrphanEviction(t *testing.T) {
 	maxOrphans := uint32(harness.txPool.cfg.Policy.MaxOrphanTxs)
 	chainedTxns, e := harness.CreateTxChain(outputs[0], maxOrphans+5)
 	if e != nil {
-		t.Fatalf("unable to create transaction chain: %v", err)
+		t.Fatalf("unable to create transaction chain: %v", e)
 	}
 	// Add enough orphans to exceed the max allowed while ensuring they are all accepted.  This will cause an eviction.
 	for _, tx := range chainedTxns[1:] {
@@ -508,7 +508,7 @@ func TestOrphanEviction(t *testing.T) {
 		if e != nil {
 			t.Fatalf(
 				"ProcessTransaction: failed to accept valid "+
-					"orphan %v", err,
+					"orphan %v", e,
 			)
 		}
 		// Ensure no transactions were reported as accepted.
@@ -549,14 +549,14 @@ func TestBasicOrphanRemoval(t *testing.T) {
 	const maxOrphans = 4
 	harness, spendableOuts, e := newPoolHarness(&netparams.MainNetParams)
 	if e != nil {
-		t.Fatalf("unable to create test pool: %v", err)
+		t.Fatalf("unable to create test pool: %v", e)
 	}
 	harness.txPool.cfg.Policy.MaxOrphanTxs = maxOrphans
 	tc := &testContext{t, harness}
 	// Create a chain of transactions rooted with the first spendable output provided by the harness.
 	chainedTxns, e := harness.CreateTxChain(spendableOuts[0], maxOrphans+1)
 	if e != nil {
-		t.Fatalf("unable to create transaction chain: %v", err)
+		t.Fatalf("unable to create transaction chain: %v", e)
 	}
 	// Ensure the orphans are accepted (only up to the maximum allowed so none are evicted).
 	for _, tx := range chainedTxns[1 : maxOrphans+1] {
@@ -567,7 +567,7 @@ func TestBasicOrphanRemoval(t *testing.T) {
 		if e != nil {
 			t.Fatalf(
 				"ProcessTransaction: failed to accept valid "+
-					"orphan %v", err,
+					"orphan %v", e,
 			)
 		}
 		// Ensure no transactions were reported as accepted.
@@ -592,7 +592,7 @@ func TestBasicOrphanRemoval(t *testing.T) {
 		}, 1,
 	)
 	if e != nil {
-		t.Fatalf("unable to create signed tx: %v", err)
+		t.Fatalf("unable to create signed tx: %v", e)
 	}
 	harness.txPool.RemoveOrphan(nonChainedOrphanTx)
 	testPoolMembership(tc, nonChainedOrphanTx, false, false)
@@ -638,7 +638,7 @@ func TestOrphanChainRemoval(t *testing.T) {
 		if e != nil {
 			t.Fatalf(
 				"ProcessTransaction: failed to accept valid "+
-					"orphan %v", err,
+					"orphan %v", e,
 			)
 		}
 		// Ensure no transactions were reported as accepted.
@@ -696,7 +696,7 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 		if e != nil {
 			t.Fatalf(
 				"ProcessTransaction: failed to accept valid "+
-					"orphan %v", err,
+					"orphan %v", e,
 			)
 		}
 		if len(acceptedTxns) != 0 {
@@ -727,7 +727,7 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 	if e != nil {
 		t.Fatalf(
 			"ProcessTransaction: failed to accept valid orphan %v",
-			err,
+			e,
 		)
 	}
 	if len(acceptedTxns) != 0 {
@@ -792,7 +792,7 @@ func TestCheckSpend(t *testing.T) {
 		if e != nil {
 			t.Fatalf(
 				"ProcessTransaction: failed to accept "+
-					"tx: %v", err,
+					"tx: %v", e,
 			)
 		}
 	}

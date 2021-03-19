@@ -63,7 +63,7 @@ func (r FutureGetRawTransactionResult) Receive() (*util.Tx, error) {
 	}
 	// Deserialize the transaction and return it.
 	var msgTx wire.MsgTx
-	if e := msgTx.Deserialize(bytes.NewReader(serializedTx)); err.Chk(e) {
+	if e := msgTx.Deserialize(bytes.NewReader(serializedTx)); E.Chk(e) {
 		return nil, e
 	}
 	return util.NewTx(&msgTx), nil
@@ -184,7 +184,7 @@ func (r FutureCreateRawTransactionResult) Receive() (*wire.MsgTx, error) {
 	}
 	// Deserialize the transaction and return it.
 	var msgTx wire.MsgTx
-	if e := msgTx.Deserialize(bytes.NewReader(serializedTx)); err.Chk(e) {
+	if e := msgTx.Deserialize(bytes.NewReader(serializedTx)); E.Chk(e) {
 		return nil, e
 	}
 	return &msgTx, nil
@@ -242,7 +242,7 @@ func (c *Client) SendRawTransactionAsync(tx *wire.MsgTx, allowHighFees bool) Fut
 	if tx != nil {
 		// Serialize the transaction and convert to hex string.
 		buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(buf); err.Chk(e) {
+		if e := tx.Serialize(buf); E.Chk(e) {
 			return newFutureError(e)
 		}
 		txHex = hex.EncodeToString(buf.Bytes())
@@ -279,7 +279,7 @@ func (r FutureSignRawTransactionResult) Receive() (*wire.MsgTx, bool, error) {
 	}
 	// Deserialize the transaction and return it.
 	var msgTx wire.MsgTx
-	if e := msgTx.Deserialize(bytes.NewReader(serializedTx)); err.Chk(e) {
+	if e := msgTx.Deserialize(bytes.NewReader(serializedTx)); E.Chk(e) {
 		return nil, false, e
 	}
 	return &msgTx, signRawTxResult.Complete, nil
@@ -293,7 +293,7 @@ func (c *Client) SignRawTransactionAsync(tx *wire.MsgTx) FutureSignRawTransactio
 	if tx != nil {
 		// Serialize the transaction and convert to hex string.
 		buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(buf); err.Chk(e) {
+		if e := tx.Serialize(buf); E.Chk(e) {
 			return newFutureError(e)
 		}
 		txHex = hex.EncodeToString(buf.Bytes())
@@ -322,7 +322,7 @@ func (c *Client) SignRawTransaction2Async(tx *wire.MsgTx, inputs []btcjson.RawTx
 	if tx != nil {
 		// Serialize the transaction and convert to hex string.
 		buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(buf); err.Chk(e) {
+		if e := tx.Serialize(buf); E.Chk(e) {
 			return newFutureError(e)
 		}
 		txHex = hex.EncodeToString(buf.Bytes())
@@ -355,7 +355,7 @@ func (c *Client) SignRawTransaction3Async(
 	if tx != nil {
 		// Serialize the transaction and convert to hex string.
 		buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(buf); err.Chk(e) {
+		if e := tx.Serialize(buf); E.Chk(e) {
 			return newFutureError(e)
 		}
 		txHex = hex.EncodeToString(buf.Bytes())
@@ -401,7 +401,7 @@ func (c *Client) SignRawTransaction4Async(
 	if tx != nil {
 		// Serialize the transaction and convert to hex string.
 		buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(buf); err.Chk(e) {
+		if e := tx.Serialize(buf); E.Chk(e) {
 			return newFutureError(e)
 		}
 		txHex = hex.EncodeToString(buf.Bytes())

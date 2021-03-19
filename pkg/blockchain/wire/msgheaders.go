@@ -35,7 +35,7 @@ func (msg *MsgHeaders) AddBlockHeader(bh *BlockHeader) (e error) {
 // This is part of the Message interface implementation.
 func (msg *MsgHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	// Limit to max block headers per message.
@@ -52,7 +52,7 @@ func (msg *MsgHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 	msg.Headers = make([]*BlockHeader, 0, count)
 	for i := uint64(0); i < count; i++ {
 		bh := &headers[i]
-		if e = readBlockHeader(r, pver, bh); err.Chk(e) {
+		if e = readBlockHeader(r, pver, bh); E.Chk(e) {
 			return
 		}
 		txCount, e := ReadVarInt(r, pver)
@@ -67,7 +67,7 @@ func (msg *MsgHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 			)
 			return messageError("MsgHeaders.BtcDecode", str)
 		}
-		if e = msg.AddBlockHeader(bh); err.Chk(e) {
+		if e = msg.AddBlockHeader(bh); E.Chk(e) {
 		}
 	}
 	return
@@ -85,17 +85,17 @@ func (msg *MsgHeaders) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) 
 		)
 		return messageError("MsgHeaders.BtcEncode", str)
 	}
-	if e = WriteVarInt(w, pver, uint64(count)); err.Chk(e) {
+	if e = WriteVarInt(w, pver, uint64(count)); E.Chk(e) {
 		return
 	}
 	for _, bh := range msg.Headers {
-		if e = writeBlockHeader(w, pver, bh); err.Chk(e) {
+		if e = writeBlockHeader(w, pver, bh); E.Chk(e) {
 			return
 		}
 		// The wire protocol encoding always includes a 0 for the number of transactions
 		// on header messages. This is really just an artifact of the way the original
 		// implementation serializes block headers, but it is required.
-		if e = WriteVarInt(w, pver, 0); err.Chk(e) {
+		if e = WriteVarInt(w, pver, 0); E.Chk(e) {
 			return
 		}
 	}

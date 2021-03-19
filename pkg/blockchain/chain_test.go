@@ -21,7 +21,7 @@ import (
 // 	for _, file := range testFiles {
 // 		blockTmp, e := loadBlocks(file)
 // 		if e != nil  {
-// 			t.Errorf("Error loading file: %v\n", err)
+// 			t.Errorf("Error loading file: %v\n", e)
 // 			return
 // 		}
 // 		blocks = append(blocks, blockTmp...)
@@ -30,7 +30,7 @@ import (
 // 	chain, teardownFunc, e := chainSetup("haveblock",
 // 		&netparams.MainNetParams)
 // 	if e != nil  {
-// 		t.Errorf("Failed to setup chain instance: %v", err)
+// 		t.Errorf("Failed to setup chain instance: %v", e)
 // 		return
 // 	}
 // 	defer teardownFunc()
@@ -39,7 +39,7 @@ import (
 // 	for i := 1; i < len(blocks); i++ {
 // 		_, isOrphan, e := chain.ProcessBlock(blocks[i], BFNone, blocks[i].Height())
 // 		if e != nil  {
-// 			t.Errorf("ProcessBlock fail on block %v: %v\n", i, err)
+// 			t.Errorf("ProcessBlock fail on block %v: %v\n", i, e)
 // 			return
 // 		}
 // 		if isOrphan {
@@ -52,7 +52,7 @@ import (
 // 	_, isOrphan, e := chain.ProcessBlock(util.NewBlock(&Block100000),
 // 		BFNone, 100000)
 // 	if e != nil  {
-// 		t.Errorf("Unable to process block: %v", err)
+// 		t.Errorf("Unable to process block: %v", e)
 // 		return
 // 	}
 // 	if !isOrphan {
@@ -76,12 +76,12 @@ import (
 // 	for i, test := range tests {
 // 		hash, e := chainhash.NewHashFromStr(test.hash)
 // 		if e != nil  {
-// 			t.Errorf("NewHashFromStr: %v", err)
+// 			t.Errorf("NewHashFromStr: %v", e)
 // 			continue
 // 		}
 // 		result, e := chain.HaveBlock(hash)
 // 		if e != nil  {
-// 			t.Errorf("HaveBlock #%d unexpected error: %v", i, err)
+// 			t.Errorf("HaveBlock #%d unexpected error: %v", i, e)
 // 			return
 // 		}
 // 		if result != test.want {
@@ -375,7 +375,7 @@ import (
 // 		utilTx := util.NewTx(test.tx)
 // 		seqLock, e := chain.CalcSequenceLock(utilTx, test.view, test.mempool)
 // 		if e != nil  {
-// 			t.Fatalf("test #%d, unable to calc sequence lock: %v", i, err)
+// 			t.Fatalf("test #%d, unable to calc sequence lock: %v", i, e)
 // 		}
 // 		if seqLock.Seconds != test.want.Seconds {
 // 			t.Fatalf("test #%d got %v seconds want %v seconds",
@@ -778,7 +778,7 @@ func TestHeightToHashRange(t *testing.T) {
 			test.maxResults)
 		if e != nil  {
 			if !test.expectError {
-				t.Errorf("%s: unexpected error: %v", test.name, err)
+				t.Errorf("%s: unexpected error: %v", test.name, e)
 			}
 			continue
 		}
@@ -847,7 +847,7 @@ func TestIntervalBlockHashes(t *testing.T) {
 		hashes, e := chain.IntervalBlockHashes(&test.endHash, test.interval)
 		if e != nil  {
 			if !test.expectError {
-				t.Errorf("%s: unexpected error: %v", test.name, err)
+				t.Errorf("%s: unexpected error: %v", test.name, e)
 			}
 			continue
 		}

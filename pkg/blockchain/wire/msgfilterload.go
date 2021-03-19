@@ -44,10 +44,10 @@ func (msg *MsgFilterLoad) BtcDecode(r io.Reader, pver uint32, enc MessageEncodin
 		str := fmt.Sprintf("filterload message invalid for protocol version %d", pver)
 		return messageError("MsgFilterLoad.BtcDecode", str)
 	}
-	if msg.Filter, e = ReadVarBytes(r, pver, MaxFilterLoadFilterSize, "filterload filter size"); err.Chk(e) {
+	if msg.Filter, e = ReadVarBytes(r, pver, MaxFilterLoadFilterSize, "filterload filter size"); E.Chk(e) {
 		return
 	}
-	if e = readElements(r, &msg.HashFuncs, &msg.Tweak, &msg.Flags); err.Chk(e) {
+	if e = readElements(r, &msg.HashFuncs, &msg.Tweak, &msg.Flags); E.Chk(e) {
 		return
 	}
 	if msg.HashFuncs > MaxFilterLoadHashFuncs {
@@ -85,7 +85,7 @@ func (msg *MsgFilterLoad) BtcEncode(w io.Writer, pver uint32, enc MessageEncodin
 		)
 		return messageError("MsgFilterLoad.BtcEncode", str)
 	}
-	if e = WriteVarBytes(w, pver, msg.Filter); err.Chk(e) {
+	if e = WriteVarBytes(w, pver, msg.Filter); E.Chk(e) {
 		return
 	}
 	return writeElements(w, msg.HashFuncs, msg.Tweak, msg.Flags)

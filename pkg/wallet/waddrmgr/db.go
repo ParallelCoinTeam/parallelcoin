@@ -376,7 +376,7 @@ func fetchManagerVersion(ns walletdb.ReadBucket) (uint32, error) {
 func putManagerVersion(ns walletdb.ReadWriteBucket, version uint32) (e error) {
 	bucket := ns.NestedReadWriteBucket(mainBucketName)
 	verBytes := uint32ToBytes(version)
-	if e = bucket.Put(mgrVersionName, verBytes); err.Chk(e) {
+	if e = bucket.Put(mgrVersionName, verBytes); E.Chk(e) {
 		str := "failed to store version"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -414,13 +414,13 @@ func fetchMasterKeyParams(ns walletdb.ReadBucket) ([]byte, []byte, error) {
 func putMasterKeyParams(ns walletdb.ReadWriteBucket, pubParams, privParams []byte) (e error) {
 	bucket := ns.NestedReadWriteBucket(mainBucketName)
 	if privParams != nil {
-		if e = bucket.Put(masterPrivKeyName, privParams); err.Chk(e) {
+		if e = bucket.Put(masterPrivKeyName, privParams); E.Chk(e) {
 			str := "failed to store master private key parameters"
 			return managerError(ErrDatabase, str, e)
 		}
 	}
 	if pubParams != nil {
-		if e = bucket.Put(masterPubKeyName, pubParams); err.Chk(e) {
+		if e = bucket.Put(masterPubKeyName, pubParams); E.Chk(e) {
 			str := "failed to store master public key parameters"
 			return managerError(ErrDatabase, str, e)
 		}
@@ -458,17 +458,17 @@ func putCoinTypeKeys(
 	coinTypePubKeyEnc []byte, coinTypePrivKeyEnc []byte,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	if coinTypePubKeyEnc != nil {
-		if e = scopedBucket.Put(coinTypePubKeyName, coinTypePubKeyEnc); err.Chk(e) {
+		if e = scopedBucket.Put(coinTypePubKeyName, coinTypePubKeyEnc); E.Chk(e) {
 			str := "failed to store encrypted cointype public key"
 			return managerError(ErrDatabase, str, e)
 		}
 	}
 	if coinTypePrivKeyEnc != nil {
-		if e = scopedBucket.Put(coinTypePrivKeyName, coinTypePrivKeyEnc); err.Chk(e) {
+		if e = scopedBucket.Put(coinTypePrivKeyName, coinTypePrivKeyEnc); E.Chk(e) {
 			str := "failed to store encrypted cointype private key"
 			return managerError(ErrDatabase, str, e)
 		}
@@ -487,13 +487,13 @@ func putMasterHDKeys(ns walletdb.ReadWriteBucket, masterHDPrivEnc, masterHDPubEn
 	// keys. If we're in watch only mode, then some or all of these keys might not
 	// be available.
 	if masterHDPrivEnc != nil {
-		if e = bucket.Put(masterHDPrivName, masterHDPrivEnc); err.Chk(e) {
+		if e = bucket.Put(masterHDPrivName, masterHDPrivEnc); E.Chk(e) {
 			str := "failed to store encrypted master HD private key"
 			return managerError(ErrDatabase, str, e)
 		}
 	}
 	if masterHDPubEnc != nil {
-		if e = bucket.Put(masterHDPubName, masterHDPubEnc); err.Chk(e) {
+		if e = bucket.Put(masterHDPubName, masterHDPubEnc); E.Chk(e) {
 			str := "failed to store encrypted master HD public key"
 			return managerError(ErrDatabase, str, e)
 		}
@@ -562,19 +562,19 @@ func putCryptoKeys(
 ) (e error) {
 	bucket := ns.NestedReadWriteBucket(mainBucketName)
 	if pubKeyEncrypted != nil {
-		if e = bucket.Put(cryptoPubKeyName, pubKeyEncrypted); err.Chk(e) {
+		if e = bucket.Put(cryptoPubKeyName, pubKeyEncrypted); E.Chk(e) {
 			str := "failed to store encrypted crypto public key"
 			return managerError(ErrDatabase, str, e)
 		}
 	}
 	if privKeyEncrypted != nil {
-		if e = bucket.Put(cryptoPrivKeyName, privKeyEncrypted); err.Chk(e) {
+		if e = bucket.Put(cryptoPrivKeyName, privKeyEncrypted); E.Chk(e) {
 			str := "failed to store encrypted crypto private key"
 			return managerError(ErrDatabase, str, e)
 		}
 	}
 	if scriptKeyEncrypted != nil {
-		if e = bucket.Put(cryptoScriptKeyName, scriptKeyEncrypted); err.Chk(e) {
+		if e = bucket.Put(cryptoScriptKeyName, scriptKeyEncrypted); E.Chk(e) {
 			str := "failed to store encrypted crypto script key"
 			return managerError(ErrDatabase, str, e)
 		}
@@ -600,7 +600,7 @@ func putWatchingOnly(ns walletdb.ReadWriteBucket, watchingOnly bool) (e error) {
 	if watchingOnly {
 		encoded = 1
 	}
-	if e = bucket.Put(watchingOnlyName, []byte{encoded}); err.Chk(e) {
+	if e = bucket.Put(watchingOnlyName, []byte{encoded}); E.Chk(e) {
 		str := "failed to store watching only flag"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -753,7 +753,7 @@ func forEachAccount(
 	fn func(account uint32) error,
 ) (e error) {
 	var scopedBucket walletdb.ReadBucket
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	acctBucket := scopedBucket.NestedReadBucket(acctBucketName)
@@ -772,7 +772,7 @@ func forEachAccount(
 func fetchLastAccount(ns walletdb.ReadBucket, scope *KeyScope) (uint32, error) {
 	var scopedBucket walletdb.ReadBucket
 	var e error
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return 0, e
 	}
 	metaBucket := scopedBucket.NestedReadBucket(metaBucketName)
@@ -796,7 +796,7 @@ func fetchAccountName(
 ) (string, error) {
 	var scopedBucket walletdb.ReadBucket
 	var e error
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return "", e
 	}
 	acctIDxBucket := scopedBucket.NestedReadBucket(acctIDIdxBucketName)
@@ -820,7 +820,7 @@ func fetchAccountByName(
 ) (uint32, error) {
 	var scopedBucket walletdb.ReadBucket
 	var e error
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return 0, e
 	}
 	idxBucket := scopedBucket.NestedReadBucket(acctNameIdxBucketName)
@@ -836,7 +836,7 @@ func fetchAccountByName(
 // database.
 func fetchAccountInfo(ns walletdb.ReadBucket, scope *KeyScope, account uint32,) (ii interface{}, e error) {
 	var scopedBucket walletdb.ReadBucket
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return nil, e
 	}
 	acctBucket := scopedBucket.NestedReadBucket(acctBucketName)
@@ -847,7 +847,7 @@ func fetchAccountInfo(ns walletdb.ReadBucket, scope *KeyScope, account uint32,) 
 		return nil, managerError(ErrAccountNotFound, str, nil)
 	}
 	var row *dbAccountRow
-	if row, e = deserializeAccountRow(accountID, serializedRow); err.Chk(e) {
+	if row, e = deserializeAccountRow(accountID, serializedRow); E.Chk(e) {
 		return nil, e
 	}
 	if row.acctType == accountDefault {
@@ -864,12 +864,12 @@ func deleteAccountNameIndex(
 	name string,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(acctNameIdxBucketName)
 	// Delete the account name key
-	if e = bucket.Delete(stringToBytes(name)); err.Chk(e) {
+	if e = bucket.Delete(stringToBytes(name)); E.Chk(e) {
 		str := fmt.Sprintf("failed to delete account name index key %s", name)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -883,12 +883,12 @@ func deleteAccountIDIndex(
 	account uint32,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(acctIDIdxBucketName)
 	// Delete the account id key
-	if e = bucket.Delete(uint32ToBytes(account)); err.Chk(e) {
+	if e = bucket.Delete(uint32ToBytes(account)); E.Chk(e) {
 		str := fmt.Sprintf("failed to delete account id index key %d", account)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -902,12 +902,12 @@ func putAccountNameIndex(
 	account uint32, name string,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(acctNameIdxBucketName)
 	// Write the account number keyed by the account name.
-	if e = bucket.Put(stringToBytes(name), uint32ToBytes(account)); err.Chk(e) {
+	if e = bucket.Put(stringToBytes(name), uint32ToBytes(account)); E.Chk(e) {
 		str := fmt.Sprintf("failed to store account name index key %s", name)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -921,12 +921,12 @@ func putAccountIDIndex(
 	account uint32, name string,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(acctIDIdxBucketName)
 	// Write the account number keyed by the account id.
-	if e = bucket.Put(uint32ToBytes(account), stringToBytes(name)); err.Chk(e) {
+	if e = bucket.Put(uint32ToBytes(account), stringToBytes(name)); E.Chk(e) {
 		str := fmt.Sprintf("failed to store account id index key %s", name)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -940,19 +940,19 @@ func putAddrAccountIndex(
 	account uint32, addrHash []byte,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(addrAcctIdxBucketName)
 	// Write account keyed by address hash
-	if e = bucket.Put(addrHash, uint32ToBytes(account)); err.Chk(e) {
+	if e = bucket.Put(addrHash, uint32ToBytes(account)); E.Chk(e) {
 		return nil
 	}
-	if bucket, e = bucket.CreateBucketIfNotExists(uint32ToBytes(account)); err.Chk(e) {
+	if bucket, e = bucket.CreateBucketIfNotExists(uint32ToBytes(account)); E.Chk(e) {
 		return e
 	}
 	// In account bucket, write a null value keyed by the address hash
-	if e = bucket.Put(addrHash, nullVal); err.Chk(e) {
+	if e = bucket.Put(addrHash, nullVal); E.Chk(e) {
 		str := fmt.Sprintf("failed to store address account index key %s", addrHash)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -966,12 +966,12 @@ func putAccountRow(
 	account uint32, row *dbAccountRow,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(acctBucketName)
 	// Write the serialized value keyed by the account number.
-	if e = bucket.Put(uint32ToBytes(account), serializeAccountRow(row)); err.Chk(e) {
+	if e = bucket.Put(uint32ToBytes(account), serializeAccountRow(row)); E.Chk(e) {
 		str := fmt.Sprintf("failed to store account %d", account)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -993,15 +993,15 @@ func putAccountInfo(
 		acctType: accountDefault,
 		rawData:  rawData,
 	}
-	if e = putAccountRow(ns, scope, account, &acctRow); err.Chk(e) {
+	if e = putAccountRow(ns, scope, account, &acctRow); E.Chk(e) {
 		return e
 	}
 	// Update account id index.
-	if e = putAccountIDIndex(ns, scope, account, name); err.Chk(e) {
+	if e = putAccountIDIndex(ns, scope, account, name); E.Chk(e) {
 		return e
 	}
 	// Update account name index.
-	if e = putAccountNameIndex(ns, scope, account, name); err.Chk(e) {
+	if e = putAccountNameIndex(ns, scope, account, name); E.Chk(e) {
 		return e
 	}
 	return nil
@@ -1013,11 +1013,11 @@ func putLastAccount(
 	account uint32,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(metaBucketName)
-	if e = bucket.Put(lastAccountName, uint32ToBytes(account)); err.Chk(e) {
+	if e = bucket.Put(lastAccountName, uint32ToBytes(account)); E.Chk(e) {
 		str := fmt.Sprintf("failed to update metadata '%s'", lastAccountName)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1224,7 +1224,7 @@ func fetchAddressByHash(
 ) (interface{}, error) {
 	var scopedBucket walletdb.ReadBucket
 	var e error
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return nil, e
 	}
 	bucket := scopedBucket.NestedReadBucket(addrBucketName)
@@ -1234,7 +1234,7 @@ func fetchAddressByHash(
 		return nil, managerError(ErrAddressNotFound, str, nil)
 	}
 	var row *dbAddressRow
-	if row, e = deserializeAddressRow(serializedRow); err.Chk(e) {
+	if row, e = deserializeAddressRow(serializedRow); E.Chk(e) {
 		return nil, e
 	}
 	switch row.addrType {
@@ -1253,7 +1253,7 @@ func fetchAddressByHash(
 func fetchAddressUsed(ns walletdb.ReadBucket, scope *KeyScope, addressID []byte) bool {
 	var scopedBucket walletdb.ReadBucket
 	var e error
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return false
 	}
 	bucket := scopedBucket.NestedReadBucket(usedAddrBucketName)
@@ -1267,7 +1267,7 @@ func markAddressUsed(
 	addressID []byte,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(usedAddrBucketName)
@@ -1276,7 +1276,7 @@ func markAddressUsed(
 	if val != nil {
 		return nil
 	}
-	if e = bucket.Put(addrHash[:], []byte{0}); err.Chk(e) {
+	if e = bucket.Put(addrHash[:], []byte{0}); E.Chk(e) {
 		str := fmt.Sprintf("failed to mark address used %x", addressID)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1303,14 +1303,14 @@ func putAddress(
 	addressID []byte, row *dbAddressRow,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadWriteBucket(addrBucketName)
 	// Write the serialized value keyed by the hash of the address. The additional
 	// hash is used to conceal the actual address while still allowed keyed lookups.
 	addrHash := sha256.Sum256(addressID)
-	if e = bucket.Put(addrHash[:], serializeAddressRow(row)); err.Chk(e) {
+	if e = bucket.Put(addrHash[:], serializeAddressRow(row)); E.Chk(e) {
 		str := fmt.Sprintf("failed to store address %x", addressID)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1326,7 +1326,7 @@ func putChainedAddress(
 	index uint32, addrType addressType,
 ) (e error) {
 	var scopedBucket walletdb.ReadWriteBucket
-	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchWriteScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	addrRow := dbAddressRow{
@@ -1336,7 +1336,7 @@ func putChainedAddress(
 		syncStatus: status,
 		rawData:    serializeChainedAddress(branch, index),
 	}
-	if e = putAddress(ns, scope, addressID, &addrRow); err.Chk(e) {
+	if e = putAddress(ns, scope, addressID, &addrRow); E.Chk(e) {
 		return e
 	}
 	// Update the next index for the appropriate internal or external branch.
@@ -1345,11 +1345,11 @@ func putChainedAddress(
 	serializedAccount := bucket.Get(accountID)
 	// Deserialize the account row.
 	var row *dbAccountRow
-	if row, e = deserializeAccountRow(accountID, serializedAccount); err.Chk(e) {
+	if row, e = deserializeAccountRow(accountID, serializedAccount); E.Chk(e) {
 		return e
 	}
 	var arow *dbDefaultAccountRow
-	if arow, e = deserializeDefaultAccountRow(accountID, row); err.Chk(e) {
+	if arow, e = deserializeDefaultAccountRow(accountID, row); E.Chk(e) {
 		return e
 	}
 	// Increment the appropriate next index depending on whether the branch is
@@ -1366,7 +1366,7 @@ func putChainedAddress(
 		arow.pubKeyEncrypted, arow.privKeyEncrypted, nextExternalIndex,
 		nextInternalIndex, arow.name,
 	)
-	if e = bucket.Put(accountID, serializeAccountRow(row)); err.Chk(e) {
+	if e = bucket.Put(accountID, serializeAccountRow(row)); E.Chk(e) {
 		str := fmt.Sprintf(
 			"failed to update next index for "+
 				"address %x, account %d", addressID, account,
@@ -1409,7 +1409,7 @@ func putScriptAddress(
 		syncStatus: status,
 		rawData:    rawData,
 	}
-	if e = putAddress(ns, scope, addressID, &addrRow); err.Chk(e) {
+	if e = putAddress(ns, scope, addressID, &addrRow); E.Chk(e) {
 		return e
 	}
 	return nil
@@ -1419,7 +1419,7 @@ func putScriptAddress(
 func existsAddress(ns walletdb.ReadBucket, scope *KeyScope, addressID []byte) bool {
 	var scopedBucket walletdb.ReadBucket
 	var e error
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return false
 	}
 	bucket := scopedBucket.NestedReadBucket(addrBucketName)
@@ -1436,7 +1436,7 @@ func fetchAddrAccount(
 ) (uint32, error) {
 	var scopedBucket walletdb.ReadBucket
 	var e error
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return 0, e
 	}
 	bucket := scopedBucket.NestedReadBucket(addrAcctIdxBucketName)
@@ -1456,7 +1456,7 @@ func forEachAccountAddress(
 	account uint32, fn func(rowInterface interface{}) error,
 ) (e error) {
 	var scopedBucket walletdb.ReadBucket
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadBucket(addrAcctIdxBucketName).NestedReadBucket(uint32ToBytes(account))
@@ -1472,7 +1472,7 @@ func forEachAccountAddress(
 				return nil
 			}
 			var addrRow interface{}
-			if addrRow, e = fetchAddressByHash(ns, scope, k); err.Chk(e) {
+			if addrRow, e = fetchAddressByHash(ns, scope, k); E.Chk(e) {
 				if merr, ok := e.(*ManagerError); ok {
 					desc := fmt.Sprintf(
 						"failed to fetch address hash '%s': %v",
@@ -1485,7 +1485,7 @@ func forEachAccountAddress(
 			}
 			return fn(addrRow)
 		},
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return maybeConvertDbError(e)
 	}
 	return nil
@@ -1498,7 +1498,7 @@ func forEachActiveAddress(
 	fn func(rowInterface interface{}) error,
 ) (e error) {
 	var scopedBucket walletdb.ReadBucket
-	if scopedBucket, e = fetchReadScopeBucket(ns, scope); err.Chk(e) {
+	if scopedBucket, e = fetchReadScopeBucket(ns, scope); E.Chk(e) {
 		return e
 	}
 	bucket := scopedBucket.NestedReadBucket(addrBucketName)
@@ -1523,7 +1523,7 @@ func forEachActiveAddress(
 			}
 			return fn(addrRow)
 		},
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return maybeConvertDbError(e)
 	}
 	return nil
@@ -1542,19 +1542,19 @@ func forEachActiveAddress(
 func deletePrivateKeys(ns walletdb.ReadWriteBucket) (e error) {
 	bucket := ns.NestedReadWriteBucket(mainBucketName)
 	// Delete the master private key netparams and the crypto private and script keys.
-	if e = bucket.Delete(masterPrivKeyName); err.Chk(e) {
+	if e = bucket.Delete(masterPrivKeyName); E.Chk(e) {
 		str := "failed to delete master private key parameters"
 		return managerError(ErrDatabase, str, e)
 	}
-	if e = bucket.Delete(cryptoPrivKeyName); err.Chk(e) {
+	if e = bucket.Delete(cryptoPrivKeyName); E.Chk(e) {
 		str := "failed to delete crypto private key"
 		return managerError(ErrDatabase, str, e)
 	}
-	if e = bucket.Delete(cryptoScriptKeyName); err.Chk(e) {
+	if e = bucket.Delete(cryptoScriptKeyName); E.Chk(e) {
 		str := "failed to delete crypto script key"
 		return managerError(ErrDatabase, str, e)
 	}
-	if e = bucket.Delete(masterHDPrivName); err.Chk(e) {
+	if e = bucket.Delete(masterHDPrivName); E.Chk(e) {
 		str := "failed to delete master HD priv key"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1567,7 +1567,7 @@ func deletePrivateKeys(ns walletdb.ReadWriteBucket) (e error) {
 				return nil
 			}
 			managerScopeBucket := scopeBucket.NestedReadWriteBucket(scopeKey)
-			if e := managerScopeBucket.Delete(coinTypePrivKeyName); err.Chk(e) {
+			if e := managerScopeBucket.Delete(coinTypePrivKeyName); E.Chk(e) {
 				str := "failed to delete cointype private key"
 				return managerError(ErrDatabase, str, e)
 			}
@@ -1700,14 +1700,14 @@ func putSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) (e error) {
 	// that keys/values are added to the bucket in order, making writes more
 	// efficient for some database backends.
 	if bs.Height > 0 {
-		if _, e = fetchBlockHash(ns, bs.Height-1); err.Chk(e) {
+		if _, e = fetchBlockHash(ns, bs.Height-1); E.Chk(e) {
 			return managerError(ErrDatabase, errStr, e)
 		}
 	}
 	// Store the block hash by block height.
 	height := make([]byte, 4)
 	binary.BigEndian.PutUint32(height, uint32(bs.Height))
-	if e = bucket.Put(height, bs.Hash[0:32]); err.Chk(e) {
+	if e = bucket.Put(height, bs.Hash[0:32]); E.Chk(e) {
 		return managerError(ErrDatabase, errStr, e)
 	}
 	// The serialized synced to format is:
@@ -1719,7 +1719,7 @@ func putSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) (e error) {
 	binary.LittleEndian.PutUint32(buf[0:4], uint32(bs.Height))
 	copy(buf[4:36], bs.Hash[0:32])
 	binary.LittleEndian.PutUint32(buf[36:], uint32(bs.Timestamp.Unix()))
-	if e = bucket.Put(syncedToName, buf); err.Chk(e) {
+	if e = bucket.Put(syncedToName, buf); E.Chk(e) {
 		return managerError(ErrDatabase, errStr, e)
 	}
 	return nil
@@ -1737,7 +1737,7 @@ func fetchBlockHash(ns walletdb.ReadBucket, height int32) (h *chainhash.Hash, e 
 		return nil, managerError(ErrDatabase, errStr, e)
 	}
 	var hash chainhash.Hash
-	if e = hash.SetBytes(hashBytes); err.Chk(e) {
+	if e = hash.SetBytes(hashBytes); E.Chk(e) {
 		return nil, managerError(ErrDatabase, errStr, e)
 	}
 	return &hash, nil
@@ -1774,7 +1774,7 @@ func putStartBlock(ns walletdb.ReadWriteBucket, bs *BlockStamp) (e error) {
 	buf := make([]byte, 36)
 	binary.LittleEndian.PutUint32(buf[0:4], uint32(bs.Height))
 	copy(buf[4:36], bs.Hash[0:32])
-	if e = bucket.Put(startBlockName, buf); err.Chk(e) {
+	if e = bucket.Put(startBlockName, buf); E.Chk(e) {
 		str := fmt.Sprintf("failed to store start block %v", bs.Hash)
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1799,7 +1799,7 @@ func putBirthday(ns walletdb.ReadWriteBucket, t time.Time) (e error) {
 	bucket := ns.NestedReadWriteBucket(syncBucketName)
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(t.Unix()))
-	if e = bucket.Put(birthdayName, buf); err.Chk(e) {
+	if e = bucket.Put(birthdayName, buf); E.Chk(e) {
 		str := "failed to store birthday"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1824,36 +1824,36 @@ func createScopedManagerNS(ns walletdb.ReadWriteBucket, scope *KeyScope) (e erro
 	// scope.
 	scopeKey := scopeToBytes(scope)
 	var scopeBucket walletdb.ReadWriteBucket
-	if scopeBucket, e = ns.CreateBucket(scopeKey[:]); err.Chk(e) {
+	if scopeBucket, e = ns.CreateBucket(scopeKey[:]); E.Chk(e) {
 		str := "failed to create sync bucket"
 		return managerError(ErrDatabase, str, e)
 	}
-	if _, e = scopeBucket.CreateBucket(acctBucketName); err.Chk(e) {
+	if _, e = scopeBucket.CreateBucket(acctBucketName); E.Chk(e) {
 		str := "failed to create account bucket"
 		return managerError(ErrDatabase, str, e)
 	}
-	if _, e = scopeBucket.CreateBucket(addrBucketName); err.Chk(e) {
+	if _, e = scopeBucket.CreateBucket(addrBucketName); E.Chk(e) {
 		str := "failed to create address bucket"
 		return managerError(ErrDatabase, str, e)
 	}
 	// usedAddrBucketName bucket was added after manager version 1 release
-	if _, e = scopeBucket.CreateBucket(usedAddrBucketName); err.Chk(e) {
+	if _, e = scopeBucket.CreateBucket(usedAddrBucketName); E.Chk(e) {
 		str := "failed to create used addresses bucket"
 		return managerError(ErrDatabase, str, e)
 	}
-	if _, e = scopeBucket.CreateBucket(addrAcctIdxBucketName); err.Chk(e) {
+	if _, e = scopeBucket.CreateBucket(addrAcctIdxBucketName); E.Chk(e) {
 		str := "failed to create address index bucket"
 		return managerError(ErrDatabase, str, e)
 	}
-	if _, e = scopeBucket.CreateBucket(acctNameIdxBucketName); err.Chk(e) {
+	if _, e = scopeBucket.CreateBucket(acctNameIdxBucketName); E.Chk(e) {
 		str := "failed to create an account name index bucket"
 		return managerError(ErrDatabase, str, e)
 	}
-	if _, e = scopeBucket.CreateBucket(acctIDIdxBucketName); err.Chk(e) {
+	if _, e = scopeBucket.CreateBucket(acctIDIdxBucketName); E.Chk(e) {
 		str := "failed to create an account id index bucket"
 		return managerError(ErrDatabase, str, e)
 	}
-	if _, e = scopeBucket.CreateBucket(metaBucketName); err.Chk(e) {
+	if _, e = scopeBucket.CreateBucket(metaBucketName); E.Chk(e) {
 		str := "failed to create a meta bucket"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1871,23 +1871,23 @@ func createManagerNS(
 ) (e error) {
 	// First, we'll create all the relevant buckets that stem off of the main bucket.
 	var mainBucket walletdb.ReadWriteBucket
-	if mainBucket, e = ns.CreateBucket(mainBucketName); err.Chk(e) {
+	if mainBucket, e = ns.CreateBucket(mainBucketName); E.Chk(e) {
 		str := "failed to create main bucket"
 		return managerError(ErrDatabase, str, e)
 	}
-	if _, e = ns.CreateBucket(syncBucketName); err.Chk(e) {
+	if _, e = ns.CreateBucket(syncBucketName); E.Chk(e) {
 		str := "failed to create sync bucket"
 		return managerError(ErrDatabase, str, e)
 	}
 	// We'll also create the two top-level scope related buckets as preparation for
 	// the operations below.
 	var scopeBucket walletdb.ReadWriteBucket
-	if scopeBucket, e = ns.CreateBucket(scopeBucketName); err.Chk(e) {
+	if scopeBucket, e = ns.CreateBucket(scopeBucketName); E.Chk(e) {
 		str := "failed to create scope bucket"
 		return managerError(ErrDatabase, str, e)
 	}
 	var scopeSchemas walletdb.ReadWriteBucket
-	if scopeSchemas, e = ns.CreateBucket(scopeSchemaBucketName); err.Chk(e) {
+	if scopeSchemas, e = ns.CreateBucket(scopeSchemaBucketName); E.Chk(e) {
 		str := "failed to create scope schema bucket"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1900,23 +1900,23 @@ func createManagerNS(
 		scopeSchema := scc
 		scopeKey := scopeToBytes(&scope)
 		schemaBytes := scopeSchemaToBytes(&scopeSchema)
-		if e = scopeSchemas.Put(scopeKey[:], schemaBytes); err.Chk(e) {
+		if e = scopeSchemas.Put(scopeKey[:], schemaBytes); E.Chk(e) {
 			return e
 		}
-		if e = createScopedManagerNS(scopeBucket, &scope); err.Chk(e) {
+		if e = createScopedManagerNS(scopeBucket, &scope); E.Chk(e) {
 			return e
 		}
-		if e = putLastAccount(ns, &scope, DefaultAccountNum); err.Chk(e) {
+		if e = putLastAccount(ns, &scope, DefaultAccountNum); E.Chk(e) {
 			return e
 		}
 	}
-	if e = putManagerVersion(ns, latestMgrVersion); err.Chk(e) {
+	if e = putManagerVersion(ns, latestMgrVersion); E.Chk(e) {
 		return e
 	}
 	createDate := uint64(time.Now().Unix())
 	var dateBytes [8]byte
 	binary.LittleEndian.PutUint64(dateBytes[:], createDate)
-	if e = mainBucket.Put(mgrCreateDateName, dateBytes[:]); err.Chk(e) {
+	if e = mainBucket.Put(mgrCreateDateName, dateBytes[:]); E.Chk(e) {
 		str := "failed to store database creation time"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1950,7 +1950,7 @@ func upgradeManager(
 			version, e = fetchManagerVersion(ns)
 			return e
 		},
-	); err.Chk(e) {
+	); E.Chk(e) {
 		str := "failed to fetch version for update"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -1960,7 +1960,7 @@ func upgradeManager(
 				ns := tx.ReadWriteBucket(namespaceKey)
 				return upgradeToVersion5(ns, pubPassPhrase)
 			},
-		); err.Chk(e) {
+		); E.Chk(e) {
 			return e
 		}
 		// The manager is now at version 5.
@@ -2003,22 +2003,22 @@ func upgradeToVersion5(ns walletdb.ReadWriteBucket, pubPassPhrase []byte) (e err
 			}
 			return nil
 		},
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return e
 	}
 	// Next, we'll write out the new database version.
-	if e = putManagerVersion(ns, 5); err.Chk(e) {
+	if e = putManagerVersion(ns, 5); E.Chk(e) {
 		return e
 	}
 	// First, we'll need to create the new buckets that are used in the new database
 	// version.
 	var scopeBucket walletdb.ReadWriteBucket
-	if scopeBucket, e = ns.CreateBucket(scopeBucketName); err.Chk(e) {
+	if scopeBucket, e = ns.CreateBucket(scopeBucketName); E.Chk(e) {
 		str := "failed to create scope bucket"
 		return managerError(ErrDatabase, str, e)
 	}
 	var scopeSchemas walletdb.ReadWriteBucket
-	if scopeSchemas, e = ns.CreateBucket(scopeSchemaBucketName); err.Chk(e) {
+	if scopeSchemas, e = ns.CreateBucket(scopeSchemaBucketName); E.Chk(e) {
 		str := "failed to create scope schema bucket"
 		return managerError(ErrDatabase, str, e)
 	}
@@ -2027,10 +2027,10 @@ func upgradeToVersion5(ns walletdb.ReadWriteBucket, pubPassPhrase []byte) (e err
 	scopeKey := scopeToBytes(&KeyScopeBIP0044)
 	scopeSchema := ScopeAddrMap[KeyScopeBIP0044]
 	schemaBytes := scopeSchemaToBytes(&scopeSchema)
-	if e = scopeSchemas.Put(scopeKey[:], schemaBytes); err.Chk(e) {
+	if e = scopeSchemas.Put(scopeKey[:], schemaBytes); E.Chk(e) {
 		return e
 	}
-	if e = createScopedManagerNS(scopeBucket, &KeyScopeBIP0044); err.Chk(e) {
+	if e = createScopedManagerNS(scopeBucket, &KeyScopeBIP0044); E.Chk(e) {
 		return e
 	}
 	bip44Bucket := scopeBucket.NestedReadWriteBucket(scopeKey[:])
@@ -2041,27 +2041,27 @@ func upgradeToVersion5(ns walletdb.ReadWriteBucket, pubPassPhrase []byte) (e err
 	// new sub-bucket.
 	encCoinPrivKeys := mainBucket.Get(coinTypePrivKeyName)
 	encCoinPubKeys := mainBucket.Get(coinTypePubKeyName)
-	if e = bip44Bucket.Put(coinTypePrivKeyName, encCoinPrivKeys); err.Chk(e) {
+	if e = bip44Bucket.Put(coinTypePrivKeyName, encCoinPrivKeys); E.Chk(e) {
 		return e
 	}
-	if e = bip44Bucket.Put(coinTypePubKeyName, encCoinPubKeys); err.Chk(e) {
+	if e = bip44Bucket.Put(coinTypePubKeyName, encCoinPubKeys); E.Chk(e) {
 		return e
 	}
-	if e = mainBucket.Delete(coinTypePrivKeyName); err.Chk(e) {
+	if e = mainBucket.Delete(coinTypePrivKeyName); E.Chk(e) {
 		return e
 	}
-	if e = mainBucket.Delete(coinTypePubKeyName); err.Chk(e) {
+	if e = mainBucket.Delete(coinTypePubKeyName); E.Chk(e) {
 		return e
 	}
 	// Next, we'll move over everything that was in the meta bucket to the meta
 	// bucket within the new scope.
 	metaBucket := ns.NestedReadWriteBucket(metaBucketName)
 	lastAccount := metaBucket.Get(lastAccountName)
-	if e = metaBucket.Delete(lastAccountName); err.Chk(e) {
+	if e = metaBucket.Delete(lastAccountName); E.Chk(e) {
 		return e
 	}
 	scopedMetaBucket := bip44Bucket.NestedReadWriteBucket(metaBucketName)
-	if e = scopedMetaBucket.Put(lastAccountName, lastAccount); err.Chk(e) {
+	if e = scopedMetaBucket.Put(lastAccountName, lastAccount); E.Chk(e) {
 		return e
 	}
 	// Finally, we'll recursively move over a set of keys which were formerly under
@@ -2074,7 +2074,7 @@ func upgradeToVersion5(ns walletdb.ReadWriteBucket, pubPassPhrase []byte) (e err
 	}
 	// Migrate each bucket recursively.
 	for _, bucketKey := range keysToMigrate {
-		if e = migrateRecursively(ns, bip44Bucket, bucketKey); err.Chk(e) {
+		if e = migrateRecursively(ns, bip44Bucket, bucketKey); E.Chk(e) {
 			return e
 		}
 	}
@@ -2090,7 +2090,7 @@ func migrateRecursively(
 	// Within this bucket key, we'll migrate over, then delete each key.
 	bucketToMigrate := src.NestedReadWriteBucket(bucketKey)
 	var newBucket walletdb.ReadWriteBucket
-	if newBucket, e = dst.CreateBucketIfNotExists(bucketKey); err.Chk(e) {
+	if newBucket, e = dst.CreateBucketIfNotExists(bucketKey); E.Chk(e) {
 		return e
 	}
 	if e = bucketToMigrate.ForEach(
@@ -2100,16 +2100,16 @@ func migrateRecursively(
 				// We have a nested bucket, so recurse into it.
 				return migrateRecursively(bucketToMigrate, newBucket, k)
 			}
-			if e := newBucket.Put(k, v); err.Chk(e) {
+			if e := newBucket.Put(k, v); E.Chk(e) {
 				return e
 			}
 			return bucketToMigrate.Delete(k)
 		},
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return e
 	}
 	// Finally, we'll delete the bucket itself.
-	if e = src.DeleteNestedBucket(bucketKey); err.Chk(e) {
+	if e = src.DeleteNestedBucket(bucketKey); E.Chk(e) {
 		return e
 	}
 	return nil

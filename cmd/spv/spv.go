@@ -9,22 +9,22 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 type (
@@ -181,7 +181,7 @@ var (
 	// MaxPeers is the maximum number of connections the client maintains.
 	MaxPeers = 125
 	// RequiredServices describes the services that are required to be supported by outbound peers.
-	RequiredServices = wire.SFNodeNetwork |/* wire.SFNodeWitness |*/ wire.SFNodeCF
+	RequiredServices = wire.SFNodeNetwork | /* wire.SFNodeWitness |*/ wire.SFNodeCF
 	// Services describes the services that are supported by the server.
 	Services = /*wire.SFNodeWitness |*/ wire.SFNodeCF
 	// TargetOutbound is the number of outbound peers to target.
@@ -259,7 +259,7 @@ func (s *ChainService) GetBlockHash(height int64) (*chainhash.Hash, error) {
 // unknown.
 func (s *ChainService) GetBlockHeader(
 	blockHash *chainhash.Hash,
-) (header *wire.BlockHeader,e error) {
+) (header *wire.BlockHeader, e error) {
 	header, _, e = s.BlockHeaders.FetchHeader(blockHash)
 	return header, e
 }
@@ -378,7 +378,7 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 	}
 	// Ignore new peers if we're shutting down.
 	if atomic.LoadInt32(&s.shutdown) != 0 {
-		inf.F("new peer %s ignored - server is shutting down", sp)
+		I.F("new peer %s ignored - server is shutting down", sp)
 		sp.Disconnect()
 		return false
 	}
@@ -387,27 +387,27 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 	var e error
 	host, _, e = net.SplitHostPort(sp.Addr())
 	if e != nil {
-		dbg.Ln("can't split host/port:", err)
+		D.Ln("can't split host/port:", e)
 		sp.Disconnect()
 		return false
 	}
 	if banEnd, ok := state.banned[host]; ok {
 		if time.Now().Before(banEnd) {
-			dbg.F(
+			D.F(
 				"peer %s is banned for another %v - disconnecting %s",
 				host, time.Until(banEnd),
 			)
 			sp.Disconnect()
 			return false
 		}
-		inf.F(
+		I.F(
 			"peer %s is no longer banned", host,
 		)
 		delete(state.banned, host)
 	}
 	// TODO: Chk for max peers from a single IP. Limit max number of total peers.
 	if state.Count() >= MaxPeers {
-		inf.F(
+		I.F(
 			"max peers reached [%d] - disconnecting peer %s",
 			MaxPeers, sp,
 		)
@@ -416,7 +416,7 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 		return false
 	}
 	// Add the new peer and start it.
-	dbg.Ln("new peer", sp)
+	D.Ln("new peer", sp)
 	state.outboundGroups[addrmgr.GroupKey(sp.NA())]++
 	if sp.persistent {
 		state.persistentPeers[sp.ID()] = sp
@@ -432,10 +432,10 @@ func (s *ChainService) handleBanPeerMsg(state *peerState, sp *ServerPeer) {
 	var e error
 	host, _, e = net.SplitHostPort(sp.Addr())
 	if e != nil {
-		dbg.F("can't split ban peer %s: %s %s", sp.Addr(), err)
+		D.F("can't split ban peer %s: %s %s", sp.Addr(), e)
 		return
 	}
-	inf.F("banned peer %s for %v", host, BanDuration)
+	I.F("banned peer %s for %v", host, BanDuration)
 	state.banned[host] = time.Now().Add(BanDuration)
 }
 
@@ -455,7 +455,7 @@ func (s *ChainService) handleDonePeerMsg(state *peerState, sp *ServerPeer) {
 			s.connManager.Disconnect(sp.connReq.ID())
 		}
 		delete(list, sp.ID())
-		dbg.Ln("removed peer", sp)
+		D.Ln("removed peer", sp)
 		return
 	}
 	if sp.connReq != nil {
@@ -499,7 +499,7 @@ func (s *ChainService) outboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) 
 	sp := newServerPeer(s, c.Permanent)
 	p, e := peer.NewOutboundPeer(newPeerConfig(sp), c.Addr.String())
 	if e != nil {
-		dbg.F("cannot create outbound peer %s: %s %s", c.Addr, err)
+		D.F("cannot create outbound peer %s: %s %s", c.Addr, e)
 		s.connManager.Disconnect(c.ID())
 	}
 	sp.Peer = p
@@ -531,7 +531,7 @@ func (s *ChainService) peerHandler() {
 	s.blockManager.Start()
 	e := s.utxoScanner.Start()
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	state := &peerState{
 		persistentPeers: make(map[int32]*ServerPeer),
@@ -573,7 +573,7 @@ out:
 			// Disconnect all peers on server shutdown.
 			state.forAllPeers(
 				func(sp *ServerPeer) {
-					trc.Ln("shutdown peer", sp)
+					F.Ln("shutdown peer", sp)
 					sp.Disconnect()
 				},
 			)
@@ -583,15 +583,15 @@ out:
 	s.connManager.Stop()
 	e = s.utxoScanner.Stop()
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	e = s.blockManager.Stop()
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	e = s.addrManager.Stop()
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	// Drain channels before exiting so nothing is left waiting around to send.
 cleanup:
@@ -680,7 +680,7 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 	}
 	// A message that has no addresses is invalid.
 	if len(msg.AddrList) == 0 {
-		err.F(
+		E.F(
 			"command [%s] from %s does not contain any addresses",
 			msg.Command(), sp.Addr(),
 		)
@@ -713,7 +713,7 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 	// Chk that the passed minimum fee is a valid amount.
 	if msg.MinFee < 0 || msg.MinFee > int64(util.MaxSatoshi) {
-		dbg.F(
+		D.F(
 			"peer %v sent an invalid feefilter '%v' -- disconnecting %s",
 			sp, util.Amount(msg.MinFee),
 		)
@@ -725,7 +725,7 @@ func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 
 // OnHeaders is invoked when a peer receives a headers bitcoin message. The message is passed down to the block manager.
 func (sp *ServerPeer) OnHeaders(p *peer.Peer, msg *wire.MsgHeaders) {
-	trc.F(
+	T.F(
 		"got headers with %d items from %s",
 		len(msg.Headers), p.Addr(),
 	)
@@ -736,18 +736,18 @@ func (sp *ServerPeer) OnHeaders(p *peer.Peer, msg *wire.MsgHeaders) {
 // the remote peer and react accordingly. We pass the message down to blockmanager which will call QueueMessage with any
 // appropriate responses.
 func (sp *ServerPeer) OnInv(p *peer.Peer, msg *wire.MsgInv) {
-	trc.F(
+	T.F(
 		"got inv with %d items from %s", len(msg.InvList), p.Addr(),
 	)
 	newInv := wire.NewMsgInvSizeHint(uint(len(msg.InvList)))
 	for _, invVect := range msg.InvList {
 		if invVect.Type == wire.InvTypeTx {
-			trc.F(
+			T.F(
 				"ignoring tx %s in inv from %v -- SPV mode",
 				invVect.Hash, sp,
 			)
 			if sp.ProtocolVersion() >= wire.BIP0037Version {
-				inf.F(
+				I.F(
 					"peer %v is announcing transactions -- disconnecting", sp,
 				)
 				sp.Disconnect()
@@ -757,7 +757,7 @@ func (sp *ServerPeer) OnInv(p *peer.Peer, msg *wire.MsgInv) {
 		}
 		e := newInv.AddInvVect(invVect)
 		if e != nil {
-			err.Ln("failed to add inventory vector:", err)
+			E.Ln("failed to add inventory vector:", e)
 			break
 		}
 	}
@@ -800,7 +800,7 @@ func (sp *ServerPeer) OnReject(_ *peer.Peer, msg *wire.MsgReject) {
 func (sp *ServerPeer) OnVerAck(_ *peer.Peer, msg *wire.MsgVerAck) {
 	e := sp.pushSendHeadersMsg()
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 }
 
@@ -814,8 +814,8 @@ func (sp *ServerPeer) OnVersion(_ *peer.Peer, msg *wire.MsgVersion) *wire.MsgRej
 	// then we'll disconnect so we can find compatible peers.
 	peerServices := sp.Services()
 	// if peerServices&wire.SFNodeWitness != wire.SFNodeWitness ||
-	if	peerServices&wire.SFNodeCF != wire.SFNodeCF {
-		inf.F(
+	if peerServices&wire.SFNodeCF != wire.SFNodeCF {
+		I.F(
 			"disconnecting peer %v, cannot serve compact filters", sp,
 		)
 		sp.Disconnect()

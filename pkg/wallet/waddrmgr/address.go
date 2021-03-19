@@ -126,7 +126,7 @@ func (a *managedAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	if len(a.privKeyCT) == 0 {
 		var e error
 		var privKey []byte
-		if privKey, e = key.Decrypt(a.privKeyEncrypted); err.Chk(e) {
+		if privKey, e = key.Decrypt(a.privKeyEncrypted); E.Chk(e) {
 			str := fmt.Sprintf("failed to decrypt private key for %s", a.address)
 			return nil, managerError(ErrCrypto, str, e)
 		}
@@ -259,7 +259,7 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 	// key could be invalidated from under the caller.
 	var privKeyCopy []byte
 	var e error
-	if privKeyCopy, e = a.unlock(a.manager.rootManager.cryptoKeyPriv); err.Chk(e) {
+	if privKeyCopy, e = a.unlock(a.manager.rootManager.cryptoKeyPriv); E.Chk(e) {
 		return nil, e
 	}
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), privKeyCopy)
@@ -274,7 +274,7 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 func (a *managedAddress) ExportPrivKey() (*util.WIF, error) {
 	var pk *ec.PrivateKey
 	var e error
-	if pk, e = a.PrivKey(); err.Chk(e) {
+	if pk, e = a.PrivKey(); E.Chk(e) {
 		return nil, e
 	}
 	return util.NewWIF(pk, a.manager.rootManager.chainParams, a.compressed)
@@ -326,13 +326,13 @@ func newManagedAddressWithoutPrivKey(
 	// var witAddr *util.AddressWitnessPubKeyHash
 	// if witAddr, e = util.NewAddressWitnessPubKeyHash(
 	// 	pubKeyHash, m.rootManager.chainParams,
-	// ); err.Chk(e) {
+	// ); E.Chk(e) {
 	// 	return nil, e
 	// }
 	// // Next we'll generate the witness program which can be used as a pkScript to
 	// // pay to this generated address.
 	// var witnessProgram []byte
-	// if witnessProgram, e = txscript.PayToAddrScript(witAddr); err.Chk(e) {
+	// if witnessProgram, e = txscript.PayToAddrScript(witAddr); E.Chk(e) {
 	// 	return nil, e
 	// }
 	// // Finally, we'll use the witness program itself as the pre-image to a p2sh
@@ -340,19 +340,19 @@ func newManagedAddressWithoutPrivKey(
 	// // then present the proper <sig, pubkey> pair as the witness.
 	// if address, e = util.NewAddressScriptHash(
 	// 	witnessProgram, m.rootManager.chainParams,
-	// ); err.Chk(e) {
+	// ); E.Chk(e) {
 	// 	return nil, e
 	// }
 	case PubKeyHash:
 		if address, e = util.NewAddressPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
-		); err.Chk(e) {
+		); E.Chk(e) {
 			return nil, e
 		}
 	// case WitnessPubKey:
 	// 	if address, e = util.NewAddressWitnessPubKeyHash(
 	// 		pubKeyHash, m.rootManager.chainParams,
-	// 	); err.Chk(e) {
+	// 	); E.Chk(e) {
 	// 		return nil, e
 	// 	}
 	}
@@ -385,7 +385,7 @@ func newManagedAddress(
 	privKeyBytes := privKey.Serialize()
 	var privKeyEncrypted []byte
 	var e error
-	if privKeyEncrypted, e = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes); err.Chk(e) {
+	if privKeyEncrypted, e = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes); E.Chk(e) {
 		str := "failed to encrypt private key"
 		return nil, managerError(ErrCrypto, str, e)
 	}
@@ -399,7 +399,7 @@ func newManagedAddress(
 		ecPubKey,
 		compressed,
 		addrType,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return nil, e
 	}
 	managedAddr.privKeyEncrypted = privKeyEncrypted
@@ -419,24 +419,24 @@ func newManagedAddressFromExtKey(
 	// whether the generated key is private.
 	if key.IsPrivate() {
 		var privKey *ec.PrivateKey
-		if privKey, e = key.ECPrivKey(); err.Chk(e) {
+		if privKey, e = key.ECPrivKey(); E.Chk(e) {
 			return nil, e
 		}
 		// Ensure the temp private key big integer is cleared after use.
 		if managedAddr, e = newManagedAddress(
 			s, derivationPath, privKey, true, addrType,
-		); err.Chk(e) {
+		); E.Chk(e) {
 			return nil, e
 		}
 	} else {
 		var pubKey *ec.PublicKey
-		if pubKey, e = key.ECPubKey(); err.Chk(e) {
+		if pubKey, e = key.ECPubKey(); E.Chk(e) {
 			return nil, e
 		}
 		if managedAddr, e = newManagedAddressWithoutPrivKey(
 			s, derivationPath, pubKey, true,
 			addrType,
-		); err.Chk(e) {
+		); E.Chk(e) {
 			return nil, e
 		}
 	}
@@ -467,7 +467,7 @@ func (a *scriptAddress) unlock(key EncryptorDecryptor) (scriptCopy []byte, e err
 	defer a.scriptMutex.Unlock()
 	if len(a.scriptCT) == 0 {
 		var script []byte
-		if script, e = key.Decrypt(a.scriptEncrypted); err.Chk(e) {
+		if script, e = key.Decrypt(a.scriptEncrypted); E.Chk(e) {
 			str := fmt.Sprintf("failed to decrypt script for %s", a.address)
 			return nil, managerError(ErrCrypto, str, e)
 		}
@@ -577,7 +577,7 @@ func newScriptAddress(
 	var address *util.AddressScriptHash
 	if address, e = util.NewAddressScriptHashFromHash(
 		scriptHash, m.rootManager.chainParams,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return nil, e
 	}
 	return &scriptAddress{

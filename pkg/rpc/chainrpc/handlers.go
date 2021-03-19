@@ -35,7 +35,7 @@ func HandleAddNode(s *Server, cmd interface{}, closeChan qu.C) (ifc interface{},
 	c, ok := cmd.(*btcjson.AddNodeCmd)
 	if !ok {
 		h, e := s.HelpCacher.RPCMethodHelp("addnode")
-		dbg.Ln(h, err)
+		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
 		}
@@ -61,7 +61,7 @@ func HandleAddNode(s *Server, cmd interface{}, closeChan qu.C) (ifc interface{},
 		}
 	}
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidParameter,
 			Message: e.Error(),
@@ -92,7 +92,7 @@ func HandleCreateRawTransaction(
 	c, ok := cmd.(*btcjson.CreateRawTransactionCmd)
 	if !ok {
 		h, e := s.HelpCacher.RPCMethodHelp("createrawtransaction")
-		dbg.Ln(h, err)
+		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
 		}
@@ -116,7 +116,7 @@ func HandleCreateRawTransaction(
 	for _, input := range c.Inputs {
 		txHash, e := chainhash.NewHashFromStr(input.Txid)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			return nil, DecodeHexError(input.Txid)
 		}
 		prevOut := wire.NewOutPoint(txHash, input.Vout)
@@ -139,7 +139,7 @@ func HandleCreateRawTransaction(
 		// Decode the provided address.
 		addr, e := util.DecodeAddress(encodedAddr, params)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCInvalidAddressOrKey,
 				Message: "Invalid address or key: " + e.Error(),
@@ -166,14 +166,14 @@ func HandleCreateRawTransaction(
 		// Create a new script which pays to the provided address.
 		pkScript, e := txscript.PayToAddrScript(addr)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			context := "Failed to generate pay-to-address script"
 			return nil, InternalRPCError(e.Error(), context)
 		}
 		// Convert the amount to satoshi.
 		satoshi, e := util.NewAmount(amount)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			context := "Failed to convert amount"
 			return nil, InternalRPCError(e.Error(), context)
 		}
@@ -189,7 +189,7 @@ func HandleCreateRawTransaction(
 	// nothing (nil) in the case of an error.
 	mtxHex, e := MessageToHex(mtx)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	return mtxHex, nil
@@ -206,7 +206,7 @@ func HandleDecodeRawTransaction(
 	c, ok := cmd.(*btcjson.DecodeRawTransactionCmd)
 	if !ok {
 		h, e := s.HelpCacher.RPCMethodHelp("decoderawtransaction")
-		dbg.Ln(h, err)
+		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
 		}
@@ -224,13 +224,13 @@ func HandleDecodeRawTransaction(
 	}
 	serializedTx, e := hex.DecodeString(hexStr)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, DecodeHexError(hexStr)
 	}
 	var mtx wire.MsgTx
 	e = mtx.Deserialize(bytes.NewReader(serializedTx))
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
 			Message: "TX decode failed: " + e.Error(),
@@ -258,7 +258,7 @@ func HandleDecodeScript(
 	c, ok := cmd.(*btcjson.DecodeScriptCmd)
 	if !ok {
 		h, e := s.HelpCacher.RPCMethodHelp("decodescript")
-		dbg.Ln(h, err)
+		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
 		}
@@ -276,7 +276,7 @@ func HandleDecodeScript(
 	}
 	script, e := hex.DecodeString(hexStr)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, DecodeHexError(hexStr)
 	}
 	// The disassembled string will contain [error] inline if the script doesn't fully parse, so ignore the error here.
@@ -294,7 +294,7 @@ func HandleDecodeScript(
 	// Convert the script itself to a pay-to-script-hash address.
 	p2sh, e := util.NewAddressScriptHash(script, s.Cfg.ChainParams)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		context := "Failed to convert script to pay-to-script-hash"
 		return nil, InternalRPCError(e.Error(), context)
 	}
@@ -322,7 +322,7 @@ func HandleEstimateFee(
 	c, ok := cmd.(*btcjson.EstimateFeeCmd)
 	if !ok {
 		h, e := s.HelpCacher.RPCMethodHelp("estimatefee")
-		dbg.Ln(h, err)
+		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
 		}
@@ -341,7 +341,7 @@ func HandleEstimateFee(
 	}
 	feeRate, e := s.Cfg.FeeEstimator.EstimateFee(uint32(c.NumBlocks))
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return -1.0, e
 	}
 	// Convert to satoshis per kb.
@@ -372,7 +372,7 @@ func HandleGenerate(
 			),
 		}
 	}
-	dbg.Ln("cpu miner stuff is missing here")
+	D.Ln("cpu miner stuff is missing here")
 	// Set the algorithm according to the port we were called on
 	// s.Cfg.CPUMiner.SetAlgo(s.Cfg.Algo)
 	// c := cmd.(*btcjson.GenerateCmd)
@@ -920,7 +920,7 @@ func HandleGetBlockTemplateLongPoll(
 	state.Lock()
 	// The state unlock is intentionally not deferred here since it needs to be manually unlocked before waiting for a
 	// notification about block template changes.
-	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); err.Chk(e) {
+	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); E.Chk(e) {
 		state.Unlock()
 		return nil, e
 	}
@@ -969,7 +969,7 @@ func HandleGetBlockTemplateLongPoll(
 	// Get the lastest block template
 	state.Lock()
 	defer state.Unlock()
-	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); err.Chk(e) {
+	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); E.Chk(e) {
 		return nil, e
 	}
 	// Include whether or not it is valid to submit work against the old block template depending on whether or not a
@@ -1010,7 +1010,7 @@ func HandleGetBlockTemplateProposal(
 		}
 	}
 	var msgBlock wire.MsgBlock
-	if e := msgBlock.Deserialize(bytes.NewReader(dataBytes)); err.Chk(e) {
+	if e := msgBlock.Deserialize(bytes.NewReader(dataBytes)); E.Chk(e) {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
 			Message: "block decode failed: " + e.Error(),
@@ -1023,17 +1023,17 @@ func HandleGetBlockTemplateProposal(
 	if !expectedPrevHash.IsEqual(prevHash) {
 		return "bad-prevblk", nil
 	}
-	if e := s.Cfg.Chain.CheckConnectBlockTemplate(block); err.Chk(e) {
+	if e := s.Cfg.Chain.CheckConnectBlockTemplate(block); E.Chk(e) {
 		if _, ok := e.(blockchain.RuleError); !ok {
-			errStr := fmt.Sprintf("failed to process block proposal: %v", err)
-			err.Ln(errStr)
+			errStr := fmt.Sprintf("failed to process block proposal: %v", e)
+			E.Ln(errStr)
 			
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCVerify,
 				Message: errStr,
 			}
 		}
-		inf.Ln("rejected block proposal:", err)
+		I.Ln("rejected block proposal:", e)
 		
 		return ChainErrToGBTErrString(e), nil
 	}
@@ -1114,7 +1114,7 @@ func HandleGetBlockTemplateRequest(
 	//
 	// Otherwise, the timestamp for the existing block template is updated (and possibly the difficulty on testnet per
 	// the consesus rules).
-	if e := workState.UpdateBlockTemplate(s, useCoinbaseValue); err.Chk(e) {
+	if e := workState.UpdateBlockTemplate(s, useCoinbaseValue); E.Chk(e) {
 		return nil, e
 	}
 	return workState.BlockTemplateResult(useCoinbaseValue, nil)
@@ -1150,14 +1150,14 @@ func HandleGetCFilter(s *Server, cmd interface{}, closeChan qu.C) (interface{}, 
 	}
 	filterBytes, e := s.Cfg.CfIndex.FilterByBlockHash(hash, c.FilterType)
 	if e != nil {
-		dbg.F("could not find committed filter for %v: %v", hash, err)
+		D.F("could not find committed filter for %v: %v", hash, e)
 		
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCBlockNotFound,
 			Message: "block not found",
 		}
 	}
-	trc.Ln("found committed filter for", hash)
+	F.Ln("found committed filter for", hash)
 	return hex.EncodeToString(filterBytes), nil
 }
 
@@ -1191,13 +1191,13 @@ func HandleGetCFilterHeader(s *Server, cmd interface{}, closeChan qu.C) (interfa
 	}
 	headerBytes, e := s.Cfg.CfIndex.FilterHeaderByBlockHash(hash, c.FilterType)
 	if len(headerBytes) > 0 {
-		dbg.Ln("found header of committed filter for", hash)
+		D.Ln("found header of committed filter for", hash)
 		
 	} else {
-		dbg.F(
+		D.F(
 			"could not find header of committed filter for %v: %v",
 			hash,
-			err,
+			e,
 		)
 		
 		return nil, &btcjson.RPCError{
@@ -1208,7 +1208,7 @@ func HandleGetCFilterHeader(s *Server, cmd interface{}, closeChan qu.C) (interfa
 	
 	e = hash.SetBytes(headerBytes)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 		
 	}
 	return hash.String(), nil
@@ -1247,7 +1247,7 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 	best := s.Cfg.Chain.BestSnapshot()
 	prev, e := s.Cfg.Chain.BlockByHash(&best.Hash)
 	if e != nil {
-		err.Ln("ERROR", err)
+		E.Ln("ERROR", e)
 		
 	}
 	var algo = prev.MsgBlock().Header.Version
@@ -1262,7 +1262,7 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 				ph := prev.MsgBlock().Header.PrevBlock
 				prev, e = s.Cfg.Chain.BlockByHash(&ph)
 				if e != nil {
-					err.Ln("ERROR", err)
+					E.Ln("ERROR", e)
 					
 				}
 				continue
@@ -1278,7 +1278,7 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 				ph := prev.MsgBlock().Header.PrevBlock
 				prev, e = s.Cfg.Chain.BlockByHash(&ph)
 				if e != nil {
-					err.Ln("ERROR", e)
+					E.Ln("ERROR", e)
 					
 				}
 				continue
@@ -1294,9 +1294,9 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 func HandleGetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{}, error) { // cpuminer
 	// generating := s.StateCfg.Miner != nil
 	// if generating {
-	//	dbg.Ln("miner is running internally")
+	//	D.Ln("miner is running internally")
 	// } else {
-	//	dbg.Ln("miner is not running")
+	//	D.Ln("miner is not running")
 	// }
 	// return nil, nil
 	// return s.Cfg.CPUMiner.IsMining(), nil
@@ -1310,7 +1310,7 @@ func HandleGetHashesPerSec(s *Server, cmd interface{}, closeChan qu.C) (interfac
 	// return int64(s.,
 	// Cfg.CPUMiner.HashesPerSecond()), nil
 	// TODO: finish this - needs generator for momentary rate (ewma)
-	dbg.Ln("miner hashes per second - multicast thing TODO")
+	D.Ln("miner hashes per second - multicast thing TODO")
 	// simple average for now
 	return int(s.Cfg.Hashrate.Load()), nil
 }
@@ -1576,7 +1576,7 @@ func HandleGetMiningInfo(
 			Difficulty = dScrypt
 		default:
 		}
-		dbg.Ln("missing generate stats in here")
+		D.Ln("missing generate stats in here")
 		ret = &btcjson.GetMiningInfoResult0{
 			Blocks:             int64(best.Height),
 			CurrentBlockSize:   best.BlockSize,
@@ -1628,7 +1628,7 @@ func HandleGetMiningInfo(
 			Difficulty = dSHA256D
 		default:
 		}
-		dbg.Ln("missing cpu miner stuff in here") // cpuminer
+		D.Ln("missing cpu miner stuff in here") // cpuminer
 		ret = &btcjson.GetMiningInfoResult{
 			Blocks:             int64(best.Height),
 			CurrentBlockSize:   best.BlockSize,
@@ -1719,7 +1719,7 @@ func HandleGetNetworkHashPS(s *Server, cmd interface{}, closeChan qu.C) (interfa
 	if startHeight < 0 {
 		startHeight = 0
 	}
-	trc.F(
+	T.F(
 		"calculating network hashes per second from %d to %d",
 		startHeight,
 		endHeight,
@@ -2496,11 +2496,11 @@ func HandleSendRawTransaction(
 		// going wrong, so log such. Otherwise, something really did go wrong, so log an actual error. In both cases, a
 		// JSON-RPC error is returned to the client with the deserialization error code (to match bitcoind behavior).
 		if _, ok := e.(mempool.RuleError); ok {
-			dbg.F("rejected transaction %v: %v", tx.Hash(), err)
+			D.F("rejected transaction %v: %v", tx.Hash(), e)
 			
 		} else {
-			err.F(
-				"failed to process transaction %v: %v", tx.Hash(), err,
+			E.F(
+				"failed to process transaction %v: %v", tx.Hash(), e,
 			)
 		}
 		return nil, &btcjson.RPCError{
@@ -2544,7 +2544,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	//	var h string
 	//	h, e = s.HelpCacher.RPCMethodHelp("setgenerate")
 	//	if e != nil  {
-	//		msg = err.err.Ln() + "\n\n"
+	//		msg = err.E.Ln() + "\n\n"
 	//	}
 	//	msg += h
 	//	return nil, &btcjson.RPCError{
@@ -2553,7 +2553,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	//		// "invalid subcommand for addnode",
 	//	}
 	// }
-	// dbg.S(c)
+	// D.S(c)
 	// // Disable generation regardless of the provided generate flag if the maximum number of threads (goroutines for our
 	// // purposes) is 0. Otherwise enable or disable it depending on the provided flag. l.ScriptError(*c.GenProcLimit,
 	// // c.Generate)
@@ -2568,7 +2568,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	//		generate = false
 	//	}
 	// }
-	// dbg.Ln("generating", generate, "threads", genProcLimit)
+	// D.Ln("generating", generate, "threads", genProcLimit)
 	// // if s.Cfg.CPUMiner.IsMining() {
 	// // 	// if s.cfg.CPUMiner.GetAlgo() != s.cfg.Algo {
 	// // 	s.Cfg.CPUMiner.Stop()
@@ -2593,14 +2593,14 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	// //*s.Config.Generate = generate
 	// //*s.Config.GenThreads = genProcLimit
 	// //if s.StateCfg.Miner != nil {
-	// //	dbg.Ln("stopping existing miner")
+	// //	D.Ln("stopping existing miner")
 	// //	consume.Kill(s.StateCfg.Miner)
 	// //	s.StateCfg.Miner = nil
 	// //}
-	// dbg.Ln("saving configuration")
+	// D.Ln("saving configuration")
 	// save.Pod(s.Config)
 	// //if *s.Config.Generate && *s.Config.GenThreads != 0 {
-	// //	dbg.Ln("starting miner")
+	// //	D.Ln("starting miner")
 	// //	args := []string{os.Args[0], "-D", *s.Config.DataDir}
 	// //	if *s.Config.KopachGUI {
 	// //		args = append(args, "--kopachgui")
@@ -2608,7 +2608,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	// //	args = append(args, "kopach")
 	// //	// args = apputil.PrependForWindows(args)
 	// //	s.StateCfg.Miner = consume.Log(s.Quit, func(ent *logg.Entry) (e error) {
-	// //		dbg.Ln(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
+	// //		D.Ln(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 	// //		return
 	// //	}, func(pkg string) (out bool) {
 	// //		return false
@@ -2681,7 +2681,7 @@ func HandleSubmitBlock(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	if e != nil {
 		return fmt.Sprintf("rejected: %s", e.Error()), nil
 	}
-	inf.F(
+	I.F(
 		"accepted block %s via submitblock", block.Hash(),
 	)
 	
@@ -2823,12 +2823,12 @@ func HandleVerifyMessage(s *Server, cmd interface{}, closeChan qu.C) (interface{
 	var buf bytes.Buffer
 	e = wire.WriteVarString(&buf, 0, "Bitcoin Signed Message:\n")
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 		
 	}
 	e = wire.WriteVarString(&buf, 0, c.Message)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 		
 	}
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())

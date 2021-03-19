@@ -123,7 +123,7 @@ type Alert struct {
 
 // Serialize encodes the alert to w using the alert protocol encoding format.
 func (alert *Alert) Serialize(w io.Writer, pver uint32) (e error) {
-	if e = writeElements(w, alert.Version, alert.RelayUntil, alert.Expiration, alert.ID, alert.Cancel); err.Chk(e) {
+	if e = writeElements(w, alert.Version, alert.RelayUntil, alert.Expiration, alert.ID, alert.Cancel); E.Chk(e) {
 		return
 	}
 	count := len(alert.SetCancel)
@@ -133,15 +133,15 @@ func (alert *Alert) Serialize(w io.Writer, pver uint32) (e error) {
 		)
 		return messageError("Alert.Serialize", str)
 	}
-	if e = WriteVarInt(w, pver, uint64(count)); err.Chk(e) {
+	if e = WriteVarInt(w, pver, uint64(count)); E.Chk(e) {
 		return
 	}
 	for i := 0; i < count; i++ {
-		if e = writeElement(w, alert.SetCancel[i]); err.Chk(e) {
+		if e = writeElement(w, alert.SetCancel[i]); E.Chk(e) {
 			return
 		}
 	}
-	if e = writeElements(w, alert.MinVer, alert.MaxVer); err.Chk(e) {
+	if e = writeElements(w, alert.MinVer, alert.MaxVer); E.Chk(e) {
 		return
 	}
 	count = len(alert.SetSubVer)
@@ -151,21 +151,21 @@ func (alert *Alert) Serialize(w io.Writer, pver uint32) (e error) {
 		)
 		return messageError("Alert.Serialize", str)
 	}
-	if e = WriteVarInt(w, pver, uint64(count)); err.Chk(e) {
+	if e = WriteVarInt(w, pver, uint64(count)); E.Chk(e) {
 		return
 	}
 	for i := 0; i < count; i++ {
-		if e = WriteVarString(w, pver, alert.SetSubVer[i]); err.Chk(e) {
+		if e = WriteVarString(w, pver, alert.SetSubVer[i]); E.Chk(e) {
 			return
 		}
 	}
-	if e = writeElement(w, alert.Priority); err.Chk(e) {
+	if e = writeElement(w, alert.Priority); E.Chk(e) {
 		return
 	}
-	if e = WriteVarString(w, pver, alert.Comment); err.Chk(e) {
+	if e = WriteVarString(w, pver, alert.Comment); E.Chk(e) {
 		return
 	}
-	if e = WriteVarString(w, pver, alert.StatusBar); err.Chk(e) {
+	if e = WriteVarString(w, pver, alert.StatusBar); E.Chk(e) {
 		return
 	}
 	return WriteVarString(w, pver, alert.Reserved)
@@ -176,13 +176,13 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) (e error) {
 	if e = readElements(
 		r, &alert.Version, &alert.RelayUntil,
 		&alert.Expiration, &alert.ID, &alert.Cancel,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return
 	}
 	// SetCancel: first read a VarInt that contains count - the number of Cancel
 	// IDs, then iterate count times and read them
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	if count > maxCountSetCancel {
@@ -194,15 +194,15 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) (e error) {
 	}
 	alert.SetCancel = make([]int32, count)
 	for i := 0; i < int(count); i++ {
-		if e = readElement(r, &alert.SetCancel[i]); err.Chk(e) {
+		if e = readElement(r, &alert.SetCancel[i]); E.Chk(e) {
 			return
 		}
 	}
-	if e = readElements(r, &alert.MinVer, &alert.MaxVer); err.Chk(e) {
+	if e = readElements(r, &alert.MinVer, &alert.MaxVer); E.Chk(e) {
 		return
 	}
 	// SetSubVer: similar to SetCancel but read count number of sub-version strings
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	if count > maxCountSetSubVer {
@@ -213,17 +213,17 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) (e error) {
 	}
 	alert.SetSubVer = make([]string, count)
 	for i := 0; i < int(count); i++ {
-		if alert.SetSubVer[i], e = ReadVarString(r, pver); err.Chk(e) {
+		if alert.SetSubVer[i], e = ReadVarString(r, pver); E.Chk(e) {
 			return
 		}
 	}
-	if e = readElement(r, &alert.Priority); err.Chk(e) {
+	if e = readElement(r, &alert.Priority); E.Chk(e) {
 		return
 	}
-	if alert.Comment, e = ReadVarString(r, pver); err.Chk(e) {
+	if alert.Comment, e = ReadVarString(r, pver); E.Chk(e) {
 		return
 	}
-	if alert.StatusBar, e = ReadVarString(r, pver); err.Chk(e) {
+	if alert.StatusBar, e = ReadVarString(r, pver); E.Chk(e) {
 		return
 	}
 	alert.Reserved, e = ReadVarString(r, pver)
@@ -258,7 +258,7 @@ func NewAlert(
 func NewAlertFromPayload(serializedPayload []byte, pver uint32) (a *Alert, e error) {
 	var alert Alert
 	r := bytes.NewReader(serializedPayload)
-	if e = alert.Deserialize(r, pver); err.Chk(e) {
+	if e = alert.Deserialize(r, pver); E.Chk(e) {
 		return
 	}
 	return &alert, nil
@@ -279,10 +279,10 @@ type MsgAlert struct {
 
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface implementation.
 func (msg *MsgAlert) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
-	if msg.SerializedPayload, e = ReadVarBytes(r, pver, MaxMessagePayload, "alert serialized payload"); err.Chk(e) {
+	if msg.SerializedPayload, e = ReadVarBytes(r, pver, MaxMessagePayload, "alert serialized payload"); E.Chk(e) {
 		return
 	}
-	if msg.Payload, e = NewAlertFromPayload(msg.SerializedPayload, pver); err.Chk(e) {
+	if msg.Payload, e = NewAlertFromPayload(msg.SerializedPayload, pver); E.Chk(e) {
 		msg.Payload = nil
 	}
 	msg.Signature, e = ReadVarBytes(
@@ -298,7 +298,7 @@ func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e
 	if msg.Payload != nil {
 		// try to Serialize Payload if possible
 		r := new(bytes.Buffer)
-		if e = msg.Payload.Serialize(r, pver); err.Chk(e) {
+		if e = msg.Payload.Serialize(r, pver); E.Chk(e) {
 			
 			// Serialize failed - ignore & fallback to SerializedPayload
 			serializedpayload = msg.SerializedPayload
@@ -312,7 +312,7 @@ func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e
 	if slen == 0 {
 		return messageError("MsgAlert.BtcEncode", "empty serialized payload")
 	}
-	if e = WriteVarBytes(w, pver, serializedpayload); err.Chk(e) {
+	if e = WriteVarBytes(w, pver, serializedpayload); E.Chk(e) {
 		
 		return
 	}

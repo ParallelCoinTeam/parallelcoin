@@ -50,7 +50,7 @@ func (wg *WalletGUI) HistoryPage() l.Widget {
 							// wg.H6(wg.openTxID.Load()).Fn,
 						).
 						Rigid(
-							 wg.lists["txdetail"].
+							wg.lists["txdetail"].
 								Vertical().
 								Length(len(out)).
 								ListElement(le).

@@ -19,7 +19,7 @@ func Call(cx *conte.Xt, wallet bool, method string, params ...interface{}) (resu
 		return
 	}
 	if usageFlags&unusableFlags != 0 {
-		err.F("The '%s' command can only be used via websockets\n", method)
+		E.F("The '%s' command can only be used via websockets\n", method)
 		// HelpPrint()
 		return
 	}
@@ -37,7 +37,7 @@ func Call(cx *conte.Xt, wallet bool, method string, params ...interface{}) (resu
 		}
 		// The error is not a json.BTCJSONError and this really should not happen. Nevertheless fall back to just
 		// showing the error if it should happen due to a bug in the package.
-		errText := fmt.Sprintf("%s command: %v\n", method, err)
+		errText := fmt.Sprintf("%s command: %v\n", method, e)
 		e = errors.New(errText)
 		// CommandUsage(method)
 		return

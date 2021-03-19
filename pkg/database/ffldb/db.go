@@ -168,7 +168,7 @@ var _ database.Cursor = (*cursor)(nil)
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Bucket() database.Bucket {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return nil
 	}
 	return c.bucket
@@ -187,7 +187,7 @@ func (c *cursor) Bucket() database.Bucket {
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Delete() (e error) {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// DBError if the cursor is exhausted.
@@ -270,7 +270,7 @@ func (c *cursor) chooseIterator(forwards bool) bool {
 // Cursor interface implementation.
 func (c *cursor) First() bool {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return false
 	}
 	// Seek to the first key in both the database and pending iterators and choose the iterator that is both valid and
@@ -286,7 +286,7 @@ func (c *cursor) First() bool {
 // Cursor interface implementation.
 func (c *cursor) Last() bool {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return false
 	}
 	// Seek to the last key in both the database and pending iterators and choose the iterator that is both valid and
@@ -302,7 +302,7 @@ func (c *cursor) Last() bool {
 // Cursor interface implementation.
 func (c *cursor) Next() bool {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return false
 	}
 	// Nothing to return if cursor is exhausted.
@@ -320,7 +320,7 @@ func (c *cursor) Next() bool {
 // Cursor interface implementation.
 func (c *cursor) Prev() bool {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return false
 	}
 	// Nothing to return if cursor is exhausted.
@@ -340,7 +340,7 @@ func (c *cursor) Prev() bool {
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Seek(seek []byte) bool {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return false
 	}
 	// Seek to the provided key in both the database and pending iterators then choose the iterator that is both valid
@@ -366,7 +366,7 @@ func (c *cursor) rawKey() []byte {
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Key() []byte {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return nil
 	}
 	// Nothing to return if cursor is exhausted.
@@ -402,7 +402,7 @@ func (c *cursor) rawValue() []byte {
 // This function is part of the database.Cursor interface implementation.
 func (c *cursor) Value() []byte {
 	// Ensure transaction state is valid.
-	if e := c.bucket.tx.checkClosed(); err.Chk(e) {
+	if e := c.bucket.tx.checkClosed(); E.Chk(e) {
 		return nil
 	}
 	// Nothing to return if cursor is exhausted.
@@ -540,7 +540,7 @@ func bucketizedKey(bucketID [4]byte, key []byte) []byte {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) Bucket(key []byte) database.Bucket {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return nil
 	}
 	// Attempt to fetch the ID for the child bucket. The bucket does not exist if the bucket index entry does not exist.
@@ -570,7 +570,7 @@ func (b *bucket) Bucket(key []byte) database.Bucket {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) CreateBucket(key []byte) (database.Bucket, error) {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return nil, e
 	}
 	// Ensure the transaction is writable.
@@ -602,7 +602,7 @@ func (b *bucket) CreateBucket(key []byte) (database.Bucket, error) {
 		}
 	}
 	// Add the new bucket to the bucket index.
-	if e := b.tx.putKey(bidxKey, childID[:]); err.Chk(e) {
+	if e := b.tx.putKey(bidxKey, childID[:]); E.Chk(e) {
 		str := fmt.Sprintf("failed to create bucket with key %q", key)
 		return nil, convertErr(str, e)
 	}
@@ -624,7 +624,7 @@ func (b *bucket) CreateBucket(key []byte) (database.Bucket, error) {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) CreateBucketIfNotExists(key []byte) (database.Bucket, error) {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return nil, e
 	}
 	// Ensure the transaction is writable.
@@ -652,7 +652,7 @@ func (b *bucket) CreateBucketIfNotExists(key []byte) (database.Bucket, error) {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) DeleteBucket(key []byte) (e error) {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// Ensure the transaction is writable.
@@ -709,7 +709,7 @@ func (b *bucket) DeleteBucket(key []byte) (e error) {
 // Bucket interface implementation.
 func (b *bucket) Cursor() database.Cursor {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return &cursor{bucket: b}
 	}
 	// Create the cursor and setup a runtime finalizer to ensure the iterators are released when the cursor is garbage
@@ -736,7 +736,7 @@ func (b *bucket) Cursor() database.Cursor {
 // interface implementation.
 func (b *bucket) ForEach(fn func(k, v []byte) error) (e error) {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// Invoke the callback for each cursor item.  Return the error returned from the callback when it is non-nil.
@@ -769,7 +769,7 @@ func (b *bucket) ForEach(fn func(k, v []byte) error) (e error) {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) ForEachBucket(fn func(k []byte) error) (e error) {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// Invoke the callback for each cursor item. Return the error returned from the callback when it is non-nil.
@@ -805,7 +805,7 @@ func (b *bucket) Writable() bool {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) Put(key, value []byte) (e error) {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// Ensure the transaction is writable.
@@ -833,7 +833,7 @@ func (b *bucket) Put(key, value []byte) (e error) {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) Get(key []byte) []byte {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return nil
 	}
 	// Nothing to return if there is no key.
@@ -857,7 +857,7 @@ func (b *bucket) Get(key []byte) []byte {
 // This function is part of the database.Bucket interface implementation.
 func (b *bucket) Delete(key []byte) (e error) {
 	// Ensure transaction state is valid.
-	if e := b.tx.checkClosed(); err.Chk(e) {
+	if e := b.tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// Ensure the transaction is writable.
@@ -1027,7 +1027,7 @@ func (tx *transaction) nextBucketID() ([4]byte, error) {
 	// Increment and update the current bucket ID and return it.
 	var nextBucketID [4]byte
 	binary.BigEndian.PutUint32(nextBucketID[:], curBucketNum+1)
-	if e := tx.putKey(curBucketIDKeyName, nextBucketID[:]); err.Chk(e) {
+	if e := tx.putKey(curBucketIDKeyName, nextBucketID[:]); E.Chk(e) {
 		return [4]byte{}, e
 	}
 	return nextBucketID, nil
@@ -1068,7 +1068,7 @@ func (tx *transaction) hasBlock(hash *chainhash.Hash) bool {
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) StoreBlock(block *u.Block) (e error) {
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// Ensure the transaction is writable.
@@ -1116,7 +1116,7 @@ func (tx *transaction) StoreBlock(block *u.Block) (e error) {
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) HasBlock(hash *chainhash.Hash) (bool, error) {
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return false, e
 	}
 	return tx.hasBlock(hash), nil
@@ -1131,7 +1131,7 @@ func (tx *transaction) HasBlock(hash *chainhash.Hash) (bool, error) {
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) HasBlocks(hashes []chainhash.Hash) ([]bool, error) {
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return nil, e
 	}
 	results := make([]bool, len(hashes))
@@ -1229,7 +1229,7 @@ func (tx *transaction) FetchBlockHeaders(hashes []chainhash.Hash) ([][]byte, err
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) FetchBlock(hash *chainhash.Hash) ([]byte, error) {
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return nil, e
 	}
 	// When the block is pending to be written on commit return the bytes from there.
@@ -1273,7 +1273,7 @@ func (tx *transaction) FetchBlock(hash *chainhash.Hash) ([]byte, error) {
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) FetchBlocks(hashes []chainhash.Hash) ([][]byte, error) {
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return nil, e
 	}
 	// NOTE: This could check for the existence of all blocks before loading any of them which would be faster in the
@@ -1343,7 +1343,7 @@ func (tx *transaction) fetchPendingRegion(region *database.BlockRegion) ([]byte,
 // implementation.
 func (tx *transaction) FetchBlockRegion(region *database.BlockRegion) ([]byte, error) {
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return nil, e
 	}
 	// When the block is pending to be written on commit return the bytes from there.
@@ -1410,7 +1410,7 @@ func (tx *transaction) FetchBlockRegion(region *database.BlockRegion) ([]byte, e
 // implementation.
 func (tx *transaction) FetchBlockRegions(regions []database.BlockRegion) ([][]byte, error) {
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return nil, e
 	}
 	// NOTE: This could check for the existence of all blocks before deserializing the locations and building up the
@@ -1543,7 +1543,7 @@ func (tx *transaction) writePendingAndCommit() (e error) {
 	}
 	// Update the metadata for the current write file and offset.
 	writeRow := serializeWriteRow(wc.curFileNum, wc.curOffset)
-	if e := tx.metaBucket.Put(writeLocKeyName, writeRow); err.Chk(e) {
+	if e := tx.metaBucket.Put(writeLocKeyName, writeRow); E.Chk(e) {
 		rollback()
 		return convertErr("failed to store write cursor", e)
 	}
@@ -1568,7 +1568,7 @@ func (tx *transaction) Commit() (e error) {
 		panic("managed transaction commit not allowed")
 	}
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// Regardless of whether the commit succeeds, the transaction is closed on return.
@@ -1592,7 +1592,7 @@ func (tx *transaction) Rollback() (e error) {
 		panic("managed transaction rollback not allowed")
 	}
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); err.Chk(e) {
+	if e := tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	tx.close()
@@ -1809,7 +1809,7 @@ func (db *db) Close() (e error) {
 func // fileExists reports whether the named file or directory exists.
 fileExists(name string) bool {
 	var e error
-	if _, e = os.Stat(name); err.Chk(e) {
+	if _, e = os.Stat(name); E.Chk(e) {
 		if os.IsNotExist(e) {
 			return false
 		}
@@ -1838,10 +1838,10 @@ func initDB(ldb *leveldb.DB) (e error) {
 	)
 	batch.Put(curBucketIDKeyName, blockIdxBucketID[:])
 	// Write everything as a single batch.
-	if e := ldb.Write(batch, nil); err.Chk(e) {
+	if e := ldb.Write(batch, nil); E.Chk(e) {
 		str := fmt.Sprintf(
 			"failed to initialize metadata database: %v",
-			err,
+			e,
 		)
 		return convertErr(str, e)
 	}

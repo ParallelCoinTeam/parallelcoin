@@ -45,7 +45,7 @@ func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
 	var nonce [NonceSize]byte
 	_, e := io.ReadFull(prng, nonce[:])
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	blob := secretbox.Seal(nil, in, &nonce, (*[keySize]byte)(ck))
@@ -79,7 +79,7 @@ func GenerateCryptoKey() (*CryptoKey, error) {
 	var key CryptoKey
 	_, e := io.ReadFull(prng, key[:])
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	return &key, nil
@@ -109,7 +109,7 @@ func (sk *SecretKey) deriveKey(password *[]byte) (e error) {
 		sk.Parameters.P,
 		len(sk.Key))
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	copy(sk.Key[:], key)
@@ -184,7 +184,7 @@ func (sk *SecretKey) Zero() {
 //
 // This should only be called after previously calling the Zero function or on an initial Unmarshal.
 func (sk *SecretKey) DeriveKey(password *[]byte) (e error) {
-	if e = sk.deriveKey(password); err.Chk(e) {
+	if e = sk.deriveKey(password); E.Chk(e) {
 		return
 	}
 	// verify password
@@ -216,13 +216,13 @@ func NewSecretKey(password *[]byte, N, r, p int) (sk *SecretKey, e error) {
 	sk.Parameters.P = p
 	_, e = io.ReadFull(prng, sk.Parameters.Salt[:])
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	// derive key
 	e = sk.deriveKey(password)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	// store digest

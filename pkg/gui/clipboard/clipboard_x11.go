@@ -73,11 +73,11 @@ func Set(text string) {
 	clipboardText = text
 	ssoc := xproto.SetSelectionOwnerChecked(X, win, clipboardAtom, xproto.TimeCurrentTime)
 	var e error
-	if e = ssoc.Check(); err.Chk(e) {
+	if e = ssoc.Check(); E.Chk(e) {
 		fmt.Fprintf(os.Stderr, "Error setting clipboard: %v", e)
 	}
 	ssoc = xproto.SetSelectionOwnerChecked(X, win, primaryAtom, xproto.TimeCurrentTime)
-	if e = ssoc.Check(); err.Chk(e) {
+	if e = ssoc.Check(); E.Chk(e) {
 		fmt.Fprintf(os.Stderr, "Error setting primary selection: %v", e)
 	}
 }
@@ -231,7 +231,7 @@ func sendSelectionNotify(ev xproto.SelectionRequestEvent) {
 	}
 	var e error
 	sec := xproto.SendEventChecked(X, false, ev.Requestor, 0, string(sn.Bytes()))
-	if e = sec.Check(); err.Chk(e) {
+	if e = sec.Check(); E.Chk(e) {
 		fmt.Fprintln(os.Stderr, e)
 	}
 }

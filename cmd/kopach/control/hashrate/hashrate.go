@@ -16,6 +16,7 @@ import (
 )
 
 var Magic = []byte{'h', 'a', 's', 1}
+
 //
 // type Container struct {
 // 	simplebuffer.Container
@@ -34,7 +35,7 @@ type Hashrate struct {
 func Get(count int32, version int32, height int32, id string) []byte {
 	nonce := make([]byte, 4)
 	var e error
-	if _, e = io.ReadFull(rand.Reader, nonce); err.Chk(e) {
+	if _, e = io.ReadFull(rand.Reader, nonce); E.Chk(e) {
 	}
 	hr := Hashrate{
 		Time:    time.Now(),
@@ -46,7 +47,7 @@ func Get(count int32, version int32, height int32, id string) []byte {
 		ID:      id,
 	}
 	srlz := gotiny.Marshal(&hr)
-	// dbg.S(srlz)
+	// D.S(srlz)
 	return srlz
 	// return Container{*simplebuffer.Serializers{
 	// 	Time.New().Put(time.Now()),
@@ -58,6 +59,7 @@ func Get(count int32, version int32, height int32, id string) []byte {
 	// 	String.New().Put(id),
 	// }.CreateContainer(Magic)}
 }
+
 //
 // // LoadContainer takes a message byte slice payload and loads it into a container
 // // ready to be decoded

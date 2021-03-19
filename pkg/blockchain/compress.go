@@ -254,7 +254,7 @@ func decompressScript(compressedPkScript []byte) []byte {
 		copy(compressedKey[1:], compressedPkScript[1:])
 		key, e := ec.ParsePubKey(compressedKey, ec.S256())
 		if e != nil {
-			err.Ln(err)
+			E.Ln(e)
 			return nil
 		}
 		pkScript := make([]byte, 67)

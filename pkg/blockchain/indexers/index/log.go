@@ -1,11 +1,11 @@
-package indexers
+package index
 
 import (
 	"github.com/p9c/pod/pkg/logg"
 )
 
 var subsystem = logg.AddLoggerSubsystem()
-var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
 
 func init() {
 	// to filter out this package, uncomment the following
@@ -15,28 +15,28 @@ func init() {
 	// var _ = logg.AddHighlightedSubsystem(subsystem)
 	
 	// these are here to test whether they are working
-	// ftl.Ln("ftl.Ln")
-	// err.Ln("err.Ln")
-	// wrn.Ln("wrn.Ln")
-	// inf.Ln("inf.Ln")
-	// dbg.Ln("dbg.Ln")
-	// trc.Ln("trc.Ln")
-	// ftl.F("%s", "ftl.F")
-	// err.F("%s", "err.F")
-	// wrn.F("%s", "wrn.F")
-	// inf.F("%s", "inf.F")
-	// dbg.F("%s", "dbg.F")
-	// trc.F("%s", "trc.F")
-	// ftl.C(func() string { return "ftl.C" })
-	// err.C(func() string { return "err.C" })
-	// wrn.C(func() string { return "wrn.C" })
-	// inf.C(func() string { return "inf.C" })
-	// dbg.C(func() string { return "dbg.C" })
-	// trc.C(func() string { return "trc.C" })
-	// ftl.C(func() string { return "ftl.C" })
-	// err.Chk(errors.New("err.Chk"))
-	// wrn.Chk(errors.New("wrn.Chk"))
-	// inf.Chk(errors.New("inf.Chk"))
-	// dbg.Chk(errors.New("dbg.Chk"))
-	// trc.Chk(errors.New("trc.Chk"))
+	// F.Ln("F.Ln")
+	// E.Ln("E.Ln")
+	// W.Ln("W.Ln")
+	// I.Ln("I.Ln")
+	// D.Ln("D.Ln")
+	// F.Ln("T.Ln")
+	// F.F("%s", "F.F")
+	// E.F("%s", "E.F")
+	// W.F("%s", "W.F")
+	// I.F("%s", "I.F")
+	// D.F("%s", "D.F")
+	// T.F("%s", "T.F")
+	// F.C(func() string { return "F.C" })
+	// E.C(func() string { return "E.C" })
+	// W.C(func() string { return "W.C" })
+	// I.C(func() string { return "I.C" })
+	// D.C(func() string { return "D.C" })
+	// T.C(func() string { return "T.C" })
+	// F.C(func() string { return "F.C" })
+	// E.Chk(errors.New("E.Chk"))
+	// W.Chk(errors.New("W.Chk"))
+	// I.Chk(errors.New("I.Chk"))
+	// D.Chk(errors.New("D.Chk"))
+	// T.Chk(errors.New("T.Chk"))
 }

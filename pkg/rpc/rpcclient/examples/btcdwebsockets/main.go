@@ -33,7 +33,7 @@ func main() {
 	podHomeDir := appdata.Dir("pod", false)
 	certs, e := ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
 	if e != nil  {
-		ftl.Ln(e)
+		F.Ln(e)
 	}
 	connCfg := &rpcclient.ConnConfig{
 		Host:         "localhost:11048",
@@ -44,17 +44,17 @@ func main() {
 	}
 	client, e := rpcclient.New(connCfg, &ntfnHandlers, qu.T())
 	if e != nil  {
-		ftl.Ln(e)
+		F.Ln(e)
 	}
 	// Register for block connect and disconnect notifications.
-	if e := client.NotifyBlocks(); err.Chk(e) {
-		ftl.Ln(e)
+	if e := client.NotifyBlocks(); E.Chk(e) {
+		F.Ln(e)
 	}
 	fmt.Println("NotifyBlocks: Registration Complete")
 	// Get the current block count.
 	blockCount, e := client.GetBlockCount()
 	if e != nil  {
-		ftl.Ln(e)
+		F.Ln(e)
 	}
 	log.Printf("Block count: %d", blockCount)
 	// For this example gracefully shutdown the client after 10 seconds. Ordinarily when to shutdown the client is

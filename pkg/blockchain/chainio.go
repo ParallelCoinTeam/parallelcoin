@@ -299,7 +299,7 @@ func decodeSpentTxOut(serialized []byte, stxo *SpentTxOut) (int, error) {
 	if e != nil {
 		return offset, errDeserialize(
 			fmt.Sprint(
-				"unable to decode txout: ", err,
+				"unable to decode txout: ", e,
 			),
 		)
 	}
@@ -350,7 +350,7 @@ func deserializeSpendJournalEntry(serialized []byte, txns []*wire.MsgTx) ([]Spen
 				return nil, errDeserialize(
 					fmt.Sprintf(
 						"unable to decode stxo for %v: %v",
-						txIn.PreviousOutPoint, err,
+						txIn.PreviousOutPoint, e,
 					),
 				)
 			}
@@ -399,7 +399,7 @@ func dbFetchSpendJournalEntry(dbTx database.Tx, block *util.Block) ([]SpentTxOut
 				ErrorCode: database.ErrCorruption,
 				Description: fmt.Sprintf(
 					"corrupt spend information for %v: %v",
-					block.Hash(), err,
+					block.Hash(), e,
 				),
 			}
 		}
@@ -649,7 +649,7 @@ func dbFetchUtxoEntry(dbTx database.Tx, outpoint wire.OutPoint) (*UtxoEntry, err
 				ErrorCode: database.ErrCorruption,
 				Description: fmt.Sprintf(
 					"corrupt utxo entry for %v: %v",
-					outpoint, err,
+					outpoint, e,
 				),
 			}
 		}
@@ -716,7 +716,7 @@ func dbPutBlockIndex(dbTx database.Tx, hash *chainhash.Hash, height int32) (e er
 	// Add the block hash to height mapping to the index.
 	meta := dbTx.Metadata()
 	hashIndex := meta.Bucket(hashIndexBucketName)
-	if e := hashIndex.Put(hash[:], serializedHeight[:]); err.Chk(e) {
+	if e := hashIndex.Put(hash[:], serializedHeight[:]); E.Chk(e) {
 		return e
 	}
 	// Add the block height to hash mapping to the index.
@@ -730,7 +730,7 @@ func dbRemoveBlockIndex(dbTx database.Tx, hash *chainhash.Hash, height int32) (e
 	// Remove the block hash to height mapping.
 	meta := dbTx.Metadata()
 	hashIndex := meta.Bucket(hashIndexBucketName)
-	if e := hashIndex.Delete(hash[:]); err.Chk(e) {
+	if e := hashIndex.Delete(hash[:]); E.Chk(e) {
 		return e
 	}
 	// Remove the block height to hash mapping.
@@ -997,7 +997,7 @@ func (b *BlockChain) initChainState() (e error) {
 			// been initialized for use with chain yet, so break out now to allow that to happen under a writable database
 			// transaction.
 			serializedData := dbTx.Metadata().Get(chainStateKeyName)
-			trc.F("serialized chain state: %0x", serializedData)
+			T.F("serialized chain state: %0x", serializedData)
 			state, e := deserializeBestChainState(serializedData)
 			if e != nil {
 				return e
@@ -1005,7 +1005,7 @@ func (b *BlockChain) initChainState() (e error) {
 			// Load all of the headers from the data for the known best chain and construct the block index accordingly.
 			// Since the number of nodes are already known, perform a single alloc for them versus a whole bunch of little
 			// ones to reduce pressure on the GC.
-			trc.Ln("loading block index...")
+			F.Ln("loading block index...")
 			blockIndexBucket := dbTx.Metadata().Bucket(blockIndexBucketName)
 			// Determine how many blocks will be loaded into the index so we can allocate the right amount.
 			var blockCount int32
@@ -1087,7 +1087,7 @@ func (b *BlockChain) initChainState() (e error) {
 				// If this isn't already marked as valid in the index, then we'll mark it as valid now to ensure consistency
 				// once we 're up and running.
 				if !iterNode.status.KnownValid() {
-					inf.F(
+					I.F(
 						"Block %v (height=%v) ancestor of chain tip not"+
 							" marked as valid, upgrading to valid for consistency",
 						iterNode.hash, iterNode.height,

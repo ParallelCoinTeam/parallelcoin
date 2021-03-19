@@ -49,7 +49,7 @@ func TestAddDuplicateDriver(t *testing.T) {
 		t.Errorf("failed to create database: %v", err)
 		return
 	}
-	if e := db.Close(); walletdb.err.Chk(e) {
+	if e := db.Close(); walletdb.E.Chk(e) {
 	}
 	_ = os.Remove(dbPath)
 }

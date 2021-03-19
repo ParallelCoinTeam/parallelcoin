@@ -30,11 +30,11 @@ func ExampleBlockChain_ProcessBlock() {
 		return
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); blockchain.err.Chk(e) {
+		if e := os.RemoveAll(dbPath); blockchain.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); blockchain.err.Chk(e) {
+		if e := db.Close(); blockchain.E.Chk(e) {
 		}
 	}()
 	// Create a new BlockChain instance using the underlying database for the main bitcoin network. This example does

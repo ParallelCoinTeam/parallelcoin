@@ -3,7 +3,7 @@ package spv
 import (
 	"fmt"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/blockchain/wire"
 )
@@ -15,7 +15,7 @@ type (
 		header  *wire.BlockHeader
 		msgType messageType
 	}
-
+	
 	// blockSubscription allows a client to subscribe to and unsubscribe from block connect and disconnect
 	// notifications.
 	//
@@ -28,7 +28,7 @@ type (
 		notifyBlock    chan *blockMessage
 		intQuit        qu.C
 	}
-
+	
 	// messageType describes the type of blockMessage.
 	messageType int
 )
@@ -59,9 +59,11 @@ func (s *ChainService) sendSubscribedMsg(bm *blockMessage) {
 // caller if they're behind the current best tip.
 //
 // TODO(aakselrod): move this to its own package and refactor so that we're not modifying an object held by the caller.
-func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
+func (s *ChainService) subscribeBlockMsg(
+	bestHeight uint32, onConnectBasic,
 	onDisconnect chan<- wire.BlockHeader,
-	quit <-chan struct{}) (*blockSubscription, error) {
+	quit <-chan struct{},
+) (*blockSubscription, error) {
 	subscription := blockSubscription{
 		onConnectBasic: onConnectBasic,
 		onDisconnect:   onDisconnect,
@@ -71,44 +73,48 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 	}
 	// At this point, we'll now check to see if we need to deliver any backlog notifications as its possible that while
 	// the caller is requesting right after a new set of blocks has been connected.
-	e := s.blockManager.SynchronizeFilterHeaders(func(filterHeaderTip uint32) (e error) {
-		s.mtxSubscribers.Lock()
-		defer s.mtxSubscribers.Unlock()
-		s.blockSubscribers[&subscription] = struct{}{}
-		go subscription.subscriptionHandler()
-		// If the best height matches the filter header tip, then we're done and don't need to proceed any further.
-		if filterHeaderTip == bestHeight {
-			return nil
-		}
-		dbg.F(
-			"delivering backlog block notifications from height=%v, to height=%v",
-			bestHeight, filterHeaderTip,
-		)
-		// Otherwise, we need to read block headers from disk to deliver a backlog to the caller before we proceed.
-		//
-		// We'll use this synchronization method to ensure the filter header state doesn't change until we're finished
-		// catching up the caller.
-		for currentHeight := bestHeight + 1; currentHeight <=
-			filterHeaderTip; currentHeight++ {
-			blockHeader, e := s.BlockHeaders.FetchHeaderByHeight(
-				currentHeight,
+	e := s.blockManager.SynchronizeFilterHeaders(
+		func(filterHeaderTip uint32) (e error) {
+			s.mtxSubscribers.Lock()
+			defer s.mtxSubscribers.Unlock()
+			s.blockSubscribers[&subscription] = struct{}{}
+			go subscription.subscriptionHandler()
+			// If the best height matches the filter header tip, then we're done and don't need to proceed any further.
+			if filterHeaderTip == bestHeight {
+				return nil
+			}
+			D.F(
+				"delivering backlog block notifications from height=%v, to height=%v",
+				bestHeight, filterHeaderTip,
 			)
-			if e != nil  {
-				err.Ln(e)
-				return fmt.Errorf(
-					"unable to read header at height: %v: %v",
-					currentHeight, err,
+			// Otherwise, we need to read block headers from disk to deliver a backlog to the caller before we proceed.
+			//
+			// We'll use this synchronization method to ensure the filter header state doesn't change until we're finished
+			// catching up the caller.
+			for currentHeight := bestHeight + 1; currentHeight <=
+				filterHeaderTip; currentHeight++ {
+				blockHeader, e := s.BlockHeaders.FetchHeaderByHeight(
+					currentHeight,
+				)
+				if e != nil {
+					E.Ln(e)
+					return fmt.Errorf(
+						"unable to read header at height: %v: %v",
+						currentHeight, e,
+					)
+				}
+				sendMsgToSubscriber(
+					&subscription, &blockMessage{
+						msgType: connectBasic,
+						header:  blockHeader,
+					},
 				)
 			}
-			sendMsgToSubscriber(&subscription, &blockMessage{
-				msgType: connectBasic,
-				header:  blockHeader,
-			})
-		}
-		return nil
-	})
-	if e != nil  {
-		err.Ln(e)
+			return nil
+		},
+	)
+	if e != nil {
+		E.Ln(e)
 		return nil, e
 	}
 	return &subscription, nil

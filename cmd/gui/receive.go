@@ -156,8 +156,8 @@ func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget
 								wg.State.receiveAddresses[i].Amount.ToDUO(),
 								msg,
 							)
-							dbg.Ln("clicked receive address list item", j)
-							if e := clipboard.WriteAll(qrText); err.Chk(e) {
+							D.Ln("clicked receive address list item", j)
+							if e := clipboard.WriteAll(qrText); E.Chk(e) {
 							}
 							wg.GetNewReceivingQRCode(qrText)
 							rp.urn = qrText
@@ -225,8 +225,8 @@ func (rp *ReceivePage) QRButton() l.Widget {
 			wg.ButtonLayout(
 				wg.currentReceiveCopyClickable.SetClick(
 					func() {
-						dbg.Ln("clicked qr code copy clicker")
-						if e := clipboard.WriteAll(rp.urn); err.Chk(e) {
+						D.Ln("clicked qr code copy clicker")
+						if e := clipboard.WriteAll(rp.urn); E.Chk(e) {
 						}
 					},
 				),
@@ -281,15 +281,15 @@ func (rp *ReceivePage) RegenerateButton() l.Widget {
 			wg.currentReceiveRegenClickable.
 				SetClick(
 					func() {
-						dbg.Ln("clicked regenerate button")
+						D.Ln("clicked regenerate button")
 						var amt float64
 						var am util.Amount
 						var e error
 						if amt, e = strconv.ParseFloat(
 							wg.inputs["receiveAmount"].GetText(),
 							64,
-						); !err.Chk(e) {
-							if am, e = util.NewAmount(amt); err.Chk(e) {
+						); !E.Chk(e) {
+							if am, e = util.NewAmount(amt); E.Chk(e) {
 							}
 						}
 						msg := wg.inputs["receiveMessage"].GetText()

@@ -98,22 +98,22 @@ func TestGCSFilterCopy(t *testing.T) {
 // TestGCSFilterMetadata checks that the filter metadata is built and copied correctly.
 func TestGCSFilterMetadata(t *testing.T) {
 	if filter.P() != P {
-		t.ftl.Ln("P not correctly stored in filter metadata")
+		t.F.Ln("P not correctly stored in filter metadata")
 	}
 	if filter.N() != uint32(len(contents)) {
-		t.ftl.Ln("N not correctly stored in filter metadata")
+		t.F.Ln("N not correctly stored in filter metadata")
 	}
 	if filter.P() != filter2.P() {
-		t.ftl.Ln("P doesn't match between copied filters")
+		t.F.Ln("P doesn't match between copied filters")
 	}
 	if filter.P() != filter3.P() {
-		t.ftl.Ln("P doesn't match between copied filters")
+		t.F.Ln("P doesn't match between copied filters")
 	}
 	if filter.N() != filter2.N() {
-		t.ftl.Ln("N doesn't match between copied filters")
+		t.F.Ln("N doesn't match between copied filters")
 	}
 	if filter.N() != filter3.N() {
-		t.ftl.Ln("N doesn't match between copied filters")
+		t.F.Ln("N doesn't match between copied filters")
 	}
 	serialized, e := filter.Bytes()
 	if e != nil  {
@@ -124,21 +124,21 @@ func TestGCSFilterMetadata(t *testing.T) {
 		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized2) {
-		t.ftl.Ln("Hash don't match between copied filters")
+		t.F.Ln("Hash don't match between copied filters")
 	}
 	serialized3, e := filter3.Bytes()
 	if e != nil  {
 		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized3) {
-		t.ftl.Ln("Hash don't match between copied filters")
+		t.F.Ln("Hash don't match between copied filters")
 	}
 	serialized4, e := filter3.Bytes()
 	if e != nil  {
 		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized4) {
-		t.ftl.Ln("Hash don't match between copied filters")
+		t.F.Ln("Hash don't match between copied filters")
 	}
 }
 
@@ -150,28 +150,28 @@ func TestGCSFilterMatch(t *testing.T) {
 		t.Fatalf("Filter match failed: %s", err.Error())
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match when it should have!")
+		t.F.Ln("Filter didn't match when it should have!")
 	}
 	match, e = filter2.Match(key, []byte("Nate"))
 	if e != nil  {
 		t.Fatalf("Filter match failed: %s", err.Error())
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match when it should have!")
+		t.F.Ln("Filter didn't match when it should have!")
 	}
 	match, e = filter.Match(key, []byte("Quentin"))
 	if e != nil  {
 		t.Fatalf("Filter match failed: %s", err.Error())
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match when it should have!")
+		t.F.Ln("Filter didn't match when it should have!")
 	}
 	match, e = filter2.Match(key, []byte("Quentin"))
 	if e != nil  {
 		t.Fatalf("Filter match failed: %s", err.Error())
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match when it should have!")
+		t.F.Ln("Filter didn't match when it should have!")
 	}
 	match, e = filter.Match(key, []byte("Nates"))
 	if e != nil  {
@@ -226,13 +226,13 @@ func TestGCSFilterMatchAny(t *testing.T) {
 		t.Fatalf("Filter match any failed: %s", err.Error())
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match any when it should have!")
+		t.F.Ln("Filter didn't match any when it should have!")
 	}
 	match, e = filter2.MatchAny(key, contents2)
 	if e != nil  {
 		t.Fatalf("Filter match any failed: %s", err.Error())
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match any when it should have!")
+		t.F.Ln("Filter didn't match any when it should have!")
 	}
 }

@@ -16,7 +16,7 @@ func DecryptMessage(creator string, ciph cipher.AEAD, data []byte) (msg []byte, 
 	if e != nil  {
 		e = errors.New(fmt.Sprintf("%s %s", creator, e.Error()))
 	} else {
-		dbg.Ln("decrypted message", hex.EncodeToString(data[:nonceSize]))
+		D.Ln("decrypted message", hex.EncodeToString(data[:nonceSize]))
 	}
 	return
 }
@@ -40,7 +40,7 @@ func EncryptMessage(creator string, ciph cipher.AEAD, magic []byte, nonce, data 
 func GetNonce(ciph cipher.AEAD) (nonce []byte, e error) {
 	// get a nonce for the packet, it is both message ID and salt
 	nonce = make([]byte, ciph.NonceSize())
-	if _, e = io.ReadFull(rand.Reader, nonce); err.Chk(e) {
+	if _, e = io.ReadFull(rand.Reader, nonce); E.Chk(e) {
 	}
 	return
 }

@@ -5,7 +5,7 @@ package votingpool_test
 // 	defer tearDown()
 // 	dbtx, e := db.BeginReadWriteTx()
 // 	if e != nil  {
-// 		t.ftl.Ln(e)
+// 		t.F.Ln(e)
 // 	}
 // 	defer dbtx.Commit()
 // 	ns, addrmgrNs := vp.TstRWNamespaces(dbtx)
@@ -36,7 +36,7 @@ package votingpool_test
 // 			store, txmgrNs, currentBlock, dustThreshold)
 // 	})
 // 	if e != nil  {
-// 		t.ftl.Ln(e)
+// 		t.F.Ln(e)
 // 	}
 // 	// Chk that all outputs were successfully fulfilled.
 // 	checkWithdrawalOutputs(t, status, map[string]util.Amount{address1: 4e6, address2: 1e6})
@@ -66,8 +66,8 @@ package votingpool_test
 // 	// redeem script, which is stored encrypted.
 // 	msgtx := status.TstGetMsgTx(ntxid)
 // 	vp.TstRunWithManagerUnlocked(t, mgr, addrmgrNs, func() {
-// 		if e = vp.SignTx(msgtx, txSigs, mgr, addrmgrNs, store, txmgrNs); err.Chk(e) {
-// 			t.ftl.Ln(e)
+// 		if e = vp.SignTx(msgtx, txSigs, mgr, addrmgrNs, store, txmgrNs); E.Chk(e) {
+// 			t.F.Ln(e)
 // 		}
 // 	})
 // 	// Any subsequent StartWithdrawal() calls with the same parameters will
@@ -78,7 +78,7 @@ package votingpool_test
 // 			store, txmgrNs, currentBlock, dustThreshold)
 // 	})
 // 	if e != nil  {
-// 		t.ftl.Ln(e)
+// 		t.F.Ln(e)
 // 	}
 // 	vp.TstCheckWithdrawalStatusMatches(t, *status, *status2)
 // }

@@ -25,9 +25,9 @@ type listenFunc func(net string, laddr string) (net.Listener, error)
 // GenerateRPCKeyPair generates a new RPC TLS keypair and writes the cert and possibly also the key in PEM format to the
 // paths specified by the config. If successful, the new keypair is returned.
 func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
-	dbg.Ln("generating TLS certificates")
+	D.Ln("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
-	dbg.Ln("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
+	D.Ln("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
 	certDir, _ := filepath.Split(*config.RPCCert)
 	keyDir, _ := filepath.Split(*config.RPCKey)
 	e := os.MkdirAll(certDir, 0700)
@@ -54,7 +54,7 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	if e != nil {
 		rmErr := os.Remove(*config.RPCCert)
 		if rmErr != nil {
-			err.Ln("cannot remove written certificates:", rmErr)
+			E.Ln("cannot remove written certificates:", rmErr)
 		}
 		return tls.Certificate{}, e
 	}
@@ -62,7 +62,7 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	if e != nil {
 		rmErr := os.Remove(*config.RPCCert)
 		if rmErr != nil {
-			err.Ln("cannot remove written certificates:", rmErr)
+			E.Ln("cannot remove written certificates:", rmErr)
 		}
 		return tls.Certificate{}, e
 	}
@@ -71,16 +71,16 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 		if e != nil {
 			rmErr := os.Remove(*config.RPCCert)
 			if rmErr != nil {
-				err.Ln("cannot remove written certificates:", rmErr)
+				E.Ln("cannot remove written certificates:", rmErr)
 			}
 			rmErr = os.Remove(*config.CAFile)
 			if rmErr != nil {
-				err.Ln("cannot remove written certificates:", rmErr)
+				E.Ln("cannot remove written certificates:", rmErr)
 			}
 			return tls.Certificate{}, e
 		}
 	}
-	inf.Ln("done generating TLS certificates")
+	I.Ln("done generating TLS certificates")
 	return keyPair, nil
 }
 
@@ -95,7 +95,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		host, _, e = net.SplitHostPort(addr)
 		if e != nil {
 			// Shouldn't happen due to already being normalized.
-			err.F(
+			E.F(
 				"`%s` is not a normalized listener address", addr,
 			)
 			continue
@@ -116,7 +116,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		ip := net.ParseIP(host)
 		switch {
 		case ip == nil:
-			wrn.F("`%s` is not a valid IP address", host)
+			W.F("`%s` is not a valid IP address", host)
 		case ip.To4() == nil:
 			// ipv6Addrs = append(ipv6Addrs, addr)
 		default:
@@ -131,7 +131,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv4Addrs {
 		listener, e := listen("tcp4", addr)
 		if e != nil {
-			wrn.F(
+			W.F(
 				"Can't listen on %s: %v", addr, e,
 			)
 			continue
@@ -180,15 +180,15 @@ func OpenRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 	}
 }
 func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server, error) {
-	trc.Ln("startRPCServers")
+	F.Ln("startRPCServers")
 	var (
 		legacyServer *legacy.Server
 		walletListen = net.Listen
 		keyPair      tls.Certificate
-		e          error
+		e            error
 	)
 	if !*cx.Config.TLS {
-		inf.Ln("server TLS is disabled - only legacy RPC may be used")
+		I.Ln("server TLS is disabled - only legacy RPC may be used")
 	} else {
 		keyPair, e = OpenRPCKeyPair(cx.Config)
 		if e != nil {
@@ -206,7 +206,7 @@ func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server,
 		}
 	}
 	if *cx.Config.Username == "" || *cx.Config.Password == "" {
-		inf.Ln("legacy RPC server disabled (requires username and password)")
+		I.Ln("legacy RPC server disabled (requires username and password)")
 	} else if len(*cx.Config.WalletRPCListeners) != 0 {
 		listeners := makeListeners(*cx.Config.WalletRPCListeners, walletListen)
 		if len(listeners) == 0 {
@@ -232,7 +232,7 @@ func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server,
 // access. For the legacy JSON-RPC server it enables methods that require a loaded wallet.
 func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *legacy.Server) {
 	if legacyServer != nil {
-		dbg.Ln("starting legacy wallet rpc server")
+		D.Ln("starting legacy wallet rpc server")
 		legacyServer.RegisterWallet(wallet)
 	}
 }

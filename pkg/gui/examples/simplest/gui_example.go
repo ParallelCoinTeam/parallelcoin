@@ -29,7 +29,7 @@ func main() {
 				minerModel.mainWidget, func(l.Context) {}, func() {
 					quit.Q()
 				}, quit,
-			); err.Chk(e) {
+			); E.Chk(e) {
 		}
 	}()
 	<-quit

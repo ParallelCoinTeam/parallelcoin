@@ -75,7 +75,7 @@ func TestVersion(t *testing.T) {
 		MaxUserAgentLen-len(customUserAgent)-2+1), "")
 	if _, ok := err.(*MessageError); !ok {
 		t.Errorf("AddUserAgent: expected error not received "+
-			"- got %v, want %T", err, MessageError{})
+			"- got %v, want %T", e, MessageError{})
 	}
 	// Version message should not have any services set by default.
 	if msg.Services != 0 {
@@ -288,14 +288,14 @@ func TestVersion(t *testing.T) {
 // 		e := test.in.BtcEncode(w, test.pver, test.enc)
 // 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
 // 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
-// 				i, err, test.writeErr)
+// 				i, e, test.writeErr)
 // 			continue
 // 		}
 // 		// For errors which are not of type MessageError, check them for equality.
 // 		if _, ok := err.(*MessageError); !ok {
 // 			if err != test.writeErr {
 // 				t.Errorf("BtcEncode #%d wrong error got: %v, "+
-// 					"want: %v", i, err, test.writeErr)
+// 					"want: %v", i, e, test.writeErr)
 // 				continue
 // 			}
 // 		}
@@ -305,14 +305,14 @@ func TestVersion(t *testing.T) {
 // 		e = msg.BtcDecode(buf, test.pver, test.enc)
 // 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
 // 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
-// 				i, err, test.readErr)
+// 				i, e, test.readErr)
 // 			continue
 // 		}
 // 		// For errors which are not of type MessageError, check them for equality.
 // 		if _, ok := err.(*MessageError); !ok {
 // 			if err != test.readErr {
 // 				t.Errorf("BtcDecode #%d wrong error got: %v, "+
-// 					"want: %v", i, err, test.readErr)
+// 					"want: %v", i, e, test.readErr)
 // 				continue
 // 			}
 // 		}

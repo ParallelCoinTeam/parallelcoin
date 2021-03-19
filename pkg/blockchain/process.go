@@ -42,7 +42,7 @@ func (b *BlockChain) ProcessBlock(
 	workerNumber uint32, candidateBlock *util.Block,
 	flags BehaviorFlags, height int32,
 ) (bool, bool, error,) {
-	trc.Ln("blockchain.ProcessBlock", height)
+	F.Ln("blockchain.ProcessBlock", height)
 	blockHeight := height
 	var prevBlock *util.Block
 	var e error
@@ -72,24 +72,24 @@ func (b *BlockChain) ProcessBlock(
 	}
 	// The candidateBlock must not already exist in the main chain or side chains.
 	var exists bool
-	if exists, e = b.blockExists(blockHash); err.Chk(e) {
+	if exists, e = b.blockExists(blockHash); E.Chk(e) {
 		return false, false, e
 	}
 	if exists {
 		str := ruleError(ErrDuplicateBlock, fmt.Sprintf("already have candidateBlock %v", bhwa(blockHeight).String()))
-		err.Ln(str)
+		E.Ln(str)
 		return false, false, str
 	}
 	// The candidateBlock must not already exist as an orphan.
 	if _, exists := b.orphans[*blockHash]; exists {
 		str := ruleError(ErrDuplicateBlock, fmt.Sprintf("already have candidateBlock (orphan)"))
-		err.Ln(str)
+		E.Ln(str)
 		return false, false, str
 	}
 	// Perform preliminary sanity checks on the candidateBlock and its transactions.
 	var DoNotCheckPow bool
 	pl := fork.GetMinDiff(fork.GetAlgoName(algo, blockHeight), blockHeight)
-	trc.F("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
+	T.F("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	ph := &candidateBlock.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	if pn == nil {
@@ -100,7 +100,7 @@ func (b *BlockChain) ProcessBlock(
 	if pb == nil {
 		DoNotCheckPow = true
 	}
-	dbg.Ln("checkBlockSanity powLimit %d %s %d %064x ts %v", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl,pn.Header().Timestamp)
+	D.Ln("checkBlockSanity powLimit %d %s %d %064x ts %v", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl,pn.Header().Timestamp)
 	if e = checkBlockSanity(
 		candidateBlock,
 		pl,
@@ -109,10 +109,10 @@ func (b *BlockChain) ProcessBlock(
 		DoNotCheckPow,
 		blockHeight,
 		pn.Header().Timestamp,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return false, false, e
 	}
-	trc.Ln("searching back to checkpoints")
+	F.Ln("searching back to checkpoints")
 	// Find the previous checkpoint and perform some additional checks based on the
 	// checkpoint. This provides a few nice properties such as preventing old side
 	// chain blocks before the last checkpoint, rejecting easy to mine, but
@@ -121,7 +121,7 @@ func (b *BlockChain) ProcessBlock(
 	// checkpoint are met.
 	blockHeader := &candidateBlock.MsgBlock().Header
 	var checkpointNode *BlockNode
-	if checkpointNode, e = b.findPreviousCheckpoint(); err.Chk(e) {
+	if checkpointNode, e = b.findPreviousCheckpoint(); E.Chk(e) {
 		return false, false, e
 	}
 	if checkpointNode != nil {
@@ -132,7 +132,7 @@ func (b *BlockChain) ProcessBlock(
 				"candidateBlock %v has timestamp %v before last checkpoint timestamp %v",
 				bhwa(blockHeight).String(), blockHeader.Timestamp, checkpointTime,
 			)
-			trc.Ln(str)
+			F.Ln(str)
 			return false, false, ruleError(ErrCheckpointTimeTooOld, str)
 		}
 		if !fastAdd {
@@ -153,20 +153,20 @@ func (b *BlockChain) ProcessBlock(
 					"processing: candidateBlock target difficulty of %064x is too low when compared to the"+
 						" previous checkpoint", currentTarget,
 				)
-				err.Ln(str)
+				E.Ln(str)
 				return false, false, ruleError(ErrDifficultyTooLow, str)
 			}
 		}
 	}
-	trc.Ln("handling orphans")
+	F.Ln("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
 	var prevHashExists bool
-	if prevHashExists, e = b.blockExists(prevHash); err.Chk(e) {
+	if prevHashExists, e = b.blockExists(prevHash); E.Chk(e) {
 		return false, false, e
 	}
 	if !prevHashExists {
-		dbg.C(
+		D.C(
 			func() string {
 				return fmt.Sprintf(
 					"adding orphan candidateBlock %v with parent %v",
@@ -180,28 +180,28 @@ func (b *BlockChain) ProcessBlock(
 	}
 	// The candidateBlock has passed all context independent checks and appears sane enough
 	// to potentially accept it into the candidateBlock chain.
-	trc.Ln("maybe accept candidateBlock")
+	F.Ln("maybe accept candidateBlock")
 	var isMainChain bool
-	if isMainChain, e = b.maybeAcceptBlock(workerNumber, candidateBlock, flags); err.Chk(e) {
+	if isMainChain, e = b.maybeAcceptBlock(workerNumber, candidateBlock, flags); E.Chk(e) {
 		return false, false, e
 	}
 	// Accept any orphan blocks that depend on this candidateBlock (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
-		trc.Ln("new candidateBlock on main chain")
+		F.Ln("new candidateBlock on main chain")
 		// Traces(candidateBlock)
 	}
-	if e = b.processOrphans(workerNumber, blockHash, flags); err.Chk(e) {
+	if e = b.processOrphans(workerNumber, blockHash, flags); E.Chk(e) {
 		return false, false, e
 	}
-	trc.F(
+	T.F(
 		"accepted candidateBlock %d %v %s",
 		blockHeight, bhwa(blockHeight).String(), fork.GetAlgoName(
 			candidateBlock.MsgBlock().
 				Header.Version, blockHeight,
 		),
 	)
-	trc.Ln("finished blockchain.ProcessBlock")
+	F.Ln("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }
 
@@ -227,7 +227,7 @@ func (b *BlockChain) blockExists(hash *chainhash.Hash) (exists bool, e error) {
 			// anything useful with it. Ultimately the entire block index should be
 			// serialized instead of only the current main chain so it can be consulted
 			// directly.
-			if _, e = dbFetchHeightByHash(dbTx, hash); err.Chk(e) {
+			if _, e = dbFetchHeightByHash(dbTx, hash); E.Chk(e) {
 			}
 			if isNotInMainChainErr(e) {
 				exists = false
@@ -270,7 +270,7 @@ func (b *BlockChain) processOrphans(
 		for i := 0; i < len(b.prevOrphans[*processHash]); i++ {
 			orphan := b.prevOrphans[*processHash][i]
 			if orphan == nil {
-				dbg.F(
+				D.F(
 					"found a nil entry at index %d in the orphan dependency list for block %v",
 					i, processHash,
 				)
@@ -282,7 +282,7 @@ func (b *BlockChain) processOrphans(
 			i--
 			// Potentially accept the block into the block chain.
 			var e error
-			if _, e = b.maybeAcceptBlock(workerNumber, orphan.block, flags); err.Chk(e) {
+			if _, e = b.maybeAcceptBlock(workerNumber, orphan.block, flags); E.Chk(e) {
 				return e
 			}
 			// Add this block to the list of blocks to process so any orphan blocks that

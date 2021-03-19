@@ -62,7 +62,7 @@ func (l binaryFreeList) Return(buf []byte) {
 // Uint8 reads a single byte from the provided reader using a buffer from the free list and returns it as a uint8.
 func (l binaryFreeList) Uint8(r io.Reader) (rv uint8, e error) {
 	buf := l.Borrow()[:1]
-	if _, e = io.ReadFull(r, buf); err.Chk(e) {
+	if _, e = io.ReadFull(r, buf); E.Chk(e) {
 		l.Return(buf)
 		return 0, e
 	}
@@ -76,7 +76,7 @@ func (l binaryFreeList) Uint8(r io.Reader) (rv uint8, e error) {
 // resulting uint16.
 func (l binaryFreeList) Uint16(r io.Reader, byteOrder binary.ByteOrder) (rv uint16, e error) {
 	buf := l.Borrow()[:2]
-	if _, e = io.ReadFull(r, buf); err.Chk(e) {
+	if _, e = io.ReadFull(r, buf); E.Chk(e) {
 		l.Return(buf)
 		return
 	}
@@ -90,7 +90,7 @@ func (l binaryFreeList) Uint16(r io.Reader, byteOrder binary.ByteOrder) (rv uint
 // resulting uint32.
 func (l binaryFreeList) Uint32(r io.Reader, byteOrder binary.ByteOrder) (rv uint32,e error) {
 	buf := l.Borrow()[:4]
-	if _, e = io.ReadFull(r, buf); err.Chk(e) {
+	if _, e = io.ReadFull(r, buf); E.Chk(e) {
 		l.Return(buf)
 		return 0, e
 	}
@@ -104,7 +104,7 @@ func (l binaryFreeList) Uint32(r io.Reader, byteOrder binary.ByteOrder) (rv uint
 // the resulting uint64.
 func (l binaryFreeList) Uint64(r io.Reader, byteOrder binary.ByteOrder) (rv uint64,e error) {
 	buf := l.Borrow()[:8]
-	if _, e = io.ReadFull(r, buf); err.Chk(e) {
+	if _, e = io.ReadFull(r, buf); E.Chk(e) {
 		l.Return(buf)
 		return
 	}
@@ -176,35 +176,35 @@ func readElement(r io.Reader, element interface{}) (e error) {
 	switch l := element.(type) {
 	case *int32:
 		var rv uint32
-		if rv, e = binarySerializer.Uint32(r, littleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint32(r, littleEndian); E.Chk(e) {
 			return
 		}
 		*l = int32(rv)
 		return
 	case *uint32:
 		var rv uint32
-		if rv, e = binarySerializer.Uint32(r, littleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint32(r, littleEndian); E.Chk(e) {
 			return
 		}
 		*l = rv
 		return
 	case *int64:
 		var rv uint64
-		if rv, e = binarySerializer.Uint64(r, littleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint64(r, littleEndian); E.Chk(e) {
 			return
 		}
 		*l = int64(rv)
 		return
 	case *uint64:
 		var rv uint64
-		if rv, e = binarySerializer.Uint64(r, littleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint64(r, littleEndian); E.Chk(e) {
 			return
 		}
 		*l = rv
 		return
 	case *bool:
 		var rv uint8
-		if rv, e = binarySerializer.Uint8(r); err.Chk(e) {
+		if rv, e = binarySerializer.Uint8(r); E.Chk(e) {
 			return
 		}
 		if rv == 0x00 {
@@ -216,7 +216,7 @@ func readElement(r io.Reader, element interface{}) (e error) {
 	// Unix timestamp encoded as a uint32.
 	case *uint32Time:
 		var rv uint32
-		if rv, e = binarySerializer.Uint32(r, binary.LittleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint32(r, binary.LittleEndian); E.Chk(e) {
 			return
 		}
 		*l = uint32Time(time.Unix(int64(rv), 0))
@@ -224,62 +224,62 @@ func readElement(r io.Reader, element interface{}) (e error) {
 	// Unix timestamp encoded as an int64.
 	case *int64Time:
 		var rv uint64
-		if rv, e = binarySerializer.Uint64(r, binary.LittleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint64(r, binary.LittleEndian); E.Chk(e) {
 			return
 		}
 		*l = int64Time(time.Unix(int64(rv), 0))
 		return
 	// Message header checksum.
 	case *[4]byte:
-		if _, e = io.ReadFull(r, l[:]); err.Chk(e) {
+		if _, e = io.ReadFull(r, l[:]); E.Chk(e) {
 		}
 		return
 	// Message header command.
 	case *[CommandSize]uint8:
-		if _, e = io.ReadFull(r, l[:]); err.Chk(e) {
+		if _, e = io.ReadFull(r, l[:]); E.Chk(e) {
 		}
 		return
 	// IP address.
 	case *[16]byte:
-		if _, e = io.ReadFull(r, l[:]); err.Chk(e) {
+		if _, e = io.ReadFull(r, l[:]); E.Chk(e) {
 		}
 		return
 	case *chainhash.Hash:
-		if _, e = io.ReadFull(r, l[:]); err.Chk(e) {
+		if _, e = io.ReadFull(r, l[:]); E.Chk(e) {
 			return
 		}
 		return nil
 	case *ServiceFlag:
 		var rv uint64
-		if rv, e = binarySerializer.Uint64(r, littleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint64(r, littleEndian); E.Chk(e) {
 			return
 		}
 		*l = ServiceFlag(rv)
 		return
 	case *InvType:
 		var rv uint32
-		if rv, e = binarySerializer.Uint32(r, littleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint32(r, littleEndian); E.Chk(e) {
 			return
 		}
 		*l = InvType(rv)
 		return
 	case *BitcoinNet:
 		var rv uint32
-		if rv, e = binarySerializer.Uint32(r, littleEndian); err.Chk(e) {
+		if rv, e = binarySerializer.Uint32(r, littleEndian); E.Chk(e) {
 			return
 		}
 		*l = BitcoinNet(rv)
 		return
 	case *BloomUpdateType:
 		var rv uint8
-		if rv, e = binarySerializer.Uint8(r); err.Chk(e) {
+		if rv, e = binarySerializer.Uint8(r); E.Chk(e) {
 			return
 		}
 		*l = BloomUpdateType(rv)
 		return
 	case *RejectCode:
 		var rv uint8
-		if rv, e = binarySerializer.Uint8(r); err.Chk(e) {
+		if rv, e = binarySerializer.Uint8(r); E.Chk(e) {
 			return
 		}
 		*l = RejectCode(rv)
@@ -292,7 +292,7 @@ func readElement(r io.Reader, element interface{}) (e error) {
 // readElements reads multiple items from r.  It is equivalent to multiple calls to readElement.
 func readElements(r io.Reader, elements ...interface{}) (e error) {
 	for _, element := range elements {
-		if e = readElement(r, element); err.Chk(e) {
+		if e = readElement(r, element); E.Chk(e) {
 			return
 		}
 	}
@@ -304,20 +304,20 @@ func writeElement(w io.Writer, element interface{}) (e error) {
 	// Attempt to write the element based on the concrete type via fast type assertions first.
 	switch el := element.(type) {
 	case int32:
-		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); err.Chk(e) {
+		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); E.Chk(e) {
 			return
 		}
 		return
 	case uint32:
-		if e = binarySerializer.PutUint32(w, littleEndian, el); err.Chk(e) {
+		if e = binarySerializer.PutUint32(w, littleEndian, el); E.Chk(e) {
 		}
 		return
 	case int64:
-		if e = binarySerializer.PutUint64(w, littleEndian, uint64(el)); err.Chk(e) {
+		if e = binarySerializer.PutUint64(w, littleEndian, uint64(el)); E.Chk(e) {
 		}
 		return
 	case uint64:
-		if e = binarySerializer.PutUint64(w, littleEndian, el); err.Chk(e) {
+		if e = binarySerializer.PutUint64(w, littleEndian, el); E.Chk(e) {
 		}
 		return
 	case bool:
@@ -326,48 +326,48 @@ func writeElement(w io.Writer, element interface{}) (e error) {
 		} else {
 			e = binarySerializer.PutUint8(w, 0x00)
 		}
-		if err.Chk(e) {
+		if E.Chk(e) {
 			return
 		}
 		return nil
 	// Message header checksum.
 	case [4]byte:
-		if _, e = w.Write(el[:]); err.Chk(e) {
+		if _, e = w.Write(el[:]); E.Chk(e) {
 			return
 		}
 		return
 	// Message header command.
 	case [CommandSize]uint8:
-		if _, e = w.Write(el[:]); err.Chk(e) {
+		if _, e = w.Write(el[:]); E.Chk(e) {
 		}
 		return
 	// IP address.
 	case [16]byte:
-		if _, e = w.Write(el[:]); err.Chk(e) {
+		if _, e = w.Write(el[:]); E.Chk(e) {
 		}
 		return
 	case *chainhash.Hash:
-		if _, e = w.Write(el[:]); err.Chk(e) {
+		if _, e = w.Write(el[:]); E.Chk(e) {
 		}
 		return
 	case ServiceFlag:
-		if e = binarySerializer.PutUint64(w, littleEndian, uint64(el)); err.Chk(e) {
+		if e = binarySerializer.PutUint64(w, littleEndian, uint64(el)); E.Chk(e) {
 		}
 		return
 	case InvType:
-		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); err.Chk(e) {
+		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); E.Chk(e) {
 		}
 		return
 	case BitcoinNet:
-		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); err.Chk(e) {
+		if e = binarySerializer.PutUint32(w, littleEndian, uint32(el)); E.Chk(e) {
 		}
 		return
 	case BloomUpdateType:
-		if e = binarySerializer.PutUint8(w, uint8(el)); err.Chk(e) {
+		if e = binarySerializer.PutUint8(w, uint8(el)); E.Chk(e) {
 		}
 		return
 	case RejectCode:
-		if e = binarySerializer.PutUint8(w, uint8(el)); err.Chk(e) {
+		if e = binarySerializer.PutUint8(w, uint8(el)); E.Chk(e) {
 			return
 		}
 		return
@@ -379,7 +379,7 @@ func writeElement(w io.Writer, element interface{}) (e error) {
 // writeElements writes multiple items to w.  It is equivalent to multiple calls to writeElement.
 func writeElements(w io.Writer, elements ...interface{}) (e error) {
 	for _, element := range elements {
-		if e = writeElement(w, element); err.Chk(e) {
+		if e = writeElement(w, element); E.Chk(e) {
 			return
 		}
 	}
@@ -389,13 +389,13 @@ func writeElements(w io.Writer, elements ...interface{}) (e error) {
 // ReadVarInt reads a variable length integer from r and returns it as a uint64.
 func ReadVarInt(r io.Reader, pver uint32) (rv uint64, e error) {
 	var discriminant uint8
-	if discriminant, e = binarySerializer.Uint8(r); err.Chk(e) {
+	if discriminant, e = binarySerializer.Uint8(r); E.Chk(e) {
 		return
 	}
 	switch discriminant {
 	case 0xff:
 		var sv uint64
-		if sv, e = binarySerializer.Uint64(r, littleEndian); err.Chk(e) {
+		if sv, e = binarySerializer.Uint64(r, littleEndian); E.Chk(e) {
 			return
 		}
 		rv = sv
@@ -410,7 +410,7 @@ func ReadVarInt(r io.Reader, pver uint32) (rv uint64, e error) {
 		}
 	case 0xfe:
 		var sv uint32
-		if sv, e = binarySerializer.Uint32(r, littleEndian); err.Chk(e) {
+		if sv, e = binarySerializer.Uint32(r, littleEndian); E.Chk(e) {
 			return
 		}
 		rv = uint64(sv)
@@ -425,7 +425,7 @@ func ReadVarInt(r io.Reader, pver uint32) (rv uint64, e error) {
 		}
 	case 0xfd:
 		var sv uint16
-		if sv, e = binarySerializer.Uint16(r, littleEndian); err.Chk(e) {
+		if sv, e = binarySerializer.Uint16(r, littleEndian); E.Chk(e) {
 			return
 		}
 		rv = uint64(sv)
@@ -450,18 +450,18 @@ func WriteVarInt(w io.Writer, pver uint32, val uint64) (e error) {
 		return binarySerializer.PutUint8(w, uint8(val))
 	}
 	if val <= math.MaxUint16 {
-		if e = binarySerializer.PutUint8(w, 0xfd); err.Chk(e) {
+		if e = binarySerializer.PutUint8(w, 0xfd); E.Chk(e) {
 			return
 		}
 		return binarySerializer.PutUint16(w, littleEndian, uint16(val))
 	}
 	if val <= math.MaxUint32 {
-		if e = binarySerializer.PutUint8(w, 0xfe); err.Chk(e) {
+		if e = binarySerializer.PutUint8(w, 0xfe); E.Chk(e) {
 			return
 		}
 		return binarySerializer.PutUint32(w, littleEndian, uint32(val))
 	}
-	if e = binarySerializer.PutUint8(w, 0xff); err.Chk(e) {
+	if e = binarySerializer.PutUint8(w, 0xff); E.Chk(e) {
 		return
 	}
 	return binarySerializer.PutUint64(w, littleEndian, val)
@@ -491,7 +491,7 @@ func VarIntSerializeSize(val uint64) int {
 // protect against memory exhaustion attacks and forced panics through malformed messages.
 func ReadVarString(r io.Reader, pver uint32) (s string, e error) {
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	// Prevent variable length strings that are larger than the maximum message size. It would be possible to cause
@@ -504,7 +504,7 @@ func ReadVarString(r io.Reader, pver uint32) (s string, e error) {
 		return "", messageError("ReadVarString", str)
 	}
 	buf := make([]byte, count)
-	if _, e = io.ReadFull(r, buf); err.Chk(e) {
+	if _, e = io.ReadFull(r, buf); E.Chk(e) {
 		return
 	}
 	return string(buf), e
@@ -513,7 +513,7 @@ func ReadVarString(r io.Reader, pver uint32) (s string, e error) {
 // WriteVarString serializes str to w as a variable length integer containing the length of the string followed by the
 // bytes that represent the string itself.
 func WriteVarString(w io.Writer, pver uint32, str string) (e error) {
-	if e = WriteVarInt(w, pver, uint64(len(str))); err.Chk(e) {
+	if e = WriteVarInt(w, pver, uint64(len(str))); E.Chk(e) {
 		return
 	}
 	_, e = w.Write([]byte(str))
@@ -526,7 +526,7 @@ func WriteVarString(w io.Writer, pver uint32, str string) (e error) {
 // fieldName parameter is only used for the error message so it provides more context in the error.
 func ReadVarBytes(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) (b []byte, e error) {
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	// Prevent byte array larger than the max message size. It would be possible to cause memory exhaustion and panics
@@ -540,7 +540,7 @@ func ReadVarBytes(r io.Reader, pver uint32, maxAllowed uint32, fieldName string)
 		return
 	}
 	b = make([]byte, count)
-	if _, e = io.ReadFull(r, b); err.Chk(e) {
+	if _, e = io.ReadFull(r, b); E.Chk(e) {
 	}
 	return
 }
@@ -549,7 +549,7 @@ func ReadVarBytes(r io.Reader, pver uint32, maxAllowed uint32, fieldName string)
 // the bytes themselves.
 func WriteVarBytes(w io.Writer, pver uint32, bytes []byte) (e error) {
 	slen := uint64(len(bytes))
-	if e = WriteVarInt(w, pver, slen); err.Chk(e) {
+	if e = WriteVarInt(w, pver, slen); E.Chk(e) {
 		return
 	}
 	_, e = w.Write(bytes)
@@ -559,7 +559,7 @@ func WriteVarBytes(w io.Writer, pver uint32, bytes []byte) (e error) {
 // randomUint64 returns a cryptographically random uint64 value. This unexported version takes a reader primarily to
 // ensure the error paths can be properly tested by passing a fake reader in the tests.
 func randomUint64(r io.Reader) (rv uint64, e error) {
-	if rv, e = binarySerializer.Uint64(r, bigEndian); err.Chk(e) {
+	if rv, e = binarySerializer.Uint64(r, bigEndian); E.Chk(e) {
 	}
 	return
 }

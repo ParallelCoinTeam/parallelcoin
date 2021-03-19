@@ -65,23 +65,23 @@ func Discover() (nat NAT, e error) {
 	var ssdp *net.UDPAddr
 	ssdp, e = net.ResolveUDPAddr("udp4", "239.255.255.250:1900")
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	var conn net.PacketConn
 	conn, e = net.ListenPacket("udp4", ":0")
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	socket := conn.(*net.UDPConn)
 	defer func() {
-		if e := socket.Close(); err.Chk(e) {
+		if e := socket.Close(); E.Chk(e) {
 		}
 	}()
 	e = socket.SetDeadline(time.Now().Add(3 * time.Second))
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	st := "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n"
@@ -97,13 +97,13 @@ func Discover() (nat NAT, e error) {
 	for i := 0; i < 3; i++ {
 		_, e = socket.WriteToUDP(message, ssdp)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			return
 		}
 		var n int
 		n, _, e = socket.ReadFromUDP(answerBytes)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			continue
 			// socket.Close()
 			// return
@@ -127,13 +127,13 @@ func Discover() (nat NAT, e error) {
 		var serviceURL string
 		serviceURL, e = getServiceURL(locURL)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			return
 		}
 		var ourIP string
 		ourIP, e = getOurIP()
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			return
 		}
 		nat = &upnpNAT{serviceURL: serviceURL, ourIP: ourIP}
@@ -214,7 +214,7 @@ func getOurIP() (ip string, e error) {
 	var hostname string
 	hostname, e = os.Hostname()
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	return net.LookupCNAME(hostname)
@@ -226,11 +226,11 @@ func getServiceURL(rootURL string) (url string, e error) {
 	var r *http.Response
 	r, e = http.Get(rootURL)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	defer func() {
-		if e = r.Body.Close(); err.Chk(e) {
+		if e = r.Body.Close(); E.Chk(e) {
 		}
 	}()
 	if r.StatusCode >= 400 {
@@ -240,7 +240,7 @@ func getServiceURL(rootURL string) (url string, e error) {
 	var root root
 	e = xml.NewDecoder(r.Body).Decode(&root)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	a := &root.Device
@@ -299,7 +299,7 @@ func soapRequest(url, function, message string) (replyXML []byte, e error) {
 	var req *http.Request
 	req, e = http.NewRequest("POST", url, strings.NewReader(fullMessage))
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	req.Header.Set("Content-Type", "text/xml ; charset=\"utf-8\"")
@@ -312,12 +312,12 @@ func soapRequest(url, function, message string) (replyXML []byte, e error) {
 	var r *http.Response
 	r, e = http.DefaultClient.Do(req)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	if r.Body != nil {
 		defer func() {
-			if e = r.Body.Close(); err.Chk(e) {
+			if e = r.Body.Close(); E.Chk(e) {
 			}
 		}()
 	}
@@ -330,7 +330,7 @@ func soapRequest(url, function, message string) (replyXML []byte, e error) {
 	var reply soapEnvelope
 	e = xml.NewDecoder(r.Body).Decode(&reply)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	return reply.Body.Data, nil
@@ -348,13 +348,13 @@ func (n *upnpNAT) GetExternalAddress() (addr net.IP, e error) {
 	var response []byte
 	response, e = soapRequest(n.serviceURL, "GetExternalIPAddress", message)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	var reply getExternalIPAddressResponse
 	e = xml.Unmarshal(response, &reply)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	addr = net.ParseIP(reply.ExternalIPAddress)
@@ -385,7 +385,7 @@ func (n *upnpNAT) AddPortMapping(
 	var response []byte
 	response, e = soapRequest(n.serviceURL, "AddPortMapping", message)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// TODO: check response to see if the port was forwarded
@@ -407,7 +407,7 @@ func (n *upnpNAT) DeletePortMapping(protocol string, externalPort, internalPort 
 	var response []byte
 	response, e = soapRequest(n.serviceURL, "DeletePortMapping", message)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// TODO: check response to see if the port was deleted

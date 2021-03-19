@@ -44,15 +44,15 @@ func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncodi
 		)
 		return messageError("MsgMerkleBlock.BtcDecode", str)
 	}
-	if e = readBlockHeader(r, pver, &msg.Header); err.Chk(e) {
+	if e = readBlockHeader(r, pver, &msg.Header); E.Chk(e) {
 		return
 	}
-	if e = readElement(r, &msg.Transactions); err.Chk(e) {
+	if e = readElement(r, &msg.Transactions); E.Chk(e) {
 		return
 	}
 	// Read num block locator hashes and limit to max.
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	if count > maxTxPerBlock {
@@ -67,10 +67,10 @@ func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncodi
 	msg.Hashes = make([]*chainhash.Hash, 0, count)
 	for i := uint64(0); i < count; i++ {
 		hash := &hashes[i]
-		if e = readElement(r, hash); err.Chk(e) {
+		if e = readElement(r, hash); E.Chk(e) {
 			return
 		}
-		if e = msg.AddTxHash(hash); err.Chk(e) {
+		if e = msg.AddTxHash(hash); E.Chk(e) {
 		}
 	}
 	msg.Flags, e = ReadVarBytes(
@@ -107,7 +107,7 @@ func (msg *MsgMerkleBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncodi
 		)
 		return messageError("MsgMerkleBlock.BtcDecode", str)
 	}
-	if e = writeBlockHeader(w, pver, &msg.Header); err.Chk(e) {
+	if e = writeBlockHeader(w, pver, &msg.Header); E.Chk(e) {
 		return
 	}
 	e = writeElement(w, msg.Transactions)

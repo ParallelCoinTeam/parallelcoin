@@ -91,7 +91,7 @@ func (wg *WalletGUI) cwfRestoreButton() l.Widget {
 	return wg.ButtonLayout(
 		wg.clickables["createRestore"].SetClick(
 			func() {
-				dbg.Ln("clicked restore button")
+				D.Ln("clicked restore button")
 				if !wg.restoring {
 					wg.inputs["walletRestore"].SetText("")
 					wg.createMatch = ""
@@ -141,11 +141,11 @@ func (wg *WalletGUI) cwfSetGenesis() l.Widget {
 					func() {
 						seedString := "f4d2c4c542bb52512ed9e6bbfa2d000e576a0c8b4ebd1acafd7efa37247366bc"
 						var e error
-						if wg.createSeed, e = hex.DecodeString(seedString); ftl.Chk(e) {
+						if wg.createSeed, e = hex.DecodeString(seedString); F.Chk(e) {
 							panic(e)
 						}
 						var wk string
-						if wk, e = bip39.NewMnemonic(wg.createSeed); err.Chk(e) {
+						if wk, e = bip39.NewMnemonic(wg.createSeed); E.Chk(e) {
 							panic(e)
 						}
 						wks := strings.Split(wk, " ")
@@ -381,7 +381,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 				return wg.CheckBox(
 					wg.bools["lan"].SetOnChange(
 						func(b bool) {
-							dbg.Ln("lan now set to", b)
+							D.Ln("lan now set to", b)
 							*wg.cx.Config.LAN = b
 							if b && *wg.cx.Config.Solo {
 								*wg.cx.Config.Solo = false
@@ -416,7 +416,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 				return wg.CheckBox(
 					wg.bools["solo"].SetOnChange(
 						func(b bool) {
-							dbg.Ln("solo now set to", b)
+							D.Ln("solo now set to", b)
 							*wg.cx.Config.Solo = b
 							if b && *wg.cx.Config.LAN {
 								*wg.cx.Config.LAN = false
@@ -448,7 +448,7 @@ func (wg *WalletGUI) cwfConfirmation() (out l.Widget) {
 	return wg.CheckBox(
 		wg.bools["ihaveread"].SetOnChange(
 			func(b bool) {
-				dbg.Ln("confirmed read", b)
+				D.Ln("confirmed read", b)
 				// if the password has been entered, we need to copy it to the variable
 				if wg.createWalletPasswordsMatch() {
 					wg.cx.Config.Lock()

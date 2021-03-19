@@ -28,12 +28,12 @@ func (a *AmountFlag) UnmarshalFlag(value string) (e error) {
 	value = strings.TrimSuffix(value, " DUO")
 	valueF64, e := strconv.ParseFloat(value, 64)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	amount, e := util.NewAmount(valueF64)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	a.Amount = amount

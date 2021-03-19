@@ -34,7 +34,7 @@ func (b *BlockChain) CalcNextRequiredDifficulty(algo string) (difficulty uint32,
 		b.BestChain.
 			Tip(), algo, false,
 	)
-	// trc.Ln("CalcNextRequiredDifficulty", difficulty)
+	// F.Ln("CalcNextRequiredDifficulty", difficulty)
 	b.ChainLock.Unlock()
 	return
 }
@@ -78,7 +78,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyFromNode(lastNode *BlockNode, alg
 	switch cF {
 	// Legacy difficulty adjustment
 	case 0:
-		// trc.Ln("before hardfork")
+		// F.Ln("before hardfork")
 		return b.CalcNextRequiredDifficultyHalcyon(lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
@@ -90,12 +90,12 @@ func (b *BlockChain) CalcNextRequiredDifficultyFromNode(lastNode *BlockNode, alg
 		if bits[version] == 0 {
 			bits, e = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
 			if e != nil  {
-				err.Ln(err)
+				E.Ln(e)
 				return
 			}
-			// dbg.Ln(bits, reflect.TypeOf(bits))
+			// D.Ln(bits, reflect.TypeOf(bits))
 			b.DifficultyBits.Store(bits)
-			// dbg.F("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
+			// D.F("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
 		}
 		newTargetBits = bits[version]
 		return

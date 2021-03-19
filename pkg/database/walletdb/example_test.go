@@ -27,11 +27,11 @@ func ExampleCreate() {
 		walletdb.		return
 	}
 	defer func() {
-		if e := os.Remove(dbPath); walletdb.err.Chk(e) {
+		if e := os.Remove(dbPath); walletdb.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); walletdb.err.Chk(e) {
+		if e := db.Close(); walletdb.E.Chk(e) {
 		}
 	}()
 	// Output:
@@ -49,9 +49,9 @@ func exampleLoadDB() (walletdb.DB, func(), error) {
 		return nil, nil, e
 	}
 	teardownFunc := func() {
-		if e := db.Close(); walletdb.err.Chk(e) {
+		if e := db.Close(); walletdb.E.Chk(e) {
 		}
-		if e := os.Remove(dbPath); walletdb.err.Chk(e) {
+		if e := os.Remove(dbPath); walletdb.E.Chk(e) {
 		}
 	}
 	exampleNum++
@@ -106,11 +106,11 @@ func Example_basicUsage() {
 		walletdb.		return
 	}
 	defer func() {
-		if e := os.Remove(dbPath); walletdb.err.Chk(e) {
+		if e := os.Remove(dbPath); walletdb.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); walletdb.err.Chk(e) {
+		if e := db.Close(); walletdb.E.Chk(e) {
 		}
 	}()
 	// Get or create a bucket in the database as needed. This bucket is what is typically passed to specific
@@ -139,7 +139,7 @@ func Example_basicUsage() {
 		// Store a key/value pair directly in the root bucket.
 		key := []byte("mykey")
 		value := []byte("myvalue")
-		if e := rootBucket.Put(key, value); err.Chk(e) {
+		if e := rootBucket.Put(key, value); E.Chk(e) {
 			return e
 		}
 		// Read the key back and ensure it matches.

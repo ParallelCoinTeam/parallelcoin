@@ -202,7 +202,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 			test.flags)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T, "+
-				"want %T", i, test.name, err, test.err)
+				"want %T", i, test.name, e, test.err)
 			continue
 		}
 		gotErrorCode := err.(btcjson.Error).ErrorCode
@@ -234,13 +234,13 @@ func TestRegisteredCmdMethods(t *testing.T) {
 	// Ensure the registered methods are returned.
 	methods := btcjson.RegisteredCmdMethods()
 	if len(methods) == 0 {
-		t.ftl.Ln("RegisteredCmdMethods: no methods")
+		t.F.Ln("RegisteredCmdMethods: no methods")
 	}
 	// Ensure the returned methods are sorted.
 	sortedMethods := make([]string, len(methods))
 	copy(sortedMethods, methods)
 	sort.Strings(sortedMethods)
 	if !reflect.DeepEqual(sortedMethods, methods) {
-		t.ftl.Ln("RegisteredCmdMethods: methods are not sorted")
+		t.F.Ln("RegisteredCmdMethods: methods are not sorted")
 	}
 }

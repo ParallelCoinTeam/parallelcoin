@@ -21,16 +21,22 @@ func TestBoundedMemoryChainEmptyList(t *testing.T) {
 	}
 	// The length of the chain at this point should be zero.
 	if memChain.len != 0 {
-		t.Fatalf("length of chain should be zero, is instead: %v",
-			memChain.len)
+		t.Fatalf(
+			"length of chain should be zero, is instead: %v",
+			memChain.len,
+		)
 	}
 	// After we push back a single element to the empty list, the Front() and Back() pointers should be identical.
-	memChain.PushBack(Node{
-		Height: 1,
-	})
+	memChain.PushBack(
+		Node{
+			Height: 1,
+		},
+	)
 	if memChain.Front() != memChain.Back() {
-		t.Fatalf("back and front of chain of length 1 should be " +
-			"identical")
+		t.Fatalf(
+			"back and front of chain of length 1 should be " +
+				"identical",
+		)
 	}
 }
 
@@ -42,9 +48,11 @@ func TestBoundedMemoryChainResetHeaderState(t *testing.T) {
 	// We'll start out by inserting 3 elements into the chain.
 	const numElements = 3
 	for i := 0; i < numElements; i++ {
-		memChain.PushBack(Node{
-			Height: int32(i),
-		})
+		memChain.PushBack(
+			Node{
+				Height: int32(i),
+			},
+		)
 	}
 	// With the set of elements inserted, we'll now pick a new element to serve as the very head of the chain, with all
 	// other items removed.
@@ -54,17 +62,23 @@ func TestBoundedMemoryChainResetHeaderState(t *testing.T) {
 	memChain.ResetHeaderState(newNode)
 	// At this point, the front and back of the chain should be identical.
 	if memChain.Front() != memChain.Back() {
-		t.Fatalf("back and front of chain of length 1 should be " +
-			"identical")
+		t.Fatalf(
+			"back and front of chain of length 1 should be " +
+				"identical",
+		)
 	}
 	// Additionally, both the front and back of the chain should be identical to the node above.
 	if *memChain.Front() != newNode {
-		t.Fatalf("wrong node, expected %v, got %v", newNode,
-			memChain.Front())
+		t.Fatalf(
+			"wrong node, expected %v, got %v", newNode,
+			memChain.Front(),
+		)
 	}
 	if *memChain.Back() != newNode {
-		t.Fatalf("wrong node, expected %v, got %v", newNode,
-			memChain.Back())
+		t.Fatalf(
+			"wrong node, expected %v, got %v", newNode,
+			memChain.Back(),
+		)
 	}
 }
 
@@ -90,22 +104,28 @@ func TestBoundedMemoryChainSizeLimit(t *testing.T) {
 	}
 	// If we attempt to get the prev element front of the chain, we should get a nil value.
 	if memChain.Front().Prev() != nil {
-		t.Fatalf("expected prev of tail to be nil, is instead: %v",
-			spew.Sdump(memChain.Front().Prev()))
+		t.Fatalf(
+			"expected prev of tail to be nil, is instead: %v",
+			spew.Sdump(memChain.Front().Prev()),
+		)
 	}
 	// The prev element to the back of the chain, should be the element directly following it.
 	expectedPrev := totalElems[len(totalElems)-2]
 	if memChain.Back().Prev().Height != expectedPrev.Height {
-		t.Fatalf("wrong node, expected %v, got %v", expectedPrev,
-			memChain.Back().Prev())
+		t.Fatalf(
+			"wrong node, expected %v, got %v", expectedPrev,
+			memChain.Back().Prev(),
+		)
 	}
 	// We'll now confirm that the remaining elements within the chain are the as we expect, and that they have the
 	// proper prev element.
 	for i, node := range memChain.chain {
 		if node.Height != totalElems[15+i].Height {
-			t.Fatalf("wrong node: expected %v, got %v",
+			t.Fatalf(
+				"wrong node: expected %v, got %v",
 				spew.Sdump(node),
-				spew.Sdump(totalElems[15+i]))
+				spew.Sdump(totalElems[15+i]),
+			)
 		}
 		if i == 0 {
 			if node.Prev() != nil {
@@ -114,9 +134,11 @@ func TestBoundedMemoryChainSizeLimit(t *testing.T) {
 		} else {
 			expectedPrevElem := memChain.chain[i-1]
 			if node.Prev().Height != expectedPrevElem.Height {
-				t.Fatalf("wrong node: expected %v, got %v",
+				t.Fatalf(
+					"wrong node: expected %v, got %v",
 					spew.Sdump(expectedPrevElem),
-					spew.Sdump(node.Prev()))
+					spew.Sdump(node.Prev()),
+				)
 			}
 		}
 	}
@@ -130,23 +152,29 @@ func TestBoundedMemoryChainPrevIteration(t *testing.T) {
 	// We'll start out by inserting 3 elements into the chain.
 	const numElements = 3
 	for i := 0; i < numElements; i++ {
-		memChain.PushBack(Node{
-			Height: int32(i),
-		})
+		memChain.PushBack(
+			Node{
+				Height: int32(i),
+			},
+		)
 	}
 	// We'll now add an additional element to the chain.
-	iterNode := memChain.PushBack(Node{
-		Height: 99,
-	})
+	iterNode := memChain.PushBack(
+		Node{
+			Height: 99,
+		},
+	)
 	// We'll now walk backwards with the iterNode until we run into the nil pointer.
 	numIters := 0
 	for iterNode != nil {
 		nextNode := iterNode
 		iterNode = iterNode.Prev()
 		if iterNode != nil && nextNode.Prev().Height != iterNode.Height {
-			t.Fatalf("expected %v, got %v",
+			t.Fatalf(
+				"expected %v, got %v",
 				spew.Sdump(nextNode.Prev()),
-				spew.Sdump(iterNode))
+				spew.Sdump(iterNode),
+			)
 		}
 		numIters++
 	}

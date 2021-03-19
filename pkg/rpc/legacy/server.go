@@ -110,8 +110,8 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 				w.Header().Set("Connection", "close")
 				w.Header().Set("Content-Type", "application/json")
 				r.Close = true
-				if e := server.CheckAuthHeader(r); err.Chk(e) {
-					wrn.Ln("unauthorized client connection attempt")
+				if e := server.CheckAuthHeader(r); E.Chk(e) {
+					W.Ln("unauthorized client connection attempt")
 					JSONAuthFail(w)
 					return
 				}
@@ -134,15 +134,15 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 				default:
 					// If auth was supplied but incorrect, rather than simply being missing,
 					// immediately terminate the connection.
-					wrn.Ln("disconnecting improperly authorized websocket client")
+					W.Ln("disconnecting improperly authorized websocket client")
 					JSONAuthFail(w)
 					return
 				}
 				conn, e := server.Upgrader.Upgrade(w, r, nil)
 				if e != nil {
-					wrn.F(
+					W.F(
 						"cannot websocket upgrade client %s: %v",
-						r.RemoteAddr, err,
+						r.RemoteAddr, e,
 					)
 					return
 				}
@@ -179,11 +179,11 @@ func HTTPBasicAuth(username, password string) []byte {
 func (s *Server) Serve(lis net.Listener) {
 	s.WG.Add(1)
 	go func() {
-		inf.Ln("wallet RPC server listening on ", lis.Addr())
+		I.Ln("wallet RPC server listening on ", lis.Addr())
 		var e error
-		if e = s.HTTPServer.Serve(lis); err.Chk(e) {
+		if e = s.HTTPServer.Serve(lis); E.Chk(e) {
 		}
-		trc.Ln("finished serving wallet RPC:", err)
+		F.Ln("finished serving wallet RPC:", e)
 		s.WG.Done()
 	}()
 }
@@ -222,9 +222,9 @@ func (s *Server) Stop() {
 	for _, listener := range s.Listeners {
 		e := listener.Close()
 		if e != nil {
-			err.F(
+			E.F(
 				"cannot close listener `%s`: %v %s",
-				listener.Addr(), err,
+				listener.Addr(), e,
 			)
 		}
 	}
@@ -267,7 +267,7 @@ func (s *Server) HandlerClosure(request *btcjson.Request) LazyHandler {
 	if wllt != nil && chainClient == nil {
 		chainClient = wllt.ChainClient()
 		s.ChainClient = chainClient
-		dbg.Ln("HandlerClosure got the ChainClient")
+		D.Ln("HandlerClosure got the ChainClient")
 	}
 	s.HandlerMutex.Unlock()
 	return LazyApplyHandler(request, wllt, chainClient)
@@ -311,7 +311,7 @@ func Throttled(threshold int64, h http.Handler) http.Handler {
 			current := atomic.AddInt64(&active, 1)
 			defer atomic.AddInt64(&active, -1)
 			if current-1 >= threshold {
-				wrn.F(
+				W.F(
 					"reached threshold of %d concurrent active clients", threshold,
 				)
 				http.Error(w, "429 Too Many Requests", 429)
@@ -370,9 +370,9 @@ func (s *Server) WebsocketClientRead(wsc *WebsocketClient) {
 		_, request, e := wsc.conn.ReadMessage()
 		if e != nil {
 			if e != io.EOF && e != io.ErrUnexpectedEOF {
-				wrn.Ln(
+				W.Ln(
 					"websocket receive failed from client %s: %v",
-					wsc.remoteAddr, err,
+					wsc.remoteAddr, e,
 				)
 			}
 			close(wsc.allRequests)
@@ -480,8 +480,8 @@ out:
 					resp, jsonErr := f()
 					mResp, e := btcjson.MarshalResponse(req.ID, resp, jsonErr)
 					if e != nil {
-						err.Ln(
-							"unable to marshal response:", err,
+						E.Ln(
+							"unable to marshal response:", e,
 						)
 					} else {
 						_ = wsc.Send(mResp)
@@ -510,9 +510,9 @@ out:
 			}
 			e := wsc.conn.SetWriteDeadline(time.Now().Add(deadline))
 			if e != nil {
-				wrn.F(
+				W.F(
 					"cannot set write deadline on client %s: %v",
-					wsc.remoteAddr, err,
+					wsc.remoteAddr, e,
 				)
 			}
 			e = wsc.conn.WriteMessage(
@@ -520,8 +520,8 @@ out:
 				response,
 			)
 			if e != nil {
-				wrn.F(
-					"failed websocket send to client %s: %v", wsc.remoteAddr, err,
+				W.F(
+					"failed websocket send to client %s: %v", wsc.remoteAddr, e,
 				)
 				break out
 			}
@@ -530,17 +530,17 @@ out:
 		}
 	}
 	wsc.quit.Q()
-	inf.Ln("disconnected websocket client", wsc.remoteAddr)
+	I.Ln("disconnected websocket client", wsc.remoteAddr)
 	s.WG.Done()
 }
 
 // WebsocketClientRPC starts the goroutines to serve JSON-RPC requests over a websocket connection for a single client.
 func (s *Server) WebsocketClientRPC(wsc *WebsocketClient) {
-	inf.F("new websocket client %s", wsc.remoteAddr)
+	I.F("new websocket client %s", wsc.remoteAddr)
 	// Clear the read deadline set before the websocket hijacked
 	// the connection.
-	if e := wsc.conn.SetReadDeadline(time.Time{}); err.Chk(e) {
-		wrn.Ln("cannot remove read deadline:", err)
+	if e := wsc.conn.SetReadDeadline(time.Time{}); E.Chk(e) {
+		W.Ln("cannot remove read deadline:", e)
 	}
 	// WebsocketClientRead is intentionally not run with the waitgroup so it is ignored during shutdown. This is to
 	// prevent a hang during shutdown where the goroutine is blocked on a read of the websocket connection if the client
@@ -576,8 +576,8 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 	if e != nil {
 		resp, e := btcjson.MarshalResponse(req.ID, nil, btcjson.ErrRPCInvalidRequest)
 		if e != nil {
-			err.Ln(
-				"Unable to marshal response:", err,
+			E.Ln(
+				"Unable to marshal response:", e,
 			)
 			http.Error(
 				w, "500 Internal Server BTCJSONError",
@@ -587,8 +587,8 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 		}
 		_, e = w.Write(resp)
 		if e != nil {
-			wrn.Ln(
-				"cannot write invalid request request to client:", err,
+			W.Ln(
+				"cannot write invalid request request to client:", e,
 			)
 		}
 		return
@@ -614,16 +614,16 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 	// Marshal and send.
 	mResp, e := btcjson.MarshalResponse(req.ID, res, jsonErr)
 	if e != nil {
-		err.Ln(
-			"unable to marshal response:", err,
+		E.Ln(
+			"unable to marshal response:", e,
 		)
 		http.Error(w, "500 Internal Server BTCJSONError", http.StatusInternalServerError)
 		return
 	}
 	_, e = w.Write(mResp)
 	if e != nil {
-		wrn.Ln(
-			"unable to respond to client:", err,
+		W.Ln(
+			"unable to respond to client:", e,
 		)
 	}
 	if stop {

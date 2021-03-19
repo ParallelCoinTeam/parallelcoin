@@ -52,8 +52,8 @@ func (h *BlockHeader) BlockHashWithAlgos(height int32) (out chainhash.Hash) {
 	// Encode the header and double sha256 everything prior to the number of transactions. Ignore the error returns
 	// since there is no way the encode could fail except being out of memory which would cause a run-time panic.
 	buf := bytes.NewBuffer(make([]byte, 0, MaxBlockHeaderPayload))
-	if e := writeBlockHeader(buf, 0, h); err.Chk(e) {
-		err.Ln("error writing block header to buffer", e)
+	if e := writeBlockHeader(buf, 0, h); E.Chk(e) {
+		E.Ln("error writing block header to buffer", e)
 	}
 	vers := h.Version
 	algo := fork.GetAlgoName(vers, height)

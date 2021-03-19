@@ -59,7 +59,7 @@ func TestNewTLSCertPair(t *testing.T) {
 	}
 	// Ensure the specified extra hosts are present.
 	for _, host := range extraHosts {
-		if e := x509Cert.VerifyHostname(host); err.Chk(e) {
+		if e := x509Cert.VerifyHostname(host); E.Chk(e) {
 			t.Fatalf("failed to verify extra host '%s'", host)
 		}
 	}
@@ -90,18 +90,18 @@ func TestNewTLSCertPair(t *testing.T) {
 	}
 	// Ensure the cert can be use for the intended purposes.
 	if !x509Cert.IsCA {
-		t.ftl.Ln("generated cert is not a certificate authority")
+		t.F.Ln("generated cert is not a certificate authority")
 	}
 	if x509Cert.KeyUsage&x509.KeyUsageKeyEncipherment == 0 {
-		t.ftl.Ln("generated cert can't be used for key encipherment")
+		t.F.Ln("generated cert can't be used for key encipherment")
 	}
 	if x509Cert.KeyUsage&x509.KeyUsageDigitalSignature == 0 {
-		t.ftl.Ln("generated cert can't be used for digital signatures")
+		t.F.Ln("generated cert can't be used for digital signatures")
 	}
 	if x509Cert.KeyUsage&x509.KeyUsageCertSign == 0 {
-		t.ftl.Ln("generated cert can't be used for signing other certs")
+		t.F.Ln("generated cert can't be used for signing other certs")
 	}
 	if !x509Cert.BasicConstraintsValid {
-		t.ftl.Ln("generated cert does not have valid basic constraints")
+		t.F.Ln("generated cert does not have valid basic constraints")
 	}
 }

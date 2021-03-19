@@ -51,7 +51,7 @@ func testDB() (walletdb.DB, func(), error) {
 	}
 	db, e := walletdb.Create("bdb", filepath.Join(tmpDir, "db"))
 	return db, func() {
-		if e := os.RemoveAll(tmpDir); err.Chk(e) {
+		if e := os.RemoveAll(tmpDir); E.Chk(e) {
 		}
 	}, err
 }
@@ -66,14 +66,14 @@ func testStore() (*Store, walletdb.DB, func(), error) {
 	}
 	db, e := walletdb.Create("bdb", filepath.Join(tmpDir, "db"))
 	if e != nil  {
-		if e := os.RemoveAll(tmpDir); err.Chk(e) {
+		if e := os.RemoveAll(tmpDir); E.Chk(e) {
 		}
 		return nil, nil, nil, e
 	}
 	teardown := func() {
-		if e := db.Close(); err.Chk(e) {
+		if e := db.Close(); E.Chk(e) {
 		}
-		if e := os.RemoveAll(tmpDir); err.Chk(e) {
+		if e := os.RemoveAll(tmpDir); E.Chk(e) {
 		}
 	}
 	var s *Store
@@ -477,7 +477,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 	}
 	s, db, teardown, e := testStore()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.F.Ln(err)
 	}
 	defer teardown()
 	for _, test := range tests {
@@ -535,7 +535,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 			return nil
 		})
 		if e != nil  {
-			t.ftl.Ln(err)
+			t.F.Ln(err)
 		}
 	}
 }
@@ -543,12 +543,12 @@ func TestFindingSpentCredits(t *testing.T) {
 	t.Parallel()
 	s, db, teardown, e := testStore()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.F.Ln(err)
 	}
 	defer teardown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.F.Ln(err)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -560,7 +560,7 @@ func TestFindingSpentCredits(t *testing.T) {
 	// Insert transaction and credit which will be spent.
 	recvRec, e := NewTxRecord(TstRecvSerializedTx, time.Now())
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.F.Ln(err)
 	}
 	e = s.InsertTx(ns, recvRec, TstRecvTxBlockDetails)
 	if e != nil  {
@@ -1291,7 +1291,7 @@ func TestRemoveUnminedTx(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, cbRec, b100); err.Chk(e) {
+		if e := store.InsertTx(ns, cbRec, b100); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, cbRec, b100, 0, false)
@@ -1339,7 +1339,7 @@ func TestRemoveUnminedTx(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, spendTxRec, nil); err.Chk(e) {
+		if e := store.InsertTx(ns, spendTxRec, nil); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, spendTxRec, nil, 1, true)
@@ -1371,7 +1371,7 @@ func TestRemoveUnminedTx(t *testing.T) {
 	checkBalance(util.Amount(changeAmount), true)
 	// Now, we'll remove the unconfirmed spend tranaction from the store.
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.RemoveUnminedTx(ns, spendTxRec); err.Chk(e) {
+		if e := store.RemoveUnminedTx(ns, spendTxRec); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 	})
@@ -1436,7 +1436,7 @@ func testInsertMempoolDoubleSpendTx(t *testing.T, first bool) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, cbRec, &b100); err.Chk(e) {
+		if e := store.InsertTx(ns, cbRec, &b100); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, cbRec, &b100, 0, false)
@@ -1457,7 +1457,7 @@ func testInsertMempoolDoubleSpendTx(t *testing.T, first bool) {
 	}
 	// We'll insert both of them into the store without confirming them.
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, firstSpendRec, nil); err.Chk(e) {
+		if e := store.InsertTx(ns, firstSpendRec, nil); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, firstSpendRec, nil, 0, false)
@@ -1466,7 +1466,7 @@ func testInsertMempoolDoubleSpendTx(t *testing.T, first bool) {
 		}
 	})
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, secondSpendRec, nil); err.Chk(e) {
+		if e := store.InsertTx(ns, secondSpendRec, nil); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, secondSpendRec, nil, 0, false)
@@ -1576,7 +1576,7 @@ func TestInsertConfirmedDoubleSpendTx(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, cbRec1, &b100); err.Chk(e) {
+		if e := store.InsertTx(ns, cbRec1, &b100); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, cbRec1, &b100, 0, false)
@@ -1592,7 +1592,7 @@ func TestInsertConfirmedDoubleSpendTx(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, firstSpendRec1, nil); err.Chk(e) {
+		if e := store.InsertTx(ns, firstSpendRec1, nil); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, firstSpendRec1, nil, 0, false)
@@ -1606,7 +1606,7 @@ func TestInsertConfirmedDoubleSpendTx(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, secondSpendRec1, nil); err.Chk(e) {
+		if e := store.InsertTx(ns, secondSpendRec1, nil); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, secondSpendRec1, nil, 0, false)
@@ -1621,7 +1621,7 @@ func TestInsertConfirmedDoubleSpendTx(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, cbRec2, &b100); err.Chk(e) {
+		if e := store.InsertTx(ns, cbRec2, &b100); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, cbRec2, &b100, 0, false)
@@ -1635,7 +1635,7 @@ func TestInsertConfirmedDoubleSpendTx(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, firstSpendRec2, nil); err.Chk(e) {
+		if e := store.InsertTx(ns, firstSpendRec2, nil); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, firstSpendRec2, nil, 0, false)
@@ -1734,7 +1734,7 @@ func TestAddDuplicateCreditAfterConfirm(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, cbRec, b100); err.Chk(e) {
+		if e := store.InsertTx(ns, cbRec, b100); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, cbRec, b100, 0, false)
@@ -1767,7 +1767,7 @@ func TestAddDuplicateCreditAfterConfirm(t *testing.T) {
 		t.ftl.Ln(err)
 	}
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, spendTxRec, nil); err.Chk(e) {
+		if e := store.InsertTx(ns, spendTxRec, nil); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, spendTxRec, nil, 1, true)
@@ -1777,7 +1777,7 @@ func TestAddDuplicateCreditAfterConfirm(t *testing.T) {
 	})
 	// Confirm the spending transaction at the next height.
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, spendTxRec, b101); err.Chk(e) {
+		if e := store.InsertTx(ns, spendTxRec, b101); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, spendTxRec, b101, 1, true)
@@ -1806,7 +1806,7 @@ func TestAddDuplicateCreditAfterConfirm(t *testing.T) {
 	//
 	// TODO(wilmer): ideally this shouldn't happen, so we should identify the real reason for this.
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
-		if e := store.InsertTx(ns, spendTxRec, nil); err.Chk(e) {
+		if e := store.InsertTx(ns, spendTxRec, nil); E.Chk(e) {
 			t.ftl.Ln(err)
 		}
 		e := store.AddCredit(ns, spendTxRec, nil, 1, true)

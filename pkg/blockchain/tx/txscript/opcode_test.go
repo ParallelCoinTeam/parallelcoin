@@ -21,7 +21,7 @@ func TestOpcodeDisabled(t *testing.T) {
 		e := opcodeDisabled(&pop, nil)
 		if !IsErrorCode(err, ErrDisabledOpcode) {
 			t.Errorf("opcodeDisabled: unexpected error - got %v, "+
-				"want %v", err, ErrDisabledOpcode)
+				"want %v", e, ErrDisabledOpcode)
 			continue
 		}
 	}

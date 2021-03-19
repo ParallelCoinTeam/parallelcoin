@@ -24,7 +24,7 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) (e e
 			return nil
 		}
 	}
-	inf.Ln("inserting unconfirmed transaction", rec.Hash)
+	I.Ln("inserting unconfirmed transaction", rec.Hash)
 	v, e := valueTxRecord(rec)
 	if e != nil {
 		return e
@@ -69,10 +69,10 @@ func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) (
 			if e != nil {
 				return e
 			}
-			dbg.Ln(
+			D.Ln(
 				"removing double spending transaction", doubleSpend.Hash,
 			)
-			if e := RemoveConflict(ns, &doubleSpend); err.Chk(e) {
+			if e := RemoveConflict(ns, &doubleSpend); E.Chk(e) {
 				return e
 			}
 		}
@@ -104,15 +104,15 @@ func RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) (e error) {
 			if e != nil {
 				return e
 			}
-			dbg.F(
+			D.F(
 				"transaction %v is part of a removed conflict chain -- removing as well %s",
 				spender.Hash,
 			)
-			if e := RemoveConflict(ns, &spender); err.Chk(e) {
+			if e := RemoveConflict(ns, &spender); E.Chk(e) {
 				return e
 			}
 		}
-		if e := deleteRawUnminedCredit(ns, k); err.Chk(e) {
+		if e := deleteRawUnminedCredit(ns, k); E.Chk(e) {
 			return e
 		}
 	}
@@ -121,7 +121,7 @@ func RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) (e error) {
 	for _, input := range rec.MsgTx.TxIn {
 		prevOut := &input.PreviousOutPoint
 		k := canonicalOutPoint(&prevOut.Hash, prevOut.Index)
-		if e := deleteRawUnminedInput(ns, k); err.Chk(e) {
+		if e := deleteRawUnminedInput(ns, k); E.Chk(e) {
 			return e
 		}
 	}

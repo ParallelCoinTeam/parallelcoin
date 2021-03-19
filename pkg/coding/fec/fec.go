@@ -15,7 +15,7 @@ var (
 	rsFEC      = func() *infectious.FEC {
 		fec, e := infectious.NewFEC(rsRequired, rsTotal)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 		}
 		return fec
 	}()
@@ -50,7 +50,7 @@ func Encode(data []byte) (chunks [][]byte, e error) {
 	}
 	e = rsFEC.Encode(data, output)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	for i := range shares {
@@ -73,7 +73,7 @@ func Encode(data []byte) (chunks [][]byte, e error) {
 func Decode(chunks [][]byte) (data []byte, e error) {
 	var shares []infectious.Share
 	if len(chunks) < 1 {
-		dbg.Ln("nil chunks")
+		D.Ln("nil chunks")
 		return nil, errors.New("asked to decode nothing")
 	}
 	totalLen := 0
@@ -97,7 +97,7 @@ func Decode(chunks [][]byte) (data []byte, e error) {
 		shares, func(s infectious.Share) {
 			copy(data[s.Number*dataLen:], s.Data)
 		},
-	); err.Chk(e) {
+	); E.Chk(e) {
 	}
 	// data, e = rsFEC.Decode(nil, shares)
 	if len(data) > 4 {

@@ -35,9 +35,13 @@ func main() {
 
 		fmt.Fprint(fh, "package "+os.Args[1]+"\n\n")
 		b, e := ioutil.ReadFile(files[i])
-		if e ==  nil {
-			fmt.Fprint(fh, fmt.Sprintf(`var %s = func() string {
-				s, _ := base64.StdEncoding.DecodeString("`, base64.StdEncoding.EncodeToString(b)))
+		if e == nil {
+			fmt.Fprint(
+				fh, fmt.Sprintf(
+					`var %s = func() string {
+				s, _ := base64.StdEncoding.DecodeString("`, base64.StdEncoding.EncodeToString(b),
+				),
+			)
 			fmt.Fprint(fh, "\")\n")
 		}
 		fmt.Println("writing file", files[i]+".go")

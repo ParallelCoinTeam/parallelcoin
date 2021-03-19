@@ -37,9 +37,9 @@ func fatalf(
 	format string, args ...interface{},
 ) {
 	var e error
-	if _, e = fmt.Fprintf(os.Stderr, format, args...); err.Chk(e) {
+	if _, e = fmt.Fprintf(os.Stderr, format, args...); E.Chk(e) {
 	}
-	if _, e = os.Stderr.Write(newlineBytes); err.Chk(e) {
+	if _, e = os.Stderr.Write(newlineBytes); E.Chk(e) {
 	}
 	os.Exit(1)
 }
@@ -173,7 +173,7 @@ func makeInputSource(
 		if e != nil {
 			sourceErr = fmt.Errorf(
 				"invalid data in listunspent result: %v",
-				err,
+				e,
 			)
 			break
 		}
@@ -260,9 +260,9 @@ func sweep() (e error) {
 	var totalSwept util.Amount
 	var numErrors int
 	var reportError = func(format string, args ...interface{}) {
-		if _, e = fmt.Fprintf(os.Stderr, format, args...); err.Chk(e) {
+		if _, e = fmt.Fprintf(os.Stderr, format, args...); E.Chk(e) {
 		}
-		if _, e = os.Stderr.Write(newlineBytes); err.Chk(e) {
+		if _, e = os.Stderr.Write(newlineBytes); E.Chk(e) {
 		}
 		numErrors++
 	}
@@ -302,7 +302,7 @@ func sweep() (e error) {
 			continue
 		}
 		outputAmount := util.Amount(tx.Tx.TxOut[0].Value)
-		inf.F(
+		I.F(
 			"Swept %v to destination account with transaction %v\n",
 			outputAmount, txHash,
 		)
@@ -311,7 +311,7 @@ func sweep() (e error) {
 	numPublished := len(sourceOutputs) - numErrors
 	transactionNoun := pickNoun(numErrors, "transaction", "transactions")
 	if numPublished != 0 {
-		inf.F(
+		I.F(
 			"Swept %v to destination account across %d %s\n",
 			totalSwept, numPublished, transactionNoun,
 		)
@@ -363,28 +363,28 @@ var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsy
 func init() {
 	// var _ = logg.AddFilteredSubsystem(subsystem)
 	// var _ = logg.AddHighlightedSubsystem(subsystem)
-	ftl.Ln("ftl.Ln")
-	err.Ln("err.Ln")
-	wrn.Ln("wrn.Ln")
-	inf.Ln("inf.Ln")
-	dbg.Ln("dbg.Ln")
-	trc.Ln("trc.Ln")
-	ftl.F("%s", "ftl.F")
-	err.F("%s", "err.F")
-	wrn.F("%s", "wrn.F")
-	inf.F("%s", "inf.F")
-	dbg.F("%s", "dbg.F")
-	trc.F("%s", "trc.F")
+	F.Ln("F.Ln")
+	E.Ln("E.Ln")
+	W.Ln("W.Ln")
+	I.Ln("I.Ln")
+	D.Ln("D.Ln")
+	F.Ln("T.Ln")
+	F.F("%s", "F.F")
+	E.F("%s", "E.F")
+	W.F("%s", "W.F")
+	I.F("%s", "I.F")
+	D.F("%s", "D.F")
+	T.F("%s", "T.F")
 	ftl.C(func() string { return "ftl.C" })
 	err.C(func() string { return "err.C" })
-	wrn.C(func() string { return "wrn.C" })
-	inf.C(func() string { return "inf.C" })
-	dbg.C(func() string { return "dbg.C" })
-	trc.C(func() string { return "trc.C" })
+	W.C(func() string { return "W.C" })
+	I.C(func() string { return "inf.C" })
+	D.C(func() string { return "D.C" })
+	T.C(func() string { return "T.C" })
 	ftl.C(func() string { return "ftl.C" })
-	err.Chk(errors.New("err.Chk"))
-	wrn.Chk(errors.New("wrn.Chk"))
-	inf.Chk(errors.New("inf.Chk"))
-	dbg.Chk(errors.New("dbg.Chk"))
-	trc.Chk(errors.New("trc.Chk"))
+	E.Chk(errors.New("E.Chk"))
+	W.Chk(errors.New("W.Chk"))
+	I.Chk(errors.New("inf.Chk"))
+	D.Chk(errors.New("D.Chk"))
+	T.Chk(errors.New("T.Chk"))
 }

@@ -22,8 +22,8 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
 		logg.App = "kopach"
-		inf.Ln("starting up kopach standalone miner for parallelcoin")
-		dbg.Ln(os.Args)
+		I.Ln("starting up kopach standalone miner for parallelcoin")
+		D.Ln(os.Args)
 		config.Configure(cx, "kopach", true)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
@@ -31,7 +31,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		defer cx.KillAll.Q()
 		e = kopach.Handle(cx)(c)
 		<-interrupt.HandlersDone
-		dbg.Ln("kopach main finished")
+		D.Ln("kopach main finished")
 		return
 	}
 }

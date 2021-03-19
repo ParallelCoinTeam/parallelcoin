@@ -89,7 +89,7 @@ func TestStartStop(t *testing.T) {
 	n.Start()
 	e := n.Stop()
 	if e != nil  {
-		t.Fatalf("Address Manager failed to stop: %v", err)
+		t.Fatalf("Address Manager failed to stop: %v", e)
 	}
 }
 func TestAddAddressByIP(t *testing.T) {
@@ -188,7 +188,7 @@ func TestAttempt(t *testing.T) {
 	// Add a new address and get it
 	e := n.AddAddressByIP(someIP + ":11047")
 	if e != nil  {
-		t.Fatalf("Adding address failed: %v", err)
+		t.Fatalf("Adding address failed: %v", e)
 	}
 	ka := n.GetAddress()
 	if !ka.LastAttempt().IsZero() {
@@ -205,7 +205,7 @@ func TestConnected(t *testing.T) {
 	// Add a new address and get it
 	e := n.AddAddressByIP(someIP + ":11047")
 	if e != nil  {
-		t.Fatalf("Adding address failed: %v", err)
+		t.Fatalf("Adding address failed: %v", e)
 	}
 	ka := n.GetAddress()
 	na := ka.NetAddress()
@@ -229,7 +229,7 @@ func TestNeedMoreAddresses(t *testing.T) {
 		s := fmt.Sprintf("%d.%d.173.147:11047", i/128+60, i%128+60)
 		addrs[i], e = n.DeserializeNetAddress(s)
 		if e != nil  {
-			t.Errorf("Failed to turn %s into an address: %v", s, err)
+			t.Errorf("Failed to turn %s into an address: %v", s, e)
 		}
 	}
 	srcAddr := wire.NewNetAddressIPPort(net.IPv4(173, 144, 173, 111), 11047, 0)
@@ -252,7 +252,7 @@ func TestGood(t *testing.T) {
 		s := fmt.Sprintf("%d.173.147.%d:11047", i/64+60, i%64+60)
 		addrs[i], e = n.DeserializeNetAddress(s)
 		if e != nil  {
-			t.Errorf("Failed to turn %s into an address: %v", s, err)
+			t.Errorf("Failed to turn %s into an address: %v", s, e)
 		}
 	}
 	srcAddr := wire.NewNetAddressIPPort(net.IPv4(173, 144, 173, 111), 11047, 0)
@@ -278,7 +278,7 @@ func TestGetAddress(t *testing.T) {
 	// Add a new address and get it
 	e := n.AddAddressByIP(someIP + ":11047")
 	if e != nil  {
-		t.Fatalf("Adding address failed: %v", err)
+		t.Fatalf("Adding address failed: %v", e)
 	}
 	ka := n.GetAddress()
 	if ka == nil {

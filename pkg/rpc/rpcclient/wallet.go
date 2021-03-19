@@ -79,7 +79,7 @@ func (r FutureListTransactionsResult) Receive() ([]btcjson.ListTransactionsResul
 // See ListTransactions for the blocking version and more details.
 func (c *Client) ListTransactionsAsync(account *string) FutureListTransactionsResult {
 	cmd := btcjson.NewListTransactionsCmd(account, nil, nil, nil)
-	dbg.S(cmd)
+	D.S(cmd)
 	return c.sendCmd(cmd)
 }
 
@@ -842,15 +842,15 @@ func (r FutureGetNewAddressResult) Receive() (util.Address, error) {
 //
 // See GetNewAddress for the blocking version and more details.
 func (c *Client) GetNewAddressAsync(account string) FutureGetNewAddressResult {
-	trc.Ln("### GetNewAddressAsync")
+	F.Ln("### GetNewAddressAsync")
 	cmd := btcjson.NewGetNewAddressCmd(&account)
-	// dbg.S(cmd)
+	// D.S(cmd)
 	return c.sendCmd(cmd)
 }
 
 // GetNewAddress returns a new address.
 func (c *Client) GetNewAddress(account string) (util.Address, error) {
-	trc.Ln("### GetNewAddress")
+	F.Ln("### GetNewAddress")
 	return c.GetNewAddressAsync(account).Receive()
 }
 

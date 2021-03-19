@@ -47,7 +47,7 @@ func NewRPCClient(
 	reconnectAttempts int,
 	quit qu.C,
 ) (*RPCClient, error) {
-	wrn.Ln("creating new RPC client")
+	W.Ln("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
 	}
@@ -78,12 +78,12 @@ func NewRPCClient(
 		OnRescanFinished:    client.onRescanFinished,
 		OnRescanProgress:    client.onRescanProgress,
 	}
-	wrn.Ln("*actually* creating rpc client")
+	W.Ln("*actually* creating rpc client")
 	rpcClient, e := rpcclient.New(client.connConfig, ntfnCallbacks, client.quit)
 	if e != nil {
 		return nil, e
 	}
-	// defer wrn.Ln("*succeeded* in making rpc client")
+	// defer W.Ln("*succeeded* in making rpc client")
 	client.Client = rpcClient
 	return client, nil
 }
@@ -97,7 +97,7 @@ func (c *RPCClient) BackEnd() string {
 // to process notifications sent by the server. After a limited number of connection attempts, this function gives up,
 // and therefore will not block forever waiting for the connection to be established to a server that may not exist.
 func (c *RPCClient) Start() (e error) {
-	// dbg.Ln(c.connConfig)
+	// D.Ln(c.connConfig)
 	e = c.Connect(c.reconnectAttempts)
 	if e != nil {
 		return e
@@ -212,7 +212,7 @@ func (c *RPCClient) FilterBlocks(req *FilterBlocksRequest,) (*FilterBlocksRespon
 		} else if !matched {
 			continue
 		}
-		trc.F(
+		T.F(
 			"fetching block height=%d hash=%v",
 			blk.Height, blk.Hash,
 		)
@@ -293,14 +293,14 @@ func (c *RPCClient) onRecvTx(tx *util.Tx, block *btcjson.BlockDetails) {
 	blk, e := parseBlock(block)
 	if e != nil {
 		// Log and drop improper notification.
-		err.Ln(
-			"recvtx notification bad block:", err,
+		E.Ln(
+			"recvtx notification bad block:", e,
 		)
 		return
 	}
 	rec, e := tm.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now())
 	if e != nil {
-		err.Ln("cannot create transaction record for relevant tx:", e)
+		E.Ln("cannot create transaction record for relevant tx:", e)
 		return
 	}
 	select {
@@ -329,7 +329,7 @@ func (c *RPCClient) onRescanFinished(hash *chainhash.Hash, height int32, blkTime
 func (c *RPCClient) handler() {
 	hash, height, e := c.GetBestBlock()
 	if e != nil {
-		err.Ln("failed to receive best block from chain server:", err)
+		E.Ln("failed to receive best block from chain server:", e)
 		c.Stop()
 		c.wg.Done()
 		return
@@ -381,7 +381,7 @@ out:
 			}
 		case c.currentBlock <- bs:
 		case <-c.quit.Wait():
-			dbg.Ln("legacy rpc handler stopping on quit channel close")
+			D.Ln("legacy rpc handler stopping on quit channel close")
 			break out
 		}
 	}

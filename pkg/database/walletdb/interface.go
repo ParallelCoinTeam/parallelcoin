@@ -138,13 +138,13 @@ func View(db DB, f func(tx ReadTx) error) (e error) {
 	var tx ReadTx
 	tx, e = db.BeginReadTx()
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	e = f(tx)
 	rollbackErr := tx.Rollback()
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	if rollbackErr != nil {
@@ -167,12 +167,12 @@ func Update(db DB, f func(tx ReadWriteTx) error) (e error) {
 	var tx ReadWriteTx
 	tx, e = db.BeginReadWriteTx()
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	e = f(tx)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		// Want to return the original error, not a rollback error if any occur.
 		_ = tx.Rollback()
 		return e

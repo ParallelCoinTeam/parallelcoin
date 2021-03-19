@@ -378,7 +378,7 @@ func TestChainViewNil(t *testing.T) {
 	// Ensure two unininitialized views are considered equal.
 	view := newChainView(nil)
 	if !view.Equals(newChainView(nil)) {
-		t.ftl.Ln("uninitialized nil views unequal")
+		t.F.Ln("uninitialized nil views unequal")
 	}
 	// Ensure the genesis of an uninitialized view does not produce a node.
 	if genesis := view.Genesis(); genesis != nil {

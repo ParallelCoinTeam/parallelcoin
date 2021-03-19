@@ -54,7 +54,7 @@ func (w *Window) Password(
 	p.unhideButton = w.IconButton(p.unhideClickable).Background("").
 		Icon(w.Icon().Color(p.borderColor).Src(&icons2.ActionVisibility))
 	p.showClickableFn = func(col string) {
-		dbg.Ln("show clickable clickeded")
+		D.Ln("show clickable clickeded")
 		p.hide = !p.hide
 		// if !p.hide {
 		// 	p.unhideButton = p.unhideButton.

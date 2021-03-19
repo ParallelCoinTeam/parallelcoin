@@ -56,8 +56,8 @@ func init() {
 		Create: createDBDriver,
 		Open:   openDBDriver,
 	}
-	if e := database.RegisterDriver(driver); err.Chk(e) {
+	if e := database.RegisterDriver(driver); E.Chk(e) {
 		panic(fmt.Sprintf("Failed to regiser database driver '%s': %v",
-			dbType, err))
+			dbType, e))
 	}
 }

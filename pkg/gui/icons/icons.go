@@ -39,7 +39,7 @@ func main() {
 					le := func(gtx l.Context, index int) l.Dimensions {
 						return ic.listWidgets[index](gtx)
 					}
-					// dbg.Ln(len(ic.listWidgets))
+					// D.Ln(len(ic.listWidgets))
 					return func(gtx l.Context) l.Dimensions {
 						return ic.th.Fill("PanelBg", ic.th.Inset(0.25, ic.lists["icons"].Vertical().Length(len(ic.listWidgets)).ListElement(le).Fn).Fn, l.Center).Fn(gtx)
 					}(gtx)
@@ -51,7 +51,7 @@ func main() {
 					quit.Q()
 					// os.Exit(0)
 				}, quit,
-			); err.Chk(e) {
+			); E.Chk(e) {
 		}
 	}()
 	app.Main()

@@ -187,7 +187,7 @@ func (s *Store) updateMinedBalance(
 		if e != nil {
 			return e
 		}
-		if e := deleteRawUnspent(ns, unspentKey); err.Chk(e) {
+		if e := deleteRawUnspent(ns, unspentKey); E.Chk(e) {
 			return e
 		}
 		newMinedBalance -= amt
@@ -216,7 +216,7 @@ func (s *Store) updateMinedBalance(
 		cred.outPoint.Index = index
 		cred.amount = amount
 		cred.change = change
-		if e := putUnspentCredit(ns, &cred); err.Chk(e) {
+		if e := putUnspentCredit(ns, &cred); E.Chk(e) {
 			return e
 		}
 		e = putUnspent(ns, &cred.outPoint, &block.Block)
@@ -241,7 +241,7 @@ func (s *Store) updateMinedBalance(
 func (s *Store) deleteUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) (e error) {
 	for i := range rec.MsgTx.TxOut {
 		k := canonicalOutPoint(&rec.Hash, uint32(i))
-		if e := deleteRawUnminedCredit(ns, k); err.Chk(e) {
+		if e := deleteRawUnminedCredit(ns, k); E.Chk(e) {
 			return e
 		}
 	}
@@ -293,18 +293,18 @@ func (s *Store) insertMinedTx(
 	if e != nil {
 		return e
 	}
-	if e := putTxRecord(ns, rec, &block.Block); err.Chk(e) {
+	if e := putTxRecord(ns, rec, &block.Block); E.Chk(e) {
 		return e
 	}
 	// Determine if this transaction has affected our balance, and if so, update it.
-	if e := s.updateMinedBalance(ns, rec, block); err.Chk(e) {
+	if e := s.updateMinedBalance(ns, rec, block); E.Chk(e) {
 		return e
 	}
 	// If this transaction previously existed within the store as unmined, we'll need to remove it from the unmined
 	// bucket.
 	if v := existsRawUnmined(ns, rec.Hash[:]); v != nil {
-		inf.F("marking unconfirmed transaction %v mined in block %d", &rec.Hash, block.Height)
-		if e := s.deleteUnminedTx(ns, rec); err.Chk(e) {
+		I.F("marking unconfirmed transaction %v mined in block %d", &rec.Hash, block.Height)
+		if e := s.deleteUnminedTx(ns, rec); E.Chk(e) {
 			return e
 		}
 	}
@@ -364,7 +364,7 @@ func (s *Store) addCredit(
 		return false, nil
 	}
 	txOutAmt := util.Amount(rec.MsgTx.TxOut[index].Value)
-	trc.F(
+	T.F(
 		"marking transaction %v output %d (%v) spendable",
 		rec.Hash, index, txOutAmt,
 	)
@@ -417,7 +417,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 			break
 		}
 		heightsToRemove = append(heightsToRemove, it.elem.Height)
-		trc.F("rolling back %d transactions from block %v height %d", len(b.transactions), b.Hash, b.Height)
+		T.F("rolling back %d transactions from block %v height %d", len(b.transactions), b.Hash, b.Height)
 		for i := range b.transactions {
 			txHash := &b.transactions[i]
 			recKey := keyTxRecord(txHash, &b.Block)
@@ -589,7 +589,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 			if e != nil {
 				return e
 			}
-			dbg.F(
+			D.F(
 				"transaction %v spends a removed coinbase output -- removing as well %s",
 				unminedRec.Hash,
 			)

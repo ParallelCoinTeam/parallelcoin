@@ -89,25 +89,25 @@ type Worker struct {
 
 func (w *Worker) Start() {
 	// if !*cx.Config.Generate {
-	// 	dbg.Ln("called start but not running generate")
+	// 	D.Ln("called start but not running generate")
 	// 	return
 	// }
-	dbg.Ln("starting up kopach workers")
+	D.Ln("starting up kopach workers")
 	w.workers = []*worker.Worker{}
 	w.clients = []*client.Client{}
 	for i := 0; i < *w.cx.Config.GenThreads; i++ {
-		dbg.Ln("starting worker", i)
+		D.Ln("starting worker", i)
 		cmd, _ := worker.Spawn(w.quit, os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, *w.cx.Config.LogLevel)
 		w.workers = append(w.workers, cmd)
 		w.clients = append(w.clients, client.New(cmd.StdConn))
 	}
 	for i := range w.clients {
-		trc.Ln("sending pass to worker", i)
+		F.Ln("sending pass to worker", i)
 		e := w.clients[i].SendPass(*w.cx.Config.MinerPass)
 		if e != nil {
 		}
 	}
-	dbg.Ln("setting workers to active")
+	D.Ln("setting workers to active")
 	w.active.Store(true)
 	
 }
@@ -115,19 +115,19 @@ func (w *Worker) Start() {
 func (w *Worker) Stop() {
 	var e error
 	for i := range w.clients {
-		if e = w.clients[i].Pause(); err.Chk(e) {
+		if e = w.clients[i].Pause(); E.Chk(e) {
 		}
-		if e = w.clients[i].Stop(); err.Chk(e) {
+		if e = w.clients[i].Stop(); E.Chk(e) {
 		}
-		if e = w.clients[i].Close(); err.Chk(e) {
+		if e = w.clients[i].Close(); E.Chk(e) {
 		}
 	}
 	for i := range w.workers {
-		// if e = w.workers[i].Interrupt(); !err.Chk(e) {
+		// if e = w.workers[i].Interrupt(); !E.Chk(e) {
 		// }
-		if e = w.workers[i].Kill(); !err.Chk(e) {
+		if e = w.workers[i].Kill(); !E.Chk(e) {
 		}
-		dbg.Ln("stopped worker", i)
+		D.Ln("stopped worker", i)
 	}
 	w.active.Store(false)
 	w.quit.Q()
@@ -135,9 +135,9 @@ func (w *Worker) Stop() {
 
 func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		dbg.Ln("miner controller starting")
+		D.Ln("miner controller starting")
 		randomBytes := make([]byte, 4)
-		if _, e = rand.Read(randomBytes); err.Chk(e) {
+		if _, e = rand.Read(randomBytes); E.Chk(e) {
 		}
 		w := &Worker{
 			id:            fmt.Sprintf("%x", randomBytes),
@@ -153,7 +153,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
-		dbg.Ln("opening broadcast channel listener")
+		D.Ln("opening broadcast channel listener")
 		w.conn, e = transport.NewBroadcastChannel(
 			"kopachmain", w, *cx.Config.MinerPass,
 			transport.DefaultPort, control.MaxDatagramSize, handlers,
@@ -173,7 +173,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		}
 		// controller watcher thread
 		go func() {
-			dbg.Ln("starting controller watcher")
+			D.Ln("starting controller watcher")
 			ticker := time.NewTicker(time.Second)
 			logger := time.NewTicker(time.Second * 5)
 		out:
@@ -185,12 +185,12 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*6 && w.FirstSender.Load() != 0
 					if wasSending {
-						dbg.Ln("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
+						D.Ln("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be listened to
 						w.FirstSender.Store(0)
 						// pause the workers
 						for i := range w.clients {
-							dbg.Ln("sending pause to worker", i)
+							D.Ln("sending pause to worker", i)
 							e := w.clients[i].Pause()
 							if e != nil {
 							}
@@ -207,23 +207,23 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 						w.quit.Q()
 					}
 				case <-w.StartChan.Wait():
-					dbg.Ln("received signal on StartChan")
+					D.Ln("received signal on StartChan")
 					*cx.Config.Generate = true
 					save.Pod(cx.Config)
 					w.Start()
 				case <-w.StopChan.Wait():
-					dbg.Ln("received signal on StopChan")
+					D.Ln("received signal on StopChan")
 					*cx.Config.Generate = false
 					save.Pod(cx.Config)
 					w.Stop()
 				case s := <-w.PassChan:
-					dbg.Ln("received signal on PassChan", s)
+					D.Ln("received signal on PassChan", s)
 					*cx.Config.MinerPass = s
 					save.Pod(cx.Config)
 					w.Stop()
 					w.Start()
 				case n := <-w.SetThreads:
-					dbg.Ln("received signal on SetThreads", n)
+					D.Ln("received signal on SetThreads", n)
 					*cx.Config.GenThreads = n
 					save.Pod(cx.Config)
 					if *cx.Config.Generate {
@@ -238,19 +238,19 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 						w.Start()
 					}
 				case <-w.quit.Wait():
-					dbg.Ln("stopping from quit")
+					D.Ln("stopping from quit")
 					interrupt.Request()
 					break out
 				}
 			}
-			dbg.Ln("finished kopach miner work loop")
+			D.Ln("finished kopach miner work loop")
 			logg.LogChanDisabled.Store(true)
 		}()
-		dbg.Ln("listening on", control.UDP4MulticastAddress)
+		D.Ln("listening on", control.UDP4MulticastAddress)
 		<-w.quit
-		inf.Ln("kopach shutting down") // , interrupt.GoroutineDump())
+		I.Ln("kopach shutting down") // , interrupt.GoroutineDump())
 		// <-interrupt.HandlersDone
-		inf.Ln("kopach finished shutdown")
+		I.Ln("kopach finished shutdown")
 		return
 	}
 }
@@ -260,7 +260,7 @@ var handlers = transport.Handlers{
 	string(hashrate.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (e error) {
 		c := ctx.(*Worker)
 		if !c.active.Load() {
-			dbg.Ln("not active")
+			D.Ln("not active")
 			return
 		}
 		var hr hashrate.Hashrate
@@ -278,10 +278,10 @@ var handlers = transport.Handlers{
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (e error) {
-		trc.Ln("received job")
+		F.Ln("received job")
 		w := ctx.(*Worker)
 		if !w.active.Load() {
-			trc.Ln("not active")
+			F.Ln("not active")
 			return
 		}
 		jr := templates.Message{}
@@ -292,21 +292,21 @@ var handlers = transport.Handlers{
 			firstSender := w.FirstSender.Load()
 			otherSent := firstSender != cN && firstSender != 0
 			if otherSent {
-				trc.Ln("ignoring other controller job")
+				F.Ln("ignoring other controller job")
 				// ignore other controllers while one is active and received first
 				return
 			}
 		} else {
-			// inf.Ln("no tworking on job of local controller")
-			// inf.Ln("p9 average",fork.P9Average)
-			// trc.Ln("now listening to controller at", cN)
+			// I.Ln("no tworking on job of local controller")
+			// I.Ln("p9 average",fork.P9Average)
+			// F.Ln("now listening to controller at", cN)
 			w.FirstSender.Store(0)
 			return
 		}
 		w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
-			if e = w.clients[i].NewJob(&jr); err.Chk(e) {
+			if e = w.clients[i].NewJob(&jr); E.Chk(e) {
 			}
 		}
 		return
@@ -322,10 +322,10 @@ var handlers = transport.Handlers{
 		np := advt.UUID
 		// np := p.GetControllerListenerPort()
 		// ns := net.JoinHostPort(strings.Split(ni.String(), ":")[0], fmt.Sprint(np))
-		dbg.Ln("received pause from server at", ni, np)
+		D.Ln("received pause from server at", ni, np)
 		if fs == np {
 			for i := range w.clients {
-				dbg.Ln("sending pause to worker", i, fs, np)
+				D.Ln("sending pause to worker", i, fs, np)
 				e := w.clients[i].Pause()
 				if e != nil {
 				}
@@ -339,22 +339,22 @@ var handlers = transport.Handlers{
 		b []byte,
 	) (e error) {
 		// w := ctx.(*Worker)
-		// dbg.Ln("shuffling work due to solution on network")
+		// D.Ln("shuffling work due to solution on network")
 		// w.FirstSender.Store(0)
-		// 	dbg.Ln("solution detected from miner at", src)
+		// 	D.Ln("solution detected from miner at", src)
 		// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
 		// 	if len(portSlice) < 2 {
-		// 		dbg.Ln("error with solution", w.FirstSender.Load(), portSlice)
+		// 		D.Ln("error with solution", w.FirstSender.Load(), portSlice)
 		// 		return
 		// 	}
 		// 	// port := portSlice[1]
 		// 	// j := sol.LoadSolContainer(b)
 		// 	// senderPort := j.GetSenderPort()
 		// 	// if fmt.Sprint(senderPort) == port {
-		// 	// // wrn.Ln("we found a solution")
+		// 	// // W.Ln("we found a solution")
 		// 	// // prepend to list of solutions for GUI display if enabled
 		// 	// if *w.cx.Config.KopachGUI {
-		// 	// 	// dbg.Ln("length solutions", len(w.solutions))
+		// 	// 	// D.Ln("length solutions", len(w.solutions))
 		// 	// 	blok := j.GetMsgBlock()
 		// 	// 	w.solutions = append(
 		// 	// 		w.solutions, []SolutionData{
@@ -382,14 +382,14 @@ var handlers = transport.Handlers{
 		// 	// 	w.Update <- struct{}{}
 		// 	// }
 		// 	// }
-		// 	// dbg.Ln("no longer listening to", w.FirstSender.Load())
+		// 	// D.Ln("no longer listening to", w.FirstSender.Load())
 		// 	// w.FirstSender.Store("")
 		return
 	},
 }
 
 func (w *Worker) HashReport() float64 {
-	trc.Ln("generating hash report")
+	F.Ln("generating hash report")
 	w.hashSampleBuf.Add(w.hashCount.Load())
 	av := ewma.NewMovingAverage()
 	var i int
@@ -406,9 +406,9 @@ func (w *Worker) HashReport() float64 {
 			i++
 			return nil
 		},
-	); err.Chk(e) {
+	); E.Chk(e) {
 	}
 	average := av.Value()
-	dbg.Ln("hashrate average", average)
+	D.Ln("hashrate average", average)
 	return average
 }

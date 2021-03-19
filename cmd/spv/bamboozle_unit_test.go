@@ -5,10 +5,10 @@ import (
 	"os"
 	"sort"
 	"testing"
-
+	
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
@@ -17,7 +17,7 @@ import (
 
 func decodeHashNoError(str string) *chainhash.Hash {
 	hash, e := chainhash.NewHashFromStr(str)
-	if e != nil  {
+	if e != nil {
 		panic("Got error decoding hash: " + err.Error())
 	}
 	return hash
@@ -120,24 +120,28 @@ var (
 		},
 	}
 	correctFilter, _ = builder.BuildBasicFilter(block, nil)
-	fakeFilter1, _   = gcs.FromBytes(2, builder.DefaultP, builder.DefaultM, []byte{
-		0x30, 0x43, 0x02, 0x1f, 0x4d, 0x23, 0x81, 0xdc,
-		0x97, 0xf1, 0x82, 0xab, 0xd8, 0x18, 0x5f, 0x51,
-		0x75, 0x30, 0x18, 0x52, 0x32, 0x12, 0xf5, 0xdd,
-		0xc0, 0x7c, 0xc4, 0xe6, 0x3a, 0x8d, 0xc0, 0x36,
-		0x58, 0xda, 0x19, 0x02, 0x20, 0x60, 0x8b, 0x5c,
-		0x4d, 0x92, 0xb8, 0x6b, 0x6d, 0xe7, 0xd7, 0x8e,
-		0xf2, 0x3a, 0x2f, 0xa7, 0x35, 0xbc, 0xb5, 0x9b,
-		0x91, 0x4a, 0x48, 0xb0, 0xe1, 0x87, 0xc5, 0xe7,
-		0x56, 0x9a, 0x18, 0x19, 0x70, 0x01,
-	})
-	fakeFilter2, _ = gcs.FromBytes(2, builder.DefaultP, builder.DefaultM, []byte{
-		0x03, 0x07, 0xea, 0xd0, 0x84, 0x80, 0x7e, 0xb7,
-		0x63, 0x46, 0xdf, 0x69, 0x77, 0x00, 0x0c, 0x89,
-		0x39, 0x2f, 0x45, 0xc7, 0x64, 0x25, 0xb2, 0x61,
-		0x81, 0xf5, 0x21, 0xd7, 0xf3, 0x70, 0x06, 0x6a,
-		0x8f,
-	})
+	fakeFilter1, _   = gcs.FromBytes(
+		2, builder.DefaultP, builder.DefaultM, []byte{
+			0x30, 0x43, 0x02, 0x1f, 0x4d, 0x23, 0x81, 0xdc,
+			0x97, 0xf1, 0x82, 0xab, 0xd8, 0x18, 0x5f, 0x51,
+			0x75, 0x30, 0x18, 0x52, 0x32, 0x12, 0xf5, 0xdd,
+			0xc0, 0x7c, 0xc4, 0xe6, 0x3a, 0x8d, 0xc0, 0x36,
+			0x58, 0xda, 0x19, 0x02, 0x20, 0x60, 0x8b, 0x5c,
+			0x4d, 0x92, 0xb8, 0x6b, 0x6d, 0xe7, 0xd7, 0x8e,
+			0xf2, 0x3a, 0x2f, 0xa7, 0x35, 0xbc, 0xb5, 0x9b,
+			0x91, 0x4a, 0x48, 0xb0, 0xe1, 0x87, 0xc5, 0xe7,
+			0x56, 0x9a, 0x18, 0x19, 0x70, 0x01,
+		},
+	)
+	fakeFilter2, _ = gcs.FromBytes(
+		2, builder.DefaultP, builder.DefaultM, []byte{
+			0x03, 0x07, 0xea, 0xd0, 0x84, 0x80, 0x7e, 0xb7,
+			0x63, 0x46, 0xdf, 0x69, 0x77, 0x00, 0x0c, 0x89,
+			0x39, 0x2f, 0x45, 0xc7, 0x64, 0x25, 0xb2, 0x61,
+			0x81, 0xf5, 0x21, 0xd7, 0xf3, 0x70, 0x06, 0x6a,
+			0x8f,
+		},
+	)
 	headers1 = &wire.MsgCFHeaders{
 		FilterHashes: []*chainhash.Hash{
 			decodeHashNoError("01234567890abcdeffedcba09f76543210"),
@@ -404,31 +408,31 @@ func heightToHeader(height uint32) *wire.BlockHeader {
 }
 func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) {
 	tempDir, e := ioutil.TempDir("", "neutrino")
-	if e != nil  {
+	if e != nil {
 		t.Fatalf("Failed to create temporary directory: %s", err)
 	}
 	defer func() {
-		if e := os.RemoveAll(tempDir); err.Chk(e) {
+		if e := os.RemoveAll(tempDir); E.Chk(e) {
 		}
 	}()
 	db, e := walletdb.Create("bdb", tempDir+"/weks.db")
-	if e != nil  {
+	if e != nil {
 		t.Fatalf("DBError opening DB: %s", err)
 	}
 	defer func() {
-		if e := db.Close(); err.Chk(e) {
+		if e := db.Close(); E.Chk(e) {
 		}
 	}()
 	hdrStore, e := headerfs.NewBlockHeaderStore(
 		tempDir, db, &netparams.SimNetParams,
 	)
-	if e != nil  {
+	if e != nil {
 		t.Fatalf("DBError creating block header store: %s", err)
 	}
 	cfStore, e := headerfs.NewFilterHeaderStore(
 		tempDir, db, headerfs.RegularFilter, &netparams.SimNetParams,
 	)
-	if e != nil  {
+	if e != nil {
 		t.Fatalf("DBError creating filter header store: %s", err)
 	}
 	var (
@@ -441,108 +445,138 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		for j := 1; j < wire.CFCheckptInterval; j++ {
 			height := uint32(i*wire.CFCheckptInterval + j)
 			header := heightToHeader(height)
-			hdrBatch = append(hdrBatch, headerfs.BlockHeader{
-				BlockHeader: header,
-				Height:      height,
-			})
-			cfBatch = append(cfBatch, headerfs.FilterHeader{
-				FilterHash: zeroHash,
-				HeaderHash: header.BlockHash(),
-				Height:     height,
-			})
+			hdrBatch = append(
+				hdrBatch, headerfs.BlockHeader{
+					BlockHeader: header,
+					Height:      height,
+				},
+			)
+			cfBatch = append(
+				cfBatch, headerfs.FilterHeader{
+					FilterHash: zeroHash,
+					HeaderHash: header.BlockHash(),
+					Height:     height,
+				},
+			)
 		}
 		height := uint32((i + 1) * wire.CFCheckptInterval)
 		header := heightToHeader(height)
-		hdrBatch = append(hdrBatch, headerfs.BlockHeader{
-			BlockHeader: header,
-			Height:      height,
-		})
-		cfBatch = append(cfBatch, headerfs.FilterHeader{
-			FilterHash: *point,
-			HeaderHash: header.BlockHash(),
-			Height:     height,
-		})
-		if e = hdrStore.WriteHeaders(hdrBatch...); err.Chk(e) {
+		hdrBatch = append(
+			hdrBatch, headerfs.BlockHeader{
+				BlockHeader: header,
+				Height:      height,
+			},
+		)
+		cfBatch = append(
+			cfBatch, headerfs.FilterHeader{
+				FilterHash: *point,
+				HeaderHash: header.BlockHash(),
+				Height:     height,
+			},
+		)
+		if e = hdrStore.WriteHeaders(hdrBatch...); E.Chk(e) {
 			t.Fatalf("DBError writing batch of headers: %s", err)
 		}
-		if e = cfStore.WriteHeaders(cfBatch...); err.Chk(e) {
+		if e = cfStore.WriteHeaders(cfBatch...); E.Chk(e) {
 			t.Fatalf("DBError writing batch of cfheaders: %s", err)
 		}
 	}
 	for i := 0; i < testCase.storeAddHeight; i++ {
-		height = uint32(len(testCase.storepoints)*
-			wire.CFCheckptInterval + i)
+		height = uint32(
+			len(testCase.storepoints)*
+				wire.CFCheckptInterval + i,
+		)
 		header = heightToHeader(height)
-		if e = hdrStore.WriteHeaders(headerfs.BlockHeader{
-			BlockHeader: header,
-			Height:      height,
-		}); err.Chk(e) {
+		if e = hdrStore.WriteHeaders(
+			headerfs.BlockHeader{
+				BlockHeader: header,
+				Height:      height,
+			},
+		); E.Chk(e) {
 			t.Fatalf("DBError writing single block header: %s", err)
 		}
-		if e = cfStore.WriteHeaders(headerfs.FilterHeader{
-			FilterHash: zeroHash,
-			HeaderHash: zeroHash,
-			Height:     height,
-		}); err.Chk(e) {
+		if e = cfStore.WriteHeaders(
+			headerfs.FilterHeader{
+				FilterHash: zeroHash,
+				HeaderHash: zeroHash,
+				Height:     height,
+			},
+		); E.Chk(e) {
 			t.Fatalf("DBError writing single cfheader: %s", err)
 		}
 	}
 	heightDiff, e := checkCFCheckptSanity(testCase.checkpoints, cfStore)
-	if e != nil  {
+	if e != nil {
 		t.Fatalf("DBError from checkCFCheckptSanity: %s", err)
 	}
 	if heightDiff != testCase.heightDiff {
-		t.Fatalf("Height difference mismatch. Expected: %d, got: %d",
-			testCase.heightDiff, heightDiff)
+		t.Fatalf(
+			"Height difference mismatch. Expected: %d, got: %d",
+			testCase.heightDiff, heightDiff,
+		)
 	}
 }
 func TestCheckCFCheckptSanity(t *testing.T) {
 	t.Parallel()
 	for _, testCase := range cfCheckptTestCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			runCheckCFCheckptSanityTestCase(t, testCase)
-		})
+		t.Run(
+			testCase.name, func(t *testing.T) {
+				runCheckCFCheckptSanityTestCase(t, testCase)
+			},
+		)
 	}
 }
 func TestCheckForCFHeadersMismatch(t *testing.T) {
 	t.Parallel()
 	for _, testCase := range checkCFHTestCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			mismatch := checkForCFHeaderMismatch(
-				testCase.headers, testCase.idx,
-			)
-			if mismatch != testCase.mismatch {
-				t.Fatalf("Wrong mismatch detected. Expected: "+
-					"%t, got: %t", testCase.mismatch,
-					mismatch)
-			}
-		})
+		t.Run(
+			testCase.name, func(t *testing.T) {
+				mismatch := checkForCFHeaderMismatch(
+					testCase.headers, testCase.idx,
+				)
+				if mismatch != testCase.mismatch {
+					t.Fatalf(
+						"Wrong mismatch detected. Expected: "+
+							"%t, got: %t", testCase.mismatch,
+						mismatch,
+					)
+				}
+			},
+		)
 	}
 }
 func TestResolveCFHeadersMismatch(t *testing.T) {
 	t.Parallel()
 	for _, testCase := range resolveCFHTestCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			badPeers, e := resolveCFHeaderMismatch(
-				block, wire.GCSFilterRegular, testCase.peerFilters,
-			)
-			if e != nil  {
-				t.Fatalf("Couldn't resolve cfheader "+
-					"mismatch: %v", err)
-			}
-			if len(badPeers) != len(testCase.badPeers) {
-				t.Fatalf("Banned wrong peers.\nExpected: "+
-					"%#v\nGot: %#v", testCase.badPeers,
-					badPeers)
-			}
-			sort.Strings(badPeers)
-			for i := 0; i < len(badPeers); i++ {
-				if badPeers[i] != testCase.badPeers[i] {
-					t.Fatalf("Banned wrong peers.\n"+
-						"Expected: %#v\nGot: %#v",
-						testCase.badPeers, badPeers)
+		t.Run(
+			testCase.name, func(t *testing.T) {
+				badPeers, e := resolveCFHeaderMismatch(
+					block, wire.GCSFilterRegular, testCase.peerFilters,
+				)
+				if e != nil {
+					t.Fatalf(
+						"Couldn't resolve cfheader "+
+							"mismatch: %v", err,
+					)
 				}
-			}
-		})
+				if len(badPeers) != len(testCase.badPeers) {
+					t.Fatalf(
+						"Banned wrong peers.\nExpected: "+
+							"%#v\nGot: %#v", testCase.badPeers,
+						badPeers,
+					)
+				}
+				sort.Strings(badPeers)
+				for i := 0; i < len(badPeers); i++ {
+					if badPeers[i] != testCase.badPeers[i] {
+						t.Fatalf(
+							"Banned wrong peers.\n"+
+								"Expected: %#v\nGot: %#v",
+							testCase.badPeers, badPeers,
+						)
+					}
+				}
+			},
+		)
 	}
 }

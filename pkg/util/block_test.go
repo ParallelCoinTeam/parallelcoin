@@ -229,29 +229,29 @@ func TestBlockErrors(t *testing.T) {
 	_, e = util.NewBlockFromBytes(shortBytes)
 	if e != io.EOF {
 		t.Errorf("NewBlockFromBytes: did not get expected error - "+
-			"got %v, want %v", err, io.EOF)
+			"got %v, want %v", e, io.EOF)
 	}
 	// Ensure TxHash returns expected error on invalid indices.
 	_, e = b.TxHash(-1)
 	if _, ok := err.(util.OutOfRangeError); !ok {
 		t.Errorf("TxHash: wrong error - got: %v <%T>, "+
-			"want: <%T>", err, err, util.OutOfRangeError(""))
+			"want: <%T>", e, err, util.OutOfRangeError(""))
 	}
 	_, e = b.TxHash(len(Block100000.Transactions) + 1)
 	if _, ok := err.(util.OutOfRangeError); !ok {
 		t.Errorf("TxHash: wrong error - got: %v <%T>, "+
-			"want: <%T>", err, err, util.OutOfRangeError(""))
+			"want: <%T>", e, err, util.OutOfRangeError(""))
 	}
 	// Ensure Tx returns expected error on invalid indices.
 	_, e = b.Tx(-1)
 	if _, ok := err.(util.OutOfRangeError); !ok {
 		t.Errorf("Tx: wrong error - got: %v <%T>, "+
-			"want: <%T>", err, err, util.OutOfRangeError(""))
+			"want: <%T>", e, err, util.OutOfRangeError(""))
 	}
 	_, e = b.Tx(len(Block100000.Transactions) + 1)
 	if _, ok := err.(util.OutOfRangeError); !ok {
 		t.Errorf("Tx: wrong error - got: %v <%T>, "+
-			"want: <%T>", err, err, util.OutOfRangeError(""))
+			"want: <%T>", e, err, util.OutOfRangeError(""))
 	}
 	// Ensure TxLoc returns expected error with short byte buffer. This makes use of the test package only function,
 	// SetBlockBytes, to inject a short byte buffer.
@@ -259,7 +259,7 @@ func TestBlockErrors(t *testing.T) {
 	_, e = b.TxLoc()
 	if e != io.EOF {
 		t.Errorf("TxLoc: did not get expected error - "+
-			"got %v, want %v", err, io.EOF)
+			"got %v, want %v", e, io.EOF)
 	}
 }
 

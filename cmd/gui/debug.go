@@ -1,13 +1,12 @@
 package gui
 
-
 // func (wg *WalletGUI) goRoutines() {
 // 	var e error
 // 	if wg.App.ActivePageGet() == "goroutines" || wg.unlockPage.ActivePageGet() == "goroutines" {
-// 		dbg.Ln("updating goroutines data")
+// 		D.Ln("updating goroutines data")
 // 		var b []byte
 // 		buf := bytes.NewBuffer(b)
-// 		if e = pprof.Lookup("goroutine").WriteTo(buf, 2); err.Chk(e) {
+// 		if e = pprof.Lookup("goroutine").WriteTo(buf, 2); E.Chk(e) {
 // 		}
 // 		lines := strings.Split(buf.String(), "\n")
 // 		var out []l.Widget
@@ -40,13 +39,13 @@ package gui
 // 										out[0] = split[0]
 // 										out[1] = split[1]
 // 									}
-// 									dbg.Ln("path", out[0], "line", out[1])
+// 									D.Ln("path", out[0], "line", out[1])
 // 									goland := "goland64.exe"
 // 									if runtime.GOOS != "windows" {
 // 										goland = "goland"
 // 									}
 // 									launch := exec.Command(goland, "--line", out[1], out[0])
-// 									if e = launch.Start(); err.Chk(e) {
+// 									if e = launch.Start(); E.Chk(e) {
 // 									}
 // 								}()
 // 							},
@@ -56,7 +55,7 @@ package gui
 // 				)
 // 			}
 // 		}
-// 		// dbg.Ln(outString)
+// 		// D.Ln(outString)
 // 		wg.State.SetGoroutines(out)
 // 		wg.invalidate <- struct{}{}
 // 	}

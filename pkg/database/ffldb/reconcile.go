@@ -51,7 +51,7 @@ func deserializeWriteRow(writeRow []byte) (uint32, uint32, error) {
 func reconcileDB(pdb *db, create bool) (database.DB, error) {
 	// Perform initial internal bucket and value creation during database creation.
 	if create {
-		if e := initDB(pdb.cache.ldb); err.Chk(e) {
+		if e := initDB(pdb.cache.ldb); E.Chk(e) {
 			return nil, e
 		}
 	}
@@ -79,13 +79,13 @@ func reconcileDB(pdb *db, create bool) (database.DB, error) {
 	wc := pdb.store.writeCursor
 	if wc.curFileNum > curFileNum || (wc.curFileNum == curFileNum &&
 		wc.curOffset > curOffset) {
-		dbg.Ln("detected unclean shutdown - repairing")
-		dbg.F(
+		D.Ln("detected unclean shutdown - repairing")
+		D.F(
 			"metadata claims file %d, offset %d. block data is at file %d, offset %d",
 			curFileNum, curOffset, wc.curFileNum, wc.curOffset,
 		)
 		pdb.store.handleRollback(curFileNum, curOffset)
-		dbg.Ln("database sync complete")
+		D.Ln("database sync complete")
 	}
 	
 	// When the write cursor position found by scanning the block files on disk is BEFORE the position the metadata
@@ -101,7 +101,7 @@ func reconcileDB(pdb *db, create bool) (database.DB, error) {
 			"metadata claims file %d, offset %d, but block data is at file %d, offset %d",
 			curFileNum, curOffset, wc.curFileNum, wc.curOffset,
 		)
-		wrn.Ln("***Database corruption detected***:", str)
+		W.Ln("***Database corruption detected***:", str)
 		return nil, makeDbErr(database.ErrCorruption, str, nil)
 	}
 	return pdb, nil

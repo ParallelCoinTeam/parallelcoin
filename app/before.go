@@ -26,15 +26,15 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		dbg.Ln("running beforeFunc")
+		D.Ln("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
 			cx.DataDir = c.String("datadir")
-			dbg.Ln("datadir", *cx.Config.DataDir)
+			D.Ln("datadir", *cx.Config.DataDir)
 		}
-		dbg.Ln(c.IsSet("D"), c.IsSet("datadir"))
+		D.Ln(c.IsSet("D"), c.IsSet("datadir"))
 		// // propagate datadir path to interrupt for restart handling
 		// interrupt.DataDir = cx.DataDir
 		// if there is a delaystart requested, pause for 3 seconds
@@ -42,7 +42,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			time.Sleep(time.Second * 3)
 		}
 		if c.IsSet("pipelog") {
-			dbg.Ln("pipe logger enabled")
+			D.Ln("pipe logger enabled")
 			*cx.Config.PipeLog = c.Bool("pipelog")
 			serve.Log(cx.KillAll, fmt.Sprint(os.Args))
 		}
@@ -58,29 +58,29 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 				cx.Config, cx.ConfigMap = pod.EmptyConfig()
 				e = json.Unmarshal(b, cx.Config)
 				if e != nil {
-					err.Ln("error unmarshalling config", e)
+					E.Ln("error unmarshalling config", e)
 					// os.Exit(1)
 					return e
 				}
 			} else {
-				ftl.Ln("unexpected error reading configuration file:", e)
+				F.Ln("unexpected error reading configuration file:", e)
 				// os.Exit(1)
 				return e
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
-			dbg.Ln("will save config after configuration")
+			D.Ln("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("loglevel") {
-			trc.Ln("set loglevel", c.String("loglevel"))
+			F.Ln("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
 		}
 		logg.SetLogLevel(*cx.Config.LogLevel)
 		if !*cx.Config.PipeLog {
 			// if/when running further instances of the same version no reason
 			// to print the version message again
-			dbg.Ln("\nrunning", os.Args, version.Get())
+			D.Ln("\nrunning", os.Args, version.Get())
 		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")
@@ -98,7 +98,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
-					dbg.Ln("using mainnet for node")
+					D.Ln("using mainnet for node")
 				}
 				cx.ActiveNet = &netparams.MainNetParams
 			}
@@ -269,7 +269,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			// if LAN is turned on it means by default we are on testnet
 			cx.ActiveNet = &netparams.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
-				dbg.Ln("set lan", c.Bool("lan"))
+				D.Ln("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")
 				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
 			} else {
@@ -287,7 +287,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 		}
 		if c.IsSet("minerpass") {
 			*cx.Config.MinerPass = c.String("minerpass")
-			dbg.Ln("--------- set minerpass", *cx.Config.MinerPass)
+			D.Ln("--------- set minerpass", *cx.Config.MinerPass)
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("blockminsize") {
@@ -386,10 +386,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			*cx.Config.DisableController = c.Bool("disablecontroller")
 		}
 		if c.IsSet("save") {
-			inf.Ln("saving configuration")
+			I.Ln("saving configuration")
 			cx.StateCfg.Save = true
 		}
-		// if e = routeable.Discover(); err.Chk(e) {
+		// if e = routeable.Discover(); E.Chk(e) {
 		// 	// TODO: this should trigger the display of this lack of internet
 		// }
 		go func() {
@@ -397,7 +397,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			for {
 				select {
 				case <-time.After(time.Second * 10):
-					if e = routeable.Discover(); err.Chk(e) {
+					if e = routeable.Discover(); E.Chk(e) {
 						// TODO: this should trigger the display of this lack of internet
 					}
 				case <-cx.KillAll:

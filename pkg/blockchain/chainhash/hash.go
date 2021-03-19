@@ -64,7 +64,7 @@ func NewHash(newHash []byte) (*Hash, error) {
 	var sh Hash
 	e := sh.SetBytes(newHash)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	return &sh, e
@@ -74,7 +74,7 @@ func NewHash(newHash []byte) (*Hash, error) {
 // hash, but any missing characters result in zero padding at the end of the Hash.
 func NewHashFromStr(hash string) (ret *Hash, e error) {
 	ret = new(Hash)
-	if e = Decode(ret, hash); err.Chk(e) {
+	if e = Decode(ret, hash); E.Chk(e) {
 		return
 	}
 	return
@@ -97,7 +97,7 @@ func Decode(dst *Hash, src string) (e error) {
 	}
 	// Hex decode the source bytes to a temporary destination.
 	var reversedHash Hash
-	if _, e = hex.Decode(reversedHash[HashSize-hex.DecodedLen(len(srcBytes)):], srcBytes); err.Chk(e) {
+	if _, e = hex.Decode(reversedHash[HashSize-hex.DecodedLen(len(srcBytes)):], srcBytes); E.Chk(e) {
 		return e
 	}
 	// Reverse copy from the temporary hash to destination. Because the temporary was zeroed, the written result will be

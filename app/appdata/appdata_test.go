@@ -34,7 +34,7 @@ func TestAppDataDir(t *testing.T) {
 	// Get the home directory to use for testing expected results.
 	var homeDir string
 	usr, e := user.Current()
-	if e != nil  {
+	if e != nil {
 		t.Errorf("user.Current: %v", e)
 		return
 	}
@@ -110,9 +110,11 @@ func TestAppDataDir(t *testing.T) {
 	for i, test := range tests {
 		ret := TstAppDataDir(test.goos, test.appName, test.roaming)
 		if ret != test.want {
-			t.Errorf("AppDataDir #%d (%s) does not match - "+
-				"expected got %s, want %s", i, test.goos, ret,
-				test.want)
+			t.Errorf(
+				"AppDataDir #%d (%s) does not match - "+
+					"expected got %s, want %s", i, test.goos, ret,
+				test.want,
+			)
 			continue
 		}
 	}

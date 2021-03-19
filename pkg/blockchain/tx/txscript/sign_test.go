@@ -152,7 +152,7 @@ func TestSignTxOutput(t *testing.T) {
 			if e := signAndCheck(msg, tx, i, inputAmounts[i], pkScript, hashType,
 				mkGetKey(map[string]addressToKey{
 					address.EncodeAddress(): {key, false},
-				}), mkGetScript(nil), nil); err.Chk(e) {
+				}), mkGetScript(nil), nil); E.Chk(e) {
 				t.				break
 			}
 		}
@@ -238,7 +238,7 @@ func TestSignTxOutput(t *testing.T) {
 				pkScript, hashType,
 				mkGetKey(map[string]addressToKey{
 					address.EncodeAddress(): {key, true},
-				}), mkGetScript(nil), nil); err.Chk(e) {
+				}), mkGetScript(nil), nil); E.Chk(e) {
 				t.				break
 			}
 		}
@@ -325,7 +325,7 @@ func TestSignTxOutput(t *testing.T) {
 				pkScript, hashType,
 				mkGetKey(map[string]addressToKey{
 					address.EncodeAddress(): {key, false},
-				}), mkGetScript(nil), nil); err.Chk(e) {
+				}), mkGetScript(nil), nil); E.Chk(e) {
 				t.				break
 			}
 		}
@@ -411,7 +411,7 @@ func TestSignTxOutput(t *testing.T) {
 				pkScript, hashType,
 				mkGetKey(map[string]addressToKey{
 					address.EncodeAddress(): {key, true},
-				}), mkGetScript(nil), nil); err.Chk(e) {
+				}), mkGetScript(nil), nil); E.Chk(e) {
 				t.				break
 			}
 		}
@@ -515,7 +515,7 @@ func TestSignTxOutput(t *testing.T) {
 					address.EncodeAddress(): {key, false},
 				}), mkGetScript(map[string][]byte{
 					scriptAddr.EncodeAddress(): pkScript,
-				}), nil); err.Chk(e) {
+				}), nil); E.Chk(e) {
 				t.				break
 			}
 		}
@@ -637,7 +637,7 @@ func TestSignTxOutput(t *testing.T) {
 					address.EncodeAddress(): {key, true},
 				}), mkGetScript(map[string][]byte{
 					scriptAddr.EncodeAddress(): pkScript,
-				}), nil); err.Chk(e) {
+				}), nil); E.Chk(e) {
 				t.				break
 			}
 		}
@@ -758,7 +758,7 @@ func TestSignTxOutput(t *testing.T) {
 					address.EncodeAddress(): {key, false},
 				}), mkGetScript(map[string][]byte{
 					scriptAddr.EncodeAddress(): pkScript,
-				}), nil); err.Chk(e) {
+				}), nil); E.Chk(e) {
 				t.				break
 			}
 		}
@@ -877,7 +877,7 @@ func TestSignTxOutput(t *testing.T) {
 					address.EncodeAddress(): {key, true},
 				}), mkGetScript(map[string][]byte{
 					scriptAddr.EncodeAddress(): pkScript,
-				}), nil); err.Chk(e) {
+				}), nil); E.Chk(e) {
 				t.				break
 			}
 		}
@@ -1014,7 +1014,7 @@ func TestSignTxOutput(t *testing.T) {
 					address2.EncodeAddress(): {key2, true},
 				}), mkGetScript(map[string][]byte{
 					scriptAddr.EncodeAddress(): pkScript,
-				}), nil); err.Chk(e) {
+				}), nil); E.Chk(e) {
 				t.				break
 			}
 		}

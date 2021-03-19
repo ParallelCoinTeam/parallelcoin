@@ -184,14 +184,14 @@ func BuilderTest(b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
 	}
 	match, e := f.Match(key, []byte("Nate"))
 	if e != nil  {
-		t.Fatalf("Filter match failed: %s", err)
+		t.Fatalf("Filter match failed: %s", e)
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match when it should have!")
+		t.F.Ln("Filter didn't match when it should have!")
 	}
 	match, e = f.Match(key, []byte("weks"))
 	if e != nil  {
-		t.Fatalf("Filter match failed: %s", err)
+		t.Fatalf("Filter match failed: %s", e)
 	}
 	if match {
 		t.Logf("False positive match, should be 1 in 2**%d!",
@@ -205,10 +205,10 @@ func BuilderTest(b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
 	}
 	match, e = f.Match(key, hash.CloneBytes())
 	if e != nil  {
-		t.Fatalf("Filter match failed: %s", err)
+		t.Fatalf("Filter match failed: %s", e)
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match when it should have!")
+		t.F.Ln("Filter didn't match when it should have!")
 	}
 	// Add a script, build a filter, and test matches
 	b.AddEntry(addrBytes)
@@ -218,10 +218,10 @@ func BuilderTest(b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
 	}
 	match, e = f.MatchAny(key, [][]byte{addrBytes})
 	if e != nil  {
-		t.Fatalf("Filter match any failed: %s", err)
+		t.Fatalf("Filter match any failed: %s", e)
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match when it should have!")
+		t.F.Ln("Filter didn't match when it should have!")
 	}
 	// Add a routine witness stack, build a filter, and test that it matches.
 	b.AddWitness(witness)
@@ -231,10 +231,10 @@ func BuilderTest(b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
 	}
 	match, e = f.MatchAny(key, witness)
 	if e != nil  {
-		t.Fatalf("Filter match any failed: %s", err)
+		t.Fatalf("Filter match any failed: %s", e)
 	}
 	if !match {
-		t.ftl.Ln("Filter didn't match when it should have!")
+		t.F.Ln("Filter didn't match when it should have!")
 	}
 	// Chk that adding duplicate items does not increase filter size.
 	originalSize := f.N()
@@ -245,6 +245,6 @@ func BuilderTest(b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
 		t.Fatalf("Filter build failed: %s", err.Error())
 	}
 	if f.N() != originalSize {
-		t.ftl.Ln("Filter size increased with duplicate items")
+		t.F.Ln("Filter size increased with duplicate items")
 	}
 }

@@ -98,7 +98,7 @@ func NewMerkleBlock(block *util.Block, filter *Filter) (*wire.MsgMerkleBlock, []
 	for _, hash := range mBlock.finalHashes {
 		e := msgMerkleBlock.AddTxHash(hash)
 		if e != nil  {
-			err.Ln(e)
+			E.Ln(e)
 		}
 	}
 	for i := uint32(0); i < uint32(len(mBlock.bits)); i++ {

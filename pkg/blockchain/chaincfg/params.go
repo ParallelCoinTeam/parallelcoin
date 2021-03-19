@@ -33,7 +33,7 @@ func Register(params *Params) (e error) {
 // mustRegister performs the same function as Register except it panics if there is an error. This should only be called
 // from package init functions.
 func mustRegister(params *Params) {
-	if e := Register(params); err.Chk(e) {
+	if e := Register(params); E.Chk(e) {
 		panic("failed to register network: " + e.Error())
 	}
 }
@@ -89,7 +89,7 @@ func newHashFromStr(hexStr string) *chainhash.Hash {
 		// chance to recover which is extremely annoying, however an exception is being made in this case because the
 		// only way this can panic is if there is an error in the hard-coded hashes. Thus it will only ever potentially
 		// panic on init and therefore is 100% predictable. loki: Panics are good when the condition should not happen!
-		panic(err)
+		panic(e)
 	}
 	return hash
 }

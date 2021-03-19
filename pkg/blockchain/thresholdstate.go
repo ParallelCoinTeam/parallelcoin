@@ -272,12 +272,12 @@ func newThresholdCaches(numCaches uint32) []thresholdStateCache {
 // 	if b.isCurrent() {
 // 		// Warn if a high enough percentage of the last blocks have unexpected versions.
 // 		bestNode := b.BestChain.Tip()
-// 		// if e := b.warnUnknownVersions(bestNode); err.Chk(e) {
+// 		// if e := b.warnUnknownVersions(bestNode); E.Chk(e) {
 // 		// 	return e
 // 		// }
 // 		//
 // 		// Warn if any unknown new rules are either about to activate or have already been activated.
-// 		if e := b.warnUnknownRuleActivations(bestNode); err.Chk(e) {
+// 		if e := b.warnUnknownRuleActivations(bestNode); E.Chk(e) {
 // 			return e
 // 		}
 // 	}

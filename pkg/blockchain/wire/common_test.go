@@ -211,7 +211,7 @@ func TestElementWireErrors(t *testing.T) {
 		e := writeElement(w, test.in)
 		if err != test.writeErr {
 			t.Errorf("writeElement #%d wrong error got: %v, want: %v",
-				i, err, test.writeErr)
+				i, e, test.writeErr)
 			continue
 		}
 		// Decode from wire format.
@@ -223,7 +223,7 @@ func TestElementWireErrors(t *testing.T) {
 		e = readElement(r, val)
 		if err != test.readErr {
 			t.Errorf("readElement #%d wrong error got: %v, want: %v",
-				i, err, test.readErr)
+				i, e, test.readErr)
 			continue
 		}
 	}
@@ -321,7 +321,7 @@ func TestVarIntWireErrors(t *testing.T) {
 		e := WriteVarInt(w, test.pver, test.in)
 		if err != test.writeErr {
 			t.Errorf("WriteVarInt #%d wrong error got: %v, want: %v",
-				i, err, test.writeErr)
+				i, e, test.writeErr)
 			continue
 		}
 		// Decode from wire format.
@@ -329,7 +329,7 @@ func TestVarIntWireErrors(t *testing.T) {
 		_, e = ReadVarInt(r, test.pver)
 		if err != test.readErr {
 			t.Errorf("ReadVarInt #%d wrong error got: %v, want: %v",
-				i, err, test.readErr)
+				i, e, test.readErr)
 			continue
 		}
 	}
@@ -498,7 +498,7 @@ func TestVarStringWireErrors(t *testing.T) {
 		e := WriteVarString(w, test.pver, test.in)
 		if err != test.writeErr {
 			t.Errorf("WriteVarString #%d wrong error got: %v, want: %v",
-				i, err, test.writeErr)
+				i, e, test.writeErr)
 			continue
 		}
 		// Decode from wire format.
@@ -506,7 +506,7 @@ func TestVarStringWireErrors(t *testing.T) {
 		_, e = ReadVarString(r, test.pver)
 		if err != test.readErr {
 			t.Errorf("ReadVarString #%d wrong error got: %v, want: %v",
-				i, err, test.readErr)
+				i, e, test.readErr)
 			continue
 		}
 	}
@@ -534,7 +534,7 @@ func TestVarStringOverflowErrors(t *testing.T) {
 		_, e := ReadVarString(rbuf, test.pver)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("ReadVarString #%d wrong error got: %v, "+
-				"want: %v", i, err, reflect.TypeOf(test.err))
+				"want: %v", i, e, reflect.TypeOf(test.err))
 			continue
 		}
 	}
@@ -617,7 +617,7 @@ func TestVarBytesWireErrors(t *testing.T) {
 		e := WriteVarBytes(w, test.pver, test.in)
 		if err != test.writeErr {
 			t.Errorf("WriteVarBytes #%d wrong error got: %v, want: %v",
-				i, err, test.writeErr)
+				i, e, test.writeErr)
 			continue
 		}
 		// Decode from wire format.
@@ -626,7 +626,7 @@ func TestVarBytesWireErrors(t *testing.T) {
 			"test payload")
 		if err != test.readErr {
 			t.Errorf("ReadVarBytes #%d wrong error got: %v, want: %v",
-				i, err, test.readErr)
+				i, e, test.readErr)
 			continue
 		}
 	}
@@ -655,7 +655,7 @@ func TestVarBytesOverflowErrors(t *testing.T) {
 			"test payload")
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("ReadVarBytes #%d wrong error got: %v, "+
-				"want: %v", i, err, reflect.TypeOf(test.err))
+				"want: %v", i, e, reflect.TypeOf(test.err))
 			continue
 		}
 	}

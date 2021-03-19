@@ -24,7 +24,7 @@ const (
 func Main() int {
 	cx := conte.GetNewContext(Name, appLanguage, "main")
 	cx.App = getApp(cx)
-	if e := cx.App.Run(os.Args); err.Chk(e) {
+	if e := cx.App.Run(os.Args); E.Chk(e) {
 		return 1
 	}
 	return 0

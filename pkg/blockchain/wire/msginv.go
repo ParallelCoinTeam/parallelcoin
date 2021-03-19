@@ -37,7 +37,7 @@ func (msg *MsgInv) AddInvVect(iv *InvVect) (e error) {
 // implementation.
 func (msg *MsgInv) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	// Limit to max inventory vectors per message.
@@ -50,10 +50,10 @@ func (msg *MsgInv) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e e
 	msg.InvList = make([]*InvVect, 0, count)
 	for i := uint64(0); i < count; i++ {
 		iv := &invList[i]
-		if e = readInvVect(r, pver, iv); err.Chk(e) {
+		if e = readInvVect(r, pver, iv); E.Chk(e) {
 			return
 		}
-		if e = msg.AddInvVect(iv); err.Chk(e) {
+		if e = msg.AddInvVect(iv); E.Chk(e) {
 		}
 	}
 	return
@@ -68,11 +68,11 @@ func (msg *MsgInv) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e e
 		str := fmt.Sprintf("too many invvect in message [%v]", count)
 		return messageError("MsgInv.BtcEncode", str)
 	}
-	if e = WriteVarInt(w, pver, uint64(count)); err.Chk(e) {
+	if e = WriteVarInt(w, pver, uint64(count)); E.Chk(e) {
 		return
 	}
 	for _, iv := range msg.InvList {
-		if e = writeInvVect(w, pver, iv); err.Chk(e) {
+		if e = writeInvVect(w, pver, iv); E.Chk(e) {
 			return
 		}
 	}

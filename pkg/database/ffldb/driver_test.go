@@ -92,11 +92,11 @@ func TestCreateOpenFail(t *testing.T) {
 		return
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); ffldb.err.Chk(e) {
+		if e := os.RemoveAll(dbPath); ffldb.E.Chk(e) {
 		}
 	}()
 	func() {
-		if e := db.Close(); ffldb.err.Chk(e) {
+		if e := db.Close(); ffldb.E.Chk(e) {
 		}
 	}()
 	wantErrCode = database.ErrDbNotOpen
@@ -142,11 +142,11 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); ffldb.err.Chk(e) {
+		if e := os.RemoveAll(dbPath); ffldb.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); ffldb.err.Chk(e) {
+		if e := db.Close(); ffldb.E.Chk(e) {
 		}
 	}()
 	// Create a bucket, put some values into it, and store a block so they can be tested for existence on re-open.
@@ -175,7 +175,7 @@ func TestPersistence(t *testing.T) {
 					err)
 			}
 		}
-		if e := tx.StoreBlock(genesisBlock); err.Chk(e) {
+		if e := tx.StoreBlock(genesisBlock); E.Chk(e) {
 			return fmt.Errorf("StoreBlock: unexpected error: %v",
 				err)
 		}
@@ -186,7 +186,7 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	// Close and reopen the database to ensure the values persist.
-	if e := db.Close(); ffldb.err.Chk(e) {
+	if e := db.Close(); ffldb.E.Chk(e) {
 	}
 	db, e = database.Open(dbType, dbPath, blockDataNet)
 	if e != nil  {
@@ -194,7 +194,7 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	defer func() {
-		if e := db.Close(); ffldb.err.Chk(e) {
+		if e := db.Close(); ffldb.E.Chk(e) {
 		}
 	}()
 	// Ensure the values previously stored in the 3rd namespace still exist and are correct.

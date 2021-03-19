@@ -7,10 +7,10 @@ import (
 	"runtime"
 	"time"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -84,25 +84,38 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 
 // createCoinbaseTx returns a coinbase transaction paying an appropriate subsidy based on the passed block height to the
 // provided address.
-func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Address, mineTo []wire.TxOut, net *netparams.Params, version int32) (*util.Tx, error) {
+func createCoinbaseTx(
+	coinbaseScript []byte,
+	nextBlockHeight int32,
+	addr util.Address,
+	mineTo []wire.TxOut,
+	net *netparams.Params,
+	version int32,
+) (*util.Tx, error) {
 	// Create the script to pay to the provided payment address.
 	pkScript, e := txscript.PayToAddrScript(addr)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
-	tx.AddTxIn(&wire.TxIn{
-		// Coinbase transactions have no inputs, so previous outpoint is zero hash and max index.
-		PreviousOutPoint: *wire.NewOutPoint(&chainhash.Hash{},
-			wire.MaxPrevOutIndex),
-		SignatureScript: coinbaseScript,
-		Sequence:        wire.MaxTxInSequenceNum,
-	})
+	tx.AddTxIn(
+		&wire.TxIn{
+			// Coinbase transactions have no inputs, so previous outpoint is zero hash and max index.
+			PreviousOutPoint: *wire.NewOutPoint(
+				&chainhash.Hash{},
+				wire.MaxPrevOutIndex,
+			),
+			SignatureScript: coinbaseScript,
+			Sequence:        wire.MaxTxInSequenceNum,
+		},
+	)
 	if len(mineTo) == 0 {
-		tx.AddTxOut(&wire.TxOut{
-			Value:    blockchain.CalcBlockSubsidy(nextBlockHeight, net, version),
-			PkScript: pkScript,
-		})
+		tx.AddTxOut(
+			&wire.TxOut{
+				Value:    blockchain.CalcBlockSubsidy(nextBlockHeight, net, version),
+				PkScript: pkScript,
+			},
+		)
 	} else {
 		for i := range mineTo {
 			tx.AddTxOut(&mineTo[i])
@@ -115,9 +128,11 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Ad
 // timestamp passed is zero ( not initialized), then the timestamp of the previous block will be used plus 1 second is
 // used. Passing nil for the previous block results in a block that builds off of the genesis block for the specified
 // chain.
-func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
+func CreateBlock(
+	prevBlock *util.Block, inclusionTxs []*util.Tx,
 	blockVersion int32, blockTime time.Time, miningAddr util.Address,
-	mineTo []wire.TxOut, net *netparams.Params) (*util.Block, error) {
+	mineTo []wire.TxOut, net *netparams.Params,
+) (*util.Block, error) {
 	var (
 		prevHash      *chainhash.Hash
 		blockHeight   int32
@@ -145,13 +160,15 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	}
 	extraNonce := uint64(0)
 	coinbaseScript, e := standardCoinbaseScript(blockHeight, extraNonce)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
-	coinbaseTx, e := createCoinbaseTx(coinbaseScript, blockHeight, miningAddr,
-		mineTo, net, blockVersion)
-	if e != nil  {
-				return nil, e
+	coinbaseTx, e := createCoinbaseTx(
+		coinbaseScript, blockHeight, miningAddr,
+		mineTo, net, blockVersion,
+	)
+	if e != nil {
+		return nil, e
 	}
 	// Create a new block ready to be solved.
 	blockTxns := []*util.Tx{coinbaseTx}
@@ -168,7 +185,7 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 		Bits:       net.PowLimitBits,
 	}
 	for _, tx := range blockTxns {
-		if e := block.AddTransaction(tx.MsgTx()); err.Chk(e) {
+		if e := block.AddTransaction(tx.MsgTx()); E.Chk(e) {
 			return nil, e
 		}
 	}

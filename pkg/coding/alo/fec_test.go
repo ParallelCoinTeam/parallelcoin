@@ -10,7 +10,7 @@ import (
 func MakeRandomBytes(size int, t *testing.T) (p []byte) {
 	p = make([]byte, size)
 	var e error
-	if _, e = rand.Read(p); err.Chk(e) {
+	if _, e = rand.Read(p); E.Chk(e) {
 		t.Fail()
 	}
 	return
@@ -34,17 +34,17 @@ func TestGetShards(t *testing.T) {
 		red := 300
 		b := MakeRandomBytes(dataLen, t)
 		segs := GetShards(b, red)
-		// alo.dbg.S(segs)
+		// alo.D.S(segs)
 		var e error
 		var p *Partials
 		for i := range segs {
 			for j := range segs[i] {
 				if i == 0 && j == 0 {
-					if p, e = NewPacket(segs[i][j]); err.Chk(e) {
+					if p, e = NewPacket(segs[i][j]); E.Chk(e) {
 						t.Fail()
 					}
 				} else {
-					if e = p.AddShard(segs[i][j]); err.Chk(e) {
+					if e = p.AddShard(segs[i][j]); E.Chk(e) {
 						t.Fail()
 					}
 				}
@@ -52,12 +52,12 @@ func TestGetShards(t *testing.T) {
 		}
 		// if we got to here we should be able to decode it
 		var ob []byte
-		if ob, e = p.Decode(); err.Chk(e) {
+		if ob, e = p.Decode(); E.Chk(e) {
 			t.Fail()
 		}
 		if string(ob) != string(b) {
-			// alo.			alo.dbg.S(b)
-			dbg.S(ob)
+			// alo.			alo.D.S(b)
+			D.S(ob)
 			t.Fatal("codec failed to decode encoded content")
 		}
 	}

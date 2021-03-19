@@ -739,7 +739,7 @@ func TestOutboundPeer(t *testing.T) {
 // 	)
 // 	p, e := peer.NewOutboundPeer(peerCfg, "10.0.0.1:11047")
 // 	if e != nil  {
-// 		t.Fatalf("NewOutboundPeer: unexpected err - %v\n", err)
+// 		t.Fatalf("NewOutboundPeer: unexpected err - %v\n", e)
 // 	}
 // 	p.AssociateConnection(localConn)
 // 	// Read outbound messages to peer into a channel
@@ -756,7 +756,7 @@ func TestOutboundPeer(t *testing.T) {
 // 				return
 // 			}
 // 			if e != nil  {
-// 				t.Errorf("Error reading message from local node: %v\n", err)
+// 				t.Errorf("Error reading message from local node: %v\n", e)
 // 				return
 // 			}
 // 			outboundMessages <- msg
@@ -769,7 +769,7 @@ func TestOutboundPeer(t *testing.T) {
 // 			t.Fatalf("Expected version message, got [%s]", msg.Command())
 // 		}
 // 	case <-time.After(time.Second):
-// 		t.ftl.Ln("Peer did not send version message")
+// 		t.F.Ln("Peer did not send version message")
 // 	}
 // 	// Remote peer writes version message advertising invalid protocol version 1
 // 	invalidVersionMsg := wire.NewMsgVersion(remoteNA, localNA, 0, 0)
@@ -781,7 +781,7 @@ func TestOutboundPeer(t *testing.T) {
 // 		peerCfg.ChainParams.Net,
 // 	)
 // 	if e != nil  {
-// 		t.Fatalf("wire.WriteMessageN: unexpected err - %v\n", err)
+// 		t.Fatalf("wire.WriteMessageN: unexpected err - %v\n", e)
 // 	}
 // 	// Expect peer to disconnect automatically
 // 	disconnected := qu.T()
@@ -793,7 +793,7 @@ func TestOutboundPeer(t *testing.T) {
 // 	case <-disconnected:
 // 		close(disconnected)
 // 	case <-time.After(time.Second):
-// 		t.ftl.Ln("Peer did not automatically disconnect")
+// 		t.F.Ln("Peer did not automatically disconnect")
 // 	}
 // 	// Expect no further outbound messages from peer
 // 	select {
@@ -802,7 +802,7 @@ func TestOutboundPeer(t *testing.T) {
 // 			t.Fatalf("Expected no further messages, received [%s]", msg.Command())
 // 		}
 // 	case <-time.After(time.Second):
-// 		t.ftl.Ln("Timeout waiting for remote reader to close")
+// 		t.F.Ln("Timeout waiting for remote reader to close")
 // 	}
 // }
 

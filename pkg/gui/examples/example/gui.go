@@ -36,7 +36,7 @@ func main() {
 		button1: th.Clickable(),
 		button2: th.Clickable().SetClick(
 			func() {
-				inf.Ln("clicked default style button")
+				I.Ln("clicked default style button")
 			},
 		),
 		boolButton1: th.Bool(false),
@@ -47,14 +47,14 @@ func main() {
 		progress:    0,
 		slider: th.Float().SetHook(
 			func(fl float32) {
-				dbg.Ln("float now at value", fl)
+				D.Ln("float now at value", fl)
 			},
 		),
 		lineEditor: th.Editor().SingleLine().Submit(true),
 		areaEditor: th.Editor().SingleLine().Submit(false),
 		radio: th.Enum().SetOnChange(
 			func(value string) {
-				dbg.Ln("changed radio button to", value)
+				D.Ln("changed radio button to", value)
 			},
 		),
 	}
@@ -173,7 +173,7 @@ func (m *MinerModel) buttons() l.Widget {
 				th.Button(
 					m.button0.SetClick(
 						func() {
-							inf.Ln("clicked customised button")
+							I.Ln("clicked customised button")
 						},
 					),
 				).
@@ -210,7 +210,7 @@ func (m *MinerModel) buttons() l.Widget {
 				th.IconButton(
 					m.iconbutton.SetClick(
 						func() {
-							dbg.Ln("clicked parallelcoin button")
+							D.Ln("clicked parallelcoin button")
 						},
 					),
 				).
@@ -223,7 +223,7 @@ func (m *MinerModel) buttons() l.Widget {
 				th.IconButton(
 					m.iconbutton1.SetClick(
 						func() {
-							dbg.Ln("clicked android button")
+							D.Ln("clicked android button")
 						},
 					),
 				).
@@ -264,7 +264,7 @@ func (m *MinerModel) buttons() l.Widget {
 			th.Switch(
 				m.boolButton2.SetOnChange(
 					func(b bool) {
-						dbg.Ln("switch state set to", b)
+						D.Ln("switch state set to", b)
 					},
 				),
 			).Fn,
@@ -272,7 +272,7 @@ func (m *MinerModel) buttons() l.Widget {
 			th.CheckBox(
 				m.boolButton1.SetOnChange(
 					func(b bool) {
-						dbg.Ln("change state to", b)
+						D.Ln("change state to", b)
 					},
 				),
 			).
@@ -292,17 +292,17 @@ func (m *MinerModel) buttons() l.Widget {
 						m.lineEditor.
 							SetChange(
 								func(txt string) {
-									dbg.Ln("lineEditor changed to:\n" + txt)
+									D.Ln("lineEditor changed to:\n" + txt)
 								},
 						).
 							SetFocus(
 								func(is bool) {
-									dbg.Ln("lineEditor is focused", is)
+									D.Ln("lineEditor is focused", is)
 								},
 							).
 							SetSubmit(
 								func(txt string) {
-									dbg.Ln("lineEditor submitted with text:\n" + txt)
+									D.Ln("lineEditor submitted with text:\n" + txt)
 								},
 							), "hint",
 					).Fn,
@@ -320,17 +320,17 @@ func (m *MinerModel) buttons() l.Widget {
 						m.areaEditor.
 							SetChange(
 								func(txt string) {
-									dbg.Ln("areaEditor changed to:\n" + txt)
+									D.Ln("areaEditor changed to:\n" + txt)
 								},
 						).
 							SetFocus(
 								func(is bool) {
-									dbg.Ln("areaEditor is focused", is)
+									D.Ln("areaEditor is focused", is)
 								},
 							).
 							SetSubmit(
 								func(txt string) {
-									dbg.Ln("areaEditor submitted with text:\n" + txt)
+									D.Ln("areaEditor submitted with text:\n" + txt)
 								},
 							), "hint",
 					).Fn,

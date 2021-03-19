@@ -57,7 +57,7 @@ func GenerateSharedSecret(privkey *PrivateKey, pubkey *PublicKey) []byte {
 // rationale on this format.
 func Encrypt(pubkey *PublicKey, in []byte) (out []byte, e error) {
 	var ephemeral *PrivateKey
-	if ephemeral, e = NewPrivateKey(S256()); err.Chk(e) {
+	if ephemeral, e = NewPrivateKey(S256()); E.Chk(e) {
 		return
 	}
 	ecdhKey := GenerateSharedSecret(ephemeral, pubkey)
@@ -68,7 +68,7 @@ func Encrypt(pubkey *PublicKey, in []byte) (out []byte, e error) {
 	// IV + Curve netparams/X/Y + padded plaintext/ciphertext + HMAC-256
 	out = make([]byte, aes.BlockSize+70+len(paddedIn)+sha256.Size)
 	iv := out[:aes.BlockSize]
-	if _, e = io.ReadFull(rand.Reader, iv); err.Chk(e) {
+	if _, e = io.ReadFull(rand.Reader, iv); E.Chk(e) {
 		return
 	}
 	// start writing public key
@@ -88,14 +88,14 @@ func Encrypt(pubkey *PublicKey, in []byte) (out []byte, e error) {
 	offset += 32
 	// start encryption
 	var block cipher.Block
-	if block, e = aes.NewCipher(keyE); err.Chk(e) {
+	if block, e = aes.NewCipher(keyE); E.Chk(e) {
 		return
 	}
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(out[offset:len(out)-sha256.Size], paddedIn)
 	// start HMAC-SHA-256
 	hm := hmac.New(sha256.New, keyM)
-	if _, e = hm.Write(out[:len(out)-sha256.Size]); err.Chk(e) { // everything is hashed
+	if _, e = hm.Write(out[:len(out)-sha256.Size]); E.Chk(e) { // everything is hashed
 	}
 	copy(out[len(out)-sha256.Size:], hm.Sum(nil)) // write checksum
 	return out, nil
@@ -133,7 +133,7 @@ func Decrypt(priv *PrivateKey, in []byte) (b []byte, e error) {
 	copy(pb[33:], yBytes)
 	// check if (X, Y) lies on the curve and create a Pubkey if it does
 	var pubkey *PublicKey
-	if pubkey, e = ParsePubKey(pb, S256()); err.Chk(e) {
+	if pubkey, e = ParsePubKey(pb, S256()); E.Chk(e) {
 		return
 	}
 	// check for cipher text length
@@ -149,7 +149,7 @@ func Decrypt(priv *PrivateKey, in []byte) (b []byte, e error) {
 	keyM := derivedKey[32:]
 	// verify mac
 	hm := hmac.New(sha256.New, keyM)
-	if _, e = hm.Write(in[:len(in)-sha256.Size]); err.Chk(e) { // everything is hashed
+	if _, e = hm.Write(in[:len(in)-sha256.Size]); E.Chk(e) { // everything is hashed
 	}
 	expectedMAC := hm.Sum(nil)
 	if !hmac.Equal(messageMAC, expectedMAC) {
@@ -157,7 +157,7 @@ func Decrypt(priv *PrivateKey, in []byte) (b []byte, e error) {
 	}
 	// start decryption
 	var block cipher.Block
-	if block, e = aes.NewCipher(keyE);err.Chk(e){
+	if block, e = aes.NewCipher(keyE);E.Chk(e){
 		return
 	}
 	mode := cipher.NewCBCDecrypter(block, iv)

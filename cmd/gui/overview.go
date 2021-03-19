@@ -394,8 +394,8 @@ func (wg *WalletGUI) recentTxCardSummaryButton(
 	return wg.ButtonLayout(
 		clickable.SetClick(
 			func() {
-				dbg.Ln("clicked tx")
-				// dbg.S(txs)
+				D.Ln("clicked tx")
+				// D.S(txs)
 				curr := wg.openTxID.Load()
 				if curr == txs.TxID {
 					wg.prevOpenTxID.Store(wg.openTxID.Load())
@@ -464,8 +464,8 @@ func (wg *WalletGUI) recentTxCardSummaryButtonGenerate(
 	return wg.ButtonLayout(
 		clickable.SetClick(
 			func() {
-				dbg.Ln("clicked tx")
-				// dbg.S(txs)
+				D.Ln("clicked tx")
+				// D.S(txs)
 				curr := wg.openTxID.Load()
 				if curr == txs.TxID {
 					wg.prevOpenTxID.Store(wg.openTxID.Load())
@@ -678,7 +678,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 			return l.Dimensions{Size: gtx.Constraints.Max}
 		}
 	}
-	dbg.Ln(">>>>>>>>>>>>>>>> iterating transactions", n, listName)
+	D.Ln(">>>>>>>>>>>>>>>> iterating transactions", n, listName)
 	var collected int
 	for x := range txList {
 		if collected >= n && n > 0 {
@@ -759,7 +759,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 					Fn,
 			).Fn(gtx)
 	}
-	dbg.Ln(">>>>>>>>>>>>>>>> history widget completed", n, listName)
+	D.Ln(">>>>>>>>>>>>>>>> history widget completed", n, listName)
 	switch listName {
 	case "history":
 		wg.TxHistoryWidget = wo

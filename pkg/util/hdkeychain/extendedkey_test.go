@@ -754,13 +754,13 @@ func TestErrors(t *testing.T) {
 	_, e := NewMaster(bytes.Repeat([]byte{0x00}, 15), net)
 	if err != ErrInvalidSeedLen {
 		t.Fatalf("NewMaster: mismatched error -- got: %v, want: %v",
-			err, ErrInvalidSeedLen)
+			e, ErrInvalidSeedLen)
 	}
 	// Should get an error when seed has too many bytes.
 	_, e = NewMaster(bytes.Repeat([]byte{0x00}, 65), net)
 	if err != ErrInvalidSeedLen {
 		t.Fatalf("NewMaster: mismatched error -- got: %v, want: %v",
-			err, ErrInvalidSeedLen)
+			e, ErrInvalidSeedLen)
 	}
 	// Generate a new key and neuter it to a public extended key.
 	seed, e := GenerateSeed(RecommendedSeedLen)
@@ -779,7 +779,7 @@ func TestErrors(t *testing.T) {
 	_, e = pubKey.Child(HardenedKeyStart)
 	if err != ErrDeriveHardFromPublic {
 		t.Fatalf("Child: mismatched error -- got: %v, want: %v",
-			err, ErrDeriveHardFromPublic)
+			e, ErrDeriveHardFromPublic)
 	}
 	// NewKeyFromString failure tests.
 	tests := []struct {
@@ -816,7 +816,7 @@ func TestErrors(t *testing.T) {
 		extKey, e := NewKeyFromString(test.key)
 		if !reflect.DeepEqual(err, test.err) {
 			t.Errorf("NewKeyFromString #%d (%s): mismatched error "+
-				"-- got: %v, want: %v", i, test.name, err,
+				"-- got: %v, want: %v", i, test.name, e,
 				test.err)
 			continue
 		}
@@ -825,7 +825,7 @@ func TestErrors(t *testing.T) {
 			if !reflect.DeepEqual(err, test.neuterErr) {
 				t.Errorf("Neuter #%d (%s): mismatched error "+
 					"-- got: %v, want: %v", i, test.name,
-					err, test.neuterErr)
+					e, test.neuterErr)
 				continue
 			}
 		}
@@ -989,6 +989,6 @@ func TestMaximumDepth(t *testing.T) {
 			ErrDeriveBeyondMaxDepth, err)
 	}
 	if noKey != nil {
-		t.ftl.Ln("Child: deriving 256th key should not succeed")
+		t.F.Ln("Child: deriving 256th key should not succeed")
 	}
 }

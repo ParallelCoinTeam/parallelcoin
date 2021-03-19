@@ -75,7 +75,7 @@ func main() {
 				// add ldflags to commands that have this
 				// for i := range split {
 				// 	split[i] =
-				// 		inf.F("'%s'", split[i])
+				// 		I.F("'%s'", split[i])
 				// }
 				fmt.Printf(
 					`executing item %d of list '%v' '%v' '%v'

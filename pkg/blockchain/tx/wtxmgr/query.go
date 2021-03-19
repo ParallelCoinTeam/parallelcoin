@@ -197,11 +197,11 @@ func (s *Store) rangeUnminedTransactions(
 	ns walletdb.ReadBucket,
 	f func([]TxDetails) (bool, error),
 ) (bool, error) {
-	trc.Ln("rangeUnminedTransactions")
+	F.Ln("rangeUnminedTransactions")
 	var details []TxDetails
 	e := ns.NestedReadBucket(bucketUnmined).ForEach(
 		func(k, v []byte) (e error) {
-			// dbg.Ln("k", k, "v", v)
+			// D.Ln("k", k, "v", v)
 			if len(k) < 32 {
 				str := fmt.Sprintf("%s: short key (expected %d bytes, read %d)", bucketUnmined, 32, len(k))
 				return storeError(ErrData, str, nil)
@@ -231,7 +231,7 @@ func (s *Store) rangeBlockTransactions(
 	ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error),
 ) (bool, error) {
-	trc.Ln("rangeBlockTransactions", begin, end)
+	F.Ln("rangeBlockTransactions", begin, end)
 	// Mempool height is considered a high bound.
 	if begin < 0 {
 		begin = int32(^uint32(0) >> 1)
@@ -239,7 +239,7 @@ func (s *Store) rangeBlockTransactions(
 	if end < 0 {
 		end = int32(^uint32(0) >> 1)
 	}
-	trc.Ln("begin", begin, "end", end)
+	F.Ln("begin", begin, "end", end)
 	var blockIter blockIterator
 	var advance func(*blockIterator) bool
 	if begin < end {
@@ -247,7 +247,7 @@ func (s *Store) rangeBlockTransactions(
 		blockIter = makeReadBlockIterator(ns, begin)
 		advance = func(it *blockIterator) bool {
 			if !it.next() {
-				dbg.Ln("end of blocks")
+				D.Ln("end of blocks")
 				return false
 			}
 			return it.elem.Height <= end
@@ -274,7 +274,7 @@ func (s *Store) rangeBlockTransactions(
 			k := keyTxRecord(&txHash, &block.Block)
 			v := existsRawTxRecord(ns, k)
 			if v == nil {
-				trc.F("missing transaction %v for block %v", txHash, block.Height)
+				T.F("missing transaction %v for block %v", txHash, block.Height)
 				// str := fmt.Sprintf("missing transaction %v for block %v", txHash, block.Height)
 				// return false, storeError(ErrData, str, nil)
 				// deleteTxRecord(ns, )
@@ -344,7 +344,7 @@ func (s *Store) RangeTransactions(
 	ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error),
 ) error {
-	trc.Ln("RangeTransactions")
+	F.Ln("RangeTransactions")
 	var addedUnmined, brk bool
 	var e error
 	if begin < 0 {
@@ -354,7 +354,7 @@ func (s *Store) RangeTransactions(
 		}
 		addedUnmined = true
 	}
-	if brk, e = s.rangeBlockTransactions(ns, begin, end, f); err.Chk(e) {
+	if brk, e = s.rangeBlockTransactions(ns, begin, end, f); E.Chk(e) {
 	}
 	if e == nil && !brk && !addedUnmined && end < 0 {
 		_, e = s.rangeUnminedTransactions(ns, f)

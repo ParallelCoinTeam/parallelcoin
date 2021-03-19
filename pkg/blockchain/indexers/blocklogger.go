@@ -56,7 +56,7 @@ func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 	if b.receivedLogTx == 1 {
 		txStr = "transaction "
 	}
-	inf.F(
+	I.F(
 		"%s %6d %s in the last %s (%6d %s, height %6d, %s)",
 		b.progressAction,
 		b.receivedLogBlocks,

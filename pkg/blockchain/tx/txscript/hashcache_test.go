@@ -34,7 +34,7 @@ func genTestTx() (*wire.MsgTx, error) {
 			Value:    rand.Int63(),
 			PkScript: make([]byte, rand.Intn(30)),
 		}
-		if _, e = rand.Read(randTxOut.PkScript); err.Chk(e) {
+		if _, e = rand.Read(randTxOut.PkScript); E.Chk(e) {
 			return nil, e
 		}
 		tx.TxOut = append(tx.TxOut, &randTxOut)

@@ -14,7 +14,7 @@ func TestPoolEnsureUsedAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -76,7 +76,7 @@ func TestPoolGetUsedAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -123,7 +123,7 @@ func TestSerializationErrors(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -190,7 +190,7 @@ func TestSerialization(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -339,7 +339,7 @@ func TestValidateAndDecryptKeys(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -392,7 +392,7 @@ func TestValidateAndDecryptKeysErrors(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()

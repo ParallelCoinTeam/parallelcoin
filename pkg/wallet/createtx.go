@@ -73,7 +73,7 @@ func (s secretSource) GetKey(addr util.Address) (privKey *ec.PrivateKey, cmpr bo
 		)
 		return nil, false, e
 	}
-	if privKey, e = mpka.PrivKey(); err.Chk(e) {
+	if privKey, e = mpka.PrivKey(); E.Chk(e) {
 		return nil, false, e
 	}
 	return privKey, ma.Compressed(), nil
@@ -106,7 +106,7 @@ func (w *Wallet) txToOutputs(
 	minconf int32, feeSatPerKb util.Amount,
 ) (tx *txauthor.AuthoredTx, e error) {
 	var chainClient chain.Interface
-	if chainClient, e = w.requireChainClient(); err.Chk(e) {
+	if chainClient, e = w.requireChainClient(); E.Chk(e) {
 		return nil, e
 	}
 	e = walletdb.Update(
@@ -114,11 +114,11 @@ func (w *Wallet) txToOutputs(
 			addrmgrNs := dbtx.ReadWriteBucket(waddrmgrNamespaceKey)
 			// Get current block's height and hash.
 			var bs *waddrmgr.BlockStamp
-			if bs, e = chainClient.BlockStamp(); err.Chk(e) {
+			if bs, e = chainClient.BlockStamp(); E.Chk(e) {
 				return
 			}
 			var eligible []wtxmgr.Credit
-			if eligible, e = w.findEligibleOutputs(dbtx, account, minconf, bs); err.Chk(e) {
+			if eligible, e = w.findEligibleOutputs(dbtx, account, minconf, bs); E.Chk(e) {
 				return
 			}
 			inputSource := makeInputSource(eligible)
@@ -131,12 +131,12 @@ func (w *Wallet) txToOutputs(
 				} else {
 					changeAddr, e = w.newChangeAddress(addrmgrNs, account)
 				}
-				if err.Chk(e) {
+				if E.Chk(e) {
 					return
 				}
 				return txscript.PayToAddrScript(changeAddr)
 			}
-			if tx, e = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb, inputSource, changeSource); err.Chk(e) {
+			if tx, e = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb, inputSource, changeSource); E.Chk(e) {
 				return
 			}
 			// Randomize change position, if change exists, before signing. This doesn't
@@ -147,15 +147,15 @@ func (w *Wallet) txToOutputs(
 			return tx.AddAllInputScripts(secretSource{w.Manager, addrmgrNs})
 		},
 	)
-	if err.Chk(e) {
+	if E.Chk(e) {
 		return
 	}
-	if e = validateMsgTx(tx.Tx, tx.PrevScripts, tx.PrevInputValues); err.Chk(e) {
+	if e = validateMsgTx(tx.Tx, tx.PrevScripts, tx.PrevInputValues); E.Chk(e) {
 		return
 	}
 	if tx.ChangeIndex >= 0 && account == waddrmgr.ImportedAddrAccount {
 		changeAmount := util.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
-		wrn.F(
+		W.F(
 			"spend from imported account produced change: moving %v from imported account into default account.",
 			changeAmount,
 		)
@@ -205,11 +205,11 @@ func (w *Wallet) findEligibleOutputs(
 		var addrs []util.Address
 		if _, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			output.PkScript, w.chainParams,
-		); err.Chk(e) || len(addrs) != 1 {
+		); E.Chk(e) || len(addrs) != 1 {
 			continue
 		}
 		var addrAcct uint32
-		if _, addrAcct, e = w.Manager.AddrAccount(addrmgrNs, addrs[0]); err.Chk(e) ||
+		if _, addrAcct, e = w.Manager.AddrAccount(addrmgrNs, addrs[0]); E.Chk(e) ||
 			addrAcct != account {
 			continue
 		}
@@ -229,11 +229,11 @@ func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amou
 			prevScript, tx, i,
 			txscript.StandardVerifyFlags, nil, hashCache, int64(inputValues[i]),
 		)
-		if err.Chk(e) {
+		if E.Chk(e) {
 			return fmt.Errorf("cannot create script engine: %s", e)
 		}
 		e = vm.Execute()
-		if err.Chk(e) {
+		if E.Chk(e) {
 			return fmt.Errorf("cannot validate transaction: %s", e)
 		}
 	}

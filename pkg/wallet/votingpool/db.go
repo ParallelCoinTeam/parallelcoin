@@ -400,7 +400,7 @@ func serializeWithdrawal(requests []OutputRequest, startAddress WithdrawalAddres
 	for ntxid, tx := range status.transactions {
 		var buf bytes.Buffer
 		buf.Grow(tx.SerializeSize())
-		if e := tx.Serialize(&buf); err.Chk(e) {
+		if e := tx.Serialize(&buf); E.Chk(e) {
 			return nil, e
 		}
 		dbTransactions[ntxid] = dbChangeAwareTx{
@@ -428,7 +428,7 @@ func serializeWithdrawal(requests []OutputRequest, startAddress WithdrawalAddres
 		Status:        dbStatus,
 	}
 	var buf bytes.Buffer
-	if e := gob.NewEncoder(&buf).Encode(row); err.Chk(e) {
+	if e := gob.NewEncoder(&buf).Encode(row); E.Chk(e) {
 		return nil, e
 	}
 	return buf.Bytes(), nil
@@ -438,7 +438,7 @@ func serializeWithdrawal(requests []OutputRequest, startAddress WithdrawalAddres
 // and returns it. This function must run with the address manager unlocked.
 func deserializeWithdrawal(p *Pool, ns, addrmgrNs walletdb.ReadBucket, serialized []byte) (*withdrawalInfo, error) {
 	var row dbWithdrawalRow
-	if e := gob.NewDecoder(bytes.NewReader(serialized)).Decode(&row); err.Chk(e) {
+	if e := gob.NewDecoder(bytes.NewReader(serialized)).Decode(&row); E.Chk(e) {
 		return nil, newError(ErrWithdrawalStorage, "cannot deserialize withdrawal information",
 			err)
 	}
@@ -513,7 +513,7 @@ func deserializeWithdrawal(p *Pool, ns, addrmgrNs walletdb.ReadBucket, serialize
 	}
 	for ntxid, tx := range row.Status.Transactions {
 		var msgtx wire.MsgTx
-		if e := msgtx.Deserialize(bytes.NewBuffer(tx.SerializedMsgTx)); err.Chk(e) {
+		if e := msgtx.Deserialize(bytes.NewBuffer(tx.SerializedMsgTx)); E.Chk(e) {
 			return nil, newError(ErrWithdrawalStorage, "cannot deserialize transaction", err)
 		}
 		wInfo.status.transactions[ntxid] = changeAwareTx{

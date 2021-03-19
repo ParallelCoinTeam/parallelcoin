@@ -13,7 +13,7 @@ func TestGenesisBlock(t *testing.T) {
 	var buf bytes.Buffer
 	e := MainNetParams.GenesisBlock.Serialize(&buf)
 	if e != nil  {
-		t.Fatalf("TestGenesisBlock: %v", err)
+		t.Fatalf("TestGenesisBlock: %v", e)
 	}
 	// Ensure the encoded block matches the expected bytes.
 	if !bytes.Equal(buf.Hash(), genesisBlockBytes) {
@@ -36,7 +36,7 @@ func TestRegTestGenesisBlock(t *testing.T) {
 	var buf bytes.Buffer
 	e := RegressionTestParams.GenesisBlock.Serialize(&buf)
 	if e != nil  {
-		t.Fatalf("TestRegTestGenesisBlock: %v", err)
+		t.Fatalf("TestRegTestGenesisBlock: %v", e)
 	}
 	// Ensure the encoded block matches the expected bytes.
 	if !bytes.Equal(buf.Hash(), regTestGenesisBlockBytes) {
@@ -60,7 +60,7 @@ func TestTestNet3GenesisBlock(t *testing.T) {
 	var buf bytes.Buffer
 	e := TestNet3Params.GenesisBlock.Serialize(&buf)
 	if e != nil  {
-		t.Fatalf("TestTestNet3GenesisBlock: %v", err)
+		t.Fatalf("TestTestNet3GenesisBlock: %v", e)
 	}
 	// Ensure the encoded block matches the expected bytes.
 	if !bytes.Equal(buf.Hash(), testNet3GenesisBlockBytes) {
@@ -84,7 +84,7 @@ func TestSimNetGenesisBlock(t *testing.T) {
 	var buf bytes.Buffer
 	e := SimNetParams.GenesisBlock.Serialize(&buf)
 	if e != nil  {
-		t.Fatalf("TestSimNetGenesisBlock: %v", err)
+		t.Fatalf("TestSimNetGenesisBlock: %v", e)
 	}
 	// Ensure the encoded block matches the expected bytes.
 	if !bytes.Equal(buf.Hash(), simNetGenesisBlockBytes) {

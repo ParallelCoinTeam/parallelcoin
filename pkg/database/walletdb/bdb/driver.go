@@ -32,7 +32,7 @@ func parseArgs(funcName string, args ...interface{}) (string, error) {
 // an existing database for use.
 func openDBDriver(args ...interface{}) (d walletdb.DB, e error) {
 	var dbPath string
-	if dbPath, e = parseArgs("Open", args...); err.Chk(e) {
+	if dbPath, e = parseArgs("Open", args...); E.Chk(e) {
 		return
 	}
 	return openDB(dbPath, false)
@@ -42,7 +42,7 @@ func openDBDriver(args ...interface{}) (d walletdb.DB, e error) {
 // creates, initializes, and opens a database for use.
 func createDBDriver(args ...interface{}) (d walletdb.DB, e error) {
 	var dbPath string
-	if dbPath, e = parseArgs("Create", args...); err.Chk(e) {
+	if dbPath, e = parseArgs("Create", args...); E.Chk(e) {
 		return
 	}
 	return openDB(dbPath, true)
@@ -55,11 +55,11 @@ func init() {
 		Open:   openDBDriver,
 	}
 	var e error
-	if e = walletdb.RegisterDriver(driver); err.Chk(e) {
+	if e = walletdb.RegisterDriver(driver); E.Chk(e) {
 		panic(
 			fmt.Sprintf(
 				"Failed to regiser database driver '%s': %v",
-				dbType, err,
+				dbType, e,
 			),
 		)
 	}

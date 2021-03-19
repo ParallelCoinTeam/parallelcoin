@@ -61,13 +61,13 @@ func (tx *transaction) ReadWriteBucket(key []byte) walletdb.ReadWriteBucket {
 }
 func (tx *transaction) CreateTopLevelBucket(key []byte) (rwb walletdb.ReadWriteBucket, e error) {
 	var boltBucket *bolt.Bucket
-	if boltBucket, e = tx.boltTx.CreateBucket(key); dbg.Chk(convertErr(e)) {
+	if boltBucket, e = tx.boltTx.CreateBucket(key); D.Chk(convertErr(e)) {
 		return
 	}
 	return (*bucket)(boltBucket), nil
 }
 func (tx *transaction) DeleteTopLevelBucket(key []byte) (e error) {
-	if e = tx.boltTx.DeleteBucket(key); err.Chk(e) {
+	if e = tx.boltTx.DeleteBucket(key); E.Chk(e) {
 		return convertErr(e)
 	}
 	return
@@ -118,7 +118,7 @@ func (b *bucket) NestedReadBucket(key []byte) walletdb.ReadBucket {
 // This function is part of the walletdb.Bucket interface implementation.
 func (b *bucket) CreateBucket(key []byte) (rwb walletdb.ReadWriteBucket, e error) {
 	var boltBucket *bolt.Bucket
-	if boltBucket, e = (*bolt.Bucket)(b).CreateBucket(key); dbg.Chk(convertErr(e)) {
+	if boltBucket, e = (*bolt.Bucket)(b).CreateBucket(key); D.Chk(convertErr(e)) {
 		return
 	}
 	return (*bucket)(boltBucket), e
@@ -131,7 +131,7 @@ func (b *bucket) CreateBucket(key []byte) (rwb walletdb.ReadWriteBucket, e error
 // This function is part of the walletdb.Bucket interface implementation.
 func (b *bucket) CreateBucketIfNotExists(key []byte) (rwb walletdb.ReadWriteBucket, e error) {
 	var boltBucket *bolt.Bucket
-	if boltBucket, e = (*bolt.Bucket)(b).CreateBucketIfNotExists(key); dbg.Chk(convertErr(e)) {
+	if boltBucket, e = (*bolt.Bucket)(b).CreateBucketIfNotExists(key); D.Chk(convertErr(e)) {
 	} else {
 		rwb = (*bucket)(boltBucket)
 	}
@@ -272,7 +272,7 @@ var _ walletdb.DB = (*db)(nil)
 
 func (db *db) beginTx(writable bool) (t *transaction, e error) {
 	var boltTx *bolt.Tx
-	if boltTx, e = (*bolt.DB)(db).Begin(writable); err.Chk(e) {
+	if boltTx, e = (*bolt.DB)(db).Begin(writable); E.Chk(e) {
 		return nil, convertErr(e)
 	}
 	return &transaction{boltTx: boltTx}, nil
@@ -309,7 +309,7 @@ func (db *db) Close() (e error) {
 // filesExists reports whether the named file or directory exists.
 func fileExists(name string) bool {
 	var e error
-	if _, e = os.Stat(name); err.Chk(e) {
+	if _, e = os.Stat(name); E.Chk(e) {
 		if os.IsNotExist(e) {
 			return false
 		}
@@ -325,7 +325,7 @@ func openDB(dbPath string, create bool) (d walletdb.DB,e error) {
 		return nil, walletdb.ErrDbDoesNotExist
 	}
 	var boltDB *bolt.DB
-	if boltDB, e = bolt.Open(dbPath, 0600, nil); err.Chk(e) {
+	if boltDB, e = bolt.Open(dbPath, 0600, nil); E.Chk(e) {
 	}
 	return (*db)(boltDB), convertErr(e)
 }

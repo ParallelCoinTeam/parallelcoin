@@ -20,7 +20,7 @@ func main() {
 	pc := ipv4.NewPacketConn(conn)
 	var ifaces []net.Interface
 	var iface net.Interface
-	if ifaces, e = net.Interfaces(); err.Chk(e) {
+	if ifaces, e = net.Interfaces(); E.Chk(e) {
 	}
 	// This grabs the first physical interface with multicast that is up
 	for i := range ifaces {
@@ -31,21 +31,21 @@ func main() {
 			break
 		}
 	}
-	if e = pc.JoinGroup(&iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); err.Chk(e) {
+	if e = pc.JoinGroup(&iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); E.Chk(e) {
 		return
 	}
 	// test
 	if loop, e := pc.MulticastLoopback(); e ==  nil {
 		fmt.Printf("MulticastLoopback status:%v\n", loop)
 		if !loop {
-			if e := pc.SetMulticastLoopback(true); err.Chk(e) {
+			if e := pc.SetMulticastLoopback(true); E.Chk(e) {
 				fmt.Printf("SetMulticastLoopback error:%v\n", err)
 			}
 		}
 	}
 	go func() {
 		for {
-			if _, e = conn.WriteTo([]byte("hello"), ipv4Addr); err.Chk(e) {
+			if _, e = conn.WriteTo([]byte("hello"), ipv4Addr); E.Chk(e) {
 				fmt.Printf("Write failed, %v\n", err)
 			}
 			time.Sleep(time.Second)
@@ -54,7 +54,7 @@ func main() {
 
 	buf := make([]byte, 1024)
 	for {
-		if n, addr, e := conn.ReadFrom(buf); err.Chk(e) {
+		if n, addr, e := conn.ReadFrom(buf); E.Chk(e) {
 			fmt.Printf("error %v", err)
 		} else {
 			fmt.Printf("recv %s from %v\n", string(buf[:n]), addr)
@@ -68,14 +68,14 @@ func main() {
 // func main() {
 // 	var ifs []net.Interface
 // 	var e error
-// 	if ifs, e = net.Interfaces(); err.Chk(e) {
+// 	if ifs, e = net.Interfaces(); E.Chk(e) {
 // 	}
-// 	dbg.S(ifs)
+// 	D.S(ifs)
 // 	var addrs []net.Addr
 // 	var addr net.Addr
 // 	for i := range ifs {
 // 		if ifs[i].Flags&net.FlagUp != 0 && ifs[i].Flags&net.FlagMulticast != 0 {
-// 			if addrs, e = ifs[i].MulticastAddrs(); err.Chk(e) {
+// 			if addrs, e = ifs[i].MulticastAddrs(); E.Chk(e) {
 // 			}
 // 			for j := range addrs {
 // 				if addrs[j].String() == Multicast {
@@ -85,5 +85,5 @@ func main() {
 // 			}
 // 		}
 // 	}
-// 	dbg.S(addr)
+// 	D.S(addr)
 // }

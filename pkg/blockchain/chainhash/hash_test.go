@@ -160,7 +160,7 @@ func TestNewHashFromStr(t *testing.T) {
 	for i, test := range tests {
 		result, e := NewHashFromStr(test.in)
 		if err != test.err {
-			t.Errorf(unexpectedErrStr, i, err, test.err)
+			t.Errorf(unexpectedErrStr, i, e, test.err)
 			continue
 		} else if e != nil  {
 

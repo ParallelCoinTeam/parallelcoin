@@ -68,7 +68,7 @@ func TestChainSvrCustomResults(t *testing.T) {
 		marshalled, e := json.Marshal(test.result)
 		if e != nil  {
 			t.Errorf("Test #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		if string(marshalled) != test.expected {

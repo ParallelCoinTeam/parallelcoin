@@ -196,7 +196,7 @@ func (wg *WalletGUI) createWalletInputsAreValid() bool {
 
 func (wg *WalletGUI) createWalletAction() {
 	// wg.NodeRunCommandChan <- "stop"
-	dbg.Ln("clicked submit wallet")
+	D.Ln("clicked submit wallet")
 	*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
 		string(os.PathSeparator) + wg.cx.ActiveNet.Name +
 		string(os.PathSeparator) + wallet.DbName
@@ -206,7 +206,7 @@ func (wg *WalletGUI) createWalletAction() {
 	seed := wg.createSeed
 	pass := []byte(wg.passwords["passEditor"].GetPassword())
 	*wg.cx.Config.WalletPass = string(pass)
-	dbg.Ln("password", string(pass))
+	D.Ln("password", string(pass))
 	save.Pod(wg.cx.Config)
 	w, e := loader.CreateNewWallet(
 		pass,
@@ -217,14 +217,14 @@ func (wg *WalletGUI) createWalletAction() {
 		wg.cx.Config,
 		qu.T(),
 	)
-	dbg.Ln("*** created wallet")
-	if err.Chk(e) {
+	D.Ln("*** created wallet")
+	if E.Chk(e) {
 		// return
 	}
 	w.Stop()
-	dbg.Ln("shutting down wallet", w.ShuttingDown())
+	D.Ln("shutting down wallet", w.ShuttingDown())
 	w.WaitForShutdown()
-	dbg.Ln("starting main app")
+	D.Ln("starting main app")
 	*wg.cx.Config.Generate = true
 	*wg.cx.Config.GenThreads = 1
 	*wg.cx.Config.NodeOff = false
@@ -237,12 +237,12 @@ func (wg *WalletGUI) createWalletAction() {
 	// 		wg.cx.Config, wg.cx.ConfigMap = pod.EmptyConfig()
 	// 		e = json.Unmarshal(b, wg.cx.Config)
 	// 		if e != nil {
-	// 			err.Ln("error unmarshalling config", e)
+	// 			E.Ln("error unmarshalling config", e)
 	// 			// os.Exit(1)
 	// 			panic(e)
 	// 		}
 	// 	} else {
-	// 		ftl.Ln("unexpected error reading configuration file:", e)
+	// 		F.Ln("unexpected error reading configuration file:", e)
 	// 		// os.Exit(1)
 	// 		// return e
 	// 		panic(e)
@@ -260,7 +260,7 @@ func (wg *WalletGUI) createWalletAction() {
 }
 
 func (wg *WalletGUI) createWalletTestnetToggle(b bool) {
-	dbg.Ln("testnet on?", b)
+	D.Ln("testnet on?", b)
 	// if the password has been entered, we need to copy it to the variable
 	if wg.passwords["passEditor"].GetPassword() != "" ||
 		wg.passwords["confirmPassEditor"].GetPassword() != "" ||
@@ -268,7 +268,7 @@ func (wg *WalletGUI) createWalletTestnetToggle(b bool) {
 		wg.passwords["passEditor"].GetPassword() ==
 			wg.passwords["confirmPassEditor"].GetPassword() {
 		*wg.cx.Config.WalletPass = wg.passwords["confirmPassEditor"].GetPassword()
-		dbg.Ln("wallet pass", *wg.cx.Config.WalletPass)
+		D.Ln("wallet pass", *wg.cx.Config.WalletPass)
 	}
 	if b {
 		wg.cx.ActiveNet = &netparams.TestNet3Params
@@ -277,8 +277,8 @@ func (wg *WalletGUI) createWalletTestnetToggle(b bool) {
 		wg.cx.ActiveNet = &netparams.MainNetParams
 		fork.IsTestnet = false
 	}
-	inf.Ln("activenet:", wg.cx.ActiveNet.Name)
-	dbg.Ln("setting ports to match network")
+	I.Ln("activenet:", wg.cx.ActiveNet.Name)
+	D.Ln("setting ports to match network")
 	*wg.cx.Config.Network = wg.cx.ActiveNet.Name
 	*wg.cx.Config.P2PListeners = cli.StringSlice{
 		fmt.Sprintf(

@@ -30,7 +30,7 @@ func main() {
 				func() {
 					quit.Q()
 				}, quit,
-			); err.Chk(e) {
+			); E.Chk(e) {
 		}
 	}()
 	<-quit

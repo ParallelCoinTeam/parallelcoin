@@ -17,7 +17,7 @@ func TestPutUsedAddrHash(t *testing.T) {
 		return putUsedAddrHash(ns, pool.ID, 0, 0, 0, dummyHash)
 	})
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	var storedHash []byte
 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
@@ -26,7 +26,7 @@ func TestPutUsedAddrHash(t *testing.T) {
 		return nil
 	})
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	if !bytes.Equal(storedHash, dummyHash) {
 		t.Fatalf("Wrong stored hash; got %x, want %x", storedHash, dummyHash)
@@ -47,7 +47,7 @@ func TestGetMaxUsedIdx(t *testing.T) {
 		return nil
 	})
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	var maxIdx Index
 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
@@ -57,7 +57,7 @@ func TestGetMaxUsedIdx(t *testing.T) {
 		return e
 	})
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	if maxIdx != Index(3001) {
 		t.Fatalf("Wrong max idx; got %d, want %d", maxIdx, Index(3001))
@@ -68,7 +68,7 @@ func TestWithdrawalSerialization(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -82,13 +82,13 @@ func TestWithdrawalSerialization(t *testing.T) {
 	serialized, e := serializeWithdrawal(wi.requests, wi.startAddress, wi.lastSeriesID,
 		wi.changeStart, wi.dustThreshold, wi.status)
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	var wInfo *withdrawalInfo
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		wInfo, e = deserializeWithdrawal(pool, ns, addrmgrNs, serialized)
 		if e != nil  {
-			t.ftl.Ln(e)
+			t.F.Ln(e)
 		}
 	})
 	if !reflect.DeepEqual(wInfo.startAddress, wi.startAddress) {
@@ -119,7 +119,7 @@ func TestPutAndGetWithdrawal(t *testing.T) {
 		return putWithdrawal(ns, poolID, roundID, serialized)
 	})
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	var retrieved []byte
 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
@@ -128,7 +128,7 @@ func TestPutAndGetWithdrawal(t *testing.T) {
 		return nil
 	})
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	if !bytes.Equal(retrieved, serialized) {
 		t.Fatalf("Wrong value retrieved from DB; got %x, want %x", retrieved, serialized)

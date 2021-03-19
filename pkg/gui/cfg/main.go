@@ -3,20 +3,20 @@ package cfg
 import (
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 )
 
 func New(cx *conte.Xt, w *gui.Window) *Config {
 	cfg := &Config{
 		Window: w,
-		cx:    cx,
-		quit:  cx.KillAll,
+		cx:     cx,
+		quit:   cx.KillAll,
 	}
 	return cfg.Init()
 }
 
 type Config struct {
-	cx         *conte.Xt
+	cx *conte.Xt
 	*gui.Window
 	Bools      map[string]*gui.Bool
 	lists      map[string]*gui.List
@@ -39,7 +39,7 @@ func (c *Config) Init() *Config {
 	}
 	c.Bools = map[string]*gui.Bool{
 		// "runstate": ng.th.Bool(false).SetOnChange(func(b bool) {
-		// 	dbg.Ln("run state is now", b)
+		// 	D.Ln("run state is now", b)
 		// }),
 	}
 	c.lists = map[string]*gui.List{

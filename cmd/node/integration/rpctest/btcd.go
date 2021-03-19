@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
-
+	
 	"github.com/p9c/pod/pkg/util/gobin"
 )
 
@@ -31,8 +31,8 @@ func podExecutablePath() (string, error) {
 		return executablePath, nil
 	}
 	testDir, e := baseDir()
-	if e != nil  {
-				return "", err
+	if e != nil {
+		return "", err
 	}
 	// Determine import path of this package. Not necessarily pod if this is a forked repo.
 	_, rpctestDir, _, ok := runtime.Caller(1)
@@ -41,8 +41,8 @@ func podExecutablePath() (string, error) {
 	}
 	podPkgPath := filepath.Join(rpctestDir, "..", "..", "..")
 	podPkg, e := build.ImportDir(podPkgPath, build.FindOnly)
-	if e != nil  {
-				return "", fmt.Errorf("failed to build pod: %v", err)
+	if e != nil {
+		return "", fmt.Errorf("failed to build pod: %v", err)
 	}
 	// Build pod and output an executable in a static temp path.
 	outputPath := filepath.Join(testDir, "pod")
@@ -50,13 +50,13 @@ func podExecutablePath() (string, error) {
 		outputPath += ".exe"
 	}
 	var gb string
-	if gb, e = gobin.Get(); err.Chk(e) {
+	if gb, e = gobin.Get(); E.Chk(e) {
 		return "", err
 	}
 	cmd := exec.Command(gb, "build", "-o", outputPath, podPkg.ImportPath)
 	e = cmd.Run()
-	if e != nil  {
-				return "", fmt.Errorf("failed to build pod: %v", err)
+	if e != nil {
+		return "", fmt.Errorf("failed to build pod: %v", err)
 	}
 	// Save executable path so future calls do not recompile.
 	executablePath = outputPath

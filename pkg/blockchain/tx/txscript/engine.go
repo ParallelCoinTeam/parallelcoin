@@ -160,7 +160,7 @@ func (vm *Engine) executeOpcode(pop *parsedOpcode) (e error) {
 	if vm.dstack.verifyMinimalData && vm.isBranchExecuting() &&
 		// pop.opcode.value >= 0 &&
 		pop.opcode.value <= OP_PUSHDATA4 {
-		if e = pop.checkMinimalDataPush(); err.Chk(e) {
+		if e = pop.checkMinimalDataPush(); E.Chk(e) {
 			return e
 		}
 	}
@@ -387,7 +387,7 @@ func (vm *Engine) CheckErrorCondition(finalScript bool) (e error) {
 	}
 	if !v {
 		// Log interesting data.
-		trc.C(
+		T.C(
 			func() string {
 				dis0, _ := vm.DisasmScript(0)
 				dis1, _ := vm.DisasmScript(1)
@@ -460,14 +460,14 @@ func (vm *Engine) Step() (done bool, e error) {
 			// Check script ran successfully and pull the script out of the first stack and execute that.
 			ee := vm.CheckErrorCondition(false)
 			if ee != nil {
-				err.Ln(e)
+				E.Ln(e)
 				done, e = false, ee
 				return
 			}
 			script := vm.savedFirstStack[len(vm.savedFirstStack)-1]
 			pops, er := parseScript(script)
 			if er != nil {
-				err.Ln(e)
+				E.Ln(e)
 				done, e = false, er
 				return
 			}
@@ -479,7 +479,7 @@ func (vm *Engine) Step() (done bool, e error) {
 		// 	// Nested P2SH.
 		// 	vm.scriptIdx.Inc()
 		// 	witness := vm.tx.TxIn[vm.txIdx].Witness
-		// 	if er := vm.verifyWitnessProgram(witness); err.Chk(e) {
+		// 	if er := vm.verifyWitnessProgram(witness); E.Chk(e) {
 		// 		done, e = false, er
 		// 		return
 		// 	}
@@ -509,7 +509,7 @@ func (vm *Engine) Execute() (e error) {
 		if e != nil {
 			return e
 		}
-		// trc.C(
+		// T.C(
 		// 	func() string {
 		// 		var o string
 		// 		dis, e := vm.DisasmPC()
@@ -905,7 +905,7 @@ func NewEngine(
 	// 	}
 		// if witProgram != nil {
 		// 	var e error
-		// 	vm.witnessVersion, vm.witnessProgram, e = ExtractWitnessPrograminf.Ln(witProgram)
+		// 	vm.witnessVersion, vm.witnessProgram, e = ExtractWitnessProgramI.Ln(witProgram)
 		// 	if e != nil {
 		// 		return nil, e
 		// 	}

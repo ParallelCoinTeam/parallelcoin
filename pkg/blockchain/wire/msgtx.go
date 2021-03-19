@@ -275,7 +275,7 @@ func (msg *MsgTx) Copy() *MsgTx {
 		// Deep copy the old previous outpoint.
 		oldOutPoint := oldTxIn.PreviousOutPoint
 		newOutPoint := OutPoint{}
-		if e = newOutPoint.Hash.SetBytes(oldOutPoint.Hash[:]); err.Chk(e) {
+		if e = newOutPoint.Hash.SetBytes(oldOutPoint.Hash[:]); E.Chk(e) {
 		}
 		newOutPoint.Index = oldOutPoint.Index
 		// Deep copy the old signature script.
@@ -330,12 +330,12 @@ func (msg *MsgTx) Copy() *MsgTx {
 // decoding transactions from the wire.
 func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	var version uint32
-	if version, e = binarySerializer.Uint32(r, littleEndian);err.Chk(e){
+	if version, e = binarySerializer.Uint32(r, littleEndian);E.Chk(e){
 		return
 	}
 	msg.Version = int32(version)
 	var count uint64
-	if count, e = ReadVarInt(r, pver);err.Chk(e){
+	if count, e = ReadVarInt(r, pver);E.Chk(e){
 		return
 	}
 	// // A count of zero (meaning no TxIn's to the uninitiated) indicates this is a
@@ -343,7 +343,7 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e er
 	// var flag [1]byte
 	// if count == 0 && enc == BaseEncoding {
 	// 	// Next, we need to read the flag, which is a single byte.
-	// 	if _, e = io.ReadFull(r, flag[:]); err.Chk(e) {
+	// 	if _, e = io.ReadFull(r, flag[:]); E.Chk(e) {
 	// 		return
 	// 	}
 	// 	// At the moment, the flag MUST be 0x01. In the future other flag types may be supported.
@@ -400,13 +400,13 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e er
 		// The pointer is set now in case a script buffer is borrowed and needs to be returned to the pool on error.
 		ti := &txIns[i]
 		msg.TxIn[i] = ti
-		if e = readTxIn(r, pver, msg.Version, ti); err.Chk(e) {
+		if e = readTxIn(r, pver, msg.Version, ti); E.Chk(e) {
 			returnScriptBuffers()
 			return
 		}
 		totalScriptSize += uint64(len(ti.SignatureScript))
 	}
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		returnScriptBuffers()
 		return
 	}
@@ -442,7 +442,7 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e er
 	// 		// For each input, the witness is encoded as a stack with one or more items.
 	// 		// Therefore, we first read a varint which encodes the number of stack items.
 	// 		var witCount uint64
-	// 		if witCount, e = ReadVarInt(r, pver); err.Chk(e) {
+	// 		if witCount, e = ReadVarInt(r, pver); E.Chk(e) {
 	// 			returnScriptBuffers()
 	// 			return
 	// 		}
@@ -559,7 +559,7 @@ func (msg *MsgTx) DeserializeNoWitness(r io.Reader) (e error) {
 // implementation. See Serialize for encoding transactions to be stored to disk, such as in a database, as opposed to
 // encoding transactions for the wire.
 func (msg *MsgTx) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
-	if e = binarySerializer.PutUint32(w, littleEndian, uint32(msg.Version)); err.Chk(e) {
+	if e = binarySerializer.PutUint32(w, littleEndian, uint32(msg.Version)); E.Chk(e) {
 		return
 	}
 	// // If the encoding version is set to BaseEncoding, and the Flags field for
@@ -573,7 +573,7 @@ func (msg *MsgTx) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e er
 	// 	// regular (legacy) one. The second byte is the Flag field, which at the moment
 	// 	// is always 0x01, but may be extended in the future to accommodate auxiliary
 	// 	// non-committed fields.
-	// 	if _, e = w.Write(witessMarkerBytes); err.Chk(e) {
+	// 	if _, e = w.Write(witessMarkerBytes); E.Chk(e) {
 	// 		return
 	// 	}
 	// }
@@ -740,7 +740,7 @@ func NewMsgTx(version int32) *MsgTx {
 
 // readOutPoint reads the next sequence of bytes from r as an OutPoint.
 func readOutPoint(r io.Reader, pver uint32, version int32, op *OutPoint) (e error) {
-	if _, e = io.ReadFull(r, op.Hash[:]); err.Chk(e) {
+	if _, e = io.ReadFull(r, op.Hash[:]); E.Chk(e) {
 		return
 	}
 	op.Index, e = binarySerializer.Uint32(r, littleEndian)
@@ -749,7 +749,7 @@ func readOutPoint(r io.Reader, pver uint32, version int32, op *OutPoint) (e erro
 
 // writeOutPoint encodes op to the bitcoin protocol encoding for an OutPoint to w.
 func writeOutPoint(w io.Writer, pver uint32, version int32, op *OutPoint) (e error) {
-	if _, e = w.Write(op.Hash[:]); err.Chk(e) {
+	if _, e = w.Write(op.Hash[:]); E.Chk(e) {
 		return
 	}
 	return binarySerializer.PutUint32(w, littleEndian, op.Index)
@@ -762,7 +762,7 @@ func writeOutPoint(w io.Writer, pver uint32, version int32, op *OutPoint) (e err
 // error.
 func readScript(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) (b []byte, e error) {
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	// Prevent byte array larger than the max message size. It would be possible to cause memory exhaustion and panics
@@ -775,7 +775,7 @@ func readScript(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) (
 		return nil, messageError("readScript", str)
 	}
 	b = scriptPool.Borrow(count)
-	if _, e = io.ReadFull(r, b); err.Chk(e) {
+	if _, e = io.ReadFull(r, b); E.Chk(e) {
 		scriptPool.Return(b)
 		return
 	}
@@ -784,13 +784,13 @@ func readScript(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) (
 
 // readTxIn reads the next sequence of bytes from r as a transaction input (TxIn).
 func readTxIn(r io.Reader, pver uint32, version int32, ti *TxIn) (e error) {
-	if e = readOutPoint(r, pver, version, &ti.PreviousOutPoint); err.Chk(e) {
+	if e = readOutPoint(r, pver, version, &ti.PreviousOutPoint); E.Chk(e) {
 		return
 	}
 	if ti.SignatureScript, e = readScript(
 		r, pver, MaxMessagePayload,
 		"transaction input signature script",
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return
 	}
 	return readElement(r, &ti.Sequence)
@@ -798,10 +798,10 @@ func readTxIn(r io.Reader, pver uint32, version int32, ti *TxIn) (e error) {
 
 // writeTxIn encodes ti to the bitcoin protocol encoding for a transaction input (TxIn) to w.
 func writeTxIn(w io.Writer, pver uint32, version int32, ti *TxIn) (e error) {
-	if e = writeOutPoint(w, pver, version, &ti.PreviousOutPoint); err.Chk(e) {
+	if e = writeOutPoint(w, pver, version, &ti.PreviousOutPoint); E.Chk(e) {
 		return
 	}
-	if e = WriteVarBytes(w, pver, ti.SignatureScript); err.Chk(e) {
+	if e = WriteVarBytes(w, pver, ti.SignatureScript); E.Chk(e) {
 		return
 	}
 	return binarySerializer.PutUint32(w, littleEndian, ti.Sequence)
@@ -809,7 +809,7 @@ func writeTxIn(w io.Writer, pver uint32, version int32, ti *TxIn) (e error) {
 
 // readTxOut reads the next sequence of bytes from r as a transaction output (TxOut).
 func readTxOut(r io.Reader, pver uint32, version int32, to *TxOut) (e error) {
-	if e = readElement(r, &to.Value); err.Chk(e) {
+	if e = readElement(r, &to.Value); E.Chk(e) {
 		return
 	}
 	to.PkScript, e = readScript(
@@ -823,7 +823,7 @@ func readTxOut(r io.Reader, pver uint32, version int32, to *TxOut) (e error) {
 // output (TxOut) to w. NOTE: This function is exported in order to allow
 // txscript to compute the new sighashes for witness transactions (BIP0143).
 func WriteTxOut(w io.Writer, pver uint32, version int32, to *TxOut) (e error) {
-	if e = binarySerializer.PutUint64(w, littleEndian, uint64(to.Value)); err.Chk(e) {
+	if e = binarySerializer.PutUint64(w, littleEndian, uint64(to.Value)); E.Chk(e) {
 		return
 	}
 	return WriteVarBytes(w, pver, to.PkScript)
@@ -832,11 +832,11 @@ func WriteTxOut(w io.Writer, pver uint32, version int32, to *TxOut) (e error) {
 // writeTxWitness encodes the bitcoin protocol encoding for a transaction
 // input's witness into to w.
 func writeTxWitness(w io.Writer, pver uint32, version int32, wit [][]byte) (e error) {
-	if e = WriteVarInt(w, pver, uint64(len(wit))); err.Chk(e) {
+	if e = WriteVarInt(w, pver, uint64(len(wit))); E.Chk(e) {
 		return
 	}
 	for _, item := range wit {
-		if e = WriteVarBytes(w, pver, item); err.Chk(e) {
+		if e = WriteVarBytes(w, pver, item); E.Chk(e) {
 			return
 		}
 	}

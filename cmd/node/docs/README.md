@@ -4,57 +4,69 @@
 
 2. [Getting Started](#GettingStarted)
 
-   1. [Installation](#Installation)
+    1. [Installation](#Installation)
 
-      1. [Windows](#WindowsInstallation)
+        1. [Windows](#WindowsInstallation)
 
-      2. [Linux/BSD/MacOSX/POSIX](#PosixInstallation)
+        2. [Linux/BSD/MacOSX/POSIX](#PosixInstallation)
 
-      3. [Gentoo Linux](#GentooInstallation)
+        3. [Gentoo Linux](#GentooInstallation)
 
-   2. [Configuration](#Configuration)
+    2. [Configuration](#Configuration)
 
-   3. [Controlling and Querying pod via podctl](#BtcctlConfig)
+    3. [Controlling and Querying pod via podctl](#BtcctlConfig)
 
-   4. [Mining](#Mining)
+    4. [Mining](#Mining)
 
 3. [Help](#Help)
 
-   1. [Startup](#Startup)
+    1. [Startup](#Startup)
 
-      1. [Using bootstrap.dat](#BootstrapDat)
+        1. [Using bootstrap.dat](#BootstrapDat)
 
-   2. [Network Configuration](#NetworkConfig)
+    2. [Network Configuration](#NetworkConfig)
 
-   3. [Wallet](#Wallet)
+    3. [Wallet](#Wallet)
 
 4. [Contact](#Contact)
 
-   1. [IRC](#ContactIRC)
+    1. [IRC](#ContactIRC)
 
-   2. [Mailing Lists](#MailingLists)
+    2. [Mailing Lists](#MailingLists)
 
 5. [Developer Resources](#DeveloperResources)
 
-   1. [Code Contribution Guidelines](#ContributionGuidelines)
+    1. [Code Contribution Guidelines](#ContributionGuidelines)
 
-   2. [JSON-RPC Reference](#JSONRPCReference)
+    2. [JSON-RPC Reference](#JSONRPCReference)
 
-   3. [The btcsuite Bitcoin-related Go Packages](#GoPackages)
+    3. [The btcsuite Bitcoin-related Go Packages](#GoPackages)
 
 <a name="About" />
 
 ### 1. About
 
-pod is a full node bitcoin implementation written in [Go](http://golang.org), licensed under the [copyfree](http://www.copyfree.org) ISC License.
+pod is a full node bitcoin implementation written in [Go](http://golang.org), licensed under
+the [copyfree](http://www.copyfree.org) ISC License.
 
-This project is currently under active development and is in a Beta state. It is extremely stable and has been in production use since October 2013, but
+This project is currently under active development and is in a Beta state. It is extremely stable and has been in
+production use since October 2013, but
 
-It properly downloads, validates, and serves the block chain using the exact rules (including consensus bugs) for block acceptance as Bitcoin Core. We have taken great care to avoid pod causing a fork to the block chain. It includes a full block validation testing framework which contains all of the 'official' block acceptance tests (and some additional ones) that is run on every pull request to help ensure it properly follows consensus. Also, it passes all of the JSON test data in the Bitcoin Core code.
+It properly downloads, validates, and serves the block chain using the exact rules (including consensus bugs) for block
+acceptance as Bitcoin Core. We have taken great care to avoid pod causing a fork to the block chain. It includes a full
+block validation testing framework which contains all of the 'official' block acceptance tests (and some additional
+ones) that is run on every pull request to help ensure it properly follows consensus. Also, it passes all of the JSON
+test data in the Bitcoin Core code.
 
-It also properly relays newly mined blocks, maintains a transaction pool, and relays individual transactions that have not yet made it into a block. It ensures all individual transactions admitted to the pool follow the rules required by the block chain and also includes more strict checks which filter transactions based on miner requirements ("standard" transactions).
+It also properly relays newly mined blocks, maintains a transaction pool, and relays individual transactions that have
+not yet made it into a block. It ensures all individual transactions admitted to the pool follow the rules required by
+the block chain and also includes more strict checks which filter transactions based on miner requirements ("standard"
+transactions).
 
-One key difference between pod and Bitcoin Core is that pod does _NOT_ include wallet functionality and this was a very intentional design decision. See the blog entry [here](https://blog.conformal.com/pod-not-your-moms-bitcoin-daemon) for more details. This means you can't actually make or receive payments directly with pod. That functionality is provided by the [btcwallet](https://github.com/p9c/pod/walletmain).
+One key difference between pod and Bitcoin Core is that pod does _NOT_ include wallet functionality and this was a very
+intentional design decision. See the blog entry [here](https://blog.conformal.com/pod-not-your-moms-bitcoin-daemon) for
+more details. This means you can't actually make or receive payments directly with pod. That functionality is provided
+by the [btcwallet](https://github.com/p9c/pod/walletmain).
 
 <a name="GettingStarted" />
 
@@ -64,7 +76,8 @@ One key difference between pod and Bitcoin Core is that pod does _NOT_ include w
 
 **2.1 Installation**
 
-The first step is to install pod. See one of the following sections for details on how to install on the supported operating systems.
+The first step is to install pod. See one of the following sections for details on how to install on the supported
+operating systems.
 
 <a name="WindowsInstallation" />
 
@@ -87,7 +100,9 @@ $ go version
 $ go env GOROOT GOPATH
 ```
 
-NOTE: The `GOROOT` and `GOPATH` above must not be the same path. It is recommended that `GOPATH` is set to a directory in your home directory such as `~/goprojects` to avoid write permission issues. It is also recommended to add `$GOPATH/bin` to your `PATH` at this point.
+NOTE: The `GOROOT` and `GOPATH` above must not be the same path. It is recommended that `GOPATH` is set to a directory
+in your home directory such as `~/goprojects` to avoid write permission issues. It is also recommended to
+add `$GOPATH/bin` to your `PATH` at this point.
 
 - Run the following commands to obtain pod, all dependencies, and install it:
 
@@ -99,9 +114,8 @@ $ glide install
 $ go install . ./cmd/...
 ```
 
-- pod (and utilities) will now be installed in `$GOPATH/bin`. If you did
-  not already add the bin directory to your system path during Go installation,
-  we recommend you do so now.
+- pod (and utilities) will now be installed in `$GOPATH/bin`. If you did not already add the bin directory to your
+  system path during Go installation, we recommend you do so now.
 
 **Updating**
 
@@ -119,7 +133,7 @@ $ go install . ./cmd/...
 
 - Install Layman and enable the Bitcoin overlay.
 
-  - https://gitlab.com/bitcoin/gentoo
+    - https://gitlab.com/bitcoin/gentoo
 
 - Copy or symlink `/var/lib/layman/bitcoin/Documentation/package.keywords/pod-live` to `/etc/portage/package.keywords/`
 
@@ -129,13 +143,16 @@ $ go install . ./cmd/...
 
 **2.2 Configuration**
 
-pod has a number of [configuration](http://godoc.org/github.com/parallelcointeam/parallelcoin) options, which can be viewed by running: `$ pod --help`.
+pod has a number of [configuration](http://godoc.org/github.com/parallelcointeam/parallelcoin) options, which can be
+viewed by running: `$ pod --help`.
 
 <a name="BtcctlConfig" />
 
 **2.3 Controlling and Querying pod via podctl**
 
-podctl is a command line utility that can be used to both control and query pod via [RPC](http://www.wikipedia.org/wiki/Remote_procedure_call). pod does **not** enable its RPC server by default; You must configure at minimum both an RPC username and password or both an RPC limited username and password:
+podctl is a command line utility that can be used to both control and query pod
+via [RPC](http://www.wikipedia.org/wiki/Remote_procedure_call). pod does **not** enable its RPC server by default; You
+must configure at minimum both an RPC username and password or both an RPC limited username and password:
 
 - pod.conf configuration file
 
@@ -183,7 +200,8 @@ miningaddr=1M83ju3EChKYyysmM2FXtLNftbacagd8FR
 
 **2. Add pod's RPC TLS certificate to system Certificate Authority list.**
 
-`cgminer` uses [curl](http://curl.haxx.se/) to fetch data from the RPC server. Since curl validates the certificate by default, we must install the `pod` RPC certificate into the default system Certificate Authority list.
+`cgminer` uses [curl](http://curl.haxx.se/) to fetch data from the RPC server. Since curl validates the certificate by
+default, we must install the `pod` RPC certificate into the default system Certificate Authority list.
 
 **Ubuntu**
 
@@ -205,7 +223,8 @@ miningaddr=1M83ju3EChKYyysmM2FXtLNftbacagd8FR
 
 **3.1 Startup**
 
-Typically pod will run and start downloading the block chain with no extra configuration necessary, however, there is an optional method to use a `bootstrap.dat` file that may speed up the initial block chain download process.
+Typically pod will run and start downloading the block chain with no extra configuration necessary, however, there is an
+optional method to use a `bootstrap.dat` file that may speed up the initial block chain download process.
 
 <a name="BootstrapDat" />
 
@@ -229,7 +248,8 @@ Typically pod will run and start downloading the block chain with no extra confi
 
 **3.1 Wallet**
 
-pod was intentionally developed without an integrated wallet for security reasons. Please see [btcwallet](https://github.com/btcsuite/btcwallet) for more information.
+pod was intentionally developed without an integrated wallet for security reasons. Please
+see [btcwallet](https://github.com/btcsuite/btcwallet) for more information.
 
 <a name="Contact" />
 
@@ -245,8 +265,7 @@ pod was intentionally developed without an integrated wallet for security reason
 
 **4.2 Mailing Lists**
 
-- <a href="mailto:pod+subscribe@opensource.conformal.com">pod</a>: discussion
-  of pod and its packages.
+- <a href="mailto:pod+subscribe@opensource.conformal.com">pod</a>: discussion of pod and its packages.
 
 - <a href="mailto:pod-commits+subscribe@opensource.conformal.com">pod-commits</a>:
   readonly mail-out of source code changes.
@@ -269,29 +288,39 @@ pod was intentionally developed without an integrated wallet for security reason
 
 - The btcsuite Bitcoin-related Go Packages:
 
-  - [btcrpcclient](https://github.com/p9c/pod/tree/master/rpcclient) - Implements a robust and easy to use Websocket-enabled Bitcoin JSON-RPC client
+    - [btcrpcclient](https://github.com/p9c/pod/tree/master/rpcclient) - Implements a robust and easy to use
+      Websocket-enabled Bitcoin JSON-RPC client
 
-  - [btcjson](https://github.com/p9c/pod/tree/master/btcjson) - Provides an extensive API for the underlying JSON-RPC command and return values
+    - [btcjson](https://github.com/p9c/pod/tree/master/btcjson) - Provides an extensive API for the underlying JSON-RPC
+      command and return values
 
-  - [wire](https://github.com/p9c/pod/tree/master/wire) - Implements the
-    Bitcoin wire protocol
+    - [wire](https://github.com/p9c/pod/tree/master/wire) - Implements the Bitcoin wire protocol
 
-  - [peer](https://github.com/p9c/pod/tree/master/peer) - Provides a common base for creating and managing Bitcoin network peers.
+    - [peer](https://github.com/p9c/pod/tree/master/peer) - Provides a common base for creating and managing Bitcoin
+      network peers.
 
-  - [blockchain](https://github.com/p9c/pod/tree/master/blockchain) - Implements Bitcoin block handling and chain selection rules
+    - [blockchain](https://github.com/p9c/pod/tree/master/blockchain) - Implements Bitcoin block handling and chain
+      selection rules
 
-  - [blockchain/fullblocktests](https://github.com/p9c/pod/tree/master/blockchain/fullblocktests) - Provides a set of block tests for testing the consensus validation rules
+    - [blockchain/fullblocktests](https://github.com/p9c/pod/tree/master/blockchain/fullblocktests) - Provides a set of
+      block tests for testing the consensus validation rules
 
-  - [txscript](https://github.com/p9c/pod/tree/master/txscript) - Implements the Bitcoin transaction scripting language
+    - [txscript](https://github.com/p9c/pod/tree/master/txscript) - Implements the Bitcoin transaction scripting
+      language
 
-  - [btcec](https://github.com/p9c/pod/tree/master/btcec) - Implements support for the elliptic curve cryptographic functions needed for the Bitcoin scripts
+    - [btcec](https://github.com/p9c/pod/tree/master/btcec) - Implements support for the elliptic curve cryptographic
+      functions needed for the Bitcoin scripts
 
-  - [database](https://github.com/p9c/pod/tree/master/database) - Provides a database interface for the Bitcoin block chain
+    - [database](https://github.com/p9c/pod/tree/master/database) - Provides a database interface for the Bitcoin block
+      chain
 
-  - [mempool](https://github.com/p9c/pod/tree/master/mempool) - Package mempool provides a policy-enforced pool of unmined bitcoin transactions.
+    - [mempool](https://github.com/p9c/pod/tree/master/mempool) - Package mempool provides a policy-enforced pool of
+      unmined bitcoin transactions.
 
-  - [util](https://github.com/p9c/pod/util) - Provides Bitcoin-specific convenience functions and types
+    - [util](https://github.com/p9c/pod/util) - Provides Bitcoin-specific convenience functions and types
 
-  - [chainhash](https://github.com/p9c/pod/tree/master/chaincfg/chainhash) - Provides a generic hash type and associated functions that allows the specific hash algorithm to be abstracted.
+    - [chainhash](https://github.com/p9c/pod/tree/master/chaincfg/chainhash) - Provides a generic hash type and
+      associated functions that allows the specific hash algorithm to be abstracted.
 
-  - [connmgr](https://github.com/p9c/pod/tree/master/connmgr) - Package connmgr implements a generic Bitcoin network connection manager.
+    - [connmgr](https://github.com/p9c/pod/tree/master/connmgr) - Package connmgr implements a generic Bitcoin network
+      connection manager.

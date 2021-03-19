@@ -798,7 +798,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 			if e != nil {
 				errChan <- fmt.Errorf(
 					"Couldn't get block "+
-						"header by height %d: %s", height, err,
+						"header by height %d: %s", height, e,
 				)
 				return
 			}
@@ -868,7 +868,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 				errChan <- fmt.Errorf(
 					"Couldn't get basic "+
 						"filter for block %d (%s) via RPC: %s",
-					height, blockHash, err,
+					height, blockHash, e,
 				)
 				return
 			}
@@ -1004,7 +1004,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 		)
 	}
 	if lastErr != nil {
-		t.ftl.Ln(lastErr)
+		t.F.Ln(lastErr)
 	}
 }
 
@@ -1328,7 +1328,7 @@ func waitForSync(
 			return fmt.Errorf(
 				"Couldn't get basic header "+
 					"for %d (%s) from DB: %v\n%s", i, hash,
-				err, goroutineDump(),
+				e, goroutineDump(),
 			)
 		}
 		knownBasicHeader, e = correctSyncNode.Node.GetCFilterHeader(
@@ -1409,7 +1409,7 @@ func startRescan(
 								"decode hash "+
 								"%s: %s",
 							details.Hash,
-							err,
+							e,
 						)
 					}
 					ourKnownTxsByBlock[*hash] = append(
@@ -1437,7 +1437,7 @@ func startRescan(
 								"decode hash "+
 								"%s: %s",
 							details.Hash,
-							err,
+							e,
 						)
 					}
 					ourKnownTxsByBlock[*hash] = append(

@@ -6,9 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/util"
 	am "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
@@ -98,9 +98,9 @@ func (r *GetUtxoRequest) deliver(report *SpendReport, e error) {
 	select {
 	case r.resultChan <- &getUtxoResult{report, e}:
 	default:
-		wrn.F(
+		W.F(
 			"duplicate getutxo result delivered for outpoint=%v, spend=%v, err=%v",
-			r.Input.OutPoint, report, err,
+			r.Input.OutPoint, report, e,
 		)
 	}
 }
@@ -136,7 +136,7 @@ func (pq *GetUtxoRequestPQ) Push(x interface{}) {
 
 // Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
 func (s *UtxoScanner) Enqueue(input *InputWithScript, birthHeight uint32) (*GetUtxoRequest, error) {
-	dbg.F("enqueuing request for %s with birth height %d %s", input.OutPoint.String(), birthHeight)
+	D.F("enqueuing request for %s with birth height %d %s", input.OutPoint.String(), birthHeight)
 	req := &GetUtxoRequest{
 		Input:       input,
 		BirthHeight: birthHeight,
@@ -227,9 +227,9 @@ func (s *UtxoScanner) batchManager() {
 		// Initiate a scan, starting from the birth height of the least-height
 		// request currently in the queue.
 		e := s.scanFromHeight(req.BirthHeight)
-		if e != nil  {
-			err.F(
-				"UXTO scan failed: %v", err,
+		if e != nil {
+			E.F(
+				"UXTO scan failed: %v", e,
 			)
 		}
 	}
@@ -261,8 +261,8 @@ func (s *UtxoScanner) scanFromHeight(initHeight uint32) (e error) {
 	// Before beginning the scan, grab the best block stamp we know of, which
 	// will serve as an initial estimate for the end height of the scan.
 	bestStamp, e := s.cfg.BestSnapshot()
-	if e != nil  {
-		err.Ln(e)
+	if e != nil {
+		E.Ln(e)
 		return e
 	}
 	var (
@@ -285,8 +285,8 @@ scanToEnd:
 		default:
 		}
 		hash, e := s.cfg.GetBlockHash(int64(height))
-		if e != nil  {
-			err.Ln(e)
+		if e != nil {
+			E.Ln(e)
 			return reporter.FailRemaining(e)
 		}
 		// If there are any new requests that can safely be added to this batch,
@@ -301,8 +301,8 @@ scanToEnd:
 				watchList: reporter.filterEntries,
 			}
 			match, e := s.cfg.BlockFilterMatches(&options, hash)
-			if e != nil  {
-				err.Ln(e)
+			if e != nil {
+				E.Ln(e)
 				return reporter.FailRemaining(e)
 			}
 			// If still no match is found, we have no reason to fetch this block,
@@ -322,10 +322,10 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		trc.F("fetching block height=%d hash=%s %s", height, hash)
+		T.F("fetching block height=%d hash=%s %s", height, hash)
 		block, e := s.cfg.GetBlock(*hash)
-		if e != nil  {
-			err.Ln(e)
+		if e != nil {
+			E.Ln(e)
 			return reporter.FailRemaining(e)
 		}
 		// Chk again to see if the utxoscanner has been signaled to exit.
@@ -334,15 +334,15 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		dbg.F("processing block height=%d hash=%s %s", height, hash)
+		D.F("processing block height=%d hash=%s %s", height, hash)
 		reporter.ProcessBlock(block.MsgBlock(), newReqs, height)
 	}
 	// We've scanned up to the end height, now perform a check to see if we still
 	// have any new blocks to process. If this is the first time through, we
 	// might have a few blocks that were added since the scan started.
 	currStamp, e := s.cfg.BestSnapshot()
-	if e != nil  {
-		err.Ln(e)
+	if e != nil {
+		E.Ln(e)
 		return reporter.FailRemaining(e)
 	}
 	// If the returned height is higher, we still have more blocks to go. Shift

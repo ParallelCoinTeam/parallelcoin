@@ -27,7 +27,7 @@ func (w *Window) Multiline(
 ) (m *Multi) {
 	if handle == nil {
 		handle = func(txt []string) {
-			dbg.Ln(txt)
+			D.Ln(txt)
 		}
 	}
 	addClickable := w.Clickable()
@@ -39,7 +39,7 @@ func (w *Window) Multiline(
 		handle:        handle,
 	}
 	handleChange := func(txt string) {
-		dbg.Ln("handleChange", m.inputLocation)
+		D.Ln("handleChange", m.inputLocation)
 		(*m.lines)[m.inputLocation] = txt
 		// after submit clear the editor
 		m.inputLocation = -1
@@ -51,19 +51,19 @@ func (w *Window) Multiline(
 	m.removeClickables = append(m.removeClickables, (*Clickable)(nil))
 	m.removeButtons = append(m.removeButtons, (*IconButton)(nil))
 	for i := range *m.lines {
-		// dbg.Ln("making clickables")
+		// D.Ln("making clickables")
 		x := i
 		clickable := m.Clickable().SetClick(
 			func() {
 				m.inputLocation = x
-				dbg.Ln("button clicked", x, m.inputLocation)
+				D.Ln("button clicked", x, m.inputLocation)
 			})
 		if len(*m.lines) > len(m.clickables) {
 			m.clickables = append(m.clickables, clickable)
 		} else {
 			m.clickables[i] = clickable
 		}
-		// dbg.Ln("making button")
+		// D.Ln("making button")
 		btn := m.ButtonLayout(clickable).CornerRadius(0).Background(
 			backgroundColor).
 			Embed(
@@ -79,14 +79,14 @@ func (w *Window) Multiline(
 		} else {
 			m.buttons[i] = btn
 		}
-		// dbg.Ln("making clickables")
+		// D.Ln("making clickables")
 		removeClickable := m.Clickable()
 		if len(*m.lines) > len(m.removeClickables) {
 			m.removeClickables = append(m.removeClickables, removeClickable)
 		} else {
 			m.removeClickables[i] = removeClickable
 		}
-		// dbg.Ln("making remove button")
+		// D.Ln("making remove button")
 		y := i
 		removeBtn := m.IconButton(removeClickable).
 			Icon(
@@ -94,7 +94,7 @@ func (w *Window) Multiline(
 			).
 			Background("").
 			SetClick(func() {
-				dbg.Ln("remove button", y, "clicked", len(*m.lines))
+				D.Ln("remove button", y, "clicked", len(*m.lines))
 				m.inputLocation = -1
 				if len(*m.lines)-1 == y {
 					*m.lines = (*m.lines)[:len(*m.lines)-1]
@@ -104,7 +104,7 @@ func (w *Window) Multiline(
 					*m.lines = append((*m.lines)[:y+1], (*m.lines)[y+2:]...)
 				}
 				m.handle(*m.lines)
-				// dbg.Ln("remove button", i, "clicked")
+				// D.Ln("remove button", i, "clicked")
 				// m.inputLocation = -1
 				// ll := len(*m.lines)-1
 				// if i == ll {
@@ -135,19 +135,19 @@ func (w *Window) Multiline(
 
 func (m *Multi) UpdateWidgets() *Multi {
 	if len(m.clickables) < len(*m.lines) {
-		dbg.Ln("allocating new clickables")
+		D.Ln("allocating new clickables")
 		m.clickables = append(m.clickables, (*Clickable)(nil))
 	}
 	if len(m.buttons) < len(*m.lines) {
-		dbg.Ln("allocating new buttons")
+		D.Ln("allocating new buttons")
 		m.buttons = append(m.buttons, (*ButtonLayout)(nil))
 	}
 	if len(m.removeClickables) < len(*m.lines) {
-		dbg.Ln("allocating new removeClickables")
+		D.Ln("allocating new removeClickables")
 		m.removeClickables = append(m.clickables, (*Clickable)(nil))
 	}
 	if len(m.removeButtons) < len(*m.lines) {
-		dbg.Ln("allocating new removeButtons")
+		D.Ln("allocating new removeButtons")
 		m.removeButtons = append(m.removeButtons, (*IconButton)(nil))
 	}
 	return m
@@ -158,11 +158,11 @@ func (m *Multi) PopulateWidgets() *Multi {
 	for i := range *m.lines {
 		if m.clickables[i] == nil {
 			added = true
-			dbg.Ln("making clickables", i)
+			D.Ln("making clickables", i)
 			x := i
 			m.clickables[i] = m.Clickable().SetClick(
 				func() {
-					dbg.Ln("clicked", x, m.inputLocation)
+					D.Ln("clicked", x, m.inputLocation)
 					m.inputLocation = x
 					m.input.editor.SetText((*m.lines)[x])
 					m.input.editor.Focus()
@@ -194,11 +194,11 @@ func (m *Multi) PopulateWidgets() *Multi {
 		}
 		if m.removeButtons[i] == nil {
 			added = true
-			dbg.Ln("making remove button", i)
+			D.Ln("making remove button", i)
 			x := i
 			m.removeButtons[i] = m.IconButton(m.removeClickables[i].
 				SetClick(func() {
-					dbg.Ln("remove button", x, "clicked", len(*m.lines))
+					D.Ln("remove button", x, "clicked", len(*m.lines))
 					m.inputLocation = -1
 					if len(*m.lines)-1 == i {
 						*m.lines = (*m.lines)[:len(*m.lines)-1]
@@ -214,7 +214,7 @@ func (m *Multi) PopulateWidgets() *Multi {
 		}
 	}
 	if added {
-		dbg.Ln("clearing editor")
+		D.Ln("clearing editor")
 		m.input.editor.SetText("")
 		m.input.editor.Focus()
 	}
@@ -236,7 +236,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 			x := i
 			btn := m.ButtonLayout(m.clickables[i].SetClick(
 				func() {
-					dbg.Ln("button pressed", (*m.lines)[x], x, m.inputLocation)
+					D.Ln("button pressed", (*m.lines)[x], x, m.inputLocation)
 					m.inputLocation = x
 					m.input.editor.SetText((*m.lines)[x])
 					m.input.editor.Focus()
@@ -266,7 +266,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 			x := i
 			m.clickables[i].SetClick(
 				func() {
-					dbg.Ln("setting", x, m.inputLocation)
+					D.Ln("setting", x, m.inputLocation)
 					m.inputLocation = x
 					m.input.editor.SetText((*m.lines)[x])
 					m.input.editor.Focus()
@@ -283,10 +283,10 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 		}
 	}
 	widgets = append(widgets, addButton.SetClick(func() {
-		dbg.Ln("clicked add")
+		D.Ln("clicked add")
 		*m.lines = append(*m.lines, "")
 		m.inputLocation = len(*m.lines) - 1
-		dbg.S([]string(*m.lines))
+		D.S([]string(*m.lines))
 		m.UpdateWidgets()
 		m.PopulateWidgets()
 		m.input.editor.SetText("")
@@ -294,7 +294,7 @@ func (m *Multi) Fn(gtx l.Context) l.Dimensions {
 	}).Background("").Fn)
 	// m.UpdateWidgets()
 	// m.PopulateWidgets()
-	// dbg.Ln(m.inputLocation)
+	// D.Ln(m.inputLocation)
 	// if m.inputLocation > 0 {
 	// 	m.input.Editor().Focus()
 	// }
@@ -313,7 +313,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 	}
 	focusFunc := func(is bool) {
 		mi := m.inputLocation
-		dbg.Ln("editor", "is focused", is)
+		D.Ln("editor", "is focused", is)
 		// debug.PrintStack()
 		if !is {
 			m.input.borderColor = m.input.borderColorUnfocused
@@ -321,11 +321,11 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			txt := m.input.editor.Text()
 			cur := (*m.lines)[m.inputLocation]
 			if txt != cur {
-				dbg.Ln("changed text")
+				D.Ln("changed text")
 				// run submit hook
 				m.input.editor.submitHook(txt)
 			} else {
-				dbg.Ln("text not changed")
+				D.Ln("text not changed")
 				// When a new item is added this unfocus event occurs and this makes it behave correctly
 				// Normally the editor would not be rendered if not focused so setting it to focus does no harm in the
 				// case of switching to another
@@ -340,12 +340,12 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 	m.input.editor.SetFocus(focusFunc)
 	for ii := range *m.lines {
 		i := ii
-		// dbg.Ln("iterating lines", i, len(*m.lines))
+		// D.Ln("iterating lines", i, len(*m.lines))
 		if m.buttons[i] == nil {
-			dbg.Ln("making new button layout")
+			D.Ln("making new button layout")
 			btn := m.ButtonLayout(m.clickables[i].SetClick(
 				func() {
-					dbg.Ln("button pressed", (*m.lines)[i], i, m.inputLocation)
+					D.Ln("button pressed", (*m.lines)[i], i, m.inputLocation)
 					m.UpdateWidgets()
 					m.PopulateWidgets()
 					m.inputLocation = i
@@ -366,7 +366,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 		}
 		if i == m.inputLocation {
 			// x := i
-			// dbg.Ln("rendering editor", x)
+			// D.Ln("rendering editor", x)
 			
 			input := func(gtx l.Context) l.Dimensions {
 				return m.Inset(0.25,
@@ -383,7 +383,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			}
 			widgets = append(widgets, input)
 		} else {
-			// dbg.Ln("rendering button", i)
+			// D.Ln("rendering button", i)
 			m.clickables[i].SetClick(
 				func() {
 					m.UpdateWidgets()
@@ -391,7 +391,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 					m.inputLocation = i
 					m.input.editor.SetText((*m.lines)[i])
 					m.input.editor.Focus()
-					dbg.Ln("setting", i, m.inputLocation)
+					D.Ln("setting", i, m.inputLocation)
 				})
 			button := func(gtx l.Context) l.Dimensions {
 				return m.Inset(0.25,
@@ -409,7 +409,7 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 			widgets = append(widgets, button)
 		}
 	}
-	// dbg.Ln("widgets", widgets)
+	// D.Ln("widgets", widgets)
 	addButton := func(gtx l.Context) l.Dimensions {
 		addb :=
 			m.Inset(0.25,
@@ -421,11 +421,11 @@ func (m *Multi) Widgets() (widgets []l.Widget) {
 								m.Icon().Scale(1.5).Color("Primary").Src(&icons.ContentAdd),
 							).
 							SetClick(func() {
-								dbg.Ln("clicked add")
+								D.Ln("clicked add")
 								m.inputLocation = len(*m.lines)
 								*m.lines = append(*m.lines, "")
 								m.input.editor.SetText("")
-								dbg.S([]string(*m.lines))
+								D.S([]string(*m.lines))
 								m.UpdateWidgets()
 								m.PopulateWidgets()
 								m.input.editor.Focus()

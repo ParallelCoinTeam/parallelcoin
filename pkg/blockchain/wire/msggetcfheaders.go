@@ -17,10 +17,10 @@ type MsgGetCFHeaders struct {
 // BtcDecode decodes r using the bitcoin protocol encoding into the receiver. This is part of the Message interface
 // implementation.
 func (msg *MsgGetCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) (e error) {
-	if e = readElement(r, &msg.FilterType);err.Chk(e){
+	if e = readElement(r, &msg.FilterType);E.Chk(e){
 		return 
 	}
-	if e = readElement(r, &msg.StartHeight);err.Chk(e){
+	if e = readElement(r, &msg.StartHeight);E.Chk(e){
 		return
 	}
 	return readElement(r, &msg.StopHash)
@@ -29,10 +29,10 @@ func (msg *MsgGetCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncodin
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
 func (msg *MsgGetCFHeaders) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) (e error) {
-	if e = writeElement(w, msg.FilterType);err.Chk(e){
+	if e = writeElement(w, msg.FilterType);E.Chk(e){
 		return
 	}
-	if e = writeElement(w, &msg.StartHeight);err.Chk(e){
+	if e = writeElement(w, &msg.StartHeight);E.Chk(e){
 		return
 	}
 	return writeElement(w, &msg.StopHash)
