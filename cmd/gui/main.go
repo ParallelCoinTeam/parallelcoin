@@ -2,6 +2,8 @@ package gui
 
 import (
 	"crypto/rand"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/util"
 	"github.com/tyler-smith/go-bip39"
 	"os"
 	"runtime"
@@ -119,6 +121,14 @@ type WalletGUI struct {
 	createWords, showWords, createMatch string
 	createVerifying                     bool
 	restoring                           bool
+	lastUpdated                         uberatomic.Int64
+}
+
+type blockUpdate struct {
+	height    int32
+	header    *wire.BlockHeader
+	txs       []*util.Tx
+	timestamp time.Time
 }
 
 func (wg *WalletGUI) Run() (e error) {
@@ -278,7 +288,7 @@ func (wg *WalletGUI) GetButtons() {
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.Clickable()
 	}
-	wg.statusBarButtons = make([]*gui.Clickable, 6)
+	wg.statusBarButtons = make([]*gui.Clickable, 7)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.Clickable()
 	}

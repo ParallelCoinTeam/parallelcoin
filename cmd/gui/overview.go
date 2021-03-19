@@ -210,6 +210,84 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 	}
 }
 
+func (wg *WalletGUI) recentTxCardStub(txs *btcjson.ListTransactionsResult) l.Widget {
+	return wg.Inset(
+		0.25,
+		wg.Flex().
+			// AlignBaseline().
+			AlignStart().
+			// Flexed(
+			// 	1,
+			// 	wg.Inset(
+			// 		0.25,
+			// 		wg.Caption(txs.Address).
+			// 			Font("go regular").
+			// 			Color("PanelText").
+			// 			TextScale(0.66).
+			// 			Alignment(text.End).
+			// 			Fn,
+			// 	).Fn,
+			// ).
+			Rigid(
+				wg.Icon().Color("PanelText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
+			).
+			// Rigid(
+			// 	wg.Caption(fmt.Sprint(*txs.BlockIndex)).Fn,
+			// 	// wg.buttonIconText(txs.clickBlock,
+			// 	// 	fmt.Sprint(*txs.BlockIndex),
+			// 	// 	&icons2.DeviceWidgets,
+			// 	// 	wg.blockPage(*txs.BlockIndex)),
+			// ).
+			Rigid(
+				wg.Caption(fmt.Sprintf("%d ", txs.BlockIndex)).Fn,
+			).
+			Rigid(
+				wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
+			).
+			Rigid(
+				wg.Caption(fmt.Sprintf("%d ", txs.Confirmations)).Fn,
+			).
+			Rigid(
+				func(gtx l.Context) l.Dimensions {
+					switch txs.Category {
+					case "generate":
+						return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
+					case "immature":
+						return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
+					case "receive":
+						return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
+					case "unknown":
+						return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
+					}
+					return l.Dimensions{}
+				},
+			).
+			Rigid(
+				wg.Caption(txs.Category+" ").Fn,
+			).
+			Rigid(
+				wg.Caption(fmt.Sprintf("%-6.8f DUO", txs.Amount)).Color("DocText").Fn,
+			).
+			// Rigid(
+			// 	wg.Flex().
+			// 		Rigid(
+			// 			wg.Icon().Color("PanelText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
+			// 		).
+			// 		Rigid(
+			// 			wg.Caption(
+			// 				time.Unix(
+			// 					txs.Time,
+			// 					0,
+			// 				).Format("02 Jan 06 15:04:05 MST"),
+			// 			).Color("PanelText").Fn,
+			// 		).
+			// 		Fn,
+			// ).
+			Fn,
+	).
+		Fn
+}
+
 func (wg *WalletGUI) recentTxCardSummary(txs *btcjson.ListTransactionsResult) l.Widget {
 	return wg.VFlex().
 		Rigid(
@@ -338,18 +416,120 @@ func (wg *WalletGUI) recentTxCardSummaryButton(
 				}
 			},
 		),
-	).Background(bgColor).Embed(
-		gui.If(
-			back,
-			wg.Flex().Rigid(
-				wg.Icon().Color("PanelText").Scale(3).Src(&icons2.NavigationArrowBack).Fn,
-			).Flexed(
-				1,
-				wg.recentTxCardSummary(txs),
-			).Fn,
-			wg.recentTxCardSummary(txs),
+	).
+		Background(bgColor).
+		Embed(
+			gui.If(
+				back,
+				wg.Flex().
+					Rigid(
+						wg.Icon().Color("PanelText").Scale(4).Src(&icons2.NavigationArrowBack).Fn,
+					).
+					Rigid(
+						wg.Inset(0.5, gui.EmptyMinWidth()).Fn,
+					).
+					Flexed(
+						1,
+						wg.Fill(
+							"DocBg", l.Center, 0, 0, wg.Inset(
+								0.5,
+								wg.recentTxCardSummary(txs),
+							).Fn,
+						).Fn,
+					).
+					Fn,
+				wg.Flex().
+					Rigid(
+						wg.Inset(0.5, gui.EmptyMaxHeight()).Fn,
+					).
+					Flexed(
+						1,
+						wg.Fill(
+							"DocBg", l.Center, 0, 0, wg.Inset(
+								0.5,
+								wg.recentTxCardSummary(txs),
+							).Fn,
+						).Fn,
+					).
+					Fn,
+			),
+		).Fn
+}
+
+func (wg *WalletGUI) recentTxCardSummaryButtonGenerate(
+	txs *btcjson.ListTransactionsResult,
+	clickable *gui.Clickable,
+	bgColor string, back bool,
+) l.Widget {
+	return wg.ButtonLayout(
+		clickable.SetClick(
+			func() {
+				dbg.Ln("clicked tx")
+				// dbg.S(txs)
+				curr := wg.openTxID.Load()
+				if curr == txs.TxID {
+					wg.prevOpenTxID.Store(wg.openTxID.Load())
+					wg.openTxID.Store("")
+					moveto := wg.originTxDetail
+					if moveto == "" {
+						moveto = wg.MainApp.ActivePageGet()
+					}
+					wg.MainApp.ActivePage(moveto)
+				} else {
+					if wg.MainApp.ActivePageGet() == "home" {
+						wg.originTxDetail = "home"
+						wg.MainApp.ActivePage("history")
+					} else {
+						wg.originTxDetail = "history"
+					}
+					wg.openTxID.Store(txs.TxID)
+				}
+			},
 		),
-	).Fn
+	).
+		Background(bgColor).
+		Embed(
+			wg.Flex().AlignStart().
+				Rigid(
+					// wg.Fill(
+					// 	"Primary", l.W, 0, 0, wg.Inset(
+					// 		0.5,
+					gui.If(
+						back,
+						wg.Flex().AlignStart().
+							Rigid(
+								wg.Icon().Color("PanelText").Scale(4).Src(&icons2.NavigationArrowBack).Fn,
+							).
+							Flexed(
+								1,
+								wg.recentTxCardSummary(txs),
+							).
+							Fn,
+						wg.Flex().AlignStart().
+							Flexed(
+								1,
+								wg.recentTxCardStub(txs),
+							).
+							Fn,
+						// wg.Flex().
+						// 	Rigid(
+						// 		wg.Inset(0.5, gui.EmptyMaxHeight()).Fn,
+						// 	).
+						// 	Flexed(
+						// 		1,
+						// 		wg.Fill(
+						// 			"DocBg", l.Center, 0, 0, wg.Inset(
+						// 				0.5,
+						// 				wg.recentTxCardSummary(txs),
+						// 			).Fn,
+						// 		).Fn,
+						// 	).
+						// 	Fn,
+					),
+				).Fn,
+			// ).Fn,
+			// ).Fn,
+		).Fn
 }
 
 func (wg *WalletGUI) recentTxCardDetail(txs *btcjson.ListTransactionsResult, clickable *gui.Clickable) l.Widget {
@@ -477,12 +657,12 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	// out = append(out)
 	var txList []btcjson.ListTransactionsResult
 	var clickables []*gui.Clickable
+	txList = wg.txHistoryList
 	switch listName {
 	case "history":
-		txList = wg.txHistoryList
 		clickables = wg.txHistoryClickables
 	case "recent":
-		txList = wg.txRecentList
+		// txList = wg.txRecentList
 		clickables = wg.recentTxsClickables
 	}
 	ltxl := len(txList)
@@ -499,12 +679,22 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		}
 	}
 	dbg.Ln(">>>>>>>>>>>>>>>> iterating transactions", n, listName)
+	var collected int
 	for x := range txList {
-		if x > n && n > 0 {
+		if collected >= n && n > 0 {
 			break
 		}
-		
 		txs := txList[x]
+		switch listName {
+		case "history":
+			collected++
+		case "recent":
+			if txs.Category == "generate" || txs.Category == "immature" || txs.Amount < 0 && txs.Fee == 0 {
+				continue
+			} else {
+				collected++
+			}
+		}
 		// spacer
 		if !first {
 			out = append(
@@ -514,14 +704,31 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		} else {
 			first = false
 		}
+		
 		ck := clickables[x]
 		out = append(
 			out,
 			func(gtx l.Context) l.Dimensions {
 				return gui.If(
-					wg.prevOpenTxID.Load() == txs.TxID,
-					wg.recentTxCardSummaryButton(&txs, ck, "Primary", false),
-					wg.recentTxCardSummaryButton(&txs, ck, "DocBg", false),
+					txs.Category == "immature",
+					wg.recentTxCardSummaryButtonGenerate(&txs, ck, "DocBg", false),
+					gui.If(
+						txs.Category == "send",
+						wg.recentTxCardSummaryButton(&txs, ck, "Danger", false),
+						gui.If(
+							txs.Category == "receive",
+							wg.recentTxCardSummaryButton(&txs, ck, "Success", false),
+							gui.If(
+								txs.Category == "generate",
+								wg.recentTxCardSummaryButtonGenerate(&txs, ck, "DocBg", false),
+								gui.If(
+									wg.prevOpenTxID.Load() == txs.TxID,
+									wg.recentTxCardSummaryButton(&txs, ck, "Primary", false),
+									wg.recentTxCardSummaryButton(&txs, ck, "DocBg", false),
+								),
+							),
+						),
+					),
 				)(gtx)
 			},
 		)
