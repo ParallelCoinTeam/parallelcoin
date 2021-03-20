@@ -21,11 +21,11 @@ func TestEncodeDecodeWIF(t *testing.T) {
 		0x94, 0xb9, 0x67, 0x89, 0xb2, 0x1a, 0x03, 0x98})
 	wif1, e := NewWIF(priv1, &netparams.MainNetParams, false)
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	wif2, e := NewWIF(priv2, &netparams.TestNet3Params, true)
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	tests := []struct {
 		wif     *WIF

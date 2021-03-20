@@ -47,7 +47,7 @@ func TestMerkleBlock(t *testing.T) {
 			t.Errorf("NewHash failed: %v\n", err)
 			return
 		}
-		if e = msg.AddTxHash(hash); err.Chk(e) {
+		if e = msg.AddTxHash(hash); E.Chk(e) {
 			t.Errorf("AddTxHash failed: %v\n", err)
 			return
 		}

@@ -95,7 +95,7 @@ func TestDeserializeUtxoEntryV0(t *testing.T) {
 		entries, e := deserializeUtxoEntryV0(test.serialized)
 		if e != nil  {
 			t.Errorf("deserializeUtxoEntryV0 #%d (%s) unexpected "+
-				"error: %v", i, test.name, err)
+				"error: %v", i, test.name, e)
 			continue
 		}
 		// Ensure the deserialized entry has the same properties as the

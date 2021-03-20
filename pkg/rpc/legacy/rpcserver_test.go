@@ -22,7 +22,7 @@ func TestThrottle(t *testing.T) {
 		go func() {
 			res, e := http.Get(srv.URL)
 			if e != nil  {
-				t.ftl.Ln(e)
+				t.F.Ln(e)
 			}
 			codes <- res.StatusCode
 		}()

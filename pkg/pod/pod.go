@@ -457,15 +457,15 @@ func ReadCAFile(config *Config) []byte {
 	var certs []byte
 	if *config.TLS {
 		var e error
-		if certs, e = ioutil.ReadFile(*config.CAFile); err.Chk(e) {
+		if certs, e = ioutil.ReadFile(*config.CAFile); E.Chk(e) {
 			// If there's an error reading the CA file, continue with nil certs and without the client connection.
 			certs = nil
 		}
 	} else {
-		inf.Ln("chain server RPC TLS is disabled")
+		I.Ln("chain server RPC TLS is disabled")
 	}
 	return certs
 }
 
 var subsystem = logg.AddLoggerSubsystem()
-var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var ftl, E, wrn, I, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)

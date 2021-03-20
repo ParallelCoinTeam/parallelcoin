@@ -50,7 +50,7 @@ func TestBytes(t *testing.T) {
 		Bytes(b)
 		e := checkZeroBytes(b)
 		if e != nil  {
-			t.Errorf("Test %d (n=%d) failed: %v", i, n, err)
+			t.Errorf("Test %d (n=%d) failed: %v", i, n, e)
 			continue
 		}
 	}
@@ -94,7 +94,7 @@ func TestBigInt(t *testing.T) {
 		BigInt(v)
 		e := checkZeroWords(v.Bits())
 		if e != nil  {
-			t.Errorf("Test %d (s=%s) failed: %v", i, s, err)
+			t.Errorf("Test %d (s=%s) failed: %v", i, s, e)
 			continue
 		}
 		if v.Cmp(bigZero) != 0 {

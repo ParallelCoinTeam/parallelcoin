@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/database"
 )
 
 const blockDbNamePrefix = "blocks"
@@ -21,10 +21,10 @@ func loadBlockDB() (database.DB, error) {
 	// The database name is based on the database type.
 	dbName := blockDbNamePrefix + "_" + cfg.DbType
 	dbPath := filepath.Join(cfg.DataDir, dbName)
-	inf.F("Loading block database from '%s'\n", dbPath)
+	I.F("Loading block database from '%s'\n", dbPath)
 	db, e := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	return db, nil
 }
@@ -35,11 +35,12 @@ func loadBlockDB() (database.DB, error) {
 // that is already hard coded into btcchain since there is no point in
 // finding candidates before already existing checkpoints.
 func findCandidates(
-	chain *blockchain.BlockChain, latestHash *chainhash.Hash) ([]*chaincfg.Checkpoint, error) {
+	chain *blockchain.BlockChain, latestHash *chainhash.Hash,
+) ([]*chaincfg.Checkpoint, error) {
 	// Start with the latest block of the main chain.
 	block, e := chain.BlockByHash(latestHash)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	// Get the latest known checkpoint.
 	latestCheckpoint := chain.LatestCheckpoint()
@@ -56,11 +57,13 @@ func findCandidates(
 	checkpointConfirmations := int32(blockchain.CheckpointConfirmations)
 	requiredHeight := latestCheckpoint.Height + checkpointConfirmations
 	if block.Height() < requiredHeight {
-		return nil, fmt.Errorf("the block database is only at height "+
-			"%d which is less than the latest checkpoint height "+
-			"of %d plus required confirmations of %d",
+		return nil, fmt.Errorf(
+			"the block database is only at height "+
+				"%d which is less than the latest checkpoint height "+
+				"of %d plus required confirmations of %d",
 			block.Height(), latestCheckpoint.Height,
-			checkpointConfirmations)
+			checkpointConfirmations,
+		)
 	}
 	// For the first checkpoint,
 	// the required height is any block after the genesis block,
@@ -84,8 +87,8 @@ func findCandidates(
 		}
 		// Determine if this block is a checkpoint candidate.
 		isCandidate, e := chain.IsCheckpointCandidate(block)
-		if e != nil  {
-						return nil, e
+		if e != nil {
+			return nil, e
 		}
 		// All checks passed, so this node seems like a reasonable checkpoint candidate.
 		if isCandidate {
@@ -97,8 +100,8 @@ func findCandidates(
 		}
 		prevHash := &block.MsgBlock().Header.PrevBlock
 		block, e = chain.BlockByHash(prevHash)
-		if e != nil  {
-						return nil, e
+		if e != nil {
+			return nil, e
 		}
 		numTested++
 	}
@@ -107,48 +110,55 @@ func findCandidates(
 
 // showCandidate display a checkpoint candidate using and output format determined by the configuration parameters.  The Go syntax output uses the format the btcchain code expects for checkpoints added to the list.
 func showCandidate(
-	candidateNum int, checkpoint *chaincfg.Checkpoint) {
+	candidateNum int, checkpoint *chaincfg.Checkpoint,
+) {
 	if cfg.UseGoOutput {
-		inf.F("Candidate %d -- {%d, newShaHashFromStr(\"%v\")},\n",
-			candidateNum, checkpoint.Height, checkpoint.Hash)
+		I.F(
+			"Candidate %d -- {%d, newShaHashFromStr(\"%v\")},\n",
+			candidateNum, checkpoint.Height, checkpoint.Hash,
+		)
 		return
 	}
-	inf.F("Candidate %d -- Height: %d, Hash: %v\n", candidateNum,
-		checkpoint.Height, checkpoint.Hash)
+	I.F(
+		"Candidate %d -- Height: %d, Hash: %v\n", candidateNum,
+		checkpoint.Height, checkpoint.Hash,
+	)
 }
 func main() {
 	// Load configuration and parse command line.
 	tcfg, _, e = loadConfig()
-	if e != nil  {
-				return
+	if e != nil {
+		return
 	}
 	cfg = tcfg
 	// Load the block database.
 	db, e := loadBlockDB()
-	if e != nil  {
+	if e != nil {
 		Error("failed to load database:", err)
 		return
 	}
 	defer func() {
-		if e := db.Close(); err.Chk(e) {
+		if e := db.Close(); E.Chk(e) {
 		}
 	}()
 	// Setup chain.  Ignore notifications since they aren't needed for this util.
-	chain, e := blockchain.New(&blockchain.Config{
-		DB:          db,
-		ChainParams: activeNetParams,
-		TimeSource:  blockchain.NewMedianTime(),
-	})
-	if e != nil  {
+	chain, e := blockchain.New(
+		&blockchain.Config{
+			DB:          db,
+			ChainParams: activeNetParams,
+			TimeSource:  blockchain.NewMedianTime(),
+		},
+	)
+	if e != nil {
 		Error("failed to initialize chain: %v\n", err)
 		return
 	}
 	// Get the latest block hash and height from the database and report status.
 	best := chain.BestSnapshot()
-	inf.F("Block database loaded with block height %d\n", best.Height)
+	I.F("Block database loaded with block height %d\n", best.Height)
 	// Find checkpoint candidates.
 	candidates, e := findCandidates(chain, &best.Hash)
-	if e != nil  {
+	if e != nil {
 		Error("Unable to identify candidates:", err)
 		return
 	}

@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"sync"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 )
 
 const (
@@ -198,7 +198,7 @@ func (s *blockStore) openWriteFile(fileNum uint32) (filer, error) {
 	filePath := blockFilePath(s.basePath, fileNum)
 	file, e := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0666)
 	if e != nil {
-		str := fmt.Sprintf("failed to open file %q: %v", filePath, err)
+		str := fmt.Sprintf("failed to open file %q: %v", filePath, e)
 		return nil, makeDbErr(database.ErrDriverSpecific, str, e)
 	}
 	return file, nil
@@ -253,7 +253,7 @@ func (s *blockStore) openFile(fileNum uint32) (*lockableFile, error) {
 // other state cleanup necessary.
 func (s *blockStore) deleteFile(fileNum uint32) (e error) {
 	filePath := blockFilePath(s.basePath, fileNum)
-	if e := os.Remove(filePath); err.Chk(e) {
+	if e := os.Remove(filePath); E.Chk(e) {
 		return makeDbErr(database.ErrDriverSpecific, e.Error(), e)
 	}
 	return nil
@@ -326,7 +326,7 @@ func (s *blockStore) writeData(data []byte, fieldName string) (e error) {
 		str := fmt.Sprintf(
 			"failed to write %s to file %d at "+
 				"offset %d: %v", fieldName, wc.curFileNum,
-			wc.curOffset-uint32(n), err,
+			wc.curOffset-uint32(n), e,
 		)
 		return makeDbErr(database.ErrDriverSpecific, str, e)
 	}
@@ -390,23 +390,23 @@ func (s *blockStore) writeBlock(rawBlock []byte) (blockLocation, error) {
 	hasher := crc32.New(castagnoli)
 	var scratch [4]byte
 	byteOrder.PutUint32(scratch[:], uint32(s.network))
-	if e := s.writeData(scratch[:], "network"); err.Chk(e) {
+	if e := s.writeData(scratch[:], "network"); E.Chk(e) {
 		return blockLocation{}, e
 	}
 	_, _ = hasher.Write(scratch[:])
 	// Block length.
 	byteOrder.PutUint32(scratch[:], blockLen)
-	if e := s.writeData(scratch[:], "block length"); err.Chk(e) {
+	if e := s.writeData(scratch[:], "block length"); E.Chk(e) {
 		return blockLocation{}, e
 	}
 	_, _ = hasher.Write(scratch[:])
 	// Serialized block.
-	if e := s.writeData(rawBlock[:], "block"); err.Chk(e) {
+	if e := s.writeData(rawBlock[:], "block"); E.Chk(e) {
 		return blockLocation{}, e
 	}
 	_, _ = hasher.Write(rawBlock)
 	// Castagnoli CRC-32 as a checksum of all the previous.
-	if e := s.writeData(hasher.Sum(nil), "checksum"); err.Chk(e) {
+	if e := s.writeData(hasher.Sum(nil), "checksum"); E.Chk(e) {
 		return blockLocation{}, e
 	}
 	loc := blockLocation{
@@ -440,7 +440,7 @@ func (s *blockStore) readBlock(hash *chainhash.Hash, loc blockLocation) ([]byte,
 		str := fmt.Sprintf(
 			"failed to read block %s from file %d, "+
 				"offset %d: %v", hash, loc.blockFileNum, loc.fileOffset,
-			err,
+			e,
 		)
 		return nil, makeDbErr(database.ErrDriverSpecific, str, e)
 	}
@@ -496,7 +496,7 @@ func (s *blockStore) readBlockRegion(loc blockLocation, offset, numBytes uint32)
 		str := fmt.Sprintf(
 			"failed to read region from block file %d, "+
 				"offset %d, len %d: %v", loc.blockFileNum, readOffset,
-			numBytes, err,
+			numBytes, e,
 		)
 		return nil, makeDbErr(database.ErrDriverSpecific, str, e)
 	}
@@ -519,10 +519,10 @@ func (s *blockStore) syncBlocks() (e error) {
 		return nil
 	}
 	// Sync the file to disk.
-	if e := wc.curFile.file.Sync(); err.Chk(e) {
+	if e := wc.curFile.file.Sync(); E.Chk(e) {
 		str := fmt.Sprintf(
 			"failed to sync file %d: %v", wc.curFileNum,
-			err,
+			e,
 		)
 		return makeDbErr(database.ErrDriverSpecific, str, e)
 	}
@@ -563,7 +563,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		wc.curFileNum = oldBlockFileNum
 		wc.curOffset = oldBlockOffset
 	}()
-	dbg.F(
+	D.F(
 		"ROLLBACK: Rolling back to file %d, offset %d",
 		oldBlockFileNum,
 		oldBlockOffset,
@@ -579,10 +579,10 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		wc.curFile.Unlock()
 	}
 	for ; wc.curFileNum > oldBlockFileNum; wc.curFileNum-- {
-		if e := s.deleteFileFunc(wc.curFileNum); err.Chk(e) {
-			wrn.Ln(
+		if e := s.deleteFileFunc(wc.curFileNum); E.Chk(e) {
+			W.Ln(
 				"ROLLBACK: Failed to delete block file number %d: %v %s",
-				wc.curFileNum, err,
+				wc.curFileNum, e,
 			)
 			return
 		}
@@ -593,18 +593,18 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		obf, e := s.openWriteFileFunc(wc.curFileNum)
 		if e != nil {
 			wc.curFile.Unlock()
-			dbg.Ln("ROLLBACK:", err)
+			D.Ln("ROLLBACK:", e)
 			return
 		}
 		wc.curFile.file = obf
 	}
 	// Truncate the to the provided rollback offset.
-	if e := wc.curFile.file.Truncate(int64(oldBlockOffset)); err.Chk(e) {
+	if e := wc.curFile.file.Truncate(int64(oldBlockOffset)); E.Chk(e) {
 		wc.curFile.Unlock()
-		wrn.Ln(
+		W.Ln(
 			"ROLLBACK: Failed to truncate file %d: %v %s",
 			wc.curFileNum,
-			err,
+			e,
 		)
 		return
 	}
@@ -612,10 +612,10 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	e := wc.curFile.file.Sync()
 	wc.curFile.Unlock()
 	if e != nil {
-		wrn.Ln(
+		W.Ln(
 			"ROLLBACK: Failed to sync file %d: %v %s",
 			wc.curFileNum,
-			err,
+			e,
 		)
 		return
 	}
@@ -633,13 +633,13 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		filePath := blockFilePath(dbPath, uint32(i))
 		st, e := os.Stat(filePath)
 		if e != nil {
-			trc.Ln(err)
+			T.Ln(e)
 			break
 		}
 		lastFile = i
 		fileLen = uint32(st.Size())
 	}
-	trc.F("Scan found latest block file #%d with length %d", lastFile, fileLen)
+	T.F("Scan found latest block file #%d with length %d", lastFile, fileLen)
 	return lastFile, fileLen
 }
 

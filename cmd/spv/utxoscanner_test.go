@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 type MockChainClient struct {
@@ -34,8 +34,10 @@ func NewMockChainClient() *MockChainClient {
 func (c *MockChainClient) SetBlock(hash *chainhash.Hash, block *util.Block) {
 	c.getBlockResponse[*hash] = block
 }
-func (c *MockChainClient) GetBlockFromNetwork(blockHash chainhash.Hash,
-	options ...QueryOption) (*util.Block, error) {
+func (c *MockChainClient) GetBlockFromNetwork(
+	blockHash chainhash.Hash,
+	options ...QueryOption,
+) (*util.Block, error) {
 	return c.getBlockResponse[blockHash], nil
 }
 func (c *MockChainClient) SetBlockHash(height int64, hash *chainhash.Hash) {
@@ -55,13 +57,16 @@ func (c *MockChainClient) BestSnapshot() (*waddrmgr.BlockStamp, error) {
 		},
 		nil
 }
-func (c *MockChainClient) blockFilterMatches(ro *rescanOptions,
-	blockHash *chainhash.Hash) (bool, error) {
+func (c *MockChainClient) blockFilterMatches(
+	ro *rescanOptions,
+	blockHash *chainhash.Hash,
+) (bool, error) {
 	return true, nil
 }
 func makeTestInputWithScript() *InputWithScript {
 	hash, _ := chainhash.NewHashFromStr(
-		"87a157f3fd88ac7907c05fc55e271dc4acdc5605d187d646604ca8c0e9382e03")
+		"87a157f3fd88ac7907c05fc55e271dc4acdc5605d187d646604ca8c0e9382e03",
+	)
 	pkScript := []byte("76a91471d7dd96d9edda09180fe9d57a477b5acc9cad118")
 	return &InputWithScript{
 		OutPoint: wire.OutPoint{
@@ -85,16 +90,20 @@ func TestFindSpends(t *testing.T) {
 	r := newBatchSpendReporter()
 	spends := r.notifySpends(&Block100000, height)
 	if len(spends) != 0 {
-		t.Fatalf("unexpected number of spend reports -- "+
-			"want %d, got %d", 0, len(spends))
+		t.Fatalf(
+			"unexpected number of spend reports -- "+
+				"want %d, got %d", 0, len(spends),
+		)
 	}
 	// Now, add the test outpoint to the outpoint index.
 	r.addNewRequests(reqs)
 	// Ensure that a spend report is now returned.
 	spends = r.notifySpends(&Block100000, height)
 	if len(spends) != 1 {
-		t.Fatalf("unexpected number of spend reports -- "+
-			"want %d, got %d", 1, len(spends))
+		t.Fatalf(
+			"unexpected number of spend reports -- "+
+				"want %d, got %d", 1, len(spends),
+		)
 	}
 }
 
@@ -102,7 +111,8 @@ func TestFindSpends(t *testing.T) {
 // output if it is found in the given block.
 func TestFindInitialTransactions(t *testing.T) {
 	hash, _ := chainhash.NewHashFromStr(
-		"e9a66845e05d5abc0ad04ec80f774a7e585c6e8db975962d069a522137b80c1d")
+		"e9a66845e05d5abc0ad04ec80f774a7e585c6e8db975962d069a522137b80c1d",
+	)
 	outpoint := &wire.OutPoint{Hash: *hash, Index: 0}
 	pkScript := []byte("76a91439aa3d569e06a1d7926dc4be1193c99bf2eb9ee08")
 	height := uint32(100000)
@@ -119,13 +129,17 @@ func TestFindInitialTransactions(t *testing.T) {
 	r := newBatchSpendReporter()
 	initialTxns := r.findInitialTransactions(&Block100000, reqs, height)
 	if len(initialTxns) != 1 {
-		t.Fatalf("unexpected number of spend reports -- "+
-			"want %v, got %v", 1, len(initialTxns))
+		t.Fatalf(
+			"unexpected number of spend reports -- "+
+				"want %v, got %v", 1, len(initialTxns),
+		)
 	}
 	output := initialTxns[*outpoint]
 	if output == nil || output.Output == nil || output.Output.Value != 1000000 {
-		t.Fatalf("Expected spend report to contain initial output -- "+
-			"instead got: %v", output)
+		t.Fatalf(
+			"Expected spend report to contain initial output -- "+
+				"instead got: %v", output,
+		)
 	}
 	// Now, modify the output index such that is invalid.
 	outpoint.Index = 1
@@ -133,14 +147,18 @@ func TestFindInitialTransactions(t *testing.T) {
 	r = newBatchSpendReporter()
 	initialTxns = r.findInitialTransactions(&Block100000, reqs, height)
 	if len(initialTxns) != 1 {
-		t.Fatalf("unexpected number of spend reports -- "+
-			"want %v, got %v", 1, len(initialTxns))
+		t.Fatalf(
+			"unexpected number of spend reports -- "+
+				"want %v, got %v", 1, len(initialTxns),
+		)
 	}
 	// The spend report should be nil since the output index is invalid.
 	output = initialTxns[*outpoint]
 	if output != nil {
-		t.Fatalf("Expected spend report to be nil since the output index "+
-			"is invalid, got %v", output)
+		t.Fatalf(
+			"Expected spend report to be nil since the output index "+
+				"is invalid, got %v", output,
+		)
 	}
 	// Finally, restore the valid output index, but modify the txid.
 	outpoint.Index = 0
@@ -149,14 +167,18 @@ func TestFindInitialTransactions(t *testing.T) {
 	r = newBatchSpendReporter()
 	initialTxns = r.findInitialTransactions(&Block100000, reqs, height)
 	if len(initialTxns) != 1 {
-		t.Fatalf("unexpected number of spend reports -- "+
-			"want %v, got %v", 1, len(initialTxns))
+		t.Fatalf(
+			"unexpected number of spend reports -- "+
+				"want %v, got %v", 1, len(initialTxns),
+		)
 	}
 	// Again, the spend report should be nil because of the invalid txid.
 	output = initialTxns[*outpoint]
 	if output != nil {
-		t.Fatalf("Expected spend report to be nil since the txid "+
-			"is not in block, got %v", output)
+		t.Fatalf(
+			"Expected spend report to be nil since the txid "+
+				"is not in block, got %v", output,
+		)
 	}
 }
 
@@ -165,118 +187,148 @@ func TestFindInitialTransactions(t *testing.T) {
 // requests, as they should be moved internally to the nextBatch slice.
 func TestDequeueAtHeight(t *testing.T) {
 	mockChainClient := NewMockChainClient()
-	scanner := NewUtxoScanner(&UtxoScannerConfig{
-		GetBlock:           mockChainClient.GetBlockFromNetwork,
-		GetBlockHash:       mockChainClient.GetBlockHash,
-		BestSnapshot:       mockChainClient.BestSnapshot,
-		BlockFilterMatches: mockChainClient.blockFilterMatches,
-	})
+	scanner := NewUtxoScanner(
+		&UtxoScannerConfig{
+			GetBlock:           mockChainClient.GetBlockFromNetwork,
+			GetBlockHash:       mockChainClient.GetBlockHash,
+			BestSnapshot:       mockChainClient.BestSnapshot,
+			BlockFilterMatches: mockChainClient.blockFilterMatches,
+		},
+	)
 	// Add the requests in order of their block heights.
 	req100000, e := scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	req100001, e := scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	// Dequeue the heights in the same order, this should return both requests without failure.
 	reqs := scanner.dequeueAtHeight(100000)
 	if len(reqs) != 1 {
-		t.Fatalf("Unexpected number of requests returned -- "+
-			"want %v, got %v", 1, len(reqs))
+		t.Fatalf(
+			"Unexpected number of requests returned -- "+
+				"want %v, got %v", 1, len(reqs),
+		)
 	}
 	if !reflect.DeepEqual(reqs[0], req100000) {
-		t.Fatalf("Unexpected request returned -- "+
-			"want %v, got %v", reqs[0], req100000)
+		t.Fatalf(
+			"Unexpected request returned -- "+
+				"want %v, got %v", reqs[0], req100000,
+		)
 	}
 	// We've missed block 100000 by this point so only return 100001.
 	reqs = scanner.dequeueAtHeight(100001)
 	if len(reqs) != 1 {
-		t.Fatalf("Unexpected number of requests returned -- "+
-			"want %v, got %v", 1, len(reqs))
+		t.Fatalf(
+			"Unexpected number of requests returned -- "+
+				"want %v, got %v", 1, len(reqs),
+		)
 	}
 	if !reflect.DeepEqual(reqs[0], req100001) {
-		t.Fatalf("Unexpected request returned -- "+
-			"want %v, got %v", reqs[0], req100001)
+		t.Fatalf(
+			"Unexpected request returned -- "+
+				"want %v, got %v", reqs[0], req100001,
+		)
 	}
 	// Now, add the requests in order of their block heights.
 	_, e = scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	req100001, e = scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	// We've missed block 100000 by this point so only return 100001.
 	reqs = scanner.dequeueAtHeight(100001)
 	if len(reqs) != 1 {
-		t.Fatalf("Unexpected number of requests returned -- "+
-			"want %v, got %v", 1, len(reqs))
+		t.Fatalf(
+			"Unexpected number of requests returned -- "+
+				"want %v, got %v", 1, len(reqs),
+		)
 	}
 	if !reflect.DeepEqual(reqs[0], req100001) {
-		t.Fatalf("Unexpected request returned -- "+
-			"want %v, got %v", reqs[0], req100001)
+		t.Fatalf(
+			"Unexpected request returned -- "+
+				"want %v, got %v", reqs[0], req100001,
+		)
 	}
 	// Try to request requests at height 100000, which should not return a request since we've already passed it.
 	reqs = scanner.dequeueAtHeight(100000)
 	if len(reqs) != 0 {
-		t.Fatalf("Unexpected number of requests returned -- "+
-			"want %v, got %v", 0, len(reqs))
+		t.Fatalf(
+			"Unexpected number of requests returned -- "+
+				"want %v, got %v", 0, len(reqs),
+		)
 	}
 	// Now, add the requests out of order wrt. their block heights.
 	req100001, e = scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	req100000, e = scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	// Dequeue the heights in the correct order, this should return both requests without failure.
 	reqs = scanner.dequeueAtHeight(100000)
 	if len(reqs) != 1 {
-		t.Fatalf("Unexpected number of requests returned -- "+
-			"want %v, got %v", 1, len(reqs))
+		t.Fatalf(
+			"Unexpected number of requests returned -- "+
+				"want %v, got %v", 1, len(reqs),
+		)
 	}
 	if !reflect.DeepEqual(reqs[0], req100000) {
-		t.Fatalf("Unexpected request returned -- "+
-			"want %v, got %v", reqs[0], req100000)
+		t.Fatalf(
+			"Unexpected request returned -- "+
+				"want %v, got %v", reqs[0], req100000,
+		)
 	}
 	reqs = scanner.dequeueAtHeight(100001)
 	if len(reqs) != 1 {
-		t.Fatalf("Unexpected number of requests returned -- "+
-			"want %v, got %v", 1, len(reqs))
+		t.Fatalf(
+			"Unexpected number of requests returned -- "+
+				"want %v, got %v", 1, len(reqs),
+		)
 	}
 	if !reflect.DeepEqual(reqs[0], req100001) {
-		t.Fatalf("Unexpected request returned -- "+
-			"want %v, got %v", reqs[0], req100001)
+		t.Fatalf(
+			"Unexpected request returned -- "+
+				"want %v, got %v", reqs[0], req100001,
+		)
 	}
 	// Again, add the requests out of order wrt. their block heights.
 	req100001, e = scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	_, e = scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	// We've missed block 100000 by this point so only return 100001.
 	reqs = scanner.dequeueAtHeight(100001)
 	if len(reqs) != 1 {
-		t.Fatalf("Unexpected number of requests returned -- "+
-			"want %v, got %v", 1, len(reqs))
+		t.Fatalf(
+			"Unexpected number of requests returned -- "+
+				"want %v, got %v", 1, len(reqs),
+		)
 	}
 	if !reflect.DeepEqual(reqs[0], req100001) {
-		t.Fatalf("Unexpected request returned -- "+
-			"want %v, got %v", reqs[0], req100001)
+		t.Fatalf(
+			"Unexpected request returned -- "+
+				"want %v, got %v", reqs[0], req100001,
+		)
 	}
 	// Try to request requests at height 100000, which should not return a request since we've already passed it.
 	reqs = scanner.dequeueAtHeight(100000)
 	if len(reqs) != 0 {
-		t.Fatalf("Unexpected number of requests returned -- "+
-			"want %v, got %v", 0, len(reqs))
+		t.Fatalf(
+			"Unexpected number of requests returned -- "+
+				"want %v, got %v", 0, len(reqs),
+		)
 	}
 }
 
@@ -288,14 +340,16 @@ func TestUtxoScannerScanBasic(t *testing.T) {
 	mockChainClient.SetBlockHash(100000, &block100000Hash)
 	mockChainClient.SetBlock(&block100000Hash, util.NewBlock(&Block100000))
 	mockChainClient.SetBestSnapshot(&block100000Hash, 100000)
-	scanner := NewUtxoScanner(&UtxoScannerConfig{
-		GetBlock:           mockChainClient.GetBlockFromNetwork,
-		GetBlockHash:       mockChainClient.GetBlockHash,
-		BestSnapshot:       mockChainClient.BestSnapshot,
-		BlockFilterMatches: mockChainClient.blockFilterMatches,
-	})
+	scanner := NewUtxoScanner(
+		&UtxoScannerConfig{
+			GetBlock:           mockChainClient.GetBlockFromNetwork,
+			GetBlockHash:       mockChainClient.GetBlockHash,
+			BestSnapshot:       mockChainClient.BestSnapshot,
+			BlockFilterMatches: mockChainClient.blockFilterMatches,
+		},
+	)
 	e := scanner.Start()
-	if e != nil  {
+	if e != nil {
 		t.Log(e)
 	}
 	defer func() {
@@ -307,16 +361,18 @@ func TestUtxoScannerScanBasic(t *testing.T) {
 		scanErr     error
 	)
 	req, e := scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if e != nil  {
-		t.Fatalf("unable to enqueue utxo scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue utxo scan request: %v", e)
 	}
 	spendReport, scanErr = req.Result(nil)
 	if scanErr != nil {
 		t.Fatalf("unable to complete scan for utxo: %v", scanErr)
 	}
 	if spendReport == nil || spendReport.SpendingTx == nil {
-		t.Fatalf("Expected scanned output to be spent -- "+
-			"scan report: %v", spendReport)
+		t.Fatalf(
+			"Expected scanned output to be spent -- "+
+				"scan report: %v", spendReport,
+		)
 	}
 }
 
@@ -334,19 +390,21 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	mockChainClient.SetBlock(&block100000Hash, util.NewBlock(&Block100000))
 	var snapshotLock sync.Mutex
 	waitForSnapshot := qu.T()
-	scanner := NewUtxoScanner(&UtxoScannerConfig{
-		GetBlock:     mockChainClient.GetBlockFromNetwork,
-		GetBlockHash: mockChainClient.GetBlockHash,
-		BestSnapshot: func() (*waddrmgr.BlockStamp, error) {
-			<-waitForSnapshot
-			snapshotLock.Lock()
-			defer snapshotLock.Unlock()
-			return mockChainClient.BestSnapshot()
+	scanner := NewUtxoScanner(
+		&UtxoScannerConfig{
+			GetBlock:     mockChainClient.GetBlockFromNetwork,
+			GetBlockHash: mockChainClient.GetBlockHash,
+			BestSnapshot: func() (*waddrmgr.BlockStamp, error) {
+				<-waitForSnapshot
+				snapshotLock.Lock()
+				defer snapshotLock.Unlock()
+				return mockChainClient.BestSnapshot()
+			},
+			BlockFilterMatches: mockChainClient.blockFilterMatches,
 		},
-		BlockFilterMatches: mockChainClient.blockFilterMatches,
-	})
+	)
 	e := scanner.Start()
-	if e != nil  {
+	if e != nil {
 		t.Log(e)
 	}
 	defer func() {
@@ -358,8 +416,8 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 		scanErr     error
 	)
 	req, e := scanner.Enqueue(makeTestInputWithScript(), 99999)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	// The utxoscanner should currently be waiting for the block stamp at height 99999. Signaling will cause the initial
 	// scan to finish and block while querying again for the updated chain tip.
@@ -377,8 +435,10 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 		t.Fatalf("unable to complete scan for utxo: %v", scanErr)
 	}
 	if spendReport == nil || spendReport.SpendingTx == nil {
-		t.Fatalf("Expected scanned output to be spent -- "+
-			"scan report: %v", spendReport)
+		t.Fatalf(
+			"Expected scanned output to be spent -- "+
+				"scan report: %v", spendReport,
+		)
 	}
 }
 
@@ -394,18 +454,21 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	// Create a mock function that will block when the utxoscanner tries to retrieve a block from the network. It will
 	// return fetchErr when it finally returns.
 	block := qu.T()
-	scanner := NewUtxoScanner(&UtxoScannerConfig{
-		GetBlock: func(chainhash.Hash, ...QueryOption,
-		) (*util.Block, error) {
-			<-block
-			return nil, fetchErr
+	scanner := NewUtxoScanner(
+		&UtxoScannerConfig{
+			GetBlock: func(
+				chainhash.Hash, ...QueryOption,
+			) (*util.Block, error) {
+				<-block
+				return nil, fetchErr
+			},
+			GetBlockHash:       mockChainClient.GetBlockHash,
+			BestSnapshot:       mockChainClient.BestSnapshot,
+			BlockFilterMatches: mockChainClient.blockFilterMatches,
 		},
-		GetBlockHash:       mockChainClient.GetBlockHash,
-		BestSnapshot:       mockChainClient.BestSnapshot,
-		BlockFilterMatches: mockChainClient.blockFilterMatches,
-	})
+	)
 	e := scanner.Start()
-	if e != nil  {
+	if e != nil {
 		t.Log(e)
 	}
 	defer func() {
@@ -414,12 +477,12 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	}()
 	// Add the requests in order of their block heights.
 	req100000, e := scanner.Enqueue(makeTestInputWithScript(), 100000)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	req100001, e := scanner.Enqueue(makeTestInputWithScript(), 100001)
-	if e != nil  {
-		t.Fatalf("unable to enqueue scan request: %v", err)
+	if e != nil {
+		t.Fatalf("unable to enqueue scan request: %v", e)
 	}
 	// Spawn our first task with a cancel chan, which we'll test to make sure it can break away early.
 	cancel100000 := qu.T()
@@ -450,7 +513,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	select {
 	case e := <-err100000:
 		if err != ErrGetUtxoCancelled {
-			t.Fatalf("unexpected error returned from Result, want: %v, got %v", ErrGetUtxoCancelled, err)
+			t.Fatalf("unexpected error returned from Result, want: %v, got %v", ErrGetUtxoCancelled, e)
 		}
 	case <-time.After(50 * time.Millisecond):
 		t.Fatalf("getutxo should have been cancelled")
@@ -468,7 +531,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		e := scanner.Stop()
-		if e != nil  {
+		if e != nil {
 			t.Log(e)
 		}
 	}()
@@ -476,9 +539,11 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	select {
 	case e := <-err100001:
 		if err != ErrShuttingDown {
-			t.Fatalf("unexpected error returned "+
-				"from Result, want: %v, got %v",
-				ErrShuttingDown, err)
+			t.Fatalf(
+				"unexpected error returned "+
+					"from Result, want: %v, got %v",
+				ErrShuttingDown, e,
+			)
 		}
 	case <-time.After(50 * time.Millisecond):
 		t.Fatalf("getutxo should have been cancelled")
@@ -496,19 +561,23 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 var Block99999 = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version: 1,
-		PrevBlock: chainhash.Hash([32]byte{
-			0x1d, 0x35, 0xce, 0x8c, 0x72, 0x5a, 0x13, 0x56,
-			0xc2, 0x34, 0xd0, 0x88, 0x59, 0x0b, 0xf7, 0x86,
-			0x69, 0x90, 0x91, 0x76, 0x2d, 0x01, 0x97, 0x36,
-			0x30, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		}),
+		PrevBlock: chainhash.Hash(
+			[32]byte{
+				0x1d, 0x35, 0xce, 0x8c, 0x72, 0x5a, 0x13, 0x56,
+				0xc2, 0x34, 0xd0, 0x88, 0x59, 0x0b, 0xf7, 0x86,
+				0x69, 0x90, 0x91, 0x76, 0x2d, 0x01, 0x97, 0x36,
+				0x30, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			},
+		),
 		// 0000000000002103637910d267190996687fb095880d432c6531a527c8ec53d1
-		MerkleRoot: chainhash.Hash([32]byte{
-			0x09, 0xa7, 0x45, 0x1a, 0x7d, 0x41, 0xca, 0x75,
-			0x8d, 0x4c, 0xc3, 0xc8, 0x5c, 0x5b, 0x07, 0x60,
-			0x30, 0xf2, 0x3c, 0x5a, 0xed, 0xd6, 0x79, 0x49,
-			0xa3, 0xe1, 0xa8, 0x55, 0xf2, 0x9d, 0xe0, 0x11,
-		}),
+		MerkleRoot: chainhash.Hash(
+			[32]byte{
+				0x09, 0xa7, 0x45, 0x1a, 0x7d, 0x41, 0xca, 0x75,
+				0x8d, 0x4c, 0xc3, 0xc8, 0x5c, 0x5b, 0x07, 0x60,
+				0x30, 0xf2, 0x3c, 0x5a, 0xed, 0xd6, 0x79, 0x49,
+				0xa3, 0xe1, 0xa8, 0x55, 0xf2, 0x9d, 0xe0, 0x11,
+			},
+		),
 		// 110ed92f558a1e3a94976ddea5c32f030670b5c58c3cc4d857ac14d7a1547a90
 		Timestamp: time.Unix(1293623731, 0), // 2010-12-29 11:55:31
 		Bits:      0x1b04864c,               // 453281356
@@ -557,19 +626,25 @@ var Block99999 = wire.MsgBlock{
 var Block100000 = wire.MsgBlock{
 	Header: wire.BlockHeader{
 		Version: 1,
-		PrevBlock: chainhash.Hash([32]byte{ // Make go vet happy.
-			0x50, 0x12, 0x01, 0x19, 0x17, 0x2a, 0x61, 0x04,
-			0x21, 0xa6, 0xc3, 0x01, 0x1d, 0xd3, 0x30, 0xd9,
-			0xdf, 0x07, 0xb6, 0x36, 0x16, 0xc2, 0xcc, 0x1f,
-			0x1c, 0xd0, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
-		}),
+		PrevBlock: chainhash.Hash(
+			[32]byte{
+				// Make go vet happy.
+				0x50, 0x12, 0x01, 0x19, 0x17, 0x2a, 0x61, 0x04,
+				0x21, 0xa6, 0xc3, 0x01, 0x1d, 0xd3, 0x30, 0xd9,
+				0xdf, 0x07, 0xb6, 0x36, 0x16, 0xc2, 0xcc, 0x1f,
+				0x1c, 0xd0, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+			},
+		),
 		// 000000000002d01c1fccc21636b607dfd930d31d01c3a62104612a1719011250
-		MerkleRoot: chainhash.Hash([32]byte{ // Make go vet happy.
-			0x66, 0x57, 0xa9, 0x25, 0x2a, 0xac, 0xd5, 0xc0,
-			0xb2, 0x94, 0x09, 0x96, 0xec, 0xff, 0x95, 0x22,
-			0x28, 0xc3, 0x06, 0x7c, 0xc3, 0x8d, 0x48, 0x85,
-			0xef, 0xb5, 0xa4, 0xac, 0x42, 0x47, 0xe9, 0xf3,
-		}),
+		MerkleRoot: chainhash.Hash(
+			[32]byte{
+				// Make go vet happy.
+				0x66, 0x57, 0xa9, 0x25, 0x2a, 0xac, 0xd5, 0xc0,
+				0xb2, 0x94, 0x09, 0x96, 0xec, 0xff, 0x95, 0x22,
+				0x28, 0xc3, 0x06, 0x7c, 0xc3, 0x8d, 0x48, 0x85,
+				0xef, 0xb5, 0xa4, 0xac, 0x42, 0x47, 0xe9, 0xf3,
+			},
+		),
 		// f3e94742aca4b5ef85488dc37c06c3282295ffec960994b2c0d5ac2a25a95766
 		Timestamp: time.Unix(1293623863, 0), // 2010-12-29 11:57:43 +0000 UTC
 		Bits:      0x1b04864c,               // 453281356
@@ -615,12 +690,15 @@ var Block100000 = wire.MsgBlock{
 			TxIn: []*wire.TxIn{
 				{
 					PreviousOutPoint: wire.OutPoint{
-						Hash: chainhash.Hash([32]byte{ // Make go vet happy.
-							0x03, 0x2e, 0x38, 0xe9, 0xc0, 0xa8, 0x4c, 0x60,
-							0x46, 0xd6, 0x87, 0xd1, 0x05, 0x56, 0xdc, 0xac,
-							0xc4, 0x1d, 0x27, 0x5e, 0xc5, 0x5f, 0xc0, 0x07,
-							0x79, 0xac, 0x88, 0xfd, 0xf3, 0x57, 0xa1, 0x87,
-						}),
+						Hash: chainhash.Hash(
+							[32]byte{
+								// Make go vet happy.
+								0x03, 0x2e, 0x38, 0xe9, 0xc0, 0xa8, 0x4c, 0x60,
+								0x46, 0xd6, 0x87, 0xd1, 0x05, 0x56, 0xdc, 0xac,
+								0xc4, 0x1d, 0x27, 0x5e, 0xc5, 0x5f, 0xc0, 0x07,
+								0x79, 0xac, 0x88, 0xfd, 0xf3, 0x57, 0xa1, 0x87,
+							},
+						),
 						// 87a157f3fd88ac7907c05fc55e271dc4acdc5605d187d646604ca8c0e9382e03
 						Index: 0,
 					},
@@ -685,12 +763,15 @@ var Block100000 = wire.MsgBlock{
 			TxIn: []*wire.TxIn{
 				{
 					PreviousOutPoint: wire.OutPoint{
-						Hash: chainhash.Hash([32]byte{ // Make go vet happy.
-							0xc3, 0x3e, 0xbf, 0xf2, 0xa7, 0x09, 0xf1, 0x3d,
-							0x9f, 0x9a, 0x75, 0x69, 0xab, 0x16, 0xa3, 0x27,
-							0x86, 0xaf, 0x7d, 0x7e, 0x2d, 0xe0, 0x92, 0x65,
-							0xe4, 0x1c, 0x61, 0xd0, 0x78, 0x29, 0x4e, 0xcf,
-						}),
+						Hash: chainhash.Hash(
+							[32]byte{
+								// Make go vet happy.
+								0xc3, 0x3e, 0xbf, 0xf2, 0xa7, 0x09, 0xf1, 0x3d,
+								0x9f, 0x9a, 0x75, 0x69, 0xab, 0x16, 0xa3, 0x27,
+								0x86, 0xaf, 0x7d, 0x7e, 0x2d, 0xe0, 0x92, 0x65,
+								0xe4, 0x1c, 0x61, 0xd0, 0x78, 0x29, 0x4e, 0xcf,
+							},
+						),
 						// cf4e2978d0611ce46592e02d7e7daf8627a316ab69759a9f3df109a7f2bf3ec3
 						Index: 1,
 					},
@@ -754,12 +835,15 @@ var Block100000 = wire.MsgBlock{
 			TxIn: []*wire.TxIn{
 				{
 					PreviousOutPoint: wire.OutPoint{
-						Hash: chainhash.Hash([32]byte{ // Make go vet happy.
-							0x0b, 0x60, 0x72, 0xb3, 0x86, 0xd4, 0xa7, 0x73,
-							0x23, 0x52, 0x37, 0xf6, 0x4c, 0x11, 0x26, 0xac,
-							0x3b, 0x24, 0x0c, 0x84, 0xb9, 0x17, 0xa3, 0x90,
-							0x9b, 0xa1, 0xc4, 0x3d, 0xed, 0x5f, 0x51, 0xf4,
-						}),
+						Hash: chainhash.Hash(
+							[32]byte{
+								// Make go vet happy.
+								0x0b, 0x60, 0x72, 0xb3, 0x86, 0xd4, 0xa7, 0x73,
+								0x23, 0x52, 0x37, 0xf6, 0x4c, 0x11, 0x26, 0xac,
+								0x3b, 0x24, 0x0c, 0x84, 0xb9, 0x17, 0xa3, 0x90,
+								0x9b, 0xa1, 0xc4, 0x3d, 0xed, 0x5f, 0x51, 0xf4,
+							},
+						),
 						// f4515fed3dc4a19b90a317b9840c243bac26114cf637522373a7d486b372600b
 						Index: 0,
 					},

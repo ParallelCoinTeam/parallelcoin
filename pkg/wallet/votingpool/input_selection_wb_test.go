@@ -23,7 +23,7 @@ var (
 // 	defer tearDown()
 // 	dbtx, e := db.BeginReadWriteTx()
 // 	if e != nil  {
-// 		t.ftl.Ln(e)
+// 		t.F.Ln(e)
 // 	}
 // 	defer func() {
 // 	e := dbtx.Commit()
@@ -59,7 +59,7 @@ var (
 // 			eligibleInputMinConfirmations)
 // 	})
 // 	if e != nil  {
-// 		t.ftl.Ln("InputSelection failed:", err)
+// 		t.F.Ln("InputSelection failed:", e)
 // 	}
 // 	// Chk we got the expected number of eligible inputs.
 // 	if len(eligibles) != expNoEligibleInputs {
@@ -68,7 +68,7 @@ var (
 // 	}
 // 	// Chk that the returned eligibles are reverse sorted by address.
 // 	if !sort.IsSorted(sort.Reverse(byAddress(eligibles))) {
-// 		t.ftl.Ln("Eligible inputs are not sorted.")
+// 		t.F.Ln("Eligible inputs are not sorted.")
 // 	}
 // 	// Chk that all credits are unique
 // 	checkUniqueness(t, eligibles)
@@ -78,7 +78,7 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -103,7 +103,7 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 		addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to get next address: %v", err)
+		t.Fatalf("Failed to get next address: %v", e)
 	}
 	checkWithdrawalAddressMatches(t, addr, 1, Branch(1), 1)
 	// The next call should give us the address for branch==0, index==2 since there are no used addresses for branch==2.
@@ -111,7 +111,7 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 		addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to get next address: %v", err)
+		t.Fatalf("Failed to get next address: %v", e)
 	}
 	checkWithdrawalAddressMatches(t, addr, 1, Branch(0), 2)
 	// Since the last addr for branch==1 was the one with index==1, a subsequent call will return nil.
@@ -119,7 +119,7 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 		addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to get next address: %v", err)
+		t.Fatalf("Failed to get next address: %v", e)
 	}
 	if addr != nil {
 		t.Fatalf("Wrong next addr; got '%s', want 'nil'", addr.addrIdentifier())
@@ -130,7 +130,7 @@ func TestNextAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -158,7 +158,7 @@ func TestNextAddr(t *testing.T) {
 			addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 		})
 		if e != nil  {
-			t.Fatalf("Failed to get next address: %v", err)
+			t.Fatalf("Failed to get next address: %v", e)
 		}
 		checkWithdrawalAddressMatches(t, addr, 1, Branch(i), lastIdx-1)
 	}
@@ -169,7 +169,7 @@ func TestNextAddr(t *testing.T) {
 			addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 		})
 		if e != nil  {
-			t.Fatalf("Failed to get next address: %v", err)
+			t.Fatalf("Failed to get next address: %v", e)
 		}
 		checkWithdrawalAddressMatches(t, addr, 1, Branch(i), lastIdx)
 	}
@@ -184,7 +184,7 @@ func TestNextAddr(t *testing.T) {
 			addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 		})
 		if e != nil  {
-			t.Fatalf("Failed to get next address: %v", err)
+			t.Fatalf("Failed to get next address: %v", e)
 		}
 		checkWithdrawalAddressMatches(t, addr, 2, Branch(i), 0)
 	}
@@ -194,7 +194,7 @@ func TestNextAddr(t *testing.T) {
 		addr, e = nextAddr(pool, ns, addrmgrNs, addr.seriesID, addr.branch, addr.index, stopSeriesID)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to get next address: %v", err)
+		t.Fatalf("Failed to get next address: %v", e)
 	}
 	if addr != nil {
 		t.Fatalf("Wrong WithdrawalAddress; got %s, want nil", addr.addrIdentifier())
@@ -309,7 +309,7 @@ func TestCreditSortingByAddress(t *testing.T) {
 func newDummyCredit(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series uint32, index Index, branch Branch,
 	txHash []byte, outpointIdx uint32) Credit {
 	var hash chainhash.Hash
-	if e := hash.SetBytes(txHash); err.Chk(e) {
+	if e := hash.SetBytes(txHash); E.Chk(e) {
 		t.ftl.Ln(e)
 	}
 	// Ensure the address defined by the given series/branch/index is present on the set of used addresses as that's a

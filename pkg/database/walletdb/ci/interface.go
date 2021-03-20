@@ -57,7 +57,7 @@ func testPutValues(
 		if v != "" {
 			vBytes = []byte(v)
 		}
-		if e := bucket.Put([]byte(k), vBytes); err.Chk(e) {
+		if e := bucket.Put([]byte(k), vBytes); E.Chk(e) {
 			tc.t.Errorf("Put: unexpected error: %v", err)
 			return false
 		}
@@ -69,7 +69,7 @@ func testPutValues(
 func testDeleteValues(
 	tc *testContext, bucket walletdb.ReadWriteBucket, values map[string]string) bool {
 	for k := range values {
-		if e := bucket.Delete([]byte(k)); err.Chk(e) {
+		if e := bucket.Delete([]byte(k)); E.Chk(e) {
 			tc.t.Errorf("Delete: unexpected error: %v", err)
 			return false
 		}
@@ -157,7 +157,7 @@ func testReadWriteBucketInterface(
 	wantErr := walletdb.ErrBucketExists
 	if _, e = bucket.CreateBucket(testBucketName); err != wantErr {
 		tc.t.Errorf("CreateBucket: unexpected error - got %v, "+
-			"want %v", err, wantErr)
+			"want %v", e, wantErr)
 		return false
 	}
 	// Ensure CreateBucketIfNotExists returns an existing bucket.
@@ -176,7 +176,7 @@ func testReadWriteBucketInterface(
 		return false
 	}
 	// Ensure deleting a bucket works as intended.
-	if e := bucket.DeleteNestedBucket(testBucketName); err.Chk(e) {
+	if e := bucket.DeleteNestedBucket(testBucketName); E.Chk(e) {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error: %v", err)
 		return false
 	}
@@ -189,7 +189,7 @@ func testReadWriteBucketInterface(
 	wantErr = walletdb.ErrBucketNotFound
 	if e := bucket.DeleteNestedBucket(testBucketName); err != wantErr {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error - got %v, "+
-			"want %v", err, wantErr)
+			"want %v", e, wantErr)
 		return false
 	}
 	// Ensure CreateBucketIfNotExists creates a new bucket when it doesn't already exist.
@@ -203,7 +203,7 @@ func testReadWriteBucketInterface(
 		return false
 	}
 	// Delete the test bucket to avoid leaving it around for future calls.
-	if e := bucket.DeleteNestedBucket(testBucketName); err.Chk(e) {
+	if e := bucket.DeleteNestedBucket(testBucketName); E.Chk(e) {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error: %v", err)
 		return false
 	}
@@ -259,7 +259,7 @@ func testManualTxInterface(
 		}
 		if !writable {
 			// Rollback the transaction.
-			if e := dbtx.Rollback(); err.Chk(e) {
+			if e := dbtx.Rollback(); E.Chk(e) {
 				tc.t.Errorf("Commit: unexpected error %v", err)
 				return false
 			}
@@ -270,14 +270,14 @@ func testManualTxInterface(
 			}
 			if rollback {
 				// Rollback the transaction.
-				if e := dbtx.Rollback(); err.Chk(e) {
+				if e := dbtx.Rollback(); E.Chk(e) {
 					tc.t.Errorf("Rollback: unexpected "+
 						"error %v", err)
 					return false
 				}
 			} else {
 				// The commit should succeed.
-				if e := dbtx.(walletdb.ReadWriteTx).Commit(); err.Chk(e) {
+				if e := dbtx.(walletdb.ReadWriteTx).Commit(); E.Chk(e) {
 					tc.t.Errorf("Commit: unexpected error "+
 						"%v", err)
 					return false
@@ -306,7 +306,7 @@ func testManualTxInterface(
 			return false
 		}
 		// Rollback the read-only transaction.
-		if e := dbtx.Rollback(); err.Chk(e) {
+		if e := dbtx.Rollback(); E.Chk(e) {
 			tc.t.Errorf("Commit: unexpected error %v", err)
 			return false
 		}
@@ -336,7 +336,7 @@ func testManualTxInterface(
 			return false
 		}
 		// Commit the changes and ensure it was successful.
-		if e := dbtx.Commit(); err.Chk(e) {
+		if e := dbtx.Commit(); E.Chk(e) {
 			tc.t.Errorf("Commit: unexpected error %v", err)
 			return false
 		}
@@ -447,7 +447,7 @@ func testNamespaceAndTxInterfaces(
 			return false
 		}
 		tc.t.Errorf("Update: inner function error not returned - got "+
-			"%v, want %v", err, forceRollbackError)
+			"%v, want %v", e, forceRollbackError)
 		return false
 	}
 	// Ensure the values that should have not been stored due to the forced rollback above were not actually stored.
@@ -496,7 +496,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if e != nil  {
-		err.Ln(err)
+		E.Ln(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
@@ -514,7 +514,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if e != nil  {
-		err.Ln(err)
+		E.Ln(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
@@ -538,18 +538,18 @@ func testAdditionalErrors(
 		wantErr := walletdb.ErrBucketNameRequired
 		if _, e = rootBucket.CreateBucket(nil); err != wantErr {
 			return fmt.Errorf("CreateBucket: unexpected error - "+
-				"got %v, want %v", err, wantErr)
+				"got %v, want %v", e, wantErr)
 		}
 		// Ensure DeleteNestedBucket returns the expected error when no bucket key is specified.
 		wantErr = walletdb.ErrIncompatibleValue
 		if e := rootBucket.DeleteNestedBucket(nil); err != wantErr {
 			return fmt.Errorf("DeleteNestedBucket: unexpected error - "+
-				"got %v, want %v", err, wantErr)
+				"got %v, want %v", e, wantErr)
 		}
 		// Ensure Put returns the expected error when no key is specified.
 		wantErr = walletdb.ErrKeyRequired
 		if e := rootBucket.Put(nil, nil); err != wantErr {
-			return fmt.Errorf("put: unexpected error - got %v, want %v", err, wantErr)
+			return fmt.Errorf("put: unexpected error - got %v, want %v", e, wantErr)
 		}
 		return nil
 	})
@@ -565,18 +565,18 @@ func testAdditionalErrors(
 		tc.t.Errorf("Begin: unexpected error: %v", err)
 		return false
 	}
-	if e := tx.Rollback(); err.Chk(e) {
+	if e := tx.Rollback(); E.Chk(e) {
 		tc.t.Errorf("Rollback: unexpected error: %v", err)
 		return false
 	}
 	wantErr := walletdb.ErrTxClosed
 	if e := tx.Rollback(); err != wantErr {
-		tc.t.Errorf("Rollback: unexpected error - got %v, want %v", err,
+		tc.t.Errorf("Rollback: unexpected error - got %v, want %v", e,
 			wantErr)
 		return false
 	}
 	if e := tx.Commit(); err != wantErr {
-		tc.t.Errorf("Commit: unexpected error - got %v, want %v", err,
+		tc.t.Errorf("Commit: unexpected error - got %v, want %v", e,
 			wantErr)
 		return false
 	}
@@ -592,11 +592,11 @@ func TestInterface(
 		return
 	}
 	defer func() {
-		if e := os.Remove(dbPath); err.Chk(e) {
+		if e := os.Remove(dbPath); E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); err.Chk(e) {
+		if e := db.Close(); E.Chk(e) {
 		}
 	}()
 	// Run all of the interface tests against the database. Create a test context to pass around.

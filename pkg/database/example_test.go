@@ -29,11 +29,11 @@ func ExampleCreate() {
 		database.		return
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); database.err.Chk(e) {
+		if e := os.RemoveAll(dbPath); database.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); database.err.Chk(e) {
+		if e := db.Close(); database.E.Chk(e) {
 		}
 	}()
 	// Output:
@@ -58,11 +58,11 @@ func Example_basicUsage() {
 		database.		return
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); database.err.Chk(e) {
+		if e := os.RemoveAll(dbPath); database.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); database.err.Chk(e) {
+		if e := db.Close(); database.E.Chk(e) {
 		}
 	}()
 	// Use the Update function of the database to perform a managed read-write transaction. The transaction will
@@ -72,7 +72,7 @@ func Example_basicUsage() {
 		// feature, but this example is using the metadata bucket directly for simplicity.
 		key := []byte("mykey")
 		value := []byte("myvalue")
-		if e := tx.Metadata().Put(key, value); err.Chk(e) {
+		if e := tx.Metadata().Put(key, value); E.Chk(e) {
 			return e
 		}
 		// Read the key back and ensure it matches.

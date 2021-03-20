@@ -12,6 +12,7 @@ type Payee struct {
 	Address util.Address
 	Amount  util.Amount
 }
+
 var (
 	// The following prepares hard fork disbursement payout transactions
 	tn = &netparams.TestNet3Params
@@ -67,24 +68,24 @@ var (
 
 func Amt(f float64) (amt util.Amount) {
 	amt, e := util.NewAmount(f)
-	if e != nil  {
-				panic(err)
+	if e != nil {
+		panic(e)
 	}
 	return
 }
 
 func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
 	out, e := util.DecodeAddress(addr, defaultNet)
-	if e != nil  {
-				panic(err)
+	if e != nil {
+		panic(e)
 	}
 	return
 }
 
 func Key(key string) (out []byte) {
 	out, e := hex.DecodeString(key)
-	if e != nil  {
-				panic(err)
+	if e != nil {
+		panic(e)
 	}
 	return
 }

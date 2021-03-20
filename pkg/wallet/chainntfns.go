@@ -19,7 +19,7 @@ func (w *Wallet) handleChainNotifications() {
 	}
 	chainClient, e := w.requireChainClient()
 	if e != nil {
-		err.Ln("handleChainNotifications called without RPC client", err)
+		E.Ln("handleChainNotifications called without RPC client", e)
 		return
 	}
 	sync := func(w *Wallet) {
@@ -28,7 +28,7 @@ func (w *Wallet) handleChainNotifications() {
 			// marked synced and many methods will error early since the wallet is known to be out of date.
 			e := w.syncWithChain()
 			if e != nil && !w.ShuttingDown() {
-				wrn.Ln("unable to synchronize wallet to chain:", err)
+				W.Ln("unable to synchronize wallet to chain:", e)
 			}
 		}
 	}
@@ -41,7 +41,7 @@ func (w *Wallet) handleChainNotifications() {
 		//  notifications with each block the way Neutrino does, and get rid of the loop. The other alternative is to
 		//  check the final hash and, if it doesn't match the original hash returned by the notification, to roll back
 		//  and restart the rescan.
-		inf.F(
+		I.F(
 			"handleChainNotifications: catching up block hashes to height %d, this might take a while", height,
 		)
 		e = walletdb.Update(
@@ -71,12 +71,12 @@ func (w *Wallet) handleChainNotifications() {
 			},
 		)
 		if e != nil {
-			err.F(
+			E.F(
 				"failed to update address manager sync state for height %d: %v",
 				height, e,
 			)
 		}
-		inf.Ln("done catching up block hashes")
+		I.Ln("done catching up block hashes")
 		return e
 	}
 	for {
@@ -163,9 +163,9 @@ func (w *Wallet) handleChainNotifications() {
 						e.Error(),
 						"couldn't get hash from database",
 					) {
-					dbg.F(errStr, notificationName, err)
+					D.F(errStr, notificationName, e)
 				} else {
-					err.F(errStr, notificationName, err)
+					E.F(errStr, notificationName, e)
 				}
 			}
 		case <-w.quit.Wait():
@@ -275,7 +275,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 				if e != nil {
 					return e
 				}
-				trc.Ln("marked address used:", addr)
+				T.Ln("marked address used:", addr)
 				continue
 			}
 			// Missing addresses are skipped. Other errors should be propagated.
@@ -290,7 +290,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 	if block == nil {
 		details, e := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, nil)
 		if e != nil {
-			err.Ln("cannot query transaction details for notification:", err)
+			E.Ln("cannot query transaction details for notification:", e)
 		}
 		// It's possible that the transaction was not found within the wallet's set of unconfirmed transactions due to
 		// it already being confirmed, so we'll avoid notifying it.
@@ -303,7 +303,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 	} else {
 		details, e := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
 		if e != nil {
-			err.Ln("cannot query transaction details for notification:", err)
+			E.Ln("cannot query transaction details for notification:", e)
 		}
 		// We'll only notify the transaction if it was found within the wallet's set of confirmed transactions.
 		if details != nil {

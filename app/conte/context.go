@@ -82,6 +82,7 @@ type Xt struct {
 	IsGUI        bool
 	waitChangers []string
 	waitCounter  int
+	Syncing      *atomic.Bool
 }
 
 func (cx *Xt) WaitAdd() {
@@ -90,8 +91,8 @@ func (cx *Xt) WaitAdd() {
 	record := fmt.Sprintf("+ %s:%d", file, line)
 	cx.waitChangers = append(cx.waitChangers, record)
 	cx.waitCounter++
-	dbg.Ln("added to waitgroup", record, cx.waitCounter)
-	dbg.Ln(cx.PrintWaitChangers())
+	D.Ln("added to waitgroup", record, cx.waitCounter)
+	D.Ln(cx.PrintWaitChangers())
 }
 
 func (cx *Xt) WaitDone() {
@@ -99,14 +100,14 @@ func (cx *Xt) WaitDone() {
 	record := fmt.Sprintf("- %s:%d", file, line)
 	cx.waitChangers = append(cx.waitChangers, record)
 	cx.waitCounter--
-	dbg.Ln("removed from waitgroup", record, cx.waitCounter)
-	dbg.Ln(cx.PrintWaitChangers())
+	D.Ln("removed from waitgroup", record, cx.waitCounter)
+	D.Ln(cx.PrintWaitChangers())
 	qu.PrintChanState()
 	cx.WaitGroup.Done()
 }
 
 func (cx *Xt) WaitWait() {
-	dbg.Ln(cx.PrintWaitChangers())
+	D.Ln(cx.PrintWaitChangers())
 	cx.WaitGroup.Wait()
 }
 
@@ -138,6 +139,7 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		Language:         lang.ExportLanguage(appLang),
 		DataDir:          appdata.Dir(appName, false),
 		NodeChan:         make(chan *chainrpc.Server),
+		Syncing:          atomic.NewBool(false),
 	}
 	return cx
 }
@@ -156,13 +158,13 @@ func (cx *Xt) IsCurrent() (is bool) {
 	if !*cx.Config.LAN {
 		cc -= othernodes
 	}
-	dbg.Ln(cc, "nodes connected")
+	D.Ln(cc, "nodes connected")
 	connected := cc > 0
 	is = rn.Chain.IsCurrent() &&
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load() || *cx.Config.Solo
-	dbg.Ln(
+	D.Ln(
 		"is current:", is, "-", rn.Chain.IsCurrent(), rn.SyncManager.IsCurrent(),
 		*cx.Config.Solo, "connected", rn.HighestKnown.Load(), rn.Chain.BestChain.Height(),
 		othernodes,

@@ -505,7 +505,7 @@ func CalcWitnessSigHash(
 ) ([]byte, error) {
 	parsedScript, e := parseScript(script)
 	if e != nil {
-		return nil, fmt.Errorf("cannot parse output script: %v", err)
+		return nil, fmt.Errorf("cannot parse output script: %v", e)
 	}
 	return calcWitnessSignatureHash(
 		parsedScript, sigHashes, hType, tx, idx,
@@ -543,7 +543,7 @@ func shallowCopyTx(tx *wire.MsgTx) wire.MsgTx {
 func CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) ([]byte, error) {
 	parsedScript, e := parseScript(script)
 	if e != nil {
-		return nil, fmt.Errorf("cannot parse output script: %v", err)
+		return nil, fmt.Errorf("cannot parse output script: %v", e)
 	}
 	return calcSignatureHash(parsedScript, hashType, tx, idx), nil
 }

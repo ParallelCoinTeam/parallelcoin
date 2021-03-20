@@ -175,7 +175,7 @@ func (a *AddrManager) updateAddress(netAddr, srcAddr *wire.NetAddress) {
 	// Add to new bucket.
 	ka.refs++
 	a.addrNew[bucket][addr] = ka
-	trc.F("added new address %s for a total of %d addresses", addr,
+	T.F("added new address %s for a total of %d addresses", addr,
 		a.nTried+a.nNew)
 }
 
@@ -188,7 +188,7 @@ func (a *AddrManager) expireNew(bucket int) {
 	var oldest *KnownAddress
 	for k, v := range a.addrNew[bucket] {
 		if v.isBad() {
-			trc.F("expiring bad address %v", k)
+			T.F("expiring bad address %v", k)
 			delete(a.addrNew[bucket], k)
 			v.refs--
 			if v.refs == 0 {
@@ -205,7 +205,7 @@ func (a *AddrManager) expireNew(bucket int) {
 	}
 	if oldest != nil {
 		key := NetAddressKey(oldest.na)
-		trc.F("expiring oldest address %v", key)
+		T.F("expiring oldest address %v", key)
 		delete(a.addrNew[bucket], key)
 		oldest.refs--
 		if oldest.refs == 0 {
@@ -274,14 +274,14 @@ func (a *AddrManager) getTriedBucket(netAddr *wire.NetAddress) int {
 //
 // It must be run as a goroutine.
 func (a *AddrManager) addressHandler() {
-	trc.Ln("starting address handler")
+	T.Ln("starting address handler")
 	dumpAddressTicker := time.NewTicker(dumpAddressInterval)
 	defer dumpAddressTicker.Stop()
 out:
 	for {
 		select {
 		case <-dumpAddressTicker.C:
-			trc.Ln("saving peers data")
+			T.Ln("saving peers data")
 			a.savePeers()
 		case <-a.quit.Wait():
 			break out
@@ -289,7 +289,7 @@ out:
 	}
 	a.savePeers()
 	a.wg.Done()
-	trc.Ln("address handler done")
+	T.Ln("address handler done")
 }
 
 // savePeers saves all the known addresses to a file so they can be read back in at next run.
@@ -334,16 +334,16 @@ func (a *AddrManager) savePeers() {
 	}
 	w, e := os.Create(a.PeersFile)
 	if e != nil  {
-		err.F("error opening file %s: %v", a.PeersFile, err)
+		E.F("error opening file %s: %v", a.PeersFile, e)
 		return
 	}
 	enc := json.NewEncoder(w)
 	defer func() {
-		if e := w.Close(); err.Chk(e) {
+		if e := w.Close(); E.Chk(e) {
 		}
 	}()
-	if e := enc.Encode(&sam); err.Chk(e) {
-		err.F("failed to encode file %s: %v", a.PeersFile, err)
+	if e := enc.Encode(&sam); E.Chk(e) {
+		E.F("failed to encode file %s: %v", a.PeersFile, e)
 		return
 	}
 }
@@ -351,17 +351,17 @@ func (a *AddrManager) savePeers() {
 // loadPeers loads the known address from the saved file. If empty, missing, or malformed file, just don't load anything
 // and start fresh
 func (a *AddrManager) loadPeers() {
-	trc.Ln("loading peers")
+	T.Ln("loading peers")
 	
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	e := a.deserializePeers(a.PeersFile)
 	if e != nil  {
-		err.F("failed to parse file %s: %v", a.PeersFile, err)
+		E.F("failed to parse file %s: %v", a.PeersFile, e)
 		// if it is invalid we nuke the old one unconditionally.
 		e = os.Remove(a.PeersFile)
 		if e != nil  {
-			wrn.F("failed to remove corrupt peers file %s: %v", a.PeersFile, err)
+			W.F("failed to remove corrupt peers file %s: %v", a.PeersFile, e)
 		}
 		a.reset()
 		return
@@ -380,19 +380,19 @@ func (a *AddrManager) deserializePeers(filePath string) (e error) {
 	}
 	r, e := os.Open(filePath)
 	if e != nil  {
-		err.Ln(e)
-		return fmt.Errorf("%s error opening file: %v", filePath, err)
+		E.Ln(e)
+		return fmt.Errorf("%s error opening file: %v", filePath, e)
 	}
 	defer func() {
-		if e := r.Close(); err.Chk(e) {
+		if e := r.Close(); E.Chk(e) {
 		}
 	}()
 	var sam serializedAddrManager
 	dec := json.NewDecoder(r)
 	e = dec.Decode(&sam)
 	if e != nil  {
-		err.Ln(e)
-		return fmt.Errorf("error reading %s: %v", filePath, err)
+		E.Ln(e)
+		return fmt.Errorf("error reading %s: %v", filePath, e)
 	}
 	if sam.Version != serialisationVersion {
 		return fmt.Errorf(
@@ -405,15 +405,15 @@ func (a *AddrManager) deserializePeers(filePath string) (e error) {
 		ka := new(KnownAddress)
 		ka.na, e = a.DeserializeNetAddress(v.Addr)
 		if e != nil  {
-			err.Ln(e)
+			E.Ln(e)
 			return fmt.Errorf("failed to deserialize netaddress "+
-				"%s: %v", v.Addr, err)
+				"%s: %v", v.Addr, e)
 		}
 		ka.srcAddr, e = a.DeserializeNetAddress(v.Src)
 		if e != nil  {
-			err.Ln(e)
+			E.Ln(e)
 			return fmt.Errorf("failed to deserialize netaddress "+
-				"%s: %v", v.Src, err)
+				"%s: %v", v.Src, e)
 		}
 		ka.attempts = v.Attempts
 		ka.lastattempt = time.Unix(v.LastAttempt, 0)
@@ -464,12 +464,12 @@ func (a *AddrManager) deserializePeers(filePath string) (e error) {
 func (a *AddrManager) DeserializeNetAddress(addr string) (*wire.NetAddress, error) {
 	host, portStr, e := net.SplitHostPort(addr)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	port, e := strconv.ParseUint(portStr, 10, 16)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	return a.HostToNetAddress(host, uint16(port), wire.SFNodeNetwork)
@@ -483,7 +483,7 @@ func (a *AddrManager) Start() {
 		return
 	}
 	// Load peers we already know about from file.
-	trc.Ln("loading peers data")
+	T.Ln("loading peers data")
 	a.loadPeers()
 	// Start the address ticker to save addresses periodically.
 	a.wg.Add(1)
@@ -493,10 +493,10 @@ func (a *AddrManager) Start() {
 // Stop gracefully shuts down the address manager by stopping the main handler.
 func (a *AddrManager) Stop() (e error) {
 	if atomic.AddInt32(&a.shutdown, 1) != 1 {
-		dbg.Ln("address manager is already in the process of shutting down")
+		D.Ln("address manager is already in the process of shutting down")
 		return nil
 	}
-	// dbg.Ln("address manager shutting down"}
+	// D.Ln("address manager shutting down"}
 	a.quit.Q()
 	a.wg.Wait()
 	return nil
@@ -531,7 +531,7 @@ func (a *AddrManager) AddAddressByIP(addrIP string) (e error) {
 	// Split IP and port
 	addr, portStr, e := net.SplitHostPort(addrIP)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	// Put it in wire.Netaddress
@@ -541,8 +541,8 @@ func (a *AddrManager) AddAddressByIP(addrIP string) (e error) {
 	}
 	port, e := strconv.ParseUint(portStr, 10, 0)
 	if e != nil  {
-		err.Ln(e)
-		return fmt.Errorf("invalid port %s: %v", portStr, err)
+		E.Ln(e)
+		return fmt.Errorf("invalid port %s: %v", portStr, e)
 	}
 	na := wire.NewNetAddressIPPort(ip, uint16(port), 0)
 	a.AddAddress(na, na) // XXX use correct src address
@@ -602,7 +602,7 @@ func (a *AddrManager) reset() {
 	// fill key with bytes from a good random source.
 	_, e := io.ReadFull(crand.Reader, a.key[:])
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 	}
 	for i := range a.addrNew {
 		a.addrNew[i] = make(map[string]*KnownAddress)
@@ -626,7 +626,7 @@ func (a *AddrManager) HostToNetAddress(host string, port uint16, services wire.S
 		data, e := base32.StdEncoding.DecodeString(
 			strings.ToUpper(host[:16]))
 		if e != nil  {
-			err.Ln(e)
+			E.Ln(e)
 			return nil, e
 		}
 		prefix := []byte{0xfd, 0x87, 0xd8, 0x7e, 0xeb, 0x43}
@@ -634,7 +634,7 @@ func (a *AddrManager) HostToNetAddress(host string, port uint16, services wire.S
 	} else if ip = net.ParseIP(host); ip == nil {
 		ips, e := a.lookupFunc(host)
 		if e != nil  {
-			err.Ln(e)
+			E.Ln(e)
 			return nil, e
 		}
 		if len(ips) == 0 {
@@ -691,7 +691,7 @@ func (a *AddrManager) GetAddress() *KnownAddress {
 			ka := e.Value.(*KnownAddress)
 			randval := a.rand.Intn(large)
 			if float64(randval) < (factor * ka.chance() * float64(large)) {
-				trc.C(func() string {
+				T.C(func() string {
 					return fmt.Sprintf("selected %v from tried bucket", NetAddressKey(ka.na))
 				})
 				return ka
@@ -720,7 +720,7 @@ func (a *AddrManager) GetAddress() *KnownAddress {
 			}
 			randval := a.rand.Intn(large)
 			if float64(randval) < (factor * ka.chance() * float64(large)) {
-				trc.C(func() string {
+				T.C(func() string {
 					return fmt.Sprintf("Selected %v from new bucket",
 						NetAddressKey(ka.na))
 				})
@@ -830,7 +830,7 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	// since we're putting something back.
 	a.nNew++
 	rmkey := NetAddressKey(rmka.na)
-	trc.F("replacing %s with %s in tried", rmkey, addrKey)
+	T.F("replacing %s with %s in tried", rmkey, addrKey)
 	
 	// We made sure there is space here just above.
 	a.addrNew[newBucket][rmkey] = rmka
@@ -955,10 +955,10 @@ func (a *AddrManager) GetBestLocalAddress(remoteAddr *wire.NetAddress) *wire.Net
 		}
 	}
 	if bestAddress != nil {
-		trc.F("suggesting address %s:%d for %s:%d", bestAddress.IP,
+		T.F("suggesting address %s:%d for %s:%d", bestAddress.IP,
 			bestAddress.Port, remoteAddr.IP, remoteAddr.Port)
 	} else {
-		trc.F("no worthy address for %s:%d", remoteAddr.IP,
+		T.F("no worthy address for %s:%d", remoteAddr.IP,
 			remoteAddr.Port)
 		// Send something unroutable if nothing suitable.
 		var ip net.IP

@@ -44,7 +44,7 @@ func ListCommands() {
 	var e error
 	for _, method := range cmdMethods {
 		var flags btcjson.UsageFlag
-		if flags, e = btcjson.MethodUsageFlags(method); err.Chk(e) {
+		if flags, e = btcjson.MethodUsageFlags(method); E.Chk(e) {
 			// This should never happen since the method was just returned from the package, but be safe.
 			continue
 		}
@@ -53,7 +53,7 @@ func ListCommands() {
 			continue
 		}
 		var usage string
-		if usage, e = btcjson.MethodUsageText(method); err.Chk(e){
+		if usage, e = btcjson.MethodUsageText(method); E.Chk(e) {
 			// This should never happen since the method was just returned from the package, but be safe.
 			continue
 		}

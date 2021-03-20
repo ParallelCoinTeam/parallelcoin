@@ -56,7 +56,7 @@ func migrateBlockIndex(db database.DB) (e error) {
 			if v1BlockIdxBucket == nil {
 				return fmt.Errorf("bucket %s does not exist", v1BucketName)
 			}
-			inf.Ln(
+			I.Ln(
 				"Re-indexing block information in the database. " +
 					"This might take a while",
 			)
@@ -123,7 +123,7 @@ func migrateBlockIndex(db database.DB) (e error) {
 	if e != nil {
 		return e
 	}
-	inf.Ln("Block database migration complete")
+	I.Ln("Block database migration complete")
 	return nil
 }
 
@@ -428,7 +428,7 @@ func deserializeUtxoEntryV0(serialized []byte) (map[uint32]*UtxoEntry, error) {
 			return nil, errDeserialize(
 				fmt.Sprintf(
 					"unable to "+
-						"decode utxo at index %d: %v", i, err,
+						"decode utxo at index %d: %v", i, e,
 				),
 			)
 		}
@@ -452,7 +452,7 @@ func upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) (e error) {
 		v1BucketName = []byte("utxoset")
 		v2BucketName = []byte("utxosetv2")
 	)
-	inf.Ln("Upgrading utxo set to v2.  This will take a while")
+	I.Ln("Upgrading utxo set to v2.  This will take a while")
 	start := time.Now()
 	// Create the new utxo set bucket as needed.
 	e = db.Update(
@@ -539,7 +539,7 @@ func upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) (e error) {
 			break
 		}
 		totalUtxos += uint64(numUtxos)
-		inf.F("migrated %d utxos (%d total)", numUtxos, totalUtxos)
+		I.F("migrated %d utxos (%d total)", numUtxos, totalUtxos)
 	}
 	// Remove the old bucket and update the utxo set version once it has been fully migrated.
 	e = db.Update(
@@ -555,7 +555,7 @@ func upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) (e error) {
 		return e
 	}
 	seconds := int64(time.Since(start) / time.Second)
-	inf.F(
+	I.F(
 		"Done upgrading utxo set.  Total utxos: %d in %d seconds",
 		totalUtxos, seconds,
 	)
@@ -583,7 +583,7 @@ func (b *BlockChain) maybeUpgradeDbBuckets(interrupt <-chan struct{}) (e error) 
 	}
 	// Update the utxo set to v2 if needed.
 	if utxoSetVersion < 2 {
-		if e := upgradeUtxoSetToV2(b.db, interrupt); err.Chk(e) {
+		if e := upgradeUtxoSetToV2(b.db, interrupt); E.Chk(e) {
 			return e
 		}
 	}

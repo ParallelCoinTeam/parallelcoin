@@ -206,7 +206,7 @@ nextTest:
 			if e != nil  {
 				t.Errorf("dbPutAddrIndexEntry #%d (%s) - "+
 					"unexpected error: %v", testNum,
-					test.name, err)
+					test.name, e)
 				continue nextTest
 			}
 		}
@@ -226,7 +226,7 @@ nextTest:
 				if numDelete <= test.numInsert {
 					t.Errorf("dbRemoveAddrIndexEntries (%s) "+
 						" delete %d - unexpected error: "+
-						"%v", test.name, numDelete, err)
+						"%v", test.name, numDelete, e)
 					continue nextTest
 				}
 			}
@@ -241,7 +241,7 @@ nextTest:
 			e = bucket.sanityCheck(test.key, numExpected)
 			if e != nil  {
 				t.Errorf("sanity check fail (%s) delete %d: %v",
-					test.name, numDelete, err)
+					test.name, numDelete, e)
 				continue nextTest
 			}
 		}

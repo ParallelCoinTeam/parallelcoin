@@ -2,6 +2,9 @@ package gui
 
 import (
 	"crypto/rand"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/util"
 	"github.com/tyler-smith/go-bip39"
 	"os"
 	"runtime"
@@ -16,7 +19,6 @@ import (
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	log "github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/urfave/cli"
@@ -97,7 +99,6 @@ type WalletGUI struct {
 	openTxID, prevOpenTxID                   *uberatomic.String
 	originTxDetail                           string
 	txMx                                     sync.Mutex
-	Syncing                                  *uberatomic.Bool
 	stateLoaded                              *uberatomic.Bool
 	currentReceiveQRCode                     *paint.ImageOp
 	currentReceiveAddress                    string
@@ -120,10 +121,17 @@ type WalletGUI struct {
 	createWords, showWords, createMatch string
 	createVerifying                     bool
 	restoring                           bool
+	lastUpdated                         uberatomic.Int64
+}
+
+type blockUpdate struct {
+	height    int32
+	header    *wire.BlockHeader
+	txs       []*util.Tx
+	timestamp time.Time
 }
 
 func (wg *WalletGUI) Run() (e error) {
-	wg.Syncing = uberatomic.NewBool(false)
 	wg.openTxID = uberatomic.NewString("")
 	wg.prevOpenTxID = uberatomic.NewString("")
 	wg.stateLoaded = uberatomic.NewBool(false)
@@ -140,8 +148,8 @@ func (wg *WalletGUI) Run() (e error) {
 	wg.lists = wg.GetLists()
 	wg.clickables = wg.GetClickables()
 	wg.checkables = wg.GetCheckables()
-	before := func() { dbg.Ln("running before") }
-	after := func() { dbg.Ln("running after") }
+	before := func() { D.Ln("running before") }
+	after := func() { D.Ln("running after") }
 	wg.node = wg.GetRunUnit(
 		"NODE", before, after,
 		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "node",
@@ -176,7 +184,7 @@ func (wg *WalletGUI) Run() (e error) {
 	wg.loadingPage = wg.getLoadingPage()
 	// wg.Watcher()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
-		inf.Ln("wallet file does not exist", *wg.cx.Config.WalletFile)
+		I.Ln("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {
 		*wg.noWallet = false
 		// if !*wg.cx.Config.NodeOff {
@@ -191,7 +199,7 @@ func (wg *WalletGUI) Run() (e error) {
 	}
 	interrupt.AddHandler(
 		func() {
-			dbg.Ln("quitting wallet gui")
+			D.Ln("quitting wallet gui")
 			// consume.Kill(wg.Node)
 			// consume.Kill(wg.Miner)
 			// wg.gracefulShutdown()
@@ -203,12 +211,12 @@ func (wg *WalletGUI) Run() (e error) {
 		for {
 			select {
 			case <-wg.invalidate.Wait():
-				trc.Ln("invalidating render queue")
+				T.Ln("invalidating render queue")
 				wg.Window.Window.Invalidate()
 				// TODO: make a more appropriate trigger for this - ie, when state actually changes.
 				// if wg.wallet.Running() && wg.stateLoaded.Load() {
 				// 	filename := filepath.Join(wg.cx.DataDir, "state.json")
-				// 	if e := wg.State.Save(filename, wg.cx.Config.WalletPass); err.Chk(e) {
+				// 	if e := wg.State.Save(filename, wg.cx.Config.WalletPass); E.Chk(e) {
 				// 	}
 				// }
 			case <-wg.cx.KillAll.Wait():
@@ -263,7 +271,7 @@ func (wg *WalletGUI) Run() (e error) {
 			wg.MainApp.Overlay,
 			interrupt.Request,
 			wg.quit,
-		); err.Chk(e) {
+		); E.Chk(e) {
 	}
 	wg.gracefulShutdown()
 	wg.quit.Q()
@@ -280,7 +288,7 @@ func (wg *WalletGUI) GetButtons() {
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.Clickable()
 	}
-	wg.statusBarButtons = make([]*gui.Clickable, 6)
+	wg.statusBarButtons = make([]*gui.Clickable, 7)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.Clickable()
 	}
@@ -291,7 +299,7 @@ func (wg *WalletGUI) ShuffleSeed() {
 	_, _ = rand.Read(wg.createSeed)
 	var e error
 	var wk string
-	if wk, e = bip39.NewMnemonic(wg.createSeed); err.Chk(e) {
+	if wk, e = bip39.NewMnemonic(wg.createSeed); E.Chk(e) {
 		panic(e)
 	}
 	wg.createWords = wk
@@ -362,7 +370,7 @@ func (wg *WalletGUI) GetInputs() Inputs {
 			func(seedWords string) {
 				var e error
 				wg.createMatch = seedWords
-				if wg.createSeed, e = bip39.EntropyFromMnemonic(seedWords); err.Chk(e) {
+				if wg.createSeed, e = bip39.EntropyFromMnemonic(seedWords); E.Chk(e) {
 					return
 				}
 				wg.createWords = seedWords
@@ -372,11 +380,11 @@ func (wg *WalletGUI) GetInputs() Inputs {
 		// "walletSeed": wg.Input(
 		// 	seedString, "wallet seed", "DocText", "DocBg", "PanelBg", func(seedHex string) {
 		// 		var e error
-		// 		if wg.createSeed, e = hex.DecodeString(seedHex); err.Chk(e) {
+		// 		if wg.createSeed, e = hex.DecodeString(seedHex); E.Chk(e) {
 		// 			return
 		// 		}
 		// 		var wk string
-		// 		if wk, e = bip39.NewMnemonic(wg.createSeed); err.Chk(e) {
+		// 		if wk, e = bip39.NewMnemonic(wg.createSeed); E.Chk(e) {
 		// 			panic(e)
 		// 		}
 		// 		wg.createWords=wk
@@ -426,9 +434,9 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 			SetCurrent(*wg.cx.Config.GenThreads).
 			ChangeHook(
 				func(n int) {
-					dbg.Ln("threads value now", n)
+					D.Ln("threads value now", n)
 					go func() {
-						dbg.Ln("setting thread count")
+						D.Ln("setting thread count")
 						if wg.miner.Running() && n != 0 {
 							wg.miner.Stop()
 							wg.miner.Start()
@@ -439,7 +447,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 						*wg.cx.Config.GenThreads = n
 						save.Pod(wg.cx.Config)
 						// if wg.miner.Running() {
-						// 	dbg.Ln("restarting miner")
+						// 	D.Ln("restarting miner")
 						// 	wg.miner.Stop()
 						// 	wg.miner.Start()
 						// }
@@ -455,7 +463,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 			SetCurrent(300).
 			ChangeHook(
 				func(n int) {
-					dbg.Ln("idle timeout", time.Duration(n)*time.Second)
+					D.Ln("idle timeout", time.Duration(n)*time.Second)
 				},
 			),
 	}
@@ -494,6 +502,9 @@ func (wg *WalletGUI) GetLists() (o ListMap) {
 
 func (wg *WalletGUI) GetClickables() ClickableMap {
 	return ClickableMap{
+		"balanceConfirmed":        wg.Clickable(),
+		"balanceUnconfirmed":      wg.Clickable(),
+		"balanceTotal":            wg.Clickable(),
 		"createWallet":            wg.Clickable(),
 		"createVerify":            wg.Clickable(),
 		"createShuffle":           wg.Clickable(),
@@ -541,39 +552,39 @@ var shuttingDown = false
 
 func (wg *WalletGUI) gracefulShutdown() {
 	if shuttingDown {
-		dbg.Ln(log.Caller("already called gracefulShutdown", 1))
+		D.Ln(logg.Caller("already called gracefulShutdown", 1))
 		return
 	} else {
 		shuttingDown = true
 	}
-	dbg.Ln("\nquitting wallet gui\n")
+	D.Ln("\nquitting wallet gui\n")
 	if wg.miner.Running() {
-		dbg.Ln("stopping miner")
+		D.Ln("stopping miner")
 		wg.miner.Stop()
 		wg.miner.Shutdown()
 	}
 	if wg.wallet.Running() {
-		dbg.Ln("stopping wallet")
+		D.Ln("stopping wallet")
 		wg.wallet.Stop()
 		wg.wallet.Shutdown()
 		wg.unlockPassword.Wipe()
 		// wg.walletLocked.Store(true)
 	}
 	if wg.node.Running() {
-		dbg.Ln("stopping node")
+		D.Ln("stopping node")
 		wg.node.Stop()
 		wg.node.Shutdown()
 	}
 	// wg.ChainMutex.Lock()
 	if wg.ChainClient != nil {
-		dbg.Ln("stopping chain client")
+		D.Ln("stopping chain client")
 		wg.ChainClient.Shutdown()
 		wg.ChainClient = nil
 	}
 	// wg.ChainMutex.Unlock()
 	// wg.WalletMutex.Lock()
 	if wg.WalletClient != nil {
-		dbg.Ln("stopping wallet client")
+		D.Ln("stopping wallet client")
 		wg.WalletClient.Shutdown()
 		wg.WalletClient = nil
 	}

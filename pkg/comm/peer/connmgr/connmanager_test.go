@@ -74,7 +74,7 @@ func TestNewConfig(t *testing.T) {
 		Dial: mockDialer,
 	})
 	if e != nil  {
-		t.Fatalf("New unexpected error: %v", err)
+		t.Fatalf("New unexpected error: %v", e)
 	}
 }
 
@@ -99,7 +99,7 @@ func TestStartStop(t *testing.T) {
 		},
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cmgr.Start()
 	gotConnReq := <-connected
@@ -140,7 +140,7 @@ func TestConnectMode(t *testing.T) {
 		},
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cr := &ConnReq{
 		Addr: &net.TCPAddr{
@@ -190,7 +190,7 @@ func TestTargetOutbound(t *testing.T) {
 		},
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cmgr.Start()
 	for i := uint32(0); i < targetOutbound; i++ {
@@ -222,7 +222,7 @@ func TestRetryPermanent(t *testing.T) {
 		},
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cr := &ConnReq{
 		Addr: &net.TCPAddr{
@@ -307,7 +307,7 @@ func TestMaxRetryDuration(t *testing.T) {
 		},
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cr := &ConnReq{
 		Addr: &net.TCPAddr{
@@ -350,7 +350,7 @@ func TestNetworkFailure(t *testing.T) {
 		},
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cmgr.Start()
 	time.AfterFunc(10*time.Millisecond, cmgr.Stop)
@@ -376,7 +376,7 @@ func TestStopFailed(t *testing.T) {
 		Dial: waitDialer,
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cmgr.Start()
 	go func() {
@@ -410,7 +410,7 @@ func TestRemovePendingConnection(t *testing.T) {
 		Dial: indefiniteDialer,
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cmgr.Start()
 	// Establish a connection request to a random IP we've chosen.
@@ -464,7 +464,7 @@ func TestCancelIgnoreDelayedConnection(t *testing.T) {
 		},
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cmgr.Start()
 	defer cmgr.Stop()
@@ -568,7 +568,7 @@ func TestListeners(t *testing.T) {
 		Dial: mockDialer,
 	})
 	if e != nil  {
-		t.Fatalf("New error: %v", err)
+		t.Fatalf("New error: %v", e)
 	}
 	cmgr.Start()
 	// Fake a couple of mock connections to each of the listeners.

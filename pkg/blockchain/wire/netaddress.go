@@ -83,16 +83,16 @@ func readNetAddress(r io.Reader, pver uint32, na *NetAddress, ts bool) (e error)
 	// working somewhere around 2106. Also timestamp wasn't added until protocol
 	// version >= NetAddressTimeVersion
 	if ts && pver >= NetAddressTimeVersion {
-		if e = readElement(r, (*uint32Time)(&na.Timestamp));err.Chk(e){
+		if e = readElement(r, (*uint32Time)(&na.Timestamp));E.Chk(e){
 			return
 		}
 	}
-	if e = readElements(r, &na.Services, &ip);err.Chk(e){
+	if e = readElements(r, &na.Services, &ip);E.Chk(e){
 		return
 	}
 	// Sigh.  Bitcoin protocol mixes little and big endian.
 	var port uint16
-	if port, e = binarySerializer.Uint16(r, bigEndian);err.Chk(e){
+	if port, e = binarySerializer.Uint16(r, bigEndian);E.Chk(e){
 		return
 	}
 	*na = NetAddress{
@@ -112,7 +112,7 @@ func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) (e error
 	// working somewhere around 2106. Also timestamp wasn't added until until
 	// protocol version >= NetAddressTimeVersion.
 	if ts && pver >= NetAddressTimeVersion {
-		if e = writeElement(w, uint32(na.Timestamp.Unix()));err.Chk(e){
+		if e = writeElement(w, uint32(na.Timestamp.Unix()));E.Chk(e){
 			return
 		}
 	}
@@ -121,7 +121,7 @@ func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) (e error
 	if na.IP != nil {
 		copy(ip[:], na.IP.To16())
 	}
-	if e = writeElements(w, na.Services, ip);err.Chk(e){
+	if e = writeElements(w, na.Services, ip);E.Chk(e){
 		return
 	}
 	// Sigh.  Bitcoin protocol mixes little and big endian.

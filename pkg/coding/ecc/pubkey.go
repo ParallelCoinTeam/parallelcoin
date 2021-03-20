@@ -97,7 +97,7 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, e error
 				"pubkey string: %d", pubKeyStr[0])
 		}
 		pubkey.X = new(big.Int).SetBytes(pubKeyStr[1:33])
-		if pubkey.Y, e = decompressPoint(curve, pubkey.X, ybit); err.Chk(e) {
+		if pubkey.Y, e = decompressPoint(curve, pubkey.X, ybit); E.Chk(e) {
 			return
 		}
 	default: // wrong!

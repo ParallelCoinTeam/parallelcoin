@@ -50,7 +50,7 @@ func (m *Manager) SetSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) (e er
 		bs = &m.syncState.startBlock
 	}
 	// Update the database.
-	if e = putSyncedTo(ns, bs); err.Chk(e){
+	if e = putSyncedTo(ns, bs); E.Chk(e){
 		return e
 	}
 	// Update memory now that the database is updated.

@@ -19,7 +19,7 @@ const (
 
 // filesExists returns whether or not the named file or directory exists.
 func fileExists(name string) bool {
-	if _, e = os.Stat(name); err.Chk(e) {
+	if _, e = os.Stat(name); E.Chk(e) {
 		if os.IsNotExist(err) {
 			return false
 		}
@@ -59,7 +59,7 @@ func isSupportedDbType(dbType string) bool {
 // 	} else {
 // 		// Create the root directory for test databases.
 // 		if !fileExists(testDbRoot) {
-// 			if e := os.MkdirAll(testDbRoot, 0700); err.Chk(e) {
+// 			if e := os.MkdirAll(testDbRoot, 0700); E.Chk(e) {
 // 				e := fmt.Errorf("unable to create test db "+
 // 					"root: %v", err)
 // 				return nil, nil, e

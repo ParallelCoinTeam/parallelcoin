@@ -1848,7 +1848,7 @@ func opcodeWithin(op *parsedOpcode, vm *Engine) (e error) {
 func calcHash(buf []byte, hasher hash.Hash) []byte {
 	_, e := hasher.Write(buf)
 	if e != nil {
-		dbg.Ln(err)
+		D.Ln(e)
 	}
 	return hasher.Sum(nil)
 }
@@ -1966,13 +1966,13 @@ func opcodeCheckSig(op *parsedOpcode, vm *Engine) (e error) {
 	// requirements enabled by the flags.
 	hashType := SigHashType(fullSigBytes[len(fullSigBytes)-1])
 	sigBytes := fullSigBytes[:len(fullSigBytes)-1]
-	if e := vm.checkHashTypeEncoding(hashType); err.Chk(e) {
+	if e := vm.checkHashTypeEncoding(hashType); E.Chk(e) {
 		return e
 	}
-	if e := vm.checkSignatureEncoding(sigBytes); err.Chk(e) {
+	if e := vm.checkSignatureEncoding(sigBytes); E.Chk(e) {
 		return e
 	}
-	if e := vm.checkPubKeyEncoding(pkBytes); err.Chk(e) {
+	if e := vm.checkPubKeyEncoding(pkBytes); E.Chk(e) {
 		return e
 	}
 	// Get script starting from the most recent OP_CODESEPARATOR.
@@ -2187,10 +2187,10 @@ func opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) (e error) {
 		// Only parse and check the signature encoding once.
 		var parsedSig *ec.Signature
 		if !sigInfo.parsed {
-			if e := vm.checkHashTypeEncoding(hashType); err.Chk(e) {
+			if e := vm.checkHashTypeEncoding(hashType); E.Chk(e) {
 				return e
 			}
-			if e := vm.checkSignatureEncoding(signature); err.Chk(e) {
+			if e := vm.checkSignatureEncoding(signature); E.Chk(e) {
 				return e
 			}
 			// Parse the signature.
@@ -2220,7 +2220,7 @@ func opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) (e error) {
 			// Use the already parsed signature.
 			parsedSig = sigInfo.parsedSignature
 		}
-		if e := vm.checkPubKeyEncoding(pubKey); err.Chk(e) {
+		if e := vm.checkPubKeyEncoding(pubKey); E.Chk(e) {
 			return e
 		}
 		// Parse the pubkey.

@@ -29,7 +29,7 @@ type Checkable struct {
 func (w *Window) Checkable() *Checkable {
 	font := "bariol regular"
 	var f text.Font
-	if fon, e := w.Theme.collection.Font(font); !err.Chk(e) {
+	if fon, e := w.Theme.collection.Font(font); !E.Chk(e) {
 		f = fon
 	}
 	// for i := range w.collection {
@@ -66,7 +66,7 @@ func (c *Checkable) Color(color string) *Checkable {
 
 // Font sets the font used on the label
 func (c *Checkable) Font(font string) *Checkable {
-	if fon, e := c.Theme.collection.Font(font); !err.Chk(e) {
+	if fon, e := c.Theme.collection.Font(font); !E.Chk(e) {
 		c.font = fon
 	}
 	return c
@@ -115,7 +115,7 @@ func (c *Checkable) Fn(gtx l.Context, checked bool) l.Dimensions {
 			Src(c.uncheckedStateIcon)
 	}
 	icon.size = c.size
-	// dbg.S(icon)
+	// D.S(icon)
 	dims :=
 		c.Theme.Flex(). // AlignBaseline().
 			Rigid(

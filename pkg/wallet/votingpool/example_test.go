@@ -225,9 +225,9 @@ func createWalletDB() (walletdb.DB, func(), error) {
 		return nil, nil, e
 	}
 	dbTearDown := func() {
-		if e := db.Close(); votingpool.err.Chk(e) {
+		if e := db.Close(); votingpool.E.Chk(e) {
 		}
-		if e := os.RemoveAll(dir); votingpool.err.Chk(e) {
+		if e := os.RemoveAll(dir); votingpool.E.Chk(e) {
 		}
 	}
 	return db, dbTearDown, nil
@@ -251,7 +251,7 @@ func votingpoolNamespace(dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
 func exampleCreateDBAndMgr() (teardown func(), db walletdb.DB, mgr *waddrmgr.Manager) {
 	var dbTearDown func()
 	var e error
-	if db, dbTearDown, e = createWalletDB(); votingpool.err.Chk(e){
+	if db, dbTearDown, e = createWalletDB(); votingpool.E.Chk(e){
 		dbTearDown()
 		panic(e)
 	}

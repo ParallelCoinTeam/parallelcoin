@@ -95,7 +95,7 @@ func (ld *Loader) CreateNewWallet(
 		w.Start()
 		ld.onLoaded(db)
 	} else {
-		if e := w.db.Close(); err.Chk(e) {
+		if e := w.db.Close(); E.Chk(e) {
 		}
 	}
 	return w, nil
@@ -121,26 +121,26 @@ func (ld *Loader) OpenExistingWallet(
 ) (*Wallet, error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
-	inf.Ln("opening existing wallet", ld.DDDirPath)
+	I.Ln("opening existing wallet", ld.DDDirPath)
 	if ld.Loaded {
-		inf.Ln("already loaded wallet")
+		I.Ln("already loaded wallet")
 		return nil, ErrLoaded
 	}
 	// Ensure that the network directory exists.
-	if e := checkCreateDir(filepath.Dir(ld.DDDirPath)); err.Chk(e) {
-		err.Ln("cannot create directory", ld.DDDirPath)
+	if e := checkCreateDir(filepath.Dir(ld.DDDirPath)); E.Chk(e) {
+		E.Ln("cannot create directory", ld.DDDirPath)
 		return nil, e
 	}
-	dbg.Ln("directory exists")
+	D.Ln("directory exists")
 	// Open the database using the boltdb backend.
 	dbPath := ld.DDDirPath
-	inf.Ln("opening database", dbPath)
+	I.Ln("opening database", dbPath)
 	db, e := walletdb.Open("bdb", dbPath)
 	if e != nil {
-		err.Ln("failed to open database '", ld.DDDirPath, "':", err)
+		E.Ln("failed to open database '", ld.DDDirPath, "':", e)
 		return nil, e
 	}
-	inf.Ln("opened wallet database")
+	I.Ln("opened wallet database")
 	var cbs *waddrmgr.OpenCallbacks
 	if canConsolePrompt {
 		cbs = &waddrmgr.OpenCallbacks{
@@ -153,25 +153,25 @@ func (ld *Loader) OpenExistingWallet(
 			ObtainPrivatePass: noConsole,
 		}
 	}
-	dbg.Ln("opening wallet '" + string(pubPassphrase) + "'")
+	D.Ln("opening wallet '" + string(pubPassphrase) + "'")
 	var w *Wallet
 	w, e = Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig, quit)
 	if e != nil {
-		err.Ln("failed to open wallet", err)
+		E.Ln("failed to open wallet", e)
 		// If opening the wallet fails (e.g. because of wrong passphrase), we must close the backing database to allow
 		// future calls to walletdb.Open().
 		e := db.Close()
 		if e != nil {
-			wrn.Ln("error closing database:", e)
+			W.Ln("error closing database:", e)
 		}
 		return nil, e
 	}
 	ld.Wallet = w
-	dbg.Ln("starting wallet", w != nil)
+	D.Ln("starting wallet", w != nil)
 	w.Start()
-	dbg.Ln("waiting for load", db != nil)
+	D.Ln("waiting for load", db != nil)
 	ld.onLoaded(db)
-	dbg.Ln("wallet opened successfully", w != nil)
+	D.Ln("wallet opened successfully", w != nil)
 	return w, nil
 }
 
@@ -193,28 +193,28 @@ func (ld *Loader) RunAfterLoad(fn func(*Wallet)) {
 // has not been loaded with CreateNewWallet or LoadExistingWallet. The Loader may be reused if this function returns
 // without error.
 func (ld *Loader) UnloadWallet() (e error) {
-	trc.Ln("unloading wallet")
+	F.Ln("unloading wallet")
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	if ld.Wallet == nil {
-		dbg.Ln("wallet not loaded")
+		D.Ln("wallet not loaded")
 		return ErrNotLoaded
 	}
-	trc.Ln("wallet stopping")
+	F.Ln("wallet stopping")
 	ld.Wallet.Stop()
-	trc.Ln("waiting for wallet shutdown")
+	F.Ln("waiting for wallet shutdown")
 	ld.Wallet.WaitForShutdown()
 	if ld.DB == nil {
-		dbg.Ln("there was no database")
+		D.Ln("there was no database")
 		return ErrNotLoaded
 	}
-	trc.Ln("wallet stopped")
+	F.Ln("wallet stopped")
 	e = ld.DB.Close()
 	if e != nil {
-		dbg.Ln("error closing database", err)
+		D.Ln("error closing database", e)
 		return e
 	}
-	trc.Ln("database closed")
+	F.Ln("database closed")
 	// time.Sleep(time.Second / 4)
 	ld.Loaded = false
 	ld.DB = nil
@@ -230,12 +230,12 @@ func (ld *Loader) WalletExists() (bool, error) {
 // onLoaded executes each added callback and prevents loader from loading any additional wallets. Requires mutex to be
 // locked.
 func (ld *Loader) onLoaded(db walletdb.DB) {
-	dbg.Ln("wallet loader callbacks running ", ld.Wallet != nil)
+	D.Ln("wallet loader callbacks running ", ld.Wallet != nil)
 	for i, fn := range ld.Callbacks {
-		dbg.Ln("running wallet loader callback", i)
+		D.Ln("running wallet loader callback", i)
 		fn(ld.Wallet)
 	}
-	dbg.Ln("wallet loader callbacks finished")
+	D.Ln("wallet loader callbacks finished")
 	ld.Loaded = true
 	ld.DB = db
 	ld.Callbacks = nil // not needed anymore

@@ -98,14 +98,14 @@ func (c *Config) Config() GroupsMap {
 				options:     sgf.Options,
 				Slot:        c.cx.ConfigMap[sgf.Slug],
 			}
-			// dbg.S(sgf)
+			// D.S(sgf)
 			// create all the necessary widgets required before display
 			tgs := tabNames[sgf.Group][sgf.Slug]
 			switch sgf.Widget {
 			case "toggle":
 				c.Bools[sgf.Slug] = c.Bool(*tgs.Slot.(*bool)).SetOnChange(
 					func(b bool) {
-						dbg.Ln(sgf.Slug, "submitted", b)
+						D.Ln(sgf.Slug, "submitted", b)
 						bb := c.cx.ConfigMap[sgf.Slug].(*bool)
 						*bb = b
 						save.Pod(c.cx.Config)
@@ -117,9 +117,9 @@ func (c *Config) Config() GroupsMap {
 			case "integer":
 				c.inputs[sgf.Slug] = c.Input(
 					fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
-						dbg.Ln(sgf.Slug, "submitted", txt)
+						D.Ln(sgf.Slug, "submitted", txt)
 						i := c.cx.ConfigMap[sgf.Slug].(*int)
-						if n, e := strconv.Atoi(txt); !err.Chk(e) {
+						if n, e := strconv.Atoi(txt); !E.Chk(e) {
 							*i = n
 						}
 						save.Pod(c.cx.Config)
@@ -131,9 +131,9 @@ func (c *Config) Config() GroupsMap {
 						*tgs.Slot.(*time.
 						Duration),
 					), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
-						dbg.Ln(sgf.Slug, "submitted", txt)
+						D.Ln(sgf.Slug, "submitted", txt)
 						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
-						if d, e := time.ParseDuration(txt); !err.Chk(e) {
+						if d, e := time.ParseDuration(txt); !E.Chk(e) {
 							*tt = d
 						}
 						save.Pod(c.cx.Config)
@@ -145,9 +145,9 @@ func (c *Config) Config() GroupsMap {
 						*tgs.Slot.(
 						*float64), 'f', -1, 64,
 					), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
-						dbg.Ln(sgf.Slug, "submitted", txt)
+						D.Ln(sgf.Slug, "submitted", txt)
 						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
-						if f, e := strconv.ParseFloat(txt, 64); !err.Chk(e) {
+						if f, e := strconv.ParseFloat(txt, 64); !E.Chk(e) {
 							*ff = f
 						}
 						save.Pod(c.cx.Config)
@@ -156,7 +156,7 @@ func (c *Config) Config() GroupsMap {
 			case "string":
 				c.inputs[sgf.Slug] = c.Input(
 					*tgs.Slot.(*string), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
-						dbg.Ln(sgf.Slug, "submitted", txt)
+						D.Ln(sgf.Slug, "submitted", txt)
 						ss := c.cx.ConfigMap[sgf.Slug].(*string)
 						*ss = txt
 						save.Pod(c.cx.Config)
@@ -167,7 +167,7 @@ func (c *Config) Config() GroupsMap {
 					"password",
 					tgs.Slot.(*string), "DocText", "DocBg", "PanelBg",
 					func(txt string) {
-						dbg.Ln(sgf.Slug, "submitted", txt)
+						D.Ln(sgf.Slug, "submitted", txt)
 						pp := c.cx.ConfigMap[sgf.Slug].(*string)
 						*pp = txt
 						save.Pod(c.cx.Config)
@@ -176,7 +176,7 @@ func (c *Config) Config() GroupsMap {
 			case "multi":
 				c.multis[sgf.Slug] = c.Multiline(
 					tgs.Slot.(*cli.StringSlice), "DocText", "DocBg", "PanelBg", 30, func(txt []string) {
-						dbg.Ln(sgf.Slug, "submitted", txt)
+						D.Ln(sgf.Slug, "submitted", txt)
 						sss := c.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
 						*sss = txt
 						save.Pod(c.cx.Config)
@@ -201,7 +201,7 @@ func (c *Config) Config() GroupsMap {
 		}
 	}
 	
-	// dbg.S(tabNames)
+	// D.S(tabNames)
 	return tabNames // .Widget(c)
 	// return func(gtx l.Context) l.Dimensions {
 	// 	return l.Dimensions{}
@@ -210,7 +210,7 @@ func (c *Config) Config() GroupsMap {
 
 func (gm GroupsMap) Widget(ng *Config) l.Widget {
 	// _, file, line, _ := runtime.Caller(2)
-	// dbg.F("%s:%d", file, line)
+	// D.F("%s:%d", file, line)
 	var groups Lists
 	for i := range gm {
 		var li ListItems
@@ -234,7 +234,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 	var out []l.Widget
 	first := true
 	for i := range groups {
-		// dbg.Ln(groups[i].name)
+		// D.Ln(groups[i].name)
 		g := groups[i]
 		if !first {
 			// put a space between the sections
@@ -364,7 +364,7 @@ func (c *Config) RenderConfigItem(item *Item, position int) []l.Widget {
 	case "radio":
 		return c.RenderRadio(item)
 	}
-	dbg.Ln("fallthrough", item.widget)
+	D.Ln("fallthrough", item.widget)
 	return []l.Widget{func(l.Context) l.Dimensions { return l.Dimensions{} }}
 }
 
@@ -514,7 +514,7 @@ func (c *Config) RenderPassword(item *Item) []l.Widget {
 }
 
 func (c *Config) RenderMulti(item *Item, position int) []l.Widget {
-	// dbg.Ln("rendering multi")
+	// D.Ln("rendering multi")
 	// c.multis[item.slug].
 	w := []l.Widget{
 		func(gtx l.Context) l.Dimensions {
@@ -535,7 +535,7 @@ func (c *Config) RenderMulti(item *Item, position int) []l.Widget {
 		},
 	}
 	widgets := c.multis[item.slug].Widgets()
-	// dbg.Ln(widgets)
+	// D.Ln(widgets)
 	w = append(w, widgets...)
 	return w
 }

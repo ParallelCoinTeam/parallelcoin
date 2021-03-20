@@ -270,7 +270,7 @@ func dbFetchAddrIndexEntries(
 					Description: fmt.Sprintf(
 						"failed to "+
 							"deserialized address index "+
-							"for key %x: %v", addrKey, err,
+							"for key %x: %v", addrKey, e,
 					),
 				}
 			}

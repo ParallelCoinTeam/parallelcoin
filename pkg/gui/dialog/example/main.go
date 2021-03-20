@@ -26,8 +26,8 @@ var (
 func main() {
 	go func() {
 		w := app.NewWindow(app.Size(unit.Px(150*6+50), unit.Px(150*6-50)))
-		if e := loop(w); err.Chk(e) {
-			log.ftl.Ln(e)
+		if e := loop(w); E.Chk(e) {
+			log.F.Ln(e)
 		}
 		os.Exit(0)
 	}()

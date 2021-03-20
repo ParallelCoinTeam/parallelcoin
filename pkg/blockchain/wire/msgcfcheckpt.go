@@ -46,16 +46,16 @@ func (msg *MsgCFCheckpt) AddCFHeader(header *chainhash.Hash) (e error) {
 // implementation.
 func (msg *MsgCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) (e error) {
 	// Read filter type
-	if e = readElement(r, &msg.FilterType); err.Chk(e) {
+	if e = readElement(r, &msg.FilterType); E.Chk(e) {
 		return
 	}
 	// Read stop hash
-	if e = readElement(r, &msg.StopHash); err.Chk(e) {
+	if e = readElement(r, &msg.StopHash); E.Chk(e) {
 		return
 	}
 	// Read number of filter headers
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	// Refuse to decode an insane number of cfheaders.
@@ -67,7 +67,7 @@ func (msg *MsgCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) 
 	msg.FilterHeaders = make([]*chainhash.Hash, count)
 	for i := uint64(0); i < count; i++ {
 		var cfh chainhash.Hash
-		if e = readElement(r, &cfh); err.Chk(e) {
+		if e = readElement(r, &cfh); E.Chk(e) {
 			return
 		}
 		msg.FilterHeaders[i] = &cfh
@@ -79,21 +79,21 @@ func (msg *MsgCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) 
 // is part of the Message interface implementation.
 func (msg *MsgCFCheckpt) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) (e error) {
 	// Write filter type
-	if e = writeElement(w, msg.FilterType); err.Chk(e) {
+	if e = writeElement(w, msg.FilterType); E.Chk(e) {
 		return
 	}
 	// Write stop hash
-	if e = writeElement(w, msg.StopHash); err.Chk(e) {
+	if e = writeElement(w, msg.StopHash); E.Chk(e) {
 		return
 	}
 	// Write length of FilterHeaders slice
 	count := len(msg.FilterHeaders)
 	e = WriteVarInt(w, pver, uint64(count))
-	if err.Chk(e) {
+	if E.Chk(e) {
 		return
 	}
 	for _, cfh := range msg.FilterHeaders {
-		if e = writeElement(w, cfh); err.Chk(e) {
+		if e = writeElement(w, cfh); E.Chk(e) {
 			return
 		}
 	}

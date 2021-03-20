@@ -325,7 +325,7 @@ func TestErroredScript(t *testing.T) {
 	// Ensure adding data, even using the non-canonical path, to a script that has errored doesn't succeed.
 	script, e = builder.AddFullData([]byte{0x00}).Script()
 	if _, ok := err.(ErrScriptNotCanonical); !ok || e ==  nil {
-		t.ftl.Ln("ScriptBuilder.AddFullData succeeded on errored script")
+		t.F.Ln("ScriptBuilder.AddFullData succeeded on errored script")
 	}
 	if !bytes.Equal(script, origScript) {
 		t.Fatalf("ScriptBuilder.AddFullData unexpected modified "+
@@ -335,7 +335,7 @@ func TestErroredScript(t *testing.T) {
 	// Ensure adding data to a script that has errored doesn't succeed.
 	script, e = builder.AddData([]byte{0x00}).Script()
 	if _, ok := err.(ErrScriptNotCanonical); !ok || e ==  nil {
-		t.ftl.Ln("ScriptBuilder.AddData succeeded on errored script")
+		t.F.Ln("ScriptBuilder.AddData succeeded on errored script")
 	}
 	if !bytes.Equal(script, origScript) {
 		t.Fatalf("ScriptBuilder.AddData unexpected modified "+
@@ -345,7 +345,7 @@ func TestErroredScript(t *testing.T) {
 	// Ensure adding an opcode to a script that has errored doesn't succeed.
 	script, e = builder.AddOp(OP_0).Script()
 	if _, ok := err.(ErrScriptNotCanonical); !ok || e ==  nil {
-		t.ftl.Ln("ScriptBuilder.AddOp succeeded on errored script")
+		t.F.Ln("ScriptBuilder.AddOp succeeded on errored script")
 	}
 	if !bytes.Equal(script, origScript) {
 		t.Fatalf("ScriptBuilder.AddOp unexpected modified script - "+
@@ -354,7 +354,7 @@ func TestErroredScript(t *testing.T) {
 	// Ensure adding an integer to a script that has errored doesn't succeed.
 	script, e = builder.AddInt64(0).Script()
 	if _, ok := err.(ErrScriptNotCanonical); !ok || e ==  nil {
-		t.ftl.Ln("ScriptBuilder.AddInt64 succeeded on errored script")
+		t.F.Ln("ScriptBuilder.AddInt64 succeeded on errored script")
 	}
 	if !bytes.Equal(script, origScript) {
 		t.Fatalf("ScriptBuilder.AddInt64 unexpected modified script - "+
@@ -362,6 +362,6 @@ func TestErroredScript(t *testing.T) {
 	}
 	// Ensure the error has a message set.
 	if err.Error() == "" {
-		t.ftl.Ln("ErrScriptNotCanonical.ScriptError does not have any text")
+		t.F.Ln("ErrScriptNotCanonical.ScriptError does not have any text")
 	}
 }

@@ -16,30 +16,30 @@ var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsy
 func init() {
 	// var _ = logg.AddFilteredSubsystem(subsystem)
 	// var _ = logg.AddHighlightedSubsystem(subsystem)
-	ftl.Ln("ftl.Ln")
-	err.Ln("err.Ln")
-	wrn.Ln("wrn.Ln")
-	inf.Ln("inf.Ln")
-	dbg.Ln("dbg.Ln")
-	trc.Ln("trc.Ln")
-	ftl.F("%s", "ftl.F")
-	err.F("%s", "err.F")
-	wrn.F("%s", "wrn.F")
-	inf.F("%s", "inf.F")
-	dbg.F("%s", "dbg.F")
-	trc.F("%s", "trc.F")
+	F.Ln("F.Ln")
+	E.Ln("E.Ln")
+	W.Ln("W.Ln")
+	I.Ln("I.Ln")
+	D.Ln("D.Ln")
+	F.Ln("T.Ln")
+	F.F("%s", "F.F")
+	E.F("%s", "E.F")
+	W.F("%s", "W.F")
+	I.F("%s", "I.F")
+	D.F("%s", "D.F")
+	T.F("%s", "T.F")
 	ftl.C(func() string { return "ftl.C" })
 	err.C(func() string { return "err.C" })
-	wrn.C(func() string { return "wrn.C" })
-	inf.C(func() string { return "inf.C" })
-	dbg.C(func() string { return "dbg.C" })
-	trc.C(func() string { return "trc.C" })
+	W.C(func() string { return "W.C" })
+	I.C(func() string { return "inf.C" })
+	D.C(func() string { return "D.C" })
+	T.C(func() string { return "T.C" })
 	ftl.C(func() string { return "ftl.C" })
-	err.Chk(errors.New("err.Chk"))
-	wrn.Chk(errors.New("wrn.Chk"))
-	inf.Chk(errors.New("inf.Chk"))
-	dbg.Chk(errors.New("dbg.Chk"))
-	trc.Chk(errors.New("trc.Chk"))
+	E.Chk(errors.New("E.Chk"))
+	W.Chk(errors.New("W.Chk"))
+	I.Chk(errors.New("inf.Chk"))
+	D.Chk(errors.New("D.Chk"))
+	T.Chk(errors.New("T.Chk"))
 }
 
 // This example demonstrates decrypting a message using a private key that is first parsed from raw bytes.
@@ -50,7 +50,7 @@ func Example_decryptMessage() {
 			"5ea381e3ce20a2c086a2e388230811",
 	)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), pkBytes)
@@ -62,12 +62,12 @@ func Example_decryptMessage() {
 			"d14174f8b83354fac3ff56075162",
 	)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 	}
 	// Try decrypting the message.
 	plaintext, e := ec.Decrypt(privKey, ciphertext)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	fmt.Println(string(plaintext))
@@ -89,14 +89,14 @@ func Example_encryptMessage() {
 	}
 	pubKey, e := ec.ParsePubKey(pubKeyBytes, ec.S256())
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// Encrypt a message decryptable by the private key corresponding to pubKey
 	message := "test message"
 	ciphertext, e := ec.Encrypt(pubKey, []byte(message))
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// Decode the hex-encoded private key.
@@ -105,7 +105,7 @@ func Example_encryptMessage() {
 			"5ea381e3ce20a2c086a2e388230811",
 	)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// note that we already have corresponding pubKey
@@ -113,7 +113,7 @@ func Example_encryptMessage() {
 	// Try decrypting and verify if it's the same message.
 	plaintext, e := ec.Decrypt(privKey, ciphertext)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	fmt.Println(string(plaintext))
@@ -130,7 +130,7 @@ func Example_signMessage() {
 			"20ee63e502ee2869afab7de234b80c",
 	)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	privKey, pubKey := ec.PrivKeyFromBytes(ec.S256(), pkBytes)
@@ -139,7 +139,7 @@ func Example_signMessage() {
 	messageHash := chainhash.DoubleHashB([]byte(message))
 	signature, e := privKey.Sign(messageHash)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// Serialize and display the signature.
@@ -162,12 +162,12 @@ func Example_verifySignature() {
 			"6f2d2a751a8b3c6f2a7e9a4999e6e4bfaf5",
 	)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	pubKey, e := ec.ParsePubKey(pubKeyBytes, ec.S256())
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// Decode hex-encoded serialized signature.
@@ -177,12 +177,12 @@ func Example_verifySignature() {
 			"1cb1205f8bde9af6592fc978b0452dafe599481c46d6b2e479",
 	)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	signature, e := ec.ParseSignature(sigBytes, ec.S256())
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// Verify the signature for the message using the public key.

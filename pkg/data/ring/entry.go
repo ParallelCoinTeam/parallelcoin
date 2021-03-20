@@ -2,15 +2,14 @@ package ring
 
 import (
 	"context"
+	"github.com/p9c/pod/pkg/logg"
 	
 	"github.com/marusama/semaphore"
-	
-	"github.com/p9c/pod/pkg/util/logi"
 )
 
 type Entry struct {
 	Sem     semaphore.Semaphore
-	Buf     []*logi.Entry
+	Buf     []*logg.Entry
 	Cursor  int
 	Full    bool
 	Clicked int
@@ -22,7 +21,7 @@ type Entry struct {
 func NewEntry(size int) *Entry {
 	return &Entry{
 		Sem:     semaphore.New(1),
-		Buf:     make([]*logi.Entry, size),
+		Buf:     make([]*logg.Entry, size),
 		Cursor:  0,
 		Clicked: -1,
 		// Buttons: make([]gel.Button, size),
@@ -33,7 +32,7 @@ func NewEntry(size int) *Entry {
 // Clear sets the buffer back to initial state
 func (b *Entry) Clear() {
 	var e error
-	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
+	if e = b.Sem.Acquire(context.Background(), 1); !E.Chk(e) {
 		defer b.Sem.Release(1)
 		b.Cursor = 0
 		b.Clicked = -1
@@ -44,7 +43,7 @@ func (b *Entry) Clear() {
 // Len returns the length of the buffer
 func (b *Entry) Len() (out int) {
 	var e error
-	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
+	if e = b.Sem.Acquire(context.Background(), 1); !E.Chk(e) {
 		defer b.Sem.Release(1)
 		if b.Full {
 			out = len(b.Buf)
@@ -56,9 +55,9 @@ func (b *Entry) Len() (out int) {
 }
 
 // Get returns the value at the given index or nil if nothing
-func (b *Entry) Get(i int) (out *logi.Entry) {
+func (b *Entry) Get(i int) (out *logg.Entry) {
 	var e error
-	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
+	if e = b.Sem.Acquire(context.Background(), 1); !E.Chk(e) {
 		defer b.Sem.Release(1)
 		bl := len(b.Buf)
 		cursor := i
@@ -69,7 +68,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 					cursor -= bl
 				}
 			}
-			// dbg.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			// D.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = b.Buf[cursor]
 		}
@@ -80,7 +79,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 //
 // // GetButton returns the gel.Button of the entry
 // func (b *Entry) GetButton(i int) (out *gel.Button) {
-// 	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
+// 	if e = b.Sem.Acquire(context.Background(), 1); !E.Chk(e) {
 // 		defer b.Sem.Release(1)
 // 		bl := len(b.Buf)
 // 		cursor := i
@@ -91,7 +90,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 // 					cursor -= bl
 // 				}
 // 			}
-// 			// dbg.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+// 			// D.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 // 			//	cursor)
 // 			out = &b.Buttons[cursor]
 // 		}
@@ -101,7 +100,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 //
 // // GetHider returns the gel.Button of the entry
 // func (b *Entry) GetHider(i int) (out *gel.Button) {
-// 	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
+// 	if e = b.Sem.Acquire(context.Background(), 1); !E.Chk(e) {
 // 		defer b.Sem.Release(1)
 // 		bl := len(b.Buf)
 // 		cursor := i
@@ -112,7 +111,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 // 					cursor -= bl
 // 				}
 // 			}
-// 			// dbg.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+// 			// D.Ln("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 // 			//	cursor)
 // 			out = &b.Hiders[cursor]
 // 		}
@@ -120,9 +119,9 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 // 	return
 // }
 
-func (b *Entry) Add(value *logi.Entry) {
+func (b *Entry) Add(value *logg.Entry) {
 	var e error
-	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
+	if e = b.Sem.Acquire(context.Background(), 1); !E.Chk(e) {
 		defer b.Sem.Release(1)
 		if b.Cursor == len(b.Buf) {
 			b.Cursor = 0
@@ -135,30 +134,30 @@ func (b *Entry) Add(value *logi.Entry) {
 	}
 }
 
-func (b *Entry) ForEach(fn func(v *logi.Entry) error) (e error) {
-	if e = b.Sem.Acquire(context.Background(), 1); !err.Chk(e) {
+func (b *Entry) ForEach(fn func(v *logg.Entry) error) (e error) {
+	if e = b.Sem.Acquire(context.Background(), 1); !E.Chk(e) {
 		c := b.Cursor
 		i := c + 1
 		if i == len(b.Buf) {
-			// dbg.Ln("hit the end")
+			// D.Ln("hit the end")
 			i = 0
 		}
 		if !b.Full {
-			// dbg.Ln("buffer not yet full")
+			// D.Ln("buffer not yet full")
 			i = 0
 		}
-		// dbg.Ln(b.Buf)
+		// D.Ln(b.Buf)
 		for ; ; i++ {
 			if i == len(b.Buf) {
-				// dbg.Ln("passed the end")
+				// D.Ln("passed the end")
 				i = 0
 			}
 			if i == c {
-				// dbg.Ln("reached cursor again")
+				// D.Ln("reached cursor again")
 				break
 			}
-			// dbg.Ln(i, b.Cursor)
-			if e = fn(b.Buf[i]); err.Chk(e) {
+			// D.Ln(i, b.Cursor)
+			if e = fn(b.Buf[i]); E.Chk(e) {
 				break
 			}
 		}

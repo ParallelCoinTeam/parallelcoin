@@ -204,21 +204,21 @@ func convertTemplateRequestField(fieldName string, iface interface{}) (interface
 func (t *TemplateRequest) UnmarshalJSON(data []byte) (e error) {
 	type templateRequest TemplateRequest
 	request := (*templateRequest)(t)
-	if e := json.Unmarshal(data, &request); err.Chk(e) {
+	if e := json.Unmarshal(data, &request); E.Chk(e) {
 		return e
 	}
 	// The SigOpLimit field can only be nil, bool, or int64.
 	var val interface{}
 	val, e = convertTemplateRequestField("sigoplimit", request.SigOpLimit)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	request.SigOpLimit = val
 	// The SizeLimit field can only be nil, bool, or int64.
 	val, e = convertTemplateRequestField("sizelimit", request.SizeLimit)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return e
 	}
 	request.SizeLimit = val

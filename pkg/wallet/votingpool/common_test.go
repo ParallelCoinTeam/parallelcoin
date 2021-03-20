@@ -31,8 +31,8 @@ func TstCheckError(t *testing.T, testName string, gotErr error, wantErrCode Erro
 
 // TstRunWithManagerUnlocked calls the given callback with the manager unlocked, and locks it again before returning.
 func TstRunWithManagerUnlocked(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, callback func()) {
-	if e := mgr.Unlock(addrmgrNs, privPassphrase); err.Chk(e) {
-		t.ftl.Ln(e)
+	if e := mgr.Unlock(addrmgrNs, privPassphrase); E.Chk(e) {
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := mgr.Lock()
@@ -43,7 +43,7 @@ func TstRunWithManagerUnlocked(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs wa
 	callback()
 }
 
-// TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual and calls t.ftl.Ln() if they're not
+// TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual and calls t.F.Ln() if they're not
 // identical.
 func TstCheckWithdrawalStatusMatches(t *testing.T, s1, s2 WithdrawalStatus) {
 	if s1.Fees() != s2.Fees() {

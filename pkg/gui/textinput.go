@@ -32,7 +32,7 @@ type TextInput struct {
 func (w *Window) TextInput(editor *Editor, hint string) *TextInput {
 	var fon text.Font
 	var e error
-	if fon, e = w.collection.Font("bariol regular"); err.Chk(e) {
+	if fon, e = w.collection.Font("bariol regular"); E.Chk(e) {
 		panic(e)
 	}
 	ti := &TextInput{
@@ -53,7 +53,7 @@ func (w *Window) TextInput(editor *Editor, hint string) *TextInput {
 func (ti *TextInput) Font(font string) *TextInput {
 	var fon text.Font
 	var e error
-	if fon, e = ti.Theme.collection.Font(font); !err.Chk(e) {
+	if fon, e = ti.Theme.collection.Font(font); !E.Chk(e) {
 		ti.editor.font = fon
 	}
 	return ti

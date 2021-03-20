@@ -17,10 +17,10 @@ func main() {
 	fi, e := os.Create("secp256k1.go")
 	
 	if e != nil  {
-				ftl.Ln(e)
+				F.Ln(e)
 	}
 	defer func() {
-		if e := fi.Close(); err.Chk(e) {
+		if e := fi.Close(); E.Chk(e) {
 		}
 	}()
 	
@@ -29,10 +29,10 @@ func main() {
 	var compressed bytes.Buffer
 	w := zlib.NewWriter(&compressed)
 	
-	if _, e = w.Write(serialized); err.Chk(e) {
+	if _, e = w.Write(serialized); E.Chk(e) {
 				os.Exit(1)
 	}
-	if e := w.Close(); err.Chk(e) {
+	if e := w.Close(); E.Chk(e) {
 	}
 	
 	// Encode the compressed byte points with base64.
@@ -60,33 +60,33 @@ func main() {
 }
 
 var subsystem = logg.AddLoggerSubsystem()
-var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var ftl, e, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
 
 func init() {
 	// var _ = logg.AddFilteredSubsystem(subsystem)
 	// var _ = logg.AddHighlightedSubsystem(subsystem)
-	ftl.Ln("ftl.Ln")
-	err.Ln("err.Ln")
-	wrn.Ln("wrn.Ln")
-	inf.Ln("inf.Ln")
-	dbg.Ln("dbg.Ln")
-	trc.Ln("trc.Ln")
-	ftl.F("%s", "ftl.F")
-	err.F("%s", "err.F")
-	wrn.F("%s", "wrn.F")
-	inf.F("%s", "inf.F")
-	dbg.F("%s", "dbg.F")
-	trc.F("%s", "trc.F")
+	F.Ln("F.Ln")
+	E.Ln("E.Ln")
+	W.Ln("W.Ln")
+	I.Ln("inf.Ln")
+	D.Ln("D.Ln")
+	F.Ln("T.Ln")
+	F.F("%s", "F.F")
+	E.F("%s", "E.F")
+	W.F("%s", "W.F")
+	I.F("%s", "I.F")
+	D.F("%s", "D.F")
+	T.F("%s", "T.F")
 	ftl.C(func() string { return "ftl.C" })
 	err.C(func() string { return "err.C" })
-	wrn.C(func() string { return "wrn.C" })
-	inf.C(func() string { return "inf.C" })
-	dbg.C(func() string { return "dbg.C" })
-	trc.C(func() string { return "trc.C" })
+	W.C(func() string { return "W.C" })
+	I.C(func() string { return "inf.C" })
+	D.C(func() string { return "D.C" })
+	T.C(func() string { return "T.C" })
 	ftl.C(func() string { return "ftl.C" })
-	err.Chk(errors.New("err.Chk"))
-	wrn.Chk(errors.New("wrn.Chk"))
-	inf.Chk(errors.New("inf.Chk"))
-	dbg.Chk(errors.New("dbg.Chk"))
-	trc.Chk(errors.New("trc.Chk"))
+	E.Chk(errors.New("E.Chk"))
+	W.Chk(errors.New("W.Chk"))
+	I.Chk(errors.New("inf.Chk"))
+	D.Chk(errors.New("D.Chk"))
+	T.Chk(errors.New("T.Chk"))
 }

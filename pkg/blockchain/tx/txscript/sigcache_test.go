@@ -16,7 +16,7 @@ func genRandomSig() (*chainhash.Hash, *ec.Signature, *ec.PublicKey, error) {
 		return nil, nil, nil, e
 	}
 	var msgHash chainhash.Hash
-	if _, e = rand.Read(msgHash[:]); err.Chk(e) {
+	if _, e = rand.Read(msgHash[:]); E.Chk(e) {
 		return nil, nil, nil, e
 	}
 	sig, e := privKey.Sign(msgHash[:])

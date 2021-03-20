@@ -99,7 +99,7 @@ func NewRecentMessages() *RecentMessages {
 // position, and then advance it, back to zero if it exceeds the buffer length,
 // overwriting the first, and so on
 func (rm *RecentMessages) Add(msg *Message) {
-	dbg.Ln("adding template with cursor", rm.cursor)
+	D.Ln("adding template with cursor", rm.cursor)
 	rm.msgs[rm.cursor] = msg
 	rm.cursor++
 	if rm.cursor >= 4 {
@@ -117,14 +117,17 @@ func (rm *RecentMessages) Len() (o int) {
 	return
 }
 
-// Find checks whether the given nonce matches any of the cached Message's
+// Find checks whether the given nonce matches any of the cached Message's and remove it from the list
 func (rm *RecentMessages) Find(nonce uint64) *Message {
 	for i := range rm.msgs {
 		if rm.msgs[i] != nil {
-			dbg.Ln("recent message", i,  rm.msgs[i].Nonce, nonce )
+			D.Ln("recent message", i, rm.msgs[i].Nonce, nonce)
 			if rm.msgs[i].Nonce == nonce {
-				dbg.Ln("found message", nonce)
-				return rm.msgs[i]
+				D.Ln("found message", nonce)
+				msg := rm.msgs[i]
+				rm.msgs[i] = nil
+				rm.cursor = i
+				return msg
 			}
 		}
 	}

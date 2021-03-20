@@ -82,6 +82,6 @@ func TestTxErrors(t *testing.T) {
 	_, e = util.NewTxFromBytes(shortBytes)
 	if e != io.EOF {
 		t.Errorf("NewTxFromBytes: did not get expected error - "+
-			"got %v, want %v", err, io.EOF)
+			"got %v, want %v", e, io.EOF)
 	}
 }

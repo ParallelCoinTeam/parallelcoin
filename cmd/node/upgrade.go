@@ -17,7 +17,7 @@ func dirEmpty(dirPath string) (bool, error) {
 		return false, e
 	}
 	defer func() {
-		if e := f.Close(); err.Chk(e) {
+		if e := f.Close(); E.Chk(e) {
 		}
 	}()
 	// Read the names of a max of one entry from the directory. When the directory is empty, an io.EOF error will be
@@ -98,21 +98,21 @@ func upgradeDBPaths(cx *conte.Xt) (e error) {
 	oldDbRoot := filepath.Join(oldPodHomeDir(), "db")
 	e = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet")
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	e = upgradeDBPathNet(
 		cx, filepath.Join(oldDbRoot, "pod_testnet.db"),
 		"testnet",
 	)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	e = upgradeDBPathNet(
 		cx, filepath.Join(oldDbRoot, "pod_regtest.db"),
 		"regtest",
 	)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	// Remove the old db directory
 	return os.RemoveAll(oldDbRoot)
@@ -129,7 +129,7 @@ func upgradeDataPaths() (e error) {
 	// Only migrate if the old path exists and the new one doesn't
 	if apputil.FileExists(oldHomePath) && !apputil.FileExists(newHomePath) {
 		// Create the new path
-		inf.F(
+		I.F(
 			"migrating application home path from '%s' to '%s'",
 			oldHomePath, newHomePath,
 		)
@@ -166,7 +166,7 @@ func upgradeDataPaths() (e error) {
 				return e
 			}
 		} else {
-			wrn.F(
+			W.F(
 				"not removing '%s' since it contains files not created by"+
 					" this application you may want to manually move them or"+
 					" delete them.", oldHomePath,

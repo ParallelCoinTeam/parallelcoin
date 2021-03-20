@@ -2,7 +2,7 @@ package walletmain
 
 import (
 	"time"
-
+	
 	"github.com/urfave/cli"
 )
 
@@ -422,7 +422,7 @@ line = "password=" + generatedRPCPass + "\n"
 											}
 										}
 										_, _ = generatedRPCPass, generatedRPCUser
-										if _, e = dest.WriteString(line); err.Chk(e) {
+										if _, e = dest.WriteString(line); E.Chk(e) {
 return nil, nil, e
 											}
 										}
@@ -460,7 +460,7 @@ fmt.Println("Supported subsystems", supportedSubsystems())
 			// logger variables may be used.
 			initLogRotator(filepath.Join(cfg.LogDir, DefaultLogFilename))
 			// Parse, validate, and set debug log level(s).
-			if e := parseAndSetDebugLevels(cfg.DebugLevel); err.Chk(e) {
+			if e := parseAndSetDebugLevels(cfg.DebugLevel); E.Chk(e) {
 e := fmt.Errorf("%s: %v", "loadConfig", e.Error())
 			fmt.Fprintln(os.Stderr, e)
 			parser.WriteHelp(os.Stderr)
@@ -503,13 +503,13 @@ str := fmt.Sprintf("The wallet already exists. Loading this " +
 								tempWalletExists = true
 							}
 							// Ensure the data directory for the network exists.
-							if e := checkCreateDir(netDir); err.Chk(e) {
+							if e := checkCreateDir(netDir); E.Chk(e) {
 fmt.Fprintln(os.Stderr, e)
 									return nil, nil, e
 								}
 								if !tempWalletExists {
 // Perform the initial wallet creation wizard.
-										if e := createSimulationWallet(&cfg); err.Chk(e) {
+										if e := createSimulationWallet(&cfg); E.Chk(e) {
 fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
 												return nil, nil, e
 											}
@@ -524,12 +524,12 @@ e := fmt.Errorf("The wallet database file `%v` "+
 					return nil, nil, e
 			}
 			// Ensure the data directory for the network exists.
-			if e := checkCreateDir(netDir); err.Chk(e) {
+			if e := checkCreateDir(netDir); E.Chk(e) {
 fmt.Fprintln(os.Stderr, e)
 				return nil, nil, e
 			}
 			// Perform the initial wallet creation wizard.
-			if e := createWallet(&cfg); err.Chk(e) {
+			if e := createWallet(&cfg); E.Chk(e) {
 fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
 					return nil, nil, e
 				}
@@ -547,12 +547,12 @@ fmt.Fprintln(os.Stderr, e)
 				// "--create option to initialize and create it...")
 				// Ensure the data directory for the network exists.
 				fmt.Println("Existing wallet not found in", cfg.ConfigFile.value)
-				if e := checkCreateDir(netDir); err.Chk(e) {
+				if e := checkCreateDir(netDir); E.Chk(e) {
 fmt.Fprintln(os.Stderr, e)
 						return nil, nil, e
 					}
 					// Perform the initial wallet creation wizard.
-					if e := createWallet(&cfg); err.Chk(e) {
+					if e := createWallet(&cfg); E.Chk(e) {
 fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
 					return nil, nil, e
 				}

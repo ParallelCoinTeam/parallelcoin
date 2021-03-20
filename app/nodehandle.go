@@ -23,7 +23,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
 		logg.App = "  node"
-		trc.Ln("running node handler")
+		F.Ln("running node handler")
 		config.Configure(cx, "node", true)
 		cx.NodeReady = qu.T()
 		cx.Node.Store(false)
@@ -39,39 +39,39 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		// Perform service command and exit if specified. Invalid service commands show an appropriate error. Only runs
 		// on Windows since the runServiceCommand function will be nil when not on Windows.
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
-			if e = runServiceCommand(serviceOpts.ServiceCommand); err.Chk(e) {
+			if e = runServiceCommand(serviceOpts.ServiceCommand); E.Chk(e) {
 				return e
 			}
 			return nil
 		}
 		// config.Configure(cx, c.Command.Name, true)
-		// dbg.Ln("starting shell")
+		// D.Ln("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			if apputil.FileExists(*cx.Config.RPCCert) &&
 				apputil.FileExists(*cx.Config.RPCKey) &&
 				apputil.FileExists(*cx.Config.CAFile) {
 			} else {
-				if _, e = walletmain.GenerateRPCKeyPair(cx.Config, true); err.Chk(e) {
+				if _, e = walletmain.GenerateRPCKeyPair(cx.Config, true); E.Chk(e) {
 				}
 			}
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				if e := node.Main(cx); err.Chk(e) {
-					err.Ln("error starting node ", e)
+				if e := node.Main(cx); E.Chk(e) {
+					E.Ln("error starting node ", e)
 				}
 			}()
-			inf.Ln("starting node")
+			I.Ln("starting node")
 			if !*cx.Config.DisableRPC {
 				cx.RPCServer = <-cx.NodeChan
 				cx.NodeReady.Q()
 				cx.Node.Store(true)
-				inf.Ln("node started")
+				I.Ln("node started")
 			}
 		}
 		cx.WaitWait()
-		inf.Ln("node is now fully shut down")
+		I.Ln("node is now fully shut down")
 		cx.WaitGroup.Wait()
 		<-cx.KillAll
 		return nil

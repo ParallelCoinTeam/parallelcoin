@@ -27,7 +27,7 @@ func ProvideSeed() ([]byte, error) {
 		seed, e := hex.DecodeString(seedStr)
 		if e != nil || len(seed) < hdkeychain.MinSeedBytes ||
 			len(seed) > hdkeychain.MaxSeedBytes {
-			err.F(
+			E.F(
 				"Invalid seed specified.  "+
 					"Must be a hexadecimal value that is at least %d bits and at"+
 					" most %d bits", hdkeychain.MinSeedBytes*8,
@@ -129,7 +129,7 @@ func promptPass(reader *bufio.Reader, prefix string, confirm bool) ([]byte, erro
 		fmt.Print("\n")
 		confirm = bytes.TrimSpace(confirm)
 		if !bytes.Equal(pass, confirm) {
-			err.Ln("The entered passphrases do not match")
+			E.Ln("The entered passphrases do not match")
 			continue
 		}
 		return pass, nil
@@ -151,7 +151,7 @@ func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, 
 	}
 	// At this point, there is an existing legacy wallet, so prompt the user for the existing private passphrase and
 	// ensure it properly unlocks the legacy wallet so all of the addresses can later be imported.
-	wrn.Ln(
+	W.Ln(
 		"You have an existing legacy wallet.  " +
 			"All addresses from your existing legacy wallet will be imported into" +
 			" the new wallet format.",
@@ -162,7 +162,7 @@ func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, 
 			return nil, e
 		}
 		// Keep prompting the user until the passphrase is correct.
-		if e := legacyKeyStore.Unlock(privPass); err.Chk(e) {
+		if e := legacyKeyStore.Unlock(privPass); E.Chk(e) {
 			if e == keystore.ErrWrongPassphrase {
 				continue
 			}
@@ -298,7 +298,7 @@ func Seed(reader *bufio.Reader) ([]byte, error) {
 		seed, e := hex.DecodeString(seedStr)
 		if e != nil || len(seed) < hdkeychain.MinSeedBytes ||
 			len(seed) > hdkeychain.MaxSeedBytes {
-			err.F(
+			E.F(
 				"Invalid seed specified.  Must be a "+
 					"hexadecimal value that is at least %d bits and "+
 					"at most %d bits\n", hdkeychain.MinSeedBytes*8,

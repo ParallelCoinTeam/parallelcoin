@@ -28,7 +28,7 @@ func Spawn(quit qu.C, args ...string) (w *Worker, e error) {
 	// }
 	// args = apputil.PrependForWindows(args)
 	// var pipeReader, pipeWriter *os.File
-	// if pipeReader, pipeWriter, e = os.Pipe(); err.Chk(e) {
+	// if pipeReader, pipeWriter, e = os.Pipe(); E.Chk(e) {
 	// }
 	w = &Worker{
 		Cmd:  exec.Command(args[0], args[1:]...),
@@ -38,16 +38,16 @@ func Spawn(quit qu.C, args ...string) (w *Worker, e error) {
 	}
 	// w.Cmd.Stderr = pipeWriter
 	var cmdOut io.ReadCloser
-	if cmdOut, e = w.Cmd.StdoutPipe(); err.Chk(e) {
+	if cmdOut, e = w.Cmd.StdoutPipe(); E.Chk(e) {
 		return
 	}
 	var cmdIn io.WriteCloser
-	if cmdIn, e = w.Cmd.StdinPipe(); err.Chk(e) {
+	if cmdIn, e = w.Cmd.StdinPipe(); E.Chk(e) {
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, quit)
 	w.Cmd.Stderr = os.Stderr
-	if e = w.Cmd.Start(); err.Chk(e) {
+	if e = w.Cmd.Start(); E.Chk(e) {
 	}
 	// data := make([]byte, 8192)
 	// go func() {
@@ -55,16 +55,16 @@ func Spawn(quit qu.C, args ...string) (w *Worker, e error) {
 	// 	for {
 	// 		select {
 	// 		case <-quit:
-	// 			dbg.Ln("passed quit chan closed", args)
+	// 			D.Ln("passed quit chan closed", args)
 	// 			break out
 	// 		default:
 	// 		}
 	// 		var n int
-	// 		if n, e = w.StdPipe.Read(data); err.Chk(e) {
+	// 		if n, e = w.StdPipe.Read(data); E.Chk(e) {
 	// 		}
 	// 		// if !onBackup {
 	// 		if n > 0 {
-	// 			if n, e = os.Stderr.Write(append([]byte("PIPED:\n"), data[:n]...)); err.Chk(e) {
+	// 			if n, e = os.Stderr.Write(append([]byte("PIPED:\n"), data[:n]...)); E.Chk(e) {
 	// 			}
 	// 		}
 	// 	}
@@ -78,23 +78,23 @@ func (w *Worker) Wait() (e error) {
 
 func (w *Worker) Interrupt() (e error) {
 	if runtime.GOOS == "windows" {
-		if e = w.Cmd.Process.Kill(); err.Chk(e) {
+		if e = w.Cmd.Process.Kill(); E.Chk(e) {
 		}
 		return
 	}
-	if e = w.Cmd.Process.Signal(syscall.SIGINT); !err.Chk(e) {
-		dbg.Ln("interrupted")
+	if e = w.Cmd.Process.Signal(syscall.SIGINT); !E.Chk(e) {
+		D.Ln("interrupted")
 	}
-	// if e = w.Cmd.Process.Release(); !err.Chk(e) {
-	//	dbg.Ln("released")
+	// if e = w.Cmd.Process.Release(); !E.Chk(e) {
+	//	D.Ln("released")
 	// }
 	return
 }
 
 // Kill forces the child process to shut down without cleanup
 func (w *Worker) Kill() (e error) {
-	if e = w.Cmd.Process.Kill(); !err.Chk(e) {
-		dbg.Ln("killed")
+	if e = w.Cmd.Process.Kill(); !E.Chk(e) {
+		D.Ln("killed")
 	}
 	return
 }

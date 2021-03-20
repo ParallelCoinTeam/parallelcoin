@@ -116,7 +116,7 @@ func (q *queryState) compare(s *Store, ns walletdb.ReadBucket,
 					"transaction at height %d",
 					detail.Block.Height)
 			}
-			if e := equalTxDetails(d, &detail); err.Chk(e) {
+			if e := equalTxDetails(d, &detail); E.Chk(e) {
 				return fmt.Errorf("%s: failed querying latest "+
 					"details regarding transaction %v",
 					changeDesc, txHash)
@@ -129,7 +129,7 @@ func (q *queryState) compare(s *Store, ns walletdb.ReadBucket,
 		if e != nil  {
 			return e
 		}
-		if e := equalTxDetails(d, detail); err.Chk(e) {
+		if e := equalTxDetails(d, detail); E.Chk(e) {
 			return fmt.Errorf("%s: failed querying latest details "+
 				"regarding transaction %v", changeDesc, txHash)
 		}
@@ -139,7 +139,7 @@ func (q *queryState) compare(s *Store, ns walletdb.ReadBucket,
 func equalTxDetails(got, exp *TxDetails) (e error) {
 	// Need to avoid using reflect.DeepEqual against slices, since it returns false for nil vs non-nil zero length
 	// slices.
-	if e := equalTxs(&got.MsgTx, &exp.MsgTx); err.Chk(e) {
+	if e := equalTxs(&got.MsgTx, &exp.MsgTx); E.Chk(e) {
 		return e
 	}
 	if got.Hash != exp.Hash {
@@ -234,10 +234,10 @@ func TestStoreQueries(t *testing.T) {
 	var db walletdb.DB
 	var teardown func()
 	var e error
-	if s, db, teardown, e = testStore(); !err.Chk(e){
+	if s, db, teardown, e = testStore(); !E.Chk(e){
 	defer teardown()
 	} else {
-		t.ftl.Ln(err)
+		t.F.Ln(err)
 	}
 	lastState := newQueryState()
 	tests = append(tests, queryTest{
@@ -249,7 +249,7 @@ func TestStoreQueries(t *testing.T) {
 	txA := spendOutput(&chainhash.Hash{}, 0, 100e8)
 	recA, e := NewTxRecordFromMsgTx(txA, timeNow())
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.F.Ln(err)
 	}
 	newState := lastState.deepCopy()
 	newState.blocks = [][]TxDetails{
@@ -294,7 +294,7 @@ func TestStoreQueries(t *testing.T) {
 	txB := spendOutput(&recA.Hash, 0, 40e8, 60e8)
 	recB, e := NewTxRecordFromMsgTx(txB, timeNow())
 	if e != nil  {
-		t.ftl.Ln(err)
+		t.F.Ln(err)
 	}
 	newState = lastState.deepCopy()
 	newState.blocks[0][0].Credits[0].Spent = true
@@ -367,7 +367,7 @@ func TestStoreQueries(t *testing.T) {
 	for _, tst := range tests {
 		e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 			ns := tx.ReadWriteBucket(namespaceKey)
-			if e := tst.updates(ns); err.Chk(e) {
+			if e := tst.updates(ns); E.Chk(e) {
 				return e
 			}
 			return tst.state.compare(s, ns, tst.desc)
@@ -439,7 +439,7 @@ func TestStoreQueries(t *testing.T) {
 			t.Errorf("RangeTransactions (reverse) ran func %d times", iterations)
 		}
 		// Make sure it also breaks early after one iteration through unmined transactions.
-		if e := s.Rollback(ns, b101.Height); err.Chk(e) {
+		if e := s.Rollback(ns, b101.Height); E.Chk(e) {
 			return e
 		}
 		iterations = 0
@@ -489,7 +489,7 @@ func TestStoreQueries(t *testing.T) {
 	for _, tst := range tests {
 		e := walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 			ns := tx.ReadWriteBucket(namespaceKey)
-			if e := tst.updates(ns); err.Chk(e) {
+			if e := tst.updates(ns); E.Chk(e) {
 				return e
 			}
 			return tst.state.compare(s, ns, tst.desc)
@@ -505,7 +505,7 @@ func TestPreviousPkScripts(t *testing.T) {
 	var teardown func()
 	var db walletdb.DB
 	var s *Store
-	if s, db, teardown, e = testStore(); !err.Chk(e) {
+	if s, db, teardown, e = testStore(); !E.Chk(e) {
 		defer teardown()
 	} else {
 		t.ftl.Ln(err)

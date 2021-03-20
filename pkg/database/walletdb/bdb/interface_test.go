@@ -18,7 +18,7 @@ func TestInterface(t *testing.T) {
 
 	dbPath := "interfacetest.db"
 	defer func() {
-		if e := os.RemoveAll(dbPath); bdb.err.Chk(e) {
+		if e := os.RemoveAll(dbPath); bdb.E.Chk(e) {
 		}
 	}()
 	walletdbtest.TestInterface(t, dbType, dbPath)

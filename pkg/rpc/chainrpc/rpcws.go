@@ -241,18 +241,18 @@ func (s *Server) WebsocketHandler(
 	// Clear the read deadline that was set before the websocket hijacked the connection.
 	e := conn.SetReadDeadline(TimeZeroVal)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	// Limit max number of websocket clients.
-	trc.Ln("new websocket client", remoteAddr)
+	T.Ln("new websocket client", remoteAddr)
 	if s.NtfnMgr.GetNumClients()+1 > *s.Config.RPCMaxWebsockets {
-		inf.F(
+		I.F(
 			"max websocket clients exceeded [%d] - disconnecting client"+
 				" %s",
 			s.Config.RPCMaxWebsockets,
 			remoteAddr,
 		)
-		if e := conn.Close(); err.Chk(e) {
+		if e := conn.Close(); E.Chk(e) {
 		}
 		return
 	}
@@ -261,8 +261,8 @@ func (s *Server) WebsocketHandler(
 	// Once it has shutdown (and hence disconnected), remove it and any notifications it registered for.
 	client, e := NewWebsocketClient(s, conn, remoteAddr, authenticated, isAdmin)
 	if e != nil {
-		err.F("failed to serve client %s: %v %s", remoteAddr, err)
-		if e := conn.Close(); err.Chk(e) {
+		E.F("failed to serve client %s: %v %s", remoteAddr, e)
+		if e := conn.Close(); E.Chk(e) {
 		}
 		return
 	}
@@ -270,7 +270,7 @@ func (s *Server) WebsocketHandler(
 	client.Start()
 	client.WaitForShutdown()
 	s.NtfnMgr.RemoveClient(client)
-	trc.Ln("disconnected websocket client", remoteAddr)
+	T.Ln("disconnected websocket client", remoteAddr)
 }
 
 // Disconnect disconnects the websocket client.
@@ -281,9 +281,9 @@ func (c *WSClient) Disconnect() {
 	if c.Disconnected {
 		return
 	}
-	trc.Ln("disconnecting websocket client", c.Addr)
+	T.Ln("disconnecting websocket client", c.Addr)
 	c.Quit.Q()
-	if e := c.Conn.Close(); err.Chk(e) {
+	if e := c.Conn.Close(); E.Chk(e) {
 	}
 	c.Disconnected = true
 }
@@ -331,7 +331,7 @@ func (c *WSClient) SendMessage(marshalledJSON []byte, doneChan chan bool) {
 
 // Start begins processing input and output messages.
 func (c *WSClient) Start() {
-	trc.Ln("starting websocket client", c.Addr)
+	T.Ln("starting websocket client", c.Addr)
 	// Start processing input and output.
 	c.WG.Add(3)
 	go c.InHandler()
@@ -359,9 +359,9 @@ out:
 		if e != nil {
 			// Log the error if it's not due to disconnecting.
 			if e != io.EOF && e != io.ErrUnexpectedEOF {
-				trc.F(
+				T.F(
 					"websocket receive error from %s: %v",
-					c.Addr, err,
+					c.Addr, e,
 				)
 			}
 			break out
@@ -378,8 +378,8 @@ out:
 			}
 			reply, e := CreateMarshalledReply(nil, nil, jsonErr)
 			if e != nil {
-				err.Ln(
-					"failed to marshal parse failure reply:", err,
+				E.Ln(
+					"failed to marshal parse failure reply:", e,
 				)
 				continue
 			}
@@ -415,24 +415,24 @@ out:
 			}
 			reply, e := CreateMarshalledReply(cmd.ID, nil, cmd.Err)
 			if e != nil {
-				err.F("failed to marshal parse failure reply:", err)
+				E.F("failed to marshal parse failure reply:", e)
 				continue
 			}
 			c.SendMessage(reply, nil)
 			continue
 		}
-		trc.F("received command <%s> from %s", cmd.Method, c.Addr)
+		T.F("received command <%s> from %s", cmd.Method, c.Addr)
 		// Chk auth. The client is immediately disconnected if the first request of an unauthenticated websocket
 		// client is not the authenticate request, an authenticate request is received when the client is already
 		// authenticated, or incorrect authentication credentials are provided in the request.
 		switch authCmd, ok := cmd.Cmd.(*btcjson.AuthenticateCmd); {
 		case c.Authenticated && ok:
-			wrn.F(
+			W.F(
 				"websocket client %s is already authenticated", c.Addr,
 			)
 			break out
 		case !c.Authenticated && !ok:
-			wrn.F("unauthenticated websocket message received")
+			W.F("unauthenticated websocket message received")
 			break out
 		case !c.Authenticated:
 			// Chk credentials.
@@ -442,7 +442,7 @@ out:
 			cmp := subtle.ConstantTimeCompare(authSha[:], c.Server.AuthSHA[:])
 			limitcmp := subtle.ConstantTimeCompare(authSha[:], c.Server.LimitAuthSHA[:])
 			if cmp != 1 && limitcmp != 1 {
-				wrn.Ln("authentication failure from", c.Addr)
+				W.Ln("authentication failure from", c.Addr)
 				break out
 			}
 			c.Authenticated = true
@@ -450,7 +450,7 @@ out:
 			// Marshal and send response.
 			reply, e := CreateMarshalledReply(cmd.ID, nil, nil)
 			if e != nil {
-				err.Ln("failed to marshal authenticate reply:", err)
+				E.Ln("failed to marshal authenticate reply:", e)
 				continue
 			}
 			c.SendMessage(reply, nil)
@@ -466,7 +466,7 @@ out:
 				// Marshal and send response.
 				reply, e := CreateMarshalledReply(request.ID, nil, jsonErr)
 				if e != nil {
-					err.Ln("failed to marshal parse failure reply:", err)
+					E.Ln("failed to marshal parse failure reply:", e)
 					continue
 				}
 				c.SendMessage(reply, nil)
@@ -494,7 +494,7 @@ out:
 	// Ensure the connection is closed.
 	c.Disconnect()
 	c.WG.Done()
-	trc.Ln("websocket client input handler done for", c.Addr)
+	T.Ln("websocket client input handler done for", c.Addr)
 }
 
 // NotificationQueueHandler handles the queuing of outgoing notifications for the websocket client. This runs as a muxer
@@ -556,7 +556,7 @@ cleanup:
 		}
 	}
 	c.WG.Done()
-	trc.Ln("websocket client notification queue handler done for", c.Addr)
+	T.Ln("websocket client notification queue handler done for", c.Addr)
 }
 
 // OutHandler handles all outgoing messages for the websocket connection. It must be run as a goroutine.
@@ -595,7 +595,7 @@ cleanup:
 		}
 	}
 	c.WG.Done()
-	trc.Ln("websocket client output handler done for", c.Addr)
+	T.Ln("websocket client output handler done for", c.Addr)
 }
 
 // ServiceRequest services a parsed RPC request by looking up and executing the appropriate RPC handler. The response is
@@ -615,7 +615,7 @@ func (c *WSClient) ServiceRequest(r *ParsedRPCCmd) {
 	}
 	reply, e := CreateMarshalledReply(r.ID, result, e)
 	if e != nil {
-		err.F("failed to marshal reply for <%s> command: %v", r.Method, e)
+		E.F("failed to marshal reply for <%s> command: %v", r.Method, e)
 		return
 	}
 	c.SendMessage(reply, nil)
@@ -934,7 +934,7 @@ OutPoint]map[qu.C]*WSClient, wsc *WSClient, ops []*wire.OutPoint,
 	for _, op := range ops {
 		spend := m.Server.Cfg.TxMemPool.CheckSpend(*op)
 		if spend != nil {
-			dbg.F(
+			D.F(
 				"found existing mempool spend for outpoint<%v>: %v",
 				op, spend.Hash(),
 			)
@@ -1045,7 +1045,7 @@ out:
 				wsc := (*WSClient)(n)
 				delete(txNotifications, wsc.Quit)
 			default:
-				wrn.Ln("unhandled notification type")
+				W.Ln("unhandled notification type")
 			}
 		case m.NumClients <- len(clients):
 		case <-m.Quit.Wait():
@@ -1069,7 +1069,7 @@ func (*WSNtfnMgr) NotifyBlockConnected(clients map[qu.C]*WSClient, block *util.B
 	)
 	marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 	if e != nil {
-		err.Ln("failed to marshal block connected notification:", e)
+		E.Ln("failed to marshal block connected notification:", e)
 		return
 	}
 	for _, wsc := range clients {
@@ -1095,9 +1095,9 @@ func (*WSNtfnMgr) NotifyBlockDisconnected(
 	)
 	marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 	if e != nil {
-		err.Ln(
+		E.Ln(
 			"failed to marshal block disconnected notification:",
-			err,
+			e,
 		)
 		return
 	}
@@ -1117,9 +1117,9 @@ func (m *WSNtfnMgr) NotifyFilteredBlockConnected(
 	var w bytes.Buffer
 	e := block.MsgBlock().Header.Serialize(&w)
 	if e != nil {
-		err.Ln(
+		E.Ln(
 			"failed to serialize header for filtered block connected"+
-				" notification:", err,
+				" notification:", e,
 		)
 		return
 	}
@@ -1145,12 +1145,12 @@ func (m *WSNtfnMgr) NotifyFilteredBlockConnected(
 		// Marshal and queue notification.
 		marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 		if e != nil {
-			err.F("failed to marshal filtered block connected notification:", err)
+			E.F("failed to marshal filtered block connected notification:", e)
 			return
 		}
 		e = wsc.QueueNotification(marshalledJSON)
 		if e != nil {
-			dbg.Ln(e)
+			D.Ln(e)
 		}
 	}
 }
@@ -1168,19 +1168,19 @@ func (*WSNtfnMgr) NotifyFilteredBlockDisconnected(
 	var w bytes.Buffer
 	e := block.MsgBlock().Header.Serialize(&w)
 	if e != nil {
-		err.Ln("failed to serialize header for filtered block disconnected notification:", err)
+		E.Ln("failed to serialize header for filtered block disconnected notification:", e)
 		return
 	}
 	ntfn := btcjson.NewFilteredBlockDisconnectedNtfn(block.Height(), hex.EncodeToString(w.Bytes()))
 	marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 	if e != nil {
-		err.Ln("failed to marshal filtered block disconnected notification:", err)
+		E.Ln("failed to marshal filtered block disconnected notification:", e)
 		return
 	}
 	for _, wsc := range clients {
 		e := wsc.QueueNotification(marshalledJSON)
 		if e != nil {
-			dbg.Ln(e)
+			D.Ln(e)
 		}
 	}
 }
@@ -1200,7 +1200,7 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 	ntfn := btcjson.NewTxAcceptedNtfn(txHashStr, util.Amount(amount).ToDUO())
 	marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 	if e != nil {
-		err.Ln("failed to marshal tx notification:", err)
+		E.Ln("failed to marshal tx notification:", e)
 		return
 	}
 	var verboseNtfn *btcjson.TxAcceptedVerboseNtfn
@@ -1221,12 +1221,12 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 				verboseNtfn,
 			)
 			if e != nil {
-				err.Ln("failed to marshal verbose tx notification:", err)
+				E.Ln("failed to marshal verbose tx notification:", e)
 			}
 			if marshalledJSONVerbose != nil {
 				e := wsc.QueueNotification(marshalledJSONVerbose)
 				if e != nil {
-					dbg.Ln(e)
+					D.Ln(e)
 				}
 				continue
 			}
@@ -1276,8 +1276,8 @@ OutPoint]map[qu.C]*WSClient, tx *util.Tx, block *util.Block,
 			}
 			marshalledJSON, e := NewRedeemingTxNotification(txHex, tx.Index(), block)
 			if e != nil {
-				err.Ln(
-					"failed to marshal redeemingtx notification:", err,
+				E.Ln(
+					"failed to marshal redeemingtx notification:", e,
 				)
 				continue
 			}
@@ -1289,7 +1289,7 @@ OutPoint]map[qu.C]*WSClient, tx *util.Tx, block *util.Block,
 					wscNotified[wscQuit] = struct{}{}
 					e := wsc.QueueNotification(marshalledJSON)
 					if e != nil {
-						dbg.Ln(e)
+						D.Ln(e)
 					}
 				}
 			}
@@ -1335,7 +1335,7 @@ func (m *WSNtfnMgr) NotifyForTxOuts(
 			)
 			marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 			if e != nil {
-				err.Ln("Failed to marshal processedtx notification:", err)
+				E.Ln("Failed to marshal processedtx notification:", e)
 				continue
 			}
 			op := []*wire.OutPoint{wire.NewOutPoint(tx.Hash(), uint32(i))}
@@ -1362,7 +1362,7 @@ func (m *WSNtfnMgr) NotifyRelevantTxAccepted(tx *util.Tx, clients map[qu.C]*WSCl
 		n := btcjson.NewRelevantTxAcceptedNtfn(TxHexString(tx.MsgTx()))
 		marshalled, e := btcjson.MarshalCmd(nil, n)
 		if e != nil {
-			err.Ln("failed to marshal notification:", err)
+			E.Ln("failed to marshal notification:", e)
 			return
 		}
 		for quitChan := range clientsToNotify {
@@ -1389,7 +1389,7 @@ func (*WSNtfnMgr) RemoveAddrRequest(
 	// Remove the client from the list to notify.
 	cmap, ok := addrs[addr]
 	if !ok {
-		wrn.F(
+		W.F(
 			"attempt to remove nonexistent addr request <%s> for websocket client %s",
 			addr, wsc.Addr,
 		)
@@ -1413,7 +1413,7 @@ OutPoint]map[qu.C]*WSClient, wsc *WSClient, op *wire.OutPoint,
 	// Remove the client from the list to notify.
 	notifyMap, ok := ops[*op]
 	if !ok {
-		wrn.Ln(
+		W.Ln(
 			"attempt to remove nonexistent spent request for"+
 				" websocket client", wsc.Addr,
 		)
@@ -1533,7 +1533,7 @@ func CheckAddressValidity(addrs []string, params *netparams.Params) (e error) {
 func DescendantBlock(prevHash *chainhash.Hash, curBlock *util.Block) (e error) {
 	curHash := &curBlock.MsgBlock().Header.PrevBlock
 	if !prevHash.IsEqual(curHash) {
-		err.F(
+		E.F(
 			"stopping rescan for reorged block %v (replaced by block %v)",
 			prevHash, curHash,
 		)
@@ -1679,9 +1679,9 @@ func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, error) {
 	}
 	numAddrs := len(cmd.Addresses)
 	if numAddrs == 1 {
-		dbg.Ln("beginning rescan for 1 address")
+		D.Ln("beginning rescan for 1 address")
 	} else {
-		dbg.F("beginning rescan for %d addresses", numAddrs)
+		D.F("beginning rescan for %d addresses", numAddrs)
 	}
 	// Build lookup maps.
 	lookups := RescanKeys{
@@ -1782,7 +1782,7 @@ fetchRange:
 		}
 		hashList, e := chain.HeightRange(minBlock, maxLoopBlock)
 		if e != nil {
-			err.Ln("error looking up block range:", err)
+			E.Ln("error looking up block range:", e)
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCDatabase,
 				Message: "Database error: " + e.Error(),
@@ -1817,7 +1817,7 @@ fetchRange:
 			// this err value is nil if it got to here from above at 1577
 			// if e != nil  {
 			//  Errorf(
-			// 		"ScriptError fetching best block hash:", err,
+			// 		"ScriptError fetching best block hash:", e,
 			// 	}
 			// 	return nil, &json.RPCError{
 			// 		Code:    json.ErrRPCDatabase,
@@ -1837,7 +1837,7 @@ fetchRange:
 				// Only handle reorgs if a block could not be found for the hash.
 				if dbErr, ok := e.(database.DBError); !ok ||
 					dbErr.ErrorCode != database.ErrBlockNotFound {
-					err.Ln("error looking up block:", err)
+					E.Ln("error looking up block:", e)
 					return nil, &btcjson.RPCError{
 						Code: btcjson.ErrRPCDatabase,
 						Message: "Database error: " +
@@ -1846,7 +1846,7 @@ fetchRange:
 				}
 				// If an absolute max block was specified, don't attempt to handle the reorg.
 				if maxBlock != math.MaxInt32 {
-					err.Ln("stopping rescan for reorged block", cmd.EndBlock)
+					E.Ln("stopping rescan for reorged block", cmd.EndBlock)
 					return nil, &ErrRescanReorg
 				}
 				// If the lookup for the previously valid block hash failed, there may have been a reorg. Fetch a new
@@ -1878,7 +1878,7 @@ fetchRange:
 			// A select statement is used to stop rescans if the client requesting the rescan has disconnected.
 			select {
 			case <-wsc.Quit.Wait():
-				dbg.F("stopped rescan at height %v for disconnected client", blk.Height())
+				D.F("stopped rescan at height %v for disconnected client", blk.Height())
 				return nil, nil
 			default:
 				RescanBlock(wsc, &lookups, blk)
@@ -1898,15 +1898,15 @@ fetchRange:
 			)
 			mn, e := btcjson.MarshalCmd(nil, n)
 			if e != nil {
-				err.F(
+				E.F(
 					"failed to marshal rescan progress notification: %v",
-					err,
+					e,
 				)
 				continue
 			}
 			if e = wsc.QueueNotification(mn); e == ErrClientQuit {
 				// Finished if the client disconnected.
-				dbg.F(
+				D.F(
 					"stopped rescan at height %v for disconnected client",
 					blk.Height(),
 				)
@@ -1925,15 +1925,15 @@ fetchRange:
 		lastBlock.Height(),
 		lastBlock.MsgBlock().Header.Timestamp.Unix(),
 	)
-	if mn, e := btcjson.MarshalCmd(nil, n); err.Chk(e) {
-		err.F(
-			"failed to marshal rescan finished notification: %v", err,
+	if mn, e := btcjson.MarshalCmd(nil, n); E.Chk(e) {
+		E.F(
+			"failed to marshal rescan finished notification: %v", e,
 		)
 	} else {
 		// The rescan is finished, so we don't care whether the client has disconnected at this point, so discard error.
 		_ = wsc.QueueNotification(mn)
 	}
-	inf.Ln("finished rescan")
+	I.Ln("finished rescan")
 	return nil, nil
 }
 
@@ -2243,7 +2243,7 @@ func RecoverFromReorg(
 ) ([]chainhash.Hash, error) {
 	hashList, e := chain.HeightRange(minBlock, maxBlock)
 	if e != nil {
-		err.Ln("error looking up block range:", e)
+		E.Ln("error looking up block range:", e)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDatabase,
 			Message: "Database error: " + e.Error(),
@@ -2254,7 +2254,7 @@ func RecoverFromReorg(
 	}
 	blk, e := chain.BlockByHash(&hashList[0])
 	if e != nil {
-		err.Ln("error looking up possibly reorged block:", err)
+		E.Ln("error looking up possibly reorged block:", e)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDatabase,
 			Message: "Database error: " + e.Error(),
@@ -2291,9 +2291,9 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 					tx.Index(), blk,
 				)
 				if e != nil {
-					err.Ln(
+					E.Ln(
 						"failed to marshal redeemingtx notification:",
-						err,
+						e,
 					)
 					continue
 				}
@@ -2335,7 +2335,7 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 							found = true
 						}
 					default:
-						wrn.F("skipping rescanned pubkey of unknown serialized length", len(sa))
+						W.F("skipping rescanned pubkey of unknown serialized length", len(sa))
 						continue
 					}
 					// If the transaction output pays to the pubkey of a rescanned P2PKH address, include it as well.
@@ -2371,7 +2371,7 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 				)
 				marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 				if e != nil {
-					err.Ln("failed to marshal recvtx notification:", err)
+					E.Ln("failed to marshal recvtx notification:", e)
 					return
 				}
 				e = wsc.QueueNotification(marshalledJSON)

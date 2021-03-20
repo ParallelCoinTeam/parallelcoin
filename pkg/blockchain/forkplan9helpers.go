@@ -22,7 +22,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode, nH int32) (
 		startHeight = fork.List[1].TestnetStart
 	}
 	if nH <= startHeight {
-		dbg.Ln("on hard fork", nH, startHeight)
+		D.Ln("on hard fork", nH, startHeight)
 		return
 	}
 	var oldestStamp int64

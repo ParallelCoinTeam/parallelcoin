@@ -2,7 +2,7 @@ package path
 
 import (
 	"path/filepath"
-
+	
 	"github.com/p9c/pod/app/conte"
 )
 
@@ -13,7 +13,11 @@ func BlockDb(cx *conte.Xt, dbType string, namePrefix string) string {
 	if dbType == "sqlite" {
 		dbName += ".db"
 	}
-	dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
-		cx.ActiveNet.Name), dbName)
+	dbPath := filepath.Join(
+		filepath.Join(
+			*cx.Config.DataDir,
+			cx.ActiveNet.Name,
+		), dbName,
+	)
 	return dbPath
 }

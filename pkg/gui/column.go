@@ -42,7 +42,7 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 		l.Vertical)
 	// generate the dimensions for all the list elements
 	dims := GetDimensionList(gtx1, len(c.rows), le)
-	dbg.S(dims)
+	D.S(dims)
 	for i := range dims {
 		if dims[i].Size.X > max {
 			max = dims[i].Size.X
@@ -58,7 +58,7 @@ func (c *Column) List(gtx l.Context) (max int, out []l.Widget) {
 				).
 				Rigid(
 					c.Inset(0.5, func(gtx l.Context) l.Dimensions {
-						// dbg.Ln("max!", m)
+						// D.Ln("max!", m)
 						// // gtx.Constraints.Max.X = max
 						// gtx.Constraints.Max.Y = dims[i].Size.Y
 						// gtx.Constraints.Min.Y = dims[i].Size.Y

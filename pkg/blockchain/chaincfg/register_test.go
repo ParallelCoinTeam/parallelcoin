@@ -464,7 +464,7 @@ func TestRegister(t *testing.T) {
 			e := Register(regTest.params)
 			if err != regTest.err {
 				t.Errorf("%s:%s: Registered network with unexpected error: got %v expected %v",
-					test.name, regTest.name, err, regTest.err)
+					test.name, regTest.name, e, regTest.err)
 			}
 		}
 		for i, magTest := range test.p2pkhMagics {
@@ -492,7 +492,7 @@ func TestRegister(t *testing.T) {
 			pubKey, e := HDPrivateKeyToPublicKeyID(magTest.priv[:])
 			if !reflect.DeepEqual(err, magTest.err) {
 				t.Errorf("%s: HD magic %d mismatched error: got %v expected %v ",
-					test.name, i, err, magTest.err)
+					test.name, i, e, magTest.err)
 				continue
 			}
 			if magTest.e ==  nil && !bytes.Equal(pubKey, magTest.want[:]) {

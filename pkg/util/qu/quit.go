@@ -21,7 +21,7 @@ func T() C {
 	createdList = append(createdList, logg.Caller("chan from", 1))
 	o := make(C)
 	createdChannels = append(createdChannels, o)
-	// trc.Ln("open channels:", len(createdList), len(createdChannels), occ)
+	// T.Ln("open channels:", len(createdList), len(createdChannels), occ)
 	return o
 }
 
@@ -33,7 +33,7 @@ func Ts(n int) C {
 	createdList = append(createdList, logg.Caller("buffered chan at", 1))
 	o := make(C, n)
 	createdChannels = append(createdChannels, o)
-	// trc.Ln("open channels:", len(createdList), len(createdChannels), occ)
+	// T.Ln("open channels:", len(createdList), len(createdChannels), occ)
 	return o
 }
 
@@ -41,10 +41,10 @@ func (c C) Q() {
 	loc := GetLocForChan(c)
 	mx.Lock()
 	if !testChanIsClosed(c) {
-		trc.Ln("closing chan from "+loc, logg.Caller("\n"+strings.Repeat(" ", 48)+"from", 1))
+		_T.Ln("closing chan from "+loc, logg.Caller("\n"+strings.Repeat(" ", 48)+"from", 1))
 		close(c)
 	} else {
-		trc.Ln(
+		_T.Ln(
 			"from"+logg.Caller("", 1), "\n"+strings.Repeat(" ", 48)+
 				"channel", loc, "was already closed",
 		)
@@ -58,7 +58,7 @@ func (c C) Signal() {
 }
 
 func (c C) Wait() <-chan struct{} {
-	// trc.Ln(logg.Caller(">>> waiting on quit channel at", 1))
+	// T.Ln(logg.Caller(">>> waiting on quit channel at", 1))
 	return c
 }
 
@@ -68,11 +68,11 @@ func testChanIsClosed(ch C) (o bool) {
 	}
 	select {
 	case <-ch:
-		// dbg.Ln("chan is closed")
+		// D.Ln("chan is closed")
 		o = true
 	default:
 	}
-	// dbg.Ln("chan is not closed")
+	// D.Ln("chan is not closed")
 	return
 }
 
@@ -92,61 +92,61 @@ func GetLocForChan(c C) (s string) {
 }
 
 func RemoveClosedChans() {
-	dbg.Ln("cleaning up closed channels (more than 50 now closed)")
+	D.Ln("cleaning up closed channels (more than 50 now closed)")
 	var c []C
 	var l []string
-	// dbg.Ln(">>>>>>>>>>>")
+	// D.Ln(">>>>>>>>>>>")
 	for i := range createdChannels {
 		if i >= len(createdList) {
 			break
 		}
 		if testChanIsClosed(createdChannels[i]) {
-			// trc.Ln(">>> closed", createdList[i])
+			// T.Ln(">>> closed", createdList[i])
 			// createdChannels[i].Q()
 		} else {
 			c = append(c, createdChannels[i])
 			l = append(l, createdList[i])
-			// trc.Ln("<<< open", createdList[i])
+			// T.Ln("<<< open", createdList[i])
 		}
-		// dbg.Ln(">>>>>>>>>>>")
+		// D.Ln(">>>>>>>>>>>")
 	}
 	createdChannels = c
 	createdList = l
 }
 
 func PrintChanState() {
-	dbg.Ln(">>>>>>>>>>>")
+	D.Ln(">>>>>>>>>>>")
 	for i := range createdChannels {
 		if i >= len(createdList) {
 			break
 		}
 		if testChanIsClosed(createdChannels[i]) {
-			trc.Ln(">>> closed", createdList[i])
+			_T.Ln(">>> closed", createdList[i])
 			// createdChannels[i].Q()
 		} else {
-			trc.Ln("<<< open", createdList[i])
+			_T.Ln("<<< open", createdList[i])
 		}
 	}
-	dbg.Ln(">>>>>>>>>>>")
+	D.Ln(">>>>>>>>>>>")
 }
 
 func GetOpenChanCount() (o int) {
 	mx.Lock()
-	// dbg.Ln(">>>>>>>>>>>")
+	// D.Ln(">>>>>>>>>>>")
 	var c int
 	for i := range createdChannels {
 		if i >= len(createdChannels) {
 			break
 		}
 		if testChanIsClosed(createdChannels[i]) {
-			// dbg.Ln("still open", createdList[i])
+			// D.Ln("still open", createdList[i])
 			// createdChannels[i].Q()
 			c++
 		} else {
 			o++
-			// dbg.Ln(">>>> ",createdList[i])
+			// D.Ln(">>>> ",createdList[i])
 		}
-		// dbg.Ln(">>>>>>>>>>>")
+		// D.Ln(">>>>>>>>>>>")
 	}
 	if c > 50 {
 		RemoveClosedChans()

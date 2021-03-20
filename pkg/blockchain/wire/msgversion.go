@@ -60,7 +60,7 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 	if !ok {
 		return fmt.Errorf("MsgVersion.BtcDecode reader is not a *bytes.Buffer")
 	}
-	if e = readElements(buf, &msg.ProtocolVersion, &msg.Services, (*int64Time)(&msg.Timestamp)); err.Chk(e) {
+	if e = readElements(buf, &msg.ProtocolVersion, &msg.Services, (*int64Time)(&msg.Timestamp)); E.Chk(e) {
 		return
 	}
 	e = readNetAddress(buf, pver, &msg.AddrYou, false)
@@ -83,10 +83,10 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 	}
 	if buf.Len() > 0 {
 		var userAgent string
-		if userAgent, e = ReadVarString(buf, pver); err.Chk(e) {
+		if userAgent, e = ReadVarString(buf, pver); E.Chk(e) {
 			return
 		}
-		if e = validateUserAgent(userAgent); err.Chk(e) {
+		if e = validateUserAgent(userAgent); E.Chk(e) {
 			return
 		}
 		msg.UserAgent = userAgent
@@ -94,7 +94,7 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 	// Protocol versions >= 209 added a last known block field. It is only
 	// considered present if there are bytes remaining in the message.
 	if buf.Len() > 0 {
-		if e = readElement(buf, &msg.LastBlock);err.Chk(e){
+		if e = readElement(buf, &msg.LastBlock);E.Chk(e){
 			return
 		}
 	}
@@ -106,7 +106,7 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		// wire encoding for the field is true when transactions should be relayed, so
 		// reverse it for the DisableRelayTx field.
 		var relayTx bool
-		if e = readElement(r, &relayTx); err.Chk(e) {
+		if e = readElement(r, &relayTx); E.Chk(e) {
 		}
 		msg.DisableRelayTx = !relayTx
 	}
@@ -116,34 +116,34 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 // BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface
 // implementation.
 func (msg *MsgVersion) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
-	if e = validateUserAgent(msg.UserAgent); err.Chk(e) {
+	if e = validateUserAgent(msg.UserAgent); E.Chk(e) {
 		return
 	}
 	if e = writeElements(
 		w, msg.ProtocolVersion, msg.Services,
 		msg.Timestamp.Unix(),
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return
 	}
-	if e = writeNetAddress(w, pver, &msg.AddrYou, false); err.Chk(e) {
+	if e = writeNetAddress(w, pver, &msg.AddrYou, false); E.Chk(e) {
 		return
 	}
-	if e = writeNetAddress(w, pver, &msg.AddrMe, false); err.Chk(e) {
+	if e = writeNetAddress(w, pver, &msg.AddrMe, false); E.Chk(e) {
 		return
 	}
-	if e = writeElement(w, msg.Nonce); err.Chk(e) {
+	if e = writeElement(w, msg.Nonce); E.Chk(e) {
 		return
 	}
-	if e = WriteVarString(w, pver, msg.UserAgent); err.Chk(e) {
+	if e = WriteVarString(w, pver, msg.UserAgent); E.Chk(e) {
 		return
 	}
-	if e = writeElement(w, msg.LastBlock); err.Chk(e) {
+	if e = writeElement(w, msg.LastBlock); E.Chk(e) {
 		return
 	}
 	// There was no relay transactions field before BIP0037Version.  Also, the wire encoding for the field is true when
 	// transactions should be relayed, so reverse it from the DisableRelayTx field.
 	if pver >= BIP0037Version {
-		if e = writeElement(w, !msg.DisableRelayTx); err.Chk(e) {
+		if e = writeElement(w, !msg.DisableRelayTx); E.Chk(e) {
 			return
 		}
 	}
@@ -213,7 +213,7 @@ func (msg *MsgVersion) AddUserAgent(
 		)
 	}
 	newUserAgent = fmt.Sprintf("%s%s/", msg.UserAgent, newUserAgent)
-	if e = validateUserAgent(newUserAgent); err.Chk(e) {
+	if e = validateUserAgent(newUserAgent); E.Chk(e) {
 		return
 	}
 	msg.UserAgent = newUserAgent

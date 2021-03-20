@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"sync"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
-	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
@@ -98,21 +98,21 @@ func newMemWallet(net *netparams.Params, harnessID uint32) (*memWallet, error) {
 	copy(harnessHDSeed[:], hdSeed[:])
 	binary.BigEndian.PutUint32(harnessHDSeed[:chainhash.HashSize], harnessID)
 	hdRoot, e := hdkeychain.NewMaster(harnessHDSeed[:], net)
-	if e != nil  {
-				return nil, nil
+	if e != nil {
+		return nil, nil
 	}
 	// The first child key from the hd root is reserved as the coinbase generation address.
 	coinbaseChild, e := hdRoot.Child(0)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	coinbaseKey, e := coinbaseChild.ECPrivKey()
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	coinbaseAddr, e := keyToAddr(coinbaseKey, net)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	// Track the coinbase generation address to ensure we properly track newly generated DUO we can spend.
 	addrs := make(map[uint32]util.Address)
@@ -153,11 +153,13 @@ func (m *memWallet) IngestBlock(height int32, header *wire.BlockHeader, filtered
 	// Append this new chain update to the end of the queue of new chain
 	// updates.
 	m.chainMtx.Lock()
-	m.chainUpdates = append(m.chainUpdates, &chainUpdate{
-		filteredTxns,
-		height,
-		true,
-	})
+	m.chainUpdates = append(
+		m.chainUpdates, &chainUpdate{
+			filteredTxns,
+			height,
+			true,
+		},
+	)
 	m.chainMtx.Unlock()
 	// Launch a goroutine to signal the chainSyncer that a new update is available. We do this in a new goroutine in
 	// order to avoid blocking the main loop of the rpc client.
@@ -209,8 +211,10 @@ func (m *memWallet) chainSyncer() {
 
 // evalOutputs evaluates each of the passed outputs, creating a new matching utxo within the wallet if we're able to
 // spend the output.
-func (m *memWallet) evalOutputs(outputs []*wire.TxOut, txHash *chainhash.Hash,
-	isCoinbase bool, undo *undoEntry) {
+func (m *memWallet) evalOutputs(
+	outputs []*wire.TxOut, txHash *chainhash.Hash,
+	isCoinbase bool, undo *undoEntry,
+) {
 	for i, output := range outputs {
 		pkScript := output.PkScript
 		// Scan all the addresses we currently control to see if the output is paying to us.
@@ -255,10 +259,13 @@ func (m *memWallet) UnwindBlock(height int32, header *wire.BlockHeader) {
 	// Append this new chain update to the end of the queue of new chain
 	// updates.
 	m.chainMtx.Lock()
-	m.chainUpdates = append(m.chainUpdates, &chainUpdate{
-		nil,
-		height,
-		false})
+	m.chainUpdates = append(
+		m.chainUpdates, &chainUpdate{
+			nil,
+			height,
+			false,
+		},
+	)
 	m.chainMtx.Unlock()
 	// Launch a goroutine to signal the chainSyncer that a new update is available. We do this in a new goroutine in
 	// order to avoid blocking the main loop of the rpc client.
@@ -284,20 +291,20 @@ func (m *memWallet) unwindBlock(update *chainUpdate) {
 func (m *memWallet) newAddress() (util.Address, error) {
 	index := m.hdIndex
 	childKey, e := m.hdRoot.Child(index)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	privKey, e := childKey.ECPrivKey()
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	addr, e := keyToAddr(privKey, m.net)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	e = m.rpc.LoadTxFilter(false, []util.Address{addr}, nil)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	m.addrs[index] = addr
 	m.hdIndex++
@@ -315,8 +322,10 @@ func (m *memWallet) NewAddress() (util.Address, error) {
 // pays enough fees as dictated by the passed fee rate. The passed fee rate should be expressed in satoshis-per-byte.
 // The transaction being funded can optionally include a change output indicated by the change boolean. NOTE: The
 // memWallet's mutex must be held when this function is called.
-func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
-	feeRate util.Amount, change bool) (e error) {
+func (m *memWallet) fundTx(
+	tx *wire.MsgTx, amt util.Amount,
+	feeRate util.Amount, change bool,
+) (e error) {
 	const (
 		// spendSize is the largest number of bytes of a sigScript which spends a p2pkh output: OP_DATA_73 <sig>
 		// OP_DATA_33 <pubkey>
@@ -348,12 +357,12 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 		changeVal := amtSelected - amt - reqFee
 		if changeVal > 0 && change {
 			addr, e := m.newAddress()
-			if e != nil  {
-								return e
+			if e != nil {
+				return e
 			}
 			pkScript, e := txscript.PayToAddrScript(addr)
-			if e != nil  {
-								return e
+			if e != nil {
+				return e
 			}
 			changeOutput := &wire.TxOut{
 				Value:    int64(changeVal),
@@ -369,22 +378,26 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 
 // SendOutputs creates then sends a transaction paying to the specified output while observing the passed fee rate. The
 // passed fee rate should be expressed in satoshis-per-byte.
-func (m *memWallet) SendOutputs(outputs []*wire.TxOut,
-	feeRate util.Amount) (*chainhash.Hash, error) {
+func (m *memWallet) SendOutputs(
+	outputs []*wire.TxOut,
+	feeRate util.Amount,
+) (*chainhash.Hash, error) {
 	tx, e := m.CreateTransaction(outputs, feeRate, true)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	return m.rpc.SendRawTransaction(tx, true)
 }
 
 // SendOutputsWithoutChange creates and sends a transaction that pays to the specified outputs while observing the
 // passed fee rate and ignoring a change output. The passed fee rate should be expressed in sat/b.
-func (m *memWallet) SendOutputsWithoutChange(outputs []*wire.TxOut,
-	feeRate util.Amount) (*chainhash.Hash, error) {
+func (m *memWallet) SendOutputsWithoutChange(
+	outputs []*wire.TxOut,
+	feeRate util.Amount,
+) (*chainhash.Hash, error) {
 	tx, e := m.CreateTransaction(outputs, feeRate, false)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	return m.rpc.SendRawTransaction(tx, true)
 }
@@ -392,8 +405,10 @@ func (m *memWallet) SendOutputsWithoutChange(outputs []*wire.TxOut,
 // CreateTransaction returns a fully signed transaction paying to the specified outputs while observing the desired fee
 // rate. The passed fee rate should be expressed in satoshis-per-byte. The transaction being created can optionally
 // include a change output indicated by the change boolean. This function is safe for concurrent access.
-func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
-	feeRate util.Amount, change bool) (*wire.MsgTx, error) {
+func (m *memWallet) CreateTransaction(
+	outputs []*wire.TxOut,
+	feeRate util.Amount, change bool,
+) (*wire.MsgTx, error) {
 	m.Lock()
 	defer m.Unlock()
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -404,7 +419,7 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 		tx.AddTxOut(output)
 	}
 	// Attempt to fund the transaction with spendable utxos.
-	if e := m.fundTx(tx, outputAmt, feeRate, change); err.Chk(e) {
+	if e := m.fundTx(tx, outputAmt, feeRate, change); E.Chk(e) {
 		return nil, e
 	}
 	// Populate all the selected inputs with valid sigScript for spending. Along the way record all outputs being spent
@@ -414,17 +429,19 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 		outPoint := txIn.PreviousOutPoint
 		utxo := m.utxos[outPoint]
 		extendedKey, e := m.hdRoot.Child(utxo.keyIndex)
-		if e != nil  {
-						return nil, e
+		if e != nil {
+			return nil, e
 		}
 		privKey, e := extendedKey.ECPrivKey()
-		if e != nil  {
-						return nil, e
+		if e != nil {
+			return nil, e
 		}
-		sigScript, e := txscript.SignatureScript(tx, i, utxo.pkScript,
-			txscript.SigHashAll, privKey, true)
-		if e != nil  {
-						return nil, e
+		sigScript, e := txscript.SignatureScript(
+			tx, i, utxo.pkScript,
+			txscript.SigHashAll, privKey, true,
+		)
+		if e != nil {
+			return nil, e
 		}
 		txIn.SignatureScript = sigScript
 		spentOutputs = append(spentOutputs, utxo)
@@ -471,8 +488,8 @@ func (m *memWallet) ConfirmedBalance() util.Amount {
 func keyToAddr(key *ec.PrivateKey, net *netparams.Params) (util.Address, error) {
 	serializedKey := key.PubKey().SerializeCompressed()
 	pubKeyAddr, e := util.NewAddressPubKey(serializedKey, net)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	return pubKeyAddr.AddressPubKeyHash(), nil
 }

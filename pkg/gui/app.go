@@ -303,7 +303,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 										a.LogoClickable.
 											SetClick(
 												func() {
-													dbg.Ln("clicked logo")
+													D.Ln("clicked logo")
 													*a.Theme.Dark = !*a.Theme.Dark
 													a.Theme.Colors.SetTheme(*a.Theme.Dark)
 													a.ThemeHook()
@@ -339,7 +339,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 										a.LogoClickable.
 											SetClick(
 												func() {
-													dbg.Ln("clicked logo")
+													D.Ln("clicked logo")
 													*a.Theme.Dark = !*a.Theme.Dark
 													a.Theme.Colors.SetTheme(*a.Theme.Dark)
 													a.ThemeHook()
@@ -379,7 +379,7 @@ func (a *App) LogoAndTitle(gtx l.Context) l.Dimensions {
 	// 							a.logoClickable.
 	// 								SetClick(
 	// 									func() {
-	// 										dbg.Ln("clicked logo")
+	// 										D.Ln("clicked logo")
 	// 										*a.Dark = !*a.Dark
 	// 										a.Theme.Colors.SetTheme(*a.Dark)
 	// 										a.themeHook()
@@ -472,7 +472,7 @@ func (a *App) renderSideBar() l.Widget {
 			
 			allDims := GetDimensionList(gtx1, len(a.sideBar), le)
 			a.PreRendering = false
-			// dbg.S(allDims)
+			// D.S(allDims)
 			max := 0
 			for _, i := range allDims {
 				if i.Size.X > max {
@@ -480,7 +480,7 @@ func (a *App) renderSideBar() l.Widget {
 				}
 			}
 			// max += int(a.TextSize.V) / 2
-			// dbg.Ln(max)
+			// D.Ln(max)
 			a.SideBarSize.V = float32(max)
 			gtx.Constraints.Max.X = max
 			gtx.Constraints.Min.X = max

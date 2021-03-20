@@ -27,25 +27,25 @@ func TestMemPool(t *testing.T) {
 	var buf bytes.Buffer
 	e := msg.BtcEncode(&buf, pver, enc)
 	if e != nil  {
-		t.Errorf("encode of MsgMemPool failed %v err <%v>", msg, err)
+		t.Errorf("encode of MsgMemPool failed %v err <%v>", msg, e)
 	}
 	// Older protocol versions should fail encode since message didn't exist yet.
 	oldPver := BIP0035Version - 1
 	e = msg.BtcEncode(&buf, oldPver, enc)
 	if e ==  nil {
 		s := "encode of MsgMemPool passed for old protocol version %v err <%v>"
-		t.Errorf(s, msg, err)
+		t.Errorf(s, msg, e)
 	}
 	// Test decode with latest protocol version.
 	readmsg := NewMsgMemPool()
 	e = readmsg.BtcDecode(&buf, pver, enc)
 	if e != nil  {
-		t.Errorf("decode of MsgMemPool failed [%v] err <%v>", buf, err)
+		t.Errorf("decode of MsgMemPool failed [%v] err <%v>", buf, e)
 	}
 	// Older protocol versions should fail decode since message didn't exist yet.
 	e = readmsg.BtcDecode(&buf, oldPver, enc)
 	if e ==  nil {
 		s := "decode of MsgMemPool passed for old protocol version %v err <%v>"
-		t.Errorf(s, msg, err)
+		t.Errorf(s, msg, e)
 	}
 }

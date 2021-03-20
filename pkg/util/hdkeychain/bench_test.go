@@ -15,7 +15,7 @@ func BenchmarkDeriveHardened(b *testing.B) {
 	b.StopTimer()
 	masterKey, e := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
 	if e != nil  {
-		b.Errorf("Failed to decode master seed: %v", err)
+		b.Errorf("Failed to decode master seed: %v", e)
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -29,7 +29,7 @@ func BenchmarkDeriveNormal(b *testing.B) {
 	b.StopTimer()
 	masterKey, e := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
 	if e != nil  {
-		b.Errorf("Failed to decode master seed: %v", err)
+		b.Errorf("Failed to decode master seed: %v", e)
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {

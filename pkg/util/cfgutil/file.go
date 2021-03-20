@@ -8,7 +8,7 @@ import (
 func FileExists(filePath string) (bool, error) {
 	_, e := os.Stat(filePath)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		if os.IsNotExist(e) {
 			return false, nil
 		}

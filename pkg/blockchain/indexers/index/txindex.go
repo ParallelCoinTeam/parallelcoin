@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -86,7 +86,7 @@ func dbPutBlockIDIndexEntry(dbTx database.Tx, hash *chainhash.Hash, id uint32) (
 	// Add the block hash to ID mapping to the index.
 	meta := dbTx.Metadata()
 	hashIndex := meta.Bucket(idByHashIndexBucketName)
-	if e := hashIndex.Put(hash[:], serializedID[:]); err.Chk(e) {
+	if e := hashIndex.Put(hash[:], serializedID[:]); E.Chk(e) {
 		return e
 	}
 	// Add the block ID to hash mapping to the index.
@@ -104,7 +104,7 @@ func dbRemoveBlockIDIndexEntry(dbTx database.Tx, hash *chainhash.Hash) (e error)
 	if serializedID == nil {
 		return nil
 	}
-	if e := hashIndex.Delete(hash[:]); err.Chk(e) {
+	if e := hashIndex.Delete(hash[:]); E.Chk(e) {
 		return e
 	}
 	// Remove the block ID to hash mapping.
@@ -187,7 +187,7 @@ func dbFetchTxIndexEntry(dbTx database.Tx, txHash *chainhash.Hash) (*database.Bl
 			ErrorCode: database.ErrCorruption,
 			Description: fmt.Sprintf(
 				"corrupt transaction index "+
-					"entry for %s: %v", txHash, err,
+					"entry for %s: %v", txHash, e,
 			),
 		}
 	}
@@ -278,14 +278,14 @@ func (idx *TxIndex) Init() (e error) {
 			for {
 				_, e := dbFetchBlockHashByID(dbTx, testBlockID)
 				if e != nil {
-					// trc.Ln(err)
+					// F.Ln(err)
 					nextUnknown = testBlockID
 					break
 				}
 				highestKnown = testBlockID
 				testBlockID += increment
 			}
-			trc.F("forward scan (highest known %d, next unknown %d)", highestKnown, nextUnknown)
+			T.F("forward scan (highest known %d, next unknown %d)", highestKnown, nextUnknown)
 			// No used block IDs due to new database.
 			if nextUnknown == 1 {
 				return nil
@@ -296,12 +296,12 @@ func (idx *TxIndex) Init() (e error) {
 				testBlockID = (highestKnown + nextUnknown) / 2
 				_, e := dbFetchBlockHashByID(dbTx, testBlockID)
 				if e != nil {
-					// trc.Ln(err)
+					// F.Ln(err)
 					nextUnknown = testBlockID
 				} else {
 					highestKnown = testBlockID
 				}
-				trc.F("binary scan (highest known %d, next unknown %d)", highestKnown, nextUnknown)
+				T.F("binary scan (highest known %d, next unknown %d)", highestKnown, nextUnknown)
 				if highestKnown+1 == nextUnknown {
 					break
 				}
@@ -313,7 +313,7 @@ func (idx *TxIndex) Init() (e error) {
 	if e != nil {
 		return e
 	}
-	trc.Ln("current internal block ID:", idx.curBlockID)
+	F.Ln("current internal block ID:", idx.curBlockID)
 	return nil
 }
 
@@ -332,10 +332,10 @@ func (idx *TxIndex) Name() string {
 // interface.
 func (idx *TxIndex) Create(dbTx database.Tx) (e error) {
 	meta := dbTx.Metadata()
-	if _, e = meta.CreateBucket(idByHashIndexBucketName); err.Chk(e) {
+	if _, e = meta.CreateBucket(idByHashIndexBucketName); E.Chk(e) {
 		return e
 	}
-	if _, e = meta.CreateBucket(hashByIDIndexBucketName); err.Chk(e) {
+	if _, e = meta.CreateBucket(hashByIDIndexBucketName); E.Chk(e) {
 		return e
 	}
 	_, e = meta.CreateBucket(txIndexKey)
@@ -348,7 +348,7 @@ func (idx *TxIndex) ConnectBlock(dbTx database.Tx, block *util.Block, stxos []bl
 	// Increment the internal block ID to use for the block being connected and add all of the transactions in the block
 	// to the index.
 	newBlockID := idx.curBlockID + 1
-	if e := dbAddTxIndexEntries(dbTx, block, newBlockID); err.Chk(e) {
+	if e := dbAddTxIndexEntries(dbTx, block, newBlockID); E.Chk(e) {
 		return e
 	}
 	// Add the new block ID index entry for the block being connected and update the current internal block ID
@@ -371,12 +371,12 @@ func (idx *TxIndex) DisconnectBlock(
 	stxos []blockchain.SpentTxOut,
 ) (e error) {
 	// Remove all of the transactions in the block from the index.
-	if e = dbRemoveTxIndexEntries(dbTx, block); err.Chk(e) {
+	if e = dbRemoveTxIndexEntries(dbTx, block); E.Chk(e) {
 		return e
 	}
 	// Remove the block ID index entry for the block being disconnected and decrement the current internal block ID to
 	// account for it.
-	if e = dbRemoveBlockIDIndexEntry(dbTx, block.Hash()); err.Chk(e) {
+	if e = dbRemoveBlockIDIndexEntry(dbTx, block.Hash()); E.Chk(e) {
 		return e
 	}
 	idx.curBlockID--
@@ -390,7 +390,7 @@ func (idx *TxIndex) DisconnectBlock(
 // When there is no entry for the provided hash, nil will be returned for the both the entry and the error.
 //
 // This function is safe for concurrent access.
-func (idx *TxIndex) TxBlockRegion(hash *chainhash.Hash) (region *database.BlockRegion,e error) {
+func (idx *TxIndex) TxBlockRegion(hash *chainhash.Hash) (region *database.BlockRegion, e error) {
 	e = idx.db.View(
 		func(dbTx database.Tx) (e error) {
 			region, e = dbFetchTxIndexEntry(dbTx, hash)

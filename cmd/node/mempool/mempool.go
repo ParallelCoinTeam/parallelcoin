@@ -4,20 +4,20 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"math"
 	"sync"
 	"sync/atomic"
 	"time"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/hardfork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	indexers "github.com/p9c/pod/pkg/blockchain/indexers"
+	"github.com/p9c/pod/pkg/blockchain/indexers"
 	"github.com/p9c/pod/pkg/blockchain/mining"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/util/logi"
 	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -215,7 +215,7 @@ func (mp *TxPool) LastUpdated() time.Time {
 func (mp *TxPool) MaybeAcceptTransaction(
 	b *blockchain.BlockChain,
 	tx *util.Tx, isNew, rateLimit bool,
-) (hashes []*chainhash.Hash, txD *TxDesc,e error) {
+) (hashes []*chainhash.Hash, txD *TxDesc, e error) {
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	hashes, txD, e = mp.maybeAcceptTransaction(b, tx, isNew, rateLimit, true)
@@ -259,7 +259,7 @@ func (mp *TxPool) ProcessTransaction(
 	b *blockchain.BlockChain, tx *util.Tx,
 	allowOrphan, rateLimit bool, tag Tag,
 ) ([]*TxDesc, error) {
-	trc.Ln("processing transaction", tx.Hash())
+	F.Ln("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	defer mp.mtx.Unlock()
@@ -268,8 +268,8 @@ func (mp *TxPool) ProcessTransaction(
 		b, tx, true,
 		rateLimit, true,
 	)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	if len(missingParents) == 0 {
 		// Accept any orphan transactions that depend on this transaction ( they may no longer be orphans if all inputs
@@ -312,7 +312,7 @@ func (mp *TxPool) RawMempoolVerbose() map[string]*btcjson.GetRawMempoolVerboseRe
 		tx := desc.Tx
 		var currentPriority float64
 		utxos, e := mp.fetchInputUtxos(tx)
-		if e ==  nil {
+		if e == nil {
 			currentPriority = mining.CalcPriority(
 				tx.MsgTx(), utxos,
 				bestHeight+1,
@@ -432,7 +432,7 @@ func (mp *TxPool) addOrphan(tx *util.Tx, tag Tag) {
 	// orphans and evict a random orphan if space is still needed.
 	e := mp.limitNumOrphans()
 	if e != nil {
-		wrn.Ln("failed to set orphan limit", e)
+		W.Ln("failed to set orphan limit", e)
 	}
 	mp.orphans[*tx.Hash()] = &orphanTx{
 		tx:         tx,
@@ -446,7 +446,7 @@ func (mp *TxPool) addOrphan(tx *util.Tx, tag Tag) {
 		}
 		mp.orphansByPrev[txIn.PreviousOutPoint][*tx.Hash()] = tx
 	}
-	dbg.Ln("stored orphan transaction", tx.Hash(), "(total:", len(mp.orphans), ")")
+	D.Ln("stored orphan transaction", tx.Hash(), "(total:", len(mp.orphans), ")")
 }
 
 // addTransaction adds the passed transaction to the memory pool. It should not be called directly as it doesn't perform
@@ -505,8 +505,8 @@ func (mp *TxPool) checkPoolDoubleSpend(tx *util.Tx) (e error) {
 // pool. This function MUST be called with the mempool lock held (for reads).
 func (mp *TxPool) fetchInputUtxos(tx *util.Tx) (*blockchain.UtxoViewpoint, error) {
 	utxoView, e := mp.cfg.FetchUtxoView(tx)
-	if e != nil  {
-				return nil, e
+	if e != nil {
+		return nil, e
 	}
 	// Attempt to populate any missing inputs from the transaction pool.
 	for _, txIn := range tx.MsgTx().TxIn {
@@ -571,9 +571,9 @@ func (mp *TxPool) limitNumOrphans() (e error) {
 		mp.nextExpireScan = now.Add(orphanExpireScanInterval)
 		numOrphans := len(mp.orphans)
 		if numExpired := origNumOrphans - numOrphans; numExpired > 0 {
-			dbg.F(
+			D.F(
 				"Expired %d %s (remaining: %d)",
-				numExpired, logi.PickNoun(numExpired, "orphan", "orphans"),
+				numExpired, logg.PickNoun(numExpired, "orphan", "orphans"),
 				numOrphans,
 			)
 		}
@@ -626,8 +626,8 @@ func (mp *TxPool) maybeAcceptTransaction(
 	// Perform preliminary sanity checks on the transaction. This makes use of blockchain which contains the invariant
 	// rules for what transactions are allowed into blocks.
 	e := blockchain.CheckTransactionSanity(tx)
-	if e != nil  {
-				if cErr, ok := e.(blockchain.RuleError); ok {
+	if e != nil {
+		if cErr, ok := e.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
 		return nil, nil, e
@@ -654,8 +654,8 @@ func (mp *TxPool) maybeAcceptTransaction(
 			mp.cfg.Policy.MinRelayTxFee,
 			mp.cfg.Policy.MaxTxVersion,
 		)
-		if e != nil  {
-						// Attempt to extract a reject code from the error so it can be retained. When not possible, fall back to a
+		if e != nil {
+			// Attempt to extract a reject code from the error so it can be retained. When not possible, fall back to a
 			// non standard error.
 			rejectCode, found := extractRejectCode(e)
 			if !found {
@@ -663,7 +663,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 			}
 			str := fmt.Sprintf(
 				"transaction %v is not standard: %v",
-				txHash, err,
+				txHash, e,
 			)
 			return nil, nil, txRuleError(rejectCode, str)
 		}
@@ -674,15 +674,15 @@ func (mp *TxPool) maybeAcceptTransaction(
 	// this point. There is a more in-depth check that happens later after fetching the referenced transaction inputs
 	// from the main chain which examines the actual spend data and prevents double spends.
 	e = mp.checkPoolDoubleSpend(tx)
-	if e != nil  {
-				return nil, nil, e
+	if e != nil {
+		return nil, nil, e
 	}
 	// Fetch all of the unspent transaction outputs referenced by the inputs to this transaction. This function also
 	// attempts to fetch the transaction itself to be used for detecting a duplicate transaction without needing to do a
 	// separate lookup.
 	utxoView, e := mp.fetchInputUtxos(tx)
-	if e != nil  {
-				if cErr, ok := e.(blockchain.RuleError); ok {
+	if e != nil {
+		if cErr, ok := e.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
 		return nil, nil, e
@@ -739,8 +739,8 @@ func (mp *TxPool) maybeAcceptTransaction(
 		tx, nextBlockHeight,
 		utxoView, mp.cfg.ChainParams,
 	)
-	if e != nil  {
-				if cErr, ok := e.(blockchain.RuleError); ok {
+	if e != nil {
+		if cErr, ok := e.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
 		return nil, nil, e
@@ -748,8 +748,8 @@ func (mp *TxPool) maybeAcceptTransaction(
 	// Don't allow transactions with non-standard inputs if the network parameters forbid their acceptance.
 	if !mp.cfg.Policy.AcceptNonStd {
 		e := checkInputsStandard(tx, utxoView)
-		if e != nil  {
-						// Attempt to extract a reject code from the error so it can be retained. When not possible, fall back to a
+		if e != nil {
+			// Attempt to extract a reject code from the error so it can be retained. When not possible, fall back to a
 			// non standard error.
 			rejectCode, found := extractRejectCode(e)
 			if !found {
@@ -757,7 +757,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 			}
 			str := fmt.Sprintf(
 				"transaction %v has a non-standard "+
-					"input: %v", txHash, err,
+					"input: %v", txHash, e,
 			)
 			return nil, nil, txRuleError(rejectCode, str)
 		}
@@ -770,8 +770,8 @@ func (mp *TxPool) maybeAcceptTransaction(
 	// activation
 	var sigOpCost int
 	sigOpCost, e = blockchain.GetSigOpCost(tx, false, utxoView, true)
-	if e != nil  {
-				if cErr, ok := e.(blockchain.RuleError); ok {
+	if e != nil {
+		if cErr, ok := e.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
 		return nil, nil, e
@@ -837,7 +837,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 		}
 		oldTotal := mp.pennyTotal
 		mp.pennyTotal += float64(serializedSize)
-		trc.F(
+		T.F(
 			"rate limit: curTotal %v, nextTotal: %v, limit %v",
 			oldTotal,
 			mp.pennyTotal,
@@ -850,15 +850,15 @@ func (mp *TxPool) maybeAcceptTransaction(
 		txscript.StandardVerifyFlags, mp.cfg.SigCache,
 		mp.cfg.HashCache,
 	)
-	if e != nil  {
-				if cErr, ok := e.(blockchain.RuleError); ok {
+	if e != nil {
+		if cErr, ok := e.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
 		return nil, nil, e
 	}
 	// Add to transaction pool.
 	txD := mp.addTransaction(utxoView, tx, bestHeight, txFee)
-	dbg.F(
+	D.F(
 		"accepted transaction %v (pool size: %v) %s",
 		txHash,
 		len(mp.pool),
@@ -917,8 +917,8 @@ func (mp *TxPool) processOrphans(b *blockchain.BlockChain, acceptedTx *util.Tx) 
 				missing, txD, e := mp.maybeAcceptTransaction(
 					b, tx, true, true, false,
 				)
-				if e != nil  {
-										// The orphan is now invalid so there is no way any other orphans which redeem any of its outputs
+				if e != nil {
+					// The orphan is now invalid so there is no way any other orphans which redeem any of its outputs
 					// can be accepted. Remove them.
 					mp.removeOrphan(tx, true)
 					break

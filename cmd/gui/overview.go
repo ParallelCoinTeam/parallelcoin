@@ -14,9 +14,10 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
-	return wg.VFlex(). // AlignMiddle().
+func (wg *WalletGUI) balanceCard() func(gtx l.Context) l.Dimensions {
+	return wg.VFlex().AlignStart().
 		Rigid(
+			
 			// wg.ButtonInset(0.25,
 			wg.H5("balances").
 				// Alignment(text.Start).
@@ -25,126 +26,95 @@ func (wg *WalletGUI) balanceCard(corners int) func(gtx l.Context) l.Dimensions {
 		).
 		Rigid(
 			wg.Fill(
-				"Primary", l.W, wg.TextSize.V, corners,
-				// wg.Flex().Flexed(1,
-				wg.Flex(). // SpaceEvenly().
-					Rigid(
-						wg.Inset(
-							0.25,
-							wg.VFlex().AlignBaseline().
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.Body1("confirmed").
-													Color("DocText").Fn,
-											).
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Fn,
-									).Fn,
+				"Primary", l.W, 0, 0,
+				wg.Inset(
+					0.25,
+					wg.VFlex().AlignEnd().
+						Rigid(
+							wg.ButtonLayout(wg.clickables["balanceConfirmed"]).SetClick(
+								func() {
+									go wg.WriteClipboard(
+										fmt.Sprintf(
+											"%6.8f",
+											wg.State.balance.Load(),
+										),
+									)
+								},
+							).Background("Transparent").Embed(
+								wg.Inset(
+									0.5,
+									wg.Caption(
+										"confirmed"+leftPadTo(
+											14, 14,
+											fmt.Sprintf(
+												"%6.8f",
+												wg.State.balance.Load(),
+											),
+										),
+									).
+										Font("go regular").
+										Alignment(text.End).
+										Color("DocText").Fn,
+								).Fn,
+							).Fn,
+						).
+						Rigid(
+							wg.ButtonLayout(wg.clickables["balanceUnconfirmed"]).SetClick(
+								func() {
+									go wg.WriteClipboard(
+										fmt.Sprintf(
+											"%6.8f",
+											wg.State.balanceUnconfirmed.Load(),
+										),
+									)
+								},
+							).Background("Transparent").Embed(
+								wg.Inset(
+									0.5,
+									wg.Caption(
+										"unconfirmed"+leftPadTo(
+											14, 14,
+											fmt.Sprintf(
+												"%6.8f",
+												wg.State.balanceUnconfirmed.Load(),
+											),
+										),
+									).
+										Font("go regular").
+										Alignment(text.End).
+										Color("DocText").Fn,
+								
+								).Fn,
+							).Fn,
+						).
+						Rigid(
+							wg.ButtonLayout(wg.clickables["balanceTotal"]).SetClick(
+								func() {
+									go wg.WriteClipboard(
+										fmt.Sprintf(
+											"%6.8f",
+											wg.State.balance.Load()+wg.State.balanceUnconfirmed.Load(),
+										),
+									)
+								},
+							).Background("Transparent").Embed(
+								wg.Inset(
+									0.5,
+									wg.H5(
+										"total"+leftPadTo(
+											14, 14, fmt.Sprintf(
+												"%6.8f", wg.State.balance.Load()+wg.
+													State.balanceUnconfirmed.Load(),
+											),
+										),
+									).
+										Alignment(text.End).
+										Color("DocText").Fn,
 								).
-								Rigid(
-									wg.Inset(
-										0.25,
-										
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.Body1("unconfirmed").
-													Color("DocText").Fn,
-											).
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Fn,
-									).Fn,
-								).
-								Rigid(
-									wg.Inset(
-										0.5,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.H6("total").
-													Color("DocText").Fn,
-											).
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Fn,
-									).Fn,
-								).
-								Fn,
+									Fn,
+							).Fn,
 						).Fn,
-					).
-					Rigid(
-						wg.Inset(
-							0.25,
-							wg.VFlex().AlignBaseline().AlignEnd().
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Rigid(
-												wg.Caption(
-													leftPadTo(
-														14, 14,
-														fmt.Sprintf(
-															"%6.8f",
-															wg.State.balance.Load(),
-														),
-													),
-												).Color("DocText").Font("go regular").Fn,
-											).Fn,
-									).Fn,
-								).
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Rigid(
-												wg.Caption(
-													leftPadTo(
-														14, 14,
-														fmt.Sprintf(
-															"%6.8f",
-															wg.State.balanceUnconfirmed.Load(),
-														),
-													),
-												).Color("DocText").Font("go regular").Fn,
-											).Fn,
-									).Fn,
-								).
-								Rigid(
-									wg.Inset(
-										0.5,
-										wg.Flex().AlignBaseline().
-											Rigid(
-												wg.H6(" ").Fn,
-											).
-											Rigid(
-												wg.H6(
-													leftPadTo(
-														14, 14, fmt.Sprintf(
-															"%6.8f", wg.State.balance.Load()+wg.
-																State.balanceUnconfirmed.Load(),
-														),
-													),
-												).Color("DocText").Fn,
-											).Fn,
-									).Fn,
-								).
-								Fn,
-						).Fn,
-					).Fn,
-				// ).Fn,
+				).Fn,
 			).Fn,
 		).Fn
 }
@@ -166,32 +136,34 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 							// wg.ButtonInset(0.25,
 							wg.VFlex().
 								Rigid(
-									// wg.Inset(0.25,
-									wg.balanceCard(0),
-									// ).Fn,
+									wg.Inset(
+										0.25,
+										wg.balanceCard(),
+									).Fn,
 								).Fn,
 							// ).Fn,
 						).
 						// Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Flexed(
 							1,
-							// wg.Inset(0.25,
-							wg.VFlex().AlignStart().
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.H5("Recent Transactions").Fn,
-									).Fn,
-								).
-								Flexed(
-									1,
-									// wg.Inset(0.5,
-									wg.RecentTxsWidget,
-									// p9.EmptyMaxWidth(),
-									// ).Fn,
-								).
-								Fn,
-							// ).Fn,
+							wg.Inset(
+								0.25,
+								wg.VFlex().AlignStart().
+									Rigid(
+										wg.Inset(
+											0.25,
+											wg.H5("Recent Transactions").Fn,
+										).Fn,
+									).
+									Flexed(
+										1,
+										// wg.Inset(0.5,
+										wg.RecentTxsWidget,
+										// p9.EmptyMaxWidth(),
+										// ).Fn,
+									).
+									Fn,
+							).Fn,
 						).
 						Fn,
 				},
@@ -202,38 +174,118 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 							// wg.ButtonInset(0.25,
 							wg.VFlex(). // SpaceSides().AlignStart().
 								Rigid(
-									// wg.Inset(0.25,
-									wg.balanceCard(0),
-									// ).Fn,
+									wg.Inset(
+										0.25,
+										wg.balanceCard(),
+									).Fn,
 								).Fn,
 							// ).Fn,
 						).
 						Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
 						Rigid(
-							// wg.Inset(0.25,
-							wg.VFlex().AlignStart().
-								Rigid(
-									wg.Inset(
-										0.25,
-										wg.H5("recent transactions").Fn,
-									).Fn,
-								).
-								Flexed(
-									1,
-									// wg.Fill("DocBg", l.W, wg.TextSize.V, 0, wg.Inset(0.25,
-									wg.RecentTxsWidget,
-									// p9.EmptyMaxWidth(),
-									// ).Fn).Fn,
-								).
+							wg.Inset(
+								0.25,
+								wg.VFlex().AlignStart().
+									Rigid(
+										wg.Inset(
+											0.25,
+											wg.H5("recent transactions").Fn,
+										).Fn,
+									).
+									Flexed(
+										1,
+										// wg.Fill("DocBg", l.W, wg.TextSize.V, 0, wg.Inset(0.25,
+										wg.RecentTxsWidget,
+										// p9.EmptyMaxWidth(),
+										// ).Fn).Fn,
+									).
+									Fn,
+							).
 								Fn,
-							// ).
-							// Fn,
 						).
 						Fn,
 				},
 			},
 		).Fn(gtx)
 	}
+}
+
+func (wg *WalletGUI) recentTxCardStub(txs *btcjson.ListTransactionsResult) l.Widget {
+	return wg.Inset(
+		0.25,
+		wg.Flex().
+			// AlignBaseline().
+			AlignStart().
+			// Flexed(
+			// 	1,
+			// 	wg.Inset(
+			// 		0.25,
+			// 		wg.Caption(txs.Address).
+			// 			Font("go regular").
+			// 			Color("PanelText").
+			// 			TextScale(0.66).
+			// 			Alignment(text.End).
+			// 			Fn,
+			// 	).Fn,
+			// ).
+			Rigid(
+				wg.Icon().Color("PanelText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
+			).
+			// Rigid(
+			// 	wg.Caption(fmt.Sprint(*txs.BlockIndex)).Fn,
+			// 	// wg.buttonIconText(txs.clickBlock,
+			// 	// 	fmt.Sprint(*txs.BlockIndex),
+			// 	// 	&icons2.DeviceWidgets,
+			// 	// 	wg.blockPage(*txs.BlockIndex)),
+			// ).
+			Rigid(
+				wg.Caption(fmt.Sprintf("%d ", txs.BlockIndex)).Fn,
+			).
+			Rigid(
+				wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
+			).
+			Rigid(
+				wg.Caption(fmt.Sprintf("%d ", txs.Confirmations)).Fn,
+			).
+			Rigid(
+				func(gtx l.Context) l.Dimensions {
+					switch txs.Category {
+					case "generate":
+						return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
+					case "immature":
+						return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
+					case "receive":
+						return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
+					case "unknown":
+						return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
+					}
+					return l.Dimensions{}
+				},
+			).
+			Rigid(
+				wg.Caption(txs.Category+" ").Fn,
+			).
+			Rigid(
+				wg.Caption(fmt.Sprintf("%-6.8f DUO", txs.Amount)).Color("DocText").Fn,
+			).
+			// Rigid(
+			// 	wg.Flex().
+			// 		Rigid(
+			// 			wg.Icon().Color("PanelText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
+			// 		).
+			// 		Rigid(
+			// 			wg.Caption(
+			// 				time.Unix(
+			// 					txs.Time,
+			// 					0,
+			// 				).Format("02 Jan 06 15:04:05 MST"),
+			// 			).Color("PanelText").Fn,
+			// 		).
+			// 		Fn,
+			// ).
+			Fn,
+	).
+		Fn
 }
 
 func (wg *WalletGUI) recentTxCardSummary(txs *btcjson.ListTransactionsResult) l.Widget {
@@ -342,8 +394,8 @@ func (wg *WalletGUI) recentTxCardSummaryButton(
 	return wg.ButtonLayout(
 		clickable.SetClick(
 			func() {
-				dbg.Ln("clicked tx")
-				// dbg.S(txs)
+				D.Ln("clicked tx")
+				// D.S(txs)
 				curr := wg.openTxID.Load()
 				if curr == txs.TxID {
 					wg.prevOpenTxID.Store(wg.openTxID.Load())
@@ -364,18 +416,120 @@ func (wg *WalletGUI) recentTxCardSummaryButton(
 				}
 			},
 		),
-	).Background(bgColor).Embed(
-		gui.If(
-			back,
-			wg.Flex().Rigid(
-				wg.Icon().Color("PanelText").Scale(3).Src(&icons2.NavigationArrowBack).Fn,
-			).Flexed(
-				1,
-				wg.recentTxCardSummary(txs),
-			).Fn,
-			wg.recentTxCardSummary(txs),
+	).
+		Background(bgColor).
+		Embed(
+			gui.If(
+				back,
+				wg.Flex().
+					Rigid(
+						wg.Icon().Color("PanelText").Scale(4).Src(&icons2.NavigationArrowBack).Fn,
+					).
+					Rigid(
+						wg.Inset(0.5, gui.EmptyMinWidth()).Fn,
+					).
+					Flexed(
+						1,
+						wg.Fill(
+							"DocBg", l.Center, 0, 0, wg.Inset(
+								0.5,
+								wg.recentTxCardSummary(txs),
+							).Fn,
+						).Fn,
+					).
+					Fn,
+				wg.Flex().
+					Rigid(
+						wg.Inset(0.5, gui.EmptyMaxHeight()).Fn,
+					).
+					Flexed(
+						1,
+						wg.Fill(
+							"DocBg", l.Center, 0, 0, wg.Inset(
+								0.5,
+								wg.recentTxCardSummary(txs),
+							).Fn,
+						).Fn,
+					).
+					Fn,
+			),
+		).Fn
+}
+
+func (wg *WalletGUI) recentTxCardSummaryButtonGenerate(
+	txs *btcjson.ListTransactionsResult,
+	clickable *gui.Clickable,
+	bgColor string, back bool,
+) l.Widget {
+	return wg.ButtonLayout(
+		clickable.SetClick(
+			func() {
+				D.Ln("clicked tx")
+				// D.S(txs)
+				curr := wg.openTxID.Load()
+				if curr == txs.TxID {
+					wg.prevOpenTxID.Store(wg.openTxID.Load())
+					wg.openTxID.Store("")
+					moveto := wg.originTxDetail
+					if moveto == "" {
+						moveto = wg.MainApp.ActivePageGet()
+					}
+					wg.MainApp.ActivePage(moveto)
+				} else {
+					if wg.MainApp.ActivePageGet() == "home" {
+						wg.originTxDetail = "home"
+						wg.MainApp.ActivePage("history")
+					} else {
+						wg.originTxDetail = "history"
+					}
+					wg.openTxID.Store(txs.TxID)
+				}
+			},
 		),
-	).Fn
+	).
+		Background(bgColor).
+		Embed(
+			wg.Flex().AlignStart().
+				Rigid(
+					// wg.Fill(
+					// 	"Primary", l.W, 0, 0, wg.Inset(
+					// 		0.5,
+					gui.If(
+						back,
+						wg.Flex().AlignStart().
+							Rigid(
+								wg.Icon().Color("PanelText").Scale(4).Src(&icons2.NavigationArrowBack).Fn,
+							).
+							Flexed(
+								1,
+								wg.recentTxCardSummary(txs),
+							).
+							Fn,
+						wg.Flex().AlignStart().
+							Flexed(
+								1,
+								wg.recentTxCardStub(txs),
+							).
+							Fn,
+						// wg.Flex().
+						// 	Rigid(
+						// 		wg.Inset(0.5, gui.EmptyMaxHeight()).Fn,
+						// 	).
+						// 	Flexed(
+						// 		1,
+						// 		wg.Fill(
+						// 			"DocBg", l.Center, 0, 0, wg.Inset(
+						// 				0.5,
+						// 				wg.recentTxCardSummary(txs),
+						// 			).Fn,
+						// 		).Fn,
+						// 	).
+						// 	Fn,
+					),
+				).Fn,
+			// ).Fn,
+			// ).Fn,
+		).Fn
 }
 
 func (wg *WalletGUI) recentTxCardDetail(txs *btcjson.ListTransactionsResult, clickable *gui.Clickable) l.Widget {
@@ -503,12 +657,12 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	// out = append(out)
 	var txList []btcjson.ListTransactionsResult
 	var clickables []*gui.Clickable
+	txList = wg.txHistoryList
 	switch listName {
 	case "history":
-		txList = wg.txHistoryList
 		clickables = wg.txHistoryClickables
 	case "recent":
-		txList = wg.txRecentList
+		// txList = wg.txRecentList
 		clickables = wg.recentTxsClickables
 	}
 	ltxl := len(txList)
@@ -524,13 +678,23 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 			return l.Dimensions{Size: gtx.Constraints.Max}
 		}
 	}
-	dbg.Ln(">>>>>>>>>>>>>>>> iterating transactions", n, listName)
+	D.Ln(">>>>>>>>>>>>>>>> iterating transactions", n, listName)
+	var collected int
 	for x := range txList {
-		if x > n && n > 0 {
+		if collected >= n && n > 0 {
 			break
 		}
-		
 		txs := txList[x]
+		switch listName {
+		case "history":
+			collected++
+		case "recent":
+			if txs.Category == "generate" || txs.Category == "immature" || txs.Amount < 0 && txs.Fee == 0 {
+				continue
+			} else {
+				collected++
+			}
+		}
 		// spacer
 		if !first {
 			out = append(
@@ -540,14 +704,31 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		} else {
 			first = false
 		}
+		
 		ck := clickables[x]
 		out = append(
 			out,
 			func(gtx l.Context) l.Dimensions {
 				return gui.If(
-					wg.prevOpenTxID.Load() == txs.TxID,
-					wg.recentTxCardSummaryButton(&txs, ck, "Primary", false),
-					wg.recentTxCardSummaryButton(&txs, ck, "DocBg", false),
+					txs.Category == "immature",
+					wg.recentTxCardSummaryButtonGenerate(&txs, ck, "DocBg", false),
+					gui.If(
+						txs.Category == "send",
+						wg.recentTxCardSummaryButton(&txs, ck, "Danger", false),
+						gui.If(
+							txs.Category == "receive",
+							wg.recentTxCardSummaryButton(&txs, ck, "Success", false),
+							gui.If(
+								txs.Category == "generate",
+								wg.recentTxCardSummaryButtonGenerate(&txs, ck, "DocBg", false),
+								gui.If(
+									wg.prevOpenTxID.Load() == txs.TxID,
+									wg.recentTxCardSummaryButton(&txs, ck, "Primary", false),
+									wg.recentTxCardSummaryButton(&txs, ck, "DocBg", false),
+								),
+							),
+						),
+					),
 				)(gtx)
 			},
 		)
@@ -578,7 +759,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 					Fn,
 			).Fn(gtx)
 	}
-	dbg.Ln(">>>>>>>>>>>>>>>> history widget completed", n, listName)
+	D.Ln(">>>>>>>>>>>>>>>> history widget completed", n, listName)
 	switch listName {
 	case "history":
 		wg.TxHistoryWidget = wo

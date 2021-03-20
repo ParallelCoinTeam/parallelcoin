@@ -34,7 +34,17 @@ func ProcessSignal() {
 	// the case statement below will mute if not binded to signal.Notify
 	// will purposely leave out SIGABRT(abort) as an example
 
-	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGHUP, os.Interrupt)
+	signal.Notify(
+		sigch,
+		syscall.SIGINT,
+		syscall.SIGQUIT,
+		syscall.SIGKILL,
+		syscall.SIGTERM,
+		syscall.SIGUSR1,
+		syscall.SIGUSR2,
+		syscall.SIGHUP,
+		os.Interrupt,
+	)
 
 	for {
 		signalType := <-sigch

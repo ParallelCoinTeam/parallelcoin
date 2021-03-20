@@ -346,7 +346,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 }
 
 // TestCalcScriptInfo ensures the CalcScriptInfo provides the expected results for various valid and invalid script pairs.
-func TestCalcScriptinf.Ln(t *testing.T) {
+func TestCalcScriptI.Ln(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name          string
@@ -507,7 +507,7 @@ func TestCalcScriptinf.Ln(t *testing.T) {
 			}
 			witness = append(witness, wit)
 		}
-		si, e := CalcScriptinf.Ln(sigScript, pkScript, test.bip16)
+		si, e := CalcScriptI.Ln(sigScript, pkScript, test.bip16)
 		if e := tstCheckScriptError(err, test.scriptInfoErr); e != nil {
 			t.Errorf("scriptinfo test %q: %v", test.name, e)
 			continue

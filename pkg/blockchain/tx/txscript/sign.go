@@ -21,7 +21,7 @@ func RawTxInWitnessSignature(
 ) ([]byte, error) {
 	parsedScript, e := parseScript(subScript)
 	if e != nil {
-		return nil, fmt.Errorf("cannot parse output script: %v", err)
+		return nil, fmt.Errorf("cannot parse output script: %v", e)
 	}
 	hash, e := calcWitnessSignatureHash(
 		parsedScript, sigHashes, hashType, tx,
@@ -32,7 +32,7 @@ func RawTxInWitnessSignature(
 	}
 	signature, e := key.Sign(hash)
 	if e != nil {
-		return nil, fmt.Errorf("cannot sign tx input: %s", err)
+		return nil, fmt.Errorf("cannot sign tx input: %s", e)
 	}
 	return append(signature.Serialize(), byte(hashType)), nil
 }
@@ -78,7 +78,7 @@ func RawTxInSignature(
 	}
 	signature, e := key.Sign(hash)
 	if e != nil {
-		return nil, fmt.Errorf("cannot sign tx input: %s", err)
+		return nil, fmt.Errorf("cannot sign tx input: %s", e)
 	}
 	return append(signature.Serialize(), byte(hashType)), nil
 }
@@ -167,7 +167,7 @@ func sign(
 		var key *ec.PrivateKey
 		key, _, e = kdb.GetKey(addresses[0])
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			return nil, class, nil, 0, e
 		}
 		script, e := p2pkSignatureScript(
@@ -403,7 +403,7 @@ func SignTxOutput(
 	sigScript, class, addresses, nrequired, e :=
 		sign(chainParams, tx, idx, pkScript, hashType, kdb, sdb)
 	if e != nil {
-		err.Ln(err)
+		E.Ln(e)
 		return nil, e
 	}
 	if class == ScriptHashTy {
@@ -413,7 +413,7 @@ func SignTxOutput(
 			sigScript, hashType, kdb, sdb,
 		)
 		if e != nil {
-			err.Ln(e)
+			E.Ln(e)
 			return nil, e
 		}
 		// Append the p2sh script as the last push in the script.

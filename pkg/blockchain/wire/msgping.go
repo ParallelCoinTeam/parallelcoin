@@ -20,7 +20,7 @@ func (msg *MsgPing) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e 
 	// There was no nonce for BIP0031Version and earlier. NOTE: > is not a mistake here. The BIP0031 was defined as
 	// AFTER the version unlike most others.
 	if pver > BIP0031Version {
-		if e = readElement(r, &msg.Nonce); err.Chk(e) {
+		if e = readElement(r, &msg.Nonce); E.Chk(e) {
 			return
 		}
 	}
@@ -33,7 +33,7 @@ func (msg *MsgPing) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e 
 	// There was no nonce for BIP0031Version and earlier. NOTE: > is not a mistake here. The BIP0031 was defined as
 	// AFTER the version unlike most others.
 	if pver > BIP0031Version {
-		if e = writeElement(w, msg.Nonce); err.Chk(e) {
+		if e = writeElement(w, msg.Nonce); E.Chk(e) {
 			return
 		}
 	}

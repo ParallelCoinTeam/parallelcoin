@@ -8,9 +8,9 @@ import (
 	
 	"github.com/niubaoshu/gotiny"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -53,7 +53,7 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 	df, ok := tip.Diffs.Load().(blockchain.Diffs)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
-		if bitsMap, e = node.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); err.Chk(e) {
+		if bitsMap, e = node.Chain.CalcNextRequiredDifficultyPlan9Controller(tip); E.Chk(e) {
 			return
 		}
 		tip.Diffs.Store(bitsMap)
@@ -87,13 +87,13 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 		txc := coinbase.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
-		// dbg.S(coinbase)
+		// D.S(coinbase)
 		(*cbs)[i] = txx
-		// dbg.Ln("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
+		// D.Ln("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append(txr, txx), false,
 		)
-		// dbg.S(mTree)
+		// D.S(mTree)
 		mr := mTree.GetRoot()
 		if mr == nil {
 			e = errors.New("got a nil merkle root")
@@ -115,16 +115,16 @@ func Get(node *chainrpc.Node, activeNet *netparams.Params, uuid uint64, mB *util
 	// 	jrb.CoinBases[i] = (*cbs)[i]
 	// }
 	out = gotiny.Marshal(&jrb)
-	// dbg.S(jrb)
-	// dbg.S(out)
+	// D.S(jrb)
+	// D.S(out)
 	// var testy []byte
 	// for i := range out {
 	// 	testy = append(testy, out[i])
 	// }
 	// var jr Job
-	// dbg.Ln(gotiny.Unmarshal(testy, &jr))
-	// dbg.S(jr)
-	// dbg.Ln("job size", len(jobber))
+	// D.Ln(gotiny.Unmarshal(testy, &jr))
+	// D.S(jr)
+	// D.Ln("job size", len(jobber))
 	// return Container{*msg.CreateContainer(Magic)}, txr
 	return cbs, out, txr
 }

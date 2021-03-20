@@ -226,18 +226,18 @@ func hexToBytes(origHex string) []byte {
 func emptyDB(t *testing.T) (tearDownFunc func(), db walletdb.DB) {
 	var dirName string
 	var e error
-	if dirName, e = ioutil.TempDir("", "mgrtest"); addrmgr.err.Chk(e) {
+	if dirName, e = ioutil.TempDir("", "mgrtest"); addrmgr.E.Chk(e) {
 		t.Fatalf("Failed to create db temp dir: %v", err)
 	}
 	dbPath := filepath.Join(dirName, "mgrtest.db")
-	if db, e = walletdb.Create("bdb", dbPath); addrmgr.err.Chk(e) {
+	if db, e = walletdb.Create("bdb", dbPath); addrmgr.E.Chk(e) {
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("createDbNamespace: unexpected error: %v", err)
 	}
 	tearDownFunc = func() {
-		if e := db.Close(); addrmgr.err.Chk(e) {
+		if e := db.Close(); addrmgr.E.Chk(e) {
 		}
-		if e := os.RemoveAll(dirName); addrmgr.err.Chk(e) {
+		if e := os.RemoveAll(dirName); addrmgr.E.Chk(e) {
 		}
 	}
 	return
@@ -274,7 +274,7 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 	})
 	if e != nil  {
 		func() {
-			if e := db.Close(); addrmgr.err.Chk(e) {
+			if e := db.Close(); addrmgr.E.Chk(e) {
 			}
 		}()
 		_ = os.RemoveAll(dirName)
@@ -282,7 +282,7 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 	}
 	tearDownFunc = func() {
 		mgr.Close()
-		if e := db.Close(); addrmgr.err.Chk(e) {
+		if e := db.Close(); addrmgr.E.Chk(e) {
 		}
 		_ = os.RemoveAll(dirName)
 	}

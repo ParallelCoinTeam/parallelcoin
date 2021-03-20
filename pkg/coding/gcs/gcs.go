@@ -168,7 +168,7 @@ func FromNBytes(P uint8, M uint64, d []byte) (*Filter, error) {
 	buffer := bytes.NewBuffer(d)
 	N, e := wire.ReadVarInt(buffer, varIntProtoVer)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	if N >= (1 << 32) {
@@ -192,12 +192,12 @@ func (f *Filter) NBytes() ([]byte, error) {
 	buffer.Grow(wire.VarIntSerializeSize(uint64(f.n)) + len(f.filterData))
 	e := wire.WriteVarInt(&buffer, varIntProtoVer, uint64(f.n))
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	_, e = buffer.Write(f.filterData)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	return buffer.Bytes(), nil
@@ -218,17 +218,17 @@ func (f *Filter) NPBytes() ([]byte, error) {
 	buffer.Grow(wire.VarIntSerializeSize(uint64(f.n)) + 1 + len(f.filterData))
 	e := wire.WriteVarInt(&buffer, varIntProtoVer, uint64(f.n))
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	e = buffer.WriteByte(f.p)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	_, e = buffer.Write(f.filterData)
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return nil, e
 	}
 	return buffer.Bytes(), nil
@@ -250,7 +250,7 @@ func (f *Filter) N() uint32 {
 func (f *Filter) Match(key [KeySize]byte, data []byte) (yn bool,e error) {
 	// Create a filter bitstream.
 	var filterData []byte
-	if filterData, e = f.Bytes();err.Chk(e){
+	if filterData, e = f.Bytes();E.Chk(e){
 		return false, e
 	}
 	b := bstream.NewBStreamReader(filterData)
@@ -266,7 +266,7 @@ func (f *Filter) Match(key [KeySize]byte, data []byte) (yn bool,e error) {
 		// Read the difference between previous and new value from bitstream.
 		value, e := f.readFullUint64(b)
 		if e != nil  {
-			err.Ln(e)
+			E.Ln(e)
 			if e ==  io.EOF {
 				return false, nil
 			}
@@ -292,7 +292,7 @@ func (f *Filter) MatchAny(key [KeySize]byte, data [][]byte) (bool, error) {
 	// Create a filter bitstream.
 	filterData, e := f.Bytes()
 	if e != nil  {
-		err.Ln(e)
+		E.Ln(e)
 		return false, e
 	}
 	b := bstream.NewBStreamReader(filterData)
@@ -330,7 +330,7 @@ func (f *Filter) MatchAny(key [KeySize]byte, data [][]byte) (bool, error) {
 			// Advance filter we're searching or return false if we're at the end because nothing matched.
 			value, e := f.readFullUint64(b)
 			if e != nil  {
-				// err.Ln(e)
+				// E.Ln(e)
 				if e ==  io.EOF {
 					return false, nil
 				}
@@ -350,21 +350,21 @@ func (f *Filter) readFullUint64(b *bstream.BStream) (rv uint64,e error) {
 	// Count the 1s until we reach a 0.
 	c, e := b.ReadBit()
 	if e != nil  {
-		err.Ln(e)
+		T.Ln(e)
 		return 0, e
 	}
 	for c {
 		quotient++
 		c, e = b.ReadBit()
 		if e != nil  {
-			dbg.Ln(e)
+			D.Ln(e)
 			return 0, e
 		}
 	}
 	// Read P bits.
 	var remainder uint64
-	if remainder, e = b.ReadBits(int(f.p));err.Chk(e){
-		dbg.Ln(e)
+	if remainder, e = b.ReadBits(int(f.p));T.Chk(e){
+		D.Ln(e)
 		return 0, e
 	}
 	// Add the multiple and the remainder.

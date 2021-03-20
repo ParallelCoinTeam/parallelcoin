@@ -30,7 +30,7 @@ func newHTTPClient(cfg *pod.Config) (client *http.Client, e error) {
 			Password: *cfg.ProxyPass,
 		}
 		dial = func(network, addr string) (c net.Conn, e error) {
-			if c, e = proxy.Dial(network, addr); err.Chk(e) {
+			if c, e = proxy.Dial(network, addr); E.Chk(e) {
 				return nil, e
 			}
 			return c, nil
@@ -40,7 +40,7 @@ func newHTTPClient(cfg *pod.Config) (client *http.Client, e error) {
 	var tlsConfig *tls.Config
 	if *cfg.TLS && *cfg.RPCCert != "" {
 		var pem []byte
-		if pem, e = ioutil.ReadFile(*cfg.RPCCert); err.Chk(e) {
+		if pem, e = ioutil.ReadFile(*cfg.RPCCert); E.Chk(e) {
 			return nil, e
 		}
 		pool := x509.NewCertPool()
@@ -78,7 +78,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	bodyReader := bytes.NewReader(marshalledJSON)
 	var httpRequest *http.Request
 	var e error
-	if httpRequest, e = http.NewRequest("POST", url, bodyReader); err.Chk(e) {
+	if httpRequest, e = http.NewRequest("POST", url, bodyReader); E.Chk(e) {
 		return nil, e
 	}
 	httpRequest.Close = true
@@ -87,19 +87,19 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	httpRequest.SetBasicAuth(*cx.Config.Username, *cx.Config.Password)
 	// Create the new HTTP client that is configured according to the user - specified options and submit the request.
 	var httpClient *http.Client
-	if httpClient, e = newHTTPClient(cx.Config); err.Chk(e) {
+	if httpClient, e = newHTTPClient(cx.Config); E.Chk(e) {
 		return nil, e
 	}
 	var httpResponse *http.Response
-	if httpResponse, e = httpClient.Do(httpRequest); err.Chk(e) {
+	if httpResponse, e = httpClient.Do(httpRequest); E.Chk(e) {
 		return nil, e
 	}
 	// Read the raw bytes and close the response.
 	var respBytes []byte
-	if respBytes, e = ioutil.ReadAll(httpResponse.Body); err.Chk(e) {
+	if respBytes, e = ioutil.ReadAll(httpResponse.Body); E.Chk(e) {
 	}
-	if e = httpResponse.Body.Close(); err.Chk(e) {
-		e = fmt.Errorf("error reading json reply: %v", err)
+	if e = httpResponse.Body.Close(); E.Chk(e) {
+		e = fmt.Errorf("error reading json reply: %v", e)
 		return nil, e
 	}
 	// Handle unsuccessful HTTP responses
@@ -107,14 +107,16 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 		// Generate a standard error to return if the server body is empty. This should not happen very often, but it's
 		// better than showing nothing in case the target server has a poor implementation.
 		if len(respBytes) == 0 {
-			return nil, fmt.Errorf("%d %s", httpResponse.StatusCode,
-				http.StatusText(httpResponse.StatusCode))
+			return nil, fmt.Errorf(
+				"%d %s", httpResponse.StatusCode,
+				http.StatusText(httpResponse.StatusCode),
+			)
 		}
 		return nil, fmt.Errorf("%s", respBytes)
 	}
 	// Unmarshal the response.
 	var resp btcjson.Response
-	if e := js.Unmarshal(respBytes, &resp); err.Chk(e) {
+	if e := js.Unmarshal(respBytes, &resp); E.Chk(e) {
 		return nil, e
 	}
 	if resp.Error != nil {

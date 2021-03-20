@@ -28,49 +28,49 @@ func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) (
 			*cfg.DataDir,
 			*cfg.Network, "wallet.db",
 		)
-		// inf.Ln("dbPath", dbPath)
+		// I.Ln("dbPath", dbPath)
 		var db walletdb.DB
 		db, e = walletdb.Open("bdb", dbPath)
-		if err.Chk(e) {
+		if E.Chk(e) {
 			// DBError("failed to open database:", err)
 			return e
 		}
 		defer db.Close()
-		dbg.Ln("dropping wtxmgr namespace")
+		D.Ln("dropping wtxmgr namespace")
 		e = walletdb.Update(
 			db, func(tx walletdb.ReadWriteTx) (e error) {
-				dbg.Ln("deleting top level bucket")
-				if e = tx.DeleteTopLevelBucket(wtxmgrNamespace); err.Chk(e) {
+				D.Ln("deleting top level bucket")
+				if e = tx.DeleteTopLevelBucket(wtxmgrNamespace); E.Chk(e) {
 				}
 				if e != nil  && e != walletdb.ErrBucketNotFound {
 					return e
 				}
 				var ns walletdb.ReadWriteBucket
-				dbg.Ln("creating new top level bucket")
-				if ns, e = tx.CreateTopLevelBucket(wtxmgrNamespace); err.Chk(e) {
+				D.Ln("creating new top level bucket")
+				if ns, e = tx.CreateTopLevelBucket(wtxmgrNamespace); E.Chk(e) {
 					return e
 				}
-				if e = wtxmgr.Create(ns); err.Chk(e) {
+				if e = wtxmgr.Create(ns); E.Chk(e) {
 					return e
 				}
 				ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 				startBlock := ns.Get(startBlockName)
-				dbg.Ln("putting start block", startBlock)
-				if e = ns.Put(syncedToName, startBlock); err.Chk(e) {
+				D.Ln("putting start block", startBlock)
+				if e = ns.Put(syncedToName, startBlock); E.Chk(e) {
 					return e
 				}
 				recentBlocks := make([]byte, 40)
 				copy(recentBlocks[0:4], startBlock[0:4])
 				copy(recentBlocks[8:], startBlock[4:])
 				binary.LittleEndian.PutUint32(recentBlocks[4:8], uint32(1))
-				defer dbg.Ln("put recent blocks")
+				defer D.Ln("put recent blocks")
 				return ns.Put(recentBlocksName, recentBlocks)
 			},
 		)
-		if err.Chk(e) {
+		if E.Chk(e) {
 			return e
 		}
-		dbg.Ln("updated wallet")
+		D.Ln("updated wallet")
 		// if w != nil {
 		// 	// Rescan chain to ensure balance is correctly regenerated
 		// 	job := &wallet.RescanJob{

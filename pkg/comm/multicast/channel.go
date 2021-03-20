@@ -20,14 +20,14 @@ import (
 
 func Conn(port int) (conn *net.UDPConn, e error) {
 	var ipv4Addr = &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1), Port: port}
-	if conn, e = net.ListenUDP("udp4", ipv4Addr); err.Chk(e) {
+	if conn, e = net.ListenUDP("udp4", ipv4Addr); E.Chk(e) {
 		return
 	}
-	dbg.Ln("listening on", conn.LocalAddr(), "to", conn.RemoteAddr())
+	D.Ln("listening on", conn.LocalAddr(), "to", conn.RemoteAddr())
 	pc := ipv4.NewPacketConn(conn)
 	// var ifaces []net.Interface
 	var iface *net.Interface
-	// if ifaces, e = net.Interfaces(); err.Chk(e) {
+	// if ifaces, e = net.Interfaces(); E.Chk(e) {
 	// }
 	// // This grabs the first physical interface with multicast that is up. Note that this should filter out
 	// // VPN connections which would normally be selected first but don't actually have a multicast connection
@@ -43,19 +43,19 @@ func Conn(port int) (conn *net.UDPConn, e error) {
 	ifcs, _ := routeable.GetAllInterfacesAndAddresses()
 	for _, ifc := range ifcs {
 		iface = ifc
-		if e = pc.JoinGroup(iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); err.Chk(e) {
+		if e = pc.JoinGroup(iface, &net.UDPAddr{IP: net.IPv4(224, 0, 0, 1)}); E.Chk(e) {
 			return
 		}
 		// test
 		var loop bool
 		if loop, e = pc.MulticastLoopback(); e == nil {
-			dbg.F("MulticastLoopback status:%v\n", loop)
+			D.F("MulticastLoopback status:%v\n", loop)
 			if !loop {
 				if e = pc.SetMulticastLoopback(true); e != nil {
-					err.F("SetMulticastLoopback error:%v\n", e)
+					E.F("SetMulticastLoopback error:%v\n", e)
 				}
 			}
-			dbg.Ln("Multicast Loopback enabled on", ifc.Name)
+			D.Ln("Multicast Loopback enabled on", ifc.Name)
 		}
 	}
 	return

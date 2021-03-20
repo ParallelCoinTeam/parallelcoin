@@ -329,10 +329,10 @@ type LazyHandler func() (interface{}, *btcjson.RPCError)
 // the returned handler performs RPC passthrough.
 func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient chain.Interface) LazyHandler {
 	handlerData, ok := RPCHandlers[request.Method]
-	// dbg.Ln("LazyApplyHandler >>> >>> >>>", ok, handlerData.Handler != nil, w != nil, chainClient != nil)
+	// D.Ln("LazyApplyHandler >>> >>> >>>", ok, handlerData.Handler != nil, w != nil, chainClient != nil)
 	if ok && handlerData.Handler != nil && w != nil && chainClient != nil {
-		// dbg.Ln("%%% found handler for call")
-		// dbg.S(request)
+		// D.Ln("%%% found handler for call")
+		// D.S(request)
 		return func() (interface{}, *btcjson.RPCError) {
 			cmd, e := btcjson.UnmarshalCmd(request)
 			if e != nil {
@@ -340,15 +340,15 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			}
 			switch client := chainClient.(type) {
 			case *chain.RPCClient:
-				// dbg.Ln("client is a chain.RPCClient")
+				// D.Ln("client is a chain.RPCClient")
 				var resp interface{}
-				if resp, e = handlerData.Handler(cmd, w, client); err.Chk(e) {
+				if resp, e = handlerData.Handler(cmd, w, client); E.Chk(e) {
 					return nil, JSONError(e)
 				}
-				dbg.Ln("handler call succeeded")
+				D.Ln("handler call succeeded")
 				return resp, nil
 			default:
-				dbg.Ln("client is unknown")
+				D.Ln("client is unknown")
 				return nil, &btcjson.RPCError{
 					Code:    -1,
 					Message: "Chain RPC is inactive",
@@ -356,17 +356,17 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			}
 		}
 	}
-	dbg.Ln("failed to find handler for call")
-	// inf.Ln("handler", handlerData.Handler, "wallet", w)
+	D.Ln("failed to find handler for call")
+	// I.Ln("handler", handlerData.Handler, "wallet", w)
 	if ok && handlerData.Handler != nil && w != nil {
-		dbg.Ln("handling", request.Method)
+		D.Ln("handling", request.Method)
 		return func() (interface{}, *btcjson.RPCError) {
 			cmd, e := btcjson.UnmarshalCmd(request)
 			if e != nil {
 				return nil, btcjson.ErrRPCInvalidRequest
 			}
 			var resp interface{}
-			if resp, e = handlerData.Handler(cmd, w); err.Chk(e) {
+			if resp, e = handlerData.Handler(cmd, w); E.Chk(e) {
 				return nil, JSONError(e)
 			}
 			return resp, nil
@@ -374,7 +374,7 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 	}
 	// Fallback to RPC passthrough
 	return func() (interface{}, *btcjson.RPCError) {
-		inf.Ln("passing to node", request.Method)
+		I.Ln("passing to node", request.Method)
 		if chainClient == nil {
 			return nil, &btcjson.RPCError{
 				Code:    -1,
@@ -716,7 +716,7 @@ func GetInfo(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.RPCClient
 func DecodeAddress(s string, params *netparams.Params) (util.Address, error) {
 	addr, e := util.DecodeAddress(s, params)
 	if e != nil {
-		msg := fmt.Sprintf("Invalid address %q: decode failed with %#q", s, err)
+		msg := fmt.Sprintf("Invalid address %q: decode failed with %#q", s, e)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidAddressOrKey,
 			Message: msg,
@@ -1171,17 +1171,17 @@ func GetTransaction(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.RP
 func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.RPCClient) (
 	out interface{}, e error,
 ) {
-	dbg.Ln("dropping wallet history")
-	if e = DropWalletHistory(w, w.PodConfig)(nil); err.Chk(e) {
+	D.Ln("dropping wallet history")
+	if e = DropWalletHistory(w, w.PodConfig)(nil); E.Chk(e) {
 	}
-	dbg.Ln("dropped wallet history")
+	D.Ln("dropped wallet history")
 	// go func() {
 	// 	rwt, e := w.Database().BeginReadWriteTx()
 	// 	if e != nil  {
 	// 		L.Script	// 	}
 	// 	ns := rwt.ReadWriteBucket([]byte("waddrmgr"))
 	// 	w.Manager.SetSyncedTo(ns, nil)
-	// 	if e = rwt.Commit(); err.Chk(e) {
+	// 	if e = rwt.Commit(); E.Chk(e) {
 	// 	}
 	// }()
 	defer interrupt.RequestRestart()
@@ -1546,8 +1546,8 @@ func ListTransactions(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.
 	txs interface{},
 	e error,
 ) {
-	// dbg.S(icmd)
-	// dbg.Ln("ListTransactions")
+	// D.S(icmd)
+	// D.Ln("ListTransactions")
 	if len(chainClient) < 1 || chainClient[0] == nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCNoChain,
@@ -1556,7 +1556,7 @@ func ListTransactions(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.
 	}
 	cmd, ok := icmd.(*btcjson.ListTransactionsCmd)
 	if !ok { // || cmd.From == nil || cmd.Count == nil || cmd.Account != nil {
-		err.Ln(
+		E.Ln(
 			"invalid parameter ok",
 			!ok,
 			"from",
@@ -1577,7 +1577,7 @@ func ListTransactions(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.
 	// if *cmd.Account != "*" {
 	// 	// For now, don't bother trying to continue if the user specified an account, since this can't be (easily or
 	// 	// efficiently) calculated.
-	// 	err.Ln("you must use * for account, as transactions are not yet grouped by account")
+	// 	E.Ln("you must use * for account, as transactions are not yet grouped by account")
 	// 	return nil, &btcjson.RPCError{
 	// 		Code:    btcjson.ErrRPCWallet,
 	// 		Message: "Transactions are not yet grouped by account",
@@ -1715,11 +1715,11 @@ func MakeOutputs(pairs map[string]util.Amount, chainParams *netparams.Params) ([
 	for addrStr, amt := range pairs {
 		addr, e := util.DecodeAddress(addrStr, chainParams)
 		if e != nil {
-			return nil, fmt.Errorf("cannot decode address: %s", err)
+			return nil, fmt.Errorf("cannot decode address: %s", e)
 		}
 		pkScript, e := txscript.PayToAddrScript(addr)
 		if e != nil {
-			return nil, fmt.Errorf("cannot create txout script: %s", err)
+			return nil, fmt.Errorf("cannot create txout script: %s", e)
 		}
 		outputs = append(outputs, wire.NewTxOut(int64(amt), pkScript))
 	}
@@ -1755,7 +1755,7 @@ func SendPairs(
 		}
 	}
 	txHashStr := txHash.String()
-	inf.Ln("successfully sent transaction", txHashStr)
+	I.Ln("successfully sent transaction", txHashStr)
 	return txHashStr, nil
 }
 func IsNilOrEmpty(s *string) bool {
@@ -1881,12 +1881,12 @@ func SendToAddress(
 	}
 	amt, e := util.NewAmount(cmd.Amount)
 	if e != nil {
-		dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", err)
+		D.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
 		return nil, e
 	}
 	// Chk that signed integer parameters are positive.
 	if amt < 0 {
-		dbg.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> need positive amount")
+		D.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> need positive amount")
 		return nil, ErrNeedPositiveAmount
 	}
 	// Mock up map of address and amount pairs.
@@ -1945,11 +1945,11 @@ func SignMessage(
 	var buf bytes.Buffer
 	e = wire.WriteVarString(&buf, 0, "Bitcoin Signed Message:\n")
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	e = wire.WriteVarString(&buf, 0, cmd.Message)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	messageHash := chainhash.DoubleHashB(buf.Bytes())
 	sigbytes, e := ec.SignCompact(
@@ -2113,7 +2113,7 @@ func SignRawTransaction(
 	var buf bytes.Buffer
 	buf.Grow(tx.SerializeSize())
 	// All returned errors (not OOM, which panics) encountered during bytes.Buffer writes are unexpected.
-	if e = tx.Serialize(&buf); err.Chk(e) {
+	if e = tx.Serialize(&buf); E.Chk(e) {
 		panic(e)
 	}
 	signErrors := make([]btcjson.SignRawTransactionError, 0, len(signErrs))
@@ -2236,11 +2236,11 @@ func VerifyMessage(
 	var buf bytes.Buffer
 	e = wire.WriteVarString(&buf, 0, "Parallelcoin Signed Message:\n")
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	e = wire.WriteVarString(&buf, 0, cmd.Message)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())
 	pk, wasCompressed, e := ec.RecoverCompact(

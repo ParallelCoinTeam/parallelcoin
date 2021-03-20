@@ -227,7 +227,7 @@ func TestChainSvrWsCmds(t *testing.T) {
 		marshalled, e := btcjson.MarshalCmd(testID, test.staticCmd())
 		if e != nil  {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		if !bytes.Equal(marshalled, []byte(test.marshalled)) {
@@ -240,13 +240,13 @@ func TestChainSvrWsCmds(t *testing.T) {
 		cmd, e := test.newCmd()
 		if e != nil  {
 			t.Errorf("Test #%d (%s) unexpected NewCmd error: %v ",
-				i, test.name, err)
+				i, test.name, e)
 		}
 		// Marshal the command as created by the generic new command creation function.
 		marshalled, e = btcjson.MarshalCmd(testID, cmd)
 		if e != nil  {
 			t.Errorf("MarshalCmd #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		if !bytes.Equal(marshalled, []byte(test.marshalled)) {
@@ -256,16 +256,16 @@ func TestChainSvrWsCmds(t *testing.T) {
 			continue
 		}
 		var request btcjson.Request
-		if e := json.Unmarshal(marshalled, &request); err.Chk(e) {
+		if e := json.Unmarshal(marshalled, &request); E.Chk(e) {
 			t.Errorf("Test #%d (%s) unexpected error while "+
 				"unmarshalling JSON-RPC request: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		cmd, e = btcjson.UnmarshalCmd(&request)
 		if e != nil  {
 			t.Errorf("UnmarshalCmd #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		if !reflect.DeepEqual(cmd, test.unmarshalled) {

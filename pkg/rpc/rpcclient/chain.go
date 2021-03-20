@@ -220,7 +220,7 @@ func (r FutureGetBlockChainInfoResult) Receive() (*btcjson.GetBlockChainInfoResu
 		return nil, e
 	}
 	var chainInfo btcjson.GetBlockChainInfoResult
-	if e := js.Unmarshal(res, &chainInfo); err.Chk(e) {
+	if e := js.Unmarshal(res, &chainInfo); E.Chk(e) {
 		return nil, e
 	}
 	return &chainInfo, nil

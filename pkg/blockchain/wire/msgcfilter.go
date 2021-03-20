@@ -33,11 +33,11 @@ type MsgCFilter struct {
 // This is part of the Message interface implementation.
 func (msg *MsgCFilter) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) (e error) {
 	// Read filter type
-	if e = readElement(r, &msg.FilterType); err.Chk(e) {
+	if e = readElement(r, &msg.FilterType); E.Chk(e) {
 		return
 	}
 	// Read the hash of the filter's block
-	if e = readElement(r, &msg.BlockHash); err.Chk(e) {
+	if e = readElement(r, &msg.BlockHash); E.Chk(e) {
 		return e
 	}
 	// Read filter data
@@ -56,10 +56,10 @@ func (msg *MsgCFilter) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) (e
 		)
 		return messageError("MsgCFilter.BtcEncode", str)
 	}
-	if e = writeElement(w, msg.FilterType); err.Chk(e) {
+	if e = writeElement(w, msg.FilterType); E.Chk(e) {
 		return
 	}
-	if e = writeElement(w, msg.BlockHash); err.Chk(e) {
+	if e = writeElement(w, msg.BlockHash); E.Chk(e) {
 		return
 	}
 	return WriteVarBytes(w, pver, msg.Data)

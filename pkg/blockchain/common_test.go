@@ -32,7 +32,7 @@ const (
 
 // filesExists returns whether or not the named file or directory exists.
 func fileExists(name string) bool {
-	if _, e = os.Stat(name); err.Chk(e) {
+	if _, e = os.Stat(name); E.Chk(e) {
 		if os.IsNotExist(err) {
 			return false
 		}
@@ -68,7 +68,7 @@ func loadBlocks(filename string) (blocks []*util.Block, e error) {
 		dr = fi
 	}
 	defer func() {
-		if e := fi.Close(); err.Chk(e) {
+		if e := fi.Close(); E.Chk(e) {
 		}
 	}()
 	var block *util.Block
@@ -119,13 +119,13 @@ func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func()
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
 		// done testing.
 		teardown = func() {
-			if e := db.Close(); err.Chk(e) {
+			if e := db.Close(); E.Chk(e) {
 			}
 		}
 	} else {
 		// Create the root directory for test databases.
 		if !fileExists(testDbRoot) {
-			if e := os.MkdirAll(testDbRoot, 0700); err.Chk(e) {
+			if e := os.MkdirAll(testDbRoot, 0700); E.Chk(e) {
 				e := fmt.Errorf("unable to create test db "+
 					"root: %v", err)
 				return nil, nil, e
@@ -142,11 +142,11 @@ func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func()
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
 		// done testing.
 		teardown = func() {
-			if e := db.Close(); err.Chk(e) {
+			if e := db.Close(); E.Chk(e) {
 			}
-			if e := os.RemoveAll(dbPath); err.Chk(e) {
+			if e := os.RemoveAll(dbPath); E.Chk(e) {
 			}
-			if e := os.RemoveAll(testDbRoot); err.Chk(e) {
+			if e := os.RemoveAll(testDbRoot); E.Chk(e) {
 			}
 		}
 	}
@@ -190,7 +190,7 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 		r = fi
 	}
 	defer func() {
-		if e := fi.Close(); err.Chk(e) {
+		if e := fi.Close(); E.Chk(e) {
 		}
 	}()
 	view := NewUtxoViewpoint()

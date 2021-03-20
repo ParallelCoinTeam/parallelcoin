@@ -128,7 +128,7 @@ func (w *Window) Run(
 	for {
 		select {
 		case fn := <-w.Runner:
-			if e = fn(); err.Chk(e) {
+			if e = fn(); E.Chk(e) {
 				return
 			}
 		case <-quit.Wait():
@@ -136,39 +136,39 @@ func (w *Window) Run(
 			// by repeating selectors we decrease the chance of a runner delaying
 			// a frame event hitting the physical frame deadline
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		case ev := <-w.Window.Events():
-			if e = w.processEvents(ev, frame, destroy); err.Chk(e) {
+			if e = w.processEvents(ev, frame, destroy); E.Chk(e) {
 				return
 			}
 		}
@@ -178,7 +178,7 @@ func (w *Window) Run(
 func (w *Window) processEvents(e event.Event, frame func(ctx l.Context) l.Dimensions, destroy func()) error {
 	switch e := e.(type) {
 	case system.DestroyEvent:
-		dbg.Ln("received destroy event", e.Err)
+		D.Ln("received destroy event", e.Err)
 		// if e.Err != nil {
 		// 	if strings.Contains(e.Err.Error(), "eglCreateWindowSurface failed") {
 		// 		return nil

@@ -74,7 +74,7 @@ func TstNewDepositScript(t *testing.T, p *Pool, seriesID uint32, branch Branch, 
 	script, e := p.DepositScript(seriesID, branch, idx)
 	if e != nil  {
 		t.Fatalf("Failed to create deposit script for series %d, branch %d, index %d: %v",
-			seriesID, branch, idx, err)
+			seriesID, branch, idx, e)
 	}
 	return script
 }
@@ -142,11 +142,11 @@ func TstCreateSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, defini
 	for _, def := range definitions {
 		e := pool.CreateSeries(ns, CurrentVersion, def.SeriesID, def.ReqSigs, def.PubKeys)
 		if e != nil  {
-			t.Fatalf("Cannot creates series %d: %v", def.SeriesID, err)
+			t.Fatalf("Cannot creates series %d: %v", def.SeriesID, e)
 		}
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			for _, key := range def.PrivKeys {
-				if e := pool.EmpowerSeries(ns, def.SeriesID, key); err.Chk(e) {
+				if e := pool.EmpowerSeries(ns, def.SeriesID, key); E.Chk(e) {
 					t.ftl.Ln(e)
 				}
 			}
@@ -258,13 +258,13 @@ func TstCreateCreditsOnStore(t *testing.T, dbtx walletdb.ReadWriteTx, s *wtxmgr.
 		t.ftl.Ln(e)
 	}
 	txmgrNs := dbtx.ReadWriteBucket(txmgrNamespaceKey)
-	if e := s.InsertTx(txmgrNs, rec, meta); err.Chk(e) {
-		t.ftl.Ln("Failed to create inputs: ", err)
+	if e := s.InsertTx(txmgrNs, rec, meta); E.Chk(e) {
+		t.ftl.Ln("Failed to create inputs: ", e)
 	}
 	credits := make([]wtxmgr.Credit, len(msgTx.TxOut))
 	for i := range msgTx.TxOut {
-		if e := s.AddCredit(txmgrNs, rec, meta, uint32(i), false); err.Chk(e) {
-			t.ftl.Ln("Failed to create inputs: ", err)
+		if e := s.AddCredit(txmgrNs, rec, meta, uint32(i), false); E.Chk(e) {
+			t.ftl.Ln("Failed to create inputs: ", e)
 		}
 		credits[i] = wtxmgr.Credit{
 			OutPoint: wire.OutPoint{
@@ -294,11 +294,11 @@ func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Poo
 	// Create a new wallet DB and addr manager.
 	dir, e := ioutil.TempDir("", "pool_test")
 	if e != nil  {
-		t.Fatalf("Failed to create db dir: %v", err)
+		t.Fatalf("Failed to create db dir: %v", e)
 	}
 	db, e = walletdb.Create("bdb", filepath.Join(dir, "wallet.db"))
 	if e != nil  {
-		t.Fatalf("Failed to create wallet DB: %v", err)
+		t.Fatalf("Failed to create wallet DB: %v", e)
 	}
 	var addrMgr *waddrmgr.Manager
 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
@@ -324,13 +324,13 @@ func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Poo
 		return e
 	})
 	if e != nil  {
-		t.Fatalf("Could not set up DB: %v", err)
+		t.Fatalf("Could not set up DB: %v", e)
 	}
 	tearDownFunc = func() {
 		addrMgr.Close()
-		if e := db.Close(); err.Chk(e) {
+		if e := db.Close(); E.Chk(e) {
 		}
-		if e := os.RemoveAll(dir); err.Chk(e) {
+		if e := os.RemoveAll(dir); E.Chk(e) {
 		}
 	}
 	return tearDownFunc, db, pool
@@ -350,7 +350,7 @@ func TstCreateTxStore(t *testing.T, db walletdb.DB) *wtxmgr.Store {
 		return e
 	})
 	if e != nil  {
-		t.Fatalf("Failed to create txmgr: %v", err)
+		t.Fatalf("Failed to create txmgr: %v", e)
 	}
 	return store
 }
@@ -391,14 +391,14 @@ func TstNewWithdrawalAddress(t *testing.T, dbtx walletdb.ReadWriteTx, p *Pool, s
 		addr, e = p.WithdrawalAddress(ns, addrmgrNs, seriesID, branch, index)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to get WithdrawalAddress: %v", err)
+		t.Fatalf("Failed to get WithdrawalAddress: %v", e)
 	}
 	return addr
 }
 func TstNewChangeAddress(t *testing.T, p *Pool, seriesID uint32, idx Index) (addr *ChangeAddress) {
 	addr, e := p.ChangeAddress(seriesID, idx)
 	if e != nil  {
-		t.Fatalf("Failed to get ChangeAddress: %v", err)
+		t.Fatalf("Failed to get ChangeAddress: %v", e)
 	}
 	return addr
 }
@@ -417,7 +417,7 @@ func createAndFulfillWithdrawalRequests(t *testing.T, dbtx walletdb.ReadWriteTx,
 	startAddr := TstNewWithdrawalAddress(t, dbtx, pool, seriesID, 1, 0)
 	lastSeriesID := seriesID
 	w := newWithdrawal(roundID, requests, eligible, *changeStart)
-	if e := w.fulfillRequests(); err.Chk(e) {
+	if e := w.fulfillRequests(); E.Chk(e) {
 		t.ftl.Ln(e)
 	}
 	return withdrawalInfo{

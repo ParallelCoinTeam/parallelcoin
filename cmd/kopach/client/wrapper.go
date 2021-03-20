@@ -20,14 +20,14 @@ func New(conn io.ReadWriteCloser) *Client {
 // NewJob is a delivery of a new job for the worker, this starts a miner
 // note that since this implements net/rpc by default this is gob encoded
 func (c *Client) NewJob(templates *templates.Message) (e error) {
-	trc.Ln("sending new templates")
-	// dbg.S(templates)
+	T.Ln("sending new templates")
+	// D.S(templates)
 	if templates == nil {
 		e = errors.New("templates is nil")
-				return
+		return
 	}
 	var reply bool
-	if e = c.Call("Worker.NewJob", templates, &reply); err.Chk(e){
+	if e = c.Call("Worker.NewJob", templates, &reply); E.Chk(e) {
 		return
 	}
 	if reply != true {
@@ -39,11 +39,11 @@ func (c *Client) NewJob(templates *templates.Message) (e error) {
 // Pause tells the worker to stop working, this is for when the controlling node
 // is not current
 func (c *Client) Pause() (e error) {
-	// dbg.Ln("sending pause")
+	// D.Ln("sending pause")
 	var reply bool
 	e = c.Call("Worker.Pause", 1, &reply)
-	if e != nil  {
-				return
+	if e != nil {
+		return
 	}
 	if reply != true {
 		e = errors.New("pause command not acknowledged")
@@ -53,11 +53,11 @@ func (c *Client) Pause() (e error) {
 
 // Stop the workers
 func (c *Client) Stop() (e error) {
-	dbg.Ln("stop working (exit)")
+	D.Ln("stop working (exit)")
 	var reply bool
 	e = c.Call("Worker.Stop", 1, &reply)
-	if e != nil  {
-				return
+	if e != nil {
+		return
 	}
 	if reply != true {
 		e = errors.New("stop command not acknowledged")
@@ -68,11 +68,11 @@ func (c *Client) Stop() (e error) {
 // SendPass sends the multicast PSK to the workers so they can dispatch their
 // solutions
 func (c *Client) SendPass(pass string) (e error) {
-	dbg.Ln("sending dispatch password")
+	D.Ln("sending dispatch password")
 	var reply bool
 	e = c.Call("Worker.SendPass", pass, &reply)
-	if e != nil  {
-				return
+	if e != nil {
+		return
 	}
 	if reply != true {
 		e = errors.New("send pass command not acknowledged")

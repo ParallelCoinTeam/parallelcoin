@@ -150,7 +150,7 @@ func TestFilterClearWireErrors(t *testing.T) {
 	for i, test := range tests {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
-		if e = test.in.BtcEncode(w, test.pver, test.enc); err.Chk(e) {
+		if e = test.in.BtcEncode(w, test.pver, test.enc); E.Chk(e) {
 		}
 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
 			t.Errorf(

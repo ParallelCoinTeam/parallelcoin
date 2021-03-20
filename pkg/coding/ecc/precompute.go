@@ -28,11 +28,11 @@ func loadS256BytePoints() (e error) {
 	// multiplication.
 	decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(bp))
 	var r io.ReadCloser
-	if r, e = zlib.NewReader(decoder); err.Chk(e) {
+	if r, e = zlib.NewReader(decoder); E.Chk(e) {
 		return
 	}
 	var serialized []byte
-	if serialized, e = ioutil.ReadAll(r); err.Chk(e) {
+	if serialized, e = ioutil.ReadAll(r); E.Chk(e) {
 		return
 	}
 	// Deserialize the precomputed byte points and set the curve to them.

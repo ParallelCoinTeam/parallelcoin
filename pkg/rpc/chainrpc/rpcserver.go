@@ -776,7 +776,7 @@ func (state *GBTWorkState) BlockTemplateResult(useCoinbaseValue bool, submitOld 
 		}
 		// Serialize the transaction for later conversion to hex.
 		txBuf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(txBuf); err.Chk(e) {
+		if e := tx.Serialize(txBuf); E.Chk(e) {
 			context := "Failed to serialize transaction"
 			return nil, InternalRPCError(e.Error(), context)
 		}
@@ -841,7 +841,7 @@ func (state *GBTWorkState) BlockTemplateResult(useCoinbaseValue bool, submitOld 
 		// Serialize the transaction for conversion to hex.
 		tx := msgBlock.Transactions[0]
 		txBuf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-		if e := tx.Serialize(txBuf); err.Chk(e) {
+		if e := tx.Serialize(txBuf); E.Chk(e) {
 			context := "Failed to serialize transaction"
 			return nil, InternalRPCError(e.Error(), context)
 		}
@@ -1001,7 +1001,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 		state.LastTxUpdate = lastTxUpdate
 		state.prevHash = latestHash
 		state.MinTimestamp = minTimestamp
-		dbg.F(
+		D.F(
 			"generated block template (timestamp %v, target %s, merkle root %s)",
 			msgBlock.Header.Timestamp,
 			targetDifficulty,
@@ -1053,11 +1053,11 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 		// several blocks per the chain consensus rules.
 		e := generator.UpdateBlockTime(0, msgBlock)
 		if e != nil {
-			dbg.Ln(e)
+			D.Ln(e)
 			
 		}
 		msgBlock.Header.Nonce = 0
-		dbg.F(
+		D.F(
 			"updated block template (timestamp %v, target %s)",
 			msgBlock.Header.Timestamp,
 			targetDifficulty,
@@ -1130,7 +1130,7 @@ func (s *Server) Start() {
 			ws, e := websocket.Upgrade(w, r, nil, 0, 0)
 			if e != nil {
 				if _, ok := e.(websocket.HandshakeError); !ok {
-					err.Ln("unexpected websocket error:", e)
+					E.Ln("unexpected websocket error:", e)
 					
 				}
 				http.Error(w, "400 Bad Request.", http.StatusBadRequest)
@@ -1142,13 +1142,13 @@ func (s *Server) Start() {
 	for _, listener := range s.Cfg.Listeners {
 		s.WG.Add(1)
 		go func(listener net.Listener) {
-			inf.Ln("chain RPC server listening on ", listener.Addr())
+			I.Ln("chain RPC server listening on ", listener.Addr())
 			e := httpServer.Serve(listener)
 			if e != nil {
-				dbg.Ln(e)
+				D.Ln(e)
 			}
-			dbg.Ln("chain RPC listener done for", listener.Addr())
-			if e := listener.Close(); err.Chk(e) {
+			D.Ln("chain RPC listener done for", listener.Addr())
+			if e := listener.Close(); E.Chk(e) {
 			}
 			s.WG.Done()
 		}(listener)
@@ -1160,22 +1160,22 @@ func (s *Server) Start() {
 // Stop is used by server.go_ to stop the rpc listener.
 func (s *Server) Stop() (e error) {
 	if atomic.AddInt32(&s.Shutdown, 1) != 1 {
-		wrn.Ln("RPC server is already in the process of shutting down")
+		W.Ln("RPC server is already in the process of shutting down")
 		return nil
 	}
-	trc.Ln("RPC server shutting down")
+	F.Ln("RPC server shutting down")
 	s.Quit.Q()
 	for _, listener := range s.Cfg.Listeners {
 		e := listener.Close()
 		if e != nil {
-			err.Ln("problem shutting down RPC:", e)
+			E.Ln("problem shutting down RPC:", e)
 			return e
 		}
 	}
 	s.NtfnMgr.Shutdown()
 	s.NtfnMgr.WaitForShutdown()
 	s.WG.Wait()
-	dbg.Ln("RPC server shutdown complete")
+	D.Ln("RPC server shutdown complete")
 	return nil
 }
 
@@ -1192,7 +1192,7 @@ func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, error) {
 	authhdr := r.Header["Authorization"]
 	if len(authhdr) == 0 {
 		if require {
-			wrn.Ln("RPC authentication failure from", r.RemoteAddr)
+			W.Ln("RPC authentication failure from", r.RemoteAddr)
 			
 			return false, false, errors.New("auth failure")
 		}
@@ -1211,7 +1211,7 @@ func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, error) {
 		return true, true, nil
 	}
 	// Request's auth doesn't match either user
-	wrn.Ln("RPC authentication failure from", r.RemoteAddr)
+	W.Ln("RPC authentication failure from", r.RemoteAddr)
 	
 	return false, false, errors.New("auth failure")
 }
@@ -1231,7 +1231,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 		case blockchain.NTBlockAccepted:
 			block, ok := notification.Data.(*util.Block)
 			if !ok {
-				wrn.Ln("chain accepted notification is not a block")
+				W.Ln("chain accepted notification is not a block")
 				break
 			}
 			// Allow any clients performing long polling via the getblocktemplate RPC to be notified when the new block
@@ -1240,7 +1240,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 		case blockchain.NTBlockConnected:
 			block, ok := notification.Data.(*util.Block)
 			if !ok {
-				wrn.Ln("chain connected notification is not a block")
+				W.Ln("chain connected notification is not a block")
 				break
 			}
 			// Notify registered websocket clients of incoming block.
@@ -1248,7 +1248,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 		case blockchain.NTBlockDisconnected:
 			block, ok := notification.Data.(*util.Block)
 			if !ok {
-				wrn.Ln("chain disconnected notification is not a block.")
+				W.Ln("chain disconnected notification is not a block.")
 				break
 			}
 			// Notify registered websocket clients.
@@ -1309,16 +1309,16 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	// Read and close the JSON-RPC request body from the caller.
 	var e error
 	var body []byte
-	if body, e = ioutil.ReadAll(r.Body); err.Chk(e) {
+	if body, e = ioutil.ReadAll(r.Body); E.Chk(e) {
 	}
-	if e = r.Body.Close(); err.Chk(e) {
+	if e = r.Body.Close(); E.Chk(e) {
 	}
 	if e != nil {
 		errCode := http.StatusBadRequest
 		http.Error(
 			w, fmt.Sprintf(
 				"%d error reading JSON message: %v",
-				errCode, err,
+				errCode, e,
 			), errCode,
 		)
 		return
@@ -1333,34 +1333,34 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	hj, ok := w.(http.Hijacker)
 	if !ok {
 		errMsg := "webserver doesn't support hijacking"
-		wrn.F(errMsg)
+		W.F(errMsg)
 		errCode := http.StatusInternalServerError
 		http.Error(w, strconv.Itoa(errCode)+" "+errMsg, errCode)
 		return
 	}
 	conn, buf, e := hj.Hijack()
 	if e != nil {
-		wrn.Ln("failed to hijack HTTP connection:", err)
+		W.Ln("failed to hijack HTTP connection:", e)
 		errCode := http.StatusInternalServerError
 		http.Error(w, strconv.Itoa(errCode)+" "+e.Error(), errCode)
 		return
 	}
 	defer func() {
-		if e := buf.Flush(); err.Chk(e) {
+		if e := buf.Flush(); E.Chk(e) {
 		}
-		if e := conn.Close(); err.Chk(e) {
+		if e := conn.Close(); E.Chk(e) {
 		}
 	}()
 	e = conn.SetReadDeadline(TimeZeroVal)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 	}
 	// Attempt to parse the raw body into a JSON-RPC request.
 	var responseID interface{}
 	var jsonErr error
 	var result interface{}
 	var request btcjson.Request
-	if e := js.Unmarshal(body, &request); err.Chk(e) {
+	if e := js.Unmarshal(body, &request); E.Chk(e) {
 		jsonErr = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCParse.Code,
 			Message: "Failed to parse request: " + e.Error(),
@@ -1419,21 +1419,21 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	var msg []byte
 	msg, e = CreateMarshalledReply(responseID, result, jsonErr)
 	if e != nil {
-		err.Ln("failed to marshal reply:", e)
+		E.Ln("failed to marshal reply:", e)
 		return
 	}
 	// Write the response.
 	e = s.WriteHTTPResponseHeaders(r, w.Header(), http.StatusOK, buf)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
-	if _, e = buf.Write(msg); err.Chk(e) {
-		err.Ln("failed to write marshalled reply:", e)
+	if _, e = buf.Write(msg); E.Chk(e) {
+		E.Ln("failed to write marshalled reply:", e)
 	}
 	// Terminate with newline to maintain compatibility with Bitcoin Core.
-	if e := buf.WriteByte('\n'); err.Chk(e) {
-		err.Ln("failed to append terminating newline to reply:", e)
+	if e := buf.WriteByte('\n'); E.Chk(e) {
+		E.Ln("failed to append terminating newline to reply:", e)
 		
 	}
 }
@@ -1444,7 +1444,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 // This function is safe for concurrent access.
 func (s *Server) LimitConnections(w http.ResponseWriter, remoteAddr string) bool {
 	if int(atomic.LoadInt32(&s.NumClients)+1) > *s.Config.RPCMaxClients {
-		inf.F(
+		I.F(
 			"max RPC clients exceeded [%d] - disconnecting client %s",
 			s.Config.RPCMaxClients, remoteAddr,
 		)
@@ -1939,7 +1939,7 @@ func FetchMempoolTxnsForAddress(
 
 // GenCertPair generates a key/cert pair to the paths provided.
 func GenCertPair(certFile, keyFile string) (e error) {
-	inf.Ln("generating TLS certificates...")
+	I.Ln("generating TLS certificates...")
 	org := "pod autogenerated cert"
 	validUntil := time.Now().Add(10 * 365 * 24 * time.Hour)
 	cert, key, e := util.NewTLSCertPair(org, validUntil, nil)
@@ -1947,15 +1947,15 @@ func GenCertPair(certFile, keyFile string) (e error) {
 		return e
 	}
 	// Write cert and key files.
-	if e = ioutil.WriteFile(certFile, cert, 0666); err.Chk(e) {
+	if e = ioutil.WriteFile(certFile, cert, 0666); E.Chk(e) {
 		return e
 	}
-	if e = ioutil.WriteFile(keyFile, key, 0600); err.Chk(e) {
-		if e := os.Remove(certFile); err.Chk(e) {
+	if e = ioutil.WriteFile(keyFile, key, 0600); E.Chk(e) {
+		if e := os.Remove(certFile); E.Chk(e) {
 		}
 		return e
 	}
-	inf.Ln("Done generating TLS certificates")
+	I.Ln("Done generating TLS certificates")
 	return nil
 }
 
@@ -1975,7 +1975,7 @@ func GetDifficultyRatio(
 	outString := difficulty.FloatString(8)
 	diff, e := strconv.ParseFloat(outString, 64)
 	if e != nil {
-		err.Ln("cannot get difficulty:", e)
+		E.Ln("cannot get difficulty:", e)
 		
 		return 0
 	}
@@ -2009,7 +2009,7 @@ func InternalRPCError(errStr, context string) *btcjson.RPCError {
 	if context != "" {
 		logStr = context + ": " + errStr
 	}
-	err.Ln(logStr)
+	E.Ln(logStr)
 	
 	return btcjson.NewRPCError(btcjson.ErrRPCInternal.Code, errStr)
 }
@@ -2027,7 +2027,7 @@ func MessageToHex(msg wire.Message) (string, error) {
 	if e := msg.BtcEncode(
 		&buf, MaxProtocolVersion,
 		wire.BaseEncoding,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		context := fmt.Sprintf("Failed to encode msg of type %Ter", msg)
 		return "", InternalRPCError(e.Error(), context)
 	}
@@ -2167,7 +2167,7 @@ func VerifyChain(s *Server, level, depth int32) (e error) {
 	if finishHeight < 0 {
 		finishHeight = 0
 	}
-	inf.F(
+	I.F(
 		"verifying chain for %d blocks at level %d",
 		best.Height-finishHeight,
 		level,
@@ -2178,7 +2178,7 @@ func VerifyChain(s *Server, level, depth int32) (e error) {
 		// Level 0 just looks up the block.
 		block, e = s.Cfg.Chain.BlockByHeight(height)
 		if e != nil {
-			err.F("verify is unable to fetch block at height %d: %v", height, e)
+			E.F("verify is unable to fetch block at height %d: %v", height, e)
 			return e
 		}
 		powLimit := fork.GetMinDiff(
@@ -2188,7 +2188,7 @@ func VerifyChain(s *Server, level, depth int32) (e error) {
 			), height,
 		)
 		var pb *util.Block
-		if pb, e = s.Cfg.Chain.BlockByHash(&block.MsgBlock().Header.PrevBlock); err.Chk(e) {
+		if pb, e = s.Cfg.Chain.BlockByHash(&block.MsgBlock().Header.PrevBlock); E.Chk(e) {
 			return
 		}
 		// Level 1 does basic chain sanity checks.
@@ -2202,15 +2202,15 @@ func VerifyChain(s *Server, level, depth int32) (e error) {
 				pb.MsgBlock().Header.Timestamp,
 			)
 			if e != nil {
-				err.F(
+				E.F(
 					"verify is unable to validate block at hash %v height %d: %v %s",
-					block.Hash(), height, err,
+					block.Hash(), height, e,
 				)
 				return e
 			}
 		}
 	}
-	inf.Ln("chain verify completed successfully")
+	I.Ln("chain verify completed successfully")
 	return nil
 }
 

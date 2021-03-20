@@ -22,7 +22,7 @@ func TestOutputSplittingNotEnoughInputs(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -46,8 +46,8 @@ func TestOutputSplittingNotEnoughInputs(t *testing.T) {
 		// inputs for the requested outputs, fulfillRequests() would drop outputs until we had enough.
 		tx.calculateFee = TstConstantFee(3)
 	}
-	if e := w.fulfillRequests(); err.Chk(e) {
-		t.ftl.Ln(e)
+	if e := w.fulfillRequests(); E.Chk(e) {
+		t.F.Ln(e)
 	}
 	if len(w.transactions) != 1 {
 		t.Fatalf("Wrong number of finalized transactions; got %d, want 1", len(w.transactions))
@@ -70,7 +70,7 @@ func TestOutputSplittingOversizeTx(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -96,8 +96,8 @@ func TestOutputSplittingOversizeTx(t *testing.T) {
 			return txMaxSize - 1
 		}
 	}
-	if e := w.fulfillRequests(); err.Chk(e) {
-		t.ftl.Ln(e)
+	if e := w.fulfillRequests(); E.Chk(e) {
+		t.F.Ln(e)
 	}
 	if len(w.transactions) != 2 {
 		t.Fatalf("Wrong number of finalized transactions; got %d, want 2", len(w.transactions))
@@ -131,7 +131,7 @@ func TestSplitLastOutputNoOutputs(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.F.Ln(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -168,7 +168,7 @@ func TestWithdrawalTxOutputs(t *testing.T) {
 	}
 	changeStart := TstNewChangeAddress(t, pool, seriesID, 0)
 	w := newWithdrawal(0, outputs, eligible, *changeStart)
-	if e := w.fulfillRequests(); err.Chk(e) {
+	if e := w.fulfillRequests(); E.Chk(e) {
 		t.ftl.Ln(e)
 	}
 	if len(w.transactions) != 1 {
@@ -204,7 +204,7 @@ func TestFulfillRequestsNoSatisfiableOutputs(t *testing.T) {
 		t, 1, "3Qt1EaKRD9g9FeL2DGkLLswhK1AKmmXFSe", util.Amount(3e6), pool.Manager().ChainParams())
 	changeStart := TstNewChangeAddress(t, pool, seriesID, 0)
 	w := newWithdrawal(0, []OutputRequest{request}, eligible, *changeStart)
-	if e := w.fulfillRequests(); err.Chk(e) {
+	if e := w.fulfillRequests(); E.Chk(e) {
 		t.ftl.Ln(e)
 	}
 	if len(w.transactions) != 0 {
@@ -247,7 +247,7 @@ func TestFulfillRequestsNotEnoughCreditsForAllRequests(t *testing.T) {
 	outputs := []OutputRequest{out1, out2, out3}
 	changeStart := TstNewChangeAddress(t, pool, seriesID, 0)
 	w := newWithdrawal(0, outputs, eligible, *changeStart)
-	if e := w.fulfillRequests(); err.Chk(e) {
+	if e := w.fulfillRequests(); E.Chk(e) {
 		t.ftl.Ln(e)
 	}
 	tx := w.transactions[0]
@@ -433,7 +433,7 @@ func TestRollbackLastOutputWhenNewOutputAdded(t *testing.T) {
 			return txMaxSize - 1
 		}
 	}
-	if e := w.fulfillRequests(); err.Chk(e) {
+	if e := w.fulfillRequests(); E.Chk(e) {
 		t.ftl.Ln("Unexpected error:", err)
 	}
 	// At this point we should have two finalized transactions.
@@ -491,7 +491,7 @@ func TestRollbackLastOutputWhenNewInputAdded(t *testing.T) {
 		}
 	}
 	// The rollback should be triggered right after the 4th input is added in order to fulfill the second request.
-	if e := w.fulfillRequests(); err.Chk(e) {
+	if e := w.fulfillRequests(); E.Chk(e) {
 		t.ftl.Ln("Unexpected error:", err)
 	}
 	// At this point we should have two finalized transactions.
@@ -889,7 +889,7 @@ func TestSignMultiSigUTXO(t *testing.T) {
 	idx := 0 // The index of the tx input we're going to sign.
 	pkScript := tx.inputs[idx].PkScript
 	TstRunWithManagerUnlocked(t, mgr, addrmgrNs, func() {
-		if e = signMultiSigUTXO(mgr, addrmgrNs, msgtx, idx, pkScript, txSigs[idx]); err.Chk(e) {
+		if e = signMultiSigUTXO(mgr, addrmgrNs, msgtx, idx, pkScript, txSigs[idx]); E.Chk(e) {
 			t.ftl.Ln(e)
 		}
 	})
@@ -1240,7 +1240,7 @@ func TestStoreTransactionsWithoutChangeOutput(t *testing.T) {
 	txmgrNs := dbtx.ReadWriteBucket(txmgrNamespaceKey)
 	wtx := createWithdrawalTxWithStoreCredits(t, dbtx, store, pool, []int64{4e6}, []int64{3e6})
 	tx := &changeAwareTx{MsgTx: wtx.toMsgTx(), changeIdx: int32(-1)}
-	if e := storeTransactions(store, txmgrNs, []*changeAwareTx{tx}); err.Chk(e) {
+	if e := storeTransactions(store, txmgrNs, []*changeAwareTx{tx}); E.Chk(e) {
 		t.ftl.Ln(e)
 	}
 	credits, e := store.UnspentOutputs(txmgrNs)
@@ -1269,7 +1269,7 @@ func TestStoreTransactionsWithChangeOutput(t *testing.T) {
 	wtx.changeOutput = wire.NewTxOut(int64(3e6), []byte{})
 	msgtx := wtx.toMsgTx()
 	tx := &changeAwareTx{MsgTx: msgtx, changeIdx: int32(len(msgtx.TxOut) - 1)}
-	if e := storeTransactions(store, txmgrNs, []*changeAwareTx{tx}); err.Chk(e) {
+	if e := storeTransactions(store, txmgrNs, []*changeAwareTx{tx}); E.Chk(e) {
 		t.ftl.Ln(e)
 	}
 	hash := msgtx.TxHash()
@@ -1410,7 +1410,7 @@ func signTxAndValidate(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.R
 	for i := range tx.TxIn {
 		pkScript := credits[i].PkScript
 		TstRunWithManagerUnlocked(t, mgr, addrmgrNs, func() {
-			if e := signMultiSigUTXO(mgr, addrmgrNs, tx, i, pkScript, txSigs[i]); err.Chk(e) {
+			if e := signMultiSigUTXO(mgr, addrmgrNs, tx, i, pkScript, txSigs[i]); E.Chk(e) {
 				t.ftl.Ln(e)
 			}
 		})

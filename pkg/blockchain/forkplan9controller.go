@@ -69,6 +69,6 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(lastNode *BlockNo
 		}
 		return
 	}
-	trc.Ln("should not fall through here")
+	F.Ln("should not fall through here")
 	return
 }

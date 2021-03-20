@@ -17,7 +17,7 @@ func main() {
 	for {
 		_, e := p.Write([]byte("ping"))
 		if e != nil  {
-			fmt.Println("err:", err)
+			fmt.Println("err:", e)
 		}
 		time.Sleep(time.Second)
 	}

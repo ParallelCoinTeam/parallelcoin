@@ -33,7 +33,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 		Action:      walletGUIHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) (e error) {
-			dbg.Ln("subcommand completed", os.Args)
+			D.Ln("subcommand completed", os.Args)
 			if interrupt.Restart {
 			}
 			return nil
@@ -126,7 +126,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 									cx.ActiveNet.Name,
 								), dbName,
 							)
-							if e = os.RemoveAll(dbPath); err.Chk(e) {
+							if e = os.RemoveAll(dbPath); E.Chk(e) {
 							}
 							return nodeHandle(cx)(c)
 						},
@@ -199,7 +199,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 									cx.ActiveNet.Name,
 								), dbName,
 							)
-							if e = os.RemoveAll(dbPath); err.Chk(e) {
+							if e = os.RemoveAll(dbPath); E.Chk(e) {
 							}
 							return nodeHandle(cx)(c)
 							// return nil
@@ -217,18 +217,18 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 							"development and testing as well as clearing up transaction mess)",
 						func(c *cli.Context) (e error) {
 							config.Configure(cx, "wallet", true)
-							inf.Ln("dropping wallet history")
+							I.Ln("dropping wallet history")
 							go func() {
-								dbg.Ln("starting wallet")
-								if e = walletmain.Main(cx); err.Chk(e) {
+								D.Ln("starting wallet")
+								if e = walletmain.Main(cx); E.Chk(e) {
 									// os.Exit(1)
 								} else {
-									dbg.Ln("wallet started")
+									D.Ln("wallet started")
 								}
 							}()
-							// dbg.Ln("waiting for walletChan")
+							// D.Ln("waiting for walletChan")
 							// cx.WalletServer = <-cx.WalletChan
-							// dbg.Ln("walletChan sent")
+							// D.Ln("walletChan sent")
 							e = legacy.DropWalletHistory(cx.WalletServer, cx.Config)(c)
 							return
 						}, au.SubCommands(), nil,
@@ -835,7 +835,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 
 func genPassword() string {
 	s, e := hdkeychain.GenerateSeed(16)
-	if e != nil  {
+	if e != nil {
 		panic("can't do nothing without entropy! " + e.Error())
 	}
 	return base58.Encode(s)

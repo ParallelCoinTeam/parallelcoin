@@ -252,11 +252,11 @@ func (s *ScopedKeyManager) deriveKey(
 	}
 	// Derive and return the key.
 	var branchKey *hdkeychain.ExtendedKey
-	if branchKey, e = acctKey.Child(branch); err.Chk(e) {
+	if branchKey, e = acctKey.Child(branch); E.Chk(e) {
 		str := fmt.Sprintf("failed to derive extended key branch %d", branch)
 		return nil, managerError(ErrKeyChain, str, e)
 	}
-	if addressKey, e = branchKey.Child(index); err.Chk(e) {
+	if addressKey, e = branchKey.Child(index); E.Chk(e) {
 		branchKey.Zero() // Zero branch key after it's used.
 		str := fmt.Sprintf("failed to derive child extended key -- branch %d, child %d", branch, index)
 		return nil, managerError(ErrKeyChain, str, e)
@@ -282,7 +282,7 @@ func (s *ScopedKeyManager) loadAccountInfo(
 	// information from the database.
 	var e error
 	var rowInterface interface{}
-	if rowInterface, e = fetchAccountInfo(ns, &s.scope, account); err.Chk(e) {
+	if rowInterface, e = fetchAccountInfo(ns, &s.scope, account); E.Chk(e) {
 		return nil, maybeConvertDbError(e)
 	}
 	// Ensure the account type is a default account.
@@ -294,12 +294,12 @@ func (s *ScopedKeyManager) loadAccountInfo(
 	}
 	// Use the crypto public key to decrypt the account public extended key.
 	var serializedKeyPub []byte
-	if serializedKeyPub, e = s.rootManager.cryptoKeyPub.Decrypt(row.pubKeyEncrypted); err.Chk(e) {
+	if serializedKeyPub, e = s.rootManager.cryptoKeyPub.Decrypt(row.pubKeyEncrypted); E.Chk(e) {
 		str := fmt.Sprintf("failed to decrypt public key for account %d", account)
 		return nil, managerError(ErrCrypto, str, e)
 	}
 	var acctKeyPub *hdkeychain.ExtendedKey
-	if acctKeyPub, e = hdkeychain.NewKeyFromString(string(serializedKeyPub)); err.Chk(e) {
+	if acctKeyPub, e = hdkeychain.NewKeyFromString(string(serializedKeyPub)); E.Chk(e) {
 		str := fmt.Sprintf("failed to create extended public key for account %d", account)
 		return nil, managerError(ErrKeyChain, str, e)
 	}
@@ -315,12 +315,12 @@ func (s *ScopedKeyManager) loadAccountInfo(
 	if !s.rootManager.isLocked() {
 		// Use the crypto private key to decrypt the account private extended keys.
 		var decrypted []byte
-		if decrypted, e = s.rootManager.cryptoKeyPriv.Decrypt(acctInfo.acctKeyEncrypted); err.Chk(e) {
+		if decrypted, e = s.rootManager.cryptoKeyPriv.Decrypt(acctInfo.acctKeyEncrypted); E.Chk(e) {
 			str := fmt.Sprintf("failed to decrypt private key for account %d", account)
 			return nil, managerError(ErrCrypto, str, e)
 		}
 		var acctKeyPriv *hdkeychain.ExtendedKey
-		if acctKeyPriv, e = hdkeychain.NewKeyFromString(string(decrypted)); err.Chk(e) {
+		if acctKeyPriv, e = hdkeychain.NewKeyFromString(string(decrypted)); E.Chk(e) {
 			str := fmt.Sprintf("failed to create extended private key for account %d", account)
 			return nil, managerError(ErrKeyChain, str, e)
 		}
@@ -332,11 +332,11 @@ func (s *ScopedKeyManager) loadAccountInfo(
 		index--
 	}
 	var lastExtKey *hdkeychain.ExtendedKey
-	if lastExtKey, e = s.deriveKey(acctInfo, branch, index, !s.rootManager.isLocked()); err.Chk(e) {
+	if lastExtKey, e = s.deriveKey(acctInfo, branch, index, !s.rootManager.isLocked()); E.Chk(e) {
 		return nil, e
 	}
 	var lastExtAddr ManagedAddress
-	if lastExtAddr, e = s.keyToManaged(lastExtKey, account, branch, index); err.Chk(e) {
+	if lastExtAddr, e = s.keyToManaged(lastExtKey, account, branch, index); E.Chk(e) {
 		return nil, e
 	}
 	acctInfo.lastExternalAddr = lastExtAddr
@@ -345,11 +345,11 @@ func (s *ScopedKeyManager) loadAccountInfo(
 		index--
 	}
 	var lastIntKey *hdkeychain.ExtendedKey
-	if lastIntKey, e = s.deriveKey(acctInfo, branch, index, !s.rootManager.isLocked()); err.Chk(e) {
+	if lastIntKey, e = s.deriveKey(acctInfo, branch, index, !s.rootManager.isLocked()); E.Chk(e) {
 		return nil, e
 	}
 	var lastIntAddr ManagedAddress
-	if lastIntAddr, e = s.keyToManaged(lastIntKey, account, branch, index); err.Chk(e) {
+	if lastIntAddr, e = s.keyToManaged(lastIntKey, account, branch, index); E.Chk(e) {
 		return nil, e
 	}
 	acctInfo.lastInternalAddr = lastIntAddr
@@ -381,7 +381,7 @@ func (s *ScopedKeyManager) AccountProperties(
 	var e error
 	if account != ImportedAddrAccount {
 		var acctInfo *accountInfo
-		if acctInfo, e = s.loadAccountInfo(ns, account); err.Chk(e) {
+		if acctInfo, e = s.loadAccountInfo(ns, account); E.Chk(e) {
 			return nil, e
 		}
 		props.AccountName = acctInfo.acctName
@@ -395,7 +395,7 @@ func (s *ScopedKeyManager) AccountProperties(
 			importedKeyCount++
 			return nil
 		}
-		if e = forEachAccountAddress(ns, &s.scope, ImportedAddrAccount, count); err.Chk(e) {
+		if e = forEachAccountAddress(ns, &s.scope, ImportedAddrAccount, count); E.Chk(e) {
 			return nil, e
 		}
 		props.ImportedKeyCount = importedKeyCount
@@ -416,7 +416,7 @@ func (s *ScopedKeyManager) DeriveFromKeyPath(
 	var e error
 	if extKey, e = s.deriveKeyFromPath(
 		ns, kp.Account, kp.Branch, kp.Index, !s.rootManager.IsLocked(),
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return nil, e
 	}
 	return s.keyToManaged(extKey, kp.Account, kp.Branch, kp.Index)
@@ -433,7 +433,7 @@ func (s *ScopedKeyManager) deriveKeyFromPath(
 	// Look up the account key information.
 	var acctInfo *accountInfo
 	var e error
-	if acctInfo, e = s.loadAccountInfo(ns, account); err.Chk(e) {
+	if acctInfo, e = s.loadAccountInfo(ns, account); E.Chk(e) {
 		return nil, e
 	}
 	return s.deriveKey(acctInfo, branch, index, private)
@@ -452,7 +452,7 @@ func (s *ScopedKeyManager) chainAddressRowToManaged(
 	isLocked := s.rootManager.isLocked()
 	var addressKey *hdkeychain.ExtendedKey
 	var e error
-	if addressKey, e = s.deriveKeyFromPath(ns, row.account, row.branch, row.index, !isLocked); err.Chk(e) {
+	if addressKey, e = s.deriveKeyFromPath(ns, row.account, row.branch, row.index, !isLocked); E.Chk(e) {
 		return nil, e
 	}
 	return s.keyToManaged(addressKey, row.account, row.branch, row.index)
@@ -464,12 +464,12 @@ func (s *ScopedKeyManager) importedAddressRowToManaged(row *dbImportedAddressRow
 	// Use the crypto public key to decrypt the imported public key.
 	var pubBytes []byte
 	var e error
-	if pubBytes, e = s.rootManager.cryptoKeyPub.Decrypt(row.encryptedPubKey); err.Chk(e) {
+	if pubBytes, e = s.rootManager.cryptoKeyPub.Decrypt(row.encryptedPubKey); E.Chk(e) {
 		str := "failed to decrypt public key for imported address"
 		return nil, managerError(ErrCrypto, str, e)
 	}
 	var pubKey *ec.PublicKey
-	if pubKey, e = ec.ParsePubKey(pubBytes, ec.S256()); err.Chk(e) {
+	if pubKey, e = ec.ParsePubKey(pubBytes, ec.S256()); E.Chk(e) {
 		str := "invalid public key for imported address"
 		return nil, managerError(ErrCrypto, str, e)
 	}
@@ -483,7 +483,7 @@ func (s *ScopedKeyManager) importedAddressRowToManaged(row *dbImportedAddressRow
 	if ma, e = newManagedAddressWithoutPrivKey(
 		s, derivationPath, pubKey, compressed,
 		s.addrSchema.ExternalAddrType,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return nil, e
 	}
 	ma.privKeyEncrypted = row.encryptedPrivKey
@@ -497,7 +497,7 @@ func (s *ScopedKeyManager) scriptAddressRowToManaged(row *dbScriptAddressRow) (M
 	// Use the crypto public key to decrypt the imported script hash.
 	var scriptHash []byte
 	var e error
-	if scriptHash, e = s.rootManager.cryptoKeyPub.Decrypt(row.encryptedHash); err.Chk(e) {
+	if scriptHash, e = s.rootManager.cryptoKeyPub.Decrypt(row.encryptedHash); E.Chk(e) {
 		str := "failed to decrypt imported script hash"
 		return nil, managerError(ErrCrypto, str, e)
 	}
@@ -547,7 +547,7 @@ func (s *ScopedKeyManager) loadAndCacheAddress(
 	}
 	// Create a new managed address for the specific type of address based on type.
 	var managedAddr ManagedAddress
-	if managedAddr, e = s.rowInterfaceToManaged(ns, rowInterface); err.Chk(e) {
+	if managedAddr, e = s.rowInterfaceToManaged(ns, rowInterface); E.Chk(e) {
 		return nil, e
 	}
 	// Cache and return the new managed address.
@@ -607,7 +607,7 @@ func (s *ScopedKeyManager) AddrAccount(
 	ns walletdb.ReadBucket,
 	address util.Address,
 ) (account uint32, e error) {
-	if account, e = fetchAddrAccount(ns, &s.scope, address.ScriptAddress()); err.Chk(e) {
+	if account, e = fetchAddrAccount(ns, &s.scope, address.ScriptAddress()); T.Chk(e) {
 		return 0, maybeConvertDbError(e)
 	}
 	return account, nil
@@ -625,7 +625,7 @@ func (s *ScopedKeyManager) nextAddresses(
 	// created.
 	var acctInfo *accountInfo
 	var e error
-	if acctInfo, e = s.loadAccountInfo(ns, account); err.Chk(e) {
+	if acctInfo, e = s.loadAccountInfo(ns, account); E.Chk(e) {
 		return nil, e
 	}
 	// Choose the account key to used based on whether the address manager is
@@ -658,7 +658,7 @@ func (s *ScopedKeyManager) nextAddresses(
 	}
 	// Derive the appropriate branch key and ensure it is zeroed when done.
 	var branchKey *hdkeychain.ExtendedKey
-	if branchKey, e = acctKey.Child(branchNum); err.Chk(e) {
+	if branchKey, e = acctKey.Child(branchNum); E.Chk(e) {
 		str := fmt.Sprintf(
 			"failed to derive extended key branch %d",
 			branchNum,
@@ -676,7 +676,7 @@ func (s *ScopedKeyManager) nextAddresses(
 		for {
 			// Derive the next child in the external chain branch.
 			var key *hdkeychain.ExtendedKey
-			if key, e = branchKey.Child(nextIndex); err.Chk(e) {
+			if key, e = branchKey.Child(nextIndex); E.Chk(e) {
 				// When this particular child is invalid, skip to the next index.
 				if e == hdkeychain.ErrInvalidChild {
 					nextIndex++
@@ -704,7 +704,7 @@ func (s *ScopedKeyManager) nextAddresses(
 		// whether the generated key is private. Also, zero the next key after creating
 		// the managed address from it.
 		var addr *managedAddress
-		if addr, e = newManagedAddressFromExtKey(s, derivationPath, nextKey, addrType); err.Chk(e) {
+		if addr, e = newManagedAddressFromExtKey(s, derivationPath, nextKey, addrType); E.Chk(e) {
 			return nil, e
 		}
 		if internal {
@@ -729,19 +729,19 @@ func (s *ScopedKeyManager) nextAddresses(
 			if e = putChainedAddress(
 				ns, &s.scope, addressID, account, ssFull,
 				info.branch, info.index, adtChain,
-			); err.Chk(e) {
+			); E.Chk(e) {
 				return nil, maybeConvertDbError(e)
 			}
 		case *scriptAddress:
 			var encryptedHash []byte
-			if encryptedHash, e = s.rootManager.cryptoKeyPub.Encrypt(a.AddrHash()); err.Chk(e) {
+			if encryptedHash, e = s.rootManager.cryptoKeyPub.Encrypt(a.AddrHash()); E.Chk(e) {
 				str := fmt.Sprintf("failed to encrypt script hash %x", a.AddrHash())
 				return nil, managerError(ErrCrypto, str, e)
 			}
 			if e = putScriptAddress(
 				ns, &s.scope, a.AddrHash(), ImportedAddrAccount, ssNone, encryptedHash,
 				a.scriptEncrypted,
-			); err.Chk(e) {
+			); E.Chk(e) {
 				return nil, maybeConvertDbError(e)
 			}
 		}
@@ -785,7 +785,7 @@ func (s *ScopedKeyManager) extendAddresses(
 	// The next address can only be generated for accounts that have already been
 	// created.
 	var acctInfo *accountInfo
-	if acctInfo, e = s.loadAccountInfo(ns, account); err.Chk(e) {
+	if acctInfo, e = s.loadAccountInfo(ns, account); E.Chk(e) {
 		return e
 	}
 	// Choose the account key to used based on whether the address manager is
@@ -822,7 +822,7 @@ func (s *ScopedKeyManager) extendAddresses(
 	}
 	// Derive the appropriate branch key and ensure it is zeroed when done.
 	var branchKey *hdkeychain.ExtendedKey
-	if branchKey, e = acctKey.Child(branchNum); err.Chk(e) {
+	if branchKey, e = acctKey.Child(branchNum); E.Chk(e) {
 		str := fmt.Sprintf("failed to derive extended key branch %d", branchNum)
 		return managerError(ErrKeyChain, str, e)
 	}
@@ -838,7 +838,7 @@ func (s *ScopedKeyManager) extendAddresses(
 		for {
 			// Derive the next child in the external chain branch.
 			var key *hdkeychain.ExtendedKey
-			if key, e = branchKey.Child(nextIndex); err.Chk(e) {
+			if key, e = branchKey.Child(nextIndex); E.Chk(e) {
 				// When this particular child is invalid, skip to the next index.
 				if e == hdkeychain.ErrInvalidChild {
 					nextIndex++
@@ -866,7 +866,7 @@ func (s *ScopedKeyManager) extendAddresses(
 		// whether the generated key is private. Also, zero the next key after creating
 		// the managed address from it.
 		var managedAddr *managedAddress
-		if managedAddr, e = newManagedAddressFromExtKey(s, derivationPath, nextKey, addrType); err.Chk(e) {
+		if managedAddr, e = newManagedAddressFromExtKey(s, derivationPath, nextKey, addrType); E.Chk(e) {
 			return e
 		}
 		if internal {
@@ -890,12 +890,12 @@ func (s *ScopedKeyManager) extendAddresses(
 			if e = putChainedAddress(
 				ns, &s.scope, addressID, account, ssFull,
 				info.branch, info.index, adtChain,
-			); err.Chk(e) {
+			); E.Chk(e) {
 				return maybeConvertDbError(e)
 			}
 		case *scriptAddress:
 			var encryptedHash []byte
-			if encryptedHash, e = s.rootManager.cryptoKeyPub.Encrypt(a.AddrHash()); err.Chk(e) {
+			if encryptedHash, e = s.rootManager.cryptoKeyPub.Encrypt(a.AddrHash()); E.Chk(e) {
 				str := fmt.Sprintf(
 					"failed to encrypt script hash %x",
 					a.AddrHash(),
@@ -905,7 +905,7 @@ func (s *ScopedKeyManager) extendAddresses(
 			if e = putScriptAddress(
 				ns, &s.scope, a.AddrHash(), ImportedAddrAccount,
 				ssNone, encryptedHash, a.scriptEncrypted,
-			); err.Chk(e) {
+			); E.Chk(e) {
 				return maybeConvertDbError(e)
 			}
 		}
@@ -941,7 +941,7 @@ func (s *ScopedKeyManager) NextExternalAddresses(
 ) (ma []ManagedAddress, e error) {
 	// Enforce maximum account number.
 	if account > MaxAccountNum {
-		if e = managerError(ErrAccountNumTooHigh, errAcctTooHigh, nil); err.Chk(e) {
+		if e = managerError(ErrAccountNumTooHigh, errAcctTooHigh, nil); E.Chk(e) {
 		}
 		return nil, e
 	}
@@ -958,7 +958,7 @@ func (s *ScopedKeyManager) NextInternalAddresses(
 ) (ma []ManagedAddress,e error) {
 	// Enforce maximum account number.
 	if account > MaxAccountNum {
-		if e = managerError(ErrAccountNumTooHigh, errAcctTooHigh, nil); err.Chk(e) {
+		if e = managerError(ErrAccountNumTooHigh, errAcctTooHigh, nil); E.Chk(e) {
 		}
 		return nil, e
 	}
@@ -976,7 +976,7 @@ func (s *ScopedKeyManager) ExtendExternalAddresses(
 	account uint32, lastIndex uint32,
 ) (e error) {
 	if account > MaxAccountNum {
-		if e = managerError(ErrAccountNumTooHigh, errAcctTooHigh, nil); err.Chk(e) {
+		if e = managerError(ErrAccountNumTooHigh, errAcctTooHigh, nil); E.Chk(e) {
 		}
 		return e
 	}
@@ -1024,7 +1024,7 @@ func (s *ScopedKeyManager) LastExternalAddress(
 	// if not it will be loaded from the database.
 	var e error
 	var acctInfo *accountInfo
-	if acctInfo, e = s.loadAccountInfo(ns, account); err.Chk(e) {
+	if acctInfo, e = s.loadAccountInfo(ns, account); E.Chk(e) {
 		return nil, e
 	}
 	if acctInfo.nextExternalIndex > 0 {
@@ -1056,7 +1056,7 @@ func (s *ScopedKeyManager) LastInternalAddress(
 	// if not it will be loaded from the database.
 	var acctInfo *accountInfo
 	var e error
-	if acctInfo, e = s.loadAccountInfo(ns, account); err.Chk(e) {
+	if acctInfo, e = s.loadAccountInfo(ns, account); E.Chk(e) {
 		return nil, e
 	}
 	if acctInfo.nextInternalIndex > 0 {
@@ -1101,12 +1101,12 @@ func (s *ScopedKeyManager) NewAccount(ns walletdb.ReadWriteBucket, name string) 
 	}
 	// Fetch latest account, and create a new account in the same transaction Fetch
 	// the latest account number to generate the next account number
-	if account, e = fetchLastAccount(ns, &s.scope); err.Chk(e) {
+	if account, e = fetchLastAccount(ns, &s.scope); E.Chk(e) {
 		return 0, e
 	}
 	account++
 	// With the name validated, we'll create a new account for the new contiguous account.
-	if e := s.newAccount(ns, account, name); err.Chk(e) {
+	if e := s.newAccount(ns, account, name); E.Chk(e) {
 		return 0, e
 	}
 	return account, nil
@@ -1122,28 +1122,28 @@ func (s *ScopedKeyManager) newAccount(
 	account uint32, name string,
 ) (e error) {
 	// Validate the account name.
-	if e := ValidateAccountName(name); err.Chk(e) {
+	if e := ValidateAccountName(name); E.Chk(e) {
 		return e
 	}
 	// Chk that account with the same name does not exist
-	if _, e = s.lookupAccount(ns, name); err.Chk(e) {
+	if _, e = s.lookupAccount(ns, name); E.Chk(e) {
 		str := fmt.Sprintf("account with the same name already exists")
 		return managerError(ErrDuplicateAccount, str, e)
 	}
 	// Fetch the cointype key which will be used to derive the next account extended
 	// keys
 	var coinTypePrivEnc []byte
-	if _, coinTypePrivEnc, e = fetchCoinTypeKeys(ns, &s.scope); err.Chk(e) {
+	if _, coinTypePrivEnc, e = fetchCoinTypeKeys(ns, &s.scope); E.Chk(e) {
 		return e
 	}
 	// Decrypt the cointype key.
 	var serializedKeyPriv []byte
-	if serializedKeyPriv, e = s.rootManager.cryptoKeyPriv.Decrypt(coinTypePrivEnc); err.Chk(e) {
+	if serializedKeyPriv, e = s.rootManager.cryptoKeyPriv.Decrypt(coinTypePrivEnc); E.Chk(e) {
 		str := fmt.Sprintf("failed to decrypt cointype serialized private key")
 		return managerError(ErrLocked, str, e)
 	}
 	var coinTypeKeyPriv *hdkeychain.ExtendedKey
-	if coinTypeKeyPriv, e = hdkeychain.NewKeyFromString(string(serializedKeyPriv)); err.Chk(e) {
+	if coinTypeKeyPriv, e = hdkeychain.NewKeyFromString(string(serializedKeyPriv)); E.Chk(e) {
 		zero.Bytes(serializedKeyPriv)
 		str := fmt.Sprintf("failed to create cointype extended private key")
 		return managerError(ErrKeyChain, str, e)
@@ -1151,30 +1151,30 @@ func (s *ScopedKeyManager) newAccount(
 	zero.Bytes(serializedKeyPriv)
 	// Derive the account key using the cointype key
 	var acctKeyPriv *hdkeychain.ExtendedKey
-	if acctKeyPriv, e = deriveAccountKey(coinTypeKeyPriv, account); err.Chk(e) {
+	if acctKeyPriv, e = deriveAccountKey(coinTypeKeyPriv, account); E.Chk(e) {
 		coinTypeKeyPriv.Zero()
 		str := "failed to convert private key for account"
 		return managerError(ErrKeyChain, str, e)
 	}
 	coinTypeKeyPriv.Zero()
 	var acctKeyPub *hdkeychain.ExtendedKey
-	if acctKeyPub, e = acctKeyPriv.Neuter(); err.Chk(e) {
+	if acctKeyPub, e = acctKeyPriv.Neuter(); E.Chk(e) {
 		str := "failed to convert public key for account"
 		return managerError(ErrKeyChain, str, e)
 	}
 	// Encrypt the default account keys with the associated crypto keys.
 	var acctPubEnc []byte
-	if acctPubEnc, e = s.rootManager.cryptoKeyPub.Encrypt([]byte(acctKeyPub.String())); err.Chk(e) {
+	if acctPubEnc, e = s.rootManager.cryptoKeyPub.Encrypt([]byte(acctKeyPub.String())); E.Chk(e) {
 		str := "failed to  encrypt public key for account"
 		return managerError(ErrCrypto, str, e)
 	}
 	var acctPrivEnc []byte
-	if acctPrivEnc, e = s.rootManager.cryptoKeyPriv.Encrypt([]byte(acctKeyPriv.String())); err.Chk(e) {
+	if acctPrivEnc, e = s.rootManager.cryptoKeyPriv.Encrypt([]byte(acctKeyPriv.String())); E.Chk(e) {
 		str := "failed to encrypt private key for account"
 		return managerError(ErrCrypto, str, e)
 	}
 	// We have the encrypted account extended keys, so save them to the database
-	if e = putAccountInfo(ns, &s.scope, account, acctPubEnc, acctPrivEnc, 0, 0, name); err.Chk(e) {
+	if e = putAccountInfo(ns, &s.scope, account, acctPubEnc, acctPrivEnc, 0, 0, name); E.Chk(e) {
 		return e
 	}
 	// Save last account metadata
@@ -1202,11 +1202,11 @@ func (s *ScopedKeyManager) RenameAccount(
 		return managerError(ErrDuplicateAccount, str, e)
 	}
 	// Validate account name
-	if e := ValidateAccountName(name); err.Chk(e) {
+	if e := ValidateAccountName(name); E.Chk(e) {
 		return e
 	}
 	var rowInterface interface{}
-	if rowInterface, e = fetchAccountInfo(ns, &s.scope, account); err.Chk(e) {
+	if rowInterface, e = fetchAccountInfo(ns, &s.scope, account); E.Chk(e) {
 		return e
 	}
 	// Ensure the account type is a default account.
@@ -1217,18 +1217,18 @@ func (s *ScopedKeyManager) RenameAccount(
 		return managerError(ErrDatabase, str, nil)
 	}
 	// Remove the old name key from the account id index.
-	if e = deleteAccountIDIndex(ns, &s.scope, account); err.Chk(e) {
+	if e = deleteAccountIDIndex(ns, &s.scope, account); E.Chk(e) {
 		return e
 	}
 	// Remove the old name key from the account name index.
-	if e = deleteAccountNameIndex(ns, &s.scope, row.name); err.Chk(e) {
+	if e = deleteAccountNameIndex(ns, &s.scope, row.name); E.Chk(e) {
 		return e
 	}
 	if e = putAccountInfo(
 		ns, &s.scope, account, row.pubKeyEncrypted,
 		row.privKeyEncrypted, row.nextExternalIndex,
 		row.nextInternalIndex, name,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return e
 	}
 	// Update in-memory account info with new name if cached and the db write was
@@ -1287,7 +1287,7 @@ func (s *ScopedKeyManager) ImportPrivateKey(
 	// Encrypt public key.
 	var encryptedPubKey []byte
 	var e error
-	if encryptedPubKey, e = s.rootManager.cryptoKeyPub.Encrypt(serializedPubKey); err.Chk(e) {
+	if encryptedPubKey, e = s.rootManager.cryptoKeyPub.Encrypt(serializedPubKey); E.Chk(e) {
 		str := fmt.Sprintf("failed to encrypt public key for %x", serializedPubKey)
 		return nil, managerError(ErrCrypto, str, e)
 	}
@@ -1295,7 +1295,7 @@ func (s *ScopedKeyManager) ImportPrivateKey(
 	var encryptedPrivKey []byte
 	if !s.rootManager.WatchOnly() {
 		privKeyBytes := wif.PrivKey.Serialize()
-		if encryptedPrivKey, e = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes); err.Chk(e) {
+		if encryptedPrivKey, e = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes); E.Chk(e) {
 			zero.Bytes(privKeyBytes)
 			str := fmt.Sprintf("failed to encrypt private key for %x", serializedPubKey)
 			return nil, managerError(ErrCrypto, str, e)
@@ -1311,11 +1311,11 @@ func (s *ScopedKeyManager) ImportPrivateKey(
 	if e = putImportedAddress(
 		ns, &s.scope, pubKeyHash, ImportedAddrAccount, ssNone,
 		encryptedPubKey, encryptedPrivKey,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return nil, e
 	}
 	if updateStartBlock {
-		if e = putStartBlock(ns, bs); err.Chk(e) {
+		if e = putStartBlock(ns, bs); E.Chk(e) {
 			return nil, e
 		}
 	}
@@ -1343,7 +1343,7 @@ func (s *ScopedKeyManager) ImportPrivateKey(
 			s.addrSchema.ExternalAddrType,
 		)
 	}
-	if err.Chk(e) {
+	if E.Chk(e) {
 		return nil, e
 	}
 	managedAddr.imported = true
@@ -1388,7 +1388,7 @@ func (s *ScopedKeyManager) ImportScript(
 	// the address manager is locked or watching-only.
 	var encryptedHash []byte
 	var e error
-	if encryptedHash, e = s.rootManager.cryptoKeyPub.Encrypt(scriptHash); err.Chk(e) {
+	if encryptedHash, e = s.rootManager.cryptoKeyPub.Encrypt(scriptHash); E.Chk(e) {
 		str := fmt.Sprintf("failed to encrypt script hash %x", scriptHash)
 		return nil, managerError(ErrCrypto, str, e)
 	}
@@ -1398,7 +1398,7 @@ func (s *ScopedKeyManager) ImportScript(
 	if !s.rootManager.WatchOnly() {
 		if encryptedScript, e = s.rootManager.cryptoKeyScript.Encrypt(
 			script,
-		); err.Chk(e) {
+		); E.Chk(e) {
 			str := fmt.Sprintf("failed to encrypt script for %x", scriptHash)
 			return nil, managerError(ErrCrypto, str, e)
 		}
@@ -1416,11 +1416,11 @@ func (s *ScopedKeyManager) ImportScript(
 	if e = putScriptAddress(
 		ns, &s.scope, scriptHash, ImportedAddrAccount, ssNone,
 		encryptedHash, encryptedScript,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return nil, maybeConvertDbError(e)
 	}
 	if updateStartBlock {
-		if e = putStartBlock(ns, bs); err.Chk(e) {
+		if e = putStartBlock(ns, bs); E.Chk(e) {
 			return nil, maybeConvertDbError(e)
 		}
 	}
@@ -1436,7 +1436,7 @@ func (s *ScopedKeyManager) ImportScript(
 	// cleared on lock and the script the caller passed should not be cleared out
 	// from under the caller.
 	var scriptAddr *scriptAddress
-	if scriptAddr, e = newScriptAddress(s, ImportedAddrAccount, scriptHash, encryptedScript); err.Chk(e) {
+	if scriptAddr, e = newScriptAddress(s, ImportedAddrAccount, scriptHash, encryptedScript); E.Chk(e) {
 		return nil, e
 	}
 	if !s.rootManager.WatchOnly() {
@@ -1477,7 +1477,7 @@ func (s *ScopedKeyManager) MarkUsed(
 	address util.Address,
 ) (e error) {
 	addressID := address.ScriptAddress()
-	if e = markAddressUsed(ns, &s.scope, addressID); err.Chk(e) {
+	if e = markAddressUsed(ns, &s.scope, addressID); E.Chk(e) {
 		return maybeConvertDbError(e)
 	}
 	// Clear caches which might have stale entries for used addresses
@@ -1524,12 +1524,12 @@ func (s *ScopedKeyManager) ForEachAccountAddress(
 	defer s.mtx.Unlock()
 	addrFn := func(rowInterface interface{}) (e error) {
 		var managedAddr ManagedAddress
-		if managedAddr, e = s.rowInterfaceToManaged(ns, rowInterface); err.Chk(e) {
+		if managedAddr, e = s.rowInterfaceToManaged(ns, rowInterface); E.Chk(e) {
 			return e
 		}
 		return fn(managedAddr)
 	}
-	if e = forEachAccountAddress(ns, &s.scope, account, addrFn); err.Chk(e) {
+	if e = forEachAccountAddress(ns, &s.scope, account, addrFn); E.Chk(e) {
 		return maybeConvertDbError(e)
 	}
 	return nil
@@ -1556,12 +1556,12 @@ func (s *ScopedKeyManager) ForEachActiveAddress(
 	defer s.mtx.Unlock()
 	addrFn := func(rowInterface interface{}) (e error) {
 		var managedAddr ManagedAddress
-		if managedAddr, e = s.rowInterfaceToManaged(ns, rowInterface); err.Chk(e) {
+		if managedAddr, e = s.rowInterfaceToManaged(ns, rowInterface); E.Chk(e) {
 			return e
 		}
 		return fn(managedAddr.Address())
 	}
-	if e = forEachActiveAddress(ns, &s.scope, addrFn); err.Chk(e) {
+	if e = forEachActiveAddress(ns, &s.scope, addrFn); E.Chk(e) {
 		return maybeConvertDbError(e)
 	}
 	return nil

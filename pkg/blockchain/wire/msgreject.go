@@ -70,7 +70,7 @@ func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (
 	}
 	// Command that was rejected.
 	var cmd string
-	if cmd, e = ReadVarString(r, pver); err.Chk(e) {
+	if cmd, e = ReadVarString(r, pver); E.Chk(e) {
 		return
 	}
 	msg.Cmd = cmd
@@ -82,13 +82,13 @@ func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (
 	// Human readable string with specific details (over and above the reject code above) about why the command was
 	// rejected.
 	var reason string
-	if reason, e = ReadVarString(r, pver);err.Chk(e){
+	if reason, e = ReadVarString(r, pver);E.Chk(e){
 		return
 	}
 	msg.Reason = reason
 	// CmdBlock and CmdTx messages have an additional hash field that identifies the specific block or transaction.
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
-		if e = readElement(r, &msg.Hash); err.Chk(e) {
+		if e = readElement(r, &msg.Hash); E.Chk(e) {
 			return
 		}
 	}
@@ -106,7 +106,7 @@ func (msg *MsgReject) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (
 		return messageError("MsgReject.BtcEncode", str)
 	}
 	// Command that was rejected.
-	if e = WriteVarString(w, pver, msg.Cmd); err.Chk(e) {
+	if e = WriteVarString(w, pver, msg.Cmd); E.Chk(e) {
 		return
 	}
 	// Code indicating why the command was rejected.
@@ -122,7 +122,7 @@ func (msg *MsgReject) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (
 	}
 	// CmdBlock and CmdTx messages have an additional hash field that identifies the specific block or transaction.
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
-		if e = writeElement(w, &msg.Hash);err.Chk(e){
+		if e = writeElement(w, &msg.Hash);E.Chk(e){
 			return
 		}
 	}

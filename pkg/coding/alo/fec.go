@@ -58,8 +58,8 @@ func GetShards(buf []byte, redundancy int, ) (out ShardedSegments) {
 	for i := range out {
 		dataLen := len(sharded[i])
 		parityLen := len(out[i]) - dataLen
-		if rs, e := reedsolomon.New(dataLen, parityLen); !err.Chk(e) {
-			if e = rs.Encode(out[i]); err.Chk(e) {
+		if rs, e := reedsolomon.New(dataLen, parityLen); !E.Chk(e) {
+			if e = rs.Encode(out[i]); E.Chk(e) {
 			}
 		}
 	}
@@ -97,7 +97,7 @@ func ShardsPerRedundancy(nShards, redundancy int) int {
 //		st += fmt.Sprintln(i, j, len(out[i][j]))
 //	}
 // }
-// dbg.Ln(st)
+// D.Ln(st)
 
 // SegmentBytes breaks a chunk of data into requested sized limit chunks
 func SegmentBytes(buf []byte, lim int) (out [][]byte) {
@@ -174,7 +174,7 @@ type ShardPrefix struct {
 func NewPacket(firstShard []byte) (o *Partials, e error) {
 	o = &Partials{}
 	var p ShardPrefix
-	if p, e = GetParams(firstShard); err.Chk(e) {
+	if p, e = GetParams(firstShard); E.Chk(e) {
 	}
 	o.totalSegments = p.totalSegments
 	o.length = p.length
@@ -195,7 +195,7 @@ func NewPacket(firstShard []byte) (o *Partials, e error) {
 // packet's wrapper passes it should be unless someone is playing silly buggers)
 func (p *Partials) AddShard(newShard []byte) (e error) {
 	var params ShardPrefix
-	if params, e = GetParams(newShard); err.Chk(e) {
+	if params, e = GetParams(newShard); E.Chk(e) {
 	}
 	if p.totalSegments != params.totalSegments {
 		return errors.New("shard has incorrect segment count for bundle")
@@ -333,7 +333,7 @@ func (p *Partials) Decode() (final []byte, e error) {
 	var needReconst, dpHas []int
 	var rs *reedsolomon.RS
 	for i := range p.segments {
-		if rs, e = reedsolomon.New(p.segments[i].data, p.segments[i].parity); !err.Chk(e) {
+		if rs, e = reedsolomon.New(p.segments[i].data, p.segments[i].parity); !E.Chk(e) {
 			for j := range p.segments[i].segment {
 				// if the segment is empty it wasn't received or deciphered but we only need reconstruction on the
 				// data shards, append to the list for the reconstruction
@@ -343,8 +343,8 @@ func (p *Partials) Decode() (final []byte, e error) {
 					dpHas = append(dpHas, j)
 				}
 			}
-			inf.Ln(dpHas, needReconst)
-			if e = rs.Reconst(p.segments[i].segment, dpHas, needReconst); err.Chk(e) {
+			I.Ln(dpHas, needReconst)
+			if e = rs.Reconst(p.segments[i].segment, dpHas, needReconst); E.Chk(e) {
 				return
 			}
 		}

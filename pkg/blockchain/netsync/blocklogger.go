@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/util"
-	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 // blockProgressLogger provides periodic logging for other services in order to show users progress of certain "actions"
@@ -15,7 +14,7 @@ type blockProgressLogger struct {
 	receivedLogBlocks int64
 	receivedLogTx     int64
 	lastBlockLogTime  time.Time
-	subsystemLogger   *log.Logger
+	// subsystemLogger   *log.Logger
 	progressAction    string
 	sync.Mutex
 }
@@ -56,7 +55,7 @@ func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 		txStr = "transaction "
 	}
 	tD := tDuration.Seconds()
-	inf.F(
+	I.F(
 		"%s %6d %s in the last %s (%6d %s, height %8d, %s) %0.2f tx/s",
 		b.progressAction,
 		b.receivedLogBlocks,

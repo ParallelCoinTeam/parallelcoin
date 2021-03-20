@@ -14,17 +14,17 @@ import (
 
 func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.AppColorizer = color.Bit24(128,255,255,false).Sprint
+		logg.AppColorizer = color.Bit24(128, 255, 255, false).Sprint
 		logg.App = "   gui"
-		dbg.Ln("starting up parallelcoin pod gui...")
+		D.Ln("starting up parallelcoin pod gui...")
 		config.Configure(cx, "gui", true)
-		// dbg.Ln(os.Args)
+		// D.Ln(os.Args)
 		// interrupt.AddHandler(func() {
-		// 	dbg.Ln("wallet gui is shut down")
+		// 	D.Ln("wallet gui is shut down")
 		// })
-		if e = gui.Main(cx, c); err.Chk(e) {
+		if e = gui.Main(cx, c); E.Chk(e) {
 		}
-		dbg.Ln("pod gui finished")
+		D.Ln("pod gui finished")
 		return
 	}
 }

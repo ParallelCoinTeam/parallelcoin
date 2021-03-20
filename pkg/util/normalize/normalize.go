@@ -10,7 +10,7 @@ import (
 // already a port specified.
 func address(addr, defaultPort string) string {
 	var e error
-	if _, _, e = net.SplitHostPort(addr); err.Chk(e) {
+	if _, _, e = net.SplitHostPort(addr); E.Chk(e) {
 		return net.JoinHostPort(addr, defaultPort)
 	}
 	return addr

@@ -85,7 +85,7 @@ func Load(ns walletdb.ReadBucket, m *waddrmgr.Manager, poolID []byte) (*Pool, er
 		return nil, newError(ErrPoolNotExists, str, nil)
 	}
 	p := newPool(m, poolID)
-	if e := p.LoadAllSeries(ns); err.Chk(e) {
+	if e := p.LoadAllSeries(ns); E.Chk(e) {
 		return nil, e
 	}
 	return p, nil
@@ -634,7 +634,7 @@ func (p *Pool) EmpowerSeries(ns walletdb.ReadWriteBucket, seriesID uint32, rawPr
 			"private Key does not have a corresponding public key in this series")
 		return newError(ErrKeysPrivatePublicMismatch, str, nil)
 	}
-	if e = p.saveSeriesToDisk(ns, seriesID, series); err.Chk(e) {
+	if e = p.saveSeriesToDisk(ns, seriesID, series); E.Chk(e) {
 		return e
 	}
 	return nil
@@ -650,13 +650,13 @@ func (p *Pool) EnsureUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID u
 	if lastIdx == 0 {
 		// highestUsedIndexFor() returns 0 when there are no used addresses for a given seriesID/branch, so we do this
 		// to ensure there is an entry with index==0.
-		if e := p.addUsedAddr(ns, addrmgrNs, seriesID, branch, lastIdx); err.Chk(e) {
+		if e := p.addUsedAddr(ns, addrmgrNs, seriesID, branch, lastIdx); E.Chk(e) {
 			return e
 		}
 	}
 	lastIdx++
 	for lastIdx <= index {
-		if e := p.addUsedAddr(ns, addrmgrNs, seriesID, branch, lastIdx); err.Chk(e) {
+		if e := p.addUsedAddr(ns, addrmgrNs, seriesID, branch, lastIdx); E.Chk(e) {
 			return e
 		}
 		lastIdx++

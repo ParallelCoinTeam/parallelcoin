@@ -1,7 +1,7 @@
 package mempool
 
 import (
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
@@ -15,7 +15,7 @@ type RuleError struct {
 
 // Error satisfies the error interface and prints human-readable errors.
 func (e RuleError) Error() string {
-	if e.Err ==  nil {
+	if e.Err == nil {
 		return "<nil>"
 	}
 	return e.Err.Error()
@@ -101,7 +101,7 @@ func ErrToRejectErr(e error) (wire.RejectCode, string) {
 	// Return a generic rejected string if there is no error. This really should not happen unless the code elsewhere is
 	// not setting an error as it should be but it's best to be safe and simply return a generic string rather than
 	// allowing the following code that dereferences the err to panic.
-	if e ==  nil {
+	if e == nil {
 		return wire.RejectInvalid, "rejected"
 	}
 	// When the underlying error is not one of the above cases, just return wire.RejectInvalid with a generic rejected

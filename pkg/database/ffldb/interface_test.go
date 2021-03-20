@@ -46,7 +46,7 @@ func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util
 		return nil, e
 	}
 	defer func() {
-		if e := fi.Close(); err.Chk(e) {
+		if e := fi.Close(); E.Chk(e) {
 			t.Errorf("failed to close file %v %v", dataFile,
 				err)
 		}
@@ -207,7 +207,7 @@ func testGetValues(tc *testContext, bucket database.Bucket, values []keyPair) bo
 // testPutValues stores all of the provided key/value pairs in the provided bucket while checking for errors.
 func testPutValues(tc *testContext, bucket database.Bucket, values []keyPair) bool {
 	for _, item := range values {
-		if e := bucket.Put(item.key, item.value); err.Chk(e) {
+		if e := bucket.Put(item.key, item.value); E.Chk(e) {
 			tc.t.Errorf("Put: unexpected error: %v", err)
 			return false
 		}
@@ -218,7 +218,7 @@ func testPutValues(tc *testContext, bucket database.Bucket, values []keyPair) bo
 // testDeleteValues removes all of the provided key/value pairs from the provided bucket.
 func testDeleteValues(tc *testContext, bucket database.Bucket, values []keyPair) bool {
 	for _, item := range values {
-		if e := bucket.Delete(item.key); err.Chk(e) {
+		if e := bucket.Delete(item.key); E.Chk(e) {
 			tc.t.Errorf("Delete: unexpected error: %v", err)
 			return false
 		}
@@ -329,7 +329,7 @@ func testCursorInterface(tc *testContext, bucket database.Bucket) bool {
 			return false
 		}
 		k := cursor.Key()
-		if e := cursor.Delete(); err.Chk(e) {
+		if e := cursor.Delete(); E.Chk(e) {
 			tc.t.Errorf("Cursor.Delete: unexpected error: %v", err)
 			return false
 		}
@@ -464,7 +464,7 @@ func testBucketInterface(tc *testContext, bucket database.Bucket) bool {
 			return false
 		}
 		// Ensure deleting a bucket works as intended.
-		if e := bucket.DeleteBucket(testBucketName); err.Chk(e) {
+		if e := bucket.DeleteBucket(testBucketName); E.Chk(e) {
 			tc.t.Errorf("DeleteBucket: unexpected error: %v", err)
 			return false
 		}
@@ -494,7 +494,7 @@ func testBucketInterface(tc *testContext, bucket database.Bucket) bool {
 			return false
 		}
 		// Delete the test bucket to avoid leaving it around for future calls.
-		if e := bucket.DeleteBucket(testBucketName); err.Chk(e) {
+		if e := bucket.DeleteBucket(testBucketName); E.Chk(e) {
 			tc.t.Errorf("DeleteBucket: unexpected error: %v", err)
 			return false
 		}
@@ -549,7 +549,7 @@ func testBucketInterface(tc *testContext, bucket database.Bucket) bool {
 // thereby leading to a deadlock and masking the real reason for the panic. It also logs a test error and repanics so
 // the original panic can be traced.
 func rollbackOnPanic(t *testing.T, tx database.Tx) {
-	if e := recover(); err.Chk(e) {
+	if e := recover(); E.Chk(e) {
 		t.Errorf("Unexpected panic: %v", err)
 		_ = tx.Rollback()
 		panic(err)
@@ -604,14 +604,14 @@ func testMetadataManualTxInterface(tc *testContext) bool {
 			}
 			if rollback {
 				// Rollback the transaction.
-				if e := tx.Rollback(); err.Chk(e) {
+				if e := tx.Rollback(); E.Chk(e) {
 					tc.t.Errorf("Rollback: unexpected "+
 						"error %v", err)
 					return false
 				}
 			} else {
 				// The commit should succeed.
-				if e := tx.Commit(); err.Chk(e) {
+				if e := tx.Commit(); E.Chk(e) {
 					tc.t.Errorf("Commit: unexpected error "+
 						"%v", err)
 					return false
@@ -645,7 +645,7 @@ func testMetadataManualTxInterface(tc *testContext) bool {
 			return false
 		}
 		// Rollback the read-only transaction.
-		if e := tx.Rollback(); err.Chk(e) {
+		if e := tx.Rollback(); E.Chk(e) {
 			tc.t.Errorf("Commit: unexpected error %v", err)
 			return false
 		}
@@ -679,7 +679,7 @@ func testMetadataManualTxInterface(tc *testContext) bool {
 			return false
 		}
 		// Commit the changes and ensure it was successful.
-		if e := tx.Commit(); err.Chk(e) {
+		if e := tx.Commit(); E.Chk(e) {
 			tc.t.Errorf("Commit: unexpected error %v", err)
 			return false
 		}
@@ -727,7 +727,7 @@ func testManagedTxPanics(tc *testContext) bool {
 	testPanic := func(fn func()) (paniced bool) {
 		// Setup a defer to catch the expected panic and update the return variable.
 		defer func() {
-			if e := recover(); err.Chk(e) {
+			if e := recover(); E.Chk(e) {
 				paniced = true
 			}
 		}()
@@ -737,10 +737,10 @@ func testManagedTxPanics(tc *testContext) bool {
 	// Ensure calling Commit on a managed read-only transaction panics.
 	paniced := testPanic(func() {
 		if e := tc.db.View(func(tx database.Tx) (e error) {
-			if e := tx.Commit(); bdb.err.Chk(e) {
+			if e := tx.Commit(); bdb.E.Chk(e) {
 			}
 			return nil
-		}); bdb.err.Chk(e) {
+		}); bdb.E.Chk(e) {
 		}
 	})
 	if !paniced {
@@ -750,10 +750,10 @@ func testManagedTxPanics(tc *testContext) bool {
 	// Ensure calling Rollback on a managed read-only transaction panics.
 	paniced = testPanic(func() {
 		if e := tc.db.View(func(tx database.Tx) (e error) {
-			if e := tx.Rollback(); bdb.err.Chk(e) {
+			if e := tx.Rollback(); bdb.E.Chk(e) {
 			}
 			return nil
-		}); bdb.err.Chk(e) {
+		}); bdb.E.Chk(e) {
 		}
 	})
 	if !paniced {
@@ -764,11 +764,11 @@ func testManagedTxPanics(tc *testContext) bool {
 	paniced = testPanic(func() {
 		if e := tc.db.Update(func(tx database.Tx) (e error) {
 			func() {
-				if e := tx.Commit(); bdb.err.Chk(e) {
+				if e := tx.Commit(); bdb.E.Chk(e) {
 				}
 			}()
 			return nil
-		}); bdb.err.Chk(e) {
+		}); bdb.E.Chk(e) {
 		}
 	})
 	if !paniced {
@@ -779,10 +779,10 @@ func testManagedTxPanics(tc *testContext) bool {
 	paniced = testPanic(
 		func() {
 			if e := tc.db.Update(func(tx database.Tx) (e error) {
-				if e := tx.Rollback(); bdb.err.Chk(e) {
+				if e := tx.Rollback(); bdb.E.Chk(e) {
 				}
 				return nil
-			}); bdb.err.Chk(e) {
+			}); bdb.E.Chk(e) {
 			}
 		},
 	)
@@ -1676,15 +1676,15 @@ func testTxClosed(tc *testContext) bool {
 		return false
 	}
 	defer rollbackOnPanic(tc.t, tx)
-	if _, e = tx.Metadata().CreateBucket(bucketName); err.Chk(e) {
+	if _, e = tx.Metadata().CreateBucket(bucketName); E.Chk(e) {
 		tc.t.Errorf("CreateBucket: unexpected error: %v", err)
 		return false
 	}
-	if e := tx.Metadata().Put(keyName, []byte("test")); err.Chk(e) {
+	if e := tx.Metadata().Put(keyName, []byte("test")); E.Chk(e) {
 		tc.t.Errorf("Put: unexpected error: %v", err)
 		return false
 	}
-	if e := tx.Commit(); err.Chk(e) {
+	if e := tx.Commit(); E.Chk(e) {
 		tc.t.Errorf("Commit: unexpected error: %v", err)
 		return false
 	}
@@ -1699,7 +1699,7 @@ func testTxClosed(tc *testContext) bool {
 		return false
 	}
 	defer rollbackOnPanic(tc.t, tx)
-	if e := tx.Rollback(); err.Chk(e) {
+	if e := tx.Rollback(); E.Chk(e) {
 		tc.t.Errorf("Rollback: unexpected error: %v", err)
 		return false
 	}

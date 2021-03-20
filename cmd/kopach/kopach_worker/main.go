@@ -12,7 +12,6 @@ import (
 	"github.com/p9c/pod/cmd/kopach/worker"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
@@ -25,30 +24,30 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			}
 		}
 		if len(os.Args) > 4 {
-			log.L.SetLevel(os.Args[4], true, "pod")
+			logg.SetLogLevel(os.Args[4])
 		}
-		dbg.Ln("miner worker starting")
+		D.Ln("miner worker starting")
 		w, conn := worker.New(os.Args[2], cx.KillAll, uint64(*cx.Config.UUID))
 		// interrupt.AddHandler(
 		// 	func() {
-		// 		dbg.Ln("KopachWorkerHandle interrupt")
-		// 		// if e := conn.Close(); err.Chk(e) {
+		// 		D.Ln("KopachWorkerHandle interrupt")
+		// 		// if e := conn.Close(); E.Chk(e) {
 		// 		// }
 		// 		// quit.Q()
 		// 	},
 		// )
 		e = rpc.Register(w)
 		if e != nil {
-			dbg.Ln(e)
+			D.Ln(e)
 			return e
 		}
-		dbg.Ln("starting up worker IPC")
+		D.Ln("starting up worker IPC")
 		rpc.ServeConn(conn)
-		dbg.Ln("stopping worker IPC")
-		// if e := conn.Close(); err.Chk(e) {
+		D.Ln("stopping worker IPC")
+		// if e := conn.Close(); E.Chk(e) {
 		// }
 		// quit.Quit()
-		dbg.Ln("finished")
+		D.Ln("finished")
 		return nil
 	}
 }

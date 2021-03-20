@@ -669,14 +669,14 @@ func TestGenerateHelpErrors(t *testing.T) {
 			test.resultTypes...)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
-				"want %T", i, test.name, err, err, test.err)
+				"want %T", i, test.name, e, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(btcjson.Error).ErrorCode
 		if gotErrorCode != test.err.ErrorCode {
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
-				err, test.err.ErrorCode)
+				e, test.err.ErrorCode)
 			continue
 		}
 	}
@@ -691,7 +691,7 @@ func TestGenerateHelp(t *testing.T) {
 	}
 	help, e := btcjson.GenerateHelp("help", descs)
 	if e != nil  {
-		t.Fatalf("GenerateHelp: unexpected error: %v", err)
+		t.Fatalf("GenerateHelp: unexpected error: %v", e)
 	}
 	wantHelp := "help (\"command\")\n" +
 		"test\n\nArguments:\n1. command (string, optional) test\n" +

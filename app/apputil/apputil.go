@@ -20,7 +20,7 @@ func EnsureDir(fileName string) {
 // FileExists reports whether the named file or directory exists.
 func FileExists(filePath string) bool {
 	_, e := os.Stat(filePath)
-	return e ==  nil
+	return e == nil
 }
 
 // MinUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast

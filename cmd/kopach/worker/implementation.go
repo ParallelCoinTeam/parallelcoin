@@ -25,7 +25,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 100
+const RoundsPerAlgo = 1024
 
 type Worker struct {
 	mx               sync.Mutex
@@ -72,15 +72,16 @@ func NewCounter(roundsPerAlgo int32) (c *Counter) {
 func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 	// the formula below rolls through versions with blocks roundsPerAlgo long for each algorithm by its index
 	algs := fork.GetAlgoVerSlice(height)
-	// dbg.Ln(algs)
+	// D.Ln(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
-		dbg.Ln("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
+		D.Ln("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
 		return 0
 	}
 	if len(algs) > 0 {
-		ver = algs[(c.C.Load()/
-			c.RoundsPerAlgo.Load())%
-			int32(len(algs))]
+		ver = algs[c.C.Load()%int32(len(algs))]
+		// ver = algs[(c.C.Load()/
+		// 	c.RoundsPerAlgo.Load())%
+		// 	int32(len(algs))]
 		c.C.Add(1)
 	}
 	return
@@ -104,16 +105,16 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 // 			i++
 // 			return nil
 // 		},
-// 	); err.Chk(e) {
+// 	); E.Chk(e) {
 // 	}
-// 	// inf.Ln("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+// 	// I.Ln("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
 // 	Tracef("average hashrate %.2f", av.Value())
 // }
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
 // allow a worker to be configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid uint64) *Worker {
-	trc.Ln("creating new worker")
+	T.Ln("creating new worker")
 	// msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		id:            id,
@@ -130,7 +131,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid u
 	w.startNonce = uint32(w.roller.C.Load())
 	interrupt.AddHandler(
 		func() {
-			dbg.Ln("worker", id, "quitting")
+			D.Ln("worker", id, "quitting")
 			w.stopChan <- struct{}{}
 			// _ = w.pipeConn.Close()
 			w.dispatchReady.Store(false)
@@ -141,13 +142,13 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid u
 }
 
 func worker(w *Worker) {
-	dbg.Ln("main work loop starting")
+	D.Ln("main work loop starting")
 	// sampleTicker := time.NewTicker(time.Second)
 	var nonce uint32
 out:
 	for {
 		// Pause state
-		trc.Ln("worker pausing")
+		T.Ln("worker pausing")
 	pausing:
 		for {
 			select {
@@ -155,19 +156,19 @@ out:
 			// 	// w.hashReport()
 			// 	break
 			case <-w.stopChan.Wait():
-				dbg.Ln("received pause signal while paused")
+				D.Ln("received pause signal while paused")
 				// drain stop channel in pause
 				break
 			case <-w.startChan.Wait():
-				dbg.Ln("received start signal")
+				D.Ln("received start signal")
 				break pausing
 			case <-w.quit.Wait():
-				dbg.Ln("quitting")
+				D.Ln("quitting")
 				break out
 			}
 		}
 		// Run state
-		trc.Ln("worker running")
+		T.Ln("worker running")
 	running:
 		for {
 			select {
@@ -175,20 +176,20 @@ out:
 			// 	// w.hashReport()
 			// 	break
 			case <-w.startChan.Wait():
-				dbg.Ln("received start signal while running")
+				D.Ln("received start signal while running")
 				// drain start channel in run mode
 				break
 			case <-w.stopChan.Wait():
-				dbg.Ln("received pause signal while running")
+				D.Ln("received pause signal while running")
 				break running
 			case <-w.quit.Wait():
-				dbg.Ln("worker stopping while running")
+				D.Ln("worker stopping while running")
 				break out
 			default:
 				if w.templatesMessage == nil || !w.dispatchReady.Load() {
-					dbg.Ln("not ready to work")
+					D.Ln("not ready to work")
 				} else {
-					// dbg.Ln("starting mining round")
+					// D.Ln("starting mining round")
 					newHeight := w.templatesMessage.Height
 					vers := w.roller.GetAlgoVer(newHeight)
 					nonce++
@@ -197,7 +198,7 @@ out:
 						w.templatesMessage.Timestamp = tn
 					}
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
-						// dbg.Ln("switching algorithms", w.roller.C.Load())
+						// D.Ln("switching algorithms", w.roller.C.Load())
 						// send out broadcast containing worker nonce and algorithm and count of blocks
 						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
 						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), vers, newHeight, w.id)
@@ -212,22 +213,22 @@ out:
 						nonce = rand.Uint32()
 						select {
 						case <-w.quit.Wait():
-							dbg.Ln("breaking out of work loop")
+							D.Ln("breaking out of work loop")
 							break out
 						case <-w.stopChan.Wait():
-							dbg.Ln("received pause signal while running")
+							D.Ln("received pause signal while running")
 							break running
 						default:
 						}
 					}
 					blockHeader := w.templatesMessage.GenBlockHeader(vers)
 					blockHeader.Nonce = nonce
-					// dbg.S(w.templatesMessage)
-					// dbg.S(blockHeader)
+					// D.S(w.templatesMessage)
+					// D.S(blockHeader)
 					hash := blockHeader.BlockHashWithAlgos(newHeight)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(blockHeader.Bits)) <= 0 {
-						dbg.Ln("found solution", newHeight)
+						D.Ln("found solution", newHeight)
 						srs := sol.Encode(w.templatesMessage.Nonce, w.templatesMessage.UUID, blockHeader)
 						e := w.dispatchConn.SendMany(
 							sol.Magic,
@@ -235,22 +236,22 @@ out:
 						)
 						if e != nil {
 						}
-						dbg.Ln("sent solution")
+						D.Ln("sent solution")
 						w.templatesMessage = nil
 						select {
 						case <-w.quit.Wait():
-							dbg.Ln("breaking out of work loop")
+							D.Ln("breaking out of work loop")
 							break out
 						default:
 						}
 						break running
 					}
-					// dbg.Ln("completed mining round")
+					// D.Ln("completed mining round")
 				}
 			}
 		}
 	}
-	dbg.Ln("worker finished")
+	D.Ln("worker finished")
 	interrupt.Request()
 }
 
@@ -266,22 +267,22 @@ func New(id string, quit qu.C, uuid uint64) (w *Worker, conn net.Conn) {
 // NewJob is a delivery of a new job for the worker, this makes the miner start
 // mining from pause or pause, prepare the work and restart
 func (w *Worker) NewJob(j *templates.Message, reply *bool) (e error) {
-	// trc.Ln("received new job")
+	// T.Ln("received new job")
 	if !w.dispatchReady.Load() {
-		dbg.Ln("dispatch not ready")
+		D.Ln("dispatch not ready")
 		*reply = true
 		return
 	}
 	if w.templatesMessage != nil {
 		if j.PrevBlock == w.templatesMessage.PrevBlock {
-			// trc.Ln("not a new job")
+			// T.Ln("not a new job")
 			*reply = true
 			return
 		}
 	}
-	// dbg.S(j)
+	// D.S(j)
 	*reply = true
-	dbg.Ln("halting current work")
+	D.Ln("halting current work")
 	w.stopChan <- struct{}{}
 	// load the job into the template
 	if w.templatesMessage == nil {
@@ -289,14 +290,14 @@ func (w *Worker) NewJob(j *templates.Message, reply *bool) (e error) {
 	} else {
 		*w.templatesMessage = *j
 	}
-	dbg.Ln("switching to new job")
+	D.Ln("switching to new job")
 	w.startChan <- struct{}{}
 	return
 }
 
 // Pause signals the worker to stop working, releases its semaphore and the worker is then idle
 func (w *Worker) Pause(_ int, reply *bool) (e error) {
-	trc.Ln("pausing from IPC")
+	T.Ln("pausing from IPC")
 	w.running.Store(false)
 	w.stopChan <- struct{}{}
 	*reply = true
@@ -305,7 +306,7 @@ func (w *Worker) Pause(_ int, reply *bool) (e error) {
 
 // Stop signals the worker to quit
 func (w *Worker) Stop(_ int, reply *bool) (e error) {
-	dbg.Ln("stopping from IPC")
+	D.Ln("stopping from IPC")
 	w.stopChan <- struct{}{}
 	defer w.quit.Q()
 	*reply = true
@@ -317,7 +318,7 @@ func (w *Worker) Stop(_ int, reply *bool) (e error) {
 // SendPass gives the encryption key configured in the kopach controller ( pod) configuration to allow workers to
 // dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (e error) {
-	dbg.Ln("receiving dispatch password", pass)
+	D.Ln("receiving dispatch password", pass)
 	rand.Seed(time.Now().UnixNano())
 	// sp := fmt.Sprint(rand.Intn(32767) + 1025)
 	// rp := fmt.Sprint(rand.Intn(32767) + 1025)

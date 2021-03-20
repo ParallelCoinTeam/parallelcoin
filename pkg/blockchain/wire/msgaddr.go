@@ -34,7 +34,7 @@ func (msg *MsgAddr) AddAddress(na *NetAddress) (e error) {
 func (msg *MsgAddr) AddAddresses(netAddrs ...*NetAddress) (e error) {
 	for _, na := range netAddrs {
 		e = msg.AddAddress(na)
-		if err.Chk(e) {
+		if E.Chk(e) {
 			return
 		}
 	}
@@ -50,7 +50,7 @@ func (msg *MsgAddr) ClearAddresses() {
 // implementation.
 func (msg *MsgAddr) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
 	var count uint64
-	if count, e = ReadVarInt(r, pver); err.Chk(e) {
+	if count, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	// Limit to max addresses per message.
@@ -65,10 +65,10 @@ func (msg *MsgAddr) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e 
 	msg.AddrList = make([]*NetAddress, 0, count)
 	for i := uint64(0); i < count; i++ {
 		na := &addrList[i]
-		if e = readNetAddress(r, pver, na, true); err.Chk(e) {
+		if e = readNetAddress(r, pver, na, true); E.Chk(e) {
 			return
 		}
-		if e = msg.AddAddress(na); err.Chk(e) {
+		if e = msg.AddAddress(na); E.Chk(e) {
 		}
 	}
 	return
@@ -93,11 +93,11 @@ func (msg *MsgAddr) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e 
 		)
 		return messageError("MsgAddr.BtcEncode", str)
 	}
-	if e = WriteVarInt(w, pver, uint64(count)); err.Chk(e) {
+	if e = WriteVarInt(w, pver, uint64(count)); E.Chk(e) {
 		return
 	}
 	for _, na := range msg.AddrList {
-		if e = writeNetAddress(w, pver, na, true); err.Chk(e) {
+		if e = writeNetAddress(w, pver, na, true); E.Chk(e) {
 			return
 		}
 	}

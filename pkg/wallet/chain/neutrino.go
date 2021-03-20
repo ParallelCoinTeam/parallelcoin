@@ -196,7 +196,7 @@ func (s *NeutrinoClient) FilterBlocks(
 		} else if !matched {
 			continue
 		}
-		trc.F(
+		T.F(
 			"fetching block height=%d hash=%v",
 			blk.Height, blk.Hash,
 		)
@@ -309,13 +309,13 @@ func (s *NeutrinoClient) Rescan(
 	s.isRescan = true
 	bestBlock, e := s.CS.BestBlock()
 	if e != nil {
-		return fmt.Errorf("can't get chain service's best block: %s", err)
+		return fmt.Errorf("can't get chain service's best block: %s", e)
 	}
 	header, e := s.CS.GetBlockHeader(&bestBlock.Hash)
 	if e != nil {
 		return fmt.Errorf(
 			"can't get block header for hash %v: %s",
-			bestBlock.Hash, err,
+			bestBlock.Hash, e,
 		)
 	}
 	// If the wallet is already fully caught up, or the rescan has started with state that indicates a "fresh" wallet,
@@ -444,8 +444,8 @@ func (s *NeutrinoClient) onFilteredBlockConnected(
 			header.Timestamp,
 		)
 		if e != nil {
-			err.Ln(
-				"cannot create transaction record for relevant tx:", err,
+			E.Ln(
+				"cannot create transaction record for relevant tx:", e,
 			)
 			// TODO(aakselrod): Return?
 			continue
@@ -462,7 +462,7 @@ func (s *NeutrinoClient) onFilteredBlockConnected(
 	// Handle RescanFinished notification if required.
 	bs, e := s.CS.BestBlock()
 	if e != nil {
-		err.Ln("can't get chain service's best block:", err)
+		E.Ln("can't get chain service's best block:", e)
 		return
 	}
 	if bs.Hash == header.BlockHash() {
@@ -573,7 +573,7 @@ func (s *NeutrinoClient) onBlockConnected(
 func (s *NeutrinoClient) notificationHandler() {
 	hash, height, e := s.GetBestBlock()
 	if e != nil {
-		err.F("failed to get best block from chain service:", err)
+		E.F("failed to get best block from chain service:", e)
 		s.Stop()
 		s.wg.Done()
 		return
@@ -628,7 +628,7 @@ out:
 			}
 		case e := <-rescanErr:
 			if e != nil {
-				err.Ln("neutrino rescan ended with error:", err)
+				E.Ln("neutrino rescan ended with error:", e)
 			}
 		case s.currentBlock <- bs:
 		case <-s.quit.Wait():

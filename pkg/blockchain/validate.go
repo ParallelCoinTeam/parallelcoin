@@ -214,7 +214,7 @@ func (b *BlockChain) checkConnectBlock(
 		b.params.Net == wire.MainNet ||
 		node.height == fork.List[1].TestnetStart &&
 			b.params.Net == wire.TestNet3 {
-		trc.Ln("checking contents of hardfork coinbase tx")
+		F.Ln("checking contents of hardfork coinbase tx")
 		btx, e := block.Tx(0)
 		if e != nil {
 		}
@@ -362,7 +362,7 @@ func (b *BlockChain) checkConnectBlock(
 	}
 	// Update the best hash for view to include this block since all of its transactions have been connected.
 	view.SetBestHash(&node.hash)
-	// trc.Ln("block connected")
+	// F.Ln("block connected")
 	return nil
 }
 
@@ -380,6 +380,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 	b.ChainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
 	defer b.ChainLock.Unlock()
 	tip := b.BestChain.Tip()
+	// tip := b.BestChain.NodeByHeight(height)
 	header := block.MsgBlock().Header
 	if tip.hash != header.PrevBlock {
 		str := fmt.Sprintf(
@@ -388,7 +389,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 		return ruleError(ErrPrevBlockNotBest, str)
 	}
 	// var pb *util.Block
-	// if pb, e = b.BlockByHash(&header.PrevBlock); err.Chk(e) {
+	// if pb, e = b.BlockByHash(&header.PrevBlock); E.Chk(e) {
 	// }
 	if e = checkBlockSanity(
 		block,
@@ -398,11 +399,11 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 		false,
 		block.Height(),
 		tip.Header().Timestamp,
-	); err.Chk(e) {
+	); E.Chk(e) {
 		return e
 	}
 	e = b.checkBlockContext(block, tip, flags, true)
-	if err.Chk(e) {
+	if E.Chk(e) {
 		return e
 	}
 	// Leave the spent txouts entry nil in the state since the information is not needed and thus extra work can be
@@ -502,7 +503,7 @@ func (b *BlockChain) checkBlockContext(
 					"block contains unfinalized "+
 						"transaction %v", tx.Hash(),
 				)
-				err.Ln(str)
+				E.Ln(str)
 				return ruleError(ErrUnfinalizedTx, str)
 			}
 		}
@@ -534,7 +535,7 @@ func (b *BlockChain) checkBlockContext(
 		// 	// this merkle root matches a computed merkle root of all the wtxid's of the
 		// 	// transactions within the block. In addition, various other checks against the
 		// 	// coinbase's witness stack.
-		// 	if e := ValidateWitnessCommitment(block); err.Chk(e) {
+		// 	if e := ValidateWitnessCommitment(block); E.Chk(e) {
 		// 				// 		return e
 		// 	}
 		// 	// Once the witness commitment, witness nonce, and sig op cost have been
@@ -575,7 +576,7 @@ func (b *BlockChain) checkBlockHeaderContext(
 		// block and difficulty retarget rules.
 		//
 		// a := fork.GetAlgoName(header.Version, prevNode.height+1)
-		// inf.F("algo %s %d %8x %d", a, header.Version, header.Bits,
+		// I.F("algo %s %d %8x %d", a, header.Version, header.Bits,
 		// 	prevNode.height+1)
 		expectedDifficulty, e := b.CalcNextRequiredDifficultyFromNode(
 			prevNode,
@@ -596,7 +597,7 @@ func (b *BlockChain) checkBlockHeaderContext(
 				expectedDifficulty,
 				CompactToBig(expectedDifficulty),
 			)
-			err.Ln(str)
+			E.Ln(str)
 			return ruleError(ErrUnexpectedDifficulty, str)
 		}
 		if fork.GetCurrent(prevNode.height+1) > 0 {
@@ -612,7 +613,7 @@ func (b *BlockChain) checkBlockHeaderContext(
 			if !header.Timestamp.After(medianTime) {
 				str := "block timestamp of %v is not after expected %v"
 				str = fmt.Sprintf(str, header.Timestamp, medianTime)
-				err.Ln(str)
+				E.Ln(str)
 				return ruleError(ErrTimeTooOld, str)
 			}
 		}
@@ -623,7 +624,7 @@ func (b *BlockChain) checkBlockHeaderContext(
 	blockHash := header.BlockHash()
 	if !b.verifyCheckpoint(blockHeight, &blockHash) {
 		str := fmt.Sprintf("block at height %d does not match checkpoint hash", blockHeight)
-		err.Ln(str)
+		E.Ln(str)
 		return ruleError(ErrBadCheckpoint, str)
 	}
 	// Find the previous checkpoint and prevent blocks which fork the main chain before it. This prevents storage of
@@ -638,7 +639,7 @@ func (b *BlockChain) checkBlockHeaderContext(
 			"block at height %d forks the main chain before the previous checkpoint at height %d",
 			blockHeight, checkpointNode.height,
 		)
-		err.Ln(str)
+		E.Ln(str)
 		return ruleError(ErrForkTooOld, str)
 	}
 	// Reject outdated block versions once a majority of the network has upgraded. These were originally voted on by
@@ -715,7 +716,7 @@ func CheckBlockSanity(
 	height int32,
 	prevBlockTimestamp time.Time,
 ) (e error) {
-	trc.Ln("CheckBlockSanity powlimit %64x", powLimit)
+	F.Ln("CheckBlockSanity powlimit %64x", powLimit)
 	return checkBlockSanity(block, powLimit, timeSource, BFNone, DoNotCheckPow, height, prevBlockTimestamp)
 }
 
@@ -1153,7 +1154,7 @@ func checkBlockHeaderSanity(
 	// block hash is less than the target value described by the bits.
 	e = checkProofOfWork(header, powLimit, flags, height)
 	if e != nil {
-		err.F("%+v %v", header, e)
+		E.F("%+v %v", header, e)
 		return e
 	}
 	// A block timestamp must not have a greater precision than one second. This
@@ -1163,7 +1164,7 @@ func checkBlockHeaderSanity(
 	if !header.Timestamp.Equal(time.Unix(header.Timestamp.Unix(), 0)) {
 		str := fmt.Sprintf("block timestamp of %v has a higher precision than one second", header.Timestamp)
 		e = ruleError(ErrInvalidTime, str)
-		err.Ln(e)
+		E.Ln(e)
 		return
 	}
 	// Ensure the block time is not too far in the future.
@@ -1178,14 +1179,14 @@ func checkBlockHeaderSanity(
 	if fork.GetCurrent(height) > 0 {
 		cbts := header.Timestamp.Truncate(time.Second)
 		pbts := prevBlockTimestamp.Truncate(time.Second)
-		dbg.Ln("TIMESTAMP PREV", pbts, "CANDIDATE", cbts)
+		D.Ln("TIMESTAMP PREV", pbts, "CANDIDATE", cbts)
 		// trc.S(pbts, cbts)
 		if pbts.Sub(cbts) > time.Second {
 			e = ruleError(
 				ErrTimeTooOld,
 				fmt.Sprint("new blocks cannot be less than one second ahead of the chain tip"),
 			)
-			err.Ln(e)
+			E.Ln(e)
 			return
 		}
 	}
@@ -1208,12 +1209,12 @@ func checkBlockSanity(
 	height int32,
 	prevBlockTimestamp time.Time,
 ) (e error) {
-	trc.F("checkBlockSanity %08x %064x", block.MsgBlock().Header.Bits, powLimit)
+	T.F("checkBlockSanity %08x %064x", block.MsgBlock().Header.Bits, powLimit)
 	msgBlock := block.MsgBlock()
 	header := &msgBlock.Header
 	e = checkBlockHeaderSanity(header, powLimit, timeSource, flags, height, prevBlockTimestamp)
 	if e != nil {
-		dbg.Ln("block processing error:", block.MsgBlock().Header.Version, e)
+		D.Ln("block processing error:", block.MsgBlock().Header.Version, e)
 		return e
 	}
 	// A block must have at least one transaction.
@@ -1346,7 +1347,7 @@ func checkProofOfWork(
 			target,
 			powLimit,
 		)
-		wrn.Ln(str)
+		W.Ln(str)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}
 	// The block hash must be less than the claimed target unless the flag to avoid
@@ -1361,7 +1362,7 @@ func checkProofOfWork(
 				"block hash of %d %064x is higher than expected max of %064x",
 				height, bigHash, target,
 			)
-			wrn.Ln(str)
+			W.Ln(str)
 			return ruleError(ErrHighHash, str)
 		}
 	}

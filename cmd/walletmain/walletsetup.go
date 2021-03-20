@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/util/legacy/keystore"
 	"github.com/p9c/pod/pkg/util/prompt"
 	"github.com/p9c/pod/pkg/wallet"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 	
 	// This initializes the bdb driver
 	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
@@ -32,14 +32,14 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) (e error) 
 	netDir := NetworkDir(*cfg.AppDataDir, activenet)
 	// Create the wallet.
 	dbPath := filepath.Join(netDir, WalletDbName)
-	inf.Ln("Creating the wallet...")
+	I.Ln("Creating the wallet...")
 	// Create the wallet database backed by bolt db.
 	db, e := walletdb.Create("bdb", dbPath)
 	if e != nil {
 		return e
 	}
 	defer func() {
-		if e := db.Close(); err.Chk(e) {
+		if e := db.Close(); E.Chk(e) {
 		}
 	}()
 	// Create the wallet.
@@ -47,7 +47,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) (e error) 
 	if e != nil {
 		return e
 	}
-	inf.Ln("The wallet has been created successfully.")
+	I.Ln("The wallet has been created successfully.")
 	return nil
 }
 
@@ -56,7 +56,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) (e error) 
 func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
-	dbg.Ln("WalletPage", loader.ChainParams.Name)
+	D.Ln("WalletPage", loader.ChainParams.Name)
 	// When there is a legacy keystore, open it now to ensure any errors don't end up exiting the process after the user
 	// has spent time entering a bunch of information.
 	netDir := NetworkDir(*config.DataDir, activenet)
@@ -78,7 +78,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 	reader := bufio.NewReader(os.Stdin)
 	privPass, e := prompt.PrivatePass(reader, legacyKeyStore)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 		time.Sleep(time.Second * 3)
 		return e
 	}
@@ -96,17 +96,17 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 				defer func() {
 					e := legacyKeyStore.Lock()
 					if e != nil {
-						dbg.Ln(e)
+						D.Ln(e)
 					}
 				}()
-				inf.Ln("Importing addresses from existing wallet...")
+				I.Ln("Importing addresses from existing wallet...")
 				lockChan := make(chan time.Time, 1)
 				defer func() {
 					lockChan <- time.Time{}
 				}()
 				e := w.Unlock(privPass, lockChan)
 				if e != nil {
-					err.F(
+					E.F(
 						"ERR: Failed to unlock new wallet "+
 							"during old wallet key import: %v", e,
 					)
@@ -114,7 +114,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 				}
 				e = convertLegacyKeystore(legacyKeyStore, w)
 				if e != nil {
-					err.F(
+					E.F(
 						"ERR: Failed to import keys from old "+
 							"wallet format: %v %s", e,
 					)
@@ -123,7 +123,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 				// Remove the legacy key store.
 				e = os.Remove(keystorePath)
 				if e != nil {
-					err.Ln(
+					E.Ln(
 						"WARN: Failed to remove legacy wallet "+
 							"from'%s'\n", keystorePath,
 					)
@@ -135,7 +135,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 	// public passphrase if the user does not want the additional public data encryption.
 	pubPass, e := prompt.PublicPass(reader, privPass, []byte(""), []byte(*config.WalletPass))
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 		time.Sleep(time.Second * 5)
 		return e
 	}
@@ -143,19 +143,19 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 	// confirmed or a value the user has entered which has already been validated.
 	seed, e := prompt.Seed(reader)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 		time.Sleep(time.Second * 5)
 		return e
 	}
-	dbg.Ln("Creating the wallet")
+	D.Ln("Creating the wallet")
 	w, e := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false, config, nil)
 	if e != nil {
-		dbg.Ln(e)
+		D.Ln(e)
 		time.Sleep(time.Second * 5)
 		return e
 	}
 	w.Manager.Close()
-	dbg.Ln("The wallet has been created successfully.")
+	D.Ln("The wallet has been created successfully.")
 	return nil
 }
 
@@ -174,10 +174,10 @@ func NetworkDir(dataDir string, chainParams *netparams.Params) string {
 // // checkCreateDir checks that the path exists and is a directory.
 // // If path does not exist, it is created.
 // func checkCreateDir(// 	path string) (e error) {
-// 	if fi, e := os.Stat(path); err.Chk(e) {
+// 	if fi, e := os.Stat(path); E.Chk(e) {
 // 		if os.IsNotExist(e) {
 // 			// Attempt data directory creation
-// 			if e = os.MkdirAll(path, 0700); err.Chk(e) {
+// 			if e = os.MkdirAll(path, 0700); E.Chk(e) {
 // 				return fmt.Errorf("cannot create directory: %s", e)
 // 			}
 // 		} else {
@@ -204,10 +204,10 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) (e 
 		case keystore.PubKeyAddress:
 			privKey, e := addr.PrivKey()
 			if e != nil {
-				wrn.F(
+				W.F(
 					"Failed to obtain private key "+
 						"for address %v: %v", addr.Address(),
-					err,
+					e,
 				)
 				continue
 			}
@@ -216,7 +216,7 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) (e 
 				netParams, addr.Compressed(),
 			)
 			if e != nil {
-				err.Ln(
+				E.Ln(
 					"Failed to create wallet "+
 						"import format for address %v: %v",
 					addr.Address(), e,
@@ -228,7 +228,7 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) (e 
 				wif, &blockStamp, false,
 			)
 			if e != nil {
-				wrn.F(
+				W.F(
 					"WARN: Failed to import private "+
 						"key for address %v: %v",
 					addr.Address(), e,
@@ -238,7 +238,7 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) (e 
 		case keystore.ScriptAddress:
 			_, e := w.ImportP2SHRedeemScript(addr.Script())
 			if e != nil {
-				wrn.F(
+				W.F(
 					"WARN: Failed to import "+
 						"pay-to-script-hash script for "+
 						"address %v: %v\n", addr.Address(), e,
@@ -246,7 +246,7 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) (e 
 				continue
 			}
 		default:
-			wrn.F(
+			W.F(
 				"WARN: Skipping unrecognized legacy "+
 					"keystore type: %T\n", addr,
 			)

@@ -13,21 +13,21 @@ import (
 
 func createTestIndex() (func(), *headerIndex, error) {
 	tempDir, e := ioutil.TempDir("", "neutrino")
-	if e != nil  {
+	if e != nil {
 		return nil, nil, e
 	}
 	db, e := walletdb.Create("bdb", tempDir+"/test.db")
-	if e != nil  {
+	if e != nil {
 		return nil, nil, e
 	}
 	cleanUp := func() {
-		if e := os.RemoveAll(tempDir); err.Chk(e) {
+		if e := os.RemoveAll(tempDir); E.Chk(e) {
 		}
-		if e := db.Close(); err.Chk(e) {
+		if e := db.Close(); E.Chk(e) {
 		}
 	}
 	filterDB, e := newHeaderIndex(db, Block)
-	if e != nil  {
+	if e != nil {
 		return nil, nil, e
 	}
 	return cleanUp, filterDB, nil
@@ -37,7 +37,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	var e error
 	var hIndex *headerIndex
 	var cleanUp func()
-	if cleanUp, hIndex, e = createTestIndex(); !err.Chk(e) {
+	if cleanUp, hIndex, e = createTestIndex(); !E.Chk(e) {
 		defer cleanUp()
 	} else {
 		t.Fatalf("unable to create test db: %v", err)
@@ -48,7 +48,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	headerIndex := make(map[uint32]headerEntry)
 	for i := uint32(0); i < numHeaders; i++ {
 		var header headerEntry
-		if _, e = rand.Read(header.hash[:]); err.Chk(e) {
+		if _, e = rand.Read(header.hash[:]); E.Chk(e) {
 			t.Fatalf("unable to read header: %v", err)
 		}
 		header.height = i
@@ -56,51 +56,61 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 		headerIndex[i] = header
 	}
 	// With the headers constructed, we'll write them to disk in a single batch.
-	if e := hIndex.addHeaders(headerEntries); err.Chk(e) {
+	if e := hIndex.addHeaders(headerEntries); E.Chk(e) {
 		t.Fatalf("unable to add headers: %v", err)
 	}
 	// Next, verify that the database tip matches the _final_ header inserted.
 	dbTip, dbHeight, e := hIndex.chainTip()
-	if e != nil  {
+	if e != nil {
 		t.Fatalf("unable to obtain chain tip: %v", err)
 	}
 	lastEntry := headerIndex[numHeaders-1]
 	if dbHeight != lastEntry.height {
-		t.Fatalf("height doesn't match: expected %v, got %v",
-			lastEntry.height, dbHeight)
+		t.Fatalf(
+			"height doesn't match: expected %v, got %v",
+			lastEntry.height, dbHeight,
+		)
 	}
 	if !bytes.Equal(dbTip[:], lastEntry.hash[:]) {
-		t.Fatalf("tip doesn't match: expected %x, got %x",
-			lastEntry.hash[:], dbTip[:])
+		t.Fatalf(
+			"tip doesn't match: expected %x, got %x",
+			lastEntry.hash[:], dbTip[:],
+		)
 	}
 	// For each header written, check that we're able to retrieve the entry both by hash and height.
 	for i, headerEntry := range headerEntries {
 		height, e := hIndex.heightFromHash(&headerEntry.hash)
-		if e != nil  {
+		if e != nil {
 			t.Fatalf("unable to retreive height(%v): %v", i, err)
 		}
 		if height != headerEntry.height {
-			t.Fatalf("height doesn't match: expected %v, got %v",
-				headerEntry.height, height)
+			t.Fatalf(
+				"height doesn't match: expected %v, got %v",
+				headerEntry.height, height,
+			)
 		}
 	}
 	// Next if we truncate the index by one, then we should end up at the second to last entry for the tip.
 	newTip := headerIndex[numHeaders-2]
-	if e := hIndex.truncateIndex(&newTip.hash, true); err.Chk(e) {
+	if e := hIndex.truncateIndex(&newTip.hash, true); E.Chk(e) {
 		t.Fatalf("unable to truncate index: %v", err)
 	}
 	// This time the database tip should be the _second_ to last entry inserted.
 	dbTip, dbHeight, e = hIndex.chainTip()
-	if e != nil  {
+	if e != nil {
 		t.Fatalf("unable to obtain chain tip: %v", err)
 	}
 	lastEntry = headerIndex[numHeaders-2]
 	if dbHeight != lastEntry.height {
-		t.Fatalf("height doesn't match: expected %v, got %v",
-			lastEntry.height, dbHeight)
+		t.Fatalf(
+			"height doesn't match: expected %v, got %v",
+			lastEntry.height, dbHeight,
+		)
 	}
 	if !bytes.Equal(dbTip[:], lastEntry.hash[:]) {
-		t.Fatalf("tip doesn't match: expected %x, got %x",
-			lastEntry.hash[:], dbTip[:])
+		t.Fatalf(
+			"tip doesn't match: expected %x, got %x",
+			lastEntry.hash[:], dbTip[:],
+		)
 	}
 }

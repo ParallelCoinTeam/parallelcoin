@@ -62,7 +62,7 @@ import (
 // 	chain, teardownFunc, e := chainSetup("checkconnectblocktemplate",
 // 		&netparams.MainNetParams)
 // 	if e != nil  {
-// 		t.Errorf("Failed to setup chain instance: %v", err)
+// 		t.Errorf("Failed to setup chain instance: %v", e)
 // 		return
 // 	}
 // 	defer teardownFunc()
@@ -80,7 +80,7 @@ import (
 // 	for _, file := range testFiles {
 // 		blockTmp, e := loadBlocks(file)
 // 		if e != nil  {
-// 			t.Fatalf("Error loading file: %v\n", err)
+// 			t.Fatalf("Error loading file: %v\n", e)
 // 		}
 // 		blocks = append(blocks, blockTmp...)
 // 	}
@@ -89,7 +89,7 @@ import (
 // 			blocks[i], BFNone, blocks[i].Height())
 // 		if e != nil  {
 // 			t.Fatalf("CheckConnectBlockTemplate: Received unexpected error "+
-// 				"processing block %d: %v", i, err)
+// 				"processing block %d: %v", i, e)
 // 		}
 // 		if !isMainChain {
 // 			t.Fatalf("CheckConnectBlockTemplate: Expected block %d to connect "+
@@ -99,19 +99,19 @@ import (
 // 	// Block 3 should fail to connect since it's already inserted.
 // 	e = chain.CheckConnectBlockTemplate(blocks[3])
 // 	if e ==  nil {
-// 		t.ftl.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 3")
 // 	}
 // 	// Block 4 should connect successfully to tip of chain.
 // 	e = chain.CheckConnectBlockTemplate(blocks[4])
 // 	if e != nil  {
 // 		t.Fatalf("CheckConnectBlockTemplate: Received unexpected error on "+
-// 			"block 4: %v", err)
+// 			"block 4: %v", e)
 // 	}
 // 	// Block 3a should fail to connect since does not build on chain tip.
 // 	e = chain.CheckConnectBlockTemplate(blocks[5])
 // 	if e ==  nil {
-// 		t.ftl.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 3a")
 // 	}
 // 	// Block 4 should connect even if proof of work is invalid.
@@ -120,14 +120,14 @@ import (
 // 	e = chain.CheckConnectBlockTemplate(util.NewBlock(&invalidPowBlock))
 // 	if e != nil  {
 // 		t.Fatalf("CheckConnectBlockTemplate: Received unexpected error on "+
-// 			"block 4 with bad nonce: %v", err)
+// 			"block 4 with bad nonce: %v", e)
 // 	}
 // 	// Invalid block building on chain tip should fail to connect.
 // 	invalidBlock := *blocks[4].MsgBlock()
 // 	invalidBlock.Header.Bits--
 // 	e = chain.CheckConnectBlockTemplate(util.NewBlock(&invalidBlock))
 // 	if e ==  nil {
-// 		t.ftl.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 4 with invalid difficulty bits")
 // 	}
 // }
@@ -146,7 +146,7 @@ func TestCheckBlockSanity(t *testing.T) {
 		block.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(-time.Second),
 	)
 	if e != nil  {
-		t.Errorf("CheckBlockSanity: %v", err)
+		t.Errorf("CheckBlockSanity: %v", e)
 	}
 	// Ensure a block that has a timestamp with a precision higher than one second fails.
 	timestamp := block.MsgBlock().Header.Timestamp
@@ -209,7 +209,7 @@ func TestCheckSerializedHeight(t *testing.T) {
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf(
 				"checkSerializedHeight #%d wrong error type "+
-					"got: %v <%T>, want: %T", i, err, err, test.err,
+					"got: %v <%T>, want: %T", i, e, e, test.err,
 			)
 			continue
 		}

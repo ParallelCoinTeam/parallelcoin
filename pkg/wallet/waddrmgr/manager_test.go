@@ -127,7 +127,7 @@ func testManagedPubKeyAddress(tc *testContext, prefix string,
 	}
 	// Ensure that the derivation path has been properly re-set after the address
 	// was read from disk.
-	_, gotAddrPath, ok := gotAddr.Derivationinf.Ln()
+	_, gotAddrPath, ok := gotAddr.DerivationI.Ln()
 	if !ok && !gotAddr.Imported() {
 		tc.t.Errorf("%s PubKey: non-imported address has empty "+
 			"derivation info", prefix)
@@ -201,7 +201,7 @@ func testManagedPubKeyAddress(tc *testContext, prefix string,
 		}
 	}
 	// Imported addresses should return a nil derivation info.
-	if _, _, ok := gotAddr.Derivationinf.Ln(); gotAddr.Imported() && ok {
+	if _, _, ok := gotAddr.DerivationI.Ln(); gotAddr.Imported() && ok {
 		tc.t.Errorf("%s Imported: expected nil derivation info", prefix)
 		return false
 	}
@@ -417,7 +417,7 @@ func testExternalAddresses(tc *testContext) bool {
 		return false
 	}
 	// Relock the manager for future tests.
-	if e := tc.rootManager.Lock(); err.Chk(e) {
+	if e := tc.rootManager.Lock(); E.Chk(e) {
 		tc.t.Errorf("Lock: unexpected error: %v", err)
 		return false
 	}
@@ -546,7 +546,7 @@ func testInternalAddresses(tc *testContext) bool {
 	// Lock the manager and retest all of the addresses to ensure the public
 	// information remains valid and the private functions return the expected
 	// error.
-	if e := tc.rootManager.Lock(); err.Chk(e) {
+	if e := tc.rootManager.Lock(); E.Chk(e) {
 		tc.t.Errorf("Lock: unexpected error: %v", err)
 		return false
 	}
@@ -784,7 +784,7 @@ func testImportPrivateKey(tc *testContext) bool {
 	}
 	// Lock the manager and retest all of the addresses to ensure the private
 	// information returns the expected error.
-	if e := tc.rootManager.Lock(); err.Chk(e) {
+	if e := tc.rootManager.Lock(); E.Chk(e) {
 		tc.t.Errorf("Lock: unexpected error: %v", err)
 		return false
 	}
@@ -940,7 +940,7 @@ func testImportScript(tc *testContext) bool {
 	}
 	// Lock the manager and retest all of the addresses to ensure the private
 	// information returns the expected error.
-	if e := tc.rootManager.Lock(); err.Chk(e) {
+	if e := tc.rootManager.Lock(); E.Chk(e) {
 		tc.t.Errorf("Lock: unexpected error: %v", err)
 		return false
 	}
@@ -1141,7 +1141,7 @@ func testChangePassphrase(tc *testContext) bool {
 		return false
 	}
 	// Relock the manager for future tests.
-	if e := tc.rootManager.Lock(); err.Chk(e) {
+	if e := tc.rootManager.Lock(); E.Chk(e) {
 		tc.t.Errorf("Lock: unexpected error: %v", err)
 		return false
 	}
@@ -1508,27 +1508,27 @@ func testWatchingOnly(tc *testContext) bool {
 		tc.t.Errorf("%v", err)
 		return false
 	}
-	if e := tc.db.Copy(fi); err.Chk(e) {
-		if e := fi.Close(); waddrmgr.err.Chk(e) {
+	if e := tc.db.Copy(fi); E.Chk(e) {
+		if e := fi.Close(); waddrmgr.E.Chk(e) {
 		}
 		tc.t.Errorf("%v", err)
 		return false
 	}
-	if e := fi.Close(); waddrmgr.err.Chk(e) {
+	if e := fi.Close(); waddrmgr.E.Chk(e) {
 	}
 	defer func() {
-		if e := os.Remove(woMgrName); waddrmgr.err.Chk(e) {
+		if e := os.Remove(woMgrName); waddrmgr.E.Chk(e) {
 		}
 	}()
 	// Open the new database copy and get the address manager namespace.
 	var db walletdb.DB
-	if db, e = walletdb.Open("bdb", woMgrName); waddrmgr.err.Chk(e) {
+	if db, e = walletdb.Open("bdb", woMgrName); waddrmgr.E.Chk(e) {
 		tc.t.Errorf("openDbNamespace: unexpected error: %v", err)
 		return false
 	}
 	
 	defer func() {
-		if e := db.Close(); waddrmgr.err.Chk(e) {
+		if e := db.Close(); waddrmgr.E.Chk(e) {
 		}
 	}()
 	// Open the manager using the namespace and convert it to watching-only.
@@ -1791,10 +1791,10 @@ func TestEncryptDecryptErrors(t *testing.T) {
 	// Now the mgr is locked and encrypting/decrypting with private keys should fail.
 	_, e = mgr.Encrypt(waddrmgr.CKTPrivate, []byte{})
 	checkManagerError(t, "encryption with private key fails when manager is locked",
-		err, waddrmgr.ErrLocked)
+		e, waddrmgr.ErrLocked)
 	_, e = mgr.Decrypt(waddrmgr.CKTPrivate, []byte{})
 	checkManagerError(t, "decryption with private key fails when manager is locked",
-		err, waddrmgr.ErrLocked)
+		e, waddrmgr.ErrLocked)
 	// Unlock the manager for these tests
 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
@@ -1956,7 +1956,7 @@ func TestScopedKeyManagerManagement(t *testing.T) {
 	}
 	// The manager was just created, we should be able to look it up within the root
 	// manager.
-	if _, e = mgr.FetchScopedKeyManager(testScope); err.Chk(e) {
+	if _, e = mgr.FetchScopedKeyManager(testScope); E.Chk(e) {
 		t.Fatalf("attempt to read created mgr failed: %v", err)
 	}
 	var externalAddr, internalAddr []waddrmgr.ManagedAddress

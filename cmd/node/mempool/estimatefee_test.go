@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/mining"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
@@ -27,14 +27,15 @@ type lastBlock struct {
 }
 
 func (eft *estimateFeeTester) checkSaveAndRestore(
-	previousEstimates [estimateFeeDepth]DUOPerKilobyte) {
+	previousEstimates [estimateFeeDepth]DUOPerKilobyte,
+) {
 	// Get the save state.
 	save := eft.ef.Save()
 	// Save and restore database.
 	var e error
 	eft.ef, e = RestoreFeeEstimator(save)
-	if e != nil  {
-				eft.t.Fatalf("Could not restore database: %s", err)
+	if e != nil {
+		eft.t.Fatalf("Could not restore database: %s", e)
 	}
 	// Save again and check that it matches the previous one.
 	redo := eft.ef.Save()
@@ -45,8 +46,10 @@ func (eft *estimateFeeTester) checkSaveAndRestore(
 	newEstimates := eft.estimates()
 	for i, prev := range previousEstimates {
 		if prev != newEstimates[i] {
-			eft.t.Error("Mismatch in estimate ", i, " after restore; got ",
-				newEstimates[i], " but expected ", prev)
+			eft.t.Error(
+				"Mismatch in estimate ", i, " after restore; got ",
+				newEstimates[i], " but expected ", prev,
+			)
 		}
 	}
 }
@@ -60,9 +63,11 @@ func (eft *estimateFeeTester) estimates() [estimateFeeDepth]DUOPerKilobyte {
 	// Chk that all estimated fee results go in descending order.
 	for i := 1; i < estimateFeeDepth; i++ {
 		if estimates[i] > estimates[i-1] {
-			eft.t.Error("Estimates not in descending order; got ",
+			eft.t.Error(
+				"Estimates not in descending order; got ",
 				estimates[i], " for estimate ", i, " and ", estimates[i-1],
-				" for ", i-1)
+				" for ", i-1,
+			)
 			panic("invalid state.")
 		}
 	}
@@ -76,7 +81,7 @@ func (eft *estimateFeeTester) newBlock(txs []*wire.MsgTx) {
 	eft.last = &lastBlock{block.Hash(), eft.last}
 	e := eft.ef.RegisterBlock(block)
 	if e != nil {
-		wrn.Ln("failed to register block:", e)
+		W.Ln("failed to register block:", e)
 	}
 }
 
@@ -85,16 +90,18 @@ func (eft *estimateFeeTester) rollback() {
 		return
 	}
 	e := eft.ef.Rollback(eft.last.hash)
-	if e != nil  {
-				eft.t.Errorf("Could not rollback: %v", err)
+	if e != nil {
+		eft.t.Errorf("Could not rollback: %v", e)
 	}
 	eft.height--
 	eft.last = eft.last.prev
 }
 
-func (eft *estimateFeeTester) round(txHistory [][]*TxDesc,
+func (eft *estimateFeeTester) round(
+	txHistory [][]*TxDesc,
 	estimateHistory [][estimateFeeDepth]DUOPerKilobyte, txPerRound,
-	txPerBlock uint32) ([][]*TxDesc, [][estimateFeeDepth]DUOPerKilobyte) {
+	txPerBlock uint32,
+) ([][]*TxDesc, [][estimateFeeDepth]DUOPerKilobyte) {
 	// generate new txs.
 	var newTxs []*TxDesc
 	for i := uint32(0); i < txPerRound; i++ {
@@ -133,13 +140,16 @@ func (eft *estimateFeeTester) round(txHistory [][]*TxDesc,
 func (
 eft *estimateFeeTester,
 ) testTx(
-	fee util.Amount) *TxDesc {
+	fee util.Amount,
+) *TxDesc {
 	eft.version++
 	return &TxDesc{
 		TxDesc: mining.TxDesc{
-			Tx: util.NewTx(&wire.MsgTx{
-				Version: eft.version,
-			}),
+			Tx: util.NewTx(
+				&wire.MsgTx{
+					Version: eft.version,
+				},
+			),
 			Height: eft.height,
 			Fee:    int64(fee),
 		},
@@ -179,8 +189,10 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf("Estimate fee error: expected %f when estimator is"+
-				" empty; got %f", expected, estimated)
+			t.Errorf(
+				"Estimate fee error: expected %f when estimator is"+
+					" empty; got %f", expected, estimated,
+			)
 		}
 	}
 	// Now insert a tx.
@@ -191,8 +203,10 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf("Estimate fee error: expected %f when estimator has one"+
-				" tx in mempool; got %f", expected, estimated)
+			t.Errorf(
+				"Estimate fee error: expected %f when estimator has one"+
+					" tx in mempool; got %f", expected, estimated,
+			)
 		}
 	}
 	// Change minRegisteredBlocks to make sure that works. Error return value expected.
@@ -201,8 +215,10 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf("Estimate fee error: expected %f before any blocks have"+
-				" been registered; got %f", expected, estimated)
+			t.Errorf(
+				"Estimate fee error: expected %f before any blocks have"+
+					" been registered; got %f", expected, estimated,
+			)
 		}
 	}
 	// Record a block with the new tx.
@@ -211,8 +227,10 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf("Estimate fee error: expected %f when one tx is binned"+
-				"; got %f", expected, estimated)
+			t.Errorf(
+				"Estimate fee error: expected %f when one tx is binned"+
+					"; got %f", expected, estimated,
+			)
 		}
 	}
 	// Roll back the last block; this was an orphan block.
@@ -222,8 +240,10 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf("Estimate fee error: expected %f after rolling back"+
-				" block; got %f", expected, estimated)
+			t.Errorf(
+				"Estimate fee error: expected %f after rolling back"+
+					" block; got %f", expected, estimated,
+			)
 		}
 	}
 	// Record an empty block and then a block with the new tx. This test was made because of a bug that only appeared
@@ -234,8 +254,10 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf("Estimate fee error: expected %f when one tx is binned"+
-				"; got %f", expected, estimated)
+			t.Errorf(
+				"Estimate fee error: expected %f when one tx is binned"+
+					"; got %f", expected, estimated,
+			)
 		}
 	}
 	// Create some more transactions.
@@ -260,8 +282,10 @@ func TestEstimateFee(t *testing.T) {
 			expected = expectedFeePerKilobyte(tx)
 		}
 		if estimated != expected {
-			t.Errorf("Estimate fee error: expected %f on round %d; got %f",
-				expected, i, estimated)
+			t.Errorf(
+				"Estimate fee error: expected %f on round %d; got %f",
+				expected, i, estimated,
+			)
 		}
 	}
 	// Record 5 more empty blocks.
@@ -282,8 +306,10 @@ func TestEstimateFee(t *testing.T) {
 			expected = expectedFeePerKilobyte(txA)
 		}
 		if estimated != expected {
-			t.Errorf("Estimate fee error: expected %f on round %d; got %f",
-				expected, i, estimated)
+			t.Errorf(
+				"Estimate fee error: expected %f on round %d; got %f",
+				expected, i, estimated,
+			)
 		}
 	}
 	// Record 9 more empty blocks.
@@ -319,8 +345,12 @@ func TestEstimateFeeRollback(t *testing.T) {
 	maxReplacements := uint32(4)
 	stepsBack := 2
 	rounds := 30
-	eft := estimateFeeTester{ef: newTestFeeEstimator(binSize,
-		maxReplacements, uint32(stepsBack)), t: t}
+	eft := estimateFeeTester{
+		ef: newTestFeeEstimator(
+			binSize,
+			maxReplacements, uint32(stepsBack),
+		), t: t,
+	}
 	var txHistory [][]*TxDesc
 	estimateHistory := [][estimateFeeDepth]DUOPerKilobyte{eft.estimates()}
 	for round := 0; round < rounds; round++ {
@@ -338,8 +368,10 @@ func TestEstimateFeeRollback(t *testing.T) {
 			// Ensure that these are both the same.
 			for i := 0; i < estimateFeeDepth; i++ {
 				if expected[i] != estimates[i] {
-					t.Errorf("Rollback value mismatch. Expected %f, got %f. ",
-						expected[i], estimates[i])
+					t.Errorf(
+						"Rollback value mismatch. Expected %f, got %f. ",
+						expected[i], estimates[i],
+					)
 					return
 				}
 			}

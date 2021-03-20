@@ -170,7 +170,7 @@ func TestStxoDecodeErrors(t *testing.T) {
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("decodeSpentTxOut (%s): expected error type "+
 				"does not match - got %T, want %T", test.name,
-				err, test.errType)
+				e, test.errType)
 			continue
 		}
 		// Ensure the expected number of bytes read is returned.
@@ -369,7 +369,7 @@ func TestSpendJournalErrors(t *testing.T) {
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("deserializeSpendJournalEntry (%s): expected "+
 				"error type does not match - got %T, want %T",
-				test.name, err, test.errType)
+				test.name, e, test.errType)
 			continue
 		}
 		if stxos != nil {
@@ -515,7 +515,7 @@ func TestUtxoEntryHeaderCodeErrors(t *testing.T) {
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("utxoEntryHeaderCode (%s): expected error "+
 				"type does not match - got %T, want %T",
-				test.name, err, test.errType)
+				test.name, e, test.errType)
 			continue
 		}
 		if code != 0 {
@@ -552,7 +552,7 @@ func TestUtxoEntryDeserializeErrors(t *testing.T) {
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("deserializeUtxoEntry (%s): expected error "+
 				"type does not match - got %T, want %T",
-				test.name, err, test.errType)
+				test.name, e, test.errType)
 			continue
 		}
 		if entry != nil {
@@ -657,7 +657,7 @@ func TestBestChainStateDeserializeErrors(t *testing.T) {
 		if reflect.TypeOf(err) != reflect.TypeOf(test.errType) {
 			t.Errorf("deserializeBestChainState (%s): expected "+
 				"error type does not match - got %T, want %T",
-				test.name, err, test.errType)
+				test.name, e, test.errType)
 			continue
 		}
 		if derr, ok := err.(database.DBError); ok {

@@ -29,16 +29,16 @@ func TestGenerateSharedSecret(t *testing.T) {
 func TestCipheringBasic(t *testing.T) {
 	privkey, e := NewPrivateKey(S256())
 	if e != nil  {
-		ftl.Ln("failed to generate private key")
+		F.Ln("failed to generate private key")
 	}
 	in := []byte("Hey there dude. How are you doing? This is a test.")
 	out, e := Encrypt(privkey.PubKey(), in)
 	if e != nil  {
-		ftl.Ln("failed to encrypt:", err)
+		F.Ln("failed to encrypt:", err)
 	}
 	dec, e := Decrypt(privkey, out)
 	if e != nil  {
-		ftl.Ln("failed to decrypt:", err)
+		F.Ln("failed to decrypt:", err)
 	}
 	if !bytes.Equal(in, dec) {
 		t.Error("decrypted data doesn't match original")
@@ -58,7 +58,7 @@ func TestCiphering(t *testing.T) {
 		"6c3f11ff572ddd5b2bedf9f9c0b327c54da02a28fcdce1f8369ffec")
 	dec, e := Decrypt(privkey, out)
 	if e != nil  {
-		ftl.Ln("failed to decrypt:", err)
+		F.Ln("failed to decrypt:", err)
 	}
 	if !bytes.Equal(in, dec) {
 		t.Error("decrypted data doesn't match original")
@@ -67,7 +67,7 @@ func TestCiphering(t *testing.T) {
 func TestCipheringErrors(t *testing.T) {
 	privkey, e := NewPrivateKey(S256())
 	if e != nil  {
-		ftl.Ln("failed to generate private key")
+		F.Ln("failed to generate private key")
 	}
 	tests1 := []struct {
 		ciphertext []byte // input ciphertext

@@ -45,7 +45,7 @@ var interruptCallbackSources []string
 // and responds to custom shutdown signals as required
 func Listener() {
 	invokeCallbacks := func() {
-		dbg.Ln(
+		D.Ln(
 			"running interrupt callbacks",
 			len(interruptCallbacks),
 			strings.Repeat(" ", 48),
@@ -54,27 +54,27 @@ func Listener() {
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
-			dbg.Ln("running callback", idx, interruptCallbackSources[idx])
+			D.Ln("running callback", idx, interruptCallbackSources[idx])
 			interruptCallbacks[idx]()
 		}
-		dbg.Ln("interrupt handlers finished")
+		D.Ln("interrupt handlers finished")
 		HandlersDone.Q()
 		if Restart {
 			var file string
 			var e error
 			file, e = osext.Executable()
 			if e != nil {
-				err.Ln(e)
+				E.Ln(e)
 				return
 			}
-			dbg.Ln("restarting")
+			D.Ln("restarting")
 			if runtime.GOOS != "windows" {
 				e = syscall.Exec(file, os.Args, os.Environ())
 				if e != nil {
-					ftl.Ln(e)
+					F.Ln(e)
 				}
 			} else {
-				dbg.Ln("doing windows restart")
+				D.Ln("doing windows restart")
 				
 				// procAttr := new(os.ProcAttr)
 				// procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
@@ -86,8 +86,8 @@ func Listener() {
 				// s = append(s, "--delaystart")
 				s = append(s, os.Args[1:]...)
 				cmd := exec.Command(s[0], s[1:]...)
-				dbg.Ln("windows restart done")
-				if e = cmd.Start(); err.Chk(e) {
+				D.Ln("windows restart done")
+				if e = cmd.Start(); E.Chk(e) {
 				}
 				// // select{}
 				// os.Exit(0)
@@ -103,7 +103,7 @@ out:
 		case sig := <-ch:
 			// if !requested {
 			// 	L.Printf("\r>>> received signal (%s)\n", sig)
-			dbg.Ln("received interrupt signal", sig)
+			D.Ln("received interrupt signal", sig)
 			requested.Store(true)
 			invokeCallbacks()
 			// pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
@@ -111,14 +111,14 @@ out:
 			break out
 		case <-ShutdownRequestChan.Wait():
 			// if !requested {
-			wrn.Ln("received shutdown request - shutting down...")
+			W.Ln("received shutdown request - shutting down...")
 			requested.Store(true)
 			invokeCallbacks()
 			break out
 			// }
 		case handler := <-addHandlerChan:
 			// if !requested {
-			// dbg.Ln("adding handler")
+			// D.Ln("adding handler")
 			interruptCallbacks = append(interruptCallbacks, handler.Fn)
 			interruptCallbackSources = append(interruptCallbackSources, handler.Source)
 			// }
@@ -134,7 +134,7 @@ func AddHandler(handler func()) {
 	// already done.
 	_, loc, line, _ := runtime.Caller(1)
 	msg := fmt.Sprintf("%s:%d", loc, line)
-	dbg.Ln("handler added by:", msg)
+	D.Ln("handler added by:", msg)
 	if ch == nil {
 		ch = make(chan os.Signal)
 		signal.Notify(ch, signals...)
@@ -148,9 +148,9 @@ func AddHandler(handler func()) {
 // Request programmatically requests a shutdown
 func Request() {
 	_, f, l, _ := runtime.Caller(1)
-	dbg.Ln("interrupt requested", f, l, requested.Load())
+	D.Ln("interrupt requested", f, l, requested.Load())
 	if requested.Load() {
-		dbg.Ln("requested again")
+		D.Ln("requested again")
 		return
 	}
 	requested.Store(true)
@@ -161,7 +161,7 @@ func Request() {
 	case _, ok = <-ShutdownRequestChan:
 	default:
 	}
-	dbg.Ln("shutdownrequestchan", ok)
+	D.Ln("shutdownrequestchan", ok)
 	if ok {
 		close(ShutdownRequestChan)
 	}
@@ -177,7 +177,7 @@ func GoroutineDump() string {
 // RequestRestart sets the reset flag and requests a restart
 func RequestRestart() {
 	Restart = true
-	dbg.Ln("requesting restart")
+	D.Ln("requesting restart")
 	Request()
 }
 

@@ -113,7 +113,7 @@ func TestCheckErrorCondition(t *testing.T) {
 		e = vm.CheckErrorCondition(false)
 		if !IsErrorCode(err, ErrScriptUnfinished) {
 			t.Fatalf("got unexepected error %v on %dth iteration",
-				err, i)
+				e, i)
 		}
 	}
 	done, e := vm.Step()

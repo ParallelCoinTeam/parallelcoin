@@ -8,7 +8,14 @@ import (
 )
 
 // Command returns a cli.Command
-func Command(name string, usage string, action interface{}, subcommands cli.Commands, flags []cli.Flag, aliases ...string) cli.Command {
+func Command(
+	name string,
+	usage string,
+	action interface{},
+	subcommands cli.Commands,
+	flags []cli.Flag,
+	aliases ...string,
+) cli.Command {
 	return cli.Command{
 		Name:        name,
 		Aliases:     aliases,

@@ -41,25 +41,25 @@ func (b *BufferUint64) ForEach(fn func(v uint64) error) (e error) {
 	c := b.Cursor
 	i := c + 1
 	if i == len(b.Buf) {
-		// dbg.Ln("hit the end")
+		// D.Ln("hit the end")
 		i = 0
 	}
 	if !b.Full {
-		// dbg.Ln("buffer not yet full")
+		// D.Ln("buffer not yet full")
 		i = 0
 	}
-	// dbg.Ln(b.Buf)
+	// D.Ln(b.Buf)
 	for ; ; i++ {
 		if i == len(b.Buf) {
-			// dbg.Ln("passed the end")
+			// D.Ln("passed the end")
 			i = 0
 		}
 		if i == c {
-			// dbg.Ln("reached cursor again")
+			// D.Ln("reached cursor again")
 			break
 		}
-		// dbg.Ln(i, b.Cursor)
-		if e = fn(b.Buf[i]); err.Chk(e) {
+		// D.Ln(i, b.Cursor)
+		if e = fn(b.Buf[i]); E.Chk(e) {
 			break
 		}
 	}

@@ -164,7 +164,7 @@ func TestAssignField(t *testing.T) {
 		e := btcjson.TstAssignField(1, "testField", dst, src)
 		if e != nil  {
 			t.Errorf("Test #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		// Indirect through to the base types to ensure their values are the same.
@@ -323,14 +323,14 @@ func TestAssignFieldErrors(t *testing.T) {
 		e := btcjson.TstAssignField(1, "testField", dst, src)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%[3]v), "+
-				"want %T", i, test.name, err, test.err)
+				"want %T", i, test.name, e, test.err)
 			continue
 		}
 		gotErrorCode := err.(btcjson.Error).ErrorCode
 		if gotErrorCode != test.err.ErrorCode {
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
-				err, test.err.ErrorCode)
+				e, test.err.ErrorCode)
 			continue
 		}
 	}
@@ -375,14 +375,14 @@ func TestNewCmdErrors(t *testing.T) {
 		_, e := btcjson.NewCmd(test.method, test.args...)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
-				"want %T", i, test.name, err, err, test.err)
+				"want %T", i, test.name, e, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(btcjson.Error).ErrorCode
 		if gotErrorCode != test.err.ErrorCode {
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
-				err, test.err.ErrorCode)
+				e, test.err.ErrorCode)
 			continue
 		}
 	}
@@ -421,14 +421,14 @@ func TestMarshalCmdErrors(t *testing.T) {
 		_, e := btcjson.MarshalCmd(test.id, test.cmd)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
-				"want %T", i, test.name, err, err, test.err)
+				"want %T", i, test.name, e, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(btcjson.Error).ErrorCode
 		if gotErrorCode != test.err.ErrorCode {
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
-				err, test.err.ErrorCode)
+				e, test.err.ErrorCode)
 			continue
 		}
 	}
@@ -488,14 +488,14 @@ func TestUnmarshalCmdErrors(t *testing.T) {
 		_, e := btcjson.UnmarshalCmd(&test.request)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
-				"want %T", i, test.name, err, err, test.err)
+				"want %T", i, test.name, e, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(btcjson.Error).ErrorCode
 		if gotErrorCode != test.err.ErrorCode {
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
-				err, test.err.ErrorCode)
+				e, test.err.ErrorCode)
 			continue
 		}
 	}

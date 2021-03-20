@@ -78,9 +78,9 @@ func (fl UsageFlag) String() string {
 // MustRegisterCmd performs the same function as RegisterCmd except it panics if there is an error. This should only be
 // called from package init functions.
 func MustRegisterCmd(method string, cmd interface{}, flags UsageFlag) {
-	if e := RegisterCmd(method, cmd, flags); err.Chk(e) {
+	if e := RegisterCmd(method, cmd, flags); E.Chk(e) {
 		panic(fmt.Sprintf("failed to register type %q: %v\n", method,
-			err))
+			e))
 	}
 	RegisteredCommands[method] = cmd
 }
@@ -201,7 +201,7 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) (e error) {
 			rvf := reflect.New(rtf.Type.Elem())
 			e := json.Unmarshal([]byte(tag), rvf.Interface())
 			if e != nil  {
-				err.Ln(e)
+				E.Ln(e)
 				str := fmt.Sprintf("default value of %q is "+
 					"the wrong type (field name %q)", tag,
 					rtf.Name)

@@ -107,7 +107,7 @@ func TestMessage(t *testing.T) {
 		var buf bytes.Buffer
 		nw, e := WriteMessageN(&buf, test.in, test.pver, test.btcnet)
 		if e != nil  {
-			t.Errorf("WriteMessage #%d error %v", i, err)
+			t.Errorf("WriteMessage #%d error %v", i, e)
 			continue
 		}
 		// Ensure the number of bytes written match the expected value.
@@ -119,7 +119,7 @@ func TestMessage(t *testing.T) {
 		rbuf := bytes.NewReader(buf.Bytes())
 		nr, msg, _, e = ReadMessageN(rbuf, test.pver, test.btcnet)
 		if e != nil  {
-			t.Errorf("ReadMessage #%d error %v, msg %v", i, err,
+			t.Errorf("ReadMessage #%d error %v, msg %v", i, e,
 				spew.Sdump(msg))
 			continue
 		}
@@ -141,14 +141,14 @@ func TestMessage(t *testing.T) {
 		var buf bytes.Buffer
 		e := WriteMessage(&buf, test.in, test.pver, test.btcnet)
 		if e != nil  {
-			t.Errorf("WriteMessage #%d error %v", i, err)
+			t.Errorf("WriteMessage #%d error %v", i, e)
 			continue
 		}
 		// Decode from wire format.
 		rbuf := bytes.NewReader(buf.Bytes())
 		msg, _, e = ReadMessage(rbuf, test.pver, test.btcnet)
 		if e != nil  {
-			t.Errorf("ReadMessage #%d error %v, msg %v", i, err,
+			t.Errorf("ReadMessage #%d error %v, msg %v", i, e,
 				spew.Sdump(msg))
 			continue
 		}
@@ -310,7 +310,7 @@ func TestReadMessageWireErrors(t *testing.T) {
 		nr, _, _, e = ReadMessageN(r, test.pver, test.btcnet)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
 			t.Errorf("ReadMessage #%d wrong error got: %v <%T>, "+
-				"want: %T", i, err, err, test.readErr)
+				"want: %T", i, e, e, test.readErr)
 			continue
 		}
 		// Ensure the number of bytes written match the expected value.
@@ -322,7 +322,7 @@ func TestReadMessageWireErrors(t *testing.T) {
 		if _, ok := err.(*MessageError); !ok {
 			if err != test.readErr {
 				t.Errorf("ReadMessage #%d wrong error got: %v <%T>, "+
-					"want: %v <%T>", i, err, err,
+					"want: %v <%T>", i, e, e,
 					test.readErr, test.readErr)
 				continue
 			}
@@ -377,7 +377,7 @@ func TestWriteMessageWireErrors(t *testing.T) {
 		nw, e := WriteMessageN(w, test.msg, test.pver, test.btcnet)
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
 			t.Errorf("WriteMessage #%d wrong error got: %v <%T>, "+
-				"want: %T", i, err, err, test.err)
+				"want: %T", i, e, e, test.err)
 			continue
 		}
 		// Ensure the number of bytes written match the expected value.
@@ -389,7 +389,7 @@ func TestWriteMessageWireErrors(t *testing.T) {
 		if _, ok := err.(*MessageError); !ok {
 			if err != test.err {
 				t.Errorf("ReadMessage #%d wrong error got: %v <%T>, "+
-					"want: %v <%T>", i, err, err,
+					"want: %v <%T>", i, e, e,
 					test.err, test.err)
 				continue
 			}

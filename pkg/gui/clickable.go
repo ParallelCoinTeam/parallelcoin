@@ -37,13 +37,13 @@ func (w *Window) Clickable() (c *Clickable) {
 		history:    nil,
 		Events: clickEvents{
 			Click: func() {
-				dbg.Ln("click event")
+				D.Ln("click event")
 			},
 			Cancel: func() {
-				dbg.Ln("cancel event")
+				D.Ln("cancel event")
 			},
 			Press: func() {
-				dbg.Ln("press event")
+				D.Ln("press event")
 			},
 		},
 	}

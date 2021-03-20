@@ -51,11 +51,11 @@ func (msg *MsgBlock) ClearTransactions() {
 // implementation. See Deserialize for decoding blocks stored to disk, such as in a database, as opposed to decoding
 // blocks from the wire.
 func (msg *MsgBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e error) {
-	if e = readBlockHeader(r, pver, &msg.Header); err.Chk(e) {
+	if e = readBlockHeader(r, pver, &msg.Header); E.Chk(e) {
 		return
 	}
 	var txCount uint64
-	if txCount, e = ReadVarInt(r, pver); err.Chk(e) {
+	if txCount, e = ReadVarInt(r, pver); E.Chk(e) {
 		return
 	}
 	// Prevent more transactions than could possibly fit into a block. It would be possible to cause memory exhaustion
@@ -70,7 +70,7 @@ func (msg *MsgBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) (e
 	msg.Transactions = make([]*MsgTx, 0, txCount)
 	for i := uint64(0); i < txCount; i++ {
 		tx := MsgTx{}
-		if e = tx.BtcDecode(r, pver, enc); err.Chk(e) {
+		if e = tx.BtcDecode(r, pver, enc); E.Chk(e) {
 			return
 		}
 		msg.Transactions = append(msg.Transactions, &tx)
@@ -115,11 +115,11 @@ func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) (txLocs []TxLoc, e error)
 	fullLen := r.Len()
 	// At the current time, there is no difference between the wire encoding at protocol version 0 and the stable
 	// long-term storage format. As a result, make use of existing wire protocol functions.
-	if e = readBlockHeader(r, 0, &msg.Header); err.Chk(e) {
+	if e = readBlockHeader(r, 0, &msg.Header); E.Chk(e) {
 		return
 	}
 	var txCount uint64
-	if txCount, e = ReadVarInt(r, 0); err.Chk(e) {
+	if txCount, e = ReadVarInt(r, 0); E.Chk(e) {
 		return
 	}
 	// Prevent more transactions than could possibly fit into a block. It would be possible to cause memory exhaustion
@@ -136,7 +136,7 @@ func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) (txLocs []TxLoc, e error)
 	for i := uint64(0); i < txCount; i++ {
 		txLocs[i].TxStart = fullLen - r.Len()
 		tx := MsgTx{}
-		if e = tx.Deserialize(r); err.Chk(e) {
+		if e = tx.Deserialize(r); E.Chk(e) {
 			return
 		}
 		msg.Transactions = append(msg.Transactions, &tx)
@@ -149,14 +149,14 @@ func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) (txLocs []TxLoc, e error)
 // implementation. See Serialize for encoding blocks to be stored to disk, such as in a database, as opposed to encoding
 // blocks for the wire.
 func (msg *MsgBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) (e error) {
-	if e = writeBlockHeader(w, pver, &msg.Header); err.Chk(e) {
+	if e = writeBlockHeader(w, pver, &msg.Header); E.Chk(e) {
 		return
 	}
-	if e = WriteVarInt(w, pver, uint64(len(msg.Transactions))); err.Chk(e) {
+	if e = WriteVarInt(w, pver, uint64(len(msg.Transactions))); E.Chk(e) {
 		return
 	}
 	for _, tx := range msg.Transactions {
-		if e = tx.BtcEncode(w, pver, enc); err.Chk(e) {
+		if e = tx.BtcEncode(w, pver, enc); E.Chk(e) {
 			return
 		}
 	}

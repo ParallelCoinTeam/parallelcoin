@@ -37,7 +37,7 @@ func TestCmdMethod(t *testing.T) {
 		method, e := btcjson.CmdMethod(test.cmd)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%[3]v), "+
-				"want %T", i, test.name, err, test.err)
+				"want %T", i, test.name, e, test.err)
 			continue
 		}
 		if e != nil  {
@@ -45,7 +45,7 @@ func TestCmdMethod(t *testing.T) {
 			if gotErrorCode != test.err.(btcjson.Error).ErrorCode {
 				t.Errorf("Test #%d (%s) mismatched error code "+
 					"- got %v (%v), want %v", i, test.name,
-					gotErrorCode, err,
+					gotErrorCode, e,
 					test.err.(btcjson.Error).ErrorCode)
 				continue
 			}
@@ -90,7 +90,7 @@ func TestMethodUsageFlags(t *testing.T) {
 		flags, e := btcjson.MethodUsageFlags(test.method)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%[3]v), "+
-				"want %T", i, test.name, err, test.err)
+				"want %T", i, test.name, e, test.err)
 			continue
 		}
 		if e != nil  {
@@ -98,7 +98,7 @@ func TestMethodUsageFlags(t *testing.T) {
 			if gotErrorCode != test.err.(btcjson.Error).ErrorCode {
 				t.Errorf("Test #%d (%s) mismatched error code "+
 					"- got %v (%v), want %v", i, test.name,
-					gotErrorCode, err,
+					gotErrorCode, e,
 					test.err.(btcjson.Error).ErrorCode)
 				continue
 			}
@@ -143,7 +143,7 @@ func TestMethodUsageText(t *testing.T) {
 		usage, e := btcjson.MethodUsageText(test.method)
 		if reflect.TypeOf(e) != reflect.TypeOf(test.err) {
 			t.Errorf("Test #%d (%s) wrong error - got %T (%[3]v), "+
-				"want %T", i, test.name, err, test.err)
+				"want %T", i, test.name, e, test.err)
 			continue
 		}
 		if e != nil  {
@@ -151,7 +151,7 @@ func TestMethodUsageText(t *testing.T) {
 			if gotErrorCode != test.err.(btcjson.Error).ErrorCode {
 				t.Errorf("Test #%d (%s) mismatched error code "+
 					"- got %v (%v), want %v", i, test.name,
-					gotErrorCode, err,
+					gotErrorCode, e,
 					test.err.(btcjson.Error).ErrorCode)
 				continue
 			}
@@ -167,7 +167,7 @@ func TestMethodUsageText(t *testing.T) {
 		usage, e = btcjson.MethodUsageText(test.method)
 		if e != nil  {
 			t.Errorf("Test #%d (%s) unexpected error: %v", i,
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		// Ensure usage still matches the expected value.

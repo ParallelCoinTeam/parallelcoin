@@ -22,7 +22,7 @@ import (
 // mainnet this is probably set to 9 or so to raise the difficulty to a reasonable level for the hard fork. at 5
 // repetitions (first plus repeats, thus 4), an example block header produces a number around 48kb in byte size and
 // ~119000 decimal digits, which is then finally hashed down to 32 bytes
-var HashReps = 2
+var HashReps = 1
 
 // Argon2i takes bytes, generates a Blake3 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {
@@ -40,7 +40,7 @@ func X11(bytes []byte) (out []byte) {
 	hf := x11.New()
 	out = make([]byte, 32)
 	hf.Hash(bytes, out)
-	// dbg.F("x11 %x", out)
+	// D.F("x11 %x", out)
 	return
 	// return cryptonight.Sum(bytes, 2)
 }
@@ -171,7 +171,7 @@ func Scrypt(bytes []byte) []byte {
 	var dk []byte
 	dk, e = scrypt.Key(c, c, 1024, 1, 1, 32)
 	if e != nil {
-		err.Ln(e)
+		E.Ln(e)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

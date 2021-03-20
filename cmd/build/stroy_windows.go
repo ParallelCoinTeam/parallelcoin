@@ -210,8 +210,8 @@ func Get() string {
 		Tag,
 		PathBase,
 	)
-	if e = ioutil.WriteFile("version/version.go", []byte(versionFileOut), 0666);e!=nil{
-		fmt.Fprintln(os.Stderr,e)
+	if e = ioutil.WriteFile("version/version.go", []byte(versionFileOut), 0666); e != nil {
+		fmt.Fprintln(os.Stderr, e)
 	}
 	// } else {
 	// 	ldFlags = []string{
@@ -292,7 +292,7 @@ func main() {
 				cmd.Stdin = os.Stdin
 				cmd.Stderr = os.Stderr
 				if e := cmd.Start(); e != nil {
-					spew.Fdump(os.Stderr,e)
+					spew.Fdump(os.Stderr, e)
 					os.Exit(1)
 				}
 				if e := cmd.Wait(); e != nil {

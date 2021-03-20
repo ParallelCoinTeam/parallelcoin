@@ -127,61 +127,61 @@ func (s *State) IsReceivingAddress() bool {
 }
 
 func (s *State) Save(filename string, pass *string) (e error) {
-	dbg.Ln("saving state...")
+	D.Ln("saving state...")
 	marshalled := s.Marshal()
 	var j []byte
-	if j, e = json.MarshalIndent(marshalled, "", "  "); err.Chk(e) {
+	if j, e = json.MarshalIndent(marshalled, "", "  "); E.Chk(e) {
 		return
 	}
-	// dbg.Ln(string(j))
+	// D.Ln(string(j))
 	var ciph cipher.AEAD
-	if ciph, e = gcm.GetCipher(*pass); err.Chk(e) {
+	if ciph, e = gcm.GetCipher(*pass); E.Chk(e) {
 		return
 	}
 	var nonce []byte
-	if nonce, e = transport.GetNonce(ciph); err.Chk(e) {
+	if nonce, e = transport.GetNonce(ciph); E.Chk(e) {
 		return
 	}
 	crypted := append(nonce, ciph.Seal(nil, nonce, j, nil)...)
 	var b []byte
 	_ = b
-	if b, e = ciph.Open(nil, nonce, crypted[len(nonce):], nil); err.Chk(e) {
+	if b, e = ciph.Open(nil, nonce, crypted[len(nonce):], nil); E.Chk(e) {
 		interrupt.Request()
 		return
 	}
-	if e = ioutil.WriteFile(filename, crypted, 0700); err.Chk(e) {
+	if e = ioutil.WriteFile(filename, crypted, 0700); E.Chk(e) {
 	}
-	if e = ioutil.WriteFile(filename+".clear", j, 0700); err.Chk(e) {
+	if e = ioutil.WriteFile(filename+".clear", j, 0700); E.Chk(e) {
 	}
 	return
 }
 
 func (s *State) Load(filename string, pass *string) (e error) {
-	dbg.Ln("loading state...")
+	D.Ln("loading state...")
 	var data []byte
 	var ciph cipher.AEAD
-	if data, e = ioutil.ReadFile(filename); err.Chk(e) {
+	if data, e = ioutil.ReadFile(filename); E.Chk(e) {
 		return
 	}
-	// dbg.Ln("cipher:", *pass)
-	if ciph, e = gcm.GetCipher(*pass); err.Chk(e) {
+	// D.Ln("cipher:", *pass)
+	if ciph, e = gcm.GetCipher(*pass); E.Chk(e) {
 		return
 	}
 	ns := ciph.NonceSize()
-	// dbg.Ln("nonce size:", ns)
+	// D.Ln("nonce size:", ns)
 	nonce := data[:ns]
 	data = data[ns:]
 	var b []byte
-	if b, e = ciph.Open(nil, nonce, data, nil); err.Chk(e) {
+	if b, e = ciph.Open(nil, nonce, data, nil); E.Chk(e) {
 		// interrupt.Request()
 		return
 	}
 	// yay, right password, now unmarshal
 	ss := &Marshalled{}
-	if e = json.Unmarshal(b, ss); err.Chk(e) {
+	if e = json.Unmarshal(b, ss); E.Chk(e) {
 		return
 	}
-	// dbg.Ln(string(b))
+	// D.Ln(string(b))
 	ss.Unmarshal(s)
 	return
 }
@@ -233,7 +233,7 @@ func (m *Marshalled) Unmarshal(s *State) {
 	if m.ReceivingAddress != "1111111111111111111114oLvT2" {
 		var e error
 		var ra util.Address
-		if ra, e = util.DecodeAddress(m.ReceivingAddress, s.currentReceivingAddress.ForNet); err.Chk(e) {
+		if ra, e = util.DecodeAddress(m.ReceivingAddress, s.currentReceivingAddress.ForNet); E.Chk(e) {
 		}
 		s.currentReceivingAddress.Store(ra)
 	}

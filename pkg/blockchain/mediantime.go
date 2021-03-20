@@ -108,9 +108,9 @@ func (m *medianTime) AddTimeSample(sourceID string, timeVal time.Time) {
 	copy(sortedOffsets, m.offsets)
 	sort.Sort(int64Sorter(sortedOffsets))
 	offsetDuration := time.Duration(offsetSecs) * time.Second
-	trc.F("Added time sample of %v (total: %v)", offsetDuration,
+	T.F("Added time sample of %v (total: %v)", offsetDuration,
 		numOffsets)
-	trc.Ln("samples:", sortedOffsets)
+	T.Ln("samples:", sortedOffsets)
 	// NOTE: The following code intentionally has a bug to mirror the buggy behavior in Bitcoin Core since the median
 	// time is used in the consensus rules. In particular, the offset is only updated when the number of entries is odd,
 	// but the max number of entries is 200, an even number. Thus, the offset will never be updated again once the max
@@ -142,13 +142,13 @@ func (m *medianTime) AddTimeSample(sourceID string, timeVal time.Time) {
 			}
 			// Warn if none of the time samples are close.
 			if !remoteHasCloseTime {
-				wrn.Ln("Please check your date and time are correct!  pod " +
+				W.Ln("Please check your date and time are correct!  pod " +
 					"will not work properly with an invalid time")
 			}
 		}
 	}
 	medianDuration := time.Duration(m.offsetSecs) * time.Second
-	dbg.Ln("new time offset:", medianDuration)
+	D.Ln("new time offset:", medianDuration)
 }
 
 // Offset returns the number of seconds to adjust the local clock based upon the median of the time samples added by

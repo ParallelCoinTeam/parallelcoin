@@ -1,6 +1,7 @@
 package rununit
 
 import (
+	"github.com/p9c/pod/pkg/logg"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -8,7 +9,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/pipe/consume"
-	"github.com/p9c/pod/pkg/util/logi"
 )
 
 // RunUnit handles correctly starting and stopping child processes that have StdConn pipe logging enabled, allowing
@@ -24,7 +24,7 @@ type RunUnit struct {
 // receives log entries and processes them (such as logging them).
 func New(
 	run, stop func(),
-	logger func(ent *logi.Entry) (e error),
+	logger func(ent *logg.Entry) (e error),
 	pkgFilter func(pkg string) (out bool),
 	quit qu.C,
 	args ...string,
@@ -39,45 +39,45 @@ func New(
 		var e error
 	out:
 		for {
-			dbg.Ln("run unit command loop", args)
+			D.Ln("run unit command loop", args)
 			select {
 			case cmd := <-r.commandChan:
 				switch cmd {
 				case true:
-					dbg.Ln(r.running.Load(), "run called for", args)
+					D.Ln(r.running.Load(), "run called for", args)
 					if r.running.Load() {
-						dbg.Ln("already running", args)
+						D.Ln("already running", args)
 						continue
 					}
 					if r.worker != nil {
-						if e = r.worker.Kill(); err.Chk(e) {
+						if e = r.worker.Kill(); E.Chk(e) {
 						}
 					}
 					// quit from rununit's quit, which closes after the main quit triggers stopping in the watcher loop
 					r.worker = consume.Log(r.quit, logger, pkgFilter, args...)
-					// dbg.Ln(r.worker)
+					// D.Ln(r.worker)
 					consume.Start(r.worker)
 					r.running.Store(true)
 					run()
-					dbg.Ln(r.running.Load())
+					D.Ln(r.running.Load())
 				case false:
 					running := r.running.Load()
-					dbg.Ln("stop called for", args, running)
+					D.Ln("stop called for", args, running)
 					if !running {
-						dbg.Ln("wasn't running", args)
+						D.Ln("wasn't running", args)
 						continue
 					}
 					consume.Kill(r.worker)
 					// var e error
-					// if e = r.worker.Wait(); err.Chk(e) {
+					// if e = r.worker.Wait(); E.Chk(e) {
 					// }
 					r.running.Store(false)
 					stop()
-					dbg.Ln(args, "after stop", r.running.Load())
+					D.Ln(args, "after stop", r.running.Load())
 				}
 				break
 			case <-r.quit.Wait():
-				dbg.Ln("runner stopped for", args)
+				D.Ln("runner stopped for", args)
 				break out
 			}
 		}
@@ -87,20 +87,20 @@ func New(
 	out:
 		select {
 		case <-quit.Wait():
-			dbg.Ln("runner quit trigger called", args)
+			D.Ln("runner quit trigger called", args)
 			running := r.running.Load()
 			if !running {
-				dbg.Ln("wasn't running", args)
+				D.Ln("wasn't running", args)
 				break out
 			}
 			// r.quit.Q()
 			consume.Kill(r.worker)
 			var e error
-			if e = r.worker.Wait(); err.Chk(e) {
+			if e = r.worker.Wait(); E.Chk(e) {
 			}
 			r.running.Store(false)
 			stop()
-			dbg.Ln(args, "after stop", r.running.Load())
+			D.Ln(args, "after stop", r.running.Load())
 		}
 	}()
 	interrupt.AddHandler(
