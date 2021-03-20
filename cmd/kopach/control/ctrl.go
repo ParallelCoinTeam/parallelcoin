@@ -243,9 +243,9 @@ out:
 				break out
 			}
 		}
-		D.Ln("wallet client is connected, switching to running")
-		if e = s.updateBlockTemplate(); E.Chk(e) {
-		}
+		// D.Ln("wallet client is connected, switching to running")
+		// if e = s.updateBlockTemplate(); E.Chk(e) {
+		// }
 	pausing:
 		for {
 			select {
@@ -549,14 +549,14 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	if _, ok := s.otherNodes[uuid]; !ok {
 		// if we haven't already added it to the permanent peer list, we can add it now
 		I.Ln("connecting to lan peer with same PSK", j.IPs, uuid)
+		s.otherNodes[uuid] = &nodeSpec{}
+		s.otherNodes[uuid].Time = time.Now()
 		// try all IPs
 		if *s.cfg.AutoListen {
 			s.cfg.P2PConnect = &cli.StringSlice{}
 		}
 		for addr := range j.IPs {
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
-			s.otherNodes[uuid] = &nodeSpec{}
-			s.otherNodes[uuid].Time = time.Now()
 			if e = s.rpcServer.Cfg.ConnMgr.Connect(
 				peerIP,
 				true,
