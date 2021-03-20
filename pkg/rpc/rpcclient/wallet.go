@@ -842,7 +842,7 @@ func (r FutureGetNewAddressResult) Receive() (util.Address, error) {
 //
 // See GetNewAddress for the blocking version and more details.
 func (c *Client) GetNewAddressAsync(account string) FutureGetNewAddressResult {
-	F.Ln("### GetNewAddressAsync")
+	T.Ln("### GetNewAddressAsync")
 	cmd := btcjson.NewGetNewAddressCmd(&account)
 	// D.S(cmd)
 	return c.sendCmd(cmd)
@@ -850,7 +850,7 @@ func (c *Client) GetNewAddressAsync(account string) FutureGetNewAddressResult {
 
 // GetNewAddress returns a new address.
 func (c *Client) GetNewAddress(account string) (util.Address, error) {
-	F.Ln("### GetNewAddress")
+	T.Ln("### GetNewAddress")
 	return c.GetNewAddressAsync(account).Receive()
 }
 

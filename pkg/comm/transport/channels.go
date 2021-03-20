@@ -91,7 +91,7 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (e error) {
 				// debug.PrintStack()
 			}
 		}
-		F.Ln(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
+		T.Ln(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
 	}
 	return
 }
@@ -180,8 +180,13 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 // that will be processed and any other messages are ignored
 func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
 	quit qu.C) (channel *Channel, e error) {
-	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
-		buffers: make(map[string]*MsgBuffer), context: ctx, Ready: qu.T()}
+	channel = &Channel{
+		Creator: creator,
+		MaxDatagramSize: maxDatagramSize,
+		buffers: make(map[string]*MsgBuffer),
+		context: ctx,
+		Ready: qu.T(),
+	}
 	if channel.sendCiph, e = gcm.GetCipher(key); E.Chk(e) {
 	}
 	if channel.sendCiph == nil {
@@ -252,7 +257,7 @@ func handleNetworkError(address string, e error) (result int) {
 func Handle(address string, channel *Channel,
 	handlers Handlers, maxDatagramSize int, quit qu.C) {
 	buffer := make([]byte, maxDatagramSize)
-	F.Ln("starting handler for", channel.Creator, "listener")
+	T.Ln("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed
 	// seenNonce := ""
 	var e error

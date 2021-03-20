@@ -114,7 +114,7 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 // NewWithConnAndSemaphore is exposed to enable use an actual network connection while retaining the same RPC API to
 // allow a worker to be configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid uint64) *Worker {
-	F.Ln("creating new worker")
+	T.Ln("creating new worker")
 	// msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		id:            id,
@@ -148,7 +148,7 @@ func worker(w *Worker) {
 out:
 	for {
 		// Pause state
-		F.Ln("worker pausing")
+		T.Ln("worker pausing")
 	pausing:
 		for {
 			select {
@@ -168,7 +168,7 @@ out:
 			}
 		}
 		// Run state
-		F.Ln("worker running")
+		T.Ln("worker running")
 	running:
 		for {
 			select {
@@ -267,7 +267,7 @@ func New(id string, quit qu.C, uuid uint64) (w *Worker, conn net.Conn) {
 // NewJob is a delivery of a new job for the worker, this makes the miner start
 // mining from pause or pause, prepare the work and restart
 func (w *Worker) NewJob(j *templates.Message, reply *bool) (e error) {
-	// F.Ln("received new job")
+	// T.Ln("received new job")
 	if !w.dispatchReady.Load() {
 		D.Ln("dispatch not ready")
 		*reply = true
@@ -275,7 +275,7 @@ func (w *Worker) NewJob(j *templates.Message, reply *bool) (e error) {
 	}
 	if w.templatesMessage != nil {
 		if j.PrevBlock == w.templatesMessage.PrevBlock {
-			// F.Ln("not a new job")
+			// T.Ln("not a new job")
 			*reply = true
 			return
 		}
@@ -297,7 +297,7 @@ func (w *Worker) NewJob(j *templates.Message, reply *bool) (e error) {
 
 // Pause signals the worker to stop working, releases its semaphore and the worker is then idle
 func (w *Worker) Pause(_ int, reply *bool) (e error) {
-	F.Ln("pausing from IPC")
+	T.Ln("pausing from IPC")
 	w.running.Store(false)
 	w.stopChan <- struct{}{}
 	*reply = true

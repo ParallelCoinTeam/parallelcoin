@@ -191,12 +191,12 @@ func (sm *SyncManager) Pause() chan<- struct{} {
 // ProcessBlock makes use of ProcessBlock on an internal instance of a block
 // chain.
 func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.BehaviorFlags) (bool, error) {
-	F.Ln("processing block")
+	T.Ln("processing block")
 	// Traces(block)
 	reply := make(chan processBlockResponse, 1)
-	F.Ln("sending to msgChan")
+	T.Ln("sending to msgChan")
 	sm.msgChan <- processBlockMsg{block: block, flags: flags, reply: reply}
-	F.Ln("waiting on reply")
+	T.Ln("waiting on reply")
 	response := <-reply
 	return response.isOrphan, response.err
 }
@@ -251,7 +251,7 @@ func (sm *SyncManager) Start() {
 	if atomic.AddInt32(&sm.started, 1) != 1 {
 		return
 	}
-	F.Ln("starting sync manager")
+	T.Ln("starting sync manager")
 	sm.wg.Add(1)
 	go sm.blockHandler(0)
 }
@@ -309,24 +309,28 @@ out:
 				}
 				msg.reply <- peerID
 			case processBlockMsg:
-				F.Ln("received processBlockMsg")
+				T.Ln("received processBlockMsg")
 				var heightUpdate int32
 				header := &msg.block.MsgBlock().Header
-				F.Ln("checking if have should have serialized block height")
+				T.Ln("checking if have should have serialized block height")
 				if blockchain.ShouldHaveSerializedBlockHeight(header) {
-					F.Ln("reading coinbase transaction")
+					T.Ln("reading coinbase transaction")
 					mbt := msg.block.Transactions()
-					coinbaseTx := mbt[len(mbt)-1]
-					F.Ln("extracting coinbase height")
-					var e error
-					var cbHeight int32
-					if cbHeight, e = blockchain.ExtractCoinbaseHeight(coinbaseTx); E.Chk(e) {
-						W.Ln("unable to extract height from coinbase tx:", e)
+					if len(mbt) > 0 {
+						coinbaseTx := mbt[len(mbt)-1]
+						T.Ln("extracting coinbase height")
+						var e error
+						var cbHeight int32
+						if cbHeight, e = blockchain.ExtractCoinbaseHeight(coinbaseTx); E.Chk(e) {
+							W.Ln("unable to extract height from coinbase tx:", e)
+						} else {
+							heightUpdate = cbHeight
+						}
 					} else {
-						heightUpdate = cbHeight
+						D.Ln("no transactions in block??")
 					}
 				}
-				F.Ln("passing to chain.ProcessBlock")
+				T.Ln("passing to chain.ProcessBlock")
 				var isOrphan bool
 				var e error
 				if _, isOrphan, e = sm.chain.ProcessBlock(
@@ -341,12 +345,12 @@ out:
 						err:      e,
 					}
 				}
-				F.Ln("sending back message on reply channel")
+				T.Ln("sending back message on reply channel")
 				msg.reply <- processBlockResponse{
 					isOrphan: isOrphan,
 					err:      nil,
 				}
-				F.Ln("sent reply")
+				T.Ln("sent reply")
 			case isCurrentMsg:
 				msg.reply <- sm.current()
 			case pauseMsg:
@@ -404,7 +408,7 @@ func (sm *SyncManager) fetchHeaderBlocks() {
 		iv := wire.NewInvVect(wire.InvTypeBlock, node.hash)
 		haveInv, e := sm.haveInventory(iv)
 		if e != nil {
-			F.Ln(
+			T.Ln(
 				"unexpected failure when checking for existing inventory during header block fetch:",
 				e,
 			)
@@ -465,7 +469,7 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 	pp := bmsg.peer
 	state, exists := sm.peerStates[pp]
 	if !exists {
-		F.Ln(
+		T.Ln(
 			"received block message from unknown peer", pp,
 		)
 		return
@@ -769,12 +773,12 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 func (sm *SyncManager) handleDonePeerMsg(peer *peerpkg.Peer) {
 	state, exists := sm.peerStates[peer]
 	if !exists {
-		F.Ln("received done peer message for unknown peer", peer)
+		T.Ln("received done peer message for unknown peer", peer)
 		return
 	}
 	// Remove the peer from the list of candidate peers.
 	delete(sm.peerStates, peer)
-	F.Ln("lost peer ", peer)
+	T.Ln("lost peer ", peer)
 	// Remove requested transactions from the global map so that they will be
 	// fetched from elsewhere next time we get an inv.
 	for txHash := range state.requestedTxns {
@@ -805,7 +809,7 @@ func (sm *SyncManager) handleHeadersMsg(hmsg *headersMsg) {
 	peer := hmsg.peer
 	_, exists := sm.peerStates[peer]
 	if !exists {
-		F.Ln("received headers message from unknown peer", peer)
+		T.Ln("received headers message from unknown peer", peer)
 		return
 	}
 	// The remote peer is misbehaving if we didn't request headers.
@@ -850,7 +854,7 @@ func (sm *SyncManager) handleHeadersMsg(hmsg *headersMsg) {
 				sm.startHeader = e
 			}
 		} else {
-			F.Ln(
+			T.Ln(
 				"received block header that does not properly connect to the chain from peer",
 				peer,
 				"-- disconnecting",
@@ -916,7 +920,7 @@ func (sm *SyncManager) handleInvMsg(imsg *invMsg) {
 	peer := imsg.peer
 	state, exists := sm.peerStates[peer]
 	if !exists {
-		F.Ln("received inv message from unknown peer", peer)
+		T.Ln("received inv message from unknown peer", peer)
 		return
 	}
 	// Attempt to find the final block in the inventory list.  There may not be one.
@@ -1377,7 +1381,7 @@ func (sm *SyncManager) startSync() {
 		}
 		sm.syncPeer = bestPeer
 	} else {
-		F.Ln("no sync peer candidates available")
+		T.Ln("no sync peer candidates available")
 	}
 }
 

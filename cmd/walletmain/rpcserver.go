@@ -180,7 +180,7 @@ func OpenRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 	}
 }
 func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server, error) {
-	F.Ln("startRPCServers")
+	T.Ln("startRPCServers")
 	var (
 		legacyServer *legacy.Server
 		walletListen = net.Listen

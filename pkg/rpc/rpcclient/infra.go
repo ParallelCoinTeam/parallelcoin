@@ -302,7 +302,7 @@ func (c *Client) handleMessage(msg []byte) {
 			return
 		}
 		// Deliver the notification.
-		F.Ln("received notification:", in.Method)
+		T.Ln("received notification:", in.Method)
 		c.handleNotification(in.rawNotification)
 		return
 	}
@@ -379,7 +379,7 @@ out:
 	// Ensure the connection is closed.
 	c.Disconnect()
 	c.wg.Done()
-	F.Ln("RPC client input handler done for", c.config.Host)
+	T.Ln("RPC client input handler done for", c.config.Host)
 }
 
 // disconnectChan returns a copy of the current disconnect channel.
@@ -403,14 +403,14 @@ out:
 		// Send any messages ready for send until the client is disconnected closed.
 		select {
 		case msg := <-c.sendChan:
-			// F.Ln("### sendChan received message to send")
+			// T.Ln("### sendChan received message to send")
 			var e error
 			if e = c.wsConn.WriteMessage(websocket.TextMessage, msg); E.Chk(e) {
-				// F.Ln("### sendChan disconnecting client")
+				// T.Ln("### sendChan disconnecting client")
 				c.Disconnect()
 				break out
 			}
-			// F.Ln("### message sent")
+			// T.Ln("### message sent")
 		case <-c.disconnectChan():
 			break out
 		}
@@ -425,20 +425,20 @@ cleanup:
 		}
 	}
 	c.wg.Done()
-	F.Ln("RPC client output handler done for", c.config.Host)
+	T.Ln("RPC client output handler done for", c.config.Host)
 }
 
 // sendMessage sends the passed JSON to the connected server using the websocket
 // connection. It is backed by a buffered channel, so it will not block until
 // the send channel is full.
 func (c *Client) sendMessage(marshalledJSON []byte) {
-	// F.Ln("### sendMessage")
+	// T.Ln("### sendMessage")
 	// Don't send the message if disconnected.
 	select {
 	case c.sendChan <- marshalledJSON:
-		// F.Ln("### message sent on channel")
+		// T.Ln("### message sent on channel")
 	case <-c.disconnectChan():
-		// F.Ln("### client is disconnected")
+		// T.Ln("### client is disconnected")
 		return
 	}
 }
@@ -585,7 +585,7 @@ out:
 			wsConn, e := dial(c.config)
 			if e != nil {
 				c.retryCount++
-				F.Ln("failed to connect to %s: %v %s", c.config.Host, e)
+				T.Ln("failed to connect to %s: %v %s", c.config.Host, e)
 				// IconScale the retry interval by the number of retries so there is a backoff
 				// up to a max of 1 minute.
 				scaledInterval := connectionRetryInterval.Nanoseconds() * c.
@@ -618,7 +618,7 @@ out:
 		}
 	}
 	c.wg.Done()
-	F.Ln("RPC client reconnect handler done for", c.config.Host)
+	T.Ln("RPC client reconnect handler done for", c.config.Host)
 }
 
 // handleSendPostMessage handles performing the passed HTTP request, reading the
@@ -687,7 +687,7 @@ cleanup:
 		}
 	}
 	c.wg.Done()
-	F.Ln("RPC client send handler done for", c.config.Host)
+	T.Ln("RPC client send handler done for", c.config.Host)
 }
 
 // sendPostRequest sends the passed HTTP request to the RPC server using the
@@ -769,18 +769,18 @@ func (c *Client) sendRequest(jReq *jsonRequest) {
 	// When running in HTTP POST mode, the command is issued via an HTTP client.
 	// Otherwise, the command is issued via the asynchronous websocket channels.
 	if c.config.HTTPPostMode {
-		// F.Ln("### sending via http post mode")
+		// T.Ln("### sending via http post mode")
 		c.sendPost(jReq)
 		return
 	}
 	// Chk whether the websocket connection has never been established, in which
 	// case the handler goroutines are not running.
-	// F.Ln("### waiting for connection established")
+	// T.Ln("### waiting for connection established")
 	select {
 	case <-c.connEstablished.Wait():
-		// F.Ln("### connEstablished")
+		// T.Ln("### connEstablished")
 	default:
-		// F.Ln("### sending back error client not connected")
+		// T.Ln("### sending back error client not connected")
 		jReq.responseChan <- &response{err: ErrClientNotConnected}
 		return
 	}
@@ -788,7 +788,7 @@ func (c *Client) sendRequest(jReq *jsonRequest) {
 	// server can be properly detected and routed to the response channel. Then send
 	// the marshalled request via the websocket connection.
 	if e := c.addRequest(jReq); E.Chk(e) {
-		// F.Ln("### error", e)
+		// T.Ln("### error", e)
 		jReq.responseChan <- &response{err: e}
 		return
 	}
@@ -803,13 +803,13 @@ func (c *Client) sendRequest(jReq *jsonRequest) {
 // It handles both websocket and HTTP POST mode depending on the configuration
 // of the client.
 func (c *Client) sendCmd(cmd interface{}) chan *response {
-	// F.Ln("### sendCmd")
+	// T.Ln("### sendCmd")
 	// Traces(cmd)
 	// Get the method associated with the command.
 	var e error
 	var method string
 	if method, e = btcjson.CmdMethod(cmd); E.Chk(e) {
-		// F.Ln("### error", e)
+		// T.Ln("### error", e)
 		return newFutureError(e)
 	}
 	// Marshal the command.
@@ -827,7 +827,7 @@ func (c *Client) sendCmd(cmd interface{}) chan *response {
 		marshalledJSON: marshalledJSON,
 		responseChan:   responseChan,
 	}
-	// F.Ln("### sending request")
+	// T.Ln("### sending request")
 	c.sendRequest(jReq)
 	return responseChan
 }
@@ -873,7 +873,7 @@ func (c *Client) doDisconnect() bool {
 	if c.disconnected {
 		return false
 	}
-	F.Ln("disconnecting RPC client", c.config.Host)
+	T.Ln("disconnecting RPC client", c.config.Host)
 	c.disconnect.Q()
 	if c.wsConn != nil {
 		if e := c.wsConn.Close(); E.Chk(e) {
@@ -897,7 +897,7 @@ func (c *Client) doShutdown() bool {
 		return false
 	default:
 	}
-	F.Ln("shutting down RPC client", c.config.Host)
+	T.Ln("shutting down RPC client", c.config.Host)
 	c.shutdown.Q()
 	return true
 }
@@ -957,7 +957,7 @@ func (c *Client) Shutdown() {
 
 // start begins processing input and output messages.
 func (c *Client) start() {
-	F.Ln("starting RPC client", c.config.Host)
+	T.Ln("starting RPC client", c.config.Host)
 	// Start the I/O processing handlers depending on whether the client is in HTTP
 	// POST mode or the default websocket mode.
 	if c.config.HTTPPostMode {
@@ -1183,7 +1183,7 @@ func New(config *ConnConfig, ntfnHandlers *NotificationHandlers, quit qu.C) (*Cl
 		}
 	}()
 	if start {
-		F.Ln("established connection to RPC server", config.Host)
+		T.Ln("established connection to RPC server", config.Host)
 		connEstablished.Q()
 		client.start()
 		if !client.config.HTTPPostMode && !client.config.DisableAutoReconnect {

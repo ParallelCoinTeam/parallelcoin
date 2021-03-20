@@ -211,7 +211,7 @@ func (wg *WalletGUI) Run() (e error) {
 		for {
 			select {
 			case <-wg.invalidate.Wait():
-				F.Ln("invalidating render queue")
+				T.Ln("invalidating render queue")
 				wg.Window.Window.Invalidate()
 				// TODO: make a more appropriate trigger for this - ie, when state actually changes.
 				// if wg.wallet.Running() && wg.stateLoaded.Load() {

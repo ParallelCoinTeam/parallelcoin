@@ -492,12 +492,12 @@ func (b *BlockChain) connectBlock(
 	// 	// // Warn if any unknown new rules are either about to activate or have already
 	// 	// // been activated.
 	// 	// if e := b.warnUnknownRuleActivations(node); E.Chk(e) {
-	// 	// 	F.Ln("warnUnknownRuleActivations ", err)
+	// 	// 	T.Ln("warnUnknownRuleActivations ", err)
 	// 	// 	return e
 	// 	// }
 	// }
 	// Write any block status changes to DB before updating best state.
-	F.Ln("flushing block status changes to db before updating best state")
+	T.Ln("flushing block status changes to db before updating best state")
 	if e = b.Index.flushToDB(); E.Chk(e) {
 		return e
 	}
@@ -514,33 +514,33 @@ func (b *BlockChain) connectBlock(
 		curTotalTxns+numTxns, node.CalcPastMedianTime(),
 	)
 	// Atomically insert info into the database.
-	F.Ln("inserting block into database")
+	T.Ln("inserting block into database")
 	e = b.db.Update(
 		func(dbTx database.Tx) (e error) {
 			// update best block state.
 			e = dbPutBestState(dbTx, state, node.workSum)
 			if e != nil {
-				F.Ln("dbPutBestState", e)
+				T.Ln("dbPutBestState", e)
 				return e
 			}
 			// Add the block hash and height to the block index which tracks the main chain.
 			e = dbPutBlockIndex(dbTx, block.Hash(), node.height)
 			if e != nil {
-				F.Ln("dbPutBlockIndex", e)
+				T.Ln("dbPutBlockIndex", e)
 				return e
 			}
 			// update the utxo set using the state of the utxo view. This entails removing all of the utxos spent and adding
 			// the new ones created by the block.
 			e = dbPutUtxoView(dbTx, view)
 			if e != nil {
-				F.Ln("dbPutUtxoView", e)
+				T.Ln("dbPutUtxoView", e)
 				return e
 			}
 			
 			// Update the transaction spend journal by adding a record for the block that contains all txos spent by it.
 			e = dbPutSpendJournalEntry(dbTx, block.Hash(), stxos)
 			if e != nil {
-				F.Ln("dbPutSpendJournalEntry", e)
+				T.Ln("dbPutSpendJournalEntry", e)
 				return e
 			}
 			// Allow the index manager to call each of the currently active optional indexes with the block being connected
@@ -548,7 +548,7 @@ func (b *BlockChain) connectBlock(
 			if b.indexManager != nil {
 				e := b.indexManager.ConnectBlock(dbTx, block, stxos)
 				if e != nil {
-					F.Ln("connectBlock ", e)
+					T.Ln("connectBlock ", e)
 					return e
 				}
 			}
@@ -556,16 +556,16 @@ func (b *BlockChain) connectBlock(
 		},
 	)
 	if e != nil {
-		F.Ln("error updating database ", e)
+		T.Ln("error updating database ", e)
 		return e
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified now that the modifications have been
 	// committed to the database.
-	F.Ln("committing new view")
+	T.Ln("committing new view")
 	view.commit()
 	
 	// This node is now the end of the best chain.
-	F.Ln("setting new chain tip")
+	T.Ln("setting new chain tip")
 	b.BestChain.SetTip(node)
 	// Update the state for the best block. Notice how this replaces the entire struct instead of updating the existing
 	// one. This effectively allows the old version to act as a snapshot which callers can use freely without needing to
@@ -579,12 +579,12 @@ func (b *BlockChain) connectBlock(
 	// tB, e := b.CalcNextRequiredDifficultyPlan9Controller(node)
 	// if e != nil  {
 	//	L.Script	// }
-	// F.Ln(time.Now().Sub(tN), "to compute all block difficulties")
+	// T.Ln(time.Now().Sub(tN), "to compute all block difficulties")
 	// node.Bits = tB
 	//
 	// Notify the caller that the block was connected to the main chain. The caller would typically want to react with
 	// actions such as updating wallets.
-	F.Ln("sending notifications for new block")
+	T.Ln("sending notifications for new block")
 	b.ChainLock.Unlock()
 	b.sendNotification(NTBlockConnected, block)
 	b.ChainLock.Lock()
@@ -951,20 +951,20 @@ func (b *BlockChain) reorganizeChain(detachNodes, attachNodes *list.List) (e err
 //
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block, flags BehaviorFlags) (bool, error) {
-	F.Ln("running connectBestChain")
+	T.Ln("running connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB. If it fails to write, it's not the end of the
 		// world. If the block is valid, we flush in connectBlock and if the block is invalid, the worst that can happen
 		// is we revalidate the block after a restart.
 		if writeErr := b.Index.flushToDB(); writeErr != nil {
-			F.Ln("ScriptError flushing block index changes to disk:", writeErr)
+			T.Ln("ScriptError flushing block index changes to disk:", writeErr)
 		}
 	}
 	// We are extending the main (best) chain with a new block. This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.BestChain.Tip().hash) {
-		F.Ln("extending main chain")
+		T.Ln("extending main chain")
 		// Skip checks if node has already been fully validated.
 		fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
 		// Perform several checks to verify the block can be connected to the main chain without violating any rules and
@@ -999,7 +999,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block, flags 
 			}
 		}
 		// Connect the block to the main chain.
-		F.Ln("connecting block to main chain")
+		T.Ln("connecting block to main chain")
 		var e error
 		if e = b.connectBlock(node, block, view, stxos); E.Chk(e) {
 			E.Ln("connect block error: ", e)
@@ -1011,7 +1011,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block, flags 
 			flushIndexState()
 			return false, e
 		}
-		F.Ln("block connected to main chain")
+		T.Ln("block connected to main chain")
 		// If this is fast add, or this block node isn't yet marked as valid, then we'll update its status and flush the
 		// state to disk again.
 		if fastAdd || !b.Index.NodeStatus(node).KnownValid() {
@@ -1023,7 +1023,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block, flags 
 		}
 		return true, nil
 	}
-	F.Ln("calculating work sum at new node")
+	T.Ln("calculating work sum at new node")
 	node.workSum = CalcWork(node.bits, node.height, node.version)
 	// We're extending (or creating) a side chain, but the cumulative work for this new side chain is not enough to make
 	// it the new chain.
@@ -1058,7 +1058,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block, flags 
 	// regardless of whether there was an error. The index would only be dirty if the block failed to connect, so we can
 	// ignore any errors writing.
 	if writeErr := b.Index.flushToDB(); writeErr != nil {
-		F.Ln("ScriptError flushing block index changes to disk:", writeErr)
+		T.Ln("ScriptError flushing block index changes to disk:", writeErr)
 	}
 	return e == nil, e
 }

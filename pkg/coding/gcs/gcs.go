@@ -350,7 +350,7 @@ func (f *Filter) readFullUint64(b *bstream.BStream) (rv uint64,e error) {
 	// Count the 1s until we reach a 0.
 	c, e := b.ReadBit()
 	if e != nil  {
-		F.Ln(e)
+		T.Ln(e)
 		return 0, e
 	}
 	for c {

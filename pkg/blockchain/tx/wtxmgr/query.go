@@ -197,7 +197,7 @@ func (s *Store) rangeUnminedTransactions(
 	ns walletdb.ReadBucket,
 	f func([]TxDetails) (bool, error),
 ) (bool, error) {
-	F.Ln("rangeUnminedTransactions")
+	T.Ln("rangeUnminedTransactions")
 	var details []TxDetails
 	e := ns.NestedReadBucket(bucketUnmined).ForEach(
 		func(k, v []byte) (e error) {
@@ -231,7 +231,7 @@ func (s *Store) rangeBlockTransactions(
 	ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error),
 ) (bool, error) {
-	F.Ln("rangeBlockTransactions", begin, end)
+	T.Ln("rangeBlockTransactions", begin, end)
 	// Mempool height is considered a high bound.
 	if begin < 0 {
 		begin = int32(^uint32(0) >> 1)
@@ -239,7 +239,7 @@ func (s *Store) rangeBlockTransactions(
 	if end < 0 {
 		end = int32(^uint32(0) >> 1)
 	}
-	F.Ln("begin", begin, "end", end)
+	T.Ln("begin", begin, "end", end)
 	var blockIter blockIterator
 	var advance func(*blockIterator) bool
 	if begin < end {
@@ -344,7 +344,7 @@ func (s *Store) RangeTransactions(
 	ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error),
 ) error {
-	F.Ln("RangeTransactions")
+	T.Ln("RangeTransactions")
 	var addedUnmined, brk bool
 	var e error
 	if begin < 0 {

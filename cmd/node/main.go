@@ -31,7 +31,7 @@ var winServiceMain func() (bool, error)
 // notified with the server once it is setup so it can gracefully stop it when
 // requested from the service control manager.
 func Main(cx *conte.Xt) (e error) {
-	F.Ln("starting up node main")
+	T.Ln("starting up node main")
 	// cx.WaitGroup.Add(1)
 	cx.WaitAdd()
 	// show version at startup
@@ -92,7 +92,7 @@ func Main(cx *conte.Xt) (e error) {
 	}
 	closeDb := func() {
 		// ensure the database is synced and closed on shutdown
-		F.Ln("gracefully shutting down the database")
+		T.Ln("gracefully shutting down the database")
 		func() {
 			if e := db.Close(); E.Chk(e) {
 			}
@@ -246,7 +246,7 @@ func loadBlockDB(cx *conte.Xt) (db database.DB, e error) {
 	}
 	I.F("loading block database from '%s'", dbPath)
 	if db, e = database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net); E.Chk(e) {
-		F.Ln(e) // return the error if it's not because the database doesn't exist
+		T.Ln(e) // return the error if it's not because the database doesn't exist
 		if dbErr, ok := e.(database.DBError); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
 			return nil, e
@@ -261,7 +261,7 @@ func loadBlockDB(cx *conte.Xt) (db database.DB, e error) {
 			return nil, e
 		}
 	}
-	F.Ln("block database loaded")
+	T.Ln("block database loaded")
 	return db, nil
 }
 

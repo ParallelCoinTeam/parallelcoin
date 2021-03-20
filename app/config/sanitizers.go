@@ -51,7 +51,7 @@ func initDictionary(cfg *pod.Config) {
 	if cfg.Language == nil || *cfg.Language == "" {
 		*cfg.Language = Lang("en")
 	}
-	F.Ln("lang set to", *cfg.Language)
+	T.Ln("lang set to", *cfg.Language)
 }
 
 func initDataDir(cfg *pod.Config) {
@@ -59,7 +59,7 @@ func initDataDir(cfg *pod.Config) {
 		D.Ln("setting default data dir")
 		*cfg.DataDir = appdata.Dir("pod", false)
 	}
-	F.Ln("datadir set to", *cfg.DataDir)
+	T.Ln("datadir set to", *cfg.DataDir)
 }
 
 func initWalletFile(cx *conte.Xt) {
@@ -67,7 +67,7 @@ func initWalletFile(cx *conte.Xt) {
 		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
 			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.DbName
 	}
-	F.Ln("wallet file set to", *cx.Config.WalletFile, *cx.Config.Network)
+	T.Ln("wallet file set to", *cx.Config.WalletFile, *cx.Config.Network)
 }
 
 func initConfigFile(cfg *pod.Config) {
@@ -75,7 +75,7 @@ func initConfigFile(cfg *pod.Config) {
 		*cfg.ConfigFile =
 			*cfg.DataDir + string(os.PathSeparator) + podConfigFilename
 	}
-	F.Ln("using config file:", *cfg.ConfigFile)
+	T.Ln("using config file:", *cfg.ConfigFile)
 }
 
 func initLogDir(cfg *pod.Config) {
@@ -97,20 +97,20 @@ func initParams(cx *conte.Xt) {
 	}
 	switch network {
 	case "testnet", "testnet3", "t":
-		F.Ln("on testnet")
+		T.Ln("on testnet")
 		cx.ActiveNet = &netparams.TestNet3Params
 		fork.IsTestnet = true
 	case "regtestnet", "regressiontest", "r":
-		F.Ln("on regression testnet")
+		T.Ln("on regression testnet")
 		cx.ActiveNet = &netparams.RegressionTestParams
 	case "simnet", "s":
-		F.Ln("on simnet")
+		T.Ln("on simnet")
 		cx.ActiveNet = &netparams.SimNetParams
 	default:
 		if network != "mainnet" && network != "m" {
 			D.Ln("using mainnet for node")
 		}
-		F.Ln("on mainnet")
+		T.Ln("on mainnet")
 		cx.ActiveNet = &netparams.MainNetParams
 	}
 }
@@ -349,7 +349,7 @@ func initLogLevel(cfg *pod.Config) {
 }
 
 func normalizeAddresses(cfg *pod.Config) {
-	F.Ln("normalising addresses")
+	T.Ln("normalising addresses")
 	port := node.DefaultPort
 	nrm := normalize.StringSliceAddresses
 	nrm(cfg.AddPeers, port)
@@ -379,7 +379,7 @@ func setRelayReject(cfg *pod.Config) {
 
 func validateDBtype(cfg *pod.Config) {
 	// Validate database type.
-	F.Ln("validating database type")
+	T.Ln("validating database type")
 	if !node.ValidDbType(*cfg.DbType) {
 		str := "%s: The specified database type [%v] is invalid -- " +
 			"supported types %v"
@@ -392,7 +392,7 @@ func validateDBtype(cfg *pod.Config) {
 
 func validateProfilePort(cfg *pod.Config) {
 	// Validate profile port number
-	F.Ln("validating profile port number")
+	T.Ln("validating profile port number")
 	if *cfg.Profile != "" {
 		profilePort, e := strconv.Atoi(*cfg.Profile)
 		if e != nil || profilePort < 1024 || profilePort > 65535 {
@@ -405,7 +405,7 @@ func validateProfilePort(cfg *pod.Config) {
 }
 func validateBanDuration(cfg *pod.Config) {
 	// Don't allow ban durations that are too short.
-	F.Ln("validating ban duration")
+	T.Ln("validating ban duration")
 	if *cfg.BanDuration < time.Second {
 		e := fmt.Errorf(
 			"%s: The banduration option may not be less than 1s -- parsed [%v]",
@@ -418,7 +418,7 @@ func validateBanDuration(cfg *pod.Config) {
 
 func validateWhitelists(cfg *pod.Config, st *state.Config) {
 	// Validate any given whitelisted IP addresses and networks.
-	F.Ln("validating whitelists")
+	T.Ln("validating whitelists")
 	if len(*cfg.Whitelists) > 0 {
 		var ip net.IP
 		st.ActiveWhitelists = make([]*net.IPNet, 0, len(*cfg.Whitelists))
@@ -454,7 +454,7 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 }
 
 func validatePeerLists(cfg *pod.Config) {
-	F.Ln("checking addpeer and connectpeer lists")
+	T.Ln("checking addpeer and connectpeer lists")
 	if len(*cfg.AddPeers) > 0 && len(*cfg.ConnectPeers) > 0 {
 		e := fmt.Errorf(
 			"%s: the --addpeer and --connect options can not be mixed",
@@ -466,7 +466,7 @@ func validatePeerLists(cfg *pod.Config) {
 }
 func configListener(cfg *pod.Config, params *netparams.Params) {
 	// --proxy or --connect without --listen disables listening.
-	F.Ln("checking proxy/connect for disabling listening")
+	T.Ln("checking proxy/connect for disabling listening")
 	if (*cfg.Proxy != "" ||
 		len(*cfg.ConnectPeers) > 0) &&
 		len(*cfg.P2PListeners) == 0 {
@@ -474,7 +474,7 @@ func configListener(cfg *pod.Config, params *netparams.Params) {
 	}
 	// Add the default listener if none were specified. The default listener is all
 	// addresses on the listen port for the network we are to connect to.
-	F.Ln("checking if listener was set")
+	T.Ln("checking if listener was set")
 	if len(*cfg.P2PListeners) == 0 {
 		*cfg.P2PListeners = []string{"0.0.0.0:" + params.DefaultPort}
 	}
@@ -482,7 +482,7 @@ func configListener(cfg *pod.Config, params *netparams.Params) {
 
 func validateUsers(cfg *pod.Config) {
 	// Chk to make sure limited and admin users don't have the same username
-	F.Ln("checking admin and limited username is different")
+	T.Ln("checking admin and limited username is different")
 	if *cfg.Username != "" &&
 		*cfg.Username == *cfg.LimitUser {
 		str := "%s: --username and --limituser must not specify the same username"
@@ -490,7 +490,7 @@ func validateUsers(cfg *pod.Config) {
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Chk to make sure limited and admin users don't have the same password
-	F.Ln("checking limited and admin passwords are not the same")
+	T.Ln("checking limited and admin passwords are not the same")
 	if *cfg.Password != "" &&
 		*cfg.Password == *cfg.LimitPass {
 		str := "%s: --password and --limitpass must not specify the same password"
@@ -502,15 +502,15 @@ func validateUsers(cfg *pod.Config) {
 
 func configRPC(cfg *pod.Config, params *netparams.Params) {
 	// The RPC server is disabled if no username or password is provided.
-	F.Ln("checking rpc server has a login enabled")
+	T.Ln("checking rpc server has a login enabled")
 	if (*cfg.Username == "" || *cfg.Password == "") &&
 		(*cfg.LimitUser == "" || *cfg.LimitPass == "") {
 		*cfg.DisableRPC = true
 	}
 	if *cfg.DisableRPC {
-		F.Ln("RPC service is disabled")
+		T.Ln("RPC service is disabled")
 	}
-	F.Ln("checking rpc server has listeners set")
+	T.Ln("checking rpc server has listeners set")
 	if !*cfg.DisableRPC && len(*cfg.RPCListeners) == 0 {
 		D.Ln("looking up default listener")
 		addrs, e := net.LookupHost(node.DefaultRPCListener)
@@ -525,7 +525,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 			addr = net.JoinHostPort(addr, params.RPCClientPort)
 		}
 	}
-	F.Ln("checking rpc max concurrent requests")
+	T.Ln("checking rpc max concurrent requests")
 	if *cfg.RPCMaxConcurrentReqs < 0 {
 		str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be" +
 			" less than 0 -- parsed [%d]"
@@ -533,7 +533,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		_, _ = fmt.Fprintln(os.Stderr, e)
 		// os.Exit(1)
 	}
-	F.Ln("checking rpc listener addresses")
+	T.Ln("checking rpc listener addresses")
 	nrms := normalize.Addresses
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
 	*cfg.AddPeers = nrms(*cfg.AddPeers, params.DefaultPort)
@@ -543,7 +543,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	var e error
 	// Validate the the minrelaytxfee.
-	F.Ln("checking min relay tx fee")
+	T.Ln("checking min relay tx fee")
 	stateConfig.ActiveMinRelayTxFee, e = util.NewAmount(*cfg.MinRelayTxFee)
 	if e != nil {
 		E.Ln(e)
@@ -552,7 +552,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max block size to a sane value.
-	F.Ln("checking max block size")
+	T.Ln("checking max block size")
 	if *cfg.BlockMaxSize < node.BlockMaxSizeMin ||
 		*cfg.BlockMaxSize > node.BlockMaxSizeMax {
 		str := "%s: The blockmaxsize option must be in between %d and %d -- parsed [%d]"
@@ -563,7 +563,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max block weight to a sane value.
-	F.Ln("checking max block weight")
+	T.Ln("checking max block weight")
 	if *cfg.BlockMaxWeight < node.BlockMaxWeightMin ||
 		*cfg.BlockMaxWeight > node.BlockMaxWeightMax {
 		str := "%s: The blockmaxweight option must be in between %d and %d -- parsed [%d]"
@@ -574,14 +574,14 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max orphan count to a sane vlue.
-	F.Ln("checking max orphan limit")
+	T.Ln("checking max orphan limit")
 	if *cfg.MaxOrphanTxs < 0 {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
 		e := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the block priority and minimum block sizes to max block size.
-	F.Ln("validating block priority and minimum size/weight")
+	T.Ln("validating block priority and minimum size/weight")
 	*cfg.BlockPrioritySize = int(
 		apputil.MinUint32(
 			uint32(*cfg.BlockPrioritySize),
@@ -613,7 +613,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
 	}
 	// Look for illegal characters in the user agent comments.
-	F.Ln("checking user agent comments", cfg.UserAgentComments)
+	T.Ln("checking user agent comments", cfg.UserAgentComments)
 	for _, uaComment := range *cfg.UserAgentComments {
 		if strings.ContainsAny(uaComment, "/:()") {
 			e := fmt.Errorf(
@@ -625,7 +625,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		}
 	}
 	// Chk the checkpoints for syntax errors.
-	F.Ln("checking the checkpoints")
+	T.Ln("checking the checkpoints")
 	stateConfig.AddedCheckpoints, e = node.ParseCheckpoints(
 		*cfg.
 			AddCheckpoints,
@@ -642,7 +642,7 @@ func validateOnions(cfg *pod.Config) {
 	// TODO: this is kinda stupid hm? switch *and* toggle by presence of flag value, one should be enough
 	if *cfg.Onion && *cfg.OnionProxy != "" {
 		E.Ln("onion enabled but no onionproxy has been configured")
-		F.Ln("halting to avoid exposing IP address")
+		T.Ln("halting to avoid exposing IP address")
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if *cfg.TorIsolation &&
@@ -667,7 +667,7 @@ func validateMiningStuff(
 		panic("state is nil")
 	}
 	// Chk mining addresses are valid and saved parsed versions.
-	F.Ln("checking mining addresses")
+	T.Ln("checking mining addresses")
 	aml := 99
 	if cfg.MiningAddrs != nil {
 		aml = len(*cfg.MiningAddrs)
@@ -709,12 +709,12 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// set to the proxy specific dial function and the lookup is set to use tor
 	// (unless --noonion is specified in which case the system DNS resolver is
 	// used).
-	F.Ln("setting network dialer and lookup")
+	T.Ln("setting network dialer and lookup")
 	stateConfig.Dial = net.DialTimeout
 	stateConfig.Lookup = net.LookupIP
 	var e error
 	if *cfg.Proxy != "" {
-		F.Ln("we are loading a proxy!")
+		T.Ln("we are loading a proxy!")
 		_, _, e = net.SplitHostPort(*cfg.Proxy)
 		if e != nil {
 			E.Ln(e)
@@ -758,7 +758,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// use the onion-specific proxy while leaving the normal dial function as
 	// selected above. This allows .onion address traffic to be routed through a
 	// different proxy than normal traffic.
-	F.Ln("setting up tor proxy if enabled")
+	T.Ln("setting up tor proxy if enabled")
 	if *cfg.OnionProxy != "" {
 		_, _, e = net.SplitHostPort(*cfg.OnionProxy)
 		if e != nil {
@@ -776,7 +776,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			)
 		}
 	}
-	F.Ln("setting onion dialer")
+	T.Ln("setting onion dialer")
 	stateConfig.Oniondial =
 		func(network, addr string, timeout time.Duration) (net.Conn, error) {
 			proxy := &socks.Proxy{
@@ -791,7 +791,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// When configured in bridge mode (both --onion and --proxy are configured), it
 	// means that the proxy configured by --proxy is not a tor proxy, so override
 	// the DNS resolution to use the onion-specific proxy.
-	F.Ln("setting proxy lookup")
+	T.Ln("setting proxy lookup")
 	if *cfg.Proxy != "" {
 		stateConfig.Lookup = func(host string) ([]net.IP, error) {
 			return connmgr.TorLookupIP(host, *cfg.OnionProxy)

@@ -1157,7 +1157,7 @@ func HandleGetCFilter(s *Server, cmd interface{}, closeChan qu.C) (interface{}, 
 			Message: "block not found",
 		}
 	}
-	F.Ln("found committed filter for", hash)
+	T.Ln("found committed filter for", hash)
 	return hex.EncodeToString(filterBytes), nil
 }
 

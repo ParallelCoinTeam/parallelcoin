@@ -274,14 +274,14 @@ func (a *AddrManager) getTriedBucket(netAddr *wire.NetAddress) int {
 //
 // It must be run as a goroutine.
 func (a *AddrManager) addressHandler() {
-	F.Ln("starting address handler")
+	T.Ln("starting address handler")
 	dumpAddressTicker := time.NewTicker(dumpAddressInterval)
 	defer dumpAddressTicker.Stop()
 out:
 	for {
 		select {
 		case <-dumpAddressTicker.C:
-			F.Ln("saving peers data")
+			T.Ln("saving peers data")
 			a.savePeers()
 		case <-a.quit.Wait():
 			break out
@@ -289,7 +289,7 @@ out:
 	}
 	a.savePeers()
 	a.wg.Done()
-	F.Ln("address handler done")
+	T.Ln("address handler done")
 }
 
 // savePeers saves all the known addresses to a file so they can be read back in at next run.
@@ -351,7 +351,7 @@ func (a *AddrManager) savePeers() {
 // loadPeers loads the known address from the saved file. If empty, missing, or malformed file, just don't load anything
 // and start fresh
 func (a *AddrManager) loadPeers() {
-	F.Ln("loading peers")
+	T.Ln("loading peers")
 	
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
@@ -483,7 +483,7 @@ func (a *AddrManager) Start() {
 		return
 	}
 	// Load peers we already know about from file.
-	F.Ln("loading peers data")
+	T.Ln("loading peers data")
 	a.loadPeers()
 	// Start the address ticker to save addresses periodically.
 	a.wg.Add(1)

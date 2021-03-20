@@ -18,7 +18,7 @@ import (
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, flags BehaviorFlags) (bool, error) {
-	F.Ln("maybeAcceptBlock starting")
+	T.Ln("maybeAcceptBlock starting")
 	// The height of this block is one more than the referenced previous block.
 	prevHash := &block.MsgBlock().Header.PrevBlock
 	prevNode := b.Index.LookupNode(prevHash)
@@ -32,14 +32,14 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 		return false, ruleError(ErrInvalidAncestorBlock, str)
 	}
 	blockHeight := prevNode.height + 1
-	F.Ln("block not found, good, setting height", blockHeight)
+	T.Ln("block not found, good, setting height", blockHeight)
 	block.SetHeight(blockHeight)
 	// // To deal with multiple mining algorithms, we must check first the block header version. Rather than pass the
 	// // direct previous by height, we look for the previous of the same algorithm and pass that.
 	// if blockHeight < b.params.BIP0034Height {
 	//
 	// }
-	F.Ln("sanitizing header versions for legacy")
+	T.Ln("sanitizing header versions for legacy")
 	var DoNotCheckPow bool
 	var pn *BlockNode
 	var a int32 = 2
@@ -60,14 +60,14 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 			}
 		}
 	}
-	F.Ln("check for blacklisted addresses")
+	T.Ln("check for blacklisted addresses")
 	txs := block.Transactions()
 	for i := range txs {
 		if ContainsBlacklisted(b, txs[i], hardfork.Blacklist) {
 			return false, ruleError(ErrBlacklisted, "block contains a blacklisted address ")
 		}
 	}
-	F.Ln("found no blacklisted addresses")
+	T.Ln("found no blacklisted addresses")
 	var e error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on the position
@@ -84,7 +84,7 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	// decoupled from the much more expensive connection logic. It also has some
 	// other nice properties such as making blocks that never become part of the
 	// main chain or blocks that fail to connect available for further analysis.
-	F.Ln("inserting block into database")
+	T.Ln("inserting block into database")
 	if e = b.db.Update(func(dbTx database.Tx) (e error) {
 		return dbStoreBlock(dbTx, block)
 	}); E.Chk(e) {
@@ -96,7 +96,7 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	newNode := NewBlockNode(blockHeader, prevNode)
 	newNode.status = statusDataStored
 	b.Index.AddNode(newNode)
-	F.Ln("flushing db")
+	T.Ln("flushing db")
 	if e = b.Index.flushToDB(); E.Chk(e) {
 		return false, e
 	}
@@ -104,14 +104,14 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	// Connect the passed block to the chain while respecting proper chain selection
 	// according to the chain with the most proof of work. This also handles
 	// validation of the transaction scripts.
-	F.Ln("connecting to best chain")
+	T.Ln("connecting to best chain")
 	var isMainChain bool
 	if isMainChain, e = b.connectBestChain(newNode, block, flags); E.Chk(e) {
 		return false, e
 	}
 	// Notify the caller that the new block was accepted into the block chain. The caller would typically want to react
 	// by relaying the inventory to other peers.
-	F.Ln("sending out block notifications for block accepted")
+	T.Ln("sending out block notifications for block accepted")
 	b.ChainLock.Unlock()
 	b.sendNotification(NTBlockAccepted, block)
 	b.ChainLock.Lock()

@@ -88,6 +88,7 @@ func New(
 		return
 	}
 	quit := qu.T()
+	D.Ln("creating othernodes map")
 	s = &State{
 		Syncing:           syncing,
 		cfg:               cfg,
@@ -340,15 +341,15 @@ func (s *State) checkConnectivity() {
 		s.Start()
 		return
 	}
-	F.Ln("checking connectivity state")
+	T.Ln("checking connectivity state")
 	ps := make(chan chainrpc.PeerSummaries, 1)
 	s.node.PeerState <- ps
-	F.Ln("sent peer list query")
+	T.Ln("sent peer list query")
 	var lanPeers int
 	var totalPeers int
 	select {
 	case connState := <-ps:
-		F.Ln("received peer list query response")
+		T.Ln("received peer list query response")
 		totalPeers = len(connState)
 		for i := range connState {
 			if routeable.IPNet.Contains(connState[i].IP) {
@@ -358,7 +359,7 @@ func (s *State) checkConnectivity() {
 		if *s.cfg.LAN {
 			// if there is no peers on lan and solo was not set, stop mining
 			if lanPeers == 0 {
-				F.Ln("no lan peers while in lan mode, stopping mining")
+				T.Ln("no lan peers while in lan mode, stopping mining")
 				s.Stop()
 			} else {
 				s.Start()
@@ -366,7 +367,7 @@ func (s *State) checkConnectivity() {
 		} else {
 			if totalPeers-lanPeers == 0 {
 				// we have no peers on the internet, stop mining
-				F.Ln("no internet peers, stopping mining")
+				T.Ln("no internet peers, stopping mining")
 				s.Stop()
 			} else {
 				s.Start()
@@ -377,11 +378,11 @@ func (s *State) checkConnectivity() {
 	case <-s.quit:
 		break
 	}
-	F.Ln(totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
+	T.Ln(totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
 }
 
 func (s *State) Advertise() {
-	F.Ln("sending out advertisment")
+	T.Ln("sending out advertisment")
 	var e error
 	if e = s.multiConn.SendMany(
 		p2padvt.Magic,
@@ -440,7 +441,7 @@ func (s *State) getBlkTemplateGenerator() *mining.BlkTmplGenerator {
 // GetMsgBlockTemplate gets a Message building on given block paying to a given
 // address
 func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *templates.Message, e error) {
-	F.Ln("GetMsgBlockTemplate")
+	T.Ln("GetMsgBlockTemplate")
 	rand.Seed(time.Now().Unix())
 	mbt = &templates.Message{
 		Nonce:     rand.Uint64(),
@@ -534,32 +535,35 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	s := ctx.(*State)
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
-	uuid := j.UUID
+	var uuid uint64
+	uuid = j.UUID
+	// I.Ln("uuid of advertisment", uuid, s.otherNodes)
 	if uuid == s.uuid {
-		// D.Ln("ignoring own advertisment message")
+		D.Ln("ignoring own advertisment message")
 		return
 	}
 	if _, ok := s.otherNodes[uuid]; !ok {
 		// if we haven't already added it to the permanent peer list, we can add it now
-		I.Ln("connecting to lan peer with same PSK", j.IPs, j.UUID)
+		I.Ln("connecting to lan peer with same PSK", j.IPs, uuid)
 		// try all IPs
 		if *s.cfg.AutoListen {
 			s.cfg.P2PConnect = &cli.StringSlice{}
 		}
 		for addr := range j.IPs {
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
+			s.otherNodes[uuid] = &nodeSpec{}
+			s.otherNodes[uuid].Time = time.Now()
 			if e = s.rpcServer.Cfg.ConnMgr.Connect(
 				peerIP,
-				false,
+				true,
 			); E.Chk(e) {
 				continue
 			}
 			D.Ln("connected to peer via address", peerIP)
-			s.otherNodes[uuid] = &nodeSpec{}
-			s.otherNodes[uuid].addr = addr
-			s.otherNodes[uuid].Time = time.Now()
+			s.otherNodes[uuid].addr = peerIP
 			break
 		}
+		I.Ln("otherNodes", s.otherNodes)
 	} else {
 		// update last seen time for uuid for garbage collection of stale disconnected
 		// nodes
@@ -568,7 +572,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	// If we lose connection for more than 9 seconds we delete and if the node
 	// reappears it can be reconnected
 	for i := range s.otherNodes {
-		if time.Now().Sub(s.otherNodes[i].Time) > time.Second*9 {
+		if time.Now().Sub(s.otherNodes[i].Time) > time.Second*6 {
 			// also remove from connection manager
 			if e = s.rpcServer.Cfg.ConnMgr.RemoveByAddr(s.otherNodes[i].addr); E.Chk(e) {
 			}
@@ -583,17 +587,17 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 
 // Solutions submitted by workers
 func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e error) {
-	D.Ln("received solution", src, dst)
+	I.Ln("received solution", src, dst)
 	s := ctx.(*State)
 	var so sol.Solution
 	gotiny.Unmarshal(b, &so)
 	tpl := s.msgBlockTemplates.Find(so.Nonce)
 	if tpl == nil {
-		D.Ln("solution nonce", so.Nonce, "is not known by this controller")
+		I.Ln("solution nonce", so.Nonce, "is not known by this controller")
 		return
 	}
 	if so.UUID != s.uuid {
-		D.Ln("solution is for another controller")
+		I.Ln("solution is for another controller")
 		return
 	}
 	var newHeader *wire.BlockHeader
@@ -601,22 +605,23 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 		return
 	}
 	if newHeader.PrevBlock != tpl.PrevBlock {
-		D.Ln("block submitted by kopach miner worker is stale")
+		I.Ln("block submitted by kopach miner worker is stale")
 		return
 	}
 	var msgBlock *wire.MsgBlock
 	if msgBlock, e = tpl.Reconstruct(newHeader); E.Chk(e) {
+		I.Ln("failed to construct new header")
 		return
 	}
-	D.Ln("sending pause to workers")
+	I.Ln("sending pause to workers")
 	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); E.Chk(e) {
 		return
 	}
-	D.Ln("signalling controller to enter pause mode")
+	I.Ln("signalling controller to enter pause mode")
 	s.Stop()
 	block := util.NewBlock(msgBlock)
 	var isOrphan bool
-	D.Ln("submitting block for processing")
+	I.Ln("submitting block for processing")
 	if isOrphan, e = s.node.SyncManager.ProcessBlock(block, blockchain.BFNone); E.Chk(e) {
 		// Anything other than a rule violation is an unexpected error, so log that
 		// error as an internal error.
@@ -628,16 +633,17 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 		} else {
 			W.Ln("block submitted via kopach miner rejected:", e)
 			if isOrphan {
-				D.Ln("block is an orphan")
+				W.Ln("block is an orphan")
 				return
 			}
 			return
 		}
 	}
-	D.Ln("clearing address used for block")
+	s.Start()
+	I.Ln("clearing address used for block")
 	s.nextAddress = nil
-	D.Ln("the block was accepted, new height", block.Height())
-	T.C(
+	I.Ln("the block was accepted, new height", block.Height())
+	I.C(
 		func() string {
 			bmb := block.MsgBlock()
 			coinbaseTx := bmb.Transactions[0].TxOut[0]

@@ -431,7 +431,7 @@ func NewBlkTmplGenerator(
 //  |  <= policy.BlockMinSize)          |   |
 //   -----------------------------------  --
 func (g *BlkTmplGenerator) NewBlockTemplate(payToAddress util.Address, algo string,) (*BlockTemplate, error) {
-	F.Ln("NewBlockTemplate", algo)
+	T.Ln("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
 	}
@@ -831,7 +831,7 @@ mempoolLoop:
 	// adjusted to ensure it comes after the median time of the last several blocks
 	// per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
-	F.Ln("legacy ts", ts)
+	T.Ln("legacy ts", ts)
 	if fork.GetCurrent(nextBlockHeight) > 0 {
 		ots := g.Chain.BestChain.NodeByHeight(best.Height).Header().Timestamp.Truncate(time.Second).Add(time.Second)
 		D.Ln("prev timestamp+1", ots)
@@ -841,9 +841,9 @@ mempoolLoop:
 		} else {
 			ts = ots
 		}
-		F.Ln("plan9 ts", ts)
+		T.Ln("plan9 ts", ts)
 	}
-	// F.Ln("algo ", ts, " ", algo)
+	// T.Ln("algo ", ts, " ", algo)
 	var reqDifficulty uint32
 	if reqDifficulty, e = g.Chain.CalcNextRequiredDifficulty(algo); E.Chk(e) {
 		return nil, e

@@ -244,7 +244,7 @@ func (s *Server) WebsocketHandler(
 		D.Ln(e)
 	}
 	// Limit max number of websocket clients.
-	F.Ln("new websocket client", remoteAddr)
+	T.Ln("new websocket client", remoteAddr)
 	if s.NtfnMgr.GetNumClients()+1 > *s.Config.RPCMaxWebsockets {
 		I.F(
 			"max websocket clients exceeded [%d] - disconnecting client"+
@@ -270,7 +270,7 @@ func (s *Server) WebsocketHandler(
 	client.Start()
 	client.WaitForShutdown()
 	s.NtfnMgr.RemoveClient(client)
-	F.Ln("disconnected websocket client", remoteAddr)
+	T.Ln("disconnected websocket client", remoteAddr)
 }
 
 // Disconnect disconnects the websocket client.
@@ -281,7 +281,7 @@ func (c *WSClient) Disconnect() {
 	if c.Disconnected {
 		return
 	}
-	F.Ln("disconnecting websocket client", c.Addr)
+	T.Ln("disconnecting websocket client", c.Addr)
 	c.Quit.Q()
 	if e := c.Conn.Close(); E.Chk(e) {
 	}
@@ -331,7 +331,7 @@ func (c *WSClient) SendMessage(marshalledJSON []byte, doneChan chan bool) {
 
 // Start begins processing input and output messages.
 func (c *WSClient) Start() {
-	F.Ln("starting websocket client", c.Addr)
+	T.Ln("starting websocket client", c.Addr)
 	// Start processing input and output.
 	c.WG.Add(3)
 	go c.InHandler()
@@ -494,7 +494,7 @@ out:
 	// Ensure the connection is closed.
 	c.Disconnect()
 	c.WG.Done()
-	F.Ln("websocket client input handler done for", c.Addr)
+	T.Ln("websocket client input handler done for", c.Addr)
 }
 
 // NotificationQueueHandler handles the queuing of outgoing notifications for the websocket client. This runs as a muxer
@@ -556,7 +556,7 @@ cleanup:
 		}
 	}
 	c.WG.Done()
-	F.Ln("websocket client notification queue handler done for", c.Addr)
+	T.Ln("websocket client notification queue handler done for", c.Addr)
 }
 
 // OutHandler handles all outgoing messages for the websocket connection. It must be run as a goroutine.
@@ -595,7 +595,7 @@ cleanup:
 		}
 	}
 	c.WG.Done()
-	F.Ln("websocket client output handler done for", c.Addr)
+	T.Ln("websocket client output handler done for", c.Addr)
 }
 
 // ServiceRequest services a parsed RPC request by looking up and executing the appropriate RPC handler. The response is

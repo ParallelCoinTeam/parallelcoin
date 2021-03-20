@@ -473,7 +473,7 @@ func (n *Node) Stop() (e error) {
 		D.Ln("server is already in the process of shutting down")
 		return nil
 	}
-	F.Ln("node shutting down")
+	T.Ln("node shutting down")
 	
 	// Shutdown the RPC server if it'n not disabled.
 	if !*n.Config.DisableRPC {
@@ -675,7 +675,7 @@ func (n *Node) HandleDonePeerMsg(state *PeerState, sp *NodePeer) {
 			n.ConnManager.Disconnect(sp.ConnReq.ID())
 		}
 		delete(list, sp.ID())
-		F.Ln("removed peer ", sp)
+		T.Ln("removed peer ", sp)
 		return
 	}
 	if sp.ConnReq != nil {
@@ -963,7 +963,7 @@ func (n *Node) PeerHandler() {
 	// and slightly faster to simply start and stop them in this handler.
 	n.AddrManager.Start()
 	n.SyncManager.Start()
-	F.Ln("starting peer handler")
+	T.Ln("starting peer handler")
 	n.peerState = &PeerState{
 		InboundPeers:    make(map[int32]*NodePeer),
 		PersistentPeers: make(map[int32]*NodePeer),
@@ -984,7 +984,7 @@ func (n *Node) PeerHandler() {
 			},
 		)
 	}
-	F.Ln("starting connmgr")
+	T.Ln("starting connmgr")
 	go n.ConnManager.Start()
 out:
 	for {
@@ -992,7 +992,7 @@ out:
 		// queries for current peer summary list
 		case qc := <-n.PeerState:
 			go func() {
-				F.Ln("handling peer summary query")
+				T.Ln("handling peer summary query")
 				// flatten the list of
 				res := make(map[int32]*NodePeer)
 				for i := range n.peerState.InboundPeers {
@@ -1016,7 +1016,7 @@ out:
 					}
 				}
 				// send back the answer
-				F.Ln("sending back peer summary")
+				T.Ln("sending back peer summary")
 				// D.S(ps)
 				qc <- ps
 			}()
@@ -2338,7 +2338,7 @@ func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Se
 			netAddr := wire.NewNetAddressIPPort(ifaceIP, uint16(port), services)
 			e = addrMgr.AddLocalAddress(netAddr, addrmgr.BoundPrio)
 			if e != nil {
-				F.Ln(e)
+				T.Ln(e)
 			}
 		}
 	} else {
@@ -2454,15 +2454,15 @@ func InitListeners(
 	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag,
 ) ([]net.Listener, upnp.NAT, error) {
 	// Listen for TCP connections at the configured addresses
-	F.Ln("listenAddrs ", listenAddrs)
+	T.Ln("listenAddrs ", listenAddrs)
 	netAddrs, e := ParseListeners(listenAddrs)
 	if e != nil {
 		return nil, nil, e
 	}
-	F.Ln("netAddrs ", netAddrs)
+	T.Ln("netAddrs ", netAddrs)
 	listeners := make([]net.Listener, 0, len(netAddrs))
 	for _, addr := range netAddrs {
-		F.Ln("addr ", addr, " ", addr.Network(), " ", addr.String())
+		T.Ln("addr ", addr, " ", addr.Network(), " ", addr.String())
 		listener, e := net.Listen(addr.Network(), addr.String())
 		if e != nil {
 			W.F("can't listen on %s: %v %s", addr, e)
@@ -2671,7 +2671,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	} else {
 		thr = *cx.Config.GenThreads
 	}
-	F.Ln("set genthreads to ", thr)
+	T.Ln("set genthreads to ", thr)
 	s := Node{
 		ChainParams:          cx.ActiveNet,
 		AddrManager:          aMgr,
@@ -2722,7 +2722,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		indexes = append(indexes, s.AddrIndex)
 	}
 	if !*cx.Config.NoCFilters {
-		F.Ln("committed filter index is enabled")
+		T.Ln("committed filter index is enabled")
 		s.CFIndex = indexers.NewCfIndex(db, cx.ActiveNet)
 		indexes = append(indexes, s.CFIndex)
 	}

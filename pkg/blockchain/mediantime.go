@@ -110,7 +110,7 @@ func (m *medianTime) AddTimeSample(sourceID string, timeVal time.Time) {
 	offsetDuration := time.Duration(offsetSecs) * time.Second
 	T.F("Added time sample of %v (total: %v)", offsetDuration,
 		numOffsets)
-	F.Ln("samples:", sortedOffsets)
+	T.Ln("samples:", sortedOffsets)
 	// NOTE: The following code intentionally has a bug to mirror the buggy behavior in Bitcoin Core since the median
 	// time is used in the consensus rules. In particular, the offset is only updated when the number of entries is odd,
 	// but the max number of entries is 200, an even number. Thus, the offset will never be updated again once the max

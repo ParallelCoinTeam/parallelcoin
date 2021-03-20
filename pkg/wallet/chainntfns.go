@@ -275,7 +275,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 				if e != nil {
 					return e
 				}
-				F.Ln("marked address used:", addr)
+				T.Ln("marked address used:", addr)
 				continue
 			}
 			// Missing addresses are skipped. Other errors should be propagated.

@@ -102,7 +102,7 @@ func (w *Worker) Start() {
 		w.clients = append(w.clients, client.New(cmd.StdConn))
 	}
 	for i := range w.clients {
-		F.Ln("sending pass to worker", i)
+		T.Ln("sending pass to worker", i)
 		e := w.clients[i].SendPass(*w.cx.Config.MinerPass)
 		if e != nil {
 		}
@@ -278,10 +278,10 @@ var handlers = transport.Handlers{
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (e error) {
-		F.Ln("received job")
+		T.Ln("received job")
 		w := ctx.(*Worker)
 		if !w.active.Load() {
-			F.Ln("not active")
+			T.Ln("not active")
 			return
 		}
 		jr := templates.Message{}
@@ -292,14 +292,14 @@ var handlers = transport.Handlers{
 			firstSender := w.FirstSender.Load()
 			otherSent := firstSender != cN && firstSender != 0
 			if otherSent {
-				F.Ln("ignoring other controller job")
+				T.Ln("ignoring other controller job")
 				// ignore other controllers while one is active and received first
 				return
 			}
 		} else {
 			// I.Ln("no tworking on job of local controller")
 			// I.Ln("p9 average",fork.P9Average)
-			// F.Ln("now listening to controller at", cN)
+			// T.Ln("now listening to controller at", cN)
 			w.FirstSender.Store(0)
 			return
 		}
@@ -389,7 +389,7 @@ var handlers = transport.Handlers{
 }
 
 func (w *Worker) HashReport() float64 {
-	F.Ln("generating hash report")
+	T.Ln("generating hash report")
 	w.hashSampleBuf.Add(w.hashCount.Load())
 	av := ewma.NewMovingAverage()
 	var i int

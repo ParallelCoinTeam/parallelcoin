@@ -633,7 +633,7 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		filePath := blockFilePath(dbPath, uint32(i))
 		st, e := os.Stat(filePath)
 		if e != nil {
-			F.Ln(e)
+			T.Ln(e)
 			break
 		}
 		lastFile = i

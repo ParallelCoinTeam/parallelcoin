@@ -412,7 +412,7 @@ func (p *Peer) UpdateLastBlockHeight(newHeight int32) {
 //
 // This function is safe for concurrent access.
 func (p *Peer) UpdateLastAnnouncedBlock(blkHash *chainhash.Hash) {
-	F.Ln("updating last blk for peer", p.addr, ",", blkHash)
+	T.Ln("updating last blk for peer", p.addr, ",", blkHash)
 	p.statsMtx.Lock()
 	p.lastAnnouncedBlock = blkHash
 	p.statsMtx.Unlock()
@@ -768,7 +768,7 @@ func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chai
 		beginHash.IsEqual(p.prevGetHdrsBegin)
 	p.prevGetHdrsMtx.Unlock()
 	if isDuplicate {
-		F.Ln(
+		T.Ln(
 			"Filtering duplicate [getheaders] with begin hash", beginHash,
 		)
 		return nil
@@ -871,7 +871,7 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 		p.cfg.Listeners.OnRead(p, n, msg, e)
 	}
 	if e != nil {
-		F.Ln(e)
+		T.Ln(e)
 		return nil, nil, e
 	}
 	// // Use closures to log expensive operations so they are only run when the logging level requires it.
@@ -1037,7 +1037,7 @@ func (p *Peer) maybeAddDeadline(pendingResponses map[string]time.Time, msgCmd st
 //
 // It must be run as a goroutine.
 func (p *Peer) stallHandler() {
-	F.Ln("starting stallHandler for", p.addr)
+	T.Ln("starting stallHandler for", p.addr)
 	// These variables are used to adjust the deadline times forward by the time it takes callbacks to execute.
 	//
 	// This is done because new messages aren't read until the previous one is finished processing (which includes
@@ -1158,14 +1158,14 @@ cleanup:
 			break cleanup
 		}
 	}
-	F.Ln("peer stall handler done for", p)
+	T.Ln("peer stall handler done for", p)
 }
 
 // inHandler handles all incoming messages for the peer.
 //
 // It must be run as a goroutine.
 func (p *Peer) inHandler() {
-	F.Ln("starting inHandler for", p.addr)
+	T.Ln("starting inHandler for", p.addr)
 	// The timer is stopped when a new message is received and reset after it is processed.
 	idleTimer := time.AfterFunc(
 		idleTimeout, func() {
@@ -1180,7 +1180,7 @@ out:
 		rMsg, buf, e := p.readMessage(p.wireEncoding)
 		idleTimer.Stop()
 		if e != nil {
-			F.Ln(e)
+			T.Ln(e)
 			// In order to allow regression tests with malformed messages, don't disconnect the peer when we're in
 			// regression test mode and the error is one of the allowed errors.
 			if p.isAllowedReadError(e) {
@@ -1363,7 +1363,7 @@ out:
 	// Ensure connection is closed.
 	p.Disconnect()
 	p.inQuit.Q()
-	F.Ln("peer input handler done for", p)
+	T.Ln("peer input handler done for", p)
 }
 
 // queueHandler handles the queuing of outgoing data for the peer.
@@ -1373,7 +1373,7 @@ out:
 //
 // That data is then passed on outHandler to be actually written.
 func (p *Peer) queueHandler() {
-	F.Ln("starting queueHandler for", p.addr)
+	T.Ln("starting queueHandler for", p.addr)
 	pendingMsgs := list.New()
 	invSendQueue := list.New()
 	trickleTicker := time.NewTicker(p.cfg.TrickleInterval)
@@ -1492,7 +1492,7 @@ cleanup:
 		}
 	}
 	p.queueQuit.Q()
-	F.Ln("peer queue handler done for", p)
+	T.Ln("peer queue handler done for", p)
 }
 
 // shouldLogWriteError returns whether or not the passed error, which is expected to have come from writing to the
@@ -1518,7 +1518,7 @@ func (p *Peer) shouldLogWriteError(e error) bool {
 //
 // It uses a buffered channel to serialize output messages while allowing the sender to continue running asynchronously.
 func (p *Peer) outHandler() {
-	F.Ln("starting outHandler for", p.addr)
+	T.Ln("starting outHandler for", p.addr)
 out:
 	for {
 		select {
@@ -1573,12 +1573,12 @@ cleanup:
 		}
 	}
 	p.outQuit.Q()
-	F.Ln("peer output handler done for", p)
+	T.Ln("peer output handler done for", p)
 }
 
 // pingHandler periodically pings the peer.  It must be run as a goroutine.
 func (p *Peer) pingHandler() {
-	F.Ln("starting pingHandler for", p.addr)
+	T.Ln("starting pingHandler for", p.addr)
 	pingTicker := time.NewTicker(pingInterval)
 	defer pingTicker.Stop()
 out:
@@ -1655,7 +1655,7 @@ func (p *Peer) Disconnect() {
 	if atomic.AddInt32(&p.disconnect, 1) != 1 {
 		return
 	}
-	F.Ln("disconnecting", p)
+	T.Ln("disconnecting", p)
 	if atomic.LoadInt32(&p.connected) != 0 {
 		_ = p.conn.Close()
 	}
@@ -1841,7 +1841,7 @@ func (p *Peer) negotiateOutboundProtocol() (e error) {
 
 // start begins processing input and output messages.
 func (p *Peer) start() (e error) {
-	F.Ln("starting peer", p)
+	T.Ln("starting peer", p)
 	negotiateErr := make(chan error, 1)
 	go func() {
 		if p.inbound {
@@ -1863,7 +1863,7 @@ func (p *Peer) start() (e error) {
 		p.Disconnect()
 		return errors.New("protocol negotiation timeout")
 	}
-	F.Ln("connected to", p)
+	T.Ln("connected to", p)
 	// The protocol has been negotiated successfully so start processing input and output messages.
 	go p.stallHandler()
 	go p.inHandler()

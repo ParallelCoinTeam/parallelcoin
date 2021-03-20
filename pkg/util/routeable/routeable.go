@@ -72,7 +72,7 @@ func Discover() (e error) {
 		// todo: this error condition always happens on iOS and Android
 		// return
 		for i := range nif {
-			F.Ln(nif[i])
+			T.Ln(nif[i])
 		}
 	} else {
 		var gw net.IP
@@ -110,12 +110,12 @@ func Discover() (e error) {
 	}
 	SecondaryAddresses = secondaryAddresses
 	SecondaryInterfaces = secondaryInterfaces
-	F.Ln("Gateway", Gateway)
-	F.Ln("Address", Address)
-	F.Ln("Interface", Interface.Name)
-	F.Ln("SecondaryAddresses")
+	T.Ln("Gateway", Gateway)
+	T.Ln("Address", Address)
+	T.Ln("Interface", Interface.Name)
+	T.Ln("SecondaryAddresses")
 	for i := range SecondaryInterfaces {
-		F.Ln(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
+		T.Ln(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
 	}
 	return
 }

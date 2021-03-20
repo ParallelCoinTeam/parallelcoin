@@ -1005,7 +1005,7 @@ func (b *BlockChain) initChainState() (e error) {
 			// Load all of the headers from the data for the known best chain and construct the block index accordingly.
 			// Since the number of nodes are already known, perform a single alloc for them versus a whole bunch of little
 			// ones to reduce pressure on the GC.
-			F.Ln("loading block index...")
+			T.Ln("loading block index...")
 			blockIndexBucket := dbTx.Metadata().Bucket(blockIndexBucketName)
 			// Determine how many blocks will be loaded into the index so we can allocate the right amount.
 			var blockCount int32

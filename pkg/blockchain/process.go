@@ -42,7 +42,7 @@ func (b *BlockChain) ProcessBlock(
 	workerNumber uint32, candidateBlock *util.Block,
 	flags BehaviorFlags, height int32,
 ) (bool, bool, error,) {
-	F.Ln("blockchain.ProcessBlock", height)
+	T.Ln("blockchain.ProcessBlock", height)
 	blockHeight := height
 	var prevBlock *util.Block
 	var e error
@@ -112,7 +112,7 @@ func (b *BlockChain) ProcessBlock(
 	); E.Chk(e) {
 		return false, false, e
 	}
-	F.Ln("searching back to checkpoints")
+	T.Ln("searching back to checkpoints")
 	// Find the previous checkpoint and perform some additional checks based on the
 	// checkpoint. This provides a few nice properties such as preventing old side
 	// chain blocks before the last checkpoint, rejecting easy to mine, but
@@ -132,7 +132,7 @@ func (b *BlockChain) ProcessBlock(
 				"candidateBlock %v has timestamp %v before last checkpoint timestamp %v",
 				bhwa(blockHeight).String(), blockHeader.Timestamp, checkpointTime,
 			)
-			F.Ln(str)
+			T.Ln(str)
 			return false, false, ruleError(ErrCheckpointTimeTooOld, str)
 		}
 		if !fastAdd {
@@ -158,7 +158,7 @@ func (b *BlockChain) ProcessBlock(
 			}
 		}
 	}
-	F.Ln("handling orphans")
+	T.Ln("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
 	var prevHashExists bool
@@ -180,7 +180,7 @@ func (b *BlockChain) ProcessBlock(
 	}
 	// The candidateBlock has passed all context independent checks and appears sane enough
 	// to potentially accept it into the candidateBlock chain.
-	F.Ln("maybe accept candidateBlock")
+	T.Ln("maybe accept candidateBlock")
 	var isMainChain bool
 	if isMainChain, e = b.maybeAcceptBlock(workerNumber, candidateBlock, flags); E.Chk(e) {
 		return false, false, e
@@ -188,7 +188,7 @@ func (b *BlockChain) ProcessBlock(
 	// Accept any orphan blocks that depend on this candidateBlock (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
-		F.Ln("new candidateBlock on main chain")
+		T.Ln("new candidateBlock on main chain")
 		// Traces(candidateBlock)
 	}
 	if e = b.processOrphans(workerNumber, blockHash, flags); E.Chk(e) {
@@ -201,7 +201,7 @@ func (b *BlockChain) ProcessBlock(
 				Header.Version, blockHeight,
 		),
 	)
-	F.Ln("finished blockchain.ProcessBlock")
+	T.Ln("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }
 

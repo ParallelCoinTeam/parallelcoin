@@ -21,7 +21,7 @@ func T() C {
 	createdList = append(createdList, logg.Caller("chan from", 1))
 	o := make(C)
 	createdChannels = append(createdChannels, o)
-	// F.Ln("open channels:", len(createdList), len(createdChannels), occ)
+	// T.Ln("open channels:", len(createdList), len(createdChannels), occ)
 	return o
 }
 
@@ -33,7 +33,7 @@ func Ts(n int) C {
 	createdList = append(createdList, logg.Caller("buffered chan at", 1))
 	o := make(C, n)
 	createdChannels = append(createdChannels, o)
-	// F.Ln("open channels:", len(createdList), len(createdChannels), occ)
+	// T.Ln("open channels:", len(createdList), len(createdChannels), occ)
 	return o
 }
 
@@ -41,10 +41,10 @@ func (c C) Q() {
 	loc := GetLocForChan(c)
 	mx.Lock()
 	if !testChanIsClosed(c) {
-		F.Ln("closing chan from "+loc, logg.Caller("\n"+strings.Repeat(" ", 48)+"from", 1))
+		_T.Ln("closing chan from "+loc, logg.Caller("\n"+strings.Repeat(" ", 48)+"from", 1))
 		close(c)
 	} else {
-		F.Ln(
+		_T.Ln(
 			"from"+logg.Caller("", 1), "\n"+strings.Repeat(" ", 48)+
 				"channel", loc, "was already closed",
 		)
@@ -58,7 +58,7 @@ func (c C) Signal() {
 }
 
 func (c C) Wait() <-chan struct{} {
-	// F.Ln(logg.Caller(">>> waiting on quit channel at", 1))
+	// T.Ln(logg.Caller(">>> waiting on quit channel at", 1))
 	return c
 }
 
@@ -101,12 +101,12 @@ func RemoveClosedChans() {
 			break
 		}
 		if testChanIsClosed(createdChannels[i]) {
-			// F.Ln(">>> closed", createdList[i])
+			// T.Ln(">>> closed", createdList[i])
 			// createdChannels[i].Q()
 		} else {
 			c = append(c, createdChannels[i])
 			l = append(l, createdList[i])
-			// F.Ln("<<< open", createdList[i])
+			// T.Ln("<<< open", createdList[i])
 		}
 		// D.Ln(">>>>>>>>>>>")
 	}
@@ -121,10 +121,10 @@ func PrintChanState() {
 			break
 		}
 		if testChanIsClosed(createdChannels[i]) {
-			F.Ln(">>> closed", createdList[i])
+			_T.Ln(">>> closed", createdList[i])
 			// createdChannels[i].Q()
 		} else {
-			F.Ln("<<< open", createdList[i])
+			_T.Ln("<<< open", createdList[i])
 		}
 	}
 	D.Ln(">>>>>>>>>>>")
