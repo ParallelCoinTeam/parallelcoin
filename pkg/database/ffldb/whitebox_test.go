@@ -24,12 +24,12 @@ var (
 	// blockDataNet is the expected network in the test block data.
 	blockDataNet = wire.MainNet
 	// blockDataFile is the path to a file containing the first 256 blocks of the block chain.
-	blockDataFile = filepath.Join("..", "testdata", "blocks1-256.bz2")
+	blockDataFile = filepath.Join("..", "tstdata", "blocks1-256.bz2")
 	// errSubTestFail is used to signal that a sub test returned false.
 	errSubTestFail = fmt.Errorf("sub test failure")
 )
 
-// loadBlocks loads the blocks contained in the testdata directory and returns a slice of them.
+// loadBlocks loads the blocks contained in the tstdata directory and returns a slice of them.
 func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, error) {
 	// Open the file that contains the blocks for reading.
 	fi, e := os.Open(dataFile)

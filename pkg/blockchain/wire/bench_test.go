@@ -289,7 +289,7 @@ func BenchmarkDeserializeTxSmall(b *testing.B) {
 // BenchmarkDeserializeTxLarge performs a benchmark on how long it takes to deserialize a very large transaction.
 func BenchmarkDeserializeTxLarge(b *testing.B) {
 	// tx bb41a757f405890fb0f5856228e23b715702d714d59bf2b1feb70d8b2b4e3e08 from the main block chain.
-	fi, e := os.Open("testdata/megatx.bin.bz2")
+	fi, e := os.Open("tstdata/megatx.bin.bz2")
 	if e != nil  {
 		b.Fatalf("Failed to read transaction data: %v", err)
 	}

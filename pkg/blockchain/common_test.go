@@ -54,7 +54,7 @@ func isSupportedDbType(dbType string) bool {
 // loadBlocks reads files containing bitcoin block data (gzipped but otherwise in the format bitcoind writes) from disk
 // and returns them as an array of util.Block. This is largely borrowed from the test code in pod.
 func loadBlocks(filename string) (blocks []*util.Block, e error) {
-	filename = filepath.Join("testdata/", filename)
+	filename = filepath.Join("tstdata/", filename)
 	var network = wire.MainNet
 	var dr io.Reader
 	var fi io.ReadCloser
@@ -177,7 +177,7 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 	//
 	// The output index and serialized utxo len are little endian uint32s and the serialized utxo uses the format
 	// described in chainio.go.
-	filename = filepath.Join("testdata", filename)
+	filename = filepath.Join("tstdata", filename)
 	fi, e := os.Open(filename)
 	if e != nil  {
 		return nil, e
