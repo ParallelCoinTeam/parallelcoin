@@ -63,6 +63,7 @@ type State struct {
 	hashCount         atomic.Uint64
 	lastNonce         int32
 	mining            *atomic.Bool
+	lastBlockUpdate   atomic.Int64
 }
 
 type nodeSpec struct {
@@ -100,13 +101,14 @@ func New(
 		otherNodeCount:    otherNodeCount,
 		quit:              quit,
 		uuid:              uuid,
-		start:             qu.Ts(1),
-		stop:              qu.Ts(1),
+		start:             qu.Ts(2),
+		stop:              qu.Ts(2),
 		blockUpdate:       make(chan *util.Block, 1),
 		hashSampleBuf:     rav.NewBufferUint64(100),
 		mining:            atomic.NewBool(false),
 		msgBlockTemplates: templates.NewRecentMessages(),
 	}
+	s.lastBlockUpdate.Store(time.Now().Add(-time.Second * 3).Unix())
 	s.generator = s.getBlkTemplateGenerator()
 	var mc *transport.Channel
 	if mc, e = transport.NewBroadcastChannel(
@@ -452,6 +454,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		Merkles:   make(templates.Merkles),
 	}
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
+		D.Ln("creating template for", curr())
 		var templateX *mining.BlockTemplate
 		if templateX, e = s.generator.NewBlockTemplate(
 			addr,
@@ -464,6 +467,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 			mbt.Timestamp = newH.Timestamp
 			mbt.Bits[curr()] = newH.Bits
 			mbt.Merkles[curr()] = newH.MerkleRoot
+			D.Ln("merkle for", curr(), mbt.Merkles[curr()])
 			mbt.SetTxs(curr(), newB.Transactions)
 		}
 	}
@@ -613,13 +617,16 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 		I.Ln("failed to construct new header")
 		return
 	}
+	
 	I.Ln("sending pause to workers")
 	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); E.Chk(e) {
 		return
 	}
 	I.Ln("signalling controller to enter pause mode")
 	s.Stop()
+	defer s.Start()
 	block := util.NewBlock(msgBlock)
+	block.SetHeight(tpl.Height)
 	var isOrphan bool
 	I.Ln("submitting block for processing")
 	if isOrphan, e = s.node.SyncManager.ProcessBlock(block, blockchain.BFNone); E.Chk(e) {
@@ -639,9 +646,6 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 			return
 		}
 	}
-	s.Start()
-	I.Ln("clearing address used for block")
-	s.nextAddress = nil
 	I.Ln("the block was accepted, new height", block.Height())
 	I.C(
 		func() string {
@@ -667,6 +671,8 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 			)
 		},
 	)
+	I.Ln("clearing address used for block")
+	s.nextAddress = nil
 	return
 }
 
